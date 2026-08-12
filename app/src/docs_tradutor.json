@@ -1,0 +1,19 @@
+{
+  "nota": "Lista única do tradutor .tex→PDF. Fonte de verdade: tex_tradutor.js e tools/corpo.sh lêem daqui. Não editar só num sítio.",
+  "docs": {
+    "teoria": "teoria.tex",
+    "catalogo": "catalogo.tex",
+    "enredo": "enredo.tex",
+    "livro": "livro.tex",
+    "corpo-estelar": "papers/corpo-estelar.tex",
+    "dualsort": "papers/dualsort.tex",
+    "fisica": "papers/fisica.tex",
+    "medida": "papers/medida.tex",
+    "milenio": "papers/milenio.tex",
+    "arquitetura": "papers/arquitetura.tex",
+    "corpo-peano": "papers/corpo_peano.tex"
+  },
+  "so_teste": {
+    "torre-induc": "papers/torre_induc.tex"
+  }
+}

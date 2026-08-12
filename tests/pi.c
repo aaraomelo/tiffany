@@ -1,5 +1,7 @@
 /* pi.c — A RETA É A ÓRBITA DO 1, E ATÉ ONDE π COMANDA (o corte é exato).
  *
+ * REGUA: GF(pⁿ) / órbita do 1 — não Landauer (portão dissipa.sh)
+ *
  * Três afirmações a medir, e elas não têm o mesmo destino:
  *
  *  (PI1) "o irracional colapsa no 1 da dimensão, e tudo na reta é gerado pelo 1 — a reta completa é

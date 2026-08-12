@@ -1,8 +1,8 @@
 {
   "medido_por": "tools/corpo.sh — fopen interceptado, não lista à mão",
   "regra": "o front serve estes de onde eles estão; nada é copiado para o dist",
-  "soma": "29f0a0c2dc9f8e31",
-  "bytes": 5190844,
+  "soma": "6190a672933981a0",
+  "bytes": 5193146,
   "ficheiros": [
     "catalogo.tex",
     "enredo.tex",
@@ -45,6 +45,7 @@
     "papers/gkcapa.tex",
     "papers/medida.tex",
     "papers/milenio.tex",
+    "papers/torre_induc.tex",
     "teoria.tex"
   ]
 }

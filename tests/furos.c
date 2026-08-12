@@ -1,5 +1,7 @@
 /* furos.c — OS FUROS ENTRE AS DIMENSÕES: Cantor é o direto, Julia é o cruzado.
  *
+ * REGUA: Cantor⊕Julia (direto/cruzado) — não Landauer (portão dissipa.sh)
+ *
  * O Aarão: "o que a transformada faz é selecionar pontos acima do infinito nos furos entre as
  * dimensões, na passagem; todos eles formam a cifra, a base ortonormal, e vem a codificação única
  * no espaço dual." E depois: "coloca Cantor como produto direto via forma algébrica e Julia no

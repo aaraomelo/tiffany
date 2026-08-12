@@ -14,20 +14,8 @@ const { pathToFileURL } = require('url')
 
 const RAIZ = path.resolve(__dirname, '..')
 const WASM = path.join(RAIZ, 'assets', 'figuras', 'wasm', 'tex.wasm')
-const DOCS = {
-  teoria: 'teoria.tex',
-  catalogo: 'catalogo.tex',
-  enredo: 'enredo.tex',
-  livro: 'livro.tex',
-  'corpo-estelar': 'papers/corpo-estelar.tex',
-  dualsort: 'papers/dualsort.tex',
-  fisica: 'papers/fisica.tex',
-  medida: 'papers/medida.tex',
-  milenio: 'papers/milenio.tex',
-  arquitetura: 'papers/arquitetura.tex',
-  'torre-induc': 'papers/torre_induc.tex',
-  'corpo-peano': 'papers/corpo_peano.tex',
-}
+const docsJson = JSON.parse(fs.readFileSync(path.join(RAIZ, 'app/src/docs_tradutor.json'), 'utf8'))
+const DOCS = { ...docsJson.docs, ...(docsJson.so_teste || {}) }
 
 const PI = Math.PI
 

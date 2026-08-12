@@ -1,5 +1,7 @@
 /* encaixa.c — A CIFRA DO ESPAÇO SEMÂNTICO: a base sai dos PRÓPRIOS vetores.
  *
+ * REGUA: ortonormalização n+1 — não Landauer (portão dissipa.sh)
+ *
  * O Aarão: "é só encaixar os embeddings na cifra — é teletransporte, segue protocolo. Se o
  * espaço dele tem n vetores, acho que n+1 vetores formam a base. Essa é a cifra. Só normalizar.
  * A base dele é ortonormal."

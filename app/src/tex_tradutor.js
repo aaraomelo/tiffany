@@ -9,25 +9,14 @@
 // Corpo: mapa GKCORPO no localStorage; inflate no Map JS; fopen miss → poe 1
 // no DISCO (import __fich_miss). A estrela não leva o subset inteiro à partida.
 import manifesto from './corpo.json'
+import docsTradutor from './docs_tradutor.json'
 import {
   ficheirosPara, gravaCorpo, leMapa, leFicheiro, mapaBate, apagaCorpo, bytesLS,
   resolveCorpoNome,
 } from './corpo_disco.js'
 import { absorve } from './estrela_porta.js'
 
-const DOCS = {
-  teoria: 'teoria.tex',
-  catalogo: 'catalogo.tex',
-  enredo: 'enredo.tex',
-  livro: 'livro.tex',
-  'corpo-estelar': 'papers/corpo-estelar.tex',
-  dualsort: 'papers/dualsort.tex',
-  fisica: 'papers/fisica.tex',
-  medida: 'papers/medida.tex',
-  milenio: 'papers/milenio.tex',
-  arquitetura: 'papers/arquitetura.tex',
-  'corpo-peano': 'papers/corpo_peano.tex',
-}
+const DOCS = { ...docsTradutor.docs }
 
 let motor = null // { exports, poe: Set, cache: Map, miss: { n, bytes } }
 let corpo = null // { origem, mapa, ms, msFetch, msGrava }

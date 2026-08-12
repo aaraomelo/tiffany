@@ -45,8 +45,15 @@ cc -O2 -fPIC -shared "$ESPIA/espia.c" -o "$ESPIA/espia.so" -ldl || {
 [ -x tests/tex ] || (cd tests && cc -O2 -std=c99 -I../lib tex.c -lm -o tex) || {
   echo "corpo.sh: o tradutor tests/tex não construiu."; exit 1; }
 
-# a mesma lista que o front compõe (app/src/tex_tradutor.js DOCS / manifesto.json docs)
-DOCS="teoria.tex catalogo.tex enredo.tex livro.tex papers/corpo-estelar.tex papers/dualsort.tex papers/fisica.tex papers/medida.tex papers/milenio.tex papers/arquitetura.tex papers/corpo_peano.tex"
+# a mesma lista que o front compõe (app/src/docs_tradutor.json → tex_tradutor.js)
+# + so_teste (ex.: torre_induc) para o corpo servir o que a autoria mede
+DOCS=$(python3 -c "
+import json
+d=json.load(open('app/src/docs_tradutor.json'))
+paths=list(d['docs'].values())+list(d.get('so_teste',{}).values())
+print(' '.join(paths))
+")
+[ -n "$DOCS" ] || { echo "corpo.sh: docs_tradutor.json vazio."; exit 1; }
 
 : > "$ESPIA/tudo.txt"
 for d in $DOCS; do

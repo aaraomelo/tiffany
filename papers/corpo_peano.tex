@@ -325,6 +325,31 @@ $\Rightarrow$ Teorema do Maestro (\S\ref{sec:maestro-thm})
 $\Rightarrow$ realização musical. Estatuto aqui: \emph{citação / eixo}.
 \end{proposicao}
 
+\begin{proposicao}[Hurwitz~8 não é teto do objecto]\label{prop:sem-teto}
+O grau oito do lado discreto (norma bilinear) \textbf{fecha em~$8$ e
+falha em~$16$}: isso classifica o relógio da contagem (Hurwitz), não
+põe parede no objecto. O lado contínuo (Gentil / Lebesgue) \textbf{não
+herda} esse período --- a torre operacional $d_k=2^{k+1}$ sobe sem
+esse tecto (\code{tests/estelar\_completo.c} §C3; \code{tests/traduz\_pi\_dim.js}:
+dim~$128$ medida). Distinguir três coisas:
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+nome & o que limita & o que \textbf{não} limita \\
+\hline
+Hurwitz~$8$ & período do relógio discreto & o objecto / a torre \\
+$\operatorname{Ind}^{8}=\mathrm{id}_{\mathcal L}$ & catálogo das leis & a dimensão $d_k$ \\
+$\mathrm{TORRE\_NTT\_MAX}=4096$ & selo NTT Gentil ($Z_{65537}$) & a torre operacional \\
+\end{tabular}
+\end{center}
+\[
+\boxed{
+\text{Hurwitz~8}=\text{período do relógio};\quad
+\text{Gentil continua};\quad
+\text{NTT}=\text{cap do selo, não da torre}.
+}
+\]
+\end{proposicao}
+
 \begin{definicao}[corpo de Cantor]\label{def:cantor}
 Lado discreto/aditivo do corpo de Alonzo ($f_c(z)=z^{2}+c$): o shift
 $\theta\mapsto2\theta$, dual a $z\mapsto z^{2}$ (Julia). Os golden
@@ -1463,6 +1488,7 @@ Torre $d_k$ & construção \\
 Metálica / borda / $bx^{a}$ / Pisot & teoremas \\
 Massa / max-cut & teorema (Dualsort) \\
 Gentil--Hurwitz (central) & citação / eixo (destino: maestro) \\
+Hurwitz~$8$ $\neq$ teto objecto & proposição (período vs selo NTT) \\
 Cantor / Peano & construção / definição \\
 Períodos $2,3,4,8$ & fechos das representações \\
 Interfaces $6,12,24$ & derivadas ($\operatorname{lcm}$) \\
@@ -1517,8 +1543,8 @@ Sinfónica $=$ Filarmónica & convenção do modelo \\
 \code{peano\_dual.c}: trial, $\Lambda_K$. Não são a mesma curva.
 
 \bigskip
-\noindent\textbf{Verificação.} \code{tests/corpo\_peano.c} §CP1--§CP39:
-Teorema Central $\to\pi_k\to$ Maestro $\to$ música;
+\noindent\textbf{Verificação.} \code{tests/corpo\_peano.c} §CP1--§CP39;
+\code{tests/autoria\_tradutor.js}: Hurwitz~$8\neq$teto;
 $\mathcal{P}_k=\mathrm{tick}\circ\mathrm{batuta}\circ\Pi$.
 
 \end{document}
