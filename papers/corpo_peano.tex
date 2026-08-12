@@ -1,6 +1,6 @@
 % papers/corpo_peano.tex
-% O corpo operacional de Peano --- construção pela borda metálica.
-% Cadeia: metálica → borda → R^n → Pisot/ζ → massa=corte → Lebesgue → Cantor/Peano → ⊕/⊗.
+% O corpo operacional de Peano --- eixo: Teorema do Maestro = realização dinâmica do central.
+% Cadeia: borda → ordem → massa → contínuo → torre → retração π_k → música.
 \documentclass[11pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -17,38 +17,59 @@
 \begin{document}
 
 \noindent\textbf{O corpo operacional de Peano}
---- construção a partir da borda metálica, massa ordenada e
-endereçamento ternário.
+--- construção até à retração; eixo: Teorema do Maestro como
+\textbf{realização dinâmica do teorema central}.
 
-\medskip
-\noindent Um corpo possui operações e ordem. Não se postula
-$\mathbb{R}$ com $+$ e $\times$: o corpo \textbf{constrói-se}. A cadeia é
+\begin{abstract}
+Um corpo possui operações e ordem. Não se postula $\mathbb{R}$ com
+$+$ e $\times$: o corpo \textbf{constrói-se}. A cadeia é
 \[
 \boxed{
-A_m
+\text{borda}
 \;\to\;
-\text{borda }x^{2}{=}nx{+}1
+\text{ordem}
 \;\to\;
-\mathbb{R}^{n}
+\text{massa}
 \;\to\;
-\text{Pisot}/\zeta
+\text{contínuo}
 \;\to\;
-\text{massa}{=}\text{corte}
+\text{torre}
 \;\to\;
-\text{Lebesgue}
+\text{retração }\pi_k
 \;\to\;
-\text{Cantor/Peano}
-\;\to\;
-\oplus,\otimes.
+\text{música}.
 }
 \]
-Fontes: \emph{Teoria} (metálicas, torre), \emph{Corpo estelar} (oito leis,
-massa, teorema central), \emph{Dualsort} (max-cut), \emph{Catálogo}
-(Cantor, Pisot, $\zeta$). Os problemas do \emph{Milénio} \textbf{não}
-são base: são \emph{leituras / derivações} das leis
-(\S\ref{sec:milenio-leitura}). Música e partitura:
-\S\ref{sec:musica}. Verificação: \code{tests/corpo\_peano.c}
-§CP1--§CP39.
+O teorema central (\emph{Corpo estelar}): contar (Hurwitz) e integrar
+(Gentil) são duais pela medida. O resultado deste paper não é só a
+estrutura: a construção \textbf{admite realização dinâmica por retração
+entre andares}. O \textbf{Teorema do Maestro}
+(Teorema~\ref{thm:proj-maestro}) é essa realização ---
+$\mathcal{P}_k=\mathrm{tick}\circ\mathrm{batuta}\circ\Pi$ executa
+$\pi_k$ a cada tick. A música não é metáfora decorativa: é a
+realização operacional observada. Milénios são leituras, não base
+(\S\ref{sec:milenio-leitura}). Verificação:
+\code{tests/corpo\_peano.c} §CP1--§CP39.
+\end{abstract}
+
+\medskip
+\noindent\textbf{Leitura.}
+\[
+\boxed{
+\text{Teorema Central}
+\;\Longrightarrow\;
+\text{retração }\pi_k
+\;\Longrightarrow\;
+\text{Teorema do Maestro}
+\;\Longrightarrow\;
+\text{realização musical}.
+}
+\]
+A construção (§§ iniciais / contínuo / torre) chega à retração; o
+Teorema do Maestro (\S\ref{sec:maestro-thm}) é o eixo; a música
+(\S\ref{sec:musica}) é a consequência
+(Conservatório$\to$Pera$\to$Batuta). Quem quiser o eixo primeiro:
+\S\ref{sec:maestro-thm}.
 
 %======================================================================
 \section{Família metálica e torre em $\mathbb{R}^{n}$}
@@ -277,15 +298,24 @@ $i\mapsto(i+n/2)\bmod n$ constrói a bipartição
 \section{Contínuo, Cantor e Peano}
 
 \begin{proposicao}[Gentil--Hurwitz via Lebesgue]\label{thm:central-peano}
-Conforme o teorema central do \emph{Corpo estelar} (citado, não
-reprovado aqui): contar (Hurwitz) e integrar (Gentil) são duais pela
-soma reversível
+Conforme o \textbf{teorema central} do \emph{Corpo estelar}
+(Teorema~central ali; citado, não reprovado aqui): contar (Hurwitz) e
+integrar (Gentil) são duais pela soma reversível
 \[
 \int_a^{b}f+\int_{f(a)}^{f(b)}f^{-1}=b\,f(b)-a\,f(a).
 \]
 O salto $\mathbb{Q}\to\mathbb{R}$ é este cruzamento. Ordem e contínuo
-recuperam-se aqui; não se postulam. Estatuto neste paper:
-\emph{citação / proposição de uso}.
+recuperam-se aqui; não se postulam.
+\[
+\boxed{
+\text{Hurwitz (contar, discreto)}
+\;\longleftrightarrow\;
+\text{Gentil (integrar, contínuo)}.
+}
+\]
+\textbf{Destino:} Teorema Central $\Rightarrow$ retração $\pi_k$
+$\Rightarrow$ Teorema do Maestro (\S\ref{sec:maestro-thm})
+$\Rightarrow$ realização musical. Estatuto aqui: \emph{citação / eixo}.
 \end{proposicao}
 
 \begin{definicao}[corpo de Cantor]\label{def:cantor}
@@ -354,6 +384,130 @@ A família de interfaces é
 $\iota_k=6\cdot2^{\lfloor k/3\rfloor}$ --- valores da
 \emph{interface}, não índices de leis.
 \end{proposicao}
+
+%======================================================================
+\section{Retração e o Teorema do Maestro}\label{sec:maestro-thm}
+
+A torre sobe por $T+T^{*}$ (Def.~\ref{def:somaprod}). O dual que
+\textbf{desce} é a retração $\pi_k$. O Teorema Central
+(Prop.~\ref{thm:central-peano}) dá a passagem estrutural
+Gentil\,$\leftrightarrow$\,Hurwitz; $\pi_k$ é essa passagem entre
+andares; o maestro é a mesma passagem \textbf{realizada no tempo}.
+\[
+\boxed{
+\text{Gentil--Hurwitz}
+\;=\;
+\text{passagem estrutural};
+\qquad
+\text{Maestro}
+\;=\;
+\text{passagem realizada no tempo}.
+}
+\]
+\[
+\boxed{
+\text{Teorema Central}
+\;\longrightarrow\;
+\pi_k
+\;\longrightarrow\;
+\text{Maestro}
+\;\longrightarrow\;
+\text{Música}.
+}
+\]
+
+\begin{definicao}[Projecção dimensional $\pi_k$]\label{def:pi-k}
+Em cada andar $k$ da torre operacional
+(Def.~\ref{def:somaprod}: $T_{k+1}=T_k+T_k^{*}$,
+$d_{k+1}=2d_k$), a \textbf{projecção dimensional} é o esquecimento
+dual da indução --- uma fase / um factor por degrau:
+\[
+\boxed{
+\pi_k\colon A_{k+1}\longrightarrow A_k,
+\qquad
+\pi_k(x\oplus y^{*})=x.
+}
+\]
+O embebimento canónico $\iota_k\colon A_k\hookrightarrow A_{k+1}$,
+$\iota_k(x)=x\oplus 0^{*}$, faz de $\pi_k$ uma \textbf{retração}:
+\[
+\boxed{
+\pi_k\circ\iota_k=\mathrm{id}_{A_k}.
+}
+\]
+Em dimensão: $d_{k+1}/2=d_k$. No catálogo de fases, a mesma forma
+desce uma $-$alidade por passo (\code{tests/milenio\_trial.c} §M8).
+No cone: sombra no hiperplano (\code{tests/sombra\_cone.c}). Estatuto:
+\emph{definição} --- já na torre.
+\end{definicao}
+
+\begin{teorema}[Maestro --- realização dinâmica do Teorema Central]\label{thm:proj-maestro}
+Seja $\pi_k\colon A_{k+1}\to A_k$ a retração entre andares consecutivos
+(Def.~\ref{def:pi-k}), com $\pi_k\circ\iota_k=\mathrm{id}_{A_k}$.
+Então uma realização dinâmica dessa retração implementa-se por um
+maestro constituído por relógio (tick), canal linear de batuta e
+partitura $\Pi$:
+\[
+\boxed{
+\mathcal{P}_k
+\;=\;
+\mathrm{tick}
+\;\circ\;
+\mathrm{batuta}
+\;\circ\;
+\Pi,
+}
+\]
+realizando $\pi_k$ a cada tick. O maestro \textbf{não} cria a
+estrutura de $A_k$: realiza a retração da estrutura superior para a
+inferior.
+\[
+\boxed{
+\mathrm{maestro}
+\;=\;
+\text{realização dinâmica de }\pi_k.
+}
+\]
+\[
+\boxed{
+\text{O maestro não compõe o corpo: projecta-o.}
+}
+\]
+Três afirmações distintas:
+\begin{enumerate}
+\item \textbf{Retração} --- $\pi_k\circ\iota_k=\mathrm{id}$,
+$d_{k+1}/2=d_k$ (álgebra da torre).
+\item \textbf{Conservação} --- se a classe Gentil/cruz admite,
+$|X_{k+1}|_{\mathrm{Gentil}}=|X_k|_{\mathrm{musical}}$ (mesmo
+invariante do Teorema Central).
+\item \textbf{Realização musical} --- batuta e $\Pi$ transportam
+$\pi_k$; não são operador novo.
+\end{enumerate}
+\[
+\boxed{
+\text{retração}
+\;\neq\;
+\text{conservação}
+\;\neq\;
+\text{realização musical}.
+}
+\]
+Correspondência:
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+Teorema Central & na torre & no tempo \\
+\hline
+Gentil (integrar) & andar $A_{k+1}$ & conservatório \\
+Hurwitz (contar) & andar $A_k$ & música \\
+bijeção / estrela & $\pi_k$ & maestro $(\mathrm{tick},\mathrm{batuta},\Pi)$ \\
+\end{tabular}
+\end{center}
+\emph{Prova.} (1)~Def.~\ref{def:pi-k}. (2)~Prop.~\ref{thm:central-peano}
+e cruz dos tecidos, na classe. (3)~$\mathcal{P}_k$ não acrescenta
+operador: só compõe interfaces que executam $\pi_k$. A geometria
+Conservatório$\to$Pera$\to$Batuta (\S\ref{sec:musica}) é a realização
+concreta do canal, não a fonte do teorema.
+\end{teorema}
 
 %======================================================================
 \section{O corpo operacional $\mathcal{C}_K$}
@@ -588,16 +742,33 @@ Empacotamento: $\mathrm{Regua}_k=30\cdot100+C_k$ (\code{tex\_core.c}).
 %======================================================================
 \section{Música e Partitura}\label{sec:musica}
 
-O corpo de Peano é a máquina. A cadeia de realizações
-\emph{não} retroage às leis:
+A música é a \textbf{consequência} do Teorema do Maestro
+(\S\ref{sec:maestro-thm}): a teoria constrói a retração; o maestro
+realiza-a dinamicamente; a música é o resultado observado.
+\[
+\boxed{
+\text{Conservatório}
+\;\to\;
+\text{Pera}
+\;\to\;
+\text{Batuta}
+\;\to\;
+\text{Ponta}
+\;\to\;
+\text{Música}.
+}
+\]
+Cadeia tipográfica (não retroage às leis):
 \[
 \text{leis}\to\text{corpo/torre}\to
-\text{música}\to\text{partitura}\to\text{naipes}\to
-\text{maestro}\to\text{orquestra}.
+\text{Teorema Central}
+\to\pi_k\to
+\text{Maestro}
+\to\text{música}/\text{partitura}/\text{naipes}/\text{orquestra}.
 \]
-Música $=$ realização particular; partitura $=$ codificação;
-naipes $=$ classificação de $G$; maestro $=$ interface; orquestra $=$
-composição de realizações.
+Música $=$ realização operacional de $\pi_k$ no tempo; partitura $=$
+codificação ($\Pi$); naipes $=$ classificação de $G$; orquestra $=$
+composição sob o maestro.
 
 \begin{definicao}[Música]\label{def:musica}
 Uma \textbf{música} é um triplo
@@ -1081,12 +1252,23 @@ maestro.
 \end{proposicao}
 
 %----------------------------------------------------------------------
-\subsection*{Interpretação dinâmica --- metrónomo, maestro, orquestra}
+\subsection*{Realização musical --- Conservatório, Pera, Batuta}
+
+Consequência do Teorema~\ref{thm:proj-maestro}: a geometria do canal
+que transporta $\pi_k$.
+\[
+\boxed{
+\mathrm{maestro}
+\;=\;
+\text{realização dinâmica de }\pi_k.
+}
+\]
 
 \begin{observacao}[estrutura de projecção do maestro]\label{obs:proj-dinamica}
-A tríade opera como transmissão entre níveis; o operador que desce é
-$\pi_k$ (Def.~\ref{def:pi-k}), realizado pelo maestro
-(Teorema~\ref{thm:proj-maestro}) --- não uma lei nova:
+Papéis na realização (não criam $\pi_k$ --- só o executam):
+metrónomo $=$ \emph{quando}; batuta $=$ \emph{como}
+(pera + vareta + ponta); partitura $\Pi=$ \emph{o quê}; orquestra $=$
+\emph{onde}; conservatório $=$ \emph{acima}.
 \[
 \boxed{
 \mathrm{Metr\acute{o}nomo}
@@ -1096,10 +1278,6 @@ $\pi_k$ (Def.~\ref{def:pi-k}), realizado pelo maestro
 \mathrm{Orquestra}.
 }
 \]
-Papéis: metrónomo $=$ \emph{quando}; batuta $=$ \emph{como}
-(pera + vareta + ponta); partitura $\Pi=$ \emph{o quê}; orquestra $=$
-\emph{onde}; conservatório $=$ \emph{acima}. O maestro junta os quatro
-da realização; a pera acopla o cone do conservatório ao canal $\pi_k$.
 \end{observacao}
 
 \begin{definicao}[Conservatório]\label{def:conservatorio}
@@ -1182,89 +1360,10 @@ B(t)
 G_i(t).
 }
 \]
-Hipótese operacional da realização musical --- não axioma do corpo.
+Hipótese operacional da realização musical --- não axioma do corpo;
+realiza $\mathcal{P}_k=\mathrm{tick}\circ\mathrm{batuta}\circ\Pi$
+(Teorema~\ref{thm:proj-maestro}).
 \end{proposicao}
-
-\begin{definicao}[Projecção dimensional $\pi_k$]\label{def:pi-k}
-Em cada andar $k$ da torre operacional
-(Def.~\ref{def:somaprod}: $T_{k+1}=T_k+T_k^{*}$,
-$d_{k+1}=2d_k$), a \textbf{projecção dimensional} é o esquecimento
-dual da indução --- uma fase / um factor por degrau:
-\[
-\boxed{
-\pi_k\colon A_{k+1}\longrightarrow A_k,
-\qquad
-\pi_k(x\oplus y^{*})=x.
-}
-\]
-O embebimento canónico $\iota_k\colon A_k\hookrightarrow A_{k+1}$,
-$\iota_k(x)=x\oplus 0^{*}$, faz de $\pi_k$ uma \textbf{retração}:
-\[
-\boxed{
-\pi_k\circ\iota_k=\mathrm{id}_{A_k}.
-}
-\]
-Em dimensão: $d_{k+1}/2=d_k$. No catálogo de fases (leis), a mesma
-forma desce uma $-$alidade por passo (hexal$\to\cdots\to$dual;
-\code{tests/milenio\_trial.c} §M8). No cone: a sombra no hiperplano é
-$\pi$ geométrico (\code{tests/sombra\_cone.c}). Estatuto:
-\emph{definição} --- já na torre; não é objecto novo do maestro.
-\end{definicao}
-
-\begin{teorema}[princípio de projecção do maestro]\label{thm:proj-maestro}
-Três afirmações distintas --- não se confundem:
-\begin{enumerate}
-\item \textbf{Retração} (álgebra da torre). $\pi_k$ (Def.~\ref{def:pi-k})
-satisfaz $\pi_k\circ\iota_k=\mathrm{id}_{A_k}$ e $d_{k+1}/2=d_k$.
-Isto é propriedade dos andares; o maestro não a cria.
-\item \textbf{Conservação} (classe Gentil). Se o passo é da classe com
-cruz/norma conservada ($T+T^{*}$), então
-$|X_{k+1}|_{\mathrm{Gentil}}=|X_k|_{\mathrm{musical}}$.
-Não segue só da retração: é hipótese de classe.
-\item \textbf{Realização musical} (interpretação dinâmica). Com
-metrónomo (tick $t$), batuta (pera\,/\,vareta\,/\,ponta) e carga
-$\Pi$, o maestro \emph{transporta} $\pi_k$:
-\[
-\boxed{
-\mathcal{P}_k
-\;=\;
-\pi_k
-\quad\text{(canal da batuta; não é operador novo)}.
-}
-\]
-\end{enumerate}
-\[
-\boxed{
-\text{retração}
-\;\neq\;
-\text{conservação}
-\;\neq\;
-\text{realização musical}.
-}
-\]
-Em concreto:
-\[
-\mathrm{Conservat\acute{o}rio}\ni X_{k+1}
-\;\xrightarrow{\mathrm{Pera}}\;
-\text{canal}
-\;\xrightarrow{\pi_k}\;
-X_k
-\;\xrightarrow{G}\;
-\mathcal{M},
-\]
-e $\Pi=(d,S,G,\ell,C,\Delta,\ldots)$ selecciona a fibra admissível.
-\[
-\boxed{
-\text{O maestro não compõe o corpo: projecta-o.}
-}
-\]
-A música é a \textbf{sombra dinâmica da retração}. O cone do
-conservatório assenta na pera; a órbita abaixo escreve-se na ponta.
-\emph{Prova.} (1)~Def.~\ref{def:pi-k}. (2)~cruz do passo de tecidos
-(\emph{Corpo estelar}; Prop.~\ref{thm:central-peano} no contínuo),
-quando a classe o admite. (3)~a batuta e a orquestra são transporte
-de $\pi_k$, não fonte: $\mathcal{P}_k$ não acrescenta operador à torre.
-\end{teorema}
 
 \begin{proposicao}[espiral áurea como realização]\label{prop:espiral-real}
 A cadeia
@@ -1356,16 +1455,16 @@ Catálogo $\mathbb{Z}/8\mathbb{Z}$ & estrutura \\
 Torre $d_k$ & construção \\
 Metálica / borda / $bx^{a}$ / Pisot & teoremas \\
 Massa / max-cut & teorema (Dualsort) \\
-Gentil--Hurwitz (aqui) & citação / proposição de uso \\
+Gentil--Hurwitz (central) & citação / eixo (destino: maestro) \\
 Cantor / Peano & construção / definição \\
 Períodos $2,3,4,8$ & fechos das representações \\
 Interfaces $6,12,24$ & derivadas ($\operatorname{lcm}$) \\
 Milénios & \textbf{interpretação} \\
-Música & definição / realização \\
+Música & realização do dual central \\
 Partitura & definição (assinatura $+$ notação) \\
 Alfabeto musical & realização \\
 Naipes & classificação da realização \\
-Maestro & interface (não necessária ao corpo) \\
+Maestro & interface que realiza $\pi_k$ \\
 Metrónomo & realização musical do relógio \\
 Batuta & canal do inversor (não é $I$) \\
 Pera & definição: base $=$ cone na batuta \\
@@ -1373,6 +1472,7 @@ Conservatório & definição: estrutura superior conservada \\
 Batuta linear / ponta & interpretação geométrica do canal \\
 Projecção $\pi_k$ & definição (retração por andar) \\
 Princípio de projecção $\mathcal{P}_k=\pi_k$ & \textbf{teorema}
+  --- realização do teorema central
   (retração $\neq$ conservação $\neq$ realização) \\
 Espiral áurea (música) & realização ($m=1$), não axioma \\
 Orquestra & realização / fusão \\
@@ -1411,7 +1511,7 @@ Sinfónica $=$ Filarmónica & convenção do modelo \\
 
 \bigskip
 \noindent\textbf{Verificação.} \code{tests/corpo\_peano.c} §CP1--§CP39:
-retração $\neq$ conservação $\neq$ realização;
-$\mathcal{P}_k=\pi_k$; maestro projecta, não compõe.
+Teorema Central $\to\pi_k\to$ Maestro $\to$ música;
+$\mathcal{P}_k=\mathrm{tick}\circ\mathrm{batuta}\circ\Pi$.
 
 \end{document}

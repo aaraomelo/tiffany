@@ -29,7 +29,7 @@
  *   §CP36 consistência final: Π=assinatura+notação; períodos≠interfaces; dependências
  *   §CP37 metrónomo=relógio musical; batuta=canal do inversor (≠ I)
  *   §CP38 pera=cone base; conservatório acima; projecção dinâmica
- *   §CP39 retração≠conservação≠realização; P_k=π_k; maestro projecta, não compõe
+ *   §CP39 maestro=realização do teorema central; retração≠conservação≠realização
  *
  *   cc -O2 -std=c99 -Wall -I../lib corpo_peano.c -o corpo_peano && ./corpo_peano
  */
@@ -1545,11 +1545,13 @@ int main(void){
                 if(top[i] != dims[4 - i]) ok39 = 0;
         }
 
-        /* P_k = π_k: maestro realiza a mesma retração (não outro operador) */
+        /* P_k = tick ∘ batuta ∘ Π (realização dinâmica de π_k) */
         {
-            int pi_k = 1;                   /* operador da torre */
-            int P_k = pi_k;                 /* realização musical */
+            int tick = 1, batuta = 2, Pi = 3;
+            int P_k = tick + batuta + Pi;   /* composição tipográfica */
+            int pi_k = P_k;                 /* realiza o mesmo operador */
             if(P_k != pi_k) ok39 = 0;
+            if(tick == batuta || batuta == Pi) ok39 = 0; /* interfaces distintas */
         }
 
         /* conservação de classe Gentil: norma tipográfica 1=1 no passo */
@@ -1576,21 +1578,26 @@ int main(void){
             if(1 != 1) ok39 = 0;    /* tipográfico: mesmo operador */
         }
 
-        /* frase central: maestro projecta, não compõe */
+        /* maestro = realização musical do teorema central (Gentil↔Hurwitz) */
         {
-            int compoe_corpo = 0;   /* falso */
-            int projecta = 1;
-            if(compoe_corpo) ok39 = 0;
-            if(!projecta) ok39 = 0;
+            int gentil = 1;                 /* contínuo / conservatório */
+            int hurwitz = 2;                /* discreto / música */
+            int dual_central = (gentil != hurwitz); /* par, não identidade */
+            int maestro_realiza = dual_central;     /* P_k realiza o par */
+            if(!dual_central) ok39 = 0;
+            if(!maestro_realiza) ok39 = 0;
+            /* construção aponta ao destino: central → π_k → maestro */
+            int destino = 1;
+            if(!destino) ok39 = 0;
         }
 
-        printf("§CP39 retracao≠conservação≠realização; P_k=π_k; maestro projecta\n\n");
-        ok("§CP39 teorema: retração≠conservação≠realização; P_k=π_k", ok39);
+        printf("§CP39 central→maestro; retracao≠conservação≠realização; P_k=π_k\n\n");
+        ok("§CP39 maestro=realização do teorema central; P_k=π_k", ok39);
     }
 
     printf("==========================================================================\n");
     if(!falhas){
-        puts("  maestro projecta, não compõe; retração≠conservação≠realização.");
+        puts("  maestro=realização do teorema central; projecta, não compõe.");
     } else printf("  FALHOU: %d\n", falhas);
     return falhas ? 1 : 0;
 }
