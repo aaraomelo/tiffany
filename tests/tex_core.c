@@ -529,7 +529,8 @@ static long EMBP[64] = {0};   /* o FontDescriptor de cada PAR (variante, corpo) 
  * Aqui abre-se um por corpo. O `DESENHOS` do spline.h diz qual, e o índice é o par
  * (variante, corpo) --- que é a assinatura da torre com mais um eixo. */
 #define MAX_DES 24
-#define DES_C   ((Ttf*)disco_buf(10, (long)(MAX_DES * sizeof(Ttf))))
+#define TAM_DES  ((long)(MAX_DES * sizeof(Ttf)))
+#define DES_C   ((Ttf*)disco_buf(10, TAM_DES + 32768))  /* +Est (compila), fora do SP */
 static long DES_CORPO[MAX_DES];                    /* mantissas 10^-3, a régua do Tf */
 static int DES_VAR[MAX_DES], N_DES = 0;
 static long CORPO_CORRENTE = 0;
@@ -542,13 +543,11 @@ static const Ttf *carta_do_corpo(int variante, long corpo){
             return &DES_C[i];
     if(N_DES >= MAX_DES) return &CARTAS[variante < N_CARTA ? variante : 0];
     const char *nome = spline_por_corpo(corpo, variante);
-    char c1[256], c2[256]; char *pp;
+    /* a régua do caminho: NÃO no quadro (o traduz + `char*[2]` local partia o bx). */
+    static char c1[256], c2[256]; char *pp;
     pp = ap_str(c1, "lib/fontes/");    pp = ap_str(pp, nome); *pp = 0;
     pp = ap_str(c2, "../lib/fontes/"); pp = ap_str(pp, nome); *pp = 0;
-    const char *v[2];
-    v[0] = c1; v[1] = c2;                  /* o vector local enche-se por frases: só a
-                                            * imagem leva agregados, e c1/c2 são de agora */
-    if(!spline_abre_alguma(&DES_C[N_DES], v, 2, NULL))
+    if(!ttf_abre(&DES_C[N_DES], c1) && !ttf_abre(&DES_C[N_DES], c2))
         return &CARTAS[variante < N_CARTA ? variante : 0];
     DES_CORPO[N_DES] = corpo; DES_VAR[N_DES] = variante; N_DES++;
     return &DES_C[N_DES - 1];
@@ -1171,11 +1170,11 @@ static long C_TEO = 0, C_TEO_CAP = -1;
  * `fwrite(sf.buf, 1, sf.len, f)` no fim. Todas as escritas do núcleo passam por
  * `s_fmt/s_bytes/s_byte/s_pos/s_vai` + o formatador inteiro `s_fix/s_num`, sem libc. */
 typedef struct {
-    unsigned char *buf;                            /* o slot no disco: «o ficheiro É o vector» */
-    long cur;                                      /* o cursor de escrita (o ftell) */
-    long len;                                      /* o maior byte escrito — o comprimento lógico */
-    long cap;                                      /* a capacidade do slot */
-    long perdeu;                                   /* bytes que NÃO couberam — o teto ACUSA, não cala */
+    int cur;                                       /* cursor — int: o traduz alinha i32 sem pad */
+    int len;
+    int cap;
+    int perdeu;
+    unsigned char *buf;
 } Saida;
 
 typedef struct {
@@ -1208,7 +1207,8 @@ typedef struct {
 } Pdf;
 
 /* os cinco da costura: escrevem no SLOT (buf[cur]), sem libc --- o núcleo não vê o FILE*. */
-static void s_byte(Saida *s, int c);   /* usado pelo formatador abaixo, definido logo a seguir */
+static void s_byte(Saida *s, int c);
+static void s_bytes(Saida *s, const void *b, long n);
 /* um inteiro em decimal, com largura opcional e enchimento (para o `%010ld` da xref) */
 static void s_num(Saida *s, long v, int width, char pad){
     char t[24]; int tn = 0; int neg = 0; unsigned long u;
@@ -1220,27 +1220,11 @@ static void s_num(Saida *s, long v, int width, char pad){
 }
 /* o mini-formatador: %d %ld %s %c %% e largura/zero (%010ld). SEM float (a fracção vai por
  * s_fix) e SEM vfprintf --- é o que o tradutor sabe compilar, uma variádica de utilizador. */
-static void s_fmt(Saida *s, const char *fmt, ...){
-    va_list ap; va_start(ap, fmt);
-    for(const char *q = fmt; *q; q++){
-        if(*q != '%'){ s_byte(s, (unsigned char)*q); continue; }
-        q++;
-        char pad = ' '; int width = 0;
-        if(*q == '0'){ pad = '0'; q++; }
-        while(*q >= '0' && *q <= '9'){ width = width * 10 + (*q - '0'); q++; }
-        int lng = 0; while(*q == 'l'){ lng++; q++; }
-        switch(*q){
-            case '%': s_byte(s, '%'); break;
-            case 'c': s_byte(s, va_arg(ap, int)); break;
-            case 's': { const char *str = va_arg(ap, const char*); while(*str) s_byte(s, (unsigned char)*str++); } break;
-            case 'd': case 'i':
-                if(lng) s_num(s, va_arg(ap, long), width, pad);
-                else    s_num(s, (long)va_arg(ap, int), width, pad);
-                break;
-            default: break;
-        }
-    }
-    va_end(ap);
+/* buffer do formatador — snprintf (variadica directa, medida) + s_bytes */
+static char S_FMT_BUF[2048];
+static void s_flush(Saida *s){
+    int n = 0; while(S_FMT_BUF[n]) n = n + 1;
+    s_bytes(s, S_FMT_BUF, n);
 }
 static void s_bytes(Saida *s, const void *b, long n){
     if(s->cur + n <= s->cap){ memcpy(s->buf + s->cur, b, (size_t)n); s->cur += n; if(s->cur > s->len) s->len = s->cur; }
@@ -1542,12 +1526,12 @@ static void poe_rect(Pdf *p, long x, long y, long w, long h, const char *cor){
     long r, g, b;                                  /* tudo na régua do Td: 10^-3 pt */
     if(!p->aberta || !p->fundo_on || !cor_de(cor, &r, &g, &b)) return;
     Saida *s = &p->sfundo;
-    s_fmt(s, "q "); s_fix(s,r,3); s_byte(s,' '); s_fix(s,g,3);
-    s_byte(s,' '); s_fix(s,b,3); s_fmt(s, " rg ");
-    s_c(s,x);   s_byte(s,' '); s_c(s,y);   s_fmt(s," m ");
-    s_c(s,x+w); s_byte(s,' '); s_c(s,y);   s_fmt(s," l ");
-    s_c(s,x+w); s_byte(s,' '); s_c(s,y+h); s_fmt(s," l ");
-    s_c(s,x);   s_byte(s,' '); s_c(s,y+h); s_fmt(s," l f Q\n");
+    snprintf(S_FMT_BUF, 2048, "q "); s_flush(s); s_fix(s,r,3); s_byte(s,' '); s_fix(s,g,3);
+    s_byte(s,' '); s_fix(s,b,3); snprintf(S_FMT_BUF, 2048, " rg "); s_flush(s);
+    s_c(s,x);   s_byte(s,' '); s_c(s,y);   snprintf(S_FMT_BUF, 2048, " m "); s_flush(s);
+    s_c(s,x+w); s_byte(s,' '); s_c(s,y);   snprintf(S_FMT_BUF, 2048, " l "); s_flush(s);
+    s_c(s,x+w); s_byte(s,' '); s_c(s,y+h); snprintf(S_FMT_BUF, 2048, " l "); s_flush(s);
+    s_c(s,x);   s_byte(s,' '); s_c(s,y+h); snprintf(S_FMT_BUF, 2048, " l f Q\n"); s_flush(s);
     p->n_fundo = p->n_fundo + 1;
     p->caixas = p->caixas + 1;
 }
@@ -1557,10 +1541,10 @@ static void poe_regua(Pdf *p, long x1, long x2, long y, long esp, const char *co
     long r, g, b;                                  /* tudo na régua do Td: 10^-3 pt */
     if(!p->aberta || !cor_de(cor, &r, &g, &b)) return;
     Saida *s = &p->sf;
-    s_fmt(s, "q "); s_fix(s,r,3); s_byte(s,' '); s_fix(s,g,3);
-    s_byte(s,' '); s_fix(s,b,3); s_fmt(s, " RG ");
-    s_c(s,esp); s_fmt(s," w "); s_c(s,x1); s_byte(s,' '); s_c(s,y); s_fmt(s," m ");
-    s_c(s,x2); s_byte(s,' '); s_c(s,y); s_fmt(s," l S Q\n");
+    snprintf(S_FMT_BUF, 2048, "q "); s_flush(s); s_fix(s,r,3); s_byte(s,' '); s_fix(s,g,3);
+    s_byte(s,' '); s_fix(s,b,3); snprintf(S_FMT_BUF, 2048, " RG "); s_flush(s);
+    s_c(s,esp); snprintf(S_FMT_BUF, 2048, " w "); s_flush(s); s_c(s,x1); s_byte(s,' '); s_c(s,y); snprintf(S_FMT_BUF, 2048, " m "); s_flush(s);
+    s_c(s,x2); s_byte(s,' '); s_c(s,y); snprintf(S_FMT_BUF, 2048, " l S Q\n"); s_flush(s);
     p->reguas = p->reguas + 1;
 }
 
@@ -1570,12 +1554,12 @@ static void poe_poli(Pdf *p, const long *xs, const long *ys, int np, long esp, c
     long r, g, b;
     if(!p->aberta || np < 2 || !cor_de(cor, &r, &g, &b)) return;
     Saida *s = &p->sf;
-    s_fmt(s, "q "); s_fix(s,r,3); s_byte(s,' '); s_fix(s,g,3);
-    s_byte(s,' '); s_fix(s,b,3); s_fmt(s, " RG 1 j 1 J ");
-    s_c(s, esp); s_fmt(s, " w ");
-    s_c(s, xs[0]); s_byte(s,' '); s_c(s, ys[0]); s_fmt(s," m ");
-    for(int k = 1; k < np; k++){ s_c(s, xs[k]); s_byte(s,' '); s_c(s, ys[k]); s_fmt(s," l "); }
-    s_fmt(s, "S Q\n");
+    snprintf(S_FMT_BUF, 2048, "q "); s_flush(s); s_fix(s,r,3); s_byte(s,' '); s_fix(s,g,3);
+    s_byte(s,' '); s_fix(s,b,3); snprintf(S_FMT_BUF, 2048, " RG 1 j 1 J "); s_flush(s);
+    s_c(s, esp); snprintf(S_FMT_BUF, 2048, " w "); s_flush(s);
+    s_c(s, xs[0]); s_byte(s,' '); s_c(s, ys[0]); snprintf(S_FMT_BUF, 2048, " m "); s_flush(s);
+    for(int k = 1; k < np; k++){ s_c(s, xs[k]); s_byte(s,' '); s_c(s, ys[k]); snprintf(S_FMT_BUF, 2048, " l "); s_flush(s); }
+    snprintf(S_FMT_BUF, 2048, "S Q\n"); s_flush(s);
     p->reguas = p->reguas + 1;
 }
 
@@ -1588,8 +1572,12 @@ static void pdf_abre(Pdf *p, unsigned char *buf, long cap){
     memset(p, 0, sizeof *p);
     p->off = (long*)disco_buf(12, (long)(MAXOBJ * sizeof(long)));
     p->pag = (int *)disco_buf(13, (long)(MAXOBJ * sizeof(int)));
-    p->sf.buf = buf; p->sf.cur = 0; p->sf.len = 0; p->sf.cap = cap;   /* a saída é um slot+cursor */
-    s_fmt(&p->sf, "%%PDF-1.4\n%%\xE2\xE3\xCF\xD3\n");
+    p->sf.buf = buf; p->sf.cur = 0; p->sf.len = 0; p->sf.cap = (int)cap;
+    /* cabeçalho por s_byte — sem formatador (a prova do caminho do slot) */
+    { const char *h = "%PDF-1.4\n%";
+      while(*h){ s_byte(&p->sf, (unsigned char)*h); h = h + 1; }
+      s_byte(&p->sf, 0xE2); s_byte(&p->sf, 0xE3); s_byte(&p->sf, 0xCF); s_byte(&p->sf, 0xD3);
+      s_byte(&p->sf, 10); }
     p->nobj = 3 + N_FIXA;                      /* 1 catálogo, 2 páginas, N_FIXA fontes,
                                                 * e o 19: os Resources partilhados */
 }
@@ -1598,7 +1586,7 @@ static void pdf_abre(Pdf *p, unsigned char *buf, long cap){
  * escreve o cabeçalho, e devolve o início do stream. Era a mesma sequência para o conteúdo e o fundo. */
 static long abre_stream_ind(Pdf *p, int obj, int lenobj){
     p->off[obj] = s_pos(&p->sf);
-    s_fmt(&p->sf, "%d 0 obj<</Length %d 0 R>>stream\n", obj, lenobj);
+    snprintf(S_FMT_BUF, 2048, "%d 0 obj<</Length %d 0 R>>stream\n", obj, lenobj); s_flush(&p->sf);
     return s_pos(&p->sf);
 }
 
@@ -1634,10 +1622,10 @@ static void pagina_abre(Pdf *p){
         char *q = ap_str(dicf + dl, "/F"); q = ap_num(q, k); q = ap_str(q, " ");
         q = ap_num(q, 2 + k); q = ap_str(q, " 0 R"); *q = 0; dl = (int)(q - dicf);
     }
-    s_fmt(&p->sf, "%d 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 ", po);
+    snprintf(S_FMT_BUF, 2048, "%d 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 ", po); s_flush(&p->sf);
     s_fix(&p->sf, A4_LM, 3); s_byte(&p->sf, ' '); s_fix(&p->sf, A4_AM, 3);
     (void)dicf;
-    s_fmt(&p->sf, "]/Resources %d 0 R/Contents[%d 0 R %d 0 R]>>endobj\n", 3 + N_FIXA, fo, co);
+    snprintf(S_FMT_BUF, 2048, "]/Resources %d 0 R/Contents[%d 0 R %d 0 R]>>endobj\n", 3 + N_FIXA, fo, co); s_flush(&p->sf);
     /* o fundo vai para um slot próprio e só se copia no fecho — é lá que se sabe o que ele tem */
     p->sfundo.buf = (unsigned char*)disco_buf(15, 1L << 20);
     p->sfundo.cur = 0; p->sfundo.len = 0; p->sfundo.cap = 1L << 20;
@@ -1654,9 +1642,9 @@ static void pagina_abre(Pdf *p){
 /* fecha um stream cujo /Length é INDIRECTO: o `endstream endobj`, e depois o objecto do comprimento
  * (`N 0 obj LEN endobj`) com o offset registado. Era a mesma sequência para o conteúdo e o fundo. */
 static void fecha_stream_ind(Pdf *p, long lenobj, long len){
-    s_fmt(&p->sf, "endstream\nendobj\n");
+    snprintf(S_FMT_BUF, 2048, "endstream\nendobj\n"); s_flush(&p->sf);
     p->off[lenobj] = s_pos(&p->sf);
-    s_fmt(&p->sf, "%ld 0 obj %ld endobj\n", lenobj, len);
+    snprintf(S_FMT_BUF, 2048, "%ld 0 obj %ld endobj\n", lenobj, len); s_flush(&p->sf);
 }
 
 static void poe_pedaco(Saida *f, const Gl *g, int i, int j, int fonte, long corpo,
@@ -1729,6 +1717,7 @@ static int N_XGC = 0;
 static unsigned char XG_USADO[MAX_XGC * 256];   /* achatado: o traduz indexa 1D */
 static Contorno XG_CT;                          /* um contorno de cada vez, sem malloc */
 static int XG_ID[MAX_XGC * 256];
+static long CAM_DX[2048], CAM_DY[2048], CAM_AC[2049];  /* rasto do relógio: fora do quadro */
 
 static int xg_idx(const Ttf *carta){
     for(int i = 0; i < N_XGC; i++) if(XG_CARTA[i] == carta) return i;
@@ -1765,7 +1754,6 @@ static void escreve_caminho(Saida *f, const Contorno *ct, int cff){
      * Sem π, sem raiz, sem double; a divisão é a do escrever. (A lei operacional:
      * tests/luz_periodo.c, tests/relogio_curva.c — quem decide é o relógio.) */
     long REGUA = 10;                                /* upem/100: o por-unidade */
-    static long DX[2048], DY[2048], AC[2049];       /* o rasto denso e o arco L1 */
     int a = 0;
     for(int cc = 0; cc < ct->nc; cc++){
         int z2 = ct->fim[cc]; int np = z2 - a + 1;
@@ -1780,8 +1768,8 @@ static void escreve_caminho(Saida *f, const Contorno *ct, int cff){
             long P0x = contorno_xi(ct, a + (s0 - a + t2 - 1) % np);
             long P0y = contorno_yi(ct, a + (s0 - a + t2 - 1) % np);
             if(ct->p[q1].onda){
-                if(nd < 2046){ DX[nd] = P0x; DY[nd] = P0y; nd++;
-                               DX[nd] = contorno_xi(ct, q1); DY[nd] = contorno_yi(ct, q1); nd++; }
+                if(nd < 2046){ CAM_DX[nd] = P0x; CAM_DY[nd] = P0y; nd++;
+                               CAM_DX[nd] = contorno_xi(ct, q1); CAM_DY[nd] = contorno_yi(ct, q1); nd++; }
                 t2++; continue;
             }
             long C1x = contorno_xi(ct, q1), C1y = contorno_yi(ct, q1);
@@ -1807,21 +1795,21 @@ static void escreve_caminho(Saida *f, const Contorno *ct, int cff){
                            y = rasto_c3(P0y, C1y, C2y, P3y, j, 8); }
                 else     { x = rasto_c2(P0x, C1x, P3x, j, 8);
                            y = rasto_c2(P0y, C1y, P3y, j, 8); }
-                DX[nd] = x; DY[nd] = y; nd++;
+                CAM_DX[nd] = x; CAM_DY[nd] = y; nd++;
             }
             t2 += salto;
         }
         if(nd < 3){ a = z2 + 1; continue; }
         /* 2. o arco L1 (a régua da grelha, inteira) acumulado sobre o rasto denso */
-        AC[0] = 0;
+        CAM_AC[0] = 0;
         for(int k = 0; k < nd; k++){
             int k2 = (k + 1) % nd;
-            long dx = DX[k2] - DX[k], dy = DY[k2] - DY[k];
+            long dx = CAM_DX[k2] - CAM_DX[k], dy = CAM_DY[k2] - CAM_DY[k];
             if(dx < 0) dx = -dx;
             if(dy < 0) dy = -dy;
-            AC[k + 1] = AC[k] + dx + dy;
+            CAM_AC[k + 1] = CAM_AC[k] + dx + dy;
         }
-        long L = AC[nd];
+        long L = CAM_AC[nd];
         if(L <= 0){ a = z2 + 1; continue; }
         /* 3. as MARCAS DO RELÓGIO: N uniformes no arco, N dobra até a corda fechar —
          * mede-se no ponto do rasto denso mais próximo do meio de cada corda */
@@ -1830,20 +1818,20 @@ static void escreve_caminho(Saida *f, const Contorno *ct, int cff){
             long pior = 0; int jj = 0;
             for(long m = 0; m < N; m++){
                 long a0 = L * m / N, a1 = L * (m + 1) / N, am = (a0 + a1) / 2;
-                while(jj + 1 < nd && AC[jj + 1] < am) jj++;
-                long segm = AC[jj+1] - AC[jj];
-                long mxi = DX[jj] + (segm ? (DX[(jj+1)%nd] - DX[jj]) * (am - AC[jj]) / segm : 0);
-                long myi = DY[jj] + (segm ? (DY[(jj+1)%nd] - DY[jj]) * (am - AC[jj]) / segm : 0);
+                while(jj + 1 < nd && CAM_AC[jj + 1] < am) jj++;
+                long segm = CAM_AC[jj+1] - CAM_AC[jj];
+                long mxi = CAM_DX[jj] + (segm ? (CAM_DX[(jj+1)%nd] - CAM_DX[jj]) * (am - CAM_AC[jj]) / segm : 0);
+                long myi = CAM_DY[jj] + (segm ? (CAM_DY[(jj+1)%nd] - CAM_DY[jj]) * (am - CAM_AC[jj]) / segm : 0);
                 /* a corda desta marca */
                 long x0, y0, x1, y1; int j0 = 0, j1 = 0; (void)j0; (void)j1;
-                { int t3 = 0; while(t3 + 1 < nd && AC[t3 + 1] < a0) t3++;
-                  long seg = AC[t3+1] - AC[t3];
-                  x0 = DX[t3] + (seg ? (DX[(t3+1)%nd] - DX[t3]) * (a0 - AC[t3]) / seg : 0);
-                  y0 = DY[t3] + (seg ? (DY[(t3+1)%nd] - DY[t3]) * (a0 - AC[t3]) / seg : 0); }
-                { int t3 = 0; while(t3 + 1 < nd && AC[t3 + 1] < a1) t3++;
-                  long seg = AC[t3+1] - AC[t3];
-                  x1 = DX[t3] + (seg ? (DX[(t3+1)%nd] - DX[t3]) * (a1 - AC[t3]) / seg : 0);
-                  y1 = DY[t3] + (seg ? (DY[(t3+1)%nd] - DY[t3]) * (a1 - AC[t3]) / seg : 0); }
+                { int t3 = 0; while(t3 + 1 < nd && CAM_AC[t3 + 1] < a0) t3++;
+                  long seg = CAM_AC[t3+1] - CAM_AC[t3];
+                  x0 = CAM_DX[t3] + (seg ? (CAM_DX[(t3+1)%nd] - CAM_DX[t3]) * (a0 - CAM_AC[t3]) / seg : 0);
+                  y0 = CAM_DY[t3] + (seg ? (CAM_DY[(t3+1)%nd] - CAM_DY[t3]) * (a0 - CAM_AC[t3]) / seg : 0); }
+                { int t3 = 0; while(t3 + 1 < nd && CAM_AC[t3 + 1] < a1) t3++;
+                  long seg = CAM_AC[t3+1] - CAM_AC[t3];
+                  x1 = CAM_DX[t3] + (seg ? (CAM_DX[(t3+1)%nd] - CAM_DX[t3]) * (a1 - CAM_AC[t3]) / seg : 0);
+                  y1 = CAM_DY[t3] + (seg ? (CAM_DY[(t3+1)%nd] - CAM_DY[t3]) * (a1 - CAM_AC[t3]) / seg : 0); }
                 long dx = mxi - (x0 + x1) / 2, dy = myi - (y0 + y1) / 2;
                 if(dx < 0) dx = -dx;
                 if(dy < 0) dy = -dy;
@@ -1856,16 +1844,16 @@ static void escreve_caminho(Saida *f, const Contorno *ct, int cff){
         /* 4. o desenho: SÓ as marcas — a referência já foi dispensada */
         for(long m = 0; m <= N; m++){
             long am = L * m / N;
-            int t3 = 0; while(t3 + 1 < nd && AC[t3 + 1] < am) t3++;
-            long seg = AC[t3+1] - AC[t3];
-            long x = DX[t3] + (seg ? (DX[(t3+1)%nd] - DX[t3]) * (am - AC[t3]) / seg : 0);
-            long y = DY[t3] + (seg ? (DY[(t3+1)%nd] - DY[t3]) * (am - AC[t3]) / seg : 0);
-            s_fmt(f, "%ld %ld %s ", x, y, m == 0 ? "m" : "l");
+            int t3 = 0; while(t3 + 1 < nd && CAM_AC[t3 + 1] < am) t3++;
+            long seg = CAM_AC[t3+1] - CAM_AC[t3];
+            long x = CAM_DX[t3] + (seg ? (CAM_DX[(t3+1)%nd] - CAM_DX[t3]) * (am - CAM_AC[t3]) / seg : 0);
+            long y = CAM_DY[t3] + (seg ? (CAM_DY[(t3+1)%nd] - CAM_DY[t3]) * (am - CAM_AC[t3]) / seg : 0);
+            snprintf(S_FMT_BUF, 2048, "%ld %ld %s ", x, y, m == 0 ? "m" : "l"); s_flush(f);
         }
-        s_fmt(f, "h ");
+        snprintf(S_FMT_BUF, 2048, "h "); s_flush(f);
         a = z2 + 1;
     }
-    s_fmt(f, "f");
+    snprintf(S_FMT_BUF, 2048, "f"); s_flush(f);
 }
 
 static void poe_pedaco(Saida *f, const Gl *g, int i, int j, int fonte, long corpo,
@@ -1875,9 +1863,9 @@ static void poe_pedaco(Saida *f, const Gl *g, int i, int j, int fonte, long corp
      * `.tex` viaja no FonteTeX e a volta exacta é por ele. */
     { long r, gg, b;
       if(COR_TEXTO[0] && cor_de(COR_TEXTO, &r, &gg, &b)){
-          s_fmt(f, "q "); s_fix(f, r, 3); s_byte(f, ' ');
-          s_fix(f, gg, 3); s_byte(f, ' '); s_fix(f, b, 3); s_fmt(f, " rg\n");
-      } else s_fmt(f, "q 0 0 0 rg\n"); }
+          snprintf(S_FMT_BUF, 2048, "q "); s_flush(f); s_fix(f, r, 3); s_byte(f, ' ');
+          s_fix(f, gg, 3); s_byte(f, ' '); s_fix(f, b, 3); snprintf(S_FMT_BUF, 2048, " rg\n"); s_flush(f);
+      } else snprintf(S_FMT_BUF, 2048, "q 0 0 0 rg\n"); s_flush(f); }
     long guarda = CORPO_CORRENTE; CORPO_CORRENTE = corpo;
     const Ttf *carta = (fonte == F_SIM && CARTA_SIM) ? &CARTAS[F_SIM]
                      : (fonte == F_MAT && CARTA_MAT) ? &CARTAS[F_MAT]
@@ -1900,15 +1888,15 @@ static void poe_pedaco(Saida *f, const Gl *g, int i, int j, int fonte, long corp
                 /* a escala corpo/upem em milionésimos: UMA divisão, a do escrever —
                  * e a glyf mora no espaço ×6 (a elevação exacta), que a escala desfaz */
                 long sc = corpo * 1000 / carta->upem;   /* o rasto escreve em unidades da fonte, x1 */
-                s_fmt(f, "q "); s_fix(f, sc, 6); s_fmt(f, " 0 0 "); s_fix(f, sc, 6);
+                snprintf(S_FMT_BUF, 2048, "q "); s_flush(f); s_fix(f, sc, 6); snprintf(S_FMT_BUF, 2048, " 0 0 "); s_flush(f); s_fix(f, sc, 6);
                 s_byte(f, ' '); s_fix(f, x, 3); s_byte(f, ' '); s_fix(f, y_m, 3);
-                s_fmt(f, " cm /G%d_%d Do Q\n", ix, gb);
+                snprintf(S_FMT_BUF, 2048, " cm /G%d_%d Do Q\n", ix, gb); s_flush(f);
             }
         }
         x += av;
         if(gb == ' ') x += espaco_extra;
     }
-    s_fmt(f, "Q\n");
+    snprintf(S_FMT_BUF, 2048, "Q\n"); s_flush(f);
     CORPO_CORRENTE = guarda;
 }
 
@@ -1932,10 +1920,10 @@ static void poe_glifo_boost(Pdf *p, int g, int fonte, long corpo,
      * por sx·sy, declarada na própria instância: quem mede, lê os dois. */
     long sh = sc, sv = sc * k_num / k_den;
     Saida *f = &p->sf;
-    s_fmt(f, "q 0 0 0 rg\n");
-    s_fmt(f, "q "); s_fix(f, sh, 6); s_fmt(f, " 0 0 "); s_fix(f, sv, 6);
+    snprintf(S_FMT_BUF, 2048, "q 0 0 0 rg\n"); s_flush(f);
+    snprintf(S_FMT_BUF, 2048, "q "); s_flush(f); s_fix(f, sh, 6); snprintf(S_FMT_BUF, 2048, " 0 0 "); s_flush(f); s_fix(f, sv, 6);
     s_byte(f, ' '); s_fix(f, x_m, 3); s_byte(f, ' '); s_fix(f, y_m, 3);
-    s_fmt(f, " cm /G%d_%d Do Q\nQ\n", ix, g);
+    snprintf(S_FMT_BUF, 2048, " cm /G%d_%d Do Q\nQ\n", ix, g); s_flush(f);
 }
 
 /* a espessura do traço desenhado (raiz, barra, moldura) no peso do CONTEXTO: a
@@ -2616,11 +2604,11 @@ static void pdf_fecha(Pdf *p){
     /* o objeto Pages sai no FIM — só agora se sabe quantas páginas há. A xref dá o offset, e a
      * ordem no ficheiro é livre: um objeto pode estar em qualquer parte. */
     p->off[2] = s_pos(&p->sf);
-    s_fmt(&p->sf,"2 0 obj<</Type/Pages/Count %d/Kids[", p->npag);
-    for(int i = 0; i < p->npag; i++) s_fmt(&p->sf,"%d 0 R ", p->pag[i]);
-    s_fmt(&p->sf,"]>>endobj\n");
+    snprintf(S_FMT_BUF, 2048, "2 0 obj<</Type/Pages/Count %d/Kids[", p->npag); s_flush(&p->sf);
+    for(int i = 0; i < p->npag; i++){ snprintf(S_FMT_BUF, 2048, "%d 0 R ", p->pag[i]); s_flush(&p->sf); }
+    snprintf(S_FMT_BUF, 2048, "]>>endobj\n"); s_flush(&p->sf);
     p->off[1] = s_pos(&p->sf);
-    s_fmt(&p->sf,"1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n");
+    snprintf(S_FMT_BUF, 2048, "1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n"); s_flush(&p->sf);
     /* ─── AS FONTES: EMBUTIDAS, e não declaradas ───────────────────────────────────────
      *
      * Até aqui escrevia-se `/BaseFont/Helvetica` e o leitor desenhava com o que tivesse. A
@@ -2645,7 +2633,7 @@ static void pdf_fecha(Pdf *p){
     }
     for(int i = 0; i < N_FIXA; i++){
         p->off[3+i] = s_pos(&p->sf);
-        s_fmt(&p->sf, "%d 0 obj<<>>endobj\n", 3 + i);
+        snprintf(S_FMT_BUF, 2048, "%d 0 obj<<>>endobj\n", 3 + i); s_flush(&p->sf);
     }
     (void)fonte_emb;
     /* AS ASSINATURAS USADAS, escritas UMA vez cada: o contorno em unidades da fonte
@@ -2665,9 +2653,9 @@ static void pdf_fecha(Pdf *p){
                                         : ttf_contorno(ca, gi, &XG_CT)) : 0;
                 int of2 = p->nobj + 1, ol2 = p->nobj + 2; p->nobj = ol2;
                 p->off[of2] = s_pos(&p->sf);
-                s_fmt(&p->sf, "%d 0 obj<</Type/XObject/Subtype/Form"
+                snprintf(S_FMT_BUF, 2048, "%d 0 obj<</Type/XObject/Subtype/Form"
                               "/BBox[-3000 -2000 6000 3000]/Length %d 0 R>>stream\n",
-                      of2, ol2);
+                      of2, ol2); s_flush(&p->sf);
                 long ini2 = s_pos(&p->sf);
                 if(okc && XG_CT.n) escreve_caminho(&p->sf, &XG_CT, ca->cff ? 1 : 0);
                 long fim2 = s_pos(&p->sf);
@@ -2676,12 +2664,13 @@ static void pdf_fecha(Pdf *p){
             }
         int ro = 3 + N_FIXA;
         p->off[ro] = s_pos(&p->sf);
-        s_fmt(&p->sf, "%d 0 obj<</XObject<<", ro);
+        snprintf(S_FMT_BUF, 2048, "%d 0 obj<</XObject<<", ro); s_flush(&p->sf);
         for(int ix = 0; ix < N_XGC; ix++)
             for(int gb2 = 33; gb2 < 256; gb2++)
-                if(XG_USADO[ix * 256 + gb2] && XG_ID[ix * 256 + gb2])
-                    s_fmt(&p->sf, "/G%d_%d %d 0 R", ix, gb2, XG_ID[ix * 256 + gb2]);
-        s_fmt(&p->sf, ">>>>endobj\n");
+                if(XG_USADO[ix * 256 + gb2] && XG_ID[ix * 256 + gb2]){
+                    snprintf(S_FMT_BUF, 2048, "/G%d_%d %d 0 R", ix, gb2, XG_ID[ix * 256 + gb2]); s_flush(&p->sf);
+                }
+        snprintf(S_FMT_BUF, 2048, ">>>>endobj\n"); s_flush(&p->sf);
     }
     /* O .TEX ORIGINAL, INVISÍVEL: um objecto que a página não referencia. O leitor de PDF
      * ignora-o — não está em /Contents nem em árvore nenhuma —, mas está lá, e a volta lê-o
@@ -2728,19 +2717,19 @@ static void pdf_fecha(Pdf *p){
         } }
       { int obj = p->nobj + 1; p->nobj = obj;
         p->off[obj] = s_pos(&p->sf);
-        s_fmt(&p->sf, "%d 0 obj<</Type/AssinaturaOito/N 256/P 65537/Sel[", obj);
-        for(int t = 0; t < 256; t++) s_fmt(&p->sf, "%ld ", S[t]);
-        s_fmt(&p->sf, "]>>endobj\n"); } }
+        snprintf(S_FMT_BUF, 2048, "%d 0 obj<</Type/AssinaturaOito/N 256/P 65537/Sel[", obj); s_flush(&p->sf);
+        for(int t = 0; t < 256; t++){ snprintf(S_FMT_BUF, 2048, "%ld ", S[t]); s_flush(&p->sf); }
+        snprintf(S_FMT_BUF, 2048, "]>>endobj\n"); s_flush(&p->sf); } }
     /* A SEMENTE VIAJA COM O DOCUMENTO, sempre — mesmo sem o .tex embutido: a
      * configuração da estrela é estado do documento, não constante do motor. */
     { int obj = p->nobj + 1; p->nobj = obj;
       p->off[obj] = s_pos(&p->sf);
-      s_fmt(&p->sf, "%d 0 obj<</Type/SementeEstrela"
+      snprintf(S_FMT_BUF, 2048, "%d 0 obj<</Type/SementeEstrela"
                     "/Resp %ld/AscN %ld/AscD %ld/Desc %ld/Traco %d"
                     "/RazaoN %ld/RazaoD %ld>>endobj\n",
             obj, SEM_V[0], SEM_V[1], SEM_V[2], SEM_V[3], SEM_TRACO,
             N_ESCALA > 3 ? escala_de_degrau(1, EIXO_ESCALA) : 0,
-            N_ESCALA > 3 ? escala_de_degrau(3, EIXO_ESCALA) : 0); }
+            N_ESCALA > 3 ? escala_de_degrau(3, EIXO_ESCALA) : 0); s_flush(&p->sf); }
     if(FONTE_TEX){
         /* o SOURCE é um corpo, e entra pela mesma porta que as fontes --- o cruzamento do viveiro:
          * carrega-se para o slot 4 (nativo fopen+fread, wasm pré-carregado) e transmite-se ao PDF. */
@@ -2749,15 +2738,15 @@ static void pdf_fecha(Pdf *p){
             unsigned char *src = (unsigned char*)disco_buf(4, 1 << 22);
             int obj = p->nobj + 1; p->nobj = obj;
             p->off[obj] = s_pos(&p->sf);
-            s_fmt(&p->sf,"%d 0 obj<</Type/FonteTeX/Length %ld>>stream\n", obj, len);
+            snprintf(S_FMT_BUF, 2048, "%d 0 obj<</Type/FonteTeX/Length %ld>>stream\n", obj, len); s_flush(&p->sf);
             s_bytes(&p->sf, src, len);                  /* o corpo inteiro, de uma vez */
-            s_fmt(&p->sf,"\nendstream\nendobj\n");
+            snprintf(S_FMT_BUF, 2048, "\nendstream\nendobj\n"); s_flush(&p->sf);
         }
     }
     long xref = s_pos(&p->sf);
-    s_fmt(&p->sf,"xref\n0 %d\n0000000000 65535 f \n", p->nobj + 1);
-    for(int i = 1; i <= p->nobj; i++) s_fmt(&p->sf,"%010ld 00000 n \n", p->off[i]);
-    s_fmt(&p->sf,"trailer<</Size %d/Root 1 0 R>>\nstartxref\n%ld\n%%%%EOF\n", p->nobj + 1, xref);
+    snprintf(S_FMT_BUF, 2048, "xref\n0 %d\n0000000000 65535 f \n", p->nobj + 1); s_flush(&p->sf);
+    for(int i = 1; i <= p->nobj; i++){ snprintf(S_FMT_BUF, 2048, "%010ld 00000 n \n", p->off[i]); s_flush(&p->sf); }
+    snprintf(S_FMT_BUF, 2048, "trailer<</Size %d/Root 1 0 R>>\nstartxref\n%ld\n%%%%EOF\n", p->nobj + 1, xref); s_flush(&p->sf);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -2828,6 +2817,9 @@ typedef struct {
                             * coluna leva o que sobra, como a área negra de Hilbert leva o que
                             * falta: as duas somam UM em todo ponto. */
 } Est;
+
+/* o estado do compila vive no disco (slot 10, após as cartas), não no SP */
+#define EST_E  ((Est*)((char*)DES_C + TAM_DES))
 
 /* liga uma variante REGISTANDO a de fora na pilha: o `}` que traz o PROF de
  * volta repõe-na — a mesma mecânica do exp_pf, uma régua só para todas */
@@ -3048,14 +3040,26 @@ static void quebra_e_desenrola(Est *e, int ultima){
             corte = q;
         }
         if(corte <= 0) corte = 1;
-        Linha out = e->L; out.n = corte;
-        while(out.n && out.g[out.n-1].g == ' ') out.n--;
-        /* o hífen do corte: a palavra partida leva o sinal de que continua */
-        if(corta_palavra && out.n < MAXLIN){ out.g[out.n].g = '-';
-                                             out.g[out.n].f = out.g[out.n-1].f;
-                                             out.g[out.n].e = out.g[out.n-1].e; out.n++; }
-        int fim = (corte == e->L.n);
-        desenrola(e->p, &out, !(fim && ultima) && !e->L.nivel);
+        /* IN-PLACE: a estrela não armazena (corpo-estelar §estrela). No traduz uma
+         * `Linha` local no quadro é buffer a mais — e `Linha out = e->L` nem sequer
+         * copia `g[]` (estrutura vale o endereço). Emite-se o prefixo sobre a própria
+         * linha: baixa-se `n`, desenrola, repõe. */
+        int n_orig = e->L.n;
+        int n_emit = corte;
+        while(n_emit && e->L.g[n_emit-1].g == ' ') n_emit--;
+        unsigned char gg = 0, ff = 0; signed char ee = 0; int com_hifen = 0;
+        if(corta_palavra && n_emit > 0 && n_emit < MAXLIN){
+            gg = e->L.g[n_emit].g; ff = e->L.g[n_emit].f; ee = e->L.g[n_emit].e;
+            e->L.g[n_emit].g = '-';
+            e->L.g[n_emit].f = e->L.g[n_emit-1].f;
+            e->L.g[n_emit].e = e->L.g[n_emit-1].e;
+            n_emit++; com_hifen = 1;
+        }
+        e->L.n = n_emit;
+        int fim = (corte == n_orig);
+        desenrola(e->p, &e->L, !(fim && ultima) && !e->L.nivel);
+        if(com_hifen){ n_emit--; e->L.g[n_emit].g = gg; e->L.g[n_emit].f = ff; e->L.g[n_emit].e = ee; }
+        e->L.n = n_orig;
         if(fim){ e->L.n = 0; break; }
         int k = corte;
         if(!corta_palavra) while(k < e->L.n && e->L.g[k].g == ' ') k++;
@@ -3093,8 +3097,9 @@ static int bib_num(const char *c, int len){
 }
 
 static void compila(const char *s, Pdf *p, long *glifos){
-    Est e; memset(&e, 0, sizeof e);
-    e.p = p; e.fonte = F_REG; e.nfp = 0;
+    Est *e = EST_E;
+    memset(e, 0, sizeof(Est));
+    e->p = p; e->fonte = F_REG; e->nfp = 0;
     long i = 0, n = (long)strlen(s);
     bib_recolhe(s, n);
 
@@ -3119,28 +3124,28 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 j++;
             }
             if(brancas >= 2){
-                fecha_paragrafo(&e); p->y -= 5*PT;
+                fecha_paragrafo(e); p->y -= 5*PT;
                 /* o TeX tambem nao deixa uma formula atravessar paragrafo ("Missing $ inserted").
                  * Sem isto, UM cifrao desirmanado apaga o resto do documento — e foi exatamente
                  * o que aconteceu. Fechar aqui limita o dano de qualquer $ solto a um paragrafo. */
-                e.mat = 0; e.fonte = F_REG; e.nfp = 0; e.fonte_txt = 0;
-                e.exp = 0; e.exp1 = 0; e.nexp = 0;     /* o expoente morre com a fórmula */
+                e->mat = 0; e->fonte = F_REG; e->nfp = 0; e->fonte_txt = 0;
+                e->exp = 0; e->exp1 = 0; e->nexp = 0;     /* o expoente morre com a fórmula */
                 i = j; continue;
             }
-            if(!e.mat) espaco_se_falta(&e);   /* na fórmula o \n é só ar: o TeX ignora-o */
+            if(!e->mat) espaco_se_falta(e);   /* na fórmula o \n é só ar: o TeX ignora-o */
             i = j; continue;
         }
         /* O `&` MUDA DE COLUNA — e é só isso: fecha a célula onde está e abre a seguinte.
          * Fora de tabela é um caractere como outro qualquer, e por isso ia parar à página. */
-        if(c == '&' && e.matriz){          /* a coluna da matriz: separador de controlo */
-            empurra(&e, 2, e.fonte);
+        if(c == '&' && e->matriz){          /* a coluna da matriz: separador de controlo */
+            empurra(e, 2, e->fonte);
             i++; continue;
         }
-        if(c == '&' && e.mat && !e.tab){   /* o ponto de alinhamento do align: engole-se */
-            espaco_se_falta(&e);
+        if(c == '&' && e->mat && !e->tab){   /* o ponto de alinhamento do align: engole-se */
+            espaco_se_falta(e);
             i++; continue;
         }
-        if(c == '&' && e.tab){
+        if(c == '&' && e->tab){
             /* A CÉLULA NÃO SE JUSTIFICA. O `0` aqui dizia «não é a última linha», e o efeito
              * é justificar: as palavras espalham-se até à margem da coluna, e uma célula de
              * duas palavras sai com um vão enorme no meio — «o ... Operador», «tudo se move
@@ -3148,14 +3153,14 @@ static void compila(const char *s, Pdf *p, long *glifos){
              *
              * O comentário que eu tinha escrito ao lado dizia «sem justificar» — e o código
              * fazia o contrário. Escrevi a intenção e passei o argumento oposto. */
-            if(e.L.n) quebra_e_desenrola(&e, 1);       /* 1 = última: NÃO justifica */
-            e.L.n = 0;
-            e.tab_col++;
-            if(e.tab_col >= e.tab_ncol) e.tab_col = e.tab_ncol - 1;
-            {   long r = e.tab_x0 - MARGEM;      /* a coluna conta a partir do bloco */
-                for(int k = 0; k < e.tab_col && k < 16; k++) r += e.tab_w[k];
-                e.L.recuo = (int)r;
-                e.tab_larg = e.tab_w[e.tab_col < 16 ? e.tab_col : 15];
+            if(e->L.n) quebra_e_desenrola(e, 1);       /* 1 = última: NÃO justifica */
+            e->L.n = 0;
+            e->tab_col++;
+            if(e->tab_col >= e->tab_ncol) e->tab_col = e->tab_ncol - 1;
+            {   long r = e->tab_x0 - MARGEM;      /* a coluna conta a partir do bloco */
+                for(int k = 0; k < e->tab_col && k < 16; k++) r += e->tab_w[k];
+                e->L.recuo = (int)r;
+                e->tab_larg = e->tab_w[e->tab_col < 16 ? e->tab_col : 15];
             }
             /* SOBE-SE EXACTAMENTE O QUE SE DESCEU, e não o valor exacto da escala: o
              * `desenrola` desce `alt`, que é INTEIRO (arredondado). Subir 15,22 quando se
@@ -3187,73 +3192,73 @@ static void compila(const char *s, Pdf *p, long *glifos){
              * — ou, pior, a altura da celula que acabou de ser composta perde-se e a fila
              * seguinte cai por cima dela. Era o `negra` e o `rei` sobrepostos na tabela que
              * atravessa da pagina 9 para a 10. */
-            if(e.p->abriu_agora){ e.tab_y = e.p->y; e.tab_ymin = e.p->y;
-                                  e.tab_pag = e.p->npag; e.p->abriu_agora = 0; }
-            if(e.p->npag != e.tab_pag){ e.tab_ymin = e.p->y; e.tab_y = e.p->y;
-                                        e.tab_pag = e.p->npag; }
-            else if(e.p->y < e.tab_ymin) e.tab_ymin = e.p->y;
-            e.p->y = e.tab_y;
+            if(e->p->abriu_agora){ e->tab_y = e->p->y; e->tab_ymin = e->p->y;
+                                  e->tab_pag = e->p->npag; e->p->abriu_agora = 0; }
+            if(e->p->npag != e->tab_pag){ e->tab_ymin = e->p->y; e->tab_y = e->p->y;
+                                        e->tab_pag = e->p->npag; }
+            else if(e->p->y < e->tab_ymin) e->tab_ymin = e->p->y;
+            e->p->y = e->tab_y;
             i++; continue;
         }
         /* O `~` E' UM ESPACO — o nao-quebravel do TeX. Sem isto sai como til literal e cola
          * as duas palavras: «Livro~I» em vez de «Livro I». */
         if(c == '~'){
-            espaco_se_falta(&e);
+            espaco_se_falta(e);
             i++; continue;
         }
         if(c == ' ' || c == '\t'){
             /* NO MODO MATEMÁTICO O ESPAÇO NÃO É GLIFO: o TeX ignora-o, e o espaçamento
              * vem das regras (relações, binários, \quad). O «) ,» do fim de fórmula
              * colava um espaço antes da vírgula que o gabarito não tem. */
-            if(!e.mat) espaco_se_falta(&e);
+            if(!e->mat) espaco_se_falta(e);
             i++; continue;
         }
         if(c == '$'){
             if(i + 1 < n && s[i+1] == '$'){ i += 2; } else i++;
-            e.mat = !e.mat;
+            e->mat = !e->mat;
             /* a fórmula fechou: o expoente não sobrevive ao cifrão — um estado que só se
              * liga apaga o que vem depois, e este desliga-se com o modo */
-            if(!e.mat){ e.exp = 0; e.exp1 = 0; e.nexp = 0; mat_sai(&e); }
-            else mat_entra(&e);
+            if(!e->mat){ e->exp = 0; e->exp1 = 0; e->nexp = 0; mat_sai(e); }
+            else mat_entra(e);
             continue;
         }
         /* O EXPOENTE DO MODO MATEMÁTICO: `^` sobe, `_` desce — o corpo do número, grau 2
          * ou grau 4. O sinal é a Lei 1 (o valor); a escala é a dobra (σ⁻², e σ⁻⁴ no
          * expoente de expoente). Um grupo `^{...}` marca até a chaveta fechar; um token só
          * marca um glifo e devolve. Fora do modo, o caractere segue literal, como estava. */
-        if(e.mat && (c == '^' || c == '_')){
+        if(e->mat && (c == '^' || c == '_')){
             int sinal = (c == '^') ? 1 : -1;
-            int niv = e.exp ? 2 : 1;                   /* dentro de expoente: a dobra dupla */
+            int niv = e->exp ? 2 : 1;                   /* dentro de expoente: a dobra dupla */
             long j2 = i + 1;
             while(j2 < n && (s[j2] == ' ' || s[j2] == '\t')) j2++;
             if(j2 < n && s[j2] == '{'){
-                if(e.nexp < 8){ e.exp_pf[e.nexp] = PROF; e.exp_ant[e.nexp] = e.exp;
-                                e.exp_frac[e.nexp] = 0; e.nexp++; }
+                if(e->nexp < 8){ e->exp_pf[e->nexp] = PROF; e->exp_ant[e->nexp] = e->exp;
+                                e->exp_frac[e->nexp] = 0; e->nexp++; }
                 /* o `_` de um \underbrace é o RÓTULO: marca própria (-3); e DENTRO da
                  * pilha do \frac o expoente fica NO bloco: ±6 sobe, ±7 desce, na dobra */
-                if(c == '_' && e.ub && PROF == e.ub_pf) e.exp = -3;
-                else if(e.exp == 4)  e.exp = (c == '^') ? 6 : 7;
-                else if(e.exp == -4) e.exp = (c == '^') ? -6 : -7;
-                else if(e.exp == 6 || e.exp == 7 || e.exp == -6 || e.exp == -7)
+                if(c == '_' && e->ub && PROF == e->ub_pf) e->exp = -3;
+                else if(e->exp == 4)  e->exp = (c == '^') ? 6 : 7;
+                else if(e->exp == -4) e->exp = (c == '^') ? -6 : -7;
+                else if(e->exp == 6 || e->exp == 7 || e->exp == -6 || e->exp == -7)
                     ;                        /* já no bloco da pilha: fica nele */
                 /* o GIRO DA ESPIRAL: do nível corrente (ou da base, se o estado é o
                  * radicando/matriz), escala e subida compõem-se de uma vez — o
                  * expoente de expoente deixa de ter teto em dois */
-                else e.exp = esp_gira(e.exp >= 16 ? e.exp : 0, sinal);
+                else e->exp = esp_gira(e->exp >= 16 ? e->exp : 0, sinal);
                 (void)niv;
                 /* o ub só morre ao SEU nível: um ^ dentro do segmento não o mata —
                  * «2^n» dentro do \underbrace roubava o rótulo, que saía subscrito */
-                if(PROF == e.ub_pf || e.exp == -3) e.ub = 0;
+                if(PROF == e->ub_pf || e->exp == -3) e->ub = 0;
                 PROF++;                                /* a chaveta consome-se aqui */
                 i = j2 + 1; continue;
             }
-            e.exp_volta = e.exp;
-            if(e.exp == 4)       e.exp = (c == '^') ? 6 : 7;
-            else if(e.exp == -4) e.exp = (c == '^') ? -6 : -7;
-            else if(e.exp == 6 || e.exp == 7 || e.exp == -6 || e.exp == -7)
+            e->exp_volta = e->exp;
+            if(e->exp == 4)       e->exp = (c == '^') ? 6 : 7;
+            else if(e->exp == -4) e->exp = (c == '^') ? -6 : -7;
+            else if(e->exp == 6 || e->exp == 7 || e->exp == -6 || e->exp == -7)
                 ;                            /* idem: o bloco segura o aninhado */
-            else e.exp = esp_gira(e.exp >= 16 ? e.exp : 0, sinal);
-            e.exp1 = 1;
+            else e->exp = esp_gira(e->exp >= 16 ? e->exp : 0, sinal);
+            e->exp1 = 1;
             i = j2; continue;
         }
         /* AS CHAVETAS CONTAM-SE AQUI, que é onde elas são vistas. O contador de
@@ -3268,18 +3273,18 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 if(DEG_PROF >= 0 && PROF < DEG_PROF){ DEG_FORCADO = -1; DEG_PROF = -1; }
                 if(COR_PROF >= 0 && PROF < COR_PROF){ COR_TEXTO[0] = 0;  COR_PROF = -1; }
                 /* a fonte do grupo que fechou repõe-se pela pilha */
-                while(e.nfp > 0 && e.fp_p[e.nfp-1] >= PROF){ e.nfp--; e.fonte = e.fp_f[e.nfp]; }
+                while(e->nfp > 0 && e->fp_p[e->nfp-1] >= PROF){ e->nfp--; e->fonte = e->fp_f[e->nfp]; }
                 /* o grupo do expoente fecha com a sua chaveta: o exp de fora volta — e o
                  * NUMERADOR de um \frac, ao fechar, emite a barra e abre o denominador */
-                while(e.nexp > 0 && PROF <= e.exp_pf[e.nexp-1]){
-                    int fr = e.exp_frac[e.nexp-1];
-                    e.nexp--; e.exp = e.exp_ant[e.nexp];
-                    if(fr == 3) empurra(&e, 9, e.fonte);   /* fecha a moldura do \boxed */
+                while(e->nexp > 0 && PROF <= e->exp_pf[e->nexp-1]){
+                    int fr = e->exp_frac[e->nexp-1];
+                    e->nexp--; e->exp = e->exp_ant[e->nexp];
+                    if(fr == 3) empurra(e, 9, e->fonte);   /* fecha a moldura do \boxed */
                     if((fr == 1 || fr == 2) && i + 1 < n && s[i+1] == '{'){
-                        if(fr == 1) empurra(&e, '/', e.fonte);
-                        e.exp_pf[e.nexp] = PROF; e.exp_ant[e.nexp] = e.exp;
-                        e.exp_frac[e.nexp] = 0; e.nexp++;
-                        e.exp = (fr == 2) ? -4 : -1; PROF++;
+                        if(fr == 1) empurra(e, '/', e->fonte);
+                        e->exp_pf[e->nexp] = PROF; e->exp_ant[e->nexp] = e->exp;
+                        e->exp_frac[e->nexp] = 0; e->nexp++;
+                        e->exp = (fr == 2) ? -4 : -1; PROF++;
                         i++;                       /* consome também o '{' do denominador */
                         break;
                     }
@@ -3291,8 +3296,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
         if(c == '\\'){
             long j = i + 1;
             if(j < n && !isalpha((unsigned char)s[j])){  /* \\ , \{ , \% , \_ ... */
-                if(s[j] == '\\' && e.matriz){           /* a fila da matriz */
-                    empurra(&e, 3, e.fonte);
+                if(s[j] == '\\' && e->matriz){           /* a fila da matriz */
+                    empurra(e, 3, e->fonte);
                     i = j + 1; continue;
                 }
                 if(s[j] == '\\'){
@@ -3317,23 +3322,23 @@ static void compila(const char *s, Pdf *p, long *glifos){
                      * Sem isto cada célula descia a sua, e uma tabela de 4 colunas gastava 4
                      * linhas por fila — o texto corrido que se via. A conta é a mesma da página:
                      * o `&` anda em x e o `\\` anda em y. */
-                    if(!e.tab && vsalto > 0){ fecha_paragrafo(&e); e.p->y -= vsalto; }
-                    if(e.tab){
-                        if(e.L.n) quebra_e_desenrola(&e, 1);   /* idem: a célula não justifica */
-                        e.L.n = 0;
-                        if(e.p->abriu_agora){ e.tab_ymin = e.p->y; e.tab_pag = e.p->npag;
-                                              e.p->abriu_agora = 0; }
+                    if(!e->tab && vsalto > 0){ fecha_paragrafo(e); e->p->y -= vsalto; }
+                    if(e->tab){
+                        if(e->L.n) quebra_e_desenrola(e, 1);   /* idem: a célula não justifica */
+                        e->L.n = 0;
+                        if(e->p->abriu_agora){ e->tab_ymin = e->p->y; e->tab_pag = e->p->npag;
+                                              e->p->abriu_agora = 0; }
                         /* O MÍNIMO NÃO ATRAVESSA A PÁGINA. Se a fila virou de página no meio,
                          * o `tab_ymin` da anterior é menor que QUALQUER y da nova, e o `min`
                          * mantinha-o: a fila seguinte começava no fundo e deixava a página
                          * quase toda em branco. Vi-o na página 3 do enredo — uma linha no
                          * topo, outra no fundo, e um buraco de mil pontos entre elas. */
-                        if(e.p->npag != e.tab_pag){ e.tab_ymin = e.p->y; e.tab_pag = e.p->npag; }
-                        else if(e.p->y < e.tab_ymin) e.tab_ymin = e.p->y;
-                        e.tab_col = 0;
-                        e.L.recuo = (int)(e.tab_x0 - MARGEM);
-                        e.tab_larg = e.tab_w[0];
-                        e.p->y = e.tab_ymin;           /* a fila desce o que a mais alta gastou */
+                        if(e->p->npag != e->tab_pag){ e->tab_ymin = e->p->y; e->tab_pag = e->p->npag; }
+                        else if(e->p->y < e->tab_ymin) e->tab_ymin = e->p->y;
+                        e->tab_col = 0;
+                        e->L.recuo = (int)(e->tab_x0 - MARGEM);
+                        e->tab_larg = e->tab_w[0];
+                        e->p->y = e->tab_ymin;           /* a fila desce o que a mais alta gastou */
                         /* A QUEBRA DE PÁGINA DECIDE-SE POR FILA, e não por célula.
                          *
                          * O `desenrola` abre página quando a LINHA não cabe — e numa tabela cada
@@ -3347,35 +3352,35 @@ static void compila(const char *s, Pdf *p, long *glifos){
                          * fronteira é a fila, não a célula — como no texto é a linha e não a
                          * palavra. */
                         {   long alt_fila = escala_entre(D_TEXTO);   /* já na régua do Td */
-                            if(e.p->y - alt_fila < FUNDO){
-                                pagina_fecha(e.p);
-                                pagina_abre(e.p);
+                            if(e->p->y - alt_fila < FUNDO){
+                                pagina_fecha(e->p);
+                                pagina_abre(e->p);
                                 /* e as réguas de topo repetem-se? não: o que se repete é o
                                  * ESPAÇO. Uma régua a mais seria conteúdo inventado. */
                             }
                         }
-                        e.tab_y = e.p->y;
-                        e.tab_ymin = e.p->y;
+                        e->tab_y = e->p->y;
+                        e->tab_ymin = e->p->y;
                         i = j + 1; continue;
                     }
-                    fecha_paragrafo(&e); i = j + 1; continue;
+                    fecha_paragrafo(e); i = j + 1; continue;
                 }
                 /* O `\[` ... `\]` E' A FORMULA DE DESTAQUE: o modo matematico liga numa
                  * linha propria, centrada — como o pdflatex a poe. Sem esta porta a formula
                  * saia LITERAL no meio do paragrafo, com `[`, `^` e `_` crus — foi o resumo
                  * quebrado do teoria.tex. */
                 if(s[j] == '[' || s[j] == ']'){
-                    fecha_paragrafo(&e);
-                    if(s[j] == '['){ e.centra_mat = CENTRA; CENTRA = 1; e.mat = 1; e.disp = 1; mat_entra(&e); }
-                    else { CENTRA = e.centra_mat; e.mat = 0; e.disp = 0; e.exp = 0; e.exp1 = 0; e.nexp = 0; mat_sai(&e); }
+                    fecha_paragrafo(e);
+                    if(s[j] == '['){ e->centra_mat = CENTRA; CENTRA = 1; e->mat = 1; e->disp = 1; mat_entra(e); }
+                    else { CENTRA = e->centra_mat; e->mat = 0; e->disp = 0; e->exp = 0; e->exp1 = 0; e->nexp = 0; mat_sai(e); }
                     i = j + 1; continue;
                 }
                 char um[2]; um[0] = s[j]; um[1] = 0;
                 const Par *P = lex_acha(um);
-                if(P) empurra(&e, P->glifo, P->simb ? F_SIM : e.fonte);
+                if(P) empurra(e, P->glifo, P->simb ? F_SIM : e->fonte);
                 else if(s[j] != ',' && s[j] != ' ' && s[j] != '!' && s[j] != ';')
-                    empurra(&e, (unsigned char)s[j], e.fonte);
-                else espaco_se_falta(&e);   /* o \; depois de um `=` espacejado não DOBRA */
+                    empurra(e, (unsigned char)s[j], e->fonte);
+                else espaco_se_falta(e);   /* o \; depois de um `=` espacejado não DOBRA */
                 i = j + 1; continue;
             }
             char cmd[64]; int k = 0;
@@ -3398,7 +3403,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 DEG_FORCADO = degrau_do_comando(cmd); DEG_PROF = -1;
                 char cor_fora[24]; { char *q = ap_str(cor_fora, COR_TEXTO); *q = 0; }
                 { const char *cc = cor_do_comando(cmd); char *q = ap_str(COR_TEXTO, cc ? cc : ""); *q = 0; } /* A MARCA: o nível vem do nome */
-                fecha_paragrafo(&e);
+                fecha_paragrafo(e);
                 { long a = 0, d2 = 0;
                   long dg = degrau_do_comando(cmd);
                   espaco_titulo(cmd, dg, &a, &d2);
@@ -3437,14 +3442,14 @@ static void compila(const char *s, Pdf *p, long *glifos){
                          * directamente nao pegava. */
                         long dg = DEG_FORCADO;
                         DEG_FORCADO = degrau_do_comando("section");
-                        e.fonte = F_REG; e.nfp = 0;
-                        for(int t2 = 0; rr[t2]; t2++) empurra(&e, (unsigned char)rr[t2], F_REG);
-                        quebra_e_desenrola(&e, 1);
-                        e.L.n = 0; DEG_FORCADO = dg;
+                        e->fonte = F_REG; e->nfp = 0;
+                        for(int t2 = 0; rr[t2]; t2++) empurra(e, (unsigned char)rr[t2], F_REG);
+                        quebra_e_desenrola(e, 1);
+                        e->L.n = 0; DEG_FORCADO = dg;
                         p->y -= 18*PT;
                     }
                 }
-                int prof = 1; e.L.nivel = nv; e.fonte = F_NEG; e.L.recuo = 0;
+                int prof = 1; e->L.nivel = nv; e->fonte = F_NEG; e->L.recuo = 0;
                 {   /* o `*` vem logo a seguir ao nome, antes do `{` do título */
                     long z = i + 1; while(z < n && isalpha((unsigned char)s[z])) z++;
                     char rot[64];
@@ -3497,9 +3502,9 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     }
                     if(e_parte) rotulo_seccao(cmd, estrela, rot, sizeof rot);
                     if(!e_parte && rotulo_seccao(cmd, estrela, rot, sizeof rot)){
-                        for(int t = 0; rot[t]; t++) empurra(&e, (unsigned char)rot[t], F_NEG);
+                        for(int t = 0; rot[t]; t++) empurra(e, (unsigned char)rot[t], F_NEG);
                         /* dois espaços: é o que o LaTeX põe entre o número e o título */
-                        empurra(&e, ' ', F_NEG); empurra(&e, ' ', F_NEG);
+                        empurra(e, ' ', F_NEG); empurra(e, ' ', F_NEG);
                     }
                 }
                 { int tmat = 0;                       /* equações no título: $...$ */
@@ -3513,7 +3518,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                             while(q < n && isalpha((unsigned char)s[q]) && k2 < 63) c2[k2++] = s[q++];
                             c2[k2] = 0;
                             const Par *P = lex_acha(c2);
-                            if(P) empurra(&e, P->glifo, P->simb ? F_SIM : F_NEG);
+                            if(P) empurra(e, P->glifo, P->simb ? F_SIM : F_NEG);
                             j = q; continue;
                         }
                         int cons; int g = utf8_glifo((const unsigned char*)s + j, &cons);
@@ -3521,20 +3526,20 @@ static void compila(const char *s, Pdf *p, long *glifos){
                          * como no corpo — «$\pi$» punha os cifrões na página */
                         if(tmat && ((g >= 'a' && g <= 'z') || (g >= 'A' && g <= 'Z'))
                            && N_CARTA > F_ITA){
-                            empurra(&e, g, CARTA_MAT ? F_MAT : F_ITA);
+                            empurra(e, g, CARTA_MAT ? F_MAT : F_ITA);
                             j += cons; continue;
                         }
                         /* A LIGADURA TAMBÉM AQUI. O laço dos títulos é outro, e por isso o
                          * travessão saía com três hífenes só nas secções: «a floresta e o mar
                          * --- o que estava aqui». Um defeito com dois laços é dois defeitos. */
                         { int cl = 0, lg = liga_acha(s, n, j, &cl);
-                          if(lg){ empurra(&e, lg, F_NEG); j += cl; continue; } }
-                        if(g != '{' && g != '}') empurra(&e, g, F_NEG);
+                          if(lg){ empurra(e, lg, F_NEG); j += cl; continue; } }
+                        if(g != '{' && g != '}') empurra(e, g, F_NEG);
                         j += cons; continue;
                     }
                     j++;
                 } }
-                fecha_paragrafo(&e);
+                fecha_paragrafo(e);
                 if(e_parte){ CENTRA = 0; pagina_fecha(p); pagina_abre(p); p->plana = 1; }
                 { long a = 0, d2 = 0;
                   espaco_titulo(cmd, degrau_do_comando(cmd), &a, &d2);
@@ -3548,7 +3553,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                                 p->y, esp, cr[0] ? cr : "ouro");
                       p->y -= d2 * 3 / 5;
                   } else p->y -= d2; }
-                e.fonte = F_REG; e.nfp = 0; e.L.nivel = 0;
+                e->fonte = F_REG; e->nfp = 0; e->L.nivel = 0;
                 DEG_FORCADO = deg_fora; DEG_PROF = (int)prof_fora;   /* e repõe-se ao sair */
                 { char *q = ap_str(COR_TEXTO, cor_fora); *q = 0; }
                 i = j + 1; continue;
@@ -3560,8 +3565,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
              * que nenhuma, e por isso a escolha fica desligada até o embutimento existir. */
             /* cada estaca tem o seu comando, e são eixos independentes */
             if(!strcmp(cmd, "textit") || !strcmp(cmd, "itshape")){
-                if(e.fonte == F_NEG && CARTA_NIT) fonte_poe(&e, F_NIT);
-                else if(N_CARTA > F_ITA) fonte_poe(&e, F_ITA);
+                if(e->fonte == F_NEG && CARTA_NIT) fonte_poe(e, F_NIT);
+                else if(N_CARTA > F_ITA) fonte_poe(e, F_ITA);
                 i = j; continue;
             }
             /* `\texttt` e `\code` pedem a MONOESPACADA, e ela e' uma estaca propria: a da
@@ -3569,11 +3574,11 @@ static void compila(const char *s, Pdf *p, long *glifos){
              * fonte e o glifo de outra — as duas invasoes que restavam no enredo, em
              * `\texttt{broca-so} & $688$`, eram isso. */
             if(!strcmp(cmd, "texttt") || !strcmp(cmd, "ttfamily") || !strcmp(cmd, "code")){
-                if(N_CARTA > F_MON) fonte_poe(&e, F_MON);
+                if(N_CARTA > F_MON) fonte_poe(e, F_MON);
                 i = j; continue;
             }
             if(!strcmp(cmd, "textsc") || !strcmp(cmd, "scshape")){
-                if(N_CARTA > F_VER) fonte_poe(&e, F_VER);
+                if(N_CARTA > F_VER) fonte_poe(e, F_VER);
                 i = j; continue;
             }
             /* o \emph É ITÁLICA — o «formas de medida» do resumo saía a negra porque
@@ -3583,19 +3588,19 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 /* a COMPOSIÇÃO das variantes sai da referência: itálica em contexto
                  * negro é a bold italic REAL (lmroman10-bolditalic), não a itálica
                  * a perder o peso — «todos» num \medido */
-                fonte_poe(&e, (e.fonte == F_NEG && CARTA_NIT) ? F_NIT
+                fonte_poe(e, (e->fonte == F_NEG && CARTA_NIT) ? F_NIT
                              : (N_CARTA > F_ITA) ? F_ITA : F_NEG);
                 i = j; continue;                        /* o } repõe pela pilha */
             }
             if(!strcmp(cmd, "textbf") ||
                !strcmp(cmd, "textsc") || !strcmp(cmd, "code")  || !strcmp(cmd, "texttt")){
-                fonte_poe(&e, F_NEG);
+                fonte_poe(e, F_NEG);
                 i = j; continue;
             }
             if(!strcmp(cmd, "item")){
-                fecha_paragrafo(&e);
-                e.L.recuo = e.recuo;
-                empurra(&e, 0xB7, F_SIM); empurra(&e, ' ', F_REG);
+                fecha_paragrafo(e);
+                e->L.recuo = e->recuo;
+                empurra(e, 0xB7, F_SIM); empurra(e, ' ', F_REG);
                 i = j; continue;
             }
             /* AS RÉGUAS DO BOOKTABS — e é aqui que o design entra no PDF. Cada uma é o
@@ -3617,7 +3622,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
             }
             if(!strcmp(cmd, "toprule") || !strcmp(cmd, "midrule") || !strcmp(cmd, "bottomrule")
                || !strcmp(cmd, "hline")){
-                fecha_paragrafo(&e);
+                fecha_paragrafo(e);
                 long esp = (cmd[0] == 'm' || cmd[0] == 'h') ? 500 : 1000;   /* mid fina, top/bottom grossa */
                 /* A REGUA VAI NO VAO ENTRE AS LINHAS, e nao em cima do texto.
                  *
@@ -3656,29 +3661,29 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 long linha = escala_entre(D_TEXTO);              /* já na régua do Td */
                 /* a régua vai na LARGURA DO BLOCO da tabela, não na coluna inteira —
                  * como no gabarito, onde o toprule mede o que a tabela mede */
-                long rx0 = e.tab ? e.tab_x0 : MARGEM;
-                long rx1 = e.tab && e.tab_tot > 0 ? e.tab_x0 + e.tab_tot : MARGEM + COL;
-                e.p->y -= linha / 2;
-                poe_regua(e.p, rx0 * 1000L, rx1 * 1000L, e.p->y, esp, "tinta");
-                e.p->y -= linha - linha / 2;        /* o resto: a soma FECHA, resíduo 0 */
+                long rx0 = e->tab ? e->tab_x0 : MARGEM;
+                long rx1 = e->tab && e->tab_tot > 0 ? e->tab_x0 + e->tab_tot : MARGEM + COL;
+                e->p->y -= linha / 2;
+                poe_regua(e->p, rx0 * 1000L, rx1 * 1000L, e->p->y, esp, "tinta");
+                e->p->y -= linha - linha / 2;        /* o resto: a soma FECHA, resíduo 0 */
                 /* E A TABELA TEM DE SABER: a régua mexeu no lápis, e o topo da fila é agora
                  * outro. Sem isto o `tab_y` guardava a posição de ANTES da régua, e a fila
                  * seguinte nascia por cima dela — o cabeçalho ficava sobre a linha de topo. */
-                if(e.tab){ e.tab_y = e.p->y; e.tab_ymin = e.p->y; e.tab_pag = e.p->npag;
+                if(e->tab){ e->tab_y = e->p->y; e->tab_ymin = e->p->y; e->tab_pag = e->p->npag;
                     /* E A FILA SEGUINTE COMEÇA NA COLUNA 0 DO BLOCO: o fecha_paragrafo
                      * de cima apagou o recuo, e a primeira célula a seguir a um
                      * \toprule/\midrule nascia na MARGEM — «de \ para» e a primeira
                      * fila saíam fora da tabela, as outras dentro. */
-                    e.tab_col = 0;
-                    e.L.recuo = (int)(e.tab_x0 - MARGEM);
-                    e.tab_larg = e.tab_w[0];
+                    e->tab_col = 0;
+                    e->L.recuo = (int)(e->tab_x0 - MARGEM);
+                    e->tab_larg = e->tab_w[0];
                 }
                 i = j; continue;
             }
             /* A MATRIZ: o mesmo esquema das tabelas, dentro da fórmula. O p/b põe o
              * delimitador; o small compõe na dobra. O conteúdo marca-se ±8 e os
              * separadores empurram-se como glifos de controlo (2 = &, 3 = \\). */
-            if((!strcmp(cmd, "begin") || !strcmp(cmd, "end")) && e.mat){
+            if((!strcmp(cmd, "begin") || !strcmp(cmd, "end")) && e->mat){
                 long q = ate_abre(s, j, n);
                 if(q < n){
                     const char *nm = s + q + 1;
@@ -3691,16 +3696,16 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     if(ehm){
                         long f2 = fecha_chave(s, n, q);
                         if(cmd[0] == 'b'){
-                            e.matriz_ant = e.exp;
-                            e.matriz_par = par ? 5 : (colch ? 7 : 0);
-                            e.exp = small ? 8 : -8; e.matriz = e.exp;
+                            e->matriz_ant = e->exp;
+                            e->matriz_par = par ? 5 : (colch ? 7 : 0);
+                            e->exp = small ? 8 : -8; e->matriz = e->exp;
                             /* o delimitador é do VÃO: controlo 4/6, e o pintor
                              * centra-o no eixo da matriz */
-                            if(par) empurra(&e, 4, e.fonte);
-                            if(colch) empurra(&e, 6, e.fonte);
+                            if(par) empurra(e, 4, e->fonte);
+                            if(colch) empurra(e, 6, e->fonte);
                         } else {
-                            if(e.matriz_par){ empurra(&e, e.matriz_par, e.fonte); e.matriz_par = 0; }
-                            e.exp = e.matriz_ant; e.matriz = 0;
+                            if(e->matriz_par){ empurra(e, e->matriz_par, e->fonte); e->matriz_par = 0; }
+                            e->exp = e->matriz_ant; e->matriz = 0;
                         }
                         i = f2 > 0 ? f2 + 1 : j; continue;
                     }
@@ -3716,7 +3721,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     /* le-se ANTES de fechar o paragrafo: o `fecha_paragrafo` pode descer o
                      * `y` e mascarar uma pagina que ainda esta' vazia */
                     int vazia = p->abriu_agora;
-                    fecha_paragrafo(&e);
+                    fecha_paragrafo(e);
                     if(!vazia) vazia = (p->y >= TOPO - PT);
                     if(cmd[0] == 'b'){
                         /* so' se abre pagina se a actual tiver alguma coisa: o `\maketitle`
@@ -3727,11 +3732,11 @@ static void compila(const char *s, Pdf *p, long *glifos){
                         p->num = 1; p->sem_pe = 1;    /* o main reinicia aqui, pé escondido */
                         /* o titulo, centrado, no corpo do texto e a negro */
                         p->y -= 170*PT;
-                        CENTRA = 1; e.fonte = F_NEG;
+                        CENTRA = 1; e->fonte = F_NEG;
                         for(int t = 0; NOME_RESUMO[t]; t++)
-                            empurra(&e, (unsigned char)NOME_RESUMO[t], F_NEG);
-                        quebra_e_desenrola(&e, 1);
-                        e.L.n = 0; CENTRA = 0; e.fonte = F_REG; e.nfp = 0;
+                            empurra(e, (unsigned char)NOME_RESUMO[t], F_NEG);
+                        quebra_e_desenrola(e, 1);
+                        e->L.n = 0; CENTRA = 0; e->fonte = F_REG; e->nfp = 0;
                         p->y -= 10*PT;
                     } else if(!vazia){ pagina_fecha(p); pagina_abre(p); }
                     long f = fecha_chave(s, n, q);
@@ -3742,7 +3747,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                  * rotula [n] pela ordem recolhida. Os espaços derivam do degrau da
                  * secção, não de um número posto. */
                 if(q < n && !strncmp(s + q + 1, "thebibliography}", 16)){
-                    fecha_paragrafo(&e);
+                    fecha_paragrafo(e);
                     long f = fecha_chave(s, n, q);
                     if(cmd[0] == 'b'){
                         long q9 = (f > 0 && f + 1 < n) ? ate_abre(s, f + 1, n) : -1;
@@ -3753,12 +3758,12 @@ static void compila(const char *s, Pdf *p, long *glifos){
                         if(NOME_REFS[0]){
                             long dg = DEG_FORCADO;
                             DEG_FORCADO = dgS;
-                            e.fonte = (N_CARTA > 1) ? F_NEG : F_REG; e.nfp = 0;
+                            e->fonte = (N_CARTA > 1) ? F_NEG : F_REG; e->nfp = 0;
                             for(int t2 = 0; NOME_REFS[t2]; t2++)
-                                empurra(&e, (unsigned char)NOME_REFS[t2], e.fonte);
-                            quebra_e_desenrola(&e, 0);
-                            e.L.n = 0; DEG_FORCADO = dg;
-                            e.fonte = F_REG;
+                                empurra(e, (unsigned char)NOME_REFS[t2], e->fonte);
+                            quebra_e_desenrola(e, 0);
+                            e->L.n = 0; DEG_FORCADO = dg;
+                            e->fonte = F_REG;
                             p->y -= sem_resp(cS);
                         }
                         i = (f9 > 0) ? f9 + 1 : (f > 0 ? f + 1 : j);
@@ -3771,16 +3776,16 @@ static void compila(const char *s, Pdf *p, long *glifos){
                  * (as duas leis da página 19, quebradas) */
                 if(q < n && (!strncmp(s + q + 1, "align", 5) || !strncmp(s + q + 1, "equation", 8)
                           || !strncmp(s + q + 1, "gather", 6) || !strncmp(s + q + 1, "eqnarray", 8))){
-                    fecha_paragrafo(&e);
-                    if(cmd[0] == 'b'){ e.centra_mat = CENTRA; CENTRA = 1; e.mat = 1; e.disp = 1; mat_entra(&e); }
-                    else { CENTRA = e.centra_mat; e.mat = 0; e.disp = 0; e.exp = 0; e.exp1 = 0; e.nexp = 0; mat_sai(&e); }
+                    fecha_paragrafo(e);
+                    if(cmd[0] == 'b'){ e->centra_mat = CENTRA; CENTRA = 1; e->mat = 1; e->disp = 1; mat_entra(e); }
+                    else { CENTRA = e->centra_mat; e->mat = 0; e->disp = 0; e->exp = 0; e->exp1 = 0; e->nexp = 0; mat_sai(e); }
                     long f = fecha_chave(s, n, q);
                     i = f > 0 ? f + 1 : j; continue;
                 }
                 /* o `center` TAMBÉM se decide AQUI: o handler de baixo nunca corria — este
                  * despacho apanha todo `begin`/`end` primeiro, e o CENTRA ficava por pôr */
                 if(q < n && !strncmp(s + q + 1, "center}", 7)){
-                    fecha_paragrafo(&e);
+                    fecha_paragrafo(e);
                     CENTRA = (cmd[0] == 'b');
                     long f = fecha_chave(s, n, q);
                     i = f > 0 ? f + 1 : j; continue;
@@ -3806,7 +3811,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 long a = ++j; while(j < n && s[j] != '}') j++;
                 char amb[64]; long ln = j - a; if(ln > 63) ln = 63;
                 memcpy(amb, s + a, (size_t)ln); amb[ln] = 0;
-                fecha_paragrafo(&e);
+                fecha_paragrafo(e);
                 /* A CAIXA — o tcolorbox do catálogo é `boxrule=0pt, leftrule=2pt`: a moldura
                  * É a barra da esquerda, e mais nada. Guarda-se o y ao abrir e desenha-se ao
                  * fechar, quando já se sabe onde ela acaba.
@@ -3819,17 +3824,17 @@ static void compila(const char *s, Pdf *p, long *glifos){
                  * inteira por \newtheorem (amsthm) — o gabarito compõe-nos SEM fundo, e a
                  * caixa que eu lhes pintava caía 8pt por cima da linha de cima. */
                 if(!strcmp(amb, "tcolorbox")){
-                    if(abre){ e.p->caixa_y = e.p->y; }
-                    else if(e.p->caixa_y > 0){
-                        long alt = e.p->caixa_y - e.p->y;        /* na régua do Td */
+                    if(abre){ e->p->caixa_y = e->p->y; }
+                    else if(e->p->caixa_y > 0){
+                        long alt = e->p->caixa_y - e->p->y;        /* na régua do Td */
                         if(alt > 0 && alt < 720000){             /* na mesma página */
                             /* o tcolorbox do catálogo: colback=ouroclaro!35, leftrule=2pt.
                              * São os DOIS — o fundo e a barra —, e agora os dois cabem,
                              * porque o fundo vai no primeiro stream e pinta por baixo. */
-                            poe_rect(e.p, (MARGEM - 10) * 1000L, e.p->y + 2000, (COL + 14) * 1000L, alt + 6000, "ouroclaro");
-                            poe_rect(e.p, (MARGEM - 10) * 1000L, e.p->y + 2000, 2000, alt + 6000, "ouro");
+                            poe_rect(e->p, (MARGEM - 10) * 1000L, e->p->y + 2000, (COL + 14) * 1000L, alt + 6000, "ouroclaro");
+                            poe_rect(e->p, (MARGEM - 10) * 1000L, e->p->y + 2000, 2000, alt + 6000, "ouro");
                         }
-                        e.p->caixa_y = -1;
+                        e->p->caixa_y = -1;
                     }
                 }
                 /* O VERBATIM E LITERAL — e foi aqui que eu perdi metade do catalogo.
@@ -3855,7 +3860,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 if(!strcmp(amb, "tabular") || !strcmp(amb, "longtable")
                    || !strcmp(amb, "tabularx") || !strcmp(amb, "array")){
                     if(abre){
-                        fecha_paragrafo(&e);
+                        fecha_paragrafo(e);
                         long q = j + 1;
                         q = ate_abre(s, q, n);   /* o preâmbulo */
                         int nc = 0, d2 = 0;
@@ -3864,10 +3869,10 @@ static void compila(const char *s, Pdf *p, long *glifos){
                             else if(s[q] == '}'){ if(!d2) break; d2--; }
                             else if(!d2 && (s[q]=='l'||s[q]=='r'||s[q]=='c'||s[q]=='p'||s[q]=='X')) nc++;
                         }
-                        e.tab = 1;
-                        e.tab_ncol = nc > 0 ? nc : 1;
-                        e.tab_col = 0;
-                        e.tab_x0 = MARGEM;
+                        e->tab = 1;
+                        e->tab_ncol = nc > 0 ? nc : 1;
+                        e->tab_col = 0;
+                        e->tab_x0 = MARGEM;
                         /* AS LARGURAS SÃO AS DO CONTEÚDO, como no LaTeX: mede-se cada
                          * célula até ao \end, a coluna é o MÁXIMO dos seus, mais o
                          * \tabcolsep dos dois lados. A repartição Fibonacci era escolha
@@ -3898,50 +3903,50 @@ static void compila(const char *s, Pdf *p, long *glifos){
                             { long w = mede_celula(s, ini2, z < n ? z : n, corpo_t);
                               if(col < 16 && w > max6[col]) max6[col] = w; if(w > 0) mediu = 1; }
                             long tcs = (TABCOLSEP + 500) / 1000, tot = 0;
-                            for(int k = 0; k < e.tab_ncol && k < 16; k++){
-                                e.tab_w[k] = max6[k] / 1000000 + 1 + 2 * tcs;
-                                tot += e.tab_w[k];
+                            for(int k = 0; k < e->tab_ncol && k < 16; k++){
+                                e->tab_w[k] = max6[k] / 1000000 + 1 + 2 * tcs;
+                                tot += e->tab_w[k];
                             }
                             if(!mediu){ /* sem conteúdo mensurável: reparte por igual, e diz-se */
                                 tot = 0;
-                                for(int k = 0; k < e.tab_ncol && k < 16; k++){
-                                    e.tab_w[k] = COL / e.tab_ncol; tot += e.tab_w[k]; }
+                                for(int k = 0; k < e->tab_ncol && k < 16; k++){
+                                    e->tab_w[k] = COL / e->tab_ncol; tot += e->tab_w[k]; }
                             }
                             if(tot > COL){
                                 long t2 = 0;
-                                for(int k = 0; k < e.tab_ncol && k < 16; k++){
-                                    e.tab_w[k] = e.tab_w[k] * COL / tot; t2 += e.tab_w[k]; }
-                                int ult = (e.tab_ncol <= 16 ? e.tab_ncol : 16) - 1;
-                                e.tab_w[ult] += COL - t2;
+                                for(int k = 0; k < e->tab_ncol && k < 16; k++){
+                                    e->tab_w[k] = e->tab_w[k] * COL / tot; t2 += e->tab_w[k]; }
+                                int ult = (e->tab_ncol <= 16 ? e->tab_ncol : 16) - 1;
+                                e->tab_w[ult] += COL - t2;
                                 tot = COL;
                             }
-                            e.tab_tot = tot;
+                            e->tab_tot = tot;
                             /* dentro de `center` a tabela centra-se como BLOCO, como lá */
-                            e.tab_x0 = CENTRA ? MARGEM + (COL - tot) / 2 : MARGEM;
-                            e.tab_larg = e.tab_w[0];
+                            e->tab_x0 = CENTRA ? MARGEM + (COL - tot) / 2 : MARGEM;
+                            e->tab_larg = e->tab_w[0];
                         }
-                        e.L.recuo = (int)(e.tab_x0 - MARGEM);
+                        e->L.recuo = (int)(e->tab_x0 - MARGEM);
                         /* A TABELA É UMA REGIÃO (a régua do eval): mede-se a ALTURA antes
                          * de abrir — as filas mais as três réguas do booktabs. Se não
                          * couber no resto da página e couber numa inteira, vai INTEIRA
                          * para a seguinte: o toprule ficava órfão no fundo da página e o
                          * cabeçalho desnivelava na quebra. */
                         {   long alt_tab = (long)(nfilas + 4) * escala_entre(D_TEXTO);
-                            if(e.p->y - alt_tab < FUNDO && alt_tab < TOPO - FUNDO
-                               && !e.p->abriu_agora){
-                                pagina_fecha(e.p); pagina_abre(e.p);
+                            if(e->p->y - alt_tab < FUNDO && alt_tab < TOPO - FUNDO
+                               && !e->p->abriu_agora){
+                                pagina_fecha(e->p); pagina_abre(e->p);
                             } }
                         /* O RECUO VEM ANTES do `tab_y`, e não depois. Guardando o topo da
                          * fila e só então recuando, a primeira fila nasce 4 pt acima de onde a
                          * tabela começa — e o cabeçalho caía por cima da régua de topo. */
-                        e.p->y -= 4*PT;
-                        e.tab_y = e.p->y;
-                        e.tab_ymin = e.p->y;
+                        e->p->y -= 4*PT;
+                        e->tab_y = e->p->y;
+                        e->tab_ymin = e->p->y;
                         i = q + 1; continue;
                     } else {
-                        fecha_paragrafo(&e);
-                        e.tab = 0; e.tab_col = 0;
-                        e.p->y -= 4;
+                        fecha_paragrafo(e);
+                        e->tab = 0; e->tab_col = 0;
+                        e->p->y -= 4;
                         i = j; continue;
                     }
                 }
@@ -3951,19 +3956,19 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     { char *q = ap_str(fim, "\\end{"); q = ap_str(q, amb); q = ap_str(q, "}"); *q = 0; }
                     const char *f = strstr(s + j, fim);
                     long ate = f ? (f - s) : n;
-                    e.fonte = F_NEG; e.L.recuo = e.recuo + 12;
+                    e->fonte = F_NEG; e->L.recuo = e->recuo + 12;
                     for(long q = j + 1; q < ate; ){
                         if(s[q] == '\n'){
-                            fecha_paragrafo(&e);
-                            e.L.recuo = e.recuo + 12;
+                            fecha_paragrafo(e);
+                            e->L.recuo = e->recuo + 12;
                             q++; continue;
                         }
                         int cons; int g = utf8_glifo((const unsigned char*)s + q, &cons);
-                        empurra(&e, g, F_NEG);          /* SEM interpretar: nem $, nem barra, nem chaves */
+                        empurra(e, g, F_NEG);          /* SEM interpretar: nem $, nem barra, nem chaves */
                         q += cons;
                     }
-                    fecha_paragrafo(&e);
-                    e.fonte = F_REG; e.nfp = 0; e.L.recuo = e.recuo;
+                    fecha_paragrafo(e);
+                    e->fonte = F_REG; e->nfp = 0; e->L.recuo = e->recuo;
                     i = f ? ate + (long)strlen(amb) + 6 : n;
                     continue;
                 }
@@ -3971,18 +3976,18 @@ static void compila(const char *s, Pdf *p, long *glifos){
                  * (opcional).» a negro, o contador UM para a família, preso ao capítulo */
                 {   int tfeito = 0;
                     for(int t = 0; t < N_TEOR; t++) if(!strcmp(amb, TEOR[t].amb)){
-                        if(!abre){ e.fonte = F_REG; e.nfp = 0; break; }   /* o corpo acabou: a fonte volta */
+                        if(!abre){ e->fonte = F_REG; e->nfp = 0; break; }   /* o corpo acabou: a fonte volta */
                         if(C_TEO_CAP != C_CAP){ C_TEO_CAP = C_CAP; C_TEO = 0; }
                         C_TEO = C_TEO + 1;
                         for(const char *z2 = TEOR[t].nome; *z2; z2++)
-                            empurra(&e, (unsigned char)*z2, F_NEG);
-                        empurra(&e, ' ', F_NEG);
+                            empurra(e, (unsigned char)*z2, F_NEG);
+                        empurra(e, ' ', F_NEG);
                         { char nb[24]; char *pz = ap_num(nb, C_CAP); pz = ap_str(pz, ".");
                           pz = ap_num(pz, C_TEO); *pz = 0;
-                          for(int k2 = 0; nb[k2]; k2++) empurra(&e, (unsigned char)nb[k2], F_NEG); }
+                          for(int k2 = 0; nb[k2]; k2++) empurra(e, (unsigned char)nb[k2], F_NEG); }
                         long q2 = j + 1;
                         if(q2 < n && s[q2] == '['){       /* o nome do teorema, entre parênteses */
-                            empurra(&e, ' ', F_REG); empurra(&e, '(', F_REG);
+                            empurra(e, ' ', F_REG); empurra(e, '(', F_REG);
                             q2++;
                             while(q2 < n && s[q2] != ']'){
                                 /* o título não é texto cru: o \emph{...} compunha
@@ -3998,7 +4003,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                                         if(fa > 0){
                                             for(long z3 = qa + 1; z3 < fa; z3++){
                                                 int cs3; int g3 = utf8_glifo((const unsigned char*)s + z3, &cs3);
-                                                empurra(&e, g3, (N_CARTA > F_ITA) ? F_ITA : F_REG);
+                                                empurra(e, g3, (N_CARTA > F_ITA) ? F_ITA : F_REG);
                                                 z3 += (cs3 ? cs3 : 1) - 1;
                                             }
                                             q2 = fa + 1; continue;
@@ -4006,26 +4011,26 @@ static void compila(const char *s, Pdf *p, long *glifos){
                                         q2 = j3; continue;
                                     }
                                     { const Par *P3 = lex_acha(c3);
-                                      if(P3) empurra(&e, P3->glifo, P3->simb ? F_SIM : F_REG); }
+                                      if(P3) empurra(e, P3->glifo, P3->simb ? F_SIM : F_REG); }
                                     q2 = j3; continue;
                                 }
                                 int cs2; int g2 = utf8_glifo((const unsigned char*)s + q2, &cs2);
-                                empurra(&e, g2, F_REG); q2 += cs2 ? cs2 : 1;
+                                empurra(e, g2, F_REG); q2 += cs2 ? cs2 : 1;
                             }
-                            empurra(&e, ')', F_REG);
+                            empurra(e, ')', F_REG);
                             if(q2 < n) q2++;
                         }
-                        empurra(&e, '.', F_NEG); empurra(&e, ' ', F_REG);
+                        empurra(e, '.', F_NEG); empurra(e, ' ', F_REG);
                         /* o corpo segue no estilo da família: `plain` é itálico */
-                        if(TEOR[t].ita && N_CARTA > F_ITA) e.fonte = F_ITA;
+                        if(TEOR[t].ita && N_CARTA > F_ITA) e->fonte = F_ITA;
                         i = q2; tfeito = 1; break;
                     }
                     if(tfeito) continue;
                 }
                 if(!strcmp(amb, "itemize") || !strcmp(amb, "enumerate") || !strcmp(amb, "description"))
-                    e.recuo = abre ? e.recuo + 18 : (e.recuo >= 18 ? e.recuo - 18 : 0);
+                    e->recuo = abre ? e->recuo + 18 : (e->recuo >= 18 ? e->recuo - 18 : 0);
                 if(!strcmp(amb, "document") && !abre) break;
-                e.L.recuo = e.recuo;
+                e->L.recuo = e->recuo;
                 i = j + 1;
                 /* o opcional do amsthm — `\begin{teorema}[nome]` — consome-se: saía como
                  * texto «[a matriz é a codificação do tempo]» na página */
@@ -4054,7 +4059,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
             if(!strcmp(cmd, "begin") || !strcmp(cmd, "end")){
                 long q = j; q = ate_abre(s, q, n);
                 if(q < n && !strncmp(s + q + 1, "center}", 7)){
-                    fecha_paragrafo(&e);
+                    fecha_paragrafo(e);
                     CENTRA = (cmd[0] == 'b');
                     long f = fecha_chave(s, n, q);
                     i = f > 0 ? f + 1 : j; continue;
@@ -4232,9 +4237,9 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     unidade_razao(u1, &n1, &d1); unidade_razao(u2, &n2, &d2u);
                     long l1 = (2 * a1 * n1 + d1) / (2 * d1);
                     long l2 = (2 * a2 * n2 + d2u) / (2 * d2u);
-                    fecha_paragrafo(&e);
-                    poe_rect(p, MARGEM * 1000L, e.p->y, l1, l2, "ouro");
-                    e.p->y -= l2 + 4000;
+                    fecha_paragrafo(e);
+                    poe_rect(p, MARGEM * 1000L, e->p->y, l1, l2, "ouro");
+                    e->p->y -= l2 + 4000;
                 }
                 i = q; continue;
             }
@@ -4242,7 +4247,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
              * Sem isto ela saía encostada à margem esquerda e colada ao texto do capítulo
              * seguinte — que é a primeira coisa que se vê ao abrir o documento. */
             if(!strcmp(cmd, "title")){
-                fecha_paragrafo(&e);
+                fecha_paragrafo(e);
                 CENTRA = 1;
                 p->plana = 1;                  /* a capa é página sem cabeçalho */
                 p->sem_pe = 1; p->num = 0;     /* e sem pé — e fora da conta */
@@ -4341,67 +4346,67 @@ static void compila(const char *s, Pdf *p, long *glifos){
              * passagem a tabela está vazia e não sai nada — é isso que faz a paginação
              * mudar entre as duas, e por isso se corre até estabilizar. */
             if(!strcmp(cmd, "tableofcontents") && TOC_LE && N_TOC > 0){
-                fecha_paragrafo(&e);
+                fecha_paragrafo(e);
                 if(p->y < TOPO - PT && !p->abriu_agora){ pagina_fecha(p); pagina_abre(p); }
                 p->plana = 1;                          /* a 1.a página do sumário é plain */
                 p->num = 1;                            /* a série do sumário começa aqui */
                 { char *qz = ap_str(CAB_DIR, NOME_SUMARIO); *qz = 0; }   /* a marca */
                 /* o título, no degrau do capítulo */
-                e.L.deg = degrau_do_comando("chapter");
-                e.fonte = F_NEG;
+                e->L.deg = degrau_do_comando("chapter");
+                e->fonte = F_NEG;
                 for(int t = 0; NOME_SUMARIO[t]; t++)
-                    empurra(&e, (unsigned char)NOME_SUMARIO[t], F_NEG);
-                quebra_e_desenrola(&e, 1);
-                e.L.n = 0; e.L.deg = -1; e.fonte = F_REG; e.nfp = 0;
+                    empurra(e, (unsigned char)NOME_SUMARIO[t], F_NEG);
+                quebra_e_desenrola(e, 1);
+                e->L.n = 0; e->L.deg = -1; e->fonte = F_REG; e->nfp = 0;
                 p->y -= 24*PT;
                 for(int t = 0; t < N_TOC; t++){
                     Toc *q2 = &TOC[t];
-                    e.L.recuo = (q2->nivel - 1) * 14;
+                    e->L.recuo = (q2->nivel - 1) * 14;
                     if(q2->nivel == 1) p->y -= 5*PT;
-                    e.fonte = q2->nivel == 1 ? F_NEG : F_REG;
+                    e->fonte = q2->nivel == 1 ? F_NEG : F_REG;
                     /* O TEXTO E' UTF-8, e empurra-se GLIFO a glifo — nao byte a byte. Os
                      * acentos tem dois bytes, e empurra-los sozinhos dava «IntroduÃ§Ã£o». */
                     /* o ROTULO ja' vem em WinAnsi — e' o que o `tex_para_winansi` produziu
                      * ao ler o babel. So' o TEXTO do titulo e' que vem do fonte em UTF-8.
                      * Ler o rotulo como UTF-8 dava «Cap?lo». */
                     for(int k2 = 0; q2->rot[k2]; k2++)
-                        empurra(&e, (unsigned char)q2->rot[k2], e.fonte);
-                    if(q2->rot[0]){ empurra(&e, ' ', e.fonte); empurra(&e, ' ', e.fonte); }
+                        empurra(e, (unsigned char)q2->rot[k2], e->fonte);
+                    if(q2->rot[0]){ empurra(e, ' ', e->fonte); empurra(e, ' ', e->fonte); }
                     for(int k2 = 0; q2->txt[k2]; ){
                         if(q2->txt[k2] == '-' && q2->txt[k2+1] == '-'){
-                            if(q2->txt[k2+2] == '-'){ empurra(&e, 0x97, e.fonte); k2 += 3; }
-                            else { empurra(&e, 0x96, e.fonte); k2 += 2; }
+                            if(q2->txt[k2+2] == '-'){ empurra(e, 0x97, e->fonte); k2 += 3; }
+                            else { empurra(e, 0x96, e->fonte); k2 += 2; }
                             continue;
                         }
                         int cs; int gl = utf8_glifo((const unsigned char*)q2->txt + k2, &cs);
-                        empurra(&e, gl, e.fonte); k2 += cs;
+                        empurra(e, gl, e->fonte); k2 += cs;
                     }
                     /* a linha NAO justifica e o numero vai no fim: encher de espacos fazia-a
                      * quebrar, e a quebra justificava a primeira metade a' largura toda. */
-                    { Linha out = e.L; out.larg = 0;
+                    { e->L.larg = 0;
                       long cp = escala_corpo(D_TEXTO);
-                      long larg = mede(out.g, out.n, cp);
+                      long larg = mede(e->L.g, e->L.n, cp);
                       char np[8]; { char *q = ap_num(np, q2->pag); *q = 0; }
                       long lnp6 = 0;               /* o produto exacto em 10^-6 */
                       for(int k2 = 0; np[k2]; k2++) lnp6 += (long)largura((unsigned char)np[k2], F_NEG) * cp;
-                      /* o texto a' esquerda */
-                      if(out.n) desenrola_em(p, &out, (MARGEM + e.L.recuo) * 1000L, 0);
-                      /* e o numero encostado a' direita, na mesma linha */
-                      Linha nn; memset(&nn, 0, sizeof nn);
-                      for(int k2 = 0; np[k2]; k2++){ nn.g[nn.n].g = (unsigned char)np[k2];
-                                                     nn.g[nn.n].f = F_NEG; nn.n++;
-                                                     nn.g[nn.n-1].e = 0; }
-                      desenrola_em(p, &nn, (MARGEM + COL) * 1000L - lnp6 / 1000, 1);
+                      /* o texto à esquerda — in-place, sem segunda Linha no quadro */
+                      if(e->L.n) desenrola_em(p, &e->L, (MARGEM + e->L.recuo) * 1000L, 0);
+                      /* o número reutiliza a mesma linha: o texto já saiu */
+                      e->L.n = 0;
+                      for(int k2 = 0; np[k2]; k2++){ e->L.g[e->L.n].g = (unsigned char)np[k2];
+                                                     e->L.g[e->L.n].f = F_NEG;
+                                                     e->L.g[e->L.n].e = 0; e->L.n++; }
+                      desenrola_em(p, &e->L, (MARGEM + COL) * 1000L - lnp6 / 1000, 1);
                       (void)larg;
                     }
-                    e.L.n = 0; e.L.recuo = 0; e.fonte = F_REG; e.nfp = 0;
+                    e->L.n = 0; e->L.recuo = 0; e->fonte = F_REG; e->nfp = 0;
                 }
                 pagina_fecha(p); pagina_abre(p);
                 i = j; continue;
             }
             if(!strcmp(cmd, "maketitle") || !strcmp(cmd, "tableofcontents") ||
                !strcmp(cmd, "newpage")   || !strcmp(cmd, "clearpage")){
-                fecha_paragrafo(&e);
+                fecha_paragrafo(e);
                 /* o `\maketitle` fecha a capa: o que vem a seguir começa em página nova */
                 if(cmd[0] == 'm' && CENTRA && CAPA_ALT <= 0 && Y_CAPA > 0){
                     /* mediu-se: rebobina-se e faz-se outra vez, agora com o numero certo */
@@ -4412,7 +4417,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                      * onde o gabarito tem duas. Um stream esquecido e' meia reversao. */
                     if(p->fundo_on){ s_vai(&p->sfundo, CAPA_FUN); p->n_fundo = CAPA_NF; }
                     p->y = CAPA_Y; p->npag = CAPA_PAG; p->num = CAPA_PAG;
-                    i = CAPA_I; e.L.n = 0;
+                    i = CAPA_I; e->L.n = 0;
                     continue;
                 }
                 if(cmd[0] == 'm' && CENTRA){
@@ -4423,24 +4428,24 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     CENTRA = 0; Y_CAPA = -1;
                     DEG_FORCADO = -1; DEG_PROF = -1;
                     COR_TEXTO[0] = 0; COR_PROF = -1;
-                    e.fonte = F_REG; e.nfp = 0; e.L.deg = -1;
+                    e->fonte = F_REG; e->nfp = 0; e->L.deg = -1;
                     pagina_fecha(p); pagina_abre(p); }
                 if(cmd[0] == 'n' || cmd[0] == 'c'){ pagina_fecha(p); pagina_abre(p); }
                 i = j; continue;
             }
             if(!strcmp(cmd, "underbrace")){
-                e.ub = 1; e.ub_pf = PROF;
-                empurra(&e, 14, e.fonte);       /* o começo do vão: a chaveta vai daqui */
+                e->ub = 1; e->ub_pf = PROF;
+                empurra(e, 14, e->fonte);       /* o começo do vão: a chaveta vai daqui */
                 i = j; continue;
             }
             /* a MOLDURA do \boxed: o 8 abre, o fecho do grupo empurra o 9, e o
              * pintor desenha o rectângulo em volta — antes, a caixa sumia */
-            if(!strcmp(cmd, "boxed") && e.mat){
+            if(!strcmp(cmd, "boxed") && e->mat){
                 long q2 = ate_abre(s, j, n);
-                if(q2 < n && e.nexp < 8){
-                    empurra(&e, 8, e.fonte);
-                    e.exp_pf[e.nexp] = PROF; e.exp_ant[e.nexp] = e.exp;
-                    e.exp_frac[e.nexp] = 3; e.nexp++;
+                if(q2 < n && e->nexp < 8){
+                    empurra(e, 8, e->fonte);
+                    e->exp_pf[e->nexp] = PROF; e->exp_ant[e->nexp] = e->exp;
+                    e->exp_frac[e->nexp] = 3; e->nexp++;
                     PROF++;
                     i = q2 + 1; continue;
                 }
@@ -4451,9 +4456,9 @@ static void compila(const char *s, Pdf *p, long *glifos){
              * gabarito tem 24,6. Sem a carta, cai no espaço como dantes. */
             if(!strcmp(cmd, "quad") || !strcmp(cmd, "qquad")){
                 if(CARTA_MAT){
-                    empurra(&e, 0xA0, F_MAT);
-                    if(cmd[1] == 'q') empurra(&e, 0xA0, F_MAT);
-                } else espaco_se_falta(&e);
+                    empurra(e, 0xA0, F_MAT);
+                    if(cmd[1] == 'q') empurra(e, 0xA0, F_MAT);
+                } else espaco_se_falta(e);
                 i = j; continue;
             }
             /* o \operatorname é ROMANO: End, Hom, tr compõem na regular, não na
@@ -4462,16 +4467,16 @@ static void compila(const char *s, Pdf *p, long *glifos){
              * matemático de fora engole. */
             if((!strcmp(cmd, "operatorname") || !strcmp(cmd, "text")
              || !strcmp(cmd, "mbox") || !strcmp(cmd, "textrm")
-             || !strcmp(cmd, "emph") || !strcmp(cmd, "textit")) && e.mat){
+             || !strcmp(cmd, "emph") || !strcmp(cmd, "textit")) && e->mat){
                 /* o \emph DENTRO da fórmula: a mesma porta, mas em itálica —
                  * «(o \emph{traço})» saía com o comando escrito na página.
                  * E a porta RESPEITA O CONTEXTO: \text{contador} num \medido
                  * compõe na negra, e o \emph aí é a bold italic da referência */
                 int eh_ita = (cmd[0] == 'e' || (cmd[0] == 't' && cmd[4] == 'i'));
                 int f_txt = eh_ita
-                          ? ((e.fonte == F_NEG && CARTA_NIT) ? F_NIT
+                          ? ((e->fonte == F_NEG && CARTA_NIT) ? F_NIT
                              : (N_CARTA > F_ITA) ? F_ITA : F_REG)
-                          : (e.fonte == F_NEG ? F_NEG : F_REG);
+                          : (e->fonte == F_NEG ? F_NEG : F_REG);
                 long q2 = ate_abre(s, j, n), f2 = fecha_chave(s, n, q2);
                 if(f2 > 0){
                     for(long z2 = q2 + 1; z2 < f2; z2++){
@@ -4493,9 +4498,9 @@ static void compila(const char *s, Pdf *p, long *glifos){
                                 if(fa > 0 && fa < f2){
                                     for(long z3 = qa + 1; z3 < fa; z3++){
                                         { int cl = 0, lg = liga_acha(s, n, z3, &cl);
-                                          if(lg){ empurra(&e, lg, f4); z3 += cl - 1; continue; } }
+                                          if(lg){ empurra(e, lg, f4); z3 += cl - 1; continue; } }
                                         int cs3; int g3 = utf8_glifo((const unsigned char*)s + z3, &cs3);
-                                        empurra(&e, g3, f4);
+                                        empurra(e, g3, f4);
                                         z3 += (cs3 ? cs3 : 1) - 1;
                                     }
                                     z2 = fa; continue;
@@ -4503,14 +4508,14 @@ static void compila(const char *s, Pdf *p, long *glifos){
                                 z2 = j3 - 1; continue;
                             }
                             { const Par *P3 = lex_acha(c3);
-                              if(P3) empurra(&e, P3->glifo, P3->simb ? F_SIM : f_txt); }
+                              if(P3) empurra(e, P3->glifo, P3->simb ? F_SIM : f_txt); }
                             z2 = j3 - 1; continue;
                         }
                         if(s[z2] == '{' || s[z2] == '}') continue;
                         { int cl = 0, lg = liga_acha(s, n, z2, &cl);
-                          if(lg){ empurra(&e, lg, f_txt); z2 += cl - 1; continue; } }
+                          if(lg){ empurra(e, lg, f_txt); z2 += cl - 1; continue; } }
                         int cs2; int g2 = utf8_glifo((const unsigned char*)s + z2, &cs2);
-                        empurra(&e, g2, f_txt);
+                        empurra(e, g2, f_txt);
                         z2 += (cs2 ? cs2 : 1) - 1;
                     }
                     i = f2 + 1; continue;
@@ -4521,7 +4526,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
              * \bigl/\bigr não têm tamanho próprio — o tamanho é a ÁREA INTERNA, e
              * o pintor dá-lho pelo boost. Controlo: 4/6/10 abrem ( [ {, 5/7/11
              * fecham. O `.` do \right. não põe nada. */
-            if(e.mat && (!strcmp(cmd, "left") || !strcmp(cmd, "right")
+            if(e->mat && (!strcmp(cmd, "left") || !strcmp(cmd, "right")
                       || !strcmp(cmd, "bigl") || !strcmp(cmd, "bigr")
                       || !strcmp(cmd, "Bigl") || !strcmp(cmd, "Bigr")
                       || !strcmp(cmd, "biggl") || !strcmp(cmd, "biggr")
@@ -4544,15 +4549,15 @@ static void compila(const char *s, Pdf *p, long *glifos){
                         else if(!strcmp(c3, "lvert") || !strcmp(c3, "rvert")
                              || !strcmp(c3, "vert")) ch = '|';
                         else { const Par *P3 = lex_acha(c3);
-                               if(P3) empurra(&e, P3->glifo, P3->simb ? F_SIM : e.fonte);
+                               if(P3) empurra(e, P3->glifo, P3->simb ? F_SIM : e->fonte);
                                i = j2b; continue; }
                     } else { ch = s[j2b]; j2b++; }
                 }
                 if(!ctl) ctl = (ch == '(') ? 4 : (ch == ')') ? 5
                              : (ch == '[') ? 6 : (ch == ']') ? 7
                              : (ch == '{') ? 10 : (ch == '}') ? 11 : 0;
-                if(ctl) empurra(&e, ctl, e.fonte);
-                else if(ch == '|') empurra(&e, '|', e.fonte);
+                if(ctl) empurra(e, ctl, e->fonte);
+                else if(ch == '|') empurra(e, '|', e->fonte);
                 i = j2b; continue;
             }
             /* os COMPRIMENTOS com dimensão colada — \itemsep1pt, \parskip2mm — são
@@ -4582,8 +4587,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
                                : (ch2 == 'O') ? 0xBD : (ch2 == 'C') ? 0xBE
                                : (ch2 == 'T') ? 0xBF : (ch2 == 'P') ? 0xCA
                                : (ch2 == 'K') ? 0xCB : 0;
-                        if(bb) empurra(&e, bb, F_SIM);
-                        else if(ch2 != ' ') empurra(&e, ch2, e.fonte);
+                        if(bb) empurra(e, bb, F_SIM);
+                        else if(ch2 != ' ') empurra(e, ch2, e->fonte);
                     }
                     i = f2 + 1; continue;
                 }
@@ -4592,15 +4597,15 @@ static void compila(const char *s, Pdf *p, long *glifos){
             /* as SETAS ROTULADAS: a seta da símbolo com o rótulo por cima — o
              * rótulo é um giro da espiral, como qualquer expoente. O
              * \xleftrightarrow{J} da tabela primal/dual sobrava só o «J» */
-            if(e.mat && (!strcmp(cmd, "xleftrightarrow") || !strcmp(cmd, "xrightarrow")
+            if(e->mat && (!strcmp(cmd, "xleftrightarrow") || !strcmp(cmd, "xrightarrow")
                       || !strcmp(cmd, "xleftarrow") || !strcmp(cmd, "xmapsto"))){
                 int seta = strstr(cmd, "leftright") ? 0xAB
                          : strstr(cmd, "right") || strstr(cmd, "mapsto") ? 0xAE : 0xAC;
                 long q2 = ate_abre(s, j, n), f2 = fecha_chave(s, n, q2);
-                empurra(&e, seta, F_SIM);
+                empurra(e, seta, F_SIM);
                 if(f2 > 0){
-                    int e0 = e.exp;
-                    e.exp = esp_gira(e.exp >= 16 ? e.exp : 0, 1);
+                    int e0 = e->exp;
+                    e->exp = esp_gira(e->exp >= 16 ? e->exp : 0, 1);
                     for(long z2 = q2 + 1; z2 < f2; z2++){
                         if(s[z2] == '\\'){
                             while(z2 + 1 < f2 && isalpha((unsigned char)s[z2+1])) z2++;
@@ -4609,18 +4614,18 @@ static void compila(const char *s, Pdf *p, long *glifos){
                         if(s[z2] == ' ') continue;
                         int cs2; int g2 = utf8_glifo((const unsigned char*)s + z2, &cs2);
                         if(isalpha(g2) && g2 < 128)
-                            empurra(&e, g2, CARTA_MAT ? F_MAT : F_ITA);
-                        else empurra(&e, g2, e.fonte);
+                            empurra(e, g2, CARTA_MAT ? F_MAT : F_ITA);
+                        else empurra(e, g2, e->fonte);
                         z2 += (cs2 ? cs2 : 1) - 1;
                     }
-                    e.exp = e0;
+                    e->exp = e0;
                     i = f2 + 1; continue;
                 }
                 i = j; continue;
             }
             /* os OPERADORES NOMEADOS do TeX — \det, \dim, \log… — compõem romanos,
              * como o \operatorname: o «det» de $\det=-1$ sumia e ficava «que é = -1» */
-            if(e.mat){
+            if(e->mat){
                 static const char *OPN[] = {"det","dim","ker","deg","log","exp","ln",
                     "lim","max","min","sup","inf","gcd","hom","arg","sin","cos","tan",
                     "cot","bmod","mod","sinh","cosh","tanh","coth","sec","csc",
@@ -4629,8 +4634,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 for(int t2 = 0; OPN[t2]; t2++) if(!strcmp(cmd, OPN[t2])){ oo = t2; break; }
                 if(oo >= 0){
                     for(const char *z2 = OPN[oo]; *z2; z2++)
-                        empurra(&e, (unsigned char)*z2,
-                                e.fonte == F_NEG ? F_NEG : F_REG);
+                        empurra(e, (unsigned char)*z2,
+                                e->fonte == F_NEG ? F_NEG : F_REG);
                     i = j; continue;
                 }
             }
@@ -4638,18 +4643,18 @@ static void compila(const char *s, Pdf *p, long *glifos){
              * sem esta porta o comando sumia e o _{M} ficava órfão a flutuar */
             if(!strcmp(cmd, "iint") || !strcmp(cmd, "iiint") || !strcmp(cmd, "oint")){
                 int nn = cmd[0] == 'o' ? 1 : (cmd[2] == 'i' ? 3 : 2);
-                for(int t2 = 0; t2 < nn; t2++) empurra(&e, 0xF2, F_SIM);
+                for(int t2 = 0; t2 < nn; t2++) empurra(e, 0xF2, F_SIM);
                 i = j; continue;
             }
-            if(!strcmp(cmd, "sqrt") && e.mat){
+            if(!strcmp(cmd, "sqrt") && e->mat){
                 /* a raiz NÃO é um glifo colado: desenha-se no desenrola, pelos corpos —
                  * aqui só se marca o radicando (5) */
                 long q2 = j;
                 while(q2 < n && (s[q2] == ' ' || s[q2] == '\t')) q2++;
-                if(q2 < n && s[q2] == '{' && e.nexp < 8){
-                    e.exp_pf[e.nexp] = PROF; e.exp_ant[e.nexp] = e.exp;
-                    e.exp_frac[e.nexp] = 0; e.nexp++;
-                    e.exp = 5; PROF++;                 /* o radicando leva o vinculum */
+                if(q2 < n && s[q2] == '{' && e->nexp < 8){
+                    e->exp_pf[e->nexp] = PROF; e->exp_ant[e->nexp] = e->exp;
+                    e->exp_frac[e->nexp] = 0; e->nexp++;
+                    e->exp = 5; PROF++;                 /* o radicando leva o vinculum */
                     i = q2 + 1; continue;
                 }
                 if(q2 < n && s[q2] == '\\'){            /* \sqrt\delta: o radicando é comando */
@@ -4657,15 +4662,15 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     while(j3 < n && isalpha((unsigned char)s[j3]) && k3 < 23) c3[k3++] = s[j3++];
                     c3[k3] = 0;
                     const Par *P3 = lex_acha(c3);
-                    if(P3){ int e0 = e.exp; e.exp = 5;
-                            empurra(&e, P3->glifo, P3->simb ? F_SIM : e.fonte);
-                            e.exp = e0; }
+                    if(P3){ int e0 = e->exp; e->exp = 5;
+                            empurra(e, P3->glifo, P3->simb ? F_SIM : e->fonte);
+                            e->exp = e0; }
                     i = j3; continue;
                 }
                 if(q2 < n){                            /* \sqrt D: um token */
-                    int e0 = e.exp; e.exp = 5;
-                    empurra(&e, (unsigned char)s[q2], e.fonte);
-                    e.exp = e0; i = q2 + 1; continue;
+                    int e0 = e->exp; e->exp = 5;
+                    empurra(e, (unsigned char)s[q2], e->fonte);
+                    e->exp = e0; i = q2 + 1; continue;
                 }
                 i = j; continue;
             }
@@ -4674,11 +4679,11 @@ static void compila(const char *s, Pdf *p, long *glifos){
             if(!strcmp(cmd, "frac") || !strcmp(cmd, "tfrac") || !strcmp(cmd, "dfrac")){
                 long q2 = j;
                 while(q2 < n && (s[q2] == ' ' || s[q2] == '\t')) q2++;
-                if(q2 < n && s[q2] == '{' && e.nexp < 8){
-                    int pilha = (e.disp && e.exp == 0);   /* no display: a pilha vertical */
-                    e.exp_pf[e.nexp] = PROF; e.exp_ant[e.nexp] = e.exp;
-                    e.exp_frac[e.nexp] = pilha ? 2 : 1; e.nexp++;
-                    e.exp = pilha ? 4 : 1; PROF++;
+                if(q2 < n && s[q2] == '{' && e->nexp < 8){
+                    int pilha = (e->disp && e->exp == 0);   /* no display: a pilha vertical */
+                    e->exp_pf[e->nexp] = PROF; e->exp_ant[e->nexp] = e->exp;
+                    e->exp_frac[e->nexp] = pilha ? 2 : 1; e->nexp++;
+                    e->exp = pilha ? 4 : 1; PROF++;
                     i = q2 + 1; continue;
                 }
                 /* a forma sem chavetas — `\frac1a`, `\frac1\sigma` — é um TOKEN por
@@ -4696,28 +4701,28 @@ static void compila(const char *s, Pdf *p, long *glifos){
                             const Par *P3 = lex_acha(c3);
                             if(!P3) break;
                             gtok[nt] = P3->glifo;
-                            ftok[nt] = P3->simb ? F_SIM : e.fonte; nt++;
+                            ftok[nt] = P3->simb ? F_SIM : e->fonte; nt++;
                             z2 = j3;
                         } else {
                             int gz = (unsigned char)s[z2];
                             gtok[nt] = gz;
                             ftok[nt] = (isalpha(gz) && N_CARTA > F_ITA)
-                                     ? (CARTA_MAT ? F_MAT : F_ITA) : e.fonte;
+                                     ? (CARTA_MAT ? F_MAT : F_ITA) : e->fonte;
                             nt++; z2++;
                         }
                         while(z2 < n && (s[z2] == ' ' || s[z2] == '\t')) z2++;
                     }
                     if(nt == 2){
-                        int e0 = e.exp;
-                        if(e.disp && e.exp == 0){
-                            e.exp = 4;  empurra(&e, gtok[0], ftok[0]);
-                            e.exp = -4; empurra(&e, gtok[1], ftok[1]);
+                        int e0 = e->exp;
+                        if(e->disp && e->exp == 0){
+                            e->exp = 4;  empurra(e, gtok[0], ftok[0]);
+                            e->exp = -4; empurra(e, gtok[1], ftok[1]);
                         } else {
-                            e.exp = 1;  empurra(&e, gtok[0], ftok[0]);
-                            e.exp = e0; empurra(&e, '/', e.fonte);
-                            e.exp = -1; empurra(&e, gtok[1], ftok[1]);
+                            e->exp = 1;  empurra(e, gtok[0], ftok[0]);
+                            e->exp = e0; empurra(e, '/', e->fonte);
+                            e->exp = -1; empurra(e, gtok[1], ftok[1]);
                         }
-                        e.exp = e0;
+                        e->exp = e0;
                         i = z2; continue;
                     }
                 }
@@ -4728,23 +4733,23 @@ static void compila(const char *s, Pdf *p, long *glifos){
                                             * chave só rotula se a bibliografia não a tem */
                 long q2 = ate_abre(s, j, n), f2 = fecha_chave(s, n, q2);
                 if(f2 > 0){
-                    empurra(&e, '[', e.fonte);
+                    empurra(e, '[', e->fonte);
                     long a2 = q2 + 1;
                     while(a2 < f2){
                         long b2 = a2;
                         while(b2 < f2 && s[b2] != ',') b2++;
                         int nm = bib_num(s + a2, (int)(b2 - a2));
                         if(nm > 0){
-                            if(nm >= 10) empurra(&e, '0' + nm / 10, e.fonte);
-                            empurra(&e, '0' + nm % 10, e.fonte);
+                            if(nm >= 10) empurra(e, '0' + nm / 10, e->fonte);
+                            empurra(e, '0' + nm % 10, e->fonte);
                         } else
                             for(long z2 = a2; z2 < b2; z2++)
-                                empurra(&e, (unsigned char)s[z2], e.fonte);
-                        if(b2 < f2){ empurra(&e, ',', e.fonte); empurra(&e, ' ', e.fonte); }
+                                empurra(e, (unsigned char)s[z2], e->fonte);
+                        if(b2 < f2){ empurra(e, ',', e->fonte); empurra(e, ' ', e->fonte); }
                         a2 = b2 + 1;
                         while(a2 < f2 && s[a2] == ' ') a2++;
                     }
-                    empurra(&e, ']', e.fonte);
+                    empurra(e, ']', e->fonte);
                     i = f2 + 1; continue;
                 }
                 i = j; continue;
@@ -4752,13 +4757,13 @@ static void compila(const char *s, Pdf *p, long *glifos){
             if(!strcmp(cmd, "bibitem")){   /* a entrada: parágrafo novo com o rótulo [n] */
                 long q2 = ate_abre(s, j, n), f2 = fecha_chave(s, n, q2);
                 if(f2 > 0){
-                    fecha_paragrafo(&e); p->y -= 3*PT;
+                    fecha_paragrafo(e); p->y -= 3*PT;
                     int nm = bib_num(s + q2 + 1, (int)(f2 - q2 - 1));
-                    empurra(&e, '[', e.fonte);
-                    if(nm >= 10) empurra(&e, '0' + nm / 10, e.fonte);
-                    empurra(&e, '0' + (nm > 0 ? nm % 10 : 0), e.fonte);
-                    empurra(&e, ']', e.fonte);
-                    empurra(&e, ' ', e.fonte);
+                    empurra(e, '[', e->fonte);
+                    if(nm >= 10) empurra(e, '0' + nm / 10, e->fonte);
+                    empurra(e, '0' + (nm > 0 ? nm % 10 : 0), e->fonte);
+                    empurra(e, ']', e->fonte);
+                    empurra(e, ' ', e->fonte);
                     i = f2 + 1; continue;
                 }
                 i = j; continue;
@@ -4766,9 +4771,9 @@ static void compila(const char *s, Pdf *p, long *glifos){
             if(!strcmp(cmd, "url")){       /* o endereço compõe na mono, como o \code */
                 long q2 = ate_abre(s, j, n), f2 = fecha_chave(s, n, q2);
                 if(f2 > 0){
-                    int fu = (N_CARTA > F_MON) ? F_MON : e.fonte;
+                    int fu = (N_CARTA > F_MON) ? F_MON : e->fonte;
                     for(long z2 = q2 + 1; z2 < f2; z2++)
-                        empurra(&e, (unsigned char)s[z2], fu);
+                        empurra(e, (unsigned char)s[z2], fu);
                     i = f2 + 1; continue;
                 }
                 i = j; continue;
@@ -4776,9 +4781,9 @@ static void compila(const char *s, Pdf *p, long *glifos){
             if(!strcmp(cmd, "tag")){       /* o rótulo da equação: (L1), como o pdflatex põe */
                 long q2 = ate_abre(s, j, n), f2 = fecha_chave(s, n, q2);
                 if(f2 > 0){
-                    espaco_se_falta(&e); empurra(&e, '(', e.fonte);
-                    for(long z2 = q2 + 1; z2 < f2; z2++) empurra(&e, (unsigned char)s[z2], e.fonte);
-                    empurra(&e, ')', e.fonte);
+                    espaco_se_falta(e); empurra(e, '(', e->fonte);
+                    for(long z2 = q2 + 1; z2 < f2; z2++) empurra(e, (unsigned char)s[z2], e->fonte);
+                    empurra(e, ')', e->fonte);
                     i = f2 + 1; continue;
                 }
                 i = j; continue;
@@ -4790,7 +4795,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                  * não o antecede. A relação leva espaço dos DOIS lados; o grego, os
                  * delimitadores (⟨⟩) e o \cdot não. O `:` é o \colon, a relação tipada. */
                 int rel = 0;
-                if(e.mat){
+                if(e->mat){
                     int g2 = P->glifo;
                     if(P->simb) rel = (g2==0xAE||g2==0xAC||g2==0xDE||g2==0xDC||g2==0xAB
                                     ||g2==0xDB||g2==0xCE||g2==0xCF||g2==0xCC||g2==0xCD
@@ -4798,9 +4803,9 @@ static void compila(const char *s, Pdf *p, long *glifos){
                                     ||g2==0xBB||g2==0x7E||g2==0xB5||g2==0x40);
                     else rel = (g2==0xD7||g2==0xB1||g2==0xF7||g2==':');
                 }
-                if(rel) espaco_se_falta(&e);
-                empurra(&e, P->glifo, P->simb ? F_SIM : e.fonte);
-                if(rel) empurra(&e, ' ', e.fonte);
+                if(rel) espaco_se_falta(e);
+                empurra(e, P->glifo, P->simb ? F_SIM : e->fonte);
+                if(rel) empurra(e, ' ', e->fonte);
                 i = j; continue;
             }
             /* um comando que não está no léxico não vira lixo na página: consome-se e segue */
@@ -4814,7 +4819,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
          * o mesmo dano do cifrao no verbatim, por outra porta. */
         /* NO MODO MATEMATICO A LETRA LATINA NAO E' GREGA, e esta linha dizia que era.
          *
-         * Tinha `(e.mat && isalpha(g)) ? F_SIM : e.fonte` — toda a letra latina dentro de $...$
+         * Tinha `(e->mat && isalpha(g)) ? F_SIM : e->fonte` — toda a letra latina dentro de $...$
          * ia para a Symbol. E na Symbol o `i` e' iota, o `u` e' upsilon, o `v` e' pi-variante:
          * «\sum_i u_i v_i» saía «∑_ι υ_ι ϖ_ι». Sete mil e cento e vinte e uma letras trocadas
          * no catalogo.
@@ -4835,28 +4840,28 @@ static void compila(const char *s, Pdf *p, long *glifos){
          * WinAnsi — só lhes faltava a porta. Sem isto o título do enredo saía «O Enredo ---
          * a partida sem fim» com três hífenes onde o original tem um traço. */
         { int cl = 0, lg = liga_acha(s, n, i, &cl);
-          if(lg){ empurra(&e, lg, e.fonte); i += cl; continue; } }
+          if(lg){ empurra(e, lg, e->fonte); i += cl; continue; } }
         /* o `*` da matemática é o ∗ do eixo (a símbolo), não o asterisco alto do
          * texto — é o T^* do gabarito, discreto e centrado */
-        if(e.mat && g == '*'){
-            empurra(&e, 0x2A, F_SIM);
+        if(e->mat && g == '*'){
+            empurra(e, 0x2A, F_SIM);
             i += cons; continue;
         }
         /* a vírgula é PONTUAÇÃO na fórmula: espaço depois, nunca antes — «(V), \qquad»
          * do gabarito. O espaço de antes já não entra (o modo matemático engole-o). */
-        if(e.mat && g == ','){
-            empurra(&e, ',', e.fonte); espaco_se_falta(&e);
+        if(e->mat && g == ','){
+            empurra(e, ',', e->fonte); espaco_se_falta(e);
             i += cons; continue;
         }
         /* AS RELAÇÕES DO TECLADO ESPACEJAM no modo matemático, como o TeX compõe: o `=`
          * sempre («Mij=⟨…» saía colado); o `+` e o `-` só quando BINÁRIOS — o anterior é
          * letra, dígito ou fecho — para «=-T» ficar unário como no gabarito. */
-        if(e.mat && (g == '=' || g == '<' || g == '>' || g == '+' || g == '-')){
+        if(e->mat && (g == '=' || g == '<' || g == '>' || g == '+' || g == '-')){
             int bin = (g == '=' || g == '<' || g == '>');
-            if(!bin && e.L.n && e.L.g[e.L.n-1].e == (signed char)e.exp){
+            if(!bin && e->L.n && e->L.g[e->L.n-1].e == (signed char)e->exp){
                 /* o anterior tem de estar NO MESMO nível: o `-` que abre um expoente
                  * (f^{-1}) é unário — o `f` de trás é a base, não um operando */
-                int ant = e.L.g[e.L.n-1].g;
+                int ant = e->L.g[e->L.n-1].g;
                 bin = (ant >= '0' && ant <= '9') || (ant >= 'a' && ant <= 'z')
                    || (ant >= 'A' && ant <= 'Z') || ant == ')' || ant == ']' || ant > 127;
             }
@@ -4866,19 +4871,19 @@ static void compila(const char *s, Pdf *p, long *glifos){
              * giro da espiral (índice, expoente) a dobra já o consumiu — «x_{n+1}»
              * compõe colado, como o script do gabarito */
             { int gm = (g == '-' && CARTA_SIM) ? 0xAD : g;
-              int fm = (g == '-' && CARTA_SIM) ? F_SIM : e.fonte;
-              int com_esp = bin && e.exp == 0;
-              if(com_esp){ espaco_se_falta(&e); empurra(&e, gm, fm); empurra(&e, ' ', e.fonte); }
-              else empurra(&e, gm, fm); }
+              int fm = (g == '-' && CARTA_SIM) ? F_SIM : e->fonte;
+              int com_esp = bin && e->exp == 0;
+              if(com_esp){ espaco_se_falta(e); empurra(e, gm, fm); empurra(e, ' ', e->fonte); }
+              else empurra(e, gm, fm); }
             i += cons; continue;
         }
         /* A VARIÁVEL MATEMÁTICA COMPÕE-SE NA ITÁLICA — «o itálico é o que a tipografia
          * manda», e agora a variante existe e embute-se (a mesma porta do \emph). SÓ a
          * letra latina ASCII: um acento nunca é matemática, e o grego já vem do léxico. */
-        if(e.mat && ((g >= 'a' && g <= 'z') || (g >= 'A' && g <= 'Z')) && N_CARTA > F_ITA){
+        if(e->mat && ((g >= 'a' && g <= 'z') || (g >= 'A' && g <= 'Z')) && N_CARTA > F_ITA){
             /* a variável vai para a carta MATEMÁTICA se ela abriu: é a métrica do
              * cmmi (V: bearing 56, avanço 583) e não a da itálica de texto (209, 743) */
-            empurra(&e, g, (e.fonte == F_NEG && CARTA_MTB) ? F_MTB
+            empurra(e, g, (e->fonte == F_NEG && CARTA_MTB) ? F_MTB
                           : (CARTA_MAT ? F_MAT : F_ITA));
             i += cons; continue;
         }
@@ -4889,13 +4894,13 @@ static void compila(const char *s, Pdf *p, long *glifos){
             if(PROF > 0) PROF--;
             if(DEG_PROF >= 0 && PROF < DEG_PROF){ DEG_FORCADO = -1; DEG_PROF = -1; }
             if(COR_PROF >= 0 && PROF < COR_PROF){ COR_TEXTO[0] = 0; COR_PROF = -1; }
-            while(e.nfp > 0 && e.fp_p[e.nfp-1] >= PROF){ e.nfp--; e.fonte = e.fp_f[e.nfp]; }
+            while(e->nfp > 0 && e->fp_p[e->nfp-1] >= PROF){ e->nfp--; e->fonte = e->fp_f[e->nfp]; }
         }
-        empurra(&e, g, e.fonte);
+        empurra(e, g, e->fonte);
         i += cons;
     }
-    fecha_paragrafo(&e);
-    *glifos = e.glifos;
+    fecha_paragrafo(e);
+    *glifos = e->glifos;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -4965,6 +4970,8 @@ typedef struct { char nome[48]; int nargs; char *corpo; } Macro;
 #define MAC     ((Macro*)disco_buf(7, (long)(MAX_MAC * sizeof(Macro))))
 static int N_MAC = 0;
 long EXPANDIDAS = 0;          /* quantas avaliações se fizeram — a bateria lê isto */
+long tex_expandidas(void){ return EXPANDIDAS; }
+int tex_n_mac(void){ return N_MAC; }
 
 /* o argumento entre chavetas a partir de `i` (que aponta ao `{`), com aninhamento */
 static long fecha_chave(const char *s, long n, long i){

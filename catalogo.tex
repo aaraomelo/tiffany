@@ -11574,27 +11574,32 @@ guardado num local, não movido em bytes); o segundo declarador com \code{*} con
 nua (\code{Par *a, *s} são ambos \code{Par*}); o \code{static} local \emph{escalar} que é slot
 e não local do wasm (o \code{local.set -1} que o motor recusava); o \code{(void)x} que descarta;
 e as atribuições encadeadas, que \textbf{não implementam pilha} --- \code{a = b = 0} são duas
-MOVE no par $(A,B)$, o corpo dual de profundidade dois que a ISA já é. \textbf{4 unidades,
-resíduo 0}, e a composição de ponta-a-ponta pede o ambiente completo nos slots (fontes, estilo,
-classe) --- o que o app monta, o passo seguinte.
+MOVE no par $(A,B)$, o corpo dual de profundidade dois que a ISA já é. O cpp expande antes do
+\code{traduz} (senão \code{SEEK\_END}/\code{MAXLIN} ficam nomes a zero). A composição é o
+\textbf{corpo de Alonzo} (\S X13: giros, \code{boxed}, smallmatrix, \code{/SementeEstrela}) e o
+selo é o \textbf{corpo de Caelum} (\S X15: \code{/AssinaturaOito}, $256$ componentes, dois
+caminhos batem). O ambiente completo nos slots (fontes, estilo, classe) é o que o
+\code{app/src/tex\_tradutor.js} monta --- a lista medida por \code{tools/corpo.sh}, não
+adivinhada. \textbf{6 unidades, resíduo 0.}
 
 \item \code{tools/corpo.sh} e \code{tests/corpo\_front.js} --- \textbf{os ficheiros no front, e
 o portão que os deixa sair.} \emph{``põe os arquivos que vc precisa no front''} --- e
 \textbf{quais são não é opinião}: o \code{fopen} do tradutor é interceptado e diz, ficheiro a
-ficheiro, o que ele foi buscar para compor os cinco documentos. São \textbf{$29$}, $4{,}56$\,MB,
-e a lista remede-se no medidor em vez de se dar por boa: \textbf{$0$ fora do manifesto}. Uma
-lista à mão envelhece calada --- muda-se um \code{\textbackslash fontsize} no estilo, entra um
-corpo novo que ninguém pôs nela, e o pedido cai com um $404$ que não explica nada.
+ficheiro, o que ele foi buscar para compor os dez documentos do front. São \textbf{$40$},
+$5{,}13$\,MB, e a lista remede-se no medidor em vez de se dar por boa: \textbf{$0$ fora do
+manifesto}, e cada \code{.tex} que o \code{tex\_tradutor.js} compõe está na lista. Uma lista à
+mão envelhece calada --- muda-se um \code{\textbackslash fontsize} no estilo, entra um corpo
+novo que ninguém pôs nela, e o pedido cai com um $404$ que não explica nada.
 
 \textbf{E o manifesto é o portão.} O repositório é \emph{público} e nem tudo nele é para
 servir: o \code{curriculo/} tem CPF e conta bancária, o \code{cristalchain} diz \emph{``IP
 privado''}. Por isso a regra é de \textbf{lista branca} --- uma lista negra esquece o próximo
-segredo. Medido nos dois lados: sai o que está na lista ($29$ de $29$, cada um com o seu tipo),
+segredo. Medido nos dois lados: sai o que está na lista ($40$ de $40$, cada um com o seu tipo),
 e \textbf{não sai} nenhum dos $10$ caminhos recusados --- \emph{dos quais $6$ existem mesmo no
 disco}, senão o controlo era sobre nada. E a fuga também não passa: nem \code{..}, nem o
 caminho absoluto, nem o \code{..} escrito em percentagem --- que é o caso que obriga a
 \textbf{decodificar antes de decidir}, senão o portão julga um texto e a leitura abre outro.
-\textbf{8 unidades, resíduo 0.}
+\textbf{9 unidades, resíduo 0.}
 
 
 \item \code{tools/libc.c} e \code{tests/libc\_wasm.js} --- \textbf{a biblioteca escrita na

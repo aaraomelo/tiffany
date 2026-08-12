@@ -10,6 +10,34 @@
 
 static char *disco_mmap(int i, const char *nome, long n){ (void)i; return (char*)disco_u8(nome, (size_t)n); }
 
+/* Fatias compactas (tests/disco_wasm.c): no wasm inicia_wasm liga-as a g_disco.
+ * Um bloco via disco_u8; cada slot é OFF[i]. Nativo no main fica no mmap por ficheiro. */
+static int USA_FATIA;
+static char *FAT_BASE;
+static int OFF_FAT[16], TAM_FAT[16], FAT_PRONTO;
+
+static char *disco_fatia(int i, const char *nome, long n){
+    (void)nome; (void)n;
+    if(i < 0 || i >= 16) return 0;
+    if(!FAT_PRONTO){
+        TAM_FAT[0]=1<<20; TAM_FAT[1]=1<<16; TAM_FAT[2]=1<<16; TAM_FAT[3]=1<<22;
+        TAM_FAT[4]=1<<22; TAM_FAT[5]=1<<20; TAM_FAT[6]=1<<16; TAM_FAT[7]=1<<18;
+        TAM_FAT[8]=1<<16; TAM_FAT[9]=1<<14; TAM_FAT[10]=1<<18; TAM_FAT[11]=1<<16;
+        TAM_FAT[12]=1<<16; TAM_FAT[13]=1<<16; TAM_FAT[14]=1<<27; TAM_FAT[15]=1<<20;
+        OFF_FAT[0]=0;
+        for(int k=1;k<16;k++) OFF_FAT[k]=OFF_FAT[k-1]+TAM_FAT[k-1];
+        FAT_BASE = (char*)disco_u8("../dados/tex_fatias.bin",
+                                   (size_t)(OFF_FAT[15] + TAM_FAT[15]));
+        if(!FAT_BASE) return 0;
+        FAT_PRONTO = 1;
+    }
+    return FAT_BASE + OFF_FAT[i];
+}
+
+static char *disco_para(int i, const char *nome, long n){
+    return USA_FATIA ? disco_fatia(i, nome, n) : disco_mmap(i, nome, n);
+}
+
 static long carrega_nativo(const char *nome, int i, long cap){
     unsigned char *b = (unsigned char*)disco_buf(i, cap);
     FILE *f = fopen(nome, "rb");
@@ -235,7 +263,8 @@ static void recolhe_macros(const char *s, long n){
         for(int t = 0; t < N_MAC; t++) if(!strcmp(MAC[t].nome, nome)) idx = t;
         if(idx < 0){ idx = N_MAC++; }
         else free(MAC[idx].corpo);
-        snprintf(MAC[idx].nome, sizeof MAC[idx].nome, "%s", nome);
+        { int nk = 0; while(nome[nk] && nk < 47){ MAC[idx].nome[nk] = nome[nk]; nk++; }
+          MAC[idx].nome[nk] = 0; }
         MAC[idx].nargs = nargs;
         long cl = f2 - q - 1;
         MAC[idx].corpo = malloc((size_t)cl + 1);
@@ -304,6 +333,57 @@ static char *expande_uma(char *s, long *n, long *quantas){
     char *o = malloc((size_t)tam + 1);                 /* exacto, mais o terminador */
     expande_corre(s, *n, o, quantas);                  /* e agora ESCREVE, no espaço contado */
     *n = tam; free(s); return o;
+}
+
+/* `\input{foo}`: o ficheiro entra no sítio, como o pdflatex faz. Sem isto o
+ * `\input{gkcapa}` dos papers nunca chegava — e a capa (gktit 23,42) não nascia. */
+static char *le_input(const char *nome, const char *dir){
+    char p[256]; char *q; long en = 0; char *e;
+    q = ap_str(p, nome); *q = 0;
+    e = le_tudo(p, &en); if(e) return e;
+    { int tem = 0; const char *z = nome; while(*z){ if(*z == '.') tem = 1; z++; }
+      if(!tem){ q = ap_str(p, nome); q = ap_str(q, ".tex"); *q = 0;
+                e = le_tudo(p, &en); if(e) return e; } }
+    if(dir && dir[0]){
+        q = ap_str(p, dir); q = ap_str(q, nome); *q = 0;
+        e = le_tudo(p, &en); if(e) return e;
+        { int tem = 0; const char *z = nome; while(*z){ if(*z == '.') tem = 1; z++; }
+          if(!tem){ q = ap_str(p, dir); q = ap_str(q, nome); q = ap_str(q, ".tex"); *q = 0;
+                    e = le_tudo(p, &en); if(e) return e; } }
+    }
+    q = ap_str(p, "../"); q = ap_str(q, nome); *q = 0;
+    e = le_tudo(p, &en); if(e) return e;
+    { int tem = 0; const char *z = nome; while(*z){ if(*z == '.') tem = 1; z++; }
+      if(!tem){ q = ap_str(p, "../"); q = ap_str(q, nome); q = ap_str(q, ".tex"); *q = 0;
+                e = le_tudo(p, &en); if(e) return e; } }
+    return 0;
+}
+
+static char *expande_inputs(char *s, long *n, const char *dir){
+    int passo;
+    for(passo = 0; passo < 8; passo++){
+        int houve = 0; long i;
+        for(i = 0; i + 7 < *n; i++){
+            if(s[i] != '\\' || strncmp(s + i + 1, "input{", 6)) continue;
+            long a = i + 7; char nome[96]; int k = 0;
+            while(a < *n && s[a] != '}' && k < 95) nome[k++] = s[a++];
+            if(a >= *n || s[a] != '}') continue;
+            nome[k] = 0; long f2 = a + 1;
+            long en = 0; char *e = le_input(nome, dir);
+            if(!e){ i = f2 - 1; continue; }
+            en = (long)strlen(e);
+            long nn = i + en + (*n - f2);
+            char *o = malloc((size_t)nn + 1);
+            if(!o){ free(e); return s; }
+            memcpy(o, s, (size_t)i);
+            memcpy(o + i, e, (size_t)en);
+            memcpy(o + i + en, s + f2, (size_t)(*n - f2));
+            o[nn] = 0;
+            free(e); free(s); s = o; *n = nn; houve = 1; break;
+        }
+        if(!houve) break;
+    }
+    return s;
 }
 
 static char *avalia_macros(char *s, long *n, const char *estilo){
@@ -406,7 +486,8 @@ static void le_niveis_estilo(void){
             if(d){ const char *ee; c = fixo_mil(d + strlen(alvo), &ee);
                    _ok = (ee != d + strlen(alvo) && c > 0); }
             if(_ok){
-                snprintf(NIVEL_CORPO[N_NIVEL].cmd, sizeof NIVEL_CORPO[N_NIVEL].cmd, "%s", cmd);
+                { int nk = 0; while(cmd[nk] && nk < 23){ NIVEL_CORPO[N_NIVEL].cmd[nk] = cmd[nk]; nk++; }
+                  NIVEL_CORPO[N_NIVEL].cmd[nk] = 0; }
                 NIVEL_CORPO[N_NIVEL].corpo = c;
                 /* A COR TAMBÉM SE LÊ, e é a do PRIMEIRO grupo. A gramática diz porquê:
                  * `\titleformat{cmd}[forma]{FORMATO}{rótulo}{sep}{antes}[depois]` — o primeiro
@@ -650,8 +731,10 @@ static void le_teoremas(void){
             }
             conv[ci] = 0;
             if(amb[0] && conv[0]){
-                snprintf(TEOR[N_TEOR].amb, sizeof TEOR[N_TEOR].amb, "%s", amb);
-                snprintf(TEOR[N_TEOR].nome, sizeof TEOR[N_TEOR].nome, "%s", conv);
+                { int nk = 0; while(amb[nk] && nk < 23){ TEOR[N_TEOR].amb[nk] = amb[nk]; nk++; }
+                  TEOR[N_TEOR].amb[nk] = 0; }
+                { int nk = 0; while(conv[nk] && nk < 31){ TEOR[N_TEOR].nome[nk] = conv[nk]; nk++; }
+                  TEOR[N_TEOR].nome[nk] = 0; }
                 TEOR[N_TEOR].ita = ita;
                 N_TEOR++;
             }
@@ -722,11 +805,17 @@ int compila_ficheiro(const char *ent, const char *sai){
      * transmite-o do slot direto para o PDF — com comentários, com \emph, com tudo —, e é ele
      * que a volta devolve byte a byte. O corpo é ordenado: basta o endereço, não uma cópia. */
     FONTE_TEX = ent;
-    /* a avaliação nas raízes, ANTES de compor: o estilo é a fonte das definições */
-    { char est[1024]; snprintf(est, sizeof est, "%s", ent);
-      char *b = strrchr(est, '/'); if(b) b[1] = 0; else est[0] = 0;
-      strncat(est, "estilo.tex", sizeof est - strlen(est) - 1);
-      s = avalia_macros(s, &n, est); }
+    /* a avaliação nas raízes, ANTES de compor: o estilo é a fonte das definições.
+     * O caminho monta-se com ap_str (sem snprintf no quadro: o traduz + sizeof do
+     * `char est[1024]` local já partiu o bx). `\input` entra antes das macros. */
+    { char dir[256]; char est[512]; char *p = dir; const char *slash = 0;
+      { const char *q = ent; while(*q){ if(*q == '/') slash = q; q++; } }
+      if(slash){ const char *q = ent; while(q <= slash) *p++ = *q++; }
+      *p = 0;
+      p = ap_str(est, dir); p = ap_str(p, "estilo.tex"); *p = 0;
+      s = expande_inputs(s, &n, dir);
+      s = avalia_macros(s, &n, est);
+      s = avalia_macros(s, &n, "estilo.tex"); }
     FILE *f = fopen(sai, "wb");
     if(!f){ free(s); fprintf(stderr, "nao escreve: %s\n", sai); return 1; }
     /* TRÊS PASSAGENS, e é o que o LaTeX faz com o `.aux`:
@@ -930,13 +1019,15 @@ static int x16_acha(const unsigned char *buf, long len, int gb, int qual,
  * host teria de chamar `main` com argv, e `compila_ficheiro` sozinha trapava
  * em g_disco/g_carrega nulos. Exportada (não-static): o browser chama-a uma vez. */
 void inicia_wasm(void){
-    g_disco   = disco_mmap;
-    g_carrega = carrega_nativo;
+    USA_FATIA = 1;                /* g_disco → fatias (disco_wasm.c), não mmap */
+    g_disco   = disco_para;
+    g_carrega = carrega_nativo;   /* fopen dos slots que o host pôs por poe_ficheiro */
     carrega_config();
 }
 
 int main(int argc, char **argv){
-    g_disco   = disco_mmap;       /* nativo: o disco é o mmap (sem RAM); no wasm o host aponta à memória linear */
+    USA_FATIA = 0;
+    g_disco   = disco_para;       /* nativo: mmap por ficheiro (disco.h) */
     g_carrega = carrega_nativo;   /* o wrapper aponta a indirecção para o fopen; no wasm o host aponta-a ao slot */
     carrega_config();             /* o wrapper parseia a config UMA vez, antes de qualquer uso do núcleo */
     if(argc == 2 && (!strcmp(argv[1], "-sh") || !strcmp(argv[1], "shell"))) return shell();

@@ -33,6 +33,8 @@
  *   funções    parâmetros, locais, chamadas (incluindo para a frente), recursão
  *   operadores + - * / %  == != < > <= >=  && || !  & | ^ << >>  = += -= *= /=  ++ --
  *   controlo   if/else, while, for, do/while, break, continue, return
+ *              (o `switch` não é construção nova: é a mesma cadeia de if/else —
+ *               catalogo.tex; a volta wasm-c reconstitui if, nunca br_table)
  *   ── e o que dele se mede (tests/traduz_volta.js) ────────────────────────────────────
  *   os DOIS CAMINHOS: o mesmo ficheiro pelo `cc` do sistema e por este, e os números batem
  *   a VOLTA:          o módulo devolve as assinaturas — porque traduzir preserva
@@ -794,6 +796,10 @@ static void MOVE(int tipo, int sentido){
  * E o tamanho sabe-se ANTES de emitir, porque se lê o corpo primeiro: sem isso a constante do
  * prólogo mudava de comprimento ao ser corrigida, e corrigir um LEB128 pelo meio desloca tudo
  * o que vem depois. */
+/* A fita do quadro: involução SP−n / SP+n (corpo-estelar §estrela) — NÃO é armazenamento.
+ * A estrela não guarda nada; o que cabe aqui é a régua do frame aberto, e fecha onde
+ * abriu. Se o SP esmaga literais, o defeito é cópia de vector no quadro (ex.: `Linha`
+ * duplicada), não «faltam megabytes»: corrige-se in-place, sem alargar a fita. */
 #define PILHA_BYTES 65536
 /* SP_SLOT, QUADRO, QUADRO_USADO, TMP_RET, QUADRO_FITA, N_FITA/FITA_SITIO e M_FRASE vivem
  * no Reg. Uma fita POR SÍTIO: duas chamadas na mesma frase não podem partilhar a fita,
@@ -1888,6 +1894,18 @@ static long mede_quadro(void){
         if(e_pun("{")) prof++;
         else if(e_pun("}")) prof--;
         else if(e_tipo() && prof > 0){
+            /* `static` dentro da função é SLOT, não quadro (declara() já o sabe).
+             * Contá-lo aqui fazia SP−n esmagar literais: `static DX[2048]` ≈ 50 KB. */
+            if(e_id("static")){
+                int p2 = 0;
+                while(T.k != TK_FIM){
+                    if(e_pun("(") || e_pun("[") || e_pun("{")) p2++;
+                    else if(e_pun(")") || e_pun("]") || e_pun("}")){ if(p2 == 0) break; p2--; }
+                    else if(p2 == 0 && e_pun(";")){ avanca(); break; }
+                    avanca();
+                }
+                continue;
+            }
             int base = le_tipo();
             for(;;){
                 if(T.k != TK_ID) break;

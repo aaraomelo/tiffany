@@ -3,7 +3,7 @@
 // O Aarão: «põe os arquivos que vc precisa no front, pode ser?»
 //
 // A lista não é minha: está em `corpo.json` e sai de `tools/corpo.sh`, que intercepta o
-// `fopen` do tradutor e escreve o que ele foi mesmo buscar para compor os cinco documentos.
+// `fopen` do tradutor e escreve o que ele foi mesmo buscar para compor os documentos do front.
 // Uma lista à mão envelhece calada — muda-se um `\fontsize` no estilo, entra um corpo novo
 // que ninguém pôs no manifesto, e o pedido cai com um 404 que não explica nada.
 //

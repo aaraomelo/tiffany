@@ -29,6 +29,7 @@ PRE='#define SEEK_SET 0
 #define stderr 0
 #define stdout 1
 #define stdin 3
+#define TEX_COM_LIBC_WASM 1
 '
 {
   printf '%s' "$PRE"
@@ -43,7 +44,13 @@ PRE='#define SEEK_SET 0
   sem_inc "$RAIZ/tests/tex.c"
 } > "$TMP/unido.c"
 
+# O traduz IGNORA linhas `#` (não é o cpp). Sem expandir, MAXLIN/SEEK_END/F_*
+# ficam nomes a zero no BSS — e `empurra` faz `n < MAXLIN-1` = `n < -1` = nunca.
+# O cpp expande; o traduz recebe números. É a costura medida, não adivinhada.
+echo "sobe_tex_wasm: a expandir macros (cpp)…"
+cc -E -P "$TMP/unido.c" > "$TMP/unido_pp.c"
+
 echo "sobe_tex_wasm: a traduzir → $OUT"
-"$TRADUZ" "$TMP/unido.c" -o "$OUT"
+"$TRADUZ" "$TMP/unido_pp.c" -o "$OUT"
 BYTES=$(wc -c < "$OUT" | tr -d ' ')
 echo "sobe_tex_wasm: $BYTES bytes — o módulo está pronto para o navegador"

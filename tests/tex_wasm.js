@@ -18,6 +18,8 @@
  *   §T2  a porta da composição está lá: poe_ficheiro/fopen/fread/fwrite e o DISCO
  *   §T3  o disco CRESCE CONTADO por memory.grow — pede-se 2 MB, sobem ~32 páginas, exacto
  *   §T4  e o que se escreve no disco lê-se de volta — a Lei 1 no ficheiro, resíduo 0
+ *   §T5  Alonzo (a composição): giros, boxed, smallmatrix — /SementeEstrela viaja
+ *   §T6  Caelum (o esqueleto): /AssinaturaOito, 256 componentes, dois caminhos batem
  */
 'use strict';
 const fs = require('fs');
@@ -40,7 +42,8 @@ console.log('=== O CORPO TRADUTOR SOBE INTEIRO: tex.c -> wasm ===\n');
 /* a régua constrói-se da fonte, sempre. O fonte é a UNIÃO — libc + spline + tex — com um
  * prelúdio de constantes que os #include dariam (SEEK_*, NULL, stderr como sink). */
 const PRELUDIO = '#define SEEK_SET 0\n#define SEEK_CUR 1\n#define SEEK_END 2\n' +
-                 '#define NULL 0\n#define EOF (-1)\n#define stderr 0\n#define stdout 1\n#define stdin 3\n';
+                 '#define NULL 0\n#define EOF (-1)\n#define stderr 0\n#define stdout 1\n#define stdin 3\n' +
+                 '#define TEX_COM_LIBC_WASM 1\n';
 const w = path.join(TMP, 'tex_wasm.wasm');
 const unido = path.join(TMP, 'tex_wasm_unido.c');
 try {
@@ -56,7 +59,11 @@ try {
         semInc(path.join(RAIZ, 'lib', 'spline.h')) + '\n' +
         semInc(path.join(RAIZ, 'tests', 'tex_core.c')) + '\n' +
         semInc(path.join(RAIZ, 'tests', 'tex.c')));
-    execFileSync(TRADUZ, [unido, '-o', w]);
+    /* o traduz ignora linhas `#` (não é o cpp). Sem expandir, MAXLIN/SEEK_END
+     * ficam nomes a zero — a mesma costura de tools/sobe_tex_wasm.sh. */
+    const unidoPp = path.join(TMP, 'tex_wasm_unido_pp.c');
+    execFileSync('cc', ['-E', '-P', unido, '-o', unidoPp]);
+    execFileSync(TRADUZ, [unidoPp, '-o', w]);
 } catch (e) {
     console.log('  o tex.c nao subiu — e sem ele nao ha nada a medir.');
     console.log(String(e.stderr || e.message).slice(0, 400));
@@ -81,8 +88,9 @@ ok('§T1 o tex.c sobe e o modulo e VALIDO — sem emscripten, a regua traduz-se 
 
 /* ─── §T2 a porta da composicao ───────────────────────────────────────────────────── */
 const tem = (n, k) => EXP.some(x => x.name === n && x.kind === (k || 'function'));
-const porta = ['poe_ficheiro', 'fopen', 'fread', 'fwrite', 'ftell', 'fseek'].every(n => tem(n));
-console.log(`   porta: DISCO(${tem('DISCO', 'memory')}) poe_ficheiro fopen fread fwrite ...`);
+const porta = ['poe_ficheiro', 'fopen', 'fread', 'fwrite', 'ftell', 'fseek',
+               'inicia_wasm', 'compila_ficheiro', 'limpa_saida', 'end_saida', 'tam_saida'].every(n => tem(n));
+console.log(`   porta: DISCO(${tem('DISCO', 'memory')}) poe_ficheiro inicia_wasm compila_ficheiro ...`);
 ok('§T2 a porta da composicao esta la: os ficheiros por slots, e o DISCO',
    tem('DISCO', 'memory') && porta);
 
@@ -136,15 +144,147 @@ catch (e) {
        n === conteudo.length && volta === conteudo);
 }
 
+/* ─── §T5 Alonzo: a composição; §T6 Caelum: o selo ───────────────────────────────────
+ * O que Alonzo compõe, Caelum assina (catalogo.tex cat:alonzo / cat:caelum; tex.c §X13/§X15). */
+{
+    const man = JSON.parse(fs.readFileSync(path.join(RAIZ, 'app/src/corpo.json'), 'utf8'));
+    const num = x => typeof x === 'bigint' ? Number(x) : x;
+    const mem = () => new Uint8Array(E.DISCO.buffer);
+    function poeStr(s) {
+        const nb = Buffer.from(s, 'latin1');
+        const p = num(E.malloc(BigInt(nb.length + 1)));
+        if (!p) throw new Error('malloc nome');
+        mem().set(nb, p); mem()[p + nb.length] = 0;
+        return p;
+    }
+    function poeFich(nome, bytes) {
+        const pN = poeStr(nome);
+        const pD = num(E.malloc(BigInt(Math.max(bytes.length, 1))));
+        if (!pD) throw new Error('malloc ' + nome);
+        if (bytes.length) mem().set(bytes instanceof Buffer ? bytes : Buffer.from(bytes), pD);
+        if (!E.poe_ficheiro(pN, pD, bytes.length)) throw new Error('poe_ficheiro recusou ' + nome);
+    }
+    function compoe(nome) {
+        E.limpa_saida();
+        const rc = num(E.compila_ficheiro(poeStr(nome), poeStr('saida.pdf')));
+        const tam = num(E.tam_saida());
+        const end = num(E.end_saida());
+        const pdf = Buffer.from(mem().slice(end, end + tam));
+        return { rc, tam, pdf };
+    }
+    function acha(pdf, marca) {
+        const m = Buffer.from(marca, 'latin1');
+        return pdf.indexOf(m);
+    }
+    /* o selo de Caelum: streams das Forms → N=2^8, Z_65537, raiz 3^256 — tex.c §X15 */
+    function espectro(pdf) {
+        const A = new Array(256).fill(0);
+        const marca = Buffer.from('/Type/XObject/Subtype/Form', 'latin1');
+        const ini = Buffer.from('stream\n', 'latin1');
+        const fim = Buffer.from('endstream', 'latin1');
+        let q = 0;
+        while (q < pdf.length) {
+            const p = pdf.indexOf(marca, q); if (p < 0) break;
+            const a = pdf.indexOf(ini, p); if (a < 0) break;
+            const b = pdf.indexOf(fim, a + 7); if (b < 0) break;
+            let k = 0;
+            for (let i = a + 7; i < b; i++) { A[k & 255] = (A[k & 255] + pdf[i]) % 65537; k++; }
+            q = b + 9;
+        }
+        let raiz = 1, b3 = 3, e3 = 256;
+        while (e3 > 0) { if (e3 & 1) raiz = raiz * b3 % 65537; b3 = b3 * b3 % 65537; e3 >>= 1; }
+        const S = new Array(256);
+        for (let j = 0; j < 256; j++) {
+            let acc = 0, w = 1, passo = 1, e4 = j, b4 = raiz;
+            while (e4 > 0) { if (e4 & 1) passo = passo * b4 % 65537; b4 = b4 * b4 % 65537; e4 >>= 1; }
+            for (let t = 0; t < 256; t++) { acc = (acc + A[t] * w) % 65537; w = w * passo % 65537; }
+            S[j] = acc;
+        }
+        return S;
+    }
+    function leSelo(pdf) {
+        const p = acha(pdf, '/Type/AssinaturaOito');
+        if (p < 0) return null;
+        const a = pdf.indexOf(0x5b, p); /* '[' */
+        if (a < 0) return null;
+        const SW = [];
+        let w = a + 1;
+        while (w < pdf.length && pdf[w] !== 0x5d && SW.length < 256) {
+            while (w < pdf.length && pdf[w] === 0x20) w++;
+            if (pdf[w] === 0x5d) break;
+            let u = 0;
+            while (w < pdf.length && pdf[w] >= 0x30 && pdf[w] <= 0x39) { u = u * 10 + (pdf[w] - 0x30); w++; }
+            SW.push(u);
+        }
+        return SW;
+    }
+    function leSemente(pdf) {
+        const p = acha(pdf, '/Type/SementeEstrela');
+        if (p < 0) return null;
+        const v = [];
+        for (let w = p + 20; w < pdf.length && v.length < 4; w++) {
+            if (pdf[w] >= 0x30 && pdf[w] <= 0x39) {
+                let u = 0;
+                while (w < pdf.length && pdf[w] >= 0x30 && pdf[w] <= 0x39) { u = u * 10 + (pdf[w] - 0x30); w++; }
+                v.push(u);
+            }
+            if (pdf[w] === 0x3e) break; /* '>' */
+        }
+        return v;
+    }
+
+    const ALONZO =
+        '\\documentclass{article}\n\\begin{document}\n' +
+        '\\[ \\left(\\frac{a^{b^{c}}}{x}\\right) \\qquad' +
+        ' \\boxed{\\ \\sigma\\,\\sigma = -1\\ } \\qquad' +
+        ' \\bigl(\\begin{smallmatrix}0&b\\\\-b&0\\end{smallmatrix}\\bigr) \\]\n' +
+        '\\end{document}\n';
+    const CAELUM =
+        '\\documentclass{article}\n\\begin{document}\n' +
+        'O esqueleto assina: $x^{2}$ e $\\frac{a}{b}$ e texto.\n' +
+        '\\end{document}\n';
+
+    let trap = '';
+    let aRc = -1, aTam = 0, aEof = false, aSem = null, aForms = 0;
+    let cRc = -1, cTam = 0, cEof = false, cSelo = null, cBate = false;
+    try {
+        for (const f of man.ficheiros) poeFich(f, fs.readFileSync(path.join(RAIZ, f)));
+        poeFich('alonzo.tex', Buffer.from(ALONZO, 'latin1'));
+        poeFich('caelum.tex', Buffer.from(CAELUM, 'latin1'));
+        E.inicia_wasm();
+
+        const A = compoe('alonzo.tex');
+        aRc = A.rc; aTam = A.tam;
+        aEof = A.pdf.includes(Buffer.from('%%EOF'));
+        aSem = leSemente(A.pdf);
+        aForms = (A.pdf.toString('latin1').match(/\/Subtype\/Form/g) || []).length;
+
+        const C = compoe('caelum.tex');
+        cRc = C.rc; cTam = C.tam;
+        cEof = C.pdf.includes(Buffer.from('%%EOF'));
+        cSelo = leSelo(C.pdf);
+        if (cSelo && cSelo.length === 256) {
+            const S = espectro(C.pdf);
+            cBate = S.every((v, i) => v === cSelo[i]);
+        }
+    } catch (e) { trap = String(e && e.message || e).slice(0, 200); }
+
+    console.log(`   §T5 Alonzo rc=${aRc} bytes=${aTam} Forms=${aForms} semente=${aSem && aSem.join(',')} eof=${aEof}${trap ? ' trap=' + trap : ''}`);
+    ok('§T5 Alonzo (a composição): giros, boxed, smallmatrix — /SementeEstrela 3,17,20,4 e %%EOF',
+       !trap && aRc === 0 && aEof && aForms > 0 && aSem && aSem[0] === 3 && aSem[1] === 17 && aSem[2] === 20 && aSem[3] === 4);
+
+    console.log(`   §T6 Caelum rc=${cRc} bytes=${cTam} selo=${cSelo && cSelo.length} bate=${cBate} eof=${cEof}`);
+    ok('§T6 Caelum (o esqueleto): /AssinaturaOito 256, dois caminhos batem — o que Alonzo compõe, Caelum assina',
+       !trap && cRc === 0 && cEof && cSelo && cSelo.length === 256 && cBate);
+}
+
 console.log('\n==========================================================================');
 if (!falhas) {
-    console.log('  O compositor LaTeX->PDF sobe INTEIRO para wasm e o modulo e valido — 157');
-    console.log('  funcoes, sem emscripten. C e backend; a ISA/wasm e a roupa do navegador.');
+    console.log('  O compositor LaTeX->PDF sobe INTEIRO para wasm e o modulo e valido.');
+    console.log('  Sem emscripten. C e backend; a ISA/wasm e a roupa do navegador.');
     console.log('');
-    console.log('  E a medida esta certa: nao ha MONTE de 12 MB nem realloc que dobra. O disco');
-    console.log('  cresce CONTADO por memory.grow — o mmap do disco.h — e o que se escreve nele');
-    console.log('  le-se de volta. A composicao de ponta-a-ponta pede o ambiente completo nos');
-    console.log('  slots (fontes, estilo, classe), que e o que o app monta — o passo seguinte.');
+    console.log('  A composição é o corpo de Alonzo; o selo é o de Caelum.');
+    console.log('  Disco contado por memory.grow, e o que se escreve lê-se de volta.');
 } else console.log(`  FALHOU: ${falhas}`);
 console.log(`#TOTAL ${feitas} ${falhas}`);
 process.exit(falhas ? 1 : 0);

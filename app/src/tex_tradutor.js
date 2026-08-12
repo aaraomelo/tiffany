@@ -5,8 +5,9 @@
 // só serve ficheiros, e a composição É no browser.
 //
 // Porta medida em tests/tex_wasm.js: poe_ficheiro / inicia_wasm / compila_ficheiro
-// / end_saida / tam_saida / DISCO. O ambiente (fontes, estilo, classe) vem de
-// /corpo/, a lista medida por tools/corpo.sh.
+// / limpa_saida / end_saida / tam_saida / DISCO. O ambiente (fontes, estilo, classe)
+// vem de /corpo/, a lista medida por tools/corpo.sh. O que Alonzo compõe, Caelum
+// assina: /SementeEstrela e /AssinaturaOito viajam com o PDF (§T5–T6).
 import manifesto from './corpo.json'
 
 const DOCS = {
@@ -96,6 +97,13 @@ export async function comporDoc (id) {
   const out = memView(E).slice(addr, addr + n)
   if (out[0] !== 0x25 || out[1] !== 0x50) // %P
     throw new Error('a saída não começa por %PDF')
+  const latin = new TextDecoder('latin1').decode(out)
+  if (!latin.includes('%%EOF'))
+    throw new Error('a saída não fecha com %%EOF')
+  if (!latin.includes('/Type/SementeEstrela'))
+    throw new Error('Alonzo: falta /SementeEstrela — a composição não viajou')
+  if (!latin.includes('/Type/AssinaturaOito'))
+    throw new Error('Caelum: falta /AssinaturaOito — o esqueleto não assinou')
   return { bytes: out, ms: Math.round(performance.now() - t0), fonte }
 }
 

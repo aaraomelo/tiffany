@@ -621,8 +621,12 @@ int sscanf(char *s, char *f, ...){
 
 #define MAX_FICH   64
 #define MAX_AGULHA 16
+#define NOME_MAX   160
 
-char FICH_NOME[MAX_FICH][160];
+/* 1D: o traduz sobe vectores de uma dimensão (tools/traduz.c). char a[N][160]
+ * não indexa — os nomes não gravam e o fopen falha. É o mesmo armazenamento,
+ * plano: FICH_NOME[i * NOME_MAX]. */
+char FICH_NOME[MAX_FICH * NOME_MAX];
 int  FICH_END[MAX_FICH];
 int  FICH_TAM[MAX_FICH];
 int  N_FICH;
@@ -643,13 +647,27 @@ int   SAIDA_N;
 
 int poe_ficheiro(char *nome, char *dados, int n){
     if(N_FICH >= MAX_FICH) return 0;
-    strcpy(FICH_NOME[N_FICH], nome);
+    strcpy(FICH_NOME + N_FICH * NOME_MAX, nome);
     FICH_END[N_FICH] = (int)dados;
     FICH_TAM[N_FICH] = n;
     N_FICH = N_FICH + 1;
     return N_FICH;
 }
 int end_saida(void){ return (int)(long)SAIDA; }
+/* bytes do slot já posto pelo host — a carta lê sem segunda cópia (malloc). */
+char *ficheiro_bytes(int h){
+    if(h <= 0 || h >= MAX_AGULHA) return 0;
+    int f = AG_FICH[h] - 1;
+    if(f < 0) return 0;
+    return (char*)(FICH_END[f] + AG_POS[h]);
+}
+int ficheiro_tam(int h){
+    if(h <= 0 || h >= MAX_AGULHA) return 0;
+    int f = AG_FICH[h] - 1;
+    if(f < 0) return 0;
+    return FICH_TAM[f] - AG_POS[h];
+}
+
 int tam_saida(void){ return SAIDA_N; }
 void limpa_saida(void){ SAIDA_N = 0; }
 
@@ -657,13 +675,30 @@ void limpa_saida(void){ SAIDA_N = 0; }
  * o mesmo. Compara-se pelo fim, que é a parte que identifica. */
 static int acha_ficheiro(char *nome){
     int ln = strlen(nome);
+    if(ln <= 0) return -1;
     for(int i = 0; i < N_FICH; i++){
-        int li = strlen(FICH_NOME[i]);
-        if(li == ln && strcmp(FICH_NOME[i], nome) == 0) return i;
-        if(li < ln && strcmp(FICH_NOME[i], nome + (ln - li)) == 0) return i;
-        if(ln < li && strcmp(FICH_NOME[i] + (li - ln), nome) == 0) return i;
+        char *fn = FICH_NOME + i * NOME_MAX;
+        int li = strlen(fn);
+        if(li == 0) continue;
+        if(li == ln && strcmp(fn, nome) == 0) return i;
+        if(li < ln && strcmp(fn, nome + (ln - li)) == 0) return i;
+        if(ln < li && strcmp(fn + (li - ln), nome) == 0) return i;
     }
     return -1;
+}
+
+/* a carta lê pelo NOME: o host já pôs os bytes, não há agulha a guardar.
+ * fopen/fclose é streaming; um blob que já está no slot só se aponta.
+ * Duas funções, sem ponteiro de saída — o traduz não grava `int*` de local. */
+char *ficheiro_end_nome(char *nome){
+    int f = acha_ficheiro(nome);
+    if(f < 0) return 0;
+    return (char*)FICH_END[f];
+}
+int ficheiro_tam_nome(char *nome){
+    int f = acha_ficheiro(nome);
+    if(f < 0) return 0;
+    return FICH_TAM[f];
 }
 
 int fopen(char *nome, char *modo){
@@ -738,7 +773,8 @@ static int saida_cabe(int precisa){
 
 int fwrite(char *d, int tam, int quantos, int h){
     int n = tam * quantos;
-    if(h <= 0 || n <= 0) return 0;
+    if(h <= 0 || h >= MAX_AGULHA || n <= 0) return 0;
+    if(!AG_ESC[h]) return tam > 0 ? quantos : 0;   /* stdout sem slot: não toca na SAIDA */
     if(!saida_cabe(AG_POS[h] + n)) n = SAIDA_CAP - AG_POS[h];
     if(n <= 0) return 0;
     for(int i = 0; i < n; i++) SAIDA[AG_POS[h] + i] = d[i];
@@ -748,7 +784,8 @@ int fwrite(char *d, int tam, int quantos, int h){
 }
 
 int fputc(int c, int h){
-    if(h <= 0) return -1;
+    if(h <= 0 || h >= MAX_AGULHA) return -1;
+    if(!AG_ESC[h]) return c & 255;                 /* stdout sem slot: descarta */
     if(!saida_cabe(AG_POS[h] + 1)) return -1;
     SAIDA[AG_POS[h]] = c;
     AG_POS[h] = AG_POS[h] + 1;
@@ -828,7 +865,7 @@ char *malloc(long n){
     return p;
 }
 void free(char *p){ }
-char *disco_u8(char *nome, long n){ return malloc(n); }
+char *disco_u8(char *nome, long n){ (void)nome; return malloc(n); }
 
 /* os três que faltavam ao tex.c — todos sobre o que já há */
 int fputs(char *s, int h){ return fwrite(s, 1, strlen(s), h); }

@@ -38,6 +38,16 @@ static long tabela(const Buf *b, const char *tag){
     return 0;
 }
 
+#ifdef TEX_COM_LIBC_WASM
+/* o host já pôs a carta no slot — aponta pelo nome, sem agulha (corpo-estelar §estrela) */
+char *ficheiro_end_nome(char *nome);
+int ficheiro_tam_nome(char *nome);
+static int ttf_abre(Ttf *t, const char *nome){
+    char *ja = ficheiro_end_nome((char*)nome);
+    int tn = ficheiro_tam_nome((char*)nome);
+    if(!ja || tn <= 0) return 0;
+    t->b.d = (unsigned char*)ja; t->b.n = tn;
+#else
 static int ttf_abre(Ttf *t, const char *nome){
     FILE *f = fopen(nome, "rb");
     if(!f) return 0;
@@ -45,6 +55,7 @@ static int ttf_abre(Ttf *t, const char *nome){
     t->b.d = malloc((size_t)t->b.n);
     if(!t->b.d || fread(t->b.d, 1, (size_t)t->b.n, f) != (size_t)t->b.n){ fclose(f); return 0; }
     fclose(f);
+#endif
     t->head = tabela(&t->b,"head"); t->hhea = tabela(&t->b,"hhea");
     t->hmtx = tabela(&t->b,"hmtx"); t->cmap = tabela(&t->b,"cmap");
     t->loca = tabela(&t->b,"loca"); t->glyf = tabela(&t->b,"glyf");
@@ -107,6 +118,7 @@ typedef struct { double x, y; int onda; } Pt;      /* onda=1 -> ponto da curva; 
 
 #define MAXPT 4096
 typedef struct { Pt p[MAXPT]; int n; int fim[64]; int nc; } Contorno;
+static unsigned char TTF_FL[MAXPT];   /* flags da glyf — fora do quadro (o traduz empilha `char[MAXPT]`) */
 
 /* o ponto do contorno lido na régua INTEIRA da fonte: o `255` da CFF traz fracção
  * 16.16 e o `div` produz razões — truncar amputava. UMA divisão arredondada, a do
@@ -132,22 +144,21 @@ static int ttf_contorno(const Ttf *t, int g, Contorno *c){
     p += 2L*nc;
     p += 2 + u16(&t->b, p);                          /* as instruções do hinting, saltadas */
     if(npt > MAXPT) return 0;
-    unsigned char fl[MAXPT];
     for(int i = 0; i < npt; ){
         unsigned char f = u8(&t->b, p++);
-        fl[i++] = f;
-        if(f & 8){ int r = u8(&t->b, p++); while(r-- && i < npt) fl[i++] = f; }
+        TTF_FL[i++] = f;
+        if(f & 8){ int r = u8(&t->b, p++); while(r-- && i < npt) TTF_FL[i++] = f; }
     }
     double x = 0;
     for(int i = 0; i < npt; i++){
-        if(fl[i] & 2){ int d = u8(&t->b, p++); x += (fl[i] & 16) ? d : -d; }
-        else if(!(fl[i] & 16)){ x += s16(&t->b, p); p += 2; }
-        c->p[i].x = x; c->p[i].onda = (fl[i] & 1) ? 1 : 0;
+        if(TTF_FL[i] & 2){ int d = u8(&t->b, p++); x += (TTF_FL[i] & 16) ? d : -d; }
+        else if(!(TTF_FL[i] & 16)){ x += s16(&t->b, p); p += 2; }
+        c->p[i].x = x; c->p[i].onda = (TTF_FL[i] & 1) ? 1 : 0;
     }
     double y = 0;
     for(int i = 0; i < npt; i++){
-        if(fl[i] & 4){ int d = u8(&t->b, p++); y += (fl[i] & 32) ? d : -d; }
-        else if(!(fl[i] & 32)){ y += s16(&t->b, p); p += 2; }
+        if(TTF_FL[i] & 4){ int d = u8(&t->b, p++); y += (TTF_FL[i] & 32) ? d : -d; }
+        else if(!(TTF_FL[i] & 32)){ y += s16(&t->b, p); p += 2; }
         c->p[i].y = y;
     }
     c->n = npt;
@@ -227,7 +238,124 @@ static void cff_curva(CffMaq *m, double x1, double y1, double x2, double y2, dou
     cff_ponto(m->c, x1, y1, 0); cff_ponto(m->c, x2, y2, 0); cff_ponto(m->c, x3, y3, 1);
     m->x = x3; m->y = y3;
 }
+/* operadores Type2: cada um é uma frase. O despacho em cff_corre é if/else —
+ * catalogo.tex «o switch é uma cadeia»; tools/traduz.c desce_corpo (wasm-c) reconstitui
+ * if/else, nunca switch; a queda de case recusa-se (tests/traduz_volta.js §V5g). */
+static void cff_rlineto(CffMaq *m, double *st, int *ns){
+    int k = 0;
+    while(k + 1 < *ns){ m->x += st[k]; m->y += st[k+1]; cff_ponto(m->c, m->x, m->y, 1); k = k + 2; }
+    *ns = 0;
+}
+static void cff_hvlineto(CffMaq *m, double *st, int *ns, int h){
+    int k = 0;
+    while(k < *ns){ if(h) m->x += st[k]; else m->y += st[k]; cff_ponto(m->c, m->x, m->y, 1); h = !h; k = k + 1; }
+    *ns = 0;
+}
+static void cff_rrc(CffMaq *m, double *st, int *ns){
+    int k = 0;
+    while(k + 5 < *ns){
+        cff_curva(m, m->x + st[k], m->y + st[k+1],
+                     m->x + st[k] + st[k+2], m->y + st[k+1] + st[k+3],
+                     m->x + st[k] + st[k+2] + st[k+4], m->y + st[k+1] + st[k+3] + st[k+5]);
+        k = k + 6;
+    }
+    *ns = 0;
+}
+static void cff_vv(CffMaq *m, double *st, int *ns){
+    int k = 0; double d1 = 0;
+    if(*ns & 1){ d1 = st[0]; k = 1; }
+    while(k + 3 < *ns){
+        double x1 = m->x + d1, y1 = m->y + st[k];
+        double x2 = x1 + st[k+1], y2 = y1 + st[k+2];
+        cff_curva(m, x1, y1, x2, y2, x2, y2 + st[k+3]);
+        d1 = 0; k = k + 4;
+    }
+    *ns = 0;
+}
+static void cff_hh(CffMaq *m, double *st, int *ns){
+    int k = 0; double d1 = 0;
+    if(*ns & 1){ d1 = st[0]; k = 1; }
+    while(k + 3 < *ns){
+        double x1 = m->x + st[k], y1 = m->y + d1;
+        double x2 = x1 + st[k+1], y2 = y1 + st[k+2];
+        cff_curva(m, x1, y1, x2, y2, x2 + st[k+3], y2);
+        d1 = 0; k = k + 4;
+    }
+    *ns = 0;
+}
+static void cff_vhhv(CffMaq *m, double *st, int *ns, int h){
+    int k = 0;
+    while(k + 3 < *ns){
+        int resto = *ns - k;
+        double x1, y1, x2, y2, x3, y3;
+        if(h){ x1 = m->x + st[k]; y1 = m->y; }
+        else { x1 = m->x; y1 = m->y + st[k]; }
+        x2 = x1 + st[k+1]; y2 = y1 + st[k+2];
+        if(h){ y3 = y2 + st[k+3]; x3 = (resto == 5) ? x2 + st[k+4] : x2; }
+        else { x3 = x2 + st[k+3]; y3 = (resto == 5) ? y2 + st[k+4] : y2; }
+        cff_curva(m, x1, y1, x2, y2, x3, y3);
+        k += (resto == 5) ? 5 : 4; h = !h;
+    }
+    *ns = 0;
+}
+static void cff_rcl(CffMaq *m, double *st, int *ns){
+    int k = 0;
+    while(k + 5 < *ns - 2){
+        cff_curva(m, m->x + st[k], m->y + st[k+1],
+                     m->x + st[k] + st[k+2], m->y + st[k+1] + st[k+3],
+                     m->x + st[k] + st[k+2] + st[k+4], m->y + st[k+1] + st[k+3] + st[k+5]);
+        k = k + 6;
+    }
+    if(k + 1 < *ns){ m->x += st[k]; m->y += st[k+1]; cff_ponto(m->c, m->x, m->y, 1); }
+    *ns = 0;
+}
+static void cff_rlc(CffMaq *m, double *st, int *ns){
+    int k = 0;
+    while(k + 1 < *ns - 6){ m->x += st[k]; m->y += st[k+1]; cff_ponto(m->c, m->x, m->y, 1); k = k + 2; }
+    if(k + 5 < *ns)
+        cff_curva(m, m->x + st[k], m->y + st[k+1],
+                     m->x + st[k] + st[k+2], m->y + st[k+1] + st[k+3],
+                     m->x + st[k] + st[k+2] + st[k+4], m->y + st[k+1] + st[k+3] + st[k+5]);
+    *ns = 0;
+}
+static void cff_esc(CffMaq *m, double *st, int *ns, unsigned o2){
+    double a1[16]; int n2 = *ns; int k;
+    for(k = 0; k < n2 && k < 16; k++) a1[k] = st[k];
+    if(o2 == 35 && n2 >= 13){
+        cff_curva(m, m->x+a1[0], m->y+a1[1], m->x+a1[0]+a1[2], m->y+a1[1]+a1[3],
+                     m->x+a1[0]+a1[2]+a1[4], m->y+a1[1]+a1[3]+a1[5]);
+        cff_curva(m, m->x+a1[6], m->y+a1[7], m->x+a1[6]+a1[8], m->y+a1[7]+a1[9],
+                     m->x+a1[6]+a1[8]+a1[10], m->y+a1[7]+a1[9]+a1[11]);
+    } else if(o2 == 34 && n2 >= 7){
+        double y0 = m->y;
+        cff_curva(m, m->x+a1[0], m->y, m->x+a1[0]+a1[1], m->y+a1[2],
+                     m->x+a1[0]+a1[1]+a1[3], m->y+a1[2]);
+        cff_curva(m, m->x+a1[4], m->y, m->x+a1[4]+a1[5], y0,
+                     m->x+a1[4]+a1[5]+a1[6], y0);
+    } else if(o2 == 36 && n2 >= 9){
+        double y0 = m->y;
+        cff_curva(m, m->x+a1[0], m->y+a1[1], m->x+a1[0]+a1[2], m->y+a1[1]+a1[3],
+                     m->x+a1[0]+a1[2]+a1[4], m->y+a1[1]+a1[3]);
+        cff_curva(m, m->x+a1[5], m->y, m->x+a1[5]+a1[6], m->y+a1[7],
+                     m->x+a1[5]+a1[6]+a1[8], y0);
+    } else if(o2 == 37 && n2 >= 11){
+        double x0 = m->x, y0 = m->y;
+        double dx = a1[0]+a1[2]+a1[4]+a1[6]+a1[8], dy = a1[1]+a1[3]+a1[5]+a1[7]+a1[9];
+        cff_curva(m, m->x+a1[0], m->y+a1[1], m->x+a1[0]+a1[2], m->y+a1[1]+a1[3],
+                     m->x+a1[0]+a1[2]+a1[4], m->y+a1[1]+a1[3]+a1[5]);
+        double x2 = m->x+a1[6]+a1[8], y2 = m->y+a1[7]+a1[9];
+        double adx = dx < 0 ? -dx : dx, ady = dy < 0 ? -dy : dy;
+        double x3 = adx > ady ? x2 + a1[10] : x2;
+        double y3 = adx > ady ? y0 : y2 + a1[10];
+        (void)x0;
+        cff_curva(m, m->x+a1[6], m->y+a1[7], x2, y2, x3, y3);
+    }
+    *ns = 0;
+}
 
+/* Type2: a cadeia if/else que o wasm-c já é (catalogo.tex; papers/arquitetura.tex
+ * thm:traduz — br_table não tem forma em C; desce_corpo reconstitui if). Os quatro
+ * switch do tex_core acabam em return; aqui o laço continua, logo não é switch. */
 static int cff_corre(CffMaq *m, long a, long z, double *st, int *ns, int *nstem, int prof){
     if(prof > 10) return 0;
     const Buf *b = m->b;
@@ -244,130 +372,55 @@ static int cff_corre(CffMaq *m, long a, long z, double *st, int *ns, int *nstem,
         }
         if(c == 28){ if(*ns < 48){ st[*ns] = (double)s16(b, p+1); *ns = *ns + 1; } p += 3; continue; }
         p++;
-        switch(c){
-        case 1: case 3: case 18: case 23:            /* stems: contam-se e limpam-se */
-            *nstem += *ns / 2; *ns = 0; break;
-        case 19: case 20:                            /* hintmask: salta os bits */
-            *nstem += *ns / 2; *ns = 0; p += (*nstem + 7) / 8; break;
-        case 21:                                     /* rmoveto */
-            if(*ns > 2){ st[0] = st[*ns-2]; st[1] = st[*ns-1]; }   /* a largura descarta-se */
+        if(c == 1 || c == 3 || c == 18 || c == 23){ *nstem += *ns / 2; *ns = 0; }
+        else if(c == 19 || c == 20){ *nstem += *ns / 2; *ns = 0; p += (*nstem + 7) / 8; }
+        else if(c == 21){
+            if(*ns > 2){ st[0] = st[*ns-2]; st[1] = st[*ns-1]; }
             cff_fecha(m); m->x += st[0]; m->y += st[1];
-            cff_ponto(m->c, m->x, m->y, 1); m->aberto = 1; *ns = 0; break;
-        case 22:                                     /* hmoveto */
+            cff_ponto(m->c, m->x, m->y, 1); m->aberto = 1; *ns = 0;
+        }
+        else if(c == 22){
             if(*ns > 1) st[0] = st[*ns-1];
             cff_fecha(m); m->x += st[0];
-            cff_ponto(m->c, m->x, m->y, 1); m->aberto = 1; *ns = 0; break;
-        case 4:                                      /* vmoveto */
+            cff_ponto(m->c, m->x, m->y, 1); m->aberto = 1; *ns = 0;
+        }
+        else if(c == 4){
             if(*ns > 1) st[0] = st[*ns-1];
             cff_fecha(m); m->y += st[0];
-            cff_ponto(m->c, m->x, m->y, 1); m->aberto = 1; *ns = 0; break;
-        case 5:                                      /* rlineto */
-            for(int k = 0; k + 1 < *ns; k += 2){ m->x += st[k]; m->y += st[k+1]; cff_ponto(m->c, m->x, m->y, 1); }
-            *ns = 0; break;
-        case 6: case 7: {                            /* h/vlineto alternado */
-            int h = (c == 6);
-            for(int k = 0; k < *ns; k++){ if(h) m->x += st[k]; else m->y += st[k];
-                                          cff_ponto(m->c, m->x, m->y, 1); h = !h; }
-            *ns = 0; break; }
-        case 8:                                      /* rrcurveto */
-            for(int k = 0; k + 5 < *ns; k += 6)
-                cff_curva(m, m->x + st[k], m->y + st[k+1],
-                             m->x + st[k] + st[k+2], m->y + st[k+1] + st[k+3],
-                             m->x + st[k] + st[k+2] + st[k+4], m->y + st[k+1] + st[k+3] + st[k+5]);
-            *ns = 0; break;
-        case 24: {                                   /* rcurveline */
-            int k = 0;
-            for(; k + 5 < *ns - 2; k += 6)
-                cff_curva(m, m->x + st[k], m->y + st[k+1],
-                             m->x + st[k] + st[k+2], m->y + st[k+1] + st[k+3],
-                             m->x + st[k] + st[k+2] + st[k+4], m->y + st[k+1] + st[k+3] + st[k+5]);
-            if(k + 1 < *ns){ m->x += st[k]; m->y += st[k+1]; cff_ponto(m->c, m->x, m->y, 1); }
-            *ns = 0; break; }
-        case 25: {                                   /* rlinecurve */
-            int k = 0;
-            for(; k + 1 < *ns - 6; k += 2){ m->x += st[k]; m->y += st[k+1]; cff_ponto(m->c, m->x, m->y, 1); }
-            if(k + 5 < *ns)
-                cff_curva(m, m->x + st[k], m->y + st[k+1],
-                             m->x + st[k] + st[k+2], m->y + st[k+1] + st[k+3],
-                             m->x + st[k] + st[k+2] + st[k+4], m->y + st[k+1] + st[k+3] + st[k+5]);
-            *ns = 0; break; }
-        case 26: case 27: {                          /* vv/hhcurveto */
-            int k = 0; double d1 = 0;
-            if(*ns & 1){ d1 = st[0]; k = 1; }
-            for(; k + 3 < *ns; k += 4){
-                double x1, y1;
-                if(c == 26){ x1 = m->x + d1; y1 = m->y + st[k]; }
-                else       { x1 = m->x + st[k]; y1 = m->y + d1; }
-                double x2 = x1 + st[k+1], y2 = y1 + st[k+2];
-                double x3, y3;
-                if(c == 26){ x3 = x2; y3 = y2 + st[k+3]; }
-                else       { x3 = x2 + st[k+3]; y3 = y2; }
-                cff_curva(m, x1, y1, x2, y2, x3, y3);
-                d1 = 0;
-            }
-            *ns = 0; break; }
-        case 30: case 31: {                          /* vh/hvcurveto alternado */
-            int h = (c == 31);
-            int k = 0;
-            while(k + 3 < *ns){
-                int resto = *ns - k;
-                double x1, y1, x2, y2, x3, y3;
-                if(h){ x1 = m->x + st[k]; y1 = m->y; }
-                else { x1 = m->x; y1 = m->y + st[k]; }
-                x2 = x1 + st[k+1]; y2 = y1 + st[k+2];
-                if(h){ y3 = y2 + st[k+3]; x3 = (resto == 5) ? x2 + st[k+4] : x2; }
-                else { x3 = x2 + st[k+3]; y3 = (resto == 5) ? y2 + st[k+4] : y2; }
-                cff_curva(m, x1, y1, x2, y2, x3, y3);
-                k += (resto == 5) ? 5 : 4; h = !h;
-            }
-            *ns = 0; break; }
-        case 10: case 29: {                          /* callsubr / callgsubr */
-            long idx = m->ls, na = 0, nz = 0;
-            if(c == 29) idx = m->gs;
-            if(!idx || *ns < 1) { *ns = 0; break; }
-            int si; *ns = *ns - 1; si = (int)st[*ns] + cff_bias(cff_index_n(b, idx));
-            na = cff_index_item(b, idx, si, &nz);
-            if(na && !cff_corre(m, na, nz, st, ns, nstem, prof + 1)) return 0;
-            break; }
-        case 11: return 1;                           /* return */
-        case 14: cff_fecha(m); return 1;             /* endchar */
-        case 12: {                                   /* escape: os flex viram duas cúbicas */
-            unsigned o2 = u8(b, p); p++;
-            double a1[16]; int n2 = *ns;
-            for(int k = 0; k < n2 && k < 16; k++) a1[k] = st[k];
-            if(o2 == 35 && n2 >= 13){                /* flex */
-                cff_curva(m, m->x+a1[0], m->y+a1[1], m->x+a1[0]+a1[2], m->y+a1[1]+a1[3],
-                             m->x+a1[0]+a1[2]+a1[4], m->y+a1[1]+a1[3]+a1[5]);
-                cff_curva(m, m->x+a1[6], m->y+a1[7], m->x+a1[6]+a1[8], m->y+a1[7]+a1[9],
-                             m->x+a1[6]+a1[8]+a1[10], m->y+a1[7]+a1[9]+a1[11]);
-            } else if(o2 == 34 && n2 >= 7){          /* hflex */
-                double y0 = m->y;
-                cff_curva(m, m->x+a1[0], m->y, m->x+a1[0]+a1[1], m->y+a1[2],
-                             m->x+a1[0]+a1[1]+a1[3], m->y+a1[2]);
-                cff_curva(m, m->x+a1[4], m->y, m->x+a1[4]+a1[5], y0,
-                             m->x+a1[4]+a1[5]+a1[6], y0);
-            } else if(o2 == 36 && n2 >= 9){          /* hflex1 */
-                double y0 = m->y;
-                cff_curva(m, m->x+a1[0], m->y+a1[1], m->x+a1[0]+a1[2], m->y+a1[1]+a1[3],
-                             m->x+a1[0]+a1[2]+a1[4], m->y+a1[1]+a1[3]);
-                cff_curva(m, m->x+a1[5], m->y, m->x+a1[5]+a1[6], m->y+a1[7],
-                             m->x+a1[5]+a1[6]+a1[8], y0);
-            } else if(o2 == 37 && n2 >= 11){         /* flex1 */
-                double x0 = m->x, y0 = m->y;
-                double dx = a1[0]+a1[2]+a1[4]+a1[6]+a1[8], dy = a1[1]+a1[3]+a1[5]+a1[7]+a1[9];
-                cff_curva(m, m->x+a1[0], m->y+a1[1], m->x+a1[0]+a1[2], m->y+a1[1]+a1[3],
-                             m->x+a1[0]+a1[2]+a1[4], m->y+a1[1]+a1[3]+a1[5]);
-                double x1 = m->x+a1[6], y1 = m->y+a1[7], x2 = x1+a1[8], y2 = y1+a1[9];
-                double x3, y3;
-                if(dx > 0 ? dx : -dx > (dy > 0 ? dy : -dy)){ x3 = x0 + dx > 0 ? x2 + a1[10] : x2 + a1[10]; y3 = y0; }
-                x3 = ((dx<0?-dx:dx) > (dy<0?-dy:dy)) ? x2 + a1[10] : x2;
-                y3 = ((dx<0?-dx:dx) > (dy<0?-dy:dy)) ? y0 : y2 + a1[10];
-                (void)x1; (void)y1;
-                cff_curva(m, m->x+a1[6], m->y+a1[7], x2, y2, x3, y3);
-            }
-            *ns = 0; break; }
-        default: *ns = 0; break;
+            cff_ponto(m->c, m->x, m->y, 1); m->aberto = 1; *ns = 0;
         }
+        else if(c == 5) cff_rlineto(m, st, ns);
+        else if(c == 6) cff_hvlineto(m, st, ns, 1);
+        else if(c == 7) cff_hvlineto(m, st, ns, 0);
+        else if(c == 8) cff_rrc(m, st, ns);
+        else if(c == 24) cff_rcl(m, st, ns);
+        else if(c == 25) cff_rlc(m, st, ns);
+        else if(c == 26) cff_vv(m, st, ns);
+        else if(c == 27) cff_hh(m, st, ns);
+        else if(c == 30) cff_vhhv(m, st, ns, 0);
+        else if(c == 31) cff_vhhv(m, st, ns, 1);
+        else if(c == 10){
+            if(m->ls && *ns >= 1){
+                *ns = *ns - 1;
+                { int si = (int)st[*ns] + cff_bias(cff_index_n(b, m->ls));
+                  long na = 0, nz = 0;
+                  na = cff_index_item(b, m->ls, si, &nz);
+                  if(na && !cff_corre(m, na, nz, st, ns, nstem, prof + 1)) return 0; }
+            } else *ns = 0;
+        }
+        else if(c == 29){
+            if(m->gs && *ns >= 1){
+                *ns = *ns - 1;
+                { int si = (int)st[*ns] + cff_bias(cff_index_n(b, m->gs));
+                  long na = 0, nz = 0;
+                  na = cff_index_item(b, m->gs, si, &nz);
+                  if(na && !cff_corre(m, na, nz, st, ns, nstem, prof + 1)) return 0; }
+            } else *ns = 0;
+        }
+        else if(c == 11) return 1;
+        else if(c == 14){ cff_fecha(m); return 1; }
+        else if(c == 12){ unsigned o2 = u8(b, p); p++; cff_esc(m, st, ns, o2); }
+        else *ns = 0;
     }
     return 1;
 }
@@ -425,25 +478,27 @@ static int cff_contorno(const Ttf *t, int g, Contorno *c){
  *
  * Aqui estão os desenhos que o gabarito usa, um por corpo, e `spline_por_corpo` escolhe o
  * mais próximo. É a mesma leitura --- o que muda é qual ficheiro se abre. */
-typedef struct { double corpo; const char *rm, *bx, *ti, *cc, *tt; } Desenho;
+/* corpo em MANTISSA (10^-3 pt): o traduz não alinha `double` no const, e a estrela
+ * já é discreta — um float aqui era a segunda régua. */
+typedef struct { long corpo; const char *rm, *bx, *ti, *cc, *tt; } Desenho;
 static const Desenho DESENHOS[] = {
-    {  8.0, "d-rm0800.otf", "d-bx1000.otf", "d-ti1000.otf", "d-cc1000.otf", "d-tt1000.otf" },
-    { 10.0, "d-rm1000.otf", "d-bx1000.otf", "d-ti1000.otf", "d-cc1000.otf", "d-tt1000.otf" },
-    { 10.95,"d-rm1095.otf", "d-bx1000.otf", "d-ti1000.otf", "d-cc1000.otf", "d-tt1095.otf" },
-    { 12.0, "d-rm1200.otf", "d-bx1200.otf", "d-ti1200.otf", "d-cc1200.otf", "d-tt1200.otf" },
-    { 14.4, "d-rm1200.otf", "d-bx1440.otf", "d-ti1440.otf", "d-cc1200.otf", "d-tt1200.otf" },
-    { 17.28,"d-rm1200.otf", "d-bx1728.otf", "d-ti1440.otf", "d-cc1728.otf", "d-tt1200.otf" },
-    { 24.88,"d-rm1200.otf", "d-bx2488.otf", "d-ti1440.otf", "d-cc1728.otf", "d-tt1200.otf" },
+    {  8000, "d-rm0800.otf", "d-bx1000.otf", "d-ti1000.otf", "d-cc1000.otf", "d-tt1000.otf" },
+    { 10000, "d-rm1000.otf", "d-bx1000.otf", "d-ti1000.otf", "d-cc1000.otf", "d-tt1000.otf" },
+    { 10950, "d-rm1095.otf", "d-bx1000.otf", "d-ti1000.otf", "d-cc1000.otf", "d-tt1095.otf" },
+    { 12000, "d-rm1200.otf", "d-bx1200.otf", "d-ti1200.otf", "d-cc1200.otf", "d-tt1200.otf" },
+    { 14400, "d-rm1200.otf", "d-bx1440.otf", "d-ti1440.otf", "d-cc1200.otf", "d-tt1200.otf" },
+    { 17280, "d-rm1200.otf", "d-bx1728.otf", "d-ti1440.otf", "d-cc1728.otf", "d-tt1200.otf" },
+    { 24880, "d-rm1200.otf", "d-bx2488.otf", "d-ti1440.otf", "d-cc1728.otf", "d-tt1200.otf" },
 };
 #define N_DESENHOS ((int)(sizeof DESENHOS / sizeof DESENHOS[0]))
 
 /* o ficheiro do desenho para este corpo e esta variante (0 rm, 1 bx, 2 ti, 3 cc).
  * O corpo entra como MANTISSA INTEIRA na régua do Tf (10^-3 pt) — o chamador é discreto;
- * a tabela local converte-se uma vez, na leitura. */
+ * a tabela já está nessa régua. */
 static const char *spline_por_corpo(long corpo_m, int variante){
     int melhor = 0; long dmin = 1L << 60;
     for(int i = 0; i < N_DESENHOS; i++){
-        long d = (long)(DESENHOS[i].corpo * 1000 + 0.5) - corpo_m; if(d < 0) d = -d;
+        long d = DESENHOS[i].corpo - corpo_m; if(d < 0) d = -d;
         if(d < dmin){ dmin = d; melhor = i; }
     }
     switch(variante){

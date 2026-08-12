@@ -496,8 +496,10 @@ A pilha inteira reverte exacto: \code{MOVE}, o disco, o tradutor, a ISA, a estac
 --- resíduo zero, medido. O compositor sobe inteiro e instancia. E a composição de \emph{ponta a
 ponta} --- dar um \code{.tex} e obter o PDF no navegador --- pede o \textbf{ambiente completo nos
 slots}: cada fonte é um corpo, e todas as assinaturas têm de estar postas, porque uma em falta é o
-corpo vazio onde a volta parte. É o que o \code{app/} monta, escrevendo nos slots pela porta que o
-\code{motor\_wasm.js} já usa --- e é o passo que liga esta arquitetura ao cliente.
+corpo vazio onde a volta parte. É o que o \code{app/src/tex\_tradutor.js} monta, escrevendo nos
+slots pela porta medida (\code{poe\_ficheiro}, \code{inicia\_wasm}, \code{compila\_ficheiro}) ---
+e o que Alonzo compõe, Caelum assina: \code{/SementeEstrela} e \code{/AssinaturaOito} viajam com
+o PDF (\code{tests/tex\_wasm.js} \S T5--T6).
 
 \smallskip
 \noindent \textbf{Nada disto foi acoplado.} Há um disco; a estrela entre os dois lados

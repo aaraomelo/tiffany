@@ -3,7 +3,7 @@
  * O Aarão: «põe os arquivos que vc precisa no front» · «os .tex têm que ir pro front, é claro».
  *
  * Vão — mas quais são «os que preciso» não é opinião minha. O `tools/corpo.sh` intercepta o
- * `fopen` do tradutor e escreve o que ele foi mesmo buscar para compor os cinco documentos;
+ * `fopen` do tradutor e escreve o que ele foi mesmo buscar para compor os documentos do front;
  * o manifesto é o resultado dessa medição. Uma lista à mão envelhece calada: muda-se um
  * `\fontsize` no estilo, entra um corpo novo que ninguém pôs na lista, e o pedido cai com um
  * 404 que não explica nada.
@@ -17,6 +17,7 @@
  * Por isso a regra é de LISTA e não de padrão. Uma lista negra («recusa /curriculo/») esquece
  * o próximo segredo; uma lista branca só deixa sair o que o tradutor provou precisar.
  *
+ *   §F0  cada .tex que o front compõe (tex_tradutor.js DOCS) está no manifesto
  *   §F1  o manifesto foi medido, e cada ficheiro dele está no disco
  *   §F2  o que o tradutor abre está no manifesto — as duas listas batem
  *   §F3  o portão deixa sair o que está na lista, e devolve o caminho certo
@@ -52,6 +53,17 @@ const mod = { FICHEIROS: null, resolveNoCorpo: null, tipoDe: null };
 new Function('mod', fonte + '\nmod.FICHEIROS=FICHEIROS; mod.resolveNoCorpo=resolveNoCorpo; mod.tipoDe=tipoDe;')(mod);
 const { resolveNoCorpo, tipoDe } = mod;
 
+/* ─── §F0 o que o browser compõe está no manifesto ────────────────────────────────── */
+{
+    const trad = fs.readFileSync(path.join(APP, 'tex_tradutor.js'), 'utf8');
+    const bloco = /const DOCS = \{([^}]+)\}/.exec(trad);
+    const fontes = bloco ? [...bloco[1].matchAll(/:\s*'([^']+\.tex)'/g)].map(x => x[1]) : [];
+    const fora = fontes.filter(f => !LISTA.includes(f));
+    console.log(`   front DOCS: ${fontes.length}; fora do manifesto: ${fora.length}${fora.length ? ' ' + fora.join(' ') : ''}`);
+    ok('§F0 cada .tex que o tex_tradutor.js compõe está no manifesto — o slot existe antes do click',
+       fontes.length >= 8 && fora.length === 0);
+}
+
 /* ─── §F1 o manifesto foi medido, e o que ele nomeia existe ───────────────────────── */
 {
     const faltam = LISTA.filter(f => !fs.existsSync(path.join(RAIZ, f)));
@@ -81,7 +93,7 @@ const { resolveNoCorpo, tipoDe } = mod;
         if (!fs.existsSync(tex)) execFileSync('cc', ['-O2','-std=c99','-I../lib','tex.c','-lm','-o','tex'],
                                               { cwd: path.join(RAIZ, 'tests') });
         const visto = new Set();
-        for (const doc of ['teoria.tex', 'enredo.tex', 'papers/corpo-estelar.tex']) {
+        for (const doc of ['teoria.tex', 'enredo.tex', 'papers/corpo-estelar.tex', 'papers/arquitetura.tex']) {
             const r = require('child_process').spawnSync(tex, [path.join(RAIZ, doc), path.join(espia, 's.pdf')],
                 { cwd: path.join(RAIZ, 'tests'), env: { ...process.env, LD_PRELOAD: path.join(espia, 'e.so') } });
             for (const l of String(r.stderr).split('\n')) {
