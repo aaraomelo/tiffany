@@ -289,35 +289,50 @@ com resíduo $0$ ---, e as duas leis fundamentais (o dual e o bidual) e a progre
 \begin{center}\small
 \begin{tabular}{@{}clll@{}}
 \toprule
- & a lei & o enunciado & fecha em (medidor) \\
+índice & a lei & realização / enunciado & fecha em (medidor) \\
 \midrule
-\textbf{0} & a divisão do zero & $0=(+1)\oplus(-1)$, \ $0\dg=\infty$ & \code{tests/zero.c} \\
-\textbf{1} & o dual & $1\dg=-1$ --- a involução, Poincaré (dim $2$) & \code{tests/bidual.c}, \code{dualsort.c} \\
-\textbf{2} & o bidual & $T\dg=-T$, $K^{**}=K$ --- o centro, YM e $P$\,vs\,$NP$ & \code{tests/transformada.c} \\
-\textbf{3} & o trial & $\{-1,0,+1\}$ --- os três sinais (dim $3$) & \code{tests/estrela.c} \\
-\textbf{4} & a tetral & $T+T^{*}$ --- os tecidos, a torre (dim $4$) & \code{tests/curvatura.c} \\
-\textbf{5} & a pental & $x^2=-1$ --- o bit $i$ (dim $5$) & \code{tests/quantico.c} \\
-\textbf{6} & a hexal & soma $=$ produto --- a interface, o relógio (dim $6$) & Teorema~\ref{thm:estrelaseis} \\
-\textbf{7} & o octonião dual & $\mathbb{H}\times\mathbb{H}^{*}$ --- ligar sem fundir (dim $8$) & \code{tests/circuito\_tradutor.c} \\
+\textbf{0} & a divisão do zero & $0=(+1)\oplus(-1)$; $0\dg=\infty$ (extensão projectiva) & \code{tests/zero.c} \\
+\textbf{1} & o dual & $1\dg=-1$ --- estaca / involução (realização binária) & \code{tests/bidual.c}, \code{dualsort.c} \\
+\textbf{2} & o bidual & $T\dg=-T$ no sector antissimétrico; $K^{**}=K$ & \code{tests/transformada.c} \\
+\textbf{3} & o trial & $\{-1,0,+1\}$ --- os três sinais & \code{tests/estrela.c} \\
+\textbf{4} & a tetral & $T+T^{*}$ --- os tecidos & \code{tests/curvatura.c} \\
+\textbf{5} & a pental & $x^2=-1$ --- o bit $i$ & \code{tests/quantico.c} \\
+\textbf{6} & a hexal & soma $=$ produto --- a interface hexal, o relógio & Teorema~\ref{thm:estrelaseis} \\
+\textbf{7} & o octonião dual & $\mathbb{H}\times\mathbb{H}^{*}$ --- ligar sem fundir & \code{tests/circuito\_tradutor.c} \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-\noindent \textbf{A descida $7\to0$ é a progressão}, e as pontas são os dois nulos: em cima o octonião
-(dim $8$, o último corpo com divisão --- a norma pára em oito, Hurwitz), em baixo a divisão do zero (dim
-$0$, a base). \emph{Não há nona}: não há degrau acima do octonião nem abaixo do zero, e entre eles cada
-dimensão tem a sua --- a Lei~$0$ e a Lei~$7$ são os dois nulos que fecham a torre, e as seis do meio são a
-sua descida. É o fecho, e não precisa de mais.
+\noindent Cada lei é operador $L_n=\operatorname{Ind}^{n}(L_0)$ no anel de
+\emph{índices} $\mathcal L=\mathbb{Z}/8\mathbb{Z}$
+(\(\operatorname{Ind}^{8}=\mathrm{id}_{\mathcal L}\); o período oito é do
+catálogo, não da torre). As representações $\rho_n$ (estaca $\nu$, trial $\tau$,
+bit $i$, tecido $T{+}T^{*}$, relógio, $\mathbb{H}{\times}\mathbb{H}^{*}$)
+fecham $\nu^{2}=\tau^{3}=i^{4}=\mathrm{id}$, e os seus períodos $2,3,4,8$
+geram a interface $6,12,24$ por $\operatorname{lcm}$
+(\emph{corpo de Peano}).
+\[
+\boxed{\text{índice da lei}\neq\text{dimensão da torre}.}
+\]
+
+\noindent \textbf{A descida $7\to0$ é a progressão}, e as pontas são os dois nulos do
+\textbf{catálogo}: em cima a Lei~$7$ (octonião dual; a norma de Hurwitz esgota-se nas
+dimensões de composição $1,2,4,8$), em baixo a Lei~$0$ (índice neutro --- \emph{não}
+dimensão zero da torre, onde $d_0=2$). \emph{Não há nona}: não há índice acima de $7$
+nem abaixo de $0$ no catálogo; a torre $d_k=2^{k+1}$ continua a crescer. É o fecho do
+ciclo das leis, e não precisa de mais.
 
 \smallskip
 \noindent \textbf{E oito é a cardinalidade do \emph{conjunto} das leis, não a da dinâmica --- e é o
 Teorema~\ref{thm:tecidos} que o diz.} O passo dos tecidos, $T_{k+1}=T_k+T_k^{*}$, é a estrela usada como
 \textbf{construtor}, e a torre que ele gera \emph{não tem topo por dentro}: a indução não pára --- a régua
-é infinita ---, e $\nu\circ\nu=\mathrm{id}$ fecha cada andar com resíduo $0$. O que a limita é
-\emph{externo}, e é a \textbf{norma}: por Hurwitz há \emph{quatro} corpos de composição e não mais ---
+é infinita ---, e $\nu\circ\nu=\mathrm{id}$ fecha cada andar com resíduo $0$. O que a norma limita é
+\emph{externo}: por Hurwitz há \emph{quatro} corpos de composição e não mais ---
 dimensões $1,2,4,8$ ---, três dobras a perder o que distingue um corpo (a ordem em $\mathbb{C}$, a comutação
-em $\mathbb{H}$, a associatividade em $\mathbb{O}$), e não há uma quinta. \textbf{É esse o período oito}: o
-grau em que a leitura \emph{pela norma} se esgota. Mas a Lei~$7$ --- o octonião \emph{dual} --- não lê pela
+em $\mathbb{H}$, a associatividade em $\mathbb{O}$), e não há uma quinta. Esse é o esgotamento da
+leitura \emph{pela norma}. O período oito do \textbf{catálogo} ($\ell_{m+8}=\ell_m$) é outro objecto:
+$\operatorname{Ind}^{8}=\mathrm{id}_{\mathcal L}$. Relacionam-se pela arquitectura do modelo; não se
+identificam com $d_k$. Mas a Lei~$7$ --- o octonião \emph{dual} --- não lê pela
 norma, lê pela estrela, e a estrela não murou (o limite é da norma, não do objecto). O octonião que ela
 constrói é um \emph{novo} corpo, e as oito leis reaplicam-se a ele como à base ---
 $\mathcal L\to\mathcal L(\mathcal L)\to\mathcal L^2(\mathcal L)\to\cdots$ ---, porque o passo dos tecidos é

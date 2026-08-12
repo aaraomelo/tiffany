@@ -657,6 +657,8 @@ int PDF_N;
 int CURSOR;                /* o cursor do disco linear — uma declaração só */
 int DISCO_FIM;
 int MARCO;                 /* depois do banco (fatias 0–2 + vfs); rascunho past isto */
+int INTERFACE_N = 6;       /* hexal por defeito; sobe 12,24,… — tex_core regista por doc */
+int LADO_N = 0;            /* 0=Hurwitz (bilinear); 1=Gentil (norma homogénea, nne.c) */
 int SLOT_PTR[16];          /* rascunho 3–15: malloc após MARCO; recua com o 1 bit */
 int SLOT_TAM[16];          /* bytes nascidos (PDF pode ser < 128 MiB, o resto do tecto) */
 
@@ -717,6 +719,9 @@ int tam_fatia(int i){
     return FAT_TAM[i];
 }
 
+/* A família de interfaces repete: 6, 12, 24, … — a régua não esgota. O MOVE
+ * escala a folga do PDF com INTERFACE_N (registada em tex_core por documento). */
+
 /* MOVE(slot, sentido): Lei 1 (involução ±1); fecho emite+absorve = Lei 0.
  * Trial: −1 emite, +1 absorve, 0 atravessa. disco_fatia = MOVE(−1). */
 int MOVE(int slot, int sentido){
@@ -731,7 +736,7 @@ int MOVE(int slot, int sentido){
     n = FAT_TAM[slot];
     if(slot == 14){
         int tecto = 4096 * 65536;
-        int folga = 12 * 1048576;
+        int folga = (12 * 1048576 * INTERFACE_N) / 6; /* escala com a interface activa */
         int base = MARCO ? MARCO : CURSOR;
         int resto = tecto - base - folga;
         if(resto > 0 && resto < n) n = resto;
@@ -781,6 +786,8 @@ void marca_saida(char *p, int n){
 void marca_vfs(void){ MARCO = CURSOR; }
 int volta_compila(void){
     if(MARCO) CURSOR = MARCO;
+    INTERFACE_N = 6;
+    LADO_N = 0;
     PDF_N = 0;
     SAIDA_N = 0;
     { int i = 3; while(i < 16){ SLOT_PTR[i] = 0; SLOT_TAM[i] = 0; i++; } }

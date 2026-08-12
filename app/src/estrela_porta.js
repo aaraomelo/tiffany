@@ -6,8 +6,9 @@
 //   3. lê os slots de volta — sem buffer-cópia entre lados
 //
 // MOVE(slot, sentido) no tex.wasm: −1 emite (garante endereço), +1 absorve
-// (só o nascido), 0 atravessa. O painel chessc não exporta MOVE: os índices
-// do BigInt64Array SÃO os slots; escreve → prog() → lê = o mesmo par ±1.
+// (só o nascido), 0 atravessa. A /Interface do PDF (6,12,24,…) regista o ciclo
+// activo no motor — folga do slot 14 escala com ela. O painel chessc não exporta
+// MOVE: os índices do BigInt64Array SÃO os slots; escreve → prog() → lê = o mesmo par ±1.
 //
 // Lei 7 = circuito tex(4)–hexal–pdf(4) = octonião dual ℍ×ℍ*.
 // Lei 8 = selo Caelum / AssinaturaOito (N=2⁸) — não confundir com a 7.

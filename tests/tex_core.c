@@ -881,6 +881,7 @@ static long sem_eixo(long c){ return (sem_asc(c) - sem_desc(c)) / 2; }
  * E[0]/E[4] — as dobras que já eram a régua) e daí para cima pela razão composta:
  * a espiral não muda os andares medidos, PROLONGA-OS. */
 #define ESP_0 16
+#define TORRE_NTT_MAX 4096   /* min(dim·32, 4096) — Z_65537 aguenta até 2^16 */
 static int ESP_NV[112]; static unsigned ESP_SG[112]; static int N_ESP = 0;
 static long esp_escala(long corpo_m, int nv){
     if(nv <= 0) return corpo_m;
@@ -903,7 +904,14 @@ static int esp_gira(int atual, int dir){
         if(ESP_NV[t] == nv2 && ESP_SG[t] == sg2) return ESP_0 + t;
     if(N_ESP >= 112) return dir > 0 ? 2 : -2;      /* a tabela encheu: o degrau antigo */
     ESP_NV[N_ESP] = nv2; ESP_SG[N_ESP] = sg2;
-    return ESP_0 + N_ESP++;
+    int r = ESP_0 + N_ESP++;
+    { int alc = nv2, t2 = 0; while(t2 < N_ESP){ if(ESP_NV[t2] > alc) alc = ESP_NV[t2]; t2++; }
+      int iface = 6, ik = alc / 3; while(ik > 0){ iface *= 2; ik--; }
+      { extern int INTERFACE_N; extern int LADO_N;
+        if(iface >= 6) INTERFACE_N = iface;
+        LADO_N = (alc >= 3) ? 1 : 0;
+      } }
+    return r;
 }
 /* ─── A PENTAL, GERAL: o vector do giro ──────────────────────────────────────────────
  *
@@ -920,7 +928,14 @@ static int esp_gira(int atual, int dir){
  * trocados multiplica por i, não inventa outra régua. */
 static long esp_passo_nv(long corpo_m, int nv){
     long e0 = esp_escala(corpo_m, nv - 1), e1 = esp_escala(corpo_m, nv);
-    return e0 - e1;
+    long passo = e0 - e1;
+    { extern int LADO_N;
+      if(LADO_N && e0 > 0 && nv > 1){
+          /* Gentil (nne.c): norma multiplicativa — o passo compõe pela razão, não pela tábua bilinear */
+          passo = corpo_m * (e0 - e1) / e0;
+      }
+    }
+    return passo;
 }
 static long esp_kern_nv(long corpo_m, int nv){      /* Re: o respiro do giro */
     return sem_resp(esp_passo_nv(corpo_m, nv));
@@ -940,10 +955,10 @@ static long esp_sobe(long corpo_m, int e){
     }
     return sobe;
 }
-/* a mesma soma para a torre toda-positiva, por nível — o outro caminho do medidor */
+/* a mesma soma para a torre toda-positiva — T+T* por andar (thm:tecidos), indução */
 static long esp_sobe_torre(long corpo_m, int nv){
     long sobe = 0;
-    for(int t = 1; t <= nv; t++) sobe += esp_sobe_nv(corpo_m, t);
+    for(int t = 1; t <= nv; t++) sobe += esp_sobe_nv(corpo_m, t);   /* Σ(passo+respiro) */
     return sobe;
 }
 static long corpo_exp_m(long corpo_m, int e){
@@ -958,7 +973,12 @@ static long corpo_exp_m(long corpo_m, int e){
 }
 static long sobe_exp_m(long corpo_m, int e){               /* a subida: o que a escala tirou */
     if(!e || e == 8 || e == -8 || e == -5) return 0;   /* matriz e nbsp: sem subida */
-    if(e >= 16) return esp_sobe(corpo_m, e);                     /* a espiral: a subida composta */
+    if(e >= 16){
+        { extern int LADO_N;
+          if(LADO_N) return esp_sobe_torre(corpo_m, ESP_NV[e - 16]); /* Gentil: indução T+T* */
+        }
+        return esp_sobe(corpo_m, e);                     /* Hurwitz: espiral com sinais */
+    }
     long d = corpo_m - corpo_exp_m(corpo_m, e);
     return e > 0 ? d : -d;
 }
@@ -2688,14 +2708,26 @@ static void pdf_fecha(Pdf *p){
     /* O .TEX ORIGINAL, INVISÍVEL: um objecto que a página não referencia. O leitor de PDF
      * ignora-o — não está em /Contents nem em árvore nenhuma —, mas está lá, e a volta lê-o
      * pelo marcador /Type/FonteTeX. É a metade que a estrela guarda para não apagar. */
-    /* O SELO DE CAELUM — a lei 8 assina o ESQUELETO. Os streams dos XObjects
-     * (as marcas do relógio, a malha que aguenta o peso) acumulam num vector de
-     * N = 2^8 posições cíclicas, e a transformada universal do anel da lei 8
-     * (Z_65537, primo de Fermat, raiz 3^256) espalha-o no espectro: UM bit
-     * trocado no esqueleto muda TODAS as componentes (o §R8 do relogio_curva,
-     * agora no próprio documento). O selo escreve-se ANTES de si mesmo — assina
-     * o que veio antes, nunca a si. */
-    { long A[256], S[256];
+    /* O SELO DE CAELUM — a lei 8 assina o ESQUELETO (N=2^8). TorreDim/TorreN sobem
+     * com a torre; o Sel[256] mantém-se — é o ciclo base; a torre continua no Gentil. */
+    { int torre_alc = 0;
+      { int t = 0; while(t < N_ESP){ if(ESP_NV[t] > torre_alc) torre_alc = ESP_NV[t]; t++; } }
+      int torre_dim = 2; { int k = 0; while(k < torre_alc){ torre_dim *= 2; k++; } }
+      int torre_lado = (torre_alc >= 3) ? 1 : 0;
+      int torre_iface = 6, ik = torre_alc / 3;
+      while(ik > 0){ torre_iface *= 2; ik--; }
+      { extern int INTERFACE_N; extern int LADO_N;
+        if(torre_iface >= 6) INTERFACE_N = torre_iface;
+        LADO_N = torre_lado;
+      }
+      long A[256], S[256];
+      long At[TORRE_NTT_MAX], St[TORRE_NTT_MAX];
+      int torre_ntt = 0;
+      if(torre_dim >= 16){
+          torre_ntt = torre_dim * 32;
+          if(torre_ntt > TORRE_NTT_MAX) torre_ntt = TORRE_NTT_MAX;
+          for(int t = 0; t < torre_ntt; t++) At[t] = 0;
+      }
       for(int t = 0; t < 256; t++) A[t] = 0;
       { long q = 0; const unsigned char *z = p->sf.buf; long len = s_pos(&p->sf);
         while(q + 26 < len){
@@ -2706,6 +2738,7 @@ static void pdf_fecha(Pdf *p){
             long b2 = a2, k2 = 0;
             while(b2 + 9 < len && memcmp(z + b2, "endstream", 9)){
                 A[k2 & 255] = (A[k2 & 255] + z[b2]) % 65537;
+                if(torre_ntt > 0) At[k2 & (torre_ntt - 1)] = (At[k2 & (torre_ntt - 1)] + z[b2]) % 65537;
                 b2++; k2++;
             }
             q = b2 + 9;
@@ -2730,19 +2763,104 @@ static void pdf_fecha(Pdf *p){
         } }
       { int obj = p->nobj + 1; p->nobj = obj;
         p->off[obj] = s_pos(&p->sf);
-        snprintf(S_FMT_BUF, 2048, "%d 0 obj<</Type/AssinaturaOito/N 256/P 65537/Sel[", obj); s_flush(&p->sf);
+        snprintf(S_FMT_BUF, 2048, "%d 0 obj<</Type/AssinaturaOito/N 256/P 65537"
+                    "/TorreDim %d/TorreN %d/Sel[", obj, torre_dim, torre_dim); s_flush(&p->sf);
         for(int t = 0; t < 256; t++){ snprintf(S_FMT_BUF, 2048, "%ld ", S[t]); s_flush(&p->sf); }
-        snprintf(S_FMT_BUF, 2048, "]>>endobj\n"); s_flush(&p->sf); } }
+        snprintf(S_FMT_BUF, 2048, "]>>endobj\n"); s_flush(&p->sf); }
+      /* Gentil (dim≥16): selo complementar — NTT min(TORRE_NTT_MAX, TorreDim·32).
+       * O Sel[256] base (Lei 8) mantém-se; a torre sobe por indução T+T* (thm:tecidos). */
+      if(torre_ntt > 0){
+        long raiz2 = 1, b5 = 3, e5 = 65536 / torre_ntt;
+        while(e5 > 0){
+            if(e5 & 1) raiz2 = raiz2 * b5 % 65537;
+            b5 = b5 * b5 % 65537; e5 >>= 1;
+        }
+        for(int j3 = 0; j3 < torre_ntt; j3++){
+            long acc = 0, w3 = 1, passo3 = 1;
+            { long e6 = j3, b6 = raiz2;
+              while(e6 > 0){
+                  if(e6 & 1) passo3 = passo3 * b6 % 65537;
+                  b6 = b6 * b6 % 65537; e6 >>= 1;
+              } }
+            for(int t = 0; t < torre_ntt; t++){
+                acc = (acc + At[t] * w3) % 65537;
+                w3 = w3 * passo3 % 65537;
+            }
+            St[j3] = acc;
+        }
+        { int obj = p->nobj + 1; p->nobj = obj;
+          p->off[obj] = s_pos(&p->sf);
+          snprintf(S_FMT_BUF, 2048, "%d 0 obj<</Type/AssinaturaTorre/N %d/P 65537"
+                      "/TorreDim %d/Sel[", obj, torre_ntt, torre_dim); s_flush(&p->sf);
+          for(int t = 0; t < torre_ntt; t++){ snprintf(S_FMT_BUF, 2048, "%ld ", St[t]); s_flush(&p->sf); }
+          snprintf(S_FMT_BUF, 2048, "]>>endobj\n"); s_flush(&p->sf); } }
     /* A SEMENTE VIAJA COM O DOCUMENTO, sempre — mesmo sem o .tex embutido: a
-     * configuração da estrela é estado do documento, não constante do motor. */
-    { int obj = p->nobj + 1; p->nobj = obj;
+     * configuração da estrela é estado do documento, não constante do motor.
+     * Alcance = max nível da espiral (subida do inversor); Dim = 2^(alcance+1)
+     * na torre da estrela (2,4,8,16,…) — Hurwitz marca a dobra discreta, a torre
+     * segue; π_n sai desta Dim (luz_periodo / Lyapunov dualizado).
+     * Lado 0 = Hurwitz (contar); 1 = Gentil/Lebesgue (integrar). Interface = 6·2^(⌊alcance/3⌋).
+     * Norma 1 = Gentil (‖xy‖=‖x‖‖y‖, nne.c) activo na espiral. */
+    { int alcance = torre_alc, dim = torre_dim, lado = torre_lado, iface = torre_iface;
+      int regua_C = 12 + 6 * (alcance / 3);        /* ordem do dual: C sobe a cada 3 andares */
+      int regua_L = 30;                            /* mantissa completa (S=2^30); a ordem é C */
+      int regua = regua_L * 100 + regua_C;         /* /Regua 3012|3018|3024 — cabe na fita */
+      long S = 1073741824L;
+      int lg = 0, d = dim;
+      while(d > 1){ lg++; d >>= 1; }
+      int iters = (dim > 1) ? (lg + dim - 2) : 1;   /* log2(q_dim)−1, sem overflow */
+      if(iters > regua_C) iters = regua_C;            /* régua deste andar, não cap global */
+      long piN = 0;
+      if(lado){
+          /* Gentil/Lebesgue: meia-corda — cap cresce a cada 3 andares (corpo_peano) */
+          long long sq = S;
+          for(int s = 0; s < iters; s++){
+              long long sq2 = (sq * sq) / S, inner = S - sq2;
+              if(inner < 0) inner = 0;
+              { unsigned long long ux = (unsigned long long)inner * (unsigned long long)S;
+                unsigned long long g = ux, h = (g + 1) / 2;
+                while(h < g){ g = h; h = (g + ux / g) / 2; }
+                inner = (long long)g; }
+              { unsigned long long ux = (unsigned long long)(2 * S + 2 * inner) * (unsigned long long)S;
+                unsigned long long g = ux, h = (g + 1) / 2;
+                while(h < g){ g = h; h = (g + ux / g) / 2; }
+                if(g <= 0) g = 1;
+                sq = (sq * S) / (long long)g; }
+          }
+          { unsigned long long num = (unsigned long long)sq * 1000000000ULL;
+            int e = iters + 1;
+            while(e > 0){ num <<= 1; e--; }
+            piN = (long)(num / (unsigned long long)S); }
+      } else {
+          long q = (dim > 0 && dim < 31) ? ((long)dim << (dim - 1)) : (1L << 30);
+          long long c = -S;
+          for(int s = 0; s < iters; s++){
+              long long t = (S + c) / 2;
+              { unsigned long long ux = (unsigned long long)t * (unsigned long long)S;
+                unsigned long long g = ux, h = (g + 1) / 2;
+                while(h < g){ g = h; h = (g + ux / g) / 2; }
+                c = (long long)g; }
+          }
+          { long long t = (S - c) / 2;
+            unsigned long long g, ux = (unsigned long long)t * (unsigned long long)S;
+            g = ux; { unsigned long long h = (g + 1) / 2;
+            while(h < g){ g = h; h = (g + ux / g) / 2; } }
+            { unsigned long long num = g * 1000000000ULL;
+              int e = iters + 1;
+              while(e > 0){ num <<= 1; e--; }
+              piN = (long)(num / (unsigned long long)S); } }
+      }
+      int obj = p->nobj + 1; p->nobj = obj;
       p->off[obj] = s_pos(&p->sf);
       snprintf(S_FMT_BUF, 2048, "%d 0 obj<</Type/SementeEstrela"
                     "/Resp %ld/AscN %ld/AscD %ld/Desc %ld/Traco %d"
-                    "/RazaoN %ld/RazaoD %ld>>endobj\n",
+                    "/RazaoN %ld/RazaoD %ld"
+                    "/Alcance %d/Dim %d/Induc %d/Lado %d/Interface %d/Norma %d"
+                    "/Regua %d/PiN %ld>>endobj\n",
             obj, SEM_V[0], SEM_V[1], SEM_V[2], SEM_V[3], SEM_TRACO,
             N_ESCALA > 3 ? escala_de_degrau(1, EIXO_ESCALA) : 0,
-            N_ESCALA > 3 ? escala_de_degrau(3, EIXO_ESCALA) : 0); s_flush(&p->sf); }
+            N_ESCALA > 3 ? escala_de_degrau(3, EIXO_ESCALA) : 0,
+            alcance, dim, alcance, lado, iface, lado, regua, piN); s_flush(&p->sf); } }
     if(FONTE_TEX){
         /* o SOURCE é um corpo, e entra pela mesma porta que as fontes --- o cruzamento do viveiro:
          * carrega-se para o slot 4 (nativo fopen+fread, wasm pré-carregado) e transmite-se ao PDF. */

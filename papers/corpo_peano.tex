@@ -1,0 +1,1103 @@
+% papers/corpo_peano.tex
+% O corpo operacional de Peano --- construção pela borda metálica.
+% Cadeia: metálica → borda → R^n → Pisot/ζ → massa=corte → Lebesgue → Cantor/Peano → ⊕/⊗.
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[portuguese]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage[margin=2.5cm]{geometry}
+\newtheorem{definicao}{Definição}
+\newtheorem{teorema}{Teorema}
+\newtheorem{proposicao}{Proposição}
+\newtheorem{corolario}{Corolário}
+\newtheorem{observacao}{Observação}
+\newtheorem{lema}{Lema}
+\newcommand{\code}[1]{\texttt{#1}}
+\begin{document}
+
+\noindent\textbf{O corpo operacional de Peano}
+--- construção a partir da borda metálica, massa ordenada e
+endereçamento ternário.
+
+\medskip
+\noindent Um corpo possui operações e ordem. Não se postula
+$\mathbb{R}$ com $+$ e $\times$: o corpo \textbf{constrói-se}. A cadeia é
+\[
+\boxed{
+A_m
+\;\to\;
+\text{borda }x^{2}{=}nx{+}1
+\;\to\;
+\mathbb{R}^{n}
+\;\to\;
+\text{Pisot}/\zeta
+\;\to\;
+\text{massa}{=}\text{corte}
+\;\to\;
+\text{Lebesgue}
+\;\to\;
+\text{Cantor/Peano}
+\;\to\;
+\oplus,\otimes.
+}
+\]
+Fontes: \emph{Teoria} (metálicas, torre), \emph{Corpo estelar} (oito leis,
+massa, teorema central), \emph{Dualsort} (max-cut), \emph{Catálogo}
+(Cantor, Pisot, $\zeta$). Os problemas do \emph{Milénio} \textbf{não}
+são base: são \emph{leituras / derivações} das leis
+(\S\ref{sec:milenio-leitura}). Música e partitura:
+\S\ref{sec:musica}. Verificação: \code{tests/corpo\_peano.c}
+§CP1--§CP36.
+
+%======================================================================
+\section{Família metálica e torre em $\mathbb{R}^{n}$}
+
+\begin{definicao}[família metálica]\label{def:metal}
+\[
+A_m=\begin{pmatrix}m&1\\1&0\end{pmatrix},
+\quad\det A_m=-1,
+\quad
+A_n=K[x]/(x^{2}-nx-1),
+\quad
+\sigma^{2}=n\sigma+1.
+\]
+Estaca $\sigma^{\dagger}=n-\sigma$; norma $N(\sigma)=-1$;
+$\Delta=n^{2}+4$ (\code{tests/metalica.c}, \code{tests/fator.c}).
+\end{definicao}
+
+\begin{proposicao}[anti-autoadjuntos]\label{prop:anti}
+Os $T$ com $T^{\dagger}=-T$ formam um corpo algébrico: em $2\times2$,
+$\{aI+bJ\}\cong\mathbb{C}$; em $K[\sigma]$, a família metálica
+($\sigma\sigma'=-1$). Hipótese: $-1$ não é quadrado em $K$
+(\emph{Teoria}).
+\end{proposicao}
+
+\begin{teorema}[torre em $\mathbb{R}^{n}$]\label{thm:rn}
+\[
+A_{n+1}=A_n+A_n^{*},
+\qquad
+\dim A_n=2^{n}\dim A_0.
+\]
+Parte de $\mathbb{R}$ ($\dim A_0=1$). A ordem sobe por indução (total,
+compatível com a soma); \textbf{não} é herdada da reta --- é produzida
+pela dualidade. Em $\mathbb{R}^{n}$ a segunda coordenada da cruz é
+$M_{ij}=\sum(x_i-c_i)(x_j-c_j)$.
+\emph{Notação:} o índice $k$ da torre operacional
+$d_k=2^{k+1}$ (com $d_0=2$) conta andares \emph{após} a primeira
+dobra $A_0\to A_1$; não identificar $n$ de $A_n$ com $k$ de $d_k$ sem
+essa convenção.
+\end{teorema}
+
+%======================================================================
+\section{A borda --- definição e unicidade de $bx^{a}$}
+
+\begin{definicao}[borda]\label{def:borda}
+A \textbf{borda} de índice $n\geq0$ é
+\[
+x^{2}=nx+1
+\qquad\text{em }A_n=K[x]/(x^{2}-nx-1),
+\]
+equivalente a $x=n+1/x$ e a $x\,x^{\dagger}=-1$ com
+$x^{\dagger}=-1/x=n-x$. Matriz companheira
+$\bigl(\begin{smallmatrix}n&1\\1&0\end{smallmatrix}\bigr)$, $\det=-1$.
+O corpo \textbf{materializa-se} na borda: o finito é $A_n$; a régua
+(expansão) é infinita.
+\end{definicao}
+
+\begin{teorema}[a forma $bx^{a}$ é a única possível]\label{thm:forma-unica}
+A equação da Lei~2
+\[
+-f \;=\; f^{-1}
+\qquad\text{i.e.}\qquad
+f\bigl(f(x)\bigr)=-x
+\]
+admite solução da forma $bx^{a}$, e essa forma é a \textbf{única} candidata
+nas duas classes naturais do modelo:
+\begin{enumerate}
+\item \textbf{Analítica em $0$} com $f(0)=0$: o grau mínimo $m$
+satisfaz $m^{2}=1$, logo $m=1$. O termo líder é $c_1 x$ com
+$c_1^{2}=-1$ --- forma $bx^{a}$ com $a=1$ no líder.
+\item \textbf{Euler-homogénea} em $\mathbb{R}_{>0}$ ($xf'=af$):
+então $f(x)=b\,x^{a}$ exactamente.
+\end{enumerate}
+Na família $f(x)=bx^{a}$, a composição dá
+$f(f(x))=b^{a+1}x^{a^{2}}$; exigir $-x$ força $a^{2}=1$.
+\begin{itemize}
+\item $a=+1$: $f(x)=bx$ e $b^{2}=-1$, logo
+$\boxed{f(x)=\pm ix}$.
+\item $a=-1$: $f(x)=b/x$ ($b\neq0$) e
+$f(f(x))=x$ --- ramo \textbf{involutivo}, Lei~1, não a Lei~2.
+É descartado para $f\circ f=-\mathrm{id}$ (não é ``$b=0$'').
+\end{itemize}
+Consequentemente
+\[
+\boxed{f\circ f=-\mathrm{id}
+\;\Longrightarrow\;
+f(x)=\pm ix}
+\]
+na classe considerada, sobre um corpo que contenha $i$.
+Sobre $\mathbb{R}$ não há solução; sobre $\mathbb{C}$, as duas diferem
+pelo sinal. Realização: $i^{2}=-1$, $i^{4}=1$ --- rotação de um quarto
+(\code{tests/lei2.c}).
+\end{teorema}
+
+\begin{proof}
+\textit{(Grau.)} $f(x)=\sum_{k\geq m}c_k x^{k}$ dá
+$f(f(x))=c_m^{m+1}x^{m^{2}}+\cdots$. Igualar a $-x$ força $m^{2}=1$,
+donde $m=1$ e $c_1^{2}=-1$.
+
+\textit{(Homogeneidade.)} $xf'=af$ $\Rightarrow$ $f=bx^{a}$.
+
+\textit{(Família.)} $f(f(x))=b^{a+1}x^{a^{2}}$. Se $a^{2}=1$ e $a=+1$:
+$b^{2}=-1$. Se $a=-1$: $f(x)=b/x$ e $f(f(x))=x$ para todo $b\neq0$
+--- nunca $-x$. Controlo: só expoentes com $p^{2}=q^{2}$ passam o
+teste de $a=1/a$; $f(f(x))=-x$ exacto em $\mathbb{Z}[i]$ para
+$\pm i$.
+\end{proof}
+
+\begin{proposicao}[o ramo $a=-1$ é a passagem pelo ponto fixo]\label{prop:a-1}
+$f(x)=b/x$ realiza a estaca $\nu(x)=-1/x$ (a menos de escala):
+$\nu\circ\nu=\mathrm{id}$, período $2$ --- \textbf{Lei~1}. Percorre a
+órbita $\{0,\infty\}$: dividir \emph{por} zero é o $\infty$; a estaca
+troca $0\leftrightarrow\infty$ e do outro lado \textbf{continua}.
+Não é degeneração: é a transição dimensional no infinito
+(\emph{Corpo estelar}, divisão do zero).
+\[
+\boxed{
+a=-1:\ \text{Lei~1 (involução)};
+\qquad
+a=+1:\ \text{Lei~2 (rotação }\pm i\text{)}.
+}
+\]
+A leitura topológica da Lei~1 (Poincaré) e a do centro da Lei~2
+(Yang--Mills, $P$ vs $NP$) são derivações --- \S\ref{sec:milenio-leitura}
+--- não axiomas deste corpo.
+\end{proposicao}
+
+\begin{proposicao}[costura no centro: as leis, não o milénio]\label{prop:centro}
+A passagem pelo ponto fixo $\{0,\infty\}$ abre os \textbf{dois nulos}
+operacionais (Lei~0: $0=(+1)\oplus(-1)$, $0^{\dagger}=\infty$). No
+centro $0$ --- ponto fixo do bidual $K^{**}=K$ --- a Lei~2
+realiza-se como rotor / parada. Dividir \emph{por} zero (o $\infty$)
+é a Lei~1 (ramo $a=-1$). Dividir \emph{o} zero é a Lei~0 a nomear o
+par, com a Lei~2 a fixar o centro. A transição dimensional no infinito
+\textbf{é} essa costura:
+\[
+\boxed{
+\text{Lei~1 atravessa};\quad
+\text{Lei~2 fixa o centro};\quad
+\text{Lei~0 nomeia os nulos}.
+}
+\]
+\end{proposicao}
+
+\begin{teorema}[unicidade sob $f^{(n)}=f^{-1}$]\label{thm:unica-borda}
+Fixe $n\geq1$. Toda solução Euler-homogénea de
+\[
+f^{(n)}=f^{-1}
+\]
+é da forma $f(x)=b\,x^{a}$ (Teorema~\ref{thm:forma-unica}), e o
+expoente $a>0$ é \textbf{único}:
+\[
+a-n=\tfrac1a
+\;\Longleftrightarrow\;
+a^{2}-na-1=0
+\;\Longleftrightarrow\;
+a=\sigma_n=\tfrac{n+\sqrt{n^{2}+4}}{2}.
+\]
+Em particular $a=\sigma_n$ \textbf{é a borda}. A outra raiz
+$\sigma_n^{\dagger}=-1/\sigma_n<0$ descarta-se (polo em $0$;
+\code{tests/aurea.c}, \code{tests/pisotbase.c}).
+\end{teorema}
+
+\begin{proof}
+Homogeneidade $\Rightarrow$ $f=bx^{a}$. A $n$-ésima derivada tem
+expoente $a-n$; a inversa tem expoente $1/a$. Igualar:
+$a(a-n)=1$, isto é $a^{2}-na-1=0$. Discriminante $n^{2}+4>0$:
+duas raízes. Só $\sigma_n>1$ dá $a>0$ com $f$ crescente e
+inversível em $(0,\infty)$.
+\end{proof}
+
+\begin{corolario}[Pisot]\label{thm:pisot}
+Toda razão metálica é unidade quadrática de Pisot:
+$|\sigma_n|>1$, $|\sigma_n^{\dagger}|<1$, logo
+$\|\sigma^{k}\|\to0$ como $|\sigma'|^{k}$ (vazamento zero;
+\code{tests/pisotbase.c}).
+\end{corolario}
+
+\begin{definicao}[zeta dinâmica]\label{def:zeta}
+\[
+\zeta(x)=\frac{1}{\det(I-xC)}=\frac{1}{1-mx-x^{2}},
+\quad
+C=\begin{pmatrix}m&1\\1&0\end{pmatrix}.
+\]
+$\zeta(0)=1$: unidade de $\mathbb{Z}[[x]]$. Coeficientes
+$c_n=mc_{n-1}+c_{n-2}$ (Fibonacci se $m=1$); traços
+$t_k=c_k+c_{k-2}$ (Lucas se $m=1$). Fecho:
+$\zeta=1/\nu(\beta)$ --- polos $=\sigma$
+(\code{tests/zetadin.c}).
+\end{definicao}
+
+%======================================================================
+\section{Massa ordenada e max-cut --- o corpo entre dimensões}
+
+\begin{proposicao}[massa na borda]\label{prop:massa}
+A segunda coordenada da cruz é o segundo momento:
+$nc^{2}-\sum xx^{\dagger}=\sum(x-c)^{2}$. Em $\mathbb{R}^{n}$ é a
+matriz $M_{ij}$; a massa escalar é o seu traço
+(\emph{Corpo estelar}). A massa é \textbf{ordenada}: no bidual a ordem
+existe, e uma ordem sobre $n$ partes precisa de $n$ componentes --- o
+escalar colapsa-a.
+\end{proposicao}
+
+\begin{teorema}[max-cut $=$ massa]\label{thm:maxcut}
+Ordenar e cortar são duais (\emph{Dualsort}). Com elementos em
+$+1$ e $-1$, $|A|+|B|=n$:
+\[
+\mathrm{corte}=|A|\,|B|,
+\qquad
+\mathrm{massa}=n-\frac{(|A|-|B|)^{2}}{n},
+\]
+máximos no mesmo argumento. O corte é a \textbf{sequência de lados}
+--- corpo ordenado materializado na borda, uma componente por vértice
+do reticulado --- não o escalar $|A||B|$. Meia volta
+$i\mapsto(i+n/2)\bmod n$ constrói a bipartição
+(\code{tests/maxcut.c}).
+\[
+\boxed{
+\text{borda}=\text{suporte};\quad
+\text{massa}=\text{corte ordenado};\quad
+\text{corpo entre dimensões}=\text{ordem na borda}.
+}
+\]
+\end{teorema}
+
+%======================================================================
+\section{Contínuo, Cantor e Peano}
+
+\begin{proposicao}[Gentil--Hurwitz via Lebesgue]\label{thm:central-peano}
+Conforme o teorema central do \emph{Corpo estelar} (citado, não
+reprovado aqui): contar (Hurwitz) e integrar (Gentil) são duais pela
+soma reversível
+\[
+\int_a^{b}f+\int_{f(a)}^{f(b)}f^{-1}=b\,f(b)-a\,f(a).
+\]
+O salto $\mathbb{Q}\to\mathbb{R}$ é este cruzamento. Ordem e contínuo
+recuperam-se aqui; não se postulam. Estatuto neste paper:
+\emph{citação / proposição de uso}.
+\end{proposicao}
+
+\begin{definicao}[corpo de Cantor]\label{def:cantor}
+Lado discreto/aditivo do corpo de Alonzo ($f_c(z)=z^{2}+c$): o shift
+$\theta\mapsto2\theta$, dual a $z\mapsto z^{2}$ (Julia). Os golden
+\[
+\mathrm{cantor}=\varphi,\qquad
+\mathrm{julia}=\psi,\qquad
+\varphi\psi=-1
+\]
+são o par metálico $m=1$ (\code{tests/cantor\_julia\_dual.c}).
+\end{definicao}
+
+\begin{definicao}[endereçamento de Peano]\label{def:peano}
+$\Lambda_K=(\mathbb{Z}/3^{K}\mathbb{Z})^{2}$, $|\Lambda_K|=9^{K}$,
+trial $\{-1,0,+1\}$. Encher$\leftrightarrow$contar $=$
+Gentil$\leftrightarrow$Hurwitz no endereço. A curva clássica é o
+limite $K\to\infty$; $\phi_K$ finito não se identifica com ela
+(\code{tests/peano\_dual.c}).
+\end{definicao}
+
+\begin{definicao}[dual de Peano]\label{def:nu}
+$\nu(\phi_K)=\phi_K^{-1}$, $\nu(\phi_K^{-1})=\phi_K$, logo
+$\nu^{2}=\mathrm{id}$. Distinto de $\phi_K^{-1}\circ\phi_K=\mathrm{id}$
+(reversibilidade da bijeção).
+\end{definicao}
+
+%======================================================================
+\section{Soma e produto na torre de dimensões}
+
+\begin{definicao}[operações entre andares]\label{def:somaprod}
+\begin{enumerate}
+\item \textbf{Soma} (clone / tecidos):
+$T_{k+1}=T_k+T_k^{*}$, $d_{k+1}=2d_k$, $d_0=2$, logo $d_k=2^{k+1}$.
+\item \textbf{Produto} (reprodução / viveiro):
+$a\otimes b:=\operatorname{lcm}(a,b)$,
+$a\otimes^{*}b:=\operatorname{gcd}(a,b)$,
+\[
+\boxed{\operatorname{lcm}(a,b)\,\operatorname{gcd}(a,b)=ab.}
+\]
+$\mathbb{R}^{a}\vee\mathbb{R}^{b}=\mathbb{R}^{\operatorname{lcm}(a,b)}$
+é rótulo do nível, não extensão de corpos.
+\end{enumerate}
+\end{definicao}
+
+\begin{teorema}[reticulado divisorial]\label{thm:reticulo}
+$a\le b$ sse $a\mid b$ em $\mathbb{N}_{>0}$: ordem parcial
+independente da dualidade. $\vee=\operatorname{lcm}$,
+$\wedge=\operatorname{gcd}$; distributivo (§CP12). Em
+$D_N=\{d:d\mid N\}$, $\nu_N(d)=N/d$ é antiautomorfismo:
+inverte a ordem, troca $\vee$ com $\wedge$.
+\end{teorema}
+
+\begin{observacao}
+A dualidade \textbf{não cria} a ordem; inverte uma ordem já existente
+em $D_N$. Reticulado e dualidade são estruturas relacionadas, não a
+mesma afirmação.
+\end{observacao}
+
+\begin{proposicao}[interface cristalina]\label{prop:iface}
+$\mathcal{O}=\{1,2,3,4,6\}$.
+$\operatorname{lcm}(2,3)=6$,
+$\operatorname{lcm}(2,3,4)=12$,
+$\operatorname{lcm}(12,8)=24$.
+A família de interfaces é
+$\iota_k=6\cdot2^{\lfloor k/3\rfloor}$ --- valores da
+\emph{interface}, não índices de leis.
+\end{proposicao}
+
+%======================================================================
+\section{O corpo operacional $\mathcal{C}_K$}
+
+\begin{definicao}[corpo operacional de Peano]\label{def:corpo}
+\[
+\mathcal{C}_K
+:=
+\bigl(\mathbb{N}_{>0},\otimes,\otimes^{*}\bigr)
+\times
+\bigl(\Lambda_K,\phi_K,\phi_K^{-1}\bigr).
+\]
+Operações: Def.~\ref{def:somaprod}. Ordem: reticulado
+$(\mathbb{N}_{>0},\mid)$, reforçada pela dualidade em $\mathbb{R}^{n}$
+e pelo contínuo da Proposição~\ref{thm:central-peano}. Massa: Teorema~\ref{thm:maxcut}
+--- corpo entre dimensões na borda. O nome marca a construção; não
+identifica $\mathcal{C}_K$ com um corpo de Galois nem com $\mathbb{R}$
+axiomatizado.
+\end{definicao}
+
+\begin{proposicao}[fecho]\label{prop:corpo}
+Fechamento de $\otimes$, $\otimes^{*}$; reversibilidade de $\phi_K$;
+$\nu^{2}=\mathrm{id}$; $\operatorname{lcm}\cdot\operatorname{gcd}=ab$;
+reticulado; leitura contínua compatível com a ordem da dualidade.
+\end{proposicao}
+
+\begin{proposicao}[escalada]\label{prop:escalada}
+$T_{k+1}=T_k+T_k^{*}$ produz
+$d_k=2^{k+1}$,
+$\iota_k=6\cdot2^{\lfloor k/3\rfloor}$,
+$C_k=12+6\lfloor k/3\rfloor$.
+\end{proposicao}
+
+\begin{corolario}[cruzamento binário--ternário]\label{cor:cruza}
+$\gcd(2^{k+1},3^{K_k})=1$ $\Rightarrow$
+$\operatorname{lcm}(d_k,3^{K_k})=d_k\,3^{K_k}$.
+\end{corolario}
+
+%======================================================================
+\section{Catálogo das leis --- anel de índices}\label{sec:catalogo}
+
+O ciclo de oito pertence ao \textbf{catálogo}, não à dimensão da torre.
+A base das oito leis é o \emph{Corpo estelar} (\code{sub:oitoleis});
+aqui só se verifica que o corpo de Peano as carrega e as induz.
+\[
+\mathcal L:=\mathbb{Z}/8\mathbb{Z},
+\qquad
+\boxed{\text{índice da lei}\neq\text{dimensão da torre}.}
+\]
+\label{def:anel}
+Lei~0 é o índice $0$, não ``dimensão~$0$'' ($d_0=2$).
+
+Soma e produto no catálogo: $\ell_1\oplus\ell_2=\ell_1+\ell_2\pmod8$,
+$\ell_1\otimes\ell_2=\ell_1\ell_2\pmod8$. Neutros: $0$ e $1$.
+Lei~7 $=-1$. Não é corpo: $2\otimes4=0\pmod8$.
+
+\begin{center}\small
+\begin{tabular}{@{}clll@{}}
+índice & nome & operador / realização & fecho \\
+\hline
+$0$ & divisão do zero & $(+1)\oplus(-1)=0$; $0^{\dagger}=\infty$ & nulo \\
+$1$ & dual & $\nu\colon x\mapsto x^{\dagger}$ & $\nu^{2}=\mathrm{id}$ \\
+$2$ & bidual & $K^{**}=K$; $T^{\dagger}=-T$ & período $2$ no dual \\
+$3$ & trial & $\tau$ em $\{-1,0,+1\}$ & $\tau^{3}=\mathrm{id}$ \\
+$4$ & tetral & $\rho_4(T)=T+T^{*}$ & $d\mapsto2d$ \\
+$5$ & pental & $\rho_5(x)=ix$ & $i^{2}=-1$, $i^{4}=\mathrm{id}$ \\
+$6$ & hexal & $\oplus=\otimes$ na interface & $\operatorname{lcm}(2,3)=6$ \\
+$7$ & octonião dual & $\mathbb{H}\times\mathbb{H}^{*}$ & $\operatorname{Ind}^{8}=\mathrm{id}_{\mathcal L}$ \\
+\end{tabular}
+\end{center}
+
+\begin{observacao}
+Anel $=$ catálogo das leis. Reticulado $=$ viveiro
+$(\mathbb{N}_{>0},\mid)$ com $\operatorname{lcm}$ idempotente.
+Não se identificam.
+\end{observacao}
+
+\begin{proposicao}[índice e dimensão]\label{cor:unicidade}
+$k\in\mathbb{N}$ e $\ell\in\mathbb{Z}/8\mathbb{Z}$ são variáveis
+distintas. O modelo associa $\ell_k=k\bmod8$ e
+\[
+(d_k,\iota_k,C_k)
+=\bigl(2^{k+1},\;6\cdot2^{\lfloor k/3\rfloor},\;
+12+6\lfloor k/3\rfloor\bigr).
+\]
+$\ell_{k+8}=\ell_k$, mas $d_{k+8}=256\,d_k$: a torre cresce.
+\end{proposicao}
+
+\begin{definicao}[indução no catálogo]\label{def:ind}
+$\operatorname{Ind}(L)=L\oplus L_1$,
+$L_n=\operatorname{Ind}^{n}(L_0)=n\cdot L_1$ em $\mathcal L$.
+$\operatorname{Ind}^{8}=\mathrm{id}_{\mathcal L}$.
+\end{definicao}
+
+\begin{proposicao}[estrutura: as oito leis reaparecem em cada andar]\label{thm:induz}
+Em cada andar $A_k$ da torre ($T_{k+1}=T_k+T_k^{*}$, $\dim=2^{k+1}$):
+\begin{enumerate}
+\item o catálogo $\mathcal L$ reaparece: $\ell_k=k\bmod8$ e
+$L_n=\operatorname{Ind}^{n}(L_0)$ com $\operatorname{Ind}^{8}=\mathrm{id}$;
+\item as representações fecham no mesmo sítio
+($\nu^{2}=\tau^{3}=i^{4}=\mathrm{id}$; $\rho_4$ dobra a dimensão;
+hexal só onde $\chi(1)\chi(3)=\chi(6)$);
+\item o passo dos tecidos é o \emph{mesmo} em todos os andares --- a
+estrela como construtor --- logo
+$\mathcal L\to\mathcal L(\mathcal L)\to\cdots$
+(\emph{Corpo estelar}): \textbf{não há Lei~$8$}, há a Lei~$0$ um nível
+acima.
+\end{enumerate}
+\[
+\boxed{
+\text{oito leis}\ =\ \text{ciclo gerador};\quad
+\text{torre}\ =\ \text{indução que as reaplica}.
+}
+\]
+\end{proposicao}
+
+\begin{observacao}[não é teorema externo]
+Isto é \textbf{estrutura do modelo}, não um teorema demonstrado a
+partir de axiomas mais fracos: o catálogo $\mathcal L$ é definido com
+$\operatorname{Ind}^{8}=\mathrm{id}$, e a torre associa
+$\ell_k=k\bmod8$ a cada andar. Distinguir:
+$k$ = andar; $\ell_k=k\bmod8$ = índice cíclico; $d_k=2^{k+1}$ =
+dimensão. A periodicidade de $\ell_k$ \textbf{não} é periodicidade de
+$d_k$ ($d_{k+8}=256\,d_k$).
+\end{observacao}
+
+\section{Interface hexal e operadores}
+
+Correspondência estelar da interface (relação do modelo):
+$\chi(1)=2$, $\chi(3)=3$, $\chi(6)=6$. Na Lei~6
+\[
+\boxed{\chi(1)\chi(3)=2\cdot3=6=\chi(6)=\chi(3)+\chi(3).}
+\]
+Soma $=$ produto \textbf{só} na interface hexal.
+$\iota_k=\chi(6)\,2^{\lfloor k/\chi(3)\rfloor}=6\cdot2^{\lfloor k/3\rfloor}$.
+
+\begin{center}\small
+\begin{tabular}{@{}clll@{}}
+lei & construção & realização & fecho \\
+\hline
+$L_0$ & $L_1\oplus L_7$ & $(+1)\oplus(-1)=0$; $0^{\dagger}=\infty$ & nulo \\
+$L_1$ & gerador & $\nu\colon x\mapsto x^{\dagger}$ & $\nu^{2}=\mathrm{id}$ \\
+$L_2$ & $L_1\oplus L_1$ & $\nu\circ\nu=\mathrm{id}_K$; $T^{\dagger}=-T$ & bidual \\
+$L_3$ & $3\cdot L_1$ & $\tau$ no trial & $\tau^{3}=\mathrm{id}$ \\
+$L_4$ & $L_1\oplus L_3$ & $\rho_4(T)=T+T^{*}$ & $d\mapsto2d$ \\
+$L_5$ & $L_1\oplus L_4$ & $\rho_5(x)=ix$ & $i^{2}=-1$, $i^{4}=\mathrm{id}$ \\
+$L_6$ & $L_3\oplus L_3$ & $\oplus=\otimes$ na interface & $\operatorname{lcm}(2,3)=6$ \\
+$L_7$ & $-L_1$ & $\mathbb{H}\times\mathbb{H}^{*}$ & $\operatorname{Ind}^{8}=\mathrm{id}_{\mathcal L}$ \\
+\end{tabular}
+\end{center}
+
+Cruz: $x^{\times}=(x\oplus\nu(x),\;x\otimes\nu(x))$.
+
+\begin{proposicao}[interfaces derivadas dos períodos]\label{thm:periodos}
+\textbf{Períodos fundamentais:} $2$ ($\nu$), $3$ ($\tau$), $4$ ($i$),
+$8$ ($\operatorname{Ind}$). Os valores $6,12,24$ \textbf{não} são
+períodos fundamentais --- são \emph{interfaces derivadas}:
+\[
+6=\operatorname{lcm}(2,3),\quad
+12=\operatorname{lcm}(2,3,4),\quad
+24=\operatorname{lcm}(2,3,4,8).
+\]
+A igualdade é aritmética; a leitura como interface/régua é do modelo.
+\end{proposicao}
+
+\[
+\boxed{
+\underbrace{\mathbb{Z}/8\mathbb{Z}}_{\text{leis}}
+\;
+\underbrace{(\mathbb{N}_{>0},\mid)}_{\text{períodos/interfaces}}
+\;
+\underbrace{d_k=2^{k+1}}_{\text{torre}}
+\;
+\underbrace{C_k}_{\text{régua}}
+}
+\]
+Quatro objectos relacionados, não identificados.
+
+%======================================================================
+\section{Onde entram os milénios --- leituras, não base}\label{sec:milenio-leitura}
+
+Os problemas do milénio \textbf{não fundam} este corpo.
+A cadeia é
+\[\text{leis}\to\text{corpo}\to\text{torre}\to\text{realizações}\to\text{leitura dos milénios}.\]
+Nunca o inverso. Cada milénio é uma \emph{interpretação / derivação}
+da lei correspondente (paper \emph{Milénio}): reformular o enunciado
+cristalizado sobre o gerador vivo.
+A tabela abaixo diz \emph{onde} cada um entra; a verdade da linha é a
+da lei, ainda que o prémio não existisse.
+
+\begin{center}\small
+\begin{tabular}{@{}clll@{}}
+lei & operador (base) & milénio (leitura) & chão clássico \\
+\hline
+$0$ & $(+1)\oplus(-1)$; $0^{\dagger}=\infty$ & --- (dois nulos) & divisão do zero \\
+$1$ & $\nu\circ\nu=\mathrm{id}$ & Poincaré & dualidade $H^{k}\!\leftrightarrow\!H_{n-k}$ \\
+$2$ & $K^{**}=K$; rotor & Yang--Mills; $P$ vs $NP$ & parada / estatuto \\
+$3$ & trial $\{-1,0,+1\}$ & Riemann ($-1$); BSD ($+1$); Hodge ($0$) & Kronecker; Dirichlet; Lefschetz \\
+$4$ & $T+T^{*}$, $|\det|=1$ & Navier--Stokes & Liouville (metade conservativa) \\
+$5$ & $x^{2}=-1$ (bit $i$) & --- (sem milénio próprio) & $\mathbb{Z}[i]$ \\
+$6$ & $\oplus=\otimes$ (interface) & --- (costura) & $\operatorname{lcm}(2,3)=6$ \\
+$7$ & $\mathbb{H}\times\mathbb{H}^{*}$ & --- (topo / norma) & Hurwitz \\
+\end{tabular}
+\end{center}
+
+\noindent No corpo de Peano, a entrada concreta é:
+\begin{itemize}
+\item Lei~1 / $a=-1$: estaca na borda; leitura Poincaré.
+\item Lei~2 / $a=+1$: $\pm ix$; no centro $0$, leitura YM e $P$ vs $NP$.
+\item Lei~3: trial e zeta / Pisot (Riemann); órbita metálica (BSD);
+diagonal / tecidos (Hodge).
+\item Lei~4: indução $d\mapsto2d$ e $\lvert\det A_m\rvert=1$ (NS
+conservativo).
+\item Leis~5--6: bit $i$ e interface hexal --- sem milénio; costuram.
+\item Leis~0 e~7: nulos do catálogo; a torre $d_k$ continua.
+\end{itemize}
+
+%======================================================================
+\section{Régua dinâmica}
+
+\begin{proposicao}\label{prop:monotona}
+$C_k=12+6\lfloor k/3\rfloor$ monótona; $C_{k+3}=C_k+6$.
+$S=2^{30}$ fixo (mantissa); $C_k$ é a janela do andar.
+\[
+\boxed{S\text{ fixo},\quad C_k\text{ resolução}.}
+\qquad
+\boxed{\text{fecho da régua}\neq\text{fecho da torre}.}
+\]
+Empacotamento: $\mathrm{Regua}_k=30\cdot100+C_k$ (\code{tex\_core.c}).
+\end{proposicao}
+
+%======================================================================
+\section{Música e Partitura}\label{sec:musica}
+
+O corpo de Peano é a máquina. A cadeia de realizações
+\emph{não} retroage às leis:
+\[
+\text{leis}\to\text{corpo/torre}\to
+\text{música}\to\text{partitura}\to\text{naipes}\to
+\text{maestro}\to\text{orquestra}.
+\]
+Música $=$ realização particular; partitura $=$ codificação;
+naipes $=$ classificação de $G$; maestro $=$ interface; orquestra $=$
+composição de realizações.
+
+\begin{definicao}[Música]\label{def:musica}
+Uma \textbf{música} é um triplo
+\[
+\mathcal{M}\;=\;(d,\,S,\,G)
+\]
+onde
+\begin{itemize}
+\item $d\in\mathbb{N}_{>0}$ é a \textbf{dimensão} (grau / andar da torre
+$d_k=2^{k+1}$, ou o grau $n$ do corpo do catálogo);
+\item $S$ é o conjunto de \textbf{sementes} --- as condições iniciais da
+órbita (tipicamente o par dual da divisão do zero $\{0,\infty\}$, ou a
+semente da estrela-espiral que declara a geometria);
+\item $G$ é o \textbf{gerador} --- o \textbf{instrumento musical}: o
+operador que move o corpo. \textbf{Restrição de classe} deste modelo:
+músicas com $G$ no sector antissimétrico $G^{\dagger}=-G$ (Lei~2).
+Não se afirma que todo instrumento físico real satisfaz
+$G^{\dagger}=-G$ --- só os da classe aqui definida.
+\end{itemize}
+\[
+\boxed{\text{convenção: cada corpo do catálogo realiza-se como uma música}.}
+\]
+O catálogo indexa; a torre dá dimensão; $S$ escolhe órbita; $G$ toca.
+Isto não acrescenta axioma às leis.
+\end{definicao}
+
+\begin{proposicao}[duas músicas]\label{prop:duas-musicas}
+Fixados $d$ e $G$, sementes distintas $S\neq S'$ dão músicas distintas
+(órbitas distintas sob o mesmo instrumento). Fixada a semente, geradores
+não conjugados dão músicas distintas. A dimensão separa andares: se
+$d\neq d'$, as músicas não coincidem.
+\end{proposicao}
+
+\begin{definicao}[Partitura]\label{def:partitura}
+A \textbf{partitura} transporta a música em dois blocos:
+\[
+\Pi
+\;=\;
+\Pi_{\mathrm{assinatura}}
+\;+\;
+\Pi_{\mathrm{notação}},
+\]
+\[
+\Pi_{\mathrm{assinatura}}
+\;=\;
+(d,\,S,\,G,\,\ell,\,C,\,\Delta),
+\qquad
+\Pi_{\mathrm{notação}}
+\;=\;
+(P,\,\kappa,\,\alpha,\,\tfrac{n}{m},\,F,\,R,\,B,\,\omega),
+\]
+com $P$ pentagrama, $\kappa$ clave, $\alpha$ armadura, $\tfrac{n}{m}$
+compás, $F$ figuras, $R$ silêncios, $B$ barras, $\omega$ final.
+A assinatura classifica; a notação escreve. Nenhum bloco funda as leis.
+\[
+\boxed{
+\text{música}=\text{realização};\quad
+\text{partitura}=\text{assinatura}+\text{notação}.
+}
+\]
+\end{definicao}
+
+\begin{proposicao}[ida e volta relativa]\label{prop:partitura-id}
+Relativamente ao catálogo $\mathcal L$ e às regras de decodificação
+declaradas, ler e tocar é involutivo na classe: $\Pi$ determina
+$\mathcal{M}$ até conjugação de $G$, e $\mathcal{M}$ determina
+$\Pi_{\mathrm{assinatura}}$ (\code{tests/assinatura.c}).
+Autocontida \emph{relativamente} a esse catálogo e decodificador ---
+não em absoluto sem regras. $\Pi$ cavalga o corpo.
+\end{proposicao}
+
+\begin{observacao}
+Música $\neq$ partitura. A música \emph{soa} (dimensão, sementes,
+instrumento em acto). A partitura \emph{codifica} (assinatura finita,
+autocontida). O Peano é o piano; o catálogo é o reportório; cada entrada
+é uma peça; a partitura é a folha.
+\end{observacao}
+
+%----------------------------------------------------------------------
+\subsection*{O alfabeto da partitura}
+
+\begin{definicao}[Pentagrama musical]\label{def:pentagrama}
+O \textbf{pentagrama} é o suporte geométrico onde a partitura se escreve:
+cinco linhas e quatro espaços. No modelo, é a
+\textbf{realização particular} (não identidade estrutural) que associa
+o suporte escrito à Lei~5 (pental / bit $i$):
+\[
+\Pi_{\mathrm{penta}}\;:=\;5\text{ linhas}
+\quad\text{(convenção de realização)}.
+\]
+Não se prova pela Lei~5 que o pentagrama clássico tenha cinco linhas;
+escolhe-se a realização.
+É a régua do andar vista de frente: a altura (linha/espaço) endereça a
+altura sonora; o eixo horizontal endereça o tempo. Sem pentagrama não
+há sítio para as figuras --- como sem $C_k$ não há janela na torre.
+\end{definicao}
+
+\begin{definicao}[Clave]\label{def:clave}
+Uma \textbf{clave} é a âncora de leitura no pentagrama: fixa qual linha
+é a referência e, com ela, o isomorfismo entre posição e altura.
+\emph{Realização / interpretação:} escolha de referencial no
+pentagrama, lida como base dual --- duas leituras (aguda / grave)
+trocadas pela estaca $\nu$ (Lei~1):
+\[
+\mathrm{clave}_{\mathrm{sol}}
+\;\overset{\nu}{\longleftrightarrow}\;
+\mathrm{clave}_{\mathrm{fá}}.
+\]
+A clave não cria notas: escolhe o referencial. Instrumento distinto
+pode exigir clave distinta; a música $(d,S,G)$ declara-a na partitura.
+\end{definicao}
+
+\begin{definicao}[Figuras musicais]\label{def:figuras}
+As \textbf{figuras} são as durações sonoras activas --- potências de
+$1/2$ a partir da unidade (semibreve $=1$, mínima $=\tfrac12$,
+semínima $=\tfrac14$, \ldots):
+\[
+f_k\;=\;2^{-k},\qquad k\geq0.
+\]
+\emph{Realização:} potências de $1/2$ espelham a torre binária no
+tempo (analogia operacional com $d\mapsto2d$, não teorema de
+identidade).
+Uma figura ocupa posição no pentagrama (altura) e intervalo no
+compás (duração). Soa: medida não nula sob o instrumento $G$.
+\end{definicao}
+
+\begin{definicao}[Silêncios musicais]\label{def:silencios}
+Os \textbf{silêncios} são o dual das figuras: mesma duração, medida
+nula (não soa). A estaca troca
+\[
+\mathrm{figura}\;\overset{\nu}{\longleftrightarrow}\;\mathrm{silêncio}
+\]
+com $\nu\circ\nu=\mathrm{id}$ --- \emph{realização} da Lei~1 no
+alfabeto rítmico. O silêncio de compás inteiro \emph{interpreta}
+localmente a Lei~0. Sem silêncios a partitura não respira; sem figuras
+não há música.
+\end{definicao}
+
+\begin{definicao}[Armadura]\label{def:armadura}
+A \textbf{armadura} é o conjunto fixo de alterações (sustenidos /
+bemóis) à cabeça da partitura: escolhe a \textbf{órbita tonal} --- a
+semente metálica / o sinal de $\Delta$ --- sem a reescrever em cada
+figura.
+\[
+\mathrm{Armadura}\;=\;\text{semente tonal de }\mathcal{M}
+\;\subset\;S.
+\]
+É parte da assinatura: mesma dimensão e instrumento, armaduras
+distintas $\Rightarrow$ músicas distintas (Proposição~\ref{prop:duas-musicas}).
+\end{definicao}
+
+\begin{definicao}[Indicador de compás]\label{def:compas}
+O \textbf{indicador de compás} é o par
+\[
+\frac{n}{m}
+\]
+à cabeça da partitura: $n$ pulsos por compás, $m$ a figura que vale um
+pulso. Valores deste modelo: períodos fundamentais $\{2,3,4,8\}$ e
+interfaces derivadas $\{6,12,24\}$:
+\[
+m,n\in\{2,3,4,6,8,12,24\}.
+\]
+O compás é a janela rítmica (realização análoga a $C_k$). Hexal
+($6=\operatorname{lcm}(2,3)$) é interface, não período fundamental.
+\end{definicao}
+
+\begin{definicao}[Barra de compás]\label{def:barra}
+A \textbf{barra de compás} é a partição vertical que fecha um
+compás e abre o seguinte: \emph{realização} do corte no eixo do tempo
+(analogia com max-cut / Lei~0 local --- não identidade).
+\[
+|\;=\;\text{fronteira de medida};\qquad
+\|\;=\;\text{barra dupla (secção)}.
+\]
+Não dura: marca. Sem barras o indicador de compás não se materializa;
+com elas a partitura fica um reticulado temporal (viveiro no tempo).
+\end{definicao}
+
+\begin{definicao}[Final da partitura]\label{def:final}
+O \textbf{final da partitura} é o fecho autocontido: barra final
+(barra fina + barra grossa) --- a peça termina com resíduo $0$.
+\emph{Realização do fecho:} declara-se $\omega$ tal que a leitura
+termina com resíduo $0$ na classe (Proposição~\ref{prop:partitura-id}).
+A analogia com $\operatorname{Ind}^{8}=\mathrm{id}_{\mathcal L}$ e
+$\nu\circ\nu=\mathrm{id}$ é interpretativa: o final da peça
+\emph{usa} esses fechos, não os prova.
+\end{definicao}
+
+\begin{proposicao}[a partitura completa]\label{prop:partitura-completa}
+Uma partitura $\Pi$ declara, nesta ordem operacional:
+\begin{enumerate}
+\item pentagrama (suporte);
+\item clave (referencial);
+\item armadura (semente tonal);
+\item indicador de compás (janela rítmica);
+\item figuras e silêncios (alfabeto, duais);
+\item barras de compás (partições);
+\item final (fecho, resíduo $0$).
+\end{enumerate}
+Estes campos entram em $\Pi_{\mathrm{notação}}$
+(Def.~\ref{def:partitura}). Sem eles a notação está incompleta;
+a assinatura sozinha classifica mas não escreve a peça. Música $=$
+realização; partitura $=$ transporte --- nenhum funda as leis.
+\end{proposicao}
+
+%----------------------------------------------------------------------
+\subsection*{Os quatro naipes --- Hurwitz no instrumento}
+
+Hurwitz classifica as álgebras reais de composição com norma
+euclidiana multiplicativa: graus (dimensões da álgebra)
+$1,2,4,8$ --- $\mathbb{R},\mathbb{C},\mathbb{H},\mathbb{O}$
+(\emph{Corpo estelar}). Os \textbf{naipes} são uma
+\textbf{definição de realização} deste modelo: nomes musicais
+atribuídos a essas quatro classes do gerador $G$. Não é um teorema de
+Hurwitz que ``Cordas$=\mathbb{R}$''; é convenção do modelo. Não há
+quinto naipe porque não há quinta álgebra de composição.
+
+\begin{definicao}[Naipe]\label{def:naipe}
+Um \textbf{naipe} é uma classe de instrumentos $G$ indexada pelo
+\emph{grau de composição} (dimensão da álgebra de Hurwitz), não pela
+dimensão $d_k$ da torre nem pelo índice $\ell$ da lei:
+\[
+\mathrm{Naipe}\;\in\;\{\text{Cordas},\,\text{Madeiras},\,\text{Metais},\,\text{Percussão}\}.
+\]
+Cada música $\mathcal{M}=(d,S,G)$ declara o naipe do seu $G$. Distinguir:
+grau de composição $\in\{1,2,4,8\}$; dimensão real do espaço de estados;
+classe do gerador; índice de lei. A orquestra funde naipes por estrela.
+\[
+\boxed{\text{naipe}\;=\;\text{realização nomeada do grau Hurwitz}.}
+\]
+\end{definicao}
+
+\begin{center}\small
+\begin{tabular}{@{}cllll@{}}
+naipe & grau comp. & álgebra & o que perde na dobra & carácter do $G$ \\
+\hline
+\textbf{Cordas} & $1$ & $\mathbb{R}$ & --- (ordenado) & contínuo, ordem total, arco \\
+\textbf{Madeiras} & $2$ & $\mathbb{C}$ & a ordem & sopro, fase $i$, período $4$ \\
+\textbf{Metais} & $4$ & $\mathbb{H}$ & a comutação & família metálica $A_m$, bocal \\
+\textbf{Percussão} & $8$ & $\mathbb{O}$ & a associatividade & golpe discreto, Hurwitz conta \\
+\end{tabular}
+\end{center}
+
+\begin{definicao}[Cordas]\label{def:cordas}
+O naipe das \textbf{Cordas} \emph{realiza} (definição) o corpo real ($\mathrm{grau\ comp.}=1$): o
+instrumento vibra em contínuo com \textbf{ordem} --- altura total,
+arco / corda. $G$ preserva a ordem da régua. É a base da torre
+($A_0\sim\mathbb{R}$): sem cordas não há primeiro andar.
+\end{definicao}
+
+\begin{definicao}[Madeiras]\label{def:madeiras}
+O naipe das \textbf{Madeiras} \emph{realiza} o corpo complexo ($\mathrm{grau\ comp.}=2$): o
+sopro introduz a \textbf{fase} --- bit $i$, Lei~5 no tubo --- e perde a
+ordem real. $G\cong aI+bJ$ com $J^{\dagger}=-J$. A dobra
+$\mathbb{R}\to\mathbb{C}$ é o primeiro tecido: corda ordenada torna-se
+coluna de ar com período $4$.
+\end{definicao}
+
+\begin{definicao}[Metais]\label{def:metais}
+O naipe dos \textbf{Metais} \emph{realiza} o corpo quaternião ($\mathrm{grau\ comp.}=4$): a
+\textbf{família metálica} $A_m$ realizada no bocal --- norma
+$|N|=1$, $\det=-1$, não comuta. $G$ vive em $\mathbb{H}$; a dobra
+$\mathbb{C}\to\mathbb{H}$ perde a comutação. O nome coincide com a
+teoria: metais $=$ metálicas no instrumento.
+\end{definicao}
+
+\begin{definicao}[Percussão]\label{def:percussao}
+O naipe da \textbf{Percussão} \emph{realiza} o corpo octonião ($\mathrm{grau\ comp.}=8$): o
+golpe discreto --- \textbf{contar} (Hurwitz) sem associar. $G$ fecha a
+norma de composição; a dobra $\mathbb{H}\to\mathbb{O}$ perde a
+associatividade. É o topo da leitura pela norma (Lei~7); a estrela
+recomeça acima, mas o naipe pára em oito.
+\end{definicao}
+
+\begin{proposicao}[não há quinto naipe]\label{prop:quatro-naipes}
+A lista $\{\text{Cordas},\,\text{Madeiras},\,\text{Metais},\,\text{Percussão}\}$
+é exacta e esgotada: graus $1,2,4,8$. Fundir naipes é a estrela entre
+corpos de composição; o resultado sobe de grau na torre, sem inventar
+naipe novo. O indicador de compás e a armadura são ortogonais ao naipe
+(ritmo e tonalidade); o naipe classifica só o $G$.
+\end{proposicao}
+
+%----------------------------------------------------------------------
+\subsection*{Maestro e orquestra}
+
+O instrumento toca. O \textbf{maestro} \textbf{não} é entidade
+matemática necessária ao corpo operacional: é
+\textbf{interface da realização musical}
+$(\mathrm{relógio},\,\mathrm{inversor},\,\Pi)$ que casa tempo e
+dinâmica entre naipes. Sem música, o corpo não precisa de maestro.
+
+\begin{definicao}[Maestro]\label{def:maestro}
+O \textbf{maestro} é o operador de interface da música:
+\[
+\mathrm{Maestro}
+\;=\;
+\bigl(\underbrace{\text{relógio}}_{\text{Lei~6 / hexal}},\;
+\underbrace{\text{inversor}}_{\text{trial }\{-1,0,+1\}},\;
+\Pi\bigr).
+\]
+\begin{itemize}
+\item O \textbf{relógio} marca o pulso --- indicador de compás,
+barras, período; meia volta é a velocidade máxima
+(\emph{Corpo estelar}). Soma $=$ produto só na hexal: ler a batuta
+\emph{é} escrever o tempo nos naipes.
+\item O \textbf{inversor} modula --- trial $\{-1,0,+1\}$: retrair,
+neutro, empurrar (piano / niente / forte; deixar / esperar / atacar).
+Não armazena buffer: escolhe o vector a cada instante
+(\code{tests/inversor\_trial.c}).
+\item $\Pi$ é a partitura (assinatura+notação, relativa ao
+decodificador); o maestro não guarda estado além do declarado.
+\end{itemize}
+\[
+\boxed{
+\text{maestro}\;\notin\;\{\text{naipes}\};
+\quad
+\text{maestro}\;=\;\text{relógio}\oplus\text{inversor na partitura}.
+}
+\]
+\end{definicao}
+
+\begin{proposicao}[fecho operacional do maestro]\label{prop:maestro-fecha}
+\textbf{Se} o maestro realiza um único relógio (Lei~6) e um único
+inversor (trial) partilhados por todos os $G_i$, e a partitura $\Pi$
+é a mesma, \textbf{então} a fusão opera com resíduo $0$ no sentido do
+casamento de relógios (\emph{Corpo estelar}, factor de potência).
+Isto é definição operacional / hipótese de execução --- não teorema
+independente ``o maestro prova o resíduo $0$''. Sem maestro comum,
+cada naipe pode correr o seu relógio e a fusão desafina.
+\end{proposicao}
+
+\begin{definicao}[Orquestra]\label{def:orquestra}
+Uma \textbf{orquestra} $\mathcal{O}$ é a fusão por estrela de um
+conjunto de naipes (instrumentos $G$ classificados), sob um maestro:
+\[
+\mathcal{O}
+\;=\;
+\mathrm{Estrela}\bigl(\{G_i\},\;\mathrm{Maestro}\bigr).
+\]
+Os naipes não se colam num produto interno único: a estrela liga sem
+fundir (\emph{Catálogo}). A espécie da orquestra é o \textbf{suporte}
+em graus de Hurwitz que ela realiza.
+\end{definicao}
+
+\begin{definicao}[Orquestra sinfónica / filarmónica]\label{def:sinfonica}
+\textbf{Convenção deste modelo:} sinfónica e filarmónica recebem a
+\emph{mesma} realização operacional --- suporte completo dos quatro
+graus de composição:
+\[
+\mathrm{supp}(\mathcal{O}_{\mathrm{sinf}})
+\;=\;
+\mathrm{supp}(\mathcal{O}_{\mathrm{fil}})
+\;=\;
+\{1,2,4,8\}.
+\]
+Não se afirma como facto universal da música histórica que sejam o
+mesmo objecto; aqui igualam-se por definição de realização. Os nomes
+permanecem distintos na linguagem; o suporte Hurwitz coincide.
+\end{definicao}
+
+\begin{definicao}[Orquestra de câmara]\label{def:camara}
+A \textbf{orquestra de câmara} é a fusão \textbf{reduzida}: suporte
+próprio em graus de Hurwitz, mas cardinalidade e interface menores
+--- viveiro com $\operatorname{lcm}$ curto, janela $C$ de câmara.
+\[
+\mathrm{supp}(\mathcal{O}_{\mathrm{câm}})
+\;\subseteq\;
+\{1,2,4,8\},
+\qquad
+|\mathcal{O}_{\mathrm{câm}}|
+\;\ll\;
+|\mathcal{O}_{\mathrm{sinf}}|.
+\]
+Pode usar vários naipes em miniatura; o que a distingue é a
+\textbf{escala} (câmara $=$ interface pequena), não a proibição de um
+naipe. O maestro continua: relógio + inversor em $\Pi$, com menos
+vozes a casar.
+\end{definicao}
+
+\begin{definicao}[Orquestra de cordas]\label{def:orq-cordas}
+A \textbf{orquestra de cordas} é a orquestra cujo suporte é
+\textbf{só} o naipe das Cordas:
+\[
+\mathrm{supp}(\mathcal{O}_{\mathrm{cord}})
+\;=\;
+\{1\}
+\;=\;
+\{\text{Cordas}\}.
+\]
+Grau $1$ ($\mathbb{R}$, ordem): arco e altura total, sem madeiras,
+metais nem percussão. O maestro reduz-se ao relógio + inversor sobre
+um único corpo de composição --- ainda interface, nunca quinto naipe.
+\end{definicao}
+
+\begin{proposicao}[ordem por suporte e escala]\label{prop:orq-hier}
+Não se afirma inclusão de conjuntos de músicos. Define-se a relação
+$\preceq$ por suporte Hurwitz e escala (cardinalidade / $\operatorname{lcm}$
+da interface):
+\[
+\mathrm{supp}(\mathcal{O}_{\mathrm{cord}})=\{1\}
+\;\subseteq\;
+\mathrm{supp}(\mathcal{O}_{\mathrm{câm}})
+\;\subseteq\;
+\{1,2,4,8\}
+\;=\;
+\mathrm{supp}(\mathcal{O}_{\mathrm{sinf}})
+\;=\;
+\mathrm{supp}(\mathcal{O}_{\mathrm{fil}}),
+\]
+e tipicamente $|\mathcal{O}_{\mathrm{câm}}|\ll|\mathcal{O}_{\mathrm{sinf}}|$.
+Uma orquestra de câmara \textbf{não} é automaticamente subestrutura
+de uma sinfónica: só o suporte/escala se comparam. Toda orquestra leva
+maestro.
+\[
+\boxed{
+\text{ordem}\;=\;\text{suporte/escala},\ \text{não}\ \subset\ \text{de elenco}.
+}
+\]
+\end{proposicao}
+
+
+%======================================================================
+\section{Camadas e auditoria}\label{sec:auditoria}
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+camada & o que é & não é \\
+\hline
+leis & operadores fundamentais & milénios, música \\
+catálogo & $\mathbb{Z}/8\mathbb{Z}$ & dimensão $d_k$ \\
+torre & indução dimensional $d_k=2^{k+1}$ & período 8 das leis \\
+reticulado & $(\mathbb{N}_{>0},\mid)$, lcm/gcd & anel de leis \\
+música & realização $(d,S,G)$ & axioma \\
+partitura & assinatura $+$ notação & o som \\
+naipes & classificação Hurwitz de $G$ & teorema de nomes \\
+maestro & interface (não necessária ao corpo) & quinto naipe \\
+orquestra & fusão $\mathrm{Estrela}(\{G_i\},\mathrm{Maestro})$ & um naipe \\
+milénios & leituras das leis & base \\
+\end{tabular}
+\end{center}
+
+\begin{center}\small
+\begin{tabular}{@{}clllll@{}}
+lei & operador & realização & fecho & na torre & na música/partitura \\
+\hline
+0 & $(+1)\oplus(-1)$ & nulos; $0^{\dagger}=\infty$ & nulo & índice, não $d=0$ & silêncio (intér.) \\
+1 & $\nu$ & estaca & $\nu^{2}=\mathrm{id}$ & dual em cada andar & clave; fig.$\leftrightarrow$sil. \\
+2 & $T^{\dagger}=-T$ & rotor $\pm i$ & período 4 & bidual / centro & gerador $G$ (classe) \\
+3 & $\tau$ & trial & $\tau^{3}=\mathrm{id}$ & sinais & inversor do maestro \\
+4 & $T+T^{*}$ & tecidos & $d\mapsto2d$ & dobra & figuras $2^{-k}$ (intér.) \\
+5 & $ix$ & bit $i$ & $i^{4}=\mathrm{id}$ & pental & pentagrama (realização) \\
+6 & $\oplus=\otimes$ & hexal / relógio & interfaces $6,12,24$ & interface & relógio do maestro \\
+7 & $\mathbb{H}\times\mathbb{H}^{*}$ & octonião dual & $\mathrm{Ind}^{8}=\mathrm{id}$ & topo norma & final (intér.); naipes \\
+\end{tabular}
+\end{center}
+
+\noindent Não há Lei~$8$: $\operatorname{Ind}^{8}=\mathrm{id}_{\mathcal L}$ é o
+fecho do catálogo.
+
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+bloco & estatuto correcto \\
+\hline
+Leis $0$--$7$ & estrutura / base \\
+Catálogo $\mathbb{Z}/8\mathbb{Z}$ & estrutura \\
+Torre $d_k$ & construção \\
+Metálica / borda / $bx^{a}$ / Pisot & teoremas \\
+Massa / max-cut & teorema (Dualsort) \\
+Gentil--Hurwitz (aqui) & citação / proposição de uso \\
+Cantor / Peano & construção / definição \\
+Períodos $2,3,4,8$ & fechos das representações \\
+Interfaces $6,12,24$ & derivadas ($\operatorname{lcm}$) \\
+Milénios & \textbf{interpretação} \\
+Música & definição / realização \\
+Partitura & definição (assinatura $+$ notação) \\
+Alfabeto musical & realização \\
+Naipes & classificação da realização \\
+Maestro & interface (não necessária ao corpo) \\
+Orquestra & realização / fusão \\
+Sinfónica $=$ Filarmónica & convenção do modelo \\
+\end{tabular}
+\end{center}
+
+\[
+\boxed{
+\text{Matemática constrói o corpo;}
+\quad
+\text{música realiza o corpo;}
+\quad
+\text{partitura o transporta como assinatura.}
+}
+\]
+
+\section{$\lambda$ binária e $\phi_K$ ternária}
+
+\code{peano.png}: $\lambda((x_n))=\sum x_n/2^n$.
+\code{peano\_dual.c}: trial, $\Lambda_K$. Não são a mesma curva.
+
+\bigskip
+\noindent\textbf{Verificação.} \code{tests/corpo\_peano.c} §CP1--§CP36:
+consistência final; dependências lógicas; milénios subordinados.
+
+\end{document}

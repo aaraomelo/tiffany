@@ -38,12 +38,14 @@
     "livro.tex",
     "papers/arquitetura.tex",
     "papers/corpo-estelar.tex",
+    "papers/corpo_peano.tex",
     "papers/dualsort.tex",
     "papers/estilo.tex",
     "papers/fisica.tex",
     "papers/gkcapa.tex",
     "papers/medida.tex",
     "papers/milenio.tex",
+    "papers/torre_induc.tex",
     "teoria.tex"
   ]
 }

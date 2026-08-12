@@ -99,6 +99,10 @@
     {
       "nome": "A Arquitetura — o tradutor .tex ↔ PDF",
       "arquivo": "/docs/arquitetura.pdf"
+    },
+    {
+      "nome": "O Corpo de Peano — borda metálica, música e a torre",
+      "arquivo": "/docs/corpo-peano.pdf"
     }
   ],
   "secoes": [

@@ -125,7 +125,8 @@ const ATUALIZADO_BR = dataCurta(ATUALIZADO)
 function docs(dd) {
   const ic = { 'enredo.pdf': '📜', 'teoria.pdf': '📐', 'catalogo.pdf': '📖', 'livro.pdf': '📚',
                'corpo-estelar.pdf': '⭐', 'dualsort.pdf': '🔀', 'fisica.pdf': '⚛️',
-               'medida.pdf': '📏', 'milenio.pdf': '∞', 'arquitetura.pdf': '🏗️' }
+               'medida.pdf': '📏', 'milenio.pdf': '∞', 'arquitetura.pdf': '🏗️',
+               'corpo-peano.pdf': '🎵' }
   const items = dd.map((d) => {
     const key = d.arquivo.split('/').pop()
     return `<a class="doc" href="${esc(d.arquivo)}" target="_blank" rel="noopener">
@@ -269,12 +270,17 @@ document.addEventListener('click', async (ev) => {
   if (antes) antes.textContent = 'a compor no browser…'
   a.setAttribute('aria-busy', 'true')
   try {
-    const { ms, disco } = await abrirDoc(id, janela)
+    const { ms, disco, estrela } = await abrirDoc(id, janela)
     if (antes) {
       const origem = disco && disco.origem ? disco.origem.replace('fetch+LS', 'LS') : '?'
       const miss = disco && disco.poeN != null ? disco.poeN : '?'
       const bit = disco && disco.bit1 ? ' · 1 bit' : ''
-      antes.textContent = `PDF · ${ms} ms · ${origem} · miss ${miss}${bit}`
+      const dim = estrela && estrela.dim != null ? ` · dim ${estrela.dim}` : ''
+      const iface = estrela && estrela.iface != null ? ` · if ${estrela.iface}` : ''
+      const induc = estrela && estrela.induc != null ? ` · ind ${estrela.induc}` : ''
+      const gentil = estrela && estrela.gentil ? ' · Gentil' : ''
+      const regua = estrela && estrela.reguaC != null ? ` · C${estrela.reguaC}` : ''
+      antes.textContent = `PDF · ${ms} ms · ${origem} · miss ${miss}${dim}${iface}${induc}${gentil}${regua}${bit}`
     }
   } catch (e) {
     console.error('[tex.wasm]', e)

@@ -26,6 +26,7 @@ const DOCS = {
   medida: 'papers/medida.tex',
   milenio: 'papers/milenio.tex',
   arquitetura: 'papers/arquitetura.tex',
+  'corpo-peano': 'papers/corpo_peano.tex',
 }
 
 let motor = null // { exports, poe: Set, cache: Map, miss: { n, bytes } }
@@ -34,6 +35,76 @@ let corpo = null // { origem, mapa, ms, msFetch, msGrava }
 function num (x) {
   // long → i64 no módulo: o motor devolve BigInt; os índices do ArrayBuffer pedem Number
   return typeof x === 'bigint' ? Number(x) : x
+}
+
+function parseRegua (v) {
+  if (v == null) return { reguaL: null, reguaC: null }
+  return { reguaL: Math.floor(v / 100), reguaC: v % 100 }
+}
+
+/** Lê /SementeEstrela do PDF — a torre viaja no documento. */
+function parseSemente (latin) {
+  const i = latin.indexOf('/Type/SementeEstrela')
+  if (i < 0) return null
+  const chunk = latin.slice(i, i + 400)
+  const numF = (k) => {
+    const m = chunk.match(new RegExp('/' + k + '\\s+(\\d+)'))
+    return m ? Number(m[1]) : null
+  }
+  const piN = numF('PiN')
+  const lado = numF('Lado')
+  const { reguaL, reguaC } = parseRegua(numF('Regua'))
+  return {
+    alcance: numF('Alcance'),
+    dim: numF('Dim'),
+    induc: numF('Induc'),
+    lado,
+    norma: numF('Norma'),
+    iface: numF('Interface'),
+    reguaL,
+    reguaC,
+    pi: piN != null ? piN / 1e9 : null,
+    gentil: lado === 1,
+  }
+}
+
+/** Lê /AssinaturaOito — selo Lei 8; TorreDim/TorreN sobem com a torre. */
+function parseAssinatura (latin) {
+  const i = latin.indexOf('/Type/AssinaturaOito')
+  if (i < 0) return null
+  const chunk = latin.slice(i, i + 120)
+  const numF = (k) => {
+    const m = chunk.match(new RegExp('/' + k + '\\s+(\\d+)'))
+    return m ? Number(m[1]) : null
+  }
+  return { n: numF('N'), torreDim: numF('TorreDim'), torreN: numF('TorreN') }
+}
+
+/** Lê /AssinaturaTorre — selo Gentil (dim≥16); NTT min(512, dim·32). */
+function parseAssinaturaTorre (latin) {
+  const i = latin.indexOf('/Type/AssinaturaTorre')
+  if (i < 0) return null
+  const chunk = latin.slice(i, i + 120)
+  const numF = (k) => {
+    const m = chunk.match(new RegExp('/' + k + '\\s+(\\d+)'))
+    return m ? Number(m[1]) : null
+  }
+  const a = latin.indexOf('[', i)
+  if (a < 0) return { n: numF('N'), torreDim: numF('TorreDim'), sel: null }
+  const sel = []
+  let w = a + 1
+  const dig = (w) => latin.charCodeAt(w) - 48
+  while (w < latin.length && latin[w] !== ']' && sel.length < 4096) {
+    while (w < latin.length && latin[w] === ' ') w++
+    if (latin[w] === ']') break
+    let u = 0
+    while (w < latin.length && latin.charCodeAt(w) >= 48 && latin.charCodeAt(w) <= 57) {
+      u = u * 10 + dig(w)
+      w++
+    }
+    sel.push(u)
+  }
+  return { n: numF('N'), torreDim: numF('TorreDim'), sel }
 }
 
 function memView (E) {
@@ -232,6 +303,7 @@ export async function comporDoc (id) {
     throw new Error('Alonzo: falta /SementeEstrela — a composição não viajou')
   if (!latin.includes('/Type/AssinaturaOito'))
     throw new Error('Caelum (Lei 8): falta /AssinaturaOito — o esqueleto não assinou')
+  const estrela = parseSemente(latin)
   const poe = {
     n: motor.miss.n,
     bytes: motor.miss.bytes,
@@ -248,6 +320,7 @@ export async function comporDoc (id) {
     bytes: out,
     ms: Math.round(performance.now() - t0),
     fonte,
+    estrela,
     disco: {
       origem: c.origem,
       msCorpo: c.ms,
@@ -271,7 +344,7 @@ export async function comporDoc (id) {
 /** Compõe e abre o PDF. `janela` (opcional) é um tab já aberto no click
  *  síncrono — senão o browser bloqueia o popup depois do await. */
 export async function abrirDoc (id, janela) {
-  const { bytes, ms, disco } = await comporDoc(id)
+  const { bytes, ms, disco, estrela } = await comporDoc(id)
   const url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }))
   if (janela && !janela.closed) {
     janela.location = url
@@ -279,7 +352,7 @@ export async function abrirDoc (id, janela) {
     window.open(url, '_blank', 'noopener')
   }
   setTimeout(() => URL.revokeObjectURL(url), 60_000)
-  return { ms, disco }
+  return { ms, disco, estrela }
 }
 
 export function idDeArquivo (href) {

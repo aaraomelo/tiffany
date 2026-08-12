@@ -1,0 +1,30 @@
+% papers/torre_induc.tex — prova de indução dos tecidos (T+T*) na espiral.
+% Escalada formal: papers/corpo_peano.tex
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[portuguese]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage[margin=2.5cm]{geometry}
+\newcommand{\code}[1]{\texttt{#1}}
+\begin{document}
+\noindent\textbf{Torre por indução} --- o passo $T_{k+1}=T_k+T_k^{*}$ sobe um andar de cada vez;
+cada \texttt{\^{}\{...\}} é um giro do inversor.
+\[
+  a^{\,b^{\,c^{\,d^{\,e^{\,f^{\,g}}}}}}\,.
+\]
+Seis níveis: dimensão da torre $d_6=128$, interface $\iota_6=24$
+(família $6\to12\to24$). A dimensão da torre \textbf{não} é o índice da lei.
+
+\medskip\noindent Quatro objectos, relacionados e não identificados
+(\code{papers/corpo\_peano.tex}):
+\[
+\underbrace{\mathbb{Z}/8\mathbb{Z}}_{\text{leis}}
+\qquad
+\underbrace{(\mathbb{N}_{>0},\mid)}_{\text{períodos}}
+\qquad
+\underbrace{d_k=2^{k+1}}_{\text{torre}}
+\qquad
+\underbrace{C_k=12+6\lfloor k/3\rfloor}_{\text{régua}}.
+\]
+O período oito é do catálogo ($\ell_{m+8}=\ell_m$); a torre cresce.
+Verificação: \code{tests/corpo\_peano.c}, \code{tests/torre\_induc.js}.
+\end{document}

@@ -112,9 +112,125 @@ function ok (q, cond) {
   const pdf = Buffer.from(mem().slice(end, end + tam)).toString('latin1')
   const lei7 = pdf.includes('/Type/SementeEstrela')   /* composição viaja (circuito) */
   const lei8 = pdf.includes('/Type/AssinaturaOito')   /* Caelum assina */
-  console.log(`   §U2 rc=${rc} tam=${tam} Semente=${lei7} AssinaturaOito=${lei8}`)
+  const migra = pdf.includes('/Interface ') && pdf.includes('/Lado ') && pdf.includes('/PiN ')
+    && pdf.includes('/Regua ')
+  const torre = pdf.includes('/TorreDim ')
+  const if6 = /\/Interface\s+6\b/.test(pdf)
+  console.log(`   §U2 rc=${rc} tam=${tam} Semente=${lei7} AssinaturaOito=${lei8} contrato=${migra} torre=${torre} if=${if6}`)
   ok('§U2 dualsort: Lei 7 (semente no circuito) e Lei 8 (selo Caelum) no mesmo PDF',
     rc === 0 && tam > 1e5 && lei7 && lei8 && pdf.includes('%%EOF'))
+  ok('§U2b migração régua: /Lado /Interface /PiN /Regua /Norma /Induc viajam na SementeEstrela',
+    migra && pdf.includes('/Norma ') && pdf.includes('/Induc '))
+  ok('§U2c interface hexal (6) no dualsort — 1.º ciclo da família', if6)
+  ok('§U2d selo parametrizado: /TorreDim /TorreN no AssinaturaOito', torre)
+  ok('§U2e Gentil dim≥16: /AssinaturaTorre N=min(512,dim·32) no arquitetura',
+    await (async () => {
+      const arq = 'papers/arquitetura.tex'
+      if (!fs.existsSync(path.join(RAIZ, arq))) return false
+      const cache = new Map()
+      for (const f of man.ficheiros) {
+        const p = path.join(RAIZ, f)
+        if (fs.existsSync(p)) cache.set(f, fs.readFileSync(p))
+      }
+      const poeSet = new Set()
+      const mem2 = () => new Uint8Array(E2.DISCO.buffer)
+      function res2 (n) {
+        const p = num(E2.vfs_reserva(n))
+        if (!p) throw new Error('vfs')
+        return p
+      }
+      function poeStr2 (s) {
+        const nb = Buffer.from(s, 'latin1')
+        const p = res2(nb.length + 1)
+        mem2().set(nb, p); mem2()[p + nb.length] = 0
+        return p
+      }
+      function poeFich2 (nome, bytes) {
+        const pN = poeStr2(nome)
+        const pD = res2(Math.max(bytes.length, 0) + 1)
+        if (bytes.length) mem2().set(bytes, pD)
+        mem2()[pD + bytes.length] = 0
+        if (!E2.poe_ficheiro(pN, pD, bytes.length)) throw new Error('poe ' + nome)
+        poeSet.add(nome)
+      }
+      const fichMiss = (ptr) => {
+        const v = mem2()
+        let s = ''
+        for (let i = ptr; i < v.length && v[i]; i++) s += String.fromCharCode(v[i])
+        const can = disco.resolveCorpoNome(s, cache)
+        if (!can || !cache.has(can)) return 0
+        if (poeSet.has(can)) return 1
+        poeFich2(can, cache.get(can))
+        return 1
+      }
+      const E2 = instanciaTex(fs.readFileSync(TEX), fichMiss).exports
+      E2.inicia_wasm()
+      if (typeof E2.marca_vfs === 'function') E2.marca_vfs()
+      E2.limpa_saida()
+      const rcA = num(E2.compila_ficheiro(poeStr2(arq), poeStr2('arq.pdf')))
+      if (rcA !== 0) return false
+      const tamA = num(E2.tam_saida())
+      const endA = porta.absorve(E2, 14)
+      const pdfA = Buffer.from(mem2().slice(endA, endA + tamA)).toString('latin1')
+      return pdfA.includes('/Type/AssinaturaTorre') && /\/AssinaturaTorre\/N\s+512\b/.test(pdfA)
+    })().catch(() => false))
+
+  ok('§U2f torre_induc: dim 128, interface 24, AssinaturaTorre N=4096',
+    await (async () => {
+      const arq = 'papers/torre_induc.tex'
+      if (!fs.existsSync(path.join(RAIZ, arq))) return false
+      const cache = new Map()
+      for (const f of man.ficheiros) {
+        const p = path.join(RAIZ, f)
+        if (fs.existsSync(p)) cache.set(f, fs.readFileSync(p))
+      }
+      const poeSet = new Set()
+      const mem2 = () => new Uint8Array(E2.DISCO.buffer)
+      function res2 (n) {
+        const p = num(E2.vfs_reserva(n))
+        if (!p) throw new Error('vfs')
+        return p
+      }
+      function poeStr2 (s) {
+        const nb = Buffer.from(s, 'latin1')
+        const p = res2(nb.length + 1)
+        mem2().set(nb, p); mem2()[p + nb.length] = 0
+        return p
+      }
+      function poeFich2 (nome, bytes) {
+        const pN = poeStr2(nome)
+        const pD = res2(Math.max(bytes.length, 0) + 1)
+        if (bytes.length) mem2().set(bytes, pD)
+        mem2()[pD + bytes.length] = 0
+        if (!E2.poe_ficheiro(pN, pD, bytes.length)) throw new Error('poe ' + nome)
+        poeSet.add(nome)
+      }
+      const fichMiss2 = (ptr) => {
+        const v = mem2()
+        let s = ''
+        for (let i = ptr; i < v.length && v[i]; i++) s += String.fromCharCode(v[i])
+        const can = disco.resolveCorpoNome(s, cache)
+        if (!can || !cache.has(can)) return 0
+        if (poeSet.has(can)) return 1
+        poeFich2(can, cache.get(can))
+        return 1
+      }
+      const E2 = instanciaTex(fs.readFileSync(TEX), fichMiss2).exports
+      E2.inicia_wasm()
+      for (const f of disco.ficheirosPara(arq, man.ficheiros)) {
+        if (cache.has(f)) poeFich2(f, cache.get(f))
+      }
+      poeFich2(arq, fs.readFileSync(path.join(RAIZ, arq)))
+      if (typeof E2.marca_vfs === 'function') E2.marca_vfs()
+      E2.limpa_saida()
+      const rcA = num(E2.compila_ficheiro(poeStr2(arq), poeStr2('torre.pdf')))
+      if (rcA !== 0) return false
+      const tamA = num(E2.tam_saida())
+      const endA = porta.absorve(E2, 14)
+      const pdfA = Buffer.from(mem2().slice(endA, endA + tamA)).toString('latin1')
+      return /\/Dim\s+128\b/.test(pdfA) && /\/Interface\s+24\b/.test(pdfA) &&
+        /\/AssinaturaTorre\/N\s+4096\b/.test(pdfA)
+    })().catch(() => false))
 
   /* ─── §U3 banco de páginas: 1 bit lógico, grow fica ──────────────────────────────── */
   const pagAntes = E.DISCO.buffer.byteLength
