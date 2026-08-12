@@ -1,8 +1,8 @@
 {
   "medido_por": "tools/corpo.sh — fopen interceptado, não lista à mão",
   "regra": "o front serve estes de onde eles estão; nada é copiado para o dist",
-  "soma": "c5929d1a75952d82",
-  "bytes": 5122328,
+  "soma": "d0feb8920c508c94",
+  "bytes": 5123244,
   "ficheiros": [
     "catalogo.tex",
     "enredo.tex",

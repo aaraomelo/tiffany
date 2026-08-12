@@ -1,8 +1,8 @@
 % papers/partitura.tex
-% Partitura do Tradutor --- desenhada pelo tradutor .tex↔PDF (tex.wasm).
-% Alinhada ao gabarito LilyPond (partitura/render/tradutor-completo.pdf):
-%   StaffGroup, 8 compassos × 4 tempos, mesmo relógio em todas as vozes.
-% Léxico: \note → ♪ (U+266A). LilyPond em partitura/ só grava.
+% Partitura do Tradutor --- DESENHADA pelo tradutor (tex.wasm).
+% Produto = partitura no pentagrama (eval). Tabela = só auditoria.
+% Gabarito tipográfico: partitura/render/tradutor-completo.pdf
+% Léxico: \note → ♪. Pauta: \rule. Overlay: \vspace negativo.
 %
 %   tests/tex papers/partitura.tex saida.pdf
 \documentclass[11pt,a4paper]{article}
@@ -18,37 +18,48 @@
 \newtheorem{observacao}{Observação}
 \newcommand{\code}[1]{\texttt{#1}}
 
-% ─── glifos do relógio (mesmo padrão do gabarito emite.c / LilyPond) ─────────
-\newcommand{\N}{\note}                 % ataque
-\newcommand{\Rr}{\ensuremath{\cdot}}   % silêncio / descanso
-% um compasso = 4 tempos (células da tabela alinhadas entre vozes)
-\newcommand{\barA}{\N\N\N\N}           % quatro ataques (metr./cordas/...)
-\newcommand{\barB}{\N\Rr\N\Rr}         % ataque-pausa (batuta/percussão)
-\newcommand{\barC}{\Rr\N\Rr\N}         % pausa-ataque (batuta alternada)
-\newcommand{\barM}{\N\Rr\Rr\Rr}        % semibreve ≈ ataque + 3 pausas (maestro)
+\newcommand{\N}{\note\,}
+\newcommand{\Rr}{\ensuremath{\cdot}\,}
+\newcommand{\Bb}{|\,}
+
+% \rule parte SEMPRE da margem --- notas tambem \noindent (sem \quad).
+\newcommand{\Penta}{%
+\noindent\rule{15.4cm}{0.32pt}\\[-1.55mm]%
+\noindent\rule{15.4cm}{0.32pt}\\[-1.55mm]%
+\noindent\rule{15.4cm}{0.32pt}\\[-1.55mm]%
+\noindent\rule{15.4cm}{0.32pt}\\[-1.55mm]%
+\noindent\rule{15.4cm}{0.32pt}%
+}
+\newcommand{\PentaUm}{\noindent\rule{15.4cm}{0.32pt}}
+
+% #1 nome #2 papel #3 pauta #4 vspace-neg (puxa notas para a pauta)
+\newcommand{\VozAbre}[4]{%
+\par\medskip\noindent\begin{minipage}{15.5cm}%
+\textbf{#1}\quad{\small\color{regua}#2}\par\nobreak
+#3\par\nobreak
+\vspace{#4}%
+\noindent
+}
 
 \input{gkcapa}
 \begin{document}
 \gkcapa{Partitura do Tradutor}
        {$\Pi_{\mathrm{tradutor}}\longmapsto\Pi_{\mathrm{musical}}$}
-       {StaffGroup no tradutor --- alinhado ao gabarito LilyPond}
+       {o sistema inteiro desenhado no pentagrama --- um relógio}
 \maketitle
 
 \begin{abstract}
-\noindent Especificação musical do sistema, composta pelo tradutor
-\texttt{.tex}$\leftrightarrow$PDF. O léxico mapeia \verb|\note| ao glifo ♪;
-o \textbf{StaffGroup} é uma tabela cujas colunas são o mesmo tick em todas
-as vozes --- a mesma geometria do gabarito
-\code{partitura/render/tradutor-completo.pdf}. Objectivo:
+\noindent Produto deste paper: a \textbf{partitura desenhada} do sistema ---
+não uma tabela. Pentagrama por \verb|\rule|; figura por \verb|\note| (♪);
+oito vozes no mesmo fluxo temporal. Cadeia:
 \[
 \boxed{
-\Pi_{\mathrm{tradutor}}
-\;\longmapsto\;
-\Pi_{\mathrm{musical}}
-\quad(\text{todas as vozes sincronizadas}).
+\text{corpo}
+\to\pi_k\to\Pi\to\text{Maestro}\to\text{vozes}\to\text{partitura}.
 }
 \]
-LilyPond (\code{partitura/emite.c}) só grava; não inventa campos.
+O pentagrama \textbf{não} é visualização de dados: é a realização musical
+da assinatura. LilyPond (\code{partitura/emite.c}) só grava.
 \end{abstract}
 
 \section{Objectivo}
@@ -64,81 +75,87 @@ LilyPond (\code{partitura/emite.c}) só grava; não inventa campos.
 \text{Orquestra}
 }
 \]
-Estado $\to$ $\Pi$ $\to$ vozes paralelas $\to$ execução sincronizada.
+Maestro $=$ tempo comum; Batuta $=$ direcção; $\Pi=$ conteúdo; naipes $=$
+vozes; pentagrama $=$ realização.
 
-\section{Gabarito e relógio}
+\section{Como o tradutor desenha}
 
-\begin{definicao}[StaffGroup Tiffany]
-Oito vozes $\times$ oito compassos $\times$ quatro tempos. Cada
-\textbf{coluna} da tabela é um compasso; a mesma coluna em todas as
-linhas é o \textbf{mesmo instante} (como as barras do StaffGroup LilyPond).
+\begin{definicao}[Pentagrama]
+Cinco \verb|\rule{15.4cm}{0.32pt}| --- a régua do Reino. Metrónomo: uma
+linha (gabarito LilyPond).
+\end{definicao}
+
+\begin{definicao}[Nota]
+\verb|\note| no léxico $\mapsto$ U+266A na OTF $\mapsto$ Form XObject
+(como \verb|\alpha| na Symbol).
 \end{definicao}
 
 \begin{observacao}
-Ritmos = os de \code{emite tradutor}: Metrónomo e naipes em semínimas
-contínuas; Batuta e Percussão em ataque-pausa; Maestro em semibreves
-(um ataque por compasso); Lei~8 no ciclo de oito graus.
+Pauta primeiro; \verb|\vspace| negativo; notas sobem ao meio do
+pentagrama. Coluna comum $=$ barras verticais $|$ no mesmo sítio em
+todas as vozes --- não uma tabela.
 \end{observacao}
 
 \section{A partitura do sistema}
 
-\noindent{\small Dim$=$8 · Alcance$=$3 · Lado$=$0 · Iface$=$6 · bpm$=$72 ·
-8 compassos · \texttt{\string\time} 4/4}\par\medskip
+\noindent{\small Dim$=$8 · Alcance$=$3 · Lado$=$0 · Iface$=$6 ·
+Metronomo ($q{=}72$) · 8 compassos · 4/4}\par
 
-\noindent
+\VozAbre{Metronomo}{pulso / Lei 6}{\PentaUm}{-2.4mm}%
+\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N%
+\end{minipage}
+
+\VozAbre{Batuta}{clave F --- direcção $I$}{\Penta}{-5.6mm}%
+\N\Rr\N\Rr\Bb\Rr\N\Rr\N\Bb\N\Rr\N\Rr\Bb\Rr\N\Rr\N\Bb\N\Rr\N\Rr\Bb\Rr\N\Rr\N\Bb\N\Rr\N\Rr\Bb\Rr\N\Rr\N%
+\end{minipage}
+
+\VozAbre{Maestro}{clave G --- projecção $\pi_k$}{\Penta}{-5.6mm}%
+\N\Rr\Rr\Rr\Bb\N\Rr\Rr\Rr\Bb\N\Rr\Rr\Rr\Bb\N\Rr\Rr\Rr\Bb\N\Rr\Rr\Rr\Bb\N\Rr\Rr\Rr\Bb\N\Rr\Rr\Rr\Bb\N\Rr\Rr\Rr%
+\end{minipage}
+
+\VozAbre{Cordas (1)}{clave G --- naipe $G_0$}{\Penta}{-5.6mm}%
+\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N%
+\end{minipage}
+
+\VozAbre{Madeiras (2)}{clave G --- naipe $G_1$}{\Penta}{-5.6mm}%
+\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N%
+\end{minipage}
+
+\VozAbre{Metais (4)}{clave G --- naipe $G_2$}{\Penta}{-5.6mm}%
+\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N%
+\end{minipage}
+
+\VozAbre{Percussao (8)}{clave F --- naipe $G_3$}{\Penta}{-5.6mm}%
+\N\Rr\N\Rr\Bb\N\Rr\N\Rr\Bb\N\Rr\N\Rr\Bb\N\Rr\N\Rr\Bb\N\Rr\N\Rr\Bb\N\Rr\N\Rr\Bb\N\Rr\N\Rr\Bb\N\Rr\N\Rr%
+\end{minipage}
+
+\VozAbre{Lei 8}{clave G --- $\mathbb{Z}/8\mathbb{Z}$}{\Penta}{-5.6mm}%
+\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N%
+\end{minipage}
+
+\begin{observacao}
+Gabarito: \code{partitura/partitura.pdf}. Mesma ordem, 8 compassos, barras
+no mesmo instante. Tradutor desenha; emissor grava.
+\end{observacao}
+
+\section{Auditoria (não o produto)}
+
+\begin{center}\small
 \begin{tabular}{@{}lcccccccc@{}}
 voz & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 \\
 \midrule
-Metronomo
- & \barA & \barA & \barA & \barA
- & \barA & \barA & \barA & \barA \\
-Batuta
- & \barB & \barC & \barB & \barC
- & \barB & \barC & \barB & \barC \\
-Maestro
- & \barM & \barM & \barM & \barM
- & \barM & \barM & \barM & \barM \\
-Cordas (1)
- & \barA & \barA & \barA & \barA
- & \barA & \barA & \barA & \barA \\
-Madeiras (2)
- & \barA & \barA & \barA & \barA
- & \barA & \barA & \barA & \barA \\
-Metais (4)
- & \barA & \barA & \barA & \barA
- & \barA & \barA & \barA & \barA \\
-Percussao (8)
- & \barB & \barB & \barB & \barB
- & \barB & \barB & \barB & \barB \\
-Lei 8
- & \barA & \barA & \barA & \barA
- & \barA & \barA & \barA & \barA \\
+Met. & \N\N\N\N & \N\N\N\N & \N\N\N\N & \N\N\N\N & \N\N\N\N & \N\N\N\N & \N\N\N\N & \N\N\N\N \\
+Bat. & \N\Rr\N\Rr & \Rr\N\Rr\N & \N\Rr\N\Rr & \Rr\N\Rr\N & \N\Rr\N\Rr & \Rr\N\Rr\N & \N\Rr\N\Rr & \Rr\N\Rr\N \\
+Mae. & \N\Rr\Rr\Rr & \N\Rr\Rr\Rr & \N\Rr\Rr\Rr & \N\Rr\Rr\Rr & \N\Rr\Rr\Rr & \N\Rr\Rr\Rr & \N\Rr\Rr\Rr & \N\Rr\Rr\Rr \\
 \end{tabular}
-
-\begin{observacao}
-Confrontar com \code{partitura/partitura.pdf} (gravação LilyPond): as
-\textbf{colunas} batem com as barras do sistema; a alteração estrutural
-aparece no mesmo instante em todas as vozes. O pentagrama tipográfico
-fica na gravação; aqui o tradutor realiza o sincronismo.
-\end{observacao}
-
-\section{Pipeline}
-
-\[
-\text{Corpo}
-\;\to\;
-\Pi
-\;\to\;
-\text{tradutor (StaffGroup + \note)}
-\;\parallel\;
-\text{emite.c}\to\texttt{.ly}\to\text{LilyPond}.
-\]
+\end{center}
+\noindent{\small A tabela verifica ticks; o produto é a partitura desenhada acima.}
 
 \section{Fecho}
 
 \begin{observacao}
-Uma única partitura, todas as vozes, um único relógio, uma única
-regência. LilyPond grava; a partitura é estrutura; o tradutor é a fonte.
+\textbf{A partitura desenhada.} Uma pauta, todas as vozes, um relógio, uma
+regência --- o sistema inteiro que aparece como música.
 \end{observacao}
 
 \end{document}
