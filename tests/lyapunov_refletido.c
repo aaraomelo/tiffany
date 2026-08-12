@@ -1,4 +1,7 @@
-/* lyapunov_refletido.c — Lyapunov pela METADE REFLETIDA, e o teorema operacional da medição.
+/* lyapunov_refletido.c — Lyapunov pela METADE REFLETIDA = atestação do Teorema do Metrónomo.
+ *
+ * Corpo de Peano: maestro projecta; metrónomo lê; Lyapunov dualizado atesta (λ⁺+λ⁻=0).
+ * Este ficheiro mede a atestação — o teorema operacional da medição.
  *
  * O Aarão: «vê se dá para derivar Lyapunov via a nossa medida pela metade refletida — isso funda o
  * teorema operacional para medição; e põe a justificativa nas proibições.»
@@ -10,10 +13,11 @@
  * O dobrador f(s)=2s tem λ⁺ = log2 (1 bit por passo); a metade refletida f⁻¹(s)=s/2 tem λ⁻ = −log2.
  * Contam-se EXPOENTES INTEIROS (potências de 2), sem um double.
  *
- * E daí o TEOREMA OPERACIONAL DA MEDIÇÃO: uma medição só é fiável se a metade refletida VOLTA com
- * resíduo 0 (λ da própria medição = 0). Se a medição perde um bit — um double que arredonda, um
- * estado sobrescrito, um malloc — não há volta, o resíduo é > 0, e a medida é ela própria caótica.
- * É a proibição da teoria dita à letra: «não pertence, por não haver como voltar» (medida.tex).
+ * E daí o TEOREMA OPERACIONAL DA MEDIÇÃO (= atestação do Metrónomo): uma medição só é fiável se a
+ * metade refletida VOLTA com resíduo 0 (λ da própria medição = 0). Se a medição perde um bit — um
+ * double que arredonda, um estado sobrescrito, um malloc — não há volta, o resíduo é > 0, e a medida
+ * é ela própria caótica. É a proibição da teoria dita à letra: «não pertence, por não haver como
+ * voltar» (medida.tex). Ver papers/corpo_peano.tex thm:metronomo; tests/corpo_peano.c §CP40.
  *
  *   §L1  λ derivado pela metade refletida: e⁺(n)=+n, e⁻(n)=−n ⇒ (e⁺−e⁻)/2n = 1 = log2 por passo
  *   §L2  a regra da soma (o espectro ±λ): e⁺(n) + e⁻(n) = 0 exacto — o que a dualidade guarda
@@ -133,6 +137,7 @@ int main(void){
 
     printf("==========================================================================\n");
     if(!falhas){
+        puts("  Teorema do Metrónomo: maestro projecta; metrónomo lê; Lyapunov dualizado atesta.");
         puts("  Lyapunov deriva-se da METADE REFLETIDA (a inversa temporal): a frente expande (e+=+n)");
         puts("  e a reflexao contrai (e-=-n), λ=(e+ - e-)/2n = log2, e a regra da soma e+ + e- = 0 e'");
         puts("  o espectro simetrico ±λ que a dualidade guarda. Dai o TEOREMA OPERACIONAL: uma medicao");

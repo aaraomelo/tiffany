@@ -1,8 +1,9 @@
 /* traduz_pi_dim.js — DIMENSÃO e π de CADA tradução .tex→PDF.
  *
- * Por documento: o inversor sobe (espiral); a Dim = 2^(alcance+1) viaja na
- * /SementeEstrela; π_n sai da dobra (Hurwitz=dobra discreta, Gentil=dual);
- * Lyapunov dualizado = FonteTeX de volta, bits da diferença.
+ * Teorema do Metrónomo (Corpo de Peano): maestro projecta; metrónomo lê;
+ * Lyapunov dualizado atesta. Por documento: o inversor sobe (espiral); a Dim =
+ * 2^(alcance+1) viaja na /SementeEstrela; π_n sai da dobra (Hurwitz=dobra
+ * discreta, Gentil=dual); Lyapunov dualizado = FonteTeX de volta, bits da diferença.
  *
  *   node tests/traduz_pi_dim.js
  */

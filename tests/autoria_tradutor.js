@@ -1,5 +1,6 @@
 /* autoria_tradutor.js — UM MEDIDOR: docs únicos + λ + selos + teto.
  *
+ * Teorema do Metrónomo: maestro projecta; metrónomo lê; Lyapunov dualizado atesta.
  * Substitui a pergunta espalhada por traduz_pi_dim / volta / unifica numa
  * passagem curta de autoria. Lista = app/src/docs_tradutor.json.
  *
@@ -185,6 +186,6 @@ try {
 }
 
 console.log('==========================================================================')
-console.log('  docs_tradutor.json = fonte única · Hurwitz8≠teto · Gentil+NTT=selo')
+console.log('  Teorema do Metrónomo: projecta / lê / atesta · docs únicos · Hurwitz8≠teto')
 console.log(`#TOTAL ${feitas} ${falhas}`)
 process.exit(falhas ? 1 : 0)

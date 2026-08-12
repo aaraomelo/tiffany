@@ -739,8 +739,9 @@ long norma_primeira(long m, long k){
     }
 }
 
-/* ─── §V11 O LYAPUNOV DUALIZADO ATESTA OS NIVEIS — E A DIMENSAO E A DOBRA DO π ─────── */
-/* A medicao dos niveis e' a da METADE REFLETIDA (tests/lyapunov_refletido.c, a estrela
+/* ─── §V11 TEOREMA DO METRÓNOMO: Lyapunov dualizado atesta os níveis; Dim = dobra do π ─── */
+/* Medição = Teorema do Metrónomo (Corpo de Peano): maestro projecta; metrónomo lê;
+ * Lyapunov dualizado atesta. A METADE REFLETIDA (tests/lyapunov_refletido.c, a estrela
  * ν(x) = −1/x da transformada estelar): num sistema reversivel os expoentes vem em pares
  * ±λ, e o nivel k SO' esta atestado se a reflexao devolve a semente com residuo 0 —
  * λ⁺ + λ⁻ = 0, o teorema operacional (uma medicao que perde um bit e' ela propria

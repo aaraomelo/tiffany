@@ -2166,17 +2166,18 @@ int main(int argc, char **argv){
            ap2 >= 0 && svp2 > svp && shp2 == shp);
     }
 
-    /* ── §X17  O LYAPUNOV DUALIZADO NO TRADUTOR INTEIRO — a metade refletida ──
-     * A medida do tradutor tex<->PDF e' a da TRANSFORMADA ESTELAR (a estrela
-     * ν∘ν=id, tests/lyapunov_refletido.c): compor e' a frente (emite, -1), a
+    /* ── §X17  TEOREMA DO METRÓNOMO NO TRADUTOR — Lyapunov dualizado / metade refletida ──
+     * Medição = Teorema do Metrónomo (Corpo de Peano): maestro projecta; metrónomo lê;
+     * Lyapunov dualizado atesta. A medida do tradutor tex<->PDF e' a da TRANSFORMADA
+     * ESTELAR (a estrela ν∘ν=id, tests/lyapunov_refletido.c): compor e' a frente (emite, -1), a
      * volta e' a metade refletida (absorve, +1), e os expoentes vem em pares
      * ±λ. O tradutor so' esta atestado se a reflexao devolve a semente com
      * residuo 0 — λ⁺+λ⁻ = 0, em BITS INTEIROS (o expoente e' o comprimento da
      * diferenca, potencias de 2, sem um double). E o residuo onde NAO PODE ser
      * zero: um byte mutado no corpo que viaja, e a volta acusa — λ_medicao > 0
      * e a medida seria ela propria caotica (o teorema operacional). */
-    puts("§X17 o Lyapunov dualizado no tradutor: a volta e a metade refletida da");
-    puts("     transformada estelar — λ⁺+λ⁻=0 em bits inteiros, e a mutacao acusa.\n");
+    puts("§X17 Teorema do Metrónomo: a volta e a metade refletida —");
+    puts("     maestro projecta; metrónomo lê; Lyapunov dualizado atesta (λ⁺+λ⁻=0).\n");
     {
         static const char F20[] =
             "\\documentclass{article}\n\\begin{document}\n"

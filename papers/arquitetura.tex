@@ -307,8 +307,9 @@ nível a nível da torre, \emph{dentro do módulo emitido}: o gerador dinâmico 
 tradutor e $\det(A_m^k)=(-1)^k$ fecha em inteiros ($m=1..6$, $k=1..10$), a Lei~0 matricial
 (o gato sobe $k$, o esquilo desce $k$, o par $(+k,-k)$ fecha a identidade), e a estrutura
 conserva pelos mesmos níveis (módulo $=\sum$ secções, código $=\sum$ funções)
---- e os níveis atestam-se pelo \textbf{Lyapunov dualizado} (a metade refletida da
-transformada estelar): o $\lambda^{+}$ do gato em bits inteiros, a reflexão do esquilo a
+--- e os níveis atestam-se pelo \textbf{Teorema do Metrónomo}
+(\emph{Corpo de Peano}): o Lyapunov dualizado (a metade refletida da
+transformada estelar) --- o $\lambda^{+}$ do gato em bits inteiros, a reflexão do esquilo a
 devolver a semente com resíduo $0$ ($\lambda^{+}{+}\lambda^{-}=0$, o teorema operacional), o
 $\pi$ a SAIR da dobra com dois bits por dobra, e o fecho dimensional $\mathrm{erro}_n\cdot
 c_n<\tfrac12$ --- a primeira dimensão que fecha é a $4$
@@ -428,13 +429,25 @@ segundo lado a andar ao lado do primeiro --- e aqui ele fecha, porque a composi�
 reversível de raiz.
 
 \smallskip
-\noindent \textbf{E a medida tem nome: é o Lyapunov dualizado, pela metade refletida da
-transformada estelar.} Num sistema reversível os expoentes vêm em pares $\pm\lambda$
+\noindent \textbf{E a medida tem nome: é o Teorema do Metrónomo}
+(\emph{Corpo de Peano}, Teorema do Metrónomo) --- o Lyapunov dualizado
+pela metade refletida da transformada estelar, lido no relógio.
+Num sistema reversível os expoentes vêm em pares $\pm\lambda$
 (\code{tests/lyapunov\_refletido.c}): compor é a frente ($-1$, emite), a volta é a metade
 refletida ($+1$, absorve), e o tradutor só está atestado se a reflexão devolve a semente com
 $\lambda^{+}{+}\lambda^{-}=0$ --- o expoente lê-se em \emph{bits inteiros} da diferença, sem um
-\emph{double}. É o \textbf{teorema operacional da medição}: uma medição que perde um bit não
-volta, e é ela própria caótica --- proibida. A lei atravessa o tradutor inteiro: a volta do
+\emph{double}. É o \textbf{teorema operacional da medição} realizado pelo metrónomo:
+uma medição que perde um bit não volta, e é ela própria caótica --- proibida.
+\[
+\boxed{
+\text{maestro projecta;}
+\;
+\text{metrónomo lê;}
+\;
+\text{Lyapunov dualizado atesta.}
+}
+\]
+A lei atravessa o tradutor inteiro: a volta do
 \code{.tex} (\code{tests/tex.c} \S X17, com a mutação de um byte no corpo que viaja a acusar),
 a do módulo ($\mathrm{sobe}\circ\mathrm{desce}$), e os níveis do gerador matricial
 (\code{tests/traduz\_volta.js} \S V11).
