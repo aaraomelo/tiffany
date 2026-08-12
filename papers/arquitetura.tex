@@ -335,6 +335,10 @@ e a \code{lib/spline.h} --- sobe para um módulo válido: as $157$ funções ins
 contínuo}. O \code{.tex} é o lado discreto --- a contagem, a assinatura, o corpo ordenado; a página é
 o lado contínuo --- a \emph{curva} de cada glifo, lida da fonte (a \code{spline.h}) e não de uma
 tabela. Entre os dois está a estrela, a bijeção dual, e ela apenas \emph{reverte}.
+O custo dominante de documentos tipograficamente densos (o \emph{catálogo}) não é a dimensão Gentil
+nem o selo NTT: é o número de \textbf{Forms} únicos --- um Form XObject por carta$\cdot$glifo, já
+partilhado por todas as ocorrências na página. Compressão Flate ficou de fora de propósito (sem
+dependência \code{zlib}); o gargalo medido é diversidade tipográfica, não repetição.
 
 \begin{teorema}[a assinatura cavalga o corpo]\label{thm:assinatura}
 A assinatura de um corpo não vive na estrela nem no banco: ela \textbf{entra discreta e sai contínua},

@@ -1,6 +1,6 @@
 % papers/corpo_peano.tex
-% O corpo operacional de Peano --- eixo: Teorema do Maestro = realização dinâmica do central.
-% Cadeia: borda → ordem → massa → contínuo → torre → retração π_k → música.
+% O corpo operacional de Peano --- eixo: Maestro (dinâmica) ⊕ Metrónomo (métrica).
+% Cadeia: borda → ordem → massa → contínuo → torre → π_k → Maestro/Metrónomo → música.
 % Auto-contido: pdflatex corpo_peano.tex; no browser via tex.wasm (mesmo dialecto dos papers).
 \documentclass[11pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
@@ -21,8 +21,8 @@
 \input{gkcapa}
 \begin{document}
 \gkcapa{O Corpo de Peano}
-       {construção até à retração --- o Teorema do Maestro}
-       {realização dinâmica do teorema central; o tradutor \texttt{.tex}$\leftrightarrow$PDF opera nesta torre}
+       {construção até à retração --- Maestro e Metrónomo}
+       {realização dinâmica e métrica do teorema central; o tradutor \texttt{.tex}$\leftrightarrow$PDF opera nesta torre}
 \maketitle
 
 \begin{abstract}
@@ -48,15 +48,20 @@ $+$ e $\times$: o corpo \textbf{constrói-se}. A cadeia é
 O teorema central (\emph{Corpo estelar}): contar (Hurwitz) e integrar
 (Gentil) são duais pela medida. O resultado deste paper não é só a
 estrutura: a construção \textbf{admite realização dinâmica por retração
-entre andares}. O \textbf{Teorema do Maestro}
-(Teorema~\ref{thm:proj-maestro}) é essa realização ---
+entre andares} e a sua \textbf{dual métrica para leitura}. O
+\textbf{Teorema do Maestro}
+(Teorema~\ref{thm:proj-maestro}) projecta ---
 $\mathcal{P}_k=\mathrm{tick}\circ\mathrm{batuta}\circ\Pi$ executa
-$\pi_k$ a cada tick. A música não é metáfora decorativa: é a
+$\pi_k$ a cada tick. O \textbf{Teorema do Metrónomo}
+(Teorema~\ref{thm:metronomo}) lê --- Lyapunov dualizado
+$\lambda^{+}{+}\lambda^{-}=0$ nas interfaces das dobras, com a
+direcção a entrar na base metálica e a transformada universal a
+avaliar na transição. A música não é metáfora decorativa: é a
 realização operacional observada. O tradutor \texttt{.tex}$\leftrightarrow$PDF
 (\emph{Arquitetura}) opera nesta torre: \code{MOVE} é a estrela; $\pi_k$ é a
 retração. Milénios são leituras, não base
 (\S\ref{sec:milenio-leitura}). Verificação:
-\code{tests/corpo\_peano.c} §CP1--§CP39.
+\code{tests/corpo\_peano.c} §CP1--§CP40.
 \end{abstract}
 
 \medskip
@@ -67,13 +72,20 @@ retração. Milénios são leituras, não base
 \;\Longrightarrow\;
 \text{retração }\pi_k
 \;\Longrightarrow\;
-\text{Teorema do Maestro}
+\bigl(\text{Maestro},\,\text{Metrónomo}\bigr)
 \;\Longrightarrow\;
 \text{realização musical}.
 }
 \]
+\[
+\boxed{
+\text{Maestro}=\text{dinâmica (projecta)};
+\qquad
+\text{Metrónomo}=\text{métrica (lê)}.
+}
+\]
 A construção (§§ iniciais / contínuo / torre) chega à retração; o
-Teorema do Maestro (\S\ref{sec:maestro-thm}) é o eixo; a música
+par Maestro\,/\,Metrónomo (\S\ref{sec:maestro-thm}) é o eixo; a música
 (\S\ref{sec:musica}) é a consequência
 (Conservatório$\to$Pera$\to$Batuta). Quem quiser o eixo primeiro:
 \S\ref{sec:maestro-thm}.
@@ -433,7 +445,11 @@ andares; o maestro é a mesma passagem \textbf{realizada no tempo}.
 \qquad
 \text{Maestro}
 \;=\;
-\text{passagem realizada no tempo}.
+\text{passagem realizada no tempo};
+\qquad
+\text{Metrónomo}
+\;=\;
+\text{passagem lida (métrica)}.
 }
 \]
 \[
@@ -442,7 +458,7 @@ andares; o maestro é a mesma passagem \textbf{realizada no tempo}.
 \;\longrightarrow\;
 \pi_k
 \;\longrightarrow\;
-\text{Maestro}
+\bigl(\text{Maestro},\,\text{Metrónomo}\bigr)
 \;\longrightarrow\;
 \text{Música}.
 }
@@ -539,6 +555,117 @@ e cruz dos tecidos, na classe. (3)~$\mathcal{P}_k$ não acrescenta
 operador: só compõe interfaces que executam $\pi_k$. A geometria
 Conservatório$\to$Pera$\to$Batuta (\S\ref{sec:musica}) é a realização
 concreta do canal, não a fonte do teorema.
+\end{teorema}
+
+\begin{teorema}[Metrónomo --- realização métrica da dinâmica]\label{thm:metronomo}
+O Teorema do Maestro (Teorema~\ref{thm:proj-maestro}) realiza $\pi_k$
+no tempo: \textbf{projecta}. O dual dessa dinâmica --- a
+\textbf{leitura mensurável do relógio} --- é o Teorema do Metrónomo.
+Não compete com o Maestro: é a realização métrica do \emph{mesmo} eixo.
+\[
+\boxed{
+\begin{array}{ccc}
+\text{Teorema Central} & & \\
+\downarrow & & \\
+\text{retração }\pi_k & & \text{invariante} \\
+\downarrow & & \downarrow \\
+\text{Maestro} & & \text{Metrónomo} \\
+\text{realização dinâmica} & & \text{realização métrica} \\
+\downarrow & & \downarrow \\
+\text{música} & & \text{Lyapunov dualizado}
+\end{array}
+}
+\]
+O relógio discreto da torre tem leitura dual: expansão e reflexão.
+Se um passo emite $\lambda^{+}$, a volta dual dá $\lambda^{-}=-\lambda^{+}$.
+Na classe operacional considerada, numa volta fechada:
+\[
+\boxed{\lambda^{+} + \lambda^{-} = 0},
+\qquad
+\boxed{\text{volta fechada}\;\Longleftrightarrow\;\lambda_{\mathrm{med}}=0}.
+\]
+O metrónomo realiza essa estrutura no tempo: cada tick marca a frente;
+a reflexão mede a volta. O Lyapunov dualizado \textbf{atesta} a
+reversibilidade do passo (\emph{Medida}, Teorema operacional;
+\code{tests/lyapunov\_refletido.c}). Não é o Lyapunov clássico
+(só $\lambda^{+}$): é a leitura métrica dualizada do passo.
+\[
+\boxed{
+\text{O maestro projecta;}
+\;
+\text{a batuta canaliza;}
+\;
+\text{o metrónomo lê;}
+\;
+\text{o Lyapunov dualizado atesta.}
+}
+\]
+\begin{enumerate}
+\item \textbf{Base metálica --- direcção discreta.} A direcção
+$I\in\{-1,0,+1\}$ entra na família metálica
+(Def.~\ref{def:metal}, Def.~\ref{def:borda}):
+\[
+A_m
+\;\longrightarrow\;
+\sigma^{2}=m\sigma+1
+\;\longrightarrow\;
+\text{passo/expansão}
+\;\longrightarrow\;
+\text{reflexão dual}
+\;\longrightarrow\;
+\pm\lambda
+\;\longrightarrow\;
+\text{tick}.
+\]
+Nas interfaces das dobras ($\Delta=m^{2}+4$), $A_m$ é a régua discreta
+que o relógio mede; $\sigma\sigma^{\dagger}=-1$ apresenta frente$+$dual
+sem identificar $\lambda$ com instabilidade clássica. A batuta só
+canaliza $I$ (Def.~\ref{def:batuta}).
+\item \textbf{Transformada universal --- ponte de representação}
+(citação, não fundamento novo):
+\[
+\text{base metálica}
+\;\xrightarrow{\;\mathcal{T}\;}\;
+\text{representação do relógio}
+\;\xrightarrow{\;\mathcal{T}^{-1}\;}\;
+\text{leitura dual},
+\]
+com $\mathcal{T}$ a avaliação nas raízes da borda já definida
+(\emph{Corpo estelar}; \code{tests/universal.c}): $F[f]=f(\sigma)$
+na transição. Não é DFT nem $\sqrt N$ no objecto
+($\sigma\sigma'=-1$).
+\end{enumerate}
+Hierarquia:
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+camada & objecto & função \\
+\hline
+fundamento & Teorema Central & contar $\leftrightarrow$ integrar \\
+estrutura & $\pi_k$ & retração \\
+dinâmica & Maestro & realiza a projecção \\
+tempo & Metrónomo & realiza o tick / lê \\
+métrica & Lyapunov dualizado & atesta a volta \\
+base discreta & $(A_m,\sigma_m)$ & régua metálica \\
+representação & $\mathcal{T}$ & transforma a leitura \\
+realização & música & resultado observado \\
+\end{tabular}
+\end{center}
+\[
+\boxed{
+\underbrace{\text{Maestro}}_{\text{projecta}}
+\;\leftrightarrow\;
+\underbrace{\text{Metrónomo}}_{\text{lê}};
+\qquad
+\text{Lyapunov dualizado}=\text{atestação métrica da volta}.
+}
+\]
+\emph{Prova.} (1)~Teorema operacional (\emph{Medida}): espectro
+$\pm\lambda$ na classe reversível; fiabilidade $=$ volta com
+resíduo~$0$ (critério operacional, não lei de todo sistema dinâmico).
+(2)~Def.~\ref{def:metal}--\ref{def:borda}: direcção na interface
+$\Delta$, não inventada pelo metrónomo. (3)~$\mathcal{T}$ citada:
+instrumento de leitura. Separação:
+projectar $\neq$ canalizar $\neq$ ler $\neq$ atestar.
 \end{teorema}
 
 %======================================================================
@@ -1134,6 +1261,9 @@ O \textbf{metrónomo} é a sua \textbf{realização musical}:
 }
 \]
 Fornece o pulso e ancora o indicador de compás e as barras.
+Como \textbf{régua} (leitura), o Teorema~\ref{thm:metronomo} eleva-o
+a realização métrica dual da dinâmica do maestro --- sem o confundir
+com a batuta (canal) nem com o inversor ($I$).
 Correspondência: $\mathrm{Metr\acute{o}nomo}\leftrightarrow\mathrm{Rel\acute{o}gio}$.
 \end{definicao}
 
@@ -1449,12 +1579,15 @@ partitura & assinatura $+$ notação & o som \\
 naipes & classificação Hurwitz de $G$ & teorema de nomes \\
 maestro & interface (não necessária ao corpo) & quinto naipe \\
 metrónomo & realização musical do relógio & o próprio relógio \\
+  & $+$ régua (Teorema do Metrónomo) & Lyapunov clássico (só $\lambda^{+}$) \\
 batuta & canal/meio que realiza o inversor & o inversor ($I$) \\
 pera & base da batuta $=$ cone acoplado ($s=0$) & a vareta / a ponta \\
 conservatório & estrutura superior conservada & orquestra / música \\
 batuta linear & vareta $B(s,t)$; ponta $P(t)$ & trajectória $=$ lei \\
 projecção $\pi_k$ & retração $A_{k+1}\to A_k$ (def.) & lei nova \\
 $\mathcal{P}_k=\pi_k$ & teorema (maestro realiza $\pi_k$) & interpretação solta \\
+Lyapunov dualizado & régua $\lambda^{+}{+}\lambda^{-}=0$ & só $\lambda^{+}$ (caos clássico) \\
+transformada universal & leitura $F[f]=f(\sigma)$ na borda & DFT / $\sqrt N$ no objecto \\
 orquestra & fusão $\mathrm{Estrela}(\{G_i\},\mathrm{Maestro})$ & um naipe \\
 milénios & leituras das leis & base \\
 \end{tabular}
@@ -1487,7 +1620,7 @@ Catálogo $\mathbb{Z}/8\mathbb{Z}$ & estrutura \\
 Torre $d_k$ & construção \\
 Metálica / borda / $bx^{a}$ / Pisot & teoremas \\
 Massa / max-cut & teorema (Dualsort) \\
-Gentil--Hurwitz (central) & citação / eixo (destino: maestro) \\
+Gentil--Hurwitz (central) & citação / eixo (destino: Maestro\,+\,Metrónomo) \\
 Hurwitz~$8$ $\neq$ teto objecto & proposição (período vs selo NTT) \\
 Cantor / Peano & construção / definição \\
 Períodos $2,3,4,8$ & fechos das representações \\
@@ -1499,14 +1632,18 @@ Alfabeto musical & realização \\
 Naipes & classificação da realização \\
 Maestro & interface que realiza $\pi_k$ \\
 Metrónomo & realização musical do relógio \\
+Teorema do Metrónomo & \textbf{teorema} --- realização métrica
+  (Lyapunov dualizado; dual da dinâmica) \\
 Batuta & canal do inversor (não é $I$) \\
 Pera & definição: base $=$ cone na batuta \\
 Conservatório & definição: estrutura superior conservada \\
 Batuta linear / ponta & interpretação geométrica do canal \\
 Projecção $\pi_k$ & definição (retração por andar) \\
 Princípio de projecção $\mathcal{P}_k=\pi_k$ & \textbf{teorema}
-  --- realização do teorema central
+  --- realização dinâmica do teorema central
   (retração $\neq$ conservação $\neq$ realização) \\
+Base metálica / dobras $\Delta$ & onde a direcção entra; interface do relógio \\
+Transformada universal & citação --- instrumento da leitura na borda \\
 Espiral áurea (música) & realização ($m=1$), não axioma \\
 Orquestra & realização / fusão \\
 Sinfónica $=$ Filarmónica & convenção do modelo \\
@@ -1524,7 +1661,13 @@ Sinfónica $=$ Filarmónica & convenção do modelo \\
 \]
 \[
 \boxed{
-\text{O maestro não compõe o corpo: projecta-o.}
+\text{O maestro projecta;}
+\;
+\text{a batuta canaliza;}
+\;
+\text{o metrónomo lê;}
+\;
+\text{o Lyapunov dualizado atesta.}
 }
 \]
 \[

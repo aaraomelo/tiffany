@@ -110,18 +110,20 @@ function compoe (id) {
   const latin = pdf.toString('latin1')
   const s = parseSemente(latin)
   const temTorre = latin.includes('/Type/AssinaturaTorre')
+  const forms = (latin.match(/\/Subtype\s*\/Form/g) || []).length
   return {
     id, ms: Math.round(ms), rc, tam,
     eof: latin.includes('%%EOF'),
     semente: latin.includes('/Type/SementeEstrela'),
     oito: latin.includes('/Type/AssinaturaOito'),
     torre: temTorre,
+    forms,
     dim: s && s.dim, lado: s && s.lado, iface: s && s.iface,
   }
 }
 
-console.log('doc            ms   dim if L  selos')
-console.log('─────────────────────────────────────────────')
+console.log('doc            ms   dim if L  Forms  selos')
+console.log('──────────────────────────────────────────────────')
 const rows = []
 for (const id of amostra) {
   const r = compoe(id)
@@ -129,10 +131,19 @@ for (const id of amostra) {
   const L = r.lado === 1 ? 'G' : 'H'
   const selos = [r.semente && 'S', r.oito && '8', r.torre && 'T'].filter(Boolean).join('')
   console.log(
-    `${r.id.padEnd(14)} ${String(r.ms).padStart(4)}  ${String(r.dim).padStart(3)} ${String(r.iface).padStart(2)} ${L}  ${selos}`
+    `${r.id.padEnd(14)} ${String(r.ms).padStart(4)}  ${String(r.dim).padStart(3)} ${String(r.iface).padStart(2)} ${L}  ${String(r.forms).padStart(5)}  ${selos}`
   )
 }
 console.log('')
+
+/* P3: gargalo = Forms únicos (já 1 Form/glifo partilhado), não a dimensão */
+{
+  const cat = compoe('catalogo')
+  rows.push(cat)
+  console.log(`   catalogo Forms=${cat.forms} ms=${cat.ms} dim=${cat.dim} (glifos únicos, já partilhados)`)
+  ok('§A7 P3: catalogo tem muitos Forms; custo ≠ dim (cf. torre-induc dim128)',
+    cat.rc === 0 && cat.forms > 500 && cat.ms > 1000)
+}
 
 const todosOk = rows.filter((r) => r.id !== 'torre-induc').every((r) => r.rc === 0 && r.eof && r.semente && r.oito)
 ok('§A1 amostra (prod) compõe com Semente+AssinaturaOito e %%EOF', todosOk)

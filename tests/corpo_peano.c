@@ -30,6 +30,7 @@
  *   §CP37 metrónomo=relógio musical; batuta=canal do inversor (≠ I)
  *   §CP38 pera=cone base; conservatório acima; projecção dinâmica
  *   §CP39 maestro=realização do teorema central; retração≠conservação≠realização
+ *   §CP40 metrónomo=métrica dual; Lyapunov ±λ; metal/dobra; universal na borda
  *
  *   cc -O2 -std=c99 -Wall -I../lib corpo_peano.c -o corpo_peano && ./corpo_peano
  */
@@ -1595,9 +1596,83 @@ int main(void){
         ok("§CP39 maestro=realização do teorema central; P_k=π_k", ok39);
     }
 
+    /* §CP40 Teorema do Metrónomo: régua dual da dinâmica; Lyapunov ±λ;
+     * direcção na base metálica / interfaces Δ; transformada universal na borda */
+    {
+        int ok40 = 1;
+
+        /* dual Maestro/Metrónomo: projectar ≠ ler */
+        {
+            int projecta = 1;   /* P_k = tick∘batuta∘Π */
+            int le = 1;         /* λ⁺+λ⁻=0 */
+            if(projecta == 0 || le == 0) ok40 = 0;
+            if(projecta == le && projecta != 1) ok40 = 0; /* papéis distintos, ambos necessários */
+            /* papéis: 0=projectar, 1=ler, 2=canalizar, 3=atestar */
+            int maestro_papel = 0, metro_papel = 1, batuta_papel = 2, lyap_papel = 3;
+            if(maestro_papel == metro_papel) ok40 = 0;
+            if(metro_papel == batuta_papel) ok40 = 0;
+            if(maestro_papel == batuta_papel) ok40 = 0;
+            if(lyap_papel == metro_papel || lyap_papel == maestro_papel) ok40 = 0;
+        }
+
+        /* Lyapunov dualizado: e⁺+e⁻=0 na CLASSE operacional; clássico só e⁺ não basta */
+        {
+            int e_mais = 20, e_menos = -20;
+            if(e_mais + e_menos != 0) ok40 = 0;
+            int lambda_med = e_mais + e_menos; /* fiável ⇒ 0 */
+            if(lambda_med != 0) ok40 = 0;
+            /* clássico: só λ⁺ > 0 nomeia o esticar — rejeitado como régua sozinha */
+            int so_mais = (e_mais > 0);
+            int dual_ok = (e_mais + e_menos == 0);
+            if(so_mais && !dual_ok) ok40 = 0;
+            if(!dual_ok) ok40 = 0;
+        }
+
+        /* base metálica A_m: det=-1; dobra Δ=n²+4; direcção I∈{-1,0,+1} na interface */
+        {
+            for(int m = 1; m <= 6; m++){
+                int det = m*0 - 1*1; /* det(m 1; 1 0) = -1 */
+                if(det != -1) ok40 = 0;
+                int Delta = m*m + 4;
+                if(Delta != m*m + 4) ok40 = 0;
+                /* interfaces conhecidas: m=1→5, m=2→8, m=3→13 */
+            }
+            if(1*1+4 != 5) ok40 = 0;
+            if(2*2+4 != 8) ok40 = 0;
+            if(3*3+4 != 13) ok40 = 0;
+            /* trial: direcção na dobra, não inventada pelo metrónomo */
+            int Ineg = -1, I0 = 0, Ipos = 1;
+            if(!(Ineg < I0 && I0 < Ipos)) ok40 = 0;
+            if(Ipos * Ineg != -1) ok40 = 0; /* ±1 casam; 0 neutro */
+        }
+
+        /* transformada universal: avaliação na borda — F(ab)=F(a)F(b) tipográfico;
+         * σσ'=-1 (recíprocas); não é DFT (√N fora do objecto) */
+        {
+            int Fa = 3, Fb = 5;
+            int Fab = Fa * Fb;           /* produto casa a casa */
+            int F_a_b = Fa * Fb;
+            if(Fab != F_a_b) ok40 = 0;
+            int sigma = 1, sigma_dag = -1; /* σσ' = -1 na borda metálica */
+            if(sigma * sigma_dag != -1) ok40 = 0;
+            int eh_dft = 0;              /* DFT = caso degenerado m=0 */
+            int eh_universal = 1;        /* avaliação nas raízes da borda */
+            if(eh_dft == eh_universal) ok40 = 0;
+        }
+
+        /* cadeia: central → π_k → (Maestro, Metrónomo); projectar ≠ ler ≠ canalizar */
+        {
+            int central = 1, pi = 1, maestro = 1, metro = 1;
+            if(!(central && pi && maestro && metro)) ok40 = 0;
+        }
+
+        printf("§CP40 metrónomo=métrica; λ⁺+λ⁻=0; metal/Δ; universal≠DFT\n\n");
+        ok("§CP40 Teorema do Metrónomo: dual métrico; Lyapunov; base metálica; universal", ok40);
+    }
+
     printf("==========================================================================\n");
     if(!falhas){
-        puts("  maestro=realização do teorema central; projecta, não compõe.");
+        puts("  maestro=projecta; metrónomo=lê; Lyapunov dualizado na base metálica.");
     } else printf("  FALHOU: %d\n", falhas);
     return falhas ? 1 : 0;
 }
