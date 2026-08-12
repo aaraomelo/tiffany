@@ -242,6 +242,9 @@ double atof(char *s){
  * porta — a estrela irradia, não enfileira. Nenhum `char t[4096]` a reter o que já se sabe. */
 int fputc(int c, int h);
 int SINK_H;                                     /* a porta por onde o formatador sem buffer emite */
+/* neuronio.c: 1 bit desenha; o dual é a ausência. O banco (FICH_NOME) não cola na
+ * célula da estrela — um store vizinho (SINK_H) apagava FICH[0] e o catálogo sumia. */
+long GUARDA_SINK;
 static int poe1(char *d, int n, int *k, int c){
     if(d){ if(*k < n - 1) d[*k] = c; }          /* com buffer: grava, contado */
     else fputc(c, SINK_H);                       /* sem buffer: emite em ordem, e nada se grava */
@@ -623,13 +626,12 @@ int sscanf(char *s, char *f, ...){
 #define MAX_AGULHA 16
 #define NOME_MAX   160
 
-/* 1D: o traduz sobe vectores de uma dimensão (tools/traduz.c). char a[N][160]
- * não indexa — os nomes não gravam e o fopen falha. É o mesmo armazenamento,
- * plano: FICH_NOME[i * NOME_MAX]. */
-char FICH_NOME[MAX_FICH * NOME_MAX];
-int  FICH_END[MAX_FICH];
-int  FICH_TAM[MAX_FICH];
-int  N_FICH;
+/* o nome mora no banco (vfs/LS), não num array .bss — copiar para DRAM é fundir
+ * estrela e banco, e a composição escrevia por cima (catalogo.tex sumia). */
+char *FICH_NOME[MAX_FICH];
+int   FICH_END[MAX_FICH];
+int   FICH_TAM[MAX_FICH];
+int   N_FICH;
 
 int  AG_FICH[MAX_AGULHA];      /* que ficheiro; 0 = agulha livre */
 int  AG_POS[MAX_AGULHA];       /* onde ela vai */
@@ -644,9 +646,9 @@ char *SAIDA;
 int   SAIDA_CAP;
 int   SAIDA_N;
 
-/* ── o disco do tradutor: 16 fatias compactas, o dual do mmap (disco_wasm.c) ──
+/* ── o disco do tradutor: banco 0–2 + rascunho 3–15 (dual do mmap) ──
  * O hospedeiro escreve na vista; a ISA só MOVE(slot, ±1). Um disco, duas
- * plataformas. PDF = slot 14. */
+ * plataformas. PDF = slot 14, malloc após MARCO — cresce no compose, recua. */
 int FAT_TAM[16];
 int FAT_OFF[16];
 int FAT_BASE;
@@ -654,6 +656,9 @@ int FAT_OK;
 int PDF_N;
 int CURSOR;                /* o cursor do disco linear — uma declaração só */
 int DISCO_FIM;
+int MARCO;                 /* depois do banco (fatias 0–2 + vfs); rascunho past isto */
+int SLOT_PTR[16];          /* rascunho 3–15: malloc após MARCO; recua com o 1 bit */
+int SLOT_TAM[16];          /* bytes nascidos (PDF pode ser < 128 MiB, o resto do tecto) */
 
 void fat_layout(void){
     if(FAT_OK) return;
@@ -666,9 +671,10 @@ void fat_layout(void){
     FAT_OK = 1;
 }
 
+/* só o banco no inicia: estilo/classe/idioma. Rascunho (3–15) não se reserva. */
 int tam_fatias(void){
     fat_layout();
-    return FAT_OFF[15] + FAT_TAM[15];
+    return FAT_OFF[3];
 }
 
 char *prende_fatias(void){
@@ -679,7 +685,9 @@ char *prende_fatias(void){
         DISCO_FIM = CURSOR;
     }
     {
-        int n = tam_fatias();
+        /* +64 KB entre banco 0–2 e vfs: soma directa. O rascunho (fonte/fundo/PDF)
+         * nasce depois do MARCO — já não pode comer o nome catalogo.tex. */
+        int n = tam_fatias() + 65536;
         FAT_BASE = CURSOR;
         while(FAT_BASE + n > DISCO_FIM){
             int faltam = (FAT_BASE + n - DISCO_FIM + 65535) / 65536;
@@ -688,12 +696,17 @@ char *prende_fatias(void){
             DISCO_FIM = DISCO_FIM + faltam * 65536;
         }
         CURSOR = FAT_BASE + n;
+        MARCO = CURSOR;            /* banco = fatias 0–2; o host MOVE o corpo depois e marca_vfs */
     }
     return (char*)FAT_BASE;
 }
 
 int end_fatia(int i){
     if(i < 0 || i >= 16) return 0;
+    if(i > 2){
+        if(SLOT_PTR[i]) return SLOT_PTR[i];
+        return 0;                  /* ainda não nasceu — não prende 128 MiB vazios */
+    }
     if(!FAT_BASE){ if(!prende_fatias()) return 0; }
     return FAT_BASE + FAT_OFF[i];
 }
@@ -734,22 +747,38 @@ int vfs_reserva(int n){
 }
 
 void marca_saida(char *p, int n){
-    (void)p;
+    if(p) SLOT_PTR[14] = (int)p;
     PDF_N = n;
+}
+
+/* o banco (LS) já está no vfs: daqui para a frente é só a composição.
+ * 1 bit: CURSOR volta ao MARCO — MOVE(−1) no monte, sem apagar o corpo.
+ * SLOT_PTR recua: o rascunho (fonte/PDF) não alimenta o próximo doc. */
+void marca_vfs(void){ MARCO = CURSOR; }
+int volta_compila(void){
+    if(MARCO) CURSOR = MARCO;
+    PDF_N = 0;
+    SAIDA_N = 0;
+    { int i = 3; while(i < 16){ SLOT_PTR[i] = 0; SLOT_TAM[i] = 0; i++; } }
+    { int h = 1; while(h < MAX_AGULHA){ AG_FICH[h] = 0; AG_ESC[h] = 0; AG_POS[h] = 0; h++; } }
+    /* banco = LS/Map no host; o FICH da composição recua com o 1 bit.
+     * (poe antes de marca_vfs também sai — o cliente volta a pôr via miss.) */
+    N_FICH = 0;
+    return MARCO;
 }
 
 /* ── a porta do hospedeiro ───────────────────────────────────────────────────────── */
 
 int poe_ficheiro(char *nome, char *dados, int n){
     if(N_FICH >= MAX_FICH) return 0;
-    strcpy(FICH_NOME + N_FICH * NOME_MAX, nome);
+    FICH_NOME[N_FICH] = nome;          /* ponteiro no disco; sem strcpy para .bss */
     FICH_END[N_FICH] = (int)dados;
     FICH_TAM[N_FICH] = n;
     N_FICH = N_FICH + 1;
     return N_FICH;
 }
 int end_saida(void){
-    if(FAT_BASE) return FAT_BASE + FAT_OFF[14];
+    if(SLOT_PTR[14]) return SLOT_PTR[14];
     return (int)(long)SAIDA;
 }
 /* bytes do slot já posto pelo host — a carta lê sem segunda cópia (malloc). */
@@ -769,32 +798,56 @@ int ficheiro_tam(int h){
 int tam_saida(void){ return PDF_N; }
 void limpa_saida(void){ PDF_N = 0; SAIDA_N = 0; }
 
-/* o nome pode vir com `../` à frente: quem abre não sabe de onde está a olhar, e o slot é
- * o mesmo. Compara-se pelo fim, que é a parte que identifica. */
+/* o nome pode vir com `../` à frente ou sem `.tex`: quem abre não sabe de onde
+ * está a olhar. Compara-se pelo fim e pela base (após `/`, sem `.tex`).
+ * (sem função auxiliar — MAX_FUN=256.) */
 static int acha_ficheiro(char *nome){
     int ln = strlen(nome);
     if(ln <= 0) return -1;
     for(int i = 0; i < N_FICH; i++){
-        char *fn = FICH_NOME + i * NOME_MAX;
+        char *fn = FICH_NOME[i];
+        if(!fn) continue;
         int li = strlen(fn);
         if(li == 0) continue;
         if(li == ln && strcmp(fn, nome) == 0) return i;
         if(li < ln && strcmp(fn, nome + (ln - li)) == 0) return i;
         if(ln < li && strcmp(fn + (li - ln), nome) == 0) return i;
+        {
+            char *aa = fn;
+            char *bb = nome;
+            { char *p = fn; while(*p){ if(*p == 47) aa = p + 1; p++; } }
+            { char *p = nome; while(*p){ if(*p == 47) bb = p + 1; p++; } }
+            int la = 0; while(aa[la]) la++;
+            int lb = 0; while(bb[lb]) lb++;
+            if(la > 4 && aa[la-4] == 46 && aa[la-3] == 116 && aa[la-2] == 101 && aa[la-1] == 120) la = la - 4;
+            if(lb > 4 && bb[lb-4] == 46 && bb[lb-3] == 116 && bb[lb-2] == 101 && bb[lb-1] == 120) lb = lb - 4;
+            if(la == lb && la > 0){
+                int k = 0;
+                while(k < la && aa[k] == bb[k]) k++;
+                if(k == la) return i;
+            }
+        }
     }
     return -1;
 }
 
 /* a carta lê pelo NOME: o host já pôs os bytes, não há agulha a guardar.
  * fopen/fclose é streaming; um blob que já está no slot só se aponta.
- * Duas funções, sem ponteiro de saída — o traduz não grava `int*` de local. */
+ * Duas funções, sem ponteiro de saída — o traduz não grava `int*` de local.
+ * wasm: miss → __fich_miss (import) — sem função auxiliar (MAX_FUN=256). */
 char *ficheiro_end_nome(char *nome){
     int f = acha_ficheiro(nome);
+#ifdef TEX_COM_LIBC_WASM
+    if(f < 0 && __fich_miss(nome)) f = acha_ficheiro(nome);
+#endif
     if(f < 0) return 0;
     return (char*)FICH_END[f];
 }
 int ficheiro_tam_nome(char *nome){
     int f = acha_ficheiro(nome);
+#ifdef TEX_COM_LIBC_WASM
+    if(f < 0 && __fich_miss(nome)) f = acha_ficheiro(nome);
+#endif
     if(f < 0) return 0;
     return FICH_TAM[f];
 }
@@ -802,6 +855,9 @@ int ficheiro_tam_nome(char *nome){
 int fopen(char *nome, char *modo){
     int esc = (modo[0] == 119 || modo[0] == 97);          /* w, a */
     int f = esc ? -1 : acha_ficheiro(nome);
+#ifdef TEX_COM_LIBC_WASM
+    if(!esc && f < 0 && __fich_miss(nome)) f = acha_ficheiro(nome);
+#endif
     if(!esc && f < 0) return 0;
     for(int h = 1; h < MAX_AGULHA; h++){
         if(AG_FICH[h] == 0 && AG_ESC[h] == 0){
@@ -937,8 +993,9 @@ int printf(char *f, ...){
  * onde os dados estáticos acabam e ESTENDE-SE pelo que se escreve, uma página de cada vez.
  * `__disco_cresce` é `memory.grow`: o motor pagina o que se toca e larga o resto, logo o
  * tecto declarado não custa RAM. Um disco que nunca se escreve não pesa — é o vector grande
- * nunca escrito do corpo-estelar. O `free` é vazio porque no disco nada se desfaz: compõe-se
- * UMA vez por módulo, e a instância seguinte nasce limpa. */
+ * nunca escrito do corpo-estelar. O `free` pontual é vazio; a involução da composição é
+ * `volta_compila`: 1 bit, CURSOR ← MARCO. Sem isso o malloc só emite (buraco branco) e
+ * o segundo PDF grande parte — Lyapunov λ>0, estado_caos. */
 /* os endereços do wasm são de 32 bits: o cursor e a fronteira são `int`, não `long` — um
  * ponteiro é i32, e misturar i64 aqui era pedir uma conversão a cada passo. */
 

@@ -95,8 +95,9 @@
  * o mmap de verdade (disco_u8, endereço fixo, sem RAM); o host (wasm) aponta-o para uma fatia da
  * memória linear (onde o slot É a memória). disco_buf continua a cachear o ponteiro por slot. */
 static char *(*g_disco)(int i, const char *nome, long n);
+/* cache dos 16 slots: 0–2 = banco (bestiário); 3–15 = rascunho da estrela (recua com o 1 bit) */
+static char *DISCO_M[16];
 static char *disco_buf(int i, long n){
-    static char *m[16];
     static const char *nome[16] = {
         "../dados/tex_estilo.bin", "../dados/tex_classe.bin", "../dados/tex_idioma.bin",
         "../dados/tex_fonte.bin",  "../dados/tex_corpo.bin",  "../dados/tex_volta.bin",
@@ -104,8 +105,19 @@ static char *disco_buf(int i, long n){
         "../dados/tex_cores.bin",  "../dados/tex_desc.bin",   "../dados/tex_pag.bin",
         "../dados/tex_x12.bin",    "../dados/tex_x13.bin",
         "../dados/tex_x14.bin",    "../dados/tex_x15.bin" };
-    if(!m[i]) m[i] = g_disco(i, nome[i], n);   /* o tamanho é o do pedido; g_disco decide o mundo */
-    return m[i];
+#ifdef TEX_COM_LIBC_WASM
+    /* Rascunho 3–15: após volta SLOT_PTR=0; se DISCO_M ficar, é UAF.
+     * Invalida por !SLOT_PTR (tipografia) ou >= MARCO (páginas). Banco 0–2 fica. */
+    if(i >= 3){
+        if(i >= 7 && i <= 10){
+            if(DISCO_M[i] && !SLOT_PTR[i]) DISCO_M[i] = 0;
+        } else {
+            if(DISCO_M[i] && MARCO && DISCO_M[i] >= (char*)MARCO) DISCO_M[i] = 0;
+        }
+    }
+#endif
+    if(!DISCO_M[i]) DISCO_M[i] = g_disco(i, nome[i], n);
+    return DISCO_M[i];
 }
 
 /* A COSTURA DA ENTRADA (simétrica da Saida): o NÚCLEO não abre ficheiros --- carrega por INDIRECÇÃO.
@@ -205,20 +217,21 @@ static char *le_tudo(const char *nome, long *n);   /* a leitura única passa por
 /* O estilo lê-se UMA vez, mas sem cache com estado em `.bss`: os três valores são
  * FUNÇÃO-ESTÁTICOS (o disco do tradutor zera-os, o nativo também), e a leitura delega no
  * `le_tudo` --- não há segundo `malloc`, nem ponteiro global `= NULL` que o tradutor recuse. */
+/* O estilo lê-se UMA vez por composição — sem cache entre documentos (neuronio: ausência). */
+static char *ESTILO_BUF;
+static long  ESTILO_LN;
+static int   ESTILO_LIDO;
 static const char *estilo_texto(long *n){
-    static char *buf;      /* sem inicializador: nasce zero (slot no tradutor, .bss no nativo) */
-    static long  ln;
-    static int   lido;
-    if(!lido){
-        lido = 1;
+    if(!ESTILO_LIDO){
+        ESTILO_LIDO = 1;
         /* o estilo entra pela COSTURA (g_carrega), no slot 0 (tex_estilo.bin) --- sem malloc
          * próprio: nativo faz fopen+fread para o slot, wasm aponta-o ao slot pré-carregado. */
         long r = g_carrega("../estilo.tex", 0, 1 << 16);
         if(r < 0) r = g_carrega("estilo.tex", 0, 1 << 16);
-        if(r >= 0){ buf = disco_buf(0, 1 << 16); ln = r; }
+        if(r >= 0){ ESTILO_BUF = disco_buf(0, 1 << 16); ESTILO_LN = r; }
     }
-    if(n) *n = ln;
-    return buf;
+    if(n) *n = ESTILO_LN;
+    return ESTILO_BUF;
 }
 
 static char *le_tudo(const char *nome, long *n);
@@ -553,10 +566,10 @@ static const Ttf *carta_do_corpo(int variante, long corpo){
     return &DES_C[N_DES - 1];
 }                            /* 0 = tabela, 1 = curva */
 
+static int CARTA_TENTADO = 0;   /* 1 bit (neuronio): presença abre; ausência (=0) a cada compila */
 static void carta_abre(void){
-    static int tentado = 0;
-    if(tentado) return;
-    tentado = 1;
+    if(CARTA_TENTADO) return;
+    CARTA_TENTADO = 1;
     CARTA = spline_abre_alguma(&CARTAS[0], SPLINE_REG, SPLINE_NCAND, &CARTA_NOME[0])
          && spline_abre_alguma(&CARTAS[1], SPLINE_NEG, SPLINE_NCAND, &CARTA_NOME[1]);
     N_CARTA = CARTA ? 2 : 0;

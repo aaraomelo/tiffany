@@ -494,12 +494,13 @@ completo: byte a byte, resíduo $0$, com \code{/SementeEstrela} e \code{/Assinat
 
 A pilha inteira reverte exacto: \code{MOVE}, o disco, o tradutor, a ISA, a estaca, e a composição
 --- resíduo zero, medido. O compositor sobe inteiro e instancia. E a composição de \emph{ponta a
-ponta} --- dar um \code{.tex} e obter o PDF no navegador --- pede o \textbf{ambiente completo nos
-slots}: cada fonte é um corpo, e todas as assinaturas têm de estar postas, porque uma em falta é o
-corpo vazio onde a volta parte. É o que o \code{app/src/tex\_tradutor.js} monta, escrevendo nos
-slots pela porta medida (\code{poe\_ficheiro}, \code{inicia\_wasm}, \code{compila\_ficheiro}) ---
+ponta} --- dar um \code{.tex} e obter o PDF no navegador --- lê o \textbf{banco no cliente}
+(\code{localStorage}, mapa GKCORPO): o host infla no Map e, em cada \code{fopen} que falha, o
+import \code{\_\_fich\_miss} põe \emph{um} ficheiro no DISCO. A estrela não pré-carrega o
+subset; o que não abre não pesa. É o que o \code{app/src/tex\_tradutor.js} monta
+(\code{inicia\_wasm}, \code{marca\_vfs}, \code{compila\_ficheiro}, \code{volta\_compila}) ---
 e o que Alonzo compõe, Caelum assina: \code{/SementeEstrela} e \code{/AssinaturaOito} viajam com
-o PDF (\code{tests/tex\_wasm.js} \S T5--T6).
+o PDF (\code{tests/tex\_wasm.js} \S T5--T6; \code{tests/corpo\_disco.js} \S D5).
 
 \smallskip
 \noindent \textbf{Nada disto foi acoplado.} Há um disco; a estrela entre os dois lados

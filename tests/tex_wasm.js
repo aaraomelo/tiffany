@@ -71,6 +71,7 @@ try {
 }
 
 const bytes = fs.readFileSync(w);
+const { instanciaTex } = require('./tex_env.js');
 const M = new WebAssembly.Module(bytes);
 const EXP = WebAssembly.Module.exports(M);
 
@@ -90,7 +91,7 @@ ok('§T1 o tex.c sobe e o modulo e VALIDO — sem emscripten, a regua traduz-se 
 const tem = (n, k) => EXP.some(x => x.name === n && x.kind === (k || 'function'));
 const porta = ['poe_ficheiro', 'fopen', 'fread', 'fwrite', 'ftell', 'fseek',
                'inicia_wasm', 'compila_ficheiro', 'limpa_saida', 'end_saida', 'tam_saida',
-               'MOVE', 'end_fatia', 'vfs_reserva'].every(n => tem(n));
+               'MOVE', 'end_fatia', 'vfs_reserva', 'marca_vfs', 'volta_compila'].every(n => tem(n));
 console.log(`   porta: DISCO(${tem('DISCO', 'memory')}) MOVE fatias poe inicia compila ...`);
 ok('§T2 a porta da composicao esta la: MOVE no DISCO, fatias e ficheiros por slots',
    tem('DISCO', 'memory') && porta);
@@ -98,7 +99,7 @@ ok('§T2 a porta da composicao esta la: MOVE no DISCO, fatias e ficheiros por sl
 /* o motor pode nao instanciar sob o ulimit -v da bateria (vale para TODOS os modulos com
  * disco): entao §T3/§T4 dizem o que se pode, e afirmam so o verificado. */
 let E = null;
-try { E = new WebAssembly.Instance(M).exports; }
+try { E = instanciaTex(M).exports; }
 catch (e) {
     if (!/Out of memory|Cannot allocate/i.test(e.message)) throw e;
     console.log('\n   o motor nao instancia modulos com disco sob este limite de espaco virtual');
@@ -130,7 +131,7 @@ catch (e) {
 /* ─── §T3b MOVE ±1 nas fatias: o mesmo que tests/move.c, no disco linear ─────────── */
 {
     E.inicia_wasm();
-    const slot = 6;   /* TAM[6] = 64 KB — o mesmo gesto de tests/move.c */
+    const slot = 1;   /* TAM[1] = 64 KB — banco (classe); rascunho 3–15 ainda não nasceu */
     const a = Number(E.MOVE(slot, -1));
     const b = Number(E.MOVE(slot, 1));
     const tam = Number(E.tam_fatia(slot));
@@ -140,9 +141,11 @@ catch (e) {
     for (let i = 0; i < 64; i++) if (oct[b + i] !== ((i * 7 + 3) & 255)) mau++;
     const pdf = Number(E.MOVE(14, 1));
     const end14 = Number(E.end_fatia(14));
-    console.log(`   §T3b MOVE(6,±1) end=${a}==${b} tam=${tam} mau=${mau}; slot14=${pdf}==${end14}`);
+    const cap14 = Number(E.tam_fatia(14));
+    const inicia = E.DISCO.buffer.byteLength;
+    console.log(`   §T3b MOVE(1,±1) end=${a}==${b} tam=${tam} mau=${mau}; slot14=${pdf}==${end14} cap=${cap14} inicia=${(inicia/1048576).toFixed(2)} MiB`);
     ok('§T3b MOVE(slot,+1) e MOVE(slot,-1) sao o mesmo endereco no DISCO — residuo 0, como move.c',
-       a > 0 && a === b && mau === 0 && tam === (1 << 16) && pdf === end14 && pdf > 0);
+       a > 0 && a === b && mau === 0 && tam === (1 << 16) && pdf === end14 && pdf === 0 && cap14 === (1 << 27) && inicia < 20 * 1048576);
 }
 
 /* ─── §T4 o que se escreve le-se de volta ─────────────────────────────────────────── */
@@ -275,6 +278,7 @@ catch (e) {
         for (const f of man.ficheiros) poeFich(f, fs.readFileSync(path.join(RAIZ, f)));
         poeFich('alonzo.tex', Buffer.from(ALONZO, 'latin1'));
         poeFich('caelum.tex', Buffer.from(CAELUM, 'latin1'));
+        if (typeof E.marca_vfs === 'function') E.marca_vfs();
 
         const A = compoe('alonzo.tex');
         aRc = A.rc; aTam = A.tam;
@@ -282,6 +286,11 @@ catch (e) {
         aSem = leSemente(A.pdf);
         aForms = (A.pdf.toString('latin1').match(/\/Subtype\/Form/g) || []).length;
 
+        /* 1 bit zera FICH (banco = LS/Map); o selo de Caelum precisa do corpo de novo. */
+        if (typeof E.volta_compila === 'function') E.volta_compila();
+        for (const f of man.ficheiros) poeFich(f, fs.readFileSync(path.join(RAIZ, f)));
+        poeFich('caelum.tex', Buffer.from(CAELUM, 'latin1'));
+        if (typeof E.marca_vfs === 'function') E.marca_vfs();
         const C = compoe('caelum.tex');
         cRc = C.rc; cTam = C.tam;
         cEof = C.pdf.includes(Buffer.from('%%EOF'));
@@ -299,6 +308,53 @@ catch (e) {
     console.log(`   §T6 Caelum rc=${cRc} bytes=${cTam} selo=${cSelo && cSelo.length} bate=${cBate} eof=${cEof}`);
     ok('§T6 Caelum (o esqueleto): /AssinaturaOito 256, dois caminhos batem — o que Alonzo compõe, Caelum assina',
        !trap && cRc === 0 && cEof && cSelo && cSelo.length === 256 && cBate);
+
+    /* §T7 1 bit + miss: instância fresca — dualsort×2, Map → fopen, FICH zera. */
+    let d1 = { rc: -1, tam: 0, forms: 0 }, d2 = { rc: -1, tam: 0, forms: 0 };
+    try {
+        const cache7 = new Map(man.ficheiros.map((f) => [f, fs.readFileSync(path.join(RAIZ, f))]));
+        const poeSet7 = new Set();
+        let E7 = null;
+        const mem7 = () => new Uint8Array(E7.DISCO.buffer);
+        const res7 = (n) => { const p = num(E7.vfs_reserva(n)); if (!p) throw new Error('vfs'); return p; };
+        const str7 = (s) => { const nb = Buffer.from(s, 'latin1'); const p = res7(nb.length + 1); mem7().set(nb, p); mem7()[p + nb.length] = 0; return p; };
+        const poe7 = (nome, bytes) => {
+            const pN = str7(nome); const pD = res7(Math.max(bytes.length, 0) + 1);
+            if (bytes.length) mem7().set(bytes instanceof Buffer ? bytes : Buffer.from(bytes), pD);
+            mem7()[pD + bytes.length] = 0;
+            if (!E7.poe_ficheiro(pN, pD, bytes.length)) throw new Error('poe ' + nome);
+        };
+        const { hitCorpo } = require('./tex_env.js');
+        const hit7 = (nome) => hitCorpo(cache7, nome);
+        E7 = instanciaTex(M, (ptr) => {
+            const v = mem7(); let s = '';
+            for (let i = ptr; i < v.length && v[i]; i++) s += String.fromCharCode(v[i]);
+            const h = hit7(s); if (!h) return 0;
+            if (poeSet7.has(h.nome)) return 1;
+            poe7(h.nome, h.u8); poeSet7.add(h.nome); return 1;
+        }).exports;
+        E7.inicia_wasm();
+        if (typeof E7.marca_vfs === 'function') E7.marca_vfs();
+        const comp7 = (nome) => {
+            E7.limpa_saida();
+            const rc = num(E7.compila_ficheiro(str7(nome), str7('saida.pdf')));
+            const tam = num(E7.tam_saida());
+            const end = num(E7.MOVE(14, 1));
+            const pdf = Buffer.from(mem7().slice(end, end + tam));
+            return { rc, tam, pdf };
+        };
+        if (typeof E7.volta_compila === 'function') E7.volta_compila();
+        poeSet7.clear();
+        d1 = comp7('papers/dualsort.tex');
+        if (typeof E7.volta_compila === 'function') E7.volta_compila();
+        poeSet7.clear();
+        d2 = comp7('papers/dualsort.tex');
+    } catch (e) { trap = String(e && e.message || e).slice(0, 200); }
+    const f1 = d1.pdf ? (d1.pdf.toString('latin1').match(/\/Subtype\/Form/g) || []).length : 0;
+    const f2 = d2.pdf ? (d2.pdf.toString('latin1').match(/\/Subtype\/Form/g) || []).length : 0;
+    console.log(`   §T7 dualsort×2 rc=${d1.rc}/${d2.rc} tam=${d1.tam}/${d2.tam} Forms=${f1}/${f2}`);
+    ok('§T7 volta_compila: a segunda composição é a mesma (1 bit, sem recorrência) — resíduo 0',
+       !trap && d1.rc === 0 && d2.rc === 0 && d1.tam === d2.tam && f1 === f2 && f1 > 50 && d1.tam > 1e5);
 }
 
 console.log('\n==========================================================================');

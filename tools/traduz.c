@@ -81,6 +81,7 @@ typedef struct {
     int tmp_ret;                               /* onde o valor espera enquanto o quadro fecha */
     int disco_publico;                         /* um global sem `static` pede o disco na porta */
     int campo_vec;                             /* o último campo lido era um vector? */
+    int n_imp;                                 /* imports env (ex.: __fich_miss); deslocam o índice das funções */
     Buf cod, mod, sec, corpos;
 } Reg;
 #define RG            DISCO_FIXO(Reg, 61)
@@ -121,6 +122,8 @@ typedef struct {
 #define TMP_RET       (RG->tmp_ret)
 #define DISCO_PUBLICO (RG->disco_publico)
 #define CAMPO_VEC     (RG->campo_vec)
+#define N_IMP         (RG->n_imp)
+#define WASM_FUN(f)   ((f) + N_IMP)
 #define COD           (RG->cod)
 #define MOD           (RG->mod)
 #define SEC           (RG->sec)
@@ -1055,6 +1058,16 @@ static int primaria(void){
             bput(&COD, 0x40); bput(&COD, 0x00);            /* memory.grow */
             return TI32;
         }
+        /* fopen miss → o host infla 1 slot do LS e faz poe. Import env.__fich_miss:
+         * síncrono (o Map JS já tem os bytes); o DISCO só cresce com o que o fopen pede. */
+        if(!strcmp(nome, "__fich_miss")){
+            if(N_IMP < 1) erro("__fich_miss sem import no módulo");
+            come("(");
+            int t = expr(); promove_topo(t, TI32);
+            come(")");
+            bput(&COD, 0x10); bu(&COD, 0);                  /* call import 0 */
+            return TI32;
+        }
 
         /* `va_arg(ap, T)` lê a fita e anda um slot. O valor GUARDA-SE num local antes de o
          * ponteiro andar: deixá-lo na pilha punha o avanço entre o valor e quem o usa, e
@@ -1203,7 +1216,7 @@ static int primaria(void){
                 long d0 = QUADRO_FITA + (long)meu_sitio * FITA_SLOTS * 8;
                 if(d0){ bput(&COD, 0x41); bs(&COD, d0); bput(&COD, 0x6A); }
             }
-            bput(&COD, 0x10); bu(&COD, (unsigned long)f);
+            bput(&COD, 0x10); bu(&COD, (unsigned long)WASM_FUN(f));
             PRIM_END = 0;                          /* o que uma função devolve é valor */
             return FUNS[f].ret;
         }
@@ -1327,7 +1340,8 @@ static void chamada_indirecta(int t){
     come(")");
     bput(&COD, 0x20); bu(&COD, (unsigned long)tmp);         /* local.get tmp: o índice, no fim */
     bput(&COD, 0x11);
-    bu(&COD, (unsigned long)(NFUN + k));       /* a assinatura, na secção de tipos */
+    /* tipos: funções, depois FPT, depois (se houver) o tipo do import — o FPT não anda */
+    bu(&COD, (unsigned long)(NFUN + k));
     bu(&COD, 0);                               /* a tabela, que é uma só */
 }
 
@@ -3300,6 +3314,20 @@ int main(int argc, char **argv){
     colhe_macros();
     for(int i = 0; i < 8 && troca_macros(); i++) ;   /* encaixadas, e com fundo */
 
+    /* o import só existe se o fonte o chama — módulos sem fopen-miss ficam sem secção 2,
+     * e a volta (traduz_volta) não parte. */
+    N_IMP = 0;
+    {
+        long i = 0;
+        while(SRC[i]){
+            if(SRC[i] == '_' && !strncmp(SRC + i, "__fich_miss", 11)){
+                char c = SRC[i + 11];
+                if(c == '(' || c == ' ' || c == '\t' || c == '\n' || c == '\r'){ N_IMP = 1; break; }
+            }
+            i++;
+        }
+    }
+
     colhe_assinaturas();
 
     /* a segunda volta: os corpos */
@@ -3419,7 +3447,7 @@ int main(int argc, char **argv){
     bmany(&MOD, "\0asm", 4);
     { unsigned char v[4] = { 1, 0, 0, 0 }; bmany(&MOD, v, 4); }
 
-    bu(&SEC, (unsigned long)(NFUN + NFPT));            /* 1: tipo — as funções e os saltos */
+    bu(&SEC, (unsigned long)(NFUN + NFPT + N_IMP));   /* 1: tipo — funções, saltos, import */
     for(int i = 0; i < NFUN; i++){
         bput(&SEC, 0x60);
         bu(&SEC, (unsigned long)FUNS[i].npar);
@@ -3434,7 +3462,24 @@ int main(int argc, char **argv){
         if(FPT[i].ret == TVOID) bu(&SEC, 0);
         else { bu(&SEC, 1); bput(&SEC, val_t(FPT[i].ret)); }
     }
+    if(N_IMP > 0){                                     /* __fich_miss(i32) -> i32 */
+        bput(&SEC, 0x60);
+        bu(&SEC, 1); bput(&SEC, 0x7F);
+        bu(&SEC, 1); bput(&SEC, 0x7F);
+    }
     seccao(1, &SEC);
+
+    if(N_IMP > 0){                                     /* 2: import env.__fich_miss */
+        bu(&SEC, (unsigned long)N_IMP);
+        {
+            const char *mod = "env", *nm = "__fich_miss";
+            bu(&SEC, (unsigned long)strlen(mod)); bmany(&SEC, mod, (long)strlen(mod));
+            bu(&SEC, (unsigned long)strlen(nm));  bmany(&SEC, nm,  (long)strlen(nm));
+            bput(&SEC, 0x00);                          /* func */
+            bu(&SEC, (unsigned long)(NFUN + NFPT));    /* tipo anexado */
+        }
+        seccao(2, &SEC);
+    }
 
     bu(&SEC, (unsigned long)NFUN);                     /* 3: função */
     for(int i = 0; i < NFUN; i++) bu(&SEC, (unsigned long)i);
@@ -3483,7 +3528,7 @@ int main(int argc, char **argv){
         bu(&SEC, (unsigned long)L);
         bmany(&SEC, FUNS[i].nome, L);
         bput(&SEC, 0x00);
-        bu(&SEC, (unsigned long)i);
+        bu(&SEC, (unsigned long)WASM_FUN(i));
     }
     if(paginas > 0 && DISCO_PUBLICO){   /* o disco só sai se um global público o pedir */
         /* o comprimento NÃO se escreve à mão: escrevi `6` para sete letras e o disco saiu
@@ -3500,7 +3545,7 @@ int main(int argc, char **argv){
         bu(&SEC, 0);
         bput(&SEC, 0x41); bs(&SEC, 0); bput(&SEC, 0x0B);
         bu(&SEC, (unsigned long)NFUN);
-        for(int i = 0; i < NFUN; i++) bu(&SEC, (unsigned long)i);
+        for(int i = 0; i < NFUN; i++) bu(&SEC, (unsigned long)WASM_FUN(i));
         seccao(9, &SEC);
     }
 

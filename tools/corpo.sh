@@ -64,6 +64,14 @@ grep '^ABRE ' "$ESPIA/tudo.txt" | sed 's/^ABRE //' | sed 's#^\.\./##' | sed "s#^
 
 N=$(wc -l < "$LISTA")
 BYTES=$(while read -r f; do stat -c%s "$RAIZ/$f"; done < "$LISTA" | paste -sd+ | bc)
+SOMA=$(python3 -c "
+import hashlib
+h=hashlib.sha256()
+for f in open('$LISTA'):
+    f=f.strip(); b=open(f,'rb').read()
+    h.update(f.encode()); h.update(len(b).to_bytes(4,'little')); h.update(b)
+print(h.hexdigest()[:16])
+")
 
 # ── o manifesto ──────────────────────────────────────────────────────────────────────
 SAIDA=app/src/corpo.json
@@ -71,6 +79,8 @@ SAIDA=app/src/corpo.json
   echo '{'
   echo '  "medido_por": "tools/corpo.sh — fopen interceptado, não lista à mão",'
   echo '  "regra": "o front serve estes de onde eles estão; nada é copiado para o dist",'
+  printf '  "soma": "%s",\n' "$SOMA"
+  printf '  "bytes": %s,\n' "$BYTES"
   printf '  "ficheiros": [\n'
   i=0
   while read -r f; do
@@ -83,5 +93,5 @@ SAIDA=app/src/corpo.json
 } > "$SAIDA"
 
 echo
-echo "  $N ficheiros, $BYTES bytes  ->  $SAIDA"
+echo "  $N ficheiros, $BYTES bytes, soma $SOMA  ->  $SAIDA"
 echo "  (medido a compor: $DOCS)"

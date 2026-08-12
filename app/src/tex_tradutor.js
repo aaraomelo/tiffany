@@ -1,13 +1,18 @@
-// ── O TRADUTOR .tex→PDF NO CLIENTE: tex.wasm + /corpo/, sem TeX Live ──────────
+// ── O TRADUTOR .tex→PDF NO CLIENTE: tex.wasm + disco LS, sem TeX Live ──────────
 //
 // O Aarão: «isso tem que rodar no front do cliente, PDF gerado no front via WASM,
 // sem servidor». Localmente o middleware Node era um atalho — em produção o nginx
 // só serve ficheiros, e a composição É no browser.
 //
-// Porta: MOVE(slot, ±1) no DISCO — inicia_wasm prende as fatias, o host escreve
-// os corpos no vfs (vfs_reserva), compila, lê o PDF no slot 14. Sem monte SAIDA.
-// /corpo/ medido por tools/corpo.sh. Alonzo compõe, Caelum assina (§T5–T6).
+// Porta: MOVE(slot, ±1) no DISCO — inicia prende só o banco (0–2); o rascunho
+// (fonte/PDF) nasce após MARCO e recua com volta_compila. Host lê slot 14.
+// Corpo: mapa GKCORPO no localStorage; inflate no Map JS; fopen miss → poe 1
+// no DISCO (import __fich_miss). A estrela não leva o subset inteiro à partida.
 import manifesto from './corpo.json'
+import {
+  ficheirosPara, gravaCorpo, leMapa, leFicheiro, mapaBate, apagaCorpo, bytesLS,
+  resolveCorpoNome,
+} from './corpo_disco.js'
 
 const DOCS = {
   teoria: 'teoria.tex',
@@ -22,7 +27,8 @@ const DOCS = {
   arquitetura: 'papers/arquitetura.tex',
 }
 
-let motor = null // { exports, view, encoder }
+let motor = null // { exports, poe: Set, cache: Map, miss: { n, bytes } }
+let corpo = null // { origem, mapa, ms, msFetch, msGrava }
 
 function num (x) {
   // long → i64 no módulo: o motor devolve BigInt; os índices do ArrayBuffer pedem Number
@@ -56,36 +62,147 @@ function poeBytes (E, nome, bytes) {
     throw new Error('tex.wasm: poe_ficheiro recusou ' + nome)
 }
 
+function cstr (E, ptr) {
+  const v = memView(E)
+  let s = ''
+  for (let i = ptr; i < v.length && v[i]; i++) s += String.fromCharCode(v[i])
+  return s
+}
+
+function bytesCache (nome) {
+  const can = resolveCorpoNome(nome, motor.cache)
+  if (!can) return null
+  return { nome: can, u8: motor.cache.get(can) }
+}
+
+/** síncrono: o Map já tem o inflate; só copia 1 ficheiro para o DISCO. */
+function fichMiss (ptr) {
+  if (!motor) return 0
+  const E = motor.exports
+  const pedido = cstr(E, ptr)
+  const hit = bytesCache(pedido)
+  if (!hit) return 0
+  if (motor.poe.has(hit.nome)) return 1
+  poeBytes(E, hit.nome, hit.u8)
+  motor.poe.add(hit.nome)
+  motor.miss.n++
+  motor.miss.bytes += hit.u8.length
+  return 1
+}
+
+function storage () {
+  try {
+    if (typeof localStorage === 'undefined') return null
+    return localStorage
+  } catch {
+    return null
+  }
+}
+
 async function fetchCorpo (caminho) {
   const r = await fetch('/corpo/' + caminho)
   if (!r.ok) throw new Error(`corpo/${caminho} → ${r.status}`)
   return new Uint8Array(await r.arrayBuffer())
 }
 
+async function garanteCorpo () {
+  if (corpo) return corpo
+  const t0 = performance.now()
+  const ls = storage()
+  const lista = manifesto.ficheiros
+  const mapaLS = ls && leMapa(ls)
+  if (mapaLS && mapaBate(mapaLS, manifesto.soma, lista)) {
+    corpo = { origem: 'localStorage', mapa: mapaLS, ms: Math.round(performance.now() - t0) }
+    return corpo
+  }
+  const pares = new Array(lista.length)
+  const tFetch = performance.now()
+  await Promise.all(lista.map(async (f, i) => {
+    pares[i] = { nome: f, bytes: await fetchCorpo(f) }
+  }))
+  const msFetch = Math.round(performance.now() - tFetch)
+  let msGrava = 0
+  let mapa = { soma: manifesto.soma, slots: pares.map((p) => ({ nome: p.nome, tam: p.bytes.length })) }
+  if (ls) {
+    const t1 = performance.now()
+    try {
+      await gravaCorpo(ls, pares, manifesto.soma)
+      mapa = leMapa(ls) || mapa
+      msGrava = Math.round(performance.now() - t1)
+    } catch {
+      try { apagaCorpo(ls) } catch { /* quota: o fetch já tem os bytes desta sessão */ }
+      corpo = {
+        origem: 'fetch', mapa, pares, ms: Math.round(performance.now() - t0), msFetch, msGrava: 0,
+      }
+      return corpo
+    }
+  }
+  // bytes ficam no LS; não se guarda a segunda cópia JS
+  corpo = { origem: ls ? 'fetch+LS' : 'fetch', mapa, ms: Math.round(performance.now() - t0), msFetch, msGrava }
+  return corpo
+}
+
+async function bytesDe (nome) {
+  if (corpo.pares) {
+    const p = corpo.pares.find((x) => x.nome === nome)
+    if (p) return p.bytes
+  }
+  const ls = storage()
+  if (ls && corpo.mapa) {
+    const u8 = await leFicheiro(ls, corpo.mapa, nome)
+    if (u8) return u8
+  }
+  return fetchCorpo(nome)
+}
+
+/** Infla o subset no Map JS — ainda não toca no DISCO. */
+async function encheCache (fonte) {
+  const nomes = ficheirosPara(fonte, manifesto.ficheiros)
+  let n = 0
+  let bytes = 0
+  const t0 = performance.now()
+  for (const nome of nomes) {
+    if (motor.cache.has(nome)) continue
+    const u8 = await bytesDe(nome)
+    motor.cache.set(nome, u8)
+    n++
+    bytes += u8.length
+  }
+  return { n, bytes, ms: Math.round(performance.now() - t0), lista: nomes.length }
+}
+
 async function carregaMotor () {
   if (motor) return motor
   const buf = await (await fetch('/wasm/tex.wasm')).arrayBuffer()
-  const { instance } = await WebAssembly.instantiate(buf)
+  const mod = await WebAssembly.compile(buf)
+  const needs = WebAssembly.Module.imports(mod).some(
+    (i) => i.module === 'env' && i.name === '__fich_miss')
+  const instance = needs
+    ? await WebAssembly.instantiate(mod, { env: { __fich_miss: (ptr) => fichMiss(ptr) } })
+    : await WebAssembly.instantiate(mod)
   const E = instance.exports
   if (typeof E.inicia_wasm !== 'function')
     throw new Error('tex.wasm sem inicia_wasm — reconstrói com tools/sobe_tex_wasm.sh')
   if (typeof E.compila_ficheiro !== 'function')
     throw new Error('tex.wasm sem compila_ficheiro')
   E.inicia_wasm()
-  // corpos no disco (MOVE −1): a lista medida, não adivinhada
-  for (const f of manifesto.ficheiros) {
-    poeBytes(E, f, await fetchCorpo(f))
-  }
-  motor = { exports: E }
+  motor = { exports: E, poe: new Set(), cache: new Map(), miss: { n: 0, bytes: 0 } }
   return motor
 }
 
-/** Compõe `id` (chave de DOCS) no browser e devolve { bytes, ms }. */
+/** Compõe `id` (chave de DOCS) no browser e devolve { bytes, ms, disco }. */
 export async function comporDoc (id) {
   const fonte = DOCS[id]
   if (!fonte) throw new Error(`documento desconhecido: ${id}`)
   const t0 = performance.now()
   const { exports: E } = await carregaMotor()
+  const c = await garanteCorpo()
+  /* 1 bit: recua o monte; o banco LS/Map fica. Cache no JS; DISCO só no fopen. */
+  if (typeof E.volta_compila === 'function') E.volta_compila()
+  motor.poe.clear()
+  motor.miss = { n: 0, bytes: 0 }
+  const cache = await encheCache(fonte)
+  if (typeof E.marca_vfs === 'function') E.marca_vfs()
   E.limpa_saida()
   const enc = new TextEncoder()
   const nEnt = enc.encode(fonte)
@@ -95,7 +212,9 @@ export async function comporDoc (id) {
   const v = memView(E)
   v.set(nEnt, pEnt); v[pEnt + nEnt.length] = 0
   v.set(nSai, pSai); v[pSai + nSai.length] = 0
+  const tComp = performance.now()
   const rc = E.compila_ficheiro(pEnt, pSai)
+  const msCompila = Math.round(performance.now() - tComp)
   if (rc !== 0) throw new Error(`compila_ficheiro(${fonte}) → ${rc}`)
   const n = num(E.tam_saida())
   const addr = typeof E.MOVE === 'function' ? num(E.MOVE(14, 1)) : num(E.end_saida())
@@ -110,7 +229,33 @@ export async function comporDoc (id) {
     throw new Error('Alonzo: falta /SementeEstrela — a composição não viajou')
   if (!latin.includes('/Type/AssinaturaOito'))
     throw new Error('Caelum: falta /AssinaturaOito — o esqueleto não assinou')
-  return { bytes: out, ms: Math.round(performance.now() - t0), fonte }
+  const poe = {
+    n: motor.miss.n,
+    bytes: motor.miss.bytes,
+    ms: cache.ms,
+    lista: cache.lista,
+  }
+  if (typeof E.volta_compila === 'function') E.volta_compila()
+  motor.poe.clear()
+  const ls = storage()
+  return {
+    bytes: out,
+    ms: Math.round(performance.now() - t0),
+    fonte,
+    disco: {
+      origem: c.origem,
+      msCorpo: c.ms,
+      msFetch: c.msFetch || 0,
+      msGrava: c.msGrava || 0,
+      msPoe: poe.ms,
+      msCompila,
+      poeN: poe.n,
+      poeBytes: poe.bytes,
+      poeLista: poe.lista,
+      lsBytes: ls ? bytesLS(ls) : 0,
+      discoPag: E.DISCO.buffer.byteLength,
+    },
+  }
 }
 
 /** Compõe e abre o PDF. `janela` (opcional) é um tab já aberto no click

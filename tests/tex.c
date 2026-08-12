@@ -36,11 +36,40 @@ static int OFF_FAT[16], TAM_FAT[16], FAT_PRONTO;
 #endif
 
 #ifdef TEX_COM_LIBC_WASM
-/* o disco linear É as fatias — prende_fatias / MOVE em libc.c. Sem malloc anónimo. */
+/* banco 0–2: fatias presas no inicia. rascunho 3–15: malloc após MARCO, recua
+ * com volta_compila (1 bit). Sem isto a fonte/PDF refrescam 140 MiB vazios. */
 static char *disco_fatia(int i, const char *nome, long n){
-    (void)nome; (void)n;
-    if(!prende_fatias()) return 0;
-    return (char*)end_fatia(i);
+    (void)nome;
+    if(i < 0 || i >= 16) return 0;
+    if(i <= 2){
+        if(!prende_fatias()) return 0;
+        return (char*)end_fatia(i);
+    }
+    if(SLOT_PTR[i]) return (char*)SLOT_PTR[i];
+    n = tam_fatia(i);                 /* tecto da fatia, não o 1.º pedido (senão OOB) */
+    if(i == 14){
+        /* o PDF cresce no que resta do tecto a partir do MARCO (banco), não do CURSOR.
+         * Medir pelo CURSOR após as macros do enredo (skak) encolhia o slot e o
+         * documento inchava noutro sítio — o bestiário tipográfico perdia a régua. */
+        int tecto = 4096 * 65536;
+        int folga = 12 * 1048576;
+        int base = MARCO ? MARCO : CURSOR;
+        int resto = tecto - base - folga;
+        if(resto > 0 && resto < n) n = resto;
+        if(n < 1048576) n = 1048576;
+    }
+    if(n < 1) return 0;
+    {
+        char *p = malloc(n);
+        if(!p) return 0;
+        if(i != 14){
+            long j = 0;
+            while(j < n){ p[j] = 0; j = j + 1; }
+        }
+        SLOT_PTR[i] = (int)p;
+        SLOT_TAM[i] = (int)n;
+        return p;
+    }
 }
 #else
 static char *disco_fatia(int i, const char *nome, long n){
@@ -112,10 +141,10 @@ static void le_nomes_idioma(void){
     free(b);
 }
 
+static long MARGEM_CACHE = -1;
 static long margem_estilo(void){
-    static long M = -1;
-    if(M >= 0) return M;
-    M = 64;                                    /* só se o estilo não disser nada */
+    if(MARGEM_CACHE >= 0) return MARGEM_CACHE;
+    long M = 64;                                    /* só se o estilo não disser nada */
     long n = 0; const char *b = estilo_texto(&n);   /* o estilo lê-se UMA vez (§estilo_texto) */
     if(b){
         /* `margin=` é sufixo de `innerleftmargin=`, `innertopmargin=` e mais quatro que o
@@ -133,6 +162,7 @@ static long margem_estilo(void){
             if(m >= 0) M = (m + 500) / 1000;       /* a margem é em pontos: UMA divisão */
         }
     }
+    MARGEM_CACHE = M;
     return M;
 }
 
@@ -253,12 +283,18 @@ static void le_hifenizacao(void){
 
 static char *le_tudo(const char *nome, long *n){
 #ifdef TEX_COM_LIBC_WASM
-    /* o corpo já está no disco: basta o endereço do slot (arquitetura: sem cópia). */
+    /* o banco (vfs/LS) é só leitura. A estrela trabalha numa JANELA — malloc após o
+     * MARCO — e volta_compila recua. Escrever in-place no slot funde os dois lados. */
     {
         char *p = ficheiro_end_nome((char*)nome);
         if(!p) return 0;
-        *n = ficheiro_tam_nome((char*)nome);
-        return p;
+        long tam = ficheiro_tam_nome((char*)nome);
+        char *c = malloc(tam + 1);
+        if(!c) return 0;
+        { long i = 0; while(i < tam){ c[i] = p[i]; i++; } }
+        c[tam] = 0;
+        *n = tam;
+        return c;
     }
 #else
     FILE *f = fopen(nome, "rb");
@@ -838,6 +874,45 @@ static void carrega_config(void){
 int compila_ficheiro(const char *ent, const char *sai){
     long t0 = 0, t_le = 0, t_cfg = 0, t_mac = 0, t_write = 0;
     long t_pass0 = 0, t_pass1 = 0, t_pass2 = 0;
+#ifdef TEX_COM_LIBC_WASM
+    /* esquilo no .bss: estrela grau 6 sem estado.
+     *
+     * Todo o rascunho DISCO_M[3–15] a zero ANTES do malloc: após volta,
+     * SLOT_PTR=0 mas o cache pode ficar; le_tudo sobe CURSOR e o relógio
+     * CURSOR «validava» UAF (catálogo a 10 pág. após dualsort).
+     * Banco 0–2 + CARTAS (bestiário) ficam. */
+    DISCO_M[3] = 0; DISCO_M[4] = 0; DISCO_M[5] = 0; DISCO_M[6] = 0;
+    DISCO_M[7] = 0; DISCO_M[8] = 0; DISCO_M[9] = 0; DISCO_M[10] = 0;
+    DISCO_M[11] = 0; DISCO_M[12] = 0; DISCO_M[13] = 0; DISCO_M[14] = 0; DISCO_M[15] = 0;
+    N_MAC = 0; EXPANDIDAS = 0;
+    N_DES = 0; CORPO_CORRENTE = 0;
+    FONTE_OTF = 0; N_FPDF = 0; N_ESP = 0; N_XGC = 0;
+    /* bestiário no LS; as CARTAS no DISCO apontavam ao FICH past MARCO — UAF após volta.
+     * CARTA_TENTADO=0 reabre as fontes via miss (1 bit / neuronio). */
+    CARTA_TENTADO = 0; CARTA = 0; N_CARTA = 0;
+    CARTA_SIM = 0; CARTA_MAT = 0; CARTA_MTB = 0; CARTA_SMB = 0; CARTA_NIT = 0;
+    CHUTES = 0; N_CHUTE_G = 0;
+    N_CORES = -1; N_ESCALA = -1; N_TEOR = -1; N_HIF = -1; N_NIVEL = -1;
+    NOMES_LIDOS = 0;
+    C_PARTE = 0; C_CAP = 0; C_SEC = 0; C_SUB = 0; C_SSUB = 0;
+    ESTILO_LIDO = 0; ESTILO_BUF = 0; ESTILO_LN = 0;
+    C_TEO = 0; C_TEO_CAP = -1;
+    TABCOLSEP = 6000; MARGEM_CACHE = -1;
+    CAB_ESQ[0] = 0; CAB_DIR[0] = 0;
+    N_TOC = 0; TOC_LE = 0; TOC_I = 0;
+    SALTA_DE = -1; SALTA_ATE = -1; CENTRA = 0;
+    Y_CAPA = -1; CAPA_POS = 0; CAPA_I = 0; CAPA_Y = 0; CAPA_FUN = 0;
+    CAPA_NF = 0; CAPA_PAG = 0; CAPA_ALT = 0;
+    DEG_FORCADO = -1; PROF = 0; DEG_PROF = -1;
+    N_BIB = 0;
+    CLASSE_CORPO = 0; CLASSE_ENTRE = 0;
+    { int k = 0; while(k < 64){ EMBP[k] = 0; k++; } }
+    { int k = 0; while(k < MAX_DES){ DES_CORPO[k] = 0; DES_VAR[k] = 0; k++; } }
+    { int k = 0; while(k < MAX_XGC){ XG_CARTA[k] = 0; k++; } }
+    { int k = 0; while(k < MAX_XGC * 256){ XG_USADO[k] = 0; XG_ID[k] = 0; k++; } }
+    { int k = 0; while(k < 112){ ESP_NV[k] = 0; ESP_SG[k] = 0; k++; } }
+    { int k = 0; while(k < 3072){ BIB_CHAVE[k] = 0; k++; } }
+#endif
     if(quer_tempo()) t0 = agora_ms();
     long n; char *s = le_tudo(ent, &n);
     if(!s){ fprintf(stderr, "nao abre: %s\n", ent); return 1; }
@@ -885,9 +960,13 @@ int compila_ficheiro(const char *ent, const char *sai){
     int *PAG_ANT = (int*)disco_buf(11, (long)(MAX_TOC * sizeof(int)));
     /* A SAÍDA É UM SLOT+CURSOR, não um FILE*: cada passagem reinicia o cursor (pdf_abre) e
      * escreve por cima; o passo 0 descarta-se, e no fim o passo mantido vai do slot ao ficheiro. */
-    unsigned char *pdfbuf = (unsigned char*)disco_buf(14, 1L << 27);   /* 128 MB, esparso no disco —
-                                            * o catálogo (519 pp + a fonte de 1,8 MB embutida)
-                                            * passa dos 64; o mmap é esparso, só o escrito pesa */
+#ifdef TEX_COM_LIBC_WASM
+    unsigned char *pdfbuf = (unsigned char*)disco_buf(14, tam_fatia(14));
+    long pdf_cap = SLOT_TAM[14] ? SLOT_TAM[14] : tam_fatia(14);
+#else
+    unsigned char *pdfbuf = (unsigned char*)disco_buf(14, 1L << 27);
+    long pdf_cap = 1L << 27;
+#endif
     long pdf_perdeu = 0;
     for(int passo = 0; passo < 3; passo++){
         if(passo == 0) N_TOC = 0;
@@ -899,7 +978,7 @@ int compila_ficheiro(const char *ent, const char *sai){
         PROF = 0; CENTRA = 0; CAPA_ALT = 0; N_FPDF = 0; N_DES = 0;
         int n_ant = N_TOC;
         for(int t = 0; t < n_ant && t < MAX_TOC; t++) PAG_ANT[t] = TOC[t].pag;
-        Pdf pp; pdf_abre(&pp, pdfbuf, 1L << 27); pagina_abre(&pp);
+        Pdf pp; pdf_abre(&pp, pdfbuf, pdf_cap); pagina_abre(&pp);
         { long tp = 0; if(quer_tempo()) tp = agora_ms();
           compila(s, &pp, &g);
           pdf_fecha(&pp);
@@ -1095,6 +1174,7 @@ void inicia_wasm(void){
     g_disco   = disco_para;
     g_carrega = carrega_nativo;   /* fopen dos slots que o host pôs por poe_ficheiro */
 #ifdef TEX_COM_LIBC_WASM
+    N_FICH = 0;                   /* sessão limpa: T4/poe anterior não cola */
     prende_fatias();              /* o DISCO é as fatias; o host MOVE os corpos depois */
 #else
     carrega_config();
