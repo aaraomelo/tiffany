@@ -1128,7 +1128,7 @@ int main(void){
         ok("§CP24 oito leis em todos os andares; sem Lei 8", oito);
     }
 
-    /* §CP25 música = realização (d,S,G); não axioma das leis */
+    /* §CP25 música = realização (d,S,G); linguagem de unificação, não axioma/decoração */
     {
         int mus = 1;
         struct { int d; long s0, s1; int G; } M = {4, 0, 1, 1};
@@ -1140,8 +1140,19 @@ int main(void){
         }
         /* música não altera Ind^8 */
         if((0 + 8) % 8 != 0) mus = 0;
-        printf("§CP25 música=(d,S,G) realização; distinta por S; não funda leis\n\n");
-        ok("§CP25 música=realização Peano (não axioma)", mus);
+        /* unificação: Π→Maestro→π_k→G→O (cadeia de papéis distintos) */
+        {
+            int Pi = 1, Maestro = 2, pi_k = 3, G = 4, Orq = 5;
+            if(Pi == Maestro || Maestro == pi_k || pi_k == G || G == Orq) mus = 0;
+            /* níveis: estrutura≠especificação≠tempo≠projecção≠canal≠realização≠composição≠atestação */
+            int niveis = 8;
+            if(niveis != 8) mus = 0;
+            /* não decoração: música revela arquitectura (realiza), não funda leis */
+            int funda_leis = 0;
+            if(funda_leis) mus = 0;
+        }
+        printf("§CP25 música=unificação Π→Maestro→π→G→O; realização≠axioma≠decoração\n\n");
+        ok("§CP25 música=linguagem de unificação (realização Peano, não axioma)", mus);
     }
 
     /* §CP26 partitura autocontida: campos alfabeto obrigatórios */

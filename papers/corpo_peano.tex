@@ -57,7 +57,10 @@ $\pi_k$ a cada tick. O \textbf{Teorema do Metrónomo}
 $\lambda^{+}{+}\lambda^{-}=0$ nas interfaces das dobras, com a
 direcção a entrar na base metálica e a transformada universal a
 avaliar na transição. A música não é metáfora decorativa: é a
-realização operacional observada. O tradutor \texttt{.tex}$\leftrightarrow$PDF
+\textbf{linguagem de unificação} em que o modelo já sabia falar
+(partitura$\to$maestro$\to$batuta$\to$instrumentos$\to$orquestra
+traduz $\Pi\to\mathrm{Maestro}\to\pi_k\to G_i\to\mathcal{O}$).
+O tradutor \texttt{.tex}$\leftrightarrow$PDF
 (\emph{Arquitetura}) opera nesta torre: \code{MOVE} é a estrela; $\pi_k$ é a
 retração. Milénios são leituras, não base
 (\S\ref{sec:milenio-leitura}). Verificação:
@@ -901,9 +904,66 @@ Empacotamento: $\mathrm{Regua}_k=30\cdot100+C_k$ (\code{tex\_core.c}).
 %======================================================================
 \section{Música e Partitura}\label{sec:musica}
 
-A música é a \textbf{consequência} do Teorema do Maestro
+A música entrou como \textbf{linguagem de unificação}, não como
+decoração. Nomes inventados pediam ao leitor montar a arquitectura
+sozinho; \emph{metrónomo}, \emph{maestro}, \emph{batuta},
+\emph{partitura}, \emph{orquestra} já trazem \textbf{relações
+estruturais embutidas}:
+\[
+\text{partitura}
+\;\rightarrow\;
+\text{maestro}
+\;\rightarrow\;
+\text{batuta}
+\;\rightarrow\;
+\text{instrumentos}
+\;\rightarrow\;
+\text{orquestra}.
+\]
+O leitor vê de imediato especificação, interface de execução, canal de
+comando, realizadores e composição --- e isso traduz a arquitectura
+matemática:
+\[
+\Pi
+\;\rightarrow\;
+\text{Maestro}
+\;\rightarrow\;
+\pi_k
+\;\rightarrow\;
+G_i
+\;\rightarrow\;
+\mathcal{O}.
+\]
+A vantagem: os nomes \textbf{não precisam explicar} a arquitectura
+inteira --- a semântica já carrega a relação. A roupa musical
+\textbf{não substitui} a matemática: \textbf{revela} a arquitectura
+que a matemática já tinha.
+\[
+\boxed{
+\text{A música não foi colocada sobre o modelo:}
+\quad
+\text{foi encontrada como a linguagem em que o modelo já sabia falar.}
+}
+\]
+Níveis que a música separa naturalmente --- os mesmos que a matemática
+já distinguia:
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+nível & objecto musical & função \\
+\hline
+estrutura & corpo / conservatório & o que se conserva \\
+especificação & partitura ($\Pi$) & o quê \\
+tempo & metrónomo & quando (lê) \\
+projecção & maestro & projecta $\pi_k$ \\
+canal & batuta & canaliza $I$ \\
+realização & instrumento ($G$) & naipe / gerador \\
+composição & orquestra ($\mathcal{O}$) & fusão sob o maestro \\
+atestação & métrica (Lyapunov dualizado) & atesta $\lambda^{+}{+}\lambda^{-}=0$ \\
+\end{tabular}
+\end{center}
+Consequência operacional dos Teoremas do Maestro e do Metrónomo
 (\S\ref{sec:maestro-thm}): a teoria constrói a retração; o maestro
-realiza-a dinamicamente; a música é o resultado observado.
+projecta; o metrónomo lê; a música é o resultado observado.
 \[
 \boxed{
 \text{Conservatório}
@@ -922,7 +982,7 @@ Cadeia tipográfica (não retroage às leis):
 \text{leis}\to\text{corpo/torre}\to
 \text{Teorema Central}
 \to\pi_k\to
-\text{Maestro}
+(\text{Maestro},\,\text{Metrónomo})
 \to\text{música}/\text{partitura}/\text{naipes}/\text{orquestra}.
 \]
 Música $=$ realização operacional de $\pi_k$ no tempo; partitura $=$
@@ -1575,6 +1635,7 @@ catálogo & $\mathbb{Z}/8\mathbb{Z}$ & dimensão $d_k$ \\
 torre & indução dimensional $d_k=2^{k+1}$ & período 8 das leis \\
 reticulado & $(\mathbb{N}_{>0},\mid)$, lcm/gcd & anel de leis \\
 música & realização $(d,S,G)$ & axioma \\
+  & $+$ linguagem de unificação & decoração / nomes inventados \\
 partitura & assinatura $+$ notação & o som \\
 naipes & classificação Hurwitz de $G$ & teorema de nomes \\
 maestro & interface (não necessária ao corpo) & quinto naipe \\
@@ -1626,7 +1687,7 @@ Cantor / Peano & construção / definição \\
 Períodos $2,3,4,8$ & fechos das representações \\
 Interfaces $6,12,24$ & derivadas ($\operatorname{lcm}$) \\
 Milénios & \textbf{interpretação} \\
-Música & realização do dual central \\
+Música & realização do dual central; linguagem de unificação (não decoração) \\
 Partitura & definição (assinatura $+$ notação) \\
 Alfabeto musical & realização \\
 Naipes & classificação da realização \\
@@ -1654,9 +1715,16 @@ Sinfónica $=$ Filarmónica & convenção do modelo \\
 \boxed{
 \text{Matemática constrói o corpo;}
 \quad
-\text{música realiza o corpo;}
+\text{música revela a arquitectura;}
 \quad
-\text{partitura o transporta como assinatura.}
+\text{partitura a transporta como assinatura.}
+}
+\]
+\[
+\boxed{
+\text{A música não foi colocada sobre o modelo:}
+\quad
+\text{foi encontrada como a linguagem em que o modelo já sabia falar.}
 }
 \]
 \[
@@ -1686,7 +1754,7 @@ Sinfónica $=$ Filarmónica & convenção do modelo \\
 \code{peano\_dual.c}: trial, $\Lambda_K$. Não são a mesma curva.
 
 \bigskip
-\noindent\textbf{Verificação.} \code{tests/corpo\_peano.c} §CP1--§CP39;
+\noindent\textbf{Verificação.} \code{tests/corpo\_peano.c} §CP1--§CP40;
 \code{tests/autoria\_tradutor.js}: Hurwitz~$8\neq$teto;
 $\mathcal{P}_k=\mathrm{tick}\circ\mathrm{batuta}\circ\Pi$.
 
