@@ -1,7 +1,7 @@
 % papers/partitura.tex
-% Partitura do Tradutor --- especificacao do sistema (Pi_tradutor |-> Pi_musical).
-% Dialecto do tradutor tiffany (tex.wasm / tests/tex): auto-contido como dualsort.
-% Gravacao LilyPond: partitura/ (emite.c -> .ly -> render/*.pdf) --- backend, nao fonte.
+% Partitura do Tradutor --- desenhada pelo tradutor .tex↔PDF (tex.wasm).
+% Os glifos musicais saem do léxico (\note → ♪ na OTF), o pentagrama de \rule.
+% LilyPond em partitura/ é gravação tipográfica paralela --- não a fonte.
 %
 %   tests/tex papers/partitura.tex saida.pdf
 %   (browser: docs/partitura.pdf via tex.wasm)
@@ -17,16 +17,44 @@
 \newtheorem{definicao}{Definição}
 \newtheorem{observacao}{Observação}
 \newcommand{\code}[1]{\texttt{#1}}
+
+% ─── o pentagrama e a nota: o tradutor já sabe \rule e o léxico \note ─────────
+% Largura FIXA (15.4cm) --- como estilo.tex: o dialecto não mede \textwidth no \rule.
+\newcommand{\TiffanyLinha}{\noindent{\color{tinta}\rule{15.4cm}{0.35pt}}}
+\newcommand{\TiffanyPentagrama}{%
+  \par\smallskip
+  \TiffanyLinha\\[-1.65mm]%
+  \TiffanyLinha\\[-1.65mm]%
+  \TiffanyLinha\\[-1.65mm]%
+  \TiffanyLinha\\[-1.65mm]%
+  \TiffanyLinha
+  \par\nobreak
+}
+% uma voz: nome + clave + pentagrama + figura no tempo (mesmo relógio)
+\newcommand{\TiffanyVoz}[3]{%
+  \par\medskip
+  \noindent\begin{minipage}{15.4cm}%
+  \textbf{#1}\quad{\small\color{regua}#2}\par\nobreak
+  \TiffanyPentagrama\nobreak
+  \noindent\quad #3%
+  \end{minipage}\par
+}
+\newcommand{\N}{\note\,}
+\newcommand{\R}{\ensuremath{\cdot}\,}
+\newcommand{\barline}{\ensuremath{|}\,}
+
 \input{gkcapa}
 \begin{document}
 \gkcapa{Partitura do Tradutor}
        {$\Pi_{\mathrm{tradutor}}\longmapsto\Pi_{\mathrm{musical}}$}
-       {todas as vozes em paralelo --- um relógio, uma regência; especificação do sistema}
+       {desenhada pelo tradutor --- todas as vozes, um relógio}
 \maketitle
 
 \begin{abstract}
-\noindent Este paper é a \textbf{especificação musical do sistema}: a partitura
-completa do tradutor, com todas as vozes sincronizadas. O objectivo formal é
+\noindent Este paper é a \textbf{especificação musical do sistema}, composta
+pelo próprio tradutor \texttt{.tex}$\leftrightarrow$PDF: o léxico mapeia
+\verb|\note| ao glifo ♪ da fonte; o pentagrama é \verb|\rule| --- a mesma
+primitiva das réguas do Reino. Objectivo:
 \[
 \boxed{
 \Pi_{\mathrm{tradutor}}
@@ -35,13 +63,12 @@ completa do tradutor, com todas as vozes sincronizadas. O objectivo formal é
 \quad(\text{todas as vozes sincronizadas}).
 }
 \]
-Não é sonificação de dados. O corpo projecta; a partitura transporta; LilyPond
-grava (\code{partitura/emite.c}). Regra editorial: a partitura \textbf{não
-inventa} informação fora da assinatura do tradutor.
+Regra: a partitura \textbf{não inventa} informação fora da assinatura.
+LilyPond (\code{partitura/emite.c}) só grava.
 \end{abstract}
 
-\medskip
-\noindent\textbf{Cadeia.}
+\section{Objectivo}
+
 \[
 \boxed{
 \text{Tradutor}
@@ -53,129 +80,67 @@ inventa} informação fora da assinatura do tradutor.
 \text{Orquestra}
 }
 \]
+Estado $\to$ assinatura $\Pi$ $\to$ vozes paralelas $\to$ execução
+sincronizada. O xadrez escondia a arquitectura; a partitura mostra-a:
+tempo $=$ metrónomo, direcção $=$ batuta, graus $=$ naipes, Maestro $=$
+sincronização.
 
-\section{Objectivo}
+\section{O glifo e a régua}
 
-Não fazer ``lei $\to$ nota $\to$ instrumento''. Fazer:
-\[
-\boxed{
-\text{estado}
-\;\to\;
-\text{assinatura }\Pi
-\;\to\;
-\text{vozes paralelas}
-\;\to\;
-\text{execução sincronizada}.
-}
-\]
-Cada voz mantém a identidade; todas partilham o mesmo relógio. Uma alteração
-estrutural aparece no \textbf{mesmo instante musical} em todas as vozes que
-dela participam.
-
-\begin{center}\small
-\begin{tabular}{@{}ll@{}}
-arquitectura & realização na partitura \\
-\midrule
-tempo & metrónomo \\
-direcção / inversão & batuta \\
-assinatura & partitura $\Pi$ \\
-graus / classes & vozes / naipes \\
-relação entre vozes & harmonia / polifonia \\
-dobra & transição de compás / andar \\
-torre & composição inteira \\
-Maestro & sincronização da projecção \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-Fundamento (não sonificação):
-\[
-\boxed{
-\text{relógio}
-\to
-\text{metrónomo}
-\to
-\text{maestro}
-\to
-\text{batuta}
-\to
-\Pi
-\to
-\pi_k
-\to
-\text{orquestra}
-}
-\]
-Os naipes são as classes Hurwitz $1,2,4,8$ (Cordas, Madeiras, Metais,
-Percussão) --- não ``um instrumento por variável''.
-
-\section{Assinatura $\Pi$}
-
-\begin{definicao}[Partitura Tiffany]
-\[
-\Pi=\Pi_{\mathrm{assinatura}}+\Pi_{\mathrm{notacao}},
-\quad
-\Pi_{\mathrm{assinatura}}=(d,S,G,L,C,\Delta).
-\]
+\begin{definicao}[Nota no tradutor]
+O comando \verb|\note| está no léxico do compositor (como \verb|\alpha|):
+traduz-se ao glifo U+266A (\emph{musicalnote}) da OTF do documento. Não é
+sonificação --- é a mesma ponte comando$\to$glifo$\to$XObject.
 \end{definicao}
 
-Campos que a partitura \emph{pode} gravar (e só esses) ---
-\code{/SementeEstrela}, \code{/AssinaturaOito}:
-
-\begin{center}\small
-\begin{tabular}{@{}lll@{}}
-campo & voz & papel \\
-\midrule
-tick / Lei~6 & Metrónomo & tempo partilhado \\
-inversor $I\in\{-1,0,+1\}$ & Batuta & direcção \\
-projecção $\pi_k$ & Maestro & sincronização \\
-grau $1$ & Cordas & naipe $G_0$ \\
-grau $2$ & Madeiras & naipe $G_1$ \\
-grau $4$ & Metais & naipe $G_2$ \\
-grau $8$ & Percussão & naipe $G_3$ \\
-Lei~8 / $\mathbb{Z}/8\mathbb{Z}$ & Lei~8 & ciclo modular \\
-\code{/Dim},\code{/Alcance},\ldots & cabeçalho & metadados $\Pi$ \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-Assinatura por omissão do emissor (\code{emite tradutor}):
-$\mathrm{Dim}{=}8$, $\mathrm{Alcance}{=}3$, $\mathrm{Lado}{=}0$ (Hurwitz),
-$\mathrm{Interface}{=}6$ (hexal), bpm~$72$, compassos~$8$.
+\begin{observacao}
+Pentagrama $=5\times$\verb|\rule{15.4cm}{0.35pt}|. Cabeçalho dourado da capa
+é a mesma primitiva. Sem LilyPond no ramo wasm.
+\end{observacao}
 
 \section{A partitura do sistema}
 
-A partitura completa do tradutor declara, em paralelo e no mesmo
-compás e tempo: Metrónomo (pulso, Lei~6); Batuta (direcção $I$);
-Maestro (projecção $\pi_k$); Cordas~(1), Madeiras~(2), Metais~(4),
-Percussão~(8) --- naipes Hurwitz; Lei~8 --- ciclo modular
-$k \to (k+1)$ mod~$8$.
+Assinatura por omissão: $\mathrm{Dim}{=}8$, $\mathrm{Alcance}{=}3$,
+$\mathrm{Lado}{=}0$, $\mathrm{Interface}{=}6$, bpm~$72$, compassos~$8$.
+Oito colunas $=$ oito ticks; a barra vertical é o mesmo instante em
+todas as vozes.
 
-\noindent\textbf{Janela de 8 compassos} (realização da assinatura por omissão).
-Cada célula é um tempo; a coluna é o mesmo tick em todas as vozes.
+\TiffanyVoz{Metronomo}{pulso / Lei 6}{%
+\N\N\N\N \barline \N\N\N\N \barline \N\N\N\N \barline \N\N\N\N
+\barline \N\N\N\N \barline \N\N\N\N \barline \N\N\N\N \barline \N\N\N\N}
 
-\begin{center}\small
-\begin{tabular}{@{}lcccccccc@{}}
-voz & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 \\
-\midrule
-Metronomo & o & o & o & o & o & o & o & o \\
-Batuta & $+$ & $0$ & $-$ & $0$ & $+$ & $0$ & $-$ & $0$ \\
-Maestro & $\pi$ & $\pi$ & $\pi$ & $\pi$ & $\pi$ & $\pi$ & $\pi$ & $\pi$ \\
-Cordas & $c$ & $d$ & $e$ & $f$ & $c$ & $d$ & $e$ & $f$ \\
-Madeiras & $e$ & $g$ & $e$ & $c$ & $g$ & $e$ & $c$ & $e$ \\
-Metais & $c$ & $e$ & $as$ & $f$ & $c$ & $e$ & $as$ & $f$ \\
-Percussao & $C$ & . & $G$ & . & $C$ & . & $G$ & . \\
-Lei oito & $0$ & $1$ & $2$ & $3$ & $4$ & $5$ & $6$ & $7$ \\
-\bottomrule
-\end{tabular}
-\end{center}
+\TiffanyVoz{Batuta}{direcção $I\in\{-1,0,+1\}$}{%
+\N\R\N\R \barline \R\N\R\N \barline \N\R\N\R \barline \R\N\R\N
+\barline \N\R\N\R \barline \R\N\R\N \barline \N\R\N\R \barline \R\N\R\N}
+
+\TiffanyVoz{Maestro}{projecção $\pi_k$}{%
+\N\R\R\R \barline \N\R\R\R \barline \N\R\R\R \barline \N\R\R\R
+\barline \N\R\R\R \barline \N\R\R\R \barline \N\R\R\R \barline \N\R\R\R}
+
+\TiffanyVoz{Cordas (1)}{naipe Hurwitz $G_0$}{%
+\N\N\N\N \barline \N\N\N\N \barline \N\N\N\N \barline \N\N\N\N
+\barline \N\N\N\N \barline \N\N\N\N \barline \N\N\N\N \barline \N\N\N\N}
+
+\TiffanyVoz{Madeiras (2)}{naipe Hurwitz $G_1$}{%
+\N\N\N\N \barline \N\N\N\N \barline \N\N\N\N \barline \N\N\N\N
+\barline \N\N\N\N \barline \N\N\N\N \barline \N\N\N\N \barline \N\N\N\N}
+
+\TiffanyVoz{Metais (4)}{naipe Hurwitz $G_2$}{%
+\N\N\N\N \barline \N\N\N\N \barline \N\N\N\N \barline \N\N\N\N
+\barline \N\N\N\N \barline \N\N\N\N \barline \N\N\N\N \barline \N\N\N\N}
+
+\TiffanyVoz{Percussao (8)}{naipe Hurwitz $G_3$}{%
+\N\R\N\R \barline \N\R\N\R \barline \N\R\N\R \barline \N\R\N\R
+\barline \N\R\N\R \barline \N\R\N\R \barline \N\R\N\R \barline \N\R\N\R}
+
+\TiffanyVoz{Lei 8}{ciclo $\mathbb{Z}/8\mathbb{Z}$}{%
+\N\N\N\N \barline \N\N\N\N \barline \N\N\N\N \barline \N\N\N\N
+\barline \N\N\N\N \barline \N\N\N\N \barline \N\N\N\N \barline \N\N\N\N}
 
 \begin{observacao}
-Isto \emph{é} a especificação: estado $\to$ $\Pi$ $\to$ vozes paralelas $\to$
-execução. A gravação tipográfica LilyPond
-(\code{partitura/render/tradutor-completo.pdf}) realiza a mesma $\Pi$; não
-acrescenta campos. O tradutor \texttt{.tex}$\leftrightarrow$PDF compõe esta
-folha; o emissor \code{emite.c} grava a partitura musical.
+Uma alteração estrutural aparece no \textbf{mesmo instante} (a mesma
+coluna / barra) em todas as vozes que dela participam. Isto \emph{é} a
+especificação: o tradutor desenha; o emissor grava.
 \end{observacao}
 
 \section{Pipeline}
@@ -185,30 +150,17 @@ folha; o emissor \code{emite.c} grava a partitura musical.
 \;\to\;
 \Pi
 \;\to\;
-\text{emissor nativo}
-\;\to\;
-\texttt{.ly}
-\;\to\;
-\text{LilyPond}.
+\text{tradutor (glifo + régua)}
+\;\parallel\;
+\text{emite.c}\to\texttt{.ly}\to\text{LilyPond}.
 \]
-\begin{center}\small
-\begin{tabular}{@{}ll@{}}
-peça & papel \\
-\midrule
-este paper & especificação ($\Pi$ no dialecto do tradutor) \\
-\code{partitura/emite.c} & emissor nativo $\Pi\mapsto$\texttt{.ly} \\
-\code{partitura/render.sh} & gravação LilyPond \\
-\code{papers/corpo\_peano.tex} & teoria (Maestro / Metrónomo / naipes) \\
-\bottomrule
-\end{tabular}
-\end{center}
 
 \section{Fecho}
 
 \begin{observacao}
-Uma única partitura, todas as vozes, um único relógio, uma única regência ---
-a torre inteira como composição. LilyPond é gravação; a partitura é
-estrutura; o tradutor é a fonte.
+Uma única partitura, todas as vozes, um único relógio, uma única
+regência --- a torre inteira como composição. LilyPond é gravação; a
+partitura é estrutura; o tradutor é a fonte.
 \end{observacao}
 
 \end{document}

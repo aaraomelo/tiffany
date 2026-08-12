@@ -250,6 +250,7 @@ static int unicode_para_winansi(int u){
         case 0x2014: return 0x97; case 0x2013: return 0x96;
         case 0x201C: return 0x93; case 0x201D: return 0x94;
         case 0x2018: return 0x91; case 0x2019: return 0x92;
+        case 0x266A: return 0x81;           /* ♪ — slot livre do WinAnsi (0x81) */
         default: return '?';
     }
 }
@@ -397,6 +398,9 @@ static const Par LEXICO[] = {
      * (T\colon V\to V perdia os dois pontos), o `\dagger` é o punhal do WinAnsi (0x86),
      * e o \quad/\qquad são espaço — espaçamento SOMA, e um comando comido sem espaço COLA */
     {"colon",':',0},{"dagger",0x86,0},{"backslash",'\\',0},{"mid",'|',0},
+    /* partitura: o ♪ já está na OTF (musicalnote); o léxico só mapeia o comando → glifo,
+     * como o grego. Slot WinAnsi 0x81 ↔ U+266A (ver winansi_para_unicode). */
+    {"note",0x81,0},{"musicnote",0x81,0},{"quarternote",0x81,0},
 };
 #define NLEX ((int)(sizeof LEXICO / sizeof LEXICO[0]))
 
@@ -459,6 +463,7 @@ static int utf8_glifo(const unsigned char *s, int *consumido){
             case 0x201C: return 0x93; case 0x201D: return 0x94;
             case 0x2013: return 0x96; case 0x2014: return 0x97;
             case 0x2026: return 0x85; case 0x00A0: return ' ';
+            case 0x266A: return 0x81;                 /* ♪ musicalnote — na OTF do documento */
         }
         return '?';
     }
@@ -637,7 +642,8 @@ static long CHUTES = 0, CHUTE_G[8], N_CHUTE_G = 0;
 int winansi_para_unicode(int g)
 {
     switch(g){
-    case 0x80: return 0x20AC;  case 0x82: return 0x201A;  case 0x83: return 0x0192;
+    case 0x80: return 0x20AC;  case 0x81: return 0x266A;  /* ♪ musicalnote (OTF) */
+    case 0x82: return 0x201A;  case 0x83: return 0x0192;
     case 0x84: return 0x201E;  case 0x85: return 0x2026;  case 0x86: return 0x2020;
     case 0x87: return 0x2021;  case 0x88: return 0x02C6;  case 0x89: return 0x2030;
     case 0x8A: return 0x0160;  case 0x8B: return 0x2039;  case 0x8C: return 0x0152;
