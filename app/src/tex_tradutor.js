@@ -4,10 +4,9 @@
 // sem servidor». Localmente o middleware Node era um atalho — em produção o nginx
 // só serve ficheiros, e a composição É no browser.
 //
-// Porta medida em tests/tex_wasm.js: poe_ficheiro / inicia_wasm / compila_ficheiro
-// / limpa_saida / end_saida / tam_saida / DISCO. O ambiente (fontes, estilo, classe)
-// vem de /corpo/, a lista medida por tools/corpo.sh. O que Alonzo compõe, Caelum
-// assina: /SementeEstrela e /AssinaturaOito viajam com o PDF (§T5–T6).
+// Porta: MOVE(slot, ±1) no DISCO — inicia_wasm prende as fatias, o host escreve
+// os corpos no vfs (vfs_reserva), compila, lê o PDF no slot 14. Sem monte SAIDA.
+// /corpo/ medido por tools/corpo.sh. Alonzo compõe, Caelum assina (§T5–T6).
 import manifesto from './corpo.json'
 
 const DOCS = {
@@ -35,16 +34,24 @@ function memView (E) {
   return new Uint8Array(E.DISCO.buffer)
 }
 
+function reserva (E, n) {
+  const p = typeof E.vfs_reserva === 'function'
+    ? num(E.vfs_reserva(n))
+    : num(E.malloc(BigInt(n)))
+  if (!p) throw new Error('tex.wasm: disco cheio')
+  return p
+}
+
 function poeBytes (E, nome, bytes) {
   const enc = new TextEncoder()
   const nb = enc.encode(nome)
-  const pNome = num(E.malloc(BigInt(nb.length + 1)))
-  const pDados = num(E.malloc(BigInt(bytes.length || 1)))
-  if (!pNome || !pDados) throw new Error('tex.wasm: malloc falhou ao pôr ' + nome)
+  const pNome = reserva(E, nb.length + 1)
+  const pDados = reserva(E, (bytes.length || 0) + 1)
   const v = memView(E)
   v.set(nb, pNome)
   v[pNome + nb.length] = 0
   if (bytes.length) v.set(bytes, pDados)
+  v[pDados + bytes.length] = 0
   if (!E.poe_ficheiro(pNome, pDados, bytes.length))
     throw new Error('tex.wasm: poe_ficheiro recusou ' + nome)
 }
@@ -64,11 +71,11 @@ async function carregaMotor () {
     throw new Error('tex.wasm sem inicia_wasm — reconstrói com tools/sobe_tex_wasm.sh')
   if (typeof E.compila_ficheiro !== 'function')
     throw new Error('tex.wasm sem compila_ficheiro')
-  // o ambiente completo nos slots — a lista medida, não adivinhada
+  E.inicia_wasm()
+  // corpos no disco (MOVE −1): a lista medida, não adivinhada
   for (const f of manifesto.ficheiros) {
     poeBytes(E, f, await fetchCorpo(f))
   }
-  E.inicia_wasm()
   motor = { exports: E }
   return motor
 }
@@ -80,19 +87,18 @@ export async function comporDoc (id) {
   const t0 = performance.now()
   const { exports: E } = await carregaMotor()
   E.limpa_saida()
-  // nomes C na memória linear
   const enc = new TextEncoder()
   const nEnt = enc.encode(fonte)
   const nSai = enc.encode('saida.pdf')
-  const pEnt = num(E.malloc(BigInt(nEnt.length + 1)))
-  const pSai = num(E.malloc(BigInt(nSai.length + 1)))
+  const pEnt = reserva(E, nEnt.length + 1)
+  const pSai = reserva(E, nSai.length + 1)
   const v = memView(E)
   v.set(nEnt, pEnt); v[pEnt + nEnt.length] = 0
   v.set(nSai, pSai); v[pSai + nSai.length] = 0
   const rc = E.compila_ficheiro(pEnt, pSai)
   if (rc !== 0) throw new Error(`compila_ficheiro(${fonte}) → ${rc}`)
   const n = num(E.tam_saida())
-  const addr = num(E.end_saida())
+  const addr = typeof E.MOVE === 'function' ? num(E.MOVE(14, 1)) : num(E.end_saida())
   if (n < 100 || !addr) throw new Error(`saída vazia (${n} bytes)`)
   const out = memView(E).slice(addr, addr + n)
   if (out[0] !== 0x25 || out[1] !== 0x50) // %P

@@ -5,6 +5,23 @@
  * com o wrapper pelos ponteiros g_disco/g_carrega. */
 #include "tex_core.c"
 
+/* TEX_TEMPO=1: tempos da composição no stderr. Só nativo — o wasm não tem relógio. */
+#ifndef TEX_COM_LIBC_WASM
+#include <time.h>
+static int quer_tempo(void){
+    static int v = -1;
+    if(v < 0){ const char *e = getenv("TEX_TEMPO"); v = (e && e[0] == '1') ? 1 : 0; }
+    return v;
+}
+static long agora_ms(void){
+    struct timespec t; clock_gettime(CLOCK_MONOTONIC, &t);
+    return t.tv_sec * 1000L + t.tv_nsec / 1000000L;
+}
+#else
+static int quer_tempo(void){ return 0; }
+static long agora_ms(void){ return 0; }
+#endif
+
 /* ── funcoes wrapper movidas do nucleo: costuras nativas, parsers de setup, macros, a volta ──
  * (o nucleo so as declara; aqui vivem, no lado nativo) */
 
@@ -13,9 +30,19 @@ static char *disco_mmap(int i, const char *nome, long n){ (void)i; return (char*
 /* Fatias compactas (tests/disco_wasm.c): no wasm inicia_wasm liga-as a g_disco.
  * Um bloco via disco_u8; cada slot é OFF[i]. Nativo no main fica no mmap por ficheiro. */
 static int USA_FATIA;
+#ifndef TEX_COM_LIBC_WASM
 static char *FAT_BASE;
 static int OFF_FAT[16], TAM_FAT[16], FAT_PRONTO;
+#endif
 
+#ifdef TEX_COM_LIBC_WASM
+/* o disco linear É as fatias — prende_fatias / MOVE em libc.c. Sem malloc anónimo. */
+static char *disco_fatia(int i, const char *nome, long n){
+    (void)nome; (void)n;
+    if(!prende_fatias()) return 0;
+    return (char*)end_fatia(i);
+}
+#else
 static char *disco_fatia(int i, const char *nome, long n){
     (void)nome; (void)n;
     if(i < 0 || i >= 16) return 0;
@@ -33,6 +60,7 @@ static char *disco_fatia(int i, const char *nome, long n){
     }
     return FAT_BASE + OFF_FAT[i];
 }
+#endif
 
 static char *disco_para(int i, const char *nome, long n){
     return USA_FATIA ? disco_fatia(i, nome, n) : disco_mmap(i, nome, n);
@@ -224,6 +252,15 @@ static void le_hifenizacao(void){
 }
 
 static char *le_tudo(const char *nome, long *n){
+#ifdef TEX_COM_LIBC_WASM
+    /* o corpo já está no disco: basta o endereço do slot (arquitetura: sem cópia). */
+    {
+        char *p = ficheiro_end_nome((char*)nome);
+        if(!p) return 0;
+        *n = ficheiro_tam_nome((char*)nome);
+        return p;
+    }
+#else
     FILE *f = fopen(nome, "rb");
     if(!f) return NULL;
     fseek(f, 0, SEEK_END); *n = ftell(f); fseek(f, 0, SEEK_SET);
@@ -231,6 +268,7 @@ static char *le_tudo(const char *nome, long *n){
     if(!s){ fclose(f); return NULL; }
     if(fread(s, 1, (size_t)*n, f) != (size_t)*n){ free(s); fclose(f); return NULL; }
     s[*n] = 0; fclose(f); return s;
+#endif
 }
 
 static void recolhe_macros(const char *s, long n){
@@ -798,9 +836,14 @@ static void carrega_config(void){
 }
 
 int compila_ficheiro(const char *ent, const char *sai){
+    long t0 = 0, t_le = 0, t_cfg = 0, t_mac = 0, t_write = 0;
+    long t_pass0 = 0, t_pass1 = 0, t_pass2 = 0;
+    if(quer_tempo()) t0 = agora_ms();
     long n; char *s = le_tudo(ent, &n);
     if(!s){ fprintf(stderr, "nao abre: %s\n", ent); return 1; }
+    if(quer_tempo()) t_le = agora_ms() - t0;
     carrega_config();          /* a config parseia-se AQUI, no wrapper, antes de o núcleo compor */
+    if(quer_tempo()) t_cfg = agora_ms() - t0 - t_le;
     /* NÃO se copia o .tex: guarda-se só o ENDEREÇO do slot de entrada. A composição (pdf_fecha)
      * transmite-o do slot direto para o PDF — com comentários, com \emph, com tudo —, e é ele
      * que a volta devolve byte a byte. O corpo é ordenado: basta o endereço, não uma cópia. */
@@ -816,8 +859,13 @@ int compila_ficheiro(const char *ent, const char *sai){
       s = expande_inputs(s, &n, dir);
       s = avalia_macros(s, &n, est);
       s = avalia_macros(s, &n, "estilo.tex"); }
+    if(quer_tempo()) t_mac = agora_ms() - t0 - t_le - t_cfg;
+#ifndef TEX_COM_LIBC_WASM
     FILE *f = fopen(sai, "wb");
     if(!f){ free(s); fprintf(stderr, "nao escreve: %s\n", sai); return 1; }
+#else
+    (void)sai;   /* PDF no slot 14 — o host lê por MOVE(+1), sem FILE */
+#endif
     /* TRÊS PASSAGENS, e é o que o LaTeX faz com o `.aux`:
      *
      *   1  compõe para um destino descartável e RECOLHE os títulos e as páginas
@@ -852,8 +900,15 @@ int compila_ficheiro(const char *ent, const char *sai){
         int n_ant = N_TOC;
         for(int t = 0; t < n_ant && t < MAX_TOC; t++) PAG_ANT[t] = TOC[t].pag;
         Pdf pp; pdf_abre(&pp, pdfbuf, 1L << 27); pagina_abre(&pp);
-        compila(s, &pp, &g);
-        pdf_fecha(&pp);
+        { long tp = 0; if(quer_tempo()) tp = agora_ms();
+          compila(s, &pp, &g);
+          pdf_fecha(&pp);
+          if(quer_tempo()){
+              long dt = agora_ms() - tp;
+              if(passo == 0) t_pass0 = dt;
+              else if(passo == 1) t_pass1 = dt;
+              else t_pass2 = dt;
+          } }
         npag = pp.npag;
         if(passo == 0){ continue; }               /* o passo 0 recolhe o sumário; o buffer reescreve-se */
         pdflen = pp.sf.len;                        /* os bytes deste passo estão em pdfbuf */
@@ -871,12 +926,29 @@ int compila_ficheiro(const char *ent, const char *sai){
     if(pdf_perdeu > 0){
         fprintf(stderr, "AVISO: %ld bytes NAO couberam no slot do PDF — o ficheiro saiu"
                         " INCOMPLETO e a volta nao fecha.\n", pdf_perdeu);
-        fclose(f); free(s);
+#ifndef TEX_COM_LIBC_WASM
+        fclose(f);
+#endif
+        free(s);
         return 1;
     }
-    fwrite(pdfbuf, 1, (size_t)pdflen, f);          /* o passo mantido, do slot para o ficheiro */
+    { long tw = 0; if(quer_tempo()) tw = agora_ms();
+#ifdef TEX_COM_LIBC_WASM
+      marca_saida((char*)pdfbuf, (int)pdflen);       /* slot 14: MOVE(+1), sem cópia SAIDA */
+#else
+      fwrite(pdfbuf, 1, (size_t)pdflen, f);          /* o passo mantido, do slot para o ficheiro */
+#endif
+      if(quer_tempo()) t_write = agora_ms() - tw; }
     (void)npag;
-    fclose(f); free(s);
+#ifndef TEX_COM_LIBC_WASM
+    fclose(f);
+#endif
+    free(s);
+    if(quer_tempo()){
+        fprintf(stderr, "TEMPO %s le=%ld cfg=%ld macros=%ld pass0=%ld pass1=%ld pass2=%ld write=%ld total=%ld ms pag=%d glifos=%ld bytes=%ld\n",
+                ent, t_le, t_cfg, t_mac, t_pass0, t_pass1, t_pass2, t_write,
+                agora_ms() - t0, npag, g, pdflen);
+    }
     if(CHUTES){
         fprintf(stderr, "AVISO: %ld larguras CHUTADAS (a fonte nao abriu ou nao tem o glifo).\n",
                 CHUTES);
@@ -1022,7 +1094,11 @@ void inicia_wasm(void){
     USA_FATIA = 1;                /* g_disco → fatias (disco_wasm.c), não mmap */
     g_disco   = disco_para;
     g_carrega = carrega_nativo;   /* fopen dos slots que o host pôs por poe_ficheiro */
+#ifdef TEX_COM_LIBC_WASM
+    prende_fatias();              /* o DISCO é as fatias; o host MOVE os corpos depois */
+#else
     carrega_config();
+#endif
 }
 
 int main(int argc, char **argv){

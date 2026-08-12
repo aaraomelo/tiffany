@@ -89,9 +89,10 @@ ok('§T1 o tex.c sobe e o modulo e VALIDO — sem emscripten, a regua traduz-se 
 /* ─── §T2 a porta da composicao ───────────────────────────────────────────────────── */
 const tem = (n, k) => EXP.some(x => x.name === n && x.kind === (k || 'function'));
 const porta = ['poe_ficheiro', 'fopen', 'fread', 'fwrite', 'ftell', 'fseek',
-               'inicia_wasm', 'compila_ficheiro', 'limpa_saida', 'end_saida', 'tam_saida'].every(n => tem(n));
-console.log(`   porta: DISCO(${tem('DISCO', 'memory')}) poe_ficheiro inicia_wasm compila_ficheiro ...`);
-ok('§T2 a porta da composicao esta la: os ficheiros por slots, e o DISCO',
+               'inicia_wasm', 'compila_ficheiro', 'limpa_saida', 'end_saida', 'tam_saida',
+               'MOVE', 'end_fatia', 'vfs_reserva'].every(n => tem(n));
+console.log(`   porta: DISCO(${tem('DISCO', 'memory')}) MOVE fatias poe inicia compila ...`);
+ok('§T2 a porta da composicao esta la: MOVE no DISCO, fatias e ficheiros por slots',
    tem('DISCO', 'memory') && porta);
 
 /* o motor pode nao instanciar sob o ulimit -v da bateria (vale para TODOS os modulos com
@@ -126,6 +127,24 @@ catch (e) {
        p > 0 && cresceu >= 32 && cresceu <= 34);
 }
 
+/* ─── §T3b MOVE ±1 nas fatias: o mesmo que tests/move.c, no disco linear ─────────── */
+{
+    E.inicia_wasm();
+    const slot = 6;   /* TAM[6] = 64 KB — o mesmo gesto de tests/move.c */
+    const a = Number(E.MOVE(slot, -1));
+    const b = Number(E.MOVE(slot, 1));
+    const tam = Number(E.tam_fatia(slot));
+    const oct = new Uint8Array(E.DISCO.buffer);
+    for (let i = 0; i < 64; i++) oct[a + i] = (i * 7 + 3) & 255;
+    let mau = 0;
+    for (let i = 0; i < 64; i++) if (oct[b + i] !== ((i * 7 + 3) & 255)) mau++;
+    const pdf = Number(E.MOVE(14, 1));
+    const end14 = Number(E.end_fatia(14));
+    console.log(`   §T3b MOVE(6,±1) end=${a}==${b} tam=${tam} mau=${mau}; slot14=${pdf}==${end14}`);
+    ok('§T3b MOVE(slot,+1) e MOVE(slot,-1) sao o mesmo endereco no DISCO — residuo 0, como move.c',
+       a > 0 && a === b && mau === 0 && tam === (1 << 16) && pdf === end14 && pdf > 0);
+}
+
 /* ─── §T4 o que se escreve le-se de volta ─────────────────────────────────────────── */
 {
     const r = Number(E.malloc(8192n));          /* aloca ANTES; a vista vem depois de crescer */
@@ -150,25 +169,29 @@ catch (e) {
     const man = JSON.parse(fs.readFileSync(path.join(RAIZ, 'app/src/corpo.json'), 'utf8'));
     const num = x => typeof x === 'bigint' ? Number(x) : x;
     const mem = () => new Uint8Array(E.DISCO.buffer);
+    function reserva(n) {
+        const p = num(E.vfs_reserva(n));
+        if (!p) throw new Error('vfs_reserva');
+        return p;
+    }
     function poeStr(s) {
         const nb = Buffer.from(s, 'latin1');
-        const p = num(E.malloc(BigInt(nb.length + 1)));
-        if (!p) throw new Error('malloc nome');
+        const p = reserva(nb.length + 1);
         mem().set(nb, p); mem()[p + nb.length] = 0;
         return p;
     }
     function poeFich(nome, bytes) {
         const pN = poeStr(nome);
-        const pD = num(E.malloc(BigInt(Math.max(bytes.length, 1))));
-        if (!pD) throw new Error('malloc ' + nome);
+        const pD = reserva(Math.max(bytes.length, 0) + 1);
         if (bytes.length) mem().set(bytes instanceof Buffer ? bytes : Buffer.from(bytes), pD);
+        mem()[pD + bytes.length] = 0;
         if (!E.poe_ficheiro(pN, pD, bytes.length)) throw new Error('poe_ficheiro recusou ' + nome);
     }
     function compoe(nome) {
         E.limpa_saida();
         const rc = num(E.compila_ficheiro(poeStr(nome), poeStr('saida.pdf')));
         const tam = num(E.tam_saida());
-        const end = num(E.end_saida());
+        const end = num(E.MOVE(14, 1));
         const pdf = Buffer.from(mem().slice(end, end + tam));
         return { rc, tam, pdf };
     }
@@ -248,10 +271,10 @@ catch (e) {
     let aRc = -1, aTam = 0, aEof = false, aSem = null, aForms = 0;
     let cRc = -1, cTam = 0, cEof = false, cSelo = null, cBate = false;
     try {
+        E.inicia_wasm();
         for (const f of man.ficheiros) poeFich(f, fs.readFileSync(path.join(RAIZ, f)));
         poeFich('alonzo.tex', Buffer.from(ALONZO, 'latin1'));
         poeFich('caelum.tex', Buffer.from(CAELUM, 'latin1'));
-        E.inicia_wasm();
 
         const A = compoe('alonzo.tex');
         aRc = A.rc; aTam = A.tam;
@@ -284,7 +307,8 @@ if (!falhas) {
     console.log('  Sem emscripten. C e backend; a ISA/wasm e a roupa do navegador.');
     console.log('');
     console.log('  A composição é o corpo de Alonzo; o selo é o de Caelum.');
-    console.log('  Disco contado por memory.grow, e o que se escreve lê-se de volta.');
+    console.log('  Disco = fatias + MOVE(slot, ±1), isomorfo ao mmap e à ISA em assembly.');
+    console.log('  O PDF lê-se do slot 14; o que se escreve lê-se de volta.');
 } else console.log(`  FALHOU: ${falhas}`);
 console.log(`#TOTAL ${feitas} ${falhas}`);
 process.exit(falhas ? 1 : 0);

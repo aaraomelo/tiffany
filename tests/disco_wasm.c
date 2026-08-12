@@ -22,17 +22,17 @@
 typedef long long L;
 enum { NSLOT = 16 };
 
-/* os tamanhos máximos por slot, como em tex.c (a fonte e o source 4 MB, o PDF 32 MB, o fundo 1 MB,
- * as tabelas pequenas). Em wasm cada slot tem um tecto fixo, e o array é a soma. */
+/* os tamanhos máximos por slot, como em tex.c / libc.c (fonte e source 4 MB,
+ * PDF 128 MB no slot 14, fundo 1 MB). Em wasm cada slot tem tecto fixo, o array é a soma. */
 static const L TAM[NSLOT] = {
     1L<<20, 1L<<16, 1L<<16, 1L<<22, 1L<<22, 1L<<20, 1L<<16, 1L<<18,
-    1L<<16, 1L<<14, 1L<<18, 1L<<16, 1L<<16, 1L<<16, 1L<<25, 1L<<20
+    1L<<16, 1L<<14, 1L<<18, 1L<<16, 1L<<16, 1L<<16, 1L<<27, 1L<<20
 };
 static L OFF[NSLOT];                 /* o offset compacto de cada slot no array */
 static L DISCO_TAM;                  /* o tamanho total (a soma) */
 
 /* o array global É a memória linear do wasm. Aqui, para medir, um único bloco; em wasm é a memória
- * do módulo. (mmap para não estourar a .bss do medidor com 40 MB; a doutrina é «o slot É a memória».) */
+ * do módulo. (mmap/calloc para não estourar a .bss do medidor com 140 MB; a doutrina é «o slot É a memória».) */
 static unsigned char *DISCO;
 
 /* o dual do disco_mmap: mesma interface, mas devolve uma fatia do array em vez de um ficheiro. */

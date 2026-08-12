@@ -638,10 +638,105 @@ int  AG_ESC[MAX_AGULHA];       /* 1 se foi aberta para escrever */
 /* a área onde o que se escreve fica, até quem hospeda a vir buscar.
  * NÃO é um array estático: o catálogo do tradutor passa dos 64 MB, e um
  * `char SAIDA[128M]` no .bss do wasm é o MONTE que a teoria da medida
- * proíbe. Cresce por malloc (memory.grow), contado. */
+ * proíbe. Cresce por malloc (memory.grow), contado. tmpfile ainda passa
+ * aqui; o PDF da composição NÃO — vive no slot 14, lido por MOVE(+1). */
 char *SAIDA;
 int   SAIDA_CAP;
 int   SAIDA_N;
+
+/* ── o disco do tradutor: 16 fatias compactas, o dual do mmap (disco_wasm.c) ──
+ * O hospedeiro escreve na vista; a ISA só MOVE(slot, ±1). Um disco, duas
+ * plataformas. PDF = slot 14. */
+int FAT_TAM[16];
+int FAT_OFF[16];
+int FAT_BASE;
+int FAT_OK;
+int PDF_N;
+int CURSOR;                /* o cursor do disco linear — uma declaração só */
+int DISCO_FIM;
+
+void fat_layout(void){
+    if(FAT_OK) return;
+    FAT_TAM[0]=1<<20; FAT_TAM[1]=1<<16; FAT_TAM[2]=1<<16; FAT_TAM[3]=1<<22;
+    FAT_TAM[4]=1<<22; FAT_TAM[5]=1<<20; FAT_TAM[6]=1<<16; FAT_TAM[7]=1<<18;
+    FAT_TAM[8]=1<<16; FAT_TAM[9]=1<<14; FAT_TAM[10]=1<<18; FAT_TAM[11]=1<<16;
+    FAT_TAM[12]=1<<16; FAT_TAM[13]=1<<16; FAT_TAM[14]=1<<27; FAT_TAM[15]=1<<20;
+    FAT_OFF[0]=0;
+    { int k = 1; while(k < 16){ FAT_OFF[k] = FAT_OFF[k-1] + FAT_TAM[k-1]; k = k + 1; } }
+    FAT_OK = 1;
+}
+
+int tam_fatias(void){
+    fat_layout();
+    return FAT_OFF[15] + FAT_TAM[15];
+}
+
+char *prende_fatias(void){
+    fat_layout();
+    if(FAT_BASE) return (char*)FAT_BASE;
+    if(CURSOR == 0){
+        CURSOR = __disco_paginas() * 65536;
+        DISCO_FIM = CURSOR;
+    }
+    {
+        int n = tam_fatias();
+        FAT_BASE = CURSOR;
+        while(FAT_BASE + n > DISCO_FIM){
+            int faltam = (FAT_BASE + n - DISCO_FIM + 65535) / 65536;
+            int antes = __disco_cresce(faltam);
+            if(antes < 0){ FAT_BASE = 0; return 0; }
+            DISCO_FIM = DISCO_FIM + faltam * 65536;
+        }
+        CURSOR = FAT_BASE + n;
+    }
+    return (char*)FAT_BASE;
+}
+
+int end_fatia(int i){
+    if(i < 0 || i >= 16) return 0;
+    if(!FAT_BASE){ if(!prende_fatias()) return 0; }
+    return FAT_BASE + FAT_OFF[i];
+}
+
+int tam_fatia(int i){
+    fat_layout();
+    if(i < 0 || i >= 16) return 0;
+    return FAT_TAM[i];
+}
+
+/* MOVE(slot, sentido): +1 absorve, −1 emite. O endereço É o slot no DISCO.
+ * O hospedeiro lê/escreve a vista — sem cópia, como o painel chess. */
+int MOVE(int slot, int sentido){
+    (void)sentido;
+    return end_fatia(slot);
+}
+
+/* reserva no disco linear (depois das fatias, ou antes se ainda não presas).
+ * É o malloc do vfs: o host escreve aí, poe_ficheiro só regista o nome. */
+int vfs_reserva(int n){
+    if(n < 1) n = 1;
+    n = ((n + 7) / 8) * 8;
+    if(CURSOR == 0){
+        CURSOR = __disco_paginas() * 65536;
+        DISCO_FIM = CURSOR;
+    }
+    while(CURSOR + n > DISCO_FIM){
+        int faltam = (CURSOR + n - DISCO_FIM + 65535) / 65536;
+        int antes = __disco_cresce(faltam);
+        if(antes < 0) return 0;
+        DISCO_FIM = DISCO_FIM + faltam * 65536;
+    }
+    {
+        int p = CURSOR;
+        CURSOR = CURSOR + n;
+        return p;
+    }
+}
+
+void marca_saida(char *p, int n){
+    (void)p;
+    PDF_N = n;
+}
 
 /* ── a porta do hospedeiro ───────────────────────────────────────────────────────── */
 
@@ -653,7 +748,10 @@ int poe_ficheiro(char *nome, char *dados, int n){
     N_FICH = N_FICH + 1;
     return N_FICH;
 }
-int end_saida(void){ return (int)(long)SAIDA; }
+int end_saida(void){
+    if(FAT_BASE) return FAT_BASE + FAT_OFF[14];
+    return (int)(long)SAIDA;
+}
 /* bytes do slot já posto pelo host — a carta lê sem segunda cópia (malloc). */
 char *ficheiro_bytes(int h){
     if(h <= 0 || h >= MAX_AGULHA) return 0;
@@ -668,8 +766,8 @@ int ficheiro_tam(int h){
     return FICH_TAM[f] - AG_POS[h];
 }
 
-int tam_saida(void){ return SAIDA_N; }
-void limpa_saida(void){ SAIDA_N = 0; }
+int tam_saida(void){ return PDF_N; }
+void limpa_saida(void){ PDF_N = 0; SAIDA_N = 0; }
 
 /* o nome pode vir com `../` à frente: quem abre não sabe de onde está a olhar, e o slot é
  * o mesmo. Compara-se pelo fim, que é a parte que identifica. */
@@ -843,8 +941,6 @@ int printf(char *f, ...){
  * UMA vez por módulo, e a instância seguinte nasce limpa. */
 /* os endereços do wasm são de 32 bits: o cursor e a fronteira são `int`, não `long` — um
  * ponteiro é i32, e misturar i64 aqui era pedir uma conversão a cada passo. */
-int CURSOR;                /* onde o próximo pedido cai — nasce no fim dos dados estáticos */
-int DISCO_FIM;             /* até onde o disco chega AGORA, em bytes */
 
 char *malloc(long n){
     int m = (int)n;
