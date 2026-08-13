@@ -1,0 +1,10 @@
+claim FrontierWhyIshikawa
+law 7
+object InterfaceWhyIshikawa
+step erode_to_root
+back group_causes
+measure root_in_branch
+invariant root in ishikawa
+mutate drop_root_from_map
+classify structural
+end

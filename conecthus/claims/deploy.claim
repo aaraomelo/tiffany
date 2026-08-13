@@ -1,0 +1,10 @@
+claim DeployPatria
+law 0
+object Publication
+step build
+back fetch_live
+measure compare
+invariant local and live
+mutate drop_pipeline
+classify structural
+end

@@ -8,7 +8,7 @@
       "phi": "o escaping dos metacaracteres LaTeX",
       "wasm": "/wasm/escapar.wasm",
       "func": "escapar",
-      "bytes": 592,
+      "bytes": 528,
       "oraculo": "cc (binário nativo)"
     },
     {
@@ -16,7 +16,7 @@
       "phi": "a decisão (prof→comando, epist→estatuto), provada pelo Z3",
       "wasm": "/wasm/decidir.wasm",
       "func": "decidir",
-      "bytes": 172,
+      "bytes": 419,
       "oraculo": "dafny + Z3 (dafny verify)"
     },
     {
@@ -24,7 +24,7 @@
       "phi": "o rótulo (grafo: + alfanum, take 40)",
       "wasm": "/wasm/rotular.wasm",
       "func": "rotular",
-      "bytes": 282,
+      "bytes": 509,
       "oraculo": "ghc (binário nativo)"
     }
   ],

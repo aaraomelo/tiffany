@@ -1,0 +1,4 @@
+/* conecthus/backends/isa/README
+ * A ISA MOVE-only vive em tools/isa.c — uma função, um disco.
+ * sobe_backends_wasm.sh traduz tools/isa.c → assets/figuras/wasm/isa.wasm
+ */

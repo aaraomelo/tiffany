@@ -1,0 +1,10 @@
+claim FiveW2H
+law 6
+object ActionPlan
+step dilate(root)
+back erode(actions)
+measure containment
+invariant root in actions
+mutate drop_root
+classify structural
+end

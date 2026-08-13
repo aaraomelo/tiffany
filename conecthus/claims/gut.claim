@@ -1,0 +1,10 @@
+claim GUTProduct
+law 6
+object GUTMatrix
+step product(G,U,T)
+back recompute(score)
+measure score
+invariant score == G*U*T && G,U,T in 1..5
+mutate allow_zero
+classify structural
+end

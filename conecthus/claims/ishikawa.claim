@@ -1,0 +1,10 @@
+claim IshikawaFree
+law 6
+object CauseMap
+step group(causes, k)
+back choose_by_cause
+measure root_stable
+invariant root stable under repartition
+mutate k = 2..12
+classify k = convention
+end

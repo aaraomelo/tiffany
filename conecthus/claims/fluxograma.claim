@@ -1,0 +1,10 @@
+claim FluxogramaDual
+law 1
+object ProcessMap
+step name_nodes_atual_futuro
+back involution_swap
+measure nodes_paired
+invariant every node has atual and futuro
+mutate drop_futuro_node
+classify structural
+end

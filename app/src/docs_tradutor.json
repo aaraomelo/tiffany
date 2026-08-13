@@ -18,6 +18,8 @@
     "medida": "papers/medida.tex",
     "milenio": "papers/milenio.tex",
     "arquitetura": "papers/arquitetura.tex",
+    "pipeline": "conecthus/pipeline.tex",
+    "fundamento": "conecthus/fundamento.tex",
     "torre-fundacao": "papers/torre_fundacao.tex",
     "corpo-peano": "papers/corpo_peano.tex",
     "partitura": "papers/partitura.tex",
@@ -33,7 +35,9 @@
     "conversa-arvore-n2-fundacao2": "papers/conversa_arvore_n2_fundacao2.tex",
     "conversa-arvore-n3-fundacao2": "papers/conversa_arvore_n3_fundacao2.tex",
     "conversa-arvore-n1-peano": "papers/conversa_arvore_n1_peano.tex",
-    "conversa-arvore-n2-peano": "papers/conversa_arvore_n2_peano.tex"
+    "conversa-arvore-n2-peano": "papers/conversa_arvore_n2_peano.tex",
+    "conversa-pipeline": "papers/conversa_pipeline.tex",
+    "conversa-arvore-n1-pipeline": "papers/conversa_arvore_n1_pipeline.tex"
   },
   "so_teste": {
     "torre-induc": "papers/torre_induc.tex"

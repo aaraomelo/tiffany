@@ -1,0 +1,10 @@
+claim PDCACycle
+law 6
+object PDCA
+step plan_do_check_act
+back return_to_plan
+measure check_residual
+invariant period == 4 && plan.has_numeric_target
+mutate drop_numeric_target
+classify structural
+end

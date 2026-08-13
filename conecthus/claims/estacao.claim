@@ -1,0 +1,10 @@
+claim StationResidual
+law 0
+object Station
+step implant
+back measure_station
+measure abs(projected - measured)
+invariant measured from station not from model
+mutate copy_reference
+classify structural
+end

@@ -1,0 +1,10 @@
+claim WhyFixedPoint
+law 5
+object WhyChain
+step erode
+back next
+measure root
+invariant next(root) == root
+mutate depth = 1..8
+classify depth = convention
+end

@@ -26,8 +26,9 @@
  *   §B2  e saem: cada um lido de volta byte a byte, RESIDUO 0
  *   §B3  a projeccao: do banco sai o manifesto, e do manifesto volta-se ao banco — a volta
  *        fecha, e e' isso que faz do ficheiro uma projeccao e nao uma segunda fonte
- *   §B14 as NOVE LINGUAGENS sao realizacoes e nenhuma e' privilegiada: entram no banco
- *        pela mesma porta, e mede-se o que SAI dele — campos lidos, desnivel zero
+ *   §B14 as DEZ LINGUAGENS sao realizacoes e nenhuma e' privilegiada: entram no banco
+ *        pela mesma porta (claim = IR do pipeline), e mede-se o que SAI dele — campos lidos,
+ *        desnivel zero
  *   §B13 os GIFs SAEM: 90 dos 92 cards ja' tinham kernel, e o GIF era um fossil de 93 MB
  *        que o codigo ja' ignorava
  *   §B12 os FOSSEIS: o que ficou de um caminho que ja' nao e' o caminho — e a segunda
@@ -758,6 +759,7 @@ int main(void)
             { "dafny",    "decidir",  1, 1, 0 },
             { "isabelle", "provar",   0, 1, 1 },
             { "latex",    "compor",   1, 1, 1 },
+            { "claim",    "afirmar",  1, 1, 0 },
         };
         int n = (int)(sizeof lin / sizeof lin[0]);
         long postas = 0, resid = 0, sem_assinatura = 0;
@@ -805,14 +807,15 @@ int main(void)
                " diferente\n", graus_distintos, n);
         printf("        e a de Dafny e' (1,1,0) — a da propria TRIADE: decidir e' cortar em"
                " dois\n\n");
-        ok("as NOVE LINGUAGENS sao realizacoes e NENHUMA e' privilegiada — e' a roupa no sitio"
+        ok("as DEZ LINGUAGENS sao realizacoes e NENHUMA e' privilegiada — e' a roupa no sitio"
            " onde eu nao a tinha visto: uma linguagem e' o que MUDA com a base, e o predicado e'"
-           " o que nao muda. Nao sao nove implementacoes de que uma seja a verdadeira: sao oito"
+           " o que nao muda. Nao sao dez implementacoes de que uma seja a verdadeira: sao"
            " realizacoes do mesmo predicado, e ele nao mora em nenhuma. Entram no banco pela"
-           " MESMA porta, e o que se mede nao e' a tabela — e' o que SAI do banco: os campos"
-           " lidos de cada chave, com desnivel ZERO, porque um campo a mais nalguma E' o"
-           " privilegio. E a outra metade: os graus NAO sao todos iguais, senao a igualdade era"
-           " oito copias. A de Dafny e' (1,1,0), a da triade, porque decidir E' cortar em dois",
+           " MESMA porta (incl. claim = IR do pipeline), e o que se mede nao e' a tabela — e'"
+           " o que SAI do banco: os campos lidos de cada chave, com desnivel ZERO, porque um"
+           " campo a mais nalguma E' o privilegio. E a outra metade: os graus NAO sao todos"
+           " iguais, senao a igualdade era copias. A de Dafny e' (1,1,0), a da triade, porque"
+           " decidir E' cortar em dois; claim partilha a assinatura (afirmar/fechar)",
            postas == n && resid == 0 && sem_assinatura == 0 && desnivel == 0
            && graus_distintos >= 4 && dafny_e_triade);
     }

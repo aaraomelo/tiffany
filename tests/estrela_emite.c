@@ -19,7 +19,7 @@
  * qualquer par ligar-se sem se conhecerem — que é exactamente o que universal quer dizer.
  *
  * E O QUE SE GANHA MEDE-SE, e é aritmética: com N roupas ligadas duas a duas precisam-se de
- * N(N−1) conversores; pela estrela precisam-se de 2N. Com as nove linguagens são 72 contra 18.
+ * N(N−1) conversores; pela estrela precisam-se de 2N. Com as dez linguagens são 90 contra 20.
  * A estrela não é uma etapa a mais — é o que impede a explosão.
  *
  * E É COMPILADO, NÃO LITERAL: a passagem não copia o texto de um formato no outro, traduz para
@@ -199,13 +199,13 @@ printf("\n§E4  A UNIVERSALIDADE conta-se: 2N contra N(N-1), e qualquer par liga
         for(long n = 2; n <= 9; n++){
             long par = n * (n - 1), est = 2 * n;
             if(n > 3 && par <= est) ok_todos = 0;      /* a partir de QUATRO ganha sempre */
-            if(n == 2 || n == 3 || n == 9)
+            if(n == 2 || n == 3 || n == 10)
                 printf("      %-10ld %-13ld %-14ld %s\n", n, par, est,
                        par > est ? "a estrela ganha" : (par == est ? "empata" : "perde"));
         }
-        /* e com as NOVE linguagens que ja' estao no banco: 72 contra 18 */
-        long n9 = 9, par9 = n9 * (n9 - 1), est9 = 2 * n9;
-        printf("\n      com as nove linguagens do banco: %ld conversores contra %ld\n", par9, est9);
+        /* e com as DEZ linguagens que ja' estao no banco: 90 contra 20 */
+        long n9 = 10, par9 = n9 * (n9 - 1), est9 = 2 * n9;
+        printf("\n      com as dez linguagens do banco: %ld conversores contra %ld\n", par9, est9);
         /* E A OUTRA METADE, que eu escrevi ERRADA e a medida apanhou: eu tinha posto «em N=2
          * empata». Nao empata — PERDE, 2 contra 4. Empata em N=3 (6 contra 6) e so' ganha a
          * partir de QUATRO. O ponto de viragem nao era onde eu disse, e a assercao acusou-o.
@@ -216,13 +216,13 @@ printf("\n§E4  A UNIVERSALIDADE conta-se: 2N contra N(N-1), e qualquer par liga
         printf("      e em N=2 a estrela PERDE (2 contra 4) e em N=3 EMPATA (6 contra 6):\n");
         printf("      ela so' ganha a partir de QUATRO — com duas ou tres roupas nao vale a pena\n");
         ok("a UNIVERSALIDADE conta-se e e' aritmetica: com N roupas duas a duas precisam-se de"
-           " N(N-1) conversores, pela estrela 2N — com as nove linguagens do banco, 72 contra"
-           " 18. E A OUTRA METADE IMPORTA, e eu escrevi-a errada: tinha posto «em N=2 empata», e"
+           " N(N-1) conversores, pela estrela 2N — com as dez linguagens do banco, 90 contra"
+           " 20. E A OUTRA METADE IMPORTA, e eu escrevi-a errada: tinha posto «em N=2 empata», e"
            " nao empata — PERDE, 2 contra 4. Empata em N=3 e so' ganha a partir de QUATRO. A"
            " assercao apanhou-o, e isso e' o que faz o numero valer: se a estrela ganhasse"
            " sempre, nao estava a medir nada. Com duas ou tres roupas ela nao vale a pena; do"
            " quarto em diante e' o que impede a explosao",
-           ok_todos && par9 == 72 && est9 == 18 && perde2 && empata3 && ganha4);
+           ok_todos && par9 == 90 && est9 == 20 && perde2 && empata3 && ganha4);
     }
 
 printf("\n§E5  O CONTROLO: sem a estrela, o par que nao se conhece NAO liga.\n\n");
@@ -254,7 +254,7 @@ printf("                    |             |\n");
 printf("                  LaTeX          PDF\n\n");
 printf("  E nao e' latex -> estrela -> pdf. A diferenca nao e' de desenho, e' de PRIVILEGIO:\n");
 printf("  com o latex na origem, ele e' o que EXISTE e o pdf e' o que se DERIVA — e uma roupa\n");
-printf("  passa a ser o corpo. E' a mesma frase das nove linguagens: o predicado nao mora em\n");
+printf("  passa a ser o corpo. E' a mesma frase das dez linguagens: o predicado nao mora em\n");
 printf("  nenhuma realizacao.\n\n");
 printf("  E A SPLINE E' O CORPO ESTELAR, que e' o que fecha isto: reversivel para todo lado —\n");
 printf("  grau 2 da' o glifo, grau 1 da' a regua, e a mesma sequencia le-se de volta. Nao e'\n");

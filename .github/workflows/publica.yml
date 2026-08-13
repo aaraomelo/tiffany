@@ -217,7 +217,8 @@ jobs:
           STATUS=$(curl -sf -o /dev/null -w '%{http_code}' https://goldenkingdom.patriatechnology.com/ || echo FAIL)
           [ "$STATUS" = "200" ] || { echo "❌ health check: $STATUS"; exit 1; }
           # o tradutor no cliente: módulo + um pedaço do corpo (não /docs/*.pdf da teoria)
-          for u in wasm/tex.wasm corpo/estilo.tex corpo/papers/dualsort.tex; do
+          for u in wasm/tex.wasm corpo/estilo.tex corpo/papers/dualsort.tex \
+                   corpo/conecthus/pipeline.tex wasm/claim.wasm; do
             C=$(curl -sf -o /dev/null -w '%{http_code}' "https://goldenkingdom.patriatechnology.com/$u" || echo FAIL)
             [ "$C" = "200" ] || { echo "❌ /$u -> $C"; exit 1; }
           done

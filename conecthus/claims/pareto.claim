@@ -1,0 +1,10 @@
+claim ParetoClosure
+law 6
+object ParetoTable
+step sum(percentages)
+back recompute(percentages)
+measure sum(percentages)
+invariant sum == 100
+mutate numerator += 1
+classify structural
+end

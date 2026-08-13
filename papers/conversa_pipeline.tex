@@ -1,0 +1,156 @@
+% !TeX program = pdflatex
+% papers/conversa_pipeline.tex — Pipeline / Controlo no corpus (leve).
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[brazil]{babel}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\input{gkcapa}
+\begin{document}
+\gkcapa{Pipeline e Controlo}
+       {IR Claim $\neq$ Result $\cdot$ histerese acima}
+       {terceiro eixo da arquitetura --- RETAIN / MOVE / RETRACT}
+\maketitle
+\begin{abstract}
+Pares curtos da IR do pipeline e do Controlo de Histerese.
+Especificação: \code{conecthus/pipeline.tex}; arquitetura
+\code{papers/arquitetura.tex} \S pipeline; Peano
+\code{thm:controle-histerese}. UI: \code{app/src/controlo.js}.
+\end{abstract}
+
+\section{o que e o pipeline}
+Linguagem intermediária: \textsf{Claim} declara; \textsf{Result} observa
+depois de $\mathrm{STEP}\to\mathrm{BACK}\to\mathrm{MEASURE}\to R$.
+Paper/teste/código são projeções. \code{conecthus/pipeline.tex}.
+
+\section{o que e um claim}
+Especificação: lei, objecto, passo, volta, medidor, invariante, mutação.
+Não contém \code{residual=0}. \code{conecthus/claims/*.claim}.
+
+\section{claim e resultado sao a mesma coisa?}
+Não. Claim $=$ especificação; Result $=$ observação. PASS sem residual é
+inválido. \code{conecthus/pipeline.tex}; \code{tests/claim\_ir.c}.
+
+\section{o que e o controlo de histerese}
+Runtime \emph{acima} da IR: Gerar $\to$ Medir$(D)$ $\to$ Seleccionar $\to$
+RETAIN / MOVE / RETRACT. Não é palavra-chave do \code{.claim}.
+\code{papers/corpo\_peano.tex} thm:controle-histerese.
+
+\section{o que e retain}
+$R=0$ e $D\preceq\Theta$: estado preservado na borda.
+\code{conecthus/core/control.c}; UI \code{app/src/controlo.js}.
+
+\section{o que e move no controlo}
+$R=0$ mas $D\npreceq\Theta$: fora da vizinhança --- muda andar / retração de
+borda. Não confundir com \code{MOVE} da ISA.
+\code{conecthus/pipeline.tex} \S controlo.
+
+\section{o que e retract}
+$R\neq0$: REOPEN do pipeline --- volta ao estágio responsável.
+\code{tests/claim\_control.c}.
+
+\section{quantos eixos tem a vizinhanca}
+Oito de realização: L1, $|R|$, $|n|$, mut, caixa, teclado, fonético, forma.
+\texttt{cafe}$\leftrightarrow$\texttt{café} mede caixa$=1$, $\phi=0$.
+\code{eixos\_texto.c}; \code{control.wasm}; \code{tests/claim\_control.c} \S K7.
+
+\section{o pipeline e o terceiro eixo?}
+Sim: porta (\code{MOVE}), torre ($\pi_k$/Maestro/Metrónomo), pipeline (Claim).
+\code{papers/arquitetura.tex} \S pipeline.
+
+\section{mostra o pipeline}
+\code{conecthus/pipeline.tex}; medidores \code{tests/claim\_ir.c},
+\code{tests/claim\_control.c}.
+
+\section{falemos do controlo}
+Histerese $=$ retenção; Controlo $=$ selecção. Dualidade no Peano.
+\code{papers/corpo\_peano.tex} \S controle-histerese.
+
+\section{o que e o eixo teclado}
+Geometria $d_K$ das teclas (ABNT2/QWERTY). \texttt{que}$\leftrightarrow$\texttt{qeu}
+tem $d_K>0$. \code{conecthus/core/eixos\_texto.c}.
+
+\section{o que e o eixo fonetico}
+Grafemas$\to$fonemas PT ($d_{\phi}$): digrafos lh/nh/ch, c/g+e,i.
+\texttt{cafe}$\equiv$\texttt{café} em $\phi$. \code{app/src/controlo.js}.
+
+\section{o que e o gut no pipeline}
+Instância da IR: produto $G\times U\times T$ que ordena (par do Pareto).
+Não é pasta \code{gut/}. \code{conecthus/claims/gut.claim}; \code{tests/claim\_ir.c} \S C4.
+
+\section{o que e o pdca no pipeline}
+Instância: ciclo de período 4; Check lê $R$ só se o Plan tem alvo numérico.
+\code{conecthus/claims/pdca.claim}.
+
+\section{gut e pdca sao linguagens novas?}
+Não. Mesma gramática Claim; mesmo executor; wasm ids 3 e 4.
+\code{eval.txt}: primeiro instâncias, depois (se alguma vez) módulos.
+
+\section{o que e o 5w2h no pipeline}
+Dilatação: da raiz Why ao plano de acções. \code{fivew2h.claim}.
+
+\section{o que e o ishikawa no pipeline}
+$k$ grupos é convenção --- mutação $2..12$ sobrevive se a escolha é por causa.
+\code{ishikawa.claim}; \code{tests/lean\_convencao.c} \S V1.
+
+\section{quantas claims lean ha?}
+Dez no disco: 9 ferramentas LMS + PipelineClosure.
+VSM/Fluxograma fecham o dual. Nenhuma pasta paralela.
+
+\section{o que e o vsm no pipeline}
+Dual actual$\leftrightarrow$futuro nomeado. \code{vsm.claim}.
+
+\section{o que e o fluxograma no pipeline}
+Dual nó a nó. \code{fluxograma.claim}; \code{tests/claim\_ir.c} \S C6.
+
+\section{o que e a fronteira no pipeline}
+Resíduo \emph{entre} dois Claims (Lei~7): não funde, mede a interface.
+GUT$\leftrightarrow$5W2H, Why$\leftrightarrow$Ishikawa, PDCA$\leftrightarrow$VSM.
+\code{conecthus/core/fronteira.c}; \code{tests/claim\_fronteira.c}.
+
+\section{o que e o acaso no controlo}
+Quarto cenário: gerar o mesmo objecto ao acaso; se empata, a métrica é
+degenerada. \code{control\_acaso\_relatorio}; fundamento \S controlo;
+\code{tests/claim\_control.c} \S K8.
+
+\section{como ensinar o corpus do pipeline}
+\code{cd banco && ../tools/pipeline.sh .fala/<hex>} --- inventário, fronteira,
+Controlo. Depois \code{papers/conversa\_pipeline.tex}.
+
+\section{como corre a fronteira na ui}
+Chip \code{F} na assistente: \code{app/src/fronteira.js}. Fala
+«mostra a fronteira» ou \texttt{gut:60,48 ordem:1,0}.
+\code{tests/fronteira\_front.js}.
+
+\section{o que e o residuo na estacao}
+A outra metade do par: projectado contra medido (MES). Referência do réu
+não fecha. \code{estacao.claim}; chip \code{E}; \code{lead:65 estacao:65}.
+
+\section{mostra o banco}
+O $R$ da implantação é documento indexado, não peso.
+\code{banco.claim}; chip \code{B}; canónico
+\code{implante P=\ldots M=\ldots R=\ldots fonte=MES}.
+
+\section{o que e a volta no banco}
+\code{write\_document} / \code{retrieve}; \code{emit}$\circ$\code{parse}=\code{id}.
+A interface continua sem estado. fundamento \emph{ob:banco}.
+
+\section{mostra o deploy}
+Portão da Pátria: o corpo local contra o GET
+\code{/corpo/conecthus/pipeline.tex}. Chip \code{D}.
+\code{deploy.claim}; \code{tools/patria.sh}.
+
+\section{o que e o deploy na patria}
+Fecha só com fetch 200. $0\wedge0$ não fecha; sem GET é réu.
+O push fica ao dono --- o Claim observa.
+
+\section{llm e o maestro?}
+Não. LLM pode extrair Claims; não projecta $\pi_k$ nem atesta
+$\lambda^{+}+\lambda^{-}=0$. \code{papers/arquitetura.tex} \S pipeline.
+
+\section{o que e pipelineclosure}
+Claim meta: \code{emit}$\circ$\code{parse}$=$\code{id}; mutação
+\code{alter\_ast} denuncia. \code{conecthus/claims/pipeline.claim}.
+
+\end{document}

@@ -1,0 +1,40 @@
+% !TeX program = pdflatex
+% papers/conversa_arvore_n1_pipeline.tex — árvore n1 (pipeline/controlo).
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[brazil]{babel}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{xcolor}\usepackage[hidelinks]{hyperref}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\input{gkcapa}
+\begin{document}
+\gkcapa{Árvore n1 --- Pipeline}
+       {Claim $\neq$ Result $\cdot$ Controlo acima}
+       {gabarito curto para a assistente}
+\maketitle
+
+\section*{o que e o pipeline}
+IR do desenvolvimento: Claim especifica; Result observa após STEP/BACK/MEASURE.
+\code{conecthus/pipeline.tex}.
+
+\section*{o que e retain}
+Fecha e fica na vizinhança: $R=0\wedge D\preceq\Theta$.
+\code{app/src/controlo.js}.
+
+\section*{o que e retract}
+$R\neq0$ --- reabre o estágio que falhou.
+\code{tests/claim\_control.c}.
+
+\section*{claim escreve o residual?}
+Não. residual no Claim é recusado pelo parser.
+\code{tests/claim\_ir.c}.
+
+\section*{o que e a fronteira}
+Resíduo entre Claims (Lei~7). \code{tests/claim\_fronteira.c}.
+
+\section*{o que e o acaso no controlo}
+Se o acaso empata, a régua é cega. \code{tests/claim\_control.c} \S K8.
+
+\section*{onde mora o controlo}
+Acima da IR, não na gramática. \code{control.wasm}; Peano thm:controle-histerese.
+
+\end{document}

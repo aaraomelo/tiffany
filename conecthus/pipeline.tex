@@ -1,0 +1,766 @@
+% !TeX program = pdflatex
+% conecthus/pipeline.tex — especificação da IR Corpo/Conecthus (v0.2).
+% Promovida a eixo da arquitetura: papers/arquitetura.tex §sec:pipeline.
+% Auto-contido: pdflatex pipeline.tex
+% Fonte: eval.txt + fundamento.tex + papers/corpo_peano.tex + arquitetura.tex.
+% Isto NÃO é ainda a linguagem executável --- é a especificação dela.
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[portuguese]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{booktabs}\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{cinza}{gray}{0.35}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\medido}[1]{\par\medskip\noindent{\small\color{cinza}\textbf{Medido.} #1}\par\medskip}
+\newtheorem{teorema}{Teorema}
+\newtheorem{definicao}[teorema]{Definição}
+\newtheorem{proposicao}[teorema]{Proposição}
+\newtheorem{obrigacao}[teorema]{Obrigação}
+\newtheorem{observacao}[teorema]{Observação}
+\newcommand{\dg}{^{\dagger}}
+
+\title{\textbf{O pipeline}\\[3pt]
+  {\large especificação v1.6 --- portão da Pátria (local contra o ar)}}
+\author{Aarão Melo Lopes}
+\date{13 de agosto de 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent O pipeline chega ao ar pela mesma régua: local (corpo tem
+\code{pipeline.tex}) contra live (HTTP 200). $0\wedge0$ não fecha;
+afirmar no ar sem fetch (réu) não fecha.
+\code{deploy.claim}; chip \code{D}; \code{tools/patria.sh}.
+Claim\,$\neq$\,Result.
+\end{abstract}
+
+\tableofcontents
+
+%----------------------------------------------------------------------
+\section{O que a v0.1 acertou, e o que o gerente corrige}\label{sec:v01-v02}
+
+A v0.1 formalizou \textsf{Claim}, \textsf{Step}/\textsf{Back}, $R$, a gramática
+do fundamento e o contrato «nenhum PASS nu». Mantém-se. Corrige-se:
+
+\begin{center}\small
+\begin{tabular}{@{}p{5.2cm}p{7.0cm}@{}}
+\toprule
+v0.1 & v0.2 \\
+\midrule
+\code{residual} dentro do Claim como expressão & Claim = especificação; Result = observação \\
+Controlo na sintaxe v0.1 & Controlo = runtime \emph{acima} da IR \\
+árvore larga (gut/pdca/ishikawa/\ldots) & três claims só; o resto são instâncias \\
+paper como par da IR & \code{*.claim} é fonte; \code{.tex} é backend \\
+pipeline = linguagem & pipeline = especificação; IR executável vem a seguir \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{obrigacao}[Claim não escreve o seu próprio PASS]\label{ob:claim-result}
+Nenhuma projeção --- nem o Claim --- declara o resultado. Resultado só existe
+depois de $\mathrm{STEP}\to\mathrm{BACK}\to\mathrm{MEASURE}\to R$. Escrever
+\code{residual = 0} no Claim e acreditar nele é exactamente o problema que o
+fundamento elimina~\cite{fundamento}.
+\end{obrigacao}
+
+%----------------------------------------------------------------------
+\section{Enquadramento: as quatro camadas do Corpo de Peano}\label{sec:peano}
+
+A Prop.~\emph{central-operacional}~\cite{peano} dualiza o Teorema Central em
+quatro camadas sem as colar. A IR mapeia nelas:
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+camada Peano & objecto na torre & na IR \\
+\midrule
+estrutura & retração $\pi_k$ & tipagem / domínio do Claim \\
+dinâmica & Maestro (projecta) & \textsf{STEP} \\
+métrica & Metrónomo ($\lambda^{+}+\lambda^{-}=0$) & \textsf{BACK}+\textsf{MEASURE}$\to R$ \\
+controlo & histerese / rede dual & runtime \emph{acima} (RETAIN/MOVE) \\
+música & Conservatório$\to$Pera$\to$Batuta & backends (LaTeX, C, teste, relatório) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\[
+\boxed{
+\begin{array}{c}
+\text{TEXTO / IDEIA}\\
+\downarrow\\
+\mathrm{EXTRACT}\to\mathrm{IR}\\
+\downarrow\\
+\underbrace{\mathsf{STEP}}_{\text{Maestro}}
+\;\to\;
+\underbrace{\mathsf{BACK}+\mathsf{MEASURE}}_{\text{Metrónomo}}
+\;\to\; R\\
+\downarrow\\
+R=0\Rightarrow\mathrm{CLOSE}\qquad
+R\neq0\Rightarrow\mathrm{REOPEN}\\[4pt]
+\text{MUTATE fora do caminho normal}\\[2pt]
+\underbrace{\mathrm{CONTROL}}_{\text{histerese}}
+\text{ só depois da IR fechar}
+\end{array}
+}
+\]
+
+\begin{observacao}[LLM $\neq$ Maestro]
+O modelo de linguagem pode \emph{extrair} Claims (estágio INGEST/EXTRACT). Não
+é o Maestro: não projecta $\pi_k$; não atesta $\lambda^{+}+\lambda^{-}=0$. A
+atestação é o medidor --- Metrónomo --- fora do modelo~\cite{peano,fundamento}.
+\end{observacao}
+
+\begin{observacao}[partitura $\Pi$ e \code{*.claim}]
+Na torre, $\Pi$ é o \emph{quê}: transporte, não fonte das leis~\cite{peano}.
+Na IR, o ficheiro \code{.claim} desempenha o mesmo papel operacional: especifica
+o quê; o executor e o medidor realizam a dinâmica e a métrica. O paper LaTeX é
+Conservatório/folha --- realização, não fonte.
+\end{observacao}
+
+%----------------------------------------------------------------------
+\section{Arquitectura do compilador}\label{sec:arch}
+
+\begin{verbatim}
+                 TEXTO / IDEIA
+                      |
+                      v
+                 [ EXTRACT ]
+                      |
+                      v
+              +---------------+
+              |   IR (fonte)  |
+              | Claim Step    |
+              | Back Measure  |
+              | Residual*     |
+              | Mutation      |
+              +-------+-------+
+                      |
+           +----------+----------+
+           v          v          v
+         PAPER      TEST       CODE
+           |          |          |
+           +----------+----------+
+                      v
+                   EXECUTE          <-- Maestro
+                      |
+                      v
+                     BACK
+                      |
+                      v
+                   MEASURE          <-- Metrónomo
+                      |
+                      v
+                  RESIDUAL R
+                   /       \
+                R = 0     R != 0
+                  |          |
+               CLOSE       REOPEN
+                  |          |
+               CRISTAL   estagio responsavel
+\end{verbatim}
+\noindent (*) Residual no diagrama é o \emph{cálculo} do runtime, não um campo
+que o Claim preenche com o valor desejado.
+
+%----------------------------------------------------------------------
+\section{Núcleo mínimo: sete primitivas + duas decisões}\label{sec:nucleo}
+
+\begin{definicao}[primitivas]\label{def:prim}
+\[
+\{\mathsf{CLAIM},\,\mathsf{STEP},\,\mathsf{BACK},\,\mathsf{MEASURE},\,
+\mathsf{RESIDUAL},\,\mathsf{MUTATE},\,\mathsf{CLASSIFY}\}
+\]
+e as decisões $\{\mathsf{CLOSE},\,\mathsf{REOPEN}\}$.
+\end{definicao}
+
+Formalmente o caminho normal:
+\[
+x
+\xrightarrow{\mathrm{STEP}}
+x'
+\xrightarrow{\mathrm{BACK}}
+\hat{x}
+\xrightarrow{\mathrm{MEASURE}}
+R(x,\hat{x}).
+\]
+\[
+R=0\Rightarrow\mathrm{CLOSE},
+\qquad
+R\neq0\Rightarrow\mathrm{REOPEN}.
+\]
+
+A mutação fica \textbf{fora} do caminho normal:
+\[
+\mathrm{CLAIM}\to\mathrm{EXECUTE}\to R,
+\qquad\text{depois}\qquad
+\mathrm{MUTATE}(\mathrm{CLAIM})\to\mathrm{EXECUTE}\to R'.
+\]
+Isto distingue \emph{fechou} de \emph{sobreviveu à mutação}.
+
+\begin{definicao}[\textsf{Claim} vs.\ \textsf{Result}]\label{def:claim-result}
+O Claim declara lei, objecto, operação, volta \emph{como procedimento},
+invariante \emph{como predicado}, e mutação. Não declara o valor de $R$.
+O Result é produzido pelo runtime:
+\begin{verbatim}
+result {
+    forward  = ...
+    reverse  = ...
+    residual = ...
+    mutation = SURVIVED | BROKEN | UNTESTED
+    class    = STRUCTURAL | CONVENTIONAL | REALIZATION
+               | HYPOTHESIS | FALSE | INCOMPLETE
+}
+\end{verbatim}
+\end{definicao}
+
+%----------------------------------------------------------------------
+\section{Pipeline operacional (estágios 0--12)}\label{sec:estagios}
+
+\begin{center}\small
+\begin{tabular}{@{}clp{7.4cm}@{}}
+\toprule
+ & estágio & acção \\
+\midrule
+0 & INGEST & texto / paper / conversa / código existente \\
+1 & EXTRACT & extrair claims \\
+2 & NORMALIZE & prosa $\to$ primitivas IR \\
+3 & TYPE & verificar tipos e domínios ($\sim\pi_k$ tipada) \\
+4 & GENERATE & gerar backends (paper/teste/código) \\
+5 & EXECUTE & executar Step (Maestro) \\
+6 & BACK & executar a volta \\
+7 & MEASURE & medir (Metrónomo) \\
+8 & RESIDUAL & calcular $R$ \\
+9 & MUTATE & perturbar Claim \\
+10 & CLASSIFY & estrutural / convencional / \ldots \\
+11 & CLOSE & cristalizar \\
+12 & REOPEN & devolver ao estágio que falhou \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{proposicao}[REOPEN é depuração epistemológica]\label{prop:reopen}
+O estágio~12 não precisa de «saber programar». Encaminha:
+\begin{itemize}\itemsep2pt
+\item TYPE falhou $\to$ NORMALIZE/TYPE;
+\item BACK falhou $\to$ definição do operador;
+\item MEASURE falhou $\to$ medidor;
+\item MUTATION falhou / não correu $\to$ class = HYPOTHESIS ou UNTESTED.
+\end{itemize}
+O pipeline deixa de ser só CI: torna-se sistema de depuração da afirmação.
+\end{proposicao}
+
+%----------------------------------------------------------------------
+\section{Formato textual mínimo (primeiro compilador)}\label{sec:formato}
+
+Não se começa por parser sofisticado. Formato pequeno:
+
+\begin{verbatim}
+claim ParetoClosure
+law 6
+object Pareto
+step sum(percentages)
+back recompute(percentages)
+measure sum(percentages)
+invariant sum == 100
+mutate numerator += 1
+end
+\end{verbatim}
+
+\noindent O compilador produz AST canónica \code{Claim(...)} e projecta:
+\begin{verbatim}
+claim -> JSON | C | Python | LaTeX | test | relatorio
+\end{verbatim}
+
+\begin{obrigacao}[fonte de verdade]\label{ob:fonte}
+A fonte passa a ser \code{claims/*.claim} (ou \code{corpo/*.ir}). O
+\code{.tex} deixa de ser fonte de verdade: é backend gerado ou anotado a
+partir da IR. Nenhuma projeção declara o seu próprio resultado.
+\end{obrigacao}
+
+\subsection*{Regra de ouro (contrato do projecto)}
+\begin{verbatim}
+A IR e a fonte de verdade.
+Paper, teste, codigo e visualizacao sao projecoes.
+Nenhuma projecao pode declarar o seu proprio resultado.
+Resultado so existe depois de: STEP -> BACK -> MEASURE -> RESIDUAL
+R = 0  -> CLOSE
+R != 0 -> REOPEN
+MUTATION determina CLASSIFICATION.
+
+PASS sem residual e invalido.
+PASS sem back e invalido.
+STRUCTURAL sem mutation e hipotese.
+MEASURE sem reverse e medida unilateral.
+\end{verbatim}
+
+%----------------------------------------------------------------------
+\section{Três claims de arranque --- e só três}\label{sec:tres}
+
+Não se começa pelas nove ferramentas Lean. Três comportamentos distintos;
+se a IR os expressa sem excepções especiais, começa a ser linguagem.
+
+\subsection*{1. Pareto --- invariância numérica}
+\[
+R=\Sigma-100\%.
+\]
+Step, Back, medida e mutação já medidos no fundamento
+(\code{tests/lean\_cruz.c})~\cite{fundamento}.
+
+\begin{verbatim}
+claim ParetoClosure
+law 6
+object ParetoTable
+step sum(percentages)
+back recompute(percentages)
+measure sum(percentages)
+invariant sum == 100
+mutate numerator += 1
+classify structural
+end
+\end{verbatim}
+O runtime (não o ficheiro) emite \code{result\{ residual=0, mutation=BROKEN, \ldots\}}.
+
+\subsection*{2. Why --- ponto fixo}
+\[
+A_{n+1}=\varepsilon(A_n),\qquad R=A_{n+1}-A_n.
+\]
+O $5$ não é a lei: é \code{default\_depth} (convenção). A estrutura é o
+ponto fixo~\cite{fundamento}.
+
+\begin{verbatim}
+claim WhyFixedPoint
+law 5
+object WhyChain
+step erode
+back next
+measure root
+invariant next(root) == root
+mutate depth = 1..8
+classify depth = convention
+end
+\end{verbatim}
+
+\subsection*{3. Kanban --- mutação estrutural}
+\begin{verbatim}
+claim KanbanThree
+law 3
+object Kanban
+step transit(states={TODO,PROGRESS,DONE})
+back invert_flow
+measure collisions
+invariant collisions == 0
+mutate merge(PROGRESS, DONE)
+classify structural
+end
+\end{verbatim}
+
+\noindent Triplo de exercícios:
+\begin{verbatim}
+Pareto  -> invariancia numerica
+Why     -> ponto fixo
+Kanban  -> mutacao estrutural
+\end{verbatim}
+
+\section{Instâncias Lean --- GUT e PDCA (v0.8)}\label{sec:instancias}
+
+O gerente~\cite{eval} proíbe árvores \code{gut/}/\code{pdca/} independentes:
+primeiro demonstram que são \textbf{só} instâncias da IR. Feito:
+
+\subsection*{GUT --- produto que ordena}
+Par do Pareto (soma mede / produto ordena)~\cite{fundamento}.
+Escala $G,U,T\in\{1,\ldots,5\}$; mutação \code{allow\_zero} quebra monotonia
+(\code{tests/lean\_cruz.c} \S L2).
+
+\begin{verbatim}
+claim GUTProduct
+law 6
+object GUTMatrix
+step product(G,U,T)
+back recompute(score)
+measure score
+invariant score == G*U*T && G,U,T in 1..5
+mutate allow_zero
+classify structural
+end
+\end{verbatim}
+
+\subsection*{PDCA --- ciclo fechado pela leitura}
+O Check precisa de alvo numérico no Plan; sem número o residual é
+ilegível~\cite{fundamento}. Mutação \code{drop\_numeric\_target}.
+
+\begin{verbatim}
+claim PDCACycle
+law 6
+object PDCA
+step plan_do_check_act
+back return_to_plan
+measure check_residual
+invariant period == 4 && plan.has_numeric_target
+mutate drop_numeric_target
+classify structural
+end
+\end{verbatim}
+
+\medido{\code{tests/claim\_ir.c} \S C4: GUT fecha em $(3,4,5)$ com score $60$;
+$0$ na escala REOPEN; PDCA fecha com alvo; sem número não fecha; Check lê
+$R=\mathrm{plan}-\mathrm{done}$. Wasm ids $3$/$4$ em \code{claim.wasm}.}
+
+\subsection*{5W2H --- dilatação (par do Why)}
+Erosão (Why) escolhe a raiz; dilatação (5W2H) escreve acções. Invariante:
+raiz $\in$ plano. Mutação \code{drop\_root} quebra.
+
+\begin{verbatim}
+claim FiveW2H
+law 6
+object ActionPlan
+step dilate(root)
+back erode(actions)
+measure containment
+invariant root in actions
+mutate drop_root
+classify structural
+end
+\end{verbatim}
+
+\subsection*{Ishikawa --- $k$ livre}
+Re-partir causas em $k\in\{2,\ldots,12\}$: escolha \emph{por causa} não
+move a raiz (resíduo $0$); o $6$ é convenção~\cite{fundamento}.
+
+\begin{verbatim}
+claim IshikawaFree
+law 6
+object CauseMap
+step group(causes, k)
+back choose_by_cause
+measure root_stable
+invariant root stable under repartition
+mutate k = 2..12
+classify k = convention
+end
+\end{verbatim}
+
+\medido{\code{tests/claim\_ir.c} \S C5: FiveW2H fecha com raiz; Ishikawa
+fecha em $k=6$ e $k=3$ com a mesma raiz (mutação SURVIVED); raiz movida
+REOPEN. Wasm ids $5$/$6$.}
+
+\subsection*{VSM e Fluxograma --- o dual nomeado}
+Os dois membros (actual / futuro) têm de existir; tirar o futuro quebra
+(involução pela metade)~\cite{fundamento}.
+
+\begin{verbatim}
+claim VSMDual
+law 1
+object ValueStream
+step name_atual_futuro
+back involution_swap
+measure both_named
+invariant atual and futuro present
+mutate drop_futuro
+classify structural
+end
+
+claim FluxogramaDual
+law 1
+object ProcessMap
+step name_nodes_atual_futuro
+back involution_swap
+measure nodes_paired
+invariant every node has atual and futuro
+mutate drop_futuro_node
+classify structural
+end
+\end{verbatim}
+
+\medido{\code{tests/claim\_ir.c} \S C6: VSM fecha com dual; sem futuro REOPEN;
+Fluxograma fecha com $n$ nós pareados; parcial $R=n-\mathrm{paired}$.
+Wasm ids $7$/$8$. Inventário LMS completo na IR.}
+
+\section{Fronteira entre Claims --- Lei~7 (v1.1)}\label{sec:fronteira}
+
+Fundir artefactos num só contexto torna a inconsistência ilegível. A forma
+obrigada~\cite{fundamento}: \textbf{dois corpos e a interface}, resíduo
+contável --- sem palavra-chave nova na gramática além de mais
+\code{.claim}.
+
+\begin{verbatim}
+claim FrontierGUT5W2H     # inversões ranking ↔ ordem de ações
+claim FrontierWhyIshikawa # raiz Why ∈ mapa Ishikawa
+claim FrontierPDCAVSM     # plan.target == vsm.futuro
+\end{verbatim}
+
+\medido{\code{tests/claim\_fronteira.c}: par consistente $R=0$; swap
+adjacente apanhado na fronteira (interna continua verde); raiz fora /
+alvo$\neq$futuro REOPEN. Wasm ids $9$--$11$. Espelha
+\code{tests/lean\_controlo.c} \S N2.}
+
+\section{Volta na estação --- projectado contra medido (v1.4)}\label{sec:estacao}
+
+A validação interna lê o artefacto contra si próprio --- metade do par.
+A outra metade é o mundo~\cite{fundamento}: lead time projectado contra o
+medido na estação. Sem essa coluna, $65\%$ e $200\%$ (estação~04) ficam
+projeções. A referência escrita pelo réu (números inferidos) valida-se
+sempre --- mutação \code{copy\_reference}.
+
+\begin{verbatim}
+claim StationResidual
+law 0
+object Station
+step implant
+back measure_station
+measure abs(projected - measured)
+invariant measured from station not from model
+mutate copy_reference
+classify structural
+end
+\end{verbatim}
+
+$R=|P-M|$. Fecha só se a leitura é externa (MES) e $R=0$. Chip \code{E}:
+\code{lead:65 estacao:65}.
+
+\medido{\code{tests/claim\_ir.c} \S C7; \code{claim.wasm} id $12$;
+\code{tests/estacao\_front.js}.}
+
+\section{O $R$ no banco --- documento, não pesos (v1.5)}\label{sec:banco}
+
+A Obrigação~\cite{fundamento} \emph{ob:banco} proíbe empurrar o fecho do
+ciclo para dentro da interface (fine-tune / RLHF sobre a correcção).
+O que a lei permite já está no sistema: o corpus recuperável. O desfecho
+da estação vira par (\code{fala}, \code{resposta}) ---
+\code{emit}$\circ$\code{parse}=\code{id} --- e a recuperação trá-lo ao
+próximo prompt. O modelo continua sem estado; o banco lembra.
+
+\begin{verbatim}
+claim BancoVolta
+law 0
+object Bank
+step write_document
+back retrieve
+measure compare
+invariant source == retrieved
+mutate alter_doc
+classify structural
+end
+\end{verbatim}
+
+Canónico: \code{implante P=p M=m R=|P-M| fonte=MES|reu}.
+A estação pode ficar aberta ($R\neq0$) e o banco \emph{fechar} --- o
+documento está intacto. Mutação \code{alter\_doc} denuncia.
+
+Chip \code{B}: após a leitura na estação, \code{aprende}; «mostra o banco»
+recupera. Sem daemon, o documento ainda é o texto canónico (não um peso).
+
+\medido{\code{tests/claim\_ir.c} \S C8; \code{claim.wasm} id $13$;
+\code{tests/estacao\_front.js} \S E4--E5; \code{tools/pipeline.sh}.}
+
+\section{Portão da Pátria --- local contra o ar (v1.6)}\label{sec:patria}
+
+Publicar não é um passo à parte da IR: é a volta contra o sítio.
+O projectado é o corpo medido (\code{tools/corpo.sh}:
+\code{conecthus/pipeline.tex} na lista). O medido é o GET
+\texttt{/corpo/conecthus/pipeline.tex} em
+\href{https://goldenkingdom.patriatechnology.com}{goldenkingdom.patriatechnology.com}.
+Os dois a zero não fecham --- não há artefacto. A afirmação sem fetch
+é a referência do réu.
+
+\begin{verbatim}
+claim DeployPatria
+law 0
+object Publication
+step build
+back fetch_live
+measure compare
+invariant local and live
+mutate drop_pipeline
+classify structural
+end
+\end{verbatim}
+
+Chip \code{D}: «mostra o deploy». O \code{publica.yml} recusa o
+artefacto se o health check não vir o pipeline e o \code{claim.wasm}.
+O push em si fica ao dono --- o Claim observa, não dispara o git.
+
+\medido{\code{tests/claim\_ir.c} \S C9; \code{claim.wasm} id $14$;
+\code{tests/patria\_front.js}; \code{tools/patria.sh}.}
+
+%----------------------------------------------------------------------
+\section{Controlo --- runtime acima da IR (v0.4)}\label{sec:controlo}
+
+O Controlo de Histerese~\cite{peano} (\code{thm:controle-histerese})
+\textbf{não} entra no parser. É camada acima, já realizada:
+
+\begin{verbatim}
+IR  (Claim, Step, Back, Measure -> Result)
+ |
+ v
+CONTROL   conecthus/core/control.c
+ |        \
+RETAIN   MOVE / RETRACT
+\end{verbatim}
+
+\[
+\boxed{
+\operatorname{Gerar}
+\to
+\operatorname{Medir}(D)
+\to
+\operatorname{Seleccionar}
+\to
+\{\mathrm{RETAIN},\,\mathrm{MOVE},\,\mathrm{RETRACT}\}
+}
+\]
+
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+acção & quando \\
+\midrule
+\code{RETAIN} & $R=0$ e $D\preceq\Theta$ --- estado preservado \\
+\code{RETRACT} & $R\neq0$ --- REOPEN do pipeline \\
+\code{MOVE} & $R=0$ mas $D\npreceq\Theta$ --- fora da borda / muda andar \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Dualidade: histerese $=$ retenção; controlo $=$ selecção. O Controlo
+já corre acima da IR (\code{conecthus/core/control.c} e
+\code{backends/control/runtime.c}$\to$\code{control.wasm}):
+$R=0\wedge D\preceq\Theta\Rightarrow\mathrm{RETAIN}$;
+$R\neq0\Rightarrow\mathrm{RETRACT}$; $R=0\wedge D\npreceq\Theta\Rightarrow\mathrm{MOVE}$.
+Oito eixos em $\mathcal{V}$: L1, $|R|$, $|n|$, mut, \emph{caixa},
+\emph{teclado} ($d_K$), \emph{fonético} ($d_{\phi}$), \emph{forma}
+(\code{conecthus/core/eixos\_texto.c}; pares reais \texttt{cafe}/\texttt{café}).
+Sem palavra-chave \code{control} no \code{.claim}.
+
+\begin{observacao}
+Na torre Peano o controlo realiza a atestação na interface --- não substitui
+o Teorema Central~\cite{peano}. Misturá-lo na sintaxe do Claim seria colar
+camadas.
+\end{observacao}
+
+%----------------------------------------------------------------------
+\section{Árvore mínima e ordem de construção}\label{sec:arvore}
+
+\begin{verbatim}
+conecthus/
+  backends/   c ptx wasm llvm glsl haskell dafny isabelle latex claim isa
+              manifesto.json   <-- nenhuma privilegiada; C subset -> traduz -> wasm
+              latex/claim_to_tex.c  <-- projecao LaTeX (sem Result)
+  claims/     9 LMS + pipeline + 3 fronteiras + estacao + banco + deploy
+  core/       execute control eixos_texto fronteira
+tests/claim_fronteira.c       Lei 7 — resíduo entre Claims
+app/src/fronteira.js          chip F na assistente
+app/src/estacao.js            chip E — P contra M; documento B
+app/src/patria.js             chip D — local contra o ar
+tests/estacao_front.js        medidor UI estação / banco
+tests/patria_front.js         medidor UI Pátria
+tools/pipeline.sh             corpus + fronteira + Controlo + banco + Pátria
+tools/patria.sh               portão local (--live = GET)
+app/src/fronteira.js          chip F na assistente
+tests/fronteira_front.js      medidor UI fronteira
+  lang/       claim.h  parse_claim.c   <-- parser (v0.3)
+  core/       execute.h/.c   control.h/.c   <-- IR + histerese acima
+  fundamento.tex
+  pipeline.tex
+papers/arquitetura.tex  §pipeline = terceiro eixo
+tools/sobe_backends_wasm.sh
+tests/backends_wasm.js        #TOTAL 26 0
+tests/claim_ir.c              parser+executor+PipelineClosure
+tests/claim_control.c         RETAIN/MOVE/RETRACT + 8 eixos V
+assets/.../control.wasm       Controlo na ponte
+app/src/controlo.js           chip C + eixos texto
+conecthus/core/eixos_texto.c  caixa/teclado/φ/forma (dados reais)
+tests/controlo_front.js       medidor UI
+papers/conversa_pipeline.tex  corpus
+\end{verbatim}
+
+\noindent A ordem do gerente \textbf{fecha}:
+\[
+\boxed{
+\text{IR}
+\to\text{parser}
+\to\text{executor}
+\to\text{medidor}
+\to\text{mutação}
+\to\text{10 claims}
+\to\text{wasm/LaTeX}
+\to\text{Controlo}
+}
+\]
+
+\medido{\code{tests/claim\_ir.c}: dez \code{.claim} (9 LMS + PipelineClosure).
+Controlo: \code{tests/claim\_control.c}.}
+
+\subsection*{O pipeline mede-se a si mesmo}
+O primeiro Claim meta pode ser a própria régua:
+
+\begin{verbatim}
+claim PipelineClosure
+law 0
+object Pipeline
+step compile
+back reconstruct
+measure compare
+invariant source == reconstructed
+mutate alter_ast
+end
+\end{verbatim}
+
+\noindent Lei~0 do fundamento: todo passo reverte, ou paga --- aplicada ao
+compilador que a implementa. No eixo Peano: Maestro compila (projecta);
+Metrónomo compara fonte e reconstrução ($R=0$ na volta).
+
+%----------------------------------------------------------------------
+\section{O que isto obriga ao LMS e à torre}\label{sec:obriga}
+
+\begin{itemize}\itemsep3pt
+\item onde o LMS já reverte (re-deriva GUT/Pareto/PDCA), já é
+  EXECUTE+BACK+MEASURE~\cite{fundamento};
+\item PASS sem back / sem residual é inválido --- limitações 4.5.x onde a
+  volta falta;
+\item STRUCTURAL sem mutation é hipótese --- a fronteira
+  Kanban/Ishikawa/Porquês já medida por mutação;
+\item MEASURE sem reverse é medida unilateral --- Observação da validação
+  parcial (artefacto contra si vs.\ contra o mundo);
+\item Controlo (acaso ao lado do ganho) entra \emph{depois} dos três claims
+  fecharem;
+\item na torre: não identificar rede dual com Gentil--Hurwitz; não
+  identificar backend musical com a fonte das leis~\cite{peano}.
+\end{itemize}
+
+\[
+\boxed{
+\mathrm{Law}\to\mathrm{Claim}\to\mathrm{Step}\to\mathrm{Back}
+\to\mathrm{Measure}\to R\to\mathrm{Mutate}\to\mathrm{Classify}
+\to\{\mathrm{Close},\mathrm{Reopen}\}
+}
+\]
+\noindent A especificação v1.6 fecha o portão da Pátria (corpo contra
+HTTP; $0\wedge0$ recusado). A entrega seguinte é o push --- o dono
+dispara; o Claim só observa.
+
+\begin{thebibliography}{9}
+\bibitem{arquitetura} A.~M.~Lopes. \emph{A arquitetura}
+  (\code{papers/arquitetura.tex}) --- três eixos: porta, torre, pipeline
+  (\S\,pipeline); «todo passo reverte, ou paga».
+\bibitem{eval} Gerente (GPT). Notas de revisão em \code{eval.txt}
+  (13~ago~2026) --- Claim\,$\neq$\,Result; Controlo acima; três claims;
+  ordem IR$\to$parser$\to$executor.
+\bibitem{fundamento} A.~M.~Lopes. \emph{O Lean reverte}
+  (\code{conecthus/fundamento.tex}).
+\bibitem{peano} A.~M.~Lopes. \emph{Corpo de Peano}
+  (\code{papers/corpo\_peano.tex}) --- $\pi_k$, Maestro/Metrónomo,
+  Prop.~central-operacional, histerese, rede dual.
+\bibitem{lms} D.~N.~Lopes et al. \emph{LLM-Driven Lean Manufacturing System}.
+  JCSTS 8(8): 91--102, 2026.
+\bibitem{teoria} A.~M.~Lopes. \emph{A teoria} (\code{teoria.tex}).
+\end{thebibliography}
+
+\vfill
+{\footnotesize\color{cinza}\noindent
+Especificação v0.2 --- eval.txt enquadrado no Corpo de Peano.\\
+\href{https://goldenkingdom.patriatechnology.com}{goldenkingdom.patriatechnology.com}.
+CC BY 4.0 (textos) $\cdot$ MIT (código).\par}
+
+\end{document}

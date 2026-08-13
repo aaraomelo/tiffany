@@ -1,0 +1,10 @@
+claim BancoVolta
+law 0
+object Bank
+step write_document
+back retrieve
+measure compare
+invariant source == retrieved
+mutate alter_doc
+classify structural
+end

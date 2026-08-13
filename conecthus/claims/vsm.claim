@@ -1,0 +1,10 @@
+claim VSMDual
+law 1
+object ValueStream
+step name_atual_futuro
+back involution_swap
+measure both_named
+invariant atual and futuro present
+mutate drop_futuro
+classify structural
+end

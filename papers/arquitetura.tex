@@ -1,5 +1,5 @@
 % !TeX program = pdflatex
-% papers/arquitetura.tex — a arquitetura do tradutor tex <-> PDF, e a reversão em cada camada.
+% papers/arquitetura.tex — a arquitetura do sistema: estrela (MOVE), torre (π_k), pipeline (IR Claim).
 % Auto-contido: compila sozinho.  pdflatex arquitetura.tex
 \documentclass[11pt,a4paper]{article}
 \usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[portuguese]{babel}
@@ -13,6 +13,8 @@
 \newcommand{\medido}[1]{\par\medskip\noindent{\small\color{cinza}\textbf{Medido.} #1}\par\medskip}
 \newtheorem{teorema}{Teorema}
 \newtheorem{definicao}[teorema]{Definição}
+\newtheorem{obrigacao}[teorema]{Obrigação}
+\newtheorem{observacao}[teorema]{Observação}
 \renewcommand{\proofname}{Demonstração}
 \newcommand{\dg}{^{\dagger}}
 
@@ -20,59 +22,40 @@
 
 \begin{document}
 \gkcapa{A Arquitetura}
-       {o tradutor \texttt{.tex}$\leftrightarrow$PDF --- corpo estelar na porta, Corpo de Peano na torre}
-       {sem estado, sem servidor --- \code{MOVE} é a estrela; $\pi_k$ é a retração}
+       {estrela \code{MOVE} $\cdot$ torre $\pi_k$ $\cdot$ pipeline Claim --- três eixos, uma régua}
+       {sem estado; IR é fonte; paper/teste/código/wasm são projeções}
 \maketitle
 
 \begin{abstract}
-\noindent Este documento descreve a arquitetura de um sistema que compõe LaTeX em PDF no
-navegador, sem servidor e sem \code{TeX Live} --- e mostra que ela não é uma escolha de engenharia
-mas a realização do \emph{corpo estelar} na porta e do \emph{Corpo de Peano} na torre. A ideia
-central é uma só: \textbf{o sistema não tem estado.} É uma \emph{interface de transformação}, e
-nada mais --- não guarda nada de ninguém, não é uma máquina com memória e \emph{não é um banco}.
-O corpo entra, atravessa e sai; nada fica. O sistema tem \textbf{dois lados} --- o que hospeda e o
-que compõe --- e eles \emph{não se acoplam}: falam por uma \textbf{estrela}, a interface reversível
-\code{MOVE}, que liga sem fundir. Cada camada da pilha é involutiva, e mede-se pela sua
-volta: o \code{MOVE} tem os dois sentidos inversos; o tradutor sobe C para \emph{WebAssembly} e a
-volta devolve o módulo byte a byte; a ISA corre nas duas realizações --- \emph{assembly} e wasm ---
-com resíduo zero slot a slot; e o compositor inteiro, $\sim\!3900$ linhas, sobe para um módulo
-válido. \textbf{C é o \emph{backend}, a ISA e o wasm são a roupa que corre no cliente.}
-A torre operacional (\emph{Corpo de Peano}) dá a retração $\pi_k$ entre andares --- a mesma
-passagem que o Teorema do Maestro realiza no tempo; o compositor desce o conservatório tipográfico
-à página pela mesma lógica.
+\noindent Este documento descreve a arquitetura do sistema --- não só o tradutor
+\code{.tex}$\leftrightarrow$PDF no navegador, mas \textbf{três eixos} sob a mesma
+exigência. (1)~A \emph{porta}: interface de transformação sem estado, estrela
+\code{MOVE}, corpo estelar. (2)~A \emph{torre}: retração $\pi_k$, Maestro/Metrónomo,
+Corpo de Peano. (3)~O \emph{pipeline}: a IR \textsf{Claim} --- linguagem intermediária
+do desenvolvimento --- com \textsf{Claim}$\neq$\textsf{Result},
+$\mathrm{STEP}\to\mathrm{BACK}\to\mathrm{MEASURE}\to R$, e as linguagens de programação
+como \textbf{backends} (nenhuma privilegiada), todas a subir C$\to$\code{traduz}$\to$wasm.
+A ideia central é uma só: \textbf{o sistema não tem estado.} É uma interface de
+transformação --- não guarda nada de ninguém, não é uma máquina com memória e
+\emph{não é um banco}. O corpo entra, atravessa e sai; nada fica. Paper, teste, código
+e visualização são projeções da IR; nenhuma projeção declara o seu próprio resultado.
 
 \smallskip
-\noindent E a reversão é \textbf{exacta em toda a pilha, composição incluída} --- porque a
-composição não \emph{tem} de dissipar. O que a página não mostra --- os comentários, a marcação
---- não se perde: \textbf{viaja no PDF, codificado e invisível}, num objecto que o leitor ignora e
-a volta lê. O \code{.tex} de partida volta byte a byte, resíduo zero. \emph{Chamar ``buraco negro''
-ao PDF era medir com a régua de um formato convencional, que perde} --- e este não é convencional:
-a tradução ida-e-volta é nossa para definir, e definimo-la reversível. \textbf{Um comentário é tão
-importante quanto o conteúdo, e por isso nada se apaga.}
-
-\smallskip
-\noindent E a composição obedece a \textbf{uma lei espacial}: toda a configuração geométrica
-nasce de uma \emph{semente}, toda a evolução é um giro da \emph{estrela-espiral}, toda a
-transformação conserva a área --- e a semente e a assinatura do esqueleto \emph{viajam no PDF}
-(\code{/SementeEstrela}, \code{/AssinaturaOito}), legíveis por quem mede (\S\ref{sec:espiral}).
-
-\smallskip
-\noindent E cada tradução deste sistema é uma \textbf{bijeção dual} --- o objecto do teorema central
-do \emph{corpo estelar}: a interface reversível, a estrela. C sobe para wasm e volta; o \code{.tex}
-compõe-se em PDF e volta; e nos dois é a mesma involução --- \emph{um lado é o discreto (a fonte, a
-contagem), o outro é a roupa que corre (o contínuo), e a estrela é a bijeção entre eles}. Não há um
-melhor: dá no mesmo pela cruz, desce pela estaca.
-
-\smallskip
-\noindent Fecha-se com a regra que atravessa tudo: \textbf{não se acoplam dois discos, há um só}, e a
-fronteira reverte.
+\noindent Cada camada da pilha de transformação é involutiva e mede-se pela volta: o
+\code{MOVE}; o tradutor C$\leftrightarrow$wasm; a ISA; o compositor
+($\sim\!3900$ linhas). \textbf{C é o \emph{backend}; a ISA e o wasm são a roupa no
+cliente.} A torre dá $\pi_k$; o pipeline dá o contrato
+$\texttt{EVERY\_STEP := STEP + BACK + MEASURE}$, $\texttt{CLOSE := }R=0$. Fecha-se:
+\textbf{não se acoplam dois discos, há um só}, e a fronteira reverte.
 \end{abstract}
 
 \section{A exigência, herdada}
 
 O \emph{corpo estelar} fixa a porta (\code{MOVE}); o \emph{Corpo de Peano}
-fixa a torre ($\pi_k$, Teorema do Maestro). Este documento não acrescenta
-doutrina --- realiza as duas.
+fixa a torre ($\pi_k$, Teorema do Maestro); o \emph{pipeline}
+(\code{conecthus/pipeline.tex}) fixa a IR do desenvolvimento
+(\textsf{Claim}). Este documento não acrescenta doutrina --- realiza as três
+no mesmo contrato.
 A exigência é uma:
 
 \begin{quote}
@@ -521,6 +504,143 @@ conservação exacta (\S X8--X9, instância contra motor), a fronteira com o con
 bit num stream espalha por $256$ de $256$ componentes do espectro. A volta do \code{teoria.tex}
 completo: byte a byte, resíduo $0$, com \code{/SementeEstrela} e \code{/AssinaturaOito} a bordo.}
 
+%----------------------------------------------------------------------
+\section{O pipeline: a IR na arquitetura do sistema}\label{sec:pipeline}
+
+A porta e a torre não bastam para \emph{desenvolver} o sistema sob a mesma
+régua. Falta o eixo que faz do paper, do teste e do código \textbf{três
+projeções} --- não três fontes. Esse eixo é o \textbf{pipeline}: a
+linguagem intermediária \textsf{Claim}, especificada em
+\code{conecthus/pipeline.tex} e realizada em
+\code{conecthus/backends/} + \code{claims/*.claim}.
+
+\[
+\boxed{
+\begin{array}{c}
+\text{TEXTO / IDEIA}\\
+\downarrow\\
+\mathrm{EXTRACT}\to\mathsf{Claim}\ \text{(IR = fonte)}\\
+\downarrow\\
+\underbrace{\mathsf{STEP}}_{\text{Maestro}}
+\to
+\underbrace{\mathsf{BACK}+\mathsf{MEASURE}}_{\text{Metrónomo}}
+\to R\\
+\downarrow\\
+R=0\Rightarrow\mathrm{CLOSE}
+\qquad
+R\neq0\Rightarrow\mathrm{REOPEN}\\[4pt]
+\swarrow\quad\downarrow\quad\searrow\\
+\text{PAPER}\quad\text{TEST}\quad\text{CODE/wasm}
+\end{array}
+}
+\]
+
+\begin{definicao}[três eixos da arquitetura]\label{def:tres-eixos}
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+eixo & objecto & contrato \\
+\midrule
+porta & estrela \code{MOVE} & ligar sem fundir; sem estado \\
+torre & $\pi_k$, Maestro/Metrónomo & projectar / ler; $\lambda^{+}+\lambda^{-}=0$ \\
+pipeline & \textsf{Claim} $\neq$ \textsf{Result} &
+  $\mathrm{STEP}\to\mathrm{BACK}\to\mathrm{MEASURE}\to R$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+Os três obedecem à mesma frase: \emph{todo passo reverte, ou paga.} O
+pipeline não é documentação do código --- é a camada onde a afirmação
+atravessa antes de ser paper ou wasm.
+\end{definicao}
+
+\subsection*{Claim não escreve o PASS}
+
+\begin{obrigacao}[fonte de verdade]\label{ob:ir-fonte}
+A IR (\code{claims/*.claim}) é a fonte. Paper, teste, código e visualização
+são projeções. Nenhuma projeção --- nem o próprio Claim --- declara o
+resultado. Resultado só existe depois de
+$\mathrm{STEP}\to\mathrm{BACK}\to\mathrm{MEASURE}\to R$.
+\begin{verbatim}
+PASS sem residual  = invalido
+PASS sem back      = invalido
+STRUCTURAL sem mutation = hipotese
+MEASURE sem reverse     = medida unilateral
+\end{verbatim}
+\end{obrigacao}
+
+\noindent O \textsf{Claim} declara lei, objecto, operação, volta
+\emph{como procedimento}, invariante \emph{como predicado}, mutação. O
+\textsf{Result} observa \code{forward}, \code{reverse}, \code{residual},
+\code{mutation}, \code{class}. Escrever \code{residual = 0} no Claim e
+acreditar nele é o defeito que o fundamento Conecthus elimina
+(\code{conecthus/fundamento.tex}).
+
+\subsection*{Linguagens = backends, nenhuma privilegiada}
+
+C, PTX, Wasm, LLVM, GLSL, Haskell, Dafny, Isabelle, LaTeX e \textbf{claim}
+entram no banco pela mesma porta, com assinatura $(p,q,r)$ --- nenhuma é o
+núcleo (\code{tests/cards.c} \S B14). A realização executável no cliente é
+única na forma:
+\[
+\boxed{
+\text{fonte C (subset)}
+\;\xrightarrow{\code{traduz}}\;
+\text{wasm}
+\qquad
+(\code{tools/sobe\_backends\_wasm.sh}).
+}
+\]
+A ISA (\code{tools/isa.c}) sobe na mesma fila --- porta única \code{MOVE}.
+O LaTeX pleno continua \code{tex.wasm}; o núcleo \code{compor.wasm} mede a
+involução compor$\dg=$descompor. O runtime
+\code{claim.wasm} fecha os três claims de arranque (Pareto, Why, Kanban).
+
+\medido{onze módulos no manifesto sobem e instanciam; escapar/decidir/rotular
+batem o gabarito das pontes; Pareto/Why/Kanban fecham $R$ com mutação a
+denunciar; ISA exporta só \code{MOVE}; latex compor$\circ$descompor devolve a
+fonte; Isabelle $x\oplus x=0$ com falhas $0$
+(\code{tests/backends\_wasm.js}, \code{\#TOTAL 10 0}).}
+
+\subsection*{Controlo acima da IR}
+
+O Controlo de Histerese (Corpo de Peano) \textbf{não} é sintaxe do Claim: é
+runtime \emph{acima} --- \code{conecthus/core/control.c} /
+\code{control.wasm} (\code{RETAIN}/\code{MOVE}/\code{RETRACT};
+\code{tests/claim\_control.c}) e chip \code{C} na assistente
+(\code{app/src/controlo.js}; \code{tests/controlo\_front.js}).
+Oito eixos em $\mathcal{V}$ --- caixa/teclado/fonético com dados reais
+(\code{conecthus/core/eixos\_texto.c}).
+Misturar os dois na sintaxe seria colar a camada de controlo à de dinâmica.
+Corpus: \code{papers/conversa\_pipeline.tex}.
+
+\begin{observacao}[LLM $\neq$ Maestro]
+O modelo pode extrair Claims (INGEST/EXTRACT). Não projecta $\pi_k$ e não
+atesta $\lambda^{+}+\lambda^{-}=0$. A atestação é o Metrónomo --- fora do
+modelo, no medidor. É a mesma fronteira da estrela: a interface não tem
+estado; o banco (e o corpus RAG) lembra.
+\end{observacao}
+
+\subsection*{Onde mora no disco}
+
+\begin{verbatim}
+conecthus/
+  pipeline.tex          especificacao da IR (promovida aqui)
+  fundamento.tex        LMS lido pelas oito leis
+  backends/             realizacoes C -> wasm (manifesto.json)
+  claims/               *.claim  = fonte de verdade
+papers/arquitetura.tex  este documento (tres eixos)
+tools/sobe_backends_wasm.sh
+tools/sobe_tex_wasm.sh
+tools/traduz.c          a bijecao C <-> wasm
+tools/isa.c             MOVE
+\end{verbatim}
+
+A especificação completa da gramática, dos estágios 0--12, do parser
+(\code{lang/parse\_claim.c}) e do executor (\code{core/execute.c}) permanece
+em \code{conecthus/pipeline.tex}. Aqui fixa-se o lugar arquitectónico:
+\textbf{o pipeline é o terceiro eixo do sistema}, já com IR executável
+(\code{tests/claim\_ir.c}).
+
 \section{O que fica, dito à vista}
 
 \noindent \textbf{Lei~7 $\neq$ Lei~8.} A \textbf{Lei~7} é o circuito
@@ -559,6 +679,13 @@ reverte e não funde; e o que compõe corre no cliente porque a régua se traduz
 \emph{O sistema é a estrela, e a estrela não paga para ligar} --- é por isso que roda em qualquer
 coisa, e é por isso que não tem \emph{buffer}: não oscila, e a entrada e a saída dos dados são o
 próprio movimento --- a modulação que gira o rotor ---, não um sinal guardado para ler depois.
+
+\smallskip
+\noindent \textbf{Três eixos, uma régua} (\S\ref{sec:pipeline}). Porta (\code{MOVE}), torre
+($\pi_k$/Maestro/Metrónomo) e pipeline (\textsf{Claim}$\neq$\textsf{Result}): o desenvolvimento
+obedece ao mesmo contrato que a transformação. A IR é fonte; paper/teste/código/wasm são
+projeções; Controlo fica acima. \emph{Todo passo reverte, ou paga} --- também quando o passo é
+uma afirmação Lean, um módulo wasm ou um paper.
 
 \vfill
 {\footnotesize\color{cinza}\noindent

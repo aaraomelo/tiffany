@@ -1,0 +1,20 @@
+{
+  "titulo": "Backends da ISA — realizações, nenhuma privilegiada",
+  "nota": "Fonte de verdade das claims: conecthus/claims/*.claim. C→traduz→wasm. Paper/teste/código são projeções.",
+  "nulo_disco": 8,
+  "export_memoria": "DISCO",
+  "linguagens": [
+    { "nome": "c",        "faz": "escapar",  "p": 1, "q": 0, "r": 1, "fonte": "conecthus/backends/c/escapar.c",           "wasm": "escapar.wasm",  "exports": ["escapar"] },
+    { "nome": "ptx",      "faz": "emitir",   "p": 1, "q": 0, "r": 1, "fonte": "conecthus/backends/ptx/emitir.c",         "wasm": "emitir.wasm",   "exports": ["emitir", "emitir_volta"] },
+    { "nome": "wasm",     "faz": "empilhar", "p": 1, "q": 0, "r": 1, "fonte": "conecthus/backends/wasm/empilhar.c",      "wasm": "empilhar.wasm", "exports": ["empilhar_push", "empilhar_pop"] },
+    { "nome": "llvm",     "faz": "baixar",   "p": 1, "q": 0, "r": 1, "fonte": "conecthus/backends/llvm/baixar.c",        "wasm": "baixar.wasm",   "exports": ["baixar"] },
+    { "nome": "glsl",     "faz": "pintar",   "p": 1, "q": 0, "r": 1, "fonte": "conecthus/backends/glsl/filtrar.c",       "wasm": "filtrar.wasm",  "exports": ["filtrar"] },
+    { "nome": "haskell",  "faz": "rotular",  "p": 0, "q": 0, "r": 1, "fonte": "conecthus/backends/haskell/rotular.c",    "wasm": "rotular.wasm",  "exports": ["rotular"] },
+    { "nome": "dafny",    "faz": "decidir",  "p": 1, "q": 1, "r": 0, "fonte": "conecthus/backends/dafny/decidir.c",      "wasm": "decidir.wasm",  "exports": ["decidir"] },
+    { "nome": "isabelle", "faz": "provar",   "p": 0, "q": 1, "r": 1, "fonte": "conecthus/backends/isabelle/provar.c",    "wasm": "provar.wasm",   "exports": ["provar_xor_nulo"] },
+    { "nome": "latex",    "faz": "compor",   "p": 1, "q": 1, "r": 1, "fonte": "conecthus/backends/latex/compor.c",       "wasm": "compor.wasm",   "exports": ["latex_compor", "latex_descompor"], "pleno": "tex.wasm" },
+    { "nome": "claim",    "faz": "afirmar",  "p": 1, "q": 1, "r": 0, "fonte": "conecthus/backends/claim/runtime.c",      "wasm": "claim.wasm",    "exports": ["claim_run", "claim_residual"], "ir": "conecthus/claims/*.claim" },
+    { "nome": "control",  "faz": "selecionar","p": 1, "q": 1, "r": 0, "fonte": "conecthus/backends/control/runtime.c",  "wasm": "control.wasm",  "exports": ["control_decide", "control_dist_arena"], "nota": "histerese acima da IR" },
+    { "nome": "isa",      "faz": "mover",    "p": 1, "q": 1, "r": 1, "fonte": "tools/isa.c",                             "wasm": "isa.wasm",      "exports": ["MOVE"], "nota": "porta única MOVE" }
+  ]
+}

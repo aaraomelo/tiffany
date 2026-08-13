@@ -1,5 +1,6 @@
 // As pontes: C, Dafny e Haskell descem ao Chrome pela ponte da CPU (WebAssembly).
 // Cada operação do colapso grafo→LaTeX roda em WASM no navegador, atestada contra a linguagem real.
+// Módulos do traduz exportam DISCO (base NULO=8); os do chessc legado exportam mem (base 0).
 
 const INP = 1024, OUTP = 8192
 
@@ -8,29 +9,43 @@ async function inst(url) {
   return (await WebAssembly.instantiate(b)).instance
 }
 
+function disco(exports) {
+  const mem = exports.DISCO || exports.mem
+  if (!mem) throw new Error('módulo sem DISCO/mem')
+  const base = exports.DISCO ? 8 : 0
+  return {
+    u8: () => new Uint8Array(mem.buffer),
+    i32: () => new Int32Array(mem.buffer, base),
+    base,
+  }
+}
+
 export async function runPontes(data) {
   const nos = data.nos, n = nos.length
   const enc = new TextEncoder(), dec = new TextDecoder()
 
   const ce = await inst(data.linguagens[0].wasm)          // C: escapar
   const escapar = (t) => {
-    const m = new Uint8Array(ce.exports.mem.buffer)
-    const b = enc.encode(t); m.set(b, INP)
+    const d = disco(ce.exports)
+    const m = d.u8()
+    const b = enc.encode(t); m.set(b, d.base + INP)
     const ln = ce.exports.escapar(INP, b.length, OUTP)
-    return dec.decode(new Uint8Array(ce.exports.mem.buffer).slice(OUTP, OUTP + ln))
+    return dec.decode(m.slice(d.base + OUTP, d.base + OUTP + ln))
   }
   const cd = await inst(data.linguagens[1].wasm)          // Dafny: decidir (batch)
-  const i32 = new Int32Array(cd.exports.mem.buffer)
+  const dd = disco(cd.exports)
+  const i32 = dd.i32()
   for (let i = 0; i < n; i++) { i32[i] = nos[i].prof; i32[n + i] = nos[i].epist }
   cd.exports.decidir(n)
   const dcd = nos.map((_, i) => [i32[2 * n + i], i32[3 * n + i]])
 
   const ch = await inst(data.linguagens[2].wasm)          // Haskell: rotular
   const rotular = (t) => {
-    const m = new Uint8Array(ch.exports.mem.buffer)
-    const b = enc.encode(t); m.set(b, INP)
+    const d = disco(ch.exports)
+    const m = d.u8()
+    const b = enc.encode(t); m.set(b, d.base + INP)
     const ln = ch.exports.rotular(INP, b.length, OUTP)
-    return dec.decode(new Uint8Array(ch.exports.mem.buffer).slice(OUTP, OUTP + ln))
+    return dec.decode(m.slice(d.base + OUTP, d.base + OUTP + ln))
   }
 
   return nos.map((no, i) => {

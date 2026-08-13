@@ -1,0 +1,10 @@
+claim KanbanThree
+law 3
+object Kanban
+step transit(states={TODO,PROGRESS,DONE})
+back invert_flow
+measure collisions
+invariant collisions == 0
+mutate merge(PROGRESS, DONE)
+classify structural
+end

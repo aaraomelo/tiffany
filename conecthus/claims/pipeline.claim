@@ -1,0 +1,10 @@
+claim PipelineClosure
+law 0
+object Pipeline
+step compile
+back reconstruct
+measure compare
+invariant source == reconstructed
+mutate alter_ast
+classify structural
+end

@@ -1,0 +1,10 @@
+claim FrontierPDCAVSM
+law 7
+object InterfacePDCAVSM
+step plan_numeric
+back name_futuro
+measure target_equals_future
+invariant pdca.target == vsm.futuro
+mutate alter_futuro
+classify structural
+end

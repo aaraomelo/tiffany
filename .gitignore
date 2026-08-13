@@ -222,3 +222,7 @@ conecthus/*.pdf
 /partitura/pg*.png
 /enredo-p*.png
 /tests/corpo_peano
+tests/claim_ir
+tests/claim_control
+tests/claim_fronteira
+.tmp-banco-*

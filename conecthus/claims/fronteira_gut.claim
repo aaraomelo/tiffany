@@ -1,0 +1,10 @@
+claim FrontierGUT5W2H
+law 7
+object InterfaceGUT5W2H
+step rank_gut
+back order_5w2h
+measure inversions
+invariant inversions == 0
+mutate swap_adjacent_distinct
+classify structural
+end

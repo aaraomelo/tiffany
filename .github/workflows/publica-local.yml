@@ -99,7 +99,7 @@ jobs:
           set -e
           S=$(curl -sf -o /dev/null -w '%{http_code}' https://goldenkingdom.patriatechnology.com/ || echo 000)
           [ "$S" = "200" ] || { echo "❌ health check: $S"; exit 1; }
-          for u in wasm/tex.wasm corpo/estilo.tex docs/cv.pdf; do
+          for u in wasm/tex.wasm corpo/estilo.tex docs/cv.pdf corpo/conecthus/pipeline.tex wasm/claim.wasm; do
             C=$(curl -sf -o /dev/null -w '%{http_code}' "https://goldenkingdom.patriatechnology.com/$u" || echo 000)
             [ "$C" = "200" ] || { echo "❌ /$u -> $C"; exit 1; }
             echo "✅ /$u"
