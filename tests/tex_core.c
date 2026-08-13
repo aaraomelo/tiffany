@@ -706,6 +706,10 @@ static int largura_de(int g, int fonte, long corpo){
 static int avanco_mil(const Ttf *t, int gi){ return (int)((long)ttf_avanco(t, gi) * 1000 / t->upem); }
 
 static int largura(int g, int fonte){
+    /* Claves musicais: avanço Emmentaler (milésimos de em, independente da fonte). */
+    if(g == 0x82) return 11266;
+    if(g == 0x83) return 11775;
+    if(g == 0x84) return 10000;
     /* O ESPACO E' UMA LETRA, e tem caixa como qualquer outra: mede 277 na Liberation e 260
      * noutra fonte — nao e' um vazio sem largura nem um numero a parte. Por isso vem da FONTE,
      * como o `o` vem, e nao de uma constante.
@@ -1623,6 +1627,31 @@ static void poe_poli(Pdf *p, const long *xs, const long *ys, int np, long esp, c
     p->reguas = p->reguas + 1;
 }
 
+/* Contornos Emmentaler (clefs.G / clefs.F) → milésimos; y=0 = linha da clave.
+ * Dados (não função) — o teto MAX_FUN do wasm não cresce. */
+#define CLEF_ESP 4394L   /* 1,55 mm = vão do pentagrama */
+#define N_CG0 37
+static const long CG0x[] = {6609,5892,7826,8598,6450,6324,6187,4993,3480,3539,3926,2845,35,3579,6683,7485,7523,7500,6648,4002,2566,2969,4289,4653,3111,1304,2144,5999,8226,8258,8237,8512,9456,11226,10108,6782,6609};
+static const long CG0y[] = {4605,7341,11218,16254,20933,20985,20973,19911,15801,13759,11378,7945,1969,-4077,-4568,-4870,-6081,-6808,-9379,-10323,-9263,-9361,-8876,-7000,-5888,-6985,-10148,-10831,-7153,-6387,-5211,-4172,-3656,-967,3205,4620,4605};
+#define N_CG1 25
+static const long CG1x[] = {1301,2467,5044,5468,5853,3774,3041,3542,5097,5176,5255,5528,5642,5613,5519,4438,4095,4664,6275,6907,7382,6668,5941,2731,1301};
+static const long CG1y[] = {492,4291,7575,6037,4499,3197,1037,-767,-2215,-2239,-2250,-2129,-1863,-1731,-1599,-598,562,1938,2654,-492,-3744,-3823,-3849,-2568,492};
+#define N_CG2 9
+static const long CG2x[] = {7171,7452,7523,6767,4956,4521,4324,5095,7171};
+static const long CG2y[] = {18367,17266,16100,13061,10405,12024,13815,16499,18367};
+#define N_CG3 7
+static const long CG3x[] = {8103,7641,7048,9274,10089,9544,8103};
+static const long CG3y[] = {-3568,-411,2654,1505,-685,-2423,-3568};
+#define N_CF0 21
+static const long CF0x[] = {4078,549,276,1969,3489,3485,1969,1565,1979,4078,6726,5995,-158,-222,-197,0,105,4486,9227,6756,4078};
+static const long CF0y[] = {4622,2485,-610,-1529,-602,1219,2092,2026,3088,4166,2043,-3531,-8630,-8735,-8902,-9016,-8988,-6764,211,4115,4622};
+#define N_CF1 7
+static const long CF1x[] = {9790,10235,11137,11583,11137,10235,9790};
+static const long CF1y[] = {2197,1424,1424,2197,2970,2970,2197};
+#define N_CF2 7
+static const long CF2x[] = {9790,10235,11137,11583,11137,10235,9790};
+static const long CF2y[] = {-2197,-2970,-2970,-2197,-1424,-1424,-2197};
+
 static int obj_novo(Pdf *p){
     p->nobj = p->nobj + 1; p->off[p->nobj] = s_pos(&p->sf);
     return p->nobj;
@@ -2036,8 +2065,64 @@ static void desenrola_em(Pdf *p, const Linha *L, long x0_m, int desce){
      * meio amputa, e o amputado soma ao longo da linha. */
     int i = 0; long xm = x0_m;
     while(i < L->n){
+        int gk = L->g[i].g;
+        /* Claves musicais (Emmentaler): 0x82 sol, 0x83 fá, 0x84 percussão.
+         * Pintam na baseline da linha — mesma âncora das notas. */
+        if(gk == 0x82 || gk == 0x83 || gk == 0x84){
+            long x0 = xm;
+            long yb = p->y;
+            long yref = yb;
+            if(gk == 0x82) yref = yb - CLEF_ESP;
+            else if(gk == 0x83) yref = yb + CLEF_ESP;
+            long rr, gg, bb;
+            if(p->aberta && cor_de("tinta", &rr, &gg, &bb)){
+                Saida *sf = &p->sf;
+                snprintf(S_FMT_BUF, 2048, "q "); s_flush(sf);
+                s_fix(sf, rr, 3); s_byte(sf, ' '); s_fix(sf, gg, 3);
+                s_byte(sf, ' '); s_fix(sf, bb, 3);
+                snprintf(S_FMT_BUF, 2048, " rg "); s_flush(sf);
+                if(gk == 0x82){
+                    s_c(sf, x0 + CG0x[0]); s_byte(sf, ' '); s_c(sf, yref + CG0y[0]); snprintf(S_FMT_BUF, 2048, " m "); s_flush(sf);
+                    for(int k = 1; k < N_CG0; k++){ s_c(sf, x0 + CG0x[k]); s_byte(sf, ' '); s_c(sf, yref + CG0y[k]); snprintf(S_FMT_BUF, 2048, " l "); s_flush(sf); }
+                    snprintf(S_FMT_BUF, 2048, "h "); s_flush(sf);
+                    s_c(sf, x0 + CG1x[0]); s_byte(sf, ' '); s_c(sf, yref + CG1y[0]); snprintf(S_FMT_BUF, 2048, " m "); s_flush(sf);
+                    for(int k = 1; k < N_CG1; k++){ s_c(sf, x0 + CG1x[k]); s_byte(sf, ' '); s_c(sf, yref + CG1y[k]); snprintf(S_FMT_BUF, 2048, " l "); s_flush(sf); }
+                    snprintf(S_FMT_BUF, 2048, "h "); s_flush(sf);
+                    s_c(sf, x0 + CG2x[0]); s_byte(sf, ' '); s_c(sf, yref + CG2y[0]); snprintf(S_FMT_BUF, 2048, " m "); s_flush(sf);
+                    for(int k = 1; k < N_CG2; k++){ s_c(sf, x0 + CG2x[k]); s_byte(sf, ' '); s_c(sf, yref + CG2y[k]); snprintf(S_FMT_BUF, 2048, " l "); s_flush(sf); }
+                    snprintf(S_FMT_BUF, 2048, "h "); s_flush(sf);
+                    s_c(sf, x0 + CG3x[0]); s_byte(sf, ' '); s_c(sf, yref + CG3y[0]); snprintf(S_FMT_BUF, 2048, " m "); s_flush(sf);
+                    for(int k = 1; k < N_CG3; k++){ s_c(sf, x0 + CG3x[k]); s_byte(sf, ' '); s_c(sf, yref + CG3y[k]); snprintf(S_FMT_BUF, 2048, " l "); s_flush(sf); }
+                    snprintf(S_FMT_BUF, 2048, "h f* Q\n"); s_flush(sf);
+                } else if(gk == 0x83){
+                    s_c(sf, x0 + CF0x[0]); s_byte(sf, ' '); s_c(sf, yref + CF0y[0]); snprintf(S_FMT_BUF, 2048, " m "); s_flush(sf);
+                    for(int k = 1; k < N_CF0; k++){ s_c(sf, x0 + CF0x[k]); s_byte(sf, ' '); s_c(sf, yref + CF0y[k]); snprintf(S_FMT_BUF, 2048, " l "); s_flush(sf); }
+                    snprintf(S_FMT_BUF, 2048, "h "); s_flush(sf);
+                    s_c(sf, x0 + CF1x[0]); s_byte(sf, ' '); s_c(sf, yref + CF1y[0]); snprintf(S_FMT_BUF, 2048, " m "); s_flush(sf);
+                    for(int k = 1; k < N_CF1; k++){ s_c(sf, x0 + CF1x[k]); s_byte(sf, ' '); s_c(sf, yref + CF1y[k]); snprintf(S_FMT_BUF, 2048, " l "); s_flush(sf); }
+                    snprintf(S_FMT_BUF, 2048, "h "); s_flush(sf);
+                    s_c(sf, x0 + CF2x[0]); s_byte(sf, ' '); s_c(sf, yref + CF2y[0]); snprintf(S_FMT_BUF, 2048, " m "); s_flush(sf);
+                    for(int k = 1; k < N_CF2; k++){ s_c(sf, x0 + CF2x[k]); s_byte(sf, ' '); s_c(sf, yref + CF2y[k]); snprintf(S_FMT_BUF, 2048, " l "); s_flush(sf); }
+                    snprintf(S_FMT_BUF, 2048, "h f* Q\n"); s_flush(sf);
+                } else {
+                    long d = CLEF_ESP / 3;
+                    s_c(sf, x0 + 1500); s_byte(sf, ' '); s_c(sf, yb + d); snprintf(S_FMT_BUF, 2048, " m "); s_flush(sf);
+                    s_c(sf, x0 + 9000); s_byte(sf, ' '); s_c(sf, yb + d); snprintf(S_FMT_BUF, 2048, " l "); s_flush(sf);
+                    s_c(sf, x0 + 9000); s_byte(sf, ' '); s_c(sf, yb + d + 900); snprintf(S_FMT_BUF, 2048, " l "); s_flush(sf);
+                    s_c(sf, x0 + 1500); s_byte(sf, ' '); s_c(sf, yb + d + 900); snprintf(S_FMT_BUF, 2048, " l h "); s_flush(sf);
+                    s_c(sf, x0 + 1500); s_byte(sf, ' '); s_c(sf, yb - d - 900); snprintf(S_FMT_BUF, 2048, " m "); s_flush(sf);
+                    s_c(sf, x0 + 9000); s_byte(sf, ' '); s_c(sf, yb - d - 900); snprintf(S_FMT_BUF, 2048, " l "); s_flush(sf);
+                    s_c(sf, x0 + 9000); s_byte(sf, ' '); s_c(sf, yb - d); snprintf(S_FMT_BUF, 2048, " l "); s_flush(sf);
+                    s_c(sf, x0 + 1500); s_byte(sf, ' '); s_c(sf, yb - d); snprintf(S_FMT_BUF, 2048, " l h f Q\n"); s_flush(sf);
+                }
+                p->reguas = p->reguas + 1;
+            }
+            xm += (gk == 0x82) ? 11266 : (gk == 0x83) ? 11775 : 10000;
+            i++; continue;
+        }
         int j = i, fonte = L->g[i].f, ex = L->g[i].e;
-        while(j < L->n && L->g[j].f == fonte && L->g[j].e == ex) j++;
+        while(j < L->n && L->g[j].f == fonte && L->g[j].e == ex
+              && L->g[j].g != 0x82 && L->g[j].g != 0x83 && L->g[j].g != 0x84) j++;
         /* o expoente é o mesmo corpo com o degrau composto — a dobra, inteira —, posto na
          * subida que a escala libertou (o dual aditivo, com o sinal da Lei 1) */
         long cpm = corpo_exp_m(corpo, ex);
@@ -2279,10 +2364,63 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
     int  front_sg = 0;
     long front_x0 = 0, front_wmax = 0;
     while(i < L->n){
+        int gk0 = L->g[i].g;
+        /* Claves (0x82 sol / 0x83 fá / 0x84 perc): baseline da linha, com as notas. */
+        if(gk0 == 0x82 || gk0 == 0x83 || gk0 == 0x84){
+            long x0 = xm, yb = p->y, yref = yb;
+            if(gk0 == 0x82) yref = yb - CLEF_ESP;
+            else if(gk0 == 0x83) yref = yb + CLEF_ESP;
+            long rr, gg, bb;
+            if(p->aberta && cor_de("tinta", &rr, &gg, &bb)){
+                Saida *sf = &p->sf;
+                snprintf(S_FMT_BUF, 2048, "q "); s_flush(sf);
+                s_fix(sf, rr, 3); s_byte(sf, ' '); s_fix(sf, gg, 3);
+                s_byte(sf, ' '); s_fix(sf, bb, 3);
+                snprintf(S_FMT_BUF, 2048, " rg "); s_flush(sf);
+                if(gk0 == 0x82){
+                    s_c(sf, x0 + CG0x[0]); s_byte(sf, ' '); s_c(sf, yref + CG0y[0]); snprintf(S_FMT_BUF, 2048, " m "); s_flush(sf);
+                    for(int k = 1; k < N_CG0; k++){ s_c(sf, x0 + CG0x[k]); s_byte(sf, ' '); s_c(sf, yref + CG0y[k]); snprintf(S_FMT_BUF, 2048, " l "); s_flush(sf); }
+                    snprintf(S_FMT_BUF, 2048, "h "); s_flush(sf);
+                    s_c(sf, x0 + CG1x[0]); s_byte(sf, ' '); s_c(sf, yref + CG1y[0]); snprintf(S_FMT_BUF, 2048, " m "); s_flush(sf);
+                    for(int k = 1; k < N_CG1; k++){ s_c(sf, x0 + CG1x[k]); s_byte(sf, ' '); s_c(sf, yref + CG1y[k]); snprintf(S_FMT_BUF, 2048, " l "); s_flush(sf); }
+                    snprintf(S_FMT_BUF, 2048, "h "); s_flush(sf);
+                    s_c(sf, x0 + CG2x[0]); s_byte(sf, ' '); s_c(sf, yref + CG2y[0]); snprintf(S_FMT_BUF, 2048, " m "); s_flush(sf);
+                    for(int k = 1; k < N_CG2; k++){ s_c(sf, x0 + CG2x[k]); s_byte(sf, ' '); s_c(sf, yref + CG2y[k]); snprintf(S_FMT_BUF, 2048, " l "); s_flush(sf); }
+                    snprintf(S_FMT_BUF, 2048, "h "); s_flush(sf);
+                    s_c(sf, x0 + CG3x[0]); s_byte(sf, ' '); s_c(sf, yref + CG3y[0]); snprintf(S_FMT_BUF, 2048, " m "); s_flush(sf);
+                    for(int k = 1; k < N_CG3; k++){ s_c(sf, x0 + CG3x[k]); s_byte(sf, ' '); s_c(sf, yref + CG3y[k]); snprintf(S_FMT_BUF, 2048, " l "); s_flush(sf); }
+                    snprintf(S_FMT_BUF, 2048, "h f* Q\n"); s_flush(sf);
+                } else if(gk0 == 0x83){
+                    s_c(sf, x0 + CF0x[0]); s_byte(sf, ' '); s_c(sf, yref + CF0y[0]); snprintf(S_FMT_BUF, 2048, " m "); s_flush(sf);
+                    for(int k = 1; k < N_CF0; k++){ s_c(sf, x0 + CF0x[k]); s_byte(sf, ' '); s_c(sf, yref + CF0y[k]); snprintf(S_FMT_BUF, 2048, " l "); s_flush(sf); }
+                    snprintf(S_FMT_BUF, 2048, "h "); s_flush(sf);
+                    s_c(sf, x0 + CF1x[0]); s_byte(sf, ' '); s_c(sf, yref + CF1y[0]); snprintf(S_FMT_BUF, 2048, " m "); s_flush(sf);
+                    for(int k = 1; k < N_CF1; k++){ s_c(sf, x0 + CF1x[k]); s_byte(sf, ' '); s_c(sf, yref + CF1y[k]); snprintf(S_FMT_BUF, 2048, " l "); s_flush(sf); }
+                    snprintf(S_FMT_BUF, 2048, "h "); s_flush(sf);
+                    s_c(sf, x0 + CF2x[0]); s_byte(sf, ' '); s_c(sf, yref + CF2y[0]); snprintf(S_FMT_BUF, 2048, " m "); s_flush(sf);
+                    for(int k = 1; k < N_CF2; k++){ s_c(sf, x0 + CF2x[k]); s_byte(sf, ' '); s_c(sf, yref + CF2y[k]); snprintf(S_FMT_BUF, 2048, " l "); s_flush(sf); }
+                    snprintf(S_FMT_BUF, 2048, "h f* Q\n"); s_flush(sf);
+                } else {
+                    long d = CLEF_ESP / 3;
+                    s_c(sf, x0 + 1500); s_byte(sf, ' '); s_c(sf, yb + d); snprintf(S_FMT_BUF, 2048, " m "); s_flush(sf);
+                    s_c(sf, x0 + 9000); s_byte(sf, ' '); s_c(sf, yb + d); snprintf(S_FMT_BUF, 2048, " l "); s_flush(sf);
+                    s_c(sf, x0 + 9000); s_byte(sf, ' '); s_c(sf, yb + d + 900); snprintf(S_FMT_BUF, 2048, " l "); s_flush(sf);
+                    s_c(sf, x0 + 1500); s_byte(sf, ' '); s_c(sf, yb + d + 900); snprintf(S_FMT_BUF, 2048, " l h "); s_flush(sf);
+                    s_c(sf, x0 + 1500); s_byte(sf, ' '); s_c(sf, yb - d - 900); snprintf(S_FMT_BUF, 2048, " m "); s_flush(sf);
+                    s_c(sf, x0 + 9000); s_byte(sf, ' '); s_c(sf, yb - d - 900); snprintf(S_FMT_BUF, 2048, " l "); s_flush(sf);
+                    s_c(sf, x0 + 9000); s_byte(sf, ' '); s_c(sf, yb - d); snprintf(S_FMT_BUF, 2048, " l "); s_flush(sf);
+                    s_c(sf, x0 + 1500); s_byte(sf, ' '); s_c(sf, yb - d); snprintf(S_FMT_BUF, 2048, " l h f Q\n"); s_flush(sf);
+                }
+                p->reguas = p->reguas + 1;
+            }
+            xm += (gk0 == 0x82) ? 11266L : (gk0 == 0x83) ? 11775L : 10000L;
+            i++; continue;
+        }
         int j = i, fonte = L->g[i].f, ex = L->g[i].e;
         while(j < L->n && L->g[j].f == fonte && L->g[j].e == ex
                        && !(L->g[j].g >= 4 && L->g[j].g <= 14
-                            && L->g[j].e != 8 && L->g[j].e != -8)) j++;
+                            && L->g[j].e != 8 && L->g[j].e != -8)
+                       && L->g[j].g != 0x82 && L->g[j].g != 0x83 && L->g[j].g != 0x84) j++;
         /* A MOLDURA DO \boxed: o 8 regista onde a caixa abre, o 9 desenha o
          * rectângulo em volta — com o respiro do TeX (corpo/5), pelos corpos,
          * como a raiz: um traço fechado de cinco pontos. */
@@ -4817,6 +4955,13 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 /* Teorema Morfológico (thm:morfologico): coordenada W — Lei~4.
                  * Dilata o parágrafo à largura do suporte [0,W]. */
                 e->morf_h = 1;
+                i = j; continue;
+            }
+            if(!strcmp(cmd, "ClaveG") || !strcmp(cmd, "ClaveF") || !strcmp(cmd, "ClaveP")){
+                /* Claves reais: glifos especiais 0x82/83/84 pintados em desenrola
+                 * na mesma baseline das notas (não no y do título). */
+                int gclef = (cmd[5] == 'F') ? 0x83 : (cmd[5] == 'P') ? 0x84 : 0x82;
+                empurra(e, gclef, e->fonte);
                 i = j; continue;
             }
             if(!strcmp(cmd, "estrela")){

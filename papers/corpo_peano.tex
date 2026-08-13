@@ -651,10 +651,11 @@ estrutura & $\pi_k$ & retração \\
 dinâmica & Maestro & realiza a projecção \\
 tempo & Metrónomo & realiza o tick / lê \\
 espaço & Morfologia $(W,H)$ duais & Lei~4 / $\operatorname{Ind}^{8}$+Estrela \\
+página & $\pi_{\mathrm{página}}$ & andar do relógio \\
 métrica & Lyapunov dualizado & atesta a volta \\
 base discreta & $(A_m,\sigma_m)$ & régua metálica \\
 representação & $\mathcal{T}$ & transforma a leitura \\
-realização & música & resultado observado \\
+realização & música / partitura gráfica & resultado observado \\
 \end{tabular}
 \end{center}
 \[
@@ -1145,16 +1146,13 @@ Música $\neq$ partitura. A música \emph{soa} (dimensão, sementes,
 instrumento em acto). A partitura \emph{codifica} (assinatura finita,
 autocontida). O Peano é o piano; o catálogo é o reportório; cada entrada
 é uma peça; a partitura é a folha.
-A gravação tipográfica (LilyPond / lyluatex) e o emissor nativo
-$\Pi_{\mathrm{tradutor}}\mapsto\Pi_{\mathrm{musical}}$ (todas as vozes
-sincronizadas; \code{emite tradutor}) vivem em \code{partitura/}
-(\code{partitura.tex}, \code{tiffany-partitura.sty}, \code{emite.c}) ---
-realização, não fundamento: a cadeia é
+A realização gráfica vive no tradutor WASM:
+\code{partitura/emite.c} emite \code{papers/partitura\_vozes.tex};
+\code{papers/partitura.tex} desenha; \code{tests/tex} / \code{tex.wasm}
+compõem \code{partitura-wasm.pdf}. Cadeia:
 relógio$\to$metrónomo$\to$maestro$\to$batuta$\to\Pi\to\pi_k\to$orquestra.
-A partitura não inventa informação fora da assinatura do tradutor.
-A figura~\ref{fig:partitura-sistema} resume as vozes; a realização desenhada
-está em \code{papers/partitura.tex} (Peano: $\nu$, trial, $\pi_k$, leis,
-naipes) e a tipográfica em \code{partitura/render/}.
+A partitura não inventa informação fora da assinatura.
+A figura~\ref{fig:partitura-sistema} resume as vozes.
 \end{observacao}
 
 %----------------------------------------------------------------------
@@ -1290,6 +1288,125 @@ a assinatura sozinha classifica mas não escreve a peça. Música $=$
 realização; partitura $=$ transporte --- nenhum funda as leis.
 \end{proposicao}
 
+\begin{definicao}[Página --- $\pi_{\mathrm{página}}$]\label{def:pi-pagina}
+A \textbf{página} é um andar de composição sob o mesmo Maestro: dimensão
+do relógio, não interrupção externa.
+\[
+\boxed{
+\mathrm{tick}
+\to
+\mathrm{compasso}
+\to
+\mathrm{partitura}
+\to
+\mathrm{página}
+\to
+\mathrm{torre}
+}
+\]
+$\pi_{\mathrm{página}}$ projecta o bloco contínuo no suporte $P_n$; se não
+cabe, $P_n\xrightarrow{\pi}P_{n+1}$ --- muda o suporte, não o estado
+(relógio, espiral, voz, métrica, $\Pi$, linha dourada). Realização no
+tradutor: \code{\textbackslash pipagina}.
+\end{definicao}
+
+\begin{corolario}[mapa clássico $\leftrightarrow$ Corpo de Peano]
+\label{cor:mapa-classico}
+Cada elemento da partitura clássica é realização (não axioma novo) de um
+objecto já no corpo. Sem Lei~$9$; sem nomes decorativos.
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+partitura clássica & Corpo de Peano / sistema & papel \\
+\hline
+pauta / pentagrama & suporte; Lei~5 $\mapsto$ pera/cone & espaço de realização \\
+linha dourada & régua de conservação (COL $=W$) & referência métrica \\
+clave $\kappa$ & referencial; $\nu$ (Lei~1) sol$\leftrightarrow$fá & leitura \\
+armadura $\alpha$ & classe/resíduo de $\Pi$ / semente $S$ & estado estrutural \\
+compás $n/m$ & janela do tick (Lei~6; $C_k$) & segmentação temporal \\
+barra $|$ & fronteira do tick (Lei~0 local) & interface \\
+barra final $\omega$ & fecho; resíduo $0$ & término \\
+nota / figura $F$ & estado projectado $\pi_k(x)$ & realização \\
+altura (Y) & coordenada no cone / espiral & dimensão vertical \\
+duração $f_k=2^{-k}$ & intervalo de relógio & permanência \\
+pausa / silêncio $R$ & nulo; $\nu$ (figura$\leftrightarrow$sil.) & estado vazio \\
+voz & naipe / componente de $G$ & canal paralelo \\
+polifonia & Estrela / orquestra & composição simultânea \\
+dinâmica & intensidade do canal & leitura da realização \\
+ligadura & continuidade da órbita & conexão de estados \\
+acento & ataque da batuta (trial) & imposição local \\
+metrónomo & relógio $+$ régua $\lambda^{+}+\lambda^{-}=0$ & leitura métrica \\
+batuta & canal linear do inversor & direcção \\
+maestro & realização de $\pi_k$ & projecção \\
+página & $\pi_{\mathrm{página}}$ (Def.~\ref{def:pi-pagina}) & andar do relógio \\
+largura $W$ & morfologia Lei~4 & dilatação horizontal \\
+altura $H$ & morfologia $\operatorname{Ind}^{8}$/Estrela & dilatação vertical \\
+torre & sequência de páginas / andares & estrutura global \\
+\end{tabular}
+\end{center}
+\[
+\boxed{
+\text{corpo}
+\to\Pi\to\pi_k\to\text{Maestro}\to\text{partitura};
+\quad
+\text{assinatura}
+\to\text{tempo}\to Y\to(W,H)\to\text{página}.
+}
+\]
+\end{corolario}
+
+\begin{teorema}[Realização gráfica --- morfologia não altera a música]
+\label{thm:realizacao-grafica}
+A cadeia
+\[
+\boxed{
+\operatorname{Assinatura}(\mathcal{C})
+\;\xrightarrow{\Pi}\;
+\operatorname{Partitura}(\mathcal{C})
+\;=\;
+\mathrm{Maestro}\circ\mathcal{M}(\Pi)
+}
+\]
+realiza graficamente a assinatura do corpo $\mathcal{C}$. A morfologia
+$\mathcal{M}:(W,H)\mapsto(W',H')$ transforma só o suporte
+(Teorema~\ref{thm:morfologico}) e \textbf{preserva}
+\[
+\Pi,\quad
+\text{ticks},\quad
+\text{ordem},\quad
+\text{durações},\quad
+\text{vozes},\quad
+\text{notas},\quad
+\text{métrica}.
+\]
+Em particular $\Pi_{\mathrm{entrada}}=\Pi_{\mathrm{saída}}$ na classe
+(Proposição~\ref{prop:partitura-id}). O tradutor WASM é o instrumento
+dessa realização --- não um compositor decorativo.
+\end{teorema}
+
+\begin{definicao}[Assinatura do Corpo de Peano]\label{def:assinatura-peano}
+A assinatura deste paper, como obra a realizar:
+\[
+\Pi^{\mathrm{Peano}}
+\;=\;
+\bigl(
+d{=}8,\;
+S{=}\mathrm{SementeEstrela},\;
+G{=}\mathrm{Hurwitz}\cup\mathbb{Z}/8\mathbb{Z},\;
+\tfrac{n}{m}{=}4/4,\;
+\mathrm{Iface}{=}6,\;
+\mathrm{Lado}{=}0
+\bigr),
+\]
+com vozes
+$\{\mathrm{Metrónomo},\mathrm{Batuta},\mathrm{Maestro},
+\mathrm{Cordas},\mathrm{Madeiras},\mathrm{Metais},\mathrm{Percussão},
+\mathrm{Lei\,8}\}$
+(Figura~\ref{fig:partitura-sistema}). Realização gráfica no
+tradutor: \code{papers/partitura.tex}
+(\code{./emite}$\to$\code{partitura\_vozes.tex};
+\code{partitura-wasm.pdf}).
+\end{definicao}
+
 \begin{figure}[ht]
 \centering
 \begin{center}\small
@@ -1307,11 +1424,10 @@ Lei 8 & $0$ & $1$ & $2$ & $3$ & $4$ & $5$ & $6$ & $7$ \\
 \bottomrule
 \end{tabular}
 \end{center}
-\caption{Partitura completa do sistema (tradutor): todas as vozes em
-paralelo, um único relógio. Especificação
-$\Pi_{\mathrm{tradutor}}\mapsto\Pi_{\mathrm{musical}}$
-(\code{papers/partitura.tex}; gravação LilyPond em
-\code{partitura/render/}).}
+\caption{Partitura completa do sistema (tradutor WASM): todas as vozes em
+paralelo, um único relógio. Realização
+$\Pi^{\mathrm{Peano}}$ em \code{papers/partitura.tex}
+(\code{partitura-wasm.pdf}).}
 \label{fig:partitura-sistema}
 \end{figure}
 
@@ -1759,6 +1875,9 @@ reticulado & $(\mathbb{N}_{>0},\mid)$, lcm/gcd & anel de leis \\
 música & realização $(d,S,G)$ & axioma \\
   & $+$ linguagem de unificação & decoração / nomes inventados \\
 partitura & assinatura $+$ notação & o som \\
+mapa clássico & Cor.~\ref{cor:mapa-classico} & nomes inventados \\
+realização gráfica & Teorema~\ref{thm:realizacao-grafica} & compositor decorativo \\
+$\Pi^{\mathrm{Peano}}$ & Def.~\ref{def:assinatura-peano} & sonificação a posteriori \\
 naipes & classificação Hurwitz de $G$ & teorema de nomes \\
 maestro & interface (não necessária ao corpo) & quinto naipe \\
 metrónomo & realização musical do relógio & o próprio relógio \\
@@ -1769,6 +1888,7 @@ conservatório & estrutura superior conservada & orquestra / música \\
 batuta linear & vareta $B(s,t)$; ponta $P(t)$ & trajectória $=$ lei \\
 projecção $\pi_k$ & retração $A_{k+1}\to A_k$ (def.) & lei nova \\
 $\mathcal{P}_k=\pi_k$ & teorema (maestro realiza $\pi_k$) & interpretação solta \\
+$\pi_{\mathrm{página}}$ & Def.~\ref{def:pi-pagina} & \texttt{\textbackslash clearpage} externo \\
 Lyapunov dualizado & régua $\lambda^{+}{+}\lambda^{-}=0$ & só $\lambda^{+}$ (caos clássico) \\
 transformada universal & leitura $F[f]=f(\sigma)$ na borda & DFT / $\sqrt N$ no objecto \\
 orquestra & fusão $\mathrm{Estrela}(\{G_i\},\mathrm{Maestro})$ & um naipe \\

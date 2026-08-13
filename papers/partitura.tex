@@ -1,12 +1,11 @@
 % papers/partitura.tex
-% Partitura do Tradutor --- DESENHADA pelo tradutor (tex.wasm).
-% Produto = partitura no pentagrama (eval). Tabela = só auditoria.
-% Geometria: pentagrama = pera/cone; música = espiral da vareta (Maestro).
-% Vozes: \input{partitura_vozes} gerado por partitura/emite.c tex
+% Partitura --- DESENHADA pelo tradutor (tex.wasm).
+% Produto = Π^{Peano} = Assinatura(corpo_peano) no pentagrama.
 %
 %   cd partitura && cc -O2 -std=c99 -Wall emite.c -o emite
-%   ./emite tex -o ../papers/partitura_vozes.tex
-%   tests/tex papers/partitura.tex saida.pdf
+%   ./emite -o ../papers/partitura_vozes.tex
+%   tests/tex papers/partitura.tex partitura-wasm.pdf
+%   bash tools/sobe_tex_wasm.sh
 \documentclass[11pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -20,14 +19,28 @@
 \newtheorem{observacao}{Observação}
 \newcommand{\code}[1]{\texttt{#1}}
 
-% Alfabeto ritmico --- Lei~1 (nu) + espiral de expoentes (translacao Y)
+% --- Alfabeto rítmico --- Lei~1 (nu) + espiral de expoentes (translação Y)
 \newcommand{\N}{\note}
 \newcommand{\Rr}{\ensuremath{\cdot}\,}
 \newcommand{\Bb}{|\,}
-% Lei~6: tick = bulbo na régua (eval: \bullet na linha; sem haste a enganar o olho)
 \newcommand{\Tick}{$\bullet$}
 
-% Cone / pera --- cinco geratrizes (Lei~5). Régua = largura COL (thm:morfologico).
+% --- Cabeça clássica: claves NATIVAS no tradutor (Emmentaler→polígono) ---
+% \ClaveG / \ClaveF / \ClaveP — não redefinir (senão vira letra G/F).
+\newcommand{\Armadura}[1]{\ensuremath{#1}\,}
+\newcommand{\Compas}[2]{\ensuremath{\tfrac{#1}{#2}}\,}
+\newcommand{\CabecaG}[2]{\ClaveG\Armadura{}\Compas{#1}{#2}}
+\newcommand{\CabecaF}[2]{\ClaveF\Armadura{}\Compas{#1}{#2}}
+\newcommand{\CabecaP}[2]{\ClaveP\Compas{#1}{#2}}
+\newcommand{\BbDupla}{\ensuremath{\|}\,}
+\newcommand{\BbFinal}{\ensuremath{\|\!|}\,}% barra final (sem \kern/\rule --- vazavam ``0.35pt'')
+\newcommand{\Din}[1]{\textit{#1}\,}
+\newcommand{\Acento}{$>$\,}
+\newcommand{\Ligadura}{\ensuremath{\smallfrown}\,}
+\newcommand{\NotaSemibreve}{$\circ$}
+\newcommand{\NotaMinima}{$\note$}
+\newcommand{\NotaSeminima}{\note}
+
 \newcommand{\Penta}{%
 \noindent\reguacol{0.32pt}\\[-1.55mm]%
 \noindent\reguacol{0.32pt}\\[-1.55mm]%
@@ -37,201 +50,112 @@
 }
 \newcommand{\PentaUm}{\noindent\reguacol{0.32pt}}
 
-% π_página + morfologia: W (Lei~4) por voz; H (Ind^8/Estrela) no bloco.
+% Página = andar do relógio do Maestro (Def.~π_página). \AndarPagina = P_n→P_{n+1}.
+\newcommand{\AndarPagina}{\newpage}%
+% Reserva o bloco do andar: se não cabe no resto de P_n, salta para P_{n+1}.
+\newcommand{\AndarAbre}{\pipagina{170mm}}%
+\newcommand{\PartituraSecao}{\section{A partitura (obra)}}%
+
+% Uma voz no andar corrente: pauta + música. π_página reserva o bloco.
 \newcommand{\VozAbre}[4]{%
 \morfvstep
-\pipagina{36mm}%
+\pipagina{28mm}%
 \par\medskip\noindent
-\textbf{#1}\quad{\small\color{regua}#2}\par\vspace{3mm}%
+\textbf{#1}\quad{\small\color{regua}#2}\par\vspace{2mm}%
 #3\par
 \vspace{#4}%
 \morfh\noindent
 }
 
-% Metrónomo: W na régua COL; slot vertical sob Estrela.
 \newcommand{\VozMetro}[2]{%
 \morfvstep
-\pipagina{22mm}%
+\pipagina{16mm}%
 \par\medskip\noindent
-\textbf{Metronomo}\quad{\small\color{regua}#1}\par\vspace{3mm}%
+\textbf{Metronomo}\quad{\small\color{regua}#1}\par\vspace{2mm}%
 \PentaUm\vspace{#2}%
 \morfh\noindent
 }
 
 \input{gkcapa}
 \begin{document}
-\gkcapa{Partitura do Tradutor}
-       {$\Pi_{\mathrm{tradutor}}\longmapsto\Pi_{\mathrm{musical}}$}
-       {pentagrama $=$ pera/cone; música $=$ espiral da vareta}
+\gkcapa{Partitura do Corpo de Peano}
+       {$\operatorname{Assinatura}(\texttt{corpo\_peano})\longmapsto\Pi^{\mathrm{Peano}}$}
+       {desenhada pelo tradutor WASM --- não sonificação}
 \maketitle
 
 \begin{abstract}
-\noindent Produto: a \textbf{partitura desenhada}. O pentagrama é o
-\textbf{cone} (pera); a música é a \textbf{espiral} que sai da dinâmica
-da vareta do Maestro e projecta a orquestra. Eixos: horizontal $=$
-Metrónomo (tick, $\lambda^{+}+\lambda^{-}=0$); vertical $=$ altura no cone
---- não a diagonal. LilyPond grava; o tradutor desenha.
+\noindent Produto: a \textbf{partitura desenhada} de
+\code{papers/corpo\_peano.tex}. Cadeia
+\[
+\boxed{
+\operatorname{Assinatura}(\mathcal{C}_{\mathrm{Peano}})
+\xrightarrow{\Pi}
+\mathrm{Maestro}\circ\mathcal{M}(\Pi)
+=
+\text{esta folha}.
+}
+\]
+Cada elemento clássico tem origem no Corpo de Peano. A morfologia
+$(W,H)$ dilata o suporte e preserva $\Pi$, ticks, vozes e métrica.
 \end{abstract}
 
-\section{Geometria (não a diagonal)}
+\section{Assinatura $\Pi^{\mathrm{Peano}}$}
 
 \[
 \boxed{
-\mathrm{Conservat\acute{o}rio}
-\;\xrightarrow{\mathrm{Pera}}\;
-\text{vareta}
-\;\rightarrow\;
-P(t)
-\;\rightarrow\;
-\text{espiral}
-\;\rightarrow\;
-\text{orquestra}.
+d{=}8,\;
+S{=}\mathrm{SementeEstrela},\;
+G{=}\mathrm{Hurwitz}\cup\mathbb{Z}/8\mathbb{Z},\;
+\tfrac{n}{m}{=}4/4,\;
+\mathrm{Iface}{=}6,\;
+\mathrm{Lado}{=}0.
 }
 \]
-\[
-\boxed{
-\text{pentagrama}=\text{pera}/\text{cone};
-\quad
-\text{música}=\text{espiral da vareta}.
-}
-\]
-\begin{itemize}
-\item \textbf{Horizontal} --- Teorema do Metrónomo: tick / leitura
-métrica; involução $\lambda^{+}\leftrightarrow\lambda^{-}$.
-\item \textbf{Vertical} --- cone (pera): altura no pentagrama; involução
-$\nu$ (clave sol$\leftrightarrow$fá, figura$\leftrightarrow$silêncio).
-\item \textbf{Maestro} --- Teorema $\mathcal{P}_k=\mathrm{tick}\circ\mathrm{batuta}\circ\Pi$:
-projecta $\pi_k$; a vareta escreve a espiral; a orquestra realiza.
-\end{itemize}
-
-\section{Cadeia}
-
 \[
 \boxed{
 \text{corpo}
-\to\pi_k\to\Pi\to\text{Maestro}\to\text{vozes}\to\text{partitura}.
-}
-\]
-
-\section{Condições (Peano / estelar)}
-
-\begin{definicao}[Pentagrama $=$ pera / cone]
-Cinco \verb|\rule| --- realização do \textbf{cone} (Def.~pera no Corpo de
-Peano): base da batuta onde o conservatório entra no canal. Não é tabela
-nem diagonal: é o suporte cónico da escrita.
-\end{definicao}
-
-\begin{definicao}[Música $=$ espiral]
-A trajectória $P(t)$ na ponta da vareta --- periódica / espiralada ---
-projecta os naipes. No tradutor a altura no cone realiza-se pela
-\textbf{espiral de expoentes} ($_{\note}$, $\note$, $^{\note}$, \ldots)
---- a mesma subida $\mathrm{esp\_gira}$ do núcleo. $\Pi$ não inventa a
-órbita: sai da dinâmica do Maestro sob o tick comum.
-\end{definicao}
-
-\begin{definicao}[Involução $\nu$ --- Lei~1 (eixo vertical)]
-\[
-\mathrm{figura}\;\overset{\nu}{\longleftrightarrow}\;\mathrm{silêncio},
-\qquad\nu\circ\nu=\mathrm{id}
-\]
-(\verb|\N| $\leftrightarrow$ \verb|\Rr|). Clave sol
-$\overset{\nu}{\longleftrightarrow}$ fá.
-\end{definicao}
-
-\begin{definicao}[Metrónomo --- Lei~6 (eixo horizontal)]
-Tick comum; $\lambda^{+}+\lambda^{-}=0$ na volta fechada. Lê; não inventa
-$\Delta$.
-\end{definicao}
-
-\begin{definicao}[Trial --- Lei~3]
-Batuta canaliza $I\in\{-1,0,+1\}$ na vareta: grave / neutro / agudo.
-\end{definicao}
-
-\begin{definicao}[Maestro --- $\pi_k$]
-Projecção sustentada no cone; ataque + silêncios ($\nu$) $=$ semibreve
-no gabarito.
-\end{definicao}
-
-\begin{definicao}[Naipes / Lei~8]
-Hurwitz $1,2,4,8$ e $\mathbb{Z}/8\mathbb{Z}$ --- a orquestra sob a
-espiral.
-\end{definicao}
-
-\begin{definicao}[Página --- dimensão do relógio ($\pi_{\mathrm{página}}$)]
-A página não interrompe o sistema: é um \textbf{andar de composição}
-sob o mesmo Maestro.
-\[
-\boxed{
-\mathrm{tick}
-\rightarrow
-\mathrm{compasso}
-\rightarrow
-\mathrm{partitura}
-\rightarrow
-\mathrm{página}
-\rightarrow
-\mathrm{torre}
-}
-\]
-$\pi_{\mathrm{página}}$ projecta o bloco contínuo no suporte $P_n$; se
-não cabe, $P_n\xrightarrow{\pi}P_{n+1}$ --- muda o suporte, não o
-estado (relógio, espiral, voz, métrica, $\Pi$, linha dourada).
-Partituras e tabelas quebram assim, sem pulo externo.
-\end{definicao}
-
-\begin{definicao}[Morfologia --- coordenadas duais $(W,H)$]
-Dual espacial do par Maestro\,/\,Metrónomo
-(Teorema~\ref{thm:morfologico}):
-\[
-\boxed{
-(W,H)=\text{coordenadas duais},
+\to\Pi\to\pi_k\to\text{Maestro}\to\text{vozes}\to\text{partitura};
 \quad
-W\leftarrow\mathrm{Lei~4},\quad
-H\leftarrow\operatorname{Ind}^{8}/\mathrm{Estrela}.
+\text{assinatura}
+\to\text{tempo}\to Y\to(W,H)\to\text{página}.
 }
 \]
-$\mathcal{M}(\Pi)\sim\Pi$: primeiro $[0,W]$ (régua COL); a altura
-$[0,H]$ \textbf{só} dilata com interface estrela (orquestra).
+
+\begin{definicao}[Cabeça clássica]
+pauta $\to$ \verb|\Cabeca*| $(\kappa,\alpha,n/m)$ $\to$ $F/R$ $\to$
+\verb|\Bb| $\to$ \verb|\BbFinal|.
 \end{definicao}
 
-% Maestro: se o início da partitura não cabe, projecta P_{n+1} (sem \clearpage).
-\pipagina{50mm}%
-\section{A partitura do sistema}
+\begin{definicao}[Morfologia --- $(W,H)$]
+$W\leftarrow$Lei~4; $H\leftarrow\operatorname{Ind}^{8}$/Estrela
+(requer \verb|\estrela|). $\mathcal{M}(\Pi)\sim\Pi$.
+\end{definicao}
 
-% H valida por Ind^8/Estrela; 8 vozes = ciclo do catálogo.
+\pipagina{50mm}%
+% Secção abre com o andar (via \PartituraSecao no emite) para não deixar página vazia.
 \estrela
-\morfv{8}%
 \input{partitura_vozes}
-\endmorfv
 
 \begin{observacao}
-Fonte: \code{./emite tex}. Gabarito: \code{partitura/render/tradutor-completo.pdf}.
-Coluna comum $=$ barras no mesmo tick (Metrónomo). Altura no cone $=$
-espiral de expoentes ($_{\note}\ldots^{\note}$) no tradutor; cromática no
-LilyPond.
+Fonte: \code{partitura/emite.c} $\to$ \code{partitura\_vozes.tex}.
+Página $=$ andar do relógio do Maestro (meia volta $=$ Dim$/2$ compassos);
+vozes em paralelo por andar; \verb|\AndarPagina| avança $P_n\to P_{n+1}$.
+Produto: \code{partitura-wasm.pdf}.
 \end{observacao}
 
-% Fecho+auditoria = um bloco: P_n→P_{n+1} sem órfão de frase.
-\pipagina{55mm}%
+\pipagina{40mm}%
 \section{Auditoria (não o produto)}
 
 \begin{center}\small
 \begin{tabular}{@{}lccc@{}}
 voz & eixo / papel & involução & conteúdo \\
-\midrule
-Met. & horizontal / Lei~6 & $\lambda^{\pm}$ & tick \\
-Bat. & vareta / Lei~3 & trial $I$ & canal \\
-Mae. & projecção $\pi_k$ & --- & espiral-fonte \\
-orquestra & cone + espiral & $\nu$ & naipes / Lei~8 \\
+\hline
+Metrónomo & horizontal / tick & $\lambda^{\pm}$ & \verb|\Tick| \\
+Batuta & trial $I$ & --- & \verb|\Acento| / ataque \\
+Maestro & $\pi_k$ & --- & projecção \\
+naipes & Hurwitz $1,2,4,8$ & --- & $G_i$ \\
+Lei~8 & $\mathbb{Z}/8\mathbb{Z}$ & $\operatorname{Ind}^{8}$ & ciclo \\
 \end{tabular}
 \end{center}
-
-\pipagina{16mm}%
-\section{Fecho}
-
-\begin{observacao}
-\textbf{A partitura desenhada.}
-Cone (pera) + espiral da vareta --- Maestro e Metrónomo, não a diagonal.
-\end{observacao}
 
 \end{document}
