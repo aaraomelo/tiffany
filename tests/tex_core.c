@@ -3073,7 +3073,12 @@ typedef struct {
     int  ub;               /* viu \underbrace: o proximo _{...} e o ROTULO (-3) */
     int  ub_pf;            /* a PROF do underbrace: um ^ interno nao mata o ub */
     int  disp;             /* matematica de DESTAQUE (\[ ou align): o \frac empilha */
-    int  morf_h;           /* Teorema Morfológico: dilata a linha à largura (W) */
+    int  morf_h;           /* Teorema Morfológico: dilata a linha à largura (W, Lei~4) */
+    int  estrela;          /* interface Estrela activa (orquestra) --- valida H */
+    int  morf_v;           /* dilatação vertical [0,H] — requer estrela / Ind^8 */
+    int  morf_vn;          /* quantas vozes no bloco morf_v */
+    int  morf_vi;          /* índice da próxima voz */
+    long morf_vy0;         /* y no topo do bloco (suporte H) */
     int  recuo;
     int  item;
     long glifos;           /* quantos glifos saíram — o solar conta o que guardou */
@@ -4809,9 +4814,61 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 i = j; continue;
             }
             if(!strcmp(cmd, "morfh")){
-                /* Teorema Morfológico (thm:morfologico, Lei~4): dilata o parágrafo
-                 * corrente à largura do suporte [0,W] — primeiro eixo, depois altura. */
+                /* Teorema Morfológico (thm:morfologico): coordenada W — Lei~4.
+                 * Dilata o parágrafo à largura do suporte [0,W]. */
                 e->morf_h = 1;
+                i = j; continue;
+            }
+            if(!strcmp(cmd, "estrela")){
+                /* Interface Estrela (Def. orquestra): valida a coordenada H.
+                 * Sem isto, \morfv não dilata — Ind^8 exige a estrela. */
+                e->estrela = 1;
+                i = j; continue;
+            }
+            if(!strcmp(cmd, "morfv")){
+                /* Coordenada H (thm:morfologico): Ind^8 / Estrela. Sem estrela,
+                 * a altura não é válida — não dilata. */
+                fecha_paragrafo(e);
+                long q = ate_abre(s, j, n);
+                int nv = 0;
+                if(q < n && s[q] == '{'){
+                    const char *pr = s + q + 1, *e1;
+                    long vv = fixo_mil(pr, &e1);
+                    long f = fecha_chave(s, n, q);
+                    if(f >= 0) q = f + 1;
+                    if(e1 != pr && vv > 0) nv = (int)(vv / 1000);
+                }
+                if(e->estrela && nv > 0){
+                    e->morf_v = 1; e->morf_vn = nv; e->morf_vi = 0;
+                    e->morf_vy0 = e->p->y;
+                } else {
+                    e->morf_v = 0; e->morf_vn = 0; e->morf_vi = 0;
+                }
+                i = q; continue;
+            }
+            if(!strcmp(cmd, "endmorfv")){
+                fecha_paragrafo(e);
+                e->morf_v = 0; e->morf_vn = 0; e->morf_vi = 0;
+                i = j; continue;
+            }
+            if(!strcmp(cmd, "morfvstep")){
+                /* Coordenada H (Ind^8/Estrela): dilata vãos entre vozes em [0,H].
+                 * Reserva h_min por voz para o corpo não cair sob FUNDO. */
+                fecha_paragrafo(e);
+                if(e->morf_v && e->estrela && e->morf_vn > 0){
+                    if(e->morf_vi == 0 && e->p->y < e->morf_vy0)
+                        e->morf_vy0 = e->p->y;   /* topo real após título */
+                    long h_min = 48 * PT;   /* ~ footprint de uma voz pentagrama */
+                    long Hsup = e->morf_vy0 - FUNDO;
+                    if(Hsup < h_min) Hsup = h_min;
+                    long n = e->morf_vn;
+                    long passo = (n > 1) ? (Hsup - h_min) / (n - 1) : 0;
+                    if(passo < 0) passo = 0;
+                    long alvo = e->morf_vy0 - e->morf_vi * passo;
+                    if(alvo < FUNDO + h_min) alvo = FUNDO + h_min;
+                    if(e->p->y > alvo) e->p->y = alvo;
+                    if(e->morf_vi < e->morf_vn) e->morf_vi++;
+                }
                 i = j; continue;
             }
             if(!strcmp(cmd, "reguacol")){
@@ -4841,7 +4898,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
             if(!strcmp(cmd, "pipagina")){
                 /* π_página: a página é dimensão do relógio (eval). O Maestro projecta o
                  * bloco para P_{n+1} se não couber — mesma régua da tabela-região.
-                 * P_n → P_{n+1} muda o suporte, não o estado (relógio, voz, Π, linha). */
+                 * P_n → P_{n+1} muda o suporte, não o estado (relógio, voz, Π, linha).
+                 * Sob \morfv (coordenada H), o bloco já foi projectado: não partir. */
                 fecha_paragrafo(e);
                 long q = ate_abre(s, j, n);
                 if(q < n && s[q] == '{'){
@@ -4849,7 +4907,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     long vv = fixo_mil(pr, &e1);
                     long f = fecha_chave(s, n, q);
                     if(f >= 0) q = f + 1;
-                    if(e1 != pr && vv > 0){
+                    if(!e->morf_v && e1 != pr && vv > 0){
                         char uu[8]; int ku = 0;
                         while(ku < 2 && e1[ku] >= 'a' && e1[ku] <= 'z'){ uu[ku] = e1[ku]; ku++; }
                         uu[ku] = 0;

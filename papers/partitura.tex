@@ -37,8 +37,9 @@
 }
 \newcommand{\PentaUm}{\noindent\reguacol{0.32pt}}
 
-% π_página + morfologia horizontal: dilata a voz a [0,W] (Lei~4 / thm:morfologico).
+% π_página + morfologia: W (Lei~4) por voz; H (Ind^8/Estrela) no bloco.
 \newcommand{\VozAbre}[4]{%
+\morfvstep
 \pipagina{36mm}%
 \par\medskip\noindent
 \textbf{#1}\quad{\small\color{regua}#2}\par\vspace{3mm}%
@@ -47,8 +48,9 @@
 \morfh\noindent
 }
 
-% Metrónomo: régua COL + ticks dilatados em W (λ⁺+λ⁻=0 no eixo).
+% Metrónomo: W na régua COL; slot vertical sob Estrela.
 \newcommand{\VozMetro}[2]{%
+\morfvstep
 \pipagina{22mm}%
 \par\medskip\noindent
 \textbf{Metronomo}\quad{\small\color{regua}#1}\par\vspace{3mm}%
@@ -177,21 +179,30 @@ estado (relógio, espiral, voz, métrica, $\Pi$, linha dourada).
 Partituras e tabelas quebram assim, sem pulo externo.
 \end{definicao}
 
-\begin{definicao}[Morfologia --- Lei~4 no suporte ($W$ primeiro)]
+\begin{definicao}[Morfologia --- coordenadas duais $(W,H)$]
 Dual espacial do par Maestro\,/\,Metrónomo
-(Teorema~\ref{thm:morfologico} em \code{corpo\_peano}):
+(Teorema~\ref{thm:morfologico}):
 \[
-\boxed{(\mathrm{dilata},\mathrm{contrai})\;\longleftrightarrow\;(\mathrm{Maestro},\mathrm{Metr\acute{o}nomo}).}
+\boxed{
+(W,H)=\text{coordenadas duais},
+\quad
+W\leftarrow\mathrm{Lei~4},\quad
+H\leftarrow\operatorname{Ind}^{8}/\mathrm{Estrela}.
+}
 \]
-$\mathcal{M}(\Pi)\sim\Pi$: ocupa $[0,W]$ (largura) antes da altura;
-a pauta e as notas partilham a régua COL --- sem acumular à esquerda.
+$\mathcal{M}(\Pi)\sim\Pi$: primeiro $[0,W]$ (régua COL); a altura
+$[0,H]$ \textbf{só} dilata com interface estrela (orquestra).
 \end{definicao}
 
 % Maestro: se o início da partitura não cabe, projecta P_{n+1} (sem \clearpage).
 \pipagina{50mm}%
 \section{A partitura do sistema}
 
+% H valida por Ind^8/Estrela; 8 vozes = ciclo do catálogo.
+\estrela
+\morfv{8}%
 \input{partitura_vozes}
+\endmorfv
 
 \begin{observacao}
 Fonte: \code{./emite tex}. Gabarito: \code{partitura/render/tradutor-completo.pdf}.
