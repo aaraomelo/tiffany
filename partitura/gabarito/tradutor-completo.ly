@@ -1,5 +1,5 @@
 % gerado por partitura/emite.c --- PARTITURA COMPLETA DO TRADUTOR
-% Pi_tradutor |-> Pi_musical: todas as vozes, um relogio, uma regencia.
+% Pi_tradutor |-> Pi_musical: Peano/estelar (nu, trial, pi_k, Lei 5/6/8, Hurwitz).
 % NAO inventa informacao fora da assinatura.
 % SementeEstrela: Dim=8 Alcance=3 Lado=0 Interface=6 bpm=72 compassos=8
 \version "2.24.0"

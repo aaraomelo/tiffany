@@ -1,9 +1,11 @@
 % papers/partitura.tex
 % Partitura do Tradutor --- DESENHADA pelo tradutor (tex.wasm).
 % Produto = partitura no pentagrama (eval). Tabela = só auditoria.
-% Gabarito tipográfico: partitura/render/tradutor-completo.pdf
-% Léxico: \note → ♪. Pauta: \rule. Overlay: \vspace negativo.
+% Geometria: pentagrama = pera/cone; música = espiral da vareta (Maestro).
+% Vozes: \input{partitura_vozes} gerado por partitura/emite.c tex
 %
+%   cd partitura && cc -O2 -std=c99 -Wall emite.c -o emite
+%   ./emite tex -o ../papers/partitura_vozes.tex
 %   tests/tex papers/partitura.tex saida.pdf
 \documentclass[11pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
@@ -18,11 +20,14 @@
 \newtheorem{observacao}{Observação}
 \newcommand{\code}[1]{\texttt{#1}}
 
-\newcommand{\N}{\note\,}
+% Alfabeto ritmico --- Lei~1 (nu) + espiral de expoentes (translacao Y)
+\newcommand{\N}{\note}
 \newcommand{\Rr}{\ensuremath{\cdot}\,}
 \newcommand{\Bb}{|\,}
+% Lei~6: tick = bulbo na régua (eval: \bullet na linha; sem haste a enganar o olho)
+\newcommand{\Tick}{$\bullet$}
 
-% \rule parte SEMPRE da margem --- notas tambem \noindent (sem \quad).
+% Cone / pera --- cinco geratrizes (Lei~5).
 \newcommand{\Penta}{%
 \noindent\rule{15.4cm}{0.32pt}\\[-1.55mm]%
 \noindent\rule{15.4cm}{0.32pt}\\[-1.55mm]%
@@ -32,12 +37,23 @@
 }
 \newcommand{\PentaUm}{\noindent\rule{15.4cm}{0.32pt}}
 
-% #1 nome #2 papel #3 pauta #4 vspace-neg (puxa notas para a pauta)
+% π_página: se o bloco não cabe, o Maestro projecta P_{n+1} (dimensão do relógio).
+% Voz = átomo sob essa projecção --- sem minipage/clearpage externos.
 \newcommand{\VozAbre}[4]{%
-\par\medskip\noindent\begin{minipage}{15.5cm}%
-\textbf{#1}\quad{\small\color{regua}#2}\par\nobreak
-#3\par\nobreak
+\pipagina{36mm}%
+\par\medskip\noindent
+\textbf{#1}\quad{\small\color{regua}#2}\par\vspace{3mm}%
+#3\par
 \vspace{#4}%
+\noindent
+}
+
+% Metrónomo: régua + ticks no mesmo eixo (λ⁺+λ⁻=0). Y contínuo; bulbo na dourada.
+\newcommand{\VozMetro}[2]{%
+\pipagina{22mm}%
+\par\medskip\noindent
+\textbf{Metronomo}\quad{\small\color{regua}#1}\par\vspace{3mm}%
+\PentaUm\vspace{#2}%
 \noindent
 }
 
@@ -45,117 +61,157 @@
 \begin{document}
 \gkcapa{Partitura do Tradutor}
        {$\Pi_{\mathrm{tradutor}}\longmapsto\Pi_{\mathrm{musical}}$}
-       {o sistema inteiro desenhado no pentagrama --- um relógio}
+       {pentagrama $=$ pera/cone; música $=$ espiral da vareta}
 \maketitle
 
 \begin{abstract}
-\noindent Produto deste paper: a \textbf{partitura desenhada} do sistema ---
-não uma tabela. Pentagrama por \verb|\rule|; figura por \verb|\note| (♪);
-oito vozes no mesmo fluxo temporal. Cadeia:
+\noindent Produto: a \textbf{partitura desenhada}. O pentagrama é o
+\textbf{cone} (pera); a música é a \textbf{espiral} que sai da dinâmica
+da vareta do Maestro e projecta a orquestra. Eixos: horizontal $=$
+Metrónomo (tick, $\lambda^{+}+\lambda^{-}=0$); vertical $=$ altura no cone
+--- não a diagonal. LilyPond grava; o tradutor desenha.
+\end{abstract}
+
+\section{Geometria (não a diagonal)}
+
+\[
+\boxed{
+\mathrm{Conservat\acute{o}rio}
+\;\xrightarrow{\mathrm{Pera}}\;
+\text{vareta}
+\;\rightarrow\;
+P(t)
+\;\rightarrow\;
+\text{espiral}
+\;\rightarrow\;
+\text{orquestra}.
+}
+\]
+\[
+\boxed{
+\text{pentagrama}=\text{pera}/\text{cone};
+\quad
+\text{música}=\text{espiral da vareta}.
+}
+\]
+\begin{itemize}
+\item \textbf{Horizontal} --- Teorema do Metrónomo: tick / leitura
+métrica; involução $\lambda^{+}\leftrightarrow\lambda^{-}$.
+\item \textbf{Vertical} --- cone (pera): altura no pentagrama; involução
+$\nu$ (clave sol$\leftrightarrow$fá, figura$\leftrightarrow$silêncio).
+\item \textbf{Maestro} --- Teorema $\mathcal{P}_k=\mathrm{tick}\circ\mathrm{batuta}\circ\Pi$:
+projecta $\pi_k$; a vareta escreve a espiral; a orquestra realiza.
+\end{itemize}
+
+\section{Cadeia}
+
 \[
 \boxed{
 \text{corpo}
 \to\pi_k\to\Pi\to\text{Maestro}\to\text{vozes}\to\text{partitura}.
 }
 \]
-O pentagrama \textbf{não} é visualização de dados: é a realização musical
-da assinatura. LilyPond (\code{partitura/emite.c}) só grava.
-\end{abstract}
 
-\section{Objectivo}
+\section{Condições (Peano / estelar)}
 
+\begin{definicao}[Pentagrama $=$ pera / cone]
+Cinco \verb|\rule| --- realização do \textbf{cone} (Def.~pera no Corpo de
+Peano): base da batuta onde o conservatório entra no canal. Não é tabela
+nem diagonal: é o suporte cónico da escrita.
+\end{definicao}
+
+\begin{definicao}[Música $=$ espiral]
+A trajectória $P(t)$ na ponta da vareta --- periódica / espiralada ---
+projecta os naipes. No tradutor a altura no cone realiza-se pela
+\textbf{espiral de expoentes} ($_{\note}$, $\note$, $^{\note}$, \ldots)
+--- a mesma subida $\mathrm{esp\_gira}$ do núcleo. $\Pi$ não inventa a
+órbita: sai da dinâmica do Maestro sob o tick comum.
+\end{definicao}
+
+\begin{definicao}[Involução $\nu$ --- Lei~1 (eixo vertical)]
+\[
+\mathrm{figura}\;\overset{\nu}{\longleftrightarrow}\;\mathrm{silêncio},
+\qquad\nu\circ\nu=\mathrm{id}
+\]
+(\verb|\N| $\leftrightarrow$ \verb|\Rr|). Clave sol
+$\overset{\nu}{\longleftrightarrow}$ fá.
+\end{definicao}
+
+\begin{definicao}[Metrónomo --- Lei~6 (eixo horizontal)]
+Tick comum; $\lambda^{+}+\lambda^{-}=0$ na volta fechada. Lê; não inventa
+$\Delta$.
+\end{definicao}
+
+\begin{definicao}[Trial --- Lei~3]
+Batuta canaliza $I\in\{-1,0,+1\}$ na vareta: grave / neutro / agudo.
+\end{definicao}
+
+\begin{definicao}[Maestro --- $\pi_k$]
+Projecção sustentada no cone; ataque + silêncios ($\nu$) $=$ semibreve
+no gabarito.
+\end{definicao}
+
+\begin{definicao}[Naipes / Lei~8]
+Hurwitz $1,2,4,8$ e $\mathbb{Z}/8\mathbb{Z}$ --- a orquestra sob a
+espiral.
+\end{definicao}
+
+\begin{definicao}[Página --- dimensão do relógio ($\pi_{\mathrm{página}}$)]
+A página não interrompe o sistema: é um \textbf{andar de composição}
+sob o mesmo Maestro.
 \[
 \boxed{
-\text{Tradutor}
-\;\xrightarrow{\Pi}\;
-\text{Partitura completa}
-\;\xrightarrow{\text{tick}}\;
-\{G_0,\ldots,G_n\}
-\;\xrightarrow{\text{Maestro}}\;
-\text{Orquestra}
+\mathrm{tick}
+\rightarrow
+\mathrm{compasso}
+\rightarrow
+\mathrm{partitura}
+\rightarrow
+\mathrm{página}
+\rightarrow
+\mathrm{torre}
 }
 \]
-Maestro $=$ tempo comum; Batuta $=$ direcção; $\Pi=$ conteúdo; naipes $=$
-vozes; pentagrama $=$ realização.
-
-\section{Como o tradutor desenha}
-
-\begin{definicao}[Pentagrama]
-Cinco \verb|\rule{15.4cm}{0.32pt}| --- a régua do Reino. Metrónomo: uma
-linha (gabarito LilyPond).
+$\pi_{\mathrm{página}}$ projecta o bloco contínuo no suporte $P_n$; se
+não cabe, $P_n\xrightarrow{\pi}P_{n+1}$ --- muda o suporte, não o
+estado (relógio, espiral, voz, métrica, $\Pi$, linha dourada).
+Partituras e tabelas quebram assim, sem pulo externo.
 \end{definicao}
 
-\begin{definicao}[Nota]
-\verb|\note| no léxico $\mapsto$ U+266A na OTF $\mapsto$ Form XObject
-(como \verb|\alpha| na Symbol).
-\end{definicao}
-
-\begin{observacao}
-Pauta primeiro; \verb|\vspace| negativo; notas sobem ao meio do
-pentagrama. Coluna comum $=$ barras verticais $|$ no mesmo sítio em
-todas as vozes --- não uma tabela.
-\end{observacao}
-
+% Maestro: se o início da partitura não cabe, projecta P_{n+1} (sem \clearpage).
+\pipagina{50mm}%
 \section{A partitura do sistema}
 
-\noindent{\small Dim$=$8 · Alcance$=$3 · Lado$=$0 · Iface$=$6 ·
-Metronomo ($q{=}72$) · 8 compassos · 4/4}\par
-
-\VozAbre{Metronomo}{pulso / Lei 6}{\PentaUm}{-2.4mm}%
-\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N%
-\end{minipage}
-
-\VozAbre{Batuta}{clave F --- direcção $I$}{\Penta}{-5.6mm}%
-\N\Rr\N\Rr\Bb\Rr\N\Rr\N\Bb\N\Rr\N\Rr\Bb\Rr\N\Rr\N\Bb\N\Rr\N\Rr\Bb\Rr\N\Rr\N\Bb\N\Rr\N\Rr\Bb\Rr\N\Rr\N%
-\end{minipage}
-
-\VozAbre{Maestro}{clave G --- projecção $\pi_k$}{\Penta}{-5.6mm}%
-\N\Rr\Rr\Rr\Bb\N\Rr\Rr\Rr\Bb\N\Rr\Rr\Rr\Bb\N\Rr\Rr\Rr\Bb\N\Rr\Rr\Rr\Bb\N\Rr\Rr\Rr\Bb\N\Rr\Rr\Rr\Bb\N\Rr\Rr\Rr%
-\end{minipage}
-
-\VozAbre{Cordas (1)}{clave G --- naipe $G_0$}{\Penta}{-5.6mm}%
-\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N%
-\end{minipage}
-
-\VozAbre{Madeiras (2)}{clave G --- naipe $G_1$}{\Penta}{-5.6mm}%
-\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N%
-\end{minipage}
-
-\VozAbre{Metais (4)}{clave G --- naipe $G_2$}{\Penta}{-5.6mm}%
-\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N%
-\end{minipage}
-
-\VozAbre{Percussao (8)}{clave F --- naipe $G_3$}{\Penta}{-5.6mm}%
-\N\Rr\N\Rr\Bb\N\Rr\N\Rr\Bb\N\Rr\N\Rr\Bb\N\Rr\N\Rr\Bb\N\Rr\N\Rr\Bb\N\Rr\N\Rr\Bb\N\Rr\N\Rr\Bb\N\Rr\N\Rr%
-\end{minipage}
-
-\VozAbre{Lei 8}{clave G --- $\mathbb{Z}/8\mathbb{Z}$}{\Penta}{-5.6mm}%
-\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N\Bb\N\N\N\N%
-\end{minipage}
+\input{partitura_vozes}
 
 \begin{observacao}
-Gabarito: \code{partitura/partitura.pdf}. Mesma ordem, 8 compassos, barras
-no mesmo instante. Tradutor desenha; emissor grava.
+Fonte: \code{./emite tex}. Gabarito: \code{partitura/render/tradutor-completo.pdf}.
+Coluna comum $=$ barras no mesmo tick (Metrónomo). Altura no cone $=$
+espiral de expoentes ($_{\note}\ldots^{\note}$) no tradutor; cromática no
+LilyPond.
 \end{observacao}
 
+% Fecho+auditoria = um bloco: P_n→P_{n+1} sem órfão de frase.
+\pipagina{55mm}%
 \section{Auditoria (não o produto)}
 
 \begin{center}\small
-\begin{tabular}{@{}lcccccccc@{}}
-voz & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 \\
+\begin{tabular}{@{}lccc@{}}
+voz & eixo / papel & involução & conteúdo \\
 \midrule
-Met. & \N\N\N\N & \N\N\N\N & \N\N\N\N & \N\N\N\N & \N\N\N\N & \N\N\N\N & \N\N\N\N & \N\N\N\N \\
-Bat. & \N\Rr\N\Rr & \Rr\N\Rr\N & \N\Rr\N\Rr & \Rr\N\Rr\N & \N\Rr\N\Rr & \Rr\N\Rr\N & \N\Rr\N\Rr & \Rr\N\Rr\N \\
-Mae. & \N\Rr\Rr\Rr & \N\Rr\Rr\Rr & \N\Rr\Rr\Rr & \N\Rr\Rr\Rr & \N\Rr\Rr\Rr & \N\Rr\Rr\Rr & \N\Rr\Rr\Rr & \N\Rr\Rr\Rr \\
+Met. & horizontal / Lei~6 & $\lambda^{\pm}$ & tick \\
+Bat. & vareta / Lei~3 & trial $I$ & canal \\
+Mae. & projecção $\pi_k$ & --- & espiral-fonte \\
+orquestra & cone + espiral & $\nu$ & naipes / Lei~8 \\
 \end{tabular}
 \end{center}
-\noindent{\small A tabela verifica ticks; o produto é a partitura desenhada acima.}
 
+\pipagina{16mm}%
 \section{Fecho}
 
 \begin{observacao}
-\textbf{A partitura desenhada.} Uma pauta, todas as vozes, um relógio, uma
-regência --- o sistema inteiro que aparece como música.
+\textbf{A partitura desenhada.}
+Cone (pera) + espiral da vareta --- Maestro e Metrónomo, não a diagonal.
 \end{observacao}
 
 \end{document}

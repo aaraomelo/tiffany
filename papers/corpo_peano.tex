@@ -1074,8 +1074,9 @@ sincronizadas; \code{emite tradutor}) vivem em \code{partitura/}
 realização, não fundamento: a cadeia é
 relógio$\to$metrónomo$\to$maestro$\to$batuta$\to\Pi\to\pi_k\to$orquestra.
 A partitura não inventa informação fora da assinatura do tradutor.
-A figura~\ref{fig:partitura-sistema} apresenta a partitura completa do
-sistema.
+A figura~\ref{fig:partitura-sistema} resume as vozes; a realização desenhada
+está em \code{papers/partitura.tex} (Peano: $\nu$, trial, $\pi_k$, leis,
+naipes) e a tipográfica em \code{partitura/render/}.
 \end{observacao}
 
 %----------------------------------------------------------------------
@@ -1085,16 +1086,22 @@ sistema.
 O \textbf{pentagrama} é o suporte geométrico onde a partitura se escreve:
 cinco linhas e quatro espaços. No modelo, é a
 \textbf{realização particular} (não identidade estrutural) que associa
-o suporte escrito à Lei~5 (pental / bit $i$):
+o suporte escrito à Lei~5 (pental / bit $i$) e, na geometria do maestro,
+ao \textbf{cone} / \textbf{pera} (Def.~\ref{def:pera}):
 \[
 \Pi_{\mathrm{penta}}\;:=\;5\text{ linhas}
-\quad\text{(convenção de realização)}.
+\quad\text{(convenção de realização)},
+\qquad
+\boxed{\text{pentagrama}=\text{pera}/\text{cone}}.
 \]
 Não se prova pela Lei~5 que o pentagrama clássico tenha cinco linhas;
 escolhe-se a realização.
 É a régua do andar vista de frente: a altura (linha/espaço) endereça a
-altura sonora; o eixo horizontal endereça o tempo. Sem pentagrama não
-há sítio para as figuras --- como sem $C_k$ não há janela na torre.
+altura sonora no cone; o eixo horizontal endereça o tempo (Metrónomo).
+A música que se escreve nele é a \textbf{espiral} da vareta
+(Def.~\ref{def:batuta-linear}) a projectar a orquestra --- não a
+diagonal. Sem pentagrama não há sítio para as figuras --- como sem
+$C_k$ não há janela na torre.
 \end{definicao}
 
 \begin{definicao}[Clave]\label{def:clave}

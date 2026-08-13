@@ -4805,10 +4805,35 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 }
                 i = j; continue;
             }
+            if(!strcmp(cmd, "pipagina")){
+                /* π_página: a página é dimensão do relógio (eval). O Maestro projecta o
+                 * bloco para P_{n+1} se não couber — mesma régua da tabela-região.
+                 * P_n → P_{n+1} muda o suporte, não o estado (relógio, voz, Π, linha). */
+                fecha_paragrafo(e);
+                long q = ate_abre(s, j, n);
+                if(q < n && s[q] == '{'){
+                    const char *pr = s + q + 1, *e1;
+                    long vv = fixo_mil(pr, &e1);
+                    long f = fecha_chave(s, n, q);
+                    if(f >= 0) q = f + 1;
+                    if(e1 != pr && vv > 0){
+                        char uu[8]; int ku = 0;
+                        while(ku < 2 && e1[ku] >= 'a' && e1[ku] <= 'z'){ uu[ku] = e1[ku]; ku++; }
+                        uu[ku] = 0;
+                        long nu, du; unidade_razao(uu, &nu, &du);
+                        long alt = (2 * vv * nu + du) / (2 * du);
+                        if(e->p->y - alt < FUNDO && alt < TOPO - FUNDO
+                           && !e->p->abriu_agora){
+                            pagina_fecha(e->p); pagina_abre(e->p);
+                        }
+                    }
+                }
+                i = q; continue;
+            }
             if(!strcmp(cmd, "rule") ||
                !strcmp(cmd, "vspace") || !strcmp(cmd, "hspace")){
-                /* `\rule{larg}{esp}` é uma RÉGUA, e este tradutor já as desenha — a do
-                 * ouro por baixo do título é a mesma primitiva das linhas da tabela */
+                /* `\rule{larg}{esp}` é uma RÉGUA. `\vspace{±}` move y (involução vertical:
+                 * positivo desce; negativo sobe — ancla a nota no cone/pentagrama). */
                 long q = j;
                 long a1 = 0, a2 = 0; char u1[8]; char u2[8]; u1[0] = 0; u2[0] = 0;
                 int nar = (cmd[0] == 'r') ? 2 : 1;
@@ -4832,19 +4857,54 @@ static void compila(const char *s, Pdf *p, long *glifos){
                         }
                     }
                 }
+                if(cmd[0] == 'v' && q < n && s[q] == '{'){
+                    /* \vspace{±Nmm}: y -= m (m<0 sobe — notas no cone/pera).
+                     * Parse local (sem função nova: MAX_FUN no wasm). */
+                    const char *pr = s + q + 1, *e1;
+                    long vv = fixo_mil(pr, &e1);
+                    long f = fecha_chave(s, n, q);
+                    if(f >= 0) q = f + 1;
+                    if(e1 != pr){
+                        char uu[8]; int ku = 0;
+                        while(ku < 2 && e1[ku] >= 'a' && e1[ku] <= 'z'){ uu[ku] = e1[ku]; ku++; }
+                        uu[ku] = 0;
+                        long nu, du; unidade_razao(uu, &nu, &du);
+                        long mag = vv < 0 ? -vv : vv;
+                        long m = (2 * mag * nu + du) / (2 * du);
+                        if(vv < 0) m = -m;
+                        fecha_paragrafo(e); e->p->y -= m;
+                    }
+                    i = q; continue;
+                }
                 for(int t = 0; t < nar && q < n; t++){
                     q = ate_abre(s, q, n);
                     long f = fecha_chave(s, n, q); if(f < 0){ q = ini; break; } q = f + 1;
                 }
-                if(cmd[0] == 'r' && a1 > 0 && a2 > 0){
-                    /* mantissa × razão da unidade, produto cruzado, UMA divisão por lado */
+                if(cmd[0] == 'r' && a1 > 0){
                     long n1, d1, n2, d2u;
-                    unidade_razao(u1, &n1, &d1); unidade_razao(u2, &n2, &d2u);
+                    unidade_razao(u1, &n1, &d1);
                     long l1 = (2 * a1 * n1 + d1) / (2 * d1);
-                    long l2 = (2 * a2 * n2 + d2u) / (2 * d2u);
-                    fecha_paragrafo(e);
-                    poe_rect(p, MARGEM * 1000L, e->p->y, l1, l2, "ouro");
-                    e->p->y -= l2 + 4000;
+                    if(a2 > 0){
+                        /* régua visível */
+                        unidade_razao(u2, &n2, &d2u);
+                        long l2 = (2 * a2 * n2 + d2u) / (2 * d2u);
+                        fecha_paragrafo(e);
+                        poe_rect(p, MARGEM * 1000L, e->p->y, l1, l2, "ouro");
+                        e->p->y -= l2 + 4000;
+                    } else {
+                        /* \rule{W}{0pt} = strut horizontal (partitura \E):
+                         * avança X sem tinta — senão as lanes diagonizam. */
+                        long acc = 0;
+                        int fm = (CARTA_MAT ? F_MAT : e->fonte);
+                        while(acc + 5000 < l1 && e->L.n < MAXLIN - 2){
+                            empurra(e, 0xA0, fm);   /* em-quad */
+                            acc += 10000;
+                        }
+                        while(acc < l1 && e->L.n < MAXLIN - 2){
+                            empurra(e, ' ', e->fonte);
+                            acc += 3330;
+                        }
+                    }
                 }
                 i = q; continue;
             }
