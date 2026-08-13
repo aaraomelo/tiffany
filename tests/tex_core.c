@@ -691,8 +691,6 @@ static const short W_SIM[224] = {
  * uma casa vazia da tabela, e vale 0 porque nunca sera' desenhada. Contar isto como chute era
  * acusar a emissao da tabela pelo que a codificacao nao tem. */
 static int largura(int g, int fonte);
-/* Avanço da clave em Td (10^-3 pt) — contorno Emmentaler absoluto, sem ×corpo. */
-static long clef_avanco_td(int g);
 /* a largura com o corpo EXPLICITO: a operação passa-lho, em vez de o ler de uma global.
  * O `CORPO_CORRENTE` era estado escondido — e estado escondido é o sítio onde as duas
  * réguas nascem, seis vezes num dia. */
@@ -708,8 +706,9 @@ static int largura_de(int g, int fonte, long corpo){
 static int avanco_mil(const Ttf *t, int gi){ return (int)((long)ttf_avanco(t, gi) * 1000 / t->upem); }
 
 static int largura(int g, int fonte){
-    /* Claves: avanço Emmentaler já em Td (10^-3 pt) — ver clef_avanco_td.
-     * NÃO multiplicar por corpo em mede(); desenrola usa o mesmo Td. */
+    /* Claves: avanço Emmentaler já em Td (10^-3 pt).
+     * NÃO multiplicar por corpo em mede(); desenrola usa o mesmo Td.
+     * (sem função nova — MAX_FUN=256 no wasm) */
     if(g == 0x82) return 11266;
     if(g == 0x83) return 11775;
     if(g == 0x84) return 10000;
@@ -1024,9 +1023,11 @@ static long mede(const Gl *g, int n, long corpo_m){   /* devolve na régua do Td
     long n4 = 0, d4 = 0; int em4 = 0;
     long m_cw[8]; long m_cel = 0; int em8 = 0, m_c = 0, m_nc = 0;
     for(int i = 0; i < n; i++){
-        /* Claves: avanço já em Td — acumula ×1000 como o resto (divide no return). */
+        /* Claves: avanço já em Td — acumula ×1000 como o resto (divide no return).
+         * Inline (MAX_FUN): 0x82/83/84 = G/F/C Emmentaler. */
         if(g[i].g == 0x82 || g[i].g == 0x83 || g[i].g == 0x84){
-            long wc = clef_avanco_td(g[i].g) * 1000;
+            long td = (g[i].g == 0x82) ? 11266L : (g[i].g == 0x83) ? 11775L : 10000L;
+            long wc = td * 1000;
             w += wc; seg += wc;
             continue;
         }
@@ -1639,15 +1640,8 @@ static void poe_poli(Pdf *p, const long *xs, const long *ys, int np, long esp, c
 /* Contornos Emmentaler (clefs.G / clefs.F) → milésimos; y=0 = linha da clave.
  * Dados (não função) — o teto MAX_FUN do wasm não cresce. */
 #define CLEF_ESP 4394L   /* 1,55 mm = vão do pentagrama */
-/* Avanço da clave na régua do Td (10^-3 pt). Contorno Emmentaler desenhado
- * em Td absoluto; NÃO é milésimo-de-em × corpo (senão mede() ×corpo inchava
- * ~10× e o \morfh achava a linha cheia sem esticar — metrónomo curto). */
-static long clef_avanco_td(int g){
-    if(g == 0x82) return 11266L;
-    if(g == 0x83) return 11775L;
-    if(g == 0x84) return 10000L;
-    return 0;
-}
+/* Avanço da clave na régua do Td (10^-3 pt): 0x82→11266, 0x83→11775, 0x84→10000.
+ * Contorno Emmentaler em Td absoluto; NÃO é milésimo-de-em × corpo. */
 #define N_CG0 37
 static const long CG0x[] = {6609,5892,7826,8598,6450,6324,6187,4993,3480,3539,3926,2845,35,3579,6683,7485,7523,7500,6648,4002,2566,2969,4289,4653,3111,1304,2144,5999,8226,8258,8237,8512,9456,11226,10108,6782,6609};
 static const long CG0y[] = {4605,7341,11218,16254,20933,20985,20973,19911,15801,13759,11378,7945,1969,-4077,-4568,-4870,-6081,-6808,-9379,-10323,-9263,-9361,-8876,-7000,-5888,-6985,-10148,-10831,-7153,-6387,-5211,-4172,-3656,-967,3205,4620,4605};
@@ -2135,7 +2129,7 @@ static void desenrola_em(Pdf *p, const Linha *L, long x0_m, int desce){
                 }
                 p->reguas = p->reguas + 1;
             }
-            xm += clef_avanco_td(gk);
+            xm += (gk == 0x82) ? 11266L : (gk == 0x83) ? 11775L : 10000L;
             i++; continue;
         }
         int j = i, fonte = L->g[i].f, ex = L->g[i].e;
@@ -2431,7 +2425,7 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
                 }
                 p->reguas = p->reguas + 1;
             }
-            xm += clef_avanco_td(gk0);
+            xm += (gk0 == 0x82) ? 11266L : (gk0 == 0x83) ? 11775L : 10000L;
             i++; continue;
         }
         int j = i, fonte = L->g[i].f, ex = L->g[i].e;
@@ -3408,8 +3402,10 @@ static void quebra_e_desenrola(Est *e, int ultima){
         for(int i = 0; i < e->L.n; i++){
             long wg;
             if(e->L.g[i].g == 0x82 || e->L.g[i].g == 0x83 || e->L.g[i].g == 0x84){
-                /* mesma régua Td que mede()/desenrola — sem ×corpo */
-                wg = clef_avanco_td(e->L.g[i].g) * 1000;
+                /* mesma régua Td que mede()/desenrola — sem ×corpo (MAX_FUN) */
+                long td = (e->L.g[i].g == 0x82) ? 11266L
+                        : (e->L.g[i].g == 0x83) ? 11775L : 10000L;
+                wg = td * 1000;
                 w6 += wg; seg6 += wg;
                 continue;
             }
