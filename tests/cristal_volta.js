@@ -1,14 +1,19 @@
-/* tests/cristal_volta.js — a volta do cristal recuperado (eval 13/08).
+/* tests/cristal_volta.js — a volta do cristal recuperado, medidor v2 (eval 13/08).
  *
  * Regra de ouro: não converter o corpus antes de conseguir reconstruí-lo.
  * A fonte é cristal/cristal.jsonl (4286 conceitos, última versão, broca-so).
  * As projeções papers/cristal_*.tex carregam cada registo em %CRISTAL —
  * o desenho do /Type/FonteTeX: a página é a leitura, a fonte viaja invisível.
  *
+ * v2 (Teorema da Absorção, corpo_peano.tex thm:absorcao): o resíduo lê-se
+ * pelo ENDEREÇO (o id), não pela posição — R(a) = Back(a) − a. A posição é
+ * derivada e não carrega informação; a régua v1 (por posição) fica só como
+ * contraste na matriz de perturbação, para o teorema aparecer na tela.
+ *
  * §V0  fonte existe e cada linha é JSON com id único
- * §V1  reconstrução: %CRISTAL de todos os .tex == fonte, byte a byte (R=0)
+ * §V1  reconstrução pelo endereço == fonte, byte a byte por id (R=0)
  * §V2  dois caminhos: nº de \section == nº de %CRISTAL, por ficheiro e total
- * §V3  perturbação: um byte trocado num registo embutido acusa (R>0)
+ * §V3  MATRIZ DE PERTURBAÇÃO — v1 (posição) × v2 (endereço), na mesma cópia
  * §V4  portão: nenhum .tex nem a fonte carregam o IP privado
  *
  *   node tests/cristal_volta.js
@@ -64,7 +69,9 @@ function idDe (linha, i) {
   try { return JSON.parse(linha).id } catch { return '￿ corrompido ' + i }
 }
 
-function residuo (regs) {
+/* v1 — por POSIÇÃO na ordem derivada (o contraste; dissipa ~n² quando o
+ * endereço morre — thm:absorcao). Fica só para a matriz. */
+function residuoV1 (regs) {
   const orden = [...regs].sort((a, b) => {
     const ia = idDe(a, 0), ib = idDe(b, 1)
     return ia < ib ? -1 : ia > ib ? 1 : 0
@@ -77,54 +84,114 @@ function residuo (regs) {
   return r
 }
 
-const R = residuo(reconstruido)
-ok('§V1 reconstrução byte a byte, R=0', R === 0)
+/* v2 — pelo ENDEREÇO: R(a) = Back(a) − a. Conta faltantes, alterados,
+ * excedentes E duplicados (cada cópia a mais carrega o nó). A ordem física
+ * não participa: é derivada do endereço. */
+const fontePorId = new Map()
+for (const l of fonteLinhas) fontePorId.set(idDe(l, 0), l)
 
-/* §V3 — perturbações (a ordem do gerente, 13/08): o sistema não só volta quando
- * está íntegro — DENUNCIA quando é alterado. Cada perturbação corre a volta e
- * tem de dar R≠0 → REOPEN, à vista. */
-function perturba (nome, transforma, esperaReopen) {
-  if (reconstruido.length === 0) { ok('§V3 ' + nome, false); return }
-  const R = residuo(transforma([...reconstruido]))
-  if (esperaReopen) {
-    console.log(`#PERT ${nome}: R=${R} -> ${R > 0 ? 'REOPEN' : 'passou (DEFEITO)'}`)
-    ok('§V3 ' + nome + ' acusa (R>0 -> REOPEN)', R > 0)
-  } else {
-    console.log(`#PERT ${nome}: R=${R} -> ${R === 0 ? 'SURVIVED (por desenho)' : 'REOPEN'}`)
-    ok('§V3 ' + nome + ' sobrevive por desenho (R=0)', R === 0)
+function residuoV2 (regs) {
+  const conteudo = new Map()      /* endereço → primeiro conteúdo visto */
+  const vezes = new Map()         /* endereço → ocorrências */
+  for (let i = 0; i < regs.length; i++) {
+    const a = idDe(regs[i], i)
+    if (!conteudo.has(a)) conteudo.set(a, regs[i])
+    vezes.set(a, (vezes.get(a) || 0) + 1)
   }
+  let r = 0
+  for (const [a, l] of fontePorId) {
+    const v = conteudo.get(a)
+    if (v === undefined) r++                 /* faltante: o par colapsa */
+    else if (v !== l) r++                    /* alterado no endereço */
+  }
+  for (const [a, n] of vezes) {
+    if (!fontePorId.has(a)) r++              /* excedente (endereço alheio) */
+    if (n > 1) r += n - 1                    /* duplicação: excesso no nó */
+  }
+  return r
+}
+
+ok('§V1 reconstrução pelo endereço, R=0', residuoV2(reconstruido) === 0)
+ok('§V1 dois caminhos: a régua de posição concorda no íntegro',
+  residuoV1(reconstruido) === 0)
+
+/* §V3 — MATRIZ DE PERTURBAÇÃO (a ordem do diretor, 13/08): as duas réguas
+ * sobre a MESMA cópia perturbada; o v2 (endereço) decide, o v1 (posição) fica
+ * de contraste — o teorema tem de aparecer na tela: R(a) = Back(a) − a. */
+console.log('')
+console.log('=== MATRIZ DE PERTURBAÇÃO — v1 (posição) × v2 (endereço) ===')
+
+function perturba (nome, transforma, esperaR) {
+  if (reconstruido.length === 0) { ok('§V3 ' + nome, false); return }
+  const copia = transforma([...reconstruido])
+  const R1 = residuoV1(copia)
+  const R2 = residuoV2(copia)
+  const veredito = esperaR === 0
+    ? (R2 === 0 ? 'ABSORVIDA (R=0)' : 'REOPEN (DEFEITO: devia absorver)')
+    : (R2 > 0 ? 'REOPEN' : 'passou (DEFEITO)')
+  console.log(`#PERT ${nome.padEnd(44)} v1 R=${String(R1).padStart(4)}   v2 R=${String(R2).padStart(2)} -> ${veredito}`)
+  ok('§V3 ' + nome + (esperaR === 0 ? ' absorvida (R=0)' : ' acusa (R>0)'),
+    esperaR === 0 ? R2 === 0 : R2 > 0)
 }
 
 const meio = () => Math.floor(reconstruido.length / 2)
 
-perturba('apagar um conceito', m => { m.splice(meio(), 1); return m }, true)
+perturba('permutação física (endereços intactos)', m => m.reverse(), 0)
+/* a ordem é derivada do endereço e não carrega informação — perturbação
+ * equivalente (o precedente: «trocar empatados é mutação equivalente»,
+ * pipeline.tex §estação) */
 
-perturba('trocar uma resposta (1 byte na descricao)', m => {
+perturba('conteúdo no endereço (1 byte na descricao)', m => {
   const alvo = m[meio()]
   const i = alvo.indexOf('"descricao":"') + 13
   m[meio()] = alvo.slice(0, i) +
     String.fromCharCode(alvo.charCodeAt(i) ^ 1) + alvo.slice(i + 1)
   return m
-}, true)
+}, 1)
 
-perturba('alterar uma categoria (meta.dominio)', m => {
+perturba('categoria no endereço (meta.dominio)', m => {
   for (let i = 0; i < m.length; i++) {
     const t = m[i].replace(/"dominio":"[^"]*"/, '"dominio":"perturbado"')
     if (t !== m[i]) { m[i] = t; break }
   }
   return m
-}, true)
+}, 1)
 
-perturba('corromper uma projeção (registo ilegível)', m => {
+perturba('remoção de endereço (o par colapsa)', m => {
+  m.splice(meio(), 1)
+  return m
+}, 1)
+
+perturba('duplicação de endereço (excesso no nó)', m => {
+  m.push(m[meio()])
+  return m
+}, 1)
+
+perturba('endereço destruído (registo ilegível)', m => {
   m[meio()] = m[meio()].slice(0, 20) + '<<<corrompido>>>'
   return m
-}, true)
+}, 1)
+/* aqui o teorema aparece: v1 dissipa ~n/2 (o ilegível perde o lugar e empurra
+ * a lista); v2 cobra o PAR exato — faltante ⊕ excedente, a Lei 0 */
 
-perturba('alterar a ordenação dos registos', m => m.reverse(), false)
-/* a ordem canónica é DERIVADA (sort por id) — a ordenação não carrega
- * informação, e por isso esta perturbação é equivalente (o precedente da casa:
- * «trocar empatados é mutação equivalente», pipeline.tex §estação). O
- * metadado, esse, acusa — é a perturbação da categoria acima. */
+/* mudança admissível: retocar a PROJEÇÃO visível sem tocar o registo — a
+ * página é a leitura, a fonte viaja no %CRISTAL; a régua absorve */
+{
+  const corpo = fs.readFileSync(path.join(PAPERS, texs[0]), 'utf8')
+    .replace('\\maketitle', '\\maketitle\n\nRetoque visível da projeção --- texto novo, registo intacto.\n')
+  const regs = []
+  for (const linha of corpo.split('\n')) {
+    if (linha.startsWith('%CRISTAL ')) regs.push(linha.slice(9))
+  }
+  for (let f = 1; f < texs.length; f++) {
+    for (const linha of fs.readFileSync(path.join(PAPERS, texs[f]), 'utf8').split('\n')) {
+      if (linha.startsWith('%CRISTAL ')) regs.push(linha.slice(9))
+    }
+  }
+  const R1 = residuoV1(regs), R2 = residuoV2(regs)
+  console.log(`#PERT ${'mudança admissível (retoque da projeção)'.padEnd(44)} v1 R=${String(R1).padStart(4)}   v2 R=${String(R2).padStart(2)} -> ${R2 === 0 ? 'ABSORVIDA (R=0)' : 'REOPEN (DEFEITO)'}`)
+  ok('§V3 mudança admissível absorvida (R=0)', R2 === 0 && R1 === 0)
+}
 
 /* §V4 — portão do privado (tools/corpo.sh: «IP privado — não publicar») */
 {
