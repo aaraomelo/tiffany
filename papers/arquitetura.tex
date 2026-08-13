@@ -179,11 +179,11 @@ nulos, e é a Lei~7 que fecha o \emph{circuito} inteiro, adiante (\emph{corpo es
 \code{sub:oitoleis}).
 
 \medido{as seis leis, medidas onde estão no tradutor: a \textbf{dual} LaTeX$\leftrightarrow$PDF fecha a
-volta com resíduo $0$ e a mutação (o \code{Td} em centésimos) abre-a; o \textbf{trial} é o eixo do
+volta com resíduo $0$ e a perturbação (o \code{Td} em centésimos) abre-a; o \textbf{trial} é o eixo do
 \code{MOVE}, com emite$+$absorve$=0$; o \textbf{bidual} devolve o corpo (resíduo $0$) e larga o
 \code{\textbackslash emph} (resíduo $>0$, correcto), e a cauda reversível recupera-o (resíduo $0$); a
 \textbf{hexal} é a porta única, involutiva nas duas ordens (resíduo $0$), contra duas portas com viés
-(resíduo $>0$); e a fronteira conta grau $2$ e eixo $3$, nenhum chega a $4$ --- e cada mutação faz a
+(resíduo $>0$); e a fronteira conta grau $2$ e eixo $3$, nenhum chega a $4$ --- e cada perturbação faz a
 asserção falhar (\code{tests/leis\_no\_tradutor.c}).}
 
 \subsection*{O disco cresce contado, não reservado}
@@ -222,7 +222,7 @@ divergir.
 \medido{o \code{str2dbl} (o \code{strtod} sem libc, \code{lib/le\_num.h}) bate o \code{strtod} da libc
 \textbf{bit a bit}: nos valores reais do estilo, em $8000$ decimais de $1$ a $4$ casas ($0$ diferenças),
 e o \code{hex2} bate o \code{sscanf \%2x} nos $256$ bytes; o \code{e} de ``\code{em}''/``\code{ex}'' não
-é consumido como expoente (o \emph{endptr} bate o do \code{strtod}). E a mutação prova a régua: trocar a
+é consumido como expoente (o \emph{endptr} bate o do \code{strtod}). E a perturbação prova a régua: trocar a
 divisão única pela cadeia de \code{/10} acende $2095$ das $8000$ (\code{tests/str2dbl\_dual.c}).}
 
 \smallskip
@@ -247,7 +247,7 @@ carrega os \emph{dois}. O grau desce na projeção, como manda a construção.)
 $0$) e o seu grau é \textbf{quatro}: dois duais que fecham na forma --- o sinal do valor ($-(-v)=v$) e o
 sinal da escala (a vírgula-fixa escreve ``\code{0.0m}'' e ``\code{m00}''), independentes, com órbita de
 $4$ estados distintos em $1200$ de $1200$ casos; e degenera a grau $2$ nos \emph{inteiros} ($k=0$, o
-conjunto fixo do dual da escala). A mutação prova: tornar os dois duais o mesmo derruba os $4$ estados
+conjunto fixo do dual da escala). A perturbação prova: tornar os dois duais o mesmo derruba os $4$ estados
 (\code{tests/corpo\_do\_numero.c}).}
 
 \smallskip
@@ -431,9 +431,38 @@ uma medição que perde um bit não volta, e é ela própria caótica --- proibi
 }
 \]
 A lei atravessa o tradutor inteiro: a volta do
-\code{.tex} (\code{tests/tex.c} \S X17, com a mutação de um byte no corpo que viaja a acusar),
+\code{.tex} (\code{tests/tex.c} \S X17, com a perturbação de um byte no corpo que viaja a acusar),
 a do módulo ($\mathrm{sobe}\circ\mathrm{desce}$), e os níveis do gerador matricial
 (\code{tests/traduz\_volta.js} \S V11).
+
+\subsection*{A absorção: o endereço decide o custo}
+
+E a mesma lei responde à pergunta do estresse: quanto \emph{custa} uma
+perturbação de $k$ elementos? O \textbf{Teorema da Absorção}
+(\emph{Corpo de Peano}, a secção da absorção) di-lo pela régua: o excesso
+$e=R-k$ é \textbf{zero exato} quando a volta lê \emph{pelo endereço} ---
+e o endereço \textbf{é} a assinatura que cavalga o corpo
+(Teorema~\ref{thm:assinatura}). Ler pela \emph{posição} na ordem
+derivada dissipa: um elemento que perde o endereço perde o lugar, e
+empurra a lista inteira. \emph{O estresse é propriedade da régua de
+leitura, não do objecto} --- e a régua certa já estava escolhida pela
+arquitetura: o disco endereça por slot, a banda por endereço ordenado,
+o cristal por id.
+
+\medido{uma perturbação, duas leituras (\code{tools/lyapunov\_measure.js},
+inteiro puro, $T=100$ por célula, torre $134\to4286$ por dobra sobre o
+cristal): endereço preservado --- apagar, alterar conteúdo, alterar
+categoria, reordenar --- dá $e=0$ \textbf{exato} nas duas réguas em todos
+os andares ($\lambda^{+}{+}\lambda^{-}=0$, sem um double); endereço
+destruído dá, pelo endereço, $e\equiv1$ com $\sigma^{2}=0$ (o par
+faltante$\oplus$excedente --- a Lei~0) e, pela posição,
+\textbf{diverge} $\sim n^{2}$ ($\sigma^{2}\cdot T^{2}$ de $13{,}4$M para
+$16{,}1$G com $n\times32$: $n^{2}$ manda $1024\times$, mediu-se
+$1200\times$; média $\approx n/2$); e no lote de $8$, duas perturbações
+no mesmo endereço \textbf{aniquilam-se} ($\mathrm{flip}\circ\mathrm{flip}
+=\mathrm{id}$ --- a Lei~1 dentro do ruído), com probabilidade
+$\sim\binom{8}{2}/n$ a cair pela torre. O teto dimensional existe, e é
+zero.}
 
 \section{A tipografia pela estrela: semente, espiral, região --- e a corte}\label{sec:espiral}
 
@@ -500,7 +529,7 @@ escreve o espectro no PDF --- \code{/AssinaturaOito}. \emph{O que Alonzo compõe
 \medido{bateria do tradutor a $62{:}62$ com resíduo $0$: os expoentes pela espiral com
 conservação exacta (\S X8--X9, instância contra motor), a fronteira com o controlo que não estica
 (\S X10), a translação ortogonal simétrica (\S X11), a lei global da área com o teste de sementes
-(\S X13), e o selo de Caelum (\S X15): dois caminhos componente a componente, e a mutação de UM
+(\S X13), e o selo de Caelum (\S X15): dois caminhos componente a componente, e a perturbação de UM
 bit num stream espalha por $256$ de $256$ componentes do espectro. A volta do \code{teoria.tex}
 completo: byte a byte, resíduo $0$, com \code{/SementeEstrela} e \code{/AssinaturaOito} a bordo.}
 
@@ -569,7 +598,8 @@ MEASURE sem reverse     = medida unilateral
 \end{obrigacao}
 
 \noindent O \textsf{Claim} declara lei, objecto, operação, volta
-\emph{como procedimento}, invariante \emph{como predicado}, mutação. O
+\emph{como procedimento}, invariante \emph{como predicado}, perturbação
+(a primitiva \code{mutate}). O
 \textsf{Result} observa \code{forward}, \code{reverse}, \code{residual},
 \code{mutation}, \code{class}. Escrever \code{residual = 0} no Claim e
 acreditar nele é o defeito que o fundamento Conecthus elimina
@@ -596,8 +626,8 @@ involução compor$\dg=$descompor. O runtime
 \code{claim.wasm} fecha os três claims de arranque (Pareto, Why, Kanban).
 
 \medido{onze módulos no manifesto sobem e instanciam; escapar/decidir/rotular
-batem o gabarito das pontes; Pareto/Why/Kanban fecham $R$ com mutação a
-denunciar; ISA exporta só \code{MOVE}; latex compor$\circ$descompor devolve a
+batem o gabarito das pontes; Pareto/Why/Kanban fecham $R$ com a
+perturbação a denunciar; ISA exporta só \code{MOVE}; latex compor$\circ$descompor devolve a
 fonte; Isabelle $x\oplus x=0$ com falhas $0$
 (\code{tests/backends\_wasm.js}, \code{\#TOTAL 10 0}).}
 

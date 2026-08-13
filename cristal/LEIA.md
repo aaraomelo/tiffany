@@ -51,7 +51,11 @@ fallbacks contados à vista: 9 chars CJK de um exemplo japonês + controlos OCR)
 
 `tests/cristal_volta.js` — §V0–§V4: fonte íntegra; **reconstrução byte a byte
 dos %CRISTAL contra cristal.jsonl com resíduo 0**; secções == registos por
-dois caminhos; mutação de um byte acusa; portão do IP privado. `#TOTAL 9 0`.
+dois caminhos; a perturbação de um byte acusa; portão do IP privado —
+`#TOTAL 13 0` com o bloco de perturbações (quatro REOPEN à vista; reordenar
+sobrevive por desenho). O estresse pela torre: `tools/lyapunov_measure.js`
+(Teorema da Absorção, `papers/corpo_peano.tex`): e = R−k = 0 exato pelo
+endereço; a divergência ~n² é da régua de posição, não do objeto.
 
 ## Refazer
 

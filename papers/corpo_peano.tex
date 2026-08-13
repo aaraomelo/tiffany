@@ -73,6 +73,11 @@ $(\theta_{\mathrm{high}},\theta_{\mathrm{low}})$ como memória da
 borda sob a batuta --- sem Lei~$9$. O dual,
 \textbf{Controle de Histerese} (\S\ref{sec:controle-histerese}),
 selecciona variantes em $\mathcal{V}_k$ sem destruir o estado retido.
+O \textbf{Teorema da Absorção} (\S\ref{sec:absorcao}) mede o
+\emph{estresse} de uma perturbação pela torre: lido pelo
+\textbf{endereço}, $e=R-k=0$ exato ($\lambda^{+}{+}\lambda^{-}=0$) e o
+teto dimensional existe; a divergência $\sim n^{2}$ é da régua de
+posição, não do objecto.
 A \textbf{leitura complexa} (\S\ref{sec:pares-complexos})
 formaliza o par $(R,I)$, deriva Euler (\S\ref{sec:euler-peano}),
 e põe o \textbf{Metrónomo entre} as visões cartesiana e polar
@@ -2086,6 +2091,8 @@ Maestro & interface que realiza $\pi_k$ \\
 Metrónomo & realização musical do relógio \\
 Teorema do Metrónomo & \textbf{teorema} --- realização métrica
   (Lyapunov dualizado; dual da dinâmica) \\
+Teorema da Absorção & \textbf{teorema operacional} --- estresse $e=0$
+  pelo endereço; $\sim n^{2}$ é a régua de posição, não o objecto \\
 Batuta & canal do inversor (não é $I$) \\
 Pera & definição: base $=$ cone na batuta \\
 Conservatório & definição: estrutura superior conservada \\
@@ -2475,6 +2482,116 @@ adaptar e soltar sem colar. Leitura polar do mesmo $H_k$:
 \S\ref{sec:rede-dual} --- depois da ponte.
 
 \end{corolario}
+
+\section{Teorema da Absorção --- o estresse pelo endereço}\label{sec:absorcao}
+
+O Metrónomo atesta a volta íntegra: $\lambda^{+}+\lambda^{-}=0$
+(Teorema~\ref{thm:metronomo}). Falta a pergunta dual: quanto \textbf{custa}
+uma perturbação? Se um passo perturba $k$ elementos de um corpo de $n$
+endereços ($\lambda^{+}=k$) e a volta lê o resíduo $R$ ($\lambda^{-}=R$),
+o \textbf{estresse} é o excesso
+\[
+\boxed{e \;=\; R - k.}
+\]
+A lei exige $e=0$: a leitura não pode dissipar mais do que a perturbação
+valeu. E a exigência decide-se pela \textbf{régua de leitura} --- que é o
+tema deste teorema, não a robustez do objecto.
+
+\begin{definicao}[duas leituras do mesmo corpo]\label{def:leitura-endereco}
+Um corpo de $n$ elementos endereçados admite duas leituras da volta:
+\begin{enumerate}
+\item \textbf{por posição} --- comparam-se as listas \emph{ordenadas};
+a posição de cada elemento na ordem derivada participa da medida;
+\item \textbf{pelo endereço} --- cada elemento lê-se pelo seu endereço
+próprio (a assinatura que \emph{cavalga o corpo}; \emph{Arquitetura},
+teorema da assinatura), e a medida conta faltantes, excedentes e
+alterados --- a ordem \textbf{não} participa, porque é derivada do
+endereço.
+\end{enumerate}
+A segunda é a leitura \textbf{dual}: a involução endereço$\to$elemento
+fecha sem passar pela lista.
+\end{definicao}
+
+\begin{teorema}[Absorção --- o estresse tem teto, e é zero]\label{thm:absorcao}
+Na leitura pelo endereço, subindo a torre ($n$ por dobra --- Lei~4):
+\begin{enumerate}
+\item \textbf{Endereço preservado} (apagar, alterar conteúdo, alterar
+categoria, reordenar): $e=0$ \textbf{exato} em todo andar ---
+$\lambda^{+}+\lambda^{-}=0$ em contagens inteiras, sem um double.
+\item \textbf{Endereço destruído} (o elemento vira ilegível): $e=1$
+\textbf{constante} com variância zero --- o elemento destruído conta como
+o \textbf{par} faltante$\oplus$excedente, a Lei~0 a nomear os dois nulos
+($0=(+1)\oplus(-1)$): quem mata um endereço paga a morte \emph{e} o
+nascimento do lixo, e mais nada.
+\item \textbf{Teto dimensional}: a variância do estresse \textbf{não
+cresce} pela torre em nenhuma classe de perturbação --- a medida escala
+sem teto de dimensão a rasgá-la.
+\end{enumerate}
+Na leitura \emph{por posição}, a classe (2) \textbf{diverge}
+$\sim n^{2}$ (média $n/2$): o elemento ilegível perde o lugar na ordem e
+empurra tudo entre a sua posição e o fim. A dissipação é da
+\textbf{régua}, não do objecto --- a ordem é derivada do endereço, e
+\emph{a régua não transporta; a volta transporta}.
+\[
+\boxed{
+\text{endereço}=\text{leitura dual: }e=0;\qquad
+\text{posição}=\text{régua derivada: dissipa }\sim n^{2}.
+}
+\]
+\emph{Prova (operacional, medida).} \code{tools/lyapunov\_measure.js}:
+inteiro puro, gerador congruente determinístico, \textbf{uma} perturbação
+com \textbf{duas} leituras (as réguas medem o mesmo objecto), $T=100$ por
+célula, torre $134\to4286$ por dobra sobre o cristal recuperado. Medido:
+$e=0$ exato em todas as células de endereço preservado; $e\equiv1$
+($\sigma^{2}=0$) no endereço destruído lido pelo endereço; e por posição
+$\sigma^{2}\cdot T^{2}$ sobe de $13\,435\,000$ para $16\,130\,133\,019$
+quando $n$ sobe $32\times$ --- $n^{2}$ manda $1024\times$, mediu-se
+$1200\times$, média $e\approx n/2$. $\square$
+\end{teorema}
+
+\begin{proposicao}[a involução dentro do ruído]\label{prop:involucao-ruido}
+Num lote de $m$ perturbações independentes, duas que caem no
+\textbf{mesmo endereço} aniquilam-se --- a alteração involutiva compõe
+consigo própria e dá a identidade ($\mathrm{flip}\circ\mathrm{flip}=
+\mathrm{id}$: \textbf{Lei~1}). O estresse aparece então \emph{negativo},
+com probabilidade de colisão $\sim\binom{m}{2}/n$, que \textbf{cai} ao
+subir a torre. Não é dissipação: é a involução a fechar dentro do próprio
+ruído (medido no mesmo \code{lyapunov\_measure.js}: lote de $8$,
+$e<0$ só por colisão, $e\to0$ com $n$).
+\end{proposicao}
+
+\begin{corolario}[variante admissível pelo endereço]\label{cor:variante-endereco}
+No Controle de Histerese (Teorema~\ref{thm:controle-histerese}), o
+critério da vizinhança $\mathcal{V}$ ganha a forma medida:
+\[
+\boxed{
+\text{variante que preserva o endereço}
+\;\Rightarrow\;
+\mathrm{RETAIN}\ \text{sem custo } (e=0);
+}
+\]
+\[
+\boxed{
+\text{variante que destrói o endereço}
+\;\Rightarrow\;
+\mathrm{RETRACT}\ \text{com custo constante (o par), nunca crescente}.
+}
+\]
+O sistema \textbf{distingue} variantes admissíveis das que violam o
+invariante --- não vale «toda alteração é corrupção»: reordenar é
+variante equivalente ($e=0$ por construção, porque a ordem é derivada), e
+o reticulado continua inteiro.
+\end{corolario}
+
+\begin{observacao}[estatuto]
+Teorema \textbf{operacional}: enuncia o que a medida fechou na classe
+considerada (corpos endereçados; perturbações das cinco classes; torre
+por dobra até $4286$). Não afirma robustez universal de todo corpo ---
+afirma que \emph{o estresse é propriedade da régua de leitura}, e que a
+leitura dual (endereço) o absorve. Sem lei nova: Lei~0 (o par dos nulos),
+Lei~1 (involução no ruído), Lei~4 (a torre por dobra), Metrónomo (a
+atestação $\lambda^{+}+\lambda^{-}=0$).
+\end{observacao}
 
 \section{Leitura complexa --- pares, polar, modelo de teste}\label{sec:pares-complexos}
 
@@ -3450,6 +3567,8 @@ leitura complexa \S\ref{sec:pares-complexos} (modelo $i^{T_k}$,
 não prova da torre);
 Lyapunov dualizado \S\ref{sec:lyap-dual-releitura}
 (\code{tests/lyapunov\_refletido.c});
+absorção \S\ref{sec:absorcao}, Teorema~\ref{thm:absorcao}:
+\code{tools/lyapunov\_measure.js} (estresse pela torre, inteiro puro);
 Teorema Central na torre: Prop.~\ref{thm:central-peano},
 \ref{prop:central-operacional};
 música / canal: Prop.~\ref{prop:rede-no-canal},

@@ -1,4 +1,4 @@
-/* tools/lyapunov_measure.js — o estresse da mutação, medido pela torre (eval 13/08).
+/* tools/lyapunov_measure.js — o estresse da perturbação, medido pela torre (eval 13/08).
  *
  * A ordem do coordenador: «o estresse da mutação deve ser minimizado,
  * inexistente se possível, para isso deve ser usado Lyapunov dual; se preciso
@@ -65,12 +65,12 @@ function rDual (fonteMap, regs) {
   return r
 }
 
-/* ── mutações (k = tamanho verdadeiro da perturbação) ─────────────────────── */
-function mutaApagar (regs) {
+/* ── perturbações (k = tamanho verdadeiro) ─────────────────────── */
+function perturbaApagar (regs) {
   regs.splice(lcg() % regs.length, 1)
   return 1
 }
-function mutaByte (regs) {
+function perturbaByte (regs) {
   for (let t = 0; t < 64; t++) {
     const i = lcg() % regs.length
     const p = regs[i].indexOf('"descricao":"')
@@ -83,39 +83,39 @@ function mutaByte (regs) {
   }
   return 0
 }
-function mutaCategoria (regs) {
+function perturbaCategoria (regs) {
   for (let t = 0; t < 64; t++) {
     const i = lcg() % regs.length
-    const m = regs[i].replace(/"dominio":"[^"]*"/, '"dominio":"mutado"')
+    const m = regs[i].replace(/"dominio":"[^"]*"/, '"dominio":"perturbado"')
     if (m !== regs[i]) { regs[i] = m; return 1 }
   }
   return 0
 }
-function mutaCorromper (regs) {
+function perturbaCorromper (regs) {
   const i = lcg() % regs.length
   regs[i] = regs[i].slice(0, 20) + '<<<corrompido>>>'
   return 1
 }
-function mutaReordenar (regs) {
+function perturbaReordenar (regs) {
   for (let i = regs.length - 1; i > 0; i--) {
     const j = lcg() % (i + 1)
     const t = regs[i]; regs[i] = regs[j]; regs[j] = t
   }
   return 0   /* admissível: a ordem é derivada, não carrega informação */
 }
-function mutaLote8 (regs) {
+function perturbaLote8 (regs) {
   let k = 0
-  for (let m = 0; m < 8; m++) k += mutaByte(regs)
+  for (let m = 0; m < 8; m++) k += perturbaByte(regs)
   return k    /* TCL: soma de 8 perturbações independentes */
 }
 
-const MUTACOES = [
-  ['apagar', mutaApagar],
-  ['byte', mutaByte],
-  ['categoria', mutaCategoria],
-  ['corromper', mutaCorromper],
-  ['reordenar', mutaReordenar],
-  ['lote 8 bytes', mutaLote8],
+const PERTURBACOES = [
+  ['apagar', perturbaApagar],
+  ['byte', perturbaByte],
+  ['categoria', perturbaCategoria],
+  ['corromper', perturbaCorromper],
+  ['reordenar', perturbaReordenar],
+  ['lote 8 bytes', perturbaLote8],
 ]
 
 /* ── a torre: n por dobra até o corpus inteiro ────────────────────────────── */
@@ -126,9 +126,9 @@ ANDARES.push(linhas.length)
 const T = 100
 console.log('=== LYAPUNOV DUAL: estresse e = R − k pela torre (T=%d por célula) ===', T)
 console.log('')
-console.log('n\tmutação\t\trégua\tΣe\tΣe²\tmax e\tσ²·T² (inteiro)')
+console.log('n\tperturbação\t\trégua\tΣe\tΣe²\tmax e\tσ²·T² (inteiro)')
 
-const curvas = {}   /* (mutação, régua) → [ [n, varT2] ] */
+const curvas = {}   /* (perturbação, régua) → [ [n, varT2] ] */
 
 for (const n of ANDARES) {
   const sub = linhas.slice(0, n)
@@ -138,14 +138,14 @@ for (const n of ANDARES) {
   const fonteMap = new Map()
   for (let i = 0; i < sub.length; i++) fonteMap.set(idDe(sub[i], i), sub[i])
 
-  for (const [nome, muta] of MUTACOES) {
+  for (const [nome, perturba] of PERTURBACOES) {
     /* UMA perturbação, DUAS leituras: as réguas medem o MESMO objecto —
      * senão a diferença entre elas carrega a diferença dos sorteios. */
     SEED = 7 + n           /* determinístico por andar; igual entre réguas */
     const acc = { ordem: { S: 0, S2: 0, mx: 0 }, dual: { S: 0, S2: 0, mx: 0 } }
     for (let t = 0; t < T; t++) {
       const regs = [...sub]
-      const k = muta(regs)
+      const k = perturba(regs)
       for (const regua of ['ordem', 'dual']) {
         const R = regua === 'ordem' ? rOrdem(fonteOrd, regs) : rDual(fonteMap, regs)
         const e = R - k
@@ -186,17 +186,17 @@ for (const [chave, serie] of Object.entries(curvas)) {
 }
 console.log('')
 if (tetoDual) {
-  console.log('  RÉGUA DUAL: σ² com teto em TODA a torre e toda mutação.')
+  console.log('  RÉGUA DUAL: σ² com teto em TODA a torre e toda perturbação.')
   console.log('  Endereço preservado → e = 0 exato (λ⁺+λ⁻ = 0); endereço destruído →')
   console.log('  e = 1 constante determinístico (faltante+excedente), σ² = 0.')
 }
 if (divergeOrdem) {
-  console.log('  RÉGUA DE ORDEM: diverge onde a mutação destrói o ENDEREÇO (corromper)')
+  console.log('  RÉGUA DE ORDEM: diverge onde a perturbação destrói o ENDEREÇO (corromper)')
   console.log('  — cresce ~n² (posição uniforme). A dissipação é da régua, não do')
   console.log('  objeto: a ordem é derivada do id. A régua não transporta; a volta sim.')
 }
 console.log('')
-console.log('  Nota (Lei 1 medida): no lote, duas mutações XOR no MESMO endereço')
+console.log('  Nota (Lei 1 medida): no lote, duas perturbações XOR no MESMO endereço')
 console.log('  aniquilam-se (flip∘flip = id) — e negativo por colisão de aniversário,')
 console.log('  probabilidade ~C(8,2)/n: cai ao subir a torre. Não é dissipação; é a')
 console.log('  involução a fechar dentro do próprio estresse.')
