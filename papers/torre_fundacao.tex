@@ -1,0 +1,251 @@
+% !TeX program = pdflatex
+% papers/torre_fundacao.tex — Quatro fundações ANTES do Corpo de Peano.
+% Não se constrói o prédio pelo teto: a teoria (Peano / histerese / música) vem no fim.
+% Auto-contido: pdflatex torre_fundacao.tex
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[portuguese]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\newtheorem{definicao}{Definição}
+\newtheorem{proposicao}{Proposição}
+\newtheorem{observacao}{Observação}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\input{gkcapa}
+\begin{document}
+\gkcapa{Torre de Fundação}
+       {Corpos $\to$ Dinâmica $\to$ Topologia $\to$ Hilbert/Clifford}
+       {antes do Corpo de Peano --- a teoria chega por último}
+\maketitle
+
+\begin{abstract}
+\noindent Não se constrói um prédio pelo teto. Este documento é a
+\textbf{torre abaixo}: quatro fundações, cada uma a responder a uma
+pergunta que a torre precisa resolver. Só depois se entra no
+\emph{Corpo de Peano} (\code{papers/corpo\_peano.tex}), no Teorema
+Central Gentil\,$\leftrightarrow$\,Hurwitz, na música e na histerese.
+\[
+\boxed{
+\text{Corpos}
+\;\to\;
+\text{Dinâmica}
+\;\to\;
+\text{Topologia}
+\;\to\;
+\text{Hilbert/Clifford}
+\;\to\;
+\text{Corpo de Peano}
+\;\to\;
+\text{Teorema Central}.
+}
+\]
+Não é um capítulo universitário genérico: é a escada até a
+arquitectura aparecer como consequência.
+\end{abstract}
+
+\medskip
+\noindent\textbf{Escada de perguntas.}
+\begin{center}\small
+\begin{tabular}{@{}lp{8.6cm}@{}}
+\toprule
+Fundação & Pergunta \\
+\midrule
+Corpos & O que pode ser composto? \\
+Dinâmica & Como isso evolui? \\
+Topologia & Onde isso pode ir sem perder continuidade? \\
+Hilbert/Clifford & Como medir e orientar o movimento? \\
+Peano (depois) & Como tudo isso se realiza numa torre? \\
+Música (depois) & Como a torre pode ser lida? \\
+Teorema Central (fim) & Por que as duas leituras são a mesma estrutura? \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+%----------------------------------------------------------------------
+\section{Fundação I --- Teoria de corpos}\label{sec:fund-corpos}
+\subsection*{Pergunta: o que pode ser composto?}
+
+Antes de Maestro ou partitura, o leitor precisa de saber o que é um
+\textbf{corpo}: um sítio onde se soma, multiplica, e onde os não-nulos
+têm inverso.
+
+\begin{definicao}[corpo --- mínimo operacional]
+Um conjunto $K$ com $+$ e $\times$ é um \textbf{corpo} quando $(K,+)$ é
+grupo abeliano, $(K\setminus\{0\},\times)$ é grupo abeliano, e a
+distribuição liga as duas operações. O zero é o neutro de $+$; o um é
+o neutro de $\times$.
+\end{definicao}
+
+\noindent O que a torre vai precisar já aqui:
+\begin{itemize}
+\item \textbf{operações e inversores} --- $a\mapsto -a$, $a\mapsto a^{-1}$
+quando $a\neq0$;
+\item \textbf{extensão e redução} --- passar de $K$ a $L\supset K$ (ou
+projectar de volta) sem inventar axiomas novos;
+\item \textbf{divisão / Hurwitz} --- a família de álgebras com norma
+multiplicativa (reais, complexos, quaterniões, octoniões) é o teto
+clássico da composição; o Corpo de Peano \emph{realizará} essa escada
+em andares $d_{k+1}=2d_k$, mas só depois.
+\end{itemize}
+
+\begin{observacao}
+Aqui o leitor aprende \textbf{o que é o corpo} antes de descobrir que o
+sistema o realiza musicalmente. Sem esta fundação, ``corpo de Peano''
+soa a metáfora.
+\end{observacao}
+
+%----------------------------------------------------------------------
+\section{Fundação II --- Dinâmica de sistemas}\label{sec:fund-dinamica}
+\subsection*{Pergunta: como isso evolui?}
+
+Composto o objecto, pergunta-se o que acontece quando se move:
+\[
+\boxed{
+X_{k+1}=F(X_k).
+}
+\]
+
+\noindent Entram naturalmente:
+\begin{itemize}
+\item \textbf{órbitas} --- $\{X_0,X_1,\ldots\}$ sob $F$;
+\item \textbf{estados} --- o ponto $X_k$ no espaço de fase;
+\item \textbf{reversibilidade} --- existência de $F^{-1}$ (ou involução
+local): a volta pode fechar;
+\item \textbf{estabilidade} --- órbitas que permanecem perto;
+\item \textbf{expansão / contração} --- taxas $\lambda^{+}$, $\lambda^{-}$
+(Lyapunov); numa volta fechada dualizada,
+$\lambda^{+}+\lambda^{-}=0$;
+\item \textbf{memória} --- o estado seguinte depende do caminho, não só
+da posição instantânea (histerese clássica: entrada $\neq$ saída).
+\end{itemize}
+
+\begin{proposicao}[pré-imagem operacional]
+Maestro, Metrónomo e Controle de Histerese \textbf{não} se inventam
+aqui: são nomes que a torre dará, mais tarde, a realizações desta
+dinâmica (projectar / ler / seleccionar). Nesta fundação basta:
+estado, órbita, volta, expansão/contração.
+\end{proposicao}
+
+%----------------------------------------------------------------------
+\section{Fundação III --- Topologia}\label{sec:fund-topologia}
+\subsection*{Pergunta: onde isso pode ir sem perder continuidade?}
+
+A dinâmica precisa de \textbf{sítio}. A topologia responde com
+vizinhança, continuidade e borda:
+\[
+\boxed{
+\mathcal{N}(x),\qquad
+\partial B,\qquad
+\pi\colon A\to A'
+\text{ (projecção / retração)}.
+}
+\]
+
+\noindent Objectos mínimos:
+\begin{itemize}
+\item \textbf{vizinhança} $\mathcal{N}(x)$ --- o que ainda conta como
+``perto'' de $x$;
+\item \textbf{continuidade} --- $F$ leva vizinhos a vizinhos;
+\item \textbf{borda} $\partial B$ --- interface entre dentro e fora
+(zona cinzenta da histerese clássica);
+\item \textbf{retração / projecção} --- $\pi\circ\iota=\mathrm{id}$
+quando a torre descer andares ($\pi_k\colon A_{k+1}\to A_k$ virá no
+Peano);
+\item \textbf{identificação} --- colar pontos sem destruir a estrutura
+local.
+\end{itemize}
+
+\begin{observacao}
+Com topologia, a histerese deixa de parecer um mecanismo inventado para
+o corpus: passa a ser \textbf{consequência natural} de uma borda com
+direcção de passagem. O Controle de Histerese escolherá variantes
+dentro de $\mathcal{V}(B)$, mas isso é o teto --- ainda não.
+\end{observacao}
+
+%----------------------------------------------------------------------
+\section{Fundação IV --- Hilbert / Clifford}\label{sec:fund-hilbert}
+\subsection*{Pergunta: como medir e orientar o movimento?}
+
+Falta a \textbf{régua} e a \textbf{orientação}:
+\[
+\boxed{
+\langle x,y\rangle,\qquad
+|x|=\sqrt{\langle x,x\rangle},\qquad
+xy+yx=2\langle x,y\rangle.
+}
+\]
+
+\noindent Hilbert dá o produto interno e a norma; Clifford dá a álgebra
+que \textbf{orienta} o movimento (reflexão, inversão, conservação):
+\begin{itemize}
+\item \textbf{norma} --- comprimento do passo;
+\item \textbf{dualidade} --- formas lineares / covectores;
+\item \textbf{reflexão} --- a volta métrica (espelho);
+\item \textbf{orientação} --- sentido do MOVE;
+\item \textbf{inversão} --- $x\mapsto x^{-1}$ quando a norma permite;
+\item \textbf{conservação} --- $|xy|=|x||y|$ nas álgebras de Hurwitz.
+\end{itemize}
+
+\begin{proposicao}[ponte]
+Esta fundação prepara directamente Gentil\,$\leftrightarrow$\,Hurwitz:
+contar e integrar tornam-se duais \emph{pela medida} --- mas o Teorema
+Central só se enuncia \textbf{depois} do Corpo de Peano ter a torre
+$A_k$ e as retrações $\pi_k$.
+\end{proposicao}
+
+%----------------------------------------------------------------------
+\section{O que ainda não se faz aqui}\label{sec:fund-nao}
+
+Não se enuncia ainda:
+\begin{itemize}
+\item o Teorema do Maestro / Metrónomo;
+\item o Teorema da Histerese nem o do Controle;
+\item a partitura como linguagem de unificação;
+\item Gentil\,$\leftrightarrow$\,Hurwitz como teorema fechado.
+\end{itemize}
+Esses objectos vivem em \code{papers/corpo\_peano.tex} e só fazem
+sentido \textbf{depois} destas quatro fundações. A ordem operacional
+do projecto espelha a mesma disciplina no corpus da assistente:
+primeiro falar (banal); depois subir complexidade; a doutrina no fim
+(\code{papers/conversa.tex}, \code{tools/vizinhanca.sh}).
+
+\section{Passagem ao Corpo de Peano}
+
+Quando as quatro perguntas tiverem resposta mínima, pode dizer-se:
+\[
+\boxed{
+\text{Agora temos os objectos necessários para construir o Corpo de Peano.}
+}
+\]
+A torre começa:
+\[
+A_0
+\;\xleftarrow{\pi_0}\;
+A_1
+\;\xleftarrow{\pi_1}\;
+A_2
+\;\xleftarrow{\pi_2}\;
+\cdots
+\qquad
+d_{k+1}=2d_k.
+\]
+Aí o Maestro é a realização dinâmica das retrações; o Metrónomo a
+leitura métrica; o Controle a selecção na vizinhança. Só no fim o
+Teorema Central:
+\[
+\boxed{\text{Gentil}\;\longleftrightarrow\;\text{Hurwitz}}
+\]
+e a música deixa de ser metáfora --- passa a ser realização gráfica de
+uma estrutura que o leitor já encontrou na fundação.
+
+\bigskip
+\noindent\textbf{Leitura.} Este paper $\to$
+\code{papers/corpo\_peano.tex} $\to$
+\code{papers/partitura.tex} / \code{papers/dualsort.tex}.
+Corpus (ainda sem aula): \code{tools/bench\_vizinhanca.sh}.
+
+\end{document}

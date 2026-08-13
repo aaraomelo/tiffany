@@ -1,0 +1,63 @@
+# Protocolo TFAL (local) — ver lib/fala.h + banco/fala.c + app/src/fala_protocolo.js
+#
+#   Assinatura(corpo) → banda=sha256 → cada cliente na sua base
+#   HELLO em claro; FALA/RESPOSTA/APRENDE/NAO_SEI em bump
+#
+# Servidor (cristal):
+#   cd banco && cc -O2 -std=c99 -Wall -I../lib -I. fala.c -o fala
+#   CONVERSA=./bin/conversa ./fala
+#
+# Cliente CLI (bash $(…) engole o \\n final da Assinatura → banda errada):
+#   preferir o front (WebCrypto) ou socket com bytes exactos; ver smoke acima.
+#   ./fala cliente "<Assinatura COM newline final>" "bom dia"
+#
+# Front (Vite): plugin antena /antena → TCP :47314; app/src/fala_protocolo.js
+#   import { abrirAntena, assinaturaDoCorpo } from './fala_protocolo.js'
+#   const a = abrirAntena()
+#   await a.hello(assinaturaDoCorpo(corpoJson))
+#   const r = await a.fala('bom dia')
+#
+# Ponte: se RESPOSTA citar .tex do catálogo (docs_tradutor.json),
+#   a UI em app/src/assistente.js abre tex_tradutor (PDF no browser).
+#   Ex.: ensinar «partitura» → «vê papers/partitura.tex»
+#
+# Maestro (app/src/maestro.js) — dualsort §assistente:
+#   massa → corteMassa (meia volta) → Π → maestroProject(Π,X,tick,I) → Y
+#   Metrónomo medirResiduo: atesta a volta (não «não alucina»)
+#   motor = cristal TFAL (realiza; não é o teorema)
+#   I=+1 avança · I=−1 retrai · r>0 + suporteFaltante → = resposta (massa+)
+#
+# Corpus casual (tudo em LaTeX → tradutor):
+#   papers/conversa.tex + tools/casual.sh <base>
+#   cd banco && ../tools/casual.sh .fala/9dcbce70cc659912c6f97a784fd4731e
+#   Respostas citam papers/*.tex → UI abre tex_tradutor automaticamente.
+#
+# Gabarito llama (ollama) — conversa BANAL primeiro (sem teoria):
+#   tools/casual.sh <base>                 # semente de trato
+#   tools/gabarito_llama.sh <base>         # ~90 pares do dia a dia → banda
+#   tools/gabarito_arvore.sh <base>        # sobe: contexto→intenção→diálogo (NIVEL=1|2|3)
+#   tools/assistente.sh <base> "fala"      # corpus → se «não sei» → ollama → aprende
+#   MODELO=qwen2.5:1.5b FORCA=1 — precisa de `ollama serve`.
+#   Teoria sobe depois, quando a fala banal estiver estável.
+#   Ordem: gabarito (volume) → árvore (complexidade) → casual.sh (cumprimentos curados).
+#
+# Teorema da Histerese (corpo_peano §histerese) — sem Lei 9:
+#   cd banco && ../tools/bench_histerese.sh .fala/<hex>
+#   H_k=(X_k,B_k,I_k); r_volta=0 na vizinhança; salto≠memória pegajosa.
+#
+# Vizinhança tolerante (banal, sem aula de teoria) — bandas 1–7:
+#   papers/conversa_vizinhanca.tex + tools/vizinhanca.sh <base>
+#   tools/bench_vizinhanca.sh <base>   # regressão bandas 1–9 + controle
+#   erro → … → soltar; ambiguidade (8); reparação (9)
+# Ordem da teoria (não pelo teto):
+#   papers/torre_fundacao.tex  →  papers/corpo_peano.tex  →  partitura / dualsort
+#   Corpos → Dinâmica → Topologia → Hilbert/Clifford → Peano → Teorema Central
+#
+# Corpus fundação (cresce como o casual):
+#   tools/fundacao.sh <base>              # pares + ingere teoria.tex
+#   ARVORE=1 tools/fundacao.sh <base>     # + árvore ollama n1/n2/n3
+#   tools/completa_corpus.sh <base> [tex] # completa frases cortadas
+#   tools/bench_fundacao.sh <base>
+#   Limites: limpa/ingere 1200; num_predict≥140; conversa RESP_LIM=4096
+#   papers/conversa_fundacao.tex
+#   Limites: limpa 1200; num_predict≥140; ingere 1200; conversa RESP_LIM=4096

@@ -1,0 +1,89 @@
+% !TeX program = pdflatex
+% papers/conversa_fundacao.tex — Corpus da escada (fundações), estilo conversa.
+% Cresce como o casual: pares curtos; cita teoria.tex / torre_fundacao / tests.
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[brazil]{babel}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage[hidelinks]{hyperref}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\input{gkcapa}
+\begin{document}
+\gkcapa{Conversa Fundação}
+       {Corpos $\to$ Dinâmica $\to$ Topologia $\to$ Hilbert/Clifford}
+       {escada no corpus; Peano só depois}
+\maketitle
+\begin{abstract}
+Pares de fala sobre as quatro fundações, no tom da assistente.
+Fontes: \code{teoria.tex}, \code{papers/torre\_fundacao.tex},
+\code{tests/topologia.c}, \code{tests/hurwitz.c}, \code{tests/hilbert\_bidual.c}.
+Semente: \code{tools/fundacao.sh}.
+\end{abstract}
+
+\section{o que é um corpo}
+Sítio com soma e produto onde os não-nulos invertem.
+Ver \code{teoria.tex} e \code{papers/torre\_fundacao.tex}.
+
+\section{o que é o corpo dual}
+Par $(V,V^{*})$ com a identificação $J$ --- as leis vivem neste ambiente.
+Detalhe em \code{teoria.tex}.
+
+\section{o que é hurwitz}
+Quatro álgebras de divisão normadas: $\mathbb{R},\mathbb{C},\mathbb{H},\mathbb{O}$.
+Medido em \code{tests/hurwitz.c}; enunciado em \code{teoria.tex}.
+
+\section{o que é dinamica de sistemas}
+$X_{k+1}=F(X_k)$ --- órbitas, estados, volta.
+\code{papers/torre\_fundacao.tex}; relógio em \code{teoria.tex}.
+
+\section{o que é a topologia dos corpos}
+Distância entre réguas: $d=\lvert\Delta_1-\Delta_2\rvert$, $\Delta=B^{2}-4C$.
+\code{tests/topologia.c}.
+
+\section{o que é a curva de hilbert aqui}
+Deriva das Leis~1 e~2; bidual $\pi$ e $\nu$.
+\code{tests/hilbert\_bidual.c}.
+
+\section{o que é clifford}
+Álgebra que orienta: $xy+yx=2\langle x,y\rangle$.
+\code{papers/torre\_fundacao.tex}.
+
+\section{mostra a fundação}
+Escada: Corpos, Dinâmica, Topologia, Hilbert/Clifford --- depois Peano.
+\code{papers/torre\_fundacao.tex}.
+
+\section{o que é a lei 1}
+$1^{\dagger}=-1$ --- dual/involução, período~2.
+\code{teoria.tex} e \code{tests/hilbert\_bidual.c}.
+
+\section{o que é a lei 2}
+$T^{\dagger}=-T$ logo $T^{2}=-1$ --- rotor, período~4.
+\code{teoria.tex} e \code{tests/hilbert\_bidual.c}.
+
+\section{porque hurwitz para em 8}
+Em 16 já há divisores de zero --- o cristal $N(xy)=N(x)N(y)$ parte.
+\code{tests/hurwitz.c}.
+
+\section{dois corpos sao isomorfos quando}
+Quando $d=\lvert\Delta_1-\Delta_2\rvert=0$ --- mesma classe.
+\code{tests/topologia.c}.
+
+\section{o que é o bidual de hilbert}
+$\pi$ estica e $\nu$ contrai; $\nu\circ\pi=\mathrm{id}$ e $\pi\circ\nu=\mathrm{id}$.
+\code{tests/hilbert\_bidual.c}.
+
+\section{o que é lyapunov}
+Taxas de expansão/contração; dualizado $\lambda^{+}+\lambda^{-}=0$ na volta.
+\code{papers/torre\_fundacao.tex}.
+
+\section{o que é retracao}
+$\pi\circ\iota=\mathrm{id}$ --- descer sem inventar.
+\code{papers/torre\_fundacao.tex}.
+
+\section{quando falamos do peano}
+Depois das quatro fundações.
+\code{papers/torre\_fundacao.tex} $\to$ \code{papers/corpo\_peano.tex}.
+
+\section{o que é o teorema central}
+Gentil$\leftrightarrow$Hurwitz pela medida --- \code{teoria.tex}; só depois da escada.
+
+\end{document}

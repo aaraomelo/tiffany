@@ -188,6 +188,26 @@ O destino de um elemento sai do \textbf{sinal de $x^{\dagger}-x$} --- uma leitur
 elemento --- e nunca de uma pergunta sobre outro elemento. \emph{Em por-unidade não há grandeza a
 comparar: há posição a ler}, e ela já está no elemento.
 
+\subsection*{Entrada na pera, saída pelo corte do Maestro}
+
+A realização musical do corpo de Peano fecha a mesma álgebra com outros nomes
+(\code{papers/corpo\_peano.tex}):
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+aqui (Dual Sort) & no corpo / partitura \\
+\midrule
+lista $A$ (entrada) & o que entra na \textbf{pera} (base da batuta, Def.~pera) \\
+trial $\{-1,0,+1\}$ & comando $I$ que a \textbf{batuta} canaliza \\
+partir / descer & o \textbf{Maestro} projecta $\mathcal{P}_k=\mathrm{tick}\circ\mathrm{batuta}\circ\Pi$ \\
+\textbf{corte} (seqüência de lados) & saída pelo corte --- a \textbf{massa} seleccionada na pera \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Maximizar o corte \emph{é} maximizar a massa (adiante, e Teorema~max-cut $=$ massa):
+não são duas quantidades que coincidem --- são a mesma, lida no dual.
+
 \section{O que se mede}
 
 \medido{a estaca é involução em $101$ pontos e o seu ponto fixo é \textbf{um só}; ela parte em
@@ -242,8 +262,8 @@ mutação (as duas estacas iguais) a cair para $2$, que é a degenerescência (\
 \section{Comparado com os outros}
 
 \textbf{E a régua não é o relógio.} O sistema é reversível: não tem tempo, só latência --- e
-latência é da máquina, não do algoritmo. A régua é \textbf{Landauer}: bits apagados, $kT\ln 2$
-cada. Conta-se sem estimar:
+latência é da máquina, não do algoritmo. A régua operacional conta \textbf{apagamento lógico}
+$N_{\mathrm{erase}}$ --- bits que a operação não recupera. Conta-se sem estimar:
 
 \begin{itemize}\itemsep2pt
 \item uma \textbf{comparação} lê dois valores de $64$ bits e devolve \emph{um}: apagam-se $127$;
@@ -255,7 +275,7 @@ cada. Conta-se sem estimar:
 \begin{center}\small
 \begin{tabular}{@{}lrrrr@{}}
 \toprule
-$n=2\times10^{5}$ & bits a comparar & bits a escrever & trocas & \textbf{bits/elem.} \\
+$n=2\times10^{5}$ & bits a comparar & bits a escrever & trocas & \textbf{$N_{\mathrm{erase}}$/elem.} \\
 \midrule
 \textbf{Dual Sort} & $\mathbf{0}$ & $25\,600\,000$ & $0$ & $\mathbf{128{,}0}$ \\
 quicksort & $508\,029\,591$ & $32\,993\,088$ & $722\,830$ & $2705{,}1$ \\
@@ -266,7 +286,25 @@ heapsort  & $817\,867\,935$ & $0$ & $3\,350\,399$ & $4089{,}3$ \\
 \end{center}
 
 \noindent \textbf{Vinte e uma vezes menos que o quicksort, trinta e quatro que o mergesort} --- e a coluna que
-separa é a primeira: \textbf{zero}. Ele não faz uma única pergunta entre elementos.
+separa é a primeira: \textbf{zero} perguntas entre elementos.
+
+\subsection*{Landauer é interpretação, não fundamento}
+
+$N_{\mathrm{erase}}$ é o que o algoritmo mede (régua do Metrónomo: leitura do que se apaga).
+Landauer dá o \emph{limite físico} correspondente --- não o fundamento da peça:
+\[
+  N_{\mathrm{erase}}
+  \quad\longrightarrow\quad
+  W_{\mathrm{Landauer}}
+  \;\ge\;
+  N_{\mathrm{erase}}\,k_{B}T\ln 2 .
+\]
+Primeiro conta-se a massa de informação apagada; depois Landauer interpreta. Em particular
+\[
+  \boxed{\;\mathrm{MOVE}\text{ reversível}\;\Longrightarrow\;N_{\mathrm{erase}}=0\;}
+\]
+não afirma ``energia física zero'': afirma que \textbf{aquela operação não exige apagamento
+lógico irreversível}. A termodinâmica fica à parte; o algoritmo fica no $N_{\mathrm{erase}}$.
 
 \subsection*{E a latência, medida por fora}
 
@@ -338,18 +376,123 @@ um lado, quem não deu está do outro. \textbf{Essa sequência é o corte}, e el
 
 \smallskip
 \noindent Meia volta é a velocidade máxima do relógio --- o único ponto onde ir e voltar são o mesmo
-caminho. \emph{Não há busca, não há comparação e não há escolha de centro: há uma rotação.}
+caminho. \emph{Não há busca, não há comparação e não há escolha de centro: há uma rotação.} É o
+tipo de operação que a Lei~$0$ / o \code{MOVE} já nomeiam: transformação reversível, e na meia volta
+involutiva --- $M^{2}=\mathrm{id}$. Ordenar e cortar como duais entram como \textbf{realização
+operacional} dessa peça (a definição formal de \code{MOVE} fica a do corpo; não se redefine
+retroactivamente pela aplicação).
+\[
+\boxed{
+\begin{array}{c}
+\text{meia-volta}
+\;=\;
+\text{\texttt{MOVE} involutivo}
+\;=\;
+\text{dobra do relógio}
+\\[0.35em]
+=\;
+\text{projeção realizada pelo Maestro}
+\end{array}
+}
+\]
+
+\subsection*{O Maestro é escala-invariante}
+
+O Teorema do Maestro (\emph{corpo de Peano}) realiza
+$\mathcal{P}_k=\mathrm{tick}\circ\mathrm{batuta}\circ\Pi$ --- projecta $\pi_k$, não inventa
+estrutura. Recebe $(\Pi,\mathrm{tick},I)$ e realiza a retração
+$A_{k+1}\xrightarrow{\pi_k}A_k$ com $\pi_k\circ\iota_k=\mathrm{id}$. A escala muda
+($d_{k+1}=2d_k$); a natureza do operador não.
+\[
+\boxed{
+\begin{array}{c}
+\text{O Maestro é escala-invariante:}
+\\[0.25em]
+\text{a dobra que realiza a projeção não depende do número de elementos,}
+\\
+\text{mas da estrutura do relógio.}
+\end{array}
+}
+\]
+Cortar $4$ nós ou $4000$ é a \emph{mesma} meia volta --- só mudam as marcas. A torre sobe por
+dobras isomorfas ($d_{k+1}/2=d_k$); o procedimento não muda com a escala.
+
+\begin{center}\small
+\begin{tabular}{@{}rrrrr@{}}
+\toprule
+$n$ & $|A|$ & corte & máx.\ & qualidade \\
+\midrule
+$4$ & $2$ & $4$ & $4$ & $1$ \\
+$64$ & $32$ & $1024$ & $1024$ & $1$ \\
+$1024$ & $512$ & $262\,144$ & $262\,144$ & $1$ \\
+$4096$ & $2048$ & $4\,194\,304$ & $4\,194\,304$ & $1$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Em onze escalas $n=4\ldots4096$: qualidade $=1$, $N_{\mathrm{erase}}=0$, $|A|=|B|$
+(\code{tools/bench\_maxcut.c} §ISO). Na árvore, a paridade corta \emph{todas} as arestas da altura
+$2$ à $12$ (até $4095$ nós) --- a mesma leitura, outra dobra.
+
+\subsection*{Tabela comparativa}
+
+Qualidade $=\mathrm{corte}/\mathrm{máx}$ no completo $K_n$. O Maestro emite a \textbf{sequência de
+lados} (massa ordenada); a busca encontra o escalar $|A|$ óptimo com $N_{\mathrm{erase}}>0$.
+
+\begin{center}\small
+\begin{tabular}{@{}rrrrrr@{}}
+\toprule
+$n$ & Maestro & busca & guloso & amostra $10^{3}$ & aleatório \\
+\midrule
+$4$ & $1$ & $1$ & $1$ & $1$ & $1$ \\
+$16$ & $1$ & $1$ & $1$ & $1$ & $0{,}98$ \\
+$256$ & $1$ & $1$ & $1$ & $1$ & $0{,}999$ \\
+$4096$ & $1$ & $1$ & $1$ & $1$ & $0{,}999$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{center}\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+$n=2\times10^{5}$ & $N_{\mathrm{erase}}$ & corte & qualidade \\
+\midrule
+\textbf{Maestro (meia volta)} & $\mathbf{0}$ & $10^{10}$ & $1$ \\
+busca $|A|$ & $12\,600\,063$ & $10^{10}$ & $1$ \\
+guloso & $5\,380\,452$ & $10^{10}$ & $1$ \\
+amostra $10^{4}$ & $629\,937$ & $<10^{10}$ & $<1$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent A latência da máquina cresce com $n$; $N_{\mathrm{erase}}$ do Maestro não --- zero em
+qualquer dobra. Landauer, se invocado, interpreta esse zero; não o substitui.
 
 \subsection*{Massa $=$ corte}
 
 A segunda coordenada da cruz é o \emph{segundo momento}. Postos os elementos em $+1$ e $-1$, com
-$|A|+|B|=n$:
+$|A|+|B|=n$ e desequilíbrio $\delta=|A|-|B|$:
 \[
-  \text{corte} = |A|\,|B|, \qquad
-  \text{massa} = n - \frac{(|A|-|B|)^2}{n} ,
+  C \;=\; |A|\,|B| \;=\; \frac{n^{2}-\delta^{2}}{4},
+  \qquad
+  M \;=\; n - \frac{\delta^{2}}{n} .
 \]
-e \textbf{as duas são função do mesmo desequilíbrio} --- ambas máximas onde ele é zero. Não são duas
-quantidades que coincidem: são a \emph{mesma}, e maximizar o corte é maximizar a massa.
+Para $n$ fixo as duas são \textbf{proporcionais}:
+\[
+  \boxed{\;M \;=\; \dfrac{4C}{n}\;}
+\]
+Não ``se comportam parecido'': são a mesma informação lida em duas réguas. O máximo ocorre em
+$\delta=0$ (partição equilibrada):
+\[
+\boxed{
+\text{corte máximo}
+\;\Longleftrightarrow\;
+\text{massa máxima}
+\;\Longleftrightarrow\;
+\text{partição equilibrada}.
+}
+\]
+Isso é a cruz e a meia volta no mesmo sítio.
 
 \subsection*{E o que o corte carrega é o corpo ordenado}
 
@@ -374,14 +517,15 @@ e pai e filho têm paridades opostas por construção. O máximo possível é o 
 atinge-o --- \emph{a resposta lê-se}, não se procura.
 
 \smallskip
-\noindent \textbf{E a régua aqui é bits apagados, não passos.} Este sistema é reversível e não tem
-tempo --- o que se mede como tempo é latência, e a latência não é propriedade do algoritmo. A
-pergunta ``quanto custa o corte?'' responde-se em bits: o corte por rotação apaga \textbf{zero}, e a
-volta fecha com resíduo zero porque a mesma operação se desfaz a si própria. Procurar o melhor
-comparando candidatos apaga $63$ bits por comparação. \emph{Não é que seja mais rápido: é que não
-paga.} E o controlo diz de onde isso vem: num triângulo, o ciclo ímpar
-mais curto, nenhuma das oito bipartições corta as três arestas. \textbf{É a árvore que o faz valer},
-e não esperteza do método.
+\noindent \textbf{E a régua aqui é $N_{\mathrm{erase}}$, não passos.} Este sistema é reversível e não
+tem tempo --- o que se mede como tempo é latência, e a latência não é propriedade do algoritmo. A
+pergunta ``quanto custa o corte?'' responde-se em apagamento lógico: o corte por rotação tem
+$N_{\mathrm{erase}}=\mathbf{0}$, e a volta fecha com resíduo zero porque a mesma operação se desfaz
+a si própria. Procurar o melhor comparando candidatos apaga $63$ bits por comparação. \emph{Não é
+que seja mais rápido: é que não paga.} Landauer, se vier, interpreta esse $N_{\mathrm{erase}}$; não
+fundamenta a peça. E o controlo diz de onde isso vem: num triângulo, o ciclo ímpar mais curto,
+nenhuma das oito bipartições corta as três arestas. \textbf{É a árvore que o faz valer}, e não
+esperteza do método.
 
 \medido{numa árvore de $63$ nós a paridade corta $62$ de $62$ arestas, o máximo possível; o
 comprimento do caminho iguala a profundidade em todos os nós; ordem $\to$ corte e caminho $\to$ ordem
@@ -390,6 +534,148 @@ meia volta parte ao meio em cinco escalas sem excepção, sem uma comparação; 
 máximo no \emph{mesmo} argumento em três escalas; e o \textbf{controlo}: no triângulo o melhor corte
 fica em $2$ de $3$; e o corte por rotação apaga $0$ bits com a volta a fechar, contra $63$ por
 comparação na busca (\code{tests/maxcut.c}).}
+
+\medido{\textbf{Experimento + bench} (\code{tools/bench\_maxcut.c}): isomorfismo do Maestro em
+$11$ escalas $n=4\ldots4096$ (qualidade $1$, $0$ bits, $|A|=|B|$); árvore por paridade com
+qualidade $1$ nas alturas $2\ldots12$; tabela comparativa Maestro/busca/guloso/amostra/aleatório;
+Landauer $n=2\times10^{5}$ --- Maestro $0$ bits no máximo, busca $12\,600\,063$; dual
+Sort(marcas)$\leftrightarrow$Maestro em $n=4096$ com resíduo $0$.}
+
+\section{Realização computacional do Teorema do Maestro}\label{sec:assistente}
+
+O Dual Sort e o max-cut fecham peças do corpo. A pergunta seguinte não é ``provar a teoria com uma
+LLM'': é \textbf{realizar o Teorema do Maestro} num agente --- a mesma arquitectura em três corpos
+(algoritmo, partitura, assistente). A arquitectura \emph{pode realizar o papel} do Maestro; o motor
+(LLM, tradutor WASM, emissor de partitura) \textbf{não é} o teorema.
+
+\subsection*{A cadeia}
+
+\[
+\boxed{
+\text{massa}
+\;\longrightarrow\;
+\text{corte}
+\;\longrightarrow\;
+\Pi
+\;\longrightarrow\;
+\pi_k
+\;\longrightarrow\;
+\text{realização}
+\;\longrightarrow\;
+\text{leitura}
+}
+\]
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+corpo & assistente & algoritmo / partitura \\
+\midrule
+massa & contexto disponível & sequência / suporte \\
+corte (max-cut) & selecção de suporte relevante & meia volta / bipartição \\
+$\Pi$ & especificação da resposta & partitura / plano \\
+Maestro & mecanismo projector & $\mathcal{P}_k=\mathrm{tick}\circ\mathrm{batuta}\circ\Pi$ \\
+tick & ciclo de processamento & Lei~6 / janela \\
+batuta $I\in\{-1,0,+1\}$ & direcção do fluxo & trial / inversor \\
+Metrónomo & leitura / auditoria & resíduo medido \\
+saída & realização & estado / nota / texto \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent O desafio deixa de ser só ``encontrar a resposta'' e passa a ser \textbf{projectar no
+tempo} o que o suporte já estrutura --- com uma ressalva: a massa de entrada nem sempre contém a
+resposta pronta. O modelo dá
+\[
+  \text{suporte disponível}
+  \;\longrightarrow\;
+  \text{estrutura projectável}.
+\]
+Se faltar informação, o agente \textbf{aumenta a massa} (ferramenta, memória, cálculo) --- não
+finge que ela já estava lá.
+
+\subsection*{Interface agnóstica ao motor}
+
+O corpo fornece a arquitectura; o motor fornece a realização:
+\[
+\boxed{
+(\Pi,\,X,\,\mathrm{tick},\,I)
+\;\longrightarrow\;
+Y
+}
+\qquad\text{e depois}\qquad
+\boxed{
+(X,\,Y,\,\Pi)
+\;\longrightarrow\;
+r
+}
+\]
+onde $X$ é a massa (após o corte), $Y$ a saída, e $r$ o \textbf{resíduo} lido pelo Metrónomo.
+Regra:
+\[
+\boxed{
+\text{o Maestro pode projectar; o Metrónomo pode rejeitar ou pedir nova passagem;}
+\;
+\text{nenhum dos dois inventa a estrutura.}
+}
+\]
+Isto é o mesmo que já está no corpo de Peano: Maestro $\neq$ compositor, Metrónomo $\neq$
+compositor.
+
+\subsection*{O Metrónomo mede o resíduo --- não ``não alucina''}
+
+Não se promove $\lambda^{+}+\lambda^{-}=0$ a detector de verdade da assistente: isso o paper não
+provou para LLMs. O Metrónomo \emph{computacional} é
+\[
+\boxed{
+\text{Metrónomo}
+\;=\;
+\text{leitura métrica do resíduo}
+}
+\]
+com
+\[
+  r
+  \;=\;
+  \operatorname{entrada}
+  \;-\;
+  \operatorname{saída}_{\mathrm{suportada}}.
+\]
+Procura-se $r=0$ quando a tarefa exige conservação estrita. Em tarefas onde $\Pi$ autoriza
+transformação, $r\neq0$ não é automaticamente erro --- é medição, não oráculo.
+
+\subsection*{Três realizações, uma arquitectura}
+
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+ & partitura & assistente & algoritmo \\
+\midrule
+entrada & corpo & contexto & estrutura \\
+$\Pi$ & partitura & especificação & plano / MOVE \\
+projecta & Maestro & agente & meia volta / estaca \\
+realiza & nota & token / bloco & estado \\
+lê & Metrónomo & auditoria & resíduo \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \emph{É a mesma arquitectura em três corpos.} O estudo da assistente avança o Dual Sort /
+max-cut sem os misturar com uma prova sobre modelos generativos: a novidade defensável é a
+\textbf{realização computacional do Teorema do Maestro} --- interface $(\Pi,X,\mathrm{tick},I)$ e
+leitura de $r$ --- já alinhada com a antena local TFAL (\code{lib/fala.h}, \code{banco/fala.c},
+\code{app/src/maestro.js}, \code{app/src/assistente.js}), onde a fala é a interface, o cristal
+\emph{realiza} a projeção e o Metrónomo \emph{atesta a volta}. O corpus casual vive em
+\LaTeX{} (\code{papers/conversa.tex}, semente \code{tools/casual.sh}): as respostas citam o
+catálogo e o tradutor WASM compõe o PDF no browser. A \textbf{histerese} da busca
+(\emph{Corpo de Peano} \S histerese, Teorema da Histerese) \textbf{não} é Lei nova:
+é memória da borda sob a batuta $I\in\{-1,0,+1\}$, validada no corpus
+(\code{tools/bench\_histerese.sh}, $r_{\mathrm{volta}}=0$ na vizinhança).
+A \textbf{rede neural dual} (\emph{Corpo de Peano} \S rede-dual) realiza o Controle
+de Histerese na UI: estaca $W=-I$, $b=c$ (Dual Sort) $\to$ banda $\mathcal{H}$ $\to$
+memória Hopfield; código \code{app/src/rede\_dual.js}, medidor
+\code{tests/rede\_dual.js}. Hopfield $=$ memória da volta; $\lambda^{+}+\lambda^{-}=0$
+segue da dualidade reversível (Metrónomo), não do atrator sozinho.
 
 \section{A permutação é o dual, e a reversibilidade é o teste}
 

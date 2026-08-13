@@ -13,6 +13,7 @@ import { initCardsCampo } from './cards_campo.js'
 import { initMotorWasm, avancaFase } from './motor_wasm.js'
 import { iniciaRelogio } from './relogio.js'
 import { abrirDoc, idDeArquivo } from './tex_tradutor.js'
+import { initAssistente } from './assistente.js'
 
 // ── helpers ──
 const el = (html) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstChild }
@@ -174,6 +175,8 @@ function hero(m) {
           }</a>
           <a class="btn ghost" href="/docs/partitura.pdf" target="_blank" rel="noopener"
              title="Especificação: Pi_tradutor → todas as vozes, um relógio">🎼 Partitura</a>
+          <a class="btn ghost" href="#assistente"
+             title="Fala local — banda = Assinatura(corpo)">✦ Assistente</a>
           <a class="btn ghost" href="#trailer">▶ Ver o trailer</a>
           <a class="btn ghost" href="/repo.git" target="_blank" rel="noopener"
              title="git clone https://goldenkingdom.patriatechnology.com/repo.git">⑂ O repositório</a>
@@ -205,7 +208,8 @@ function autor(a) {
 
 function nav(m) {
   const links = [...m.secoes.map((s) => ({ id: s.id, t: s.titulo })),
-    { id: 'trailer', t: 'Trailer' }, { id: 'substratos', t: 'Substratos' }, { id: 'pontes', t: 'Pontes' }, { id: 'autor', t: 'O autor' }, { id: 'docs', t: 'Docs' }]
+    { id: 'trailer', t: 'Trailer' }, { id: 'substratos', t: 'Substratos' }, { id: 'pontes', t: 'Pontes' },
+    { id: 'assistente', t: 'Assistente' }, { id: 'autor', t: 'O autor' }, { id: 'docs', t: 'Docs' }]
   // o botão ☰ só aparece no telemóvel (o CSS o esconde no desktop); abre a gaveta dos links
   return `<nav class="nav">
     <a class="brand" href="#top">Reino Dourado</a>
@@ -223,6 +227,7 @@ manifesto.secoes.forEach((s) => main.insertAdjacentHTML('beforeend', secao(s)))
 main.insertAdjacentHTML('beforeend', trailer(manifesto.trailer))
 main.appendChild(initSubstratos(substratosData))
 main.appendChild(initPontes(pontesData))
+main.appendChild(initAssistente())
 main.insertAdjacentHTML('beforeend', docs(manifesto.docs))
 main.insertAdjacentHTML('beforeend', autor(manifesto.autor))
 main.insertAdjacentHTML('beforeend', `

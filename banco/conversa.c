@@ -77,6 +77,7 @@ static void grava(long i, Slot s){ MOVE(i, -1, s); }
 #define LARG    6            /* filhos por registo de nó — o resto encadeia */
 /* nó = [nfilhos | resposta][s1|f1][s2|f2]...[s6|f6][0|continuação] = 8 slots */
 #define NOSL    8
+#define RESP_LIM 4096        /* respostas longas do corpus — não cortar a meio */
 
 static long novo_no(void){
     long l = le(H_LIVRE).a;
@@ -1320,7 +1321,7 @@ static void responde(const char *fala){
         printf("   (torção: %d falas no mesmo canal)\n", n);
         for(int k = 0; k < n; k++){
             no_banco(torc_banco[k < 8 ? k : 7]);   /* cada resposta no SEU banco */
-            char t[1024]; le_texto(v[k], t, sizeof t);
+            char t[RESP_LIM]; le_texto(v[k], t, sizeof t);
             printf("%s\n", t);
         }
         return;
@@ -1373,7 +1374,7 @@ static void responde(const char *fala){
                    " Do lado de cada um há isto — precisa de mais uma palavra para escolher)\n",
                    nb);
             for(int k = 0; k < nb; k++){
-                char t[1024]; le_texto(saidas[k], t, sizeof t);
+                char t[RESP_LIM]; le_texto(saidas[k], t, sizeof t);
                 printf("   %d) %s\n", k + 1, t);
             }
             return;
@@ -1381,7 +1382,7 @@ static void responde(const char *fala){
     }
     if(!r){
         /* ANTES DO DECRETO: perguntar ao barramento. Nao sei nao e o fim — e o fim do que EU sei. */
-        char outra[1024];
+        char outra[RESP_LIM];
         if(pergunta_ao_barramento(fala, outra, sizeof outra)){
             printf("%s\n", outra);
             printf("   (do barramento — outra assistente sabia, e eu aprendi)\n");
@@ -1392,7 +1393,7 @@ static void responde(const char *fala){
         printf("   (nada no corpus alcança esta fala — ensina-me com: aprende)\n");
         return;
     }
-    char t[1024]; le_texto(r, t, sizeof t);
+    char t[RESP_LIM]; le_texto(r, t, sizeof t);
     printf("%s\n", t);
     printf("   (%s, %d símbolo(s) de caminho)\n", via, d);
 }

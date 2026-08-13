@@ -32,7 +32,7 @@ def main():
         fecha = corpo.find('}')
         if fecha < 0: continue
         titulo = limpa(corpo[:fecha])
-        resto = limpa(corpo[fecha+1:])[:400]
+        resto = limpa(corpo[fecha+1:])[:1200]
         if len(titulo) < 4 or len(resto) < 40: continue
         t = titulo.replace("'", "").replace('"', '')
         r = resto.replace("'", "").replace('"', '')
@@ -44,7 +44,7 @@ def main():
         bloco = m.group(1)
         corte = re.split(r'---|\.\s', limpa(bloco), maxsplit=1)
         if len(corte) < 2: continue
-        titulo, resto = corte[0].strip()[:120], corte[1].strip()[:400]
+        titulo, resto = corte[0].strip()[:200], corte[1].strip()[:1200]
         # A FALA E A PARTE HUMANA. O item comeca por "tools/x.c" e ninguem pergunta assim — o
         # nome do ficheiro e etiqueta, nao pergunta. Fica o que vem depois dele.
         titulo = re.sub(r'^tools/\S+\s*[-—]*\s*', '', titulo).strip()

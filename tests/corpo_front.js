@@ -55,9 +55,10 @@ const { resolveNoCorpo, tipoDe } = mod;
 
 /* ─── §F0 o que o browser compõe está no manifesto ────────────────────────────────── */
 {
-    const trad = fs.readFileSync(path.join(APP, 'tex_tradutor.js'), 'utf8');
-    const bloco = /const DOCS = \{([^}]+)\}/.exec(trad);
-    const fontes = bloco ? [...bloco[1].matchAll(/:\s*'([^']+\.tex)'/g)].map(x => x[1]) : [];
+    // Fonte de verdade: docs_tradutor.json (tex_tradutor.js faz DOCS = { ...docsTradutor.docs })
+    const docsJson = JSON.parse(fs.readFileSync(path.join(APP, 'docs_tradutor.json'), 'utf8'));
+    const fontes = Object.values({ ...docsJson.docs, ...(docsJson.so_teste || {}) })
+        .filter(f => typeof f === 'string' && f.endsWith('.tex'));
     const fora = fontes.filter(f => !LISTA.includes(f));
     console.log(`   front DOCS: ${fontes.length}; fora do manifesto: ${fora.length}${fora.length ? ' ' + fora.join(' ') : ''}`);
     ok('§F0 cada .tex que o tex_tradutor.js compõe está no manifesto — o slot existe antes do click',

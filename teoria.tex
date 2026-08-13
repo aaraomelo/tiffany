@@ -2406,6 +2406,94 @@ constrói a partir da estaca. Nenhum passo invoca a reta, nem o círculo, nem um
 e o círculo, se aparecer, aparece \emph{depois}, como a figura que este fluxo desenha. É a mesma
 inversão que atravessa o texto todo: \emph{a figura não é o dado, é o rasto}.
 
+\subsection{A fórmula de Euler --- o que a prova já nomeou}\label{sec:euler}
+
+\noindent A prova do meio-período já escreveu
+\[
+  \exp(tJ) \;=\; c(t)\cdot 1 \;+\; s(t)\cdot J
+\]
+com as duas séries e a conservação $c^{2}+s^{2}\equiv1$. \textbf{Isso é a fórmula de Euler},
+ainda sem o nome clássico: a exponencial do gerador normalizado decompõe-se no par dual
+$(c,s)$ da cruz. O que falta é só dizer que $c$ e $s$ \emph{são} o cosseno e o seno --- não
+por definição geométrica, mas porque são as únicas funções que a série e a Lei~$2$ forçam.
+
+\begin{mdframed}[linewidth=0.4pt,innerleftmargin=10pt,innerrightmargin=10pt,
+                 innertopmargin=8pt,innerbottommargin=8pt,skipabove=6pt,skipbelow=6pt]
+\textbf{Teorema (Euler --- fluxo do gerador normalizado).}\label{thm:euler}
+Seja $J$ com $J^{\dagger}=-J$ e $J^{2}=-1$, e seja
+\[
+  \exp(tJ) \;=\; \sum_{n\geq0}\frac{(tJ)^{n}}{n!}.
+\]
+Então existem únicas funções $c,s$ (as séries acima) tais que
+\[
+  \boxed{\;\exp(tJ) \;=\; c(t)\,1 \;+\; s(t)\,J\;}
+\]
+com
+\[
+  \boxed{\;c'= -s,\qquad s'= c,\qquad c(0)=1,\quad s(0)=0\;}
+\]
+e
+\[
+  \boxed{\;c(t)^{2}+s(t)^{2}\;\equiv\;1\;}.
+\]
+Escreve-se $\cos t := c(t)$ e $\sin t := s(t)$. Em particular, na realização
+$J\mapsto i$ (o rotor da Lei~$2$ no plano do par conjugado),
+\[
+  \boxed{\;e^{i\theta} \;=\; \cos\theta \;+\; i\sin\theta\;}.
+\]
+\end{mdframed}
+
+\begin{proof}
+Como $J^{2}=-1$, as potências ciclam: $J^{0}=1$, $J^{1}=J$, $J^{2}=-1$, $J^{3}=-J$, e
+depois repetem. A série de $\exp(tJ)$ parte em índices pares e ímpares:
+\[
+  \exp(tJ)
+  \;=\;
+  \sum_{k}\frac{(-1)^{k}t^{2k}}{(2k)!}\,1
+  \;+\;
+  \sum_{k}\frac{(-1)^{k}t^{2k+1}}{(2k+1)!}\,J
+  \;=\;
+  c(t)\,1+s(t)\,J.
+\]
+Derivação termo a termo (Parte~\ref{part:analise}) dá $c'=-s$ e $s'=c$; os valores em
+$0$ são os da série. A Lei~$2$ conserva a cruz:
+\[
+  \bigl(c^{2}+s^{2}\bigr)'
+  \;=\;
+  2cc'+2ss'
+  \;=\;
+  -2cs+2sc
+  \;=\;
+  0,
+\]
+e em $t=0$ vale $1$, logo $c^{2}+s^{2}\equiv1$. Unicidade: o par $(c,s)$ resolve o
+problema de valor inicial linear de ordem um no plano da cruz; a solução é única. A
+identificação $J\mapsto i$ é a realização do par conjugado
+(\emph{Corpo de Peano}, \S pares complexos): o mesmo enunciado torna-se
+$e^{i\theta}=\cos\theta+i\sin\theta$. $\square$
+\end{proof}
+
+\noindent \textbf{Nada foi emprestado.} Não se postula o círculo para definir seno e
+cosseno: eles saem da série do fluxo e da conservação da norma. O círculo, se aparecer,
+é o rasto $\{c(t)+s(t)J\}$ no plano da cruz --- a figura, outra vez, depois do operador.
+
+\medskip
+\noindent \textbf{Corolários imediatos} (já usados em silêncio noutros sítios):
+\begin{itemize}\itemsep2pt
+\item $e^{i\pi}=\cos\pi+i\sin\pi=-1$ --- a Lei~$1$ lida no fluxo (definição de $\pi$);
+\item $e^{i\cdot0}=1$, e $+1$, $-1$ em polar são o mesmo elemento com fases $0$ e $\pi$
+      (\S assinatura / trial);
+\item $i^{z}=e^{i\pi z/2}$ --- a torre de teste $T_{k+1}=i^{T_k}$
+      (\emph{Corpo de Peano}) assenta nesta identidade, não numa metáfora;
+\item forma polar: se $z=r e^{i\theta}$, então $r$ é a norma da cruz e $\theta$ a fase
+      do fluxo --- módulo e orientação, sem inventar coordenadas novas.
+\end{itemize}
+
+\medido{\code{tests/pidual.c} --- as somas de $\cos$/$\sin$ (Machin, Euler, Hermann)
+concordam nas $24$ primeiras casas de $\pi$ em aritmética inteira; o residual de
+$\cos\pi+1$ e $\sin\pi$ mede o fecho da fórmula no alvo da Lei~$1$.
+\code{tests/luz\_periodo.c}: $c=\pi R$ como concordância de dois instrumentos.}
+
 \subsection{Por que $\pi$ não é um elemento, e sim um limite}\label{sec:pilimite}
 
 \noindent A álgebra dá os passos e não dá o alvo, e isto pode ser medido em vez de afirmado. Os

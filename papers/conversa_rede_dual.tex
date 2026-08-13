@@ -1,0 +1,114 @@
+% !TeX program = pdflatex
+% papers/conversa_rede_dual.tex — Rede neural dual no corpus (leve; depois histerese).
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[brazil]{babel}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\input{gkcapa}
+\begin{document}
+\gkcapa{Rede neural dual}
+       {P $\cdot$ $\mathcal{H}$ $\cdot$ H na interface}
+       {estaca, banda, memória --- conjugação, não atrator}
+\maketitle
+\begin{abstract}
+Pares curtos do Teorema da Rede Dual.
+Detalhe: \code{papers/corpo\_peano.tex} \S rede-dual.
+UI: \code{app/src/rede\_dual.js}; medidor \code{tests/rede\_dual.js}.
+\end{abstract}
+
+\section{o que e a rede dual}
+$P\cdot\mathcal{H}\cdot H$: estaca $W=-I$, banda de histerese, Hopfield $=$ memória $Y$.
+$\lambda^{-}$ vem da conjugação reversível, não do atrator.
+\code{papers/corpo\_peano.tex} \S rede-dual.
+
+\section{o que e a rede neural dual}
+Teorema: retenção na banda; $F_H=D\circ F_P^{-1}\circ D^{-1}$; $\lambda_P+\lambda_H=0$.
+Hopfield $=$ memória da volta, não inversão. Pesos $W=-I$ pela Lei~1.
+\code{papers/corpo\_peano.tex} \S rede-dual.
+
+\section{o que e a conjugacao reversivel}
+$F_H=D\circ F_P^{-1}\circ D^{-1}$ com $D(x)=2c-x$ (estaca Dual Sort).
+Hopfield $\neq$ inversão: atracção $\neq$ reversibilidade.
+\code{papers/corpo\_peano.tex} \S rede-dual; \code{tests/rede\_dual.js} §R5--§R7.
+
+\section{o que e o estado hibrido}
+$X=(x,h)$; $\mathcal{F}\colon(x,h)\mapsto(x',h')$.
+Na banda: $(x',h')=(x,h)$. Fora: frente $F_P$ ou volta $F_H$.
+\code{papers/corpo\_peano.tex} \S rede-dual.
+
+\section{o que e retencao neural}
+$|u|\le\Delta\Rightarrow h'=h$; sequência na banda conserva $h_n=h_0$.
+\code{papers/corpo\_peano.tex} thm:retencao-neural.
+
+\section{hopfield e a inversa?}
+Não. Hopfield realiza a memória da volta; a dualidade reversível garante $\lambda^{-}$.
+\code{papers/corpo\_peano.tex} \S rede-dual.
+
+\section{o que mede o metronomo na rede}
+$\lambda^{+}+\lambda^{-}=0$ quando a volta fecha --- atestação, não oráculo.
+\code{papers/corpo\_peano.tex}; UI \code{app/src/assistente.js}.
+
+\section{mostra a rede dual}
+\code{papers/corpo\_peano.tex} \S rede-dual --- depois histerese e leitura complexa.
+Medidor: \code{tests/rede\_dual.js}.
+
+\section{falemos da rede dual}
+Três operadores distintos: percepção, borda, memória.
+\code{papers/corpo\_peano.tex} \S rede-dual.
+
+\section{a conjugacao fechou no experimento?}
+Sim, no modelo afim Dual Sort: $DF_H\,DF_P=I$, $F_H\circ F_P=\mathrm{id}$,
+$\lambda_P+\lambda_H=0$ em dim.~1 e~2 (\code{tests/rede\_dual.js} §R5--§R7;
+Prop.\ fecho experimental em \code{papers/corpo\_peano.tex}).
+Hopfield continua memória $Y$, não a prova de inversão.
+
+\section{a rede dual e o teorema central?}
+Não é o Teorema Central: é o controlo de histerese sob Maestro/Metrónomo.
+Cadeia: Central $\to$ Maestro/Metrónomo $\to$ controlo $\to$ rede dual.
+\code{papers/corpo\_peano.tex} Prop.\ leitura operacional.
+
+\section{o que e o teorema central no peano}
+Hurwitz (contar) $\leftrightarrow$ Gentil (integrar) pela soma reversível ---
+estrela $\nu\circ\nu=\mathrm{id}$. Citado do Corpo estelar; na torre vira
+$\pi_k$, Maestro/Metrónomo, depois controlo.
+\code{papers/corpo\_peano.tex}; \code{teoria.tex} \S central.
+
+\section{como o teorema central sobe a torre}
+Estrutura $\pi_k$ $\to$ dinâmica/métrica (Maestro projecta; Metrónomo
+atesta $\lambda^{+}+\lambda^{-}=0$) $\to$ controlo $(P,\mathcal{H},H)$
+$\to$ Conservatório/Pera/Batuta.
+Mesma forma da estrela; camadas distintas.
+\code{papers/corpo\_peano.tex} Prop.\ central-operacional.
+
+\section{o que e o conservatorio no peano}
+Andar acima: estrutura superior conservada (norma Gentil, cone).
+Não é a orquestra --- é o depósito que a projecção não inventa.
+\code{papers/corpo\_peano.tex} \S musica.
+
+\section{o que e a pera na batuta}
+Base da batuta: cone acoplado em $s=0$; encaixe
+Conservatório$\hookrightarrow$Batuta. Não é $I$.
+\code{papers/corpo\_peano.tex}.
+
+\section{como a rede dual entra na musica}
+A batuta canaliza $I$; a rede dual escolhe $F_P$/retenção/$F_H$;
+o Metrónomo atesta $\lambda^{+}+\lambda^{-}=0$ relativamente a $\Pi$.
+\code{papers/corpo\_peano.tex} Prop.\ rede-no-canal.
+
+\section{o que e a partitura pi}
+$\Pi=$ assinatura $+$ notação: o \emph{quê} do Maestro.
+Música $=$ realização; partitura $=$ transporte. Não funda leis.
+\code{papers/corpo\_peano.tex} Def.\ partitura; \code{papers/partitura.tex}.
+
+\section{como a partitura entra na assistente}
+\code{partituraFala} extrai $\Pi$; batuta dá $I$; rede dual escolhe o ramo;
+Metrónomo lê $r$ sob $\Pi$.
+\code{app/src/maestro.js}; Prop.\ pi-cadeia em \code{papers/corpo\_peano.tex}.
+
+\section{mostra a partitura}
+\code{papers/partitura.tex} --- realização gráfica; produto
+\code{partitura-wasm.pdf}.
+
+\end{document}

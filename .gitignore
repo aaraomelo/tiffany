@@ -4,6 +4,7 @@
 *.out
 *.toc
 *.fls
+*.fdb_latexmk
 *.synctex.gz
 
 # PDFs gerados dos papers (pdflatex regenera dos .tex). Os quatro da raiz foram apagados
@@ -19,6 +20,7 @@ banco/*
 !banco/*.c
 !banco/*.sql
 !banco/*.sh
+!banco/*.txt
 !banco/apps/
 !banco/apps/*.erg
 !banco/*.py
@@ -36,6 +38,8 @@ tools/*
 !tools/*.py
 !tools/atestados.txt
 !tools/NAO-MEDIDORES.txt
+!tools/.gabarito_sistema.txt
+!tools/.gabarito_fundacao.txt
 /morfico.pdf
 
 # tatoeba/ SAIU DO PROJETO em 03/08. Os 17 medidores dependiam de corpus que nunca esteve
@@ -115,6 +119,8 @@ curriculo/*
 tests/dados/
 banco/dados/
 dados/
+banco/.fala/
+banco/fala
 
 # O hinário "Nova Dimensão" é obra religiosa de terceiro (Santo Daime), usada como
 # BASE do terceiro acto — o enredo dá-lhe crédito e NÃO reproduz o texto dos hinos.

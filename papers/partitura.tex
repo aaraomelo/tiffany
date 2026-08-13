@@ -56,7 +56,17 @@
 \newcommand{\AndarAbre}{\pipagina{170mm}}%
 \newcommand{\PartituraSecao}{\section{A partitura (obra)}}%
 
-% Uma voz no andar corrente: pauta + música. π_página reserva o bloco.
+% Metrónomo = eixo W (Lei~4 / Def.~morfológico): dilata [0,W]; as vozes seguem a marca.
+\newcommand{\VozMetro}[2]{%
+\morfvstep
+\pipagina{16mm}%
+\par\medskip\noindent
+\textbf{Metronomo}\quad{\small\color{regua}#1}\par\vspace{2mm}%
+\PentaUm\vspace{#2}%
+\morfh\noindent
+}
+
+% Voz sob a mesma marca W do metrónomo (\morfh = Lei~4).
 \newcommand{\VozAbre}[4]{%
 \morfvstep
 \pipagina{28mm}%
@@ -64,15 +74,6 @@
 \textbf{#1}\quad{\small\color{regua}#2}\par\vspace{2mm}%
 #3\par
 \vspace{#4}%
-\morfh\noindent
-}
-
-\newcommand{\VozMetro}[2]{%
-\morfvstep
-\pipagina{16mm}%
-\par\medskip\noindent
-\textbf{Metronomo}\quad{\small\color{regua}#1}\par\vspace{2mm}%
-\PentaUm\vspace{#2}%
 \morfh\noindent
 }
 
@@ -120,6 +121,17 @@ G{=}\mathrm{Hurwitz}\cup\mathbb{Z}/8\mathbb{Z},\;
 \to\text{tempo}\to Y\to(W,H)\to\text{página}.
 }
 \]
+\[
+\boxed{
+\Pi=\text{quê};\quad
+I=\text{sentido};\quad
+\mathcal{F}=\text{ramo dual};\quad
+r=\text{atestação}
+\quad
+(\text{Prop.\ pi-cadeia / rede-no-canal em }
+\code{papers/corpo\_peano.tex}).
+}
+\]
 
 \begin{definicao}[Cabeça clássica]
 pauta $\to$ \verb|\Cabeca*| $(\kappa,\alpha,n/m)$ $\to$ $F/R$ $\to$
@@ -138,8 +150,8 @@ $W\leftarrow$Lei~4; $H\leftarrow\operatorname{Ind}^{8}$/Estrela
 
 \begin{observacao}
 Fonte: \code{partitura/emite.c} $\to$ \code{partitura\_vozes.tex}.
-Página $=$ andar do relógio do Maestro (meia volta $=$ Dim$/2$ compassos);
-vozes em paralelo por andar; \verb|\AndarPagina| avança $P_n\to P_{n+1}$.
+Metrónomo $=$ marca $W$ (Lei~4 / \verb|\morfh|): dilata $[0,W]$;
+vozes seguem a mesma marca. Página $=$ andar do relógio (meia volta).
 Produto: \code{partitura-wasm.pdf}.
 \end{observacao}
 
@@ -150,10 +162,10 @@ Produto: \code{partitura-wasm.pdf}.
 \begin{tabular}{@{}lccc@{}}
 voz & eixo / papel & involução & conteúdo \\
 \hline
-Metrónomo & horizontal / tick & $\lambda^{\pm}$ & \verb|\Tick| \\
+Metrónomo & $W$ / tick (relógio) & $\lambda^{\pm}$ & \verb|\Tick| + \verb|\morfh| \\
 Batuta & trial $I$ & --- & \verb|\Acento| / ataque \\
 Maestro & $\pi_k$ & --- & projecção \\
-naipes & Hurwitz $1,2,4,8$ & --- & $G_i$ \\
+naipes & Hurwitz $1,2,4,8$ & --- & $G_i$ (seguem $W$) \\
 Lei~8 & $\mathbb{Z}/8\mathbb{Z}$ & $\operatorname{Ind}^{8}$ & ciclo \\
 \end{tabular}
 \end{center}

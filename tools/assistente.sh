@@ -1,91 +1,85 @@
 #!/bin/bash
-# assistente.sh — A ASSISTENTE LIGADA AO FORWARD: corpus primeiro, llama depois, e aprende.
+# assistente.sh — corpus primeiro; ollama como gabarito; aprende de volta.
 #
-# O Aarão: "pode ligar, e também cabe realizar o llama aí, porque agora ele roda num ambiente
-# reversível via o corpo da cifra."
+#   ./assistente.sh <base> "a fala"
+#   ./assistente.sh <base> conversa
+#   MODELO=qwen2.5:1.5b ./assistente.sh <base> "oi"
 #
-# As duas peças já existiam e nunca se tinham tocado:
-#
-#   conversa.c   o corpus — cifra a fala, desce a árvore em pread, e a resposta mora na folha.
-#                Nada em RAM. E tem o DECRETO: quando nada alcança a fala, diz "não sei" em vez
-#                de inventar — é o único dos três métodos sem dual, e é ele que a torna honesta.
-#
-# O encaixe sai do decreto e não de uma regra minha: o corpus responde o que sabe, e é o "não
-# sei" que passa a palavra ao llama. Depois a resposta VOLTA para o corpus — a assistente
-# aprende do que o modelo disse, e da segunda vez responde sem o acordar.
-#
-# E A POTÊNCIA entrou no despacho. O Aarão: "cruza dois da mesma arquitetura e põe no despacho;
-# aí já é potência, e não clone nem reprodução." O potencia.c mediu porquê: com a mesma forma o
-# corpo não cresce (não é reprodução) e não se copia (não é clone) — sobe o EXPOENTE. E num
-# agente isso é executável: A² é o forward aplicado ao próprio resultado.
-#
-# O clone e a reprodução não entram aqui, e por razões diferentes: o clone devolve o que entrou
-# (não acrescenta nada ao despacho) e o filho da reprodução vive num corpo que nenhum pai
-# habitava — é material do banco, não uma rede que corra. A potência é a única das três que
-# responde.
-#
-#   ./assistente.sh <base> "a fala"        pergunta
-#   ./assistente.sh <base> "a fala" 2      pergunta com POTÊNCIA 2 (o agente relê-se)
-#   ./assistente.sh <base> conversa        modo interativo
+# O llama NÃO é o Maestro — só gabarito temporário quando o corpus diz «não sei».
 set -u
 CD="$(cd "$(dirname "$0")" && pwd)"
-BASE=${1:-$CD/../.torre/assistente}
-CONVERSA=${CONVERSA:-$CD/conversa}
-FORWARD=${FORWARD:-$CD/forward}
-N=${N:-24}
-POT=${POT:-1}          # a potência do agente: 1 = A, 2 = A², … (potencia.c)
+ROOT=$(cd "$CD/.." && pwd)
+BASE=${1:-$ROOT/banco/.fala/assistente}
+CV=${CONVERSA:-$ROOT/banco/bin/conversa}
+MODELO="${MODELO:-qwen2.5:1.5b}"
+SISTEMA="$CD/.gabarito_sistema.txt"
 
-[ -x "$CONVERSA" ] || { echo "assistente: falta o corpus — cc -O2 -std=c99 -I$CD $CD/conversa.c -lm -o $CONVERSA" >&2; exit 1; }
-[ -x "$FORWARD" ]  || { echo "assistente: falta o forward — cc -O2 -std=c99 -I$CD $CD/forward.c -lm -o $FORWARD" >&2; exit 1; }
-mkdir -p "$(dirname "$BASE")"
+[ -x "$CV" ] || { echo "assistente: falta $CV" >&2; exit 1; }
+mkdir -p "$(dirname "$BASE")" "$BASE"
 
-responde(){
+if [ ! -f "$SISTEMA" ]; then
+  cat > "$SISTEMA" <<'SYS'
+És uma assistente educada e simpática. Português do Brasil, 1–3 frases.
+Assuntos do dia a dia. NÃO fales de teoria, papers ou algoritmos.
+SYS
+fi
+
+ollama_ask() {
+  local fala="$1"
+  python3 - "$MODELO" "$SISTEMA" "$fala" <<'PY'
+import json, sys, urllib.request
+modelo, sistema_path, fala = sys.argv[1], sys.argv[2], sys.argv[3]
+sistema = open(sistema_path, encoding="utf-8").read().strip()
+payload = {
+  "model": modelo,
+  "stream": False,
+  "options": {"temperature": 0.35, "num_predict": 200},
+  "messages": [
+    {"role": "system", "content": sistema},
+    {"role": "user", "content": fala},
+  ],
+}
+req = urllib.request.Request(
+  "http://127.0.0.1:11434/api/chat",
+  data=json.dumps(payload).encode("utf-8"),
+  headers={"Content-Type": "application/json"},
+  method="POST",
+)
+with urllib.request.urlopen(req, timeout=120) as r:
+  d = json.loads(r.read().decode("utf-8"))
+print(d.get("message", {}).get("content", "").strip())
+PY
+}
+
+responde() {
   local fala="$1"
   local r
-  r=$("$CONVERSA" "$BASE" responde "$fala" 2>/dev/null | head -1)
-  if [ -n "$r" ] && [ "$r" != "não sei." ]; then
+  r=$("$CV" "$BASE" responde "$fala" 2>/dev/null | head -1)
+  if [ -n "$r" ] && [ "$r" != "não sei." ] && [ "$r" != "nao sei" ]; then
     echo "[corpus] $r"
     return 0
   fi
-  # O DECRETO passou a palavra. Agora o llama — do disco, em CPU, sem servidor nenhum.
-  echo "[corpus] não sei — a perguntar ao llama (do disco, CPU)" >&2
+  echo "[corpus] não sei — gabarito ollama ($MODELO)" >&2
   local g
-  g=$("$FORWARD" "$fala" "$N" 2>/dev/null | sed -n 's/^      gerado   "\(.*\)"$/\1/p')
-  if [ -z "$g" ]; then echo "[llama] (não respondeu)"; return 1; fi
+  g=$(ollama_ask "$fala" 2>/dev/null | tr '\n' ' ' | sed 's/  */ /g; s/^[[:space:]]*//; s/[[:space:]]*$//')
+  if [ -z "$g" ]; then
+    echo "[llama] (não respondeu — ollama a correr?)"
+    return 1
+  fi
   echo "[llama] $g"
-
-  # A POTÊNCIA: A² é o agente a responder à sua própria resposta. Corre porque o corpo é o
-  # mesmo — só o expoente sobe. E o espaço de estados é finito, portanto a órbita fecha
-  # (potencia.c §P3): não é preciso pôr teto à mão, o corpo põe-no.
-  local k=1
-  while [ "$k" -lt "$POT" ]; do
-    local g2
-    g2=$("$FORWARD" "$fala$g" "$N" 2>/dev/null | sed -n 's/^      gerado   "\(.*\)"$/\1/p')
-    [ -z "$g2" ] && break
-    k=$((k+1))
-    echo "[llama^$k] $g2"
-    g="$g$g2"
-  done
-  # e VOLTA para o corpus: da próxima vez o modelo não é preciso
-  "$CONVERSA" "$BASE" aprende "$fala" "$g" >/dev/null 2>&1
-  echo "[corpus] aprendido — da próxima respondo sem acordar o modelo" >&2
+  "$CV" "$BASE" aprende "$fala" "$g" >/dev/null 2>&1
+  echo "[corpus] aprendido — da próxima sem acordar o modelo" >&2
 }
 
 if [ "${2:-}" = "conversa" ] || [ "${1:-}" = "conversa" ]; then
-  echo "assistente: corpus em $BASE, llama em $FORWARD (disco+CPU). Ctrl-D para sair."
+  echo "assistente: corpus=$BASE gabarito=$MODELO  (Ctrl-D sai)"
   while IFS= read -r -p "> " linha; do
     [ -z "$linha" ] && continue
     responde "$linha"
   done
 else
   shift 2>/dev/null || true
-  # o último argumento numérico é a potência
-  if [ $# -gt 1 ]; then
-    local ult
-    eval ult=\${$#}
-    case "$ult" in ([0-9]) POT="$ult"; set -- "${@:1:$(($#-1))}" ;; esac
-  fi
   fala="${*:-}"
-  [ -z "$fala" ] && { echo "uso: $0 <base> \"a fala\"   |   $0 <base> conversa" >&2; exit 2; }
+  [ -z "$fala" ] && { echo "uso: $0 <base> \"fala\" | $0 <base> conversa" >&2; exit 2; }
   responde "$fala"
 fi

@@ -27,7 +27,10 @@
 
 \begin{abstract}
 Um corpo possui operações e ordem. Não se postula $\mathbb{R}$ com
-$+$ e $\times$: o corpo \textbf{constrói-se}. A cadeia é
+$+$ e $\times$: o corpo \textbf{constrói-se}. \textbf{A teoria vem no
+fim:} antes, a torre de fundação
+(\code{papers/torre\_fundacao.tex}) --- Corpos, Dinâmica, Topologia,
+Hilbert/Clifford. A cadeia neste paper é
 \[
 \boxed{
 \text{borda}
@@ -46,7 +49,8 @@ $+$ e $\times$: o corpo \textbf{constrói-se}. A cadeia é
 }
 \]
 O teorema central (\emph{Corpo estelar}): contar (Hurwitz) e integrar
-(Gentil) são duais pela medida. O resultado deste paper não é só a
+(Gentil) são duais pela medida --- \emph{ponto de chegada}, não de
+partida. O resultado deste paper não é só a
 estrutura: a construção \textbf{admite realização dinâmica por retração
 entre andares} e a sua \textbf{dual métrica para leitura}. O
 \textbf{Teorema do Maestro}
@@ -63,12 +67,44 @@ traduz $\Pi\to\mathrm{Maestro}\to\pi_k\to G_i\to\mathcal{O}$).
 O tradutor \texttt{.tex}$\leftrightarrow$PDF
 (\emph{Arquitetura}) opera nesta torre: \code{MOVE} é a estrela; $\pi_k$ é a
 retração. Milénios são leituras, não base
-(\S\ref{sec:milenio-leitura}). Verificação:
-\code{tests/corpo\_peano.c} §CP1--§CP40.
+(\S\ref{sec:milenio-leitura}). O \textbf{Teorema da Histerese}
+(\S\ref{sec:histerese}) deriva o conceito clássico
+$(\theta_{\mathrm{high}},\theta_{\mathrm{low}})$ como memória da
+borda sob a batuta --- sem Lei~$9$. O dual,
+\textbf{Controle de Histerese} (\S\ref{sec:controle-histerese}),
+selecciona variantes em $\mathcal{V}_k$ sem destruir o estado retido.
+A \textbf{leitura complexa} (\S\ref{sec:pares-complexos})
+formaliza o par $(R,I)$, deriva Euler (\S\ref{sec:euler-peano}),
+e põe o \textbf{Metrónomo entre} as visões cartesiana e polar
+(\S\ref{sec:metronomo-ponte}) --- mede o tick nas duas cartas; depois
+a forma polar e a releitura de Lyapunov
+(\S\ref{sec:lyap-dual-releitura}). Só então a \textbf{rede neural
+dual} (\S\ref{sec:rede-dual}): Teoremas~\ref{thm:retencao-neural},
+\ref{thm:rede-dual}; pesos $W=-I$ pela Lei~1; Hopfield $=$ memória da
+volta, não inversão --- $\lambda^{+}+\lambda^{-}=0$ pela dualidade
+reversível (Teorema~\ref{thm:metronomo}). Verificação:
+\code{tests/corpo\_peano.c} §CP1--§CP40;
+\code{tools/bench\_histerese.sh};
+\code{tools/bench\_vizinhanca.sh};
+\code{papers/dualsort.tex}.
 \end{abstract}
 
 \medskip
 \noindent\textbf{Leitura.}
+\[
+\boxed{
+\text{Fundação}
+\;(\code{papers/torre\_fundacao.tex})
+\;\Longrightarrow\;
+\text{este paper}
+\;\Longrightarrow\;
+\text{Teorema Central}
+\;\Longrightarrow\;
+\text{música}.
+}
+\]
+Não se entra pelo teto: Corpos\,$\to$\,Dinâmica\,$\to$\,Topologia\,$\to$\,
+Hilbert/Clifford \textbf{antes} do Maestro, da histerese e do Gentil--Hurwitz.
 \[
 \boxed{
 \text{Teorema Central}
@@ -77,6 +113,8 @@ retração. Milénios são leituras, não base
 \;\Longrightarrow\;
 \bigl(\text{Maestro},\,\text{Metrónomo}\bigr)
 \;\Longrightarrow\;
+\text{controlo / rede dual}
+\;\Longrightarrow\;
 \text{realização musical}.
 }
 \]
@@ -84,15 +122,18 @@ retração. Milénios são leituras, não base
 \boxed{
 \text{Maestro}=\text{dinâmica (projecta)};
 \qquad
-\text{Metrónomo}=\text{métrica (lê)}.
+\text{Metrónomo}=\text{métrica (lê)};
+\qquad
+\text{rede dual}=\text{controlo }(P,\mathcal{H},H).
 }
 \]
 A construção (§§ iniciais / contínuo / torre) chega à retração; o
-par Maestro\,/\,Metrónomo (\S\ref{sec:maestro-thm}) é o eixo; a música
+par Maestro\,/\,Metrónomo (\S\ref{sec:maestro-thm}) é o eixo; o
+controlo de histerese e a rede dual (\S\ref{sec:rede-dual}) realizam
+a atestação na interface; a música
 (\S\ref{sec:musica}) é a consequência
 (Conservatório$\to$Pera$\to$Batuta). Quem quiser o eixo primeiro:
-\S\ref{sec:maestro-thm}.
-
+\S\ref{sec:maestro-thm} --- mas só depois da fundação.
 %======================================================================
 \section{Família metálica e torre em $\mathbb{R}^{n}$}
 
@@ -335,9 +376,50 @@ recuperam-se aqui; não se postulam.
 \text{Gentil (integrar, contínuo)}.
 }
 \]
+A bijeção dual é a \textbf{estrela} $\nu$ com $\nu\circ\nu=\mathrm{id}$
+(involução, Lei~1 no nível da medida): liga sem fundir, resíduo~$0$.
 \textbf{Destino:} Teorema Central $\Rightarrow$ retração $\pi_k$
 $\Rightarrow$ Teorema do Maestro (\S\ref{sec:maestro-thm})
+$\Rightarrow$ controlo / rede dual (\S\ref{sec:rede-dual})
 $\Rightarrow$ realização musical. Estatuto aqui: \emph{citação / eixo}.
+\end{proposicao}
+
+\begin{proposicao}[leitura operacional do Teorema Central na torre]\label{prop:central-operacional}
+O Teorema Central (Prop.~\ref{thm:central-peano}) dualiza
+contar$\leftrightarrow$integrar. Na torre operacional, a mesma
+dualidade realiza-se em \textbf{quatro} camadas sem as colar:
+\begin{enumerate}
+\item \textbf{Estrutura.} Retração $\pi_k$ (Def.~\ref{def:pi-k}): desce
+o andar --- o ``contar'' do nível superior projecta-se no inferior.
+\item \textbf{Dinâmica / métrica.} Maestro projecta
+(Teorema~\ref{thm:proj-maestro}) via
+$\mathcal{P}_k=\mathrm{tick}\circ\mathrm{batuta}\circ\Pi$;
+Metrónomo atesta $\lambda^{+}+\lambda^{-}=0$
+(Teorema~\ref{thm:metronomo}) --- o ``integrar'' da volta,
+resíduo~$0$. A partitura $\Pi$ é o \emph{quê}
+(Def.~\ref{def:partitura}): transporte, não fonte das leis.
+\item \textbf{Controlo.} Histerese e rede dual
+(Teoremas~\ref{thm:controle-histerese},~\ref{thm:rede-dual};
+Prop.~\ref{prop:fecho-conj-exp}): $F_H=D\circ F_P^{-1}\circ D^{-1}$
+é a \emph{mesma forma} da estrela (involução $D$, soma de expoentes
+nula), realizada como controlador --- não como substituto do
+Teorema Central.
+\item \textbf{Música.} Conservatório$\to$Pera$\to$Batuta
+(\S\ref{sec:musica}): o canal geométrico que transporta $\pi_k$ e o
+comando $I\in\{-1,0,+1\}$ (batuta) --- sombra do conservatório, não
+fonte do teorema.
+\end{enumerate}
+\[
+\boxed{
+\nu_{\mathrm{Central}}
+\;\sim\;
+\bigl(\pi_k,\;\lambda^{+}+\lambda^{-}=0,\;F_H,\;
+\mathrm{Conservat\acute{o}rio}\!\to\!\mathrm{Pera}\!\to\!\mathrm{Batuta}\bigr).
+}
+\]
+\emph{Proibições:} não identificar rede neural com Gentil--Hurwitz;
+não identificar batuta com $I$ (a batuta \emph{canaliza} $I$);
+a música \emph{realiza} o canal sob a atestação que o Central exige.
 \end{proposicao}
 
 \begin{proposicao}[Hurwitz~8 não é teto do objecto]\label{prop:sem-teto}
@@ -549,18 +631,21 @@ $\pi_k$; não são operador novo.
 Correspondência:
 \begin{center}\small
 \begin{tabular}{@{}lll@{}}
-Teorema Central & na torre & no tempo \\
+Teorema Central & na torre & no tempo / interface \\
 \hline
 Gentil (integrar) & andar $A_{k+1}$ & conservatório \\
-Hurwitz (contar) & andar $A_k$ & música \\
+Hurwitz (contar) & andar $A_k$ & música / orquestra \\
 bijeção / estrela & $\pi_k$ & maestro $(\mathrm{tick},\mathrm{batuta},\Pi)$ \\
+atestação $\lambda^{+}+\lambda^{-}=0$ & Metrónomo & resíduo da volta \\
+controlo $(P,\mathcal{H},H)$ & rede dual & escolha $F_P$/$F_H$ via $I$ \\
 \end{tabular}
 \end{center}
 \emph{Prova.} (1)~Def.~\ref{def:pi-k}. (2)~Prop.~\ref{thm:central-peano}
 e cruz dos tecidos, na classe. (3)~$\mathcal{P}_k$ não acrescenta
 operador: só compõe interfaces que executam $\pi_k$. A geometria
 Conservatório$\to$Pera$\to$Batuta (\S\ref{sec:musica}) é a realização
-concreta do canal, não a fonte do teorema.
+concreta do canal, não a fonte do teorema. Controlo:
+Prop.~\ref{prop:central-operacional}, \S\ref{sec:rede-dual}.
 \end{teorema}
 
 \begin{teorema}[Metrónomo --- realização métrica da dinâmica]\label{thm:metronomo}
@@ -1288,6 +1373,46 @@ a assinatura sozinha classifica mas não escreve a peça. Música $=$
 realização; partitura $=$ transporte --- nenhum funda as leis.
 \end{proposicao}
 
+\begin{proposicao}[$\Pi$ na cadeia operacional e na UI]\label{prop:pi-cadeia}
+A partitura $\Pi$ (Def.~\ref{def:partitura}) entra em três sítios sem
+os fundir:
+\begin{enumerate}
+\item \textbf{Maestro.}
+$\mathcal{P}_k=\mathrm{tick}\circ\mathrm{batuta}\circ\Pi$
+(Teorema~\ref{thm:proj-maestro}) --- $\Pi$ determina o projectar.
+\item \textbf{Histerese.} $H_{k+1}=\mathrm{Maestro}(\Pi,H_k)$
+(Teorema~\ref{thm:histerese}) --- $\Pi$ orienta a memória da borda.
+\item \textbf{Assistente / rede dual.} Na UI,
+\code{partituraFala} extrai $\Pi$ da fala; o controlo
+$\mathcal{F}$ escolhe o ramo; o Metrónomo lê o resíduo $r$
+relativamente a $\Pi$ (\code{app/src/maestro.js},
+\code{app/src/assistente.js}; Dual Sort
+\code{papers/dualsort.tex}).
+\end{enumerate}
+\[
+\boxed{
+\Pi
+\;=\;
+\text{o quê};
+\qquad
+I
+\;=\;
+\text{o sentido};
+\qquad
+\mathcal{F}
+\;=\;
+\text{o ramo};
+\qquad
+r
+\;=\;
+\text{a atestação}.
+}
+\]
+A realização gráfica (\code{papers/partitura.tex},
+\code{partitura-wasm.pdf}) desenha $\Pi$; não substitui o Teorema
+Central nem a rede dual.
+\end{proposicao}
+
 \begin{definicao}[Página --- $\pi_{\mathrm{página}}$]\label{def:pi-pagina}
 A \textbf{página} é um andar de composição sob o mesmo Maestro: dimensão
 do relógio, não interrupção externa.
@@ -1807,6 +1932,30 @@ canaliza (Def.~\ref{def:batuta}). A pera não é $I$: é a base cónica
 do canal.
 \end{definicao}
 
+\begin{proposicao}[rede dual no canal musical]\label{prop:rede-no-canal}
+Na UI / assistente, o comando $I$ da batuta (Def.~\ref{def:batuta})
+escolhe o ramo do controlador dual
+(\S\ref{sec:rede-dual}): frente $F_P$, retenção na banda, ou volta
+$F_H$. A geometria Conservatório$\to$Pera$\to$Batuta \textbf{não}
+define $x'$; só canaliza $I$. Em troca, a rede dual \textbf{não}
+substitui o conservatório: decide sob a atestação do Metrónomo
+relativamente a $\Pi$ (Prop.~\ref{prop:pi-cadeia}).
+\[
+\boxed{
+\Pi
+\;+\;
+\mathrm{Batuta}(I)
+\;\longrightarrow\;
+\mathcal{F}\colon(x,h)\mapsto(x',h')
+\;\longrightarrow\;
+\text{Metrónomo }(r,\,\lambda^{+}+\lambda^{-}=0).
+}
+\]
+Fundamento: Teoremas~\ref{thm:proj-maestro},~\ref{thm:metronomo},
+\ref{thm:rede-dual}; Prop.~\ref{prop:central-operacional},
+\ref{prop:pi-cadeia}.
+\end{proposicao}
+
 \begin{proposicao}[cadência e carga]\label{prop:tick-carga}
 O metrónomo fornece o parâmetro temporal $t$ (ticks $t_0,t_1,\ldots$
 ou relógio contínuo). A partitura impõe o conteúdo; o maestro
@@ -1990,6 +2139,1301 @@ Sinfónica $=$ Filarmónica & convenção do modelo \\
 }
 \]
 
+\section{Teorema da Histerese --- memória da borda}\label{sec:histerese}
+
+A histerese clássica introduz dois limiares $(\theta_{\mathrm{high}},\theta_{\mathrm{low}})$
+para que \emph{entrar} e \emph{sair} não coincidam. No Corpo de Peano
+\textbf{não} se postula uma Lei~$9$: os limiares são as duas faces da
+volta já medida pelo Metrónomo; a ``zona cinzenta'' é a borda
+(Def.~\ref{def:borda}); a memória é o estado do relógio $X_k$.
+
+\subsection*{Derivação do conceito clássico}
+
+No modelo clássico de Schmitt / histerese de limiar:
+\[
+y_{k+1}
+=
+\begin{cases}
++1 & \text{se }x_k\geq\theta_{\mathrm{high}},\\
+-1 & \text{se }x_k\leq\theta_{\mathrm{low}},\\
+y_k & \text{caso contrário (zona cinzenta)}.
+\end{cases}
+\]
+A zona cinzenta é precisamente o lugar onde a decisão ainda não
+atravessou; no nosso vocabulário:
+\[
+\boxed{
+A
+\;|\;
+\text{borda }B
+\;|\;
+A^{c}.
+}
+\]
+Os dois limiares não são cortes arbitrários independentes: sob a
+leitura dual do Metrónomo (Teorema~\ref{thm:metronomo}),
+\[
+\boxed{
+\theta_{\mathrm{high}}\;\leftrightarrow\;\lambda^{+}
+\quad\text{(expansão)},
+\qquad
+\theta_{\mathrm{low}}\;\leftrightarrow\;\lambda^{-}
+\quad\text{(retração)},
+}
+\]
+com o fecho da volta
+\[
+\boxed{\lambda^{+} + \lambda^{-} = 0}.
+\]
+Assim $\mathrm{entrar}\neq\mathrm{sair}$ deixa de ser axioma extra e
+passa a ser corolário da \textbf{borda orientada} pela batuta
+$I\in\{-1,0,+1\}$ (Lei~3).
+
+\begin{definicao}[estado de histerese]\label{def:H-k}
+Seja $X_k$ o suporte activo no tick $k$, $B_k$ a borda entre $X_k$ e o
+seu complemento, e $I_k\in\{-1,0,+1\}$ a direcção da batuta. O
+\textbf{estado de histerese} é
+\[
+\boxed{
+H_k = \bigl(X_k,\,B_k,\,I_k\bigr).
+}
+\]
+\end{definicao}
+
+\begin{teorema}[Histerese --- composição das leis existentes]\label{thm:histerese}
+Seja $\Pi$ a partitura e $\mathcal{P}_k=\mathrm{tick}\circ\mathrm{batuta}\circ\Pi$
+a realização do Maestro (Teorema~\ref{thm:proj-maestro}). Então
+\[
+\boxed{
+H_{k+1}
+=
+\operatorname{Maestro}\bigl(\Pi,\,H_k\bigr),
+}
+\]
+com
+\[
+\boxed{
+I_k=+1 \Rightarrow \text{expansão }(B\to X),\quad
+I_k=0 \Rightarrow \text{retenção }(B\to B),\quad
+I_k=-1 \Rightarrow \text{retração }(X\to B).
+}
+\]
+A passagem de volta obedece ao Metrónomo:
+\[
+\boxed{\lambda^{+} + \lambda^{-} = 0},
+\]
+de modo que a memória da passagem \textbf{não} constitui perda
+estrutural quando a involução fecha. Em suma:
+\[
+\boxed{
+\text{histerese}
+=
+\text{memória de uma dobra sob orientação do MOVE}.
+}
+\]
+A batuta determina o sentido; o Metrónomo atesta a volta.
+\emph{Não há Lei nova:} a histerese é realização composta.
+Corpus banal de vizinhança tolerante (erro\,/\,abreviação\,/\,expressão,
+sem aula): \code{papers/conversa\_vizinhanca.tex},
+\code{tools/vizinhanca.sh}.
+\end{teorema}
+
+\begin{proposicao}[núcleo mínimo]\label{prop:histerese-nucleo}
+O núcleo operacional do Teorema~\ref{thm:histerese} é
+\[
+\boxed{
+\text{Lei~0 (MOVE)}
+\to
+\text{Lei~3 (trial }I\text{)}
+\to
+\text{Lei~4 (dobra / borda)}
+\to
+\text{Lei~5 (bit / corte)}
+\to
+\text{Lei~6 (relógio)}.
+}
+\]
+A Lei~1 dá a dualidade da volta; a Lei~2 a orientação rotórica; a
+Lei~7 aparece só quando a realização sobe na torre octoniónica.
+\end{proposicao}
+
+\begin{center}\small
+\begin{tabular}{@{}lp{9.2cm}@{}}
+\toprule
+Lei & papel na histerese \\
+\midrule
+0 --- MOVE & deslocar estados sem comparação destrutiva \\
+1 --- dual & frente/volta da passagem \\
+2 --- rotor & movimento orientado \\
+3 --- trial & $I\in\{-1,0,+1\}$: direcção da histerese \\
+4 --- dobra & cria a \textbf{borda}; atravessar / retrair \\
+5 --- bit & regista a separação do corte \\
+6 --- relógio & memória espacial $\mapsto$ sequência $k\mapsto k+1$ \\
+7 --- octonião & realização multicanal na torre \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{corolario}[busca semântica]\label{cor:histerese-busca}
+Uma busca com histerese \textbf{não} necessita de dois limiares
+independentes como axiomas. A existência de uma borda com direcção
+de passagem produz $\mathrm{entrar}\neq\mathrm{sair}$. A tolerância
+deixa de ser um número arbitrário e passa a ser \textbf{propriedade
+operacional da borda}. A cadeia realizada é
+\[
+\boxed{
+\text{consulta}
+\to
+\text{massa }X
+\to
+\text{corte}
+\to
+\text{suporte}+B
+\to
+\Pi
+\to
+\pi_k
+\to
+\text{Maestro }(I)
+\to
+\text{Metrónomo }(r).
+}
+\]
+O Maestro não procura a resposta: projecta o suporte. O Metrónomo não
+inventa: lê o fechamento. Validação no corpus da assistente:
+\code{tools/bench\_histerese.sh} (vizinhança, abreviação, sequência,
+borda, $r_{\mathrm{volta}}$).
+\end{corolario}
+
+\begin{observacao}[clássico $\mapsto$ corpo]
+\[
+\boxed{
+\begin{array}{rcl}
+\theta_{\mathrm{high}},\theta_{\mathrm{low}}
+&\;\longmapsto\;&
+\lambda^{+},\lambda^{-},\\[2pt]
+\text{zona cinzenta}
+&\;\longmapsto\;&
+B_k,\\[2pt]
+\text{estado interno }y_k
+&\;\longmapsto\;&
+H_k=(X_k,B_k,I_k),\\[2pt]
+\text{memória ad hoc}
+&\;\longmapsto\;&
+\text{tick / }X_k.
+\end{array}
+}
+\]
+\end{observacao}
+
+\section{Teorema do Controle de Histerese --- dual}\label{sec:controle-histerese}
+
+O Teorema~\ref{thm:histerese} diz \textbf{quando} o estado permanece.
+O dual diz \textbf{por onde} se pode procurar uma realização equivalente
+sem destruir o estado retido. Continua \textbf{sem Lei~$9$}: o controlo
+é operação composta; os eixos são coordenadas de realização, não leis.
+
+\begin{definicao}[vizinhança admissível]\label{def:V-k}
+Dado $H_k=(X_k,B_k,I_k)$, a \textbf{vizinhança admissível} $\mathcal{V}_k$
+é o produto de eixos de distância (não estruturais):
+\[
+\boxed{
+\mathcal{V}
+=
+\mathcal{V}_{\mathrm{caixa}}
+\times
+\mathcal{V}_{\mathrm{teclado}}
+\times
+\mathcal{V}_{\phi}
+\times
+\mathcal{V}_{\mathrm{forma}}
+\times\cdots
+}
+\]
+com vector de distância
+\[
+\boxed{
+D(x,y)=\bigl(d_{\mathrm{caixa}},\,d_K,\,d_{\phi},\,d_{\mathrm{forma}},\,\ldots\bigr)
+}
+\]
+e região
+\[
+\boxed{
+\mathcal{V}(x)=\{y:D(x,y)\preceq\Theta\}.
+}
+\]
+Eixos (realizações, não leis): \emph{caixa} (segmentação/acentos:
+\texttt{cafe}$\leftrightarrow$\texttt{café}); \emph{teclado} (geometria
+$d_K$ das teclas); \emph{fonético} $\phi$ (grafemas$\to$fonemas,
+$d_{\phi}$).
+\end{definicao}
+
+\begin{definicao}[operador de controlo]\label{def:C-k}
+\[
+\boxed{
+\mathcal{C}_k\colon H_k\times\mathcal{V}_k\longrightarrow H_{k+1}\ \text{ou}\ H_k.
+}
+\]
+A histerese fornece a borda $B_k$; o controlo escolhe $v\in\mathcal{V}_k(B_k)$.
+\end{definicao}
+
+\begin{teorema}[Controle de Histerese]\label{thm:controle-histerese}
+A geração de variantes de um estado ocorre \textbf{dentro} da vizinhança
+determinada pela sua borda, segundo eixos de distância admissíveis; a
+selecção de uma variante \textbf{não} altera o estado retido enquanto o
+critério de fechamento do Metrónomo permanecer satisfeito:
+\[
+\boxed{
+\mathcal{C}_k(v)\in B_k
+\;\Rightarrow\;
+\text{estado preservado},
+}
+\qquad
+\boxed{
+\mathcal{C}_k(v)\notin B_k
+\;\Rightarrow\;
+\text{retração ou mudança de andar}.
+}
+\]
+Dualidade:
+\[
+\boxed{
+\text{Histerese}=\text{retenção}
+\qquad\Longleftrightarrow\qquad
+\text{Controle}=\text{seleção}.
+}
+\]
+\[
+\boxed{
+\text{Histerese: }X\to H;
+\qquad
+\text{Controle: }H\to X'.
+}
+\]
+Em cadeia:
+\[
+\boxed{
+\operatorname{Gerar}
+\to
+\operatorname{Medir}(D)
+\to
+\operatorname{Seleccionar}_{\Pi}
+\to
+\operatorname{Reter\ /\ Fechar}.
+}
+\]
+A geração filtrada pela partitura evita explosão combinatória:
+\[
+\boxed{
+\operatorname{Var}_{\Pi}(x)
+=
+\operatorname{Gerar}(x)
+\cap
+\operatorname{Admissível}(\Pi).
+}
+\]
+\[
+\boxed{
+\text{Histerese}=\text{memória da dobra};
+\qquad
+\text{Controle}=\text{movimento admissível pela dobra}.
+}
+\]
+\emph{Prova (esboço).} A borda $B_k$ e $I_k$ vêm do Teorema~\ref{thm:histerese}
+(Leis~0,3,4,5,6). $\mathcal{V}_k$ não acrescenta operador estrutural: só
+coordena distâncias de realização. $\mathcal{C}_k$ compõe
+$\operatorname{Maestro}(\Pi,\cdot)$ com a selecção em $\mathcal{V}_k$; o
+Metrónomo atesta o fecho ($\lambda^{+}+\lambda^{-}=0$). Ultrapassar $B_k$
+é $I=\pm1$ já previsto --- mudança de andar, não Lei nova.
+\end{teorema}
+
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+Histerese & Controle \\
+\midrule
+retém estado & escolhe variante \\
+borda $B_k$ & região admissível $\mathcal{V}_k$ \\
+memória & geração $\operatorname{Var}$ \\
+volta & selecção \\
+$\lambda^{+},\lambda^{-}$ & direcção de exploração \\
+Metrónomo & critério de fechamento \\
+Maestro & execução do controlo \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{corolario}[torre da histerese]\label{cor:torre-histerese}
+Os andares $H_k$ formam uma torre operacional: cada eixo de $\mathcal{V}$
+pode refinar-se sem criar dimensão estrutural nova. Hardcore (eixos
+fortes) e geração automática de variantes são \textbf{realizações} de
+$\mathcal{C}_k$, não postulados. Bandas 8--9 do corpus
+(\code{tools/vizinhanca.sh}: ambiguidade controlada; reparação) exercitam
+adaptar e soltar sem colar. Leitura polar do mesmo $H_k$:
+\S\ref{sec:pares-complexos} (Metrónomo entre cartesiano e polar:
+\S\ref{sec:metronomo-ponte}). Realização neural do dual:
+\S\ref{sec:rede-dual} --- depois da ponte.
+
+\end{corolario}
+
+\section{Leitura complexa --- pares, polar, modelo de teste}\label{sec:pares-complexos}
+
+A torre iterada $T_1=i$, $T_{k+1}=i^{T_k}$ é uma
+\textbf{analogia dinâmica limpa} --- \emph{não} um teorema do Corpo de
+Peano. O Maestro realiza retração entre andares; a torre de $i$ itera
+até um ponto fixo. A relação legítima é dinâmica: ambos transformam
+estado a cada tick e perguntam se a órbita fecha, converge ou diverge.
+Antes de escrever $e^{i\theta}$ ou $i^{z}$, deriva-se Euler
+\textbf{neste} paper (\S\ref{sec:euler-peano}), no par conjugado do
+andar.
+
+\subsection*{Princípio dos pares complexos}
+
+A ideia \textbf{não} é que cada andar inteiro seja $\mathbb{C}$. É que
+cada \textbf{par conjugado} de componentes admite estrutura complexa:
+\[
+\boxed{(x,y)\;\longleftrightarrow\; z=x+iy}.
+\]
+
+\begin{definicao}[par conjugado do andar]\label{def:par-RI}
+Para cada $k$, seja
+\[
+\boxed{P_k = A_k^{(R)}\oplus A_k^{(I)}}.
+\]
+Se existe unidade $J_k$ com $J_k^{2}=-1$, define-se
+\[
+\boxed{\Phi_k(x,y)=x+J_k y}.
+\]
+\end{definicao}
+
+\begin{proposicao}[duas congruências]\label{prop:duas-cong}
+Como espaço real bidimensional,
+\[
+\boxed{P_k\cong_{\mathbb{R}}\mathbb{C}}
+\]
+é automático. Já
+\[
+\boxed{P_k\cong_{\mathrm{alg}}\mathbb{C}}
+\]
+exige que a multiplicação de $A_k$ seja compatível com $J_k$
+($i^{2}=-1$ e a regra $(x_1+iy_1)(x_2+iy_2)=\cdots$). Identificação
+geométrica $\neq$ isomorfismo algébrico --- a auditoria mantém a
+distinção explícita.
+\end{proposicao}
+
+A diferença entre andares não é a \emph{espécie} do par, mas a
+\textbf{escala/resolução} da realização. A retração $\pi_k\colon P_{k+1}\to P_k$
+é compatível com a realização complexa quando existe $\rho_k$ com
+\[
+\boxed{\Phi_k\circ\pi_k \;=\; \rho_k\circ\Phi_{k+1}}.
+\]
+Ou seja: a dobra \textbf{não} destrói o par; projecta-o para a escala
+seguinte. Em diagrama:
+\[
+\boxed{
+\begin{array}{ccccc}
+P_0 & \leftarrow & P_1 & \leftarrow & P_2\leftarrow\cdots \\
+\downarrow\Phi_0 && \downarrow\Phi_1 && \downarrow\Phi_2 \\
+\mathbb{C} & \xleftarrow{\rho_0} & \mathbb{C}
+& \xleftarrow{\rho_1} & \mathbb{C}\leftarrow\cdots
+\end{array}
+}
+\]
+\[
+\boxed{
+\text{andar}\to\text{par }(R,I)\to\mathbb{C};
+\qquad
+\text{torre}=\text{retrações entre essas representações}.
+}
+\]
+O próximo passo mensurável: construir a matriz de cada $\pi_k$ no par
+$(R,I)$ e verificar se comuta com a multiplicação por $i$ ---
+\emph{testar}, não apenas afirmar, a compatibilidade.
+
+\subsection*{Derivação de Euler no par}\label{sec:euler-peano}
+
+No par $P_k$ a unidade $J=J_k$ satisfaz $J^{2}=-1$
+(Def.~\ref{def:par-RI}). O fluxo gerado por $J$ é a série
+\[
+\boxed{
+\exp(tJ)
+\;=\;
+\sum_{n\geq0}\frac{(tJ)^{n}}{n!}.
+}
+\]
+Como $J^{2}=-1$, as potências ciclam com período quatro:
+\[
+\boxed{
+J^{0}=1,\quad
+J^{1}=J,\quad
+J^{2}=-1,\quad
+J^{3}=-J,
+\quad\text{e depois repetem}.
+}
+\]
+Separando a série pelos índices pares e ímpares:
+\[
+\exp(tJ)
+\;=\;
+\sum_{m\geq0}\frac{(-1)^{m}t^{2m}}{(2m)!}\,1
+\;+\;
+\sum_{m\geq0}\frac{(-1)^{m}t^{2m+1}}{(2m+1)!}\,J.
+\]
+Define-se
+\[
+\boxed{
+c(t)=\sum_{m}\frac{(-1)^{m}t^{2m}}{(2m)!},
+\qquad
+s(t)=\sum_{m}\frac{(-1)^{m}t^{2m+1}}{(2m+1)!},
+}
+\]
+donde
+\[
+\boxed{\exp(tJ) \;=\; c(t)\,1 \;+\; s(t)\,J}.
+\]
+
+\begin{proposicao}[conservação da cruz]\label{prop:euler-cruz}
+Derivando termo a termo, $c'=-s$ e $s'=c$, com $c(0)=1$, $s(0)=0$.
+A Lei~$2$ (rotor / não-dissipação) dá
+\[
+\bigl(c^{2}+s^{2}\bigr)'
+\;=\;
+2cc'+2ss'
+\;=\;
+-2cs+2sc
+\;=\;
+0,
+\]
+logo
+\[
+\boxed{c(t)^{2}+s(t)^{2}\;\equiv\;1}.
+\]
+Escreve-se $\cos t:=c(t)$ e $\sin t:=s(t)$ --- \textbf{não} por
+postular o círculo: o círculo é o rasto $\{c(t)+s(t)J\}$ no plano do
+par. Unicidade: o par $(c,s)$ resolve o IVP linear no plano $(R,I)$.
+\end{proposicao}
+
+\begin{teorema}[Euler no Corpo de Peano]\label{thm:euler-peano}
+Na realização $J\mapsto i$ do par conjugado
+(Prop.~\ref{prop:duas-cong}),
+\[
+\boxed{e^{i\theta} \;=\; \cos\theta \;+\; i\sin\theta}.
+\]
+Em particular
+\[
+\boxed{i^{z} \;=\; e^{\log(i)\cdot z} \;=\; e^{i\pi z/2}},
+\]
+porque $i=e^{i\pi/2}$ segue de $\cos(\pi/2)+i\sin(\pi/2)=i$.
+Assim $F(z)=i^{z}=e^{i\pi z/2}$ \textbf{deriva-se} neste paper; não
+se importa como metáfora.
+\end{teorema}
+
+\emph{Prova.} O Teorema reduz-se à Proposição~\ref{prop:euler-cruz}
+com $J=i$: $\exp(i\theta)=c(\theta)+i\,s(\theta)$. Os valores
+$\cos(\pi/2)=0$, $\sin(\pi/2)=1$ dão $e^{i\pi/2}=i$; a identidade
+$a^{b}=e^{b\log a}$ no ramo principal de $\mathbb{C}^{\times}$ dá
+$i^{z}=e^{z\cdot i\pi/2}$. $\square$
+
+\noindent Corolários na torre de teste:
+\[
+\boxed{e^{i\pi}=-1}
+\quad\text{(Lei~$1$ no fluxo)},
+\qquad
+\boxed{z=r e^{i\theta}}
+\quad\text{(forma polar do mesmo par)}.
+\]
+A ponte à fundação: a mesma decomposição aparece em
+\code{teoria.tex} na definição dinâmica de $\pi$; aqui ela é
+\textbf{leitura do andar} --- o que o par $(R,I)$ precisa para o
+modelo $T_{k+1}=i^{T_k}$ ser legítimo.
+
+\subsection*{Maestro $\neq$ operador $F$}
+
+Seja $F(z)=e^{i\pi z/2}=i^{z}$ (Teorema~\ref{thm:euler-peano}).
+Então $T_k=F^{k-1}(i)$ e o limite
+$T_{\ast}$ satisfaz $F(T_{\ast})=T_{\ast}$. Correspondência conceitual:
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+torre de $i$ & dinâmica do Maestro \\
+\midrule
+$T_k$ & estado no tick $k$ \\
+$F(z)=i^{z}$ & operador de evolução (modelo) \\
+$k\mapsto k+1$ & tick \\
+$F(T)=T$ & estado que fecha \\
+convergência & estabilização da órbita \\
+\bottomrule
+\end{tabular}
+\end{center}
+Mas
+\[
+\boxed{\text{Maestro: retração }\pi_k\colon A_{k+1}\to A_k}
+\qquad\text{enquanto}\qquad
+\boxed{\text{torre de }i\text{: iteração }F\colon\mathbb{C}\to\mathbb{C}}.
+\]
+O Metrónomo \textbf{não} é $F$: conta e atesta iterações
+($k\mapsto k+1$; medição). O Maestro, no modelo de teste, realiza
+$T_k\mapsto T_{k+1}=F(T_k)$. O Maestro do paper
+(Teorema~\ref{thm:proj-maestro}) continua
+$\mathcal{P}_k=\mathrm{tick}\circ\mathrm{batuta}\circ\Pi$ --- projecta
+$\pi_k$; \textbf{não} inventa o próximo estado.
+
+\begin{proposicao}[separação]\label{prop:analogia-i}
+A dinâmica $T_{k+1}=i^{T_k}$ \textbf{não prova} a torre dos andares.
+É \textbf{modelo de teste}: pergunta, andar a andar, se a estrutura
+postulada satisfaz simultaneamente par complexo, retração, histerese e
+fecho. Sem essa separação, a analogia vira teorema falso.
+\end{proposicao}
+
+\subsection*{Dinâmica cartesiana do modelo}
+
+Sobre $z_k=x_k+iy_k$, a operação $z_{k+1}=i^{z_k}=e^{i\pi z_k/2}$
+(Teorema~\ref{thm:euler-peano}) separa os eixos:
+\[
+\boxed{
+x_{k+1}=e^{-\pi y_k/2}\cos\frac{\pi x_k}{2},
+\qquad
+y_{k+1}=e^{-\pi y_k/2}\sin\frac{\pi x_k}{2}.
+}
+\]
+\textbf{Real = um eixo; imaginário = o outro} --- o tipo de par que o
+Maestro pode projectar.
+
+\subsection*{Metrónomo --- ponte entre cartesiano e polar}\label{sec:metronomo-ponte}
+
+O Teorema~\ref{thm:metronomo} \textbf{não} escolhe coordenadas: lê a
+volta. Entre as duas visões do mesmo estado $z=x+iy=re^{i\theta}$, o
+Metrónomo é a ponte:
+\[
+\boxed{
+\begin{array}{ccc}
+\text{visão cartesiana }(x,y)
+&\;\xrightarrow{\;\text{Metrónomo}\;}\;
+&
+\text{visão polar }(r,\theta)
+\\
+\Delta x,\,\Delta y
+&\;\longleftrightarrow\;
+&
+\Delta r,\,\Delta\theta
+\\
+\text{frente/volta }(\lambda^{+},\lambda^{-})
+&\;\text{atesta}\;
+&
+\text{fecho da órbita}
+\end{array}
+}
+\]
+\[
+\boxed{
+\text{Maestro projecta o estado};
+\qquad
+\text{Metrónomo mede o tick nas duas leituras};
+\qquad
+\text{não inventa estrutura}.
+}
+\]
+No cartesiano, o tick lê o deslocamento do par $(R,I)$; no polar, o
+mesmo tick decompõe-se em
+\[
+\boxed{\text{Metrónomo}\longrightarrow(\Delta r_k,\,\Delta\theta_k)}.
+\]
+A condição de fecho é a mesma lei ($\lambda^{+}+\lambda^{-}=0$), lida
+em qualquer das duas cartas:
+\[
+\boxed{
+\Delta x\to0,\;\Delta y\to0
+\quad\Longleftrightarrow\quad
+\Delta r\to0,\;\Delta\theta\to0\pmod{2\pi}
+}
+\]
+quando a mudança de coordenadas é regular fora da origem. Assim o
+Metrónomo \textbf{fica entre} as duas visões: traduz a medição, não a
+dinâmica. A dinâmica (Maestro / $F$) muda de carta; a atestação
+permanece.
+
+\subsection*{Forma polar --- módulo e fase}
+
+Escreva $T_k=r_k e^{i\theta_k}$ (corolário de Euler). Então
+\[
+\boxed{
+r_{k+1}=e^{-\frac{\pi r_k}{2}\sin\theta_k},
+\qquad
+\theta_{k+1}=\frac{\pi r_k}{2}\cos\theta_k\pmod{2\pi}.
+}
+\]
+O próximo módulo depende do seno da fase; a próxima fase, do cosseno.
+Em linguagem da torre:
+\[
+\boxed{r=\text{amplitude/ocupação},
+\qquad
+\theta=\text{fase/orientação}.}
+\]
+Isto é mais próximo da histerese do que o cartesiano puro.
+
+\begin{proposicao}[dualidade cruzada]\label{prop:cruzada}
+Como $r_{k+1}=e^{-\pi y_k/2}$ e $\theta_{k+1}=\pi x_k/2$,
+\[
+\boxed{y_k\to r_{k+1},
+\qquad
+x_k\to\theta_{k+1}.}
+\]
+O eixo imaginário controla o módulo seguinte; o real, a fase seguinte.
+O par $(R,I)$ \textbf{não} desaparece no polar: muda de função,
+\[
+\boxed{(R,I)\;\longrightarrow\;(\theta,r)}
+\quad\text{com}\quad
+R\to\theta_{\mathrm{próximo}},\;
+I\to r_{\mathrm{próximo}}.
+\]
+\end{proposicao}
+
+\begin{definicao}[histerese polar]\label{def:H-polar}
+Além de $H_k=(X_k,B_k,I_k)$ (Def.~\ref{def:H-k}), a leitura polar
+do mesmo estado é
+\[
+\boxed{
+H_k^{\mathrm{pol}}
+=
+\bigl(r_k,\,\theta_k;\,\Delta r_k,\,\Delta\theta_k;\,I_k\bigr),
+}
+\]
+com região de retenção em anel\,/\,setor
+\[
+\boxed{
+B_k^{\mathrm{pol}}
+=
+[r_k-\Delta r_k,\,r_k+\Delta r_k]
+\times
+[\theta_k-\Delta\theta_k,\,\theta_k+\Delta\theta_k].
+}
+\]
+\[
+\boxed{\text{histerese polar}=\text{anel}+\text{setor}+\text{memória de sentido}}.
+\]
+\end{definicao}
+
+\subsection*{Ponto fixo do modelo (após a ponte)}
+
+Com o Metrónomo a ler $(\Delta r,\Delta\theta)$
+(\S\ref{sec:metronomo-ponte}), o fecho não é ``só o raio parou'':
+\[
+\boxed{\Delta r_k\to0
+\quad\text{e}\quad
+\Delta\theta_k\to0\pmod{2\pi}}.
+\]
+No ponto fixo $T_{\ast}=r_{\ast}e^{i\theta_{\ast}}$ de $T=i^{T}$,
+\[
+\boxed{
+r_{\ast}=e^{-\frac{\pi r_{\ast}}{2}\sin\theta_{\ast}},
+\qquad
+\theta_{\ast}=\frac{\pi r_{\ast}}{2}\cos\theta_{\ast}\pmod{2\pi}.
+}
+\]
+Com $0<\theta_{\ast}<\pi/2$ tem-se $\sin\theta_{\ast}>0$ e
+$r_{\ast}<1$ --- \textbf{contração radial natural} nessa região.
+Numericamente (modelo de teste, não axioma do paper):
+\[
+\boxed{
+|T_{\ast}|=r_{\ast}\approx 0{,}567559\ldots,
+\qquad
+\theta_{\ast}\approx 0{,}688462\ldots\ \mathrm{rad},
+}
+\]
+\[
+T_{\ast}\approx 0{,}438283+0{,}360599\,i.
+\]
+A norma \textbf{não} converge para $0$ nem para $1$: entra num
+\textbf{atrator interior local} em torno de $r_{\ast}$.
+\[
+\boxed{
+\text{contração}\;\Rightarrow\;\text{retenção local em torno de }T_{\ast}
+}
+\qquad\text{mas \emph{não}}
+\qquad
+\boxed{
+\text{contração}\;\Rightarrow\;\text{preenchimento do andar}.
+}
+\]
+Preencher o andar exige a banda $B_k^{\mathrm{pol}}$
+(Def.~\ref{def:H-polar}) e medir cobertura\,/\,recorrência sob a
+dinâmica --- histerese$+$cobertura, não só o ponto fixo.
+
+\subsection*{Releitura do Lyapunov dualizado}\label{sec:lyap-dual-releitura}
+
+Três leituras distintas --- não três nomes para o mesmo número.
+
+\begin{center}\small
+\begin{tabular}{@{}llp{6.2cm}@{}}
+\toprule
+leitura & objecto & o que mede \\
+\midrule
+clássica & $\lambda=\log|F'|$ & contração local num tick \\
+paper (Metrónomo) & $(\lambda^{+},\lambda^{-})$ & frente\,/\,volta (reversão) \\
+polar (modelo) & espectro de $J_{\mathrm{polar}}$ & canais $(r,\theta)$ conjugados \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{1. Lyapunov clássico do modelo.}
+Como $F'(z)=\frac{i\pi}{2}F(z)$ (Teorema~\ref{thm:euler-peano}),
+ao longo da órbita $|F'(T_k)|=\frac{\pi}{2}r_{k+1}$. No limite
+$r_k\to r_{\ast}$,
+\[
+\boxed{
+\lambda_{\mathrm{cl}}
+\;=\;
+\log\Bigl(\frac{\pi}{2}r_{\ast}\Bigr)
+\;\approx\;
+-0{,}1148
+\;<\;0
+}.
+\]
+Contração local em $T_{\ast}$ --- escalar; ainda não é o dualizado do
+paper.
+
+\paragraph{2. Lyapunov dualizado do paper --- frente e volta.}
+No Teorema~\ref{thm:metronomo} o par é
+\[
+\boxed{\lambda^{+} \;=\; \log|f'|,\qquad
+\lambda^{-} \;=\; \log|(f^{-1})'| \;=\; -\lambda^{+}},
+\]
+donde
+\[
+\boxed{\lambda^{+} + \lambda^{-} \;=\; 0}
+\]
+numa volta fechada (\code{tests/lyapunov\_refletido.c}: metade
+refletida). Espectro $\pm$ da classe reversível --- dualidade
+\textbf{temporal}, não espectral\,/\,polar.
+\[
+\boxed{
+\text{clássico }=\text{ um canal};
+\qquad
+\text{dualizado do paper }=\text{ frente}+\text{reflexão}.
+}
+\]
+
+\paragraph{3. Jacobiano polar concreto.}
+Com $a=\pi/2$,
+\[
+\boxed{
+f_r(r,\theta)=e^{-a r\sin\theta},
+\qquad
+f_{\theta}(r,\theta)=a r\cos\theta.
+}
+\]
+O Jacobiano é
+\[
+J_{\mathrm{pol}}
+=
+\begin{pmatrix}
+-a\sin\theta\,f_r & -a r\cos\theta\,f_r \\
+a\cos\theta & -a r\sin\theta
+\end{pmatrix}.
+\]
+No ponto fixo $f_r=r_{\ast}$,
+\[
+\boxed{
+J_{\mathrm{pol}}(T_{\ast})
+=
+\begin{pmatrix}
+-a r_{\ast}\sin\theta_{\ast} & -a r_{\ast}^{2}\cos\theta_{\ast} \\
+a\cos\theta_{\ast} & -a r_{\ast}\sin\theta_{\ast}
+\end{pmatrix}.
+}
+\]
+Daí
+\[
+\boxed{\det J_{\mathrm{pol}} \;=\; a^{2}r_{\ast}^{2} \;=\; |F'(T_{\ast})|^{2}},
+\]
+correcto. \textbf{Mas} $\det=|F'|^{2}$ \emph{não} implica, por si,
+autovalores conjugados: isso vem da forma concreta desta matriz.
+
+\begin{proposicao}[espectro polar em $T_{\ast}$]\label{prop:J-polar}
+A matriz $J_{\mathrm{pol}}(T_{\ast})$ é do tipo
+$\bigl(\begin{smallmatrix}A&B\\C&A\end{smallmatrix}\bigr)$ com
+$A=-a r_{\ast}\sin\theta_{\ast}$ e
+$BC=-a^{2}r_{\ast}^{2}\cos^{2}\theta_{\ast}<0$ (em
+$0<\theta_{\ast}<\pi/2$). Logo
+\[
+\boxed{
+\mu_{\pm}
+\;=\;
+A\pm\sqrt{BC}
+\;=\;
+-a r_{\ast}\sin\theta_{\ast}
+\pm i\, a r_{\ast}\cos\theta_{\ast}
+}
+\]
+\[
+\boxed{
+\mu_{\pm}
+\;=\;
+a r_{\ast}\bigl(-\sin\theta_{\ast}\pm i\cos\theta_{\ast}\bigr)
+\;=\;
+\pm i\,|F'(T_{\ast})|\,e^{\pm i\theta_{\ast}}.
+}
+\]
+Em particular
+\[
+\boxed{|\mu_{\pm}| \;=\; a r_{\ast} \;=\; |F'(T_{\ast})|},
+\qquad
+\boxed{
+\log|\mu_{+}|=\log|\mu_{-}|=\lambda_{\mathrm{cl}}\approx-0{,}1148
+},
+\]
+e $\log|\mu_{+}|+\log|\mu_{-}|=2\lambda_{\mathrm{cl}}$. Numericamente
+$\mu_{\pm}\approx-0{,}566\pm0{,}688\,i$, $|\mu|\approx0{,}8915$.
+O ``dual'' polar \textbf{não} é um par real distinto: são conjugados
+\textbf{porque} diagonais iguais e $BC<0$ neste Jacobiano --- não por
+um princípio genérico ``toda realização polar de diferencial complexa''.
+\end{proposicao}
+
+\emph{Prova.} Forma de $J_{\mathrm{pol}}$ por derivação de
+$(f_r,f_{\theta})$; no ponto fixo $f_r=r$. Autovalores de
+$\bigl(\begin{smallmatrix}A&B\\C&A\end{smallmatrix}\bigr)$:
+$A\pm\sqrt{BC}$. Com $BC<0$, $\sqrt{BC}=i\,a r_{\ast}|\cos\theta_{\ast}|$;
+em $0<\theta_{\ast}<\pi/2$ obtém-se a fórmula acima. Módulo:
+$a r_{\ast}\sqrt{\sin^{2}+\cos^{2}}=a r_{\ast}=|F'|$. A identidade
+$-\sin\theta\pm i\cos\theta=\pm i\,e^{\pm i\theta}$ dá a forma polar do
+espectro. $\square$
+
+\noindent Leitura:
+\[
+\boxed{
+\text{módulo do espectro}\;\longleftrightarrow\;\text{contração},
+\qquad
+\text{argumento do espectro}\;\longleftrightarrow\;\text{orientação/fase}.
+}
+\]
+A polarização separa ocupação e orientação; a dinâmica mantém-nas
+acopladas.
+
+\paragraph{4. Dualidade temporal $\neq$ dualidade espectral.}
+\[
+\boxed{
+(\lambda^{+},\lambda^{-})=(\lambda_{\mathrm{passo}},-\lambda_{\mathrm{passo}}),
+\qquad
+\lambda^{+}+\lambda^{-}=0
+\quad\text{(reversão)}
+}
+\]
+\[
+\boxed{
+\bigl(\log|\mu_{+}|,\log|\mu_{-}|\bigr)=(\lambda_{\mathrm{cl}},\lambda_{\mathrm{cl}}),
+\qquad
+\log|\mu_{+}|+\log|\mu_{-}|=2\lambda_{\mathrm{cl}}
+\quad\text{(volume infinitesimal)}
+}
+\]
+\[
+\boxed{
++\lambda\;\leftrightarrow\;-\lambda
+\quad\text{(temporal)}
+\qquad\neq\qquad
+\mu_{+}\;\leftrightarrow\;\overline{\mu_{-}},\ |\mu_{+}|=|\mu_{-}|
+\quad\text{(espectral/polar)}.
+}
+\]
+O modelo $i^{T_k}$ ilustra a dualização polar; a atestação
+$\lambda^{+}+\lambda^{-}=0$ continua a ser a do Teorema~\ref{thm:metronomo},
+medida em \code{tests/lyapunov\_refletido.c}.
+
+\subsection*{Arquitectura reunida}
+
+\[
+\boxed{
+(x,y)
+\;\xrightarrow{\text{Maestro}}\;
+(x',y')
+\qquad
+\text{Metrónomo}
+\qquad
+(r,\theta)
+\;\xrightarrow{\text{Maestro}}\;
+(r',\theta')
+}
+\]
+\[
+\boxed{
+\text{cartesiano}
+\;\underset{\text{Metrónomo}}{\longleftrightarrow}\;
+\text{polar}
+}
+\qquad
+\boxed{
+(R,I)
+\;\overset{\text{Euler}}{\longrightarrow}\;
+(\theta_{\mathrm{próximo}},r_{\mathrm{próximo}})
+}
+\]
+\[
+\boxed{
+\begin{array}{rcl}
+\text{Maestro} &\colon& \text{transporta o estado (qualquer carta)}\\
+\text{Metrónomo} &\colon& \text{ponte: mede o tick nas duas visões}\\
+\text{Histerese} &\colon& \text{retém o estado}\\
+\text{Lyapunov clássico} &\colon& \text{mede contração local}\\
+\text{Lyapunov dual} &\colon& \text{mede frente/reflexão}
+\end{array}
+}
+\]
+\[
+\boxed{
+r_{\ast}\to|F'(T_{\ast})|\to\lambda_{\mathrm{cl}}<0;
+\qquad
+J_{\mathrm{pol}}\to(\mu_{+},\mu_{-})\ \text{com}\ |\mu_{\pm}|=e^{\lambda_{\mathrm{cl}}};
+}
+\]
+\[
+\boxed{
+i^{T_k}=\text{modelo de teste},\;\text{não prova da torre}.
+}
+\]
+
+\section{Rede neural dual --- realização do Controle de Histerese}\label{sec:rede-dual}
+
+O Teorema~\ref{thm:controle-histerese} diz \emph{retenção}$\leftrightarrow$\emph{selecção}.
+Esta secção realiza esse dual por um sistema híbrido $(P,\mathcal{H},H)$
+e eleva o que é demonstrável a teorema --- sem colar Hopfield com
+inversão. Vem \textbf{depois} da leitura complexa: o Metrónomo já
+ponteia cartesiano e polar (\S\ref{sec:metronomo-ponte}); a rede
+realiza o controlo sobre essa mesma atestação. Núcleo: leis já no
+corpo (Teorema~\ref{thm:histerese}, Prop.~\ref{prop:histerese-nucleo});
+estaca do Dual Sort (\code{papers/dualsort.tex}); Metrónomo
+(Teorema~\ref{thm:metronomo}, \S\ref{sec:metronomo-ponte}).
+
+\subsection*{Três níveis (não misturar)}
+
+\begin{center}\small
+\begin{tabular}{@{}llp{5.8cm}@{}}
+\toprule
+nível & objecto & estatuto \\
+\midrule
+geometria da estaca & $W_P=-I$, $b_P=c$ & determinístico (Lei~1) \\
+histerese como controlador & retenção na banda & teorema (indução) \\
+memória associativa + volta & $H$, conjugação $D$ & teorema \emph{sob} dualidade reversível \\
+\bottomrule
+\end{tabular}
+\end{center}
+Três memórias distintas:
+\[
+\boxed{
+\begin{array}{rcl}
+\text{estaca} &\longrightarrow& \text{memória geométrica}\\
+\text{histerese} &\longrightarrow& \text{memória de estado}\\
+\text{Hopfield} &\longrightarrow& \text{memória associativa}
+\end{array}
+}
+\]
+\[
+\boxed{
+\text{geometria}\to\text{borda}\to\text{retenção}\to\text{atração}.
+}
+\]
+
+\subsection*{Sistema híbrido}
+
+\begin{definicao}[sistema neural de histerese]\label{def:sistema-hibrido}
+O estado verdadeiro é o par
+\[
+\boxed{X_k=(x_k,h_k)},
+\]
+não $x_k$ sozinho --- a histerese só existe porque o estado inclui a
+memória (Teorema~\ref{thm:histerese}: $H_k=(X_k,B_k,I_k)$).
+O controlador perceptron (estaca, Lei~1) é
+\[
+\boxed{u_k=W_Px_k+b_P},\qquad
+\boxed{W_P=-I,\quad b_P=c}
+\]
+(normalização $u=c-x$; equivalente $W_P=-2I$, $b_P=2c$ pela
+$x^{\dagger}-x=2(c-x)$). A memória de estado actualiza-se por
+\[
+\boxed{
+h_{k+1}
+=
+\begin{cases}
++1 & u_k>\Delta,\\
+h_k & |u_k|\le\Delta,\\
+-1 & u_k<-\Delta.
+\end{cases}
+}
+\]
+A aplicação do sistema é
+\[
+\boxed{\mathcal{F}\colon(x,h)\mapsto(x',h')},
+\]
+com $u=c-x$ e
+\[
+\boxed{
+\begin{cases}
+|u|\le\Delta & \Longrightarrow\; (x',h')=(x,h)
+\quad\text{(retenção)},\\[4pt]
+u>\Delta & \Longrightarrow\;
+x'=F_P(x),\; h'=+1
+\quad\text{(frente)},\\[4pt]
+u<-\Delta & \Longrightarrow\;
+x'=F_H(x),\; h'=-1
+\quad\text{(volta dual)},
+\end{cases}
+}
+\]
+onde $F_H=D\circ F_P^{-1}\circ D^{-1}$
+(Def.~\ref{def:conjugacao-D}) e $D(x)=2c-x$ (estaca).
+Hopfield fornece a memória associativa $Y$, \textbf{não} define $x'$.
+A banda de ambiguidade é
+\[
+\boxed{\mathcal{B}_{\Delta}=[c-\Delta,\,c+\Delta]},
+\qquad
+\boxed{b_{-}-b_{+}=2\Delta}
+\]
+(dois limiares duais com $W_{\pm}=-I$; Prop.~\ref{prop:dois-limiares}).
+\end{definicao}
+
+\begin{proposicao}[pesos pela Lei~1]\label{prop:pesos-lei1}
+A estaca $x^{\dagger}=2c-x$ (involução, Lei~1; Dual Sort) determina
+\[
+\boxed{W_P=-I=\text{geometria}},
+\qquad
+\boxed{b_{-}-b_{+}=2\Delta=\text{memória de retenção}}.
+\]
+O peso \textbf{não} precisa ser aprendido para existir a borda. A
+aprendizagem, se houver, fica em $W_{H}$ (memória associativa), não em
+$W_P$. Fundamento: Lei~1 (dual/involução); Lei~3 (trial
+$I\in\{-1,0,+1\}$ na banda); Lei~4 (dobra/borda,
+Def.~\ref{def:borda}); Lei~0 (MOVE sem comparação destrutiva).
+\end{proposicao}
+
+\begin{proposicao}[dois limiares duais]\label{prop:dois-limiares}
+\[
+\boxed{u_{+}(x)=c-\Delta-x,\qquad u_{-}(x)=c+\Delta-x},
+\]
+\[
+\boxed{w_{+}=w_{-}=-1,\qquad b_{+}=c-\Delta,\qquad b_{-}=c+\Delta}.
+\]
+Na região $c-\Delta<x<c+\Delta$: $P_{+}(x)\neq P_{-}(x)$ ---
+\[
+\boxed{\text{discordância dos duais}=\text{região de histerese}}.
+\]
+\end{proposicao}
+
+\begin{proposicao}[unidade ternária com memória]\label{prop:trial-neural}
+O trial $\{-1,0,+1\}$ (Lei~3) realiza-se por
+\[
+\boxed{
+s(x)=\operatorname{sgn}(c-x),\qquad
+s=0\;\Longleftrightarrow\; x^{\dagger}=x.
+}
+\]
+Com histerese no trial: $s_{k+1}=s_k$ quando $|x_k-c|\le\Delta$ --- a
+memória é o estado que a borda impede de mudar
+(Teorema~\ref{thm:histerese}).
+\end{proposicao}
+
+\begin{teorema}[Retenção Neural]\label{thm:retencao-neural}
+Uma rede limiar com dois limiares separados por $2\Delta$
+(Def.~\ref{def:sistema-hibrido}) conserva o estado interno sob qualquer
+sequência de perturbações confinada à banda de histerese:
+\[
+\boxed{|u_k|\le\Delta\;\Longrightarrow\; h_{k+1}=h_k}.
+\]
+Em particular, se $u_0,\ldots,u_{n-1}\in[-\Delta,\Delta]$, então
+\[
+\boxed{h_n=h_0}.
+\]
+\end{teorema}
+
+\emph{Prova.} Por definição de $h_{k+1}$, $|u_k|\le\Delta$ força
+$h_{k+1}=h_k$. Indução em $k$ dá $h_n=h_0$. $\square$
+
+\noindent Fundamento: Teorema~\ref{thm:histerese}
+($I=0\Rightarrow$ retenção $B\to B$); Teorema~\ref{thm:controle-histerese}
+($\mathcal{C}_k(v)\in B_k\Rightarrow$ estado preservado); Lei~4 (borda);
+Lei~6 (relógio: memória espacial $\mapsto$ sequência $k\mapsto k+1$).
+
+\subsection*{Memória associativa $\neq$ inversão}
+
+\begin{definicao}[três operadores]\label{def:tres-ops}
+\[
+\boxed{
+\underbrace{P}_{\text{percepção}}
+\;\longleftrightarrow\;
+\underbrace{\mathcal{H}}_{\text{borda}}
+\;\longleftrightarrow\;
+\underbrace{H}_{\text{memória}}
+}
+\]
+são \textbf{três} operadores distintos. \textbf{Proibição:}
+\[
+\boxed{
+\text{Hopfield realiza a memória da volta;}
+\quad
+\text{a dualidade reversível é que garante }\lambda^{-}.
+}
+\]
+Hopfield clássico ($W_H=\frac1N\sum_{\mu}\xi^{\mu}(\xi^{\mu})^{\!\top}$,
+$(W_H)_{ii}=0$) dá \emph{retorno à memória} (atração), não
+automaticamente \emph{retorno inverso da trajectória}. Atracção $\neq$
+reversibilidade.
+\end{definicao}
+
+\begin{definicao}[conjugação reversível]\label{def:conjugacao-D}
+Seja $F_P$ a dinâmica de decisão (frente) e $F_H$ uma realização da
+volta. Diz-se que $F_H$ é \textbf{dual conjugado} a $F_P$ no conjunto
+admissível $\mathcal{A}$ se existe $D$ com
+\[
+\boxed{
+F_H \;=\; D\circ F_P^{-1}\circ D^{-1}
+\quad\text{em }\mathcal{A}.
+}
+\]
+Então
+\[
+\boxed{DF_H \;=\; D\,(DF_P)^{-1}\,D^{-1}},
+\]
+e os invariantes locais passam aos inversos.
+\end{definicao}
+
+\begin{teorema}[Realização Neural Dual da Histerese]\label{thm:rede-dual}
+Considere o sistema híbrido $X_k=(x_k,h_k)$
+(Def.~\ref{def:sistema-hibrido}) com controlador $u_k=-x_k+c$ e banda
+$\mathcal{B}_{\Delta}$. Suponha que exista realização dual $F_H$
+conjugada a $F_P$ no admissível $\mathcal{A}$
+(Def.~\ref{def:conjugacao-D}), com métrica compatível com $D$. Então:
+\begin{enumerate}
+\item \textbf{Retenção.} $|u_k|\le\Delta\Rightarrow h_{k+1}=h_k$
+(Teorema~\ref{thm:retencao-neural}).
+\item \textbf{Borda.} A região de ambiguidade é
+$\mathcal{B}_{\Delta}=[c-\Delta,c+\Delta]$
+(Def.~\ref{def:borda}; Prop.~\ref{prop:dois-limiares}).
+\item \textbf{Dualidade dinâmica.} $DF_H=(DF_P)^{-1}$ até conjugação
+por $D$.
+\item \textbf{Lyapunov dualizado.}
+\[
+\boxed{\lambda_H=-\lambda_P},
+\qquad
+\boxed{\lambda_P+\lambda_H=0},
+\]
+com
+\[
+\lambda_P=\log|DF_P|,\qquad
+\lambda_H=\log|DF_H|
+\]
+(leitura do Teorema~\ref{thm:metronomo} no par frente/volta).
+\item \textbf{Fecho.} Se $h_n=h_0$ e a composição fecha em $\mathcal{A}$,
+\[
+\boxed{F_H\circ F_P=\mathrm{id}_{\mathcal{A}}}.
+\]
+\end{enumerate}
+Em cadeia:
+\[
+\boxed{
+P
+\overset{\lambda^{+}}{\longrightarrow}
+\text{borda/histerese}
+\overset{\lambda^{-}}{\longrightarrow}
+\text{memória},
+\qquad
+\lambda^{+}+\lambda^{-}=0.
+}
+\]
+\emph{Não} há Lei~$9$: tudo compõe Leis~0--6, Teoremas~\ref{thm:histerese},
+\ref{thm:controle-histerese}, \ref{thm:metronomo},
+\ref{thm:proj-maestro} (Maestro escolhe $F_P$ ou $F_H$ via batuta
+$I$; Metrónomo atesta o fecho).
+\end{teorema}
+
+\emph{Prova.} (i)~Teorema~\ref{thm:retencao-neural}. (ii)~Definição da
+banda e Prop.~\ref{prop:dois-limiares} (Lei~1$+$Lei~4). (iii)~Derivada
+da conjugação $F_H=D\circ F_P^{-1}\circ D^{-1}$. (iv)~Tomando módulos
+(ou log-norma) compatíveis com $D$:
+$\log|DF_H|=-\log|DF_P|$. Isto é o espectro $\pm$ do
+Teorema~\ref{thm:metronomo} realizado no par $(F_P,F_H)$, não um
+número inventado. (v)~Em $\mathcal{A}$,
+$F_H\circ F_P=D\circ F_P^{-1}\circ D^{-1}\circ F_P$; com $D$ a
+identificar a leitura da volta (involução Lei~1 / estaca), a composição
+fecha. O Maestro (Teorema~\ref{thm:proj-maestro}) projecta a escolha
+de lado; o controlo (Teorema~\ref{thm:controle-histerese}) restringe a
+variante a $\mathcal{V}_k$ / $\mathcal{B}_{\Delta}$. $\square$
+
+\noindent \textbf{Rotor (Lei~2).} No par,
+$W_{\mathrm{estaca}}=-I$ (reflexão) e
+$W_{\mathrm{rotor}}=J$ com $J^{2}=-I$ (rotação): duas faces da mesma
+dualidade (Lei~1$\leftrightarrow$Lei~2).
+
+\begin{proposicao}[fecho experimental da conjugação]\label{prop:fecho-conj-exp}
+No modelo afim $F_P(x)=c+A(x-c)$ com $A$ invertível e
+$D(x)=2c-x$, a realização
+$F_H=D\circ F_P^{-1}\circ D^{-1}$ verifica numericamente
+\[
+\boxed{DF_H\,DF_P=I},
+\qquad
+\boxed{F_H\circ F_P=\mathrm{id}},
+\qquad
+\boxed{\lambda_P+\lambda_H=0}
+\]
+em dimensão~$1$ e~$2$ (incluindo shear), por diferenças finitas
+(\code{tests/rede\_dual.js} §R5--§R7). O sistema híbrido
+$\mathcal{F}\colon(x,h)\mapsto(x',h')$ conserva $h$ sob perturbações
+na banda (§R6; Teorema~\ref{thm:retencao-neural}).
+Hopfield fornece $Y$ (memória), \textbf{não} substitui $F_H$.
+\end{proposicao}
+
+\noindent Isto fecha os quatro pontos do gerente:
+(1)~$\mathcal{F}$ híbrido; (2)~retenção; (3)~Hopfield~$\neq$~inversão;
+(4)~conjugação reversível medida. A hipótese algébrica
+(Def.~\ref{def:conjugacao-D}) permanece; o experimento atesta a
+realização no modelo Dual Sort / estaca.
+
+\noindent \textbf{Ponte ao Teorema Central.} Ver
+Prop.~\ref{prop:central-operacional}: quatro camadas
+($\pi_k$, Maestro/Metrónomo, controlo, música).
+A rede dual \textbf{não} é o Teorema Central; a batuta
+\textbf{não} é $I$. Em cadeia:
+\[
+\boxed{
+\text{Teorema Central}
+\;\longrightarrow\;
+\text{Maestro/Metrónomo}
+\;\longrightarrow\;
+\text{controlo }(P,\mathcal{H},H)
+\;\longrightarrow\;
+\mathrm{Conservat\acute{o}rio}\!\to\!\mathrm{Pera}\!\to\!\mathrm{Batuta}.
+}
+\]
+Prop.~\ref{prop:rede-no-canal}: $I$ da batuta alimenta $\mathcal{F}$.
+
+\noindent \textbf{Verificação.} Núcleo Lyapunov:
+\code{tests/lyapunov\_refletido.c}; Dual Sort:
+\code{papers/dualsort.tex}; UI:
+\code{app/src/rede\_dual.js}, \code{app/src/assistente.js};
+medidor \code{tests/rede\_dual.js} /
+\code{tools/bench\_rede\_dual.sh}; corpus
+\code{papers/conversa\_rede\_dual.tex},
+\code{papers/conversa\_arvore\_n1\_rede\_dual.tex}.
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+peça & lei / teorema & realização neural \\
+\midrule
+estaca $x^{\dagger}=2c-x$ & Lei~1 & $W_P=-I$, $b_P=c$ \\
+trial & Lei~3 & $\operatorname{sgn}\in\{-1,0,+1\}$ \\
+borda / banda & Lei~4; Def.~\ref{def:borda} & $b_{-}-b_{+}=2\Delta$ \\
+MOVE / tick & Lei~0; Lei~6 & $\mathcal{F}$, $k\mapsto k+1$ \\
+retenção & Thm.~\ref{thm:histerese},~\ref{thm:retencao-neural} & $h'=h$ na banda \\
+controlo & Thm.~\ref{thm:controle-histerese} & escolhe $F_P$ / $F_H$ \\
+projecta & Thm.~\ref{thm:proj-maestro} & Maestro / batuta $I$ \\
+atesta & Thm.~\ref{thm:metronomo} & $\lambda_P+\lambda_H=0$ \\
+fecho medido & Prop.~\ref{prop:fecho-conj-exp} & §R5--§R7 \\
+memória assoc. & --- (realização) & $W_H$ Hebb; atracção \\
+volta dual & Def.~\ref{def:conjugacao-D} & $F_H=D\circ F_P^{-1}\circ D^{-1}$ \\
+rotor & Lei~2 & $J$, $J^{2}=-I$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+
 \section{$\lambda$ binária e $\phi_K$ ternária}
 
 \code{peano.png}: $\lambda((x_n))=\sum x_n/2^n$.
@@ -1998,6 +3442,27 @@ Sinfónica $=$ Filarmónica & convenção do modelo \\
 \bigskip
 \noindent\textbf{Verificação.} \code{tests/corpo\_peano.c} §CP1--§CP40;
 \code{tests/autoria\_tradutor.js}: Hurwitz~$8\neq$teto;
-$\mathcal{P}_k=\mathrm{tick}\circ\mathrm{batuta}\circ\Pi$.
+$\mathcal{P}_k=\mathrm{tick}\circ\mathrm{batuta}\circ\Pi$;
+Teorema~\ref{thm:histerese}: \code{tools/bench\_histerese.sh};
+Teorema~\ref{thm:controle-histerese}: \code{tools/bench\_vizinhanca.sh}
+(bandas 1--9);
+leitura complexa \S\ref{sec:pares-complexos} (modelo $i^{T_k}$,
+não prova da torre);
+Lyapunov dualizado \S\ref{sec:lyap-dual-releitura}
+(\code{tests/lyapunov\_refletido.c});
+Teorema Central na torre: Prop.~\ref{thm:central-peano},
+\ref{prop:central-operacional};
+música / canal: Prop.~\ref{prop:rede-no-canal},
+\ref{prop:pi-cadeia}
+(\S\ref{sec:musica}; \code{papers/partitura.tex});
+rede neural dual \S\ref{sec:rede-dual}:
+Teoremas~\ref{thm:retencao-neural},~\ref{thm:rede-dual},
+Prop.~\ref{prop:fecho-conj-exp}
+(\code{papers/dualsort.tex}; UI \code{app/src/rede\_dual.js},
+\code{tests/rede\_dual.js};
+corpus \code{papers/conversa\_rede\_dual.tex},
+\code{papers/conversa\_arvore\_n1\_rede\_dual.tex};
+\code{tools/bench\_fundacao.sh},
+\code{tools/bench\_rede\_dual.sh}).
 
 \end{document}

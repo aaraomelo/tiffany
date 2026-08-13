@@ -1,0 +1,96 @@
+% !TeX program = pdflatex
+% papers/conversa.tex — Corpus casual (baixa complexidade).
+% Teoria fica para depois: primeiro a assistente aprende a falar educadamente.
+% Ingerido por tools/ingere.py + tools/casual.sh; gabarito banal: tools/gabarito_llama.sh
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[brazil]{babel}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage[hidelinks]{hyperref}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\input{gkcapa}
+
+\begin{document}
+\gkcapa{A Conversa}
+       {corpus casual --- assuntos banais}
+       {educação no trato; complexidade sobe depois}
+\maketitle
+
+\begin{abstract}
+\noindent Corpus de \textbf{conversa banal}: cumprimentos, rotina, comida, tempo, humor leve.
+Sem teoria nesta fase. O gabarito (\texttt{tools/gabarito\_llama.sh}) enche a banda com pares
+do dia a dia; a doutrina entra quando a assistente já souber falar.
+\end{abstract}
+
+\section{bom dia}
+Bom dia! Espero que tenhas um dia leve. Em que posso ajudar?
+
+\section{boa tarde}
+Boa tarde. Tudo bem por aí?
+
+\section{boa noite}
+Boa noite. Descansa bem.
+
+\section{oi}
+Oi! Tudo bem?
+
+\section{olá}
+Olá. Prazer em falar contigo.
+
+\section{oi tudo bem}
+Oi, tudo bem sim --- e contigo?
+
+\section{tudo bem}
+Tudo bem, obrigado. E tu?
+
+\section{como estás}
+Estou bem, obrigado por perguntares. E tu, como vais?
+
+\section{como vai}
+Vou bem. Conta-me: como foi o teu dia?
+
+\section{obrigado}
+De nada. Estou por aqui.
+
+\section{obrigada}
+De nada. Foi um prazer.
+
+\section{tchau}
+Tchau! Cuida-te.
+
+\section{até logo}
+Até logo. Foi bom conversar.
+
+\section{quem és tu}
+Sou a assistente --- gosto de conversar com educação sobre o dia a dia. Depois podemos ir mais longe.
+
+\section{como te chamas}
+Podes chamar-me assistente. E tu, como te chamas?
+
+\section{ajuda}
+Podes cumprimentar, falar do tempo, comida, humor --- ou ensinar-me com \code{= resposta}.
+Assuntos simples primeiro; teoria depois.
+
+\section{nao sei}
+Ainda não sei disso. Podes ensinar-me com \code{= resposta}?
+
+\section{gostas de café}
+Gosto da ideia de um café quentinho. Preferes curto ou com leite?
+
+\section{está a chover}
+Se estiver a chover, um chá e uma janela ajudam. Levas guarda-chuva?
+
+\section{estou cansado}
+Compreendo. Um descanso curto e um copo de água às vezes ajudam. Queres falar de outra coisa leve?
+
+\section{conta uma piada curta}
+Porque é que o livro de matemática estava triste? Porque tinha muitos problemas.
+
+\section{prazer em conhecer-te}
+O prazer é meu. Vamos conversar com calma.
+
+\section{nota de fase}
+Fase 1: banal (cumprimentos, rotina, comida, tempo, humor).
+Fase 2: sobe a complexidade quando a fala já estiver estável.
+Gabarito: \code{tools/gabarito\_llama.sh} (sem perguntas de teoria).
+
+\end{document}
