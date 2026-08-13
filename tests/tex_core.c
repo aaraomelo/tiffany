@@ -3073,6 +3073,7 @@ typedef struct {
     int  ub;               /* viu \underbrace: o proximo _{...} e o ROTULO (-3) */
     int  ub_pf;            /* a PROF do underbrace: um ^ interno nao mata o ub */
     int  disp;             /* matematica de DESTAQUE (\[ ou align): o \frac empilha */
+    int  morf_h;           /* Teorema Morfológico: dilata a linha à largura (W) */
     int  recuo;
     int  item;
     long glifos;           /* quantos glifos saíram — o solar conta o que guardou */
@@ -3390,7 +3391,8 @@ static void quebra_e_desenrola(Est *e, int ultima){
               if(e->L.g[t].g == 9) n9++;
           }
           if(n8 > n9) jcx = 1;
-          desenrola(e->p, &e->L, !(fim && ultima) && !e->L.nivel && !jcx);
+          /* morf_h (thm:morfologico): dilata mesmo a última linha — ocupa [0,W]. */
+          desenrola(e->p, &e->L, (e->morf_h || !(fim && ultima)) && !e->L.nivel && !jcx);
         }
         if(com_hifen){ n_emit--; e->L.g[n_emit].g = gg; e->L.g[n_emit].f = ff; e->L.g[n_emit].e = ee; }
         e->L.n = n_orig;
@@ -3405,6 +3407,7 @@ static void quebra_e_desenrola(Est *e, int ultima){
 static void fecha_paragrafo(Est *e){
     if(e->L.n) quebra_e_desenrola(e, 1);
     e->L.n = 0; e->L.nivel = 0; e->L.recuo = e->recuo;
+    e->morf_h = 0;   /* a dilatação vale um parágrafo (uma voz) */
 }
 
 /* A BIBLIOGRAFIA: os \bibitem recolhem-se POR ORDEM antes de compor — a chave
@@ -4804,6 +4807,36 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     }
                 }
                 i = j; continue;
+            }
+            if(!strcmp(cmd, "morfh")){
+                /* Teorema Morfológico (thm:morfologico, Lei~4): dilata o parágrafo
+                 * corrente à largura do suporte [0,W] — primeiro eixo, depois altura. */
+                e->morf_h = 1;
+                i = j; continue;
+            }
+            if(!strcmp(cmd, "reguacol")){
+                /* Régua dourada na largura COL (= suporte W). Sem cm mágico: a
+                 * morfologia e a pauta partilham o mesmo [0,W]. */
+                fecha_paragrafo(e);
+                long q = ate_abre(s, j, n);
+                long a2 = 320; char u2[8]; u2[0] = 'p'; u2[1] = 't'; u2[2] = 0;
+                if(q < n && s[q] == '{'){
+                    const char *pr = s + q + 1, *e1;
+                    long v2 = fixo_mil(pr, &e1);
+                    long f = fecha_chave(s, n, q);
+                    if(f >= 0) q = f + 1;
+                    if(e1 != pr && v2 > 0){
+                        int k2 = 0; while(k2 < 2 && e1[k2] >= 'a' && e1[k2] <= 'z'){ u2[k2] = e1[k2]; k2++; }
+                        u2[k2] = 0; a2 = v2;
+                    }
+                }
+                { long n2, d2u; unidade_razao(u2, &n2, &d2u);
+                  long l2 = (2 * a2 * n2 + d2u) / (2 * d2u);
+                  if(l2 < 1) l2 = 320;
+                  poe_rect(e->p, MARGEM * 1000L, e->p->y, COL * 1000L, l2, "ouro");
+                  e->p->y -= l2 + 4000;
+                }
+                i = q; continue;
             }
             if(!strcmp(cmd, "pipagina")){
                 /* π_página: a página é dimensão do relógio (eval). O Maestro projecta o

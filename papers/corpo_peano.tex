@@ -650,6 +650,7 @@ fundamento & Teorema Central & contar $\leftrightarrow$ integrar \\
 estrutura & $\pi_k$ & retração \\
 dinâmica & Maestro & realiza a projecção \\
 tempo & Metrónomo & realiza o tick / lê \\
+espaço & Morfologia (Lei~4) & dilata / contrai o suporte \\
 métrica & Lyapunov dualizado & atesta a volta \\
 base discreta & $(A_m,\sigma_m)$ & régua metálica \\
 representação & $\mathcal{T}$ & transforma a leitura \\
@@ -673,6 +674,84 @@ $\Delta$, não inventada pelo metrónomo. (3)~$\mathcal{T}$ citada:
 instrumento de leitura. Separação:
 projectar $\neq$ canalizar $\neq$ ler $\neq$ atestar.
 \end{teorema}
+
+\begin{teorema}[Morfológico --- realização espacial da Lei~4]\label{thm:morfologico}
+A Lei~4 (dobra, $T+T^{*}$, $d\mapsto 2d$, interfaces $\Delta=m^{2}+4$)
+é o fundamento algébrico da \textbf{contração/dilatação}. O par
+Maestro\,/\,Metrónomo realiza essa dualidade no \emph{tempo}
+(Teoremas~\ref{thm:proj-maestro},~\ref{thm:metronomo}). O
+\textbf{corpo morfíco} realiza a \emph{mesma} dualidade no
+\textbf{espaço} --- sem nova lei, sem Lei~$9$:
+\[
+\boxed{
+(\mathrm{Maestro},\,\mathrm{Metr\acute{o}nomo})
+\;\longleftrightarrow\;
+(\text{dilata\c{c}\~{a}o},\,\text{contra\c{c}\~{a}o}).
+}
+\]
+Seja $R_k$ o suporte disponível no andar $k$ (a página como dimensão
+do relógio, $\pi_{\mathrm{p\acute{a}gina}}$). A morfologia
+\[
+\boxed{
+\mathcal{M}_k\colon A_k\longrightarrow R_k,
+\qquad
+\mathcal{M}_k=\mathcal{D}_k\circ\mathcal{C}_k^{-1}
+}
+\]
+adapta o suporte espacial preservando a assinatura:
+\[
+\boxed{
+\mathcal{M}_k(\Pi)\sim\Pi
+}
+\]
+--- mesma realização estrutural (duração, ordem dos ticks, vozes,
+métrica, linha dourada), não a mesma coordenada gráfica. Ordem da
+torre no suporte:
+\[
+\boxed{
+\text{largura}\;\longrightarrow\;\text{altura}
+}
+\]
+primeiro preenche $[0,W]$ (eixo do Metrónomo); depois ajusta $[0,H]$.
+\[
+\boxed{
+\begin{array}{c@{\quad}c}
+\text{dilata\c{c}\~{a}o} & \text{ocupa o suporte} \\
+\text{contra\c{c}\~{a}o} & \text{reencontra o suporte} \\
+\hline
+\text{dilata\c{c}\~{a}o}+\text{contra\c{c}\~{a}o} & \text{mesma realiza\c{c}\~{a}o}.
+\end{array}
+}
+\]
+\[
+\boxed{
+\underbrace{\Pi}_{\text{conte\'{u}do}}
+\qquad
+\underbrace{\mathcal{M}}_{\text{suporte}}.
+}
+\]
+\emph{Prova.} (1)~Lei~4 já contém a passagem entre escalas/suportes
+e $\Delta$ nas interfaces. (2)~Maestro projecta no tempo; Metrónomo
+lê a volta ($\lambda^{+}+\lambda^{-}=0$). (3)~$\mathcal{D}$/$\mathcal{C}$
+são o dual espacial dessa projecção/leitura --- a página deixa de ser
+recipiente e passa a participação do suporte na realização. Não se
+infla o catálogo: oito leis; morfologia $=$ realização espacial da
+dobra.
+\end{teorema}
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+temporal & espacial & objecto \\
+\hline
+Maestro & dilatação $\mathcal{D}$ & projecta / ocupa \\
+Metrónomo & contração $\mathcal{C}$ & lê / reencontra \\
+tick & coordenada & marca \\
+relógio & página & suporte \\
+$\lambda^{+}$ & expansão & frente \\
+$\lambda^{-}$ & contração & volta \\
+volta fechada & fechamento morfíco & $\mathcal{M}(\Pi)\sim\Pi$ \\
+\end{tabular}
+\end{center}
 
 %======================================================================
 \section{O corpo operacional $\mathcal{C}_K$}
@@ -1706,7 +1785,7 @@ lei & operador & realização & fecho & na torre & na música/partitura \\
 1 & $\nu$ & estaca & $\nu^{2}=\mathrm{id}$ & dual em cada andar & clave; fig.$\leftrightarrow$sil. \\
 2 & $T^{\dagger}=-T$ & rotor $\pm i$ & período 4 & bidual / centro & gerador $G$ (classe) \\
 3 & $\tau$ & trial & $\tau^{3}=\mathrm{id}$ & sinais & inversor do maestro \\
-4 & $T+T^{*}$ & tecidos & $d\mapsto2d$ & dobra & figuras $2^{-k}$ (intér.) \\
+4 & $T+T^{*}$ & tecidos & $d\mapsto2d$ & dobra & morfologia $\mathcal{M}$ (larg.$\!\to$alt.) \\
 5 & $ix$ & bit $i$ & $i^{4}=\mathrm{id}$ & pental & pentagrama (realização) \\
 6 & $\oplus=\otimes$ & hexal / relógio & interfaces $6,12,24$ & interface & relógio do maestro \\
 7 & $\mathbb{H}\times\mathbb{H}^{*}$ & octonião dual & $\mathrm{Ind}^{8}=\mathrm{id}$ & topo norma & final (intér.); naipes \\

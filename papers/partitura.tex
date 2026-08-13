@@ -27,34 +27,33 @@
 % Lei~6: tick = bulbo na régua (eval: \bullet na linha; sem haste a enganar o olho)
 \newcommand{\Tick}{$\bullet$}
 
-% Cone / pera --- cinco geratrizes (Lei~5).
+% Cone / pera --- cinco geratrizes (Lei~5). Régua = largura COL (thm:morfologico).
 \newcommand{\Penta}{%
-\noindent\rule{15.4cm}{0.32pt}\\[-1.55mm]%
-\noindent\rule{15.4cm}{0.32pt}\\[-1.55mm]%
-\noindent\rule{15.4cm}{0.32pt}\\[-1.55mm]%
-\noindent\rule{15.4cm}{0.32pt}\\[-1.55mm]%
-\noindent\rule{15.4cm}{0.32pt}%
+\noindent\reguacol{0.32pt}\\[-1.55mm]%
+\noindent\reguacol{0.32pt}\\[-1.55mm]%
+\noindent\reguacol{0.32pt}\\[-1.55mm]%
+\noindent\reguacol{0.32pt}\\[-1.55mm]%
+\noindent\reguacol{0.32pt}%
 }
-\newcommand{\PentaUm}{\noindent\rule{15.4cm}{0.32pt}}
+\newcommand{\PentaUm}{\noindent\reguacol{0.32pt}}
 
-% π_página: se o bloco não cabe, o Maestro projecta P_{n+1} (dimensão do relógio).
-% Voz = átomo sob essa projecção --- sem minipage/clearpage externos.
+% π_página + morfologia horizontal: dilata a voz a [0,W] (Lei~4 / thm:morfologico).
 \newcommand{\VozAbre}[4]{%
 \pipagina{36mm}%
 \par\medskip\noindent
 \textbf{#1}\quad{\small\color{regua}#2}\par\vspace{3mm}%
 #3\par
 \vspace{#4}%
-\noindent
+\morfh\noindent
 }
 
-% Metrónomo: régua + ticks no mesmo eixo (λ⁺+λ⁻=0). Y contínuo; bulbo na dourada.
+% Metrónomo: régua COL + ticks dilatados em W (λ⁺+λ⁻=0 no eixo).
 \newcommand{\VozMetro}[2]{%
 \pipagina{22mm}%
 \par\medskip\noindent
 \textbf{Metronomo}\quad{\small\color{regua}#1}\par\vspace{3mm}%
 \PentaUm\vspace{#2}%
-\noindent
+\morfh\noindent
 }
 
 \input{gkcapa}
@@ -176,6 +175,16 @@ $\pi_{\mathrm{página}}$ projecta o bloco contínuo no suporte $P_n$; se
 não cabe, $P_n\xrightarrow{\pi}P_{n+1}$ --- muda o suporte, não o
 estado (relógio, espiral, voz, métrica, $\Pi$, linha dourada).
 Partituras e tabelas quebram assim, sem pulo externo.
+\end{definicao}
+
+\begin{definicao}[Morfologia --- Lei~4 no suporte ($W$ primeiro)]
+Dual espacial do par Maestro\,/\,Metrónomo
+(Teorema~\ref{thm:morfologico} em \code{corpo\_peano}):
+\[
+\boxed{(\mathrm{dilata},\mathrm{contrai})\;\longleftrightarrow\;(\mathrm{Maestro},\mathrm{Metr\acute{o}nomo}).}
+\]
+$\mathcal{M}(\Pi)\sim\Pi$: ocupa $[0,W]$ (largura) antes da altura;
+a pauta e as notas partilham a régua COL --- sem acumular à esquerda.
 \end{definicao}
 
 % Maestro: se o início da partitura não cabe, projecta P_{n+1} (sem \clearpage).
