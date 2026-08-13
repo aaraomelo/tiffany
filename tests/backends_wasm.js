@@ -148,6 +148,12 @@ function i32(ex) { return new Int32Array(ex.DISCO.buffer, BASE); }
         a[0] = 1; a[1] = 1; a[2] = 1;
         const closeDep = c.claim_run(14);
         ok('§W2 DeployPatria CLOSE local+live', closeDep === 1 && a[0] === 0);
+
+        a[0] = 4286; a[1] = 4286; a[2] = 0; a[3] = 1;
+        const closeCr = c.claim_run(15);
+        ok('§W2 CristalVolta CLOSE fonte==reconstruido', closeCr === 1 && a[0] === 0);
+        a[0] = 4286; a[1] = 4285; a[2] = 0; a[3] = 1;
+        ok('§W2 CristalVolta conceito apagado REOPEN', c.claim_run(15) === 0 && a[0] === 1);
     }
 
     /* §W3 ISA */

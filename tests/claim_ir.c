@@ -10,6 +10,7 @@
  * §C7  estação — projectado contra medido
  * §C8  banco — documento de implantação (ob:banco), não pesos
  * §C9  Pátria — local contra live
+ * §C10 Cristal — projeção LaTeX contra fonte (byte a byte); 0∧0 não fecha
  *
  *   cc -O2 -std=c99 -Wall -I../lib claim_ir.c -o claim_ir && ./claim_ir
  */
@@ -263,6 +264,37 @@ int main(void){
             }
             ok("§C9 corpo.json lista pipeline.tex", tem);
         }
+    }
+
+    /* §C10 Cristal — a volta da recuperação (eval 13/08): projeção LaTeX
+     * contra a fonte cristal/cristal.jsonl. O medidor real é
+     * tests/cristal_volta.js; aqui formaliza-se a decisão na IR. */
+    {
+        Claim cc;
+        ok("§C10 parse cristal.claim",
+           claim_parse_file(CLAIMS "/cristal.claim", &cc) == 0);
+        ClaimInput in; memset(&in, 0, sizeof in);
+        in.n = 4; in.v[0] = 4286; in.v[1] = 4286; in.v[2] = 0; in.v[3] = 1;
+        ClaimResult r;
+        ok("§C10 CristalVolta CLOSE R=0 (fonte==reconstruido)",
+           claim_execute(&cc, &in, &r) == 0 && r.closed && r.residual == 0);
+        ok("§C10 mutacao alter_projection denuncia", r.mutation == 1);
+
+        in.v[1] = 4285;  /* um conceito apagado na projeção */
+        ok("§C10 conceito apagado REOPEN R=1",
+           claim_execute(&cc, &in, &r) == 0 && !r.closed && r.residual == 1);
+
+        in.v[1] = 4286; in.v[2] = 3;  /* três registos corrompidos */
+        ok("§C10 corrupcao byte a byte REOPEN R=3",
+           claim_execute(&cc, &in, &r) == 0 && !r.closed && r.residual == 3);
+
+        in.v[0] = 0; in.v[1] = 0; in.v[2] = 0;
+        ok("§C10 0 e 0 nao fecha (sem corpus nao ha volta)",
+           claim_execute(&cc, &in, &r) == 0 && !r.closed);
+
+        in.v[0] = 4286; in.v[1] = 4286; in.v[2] = 0; in.v[3] = 0;
+        ok("§C10 reu (sem medidor) nao fecha",
+           claim_execute(&cc, &in, &r) == 0 && !r.closed);
     }
 
     puts("");

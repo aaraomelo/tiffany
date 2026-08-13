@@ -268,6 +268,24 @@ static int exec_banco(const ClaimInput *in, ClaimResult *r){
     return 0;
 }
 
+/* Cristal: v[0]=n fonte, v[1]=n reconstruído, v[2]=mismatches byte a byte,
+ * v[3]=external (1 = medidor tests/cristal_volta.js correu; 0 = réu afirmou).
+ * STEP project_latex → BACK reconstruct → MEASURE byte_compare. 0∧0 não fecha. */
+static int exec_cristal(const ClaimInput *in, ClaimResult *r){
+    if(!in || in->n < 3) return -1;
+    int nf = in->v[0], nr = in->v[1], mm = in->v[2];
+    int ext = (in->n >= 4) ? in->v[3] : 0;
+    long d = (long)nf - (long)nr;
+    if(d < 0) d = -d;
+    r->forward = nf;
+    r->reverse = nr;
+    r->residual = d + (mm > 0 ? mm : 0);
+    r->closed = (ext != 0) && (nf > 0) && (r->residual == 0);
+    r->mutation = (nr > 0) ? 1 : 0;   /* alter_projection denuncia se há projeção */
+    r->klass = 0;
+    return 0;
+}
+
 /* Pátria: v[0]=local (corpo), v[1]=live (HTTP), v[2]=external (fetch, não réu). */
 static int exec_deploy(const ClaimInput *in, ClaimResult *r){
     if(!in || in->n < 2) return -1;
@@ -311,6 +329,10 @@ int claim_execute(const Claim *c, const ClaimInput *in, ClaimResult *out){
     if(strcmp(c->name, "DeployPatria") == 0 || strcmp(c->object, "Publication") == 0){
         if(!in) return -1;
         return exec_deploy(in, out);
+    }
+    if(strcmp(c->name, "CristalVolta") == 0 || strcmp(c->object, "Cristal") == 0){
+        if(!in) return -1;
+        return exec_cristal(in, out);
     }
     if(strcmp(c->name, "ParetoClosure") == 0 || strstr(c->object, "Pareto")){
         if(!in) return -1;

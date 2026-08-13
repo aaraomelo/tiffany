@@ -25,6 +25,9 @@ def main():
     if len(sys.argv) < 2:
         print("uso: ingere.py <ficheiro.tex>", file=sys.stderr); return 2
     txt = open(sys.argv[1], encoding='utf-8', errors='replace').read()
+    # comentário TeX não é conteúdo: cai antes da descida (o %CRISTAL das
+    # projeções do cristal, e os % da própria teoria). O \% escapado fica.
+    txt = re.sub(r'(?m)(?<!\\)%.*$', '', txt)
     # a descida: cada secção é um nível, e o título é a cabeça dele
     partes = re.split(r'\\(?:sub)*section\*?\{', txt)
     n = 0

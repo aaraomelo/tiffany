@@ -1,6 +1,7 @@
 /* conecthus/backends/claim/runtime.c — IR Claim em wasm.
  * ids: 0 Pareto · 1 Why · 2 Kanban · 3 GUT · 4 PDCA · 5 FiveW2H
- *      6 Ishikawa · 7 VSM · 8 Fluxograma
+ *      6 Ishikawa · 7 VSM · 8 Fluxograma · 9-11 fronteiras · 12 estação
+ *      13 banco · 14 deploy · 15 cristal
  * residual universal em a[7].
  */
 unsigned char arena[65536];
@@ -163,6 +164,19 @@ static int claim_deploy(void){
     return closed;
 }
 
+/* id 15: a[0]=n fonte, a[1]=n rec, a[2]=mismatches, a[3]=external
+ *        → a[0]=R, a[1]=closed, a[2]=mut */
+static int claim_cristal(void){
+    int *a = (int *)arena;
+    int nf = a[0], nr = a[1], mm = a[2], ext = a[3];
+    int d = nf - nr;
+    if(d < 0) d = -d;
+    int R = d + (mm > 0 ? mm : 0);
+    int closed = (ext != 0 && nf > 0 && R == 0) ? 1 : 0;
+    a[0] = R; a[1] = closed; a[2] = (nr > 0) ? 1 : 0; a[7] = R;
+    return closed;
+}
+
 int claim_run(int id){
     if(id == 0) return claim_pareto();
     if(id == 1) return claim_why();
@@ -179,6 +193,7 @@ int claim_run(int id){
     if(id == 12) return claim_estacao();
     if(id == 13) return claim_banco();
     if(id == 14) return claim_deploy();
+    if(id == 15) return claim_cristal();
     return -1;
 }
 

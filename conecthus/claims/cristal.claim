@@ -1,0 +1,10 @@
+claim CristalVolta
+law 0
+object Cristal
+step project_latex
+back reconstruct
+measure byte_compare
+invariant source == reconstructed
+mutate alter_projection
+classify structural
+end

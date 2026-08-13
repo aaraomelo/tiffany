@@ -25,6 +25,8 @@ CV="$D/../banco/bin/conversa"
 [ -x "$CV" ] || CV="$D/conversa"
 python3 "$D/ingere.py" "$D/../teoria.tex"   | "$CV" "$B" - >/dev/null
 python3 "$D/ingere.py" "$D/../catalogo.tex" | "$CV" "$B" - >/dev/null
+# o cristal recuperado (eval 13/08): falas + 4286 conceitos pelas projeções
+"$D/cristal.sh" "$B" >/dev/null
 # casual: conversas + citações → tradutor
 "$D/casual.sh" "$B" >/dev/null
 echo "corpus: $("$CV" "$B" conversa </dev/null 2>&1 | head -1)"
