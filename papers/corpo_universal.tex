@@ -1533,6 +1533,42 @@ $\mathcal{M}$).
 $\square$
 \end{teorema}
 
+\begin{teorema}[a geometria trazida --- o Klein da casa]\label{thm:geometria}
+A pergunta da mesa («que estrutura as operações determinam?») tem
+resposta geométrica: \emph{a geometria é o par (forma, grupo)}, e as
+operações do núcleo determinam-no com precisão:
+\begin{enumerate}
+\item \textbf{o grupo do núcleo é $D_{4}$}: $\{\pm I,\pm J,\pm S,
+\pm X\}$ fecha por produto ($64/64$), $J^{4}=S^{2}=I$,
+$SJS=J^{-1}$ --- graduado pelo $\det$ ($4$ rotações, $4$ reflexões),
+com cada inverso dentro do conjunto.
+\item \textbf{e é a interseção das duas geometrias}: os $8$
+preservam o círculo $x^{2}{+}y^{2}$ \emph{exatamente} e a hipérbole
+diagonal $x^{2}{-}y^{2}$ \emph{a menos de sinal} --- e o sinal é um
+segundo caráter: os dois caracteres $(\det,\text{sinal-}D)$ separam
+$D_{4}$ em $4$ classes de $2$, a abelianização
+$\mathbb{Z}/2\times\mathbb{Z}/2$, medida elemento a elemento.
+\item \textbf{a carta $W$ diagonaliza a forma metálica}:
+$4N(a,b)=(2a{+}mb)^{2}-(m^{2}{+}4)b^{2}$ --- a forma de traço do
+produto dual (Teor.~\ref{thm:produto-dual}) lida como mudança de
+carta; e \emph{nela a estaca é o espelho}: a conjugação
+$(a,b)\mapsto(a{+}mb,-b)$ vira $(u,v)\mapsto(u,-v)$. Álgebra e
+geometria: a mesma involução, em cartas diferentes.
+\item \textbf{cada membrana estende o núcleo com o seu fluxo}: o
+relógio (compacto, transitivo, preserva o círculo --- $2N$ rotações)
+e o Pell ($\sigma^{k}$, com $N$ a alternar $(-1)^{k}$ --- o sinal do
+encaixe). O gume: $\sigma$ quebra o círculo e a rotação genérica
+quebra a hipérbole --- \emph{os fluxos não se trocam}.
+\end{enumerate}
+A estrutura que as operações determinam é o \textbf{par de geometrias}
+--- o círculo compacto e a hipérbole de Pell --- \emph{com um só
+núcleo por interseção}: $D_{4}$, o grupo das operações. As membranas
+$d=\pm1$ são as duas formas; o núcleo é o que elas partilham.
+\emph{Medido:} \code{tests/geometria\_corpo.js} ($9{:}0$; assinado
+por $\mathcal{M}$).
+$\square$
+\end{teorema}
+
 %======================================================================
 \section{Extensões nomeadas --- o mapa, sem teorema}\label{sec:extensoes}
 
