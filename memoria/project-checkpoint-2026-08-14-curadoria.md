@@ -5,7 +5,7 @@ metadata:
   node_type: memory
   type: project
   originSessionId: b6c6c5cb-b5ec-45f0-ac00-480c20a1bb2d
-  modified: 2026-08-14T08:01:50.547Z
+  modified: 2026-08-14T08:13:02.799Z
 ---
 
 **14/08 — A CURADORIA RESOLVIDA, 36c1fa5 (pushado).** Ordem do dono: «resolve a curadoria». Forma: **camada de transações declaradas**, lidas antes de decidir.
@@ -41,4 +41,11 @@ metadata:
 - Anel grande: gap espectral (F_k=1 até 64), primeiro período = folha (A₂^8192=I).
 - Prosa: corpo_universal §sec:zeta-dinamica (thm:zeta-dinamica + obs transformação espectral EM ABERTO — «o nome clássico só entra se a medida o trouxer») + §sec:milenio-universal (tabela das 8 leis como no Peano, estatuto leituras-não-base; o degrau operacional da Lei 3 agora medido: trial→batuta→órbitas→ζ_T→leitura Riemann). Peano ganhou ponteiro, secção fica. Bateria **429:429**.
 
-Relacionado: [[checkpoint-2026-08-13-cristal]], [[feedback-a-referencia-escrita-a-mao]], [[feedback-dois-caminhos]], [[feedback-a-base-ja-existe]].
+**Noite 4 — O METRÓNOMO EM FOURIER, ad1c3fc.** Coordenador: «fundamentar o metrónomo ou coração via f(t)=Σc_k e^{ikt}, apresentar os c_k, maestro como derivação»; gerente corrige a equação (Σk·c_k é a DERIVADA — «o Metrónomo pode ser o operador derivada») e inverte o estatuto: «Fourier não fundamenta — REPRESENTA o operador já medido»; diretor PROÍBE «coração» até a medida autorizar. `tests/metronomo_fourier.js` **15:0**:
+- **OS c_k SÃO AS DUAS FOLHAS**: o espectro da órbita da batuta tem exatamente 2 riscas, em ω^k=σ e ω^k=σ† (σσ†=−1) — q=257 (k={69,123}, ω^k={61,198}) E no anel grande (65537, N=8192, riscas nos logs {5737,6551}, 8 controlos nulos).
+- Metrónomo = QUANDO: tick diagonal (c_k↦ω^k·c_k; a folha roda pela própria folha); a derivada discreta honesta Δ⟺(ω^k−1) — «o ik do contínuo é ω^k−1 no anel».
+- Maestro = QUAIS (derivação espectral): retração d→d/2 = DOBRA dos modos 2⁻¹(c_k+c_{k+N/2}) (T+T*!); projetor 2⁻¹(id+T^{N/2}) = seletor a_k∈{0,1}, partição+idempotência.
+- **Parseval 0=0 apanhado pela regra «normalizar não é medir»**: o zero é ESTRUTURAL (isotropia das folhas: Σσ^{2n}=0, cruzado Σ(−1)^n=0 porque σσ†=−1) — gume recuperado com controlo nos bytes reais (48=48≠0). Volta exata R_total=0.
+- Prosa: thm:metronomo-fourier no corpo_universal (entre a zeta e os milénios). Bateria **430:430**.
+
+Relacionado: [[checkpoint-2026-08-13-cristal]], [[feedback-a-referencia-escrita-a-mao]], [[feedback-dois-caminhos]], [[feedback-a-base-ja-existe]], [[feedback-normalizar-nao-e-medir]].
