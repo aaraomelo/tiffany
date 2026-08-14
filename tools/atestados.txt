@@ -85,8 +85,10 @@ convolucao_universal 14db429c007982da 0
 coroa bf5f52e1e6e43aea 0
 coroacao 69ae2836d0ea4d17 0
 corpo bb3c75a6171597ad 0
+corpo_autossimilar cfed1db62ac9d8ef 0
 corpo_disco d558d055b5ff6e4e 0
 corpo_do_numero 235bf71b3ace5cac 0
+corpo_dual 829b5470e1022d51 0
 corpo_fisico c07fbc65745023c7 0
 corpo_front 6d9be918caa521db 0
 corpo_peano 2d97401f92e6dee6 0
@@ -408,6 +410,7 @@ teletransporte 8b13cc6bf9acf1a0 0
 telomero c1812a6efcda83af 0
 tensor 22059d38a7653ff7 0
 teorema_universal df27b1753b369ed2 0
+teoria_vetorial 4720f0890da571d2 0
 termica 517ad21a05866f7e 0
 tesseracto ebf76569a555a633 0
 tesserato_espiral 55f89989bf04aa64 0

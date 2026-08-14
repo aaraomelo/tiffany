@@ -27,13 +27,29 @@
 
 \begin{abstract}
 O \textbf{Corpo Universal} é o quadro dos operadores que a bateria já
-mediu, organizado pela cadeia
+mediu, reestruturado (ordem do coordenador, 14/08) a partir da
+\textbf{fundação vetorial}: tudo começa num espaço vetorial e no seu
+dual,
 \[
 \boxed{
-\text{corpo}\to\text{norma}\to\text{ordem}\to\text{observador}
-\to\text{transformação}\to\text{dual}.
+K_{0}\to(K,\dagger,N)\to V\to V^{*}
+\to\langle\cdot,\cdot\rangle
+\to\mathrm{Universal}_{(K,K^{\dagger})}
+\to\text{realizações}\to\text{intérpretes},
 }
 \]
+com três factos medidos na base: \emph{todo corpo já é dual por
+definição} (dois grupos, dois neutros, duas involuções, uma costura);
+\emph{o dual abstrato é o dual operacional}
+($\omega(Mu,v)=\omega(u,M^{\dagger}v)$, exaustivo); e \emph{o
+construtor é autossimilar} (o corpo usa um corpo para construir outro
+da mesma forma, com o metal de um andar por régua do seguinte).
+\textbf{Peano não é o corpo universal: é uma realização dele} --- e o
+Metrónomo não é a língua: é o intérprete (o Quantizador) numa
+realização. A cadeia antiga
+(corpo$\to$norma$\to$ordem$\to$observador$\to$transformação$\to$dual)
+continua válida como o \emph{percurso operacional} dentro deste
+quadro.
 As \textbf{cinco operações} --- Soma, Multiplicação, Divisão, Dual,
 Inversão --- entram cada uma com a sua conservação \emph{medida}; o
 \textbf{observador} é a escada $I_1\prec I_2\prec I_3\prec\cdots$; a
@@ -60,15 +76,202 @@ um medidor validou. Verificação:
 \noindent\textbf{Leitura.}
 \[
 \boxed{
-\text{Corpo Universal (este paper)}
+\text{fundação }(K,V,V^{*})
 \;\Longrightarrow\;
-\text{Corpo de Peano (instância)}
+\text{língua (Universal)}
 \;\Longrightarrow\;
-\text{realização musical / tradutor}.
+\text{realização (Peano)}
+\;\Longrightarrow\;
+\text{intérprete (Quantizador/Maestro)}.
 }
 \]
 Nada aqui funda as oito leis: o catálogo é o do \emph{Corpo estelar}, e
-este paper organiza o que os medidores fecharam por cima dele.
+este paper organiza o que os medidores fecharam por cima dele. As
+camadas e os seus donos estão na tabela de \S\ref{sec:fundacao}.
+
+%======================================================================
+\section{A fundação vetorial --- $K$, $V$, $V^{*}$, e o corpo é
+dual}\label{sec:fundacao}
+
+Por ordem do coordenador (14/08), o paper reestrutura-se a partir da
+fundação que a \emph{Teoria} já tinha (\code{teoria.tex}): tudo começa
+num espaço vetorial, e de mais nada.
+\[
+\boxed{
+K_{0}
+\;\longrightarrow\;
+(K,\dagger,N)
+\;\longrightarrow\;
+V\ \text{sobre}\ K
+\;\longrightarrow\;
+V^{*}\ \text{sobre}\ K^{\dagger}
+\;\longrightarrow\;
+\langle\cdot,\cdot\rangle
+\;\longrightarrow\;
+\mathrm{Universal}_{(K,K^{\dagger})}
+\;\longrightarrow\;
+\text{realizações}.
+}
+\]
+\textbf{O primal}: $V$, espaço vetorial sobre $K$. \textbf{O dual}:
+$V^{*}=\operatorname{Hom}(V,K)$. \textbf{O adjunto}:
+$T^{*}\varphi=\varphi\circ T$ existe sempre, mas
+$T\in\operatorname{End}(V)$ e $T^{*}\in\operatorname{End}(V^{*})$
+vivem em espaços distintos --- compará-los exige o isomorfismo de um
+emparelhamento não degenerado, e só então
+$T^{\dagger}=J^{-1}T^{*}J$ é bem tipado (\emph{Teoria}). E a correção
+do coordenador, \emph{investigada e medida}: $V$ e $V^{*}$ não vivem
+sobre um corpo comum --- vivem sobre $K$ \emph{e} $K^{*}$, e o que
+$K^{*}$ é foi \textbf{descoberto pela medida}, não decretado.
+
+\begin{teorema}[a fundação medida --- o dual abstrato é o dual
+operacional]\label{thm:fundacao}
+No $V$ da casa ($V=K^{2}$, onde vivem as cartas, as órbitas e os
+pares $(c,s)$): \textbf{(i)} $V$ e $V^{*}$ são espaços vetoriais
+(axiomas medidos, comutatividade exaustiva em $\mathbb{F}_{17}$);
+\textbf{(ii) o emparelhamento bilinear da casa é o determinante},
+$\omega(u,v)=u_{1}v_{2}-u_{2}v_{1}$ --- não-degenerado (exaustivo) e
+identificando $V^{*}\cong V$ por contagem: \emph{o dual está na
+fundação, não nasce depois}; \textbf{(iii) a identidade central}:
+\[
+\boxed{\;\omega(Mu,v)=\omega(u,M^{\dagger}v),\qquad
+M^{\dagger}=\mathrm{tr}(M)\,I-M\;}
+\]
+exaustiva ($334\,084/334\,084$) --- o adjunto transportado
+($T^{\dagger}=J^{-1}T^{*}J$ da \emph{Teoria}) \emph{é} a estaca dos
+medidores; \textbf{(iv) a Lei~2 bem tipada}: $T^{\dagger}=-T$
+$\iff$ $\mathrm{tr}\,T=0$, exaustivo --- os anti-autoadjuntos são
+\emph{exatamente} os geradores de Clifford
+(Teor.~\ref{thm:derivacao-primitivas}); o gume: $A_{m}$ (traço
+$m\neq0$) não é anti-autoadjunto --- a batuta \emph{gera} a dinâmica
+em vez de assinar a forma; \textbf{(v)} as relações do núcleo fecham
+sobre $\mathbb{Q}$, $\mathbb{F}_{17}$ e $\mathbb{F}_{65537}$ --- a
+língua não escolhe o corpo.
+\emph{Medido:} \code{tests/teoria\_vetorial.js} ($7{:}0$;
+$\mathcal{M}$).
+$\square$
+\end{teorema}
+
+\begin{teorema}[o corpo do Universal é dual --- e a troca de corpo é
+a dinâmica]\label{thm:corpo-dual}
+A investigação pedida («o que é $K^{*}$?») fechou com resíduo zero, e
+a definição \emph{vem do resultado}:
+\textbf{(i) o corpo dualizado é $(K,\dagger,N)$}: $K$ com involução
+de corpo $x\mapsto x^{\dagger}$ (a estaca: $\sigma^{\dagger}=m-\sigma$,
+$\sigma\sigma^{\dagger}=-1$, $\sigma+\sigma^{\dagger}=m$ ---
+exaustivos, com $(xy)^{\dagger}=x^{\dagger}y^{\dagger}$) sobre o
+corpo fixo $K_{0}=\{x^{\dagger}=x\}$ (contado exato); $K^{*}$ \emph{é}
+$K$ com a ação conjugada --- a estaca é o dicionário que define um
+sobre o outro --- e a norma $N(x)=x x^{\dagger}$ cai \emph{sempre}
+em $K_{0}$, multiplica (Lei~7) e é a hipérbole $a^{2}+mab-b^{2}$ por
+dois caminhos.
+\textbf{(ii) $V$ sobre $K$, $V^{*}$ sobre $K^{\dagger}$}: o
+emparelhamento é \emph{sesquilinear} --- $h(\lambda u,v)=\lambda\,
+h(u,v)$ mas $h(u,\lambda v)=\lambda^{\dagger}h(u,v)$ (exaustivos em
+$\lambda$): a ação de $K$ em $V^{*}$ é a conjugada \emph{por
+construção}; e $h(u,v)^{\dagger}=h(v,u)$ --- trocar os papéis é
+aplicar a estaca, e dualizar duas vezes devolve (Lei~1).
+\textbf{(iii) a joia --- a troca de corpo é a dinâmica} (a hipótese
+do coordenador, confirmada): no andar \emph{inerte} ($m^{2}{+}4$
+não-resíduo) o Frobenius $x\mapsto x^{p}$ é \emph{exatamente} a
+estaca ($x^{p}=x^{\dagger}$ nos $289$, fixando $K_{0}$;
+$\mathrm{Frob}^{2}=\mathrm{id}$); no \emph{separado}, $x^{p}=x$ e os
+dois corpos ficam \emph{à vista} como folhas --- a dicotomia
+inerte/separado do censo ($516\leftrightarrow128$ na zeta) é a
+dicotomia troca/não-troca. E a resposta à pergunta da mesa: o
+\emph{núcleo} é $K$-linear (troca vetores \emph{dentro} de $K$); o
+\emph{Frobenius} é semilinear ($F(\lambda u)=\lambda^{\dagger}F(u)$
+--- troca o próprio corpo); a identidade do emparelhamento
+\emph{sobrevive} à troca ($h(Fu,Fv)=h(u,v)^{\dagger}$): \emph{quem
+troca o corpo é a aritmética do andar, não a álgebra do núcleo}.
+\textbf{(iv) a instância é dualizada também}: no relógio de Peano
+($\mathbb{F}_{65537}$, $m{=}2$, separado) o corpo dual está à vista
+como par de folhas explícitas ($\sigma=4081$,
+$\sigma^{\dagger}=61458$, $\sigma\sigma^{\dagger}=-1$) --- a
+realização dualiza por folhas o que o inerte dualiza por Frobenius.
+\textbf{(v)} as relações do núcleo fecham com entradas no próprio
+$K$ dualizado: $\mathrm{Universal}_{(K,K^{\dagger})}$.
+\emph{Medido:} \code{tests/corpo\_dual.js} ($8{:}0$; $\mathcal{M}$).
+$\square$
+\end{teorema}
+
+\begin{teorema}[todo corpo já é dual --- e o construtor é
+autossimilar]\label{thm:autossimilar}
+As duas frases finais do coordenador, medidas:
+\textbf{(i) todo corpo já é dual por definição} --- a forma dual
+pelas primitivas: um corpo é \emph{dois grupos} --- o aditivo
+$(K,+,0)$ com o espelho $x\mapsto-x$ e o multiplicativo
+$(K^{\times},\cdot,1)$ com a inversão $x\mapsto1/x$ --- dois neutros
+(o $0$ e o $1$ de toda dimensão), duas involuções,
+\emph{costurados} pela distributividade (Lei~6) e com o expoente por
+dicionário ($g^{a+b}=g^{a}g^{b}$ exaustivo: o caráter \emph{dentro}
+do corpo). As cinco primitivas são a apresentação dual do próprio
+corpo.
+\textbf{(ii) a autossimilaridade é do construtor}: \emph{uma} função
+--- $(K,m)\mapsto K[\sigma_{m}]$ com $\sigma^{2}=m\sigma+1$, escrita
+só nas primitivas ($K^{2}$ com $\oplus$ componente, $\otimes$ pela
+dobra, $\dagger$ pela estaca, ${}^{-1}=\dagger/N$) --- dá $K_{1}$ de
+$K_{0}$ e $K_{2}$ de $K_{1}$: o mesmo código, a mesma forma. E
+\textbf{a joia}: a varredura (constantes primeiro) mostra que nenhum
+$m\in K_{0}$ serve no andar $2$; a primeira régua válida é
+$\boxed{m_{1}=\sigma}$ --- \emph{o metal do andar $1$ é a régua do
+andar $2$}: o corpo usa o corpo para construir o corpo.
+\textbf{(iii) as mesmas leis sobem}: estaca
+($\tau\tau^{\dagger}=-1$, $\tau+\tau^{\dagger}=m_{1}$), norma no
+corpo de baixo ($900/900$), inversos por $\dagger/N$, e o Frobenius
+do andar \emph{é} a estaca do andar ($x^{|K_{1}|}=x^{\dagger}$, com
+$\mathrm{Frob}^{2}=\mathrm{id}$) --- a joia do
+Teor.~\ref{thm:corpo-dual}, um andar acima, pela mesma lei.
+\textbf{(iv)} a dimensão dobra ($17,\,17^{2},\,17^{4}$ --- o
+$\dim A_{n+1}=2\dim A_{n}$ nos corpos), o mergulho
+$K_{1}\hookrightarrow K_{2}$ é homomorfismo e os neutros herdam.
+\textbf{(v) o gume}: o mesmo construtor com disc \emph{quadrado} não
+dá corpo ($32=2p-2$ divisores de zero exibidos) --- inerte constrói
+corpo, split constrói o par de folhas à vista: as duas faces do
+Teor.~\ref{thm:corpo-dual}, decididas pelo quadrado.
+\emph{Medido:} \code{tests/corpo\_autossimilar.js} ($6{:}0$;
+$\mathcal{M}$).
+$\square$
+\end{teorema}
+
+\subsection*{As camadas --- quem é dono de quê}\label{sec:camadas}
+
+\[
+\boxed{\textbf{Peano não é o corpo universal; Peano é uma realização
+do corpo universal.}}
+\]
+\[
+\boxed{\textbf{O Metrónomo não é a língua; é o intérprete
+quantificador da língua numa realização.}}
+\]
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+camada & o que é & onde vive neste paper \\
+\midrule
+\textbf{fundação} & $K_{0}$, $(K,\dagger,N)$, $V$, $V^{*}$, os
+  emparelhamentos & \S\ref{sec:fundacao}; \emph{Teoria} \\
+\textbf{língua} ($\mathrm{Universal}_{(K,K^{\dagger})}$) & as cinco
+  operações, o núcleo $(X,S,H,J)$ &
+  \S\ref{sec:cinco}; Teors.~\ref{thm:universal-espelho},
+  \ref{thm:produto-dual}, \ref{thm:derivacao-primitivas} \\
+\textbf{realização} & Peano: $K=\mathbb{F}_{65537}$ (folhas à vista),
+  $V=$ o relógio; batuta, pera, trial &
+  \S\ref{sec:instancia}; \emph{Corpo de Peano} \\
+\textbf{intérprete} & Quantizador (tick$+$invariante $=\forall$);
+  Maestro$\circ$Quantizador $=$ memória &
+  Teors.~\ref{thm:quantizador-universal}, \ref{thm:quantificador},
+  \ref{thm:maestro-memoria} \\
+\textbf{aplicações} & os milénios como leituras; a passagem global &
+  \S\ref{sec:milenio-universal}; Teors.~\ref{thm:solucoes-primitivas},
+  \ref{thm:passagem-global} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent O intérprete \emph{opera sobre} a língua e a realização ---
+não pertence a nenhuma; a troca de corpo pertence à \emph{aritmética
+do andar} (Teor.~\ref{thm:corpo-dual}); e cada resultado deste paper
+ocupa uma camada só.
 
 %======================================================================
 \section{As cinco operações --- cada uma com a sua conservação}\label{sec:cinco}
