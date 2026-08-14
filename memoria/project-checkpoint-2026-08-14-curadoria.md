@@ -130,3 +130,9 @@ Ordem «migrar para sistema unificado» executada pelo contrato do gerente (Univ
 ## ESTADO DE REPOUSO (fim do dia — decreto da mesa, eval final 14/08)
 
 **CONGELAMENTO ESTRITO decretado pelo diretor; unânime.** Bateria 428:428 com --refaz total. A Torre tem raiz única: Universal → (X,S,H,J) → {álgebra, geometria, espectro, instância}, com HJH=2J⁻¹ a impedir o colapso das distinções. **Os legados são TESTEMUNHAS da migração** (gerente): não se apagam até à pergunta explícita «podemos retirar as testemunhas sem perder capacidade de reconstrução?» — e a purga exigirá árvore nova → refaz → 428/428 + reconstrução a partir do Universal. Até nova ordem: zero elos novos, zero prosa de expansão, manutenção apenas.
+
+## FASE 5 + A INVARIÂNCIA DO PRODUTO DUAL (madrugada, 8ee581f + 0e4021f — bateria 429:429)
+
+**Fase 5 (legados, 8ee581f)**: as 11 órfãs saem da tabela linha a linha; os 11 MUDOS eram saídas velhas em /tmp de medidores movidos — scan restrito à árvore viva (o aviso morre quando o medidor sai); a álgebra de blocos ganhou UM dono (matn na lib: n×n BigInt + kron = a ponte oficial núcleo→andares); clifford_pleno/teorema_universal consomem nucleo/matn com a derivação mantida como ASSERÇÃO; a árvore dual guarda o caminho antigo inline como TESTEMUNHA. --refaz 428:428 sem avisos. O sistema encolheu (88+/89−).
+
+**Produto Dual (0e4021f, produto_dual.js 15:0)**: o produto do par É o rotor (S·X=J, X·S=J⁻¹ — o triângulo fecha por produto); a dualidade INVERTE o produto (C_H permuta os fatores ⟹ C_H(SX)=(SX)⁻¹ = a diedral relida); no corpo M·M†=M†·M=det·I com estaca anti-automorfismo ((MN)†=N†M†) e as membranas d=±1 como valores na unidade; Parseval = invariância espectral com o ESPELHO no índice (k↔−k); na órbita |d|=1 (fator de potência) e pitagórica constante. Lição repetida e re-aprendida: **o gume não morde em par ortogonal (0=0)** — segunda vez (§T2, §I4); verificar sempre se o controlo PODE falhar no dado escolhido.
