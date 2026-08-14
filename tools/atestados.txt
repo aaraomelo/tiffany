@@ -188,6 +188,7 @@ fractal 6bab7fb3cd133ffb 0
 fronteira_front efe3776eb4b37362 0
 furos 6be7e5769751df24 0
 fusao 13c9bc056928be95 0
+fusao_conceitos 77b528b3ae9b2bc9 0
 gauss 77024247661e4422 0
 gerador 2373ad5c9d2e6e8c 0
 gerador_analog 6a7abcf53c950b0b 0
