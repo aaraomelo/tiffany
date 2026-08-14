@@ -350,6 +350,7 @@ relogio_curva 63997a9b0f828082 0
 relogio_opera d8a205fd815ca2cb 0
 render df16f47ea89dd524 0
 renormaliza ca31a22ea5e1ff3f 0
+residuo_universal 0f3aadabb52d8da3 0
 residuos_totais 52cf778fe4c28b37 0
 reversao 6ce3ed15e79f47b7 0
 ribossomo 5d80dbc0f2781041 0
