@@ -5,7 +5,7 @@ metadata:
   node_type: memory
   type: project
   originSessionId: b6c6c5cb-b5ec-45f0-ac00-480c20a1bb2d
-  modified: 2026-08-14T08:45:08.671Z
+  modified: 2026-08-14T08:55:16.898Z
 ---
 
 **14/08 — A CURADORIA RESOLVIDA, 36c1fa5 (pushado).** Ordem do dono: «resolve a curadoria». Forma: **camada de transações declaradas**, lidas antes de decidir.
@@ -67,5 +67,12 @@ metadata:
 - **As 8 leis em lib/universal.js** como interface normativa: catálogo `leis` com verificação operacional por lei (Lei 0 curva x=±1; Lei 1 estaca; Lei 2 rotor/espelho RJ=−JR; Lei 3 trial x³=x; Lei 4 |det|=1; Lei 5 bit=ponto fixo de ν; Lei 6 lcm(2,3)=6; Lei 7 det multiplicativo). `verificaLeis()` 8/8.
 - **Primitivas promovidas**: anel(q), dft/idft, renormaliza (t↦t²−(d+d) — o mix BigInt/Number apanhado ao vivo), morfo δ/ε em ℤ. Substituição em toro_histerese, metronomo_fourier, metronomo_autossimilar, lebesgue_toro (totais idênticos 16/15/12/7); zeta_universal fica (fábrica de MATRIZES mod q, régua própria). Testemunha ampliada: migracao_universal §M7+§M8 (15:0) — leis 8/8 + primitivas caso a caso (DFT coeficiente a coeficiente, renormaliza vs quadraturas BigInt, morfologia elemento a elemento).
 - Reatestação em massa dos 14 importadores da lib (a regra da casa). docs §9; arquitetura.tex atualizada. Bateria **432:432**.
+
+**Noite 8 — A CONVOLUÇÃO SAIU DO MAPA, 24a3952.** Coordenador: «ve transformada universal e convolução/deconvolução universal»; a mesa tinha pedido pausa MAS definiu o único laboratório autorizado para a reabertura («um laboratório, uma pergunta — a convolução emerge ou não? NÃO assumir o * clássico») — a ordem do dono reabriu com esse elo. `tests/convolucao_universal.js` **13:0**:
+- **O candidato EMERGE, não se importa**: o produto de corpos f(A)·g(A) INDUZ a soma sobre i+j=k nas sequências (matrizes inteiras, bytes reais, m=1..3); a dobra algébrica σ²=mσ+1 reduz ao corpo r₀+r₁σ (recorrência == matriz cheia). Associativa, comutativa, δ identidade — pelo caminho que não sabe o que é convolução.
+- **A transformada casa nas duas realizações**: eval_σ(a*b)=eval_σ(a)·eval_σ(b) nas duas folhas; dft(a⊛b)=dft(a)·dft(b) ponto a ponto (a dft da lib).
+- **Conservação multiplicativa**: a massa multiplica (Σ(a⊛b)=Σa·Σb); as autocorrelações convolvem (c⊛c̃=(a⊛ã)⊛(b⊛b̃)).
+- **A DECONVOLUÇÃO é a divisão espectral** (dual com as duas partes): exata com espectro sem zeros (R_total=0 RETAIN); o gume são os DIVISORES DE ZERO exibidos — 1⃗⊛[1,−1,0,…]=0, colisão a≠a′ com a⊛1⃗=a′⊛1⃗, e dft(1⃗) com N−1 zeros (o tema do corpo-estelar). Lei invariante de escala (N=16/8/4).
+- «convolução = a forma aditiva da multiplicação, vista pela Transformada Universal» — a fórmula do gerente, MEDIDA. Prosa mínima: bullet do §extensoes convertido (saiu do mapa), ponteiro no Peano. Só falta no mapa: Pontryagin contínuo, Clifford pleno, La Hire, Dirac contínuo. Bateria **433:433**.
 
 Relacionado: [[checkpoint-2026-08-13-cristal]], [[feedback-a-referencia-escrita-a-mao]], [[feedback-dois-caminhos]], [[feedback-a-base-ja-existe]], [[feedback-normalizar-nao-e-medir]].
