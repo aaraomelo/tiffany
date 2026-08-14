@@ -59,6 +59,7 @@ claim_control 714e166108b42d2c 0
 claim_fronteira 029178ccd46151e2 0
 claim_ir 51325b8926591ffa 0
 clifford_dual 12ecc8250a26cd5a 0
+clifford_pleno f62c75d96715560c 0
 cobertura 575ec441d3142f8b 0
 colheita fc14bd493e6ca894 0
 colisor_corpos 3be2fa7041eb0275 0

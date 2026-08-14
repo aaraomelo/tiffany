@@ -994,6 +994,42 @@ fica apontada, n\~ao reafirmada.
 $\square$
 \end{teorema}
 
+\begin{teorema}[Clifford pleno --- o andar acima, com o espelho por
+deck]\label{thm:clifford-pleno}
+O andar acima de $\mathrm{Cl}(1,1)$ (clifford\_dual, $14{:}0$)
+constr\'oi-se pelo movimento da casa --- a duplica\c{c}\~ao de bloco
+--- e fecha por aritm\'etica exata:
+\begin{enumerate}
+\item \textbf{o gerador velho sobe vestido com o espelho}:
+$e_{i}=\mathrm{diag}(E_{i},E_{i})\cdot S$ com $S=\mathrm{diag}(I,-I)$,
+$S^{2}=I$, e $S$ anticomuta com a troca de folha --- a duplica\c{c}\~ao
+\'e um \emph{recobrimento duplo} e o espelho \'e o deck, o mesmo do
+Teor.~\ref{thm:viviani}. O gume: $\mathrm{diag}(D,D)$ --- sem o
+espelho --- \emph{n\~ao} anticomuta.
+\item \textbf{o andar fecha}: $e_{1}^{2}=L_{8}$, $e_{2}^{2}=-L_{8}$,
+$e_{3}^{2}=I_{8}$ e os tr\^es anticomutadores zeram ($m=1..4$) ---
+$\mathrm{Cl}(2,1)$ sobre o corpo met\'alico; e $e_{4}$ com
+$e_{4}^{2}=-I_{8}$ completa a assinatura $(2,2)$.
+\item \textbf{a dimens\~ao dobra, dois degraus medidos}: os produtos
+de subconjuntos t\^em posto $4\to8\to16$ por elimina\c{c}\~ao exata
+--- $\dim A_{n+1}=2\dim A_{n}$, medida e n\~ao afirmada.
+\item \textbf{o volume \'e central no \'impar e gradua no par}:
+$\omega=e_{1}e_{2}e_{3}$ comuta com os tr\^es geradores de
+$\mathrm{Cl}(2,1)$; no andar de baixo, $DG$ \emph{anti}comuta com $D$
+e $G$ --- as duas metades da frase, uma por andar. E $\omega^{2}$
+fecha por dois caminhos (matricial vs
+$(-1)^{k(k-1)/2}\prod e_{i}^{2}=L_{8}^{2}$).
+\item \textbf{a subálgebra par fecha sobre o corpo certo}: sobre
+$\mathbb{Z}$ os pares \emph{n\~ao} fecham
+($(e_{1}e_{2})(e_{1}e_{3})=-L_{8}\,e_{2}e_{3}$ sai do span) --- a
+falha da primeira medida apontou os coeficientes: s\~ao
+$\mathbb{Z}[A]$, o corpo met\'alico, e sobre ele o posto \'e
+$8=4\times2$ e nenhum dos $16$ produtos sobe.
+\end{enumerate}
+\emph{Medido:} \code{tests/clifford\_pleno.js} ($12{:}0$).
+$\square$
+\end{teorema}
+
 %======================================================================
 \section{Onde entram os milénios --- leituras, não base}\label{sec:milenio-universal}
 
