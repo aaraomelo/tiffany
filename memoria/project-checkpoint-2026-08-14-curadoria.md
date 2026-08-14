@@ -5,7 +5,7 @@ metadata:
   node_type: memory
   type: project
   originSessionId: b6c6c5cb-b5ec-45f0-ac00-480c20a1bb2d
-  modified: 2026-08-14T07:50:57.025Z
+  modified: 2026-08-14T08:01:50.547Z
 ---
 
 **14/08 — A CURADORIA RESOLVIDA, 36c1fa5 (pushado).** Ordem do dono: «resolve a curadoria». Forma: **camada de transações declaradas**, lidas antes de decidir.
@@ -34,5 +34,11 @@ metadata:
 **Noite 2 — LIMPEZA + O TORO AUDITADO, 24b45f1.** Ordem do coordenador: «dualizar a superfície, toro no centro, histerese de Peano, zeta de Riemann…»; a mesa TRAVOU o nome (Grok: buscar→medir→nomear; gerente: 4 camadas, «linha crítica metálica» proibida sem equação; diretor: zeta só como consequência, e AUTORIZA a limpeza). Executado:
 - **Limpeza da dupla árvore**: 7 medidores religados à lib (cristal_volta, cristal_energia, residuos_totais, fusao_conceitos, cristal_curadoria, assinatura_banal, contorno_riemann — lib ganhou `corte`). NÃO tocados por não serem duplicatas: assinatura_colisoes (UTF-16!), lyapunov (regex idDe, rDual sem duplicados — réguas variantes), observador (energia sobre vetores), equivalencia+migracao (testemunhas POR DESENHO). **Regra nova: lib muda ⇒ reatestar os dependentes** (a atestação assina o medidor, não a lib). Bateria idêntica 427:427.
 - **`tests/toro_histerese.js` 16:0** — o espaço de fase: o TORO OPERACIONAL existe — batuta fecha em círculo (ord(A₁ mod 65537)=14564, minimal), folha = 2ª volta (det A^k alterna ±1), toro das unidades {±A^k} do tamanho previsto (−I∈⟨A⟩); caminhada fechada (λ⁺+λ⁻=0) devolve estado real EXATO com R_total=0 RETAIN, aberta REOPEN; **massa no centro** (M(z)=E(x)+E(y) invariante sob monodromia nas 52; |det| parado na órbita, sinal=folha); **histerese = laço α≤id≤φ que seleciona** (abertos voltam exatos; truncar a dilatação na borda quebra φ≥id — apanhado ao vivo). **Espectro como DADO**: m=1..6 dicotomia separadas (T|2(p−1): T₃=65536=p−1, T₂=8192) vs inertes (T|2(p+1): T₅=T₆=131076); pontos fixos de A^k exatamente nos múltiplos do período da folha. Zeta/Riemann NÃO nomeados — «o nome espectral, se vier, vem da medida seguinte». Nota \medido no thm:histerese do Peano. Bateria **428:428**.
+
+**Noite 3 — A ZETA DINÂMICA DERIVADA, 8604ea4.** Coordenador: «levar derivação zeta para o universal com os outros milénios, são primitivas operacionais dinâmicas»; gerente corrige o Grok («JÁ há material — mas zeta GERADA pelo operador, não axioma»), diretor autoriza. `tests/zeta_universal.js` **10:0**:
+- Palco pequeno q=257=2^8+1 (irmão do 65537): **censo COMPLETO** de (ℤ/257)² para m=1..3 — ζ_T(u)=∏(1−u^d)^{−N_d} construída do censo; dois caminhos inteiros (Σd·N_d=F_k núcleo; série n·z_n=ΣF_j·z_{n−j} em BigInt com divisibilidade a fechar); histerese filtra (T^d x=x ⟹ R_total=0 RETAIN; truncada REOPEN); N_1=1 (massa no centro).
+- **Achado do censo**: m=1 inerte dá períodos {1,516}×128 órbitas; m=2,3 separadas dão {1,128}×516 — os números TROCAM de papel (516=2(q+1), 128|q−1, 516·128=q²−1). A dualidade inerte/separado à vista.
+- Anel grande: gap espectral (F_k=1 até 64), primeiro período = folha (A₂^8192=I).
+- Prosa: corpo_universal §sec:zeta-dinamica (thm:zeta-dinamica + obs transformação espectral EM ABERTO — «o nome clássico só entra se a medida o trouxer») + §sec:milenio-universal (tabela das 8 leis como no Peano, estatuto leituras-não-base; o degrau operacional da Lei 3 agora medido: trial→batuta→órbitas→ζ_T→leitura Riemann). Peano ganhou ponteiro, secção fica. Bateria **429:429**.
 
 Relacionado: [[checkpoint-2026-08-13-cristal]], [[feedback-a-referencia-escrita-a-mao]], [[feedback-dois-caminhos]], [[feedback-a-base-ja-existe]].
