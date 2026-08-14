@@ -242,6 +242,7 @@ matricial e708671d4f3558dc 0
 maxcut 6e3f503ba23045de 0
 mcu ab518f13dc30a9da 0
 mecanica 122a11b4b3090e35 0
+medicao_normativa 1d628d6930adb23b 0
 medida f884b8cb1ec7bd9b 0
 meia_passagem 2fd7a5cd2b26078a 0
 meio_aberto 23d64525b11bc961 0

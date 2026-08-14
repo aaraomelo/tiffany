@@ -506,3 +506,30 @@ realização** — «unifica sem apagar as diferenças».
   §N4 leis 8/8 + contrato juntos.
 - **Legados NÃO apagados** (regra do gerente): a limpeza dos duplicados
   é fase posterior, depois do portão --refaz validar a torre inteira.
+
+## 17. O PROTOCOLO NORMATIVO DA MEDIÇÃO — regra permanente (14/08, mesa)
+
+**O contrato** (lib/universal.js, `medicao` — meta-medido por
+tests/medicao_normativa.js):
+
+    𝓜(O) = (R, G, V)      fecha(𝓜) ⟺ R = 0  ∧  G  ∧  V = 0
+
+- **R** — o invariante: resíduo da afirmação;
+- **G** — o GUME: o contra-caso construído para falhar, e que FALHOU
+  como previsto (`true` estrito; truthy desleixado é recusado);
+- **V** — a volta: resíduo da reconstrução exata.
+
+Critério mais forte que «deu zero»: *um teste que só sabe passar não
+atesta* — a forma do falso verde de 14/08 (R=0 sem gume) é recusada
+pelo próprio contrato. Todo medidor novo importa o núcleo e declara o
+gume.
+
+**A lei arquitetural do --refaz** (elevada de procedimento a portão):
+
+    mudança estrutural OU teorema novo  ⟹  --refaz total obrigatório
+
+Todo teorema entra pelo mesmo portão pelo qual a arquitetura entra.
+
+**A simetria de desenho**: o produto dual exige o espelho no índice
+(k↔−k) para não perder informação; a medição exige o gume
+(afirmação↔contra-caso) para não perder falsificabilidade.

@@ -1134,6 +1134,25 @@ membrana $+1$.
 $\square$
 \end{teorema}
 
+\begin{observacao}[fase 6 --- o contrato normativo da medi\c{c}\~ao]
+\label{obs:medicao}
+Por ordem da mesa, a ferramenta de medi\c{c}\~ao subiu a
+infraestrutura: a lib exporta \code{medicao} com o contrato
+$\mathcal{M}(O)=(R,G,V)$ e o crit\'erio
+$\mathrm{fecha}(\mathcal{M})\iff R=0\wedge G\wedge V=0$ --- o
+invariante, o \emph{gume} (o contra-caso que falhou como previsto) e
+a volta, os tr\^es obrigat\'orios. A meta-medi\c{c}\~ao verifica que
+dos $8$ cantos exatamente um fecha, que o contrato fecha na
+medi\c{c}\~ao real do n\'ucleo e reabre com cada componente sabotado,
+que as formas hist\'oricas de falso verde s\~ao recusadas, e que o
+relato desleixado do gume \'e recusado pelo tipo. A simetria com o
+Teor.~\ref{thm:produto-dual} \'e de desenho: o espelho no \'indice
+conserva a informa\c{c}\~ao; o gume conserva a falsificabilidade. E a
+lei arquitetural que o acompanha: \emph{mudan\c{c}a estrutural ou
+teorema novo} $\Rightarrow$ \code{--refaz} total.
+\emph{Medido:} \code{tests/medicao\_normativa.js} ($6{:}0$).
+\end{observacao}
+
 %======================================================================
 \section{Onde entram os milénios --- leituras, não base}\label{sec:milenio-universal}
 
