@@ -145,13 +145,13 @@ existem corpos distintos com a mesma energia.
 \item \textbf{$I_2$ não basta}: a \emph{dupla transposição espelhada}
 --- trocar «ab»$\to$«ba» num sítio e «ba»$\to$«ab» noutro, à mesma
 distância interna $d$ --- conserva o multiconjunto ($E$) e cancela a
-fase: $\Delta\Phi=d(a{-}b)+d(b{-}a)=0$. \textbf{Todos os $4286$
+fase: $\Delta\Phi=d(a{-}b)+d(b{-}a)=0$. \textbf{Todos os $4234$
 registos do cristal admitem esta colisão em dados orgânicos} (o par
 espelhado é ubíquo no texto), e $11$ de $20$ respostas do corpus banal
 também.
 \item \textbf{$\Phi_2$ resgata a família}:
 $\Delta\Phi_2=d(b{-}a)\bigl((i'{+}j')-(i{+}j)\bigr)$ só zera com os
-centros coincidentes --- separou as $4286$ e as $11$, todas.
+centros coincidentes --- separou as $4234$ e as $11$, todas.
 \item \textbf{A divisão de trabalho, medida}: os $190$ pares
 \emph{naturalmente} distintos do corpus banal separam-se todos já em
 $I_1$ --- o degrau grosso resolve o mundo natural; o degrau fino
@@ -161,7 +161,7 @@ resolve o adversário.
 \boxed{\text{conservar a norma não conserva a identidade.}}
 \]
 \emph{Prova (operacional, medida).} \code{tests/assinatura\_colisoes.js}
-($4286/4286$; $\Phi_2$ separa $4286/4286$; $30\,000$ cadeias sem colisão
+($4234/4234$; $\Phi_2$ separa $4234/4234$; $30\,000$ cadeias sem colisão
 de $I_3$ --- orçamento dito); \code{tests/assinatura\_banal.js}
 (a escada no orgânico: $190$ em $I_1$, $0$ em $I_2$/$I_3$, $0$ por
 separar; $11$ espelhados só em $\Phi_2$). $\square$
@@ -278,8 +278,22 @@ conservação fecha com o \textbf{termo de contorno exato}
 byte, e no corpus a fusão é \emph{transação declarada}
 ($R_{\mathrm{endereço}}=3$: dois saem, um entra) que \textbf{reverte a
 $R=0$} --- todo passo reverte, ou paga. Medido:
-\code{tests/fusao\_conceitos.js}. Fundir \emph{de facto} é curadoria
-do dono.
+\code{tests/fusao\_conceitos.js}.
+
+\textbf{A curadoria foi resolvida} (ordem do dono, 13/08):
+\code{tools/cristal\_cura.py} aplicou $52$ fusões à fonte --- $44$
+\emph{medidas} (pares de texto byte-idêntico: o mesmo conteúdo ingerido
+por dois esquemas de endereço, id nu \emph{vs} id de hub) e $8$
+\emph{julgadas com leitura} (mesmo conceito em prosa diferente: as duas
+faces viajam intactas no registo) --- e \textbf{recusou} $13$ pares que
+a regra cega fundiria (arte$\neq$artes, análise$\supsetneq$transformada
+de Fourier, homónimos): a recusa é parte da decisão e fica no livro
+\code{cristal/curadoria.tsv}, com motivo. O corpus passou de $4286$ a
+$4234$ endereços \emph{sem perder um byte}: desfazer as $52$ devolve os
+$4286$ na âncora $E=38\,731\,623\,179$ exata, e um byte induzido dentro
+de qualquer fusão quebra a âncora. Medido:
+\code{tests/cristal\_curadoria.js}; o esgotamento também --- no corpus
+curado não resta nenhum par de texto idêntico.
 O clone responde-se pela métrica $x\sim_{\mathcal O}y$: $I$ identifica
 o corpo; o endereço conta a carga (o um e o dois); a admissão é do
 Controle.
@@ -343,7 +357,7 @@ empurra tudo entre a sua posição e o fim. A dissipação é da
 \emph{Prova (operacional, medida).} \code{tests/lyapunov\_torre.js}:
 inteiro puro, gerador congruente determinístico, \textbf{uma} indução
 com \textbf{duas} leituras (as réguas medem o mesmo objecto), $T=100$ por
-célula, torre $134\to4286$ por dobra sobre o cristal recuperado. Medido:
+célula, torre $134\to4234$ por dobra sobre o cristal recuperado. Medido:
 $e=0$ exato em todas as células de endereço preservado; $e\equiv1$
 ($\sigma^{2}=0$) no endereço destruído lido pelo endereço; e por posição
 $\sigma^{2}\cdot T^{2}$ sobe de $13\,435\,000$ para $16\,130\,133\,019$
@@ -392,7 +406,7 @@ o reticulado continua inteiro.
 \begin{observacao}[estatuto]
 Teorema \textbf{operacional}: enuncia o que a medida fechou na classe
 considerada (corpos endereçados; induções das cinco classes; torre
-por dobra até $4286$). Não afirma robustez universal de todo corpo ---
+por dobra até $4234$). Não afirma robustez universal de todo corpo ---
 afirma que \emph{o estresse é propriedade da régua de leitura}, e que a
 leitura dual (endereço) o absorve. Sem lei nova: Lei~0 (o par dos nulos),
 Lei~1 (involução no ruído), Lei~4 (a torre por dobra), Metrónomo (a

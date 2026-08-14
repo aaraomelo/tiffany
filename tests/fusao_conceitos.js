@@ -23,8 +23,11 @@
  * §F5  nada se apaga: cada byte dos originais está em z (a memória da
  *      divisão, medida)
  *
- * NOTA DE CURADORIA: o medidor prova a OPERAÇÃO em memória; o
- * cristal.jsonl não se altera — fundir de facto é decisão do dono.
+ * NOTA DE CURADORIA (13/08, «resolve a curadoria»): a curadoria foi
+ * EXECUTADA — tools/cristal_cura.py aplicou 52 fusões à fonte e o medidor
+ * é tests/cristal_curadoria.js. Aqui a operação continua a provar-se em
+ * memória, sobre um par que a curadoria MANTEVE de propósito (arte/artes:
+ * prosa distinta — fundem em memória, não no corpus).
  *
  *   node tests/fusao_conceitos.js
  */
@@ -103,12 +106,12 @@ console.log(`candidatos reais: ${paresSP.length} pares singular/plural · ${titu
 ok('§F0 O OBJETO EXISTE: candidatos reais de fusão no cristal (não inventados)',
   paresSP.length >= 5 && titulosDup >= 30)
 
-/* §F1/§F2 — o caso concreto: reticulado ↔ reticulados */
+/* §F1/§F2 — o caso concreto: arte ↔ artes (par real, mantido na curadoria) */
 {
-  const lx = regs.get('reticulado'), ly = regs.get('reticulados')
-  const z = funde('reticulado', lx, ly)
+  const lx = regs.get('arte'), ly = regs.get('artes')
+  const z = funde('arte', lx, ly)
   const Edz = E(z) - E(lx) - E(ly)
-  const Eesq = E(esqueleto('reticulado'))
+  const Eesq = E(esqueleto('arte'))
   console.log(`E(x)=${E(lx)} E(y)=${E(ly)} E(z)=${E(z)} · E_∂=${Edz} = E(esqueleto)=${Eesq}`)
   ok('§F1 a fusão conserva: E(z) = E(x)+E(y)+E_∂, e E_∂ = E(esqueleto) — dois caminhos',
     Edz === Eesq && Edz > 0)
@@ -142,8 +145,8 @@ ok('§F0 O OBJETO EXISTE: candidatos reais de fusão no cristal (não inventados
     }
     return r
   }
-  const lx = regs.get('reticulado'), ly = regs.get('reticulados')
-  const z = funde('reticulado_fundido', lx, ly)
+  const lx = regs.get('arte'), ly = regs.get('artes')
+  const z = funde('arte_fundida', lx, ly)
   const fundido = linhas.filter(l => l !== lx && l !== ly).concat([z])
   const R1 = rEnd(linhas, fundido)
   const partes = fibra(z)
@@ -180,10 +183,10 @@ ok('§F0 O OBJETO EXISTE: candidatos reais de fusão no cristal (não inventados
 
 console.log('')
 if (!falhas) {
-  console.log('  A fusão de conceitos saiu da quarentena PELOS DADOS: o objeto existe')
-  console.log('  (68 candidatos reais), a fusão conserva com termo de contorno exato,')
-  console.log('  a fibra devolve byte a byte, e no corpus ela é transação declarada')
-  console.log('  que reverte a R=0. Fundir DE FACTO é curadoria do dono.')
+  console.log('  A fusão de conceitos saiu da quarentena PELOS DADOS, e a curadoria')
+  console.log('  foi RESOLVIDA (tools/cristal_cura.py, tests/cristal_curadoria.js):')
+  console.log('  a fusão conserva com termo de contorno exato, a fibra devolve byte')
+  console.log('  a byte, e no corpus ela é transação declarada que reverte a R=0.')
 }
 console.log(`#TOTAL ${feitas} ${falhas}`)
 process.exit(falhas ? 1 : 0)

@@ -94,10 +94,11 @@ corpodecorpos e5cba0db271ea443 0
 cosmico ad551a25ab7b7917 0
 cosmologia ba6dd5df9be09b0a 0
 cristal_adversarial a5b592f03e349608 0
+cristal_curadoria 88bb8c9fade66cd3 0
 cristal_energia 016ed57dd57ccc33 0
 cristal_front cc86ec06a324230b 0
 cristal_modelo 9b6bb9fc9a03a96e 0
-cristal_volta 0346d04832deddd4 0
+cristal_volta ef9af83b36e0f023 0
 cristalino 6988eca8676626b1 0
 cruza b5fd026db2e5f02a 0
 cruzamento 33bb8f715e706c30 0
@@ -150,7 +151,7 @@ enche a2861fc14a9fd7f9 0
 entre c9d4cbfc7a5a9307 0
 entrega dd303b06ea369e41 0
 entropia_dual 9825617e56adbcdb 0
-equivalencia_universal b8dc8bd8f1c897e2 0
+equivalencia_universal 30d9d3d4a4f7f622 0
 erg 24fd5a4ae1cb1739 0
 escada 5b25d287f60365e5 0
 escala cbd75de37ec6421d 0
@@ -188,7 +189,7 @@ fractal 6bab7fb3cd133ffb 0
 fronteira_front efe3776eb4b37362 0
 furos 6be7e5769751df24 0
 fusao 13c9bc056928be95 0
-fusao_conceitos 77b528b3ae9b2bc9 0
+fusao_conceitos 2f8ae31387575a74 0
 gauss 77024247661e4422 0
 gerador 2373ad5c9d2e6e8c 0
 gerador_analog 6a7abcf53c950b0b 0
@@ -276,7 +277,7 @@ norma bdf69591c85236b2 0
 normal_circulo 3cdc5e43a8d97101 0
 nove_periodico c18299871152ca54 0
 numerica 2d1d6e20b7f87362 0
-observador_torre 5bff9b356a2a9814 0
+observador_torre 3d55320445a27093 0
 octeto 3be2809a3655f8e0 0
 operador_dual 4d874f9b9b8aee4d 0
 orbita_real 76d42a35f89973a2 0

@@ -75,7 +75,7 @@ function momentos (bytes) {
   let todos = true
   for (let t = 0; t < 200; t++) {
     const pos = new Set()
-    while (pos.size < 8) pos.add(1 + lcg() % 4286)
+    while (pos.size < 8) pos.add(1 + lcg() % 4234)
     const xs = [...pos]
     let det = 1
     for (let i = 0; i < 8; i++) {

@@ -1,7 +1,9 @@
 /* tests/cristal_volta.js — a volta do cristal recuperado, medidor v2 (eval 13/08).
  *
  * Regra de ouro: não converter o corpus antes de conseguir reconstruí-lo.
- * A fonte é cristal/cristal.jsonl (4286 conceitos, última versão, broca-so).
+ * A fonte é cristal/cristal.jsonl (4234 conceitos: 4286 recuperados do
+ * broca-so menos 52 fusões de curadoria — tools/cristal_cura.py; cada fusão
+ * guarda as duas partes byte a byte, medidor tests/cristal_curadoria.js).
  * As projeções papers/cristal_*.tex carregam cada registo em %CRISTAL —
  * o desenho do /Type/FonteTeX: a página é a leitura, a fonte viaja invisível.
  *
@@ -35,7 +37,8 @@ const PAPERS = path.join(RAIZ, 'papers')
 
 /* §V0 — a fonte */
 const fonteLinhas = fs.readFileSync(FONTE, 'utf8').split('\n').filter(l => l.length)
-ok('§V0 fonte com 4286 conceitos', fonteLinhas.length === 4286)
+ok('§V0 fonte com 4234 conceitos (4286 − 52 fusões de curadoria)',
+  fonteLinhas.length === 4234)
 const fonteIds = new Set()
 let jsonOk = true
 for (const l of fonteLinhas) {
@@ -63,7 +66,7 @@ for (const f of texs) {
   seccoesTotal += seccoes
 }
 ok('§V2 secções == registos, ficheiro a ficheiro', casaOk)
-ok('§V2 total de secções == 4286', seccoesTotal === 4286)
+ok('§V2 total de secções == 4234', seccoesTotal === 4234)
 
 function idDe (linha, i) {
   try { return JSON.parse(linha).id } catch { return '￿ corrompido ' + i }
@@ -204,7 +207,8 @@ induz('endereço destruído (registo ilegível)', m => {
 
 console.log('')
 if (!falhas) {
-  console.log('  O cristal voltou: 4286 conceitos, fonte == projeções, a indução acusa.')
+  console.log('  O cristal voltou: 4234 conceitos (52 fusões de curadoria), fonte ==')
+  console.log('  projeções, a indução acusa.')
   console.log('  LaTeX = projeção verificável; a fonte é cristal/cristal.jsonl.')
 }
 console.log(`#TOTAL ${feitas} ${falhas}`)

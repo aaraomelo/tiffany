@@ -204,10 +204,10 @@ CAB = r'''%% !TeX program = pdflatex
 '''
 
 
-def secao(r):
-    linhas = ['%CRISTAL ' + json.dumps(r, ensure_ascii=False, sort_keys=True,
-                                       separators=(',', ':'))]
-    linhas.append('\\section{%s}' % tex_txt(r.get('titulo') or r['id']))
+def corpo_secao(r, hid):
+    """As linhas visíveis de um conceito; hid é o endereço (id do registo na
+    fonte — numa fusão, o id mantido)."""
+    linhas = ['\\section{%s}' % tex_txt(r.get('titulo') or hid)]
     d = (r.get('descricao') or '').strip()
     if d:
         linhas.append(tex_txt(d))
@@ -225,7 +225,7 @@ def secao(r):
         rel = '; '.join('%s %s' % (a.get('rel', '?'), a.get('alvo', '?')) for a in ar)
         linhas.append('\\prov{relações: %s}' % tex_txt(rel))
     meta = r.get('meta') or {}
-    nv = HISTORIA.get(r['id'], 1)
+    nv = HISTORIA.get(hid, 1)
     pv = ' \\textperiodcentered{} '.join(filter(None, [
         tex_txt(str(r.get('origem', ''))),
         tex_txt(str(meta.get('fonte', ''))),
@@ -235,6 +235,30 @@ def secao(r):
         ('história %d versões no jornal' % nv) if nv > 1 else '',
     ]))
     linhas.append('\\prov{proveniência: %s}' % pv)
+    return linhas
+
+
+def secao(r):
+    """Uma \\section por registo da fonte; o registo viaja no %CRISTAL. Um
+    registo de fusão (tools/cristal_cura.py) desdobra-se: corpo da face
+    mantida, segunda face à vista quando a prosa difere, nota de curadoria."""
+    cab = ['%CRISTAL ' + json.dumps(r, ensure_ascii=False, sort_keys=True,
+                                    separators=(',', ':'))]
+    if 'fusao' not in r:
+        return '\n'.join(cab + corpo_secao(r, r['id'])) + '\n'
+    x, y = r['fusao']
+    linhas = cab + corpo_secao(x, r['id'])
+    dx = (x.get('descricao') or '').strip()
+    dy = (y.get('descricao') or '').strip()
+    if dy and dy != dx:
+        linhas.append('\\prov{a segunda face --- %s:}' % tex_txt(y.get('id', '?')))
+        linhas.append(tex_txt(dy))
+        nota = ('fusão de curadoria (julgada): absorve %s --- as duas faces '
+                'acima, intactas no registo') % y.get('id', '?')
+    else:
+        nota = ('fusão de curadoria (texto idêntico): absorve %s --- o mesmo '
+                'conteúdo por dois esquemas de endereço') % y.get('id', '?')
+    linhas.append('\\prov{%s}' % tex_txt(nota))
     return '\n'.join(linhas) + '\n'
 
 
@@ -248,7 +272,8 @@ def main():
     with open(FONTE, encoding='utf-8') as f:
         for linha in f:
             r = json.loads(linha)
-            dom = (r.get('meta') or {}).get('dominio', '(sem)')
+            meta = r.get('meta') or ('fusao' in r and r['fusao'][0].get('meta')) or {}
+            dom = meta.get('dominio', '(sem)')
             grupos[dom2grupo.get(dom, 'diversos')].append(r)
     total = 0
     for g, rs in grupos.items():

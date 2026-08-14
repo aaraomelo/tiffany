@@ -14,7 +14,7 @@
  * §Q2  (Φ,Φ₂)_U = (Φ,Φ₂)_P sobre as 20 respostas do banal
  * §Q3  R_endereço,U = R_endereço,P no íntegro e sob indução
  * §Q4  D_U = D_P (as transições) no íntegro e sob indução
- * §Q5  o espectro: a energia espectral do digest = 37.222 pelos DOIS lados
+ * §Q5  o espectro: a energia espectral do digest = 59.436 pelos DOIS lados
  * §Q6  o veredito: 𝒰[σ_Peano] e 𝒫 concordam em todos os invariantes
  *
  *   node tests/equivalencia_universal.js
@@ -165,11 +165,22 @@ const pares = []
 
 ok('§Q0 a assinatura σ_Peano instancia o 𝒰 genérico', typeof U.energia === 'function')
 
-/* §Q1 — E sobre o cristal inteiro */
+/* §Q1 — E sobre o cristal inteiro. A âncora: E antes da curadoria era
+ * 38731623179 (atestado por cristal_energia); cada fusão de curadoria soma o
+ * seu contorno E_∂ = E(esqueleto) — o valor de hoje DERIVA-SE da âncora mais
+ * os contornos lidos da própria fonte (muda a fonte, muda sozinho). */
 {
   const eU = U.energia(cristal), eP = energiaP(cristal)
-  console.log(`E_U = ${eU} · E_P = ${eP}`)
-  ok('§Q1 E_U = E_P sobre os 4286 (inteiro exato)', eU === eP && eU === 38731623179)
+  let eDeriva = 38731623179
+  for (const l of cristal) {
+    const r = JSON.parse(l)
+    if (r.fusao) {
+      eDeriva += U.energia(['{"fusao":[,],"id":"' + r.id + '","tipo":"conceito"}'])
+    }
+  }
+  console.log(`E_U = ${eU} · E_P = ${eP} · âncora+contornos = ${eDeriva}`)
+  ok('§Q1 E_U = E_P sobre o cristal curado == âncora pré-curadoria + Σ contornos',
+    eU === eP && eU === eDeriva)
 }
 
 /* §Q2 — a escada sobre o banal */
@@ -212,7 +223,7 @@ ok('§Q0 a assinatura σ_Peano instancia o 𝒰 genérico', typeof U.energia ===
     iguais && dU === dP && dU > 0)
 }
 
-/* §Q5 — o espectro do digest: 37.222 pelos dois lados */
+/* §Q5 — o espectro do digest: 59.436 pelos dois lados */
 {
   function powmod (b, e) {
     let r = 1; b %= P
@@ -241,8 +252,11 @@ ok('§Q0 a assinatura σ_Peano instancia o 𝒰 genérico', typeof U.energia ===
   let LHS = 0
   for (let k = 0; k < 256; k++) LHS = (LHS + X[k] * X[(256 - k) % 256]) % P
   console.log(`espectral U = ${LHS} · direto P = ${RHS}`)
-  ok('§Q5 a energia espectral = 37.222 pelos DOIS caminhos (Parseval, o valor da bateria)',
-    LHS === RHS && LHS === 37222)
+  /* 59436 é o valor sobre o cristal CURADO, medido também por
+   * tests/cristal_energia.js (1D, 2D e 4D) — âncora cruzada entre dois
+   * programas; antes da curadoria era 37222 */
+  ok('§Q5 a energia espectral = 59436 pelos DOIS caminhos (Parseval, o valor da bateria)',
+    LHS === RHS && LHS === 59436)
 }
 
 /* §Q6 — o veredito */

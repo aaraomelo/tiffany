@@ -1,5 +1,5 @@
 // cristal.js — chip X (xtal): a proveniência do cristal na tela.
-// O cristal (cristal/cristal.jsonl, 4286 conceitos) chega à assistente pelo
+// O cristal (cristal/cristal.jsonl, 4234 conceitos após a curadoria) chega à assistente pelo
 // BANCO (tools/cristal.sh ingere as projeções); o chip não pede ficheiro novo
 // ao site — lê a resposta e mostra o recibo: origem · fonte · domínio ·
 // confiança · história. A memória não é só armazenamento; tem auditoria.
