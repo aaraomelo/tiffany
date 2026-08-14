@@ -306,7 +306,7 @@ verde --- a regra de ouro da mecânica:
   subida de andar quando a raiz não cabe & \code{dirac\_transicao.js}
   $13$:$0$ \\
 6 & \textbf{Inversor total} & $R_{\mathrm{total}}=(R_{\mathrm{end}},R_E,
-  R_\Phi,R_{\Phi_2},R_D)$: RETAIN $\iff$ tudo zera & \code{residuos\_totais.js}
+  R_\Phi,R_{\Phi_2},R_D)$: RETAIN $\iff$ tudo zera & \code{tests/residuos\_totais.js}
   $9$:$0$ \\
 \bottomrule
 \end{tabular}
@@ -477,6 +477,10 @@ discreta (\S\ref{sec:dirac}) é o primeiro degrau deles.
 \bigskip
 \noindent\textbf{Verificação.}
 \code{tests/dirac\_transicao.js} \S D0--D6 ($13$:$0$);
+\code{tests/residuos\_totais.js} \S R1--R6 (o Inversor total);
+\code{tests/cristal\_adversarial.js} (a caçada às malditas);
+\code{tests/cristal\_front.js} (o chip X);
+\code{tests/equivalencia\_universal.js} (o adaptador $\mathcal U[\sigma]\cong\mathcal P$);
 \code{tests/ponte\_universal\_metalica.js} \S P0--P5 ($12$:$0$);
 \code{tests/observador\_torre.js} \S T1--T5 ($10$:$0$);
 \code{tests/assinatura\_colisoes.js} \S C0--C4;

@@ -622,7 +622,9 @@ int sscanf(char *s, char *f, ...){
  * operação com o destino mudado, que é o que o salto sempre foi.
  */
 
-#define MAX_FICH   64
+#define MAX_FICH   128   /* o manifesto passou de 64 ficheiros (69 em 13/08)
+                          * quando os papers com capa entraram todos; a tabela
+                          * acompanha — o mesmo gesto do «alarga o slot». */
 #define MAX_AGULHA 16
 #define NOME_MAX   160
 

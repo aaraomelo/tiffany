@@ -193,8 +193,12 @@ for f in $(cat "$LISTA"); do
   fi
 
   # medidor em .js roda com node — a mesma porta do .py: não compila, e a assinatura é do .js
+  # O V8 RESERVA espaço VIRTUAL enorme por memória wasm (guard regions de ~10 GB
+  # por instância, sem tocar na residente): ulimit -v de 8 GB matava qualquer
+  # medidor wasm com "Out of memory" falso. A proteção que se quer é sobre a
+  # RESIDENTE; para o virtual, 64 GB deixam o wasm instanciar sem abrir a swap.
   if [ -f "$base.js" ] && [ ! -f "$base.c" ]; then
-    (ulimit -v 8000000; timeout 600 node "$base.js" </dev/null > "$out" 2>&1); r=$?
+    (ulimit -v 200000000; timeout 600 node "$base.js" </dev/null > "$out" 2>&1); r=$?
     printf '%s' "$r" > "$out.exit"
     grep -v "^$base " "$TABELA" > "$TABELA.novo" 2>/dev/null; mv "$TABELA.novo" "$TABELA"
     printf '%s %s %d\n' "$base" "$ass" "$r" >> "$TABELA"

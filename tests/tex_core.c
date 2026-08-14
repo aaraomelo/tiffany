@@ -78,6 +78,14 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdarg.h>   /* a costura da saída: um formatador variádico próprio (o tradutor fá-lo) */
+
+#ifndef TEX_COM_LIBC_WASM
+/* No wasm estes vivem em tools/libc.c (662-663); o nativo perdeu-os quando a
+ * partitura passou a só-WASM (0aa6ace) e o link partia em silêncio — o
+ * «NÃO COMPILOU» que não diz FALHA. Os defaults são os do próprio libc. */
+int INTERFACE_N = 6;   /* hexal por defeito */
+int LADO_N = 0;        /* 0=Hurwitz (bilinear); 1=Gentil */
+#endif
 #include "spline.h"   /* a carta da fonte: a largura vem da CURVA */
 #include "disco.h"    /* «o ficheiro É o vector»: os buffers grandes vivem no DISCO */
 #include "le_num.h"   /* o strtod e o hex do núcleo, sem libc --- fonte única, travada em str2dbl_dual.c */
