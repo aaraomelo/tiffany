@@ -1,0 +1,172 @@
+% !TeX program = pdflatex
+% papers/geometrico.tex — a reta real geométrica.
+% Parte da dimensão 3: cada nível n≥3, círculo e polígono regular da
+% mesma área; o axioma fundamental é a soma em andares consecutivos.
+% Auto-contido: pdflatex geometrico.tex
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[portuguese]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\newtheorem{definicao}{Definição}
+\newtheorem{axioma}{Axioma}
+\newtheorem{proposicao}{Proposição}
+\newtheorem{observacao}{Observação}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\abs}[1]{\lvert #1\rvert}
+\input{gkcapa}
+\begin{document}
+\gkcapa{A Reta Real Geométrica}
+       {da dimensão $3$ em diante, círculo e polígono da mesma área}
+       {o axioma fundamental é a soma em andares consecutivos}
+\maketitle
+
+\begin{abstract}
+\noindent A \textbf{reta real geométrica} não começa no ponto nem no
+segmento: começa na \textbf{dimensão~$3$}, o primeiro polígono regular
+que fecha. Em cada nível $n\geq 3$ há um círculo $C_{n}$ e um polígono
+regular $P_{n}$ com a \textbf{mesma área}
+\[
+\boxed{\;\abs{C_{n}}=\abs{P_{n}}\;}
+\]
+onde $\abs{\,\cdot\,}$ é a área. O \textbf{axioma fundamental} lê essa
+igualdade em \emph{dois andares consecutivos} $(n,n{+}1)$:
+\[
+\boxed{
+\abs{C_{n+1}}+\abs{C_{n}}
+\;=\;
+\abs{P_{n+1}}+\abs{P_{n}}.
+}
+\]
+A reta constrói-se a partir daí: cada passo $n\to n{+}1$ acrescenta um
+nível da mesma forma. A torre \textbf{normaliza-se} para que a soma
+de todos os círculos seja $\tfrac12$ e a de todos os polígonos seja
+$\tfrac12$ --- a reta inteira pesa $1$.
+\end{abstract}
+
+\section{Da dimensão $3$}
+
+O nível $2$ não abre a reta: o ``polígono'' de dois lados não fecha
+área finita no dual. A construção parte do \textbf{triângulo} --- o
+primeiro regular que fecha --- e sobe por inteiros consecutivos
+$3,4,5,6,\ldots$
+
+\begin{definicao}[nível]
+Para cada inteiro $n\geq 3$, o \textbf{nível}~$n$ é o par
+$(C_{n},P_{n})$, onde $C_{n}$ é um círculo e $P_{n}$ é um polígono
+regular de $n$ lados, ambos no mesmo plano.
+\end{definicao}
+
+\begin{definicao}[área]
+$\abs{\,\cdot\,}$ designa a \textbf{área} (medida de Lebesgue no
+plano). Não é perímetro, não é número de vértices: é a área.
+\end{definicao}
+
+\begin{definicao}[mesma área]
+Em cada nível $n\geq 3$,
+\[
+\abs{C_{n}}=\abs{P_{n}}.
+\]
+O círculo do andar e o polígono do andar têm a mesma área. Essa é a
+identificação do nível --- não uma aproximação, não um limite.
+\end{definicao}
+
+\section{O axioma fundamental}
+
+Consecutivo quer dizer $(n,n{+}1)$: $3,4$; $4,5$; $5,6$; $\ldots$
+
+\begin{axioma}[soma consecutiva]\label{ax:soma}
+Para todo $n\geq 3$,
+\[
+\abs{C_{n+1}}+\abs{C_{n}}
+\;=\;
+\abs{P_{n+1}}+\abs{P_{n}}.
+\]
+\end{axioma}
+
+A igualdade de cada nível dá a soma dos dois níveis: se
+$\abs{C_{n}}=\abs{P_{n}}$ e $\abs{C_{n+1}}=\abs{P_{n+1}}$, o
+Axioma~\ref{ax:soma} segue. O axioma \emph{é} essa leitura
+consecutiva: a reta não se gera por um andar isolado, gera-se pelo
+\textbf{passo} $n\to n{+}1$.
+
+\begin{observacao}
+O axioma não mistura andares que saltam ($n$ com $n{+}2$, nem
+duplicação $n$ com $2n$). O gerador da reta é o consecutivo inteiro.
+\end{observacao}
+
+\section{A construção}
+
+\begin{definicao}[reta real geométrica]\label{def:reta}
+A \textbf{reta real geométrica} $\mathcal{R}$ é a cadeia dos níveis
+$n\geq 3$,
+\[
+(C_{3},P_{3})\;\longrightarrow\;(C_{4},P_{4})\;\longrightarrow\;
+(C_{5},P_{5})\;\longrightarrow\;\cdots
+\]
+com $\abs{C_{n}}=\abs{P_{n}}$ em cada degrau e o
+Axioma~\ref{ax:soma} em cada passo. O ponto da reta no nível~$n$ é o
+par de mesma área; o avanço na reta é o consecutivo.
+\end{definicao}
+
+No primeiro passo, $n=3$:
+\[
+\abs{C_{4}}+\abs{C_{3}}=\abs{P_{4}}+\abs{P_{3}}.
+\]
+No seguinte, $n=4$:
+\[
+\abs{C_{5}}+\abs{C_{4}}=\abs{P_{5}}+\abs{P_{4}}.
+\]
+E assim por diante. Cada igualdade é o mesmo facto --- mesma área no
+andar --- lido no par consecutivo que empurra a reta.
+
+\section{Normalização da torre}\label{sec:norma}
+
+Sem pesos, a soma infinita dos níveis diverge. Normalizar \emph{não}
+é dividir cada termo por si próprio: é escolher as áreas da cadeia
+para a série fechar num valor que pode falhar.
+
+\begin{definicao}[torre normalizada]\label{def:norma}
+A área do nível $n\geq 3$ é
+\[
+\boxed{\;
+\abs{C_{n}}=\abs{P_{n}}=\frac{1}{2^{n-1}}.
+\;}
+\]
+\end{definicao}
+
+O primeiro nível pesa $\abs{C_{3}}=\tfrac14$; o seguinte
+$\tfrac18$; depois $\tfrac1{16}$, $\ldots$
+
+\begin{proposicao}[as duas metades]\label{prop:metades}
+\[
+\sum_{n=3}^{\infty}\abs{C_{n}}=\frac12,
+\qquad
+\sum_{n=3}^{\infty}\abs{P_{n}}=\frac12.
+\]
+A reta $\mathcal{R}$ pesa $1$: metade círculos, metade polígonos.
+A soma parcial até $N$ é
+\[
+\sum_{n=3}^{N}\frac{1}{2^{n-1}}
+\;=\;
+\frac12-\frac{1}{2^{N-1}}.
+\]
+\end{proposicao}
+
+A segunda igualdade é a primeira: $\abs{C_{n}}=\abs{P_{n}}$ em cada
+nível. O Axioma~\ref{ax:soma} no peso normalizado lê-se
+$\frac1{2^{n}}+\frac1{2^{n-1}}=\frac3{2^{n}}$ dos dois lados.
+
+\begin{observacao}[o gume]
+Se todos os andares tivessem a \emph{mesma} área $\tfrac14$ (o peso
+do triângulo, repetido), já três níveis somariam $\tfrac34\neq\tfrac12$.
+A série só fecha porque os níveis \emph{descem} em potência de $2$.
+\end{observacao}
+
+\emph{Medido:} \code{tests/geometrico.js}.
+
+\end{document}

@@ -234,6 +234,168 @@ $\mathcal{M}$).
 $\square$
 \end{teorema}
 
+\begin{teorema}[o gerador do corpo universal em primos --- recuperado
+dos documentos]\label{thm:gerador-primos}
+A máquina de conversão estava escrita há meses
+(\code{tests/gerador.c} \S G9--G10) e recupera-se aqui, re-medida em
+JS (dois caminhos \emph{entre linguagens}):
+\textbf{(i) o primo vem da ordem, não o contrário}: para toda ordem
+$k$, o menor primo com $k\mid p-1$ existe, o menor gerador $g$
+existe, e a projeção $w_{k}=g^{(p-1)/k}$ tem
+$\mathrm{ord}(w_{k})=k$ exata --- «para toda ordem há corpo, gerador
+e projeção».
+\textbf{(ii) a joia --- a escada de Fermat emerge das ordens}: o
+menor primo que a ordem $2^{2^{j}}$ pede \emph{é} o primo de Fermat
+($16\to17$, $256\to257$, $65536\to65537$), com o \emph{mesmo}
+gerador $g=3$ nos três e $w=g$ no topo: \emph{os andares da casa
+nunca foram escolhidos --- foram gerados pela necessidade; e não são
+três torções: é uma}.
+\textbf{(iii) o encadeamento é a dobra}: $w_{2k}^{2}=w_{k}$ na
+cadeia inteira de $65537$ --- um gerador, com o expoente a andar por
+soma e a potência por produto.
+\textbf{(iv) $\pi$ em cada dimensão, sem nada de fora}: a meia-volta
+$w^{k/2}=-1$ é exata em todo andar par --- o ângulo $\pi$ aterra no
+mesmo marco (o espelho central) em todos os primos que as ordens
+geram: a projeção de $\pi$ \emph{realizada em primos}.
+\textbf{(v) a conversão tem volta}: fundir $=$ produto espectral
+(convolução), abrir $=$ divisão espectral (deconvolução) --- o fator
+recupera-se exato, e o gume exibe o divisor de zero (o espectro
+zerado de $\hat{\vec{1}}$) onde a volta não existe.
+A leitura que isto sustenta, \emph{dentro da casa}: todo algébrico
+converte de dimensão (vira régua, metal ou primo noutro andar ---
+Teors.~\ref{thm:corpo-dual}, \ref{thm:autossimilar}); $\pi$ não
+converte porque é \emph{o que está a ser projetado em todas} --- o
+transcendente único da língua, com a reta incontável declarada como
+caminhos sem nome (Teor.~\ref{thm:primos-irracionais}: o contável
+fechado contra o incontável sem fecho).
+\emph{Medido:} \code{tests/gerador\_primos.js} ($8{:}0$;
+$\mathcal{M}$).
+$\square$
+\end{teorema}
+
+\begin{teorema}[$\pi$ é da família metálica --- o membro-limite; e o
+espectro é os polígonos do corpo]\label{thm:pi-familia}
+A leitura do coordenador («$\pi$ não é diferente da família: gera um
+ponto fixo em cada dimensão --- o $0$; o andar $0$ projeta no
+infinito, polígonos metálicos até chegar ao círculo; a transformada
+pega o representante acima; o espectro mostra os polígonos metálicos
+do corpo --- isso é o espectro»), medida por inteiro:
+\textbf{(i) a família é uma, pela tricotomia do traço}: os polígonos
+são os membros \emph{elíticos} ($t_{n}=2\cos(\pi/n)<2$: a companheira
+fecha em ordem $2n$ exata no primo da ordem, $n=2,3,4,6,8$); os
+metais são os \emph{hiperbólicos} ($\mathrm{disc}=m^{2}{+}4>0$, as
+folhas); e o limite $t=2$ --- o círculo a que os polígonos chegam ---
+é o \emph{parabólico}.
+\textbf{(ii) a joia --- o limite é a translação}: $C_{t=2}$ é
+unipotente com o \emph{mesmo nó} do encaixotador
+($(C{-}I)^{2}=(L{-}I)^{2}=0$, ponto fixo único) e a sua ordem
+mod~$p$ é exatamente $p$ em todos os primos --- ao chegar ao círculo
+a família muda de natureza, de fechar na escada para fechar só no
+primo inteiro: \emph{a fronteira aditiva (\S L5) fica derivada como
+limite da própria família}; e $R(2)=2$ --- o limite é o ponto fixo da
+renormalização.
+\textbf{(iii) $\pi$ gera o $0$ em cada dimensão}:
+$(c,s)(\pi)=(-1,0)$ nos três andares --- o $s=0$ é o eixo fixo do
+espelho, o nó do andar.
+\textbf{(iv) o representante acima}: $\sqrt2$ é $11$ em
+$\mathbb{F}_{17}$ ($11^{2}=2$ exato) e $\sqrt3$ é $9$ em
+$\mathbb{F}_{13}$ ($9^{2}=3$ exato) --- os polígonos irracionais
+realizados inteiros nos primos das ordens.
+\textbf{(v) o espectro é os polígonos do corpo}: as frequências
+particionam-se pelos divisores com $\varphi(d)$ vértices por
+polígono (exato); $\pi$ no infinito projeta-se em \emph{todas} as
+retas pelo $0$ ($\omega^{k+M/2}=-\omega^{k}$: o antípoda em cada
+diâmetro) e \emph{reflete pelo $1$} (a inversão $k\leftrightarrow-k$
+com fixos exatamente $\{1,-1\}$ --- o $0$ e $1$ do andar); e as
+folhas do corpo são \emph{vértices}:
+$\mathrm{ord}(\sigma)=\mathrm{ord}(\sigma^{\dagger})=8192$ --- o
+corpo aparece no espectro como o \emph{seu} polígono, o mesmo $8192$
+do fecho da órbita da zeta. \emph{Isso é o espectro.}
+\textbf{(vi) o gume}: $t=2$ nunca fecha em ordem da escada
+($\mathrm{ord}=p$, ímpar) --- é por isso que a álgebra não alcança o
+contínuo e o encaixe alcança: a mesma fronteira, agora como
+propriedade do membro-limite.
+\emph{Medido:} \code{tests/pi\_familia.js} ($7{:}0$; $\mathcal{M}$).
+$\square$
+\end{teorema}
+
+\begin{teorema}[os $0$ dos andares são círculos de áreas distintas ---
+Arquimedes das áreas, parente do AGM]\label{thm:area-andares}
+A nota do coordenador sobre o Teor.~\ref{thm:pi-familia}: os $0$ que
+$\pi_{\infty}$ projecta \emph{não são o mesmo círculo}. Cada andar
+elítico $n\in\{3,4,6,8\}$ traz o círculo renormalizado com a
+\textbf{área do polígono dual} (circunscrito $C_{n}$); o próprio
+(inscrito $I_{n}$) fica por baixo. Isso é Arquimedes das áreas, e a
+duplicação $n\to 2n$ desce pelas médias \emph{geométrica} e
+\emph{harmónica} --- o GHM, parente do AGM (Teor.~\ref{thm:agm-analitico}),
+não o AGM:
+\[
+I_{2n}^{2}=I_{n}\,C_{n},\qquad
+C_{2n}\,(I_{2n}+C_{n})=2\,I_{2n}\,C_{n}.
+\]
+\textbf{(i) o par}: $I_{n}<C_{n}$ exacto em $\mathbb{Q}(\sqrt2)$ e
+$\mathbb{Q}(\sqrt3)$.
+\textbf{(ii) a joia}: as duas identidades, exactas em $4\to8$ e
+$3\to6$.
+\textbf{(iii) os $0$ não são iguais}: $C_{3},C_{4},C_{6},C_{8}$
+pairwise distintos por desigualdades quadráticas inteiras --- cada $0$
+tem área $C_{n}$, logo raio próprio; o unitário único só aparece no
+limite.
+\textbf{(iv) o dual é o de cima}: $I_{8}<333/106<\pi<22/7<C_{8}$ em
+$\mathbb{Z}$ --- $\pi$ no buraco, o mesmo encaixe do
+Teor.~\ref{thm:metronomo-pi}, agora em área.
+\textbf{(v) o gume}: a média aritmética \emph{não} duplica
+($(I_{4}+C_{4})/2=3$, $I_{8}^{2}=8\neq9$) --- essa é a régua do
+período, não desta descida.
+\textbf{(vi) a soma do círculo, ignorando a base metálica}: as folhas
+hiperbólicas $(\sigma,\sigma^{\dagger})$ \emph{não} estão no relógio
+do andar ($\mathrm{ord}=8192\nmid 16$). Normalizar é dividir pelo
+$\sqrt{d}$ do andar --- não o p.u.\ vazio:
+$I_{8}/\sqrt2=I_{4}$ e $I_{6}/\sqrt3=2\cdot(I_{3}/\sqrt3)$, exactos.
+O círculo discreto é então a soma dos polígonos \emph{elíticos} da
+torre divisora (os andares abaixo do parabólico):
+$\sum_{d\mid n}\varphi(d)=n$.
+Somar o metal ao relógio dá $16+2\neq16$; somar áreas cruas sem
+normalizar dá $I_{3}+I_{6}\neq C_{6}$ ($9\neq8$).
+\textbf{(vii) o dual --- polígono $=$ círculos abaixo}: o mesmo corte
+(ignora o metal, normaliza). Um passo:
+$I_{8}\sqrt2=C_{4}$ e $I_{6}\cdot 2=C_{3}$ --- i.e.\ $I_{2n}=C_{n}/2$
+após o $\sqrt{d}$; o único elítico abaixo, a base $1,2$ fora.
+Somar a \emph{torre} toda falha:
+$I_{16}^{2}=32-16\sqrt2\neq36-16\sqrt2=((C_{8}+C_{4})/2)^{2}$
+($36\neq32$); sem normalizar $I_{8}\neq C_{4}$ ($8\neq16$).
+\textbf{(viii) o sistema de coordenadas}: o círculo do andar de cima
+mapeia-se pelos polígonos de baixo. A \emph{ordem} é o polígono
+($\mathbb{Z}/n\mathbb{Z}$, já resolvida). As \emph{coordenadas} são
+cartas equiareais $P_{n}\to D_{j}$ --- o determinante do sector, após
+a escala do metal, vale o do inscrito ($1/\sqrt2$ no quadrado,
+$1/2$ no triângulo): cada carta preserva área e leva o polígono no
+círculo da mesma área. O atlas tem $\varphi(2n)$ cartas, e a soma das
+áreas é o próximo andar: $4\cdot I_{4}=8$ (o círculo discreto $n=8$)
+e $2\cdot I_{3}=I_{6}$. Sem a escala a projecção no dual \emph{não}
+é equiareal ($2\neq1$, $4\neq1$).
+\textbf{(ix) o dual das coordenadas}: um polígono descreve-se nas
+cartas dos círculos de baixo, da mesma forma. A \emph{ordem} é o
+círculo ($n$ sectores). Cada carta é a inversa equiareal
+$D_{n}\to P_{2n}$ --- $GF=FG=I$ exacto no anel ($G_{4}$ com
+$\det=1$; no triângulo $2\cdot\tfrac12=1$). O atlas tem $n$
+sectores, e a soma é o polígono de cima:
+$C_{4}=I_{8}\sqrt2$ (4 sectores) e $C_{3}=I_{6}\cdot 2$ (3 sectores).
+Sem a inversa-escala o $\det$ é $2\neq1$.
+\textbf{(x) andares consecutivos $(n,n{+}1)$}: $2,3$; $3,4$; $4,5$;
+$5,6$; $\ldots$
+Em cada andar círculo e polígono têm a \emph{mesma área} ($C_{n}$).
+A soma dos círculos é a soma desses polígonos. Em ordem:
+$2{+}3=5$, $3{+}4=7$, $4{+}5=9$, $5{+}6=11$.
+O andar $2$: $I_{2}=0$ e $C_{2}=2\tan(\pi/2)$ não está no anel
+(catálogo).
+A frase mais forte do eval («todo o infinito determinado só por essa
+projeção») \emph{não} é este residual --- fica o medidor que o
+coordenador pediu.
+\emph{Medido:} \code{tests/arquimedes\_area.js} ($21{:}0$; $\mathcal{M}$).
+$\square$
+\end{teorema}
+
 \subsection*{As camadas --- quem é dono de quê}\label{sec:camadas}
 
 \[

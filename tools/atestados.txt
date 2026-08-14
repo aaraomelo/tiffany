@@ -204,6 +204,7 @@ gauss 77024247661e4422 0
 geometria_corpo 99c0472d0316ad9f 0
 gerador 2373ad5c9d2e6e8c 0
 gerador_analog 6a7abcf53c950b0b 0
+gerador_primos dccf9257d62b61f2 0
 geral 8b348cb631664831 0
 gguf e0586cfef6b9f200 0
 gitb c558deae4b86e995 0
@@ -326,6 +327,7 @@ pdf_corpo ae32f6ce86e39c76 0
 peano_dual a4d3f191455dc4b6 0
 pendulo 520f1a722d7fa6d0 0
 pi a6e582401ae1a2f2 0
+pi_familia ea3960ed8925d824 0
 pi_rei 294e870293561aac 0
 pidual 34b8faa62b3bf489 0
 pimonte 317fdba0a5c75103 0
