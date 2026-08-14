@@ -27,6 +27,7 @@ import { passoControlo, CTRL } from './controlo.js'
 import { passoFronteira } from './fronteira.js'
 import { passoEstacao, documentoImplante, pedeBanco } from './estacao.js'
 import { passoPatria, pedePatria, medePatriaLive } from './patria.js'
+import { passoCristal } from './cristal.js'
 
 /** basename / path → id do tradutor (docs_tradutor.json). */
 function mapaTex () {
@@ -91,6 +92,7 @@ export function initAssistente () {
           <span class="asst-est" data-estacao title="Estação: projectado contra medido">E=—</span>
           <span class="asst-banco" data-banco title="Banco: documento de implantação">B=—</span>
           <span class="asst-patria" data-patria title="Pátria: corpo local contra o ar">D=—</span>
+          <span class="asst-xtal" data-xtal title="Cristal: proveniência da resposta (origem · domínio · confiança · história)">X=—</span>
         </div>
         <div class="asst-log" data-log role="log" aria-live="polite"></div>
         <form class="asst-form" data-form>
@@ -104,7 +106,7 @@ export function initAssistente () {
           · ensinar: <code>= resposta</code>
           · <code>r&gt;0</code> + massa faltante → ensinar ou ferramenta
           · rede: ℱ:(x,h)↦(x′,h′); |u|≤Δ retém; Hopfield=memória Y; λ⁻ da conjugação
-          · Π=quê · I=sentido · r · C=Controlo · F=Fronteira · E=Estação · B=banco · D=Pátria
+          · Π=quê · I=sentido · r · C=Controlo · F=Fronteira · E=Estação · B=banco · D=Pátria · X=Cristal
           · corpus: <code>tools/pipeline.sh</code> · <code>gut:…</code> /
             <code>lead:65 estacao:65</code></p>
       </div>
@@ -124,6 +126,7 @@ export function initAssistente () {
   const estacaoEl = sec.querySelector('[data-estacao]')
   const bancoEl = sec.querySelector('[data-banco]')
   const patriaEl = sec.querySelector('[data-patria]')
+  const xtalEl = sec.querySelector('[data-xtal]')
   const form = sec.querySelector('[data-form]')
   const input = sec.querySelector('[data-in]')
   const btnRetrair = sec.querySelector('[data-retrair]')
@@ -253,6 +256,27 @@ export function initAssistente () {
         if (y && y.texto) linha('sys', 'banco', 'recuperado: ' + y.texto, false)
       } catch (err) { /* daemon opcional */ }
     })()
+  }
+
+  function mostraCristal (fala, Y) {
+    const cx = passoCristal(fala, Y)
+    if (!cx) {
+      xtalEl.textContent = 'X=—'
+      xtalEl.className = 'asst-xtal'
+      return
+    }
+    if (cx.ok) {
+      xtalEl.textContent = 'X=' + cx.prov.dominio +
+        (cx.prov.versoes > 1 ? ' ·' + cx.prov.versoes + 'v' : '')
+      xtalEl.className = 'asst-xtal ok'
+      xtalEl.title = cx.motivo + ' · assinatura E=' + cx.ass.E + ' fase=' + cx.ass.fase
+      linha('sys', 'cristal', cx.motivo, false)
+    } else {
+      xtalEl.textContent = 'X=∅'
+      xtalEl.className = 'asst-xtal'
+      xtalEl.title = cx.motivo
+      linha('sys', 'cristal', cx.motivo, false)
+    }
   }
 
   function mostraPatria (fala) {
@@ -415,6 +439,7 @@ export function initAssistente () {
       mostraCiclo(BATUTA.NEUTRO, residuo, passo, pi, fala)
       historico.push(fala, passo.recall.Y)
       linha('ela', 'assistente', passo.recall.Y, true)
+      mostraCristal(fala, passo.recall.Y)
       linha('sys', 'metrónomo', residuo.motivo +
         ' · λΣ=' + passo.lambdaSoma.toFixed(2), false)
       return
@@ -441,6 +466,7 @@ export function initAssistente () {
       }, pi, fala)
       historico.push(fala, passo.recall.Y)
       linha('ela', 'assistente', passo.recall.Y, true)
+      mostraCristal(fala, passo.recall.Y)
       linha('sys', 'metrónomo', residuo.motivo +
         ' · overlap=' + (passo.recall.overlap != null
           ? passo.recall.overlap.toFixed(2) : '?'), false)
@@ -483,7 +509,7 @@ export function initAssistente () {
     if (r && !r.ok) {
       mostraCiclo(saida.batuta, r, passo, pi, fala)
       linha('sys', 'metrónomo', 'r=' + r.r + ' — ' + r.motivo, false)
-      if (saida.Y) linha('ela', 'assistente', saida.Y, true)
+      if (saida.Y) { linha('ela', 'assistente', saida.Y, true); mostraCristal(fala, saida.Y) }
       return
     }
     if (saida.Y) {
@@ -498,6 +524,7 @@ export function initAssistente () {
       mostraCiclo(saida.batuta, r, passoOk, pi, fala)
       historico.push(fala, saida.Y)
       linha('ela', 'assistente', saida.Y, true)
+      mostraCristal(fala, saida.Y)
       if (r && r.motivo) {
         linha('sys', 'metrónomo', r.motivo +
           (r.ok ? ' · λΣ≈0 (fecho)' : ''), false)
