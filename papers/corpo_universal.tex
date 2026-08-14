@@ -111,28 +111,382 @@ idêntica); a membrana de Dirac passa
 \end{definicao}
 
 %======================================================================
-\section{O observador --- a escada, citada da instância}\label{sec:obs-uni}
+\section{O observador --- a escada, o isomorfismo-dual e as fibras}\label{sec:observador}
 
-A escada $I_1=(E)\prec I_2=(E,\Phi)\prec I_3=(E,\Phi,\Phi_2)\prec\cdots$
-e os seus teoremas --- a estrita é orgânica ($4286/4286$ colisões da
-dupla transposição espelhada; $\Phi_2$ separa todas), o \textbf{teto
-pelas oito leis} (oito momentos fecham suporte $\le8$; $\Delta^{8}$
-escapa ao linear e cai na energia --- a cruz) --- estão enunciados e
-medidos na instância (\emph{Corpo de Peano}, secções do observador e da
-energia). O universal só fixa o papel:
+\begin{definicao}[observador e a escada]\label{def:observador}
+Um \textbf{observador} é um vector de invariantes
+$I(x)$ lido sobre um corpo endereçado; cada observador define a
+equivalência $x\sim_{I}y\iff I(x)=I(y)$. A \textbf{escada} é a
+hierarquia estrita
+\[
+\boxed{
+I_1=(E)\;\prec\;I_2=(E,\Phi)\;\prec\;I_3=(E,\Phi,\Phi_2)\;\prec\;\cdots
+\;\prec\;I_\infty=\text{o espectro completo},
+}
+\]
+com $\Phi_m=\sum_i (i{+}1)^m b_i$ (os momentos --- a fase $\Phi=\Phi_1$,
+a curvatura $\Phi_2$) e o refinamento
+$x\sim_{I_{k+1}}y\Rightarrow x\sim_{I_k}y$.
 \[
 \boxed{
 \text{cada observador define uma resolução de identidade;}
 \quad
-\text{o \textbf{Conservatório} é o espaço dos invariantes.}
+\text{aumentar o observador refina as classes.}
 }
 \]
-\emph{Conservar a norma não conserva a identidade} --- por isso o fecho
-é sempre um \textbf{par} de conservações concorrentes
-($R_{\mathrm{total}}=(R_{\mathrm{endereço}},R_E)=0$), e a escada mede a
-ordem sem ser a definição dela.
+\end{definicao}
 
-%======================================================================
+\begin{teorema}[a escada é estrita --- e a estrita é orgânica]\label{thm:escada}
+Cada degrau da escada tem cegueira construtível, e ela vive nos dados
+reais:
+\begin{enumerate}
+\item \textbf{$I_1$ não basta} (o Teorema da Absorção e a caçada):
+existem corpos distintos com a mesma energia.
+\item \textbf{$I_2$ não basta}: a \emph{dupla transposição espelhada}
+--- trocar «ab»$\to$«ba» num sítio e «ba»$\to$«ab» noutro, à mesma
+distância interna $d$ --- conserva o multiconjunto ($E$) e cancela a
+fase: $\Delta\Phi=d(a{-}b)+d(b{-}a)=0$. \textbf{Todos os $4286$
+registos do cristal admitem esta colisão em dados orgânicos} (o par
+espelhado é ubíquo no texto), e $11$ de $20$ respostas do corpus banal
+também.
+\item \textbf{$\Phi_2$ resgata a família}:
+$\Delta\Phi_2=d(b{-}a)\bigl((i'{+}j')-(i{+}j)\bigr)$ só zera com os
+centros coincidentes --- separou as $4286$ e as $11$, todas.
+\item \textbf{A divisão de trabalho, medida}: os $190$ pares
+\emph{naturalmente} distintos do corpus banal separam-se todos já em
+$I_1$ --- o degrau grosso resolve o mundo natural; o degrau fino
+resolve o adversário.
+\end{enumerate}
+\[
+\boxed{\text{conservar a norma não conserva a identidade.}}
+\]
+\emph{Prova (operacional, medida).} \code{tests/assinatura\_colisoes.js}
+($4286/4286$; $\Phi_2$ separa $4286/4286$; $30\,000$ cadeias sem colisão
+de $I_3$ --- orçamento dito); \code{tests/assinatura\_banal.js}
+(a escada no orgânico: $190$ em $I_1$, $0$ em $I_2$/$I_3$, $0$ por
+separar; $11$ espelhados só em $\Phi_2$). $\square$
+\end{teorema}
+
+\begin{teorema}[o teto do observador pelas oito leis]\label{thm:teto-oito}
+Sejam $\Phi_0,\ldots,\Phi_7$ os \textbf{oito} momentos --- um por lei do
+catálogo --- lidos no anel ($\mathbb{Z}_{65537}$). Então:
+\begin{enumerate}
+\item \textbf{Fecho em $8$}: se os oito momentos coincidem, não existe
+diferença de suporte $\le8$ --- a matriz de Vandermonde das posições
+tem $\det=\prod_{i<j}(x_i-x_j)$, e posições distintas menores que $p$
+nunca o anulam no anel.
+\item \textbf{E falha em $9$}: o padrão $\Delta^{8}$ (os binomiais
+alternados $\binom{8}{k}(-1)^k$, suporte $9$) anula os oito momentos
+--- escapa ao observador linear. A \textbf{energia} (quadrática)
+apanha-o no caso genérico: a cruz outra vez --- o linear ordena, o
+quadrático mede, e nenhum sozinho é o par.
+\item \textbf{A torre continua}: acima do suporte $8$ sobe-se de andar
+--- cada dobra dá momentos novos. O teto é do \emph{relógio} do
+observador, não do objecto --- o mesmo gesto do relógio de Hurwitz
+(Hurwitz~8 não é teto do objecto --- \emph{Corpo de Peano}; analogia de forma, não identidade).
+\end{enumerate}
+\emph{Prova (operacional, medida).} \code{tests/observador\_torre.js}:
+Vandermonde sem zero em $200$ conjuntos de $8$ posições da torre;
+$\Delta^{8}$ com os oito momentos \textbf{todos} iguais e
+$\Delta E=12\,870\neq0$. $\square$
+\end{teorema}
+
+\begin{definicao}[isomorfismo-dual ordenado]\label{def:iso-dual}
+Um mapa $f\colon X\to Y$ é \textbf{isomorfismo-dual ordenado} quando
+preserva \emph{simultaneamente} o fecho do observador e a ordem:
+\[
+\boxed{
+I(f(x))=I(x)
+\qquad\land\qquad
+x\prec_X y\iff f(x)\prec_Y f(y).
+}
+\]
+A escada $(\Phi,\Phi_2,\ldots)$ é o \textbf{observador da ordem} ---
+mede-a; não é a definição dela. A permutação admissível é a testemunha:
+muda a posição física, preserva $I$ e a ordem própria (derivada do
+endereço).
+\end{definicao}
+
+\begin{teorema}[as duas fusões --- e a fusão é multiplicação]\label{thm:fusao-mult}
+A torre tem \textbf{duas} fusões, e cada uma conserva à sua maneira:
+\begin{enumerate}
+\item \textbf{Fusão aditiva} $\oplus$ (a dobra/clone --- Lei~4,
+$T+T^{*}$): a energia \textbf{soma}, $E(u\oplus u)=2E(u)$, e a
+retração $\pi$ devolve o original byte a byte.
+\item \textbf{Fusão multiplicativa} $\otimes$ (corpos independentes):
+a energia \textbf{multiplica},
+\[
+\boxed{E(u\otimes v)=E(u)\cdot E(v)}
+\quad\text{exato em inteiros}
+\]
+--- a conservação multiplicativa da norma, $N(xy)=N(x)N(y)$: o
+\textbf{cristal de Hurwitz}. $\Phi_0$ multiplica no anel. No viveiro a
+mesma lei já estava escrita:
+$\operatorname{lcm}\cdot\operatorname{gcd}=ab$.
+\end{enumerate}
+\[
+\boxed{
+\oplus\ \text{soma}\quad\longleftrightarrow\quad\otimes\ \text{multiplica}
+\qquad\text{--- o par aditivo/multiplicativo da torre.}
+}
+\]
+\emph{Prova (operacional, medida).} \code{tests/observador\_torre.js}
+\S T3, \S T5: $50$ pares reais do cristal, igualdade exata; clone e
+retração exatos. $\square$
+\end{teorema}
+
+\begin{teorema}[divisão $=$ fibra --- e a clássica emerge]\label{thm:divisao-fibra}
+A \textbf{divisão} não se postula como aritmética: é a \textbf{fibra
+inversa} da fusão,
+\[
+\boxed{
+F^{-1}(z)=\{(x,y):F(x,y)=z\},
+\qquad
+I(z)=I(F(x,y))\ \text{(conservação)}.
+}
+\]
+No caso multiplicativo, dado $z=u\otimes v$ e um dos fatores, a fibra
+resolve-se componente a componente:
+\[
+\boxed{x_i=z_{ij}/v_j}
+\quad\text{--- divisão \textbf{inteira} exata, consistente por todos os
+$j$ (oito caminhos que concordam), devolvendo $u$ byte a byte;}
+\]
+e a energia divide: $E(u)=E(z)/E(v)$ exato.
+\[
+\boxed{\text{a divisão clássica emerge da fibra --- medida, não postulada.}}
+\]
+\emph{Prova (operacional, medida).} \code{tests/observador\_torre.js}
+\S T4: $50$ casos reais, recuperação exata, oito caminhos concordantes,
+energia a dividir sem resto. $\square$
+\end{teorema}
+
+\begin{observacao}[estatuto e quarentena]
+Tudo aqui é operacional e medido; sem lei nova --- Lei~4 (a dobra),
+Lei~7/Hurwitz (a conservação multiplicativa), o catálogo dos oito (o
+teto). A \textbf{fusão de conceitos} do cristal (dois conceitos $\to$
+um) continua \emph{sem objeto no banco}: a definição pela fibra está
+pronta e espera o primeiro caso real --- sem objeto, não há física.
+O clone responde-se pela métrica $x\sim_{\mathcal O}y$: $I$ identifica
+o corpo; o endereço conta a carga (o um e o dois); a admissão é do
+Controle.
+\end{observacao}
+
+\section{Teorema da Absorção --- o estresse pelo endereço}\label{sec:absorcao}
+
+O Metrónomo atesta a volta íntegra: $\lambda^{+}+\lambda^{-}=0$
+(o Teorema do Metrónomo --- \emph{Corpo de Peano}). Falta a pergunta dual: quanto \textbf{custa}
+uma indução? Se um passo induz $k$ elementos de um corpo de $n$
+endereços ($\lambda^{+}=k$) e a volta lê o resíduo $R$ ($\lambda^{-}=R$),
+o \textbf{estresse} é o excesso
+\[
+\boxed{e \;=\; R - k.}
+\]
+A lei exige $e=0$: a leitura não pode dissipar mais do que a indução
+valeu. E a exigência decide-se pela \textbf{régua de leitura} --- que é o
+tema deste teorema, não a robustez do objecto.
+
+\begin{definicao}[duas leituras do mesmo corpo]\label{def:leitura-endereco}
+Um corpo de $n$ elementos endereçados admite duas leituras da volta:
+\begin{enumerate}
+\item \textbf{por posição} --- comparam-se as listas \emph{ordenadas};
+a posição de cada elemento na ordem derivada participa da medida;
+\item \textbf{pelo endereço} --- cada elemento lê-se pelo seu endereço
+próprio (a assinatura que \emph{cavalga o corpo}; \emph{Arquitetura},
+teorema da assinatura), e a medida conta faltantes, excedentes e
+alterados --- a ordem \textbf{não} participa, porque é derivada do
+endereço.
+\end{enumerate}
+A segunda é a leitura \textbf{dual}: a involução endereço$\to$elemento
+fecha sem passar pela lista.
+\end{definicao}
+
+\begin{teorema}[Absorção --- o estresse tem teto, e é zero]\label{thm:absorcao}
+Na leitura pelo endereço, subindo a torre ($n$ por dobra --- Lei~4):
+\begin{enumerate}
+\item \textbf{Endereço preservado} (apagar, alterar conteúdo, alterar
+categoria, reordenar): $e=0$ \textbf{exato} em todo andar ---
+$\lambda^{+}+\lambda^{-}=0$ em contagens inteiras, sem um double.
+\item \textbf{Endereço destruído} (o elemento vira ilegível): $e=1$
+\textbf{constante} com variância zero --- o elemento destruído conta como
+o \textbf{par} faltante$\oplus$excedente, a Lei~0 a nomear os dois nulos
+($0=(+1)\oplus(-1)$): quem mata um endereço paga a morte \emph{e} o
+nascimento do lixo, e mais nada.
+\item \textbf{Teto dimensional}: a variância do estresse \textbf{não
+cresce} pela torre em nenhuma classe de indução --- a medida escala
+sem teto de dimensão a rasgá-la.
+\end{enumerate}
+Na leitura \emph{por posição}, a classe (2) \textbf{diverge}
+$\sim n^{2}$ (média $n/2$): o elemento ilegível perde o lugar na ordem e
+empurra tudo entre a sua posição e o fim. A dissipação é da
+\textbf{régua}, não do objecto --- a ordem é derivada do endereço, e
+\emph{a régua não transporta; a volta transporta}.
+\[
+\boxed{
+\text{endereço}=\text{leitura dual: }e=0;\qquad
+\text{posição}=\text{régua derivada: dissipa }\sim n^{2}.
+}
+\]
+\emph{Prova (operacional, medida).} \code{tools/lyapunov\_measure.js}:
+inteiro puro, gerador congruente determinístico, \textbf{uma} indução
+com \textbf{duas} leituras (as réguas medem o mesmo objecto), $T=100$ por
+célula, torre $134\to4286$ por dobra sobre o cristal recuperado. Medido:
+$e=0$ exato em todas as células de endereço preservado; $e\equiv1$
+($\sigma^{2}=0$) no endereço destruído lido pelo endereço; e por posição
+$\sigma^{2}\cdot T^{2}$ sobe de $13\,435\,000$ para $16\,130\,133\,019$
+quando $n$ sobe $32\times$ --- $n^{2}$ manda $1024\times$, mediu-se
+$1200\times$, média $e\approx n/2$. Matriz de indução no medidor v2
+(\code{tests/cristal\_volta.js} \S V3, as duas réguas na mesma cópia):
+permutação e retoque da projeção \emph{absorvidos} ($R=0$); conteúdo,
+categoria, remoção e duplicação $R=1$; endereço destruído --- posição
+$R=1641$, endereço $R=2$, o par. $\square$
+\end{teorema}
+
+\begin{proposicao}[a involução dentro do ruído]\label{prop:involucao-ruido}
+Num lote de $m$ induções independentes, duas que caem no
+\textbf{mesmo endereço} aniquilam-se --- a alteração involutiva compõe
+consigo própria e dá a identidade ($\mathrm{flip}\circ\mathrm{flip}=
+\mathrm{id}$: \textbf{Lei~1}). O estresse aparece então \emph{negativo},
+com probabilidade de colisão $\sim\binom{m}{2}/n$, que \textbf{cai} ao
+subir a torre. Não é dissipação: é a involução a fechar dentro do próprio
+ruído (medido no mesmo \code{lyapunov\_measure.js}: lote de $8$,
+$e<0$ só por colisão, $e\to0$ com $n$).
+\end{proposicao}
+
+\begin{corolario}[variante admissível pelo endereço]\label{cor:variante-endereco}
+No Controle de Histerese (o Controle de Histerese --- \emph{Corpo de Peano}), o
+critério da vizinhança $\mathcal{V}$ ganha a forma medida:
+\[
+\boxed{
+\text{variante que preserva o endereço}
+\;\Rightarrow\;
+\mathrm{RETAIN}\ \text{sem custo } (e=0);
+}
+\]
+\[
+\boxed{
+\text{variante que destrói o endereço}
+\;\Rightarrow\;
+\mathrm{RETRACT}\ \text{com custo constante (o par), nunca crescente}.
+}
+\]
+O sistema \textbf{distingue} variantes admissíveis das que violam o
+invariante --- não vale «toda alteração é corrupção»: reordenar é
+variante equivalente ($e=0$ por construção, porque a ordem é derivada), e
+o reticulado continua inteiro.
+\end{corolario}
+
+\begin{observacao}[estatuto]
+Teorema \textbf{operacional}: enuncia o que a medida fechou na classe
+considerada (corpos endereçados; induções das cinco classes; torre
+por dobra até $4286$). Não afirma robustez universal de todo corpo ---
+afirma que \emph{o estresse é propriedade da régua de leitura}, e que a
+leitura dual (endereço) o absorve. Sem lei nova: Lei~0 (o par dos nulos),
+Lei~1 (involução no ruído), Lei~4 (a torre por dobra), Metrónomo (a
+atestação $\lambda^{+}+\lambda^{-}=0$).
+\end{observacao}
+
+\section{Energia --- a conservação pelo Parseval dourado}\label{sec:energia}
+
+\begin{definicao}[indução e meta-indução]\label{def:inducao}
+O passo que transforma um corpo chama-se \textbf{indução} --- o mesmo
+gesto da Lei~4: toda transformação é um passo de indução na torre. O
+passo \emph{sobre} os passos --- a leitura dual que mede a indução e
+valida o que ela conservou --- é a \textbf{meta-indução}: o Metrónomo a
+ler a indução. A dualidade é a de sempre: a indução projecta
+($\lambda^{+}$), a meta-indução lê ($\lambda^{-}$), e o que a
+meta-indução \textbf{valida é a conservação de energia}.
+\end{definicao}
+
+\begin{definicao}[energia]\label{def:energia}
+A \textbf{energia} de um corpo $x$ de componentes endereçadas é o
+segundo momento
+\[
+\boxed{E(x)\;=\;\sum_i x_i^{2}}
+\]
+--- a \textbf{massa} da cruz (a massa da cruz: a segunda
+coordenada é $\sum(x-c)^{2}$ --- \emph{Corpo de Peano}), pela régua ao quadrado ($E=m$ em p.u.;
+\emph{Corpo estelar}). A energia é a \textbf{norma}: as leis de
+conservação da norma do sistema são três nomes da mesma exigência ---
+$N(xy)=N(x)N(y)$ (Hurwitz, o lado que conta), $|\det|=1$ (o fator de
+potência) e $\lambda^{+}+\lambda^{-}=0$ (o Metrónomo) --- e
+\textbf{Parseval é essa exigência lida na transformada}: a energia não
+se perde ao atravessar, muda de domínio.
+\end{definicao}
+
+\begin{teorema}[Parseval multidimensão pelo teorema central]\label{thm:parseval-multi}
+No anel da Lei~8 ($\mathbb{Z}_{65537}$, a transformada dourada
+$F[x]_k=\sum_i x_i g^{ik}$ com $g$ de ordem $N$), para eixos de
+dimensões $N_1,\ldots,N_d$ com raízes de ordens $N_i$:
+\[
+\boxed{
+\sum_{\mathbf{k}} X_{\mathbf{k}}\,X_{-\mathbf{k}}
+\;=\;
+\Bigl(\prod_{i=1}^{d} N_i\Bigr)\cdot\sum_{\mathbf{i}} x_{\mathbf{i}}^{2},
+}
+\]
+e o fator depende \textbf{só da dimensão total} $\prod N_i$, não da
+fatoração em eixos. Derivação pelo \textbf{teorema central}
+(o teorema central Gentil--Hurwitz, citado do \emph{Corpo estelar}):
+\begin{enumerate}
+\item \textbf{O par frente/volta.} Avaliar na raiz $g^{k}$ e na inversa
+$g^{-k}$ é a ida e a reflexão --- $(X_k,X_{-k})$ é o par
+$(\lambda^{+},\lambda^{-})$ na representação. O produto fechado
+$\sum_k g^{(i-j)k}=N\,\delta_{ij}$ é \textbf{contar} (Hurwitz): a órbita
+completa da raiz conta $N$ na diagonal e $0$ fora --- o corte discreto.
+\item \textbf{O lado contínuo.} A mesma linha, integrada, é
+$\int|f|^{2}=\int|F|^{2}$ com a medida de Lebesgue --- \textbf{integrar}
+(Gentil). A ordem conserva-se porque a medida é $\sigma$-aditiva: o
+degrau $\mathbb{Q}\to\mathbb{R}$ do teorema central transporta a
+contagem para a integral sem perder a ordem.
+\item \textbf{Multidimensão.} Os eixos compõem por \textbf{produto de
+medidas} (Lebesgue/Fubini: a medida do produto é o produto iterado), e a
+torre sobe por dobra (Lei~4) --- logo Parseval compõe eixo a eixo e o
+fator multiplica: $\prod N_i$.
+\end{enumerate}
+\emph{Prova (operacional, medida).} \code{tests/cristal\_energia.js}
+sobre o digest do cristal no anel ($N=2^{8}$, a acumulação do
+\code{/AssinaturaOito}): a \textbf{mesma} dimensão $256$ fatorada como
+$256$, $16\cdot16$ e $4^{4}$ --- a raiz de ordem $4$ é o período do $i$
+(pental) --- dá o \textbf{mesmo} espectro de energia
+($\Sigma X X_{-}=37\,222=256\cdot\Sigma A^{2}$ nos três caminhos); e a
+raiz de ordem errada ($3^{128}$, ordem $512$) \textbf{quebra} a
+identidade --- a asserção pode falhar. $\square$
+\end{teorema}
+
+\begin{corolario}[a verificação dá-se por energia]\label{cor:verifica-energia}
+A volta de um corpo atesta-se \textbf{por energia}, sem comparação
+analítica termo a termo:
+\[
+\boxed{
+E(\text{fonte})=E(\text{reconstrução})
+\quad\text{(inteiro exato)},
+}
+\qquad
+\boxed{
+\text{caminho espectral valida a conta (dois caminhos)}.
+}
+\]
+A indução legítima \textbf{conserva} $E$; a que viola o invariante muda
+$E$ e a meta-indução acusa. Medido
+(\code{tests/cristal\_energia.js} \S E0, \S E5):
+$E=38\,731\,623\,179$ exato dos dois lados; permutação conserva
+($\Delta E=0$); e \textbf{remoção e duplicação do mesmo endereço dão}
+$\Delta E=\mp7\,433\,979$ --- o par $(+1)\oplus(-1)$ da Lei~0, com soma
+zero, agora lido na energia.
+\end{corolario}
+
+\begin{observacao}[estatuto]
+A cadeia é derivação \emph{na classe}: o teorema central dá a ponte
+contar$\leftrightarrow$integrar; Parseval é a conservação da norma lida
+nessa ponte; a multidimensão segue porque os dois lados compõem por
+produto (contagem multiplicativa; medida-produto). A conta fechada é a
+do anel ($\mathbb{Z}_{65537}$, inteira, com a raiz errada a quebrar) ---
+não se reivindica aqui prova nova do Parseval clássico: reivindica-se a
+\textbf{leitura} dele como caso do teorema central, e a verificação
+\textbf{por energia} que ela habilita.
+\end{observacao}
+
 \section{A membrana de Dirac --- a raiz da transição}\label{sec:dirac}
 
 A transformada universal (avaliação nas folhas $\sigma,\sigma^{\dagger}$;

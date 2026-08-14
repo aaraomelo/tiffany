@@ -121,5 +121,30 @@ Adaptador de equivalência: `tests/equivalencia_universal.js` **7:0** —
 E, (Φ,Φ₂), R_endereço, D e o espectro idênticos por 𝒰[σ_Peano] e 𝒫 sobre
 os objetos reais (E=38.731.623.179; espectro 37.222; R induzido igual).
 
-**Estado: INVENTARIADO, baseline selado, adaptador verde.
-Aguardando a instrução final de corte da mesa.**
+## 6. O CORTE — executado em 13/08/2026 («segue» do coordenador)
+
+Protocolo cumprido passo a passo:
+
+1. Bateria ANTES: 420 — 418 verdes, 2 falhas nomeadas. ✓
+2. Contagem por documento ANTES: Peano 26 · Universal 20 · união 38. ✓
+3. Movidas as três secções marcadas «mover» (Absorção; Energia/Parseval;
+   Observador/escada/teto-oito/iso-dual/fusão/fibra) do corpo_peano para o
+   corpo_universal; referências cruzadas reescritas (labels de instância →
+   citações textuais); o Peano ganhou a nota de instância
+   (§sec:instancia-universal); a ponte universal↔metálica FICOU no Peano
+   como instância exemplar (a mesa não mandou movê-la); a menção da
+   Arquitetura mudou de casa junto. ✓
+4. pdflatex: corpo_peano, corpo_universal e arquitetura — 2 passagens cada,
+   zero referências órfãs (varredura \ref×\label nos dois). ✓
+5. Bateria DEPOIS: 420 — 418 verdes, 2 falhas — **idêntica**. ✓
+6. Contagem DEPOIS: Peano 21 · Universal 20 · **união 38 = 38, diff vazio —
+   ninguém saiu em silêncio**. ✓
+7. `tests/equivalencia_universal.js`: **7:0 antes E depois**. ✓
+8. Logo, declara-se — como propriedade verificável, não intenção:
+
+   **O CORPO DE PEANO É REALIZAÇÃO DO CORPO UNIVERSAL.**
+
+   𝒰 é a infraestrutura (operações, observador, morfologia, membrana,
+   Inversor total); o Peano é 𝒰[σ_Peano] — e a bateria não mudou um bit.
+
+**Estado: CORTE EXECUTADO. Peano ≺ Universal como propriedade medida.**
