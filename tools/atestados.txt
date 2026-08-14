@@ -44,6 +44,7 @@ canvas_front f5106644abd9858b 0
 cards 43b08164685d307d 0
 carnot 8d04da08cd5af623 0
 catalogo fd8969387f25f550 0
+central_continuo 2806a99350c5d4e4 0
 checkup b98a8fcd902c838a 0
 chessb 0768070318a75793 0
 chicote 8640e84ecdd471c2 0

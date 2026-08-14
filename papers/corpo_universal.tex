@@ -1913,18 +1913,56 @@ metal é o ponto fixo ($A\cdot(\varphi,1)=\varphi\cdot(\varphi,1)$,
 pois $\varphi^{2}=m\varphi+1$). Os metais são pontos fixos da fração
 \emph{linear} (grau $1$); a borda pede a \emph{dobra} (grau $2$) ---
 $\pi$ está uma classe de operação acima das réguas.
-\item \textbf{e $\pi$ é gerador, via dimensões}: na escada dos
-polígonos ($t=2\cos(\pi/n)$: $n{=}3\to1$, $n{=}4\to\sqrt2$,
-$n{=}6\to\sqrt3$), a dimensão $5$ --- o \emph{pental} da teoria ---
-é onde $\pi$ gera o OURO: o pentágono inteiro tem $C^{5}=-I$
-(matrizes $4\times4$ de inteiros) e o traço-dobra $T=C+C^{-1}$
-satisfaz $T^{2}=T+I$. E a casa não vê o pentágono no relógio: a ordem
-$5$ está \emph{ausente} da escada de Fermat ($z^{5}=1$ só trivial nos
-três andares) --- a régua $m{=}1$ apanha o que o relógio não tem:
-\emph{o metal é o pentágono visto pelo corpo, uma dimensão acima}.
+\item \textbf{e $\pi$ é gerador, via dimensões} --- com a distinção
+semântica do gerente preservada: $\pi$ é o \emph{parâmetro gerador da
+geometria angular} ($t=2\cos(\pi/n)$: $n{=}3\to1$, $n{=}4\to\sqrt2$,
+$n{=}5\to$ OURO, $n{=}6\to\sqrt3$); $\varphi$ é o \emph{ponto fixo
+algébrico} de uma família específica; e $C^{5}=-I$ (matrizes
+$4\times4$ de inteiros, com o traço-dobra $T=C+C^{-1}$ a satisfazer
+$T^{2}=T+I$) é a \emph{realização inteira da simetria pentagonal}. O
+ELO entre a parametrização angular e a realização inteira é
+\textbf{explícito}: o polinómio $z^{4}-z^{3}+z^{2}-z+1$ --- ao mesmo
+tempo o fator angular de $z^{5}+1$ e o polinómio da matriz $C$ --- o
+mesmo objeto, duas cartas. E a casa não vê o pentágono no relógio (a
+ordem $5$ está ausente da escada: $z^{5}=1$ só trivial nos três
+andares) --- a régua $m{=}1$ apanha o que o relógio não tem: \emph{o
+metal é o pentágono visto pelo corpo, uma dimensão acima}.
 \end{enumerate}
 \emph{Medido:} \code{tests/metronomo\_pi.js} ($13{:}0$; assinado por
 $\mathcal{M}$).
+$\square$
+\end{teorema}
+
+\begin{teorema}[o Teorema Central do contínuo --- a classe racional
+encaixota o irracional por baixo]\label{thm:central-continuo}
+Os quatro pontos do gerente, cada um com medida inteira exata:
+\begin{enumerate}
+\item \textbf{existência e unicidade do limite}: dois habitantes de
+todos os intervalos até a profundidade $K$ coincidem ---
+$|rs'-r's|$ é inteiro $<ss'/2^{K}<1$, logo \emph{zero} (o pombal);
+distintos são separados na profundidade $\log_{2}(ss')$.
+\item \textbf{sobrejetividade, na classe comparável}: todo $x$ com
+teste de chão exato tem caminho --- racionais, quadráticos ($1/\varphi$,
+$\sqrt2-1$) e $\pi-3$ até à profundidade do certificado ($23$ bits) ---
+e a \emph{volta} põe $x$ em todos os intervalos.
+\item \textbf{unicidade módulo a borda}: os diádicos --- e só eles ---
+têm \emph{dois} caminhos ($1000\ldots=0111\ldots$, com a soma
+geométrica exata a fechar no nó); o não-diádico tem um.
+$\mathbb{R}\cong\{\text{caminhos}\}/\!\sim$, e $\sim$ identifica
+exatamente \emph{os nós da árvore}: a borda é a ramificação.
+\item \textbf{completude e o encaixotamento}: a classe racional
+$\{m_{k}/2^{k}\}$ \emph{cresce}, fica \emph{toda abaixo} de $x$, e
+\emph{ultrapassa todo racional} $<x$ --- $x$ é o \textbf{supremo
+exato} da sua classe (o corte de Dedekind em três cláusulas
+verificadas); e a sequência de Cauchy dos truncados estabiliza bit a
+bit \emph{dentro} do objeto.
+\end{enumerate}
+O Teorema Central lê o conjunto: Hurwitz \emph{conta} a borda (os
+nós, magros: $0{,}246\to0{,}015\to0{,}001$), Gentil \emph{casa} o
+endereço, Lebesgue \emph{mede} o que sobra. \emph{A reta não é onde
+algo está sentado --- é o limite dos caminhos da torre.}
+\emph{Medido:} \code{tests/central\_continuo.js} ($7{:}0$; assinado
+por $\mathcal{M}$).
 $\square$
 \end{teorema}
 
