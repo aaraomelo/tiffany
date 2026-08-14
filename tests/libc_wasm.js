@@ -62,8 +62,16 @@ try {
 const bytes = fs.readFileSync(w);
 const M = new WebAssembly.Module(bytes);
 
+/* a libc ganhou imports desde que este medidor nasceu (env.__fich_miss,
+ * do trabalho do MAX_FICH) e o Node exige o objeto: constroem-se stubs
+ * NOMEADOS a partir do que o módulo declara — nada silencioso */
+const IMP = {};
+for (const d of WebAssembly.Module.imports(M)) {
+    IMP[d.module] = IMP[d.module] || {};
+    if (d.kind === 'function') IMP[d.module][d.name] = () => 0;
+}
 let E = null;
-try { E = new WebAssembly.Instance(M).exports; }
+try { E = new WebAssembly.Instance(M, IMP).exports; }
 catch (e) {
     if (!/Out of memory|Cannot allocate/i.test(e.message)) throw e;
 }
@@ -344,8 +352,12 @@ if (!E) {
  * nome; o programa abre pelo nome e le slots. E mede-se pela VOLTA — o que se escreve le-se
  * de volta, byte a byte, que e a Lei 1 aplicada ao ficheiro. */
 if (E) {
+    /* a dieta «sem memoria» (05/08) encolheu o wasm para 2 paginas e o
+     * offset magico end_saida()+7M passou a cair FORA — pede-se ao
+     * alocador da casa (vfs_reserva), como o app faz */
+    const r = Number(E.vfs_reserva(16384));
+    const S = E.end_saida();
     const oct = new Uint8Array(E.DISCO.buffer);
-    const S = E.end_saida(), r = S + 7000000;
     const poe = (a, t) => { const b = Buffer.from(t, 'latin1');
         for (let i = 0; i < b.length; i++) oct[a + i] = b[i]; oct[a + b.length] = 0; return a; };
     const le = (a, n) => { let t = ''; for (let i = 0; i < n; i++) t += String.fromCharCode(oct[a + i]); return t; };

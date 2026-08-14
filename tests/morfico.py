@@ -20,9 +20,12 @@ máscara de simétrica para não-simétrica (para pôr a antípoda B̌=−B a tr
 """
 from __future__ import annotations
 
+import os
 import random
 import sys
 
+# o Formalizador mora em tools/ (a reorganização moveu-o; o medidor não re-correu)
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'tools'))
 from formalizador import Formalizador
 
 random.seed(1)

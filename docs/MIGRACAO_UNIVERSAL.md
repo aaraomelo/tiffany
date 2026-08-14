@@ -263,3 +263,57 @@ diretor sela. A REGRA DE OURO entra no protocolo:
 
 **Estado: FASE 3 EXECUTADA. Universal dono das leis; Peano e demais corpos,
 donos da realização. Pendente de decisão da mesa: nada.**
+
+## 10. A AUDITORIA DA REGRESSÃO TOTAL (14/08/2026, madrugada)
+
+Ordem da mesa: «regressão completa caso a caso; o critério não é escore
+global». Executado: `bateria.sh --refaz` (todas as 433 sementes reabertas,
+tabela nunca truncada) + diff contra a fotografia dos atestados.
+
+**O ACHADO: 28 medidores caíram com assinatura de fonte INALTERADA** — o
+«medidor que nunca mediu» em escala: a atestação assina a fonte do medidor,
+e o MUNDO por baixo (libc, fixtures, papers, memória wasm) mudou sem os
+re-correr. A regressão total existe exatamente para isto.
+
+### Classe A — fixtures externas ausentes (10): «NÃO MEDIU», honestos
+antissim, campomedio, cifrando, dualcifra, entrega, folhas, liquida_doador,
+protocolo, recupera, transfusao_real — todos pedem o DOADOR (Ollama acordado
++ colheitas: interroga.sh, colhe_transfusao.sh, antissimetrica.sh…). O
+sistema é AUTO-CONTIDO desde 05/08 (o Ollama saiu da órbita): estes
+medidores só medem com o doador presente. Estado: vermelhos com causa.
+**Proposta ao dono**: colher uma vez com o doador e VERSIONAR os vetores
+como fixtures do repo (medir contra fixture, não contra o daemon) — ou
+reclassificar como bancada-com-doador fora da bateria de sempre.
+
+### Classe B — pipeline compositor/fontes/app (14): regressões reais acumuladas
+spline (8 falhas: leitura de contornos TTF), dual_spline_ttf (4: glyf×hmtx),
+biblioteca (2: cobertura do compositor), volta_estrela (1: resíduo por
+glifo), fonte_banco (1: assinatura do LATEX no banco), avalia_macros (3:
+\gkcapa na página 1), design_no_pdf (1), escala (1), escala_dourada (1:
+salto do título), dois_streams (4), app_arranca (2), sem_chute (5),
+compoe_ao_clicar, fator (2: dobras da assistente). Causas prováveis por
+família: fontes/TTF (mudança na fonte ou no leitor), compositor tex.c
+(papers cresceram; capa mudou), app (bundle). **Pendente: uma sessão de
+reparo por família, um medidor de cada vez.**
+
+### Classe C — causa imediata (4): CONSERTADOS nesta auditoria
+- **refs** ✓ 0: 2 órfãs + 7 \ref CRUZADAS no catalogo.tex (labels vivem na
+  teoria.tex — o próprio §R3 do medidor as proíbe) → todas textuais.
+- **morfico** ✓ 0: `formalizador` mudou para tools/ numa reorganização;
+  sys.path aponta lá.
+- **tres_reconstroi** ✓ 0: a fixture sandbox/tiffany.tex sumiu; a prosa
+  agora é ../teoria.tex (cwd dos medidores = tests/).
+- **libc_wasm** ▲ de CRASH para 2 falhas NOMEADAS: (a) o Node exige o
+  objeto de imports (env.__fich_miss, do trabalho MAX_FICH) — stubs
+  nomeados; (b) o offset mágico end_saida()+7M caía fora das 2 páginas da
+  dieta «sem memória» → vfs_reserva. O que RESTA é real e novo:
+  §L4b o write devolve vazio (candidato: caminho de escrita pós-dieta);
+  §L5 o traduz acusa «pilha vazia na descida» ao redescer a libc inteira
+  (candidato: construções novas do MAX_FICH que a descida não cobre).
+
+**Totais**: antes da auditoria 433:433 (com 28 atestados envelhecidos);
+depois do refaz 405 verdes/28; depois dos consertos **408 verdes / 25
+vermelhos com causa nomeada** (Classe A 10 + Classe B 14 + libc_wasm). A bateria agora diz a VERDADE.
+
+REGRA REFORÇADA: a regressão total (`--refaz`) entra no protocolo de fecho
+de qualquer fase — a atestação por assinatura não vê o mundo a mudar.

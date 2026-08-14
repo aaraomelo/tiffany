@@ -17,7 +17,7 @@
  * como G^3 = G^-1 (tres_e_tres.c). Logo "tres de cada lado" reconstroi por ser a
  * inversa, e reconstroi QUALQUER dado, nao so' o bem-comportado.
  *
- * A PROSA: le'-se o proprio sandbox/tiffany.tex — texto real, acentuado, com LaTeX,
+ * A PROSA: le'-se a teoria.tex da raiz — texto real, acentuado, com LaTeX,
  * sem nenhum preparo. Se reconstruir isso byte a byte com residuo 0, reconstroi prosa.
  *
  * cc -O2 tres_reconstroi.c -o tres_reconstroi && ./tres_reconstroi
@@ -73,8 +73,8 @@ int main(void) {
     }
 
     /* (1) A PROSA: os bytes do proprio tiffany.tex, sem preparo nenhum */
-    printf("\n(1) a prosa: bytes crus de sandbox/tiffany.tex\n");
-    FILE *f = fopen("../tiffany.tex", "rb");
+    printf("\n(1) a prosa: bytes crus de teoria.tex (a prosa real da raiz)\n");
+    FILE *f = fopen("../teoria.tex", "rb");   /* cwd=tests/; o sandbox/tiffany.tex saiu numa reorganizacao */
     if (!f) { printf("    nao abriu o arquivo\n"); return 1; }
     i64 prosa[N]; unsigned char raw[N];
     size_t lidos = fread(raw, 1, N, f);
