@@ -35,7 +35,9 @@
 
 int main(void)
 {
-    long falhas = 0;
+    /* o `falhas` e' o de unidade.h — um local aqui SOMBREAVA o do header: o ok()
+     * somava la', o return devolvia o de ca' (sempre zero), e uma unidade vermelha
+     * nao virava o exit. O exit E' a assercao; nao se declara outra vez. */
     puts("\n=== VESTIR A ROUPA — a estrutura primeiro, as constantes no fim ===\n");
 
     /* ═══ §R1 — a velocidade maxima, e o 32 ══════════════════════════════════════════
@@ -270,5 +272,5 @@ int main(void)
 
     puts("");
     if(!falhas) puts("=== todos passaram: a estrutura deriva-se, e as constantes vem no fim ===\n");
-    return 0;
+    return falhas ? 1 : 0;
 }

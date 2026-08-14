@@ -40,7 +40,9 @@ static long dif(const unsigned char *a, const unsigned char *b){
     long d=0; for(long k=0;k<W*H;k++) if(a[k]!=b[k]) d++; return d; }
 
 int main(void){
-    long falhas = 0;
+    /* o `falhas` e' o de unidade.h — um local aqui SOMBREAVA o do header: o ok()
+     * somava la', o return devolvia o de ca' (sempre zero), e uma unidade vermelha
+     * nao virava o exit. O exit E' a assercao; nao se declara outra vez. */
     static unsigned char g[W*H], p[W*H], q[W*H], u[W*H], v[W*H];
     memset(g,0,sizeof g); g[(H/2)*W + W/2] = 1;
     puts("\n=== O RENDERIZADOR E' O CORPO MORFICO ===\n");

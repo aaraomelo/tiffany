@@ -52,7 +52,9 @@ static int prof(int i){ int d = 0; while(i > 0){ i = (i-1)/2; d++; } return d; }
 
 int main(void)
 {
-    long falhas = 0;
+    /* o `falhas` e' o de unidade.h — um local aqui SOMBREAVA o do header: o ok()
+     * somava la', o return devolvia o de ca' (sempre zero), e uma unidade vermelha
+     * nao virava o exit. O exit E' a assercao; nao se declara outra vez. */
     puts("\n=== MAX-CUT NO DUAL SORT: ordenar e cortar sao DUAIS ===\n");
 
     /* ═══ §K1 — na arvore, o max-cut e' a paridade, e corta TUDO ════════════════════ */
@@ -343,6 +345,6 @@ int main(void)
         puts("  E o max-cut resolve-se porque a estrutura E' UMA ARVORE — a paridade corta todas");
         puts("  as arestas e o maximo possivel e' o total. Num ciclo impar isso quebra. O merito");
         puts("  nao e' do metodo: e' de reconhecer que o relogio e' uma arvore.");
-    } else printf("  FALHOU: %ld\n", falhas);
+    } else printf("  FALHOU: %d\n", falhas);
     return falhas ? 1 : 0;
 }

@@ -35,7 +35,9 @@ static long res(long a, long b){ long d = a - b; return d < 0 ? -d : d; }
 
 int main(void)
 {
-    long falhas = 0;
+    /* o `falhas` e' o de unidade.h — um local aqui SOMBREAVA o do header: o ok()
+     * somava la', o return devolvia o de ca' (sempre zero), e uma unidade vermelha
+     * nao virava o exit. O exit E' a assercao; nao se declara outra vez. */
     puts("\n=== PROMOVER: subir um andar, e a leitura vem junto ===\n");
 
     /* ═══ §Q1 — promover DOBRA a dimensao ═══════════════════════════════════════════ */
@@ -155,6 +157,6 @@ int main(void)
         puts("  E e' a DUAL DA ESCRITA: escrever directo poe o novo por cima do velho e o velho");
         puts("  nao volta; escrever o par guarda a volta, e quem escreve o par JA' LEU. Uma");
         puts("  passagem contra duas — porque ler e escrever deixaram de ser dois.");
-    } else printf("  FALHOU: %ld\n", falhas);
+    } else printf("  FALHOU: %d\n", falhas);
     return falhas ? 1 : 0;
 }

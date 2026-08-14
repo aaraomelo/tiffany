@@ -100,7 +100,9 @@ static long carrega(const char *caminho, struct card *cs, long cap)
 
 int main(void)
 {
-    long falhas = 0;
+    /* o `falhas` e' o de unidade.h — um `long falhas = 0` local aqui SOMBREAVA o do
+     * header: o ok() somava no de la', o return devolvia o de ca', e o medidor saia
+     * verde com unidades vermelhas. O exit E' a assercao; nao se declara outra vez. */
     puts("\n=== OS CARDS NO BANCO — a estrela a gerir, e nao um ficheiro ao lado ===\n");
 
     static struct card cs[256];
@@ -121,18 +123,19 @@ int main(void)
             if(gravar(&b, cs[i].chave, cs[i].val, cs[i].n)) postos++;
             else recusados++;
         }
-        printf("  §B1  objectos com nome no manifesto: %ld (92 pecas + 7 documentos + 6 kernels)\n"
+        printf("  §B1  objectos com nome no manifesto: %ld (92 pecas + 12 documentos + 6 kernels + o autor)\n"
                "       postos no banco: %ld    recusados: %ld\n\n", nc, postos, recusados);
         ok("os cards entram no BANCO, um por chave — e o manifesto deixa de ser a fonte para"
            " passar a projeccao. Nao e' arrumacao: um ficheiro que so' se le' e' MEIA operacao,"
            " e a estrela e' o que tem os dois sentidos. Postos todos os que se leram, e nenhum"
-           " recusado. E sao 106 e nao 92: entram as 92 pecas, os 7 DOCUMENTOS e os 7 KERNELS, porque"
-           " todos tem nome e todos sao do sistema — a fonte e' uma so' para tudo o que o site"
-           " serve. O numero subiu de 99 para 106 quando os kernels passaram a declarar a"
-           " operacao da triade: antes eram nomes soltos e nao tinham campo nome nenhum. E"
-           " voltou a 105 quando o raymarch saiu — o que nao e' operacao da triade nao fica no"
-           " sistema so' porque ja' la' estava",
-           nc == 105 && postos == nc && recusados == 0);
+           " recusado. E sao 111 e nao 92: entram as 92 pecas, os 12 DOCUMENTOS, os 6 KERNELS e o"
+           " autor, porque todos tem nome e todos sao do sistema — a fonte e' uma so' para tudo o"
+           " que o site serve. O numero e' um PINO deliberado e a historia dele e' curadoria: subiu"
+           " de 99 para 106 quando os kernels declararam a operacao da triade, desceu a 105 quando"
+           " o raymarch saiu, e subiu a 111 quando os papers com capa, a Partitura e o Corpo de"
+           " Peano entraram nos docs (7->12) e o autor ganhou nome — cada mudanca do manifesto"
+           " obriga a olhar, e e' para isso que o pino serve",
+           nc == 111 && postos == nc && recusados == 0);
     }
 
     /* ═══ §B2 — e saem: byte a byte, residuo 0 ═════════════════════════════════════ */
@@ -559,6 +562,13 @@ int main(void)
          * renderizador escreveu e conta-se nela. Se o ficheiro nao existir, nao se conta:
          * diz-se que falta. */
         long resid = 0, verificados = 0, sem_ficheiro = 0;
+        /* o renderizador CONSTROI-SE aqui: o bloco assumia /tmp/render_bin ja' feito por
+         * alguem, e quando ninguem o fazia os 8 davam «sem ficheiro» — com o medidor verde
+         * por cima (o exit nao carregava as falhas; ver o main). Um medidor que depende de
+         * um binario constroi o binario. O #include do render.c e' relativo ao fonte dele,
+         * por isso compila de qualquer cwd. */
+        if(system("cc -O2 -std=c99 -o /tmp/render_bin ../tools/render.c -lm 2>/dev/null") != 0)
+            if(system("cc -O2 -std=c99 -o /tmp/render_bin tools/render.c -lm 2>/dev/null") != 0){}
         const char *nomes[] = { "rainha", "rei", "pegaso", "venom", "gelo",
                                 "benjamim", "charles", "regente" };
         int n = 8;
@@ -832,6 +842,6 @@ int main(void)
         puts("");
         puts("  Um ficheiro que so' se le' e' meia operacao. A estrela e' o que tem os dois");
         puts("  sentidos, e agora os cards vivem dentro dela em vez de ao lado.");
-    } else printf("  FALHOU: %ld\n", falhas);
+    } else printf("  FALHOU: %d\n", falhas);
     return falhas ? 1 : 0;
 }

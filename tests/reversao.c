@@ -51,7 +51,9 @@ static long cifra(long x, long k){ return x ^ k; }             /* a cifra e' o X
 
 int main(void)
 {
-    long falhas = 0;
+    /* o `falhas` e' o de unidade.h — um local aqui SOMBREAVA o do header: o ok()
+     * somava la', o return devolvia o de ca' (sempre zero), e uma unidade vermelha
+     * nao virava o exit. O exit E' a assercao; nao se declara outra vez. */
     puts("\n=== O MEDIDOR E' 0 — reversao, e nao comparacao ===\n");
 
     /* ═══ §V1 — a estaca ═════════════════════════════════════════════════════════════
@@ -220,6 +222,6 @@ int main(void)
         puts("  Querer dissipacao e' so' TIRAR A REVERSAO. E uma assercao que compara contra um");
         puts("  valor escrito por mim passa mesmo com o objecto trocado: ela verifica a minha");
         puts("  aritmetica, nao o objecto. Neste ficheiro nao ha' um unico numero esperado.");
-    } else printf("  FALHOU: %ld\n", falhas);
+    } else printf("  FALHOU: %d\n", falhas);
     return falhas ? 1 : 0;
 }

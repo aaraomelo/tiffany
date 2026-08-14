@@ -2524,7 +2524,22 @@ static void captura_reverso(const char *s){
     for(long i = 0; s[i]; ){                              /* 1: as directivas # (a config) */
         char c = s[i];
         if(c=='"'||c=='\''){ char q=c; i++; while(s[i]&&s[i]!=q){ if(s[i]=='\\'&&s[i+1])i++; i++; } if(s[i])i++; continue; }
-        if(c=='#' && (i==0||s[i-1]=='\n')){ long j=i; while(s[j]&&s[j]!='\n')j++; bmany(&r,s+i,j-i); bput(&r,'\n'); i=j; continue; }
+        if(c=='#' && (i==0||s[i-1]=='\n')){ long j=i; while(s[j]&&s[j]!='\n')j++;
+            /* um `/*` SEM fecho na mesma linha ficava PENDURADO no replay da
+             * config e engolia as directivas seguintes na recaptura — o
+             * round-trip da libc divergia 14551 bytes por isto (auditoria
+             * 14/08). Corta-se a directiva no abridor; o comentário inteiro
+             * viaja pela passagem 2, nada se perde. */
+            long fim=j;
+            for(long k2=i;k2+1<j;k2++){
+                if(s[k2]=='/'&&s[k2+1]=='*'){
+                    long m2=k2+2; int fechou=0;
+                    while(m2+1<j){ if(s[m2]=='*'&&s[m2+1]=='/'){ fechou=1; break; } m2++; }
+                    if(!fechou){ fim=k2; while(fim>i&&s[fim-1]==' ')fim--; }
+                    break;
+                }
+            }
+            bmany(&r,s+i,fim-i); bput(&r,'\n'); i=j; continue; }
         i++;
     }
     REV_CFG = r.n;
@@ -2582,12 +2597,12 @@ static void empurra(const char *fmt, ...){
     memcpy(PILHA[NP], tmp, sizeof tmp); NP++;
 }
 static int DBG_FN; static unsigned DBG_OP; static long DBG_MP;
-static unsigned DBG_ANEL[16]; static long DBG_AMP[16]; static int DBG_I;
+static unsigned DBG_ANEL[64]; static long DBG_AMP[64]; static int DBG_NP[64]; static int DBG_I;
 static const char *puxa(void){
     if(NP <= 0){ fprintf(stderr, "traduz: pilha vazia na descida (fn=%d op=0x%02X MP=%ld)\n",
                           DBG_FN, DBG_OP, (long)DBG_MP);
-                 for(int z = 0; z < 16; z++){ int k = (DBG_I + z) & 15;
-                     fprintf(stderr, "  anel[%2d] MP=%ld op=0x%02X\n", z, DBG_AMP[k], (long)DBG_ANEL[k]); }
+                 for(int z = 0; z < 64; z++){ int k = (DBG_I + z) & 63;
+                     fprintf(stderr, "  anel[%2d] MP=%ld op=0x%02X NP=%d\n", z, DBG_AMP[k], (long)DBG_ANEL[k], DBG_NP[k]); }
                  exit(2); }
     return PILHA[--NP];
 }
@@ -2672,6 +2687,9 @@ static const char *NOME_T[4] = { "int", "long", "double", "void" };
 static int t_de_val(unsigned v){ return v == 0x7F ? TI32 : v == 0x7E ? TI64 : TF64; }
 
 typedef struct { int par[16], npar, ret; } Assin;
+static int DESCE_NIMP;
+static Assin DESCE_IMP_ASS[8];
+static char DESCE_IMP_NOME[8][64];
 #define ASS        DISCO_FIXO(Assin, 56)
 #define NOMES      DISCO_FIXO2(char, 64, 57)
 /* quem está na secção de exportação. Quem NÃO está desce como `static` — sem isto a volta
@@ -2689,7 +2707,7 @@ static int desce_corpo(long fim, int fidx){
     while(MP < fim){
         unsigned op = M[MP++];
         DBG_OP = op; DBG_MP = MP;
-        DBG_ANEL[DBG_I & 15] = op; DBG_AMP[DBG_I & 15] = MP; DBG_I++;
+        DBG_ANEL[DBG_I & 63] = op; DBG_AMP[DBG_I & 63] = MP; DBG_NP[DBG_I & 63] = NP; DBG_I++;
 
         /* a condição de um laço: `<c> i32.eqz br_if <bloco de fora>` — o `eqz` está lá porque
          * o wasm sai quando é verdade e o C fica enquanto é verdade; ao voltar, tira-se. */
@@ -2762,6 +2780,20 @@ static int desce_corpo(long fim, int fidx){
             break;
         case 0x10: {                                                    /* call */
             unsigned long f = d_u();
+            if(f < (unsigned long)DESCE_NIMP){
+                /* a chamada é ao IMPORT: nome e assinatura da secção 2 */
+                char args[512] = ""; int n = DESCE_IMP_ASS[f].npar;
+                char peca[16][512];
+                for(int i = n - 1; i >= 0; i--) snprintf(peca[i], 512, "%s", puxa());
+                for(int i = 0; i < n; i++){
+                    if(i) strncat(args, ", ", sizeof args - strlen(args) - 1);
+                    strncat(args, peca[i], sizeof args - strlen(args) - 1);
+                }
+                if(DESCE_IMP_ASS[f].ret == TVOID) frase(prof, "%s(%s);", DESCE_IMP_NOME[f], args);
+                else empurra("%s(%s)", DESCE_IMP_NOME[f], args);
+                break;
+            }
+            f -= (unsigned long)DESCE_NIMP;
             char args[512] = ""; int n = ASS[f].npar;
             char peca[16][512];
             for(int i = n - 1; i >= 0; i--) snprintf(peca[i], 512, "%s", puxa());
@@ -2972,6 +3004,37 @@ static int desce_modulo(const unsigned char *b, long n, FILE *o){
         long nr = (long)d_u();
         tipos[i].ret = nr ? t_de_val(M[MP++]) : TVOID;
     }
+    /* OS IMPORTS DESLOCAM O ÍNDICE — a subida sabe-o (WASM_FUN = f + N_IMP)
+     * e a descida ESQUECIA: com o env.__fich_miss no módulo, toda chamada
+     * resolvia o NOME e o npar do vizinho — e a pilha «esvaziava» no fputc
+     * porque o npar lido era o da função seguinte (auditoria 14/08, o anel
+     * de opcodes). Lê-se a secção 2, guarda-se o tipo e o nome de cada
+     * import de função, e TODO índice vindo do bytecode desconta-os. */
+    int nimp_fn = 0;
+    static Assin IMP_ASS[8];
+    static char IMP_NOME[8][64];
+    if(off[2]){
+        MP = off[2];
+        long ni = (long)d_u();
+        for(long i = 0; i < ni; i++){
+            long Lm = (long)d_u(); MP += Lm;               /* módulo (env) */
+            long Ln = (long)d_u();
+            char nomei[64]; long k2 = Ln < 63 ? Ln : 63;
+            memcpy(nomei, M + MP, (size_t)k2); nomei[k2] = 0; MP += Ln;
+            int kindi = M[MP++];
+            if(kindi == 0){
+                unsigned long ti = d_u();
+                if(nimp_fn < 8){
+                    IMP_ASS[nimp_fn] = tipos[ti < (unsigned long)nt ? ti : 0];
+                    snprintf(IMP_NOME[nimp_fn], 64, "%s", nomei);
+                    nimp_fn++;
+                }
+            } else if(kindi == 2){ (void)d_u(); if(M[MP-1] & 1) (void)d_u(); }
+            else { (void)d_u(); }
+        }
+    }
+    DESCE_NIMP = nimp_fn;
+    for(int i = 0; i < nimp_fn && i < 8; i++){ DESCE_IMP_ASS[i] = IMP_ASS[i]; snprintf(DESCE_IMP_NOME[i], 64, "%s", IMP_NOME[i]); }
     /* que tipo tem cada função */
     MP = off[3];
     long nf = (long)d_u();
@@ -2989,9 +3052,10 @@ static int desce_modulo(const unsigned char *b, long n, FILE *o){
             char nome[64]; long k = L < 63 ? L : 63;
             memcpy(nome, M + MP, (size_t)k); nome[k] = 0; MP += L;
             int kind = M[MP++]; unsigned long idx = d_u();
-            if(kind == 0 && idx < (unsigned long)N_ASS){
-                snprintf(NOMES[idx], 64, "%s", nome);
-                EXPORTADA[idx] = 1;
+            if(kind == 0 && idx >= (unsigned long)nimp_fn
+               && idx - nimp_fn < (unsigned long)N_ASS){
+                snprintf(NOMES[idx - nimp_fn], 64, "%s", nome);
+                EXPORTADA[idx - nimp_fn] = 1;
             }
             if(kind == 2) disco_sai = 1;
         }

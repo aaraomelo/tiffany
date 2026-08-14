@@ -45,7 +45,9 @@ static long pot(long b, long e){ long r = 1; while(e-- > 0) r *= b; return r; }
 
 int main(void)
 {
-    long falhas = 0;
+    /* o `falhas` e' o de unidade.h — um local aqui SOMBREAVA o do header: o ok()
+     * somava la', o return devolvia o de ca' (sempre zero), e uma unidade vermelha
+     * nao virava o exit. O exit E' a assercao; nao se declara outra vez. */
     puts("\n=== DOIS UNIVERSOS — e a estrela entre eles ===\n");
 
     /* ═══ §W1 — o expoente do corpo negro SAI da diluicao ════════════════════════════
@@ -268,6 +270,6 @@ int main(void)
         puts("  E o corpo negro sai de graca: r ~ a^{-(d+1)} e T ~ a^{-1} dao r ~ T^{d+1},");
         puts("  que em d = 3 e' a QUARTA potencia. Nao se citou lei nenhuma — compuseram-se");
         puts("  dois expoentes que ja' estavam derivados.");
-    } else printf("  FALHOU: %ld\n", falhas);
+    } else printf("  FALHOU: %d\n", falhas);
     return falhas ? 1 : 0;
 }

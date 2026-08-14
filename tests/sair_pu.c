@@ -47,7 +47,9 @@ static Pi pi_red(Pi x){ long a = x.n<0?-x.n:x.n, b = x.d;
 
 int main(void)
 {
-    long falhas = 0;
+    /* o `falhas` e' o de unidade.h — um local aqui SOMBREAVA o do header: o ok()
+     * somava la', o return devolvia o de ca' (sempre zero), e uma unidade vermelha
+     * nao virava o exit. O exit E' a assercao; nao se declara outra vez. */
     puts("\n=== SAIR DO P.U.: o 8.pi primeiro, depois o passo, depois a regua ===\n");
 
     /* ═══ §Y1 — PRIMEIRO o 8.pi ══════════════════════════════════════════════════════
@@ -214,6 +216,6 @@ int main(void)
         puts("");
         puts("  Tres entradas, NENHUMA de fora. Eu tinha posto um sistema de unidades alheio no");
         puts("  lugar da terceira — e isso nao e' derivar: e' encostar-se.");
-    } else printf("  FALHOU: %ld\n", falhas);
+    } else printf("  FALHOU: %d\n", falhas);
     return falhas ? 1 : 0;
 }

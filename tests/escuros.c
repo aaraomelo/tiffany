@@ -51,7 +51,9 @@ static Cont c_neg(Cont c){ Cont v = { c.nome, -c.n, c.d }; return v; }
 
 int main(void)
 {
-    long falhas = 0;
+    /* o `falhas` e' o de unidade.h — um local aqui SOMBREAVA o do header: o ok()
+     * somava la', o return devolvia o de ca' (sempre zero), e uma unidade vermelha
+     * nao virava o exit. O exit E' a assercao; nao se declara outra vez. */
     puts("\n=== OS DOIS ESCUROS: um ponto fixo por involucao ===\n");
 
     /* ═══ §D1 — cada involucao tem UM ponto fixo ══════════════════════════════════════ */
@@ -252,6 +254,6 @@ int main(void)
         puts("  Um ponto fixo nao se separa do seu dual pela leitura que o fixa — e' isso que");
         puts("  DEGENERAR quer dizer. Escuro, aqui, nao e' metafora: e' um conteudo que a");
         puts("  leitura disponivel nao separa, e por isso so' se le' pelo OUTRO lado do par.");
-    } else printf("  FALHOU: %ld\n", falhas);
+    } else printf("  FALHOU: %d\n", falhas);
     return falhas ? 1 : 0;
 }

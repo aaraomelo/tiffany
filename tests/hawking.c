@@ -39,7 +39,9 @@ static long pot(long b, long e){ long r = 1; while(e-- > 0) r *= b; return r; }
 
 int main(void)
 {
-    long falhas = 0;
+    /* o `falhas` e' o de unidade.h — um local aqui SOMBREAVA o do header: o ok()
+     * somava la', o return devolvia o de ca' (sempre zero), e uma unidade vermelha
+     * nao virava o exit. O exit E' a assercao; nao se declara outra vez. */
     puts("\n=== HAWKING: a temperatura e' o inverso do raio ===\n");
 
     /* ═══ §H1 — a contagem: UMA escala ═══════════════════════════════════════════════
@@ -218,6 +220,6 @@ int main(void)
         puts("  Parseval outra vez, multiplicativo, porque o corpo e' multiplicativo.");
         puts("");
         puts("  Nao entrou uma constante. Nao havia onde ir buscar uma segunda escala.");
-    } else printf("  FALHOU: %ld\n", falhas);
+    } else printf("  FALHOU: %d\n", falhas);
     return falhas ? 1 : 0;
 }

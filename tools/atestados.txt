@@ -1,5 +1,5 @@
 acesso 0a1c710c2b9252df 0
-acoplamento 0de35053aa7fd353 0
+acoplamento 7a48c242e20301a4 0
 agentes 4e6a08ca0eee820a 0
 agm 2c9e8cedfee7ccac 0
 agm_analog 9464d727b662316a 0
@@ -7,7 +7,7 @@ agm_deforma 99c411ca3dffac43 0
 agm_gerador 958387d0ec02fc04 0
 algebra e4923ae8b9efc021 0
 amplifica 18a45c8f08ff73f8 0
-analiticas 20b227b78073f646 0
+analiticas e839e3fbf00311e4 0
 analog 04ade86bdec3cc0c 0
 antissim 798b7acc9113ebf0 2
 antissimetrico 5c13e7c1c00d85b1 0
@@ -43,7 +43,7 @@ canal 19f659a3a41832ea 0
 cantor 37a78d4f6d91e54f 0
 cantor_julia_dual 2a215f46ac3417d6 0
 canvas_front f5106644abd9858b 0
-cards e2036e273f3fac04 0
+cards 43b08164685d307d 0
 carnot 8d04da08cd5af623 0
 catalogo fd8969387f25f550 0
 checkup b98a8fcd902c838a 0
@@ -70,7 +70,7 @@ cone_nulo 504b52404fbfd424 0
 config_corpo 058335e53d3b487e 0
 conico db6e0cef9c0d6c26 0
 conjunto ee3b0d585a79668e 0
-constantes 22d3b84151817635 0
+constantes 0a154572e05cc610 0
 constroi 2c60273bdc7acb47 0
 conta b61d39344f09ecf3 0
 contagem_cifra 950b2e07602b7dad 0
@@ -144,7 +144,7 @@ dualrn 8a91b8108dcd0df5 0
 dualsort 3298ebc60a6b388c 0
 dualsort_banco 32ec1211d142f264 0
 edo 17b331411cdf37ee 0
-einstein 3c41dac834115d52 0
+einstein a8ce9f96f9b3109a 0
 eletrico 3367df7bc35a0e03 0
 elipses f2e2baa850da0069 0
 encaixa 12b97f8add189a61 0
@@ -152,14 +152,14 @@ encanamento 045b4f98e950e3c9 0
 enche a2861fc14a9fd7f9 0
 entre c9d4cbfc7a5a9307 0
 entrega dd303b06ea369e41 2
-entropia_dual 9825617e56adbcdb 0
+entropia_dual 9e1e8357b68c4eb5 0
 equivalencia_universal 424be18459dfa372 0
 erg 24fd5a4ae1cb1739 0
 escada 5b25d287f60365e5 0
 escala d6e3ee5a8e38e0cc 0
 escala_dourada 7ae60b0712a0b7cf 0
 escala_espaco 849fe8fea9a4b7d9 0
-escuros 083ab278ca83ff73 0
+escuros 1387b814af7e9a7f 0
 espelho d56cc3c0b73eee7a 0
 espurio b087b9b6bc7fc263 0
 esquilo 8dc0713ba6d2b3e9 0
@@ -201,7 +201,7 @@ gitb c558deae4b86e995 0
 grau 875760f31c09ce87 0
 grupo 17bb34c3fdd2c251 0
 guarda 6e9ee3952f6cb691 0
-hawking 6d2711eadd0f59c7 0
+hawking 456bb5aa6bdfaa3c 0
 headjack 26c9a27cb791d804 0
 hilbert_bidual b7e85807ec6864e8 0
 hiper 965c8458576d06ff 0
@@ -231,7 +231,7 @@ lei2 aafa184130e2d70f 0
 leis_no_tradutor b021c11d75457674 0
 lemniscata 72425a6ff1117151 0
 letra_assinatura ac69847f7bec6136 0
-libc_wasm 5f8e4a9025f6c70b 1
+libc_wasm fc834bc8eeefe10a 0
 liga 9a74373ac9338675 0
 linear 02f99a21eba6406b 0
 liquida 6f6a73a8318e27bf 0
@@ -245,11 +245,11 @@ lyapunov_refletido 1e9f698b6ae0aab6 0
 lyapunov_torre 6d18b7610f966dc9 0
 maisum 06d588623bce168e 0
 matricial e708671d4f3558dc 0
-maxcut ef83dcb45caec2fe 0
+maxcut 6e3f503ba23045de 0
 mcu ab518f13dc30a9da 0
 mecanica 122a11b4b3090e35 0
 medida f884b8cb1ec7bd9b 0
-meia_passagem 95e18aaed12475d8 0
+meia_passagem 2fd7a5cd2b26078a 0
 meio_aberto 23d64525b11bc961 0
 metades ffed9b53a315b61c 0
 metalica 8974bfc6b912b456 0
@@ -299,7 +299,7 @@ ouro_base 54a516183f184039 0
 ouro_branco eb5b0bc78ff590a9 0
 palavra 57157f16be7664e5 0
 parabola 986f731493cd1a64 0
-parseval bfdfb5f5f3815523 0
+parseval 72b8ef997da2bd4f 0
 pascal 52b41d2d25608f60 0
 patria_front bd725634b0b6534c 0
 pdf_corpo ae32f6ce86e39c76 0
@@ -322,7 +322,7 @@ potencia cc93709e0a87f0db 0
 prensor e1992045bed94bb2 0
 prisma af1d7b9d723bc06c 0
 progressoes 68a256306197805b 0
-promove fd9b95b550e253a3 0
+promove a305cad77d13697a 0
 protocolo 16cbd195b00de152 2
 quantico 5cf79db190356ce4 0
 quasi c1eae084a401bc3d 0
@@ -347,10 +347,10 @@ relay d8b1fff146f41471 0
 relogio 424be4ecfc6567fb 0
 relogio_curva 63997a9b0f828082 0
 relogio_opera d8a205fd815ca2cb 0
-render 3ecbf5ec0d01896a 0
-renormaliza 0c4d1194d667b6e3 0
+render df16f47ea89dd524 0
+renormaliza ca31a22ea5e1ff3f 0
 residuos_totais 52cf778fe4c28b37 0
-reversao 1066c211ef635b79 0
+reversao 6ce3ed15e79f47b7 0
 ribossomo 5d80dbc0f2781041 0
 rn 7aa3b7aa2433101f 0
 robo b1af06aa747c26cc 0
@@ -358,7 +358,7 @@ rotacao 1dd03ecf0025d4d2 0
 rotaciona d5e304bfd7d6ea7b 0
 rotulos da58cb7659dcef98 0
 roupa 21ee9ca0cda0f4bd 0
-sair_pu ece17024ec05b09c 0
+sair_pu e7e789497f7128e7 0
 saltos 6ee5a6b83928bee0 0
 selberg 3a2bb3ff7f1dbcb8 0
 selo f6d39d6487a0f0aa 0
@@ -420,7 +420,7 @@ venom 81e08aaa27713a46 0
 venom_string 86edcbaa18a94320 0
 vesica 71a5e659a20e428e 0
 veste e8a6771f4d30a029 0
-vestir cf3b275b042cfaa1 0
+vestir c6a992b10f98f16a 0
 viveiro da5be75cca61984f 0
 viveiro_metrico cdf89d2d1ba2b762 0
 vizinha 6e95eef741d17536 0

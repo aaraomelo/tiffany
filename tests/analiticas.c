@@ -39,7 +39,9 @@ static int J_val(int k){ int p = J_pot(k); return p == 0 ? +1 : (p == 2 ? -1 : 0
 
 int main(void)
 {
-    long falhas = 0;
+    /* o `falhas` e' o de unidade.h — um local aqui SOMBREAVA o do header: o ok()
+     * somava la', o return devolvia o de ca' (sempre zero), e uma unidade vermelha
+     * nao virava o exit. O exit E' a assercao; nao se declara outra vez. */
     puts("\n=== AS ANALITICAS: do relogio e da familia, e Lambda com valor ===\n");
 
     /* ═══ §A1 — pi e' o MEIO-PERIODO ═════════════════════════════════════════════════
@@ -224,6 +226,6 @@ int main(void)
         puts("    e das duas juntas:  LAMBDA = 3/D,  e no ponto fixo m = 0 vale 3/4.");
         puts("");
         puts("  Deixar Lambda 'livre' nao era deriva-lo — era nao o derivar.");
-    } else printf("  FALHOU: %ld\n", falhas);
+    } else printf("  FALHOU: %d\n", falhas);
     return falhas ? 1 : 0;
 }

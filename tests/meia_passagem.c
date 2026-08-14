@@ -54,7 +54,9 @@ static long nao_dag(long x, long c){ return x + c; }
 
 int main(void)
 {
-    long falhas = 0;
+    /* o `falhas` e' o de unidade.h — um local aqui SOMBREAVA o do header: o ok()
+     * somava la', o return devolvia o de ca' (sempre zero), e uma unidade vermelha
+     * nao virava o exit. O exit E' a assercao; nao se declara outra vez. */
     puts("\n=== O PROTOCOLO: inverter o sinal e dividir por dois ===\n");
 
     /* ═══ §P1 — S + A = x, numa passagem ════════════════════════════════════════════ */
@@ -170,6 +172,6 @@ int main(void)
         puts("  Cortar ao meio nao quebra nada porque as duas metades RECONSTROEM — o que se");
         puts("  perde e' ficar com uma so'. E a divisao e' exacta porque a involucao garante a");
         puts("  paridade: num objecto que nao reverte, ela falha, e o protocolo acusa.");
-    } else printf("  FALHOU: %ld\n", falhas);
+    } else printf("  FALHOU: %d\n", falhas);
     return falhas ? 1 : 0;
 }

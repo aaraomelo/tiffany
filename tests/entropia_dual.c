@@ -43,7 +43,9 @@ static long pot(long b, long e){ long r = 1; while(e-- > 0) r *= b; return r; }
 
 int main(void)
 {
-    long falhas = 0;
+    /* o `falhas` e' o de unidade.h — um local aqui SOMBREAVA o do header: o ok()
+     * somava la', o return devolvia o de ca' (sempre zero), e uma unidade vermelha
+     * nao virava o exit. O exit E' a assercao; nao se declara outra vez. */
     puts("\n=== A ENTROPIA DO BURACO BRANCO — e a segunda lei tem um lado ===\n");
 
     /* ═══ §X1 — a MESMA lei, aplicada ao raio dual ══════════════════════════════════
@@ -198,6 +200,6 @@ int main(void)
         puts("  e' verdade e nao e' lei do universo — e' lei de METADE dele. A lei do par e' que");
         puts("  a soma nao muda, e a seta do tempo nao e' propriedade do tempo: e' uma");
         puts("  polaridade lida sem a outra.");
-    } else printf("  FALHOU: %ld\n", falhas);
+    } else printf("  FALHOU: %d\n", falhas);
     return falhas ? 1 : 0;
 }

@@ -70,7 +70,9 @@ static long posto(long M[][3], int n, int cols)
 
 int main(void)
 {
-    long falhas = 0;
+    /* o `falhas` e' o de unidade.h — um local aqui SOMBREAVA o do header: o ok()
+     * somava la', o return devolvia o de ca' (sempre zero), e uma unidade vermelha
+     * nao virava o exit. O exit E' a assercao; nao se declara outra vez. */
     puts("\n=== TODAS AS CONSTANTES EM FUNCAO DA TEORIA ===\n");
 
     /* ═══ §Z1 — o p.u. baixa o posto de 3 para 1 ════════════════════════════════════ */
@@ -829,6 +831,6 @@ int main(void)
         puts("    sigma     vem da borda da familia         — puro (e' uma densidade)");
         puts("");
         puts("  Um puro sem contagem por tras nao entra. E' por isso que alfa nao esta' ca'.");
-    } else printf("  FALHOU: %ld\n", falhas);
+    } else printf("  FALHOU: %d\n", falhas);
     return falhas ? 1 : 0;
 }

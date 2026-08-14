@@ -356,11 +356,14 @@ if (E) {
      * offset magico end_saida()+7M passou a cair FORA — pede-se ao
      * alocador da casa (vfs_reserva), como o app faz */
     const r = Number(E.vfs_reserva(16384));
-    const S = E.end_saida();
-    const oct = new Uint8Array(E.DISCO.buffer);
-    const poe = (a, t) => { const b = Buffer.from(t, 'latin1');
-        for (let i = 0; i < b.length; i++) oct[a + i] = b[i]; oct[a + b.length] = 0; return a; };
-    const le = (a, n) => { let t = ''; for (let i = 0; i < n; i++) t += String.fromCharCode(oct[a + i]); return t; };
+    /* a memoria CRESCE (memory.grow no realloc da saida) e uma vista velha fica
+     * DESTACADA: escrever nela nao escreve em lado nenhum, sem erro. O formato do
+     * fprintf «desaparecia» por isto — o cano estava bom, a vista e que estava
+     * morta. Regra: a vista pede-se FRESCA a cada uso, para LER e para ESCREVER. */
+    const poe = (a, t) => { const o = new Uint8Array(E.DISCO.buffer); const b = Buffer.from(t, 'latin1');
+        for (let i = 0; i < b.length; i++) o[a + i] = b[i]; o[a + b.length] = 0; return a; };
+    const le = (a, n) => { const o = new Uint8Array(E.DISCO.buffer);
+        let t = ''; for (let i = 0; i < n; i++) t += String.fromCharCode(o[a + i]); return t; };
 
     const CONTEUDO = 'reino dourado\ne o resto do corpo\n';
     E.poe_ficheiro(poe(r, 'lib/classe/classe.txt'), poe(r + 256, CONTEUDO), CONTEUDO.length);
@@ -385,15 +388,12 @@ if (E) {
     const w = E.fopen(poe(r + 5000, ''), poe(r + 5064, 'w'));
     E.fwrite(poe(r + 5128, 'BT '), 1, 3, w);
     const fita = r + 5200;
-    const dv = new DataView(E.DISCO.buffer);
+    const dv = new DataView(E.DISCO.buffer);   /* fresca: depois do fwrite que fez crescer */
     dv.setInt32(fita, 42, true); dv.setFloat64(fita + 8, 13.6, true);
     E.fprintf(w, poe(r + 5300, '%d Tf %.3f Td'), fita);
     E.fputc(10, w);
     /* a SAIDA realoca ao crescer — o ponteiro lê-se FRESCO, não do S velho */
-    const oct2 = new Uint8Array(E.DISCO.buffer);
-    const S2 = E.end_saida();
-    const le2 = (a, n) => { let t = ''; for (let i = 0; i < n; i++) t += String.fromCharCode(oct2[a + i]); return t; };
-    const saiu = le2(S2, E.tam_saida());
+    const saiu = le(E.end_saida(), E.tam_saida());
     console.log(`   §L4b escrito: ${JSON.stringify(saiu)}`);
     ok('§L4b escrever e MOVE(-1) na mesma agulha: sai exactamente o que se pediu',
        saiu === 'BT 42 Tf 13.600 Td\n');

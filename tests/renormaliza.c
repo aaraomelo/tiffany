@@ -34,7 +34,9 @@ static long dist(long p, long q){ long a = p, b = q - p; return a < b ? a : b; }
 
 int main(void)
 {
-    long falhas = 0;
+    /* o `falhas` e' o de unidade.h — um local aqui SOMBREAVA o do header: o ok()
+     * somava la', o return devolvia o de ca' (sempre zero), e uma unidade vermelha
+     * nao virava o exit. O exit E' a assercao; nao se declara outra vez. */
     puts("\n=== A RENORMALIZACAO DO RELOGIO PELA ESPIRAL METALICA ===\n");
 
     /* ═══ §N1 — a velocidade maxima e' meia volta, e a razao nao se move ══════════════
@@ -199,5 +201,5 @@ int main(void)
 
     puts("");
     if(!falhas) puts("=== todos passaram: o numero e' da regua, a meia volta e' do objecto ===\n");
-    return 0;
+    return falhas ? 1 : 0;
 }

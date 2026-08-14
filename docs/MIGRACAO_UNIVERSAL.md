@@ -437,3 +437,51 @@ corrige-se a fonte da emissão». Executado por caso mínimo + bissecção:
 **Bateria: 422 — 421 verdes, 1 vermelho (libc_wasm) com a causa reduzida a
 UM mecanismo do traduz.** O portão de ouro (422:422 + --refaz) espera essa
 sessão; o compositor já fala a verdade pura.
+
+## 15. O PORTÃO DE OURO: 422:422 — E A REDE CONTRA O VERDE FALSO
+
+A sessão de compilador previu «desarmar o içamento do va_arg» — e o
+diagnóstico anterior estava ERRADO nas duas frentes. Nenhuma das causas
+era a lógica do va_arg:
+
+- **§L5 (round-trip 14551 bytes)**: DUAS raízes no traduz. (a) A descida
+  IGNORAVA a secção de imports do wasm — `call` e exports indexam
+  contando os imports, mas ASS[]/NOMES[] só tinham as definidas: o `f`
+  errado tirava o npar errado e a pilha esvaziava. Agora a secção 2 é
+  lida (DESCE_NIMP/DESCE_IMP_ASS/DESCE_IMP_NOME) e os índices descontam.
+  (b) A captura de directivas apanhava `#define MAX_FICH 128 /* o
+  manifesto…` — um `/*` SEM fecho na mesma linha — e no replay da config
+  esse abridor PENDURADO engolia as directivas seguintes na recaptura
+  (as caudas divergiam: A=0, B=1 em `#define MAX_AGULHA`). A directiva
+  corta-se no abridor; o comentário viaja INTEIRO pela passagem 2.
+  **sobe(desce(M)) = M, resíduo 0 nos 29717 bytes da libc.**
+- **§L4b (fprintf «mudo»)**: a libc NUNCA esteve muda. A vista
+  `Uint8Array` do medidor ficava DESTACADA quando o `memory.grow` do
+  realloc da SAIDA corria — o `poe` do formato escrevia numa vista morta,
+  SEM erro, e o vsnprintf via string vazia. A vista pede-se FRESCA a cada
+  uso, para ler E para escrever. Sai `"BT 42 Tf 13.600 Td\n"`, byte a byte.
+
+E o refaz do portão (422:422 nos exits) denunciou na linha das unidades
+(«2 falharam») um FALSO VERDE ESTRUTURAL:
+
+- **cards.c saía 0 com duas #UNIT falha**: um `long falhas = 0` LOCAL no
+  main sombreava o contador de lib/unidade.h — o ok() somava no do
+  header, o return devolvia o local. E as unidades falhavam DE VERDADE:
+  o pino do manifesto em 105 com o mundo em 111 (docs 7→12: papers com
+  capa, Partitura, Corpo de Peano; o autor com nome), e o §B10 a assumir
+  um /tmp/render_bin que NINGUÉM construía. Pino atualizado com a
+  história, o bloco compila o renderizador ele próprio (8 assinaturas
+  lidas, 0 divergem — o circuito fecha de verdade), shadow removido.
+  Mutação de controlo: pino errado → exit 1.
+- **A classe varrida**: mais 16 medidores com o MESMO shadow, 3 deles com
+  `return 0` fixo (einstein, vestir, renormaliza — o exit nunca poderia
+  falhar). Todos consertados.
+- **A REDE (bateria.sh, nos 3 ramos)**: exit e unidades TÊM DE CONCORDAR
+  — exit 0 com `#UNIT falha` vira «FALHA: VERDE FALSO», e a atestação é
+  corrigida para 9 NA HORA (senão o reuso ressuscitava o verde — a lição
+  do medidor que nunca mediu). Nenhum medidor futuro precisa de ser
+  confiado: os dois caminhos comparam-se no runner.
+
+**Bateria: 422:422, 0 falhas, unidades 118:0 nos 17 reabertos. O portão
+de ouro está fechado; a fila teórica reabre (Viviani → Lei trial →
+intervalos encaixantes → teorema dos resíduos → Clifford).**

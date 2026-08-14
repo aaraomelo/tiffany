@@ -188,7 +188,22 @@ for f in $(cat "$LISTA"); do
     fi
     uni_ok=$((uni_ok + u_ok)); uni_ma=$((uni_ma + u_ma))
     [ "$u_ok$u_ma" != "00" ] && cert="$u_ok unidade(s), $u_ma falha(s) — ${cert:-ok}"
+    # EXIT E UNIDADES TÊM DE CONCORDAR. O cards saiu 0 com duas #UNIT falha — um
+    # `long falhas` local no main sombreava o contador do unidade.h e o verde era
+    # falso (14/08, e havia mais 16 com o mesmo shadow e 3 com `return 0` fixo).
+    # A rede fecha a CLASSE: verde com unidade vermelha não é verde, é FALHA — e
+    # nenhum medidor futuro precisa de ser confiado, porque os dois caminhos são
+    # comparados aqui.
+    if [ "$r" -eq 0 ] && [ "$u_ma" -gt 0 ]; then
+      r=9
+      # a tabela ja' levou o exit 0 — corrige-se, senao o REUSO ressuscitava o verde
+      # (a licao do medidor que nunca mediu: a atestacao guarda o resultado FINAL)
+      grep -v "^$base " "$TABELA" > "$TABELA.novo" 2>/dev/null; mv "$TABELA.novo" "$TABELA"
+      printf '%s %s 9\n' "$base" "$ass" >> "$TABELA"
+      LC_ALL=C sort -o "$TABELA" "$TABELA"
+    fi
     if [ "$r" -eq 0 ]; then printf '%-26s %-9s %s\n' "$f" "VERDE" "${cert:-ok}"; verde=$((verde+1))
+    elif [ "$r" -eq 9 ]; then printf '%-26s %-9s %s\n' "$f" "FALHA" "VERDE FALSO: exit 0 com $u_ma unidade(s) vermelha(s)"; falha=$((falha+1))
     else printf '%-26s %-9s %s\n' "$f" "FALHA" "exit $r"; falha=$((falha+1)); fi
     continue
   fi
@@ -218,7 +233,22 @@ for f in $(cat "$LISTA"); do
     fi
     uni_ok=$((uni_ok + u_ok)); uni_ma=$((uni_ma + u_ma))
     [ "$u_ok$u_ma" != "00" ] && cert="$u_ok unidade(s), $u_ma falha(s) — ${cert:-ok}"
+    # EXIT E UNIDADES TÊM DE CONCORDAR. O cards saiu 0 com duas #UNIT falha — um
+    # `long falhas` local no main sombreava o contador do unidade.h e o verde era
+    # falso (14/08, e havia mais 16 com o mesmo shadow e 3 com `return 0` fixo).
+    # A rede fecha a CLASSE: verde com unidade vermelha não é verde, é FALHA — e
+    # nenhum medidor futuro precisa de ser confiado, porque os dois caminhos são
+    # comparados aqui.
+    if [ "$r" -eq 0 ] && [ "$u_ma" -gt 0 ]; then
+      r=9
+      # a tabela ja' levou o exit 0 — corrige-se, senao o REUSO ressuscitava o verde
+      # (a licao do medidor que nunca mediu: a atestacao guarda o resultado FINAL)
+      grep -v "^$base " "$TABELA" > "$TABELA.novo" 2>/dev/null; mv "$TABELA.novo" "$TABELA"
+      printf '%s %s 9\n' "$base" "$ass" >> "$TABELA"
+      LC_ALL=C sort -o "$TABELA" "$TABELA"
+    fi
     if [ "$r" -eq 0 ]; then printf '%-26s %-9s %s\n' "$f" "VERDE" "${cert:-ok}"; verde=$((verde+1))
+    elif [ "$r" -eq 9 ]; then printf '%-26s %-9s %s\n' "$f" "FALHA" "VERDE FALSO: exit 0 com $u_ma unidade(s) vermelha(s)"; falha=$((falha+1))
     else printf '%-26s %-9s %s\n' "$f" "FALHA" "exit $r"; falha=$((falha+1)); fi
     continue
   fi
@@ -258,7 +288,16 @@ for f in $(cat "$LISTA"); do
   if negativo_esperado "$base"; then uni_ok=$((uni_ok + u_ok)); uni_neg=$((uni_neg + u_ma))
   else uni_ok=$((uni_ok + u_ok)); uni_ma=$((uni_ma + u_ma)); fi
   [ "$u_ok$u_ma" != "00" ] && ver="$u_ok unidade(s), $u_ma falha(s) — ${ver}"
-  if [ "$r" -eq 0 ]; then
+  # a mesma rede do ramo .py/.js: exit 0 com unidade vermelha é FALHA, não verde
+  if ! negativo_esperado "$base" && [ "$r" -eq 0 ] && [ "$u_ma" -gt 0 ]; then
+    r=9
+    grep -v "^$base " "$TABELA" > "$TABELA.novo" 2>/dev/null; mv "$TABELA.novo" "$TABELA"
+    printf '%s %s 9\n' "$base" "$ass" >> "$TABELA"
+    LC_ALL=C sort -o "$TABELA" "$TABELA"
+  fi
+  if [ "$r" -eq 9 ]; then
+    printf '%-26s %-9s %s\n' "$f" "FALHA" "VERDE FALSO: exit 0 com $u_ma unidade(s) vermelha(s)"; falha=$((falha+1))
+  elif [ "$r" -eq 0 ]; then
     printf '%-26s %-9s %s\n' "$f" "VERDE" "${ver:-ok}"; verde=$((verde+1))
   elif [ "$r" -eq 1 ] && negativo_esperado "$base"; then
     printf '%-26s %-9s %s\n' "$f" "NEGATIVO" "teorema negativo por projeto — ${ver:-ver paper}"; negativo=$((negativo+1))

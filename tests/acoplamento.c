@@ -42,7 +42,9 @@ static Pi pi_red(Pi x){ long a = x.n < 0 ? -x.n : x.n, b = x.d;
 
 int main(void)
 {
-    long falhas = 0;
+    /* o `falhas` e' o de unidade.h — um local aqui SOMBREAVA o do header: o ok()
+     * somava la', o return devolvia o de ca' (sempre zero), e uma unidade vermelha
+     * nao virava o exit. O exit E' a assercao; nao se declara outra vez. */
     puts("\n=== O 8.pi DERIVADO — do fluxo e do traco ===\n");
 
     /* ═══ §G1 — a area da esfera unitaria, por recorrencia inteira ═══════════════════
@@ -192,6 +194,6 @@ int main(void)
         puts("");
         puts("  E a distincao que sobra: 8.pi e' adimensional como alfa — mas 8.pi SAI DE");
         puts("  CONTAR e alfa nao. Nem todo o numero puro esta' fora do alcance.");
-    } else printf("  FALHOU: %ld\n", falhas);
+    } else printf("  FALHOU: %d\n", falhas);
     return falhas ? 1 : 0;
 }

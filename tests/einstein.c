@@ -27,7 +27,9 @@
 
 int main(void)
 {
-    long falhas = 0;
+    /* o `falhas` e' o de unidade.h — um local aqui SOMBREAVA o do header: o ok()
+     * somava la', o return devolvia o de ca' (sempre zero), e uma unidade vermelha
+     * nao virava o exit. O exit E' a assercao; nao se declara outra vez. */
     puts("\n=== EINSTEIN, DERIVADO — a conservacao fixa tudo ===\n");
 
     /* ═══ §E1 — o coeficiente 1/2 e' o UNICO que conserva ════════════════════════════
@@ -219,5 +221,5 @@ int main(void)
 
     puts("");
     if(!falhas) puts("=== todos passaram: a conservacao fixa o coeficiente, a dimensao e o Lambda ===\n");
-    return 0;
+    return falhas ? 1 : 0;
 }
