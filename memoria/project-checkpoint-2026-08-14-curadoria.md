@@ -5,7 +5,7 @@ metadata:
   node_type: memory
   type: project
   originSessionId: b6c6c5cb-b5ec-45f0-ac00-480c20a1bb2d
-  modified: 2026-08-14T04:15:24.429Z
+  modified: 2026-08-14T04:28:38.864Z
 ---
 
 **14/08 — A CURADORIA RESOLVIDA, 36c1fa5 (pushado).** Ordem do dono: «resolve a curadoria». Forma: **camada de transações declaradas**, lidas antes de decidir.
@@ -19,4 +19,10 @@ metadata:
 - E(fonte): 38.731.623.179 → **38.771.546.660** (= âncora + Σ contornos, derivado no medidor, não escrito à mão). Espectral 37.222 → **59.436** (âncora cruzada entre cristal_energia e equivalencia_universal). Grupos: manual 516 (−44), xadrez 150 (−4), matematica 679, computacao 515, engenharia 441, diversos 88.
 - Atualizados: cristal_volta (4234), equivalencia (E derivada), fusao_conceitos (par demo = arte/artes mantido), observador_torre, cristal_tex.py (fusão desdobra: face mantida + segunda face à vista + nota), cristal.sh, LEIA.md, corpo_universal.tex (caixa de quarentena → curadoria resolvida), arquitetura.tex. **Bateria 425:425, zero falhas**; segredo.sh LIMPO.
 
-Relacionado: [[checkpoint-2026-08-13-cristal]], [[feedback-a-referencia-escrita-a-mao]], [[feedback-dois-caminhos]].
+**Tarde — A GEOMETRIA DO CONTORNO, 1f5c38b.** Ordem: «formalizar a geometria, vê se está na superfície de Riemann»; eval (Grok/gerente/diretor): buscar→medir→nomear, C0–C7, quarentena do nome. `tests/contorno_riemann.js` **23:0**, bateria **426:426**:
+- **O recobrimento**: w=2x−m dá **w²=m²+4** (a dobra É o discriminante); sobre ℤ só a Lei 0 ((0,±2)→x=±1, enumeração completa dos divisores de 4); um andar acima realiza-se inteiro: W=2A−mI, W²=(m²+4)I. **A troca de folha é a estaca**: A·(mI−A)=−I.
+- **Os 52 contornos**: fecham orientados (LIFO, cordas lidas), 2 folhas + 1 corte (dois caminhos: fibra cega == leitura com estado de corda); **planos** — E_∂−E(id)=E(moldura)=295.589 constante; monodromia ν∘ν=id byte a byte e só paga o endereço.
+- **As cartas da torção**: o esquilo J (já da morfologia) dá anel gaussiano exato; DUAS assinaturas lado a lado: a²+b² (definida, torção) vs a²+mab−b² (indefinida, corpo); det multiplicativo nas duas (Lei 7); rotor comuta (holomorfo), espelho conjuga e anti-comuta (o par); **⟨J,R⟩ tem ordem exatamente 8**.
+- **A ramificação está no rotor, não no corpus**: (2J)²+4I=0 exato (a dobra ZERA em m=2J), X=J raiz dupla com x†=x e ν(x)=x; auto-fusão = ponto fixo de ν (a membrana D²=A⊕A); nenhuma das 52 fixa. Veredito: «a parte de Riemann está onde o rotor está; a hiperbólica onde o corpo vive» — Dirac vira mudança de folha. Prosa: corpo_universal §sec:contorno-geo (3 teoremas + obs:riemann, sem afirmar holomorfia nas folhas reais).
+
+Relacionado: [[checkpoint-2026-08-13-cristal]], [[feedback-a-referencia-escrita-a-mao]], [[feedback-dois-caminhos]], [[feedback-a-base-ja-existe]].
