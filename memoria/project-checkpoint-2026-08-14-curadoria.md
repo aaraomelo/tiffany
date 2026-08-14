@@ -90,4 +90,10 @@ metadata:
 - **DOIS VERMELHOS HONESTOS (defeitos reais)**: sem_chute §N7 — **DUPLO-DESENHO no compositor**: fragmentos pós-hífen desenhados 2× no mesmo sítio (93 glifos, págs 422/423/425/434, cluster nas molduras; «ssiimm» à vista; alvo: quebra_e_desenrola × pintor BX_); libc_wasm — write vazio + traduz «pilha vazia na descida».
 - Bateria: **422 — 420 verdes, 2 com defeito real apontado** (era 433:433 com 28 mentiras). Lições ao vivo: tautologia minha apanhada 2× (biblioteca §Y3 a==a; calibrar pelo mínimo tornaria violação impossível — usa-se a moda).
 
+**Madrugada 4 — O MARTELO NO DUPLO-DESENHO, 25cf98b.** Mesa: «corrige-se a fonte da emissão, não se tapa». Caso mínimo + bissecção no catálogo (20970–20985):
+- **RAIZ**: o despacho casava `aligned` pelo PREFIXO «align» → porta de display: o `\begin{aligned}` guardava centra_mat=1 POR CIMA do 0 do pai `\[`, e o `\end{aligned}` desligava o modo DO PAI — o CENTRA ficava preso para sempre: tudo centrava, células no mesmo x («sim»+«sim», 93 glifos, 4 páginas). Conserto no tex_core: **aligned/gathered são SUB-ambientes — só consomem a chave**. Catálogo inteiro 0 duplos; tex.wasm reconstruído; **sem_chute VERDE**.
+- **libc §L4b curado em 2**: tam_saida devolvia só PDF_N (o par nasceu na dieta; write direto enchia SAIDA com o contador a 0) → `PDF_N>0?PDF_N:SAIDA_N`; e o medidor lia o ponteiro VELHO da SAIDA (realloc move) → lê-se fresco.
+- **§L5+fprintf: UMA raiz nomeada até ao osso**: a descida do traduz morre no sscanf (fn=29, call com pilha vazia; anel de 16 opcodes FICA no traduz como diagnóstico) — o **va_arg do subida IÇA código (memmove no COD) e a leitura linear da descida desfasa a pilha**. Sessão própria de compilador.
+- Bateria **422: 421 verdes, 1** (libc_wasm, causa=um mecanismo). Método que pagou: caso mínimo → bissecção → variantes → instrumentação com anel → raiz.
+
 Relacionado: [[checkpoint-2026-08-13-cristal]], [[feedback-a-referencia-escrita-a-mao]], [[feedback-dois-caminhos]], [[feedback-a-base-ja-existe]], [[feedback-normalizar-nao-e-medir]], [[feedback-o-medidor-que-nunca-mediu]], [[feedback-a-regua-nao-transporta]].
