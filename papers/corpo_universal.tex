@@ -752,6 +752,46 @@ explícita $u=\mathcal{F}(s)$ que a produza --- e essa transformação
 ser concreta; o nome clássico só entra se a medida o trouxer.
 \end{observacao}
 
+\begin{teorema}[a representação espectral do Metrónomo, e o Maestro
+como derivação]\label{thm:metronomo-fourier}
+A série $f(t)=\sum_{k}c_{k}e^{ikt}$ entra no corpo pela forma discreta
+honesta --- $x_{n}=N^{-1}\sum_{k}c_{k}\omega^{kn}$ no anel, $\omega^{N}=1$
+--- e os $c_{k}$ \textbf{não se postulam: medem-se} da órbita da batuta
+já auditada. O que a medida dá:
+\begin{enumerate}
+\item \textbf{Os $c_{k}$, apresentados: são as duas folhas.} O espectro
+da órbita tem \emph{exatamente dois} modos não-nulos, e as suas
+frequências são as folhas: $\omega^{k_{1}}=\sigma$,
+$\omega^{k_{2}}=\sigma^{\dagger}$, com $\sigma\sigma^{\dagger}=-1$ (a
+estaca). Em $q=257$, $N=128$: riscas em $k=\{69,123\}$ com
+$\omega^{k}=\{61,198\}$ == as raízes de $t^{2}=mt+1$; no anel grande
+($65537$, $N=8192$) as duas riscas sobrevivem e os controlos são nulos.
+\item \textbf{O Metrónomo mede \emph{quando}}: o tick é
+\emph{diagonal} no espectro ($c_{k}\mapsto\omega^{k}c_{k}$ em todos os
+modos --- a folha roda pela própria folha), e a derivada discreta
+honesta é $\Delta\!\iff\!c_{k}\mapsto(\omega^{k}{-}1)c_{k}$: o «$ik$»
+do contínuo é $\omega^{k}-1$ no anel.
+\item \textbf{O Maestro decide \emph{quais}}, como derivação
+espectral: a retração $d\to d/2$ (a dobra da torre) age nos modos por
+$\hat{c}_{k}=2^{-1}(c_{k}+c_{k+N/2})$ --- o $T{+}T^{*}$ --- e o
+projetor $2^{-1}(\mathrm{id}+T^{N/2})$, construído da própria batuta,
+age como seletor $c_{k}\mapsto a_{k}c_{k}$ com $a_{k}\in\{0,1\}$,
+partição da unidade e idempotência exatas.
+\item \textbf{Nada se perde}: Parseval fecha no anel (na órbita os
+dois lados dão $0$ --- \emph{isotropia das folhas}, medida:
+$\sum\sigma^{2n}=0$ na volta e o cruzado leva $\sum(-1)^{n}=0$ porque
+$\sigma\sigma^{\dagger}=-1$; o controlo nos bytes reais do cristal
+fecha com valor $\neq0$), e a inversa devolve a órbita exata com
+$R_{\rm total}=(0,0,0,0,0)$.
+\end{enumerate}
+Estatuto: \textbf{Fourier não fundamenta o Metrónomo --- representa-o.}
+O Metrónomo continua primitiva operacional (o gerador temporal); o
+Maestro é a sua \emph{derivação} espectral (o organizador dos modos).
+O nome de interpretação que o coordenador propôs para o gerador comum
+das transições aguarda a medida que o autorize.
+\emph{Medido:} \code{tests/metronomo\_fourier.js} ($15{:}0$). $\square$
+\end{teorema}
+
 %======================================================================
 \section{Onde entram os milénios --- leituras, não base}\label{sec:milenio-universal}
 
