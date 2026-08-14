@@ -278,6 +278,94 @@ fecho $\operatorname{Ind}^{8}=\mathrm{id}$ vale no universal porque vale
 no catálogo --- não há lei nova em nenhum dos dois.
 
 %======================================================================
+\section{Primitivas operacionais mecânicas}\label{sec:primitivas}
+
+As engrenagens do sistema, cada uma \textbf{biunívoca} com um medidor
+verde --- a regra de ouro da mecânica:
+\[
+\boxed{
+\text{o que tem código verde entra; o que for só linguagem fica fora.}
+}
+\]
+\begin{center}\small
+\begin{tabular}{@{}clll@{}}
+\toprule
+ & primitiva & o que faz & medidor (verde) \\
+\midrule
+1 & \textbf{Núcleo de leitura} & corpo \& endereço: extrai o cristal;
+  a cardinalidade conta a carga & \code{cristal\_volta.js} $16$:$0$ \\
+2 & \textbf{Resolução de ordem} & a escada $(\Phi,\Phi_2)$: impede a
+  cegueira da energia isolada & \code{assinatura\_colisoes.js};
+  \code{assinatura\_banal.js} \\
+3 & \textbf{Transformação universal} & família metálica:
+  $\det=\pm1$, inversa inteira exata & \code{ponte\_universal\_metalica.js}
+  $12$:$0$ \\
+4 & \textbf{Fibra de desagregação} & divisão: decompositores admissíveis
+  por $F^{-1}(z)$ sob conservação & \code{observador\_torre.js} \S T4 \\
+5 & \textbf{Membrana de Dirac} & transição entre estados; fatoração e
+  subida de andar quando a raiz não cabe & \code{dirac\_transicao.js}
+  $13$:$0$ \\
+6 & \textbf{Inversor total} & $R_{\mathrm{total}}=(R_{\mathrm{end}},R_E,
+  R_\Phi,R_{\Phi_2},R_D)$: RETAIN $\iff$ tudo zera & \code{residuos\_totais.js}
+  $9$:$0$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+As seis compõem a máquina completa: ler pelo endereço, resolver a
+ordem, transformar com volta, desagregar pela fibra, atravessar a
+transição, e admitir só o que conserva tudo --- as \textbf{operações
+mecânicas} de que as cinco operações algébricas
+(\S\ref{sec:cinco}) são a leitura.
+
+%======================================================================
+\section{Os domínios como realizações das oito leis}\label{sec:dominios}
+
+O inventário do repo, com o estatuto medido --- \textbf{a tabela não
+afirma equivalência entre domínios}: afirma que cada domínio realiza
+operações do catálogo com resíduo $0$, no seu próprio medidor. A ponte
+\emph{entre} domínios continua a construir-se elo a elo.
+\begin{center}\small
+\begin{tabular}{@{}lllll@{}}
+\toprule
+domínio & objeto no repo & leis realizadas & medidor (atestado) & estado \\
+\midrule
+álgebra & família metálica $A_m$ & 4, 7 (mult./inversão) &
+  \code{ponte\_universal\_metalica.js} & verde \\
+análise & transformada dourada; Parseval/Lebesgue & 8 (anel); central &
+  \code{cristal\_energia.js} & verde \\
+topologia & a topologia dos corpos: $d(r_1,r_2)=|\Delta_1-\Delta_2|$;
+  $d=0\iff$ isomorfos; transporte parabólico $\det 1$ & 1, 2 &
+  \code{tests/topologia.c} & verde \\
+geometria & o simplex é a \emph{sombra} da base do andar acima
+  (projeção dual e reversível); cone/espiral & 4, 5 &
+  \code{tests/sombra\_cone.c}; \code{cone\_espiral.c} & verde \\
+termodinâmica & Carnot pelo $\oint$, exato em $\mathbb{Q}$:
+  $\eta=1-T_f/T_q$ derivado; o irreversível \emph{cai} & 0, 4
+  (reverte ou paga) & \code{tests/carnot.c} & verde \\
+cosmologia & a expansão completa em p.u., inteira;
+  $\rho a^{3(1+w)}=C$; $w$ em órbitas de quatro; $w=-1$ ponto fixo &
+  2, 4 & \code{tests/cosmologia.c} & verde \\
+redes neurais & perceptron $=$ estaca ($W_P=-I$, Lei~1); rotor
+  $J^{2}=-I$ (Lei~2); Hopfield $=$ memória da volta;
+  $\lambda^{+}+\lambda^{-}=0$ & 1, 2, 3, 4 &
+  \code{tests/rede\_dual.js} $28$:$0$ & verde \\
+\quad$\hookrightarrow$ Clifford & $D^{2}=L$ (a assinatura necessária) &
+  --- & \code{dirac\_transicao.js} \S D6 & parcial \\
+\bottomrule
+\end{tabular}
+\end{center}
+\begin{observacao}[o estatuto da tabela]
+Cada linha verde foi \textbf{re-atestada} na data deste texto (os
+medidores C compilados e corridos; os js com \code{\#TOTAL} $0$
+falhas). «Verde» diz: \emph{o domínio realiza as leis citadas no seu
+medidor}. Não diz: «os domínios são a mesma coisa» --- essa afirmação
+continua a exigir a sua ponte (\S\ref{sec:extensoes}). A frase do
+sistema para a termodinâmica já estava escrita na Arquitetura:
+\emph{todo passo reverte, ou paga} --- e o \code{carnot.c} mede
+exatamente o pagar ($\oint dQ/T<0$ faz $\eta$ cair).
+\end{observacao}
+
+%======================================================================
 \section{Extensões nomeadas --- o mapa, sem teorema}\label{sec:extensoes}
 
 Cada nome abaixo \textbf{espera a sua ponte}; nenhum entra como teorema
