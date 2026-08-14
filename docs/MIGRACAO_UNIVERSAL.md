@@ -116,7 +116,16 @@ quebraram; ninguém viu porque o nativo deixou de compilar E o wasm não
 exporta a suíte §X (só compila/volta). Não é «o wasm é canónico e está
 verde» — o wasm está verde em OUTRAS suítes; §X9/§X16 estão por testar em
 qualquer lado desde 0aa6ace. Se a expectativa envelheceu com o desenho novo
-ou se o giro regrediu: **decisão do dono** (é a maquinaria da partitura). Os 4 medidores novos da sessão (residuos_totais,
+ou se o giro regrediu: **decisão do dono** (é a maquinaria da partitura).
+
+**RESOLVIDO (ordem do coordenador: «avança com a reversão da partitura»)**:
+o giro tinha regredido — o desvio `if(LADO_N) return esp_sobe_torre(...)`
+no `sobe_exp_m` trocava a soma COM SINAIS pela torre toda-positiva e a
+inversa morria. A reversão foi cirúrgica: o giro soma sempre com sinais
+(`esp_sobe`); o lado Gentil continua a entrar pelo PASSO (`esp_passo_nv`);
+para torres todas-positivas as duas somas coincidem, logo a indução T+T*
+nada perdeu. tex nativo 62:0; as dez suítes wasm todas verdes; bateria
+**421 — 420 verdes, 1 falha** (só o daemon fala.c). Os 4 medidores novos da sessão (residuos_totais,
 cristal_adversarial, cristal_front, equivalencia_universal) entraram na
 varredura ao serem citados no corpo_universal (416→420). Nota do harness:
 tools/*.js nunca entram na varredura (só tests|banco) — o

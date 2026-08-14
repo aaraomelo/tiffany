@@ -1012,10 +1012,14 @@ static long corpo_exp_m(long corpo_m, int e){
 static long sobe_exp_m(long corpo_m, int e){               /* a subida: o que a escala tirou */
     if(!e || e == 8 || e == -8 || e == -5) return 0;   /* matriz e nbsp: sem subida */
     if(e >= 16){
-        { extern int LADO_N;
-          if(LADO_N) return esp_sobe_torre(corpo_m, ESP_NV[e - 16]); /* Gentil: indução T+T* */
-        }
-        return esp_sobe(corpo_m, e);                     /* Hurwitz: espiral com sinais */
+        /* A REVERSÃO DA PARTITURA: o giro soma SEMPRE com sinais. O lado
+         * Gentil já entra pelo PASSO (esp_passo_nv, via LADO_N); trocar a
+         * soma pela torre toda-positiva esquecia os sinais e matava a
+         * inversa — o índice deixava de descer o que o expoente sobe (§X9)
+         * e o vão sup–sub colapsava (§X16). Para torres todas-positivas as
+         * duas somas coincidem, logo a indução T+T* (esp_sobe_torre) nada
+         * perde: ela é a régua dos medidores da torre, não do giro. */
+        return esp_sobe(corpo_m, e);                     /* espiral com sinais, inversa exata */
     }
     long d = corpo_m - corpo_exp_m(corpo_m, e);
     return e > 0 ? d : -d;

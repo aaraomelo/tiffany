@@ -375,7 +375,7 @@ tensor 22059d38a7653ff7 0
 termica 517ad21a05866f7e 0
 tesseracto ebf76569a555a633 0
 tesserato_espiral 55f89989bf04aa64 0
-tex 548ca752cb7fd27c 1
+tex 548ca752cb7fd27c 0
 tex_wasm 1bc71686aca7c02b 0
 texto 9faa357fc47031c3 0
 tikz 147f528e4e429a4e 0
