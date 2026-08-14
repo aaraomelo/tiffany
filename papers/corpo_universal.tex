@@ -1153,6 +1153,23 @@ teorema novo} $\Rightarrow$ \code{--refaz} total.
 \emph{Medido:} \code{tests/medicao\_normativa.js} ($6{:}0$).
 \end{observacao}
 
+\begin{observacao}[o avan\c{c}o do corpus --- os teoremas viram
+conceitos]\label{obs:avanco}
+Por ordem da mesa («vamos avan\c{c}ar com o corpus»), os oito
+resultados de 14/08 entraram no cristal como conceitos com
+\code{meta.fonte=tiffany} --- distintos do corpus recuperado do
+jornal, que continua \emph{intacto debaixo do avan\c{c}o}: a
+conserva\c{c}\~ao da curadoria \'e derivada, n\~ao pinada
+($(\mathrm{conceitos}-\mathrm{tiffany})+\mathrm{fus\~oes}=4286$), e a
+\^ancora da volta total ($E=38731623179$) fecha no recuperado. A
+ferramenta (\code{tools/cristal\_avanca.py}) recusa o id duplicado, o
+JSON n\~ao-can\'onico e o registo sem fonte declarada, e o
+\code{--desfaz} devolve o estado anterior byte a byte --- medido por
+dois caminhos. Este \'e o primeiro elo \emph{assinado explicitamente}
+pelo contrato $\mathcal{M}=(R,G,V)$ da Obs.~\ref{obs:medicao}.
+\emph{Medido:} \code{tests/cristal\_avanco.js} ($5{:}0$).
+\end{observacao}
+
 %======================================================================
 \section{Onde entram os milénios --- leituras, não base}\label{sec:milenio-universal}
 

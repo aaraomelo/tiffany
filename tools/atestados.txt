@@ -93,11 +93,12 @@ corpodecorpos e5cba0db271ea443 0
 cosmico ad551a25ab7b7917 0
 cosmologia ba6dd5df9be09b0a 0
 cristal_adversarial a5b592f03e349608 0
-cristal_curadoria 34098116ccd66dd9 0
+cristal_avanco ec50ac8976939fb6 0
+cristal_curadoria bfeee7520712d444 0
 cristal_energia e27839809729282c 0
 cristal_front cc86ec06a324230b 0
 cristal_modelo 9b6bb9fc9a03a96e 0
-cristal_volta 430b66d40777f3ff 0
+cristal_volta 5ac1be94a6c668cb 0
 cristalino 6988eca8676626b1 0
 cruza b5fd026db2e5f02a 0
 cruzamento 33bb8f715e706c30 0
@@ -149,7 +150,7 @@ encanamento 045b4f98e950e3c9 0
 enche a2861fc14a9fd7f9 0
 entre c9d4cbfc7a5a9307 0
 entropia_dual 9e1e8357b68c4eb5 0
-equivalencia_universal 424be18459dfa372 0
+equivalencia_universal 4f70e8b809338078 0
 erg 24fd5a4ae1cb1739 0
 escada 5b25d287f60365e5 0
 escala d6e3ee5a8e38e0cc 0

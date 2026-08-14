@@ -117,17 +117,23 @@ ok('§Q0 a assinatura σ_Peano instancia o 𝒰 genérico', typeof U.energia ===
  * seu contorno E_∂ = E(esqueleto) — o valor de hoje DERIVA-SE da âncora mais
  * os contornos lidos da própria fonte (muda a fonte, muda sozinho). */
 {
+  /* o corpus AVANÇOU (14/08 noite): a âncora é do corpus do JORNAL, e a
+   * equação vale no RECUPERADO (sem meta.fonte=tiffany); o cristal cheio
+   * fecha por DECOMPOSIÇÃO derivada: E(cheio) = E(recuperado) + E(nascidos) */
+  const nascidos = cristal.filter(l => (JSON.parse(l).meta || {}).fonte === 'tiffany')
+  const recuperado = cristal.filter(l => (JSON.parse(l).meta || {}).fonte !== 'tiffany')
   const eU = U.energia(cristal), eP = energiaP(cristal)
+  const eRec = U.energia(recuperado), eNasc = U.energia(nascidos)
   let eDeriva = 38731623179
-  for (const l of cristal) {
+  for (const l of recuperado) {
     const r = JSON.parse(l)
     if (r.fusao) {
       eDeriva += U.energia(['{"fusao":[,],"id":"' + r.id + '","tipo":"conceito"}'])
     }
   }
-  console.log(`E_U = ${eU} · E_P = ${eP} · âncora+contornos = ${eDeriva}`)
-  ok('§Q1 E_U = E_P sobre o cristal curado == âncora pré-curadoria + Σ contornos',
-    eU === eP && eU === eDeriva)
+  console.log(`E_U = ${eU} · E_P = ${eP} · recuperado = ${eRec} · âncora+contornos = ${eDeriva} · nascidos = ${eNasc}`)
+  ok('§Q1 E_U = E_P no cristal cheio; a âncora do jornal fecha no RECUPERADO; e o cheio decompõe: E = E_rec + E_nascidos',
+    eU === eP && eRec === eDeriva && eU === eRec + eNasc && eNasc > 0)
 }
 
 /* §Q2 — a escada sobre o banal */
@@ -177,10 +183,14 @@ ok('§Q0 a assinatura σ_Peano instancia o 𝒰 genérico', typeof U.energia ===
     while (e > 0) { if (e & 1) r = r * b % P; b = b * b % P; e >>= 1 }
     return r
   }
+  /* o digest com âncora é o do RECUPERADO (o valor 59436 é do corpus do
+   * jornal curado, cruzado com cristal_energia de 13/08); o cheio mede-se
+   * pelos dois caminhos na mesma passagem, sem pino — muda com o corpus */
+  const recuperado = cristal.filter(l => (JSON.parse(l).meta || {}).fonte !== 'tiffany')
   const A = new Array(256).fill(0)
   {
     let k = 0
-    for (const l of cristal) {
+    for (const l of recuperado) {
       const b = Buffer.from(l, 'utf8')
       for (let i = 0; i < b.length; i++) { A[k & 255] = (A[k & 255] + b[i]) % P; k++ }
     }
@@ -202,7 +212,7 @@ ok('§Q0 a assinatura σ_Peano instancia o 𝒰 genérico', typeof U.energia ===
   /* 59436 é o valor sobre o cristal CURADO, medido também por
    * tests/cristal_energia.js (1D, 2D e 4D) — âncora cruzada entre dois
    * programas; antes da curadoria era 37222 */
-  ok('§Q5 a energia espectral = 59436 pelos DOIS caminhos (Parseval, o valor da bateria)',
+  ok('§Q5 a energia espectral do RECUPERADO = 59436 pelos DOIS caminhos (a âncora do jornal, intacta debaixo do avanço)',
     LHS === RHS && LHS === 59436)
 }
 

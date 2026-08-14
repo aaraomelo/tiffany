@@ -9,9 +9,9 @@
  *
  * §K0  o livro da curadoria: cada «funde» tem o z na fonte com as partes
  *      ditas; cada «mantem» tem os dois lados vivos e distintos
- * §K1  a contagem fecha: conceitos + fusões == 4286 (o corpus recuperado)
+ * §K1  a contagem fecha: (conceitos − tiffany) + fusões == 4286 (o recuperado)
  * §K2  conservação POR FUSÃO: E(z) = E(x)+E(y)+E(esqueleto) — todas as 52
- * §K3  a volta total: desfazer todas devolve 4286 endereços únicos com
+ * §K3  a volta total (no recuperado): desfazer todas devolve 4286 com
  *      E == 38731623179 — a âncora atestada ANTES da curadoria
  * §K4  esgotamento: no corpus curado não resta NENHUM par de texto idêntico
  *      (a regra mecânica esgotou o estrato que a justifica)
@@ -84,8 +84,12 @@ console.log(`curadoria.tsv: ${fundeTsv.length} funde (${fundeTsv.filter(c => c[3
 
 /* §K1/§K2 — contagem e conservação */
 const fusoes = linhas.filter(l => JSON.parse(l).fusao)
-ok('§K1 a contagem fecha: conceitos + fusões == 4286 (e fusões == livro)',
-  linhas.length + fusoes.length === 4286 && fusoes.length === fundeTsv.length)
+/* o corpus AVANÇOU (14/08 noite): o que nasce na tiffany declara
+ * meta.fonte=tiffany e NÃO conta para o recuperado — a conservação da
+ * curadoria é sobre o corpus do jornal, derivada e não pinada */
+const nascidos = linhas.filter(l => (JSON.parse(l).meta || {}).fonte === 'tiffany').length
+ok('§K1 a contagem fecha: (conceitos − nascidos na tiffany) + fusões == 4286 (e fusões == livro)',
+  (linhas.length - nascidos) + fusoes.length === 4286 && fusoes.length === fundeTsv.length)
 {
   let conserva = fusoes.length > 0
   for (const lz of fusoes) {
@@ -114,12 +118,16 @@ function desfazTudo (ls) {
   return fora
 }
 {
-  const antes = desfazTudo(linhas)
+  /* a âncora é do corpus do JORNAL (pré-curadoria): com o avanço de
+   * 14/08 os nascidos na tiffany (meta.fonte=tiffany) ficam FORA da
+   * volta total — a conservação é do recuperado, e continua exata */
+  const recuperado = linhas.filter(l => (JSON.parse(l).meta || {}).fonte !== 'tiffany')
+  const antes = desfazTudo(recuperado)
   const ids = new Set(antes.map(l => { try { return JSON.parse(l).id } catch { return '?' } }))
   let eAntes = 0
   for (const l of antes) eAntes += E(l)
-  console.log(`volta total: ${antes.length} registos, ${ids.size} endereços, E=${eAntes}`)
-  ok('§K3 desfazer todas devolve 4286 endereços únicos com E == 38731623179 (a âncora)',
+  console.log(`volta total (recuperado): ${antes.length} registos, ${ids.size} endereços, E=${eAntes}`)
+  ok('§K3 desfazer todas devolve 4286 endereços únicos com E == 38731623179 (a âncora do jornal, intacta debaixo do avanço)',
     antes.length === 4286 && ids.size === 4286 && eAntes === 38731623179)
 }
 
