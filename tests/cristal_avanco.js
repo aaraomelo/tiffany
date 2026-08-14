@@ -39,14 +39,22 @@ function ok (q, cond) {
 
 const RAIZ = path.join(__dirname, '..')
 const CRISTAL = path.join(RAIZ, 'cristal', 'cristal.jsonl')
-const LOTE = path.join(RAIZ, 'cristal', 'avanco_2026-08-14.jsonl')
+/* o avanço virou FLUXO (lote b de 14/08): a contagem deriva de TODOS os
+ * lotes commitados — a curadoria vive nos ficheiros avanco_*.jsonl, e o
+ * pino de contagem morreu com ela (a conservação do recuperado continua
+ * pinada onde deve: na âncora do jornal, §A1) */
+const LOTES = fs.readdirSync(path.join(RAIZ, 'cristal'))
+  .filter(f => /^avanco_.*\.jsonl$/.test(f)).sort()
+  .map(f => path.join(RAIZ, 'cristal', f))
+const LOTE = LOTES[0]
 const CAMPOS = ['arestas', 'confianca', 'contraexemplos', 'descricao', 'epistemico',
   'exemplos', 'id', 'memoria', 'meta', 'origem', 'palavras_chave',
   'sinonimos', 'tipo', 'titulo'].join()
 
 const linhas = fs.readFileSync(CRISTAL, 'utf8').split('\n').filter(Boolean)
-const lote = fs.readFileSync(LOTE, 'utf8').split('\n').filter(Boolean)
+const lote = LOTES.flatMap(p => fs.readFileSync(p, 'utf8').split('\n').filter(Boolean))
 const idsLote = lote.map(l => JSON.parse(l).id)
+const ESPERADO = 4234 + lote.length          /* derivado dos lotes, não pinado */
 const U = Universal(sigmaPeano)
 
 /* §A0 — R: o invariante do estado */
@@ -54,7 +62,7 @@ let R = 0
 {
   const regs = linhas.map(l => JSON.parse(l))
   const ids = regs.map(r => r.id)
-  if (linhas.length !== 4242) R++
+  if (linhas.length !== ESPERADO) R++
   if (ids.join() !== [...ids].sort().join()) R++
   if (new Set(ids).size !== ids.length) R++
   const noCristal = new Set(ids)
@@ -70,7 +78,7 @@ let R = 0
     const c = U.contorno(l)
     if (!c.fecha || c.cruzou) R++
   }
-  console.log(`\n§A0  4242 linhas, ordem e unicidade, 8 do lote byte-idênticos, medidores citados existem, contorno fecha — R parcial: ${R}`)
+  console.log(`\n§A0  ${linhas.length} linhas (= 4234 + ${lote.length} dos lotes), ordem e unicidade, lote byte-idêntico, medidores citados existem, contorno fecha — R parcial: ${R}`)
   ok('§A0 o invariante do estado: contagem, ordem canónica, unicidade, esquema, canonicidade byte a byte, medidores reais e contorno fechado', R === 0)
 }
 
@@ -82,12 +90,13 @@ let R = 0
   const recuperado = (linhas.length - tiffany) + fusoes
   if (recuperado !== 4286) R++
   console.log(`\n§A1  tiffany: ${tiffany} · fusões: ${fusoes} · (conceitos − tiffany) + fusões = ${recuperado}`)
-  ok('§A1 o corpus recuperado continua intacto debaixo do avanço: (conceitos − tiffany) + fusões == 4286, derivado e não pinado', recuperado === 4286 && tiffany === 8)
+  ok('§A1 o corpus recuperado continua intacto debaixo do avanço: (conceitos − tiffany) + fusões == 4286, derivado e não pinado', recuperado === 4286 && tiffany === lote.length)
 }
 
 /* §A2 — G: os três contra-casos recusados */
 let G = false
 {
+  const antesLen = fs.readFileSync(CRISTAL, 'utf8').length
   const tmp = '/tmp/claude-1000/-home-aaraolopes-Documentos-tiffany/b6c6c5cb-b5ec-45f0-ac00-480c20a1bb2d/scratchpad'
   fs.mkdirSync(tmp, { recursive: true })
   const roda = lotePath => {
@@ -114,7 +123,7 @@ let G = false
   const r3 = roda(semFonte)
   G = r1 !== 0 && r2 !== 0 && r3 !== 0
   const hashDepois = fs.readFileSync(CRISTAL, 'utf8').length
-  console.log(`\n§A2  recusas (exit≠0): duplicado=${r1} não-canónico=${r2} sem-fonte=${r3} · cristal intocado: ${linhas.length === 4242 && hashDepois === fs.readFileSync(CRISTAL, 'utf8').length}`)
+  console.log(`\n§A2  recusas (exit≠0): duplicado=${r1} não-canónico=${r2} sem-fonte=${r3} · cristal intocado: ${hashDepois === antesLen}`)
   ok('§A2 o GUME: a ferramenta recusa o id duplicado, o JSON não-canónico e o registo sem fonte declarada — três recusas, e o cristal fica intocado', G)
 }
 
@@ -122,20 +131,21 @@ let G = false
 let V = 0
 {
   const antes = fs.readFileSync(CRISTAL, 'utf8')
-  /* caminho 1: --desfaz da ferramenta */
+  const loteUm = fs.readFileSync(LOTE, 'utf8').split('\n').filter(Boolean)
+  /* caminho 1: --desfaz da ferramenta (um lote de cada vez — o primeiro) */
   execFileSync('python3', [path.join(RAIZ, 'tools', 'cristal_avanca.py'), LOTE, '--desfaz'],
     { cwd: RAIZ, stdio: 'pipe' })
   const desfeito = fs.readFileSync(CRISTAL, 'utf8')
   /* caminho 2: remover as linhas do lote à mão */
-  const alvo = new Set(idsLote)
+  const alvo = new Set(loteUm.map(l => JSON.parse(l).id))
   const aMao = antes.split('\n').filter(l => l && !alvo.has(JSON.parse(l).id)).join('\n') + '\n'
   if (desfeito !== aMao) V++
-  if (desfeito.split('\n').filter(Boolean).length !== 4234) V++
+  if (desfeito.split('\n').filter(Boolean).length !== linhas.length - loteUm.length) V++
   /* e a re-ida devolve o estado com os 8, byte a byte */
   execFileSync('python3', [path.join(RAIZ, 'tools', 'cristal_avanca.py'), LOTE],
     { cwd: RAIZ, stdio: 'pipe' })
   if (fs.readFileSync(CRISTAL, 'utf8') !== antes) V++
-  console.log(`\n§A3  desfaz == remoção à mão: ${desfeito === aMao} · 4234 no desfeito · re-ida byte a byte — V: ${V}`)
+  console.log(`\n§A3  desfaz == remoção à mão: ${desfeito === aMao} · ${linhas.length - loteUm.length} no desfeito · re-ida byte a byte — V: ${V}`)
   ok('§A3 a VOLTA por dois caminhos: --desfaz == remoção à mão byte a byte, e a re-ida devolve o estado exato', V === 0)
 }
 

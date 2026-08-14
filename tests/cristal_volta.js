@@ -1,7 +1,7 @@
 /* tests/cristal_volta.js — a volta do cristal recuperado, medidor v2 (eval 13/08).
  *
  * Regra de ouro: não converter o corpus antes de conseguir reconstruí-lo.
- * A fonte é cristal/cristal.jsonl (4242 conceitos: 4286 recuperados do
+ * A fonte é cristal/cristal.jsonl (4234 + lotes: 4286 recuperados do
  * broca-so menos 52 fusões de curadoria — tools/cristal_cura.py; cada fusão
  * guarda as duas partes byte a byte, medidor tests/cristal_curadoria.js).
  * As projeções papers/cristal_*.tex carregam cada registo em %CRISTAL —
@@ -42,11 +42,15 @@ const PAPERS = path.join(RAIZ, 'papers')
 
 /* §V0 — a fonte */
 const fonteLinhas = fs.readFileSync(FONTE, 'utf8').split('\n').filter(l => l.length)
-/* o pino subiu a 4242 quando o corpus AVANÇOU (14/08 noite): os 8
- * teoremas do dia entraram com meta.fonte=tiffany — o recuperado
- * continua intacto debaixo ((c−t)+f == 4286, cristal_avanco §A1) */
-ok('§V0 fonte com 4242 conceitos (4286 − 52 fusões + 8 do avanço de 14/08)',
-  fonteLinhas.length === 4242)
+/* o pino MORREU quando o avanço virou fluxo (lote b, 14/08): a contagem
+ * deriva dos lotes commitados em cristal/avanco_*.jsonl — a curadoria
+ * vive neles, e o recuperado continua guardado pela âncora do jornal
+ * ((c−t)+f == 4286, cristal_avanco §A1) */
+const nascidos = fs.readdirSync(path.join(RAIZ, 'cristal'))
+  .filter(f => /^avanco_.*\.jsonl$/.test(f))
+  .reduce((n2, f) => n2 + fs.readFileSync(path.join(RAIZ, 'cristal', f), 'utf8').split('\n').filter(Boolean).length, 0)
+ok('§V0 fonte com 4234 + nascidos conceitos (a contagem deriva dos lotes de avanço)',
+  fonteLinhas.length === 4234 + nascidos)
 const fonteIds = new Set()
 let jsonOk = true
 for (const l of fonteLinhas) {
@@ -74,7 +78,7 @@ for (const f of texs) {
   seccoesTotal += seccoes
 }
 ok('§V2 secções == registos, ficheiro a ficheiro', casaOk)
-ok('§V2 total de secções == 4242 (o avanço de 14/08 nas projeções)', seccoesTotal === 4242)
+ok('§V2 total de secções == fonte (as projeções acompanham os lotes)', seccoesTotal === fonteLinhas.length)
 
 const idDe = (linha, i) => sigmaPeano.endereco(linha, i)
 
@@ -194,7 +198,7 @@ induz('endereço destruído (registo ilegível)', m => {
 
 console.log('')
 if (!falhas) {
-  console.log('  O cristal voltou: 4242 conceitos (52 fusões + 8 do avanço), fonte ==')
+  console.log(`  O cristal voltou: ${fonteLinhas.length} conceitos (52 fusões + os lotes), fonte ==`)
   console.log('  projeções, a indução acusa.')
   console.log('  LaTeX = projeção verificável; a fonte é cristal/cristal.jsonl.')
 }
