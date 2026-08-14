@@ -2035,6 +2035,62 @@ $\mathcal{M}$).
 $\square$
 \end{teorema}
 
+\begin{teorema}[o posto da curva de Viviani --- medido por descida
+completa]\label{thm:posto}
+O lado algébrico de BSD para a curva da casa fecha por cálculo finito
+inteiro. Com a $2$-torsão plena, a descida é exata: a \textbf{imagem
+da torsão} é o subgrupo de ordem $4$
+($(1,1),(15,15),(-15,-15),(-1,-1)$ --- as partes livres de quadrados
+das diferenças $e_{i}-e_{j}$); o \textbf{funil real} elimina os
+quadrantes de sinal misto ($128$ classes); a \textbf{varredura local
+completa} obstrui as $124$ restantes (ausência de solução primitiva
+mod $2^{6}/3^{3}/5^{3}$ nalguma das três cónicas
+$d_{1}z_{1}^{2}-d_{2}z_{2}^{2}=-60$, etc.) --- \emph{zero
+sobreviventes}, estável em profundidade maior. O veredito:
+$\mathrm{Sel}_{2}=(\mathbb{Z}/2)^{2}$, logo (chão: a injeção de
+$E(\mathbb{Q})/2E(\mathbb{Q})$ no Selmer) $2^{r}\le1$:
+\[
+\boxed{\;r=0,\qquad E(\mathbb{Q})=(\mathbb{Z}/2)^{2}\;}
+\]
+--- os quatro pontos de torsão e mais nada. O \textbf{gume nos dois
+sentidos}: a mesma maquinaria na curva congruente $n{=}6$ (posto $1$)
+deixa a classe do ponto $(-3,-1)$ \emph{sobreviver} --- onde há ponto
+a descida não mata; na nossa, mata tudo. \emph{BSD para esta curva
+reduz-se a uma afirmação analítica: $L(E,1)\ne0$ --- nomeada.}
+\emph{Medido:} \code{tests/posto\_viviani.js} ($7{:}0$; assinado por
+$\mathcal{M}$).
+$\square$
+\end{teorema}
+
+\begin{teorema}[o encaixotamento nos dois sentidos é o AGM --- e
+calcula o analítico]\label{thm:agm-analitico}
+A formalização pedida é uma descoberta de nome: \emph{o encaixotamento
+nos dois sentidos via Teorema Central é a média
+aritmético-geométrica} --- a classe aritmética desce por cima, a
+geométrica sobe por baixo, $g\le M\le a$ sempre (as duas classes,
+uma de cada lado, com o limite único pelo pombal do
+Teor.~\ref{thm:central-continuo} e colapso quadrático certificado).
+E o AGM \textbf{calcula o analítico}: com o $\pi$ da torre
+(Teor.~\ref{thm:metronomo-pi}) e $\mathrm{AGM}(8,\sqrt{60})$
+certificado em intervalos racionais, o período real da curva
+(chão: Gauss) fica medido:
+\[
+\Omega=\frac{2\pi}{\mathrm{AGM}(\sqrt{e_{1}-e_{3}},\sqrt{e_{1}-e_{2}})}
+\in(0{,}798121,\;0{,}798122).
+\]
+As somas de Dirichlet \emph{exatas} ($a_{n}$ por Hecke, racionais
+BigInt, sem os primos maus --- declarado) dão a evidência que o posto
+$0$ previa: $S_{300}<S_{700}<S_{1400}\approx0{,}8754$, positivas com
+incrementos a encolher; e \textbf{o analítico vê o posto}: a curva de
+posto $1$ ($n{=}6$, congruente --- chão: $L(E,1)=0$) fica mais de
+$4\times$ menor na mesma máquina. A certificação do limite $L(E,1)$
+fica declarada fora (a cauda não é absolutamente convergente): a
+fronteira analítica tem nome, e o resto está medido.
+\emph{Medido:} \code{tests/agm\_analitico.js} ($6{:}0$; assinado por
+$\mathcal{M}$).
+$\square$
+\end{teorema}
+
 %======================================================================
 \section{Extensões nomeadas --- o mapa, sem teorema}\label{sec:extensoes}
 

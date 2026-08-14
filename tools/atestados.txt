@@ -2,6 +2,7 @@ acesso 0a1c710c2b9252df 0
 acoplamento 7a48c242e20301a4 0
 agentes 4e6a08ca0eee820a 0
 agm 2c9e8cedfee7ccac 0
+agm_analitico 71272f7669b34069 0
 agm_analog 9464d727b662316a 0
 agm_deforma 99c411ca3dffac43 0
 agm_gerador 958387d0ec02fc04 0
@@ -329,6 +330,7 @@ poligonos 4a132f94a847e701 0
 ponte_universal_metalica 6bdedb0d4a48d0b8 0
 pontofixo 8970f01c1addedf1 0
 pontryagin 1859961af08854d9 0
+posto_viviani d6eeac3d7d845b41 0
 potencia cc93709e0a87f0db 0
 prensor e1992045bed94bb2 0
 primos_irracionais 1535759cdad94d4b 0
