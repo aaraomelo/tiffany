@@ -2095,6 +2095,12 @@ Teorema da Absorção & \textbf{teorema operacional} --- estresse $e=0$
   pelo endereço; $\sim n^{2}$ é a régua de posição, não o objecto \\
 Parseval multidimensão & \textbf{teorema} (leitura do central) --- fator
   $=\prod N_i$; verificação por energia \\
+Escada de observadores & \textbf{teorema operacional} --- $I_1\prec I_2\prec
+  I_3$; a estrita é orgânica ($4286/4286$) \\
+Teto pelas oito leis & \textbf{teorema operacional} --- $8$ momentos fecham
+  suporte $\le8$; $\Delta^{8}$ escapa; a cruz apanha \\
+Fusão/divisão & \textbf{teorema operacional} --- $\otimes$ multiplica $E$;
+  fibra devolve a divisão clássica; fusão de conceitos SEM objeto \\
 Batuta & canal do inversor (não é $I$) \\
 Pera & definição: base $=$ cone na batuta \\
 Conservatório & definição: estrutura superior conservada \\
@@ -2698,6 +2704,167 @@ do anel ($\mathbb{Z}_{65537}$, inteira, com a raiz errada a quebrar) ---
 não se reivindica aqui prova nova do Parseval clássico: reivindica-se a
 \textbf{leitura} dele como caso do teorema central, e a verificação
 \textbf{por energia} que ela habilita.
+\end{observacao}
+
+\section{O observador --- a escada, o isomorfismo-dual e as fibras}\label{sec:observador}
+
+\begin{definicao}[observador e a escada]\label{def:observador}
+Um \textbf{observador} é um vector de invariantes
+$I(x)$ lido sobre um corpo endereçado; cada observador define a
+equivalência $x\sim_{I}y\iff I(x)=I(y)$. A \textbf{escada} é a
+hierarquia estrita
+\[
+\boxed{
+I_1=(E)\;\prec\;I_2=(E,\Phi)\;\prec\;I_3=(E,\Phi,\Phi_2)\;\prec\;\cdots
+\;\prec\;I_\infty=\text{o espectro completo},
+}
+\]
+com $\Phi_m=\sum_i (i{+}1)^m b_i$ (os momentos --- a fase $\Phi=\Phi_1$,
+a curvatura $\Phi_2$) e o refinamento
+$x\sim_{I_{k+1}}y\Rightarrow x\sim_{I_k}y$.
+\[
+\boxed{
+\text{cada observador define uma resolução de identidade;}
+\quad
+\text{aumentar o observador refina as classes.}
+}
+\]
+\end{definicao}
+
+\begin{teorema}[a escada é estrita --- e a estrita é orgânica]\label{thm:escada}
+Cada degrau da escada tem cegueira construtível, e ela vive nos dados
+reais:
+\begin{enumerate}
+\item \textbf{$I_1$ não basta} (Teorema~\ref{thm:absorcao} e a caçada):
+existem corpos distintos com a mesma energia.
+\item \textbf{$I_2$ não basta}: a \emph{dupla transposição espelhada}
+--- trocar «ab»$\to$«ba» num sítio e «ba»$\to$«ab» noutro, à mesma
+distância interna $d$ --- conserva o multiconjunto ($E$) e cancela a
+fase: $\Delta\Phi=d(a{-}b)+d(b{-}a)=0$. \textbf{Todos os $4286$
+registos do cristal admitem esta colisão em dados orgânicos} (o par
+espelhado é ubíquo no texto), e $11$ de $20$ respostas do corpus banal
+também.
+\item \textbf{$\Phi_2$ resgata a família}:
+$\Delta\Phi_2=d(b{-}a)\bigl((i'{+}j')-(i{+}j)\bigr)$ só zera com os
+centros coincidentes --- separou as $4286$ e as $11$, todas.
+\item \textbf{A divisão de trabalho, medida}: os $190$ pares
+\emph{naturalmente} distintos do corpus banal separam-se todos já em
+$I_1$ --- o degrau grosso resolve o mundo natural; o degrau fino
+resolve o adversário.
+\end{enumerate}
+\[
+\boxed{\text{conservar a norma não conserva a identidade.}}
+\]
+\emph{Prova (operacional, medida).} \code{tests/assinatura\_colisoes.js}
+($4286/4286$; $\Phi_2$ separa $4286/4286$; $30\,000$ cadeias sem colisão
+de $I_3$ --- orçamento dito); \code{tests/assinatura\_banal.js}
+(a escada no orgânico: $190$ em $I_1$, $0$ em $I_2$/$I_3$, $0$ por
+separar; $11$ espelhados só em $\Phi_2$). $\square$
+\end{teorema}
+
+\begin{teorema}[o teto do observador pelas oito leis]\label{thm:teto-oito}
+Sejam $\Phi_0,\ldots,\Phi_7$ os \textbf{oito} momentos --- um por lei do
+catálogo --- lidos no anel ($\mathbb{Z}_{65537}$). Então:
+\begin{enumerate}
+\item \textbf{Fecho em $8$}: se os oito momentos coincidem, não existe
+diferença de suporte $\le8$ --- a matriz de Vandermonde das posições
+tem $\det=\prod_{i<j}(x_i-x_j)$, e posições distintas menores que $p$
+nunca o anulam no anel.
+\item \textbf{E falha em $9$}: o padrão $\Delta^{8}$ (os binomiais
+alternados $\binom{8}{k}(-1)^k$, suporte $9$) anula os oito momentos
+--- escapa ao observador linear. A \textbf{energia} (quadrática)
+apanha-o no caso genérico: a cruz outra vez --- o linear ordena, o
+quadrático mede, e nenhum sozinho é o par.
+\item \textbf{A torre continua}: acima do suporte $8$ sobe-se de andar
+--- cada dobra dá momentos novos. O teto é do \emph{relógio} do
+observador, não do objecto --- o mesmo gesto do relógio de Hurwitz
+(Prop.~\ref{prop:sem-teto}: analogia de forma, não identidade).
+\end{enumerate}
+\emph{Prova (operacional, medida).} \code{tests/observador\_torre.js}:
+Vandermonde sem zero em $200$ conjuntos de $8$ posições da torre;
+$\Delta^{8}$ com os oito momentos \textbf{todos} iguais e
+$\Delta E=12\,870\neq0$. $\square$
+\end{teorema}
+
+\begin{definicao}[isomorfismo-dual ordenado]\label{def:iso-dual}
+Um mapa $f\colon X\to Y$ é \textbf{isomorfismo-dual ordenado} quando
+preserva \emph{simultaneamente} o fecho do observador e a ordem:
+\[
+\boxed{
+I(f(x))=I(x)
+\qquad\land\qquad
+x\prec_X y\iff f(x)\prec_Y f(y).
+}
+\]
+A escada $(\Phi,\Phi_2,\ldots)$ é o \textbf{observador da ordem} ---
+mede-a; não é a definição dela. A permutação admissível é a testemunha:
+muda a posição física, preserva $I$ e a ordem própria (derivada do
+endereço).
+\end{definicao}
+
+\begin{teorema}[as duas fusões --- e a fusão é multiplicação]\label{thm:fusao-mult}
+A torre tem \textbf{duas} fusões, e cada uma conserva à sua maneira:
+\begin{enumerate}
+\item \textbf{Fusão aditiva} $\oplus$ (a dobra/clone --- Lei~4,
+$T+T^{*}$): a energia \textbf{soma}, $E(u\oplus u)=2E(u)$, e a
+retração $\pi$ devolve o original byte a byte.
+\item \textbf{Fusão multiplicativa} $\otimes$ (corpos independentes):
+a energia \textbf{multiplica},
+\[
+\boxed{E(u\otimes v)=E(u)\cdot E(v)}
+\quad\text{exato em inteiros}
+\]
+--- a conservação multiplicativa da norma, $N(xy)=N(x)N(y)$: o
+\textbf{cristal de Hurwitz}. $\Phi_0$ multiplica no anel. No viveiro a
+mesma lei já estava escrita:
+$\operatorname{lcm}\cdot\operatorname{gcd}=ab$.
+\end{enumerate}
+\[
+\boxed{
+\oplus\ \text{soma}\quad\longleftrightarrow\quad\otimes\ \text{multiplica}
+\qquad\text{--- o par aditivo/multiplicativo da torre.}
+}
+\]
+\emph{Prova (operacional, medida).} \code{tests/observador\_torre.js}
+\S T3, \S T5: $50$ pares reais do cristal, igualdade exata; clone e
+retração exatos. $\square$
+\end{teorema}
+
+\begin{teorema}[divisão $=$ fibra --- e a clássica emerge]\label{thm:divisao-fibra}
+A \textbf{divisão} não se postula como aritmética: é a \textbf{fibra
+inversa} da fusão,
+\[
+\boxed{
+F^{-1}(z)=\{(x,y):F(x,y)=z\},
+\qquad
+I(z)=I(F(x,y))\ \text{(conservação)}.
+}
+\]
+No caso multiplicativo, dado $z=u\otimes v$ e um dos fatores, a fibra
+resolve-se componente a componente:
+\[
+\boxed{x_i=z_{ij}/v_j}
+\quad\text{--- divisão \textbf{inteira} exata, consistente por todos os
+$j$ (oito caminhos que concordam), devolvendo $u$ byte a byte;}
+\]
+e a energia divide: $E(u)=E(z)/E(v)$ exato.
+\[
+\boxed{\text{a divisão clássica emerge da fibra --- medida, não postulada.}}
+\]
+\emph{Prova (operacional, medida).} \code{tests/observador\_torre.js}
+\S T4: $50$ casos reais, recuperação exata, oito caminhos concordantes,
+energia a dividir sem resto. $\square$
+\end{teorema}
+
+\begin{observacao}[estatuto e quarentena]
+Tudo aqui é operacional e medido; sem lei nova --- Lei~4 (a dobra),
+Lei~7/Hurwitz (a conservação multiplicativa), o catálogo dos oito (o
+teto). A \textbf{fusão de conceitos} do cristal (dois conceitos $\to$
+um) continua \emph{sem objeto no banco}: a definição pela fibra está
+pronta e espera o primeiro caso real --- sem objeto, não há física.
+O clone responde-se pela métrica $x\sim_{\mathcal O}y$: $I$ identifica
+o corpo; o endereço conta a carga (o um e o dois); a admissão é do
+Controle.
 \end{observacao}
 
 \section{Leitura complexa --- pares, polar, modelo de teste}\label{sec:pares-complexos}
@@ -3679,6 +3846,11 @@ absorção \S\ref{sec:absorcao}, Teorema~\ref{thm:absorcao}:
 energia \S\ref{sec:energia}, Teorema~\ref{thm:parseval-multi}:
 \code{tests/cristal\_energia.js} (Parseval dourado 1D/2D/4D no anel;
 verificação por energia);
+observador \S\ref{sec:observador}, Teoremas~\ref{thm:escada},
+\ref{thm:teto-oito}, \ref{thm:fusao-mult}, \ref{thm:divisao-fibra}:
+\code{tests/assinatura\_banal.js}, \code{tests/assinatura\_colisoes.js},
+\code{tests/observador\_torre.js} (a escada; o teto das oito; fusão
+$\otimes$/$\oplus$; divisão pela fibra);
 Teorema Central na torre: Prop.~\ref{thm:central-peano},
 \ref{prop:central-operacional};
 música / canal: Prop.~\ref{prop:rede-no-canal},
