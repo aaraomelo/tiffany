@@ -691,6 +691,106 @@ indefinida, e chamar-lhe círculo seria trazer a régua errada.
 \end{observacao}
 
 %======================================================================
+\section{A dinâmica e o seu espectro --- a zeta operacional como
+primitiva derivada}\label{sec:zeta-dinamica}
+
+A ordem da mesa (14/08): a zeta \textbf{não se importa; deriva-se}. A
+cadeia inteira, cada elo já medido:
+\[
+\text{8 Leis}
+\to
+\text{Corpo Universal}
+\to
+\text{operadores}
+\to
+\text{Metrónomo}{+}\text{Maestro}
+\to
+\text{toro/histerese/monodromia}
+\to
+\text{órbitas e períodos}
+\to
+\boxed{\zeta_{T}}
+\to
+\text{leituras.}
+\]
+
+\begin{teorema}[a zeta dinâmica é derivada, e fecha em inteiros]\label{thm:zeta-dinamica}
+Seja $T$ a batuta ($A_{m}$) a agir no toro discreto $(\mathbb{Z}/q)^{2}$,
+$q=257=2^{8}{+}1$ (o irmão de $8$ bits do anel da casa). O \textbf{censo
+completo} das órbitas (os $66\,049$ pontos, nenhum amostrado) dá os
+períodos primitivos $N_{d}$ e define
+\[
+\boxed{\;\zeta_{T}(u)\;=\;\prod_{d}\bigl(1-u^{d}\bigr)^{-N_{d}}\;}
+\]
+--- uma função \emph{gerada pelo operador}. Ela valida-se por
+\textbf{dois caminhos inteiros}: $\sum_{d\mid k}d\,N_{d}=F_{k}$ (o censo
+contra o núcleo $\#\ker(A^{k}{-}I)$, sem exceção até $\mathrm{ord}(A)$)
+e, na série, $n\,z_{n}=\sum_{j}F_{j}z_{n-j}$ contra a expansão do
+produto --- com a divisibilidade por $n$ a fechar em todo termo (podia
+falhar; fecha). A \textbf{histerese filtra}: $T^{d}x=x$ implica
+$R_{\rm total}=(0,0,0,0,0)$ (RETAIN) em toda classe de período, e a
+caminhada truncada acusa (REOPEN) --- $\mathcal{O}_{\rm admissível}$ é
+medido, não declarado. A \textbf{massa fica no centro}: $N_{1}=1$, a
+única órbita de período $1$ é a origem. E o censo trouxe a
+\textbf{dualidade inerte/separado à vista}: $m=1$ (folhas inertes) dá
+períodos $\{1,516\}$ com $128$ órbitas; $m=2,3$ (folhas separadas) dá
+$\{1,128\}$ com $516$ órbitas --- os dois números \emph{trocam de
+papel} ($516=2(q{+}1)$, $128\mid q{-}1$), e
+$516\cdot128=q^{2}-1$ nos dois lados. No anel grande ($65537$) o
+espectro tem \textbf{gap}: $F_{k}=1$ até $k=64$ e o primeiro período é
+o da folha ($A_{2}^{8192}=I$ exato) --- a órbita fecha onde o toro
+auditado disse.
+\emph{Medido:} \code{tests/zeta\_universal.js} ($10{:}0$);
+\code{tests/toro\_histerese.js} ($16{:}0$). $\square$
+\end{teorema}
+
+\begin{observacao}[a transformação espectral fica em aberto, e concreta]
+O que existe é a zeta \emph{do operador}, $\zeta_{T}(u)$. A ligação a
+qualquer função clássica em $s$ exigiria uma transformação espectral
+explícita $u=\mathcal{F}(s)$ que a produza --- e essa transformação
+\textbf{não foi medida}. A pergunta deixou de ser metafórica e passou a
+ser concreta; o nome clássico só entra se a medida o trouxer.
+\end{observacao}
+
+%======================================================================
+\section{Onde entram os milénios --- leituras, não base}\label{sec:milenio-universal}
+
+Como no \emph{Corpo de Peano} (\S milénio-leitura de lá, que fica como
+entrada concreta da instância): os problemas do milénio \textbf{não
+fundam} este corpo. A cadeia é
+\[
+\text{leis}\to\text{corpo}\to\text{operadores}\to\text{dinâmica}
+\to\text{realizações}\to\text{leitura dos milénios},
+\]
+nunca o inverso. Cada milénio é uma \emph{interpretação} da lei
+correspondente --- a verdade da linha é a da lei, ainda que o prémio
+não existisse:
+
+\begin{center}\small
+\begin{tabular}{@{}clll@{}}
+lei & operador (base) & milénio (leitura) & chão clássico \\
+\hline
+$0$ & $(+1)\oplus(-1)$; $0^{\dagger}=\infty$ & --- (dois nulos) & divisão do zero \\
+$1$ & $\nu\circ\nu=\mathrm{id}$ & Poincaré & dualidade $H^{k}\!\leftrightarrow\!H_{n-k}$ \\
+$2$ & $K^{**}=K$; rotor & Yang--Mills; $P$ vs $NP$ & parada / estatuto \\
+$3$ & trial $\{-1,0,+1\}$ & Riemann ($-1$); BSD ($+1$); Hodge ($0$) & Kronecker; Dirichlet; Lefschetz \\
+$4$ & $T+T^{*}$, $|\det|=1$ & Navier--Stokes & Liouville (metade conservativa) \\
+$5$ & $x^{2}=-1$ (bit $i$) & --- (sem milénio próprio) & $\mathbb{Z}[i]$ \\
+$6$ & $\oplus=\otimes$ (interface) & --- (costura) & $\operatorname{lcm}(2,3)=6$ \\
+$7$ & $\mathbb{H}\times\mathbb{H}^{*}$ & --- (topo / norma) & Hurwitz \\
+\end{tabular}
+\end{center}
+
+\noindent A novidade desta ronda é o \textbf{degrau operacional} da
+linha da Lei~3: entre o trial e a leitura Riemann existe agora um
+gerador vivo e medido --- a batuta, as órbitas, os períodos e
+$\zeta_{T}$ (Teorema~\ref{thm:zeta-dinamica}). \emph{A leitura continua
+leitura}: o que está medido é a zeta dinâmica do Corpo Universal; a
+ponte para o enunciado clássico é a transformação espectral em aberto.
+As demais linhas mantêm no Universal o estatuto que têm no Peano:
+leituras sobre teorema provado, nunca alicerce.
+
+%======================================================================
 \section{Os papéis --- a nomenclatura com cidadania}\label{sec:papeis}
 
 Os nomes deixaram de ser abstratos: cada um é o papel funcional que um
