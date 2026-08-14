@@ -93,6 +93,7 @@ python3 -c "open('/tmp/bat.pgm','ab').write(bytes(((x*7+y*13)%256) for y in rang
 args() { case "$1" in
   neuronio|neuronio_analog) echo "../teoria.tex" ;;
   banco|sql)                echo "teste" ;;
+  fala)                     echo "-teste" ;;
   linear|venom)             echo "/tmp/bat.pgm" ;;
   ancora)                   echo "pares.tsv 20000" ;;
   homogeneo|embedding)      echo "pares.tsv" ;;

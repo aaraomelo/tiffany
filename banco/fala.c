@@ -235,12 +235,97 @@ static int cliente(const char *assinatura, const char *fala){
     return 0;
 }
 
+/* -teste: a VOLTA do protocolo, offline e auto-terminante — o daemon não é
+ * medidor, mas o seu protocolo é: empacota∘desempacota = id, o bump é a
+ * involução (J: ida = volta), e a mutação de um byte acusa. É este modo que
+ * a bateria corre (tools/bateria.sh args: fala → -teste). */
+static int auto_teste(void){
+    int falhas = 0, feitas = 0;
+    unsigned char banda[32];
+    fala_banda_de_assinatura("assinatura-de-teste", banda);
+#define OKT(q, cond) do{ feitas++; int c_ = (cond); if(!c_) falhas++; \
+    printf("#UNIT %s %s\n", c_ ? "ok" : "falha", q); }while(0)
+
+    /* §A1 — empacota → desempacota = id, nas quatro ops (HELLO em claro) */
+    {
+        const unsigned char ops[4] = { FALA_HELLO, FALA_FALA, FALA_APRENDE, FALA_RESPOSTA };
+        const char *txt = "a fala é a interface — não há API de grafo";
+        int todos = 1;
+        for(int i = 0; i < 4; i++){
+            unsigned char frame[FALA_HDR + FALA_MAX];
+            char volta[FALA_MAX + 1];
+            unsigned char op = 0; unsigned seq = 0; size_t nout = 0;
+            int m = fala_empacota(frame, sizeof frame, ops[i], 7u + (unsigned)i,
+                                  banda, txt, strlen(txt));
+            if(m < 0){ todos = 0; continue; }
+            int r = fala_desempacota(frame, (size_t)m, &op, &seq, banda,
+                                     volta, sizeof volta, &nout);
+            if(r < 0 || op != ops[i] || seq != 7u + (unsigned)i ||
+               nout != strlen(txt) || memcmp(volta, txt, nout) != 0) todos = 0;
+        }
+        OKT("§A1 empacota∘desempacota = id nas 4 ops (HELLO claro; resto em bump)", todos);
+    }
+
+    /* §A2 — o bump é involução: dois bumps devolvem o claro (J, ida = volta) */
+    {
+        unsigned char ks[FALA_MAX];
+        keystream(banda, ks, 64);
+        unsigned char claro[64], uma[64], duas[64];
+        for(int i = 0; i < 64; i++) claro[i] = (unsigned char)(i * 7 + 1);
+        bump(claro, ks, uma, 64);
+        bump(uma, ks, duas, 64);
+        OKT("§A2 bump∘bump = id — a involução do keystream (Lei 1 no canal)",
+            memcmp(claro, duas, 64) == 0 && memcmp(claro, uma, 64) != 0);
+    }
+
+    /* §A3 — a mutação acusa: magic ferido recusa; corpo ferido difere */
+    {
+        unsigned char frame[FALA_HDR + FALA_MAX];
+        char volta[FALA_MAX + 1];
+        unsigned char op = 0; unsigned seq = 0; size_t nout = 0;
+        const char *txt = "o corpo em trânsito";
+        int m = fala_empacota(frame, sizeof frame, FALA_FALA, 9u, banda,
+                              txt, strlen(txt));
+        frame[0] ^= 1;   /* fere o magic */
+        int r1 = fala_desempacota(frame, (size_t)m, &op, &seq, banda,
+                                  volta, sizeof volta, &nout);
+        frame[0] ^= 1;   /* repara; fere o corpo */
+        frame[FALA_HDR] ^= 1;
+        int r2 = fala_desempacota(frame, (size_t)m, &op, &seq, banda,
+                                  volta, sizeof volta, &nout);
+        OKT("§A3 mutação: magic ferido recusa (-2); corpo ferido difere do claro",
+            r1 == -2 && r2 == 0 && memcmp(volta, txt, strlen(txt)) != 0);
+    }
+
+    /* §A4 — bandas distintas não se leem: o bump da banda errada dá lixo */
+    {
+        unsigned char outra[32];
+        fala_banda_de_assinatura("outra-assinatura", outra);
+        unsigned char frame[FALA_HDR + FALA_MAX];
+        char volta[FALA_MAX + 1];
+        unsigned char op = 0; unsigned seq = 0; size_t nout = 0;
+        const char *txt = "cada cliente na sua banda";
+        int m = fala_empacota(frame, sizeof frame, FALA_FALA, 11u, banda,
+                              txt, strlen(txt));
+        fala_desempacota(frame, (size_t)m, &op, &seq, outra,
+                         volta, sizeof volta, &nout);
+        OKT("§A4 a banda errada não lê: o texto não volta (isolamento por sha256)",
+            nout == strlen(txt) && memcmp(volta, txt, nout) != 0);
+    }
+
+    printf("\nunidades: %d   falhas: %d\n", feitas, falhas);
+    return falhas ? 1 : 0;
+#undef OKT
+}
+
 int main(int argc, char **argv){
     const char *env;
     if((env = getenv("FALA_RAIZ"))) RAIZ = env;
     if((env = getenv("CONVERSA"))) CONVERSA_BIN = env;
     if((env = getenv("FALA_HOST"))) snprintf(HOST, sizeof HOST, "%s", env);
     if((env = getenv("FALA_PORT"))) PORT = atoi(env);
+
+    if(argc >= 2 && !strcmp(argv[1], "-teste")) return auto_teste();
 
     if(argc >= 2 && !strcmp(argv[1], "cliente")){
         if(argc < 4){

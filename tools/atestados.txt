@@ -170,7 +170,7 @@ estrela_pontofixo 28214a4f49ddadcb 0
 estrela_unifica 5e2f9d7b477e452a 0
 evolutivo 0d23ff55520f5c59 0
 expressao 92d06c014898a2ea 0
-fala b82e36c3f659430f 124
+fala 710144c0e4bd433c 0
 familia_real 63bd209ecb10c32e 0
 fase_regua 7fea0714af2577e9 0
 fatia 2110e02e5b085682 0
