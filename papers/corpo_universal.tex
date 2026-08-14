@@ -825,6 +825,46 @@ $\varepsilon$--$\delta$.
 \emph{Medido:} \code{tests/lebesgue\_toro.js} ($7{:}0$).
 \end{observacao}
 
+\begin{teorema}[a renormalização do espectro --- multiespectral,
+autossimilar, com núcleo invariável]\label{thm:renormalizacao}
+A lei de transição entre escalas não se inventa: \textbf{é a dobra}
+(a mesma do Maestro, e a dobra temporal $x\mapsto x^{2}$ da membrana).
+Subamostrar a órbita por $2$ eleva as folhas ao quadrado, e o corpo
+renormaliza pela lei inteira dos traços
+\[
+\boxed{\;t_{j+1}=t_{j}^{2}-2d_{j},\qquad d_{j+1}=d_{j}^{2}\;}
+\]
+--- validada por dois caminhos (recorrência contra traço/det de
+$A^{2^{j}}$ por quadraturas, global em inteiros exatos e reduzindo
+exato ao anel). O que a medida dá, na órbita real:
+\begin{enumerate}
+\item \textbf{Autossimilar}: todo nível da cascata satisfaz a
+\emph{mesma forma} $y_{n+1}=t_{j}y_{n}-d_{j}y_{n-1}$ (os $14$ níveis,
+mod $p$), e o ângulo da risca segue o \textbf{mapa de duplicação}
+$\theta\mapsto2\theta$ (a risca do nível $j$ está em $k_{0}\bmod
+N_{j}$; razão de escala $\rho=2$ exata, controlos nulos).
+\item \textbf{Multiespectral}: a cascata tem $13$ níveis em $65537$,
+$7$ em $257$, $4$ em $17$ --- a escada de Fermat aprofunda a mesma
+cascata; cada nível tem o seu par de riscas.
+\item \textbf{Ponto fixo de renormalização}: $R(t)=t^{2}-2$ tem
+$R(2)=2$; a cascata atinge-o e \emph{fica} --- $R(S_{*})=S_{*}$.
+\item \textbf{O fundo da cascata é o catálogo}: as três últimas dobras
+são, em \emph{todos} os andares de Fermat, $t=0$ (o rotor --- o bit
+$i$, ordem $4$, Lei~5), $t=-2$ (o espelho, ordem $2$) e $t=+2$ (a
+unidade, Lei~0) --- a cauda $(0,-2,+2)$ é universal.
+\end{enumerate}
+\textbf{O núcleo espectral invariável} --- o que sobrevive a todas as
+dobras em todos os andares --- é o catálogo mínimo, Lei~5
+$\to$ Lei~0: este é o candidato \emph{técnico} ao nome que o
+coordenador propôs para o gerador comum. Estatuto dos nomes:
+\emph{fractal clássico não se afirma} (não há métrica de Hausdorff em
+jogo); o que está medido é a \textbf{autossimilaridade espectral
+discreta com ponto fixo de renormalização} --- a fractalidade
+\emph{operacional}.
+\emph{Medido:} \code{tests/metronomo\_autossimilar.js} ($12{:}0$).
+$\square$
+\end{teorema}
+
 %======================================================================
 \section{Onde entram os milénios --- leituras, não base}\label{sec:milenio-universal}
 
