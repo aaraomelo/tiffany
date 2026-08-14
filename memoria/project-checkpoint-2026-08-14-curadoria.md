@@ -5,7 +5,7 @@ metadata:
   node_type: memory
   type: project
   originSessionId: b6c6c5cb-b5ec-45f0-ac00-480c20a1bb2d
-  modified: 2026-08-14T08:22:24.662Z
+  modified: 2026-08-14T08:32:37.875Z
 ---
 
 **14/08 — A CURADORIA RESOLVIDA, 36c1fa5 (pushado).** Ordem do dono: «resolve a curadoria». Forma: **camada de transações declaradas**, lidas antes de decidir.
@@ -53,5 +53,13 @@ metadata:
 - Lebesgue: **layer-cake inteiro** — Σx_n (ticks) == Σ_v #{x_n≥v} (níveis) EXATO em cada andar («a lei não espera o limite»); a medida normalizada AFINA: D/N = 2,0→0,625→0,0908 estritamente decrescente (produto cruzado, zero doubles; controlo constante D=(B−1)N acusa).
 - Gentil: a soma reversível discreta Σx + Σ#{x<v} = N·q exata (o ∫f+∫f⁻¹=bf(b) da casa, cada par (n,v) contado uma vez).
 - **Divisão de trabalho medida**: a imagem uniformiza (Lebesgue), o espectro fica ATÓMICO (2 riscas nas folhas em todo andar — Hurwitz), a massa no centro (Gentil). «Metade para cada lado». Tríade = três representações da MESMA conservação; sem fundir nomes. Prosa: obs:triade-central no corpo_universal. Bateria **431:431**.
+
+**Noite 6 — A RENORMALIZAÇÃO DO ESPECTRO, 5bd6b9f.** Coordenador: «mostrar que o espectro é fractal, é de facto um coração, multiespectral e autossimilar»; a mesa converteu em protocolo de RENORMALIZAÇÃO (gerente: «o fractal não está na fotografia — está na transformação entre andares»; diretor: coração = núcleo espectral invariável ∩Spec, fractal só com ponto fixo). `tests/metronomo_autossimilar.js` **12:0**:
+- **A lei de transição É A DOBRA** (a do Maestro/Dirac x↦x²): subamostrar por 2 eleva as folhas ao quadrado; traços obedecem **t_{j+1}=t_j²−2d_j, d_{j+1}=d_j²** — dois caminhos (recorrência vs quadraturas de A^{2^j}, BigInt global + redução exata ao anel: 1331714→20974).
+- **Autossimilar**: todos os 14 níveis satisfazem a MESMA forma y₂=t_j·y₁−d_j·y₀; o ângulo da risca segue o **mapa de duplicação θ↦2θ** (risca do nível j em k₀ mod N_j; ρ=2 exato, controlos nulos).
+- **Multiespectral**: profundidades 13/7/4 na escada de Fermat (65537/257/17) — a mesma cascata, mais funda.
+- **Ponto fixo**: R(t)=t²−2, R(2)=2, atingido em j=13 e FICA. Gume: R(0)=−2, R(−2)=2 (a cauda anda).
+- **O ACHADO**: o fundo da cascata é O CATÁLOGO — cauda universal (0,−2,+2) nos três andares: **bit i (ordem 4, Lei 5) → espelho (ordem 2) → unidade (Lei 0)**. O núcleo espectral invariável = catálogo mínimo Lei 5→Lei 0 — o candidato TÉCNICO a «coração».
+- Estatuto dos nomes: fractal clássico NÃO se afirma (sem Hausdorff); medido = «autossimilaridade espectral discreta com ponto fixo de renormalização» (fractalidade operacional). Prosa: thm:renormalizacao no corpo_universal. Bateria **432:432**.
 
 Relacionado: [[checkpoint-2026-08-13-cristal]], [[feedback-a-referencia-escrita-a-mao]], [[feedback-dois-caminhos]], [[feedback-a-base-ja-existe]], [[feedback-normalizar-nao-e-medir]].
