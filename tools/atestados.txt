@@ -235,6 +235,7 @@ logico afd540f8d888135d 0
 logico_continuo 0cb6224c6d89cb4e 0
 luz_periodo bbe03b56937b8167 0
 lyapunov_refletido 1e9f698b6ae0aab6 0
+lyapunov_torre 6d18b7610f966dc9 0
 maisum 06d588623bce168e 0
 matricial e708671d4f3558dc 0
 maxcut ef83dcb45caec2fe 0

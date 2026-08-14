@@ -1,4 +1,4 @@
-/* tools/lyapunov_measure.js — o estresse da indução, medido pela torre (eval 13/08).
+/* tests/lyapunov_torre.js — o estresse da indução, medido pela torre (eval 13/08).
  *
  * A ordem do coordenador: «o estresse da mutação deve ser minimizado,
  * inexistente se possível, para isso deve ser usado Lyapunov dual; se preciso
@@ -18,7 +18,7 @@
  * TCL: além de k=1, soma de m=8 induções independentes.
  * Determinístico: LCG inteiro (o mesmo passo do control.c), sem Math.random.
  *
- *   node tools/lyapunov_measure.js
+ *   node tests/lyapunov_torre.js
  */
 'use strict'
 const fs = require('fs')

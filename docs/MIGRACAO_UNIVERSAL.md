@@ -108,9 +108,15 @@ Bateria oficial (`tools/bateria.sh`, os três documentos): primeira corrida
 
 **Total final após as correções: 420 medidores — 418 verdes, 2 falhas,
 ambas pré-existentes e com causa nomeada** (o daemon fala.c; o tex.c nativo
-com §X9/§X16 a falhar desde que a partitura passou a só-WASM em 0aa6ace —
-antes nem compilava e o «NÃO COMPILOU» não dizia FALHA: o medidor que nunca
-mediu, agora visível). Os 4 medidores novos da sessão (residuos_totais,
+com §X9/§X16 a falhar). Sobre o tex: a bisseção fechou o quadro — o
+pré-0aa6ace passava as MESMAS 62 unidades sem sequer ter INTERFACE_N/LADO_N;
+a maquinaria da interface criada em 0aa6ace mudou o comportamento do
+esp_gira e §X9 (ida-e-volta do giro) e §X16 (dilatação da fronteira)
+quebraram; ninguém viu porque o nativo deixou de compilar E o wasm não
+exporta a suíte §X (só compila/volta). Não é «o wasm é canónico e está
+verde» — o wasm está verde em OUTRAS suítes; §X9/§X16 estão por testar em
+qualquer lado desde 0aa6ace. Se a expectativa envelheceu com o desenho novo
+ou se o giro regrediu: **decisão do dono** (é a maquinaria da partitura). Os 4 medidores novos da sessão (residuos_totais,
 cristal_adversarial, cristal_front, equivalencia_universal) entraram na
 varredura ao serem citados no corpo_universal (416→420). Nota do harness:
 tools/*.js nunca entram na varredura (só tests|banco) — o
