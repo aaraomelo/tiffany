@@ -339,6 +339,7 @@ produto_dual ddd1edbd32b0678a 0
 progressoes 68a256306197805b 0
 promove a305cad77d13697a 0
 quantico 5cf79db190356ce4 0
+quantificador_histerese afd27f900a63173a 0
 quasi c1eae084a401bc3d 0
 quatro 7ab68ac6a57ef1f7 0
 quebra 789cef502f39fd13 0
@@ -392,6 +393,7 @@ spline fc82557165d00834 0
 sql dd9f1021d22ed500 0
 sshb 867d3328b082b67a 0
 str2dbl_dual 74601c0ca36de56f 0
+superficie_tate 42631bd983dc985c 0
 sustento 159daa95a6bc46b6 0
 tecido a71972ce13c4429d 0
 teletransporte 8b13cc6bf9acf1a0 0

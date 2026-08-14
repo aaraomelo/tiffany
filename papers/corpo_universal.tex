@@ -2091,6 +2091,52 @@ $\mathcal{M}$).
 $\square$
 \end{teorema}
 
+\begin{teorema}[a superfície da casa --- Hodge/Tate em dimensão 2,
+por contagem dos dois lados]\label{thm:superficie}
+A superfície é $E\times E$ sobre $\mathbb{F}_{p}$, com $E$ a curva de
+Viviani; o chão declarado dos dois lados (Tate 1966 para abelianas;
+Lefschetz $(1,1)$ para a Hodge complexa em dim $2$). A casa REALIZA a
+contagem: \textbf{o lado das classes} --- a multiplicidade do
+autovalor $p$ em $H^{2}(E\times E)$ é exatamente $4$ (duas triviais
+mais $\alpha\bar\alpha=\bar\alpha\alpha=p$; $\alpha^{2}\ne p$ por
+Hasse \emph{estrito}, com os $a_{p}$ re-contados do zero);
+\textbf{o lado dos ciclos} --- as duas fibras, a diagonal e o
+\emph{gráfico de Frobenius} têm matriz de interseção de determinante
+$\ne0$ nos quatro primos: posto $4$ = multiplicidade — \emph{cada
+classe é ciclo}. \textbf{A joia}: $\Delta\cdot\Gamma_{F}=N=p+1-a_{p}$
+--- o número de interseção de dois ciclos na superfície \emph{é} a
+contagem de pontos da curva: a geometria conta a aritmética.
+\textbf{O gume}: sem $\Gamma_{F}$ os três óbvios têm posto $3<4$ —
+a quarta classe exige o ciclo não-óbvio. O elo «dim $\ge2$» do
+inventário do Clay está pago na leitura de Tate.
+\emph{Medido:} \code{tests/superficie\_tate.js} ($6{:}0$; assinado
+por $\mathcal{M}$).
+$\square$
+\end{teorema}
+
+\begin{teorema}[o quantificador é o metrónomo; o contínuo é a
+histerese]\label{thm:quantificador}
+A pergunta do coordenador, respondida como leitura operacional medida:
+\textbf{o $\forall$ da casa é o metrónomo com um invariante} --- base
+mais passo-que-conserva (\emph{a indução é conservação}: uma
+verificação do passo substitui infinitas; a varredura completa é só o
+controlo), e o papel dual: o que não é invariante, o metrónomo
+\emph{refuta} no primeiro tick que desmente --- prova com invariante,
+refuta sem. \textbf{O contínuo da casa é a histerese}: dois caminhos
+no mesmo $u$ final retêm estados opostos (o estado é do \emph{caminho},
+não do ponto --- a definição do real, agora como dinâmica), e as
+histórias distinguíveis contam \emph{exatamente} $2^{k+1}-1$ --- os
+nós da árvore binária --- contra $3$ estados posicionais constantes:
+\emph{a histerese preenche a dimensão com a árvore}. Casa com as
+leis: o metrónomo-$\forall$ com a batuta (Lei~3) e a conservação
+(Leis~4/7); a histerese com a Lei~1 (a memória da divisão) e o
+Lebesgue do Teorema Central. O estatuto: os $\forall$ do Clay correm
+sobre objetos de fora --- declarado; o inventário não muda.
+\emph{Medido:} \code{tests/quantificador\_histerese.js} ($8{:}0$;
+assinado por $\mathcal{M}$).
+$\square$
+\end{teorema}
+
 %======================================================================
 \section{Extensões nomeadas --- o mapa, sem teorema}\label{sec:extensoes}
 
