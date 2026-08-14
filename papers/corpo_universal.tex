@@ -1847,6 +1847,44 @@ $\leftrightarrow$ $H^{1}$ (com o deck a agir $-1$ no diferencial,
 global da curva e os zeros clássicos continuam elos próprios.
 \end{observacao}
 
+\begin{teorema}[primos e irracionais na árvore --- a órbita fechada e
+o caminho sem fecho]\label{thm:primos-irracionais}
+A frase do coordenador («os primos são duais de irracionais no
+limite») recebe a definição operacional da mesa e fecha nas metades
+finitas. A operação dual é \emph{a dobra} $x\mapsto2x\bmod1$ (o shift
+nos bits):
+\begin{enumerate}
+\item \textbf{o primo é a órbita fechada pura}: os bits de $1/p$ têm
+período exatamente $\mathrm{ord}_{p}(2)$, sem período próprio --- e
+na escada de Fermat \emph{os períodos dobram}
+($\mathrm{ord}(2)=8,16,32$ em $17,257,65537$): a torre dos períodos é
+a torre $2$-ádica (\S L3), recuperada do lado dos primos.
+\item \textbf{o irracional é o caminho sem fecho, por teorema}:
+fecho da órbita $\Rightarrow$ racional $\Rightarrow$ norma $0$; e a
+norma dos convergentes é $\pm1$ (o encaixe, re-medido) --- os $200$
+bits de $1/\varphi$ sem período $\le60$ são a verificação, a norma é
+a razão.
+\item \textbf{o Teorema Central lê os dois}: Hurwitz \emph{conta} os
+fechados (as órbitas são os «primos» da dinâmica --- o produto de
+Euler da zeta global, \S Z4); Gentil \emph{casa} (o endereço na
+árvore serve os dois objetos); Lebesgue \emph{mede} o que sobra ---
+os fechados de período $\le5$ emagrecem estritamente na árvore
+($0{,}97\to0{,}12\to0{,}015$): a versão \emph{contada} de «medida
+zero contra medida plena».
+\item \textbf{o gume triplo}: o diádico \emph{termina}, o primo
+\emph{roda}, o irracional \emph{foge} --- três comportamentos
+separados pela mesma medida; e a aproximação \emph{não é o objeto}:
+truncar $1/\varphi$ no nível $10$ diverge do verdadeiro logo no nível
+$11$.
+\end{enumerate}
+«Duais \emph{no limite}» fica com o estatuto exato: é \textbf{a
+fronteira} --- o contável fechado contra o incontável sem fecho ---
+e a casa mede as duas metades finitas sem a atravessar.
+\emph{Medido:} \code{tests/primos\_irracionais.js} ($7{:}0$;
+assinado por $\mathcal{M}$).
+$\square$
+\end{teorema}
+
 %======================================================================
 \section{Extensões nomeadas --- o mapa, sem teorema}\label{sec:extensoes}
 

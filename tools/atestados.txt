@@ -327,6 +327,7 @@ pontofixo 8970f01c1addedf1 0
 pontryagin 1859961af08854d9 0
 potencia cc93709e0a87f0db 0
 prensor e1992045bed94bb2 0
+primos_irracionais 1535759cdad94d4b 0
 prisma af1d7b9d723bc06c 0
 produto_dual ddd1edbd32b0678a 0
 progressoes 68a256306197805b 0
