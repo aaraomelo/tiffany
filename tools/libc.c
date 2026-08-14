@@ -828,7 +828,10 @@ int ficheiro_tam(int h){
     return FICH_TAM[f] - AG_POS[h];
 }
 
-int tam_saida(void){ return PDF_N; }
+/* o PDF composto quando o há; a fita crua quando só se escreveu (o par
+ * PDF_N/SAIDA_N nasceu na dieta de memória e o tam_saida ficou só com um
+ * lado — o write direto enchia a SAIDA e este devolvia 0; auditoria 14/08) */
+int tam_saida(void){ return PDF_N > 0 ? PDF_N : SAIDA_N; }
 void limpa_saida(void){ PDF_N = 0; SAIDA_N = 0; }
 
 /* o nome pode vir com `../` à frente ou sem `.tex`: quem abre não sabe de onde

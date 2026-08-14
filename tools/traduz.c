@@ -2581,8 +2581,14 @@ static void empurra(const char *fmt, ...){
     va_end(ap);
     memcpy(PILHA[NP], tmp, sizeof tmp); NP++;
 }
+static int DBG_FN; static unsigned DBG_OP; static long DBG_MP;
+static unsigned DBG_ANEL[16]; static long DBG_AMP[16]; static int DBG_I;
 static const char *puxa(void){
-    if(NP <= 0){ fprintf(stderr, "traduz: pilha vazia na descida\n"); exit(2); }
+    if(NP <= 0){ fprintf(stderr, "traduz: pilha vazia na descida (fn=%d op=0x%02X MP=%ld)\n",
+                          DBG_FN, DBG_OP, (long)DBG_MP);
+                 for(int z = 0; z < 16; z++){ int k = (DBG_I + z) & 15;
+                     fprintf(stderr, "  anel[%2d] MP=%ld op=0x%02X\n", z, DBG_AMP[k], (long)DBG_ANEL[k]); }
+                 exit(2); }
     return PILHA[--NP];
 }
 
@@ -2677,10 +2683,13 @@ typedef struct { int par[16], npar, ret; } Assin;
 /* A descida do corpo de uma função. Devolve 0 se encontrou algo que não sabe desfazer —
  * e dizê-lo é melhor do que inventar C que não corresponde. */
 static int desce_corpo(long fim, int fidx){
+    DBG_FN = fidx;
     NP = 0; NQ = 0; NLAB = 0;
     int prof = 0;
     while(MP < fim){
         unsigned op = M[MP++];
+        DBG_OP = op; DBG_MP = MP;
+        DBG_ANEL[DBG_I & 15] = op; DBG_AMP[DBG_I & 15] = MP; DBG_I++;
 
         /* a condição de um laço: `<c> i32.eqz br_if <bloco de fora>` — o `eqz` está lá porque
          * o wasm sai quando é verdade e o C fica enquanto é verdade; ao voltar, tira-se. */

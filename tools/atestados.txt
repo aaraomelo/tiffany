@@ -231,7 +231,7 @@ lei2 aafa184130e2d70f 0
 leis_no_tradutor b021c11d75457674 0
 lemniscata 72425a6ff1117151 0
 letra_assinatura ac69847f7bec6136 0
-libc_wasm 68d1a936def9da1f 1
+libc_wasm 5f8e4a9025f6c70b 1
 liga 9a74373ac9338675 0
 linear 02f99a21eba6406b 0
 liquida 6f6a73a8318e27bf 0
@@ -362,7 +362,7 @@ sair_pu ece17024ec05b09c 0
 saltos 6ee5a6b83928bee0 0
 selberg 3a2bb3ff7f1dbcb8 0
 selo f6d39d6487a0f0aa 0
-sem_chute 56b9981f39111844 1
+sem_chute 56b9981f39111844 0
 semantico eb5372d2769edde6 0
 semente 98e9a0194e17f02d 0
 significado ff504aa181796ca5 0

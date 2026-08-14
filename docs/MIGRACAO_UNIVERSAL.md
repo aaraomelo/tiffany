@@ -398,3 +398,42 @@ uma leitura, muitos usos). Consertados com ele:
 
 **Bateria: 422 medidores — 420 verdes, 2 vermelhos com defeito real
 apontado.** (Os 11 de integração fora da bateria, por estatuto.)
+
+## 13. O DUPLO-DESENHO RESOLVIDO NA RAIZ (14/08, madrugada 3 — martelo)
+
+Ordem da mesa: «não se tapa duplo-desenho com regra de supressão;
+corrige-se a fonte da emissão». Executado por caso mínimo + bissecção:
+
+- **Reprodução mínima**: `\[ \boxed{\;\begin{aligned}…\end{aligned}\;} \]`
+  seguido de QUALQUER tabela ⇒ células umas sobre as outras. Bissecção no
+  catálogo apontou as linhas 20970–20985 (o boxed+aligned do «par n,m»).
+- **A raiz**: o despacho de ambientes casava `aligned` pelo PREFIXO
+  «align» e tratava-o como porta de display — o `\begin{aligned}` fazia
+  `centra_mat = CENTRA` (guardava 1 por cima do 0 do pai `\[`) e o
+  `\end{aligned}` DESLIGAVA o modo do pai. Dali em diante o CENTRA ficava
+  preso: TUDO centrava — prosa no meio da página e as células das tabelas
+  no mesmo x (o «sim»+«sim» = 93 glifos duplos, págs 422/423/425/434).
+- **O conserto (tex_core.c)**: `aligned`/`gathered` são SUB-ambientes
+  dentro da matemática — só consomem a chave e ficam no modo do pai.
+  Caso mínimo 0 duplos; **catálogo inteiro 0 duplos**; tex.wasm
+  reconstruído; sem_chute **VERDE** (§N7 resíduo 0 nos três documentos).
+
+## 14. A LIBC: UM LADO CURADO, O OUTRO NOMEADO ATÉ AO OSSO
+
+- **§L4b CURADO em dois passos**: (a) `tam_saida()` devolvia só PDF_N — o
+  par PDF_N/SAIDA_N nasceu na dieta e o write direto enchia a SAIDA com o
+  contador a devolver 0; agora `PDF_N>0 ? PDF_N : SAIDA_N`. (b) o medidor
+  lia com o ponteiro VELHO da SAIDA (o realloc move-a) — lê-se fresco.
+  O fwrite/fputc/fseek/rewind fecham; falta só o fprintf (abaixo).
+- **§L5 e o fprintf — A MESMA RAIZ, nomeada**: a descida do traduz morre
+  «pilha vazia» DENTRO do sscanf (fn=29, op=0x10 call, MP=3899; anel de
+  16 opcodes gravado no erro — instrumentação que FICA no traduz).
+  Causa: o `va_arg` do subida IÇA bytes de código para o princípio da
+  frase (memmove no COD) e a leitura LINEAR da descida fica com a pilha
+  de expressões desfasada. O fprintf mudo do §L4b é o mesmo território
+  (varargs pela fita). **Sessão própria de compilador: ensinar a descida
+  a desfazer o içamento (ou marcar a fita na descida).**
+
+**Bateria: 422 — 421 verdes, 1 vermelho (libc_wasm) com a causa reduzida a
+UM mecanismo do traduz.** O portão de ouro (422:422 + --refaz) espera essa
+sessão; o compositor já fala a verdade pura.

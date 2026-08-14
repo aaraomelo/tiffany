@@ -4484,6 +4484,18 @@ static void compila(const char *s, Pdf *p, long *glifos){
                  * (as duas leis da página 19, quebradas) */
                 if(q < n && (!strncmp(s + q + 1, "align", 5) || !strncmp(s + q + 1, "equation", 8)
                           || !strncmp(s + q + 1, "gather", 6) || !strncmp(s + q + 1, "eqnarray", 8))){
+                    /* O `aligned`/`gathered` é SUB-ambiente DENTRO da matemática: o pai
+                     * (`\[` ou `align`) já ligou o modo. Tratá-lo como porta de display
+                     * CLOBBERAVA o centra_mat do pai (guardava 1 por cima do 0), e no `\]`
+                     * o CENTRA ficava preso: dali em diante TUDO centrava — prosa no meio
+                     * da página e as células das tabelas UMAS SOBRE AS OUTRAS (o
+                     * duplo-desenho que a auditoria de 14/08 apanhou: «sim»+«sim» no
+                     * mesmo x, págs 422/423/425/434 do catálogo). O nome com `ed` só
+                     * consome a chave e fica no modo do pai. */
+                    if(!strncmp(s + q + 1, "aligned", 7) || !strncmp(s + q + 1, "gathered", 8)){
+                        long f = fecha_chave(s, n, q);
+                        i = f > 0 ? f + 1 : j; continue;
+                    }
                     fecha_paragrafo(e);
                     if(cmd[0] == 'b'){ e->centra_mat = CENTRA; CENTRA = 1; e->mat = 1; e->disp = 1; mat_entra(e); }
                     else { CENTRA = e->centra_mat; e->mat = 0; e->disp = 0; e->exp = 0; e->exp1 = 0; e->nexp = 0; mat_sai(e); }

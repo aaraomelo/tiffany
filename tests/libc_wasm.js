@@ -389,7 +389,11 @@ if (E) {
     dv.setInt32(fita, 42, true); dv.setFloat64(fita + 8, 13.6, true);
     E.fprintf(w, poe(r + 5300, '%d Tf %.3f Td'), fita);
     E.fputc(10, w);
-    const saiu = le(S, E.tam_saida());
+    /* a SAIDA realoca ao crescer — o ponteiro lê-se FRESCO, não do S velho */
+    const oct2 = new Uint8Array(E.DISCO.buffer);
+    const S2 = E.end_saida();
+    const le2 = (a, n) => { let t = ''; for (let i = 0; i < n; i++) t += String.fromCharCode(oct2[a + i]); return t; };
+    const saiu = le2(S2, E.tam_saida());
     console.log(`   §L4b escrito: ${JSON.stringify(saiu)}`);
     ok('§L4b escrever e MOVE(-1) na mesma agulha: sai exactamente o que se pediu',
        saiu === 'BT 42 Tf 13.600 Td\n');
