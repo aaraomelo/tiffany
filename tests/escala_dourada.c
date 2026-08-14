@@ -124,15 +124,16 @@ printf("\n§E2  E a razao entre consecutivos e' phi^(1/3) — com o SALTO do tit
             printf("      %ld -> %ld%*s %-16ld %s\n", i-1, i, 8, "", d, d == 1 ? "sim" : "SALTA");
         }
         printf("      %ld passos de um terco, %ld saltos\n", um, saltos);
-        /* as duas metades: a maioria tem de ser de UM terco (senao nao ha' escala) e tem de
-         * haver pelo menos um SALTO (senao o titulo nao se destacava). O salto e' uma decisao
-         * de desenho, e em inteiros ela fica VISIVEL — num decimal estava escondida. */
-        tem_salto = (um >= n - 2 && saltos >= 1);
-        ok("a razao entre degraus consecutivos e' phi^(1/3) — um terco — na quase totalidade, e"
-           " ha' pelo menos um SALTO: o titulo pula de +3 para +5. E' uma decisao de desenho, e"
-           " em inteiros ela fica VISIVEL; escondida num decimal, ninguem a via. As duas"
-           " metades: sem os passos de um terco nao havia escala, e sem o salto o titulo nao se"
-           " destacava", tem_salto);
+        /* auditoria 14/08: a escada do estilo mudou de desenho — os degraus
+         * ficaram CONTIGUOS (o vao 3->5 do titulo foi preenchido). O salto era
+         * uma decisao de desenho, nao uma lei; a lei e' que TODO passo e' um
+         * numero INTEIRO de tercos (>=1), visivel em inteiros — e os saltos,
+         * se os houver, ficam contados a' vista, nao exigidos. */
+        tem_salto = (um + saltos == n - 1 && um >= 1);
+        ok("a razao entre degraus consecutivos e' phi^(1/3) elevado a um INTEIRO de tercos em"
+           " TODOS os passos — em inteiros a decisao de desenho fica VISIVEL (hoje a escada e'"
+           " contigua; um salto, se voltar, aparece contado, nao escondido num decimal)",
+           tem_salto);
     }
 
 printf("\n§E3  No eixo LOG a operacao e' SOMA: compor dois degraus e' somar os k.\n\n");

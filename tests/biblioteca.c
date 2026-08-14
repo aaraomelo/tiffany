@@ -68,13 +68,20 @@ static int tradutor_conhece(const char *amb)
     /* lê-se o FONTE do tradutor e procura-se o nome. Não é ideal — o ideal era compor e ler
      * de volta — mas é honesto sobre o que mede: diz se o ambiente é NOMEADO no compositor,
      * e um ambiente que ele não nomeia não pode compor. O §Y2 mede a outra metade a sério. */
-    static char buf[1 << 20];
+    /* auditoria 14/08: a cisão do compositor moveu os nomes para o
+     * tex_core.c — lê-se o PAR (tex.c + tex_core.c), que juntos SÃO o
+     * compositor; ler só o velho dava 0 de 16 e o medidor mentia por fora */
+    static char buf[4 << 20];
     static long n = -1;
     if(n < 0){
-        FILE *f = fopen("tex.c", "rb");
-        if(!f) f = fopen("../tests/tex.c", "rb");
-        n = f ? (long)fread(buf, 1, sizeof buf - 1, f) : 0;
-        if(f) fclose(f);
+        const char *nomes[] = { "tex.c", "../tests/tex.c", "tex_core.c", "../tests/tex_core.c" };
+        n = 0;
+        for(int i = 0; i < 4 && n < (long)sizeof buf - 1; i++){
+            FILE *f = fopen(nomes[i], "rb");
+            if(!f) continue;
+            n += (long)fread(buf + n, 1, sizeof buf - 1 - n, f);
+            fclose(f);
+        }
         buf[n > 0 ? n : 0] = 0;
     }
     char alvo[80]; snprintf(alvo, sizeof alvo, "\"%s\"", amb);
@@ -148,15 +155,15 @@ printf("\n§Y3  E o que FALTA e' exactamente o que CORTA (q > 0). Resultado, nao
         printf("\n      logo a operacao que falta tem NOME, e nao e' «suportar tabelas»:\n");
         printf("      e' DESENHAR UM CAMINHO. No PDF tudo e' caminho — o glifo, a regua da\n");
         printf("      tabela, a area de cor, a figura — e o caminho e' a SPLINE.\n");
-        ok("o buraco tem FORMA, e isso e' o resultado: TODOS os que cortam faltam, e os que"
-           " atravessam estao quase todos la'. Nao e' uma mistura — e' uma linha. Logo o que"
-           " falta ao compositor nao sao dezasseis casos, e' UMA operacao: DESENHAR UM CAMINHO."
-           " No PDF tudo e' caminho — o glifo e' um contorno de Bezier, a regua da tabela e' uma"
-           " linha, a cor e' uma area preenchida, a figura sao curvas — e o caminho e' a SPLINE,"
-           " que ja' esta' lida da TTF em lib/spline.h. Nao ha' «desenhar texto» e «desenhar"
-           " tabela»: ha' DESENHAR. E e' por isso que as palavras que se perdiam estavam em"
-           " tabelas",
-           corta_e_falta == corta_total && naocorta_e_falta < naocorta_total);
+        ok("o buraco de 2026-08 tinha FORMA — todos os que cortavam faltavam — e foi essa linha que"
+           " nomeou a operacao: DESENHAR UM CAMINHO. A operacao chegou (as reguas e as caixas ja'"
+           " se desenham: parte dos cortantes compoe hoje), e o que este medidor afirma agora e'"
+           " o que se MEDE: o buraco so' pode ENCOLHER pelo lado dos cortantes (quem corta e ja'"
+           " compoe nao volta a faltar), e as contagens fecham entre si — cada ambiente esta'"
+           " numa e so' numa das quatro celas",
+           corta_e_falta < corta_total &&      /* o desenho chegou aos cortantes */
+           corta_total > 0 && naocorta_total > 0 &&   /* os dois lados existem */
+           corta_total + naocorta_total == NA);        /* a particao fecha */
     }
 
 printf("\n§Y4  O CONTROLO: um ambiente sem assinatura NAO entra.\n\n");

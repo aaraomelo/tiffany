@@ -11,7 +11,7 @@ analiticas 20b227b78073f646 0
 analog 04ade86bdec3cc0c 0
 antissim 798b7acc9113ebf0 2
 antissimetrico 5c13e7c1c00d85b1 0
-app_arranca e9ca1d41b25fa9e5 1
+app_arranca abb24b0fe22e3ae2 0
 arraytermico e4a2d53b3a3ef1da 0
 artefato d7a764740ef476b0 0
 assinatura 382c0f6005c44274 0
@@ -21,7 +21,7 @@ assinatura_tradutor 71805022a70f092e 0
 ataque 54c457ea130598f8 0
 aurea f73354b6db20cbb5 0
 autoria_tradutor 0591f5d4efec101f 0
-avalia_macros d9f401443059b0ef 1
+avalia_macros 6dc8be4f913e264f 0
 aya 9b26183507a36142 0
 backend_ttf f0f025af98008bbf 0
 backends_wasm 36dc32f59dd36e1a 0
@@ -32,7 +32,7 @@ banda d2f4c8e26b179307 0
 barramento 8d975d371666a0c7 0
 base c9803c08783a79f9 0
 base_local a24cac35e9d0a65f 0
-biblioteca edee5fbb56e405a6 1
+biblioteca c1f10655bb60418b 0
 bidual 503ba21286d79154 0
 bit_metropolis cd99cd38b06fd1a8 0
 buracos 66161db65811b122 0
@@ -112,7 +112,7 @@ demonstracoes a685d9fad33b9705 0
 densidade f31b20fa261adfa1 0
 desenha c24eec4c13220fa5 0
 design ab79b554f91257ef 0
-design_no_pdf 184b1aaeaad4bcd7 1
+design_no_pdf c808ea80e27f1cb8 0
 dif 45283285651136c9 0
 diferentes 165466b5efd81a99 0
 dimensoes 1bfd9d609f9567a9 0
@@ -124,7 +124,7 @@ dissipa 61ed3617880c8396 0
 dissipa_pagina 092dbc2e096cf561 0
 distancia b942370c17c50cda 0
 dna d913ac3541f9d307 0
-dois_streams 1c335e32b2c2e84f 1
+dois_streams 624d9e1997aa4657 0
 dominios a4d6c3573f6d8047 0
 dourada 0d4544be18ec836a 0
 dourada_banco da40aa247da4be4c 0
@@ -156,8 +156,8 @@ entropia_dual 9825617e56adbcdb 0
 equivalencia_universal 424be18459dfa372 0
 erg 24fd5a4ae1cb1739 0
 escada 5b25d287f60365e5 0
-escala cbd75de37ec6421d 1
-escala_dourada 9dc7d23075a3b4ab 1
+escala d6e3ee5a8e38e0cc 0
+escala_dourada 7ae60b0712a0b7cf 0
 escala_espaco 849fe8fea9a4b7d9 0
 escuros 083ab278ca83ff73 0
 espelho d56cc3c0b73eee7a 0
@@ -177,14 +177,14 @@ fala 710144c0e4bd433c 0
 familia_real 63bd209ecb10c32e 0
 fase_regua 7fea0714af2577e9 0
 fatia 2110e02e5b085682 0
-fator d456f6efc80bc96b 1
+fator e52bb20db9b8ca01 0
 fecha 78a93ae5af23426b 0
 fecho_convexo 1cc9544415551039 0
 fermat 0657621efa6e4bbc 0
 fisica 934484ad77a8c2aa 0
 fita 708d74da822a8f82 0
 folhas 5305836eb898f5c3 2
-fonte_banco 848e5545632b4f35 1
+fonte_banco 53525f1a1b7fe74d 0
 fonte_corpo 6720cdb0b5e2252e 0
 forca 2523c31d50858a8b 0
 fractal 6bab7fb3cd133ffb 0
@@ -362,7 +362,7 @@ sair_pu ece17024ec05b09c 0
 saltos 6ee5a6b83928bee0 0
 selberg 3a2bb3ff7f1dbcb8 0
 selo f6d39d6487a0f0aa 0
-sem_chute 445384c487f00df7 1
+sem_chute 56b9981f39111844 1
 semantico eb5372d2769edde6 0
 semente 98e9a0194e17f02d 0
 significado ff504aa181796ca5 0
@@ -424,7 +424,7 @@ vestir cf3b275b042cfaa1 0
 viveiro da5be75cca61984f 0
 viveiro_metrico cdf89d2d1ba2b762 0
 vizinha 6e95eef741d17536 0
-volta_estrela f72df1d6b311ea0b 1
+volta_estrela 59d9d31fd90137e4 0
 wasm_sobe 8c931b0862f2fa4c 0
 xx 74015b6c45e12f4d 0
 zero 625eaa454b88f7d2 0

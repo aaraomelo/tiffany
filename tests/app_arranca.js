@@ -101,6 +101,12 @@ function domMinimo () {
   win.window = win
   win.globalThis = win
   win.self = win
+  /* auditoria 14/08: o canvas/tex_tradutor trouxe TextEncoder/TextDecoder ao
+   * main — são globais REAIS do navegador e do Node, não DOM falso: passa-se
+   * os do Node ao contexto, senão o main morre em «TextEncoder is not
+   * defined» e o relógio nunca chega a armar (§A2 caía por arrasto) */
+  win.TextEncoder = TextEncoder
+  win.TextDecoder = TextDecoder
   return { win, registados }
 }
 

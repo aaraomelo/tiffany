@@ -77,10 +77,12 @@ ok('e nenhum Td ficou por ler — um sscanf que falha em silêncio congela o y',
  * um número grande, o varredor não está alinhado e o 0 era sorte. Tem de dar exactamente 1. */
 const A3 = path.join(TMP, 'A3.pdf')
 const cru = fs.readFileSync(A2)
-const alvo = cru.indexOf(Buffer.from('Reino Dourado'))
+/* auditoria 14/08: no dialecto não há bytes 'Reino Dourado' — o texto são
+ * glifos /Gf_c Do. Troca-se UM: /G0_82 ('R') vira /G0_88 ('X'), mesmo posto. */
+const alvo = cru.indexOf(Buffer.from('/G0_82 Do'))
 if (alvo > 0) {
   const mut = Buffer.from(cru)
-  mut[alvo] = 'X'.charCodeAt(0)
+  mut[alvo + 5] = '8'.charCodeAt(0)          /* /G0_82 → /G0_88 */
   fs.writeFileSync(A3, mut)
   const v2 = resid(A, A3)
   console.log(`\n§V2  MUTAÇÃO: um glifo trocado (R→X) no posto da capa`)
@@ -104,8 +106,13 @@ ok('contra outro documento o resíduo é grande — a medida distingue', v3.r > 
  * IRRADIA.» A primeira versão desta absorção tinha `Posto v[4000000]` — 366 MB, e com tecto,
  * que é o que uma fila sempre tem. Aqui não há vector nenhum na varredura. */
 const fonte = fs.readFileSync(path.join(__dirname, 'tex.c'), 'utf8')
-const varre = fonte.slice(fonte.indexOf('static long varre_postos'),
-                          fonte.indexOf('/* ── emitir `.tex`'))
+/* auditoria 14/08: a âncora antiga («emitir `.tex`») saiu do tex.c e o
+ * corte apanhava o ficheiro inteiro — o fim é o fim REAL da função: a
+ * próxima declaração static */
+const iniV = fonte.indexOf('static long varre_postos')
+const restoV = fonte.slice(iniV + 10)
+const fimV = restoV.search(/\nstatic /)
+const varre = restoV.slice(0, fimV < 0 ? undefined : fimV)
 const vetores = [...varre.matchAll(/\[\s*(\d{4,})\s*\]/g)].map((m) => +m[1])
 console.log(`\n§V4  vectores dentro da varredura: ${vetores.length ? vetores.join(', ') : 'nenhum'}`)
 ok('a absorção irradia: nenhum vector com tecto dentro da varredura', vetores.length === 0)

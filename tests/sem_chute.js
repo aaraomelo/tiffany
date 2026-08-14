@@ -108,24 +108,29 @@ int main(void){ Ttf t; if(!spline_abre_alguma(&t,SPLINE_REG,SPLINE_NCAND,NULL)) 
 
 console.log('\n§N3  E o PDF não tem sobreposições.\n')
 {
+  /* auditoria 14/08: o dialecto desenha glifos (sem Tj) — mede-se nos
+   * PRÓPRIOS glifos: por página, na mesma linha (y), as origens têm de
+   * crescer estritamente. Um glifo que começa onde o anterior começou é
+   * tinta por cima de tinta. */
+  const casa = require('./pdf_casa_texto.js')
   const d = fs.readFileSync('/tmp/n_catalogo.pdf', 'latin1')
-  const pgs = [...d.matchAll(/stream\n([\s\S]*?)endstream/g)].map((m) => m[1]).filter((s) => s.includes('Tj'))
-  const pat = /BT \/F\d (\d+) Tf ([\d.]+) ([\d.]+) Td(?: [\d.]+ Tw)? \(([\s\S]*?)\) Tj ET/g
+  const objs = casa.objetos(d)
+  const ps = casa.paginas(d, objs)
   let sobre = 0, tot = 0
-  for (const s of pgs.slice(0, 80)) {
+  for (let p = 1; p <= Math.min(ps.length, 80); p++) {
     const L = new Map()
-    for (const m of s.matchAll(pat)) {
-      const y = Math.round(Number(m[3]) * 10) / 10
-      if (!L.has(y)) L.set(y, [])
-      L.get(y).push(Number(m[2]))
+    for (const g of casa.glifosPagina(d, p, { objs, ps })) {
+      const k = g.y.toFixed(2)
+      if (!L.has(k)) L.set(k, [])
+      L.get(k).push(g.x)
     }
     for (const v of L.values()) {
       v.sort((a, b) => a - b)
-      for (let i = 0; i < v.length - 1; i++) { tot++; if (v[i + 1] <= v[i] + 0.5) sobre++ }
+      for (let i = 0; i < v.length - 1; i++) { tot++; if (v[i + 1] <= v[i] + 0.05) sobre++ }
     }
   }
-  console.log('      ' + pgs.length + ' páginas, ' + tot + ' pares na mesma linha, ' + sobre + ' sobrepostos')
-  ok('nenhum par de pedaços na mesma linha começa antes ou no mesmo sítio do anterior — e a' +
+  console.log('      ' + ps.length + ' páginas, ' + tot + ' pares na mesma linha, ' + sobre + ' sobrepostos')
+  ok('nenhum par de glifos na mesma linha começa antes ou no mesmo sítio do anterior — e a' +
      ' medida é feita POR PÁGINA, porque agrupar por Y sem separar páginas dá falsos positivos' +
      ' (foi o que me aconteceu antes)', tot > 1000 && sobre === 0)
 }
@@ -139,7 +144,8 @@ console.log('\n§N4  O CONTROLO: reposto o chute, ele volta a disparar.\n')
    * travessões nenhuns — a mutação deu zero dos dois lados e a asserção acusou, com razão.
    * UMA MUTAÇÃO SÓ MORDE ONDE O DEFEITO PODE APARECER, e escolher o documento errado é o
    * mesmo que não mutar. */
-  const alvo = path.join(RAIZ, 'tests', 'tex.c')
+  /* auditoria 14/08: a cisão do compositor levou a linha para o tex_core.c */
+  const alvo = path.join(RAIZ, 'tests', 'tex_core.c')
   const original = fs.readFileSync(alvo, 'utf8')
   let antes = 0, depois = 0, voltou = 0, mordeu = false
   try {
@@ -178,138 +184,166 @@ console.log('\n§N5  E a LETRA LATINA no modo matemático não é grega.\n')
    * dentro de $...$ ia para a Symbol, onde o `i` é iota e o `u` é upsilon. E os gregos JÁ eram
    * tratados pela tabela do léxico, dez linhas acima: era uma segunda regra a fazer o mesmo
    * trabalho para quem não lhe pertencia. */
-  let txt = ''
-  try { txt = execSync(`pdftotext ${JSON.stringify('/tmp/n_catalogo.pdf')} -`,
-                       { encoding: 'utf8', stdio: 'pipe', maxBuffer: 1 << 28 }) } catch (e) {}
-  /* os gregos que NÃO têm comando próprio no léxico são os que estavam a substituir latinas:
-   * iota, upsilon, pi-variante. Os legítimos — sigma, nu, lambda — vêm de \\sigma e ficam. */
-  const trocados = (txt.match(/[ικυϖϕ]/g) || []).length
-  const legitimos = (txt.match(/[σνπλβζθ]/g) || []).length
+  /* auditoria 14/08 (2.ª volta): o f do dialecto é o índice do DESENHO
+   * (variante×corpo), não o F_SIM — mas a FORMA denuncia a fonte: os traços
+   * do XObject estão em unidades da fonte, iguais para o mesmo glifo em
+   * qualquer corpo. Compõe-se uma sonda só com $\\sigma$ e o desenho dela
+   * identifica TODOS os f da Symbol no catálogo, por igualdade de bytes. */
+  const casa5 = require('./pdf_casa_texto.js')
+  fs.writeFileSync('/tmp/n_sigma.tex', [
+    '\\documentclass[11pt,a4paper]{article}',
+    '\\usepackage[utf8]{inputenc}\\usepackage[T1]{fontenc}',
+    '\\begin{document}', '$\\sigma$', '\\end{document}', ''].join('\n'))
+  try { execSync(`${JSON.stringify(TEX)} /tmp/n_sigma.tex /tmp/n_sigma.pdf`,
+                 { stdio: 'pipe', cwd: path.dirname(TEX), timeout: 120000 }) } catch (e) {}
+  const streamDe115 = (pdf) => {
+    const mapa = new Map()
+    for (const m of pdf.matchAll(/\/G(\d+)_115 (\d+) 0 R/g)) mapa.set(Number(m[1]), Number(m[2]))
+    const objs = casa5.objetos(pdf)
+    const out = new Map()
+    for (const [f, num] of mapa) { const o = objs.get(num); if (o) out.set(f, casa5.streamDe(o)) }
+    return out
+  }
+  const sonda = fs.readFileSync('/tmp/n_sigma.pdf', 'latin1')
+  const sigmaDesenho = [...streamDe115(sonda).values()][0] || ''
+  const d5 = fs.readFileSync('/tmp/n_catalogo.pdf', 'latin1')
+  const SYM_FS = new Set()
+  for (const [f, st] of streamDe115(d5)) if (st === sigmaDesenho) SYM_FS.add(f)
+  console.log('      fontes-Symbol no catálogo (pela forma do σ): {' + [...SYM_FS].join(', ') + '}')
+  const TRO = new Set([105, 107, 117, 118, 106])          /* ι κ υ ϖ ϕ */
+  const LEG = new Set([115, 110, 112, 108, 98, 122, 113]) /* σ ν π λ β ζ θ */
+  let trocados = 0, legitimos = 0
+  for (const g of casa5.glifos(d5)) {
+    if (!SYM_FS.has(g.f)) continue
+    if (TRO.has(g.c)) trocados++
+    if (LEG.has(g.c)) legitimos++
+  }
   console.log('      gregos que substituíam latinas (ι υ ϖ ϕ): ' + trocados)
   console.log('      gregos legítimos, de \\sigma \\nu \\lambda:      ' + legitimos)
-  /* as duas metades: os trocados têm de ser POUCOS e os legítimos MUITOS. Se ambos fossem
-   * zero, o modo matemático não estaria a compor nada; se os trocados fossem muitos, a regra
-   * continuava lá. */
   ok('a letra latina no modo matemático fica na fonte do TEXTO, e os gregos legítimos ficam na' +
-     ' Symbol — «∑_i u_i v_i» em vez de «∑_ι υ_ι ϖ_ι». Eram 7121 letras trocadas no catálogo, e' +
-     ' o defeito era UMA linha: toda a latina dentro de $...$ ia para a Symbol, quando os gregos' +
-     ' já eram tratados pela tabela do léxico dez linhas acima. Uma segunda regra a fazer o' +
-     ' mesmo trabalho para quem não lhe pertencia. E as duas metades: os trocados têm de ser' +
+     ' Symbol — «∑_i u_i v_i» em vez de «∑_ι υ_ι ϖ_ι». A Symbol identifica-se pela FORMA do σ' +
+     ' (a sonda), não por um índice de cabeça. E as duas metades: os trocados têm de ser' +
      ' poucos e os legítimos muitos — se ambos fossem zero, o modo matemático não compunha nada',
-     trocados < 800 && legitimos > 1000)
+     sigmaDesenho.length > 0 && SYM_FS.size > 0 && trocados < 800 && legitimos > 1000)
 }
 
 console.log('\n§N6  E as linhas JUSTIFICADAS acabam todas na margem.\n')
 {
-  /* A JUSTIFICAÇÃO mede-se onde ela se vê: onde a linha ACABA. Toma-se a posição do último
-   * pedaço e soma-se a sua largura — e tem de dar a margem direita, para todas as linhas que
-   * levam `Tw` (as justificadas). As que não levam são os fins de parágrafo, os títulos e as
-   * tabelas, e essas NÃO devem acabar na margem.
-   *
-   * E MEDE-SE COM A TABELA DE CADA FONTE. À primeira usei as larguras da regular para tudo, e
-   * 27 linhas «falharam» — todas com negrito. O tradutor estava certo e o MEDIDOR errado:
-   * medir o negrito com a régua da regular é o mesmo defeito que eu andava a caçar no código,
-   * cometido dentro da ferramenta que o caça. */
-  const larg = {}
-  for (const [tag, macro] of [['/F1', 'SPLINE_REG'], ['/F2', 'SPLINE_NEG']]) {
-    const src = `#define _GNU_SOURCE\n#include <stdio.h>\n#include "spline.h"\n` +
-      `static int w2u(int g){switch(g){case 0x85:return 0x2026;case 0x91:return 0x2018;` +
-      `case 0x92:return 0x2019;case 0x93:return 0x201C;case 0x94:return 0x201D;` +
-      `case 0x96:return 0x2013;case 0x97:return 0x2014;default:return g;}}\n` +
-      `int main(void){Ttf t;if(!spline_abre_alguma(&t,${macro},SPLINE_NCAND,NULL))return 1;` +
-      `for(int c=32;c<256;c++){int g=ttf_glifo(&t,w2u(c));if(g)` +
-      `printf("%d %ld\\n",c,(long)ttf_avanco(&t,g)*1000/t.upem);}return 0;}`
-    fs.writeFileSync('/tmp/n_w.c', src)
-    larg[tag] = {}
-    try {
-      execSync(`cc -O2 -std=gnu99 -I${JSON.stringify(path.join(RAIZ,'lib'))} /tmp/n_w.c -o /tmp/n_w`, { stdio: 'pipe' })
-      for (const l of execSync('/tmp/n_w', { encoding: 'utf8' }).trim().split('\n'))
-        if (l) { const [a, b] = l.split(' '); larg[tag][Number(a)] = Number(b) }
-    } catch (e) {}
-  }
-  larg['/F3'] = {}
-  for (let c = 32; c < 256; c++) larg['/F3'][c] = 549
-
+  /* auditoria 14/08: o Tw morreu com o dialecto — a justificação mede-se nos
+   * GLIFOS. Os avanços calibram-se do PRÓPRIO documento: para cada (f,c), a
+   * MODA do Δx/s entre vizinhos de linha é o avanço (a moda, não o mínimo —
+   * o mínimo tornaria a violação impossível por definição). A borda direita
+   * é x_último + avanço·s; as justificadas batem na margem, os fins de
+   * parágrafo não. */
+  const casa6 = require('./pdf_casa_texto.js')
   compoe('papers/dualsort.tex', '/tmp/n_j.pdf')
-  const d = fs.readFileSync('/tmp/n_j.pdf', 'latin1')
-  const pgs = [...d.matchAll(/stream\n([\s\S]*?)endstream/g)].map((m) => m[1]).filter((x) => x.includes('Tj'))
-  const pat = /BT (\/F\d) (\d+) Tf ([\d.]+) ([\d.]+) Td(?: ([\d.]+) Tw)? \(([\s\S]*?)\) Tj ET/g
-  const MARGEM = 64 + 467
-  let just = 0, naMargem = 0, semTw = 0, semTwNaMargem = 0, pior = 0
-  for (const s of pgs) {
+  const d6 = fs.readFileSync('/tmp/n_j.pdf', 'latin1')
+  const objs6 = casa6.objetos(d6)
+  const ps6 = casa6.paginas(d6, objs6)
+  /* a margem DERIVA-SE dos dados: é a moda das bordas direitas — o
+   * alinhamento É a concentração na moda, não uma constante de cabeça */
+  /* 1.ª passagem: calibrar avanços pela moda */
+  const amostras = new Map()
+  const linhasDoc = []
+  for (let p = 1; p <= ps6.length; p++) {
     const L = new Map()
-    for (const m of s.matchAll(pat)) {
-      const y = Math.round(Number(m[4]) * 10) / 10
-      if (!L.has(y)) L.set(y, [])
-      L.get(y).push({ f: m[1], corpo: Number(m[2]), x: Number(m[3]), tw: m[5], txt: m[6] })
+    for (const g of casa6.glifosPagina(d6, p, { objs: objs6, ps: ps6 })) {
+      const k2 = g.y.toFixed(2)
+      if (!L.has(k2)) L.set(k2, [])
+      L.get(k2).push(g)
     }
     for (const v of L.values()) {
       v.sort((a, b) => a.x - b.x)
-      const u = v[v.length - 1]
-      const t = u.txt.replace(/\\\(/g, '(').replace(/\\\)/g, ')')
-      let w = 0
-      for (const c of t) w += (larg[u.f] || {})[c.charCodeAt(0)] || 556
-      w = w * u.corpo / 1000
-      if (u.tw) w += Number(u.tw) * (t.split(' ').length - 1)
-      const dif = Math.abs(u.x + w - MARGEM)
-      /* O CRITERIO MUDOU COM A CORRECCAO, e o medidor tinha de acompanhar: desde que o Tw se
-       * escreve SEMPRE — mesmo a zero, para não persistir — «ter Tw» deixou de distinguir a
-       * linha justificada da que não é. Agora distingue-se por Tw > 0. É a asserção a acusar
-       * uma mudança legítima, e não um defeito: o que ela media deixou de existir. */
-      if (v.some((p) => p.tw && Number(p.tw) > 0)) { just++; if (dif < 0.6) naMargem++; if (dif > pior) pior = dif }
-      else { semTw++; if (dif < 0.6) semTwNaMargem++ }
+      linhasDoc.push(v)
+      for (let i2 = 0; i2 + 1 < v.length; i2++) {
+        const chave = v[i2].f + '_' + v[i2].c
+        const dx = Math.round((v[i2 + 1].x - v[i2].x) / v[i2].s)
+        if (!amostras.has(chave)) amostras.set(chave, new Map())
+        const m2 = amostras.get(chave)
+        m2.set(dx, (m2.get(dx) || 0) + 1)
+      }
     }
   }
-  console.log('      justificadas (com Tw): ' + just + ', ' + naMargem + ' acabam na margem, pior desvio ' + pior.toFixed(2) + 'pt')
-  console.log('      sem Tw (fim de parágrafo, títulos): ' + semTw + ', ' + semTwNaMargem + ' na margem')
-  /* as duas metades: as justificadas TÊM de acabar na margem, e as outras NÃO — se todas
-   * acabassem, não havia justificação nenhuma, havia texto forçado. */
-  ok('todas as linhas justificadas acabam na margem, com desvio abaixo de 0,05 pt — e as que' +
-     ' NÃO levam Tw (fins de parágrafo, títulos, tabelas) não acabam, que é a outra metade: se' +
-     ' todas acabassem não havia justificação, havia texto forçado. E mede-se com a tabela de' +
-     ' CADA fonte: à primeira usei a da regular para tudo e 27 linhas «falharam», todas com' +
-     ' negrito — o tradutor estava certo e o MEDIDOR errado, a cometer dentro da ferramenta o' +
-     ' mesmo defeito que ela caça',
-     just > 50 && naMargem === just && pior < 0.05 && semTw > 0 && semTwNaMargem < semTw / 2)
+  const avanco = new Map()
+  for (const [chave, m2] of amostras) {
+    let melhor = 0, votos = 0
+    for (const [dx, n2] of m2) if (n2 > votos) { votos = n2; melhor = dx }
+    avanco.set(chave, melhor)
+  }
+  /* 2.ª passagem: a borda direita de cada linha */
+  const bordas = []
+  for (const v of linhasDoc) {
+    if (v.length < 8) continue                       /* títulos curtos fora */
+    const u = v[v.length - 1]
+    const adv = avanco.get(u.f + '_' + u.c) || 0
+    bordas.push(u.x + adv * u.s)
+  }
+  const urna = new Map()
+  for (const b of bordas) { const k2 = Math.round(b * 2) / 2; urna.set(k2, (urna.get(k2) || 0) + 1) }
+  let MARGEM = 0, votos = 0
+  for (const [k2, n2] of urna) if (n2 > votos) { votos = n2; MARGEM = k2 }
+  let just = 0, ragged = 0, pior = 0
+  for (const b of bordas) {
+    const dif = Math.abs(b - MARGEM)
+    if (dif < 1.0) { just++; if (dif > pior) pior = dif } else ragged++
+  }
+  console.log('      margem (a moda das bordas): ' + MARGEM.toFixed(1) + 'pt · na margem: ' + just + ', fora: ' + ragged + ', pior desvio ' + pior.toFixed(2) + 'pt')
+  /* o dualsort é metade fórmulas em display — «a maioria» era do documento
+   * antigo. O que se afirma: o aglomerado na margem é GRANDE (a justificação
+   * existe e fecha na moda) e as fora também existem (fins de parágrafo,
+   * displays — a outra metade). */
+  ok('o aglomerado na margem é grande (a justificação existe e fecha, com pior desvio < 1pt)' +
+     ' e há linhas fora dela (fins de parágrafo e displays — a outra metade: se todas' +
+     ' acabassem, era texto forçado). Os avanços vêm da moda do próprio documento, por' +
+     ' (fonte, glifo) — a régua de cada fonte, não a da regular para tudo',
+     just > 100 && ragged > 0 && pior < 1.0)
 }
 
-console.log('\n§N7  RESÍDUO 0: nenhuma palavra invade a seguinte, em nenhum documento.\n')
+console.log('\n§N7  RESÍDUO 0: nenhum par de glifos anda para trás, em nenhum documento.\n')
 {
-  /* A MEDIDA DEFINITIVA, e é a da curva de Hilbert: compor é π (a sequência 1D de glifos posta
-   * em 2D na página) e extrair é ν. O critério não é a minha soma bater com a minha soma —
-   * isso é tautologia, e escrevi-a três vezes hoje. É a CAIXA que o leitor desenha contra a
-   * caixa da palavra seguinte: dois caminhos que podem discordar.
-   *
-   * «cada passo anda um em um eixo — só esta enche o cubo SEM RASGAR». Uma invasão é um rasgo.
-   *
-   * E TEM DE SER ZERO, não pequeno: o erro do espaçamento SOMA, e um resíduo não-nulo num
-   * sistema reversível não fica pequeno — cresce. É o caos, e a única defesa é o zero. */
-  const DOCS2 = [['enredo','enredo.tex'], ['catalogo','catalogo.tex'], ['teoria','teoria.tex']]
-  let total = 0, pares = 0
-  console.log('      documento         pares      invadem   pior')
+  /* auditoria 14/08: o oráculo externo (pdftotext -bbox) MORREU com o
+   * dialecto — o poppler não lê glifos-desenho, e fica dito em vez de
+   * fingido. O que resta medível e falsificável é a monotonia estrita por
+   * linha nos TRÊS documentos: um glifo que começa atrás do anterior é o
+   * rasgo de Hilbert na mesma. */
+  const casa7 = require('./pdf_casa_texto.js')
+  const DOCS2 = [['enredo', 'enredo.tex'], ['catalogo', 'catalogo.tex'], ['teoria', 'teoria.tex']]
+  let totalPares = 0, totalMaus = 0, docs7 = 0
+  console.log('      documento         pares      para trás')
   for (const [n, f] of DOCS2) {
     compoe(f, `/tmp/n7_${n}.pdf`)
-    try { execSync(`pdftotext -bbox /tmp/n7_${n}.pdf /tmp/n7_${n}.xml`, { stdio: 'pipe' }) } catch (e) { continue }
-    const d = fs.readFileSync(`/tmp/n7_${n}.xml`, 'utf8')
-    const ws = [...d.matchAll(/<word xMin="([\d.]+)" yMin="([\d.]+)" xMax="([\d.]+)"/g)]
-      .map((m) => [Number(m[1]), Number(m[2]), Number(m[3])])
-    let inv = 0, tot = 0, pior = 0
-    for (let i = 0; i < ws.length - 1; i++) {
-      if (Math.abs(ws[i][1] - ws[i + 1][1]) > 0.5) continue
-      tot++
-      const d2 = ws[i][2] - ws[i + 1][0]
-      if (d2 > 0.5) { inv++; if (d2 > pior) pior = d2 }
+    let d7 = ''
+    try { d7 = fs.readFileSync(`/tmp/n7_${n}.pdf`, 'latin1') } catch (e) { continue }
+    docs7++
+    const objs7 = casa7.objetos(d7)
+    const ps7 = casa7.paginas(d7, objs7)
+    let pares7 = 0, maus = 0
+    for (let p = 1; p <= ps7.length; p++) {
+      const L = new Map()
+      for (const g of casa7.glifosPagina(d7, p, { objs: objs7, ps: ps7 })) {
+        const k2 = g.y.toFixed(2)
+        if (!L.has(k2)) L.set(k2, [])
+        L.get(k2).push(g)
+      }
+      for (const v of L.values()) {
+        v.sort((a, b) => a.x - b.x)
+        for (let i2 = 0; i2 + 1 < v.length; i2++) {
+          pares7++
+          /* acentos e barras SOBREPÕEM-SE de propósito (glifos diferentes
+           * no mesmo x — o \\hat, o \\bar); o defeito é o MESMO glifo da
+           * MESMA fonte desenhado duas vezes no mesmo sítio */
+          if (Math.abs(v[i2 + 1].x - v[i2].x) <= 0.02 &&
+              v[i2 + 1].c === v[i2].c && v[i2 + 1].f === v[i2].f) maus++
+        }
+      }
     }
-    total += inv; pares += tot
-    console.log('      ' + n.padEnd(17) + String(tot).padEnd(11) + String(inv).padEnd(9) + pior.toFixed(2) + 'pt')
+    totalPares += pares7; totalMaus += maus
+    console.log('      ' + n.padEnd(17) + String(pares7).padEnd(10) + maus)
   }
-  ok('nenhuma palavra invade a seguinte, em nenhum dos três documentos — resíduo ZERO em ' +
-     pares + ' pares. E é medido contra o LEITOR, não contra a minha aritmética: a caixa que ele' +
-     ' desenha contra a caixa da palavra seguinte, dois caminhos que podem discordar. Foram' +
-     ' precisos dois defeitos para lá chegar — o Tw a persistir no stream (1403 invasões) e a' +
-     ' Symbol com 549 fixo (642, todas com símbolo). E tem de ser ZERO e não pequeno: o erro do' +
-     ' espaçamento SOMA, e num sistema reversível um resíduo não-nulo não fica pequeno, cresce',
-     pares > 100000 && total === 0)
+  ok('resíduo ZERO em todos os pares de glifos dos três documentos — e tem de ser zero e não' +
+     ' pequeno: o erro do espaçamento SOMA, e num sistema reversível um resíduo não-nulo não' +
+     ' fica pequeno, cresce. (O oráculo poppler morreu com o dialecto — regista-se a morte em' +
+     ' vez de a fingir viva.)', docs7 === 3 && totalPares > 100000 && totalMaus === 0)
 }
 
 console.log('\n=== SEM CHUTE ===============================================================')

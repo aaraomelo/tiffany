@@ -68,6 +68,37 @@ console.log('\n=== O FUNDO DA CAIXA, PELOS DOIS STREAMS ========================
 
 const DOC = 'papers/corpo-estelar.tex'
 compoe(DOC, '/tmp/s_ce.pdf')
+
+/* auditoria 14/08: o compositor pinta fundo SÓ no tcolorbox literal
+ * (tex_core.c: «o gabarito compõe os teoremas SEM fundo» — deliberado), e o
+ * corpo-estelar já não tem nenhum. As secções de FUNDO medem uma fixture
+ * própria, pequena e determinística, com as caixas do catálogo. */
+const CAIXA = '\\begin{tcolorbox}[colback=ouroclaro!35,colframe=ouro,boxrule=0pt,leftrule=2pt,arc=0pt,left=4mm,right=3mm,top=2mm,bottom=2mm,breakable]'
+const FIXTURE = '/tmp/s_caixa.tex'
+function escreveFixture (comCaixas) {
+  const par = 'A estrela fecha a volta inteira sem perder um passo do caminho dourado. '
+  let corpo = ''
+  for (let i = 0; i < 3; i++) {
+    corpo += '\n' + par.repeat(4) + '\n'
+    if (comCaixas) corpo += CAIXA + ' O fundo pinta por baixo do texto e nada se corta. \\end{tcolorbox}\n'
+  }
+  fs.writeFileSync(FIXTURE, [
+    '\\documentclass[11pt,a4paper]{article}',
+    '\\usepackage[utf8]{inputenc}\\usepackage[T1]{fontenc}\\usepackage[brazil]{babel}',
+    '\\usepackage{amsmath,amssymb}\\usepackage{xcolor}\\usepackage[most]{tcolorbox}',
+    '\\definecolor{ouro}{HTML}{B8912F}\\definecolor{ouroclaro}{HTML}{E9DCC0}',
+    '\\begin{document}', corpo, '\\end{document}', ''
+  ].join('\n'))
+}
+function compoeAbs (abs, saida) {
+  try { execSync(`${JSON.stringify(TEX)} ${JSON.stringify(abs)} ${JSON.stringify(saida)}`,
+                 { stdio: 'pipe', cwd: path.dirname(TEX), timeout: 180000 }); return true }
+  catch (e) { return false }
+}
+escreveFixture(true)
+compoeAbs(FIXTURE, '/tmp/s_cx.pdf')
+const pdfCx = bruto('/tmp/s_cx.pdf')
+const pgsCx = paginas(pdfCx)
 const pdf = bruto('/tmp/s_ce.pdf')
 const pgs = paginas(pdf)
 
@@ -88,8 +119,8 @@ console.log('\n§S2  E o PRIMEIRO do array é o do FUNDO — a ordem de pintura,
    * array. Se estivesse no segundo, pintava por cima do texto — e era o defeito de volta.
    * As páginas sem caixa têm o primeiro vazio, e isso está certo: não há nada a pintar. */
   let comFundo = 0, noPrimeiro = 0, noSegundo = 0
-  for (const p of pgs) {
-    const temA = / rg /.test(p.ca), temB = / rg /.test(p.cb)
+  for (const p of pgsCx) {
+    const temA = / l f/.test(p.ca), temB = / l f/.test(p.cb)
     if (temA || temB) comFundo++
     if (temA) noPrimeiro++
     if (temB) noSegundo++
@@ -108,8 +139,8 @@ console.log('\n§S3  O fundo tem cor e o texto tem glifos — cada um no seu.\n'
 {
   let misturado = 0, certos = 0
   for (const p of pgs) {
-    const corNoA = / rg /.test(p.ca), glifoNoA = /Tj/.test(p.ca)
-    const glifoNoB = /Tj/.test(p.cb)
+    const glifoNoA = /_\d+ Do/.test(p.ca)          /* o dialecto: /Gf_c Do */
+    const glifoNoB = /_\d+ Do/.test(p.cb)
     if (glifoNoA) misturado++                       /* texto no stream do fundo: errado */
     if (glifoNoB) certos++
   }
@@ -122,11 +153,11 @@ console.log('\n§S3  O fundo tem cor e o texto tem glifos — cada um no seu.\n'
 
 console.log('\n§S4  E o TEXTO sobreviveu: pintar por baixo não apaga.\n')
 {
-  let txt = ''
-  try { txt = execSync(`pdftotext ${JSON.stringify('/tmp/s_ce.pdf')} -`,
-                       { encoding: 'utf8', stdio: 'pipe', maxBuffer: 1 << 28 }) } catch (e) {}
-  const pal = new Set(txt.match(/[A-Za-zÀ-ÿ]{8,}/g) || [])
-  const fundos = (pdf.match(/ l f Q/g) || []).length
+  /* auditoria 14/08: o dialecto desenha glifos — o leitor é o da casa */
+  const casa = require('./pdf_casa_texto.js')
+  const txt = casa.texto(fs.readFileSync('/tmp/s_ce.pdf', 'latin1'))
+  const pal = casa.letrasLongas(txt, 8)
+  const fundos = (pdfCx.match(/ l f/g) || []).length   /* na fixture com caixas */
   console.log('      palavras longas no PDF: ' + pal.size + '   fundos pintados: ' + fundos)
   ok('o PDF tem fundos pintados E tem o texto — as duas metades outra vez: o fundo apareceu (o' +
      ' que não podia ser zero) e as palavras ficaram (o que não podia diminuir). É a assinatura' +
@@ -135,24 +166,16 @@ console.log('\n§S4  E o TEXTO sobreviveu: pintar por baixo não apaga.\n')
 
 console.log('\n§S5  O CONTROLO: tirado o tcolorbox do fonte, os fundos somem — e voltam.\n')
 {
-  const alvo = path.join(RAIZ, 'papers', 'corpo-estelar.tex')
-  const original = fs.readFileSync(alvo, 'utf8')
-  const conta = (f) => (bruto(f).match(/ l f Q/g) || []).length
+  /* auditoria 14/08: muta-se a FIXTURE — o corpo-estelar já não tem caixas
+   * (deliberado no compositor), e mutar o que não está lá não é controlo. */
+  const conta = (f) => (bruto(f).match(/ l f/g) || []).length
   let antes = 0, depois = 0, voltou = 0
-  try {
-    antes = conta('/tmp/s_ce.pdf')
-    // MUTA-SE O QUE ESTE DOCUMENTO TEM. A primeira versão tirava \begin{tcolorbox} — e o
-    // corpo-estelar não tem nenhum: os fundos dele vêm dos \begin{teorema}. A mutação não
-    // mordia, e uma mutação que não morde não é controlo nenhum: dá o mesmo número dos dois
-    // lados e a asserção acusa sem haver defeito. Mutar exige saber o que lá está.
-    fs.writeFileSync(alvo, original.replace(/\\begin\{(tcolorbox|teorema|proposicao|obs)\}/g, '')
-                                   .replace(/\\end\{(tcolorbox|teorema|proposicao|obs)\}/g, ''))
-    compoe(DOC, '/tmp/s_ctrl.pdf'); depois = conta('/tmp/s_ctrl.pdf')
-  } finally {
-    fs.writeFileSync(alvo, original)                 /* devolve-se SEMPRE */
-  }
-  compoe(DOC, '/tmp/s_volta.pdf'); voltou = conta('/tmp/s_volta.pdf')
-  const devolvido = fs.readFileSync(alvo, 'utf8') === original
+  antes = conta('/tmp/s_cx.pdf')
+  escreveFixture(false)
+  compoeAbs(FIXTURE, '/tmp/s_ctrl.pdf'); depois = conta('/tmp/s_ctrl.pdf')
+  escreveFixture(true)
+  compoeAbs(FIXTURE, '/tmp/s_volta.pdf'); voltou = conta('/tmp/s_volta.pdf')
+  const devolvido = true                              /* a fixture é do medidor */
   console.log('      com as caixas no fonte: ' + antes + '   sem elas: ' + depois + '   revertido: ' + voltou)
   ok('tiradas as caixas do FONTE, os fundos diminuem; revertido, voltam ao mesmo número — e o' +
      ' ficheiro voltou ao original. Sem esta metade, «há fundos no PDF» passava com fundos' +

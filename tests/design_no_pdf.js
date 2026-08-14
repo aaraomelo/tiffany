@@ -93,10 +93,13 @@ console.log('\n§G3  E o TEXTO não se perdeu: desenhar põe-se por baixo, não 
   /* a segunda metade: acrescentar desenho não pode tirar palavras. Se tirasse, o desenho
    * estaria a cortar o fluxo — e nenhuma peça de design corta (q=0). */
   let texto = ''
-  try { texto = execSync(`pdftotext ${JSON.stringify('/tmp/g_catalogo.pdf')} -`,
-                         { encoding: 'utf8', stdio: 'pipe', maxBuffer: 1 << 28 }) } catch (e) {}
-  const pal = new Set((texto.match(/[A-Za-zÀ-ÿ]{8,}/g) || []))
-  console.log('      palavras longas no PDF do catálogo: ' + pal.size)
+  /* auditoria 14/08: o dialecto da casa desenha glifos (sem Tj) — o
+   * pdftotext lia zero. O leitor certo é o da casa; «palavras» são
+   * sequências de letras, porque os espaços são lacunas geométricas. */
+  const casa = require('./pdf_casa_texto.js')
+  texto = casa.texto(bruto('/tmp/g_catalogo.pdf'))
+  const pal = casa.letrasLongas(texto, 8)
+  console.log('      sequências longas de letras no PDF do catálogo: ' + pal.size)
   console.log('      réguas desenhadas no mesmo PDF:     ' + (medido.catalogo ? medido.catalogo.r : 0))
   ok('o PDF tem desenho E tem texto — milhares de palavras longas ao lado de centenas de' +
      ' réguas. São as duas metades: o desenho apareceu (o que não podia ser zero) e o texto' +

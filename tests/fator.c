@@ -359,7 +359,7 @@ printf("\n§W7  A RESOLUÇÃO modula até fp = 1 — e o 1 É a condição de pa
         /* a MAQUINA: corre-se o conversa e le-se quantas dobras ele declara */
         char cmd[512], linha[1024]; int real = -1;
         snprintf(cmd, sizeof cmd,
-                 "./conversa ../.torre/tecido responde '%s' 2>/dev/null", casos[c].conta);
+                 "../banco/bin/conversa ../.torre/tecido responde '%s' 2>/dev/null", casos[c].conta);
         FILE *f = popen(cmd, "r");
         if(f){
             while(fgets(linha, sizeof linha, f)){
@@ -460,7 +460,7 @@ printf("\n§W9  O INVERSOR ATRAVESSA AS REALIZAÇÕES — e é escrita/leitura, 
      *     concordaria com qualquer coisa porque não media nada. */
     {
         char linha[1024]; int real = -1;
-        FILE *f = popen("./conversa ../.torre/tecido responde "
+        FILE *f = popen("../banco/bin/conversa ../.torre/tecido responde "
                         "'((1+2) x 3) + ((4+5) x 6)' 2>/dev/null", "r");
         if(f){
             while(fgets(linha, sizeof linha, f)){

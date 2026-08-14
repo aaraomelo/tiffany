@@ -172,11 +172,31 @@ printf("\n§F4  E a fonte e' de uma LINGUAGEM, que nao e' o meio.\n\n");
          * a' parte, e e' isso que privilegio quer dizer. */
         struct base c;
         long tem = 0, p = 0, q = 0, r = 0;
-        if(abrir(&c, "/tmp/cards_banco", 0)){
-            unsigned char v[96];
-            long n = ler(&c, "linguagem/latex", v, sizeof v - 1);
-            if(n > 0){ v[n] = 0; tem = (sscanf((char*)v, "%ld,%ld,%ld", &p, &q, &r) == 3); }
-            fechar(&c);
+        /* auditoria 14/08: /tmp/cards_banco é partilhado por 21 medidores e
+         * abrir(...,1) TRUNCA — depender da sobra do cards era fragilidade de
+         * ordem. A âncora entre-programas mantém-se: a assinatura lê-se DA
+         * FONTE do cards.c (muda lá, muda aqui); e a ida-e-volta prova-se no
+         * banco DESTE medidor, isolado. */
+        (void)c;
+        {
+            FILE *fc = fopen("cards.c", "rb");
+            if(fc){
+                char lin[512];
+                while(fgets(lin, sizeof lin, fc)){
+                    char faz[64];
+                    if(sscanf(lin, " { \"latex\", \"%63[^\"]\", %ld, %ld, %ld },", faz, &p, &q, &r) == 4){ tem = 1; break; }
+                }
+                fclose(fc);
+            }
+        }
+        if(tem){
+            unsigned char v[96]; unsigned char out[96];
+            long m = (long)snprintf((char*)v, sizeof v, "%ld,%ld,%ld", p, q, r);
+            if(!gravar(&b, "linguagem/latex", v, m)) tem = 0;
+            else {
+                long k = ler(&b, "linguagem/latex", out, sizeof out - 1);
+                if(k != m || memcmp(out, v, (size_t)m) != 0) tem = 0;
+            }
         }
         if(tem) printf("      latex no banco: (%ld,%ld,%ld) — expande, quebra, e o texto passa\n", p, q, r);
         else    printf("      latex no banco: AUSENTE (corra tests/cards.c primeiro)\n");

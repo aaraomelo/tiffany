@@ -70,7 +70,10 @@ ok('e elas são de facto usadas — mais de mil vezes nos três documentos', uso
 const pdf = path.join(TMP, 'enredo.pdf')
 sh(`${JSON.stringify(TEX)} ${JSON.stringify(path.join(RAIZ, 'enredo.tex'))} ${JSON.stringify(pdf)}`,
    { cwd: __dirname, timeout: 900000 })
-const p1 = sh(`pdftotext -f 1 -l 1 ${JSON.stringify(pdf)} -`)
+/* auditoria 14/08: o dialecto desenha glifos — pdftotext lê zero. O leitor
+ * é o da casa; espaços são lacunas, logo as comparações tiram os espaços. */
+const casa = require('./pdf_casa_texto.js')
+const p1 = casa.textoPagina(fs.readFileSync(pdf, 'latin1'), 1).replace(/\s+/g, '')
 
 /* as palavras não se escrevem aqui: LÊEM-SE do corpo do \gkcapa no estilo.tex, senão eram
  * uma referência escrita à mão e mudar o estilo não mudaria este medidor */
@@ -96,7 +99,8 @@ ok('as palavras que só existem no corpo do \\gkcapa aparecem na página 1',
 const arg = /\\gkcapa\{([^}]*)\}/.exec(fs.readFileSync(path.join(RAIZ, 'enredo.tex'), 'utf8'))
 const tit = arg ? arg[1].replace(/---/g, '—') : null
 console.log(`     o 1.º argumento, lido do enredo.tex: «${tit}»`)
-ok('o argumento do \\gkcapa sai na página 1 — a avaliação substitui #1', !!tit && p1.includes(tit))
+ok('o argumento do \\gkcapa sai na página 1 — a avaliação substitui #1',
+   !!tit && p1.includes(tit.replace(/\s+/g, '')))
 
 /* ─── §M3 os degraus da dourada atravessam ─────────────────────────────────────────── */
 /* o estilo declara os tamanhos; o PDF tem de os usar. Compara-se o CONJUNTO, não um valor. */
@@ -117,7 +121,10 @@ for (const m of cru.toString('latin1').matchAll(/stream\r?\n/g)) {
   catch (e) { bruto += cru.subarray(a, b).toString('latin1') }
   if (bruto.length > 2e6) break
 }
-const noPdf = [...new Set([...bruto.matchAll(/\/F\d+\s+(\d+(?:\.\d+)?)\s+Tf/g)].map((m) => +m[1]))]
+/* auditoria 14/08: sem Tf no dialecto — o corpo é a ESCALA do cm × upem
+ * (s·1000), exata a 2 casas como o \\fontsize declara */
+const noPdf = [...new Set([...bruto.matchAll(/([\d.]+) 0 0 [\d.]+ [\-\d.]+ [\-\d.]+ cm\s*\/G/g)]
+  .map((m) => Math.round(+m[1] * 1000 * 100) / 100))]
   .sort((a, b) => a - b)
 /* RESÍDUO ZERO, não «perto»: o `Tf` do PDF aceita fracções, logo o corpo pode ser o degrau
  * EXACTO. Uma tolerância aqui deixaria passar o arredondamento a inteiro que havia — e era
@@ -183,9 +190,17 @@ ok('o nome do capítulo vem do babel instalado, não deste ficheiro',
  * primitiva a minha numeração ia 1..148 onde o original vai 1..54 e depois 1..94 */
 const seqDe = (f) => (sh(`pdftotext ${JSON.stringify(f)} -`).match(/[Cc]ap[íi]tulo\s+(\d+)/g) || [])
   .map((t) => +t.replace(/\D+/g, ''))
+/* o nosso PDF lê-se pela casa (o pdftotext dá vazio no dialecto) */
+const seqCasa = (f) => (casa.texto(fs.readFileSync(f, 'latin1')).match(/[Cc]ap[íi]tulo\s*(\d+)/g) || [])
+  .map((t) => +t.replace(/\D+/g, ''))
 const orig = path.join('/tmp/compara', 'enredo_orig.pdf')
+/* auditoria 14/08: o oráculo constrói-se quando falta — o pdflatex está na
+ * máquina, e é ELE a referência deste medidor */
+if (!fs.existsSync(orig)) {
+  try { sh(`node ${JSON.stringify(path.join(RAIZ, 'tools', 'compara.js'))} enredo`, { timeout: 900000 }) } catch (e) {}
+}
 if (fs.existsSync(orig)) {
-  const sA = seqDe(orig), sB = seqDe(pdf)
+  const sA = seqDe(orig), sB = seqCasa(pdf)
   const quebras = (v) => v.map((x, i) => (i && x !== v[i - 1] + 1 ? `${v[i - 1]}→${x}` : null)).filter(Boolean)
   const qA = quebras(sA), qB = quebras(sB)
   console.log(`     capítulos: pdflatex ${sA.length} (último ${sA[sA.length - 1]}), nosso ${sB.length} (último ${sB[sB.length - 1]})`)
@@ -212,12 +227,18 @@ fs.writeFileSync(path.join(mut, 'estilo.tex'), estilo.slice(0, iC) + estilo.slic
 const pdfM = path.join(TMP, 'mut.pdf')
 sh(`${JSON.stringify(TEX)} ${JSON.stringify(path.join(mut, 'enredo.tex'))} ${JSON.stringify(pdfM)}`,
    { cwd: __dirname, timeout: 900000 })
-const p1M = fs.existsSync(pdfM) ? sh(`pdftotext -f 1 -l 1 ${JSON.stringify(pdfM)} -`) : ''
-const sobrou = naCapa.filter((w) => p1M.includes(w))
+const p1M = fs.existsSync(pdfM) ? casa.textoPagina(fs.readFileSync(pdfM, 'latin1'), 1).replace(/\s+/g, '') : ''
+/* auditoria 14/08: palavras da capa que TAMBÉM vivem no texto do enredo
+ * (Reino, Dourado…) reaparecem na página 1 quando a capa sai — o conteúdo
+ * não prova nada sobre a avaliação. Só as palavras exclusivas do estilo
+ * têm de sumir, e essas somem EXATAS. */
+const enredoTxt = fs.readFileSync(path.join(RAIZ, 'enredo.tex'), 'utf8')
+const soDoEstilo = naCapa.filter((w) => !enredoTxt.includes(w))
+const sobrou = soDoEstilo.filter((w) => p1M.includes(w))
 console.log(`\n§M4  MUTAÇÃO: cortado o \\providecommand{\\gkcapa} do estilo`)
-console.log(`     das ${naCapa.length} palavras da capa, sobraram ${sobrou.length}: ${sobrou.join(', ') || '(nenhuma)'}`)
-ok('sem a definição no estilo, as palavras da capa somem — logo vinham da avaliação',
-   naCapa.length > 0 && sobrou.length === 0)
+console.log(`     das ${soDoEstilo.length} palavras exclusivas do estilo, sobraram ${sobrou.length}: ${sobrou.join(', ') || '(nenhuma)'}`)
+ok('sem a definição no estilo, as palavras EXCLUSIVAS do estilo somem — logo vinham da avaliação',
+   soDoEstilo.length > 0 && sobrou.length === 0)
 
 /* ─── fecho ───────────────────────────────────────────────────────────────────────── */
 console.log(`\n${'='.repeat(74)}`)

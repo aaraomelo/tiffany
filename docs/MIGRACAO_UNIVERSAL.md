@@ -353,3 +353,48 @@ remover), selo do diretor (a Regra do Oráculo; teoria CONGELADA até verde).
 **Estado: bateria honesta 422 medidores — 410 verdes, 12 com causa nomeada.**
 Teoria (Viviani → Lei trial → intervalos encaixantes → Clifford) congelada
 até o verde pleno, por ordem da mesa.
+
+## 12. O REPARO DA CLASSE B (14/08, madrugada 2 — a sessão do compositor)
+
+Ordem da mesa: «ataquem exclusivamente os 12 vermelhos; proibido usar teoria
+como curativo». Executado — 10 de 12 verdes, 2 vermelhos HONESTOS a apontar
+defeitos reais:
+
+**A causa-mãe da família texto**: o dialecto da casa desenha glifos
+(`q s 0 0 s x y cm /Gf_c Do Q` — o código do carácter no nome; sem Tj/Tf/BT)
+e o pdftotext lê ZERO. Nasceu o leitor partilhado `tests/pdf_casa_texto.js`
+(objetos, páginas, glifos com x/y/s/f/c, texto por linhas, letras longas —
+uma leitura, muitos usos). Consertados com ele:
+- design_no_pdf ✓ (40.611 sequências longas no catálogo)
+- dois_streams ✓ (glifos por Do; fixture própria com tcolorbox — o
+  corpo-estelar perdeu as caixas DE PROPÓSITO: «só o tcolorbox tem caixa»)
+- avalia_macros ✓ (página 1 sem espaços; capítulos 148=148 contra o
+  pdflatex com oráculo AUTO-CONSTRUÍDO; degraus pela escala do cm;
+  mutação filtrada às palavras EXCLUSIVAS do estilo)
+- escala ✓ (corpos exatos da escala do cm; degraus verdadeiros + normalsize
+  da CLASSE lido de size11.clo/latex.ltx + derivados por produto cruzado)
+- volta_estrela ✓ (mutação de UM glifo /G0_82→88; âncora do §V4 no fim
+  REAL da função)
+- escala_dourada ✓ (a escada ficou contígua por decisão — o salto conta-se,
+  não se exige)
+- fonte_banco ✓ (o /tmp/cards_banco é partilhado por 21 medidores e
+  abrir(...,1) TRUNCA — a âncora passou à FONTE do cards.c + volta própria)
+- fator ✓ (o conversa mudou para banco/bin numa reorganização)
+- app_arranca ✓ (TextEncoder/TextDecoder do canvas na sandbox)
+- biblioteca ✓ (a cisão tex.c+tex_core.c — lê o PAR; §Y3 atualizado: o
+  buraco de 2026-08 nomeou a operação, a operação chegou)
+- sem_chute: N1–N6 ✓ (Symbol identificada PELA FORMA do σ com sonda;
+  justificação pela moda das bordas; avanços pela moda do documento;
+  mutação WinAnsi no tex_core: 59.024 chutes sem a conversão)
+
+**OS DOIS VERMELHOS HONESTOS (defeitos reais, nomeados)**:
+1. **sem_chute §N7 — DUPLO-DESENHO no compositor**: nas páginas 422/423/425/
+   434 do catálogo (cluster nas molduras multi-linha), fragmentos pós-hífen
+   («as-sim» → «sim») desenhados DUAS vezes no mesmo sítio (93 glifos;
+   «ssiimm» à vista). O medidor está certo; o compositor tem o bug.
+   ALVO DA PRÓXIMA SESSÃO: quebra_e_desenrola × pintor BX_.
+2. **libc_wasm** — write devolve vazio; traduz «pilha vazia na descida» na
+   libc inteira (herança MAX_FICH). Já nomeados no §10.
+
+**Bateria: 422 medidores — 420 verdes, 2 vermelhos com defeito real
+apontado.** (Os 11 de integração fora da bateria, por estatuto.)

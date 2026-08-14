@@ -51,8 +51,11 @@ function compoe (fonte, saida) {
   catch (e) { return false }
 }
 const tamanhos = (f) => {
+  /* auditoria 14/08: o dialecto não tem Tf — o corpo é a ESCALA do cm × upem
+   * (s·1000), exata a 2 casas */
   const d = fs.readFileSync(f, 'latin1')
-  return [...new Set([...d.matchAll(/\/F\d (\d+) Tf/g)].map((m) => Number(m[1])))].sort((a, b) => a - b)
+  return [...new Set([...d.matchAll(/([\d.]+) 0 0 [\d.]+ [\-\d.]+ [\-\d.]+ cm\s*\/G/g)]
+    .map((m) => Math.round(+m[1] * 1000 * 100) / 100))].sort((a, b) => a - b)
 }
 
 console.log('\n=== A ESCALA TIPOGRÁFICA SAI DO estilo.tex, E É φ^(1/3) ====================\n')
@@ -102,18 +105,48 @@ console.log('\n§T3  E o PDF usa os degraus da escala, não 10 e 14.\n')
   // Math.round(corpo + 0.5) — que arredonda DUAS vezes: 12,33 vira 12,83 e depois 13, quando
   // o (int)(x + 0.5) do tradutor dá 12. A asserção acusou e o defeito era do medidor, não do
   // código: comparar contra uma régua que não é a que o objecto usa acusa sempre.
-  const comoOC = (x) => Math.floor(x + 0.5)
-  const arred = new Set(D.map((d) => comoOC(d.corpo)))
+  /* auditoria 14/08: o dialecto emite o corpo EXATO na escala do cm (o Tf
+   * inteiro morreu) — compara-se contra os degraus VERDADEIROS e contra os
+   * corpos derivados que o compositor constrói por produto cruzado de
+   * degraus (corpo_exp_m: corpo·d_a/d_b, pares (0,4) e (1,3)) — a régua do
+   * objeto, lida do estilo, sem um número de mão */
+  const mil = D.map((d) => Math.round(d.corpo * 1000))
+  /* o corpo do TEXTO não é degrau: é o \normalsize da CLASSE — lê-se de
+   * size{N}.clo + latex.ltx (a lição do avalia_macros), não se afirma */
+  function corpoDaClasse () {
+    try {
+      const mestre = fs.readFileSync(path.join(RAIZ, 'livro.tex'), 'utf8')
+      const sz = (/(\d+)pt/.exec((/\\documentclass\[([^\]]*)\]/.exec(mestre) || [])[1] || '') || [])[1]
+      if (!sz) return null
+      const sh2 = (c) => require('child_process').execSync(c, { encoding: 'utf8', stdio: 'pipe' })
+      const clo = sh2(`kpsewhich size${sz}.clo`).trim()
+      const cmd = (/\\@setfontsize\s*\\normalsize\s*(\\@[a-z]+)/.exec(fs.readFileSync(clo, 'latin1')) || [])[1]
+      const ltx = sh2('kpsewhich latex.ltx').trim()
+      const rx = new RegExp('\\\\def' + cmd.replace(/\\/g, '\\\\') + '\\{([\\d.]+)\\}')
+      const v = (rx.exec(fs.readFileSync(ltx, 'latin1')) || [])[1]
+      return v ? Math.round(parseFloat(v) * 1000) : null
+    } catch (e) { return null }
+  }
+  const daClasse = corpoDaClasse()
+  if (daClasse) mil.push(daClasse)
+  const pares = [[mil[0], mil[4]], [mil[1], mil[3]]]
+  const admissiveis = []
+  for (const b0 of mil) {
+    admissiveis.push(b0)
+    for (const [a, b] of pares) admissiveis.push(Math.floor(b0 * a / b))
+  }
+  const perto = (t) => admissiveis.some((m) => Math.abs(t - m / 1000) <= 0.02)
   let fora = 0, docs = 0
   console.log('      documento         tamanhos no PDF')
   for (const [n, f] of [['dualsort', 'papers/dualsort.tex'], ['teoria', 'teoria.tex']]) {
     if (!compoe(f, `/tmp/t_${n}.pdf`)) continue
     docs++
     const ts = tamanhos(`/tmp/t_${n}.pdf`)
-    for (const t of ts) if (!arred.has(t)) fora++
+    for (const t of ts) if (!perto(t)) fora++
     console.log('      ' + n.padEnd(17) + ts.join(', ') + ' pt')
   }
-  console.log('      degraus da escala (arredondados): ' + [...arred].sort((a, b) => a - b).join(', '))
+  console.log('      degraus (exatos): ' + D.map((d) => d.corpo).join(', ') +
+              ' — e os derivados por produto cruzado dos pares (0,4) e (1,3)')
   ok('todos os tamanhos que aparecem no PDF são degraus da escala do estilo.tex, e nenhum vem' +
      ' de fora dela. Antes eram 10, 12 e 15 — três números escritos à mão, e o do meio nem' +
      ' sequer da mesma família', docs === 2 && fora === 0)
