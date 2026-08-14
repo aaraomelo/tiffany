@@ -74,7 +74,7 @@ borda sob a batuta --- sem Lei~$9$. O dual,
 \textbf{Controle de Histerese} (\S\ref{sec:controle-histerese}),
 selecciona variantes em $\mathcal{V}_k$ sem destruir o estado retido.
 O \textbf{Teorema da Absorção} (\S\ref{sec:absorcao}) mede o
-\emph{estresse} de uma perturbação pela torre: lido pelo
+\emph{estresse} de uma indução pela torre: lido pelo
 \textbf{endereço}, $e=R-k=0$ exato ($\lambda^{+}{+}\lambda^{-}=0$) e o
 teto dimensional existe; a divergência $\sim n^{2}$ é da régua de
 posição, não do objecto.
@@ -2093,6 +2093,8 @@ Teorema do Metrónomo & \textbf{teorema} --- realização métrica
   (Lyapunov dualizado; dual da dinâmica) \\
 Teorema da Absorção & \textbf{teorema operacional} --- estresse $e=0$
   pelo endereço; $\sim n^{2}$ é a régua de posição, não o objecto \\
+Parseval multidimensão & \textbf{teorema} (leitura do central) --- fator
+  $=\prod N_i$; verificação por energia \\
 Batuta & canal do inversor (não é $I$) \\
 Pera & definição: base $=$ cone na batuta \\
 Conservatório & definição: estrutura superior conservada \\
@@ -2487,13 +2489,13 @@ adaptar e soltar sem colar. Leitura polar do mesmo $H_k$:
 
 O Metrónomo atesta a volta íntegra: $\lambda^{+}+\lambda^{-}=0$
 (Teorema~\ref{thm:metronomo}). Falta a pergunta dual: quanto \textbf{custa}
-uma perturbação? Se um passo perturba $k$ elementos de um corpo de $n$
+uma indução? Se um passo induz $k$ elementos de um corpo de $n$
 endereços ($\lambda^{+}=k$) e a volta lê o resíduo $R$ ($\lambda^{-}=R$),
 o \textbf{estresse} é o excesso
 \[
 \boxed{e \;=\; R - k.}
 \]
-A lei exige $e=0$: a leitura não pode dissipar mais do que a perturbação
+A lei exige $e=0$: a leitura não pode dissipar mais do que a indução
 valeu. E a exigência decide-se pela \textbf{régua de leitura} --- que é o
 tema deste teorema, não a robustez do objecto.
 
@@ -2524,7 +2526,7 @@ o \textbf{par} faltante$\oplus$excedente, a Lei~0 a nomear os dois nulos
 ($0=(+1)\oplus(-1)$): quem mata um endereço paga a morte \emph{e} o
 nascimento do lixo, e mais nada.
 \item \textbf{Teto dimensional}: a variância do estresse \textbf{não
-cresce} pela torre em nenhuma classe de perturbação --- a medida escala
+cresce} pela torre em nenhuma classe de indução --- a medida escala
 sem teto de dimensão a rasgá-la.
 \end{enumerate}
 Na leitura \emph{por posição}, a classe (2) \textbf{diverge}
@@ -2539,14 +2541,14 @@ empurra tudo entre a sua posição e o fim. A dissipação é da
 }
 \]
 \emph{Prova (operacional, medida).} \code{tools/lyapunov\_measure.js}:
-inteiro puro, gerador congruente determinístico, \textbf{uma} perturbação
+inteiro puro, gerador congruente determinístico, \textbf{uma} indução
 com \textbf{duas} leituras (as réguas medem o mesmo objecto), $T=100$ por
 célula, torre $134\to4286$ por dobra sobre o cristal recuperado. Medido:
 $e=0$ exato em todas as células de endereço preservado; $e\equiv1$
 ($\sigma^{2}=0$) no endereço destruído lido pelo endereço; e por posição
 $\sigma^{2}\cdot T^{2}$ sobe de $13\,435\,000$ para $16\,130\,133\,019$
 quando $n$ sobe $32\times$ --- $n^{2}$ manda $1024\times$, mediu-se
-$1200\times$, média $e\approx n/2$. Matriz de perturbação no medidor v2
+$1200\times$, média $e\approx n/2$. Matriz de indução no medidor v2
 (\code{tests/cristal\_volta.js} \S V3, as duas réguas na mesma cópia):
 permutação e retoque da projeção \emph{absorvidos} ($R=0$); conteúdo,
 categoria, remoção e duplicação $R=1$; endereço destruído --- posição
@@ -2554,7 +2556,7 @@ $R=1641$, endereço $R=2$, o par. $\square$
 \end{teorema}
 
 \begin{proposicao}[a involução dentro do ruído]\label{prop:involucao-ruido}
-Num lote de $m$ perturbações independentes, duas que caem no
+Num lote de $m$ induções independentes, duas que caem no
 \textbf{mesmo endereço} aniquilam-se --- a alteração involutiva compõe
 consigo própria e dá a identidade ($\mathrm{flip}\circ\mathrm{flip}=
 \mathrm{id}$: \textbf{Lei~1}). O estresse aparece então \emph{negativo},
@@ -2589,12 +2591,113 @@ o reticulado continua inteiro.
 
 \begin{observacao}[estatuto]
 Teorema \textbf{operacional}: enuncia o que a medida fechou na classe
-considerada (corpos endereçados; perturbações das cinco classes; torre
+considerada (corpos endereçados; induções das cinco classes; torre
 por dobra até $4286$). Não afirma robustez universal de todo corpo ---
 afirma que \emph{o estresse é propriedade da régua de leitura}, e que a
 leitura dual (endereço) o absorve. Sem lei nova: Lei~0 (o par dos nulos),
 Lei~1 (involução no ruído), Lei~4 (a torre por dobra), Metrónomo (a
 atestação $\lambda^{+}+\lambda^{-}=0$).
+\end{observacao}
+
+\section{Energia --- a conservação pelo Parseval dourado}\label{sec:energia}
+
+\begin{definicao}[indução e meta-indução]\label{def:inducao}
+O passo que transforma um corpo chama-se \textbf{indução} --- o mesmo
+gesto da Lei~4: toda transformação é um passo de indução na torre. O
+passo \emph{sobre} os passos --- a leitura dual que mede a indução e
+valida o que ela conservou --- é a \textbf{meta-indução}: o Metrónomo a
+ler a indução. A dualidade é a de sempre: a indução projecta
+($\lambda^{+}$), a meta-indução lê ($\lambda^{-}$), e o que a
+meta-indução \textbf{valida é a conservação de energia}.
+\end{definicao}
+
+\begin{definicao}[energia]\label{def:energia}
+A \textbf{energia} de um corpo $x$ de componentes endereçadas é o
+segundo momento
+\[
+\boxed{E(x)\;=\;\sum_i x_i^{2}}
+\]
+--- a \textbf{massa} da cruz (Prop.~\ref{prop:massa}: a segunda
+coordenada é $\sum(x-c)^{2}$), pela régua ao quadrado ($E=m$ em p.u.;
+\emph{Corpo estelar}). A energia é a \textbf{norma}: as leis de
+conservação da norma do sistema são três nomes da mesma exigência ---
+$N(xy)=N(x)N(y)$ (Hurwitz, o lado que conta), $|\det|=1$ (o fator de
+potência) e $\lambda^{+}+\lambda^{-}=0$ (o Metrónomo) --- e
+\textbf{Parseval é essa exigência lida na transformada}: a energia não
+se perde ao atravessar, muda de domínio.
+\end{definicao}
+
+\begin{teorema}[Parseval multidimensão pelo teorema central]\label{thm:parseval-multi}
+No anel da Lei~8 ($\mathbb{Z}_{65537}$, a transformada dourada
+$F[x]_k=\sum_i x_i g^{ik}$ com $g$ de ordem $N$), para eixos de
+dimensões $N_1,\ldots,N_d$ com raízes de ordens $N_i$:
+\[
+\boxed{
+\sum_{\mathbf{k}} X_{\mathbf{k}}\,X_{-\mathbf{k}}
+\;=\;
+\Bigl(\prod_{i=1}^{d} N_i\Bigr)\cdot\sum_{\mathbf{i}} x_{\mathbf{i}}^{2},
+}
+\]
+e o fator depende \textbf{só da dimensão total} $\prod N_i$, não da
+fatoração em eixos. Derivação pelo \textbf{teorema central}
+(Prop.~\ref{thm:central-peano}):
+\begin{enumerate}
+\item \textbf{O par frente/volta.} Avaliar na raiz $g^{k}$ e na inversa
+$g^{-k}$ é a ida e a reflexão --- $(X_k,X_{-k})$ é o par
+$(\lambda^{+},\lambda^{-})$ na representação. O produto fechado
+$\sum_k g^{(i-j)k}=N\,\delta_{ij}$ é \textbf{contar} (Hurwitz): a órbita
+completa da raiz conta $N$ na diagonal e $0$ fora --- o corte discreto.
+\item \textbf{O lado contínuo.} A mesma linha, integrada, é
+$\int|f|^{2}=\int|F|^{2}$ com a medida de Lebesgue --- \textbf{integrar}
+(Gentil). A ordem conserva-se porque a medida é $\sigma$-aditiva: o
+degrau $\mathbb{Q}\to\mathbb{R}$ do teorema central transporta a
+contagem para a integral sem perder a ordem.
+\item \textbf{Multidimensão.} Os eixos compõem por \textbf{produto de
+medidas} (Lebesgue/Fubini: a medida do produto é o produto iterado), e a
+torre sobe por dobra (Lei~4) --- logo Parseval compõe eixo a eixo e o
+fator multiplica: $\prod N_i$.
+\end{enumerate}
+\emph{Prova (operacional, medida).} \code{tests/cristal\_energia.js}
+sobre o digest do cristal no anel ($N=2^{8}$, a acumulação do
+\code{/AssinaturaOito}): a \textbf{mesma} dimensão $256$ fatorada como
+$256$, $16\cdot16$ e $4^{4}$ --- a raiz de ordem $4$ é o período do $i$
+(pental) --- dá o \textbf{mesmo} espectro de energia
+($\Sigma X X_{-}=37\,222=256\cdot\Sigma A^{2}$ nos três caminhos); e a
+raiz de ordem errada ($3^{128}$, ordem $512$) \textbf{quebra} a
+identidade --- a asserção pode falhar. $\square$
+\end{teorema}
+
+\begin{corolario}[a verificação dá-se por energia]\label{cor:verifica-energia}
+A volta de um corpo atesta-se \textbf{por energia}, sem comparação
+analítica termo a termo:
+\[
+\boxed{
+E(\text{fonte})=E(\text{reconstrução})
+\quad\text{(inteiro exato)},
+}
+\qquad
+\boxed{
+\text{caminho espectral valida a conta (dois caminhos)}.
+}
+\]
+A indução legítima \textbf{conserva} $E$; a que viola o invariante muda
+$E$ e a meta-indução acusa. Medido
+(\code{tests/cristal\_energia.js} \S E0, \S E5):
+$E=38\,731\,623\,179$ exato dos dois lados; permutação conserva
+($\Delta E=0$); e \textbf{remoção e duplicação do mesmo endereço dão}
+$\Delta E=\mp7\,433\,979$ --- o par $(+1)\oplus(-1)$ da Lei~0, com soma
+zero, agora lido na energia.
+\end{corolario}
+
+\begin{observacao}[estatuto]
+A cadeia é derivação \emph{na classe}: o teorema central dá a ponte
+contar$\leftrightarrow$integrar; Parseval é a conservação da norma lida
+nessa ponte; a multidimensão segue porque os dois lados compõem por
+produto (contagem multiplicativa; medida-produto). A conta fechada é a
+do anel ($\mathbb{Z}_{65537}$, inteira, com a raiz errada a quebrar) ---
+não se reivindica aqui prova nova do Parseval clássico: reivindica-se a
+\textbf{leitura} dele como caso do teorema central, e a verificação
+\textbf{por energia} que ela habilita.
 \end{observacao}
 
 \section{Leitura complexa --- pares, polar, modelo de teste}\label{sec:pares-complexos}
@@ -3573,6 +3676,9 @@ Lyapunov dualizado \S\ref{sec:lyap-dual-releitura}
 (\code{tests/lyapunov\_refletido.c});
 absorção \S\ref{sec:absorcao}, Teorema~\ref{thm:absorcao}:
 \code{tools/lyapunov\_measure.js} (estresse pela torre, inteiro puro);
+energia \S\ref{sec:energia}, Teorema~\ref{thm:parseval-multi}:
+\code{tests/cristal\_energia.js} (Parseval dourado 1D/2D/4D no anel;
+verificação por energia);
 Teorema Central na torre: Prop.~\ref{thm:central-peano},
 \ref{prop:central-operacional};
 música / canal: Prop.~\ref{prop:rede-no-canal},
