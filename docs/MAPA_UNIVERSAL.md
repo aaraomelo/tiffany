@@ -155,3 +155,26 @@ locais/finitas e DECLARA a fronteira; satisfazer o Clay exigiria
 atravessá-la, o que o próprio método diz não fazer. Os elos que AINDA
 são nossos: a 2-descida da curva de Viviani (o posto), o Euler parcial
 exato, e o toro como superfície de Hodge.
+
+## O levantamento atualizado (14/08, fim da madrugada — pós-posto/AGM/Tate/histerese)
+
+| problema | o que MUDOU desde o inventário | estado do que falta |
+|---|---|---|
+| **Poincaré** | — | resolvido (Perelman), não por nós |
+| **Riemann** | o dicionário órbitas↔primos MEDIDO (24/24, 22/22); o gume de 𝓕 (ponte algébrica global impossível: grau (2,2) vs infinitos zeros); o defeito da linha = MEIA unidade = o lugar arquimediano | a ζ clássica continua fora; a ponte só pode ser transcendente/fator-a-fator, com o arquimediano incluído — a fronteira nunca esteve tão nítida |
+| **BSD** | **o lado algébrico FECHOU para a nossa curva**: posto 0 por 2-descida completa (zero sobreviventes; controlo positivo na n=6); Ω certificado (0.798121–0.798122) via AGM+π; somas de Dirichlet exatas positivas (≈0.8754) e o analítico VÊ o posto (n=6 fica 4× menor) | para a NOSSA curva: UM elo — certificar L(E,1)≠0 (pede modularidade/símbolos modulares — régua de fora); para o Clay: o quantificador (todas as curvas) |
+| **Hodge** | **dim ≥ 2 pago na leitura de Tate**: E×E/F_p com 4 classes = 4 ciclos (Frobenius necessário: sem ele posto 3); a joia Δ·Γ=N | a Hodge complexa geral (dim ≥ 4, classes não-divisor; variedades gerais) = o quantificador |
+| **Navier–Stokes** | fronteira renomeada: a meia-unidade arquimediana é a mesma da linha crítica e do gap | o contínuo 3D — a fronteira, agora com gramática (histerese) |
+| **Yang–Mills** | idem: o gap por andar + a fronteira nomeada em triplo | a QFT contínua 4D |
+| **P vs NP** | **o nosso ∀ tem nome**: metrónomo+invariante (prova/refuta); a assimetria exata (11vs47, 11vs4095, fibra paga det) | o ∀ do Clay corre sobre máquinas de fora — sem invariante-do-passo interno possível |
+
+**A mudança estrutural do levantamento**: as duas barreiras deixaram de
+ser muros sem nome e ganharam GRAMÁTICA — (i) o limite contínuo é a
+HISTERESE (a memória do caminho = Maestro+Metrónomo: dobra+seletor
+sobre o tick; preenche a dimensão com a árvore 2^{k+1}−1); (ii) o
+quantificador universal é o METRÓNOMO COM INVARIANTE (a indução é
+conservação; refuta sem invariante). Os problemas do Clay pedem
+exatamente o que estas gramáticas não alcançam de dentro: o seletor
+sobre objetos de fora (todas as curvas, todas as máquinas) e a
+histerese completada (o contínuo real). **Saber o nome da parede não a
+derruba — mas agora sabe-se ONDE ela está e DE QUE é feita.**

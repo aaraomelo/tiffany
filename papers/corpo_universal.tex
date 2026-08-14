@@ -1264,7 +1264,10 @@ medidor validou.
 \toprule
 papel & função no universal & onde o medidor fechou \\
 \midrule
-\textbf{Metrónomo} & métrica/ordem: lê a transição & \S D0, \S D4; \emph{Peano} (Teor.\ do Metrónomo) \\
+\textbf{Quantizador} & converte o contínuo em contagem conservada
+  (ângulo, energia, verdade) & Teor.~\ref{thm:quantizador-universal} \\
+\quad$\hookrightarrow$ Metrónomo & a realização de Peano: métrica/ordem,
+  lê a transição & \S D0, \S D4; \emph{Peano} (Teor.\ do Metrónomo) \\
 \textbf{Maestro} & dinâmica: projecta o passo & \emph{Peano} (Teor.\ do Maestro) \\
 \textbf{Inversor} & a volta: admissibilidade & \S D5; \S P3 \\
 \textbf{Orquestra} & composição dos operadores & \emph{Peano} (Estrela dos $G_i$) \\
@@ -2134,6 +2137,279 @@ Lebesgue do Teorema Central. O estatuto: os $\forall$ do Clay correm
 sobre objetos de fora --- declarado; o inventário não muda.
 \emph{Medido:} \code{tests/quantificador\_histerese.js} ($8{:}0$;
 assinado por $\mathcal{M}$).
+$\square$
+\end{teorema}
+
+\begin{teorema}[a memória é Maestro $+$ Metrónomo]\label{thm:maestro-memoria}
+A pergunta do coordenador («a memória vem de Maestro$+$Metrónomo?»)
+tem resposta SIM com a gramática exata que o espectro já tinha
+(«Maestro $=$ dobra $+$ seletor», \S MF): a histerese é
+\emph{exatamente} $\mathrm{seletor}\circ(\mathrm{dobra},\mathrm{id})$
+(reproduzida ponto a ponto, $33/33$); \textbf{nenhuma metade tem
+memória sozinha} (sempre-dobra não retém; sempre-retém não aprende —
+a memória exige o seletor \emph{a meio}: a membrana); \textbf{o
+estado retido vive no trial} $\{-1,0,+1\}$ (Lei~3 — a batuta que o
+Maestro deixou apontada); e as histórias contam $2^{k+1}-1$: \emph{o
+guardado é o caminho}. O espectro, a dinâmica e a memória falam a
+mesma frase.
+\emph{Medido:} \code{tests/maestro\_memoria.js} ($5{:}0$; $\mathcal{M}$).
+$\square$
+\end{teorema}
+
+\begin{teorema}[a realização da histerese é o passo de calor --- a
+retenção espectral]\label{thm:histerese-navier}
+Aplicados os resultados (a leitura do coordenador): \textbf{a equação
+da histerese é a retenção espectral} --- o passo de calor multiplica o
+modo $k$ por $\cos^{2}(\pi k/M)=\mu_{k}^{2}/4$ (a meia-volta ao
+quadrado como fator de retenção), com o espectro exato $\{1,\frac12,0\}$
+no ciclo $M{=}4$: modo $0$ retido pleno, modo $\pi/2$ meio-retido,
+modo $\pi$ \emph{dobrado a zero num passo} — o calor é o seletor do
+Maestro, modo a modo. \textbf{As classes são as massas} (mesma massa:
+a diferença morre relativamente, $2^{n}$ contra $4^{n}$; massas
+diferentes \emph{nunca} se encontram — $\Sigma d=-4^{6}$ exato: a
+memória mínima é inviolável). \textbf{Os pontos fixos}: da difusão,
+os constantes (varredura exaustiva: $\Delta u=0\iff u$ constante —
+um por classe); da histerese, a zona inteira. E \textbf{os dois
+extremos da memória}: Euler conserva o produto dual da diferença
+(memória total); a difusão só a massa (mínima) — o N--S do contínuo
+vive entre os dois, e essa leitura fica \emph{declarada como leitura}:
+o contínuo é a fronteira; a gramática está medida.
+\emph{Medido:} \code{tests/histerese\_navier.js} ($6{:}0$;
+$\mathcal{M}$).
+$\square$
+\end{teorema}
+
+\begin{teorema}[a batuta linear sela a passagem ao contínuo --- e o
+gap é a vareta]\label{thm:batuta-continuo}
+A batuta do corpo de Peano (pera $+$ vareta $+$ ponta, com a vareta
+\emph{linear}: $B(s,t)=p(t)+s\,u(t)$) é o selo que faltava nomear na
+passagem discreto$\to$contínuo. \textbf{(i) A vareta é exata e
+rígida}: afim em $s$ implica racional-exata para todo $s$ racional
+--- o contínuo entra \emph{sem erro} --- e vale o \emph{pombal
+linear}: as duas pontas determinam a vareta inteira
+($2B(\tfrac12)=B(0)+B(1)$, cruzado exato); a vareta \emph{quebrada}
+concorda nas pontas e viola o meio --- só a reta é selada pelas
+pontas. \textbf{(ii) A joia --- o gap é a vareta}: o comprimento ao
+quadrado da vareta entre dois ticks do relógio é
+$(\Delta c)^{2}+(\Delta s)^{2}=2-t_{1}$ ($16/16$ no anel) ---
+\emph{exatamente} o gap de Yang--Mills por andar: a massa discreta
+\emph{é} o comprimento da batuta entre ticks, e o limite contínuo (o
+gap a fechar) é a vareta a encolher. \textbf{(iii) O trial
+linearizado é o intervalo}: $\{-1,0,+1\}$ são as duas pontas e o
+\emph{meio} da vareta (a pera --- o cone --- no zero); cada
+$x\in[-1,1]$ é mistura \emph{única} das folhas
+($\lambda=\tfrac{x+1}{2}$, volta $2\lambda-1=x$ exata).
+\textbf{(iv) O selo do caminho}: a interpolação linear entre os nós
+do nível $k$ contém o verdadeiro com erro $\le 2^{-k}$ (o nível fino
+vive dentro do intervalo do grosso) --- o encaixe é o \emph{erro da
+vareta}. Discreto (nós) $+$ linear (vareta) $\Rightarrow$ contínuo
+(caminho), certificado: a pera ancora, a vareta atravessa, a ponta
+escreve.
+\emph{Medido:} \code{tests/batuta\_continuo.js} ($6{:}0$;
+$\mathcal{M}$).
+$\square$
+\end{teorema}
+
+\begin{teorema}[a dinâmica é gerada pelo inversor --- e cada inversão
+custa um espelho]\label{thm:dinamica-inversor}
+O inversor da casa tem dois rostos que a lib separa: $J$ ($x\mapsto
+-1/x$, o bit, $\det=+1$, ordem $4$) e $X=\mathrm{espelho}\cdot J$
+($x\mapsto 1/x$, a troca, $\det=-1$). \textbf{(i) O gerador}: a
+dinâmica $\langle T,J\rangle$ fecha com \emph{duas} relações, medidas
+com ordens exatas --- $J^{2}=-I$ (o bit quadra no espelho central) e
+$(JT)^{3}=I$ (a tríade fecha na unidade) --- e a batuta \emph{fatora}
+pelo inversor: $A_{m}=T^{m}X$. \textbf{(ii) Euclides é a dinâmica do
+inversor}: o passo $(p,q)\mapsto(q,\,p-aq)$ é $X\circ T^{-a}$; a
+órbita do racional desce até à folha, \emph{a folha é o
+$\mathrm{gcd}$}, e a reconstrução $\prod A_{a_{i}}$ devolve o par
+exato (dois caminhos que concordam) --- dividir é inverter: a
+dualidade como memória da divisão, agora como dinâmica.
+\textbf{(iii) A joia --- o resíduo é a membrana}: na órbita metálica
+$A_{m}^{n}$, o resíduo da forma $p^{2}-mpq-q^{2}$ é
+\emph{exatamente} $(-1)^{n}$ ($24/24$) --- cada inversão custa um
+espelho no determinante ($\det X=-1$) e a norma do convergente
+paga-o à vista: a alternância da membrana (\S K0), aritmética pura.
+\textbf{(iv) Lagrange na casa}: a quadrática do ponto fixo
+\emph{deriva-se da matriz} ($cx^{2}+(d-a)x-b$): para $A_{m}$ dá
+$x^{2}-mx-1$ com $\mathrm{disc}=m^{2}+4$ --- \emph{as dobras da
+casa}; o quadrático de itinerário $[1,2]$ é periódico com o resíduo
+da forma do período a repetir $(-1,2)$. A natureza do número \emph{é}
+o tipo da órbita do inversor: finita (racional, folha $=$
+$\mathrm{gcd}$), fixa (metálico), periódica (quadrático). \textbf{(v)
+O gume}: sem o inversor, $q$ é invariante da translação --- a órbita
+$\langle T\rangle$ nunca alcança a folha: \emph{nada desce sem
+inverter}.
+\emph{Medido:} \code{tests/dinamica\_inversor.js} ($6{:}0$;
+$\mathcal{M}$).
+$\square$
+\end{teorema}
+
+\begin{teorema}[a derivação pelas primitivas --- as quatro pontes são
+palavras nas cinco operações]\label{thm:derivacao-primitivas}
+As cinco operações (\S\ref{sec:cinco}) \textbf{não são independentes
+--- o dual emparelha com cada uma}: soma com o dual dá o \emph{centro}
+($M+M^{\dagger}=\mathrm{tr}\,M\cdot I$), multiplicação com o dual dá a
+\emph{membrana} ($M M^{\dagger}=\det M\cdot I$), e a \textbf{inversão
+é a divisão do dual} ($M^{-1}=M^{\dagger}/\det M$); Cayley--Hamilton
+é a \emph{concordância} dos três emparelhamentos, derivada. E as
+quatro pontes que saíram do mapa (\S\ref{sec:extensoes}) são
+\textbf{palavras} nessas operações:
+\textbf{(i) Clifford $=$ $\otimes$ $+$ $\dagger$}: gerador $\iff$
+auto-dual-negativo ($a^{\dagger}=-a$); $e^{2}=-\det(e)\,I$ é o produto
+dual; o anticomutador é a \emph{polarização da soma no determinante}
+($\{a,b\}=-(\det(a{+}b)-\det a-\det b)\,I$) --- e o núcleo da lib
+\emph{já é} a tríade $\mathrm{Cl}(2,1)$: $\{S,X,J\}$ anticomutam dois
+a dois com quadrados $(I,I,-I)$, e o $H^{2}=2I$ do
+Teor.~\ref{thm:universal-espelho} é a polarização de $S{+}X$
+($\det H=-2$). O gume: $\{S,W\}=2I\neq0$, e a fórmula \emph{prevê} o
+valor.
+\textbf{(ii) La Hire $=$ $\oplus$ $+$ $\dagger$ na órbita}: somar com
+o próprio dual aterra no \emph{centro}
+($R^{k}+(R^{k})^{\dagger}=\mathrm{tr}\cdot I$ --- o diâmetro é o
+centro da álgebra), e na membrana $+1$ o dual é a inversão
+($\det=1\Rightarrow R^{\dagger}=R^{-1}$, exato no anel): a rotação
+vira translação porque a soma dual só deixa o escalar.
+\textbf{(iii) Pontryagin $=$ o dual do grupo pela troca
+$\oplus\to\otimes$}: o caráter converte soma em produto
+($\chi(a{+}b)=\chi(a)\chi(b)$, $256/256$), a restrição na torre é a
+redução do índice, e o \emph{bidual é a volta}
+($\mathrm{idft}\circ\mathrm{dft}=\mathrm{id}$): a Lei~1 no nível dos
+grupos.
+\textbf{(iv) Dirac $=$ $\otimes\circ\dagger\circ\oplus$}:
+$D=(\mathrm{troca}\otimes I)\cdot(A\oplus I)$ --- construído só com
+\code{kron} e \code{bloco} da lib, byte a byte o $D$ do
+Teor.~\ref{thm:furo}, com $D^{2}=A\oplus A$; e \emph{sem a troca a
+palavra falha} ($(A\oplus I)^{2}=A^{2}\oplus I$): o dual é
+obrigatório --- «metade para cada lado» é a soma direta costurada
+pela troca. E \textbf{tudo no contínuo}: o operador fecha na unidade
+em profundidade finita (a raiz $2$-ádica) e o diâmetro de La Hire é o
+intervalo da batuta (mistura única com volta exata,
+Teor.~\ref{thm:batuta-continuo}).
+\emph{Medido:} \code{tests/derivacao\_primitivas.js} ($7{:}0$;
+$\mathcal{M}$).
+$\square$
+\end{teorema}
+
+\begin{teorema}[as soluções lidas pelas primitivas --- o inventário do
+Clay em palavras]\label{thm:solucoes-primitivas}
+O inventário (\S\ref{sec:milenio-universal}) re-lido nos termos do
+Teor.~\ref{thm:derivacao-primitivas}, com resultados novos exatos:
+\textbf{Riemann pela inversão} --- a equação funcional é
+inversão$\circ$espelho ($Z(1/u)=Z(-u)$, ponto a ponto no anel, com o
+numerador mutado a quebrá-la), e \emph{os zeros são os pontos
+autoduais}: os únicos racionais com $|u|=|1/u|$ são $\pm1$
+(varredura completa reduzida), exatamente onde $Z$ zera --- a linha
+crítica é o lugar fixo da inversão, e a sua parte racional é o par da
+Lei~0.
+\textbf{BSD pela divisão medida na multiplicação} --- a imagem da
+$2$-descida é um \emph{grupo} por $\otimes$ módulo quadrados
+($16/16$), e o AGM do período é o par $\oplus/\otimes$: a ordem
+$g\le a$ \emph{deriva} de $(a{+}b)^{2}-4ab=(a{-}b)^{2}\ge0$, com
+igualdade exatamente no encontro.
+\textbf{Hodge pelos dois emparelhamentos (a joia)} --- $a_{p}$ é a
+\emph{soma dual} do Frobenius ($F+F^{\dagger}=a_{p}I$) e $p$ é o
+\emph{produto dual} ($F F^{\dagger}=pI$); a contagem é
+$\boxed{N=\det(F-I)}$, validada por recontagem do zero (dois
+caminhos); e a multiplicidade de Tate é identidade polinomial:
+$\mathrm{charpoly}(F{\otimes}F)=(x{-}p)^{2}(x^{2}-(a_{p}^{2}{-}2p)x+p^{2})$,
+Faddeev--LeVerrier contra o produto simbólico ($4/4$).
+\textbf{Navier--Stokes pela soma das metades} --- o transporte
+\emph{multiplica} pela folha (produto dual conservado), o calor
+\emph{divide} o modo (retenção $\{4,2,0\}$ inteira), e o passo é a
+soma das duas partes: a seta vive só na metade que divide.
+\textbf{A Lei~2 em palavras} --- Yang--Mills: o gauge é a conjugação
+$\otimes\circ\div$ (a plaqueta telescopa exata; o link nu muda --- o
+gume); $P$~vs~$NP$: a assimetria é \emph{o preço da divisão}
+($\mathrm{adj}\cdot M=\det\cdot I$), e a classe $P$ da casa é
+$|\det|=1$ --- onde a divisão é grátis ($\det=2$ deixa resto).
+\textbf{Poincaré pelo bidual} --- $(M^{\dagger})^{\dagger}=M$ e
+$\mathrm{espelho}^{2}=I$: a dualidade $H^{k}\leftrightarrow H_{n-k}$
+é $\dagger\circ\dagger=\mathrm{id}$ (Lei~1), a mesma volta do bidual
+de Pontryagin. O estatuto do inventário não muda: a leitura corre
+sobre o provado --- mas agora \emph{a gramática é uma}: sete
+problemas, cinco operações.
+\emph{Medido:} \code{tests/solucoes\_primitivas.js} ($8{:}0$;
+$\mathcal{M}$).
+$\square$
+\end{teorema}
+
+\begin{teorema}[a passagem global constrói-se --- a correção do
+coordenador, e Clifford a fechar]\label{thm:passagem-global}
+\textbf{A correção, registada}: o Teor.~\ref{thm:duas-pontes} mediu
+«nenhuma $\mathcal{F}$ \emph{de grau finito}» --- e a mesa leu porta
+fechada. Leitura precipitada (correção do coordenador, 14/08): o
+teorema não fecha a porta, \emph{força a construção pelo limite} ---
+a mesma força que fez o contínuo ser histerese e a batuta selar a
+linearização. A chave --- \emph{primos $\leftrightarrow$ irracionais
+no finito-infinito; todas as dimensões com o seu $0$ e $1$, o círculo
+e o polígono metálico} --- sai medida:
+\textbf{(i) os zeros são de todas as dimensões, os polos de cada
+uma}: o numerador de $Z_{m}$ não depende da régua --- $u=\pm1$ (o par
+da Lei~0) é partilhado por todas; as folhas (o polígono metálico
+próprio) nunca coincidem entre réguas (dois caminhos).
+\textbf{(ii) a torre dá o infinito}: cada andar acerta os zeros em
+exatamente \emph{dois} ticks ($k=0,M/2$) --- dois por andar, todo
+andar: a família tem infinitos zeros onde cada membro tem dois.
+\textbf{(iii) a linha crítica vive no irracional}: a FE \emph{pesada}
+$p\,u^{2}P(1/(pu))=P(u)$ é exata (o peso errado quebra --- o gume), o
+lugar fixo é $|u|=1/\sqrt{p}$, \emph{sem pontos racionais}
+($p r^{2}=s^{2}$ insolúvel) e com linhas de primos distintos que
+nunca se cruzam --- a linha da casa passa pelos racionais $\pm1$; a
+de cada primo, pelo seu irracional: \emph{o defeito de meia unidade
+(Re$\,s=0$ vs $\tfrac12$) é o peso --- $\tfrac12$ é o expoente da
+raiz}.
+\textbf{(iv) e Clifford fecha} (a verificação pedida): a raiz
+$\sqrt{p}$ que não cabe em $\mathbb{Q}$ existe \emph{inteira um andar
+acima} como gerador de Clifford --- $e_{p}=[0,p;1,0]$:
+$e_{p}^{2}=p\,I$, auto-dual-negativo, $\det=-p$ --- o movimento da
+membrana de Dirac (Teor.~\ref{thm:furo}) e da carta $W$; e $e_{p}$
+\emph{anticomuta com o espelho} ($\{S,e_{p}\}=0$, polarização $0$):
+cada primo entra na álgebra do núcleo como gerador próprio. Na
+variável $v=u\,e_{p}$, a inversão pesada é a inversão \emph{nua} da
+casa, e a linha crítica de todo primo é $|v|=1$ --- \emph{a mesma
+linha, um andar acima}. A passagem constrói-se pela família
+(torre $+$ subida de andar); o que resta dela é o limite, nomeado.
+\emph{Medido:} \code{tests/passagem\_global.js} ($7{:}0$;
+$\mathcal{M}$).
+$\square$
+\end{teorema}
+
+\begin{teorema}[a separação das línguas --- o Quantizador, e o
+Metrónomo como realização de Peano]\label{thm:quantizador-universal}
+Por ordem do coordenador (14/08), a língua universal separa-se da
+realização: \textbf{Metrónomo é o nome de Peano} (a face musical ---
+o tempo em ticks); o papel universal chama-se \textbf{Quantizador}
+--- \emph{o operador que converte o contínuo em contagem conservada}.
+A interpretação, medida em três faces:
+\textbf{(i) quantiza o ângulo}: o relógio extrai do círculo
+exatamente $M$ pontos (ordem \emph{exata}: $\omega^{M}=1$ com
+$\omega^{M/2}=-1$) e o refinamento é a torre
+($\omega_{2M}^{2}=\omega_{M}$) --- o contínuo entra por refinamento
+do passo de quantização, nunca por salto.
+\textbf{(ii) quantiza a energia --- a cascata do quantum (a joia)}:
+o gap $2-t_{M}$ é o \emph{quantum do andar} ($\neq0$ em todos) e
+\textbf{fatora pela dobra}:
+\[
+\boxed{\;(2-t_{2M})\,(2+t_{2M})\;=\;2-t_{M}\;}
+\]
+--- o quantum do andar grosso é o do fino vezes a meia-volta ao
+quadrado ($\mu^{2}=2+t$); a escada desce sem nunca zerar, e o zero é
+só do limite: \emph{o tick é o quantum, e $\hbar\to0$ é a vareta a
+encolher} (Teor.~\ref{thm:batuta-continuo}). O gume: o
+emparelhamento errado quebra.
+\textbf{(iii) quantiza a verdade}: \emph{uma} identidade matricial
+($R^{\mathsf{T}}R=I$ no anel) substitui as $M$ verificações (a
+varredura fica como controlo) --- o $\forall$ do
+Teor.~\ref{thm:quantificador} é o Quantizador da verdade, e o seu
+dual é o limite (a histerese).
+\textbf{E a separação desceu ao código}: a lib fica \emph{abaixo}
+das duas línguas --- nem os nomes de Peano nem «quantizador»
+aparecem nela ($0$ ocorrências; a asserção \emph{falhava} antes: a
+Lei~3 dizia «a batuta», instância dentro da língua universal,
+removida). A lei não precisa de nome; os nomes vivem nos papers ---
+o Universal é dono da lei, cada instância é dona da sua face.
+\emph{Medido:} \code{tests/quantizador\_universal.js} ($7{:}0$;
+$\mathcal{M}$).
 $\square$
 \end{teorema}
 

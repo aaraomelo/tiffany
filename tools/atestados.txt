@@ -32,6 +32,7 @@ banda d2f4c8e26b179307 0
 barramento 8d975d371666a0c7 0
 base c9803c08783a79f9 0
 base_local a24cac35e9d0a65f 0
+batuta_continuo 7671972b9f96081b 0
 biblioteca c1f10655bb60418b 0
 bidual 503ba21286d79154 0
 bit_metropolis cd99cd38b06fd1a8 0
@@ -111,12 +112,14 @@ deforma a65d0d53edf428fc 0
 deforma_d fb144a649a4dcf70 0
 demonstracoes a685d9fad33b9705 0
 densidade f31b20fa261adfa1 0
+derivacao_primitivas 3d04c680af7012a7 0
 desenha c24eec4c13220fa5 0
 design ab79b554f91257ef 0
 design_no_pdf c808ea80e27f1cb8 0
 dif 45283285651136c9 0
 diferentes 165466b5efd81a99 0
 dimensoes 1bfd9d609f9567a9 0
+dinamica_inversor 3857d5d566297c2e 0
 dirac_transicao 97341d46b5343b0d 0
 disco 92e60d19d5605966 0
 disco_wasm 6f8c8a6766654c6c 0
@@ -211,6 +214,7 @@ hilbert_bidual b7e85807ec6864e8 0
 hiper 965c8458576d06ff 0
 hipercubo32 ea42d6c98082dcd2 0
 hipociclo 514fec9334344cf9 0
+histerese_navier ed3e0f5791f828fd 0
 hodge_viviani 9e53debee8151fb9 0
 hopfield 9009b4f6ecdc43a3 0
 hurwitz c3d6c02377a0072b 0
@@ -249,6 +253,7 @@ logico_continuo 0cb6224c6d89cb4e 0
 luz_periodo bbe03b56937b8167 0
 lyapunov_refletido 1e9f698b6ae0aab6 0
 lyapunov_torre 6d18b7610f966dc9 0
+maestro_memoria d89b11e2c1b7a549 0
 maisum 06d588623bce168e 0
 matricial e708671d4f3558dc 0
 maxcut 6e3f503ba23045de 0
@@ -313,6 +318,7 @@ parabola 986f731493cd1a64 0
 paracomplexo 2691565615f4e600 0
 parseval 72b8ef997da2bd4f 0
 pascal 52b41d2d25608f60 0
+passagem_global 96703b17e0d7e130 0
 patria_front bd725634b0b6534c 0
 pdf_corpo ae32f6ce86e39c76 0
 peano_dual a4d3f191455dc4b6 0
@@ -340,6 +346,7 @@ progressoes 68a256306197805b 0
 promove a305cad77d13697a 0
 quantico 5cf79db190356ce4 0
 quantificador_histerese afd27f900a63173a 0
+quantizador_universal 5432c65b6546dfe0 0
 quasi c1eae084a401bc3d 0
 quatro 7ab68ac6a57ef1f7 0
 quebra 789cef502f39fd13 0
@@ -386,6 +393,7 @@ simula ec8b4e5edec62a25 0
 sistema b93be799ff62ae01 0
 smartcontract 2686bef07a252cfb 0
 solar bdc476d2250886a9 0
+solucoes_primitivas a317586c48866d16 0
 sombra_cone 2b75f89f2187feac 0
 sombras bb1e5441b87d7cb5 0
 spinor32 d6b61362e77bb476 0
