@@ -106,9 +106,9 @@ Critério da mesa para o próximo elo (um só, quando a mesa escolher):
 
 | candidato | o que já está medido | o que falta | lacuna |
 |---|---|---|---|
-| **Clifford pleno** | Cl(1,1) completo: D²=L, G²=−L, {D,G}=0, graduação ℤ₂, v²=(x²−y²)L (clifford_dual 14:0); as cartas da torção e o grupo de ordem 8 (contorno_riemann) | subir de Cl(1,1) para Cl(2,1)/Cl(n): mais um gerador anticomutante e as suas relações — o mesmo movimento «um andar acima» já usado duas vezes | **pequena** — só álgebra inteira de matrizes maiores |
+| **Clifford pleno** | **PAGO (14/08)**: Cl(2,1) e Cl(2,2) fecham, dim dobra 4→8→16 medida, gerador vestido com o espelho, par sobre ℤ[A] (clifford_pleno 12:0, thm:clifford-pleno) | — | fechada |
 | **Pontryagin contínuo** | o degrau discreto (bidual do anel devolve o grupo — morfologia_universal); a escada de Fermat como limite por ponto fixo (lebesgue_toro) | caracteres do limite; exigiria a escada infinita ou um objeto contínuo novo | média |
 | **Dirac contínuo** | a membrana discreta inteira (dirac_transicao 13:0); as dobras temporais | o limite contínuo do operador — sem régua inteira óbvia | grande |
-| **La Hire** | o rotor J e o par roda/espelha | a realização geométrica do rolamento (círculo em círculo duplo) — objeto novo, mas de geometria inteira plausível | média |
+| **La Hire** | **PAGO (14/08)**: o rolamento 2:1 é a dobra H no par (rotação, inversa); diâmetros = eixos do espelho; J troca-os; gume 3:1 pela ordem 6 ausente (lahire_universal 7:0, assinado por 𝓜) | — | fechada |
 
 (Avaliação do analista para a mesa decidir; nenhuma escolha feita aqui.)

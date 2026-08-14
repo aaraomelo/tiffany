@@ -1442,17 +1442,45 @@ antes do seu medidor:
 \begin{itemize}
 \item \textbf{Pontryagin} --- o eixo álgebra/topologia da teoria (a
 dualidade dos caracteres); o degrau \emph{discreto} já está medido (o
-bidual do anel devolve o grupo --- Teorema~\ref{thm:torcao}); o
-\emph{contínuo} (o limite da escada de observadores) continua no mapa.
-\item \textbf{Clifford} --- $D^{2}=L$ é a assinatura de uma relação de
-Clifford; a estrutura medida é \emph{necessária} mas não suficiente
-para a álgebra plena --- a próxima ponte natural.
-\item \textbf{La Hire} --- o operador geométrico do rolamento dual (o
-círculo de raio $r$ dentro de $2r$ fecha rotação em translação):
-candidato geométrico do rotor da Lei~2.
+bidual do anel devolve o grupo --- Teorema~\ref{thm:torcao}), e o
+degrau seguinte fechou a 14/08: \emph{o buraco e o preenchimento}
+(Teor.~\ref{thm:encaixe} --- a álgebra inteira constrói a cadeia que
+aponta para fora de $\mathbb{Q}$; o contínuo é o que preenche). O que
+resta no mapa é s\'o o \emph{operar} no limite (os caracteres do
+contínuo); alcançá-lo está medido.
+\item \textbf{Clifford --- SAIU DO MAPA: a ponte fechou} (14/08). O
+que aqui se dizia «necessária mas não suficiente» completou-se: o
+andar acima existe e fecha (Teor.~\ref{thm:clifford-pleno} ---
+$\mathrm{Cl}(2,1)$ e $(2,2)$, a dimensão a dobrar medida em dois
+degraus, o gerador vestido com o espelho, a subálgebra par sobre
+$\mathbb{Z}[A]$). \emph{Medido:} \code{tests/clifford\_pleno.js}
+($12{:}0$).
+\item \textbf{La Hire --- SAIU DO MAPA: a ponte fechou} (14/08,
+esta sessão). O rolamento $2{:}1$ realiza-se inteiro no relógio e a
+razão é da casa: o ponto é $P_{k}=z^{k}+z^{-k}$ --- \emph{a dobra
+$H$ do núcleo aplicada ao par (rotação, rotação inversa)}. A rotação
+vira translação porque a dobra diagonaliza a troca: $P_{k}$ cai no
+eixo fixo do espelho ($y=0$, o diâmetro) e o ponto irmão $Q_{k}$ no
+anti-eixo --- os dois diâmetros \emph{são} os eixos do espelho, o
+ponto é o \emph{traço} da rotação (dois caminhos:
+$z^{k}+z^{-k}=\mathrm{tr}(\mathrm{carta})$), e o rotor $J$ troca os
+diâmetros: o candidato do mapa («o rotor da Lei~2») confirmou-se como
+consequência. O gume é o mesmo facto do Teor.~\ref{thm:viviani}: o
+rolamento $3{:}1$ falha a reta em $M{-}2$ pontos, porque o outro zero
+pediria $\cos t=1/2$, ordem $6$, ausente da escada
+($3\nmid2^{2^{j}}$, Euler nos três andares).
+\[
+\boxed{\text{La Hire} = \text{a dobra $H$ lida em geometria: rotação
+$\xrightarrow{H}$ translação.}}
+\]
+\emph{Medido:} \code{tests/lahire\_universal.js} ($7{:}0$; assinado
+pelo contrato $\mathcal{M}$).
 \item \textbf{Dirac contínuo} --- registrado como \emph{ausente} da
 ponte metálica (\S P4 da ponte); a membrana discreta
-(\S\ref{sec:dirac}) é o primeiro degrau dele.
+(\S\ref{sec:dirac}) é o primeiro degrau dele, e a 14/08 a membrana
+ganhou leitura nova: $d=\pm1$ é \emph{o valor do produto dual na
+unidade} (Teor.~\ref{thm:produto-dual}) --- o degrau seguinte tem
+nome; o limite contínuo continua sem régua inteira óbvia, e fica.
 \item \textbf{Convolução universal --- SAIU DO MAPA: a ponte fechou}
 (o único laboratório autorizado pela mesa, 14/08). O candidato $*$
 \emph{não se importou}: o produto de corpos $f(A)\cdot g(A)$
