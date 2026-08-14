@@ -5,7 +5,7 @@ metadata:
   node_type: memory
   type: project
   originSessionId: b6c6c5cb-b5ec-45f0-ac00-480c20a1bb2d
-  modified: 2026-08-14T08:13:02.799Z
+  modified: 2026-08-14T08:22:24.662Z
 ---
 
 **14/08 — A CURADORIA RESOLVIDA, 36c1fa5 (pushado).** Ordem do dono: «resolve a curadoria». Forma: **camada de transações declaradas**, lidas antes de decidir.
@@ -47,5 +47,11 @@ metadata:
 - Maestro = QUAIS (derivação espectral): retração d→d/2 = DOBRA dos modos 2⁻¹(c_k+c_{k+N/2}) (T+T*!); projetor 2⁻¹(id+T^{N/2}) = seletor a_k∈{0,1}, partição+idempotência.
 - **Parseval 0=0 apanhado pela regra «normalizar não é medir»**: o zero é ESTRUTURAL (isotropia das folhas: Σσ^{2n}=0, cruzado Σ(−1)^n=0 porque σσ†=−1) — gume recuperado com controlo nos bytes reais (48=48≠0). Volta exata R_total=0.
 - Prosa: thm:metronomo-fourier no corpo_universal (entre a zeta e os milénios). Bateria **430:430**.
+
+**Noite 5 — A TRÍADE PELO TEOREMA CENTRAL, c4c655d.** Coordenador: «interpreta como o Teorema Central vê hurwitz-gentil-lebesgue»; gerente/diretor: «Lebesgue não está em aberto — é o LIMITE DE MEDIDA da mesma conservação». A leitura já estava no corpo-estelar («Hurwitz conta o domínio, Lebesgue mede a imagem, Gentil é a soma reversível que os casa; o limite é ponto fixo, não ε–δ») — `tests/lebesgue_toro.js` **7:0** realizou-a na órbita pela ESCADA DE FERMAT q∈{17,257,65537}:
+- Hurwitz: folhas σσ†=−1 nos 3 andares; corte do domínio exato.
+- Lebesgue: **layer-cake inteiro** — Σx_n (ticks) == Σ_v #{x_n≥v} (níveis) EXATO em cada andar («a lei não espera o limite»); a medida normalizada AFINA: D/N = 2,0→0,625→0,0908 estritamente decrescente (produto cruzado, zero doubles; controlo constante D=(B−1)N acusa).
+- Gentil: a soma reversível discreta Σx + Σ#{x<v} = N·q exata (o ∫f+∫f⁻¹=bf(b) da casa, cada par (n,v) contado uma vez).
+- **Divisão de trabalho medida**: a imagem uniformiza (Lebesgue), o espectro fica ATÓMICO (2 riscas nas folhas em todo andar — Hurwitz), a massa no centro (Gentil). «Metade para cada lado». Tríade = três representações da MESMA conservação; sem fundir nomes. Prosa: obs:triade-central no corpo_universal. Bateria **431:431**.
 
 Relacionado: [[checkpoint-2026-08-13-cristal]], [[feedback-a-referencia-escrita-a-mao]], [[feedback-dois-caminhos]], [[feedback-a-base-ja-existe]], [[feedback-normalizar-nao-e-medir]].
