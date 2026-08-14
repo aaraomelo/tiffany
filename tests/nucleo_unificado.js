@@ -29,7 +29,7 @@
  *      leis e o núcleo de pé ao mesmo tempo
  */
 'use strict'
-const { Universal, mat2, nucleo, verificaLeis, anel, dft } = require('../lib/universal.js')
+const { Universal, mat2, nucleo, verificaLeis, anel, dft, matn } = require('../lib/universal.js')
 const { sigmaPeano } = require('../lib/peano.js')
 
 let falhas = 0, feitas = 0
@@ -87,10 +87,9 @@ function mul8 (X, Y) {
 const eq8 = (X, Y) => X.every((v, i) => v === Y[i])
 const Z4 = new Array(16).fill(0n)
 const I4 = [1n, 0n, 0n, 0n, 0n, 1n, 0n, 0n, 0n, 0n, 1n, 0n, 0n, 0n, 0n, 1n]
-/* o levantamento: M(2×2) ⊗ I₄ — cada entrada vira um bloco escalar */
-const kronI4 = M => bloco8(
-  I4.map(v => BigInt(M[0]) * v), I4.map(v => BigInt(M[1]) * v),
-  I4.map(v => BigInt(M[2]) * v), I4.map(v => BigInt(M[3]) * v))
+/* o levantamento NOVO é o da lib (fase 5): matn.kron — o caminho antigo
+ * (bloco8 local, acima) fica como TESTEMUNHA independente da migração */
+const kronI4 = M => matn.kron(M, 4)
 {
   /* o caminho ANTIGO: os blocos como clifford_pleno.js os escreve */
   const nI4 = I4.map(v => -v)

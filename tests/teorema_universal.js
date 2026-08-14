@@ -51,7 +51,7 @@
  *      escrita nas leis (Lei 1: involuções; Lei 2: o par que gera)
  */
 'use strict'
-const { anel, dft, mat2, verificaLeis } = require('../lib/universal.js')
+const { anel, dft, mat2, verificaLeis, nucleo, matn } = require('../lib/universal.js')
 
 let falhas = 0, feitas = 0
 function ok (q, cond) {
@@ -64,11 +64,12 @@ const { mul, espelho, J, I, igual } = mat2
 const soma2 = (A, B) => A.map((v, i) => v + B[i])
 const escala2 = (A, c) => A.map(v => c * v)
 
-/* §T0 — a identidade-mãe */
-const troca = mul(espelho, J)
-const H = soma2(troca, espelho)
+/* §T0 — a identidade-mãe (fase 5: a quádrupla vem do NÚCLEO da lib; a
+ * derivação troca = espelho·J continua a ser ASSERÇÃO, não construção) */
+const troca = nucleo.X
+const H = nucleo.H
 {
-  const geraTroca = igual(troca, [0, 1, 1, 0])
+  const geraTroca = igual(troca, mul(espelho, J)) && igual(H, soma2(troca, espelho))
   const had = igual(mul(H, H), escala2(I, 2))
   const dual1 = igual(mul(mul(H, troca), H), escala2(espelho, 2))
   const dual2 = igual(mul(mul(H, espelho), H), escala2(troca, 2))
@@ -157,38 +158,15 @@ for (let k = 0; k < M; k++) {
   ok('§T2 o gume: a torção com sinal trocado (ω^{+k}) não reproduz os ímpares do z — e no x não morde porque x é PAR PURO (a diferença é zero)', gume === 1)
 }
 
-/* o andar da álgebra — byte a byte de clifford_pleno.js */
-function bloco8 (Pb, Qb, Rb, Sb) {
-  const C = new Array(64)
-  for (let i = 0; i < 4; i++) {
-    for (let j = 0; j < 4; j++) {
-      C[8 * i + j] = Pb[4 * i + j]
-      C[8 * i + j + 4] = Qb[4 * i + j]
-      C[8 * (i + 4) + j] = Rb[4 * i + j]
-      C[8 * (i + 4) + j + 4] = Sb[4 * i + j]
-    }
-  }
-  return C
-}
-function mul8 (X, Y) {
-  const C = new Array(64).fill(0n)
-  for (let i = 0; i < 8; i++) {
-    for (let k = 0; k < 8; k++) {
-      const v = X[8 * i + k]
-      if (v === 0n) continue
-      for (let j = 0; j < 8; j++) C[8 * i + j] += v * Y[8 * k + j]
-    }
-  }
-  return C
-}
-const eq8 = (X, Y) => X.every((v, i) => v === Y[i])
-const Z4 = new Array(16).fill(0n)
-const I4 = [1n, 0n, 0n, 0n, 0n, 1n, 0n, 0n, 0n, 0n, 1n, 0n, 0n, 0n, 0n, 1n]
-const nI4 = I4.map(v => -v)
-const I8 = bloco8(I4, Z4, Z4, I4)
-const S8 = bloco8(I4, Z4, Z4, nI4)                     /* o espelho de bloco */
-const e3 = bloco8(Z4, I4, I4, Z4)                      /* a troca de bloco */
-const H8 = bloco8(I4, I4, I4, nI4)                     /* a dobra de bloco */
+/* o andar da álgebra — fase 5: os blocos são o LEVANTAMENTO do núcleo
+ * pela lib (matn.kron), não construções locais; a igualdade byte a byte
+ * com as formas antigas está na árvore dual (nucleo_unificado §N1) */
+const mul8 = (X, Y) => matn.mul(8, X, Y)
+const eq8 = matn.igual
+const I8 = matn.I(8)
+const S8 = matn.kron(nucleo.S, 4)                      /* o espelho de bloco */
+const e3 = matn.kron(nucleo.X, 4)                      /* a troca de bloco */
+const H8 = matn.kron(nucleo.H, 4)                      /* a dobra de bloco */
 
 /* §T3 — a álgebra realiza: as relações sobem intactas */
 {

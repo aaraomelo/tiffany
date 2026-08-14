@@ -9,7 +9,6 @@ algebra e4923ae8b9efc021 0
 amplifica 18a45c8f08ff73f8 0
 analiticas e839e3fbf00311e4 0
 analog 04ade86bdec3cc0c 0
-antissim 798b7acc9113ebf0 2
 antissimetrico 5c13e7c1c00d85b1 0
 app_arranca abb24b0fe22e3ae2 0
 arraytermico e4a2d53b3a3ef1da 0
@@ -38,7 +37,6 @@ bit_metropolis cd99cd38b06fd1a8 0
 buracos 66161db65811b122 0
 cadeia a4345fd4735fc923 0
 caminho 7934d7eb5949397d 0
-campomedio 50177cb36ef33ad7 2
 canal 19f659a3a41832ea 0
 cantor 37a78d4f6d91e54f 0
 cantor_julia_dual 2a215f46ac3417d6 0
@@ -52,20 +50,18 @@ chicote 8640e84ecdd471c2 0
 cifra_continuo a042d2847dc3ab86 0
 cifra_entrada b4025cb4e10047b2 0
 cifra_prova 01d2b88bf2ca2e40 0
-cifrando f400baeb8391633e 2
 circuito 5da28f116a850e15 0
 circuito_tradutor b9a717b6f23811ab 0
 claim_control 714e166108b42d2c 0
 claim_fronteira 029178ccd46151e2 0
 claim_ir 51325b8926591ffa 0
 clifford_dual 12ecc8250a26cd5a 0
-clifford_pleno f62c75d96715560c 0
+clifford_pleno 8861e58d2970553f 0
 cobertura 575ec441d3142f8b 0
 colheita fc14bd493e6ca894 0
 colisor_corpos 3be2fa7041eb0275 0
 completo b7ccb59fe44332bc 0
 complexo 1ffd14ad04af24c5 0
-compoe_ao_clicar 9e342a04b1fd01b6 2
 cone_espiral 63b392f5bb541bab 0
 cone_nulo 504b52404fbfd424 0
 config_corpo 058335e53d3b487e 0
@@ -138,7 +134,6 @@ duais 28dc625dbb3da8b3 0
 dual 869340d98961353e 0
 dual_cadeia c7280a378e486134 0
 dual_spline_ttf 3e8e11fb1a25018f 0
-dualcifra d92ee92a52c7d147 2
 dualidade 18065d141793793e 0
 dualreta d9a0e2809774fac6 0
 dualrn 8a91b8108dcd0df5 0
@@ -153,7 +148,6 @@ encaixe_continuo fb85476766754fcb 0
 encanamento 045b4f98e950e3c9 0
 enche a2861fc14a9fd7f9 0
 entre c9d4cbfc7a5a9307 0
-entrega dd303b06ea369e41 2
 entropia_dual 9e1e8357b68c4eb5 0
 equivalencia_universal 424be18459dfa372 0
 erg 24fd5a4ae1cb1739 0
@@ -185,7 +179,6 @@ fecho_convexo 1cc9544415551039 0
 fermat 0657621efa6e4bbc 0
 fisica 934484ad77a8c2aa 0
 fita 708d74da822a8f82 0
-folhas 5305836eb898f5c3 2
 fonte_banco 53525f1a1b7fe74d 0
 fonte_corpo 6720cdb0b5e2252e 0
 forca 2523c31d50858a8b 0
@@ -237,7 +230,6 @@ libc_wasm fc834bc8eeefe10a 0
 liga 9a74373ac9338675 0
 linear 02f99a21eba6406b 0
 liquida 6f6a73a8318e27bf 0
-liquida_doador b4cc6097ca6f57ad 2
 llm 3ca3e3ba0ee143d5 0
 llm_reversivel ad337505752179a9 0
 logico afd540f8d888135d 0
@@ -284,7 +276,7 @@ nomeia 71483f3f6333df06 0
 norma bdf69591c85236b2 0
 normal_circulo 3cdc5e43a8d97101 0
 nove_periodico c18299871152ca54 0
-nucleo_unificado fca15df734e7132d 0
+nucleo_unificado ac7c6cf9a9960bc6 0
 numerica 2d1d6e20b7f87362 0
 observador_torre 3d55320445a27093 0
 octeto 3be2809a3655f8e0 0
@@ -326,7 +318,6 @@ prensor e1992045bed94bb2 0
 prisma af1d7b9d723bc06c 0
 progressoes 68a256306197805b 0
 promove a305cad77d13697a 0
-protocolo 16cbd195b00de152 2
 quantico 5cf79db190356ce4 0
 quasi c1eae084a401bc3d 0
 quatro 7ab68ac6a57ef1f7 0
@@ -337,7 +328,6 @@ rastro 26e475d85d748049 0
 reais 621a5430042c6845 0
 recaman e67ba263ef7dfb38 0
 reconstroi ebee793f4c68d7b0 0
-recupera d123f7bf327ecc0a 2
 recursao 7b5ddd4dbc13c83b 0
 rede_dual 982122481c4d95f5 0
 refracao ce9fa14f889657fc 0
@@ -386,7 +376,7 @@ tecido a71972ce13c4429d 0
 teletransporte 8b13cc6bf9acf1a0 0
 telomero c1812a6efcda83af 0
 tensor 22059d38a7653ff7 0
-teorema_universal 19bf67b7a5ce2e1b 0
+teorema_universal df27b1753b369ed2 0
 termica 517ad21a05866f7e 0
 tesseracto ebf76569a555a633 0
 tesserato_espiral 55f89989bf04aa64 0
@@ -407,7 +397,6 @@ traduz_volta 9302ea3367def892 0
 transforma 482ec2df8e69cd65 0
 transformada 23899586ee0774d4 0
 transfusao 103d2692f48b184b 0
-transfusao_real 4ee0b320904b787b 2
 travessia 4d90fe8423093207 0
 tres_pontos 43ad5af8747edc63 0
 tres_reconstroi 1f48f7d032a33b62 0

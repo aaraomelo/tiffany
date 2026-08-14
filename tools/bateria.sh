@@ -354,6 +354,11 @@ printf '%s\n' "-----------------------------------------------------------------
 mudos=0
 for _f in "$SAIDA"/*.txt; do
   [ -f "$_f" ] || continue
+  # so' conta quem AINDA e' da arvore: as saidas velhas de medidores movidos
+  # (o doador foi para integration/ em 14/08) ficavam em /tmp e o aviso
+  # «faltam dados do doador» nunca morria — contava fantasmas, nao medidores
+  _b=$(basename "$_f" .txt)
+  [ -f "$RAIZ/tests/$_b.c" ] || [ -f "$RAIZ/banco/$_b.c" ] || [ -f "$RAIZ/tatoeba/$_b.c" ] ||   [ -f "$RAIZ/tests/$_b.py" ] || [ -f "$RAIZ/tests/$_b.js" ] || continue
   grep -q "NAO MEDIU\|NÃO MEDIU" "$_f" 2>/dev/null && mudos=$((mudos+1))
 done
 if [ "$mudos" -gt 0 ]; then

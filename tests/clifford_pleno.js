@@ -40,7 +40,7 @@
  *      espaço dos 4 pares — o posto não sobe
  */
 'use strict'
-const { anel } = require('../lib/universal.js')
+const { anel, nucleo, matn } = require('../lib/universal.js')
 
 let falhas = 0, feitas = 0
 function ok (q, cond) {
@@ -76,37 +76,19 @@ function bloco (P, Q, R, S) {
 function soma4 (A, B) { return A.map((v, i) => v + B[i]) }
 function escala4 (A, c) { return A.map(v => c * v) }
 
-/* ── o andar M₈: a mesma duplicação de bloco, um degrau acima ───────────── */
-function mul8 (A, B) {
-  const C = new Array(64).fill(0n)
-  for (let i = 0; i < 8; i++) {
-    for (let k = 0; k < 8; k++) {
-      const a = A[8 * i + k]
-      if (a === 0n) continue
-      for (let j = 0; j < 8; j++) C[8 * i + j] += a * B[8 * k + j]
-    }
-  }
-  return C
-}
-function eq8 (A, B) { return A.every((v, i) => v === B[i]) }
-function soma8 (A, B) { return A.map((v, i) => v + B[i]) }
-function escala8 (A, c) { return A.map(v => c * v) }
-function bloco8 (P, Q, R, S) {                 /* quatro 4×4 → um 8×8 */
-  const C = new Array(64)
-  for (let i = 0; i < 4; i++) {
-    for (let j = 0; j < 4; j++) {
-      C[8 * i + j] = P[4 * i + j]
-      C[8 * i + j + 4] = Q[4 * i + j]
-      C[8 * (i + 4) + j] = R[4 * i + j]
-      C[8 * (i + 4) + j + 4] = S[4 * i + j]
-    }
-  }
-  return C
-}
+/* ── o andar M₈ pela LIB (fase 5 — a limpeza dos legados): a álgebra de
+ * blocos tem um dono (matn) e o espelho de bloco é o LEVANTAMENTO do
+ * núcleo, não uma construção local: S₈ = nucleo.S ⊗ I₄ (a árvore dual
+ * nucleo_unificado §N1 mediu a igualdade byte a byte antes desta troca) */
+const mul8 = (A, B) => matn.mul(8, A, B)
+const eq8 = matn.igual
+const soma8 = matn.soma
+const escala8 = (A, c) => matn.escala(c, A)
+const bloco8 = (P, Q, R, S) => matn.bloco(4, P, Q, R, S)
 const Z4 = new Array(16).fill(0n)
-const I4 = [1n, 0n, 0n, 0n, 0n, 1n, 0n, 0n, 0n, 0n, 1n, 0n, 0n, 0n, 0n, 1n]
-const I8 = bloco8(I4, Z4, Z4, I4)
-const S8 = bloco8(I4, Z4, Z4, escala4(I4.map(v => v), -1n))   /* o ESPELHO de bloco: diag(I,−I) */
+const I4 = matn.I(4)
+const I8 = matn.I(8)
+const S8 = matn.kron(nucleo.S, 4)              /* o ESPELHO de bloco, do núcleo */
 
 const anti8 = (X, Y) => soma8(mul8(X, Y), mul8(Y, X))
 const zera8 = X => X.every(v => v === 0n)
@@ -153,7 +135,7 @@ const L = bloco(Am, Z2, Z2, Am)
 /* o andar: os geradores de Cl(2,1) em M₈ */
 const e1 = bloco8(D, Z4, Z4, escala4(D, -1n))          /* diag(D, −D) */
 const e2 = bloco8(G, Z4, Z4, escala4(G, -1n))          /* diag(G, −G) */
-const e3 = bloco8(Z4, I4, I4, Z4)                       /* a troca de folha */
+const e3 = matn.kron(nucleo.X, 4)                       /* a troca de folha, do núcleo */
 const L8 = bloco8(L, Z4, Z4, L)
 
 /* §P1 — o andar fecha, e o gume */
