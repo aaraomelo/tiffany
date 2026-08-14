@@ -1609,6 +1609,40 @@ $\mathcal{M}$).
 $\square$
 \end{teorema}
 
+\begin{teorema}[a costura --- termodinâmica e memória neural contra o
+mesmo observável]\label{thm:costura}
+Ordem da mesa: não fundir por decreto --- \emph{descobrir} se os
+domínios partilham o invariante operacional, com a unidade de
+comparação (invariante, transformação admissível, gume) em cada um. O
+que a medida dá:
+\begin{center}
+\begin{tabular}{p{0.16\linewidth}p{0.26\linewidth}p{0.24\linewidth}p{0.22\linewidth}}
+\textbf{domínio} & \textbf{invariante $Q$} & \textbf{espelho ($T$)} &
+\textbf{empurrão (gume)} \\
+\hline
+mecânica & $c^{2}+s^{2}$ no fluxo & $S$: $SR_{k}=R_{-k}S$ & rodar
+\emph{e} transladar quebra \\
+Carnot & $\oint dQ/T=0$, exato em $\mathbb{Q}$ ($585$ ciclos) & a
+bomba (o ciclo invertido) conserva o $\oint$ & $\delta>0$ no calor
+rejeitado: $\oint<0$ \emph{sempre} --- a seta \\
+Hopfield & $E(x)=-x^{T}Wx$ (inteiro): $Q_{\text{volta}}=
+Q_{\text{entrada}}$ no atrator; descida \emph{estrita} do perturbado
+(o Lyapunov medido) & $E(-x)=E(x)$ & o campo constante $t\cdot\mathbf{1}$
+quebra o recall num limiar finito medido \\
+\end{tabular}
+\end{center}
+Os três fecham com $R_{Q}=0$, o espelho vive nos três, e \emph{o mesmo
+empurrão} --- a translação, o gérmen aditivo da fronteira (\S L5) ---
+quebra os três: a seta térmica, a fronteira de $\mathbb{R}$ e o limiar
+da rede são a mesma parede, vista de três cartas. A partilha é
+\textbf{descoberta}, não decretada --- e teria sido igualmente
+resultado se não fechasse.
+\emph{Medido:} \code{tests/costura\_mecanica.js} ($8{:}0$; assinado
+por $\mathcal{M}$; as pontas: \code{tests/carnot.c},
+\code{tests/rede\_dual.js}).
+$\square$
+\end{teorema}
+
 %======================================================================
 \section{Extensões nomeadas --- o mapa, sem teorema}\label{sec:extensoes}
 

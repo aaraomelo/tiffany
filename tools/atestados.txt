@@ -92,6 +92,7 @@ corpo_viveiro 35c96afeadd012b8 0
 corpodecorpos e5cba0db271ea443 0
 cosmico ad551a25ab7b7917 0
 cosmologia ba6dd5df9be09b0a 0
+costura_mecanica 3300d90fae0bb568 0
 cristal_adversarial a5b592f03e349608 0
 cristal_avanco 3f936ab364e5a5c6 0
 cristal_curadoria bfeee7520712d444 0
