@@ -207,6 +207,7 @@ hurwitz c3d6c02377a0072b 0
 icc a1b66e7969752be4 0
 inducao 08eb20f9b21c6338 0
 instrumento 7e6416b6f2a92ecd 0
+interface_padrao d5102ce78f3704d3 0
 inversor_trial aea4007324309576 0
 isa4 043933598b3025cf 0
 isa_dupla 153fd4762a86077d 0

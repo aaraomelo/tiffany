@@ -622,7 +622,22 @@ núcleo (\code{tests/cards.c} \S B14). A realização executável no cliente é
 \]
 A ISA (\code{tools/isa.c}) sobe na mesma fila --- porta única \code{MOVE}.
 O LaTeX pleno continua \code{tex.wasm}; o núcleo \code{compor.wasm} mede a
-involução compor$\dg=$descompor. O runtime
+involução compor$\dg=$descompor.
+
+\smallskip
+\noindent \textbf{E o LaTeX é a interface padrão.} Não é privilégio de
+língua no banco --- as linguagens continuam backends de porta única, e
+\emph{nenhuma é o núcleo}. É a \textbf{porta de entrada e saída por
+omissão}: quando nada se especifica, o corpo entra e sai como \code{.tex},
+porque só o LaTeX é $(p,q,r)=(1,1,1)$ \emph{com} tradutor pleno e volta
+byte a byte (a fonte viaja no PDF --- Teorema~\ref{thm:composicao}). O
+manifesto declara-o (\code{interface\_padrao}), e o padrão é a porta,
+não o trono.
+
+\medido{o manifesto declara \code{interface\_padrao=latex}; o latex é o
+único backend $(1,1,1)$ com pleno; a involução compor$\dg=$descompor fecha
+no wasm real; e a volta plena está atestada na bateria (o \code{tex} a
+$62$:$0$) --- \code{tests/interface\_padrao.js}.} O runtime
 \code{claim.wasm} fecha os três claims de arranque (Pareto, Why, Kanban).
 
 \medido{onze módulos no manifesto sobem e instanciam; escapar/decidir/rotular
