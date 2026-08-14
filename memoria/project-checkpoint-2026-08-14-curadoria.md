@@ -107,3 +107,14 @@ O diagnóstico da véspera («desarmar o içamento do va_arg») estava ERRADO na
 - **§L5**: (a) a descida ignorava a secção de IMPORTS do wasm (call/export indexam contando imports; ASS[] só tinha as definidas → npar errado → «pilha vazia»); (b) a captura de directivas apanhava `#define … /*` com o abridor SEM fecho na linha — pendurado no replay, engolia as directivas seguintes na recaptura. Corta-se no abridor; o comentário viaja pela passagem 2. Round-trip resíduo 0.
 - **§L4b**: o fprintf nunca esteve mudo — a vista Uint8Array do medidor DESTACAVA no memory.grow e o `poe` escrevia numa vista morta, sem erro. Vista fresca a cada uso, para ler E escrever.
 - **O refaz denunciou o falso verde estrutural** pela linha das unidades («2 falharam» com 422 verdes): cards.c com `long falhas` local a sombrear o contador do unidade.h (exit sempre 0), pino do manifesto em 105 com o mundo em 111, §B10 a assumir /tmp/render_bin que ninguém construía. +16 medidores com o mesmo shadow, 3 com `return 0` fixo. **A rede na bateria (3 ramos): exit≡unidades ou «VERDE FALSO», com reatestação a 9 na hora.**
+
+## A fila teórica paga (noite, d548169)
+
+Depois do portão (422:422), a fila selada correu inteira, medidor antes da prosa, bateria **426:426**:
+
+- **Viviani (viviani_universal.js 18:0, fd46019)** — a curva inteira no anel pela meia-volta; a dobra 2cos2u=(2cosu)²−2 É o R da lib com d=1; o recobrimento duplo tem deck=espelho e graduação ℤ/2 lida na dft (pares=base, ímpares=folha); o nó é o ponto fixo R(2)=2; o trial da altura vive em {1,i,−1,−i}; t=−1 não existe em andar nenhum (3∤2^{2^j}, Euler nos três).
+- **Encaixe (encaixe_continuo.js 12:0, c105790)** — a unidade ±1 (Lei 4, Am(1)^k) encaixa E mede ((q_kq_{k+1})·|I_k|=1 até k=90); os 1325 racionais s≤50 saem todos — o contínuo é o que preenche o buraco (eixo Pontryagin com medidor); φ·(1−φ)=−1 em ℤ[φ]; e a escada áurea é a MEMBRANA d=−1 da lei cuja d=1 desenhou Viviani (círculo/hipérbole = par de membranas).
+- **Resíduos (residuo_universal.js 12:0, 0004dca)** — o «2πi» da casa é M; a soma de contorno lê só c_{−1} e o resíduo É o ponto fixo da monodromia no espectro (o enquadramento do gerente, medido); polo simples por dois caminhos (∏(a−z)=a^M−1 e derivada do log); conservação res_a+res_b=0; g'/g conta multiplicidades até ao grau.
+- **Clifford pleno (clifford_pleno.js 12:0, d548169)** — o gerador sobe VESTIDO com o espelho (a duplicação é recobrimento duplo, deck=espelho de Viviani); Cl(2,1) e (2,2) fecham; dim dobra 4→8→16 medida; volume central no ímpar/graduado no par; e a subálgebra par só fecha sobre ℤ[A] — **a falha da primeira medida apontou o corpo dos coeficientes** (o gume nasceu da falha).
+
+O fio das quatro: **o espelho como deck de recobrimento** apareceu em Viviani (geometria), no espectro (Fourier) e em Clifford (álgebra) — o mesmo objeto da lib três vezes, sem ser convocado.
