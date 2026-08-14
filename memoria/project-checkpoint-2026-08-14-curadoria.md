@@ -5,7 +5,7 @@ metadata:
   node_type: memory
   type: project
   originSessionId: b6c6c5cb-b5ec-45f0-ac00-480c20a1bb2d
-  modified: 2026-08-14T07:33:26.637Z
+  modified: 2026-08-14T07:50:57.025Z
 ---
 
 **14/08 — A CURADORIA RESOLVIDA, 36c1fa5 (pushado).** Ordem do dono: «resolve a curadoria». Forma: **camada de transações declaradas**, lidas antes de decidir.
@@ -30,5 +30,9 @@ metadata:
 - **`lib/peano.js`** — σ_Peano (ℤ_65537, UTF-8, endereço=id). 𝒫=𝒰[σ_Peano].
 - **`tests/migracao_universal.js` 10:0** — o teste decisivo: escada idêntica nos 4274 textos; R_endereço igual sob as 7 induções; vetor total E DECISÕES RETAIN/REOPEN iguais nas 5 classes (espelhado orgânico (1,0,0,62937,1): E e Φ cegos, Φ₂/R_D acusam dos dois lados); 52 fibras/monodromias byte a byte; geometria entrada a entrada. Armadilha minha apanhada pelo log: o primeiro «espelhado» era fallback que quebrava E (R_E=7791) — troquei pela dupla transposição verdadeira («ab…ba», E e Φ conservados por construção).
 - **Dupla árvore**: nada apagado; `equivalencia_universal.js` RELIGADO à lib (7:0 antes e depois). **Limpeza das formas embutidas AGUARDA ordem da mesa.** Bateria **427:427**. Prosa: arquitetura.tex subsecção «A infraestrutura universal»; docs/MIGRACAO_UNIVERSAL.md §7.
+
+**Noite 2 — LIMPEZA + O TORO AUDITADO, 24b45f1.** Ordem do coordenador: «dualizar a superfície, toro no centro, histerese de Peano, zeta de Riemann…»; a mesa TRAVOU o nome (Grok: buscar→medir→nomear; gerente: 4 camadas, «linha crítica metálica» proibida sem equação; diretor: zeta só como consequência, e AUTORIZA a limpeza). Executado:
+- **Limpeza da dupla árvore**: 7 medidores religados à lib (cristal_volta, cristal_energia, residuos_totais, fusao_conceitos, cristal_curadoria, assinatura_banal, contorno_riemann — lib ganhou `corte`). NÃO tocados por não serem duplicatas: assinatura_colisoes (UTF-16!), lyapunov (regex idDe, rDual sem duplicados — réguas variantes), observador (energia sobre vetores), equivalencia+migracao (testemunhas POR DESENHO). **Regra nova: lib muda ⇒ reatestar os dependentes** (a atestação assina o medidor, não a lib). Bateria idêntica 427:427.
+- **`tests/toro_histerese.js` 16:0** — o espaço de fase: o TORO OPERACIONAL existe — batuta fecha em círculo (ord(A₁ mod 65537)=14564, minimal), folha = 2ª volta (det A^k alterna ±1), toro das unidades {±A^k} do tamanho previsto (−I∈⟨A⟩); caminhada fechada (λ⁺+λ⁻=0) devolve estado real EXATO com R_total=0 RETAIN, aberta REOPEN; **massa no centro** (M(z)=E(x)+E(y) invariante sob monodromia nas 52; |det| parado na órbita, sinal=folha); **histerese = laço α≤id≤φ que seleciona** (abertos voltam exatos; truncar a dilatação na borda quebra φ≥id — apanhado ao vivo). **Espectro como DADO**: m=1..6 dicotomia separadas (T|2(p−1): T₃=65536=p−1, T₂=8192) vs inertes (T|2(p+1): T₅=T₆=131076); pontos fixos de A^k exatamente nos múltiplos do período da folha. Zeta/Riemann NÃO nomeados — «o nome espectral, se vier, vem da medida seguinte». Nota \medido no thm:histerese do Peano. Bateria **428:428**.
 
 Relacionado: [[checkpoint-2026-08-13-cristal]], [[feedback-a-referencia-escrita-a-mao]], [[feedback-dois-caminhos]], [[feedback-a-base-ja-existe]].
