@@ -5,7 +5,7 @@ metadata:
   node_type: memory
   type: project
   originSessionId: b6c6c5cb-b5ec-45f0-ac00-480c20a1bb2d
-  modified: 2026-08-14T04:28:38.864Z
+  modified: 2026-08-14T07:33:26.637Z
 ---
 
 **14/08 — A CURADORIA RESOLVIDA, 36c1fa5 (pushado).** Ordem do dono: «resolve a curadoria». Forma: **camada de transações declaradas**, lidas antes de decidir.
@@ -24,5 +24,11 @@ metadata:
 - **Os 52 contornos**: fecham orientados (LIFO, cordas lidas), 2 folhas + 1 corte (dois caminhos: fibra cega == leitura com estado de corda); **planos** — E_∂−E(id)=E(moldura)=295.589 constante; monodromia ν∘ν=id byte a byte e só paga o endereço.
 - **As cartas da torção**: o esquilo J (já da morfologia) dá anel gaussiano exato; DUAS assinaturas lado a lado: a²+b² (definida, torção) vs a²+mab−b² (indefinida, corpo); det multiplicativo nas duas (Lei 7); rotor comuta (holomorfo), espelho conjuga e anti-comuta (o par); **⟨J,R⟩ tem ordem exatamente 8**.
 - **A ramificação está no rotor, não no corpus**: (2J)²+4I=0 exato (a dobra ZERA em m=2J), X=J raiz dupla com x†=x e ν(x)=x; auto-fusão = ponto fixo de ν (a membrana D²=A⊕A); nenhuma das 52 fixa. Veredito: «a parte de Riemann está onde o rotor está; a hiperbólica onde o corpo vive» — Dirac vira mudança de folha. Prosa: corpo_universal §sec:contorno-geo (3 teoremas + obs:riemann, sem afirmar holomorfia nas folhas reais).
+
+**Noite — FASE 2 DA MIGRAÇÃO: O UNIVERSAL É INFRAESTRUTURA, c237f41.** Coordenador: «promover na arquitetura do sistema e migrar»; gerente AUTORIZA cirúrgico («não mover a teoria; mover a PROPRIEDADE»; «Universal não é mais um paper. É a infraestrutura»); diretor sela a Regra de Ouro: igualdade POR CASO, não «ambos dão zero». Executado:
+- **`lib/universal.js`** — a única implementação 𝒰, agnóstica (parametrizada por σ; **não contém a palavra Peano — MEDIDO em §M0**, não prometido): escada, energia, R_endereço, transições, residuoTotal+retain, funde/fibra/monodromia, contorno, mat2 (J/espelho/A_m/W/estaca/cartas). Proveniência byte a byte dos medidores atestados; zero teoria nova.
+- **`lib/peano.js`** — σ_Peano (ℤ_65537, UTF-8, endereço=id). 𝒫=𝒰[σ_Peano].
+- **`tests/migracao_universal.js` 10:0** — o teste decisivo: escada idêntica nos 4274 textos; R_endereço igual sob as 7 induções; vetor total E DECISÕES RETAIN/REOPEN iguais nas 5 classes (espelhado orgânico (1,0,0,62937,1): E e Φ cegos, Φ₂/R_D acusam dos dois lados); 52 fibras/monodromias byte a byte; geometria entrada a entrada. Armadilha minha apanhada pelo log: o primeiro «espelhado» era fallback que quebrava E (R_E=7791) — troquei pela dupla transposição verdadeira («ab…ba», E e Φ conservados por construção).
+- **Dupla árvore**: nada apagado; `equivalencia_universal.js` RELIGADO à lib (7:0 antes e depois). **Limpeza das formas embutidas AGUARDA ordem da mesa.** Bateria **427:427**. Prosa: arquitetura.tex subsecção «A infraestrutura universal»; docs/MIGRACAO_UNIVERSAL.md §7.
 
 Relacionado: [[checkpoint-2026-08-13-cristal]], [[feedback-a-referencia-escrita-a-mao]], [[feedback-dois-caminhos]], [[feedback-a-base-ja-existe]].
