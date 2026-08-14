@@ -5,7 +5,7 @@ metadata:
   node_type: memory
   type: project
   originSessionId: b6c6c5cb-b5ec-45f0-ac00-480c20a1bb2d
-  modified: 2026-08-14T08:55:16.898Z
+  modified: 2026-08-14T09:36:11.540Z
 ---
 
 **14/08 — A CURADORIA RESOLVIDA, 36c1fa5 (pushado).** Ordem do dono: «resolve a curadoria». Forma: **camada de transações declaradas**, lidas antes de decidir.
@@ -75,4 +75,9 @@ metadata:
 - **A DECONVOLUÇÃO é a divisão espectral** (dual com as duas partes): exata com espectro sem zeros (R_total=0 RETAIN); o gume são os DIVISORES DE ZERO exibidos — 1⃗⊛[1,−1,0,…]=0, colisão a≠a′ com a⊛1⃗=a′⊛1⃗, e dft(1⃗) com N−1 zeros (o tema do corpo-estelar). Lei invariante de escala (N=16/8/4).
 - «convolução = a forma aditiva da multiplicação, vista pela Transformada Universal» — a fórmula do gerente, MEDIDA. Prosa mínima: bullet do §extensoes convertido (saiu do mapa), ponteiro no Peano. Só falta no mapa: Pontryagin contínuo, Clifford pleno, La Hire, Dirac contínuo. Bateria **433:433**.
 
-Relacionado: [[checkpoint-2026-08-13-cristal]], [[feedback-a-referencia-escrita-a-mao]], [[feedback-dois-caminhos]], [[feedback-a-base-ja-existe]], [[feedback-normalizar-nao-e-medir]].
+**Madrugada — A CONSOLIDAÇÃO E O ACHADO DA REGRESSÃO, 4592b34.** Mesa unânime: modo auditoria («provar que a Torre migrada continua a mesma Torre»). `--refaz` (433 sementes, tabela nunca truncada) + diff contra a fotografia:
+- **28 medidores caíram com assinatura INALTERADA** — «o medidor que nunca mediu» EM ESCALA: a atestação assina a fonte, o mundo mudou por baixo. Classes: **A (10)** fixtures do doador/Ollama ausentes (auto-contido desde 05/08 — proposta: versionar vetores como fixtures); **B (14)** pipeline compositor/fontes/app (spline 8, dual_spline_ttf 4, sem_chute 5, avalia_macros/gkcapa…) — uma sessão de reparo por família; **C (4) consertados**: refs (2 órfãs + 7 \ref CRUZADAS no catálogo→textuais), morfico (formalizador→tools/), tres_reconstroi (fixture sumida→../teoria.tex; cwd=tests/), libc_wasm (imports env.__fich_miss + offset mágico 7M vs 2 páginas da dieta→vfs_reserva) — este último de CRASH para 2 regressões NOVAS nomeadas: write devolve vazio; traduz «pilha vazia na descida» na libc inteira.
+- Estado real: **408 verdes / 25 com causa nomeada** — a bateria diz a verdade. REGRA NOVA: `--refaz` entra no fecho de toda fase. docs §10 + docs/MAPA_UNIVERSAL.md (a árvore Leis→…→Leis, cada nó com medidor; lacunas dos 4 candidatos: Clifford pleno a menor).
+- **Viviani (pergunta do coordenador, sondada no scratchpad — SEM medidor no repo ainda, consolidação primeiro)**: a curva (esfera∩cilindro) realiza-se INTEIRA no anel (i=3^16384; meia-raiz ω′ de ordem 2N): esfera, cilindro, projeção parábola z²=2a(2a−x) (o eixo do ponto hermitiano!), quártica de Gerono 4a²y²=z²(4a²−z²) (o oito), e **2cos(2u)=(2cosu)²−2 — a curva é o desenho geométrico de UMA dobra da renormalização**; parametriza-se pela MEIA-volta (fecho em 4π — o recobrimento duplo; ±z são as folhas/espelho; colam-se num único ponto (2a,0,0) — a ramificação/membrana). Candidato a medidor quando a mesa reabrir.
+
+Relacionado: [[checkpoint-2026-08-13-cristal]], [[feedback-a-referencia-escrita-a-mao]], [[feedback-dois-caminhos]], [[feedback-a-base-ja-existe]], [[feedback-normalizar-nao-e-medir]], [[feedback-o-medidor-que-nunca-mediu]].
