@@ -1,0 +1,319 @@
+% !TeX program = pdflatex
+% papers/corpo_universal.tex — o Corpo Universal: as cinco operações, o
+% observador, a transformada e a membrana de Dirac. O Corpo de Peano é
+% instância. NENHUMA afirmação sem medidor: cada teorema cita a bateria.
+% Auto-contido: pdflatex corpo_universal.tex
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[portuguese]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\newtheorem{definicao}{Definição}
+\newtheorem{teorema}{Teorema}
+\newtheorem{proposicao}{Proposição}
+\newtheorem{corolario}{Corolário}
+\newtheorem{observacao}{Observação}
+\newcommand{\code}[1]{\texttt{#1}}
+\input{gkcapa}
+\begin{document}
+\gkcapa{O Corpo Universal}
+       {as cinco operações, o observador, a membrana --- o Peano é instância}
+       {tudo aqui tem medidor; a visão unificada constrói-se por elos, e cada elo aguenta peso}
+\maketitle
+
+\begin{abstract}
+O \textbf{Corpo Universal} é o quadro dos operadores que a bateria já
+mediu, organizado pela cadeia
+\[
+\boxed{
+\text{corpo}\to\text{norma}\to\text{ordem}\to\text{observador}
+\to\text{transformação}\to\text{dual}.
+}
+\]
+As \textbf{cinco operações} --- Soma, Multiplicação, Divisão, Dual,
+Inversão --- entram cada uma com a sua conservação \emph{medida}; o
+\textbf{observador} é a escada $I_1\prec I_2\prec I_3\prec\cdots$; a
+\textbf{transformada universal} é a avaliação nas folhas, realizada
+inteira pela matriz companheira; e a \textbf{membrana de Dirac} é a
+raiz quadrada da transição do Metrónomo: não existe no próprio andar
+(o dual proíbe, $\det^2=-1$), existe \emph{inteira} um andar acima,
+aterra na diagonal exatamente nas transições, e o seu espectro vive na
+\textbf{borda dobrada} $x^{4}-mx^{2}-1$ --- a dobra temporal
+$x\mapsto x^{2}$ a aceder representantes na dimensão acima. O
+\textbf{Corpo de Peano} (\code{papers/corpo\_peano.tex}) é
+\emph{instância} deste quadro: a sua realização dinâmica e musical
+(Maestro, Metrónomo, Batuta, Orquestra, Conservatório). Os papéis
+ganham cidadania \emph{sob condição}: cada nome é o papel funcional que
+um medidor validou. Verificação:
+\code{tests/dirac\_transicao.js} ($13$:$0$),
+\code{tests/ponte\_universal\_metalica.js} ($12$:$0$),
+\code{tests/observador\_torre.js} ($10$:$0$),
+\code{tests/assinatura\_colisoes.js}, \code{tests/assinatura\_banal.js},
+\code{tests/cristal\_energia.js}, \code{tests/cristal\_volta.js}.
+\end{abstract}
+
+\medskip
+\noindent\textbf{Leitura.}
+\[
+\boxed{
+\text{Corpo Universal (este paper)}
+\;\Longrightarrow\;
+\text{Corpo de Peano (instância)}
+\;\Longrightarrow\;
+\text{realização musical / tradutor}.
+}
+\]
+Nada aqui funda as oito leis: o catálogo é o do \emph{Corpo estelar}, e
+este paper organiza o que os medidores fecharam por cima dele.
+
+%======================================================================
+\section{As cinco operações --- cada uma com a sua conservação}\label{sec:cinco}
+
+\begin{definicao}[as cinco operações do corpo universal]\label{def:cinco}
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+operação & conservação medida & medidor \\
+\midrule
+\textbf{Soma} $\oplus$ (a dobra/clone, Lei~4) & $E(u\oplus u)=2E(u)$; a retração devolve & \code{observador\_torre} \S T5 \\
+\textbf{Multiplicação} $\otimes$ (fusão) & $E(u\otimes v)=E(u)E(v)$ --- $N(xy)=N(x)N(y)$ & \code{observador\_torre} \S T3 \\
+\textbf{Divisão} (a fibra) & $x_i=z_{ij}/v_j$ exata; $E(u)=E(z)/E(v)$ & \code{observador\_torre} \S T4 \\
+\textbf{Dual} $\dagger$ (a involução) & $\sigma\sigma^{\dagger}=-1$; $\lambda^{+}+\lambda^{-}=0$ & \code{lyapunov\_refletido}; \emph{Peano} \\
+\textbf{Inversão} (a volta) & admissível $\iff$ tem volta $\wedge$ conserva a escada & \code{ponte\_universal\_metalica} \S P3 \\
+\bottomrule
+\end{tabular}
+\end{center}
+A Soma conserva \emph{adicionando}; a Multiplicação conserva
+\emph{multiplicando} --- o par aditivo/multiplicativo da torre; a
+Divisão é a \textbf{fibra inversa} da fusão (dividir custa exatamente o
+$\det$: $\operatorname{adj}(M)\,M=\det(M)\,I$); o Dual guarda a segunda
+metade; a Inversão é o critério de admissibilidade.
+\end{definicao}
+
+\begin{definicao}[o Inversor]\label{def:inversor}
+Uma transformação $T$ é \textbf{admissível} quando
+\[
+\boxed{
+\exists\,T^{-1}\ \text{(a volta)}
+\qquad\land\qquad
+I\bigl(T^{-1}(T(x))\bigr)=I(x)\ \text{na escada completa}.
+}
+\]
+O \textbf{Inversor} é o papel funcional que decide: mede a volta contra
+$(E,\Phi,\Phi_2,\ldots)$ e rejeita no primeiro desvio. Medido: a
+transformada metálica passa (volta inteira nas unidades, escada
+idêntica); a membrana de Dirac passa
+(\code{tests/dirac\_transicao.js} \S D5).
+\end{definicao}
+
+%======================================================================
+\section{O observador --- a escada, citada da instância}\label{sec:obs-uni}
+
+A escada $I_1=(E)\prec I_2=(E,\Phi)\prec I_3=(E,\Phi,\Phi_2)\prec\cdots$
+e os seus teoremas --- a estrita é orgânica ($4286/4286$ colisões da
+dupla transposição espelhada; $\Phi_2$ separa todas), o \textbf{teto
+pelas oito leis} (oito momentos fecham suporte $\le8$; $\Delta^{8}$
+escapa ao linear e cai na energia --- a cruz) --- estão enunciados e
+medidos na instância (\emph{Corpo de Peano}, secções do observador e da
+energia). O universal só fixa o papel:
+\[
+\boxed{
+\text{cada observador define uma resolução de identidade;}
+\quad
+\text{o \textbf{Conservatório} é o espaço dos invariantes.}
+}
+\]
+\emph{Conservar a norma não conserva a identidade} --- por isso o fecho
+é sempre um \textbf{par} de conservações concorrentes
+($R_{\mathrm{total}}=(R_{\mathrm{endereço}},R_E)=0$), e a escada mede a
+ordem sem ser a definição dela.
+
+%======================================================================
+\section{A membrana de Dirac --- a raiz da transição}\label{sec:dirac}
+
+A transformada universal (avaliação nas folhas $\sigma,\sigma^{\dagger}$;
+realização inteira pela matriz companheira --- \emph{Corpo de Peano},
+a ponte) tem agora a sua \textbf{construção de Dirac}: o operador que
+fatora a transição do Metrónomo. A escolha do coordenador --- a raiz
+quadrada, \emph{metade para cada lado} --- e a derivação que já existia:
+
+\begin{teorema}[a borda é uma fatoração de Dirac]\label{thm:borda-dirac}
+No próprio andar, $D=A_m$ satisfaz
+\[
+\boxed{D^{2}=m\,D+I}
+\]
+--- a equação da borda $x^{2}=mx+1$ \emph{é} a fatoração: o passo é a
+raiz quadrada do salto composto $L=A_m^{2}$. E \emph{metade para cada
+lado}: $A^{k}A^{k}=A^{2k}$ com $\det(A^{k})^{2}=\det(A^{2k})=+1$ ---
+cada metade carrega $\det=(-1)^{k}$ e o par fecha
+($\sigma\sigma^{\dagger}=-1$).
+\emph{Medido:} \code{tests/dirac\_transicao.js} \S D1, $m=1..6$, exato.
+\end{teorema}
+
+\begin{teorema}[a obstrução, e o furo na torre]\label{thm:furo}
+A raiz quadrada do \emph{próprio passo} não existe no andar:
+\[
+\boxed{
+\nexists\,D\in M_2(\mathbb{Z})\ \text{com}\ D^{2}=A_m
+}
+\qquad
+\text{(}\det(D)^{2}=-1\ \text{impossível; }\sigma^{\dagger}<0\text{)},
+\]
+--- a obstrução é o \textbf{preço do dual} $\sigma\sigma^{\dagger}=-1$.
+E existe \textbf{inteira, um andar acima}: na dobra ($4\times4$),
+\[
+\boxed{
+D=\begin{pmatrix}0&I\\A_m&0\end{pmatrix},
+\qquad
+D^{2}=A_m\oplus A_m,
+\qquad
+\det D=-1\ \text{(unidade: inversa inteira).}
+}
+\]
+\emph{Medido:} busca exaustiva vazia no $2\times2$; $D^{2}=A\oplus A$
+exato, $m=1..6$; $D^{-1}D=I_4$ (\S D2--D3).
+\end{teorema}
+
+\begin{teorema}[Dirac atua exatamente nas transições]\label{thm:dirac-transicao}
+$D$ aterra na diagonal $\{(z,z)\}$ \textbf{se e só se} o par é uma
+transição verdadeira do Metrónomo:
+\[
+\boxed{
+D(x,y)\in\text{diagonal}
+\iff
+y=A_m x.
+}
+\]
+As transições são o lugar próprio do operador --- e a diagonal é o seu
+conjunto fixo de aterragem. O Inversor aceita $D$: a volta é inteira e
+a escada $(E,\Phi,\Phi_2)$ regressa idêntica.
+\emph{Medido:} $100/100$ transições na diagonal, $100/100$
+não-transições fora; $30$ corpos com a escada restaurada (\S D4--D5).
+\end{teorema}
+
+\begin{teorema}[o salto espectral --- a dobra temporal]\label{thm:dobra-temporal}
+$D$ satisfaz
+\[
+\boxed{D^{4}=m\,D^{2}+I}
+\qquad\text{isto é}\qquad
+\boxed{\text{mín}(D)=x^{4}-mx^{2}-1=\bigl(x^{2}\bigr)^{2}-m\bigl(x^{2}\bigr)-1:}
+\]
+o polinômio mínimo de $D$ é a \textbf{borda dobrada} pela substituição
+$x\mapsto x^{2}$ --- a \textbf{dobra temporal}: dois meios-passos são um
+tick. Os representantes espectrais de $D$ ($\pm\sqrt{\sigma}$,
+$\pm\sqrt{\sigma^{\dagger}}$) vivem no corpo de grau $4$ --- \textbf{o
+andar acima da torre}, acedido pela dobra. E a leitura adjunta fecha o
+outro lado: $D^{\dagger}D=(mA+I)\oplus I$ --- o salto inteiro num lado,
+a identidade no outro: \emph{metade para cada lado}, literalmente.
+\emph{Medido:} \S D6, $m=1..6$, exato.
+\end{teorema}
+
+\begin{definicao}[membrana]\label{def:membrana}
+Uma \textbf{membrana} é um corpo (qualquer função endereçada) que
+atravessa a transformada. A sua \textbf{representação espectral no
+corpo universal} obtém-se pelas \textbf{dobras temporais}: cada dobra
+$x\mapsto x^{2}$ sobe um andar e a membrana ganha os representantes
+desse andar (Teorema~\ref{thm:dobra-temporal}). Estatuto:
+\emph{definição de realização} sobre os teoremas medidos --- a membrana
+não é operador novo; é o corpo em trânsito pela fatoração.
+\end{definicao}
+
+%======================================================================
+\section{Os papéis --- a nomenclatura com cidadania}\label{sec:papeis}
+
+Os nomes deixaram de ser abstratos: cada um é o papel funcional que um
+medidor validou.
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+papel & função no universal & onde o medidor fechou \\
+\midrule
+\textbf{Metrónomo} & métrica/ordem: lê a transição & \S D0, \S D4; \emph{Peano} (Teor.\ do Metrónomo) \\
+\textbf{Maestro} & dinâmica: projecta o passo & \emph{Peano} (Teor.\ do Maestro) \\
+\textbf{Inversor} & a volta: admissibilidade & \S D5; \S P3 \\
+\textbf{Orquestra} & composição dos operadores & \emph{Peano} (Estrela dos $G_i$) \\
+\textbf{Conservatório} & o espaço dos invariantes & a escada $(E,\Phi,\Phi_2)$; \S B4 \\
+\textbf{Membrana} & o corpo em trânsito & Def.~\ref{def:membrana} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+%======================================================================
+\section{O Corpo de Peano é instância}\label{sec:instancia}
+
+\[
+\boxed{
+\text{Corpo de Peano}\;\prec\;\text{Corpo Universal}:
+}
+\]
+o Peano realiza o quadro com escolhas concretas --- a torre
+$d_k=2^{k+1}$, o catálogo $\mathbb{Z}/8\mathbb{Z}$, a retração $\pi_k$,
+o par Maestro/Metrónomo, a realização musical
+(partitura$\to$orquestra), a histerese e a rede dual. O universal não
+o repete: \textbf{cita-o} --- cada teorema de lá é um caso deste
+quadro, e cada teorema daqui foi medido sobre os corpos de lá (o
+cristal, a família metálica, o corpus banal).
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+universal & instância no Peano & medidor \\
+\midrule
+Soma $\oplus$ & $T_{k+1}=T_k+T_k^{*}$ (Lei~4) & \code{observador\_torre} \S T5 \\
+Multiplicação $\otimes$ & viveiro ($\operatorname{lcm}\cdot\operatorname{gcd}=ab$) & \S T3 \\
+Divisão/fibra & retração $\pi_k$; $\operatorname{adj}\cdot M=\det\cdot I$ & \S T4; \S P2 \\
+Dual & estaca $\nu$; $\sigma^{\dagger}$ & \emph{Peano}, Lei~1 \\
+Inversão & Metrónomo ($\lambda^{+}+\lambda^{-}=0$) & \code{lyapunov\_refletido} \\
+escada $I_k$ & \S observador do \emph{Peano} & \S B4, \S C1--C2 \\
+membrana & o corpo que o tradutor compõe & \code{cristal\_volta} \\
+\bottomrule
+\end{tabular}
+\end{center}
+E as \textbf{oito leis} continuam sendo o catálogo de ambos: o teto do
+observador é o teto das oito (oito momentos fecham suporte $\le8$), e o
+fecho $\operatorname{Ind}^{8}=\mathrm{id}$ vale no universal porque vale
+no catálogo --- não há lei nova em nenhum dos dois.
+
+%======================================================================
+\section{Extensões nomeadas --- o mapa, sem teorema}\label{sec:extensoes}
+
+Cada nome abaixo \textbf{espera a sua ponte}; nenhum entra como teorema
+antes do seu medidor:
+\begin{itemize}
+\item \textbf{Pontryagin} --- o eixo álgebra/topologia da teoria (a
+dualidade dos caracteres); candidato natural para o limite da escada de
+observadores (discreto$\to$contínuo).
+\item \textbf{Clifford} --- $D^{2}=L$ é a assinatura de uma relação de
+Clifford; a estrutura medida é \emph{necessária} mas não suficiente
+para a álgebra plena --- a próxima ponte natural.
+\item \textbf{La Hire} --- o operador geométrico do rolamento dual (o
+círculo de raio $r$ dentro de $2r$ fecha rotação em translação):
+candidato geométrico do rotor da Lei~2.
+\item \textbf{Dirac contínuo e convolução universal} --- registrados
+como \emph{ausentes} da ponte metálica (\S P4 da ponte); a membrana
+discreta (\S\ref{sec:dirac}) é o primeiro degrau deles.
+\end{itemize}
+\[
+\boxed{
+\text{a visão unificada é hipótese testável por elos ---}
+\quad
+\text{não se decreta; constrói-se ponte a ponte.}
+}
+\]
+
+\bigskip
+\noindent\textbf{Verificação.}
+\code{tests/dirac\_transicao.js} \S D0--D6 ($13$:$0$);
+\code{tests/ponte\_universal\_metalica.js} \S P0--P5 ($12$:$0$);
+\code{tests/observador\_torre.js} \S T1--T5 ($10$:$0$);
+\code{tests/assinatura\_colisoes.js} \S C0--C4;
+\code{tests/assinatura\_banal.js} \S B0--B5;
+\code{tests/cristal\_energia.js} \S E0--E5;
+\code{tests/cristal\_volta.js} \S V0--V4;
+instância: \code{papers/corpo\_peano.tex} (§§ absorção, energia,
+observador, ponte).
+
+\end{document}
