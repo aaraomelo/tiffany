@@ -385,6 +385,7 @@ tecido a71972ce13c4429d 0
 teletransporte 8b13cc6bf9acf1a0 0
 telomero c1812a6efcda83af 0
 tensor 22059d38a7653ff7 0
+teorema_universal 19bf67b7a5ce2e1b 0
 termica 517ad21a05866f7e 0
 tesseracto ebf76569a555a633 0
 tesserato_espiral 55f89989bf04aa64 0

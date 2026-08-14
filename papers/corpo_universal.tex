@@ -1030,6 +1030,56 @@ $8=4\times2$ e nenhum dos $16$ produtos sobe.
 $\square$
 \end{teorema}
 
+\begin{teorema}[o Teorema Universal do espelho --- uma identidade, tr\^es
+realiza\c{c}\~oes]\label{thm:universal-espelho}
+O espelho que apareceu sem ser convocado em tr\^es andares
+(Teors.~\ref{thm:viviani}, \ref{thm:clifford-pleno} e o espectro) n\~ao
+s\~ao tr\^es objetos parecidos: \'e \emph{uma} identidade dos objetos da
+lib, e cada andar a realiza. Nos geradores ($\mathrm{troca}$,
+$\mathrm{espelho}$, $J$, todos da lib):
+\[
+\mathrm{troca}=\mathrm{espelho}\cdot J,\qquad
+H=\mathrm{troca}+\mathrm{espelho},\qquad H^{2}=2I,
+\]
+\[
+H\,\mathrm{troca}\,H=2\,\mathrm{espelho},\qquad
+H\,\mathrm{espelho}\,H=2\,\mathrm{troca},\qquad
+H\,J\,H=2\,J^{-1}.
+\]
+A troca \'e o deck visto \emph{antes} da dobra (permuta as folhas); o
+espelho \'e o mesmo deck visto \emph{depois} (age $\pm1$ nas metades);
+$H$ \'e a mudan\c{c}a de vista, e \'e a \emph{dualidade do par} --- troca
+e espelho permutam-se, enquanto o rotor vai ao seu inverso (a
+rela\c{c}\~ao diedral; o gume: $HJH$ n\~ao \'e $\pm2$ vezes membro
+nenhum do par). E os andares:
+\begin{enumerate}
+\item \textbf{geometria}: nas folhas da curva do
+Teor.~\ref{thm:viviani}, a dobra separa soma e diferen\c{c}a --- $x,y$
+s\~ao \emph{pura soma} e $z$ \emph{pura diferen\c{c}a}, nos $2N$
+pontos; a ramifica\c{c}\~ao \'e o \'unico par de folhas com
+diferen\c{c}a nula (o par do n\'o).
+\item \textbf{espectro}: a dobra de Cooley--Tukey \emph{\'e} o $H$:
+$c_{2j}=\mathrm{dft}_{N}(\text{soma})$ e
+$c_{2j+1}=\mathrm{dft}_{N}(\text{diferen\c{c}a}\cdot\omega^{-k})$,
+exato no anel; a tor\c{c}\~ao com sinal trocado falha onde h\'a parte
+\'impar.
+\item \textbf{\'algebra}: no bloco, $e_{3}$ \'e a troca, $S$ o
+espelho, $H_{8}$ a dobra --- $H_{8}e_{3}H_{8}=2S_{8}$,
+$H_{8}S_{8}H_{8}=2e_{3}$, $\{S,e_{3}\}=0$: as rela\c{c}\~oes do
+$2\times2$ sobem intactas, e s\~ao exatamente o que vestiu os
+geradores do Teor.~\ref{thm:clifford-pleno}.
+\item \textbf{o tra\c{c}o conta}: $\mathrm{tr}=0$ nas duas vistas e
+nas duas escalas, e as metades s\~ao iguais
+($\mathrm{posto}(I\pm S)=\mathrm{posto}(I\pm e_{3})=4$) --- a
+dualidade \'e a mem\'oria da divis\~ao: nada se perde.
+\item \textbf{as 8 Leis por cima}: \code{verificaLeis()} toda verde, e
+a identidade-m\~ae est\'a escrita nelas --- a Lei~1 d\'a as
+involu\c{c}\~oes, a Lei~2 d\'a o par que gera.
+\end{enumerate}
+\emph{Medido:} \code{tests/teorema\_universal.js} ($13{:}0$).
+$\square$
+\end{teorema}
+
 %======================================================================
 \section{Onde entram os milénios --- leituras, não base}\label{sec:milenio-universal}
 
