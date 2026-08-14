@@ -871,6 +871,50 @@ pergunta}, não afirmada.
 $\square$
 \end{teorema}
 
+\begin{teorema}[a dobra desenhada --- o n\'o \'e o ponto fixo, o
+recobrimento \'e o espelho, o trial da altura \'e o bit]\label{thm:viviani}
+A intersec\c{c}\~ao esfera--cilindro tangente (a curva que a literatura
+chama de Viviani) realiza-se \emph{inteira} no anel pelo rel\'ogio da
+meia-volta: $h$ de ordem $2N$ d\'a o meio-\^angulo $u$, $h^{2}$ o
+\^angulo cheio, e $x=a(1+\cos t)$, $y=a\sin t$, $z=2a\sin u$
+satisfazem esfera \emph{e} cilindro nos $2N$ pontos --- com dois
+controlos: o acaso de mesma magnitude falha, e o cilindro
+\emph{deslocado} para a origem tem \emph{zero} pontos, porque
+$\cos t=-1/2$ pede ordem $3$ e $3\nmid2^{2^{j}}$. Da\'i:
+\begin{enumerate}
+\item \textbf{A dobra \'e a lei}: $2\cos(2u)=(2\cos u)^{2}-2$ \'e
+o $R$ da lib com membrana $d=1$, ponto a ponto e em cascata
+($R^{j}$ l\^e o \^angulo $2^{j}u$, $j\le5$); a membrana errada
+($d=2$) falha nos $2N$. A curva \'e o \emph{desenho no espa\c{c}o de
+uma dobra da renormaliza\c{c}\~ao} (Teor.~\ref{thm:renormalizacao}).
+\item \textbf{O recobrimento \'e o espelho}: a base $(x,y)$ fecha em
+$N$, o ponto s\'o em $2N$, e a troca de folha \'e
+$(y,z)\mapsto(y,-z)$ --- o \code{espelho} da lib, com
+$\mathrm{espelho}^{2}=I$ ($\nu\circ\nu=\mathrm{id}$: dualidade, n\~ao
+degenera\c{c}\~ao). No espectro (a \code{dft} da lib): $x,y$ vivem nas
+frequ\^encias \emph{pares} $\{0,2,2N{-}2\}$ e $z$ nas \emph{\'impares}
+$\{1,2N{-}1\}$, suportes exatos --- a gradua\c{c}\~ao $\mathbb{Z}/2$ do
+recobrimento lida em Fourier.
+\item \textbf{O n\'o \'e o ponto fixo}: os pontos fixos do deck s\~ao
+$2$ par\^ametros ($h=\pm1$) e \emph{um} s\'o ponto $(2a,0,0)$ --- a
+auto-intersec\c{c}\~ao \'e a ramifica\c{c}\~ao, e \'e o \'unico ponto
+da curva com $t=2\cos u=2$: exatamente o ponto fixo $R(2)=2$ da
+cascata. O \emph{outro} fixo ($t=-1$) exigiria $h^{3}=1$, e o crit\'erio
+de Euler d\'a $(-3)^{(q-1)/2}=q-1$ nos tr\^es andares $17$, $257$,
+$65537$: n\~ao existe na escada de Fermat.
+\item \textbf{O trial da altura \'e o bit}: $z^{3}=4a^{2}z$ (a Lei~3
+na escala $2a$) vale em exatamente $4$ par\^ametros --- o subgrupo
+$\{1,i,-1,-i\}$ da Lei~5.
+\item \textbf{As proje\c{c}\~oes s\~ao os cortes}: $xz$ d\'a a
+par\'abola $z^{2}=2a(2a-x)$ e $yz$ a qu\'artica de Gerono
+$4a^{2}y^{2}=z^{2}(4a^{2}-z^{2})$, nos $2N$; o coeficiente mutado
+($3a$) falha em exatamente $2N-2$ --- s\'o os $2$ par\^ametros do n\'o
+escapam.
+\end{enumerate}
+\emph{Medido:} \code{tests/viviani\_universal.js} ($18{:}0$).
+$\square$
+\end{teorema}
+
 %======================================================================
 \section{Onde entram os milénios --- leituras, não base}\label{sec:milenio-universal}
 
