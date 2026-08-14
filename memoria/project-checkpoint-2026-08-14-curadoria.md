@@ -5,7 +5,7 @@ metadata:
   node_type: memory
   type: project
   originSessionId: b6c6c5cb-b5ec-45f0-ac00-480c20a1bb2d
-  modified: 2026-08-14T08:32:37.875Z
+  modified: 2026-08-14T08:45:08.671Z
 ---
 
 **14/08 — A CURADORIA RESOLVIDA, 36c1fa5 (pushado).** Ordem do dono: «resolve a curadoria». Forma: **camada de transações declaradas**, lidas antes de decidir.
@@ -61,5 +61,11 @@ metadata:
 - **Ponto fixo**: R(t)=t²−2, R(2)=2, atingido em j=13 e FICA. Gume: R(0)=−2, R(−2)=2 (a cauda anda).
 - **O ACHADO**: o fundo da cascata é O CATÁLOGO — cauda universal (0,−2,+2) nos três andares: **bit i (ordem 4, Lei 5) → espelho (ordem 2) → unidade (Lei 0)**. O núcleo espectral invariável = catálogo mínimo Lei 5→Lei 0 — o candidato TÉCNICO a «coração».
 - Estatuto dos nomes: fractal clássico NÃO se afirma (sem Hausdorff); medido = «autossimilaridade espectral discreta com ponto fixo de renormalização» (fractalidade operacional). Prosa: thm:renormalizacao no corpo_universal. Bateria **432:432**.
+
+**Noite 7 — FASE 3: AS LEIS PROMOVIDAS, bd52479.** Coordenador: «procurar hausdorff no repo, promover as leis e migrar o sistema»; Grok travava, gerente AUTORIZA definitivo (regra de ouro: **«Universal é dono da lei; instâncias são donas apenas da realização»**; renormalização = operador de LEITURA das leis, não lei nova; zero teoria), diretor sela.
+- **Hausdorff encontrado na casa**: `tests/dourada.c` mede a dimensão COMPLEXA do Cantor do ouro («Hausdorff é a parte REAL, a oscilação de período ln φ é a parte IMAGINÁRIA»); cristal tem dimensao_de_hausdorff, Cantor-sem-11 (0,694), energia_fractal_cantor (Bowen-Ruelle P(d)=0); ciencia.sh «a medida é escolhida». Ponte espectro↔dimensão NOMEADA no thm:renormalizacao, não afirmada.
+- **As 8 leis em lib/universal.js** como interface normativa: catálogo `leis` com verificação operacional por lei (Lei 0 curva x=±1; Lei 1 estaca; Lei 2 rotor/espelho RJ=−JR; Lei 3 trial x³=x; Lei 4 |det|=1; Lei 5 bit=ponto fixo de ν; Lei 6 lcm(2,3)=6; Lei 7 det multiplicativo). `verificaLeis()` 8/8.
+- **Primitivas promovidas**: anel(q), dft/idft, renormaliza (t↦t²−(d+d) — o mix BigInt/Number apanhado ao vivo), morfo δ/ε em ℤ. Substituição em toro_histerese, metronomo_fourier, metronomo_autossimilar, lebesgue_toro (totais idênticos 16/15/12/7); zeta_universal fica (fábrica de MATRIZES mod q, régua própria). Testemunha ampliada: migracao_universal §M7+§M8 (15:0) — leis 8/8 + primitivas caso a caso (DFT coeficiente a coeficiente, renormaliza vs quadraturas BigInt, morfologia elemento a elemento).
+- Reatestação em massa dos 14 importadores da lib (a regra da casa). docs §9; arquitetura.tex atualizada. Bateria **432:432**.
 
 Relacionado: [[checkpoint-2026-08-13-cristal]], [[feedback-a-referencia-escrita-a-mao]], [[feedback-dois-caminhos]], [[feedback-a-base-ja-existe]], [[feedback-normalizar-nao-e-medir]].
