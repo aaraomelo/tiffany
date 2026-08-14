@@ -152,3 +152,16 @@ Ordem «vamos avançar com o corpus»: os 8 teoremas do dia entraram no cristal 
 ## O LOTE B — o avanço vira fluxo (f917643, bateria 435:435)
 
 Os 4 teoremas do selo (La Hire, limite 2-ádico, estrutura, real-caminho) entraram no cristal (4242→4246), com arestas ligando ao grafo dos 8 anteriores. **Mudança estrutural: os pinos de contagem morreram** — cristal_avanco e cristal_volta DERIVAM a contagem dos lotes commitados (4234 + Σ cristal/avanco_*.jsonl); a curadoria vive nos lotes (revistos no git), o recuperado continua guardado pelas âncoras do jornal ((c−t)+f==4286, E=38731623179, digest 59436). **Próximo avanço custa três comandos e zero medidores tocados**: escrever cristal/avanco_DATA.jsonl → tools/cristal_avanca.py → tools/cristal_tex.py → --refaz.
+
+## A RONDA DAS PONTES FÍSICAS E ARITMÉTICAS (madrugada 3 — bateria 441:441)
+
+Depois do selo, o coordenador puxou seis pontes numa madrugada, todas medidor-primeiro, todas assinadas por 𝓜:
+
+- **Geometria (25f16cb, geometria_corpo 9:0)** — o Klein da casa: D₄ = {±I,±J,±S,±X} é a INTERSEÇÃO das duas geometrias (círculo exato, hipérbole a menos de sinal — dois caracteres, ℤ/2×ℤ/2); a carta W diagonaliza a forma metálica (4N=(2a+mb)²−(m²+4)b²) e NELA a estaca é o espelho; os fluxos (relógio/Pell) não se trocam.
+- **Mecânica (e010286, mecanica_corpo 8:0)** — o fluxo conserva o produto dual; σ ALTERNA a membrana (−1)^k e σ² conserva exato (a falha 15/30 era física); parcelas oscilam/escapam; SJS=J⁻¹ É a reversão do tempo; det = seta; o empurrão (translação) quebra.
+- **Costura (3011a4e, costura_mecanica 8:0)** — mecânica, Carnot (585 ciclos ℚ-exatos) e Hopfield inteiro (E=−224, limiar t=15) partilham (invariante, espelho, gume) — e o MESMO empurrão quebra os três: a seta térmica, a fronteira aditiva e o limiar da rede são a mesma parede.
+- **Para-complexo (0cfbd8b, paracomplexo 6:0)** — obs:riemann resolvida: as folhas têm a carta (I,W) (2A=mI+W; estaca = conjugação; transversal à holomorfa); a régua errada é IMPOSSÍVEL (b²(m²+4)=−1).
+- **Navier-Stokes (0cfbd8b, navier_corpo 8:0)** — derivado no ciclo: Laplaciano = dobra−2 com símbolo μ_k² (quadrado da meia-volta); identidade de energia por partes em ℤ; Euler conserva/N-S dissipa (a viscosidade é a única seta); Clay fora por declaração.
+- **A ELÍPTICA SAI DE VIVIANI (2ddb759, eliptica_viviani 10:0)** — pela DESAFINAÇÃO do nó: Viviani é a fibra nodal (C=0 ∀a; falha o teste elíptico — o gume); a desafinada vai reversivelmente (60 pts byte a byte) a y²=x³−20x²−1152x−9216 (Δ≠0); deck→(x,−y); a_p=2/18 com Hasse por dois caminhos. **Barreira explícita: a_p ≠ L ≠ BSD.**
+
+**Hodge inventariado** (★=J, decomposição par/ímpar Parseval-dual — a ponte nasce quando a mesa ordenar); **BSD**: a curva nasceu, faltam L global/posto/ord (elos independentes, no mapa). Lição da ronda: as falhas honestas eram física (a membrana que alterna; o par ortogonal 0=0; a nodal que falha o teste elíptico) — o gume certo transforma a falha em estrutura.
