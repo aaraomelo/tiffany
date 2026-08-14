@@ -485,3 +485,24 @@ E o refaz do portão (422:422 nos exits) denunciou na linha das unidades
 **Bateria: 422:422, 0 falhas, unidades 118:0 nos 17 reabertos. O portão
 de ouro está fechado; a fila teórica reabre (Viviani → Lei trial →
 intervalos encaixantes → teorema dos resíduos → Clifford).**
+
+## 16. FASE 4 — O NÚCLEO UNIFICADO (ordem da mesa, 14/08 noite)
+
+O coordenador: «migrar para sistema unificado». O gerente autorizou com
+o contrato: **o Universal é dono da ESTRUTURA, cada domínio é dono da
+realização** — «unifica sem apagar as diferenças».
+
+- **lib/universal.js exporta `nucleo`** = (X, S, H, J) com as cinco
+  relações do Teorema Universal e `verifica()` operacional. X e H são
+  DERIVADOS de espelho/J no próprio módulo (a referência não é cópia).
+  A mudança na lib foi puramente aditiva (diff: só o export cresceu).
+- **A árvore dual (nucleo_unificado.js 11:0)**: cada objeto pelos DOIS
+  caminhos — legado local vs núcleo — igualdade entrada a entrada:
+  §N0 origem (X,H == construção local), §N1 álgebra (⊗I₄ reproduz os
+  blocos de clifford_pleno byte a byte, relações com as mesmas
+  constantes; ⊗espelho é o gume), §N2 geometria/espectro (H nas folhas
+  = soma/diferença; Cooley–Tukey através do núcleo), §N3 Peano
+  (ν∘ν=id, fibra verbatim, RETAIN/REOPEN pelo vetor completo),
+  §N4 leis 8/8 + contrato juntos.
+- **Legados NÃO apagados** (regra do gerente): a limpeza dos duplicados
+  é fase posterior, depois do portão --refaz validar a torre inteira.

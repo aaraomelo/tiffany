@@ -1080,6 +1080,22 @@ involu\c{c}\~oes, a Lei~2 d\'a o par que gera.
 $\square$
 \end{teorema}
 
+\begin{observacao}[fase 4 --- o n\'ucleo unificado]\label{obs:nucleo}
+Por ordem da mesa, a identidade do Teor.~\ref{thm:universal-espelho}
+deixou de ser s\'o teorema e passou a \emph{infraestrutura}: a lib
+exporta \code{nucleo} $=(X,S,H,J)$ com as cinco rela\c{c}\~oes
+verific\'aveis ($X$ e $H$ s\~ao \emph{derivados} de $S$ e $J$, n\~ao
+escritos), e a \'arvore dual mede os quatro adaptadores --- \'algebra
+($\otimes I_{4}$ reproduz os blocos byte a byte), geometria ($H$ nas
+folhas), espectro (Cooley--Tukey atrav\'es do n\'ucleo) e Peano (a
+inst\^ancia original: $\nu\circ\nu=\mathrm{id}$, RETAIN/REOPEN, fibra
+verbatim) --- entrada a entrada contra os legados. O Universal \'e dono
+da estrutura; cada dom\'inio \'e dono da realiza\c{c}\~ao. As
+implementa\c{c}\~oes legadas ficam at\'e o port\~ao \code{--refaz}
+validar a torre inteira.
+\emph{Medido:} \code{tests/nucleo\_unificado.js} ($11{:}0$).
+\end{observacao}
+
 %======================================================================
 \section{Onde entram os milénios --- leituras, não base}\label{sec:milenio-universal}
 
