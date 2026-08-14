@@ -142,6 +142,7 @@ dualreta d9a0e2809774fac6 0
 dualrn 8a91b8108dcd0df5 0
 dualsort 3298ebc60a6b388c 0
 dualsort_banco 32ec1211d142f264 0
+duas_pontes a50961f0657e4654 0
 edo 17b331411cdf37ee 0
 einstein a8ce9f96f9b3109a 0
 eletrico 3367df7bc35a0e03 0
