@@ -150,6 +150,7 @@ elipses f2e2baa850da0069 0
 eliptica_viviani 6202e1b445210d57 0
 encaixa 12b97f8add189a61 0
 encaixe_continuo fb85476766754fcb 0
+encaixotamento 0f9c4a6716e901fe 0
 encanamento 045b4f98e950e3c9 0
 enche a2861fc14a9fd7f9 0
 entre c9d4cbfc7a5a9307 0
