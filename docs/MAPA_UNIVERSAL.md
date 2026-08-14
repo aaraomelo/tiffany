@@ -129,3 +129,29 @@ global DA CURVA aberto** (L(E,s), zeros de L, posto — elos próprios).
 |-----------|-----------|--------|
 | **Hodge** | **PONTE LOCAL PAGA (madrugada)**: hodge_viviani 7:0 — o Cartier–Hasse–Witt no diferencial ω=dx/y CONTA os pontos (== a_p, dois andares, gume no índice); a involução age −1 em ω; a 2-torsão é o trial (4 pontos). A dualidade de Hodge completa (H^{1,0}⊕H^{0,1} global) fica no mapa | local medido; global no mapa |
 | **BSD** | a CURVA nasceu (14/08 madrugada): eliptica_viviani 10:0 — Viviani é a fibra nodal, a desafinação dá Weierstrass y²=x³−20x²−1152x−9216, deck→(x,−y), a_p=2/18 com Hasse por dois caminhos; FALTAM: L global, posto, ord_{s=1} — elos independentes | curva medida; conjectura no mapa |
+
+## O inventário do Clay (14/08, madrugada — a pedido do coordenador)
+
+A régua desta tabela é a DO CLAY, não a nossa. O que a casa tem são
+leituras medidas, verdades locais/finitas e fronteiras declaradas como
+teorema — **nenhum problema do Clay está satisfeito por nós**, e um
+(Poincaré) já estava satisfeito pelo mundo.
+
+| problema | o que a casa MEDIU | o que o Clay EXIGE | o que falta |
+|---|---|---|---|
+| **Poincaré** | a leitura pela Lei 1 (ν∘ν=id; dualidade H^k↔H_{n−k}) | — | **nada: resolvido (Perelman, 2003)** — não por nós |
+| **Riemann** | ζ_T derivada do censo (10:0); a zeta GLOBAL racional com FE=espelho e zeros no círculo POR CONSTRUÇÃO (zeta_global 8:0); RH local da curva (Hasse, hodge_viviani) | os zeros não-triviais da ζ(s) CLÁSSICA (sobre os primos de ℤ) em Re s = ½ | a transformação espectral que ligue a zeta de órbitas à de primos — registada em aberto (obs); o objeto do Clay é infinito-analítico, fora da medida exata finita |
+| **BSD** | a curva nasceu de Viviani (Weierstrass Δ≠0, 10:0); a_p com Hasse em 2 andares; encontro local Hodge=contagem (7:0) | para TODA E/ℚ: ord_{s=1}L(E,s) = rank E(ℚ) | (a) L global (todos os primos + continuação, via modularidade); (b) o posto algébrico (descida); (c) a igualdade; (d) o quantificador TODAS. **Elos ainda medíveis**: o posto da NOSSA curva por 2-descida; produto de Euler parcial exato |
+| **Hodge** | o encontro local (Cartier–Hasse–Witt conta, 7:0); ★=J; par/ímpar; dicionário Lei 0↔H⁰⊕H², folhas↔H¹ | toda classe de Hodge (p,p) em variedade projetiva lisa é ℚ-combinação de ciclos algébricos | dimensão: em curvas a conjectura é trivial; o Clay começa em dim ≥ 2. **Elo medível**: o toro da casa como superfície (classes e ciclos no (Z/q)²) |
+| **Navier–Stokes** | N-S discreto derivado (identidade de energia EXATA em ℤ; gume Euler/N-S; 8:0) | existência e suavidade global (ou blow-up) no CONTÍNUO 3D | o limite contínuo — exatamente a fronteira aditiva (teorema §L5); a identidade de energia que temos exata é o único a-priori conhecido, e é insuficiente no 3D supercrítico |
+| **Yang–Mills** | gauge+Bianchi no toro; gap POR ANDAR (quantum 1; 2−t₁≠0; 8:0) | construir a QFT 4D (axiomas OS/Wightman) e provar gap > 0 no contínuo | a teoria quântica contínua (a medida funcional) e o gap UNIFORME no limite — o limite é o problema; o lattice finito tem gap trivialmente |
+| **P vs NP** | a assimetria em contagens exatas (11 vs 47; 11 vs 4095); a fibra paga o det; leitura = par fibra/fusão | prova sobre TODOS os algoritmos (lower bound universal) | o quantificador universal — fora do método por natureza (a casa mede objetos, não o espaço das máquinas); as barreiras clássicas (relativização, natural proofs, algebrização) aplicam-se a qualquer tentativa |
+
+**O padrão, numa frase**: o que falta é sempre **um limite ou um
+quantificador universal** — e os dois vivem na fronteira que a casa
+mediu como teorema (a translação que nunca fecha sob a dobra). O método
+da casa — medida inteira exata, contrato 𝓜, gume — alcança verdades
+locais/finitas e DECLARA a fronteira; satisfazer o Clay exigiria
+atravessá-la, o que o próprio método diz não fazer. Os elos que AINDA
+são nossos: a 2-descida da curva de Viviani (o posto), o Euler parcial
+exato, e o toro como superfície de Hodge.
