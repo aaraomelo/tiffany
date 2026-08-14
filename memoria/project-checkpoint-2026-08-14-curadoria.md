@@ -5,7 +5,7 @@ metadata:
   node_type: memory
   type: project
   originSessionId: b6c6c5cb-b5ec-45f0-ac00-480c20a1bb2d
-  modified: 2026-08-14T09:36:11.540Z
+  modified: 2026-08-14T10:01:11.667Z
 ---
 
 **14/08 — A CURADORIA RESOLVIDA, 36c1fa5 (pushado).** Ordem do dono: «resolve a curadoria». Forma: **camada de transações declaradas**, lidas antes de decidir.
@@ -80,4 +80,10 @@ metadata:
 - Estado real: **408 verdes / 25 com causa nomeada** — a bateria diz a verdade. REGRA NOVA: `--refaz` entra no fecho de toda fase. docs §10 + docs/MAPA_UNIVERSAL.md (a árvore Leis→…→Leis, cada nó com medidor; lacunas dos 4 candidatos: Clifford pleno a menor).
 - **Viviani (pergunta do coordenador, sondada no scratchpad — SEM medidor no repo ainda, consolidação primeiro)**: a curva (esfera∩cilindro) realiza-se INTEIRA no anel (i=3^16384; meia-raiz ω′ de ordem 2N): esfera, cilindro, projeção parábola z²=2a(2a−x) (o eixo do ponto hermitiano!), quártica de Gerono 4a²y²=z²(4a²−z²) (o oito), e **2cos(2u)=(2cosu)²−2 — a curva é o desenho geométrico de UMA dobra da renormalização**; parametriza-se pela MEIA-volta (fecho em 4π — o recobrimento duplo; ±z são as folhas/espelho; colam-se num único ponto (2a,0,0) — a ramificação/membrana). Candidato a medidor quando a mesa reabrir.
 
-Relacionado: [[checkpoint-2026-08-13-cristal]], [[feedback-a-referencia-escrita-a-mao]], [[feedback-dois-caminhos]], [[feedback-a-base-ja-existe]], [[feedback-normalizar-nao-e-medir]], [[feedback-o-medidor-que-nunca-mediu]].
+**Madrugada 2 — O SANEAMENTO DO DOADOR E A CURA DAS FONTES, 1cd44e2.** Coordenador: «tirar o conceito de doador e sanear»; gerente dá o crivo (derivável/fixture/integração/remover), diretor sela (Regra do Oráculo; TEORIA CONGELADA — Viviani→trial→intervalos→Clifford esperam o verde).
+- **Classe A → `integration/`**: os 10 da crónica do doador + compoe_ao_clicar (vite :8099), com LEIA.md (estatuto + achado histórico de cada um; scripts de colheita saíram na purga de 05/08; gémeos internos já na bateria). Citações do catálogo movidas — ninguém saiu em silêncio.
+- **Família das fontes CURADA NA RAIZ**: lib/fontes/documento-*.otf é **CFF sem glyf/loca** e ttf_contorno lia lixo silencioso (loca NEGATIVA, 0 contornos) — o comentário da lib prometia «convertidas para sfnt que este leitor lê» e era falso na prática. Conserto: **despacho em ttf_contorno → cff_contorno** (a lib JÁ o tinha!, «TTF e OTF são a mesma spline» honrado no código); e spline.c/dual_spline_ttf.c de volta ao SEU oráculo (Liberation — o §P2 é contra a tabela Helvetica; xMin só existe em TrueType; o n=3 hard-coded nunca chegava à Liberation da lista nova). spline ✓ dual_spline_ttf ✓.
+- **refs** ✓ (2 órfãs + 7 cruzadas no catálogo→textuais), **morfico** ✓, **tres_reconstroi** ✓ (cwd=tests/ → ../teoria.tex).
+- **Bateria honesta: 422 medidores — 410 verdes, 12 nomeados**: família compositor-TEXTO (catálogo compõe 1622 réguas mas extração de texto dá 0 palavras/1 página — candidato: glifos viraram desenho/XObjects; SESSÃO PRÓPRIA) + libc_wasm (write vazio; traduz «pilha vazia na descida»). docs §11.
+
+Relacionado: [[checkpoint-2026-08-13-cristal]], [[feedback-a-referencia-escrita-a-mao]], [[feedback-dois-caminhos]], [[feedback-a-base-ja-existe]], [[feedback-normalizar-nao-e-medir]], [[feedback-o-medidor-que-nunca-mediu]], [[feedback-a-regua-nao-transporta]].
