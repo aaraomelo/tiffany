@@ -113,9 +113,16 @@ Critério da mesa para o próximo elo (um só, quando a mesa escolher):
 
 (Avaliação do analista para a mesa decidir; nenhuma escolha feita aqui.)
 
+## A hipótese do coordenador (registada 14/08, madrugada 3)
+
+«BSD, Hodge e Riemann resolvem-se mutuamente via Viviani no trial» —
+**verdade LOCAL medida** (hodge_viviani.js 7:0: os três lados calculam o
+mesmo a_p na curva da desafinação; o trial é a 2-torsão) **+ hipótese
+GLOBAL aberta** (L global, zeros globais, posto — elos independentes).
+
 ## O mapa de destino (14/08 madrugada — a fila da mesa)
 
 | candidato | inventário | estado |
 |-----------|-----------|--------|
-| **Hodge** | os objetos JÁ existem: o candidato a operador ★ é o próprio J (em 2D a estrela nas 1-formas é a rotação de 90°: ★²=−1=J², medido em todo o lado); a decomposição ortogonal é a graduação par/ímpar do espectro (viviani §V6, com ortogonalidade Parseval-dual em produto_dual §I4) | inventariado — a ponte nasce daqui quando a mesa ordenar |
+| **Hodge** | **PONTE LOCAL PAGA (madrugada)**: hodge_viviani 7:0 — o Cartier–Hasse–Witt no diferencial ω=dx/y CONTA os pontos (== a_p, dois andares, gume no índice); a involução age −1 em ω; a 2-torsão é o trial (4 pontos). A dualidade de Hodge completa (H^{1,0}⊕H^{0,1} global) fica no mapa | local medido; global no mapa |
 | **BSD** | a CURVA nasceu (14/08 madrugada): eliptica_viviani 10:0 — Viviani é a fibra nodal, a desafinação dá Weierstrass y²=x³−20x²−1152x−9216, deck→(x,−y), a_p=2/18 com Hasse por dois caminhos; FALTAM: L global, posto, ord_{s=1} — elos independentes | curva medida; conjectura no mapa |

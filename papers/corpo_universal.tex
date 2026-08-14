@@ -1729,6 +1729,42 @@ por $\mathcal{M}$).
 $\square$
 \end{teorema}
 
+\begin{teorema}[o encontro local --- Hodge conta, Riemann fecha, na
+curva de Viviani]\label{thm:encontro-local}
+A hipótese do coordenador («BSD, Hodge e Riemann resolvem-se
+mutuamente via Viviani no trial») tem agora a sua metade
+\emph{demonstrável} medida --- o encontro é LOCAL, e os três lados
+calculam o mesmo número:
+\begin{enumerate}
+\item \textbf{o lado de Hodge conta}: o operador de
+Cartier--Hasse--Witt age no diferencial $\omega=dx/y$, e o seu
+coeficiente (o de $x^{p-1}$ em $f^{(p-1)/2}$ mod $p$) é
+\emph{exatamente} o $a_{p}$ da contagem de pontos --- $2$ em
+$\mathbb{F}_{17}$, $18$ em $\mathbb{F}_{257}$, por dois caminhos
+independentes. O gume: o índice errado ($x^{p-2}$) difere ($130\ne18$
+em $\mathbb{F}_{257}$; em $\mathbb{F}_{17}$ coincide por acaso,
+registado).
+\item \textbf{o lado de Riemann fecha localmente}:
+$\mathrm{disc}(x^{2}-a_{p}x+p)<0$ e produto de raízes $=p$ --- os
+zeros da zeta local vivem em $|\alpha|=\sqrt{p}$ (o teorema de Hasse,
+realizado por medida), e a equação funcional é a reversão
+$[1,-a_{p},p]\leftrightarrow[p,-a_{p},1]$: o $s\leftrightarrow1-s$
+em miniatura.
+\item \textbf{o trial está na curva}: a involução --- o deck de
+Viviani --- age como $-1$ em $\omega$ (ponto a ponto, o caráter ímpar
+do $z$ de Viviani), e os seus pontos fixos são a $2$-torsão
+\emph{completa}: $4$ pontos nos dois andares --- o mesmo $4$ do bit
+$\{1,i,-1,-i\}$: a ramificação da dobra, outra vez.
+\end{enumerate}
+A barreira continua explícita: o encontro é local; $L$ global, zeros
+globais e posto são elos independentes --- a hipótese fica
+\emph{registada como verdade local medida $+$ hipótese global
+aberta}.
+\emph{Medido:} \code{tests/hodge\_viviani.js} ($7{:}0$; assinado por
+$\mathcal{M}$).
+$\square$
+\end{teorema}
+
 %======================================================================
 \section{Extensões nomeadas --- o mapa, sem teorema}\label{sec:extensoes}
 
