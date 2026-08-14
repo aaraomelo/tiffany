@@ -1569,6 +1569,46 @@ por $\mathcal{M}$).
 $\square$
 \end{teorema}
 
+\begin{teorema}[a mecânica trazida --- o fluxo como ação
+conservativa]\label{thm:mecanica}
+A mecânica não se importa: \emph{deriva-se} dos fluxos das duas
+membranas, e a pergunta da mesa («o fluxo é uma ação que conserva o
+produto dual?») responde-se SIM, com a estrutura fina à vista:
+\begin{enumerate}
+\item \textbf{a conservação}: no relógio, $c^{2}+s^{2}=1$ ao longo de
+toda a trajetória; no Pell, $\sigma$ conserva $|4N|$ \emph{alternando
+a membrana} $(-1)^{k}$ --- o sinal do encaixe --- e $\sigma^{2}$ (a
+unidade de Pell) conserva \emph{exato}, BigInt.
+\item \textbf{a energia decompõe-se nas parcelas da carta}: $c^{2}$ e
+$s^{2}$ no círculo, $u^{2}$ e $(m^{2}{+}4)v^{2}$ na hipérbole. Os dois
+regimes distinguem-se pelo comportamento das parcelas com o invariante
+fixo: no círculo elas \emph{oscilam} ($c^{2}$ periódico) e o rotor $J$
+\emph{troca-as} ($c^{2}\leftrightarrow s^{2}$, pela ação real da
+matriz) --- a troca cinética$\leftrightarrow$potencial é o rotor; no
+Pell elas \emph{escapam} ($u_{k}$ estritamente crescente) mantendo a
+diferença. Oscilação compacta e escape não-compacto: as duas mecânicas
+das duas membranas.
+\item \textbf{a $T$-simetria já estava no grupo}:
+$S\,R_{k}=R_{-k}\,S$ em todos os ticks --- a relação diedral
+$SJS=J^{-1}$ \emph{é} a reversão do tempo, com $T^{2}=\mathrm{id}$; e
+na hipérbole a estaca inverte o fluxo a menos do sinal da membrana
+($\overline{\sigma v}=-\sigma^{-1}\overline{v}$, exato).
+\item \textbf{$D_{4}$ age no fluxo}: $g\,R\,g^{-1}=R^{\det g}$ para
+os $8$ elementos --- as rotações comutam com o tempo, as reflexões
+invertem-no: \emph{o $\det$ é a seta do tempo}.
+\item \textbf{o gume}: rodar \emph{e} transladar perde a conservação
+em todos os passos --- a translação (a mesma da fronteira aditiva,
+\S L5) não é isometria do produto dual.
+\end{enumerate}
+O corpo já não é uma coleção de números: é \emph{o que sustenta
+movimentos conservativos sob as suas operações}. Se Lagrange ou
+Hamilton aparecerem, será como representação disto --- não como
+importação.
+\emph{Medido:} \code{tests/mecanica\_corpo.js} ($8{:}0$; assinado por
+$\mathcal{M}$).
+$\square$
+\end{teorema}
+
 %======================================================================
 \section{Extensões nomeadas --- o mapa, sem teorema}\label{sec:extensoes}
 
