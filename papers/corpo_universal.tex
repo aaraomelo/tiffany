@@ -690,6 +690,26 @@ indefinida, e chamar-lhe círculo seria trazer a régua errada.
 \emph{Medido:} \code{tests/contorno\_riemann.js}, $23{:}0$.
 \end{observacao}
 
+\begin{teorema}[a estrutura das folhas reais --- a resolução da
+observação]\label{thm:paracomplexo}
+A recusa acima («não se afirma estrutura holomorfa sobre as folhas»)
+estava certa --- e agora tem teorema e régua própria. As folhas reais
+têm a carta \textbf{para-complexa} $(I,W)$, dual exata da holomorfa
+$(I,J)$ da torção: $J^{2}=-I$ com $\det=a^{2}{+}b^{2}$ \emph{versus}
+$W^{2}=+(m^{2}{+}4)I$ com $\det(aI{+}bW)=a^{2}-(m^{2}{+}4)b^{2}$ (a
+diagonal do Teor.~\ref{thm:geometria}), multiplicativa. O corpo vive
+\emph{dentro} da carta ($2A=mI+W$, inteiro exato); a \textbf{estaca é
+a conjugação da carta} ($x\mapsto x^{\dagger}$ corresponde a
+$(a,b)\mapsto(a,-b)$, byte a byte); as duas estruturas são
+transversais (partilham só a unidade); e a régua errada é
+\textbf{impossível, não apenas desaconselhada}: $(bW)^{2}=-I$ exigiria
+$b^{2}(m^{2}{+}4)=-1$, sem solução racional. \emph{Holomorfa na
+torção, para-complexa nas folhas: o par completo, sem confusão.}
+\emph{Medido:} \code{tests/paracomplexo.js} ($6{:}0$; assinado por
+$\mathcal{M}$).
+$\square$
+\end{teorema}
+
 %======================================================================
 \section{A dinâmica e o seu espectro --- a zeta operacional como
 primitiva derivada}\label{sec:zeta-dinamica}
@@ -1640,6 +1660,35 @@ resultado se não fechasse.
 \emph{Medido:} \code{tests/costura\_mecanica.js} ($8{:}0$; assinado
 por $\mathcal{M}$; as pontas: \code{tests/carnot.c},
 \code{tests/rede\_dual.js}).
+$\square$
+\end{teorema}
+
+\begin{teorema}[a costura em campo --- Navier--Stokes discreto,
+derivado]\label{thm:navier}
+No ciclo, $u'=u+[-\mathrm{conv}(u)+\nu\Delta u]$ deriva-se das peças
+da casa, com a fronteira do Clay declarada \emph{fora} (como nos
+milénios: a leitura corre sobre o provado):
+\begin{enumerate}
+\item \textbf{o Laplaciano é a dobra menos $2$}: $\Delta=$
+convolução com $[1,-2,1]$, símbolo $t_{k}-2$ (dois caminhos no anel);
+e o símbolo do passo de calor é
+$2+t_{k}=\mu_{k}^{2}$ --- \emph{o quadrado da meia-volta}: a
+fatoração espectral do operador de difusão discreto.
+\item \textbf{a identidade de energia, exata em $\mathbb{Z}$}:
+$\sum u\,\Delta u=-\sum(u_{i+1}-u_{i})^{2}$ (por partes no ciclo)
+e $\sum$fluxo$(u^{2})=0$ (telescópio) --- o transporte
+\emph{conserva}, a viscosidade \emph{só pode dissipar}.
+\item \textbf{a difusão}: massa conservada exata (o modo $0$ --- o
+que a volta não vê), energia estritamente decrescente para todo campo
+não-constante, equilíbrio no constante (a massa no centro).
+\item \textbf{o gume que separa Euler de N--S}: o transporte
+espectral conserva o produto dual exato; o passo de calor muda-o ---
+\emph{a viscosidade é a única seta}. N--S é a costura do
+Teor.~\ref{thm:costura} em campo: o conservativo da mecânica mais a
+seta do Carnot, no mesmo $u$.
+\end{enumerate}
+\emph{Medido:} \code{tests/navier\_corpo.js} ($8{:}0$; assinado por
+$\mathcal{M}$).
 $\square$
 \end{teorema}
 

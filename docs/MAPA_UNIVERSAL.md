@@ -112,3 +112,10 @@ Critério da mesa para o próximo elo (um só, quando a mesa escolher):
 | **La Hire** | **PAGO (14/08)**: o rolamento 2:1 é a dobra H no par (rotação, inversa); diâmetros = eixos do espelho; J troca-os; gume 3:1 pela ordem 6 ausente (lahire_universal 7:0, assinado por 𝓜) | — | fechada |
 
 (Avaliação do analista para a mesa decidir; nenhuma escolha feita aqui.)
+
+## O mapa de destino (14/08 madrugada — a fila da mesa)
+
+| candidato | inventário | estado |
+|-----------|-----------|--------|
+| **Hodge** | os objetos JÁ existem: o candidato a operador ★ é o próprio J (em 2D a estrela nas 1-formas é a rotação de 90°: ★²=−1=J², medido em todo o lado); a decomposição ortogonal é a graduação par/ímpar do espectro (viviani §V6, com ortogonalidade Parseval-dual em produto_dual §I4) | inventariado — a ponte nasce daqui quando a mesa ordenar |
+| **BSD** | exige curva elíptica, L-função e posto — NENHUM medido; derivar agora seria o salto que o contrato 𝓜 impede | no mapa de destino, sem data |
