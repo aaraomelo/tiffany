@@ -44,7 +44,7 @@
  *   node tests/metronomo_autossimilar.js
  */
 'use strict'
-const { mat2 } = require('../lib/universal.js')
+const { mat2, renormaliza } = require('../lib/universal.js')
 
 let falhas = 0, feitas = 0
 function ok (q, cond) {
@@ -61,17 +61,15 @@ const { mul, Am } = mat2
   const mulB = (X, Y) => [X[0] * Y[0] + X[1] * Y[2], X[0] * Y[1] + X[1] * Y[3],
     X[2] * Y[0] + X[3] * Y[2], X[2] * Y[1] + X[3] * Y[3]]
   let M = [2n, 1n, 1n, 0n]
-  let t = 2n, d = -1n
+  let est = { t: 2n, d: -1n }
   let doisCaminhos = true
-  const globais = [t]
+  const globais = [est.t]
   for (let j = 1; j <= 8; j++) {
     M = mulB(M, M)                                   /* A^{2^j} */
-    const nt = t * t - 2n * d
-    d = d * d
-    t = nt
-    globais.push(t)
-    if (M[0] + M[3] !== t) doisCaminhos = false      /* traço da matriz */
-    if (M[0] * M[3] - M[1] * M[2] !== d) doisCaminhos = false
+    est = renormaliza(est)                           /* fase 3: o R da lib */
+    globais.push(est.t)
+    if (M[0] + M[3] !== est.t) doisCaminhos = false  /* traço da matriz */
+    if (M[0] * M[3] - M[1] * M[2] !== est.d) doisCaminhos = false
   }
   ok('§A0 a lei t_{j+1}=t_j²−2d_j, d_{j+1}=d_j² == traço/det de A^{2^j} por quadraturas — global exato (BigInt, j=0..8)',
     doisCaminhos)
@@ -101,8 +99,8 @@ const powm = (b, e) => {
 const cascata = [{ t: 2, d: P - 1 }]
 for (let j = 1; j <= 15; j++) {
   const { t, d } = cascata[j - 1]
-  const dd = d === P - 1 ? -1 : d
-  cascata.push({ t: mod(t * t - 2 * dd), d: mod(d * d) })
+  const r = renormaliza({ t, d: d === P - 1 ? -1 : d })   /* fase 3: o R da lib */
+  cascata.push({ t: mod(r.t), d: mod(r.d) })
 }
 console.log('cascata mod p: t = ' + cascata.map(c => c.t === P - 2 ? '-2' : c.t === P - 1 ? '-1' : c.t).slice(0, 14).join(', '))
 

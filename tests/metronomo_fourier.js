@@ -53,16 +53,8 @@ function ok (q, cond) {
 
 const { mul, Am } = mat2
 
-function anel (q) {
-  const mod = x => ((x % q) + q) % q
-  const powm = (b, e) => {
-    let r = 1; b = mod(b)
-    while (e > 0) { if (e & 1) r = r * b % q; b = b * b % q; e >>= 1 }
-    return r
-  }
-  const inv = a => powm(a, q - 2)
-  return { mod, powm, inv }
-}
+/* fase 3: o anel é o da infraestrutura */
+const { anel } = require('../lib/universal.js')
 
 /* ── o palco pequeno: q=257, m=2, a órbita de período 128 do censo ───────── */
 const q = 257
@@ -86,19 +78,10 @@ ok('§MF0 3 é raiz primitiva mod 257 (ord = 256, e 3^128 = −1)',
   powm(g, 256) === 1 && powm(g, 128) === q - 1)
 const w = powm(g, 2)                                /* ord(ω) = 128 */
 
-function dft (xs) {
-  const M = xs.length
-  const wq = powm(w, 128 / M)                       /* raiz de ordem M */
-  const c = []
-  for (let k = 0; k < M; k++) {
-    let s = 0
-    const wk = powm(wq, M - (k % M))                /* ω^{−k} */
-    let f = 1
-    for (let n = 0; n < M; n++) { s = (s + xs[n] * f) % q; f = f * wk % q }
-    c.push(s)
-  }
-  return c
-}
+/* fase 3: a DFT é a da lib (o w de cada tamanho deriva do de ordem 128) */
+const { dft: dftLib } = require('../lib/universal.js')
+const ANEL = anel(q)
+function dft (xs) { return dftLib(xs, ANEL, powm(w, 128 / xs.length)) }
 const c = dft(x)
 
 /* §MF0 — os c_k apresentados: duas folhas */
@@ -217,15 +200,8 @@ const c = dft(x)
 
 /* §MF6 — a volta exata, com R_total = 0 */
 {
-  const iN = inv(N)
-  const volta = []
-  for (let n = 0; n < N; n++) {
-    let s = 0
-    const wn = powm(w, n)
-    let f = 1
-    for (let k = 0; k < N; k++) { s = (s + c[k] * f) % q; f = f * wn % q }
-    volta.push(s * iN % q)
-  }
+  const { idft } = require('../lib/universal.js')
+  const volta = idft(c, ANEL, w)
   const R = U.residuoTotal([['orbita', x.join(',')]], [['orbita', volta.join(',')]])
   console.log(`volta: R=(${R.Rend},${R.RE},${R.RF1},${R.RF2},${R.RD})`)
   ok('§MF6 a inversa devolve a órbita EXATA (128/128) com R_total = 0 — nada se perde na representação',

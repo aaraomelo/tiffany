@@ -224,3 +224,42 @@ Verificação: cada medidor re-corrido após a cirurgia; bateria completa
 REGRA NOVA DA CASA: quando lib/universal.js ou lib/peano.js mudam, os
 medidores que os importam têm de ser re-atestados (`--reatesta`) mesmo sem
 mudança na própria fonte — a atestação assina o medidor, não a lib.
+
+## 9. FASE 3 — as leis promovidas (executada em 14/08/2026, noite)
+
+Ordem da mesa: gerente **AUTORIZA** («promover as 8 leis e as primitivas já
+verificadas para o Universal; Peano passa a ser instância; zero teoria nova»);
+diretor sela. A REGRA DE OURO entra no protocolo:
+
+**O Universal é dono da lei; as instâncias são donas apenas da realização.**
+
+- **As 8 leis em `lib/universal.js`** como interface normativa: catálogo
+  `leis` com verificação OPERACIONAL por lei (identidades já atestadas pelos
+  medidores — nada de teoria nova): Lei 0 pela enumeração da curva (x=±1);
+  Lei 1 pela estaca A·(mI−A)=−I; Lei 2 pelo par rotor/espelho (RJ=−JR);
+  Lei 3 pelo trial x³=x; Lei 4 por |det|=1 e tr W=0; Lei 5 pelo bit como
+  ponto fixo de ν; Lei 6 por lcm(2,3)=6; Lei 7 pelo det multiplicativo nas
+  duas cartas. `verificaLeis()` → 8/8 (migracao_universal §M7).
+- **Primitivas dinâmicas promovidas**: `anel(q)`, `dft`/`idft`,
+  `renormaliza` (t↦t²−2d — o OPERADOR DE LEITURA das leis, não lei nova),
+  `morfo` (δ/ε em ℤ, sem truncar — a lição da borda codificada).
+- **Substituição (não reescrita)**: toro_histerese (morfologia),
+  metronomo_fourier (anel + dft/idft), metronomo_autossimilar
+  (renormaliza), lebesgue_toro (anel + dft) religados à lib; totais
+  idênticos (16/15/12/7; zeta_universal 10 intacto — a sua fábrica é de
+  MATRIZES mod q, régua própria, fica).
+- **Testemunha ampliada**: migracao_universal §M8 compara cada primitiva
+  nova com a forma embutida antiga, caso a caso (DFT coeficiente a
+  coeficiente; renormaliza vs quadraturas BigInt; morfologia elemento a
+  elemento).
+- **Inventário Hausdorff (ordem do coordenador)**: a régua JÁ EXISTE na
+  casa — tests/dourada.c (dimensão complexa do Cantor do ouro: «Hausdorff é
+  a parte REAL, a oscilação de período ln φ é a parte IMAGINÁRIA»);
+  cristal: dimensao_de_hausdorff (ciencias), Cantor-sem-11 dim
+  ln2/lnφ²≈0,694 (papers), energia_fractal_cantor com Bowen-Ruelle P(d)=0
+  (fractal); tools/ciencia.sh («a medida é escolhida»); deforma.c (0,87 da
+  literatura, NÃO medido). A ponte espectro↔dimensão fica NOMEADA como
+  próxima pergunta no thm:renormalizacao — não afirmada.
+
+**Estado: FASE 3 EXECUTADA. Universal dono das leis; Peano e demais corpos,
+donos da realização. Pendente de decisão da mesa: nada.**

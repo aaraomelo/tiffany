@@ -336,6 +336,82 @@ const pares = []
     iguais && mat2.igual(mat2.J, JP) && mat2.igual(mat2.espelho, RP))
 }
 
+/* §M7 — FASE 3: as oito leis como interface normativa (a promoção) */
+{
+  const { verificaLeis } = require('../lib/universal.js')
+  const v = verificaLeis()
+  for (const l of v) console.log(`#LEI ${l.n} ${l.nome.padEnd(52)} ${l.ok ? 'ok' : 'FALHA'}`)
+  ok('§M7 as OITO leis verificam na infraestrutura: catálogo completo, todas operacionais',
+    v.length === 8 && v.every(l => l.ok) &&
+    v.map(l => l.n).join() === '0,1,2,3,4,5,6,7')
+}
+
+/* §M8 — FASE 3: as primitivas dinâmicas contra as formas embutidas
+ * (anel/DFT de metronomo_fourier; a lei da cascata de
+ * metronomo_autossimilar; a morfologia de toro_histerese) */
+{
+  const { anel, dft, idft, renormaliza, morfo } = require('../lib/universal.js')
+  /* forma antiga do anel/DFT (metronomo_fourier, byte a byte) */
+  function anelP (q) {
+    const mod = x => ((x % q) + q) % q
+    const powm = (b, e) => {
+      let r = 1; b = mod(b)
+      while (e > 0) { if (e & 1) r = r * b % q; b = b * b % q; e >>= 1 }
+      return r
+    }
+    return { mod, powm }
+  }
+  const q = 257
+  const Aq = anel(q), Ap = anelP(q)
+  const w = Aq.powm(3, 2)                               /* ord 128 */
+  /* a órbita real m=2 */
+  let v2 = [1, 0]
+  const xs = []
+  do { xs.push(v2[0]); v2 = [Aq.mod(2 * v2[0] + v2[1]), v2[0]] } while (v2[0] !== 1 || v2[1] !== 0)
+  function dftP (zs) {
+    const M = zs.length
+    const c = []
+    for (let k = 0; k < M; k++) {
+      let s = 0
+      const wk = Ap.powm(w, M - (k % M))
+      let f = 1
+      for (let n = 0; n < M; n++) { s = (s + zs[n] * f) % q; f = f * wk % q }
+      c.push(s)
+    }
+    return c
+  }
+  const cU = dft(xs, Aq, w), cP = dftP(xs)
+  const voltaU = idft(cU, Aq, w)
+  ok('§M8 a DFT da lib == a forma embutida, coeficiente a coeficiente, na órbita real (128 casos)',
+    cU.length === cP.length && cU.every((s, k) => s === cP[k]))
+  ok('§M8 a inversa da lib devolve a órbita byte a byte (idft∘dft = id)',
+    voltaU.every((s, n) => s === xs[n]))
+  /* a lei da cascata: renormaliza == quadraturas de matriz (BigInt) */
+  const mulB = (X, Y) => [X[0] * Y[0] + X[1] * Y[2], X[0] * Y[1] + X[1] * Y[3],
+    X[2] * Y[0] + X[3] * Y[2], X[2] * Y[1] + X[3] * Y[3]]
+  let M2 = [2n, 1n, 1n, 0n]
+  let est = { t: 2n, d: -1n }
+  let cascataOk = true
+  for (let j = 1; j <= 8; j++) {
+    M2 = mulB(M2, M2)
+    est = renormaliza(est)
+    if (M2[0] + M2[3] !== est.t) cascataOk = false
+    if (M2[0] * M2[3] - M2[1] * M2[2] !== est.d) cascataOk = false
+  }
+  ok('§M8 a renormalização da lib == traço/det de A^{2^j} por quadraturas (BigInt, j=1..8)',
+    cascataOk)
+  /* a morfologia: lib == forma embutida de toro_histerese, no suporte real */
+  const b = Buffer.from(cristal[1], 'utf8')
+  const S = new Set()
+  for (let i = 0; i < b.length; i++) if (b[i] & 1) S.add(i)
+  const dilataP = X => { const R2 = new Set(); for (const i of X) { R2.add(i); R2.add(i + 1) } return R2 }
+  const erodeP = X => { const R2 = new Set(); for (const i of X) if (X.has(i + 1)) R2.add(i); return R2 }
+  const igualS = (A2, B2) => A2.size === B2.size && [...A2].every(i => B2.has(i))
+  ok('§M8 a morfologia da lib == a forma embutida (δ, ε, α, φ) no suporte real, elemento a elemento',
+    igualS(morfo.dilata(S), dilataP(S)) && igualS(morfo.erode(S), erodeP(S)) &&
+    igualS(morfo.abre(S), dilataP(erodeP(S))) && igualS(morfo.fecha(S), erodeP(dilataP(S))))
+}
+
 console.log('')
 if (!falhas) {
   console.log('  A EQUIVALÊNCIA FECHOU POR CASO: a única implementação universal')

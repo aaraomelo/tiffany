@@ -225,7 +225,7 @@ latex_corpo dc511e8c18bbea1d 0
 lean_controlo aaf49206e4a67e72 0
 lean_convencao c6f7c086994efcfc 0
 lean_cruz 0707dd551947897b 0
-lebesgue_toro 091ff218ee3ab347 0
+lebesgue_toro 65132337ebb27456 0
 lei2 aafa184130e2d70f 0
 leis_no_tradutor b021c11d75457674 0
 lemniscata 72425a6ff1117151 0
@@ -253,10 +253,10 @@ meio_aberto 23d64525b11bc961 0
 metades ffed9b53a315b61c 0
 metalica 8974bfc6b912b456 0
 metrica 88d942f5fa1ec127 0
-metronomo_autossimilar 60d83cde8abd1b45 0
-metronomo_fourier 6ae55567ac839af0 0
+metronomo_autossimilar daf675c96c99ac84 0
+metronomo_fourier b70d83baa019ad03 0
 microfluidica 7d10ccec731925cd 0
-migracao_universal 0d3c7a041c932c2a 0
+migracao_universal 7bbcce67bc1915a2 0
 milenio 3ae5c1319f2be093 0
 milenio_trial fadcc72d65f812a7 0
 mmu 3e46735bb1cec005 0
@@ -391,7 +391,7 @@ tikz 147f528e4e429a4e 0
 toolkit 31bc9d0214124d3b 0
 toolkit_llm c3777b0aa146ffb6 0
 topologia 7a909bdb58a515ec 0
-toro_histerese 274efdb3f7d14345 0
+toro_histerese 1f70fcec201cda1d 0
 torre_induc 0e26df90f9fdcaca 0
 torres acf1a40374e156e3 0
 traducao 9a4d69e8627dc0f4 0

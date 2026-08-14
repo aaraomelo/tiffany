@@ -38,6 +38,8 @@
  *   node tests/lebesgue_toro.js
  */
 'use strict'
+/* fase 3: o anel e a DFT são os da infraestrutura */
+const { anel, dft } = require('../lib/universal.js')
 
 let falhas = 0, feitas = 0
 function ok (q, cond) {
@@ -50,12 +52,7 @@ const B = 8                                  /* faixas da imagem: as oito */
 const ESCADA = [17, 257, 65537]
 
 function andar (q) {
-  const mod = x => ((x % q) + q) % q
-  const powm = (b, e) => {
-    let r = 1; b = mod(b)
-    while (e > 0) { if (e & 1) r = r * b % q; b = b * b % q; e >>= 1 }
-    return r
-  }
+  const { mod, powm } = anel(q)
   /* a órbita da batuta A_2, do estado [1,0] até fechar */
   let v = [1, 0]
   const xs = []
@@ -152,14 +149,8 @@ const andares = ESCADA.map(andar)
   for (const a of andares.slice(0, 2)) {                   /* 17 e 257: DFT completa */
     /* ω de ordem N no anel (3 é primitivo mod 17 e mod 257) */
     const w = a.powm(3, (a.q - 1) / a.N)
-    let riscas = 0
-    for (let k = 0; k < a.N; k++) {
-      let s = 0
-      const wk = a.powm(w, a.N - k)
-      let f = 1
-      for (let n = 0; n < a.N; n++) { s = (s + a.xs[n] * f) % a.q; f = f * wk % a.q }
-      if (s !== 0) riscas++
-    }
+    const c = dft(a.xs, anel(a.q), w)
+    const riscas = c.filter(s => s !== 0).length
     if (riscas !== 2) atomico = false
   }
   ok('§T4 o espectro permanece ATÓMICO enquanto a imagem uniformiza: exatamente 2 riscas em q=17 e q=257 — metade para cada lado',

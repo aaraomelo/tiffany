@@ -480,7 +480,7 @@ $\mathcal{P}=\mathcal{U}[\sigma_{\rm Peano}]$, com a assinatura em
 \code{lib/peano.js}. A regra de ouro da equivalência cumpriu-se
 \emph{por caso}, não por «ambos dão zero»:
 
-\medido{\code{tests/migracao\_universal.js} ($10{:}0$): a escada
+\medido{\code{tests/migracao\_universal.js} ($15{:}0$): a escada
 idêntica componente a componente nos $4274$ textos reais (cristal $+$
 banal); a energia total exata; $R_{\mathrm{endereço}}$ igual sob as sete
 induções de \code{cristal\_volta}; o vetor total
@@ -488,9 +488,28 @@ $(R_{\mathrm{end}},R_E,R_{\Phi},R_{\Phi_2},R_D)$ \textbf{e as decisões}
 RETAIN/REOPEN iguais nas cinco classes --- incluindo o espelhado
 orgânico $(1,0,0,62937,1)$, em que $E$ e $\Phi$ são cegos e a curvatura
 e a membrana acusam dos dois lados; a fibra e a monodromia byte a byte
-nas $52$ fusões; a geometria entrada a entrada. A árvore antiga fica no
-lugar (dupla árvore) até a limpeza ser ordenada;
-\code{tests/equivalencia\_universal.js} já importa a única implementação.}
+nas $52$ fusões; a geometria entrada a entrada. A limpeza da dupla
+árvore foi executada (os medidores importam a lib; as testemunhas
+guardam as formas antigas por desenho).}
+
+\medskip
+\noindent\textbf{Fase 3 (ordem da mesa, 14/08): as oito leis são a
+interface normativa.} A regra de ouro --- \emph{o Universal é dono da
+lei; as instâncias são donas apenas da realização} --- entrou no
+código: \code{lib/universal.js} carrega o catálogo \code{leis} (as
+oito, cada uma com a sua verificação \emph{operacional}: o par
+$(+1)\oplus(-1)$ pela enumeração da curva; a estaca $A\cdot(mI{-}A)=-I$;
+o rotor e o espelho com $RJ=-JR$; o trial por $x^{3}=x$; a dobra com
+$|\det|=1$; o bit como ponto fixo de $\nu$; a interface
+$\mathrm{lcm}(2,3)=6$; Hurwitz pelo $\det$ multiplicativo nas duas
+cartas) e as primitivas dinâmicas promovidas --- \code{anel},
+\code{dft}/\code{idft}, \code{renormaliza} (o operador de leitura das
+leis, não uma lei nova) e a morfologia $\delta,\varepsilon$ em
+$\mathbb{Z}$. \emph{Medido:} \code{tests/migracao\_universal.js}
+\S M7--\S M8 --- as oito verificam, e cada primitiva nova reproduz a
+forma embutida antiga caso a caso (DFT coeficiente a coeficiente na
+órbita real; renormalização contra quadraturas de $A^{2^{j}}$ em
+inteiros exatos; morfologia elemento a elemento no suporte real).
 
 \section{A tipografia pela estrela: semente, espiral, região --- e a corte}\label{sec:espiral}
 

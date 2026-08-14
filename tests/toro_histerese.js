@@ -44,7 +44,7 @@
 'use strict'
 const fs = require('fs')
 const path = require('path')
-const { Universal, mat2 } = require('../lib/universal.js')
+const { Universal, mat2, morfo } = require('../lib/universal.js')
 const { sigmaPeano } = require('../lib/peano.js')
 const U = Universal(sigmaPeano)
 
@@ -233,10 +233,10 @@ const T1 = ordem(mmod(Am(1)))
     if (isolado && buraco) { b = bb; X = S; N = bb.length; break }
   }
   ok('§H4 o suporte irregular existe nos dados reais (isolados E buracos)', X !== null)
-  /* a adjunção vive em ℤ (sem truncar na borda do buffer — truncar quebra
-   * φ ≥ id no último ponto, medido) */
-  const dilata = S => { const R = new Set(); for (const i of S) { R.add(i); R.add(i + 1) } return R }
-  const erode = S => { const R = new Set(); for (const i of S) if (S.has(i + 1)) R.add(i); return R }
+  /* a adjunção vive em ℤ (sem truncar na borda — a lição está na lib);
+   * fase 3: δ e ε são os da infraestrutura */
+  const dilata = morfo.dilata
+  const erode = morfo.erode
   const igualS = (A2, B2) => A2.size === B2.size && [...A2].every(i => B2.has(i))
   const abre = S => dilata(erode(S))
   const fecha = S => erode(dilata(S))
