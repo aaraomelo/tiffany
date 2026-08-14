@@ -915,6 +915,43 @@ escapam.
 $\square$
 \end{teorema}
 
+\begin{teorema}[os intervalos encaixantes --- a propriedade do
+cont\'inuo, derivada]\label{thm:encaixe}
+A \'algebra inteira constr\'oi a cadeia e mede o seu pr\'oprio limite:
+com os convergentes do \'aureo $c_{k}=F_{k+1}/F_{k}$ sa\'idos de
+$A_{1}^{k}$ (a matriz \code{Am(1)} da lib; dois caminhos, entrada a
+entrada), os intervalos $I_{k}$ de extremos consecutivos satisfazem,
+tudo por aritm\'etica inteira exata at\'e $k=90$:
+\begin{enumerate}
+\item \textbf{a unidade encaixa e mede}:
+$p_{k+1}q_{k}-p_{k}q_{k+1}=(-1)^{k+1}$ (o fator de pot\^encia,
+Lei~4) d\'a de uma vez o zigue-zague que encaixa
+($I_{k+1}\subset I_{k}$ por desigualdades cruzadas) \emph{e} o
+comprimento exato: $(q_{k}q_{k+1})\cdot|I_{k}|=1$.
+\item \textbf{o buraco}: a varredura exaustiva dos $1325$ racionais
+$r/s$ com $s\le50$ mostra que \emph{todos} saem de algum $I_{k}$; e
+nenhum convergente \'e o ponto comum, porque
+$p^{2}-pq-q^{2}=\pm1\ne0$ sempre. A cadeia aponta para fora de
+$\mathbb{Q}$: \emph{o cont\'inuo \'e o que preenche} --- a \'algebra
+opera e n\~ao alcan\c{c}a, a topologia alcan\c{c}a e n\~ao opera (o
+eixo de Pontryagin da teoria em tr\^es partes).
+\item \textbf{a dualidade com os dois membros}: o par \'e
+$(\varphi,\,1-\varphi)$ com $\varphi\cdot(1-\varphi)=-1$ em
+$\mathbb{Z}[\varphi]$ --- a involu\c{c}\~ao $x^{\dagger}=-1/x$ com
+$x\,x^{\dagger}=-1$, em pares inteiros --- e a cadeia conjugada
+$1-c_{k}$ encaixa para o outro membro com a mesma unidade.
+\item \textbf{a outra membrana da mesma lei}:
+$L_{2k}=L_{k}^{2}-2(-1)^{k}$ \'e o $R$ da lib com $d=(-1)^{k}$ --- a
+escada \'aurea \'e a membrana $d=-1$ (hip\'erbole) da \emph{mesma}
+renormaliza\c{c}\~ao cuja membrana $d=1$ (c\'irculo) desenhou a curva
+do Teor.~\ref{thm:viviani}; fixar $d=1$ falha exatamente nos $k$
+\'impares. O par c\'irculo/hip\'erbole \'e o par das membranas, n\~ao
+duas leis.
+\end{enumerate}
+\emph{Medido:} \code{tests/encaixe\_continuo.js} ($12{:}0$).
+$\square$
+\end{teorema}
+
 %======================================================================
 \section{Onde entram os milénios --- leituras, não base}\label{sec:milenio-universal}
 
