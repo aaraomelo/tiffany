@@ -368,14 +368,94 @@ exatamente o pagar ($\oint dQ/T<0$ faz $\eta$ cair).
 \end{observacao}
 
 %======================================================================
+\section{A morfologia --- o par $\delta\dashv\varepsilon$ e a torção}\label{sec:morfologia}
+
+A morfologia do Universal não se importa de fora: \textbf{a construção
+já estava no repo} (o mórfico do \emph{Catálogo}; \code{tests/toolkit.c}
+\S K3; \code{tests/morfico\_ordem.c}; Porquês${}=\varepsilon$ /
+5W2H${}=\delta$ no Conecthus), e o laboratório
+(\code{tests/morfologia\_universal.js}, $14$:$0$) verificou-a pelo
+critério decisivo:
+\[
+\boxed{
+\text{morfologia válida}
+\iff
+\text{dual existe}\;\land\;\text{volta existe}\;\land\;\text{invariante conservado}.
+}
+\]
+
+\begin{teorema}[o par morfológico]\label{thm:morf-par}
+A dilatação e a erosão são o par \textbf{adjunto}
+\[
+\boxed{\delta(A)\subseteq C\iff A\subseteq\varepsilon(C)}
+\qquad(4096/4096\ \text{pares, varredura completa}),
+\]
+e dele \textbf{emergem} --- não se postulam --- a abertura e o fecho
+clássicos: $\alpha=\delta\circ\varepsilon\le\mathrm{id}\le
+\varepsilon\circ\delta=\varphi$, ambos \emph{idempotentes}. A
+\textbf{volta existe na fronteira admissível}:
+$\delta(\varepsilon(A))=A$ \emph{exatamente} nos conjuntos
+$B$-abertos ($29$ de $64$ no universo medido) --- $E(D(x))=x$ dentro
+da fronteira, como a adjunção manda. O invariante é a \textbf{ordem do
+parâmetro}: o raio \emph{soma}
+($\operatorname{dil}_r\circ\operatorname{dil}_s=\operatorname{dil}_{r+s}$,
+Minkowski), total e monótona no objeto. E o par \textbf{muda o corpo}:
+$\delta$ cria ($A\subseteq\delta A$), $\varepsilon$ remove
+($\varepsilon A\subseteq A$) --- a massa sobe e desce, medida.
+\end{teorema}
+
+\begin{teorema}[a torção]\label{thm:torcao}
+A torção tem \textbf{duas realizações que concordam}, e nenhuma é
+dilatação escondida:
+\begin{enumerate}
+\item \textbf{o esquilo} $J\colon(a,b)\mapsto(b,-a)$:
+$J^{2}=-I$, $J^{4}=\mathrm{id}$, $|\det J|=1$, e a \textbf{norma
+conserva exata} --- $J$ transporta a coordenada para o eixo dual sem
+criar nem remover;
+\item \textbf{a órbita do anel}: a torção $w$ ($3^{256}$ em
+$\mathbb{Z}_{65537}$) fecha em $256$ e em nenhum divisor próprio ---
+\emph{a base é a órbita da torção} (\emph{Catálogo}) --- e \textbf{o
+dual do dual devolve o grupo}: ida pelos caracteres, volta pela órbita
+inversa, resíduo $0$ --- o degrau \emph{discreto} de Pontryagin,
+medido no anel.
+\end{enumerate}
+\[
+\boxed{
+\text{erosão/dilatação mudam o \textbf{corpo}};
+\qquad
+\text{a torção muda o \textbf{representante} sem o destruir.}
+}
+\]
+E a decomposição da morfologia universal é
+\[
+\boxed{
+\text{morfologia}=\underbrace{\delta/\varepsilon}_{\text{escala/representação}}
++\underbrace{J}_{\text{eixo/assinatura}},
+}
+\qquad
+\text{corpo}\xrightarrow{\delta/\varepsilon}\text{representação}
+\xrightarrow{J}\text{dual}\xrightarrow{\text{Inversor}}\text{corpo}.
+\]
+A torção participa do par de Clifford recém-fechado ($J^{2}=-I$ é o
+rotor da Lei~2; $\mathrm{Cl}(1,1)$ dá a assinatura) --- a morfologia lê
+a escala, a torção assina o eixo, o Inversor confere a volta, o
+Metrónomo mede o custo.
+\emph{Medido:} \code{tests/morfologia\_universal.js} \S M1--M6;
+inventário re-atestado: \code{toolkit.c} ($8$ ok),
+\code{morfico\_ordem.c} ($3$ ok), \code{universal.c} ($42$ ok),
+\code{rede\_dual.js} ($28$:$0$).
+\end{teorema}
+
+%======================================================================
 \section{Extensões nomeadas --- o mapa, sem teorema}\label{sec:extensoes}
 
 Cada nome abaixo \textbf{espera a sua ponte}; nenhum entra como teorema
 antes do seu medidor:
 \begin{itemize}
 \item \textbf{Pontryagin} --- o eixo álgebra/topologia da teoria (a
-dualidade dos caracteres); candidato natural para o limite da escada de
-observadores (discreto$\to$contínuo).
+dualidade dos caracteres); o degrau \emph{discreto} já está medido (o
+bidual do anel devolve o grupo --- Teorema~\ref{thm:torcao}); o
+\emph{contínuo} (o limite da escada de observadores) continua no mapa.
 \item \textbf{Clifford} --- $D^{2}=L$ é a assinatura de uma relação de
 Clifford; a estrutura medida é \emph{necessária} mas não suficiente
 para a álgebra plena --- a próxima ponte natural.
