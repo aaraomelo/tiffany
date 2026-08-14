@@ -533,3 +533,16 @@ Todo teorema entra pelo mesmo portão pelo qual a arquitetura entra.
 **A simetria de desenho**: o produto dual exige o espelho no índice
 (k↔−k) para não perder informação; a medição exige o gume
 (afirmação↔contra-caso) para não perder falsificabilidade.
+
+## 18. O SELO — o fim das migrações (14/08 noite, decreto do diretor)
+
+A ordem «formalizar o corpo e migrar o sistema com base nas operações»
+resolveu-se SEM fase 7: a formalização é o Teorema de Estrutura
+(thm:estrutura, estrutura_corpo.js 7:0) e a migração já estava feita —
+as seis fases eram a implementação da cadeia
+Lei → Operação → Corpo → Ordem → Refinamento → Caminho → Limite.
+O manifesto completo: docs/ESTRUTURA_CORPO.md. Congelamento
+arquitetural absoluto: nova migração só com inventário de ownership e
+ordem explícita do gerente. «Completo» = completude por refinamento
+operacional (selo de honestidade protegido por medidor); um real =
+um caminho raiz→folha na árvore da torre (thm:real-caminho).

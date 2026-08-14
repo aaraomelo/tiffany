@@ -168,6 +168,7 @@ estrela c5bed29dd437e004 0
 estrela_emite a6d07852e80a89ea 0
 estrela_pontofixo 28214a4f49ddadcb 0
 estrela_unifica 5e2f9d7b477e452a 0
+estrutura_corpo 2f62a80aac5c3a03 0
 evolutivo 0d23ff55520f5c59 0
 expressao 92d06c014898a2ea 0
 fala 710144c0e4bd433c 0
@@ -230,6 +231,7 @@ lemniscata 72425a6ff1117151 0
 letra_assinatura ac69847f7bec6136 0
 libc_wasm fc834bc8eeefe10a 0
 liga 9a74373ac9338675 0
+limite_escada 582f8604e39f093d 0
 linear 02f99a21eba6406b 0
 liquida 6f6a73a8318e27bf 0
 llm 3ca3e3ba0ee143d5 0
@@ -330,6 +332,7 @@ racional_pg 62d5f52b3aa7c179 0
 radiacao 803b45791ce8714f 0
 rastro 26e475d85d748049 0
 reais 621a5430042c6845 0
+real_caminho 8e59cbaaf2b0ed87 0
 recaman e67ba263ef7dfb38 0
 reconstroi ebee793f4c68d7b0 0
 recursao 7b5ddd4dbc13c83b 0

@@ -1435,19 +1435,128 @@ inventário re-atestado: \code{toolkit.c} ($8$ ok),
 \end{teorema}
 
 %======================================================================
+\section{O Teorema de Estrutura --- o que o Corpo Universal É}
+\label{sec:estrutura}
+
+Ordem da mesa (14/08): organizar os resultados e formalizar. A palavra
+do coordenador era «corpo completo e ordenado»; a mesa travou o
+adjetivo clássico --- um corpo ordenado completo no sentido usual é
+isomorfo a $\mathbb{R}$, e isso apagaria as folhas, o toro e o par
+$(\sigma,\sigma^{\dagger})$. O que se formaliza é \emph{o que a medida
+dá}, linha a linha:
+
+\begin{center}
+\begin{tabular}{p{0.21\linewidth}p{0.44\linewidth}p{0.25\linewidth}}
+\textbf{propriedade} & \textbf{o que está medido} & \textbf{medidor} \\
+\hline
+corpo &
+no andar, $K=\mathbb{F}_{q}[\sigma]/(\sigma^{2}{-}m\sigma{-}1)$ é
+corpo quando $m^{2}{+}4$ é não-resíduo (axiomas exaustivos em
+$\mathbb{F}_{17}[\sigma]$: $288$ inversos, comutativo nos $289^{2}$
+pares); quando é resíduo, $\sigma$ separa nas \emph{folhas} e os
+divisores de zero são exibidos &
+\code{estrutura\_corpo.js} \S S0--S1 \\
+ordem &
+a clássica é \emph{impossível} no andar (característica $p$, medida
+nos três); a da casa é a \emph{ordem de escada}: refinamento estrito
+$\mu_{8}\subset\mu_{16}\subset\mu_{32}$, total entre andares,
+cíclica dentro &
+\S S2 \\
+compatibilidade &
+a inclusão de andares respeita o produto; cada andar fecha; a
+restrição de caracteres é a redução do índice &
+\S S3; \code{limite\_escada.js} \S L1--L2 \\
+completude operacional &
+por \emph{refinamento}: as sequências compatíveis (o $2$-ádico)
+operam e o topo determina a torre sem colisões; a cascata do operador
+termina na unidade em profundidade finita &
+\S S4; \S L3--L4 \\
+completude métrica clássica &
+\textbf{não} --- \emph{por teorema, não por falta}: a translação (o
+gérmen de $\mathbb{R}$) tem ordem $p$ ímpar e nunca fecha sob a
+dobra &
+\S L5 \\
+\end{tabular}
+\end{center}
+
+\begin{teorema}[de Estrutura do Corpo Universal]\label{thm:estrutura}
+As operações medidas fazem do Universal, em cada andar, um
+\textbf{corpo operacional} (corpo de verdade quando o discriminante
+não separa; o par de folhas, com os divisores exibidos, quando
+separa); a escada induz uma \textbf{ordem de refinamento} --- a única
+compatível, porque a característica $p$ mata a ordem clássica --- e
+uma \textbf{completude por refinamento}: o limite da torre é o relógio
+$2$-ádico, que \emph{opera} (caracteres compatíveis) e no qual o
+operador de Dirac é raiz da unidade em profundidade finita. A relação
+destas noções com o corpo ordenado completo clássico não é lacuna
+aberta: está \emph{fechada por teorema} --- a direção aditiva nunca
+retorna pela dobra, e $\mathbb{R}$ é alcançado (Teor.~\ref{thm:encaixe})
+mas não operado. \emph{A álgebra opera e não alcança; a topologia
+alcança e não opera} --- e agora ambos os lados são medidos.
+\emph{Medido:} \code{tests/estrutura\_corpo.js} ($7{:}0$) e
+\code{tests/limite\_escada.js} ($8{:}0$), ambos assinados pelo
+contrato $\mathcal{M}$.
+$\square$
+\end{teorema}
+
+\begin{teorema}[o real é um caminho da raiz à folha]\label{thm:real-caminho}
+A árvore já existia: é a torre com fibra $2$ (\S L3), lida como árvore
+binária --- nível $k$ com $2^{k}$ nós, cada nó com dois filhos. Um
+número real identifica-se com um \emph{caminho da raiz à folha}, e o
+corte de Dedekind é o que ele decide a cada nó. Com o real concreto da
+casa ($x=1/\varphi$, o ponto do Teor.~\ref{thm:encaixe}), tudo por
+aritmética inteira exata ($m\le2^{k}x\iff(2m+2^{k})^{2}\le5\cdot4^{k}$,
+BigInt):
+\begin{enumerate}
+\item \textbf{o caminho desce sem saltos}: $m_{k+1}\in\{2m_{k},
+2m_{k}{+}1\}$ até $k=40$, os intervalos diádicos encaixam e o
+numerador do comprimento é a \emph{unidade} em todo nível --- o mesmo
+padrão do encaixe, agora na árvore.
+\item \textbf{o corte}: em cada nível, todo diádico $j\le m_{k}$
+fica à esquerda de $x$ e todo $j>m_{k}$ à direita ($131\,086$
+comparações exatas); e a folha \emph{não é nó}:
+$(2m+N)^{2}=5N^{2}$ é imposs\'ivel --- o real é o caminho, não um
+ponto da árvore.
+\item \textbf{os bits por dois caminhos}: o chão quadrático coincide
+com o \emph{itinerário da dobra} $x\mapsto2x-b$ (aritmética exata em
+$\mathbb{Z}[\sqrt5]$) --- a mesma dobra da renormalização, agora a
+soletrar o real.
+\item \textbf{rigidez e volta}: o endereço reconstrói-se dos bits
+byte a byte, e um bit trocado \emph{expulsa} $x$ do intervalo.
+\end{enumerate}
+O tríptico fecha: \emph{o encaixe alcança} (Teor.~\ref{thm:encaixe}),
+\emph{a árvore endereça} (a torre da fibra $2$), \emph{a dobra
+soletra} (o itinerário). O contínuo entra no sistema como
+\textbf{caminho}, sem nunca fingir ser nó.
+\emph{Medido:} \code{tests/real\_caminho.js} ($8{:}0$; assinado por
+$\mathcal{M}$).
+$\square$
+\end{teorema}
+
+%======================================================================
 \section{Extensões nomeadas --- o mapa, sem teorema}\label{sec:extensoes}
 
 Cada nome abaixo \textbf{espera a sua ponte}; nenhum entra como teorema
 antes do seu medidor:
 \begin{itemize}
-\item \textbf{Pontryagin} --- o eixo álgebra/topologia da teoria (a
-dualidade dos caracteres); o degrau \emph{discreto} já está medido (o
-bidual do anel devolve o grupo --- Teorema~\ref{thm:torcao}), e o
-degrau seguinte fechou a 14/08: \emph{o buraco e o preenchimento}
-(Teor.~\ref{thm:encaixe} --- a álgebra inteira constrói a cadeia que
-aponta para fora de $\mathbb{Q}$; o contínuo é o que preenche). O que
-resta no mapa é s\'o o \emph{operar} no limite (os caracteres do
-contínuo); alcançá-lo está medido.
+\item \textbf{Pontryagin --- SAIU DO MAPA: o limite opera} (14/08,
+esta sessão). O degrau discreto já estava medido (o bidual devolve o
+grupo, Teor.~\ref{thm:torcao}); o alcançar também
+(Teor.~\ref{thm:encaixe}); e agora o \emph{operar}: a torre dos
+relógios $\mu_{8}\subset\mu_{16}\subset\mu_{32}$ tem restrição de
+caracteres $=$ redução do índice (exata ponto a ponto), as setas
+inclusão$\leftrightarrow$projeção são duais pelo emparelhamento, o
+bidual devolve o grupo em cada andar, e as sequências
+\emph{compatíveis} de índices --- o inteiro $2$-ádico --- somam-se
+componente a componente com a ação a fechar em todos os andares. A
+escada de Fermat é a torre $2$-ádica \emph{por desenho}
+($q-1=2^{2^{j}}$ nos três andares). E a fronteira é teorema, não
+lacuna: a translação (o gérmen de $\mathbb{R}$) tem ordem $p$ ímpar e
+a dobra \emph{nunca} a devolve à unidade --- \emph{a álgebra opera no
+$2$-ádico e não alcança $\mathbb{R}$; o encaixe alcança $\mathbb{R}$ e
+não opera}: o eixo fecha medido dos dois lados.
+\emph{Medido:} \code{tests/limite\_escada.js} ($8{:}0$; assinado por
+$\mathcal{M}$).
 \item \textbf{Clifford --- SAIU DO MAPA: a ponte fechou} (14/08). O
 que aqui se dizia «necessária mas não suficiente» completou-se: o
 andar acima existe e fecha (Teor.~\ref{thm:clifford-pleno} ---
@@ -1475,12 +1584,19 @@ $\xrightarrow{H}$ translação.}}
 \]
 \emph{Medido:} \code{tests/lahire\_universal.js} ($7{:}0$; assinado
 pelo contrato $\mathcal{M}$).
-\item \textbf{Dirac contínuo} --- registrado como \emph{ausente} da
-ponte metálica (\S P4 da ponte); a membrana discreta
-(\S\ref{sec:dirac}) é o primeiro degrau dele, e a 14/08 a membrana
-ganhou leitura nova: $d=\pm1$ é \emph{o valor do produto dual na
-unidade} (Teor.~\ref{thm:produto-dual}) --- o degrau seguinte tem
-nome; o limite contínuo continua sem régua inteira óbvia, e fica.
+\item \textbf{Dirac contínuo --- SAIU DO MAPA: o limite do operador
+existe e é $2$-ádico} (14/08, esta sessão). A cascata do operador
+termina \emph{na unidade}: $A^{2^{j}}=I$ exato (matriz, não só
+traço) nas profundidades $4/7/13$ dos três andares, logo
+$D^{2^{j+1}}=I_{4}$ --- o operador de Dirac é \emph{raiz $2$-ádica da
+unidade}, com a profundidade a crescer com a escada. O limite contínuo
+do operador existe, é atingido em profundidade \emph{finita} em cada
+andar, e é o mesmo objeto $2$-ádico dos caracteres --- uma régua, duas
+pontes. A membrana $d=\pm1$ é o valor do produto dual na unidade
+(Teor.~\ref{thm:produto-dual}); o que fica \emph{fora} --- a direção
+aditiva --- fica por teorema (a translação nunca fecha sob a dobra),
+não por falta.
+\emph{Medido:} \code{tests/limite\_escada.js} \S L4--L5.
 \item \textbf{Convolução universal --- SAIU DO MAPA: a ponte fechou}
 (o único laboratório autorizado pela mesa, 14/08). O candidato $*$
 \emph{não se importou}: o produto de corpos $f(A)\cdot g(A)$

@@ -107,8 +107,8 @@ Critério da mesa para o próximo elo (um só, quando a mesa escolher):
 | candidato | o que já está medido | o que falta | lacuna |
 |---|---|---|---|
 | **Clifford pleno** | **PAGO (14/08)**: Cl(2,1) e Cl(2,2) fecham, dim dobra 4→8→16 medida, gerador vestido com o espelho, par sobre ℤ[A] (clifford_pleno 12:0, thm:clifford-pleno) | — | fechada |
-| **Pontryagin contínuo** | o degrau discreto (bidual do anel devolve o grupo — morfologia_universal); a escada de Fermat como limite por ponto fixo (lebesgue_toro) | caracteres do limite; exigiria a escada infinita ou um objeto contínuo novo | média |
-| **Dirac contínuo** | a membrana discreta inteira (dirac_transicao 13:0); as dobras temporais | o limite contínuo do operador — sem régua inteira óbvia | grande |
+| **Pontryagin contínuo** | **PAGO (14/08)**: a torre de caracteres opera no limite 2-ádico (restrição=redução, adjunção, bidual por andar, soma compatível); a fronteira aditiva é TEOREMA (a translação nunca fecha sob a dobra) — limite_escada 8:0; e o real entra como CAMINHO na árvore (real_caminho 8:0) | — | fechada |
+| **Dirac contínuo** | **PAGO (14/08)**: a cascata do operador termina NA UNIDADE (A^{2^j}=I nas profundidades 4/7/13; D^{2^{j+1}}=I₄) — o operador é raiz 2-ádica da unidade, o limite existe em profundidade finita (limite_escada §L4) | — | fechada |
 | **La Hire** | **PAGO (14/08)**: o rolamento 2:1 é a dobra H no par (rotação, inversa); diâmetros = eixos do espelho; J troca-os; gume 3:1 pela ordem 6 ausente (lahire_universal 7:0, assinado por 𝓜) | — | fechada |
 
 (Avaliação do analista para a mesa decidir; nenhuma escolha feita aqui.)
