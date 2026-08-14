@@ -2101,6 +2101,8 @@ Teto pelas oito leis & \textbf{teorema operacional} --- $8$ momentos fecham
   suporte $\le8$; $\Delta^{8}$ escapa; a cruz apanha \\
 Fusão/divisão & \textbf{teorema operacional} --- $\otimes$ multiplica $E$;
   fibra devolve a divisão clássica; fusão de conceitos SEM objeto \\
+A ponte universal--metálica & \textbf{teorema operacional} --- conserva por
+  produto; volta com ordem; CF/Möbius/Pisot emergem; Dirac no mapa \\
 Batuta & canal do inversor (não é $I$) \\
 Pera & definição: base $=$ cone na batuta \\
 Conservatório & definição: estrutura superior conservada \\
@@ -2865,6 +2867,66 @@ pronta e espera o primeiro caso real --- sem objeto, não há física.
 O clone responde-se pela métrica $x\sim_{\mathcal O}y$: $I$ identifica
 o corpo; o endereço conta a carga (o um e o dois); a admissão é do
 Controle.
+\end{observacao}
+
+\section{A ponte --- transformada universal e família metálica}\label{sec:ponte}
+
+A visão unificada constrói-se por elos, não por manifesto: uma ponte de
+cada vez, e a ponte tem de aguentar peso. A primeira liga a
+\textbf{transformada universal} (a avaliação nas folhas $\sigma,\sigma^{\dagger}$
+--- \emph{Corpo estelar}; não é DFT, e o $\sqrt N$ não sobrevive porque o
+objecto é multiplicativo) à \textbf{família metálica}
+(Def.~\ref{def:metal}).
+
+\begin{teorema}[a ponte]\label{thm:ponte-universal}
+A transformada universal realiza-se \textbf{inteira} na matriz
+companheira, $x=a+b\sigma\leftrightarrow M=aI+bA_m$, e nessa realização:
+\begin{enumerate}
+\item \textbf{a conservação é por produto}:
+$N(xy)=N(x)N(y)$ com $N(x)=\det M=a^{2}+mab-b^{2}$ --- e
+$\det(A_m^{k})=(-1)^{k}$ exato (o Parseval dourado), o vazamento de
+$\sigma^{\dagger k}$ compensado pelo dual, em inteiros;
+\item \textbf{a volta devolve massa e ordem}: nas unidades ($|\det|=1$,
+o fator de potência) a inversa é inteira, $T^{-1}\!\circ T=\mathrm{id}$
+elemento a elemento, e a escada $(E,\Phi,\Phi_2)$ da sequência de corpos
+volta \emph{idêntica} --- identidade ordenada, não só energia;
+\item \textbf{a fibra reaparece}: $\operatorname{adj}(M)\cdot M=\det(M)\,I$
+--- dividir custa exatamente o $\det$ (Teorema~\ref{thm:divisao-fibra},
+agora no corpo da transformada);
+\item \textbf{a cruz das duas leituras}: a mesma família fecha na
+leitura multiplicativa (as folhas, o $\det$) e na aditiva (o anel da
+Lei~8: o vector dos $F_k$ passa o Parseval dourado).
+\end{enumerate}
+\emph{Prova (operacional, medida).} \code{tests/ponte\_universal\_metalica.js}
+($12$:$0$, BigInt exato, sem um float): $m=1..6$, $k=1..12$ no
+Parseval dourado; $100$ pares na conservação; $40$ corpos na volta com
+a escada idêntica; Parseval no anel com
+$\Sigma XX_{-}=14\,050=256\cdot\Sigma F^{2}$. $\square$
+\end{teorema}
+
+\begin{observacao}[o que emerge --- e o que não aparece]\label{obs:emerge}
+Da dinâmica da ponte \textbf{emergem}, sem prosa antecipada:
+\begin{itemize}
+\item \textbf{frações contínuas} --- $A_m^{k}$ \emph{carrega} os
+convergentes de $[m;m,m,\ldots]$ (a matriz é o passo da fração
+contínua);
+\item \textbf{Möbius} --- compor matrizes é compor transformações
+fracionárias (produto cruzado exato em inteiros);
+\item \textbf{Pisot em inteiros} --- $L_k^{2}-\Delta F_k^{2}=4(-1)^{k}$
+($m=1..6$, $k=1..20$): a forma inteira do vazamento $|\sigma^{\dagger}|<1$,
+sem um float.
+\end{itemize}
+E \textbf{não aparecem} nesta ponte: Dirac e a convolução universal ---
+ficam no \emph{mapa de destino}, à espera das suas próprias pontes.
+A cadeia que explica por que as áreas partilham estrutura é
+\[
+\boxed{
+\text{corpo}\to\text{norma}\to\text{ordem}\to\text{observador}
+\to\text{transformação}\to\text{dual}
+}
+\]
+--- a visão unificada como \textbf{hipótese testável por elos}, não como
+manifesto.
 \end{observacao}
 
 \section{Leitura complexa --- pares, polar, modelo de teste}\label{sec:pares-complexos}
@@ -3851,6 +3913,9 @@ observador \S\ref{sec:observador}, Teoremas~\ref{thm:escada},
 \code{tests/assinatura\_banal.js}, \code{tests/assinatura\_colisoes.js},
 \code{tests/observador\_torre.js} (a escada; o teto das oito; fusão
 $\otimes$/$\oplus$; divisão pela fibra);
+a ponte \S\ref{sec:ponte}, Teorema~\ref{thm:ponte-universal}:
+\code{tests/ponte\_universal\_metalica.js} (universal $\leftrightarrow$
+metálica; frações contínuas, Möbius e Pisot emergem);
 Teorema Central na torre: Prop.~\ref{thm:central-peano},
 \ref{prop:central-operacional};
 música / canal: Prop.~\ref{prop:rede-no-canal},
