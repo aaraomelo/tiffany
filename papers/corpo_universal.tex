@@ -1096,6 +1096,44 @@ validar a torre inteira.
 \emph{Medido:} \code{tests/nucleo\_unificado.js} ($11{:}0$).
 \end{observacao}
 
+\begin{teorema}[a Invari\^ancia do Produto Dual]\label{thm:produto-dual}
+O \emph{produto dual} --- o produto de um objeto com o seu par --- \'e
+um s\'o invariante lido em quatro andares, e a dualidade
+\emph{inverte-o} sem nunca lhe mudar o valor:
+\begin{enumerate}
+\item \textbf{no n\'ucleo, o produto do par \'e o rotor}:
+$S\cdot X=J$ e $X\cdot S=J^{-1}$ --- uma orienta\c{c}\~ao por ordem,
+$|\det|=1$ na origem. A conjuga\c{c}\~ao pela dobra permuta os
+fatores ($C_{H}(S)=X$, $C_{H}(X)=S$), logo
+$C_{H}(S X)=(S X)^{-1}$ --- e isto \emph{\'e} a rela\c{c}\~ao diedral
+$HJH=2J^{-1}$ do Teor.~\ref{thm:universal-espelho}, lida como
+invari\^ancia do produto.
+\item \textbf{no corpo, \'e central e \'e a membrana}:
+$M M^{\dagger}=M^{\dagger}M=\det(M)\,I$ com a estaca
+$M^{\dagger}=(\mathrm{tr}\,M)I-M$; $\det M^{\dagger}=\det M$,
+$(M^{\dagger})^{\dagger}=M$, $(MN)^{\dagger}=N^{\dagger}M^{\dagger}$
+(anti-automorfismo), $\det$ multiplicativo (Lei~7) e invariante sob a
+conjuga\c{c}\~ao por $H$. O valor na unidade diz a carta --- c\'irculo
+$+1$, hip\'erbole $-1$ --- e $d\mapsto d^{2}$ com $|d|=1$ fixa
+exatamente $\{\pm1\}$: \emph{as membranas s\~ao os valores do produto
+dual}. A forma de tra\c{c}o fecha por dois caminhos:
+$\mathrm{tr}(A_{m})^{2}-(m^{2}+4)=4\det(A_{m})$.
+\item \textbf{no espectro, Parseval \'e a invari\^ancia}:
+$M\,\langle u,v\rangle=\sum_{k}\hat{u}_{k}\hat{v}_{-k}$, exato no
+anel --- e o emparelhamento dual faz-se \emph{pelo espelho no
+\'indice} ($k\leftrightarrow-k$): sem ele a soma n\~ao fecha. O gume
+morde onde pode: no par ortogonal (suportes pares/\'impares
+disjuntos) as duas somas d\~ao $0=0$ e n\~ao h\'a o que falhar.
+\item \textbf{na \'orbita, \'e o fator de pot\^encia}:
+$\det(A^{k})=(-1)^{k}$ com $|d|=1$ ao longo do fluxo (BigInt,
+$k\le60$), e no rel\'ogio $\cos^{2}u+\sin^{2}u=1$ em todos os ticks
+--- a identidade pitag\'orica \'e o produto dual \emph{constante} na
+membrana $+1$.
+\end{enumerate}
+\emph{Medido:} \code{tests/produto\_dual.js} ($15{:}0$).
+$\square$
+\end{teorema}
+
 %======================================================================
 \section{Onde entram os milénios --- leituras, não base}\label{sec:milenio-universal}
 
