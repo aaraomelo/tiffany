@@ -51,6 +51,11 @@
 'use strict'
 const fs = require('fs')
 const path = require('path')
+/* limpeza da dupla árvore (14/08): as formas embutidas saíram — a única
+ * implementação é a da infraestrutura */
+const { Universal, mat2 } = require('../lib/universal.js')
+const { sigmaPeano } = require('../lib/peano.js')
+const U = Universal(sigmaPeano)
 
 let falhas = 0, feitas = 0
 function ok (q, cond) {
@@ -59,22 +64,15 @@ function ok (q, cond) {
   console.log(`#UNIT ${cond ? 'ok' : 'falha'} ${q}`)
 }
 
-/* ── 2×2 inteiras: [a,b,c,d] = [[a,b],[c,d]] ─────────────────────────────── */
-function mul (X, Y) {
-  return [X[0] * Y[0] + X[1] * Y[2], X[0] * Y[1] + X[1] * Y[3],
-    X[2] * Y[0] + X[3] * Y[2], X[2] * Y[1] + X[3] * Y[3]]
-}
-function soma (X, Y) { return X.map((v, i) => v + Y[i]) }
-function escala (k, X) { return X.map(v => k * v) }
-function det (X) { return X[0] * X[3] - X[1] * X[2] }
-function tr (X) { return X[0] + X[3] }
-function igual (X, Y) { return X.every((v, i) => v === Y[i]) }
-const I = [1, 0, 0, 1]
-const J = [0, 1, -1, 0]              /* o esquilo (morfologia §M4) */
-const R = [1, 0, 0, -1]              /* o espelho (B_s espelha) */
-const Am = m => [m, 1, 1, 0]
-const carta = (a, b) => soma(escala(a, I), escala(b, J))      /* x + Jy */
-const corpo = (a, b, m) => soma(escala(a, I), escala(b, Am(m)))
+/* ── a geometria e os operadores: os da infraestrutura (lib) ─────────────── */
+const { mul, soma, escala, det, tr, igual, Am } = mat2
+const I = mat2.I
+const J = mat2.J                       /* o esquilo */
+const R = mat2.espelho                 /* o espelho */
+const W = mat2.W                       /* w = 2x − m */
+const dual = mat2.estaca               /* A† = mI − A */
+const carta = mat2.carta
+const corpo = mat2.corpo
 
 /* ── as 52 fusões reais ──────────────────────────────────────────────────── */
 const RAIZ = path.join(__dirname, '..')
@@ -82,64 +80,13 @@ const linhas = fs.readFileSync(path.join(RAIZ, 'cristal', 'cristal.jsonl'), 'utf
   .split('\n').filter(l => l.length)
 const fusoes = linhas.filter(l => JSON.parse(l).fusao)
 
-function E (s) {
-  const b = Buffer.from(String(s), 'utf8')
-  let e = 0
-  for (let i = 0; i < b.length; i++) e += b[i] * b[i]
-  return e
-}
-/* a fibra CEGA às cordas (a régua dos medidores anteriores) */
-function corteCego (lz) {
-  const ini = lz.indexOf('[') + 1
-  const fim = lz.lastIndexOf(']')
-  let prof = 0
-  for (let i = ini; i < fim; i++) {
-    if (lz[i] === '{') prof++
-    else if (lz[i] === '}') prof--
-    else if (lz[i] === ',' && prof === 0) return i
-  }
-  return -1
-}
-function partes (lz) {
-  const c = corteCego(lz)
-  const ini = lz.indexOf('[') + 1, fim = lz.lastIndexOf(']')
-  return [lz.slice(ini, c), lz.slice(c + 1, fim)]
-}
-function funde (idZ, lx, ly) {
-  return '{"fusao":[' + lx + ',' + ly + '],"id":"' + idZ + '","tipo":"conceito"}'
-}
-function nu (lz) {
-  const [lx, ly] = partes(lz)
-  return funde(JSON.parse(ly).id, ly, lx)
-}
-/* o contorno LIDO: pilha de tipos fora das cordas, com escape */
-function contorno (lz) {
-  const pilha = []
-  let minOk = true, emCorda = false, escapa = false, cruzou = false
-  const cortes = []
-  let arrayProf = -1
-  for (let i = 0; i < lz.length; i++) {
-    const ch = lz[i]
-    if (emCorda) {
-      if (escapa) escapa = false
-      else if (ch === '\\') escapa = true
-      else if (ch === '"') emCorda = false
-      continue
-    }
-    if (ch === '"') emCorda = true
-    else if (ch === '{' || ch === '[') {
-      if (ch === '[' && arrayProf < 0) arrayProf = pilha.length + 1
-      pilha.push(ch)
-    } else if (ch === '}' || ch === ']') {
-      const abriu = pilha.pop()
-      if (abriu === undefined) minOk = false
-      else if ((ch === '}') !== (abriu === '{')) cruzou = true
-    } else if (ch === ',' && pilha.length === arrayProf && arrayProf > 0) {
-      cortes.push(i)
-    }
-  }
-  return { fecha: pilha.length === 0 && minOk && !emCorda, cruzou, cortes }
-}
+const E = s => U.escada(s).E
+/* a fibra CEGA às cordas e o contorno lido: os da infraestrutura */
+const corteCego = U.corte
+const partes = lz => U.fibra(lz)
+const funde = U.funde
+const nu = U.monodromia
+const contorno = U.contorno
 
 /* §C0 — os contornos fecham, sem cruzamento */
 {

@@ -15,7 +15,7 @@ app_arranca e9ca1d41b25fa9e5 0
 arraytermico e4a2d53b3a3ef1da 0
 artefato d7a764740ef476b0 0
 assinatura 382c0f6005c44274 0
-assinatura_banal d03d8c58863498c0 0
+assinatura_banal 807a95526f24eccf 0
 assinatura_colisoes 22f557e6dc462b7b 0
 assinatura_tradutor 71805022a70f092e 0
 ataque 54c457ea130598f8 0
@@ -76,7 +76,7 @@ conta b61d39344f09ecf3 0
 contagem_cifra 950b2e07602b7dad 0
 continua 64ca965db92f3e08 0
 continuo b98335aed4401267 0
-contorno_riemann 6ff08c267dcef976 0
+contorno_riemann 6cf7ea38b2e3b6b7 0
 contrato 5fffd2633c0858b1 0
 controlo_front e94ce67fbef877c1 0
 conversa 8e01428ae94ab806 0
@@ -95,11 +95,11 @@ corpodecorpos e5cba0db271ea443 0
 cosmico ad551a25ab7b7917 0
 cosmologia ba6dd5df9be09b0a 0
 cristal_adversarial a5b592f03e349608 0
-cristal_curadoria 88bb8c9fade66cd3 0
-cristal_energia 016ed57dd57ccc33 0
+cristal_curadoria 34098116ccd66dd9 0
+cristal_energia e27839809729282c 0
 cristal_front cc86ec06a324230b 0
 cristal_modelo 9b6bb9fc9a03a96e 0
-cristal_volta ef9af83b36e0f023 0
+cristal_volta 430b66d40777f3ff 0
 cristalino 6988eca8676626b1 0
 cruza b5fd026db2e5f02a 0
 cruzamento 33bb8f715e706c30 0
@@ -190,7 +190,7 @@ fractal 6bab7fb3cd133ffb 0
 fronteira_front efe3776eb4b37362 0
 furos 6be7e5769751df24 0
 fusao 13c9bc056928be95 0
-fusao_conceitos 2f8ae31387575a74 0
+fusao_conceitos 3c406248b1261cc4 0
 gauss 77024247661e4422 0
 gerador 2373ad5c9d2e6e8c 0
 gerador_analog 6a7abcf53c950b0b 0
@@ -345,7 +345,7 @@ relogio_curva 63997a9b0f828082 0
 relogio_opera d8a205fd815ca2cb 0
 render 3ecbf5ec0d01896a 0
 renormaliza 0c4d1194d667b6e3 0
-residuos_totais abe3afe0017de561 0
+residuos_totais 52cf778fe4c28b37 0
 reversao 1066c211ef635b79 0
 ribossomo 5d80dbc0f2781041 0
 rn 7aa3b7aa2433101f 0
@@ -388,6 +388,7 @@ tikz 147f528e4e429a4e 0
 toolkit 31bc9d0214124d3b 0
 toolkit_llm c3777b0aa146ffb6 0
 topologia 7a909bdb58a515ec 0
+toro_histerese 274efdb3f7d14345 0
 torre_induc 0e26df90f9fdcaca 0
 torres acf1a40374e156e3 0
 traducao 9a4d69e8627dc0f4 0

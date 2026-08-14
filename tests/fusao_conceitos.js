@@ -34,6 +34,11 @@
 'use strict'
 const fs = require('fs')
 const path = require('path')
+/* limpeza da dupla árvore (ordem do diretor, 14/08): a forma embutida
+ * saiu — a única implementação é a da infraestrutura (lib) */
+const { Universal } = require('../lib/universal.js')
+const { sigmaPeano } = require('../lib/peano.js')
+const U = Universal(sigmaPeano)
 
 let falhas = 0, feitas = 0
 function ok (q, cond) {
@@ -49,45 +54,14 @@ const linhas = fs.readFileSync(path.join(RAIZ, 'cristal', 'cristal.jsonl'), 'utf
 const regs = new Map()
 for (const l of linhas) regs.set(JSON.parse(l).id, l)
 
-function E (s) {
-  const b = Buffer.from(String(s), 'utf8')
-  let e = 0
-  for (let i = 0; i < b.length; i++) e += b[i] * b[i]
-  return e
-}
-function I3 (s) {
-  const b = Buffer.from(String(s), 'utf8')
-  let e = 0, f1 = 0, f2 = 0
-  for (let i = 0; i < b.length; i++) {
-    e += b[i] * b[i]
-    f1 = (f1 + (i + 1) * b[i]) % P
-    f2 = (f2 + ((i + 1) * (i + 1) % P) * b[i]) % P
-  }
-  return e + '|' + f1 + '|' + f2
-}
+const E = s => U.escada(s).E
+const I3 = s => { const e = U.escada(s); return e.E + '|' + e.f1 + '|' + e.f2 }
 
 /* ── a fusão: soma direta com contorno; as partes viajam INTACTAS ────────── */
-function funde (idZ, lx, ly) {
-  return '{"fusao":[' + lx + ',' + ly + '],"id":"' + idZ + '","tipo":"conceito"}'
-}
-function esqueleto (idZ) { return funde(idZ, '', '') }
-function fibra (lz) {
-  const o = JSON.parse(lz)
-  if (!Array.isArray(o.fusao) || o.fusao.length !== 2) return null
-  /* a volta byte a byte: re-serializar as partes tem de dar o que entrou —
-   * por isso a fibra corta o TEXTO, não re-serializa */
-  const ini = lz.indexOf('[') + 1
-  const fim = lz.lastIndexOf(']')
-  const miolo = lz.slice(ini, fim)
-  let prof = 0, corte = -1
-  for (let i = 0; i < miolo.length; i++) {
-    if (miolo[i] === '{') prof++
-    else if (miolo[i] === '}') prof--
-    else if (miolo[i] === ',' && prof === 0) { corte = i; break }
-  }
-  if (corte < 0) return null
-  return [miolo.slice(0, corte), miolo.slice(corte + 1)]
-}
+/* a fusão, a moldura e a fibra: as da infraestrutura */
+const funde = U.funde
+const esqueleto = U.esqueleto
+const fibra = U.fibra
 
 /* §F0 — o objeto existe, nos dados */
 const paresSP = []
@@ -124,27 +98,7 @@ ok('§F0 O OBJETO EXISTE: candidatos reais de fusão no cristal (não inventados
 
 /* §F3 — no corpus: a fusão é transação declarada, e desfaz-se a R=0 */
 {
-  function rEnd (fonte, cand) {
-    const F = new Map(), C = new Map(), vezes = new Map()
-    const idDe = l => { try { return JSON.parse(l).id } catch { return '?' } }
-    for (const l of fonte) F.set(idDe(l), l)
-    for (const l of cand) {
-      const a = idDe(l)
-      if (!C.has(a)) C.set(a, l)
-      vezes.set(a, (vezes.get(a) || 0) + 1)
-    }
-    let r = 0
-    for (const [a, l] of F) {
-      const v = C.get(a)
-      if (v === undefined) r++
-      else if (v !== l) r++
-    }
-    for (const [a, n] of vezes) {
-      if (!F.has(a)) r++
-      if (n > 1) r += n - 1
-    }
-    return r
-  }
+  const rEnd = (fonte, cand) => U.rEndereco(fonte, cand)
   const lx = regs.get('arte'), ly = regs.get('artes')
   const z = funde('arte_fundida', lx, ly)
   const fundido = linhas.filter(l => l !== lx && l !== ly).concat([z])

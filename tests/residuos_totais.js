@@ -28,6 +28,11 @@
 'use strict'
 const fs = require('fs')
 const path = require('path')
+/* limpeza da dupla árvore (ordem do diretor, 14/08): a forma embutida
+ * saiu — a única implementação é a da infraestrutura (lib) */
+const { Universal } = require('../lib/universal.js')
+const { sigmaPeano } = require('../lib/peano.js')
+const U = Universal(sigmaPeano)
 
 let falhas = 0, feitas = 0
 function ok (q, cond) {
@@ -50,57 +55,16 @@ while ((m = rx.exec(tex)) && pares.length < 20) {
 console.log(`corpus banal: ${pares.length} pares reais (fala → resposta)`)
 
 /* ── os componentes do vetor ──────────────────────────────────────────────── */
-function assinatura (s) {
-  const b = Buffer.from(String(s), 'utf8')
-  let E = 0, f1 = 0, f2 = 0
-  for (let i = 0; i < b.length; i++) {
-    E += b[i] * b[i]
-    f1 = (f1 + (i + 1) * b[i]) % P
-    f2 = (f2 + ((i + 1) * (i + 1) % P) * b[i]) % P
-  }
-  return { E, f1, f2 }
-}
+const assinatura = s => U.escada(s)
 /* a leitura da membrana: as transições (pares consecutivos) do corpo */
-function transicoes (s) {
-  const b = Buffer.from(String(s), 'utf8')
-  const t = []
-  for (let i = 0; i + 1 < b.length; i++) t.push(b[i] * 256 + b[i + 1])
-  return t
-}
+const transicoes = s => U.transicoes(s)
 
-function residuoTotal (fonte, cand) {
-  /* fonte, cand: listas de [endereço, corpo] */
-  const F = new Map(fonte)
-  const C = new Map()
-  const vezes = new Map()
-  for (const [a, s] of cand) {
-    if (!C.has(a)) C.set(a, s)
-    vezes.set(a, (vezes.get(a) || 0) + 1)
-  }
-  let Rend = 0, RE = 0, RF1 = 0, RF2 = 0, RD = 0
-  for (const [a, s0] of F) {
-    const s1 = C.get(a)
-    if (s1 === undefined) { Rend++; continue }
-    if (s1 !== s0) Rend++
-    const i0 = assinatura(s0), i1 = assinatura(s1)
-    RE += Math.abs(i1.E - i0.E)
-    RF1 += (i1.f1 - i0.f1 + P) % P
-    RF2 += (i1.f2 - i0.f2 + P) % P
-    const t0 = transicoes(s0), t1 = transicoes(s1)
-    if (t0.length !== t1.length) RD++
-    else if (t0.some((v, i) => v !== t1[i])) RD++
-  }
-  for (const [a, n] of vezes) {
-    if (!F.has(a)) Rend++
-    if (n > 1) Rend += n - 1
-  }
-  return { Rend, RE, RF1, RF2, RD }
-}
+const residuoTotal = (fonte, cand) => U.residuoTotal(fonte, cand)
 
 function mostra (nome, R, veredito) {
   console.log(`#R ${nome.padEnd(38)} R=(${R.Rend},${R.RE},${R.RF1},${R.RF2},${R.RD}) -> ${veredito}`)
 }
-const retain = R => R.Rend === 0 && R.RE === 0 && R.RF1 === 0 && R.RF2 === 0 && R.RD === 0
+const retain = U.retain
 
 const fonte = pares.map(([a, s]) => [a, s])
 

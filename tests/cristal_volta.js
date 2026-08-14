@@ -23,6 +23,11 @@
 'use strict'
 const fs = require('fs')
 const path = require('path')
+/* limpeza da dupla árvore (ordem do diretor, 14/08): a forma embutida
+ * saiu — a única implementação é a da infraestrutura (lib) */
+const { Universal } = require('../lib/universal.js')
+const { sigmaPeano } = require('../lib/peano.js')
+const U = Universal(sigmaPeano)
 
 let falhas = 0, feitas = 0
 function ok (q, cond) {
@@ -68,9 +73,7 @@ for (const f of texs) {
 ok('§V2 secções == registos, ficheiro a ficheiro', casaOk)
 ok('§V2 total de secções == 4234', seccoesTotal === 4234)
 
-function idDe (linha, i) {
-  try { return JSON.parse(linha).id } catch { return '￿ corrompido ' + i }
-}
+const idDe = (linha, i) => sigmaPeano.endereco(linha, i)
 
 /* v1 — por POSIÇÃO na ordem derivada (o contraste; dissipa ~n² quando o
  * endereço morre — thm:absorcao). Fica só para a matriz. */
@@ -93,26 +96,7 @@ function residuoV1 (regs) {
 const fontePorId = new Map()
 for (const l of fonteLinhas) fontePorId.set(idDe(l, 0), l)
 
-function residuoV2 (regs) {
-  const conteudo = new Map()      /* endereço → primeiro conteúdo visto */
-  const vezes = new Map()         /* endereço → ocorrências */
-  for (let i = 0; i < regs.length; i++) {
-    const a = idDe(regs[i], i)
-    if (!conteudo.has(a)) conteudo.set(a, regs[i])
-    vezes.set(a, (vezes.get(a) || 0) + 1)
-  }
-  let r = 0
-  for (const [a, l] of fontePorId) {
-    const v = conteudo.get(a)
-    if (v === undefined) r++                 /* faltante: o par colapsa */
-    else if (v !== l) r++                    /* alterado no endereço */
-  }
-  for (const [a, n] of vezes) {
-    if (!fontePorId.has(a)) r++              /* excedente (endereço alheio) */
-    if (n > 1) r += n - 1                    /* duplicação: excesso no nó */
-  }
-  return r
-}
+function residuoV2 (regs) { return U.rEndereco(fonteLinhas, regs) }
 
 ok('§V1 reconstrução pelo endereço, R=0', residuoV2(reconstruido) === 0)
 ok('§V1 dois caminhos: a régua de posição concorda no íntegro',

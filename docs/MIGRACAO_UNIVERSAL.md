@@ -199,3 +199,28 @@ Princípio: **«Universal não é mais um paper. É a infraestrutura.»**
 **Estado: EQUIVALÊNCIA PROVADA POR CASO. A limpeza (remoção das formas
 embutidas nos medidores antigos) aguarda ordem da mesa — dupla árvore de
 pé, como o protocolo manda.**
+
+## 8. A LIMPEZA — executada em 14/08/2026 (autorizada pelo diretor)
+
+Formas embutidas removidas (agora importam a lib): cristal_volta (idDe,
+residuoV2), cristal_energia (energia), residuos_totais (assinatura,
+transicoes, residuoTotal, retain), fusao_conceitos (E, I3, funde, esqueleto,
+fibra, rEnd), cristal_curadoria (E, esqueleto, fibra), assinatura_banal (I),
+contorno_riemann (matrizes 2×2, E, corteCego, partes, funde, ν, contorno —
+a lib ganhou `corte` para preservar os dois caminhos do §C1).
+
+Deliberadamente NÃO tocados (não são duplicatas):
+- assinatura_colisoes: lê UTF-16 (`charCodeAt & 0xFFFF`) — régua própria da
+  caçada, semântica DIFERENTE da leitura por bytes;
+- lyapunov_torre: idDe por regex e rDual sem contagem de duplicados — réguas
+  variantes do estudo de estresse (o v1/posição é contraste POR DESENHO);
+- observador_torre: energia sobre VETORES inteiros (outro domínio);
+- equivalencia_universal e migracao_universal: guardam as cópias antigas POR
+  DESENHO — são as testemunhas da equivalência.
+
+Verificação: cada medidor re-corrido após a cirurgia; bateria completa
+**427:427, zero falhas** (mesmos totais de antes da limpeza).
+
+REGRA NOVA DA CASA: quando lib/universal.js ou lib/peano.js mudam, os
+medidores que os importam têm de ser re-atestados (`--reatesta`) mesmo sem
+mudança na própria fonte — a atestação assina o medidor, não a lib.

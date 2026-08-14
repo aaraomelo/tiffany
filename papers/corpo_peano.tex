@@ -2243,6 +2243,27 @@ A batuta determina o sentido; o Metrónomo atesta a volta.
 Corpus banal de vizinhança tolerante (erro\,/\,abreviação\,/\,expressão,
 sem aula): \code{papers/conversa\_vizinhanca.tex},
 \code{tools/vizinhanca.sh}.
+
+\medskip
+\noindent\textbf{Auditoria do espaço de fase} (ordem da mesa, 14/08;
+factos medidos, sem teoria nova): a batuta fecha em círculo no anel ---
+$\mathrm{ord}(A_1 \bmod 65537)=14564$, minimal, com a \emph{folha} como
+segunda volta ($\det A^{k}$ alterna $-1,+1$) e o toro das unidades
+$\{\pm A^{k}\}$ do tamanho previsto pela pertença de $-I$; a caminhada
+\emph{fechada} ($\lambda^{+}{+}\lambda^{-}=0$) devolve o estado real
+exato com $R_{\rm total}=(0,0,0,0,0)$ (RETAIN) e a aberta acusa
+(REOPEN); a massa fica no \emph{centro} ($M(z)=E(x){+}E(y)$ invariante
+sob a monodromia nas $52$ fusões; $|\det|$ constante ao longo da
+órbita, o sinal a marcar a folha); e a histerese é o laço
+$\alpha=\delta\varepsilon\leq\mathrm{id}\leq\varphi=\varepsilon\delta$
+que \emph{seleciona} os admissíveis (os abertos voltam exatos; os
+isolados são a memória perdida --- e truncar a dilatação na borda do
+buffer quebra $\varphi\geq\mathrm{id}$, medido). Os períodos ficam como
+\emph{dado}: $m=1..6$ dá a dicotomia folhas separadas
+($T\mid 2(p{-}1)$; e.g.\ $T_3=65536$) ou inertes ($T\mid 2(p{+}1)$;
+$T_5=T_6=131076$), com os pontos fixos não-triviais de $A^{k}$
+exatamente nos múltiplos do período da folha.
+\emph{Medido:} \code{tests/toro\_histerese.js} ($16{:}0$).
 \end{teorema}
 
 \begin{proposicao}[núcleo mínimo]\label{prop:histerese-nucleo}

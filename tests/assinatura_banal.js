@@ -23,6 +23,11 @@
 'use strict'
 const fs = require('fs')
 const path = require('path')
+/* limpeza da dupla árvore (ordem do diretor, 14/08): a forma embutida
+ * saiu — a única implementação é a da infraestrutura (lib) */
+const { Universal } = require('../lib/universal.js')
+const { sigmaPeano } = require('../lib/peano.js')
+const U = Universal(sigmaPeano)
 
 let falhas = 0, feitas = 0
 function ok (q, cond) {
@@ -32,16 +37,7 @@ function ok (q, cond) {
 }
 
 const P = 65537
-function I (texto) {
-  const b = Buffer.from(String(texto), 'utf8')
-  let E = 0, fase = 0, f2 = 0
-  for (let i = 0; i < b.length; i++) {
-    E += b[i] * b[i]
-    fase = (fase + (i + 1) * b[i]) % P
-    f2 = (f2 + ((i + 1) * (i + 1) % P) * b[i]) % P
-  }
-  return { E, fase, f2 }
-}
+const I = texto => { const e = U.escada(texto); return { E: e.E, fase: e.f1, f2: e.f2 } }
 const igual = (a, b) => a.E === b.E && a.fase === b.fase
 
 /* o degrau da escada em que o par se separa: 1=E, 2=Φ, 3=Φ₂, 0=não separa */

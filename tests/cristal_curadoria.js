@@ -24,6 +24,11 @@
 'use strict'
 const fs = require('fs')
 const path = require('path')
+/* limpeza da dupla árvore (ordem do diretor, 14/08): a forma embutida
+ * saiu — a única implementação é a da infraestrutura (lib) */
+const { Universal } = require('../lib/universal.js')
+const { sigmaPeano } = require('../lib/peano.js')
+const U = Universal(sigmaPeano)
 
 let falhas = 0, feitas = 0
 function ok (q, cond) {
@@ -38,27 +43,9 @@ const linhas = fs.readFileSync(path.join(RAIZ, 'cristal', 'cristal.jsonl'), 'utf
 const regs = new Map()
 for (const l of linhas) regs.set(JSON.parse(l).id, l)
 
-function E (s) {
-  const b = Buffer.from(String(s), 'utf8')
-  let e = 0
-  for (let i = 0; i < b.length; i++) e += b[i] * b[i]
-  return e
-}
-function esqueleto (id) { return '{"fusao":[,],"id":"' + id + '","tipo":"conceito"}' }
-function fibra (lz) {
-  const ini = lz.indexOf('[') + 1
-  const fim = lz.lastIndexOf(']')
-  const miolo = lz.slice(ini, fim)
-  let prof = 0
-  for (let i = 0; i < miolo.length; i++) {
-    if (miolo[i] === '{') prof++
-    else if (miolo[i] === '}') prof--
-    else if (miolo[i] === ',' && prof === 0) {
-      return [miolo.slice(0, i), miolo.slice(i + 1)]
-    }
-  }
-  return null
-}
+const E = s => U.escada(s).E
+const esqueleto = U.esqueleto
+const fibra = U.fibra
 
 /* o livro da curadoria */
 const tsv = fs.readFileSync(path.join(RAIZ, 'cristal', 'curadoria.tsv'), 'utf8')

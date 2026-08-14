@@ -31,6 +31,11 @@
 'use strict'
 const fs = require('fs')
 const path = require('path')
+/* limpeza da dupla árvore (ordem do diretor, 14/08): a forma embutida
+ * saiu — a única implementação é a da infraestrutura (lib) */
+const { Universal } = require('../lib/universal.js')
+const { sigmaPeano } = require('../lib/peano.js')
+const U = Universal(sigmaPeano)
 
 let falhas = 0, feitas = 0
 function ok (q, cond) {
@@ -44,15 +49,8 @@ const FONTE = path.join(RAIZ, 'cristal', 'cristal.jsonl')
 const PAPERS = path.join(RAIZ, 'papers')
 const P = 65537
 
-/* ── energia exata (inteiro, sem mod): E = Σ byte² sobre o conjunto ───────── */
-function energia (linhas) {
-  let E = 0
-  for (const l of linhas) {
-    const b = Buffer.from(l, 'utf8')
-    for (let i = 0; i < b.length; i++) E += b[i] * b[i]
-  }
-  return E   /* < 2^53: exato */
-}
+/* ── energia exata (inteiro, sem mod): E = Σ byte² — a da lib ─────────────── */
+const energia = linhas => U.energia(linhas)
 
 const fonteLinhas = fs.readFileSync(FONTE, 'utf8').split('\n').filter(l => l.length)
 const texs = fs.readdirSync(PAPERS).filter(f => /^cristal_.*\.tex$/.test(f)).sort()
