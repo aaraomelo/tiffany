@@ -792,6 +792,39 @@ das transições aguarda a medida que o autorize.
 \emph{Medido:} \code{tests/metronomo\_fourier.js} ($15{:}0$). $\square$
 \end{teorema}
 
+\begin{observacao}[como o Teorema Central vê
+Hurwitz--Gentil--Lebesgue]\label{obs:triade-central}
+A leitura já estava no \emph{Corpo estelar} («Hurwitz conta o domínio,
+Lebesgue mede a imagem, Gentil é a soma reversível que os casa --- e o
+limite é o que os três, juntos, medem igual»); aqui ela
+\textbf{realiza-se na órbita do toro}, pela escada de Fermat
+$q\in\{17,257,65537\}=\{2^{4}{+}1,2^{8}{+}1,2^{16}{+}1\}$:
+\begin{itemize}
+\item \textbf{Hurwitz conta o domínio} --- as folhas separam em todo
+andar com $\sigma\sigma^{\dagger}=-1$, e o corte pelo domínio (a soma
+pelos ticks) é exato;
+\item \textbf{Lebesgue mede a imagem} --- o corte por níveis fecha com
+o do domínio \emph{sem esperar o limite} (o layer-cake inteiro,
+resíduo $0$ em cada andar), e a medida de contagem normalizada
+\emph{afina para a uniforme} pela escada: $D/N = 2{,}0 \to 0{,}625 \to
+0{,}0908$, estritamente decrescente (frações comparadas por produto
+cruzado; o controlo constante dá $D=(B{-}1)N$ e acusa);
+\item \textbf{Gentil casa os dois} --- a soma reversível discreta
+$\sum_{n}x_{n}+\sum_{v}\#\{x_{n}<v\}=N\!\cdot\!q$ exata nos três
+andares: o $\int f+\int f^{-1}=b\,f(b)-a\,f(a)$ da casa, com cada par
+$(n,v)$ contado uma vez.
+\end{itemize}
+E a \textbf{divisão de trabalho} que a medida trouxe: enquanto a
+imagem uniformiza (Lebesgue), o espectro permanece \emph{atómico} ---
+duas riscas nas folhas em cada andar --- e a massa fica no centro
+(Teorema~\ref{thm:metronomo-fourier}); \emph{metade para cada lado}.
+A tríade \textbf{não é identidade de nomes}: é três representações da
+mesma conservação, com o Teorema Central como eixo --- e o limite como
+\emph{ponto fixo} onde as três medem igual, não como
+$\varepsilon$--$\delta$.
+\emph{Medido:} \code{tests/lebesgue\_toro.js} ($7{:}0$).
+\end{observacao}
+
 %======================================================================
 \section{Onde entram os milénios --- leituras, não base}\label{sec:milenio-universal}
 

@@ -225,6 +225,7 @@ latex_corpo dc511e8c18bbea1d 0
 lean_controlo aaf49206e4a67e72 0
 lean_convencao c6f7c086994efcfc 0
 lean_cruz 0707dd551947897b 0
+lebesgue_toro 091ff218ee3ab347 0
 lei2 aafa184130e2d70f 0
 leis_no_tradutor b021c11d75457674 0
 lemniscata 72425a6ff1117151 0
