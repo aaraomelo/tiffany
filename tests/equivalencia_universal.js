@@ -33,65 +33,12 @@ function ok (q, cond) {
 const RAIZ = path.join(__dirname, '..')
 const P = 65537
 
-/* ── o lado 𝒰: genérico, parametrizado pela assinatura ───────────────────── */
-function Universal (sigma) {
-  return {
-    energia (obj) {
-      let E = 0
-      for (const item of obj) {
-        const b = sigma.bytes(item)
-        for (let i = 0; i < b.length; i++) E += b[i] * b[i]
-      }
-      return E
-    },
-    escada (texto) {
-      const b = sigma.bytes(texto)
-      let E = 0, f1 = 0, f2 = 0
-      for (let i = 0; i < b.length; i++) {
-        E += b[i] * b[i]
-        f1 = (f1 + (i + 1) * b[i]) % sigma.p
-        f2 = (f2 + ((i + 1) * (i + 1) % sigma.p) * b[i]) % sigma.p
-      }
-      return { E, f1, f2 }
-    },
-    rEndereco (fonte, regs) {
-      const F = new Map()
-      for (let i = 0; i < fonte.length; i++) F.set(sigma.endereco(fonte[i], i), fonte[i])
-      const visto = new Map(), vezes = new Map()
-      for (let i = 0; i < regs.length; i++) {
-        const a = sigma.endereco(regs[i], i)
-        if (!visto.has(a)) visto.set(a, regs[i])
-        vezes.set(a, (vezes.get(a) || 0) + 1)
-      }
-      let r = 0
-      for (const [a, l] of F) {
-        const v = visto.get(a)
-        if (v === undefined) r++
-        else if (v !== l) r++
-      }
-      for (const [a, n] of vezes) {
-        if (!F.has(a)) r++
-        if (n > 1) r += n - 1
-      }
-      return r
-    },
-    transicoes (texto) {
-      const b = sigma.bytes(texto)
-      const t = []
-      for (let i = 0; i + 1 < b.length; i++) t.push(b[i] * 256 + b[i + 1])
-      return t
-    },
-  }
-}
-
-/* a assinatura Peano */
-const sigmaPeano = {
-  p: P,
-  bytes: s => Buffer.from(String(s), 'utf8'),
-  endereco: (l, i) => {
-    try { return JSON.parse(l).id } catch { return '￿ corrompido ' + i }
-  },
-}
+/* ── o lado 𝒰: A ÚNICA IMPLEMENTAÇÃO (promovida a infraestrutura na
+ * migração cirúrgica de 14/08 — o código que vivia aqui embutido subiu
+ * para lib/universal.js; a assinatura da instância para lib/peano.js;
+ * o teste decisivo por caso é tests/migracao_universal.js) ─────────────── */
+const { Universal } = require('../lib/universal.js')
+const { sigmaPeano } = require('../lib/peano.js')
 const U = Universal(sigmaPeano)
 
 /* ── o lado 𝒫: as formas EMBUTIDAS dos medidores da instância ────────────── */

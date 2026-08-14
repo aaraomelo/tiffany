@@ -152,7 +152,7 @@ enche a2861fc14a9fd7f9 0
 entre c9d4cbfc7a5a9307 0
 entrega dd303b06ea369e41 0
 entropia_dual 9825617e56adbcdb 0
-equivalencia_universal 30d9d3d4a4f7f622 0
+equivalencia_universal 424be18459dfa372 0
 erg 24fd5a4ae1cb1739 0
 escada 5b25d287f60365e5 0
 escala cbd75de37ec6421d 0
@@ -253,6 +253,7 @@ metades ffed9b53a315b61c 0
 metalica 8974bfc6b912b456 0
 metrica 88d942f5fa1ec127 0
 microfluidica 7d10ccec731925cd 0
+migracao_universal 0d3c7a041c932c2a 0
 milenio 3ae5c1319f2be093 0
 milenio_trial fadcc72d65f812a7 0
 mmu 3e46735bb1cec005 0

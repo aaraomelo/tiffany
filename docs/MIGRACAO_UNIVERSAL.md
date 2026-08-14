@@ -163,3 +163,39 @@ Protocolo cumprido passo a passo:
    Inversor total); o Peano é 𝒰[σ_Peano] — e a bateria não mudou um bit.
 
 **Estado: CORTE EXECUTADO. Peano ≺ Universal como propriedade medida.**
+
+## 7. FASE 2 — a infraestrutura (executada em 14/08/2026)
+
+Ordem da mesa (eval 14/08): gerente **autoriza** «em modo cirúrgico:
+inventário → adaptador → equivalência → regressão → remoção de duplicatas.
+Nenhuma lei nova»; diretor sela a **Regra de Ouro da Equivalência**: não
+basta a bateria passar — os estados internos (E, Φ, Φ₂, R_D) e as decisões
+têm de ser idênticos POR CASO (`R_antigo == R_universal_peano`).
+
+Princípio: **«Universal não é mais um paper. É a infraestrutura.»**
+
+- **Freeze**: base S₀ = `1f5c38b` (bateria de referência 426:426).
+- **A única implementação**: `lib/universal.js` — 𝒰 agnóstico,
+  parametrizado por σ = (anel, leitura, endereço); operadores: escada
+  (E,Φ,Φ₂), energia, R_endereço, transições da membrana, residuoTotal +
+  retain, funde/esqueleto/fibra, monodromia, contorno, e `mat2` (J,
+  espelho, A_m, W, estaca, cartas). Proveniência linha a linha dos
+  medidores atestados (semântica byte a byte, zero teoria nova).
+  **Agnosticismo MEDIDO**: a fonte não contém a palavra da instância
+  (§M0 falha se alguém a escrever).
+- **A realização**: `lib/peano.js` — σ_Peano (ℤ_65537, bytes UTF-8,
+  endereço = id JSON com sentinela por posição). 𝒫 = 𝒰[σ_Peano].
+- **Dupla árvore**: nenhum medidor antigo foi apagado; as formas embutidas
+  continuam nos medidores da instância. `tests/equivalencia_universal.js`
+  foi RELIGADO à lib (o lado 𝒰 embutido subiu; 7:0 igual antes e depois).
+- **O teste decisivo**: `tests/migracao_universal.js` **10:0** — por caso:
+  escada idêntica nos 4274 textos reais (4234 cristal + 40 banal); energia
+  total exata; R_endereço igual sob as 7 induções de cristal_volta
+  (0,0,1,1,1,1,2 dos dois lados); vetor total E DECISÕES iguais nas 5
+  classes de residuos_totais — espelhado orgânico (1,0,0,62937,1) com E e
+  Φ cegos e Φ₂/R_D a acusar DOS DOIS LADOS; fibra/volta/monodromia byte a
+  byte nas 52 fusões; geometria entrada a entrada (m=0..8, grelha −3..3).
+
+**Estado: EQUIVALÊNCIA PROVADA POR CASO. A limpeza (remoção das formas
+embutidas nos medidores antigos) aguarda ordem da mesa — dupla árvore de
+pé, como o protocolo manda.**

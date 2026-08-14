@@ -464,6 +464,34 @@ no mesmo endereço \textbf{aniquilam-se} ($\mathrm{flip}\circ\mathrm{flip}
 $\sim\binom{8}{2}/n$ a cair pela torre. O teto dimensional existe, e é
 zero.}
 
+\subsection*{A infraestrutura universal: uma implementação, muitas
+assinaturas}
+
+A mesa autorizou a migração cirúrgica (14/08): \emph{o Universal deixou
+de ser só paper e virou infraestrutura}. A única implementação dos
+operadores --- escada $(E,\Phi,\Phi_2)$, energia, $R_{\mathrm{endereço}}$,
+transições da membrana, vetor total com decisão RETAIN/REOPEN, fusão com
+fibra e monodromia, contorno e a geometria da torção --- vive em
+\code{lib/universal.js}, \textbf{agnóstica}: parametriza-se por uma
+assinatura $\sigma=(\text{anel},\text{leitura},\text{endereço})$ e não
+nomeia nenhuma realização (isto é \emph{medido} no texto da fonte, não
+prometido). O Peano é o primeiro corpo concreto:
+$\mathcal{P}=\mathcal{U}[\sigma_{\rm Peano}]$, com a assinatura em
+\code{lib/peano.js}. A regra de ouro da equivalência cumpriu-se
+\emph{por caso}, não por «ambos dão zero»:
+
+\medido{\code{tests/migracao\_universal.js} ($10{:}0$): a escada
+idêntica componente a componente nos $4274$ textos reais (cristal $+$
+banal); a energia total exata; $R_{\mathrm{endereço}}$ igual sob as sete
+induções de \code{cristal\_volta}; o vetor total
+$(R_{\mathrm{end}},R_E,R_{\Phi},R_{\Phi_2},R_D)$ \textbf{e as decisões}
+RETAIN/REOPEN iguais nas cinco classes --- incluindo o espelhado
+orgânico $(1,0,0,62937,1)$, em que $E$ e $\Phi$ são cegos e a curvatura
+e a membrana acusam dos dois lados; a fibra e a monodromia byte a byte
+nas $52$ fusões; a geometria entrada a entrada. A árvore antiga fica no
+lugar (dupla árvore) até a limpeza ser ordenada;
+\code{tests/equivalencia\_universal.js} já importa a única implementação.}
+
 \section{A tipografia pela estrela: semente, espiral, região --- e a corte}\label{sec:espiral}
 
 \noindent A composição tipográfica do tradutor deixou de ser uma coleção de réguas locais e
