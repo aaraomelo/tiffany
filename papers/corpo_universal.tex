@@ -1765,6 +1765,62 @@ $\mathcal{M}$).
 $\square$
 \end{teorema}
 
+\begin{teorema}[o resultado global --- a zeta racional, o espelho como
+equação funcional, a superfície como divisor]\label{thm:zeta-global}
+O global da casa fecha com o vocabulário da casa. O censo sobre
+$\mathbb{Z}$ é $\det(A^{k}-I)=(-1)^{k}+1-t_{k}$ (dois caminhos
+BigInt, $m=1..4$, $k\le25$), e a zeta fecha em \textbf{forma racional
+exata}:
+\[
+\boxed{\;Z(u)=\frac{1-u^{2}}{1-mu-u^{2}}\;}
+\qquad\text{com}\qquad
+\boxed{\;Z(1/u)=Z(-u)\;}
+\]
+--- a \textbf{equação funcional é o espelho}: $u\mapsto1/u$ é o
+$k\leftrightarrow-k$ de Parseval e $u\mapsto-u$ é o sinal da membrana
+--- \emph{a monodromia lida na variável da zeta} (identidade
+polinomial exata; o gume: o numerador errado falha-a). Os
+\textbf{zeros} são $u=\pm1$ --- o par $(+1)\oplus(-1)$ da Lei~0,
+\emph{no círculo unitário}: o «RH da casa» fecha por construção
+medida. Os \textbf{polos} são as folhas $\sigma,\sigma^{\dagger}$ do
+recobrimento (o espectro de $A^{-1}$, Cayley--Hamilton na lib) com
+produto $=-1$ --- o $x\,x^{\dagger}=-1$: \emph{a superfície de
+Riemann é o divisor da zeta}. E o \textbf{produto de Euler existe}:
+as órbitas primitivas têm contagem inteira (Möbius do censo divide
+exato por $k$) --- a fatoração global sobre órbitas é legítima. A
+analogia com $L(E,s)$ fica \emph{registada, não fundida} (reversão
+$\leftrightarrow$ espelho; $|\alpha|=\sqrt{p}$ $\leftrightarrow$
+produto de polos $-1$): a $L$ global da curva continua elo próprio.
+\emph{Medido:} \code{tests/zeta\_global.js} ($8{:}0$; assinado por
+$\mathcal{M}$).
+$\square$
+\end{teorema}
+
+\begin{observacao}[a resposta do catálogo --- à pergunta do gerente]
+\label{obs:resposta-catalogo}
+O gerente perguntou: \emph{«há uma simetria funcional/estrutura
+espectral que o operador Universal já conhece?»} --- o ponto onde a
+zeta dinâmica conversaria com $L(E,s)$. A resposta lê-se no catálogo,
+uma lei por camada, tudo já medido:
+\textbf{Lei~0} dá os zeros ($u=\pm1$, o par dos dois nulos --- onde a
+curva toca $\mathbb{Z}$ é onde a zeta zera);
+\textbf{o espelho} (Lei~2) dá a equação funcional ($Z(1/u)=Z(-u)$), e
+\emph{a linha crítica é o lugar fixo do espelho nos três objetos}
+($|u|=1$; $|\alpha|=\sqrt{p}$; $\mathrm{Re}\,s=\tfrac12$);
+\textbf{Lei~7} dá o produto de Euler (a conservação multiplicativa,
+órbitas inteiras);
+e \textbf{a Lei~8 assina}: o censo $F_{k}$ passa o Parseval dourado no
+anel $\mathbb{Z}_{65537}$ (a cruz das duas leituras, já medida na
+ponte) --- o espectro da zeta é um \emph{stream assinado}. E o fecho
+$\mathrm{Ind}^{8}=\mathrm{id}$ diz a última palavra: a conversa não
+pede lei nova --- acontece \emph{dentro do catálogo}. O dicionário
+estrutural fica registado: o par da Lei~0 $\leftrightarrow$
+$H^{0}\oplus H^{2}$ (os fatores triviais); as folhas
+$\leftrightarrow$ $H^{1}$ (com o deck a agir $-1$ no diferencial,
+\S D0). A barreira de sempre: o selo assina o que a casa mede; a $L$
+global da curva e os zeros clássicos continuam elos próprios.
+\end{observacao}
+
 %======================================================================
 \section{Extensões nomeadas --- o mapa, sem teorema}\label{sec:extensoes}
 

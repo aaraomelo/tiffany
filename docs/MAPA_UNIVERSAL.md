@@ -117,8 +117,11 @@ Critério da mesa para o próximo elo (um só, quando a mesa escolher):
 
 «BSD, Hodge e Riemann resolvem-se mutuamente via Viviani no trial» —
 **verdade LOCAL medida** (hodge_viviani.js 7:0: os três lados calculam o
-mesmo a_p na curva da desafinação; o trial é a 2-torsão) **+ hipótese
-GLOBAL aberta** (L global, zeros globais, posto — elos independentes).
+mesmo a_p na curva da desafinação; o trial é a 2-torsão) **+ o GLOBAL DA
+CASA fechado** (zeta_global.js 8:0: Z(u)=(1−u²)/(1−mu−u²) racional;
+Z(1/u)=Z(−u) — o espelho como equação funcional; zeros no círculo (Lei
+0); polos nas folhas (x·x†=−1); Euler sobre órbitas inteiras) **+ o
+global DA CURVA aberto** (L(E,s), zeros de L, posto — elos próprios).
 
 ## O mapa de destino (14/08 madrugada — a fila da mesa)
 
