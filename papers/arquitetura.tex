@@ -726,6 +726,24 @@ coisa, e é por isso que não tem \emph{buffer}: não oscila, e a entrada e a sa
 próprio movimento --- a modulação que gira o rotor ---, não um sinal guardado para ler depois.
 
 \smallskip
+\noindent \textbf{E o daemon renderiza LaTeX no canvas por default.} A resposta
+da assistente é \code{.tex} (a interface padrão); o tradutor compõe-na pelo
+\emph{mesmo esquema do PDF} --- fonte virtual no Map, \code{fich\_miss} serve,
+\code{compila\_ficheiro}, \code{MOVE(14,+1)} absorve --- e o \textbf{pintor do
+dialecto} (\code{app/src/canvas\_tex.js}) desenha o nosso próprio PDF no canvas,
+sem dependência externa: texto plano (Flate fora de propósito), glifos como
+Forms de traços \code{m}/\code{l}, e onze operadores que fecham. E \emph{os
+corpos viajam à vista}: o pintor devolve Alonzo (\code{/SementeEstrela}) e
+Caelum (\code{/AssinaturaOito}) com a página.
+
+\medido{o dialecto fecha no pintor: dualsort composto em node pelo esquema do
+PDF, página A4 exata, $51\,744$ traços na primeira página e ZERO operadores
+desconhecidos; os corpos de Alonzo e Caelum presentes e lidos ($256$
+componentes); e uma resposta solta do daemon, embrulhada no documento mínimo,
+compõe e pinta pelo mesmo caminho --- o default é viável
+(\code{tests/canvas\_front.js}, $11$:$0$).}
+
+\smallskip
 \noindent \textbf{Três eixos, uma régua} (\S\ref{sec:pipeline}). Porta (\code{MOVE}), torre
 ($\pi_k$/Maestro/Metrónomo) e pipeline (\textsf{Claim}$\neq$\textsf{Result}): o desenvolvimento
 obedece ao mesmo contrato que a transformação. A IR é fonte; paper/teste/código/wasm são

@@ -28,6 +28,8 @@ import { passoFronteira } from './fronteira.js'
 import { passoEstacao, documentoImplante, pedeBanco } from './estacao.js'
 import { passoPatria, pedePatria, medePatriaLive } from './patria.js'
 import { passoCristal } from './cristal.js'
+import { comporTexto } from './tex_tradutor.js'
+import { parsePdfCasa, pintaPagina, corposDoPdf } from './canvas_tex.js'
 
 /** basename / path → id do tradutor (docs_tradutor.json). */
 function mapaTex () {
@@ -279,6 +281,46 @@ export function initAssistente () {
     }
   }
 
+  /* o daemon renderiza LaTeX no canvas POR DEFAULT — o mesmo esquema do
+   * PDF (tex.wasm, slots, MOVE); em falha fica o texto, sem drama. E os
+   * corpos viajam à vista: Alonzo (a semente) e Caelum (a Lei 8). */
+  let canvasAvisado = false
+  function rendeCanvas (Y) {
+    if (!Y || Y.length < 3) return
+    ;(async () => {
+      try {
+        const embrulho = '\\documentclass[11pt,a4paper]{article}\n' +
+          '\\begin{document}\n' + Y + '\n\\end{document}\n'
+        const r = await comporTexto('resposta.tex', embrulho)
+        const doc = parsePdfCasa(r.bytes)
+        if (!doc.paginas.length) return
+        const d = document.createElement('div')
+        d.className = 'asst-msg ela'
+        const q = document.createElement('span')
+        q.className = 'quem'
+        q.textContent = 'canvas'
+        const t = document.createElement('span')
+        t.className = 'txt'
+        const c = document.createElement('canvas')
+        c.className = 'asst-canvas'
+        pintaPagina(doc, 0, c, 1.25)
+        const corpos = corposDoPdf(doc)
+        c.title = 'Alonzo ' + (corpos.alonzo || '—') +
+          ' · Caelum S[0..3]=' + (corpos.caelum ? corpos.caelum.slice(0, 4).join(',') : '—')
+        t.appendChild(c)
+        d.appendChild(q)
+        d.appendChild(t)
+        log.appendChild(d)
+        log.scrollTop = log.scrollHeight
+      } catch (err) {
+        if (!canvasAvisado) {
+          canvasAvisado = true
+          linha('sys', 'canvas', 'render adiado: ' + (err.message || err), false)
+        }
+      }
+    })()
+  }
+
   function mostraPatria (fala) {
     if (!pedePatria(fala)) return
     patriaEl.textContent = 'D=…'
@@ -440,6 +482,7 @@ export function initAssistente () {
       historico.push(fala, passo.recall.Y)
       linha('ela', 'assistente', passo.recall.Y, true)
       mostraCristal(fala, passo.recall.Y)
+      rendeCanvas(passo.recall.Y)
       linha('sys', 'metrónomo', residuo.motivo +
         ' · λΣ=' + passo.lambdaSoma.toFixed(2), false)
       return
@@ -467,6 +510,7 @@ export function initAssistente () {
       historico.push(fala, passo.recall.Y)
       linha('ela', 'assistente', passo.recall.Y, true)
       mostraCristal(fala, passo.recall.Y)
+      rendeCanvas(passo.recall.Y)
       linha('sys', 'metrónomo', residuo.motivo +
         ' · overlap=' + (passo.recall.overlap != null
           ? passo.recall.overlap.toFixed(2) : '?'), false)
@@ -509,7 +553,7 @@ export function initAssistente () {
     if (r && !r.ok) {
       mostraCiclo(saida.batuta, r, passo, pi, fala)
       linha('sys', 'metrónomo', 'r=' + r.r + ' — ' + r.motivo, false)
-      if (saida.Y) { linha('ela', 'assistente', saida.Y, true); mostraCristal(fala, saida.Y) }
+      if (saida.Y) { linha('ela', 'assistente', saida.Y, true); mostraCristal(fala, saida.Y); rendeCanvas(saida.Y) }
       return
     }
     if (saida.Y) {
@@ -525,6 +569,7 @@ export function initAssistente () {
       historico.push(fala, saida.Y)
       linha('ela', 'assistente', saida.Y, true)
       mostraCristal(fala, saida.Y)
+      rendeCanvas(saida.Y)
       if (r && r.motivo) {
         linha('sys', 'metrónomo', r.motivo +
           (r.ok ? ' · λΣ≈0 (fecho)' : ''), false)

@@ -337,6 +337,43 @@ export async function comporDoc (id) {
   }
 }
 
+/** Compõe um TEXTO solto (a resposta do daemon) pelo MESMO esquema do PDF:
+ *  fonte virtual no Map, fich_miss serve, compila, MOVE(14,+1) absorve.
+ *  O embrulho mínimo é do chamador; as fontes/estilo vêm do subset da casa. */
+export async function comporTexto (nomeVirtual, tex) {
+  const { exports: E } = await carregaMotor()
+  await garanteCorpo()
+  if (typeof E.volta_compila === 'function') E.volta_compila()
+  motor.poe.clear()
+  motor.miss = { n: 0, bytes: 0 }
+  await encheCache('papers/dualsort.tex')     /* o subset com as fontes da casa */
+  motor.cache.set(nomeVirtual, new TextEncoder().encode(tex))
+  if (typeof E.marca_vfs === 'function') E.marca_vfs()
+  E.limpa_saida()
+  const enc = new TextEncoder()
+  const nEnt = enc.encode(nomeVirtual)
+  const nSai = enc.encode('saida.pdf')
+  const pEnt = reserva(E, nEnt.length + 1)
+  const pSai = reserva(E, nSai.length + 1)
+  const v = memView(E)
+  v.set(nEnt, pEnt); v[pEnt + nEnt.length] = 0
+  v.set(nSai, pSai); v[pSai + nSai.length] = 0
+  const rc = E.compila_ficheiro(pEnt, pSai)
+  if (rc !== 0) throw new Error(`comporTexto(${nomeVirtual}) → ${rc}`)
+  const n = num(E.tam_saida())
+  const addr = typeof E.MOVE === 'function' ? absorve(E, 14) : num(E.end_saida())
+  if (n < 100 || !addr) throw new Error(`saída vazia (${n} bytes)`)
+  const out = memView(E).slice(addr, addr + n)
+  const latin = new TextDecoder('latin1').decode(out)
+  if (out[0] !== 0x25 || !latin.includes('%%EOF')) throw new Error('PDF inválido')
+  const estrela = parseSemente(latin)
+  const oito = parseAssinatura(latin)
+  motor.cache.delete(nomeVirtual)
+  if (typeof E.volta_compila === 'function') E.volta_compila()
+  motor.poe.clear()
+  return { bytes: out, estrela, oito }
+}
+
 /** Compõe e abre o PDF. `janela` (opcional) é um tab já aberto no click
  *  síncrono — senão o browser bloqueia o popup depois do await. */
 export async function abrirDoc (id, janela) {
