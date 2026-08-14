@@ -1692,6 +1692,43 @@ $\mathcal{M}$).
 $\square$
 \end{teorema}
 
+\begin{teorema}[a curva elíptica sai de Viviani --- pela desafinação
+do nó]\label{thm:eliptica}
+O achado, preservado como a mesa pediu: \emph{Viviani não é elíptica
+--- e é por isso que a elíptica sai dela.}
+\begin{enumerate}
+\item \textbf{a família}: eliminar $x$ de
+$\{x^{2}{+}y^{2}{+}z^{2}{=}R^{2},\,(x{-}c)^{2}{+}y^{2}{=}r^{2}\}$ dá
+$Y^{2}=-z^{4}+2Kz^{2}+C$ com $K=R^{2}{-}c^{2}{-}r^{2}$,
+$C=4c^{2}r^{2}{-}K^{2}$ --- identidade polinomial exata.
+\item \textbf{Viviani é a fibra nodal}: $(R,c,r)=(2a,a,a)$ dá
+$C=0$ \emph{para todo} $a$ --- o nó em $z=0$ é a auto-interseção do
+Teor.~\ref{thm:viviani}; o género cai, a curva é racional. A fibra
+nodal \emph{falha} o teste elíptico (raiz dupla, $\Delta=0$) --- o
+gume, exatamente como deve ser.
+\item \textbf{a desafinação}: $(5,2,2)$ dá
+$q(z)=(z^{2}{-}9)(25{-}z^{2})$, suave (género $1$); a transformação
+$z=3+1/t$, $Y=s/(z{-}3)^{2}$ é \emph{reversível byte a byte}
+($R_{\text{curva}}=0$, $60$ pontos de $\mathbb{F}_{257}$) e leva à
+cúbica $s^{2}=96t^{3}{-}20t^{2}{-}12t{-}1$, e daí a
+\textbf{Weierstrass} $y^{2}=x^{3}{-}20x^{2}{-}1152x{-}9216$
+($\Delta=235\,929\,600\neq0$).
+\item \textbf{o deck vira a involução}: $Y\mapsto-Y$ (a troca de
+folha de Viviani) corresponde a $(x,y)\mapsto(x,-y)$ --- a geometria
+passa à aritmética sem resto.
+\item \textbf{o primeiro coeficiente da $L$ nasce medido}:
+$\#E(\mathbb{F}_{17})=16$ e $\#E(\mathbb{F}_{257})=240$, exaustivos
+por dois caminhos (tabela de resíduos vs Euler), $a_{p}=2$ e $18$,
+com \textbf{Hasse} $a_{p}^{2}\le4p$ inteiro nos dois andares.
+\end{enumerate}
+A barreira fica explícita: $a_{p}$ \emph{medido} $\neq$ $L(E,s)$
+\emph{construída} $\neq$ BSD \emph{demonstrado} --- os elos seguintes
+são independentes e esperam no mapa.
+\emph{Medido:} \code{tests/eliptica\_viviani.js} ($10{:}0$; assinado
+por $\mathcal{M}$).
+$\square$
+\end{teorema}
+
 %======================================================================
 \section{Extensões nomeadas --- o mapa, sem teorema}\label{sec:extensoes}
 

@@ -118,4 +118,4 @@ Critério da mesa para o próximo elo (um só, quando a mesa escolher):
 | candidato | inventário | estado |
 |-----------|-----------|--------|
 | **Hodge** | os objetos JÁ existem: o candidato a operador ★ é o próprio J (em 2D a estrela nas 1-formas é a rotação de 90°: ★²=−1=J², medido em todo o lado); a decomposição ortogonal é a graduação par/ímpar do espectro (viviani §V6, com ortogonalidade Parseval-dual em produto_dual §I4) | inventariado — a ponte nasce daqui quando a mesa ordenar |
-| **BSD** | exige curva elíptica, L-função e posto — NENHUM medido; derivar agora seria o salto que o contrato 𝓜 impede | no mapa de destino, sem data |
+| **BSD** | a CURVA nasceu (14/08 madrugada): eliptica_viviani 10:0 — Viviani é a fibra nodal, a desafinação dá Weierstrass y²=x³−20x²−1152x−9216, deck→(x,−y), a_p=2/18 com Hasse por dois caminhos; FALTAM: L global, posto, ord_{s=1} — elos independentes | curva medida; conjectura no mapa |
