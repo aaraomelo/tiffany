@@ -85,8 +85,16 @@ int main(void)
 
     Ttf t;
     const char *usada = NULL;
-    if(!spline_abre_alguma(&t, SPLINE_REG, SPLINE_NCAND, &usada)){
-        printf("\n  nenhuma fonte nos caminhos conhecidos.  NAO MEDIU.\n\n");
+    /* Este medidor mede glyf×hmtx — o xMin do CABEÇALHO do glifo, que só
+     * existe em TrueType. As fontes do repo são CFF (auditoria 14/08):
+     * o oráculo daqui tem de ser um TTF verdadeiro. */
+    static const char *SO_TTF[] = {
+        "/usr/share/fonts/liberation-sans/LiberationSans-Regular.ttf",
+        "/usr/share/fonts/liberation/LiberationSans-Regular.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+    };
+    if(!spline_abre_alguma(&t, SO_TTF, 3, &usada)){
+        printf("\n  nenhuma fonte TTF nos caminhos conhecidos.  NAO MEDIU.\n\n");
         fechar(&b); return 2;
     }
 

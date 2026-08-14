@@ -317,3 +317,39 @@ vermelhos com causa nomeada** (Classe A 10 + Classe B 14 + libc_wasm). A bateria
 
 REGRA REFORÇADA: a regressão total (`--refaz`) entra no protocolo de fecho
 de qualquer fase — a atestação por assinatura não vê o mundo a mudar.
+
+## 11. O SANEAMENTO DO DOADOR E O REPARO DAS FONTES (14/08, continuação)
+
+Decisão do coordenador («podemos tirar o conceito de doador e sanear o
+sistema»), protocolo do gerente (o crivo derivável/fixture/integração/
+remover), selo do diretor (a Regra do Oráculo; teoria CONGELADA até verde).
+
+- **Classe A resolvida — integração declarada**: os 10 da crónica do doador
+  + compoe_ao_clicar (servidor vite) moveram para `integration/` com
+  LEIA.md (estatuto, achados históricos, o que cada um precisa). Nenhum
+  removido; nenhum finge medir. Citações no catálogo atualizadas (saem da
+  bateria DECLARADAMENTE — ninguém sai em silêncio). Gémeos internos das
+  operações já na bateria: transfusao.c, plugue, fala.c -teste.
+- **Família das fontes CURADA na raiz**: a fonte do repo
+  (lib/fontes/documento-*.otf) é CFF — SEM glyf/loca — e `ttf_contorno`
+  lia offsets inexistentes como lixo silencioso (loca negativa, 0
+  contornos). O conserto no sítio: DESPACHO em ttf_contorno para o
+  cff_contorno que a lib já tinha («TTF e OTF são a mesma spline»,
+  honrado no código). E os medidores-oráculo voltaram ao seu oráculo:
+  spline.c e dual_spline_ttf.c abrem a LIBERATION (o §P2 compara contra a
+  tabela Helvetica do tex.c; o xMin do glyf só existe em TrueType) — a
+  lista SPLINE_REG da lib serve o COMPOSITOR, não estes medidores.
+  spline 0 ✓ · dual_spline_ttf 0 ✓.
+- **O que resta (12)**: a família compositor-texto — o catálogo COMPÕE
+  (1622 réguas, cores do estilo confirmadas, controlo por mutação passa)
+  mas a extração de TEXTO dá 0 palavras/1 página (design_no_pdf §G3,
+  dois_streams, sem_chute, escala, escala_dourada, avalia_macros,
+  volta_estrela, fonte_banco, biblioteca, fator, app_arranca). Candidato
+  único: a forma do TEXTO no PDF mudou (glifos como desenho/XObjects com
+  as fontes do repo) e os leitores dos medidores não a reconhecem — OU o
+  compositor perde o texto de facto. SESSÃO PRÓPRIA. E libc_wasm: o write
+  devolve vazio; o traduz «pilha vazia na descida» na libc inteira.
+
+**Estado: bateria honesta 422 medidores — 410 verdes, 12 com causa nomeada.**
+Teoria (Viviani → Lei trial → intervalos encaixantes → Clifford) congelada
+até o verde pleno, por ordem da mesa.

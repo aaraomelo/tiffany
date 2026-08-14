@@ -128,7 +128,12 @@ static long contorno_xi(const Contorno *c, int i){
 static long contorno_yi(const Contorno *c, int i){
     double v = c->p[i].y; return (long)(v >= 0 ? v + 0.5 : v - 0.5); }
 
+static int cff_contorno(const Ttf *t, int g, Contorno *c);
 static int ttf_contorno(const Ttf *t, int g, Contorno *c){
+    /* «TTF e OTF são a mesma spline» — honrado AQUI, no despacho: numa fonte
+     * CFF não há glyf/loca, e ler offsets inexistentes dava lixo silencioso
+     * (a auditoria de 14/08 apanhou-o: contornos 0 e loca negativa) */
+    if(!t->glyf || !t->loca) return cff_contorno(t, g, c);
     long off, off2;
     if(t->longloca){ off = (long)u32(&t->b, t->loca + 4L*g); off2 = (long)u32(&t->b, t->loca + 4L*g + 4); }
     else           { off = 2L*u16(&t->b, t->loca + 2L*g);   off2 = 2L*u16(&t->b, t->loca + 2L*g + 2); }

@@ -155,9 +155,21 @@ static void ok(const char *q, int cond){
     printf("  [%s] %s\n", cond ? "ok" : "FALHA", q);
 }
 
-/* as candidatas e o abre_alguma vivem agora no spline.h — uma leitura, dois usos */
-#define CANDIDATAS SPLINE_REG
-#define CAND_NEG   SPLINE_NEG
+/* O ORÁCULO DESTE MEDIDOR É A LIBERATION SANS (metricamente Arial→Helvetica):
+ * o §P2 compara o ficheiro contra a tabela base-14 do tex.c, e isso só faz
+ * sentido com a Liberation. O SPLINE_REG da lib serve o COMPOSITOR (as fontes
+ * do repo primeiro) — a auditoria de 14/08 apanhou o medidor a abrir a fonte
+ * errada quando a lista da lib mudou. Aqui a lista é a do oráculo. */
+static const char *CANDIDATAS[] = {
+    "/usr/share/fonts/liberation-sans/LiberationSans-Regular.ttf",
+    "/usr/share/fonts/liberation/LiberationSans-Regular.ttf",
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+};
+static const char *CAND_NEG[] = {
+    "/usr/share/fonts/liberation-sans/LiberationSans-Bold.ttf",
+    "/usr/share/fonts/liberation/LiberationSans-Bold.ttf",
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+};
 #define abre_alguma spline_abre_alguma
 
 int main(void){

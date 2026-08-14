@@ -136,7 +136,7 @@ dtcn cf607d0c0a75e3d5 0
 duais 28dc625dbb3da8b3 0
 dual 869340d98961353e 0
 dual_cadeia c7280a378e486134 0
-dual_spline_ttf 9128954b26377745 1
+dual_spline_ttf 3e8e11fb1a25018f 0
 dualcifra d92ee92a52c7d147 2
 dualidade 18065d141793793e 0
 dualreta d9a0e2809774fac6 0
@@ -373,7 +373,7 @@ solar bdc476d2250886a9 0
 sombra_cone 2b75f89f2187feac 0
 sombras bb1e5441b87d7cb5 0
 spinor32 d6b61362e77bb476 0
-spline e9b809b93de713f5 1
+spline fc82557165d00834 0
 sql dd9f1021d22ed500 0
 sshb 867d3328b082b67a 0
 str2dbl_dual 74601c0ca36de56f 0

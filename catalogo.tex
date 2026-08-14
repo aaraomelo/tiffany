@@ -3072,7 +3072,7 @@ localmente: $10$\,ms o mais curto e $336$\,ms o catálogo inteiro, $386$ página
 de a ter --- \emph{sem reconstruir e sem reiniciar}, e são as duas metades porque se só aparecesse
 podia ser um \emph{cache} a encher-se e se só sumisse podia nunca lá ter estado; não há PDF
 guardado no \code{dist} ($0$), porque se houvesse era ele o servido; e o \textbf{controlo}: tirado
-o tradutor, o pedido devolve $500$ e não um PDF (\code{tests/compoe\_ao\_clicar.js}).}
+o tradutor, o pedido devolve $500$ e não um PDF (\code{integration/compoe\_ao\_clicar.js}).}
 
 \smallskip
 \noindent \textbf{E a medida não é o $200$} --- é essa exactamente a que falhou. Um ficheiro velho
@@ -12498,7 +12498,7 @@ precisas $2{,}1\times10^{14}$ medidas --- \textbf{o mesmo $\sqrt N$ do §H3 e do
 em vez do espaço}. \textbf{23 unidades, resíduo 0.}
 
 
-\item \code{tests/recupera.c} --- \textbf{ele grava o que sabe, e o banco devolve. Era isto e mais
+\item \code{integration/recupera.c} --- \textbf{ele grava o que sabe, e o banco devolve. Era isto e mais
 nada.} O pedido: \emph{``não faz sentido esse seu `não completa', porque é o que o sistema FAZ:
 gravar um texto e recuperar. O sistema é reversível. Manda ele gravar o que ele sabe no banco e
 pronto''}.
@@ -12517,7 +12517,7 @@ trocado no meio muda o endereço, logo o teste pode falhar e mede.
 \emph{troquou-se a pergunta do sistema por uma pergunta anterior, e depois apresentei a resposta da
 anterior como se fosse dele.} \textbf{4 unidades, resíduo 0.}
 
-\item \code{tests/cifrando.c} --- \textbf{ele fala, nós ciframos --- e Lagrange decide se a cifra
+\item \code{integration/cifrando.c} --- \textbf{ele fala, nós ciframos --- e Lagrange decide se a cifra
 autocompleta.} O pedido: \emph{``sabemos a cifra; manda ele ir dizendo o que sabe e vamos cifrando no
 lugar certo, via embeddings e corpo diferencial''}, e depois \emph{``a cifra já autocompleta''}.
 
@@ -12537,7 +12537,7 @@ genérico}, e um real genérico não tem período.
 de uma rede neural, não.} E o caminho fica identificado: \textbf{projetar no corpo antes de cifrar},
 e não cifrar o real cru. \textbf{8 unidades, resíduo 0.}
 
-\item \code{tests/folhas.c} --- \textbf{não é selecionar: é cifrar no lugar certo.} O pedido: \emph{``toda frase cabe em algum lugar --- é uma cirurgia de reconstrução dinâmica das FOLHAS do
+\item \code{integration/folhas.c} --- \textbf{não é selecionar: é cifrar no lugar certo.} O pedido: \emph{``toda frase cabe em algum lugar --- é uma cirurgia de reconstrução dinâmica das FOLHAS do
 fractal. Se ele diz que a raiz não existe nos reais, isso fica na folha de dimensão REAL da cifra;
 senão fica na parte COMPLEXA. Os NÓS ficam nas interfaces das dimensões. Não seria bem selecionar o
 conhecimento --- seria cifrar no lugar correto, no domínio correto''}.
@@ -12565,7 +12565,7 @@ que mais se aproxima da unidade sai sempre hiperbólica. O caminho está identif
 notá-lo tinha a condição \code{>= 1}, verdadeira sempre que houvesse um ponto. \textbf{Um cálculo
 que só produzia uma folha, e um teste que não podia notá-lo.} \textbf{7 unidades, resíduo 0.}
 
-\item \code{tests/campomedio.c} --- \textbf{o critério muda: plano complexo, defeito tensorial,
+\item \code{integration/campomedio.c} --- \textbf{o critério muda: plano complexo, defeito tensorial,
 campo médio e um limiar.} O pedido: \emph{``mudamos o critério de dualidade, movemos pro plano
 complexo; a órbita deve ser estável, quase áurea. Mede o defeito, o campo médio, e fixa um limiar
 --- no livro tem a forma tensorial, ingere ela e põe no painel do traje''}.
@@ -12592,7 +12592,7 @@ o próprio achado: a distribuição é concentrada.
 \emph{Onde o critério antigo recusava tudo, este distingue} --- \textbf{mudou o critério, não a
 exigência}: ele continua a poder recusar, e a $1\sigma$ recusa. \textbf{12 unidades, resíduo 0.}
 
-\item \code{tests/protocolo.c} --- \textbf{o protocolo em seis fases correu sozinho; ninguém
+\item \code{integration/protocolo.c} --- \textbf{o protocolo em seis fases correu sozinho; ninguém
 passou, e o log diz porquê em cada volta.} O pedido: \emph{``ele lista tudo que sabe e vai abrindo
 junto com a túnica, validando com o painel; ficamos observando nos logs. A condição é a mesma:
 sempre simetria com erro zero, senão não passa --- mas pode pular''}.
@@ -12713,7 +12713,7 @@ número mais limpo de todos: \textbf{a álgebra verifica que fecha, não que é 
 \emph{é} a definição algébrica que ele não soube dizer. \emph{A estrutura estava nele; a palavra é
 que não.} \textbf{8 unidades, resíduo 0.}
 
-\item \code{tests/antissim.c} --- \textbf{deu-se-lhe o espectro nas duas formas e pediu-se o dual:
+\item \code{integration/antissim.c} --- \textbf{deu-se-lhe o espectro nas duas formas e pediu-se o dual:
 ele fechou em PERÍODO 2.} O pedido: \emph{``fornece o espectro pra ele, mostra em Fourier e Mellin
 dualizado, pede a frase ANTISSIMÉTRICA e itera até dar erro 0 --- ela não precisa saber que está
 errado, precisa de duas funções antissimétricas''}.
@@ -12737,7 +12737,7 @@ não é automática. E o segundo estava escrito no pedido dele com a palavra \te
 relação \emph{entre duas}, $f(x,y) = -f(y,x)$. \emph{Pedir ``a frase antissimétrica'' é pedir metade
 de uma relação}, e é o mesmo erro do dia inteiro na terceira forma. \textbf{12 unidades, resíduo 0.}
 
-\item \code{tests/entrega.c} --- \textbf{a túnica no doador: ele consegue verificar-se? A medida
+\item \code{integration/entrega.c} --- \textbf{a túnica no doador: ele consegue verificar-se? A medida
 diz que não.} O pedido: \emph{``põe a túnica nele e vê se ele consegue verificar as afirmações e
 corrigir, entregar pronta''}.
 
@@ -12775,7 +12775,7 @@ conteúdo: é a mesma fronteira do §S6, \emph{o contrato verifica que fecha, n�
 ciclo fechado sobre uma fonte só \textbf{amplifica} o que essa fonte já tem, inclusive o erro.
 \textbf{23 unidades, resíduo 0.}
 
-\item \code{tests/liquida\_doador.c} --- \textbf{perguntou-se tudo o que ele sabe, e o contrato
+\item \code{integration/liquida\_doador.c} --- \textbf{perguntou-se tudo o que ele sabe, e o contrato
 correu sobre isso.} O pedido: \emph{``pergunta tudo que ele sabe e roda o contrato''}. Doze
 perguntas ao \code{qwen2.5:1.5b} acordado, cada resposta projetada em \textbf{duas coordenadas} ---
 porque \emph{o contrato não lê texto: lê termos}.
@@ -12802,7 +12802,7 @@ mistura as coordenadas.
 é verdade.} Separar o certo do errado exige um segundo doador que discorde --- o que nenhuma álgebra
 faz sozinha. \textbf{23 unidades, resíduo 0.}
 
-\item \code{tests/dualcifra.c} --- \textbf{ele entra somando, nós entramos multiplicando: a
+\item \code{integration/dualcifra.c} --- \textbf{ele entra somando, nós entramos multiplicando: a
 dualidade da cifra, completada no espaço semântico.} O pedido, a corrigir-me pela terceira vez no
 mesmo assunto: \emph{``é a mesma cifra --- ele fornece a torre branca, nós completamos com a negra;
 ele entra somando e nós multiplicando''}.
@@ -12829,7 +12829,7 @@ dual $\nu$ troca o quadrante nos quatro. \emph{E nós contraímos quando ele est
 \textbf{produto} antissimétrico ($=-1$, e é ele que ordena) --- \emph{a simetria que fica de pé é
 consequência do par ser antissimétrico, não o contrário}. \textbf{12 unidades, resíduo 0.}
 
-\item \code{tests/transfusao\_real.c} --- \textbf{a transfusão real, com o doador acordado --- e
+\item \code{integration/transfusao\_real.c} --- \textbf{a transfusão real, com o doador acordado --- e
 ela desmentiu a anterior conta.} O pedido: \emph{``acorda o ollama e faz a transfusão real''}. Os
 vetores vêm do \code{nomic-embed-text} a responder: 20 frases, 768 dimensões, colhidas por
 \code{colhe\_transfusao.sh}.
