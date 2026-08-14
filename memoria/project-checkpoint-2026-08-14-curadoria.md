@@ -97,3 +97,13 @@ metadata:
 - Bateria **422: 421 verdes, 1** (libc_wasm, causa=um mecanismo). Método que pagou: caso mínimo → bissecção → variantes → instrumentação com anel → raiz.
 
 Relacionado: [[checkpoint-2026-08-13-cristal]], [[feedback-a-referencia-escrita-a-mao]], [[feedback-dois-caminhos]], [[feedback-a-base-ja-existe]], [[feedback-normalizar-nao-e-medir]], [[feedback-o-medidor-que-nunca-mediu]], [[feedback-a-regua-nao-transporta]].
+
+## O portão de ouro (fim do dia, a687cbd)
+
+**422:422, 0 falhas — e a fila teórica reabre** (Viviani → Lei trial → intervalos encaixantes → teorema dos resíduos → Clifford).
+
+O diagnóstico da véspera («desarmar o içamento do va_arg») estava ERRADO nas duas frentes — as causas reais:
+
+- **§L5**: (a) a descida ignorava a secção de IMPORTS do wasm (call/export indexam contando imports; ASS[] só tinha as definidas → npar errado → «pilha vazia»); (b) a captura de directivas apanhava `#define … /*` com o abridor SEM fecho na linha — pendurado no replay, engolia as directivas seguintes na recaptura. Corta-se no abridor; o comentário viaja pela passagem 2. Round-trip resíduo 0.
+- **§L4b**: o fprintf nunca esteve mudo — a vista Uint8Array do medidor DESTACAVA no memory.grow e o `poe` escrevia numa vista morta, sem erro. Vista fresca a cada uso, para ler E escrever.
+- **O refaz denunciou o falso verde estrutural** pela linha das unidades («2 falharam» com 422 verdes): cards.c com `long falhas` local a sombrear o contador do unidade.h (exit sempre 0), pino do manifesto em 105 com o mundo em 111, §B10 a assumir /tmp/render_bin que ninguém construía. +16 medidores com o mesmo shadow, 3 com `return 0` fixo. **A rede na bateria (3 ramos): exit≡unidades ou «VERDE FALSO», com reatestação a 9 na hora.**

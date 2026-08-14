@@ -30,6 +30,7 @@
 - **[A estrutura lida como ruído](feedback-estrutura-lida-como-ruido.md)** — um resíduo que não fecha pode ser **meia órbita**, não erro de medida. Perguntar **o período do operador** ANTES de propor medir dispersão. Sinal: a «volta» dá o mesmo que o controlo — se voltasse, seria *muito* menor.
 - **[Duas réguas para o mesmo objecto](feedback-duas-reguas.md)** — SEIS vezes num dia, e o sintoma é sempre o mesmo: letras coladas. O sítio esquecido foi sempre um `if` ou ternário escrito quando só havia duas fontes. Letra colada não é posição: é a régua a não separar.
 - **[A régua não transporta](feedback-a-regua-nao-transporta.md)** — o `thm:transporte` dele refutou o meu método antes de eu o construir: medir contra o pdflatex é INTRANSPORTÁVEL, não difícil. A volta transporta; a régua não.
+- **[O exit sombreado](feedback-o-exit-sombreado.md)** — 17 medidores verdes com unidades vermelhas (contador local a sombrear o do header). A cura é a REDE no runner (exit≡unidades, «VERDE FALSO») + reatestar na hora. Ler SEMPRE as duas linhas do total.
 - **[Revisores em paralelo](feedback-revisores-externos.md)** — compensam MUITO e é preciso REPICAR (ficam idle sem entregar). Os graves são todos do mesmo tipo: A ASSERÇÃO ERA O DEFEITO. Reivindicar a mais custa mais que dizer menos.
 
 ## A teoria
