@@ -604,6 +604,93 @@ não é operador novo; é o corpo em trânsito pela fatoração.
 \end{definicao}
 
 %======================================================================
+\section{A geometria do contorno --- o recobrimento e as cartas da
+torção}\label{sec:contorno-geo}
+
+A curadoria deixou $52$ contornos reais (os $E_{\partial}$ das fusões) e
+a pergunta do coordenador: que geometria têm, e em que superfície vivem?
+A resposta foi medida antes de nomeada
+(\code{tests/contorno\_riemann.js}, $23{:}0$): inventário primeiro (o
+esquilo $J$, o espelho, as folhas $\sigma,\sigma^{\dagger}$ e a dobra
+$n^{2}{+}4$ já existiam --- aqui só se articulam), depois o plano
+C0--C7 do gerente, e o nome no fim.
+
+\begin{teorema}[o recobrimento do corpo universal]\label{thm:recobrimento}
+A mudança $w=2x-m$ leva $x^{2}=mx+1$ em
+\[
+\boxed{\;w^{2}=m^{2}+4\;}
+\]
+--- \textbf{a dobra é o discriminante}, e as duas folhas $x=(m\pm w)/2$
+são as folhas $\sigma,\sigma^{\dagger}$ da transformada. Sobre $\mathbb{Z}$
+a curva toca apenas a Lei~0: a enumeração \emph{completa} dos divisores
+de $(w{-}m)(w{+}m)=4$ dá $(m,w)=(0,\pm2)$, isto é, $x=\pm1$ --- o par
+$(+1)\oplus(-1)$. Um andar acima ela \textbf{realiza-se inteira}
+(o movimento da membrana): $W=2A_{m}-mI$ satisfaz
+$W^{2}=(m^{2}{+}4)I$, $\operatorname{tr}W=0$, $\det W=-(m^{2}{+}4)$,
+exato para $m=0..8$. E \textbf{a troca de folha é a estaca}:
+$A\cdot(mI-A)=-I$ (o $x\cdot x^{\dagger}=-1$ da Lei~1), involução exata.
+\emph{Medido:} \S S0--\S S2. $\square$
+\end{teorema}
+
+\begin{teorema}[a geometria dos $52$ contornos reais]\label{thm:contorno-plano}
+Nas $52$ fusões da curadoria: o contorno \textbf{fecha} (pilha vazia no
+fim, nunca negativa) e \textbf{sem cruzamento} (cada abridor fecha com o
+seu tipo --- o traçado é orientável); no nível do array vivem
+\textbf{duas componentes} (as folhas) e \textbf{um corte só}, lido por
+dois caminhos concordantes (a fibra cega e a leitura com estado de
+corda). O contorno é \textbf{plano}:
+\[
+E_{\partial}-E(\mathrm{id})=E(\text{moldura})=295\,589
+\quad\text{--- a mesma constante nas } 52,
+\]
+toda a variação do contorno é o endereço. A \textbf{monodromia} $\nu$
+troca as folhas ($[x,y]@\mathrm{id}_{x}\mapsto[y,x]@\mathrm{id}_{y}$),
+volta byte a byte ($\nu\circ\nu=\mathrm{id}$) e \textbf{só paga o
+endereço}: $E(\nu z)-E(z)=E(\mathrm{id}_{y})-E(\mathrm{id}_{x})$ exato.
+Ponto fixo de $\nu$ $\iff$ as folhas coincidem (a auto-fusão --- o caso
+$D^{2}=A\oplus A$ da membrana); \textbf{nenhuma} das $52$ é fixa: o
+recobrimento é \emph{não-ramificado sobre o corpus real}.
+\emph{Medido:} \S C0, \S C1, \S C4, \S C7, \S S3--\S S5. $\square$
+\end{teorema}
+
+\begin{teorema}[as cartas da torção, e o seu dual]\label{thm:cartas}
+O esquilo $J$ ($J^{2}=-I$, período $4$, $\det J=+1$ --- já medido na
+morfologia) legitima a carta $(x,Jx)$: o anel $\{aI+bJ\}$ multiplica
+\emph{exato} por $(ac-bd,\;ad+bc)$ e comuta. As \textbf{duas
+assinaturas} medem-se lado a lado: $\det(aI+bJ)=a^{2}+b^{2}$
+(definida --- o círculo da torção) contra
+$\det(aI+bA_{m})=a^{2}+mab-b^{2}$ (indefinida --- a hipérbole do corpo,
+que muda de sinal e só zera na origem); e o $\det$ é
+\textbf{multiplicativo nas duas} (Lei~7). As transições do rotor
+comutam com toda a carta (lineares na estrutura); \textbf{o dual tem as
+duas partes na mesma frase}: o espelho $R$ ($R^{2}=I$, $\det R=-1$,
+$RJ=-JR$) \emph{conjuga}, $R(aI+bJ)R=aI-bJ$, e \emph{não} comuta quando
+$b\neq0$ --- o par holomorfo/anti-holomorfo é o par roda/espelha das
+duas torres. O cociclo fecha: $\langle J,R\rangle$ tem ordem
+\textbf{exatamente $8$}, fechado e com inversos; e toda volta é exata
+($J^{4}=I$, $R^{2}=I$, $\nu\circ\nu=\mathrm{id}$).
+\emph{Medido:} \S C2, \S C3, \S C5--\S C7. $\square$
+\end{teorema}
+
+\begin{observacao}[o nome, como consequência]\label{obs:riemann}
+O que a medida dá: um \textbf{recobrimento duplo} orientável, com
+monodromia involutiva que paga só o endereço, \emph{não-ramificado e de
+assinatura hiperbólica sobre o corpus real}; e \textbf{cartas complexas
+exatas na direção da torção}, com transições que fecham em grupo de
+ordem $8$. E dá o ponto de colagem: \textbf{a dobra zera na torção} ---
+$(2J)^{2}+4I=0$ exato, e $X=J$ é raiz \emph{dupla} de $X^{2}=2J\cdot
+X+I$ com $x^{\dagger}=x$ e $\nu(x)=x$: as folhas colam-se no rotor, não
+no corpus. O nome chega assim: \emph{a parte de Riemann está onde o
+rotor está; a parte hiperbólica, onde o corpo vive} --- e a barreira de
+Dirac lê-se geometricamente: subir de andar ($D^{2}=L$) é
+\textbf{mudar de folha pela transição admissível}, não saltar no vácuo;
+a travessia do corte é a dobra. Não se afirma estrutura holomorfa
+\emph{sobre as folhas reais} --- lá a forma é $a^{2}+mab-b^{2}$,
+indefinida, e chamar-lhe círculo seria trazer a régua errada.
+\emph{Medido:} \code{tests/contorno\_riemann.js}, $23{:}0$.
+\end{observacao}
+
+%======================================================================
 \section{Os papéis --- a nomenclatura com cidadania}\label{sec:papeis}
 
 Os nomes deixaram de ser abstratos: cada um é o papel funcional que um
