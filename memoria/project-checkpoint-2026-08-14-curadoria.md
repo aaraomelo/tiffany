@@ -189,3 +189,37 @@ Depois do encontro local, o coordenador puxou SEM PAUSA (o gerente retirou o dec
 **A fundação vetorial (26ee08a, 464:464, 4066 unidades)**: o eval pediu K→V→V*→Universal→Peano e o coordenador refinou DUAS vezes: (1) «V e V* sobre K e K*, o universal é dualizado, a troca talvez seja da dinâmica — investiga»; (2) «todo corpo já é dual por definição — apresentar na forma dual com as primitivas; daí a autossimilaridade: usa um corpo pra construir outro da mesma forma». Três medidores: **teoria_vetorial** (7:0: o emparelhamento da casa é o DETERMINANTE ω, não-degenerado exaustivo; **ω(Mu,v)=ω(u,M†v) 334084/334084 — o dual abstrato de teoria.tex É a estaca**; anti-autoadjunto ⟺ tr=0 = gerador de Clifford — a Lei 2 bem tipada e o §D2 são a mesma condição). **corpo_dual** (8:0: **K* DESCOBERTO pela medida, não decretado — é K com a ação conjugada pela estaca**; V*/K† por sesquilinearidade (h(u,λv)=λ†h); **A TROCA DE CORPO É A DINÂMICA: no inerte o Frobenius É a estaca (x^p=x† 289/289), no separado x^p=x e as folhas ficam à vista** (4081/61458 no relógio, σσ†=−1) — a dicotomia inerte/separado do censo é troca/não-troca; o núcleo é K-linear, o Frobenius é semilinear — quem troca o corpo é a aritmética do andar). **corpo_autossimilar** (6:0: todo corpo já é dual — dois grupos, dois neutros, duas involuções, a costura; o construtor é UMA função nas primitivas; **A JOIA: a primeira régua válida do andar 2 é m₁=σ — O METAL DO ANDAR 1 É A RÉGUA DO ANDAR 2**; as leis sobem; split dá 2p−2 divisores de zero). Paper REESTRUTURADO: sec:fundacao abre, camadas com dono (fundação/língua/realização/intérprete/aplicações), as duas frases em caixa («Peano não é o corpo universal; é uma realização»; «o Metrónomo não é a língua; é o intérprete»), teste da reorganização: 94→97 citações, +3 exatos.
 
 **Lições da tarde**: (1) o `*/` dentro de comentário JS fechou o bloco DE NOVO (V*/K — mesma armadilha do posto_viviani; grep antes de correr). (2) `cd papers && bash tools/bateria.sh` falha DUAS vezes — lançar portões sempre da raiz. (3) A correção do coordenador sobre a 𝓕: defendi a medição primeiro (o teorema mantém-se) e cedi só na LEITURA (porta fechada → construção forçada) — o padrão certo de «ceder contra a própria medição». (4) O pgrep de bateria apanha-se a si próprio via sh -c — confirmar com ps antes de declarar portão vivo.
+
+## A ESCADA ARITMÉTICA DA ASSISTENTE (noite 14/08 → madrugada 15/08 — bateria 464→468)
+
+A entrega passou a ser conduzida pelos `eval.txt`: cada vez que ele reescreve o ficheiro,
+é um andar novo, e a assistente sobe-o com o seu `lib/*.h` + secção medida + falas com o
+relógio de ticks. Sete versões neste ciclo. Estado final: **bateria 468:468, interno
+145:0, vizinhança 35:0, membrana 29:0, histerese 31:0, compõe 2:0**.
+
+Os andares: **lógica booleana** (GF(2), ANF por Möbius que é involução, Quine–McCluskey
+com volta), **conjuntos** (a pertença É a variável), **relação→função→bijeção** (a bijeção
+é a que TEM VOLTA), **ℕ** (Peano — o motor demonstra os próprios instrumentos), **ℤ** (a
+reversibilidade da soma; Bézout/diofantinas), **ℚ** (a reversibilidade da multiplicação
+não nula) — este último em `8dfb094`, detalhe em [[project-escada-aritmetica-n-z-q]].
+
+**Os três defeitos da madrugada, e nenhum foi apanhado por asserção:**
+
+1. **A membrana media só metade do par** — o `bench_membrana.sh` varria a tabela `LX` (o
+   que a assistente LÊ) contra o dialecto do tradutor e nunca o que ela ESCREVE. Aberto o
+   segundo sentido, caíram na hora `\land` e `\overline`, emitidos há sessões e
+   desconhecidos do tradutor (agora `\wedge`/`\neg`). 16:0 → 29:0. Ver
+   [[feedback-medir-so-metade-do-par]].
+2. **A casa escrevia numa notação e lia noutra** — o `eval.txt` põe o produto booleano por
+   justaposição e o complemento posfixo («A + AB = A», «F = AB + AB'») e o parser exigia
+   `*`: «simplifica a + ab» morria CALADA. O gume ficou no espaço. Ver
+   [[feedback-escrever-numa-notacao-ler-noutra]].
+3. **O `ingere.py`** — `---` dava «—-» (travessão + hífen órfão) em 29 das 59 peças, e o
+   `\end{document}` deixava a palavra «document» colada ao fim da última secção de TODOS
+   os papers. Um era ordem (o travessão mais longo sai primeiro), o outro era o nome do
+   ambiente a sobreviver ao `\[a-zA-Z]+`.
+
+**Método que se firmou**: implementar → varrer exaustivamente com as respostas publicadas
+DELE como referência → **mutar a lib e contar as falhas**. Em ℚ e na booleana: seis
+mutações, 3/2/6/1/1/1 falhas, base 0. A mutação é o que separa a asserção que mede da que
+acompanha.
