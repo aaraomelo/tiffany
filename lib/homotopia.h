@@ -167,6 +167,43 @@ static int pal_igual(Pal x, Pal y){
 }
 static int pal_trivial(Pal x){ return pal_reduz(x).n == 0; }
 
+/* ── A MATRIZ DE INCIDÊNCIA, e a PONTE para a cohomologia ──────────────────────
+ * A linha da aresta a→b tem −1 na coluna a e +1 na coluna b. Aplicá-la a f ∈ Λ⁰ dá
+ * exactamente (df)(e) = f(b) − f(a): é a derivada exterior de grau 0 escrita num grafo.
+ * O posto dela é dim im d, e daí saem as três dimensões do complexo. E a TRANSPOSTA é o
+ * ∂ — a adjunção ∂ ⊣ d em coordenadas. */
+static Mat gr_incidencia(Grafo g){
+    if(g.ne > LN_MAX || g.nv > LN_MAX){ ht_estouros++; return mat0(1,1); }
+    Mat M = mat0(g.ne, g.nv);
+    for(int e = 0; e < g.ne; e++){
+        M.a[e][g.a[e]] = qz(-1,1);
+        M.a[e][g.b[e]] = qz(1,1);
+    }
+    return M;
+}
+/* a soma de uma cocadeia ao longo do grafo — detecta a não-exactidão nos ciclos */
+static Qz gr_soma_cocadeia(Grafo g, const Qz *w){
+    Qz s = qz(0,1);
+    for(int e = 0; e < g.ne; e++) s = qz_soma(s, w[e]);
+    return s;
+}
+/* ω = df? propaga f pelas arestas e CONFERE em todas — a fibra, e ela pode ser vazia */
+static int gr_potencial(Grafo g, const Qz *w, Qz *f){
+    int visto[HT_V];
+    for(int i = 0; i < g.nv; i++){ visto[i] = 0; f[i] = qz(0,1); }
+    visto[0] = 1;
+    for(int volta = 0; volta < g.nv; volta++)
+        for(int e = 0; e < g.ne; e++){
+            if(visto[g.a[e]] && !visto[g.b[e]]){
+                f[g.b[e]] = qz_soma(f[g.a[e]], w[e]); visto[g.b[e]] = 1;
+            } else if(visto[g.b[e]] && !visto[g.a[e]]){
+                f[g.a[e]] = qz_soma(f[g.b[e]], qz_oposto(w[e])); visto[g.a[e]] = 1;
+            }
+        }
+    for(int e = 0; e < g.ne; e++)
+        if(!qz_igual(qz_soma(f[g.b[e]], qz_oposto(f[g.a[e]])), w[e])) return 0;
+    return 1;
+}
 /* ── A ABELIANIZAÇÃO: contar os expoentes ──────────────────────────────────────
  * Em ℤ² (o toro) ab = ba; no grupo LIVRE não. A abelianização apaga a ordem e fica só a
  * contagem — e é ela que mostra que a diferença entre os dois é a ORDEM, não os

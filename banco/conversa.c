@@ -1379,6 +1379,326 @@ static void esc_mat(const char *ind, Mat A);
 static void esc_qz(const char *pre, Qz x, const char *pos);
 static void esc_col(const char *s, int largura);
 static void tique7(int slot, const char *porque);
+/* ── A PONTE PARA A COHOMOLOGIA, nas três camadas ──────────────────────────────────
+ * O `eval.txt` deu a formulação que ficou, e ela é melhor do que a minha: eu tinha posto
+ * a CONTAGEM como enunciado, e a contagem é a realização. A lei é
+ *
+ *        LOCALMENTE CONTRÁCTIL  ⇏  GLOBALMENTE CONTRÁCTIL
+ *
+ * porque «a obstrução não precisa de aparecer em nenhuma vizinhança — ela pode surgir NA
+ * COLAGEM das vizinhanças». Donde: INVARIANTE GLOBAL = INFORMAÇÃO DA COLAGEM.
+ *
+ * E as três camadas ficam alinhadas, cada uma com o seu quociente:
+ *        Universal   obstrução global à contração
+ *        Peano       ker ∂ / im ∂        ciclo − borda = classe
+ *        Estelar     ker d / im d        fechada − exacta = cohomologia
+ *
+ * E a consequência metodológica, que é uma EXIGÊNCIA e não uma observação: «o buraco pode
+ * ser invisível numa representação e aparecer imediatamente noutra» — logo não basta
+ * provar que existe obstrução; é preciso DESCOBRIR EM QUE REPRESENTAÇÃO ela aparece. */
+static const struct { int n; const char *nome; const char *enunciado; } PN10[] = {
+ {  1, "local e global",    "localmente contráctil ⇏ globalmente contráctil — a LEI" },
+ {  2, "a colagem",         "invariante global = informação da COLAGEM" },
+ {  3, "o complexo",        "Λ⁰ →d Λ¹ num grafo, e dim H¹ = E − V + C" },
+ {  4, "dois caminhos",     "Gauss na incidência contra a contagem — e não partilham nada" },
+ {  5, "a testemunha",      "ω ≡ 1 no ciclo: soma n ≠ 0, e toda exacta soma ZERO" },
+ {  6, "ciclo menos borda", "a face de PEANO: ker ∂ / im ∂, e ∂₂ não existe no grafo" },
+ {  7, "fechada menos exacta","a face do ESTELAR: ker d / im d, e o porquê de Poincaré" },
+ {  8, "a adjuncao",        "∂ é a TRANSPOSTA de d — a adjunção em coordenadas" },
+ {  9, "nao linear",        "π₁ é não abeliano; H₁ é a sua abelianização — apagar a ordem" },
+ { 10, "a representacao",   "o buraco pode ser invisível numa e visível noutra" },
+};
+static void ponte_resolve(int n){
+    TICK_N = 0;
+    printf("   %d — %s\n", n, PN10[n-1].enunciado);
+    Grafo P = gr_caminho(5), C5 = gr_ciclo(5), C6 = gr_ciclo(6), C8 = gr_ciclo(8);
+    Grafo O = gr_oito(3);
+    switch(n){
+    case 1: case 2:
+        tique7(0, "sejam C₈ o círculo e P₅ a reta, e as vizinhanças de cada ponto");
+        tique7(1, "a lei:");
+        printf("      localmente contráctil $\\ne\\Rightarrow$ globalmente contráctil\n");
+        tique7(2, "e o conteúdo estrutural é este: a obstrução NÃO PRECISA de aparecer em"
+                  " vizinhança nenhuma. Ela pode surgir na COLAGEM das vizinhanças — e"
+                  " quando surge lá, nenhum teste local a encontra");
+        tique7(3, "a lei mede-se num PAR, e é o par que a torna um teorema: um espaço onde"
+                  " o local é contráctil e o global também, e outro onde o local é"
+                  " contráctil e o global NÃO. Sem os dois, «as vizinhanças são"
+                  " contrácteis» não distinguia nada");
+        { long a8 = 0, a5 = 0;
+          for(int v = 0; v < C8.nv; v++) if(gr_contractil(gr_estrela(C8,v))) a8++;
+          for(int v = 0; v < P.nv; v++)  if(gr_contractil(gr_estrela(P,v)))  a5++;
+          printf("      espaço   estrelas locais contrácteis   o TODO contrai?\n");
+          printf("      C₈       %ld de %d                       %s\n",
+                 a8, C8.nv, gr_contractil(C8) ? "sim" : "NÃO");
+          printf("      P₅       %ld de %d                       %s\n",
+                 a5, P.nv, gr_contractil(P) ? "SIM" : "não");
+          printf("      → a mesma resposta LOCAL, respostas GLOBAIS diferentes\n");
+          tique7(4, "a testemunha é a coluna do meio: ela é IGUAL nos dois espaços. Todas"
+                    " as estrelas contrácteis em ambos — e mesmo assim um contrai e o"
+                    " outro não. É a igualdade local que dá força à diferença global");
+          tique7(5, a8 == C8.nv && a5 == P.nv && !gr_contractil(C8) && gr_contractil(P)
+                 ? (n == 2
+                    ? "logo INVARIANTE GLOBAL = INFORMAÇÃO DA COLAGEM: o que distingue os"
+                      " dois espaços não está em ponto nenhum, está em como os pontos se"
+                      " ligam"
+                    : "logo localmente contráctil NÃO implica globalmente contráctil, e o"
+                      " contra-exemplo cabe em oito pontos")
+                 : "os regimes não se separaram — NÃO afirmo");
+          tique7(6, "e a VOLTA é onde isto se conta: a obstrução tem um NÚMERO, e ele é"
+                    " E − V + C. As falas 3 e 4 medem-no por dois caminhos"); }
+        break;
+    case 3: case 4:
+        tique7(0, "seja G um grafo, Λ⁰ as funções nos vértices e Λ¹ as nas arestas");
+        tique7(1, n == 3 ? "o complexo, e é o MESMO d:" : "os dois caminhos:");
+        printf(n == 3 ? "      $(df)(e) = f(\\text{cabeça}) - f(\\text{cauda})$,"
+                        "\\qquad $\\dim H^{1} = E - V + C$\n"
+                      : "      Gauss na incidência\\qquad contra\\qquad a CONTAGEM\n");
+        tique7(2, n == 3
+               ? "e não é uma analogia: (df)(e) = f(b) − f(a) É a derivada exterior de"
+                 " grau 0 — o gradiente — escrita num grafo. A matriz que a realiza é a"
+                 " matriz de INCIDÊNCIA, com −1 na cauda e +1 na cabeça"
+               : "um lado faz ELIMINAÇÃO DE GAUSS na matriz de incidência e conta o posto;"
+                 " o outro CONTA vértices, arestas e componentes. Álgebra linear contra"
+                 " aritmética de inteiros — e não partilham uma linha de código");
+        tique7(3, "a lei é o teorema do posto: dim ker d = C (as constantes por"
+                  " componente), dim im d = V − C, e dim H¹ = dim Λ¹ − dim im d = E − V + C");
+        { long mal = 0;
+          struct { const char *n; Grafo g; } GS[] = {
+              {"caminho P₅", P}, {"ciclo C₅", C5}, {"ciclo C₆", C6}, {"oito", O} };
+          printf("      espaço        V  E  C   ker d  im d   H¹ (Gauss)  E−V+C\n");
+          for(int i = 0; i < 4; i++){
+              Grafo g = GS[i].g;
+              int C = gr_componentes(g);
+              Mat M = gr_incidencia(g);
+              int r = mat_posto(M);
+              printf("      %-13s %-2d %-2d %-3d %-6d %-6d %-11d %d\n",
+                     GS[i].n, g.nv, g.ne, C, g.nv - r, r, g.ne - r, g.ne - g.nv + C);
+              if(g.nv - r != C || g.ne - r != g.ne - g.nv + C) mal++;
+          }
+          tique7(4, "a testemunha são as DUAS últimas colunas: uma sai de eliminar a"
+                    " matriz, a outra de contar três inteiros. Baterem nos quatro espaços"
+                    " é o teorema — se eu tivesse calculado uma A PARTIR da outra, a"
+                    " comparação era vazia");
+          tique7(5, mal == 0
+                 ? "logo dim H¹ = E − V + C, e o buraco tem um número exacto"
+                 : "os caminhos separam-se — NÃO afirmo");
+          tique7(6, "e a VOLTA é que este número é o MESMO do posto de π₁ do andar"
+                    " anterior — a cohomologia e a homotopia contam o mesmo buraco, e a"
+                    " fala 9 diz o que as separa"); }
+        break;
+    case 5:
+        tique7(0, "seja C₅ o ciclo e ω a cocadeia que vale 1 em cada aresta");
+        tique7(1, "ela NÃO é exacta, e a razão é uma soma:");
+        printf("      $\\sum_{\\text{ciclo}} \\omega = 5 \\neq 0$,\\qquad e toda exacta"
+               " soma ZERO\n");
+        tique7(2, "porque toda cocadeia exacta TELESCOPA: se ω = df, então somar ao longo"
+                  " de um ciclo dá f(v₀) − f(v₀) = 0. Uma soma não nula é uma obstrução"
+                  " EXIBIDA, e não uma afirmação de que existe");
+        tique7(3, "a lei é que «ω = df» é uma FIBRA: dado ω, achar f. Constrói-se f"
+                  " propagando pelas arestas, e depois CONFERE-SE em todas — incluindo as"
+                  " que fecham ciclos. É a conferência que decide, e é ela a volta");
+        { Qz w[HT_E], f[HT_V];
+          for(int e = 0; e < C5.ne; e++) w[e] = qz(1,1);
+          int ex = gr_potencial(C5, w, f);
+          Qz s = gr_soma_cocadeia(C5, w);
+          Qz g0[HT_V], we[HT_E], f2[HT_V];
+          for(int v = 0; v < C5.nv; v++) g0[v] = qz_de_inteiro(v*v % 7);
+          for(int e = 0; e < C5.ne; e++)
+              we[e] = qz_soma(g0[C5.b[e]], qz_oposto(g0[C5.a[e]]));
+          int ex2 = gr_potencial(C5, we, f2);
+          long achou = 0, casos = 0;
+          for(long sd = 1; sd <= 40; sd++){
+              Qz wt[HT_E], ft[HT_V];
+              for(int e = 0; e < P.ne; e++){
+                  long h = sd*1103515245L + e*12345L + 7; h ^= h >> 13;
+                  wt[e] = qz_de_inteiro(h % 11 - 5);
+              }
+              if(gr_potencial(P, wt, ft)) achou++;
+              casos++;
+          }
+          printf("      no ciclo C₅, ω ≡ 1:   soma = "); esc_qz("", s, "");
+          printf("   e o potencial: %s\n", ex ? "ACHADO (mau)" : "RECUSADO");
+          printf("      e uma ω construída como df: potencial %s\n",
+                 ex2 ? "achado" : "NÃO achado");
+          printf("      CONTROLO na ÁRVORE P₅: %ld de %ld cocadeias aleatórias são"
+                 " exactas\n", achou, casos);
+          tique7(4, "a testemunha tem TRÊS partes, e as três são precisas: a soma 5 ≠ 0"
+                    " (logo não pode ser exacta), a busca do potencial a RECUSAR, e o"
+                    " controlo em dois sentidos — uma ω que É df é achada, e na árvore"
+                    " todas as 40 aleatórias são exactas, porque lá não há ciclo onde a"
+                    " soma possa não fechar");
+          tique7(5, !ex && ex2 && achou == casos && s.p == 5
+                 ? "logo a obstrução é EXIBIDA e não afirmada — e ela é o análogo discreto"
+                   " da forma do ângulo, que cabe num grafo de cinco vértices"
+                 : "os controlos não separaram — NÃO afirmo");
+          tique7(6, "e a VOLTA é a fibra: «ω = df» tem solução exactamente onde não há"
+                    " ciclo com soma não nula. É a mesma fibra do potencial do Cálculo III"
+                    " e a mesma que a tabela de fechos do Peano isola no caso b = 0"); }
+        break;
+    case 6: case 7: case 8:
+        tique7(0, n == 6 ? "seja a cadeia C₁ →∂ C₀ do grafo"
+             : n == 7 ? "seja o complexo graduado Λ⁰ →d Λ¹ →d ⋯"
+                      : "sejam ∂ e d, e a matriz de incidência");
+        tique7(1, n == 6 ? "a face DISCRETA — ciclo menos borda:"
+             : n == 7 ? "a face GRADUADA — fechada menos exacta:"
+                      : "a adjunção, em coordenadas:");
+        printf(n == 6 ? "      $H_1 = \\ker\\partial_1 / \\operatorname{im}\\partial_2$"
+                        ",\\qquad e num grafo NÃO HÁ $\\partial_2$\n"
+             : n == 7 ? "      $H^k = \\ker(d) / \\operatorname{im}(d)$\n"
+                      : "      $\\partial$ é a TRANSPOSTA de $d$\n");
+        tique7(2, n == 6
+               ? "e é esta a face de Peano, que é a realização DISCRETA: o ciclo é o que"
+                 " tem borda nula, ker ∂₁. Num grafo não há 2-células, logo im ∂₂ = 0 e"
+                 " H₁ = ker ∂₁ EXACTAMENTE — o quociente não tem denominador"
+             : n == 7
+               ? "e esta é a face do estelar, a realização GRADUADA: d² = 0 garante"
+                 " im d ⊆ ker d, e a pergunta é se PREENCHE. Num domínio em estrela"
+                 " preenche (Poincaré) e H¹ = 0 — é o regime dos polinómios, e é por isso"
+                 " que lá o buraco não aparecia"
+               : "e a adjunção ∂ ⊣ d, que este sistema já tinha provado pelo"
+                 " emparelhamento da integração, aqui vê-se em coordenadas: ∂ é"
+                 " literalmente a matriz de incidência TRANSPOSTA. A mesma tabela, lida ao"
+                 " contrário");
+        tique7(3, "a lei é que o posto de uma matriz é o da sua transposta — e é ela que"
+                  " faz os dois lados dar o mesmo número sem que nenhum saiba do outro");
+        { long mal = 0;
+          struct { const char *n; Grafo g; } GS[] = {
+              {"caminho P₅", P}, {"ciclo C₅", C5}, {"ciclo C₆", C6}, {"oito", O} };
+          printf("      espaço        ker ∂₁ (ciclos)  H¹ (cocadeias)  posto π₁\n");
+          for(int i = 0; i < 4; i++){
+              Grafo g = GS[i].g;
+              Mat M = gr_incidencia(g), Mt = mat_transposta(M);
+              int h1 = g.ne - mat_posto(M);
+              int ci = g.ne - mat_posto(Mt);
+              int p1 = gr_posto(g);
+              printf("      %-13s %-16d %-15d %d\n", GS[i].n, ci, h1, p1);
+              if(!(ci == h1 && h1 == p1)) mal++;
+          }
+          tique7(4, "a testemunha são TRÊS contagens independentes a dar o mesmo número:"
+                    " os ciclos (núcleo de ∂), as cocadeias (H¹ por eliminação) e a árvore"
+                    " geradora (posto de π₁). Nenhuma sabe das outras");
+          tique7(5, mal == 0
+                 ? (n == 8
+                    ? "logo ∂ e d são adjuntos, e é a adjunção que explica por que os dois"
+                      " lados contam o mesmo"
+                    : n == 6
+                    ? "logo CICLO MENOS BORDA É CLASSE, e no grafo a borda é zero — o"
+                      " ciclo já é a classe"
+                    : "logo FECHADA MENOS EXACTA É COHOMOLOGIA, e é a mesma frase lida na"
+                      " outra linguagem")
+                 : "as contagens divergem — NÃO afirmo");
+          tique7(6, "e a VOLTA são as duas frases lado a lado, que é como as três camadas"
+                    " ficam alinhadas: CICLO − BORDA = CLASSE no discreto, e FECHADA −"
+                    " EXACTA = COHOMOLOGIA no graduado. A mesma construção, dois nomes"); }
+        break;
+    case 9:
+        tique7(0, "seja o oito, com os dois laços a e b");
+        tique7(1, "π₁ é não abeliano; H₁ é a sua abelianização:");
+        printf("      $\\pi_1$ LIVRE de posto 2,\\qquad $H_1 = \\mathbb{Z}^{2}$\n");
+        tique7(2, "e a passagem de um ao outro é APAGAR A ORDEM. Os dois têm a mesma"
+                  " contagem — 2 —, e estruturas diferentes: no grupo livre ab ≠ ba, e em"
+                  " ℤ² são iguais. O comutador aba⁻¹b⁻¹ não se reduz em π₁ e morre em H₁");
+        tique7(3, "a lei é que a cohomologia é a versão LINEARIZADA do mesmo fenómeno: ela"
+                  " vê QUANTOS buracos há, e π₁ vê também COMO eles se enrolam uns nos"
+                  " outros. O invariante mais grosso é mais fácil de calcular e vê menos");
+        { int A[] = {1}, B[] = {2};
+          Pal a = pal_de(A,1), b = pal_de(B,1);
+          Pal ab = pal_junta(a,b), ba = pal_junta(b,a);
+          Pal com = pal_junta(pal_junta(a,b), pal_junta(pal_inversa(a), pal_inversa(b)));
+          int na, nb;
+          pal_abeliana(com, &na, &nb);
+          Mat M = gr_incidencia(O);
+          int h1 = O.ne - mat_posto(M);
+          printf("      posto π₁ = %d (livre, NÃO abeliano);   dim H₁ = %d (abeliano)\n",
+                 gr_posto(O), h1);
+          printf("      ab = ba em π₁?               %s\n", pal_igual(ab,ba) ? "sim" : "não");
+          printf("      o comutador é trivial em π₁?  %s\n",
+                 pal_trivial(com) ? "sim" : "não");
+          printf("      e a sua imagem em H₁:         (%d, %d)   ← morre\n", na, nb);
+          tique7(4, "a testemunha é o comutador nos DOIS sítios: não trivial em π₁ (não se"
+                    " reduz) e nulo em H₁ (a abelianização apaga-o). É a medida exacta do"
+                    " que a linearização PERDE");
+          tique7(5, !pal_igual(ab,ba) && !pal_trivial(com) && na == 0 && nb == 0
+                       && gr_posto(O) == h1
+                 ? "logo π₁ dá a realização NÃO LINEAR e H₁ a LINEARIZADA, com a mesma"
+                   " contagem e informação diferente"
+                 : "os dois não se separaram — NÃO afirmo");
+          tique7(6, "e a VOLTA é a escolha do invariante: H₁ é mais fácil (é álgebra"
+                    " linear) e vê menos; π₁ é mais difícil (é combinatória de palavras) e"
+                    " vê mais. Nenhum dos dois é o certo — o certo depende do que se quer"
+                    " distinguir"); }
+        break;
+    case 10:
+        tique7(0, "seja a mesma obstrução, em duas representações");
+        tique7(1, "a consequência metodológica:");
+        printf("      o buraco pode ser INVISÍVEL numa representação e aparecer"
+               " imediatamente noutra\n");
+        tique7(2, "e não é uma observação — é uma EXIGÊNCIA que este sistema passa a fazer"
+                  " a si próprio. No andar das formas eu medi d² = 0 e o lema de Poincaré"
+                  " em ℚ[x,y,z], e concluí honestamente que ali toda fechada é exacta. A"
+                  " conclusão estava certa e era PARCIAL: a testemunha clássica — a forma"
+                  " do ângulo (−y dx + x dy)/(x²+y²) — não é polinomial, e por isso não"
+                  " vivia naquele anel");
+        tique7(3, "a lei é que a ausência de contra-exemplo NUMA representação não é"
+                  " ausência de contra-exemplo. É a mesma regra do gume automático: não"
+                  " achar não conclui — e aqui ela aplica-se à escolha do próprio"
+                  " ambiente onde se procura");
+        { Qz w[HT_E], f[HT_V];
+          for(int e = 0; e < C5.ne; e++) w[e] = qz(1,1);
+          int ex = gr_potencial(C5, w, f);
+          Mat M = gr_incidencia(C5);
+          int h1 = C5.ne - mat_posto(M);
+          printf("      representação              o buraco aparece?\n");
+          printf("      ℚ[x,y,z] (polinómios)      NÃO — o domínio é estrelado, e a\n");
+          printf("                                 testemunha não é polinomial\n");
+          printf("      grafo C₅ (combinatória)    SIM — dim H¹ = %d, e a testemunha é\n",
+                 h1);
+          printf("                                 ω ≡ 1, com potencial %s\n",
+                 ex ? "achado" : "RECUSADO");
+          printf("      → foi o salto ℚ[x,y,z] ⟶ grafo, e o buraco cabe em 5 vértices\n");
+          tique7(4, "a testemunha é o PAR de representações com a MESMA pergunta: numa a"
+                    " resposta é «não há» e na outra é «há, e é este». Não mudou a"
+                    " matemática — mudou o sítio onde se procurou");
+          tique7(5, h1 == 1 && !ex
+                 ? "logo NÃO BASTA PROVAR QUE EXISTE UM BURACO: é preciso descobrir em que"
+                   " REPRESENTAÇÃO ele aparece. E a recíproca é a que morde — não achar"
+                   " numa representação não prova que não exista"
+                 : "as representações não se separaram — NÃO afirmo");
+          tique7(6, "e a VOLTA é a camada que isto acrescenta ao método desta casa: às"
+                    " perguntas «que entrada faria isto falhar?» e «este ramo chega a"
+                    " correr?» junta-se agora «em que representação é que o defeito seria"
+                    " visível?». É a mesma família de perguntas, um nível acima"); }
+        break;
+    }
+}
+static int resolve_ponte(const char *f){
+    const char *p = f;
+    for(size_t i = 0; i < sizeof PN10/sizeof *PN10; i++)
+        if(!strcmp(p, PN10[i].nome)){ ponte_resolve(PN10[i].n); return 1; }
+    if(!strncmp(p, "ponte", 5)) p += 5;
+    else if(!strncmp(p, "cohomologia", 11)) p += 11;
+    else return 0;
+    while(*p == ' ') p++;
+    if(!*p){
+        printf("   A ponte para a cohomologia — «ponte N» ou «ponte <nome>»\n");
+        printf("   localmente contráctil ⇏ globalmente contráctil\n\n");
+        for(size_t i = 0; i < sizeof PN10/sizeof *PN10; i++){
+            printf("     %2d  ", PN10[i].n);
+            esc_col(PN10[i].nome, 22);
+            printf("  %s\n", PN10[i].enunciado);
+        }
+        return 1;
+    }
+    if(*p >= '0' && *p <= '9'){
+        long n = 0;
+        while(*p >= '0' && *p <= '9') n = n*10 + (*p++ - '0');
+        while(*p == ' ') p++;
+        if(!*p && n >= 1 && n <= 10){ ponte_resolve((int)n); return 1; }
+        return 0;
+    }
+    return 0;
+}
 /* ── HOMOTOPIA: O BURACO QUE NENHUM PONTO VÊ ────────────────────────────────────────
  * O `eval.txt` põe o desafio numa frase: «o círculo força a distinguir LOCALMENTE IGUAL
  * ≠ GLOBALMENTE IGUAL. A reta pode ser contraída a um ponto; o círculo não. Aí vamos
@@ -14350,6 +14670,7 @@ static int resolve_mostra(const char *f){ return resolve_mostra_em(f, "../papers
 static int resolve_simbolico(const char *fala){
     if(resolve_divisibilidade(fala)) return 1;     /* o relógio de 6 ticks */
     if(resolve_bezout(fala)) return 1;             /* a testemunha e o critério */
+    if(resolve_ponte(fala)) return 1;              /* a ponte para a cohomologia, os 10 */
     if(resolve_homo(fala)) return 1;               /* homotopia: o buraco, os 14 */
     if(resolve_topo(fala)) return 1;               /* topologia sem régua, os 20 */
     if(resolve_metrico(fala)) return 1;            /* espaços métricos, os 16 */
@@ -15399,6 +15720,145 @@ static int teste(void){
                 if(e_conta(nu2)) roubadas++;
             }
             ok("e a membrana nao rouba o corpus: fala sem LaTeX nao vira conta", roubadas == 0);
+
+        /* ═══ §C49 A PONTE PARA A COHOMOLOGIA, nas três camadas ══════════════════
+         * A lei é «localmente contráctil ⇏ globalmente contráctil», e a contagem é a
+         * realização — eu tinha trocado as duas. E as três camadas ficam alinhadas:
+         * Universal (obstrução global), Peano (ker ∂/im ∂), Estelar (ker d/im d). */
+        printf("\n§C49 A PONTE: local ⇏ global, e o buraco contado de três modos.\n\n");
+        {
+            Grafo P = gr_caminho(5), C5 = gr_ciclo(5), C6 = gr_ciclo(6), C8 = gr_ciclo(8);
+            Grafo O = gr_oito(3);
+
+            /* (1) A LEI: local ⇏ global, medida no PAR */
+            { long a8 = 0, a5 = 0;
+              for(int v = 0; v < C8.nv; v++) if(gr_contractil(gr_estrela(C8,v))) a8++;
+              for(int v = 0; v < P.nv; v++)  if(gr_contractil(gr_estrela(P,v)))  a5++;
+              printf("      C₈: %ld/%d estrelas contrácteis, todo %s;   P₅: %ld/%d, todo %s\n",
+                     a8, C8.nv, gr_contractil(C8) ? "contrai" : "NÃO contrai",
+                     a5, P.nv, gr_contractil(P) ? "CONTRAI" : "não contrai");
+              ok("LOCALMENTE CONTRÁCTIL ⇏ GLOBALMENTE CONTRÁCTIL, e a formulação é do"
+                 " coordenador — eu tinha posto a CONTAGEM como enunciado, e a contagem é"
+                 " a realização. A lei é que a obstrução não precisa de aparecer em"
+                 " vizinhança nenhuma: pode surgir na COLAGEM. E a coluna do meio é IGUAL"
+                 " nos dois espaços — é a igualdade local que dá força à diferença global."
+                 " Donde: INVARIANTE GLOBAL = INFORMAÇÃO DA COLAGEM",
+                 a8 == C8.nv && a5 == P.nv && !gr_contractil(C8) && gr_contractil(P)); }
+
+            /* (2) TRÊS contagens independentes, um só número */
+            { long mal = 0;
+              Grafo GS[] = { P, C5, C6, O };
+              for(int i = 0; i < 4; i++){
+                  Mat M = gr_incidencia(GS[i]), Mt = mat_transposta(M);
+                  int h1 = GS[i].ne - mat_posto(M);
+                  int ci = GS[i].ne - mat_posto(Mt);
+                  int p1 = gr_posto(GS[i]);
+                  int cn = GS[i].ne - GS[i].nv + gr_componentes(GS[i]);
+                  if(!(ci == h1 && h1 == p1 && p1 == cn)) mal++;
+              }
+              printf("      ciclos (ker ∂), cocadeias (H¹), árvore (π₁) e contagem (E−V+C)"
+                     " nos 4 espaços: %ld divergências\n", mal);
+              ok("QUATRO CONTAGENS INDEPENDENTES E UM SÓ NÚMERO: o núcleo de ∂ por"
+                 " eliminação na transposta, o H¹ por eliminação na incidência, o posto de"
+                 " π₁ por árvore geradora, e E − V + C por aritmética. Nenhuma sabe das"
+                 " outras — e é a ADJUNÇÃO ∂ ⊣ d que explica por que as duas primeiras"
+                 " batem: ∂ é literalmente a transposta de d, a mesma tabela lida ao"
+                 " contrário",
+                 mal == 0); }
+
+            /* (3) A TESTEMUNHA e os controlos */
+            { Qz w[HT_E], f[HT_V];
+              for(int e = 0; e < C5.ne; e++) w[e] = qz(1,1);
+              int ex = gr_potencial(C5, w, f);
+              Qz s = gr_soma_cocadeia(C5, w);
+              Qz g0[HT_V], we[HT_E], f2[HT_V];
+              for(int v = 0; v < C5.nv; v++) g0[v] = qz_de_inteiro(v*v % 7);
+              for(int e = 0; e < C5.ne; e++)
+                  we[e] = qz_soma(g0[C5.b[e]], qz_oposto(g0[C5.a[e]]));
+              int ex2 = gr_potencial(C5, we, f2);
+              long achou = 0, casos = 0;
+              for(long sd = 1; sd <= 40; sd++){
+                  Qz wt[HT_E], ft[HT_V];
+                  for(int e = 0; e < P.ne; e++){
+                      long h = sd*1103515245L + e*12345L + 7; h ^= h >> 13;
+                      wt[e] = qz_de_inteiro(h % 11 - 5);
+                  }
+                  if(gr_potencial(P, wt, ft)) achou++;
+                  casos++;
+              }
+              printf("      ω ≡ 1 em C₅: soma ");
+              esc_qz("", s, "");
+              printf(", potencial %s;  ω = df: %s;  árvore: %ld/%ld exactas\n",
+                     ex ? "ACHADO" : "recusado", ex2 ? "achado" : "NÃO",
+                     achou, casos);
+              ok("A OBSTRUÇÃO É EXIBIDA, NÃO AFIRMADA: no ciclo, ω ≡ 1 soma 5 ≠ 0, e toda"
+                 " cocadeia exacta TELESCOPA para zero — logo não é exacta, e a busca do"
+                 " potencial recusa. «ω = df» é uma FIBRA, e ela é vazia exactamente onde"
+                 " há ciclo. E o controlo separa nos dois sentidos: uma ω que É df é"
+                 " achada, e na ÁRVORE as 40 aleatórias são todas exactas",
+                 !ex && ex2 && achou == casos && s.p == 5); }
+
+            /* (4) π₁ NÃO LINEAR contra H₁ LINEARIZADO */
+            { int A[] = {1}, B[] = {2};
+              Pal a = pal_de(A,1), b = pal_de(B,1);
+              Pal ab = pal_junta(a,b), ba = pal_junta(b,a);
+              Pal com = pal_junta(pal_junta(a,b), pal_junta(pal_inversa(a), pal_inversa(b)));
+              int na, nb;
+              pal_abeliana(com, &na, &nb);
+              Mat M = gr_incidencia(O);
+              int h1 = O.ne - mat_posto(M);
+              printf("      oito: posto π₁ = %d (não abeliano), dim H₁ = %d (abeliano);"
+                     " comutador em H₁ = (%d,%d)\n", gr_posto(O), h1, na, nb);
+              ok("π₁ DÁ A VERSÃO NÃO LINEAR E H₁ A LINEARIZADA, e a passagem é APAGAR A"
+                 " ORDEM. Mesma contagem (2), estruturas diferentes: em π₁ ab ≠ ba e o"
+                 " comutador não se reduz; em H₁ ele morre em (0,0). A cohomologia vê"
+                 " QUANTOS buracos há; π₁ vê também COMO se enrolam. O invariante mais"
+                 " grosso é mais fácil de calcular e vê menos",
+                 !pal_igual(ab,ba) && !pal_trivial(com) && na == 0 && nb == 0
+                 && gr_posto(O) == h1); }
+
+            /* (5) A REPRESENTAÇÃO — a exigência nova */
+            { Qz w[HT_E], f[HT_V];
+              for(int e = 0; e < C5.ne; e++) w[e] = qz(1,1);
+              int ex = gr_potencial(C5, w, f);
+              Mat M = gr_incidencia(C5);
+              int h1 = C5.ne - mat_posto(M);
+              printf("      ℚ[x,y,z]: o buraco NÃO aparece;  grafo C₅: dim H¹ = %d e a"
+                     " testemunha é ω ≡ 1 (%s)\n", h1, ex ? "achado" : "recusado");
+              ok("O BURACO PODE SER INVISÍVEL NUMA REPRESENTAÇÃO E APARECER NOUTRA — e isto"
+                 " é uma EXIGÊNCIA nova que a casa passa a fazer a si própria, não uma"
+                 " observação. No andar das formas medi o lema de Poincaré em ℚ[x,y,z] e"
+                 " concluí que ali toda fechada é exacta: certo, e PARCIAL — a testemunha"
+                 " clássica não é polinomial. Não basta provar que existe obstrução: é"
+                 " preciso descobrir EM QUE REPRESENTAÇÃO ela aparece. E às perguntas «que"
+                 " entrada faria isto falhar?» e «este ramo chega a correr?» junta-se agora"
+                 " «em que representação seria o defeito visível?»",
+                 h1 == 1 && !ex); }
+
+            /* E OS DEZ CORREM */
+            { int vmal = 0, por_n = 0, por_nome = 0;
+              fflush(stdout);
+              int guarda = dup(1), nulo = open("/dev/null", O_WRONLY);
+              if(guarda >= 0 && nulo >= 0) dup2(nulo, 1);
+              for(int k = 1; k <= 10; k++){
+                  char fala[64];
+                  snprintf(fala, sizeof fala, "ponte %d", k);
+                  if(resolve_ponte(fala)) por_n++; else vmal++;
+              }
+              for(size_t i = 0; i < sizeof PN10/sizeof *PN10; i++)
+                  if(resolve_ponte(PN10[i].nome)) por_nome++; else vmal++;
+              if(resolve_ponte("ponte 11")) vmal++;
+              fflush(stdout);
+              if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
+              if(nulo >= 0) close(nulo);
+              printf("      os dez: %d por número, %d por nome\n", por_n, por_nome);
+              ok("O TEOREMA ESTÁ PROMOVIDO À ASSISTENTE em dez falas, e as três camadas"
+                 " ficam alinhadas com as duas frases lado a lado: CICLO − BORDA = CLASSE"
+                 " no discreto (Peano, ker ∂/im ∂) e FECHADA − EXACTA = COHOMOLOGIA no"
+                 " graduado (Estelar, ker d/im d), com o Universal a ter a lei — a"
+                 " obstrução global à contração",
+                 vmal == 0 && por_n == 10 && por_nome == 10); }
+        }
 
         /* ═══ §C48 HOMOTOPIA: O BURACO QUE NENHUM PONTO VÊ ═══════════════════════
          * «O círculo força a distinguir LOCALMENTE IGUAL ≠ GLOBALMENTE IGUAL. Vamos
