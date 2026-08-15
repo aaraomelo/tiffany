@@ -57,6 +57,7 @@
 - [A escada do diabo](project-escada-do-diabo.md) — 1/2 é o patamar mais largo; e um revisor apanhou DUAS frases falsas publicadas, incluindo «os convergentes do áureo encolhem mais depressa», que é o contrário.
 - [O fator de potência é a régua](project-fator-de-potencia.md) — |det|=1, fator unitário e inversa inteira são TRÊS NOMES da mesma condição. O motor quer fp=1, o tecido quer fp=0.
 - [O corpo quântico e o cósmico](project-quantico-cosmico.md) — [σi,σj]=2i·ε·σk É o produto cruzado. E: CHAMEI LEI À CONSEQUÊNCIA DE UMA ESCOLHA MINHA (Carnot). Gatilho: que parâmetros do teorema fui eu que escolhi?
+- **[Cálculo I exacto](project-calculo-exacto.md)** — `(f(a+h)−f(a))/h` **É** um polinómio em h, logo a derivada é uma AVALIAÇÃO e não um limite; e a casa já derivava exacto pela parte ε do dual. O ponto do Valor Médio pode ser IRRACIONAL, e isso não é falha.
 - **[A torre: Hurwitz e Gentil](project-torre-hurwitz-gentil.md)** — o eval dos hipercomplexos é METADE (o discreto). Gentil é o contínuo SEM grau, Lebesgue a soma reversível que os casa, e o tecto de 8 é da NORMA, não do objecto.
 - **[O fecho do dual: Lagrange](project-o-fecho-do-dual-lagrange.md)** — directo² + cruzado² = N(u)N(v). A casa tinha o split num paper e a conservação da norma noutro, e nunca escreveu que são a MESMA frase; e o degrau 4 de Hurwitz é onde o escalar arranja lugar.
 - [O WHERE é o corpo mórfico](project-where-morfico.md) — erosão/dilatação são o par dual: erode-se para escolher, dilata-se para escrever.
