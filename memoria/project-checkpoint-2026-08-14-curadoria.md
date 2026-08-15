@@ -278,3 +278,18 @@ Ver [[feedback-varrer-onde-nada-pode-falhar]].
 E a segunda, no mesmo sítio: **«0 choques» podia ser um detetor avariado**. Um contador de
 desacordos precisa de um caso FORJADO que o obrigue a disparar, senão o zero não distingue
 «concordam» de «não estou a olhar».
+
+
+### Teoria dos números: os dezassete (`7cadf01`, interno 179:0)
+
+Os 17 exercícios correm na assistente. A descoberta que organiza o andar — **Euclides =
+MDC = Bézout = FC é a MESMA descida lida em colunas diferentes** — está em
+[[project-teoria-dos-numeros]].
+
+**A asserção minha que caiu, e estava certa a cair**: «todo convergente é a melhor
+aproximação do seu denominador» — falso em j = 0. Não alarguei o enunciado para o salvar:
+nomeei a exceção e medi-a nos dois sentidos.
+
+**E a regra nova**: [[feedback-o-ramo-que-nunca-corre]] — duas mutações sobreviveram por
+causas DIFERENTES (ramo inalcançável com os meus dados vs. guarda redundante), e só o
+programa mínimo de dez linhas distinguiu uma da outra.
