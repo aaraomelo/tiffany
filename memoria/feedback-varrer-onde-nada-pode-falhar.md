@@ -23,6 +23,13 @@ viveria**, e varrer LÁ — normalmente é o regime *pobre* (esforço baixo, dad
 precisão pequena), não o rico. A cura foi varrer quatro esforços (1, 2, 5, 14): os
 baixos trazem 11952 indecisos e a mutação morre na hora.
 
+**A forma mais traiçoeira: o objeto SIMÉTRICO.** Medi «normal ⟺ gH = Hg» em ℤ₁₂, que é
+ABELIANO — lá todo subgrupo é normal e os dois lados coincidem sempre. A varredura era
+completa e não distinguia nada; apagar a conjugação sobrevivia. O mesmo com «corpo ⟹
+domínio tem um sentido só» varrido em ℤₘ, onde vale a equivalência. **Quando o teorema
+afirma uma ASSIMETRIA, o exemplo tem de ser assimétrico** — S₃ em vez de ℤ₁₂, ℤ em vez de
+ℤₘ. Ver [[project-algebra-moderna-sete-ticks]].
+
 E o segundo defeito da mesma família, no mesmo sítio: **«0 choques» podia ser um detetor
 avariado**, e um detetor avariado dá sempre 0. Um contador de desacordos precisa de um
 **caso forjado** que o obrigue a disparar — sem isso, o zero não distingue «concordam» de

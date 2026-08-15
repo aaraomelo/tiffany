@@ -309,3 +309,20 @@ andar «analítico» inteiro em aritmética exata.
 de ordem PRIMA (caso degenerado — troquei para #E = 24 com sete ordens), e uma testemunha
 saía por estrear a imprimir memória com a asserção verde
 ([[feedback-o-destino-rotativo]], quarta forma da mesma família).
+
+
+### Álgebra moderna: a espinha de sete ticks (`81a69e8`, interno 204:0)
+
+Ele passou a exigir a FORMA, e ela é a entrega: **hipóteses → definição → transição → lei
+usada → testemunha → conclusão → volta**, com a definição em **LaTeX** no seu tick, e a
+razão dita — «não medir só a conclusão». Detalhe em
+[[project-algebra-moderna-sete-ticks]].
+
+Isso mudou o código: cada elo das cadeias passou a ter asserção própria, Lagrange mede-se
+pela PARTIÇÃO, e o isomorfismo é PROCURADO em vez de declarado.
+
+**A lição de medição do andar** — e é a forma mais traiçoeira do
+[[feedback-varrer-onde-nada-pode-falhar]]: eu media «normal ⟺ gH = Hg» em ℤ₁₂, que é
+ABELIANO, e «corpo ⟹ domínio tem um sentido só» em ℤₘ, onde vale a equivalência. Varreduras
+completas em objetos onde o teorema **não distingue nada**. Regra: **teorema sobre
+assimetria pede exemplo assimétrico** — S₃ em vez de ℤ₁₂, ℤ em vez de ℤₘ.
