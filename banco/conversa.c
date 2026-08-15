@@ -40,6 +40,7 @@
 #include "naturais.h"   /* o chão: Peano, e os instrumentos demonstrados */
 #include "inteiros.h"   /* Z: e o que eles acrescentam é a reversibilidade */
 #include "racionais.h"  /* Q: a reversibilidade da multiplicacao nao nula */
+#include "reais.h"      /* R: o real e o CORTE, e nunca um decimal */
 #include "eletrico.h"
 
 typedef struct { long a, b; } Slot;
@@ -680,9 +681,15 @@ static int quadrado_perfeito(long n, long *r){
     if(s * s != n) return 0;
     *r = s; return 1;
 }
+/* O DESTINO É ROTATIVO, E A ROTAÇÃO TEM TAMANHO. Duas vezes escrevi mais de FRAC2_N
+ * chamadas num único `printf` e a última sobrescreveu a primeira: a linha saiu com o
+ * número errado e nenhuma asserção o viu, porque as asserções leem os valores e não o
+ * texto. O guarda é do lado da FONTE — `tools/bench_destino.sh` conta as chamadas por
+ * `printf` e recusa acima de FRAC2_N. A regra: uma chamada por `printf`, ou contar. */
+#define FRAC2_N 4
 static const char *frac2(long p, long q){    /* ct_reduz + ct_escreve, destino rotativo */
-    static char buf[4][80]; static int k = 0;
-    char *o = buf[k++ & 3];
+    static char buf[FRAC2_N][80]; static int k = 0;
+    char *o = buf[k++ % FRAC2_N];
     if(q < 0){ p = -p; q = -q; }
     ct_reduz(&p, &q);                       /* a redução também é da casa */
     ct_escreve(p, q, o, 80);
@@ -1333,6 +1340,173 @@ static int resolve_bezout(const char *f){
            xs, ys, a, xs, b, ys, a*xs + b*ys,
            a*xs + b*ys == c ? "(resíduo 0)" : "— NÃO afirmo");
     return 1;
+}
+/* ── ℝ ──────────────────────────────────────────────────────────────────────────────
+ * «O racional fornece as marcações; o real preenche os cortes entre elas.»
+ *
+ * Aqui a assistente não pode ter um decimal em lado nenhum, e não é disciplina: é a
+ * MATÉRIA do andar. Um decimal afirmaria que o real é uma tira de casas; o corte diz que
+ * ele é a DECISÃO sobre cada racional. A saída mostra os três caminhos e faz-lhes a
+ * volta um contra o outro. */
+static long le_natural(const char **q){
+    while(**q && (**q < '0' || **q > '9')) (*q)++;
+    long n = 0; int tem = 0;
+    while(**q >= '0' && **q <= '9'){ n = n*10 + (*(*q)++ - '0'); tem = 1; }
+    return tem ? n : -1;
+}
+static int resolve_reais(const char *f){
+    const char *p = f;
+
+    /* «prova que raiz de 2 nao é racional» — o exercício 13, e o gume é o 4 */
+    { int quer = 0;
+      if(!strncmp(p, "prova que raiz", 14)) quer = 1;
+      else if(!strncmp(p, "prova que a raiz", 16)) quer = 1;
+      else if(!strncmp(p, "raiz de 2 é irracional", 23)) quer = 1;
+      if(quer){
+        const char *q = p;
+        long a = le_natural(&q);
+        if(a < 2) a = 2;
+        TICK_N = 0;
+        long r = raizi(a);
+        int perfeito = (r*r == a);
+        printf("   √%ld ∉ ℚ ?\n", a);
+        tique("HIPÓTESE — suponha-se que sim: √a = p/q com a fração REDUZIDA, isto é,"
+              " gcd(p,q) = 1. É a forma reduzida que carrega a prova toda");
+        tique("QUADRADO — elevar os dois lados tira a raiz e deixa só inteiros");
+        printf("      p²/q² = %ld,  logo  p² = %ld·q²\n", a, a);
+        tique("EXPOENTES — e é aqui que a prova decide, para qualquer a e não só para o 2:"
+              " num QUADRADO todo expoente primo é PAR (o de p² é o dobro do de p, o de q²"
+              " o dobro do de q). Logo o expoente de cada primo em a = p²/q² é par também");
+        { long pr[NT_FAT]; int ex[NT_FAT];
+          int k = nt_fatora(a, pr, ex, NT_FAT), impar = -1;
+          printf("      %ld = ", a);
+          for(int i = 0; i < k; i++){
+              printf("%s%ld", i ? "·" : "", pr[i]);
+              if(ex[i] > 1) printf("^%d", ex[i]);
+              if(ex[i] % 2) impar = i;
+          }
+          printf("   (e a volta: %ld)\n", nt_refaz(pr, ex, k));
+          if(impar < 0){
+              tique("CONTRAEXEMPLO — e a prova PARA aqui: TODOS os expoentes são pares,"
+                    " logo a é quadrado perfeito e a raiz É racional. Não há nada a"
+                    " refutar, e é este o gume — uma cadeia que corresse na mesma"
+                    " provaria o falso");
+              printf("      √%ld = %ld = %ld/1, e a hipótese não leva a contradição nenhuma\n",
+                     a, r, r);
+              return 1;
+          }
+          printf("      o primo %ld tem expoente %d, que é ÍMPAR — é ele a testemunha\n",
+                 pr[impar], ex[impar]); }
+        tique("CONTRADIÇÃO — um expoente ímpar não pode ser a diferença de dois pares."
+              " Logo não há fração nenhuma, e o corte fica sem ponto em ℚ");
+        printf("      √%ld ∉ ℚ\n", a);
+        if(a == 2){
+            tique("E A DESCIDA, que é a mesma coisa vista pela paridade: p² = 2q² faz p"
+                  " par (ímpar² é ímpar), p = 2k dá 4k² = 2q², isto é q² = 2k², e o mesmo"
+                  " faz q par — os dois pares contra gcd(p,q) = 1");
+            { int impar_par = 0;
+              for(long k = 1; k <= 99; k += 2) if((k*k) % 2 == 0) impar_par++;
+              printf("      ímpar² é ímpar em 50 casos varridos: %s\n",
+                     impar_par == 0 ? "sempre (nenhum contraexemplo)" : "FALHOU"); }
+        }
+        tique("VOLTA — e a ausência confirma-se por varredura: nenhum p/q com q pequeno"
+              " cai EM CIMA do corte, e a fronteira aperta sem nunca fechar");
+        { long em_cima = 0, total = 0; Qz lo = qz(0,1), hi = qz_de_inteiro(r+1);
+          for(long d = 1; d <= 80; d++) for(long pp = 1; pp <= (r+1)*d; pp++){
+              Qz x = qz(pp,d); int bom, s = rz_cmp(x, 2, a, &bom);
+              if(!bom) continue;
+              total++;
+              if(s == 0) em_cima++;
+              if(s < 0 && qz_menor(lo, x)) lo = x;
+              if(s > 0 && qz_menor(x, hi)) hi = x;
+          }
+          printf("      %ld racionais varridos, %ld em cima — e ", total, em_cima);
+          printf("%s", frac2(lo.p, lo.q));
+          printf(" < √%ld < %s\n", a, frac2(hi.p, hi.q)); }
+        printf("\n   $\\sqrt{%ld} \\notin \\mathbb{Q}$\n", a);
+        return 1;
+      } }
+
+    /* «corte de raiz 2» — a construção do §1, e os TRÊS caminhos com a volta */
+    { int quer = 0;
+      if(!strncmp(p, "corte de raiz", 13)) quer = 1;
+      else if(!strncmp(p, "constroi raiz", 13) || !strncmp(p, "constrói raiz", 14)) quer = 1;
+      else if(!strncmp(p, "encaixota raiz", 14)) quer = 1;
+      if(!quer) return 0;
+      const char *q = p;
+      long a = le_natural(&q);
+      if(a < 2) a = 2;
+      Corte c = { a, 2 };
+      long r = raizi(a);
+      TICK_N = 0;
+      printf("   √%ld pelo CORTE — e não por casas decimais\n", a);
+      tique("CORTE — o real é a DECISÃO sobre cada racional, não uma tira de casas:"
+            " A = {q ∈ ℚ : q ≤ 0 ou q² < a} e B o resto. E o critério é INTEIRO —"
+            " (p/d)² < a é p² < a·d², sem divisão nenhuma");
+      if(r*r == a){
+          printf("      √%ld = %ld: o corte FECHA em ℚ, e o ponto já lá estava\n", a, r);
+          tique("VOLTA — e confere: %ld² = %ld, exato. Não há buraco a preencher aqui");
+          printf("      %ld² = %ld   (resíduo 0)\n", r, r*r);
+          return 1;
+      }
+      tique("O BURACO — e é ele o andar: nenhum racional cai EM CIMA do corte. Varre-se"
+            " e conta-se, porque a ausência também se mede");
+      { long em_cima = 0, total = 0;
+        for(long d = 1; d <= 80; d++) for(long pp = 1; pp <= (r+1)*d; pp++){
+            Qz x = qz(pp,d); int bom, s = rz_cmp(x, 2, a, &bom);
+            if(bom){ total++; if(s == 0) em_cima++; } }
+        printf("      %ld racionais decididos, %ld em cima — o corte não tem ponto em ℚ\n",
+               total, em_cima); }
+      tique("ENCAIXOTAMENTO — as caixas, e a largura NÃO «tende a zero»: é a fração"
+            " (b₀−a₀)/2ᵏ, exata. Cada dobra é um tick, e a velocidade só refina por DOBRA");
+      { Qz lo, hi;
+        rz_caixa_inicial(c, &lo, &hi);
+        printf("      caixa 0:  %s", frac2(lo.p, lo.q));
+        printf(" < √%ld < %s\n", a, frac2(hi.p, hi.q));
+        for(int k = 1; k <= 3; k++){
+            rz_encaixota(c, &lo, &hi, 4);
+            Qz w = qz_soma(hi, qz_oposto(lo));
+            printf("      caixa %d:  %s", 4*k, frac2(lo.p, lo.q));
+            printf(" < √%ld < %s", a, frac2(hi.p, hi.q));
+            printf("   (largura %s)\n", frac2(w.p, w.q));
+        } }
+      tique("PONTO FIXO — e há um segundo caminho que não sabe do primeiro: o Möbius"
+            " INTEIRO x ↦ (a + bx)/(x + b) tem por ponto fixo exatamente x² = a. Com"
+            " b² > a ele não troca de lado, e a sucessão sobe MONÓTONA e limitada");
+      { long b = rz_b(a);
+        Qz x = qz_de_inteiro(r);
+        printf("      b = %ld (b² = %ld > %ld):  ", b, b*b, a);
+        for(int k = 0; k < 5; k++){ printf("%s%s", k ? " → " : "", frac2(x.p, x.q));
+                                    x = rz_passo(a, b, x); }
+        printf(" …\n      e é de CAUCHY em ℚ sem limite em ℚ — o ponto que ela persegue"
+               " é o corte, e o corte não é fração\n"); }
+      tique("FRAÇÃO CONTÍNUA — a escrita, e é a régua da casa: `lado` por PQa, em"
+            " inteiros. Ela FECHA no período (Lagrange), e é isso que a torna a forma"
+            " normalizada — não guarda as casas, guarda a regra que as geraria");
+      printf("      √%ld = %s   (o período é o invariante completo)\n", a, fc_da_borda(0, -a));
+      tique("VOLTA — e os três têm de concordar: o convergente da FC cai DENTRO da caixa"
+            " que a bisseção fechou, sem que os dois métodos se conheçam. Se"
+            " discordassem, um deles estava errado");
+      { Qz lo, hi;
+        rz_caixa_inicial(c, &lo, &hi);
+        rz_encaixota(c, &lo, &hi, 12);
+        long t[48]; size_t nt = lado(0, -a, t, 48);
+        long pn = 1, qn = 0, pa2 = 0, qa2 = 1;
+        Qz cv = qz(1,1); int achou = 0;
+        for(size_t i = 0; i < 12 && nt; i++){
+            long ai = t[i < nt ? i : (1 + (i - 1) % (nt > 1 ? nt - 1 : 1))];
+            long pp = ai*pn + pa2, qq = ai*qn + qa2;
+            pa2 = pn; qa2 = qn; pn = pp; qn = qq;
+            if(qn <= 0 || qn > (1L<<28)) break;
+            cv = qz(pn, qn);
+            if(!qz_menor(cv, lo) && !qz_menor(hi, cv)){ achou = 1; break; }
+        }
+        printf("      caixa 12: %s", frac2(lo.p, lo.q));
+        printf(" < √%ld < %s\n", a, frac2(hi.p, hi.q));
+        printf("      convergente: %s", frac2(cv.p, cv.q));
+        printf("   %s\n", achou ? "— cai DENTRO da caixa (resíduo 0)" : "— NÃO afirmo"); }
+      printf("\n   $\\sqrt{%ld}$ é o corte, e a fração contínua é a sua escrita.\n", a);
+      return 1; }
 }
 /* ── ℚ ──────────────────────────────────────────────────────────────────────────────
  * «prova que (a/b)/(c/d) = ad/bc» — e ele escreveu o relógio inteiro que espera:
@@ -3418,6 +3592,7 @@ static int resolve_mostra(const char *f){ return resolve_mostra_em(f, "../papers
 static int resolve_simbolico(const char *fala){
     if(resolve_divisibilidade(fala)) return 1;     /* o relógio de 6 ticks */
     if(resolve_bezout(fala)) return 1;             /* a testemunha e o critério */
+    if(resolve_reais(fala)) return 1;              /* ℝ: o corte, e nunca um decimal */
     if(resolve_racionais(fala)) return 1;          /* ℚ: a fibra, e a sua ausência */
     if(resolve_naturais(fala)) return 1;           /* a escada da aritmética */
     if(resolve_relacao(fala)) return 1;            /* relação → função → volta */
@@ -4446,6 +4621,352 @@ static int teste(void){
                 if(e_conta(nu2)) roubadas++;
             }
             ok("e a membrana nao rouba o corpus: fala sem LaTeX nao vira conta", roubadas == 0);
+
+        /* ═══ §C29 OS REAIS: O REAL É O CORTE, E NUNCA UM DECIMAL ═════════════════
+         * «ℝ acrescenta a completude: todo buraco racional recebe um ponto.» E a cadeia
+         * fecha: ℕ conta, ℤ reverte a soma, ℚ reverte a multiplicação não nula, ℝ fecha
+         * os limites que ℚ não consegue conter.
+         *
+         * Aqui a regra da casa é a própria matéria do andar: um `double` afirmaria que o
+         * real é uma tira de casas, e o corte diz que ele é a DECISÃO sobre cada
+         * racional. A decisão é inteira (pⁿ < a·dⁿ) — por isso √2 mede-se sem nunca se
+         * aproximar de nada.
+         *
+         * TRÊS CAMINHOS, e é a concordância deles a medida: o CORTE diz onde está, o
+         * MÖBIUS INTEIRO vai lá (x ↦ (a+bx)/(x+b), ponto fixo x² = a), e a FRAÇÃO
+         * CONTÍNUA escreve-o. Se discordassem num racional, um estava errado. */
+        printf("\n§C29 OS REAIS: o corte, o ponto fixo e a fração contínua — o mesmo ponto.\n\n");
+        {
+            Corte c2 = { 2, 2 };                      /* o √2 dele, o primeiro buraco */
+
+            /* (§1)(ex.12)(ex.13) O CORTE, E O BURACO. O corte de √2 parte ℚ em dois e
+             * NÃO tem racional em cima — é essa ausência o buraco, e conta-se. */
+            { int rmal = 0; long em_cima = 0, sweep = 0, perto = 0;
+              Qz melhor_lo = qz(0,1), melhor_hi = qz(2,1);
+              for(long d = 1; d <= 120; d++) for(long p = 1; p <= 2*d + 2; p++){
+                  Qz q = qz(p, d);
+                  int bom, s = rz_cmp(q, 2, 2, &bom);
+                  if(!bom){ rmal++; continue; }
+                  sweep++;
+                  if(s == 0) em_cima++;               /* seria √2 ∈ ℚ */
+                  /* o corte é uma PARTIÇÃO: cada racional cai num lado e num só */
+                  if((s < 0) != (rz_abaixo(c2, q) == 1)) rmal++;
+                  /* e a fronteira aperta-se sem nunca fechar: os melhores dos dois lados */
+                  if(s < 0 && qz_menor(melhor_lo, q)){ melhor_lo = q; perto++; }
+                  if(s > 0 && qz_menor(q, melhor_hi)) melhor_hi = q;
+              }
+              /* o DESCENSO, que é a prova, e mede-se elo a elo em vez de se afirmar:
+               * p² = 2q² obriga p par (ímpar² é ímpar, 2q² é par); p = 2k dá q² = 2k²,
+               * e o mesmo argumento obriga q par — contra gcd(p,q) = 1 */
+              int elo1 = 1, elo2 = 1;
+              for(long p = 1; p <= 400; p += 2) if((p*p) % 2 == 0) elo1 = 0;   /* ímpar² ímpar */
+              for(long q = 0; q <= 400; q++) if((2*q*q) % 2 != 0) elo2 = 0;    /* 2q² par */
+              printf("      o corte de √2 em %ld racionais: %ld em cima (o buraco), e a"
+                     " fronteira aperta em %s < √2 < %s\n",
+                     sweep, em_cima, frac2(melhor_lo.p, melhor_lo.q),
+                     frac2(melhor_hi.p, melhor_hi.q));
+              ok("O REAL É O CORTE: √2 parte ℚ em dois lados, cada racional cai num e num"
+                 " só, e NENHUM cai em cima — é essa ausência o buraco. E o descenso"
+                 " prova-o elo a elo: ímpar² é ímpar e 2q² é par, logo p² = 2q² obriga p"
+                 " par, e o mesmo obriga q par — contra a forma reduzida",
+                 rmal == 0 && em_cima == 0 && sweep > 10000 && elo1 && elo2 && perto > 0); }
+
+            /* E O CRITÉRIO GERAL, que é o que a fala afirma: √a ∈ ℚ ⟺ TODO expoente
+             * primo de a é PAR. A paridade do §1 é só o caso a = 2; o teorema é este, e
+             * mede-se contra o `raizi` da casa — dois caminhos que têm de concordar. */
+            { int xmal = 0, fechou2 = 0, abriu2 = 0;
+              for(long a2 = 2; a2 <= 400; a2++){
+                  long pr[NT_FAT]; int ex[NT_FAT];
+                  int k = nt_fatora(a2, pr, ex, NT_FAT), todos_pares = 1;
+                  for(int i = 0; i < k; i++) if(ex[i] % 2) todos_pares = 0;
+                  long rr = raizi(a2);
+                  if(todos_pares != (rr*rr == a2)) xmal++;      /* o critério vs a régua */
+                  if(nt_refaz(pr, ex, k) != a2) xmal++;         /* e a volta da fatoração */
+                  if(todos_pares) fechou2++; else abriu2++;
+              }
+              ok("e o CRITÉRIO é geral: √a ∈ ℚ exatamente quando TODO expoente primo de a"
+                 " é PAR — a paridade do √2 é só o caso a = 2. Medido em 399 números"
+                 " contra o `raizi` da casa, com a volta da fatoração a fechar: quando um"
+                 " expoente é ímpar, é ele a testemunha do buraco",
+                 xmal == 0 && fechou2 > 0 && abriu2 > 0); }
+
+            /* (§5)(§6) O TEOREMA DO SUPREMO — e as duas metades que ele nomeia.
+             * A MENORIDADE é a que não é tautologia: se u < √2 então EXIBE-SE q ∈ S com
+             * u < q < √2. E a testemunha é o Möbius: q = (2u+2)/(u+2). O mesmo mapa
+             * aperta o outro lado — é o PAR, e por isso mede-se nos dois. */
+            { int smal = 0; long dentro = 0, fora = 0;
+              long b2 = rz_b(2);                      /* b escolhe-se por b² > a, e é isso
+                                                       * que faz o mapa NÃO trocar de lado */
+              if(b2*b2 <= 2) smal++;
+              for(long d = 1; d <= 60; d++) for(long p = 1; p <= 3*d; p++){
+                  Qz u = qz(p, d);
+                  int bom, s = rz_cmp(u, 2, 2, &bom);
+                  if(!bom){ smal++; continue; }
+                  Qz v = rz_passo(2, b2, u);          /* (2 + bu)/(u + b), com b = rz_b(2) */
+                  int bv, sv = rz_cmp(v, 2, 2, &bv);
+                  if(!bv){ smal++; continue; }
+                  if(s < 0){                          /* u ∈ S: o novo é MAIOR e ainda em S */
+                      if(!qz_menor(u, v)) smal++;
+                      if(sv >= 0) smal++;             /* continua abaixo de √2 */
+                      dentro++;
+                  } else if(s > 0){                   /* u é cota: o novo é cota MENOR */
+                      if(!qz_menor(v, u)) smal++;
+                      if(sv <= 0) smal++;
+                      fora++;
+                  }
+              }
+              Qz u0 = qz(7,5), q0 = rz_passo(2, b2, u0);
+              printf("      menoridade: u = 7/5 (u² = 49/25 < 2) dá q = %s, e q² = %s < 2\n",
+                     frac2(q0.p, q0.q), frac2(q0.p*q0.p, q0.q*q0.q));
+              ok("sup S = √2 com S = {q > 0 : q² < 2}: a MENORIDADE exibe a testemunha —"
+                 " de u ∈ S sai q = (2u+2)/(u+2) com u < q e q ainda em S, logo nenhum"
+                 " racional abaixo de √2 é cota. E o MESMO mapa desce as cotas por cima:"
+                 " os dois lados do par medidos juntos, não um só",
+                 smal == 0 && dentro > 1000 && fora > 1000); }
+
+            /* (§9)(§2) A SUCESSÃO MONÓTONA E DE CAUCHY, e o buraco à vista: ela é de
+             * Cauchy em ℚ e o seu limite NÃO é racional, porque o ponto fixo x = (2+2x)/(x+2)
+             * é x² = 2. É a construção de Cauchy dele, sem nenhum ε flutuante: a largura
+             * é uma FRAÇÃO e compara-se com outra fração. */
+            { int cmal = 0;
+              Qz x = qz_de_inteiro(1), ant = x;
+              Qz termos[9];
+              for(int k = 0; k < 9; k++){
+                  termos[k] = x;
+                  if(k){ if(!qz_menor(ant, x)) cmal++; }   /* estritamente crescente */
+                  { int bom, s = rz_cmp(x, 2, 2, &bom);
+                    if(!bom || s >= 0) cmal++; }           /* e limitada por √2 */
+                  if(!qz_menor(x, qz_de_inteiro(2))) cmal++;/* logo por 2 */
+                  ant = x; x = rz_passo(2, rz_b(2), x);
+              }
+              /* de CAUCHY: as diferenças encolhem, e mede-se com FRAÇÕES */
+              Qz gap_cedo = qz_soma(termos[2], qz_oposto(termos[1]));
+              Qz gap_tarde = qz_soma(termos[8], qz_oposto(termos[7]));
+              if(!qz_menor(gap_tarde, gap_cedo)) cmal++;
+              /* e o limite NÃO é racional: o ponto fixo pede x² = 2, e o corte diz que
+               * nenhum racional o cumpre — a mesma varredura de cima */
+              int fixo_racional = 0;
+              for(long d = 1; d <= 200; d++) for(long p = 1; p <= 2*d; p++){
+                  Qz q = qz(p,d);
+                  if(qz_igual(rz_passo(2,rz_b(2),q), q)) fixo_racional++;
+              }
+              /* UM `frac2` POR `printf`: o destino é rotativo de QUATRO, e cinco numa só
+               * chamada faziam o quinto sobrescrever o primeiro — a linha saía com o
+               * termo errado e nenhuma asserção o via, porque a asserção não lê o texto */
+              printf("      a sucessão: ");
+              for(int k = 0; k < 5; k++) printf("%s%s", k ? ", " : "",
+                                                frac2(termos[k].p, termos[k].q));
+              printf(" …  crescente, e limitada por 2\n");
+              printf("      e o salto encolhe de %s", frac2(gap_cedo.p, gap_cedo.q));
+              printf(" para %s", frac2(gap_tarde.p, gap_tarde.q));
+              printf(" — de Cauchy, e SEM limite em ℚ\n");
+              ok("a sucessão do Möbius é CRESCENTE e LIMITADA (o §9), é de CAUCHY (os"
+                 " saltos encolhem, medidos como FRAÇÕES e não como ε) e o seu limite NÃO"
+                 " está em ℚ: o ponto fixo pede x² = 2 e nenhum racional o cumpre. É o"
+                 " buraco à vista — a sucessão existe em ℚ e o ponto dela não",
+                 cmal == 0 && fixo_racional == 0); }
+
+            /* (§10) OS INTERVALOS ENCAIXADOS — e as larguras são EXATAS, não «tendem» */
+            { int imal = 0;
+              Qz lo, hi;
+              if(!rz_caixa_inicial(c2, &lo, &hi)) imal++;
+              Qz lo0 = lo, hi0 = hi;
+              Qz larg_ant = qz_soma(hi, qz_oposto(lo));
+              for(int k = 1; k <= 20; k++){
+                  Qz lo_ant = lo, hi_ant = hi;
+                  rz_encaixota(c2, &lo, &hi, 1);
+                  /* ENCAIXADO: o novo cabe dentro do velho, nos dois lados */
+                  if(qz_menor(lo, lo_ant) || qz_menor(hi_ant, hi)) imal++;
+                  /* a largura é EXATAMENTE metade — e é uma fração, não um limite */
+                  Qz larg = qz_soma(hi, qz_oposto(lo));
+                  if(!qz_igual(qz_mult(larg, qz_de_inteiro(2)), larg_ant)) imal++;
+                  /* e o ponto continua lá dentro: lo ∈ A e hi ∈ B, sempre */
+                  { int b1, b2;
+                    if(rz_cmp(lo, 2, 2, &b1) >= 0 || !b1) imal++;
+                    if(rz_cmp(hi, 2, 2, &b2) <= 0 || !b2) imal++; }
+                  larg_ant = larg;
+              }
+              Qz larg20 = qz_soma(hi, qz_oposto(lo));
+              /* a largura ao fim de 20 dobras é EXATAMENTE (hi₀−lo₀)/2²⁰ */
+              Qz esperada = qz(hi0.p*lo0.q - lo0.p*hi0.q, hi0.q*lo0.q*(1L<<20));
+              printf("      caixa 20: %s < √2 < %s,  largura = %s (= 1/2²⁰ exata)\n",
+                     frac2(lo.p,lo.q), frac2(hi.p,hi.q), frac2(larg20.p,larg20.q));
+              ok("os INTERVALOS ENCAIXADOS: cada caixa cabe na anterior, a largura é"
+                 " EXATAMENTE metade a cada dobra (uma fração, não um «tende a zero») e o"
+                 " corte fica sempre entre as pontas — ao fim de 20 dobras a largura é"
+                 " (b₀−a₀)/2²⁰ e confere ao numerador",
+                 imal == 0 && qz_igual(larg20, esperada)); }
+
+            /* OS TRÊS CAMINHOS TÊM DE CONCORDAR: os CONVERGENTES da fração contínua
+             * caem DENTRO das caixas do encaixotamento. É o dois-caminhos deste andar —
+             * a bisseção e a FC nunca se falaram, e localizam o mesmo ponto. */
+            { int fmal = 0, comparados = 0;
+              long a[48];
+              size_t nt = lado(0, -2, a, 48);                /* a FC de √2 = [1;2,2,2,…] */
+              long pn = 1, qn = 0, pa = 0, qa = 1;           /* os convergentes por recorrência */
+              Qz lo, hi;
+              rz_caixa_inicial(c2, &lo, &hi);
+              rz_encaixota(c2, &lo, &hi, 12);                /* a caixa dos 12 ticks */
+              for(size_t i = 0; i < 8 && i < 48; i++){
+                  long ai = a[i < nt ? i : (1 + (i - 1) % (nt > 1 ? nt - 1 : 1))];
+                  long pp = ai*pn + pa, qq2 = ai*qn + qa;
+                  pa = pn; qa = qn; pn = pp; qn = qq2;
+                  if(qn <= 0) continue;
+                  Qz cv = qz(pn, qn);
+                  int bom, s = rz_cmp(cv, 2, 2, &bom);
+                  if(!bom) continue;
+                  if(s == 0) fmal++;                          /* um convergente NUNCA é √2 */
+                  /* a partir de certo termo o convergente entra na caixa e lá fica */
+                  if(qn >= 100){
+                      if(qz_menor(cv, lo) || qz_menor(hi, cv)) fmal++;
+                      comparados++;
+                  }
+              }
+              printf("      a FC de √2 = %s  (período %zu — Lagrange), e os convergentes\n",
+                     fc_da_borda(0, -2), nt);
+              printf("      de denominador ≥ 100 caem DENTRO da caixa dos 12 ticks: %d de %d\n",
+                     comparados, comparados);
+              ok("OS TRÊS CAMINHOS CONCORDAM: o CORTE decide, o MÖBIUS persegue e a FRAÇÃO"
+                 " CONTÍNUA escreve — e os convergentes de √2 = [1;2,2,2,…] caem dentro da"
+                 " caixa que a bisseção fechou, sem que os dois métodos se conheçam."
+                 " Nenhum convergente é √2: a FC não fecha, e é isso que ela diz",
+                 fmal == 0 && comparados > 0 && nt > 0); }
+
+            /* (§7) ARQUIMEDES em ℝ, e (§8) a DENSIDADE dos DOIS: racionais e irracionais */
+            { int amal = 0;
+              /* para todo real (aqui os cortes ⁿ√a) existe n natural com n > x */
+              for(long a2 = 2; a2 <= 60; a2++){
+                  Corte ca = { a2, 2 };
+                  Qz lo, hi;
+                  if(!rz_caixa_inicial(ca, &lo, &hi)){ amal++; continue; }
+                  long n2 = hi.p / hi.q + 1;               /* o n EXIBE-SE */
+                  int bom, s = rz_cmp(qz_de_inteiro(n2), 2, a2, &bom);
+                  if(!bom || s <= 0) amal++;               /* n > √a2, medido pelo corte */
+                  /* e o dual: 1/n < ε para ε = 1/m, com n = m+1 */
+                  for(long m = 1; m <= 40; m++)
+                      if(!qz_menor(qz(1, m+1), qz(1, m))) amal++;
+              }
+              /* a DENSIDADE dos racionais: entre dois reais (dois cortes) há um racional,
+               * e ele SAI do encaixotamento — não se postula, exibe-se */
+              Corte c3 = { 3, 2 };
+              Qz l2, h2, l3, h3;
+              rz_caixa_inicial(c2, &l2, &h2); rz_encaixota(c2, &l2, &h2, 16);
+              rz_caixa_inicial(c3, &l3, &h3); rz_encaixota(c3, &l3, &h3, 16);
+              Qz entre = qz_medio(h2, l3);                 /* √2 < h2 ≤ entre ≤ l3 < √3 */
+              int racional_entre = qz_menor(h2, entre) && qz_menor(entre, l3);
+              /* e um IRRACIONAL entre dois racionais: √2/4, irracional porque √2 o é — se
+               * √2/4 fosse p/d, então √2 = 4p/d estaria em ℚ, e não está. A caixa de √2
+               * dividida por 4 é a caixa de √2/4, e é ela que o põe entre 1/3 e 1/2. */
+              Qz a5 = qz(1,3), b5 = qz(1,2);
+              Qz irr_lo = qz(l2.p, l2.q * 4), irr_hi = qz(h2.p, h2.q * 4);
+              int irracional_entre = qz_menor(a5, irr_lo) && qz_menor(irr_hi, b5);
+              printf("      √2 < %s < √3   (o racional entre dois reais)\n",
+                     frac2(entre.p, entre.q));
+              printf("      e √2/4 ∈ (%s", frac2(irr_lo.p, irr_lo.q));
+              printf(", %s) cai entre 1/3 e 1/2 — o irracional\n", frac2(irr_hi.p, irr_hi.q));
+              ok("ARQUIMEDES vale em ℝ com o n EXIBIDO pela caixa, e a DENSIDADE é dos"
+                 " DOIS lados: entre √2 e √3 exibe-se um racional (sai do encaixotamento,"
+                 " não se postula) e entre 1/3 e 1/2 exibe-se um IRRACIONAL, o √2/4 —"
+                 " racional ele seria se √2 o fosse, e não é",
+                 amal == 0 && racional_entre && irracional_entre); }
+
+            /* (§12) A EXISTÊNCIA DE RAÍZES: ∀a>0 ∀n≥1 ∃!x>0 com xⁿ = a, e a UNICIDADE é
+             * a monotonia estrita. Quando fecha em ℚ, o corte e o `raizi` da casa têm de
+             * dar o mesmo — dois caminhos outra vez. */
+            { int emal2 = 0, fechou = 0, abriu = 0;
+              for(long a2 = 1; a2 <= 200; a2++) for(int n2 = 2; n2 <= 3; n2++){
+                  Corte ca = { a2, n2 };
+                  long r = 0;
+                  int fecha = rz_fecha_em_q(ca, &r);
+                  if(n2 == 2){
+                      long rr = raizi(a2);                  /* a régua da casa */
+                      if(fecha != (rr*rr == a2)) emal2++;   /* os dois caminhos */
+                      if(fecha && r != rr) emal2++;
+                  }
+                  if(fecha){ fechou++;
+                      Qz z = qz_de_inteiro(r);
+                      if(!rz_no_corte(ca, z)) emal2++;      /* e o corte confirma: rⁿ = a */
+                  } else { abriu++;
+                      Qz lo, hi;
+                      if(!rz_caixa_inicial(ca, &lo, &hi)) emal2++;
+                      else { rz_encaixota(ca, &lo, &hi, 10);
+                             int b1, b2;
+                             if(rz_cmp(lo, n2, a2, &b1) >= 0 || !b1) emal2++;
+                             if(rz_cmp(hi, n2, a2, &b2) <= 0 || !b2) emal2++; }
+                  }
+                  /* a UNICIDADE é a MONOTONIA: x < y ⟹ xⁿ < yⁿ nos positivos */
+                  for(long x = 1; x <= 12; x++) for(long y = x+1; y <= 13; y++){
+                      __int128 X = 1, Y = 1;
+                      for(int i = 0; i < n2; i++){ X *= x; Y *= y; }
+                      if(!(X < Y)) emal2++;
+                  }
+              }
+              printf("      raízes de 1..200 em índices 2 e 3: %d fecham em ℚ, %d abrem"
+                     " caixa — e o corte concorda com o `raizi` da casa em todas\n",
+                     fechou, abriu);
+              ok("a EXISTÊNCIA DE RAÍZES: para cada a > 0 e n ≥ 1 o corte dá o x, e a"
+                 " UNICIDADE é a monotonia estrita de xⁿ nos positivos. Quando fecha em ℚ"
+                 " o corte e o `raizi` da casa dão o MESMO inteiro; quando não fecha, a"
+                 " caixa aperta e as pontas ficam nos dois lados",
+                 emal2 == 0 && fechou > 0 && abriu > 0); }
+
+            /* (§13) O TEOREMA DO VALOR INTERMÉDIO, com o exemplo dele: f(x) = x² − 2 em
+             * [1,2], f(1) = −1 e f(2) = 2. A bisseção É o encaixotamento, e o INVARIANTE
+             * que a autoriza mede-se a cada passo: o sinal continua a trocar. */
+            { int tmal = 0;
+              Qz lo = qz_de_inteiro(1), hi = qz_de_inteiro(2);
+              /* f(1) = −1 < 0 < 2 = f(2) — a hipótese, medida e não assumida */
+              Qz f_lo = qz_soma(qz_mult(lo,lo), qz_de_inteiro(-2));
+              Qz f_hi = qz_soma(qz_mult(hi,hi), qz_de_inteiro(-2));
+              if(!(f_lo.p < 0 && f_hi.p > 0)) tmal++;
+              for(int k = 0; k < 18; k++){
+                  Qz m = qz_medio(lo, hi);
+                  Qz fm = qz_soma(qz_mult(m,m), qz_de_inteiro(-2));
+                  if(fm.p == 0) break;                      /* seria a raiz racional */
+                  if(fm.p < 0) lo = m; else hi = m;
+                  Qz fl = qz_soma(qz_mult(lo,lo), qz_de_inteiro(-2));
+                  Qz fh = qz_soma(qz_mult(hi,hi), qz_de_inteiro(-2));
+                  if(!(fl.p < 0 && fh.p > 0)) tmal++;       /* O INVARIANTE, a cada tick */
+              }
+              /* e o c é o corte: as pontas apertam-no dos dois lados */
+              int b1, b2;
+              if(rz_cmp(lo, 2, 2, &b1) >= 0 || !b1) tmal++;
+              if(rz_cmp(hi, 2, 2, &b2) <= 0 || !b2) tmal++;
+              printf("      f(x) = x²−2 em [1,2]: f(1) = %s", frac2(f_lo.p,f_lo.q));
+              printf(" e f(2) = %s", frac2(f_hi.p,f_hi.q));
+              printf(", e 18 cortes dão c ∈ (%s", frac2(lo.p,lo.q));
+              printf(", %s)\n", frac2(hi.p,hi.q));
+              ok("o VALOR INTERMÉDIO com o exemplo dele: f(1) = −1 < 0 < 2 = f(2), e a"
+                 " bisseção É o encaixotamento — o INVARIANTE (o sinal troca entre as"
+                 " pontas) mede-se a CADA tick, e o c que sobra é exatamente o corte de"
+                 " √2. O teorema não se cita: o invariante é que o carrega", tmal == 0); }
+
+            /* (§4)(ex.1–5) O VALOR ABSOLUTO, e o exercício 5 nos DOIS sentidos */
+            { int vmal = 0, viu_ida = 0, viu_volta = 0;
+              for(long p = -12; p <= 12; p++) for(long d = 1; d <= 6; d++){
+                  Qz x = qz(p,d), ax = x.p < 0 ? qz_oposto(x) : x;
+                  if(ax.p < 0) vmal++;                                  /* |x| ≥ 0 */
+                  if(qz_mult(x,x).p < 0) vmal++;                        /* x² ≥ 0 */
+                  for(long p2 = -12; p2 <= 12; p2++) for(long d2 = 1; d2 <= 6; d2++){
+                      Qz y = qz(p2,d2), ay = y.p < 0 ? qz_oposto(y) : y;
+                      Qz xy = qz_mult(x,y), axy = xy.p < 0 ? qz_oposto(xy) : xy;
+                      if(!qz_igual(axy, qz_mult(ax,ay))) vmal++;        /* |xy| = |x||y| */
+                      Qz s = qz_soma(x,y), as = s.p < 0 ? qz_oposto(s) : s;
+                      if(qz_menor(qz_soma(ax,ay), as)) vmal++;          /* triangular */
+                      /* ex.5: |x| < ε ⟺ −ε < x < ε, e as DUAS direções contam-se */
+                      if(y.p > 0){
+                          int esq = qz_menor(ax, y);
+                          int dir = qz_menor(qz_oposto(y), x) && qz_menor(x, y);
+                          if(esq != dir) vmal++;
+                          if(esq) viu_ida++; else viu_volta++;
+                      }
+                  }
+              }
+              ok("o VALOR ABSOLUTO: |x| ≥ 0, x² ≥ 0, |xy| = |x||y| e a TRIANGULAR — e o"
+                 " exercício 5 mede-se como equivalência, |x| < ε ⟺ −ε < x < ε, com os"
+                 " dois lados a ocorrerem (não é uma implicação com o nome de ⟺)",
+                 vmal == 0 && viu_ida > 0 && viu_volta > 0); }
+        }
 
         /* ═══ §C28 OS RACIONAIS: a REVERSIBILIDADE DA MULTIPLICAÇÃO NÃO NULA ══════
          * A escada e o que cada andar acrescenta, ditos por ele:
