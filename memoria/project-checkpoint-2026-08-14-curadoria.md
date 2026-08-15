@@ -293,3 +293,19 @@ nomeei a exceção e medi-a nos dois sentidos.
 **E a regra nova**: [[feedback-o-ramo-que-nunca-corre]] — duas mutações sobreviveram por
 causas DIFERENTES (ramo inalcançável com os meus dados vs. guarda redundante), e só o
 programa mínimo de dez linhas distinguiu uma da outra.
+
+
+### Möbius inversor e curvas elípticas (`3073941`, interno 192:0)
+
+Os dois pacotes seguintes do `eval.txt` — μ = 1⁻¹ na convolução de Dirichlet, e as curvas
+elípticas onde **a fibra escolhe qual operação existe**. Detalhe em
+[[project-mobius-e-elipticas]].
+
+**A decisão que evitou os floats**: a série de Dirichlet mede-se **formalmente** — a
+identidade é sobre os COEFICIENTES e o `s` nunca se avalia. Foi o que permitiu pôr um
+andar «analítico» inteiro em aritmética exata.
+
+**E dois defeitos meus, os dois de família conhecida**: o Lagrange ia ser medido numa curva
+de ordem PRIMA (caso degenerado — troquei para #E = 24 com sete ordens), e uma testemunha
+saía por estrear a imprimir memória com a asserção verde
+([[feedback-o-destino-rotativo]], quarta forma da mesma família).

@@ -32,9 +32,9 @@
 - **[A régua não transporta](feedback-a-regua-nao-transporta.md)** — o `thm:transporte` dele refutou o meu método antes de eu o construir: medir contra o pdflatex é INTRANSPORTÁVEL. A volta transporta, a régua não.
 - **[O exit sombreado](feedback-o-exit-sombreado.md)** — 17 medidores verdes com unidades vermelhas (contador local a sombrear o do header). A cura é a REDE no runner; ler SEMPRE as duas linhas do total.
 - **[Medir só metade do par](feedback-medir-so-metade-do-par.md)** — o bench da membrana varria a ENTRADA e nunca a SAÍDA; aberto o segundo sentido, caíram dois comandos inventados que passavam há sessões.
-- **[O ramo que nunca corre](feedback-o-ramo-que-nunca-corre.md)** — mutação que sobrevive tem DUAS doenças: ramo inalcançável com os meus dados (gap meu) ou guarda redundante (está certo). Escrever o programa mínimo que executa a linha, não adivinhar.
-- **[Varrer onde nada pode falhar](feedback-varrer-onde-nada-pode-falhar.md)** — 22960 casos com esforço ALTO, onde o ramo do defeito nem corre: a mutação sobrevivia. Em que REGIME viveria o defeito? É o pobre, não o rico.
-- **[O destino rotativo](feedback-o-destino-rotativo.md)** — mais chamadas a `frac2` num `printf` do que fatias: a linha imprime o número ERRADO, duas vezes. E o `%-Ns` enche por BYTES sobre acentos, três vezes. Medir do lado da FONTE.
+- **[O ramo que nunca corre](feedback-o-ramo-que-nunca-corre.md)** — mutação que sobrevive tem DUAS doenças: ramo inalcançável com os meus dados (gap meu) ou guarda redundante (está certo). Programa mínimo, não adivinhar.
+- **[Varrer onde nada pode falhar](feedback-varrer-onde-nada-pode-falhar.md)** — 22960 casos com esforço ALTO, onde o ramo do defeito nem corre. Em que REGIME viveria o defeito? É o pobre, não o rico.
+- **[O destino rotativo](feedback-o-destino-rotativo.md)** — o valor certo e o TEXTO errado, invisível às asserções: `frac2` a rodar por baixo do printf, `%-Ns` a encher por bytes sobre acentos, testemunha devolvida por estrear. Medir do lado da FONTE.
 - **[Escrever numa notação e ler noutra](feedback-escrever-numa-notacao-ler-noutra.md)** — o `eval.txt` escreve «A + AB = A» por justaposição e o parser exigia `*`: a fala morria CALADA. Passar pelo leitor as expressões LITERAIS da fonte.
 - **[Compor, não ancorar](feedback-compor-nao-ancorar.md)** — no tradutor NADA se posiciona à mão: todo anexo compõe pelo motor da espiral com a SEMENTE certa. Âncoras e offsets meus são invenção, e ele apanha-as na hora.
 - **[Definição e medida em gavetas diferentes](feedback-definicao-e-medida.md)** — a definição diz o que PODE ser preservado; a medida diz o que FOI, nesta realização. Lei, realização e evidência não se misturam numa frase.
@@ -54,6 +54,7 @@
 - [O corpo quântico e o cósmico](project-quantico-cosmico.md) — [σi,σj]=2i·ε·σk É o produto cruzado. E: CHAMEI LEI À CONSEQUÊNCIA DE UMA ESCOLHA MINHA (Carnot). Gatilho: que parâmetros do teorema fui eu que escolhi?
 - [O WHERE é o corpo mórfico](project-where-morfico.md) — erosão/dilatação são o par dual: erode-se para escolher, dilata-se para escrever.
 - **[A escada aritmética ℕ→ℤ→ℚ→ℝ](project-escada-aritmetica-n-z-q.md)** — ℤ dá a reversibilidade da SOMA, ℚ a da MULTIPLICAÇÃO não nula; e o gume dele: dividir por zero é uma operação SEM FIBRA.
+- **[Möbius inversor e as elípticas](project-mobius-e-elipticas.md)** — μ = 1⁻¹ na convolução (a inversão de Möbius É a deconvolução), e na curva a FIBRA escolhe qual das três operações corre. A série de Dirichlet mede-se FORMAL.
 - **[Teoria dos números: uma órbita](project-teoria-dos-numeros.md)** — Euclides = MDC = Bézout = FC é a MESMA descida lida em colunas diferentes. E a asserção que caiu com razão: o convergente de ordem 0 não é a melhor aproximação.
 - **[O real é o CORTE](project-o-real-e-o-corte.md)** — e nunca um decimal: o exato aqui é a MATÉRIA. Quatro portas que INDUZEM O MESMO CORTE — medido nos seis pares, sem árbitro, com a indecisão contada à parte.
 
