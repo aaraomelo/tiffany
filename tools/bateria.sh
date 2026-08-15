@@ -287,7 +287,11 @@ for f in $(cat "$LISTA"); do
   # mesma saída, o que é incoerência e não informação. Vai para o seu próprio balde.
   if negativo_esperado "$base"; then uni_ok=$((uni_ok + u_ok)); uni_neg=$((uni_neg + u_ma))
   else uni_ok=$((uni_ok + u_ok)); uni_ma=$((uni_ma + u_ma)); fi
-  [ "$u_ok$u_ma" != "00" ] && ver="$u_ok unidade(s), $u_ma falha(s) — ${ver}"
+  # ${ver:-ok} e nao ${ver}: o ramo .py/.js ja' escrevia ${cert:-ok}, e este nao. Um medidor
+  # que nao imprima nenhum dos tokens do veredicto ("RESIDUO 0", "FALHOU", ...) saia' com um
+  # travessao pendurado — "VERDE  11 unidade(s), 0 falha(s) —". As duas metades do mesmo if,
+  # e a que ficou para tras foi a que ninguem exercitou ate' agora.
+  [ "$u_ok$u_ma" != "00" ] && ver="$u_ok unidade(s), $u_ma falha(s) — ${ver:-ok}"
   # a mesma rede do ramo .py/.js: exit 0 com unidade vermelha é FALHA, não verde
   if ! negativo_esperado "$base" && [ "$r" -eq 0 ] && [ "$u_ma" -gt 0 ]; then
     r=9

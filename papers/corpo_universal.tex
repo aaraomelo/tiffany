@@ -804,6 +804,127 @@ ler a indução. A dualidade é a de sempre: a indução projecta
 meta-indução \textbf{valida é a conservação de energia}.
 \end{definicao}
 
+\begin{teorema}[a descida é o dual da indução, e a meta-indução mede o
+PASSO]\label{thm:meta-inducao}
+A Definição~\ref{def:inducao} nomeia o par --- a indução projecta
+($\lambda^{+}$), a meta-indução lê ($\lambda^{-}$). Este teorema diz o
+que cada metade \emph{faz}, e como se mede.
+
+\textbf{(0) As duas metades.} Seja $P(n)$ uma proposição sobre andares
+da torre. A \textbf{indução} sobe: base em $0$, e
+$P(n)\Rightarrow P(n+1)$. A \textbf{descida} desce: nega-se a tese --- «há
+um \emph{primeiro} andar $N$ onde $P$ falha» --- e mostra-se que esse $N$
+não existe, porque o passo aplicado em $N-1$ tê-lo-ia produzido. As duas
+usam \emph{o mesmo} facto, e nada mais: $\mathbb{N}$ é bem ordenado. São
+duais no sentido desta casa --- a involução é inverter a ordem, e
+$\nu\circ\nu=\operatorname{id}$: a indução diz o que \textbf{há} no andar
+seguinte, a descida diz o que \textbf{não há} em andar nenhum, e é a
+mesma frase.
+
+\textbf{(1) A meta-indução: o que se mede é o passo.} Se o passo
+$\mathcal{C}(n)\to\mathcal{C}(n+1)$ é uma construção cujo corpo
+\emph{não menciona} $n$, então $\forall n\,\mathcal{C}(n)$ segue da
+\textbf{forma} do passo. O resultado não é
+$\mathcal{C}(0),\ldots,\mathcal{C}(N)$ --- é
+\[
+\boxed{\;\forall n\ge0,\;\mathcal{C}(n),\;}
+\]
+e a ausência de tecto dimensional é consequência da forma da construção,
+$T_{n+1}=T_{n}\oplus T_{n}^{\ast}$, e \textbf{não} de uma varredura
+finita. Uma tabela de andares prova os andares da tabela.
+
+\textbf{(2) E é por isso que uma saturação não é um resultado.} Se uma
+realização finita --- inteiros, racionais, matrizes --- transborda ao
+$k$-ésimo passo, o que se mediu foi o tamanho da representação e não a
+lei:
+\[
+\boxed{\;\text{falha de representação}\;\neq\;\text{contra-exemplo
+matemático}.\;}
+\]
+A regra que daí sai é operacional e é obrigatória: sempre que a primeira
+realização atinge o seu limite, a conservação verifica-se numa
+\textbf{segunda realização independente}, e a saturação conta-se em
+lugar \emph{separado} dos defeitos.
+
+\emph{Prova (operacional, medida).} \code{tests/conservacao\_metrica.c}
+$\S$M0--$\S$M1. A descida procura o primeiro andar onde a conservação
+falha e volta \textbf{vazia} em $400$ andares; e a procura vale porque o
+segundo controlo mostra que ela sabe achar --- com um passo
+\emph{sabotado}, que duplica a cada andar, ela acha em $N=1$. O passo
+verdadeiro verifica-se em $640$ entradas independentes (não em $640$
+andares: em $640$ \emph{entradas} do passo, que é outra coisa), e tem
+onde falhar --- com $\det T=0$ o operador não tem dual, e o passo
+recusa. $\square$
+\end{teorema}
+
+\begin{teorema}[conservação métrica por dualidade: o determinante É o
+factor de medida, em todo andar]\label{thm:conservacao-metrica}
+Seja $\mathcal{T}=\{T_{k}\}_{k\ge0}$ a torre construída por extensão
+dual, e $\sigma_{k}$ o operador métrico do $k$-ésimo andar, com a
+relação de passagem que esta casa já tinha escrito
+(\emph{Corpo de Peano}, \emph{$\S$~o relógio}):
+\[
+\sigma_{k}\,\sigma_{k'}=-1 .
+\]
+Então a conservação métrica admite formulação \textbf{independente da
+dimensão}: a medida é conservada pela ação dual, e
+\[
+\boxed{\;|\det|\;\text{é o factor de escala da medida, e}\;
+\sigma_{k}\sigma_{k'}=-1\;\Longleftrightarrow\;|\det|=1.\;}
+\]
+
+\textbf{(0) O que este teorema NÃO afirma.} Se $\sigma_{n}(A)$ se
+\emph{define} como $|\det A|$, então «$\det|\cdot|=\sigma_{n}$» é verdade
+por definição, e uma proposição que não pode falhar não é um teorema. O
+conteúdo está noutro sítio, e é ele que se mede: esse \textbf{mesmo}
+número é, ao mesmo tempo,
+\begin{enumerate}
+\item o determinante, por eliminação --- \emph{álgebra};
+\item o factor da ação em $\Lambda^{n}$, pela cunha das colunas ---
+\emph{geometria}: $A(v_{1})\wedge\cdots\wedge A(v_{n})=\det(A)\,
+v_{1}\wedge\cdots\wedge v_{n}$;
+\item o produto dos valores próprios $\sigma\sigma'$ --- \emph{espectro},
+e sai dos coeficientes, sem avaliar raiz nenhuma;
+\item a razão entre pontos do reticulado na imagem e na fonte ---
+\emph{contagem}, e esta não toca em determinante nenhum.
+\end{enumerate}
+Quatro contas sem código em comum e um só número. \emph{Isso} é o
+teorema; a igualdade com $\sigma_{n}$ é a notação.
+
+\textbf{(1) A hipótese estrutural É a conservação da área.} O
+determinante é o produto dos valores próprios; logo
+$\sigma\sigma'=-1$ e $|\det A_{m}|=1$ são a \emph{mesma} frase, e não
+duas. A casa tinha a relação escrita no \emph{Corpo de Peano} e no
+Universal (Def.~\ref{def:energia} lista $|\det|=1$ entre os três nomes
+da conservação da norma) e nunca a tinha ligado à \textbf{medida}: o
+gato estica por $\sigma$ numa direcção e encolhe por $1/\sigma$ na
+outra, e o produto é $1$. O sinal negativo é a inversão de orientação,
+que a medida não vê.
+
+\textbf{(2) Sem tecto, e pela forma.} Base: $\det(I)=1$. Passo: para a
+extensão dual $T_{n+1}=T_{n}\oplus T_{n}^{\ast}$ com $T^{\ast}$ o dual
+métrico,
+\[
+\det(T\oplus T^{\ast})=\det(T)\cdot\det(T^{\ast})
+=\det(T)\cdot\frac{1}{\det(T)}=1,
+\]
+e a conta \textbf{não menciona a dimensão}. Pelo
+Teorema~\ref{thm:meta-inducao}, $\forall n$. A conservação não é
+reintroduzida em cada andar: é \textbf{transportada pela dualidade}.
+
+\emph{Prova (operacional, medida).} \code{tests/conservacao\_metrica.c}
+$\S$M2--$\S$M7, $11{:}0$. As quatro contas coincidem: eliminação contra
+cunha em $2401$ matrizes $2\times2$ e $625$ $3\times3$ ($0$
+divergências); $\sigma\sigma'=\det=-1$ em $40$ metais; e a contagem do
+reticulado feita pelos \emph{dois} lados --- descendo pela
+divisibilidade e subindo por geração --- a concordar exactamente. O gume:
+retirada a hipótese, a dilatação por $k$ multiplica a área por $k$ e o
+buscador acha em $7$ de $7$, e nos metais volta vazio em $20$ de $20$. E
+o $\S$M6 mede a regra do Teorema~\ref{thm:meta-inducao}: a primeira
+realização satura em $k=19$, e a segunda --- em resíduos --- responde
+até $k=400$ em três primos, com $\det(A^{k})=(-1)^{k}$. $\square$
+\end{teorema}
+
 \begin{definicao}[energia]\label{def:energia}
 A \textbf{energia} de um corpo $x$ de componentes endereçadas é o
 segundo momento

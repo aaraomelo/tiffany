@@ -1618,6 +1618,59 @@ adjunção.
 $\square$
 \end{teorema}
 
+\begin{teorema}[a face graduada da conservação métrica --- o Jacobiano, e
+a lei é LOCAL]\label{thm:medida-jacobiano}
+A realização graduada da conservação métrica (\emph{Corpo Universal},
+Teor.~da conservação métrica por dualidade) é a \textbf{mudança de
+variável}: o determinante deixa de ser função de uma matriz e passa a
+ser o \textbf{factor local da medida},
+\[
+\boxed{\;\mu_{n}(T(E))=\int_{E}|\det DT(x)|\,d\mu_{n}(x)\;}
+\]
+e, no caso conservativo,
+\[
+|\det DT(x)|=1\;\;\text{em todo }x
+\quad\Longrightarrow\quad
+\mu_{n}(T(E))=\mu_{n}(E).
+\]
+
+\textbf{(0) O que a graduação acrescenta ao lado discreto.} No
+Teor.~da face discreta (\emph{Corpo de Peano}) o factor é \emph{um}
+número, porque a transformação é linear. Aqui ele é uma \textbf{função
+do ponto}, e a conservação passa a ser uma condição \emph{pontual} ---
+que é exactamente o que a graduação faz em toda esta tabela: transforma
+uma constante num campo. O determinante é o coeficiente da $n$-forma de
+volume, e a $n$-forma é o topo do complexo $\Lambda^{\bullet}$: por isso
+o factor de medida vive no mesmo sítio onde $d$ deixa de ter para onde
+subir.
+
+\textbf{(1) A testemunha, e ela não é linear.} O cisalhamento
+$T(x,y)=(x+y^{2}+3y+5,\;y)$ tem
+\[
+DT=\begin{pmatrix} 1 & 2y+3\\ 0 & 1\end{pmatrix},
+\qquad \det DT=1\quad\text{em todo ponto},
+\]
+e a entrada $\partial/\partial y$ \emph{muda} com o ponto. Logo a
+conservação da medida não é uma propriedade de matrizes: é do factor de
+volume ponto a ponto, e o caso linear é apenas aquele em que ele não
+varia.
+
+\textbf{(2) E a ausência de tecto é da forma, não da varredura.} A base
+é $\det(I)=1$; o passo é
+$\det(T\oplus T^{\ast})=\det T\cdot\det T^{\ast}=1$, e não menciona a
+dimensão. A conservação não é reintroduzida em cada andar --- é
+transportada pela dualidade, que é a relação $\sigma_{k}\sigma_{k'}=-1$
+desta torre.
+
+\emph{Medido:} \code{tests/conservacao\_metrica.c} ($\S$M4--$\S$M6,
+$11{:}0$): $|\det DT|=1$ em $100$ pontos racionais com a derivada a
+variar em $98$ deles; o gume --- a dilatação por $k$ achada em $7$ de
+$7$ e o buscador a voltar vazio nos $20$ metais; e a regra da segunda
+realização --- a primeira satura em $k=19$ e a segunda, em resíduos,
+responde até $k=400$ em três primos. Uma saturação não é um
+contra-exemplo, e conta-se em lugar separado. $\square$
+\end{teorema}
+
 \begin{teorema}[a face graduada da ponte --- onde a obstrução deixa de ser
 zero]\label{thm:ponte-graduada}
 A graduação do teorema anterior tem uma propriedade que só se vê quando

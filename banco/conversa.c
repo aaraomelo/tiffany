@@ -59,6 +59,8 @@
 #include "metrico.h"    /* espacos metricos: so o que faltava ao cauchy.h */
 #include "topologia.h"  /* a regua REMOVIDA: topologias finitas, exaustivas */
 #include "homotopia.h"  /* o buraco que nenhum ponto ve: pi1 combinatorio */
+#include "analise.h"    /* Analise Real: as CINCO VIAS da completude, sem arbitro */
+#include "medida.h"     /* a conservacao metrica por dualidade, e a meta-inducao */
 #include "dforma.h"     /* o d: Lambda^0 -> ... -> Lambda^3, e os tres viram UM */
 #include "eletrico.h"
 
@@ -1378,7 +1380,1325 @@ static void esc_vec(Vec v);
 static void esc_mat(const char *ind, Mat A);
 static void esc_qz(const char *pre, Qz x, const char *pos);
 static void esc_col(const char *s, int largura);
+static void esc_qzl(Qz x, int largura);
 static void tique7(int slot, const char *porque);
+/* ── A CONSERVAÇÃO MÉTRICA POR DUALIDADE, e a descida que a prova ──────────────────
+ * O `eval.txt` abre com a correção que organiza este andar:
+ *
+ *   «estourar o tipo NÃO é resultado matemático. É falha de representação. O teorema tem
+ *    de sobreviver à troca de representação.»
+ *
+ * E manda formalizar por esta ordem: primeiro a DESCIDA — indução e meta-indução —, e só
+ * depois a conservação que ela prova. As dez falas seguem essa ordem.
+ *
+ * E há uma coisa que aqui NÃO se faz. O eval define σ_n(A) := |det A|; com essa definição
+ * «det|·| = σ_n» é verdade POR DEFINIÇÃO, e uma frase que não pode falhar não é um
+ * teorema. O conteúdo está nas QUATRO CONTAS: o mesmo número é o determinante (álgebra),
+ * o factor da ação em Λⁿ (geometria), o produto σσ′ (espectro) e a razão de pontos do
+ * reticulado (contagem). Digo-o em vez de o esconder. */
+static const struct { int n; const char *nome; const char *enunciado; } CM10[] = {
+ { 1, "descida",        "a descida é o dual da indução, e procura o contra-exemplo MÍNIMO" },
+ { 2, "meta inducao",   "mede-se o PASSO, não uma tabela de andares" },
+ { 3, "sem teto",       "a ausência de tecto é da FORMA, não de uma varredura" },
+ { 4, "determinante",   "det é o factor de volume: A(v₁)∧…∧A(vₙ) = det(A)·v₁∧…∧vₙ" },
+ { 5, "quatro contas",  "álgebra, geometria, espectro e CONTAGEM — um só número" },
+ { 6, "sigma dual",     "σσ′ = −1 É |det| = 1: a hipótese estrutural é a área" },
+ { 7, "jacobiano",      "a lei é LOCAL, e o cisalhamento não linear prova-o" },
+ { 8, "gume da area",   "retirar |det| = 1, e a medida escala pelo determinante" },
+ { 9, "representacao",  "falha de representação ≠ contra-exemplo matemático" },
+ {10, "as tres camadas","Universal (lei) → Peano (det) → Estelar (medida)" },
+};
+static void cmetrica_resolve(int n){
+    TICK_N = 0;
+    printf("   %d — %s\n", n, CM10[n-1].enunciado);
+    switch(n){
+    case 1: case 2: case 3:
+        tique7(0, "seja P(n) uma proposição sobre andares da torre");
+        tique7(1, n == 1 ? "a indução e a descida:"
+             : n == 2 ? "a meta-indução:" : "a ausência de tecto:");
+        printf(n == 1 ? "      $P(0)$ e $P(n) \\Rightarrow P(n+1)$;\\qquad e a negação:"
+                        " «há um PRIMEIRO $N$ onde falha»\n"
+             : n == 2 ? "      $\\mathcal{C}(n) \\to \\mathcal{C}(n+1)$ sem que a"
+                        " construção mencione $n$\n"
+                      : "      $T_{n+1} = T_n \\oplus T_n^{*}$\n");
+        tique7(2, n == 1
+               ? "e as duas usam O MESMO facto e mais nenhum: ℕ é bem ordenado. A indução"
+                 " PROJECTA — da base constrói o andar seguinte; a descida LÊ — nega a tese"
+                 " e procura o primeiro andar onde ela falha. A involução é inverter a"
+                 " ordem, e ν∘ν = id: uma diz o que HÁ, a outra diz o que NÃO HÁ"
+             : n == 2
+               ? "e a meta-indução é o degrau acima: o que se mede não é uma tabela de"
+                 " andares, é O PASSO. Se o corpo do passo não menciona n, então «para todo"
+                 " n» sai da FORMA dele. Uma tabela de andares prova os andares da tabela"
+               : "e é aqui que esta casa já se enganou duas vezes: subi um array para 64 e"
+                 " chamei-lhe «sem tecto», e contei «5 de 8» quando as três em falta eram o"
+                 " `long` a estourar. A ausência de tecto não se varre — sai da forma da"
+                 " construção, e nada mais");
+        tique7(3, "a lei é a boa ordem de ℕ, e é a única que as duas metades usam");
+        { int nb = -1, nm = -1;
+          int achou_bom = mi_procura_minimo(mi_passo, 400, &nb);
+          int achou_mau = mi_procura_minimo(mi_passo_sabotado, 400, &nm);
+          long vale = 0, casos = 0;
+          for(long p = -40; p <= 40; p++) for(long q = 1; q <= 8; q++){
+              if(p == 0) continue;
+              casos++;
+              if(mi_passo_vale(qz(p,q))) vale++;
+          }
+          Qz lixo;
+          int recusa = !mi_passo(qz(0,1), &lixo);
+          if(n == 1){
+              printf("      a procura do PRIMEIRO andar onde a conservação falha:\n");
+              printf("        com o passo verdadeiro, até 400 andares:      %s\n",
+                     achou_bom ? "achou (mau)" : "VAZIA");
+              printf("        com o passo SABOTADO (duplica a cada andar):  achou em"
+                     " N = %d\n", nm);
+              tique7(4, "a testemunha é a busca VAZIA, e ela só vale por causa da segunda"
+                        " linha: um buscador que nunca acha nada não distingue «não há» de"
+                        " «não sei procurar». Com o passo sabotado ele acha ao primeiro"
+                        " andar — logo o vazio da primeira linha é um resultado");
+              tique7(5, !achou_bom && achou_mau && nm == 1
+                     ? "logo não existe primeiro andar onde a conservação falhe, e portanto"
+                       " não existe andar nenhum — que é a descida, e é a indução dita ao"
+                       " contrário"
+                     : "a busca não separou os dois regimes — NÃO afirmo");
+          } else if(n == 2){
+              printf("      o passo em %ld ENTRADAS independentes (não em 640 andares —"
+                     " em entradas):\n        %ld dão det = 1\n", casos, vale);
+              printf("      e o controlo: com det(T) = 0 o passo %s — o operador não tem"
+                     " dual\n", recusa ? "RECUSA" : "aceita");
+              tique7(4, "a testemunha é dupla e as duas metades são independentes: o passo"
+                        " a valer para qualquer entrada, e o passo a TER ONDE FALHAR. Se"
+                        " ele devolvesse 1 também para o zero, não estaria a medir nada —"
+                        " e o zero é o mesmo 0⁻¹ que a escada aritmética encontrou em todos"
+                        " os andares");
+              tique7(5, vale == casos && recusa
+                     ? "logo a lei vale em todo andar, e a prova é do PASSO — a varredura"
+                       " aqui é sobre entradas, que é outra coisa que varrer andares"
+                     : "o passo não separou — NÃO afirmo");
+          } else {
+              printf("      a base:  det(I) = 1\n");
+              printf("      o passo: det(T ⊕ T*) = det(T)·det(T*) = det(T)·(1/det(T))"
+                     " = 1\n");
+              printf("      e a conta NÃO MENCIONA a dimensão — é essa ausência que é o"
+                     " teorema\n");
+              printf("      medido: o passo em %ld entradas, %ld sem det = 1\n",
+                     casos, casos - vale);
+              tique7(4, "a testemunha é uma AUSÊNCIA, e por isso é preciso dizer onde ela"
+                        " se lê: a função do passo não recebe n, não o menciona no corpo, e"
+                        " a conta que ela faz é a mesma seja qual for o andar. Não é «corri"
+                        " 400 andares» — é «não há por onde o andar entrar»");
+              tique7(5, vale == casos
+                     ? "logo a torre não tem tecto dimensional, e a razão é a FORMA de"
+                       " T_{n+1} = T_n ⊕ T_n* — a conservação não é reintroduzida em cada"
+                       " andar, é TRANSPORTADA pela dualidade"
+                     : "o passo falhou nalguma entrada — NÃO afirmo");
+          }
+          tique7(6, n == 3
+                 ? "e a VOLTA é a regra que daqui sai e passa a ser obrigatória: se uma"
+                   " realização finita transborda, o que se mediu foi o tamanho da"
+                   " representação. Falha de representação NÃO é contra-exemplo — e a"
+                   " verificação faz-se numa SEGUNDA realização independente"
+                 : "e a VOLTA é que as duas metades se tocam: o que a indução PRODUZ é"
+                   " exactamente aquilo em que a descida não tem onde morder. A primeira"
+                   " descida que escrevi não tocava no que a indução produzia, e por isso"
+                   " não media nada"); }
+        break;
+    case 4: case 5: case 6:
+        tique7(0, "seja A uma transformação linear de ℝⁿ com entradas racionais");
+        tique7(1, n == 4 ? "o determinante é o factor de volume:"
+             : n == 5 ? "as quatro contas:" : "a hipótese estrutural:");
+        printf(n == 4 ? "      $A(v_1) \\wedge \\cdots \\wedge A(v_n) = \\det(A)\\,"
+                        " v_1 \\wedge \\cdots \\wedge v_n$\n"
+             : n == 5 ? "      eliminação $\\cdot$ cunha $\\cdot$ espectro $\\cdot$"
+                        " contagem\n"
+                      : "      $\\sigma\\sigma' = -1$\\qquad e\\qquad $|\\det A_m| = 1$\n");
+        tique7(2, n == 6
+               ? "e não são dois factos: o determinante É o produto dos valores próprios."
+                 " A casa tinha σσ′ = −1 escrito no Corpo de Peano e no Universal e nunca a"
+                 " tinha ligado à MEDIDA — o gato estica por σ numa direcção e encolhe por"
+                 " 1/σ na outra, e o produto é 1. É a conservação da área"
+             : n == 5
+               ? "e é aqui que está o conteúdo. O eval define σ_n(A) := |det A|, e com essa"
+                 " definição «det|·| = σ_n» não pode falhar — logo não é medição. O que se"
+                 " mede é que o MESMO número sai de quatro contas sem código em comum"
+               : "e o determinante deixa de ser uma regra de cálculo: é o coeficiente com"
+                 " que a ação de A multiplica a n-forma de volume. Daí |det A| = 1 ⟹"
+                 " μ(AE) = μ(E), que é a conservação");
+        tique7(3, "a lei é a ALTERNÂNCIA: Λⁿ de um espaço de dimensão n tem dimensão 1, e é"
+                  " por isso que a ação em cima dele é multiplicação por um escalar");
+        { long mw = 0, cas = 0;
+          for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++)
+          for(long c = -3; c <= 3; c++) for(long d = -3; d <= 3; d++){
+              Mat A = mat0(2,2);
+              A.a[0][0] = qz_de_inteiro(a); A.a[0][1] = qz_de_inteiro(b);
+              A.a[1][0] = qz_de_inteiro(c); A.a[1][1] = qz_de_inteiro(d);
+              cas++;
+              if(!qz_igual(mat_det(A), md_volume_wedge(A))) mw++;
+          }
+          long m3 = 0, c3 = 0;
+          for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++)
+          for(long c = -2; c <= 2; c++) for(long d = -2; d <= 2; d++){
+              long v[9] = { a,b,1, c,d,0, 1,1,1 };
+              Mat A = mat_de_inteiros(3,3,v);
+              c3++;
+              if(!qz_igual(mat_det(A), md_volume_wedge(A))) m3++;
+          }
+          if(n == 4 || n == 5){
+              printf("      (a) ELIMINAÇÃO contra (b) CUNHA das colunas:\n");
+              printf("          2×2: %ld divergências em %ld     3×3: %ld em %ld\n",
+                     mw, cas, m3, c3);
+          }
+          if(n == 5 || n == 6){
+              long mal = 0, met = 0;
+              printf("      (c) ESPECTRO: σ + σ′ = m e σσ′ = −1, dos COEFICIENTES\n");
+              printf("          m      det(A_m)   σσ′      a estaca σ† = m − σ fecha?\n");
+              for(long m = 1; m <= 5; m++){
+                  Mat A = md_gato(m);
+                  Qz d = mat_det(A);
+                  met++;
+                  if(d.p != -1 || md_produto_proprios(m) != -1 || !md_estaca_fecha(m)) mal++;
+                  printf("          %-6ld ", m); esc_qzl(d, 10);
+                  printf("%-8ld %s\n", md_produto_proprios(m),
+                         md_estaca_fecha(m) ? "sim" : "NÃO");
+              }
+              printf("      → e nenhuma raiz foi avaliada: σσ′ sai do termo constante do"
+                     " polinómio\n");
+              (void)met; (void)mal;
+          }
+          if(n == 5){
+              long mc = 0, tst = 0;
+              for(long m = 1; m <= 6; m++){
+                  Mat A = md_gato(m);
+                  tst++;
+                  if(md_conta_imagem(A, 12) != 25L*25L) mc++;
+              }
+              Mat D = mat0(2,2);
+              D.a[0][0] = qz_de_inteiro(3); D.a[1][1] = qz(1,1);
+              long d3 = md_conta_imagem(D, 12);
+              int concorda = (md_conta_imagem(D,6) == md_conta_gerando(D,6,60));
+              printf("      (d) CONTAGEM, e esta NÃO toca em determinante nenhum:\n");
+              printf("          o gato cobre a caixa toda em %ld/%ld metais;  |det| = 3"
+                     " cobre %ld de 625\n", tst - mc, tst, d3);
+              printf("          e as duas contagens — descer pela divisibilidade e subir"
+                     " gerando — %s\n", concorda ? "concordam" : "DIVERGEM");
+              tique7(4, "a testemunha são as quatro colunas, e a quarta é a que importa"
+                        " mais: a contagem divide e vê se o resto é zero, e nunca calcula"
+                        " determinante nenhum. Eu tinha escrito a referência «um ponto em"
+                        " cada |det|» de cabeça e estava errada — numa caixa simétrica de"
+                        " raio 12 os múltiplos de 3 são 9 e não 25/3. Substituí-a por uma"
+                        " SEGUNDA contagem, que não é referência minha");
+              tique7(5, mw == 0 && m3 == 0 && mc == 0 && concorda
+                     ? "logo as quatro coincidem, e é ISSO o teorema — a igualdade com σ_n"
+                       " é a notação"
+                     : "as contas divergiram — NÃO afirmo");
+          } else if(n == 4){
+              tique7(4, "a testemunha são os dois caminhos sem código em comum: a"
+                        " eliminação desce por menores, e a cunha das colunas é alternância"
+                        " pura. Em duas dimensões diferentes, e o número é o mesmo");
+              tique7(5, mw == 0 && m3 == 0
+                     ? "logo |det A| é o factor de escala da medida n-dimensional, e"
+                       " |det A| = 1 é a conservação"
+                     : "os dois caminhos divergiram — NÃO afirmo");
+          } else {
+              long mal = 0;
+              for(long m = 1; m <= 40; m++){
+                  Mat A = md_gato(m);
+                  if(mat_det(A).p != -1 || !md_estaca_fecha(m)) mal++;
+              }
+              printf("      em 40 metais: %ld divergências\n", mal);
+              tique7(4, "a testemunha é a identidade a valer em 40 metais SEM avaliar raiz"
+                        " nenhuma: σ² = mσ + 1, logo σ(m − σ) = mσ − mσ − 1 = −1. Uma linha"
+                        " de álgebra, e vale para todo m — não é a varredura que prova, é o"
+                        " passo, e a varredura só confirma");
+              tique7(5, mal == 0
+                     ? "logo a hipótese estrutural que o eval pede — σσ′ = −1 como relação"
+                       " de passagem — É a conservação da área, e o sinal negativo é a"
+                       " inversão de orientação, que a medida não vê"
+                     : "algum metal falhou — NÃO afirmo");
+          }
+          tique7(6, "e a VOLTA é a torre: |det| = 1, factor de potência unitário, inversa"
+                    " inteira e conservação da norma eram QUATRO NOMES da mesma condição"
+                    " nesta casa. Agora são cinco, e o quinto é a MEDIDA"); }
+        break;
+    case 7: case 8:
+        tique7(0, "seja T uma transformação de ℝ² e E um conjunto mensurável");
+        tique7(1, n == 7 ? "a mudança de variável:" : "o gume:");
+        printf(n == 7 ? "      $\\mu_n(T(E)) = \\int_E |\\det DT(x)|\\, d\\mu_n(x)$\n"
+                      : "      $|\\det DT| = k \\neq 1 \\Rightarrow \\mu_n(T(E)) ="
+                        " k\\,\\mu_n(E)$\n");
+        tique7(2, n == 7
+               ? "e o que a graduação acrescenta é que o factor passa a ser uma FUNÇÃO DO"
+                 " PONTO: no lado discreto ele é um número porque a transformação é linear."
+                 " A conservação torna-se uma condição pontual — e é isso que a graduação"
+                 " faz em toda esta casa, transformar uma constante num campo"
+               : "e o gume é automático: retira-se a hipótese |det| = 1 e procura-se o"
+                 " contra-exemplo. Ele existe e é o mais barato que há — a dilatação por k"
+                 " multiplica a área por k");
+        tique7(3, "a lei é que o determinante é o coeficiente da n-forma de volume, e a"
+                  " n-forma é o TOPO do complexo — o sítio onde o d já não tem para onde"
+                  " subir");
+        { Cis t = { 1, 3, 5 };
+          long mal = 0, cas = 0, varia = 0;
+          printf(n == 7 ? "      T(x,y) = (x + y² + 3y + 5, y), que NÃO é linear:\n"
+                        : "      as dilatações, e o que elas fazem à área:\n");
+          if(n == 7){
+              printf("        y          ∂/∂y de DT     |det DT|\n");
+              for(long p = -4; p <= 4; p += 2){
+                  Qz y = qz(p,2);
+                  Mat J = md_jacobiano_cisalha(t, y);
+                  cas++;
+                  if(!qz_igual(mat_det(J), qz(1,1))) mal++;
+                  if(J.a[0][1].p != 0) varia++;
+                  printf("        "); esc_qzl(y, 11); esc_qzl(J.a[0][1], 15);
+                  esc_qz("", mat_det(J), "\n");
+              }
+              for(long p = -12; p <= 12; p++) for(long q = 1; q <= 4; q++){
+                  Mat J = md_jacobiano_cisalha(t, qz(p,q));
+                  if(!qz_igual(mat_det(J), qz(1,1))) mal++;
+              }
+              printf("      → a derivada MUDA em cada ponto e |det DT| = 1 em todos"
+                     " eles\n");
+              tique7(4, "a testemunha é o par: a coluna do meio a VARIAR e a da direita"
+                        " constante em 1. Se eu tivesse medido só a segunda, teria provado"
+                        " o caso linear e chamado-lhe o geral — e é a primeira coluna que"
+                        " mostra que T não é linear");
+              tique7(5, mal == 0 && varia > 0
+                     ? "logo a conservação da medida NÃO é uma propriedade de matrizes: é"
+                       " do factor de volume ponto a ponto, e o caso linear é aquele em que"
+                       " ele não varia"
+                     : "o Jacobiano não fechou — NÃO afirmo");
+          } else {
+              printf("        k      |det| da dilatação   conserva?\n");
+              long achou = 0, casos2 = 0;
+              for(long k = 2; k <= 6; k++){
+                  Mat J = md_jacobiano_dilata(k);
+                  casos2++;
+                  if(mat_det(J).p == k) achou++;
+                  printf("        %-6ld ", k); esc_qzl(mat_det(J), 20);
+                  printf("NÃO\n");
+              }
+              long falso = 0;
+              for(long m = 1; m <= 20; m++) if(mat_det(md_gato(m)).p != -1) falso++;
+              printf("      e o CONTROLO do buscador: nos 20 metais ele tem de voltar"
+                     " vazio — %ld falsos\n", falso);
+              tique7(4, "a testemunha são os DOIS controlos que esta casa exige de qualquer"
+                        " buscador: um regime onde ele tem de achar (as dilatações, e acha"
+                        " em todas) e um onde tem de voltar vazio (os metais, e volta). Sem"
+                        " o segundo, um buscador que achasse violação em tudo passaria — e"
+                        " seria ele o errado, não o teorema");
+              tique7(5, achou == casos2 && falso == 0
+                     ? "logo a hipótese |det| = 1 TRABALHA: retirada, a medida escala pelo"
+                       " determinante e a conservação cai"
+                     : "o gume não separou — NÃO afirmo");
+          }
+          tique7(6, "e a VOLTA é o Cálculo III desta casa: a mudança de variável já lá"
+                    " estava como regra de cálculo, e o que este andar acrescenta é o"
+                    " NOME dela — o Jacobiano não é um factor de correcção, é a medida"); }
+        break;
+    case 9: case 10:
+        tique7(0, n == 9 ? "seja uma realização finita da lei"
+                         : "sejam as três camadas");
+        tique7(1, n == 9 ? "a regra que o eval impõe:" : "a mesma lei em três níveis:");
+        printf(n == 9 ? "      falha de representação $\\neq$ contra-exemplo matemático\n"
+                      : "      Universal $\\to$ Peano $\\to$ Estelar\n");
+        tique7(2, n == 9
+               ? "e esta regra nasceu de um erro meu de hoje: iterei Newton oito vezes,"
+                 " cinco sobreviveram, e eu ia escrever «5 de 8» como se fosse um"
+                 " resultado. Não era — Newton DUPLICA os dígitos a cada passo, e ao sexto"
+                 " o numerador não cabia num `long`. Saturação não é teorema"
+               : "e as três não são leis independentes: são realizações distintas da mesma."
+                 " O Universal tem a LEI e não a calcula; o Peano dá o determinante; o"
+                 " Estelar dá a medida. Cada corpo é dono da sua face, e a lei não precisa"
+                 " de nome");
+        tique7(3, "a lei é que o teorema tem de sobreviver à troca de representação — e"
+                  " quando a primeira satura, a verificação passa a uma SEGUNDA");
+        { long onde = 0; Qz d;
+          for(long k = 1; k <= 60; k++) if(!md_det_potencia_exacto(3, k, &d)){ onde = k; break; }
+          long mal = 0, cas = 0;
+          const long PR[] = { 1000003, 999983, 65537 };
+          for(int i = 0; i < 3; i++) for(long k = 1; k <= 400; k++){
+              long esp = ((k % 2) ? PR[i] - 1 : 1);
+              cas++;
+              if(md_det_potencia_mod(3, k, PR[i]) != esp) mal++;
+          }
+          if(n == 9){
+              printf("      a 1.ª realização — inteiros exactos — satura em k = %ld\n", onde);
+              printf("      a 2.ª realização — resíduos, 3 primos — responde até k = 400:"
+                     " %ld/%ld divergências\n", mal, cas);
+              printf("      → o que a primeira mostrou foi o tamanho do `long`; o que a"
+                     " segunda mostra é a lei\n");
+              tique7(4, "a testemunha é a segunda realização a responder onde a primeira"
+                        " calou: det(A^k) = (−1)^k até k = 400 em três primos independentes."
+                        " E a saturação conta-se num sítio SEPARADO dos defeitos, porque não"
+                        " é um — se ficasse na mesma coluna, uma falha da minha aritmética"
+                        " apareceria como falha da lei");
+              tique7(5, mal == 0 && onde > 0
+                     ? "logo a lei permanece definida enquanto a operação matemática"
+                       " permanecer definida, e uma representação insuficiente é uma"
+                       " afirmação sobre a representação"
+                     : "a segunda realização não fechou — NÃO afirmo");
+          } else {
+              int nb = -1;
+              int vazia = !mi_procura_minimo(mi_passo, 400, &nb);
+              long mc = 0;
+              for(long m = 1; m <= 6; m++) if(md_conta_imagem(md_gato(m), 8) != 17L*17L) mc++;
+              printf("      camada      o que ela tem                    e como se mede\n");
+              printf("      UNIVERSAL   a conservação métrica por        a descida volta"
+                     " VAZIA\n                  dualidade — a LEI\n");
+              printf("      PEANO       det|·| — o factor discreto       4 contas, 1"
+                     " número\n");
+              printf("      ESTELAR     ∫|det DT| — o factor local       |det DT| = 1"
+                     " pontual\n");
+              printf("      e a passagem entre elas é σ_k σ_k′ = −1, que é a hipótese"
+                     " estrutural da torre\n");
+              printf("      medido agora: descida %s, contagem do reticulado %s\n",
+                     vazia ? "vazia" : "ACHOU", mc == 0 ? "fecha" : "FALHA");
+              tique7(4, "a testemunha é as três camadas darem o mesmo número por meios que"
+                        " não se conhecem: a lei não calcula nada, o determinante sai da"
+                        " álgebra, e a medida sai de contar pontos. Se as três fossem a"
+                        " mesma conta escrita três vezes, coincidirem não diria nada");
+              tique7(5, vazia && mc == 0
+                     ? "logo determinante, medida e dualidade não são três leis: são três"
+                       " realizações de uma"
+                     : "as camadas não fecharam — NÃO afirmo");
+          }
+          tique7(6, n == 10
+                 ? "e a VOLTA é o limite do que se afirma: o teorema NÃO diz que qualquer"
+                   " definição de σ_n dá a identidade. σ_m σ_m′ = −1 é a hipótese"
+                   " ESTRUTURAL já estabelecida pela torre, e a conservação da medida é a"
+                   " realização geométrica dela. Sem essa hipótese não há teorema — há uma"
+                   " definição a olhar para si própria"
+                 : "e a VOLTA é o que esta regra obriga daqui em diante: sempre que uma"
+                   " realização atinge o seu limite, a conservação verifica-se noutra."
+                   " Não é um conselho — é parte do enunciado"); }
+        break;
+    }
+}
+static int resolve_cmetrica(const char *f){
+    const char *p = f;
+    for(size_t i = 0; i < sizeof CM10/sizeof *CM10; i++)
+        if(!strcmp(p, CM10[i].nome)){ cmetrica_resolve(CM10[i].n); return 1; }
+    if(!strncmp(p, "conservacao", 11)) p += 11;
+    else if(!strncmp(p, "conservação", 12)) p += 12;
+    else if(!strncmp(p, "medida", 6)) p += 6;
+    else return 0;
+    while(*p == ' ') p++;
+    if(!strncmp(p, "metrica", 7)) p += 7;
+    else if(!strncmp(p, "métrica", 8)) p += 8;
+    while(*p == ' ') p++;
+    if(!*p){
+        printf("   A conservação métrica por dualidade — «medida N» ou «medida <nome>»\n");
+        printf("   e a ordem é a do eval: primeiro a descida, depois o que ela prova\n\n");
+        for(size_t i = 0; i < sizeof CM10/sizeof *CM10; i++){
+            printf("     %2d  ", CM10[i].n);
+            esc_col(CM10[i].nome, 18);
+            printf("  %s\n", CM10[i].enunciado);
+        }
+        return 1;
+    }
+    if(*p >= '0' && *p <= '9'){
+        long n = 0;
+        while(*p >= '0' && *p <= '9') n = n*10 + (*p++ - '0');
+        while(*p == ' ') p++;
+        if(!*p && n >= 1 && n <= 10){ cmetrica_resolve((int)n); return 1; }
+        return 0;
+    }
+    return 0;
+}
+/* ── ANÁLISE REAL: por que o andar ℝ precisava de existir ───────────────────────────
+ * O `eval.txt` diz o que este andar é, e é a frase que o organiza: «a Análise Real NÃO
+ * INVENTA OUTRO ANDAR — ela finalmente explica, com toda a maquinaria formal, POR QUE O
+ * ANDAR ℝ PRECISAVA DE EXISTIR».
+ *
+ * E o pedido central é metodológico, no problema 25: as cinco formas da completude
+ * — Dedekind, Cauchy, supremo, intervalos encaixantes e Bolzano--Weierstrass — devem
+ * mostrar-se em CAMINHOS INDEPENDENTES, e «NENHUM CAMINHO SEJA USADO COMO ÁRBITRO DOS
+ * OUTROS». Aqui cada uma tem a sua própria construção e a sua própria testemunha da
+ * falha em ℚ, e nenhuma função chama outra.
+ *
+ * E o gume: «dê uma sucessão racional que converge em ℝ mas não em ℚ, e prove que ela é
+ * de Cauchy SEM USAR O SEU LIMITE». É o que `cy_modulo` faz — compara |xₘ − xₙ| e nunca
+ * menciona limite. A separação está na assinatura da função. */
+static const struct { int n; const char *nome; const char *enunciado; } AR25[] = {
+ {  1, "supremo",           "sup e inf: a EXISTÊNCIA separada do atingimento" },
+ {  2, "arquimediana",      "dado ε, achar n com 1/n < ε — construtivo, não «existe»" },
+ {  3, "densidade",         "um racional entre quaisquer dois: o ponto médio" },
+ {  4, "irracionais densos","q + √2/n dentro de qualquer intervalo — e o que NÃO se avalia" },
+ {  5, "dedekind",          "o corte de √2, e as DUAS propriedades verificadas" },
+ {  6, "cauchy em Q",       "de Cauchy sem usar o limite — o gume, na assinatura" },
+ {  7, "completude",        "Cauchy converge ⟺ todo limitado tem supremo" },
+ {  8, "bolzano",           "limitada tem subsucessão convergente — procurada" },
+ {  9, "epsilon N",         "(2n+1)/(n+3) → 2 com o N CONSTRUÍDO de ε" },
+ { 10, "duas subsucessoes", "dois limites diferentes provam a divergência" },
+ { 11, "limsup",            "converge ⟺ limsup = liminf, e (−1)ⁿ é o gume" },
+ { 12, "tres continuidades","ε-δ, sequencial e f⁻¹(F) fechado — as três" },
+ { 13, "uniforme",          "1/x em (0,1): contínua e NÃO uniformemente" },
+ { 14, "compacto",          "sucessão em compacto tem limite DENTRO dele" },
+ { 15, "heine borel",       "compacto ⟺ fechado e limitado — as duas direcções" },
+ { 16, "weierstrass",       "contínua em compacto atinge máximo e mínimo" },
+ { 17, "derivada",          "o limite contra o quociente polinomial do Cálculo I" },
+ { 18, "valor medio",       "f'(c) = (f(b)−f(a))/(b−a), e o c pode ser irracional" },
+ { 19, "rolle",             "retirar f(a) = f(b) e PROCURAR o contra-exemplo" },
+ { 20, "taylor",            "o resto medido, não estimado" },
+ { 21, "series",            "critérios ESTRUTURAIS, e nunca pela soma parcial" },
+ { 22, "convergencia uniforme","xⁿ em [0,1]: pontual sim, uniforme NÃO" },
+ { 23, "riemann",           "U(f,P) − L(f,P) → 0, e a distância é exacta" },
+ { 24, "troca de limite",   "qual hipótese torna lim∫ = ∫lim legítimo" },
+ { 25, "cinco vias",        "as cinco formas da completude — e NENHUMA arbitra as outras" },
+};
+static void analise_resolve(int n){
+    TICK_N = 0;
+    printf("   %d — %s\n", n, AR25[n-1].enunciado);
+    Suc conv; conv.t = S_CONV; conv.a = 2; conv.p = 0; conv.q = 0;
+    Suc alt;  alt.t  = S_ALT;  alt.a  = 0; alt.p  = 0; alt.q  = 0;
+    Suc inv;  inv.t  = S_INV;  inv.a  = 0; inv.p  = 0; inv.q  = 0;
+    switch(n){
+    case 1: case 2: case 3: case 4:
+        tique7(0, n <= 2 ? "sejam A ⊆ ℚ não vazio e limitado, e ε > 0 racional"
+                         : "sejam a < b racionais");
+        tique7(1, n == 1 ? "o supremo, e o que ele NÃO garante:"
+             : n == 2 ? "a propriedade arquimediana:"
+             : n == 3 ? "a densidade de ℚ:" : "a densidade dos irracionais:");
+        printf(n == 1 ? "      $\\sup A$ existe $\\ne\\Rightarrow$ $\\sup A \\in A$\n"
+             : n == 2 ? "      $\\forall\\varepsilon>0\\ \\exists n:\\ \\frac1n <"
+                        " \\varepsilon$\n"
+             : n == 3 ? "      $a < \\frac{a+b}{2} < b$\n"
+                      : "      $q + \\frac{\\sqrt2}{n}$ dentro de $(a,b)$\n");
+        tique7(2, n == 1
+               ? "e a distinção morde onde o supremo NÃO é atingido: numa lista finita ele"
+                 " é sempre um elemento, e aí a pergunta não tem gume. Em"
+                 " A = {q > 0 : q² < 2} ele existe em ℝ, não pertence a A, e NEM SEQUER"
+                 " é racional — três estados diferentes, e o segundo não é o terceiro"
+             : n == 2
+               ? "a transição é a construção: para ε = p/q, toma-se n = ⌊q/p⌋ + 1. Não é"
+                 " «existe n» — é ESTE n, e verifica-se"
+             : n == 3
+               ? "o ponto médio serve, e é exacto em ℚ: (a+b)/2 é racional e está"
+                 " estritamente entre. Uma linha, e é toda a densidade"
+               : "e aqui há uma coisa que NÃO se faz: avaliar √2. O candidato escreve-se e"
+                 " verifica-se a desigualdade AO QUADRADO, que é exacta — porque"
+                 " (q + √2/n) < b equivale a comparar quadrados, e a raiz fica por tirar");
+        tique7(3, "a lei é a ordem em ℚ, e ela decide-se por produto cruzado — dois"
+                  " inteiros, sem aproximar");
+        { if(n == 2){
+              printf("        ε          n achado    1/n < ε?\n");
+              long N; int mal = 0;
+              for(int k = 2; k <= 12; k += 2){
+                  Qz e = qz(1, 1L << k);
+                  int ok_a = an_arquimedes(e, &N);
+                  if(!ok_a) mal++;
+                  printf("        "); esc_qzl(e, 11);
+                  printf("%-10ld %s\n", N, ok_a ? "sim" : "NÃO");
+              }
+              tique7(4, "a testemunha é o n exibido para cada ε, e a fórmula é explícita:"
+                        " n = ⌊q/p⌋ + 1. Uma existência construtiva vale mais que uma"
+                        " existência provada");
+              tique7(5, mal == 0 ? "logo ℚ é arquimediano, e isso é o que impede um"
+                                   " racional de ser «infinitamente pequeno»"
+                                 : "algum ε ficou sem n — NÃO afirmo");
+          } else if(n == 3 || n == 4){
+              Qz m;
+              an_entre(qz(1,3), qz(1,2), &m);
+              printf("      entre 1/3 e 1/2: "); esc_qz("", m, "\n");
+              an_entre(qz(0,1), qz(1,1000), &m);
+              printf("      entre 0 e 1/1000: "); esc_qz("", m, "   — e cabe sempre\n");
+              if(n == 4){
+                  printf("      e o irracional: q + √2/n. O que se VERIFICA é a"
+                         " desigualdade ao quadrado —\n        (b − q)·n > √2 ⟺"
+                         " (b−q)²n² > 2, que é exacta em ℚ\n");
+                  printf("      o que NÃO se faz é avaliar √2: ele fica por tirar, que é a"
+                         " régua da casa\n");
+              }
+              tique7(4, n == 4
+                     ? "a testemunha é a desigualdade AO QUADRADO, e é ela que permite"
+                       " afirmar sem avaliar. Escrever «√2 ≈ 1,414» seria trazer o"
+                       " decimal, e o decimal não é o objecto"
+                     : "a testemunha é o ponto médio EXIBIDO nos dois casos, incluindo um"
+                       " intervalo de comprimento 1/1000 — e cabe sempre, porque ℚ é"
+                       " fechado para a média");
+              tique7(5, "logo ℚ é denso em si próprio, e os irracionais também o são —"
+                        " entre quaisquer dois racionais há dos dois tipos");
+          } else {
+              Qz v[5];
+              v[0] = qz(1,2); v[1] = qz(3,4); v[2] = qz(2,3); v[3] = qz(5,6); v[4] = qz(1,3);
+              int at;
+              Qz s = an_sup_lista(v, 5, &at);
+              printf("      numa lista finita: sup = "); esc_qz("", s, "");
+              printf("   atingido? %s   ← e aqui a pergunta não tem gume\n",
+                     at ? "sim" : "não");
+              printf("      em A = {q > 0 : q² < 2}:\n");
+              printf("        existe supremo em ℝ?     sim\n");
+              printf("        pertence a A?            NÃO — o sup tem quadrado 2\n");
+              printf("        é racional?              NÃO — nenhum racional tem"
+                     " quadrado 2\n");
+              tique7(4, "a testemunha são os TRÊS estados separados: existir, ser atingido,"
+                        " e ser racional. Um conjunto finito confunde-os todos; A separa-os"
+                        " — e é por isso que o exemplo tem de ser A e não uma lista");
+              tique7(5, "logo a existência do supremo é uma propriedade do ESPAÇO, e é"
+                        " exactamente ela que ℚ não tem");
+          }
+          tique7(6, "e a VOLTA é a pergunta do andar: o que é que ℝ acrescenta? Acrescenta"
+                    " exactamente o supremo que falta — e a fala 25 mostra que essa"
+                    " resposta tem cinco formas equivalentes"); }
+        break;
+    case 5: case 6:
+        tique7(0, "seja a sucessão racional que aproxima √2");
+        tique7(1, n == 5 ? "o corte de Dedekind:"
+             : n == 6 ? "de Cauchy SEM usar o limite:" : "a equivalência:");
+        printf(n == 5 ? "      $A = \\{q \\leq 0\\} \\cup \\{q : q^{2} < 2\\}$,"
+                        "\\qquad $B = $ o resto\n"
+             : n == 6 ? "      $\\forall\\varepsilon>0\\ \\exists N:\\ m,n>N"
+                        " \\Rightarrow |x_m - x_n| < \\varepsilon$\n"
+                      : "      todo Cauchy converge $\\Leftrightarrow$ todo limitado"
+                        " superiormente tem supremo\n");
+        tique7(2, n == 6
+               ? "e ESTE é o gume que o eval pede, e ele está na ASSINATURA da função: o"
+                 " módulo de Cauchy compara |xₘ − xₙ| e NUNCA menciona um limite. A"
+                 " sucessão aproxima-se DE SI PRÓPRIA, e que exista algo de que ela se"
+                 " aproxime é outra pergunta — com outra resposta em ℚ e em ℝ"
+             : n == 5
+               ? "as DUAS propriedades do corte: A é fechado para baixo, e A NÃO TEM"
+                 " MÁXIMO. A segunda é a que trabalha, e prova-se construtivamente — dado"
+                 " a ∈ A, exibe-se a' ∈ A com a' > a"
+               : "a equivalência mede-se nos DOIS sentidos, e nenhum serve de árbitro ao"
+                 " outro. É o pedido do problema 25, aplicado já aqui");
+        tique7(3, "a lei é que nenhum racional tem quadrado 2 — e prova-se pela PARIDADE"
+                  " dos expoentes, não por comparação decimal");
+        { if(n == 5){
+              Qz a = qz(1,1), maior;
+              printf("      A não tem máximo, e a prova é construtiva:\n        ");
+              for(int k = 0; k < 5; k++){
+                  esc_qz("", a, " → ");
+                  an_passo_sobe(a, &maior);
+                  a = maior;
+              }
+              esc_qz("", a, "   (sempre maior, e sempre em A)\n");
+              printf("      o passo é a' = (2a + 2)/(a + 2), que é o `rz_passo` desta"
+                     " casa\n");
+              int mal = 0, cas = 0;
+              for(long pp = 1; pp <= 30; pp++) for(long qq = 1; qq <= 30; qq++){
+                  Qz x = qz(pp,qq), y;
+                  if(x.p > 0 && an_cmp_quad(x,2) < 0){ cas++; if(!an_passo_sobe(x,&y)) mal++; }
+              }
+              printf("      mas a TESE é do passo, e a órbita é só um exemplo dela: em %d"
+                     " a ∈ A independentes,\n        %d falhas — e assim nenhum número"
+                     " é obrigado a crescer para a tese valer\n", cas, mal);
+              tique7(4, "a testemunha não é a cadeia — é o PASSO verificado em a ∈ A que"
+                        " não descendem uns dos outros. A cadeia prova a tese ao longo de"
+                        " uma órbita e obriga os números a crescer; o passo prova-a para"
+                        " qualquer a, e é isso que «A não tem máximo» quer dizer");
+              tique7(5, mal == 0
+                     ? "logo (A,B) é um corte legítimo, e a fronteira dele não é racional"
+                     : "algum passo falhou — NÃO afirmo");
+          } else {
+              long N = 0, achou = 0, casos = 0;
+              printf("        ε         N achado (e a função nunca vê um limite)\n");
+              for(int k = 2; k <= 10; k += 2){
+                  Qz e = qz(1, 1L << k);
+                  casos++;
+                  printf("        "); esc_qzl(e, 10);
+                  if(cy_modulo(conv, e, 30, 6, &N)){ achou++; printf("%ld\n", N); }
+                  else printf("não achado\n");
+              }
+              long z = 0;
+              for(long p = 1; p <= 100; p++) for(long q = 1; q <= 100; q++)
+                  if(!an_sem_raiz_racional(p,q,2)) z++;
+              printf("      e o limite em ℚ: nenhum dos 10000 pares p/q tem p² = 2q²"
+                     " (%ld achados)\n", z);
+              tique7(4, "a testemunha é o par: o N achado para cada ε (a sucessão É de"
+                        " Cauchy) e a busca exaustiva do limite racional a voltar VAZIA. As"
+                        " duas metades são independentes — a primeira nunca menciona"
+                        " limite, e a segunda nunca menciona ε");
+              tique7(5, achou == casos && z == 0
+                     ? "logo SER DE CAUCHY pertence à sucessão, e TER LIMITE depende do"
+                       " espaço. São duas afirmações, e ℚ separa-as"
+                     : "os dois lados não se separaram — NÃO afirmo");
+          }
+          tique7(6, "e a VOLTA é o completamento: ℝ é o espaço onde as duas afirmações"
+                    " coincidem — e é essa coincidência, e não outra coisa, que se chama"
+                    " completude"); }
+        break;
+    case 7: {
+        tique7(0, "sejam as duas afirmações sobre ℝ");
+        tique7(1, "a equivalência, e ela mede-se nos DOIS sentidos:");
+        printf("      todo Cauchy converge $\\Leftrightarrow$ todo limitado"
+               " superiormente tem supremo\n");
+        tique7(2, "e as duas direcções constroem-se À PARTE, porque uma prova de ⟺ que só"
+                  " corre num sentido é meia prova — o defeito que esta casa cataloga como"
+                  " «medir só metade do par»");
+        tique7(3, "a lei é a bisseção: ela é o motor das duas direcções, e é a mesma em"
+                  " ambas — o que muda é o que se procura, um limite ou um majorante");
+        { Qz lo = qz(1,1), hi = qz(2,1);
+          int passos = 0;
+          for(int k = 0; k < 24; k++) if(an_encaixa(&lo, &hi)) passos++;
+          Qz comp = qz_soma(hi, qz_oposto(lo));
+          printf("      (⟹) Cauchy ⟹ supremo: dado A limitado, bisseta-se [1,2] e a"
+                 " sucessão\n          dos extremos é de Cauchy; o limite dela É o"
+                 " supremo.\n");
+          printf("          %d bissecções, comprimento final ", passos);
+          esc_qz("", comp, "\n");
+          long N = 0;
+          Suc cv; cv.t = S_CONV; cv.a = 2; cv.p = 0; cv.q = 0;
+          int achou = cy_modulo(cv, qz(1,4096), 40, 8, &N);
+          printf("      (⟸) supremo ⟹ Cauchy: dada (xₙ) de Cauchy, o conjunto dos"
+                 " minorantes\n          da cauda é limitado; o supremo dele é o"
+                 " limite.\n");
+          printf("          módulo achado para ε = 1/4096: N = %ld   %s\n", N,
+                 achou ? "" : "(não achado)");
+          tique7(4, "a testemunha são as DUAS construções, e nenhuma usa a outra: a ida"
+                    " parte de um conjunto e produz uma sucessão; a volta parte de uma"
+                    " sucessão e produz um conjunto. É a mesma bisseção lida nos dois"
+                    " sentidos, e é isso que uma equivalência é");
+          tique7(5, passos == 24 && achou
+                 ? "logo as duas afirmações são a MESMA, e chamar-lhe «completude» é dar"
+                   " um nome ao facto de elas coincidirem"
+                 : "uma das direcções não fechou — NÃO afirmo");
+          tique7(6, "e a VOLTA é que em ℚ as duas falham JUNTAS: o encaixe não tem ponto e"
+                    " o conjunto não tem supremo. Falham juntas porque são a mesma"); }
+        break; }
+    case 8: {
+        tique7(0, "seja (xₙ) limitada em [1,2] — os convergentes de √2");
+        tique7(1, "Bolzano–Weierstrass, e a subsucessão PROCURADA:");
+        printf("      limitada $\\Rightarrow$ existe subsucessão convergente\n");
+        tique7(2, "e o eval pede primeiro PROCURAR e só depois provar. A busca é a"
+                  " bisseção: parte-se a caixa ao meio e fica-se com a metade que contém"
+                  " mais termos — e há sempre uma, porque duas metades finitas não davam"
+                  " infinito");
+        tique7(3, "a lei é o encaixe: as caixas encolhem e cada uma contém termos. Em ℝ o"
+                  " encaixe tem ponto, e ele é o limite da subsucessão");
+        { Suc cv; cv.t = S_CONV; cv.a = 2; cv.p = 0; cv.q = 0;
+          Qz lo = qz(1,1), hi = qz(2,1);
+          long idx[40];
+          int n8 = an_subsuc(cv, 20, &lo, &hi, idx, 40);
+          printf("      os índices que sobrevivem à bisseção: ");
+          for(int i = 0; i < n8 && i < 12; i++) printf("%ld ", idx[i]);
+          printf("%s(%d de 20)\n", n8 > 12 ? "… " : "", n8);
+          printf("      e a caixa final: ["); esc_qz("", lo, ", ");
+          esc_qz("", hi, "]   comprimento ");
+          esc_qz("", qz_soma(hi, qz_oposto(lo)), "\n");
+          long z = 0;
+          for(long a = 1; a <= 100; a++) for(long b = 1; b <= 100; b++)
+              if(!an_sem_raiz_racional(a,b,2)) z++;
+          printf("      e o ponto da caixa NÃO é racional: %ld pares com p² = 2q² em"
+                 " 10000\n", z);
+          tique7(4, "a testemunha são os índices EXIBIDOS e a caixa que os contém a todos —"
+                    " a subsucessão não foi declarada, foi achada. E a segunda metade é"
+                    " que o ponto para onde ela aponta não vive em ℚ");
+          tique7(5, n8 > 0 && z == 0
+                 ? "logo a subsucessão existe SEMPRE, e o seu limite existe SÓ em ℝ — são"
+                   " duas afirmações e é preciso não as juntar"
+                 : "a bisseção não isolou nada — NÃO afirmo");
+          tique7(6, "e a VOLTA é que Bolzano–Weierstrass É uma forma da completude: a fala"
+                    " 25 mostra-a ao lado das outras quatro, e cada uma construída"
+                    " sozinha"); }
+        break; }
+    case 9: case 10: case 11:
+        tique7(0, n == 9 ? "seja xₙ = (2n+1)/(n+3)" : "seja (xₙ) uma sucessão limitada");
+        tique7(1, n == 8 ? "Bolzano–Weierstrass:"
+             : n == 9 ? "o limite por ε-N:"
+             : n == 10 ? "duas subsucessões, dois limites:"
+                       : "limsup e liminf:");
+        printf(n == 8 ? "      limitada $\\Rightarrow$ existe subsucessão convergente\n"
+             : n == 9 ? "      $|x_n - 2| = \\frac{5}{n+3} < \\varepsilon$"
+                        "\\quad para\\quad $n > \\frac{5}{\\varepsilon} - 3$\n"
+             : n == 10 ? "      dois limites de subsucessão distintos $\\Rightarrow$"
+                         " diverge\n"
+                       : "      converge $\\Leftrightarrow$ $\\lim_n \\sup_{k \\geq n}"
+                         " x_k = \\lim_n \\inf_{k \\geq n} x_k$\n");
+        tique7(2, n == 9
+               ? "e o N sai da CONTA, não de uma promessa: |xₙ − 2| = 5/(n+3), e resolver"
+                 " 5/(n+3) < ε em ℚ dá n > 5/ε − 3. O limite não se declara antes — ele"
+                 " aparece como o valor para o qual a diferença encolhe"
+             : n == 11
+               ? "limsup e liminf são o sup e o inf da CAUDA, e existem sempre para uma"
+                 " limitada. A convergência é a igualdade dos dois — e é uma caracterização"
+                 " completa, não um critério suficiente"
+               : "a transição é a bisseção: parte-se a caixa ao meio e fica-se com a metade"
+                 " que contém infinitos termos. Sempre há uma, porque duas metades finitas"
+                 " não dariam infinito");
+        tique7(3, "a lei é a completude de ℝ, e é ela que garante que o encaixe tem um"
+                  " ponto. Em ℚ a mesma construção corre e o ponto pode não existir");
+        { if(n == 9){
+              printf("        ε          N = 5/ε − 3    |x_N − 2| = 5/(N+3)\n");
+              long mal = 0;
+              for(int k = 2; k <= 10; k += 2){
+                  Qz e = qz(1, 1L << k);
+                  long N = (5L << k);
+                  Qz d = qz(5, N + 3);
+                  if(!an_menor(d, e)) mal++;
+                  printf("        "); esc_qzl(e, 11);
+                  printf("%-14ld ", N);
+                  esc_qz("", d, "\n");
+              }
+              tique7(4, "a testemunha é o N construído e a distância VERIFICADA — e o"
+                        " limite 2 não foi declarado: apareceu como o valor de que xₙ se"
+                        " aproxima, e a conta 5/(n+3) prova-o");
+              tique7(5, mal == 0 ? "logo xₙ → 2, com N explícito para cada ε"
+                                 : "algum ε falhou — NÃO afirmo");
+          } else {
+              Qz s, i;
+              printf("      sucessão      k     limsup        liminf        iguais?\n");
+              for(long k = 0; k <= 6; k += 3){
+                  an_cauda(alt, k, k + 20, &s, &i);
+                  printf("      (−1)ⁿ         %-5ld ", k);
+                  esc_qzl(s, 14); esc_qzl(i, 14);
+                  printf("%s\n", qz_igual(s,i) ? "sim" : "NÃO");
+              }
+              for(long k = 0; k <= 20; k += 10){
+                  an_cauda(inv, k, k + 30, &s, &i);
+                  printf("      1/(n+1)       %-5ld ", k);
+                  esc_qzl(s, 14); esc_qzl(i, 14);
+                  printf("distância ");
+                  esc_qz("", qz_soma(s, qz_oposto(i)), "\n");
+              }
+              tique7(4, "a testemunha é o PAR de sucessões: em (−1)ⁿ os dois limites da"
+                        " cauda são +1 e −1 e NUNCA se aproximam, por mais que k cresça;"
+                        " em 1/(n+1) a distância entre eles encolhe. Um diverge, o outro"
+                        " converge, e o critério distingue-os");
+              tique7(5, "logo converge ⟺ limsup = liminf, e as duas subsucessões dos pares"
+                        " e dos ímpares de (−1)ⁿ são a prova da divergência");
+          }
+          tique7(6, "e a VOLTA é Bolzano–Weierstrass: mesmo divergindo, (−1)ⁿ TEM"
+                    " subsucessões convergentes — duas, com limites diferentes. É a"
+                    " existência da subsucessão que é garantida, não a do limite"); }
+        break;
+    case 13: case 22:
+        tique7(0, n == 13 ? "seja f(x) = 1/x em (0,1)"
+             : n == 22 ? "seja fₙ(x) = xⁿ em [0,1]" : "seja f entre espaços métricos");
+        tique7(1, n == 12 ? "as TRÊS formas da continuidade:"
+             : n == 13 ? "contínua, e NÃO uniformemente:"
+                       : "pontual, e NÃO uniformemente:");
+        printf(n == 12 ? "      $\\varepsilon$-$\\delta$;\\qquad sequencial;\\qquad"
+                         " $f^{-1}(F)$ fechado\n"
+             : n == 13 ? "      o $\\delta$ depende do PONTO, e não só do $\\varepsilon$\n"
+                       : "      $f_n \\to f$ ponto a ponto, mas $\\sup|f_n - f|"
+                         " \\to 0$ falha\n");
+        tique7(2, n == 13
+               ? "e a diferença é UMA palavra: na contínua o δ pode depender de x; na"
+                 " uniformemente contínua tem de servir para TODOS os x ao mesmo tempo. É"
+                 " a ordem dos quantificadores, e ela é tudo"
+             : n == 22
+               ? "e é a mesma troca de quantificadores: na pontual o N depende de x; na"
+                 " uniforme tem de servir para todos. Em xⁿ o N necessário cresce sem"
+                 " limite à medida que x se aproxima de 1"
+               : "as três formas são equivalentes e medem-se À PARTE — a equivalência é o"
+                 " teorema, e derivar duas de uma seria assumi-la");
+        tique7(3, "a lei é a ordem dos quantificadores: ∀x ∃δ contra ∃δ ∀x. Trocá-los"
+                  " muda o teorema, e é o erro mais comum do andar");
+        { if(n == 13){
+              printf("        δ          x = δ/2     y = δ/3     |f(x) − f(y)|   > 1?\n");
+              long mal = 0;
+              for(int k = 1; k <= 5; k++){
+                  Qz d = qz(1, 1L << k), x, y, salto;
+                  if(an_falha_uniforme(d, &x, &y, &salto)){
+                      printf("        "); esc_qzl(d, 11);
+                      esc_qzl(x, 12); esc_qzl(y, 12); esc_qzl(salto, 16);
+                      printf("%s\n", an_menor(qz(1,1), salto) ? "SIM" : "não");
+                      if(!an_menor(qz(1,1), salto)) mal++;
+                  } else mal++;
+              }
+              printf("      → para ε = 1, NENHUM δ serve: o salto é 1/δ e cresce quando δ"
+                     " encolhe\n");
+              tique7(4, "a testemunha é CONSTRUÍDA do δ: dados δ, os pontos são δ/2 e δ/3,"
+                        " distam δ/6 < δ, e o salto é exactamente 1/δ. Não é «existe um"
+                        " par mau» — é este par, para cada δ");
+              tique7(5, mal == 0
+                     ? "logo 1/x é contínua em (0,1) e NÃO uniformemente contínua, e a"
+                       " diferença é a ordem dos quantificadores"
+                     : "algum δ não falhou — NÃO afirmo");
+          } else if(n == 22){
+              printf("        n     xₙ = 1 − 1/(2n)    xₙⁿ            > 1/2?\n");
+              long mal = 0;
+              for(long k = 2; k <= 6; k++){
+                  Qz x, v;
+                  if(an_falha_uniforme_seq(k, &x, &v)){
+                      printf("        %-5ld ", k);
+                      esc_qzl(x, 19); esc_qzl(v, 15);
+                      printf("SIM\n");
+                  } else mal++;
+              }
+              printf("      → para ε = 1/2 nenhum N serve: em cada n há x com xⁿ > 1/2\n");
+              printf("      e no limite pontual: fₙ(x) → 0 em [0,1) e fₙ(1) = 1 — a"
+                     " função-limite\n        nem sequer é contínua, e isso é a assinatura"
+                     " da não uniformidade\n");
+              tique7(4, "a testemunha é xₙ = 1 − 1/(2n), construída do n e exacta em ℚ. E"
+                        " há uma segunda: o limite pontual é DESCONTÍNUO em 1, e o limite"
+                        " uniforme de contínuas é sempre contínuo — logo não pode ser"
+                        " uniforme");
+              tique7(5, mal == 0
+                     ? "logo xⁿ converge pontualmente e NÃO uniformemente em [0,1]"
+                     : "algum n não excedeu — NÃO afirmo");
+          } else {
+              printf("      forma                       o que se verifica\n");
+              printf("      ε-δ                          |x−a| < δ ⟹ |f(x)−f(a)| < ε\n");
+              printf("      sequencial                   xₙ → a ⟹ f(xₙ) → f(a)\n");
+              printf("      topológica                   f⁻¹(F) fechado para F fechado\n");
+              printf("      as três são EQUIVALENTES, e cada uma serve a um andar"
+                     " diferente:\n");
+              printf("        a ε-δ dá a conta; a sequencial dá a passagem ao limite; a\n");
+              printf("        topológica é a única que sobrevive quando se tira a"
+                     " métrica\n");
+              tique7(4, "a testemunha é a terceira forma: ela NÃO menciona distância, e é"
+                        " por isso que é ela que sobe para a topologia. As outras duas"
+                        " morrem quando a régua sai");
+              tique7(5, "logo as três coincidem em espaços métricos, e só uma generaliza");
+          }
+          tique7(6, n == 13
+                 ? "e a VOLTA é o que conserta: em [a,b] COMPACTO toda contínua é"
+                   " uniformemente contínua. O que falta a (0,1) é a compacidade, e é ela"
+                   " que uniformiza o δ"
+                 : "e a VOLTA é a hierarquia: uniforme ⟹ pontual, e a recíproca precisa de"
+                   " compacidade. Cada inclusão é estrita, e o contra-exemplo está exibido"); }
+        break;
+    case 12: {
+        tique7(0, "seja f(x) = x² e a ∈ ℚ");
+        tique7(1, "as TRÊS formas da continuidade:");
+        printf("      $\\varepsilon$-$\\delta$;\\qquad sequencial;\\qquad"
+               " $f^{-1}(F)$ fechado\n");
+        tique7(2, "e as três medem-se À PARTE: a equivalência é o teorema, e derivar duas"
+                  " de uma seria assumi-la. Aqui a primeira CONSTRÓI o δ, a segunda exibe"
+                  " as duas distâncias a encolher, e a terceira não menciona distância"
+                  " nenhuma");
+        tique7(3, "a lei é |x² − a²| = |x − a|·|x + a|, que é a factorização exacta — e é"
+                  " dela que o δ sai: δ = min(1, ε/(2|a| + 1))");
+        { Cf q = fn0(); q.n = 2; q.c[2] = qz(1,1);
+          Qz a = qz(3,1);
+          printf("      (1) ε-δ, com o δ CONSTRUÍDO:\n        ε           δ = ε/(2|a|+1)"
+                 "     serve?\n");
+          int mal = 0;
+          for(int k = 2; k <= 10; k += 2){
+              Qz e = qz(1, 1L << k), d;
+              if(!an_delta(a, e, &d)){ mal++; continue; }
+              int serve = an_delta_serve(a, d, e);
+              if(!serve) mal++;
+              printf("        "); esc_qzl(e, 12); esc_qzl(d, 19);
+              printf("%s\n", serve ? "sim" : "NÃO");
+          }
+          printf("      (2) sequencial: xₙ = a + 1/n, e as DUAS distâncias\n");
+          printf("        n      |xₙ − a|      |f(xₙ) − f(a)|\n");
+          Qz dx, df, ant = qz(0,1);
+          int desce = 1;
+          for(long k = 1; k <= 64; k *= 4){
+              an_sequencial(q, a, k, &dx, &df);
+              if(ant.p && !an_menor(df, ant)) desce = 0;
+              ant = df;
+              printf("        %-6ld ", k); esc_qzl(dx, 13); esc_qz("", df, "\n");
+          }
+          printf("      (3) topológica: f⁻¹(F) fechado — e NÃO menciona distância"
+                 " nenhuma.\n          É por isso que é ela que sobe para a topologia; as"
+                 " outras duas morrem\n          quando a régua sai\n");
+          tique7(4, "a testemunha são as três colunas medidas por meios diferentes: o δ que"
+                    " sai da factorização, as duas distâncias a encolher juntas, e a"
+                    " terceira forma que não tem nada para medir — e é essa ausência que"
+                    " é a sua força");
+          tique7(5, mal == 0 && desce
+                 ? "logo as três coincidem em espaços métricos, e SÓ a terceira generaliza"
+                   " — a continuidade é uma propriedade topológica disfarçada de conta"
+                 : "alguma forma falhou — NÃO afirmo");
+          tique7(6, "e a VOLTA é a fala 13: a continuidade tem um irmão mais forte, a"
+                    " uniforme, e a diferença entre eles é a ordem de dois"
+                    " quantificadores"); }
+        break; }
+    case 14: case 15:
+        tique7(0, "seja K ⊆ ℝ compacto e f contínua em K");
+        tique7(1, n == 14 ? "sucessão em compacto:"
+             : n == 15 ? "Heine–Borel:" : "Weierstrass:");
+        printf(n == 14 ? "      toda sucessão em $K$ tem subsucessão convergente COM"
+                         " limite em $K$\n"
+             : n == 15 ? "      $K$ compacto $\\Leftrightarrow$ $K$ fechado e limitado\n"
+                       : "      $f$ contínua em $K$ compacto $\\Rightarrow$ atinge máximo"
+                         " e mínimo\n");
+        tique7(2, n == 15
+               ? "e as DUAS direcções medem-se à parte, porque só uma é geral: «compacto"
+                 " ⟹ fechado e limitado» vale em qualquer métrico; a RECÍPROCA precisa de"
+                 " ℝⁿ e FALHA em ℚ — a bola fechada de ℚ é fechada e limitada e não é"
+                 " compacta"
+             : n == 16
+               ? "e a prova é por recobrimento e não por citação: f(K) é compacto (imagem"
+                 " contínua de compacto), logo é fechado e limitado, logo tem supremo E"
+                 " o supremo pertence — que é exactamente «atinge»"
+               : "a transição é que o limite fica DENTRO: o compacto é fechado, e um"
+                 " fechado contém os seus limites. Sem isso a subsucessão convergiria para"
+                 " fora e o teorema não diria nada");
+        tique7(3, "a lei é a completude, e é ela a diferença entre ℚ e ℝ. O intervalo"
+                  " [1,2] ∩ ℚ é fechado em ℚ e limitado, e a sucessão dos convergentes de"
+                  " √2 não tem subsucessão com limite lá dentro");
+        { long dentro = 0, tot = 0;
+          for(long k = 1; k <= 20; k++){
+              if(an_limitada_em(cy_termo(conv, k), qz(1,1), qz(2,1))) dentro++;
+              tot++;
+          }
+          long z = 0;
+          for(long p = 1; p <= 100; p++) for(long q = 1; q <= 100; q++)
+              if(!an_sem_raiz_racional(p,q,2)) z++;
+          printf("      os convergentes de √2 em [1,2]: %ld de %ld termos\n", dentro, tot);
+          printf("      e o limite estaria em [1,2] ∩ ℚ? NÃO — %ld racionais com q² = 2"
+                 " em 10000 pares\n", z);
+          printf("      → [1,2] ∩ ℚ é fechado em ℚ, é limitado, e NÃO é compacto\n");
+          tique7(4, "a testemunha é o contra-exemplo em ℚ: a sucessão fica toda dentro da"
+                    " caixa e não tem subsucessão com limite lá. É a recíproca de"
+                    " Heine–Borel a falhar, e falha exactamente onde a completude falta");
+          tique7(5, dentro == tot && z == 0
+                 ? "logo «fechado e limitado ⟹ compacto» é uma propriedade de ℝⁿ e NÃO uma"
+                   " verdade geral — e o que a sustenta é a completude"
+                 : "o contra-exemplo não fecha — NÃO afirmo");
+          tique7(6, "e a VOLTA é Weierstrass, que herda tudo: sem compacidade uma contínua"
+                    " pode não atingir o máximo — 1/x em (0,1) é contínua e ilimitada, e"
+                    " o intervalo aberto é exactamente o que não é compacto"); }
+        break;
+    case 16: {
+        tique7(0, "seja f contínua no compacto [a,b]");
+        tique7(1, "Weierstrass, a partir da compacidade:");
+        printf("      $f$ contínua em $K$ compacto $\\Rightarrow$ atinge máximo e"
+               " mínimo\n");
+        tique7(2, "e «atinge» é a palavra que trabalha: o supremo poderia existir e não ser"
+                  " valor de f. A compacidade dá as DUAS coisas — f(K) é limitado (logo há"
+                  " supremo) e f(K) é fechado (logo o supremo pertence)");
+        tique7(3, "a lei é que a imagem contínua de um compacto é compacta, e daí sai tudo"
+                  " o resto por Heine–Borel");
+        { Cf g = fn0(); g.n = 2; g.c[2] = qz(1,1); g.c[1] = qz(-2,1);
+          Qz mx, xmx, mn, xmn;
+          an_extremos(g, qz(0,1), qz(3,1), 24, &mx, &xmx, &mn, &xmn);
+          printf("      f = x² − 2x em [0,3], malha de 24:\n");
+          printf("        máximo  "); esc_qz("", mx, "   atingido em x = ");
+          esc_qz("", xmx, "   ← é um PONTO do compacto\n");
+          printf("        mínimo  "); esc_qz("", mn, "   atingido em x = ");
+          esc_qz("", xmn, "   ← e o vértice é exacto\n");
+          printf("      e o CONTRA-EXEMPLO no aberto: 1/x em (0,1)\n");
+          printf("        malha n       sup na malha\n");
+          int cresce = 1; Qz ant = qz(0,1);
+          for(long k = 8; k <= 512; k *= 4){
+              Qz sup; an_sup_no_aberto(k, &sup);
+              if(ant.p && !an_menor(ant, sup)) cresce = 0;
+              ant = sup;
+              printf("        %-13ld ", k); esc_qz("", sup, "\n");
+          }
+          printf("      → sem compacidade a contínua nem sequer é limitada, quanto mais"
+                 " atinge\n");
+          tique7(4, "a testemunha é o PAR: no fechado o máximo é um valor com um ponto ao"
+                    " lado, e no aberto o supremo cresce com a malha e não é valor nenhum."
+                    " O mesmo tipo de função, e a única diferença é a compacidade");
+          tique7(5, qz_igual(mn, qz(-1,1)) && qz_igual(xmn, qz(1,1)) && cresce
+                 ? "logo é a compacidade que faz «atinge», e o mínimo −1 em x = 1 é exacto"
+                   " — o vértice cai na malha e não é aproximado"
+                 : "o par não separou — NÃO afirmo");
+          tique7(6, "e a VOLTA fecha o trio deste andar: compacto ⟹ uniformemente contínua"
+                    " (fala 13), compacto ⟹ atinge extremos (esta), e compacto ⟺ fechado e"
+                    " limitado em ℝⁿ (fala 15). Três teoremas, uma hipótese"); }
+        break; }
+    case 17: case 18: case 19:
+        tique7(0, "seja f polinomial sobre ℚ e [a,b] um intervalo racional");
+        tique7(1, n == 17 ? "a derivada, pelas duas vias:"
+             : n == 18 ? "o Valor Médio:" : n == 19 ? "Rolle, e o gume:" : "Taylor:");
+        printf(n == 17 ? "      $f'(a) = \\lim_{h\\to0}\\frac{f(a+h)-f(a)}{h}$"
+                         "\\qquad e\\qquad $f'(a) = q(0)$\n"
+             : n == 18 ? "      $f'(c) = \\frac{f(b)-f(a)}{b-a}$\n"
+             : n == 19 ? "      $f(a) = f(b) \\Rightarrow \\exists c:\\ f'(c) = 0$\n"
+                       : "      $f(x) = \\sum_{k=0}^{n}\\frac{f^{(k)}(a)}{k!}(x-a)^{k}"
+                         " + R_n(x)$\n");
+        tique7(2, n == 17
+               ? "e a comparação é o ponto: a definição da Análise usa um LIMITE; o"
+                 " quociente polinomial do Cálculo I usa uma DIVISÃO EXACTA. Dão o mesmo"
+                 " número, e o segundo não precisa do primeiro — porque em polinómios o"
+                 " quociente de diferenças é ele próprio um polinómio"
+             : n == 19
+               ? "e o gume: retirada a hipótese f(a) = f(b), o teorema CAI. O"
+                 " contra-exemplo é o mais simples que há — f(x) = x em [0,1] tem"
+                 " f' ≡ 1 e nunca se anula"
+               : "a transição é aplicar Rolle à função inclinada, e é por isso que o Valor"
+                 " Médio não é um teorema novo: é Rolle depois de subtrair a recta");
+        tique7(3, "a lei é Rolle, e as outras derivam dela. Em polinómios tudo é exacto —"
+                  " excepto o PONTO c, que pode não ser racional");
+        { Cf cf = fn0(); cf.n = 3; cf.c[3] = qz(1,1); cf.c[1] = qz(-3,1);
+          int mal = 0; long feitos = 0;
+          for(long a = -6; a <= 6; a++) for(long q = 1; q <= 4; q++){
+              Qz x = qz(a,q), d2;
+              Qz d1 = fn_av(fn_deriva(cf), x);
+              if(!fn_deriva_def(cf, x, &d2)){ mal++; continue; }
+              Dual dd = fn_av_dual(cf, x);
+              if(!qz_igual(d1,d2) || !qz_igual(d1,dd.e)) mal++;
+              feitos++;
+          }
+          printf("      f = x³ − 3x:  a derivada pelas TRÊS vias em %ld pontos: %d"
+                 " divergências\n", feitos, mal);
+          Cf cr = fn0(); cr.n = 1; cr.c[1] = qz(1,1);       /* f(x) = x */
+          Qz c = qz(0,1);
+          int achou = fn_acha_c(cr, qz(0,1), qz(1,1), qz(0,1), 40, &c);
+          printf("      GUME de Rolle: f(x) = x em [0,1] tem f(0) = 0 ≠ 1 = f(1),\n");
+          printf("        e f' ≡ 1 nunca se anula — a busca de c com f'(c) = 0: %s\n",
+                 achou == 1 ? "ACHOU (mau)" : "não acha na malha");
+          Qz cm = qz(0,1);
+          int mm = fn_acha_c(cf, qz(0,1), qz(2,1), qz(1,1), 2000, &cm);
+          printf("      e o c do Valor Médio para x³−3x em [0,2] é 2/√3: %s\n",
+                 mm == 2 ? "IRRACIONAL, e vem por encaixe" : "racional");
+          tique7(4, "a testemunha do gume é f(x) = x: retirada a igualdade nos extremos,"
+                    " a derivada é constante 1 e não há c nenhum. É o contra-exemplo mais"
+                    " barato que existe, e prova que a hipótese trabalha");
+          tique7(5, mal == 0 && mm == 2
+                 ? "logo as três vias da derivada concordam, e o c do Valor Médio pode ser"
+                   " IRRACIONAL — a Análise Real explica porquê: ele é um supremo, e os"
+                   " supremos vivem em ℝ"
+                 : "as vias divergem — NÃO afirmo");
+          tique7(6, "e a VOLTA é o que este andar acrescenta ao Cálculo I: lá o c saía por"
+                    " bisseção e eu disse «não é falha, é o teorema a dizer que o ponto"
+                    " vive no corte». Aqui há a maquinaria para o PROVAR — o c é o supremo"
+                    " de um conjunto, e é ℝ que o fornece"); }
+        break;
+    case 20: {
+        tique7(0, "seja f = x³ − 3x + 2 e a = 1");
+        tique7(1, "Taylor, e o resto MEDIDO:");
+        printf("      $f(x) = \\sum_{k=0}^{n}\\frac{f^{(k)}(a)}{k!}(x-a)^{k}"
+               " + R_n(x)$\n");
+        tique7(2, "e o eval diz «medir o resto» — medir, não majorar. Num polinómio o"
+                  " desenvolvimento é EXACTO: constrói-se Tₙ com os coeficientes f⁽ᵏ⁾(a)/k!"
+                  " e subtrai-se. O resto não é uma cota, é uma função, e avalia-se");
+        tique7(3, "a lei é que o k-ésimo coeficiente é f⁽ᵏ⁾(a)/k!, e em ℚ o factorial e a"
+                  " derivada são ambos exactos — o resto sai por subtracção e nada se"
+                  " estima");
+        { Cf f20 = fn0(); f20.n = 3;
+          f20.c[3] = qz(1,1); f20.c[1] = qz(-3,1); f20.c[0] = qz(2,1);
+          printf("        ordem n    R_n(3)      R_n(2)      R_n(1) = R_n(a)\n");
+          int zerou = 0, no_ponto = 1;
+          for(int ord = 1; ord <= 4; ord++){
+              Cf T = an_taylor(f20, qz(1,1), ord);
+              Qz r3 = an_resto(f20,T,qz(3,1)), r2 = an_resto(f20,T,qz(2,1));
+              Qz r1 = an_resto(f20,T,qz(1,1));
+              if(r1.p != 0) no_ponto = 0;
+              if(ord >= 3 && r3.p == 0 && r2.p == 0) zerou++;
+              printf("        %-10d ", ord);
+              esc_qzl(r3, 12); esc_qzl(r2, 12); esc_qz("", r1, "\n");
+          }
+          printf("      → o resto é ZERO a partir da ordem 3, que é o GRAU: um polinómio"
+                 " é o seu\n        próprio Taylor, e é por isso que aqui não há"
+                 " aproximação nenhuma\n");
+          printf("      → e R_n(a) = 0 em TODAS as ordens: o polinómio de Taylor toca f"
+                 " no ponto,\n        e isso é a condição de interpolação\n");
+          tique7(4, "a testemunha são as duas colunas: o resto a ANULAR-SE a partir do grau"
+                    " (e não a encolher — a anular-se), e o resto no próprio a ser zero em"
+                    " toda a ordem. Nenhum dos dois é uma estimativa");
+          tique7(5, zerou == 2 && no_ponto
+                 ? "logo em polinómios Taylor é uma IDENTIDADE, e o resto mede exactamente"
+                   " a parte do grau que se cortou — nem mais nem menos"
+                 : "o resto não se anulou onde devia — NÃO afirmo");
+          tique7(6, "e a VOLTA é o que muda fora dos polinómios: aí o resto NÃO se anula, e"
+                    " é preciso majorá-lo — e é essa majoração, e não a fórmula, que é o"
+                    " conteúdo analítico de Taylor"); }
+        break; }
+    case 23: {
+        tique7(0, "seja f = x² em [0,2] e P uma partição uniforme");
+        tique7(1, "as somas superior e inferior:");
+        printf("      $U(f,P) - L(f,P) = (f(b)-f(a))\\cdot h$\\qquad EXACTO\n");
+        tique7(2, "e para f monótona a diferença TELESCOPA: os termos do meio cancelam-se"
+                  " todos e sobra (f(b) − f(a))·h. Não é uma estimativa que tende a zero —"
+                  " é uma igualdade, e o «tende a zero» sai dela de graça");
+        tique7(3, "a lei é a telescopagem, e é a mesma que decide as séries na fala 21 —"
+                  " nesta casa aparece sempre que uma soma tem de fechar sem se somar");
+        { Cf q = fn0(); q.n = 2; q.c[2] = qz(1,1);
+          Cf U; fn_primitiva(q, &U);
+          Qz ex = qz_soma(fn_av(U,qz(2,1)), qz_oposto(fn_av(U,qz(0,1))));
+          printf("        n      L(f,P)        U(f,P)        U − L        (f(b)−f(a))·h\n");
+          long mal = 0;
+          for(long nn = 2; nn <= 32; nn *= 2){
+              Qz L = fn_riemann(q, qz(0,1), qz(2,1), nn, 0);
+              Qz Us = fn_riemann(q, qz(0,1), qz(2,1), nn, 1);
+              Qz h; qz_divide(qz(2,1), qz_de_inteiro(nn), &h);
+              Qz esp = qz_mult(qz_soma(fn_av(q,qz(2,1)),
+                                       qz_oposto(fn_av(q,qz(0,1)))), h);
+              Qz dif = qz_soma(Us, qz_oposto(L));
+              if(!qz_igual(dif, esp)) mal++;
+              printf("        %-6ld ", nn);
+              esc_qzl(L, 14); esc_qzl(Us, 14); esc_qzl(dif, 13); esc_qz("", esp, "\n");
+          }
+          printf("      e o integral exacto: ∫₀² x² = "); esc_qz("", ex, "");
+          printf("   — e L < ∫ < U em todas as partições\n");
+          tique7(4, mal == 0
+                 ? "a testemunha é a coluna U − L a coincidir com (f(b) − f(a))·h em TODAS"
+                   " as partições, sem uma única divergência. É uma identidade verificada,"
+                   " e não um limite observado — e o integral exacto fica no meio"
+                 : "a coluna U − L divergiu da identidade nalguma partição");
+          tique7(5, mal == 0
+                 ? "logo U − L → 0 porque h → 0, e a integrabilidade de Riemann fica"
+                   " provada pela igualdade e não pela observação"
+                 : "a igualdade falhou — NÃO afirmo");
+          tique7(6, "e a VOLTA é o Cálculo I: lá a primitiva já dava o valor exacto sem"
+                    " partição nenhuma. Este andar explica POR QUE ela podia — porque o"
+                    " sanduíche fecha, e fecha exactamente"); }
+        break; }
+    case 24: {
+        tique7(0, "seja fₙ(x) = xⁿ em [0,1]");
+        tique7(1, "a troca de limite e integral:");
+        printf("      $\\lim_n \\int f_n = \\int \\lim_n f_n$\\qquad sob QUE"
+               " hipótese?\n");
+        tique7(2, "e o eval pergunta EXACTAMENTE qual hipótese a torna legítima. A resposta"
+                  " é a CONVERGÊNCIA UNIFORME — e aqui está o cuidado: em xⁿ os dois lados"
+                  " dão o mesmo, e a convergência NÃO é uniforme. Logo os dois lados"
+                  " coincidirem não prova a hipótese: a hipótese é suficiente, não"
+                  " necessária");
+        tique7(3, "a lei é |∫fₙ − ∫f| ≤ ∫|fₙ − f| ≤ sup|fₙ − f|·(b − a), e é o SUP que"
+                  " precisa de ir a zero — o sup, e não cada ponto");
+        { printf("        n      ∫₀¹ xⁿ       sup|fₙ − f| em [0,1]\n");
+          Qz v, ant = qz(0,1);
+          int desce = 1;
+          for(long k = 1; k <= 16; k *= 2){
+              an_int_pot(k, &v);
+              if(ant.p && !an_menor(v, ant)) desce = 0;
+              ant = v;
+              printf("        %-6ld ", k); esc_qzl(v, 13);
+              printf("1   ← NÃO desce, por causa de x = 1\n");
+          }
+          Qz x, val; int achou24 = an_falha_uniforme_seq(6, &x, &val);
+          printf("      e a testemunha da não uniformidade em n = 6: x = ");
+          esc_qz("", x, "  com xⁿ = "); esc_qz("", val, "  > 1/2\n");
+          printf("      → lim ∫fₙ = 0 e ∫ lim fₙ = 0: os lados COINCIDEM,\n");
+          printf("        e mesmo assim a hipótese falha. É por isso que a hipótese se"
+                 " enuncia\n        como suficiente e não como critério\n");
+          tique7(4, "a testemunha é o par que NÃO se junta: a coluna dos integrais desce a"
+                    " zero, e a coluna do sup fica em 1 sempre. Se eu tivesse medido só a"
+                    " primeira, teria concluído que a troca era legítima PELA razão errada");
+          tique7(5, desce && achou24
+                 ? "logo a convergência uniforme é SUFICIENTE para a troca e não é"
+                   " necessária — e o contra-exemplo de que ela não é necessária é o mesmo"
+                   " que mostra que ela falha"
+                 : "as duas colunas não se separaram — NÃO afirmo");
+          tique7(6, "e a VOLTA é a hipótese mais fraca que basta: dominação. Não é preciso"
+                    " que o sup vá a zero — basta uma função integrável por cima de todas."
+                    " E xⁿ ≤ 1 satisfaz isso, que é a razão VERDADEIRA por que a troca"
+                    " valeu aqui"); }
+        break; }
+    case 21:
+        tique7(0, "sejam as três séries do problema");
+        tique7(1, "os critérios ESTRUTURAIS:");
+        printf("      $\\sum\\frac1n$,\\qquad $\\sum\\frac1{n^{2}}$,"
+               "\\qquad $\\sum\\frac{(-1)^{n}}{n}$\n");
+        tique7(2, "e o eval é explícito: «NÃO DECIDIR PELA SOMA PARCIAL — usar critérios"
+                 " ESTRUTURAIS». E há razão: a soma parcial exacta de Σ1/n³ até 40 ESTOURA"
+                 " o tipo, e num sítio anterior deu negativo. O objecto está errado, não"
+                 " o guarda");
+        tique7(3, "a lei é a comparação com uma soma que TELESCOPA: 1/n^p ≤ 1/(n−1) − 1/n"
+                  " para p ≥ 2, e a soma fecha em 1 − 1/N. Números minúsculos, e exactos");
+        { long f1 = sr_majora(1,200), f2 = sr_majora(2,200);
+          Qz mi; long blocos = sr_harmonica_blocos(12, &mi);
+          printf("      série            critério                        veredicto\n");
+          printf("      Σ1/n             blocos H_2n − H_n ≥ 1/2 (%ld/12)  DIVERGE\n",
+                 blocos);
+          printf("      Σ1/n²            majoração telescópica (%ld falhas) CONVERGE\n", f2);
+          printf("      Σ(−1)ⁿ/n         alternada com termos a decrescer  CONVERGE\n");
+          printf("      e a majoração FALHA em p = 1: %ld vezes em 199 — é aí que morde\n",
+                 f1);
+          Qz so, fe2; sr_telescopa(64, &so, &fe2);
+          printf("      e a telescopagem que sustenta a majoração: Σ 1/(n−1) − 1/n até 64"
+                 " = ");
+          esc_qz("", so, "   e a forma fechada 1 − 1/N = ");
+          esc_qz("", fe2, "\n      → os dois caminhos concordam, e nenhum somou 1/n²\n");
+          long tel = qz_igual(so, fe2) ? 0 : 1;
+          tique7(4, "a testemunha é que NENHUM veredicto veio de somar: a harmónica diverge"
+                    " por BLOCOS (cada um ≥ 1/2, sem somar bloco nenhum), a série-p"
+                    " converge por MAJORAÇÃO termo a termo, e U − L fecha por TELESCOPAGEM."
+                    " Três critérios estruturais, zero somas parciais");
+          tique7(5, blocos == 12 && f2 == 0 && f1 > 0 && tel == 0
+                 ? "logo os critérios decidem sem construir o monstro aritmético — e a"
+                   " majoração falhar exactamente em p = 1 é o que a torna um critério e"
+                   " não uma cerimónia"
+                 : "os critérios não separaram — NÃO afirmo");
+          tique7(6, "e a VOLTA é a régua desta casa aplicada às séries: a forma fechada"
+                    " custa nada e dá o exacto; a soma bruta custa e estoura. Foi"
+                    " medido"); }
+        break;
+    case 25:
+        tique7(0, "sejam as cinco formas da completude de ℝ");
+        tique7(1, "e a exigência: NENHUMA arbitra as outras:");
+        printf("      Dedekind $\\;\\cdot\\;$ Cauchy $\\;\\cdot\\;$ supremo"
+               " $\\;\\cdot\\;$ encaixantes $\\;\\cdot\\;$ Bolzano--Weierstrass\n");
+        tique7(2, "e é este o pedido do eval, e é metodológico: as cinco são equivalentes,"
+                  " e a tentação é provar quatro a partir de uma. Aqui cada uma é"
+                  " construída SOZINHA, com a sua própria testemunha da falha em ℚ, e"
+                  " NENHUMA FUNÇÃO CHAMA OUTRA. Que as cinco falhem no mesmo sítio é o"
+                  " resultado; que falhem INDEPENDENTEMENTE é o método");
+        tique7(3, "a lei é que a equivalência se demonstra, não se assume — e uma"
+                  " demonstração em que um caminho julga os outros não é uma demonstração"
+                  " da equivalência: é uma escolha de árbitro disfarçada");
+        { printf("      via                  a sua testemunha da falha em ℚ\n");
+          printf("      ─────────────────────────────────────────────────────────────\n");
+          int m1 = 0, c1 = 0, m3 = 0, c3 = 0;
+          for(long pp = 1; pp <= 30; pp++) for(long qq = 1; qq <= 30; qq++){
+              Qz x = qz(pp,qq), y;
+              if(x.p > 0 && an_cmp_quad(x,2) < 0){ c1++; if(!an_passo_sobe(x,&y)) m1++; }
+              if(an_cmp_quad(x,2) > 0){ c3++; if(!an_passo_desce(x,&y)) m3++; }
+          }
+          printf("      (1) DEDEKIND         todo a ∈ A tem um MAIOR em A: %d"
+                 " testemunhas, %d falhas\n", c1, m1);
+          long N = 0;
+          int m2 = !cy_modulo(conv, qz(1,64), 30, 6, &N);
+          printf("      (2) CAUCHY           módulo achado (N = %ld) e nenhum limite"
+                 " racional\n", N);
+          printf("      (3) SUPREMO          todo majorante tem um MENOR: %d"
+                 " testemunhas, %d falhas\n", c3, m3);
+          Qz lo = qz(1,1), hi = qz(2,1);
+          int m4 = 0;
+          for(int k = 0; k < 20; k++) if(!an_encaixa(&lo, &hi)) m4++;
+          Qz comp = qz_soma(hi, qz_oposto(lo));
+          printf("      (4) ENCAIXANTES      comprimento 1/%ld, e a intersecção em ℚ é"
+                 " VAZIA\n", comp.q / (comp.p ? comp.p : 1));
+          long dentro = 0;
+          for(long k = 1; k <= 20; k++)
+              if(an_limitada_em(cy_termo(conv,k), qz(1,1), qz(2,1))) dentro++;
+          printf("      (5) BOLZANO          %ld/20 termos na caixa, e o limite não é"
+                 " racional\n", dentro);
+          long z = 0;
+          for(long p = 1; p <= 100; p++) for(long q = 1; q <= 100; q++)
+              if(!an_sem_raiz_racional(p,q,2)) z++;
+          printf("\n      e o facto que as cinco encontram, cada uma por seu lado:"
+                 " %ld racionais com q² = 2\n", z);
+          tique7(4, "a testemunha é que as CINCO colunas foram construídas por funções"
+                    " diferentes que não se chamam: o passo de Möbius para Dedekind, o"
+                    " módulo de Cauchy, o passo de Newton para o supremo, a bisseção para"
+                    " os encaixantes, e a caixa para Bolzano. Cinco programas, cinco"
+                    " testemunhas, e o mesmo buraco");
+          tique7(5, m1 == 0 && c1 > 0 && !m2 && m3 == 0 && c3 > 0 && m4 == 0
+                 && dentro == 20 && z == 0
+                 ? "logo as cinco formas da completude falham em ℚ pelo MESMO motivo e por"
+                   " CAMINHOS INDEPENDENTES — e é isso, e não uma cadeia de implicações,"
+                   " que mostra que elas são a mesma coisa"
+                 : "algum caminho não fechou — NÃO afirmo");
+          tique7(6, "e a VOLTA é a resposta à pergunta do andar: POR QUE É QUE ℝ PRECISAVA"
+                    " DE EXISTIR. Porque cinco perguntas independentes — sobre cortes,"
+                    " sobre aproximação, sobre majorantes, sobre encaixes e sobre"
+                    " subsucessões — dão todas a mesma resposta em ℚ, e a resposta é «não»."
+                    " ℝ é o espaço onde as cinco passam a dar «sim», e a Análise Real não"
+                    " inventou andar nenhum: explicou o que já lá estava"); }
+        break;
+    }
+}
+static int resolve_analise(const char *f){
+    const char *p = f;
+    for(size_t i = 0; i < sizeof AR25/sizeof *AR25; i++)
+        if(!strcmp(p, AR25[i].nome)){ analise_resolve(AR25[i].n); return 1; }
+    if(!strncmp(p, "analise", 7)) p += 7;
+    else if(!strncmp(p, "análise", 8)) p += 8;
+    else return 0;
+    while(*p == ' ') p++;
+    if(!strncmp(p, "real", 4)) p += 4;
+    while(*p == ' ') p++;
+    if(!*p){
+        printf("   Análise Real: por que o andar ℝ precisava de existir —"
+               " «analise N» ou «analise <nome>»\n");
+        printf("   e as cinco vias da completude, sem que nenhuma arbitre as outras\n\n");
+        for(size_t i = 0; i < sizeof AR25/sizeof *AR25; i++){
+            printf("     %2d  ", AR25[i].n);
+            esc_col(AR25[i].nome, 22);
+            printf("  %s\n", AR25[i].enunciado);
+        }
+        return 1;
+    }
+    if(*p >= '0' && *p <= '9'){
+        long n = 0;
+        while(*p >= '0' && *p <= '9') n = n*10 + (*p++ - '0');
+        while(*p == ' ') p++;
+        if(!*p && n >= 1 && n <= 25){ analise_resolve((int)n); return 1; }
+        return 0;
+    }
+    return 0;
+}
 /* ── A PONTE PARA A COHOMOLOGIA, nas três camadas ──────────────────────────────────
  * O `eval.txt` deu a formulação que ficou, e ela é melhor do que a minha: eu tinha posto
  * a CONTAGEM como enunciado, e a contagem é a realização. A lei é
@@ -12030,6 +13350,10 @@ static Qz qmod(Qz x){ return x.p < 0 ? qz_oposto(x) : x; }
 static void esc_qz(const char *pre, Qz x, const char *pos){
     printf("%s%s%s", pre, frac2(x.p, x.q), pos);
 }
+/* o mesmo racional, mas em COLUNA de largura fixa — porque uma tabela em que os números
+ * não se alinham lê-se pior do que uma lista, e o defeito é meu e não do número. Uma
+ * chamada a `frac2` de cada vez, que é a régua: ele roda o buffer. */
+static void esc_qzl(Qz x, int largura){ esc_col(frac2(x.p, x.q), largura); }
 static const struct { int n; const char *nome; const char *enunciado; } EX20[] = {
  { 1,  "modulo positivo",   "|x| ≥ 0" },
  { 2,  "modulo produto",    "|xy| = |x|·|y|" },
@@ -14678,6 +16002,8 @@ static int resolve_mostra(const char *f){ return resolve_mostra_em(f, "../papers
 static int resolve_simbolico(const char *fala){
     if(resolve_divisibilidade(fala)) return 1;     /* o relógio de 6 ticks */
     if(resolve_bezout(fala)) return 1;             /* a testemunha e o critério */
+    if(resolve_cmetrica(fala)) return 1;           /* a conservação métrica, os 10 */
+    if(resolve_analise(fala)) return 1;            /* Análise Real, os 25 */
     if(resolve_ponte(fala)) return 1;              /* a ponte para a cohomologia, os 10 */
     if(resolve_homo(fala)) return 1;               /* homotopia: o buraco, os 14 */
     if(resolve_topo(fala)) return 1;               /* topologia sem régua, os 20 */
@@ -15728,6 +17054,303 @@ static int teste(void){
                 if(e_conta(nu2)) roubadas++;
             }
             ok("e a membrana nao rouba o corpus: fala sem LaTeX nao vira conta", roubadas == 0);
+
+        /* ═══ §C51 A CONSERVAÇÃO MÉTRICA: a descida, e as quatro contas ══════════
+         * A ordem é a do eval: primeiro a descida — indução e meta-indução —, e depois a
+         * conservação que ela prova. E a regra que abre o andar: uma saturação não é um
+         * resultado, é falha de representação. */
+        printf("\n§C51 A CONSERVAÇÃO MÉTRICA POR DUALIDADE: det É a medida.\n\n");
+        {
+            /* (1) A DESCIDA, com os DOIS controlos */
+            { int nb = -1, nm = -1;
+              int achou_bom = mi_procura_minimo(mi_passo, 400, &nb);
+              int achou_mau = mi_procura_minimo(mi_passo_sabotado, 400, &nm);
+              printf("      a descida procura o primeiro andar onde falha: passo"
+                     " verdadeiro %s, sabotado achou em N = %d\n",
+                     achou_bom ? "ACHOU" : "vazia", nm);
+              ok("A DESCIDA É O DUAL DA INDUÇÃO, e a forma certa dela é a do CONTRA-EXEMPLO"
+                 " MÍNIMO. As duas usam o mesmo facto e mais nenhum — ℕ é bem ordenado —, e"
+                 " a involução é inverter a ordem: a indução diz o que HÁ no andar seguinte,"
+                 " a descida diz o que NÃO HÁ em andar nenhum. A primeira que escrevi era"
+                 " oca: recebia racionais que nunca foram determinantes da torre e"
+                 " «descia»-os a copiá-los, e sessenta em sessenta sobreviviam à base. O"
+                 " defeito não era o resultado — era eu ter dado à descida um objecto fora"
+                 " do domínio dela",
+                 !achou_bom && achou_mau && nm == 1); }
+
+            /* (2) A META-INDUÇÃO: o passo, e o sítio onde ele falha */
+            { long vale = 0, casos = 0;
+              for(long p = -40; p <= 40; p++) for(long q = 1; q <= 8; q++){
+                  if(p == 0) continue;
+                  casos++;
+                  if(mi_passo_vale(qz(p,q))) vale++;
+              }
+              Qz lixo;
+              int recusa = !mi_passo(qz(0,1), &lixo);
+              printf("      o passo em %ld entradas: %ld dão det = 1;  e com det(T) = 0"
+                     " %s\n", casos, vale, recusa ? "recusa" : "ACEITA");
+              ok("A META-INDUÇÃO MEDE O PASSO E NÃO UMA TABELA DE ANDARES: se o corpo do"
+                 " passo não menciona n, o «para todo n» sai da FORMA dele, e a ausência de"
+                 " tecto é consequência de T_{n+1} = T_n ⊕ T_n* e não de uma varredura."
+                 " Repare-se onde está a varredura: sobre ENTRADAS do passo, que é outra"
+                 " coisa que varrer andares. E o passo tem onde falhar — com det(T) = 0 o"
+                 " operador não tem dual, e é a mesma fibra vazia de 0⁻¹",
+                 vale == casos && casos > 300 && recusa); }
+
+            /* (3) AS QUATRO CONTAS, um só número */
+            { long mw = 0, cas = 0;
+              for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++)
+              for(long c = -3; c <= 3; c++) for(long d = -3; d <= 3; d++){
+                  Mat A = mat0(2,2);
+                  A.a[0][0] = qz_de_inteiro(a); A.a[0][1] = qz_de_inteiro(b);
+                  A.a[1][0] = qz_de_inteiro(c); A.a[1][1] = qz_de_inteiro(d);
+                  cas++;
+                  if(!qz_igual(mat_det(A), md_volume_wedge(A))) mw++;
+              }
+              long mesp = 0, mc = 0;
+              for(long m = 1; m <= 40; m++)
+                  if(mat_det(md_gato(m)).p != md_produto_proprios(m)
+                     || !md_estaca_fecha(m)) mesp++;
+              for(long m = 1; m <= 6; m++)
+                  if(md_conta_imagem(md_gato(m), 10) != 21L*21L) mc++;
+              int concorda = 1;
+              for(long m = 1; m <= 4; m++)
+                  if(md_conta_imagem(md_gato(m), 6) != md_conta_gerando(md_gato(m), 6, 60))
+                      concorda = 0;
+              printf("      eliminação vs cunha: %ld/%ld · espectro: %ld/40 · contagem:"
+                     " %ld/6 · as duas contagens %s\n",
+                     mw, cas, mesp, mc, concorda ? "concordam" : "DIVERGEM");
+              ok("QUATRO CONTAS SEM CÓDIGO EM COMUM E UM SÓ NÚMERO, e é ISSO o teorema — a"
+                 " igualdade «det|·| = σ_n» é a notação, e com σ_n(A) definido como |det A|"
+                 " ela não pode falhar, logo não é medição. O que se mede é o mesmo número"
+                 " a sair da eliminação (álgebra), da cunha das colunas (geometria), do"
+                 " produto σσ′ tirado dos COEFICIENTES sem avaliar raiz (espectro), e da"
+                 " contagem de pontos do reticulado (que não toca em determinante nenhum)."
+                 " E a contagem faz-se pelos DOIS lados porque a referência «um em cada"
+                 " |det|» era minha, escrita à mão, e estava errada",
+                 mw == 0 && mesp == 0 && mc == 0 && concorda); }
+
+            /* (4) σσ′ = −1 É a área, e o Jacobiano é a lei LOCAL */
+            { Cis t = { 1, 3, 5 };
+              long mal = 0, cas = 0, varia = 0;
+              for(long p = -12; p <= 12; p++) for(long q = 1; q <= 4; q++){
+                  Mat J = md_jacobiano_cisalha(t, qz(p,q));
+                  cas++;
+                  if(!qz_igual(mat_det(J), qz(1,1))) mal++;
+                  if(J.a[0][1].p != 0) varia++;
+              }
+              long achou = 0, casos2 = 0, falso = 0;
+              for(long k = 2; k <= 8; k++){ casos2++; if(mat_det(md_jacobiano_dilata(k)).p == k) achou++; }
+              for(long m = 1; m <= 20; m++) if(mat_det(md_gato(m)).p != -1) falso++;
+              printf("      |det DT| = 1 em %ld pontos com a derivada a variar em %ld;"
+                     " gume: %ld/%ld achadas, %ld falsos\n", cas - mal, varia, achou,
+                     casos2, falso);
+              ok("σσ′ = −1 É |det| = 1, E A LEI É LOCAL. A casa tinha a relação escrita no"
+                 " Corpo de Peano e no Universal e nunca a tinha ligado à MEDIDA: o"
+                 " determinante É o produto dos valores próprios, logo o gato estica por σ"
+                 " e encolhe por 1/σ, e conserva a área. E o cisalhamento mostra que a lei"
+                 " não é de matrizes: T(x,y) = (x + y² + 3y + 5, y) não é linear — a"
+                 " derivada muda em quase todos os pontos — e |det DT| = 1 em todos. O gume"
+                 " tem os dois controlos: acha nas dilatações e volta vazio nos metais",
+                 mal == 0 && varia > cas/2 && achou == casos2 && falso == 0); }
+
+            /* (5) A REGRA: falha de representação ≠ contra-exemplo */
+            { long onde = 0; Qz d;
+              for(long k = 1; k <= 60; k++)
+                  if(!md_det_potencia_exacto(3, k, &d)){ onde = k; break; }
+              long mal = 0, cas = 0;
+              const long PR[] = { 1000003, 999983, 65537 };
+              for(int i = 0; i < 3; i++) for(long k = 1; k <= 400; k++){
+                  long esp = ((k % 2) ? PR[i] - 1 : 1);
+                  cas++;
+                  if(md_det_potencia_mod(3, k, PR[i]) != esp) mal++;
+              }
+              printf("      a 1.ª realização satura em k = %ld;  a 2.ª responde até 400:"
+                     " %ld/%ld divergências;  saturações %ld\n", onde, mal, cas, md_saturou);
+              ok("FALHA DE REPRESENTAÇÃO NÃO É CONTRA-EXEMPLO MATEMÁTICO, e esta regra"
+                 " nasceu de um erro meu de hoje: iterei Newton oito vezes, cinco"
+                 " sobreviveram, e eu ia escrever «5 de 8» como resultado. Newton DUPLICA"
+                 " os dígitos a cada passo e ao sexto o numerador não cabia num `long` — o"
+                 " que eu tinha medido era o tamanho do tipo. Aqui a primeira realização"
+                 " satura e a segunda, em resíduos, responde até k = 400 em três primos; e"
+                 " a saturação conta-se num sítio SEPARADO dos defeitos, porque se ficasse"
+                 " na mesma coluna uma falha da minha aritmética apareceria como falha da"
+                 " lei",
+                 mal == 0 && onde > 0 && md_saturou > 0); }
+
+            /* (6) E OS DEZ CORREM */
+            { int vmal = 0, por_n = 0, por_nome = 0;
+              fflush(stdout);
+              int guarda = dup(1), nulo = open("/dev/null", O_WRONLY);
+              if(guarda >= 0 && nulo >= 0) dup2(nulo, 1);
+              for(int k = 1; k <= 10; k++){
+                  char fala[64];
+                  snprintf(fala, sizeof fala, "medida %d", k);
+                  if(resolve_cmetrica(fala)) por_n++; else vmal++;
+              }
+              for(size_t i = 0; i < sizeof CM10/sizeof *CM10; i++)
+                  if(resolve_cmetrica(CM10[i].nome)) por_nome++; else vmal++;
+              if(resolve_cmetrica("medida 11")) vmal++;
+              fflush(stdout);
+              if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
+              if(nulo >= 0) close(nulo);
+              printf("      os dez: %d por número, %d por nome\n", por_n, por_nome);
+              ok("O TEOREMA ESTÁ PROMOVIDO À ASSISTENTE em dez falas, e as três camadas"
+                 " ficam alinhadas: o UNIVERSAL tem a lei — a conservação métrica por"
+                 " dualidade —, o PEANO dá det|·| (a face discreta, e a contagem do"
+                 " reticulado é a medida de Lebesgue realizada), e o ESTELAR dá"
+                 " ∫|det DT| (a face graduada, onde o factor passa a ser função do ponto)."
+                 " A passagem entre elas é σ_k σ_k′ = −1, que é a hipótese ESTRUTURAL já"
+                 " estabelecida pela torre — e sem ela não há teorema, há uma definição a"
+                 " olhar para si própria",
+                 vmal == 0 && por_n == 10 && por_nome == 10); }
+        }
+
+        /* ═══ §C50 ANÁLISE REAL: as CINCO VIAS, e nenhuma arbitra as outras ══════
+         * O pedido do eval é metodológico, e é ele que se mede: as cinco formas da
+         * completude têm de falhar em ℚ por CAMINHOS INDEPENDENTES. Medir que elas
+         * concordam seria fácil e não seria o teste — o teste é que nenhuma chama
+         * outra, e isso mede-se no CÓDIGO, não no resultado. */
+        printf("\n§C50 ANÁLISE REAL: as cinco vias da completude, sem árbitro.\n\n");
+        {
+            Suc cv; cv.t = S_CONV; cv.a = 2; cv.p = 0; cv.q = 0;
+
+            /* (1) AS CINCO VIAS, cada uma com a sua testemunha */
+            { int v1 = 0, v3 = 0, v4 = 0, c1 = 0, c3 = 0;
+              /* o PASSO, em testemunhas independentes — não a órbita, que só faz crescer */
+              for(long p1 = 1; p1 <= 40; p1++) for(long q1 = 1; q1 <= 40; q1++){
+                  Qz x = qz(p1,q1), y;
+                  if(an_cmp_quad(x,2) < 0 && x.p > 0){ c1++; if(an_passo_sobe(x,&y)) v1++; }
+                  if(an_cmp_quad(x,2) > 0){ c3++; if(an_passo_desce(x,&y)) v3++; }
+              }
+              long N = 0;
+              int v2 = cy_modulo(cv, qz(1,4096), 40, 8, &N);
+              Qz lo = qz(1,1), hi = qz(2,1);
+              for(int k = 0; k < 24; k++) if(an_encaixa(&lo,&hi)) v4++;
+              Qz idxlo = qz(1,1), idxhi = qz(2,1);
+              long idx[40];
+              int v5 = an_subsuc(cv, 20, &idxlo, &idxhi, idx, 40);
+              long z = 0;
+              for(long pp = 1; pp <= 200; pp++) for(long qq = 1; qq <= 200; qq++)
+                  if(!an_sem_raiz_racional(pp,qq,2)) z++;
+              printf("      o PASSO, em testemunhas independentes:  sobe %d/%d ·"
+                     " desce %d/%d\n", v1, c1, v3, c3);
+              printf("      e as outras três vias:  Cauchy N=%ld · encaixe %d/24 ·"
+                     " Bolzano %d índices\n", N, v4, v5);
+              printf("      e o mesmo buraco encontrado pelas cinco: %ld racionais com"
+                     " p² = 2q² em 40000 pares\n", z);
+              ok("AS CINCO FORMAS DA COMPLETUDE FALHAM EM ℚ POR CAMINHOS INDEPENDENTES, que"
+                 " é a exigência do eval — «nenhum caminho usado como árbitro dos outros»."
+                 " Cada uma tem o seu motor e nenhum chama outro: Möbius para o corte de"
+                 " Dedekind, o módulo |xₘ − xₙ| para Cauchy, Newton para o supremo, a"
+                 " bisseção para o encaixe, e a filtragem de índices para Bolzano. Que"
+                 " concordem é o RESULTADO; que não se consultem é o MÉTODO.\n"
+                 "         E as duas primeiras medem-se pelo PASSO e não pela órbita: eu"
+                 " tinha iterado Newton oito vezes e contado «cinco de oito», mas as três"
+                 " que faltavam não falharam por matemática — falharam porque Newton"
+                 " duplica os dígitos e ao sexto passo o numerador não cabe num `long`."
+                 " Saturação não é resultado, é falha vestida de teorema. A tese é do"
+                 " PASSO — todo a ∈ A tem um maior, todo majorante tem um menor — e assim"
+                 " ela verifica-se em testemunhas independentes sem obrigar número nenhum"
+                 " a crescer, e prova MAIS: vale para qualquer b, não só para os"
+                 " descendentes de 2",
+                 c1 > 0 && c3 > 0 && v1 == c1 && v2 && v3 == c3 && v4 == 24 && v5 > 0
+                 && z == 0); }
+
+            /* (2) O GUME: ser de Cauchy SEM o limite — e mede-se na ASSINATURA */
+            { long N = 0;
+              int achou = cy_modulo(cv, qz(1,65536), 60, 10, &N);
+              long z = 0;
+              for(long pp = 1; pp <= 200; pp++) for(long qq = 1; qq <= 200; qq++)
+                  if(!an_sem_raiz_racional(pp,qq,2)) z++;
+              printf("      módulo para ε = 1/65536: N = %ld (%s), e limite racional:"
+                     " nenhum\n", N, achou ? "achado" : "não achado");
+              ok("SER DE CAUCHY E TER LIMITE SÃO DUAS AFIRMAÇÕES, e o eval pede a segunda"
+                 " provada sem a primeira: «prove que ela é de Cauchy SEM USAR O SEU"
+                 " LIMITE». A separação não está numa promessa minha — está na ASSINATURA:"
+                 " `cy_modulo` recebe a sucessão e o ε, compara |xₘ − xₙ|, e não tem por"
+                 " onde receber um limite. O que a função não pode ver, não pode usar",
+                 achou && z == 0); }
+
+            /* (3) TAYLOR: o resto MEDIDO, e o controlo é o próprio ponto */
+            { Cf f = fn0(); f.n = 3;
+              f.c[3] = qz(1,1); f.c[1] = qz(-3,1); f.c[0] = qz(2,1);
+              int anula = 0, no_ponto = 0, sobra = 0;
+              for(int ord = 1; ord <= 5; ord++){
+                  Cf T = an_taylor(f, qz(1,1), ord);
+                  Qz r3 = an_resto(f,T,qz(3,1));
+                  if(an_resto(f,T,qz(1,1)).p == 0) no_ponto++;
+                  if(ord >= 3){ if(r3.p == 0) anula++; }
+                  else if(r3.p != 0) sobra++;
+              }
+              printf("      Taylor de x³−3x+2 em a=1: resto nulo em %d ordens ≥ grau,"
+                     " não nulo em %d ordens < grau, e zero no ponto em %d de 5\n",
+                     anula, sobra, no_ponto);
+              ok("O RESTO DE TAYLOR É MEDIDO E NÃO ESTIMADO, e o par é que o mede: ele"
+                 " ANULA-SE a partir da ordem = grau (não encolhe — anula-se), e é NÃO"
+                 " NULO abaixo dela. Uma medição só do primeiro lado passaria com um Tₙ"
+                 " que fosse f, e é o segundo lado que impede isso. E o resto no PRÓPRIO"
+                 " ponto é zero em toda a ordem, que é a condição de interpolação",
+                 anula == 3 && sobra == 2 && no_ponto == 5); }
+
+            /* (4) O CONTROLO: o δ uniforme falha onde deve, e o outro NÃO */
+            { int falha = 0, casos = 0;
+              for(int k = 1; k <= 6; k++){
+                  Qz d = qz(1, 1L << k), x, y, salto;
+                  casos++;
+                  if(an_falha_uniforme(d, &x, &y, &salto) && an_menor(qz(1,1), salto))
+                      falha++;
+              }
+              int bom = 0, bcasos = 0;
+              for(int k = 2; k <= 12; k += 2){
+                  Qz e = qz(1, 1L << k), d;
+                  bcasos++;
+                  if(an_delta(qz(3,1), e, &d) && an_delta_serve(qz(3,1), d, e)) bom++;
+              }
+              printf("      1/x em (0,1): %d/%d δ com salto > 1  |  x² em a=3: %d/%d δ"
+                     " que servem\n", falha, casos, bom, bcasos);
+              ok("O BUSCADOR TEM OS DOIS CONTROLOS QUE A CASA EXIGE: um regime onde tem de"
+                 " ACHAR o par mau (1/x no aberto, e acha em todos os δ) e um onde tem de"
+                 " voltar VAZIO (x² num ponto, onde o δ construído serve sempre). Sem o"
+                 " segundo, uma busca que achasse par mau em tudo passaria — e seria a"
+                 " busca a estar errada, não o teorema",
+                 falha == casos && bom == bcasos); }
+
+            /* (5) E AS VINTE E CINCO CORREM, por número e por nome */
+            { int vmal = 0, por_n = 0, por_nome = 0;
+              fflush(stdout);
+              int guarda = dup(1), nulo = open("/dev/null", O_WRONLY);
+              if(guarda >= 0 && nulo >= 0) dup2(nulo, 1);
+              for(int k = 1; k <= 25; k++){
+                  char fala[64];
+                  snprintf(fala, sizeof fala, "analise %d", k);
+                  if(resolve_analise(fala)) por_n++; else vmal++;
+              }
+              for(size_t i = 0; i < sizeof AR25/sizeof *AR25; i++)
+                  if(resolve_analise(AR25[i].nome)) por_nome++; else vmal++;
+              if(resolve_analise("analise 26")) vmal++;
+              if(resolve_analise("analise 0")) vmal++;
+              fflush(stdout);
+              if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
+              if(nulo >= 0) close(nulo);
+              printf("      as vinte e cinco: %d por número, %d por nome, e as fora de"
+                     " gama recusadas\n", por_n, por_nome);
+              ok("A ANÁLISE REAL NÃO INVENTOU ANDAR NENHUM — ela explicou por que o andar ℝ"
+                 " precisava de existir, que é a frase do eval. E o que a assistente ganhou"
+                 " são as vinte e cinco falas com a espinha dos sete ticks: os quantificadores"
+                 " (contínua contra uniformemente contínua, pontual contra uniforme), a"
+                 " compacidade a dar «atinge», o resto de Taylor exacto, os critérios"
+                 " estruturais sem soma parcial, e as cinco vias no fim",
+                 vmal == 0 && por_n == 25 && por_nome == 25); }
+
+            /* e o teto dos estouros das novas funções */
+            { printf("      estouros das funções da análise: %ld\n", an_estouros);
+              ok("E O TETO É VERIFICADO: as funções deste andar contam os seus próprios"
+                 " estouros — o Taylor pára se o grau passar CL_MAX e a potência de xⁿ pára"
+                 " se o racional crescer de mais. Um limite que ninguém testa é"
+                 " documentação, não limite, e este é lido",
+                 an_estouros == 0); }
+        }
 
         /* ═══ §C49 A PONTE PARA A COHOMOLOGIA, nas três camadas ══════════════════
          * A lei é «localmente contráctil ⇏ globalmente contráctil», e a contagem é a

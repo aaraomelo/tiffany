@@ -2118,6 +2118,56 @@ esta tabela. O teorema não os junta --- separa-os pelo $a$.
 $\square$
 \end{teorema}
 
+\begin{teorema}[a face discreta da conservação métrica --- o determinante
+é a área, e o gato já a conservava]\label{thm:det-volume}
+A realização discreta da conservação métrica (\emph{Corpo Universal},
+Teor.~da conservação métrica por dualidade) é o \textbf{determinante}, e
+esta tabela já a tinha escrita sem lhe dar o nome: a relação
+$\sigma\sigma'=-1$ do relógio ($\S$~a estaca) \emph{é} $|\det A_{m}|=1$.
+
+\textbf{(0) O determinante é o factor de volume.} Para
+$A:\mathbb{R}^{n}\to\mathbb{R}^{n}$, a ação sobre o elemento de volume
+orientado é
+\[
+A(v_{1})\wedge\cdots\wedge A(v_{n})=\det(A)\,v_{1}\wedge\cdots\wedge
+v_{n},
+\]
+logo $|\det A|$ é exactamente o factor de escala da medida
+$n$-dimensional, e
+\[
+\boxed{\;|\det A|=1\;\Longrightarrow\;\mu_{n}(AE)=\mu_{n}(E)\;}
+\]
+para todo mensurável $E$.
+
+\textbf{(1) E no gato isso já estava.} $A_{m}=\begin{pmatrix} m & 1\\
+1 & 0\end{pmatrix}$ tem $\lambda^{2}-m\lambda-1$, donde
+$\sigma+\sigma'=m$ e $\sigma\sigma'=-1$; e o produto dos valores
+próprios \emph{é} o determinante. Logo $\det A_{m}=-1$ para todo metal, e
+a matriz metálica \textbf{conserva a área}: estica por $\sigma$ numa
+direcção e encolhe por $1/\sigma$ na outra --- que é a leitura
+geométrica de a norma ser $-1$, e por isso de os metais serem
+\emph{unidades}. A inversa inteira, o factor de potência unitário e a
+conservação da área são o mesmo facto, e agora com a medida no meio.
+
+\textbf{(2) A prova que não usa determinante nenhum.} A face
+propriamente discreta é a \textbf{contagem}: com entradas inteiras e
+$|\det|=1$, $A$ leva $\mathbb{Z}^{2}$ \emph{sobre} $\mathbb{Z}^{2}$, e
+isso vê-se contando quantos pontos de uma caixa têm pré-imagem inteira
+--- uma divisão e um resto, sem determinante. Com $|\det|=k$ cobre-se
+estritamente menos. Esta é a medida de Lebesgue realizada no reticulado,
+e é a conta que sobrevive à troca de representação.
+
+\emph{Medido:} \code{tests/conservacao\_metrica.c} ($\S$M2--$\S$M3,
+$11{:}0$): eliminação contra cunha em $2401$ matrizes $2\times2$ e $625$
+$3\times3$ sem divergência; $\det A_{m}=\sigma\sigma'=-1$ em $40$
+metais; e a contagem feita pelos \emph{dois} lados --- descendo pela
+divisibilidade e subindo por geração --- a coincidir. A referência
+«um ponto em cada $|\det|$» foi escrita à mão e estava errada (numa
+caixa simétrica de raio $12$ os múltiplos de $3$ são $9$, não $25/3$);
+substituiu-se pela segunda contagem, que não é referência minha.
+$\square$
+\end{teorema}
+
 \begin{teorema}[a face discreta da ponte --- o potencial é a fibra, e ela
 esvazia-se no ciclo]\label{thm:ponte-discreta}
 A realização discreta da ponte
