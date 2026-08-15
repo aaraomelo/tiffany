@@ -45,3 +45,19 @@ alimentada com a indefinida da casa tem de devolver «não», e aí morde (cai e
 **Regra**: quando a tese é sempre verdadeira no domínio testado, a implementação que a
 decide não está a ser testada. Alargar o domínio até onde ela possa ser falsa — e é o mesmo
 que [[feedback-varrer-onde-nada-pode-falhar]] visto do lado da função em vez dos dados.
+
+
+## E o andar seguinte (Gram → exterior, `18aa6c7`)
+
+Três exigências sobre COMO medir, e nenhuma de conteúdo:
+
+- **«Não basta olhar para a matriz: é preciso PROCURAR TESTEMUNHAS»** — a assinatura passou
+  a ser caçada, com o vetor de cada sinal exibido.
+- **O contra-exemplo em característica 2**: a polarização precisa do 1/2, e em 𝔽₂ ele é uma
+  **fibra vazia** — a exceção de sempre a derrubar uma identidade. E lá −1 = 1, logo
+  simétrica e antissimétrica **colapsam** (2 formas medidas que são as duas coisas).
+- **A correção ao meu método**: [[feedback-medir-os-extremos]].
+
+E o determinante deixou de ser receita: `Tu ∧ Tv = det(T)·(u∧v)` — «a ação do operador no
+VOLUME ORIENTADO». O tensorial fecha com a universalidade `B̃(u⊗v) = B(u,v)`, que é «a
+versão abstrata de transformar duas entradas numa operação única».

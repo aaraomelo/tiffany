@@ -34,6 +34,7 @@
 - **[Medir só metade do par](feedback-medir-so-metade-do-par.md)** — o bench da membrana varria a ENTRADA e nunca a SAÍDA; e apanhou o `\pmod` OUTRA VEZ, muito depois de ter nascido por causa dele.
 - **[O teto não verificado](feedback-o-teto-nao-verificado.md)** — `an_zn(&R,40)` escreveu 1600 inteiros num array de 24×24 e a máquina deixou de terminar. Um `#define` que ninguém testa é documentação, não limite.
 - **[O ramo que nunca corre](feedback-o-ramo-que-nunca-corre.md)** — mutação que sobrevive tem DUAS doenças: ramo inalcançável (gap meu) ou guarda redundante (está certo). Programa mínimo, não adivinhar.
+- **[Medir os extremos](feedback-medir-os-extremos.md)** — varri 625 matrizes para `ker T* = (im T)°` quando a prova são CINCO definições em ⟺. Varrer os extremos confirma a conclusão e não mede a prova. Se a prova cabe em definições, a varredura é o substituto de a ter escrito.
 - **[Varrer onde nada pode falhar](feedback-varrer-onde-nada-pode-falhar.md)** — varredura num regime onde o defeito não vive: esforço alto sem indecisos, objeto SIMÉTRICO num teorema de assimetria, ou TESE SEMPRE VERDADEIRA.
 - **[O destino rotativo](feedback-o-destino-rotativo.md)** — valor certo e TEXTO errado, invisível às asserções: `frac2` a rodar sob o printf, `%-Ns` por bytes, testemunha por estrear, `%ld` dentro de `tique`/`ok` (não formatam). Medir do lado da FONTE.
 - **[Escrever numa notação e ler noutra](feedback-escrever-numa-notacao-ler-noutra.md)** — o `eval.txt` escreve «A + AB = A» e o parser exigia `*`: a fala morria CALADA. Passar pelo leitor as expressões LITERAIS da fonte.
@@ -61,7 +62,7 @@
 - **[Teoria dos números](project-teoria-dos-numeros.md)** — Euclides = MDC = Bézout = FC é a MESMA descida em colunas diferentes; e o convergente de ordem 0 NÃO é a melhor aproximação.
 - **[Möbius e as elípticas](project-mobius-e-elipticas.md)** — μ = 1⁻¹ na convolução (a inversão É a deconvolução); e na curva a FIBRA escolhe a operação. Dirichlet mede-se FORMAL.
 - **[Álgebra moderna](project-algebra-moderna-sete-ticks.md)** — a espinha de sete ticks que ele exigiu (hipóteses→…→LEI→TESTEMUNHA→…→volta), com a definição em LaTeX. «Não medir só a conclusão».
-- **[A casa já corria Cayley–Hamilton](project-a-casa-ja-corria-cayley.md)** — a `estaca` (A·(mI−A)=−I) É ele, e as duas cartas são as duas formas quadráticas: o andar novo trouxe o NOME, não o motor. E a raiz nunca se tira.
+- **[A casa já corria Cayley–Hamilton](project-a-casa-ja-corria-cayley.md)** — a `estaca` (A·(mI−A)=−I) É ele, e as duas cartas são as duas formas quadráticas: o andar trouxe o NOME, não o motor. E a raiz nunca se tira; e a assinatura CAÇA-SE.
 - **[O gume automático](project-gume-automatico.md)** — retirar a hipótese e PROCURAR o contra-exemplo: a regra que eu aplicava à mão virou função. Um buscador precisa de DOIS controlos: um onde tem de achar, outro onde não.
 - **[Corpos: a escada fecha](project-corpos-a-escada-fecha.md)** — «toda operação com fibra tem volta» vira estrutura formal, e a exceção é a MESMA: 0⁻¹ não existe.
 
