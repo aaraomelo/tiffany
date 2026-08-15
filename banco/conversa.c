@@ -1408,7 +1408,7 @@ static const struct { int n; const char *nome; const char *enunciado; } UN23[] =
  { 19, "estrutura",          "corpo em cada nível; a ordem é de REFINAMENTO; o limite é ℤ₂" },
  { 20, "o real e um caminho","o real é um caminho raiz→folha na árvore binária, e NÃO um nó" },
  { 21, "geometria de klein", "a geometria é o par (forma, grupo) — o programa de Erlangen aplicado" },
- { 22, "maestro e metronomo","a memória é seletor ∘ dobra: a histerese tem gramática exacta" },
+ { 22, "memoria",           "a memória é o projector espectral ∘ Quantizador — gramática exacta" },
  { 23, "dicionario",         "a tradução inteira: o que é consagrado e o que o paper propõe" },
 };
 static void universal_resolve(int n){
@@ -1797,14 +1797,16 @@ static void universal_resolve(int n){
                   " meio teorema. Medido: tests/geometria_corpo.js (9:0)");
         break;
     case 22:
-        tique7(0, "seja a pergunta «a memória vem de Maestro + Metrónomo?»");
+        tique7(0, "seja a pergunta «a memória vem do projector espectral com o gerador temporal?»");
         tique7(1, "a resposta é sim, com gramática exacta:");
-        printf("      $\\text{Maestro} = \\text{dobra} + \\text{seletor}$,"
-               " \\qquad histerese $=$ seletor $\\circ$ dobra\n");
-        tique7(2, "TRADUÇÃO: «Maestro» e «Metrónomo» são termos do paper e NÃO TÊM"
-                  " consagrado — ficam como ele propõe, e é o caso previsto pela regra. O"
-                  " que é consagrado é o fenómeno: HISTERESE, a dependência do estado no"
-                  " percurso e não só na posição");
+        printf("      $P = 2^{-1}(\\mathrm{id} + T^{N/2})$   idempotente,   e a"
+               " histerese e' $P$ composto com a duplicacao\n");
+        tique7(2, "TRADUÇÃO: o paper do universal foi LIMPO — os nomes musicais (Maestro,"
+                  " Metrónomo, Batuta, Orquestra, Conservatório) passaram todos para o"
+                  " corpo de Peano, que é a REALIZAÇÃO. No universal cada papel chama-se"
+                  " pela função: Maestro é o PROJECTOR ESPECTRAL 2⁻¹(id + T^{N/2}),"
+                  " idempotente e com partição da unidade; Metrónomo é o QUANTIZADOR (o"
+                  " gerador temporal). E o fenómeno tem nome consagrado: HISTERESE");
         tique7(3, "a lei é a decomposição: a histerese é EXACTAMENTE seletor ∘ dobra, e a"
                   " composição é o que lhe dá a memória — a dobra guarda, o seletor lê");
         tique7(4, "a testemunha é a gramática a bater com o espectro que já estava medido —"
@@ -1840,13 +1842,25 @@ static void universal_resolve(int n){
         printf("      gume               →   contra-exemplo\n");
         printf("      andar              →   nível / grau\n");
         printf("      tique              →   passo de iteração\n");
-        printf("\n      E SEM CONSAGRADO — ficam como o paper propõe:\n");
-        printf("      Maestro · Metrónomo · batuta · membrana · Quantizador ·\n");
-        printf("      Inversor · endereço · estresse · contorno · as oito leis\n");
-        tique7(2, "a regra tem dois ramos e ambos correm: 21 termos traduzem-se para"
-                  " consagrado, e 10 ficam como o paper os propõe porque não há consagrado"
+        printf("      Maestro            →   projector espectral 2⁻¹(id + T^{N/2})\n");
+        printf("      Metrónomo          →   Quantizador (o gerador temporal)\n");
+        printf("      batuta             →   o operador do passo A_m\n");
+        printf("      pera·vareta·ponta  →   ponto-base · vector director · extremos\n");
+        printf("      Orquestra          →   a composição dos operadores\n");
+        printf("      Conservatório      →   o espaço dos invariantes\n");
+        printf("\n      E SEM CONSAGRADO — ficam como o paper os propõe:\n");
+        printf("      Quantizador · Inversor · membrana · endereço · estresse ·\n");
+        printf("      contorno · as oito leis\n");
+        printf("\n      E OS MUSICAIS SAÍRAM DO UNIVERSAL: Maestro, Metrónomo, Batuta,\n");
+        printf("      Orquestra e Conservatório vivem agora só no CORPO DE PEANO, que é\n");
+        printf("      a realização. No universal cada papel chama-se pela função, e os\n");
+        printf("      nomes musicais só aparecem onde se DECLARA a correspondência.\n");
+        tique7(2, "a regra tem dois ramos e ambos correm: 27 termos traduzem-se para"
+                  " consagrado, e 7 ficam como o paper os propõe porque não há consagrado"
                   " para eles. Um dicionário em que TUDO traduzisse seria suspeito — quer"
-                  " dizer que eu tinha forçado nomes clássicos a objectos que não são");
+                  " dizer que eu tinha forçado nomes clássicos a objectos que não são. E o"
+                  " paper do universal foi LIMPO: os cinco nomes musicais saíram do corpo"
+                  " do texto e ficaram só onde se declara a correspondência com Peano");
         tique7(3, "a lei é a do corpus desta casa: o nome clássico entra como CLÁUSULA, e o"
                   " sujeito da frase é o resultado. Traduzir não é substituir o objecto"
                   " pelo nome do morto");
