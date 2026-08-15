@@ -49,7 +49,13 @@ concordam em 52 pontos, com a parte REAL do dual a devolver f(a) como controlo.
 | continuidade | a MEMBRANA — `def:membrana`, o corpo em trânsito |
 | derivada | a FIBRA — `thm:divisao-fibra`; e Δ ⟺ c_k ↦ (ω^k−1)c_k, `thm:metronomo-fourier` |
 | integral | a SOMA REVERSÍVEL de Gentil — `obs:triade-central` |
-| **Teorema Fundamental** | **`thm:central`: ∫f + ∫f⁻¹ = bf(b) − af(a)** — derivar e integrar são os dois lados da bijeção dual, ν∘ν = id |
+| **Teorema Fundamental** | a VOLTA: ∫ e d/dx são operações inversas |
+
+⚠ **E NÃO é o `thm:central`.** Escrevi que «É» e o Aarão corrigiu: aquele é
+∫f + ∫f⁻¹ = bf(b) − af(a), a integral da **função** inversa — teorema clássico distinto
+que *deriva* do TFC. Um inverte **operações**, o outro inverte **funções**. A
+correspondência entre os dois é **proposta por esta casa**, uma camada acima; a
+matemática clássica do TFC sustenta-se sozinha. Ver [[feedback-insinuacao-arquitetonica]].
 
 Realizado em `lib/calculo.h`, `banco/conversa.c` §C42 e «calculo 1..21».
 Ver [[project-torre-hurwitz-gentil]], [[project-o-real-e-o-corte]].
