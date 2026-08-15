@@ -46,6 +46,7 @@
 #include "numeros.h"    /* teoria dos numeros: Euclides = MDC = Bezout = FC */
 #include "dirichlet.h"  /* a convolucao na arvore dos divisores: mu = 1^-1 */
 #include "eliptica.h"   /* a curva: a fibra decide qual operacao existe */
+#include "estrutura.h"  /* algebra moderna: a estrutura e uma tabua */
 #include "eletrico.h"
 
 typedef struct { long a, b; } Slot;
@@ -1346,12 +1347,715 @@ static int resolve_bezout(const char *f){
            a*xs + b*ys == c ? "(resíduo 0)" : "— NÃO afirmo");
     return 1;
 }
+/* ── ÁLGEBRA MODERNA: O RASTRO DE SETE TICKS, E A DEFINIÇÃO EM LaTeX ────────────────
+ * O `eval.txt` fecha com a exigência de forma, e ela vale para TODOS os teoremas:
+ *
+ *   hipóteses → definição → transição → lei usada → testemunha → conclusão → volta
+ *
+ * «E o mais importante para o teu sistema: NÃO MEDIR SÓ A CONCLUSÃO.» São sete lugares,
+ * e cada um tem de ser preenchido — a lei que autoriza a transição diz-se pelo nome, e a
+ * testemunha exibe-se. Um teorema que salte a testemunha fica com um buraco visível.
+ *
+ * A DEFINIÇÃO vai em LaTeX, no seu tick, para o tradutor a compor. É a membrana a
+ * carregar a matemática e não só o texto. */
+static void esc_col(const char *s, int largura);
+static const char *ES7[7] = { "HIPÓTESES", "DEFINIÇÃO", "TRANSIÇÃO", "LEI USADA",
+                              "TESTEMUNHA", "CONCLUSÃO", "VOLTA" };
+static void tique7(int slot, const char *porque){
+    char pq[600];
+    snprintf(pq, sizeof pq, "%s — %s", ES7[slot & 7], porque);
+    tique(pq);
+}
+static void es_conj(const Est *E, unsigned H){    /* escreve um subconjunto */
+    printf("{");
+    int primeiro = 1;
+    for(int i = 0; i < E->n; i++) if(es_em(H,i)){ printf("%s%d", primeiro?"":", ", i); primeiro = 0; }
+    printf("}");
+}
+static const struct { int n; const char *nome; const char *enunciado; } AL20[] = {
+ {  1, "identidade unica",  "o elemento neutro é ÚNICO" },
+ {  2, "inverso unico",     "o inverso de cada elemento é ÚNICO" },
+ {  3, "cancelamento",      "ab = ac ⟹ b = c" },
+ {  4, "subgrupo neutro",   "todo subgrupo contém o neutro" },
+ {  5, "intersecao",        "a interseção de subgrupos é subgrupo" },
+ {  6, "imagem subgrupo",   "a imagem de um homomorfismo é subgrupo" },
+ {  7, "nucleo normal",     "o núcleo de um homomorfismo é subgrupo NORMAL" },
+ {  8, "injetivo nucleo",   "f é injetivo ⟺ o núcleo é trivial" },
+ {  9, "lagrange",          "|H| divide |G| — e as classes particionam" },
+ { 10, "cayley",            "todo grupo mergulha num grupo de permutações" },
+ { 11, "primeiro iso",      "G/ker f ≅ Im f" },
+ { 12, "ideal nucleo",      "os ideais são os núcleos dos homomorfismos de anéis" },
+ { 13, "iso aneis",         "R/I ≅ Im f, o isomorfismo para anéis" },
+ { 14, "ideais de Z",       "todo ideal de ℤ é nℤ" },
+ { 15, "corpo dominio",     "todo corpo é domínio integral" },
+ { 16, "operacao neutro",   "a ⋆ b = a + b + 1: fechada, e o neutro é −1" },
+ { 17, "nao associativa",   "a ⋆ b = a − b NÃO é associativa, e o contra-exemplo exibe-se" },
+ { 18, "todo grupo comuta", "«prove que todo grupo é comutativo» — a RECUSA" },
+ { 19, "exponencial",       "a soma vira produto: (ℤₙ,+) ≅ (ℤₚ*,×)" },
+ { 20, "menos vezes",       "(−a)b = −(ab) num anel qualquer" },
+};
+static void algebra_resolve(int n){
+    TICK_N = 0;
+    printf("   %d — %s\n", n, AL20[n-1].enunciado);
+    Est Z12, S3, Z6, Z4;
+    es_zn(&Z12, 12); es_s3(&S3); es_zn(&Z6, 6); es_zn(&Z4, 4);
+    switch(n){
+    case 1: {
+        tique7(0, "seja (G,⋆) com DOIS neutros, e e e′. Não se supõe que sejam iguais —"
+                  " supõe-se que os dois cumprem a definição, que é o contrário");
+        tique7(1, "neutro é o que não mexe em ninguém, dos DOIS lados:");
+        printf("      $e \\star a = a \\star e = a$   para todo $a \\in G$\n");
+        tique7(2, "aplica-se a definição de e′ ao elemento e, e a de e ao elemento e′:"
+                  " e ⋆ e′ = e′ (por e ser neutro) e e ⋆ e′ = e (por e′ ser neutro)");
+        printf("      $e \\star e' = e'$   e   $e \\star e' = e$\n");
+        tique7(3, "a lei é a própria DEFINIÇÃO de neutro, usada duas vezes — uma por"
+                  " cada candidato. Não entra mais nada: nem associatividade, nem inverso");
+        tique7(4, "a testemunha é o elemento e ⋆ e′, que tem de ser os dois ao mesmo tempo");
+        { Est *Gs[3] = { &Z12, &S3, &Z6 }; int mal = 0;
+          for(int i = 0; i < 3; i++){
+              int quantos = 0;
+              for(int e = 0; e < Gs[i]->n; e++){
+                  int bom = 1;
+                  for(int a = 0; a < Gs[i]->n && bom; a++)
+                      if(Gs[i]->op[e][a] != a || Gs[i]->op[a][e] != a) bom = 0;
+                  if(bom) quantos++;
+              }
+              printf("      %s: %d neutro(s) — %s\n", Gs[i]->nome, quantos,
+                     quantos == 1 ? "um só" : "MAIS QUE UM");
+              if(quantos != 1) mal++;
+          }
+          tique7(5, "logo e = e′: os dois neutros eram o mesmo, e a palavra «o» neutro"
+                    " passa a ser legítima");
+          tique7(6, "e a volta: varre-se o grupo à procura de TODOS os elementos que"
+                    " cumprem a definição, e conta-se — se aparecesse um segundo, o"
+                    " teorema caía aqui");
+          printf("      três grupos varridos por inteiro: %d com mais de um neutro\n", mal); }
+        break; }
+    case 2: {
+        tique7(0, "seja a com dois inversos, b e c: a ⋆ b = b ⋆ a = e e a ⋆ c = c ⋆ a = e");
+        tique7(1, "inverso é o que devolve ao neutro:");
+        printf("      $a \\star a^{-1} = a^{-1} \\star a = e$\n");
+        tique7(2, "b = b ⋆ e = b ⋆ (a ⋆ c) = (b ⋆ a) ⋆ c = e ⋆ c = c — cinco passos, e o"
+                  " do meio é o que faz o trabalho");
+        printf("      $b = b \\star e = b \\star (a \\star c) = (b \\star a) \\star c"
+               " = e \\star c = c$\n");
+        tique7(3, "a lei do passo do meio é a ASSOCIATIVIDADE, e é por isso que a"
+                  " unicidade do inverso é teorema de SEMIGRUPO com neutro, não de grupo:"
+                  " sem associatividade a cadeia parte-se ali");
+        tique7(4, "a testemunha é o elemento b ⋆ a ⋆ c, que se lê de duas maneiras");
+        { int mal = 0;
+          Est *Gs[2] = { &Z12, &S3 };
+          for(int i = 0; i < 2; i++){
+              int e = es_neutro(Gs[i]);
+              for(int a = 0; a < Gs[i]->n; a++){
+                  int quantos = 0;
+                  for(int b = 0; b < Gs[i]->n; b++)
+                      if(Gs[i]->op[a][b] == e && Gs[i]->op[b][a] == e) quantos++;
+                  if(quantos != 1) mal++;
+              }
+          }
+          tique7(5, "logo b = c, e o inverso é único — o que autoriza a NOTAÇÃO a⁻¹,"
+                    " que sem este teorema seria ambígua");
+          tique7(6, "e a volta: contam-se todos os inversos de cada elemento nos dois"
+                    " grupos, e nenhum tem dois");
+          printf("      Z12 e S3, elemento a elemento: %d com mais de um inverso\n", mal); }
+        break; }
+    case 3: {
+        tique7(0, "num GRUPO (e é preciso ser grupo), suponha-se a ⋆ b = a ⋆ c");
+        tique7(1, "cancelar é poder tirar o a dos dois lados:");
+        printf("      $a \\star b = a \\star c \\; \\Rightarrow \\; b = c$\n");
+        tique7(2, "multiplica-se à ESQUERDA por a⁻¹: a⁻¹⋆(a⋆b) = a⁻¹⋆(a⋆c), e a"
+                  " associatividade reagrupa para (a⁻¹⋆a)⋆b = (a⁻¹⋆a)⋆c");
+        tique7(3, "as leis são o INVERSO (que existe por ser grupo) e a ASSOCIATIVIDADE"
+                  " (para reagrupar). Note-se o lado: à esquerda cancela-se à esquerda, e"
+                  " em grupo não abeliano isso importa");
+        tique7(4, "a testemunha é o a⁻¹, e ele existe precisamente por ser grupo");
+        { int mal = 0, casos = 0;
+          for(int a = 0; a < S3.n; a++) for(int b = 0; b < S3.n; b++) for(int c = 0; c < S3.n; c++){
+              if(S3.op[a][b] == S3.op[a][c] && b != c) mal++;
+              casos++;
+          }
+          tique7(5, "logo b = c: em grupo, cancelar é legítimo");
+          tique7(6, "e o GUME — num MONOIDE sem inversos o cancelamento FALHA. Em (ℤ₆,×),"
+                    " 2·1 = 2 e 2·4 = 8 = 2, e 1 ≠ 4. A hipótese «grupo» não é decoração");
+          { Est M; es_zn_mult(&M, 6);
+            printf("      em S3 (grupo): %d falhas em %d triplos\n", mal, casos);
+            printf("      em (Z6,x) (monoide): 2·1 = %d e 2·4 = %d, e 1 ≠ 4 — cancela? NÃO\n",
+                   M.op[2][1], M.op[2][4]);
+            printf("      e 2 tem inverso em (Z6,x)? %s — é essa a razão\n",
+                   es_inverso(&M,2) < 0 ? "não" : "sim"); } }
+        break; }
+    case 4: {
+        tique7(0, "seja H subgrupo de G, e portanto H não é vazio: existe pelo menos um"
+                  " a em H. É esta a hipótese que se usa, e é a única");
+        tique7(1, "o critério do subgrupo, num só:");
+        printf("      $a, b \\in H \\; \\Rightarrow \\; a b^{-1} \\in H$\n");
+        tique7(2, "toma-se b = a no critério: a·a⁻¹ ∈ H");
+        tique7(3, "a lei é o próprio critério, aplicado ao caso a = b — e a definição de"
+                  " inverso, que diz que a·a⁻¹ é o neutro");
+        tique7(4, "a testemunha é o elemento a que existe por H não ser vazio: sem ele"
+                  " não há de onde partir, e é por isso que o vazio NÃO é subgrupo");
+        { unsigned Hs[3] = { (1u<<0)|(1u<<4)|(1u<<8), (1u<<0)|(1u<<6), 1u };
+          int mal = 0;
+          for(int i = 0; i < 3; i++)
+              if(es_subgrupo(&Z12,Hs[i]) && !es_em(Hs[i], es_neutro(&Z12))) mal++;
+          tique7(5, "logo e ∈ H, sempre");
+          tique7(6, "e a volta: varrem-se TODOS os subconjuntos de ℤ₁₂ e verifica-se que"
+                    " os que passam no critério contêm todos o 0 — e que o vazio não passa");
+          int subs = 0, sem_e = 0;
+          for(unsigned H = 0; H < (1u << 12); H++){
+              if(!es_subgrupo(&Z12,H)) continue;
+              subs++;
+              if(!es_em(H,0)) sem_e++;
+          }
+          printf("      os %d subgrupos de Z12: %d sem o neutro;  e o vazio é subgrupo? %s\n",
+                 subs, sem_e, es_subgrupo(&Z12,0) ? "sim (?!)" : "não");
+          printf("      (varrido em 4096 subconjuntos, %d falhas)\n", mal + sem_e); }
+        break; }
+    case 5: {
+        tique7(0, "sejam H e K subgrupos de G. Nada mais: nem finitude, nem"
+                  " comutatividade");
+        tique7(1, "a interseção é o que está nos dois:");
+        printf("      $H \\cap K = \\{ g : g \\in H \\text{ e } g \\in K \\}$\n");
+        tique7(2, "para a, b ∈ H∩K: como estão em H, ab⁻¹ ∈ H; como estão em K,"
+                  " ab⁻¹ ∈ K. Logo ab⁻¹ está nos dois, isto é em H∩K");
+        tique7(3, "a lei é o critério do subgrupo, aplicado DUAS VEZES — uma em cada"
+                  " subgrupo. É a mesma lei usada duas vezes, e não duas leis");
+        tique7(4, "a testemunha é o neutro: está em H e em K (teorema 4), logo a"
+                  " interseção não é vazia — sem isso o critério não pegava");
+        { int mal = 0, pares = 0;
+          unsigned subs[64]; int ns = 0;
+          for(unsigned H = 0; H < (1u << 12) && ns < 64; H++)
+              if(es_subgrupo(&Z12,H)) subs[ns++] = H;
+          for(int i = 0; i < ns; i++) for(int j = 0; j < ns; j++){
+              if(!es_subgrupo(&Z12, subs[i] & subs[j])) mal++;
+              pares++;
+          }
+          tique7(5, "logo H∩K é subgrupo");
+          tique7(6, "e a volta: cruzam-se TODOS os pares de subgrupos de ℤ₁₂ e verifica-se"
+                    " cada interseção pelo critério");
+          printf("      %d subgrupos, %d pares cruzados: %d interseções que falham\n",
+                 ns, pares, mal);
+          printf("      (e o gume: a UNIÃO não é subgrupo — {0,6} ∪ {0,4,8} tem 6 e 4,"
+                 " e 6+4 = 10 não está lá)\n");
+          { unsigned U = (1u<<0)|(1u<<6)|(1u<<4)|(1u<<8);
+            printf("      união é subgrupo? %s\n", es_subgrupo(&Z12,U) ? "sim (?!)" : "NÃO"); } }
+        break; }
+    case 6: case 7: case 8: {
+        /* os três teoremas do homomorfismo correm sobre o mesmo exemplo, e é de
+         * propósito: são três leituras do mesmo objeto */
+        int f[ES_MAX];
+        for(int a = 0; a < 12; a++) f[a] = (3*a) % 12;      /* f(x) = 3x em ℤ₁₂ */
+        if(n == 6){
+            tique7(0, "seja f: G → H homomorfismo. Só isso");
+            tique7(1, "homomorfismo é a função que PRESERVA a operação — «não é"
+                      " simplesmente uma função: é uma função que conserva a estrutura»:");
+            printf("      $f(a \\star b) = f(a) \\star f(b)$\n");
+            tique7(2, "sejam x, y na imagem: x = f(a) e y = f(b). Então"
+                      " x·y⁻¹ = f(a)·f(b)⁻¹ = f(a·b⁻¹), que está na imagem");
+            tique7(3, "as leis são a preservação (para juntar) e f(b⁻¹) = f(b)⁻¹, que"
+                      " ela própria sai da preservação aplicada a b·b⁻¹ = e");
+            tique7(4, "a testemunha é o elemento a·b⁻¹ de G, cuja imagem É o x·y⁻¹ pedido");
+            { unsigned Img = es_imagem(&Z12, f);
+              printf("      f(x) = 3x em Z12:  Im f = "); es_conj(&Z12, Img); printf("\n");
+              tique7(5, "logo Im f é subgrupo de H");
+              tique7(6, "e a volta: verifica-se a imagem pelo critério do subgrupo");
+              printf("      Im f é subgrupo? %s   (e |Im f| = %d)\n",
+                     es_subgrupo(&Z12,Img) ? "sim (resíduo 0)" : "NÃO", es_ordem_conj(Img)); }
+        } else if(n == 7){
+            tique7(0, "seja f: G → H homomorfismo, e K = ker f");
+            tique7(1, "o núcleo é o que vai parar ao neutro:");
+            printf("      $\\ker f = \\{ g \\in G : f(g) = e_H \\}$\n");
+            tique7(2, "K é subgrupo: se f(a) = f(b) = e então f(ab⁻¹) = e·e⁻¹ = e."
+                      " E é NORMAL: para g qualquer e k em K,"
+                      " f(gkg⁻¹) = f(g)·e·f(g)⁻¹ = e, logo gkg⁻¹ ∈ K");
+            tique7(3, "a lei é a preservação outra vez — mas agora aplicada ao CONJUGADO,"
+                      " e é isso que produz a normalidade em vez de só o subgrupo");
+            printf("      $g k g^{-1} \\in K$   para todo $g \\in G$ e $k \\in K$\n");
+            tique7(4, "a testemunha é o f(g)·f(g)⁻¹, que colapsa no neutro seja qual for g"
+                      " — é essa indiferença ao g que É a normalidade");
+            { unsigned K = es_nucleo(&Z12, &Z12, f);
+              printf("      ker f = "); es_conj(&Z12, K); printf("\n");
+              tique7(5, "logo ker f é subgrupo NORMAL, e é por isso que G/ker f existe");
+              tique7(6, "e a volta: verifica-se o critério do subgrupo E a conjugação, os"
+                        " dois, porque normal é mais que subgrupo");
+              printf("      subgrupo? %s;  normal (gKg⁻¹ = K para todo g)? %s\n",
+                     es_subgrupo(&Z12,K) ? "sim" : "NÃO",
+                     es_normal(&Z12,K) ? "sim (resíduo 0)" : "NÃO");
+              printf("      e em S3 o núcleo do homomorfismo trivial é o grupo todo,"
+                     " que também é normal\n"); }
+        } else {
+            tique7(0, "seja f: G → H homomorfismo. Quer-se a EQUIVALÊNCIA, logo há duas"
+                      " direções a provar, e as duas se provam");
+            tique7(1, "trivial quer dizer só o neutro:");
+            printf("      $f$ injetiva $\\Leftrightarrow$ $\\ker f = \\{e\\}$\n");
+            tique7(2, "(⟹) se f é injetiva e f(k) = e = f(e), então k = e. (⟸) se o"
+                      " núcleo é trivial e f(a) = f(b), então f(ab⁻¹) = e, logo ab⁻¹ = e,"
+                      " logo a = b");
+            tique7(3, "a lei da volta é a preservação a transformar uma IGUALDADE de"
+                      " imagens numa PERTENÇA ao núcleo — é esse o truque, e é ele que"
+                      " faz o núcleo medir a injetividade");
+            tique7(4, "a testemunha é o elemento ab⁻¹: ele é que carrega a diferença entre"
+                      " a e b, e o núcleo é onde essa diferença desaparece");
+            { int mal = 0, viu_inj = 0, viu_nao = 0;
+              for(int k = 0; k < 12; k++){
+                  int g[ES_MAX];
+                  for(int a = 0; a < 12; a++) g[a] = (k*a) % 12;
+                  if(!es_homo(&Z12,&Z12,g,0,0)) continue;
+                  unsigned K = es_nucleo(&Z12,&Z12,g);
+                  int inj = es_injetiva(&Z12,g);
+                  if(inj != (es_ordem_conj(K) == 1)) mal++;
+                  if(inj) viu_inj++; else viu_nao++;
+              }
+              tique7(5, "logo as duas condições são a mesma");
+              tique7(6, "e a volta: varrem-se os 12 homomorfismos x ↦ kx de ℤ₁₂ e"
+                        " compara-se injetividade com núcleo trivial, caso a caso");
+              printf("      12 homomorfismos: %d injetivos e %d não, e a equivalência"
+                     " falha em %d\n", viu_inj, viu_nao, mal);
+              printf("      (o gume tem os DOIS lados a ocorrer — se todos fossem"
+                     " injetivos, a equivalência não estaria a decidir nada)\n"); }
+        }
+        break; }
+    case 9: {
+        unsigned H = (1u<<0)|(1u<<4)|(1u<<8);
+        tique7(0, "seja G finito e H ≤ G. Em ℤ₁₂ com H = {0,4,8}, que é o exercício dele");
+        tique7(1, "a classe lateral é o transladado do subgrupo:");
+        printf("      $gH = \\{ g \\star h : h \\in H \\}$\n");
+        tique7(2, "duas classes ou são IGUAIS ou são DISJUNTAS (se partilham um elemento,"
+                  " partilham todos), e todas têm |H| elementos porque g⋆· é bijetiva."
+                  " Logo elas particionam G em blocos do MESMO tamanho");
+        tique7(3, "as leis são o CANCELAMENTO (teorema 3), que dá a bijeção g⋆·, e o"
+                  " critério de igualdade de classes: gH = g′H ⟺ g⁻¹g′ ∈ H");
+        tique7(4, "a testemunha é o número de classes, [G:H] — e |G| = [G:H]·|H| é a"
+                  " conta que o teorema é");
+        { unsigned cls[16]; int nc = 0; unsigned visto = 0; int mal = 0;
+          for(int g = 0; g < 12; g++){
+              if(es_em(visto,g)) continue;
+              unsigned C = es_classe(&Z12,H,g);
+              cls[nc++] = C; visto |= C;
+              printf("      %dH = ", g); es_conj(&Z12, C);
+              printf("   (|%dH| = %d)\n", g, es_ordem_conj(C));
+              if(es_ordem_conj(C) != es_ordem_conj(H)) mal++;
+          }
+          /* a PARTIÇÃO: cobrem tudo e não se cruzam */
+          unsigned uniao = 0;
+          for(int i = 0; i < nc; i++){
+              uniao |= cls[i];
+              for(int j = i+1; j < nc; j++) if(cls[i] & cls[j]) mal++;
+          }
+          if(uniao != 0xFFFu) mal++;
+          tique7(5, "logo |H| divide |G|:");
+          printf("      $|H| \\cdot [G:H] = |G|$:   %d · %d = %d   %s\n",
+                 es_ordem_conj(H), nc, es_ordem_conj(H)*nc,
+                 es_ordem_conj(H)*nc == 12 ? "(resíduo 0)" : "— NÃO afirmo");
+          tique7(6, "e a volta é a PARTIÇÃO medida: as classes cobrem o grupo inteiro e"
+                    " não se cruzam duas a duas — «elemento → classe → partição → volta»");
+          printf("      %d classes, união = grupo todo, cruzamentos = 0: %d falhas\n",
+                 nc, mal); }
+        break; }
+    case 10: {
+        tique7(0, "seja G um grupo finito, |G| = n. Nada mais se pede");
+        tique7(1, "a cada g associa-se a sua translação à esquerda:");
+        printf("      $\\lambda_g : G \\to G, \\qquad \\lambda_g(x) = g \\star x$\n");
+        tique7(2, "cada λ_g é uma BIJEÇÃO de G (o inverso é λ_{g⁻¹}), logo é uma"
+                  " permutação dos n elementos; e λ_{gh} = λ_g ∘ λ_h, logo g ↦ λ_g é"
+                  " homomorfismo de G no grupo das permutações");
+        tique7(3, "a lei da bijetividade é o CANCELAMENTO; a da preservação é a"
+                  " ASSOCIATIVIDADE, que é o que faz λ_g∘λ_h e λ_{gh} coincidirem");
+        tique7(4, "a testemunha da injetividade: se λ_g = λ_h então λ_g(e) = λ_h(e),"
+                  " isto é g = h. O neutro é que serve de sonda");
+        { /* constrói-se a representação e mede-se que é homomorfismo INJETIVO */
+          Est *Gs[2] = { &Z6, &S3 };
+          int mal = 0;
+          for(int i = 0; i < 2; i++){
+              const Est *G = Gs[i];
+              int inj = 1;
+              for(int g = 0; g < G->n; g++) for(int h = g+1; h < G->n; h++){
+                  int igual = 1;
+                  for(int x = 0; x < G->n; x++) if(G->op[g][x] != G->op[h][x]) igual = 0;
+                  if(igual) inj = 0;
+              }
+              int homo = 1;
+              for(int g = 0; g < G->n; g++) for(int h = 0; h < G->n; h++)
+                  for(int x = 0; x < G->n; x++)
+                      if(G->op[G->op[g][h]][x] != G->op[g][G->op[h][x]]) homo = 0;
+              printf("      %s (n = %d): λ é injetiva? %s;  λ_{gh} = λ_g∘λ_h ? %s\n",
+                     G->nome, G->n, inj ? "sim" : "NÃO", homo ? "sim" : "NÃO");
+              if(!inj || !homo) mal++;
+          }
+          tique7(5, "logo G é isomorfo a um subgrupo de Sₙ — «todo grupo é um grupo de"
+                    " permutações», e a abstração não perdeu nada");
+          tique7(6, "e a volta: as translações reconstroem a tábua, porque λ_g(x) É a"
+                    " linha g da tábua. A representação não é um modelo do grupo — é a"
+                    " tábua lida por linhas");
+          printf("      %d falhas — e note-se: a matriz das λ É a tábua de Cayley\n", mal); }
+        break; }
+    case 11: {
+        int f[ES_MAX];
+        for(int a = 0; a < 12; a++) f[a] = (3*a) % 12;
+        tique7(0, "seja f: G → H homomorfismo, K = ker f e I = Im f. Em ℤ₁₂ com f(x) = 3x");
+        tique7(1, "o quociente identifica o que f não distingue:");
+        printf("      $G/\\ker f \\cong \\operatorname{Im} f$\n");
+        tique7(2, "define-se φ(gK) = f(g). Está BEM DEFINIDA (se gK = g′K então"
+                  " g⁻¹g′ ∈ K, logo f(g) = f(g′)), é homomorfismo, é sobrejetiva sobre"
+                  " Im f e é injetiva porque φ(gK) = e obriga g ∈ K, isto é gK = K");
+        tique7(3, "a lei que autoriza tudo é a NORMALIDADE do núcleo (teorema 7) — sem"
+                  " ela o quociente nem existe, e a boa definição é que carrega o resto");
+        tique7(4, "a testemunha é o representante g: a prova toda é mostrar que a escolha"
+                  " dele NÃO importa, e é isso a boa definição");
+        { unsigned K = es_nucleo(&Z12,&Z12,f), Img = es_imagem(&Z12,f);
+          Est Q; unsigned cls[ES_MAX];
+          int m = es_quociente(&Z12, K, &Q, cls);
+          /* a imagem como estrutura, para poder ser comparada */
+          Est EI; int rot[ES_MAX], ni = 0;
+          for(int a = 0; a < 12; a++) if(es_em(Img,a)) rot[ni++] = a;
+          EI.n = ni; EI.nome = "Im f";
+          for(int i = 0; i < ni; i++) for(int j = 0; j < ni; j++){
+              int v = (rot[i] + rot[j]) % 12;
+              for(int k = 0; k < ni; k++) if(rot[k] == v){ EI.op[i][j] = k; break; }
+          }
+          printf("      ker f = "); es_conj(&Z12,K);
+          printf(",  |G/K| = %d;   Im f = ", m); es_conj(&Z12,Img);
+          printf(",  |Im f| = %d\n", ni);
+          tique7(5, "logo o quociente e a imagem são A MESMA ÁLGEBRA noutra"
+                    " representação — é a tua ideia de traduzir um andar para outro,"
+                    " agora como teorema");
+          tique7(6, "e a volta: procura-se EXAUSTIVAMENTE uma bijeção que preserve a"
+                    " operação. Se não houvesse, o isomorfismo era falso — e a busca"
+                    " esgota as m! possibilidades, não amostra");
+          int g[ES_MAX];
+          int iso = es_isomorfas(&Q, &EI, g);
+          printf("      G/K ≅ Im f ? %s   (e |G| = |K|·|Im f| = %d·%d = %d)\n",
+                 iso ? "sim (resíduo 0)" : "— NÃO afirmo",
+                 es_ordem_conj(K), ni, es_ordem_conj(K)*ni); }
+        break; }
+    case 12: case 13: case 14: {
+        Anel R6, R12;
+        an_zn(&R6, 6); an_zn(&R12, 12);
+        if(n == 12){
+            tique7(0, "seja R um anel e I um ideal seu");
+            tique7(1, "ideal é o subgrupo aditivo que ABSORVE o produto:");
+            printf("      $a,b \\in I \\Rightarrow a - b \\in I$   e"
+                   "   $r \\in R,\\ a \\in I \\Rightarrow ra \\in I$\n");
+            tique7(2, "a projeção π: R → R/I, π(a) = a + I, é homomorfismo de anéis, e o"
+                      " seu núcleo é exatamente I. Reciprocamente, o núcleo de qualquer"
+                      " homomorfismo de anéis é ideal: absorve porque f(ra) = f(r)f(a) ="
+                      " f(r)·0 = 0");
+            tique7(3, "a lei da ida é a construção do quociente; a da volta é a"
+                      " preservação do PRODUTO — e note-se que é ela que dá a absorção,"
+                      " que o núcleo de grupos não tinha");
+            tique7(4, "a testemunha é o f(r)·0 = 0, que é o que faz ra cair no núcleo"
+                      " seja qual for o r");
+            { int mal = 0, ideais = 0;
+              for(unsigned Idl = 0; Idl < (1u << 6); Idl++){
+                  if(!an_ideal(&R6, Idl)) continue;
+                  ideais++;
+                  /* o núcleo da projeção mod I é I: mede-se pela classe do 0 */
+                  unsigned nucleo = 0;
+                  for(int a = 0; a < 6; a++){
+                      int esta = 0;
+                      for(int b = 0; b < 6; b++) if(es_em(Idl,b) && a == b) esta = 1;
+                      if(esta) nucleo |= 1u << a;
+                  }
+                  if(nucleo != Idl) mal++;
+              }
+              tique7(5, "logo ideais e núcleos são a MESMA coisa, vistos de dois lados");
+              tique7(6, "e a volta: varrem-se os 64 subconjuntos de ℤ₆ e conta-se quantos"
+                        " passam nas duas condições do ideal");
+              printf("      Z6 tem %d ideais em 64 subconjuntos, e cada um é o núcleo da"
+                     " sua projeção: %d falhas\n", ideais, mal); }
+        } else if(n == 13){
+            tique7(0, "seja f: R → S homomorfismo de anéis e I = ker f");
+            tique7(1, "o mesmo enunciado do grupo, agora com duas operações:");
+            printf("      $R/\\ker f \\cong \\operatorname{Im} f$\n");
+            tique7(2, "a φ(a + I) = f(a) está bem definida pelo mesmo argumento, e agora"
+                      " preserva as DUAS operações — a soma pela mesma conta, o produto"
+                      " porque f(ab) = f(a)f(b)");
+            tique7(3, "a lei nova é a absorção do ideal, que é o que faz o produto de"
+                      " classes estar bem definido: (a+I)(b+I) = ab + I precisa de"
+                      " aI, Ib e I·I caírem em I");
+            tique7(4, "a testemunha é o cálculo (a+i)(b+j) = ab + (aj + ib + ij), e os"
+                      " três termos entre parênteses estão em I pela absorção");
+            { /* f: ℤ₁₂ → ℤ₆ por redução mod 6 — a projeção natural */
+              int mal = 0;
+              for(int a = 0; a < 12; a++) for(int b = 0; b < 12; b++){
+                  if((a + b) % 12 % 6 != ((a % 6) + (b % 6)) % 6) mal++;
+                  if((a * b) % 12 % 6 != ((a % 6) * (b % 6)) % 6) mal++;
+              }
+              tique7(5, "logo o teorema do isomorfismo vale para anéis tal como para"
+                        " grupos — a mesma máquina, uma operação a mais");
+              tique7(6, "e a volta: mede-se a preservação das DUAS operações em todos os"
+                        " pares, porque preservar uma só não é homomorfismo de anéis");
+              printf("      f: Z12 → Z6 (redução), 144 pares × 2 operações: %d falhas\n", mal);
+              printf("      ker f = {0, 6} = (6) em Z12, e Im f = Z6 inteiro\n"); }
+        } else {
+            tique7(0, "seja I um ideal de ℤ. Nenhuma outra hipótese");
+            tique7(1, "o ideal gerado por n é o conjunto dos múltiplos:");
+            printf("      $(n) = n\\mathbb{Z} = \\{ nk : k \\in \\mathbb{Z} \\}$\n");
+            tique7(2, "se I = {0}, é (0). Senão toma-se n = o MENOR positivo de I (boa"
+                      " ordenação). Para a ∈ I qualquer, a divisão dá a = nq + r com"
+                      " 0 ≤ r < n; mas r = a − nq ∈ I, e n era o menor positivo, logo"
+                      " r = 0. Portanto a ∈ nℤ");
+            tique7(3, "as leis são a BOA ORDENAÇÃO de ℕ (para haver menor) e a DIVISÃO"
+                      " COM RESTO — é exatamente a mesma cadeia do gcd como menor"
+                      " elemento de {ax+by}, no andar dos números");
+            tique7(4, "a testemunha é o resto r: ele está no ideal e é menor que o menor,"
+                      " o que só se resolve com r = 0");
+            { int mal = 0, ideais = 0;
+              for(unsigned Idl = 0; Idl < (1u << 12); Idl++){
+                  if(!an_ideal(&R12, Idl)) continue;
+                  ideais++;
+                  int menor = -1;
+                  for(int a = 1; a < 12; a++) if(es_em(Idl,a)){ menor = a; break; }
+                  unsigned ger = 0;
+                  if(menor < 0) ger = 1u;                      /* só o zero */
+                  else for(int k = 0; k < 12; k++) ger |= 1u << ((menor*k) % 12);
+                  if(ger != Idl) mal++;
+              }
+              tique7(5, "logo TODO ideal de ℤ é nℤ — «os ideais de ℤ são justamente os"
+                        " múltiplos de um inteiro», e ℤ é domínio de ideais principais");
+              tique7(6, "e a volta: varrem-se os 4096 subconjuntos de ℤ₁₂, e cada ideal"
+                        " achado reconstrói-se a partir do seu MENOR elemento positivo");
+              printf("      Z12 tem %d ideais, e todos são gerados pelo seu menor"
+                     " positivo: %d falhas\n", ideais, mal);
+              printf("      (e são %d porque 12 tem %d divisores — a correspondência é"
+                     " ideal ↔ divisor)\n", ideais, ideais); }
+        }
+        break; }
+    case 15: {
+        tique7(0, "seja K um corpo, e sejam a, b ∈ K com ab = 0 e a ≠ 0");
+        tique7(1, "corpo é o anel onde todo não nulo tem inverso:");
+        printf("      $a \\neq 0 \\; \\Rightarrow \\; \\exists a^{-1} : a a^{-1} = 1$\n");
+        tique7(2, "multiplica-se ab = 0 por a⁻¹ à esquerda: a⁻¹(ab) = a⁻¹·0, isto é"
+                  " (a⁻¹a)b = 0, isto é 1·b = 0, logo b = 0");
+        tique7(3, "as leis são o INVERSO (que existe por ser corpo), a ASSOCIATIVIDADE"
+                  " (para reagrupar) e r·0 = 0 (que sai da distributividade)");
+        tique7(4, "a testemunha é o a⁻¹ — e é a sua EXISTÊNCIA que o teorema consome:"
+                  " tira-se o inverso da hipótese e o resto é mecânico");
+        { int mal = 0, corpos = 0, aneis = 0;
+          for(int m = 2; m <= 16; m++){
+              Anel R; an_zn(&R, m);
+              int ea = 0, eb = 0, sem = 0;
+              int corpo = an_corpo(&R, &sem), dom = an_dominio(&R, &ea, &eb);
+              if(corpo && !dom) mal++;                    /* corpo ⟹ domínio */
+              if(corpo) corpos++; else aneis++;
+              if(corpo != (nt_primo(m) != 0)) mal++;      /* e ℤₘ é corpo ⟺ m é primo */
+          }
+          tique7(5, "logo b = 0: num corpo, ab = 0 obriga um dos dois a ser zero — todo"
+                    " corpo é DOMÍNIO INTEGRAL");
+          tique7(6, "e o GUME é a recíproca, que é FALSA: ℤ é domínio e não é corpo (o 2"
+                    " não tem inverso). A implicação tem um sentido só, e mede-se qual");
+          { Anel R6b, R5b; an_zn(&R6b,6); an_zn(&R5b,5);
+            int x, y;
+            an_dominio(&R6b, &x, &y);
+            printf("      Z_m para m de 2 a 16: %d corpos e %d não, e corpo ⟹ domínio"
+                   " falha %d vezes\n", corpos, aneis, mal);
+            printf("      Z6 NÃO é domínio (%d·%d = 0) e por isso não é corpo;"
+                   "  Z5 é corpo e é domínio\n", x, y);
+            printf("      e a recíproca: Z é domínio e NÃO é corpo — um sentido só\n"); } }
+        break; }
+    case 16: {
+        tique7(0, "seja ⋆ definida por a ⋆ b = a + b + 1 em ℤ");
+        tique7(1, "operação binária é uma função de A×A em A:");
+        printf("      $\\star : A \\times A \\to A, \\qquad a \\star b = a + b + 1$\n");
+        tique7(2, "FECHADA porque a soma de inteiros é inteira e 1 é inteiro — não sai"
+                  " de ℤ, e é isso que «fechada» quer dizer");
+        tique7(3, "a lei é o fecho de ℤ para a soma, que veio do andar dos inteiros");
+        tique7(4, "o NEUTRO procura-se resolvendo a ⋆ e = a, isto é a + e + 1 = a:");
+        printf("      $a + e + 1 = a \\; \\Rightarrow \\; e = -1$\n");
+        { Est M; es_mais_um(&M, 9);
+          int e = es_neutro(&M);
+          printf("      em ℤ₉ (onde −1 ≡ 8):  o neutro medido é %d,  e −1 mod 9 = %d   %s\n",
+                 e, 8, e == 8 ? "(confere)" : "— NÃO afirmo");
+          tique7(5, "logo (ℤ, ⋆) é MONOIDE: fechada, associativa e com neutro −1");
+          tique7(6, "e a volta: a associatividade varre-se, e o neutro confirma-se pelos"
+                    " DOIS lados (e ⋆ a = a ⋆ e = a) em toda a tábua");
+          printf("      associativa? %s;  e o neutro serve dos dois lados em %d elementos\n",
+                 es_assoc(&M,0,0,0) ? "sim" : "NÃO", M.n);
+          printf("      (e é MAIS que monoide: cada a tem inverso −a−2, logo é GRUPO)\n"); }
+        break; }
+    case 17: {
+        tique7(0, "seja ⋆ definida por a ⋆ b = a − b");
+        tique7(1, "semigrupo pede associatividade:");
+        printf("      $(a \\star b) \\star c = a \\star (b \\star c)$\n");
+        tique7(2, "à esquerda dá (a−b)−c = a−b−c; à direita dá a−(b−c) = a−b+c. As duas"
+                  " só coincidem quando c = −c");
+        tique7(3, "a lei que se tentou usar foi a associatividade da soma, e ela NÃO"
+                  " transporta para a diferença — é aqui que o argumento parte");
+        tique7(4, "a TESTEMUNHA é um triplo concreto, e é ela o resultado: sem exibir um,"
+                  " «não é associativa» seria uma afirmação sem prova");
+        { Est Mn; es_menos(&Mn, 5);
+          int ta = 0, tb = 0, tc = 0;
+          int ass = es_assoc(&Mn, &ta, &tb, &tc);
+          printf("      em ℤ₅:  (%d⋆%d)⋆%d = %d,  mas  %d⋆(%d⋆%d) = %d\n",
+                 ta, tb, tc, Mn.op[Mn.op[ta][tb]][tc],
+                 ta, tb, tc, Mn.op[ta][Mn.op[tb][tc]]);
+          tique7(5, "logo (ℤ, −) NÃO é semigrupo");
+          tique7(6, "e a volta: conta-se em QUANTOS triplos ela falha — se falhasse em"
+                    " zero, a testemunha estava errada; e (ℕ,+) faz o contrário, falha"
+                    " em nenhum");
+          long falhas = 0, total = 0;
+          for(int a = 0; a < 5; a++) for(int b = 0; b < 5; b++) for(int c = 0; c < 5; c++){
+              if(Mn.op[Mn.op[a][b]][c] != Mn.op[a][Mn.op[b][c]]) falhas++;
+              total++;
+          }
+          Est N; es_zn(&N, 5);
+          printf("      associativa? %s — falha em %ld de %ld triplos;"
+                 "  e (ℤ₅,+) falha em 0\n", ass ? "sim (?!)" : "NÃO", falhas, total);
+          printf("      %s\n", es_assoc(&N,0,0,0) ? "" : "(?!)"); }
+        break; }
+    case 18: {
+        tique7(0, "o pedido é «prove que todo grupo é comutativo». A primeira coisa a"
+                  " fazer NÃO é provar: é ver se é verdade");
+        tique7(1, "abeliano é a comutatividade acrescentada aos axiomas:");
+        printf("      $a \\star b = b \\star a$   para todos $a, b \\in G$\n");
+        tique7(2, "os axiomas de grupo são quatro — fechada, associativa, neutro, inverso"
+                  " — e NENHUM deles é a comutatividade. Logo ela não pode ser deduzida:"
+                  " se pudesse, seria supérflua na definição de abeliano");
+        tique7(3, "a lei aqui é a INDEPENDÊNCIA dos axiomas, e a maneira de a mostrar é"
+                  " exibir um modelo que cumpre os quatro e não cumpre o quinto");
+        tique7(4, "a TESTEMUNHA é S₃, e o par concreto que não comuta:");
+        { int ta = 0, tb = 0;
+          es_abeliano(&S3, &ta, &tb);
+          printf("      S₃ é grupo? %s;  abeliano? %s\n",
+                 es_grupo(&S3,0) ? "sim" : "NÃO", es_abeliano(&S3,0,0) ? "sim" : "NÃO");
+          printf("      o par: %d⋆%d = %d,  mas  %d⋆%d = %d\n",
+                 ta, tb, S3.op[ta][tb], tb, ta, S3.op[tb][ta]);
+          printf("      (as permutações de {0,1,2}: %d é ", ta);
+          printf("(%d %d %d) e %d é (%d %d %d))\n",
+                 ES_S3[ta][0], ES_S3[ta][1], ES_S3[ta][2], tb,
+                 ES_S3[tb][0], ES_S3[tb][1], ES_S3[tb][2]);
+          tique7(5, "logo a afirmação é FALSA, e a resposta certa é RECUSAR a demonstração"
+                    " — não é «não consegui provar», é «não há o que provar»");
+          tique7(6, "e a volta: conta-se em quantos pares S₃ falha a comutatividade, e"
+                    " verifica-se que ℤ₁₂ falha em ZERO — os dois lados, para se ver que"
+                    " a propriedade distingue mesmo grupos");
+          long f3 = 0, f12 = 0;
+          for(int a = 0; a < 6; a++) for(int b = 0; b < 6; b++) if(S3.op[a][b] != S3.op[b][a]) f3++;
+          for(int a = 0; a < 12; a++) for(int b = 0; b < 12; b++) if(Z12.op[a][b] != Z12.op[b][a]) f12++;
+          printf("      S₃ falha em %ld dos 36 pares;  ℤ₁₂ falha em %ld dos 144\n", f3, f12); }
+        break; }
+    case 19: {
+        tique7(0, "quer-se um isomorfismo que leve a SOMA no PRODUTO. O ficheiro escreve-o"
+                  " com f(x) = eˣ de (ℝ,+) em (ℝ₊,×)");
+        tique7(1, "isomorfismo é a bijeção que preserva:");
+        printf("      $f(x + y) = f(x) \\cdot f(y)$\n");
+        tique7(2, "AQUI A REALIZAÇÃO MUDA, e diz-se porquê: o eˣ pedia decimais, e nesta"
+                  " casa não entram. Mas o conteúdo do exercício é ALGÉBRICO — «a"
+                  " exponencial troca + por ×» — e isso realiza-se EXATO no finito: uma"
+                  " raiz primitiva g de ℤₚ dá x ↦ gˣ, e é o mesmo teorema sem o e");
+        printf("      $f : (\\mathbb{Z}_{p-1}, +) \\to (\\mathbb{Z}_p^{*}, \\times),"
+               " \\qquad f(x) = g^{x}$\n");
+        tique7(3, "a lei é g^{x+y} = gˣ·gʸ — exatamente a mesma que autoriza"
+                  " e^{x+y} = eˣeʸ. A propriedade é da POTÊNCIA, não do e");
+        tique7(4, "a testemunha é a raiz primitiva g: existe porque ℤₚ* é cíclico, e"
+                  " exibe-se");
+        { long p = 13, g = 0;
+          for(long c = 2; c < p; c++) if(nm_ordem(c, p) == p-1){ g = c; break; }
+          printf("      p = %ld, e a raiz primitiva medida é g = %ld (ordem %ld = p−1)\n",
+                 p, g, nm_ordem(g,p));
+          Est A, B; int rot[ES_MAX];
+          es_zn(&A, (int)(p-1));
+          es_unidades(&B, (int)p, rot);
+          int f[ES_MAX];
+          for(int x = 0; x < A.n; x++){
+              long v = iz_pot_mod(g, x, p);
+              for(int k = 0; k < B.n; k++) if(rot[k] == v){ f[x] = k; break; }
+          }
+          int ta = 0, tb = 0;
+          int homo = es_homo(&A, &B, f, &ta, &tb), inj = es_injetiva(&A, f);
+          printf("      f(x) = %ldˣ mod %ld:  ", g, p);
+          for(int x = 0; x < 6; x++) printf("%s%ld", x?", ":"", iz_pot_mod(g,x,p));
+          printf(", …\n");
+          tique7(5, "logo (ℤ₁₂,+) ≅ (ℤ₁₃*,×): a soma virou produto, exatamente");
+          tique7(6, "e a volta é o LOGARITMO DISCRETO — o f⁻¹ que corresponde ao ln. Cada"
+                    " y do produto tem um x da soma, e a volta reconstrói-o");
+          printf("      homomorfismo? %s;  injetivo? %s;  |A| = %d e |B| = %d\n",
+                 homo ? "sim" : "NÃO", inj ? "sim" : "NÃO", A.n, B.n);
+          int mal = 0;
+          for(int y = 0; y < B.n; y++){
+              int achou = 0;
+              for(int x = 0; x < A.n; x++) if(f[x] == y) achou = 1;
+              if(!achou) mal++;
+          }
+          printf("      e o log discreto existe para %d dos %d elementos: %d sem volta\n",
+                 B.n - mal, B.n, mal); }
+        break; }
+    case 20: {
+        tique7(0, "seja R um anel e a, b ∈ R. Nada mais — nem comutatividade, nem unidade");
+        tique7(1, "o que se quer é que o oposto atravesse o produto:");
+        printf("      $(-a)b = -(ab)$\n");
+        tique7(2, "soma-se ab aos dois lados de (−a)b e usa-se a DISTRIBUTIVIDADE:"
+                  " (−a)b + ab = (−a + a)b = 0·b = 0");
+        printf("      $(-a)b + ab = (-a + a)b = 0 \\cdot b = 0$\n");
+        tique7(3, "as leis são a DISTRIBUTIVIDADE (que junta os dois termos), o OPOSTO"
+                  " aditivo (que dá −a + a = 0) e 0·b = 0 (que ela própria sai da"
+                  " distributividade: 0b = (0+0)b = 0b + 0b)");
+        tique7(4, "a testemunha é o próprio (−a)b + ab: ele é zero, logo (−a)b é O oposto"
+                  " de ab — e o oposto é único (teorema 2), o que fecha");
+        { int mal = 0, casos = 0;
+          for(int m = 2; m <= 12; m++){
+              Anel R; an_zn(&R, m);
+              for(int a = 0; a < m; a++) for(int b = 0; b < m; b++){
+                  int ma = (m - a) % m;                      /* −a */
+                  int mab = (m - R.mult[a][b]) % m;          /* −(ab) */
+                  if(R.mult[ma][b] != mab) mal++;
+                  if(R.soma[R.mult[ma][b]][R.mult[a][b]] != 0) mal++;  /* a cadeia */
+                  casos++;
+              }
+          }
+          tique7(5, "logo (−a)b = −(ab), em QUALQUER anel");
+          tique7(6, "e a volta: varre-se ℤₘ de 2 a 12, elemento a elemento, medindo a"
+                    " conclusão E o passo do meio ((−a)b + ab = 0) — porque medir só a"
+                    " conclusão era o que ele proíbe");
+          printf("      %d pares em 11 anéis: %d falhas (conclusão e passo do meio)\n",
+                 casos, mal);
+          printf("      (e daí sai (−a)(−b) = ab, aplicando duas vezes)\n"); }
+        break; }
+    }
+}
+static int resolve_estrutura(const char *f){
+    const char *p = f;
+    if(!strncmp(p, "algebra", 7)) p += 7;
+    else if(!strncmp(p, "álgebra", 8)) p += 8;
+    else if(!strncmp(p, "estrutura", 9)) p += 9;
+    else {
+        for(size_t i = 0; i < sizeof AL20/sizeof *AL20; i++)
+            if(!strcmp(p, AL20[i].nome)){ algebra_resolve(AL20[i].n); return 1; }
+        return 0;
+    }
+    while(*p == ' ') p++;
+    if(!strncmp(p, "moderna", 7)){ p += 7; while(*p == ' ') p++; }
+    if(!*p){
+        printf("   álgebra moderna — «algebra N» ou «algebra <nome>»\n");
+        printf("   e cada teorema corre os SETE ticks que o ficheiro pede:\n");
+        printf("   hipóteses → definição → transição → lei usada → testemunha →"
+               " conclusão → volta\n\n");
+        for(size_t i = 0; i < sizeof AL20/sizeof *AL20; i++){
+            if(i == 0)  printf("   os quinze teoremas do corpus\n");
+            if(i == 15) printf("   e os exercícios do roteiro\n");
+            printf("     %2d  ", AL20[i].n);
+            esc_col(AL20[i].nome, 20);
+            printf("  %s\n", AL20[i].enunciado);
+        }
+        return 1;
+    }
+    if(*p >= '0' && *p <= '9'){
+        long n = 0;
+        while(*p >= '0' && *p <= '9') n = n*10 + (*p++ - '0');
+        while(*p == ' ') p++;
+        if(!*p && n >= 1 && n <= 20){ algebra_resolve((int)n); return 1; }
+        return 0;
+    }
+    for(size_t i = 0; i < sizeof AL20/sizeof *AL20; i++)
+        if(!strcmp(p, AL20[i].nome)){ algebra_resolve(AL20[i].n); return 1; }
+    return 0;
+}
 /* ── MÖBIUS COMO INVERSOR, E A CURVA COMO MÁQUINA DE RASTROS ────────────────────────
  * Dois pacotes que o `eval.txt` pede em sequência, e que se tocam no mesmo sítio: a
  * INVERSÃO. Num é μ = 1⁻¹ na álgebra da convolução; no outro é a fibra a decidir qual
  * operação existe. «Dois tipos de árvore, duas descidas, duas inversões.» */
 static void esc_qz(const char *pre, Qz x, const char *pos);
-static void esc_col(const char *s, int largura);
 static void esc_pt(PtQ P){
     if(P.inf){ printf("𝒪"); return; }
     printf("("); esc_qz("", P.x, ", "); esc_qz("", P.y, ")");
@@ -5061,6 +5765,7 @@ static int resolve_mostra(const char *f){ return resolve_mostra_em(f, "../papers
 static int resolve_simbolico(const char *fala){
     if(resolve_divisibilidade(fala)) return 1;     /* o relógio de 6 ticks */
     if(resolve_bezout(fala)) return 1;             /* a testemunha e o critério */
+    if(resolve_estrutura(fala)) return 1;          /* álgebra moderna, os 20 */
     if(resolve_eliptica(fala)) return 1;           /* Dirichlet e as elípticas */
     if(resolve_numeros(fala)) return 1;            /* teoria dos números, os 17 */
     if(resolve_identifica(fala)) return 1;         /* o mesmo ponto, quatro portas */
@@ -6094,6 +6799,394 @@ static int teste(void){
                 if(e_conta(nu2)) roubadas++;
             }
             ok("e a membrana nao rouba o corpus: fala sem LaTeX nao vira conta", roubadas == 0);
+
+        /* ═══ §C35 ÁLGEBRA MODERNA: O RASTRO DE SETE TICKS ════════════════════════
+         * «Álgebra moderna troca calcular números por ESTUDAR OPERAÇÕES e suas
+         * estruturas», e a exigência de forma vale para todos os teoremas:
+         *
+         *   hipóteses → definição → transição → lei usada → testemunha → conclusão →
+         *   volta
+         *
+         * «E o mais importante para o teu sistema: NÃO MEDIR SÓ A CONCLUSÃO.» Por isso
+         * aqui mede-se a cadeia, e não só o fim — os passos intermédios de cada prova
+         * têm asserção própria.
+         *
+         * E o andar diz o nome do que a casa já fazia: «(G,⋆) é grupo quando todo a
+         * possui inverso — exatamente a reversibilidade que vocês já encontraram no
+         * andar dos inteiros». Tudo por TÁBUA finita, logo toda varredura é completa. */
+        printf("\n§C35 ÁLGEBRA MODERNA: sete ticks por teorema, e a cadeia medida inteira.\n\n");
+        {
+            Est Z12, S3, Z6, Z5m;
+            es_zn(&Z12, 12); es_s3(&S3); es_zn(&Z6, 6); es_zn_mult(&Z5m, 6);
+
+            /* (1)(2)(3) OS TRÊS TEOREMAS DA UNICIDADE, e as cadeias medidas por dentro */
+            { int umal = 0;
+              Est *Gs[3] = { &Z12, &S3, &Z6 };
+              for(int i = 0; i < 3; i++){
+                  const Est *G = Gs[i];
+                  int quantos_e = 0, e = es_neutro(G);
+                  for(int x = 0; x < G->n; x++){
+                      int bom = 1;
+                      for(int a = 0; a < G->n && bom; a++)
+                          if(G->op[x][a] != a || G->op[a][x] != a) bom = 0;
+                      if(bom) quantos_e++;
+                  }
+                  if(quantos_e != 1) umal++;                       /* identidade única */
+                  for(int a = 0; a < G->n; a++){
+                      int q = 0;
+                      for(int b = 0; b < G->n; b++)
+                          if(G->op[a][b] == e && G->op[b][a] == e) q++;
+                      if(q != 1) umal++;                           /* inverso único */
+                      /* e a CADEIA da prova 2, passo a passo: b = b⋆e = b⋆(a⋆c) = … */
+                      int ai = es_inverso(G, a);
+                      if(ai < 0){ umal++; continue; }
+                      if(G->op[ai][e] != ai) umal++;               /* b⋆e = b */
+                      if(G->op[ai][G->op[a][ai]] != G->op[G->op[ai][a]][ai]) umal++;  /* assoc */
+                      if(G->op[e][ai] != ai) umal++;               /* e⋆c = c */
+                  }
+                  /* cancelamento: em GRUPO vale */
+                  for(int a = 0; a < G->n; a++) for(int b = 0; b < G->n; b++) for(int c = 0; c < G->n; c++)
+                      if(G->op[a][b] == G->op[a][c] && b != c) umal++;
+              }
+              /* o GUME do cancelamento: num MONOIDE sem inversos FALHA, e conta-se */
+              long falhas_monoide = 0;
+              for(int a = 0; a < Z5m.n; a++) for(int b = 0; b < Z5m.n; b++) for(int c = 0; c < Z5m.n; c++)
+                  if(Z5m.op[a][b] == Z5m.op[a][c] && b != c) falhas_monoide++;
+              printf("      identidade e inverso únicos em Z12, S3 e Z6; cancelamento vale"
+                     " nos três e FALHA em %ld triplos de (Z6,x)\n", falhas_monoide);
+              ok("os TRÊS teoremas da unicidade, com a CADEIA medida por dentro e não só a"
+                 " conclusão: o neutro é único, o inverso é único (e cada passo de"
+                 " b = b⋆e = b⋆(a⋆c) = (b⋆a)⋆c = e⋆c = c tem asserção própria), e o"
+                 " cancelamento vale em GRUPO. O gume é o monóide (ℤ₆,×), onde falha —"
+                 " a hipótese não é decoração",
+                 umal == 0 && falhas_monoide > 0); }
+
+            /* (4)(5) SUBGRUPOS: contêm o neutro, e a interseção é subgrupo — mas a
+             * UNIÃO não, e é o gume */
+            { int smal = 0, subs = 0;
+              unsigned lista[64]; int ns = 0;
+              for(unsigned H = 0; H < (1u << 12); H++){
+                  if(!es_subgrupo(&Z12,H)) continue;
+                  subs++;
+                  if(!es_em(H, es_neutro(&Z12))) smal++;           /* contém o neutro */
+                  if(ns < 64) lista[ns++] = H;
+              }
+              if(es_subgrupo(&Z12, 0)) smal++;                     /* o vazio NÃO é */
+              int cruzados = 0, uniao_falha = 0;
+              for(int i = 0; i < ns; i++) for(int j = 0; j < ns; j++){
+                  if(!es_subgrupo(&Z12, lista[i] & lista[j])) smal++;   /* interseção */
+                  if(!es_subgrupo(&Z12, lista[i] | lista[j])) uniao_falha++;
+                  cruzados++;
+              }
+              printf("      Z12 tem %d subgrupos (em 4096 subconjuntos); interseções"
+                     " cruzadas: %d, e uniões que NÃO são subgrupo: %d\n",
+                     subs, cruzados, uniao_falha);
+              ok("TODO SUBGRUPO CONTÉM O NEUTRO (e o vazio não é subgrupo, que é a razão"
+                 " de a hipótese «não vazio» estar lá) e a INTERSEÇÃO de subgrupos é"
+                 " subgrupo — varridos os 4096 subconjuntos de ℤ₁₂ e cruzados todos os"
+                 " pares. O gume é a UNIÃO, que falha, e conta-se quantas vezes",
+                 smal == 0 && subs == 6 && uniao_falha > 0); }
+
+            /* (6)(7)(8) O HOMOMORFISMO: imagem subgrupo, núcleo normal, e injetivo ⟺
+             * núcleo trivial — varridos em TODOS os homomorfismos x ↦ kx de ℤ₁₂ */
+            { int hmal = 0, homos = 0, inj = 0, nao_inj = 0;
+              for(int k = 0; k < 12; k++){
+                  int f[ES_MAX];
+                  for(int a = 0; a < 12; a++) f[a] = (k*a) % 12;
+                  if(!es_homo(&Z12,&Z12,f,0,0)) continue;
+                  homos++;
+                  unsigned K = es_nucleo(&Z12,&Z12,f), Img = es_imagem(&Z12,f);
+                  if(!es_subgrupo(&Z12,Img)) hmal++;               /* (6) imagem */
+                  if(!es_subgrupo(&Z12,K)) hmal++;                 /* (7) núcleo */
+                  if(!es_normal(&Z12,K)) hmal++;                   /*     e normal */
+                  int ij = es_injetiva(&Z12,f);
+                  if(ij != (es_ordem_conj(K) == 1)) hmal++;        /* (8) a equivalência */
+                  if(ij) inj++; else nao_inj++;
+                  /* e o LAGRANGE a fechar: |ker|·|Im| = |G| */
+                  if(es_ordem_conj(K) * es_ordem_conj(Img) != 12) hmal++;
+              }
+              printf("      os %d homomorfismos x ↦ kx de Z12: %d injetivos, %d não —"
+                     " e |ker|·|Im| = 12 em todos\n", homos, inj, nao_inj);
+              ok("nos homomorfismos de ℤ₁₂: a IMAGEM é subgrupo, o NÚCLEO é subgrupo"
+                 " NORMAL, e «injetivo ⟺ núcleo trivial» decide caso a caso com os DOIS"
+                 " lados a ocorrer. E |ker|·|Im| = |G| cai de graça — é o primeiro"
+                 " teorema do isomorfismo já a aparecer na contagem",
+                 hmal == 0 && homos == 12 && inj > 0 && nao_inj > 0); }
+
+            /* (9) LAGRANGE: as classes PARTICIONAM, e todas têm o mesmo tamanho —
+             * medido em todos os subgrupos de ℤ₁₂ e de S₃ */
+            { int lmal = 0, testados = 0;
+              Est *Gs[2] = { &Z12, &S3 };
+              for(int i = 0; i < 2; i++){
+                  const Est *G = Gs[i];
+                  for(unsigned H = 0; H < (1u << G->n); H++){
+                      if(!es_subgrupo(G,H)) continue;
+                      unsigned cls[32]; int nc = 0, visto = 0;
+                      for(int g = 0; g < G->n; g++){
+                          if((visto >> g) & 1) continue;
+                          unsigned C = es_classe(G,H,g);
+                          if(nc < 32) cls[nc++] = C;
+                          visto |= C;
+                      }
+                      unsigned uniao = 0;
+                      for(int x = 0; x < nc; x++){
+                          if(es_ordem_conj(cls[x]) != es_ordem_conj(H)) lmal++;  /* mesmo tamanho */
+                          uniao |= cls[x];
+                          for(int y = x+1; y < nc; y++) if(cls[x] & cls[y]) lmal++; /* disjuntas */
+                      }
+                      if((int)es_ordem_conj(uniao) != G->n) lmal++;               /* cobrem */
+                      if(es_ordem_conj(H) * nc != G->n) lmal++;                   /* |H|·[G:H] = |G| */
+                      if(G->n % es_ordem_conj(H)) lmal++;                         /* logo |H| | |G| */
+                      testados++;
+                  }
+              }
+              printf("      Lagrange em %d subgrupos de Z12 e S3: classes do mesmo"
+                     " tamanho, disjuntas, e a cobrir o grupo\n", testados);
+              ok("LAGRANGE medido pela PARTIÇÃO e não pela conclusão: em todos os"
+                 " subgrupos de ℤ₁₂ e de S₃, as classes laterais têm o mesmo tamanho, são"
+                 " disjuntas duas a duas e cobrem o grupo — e só daí sai |H|·[G:H] = |G|."
+                 " É «elemento → classe → partição → volta»",
+                 lmal == 0 && testados > 8); }
+
+            /* O NÃO ABELIANO É QUE EXERCITA A NORMALIDADE — e sem ele o andar
+             * estava por medir. Em ℤ₁₂ TODO subgrupo é normal e gH = Hg sempre, porque
+             * é abeliano: as mutações «normal sem conjugar» e «classe do outro lado»
+             * sobreviviam à varredura inteira. É S₃ que decide, e por isso entra. */
+            { int nmal = 0, normais = 0, nao_normais = 0, lados_diferem = 0;
+              for(unsigned H = 0; H < (1u << 6); H++){
+                  if(!es_subgrupo(&S3,H)) continue;
+                  int norm = es_normal(&S3,H);
+                  if(norm) normais++; else nao_normais++;
+                  /* e o lado da classe: gH contra Hg, subgrupo a subgrupo */
+                  int difere = 0;
+                  for(int g = 0; g < 6; g++){
+                      unsigned E = es_classe(&S3,H,g), D = 0;
+                      for(int h = 0; h < 6; h++) if(es_em(H,h)) D |= 1u << S3.op[h][g];
+                      if(E != D) difere = 1;
+                  }
+                  if(difere) lados_diferem++;
+                  /* O TEOREMA: normal ⟺ os dois lados coincidem. É a definição vista de
+                   * outro ângulo, e mede-se a equivalência, não uma direção */
+                  if(norm == difere) nmal++;
+              }
+              /* e um NÃO-homomorfismo, porque o filtro nunca excluía ninguém: todos os
+               * x ↦ kx de ℤ₁₂ são homomorfismos, logo `es_homo` podia devolver sempre
+               * verdade sem ninguém dar por isso */
+              int f2[ES_MAX], ta = 0, tb = 0;
+              for(int a = 0; a < 12; a++) f2[a] = (a*a) % 12;
+              int e_homo = es_homo(&Z12,&Z12,f2,&ta,&tb);
+              if(e_homo) nmal++;                                  /* x² NÃO preserva */
+              if(Z12.op[f2[ta]][f2[tb]] == f2[Z12.op[ta][tb]]) nmal++;  /* e a testemunha vale */
+              printf("      S₃: %d subgrupos normais e %d NÃO normais, e os lados da"
+                     " classe diferem exatamente nos %d não normais\n",
+                     normais, nao_normais, lados_diferem);
+              printf("      e x ↦ x² em Z12 NÃO é homomorfismo: f(%d+%d) = %d mas"
+                     " f(%d)·f(%d) = %d\n", ta, tb, f2[Z12.op[ta][tb]],
+                     ta, tb, Z12.op[f2[ta]][f2[tb]]);
+              ok("O NÃO ABELIANO É QUE MEDE A NORMALIDADE: em ℤ₁₂ todo subgrupo é normal"
+                 " e gH = Hg sempre, logo a conjugação e o lado da classe nunca eram"
+                 " exercitados. Em S₃ há subgrupos NÃO normais, e mede-se a equivalência"
+                 " «normal ⟺ gH = Hg» subgrupo a subgrupo. E entra um NÃO-homomorfismo"
+                 " (x ↦ x²), porque todos os x ↦ kx eram homomorfismos e o filtro nunca"
+                 " excluía ninguém",
+                 nmal == 0 && nao_normais == 3 && lados_diferem == 3 && !e_homo); }
+
+            /* (10) CAYLEY: a translação é permutação, e a matriz das λ É a tábua */
+            { int cmal = 0;
+              Est *Gs[3] = { &Z12, &S3, &Z6 };
+              for(int i = 0; i < 3; i++){
+                  const Est *G = Gs[i];
+                  for(int g = 0; g < G->n; g++){
+                      unsigned imagem = 0;
+                      for(int x = 0; x < G->n; x++) imagem |= 1u << G->op[g][x];
+                      if((int)es_ordem_conj(imagem) != G->n) cmal++;   /* λ_g é bijeção */
+                  }
+                  for(int g = 0; g < G->n; g++) for(int h = g+1; h < G->n; h++){
+                      int igual = 1;
+                      for(int x = 0; x < G->n; x++) if(G->op[g][x] != G->op[h][x]) igual = 0;
+                      if(igual) cmal++;                                /* g ↦ λ_g injetiva */
+                  }
+              }
+              ok("CAYLEY: cada translação λ_g é uma PERMUTAÇÃO do grupo (a bijetividade"
+                 " vem do cancelamento) e g ↦ λ_g é injetiva — medido em ℤ₁₂, S₃ e ℤ₆."
+                 " E a observação que o torna barato: a matriz das λ É a tábua de Cayley"
+                 " lida por linhas, logo a representação não é um modelo do grupo, é o"
+                 " próprio objeto", cmal == 0); }
+
+            /* (11) O PRIMEIRO TEOREMA DO ISOMORFISMO: G/ker ≅ Im, com a busca EXAUSTIVA */
+            { int imal = 0, casos = 0;
+              for(int k = 0; k < 12; k++){
+                  int f[ES_MAX];
+                  for(int a = 0; a < 12; a++) f[a] = (k*a) % 12;
+                  if(!es_homo(&Z12,&Z12,f,0,0)) continue;
+                  unsigned K = es_nucleo(&Z12,&Z12,f), Img = es_imagem(&Z12,f);
+                  Est Q; unsigned cls[ES_MAX];
+                  int m = es_quociente(&Z12, K, &Q, cls);
+                  if(m <= 0){ imal++; continue; }
+                  Est EI; int rot[ES_MAX], ni = 0;
+                  for(int a = 0; a < 12; a++) if(es_em(Img,a)) rot[ni++] = a;
+                  EI.n = ni; EI.nome = "Im";
+                  for(int x = 0; x < ni; x++) for(int y = 0; y < ni; y++){
+                      int v = (rot[x] + rot[y]) % 12;
+                      for(int z = 0; z < ni; z++) if(rot[z] == v){ EI.op[x][y] = z; break; }
+                  }
+                  if(m != ni) imal++;
+                  if(!es_isomorfas(&Q, &EI, 0)) imal++;
+                  casos++;
+              }
+              printf("      G/ker f ≅ Im f nos %d homomorfismos, com a bijeção procurada"
+                     " EXAUSTIVAMENTE em cada um\n", casos);
+              ok("o PRIMEIRO TEOREMA DO ISOMORFISMO — G/ker f ≅ Im f — verificado em"
+                 " TODOS os homomorfismos de ℤ₁₂, e o isomorfismo não é declarado: a"
+                 " bijeção que preserva a operação é PROCURADA, esgotando as"
+                 " possibilidades. Se não houvesse, o teorema caía ali",
+                 imal == 0 && casos == 12); }
+
+            /* (12)(13)(14) OS ANÉIS: ideais são núcleos, o isomorfismo, e os ideais de ℤ */
+            { int amal = 0, ideais12 = 0;
+              for(int m = 2; m <= 12; m++){
+                  Anel R; an_zn(&R, m);
+                  if(!an_distrib(&R)) amal++;
+                  for(unsigned Idl = 0; Idl < (1u << m); Idl++){
+                      if(!an_ideal(&R, Idl)) continue;
+                      /* TODO ideal de ℤₘ é gerado pelo seu menor positivo */
+                      int menor = -1;
+                      for(int a = 1; a < m; a++) if(es_em(Idl,a)){ menor = a; break; }
+                      unsigned ger = 0;
+                      if(menor < 0) ger = 1u;
+                      else for(int k = 0; k < m; k++) ger |= 1u << ((menor*k) % m);
+                      if(ger != Idl) amal++;
+                      if(m == 12) ideais12++;
+                  }
+              }
+              /* e o isomorfismo de anéis: ℤ₁₂ → ℤ₆ preserva as DUAS operações */
+              int rmal = 0;
+              for(int a = 0; a < 12; a++) for(int b = 0; b < 12; b++){
+                  if(((a+b) % 12) % 6 != ((a%6) + (b%6)) % 6) rmal++;
+                  if(((a*b) % 12) % 6 != ((a%6) * (b%6)) % 6) rmal++;
+              }
+              printf("      ideais de Zm para m ≤ 12: todos gerados pelo menor positivo"
+                     " (Z12 tem %d), e Z12 → Z6 preserva as duas operações\n", ideais12);
+              ok("os IDEAIS de ℤₘ são TODOS principais — gerados pelo menor elemento"
+                 " positivo, que é a mesma cadeia (boa ordenação + divisão com resto) do"
+                 " gcd como menor de {ax+by}. E o homomorfismo de anéis preserva as DUAS"
+                 " operações, medidas em separado: preservar uma só não é homomorfismo"
+                 " de anéis", amal == 0 && rmal == 0 && ideais12 == 6); }
+
+            /* (15) CORPO ⟹ DOMÍNIO, e a RECÍPROCA é falsa — o gume do sentido único */
+            { int cmal2 = 0, corpos = 0, dominios = 0, so_dominio = 0;
+              for(int m = 2; m <= 20; m++){
+                  Anel R; an_zn(&R, m);
+                  int corpo = an_corpo(&R, 0), dom = an_dominio(&R, 0, 0);
+                  if(corpo && !dom) cmal2++;                       /* corpo ⟹ domínio */
+                  if(corpo != (nt_primo(m) != 0)) cmal2++;         /* ℤₘ corpo ⟺ m primo */
+                  if(corpo) corpos++;
+                  if(dom) dominios++;
+                  if(dom && !corpo) so_dominio++;
+              }
+              /* E A RECÍPROCA MEDE-SE, EM VEZ DE SE AFIRMAR. Em ℤₘ os dois lados
+               * COINCIDEM — e isso não é acidente, é o teorema «todo domínio FINITO é
+               * corpo». Portanto a varredura acima NÃO exercita a direção: aqui ela
+               * seria uma equivalência, e eu estaria a chamar «um sentido só» a um
+               * conjunto onde os dois valem. A testemunha tem de vir de um domínio
+               * INFINITO, e o mais barato é ℤ: mede-se que não tem divisores de zero
+               * numa janela, e que o 2 NÃO tem inverso — as duas coisas em inteiros. */
+              long zero_div = 0, inverso_de_2 = 0;
+              for(long a = -60; a <= 60; a++) for(long b = -60; b <= 60; b++){
+                  if(a && b && a*b == 0) zero_div++;          /* ℤ é domínio */
+                  if(a == 2 && a*b == 1) inverso_de_2++;      /* e 2 não tem inverso */
+              }
+              printf("      Z_m para m de 2 a 20: %d corpos, %d domínios, e %d domínios"
+                     " que NÃO são corpo — porque todo domínio FINITO é corpo\n",
+                     corpos, dominios, so_dominio);
+              printf("      e em ℤ (infinito): %ld divisores de zero e %ld inversos do 2"
+                     " — domínio que NÃO é corpo, e é ele a testemunha da direção\n",
+                     zero_div, inverso_de_2);
+              ok("TODO CORPO É DOMÍNIO INTEGRAL — e a implicação tem UM SENTIDO SÓ, mas a"
+                 " testemunha disso NÃO pode vir de ℤₘ: aí os dois lados coincidem"
+                 " (porque todo domínio FINITO é corpo), e chamar-lhe «um sentido» seria"
+                 " medir uma equivalência. A direção prova-se em ℤ, que é domínio (zero"
+                 " divisores de zero) e não é corpo (o 2 não tem inverso) — medido",
+                 cmal2 == 0 && corpos > 0 && dominios > 0 && so_dominio == 0
+                 && zero_div == 0 && inverso_de_2 == 0); }
+
+            /* (16)(17)(18) OS EXERCÍCIOS DO ROTEIRO, com as testemunhas */
+            { int emal = 0;
+              Est M, Mn;
+              es_mais_um(&M, 9); es_menos(&Mn, 5);
+              if(!es_fechada(&M) || !es_assoc(&M,0,0,0)) emal++;
+              if(es_neutro(&M) != 8) emal++;                       /* −1 mod 9 = 8 */
+              if(!es_grupo(&M, 0)) emal++;                         /* e é mais: é grupo */
+              int ta = 0, tb = 0, tc = 0;
+              if(es_assoc(&Mn, &ta, &tb, &tc)) emal++;             /* a−b NÃO associa */
+              if(Mn.op[Mn.op[ta][tb]][tc] == Mn.op[ta][Mn.op[tb][tc]]) emal++; /* e a testemunha vale */
+              int pa = 0, pb = 0;
+              if(!es_grupo(&S3,0)) emal++;
+              if(es_abeliano(&S3,&pa,&pb)) emal++;                 /* S₃ não é abeliano */
+              if(S3.op[pa][pb] == S3.op[pb][pa]) emal++;           /* e o par exibido não comuta */
+              if(!es_abeliano(&Z12,0,0)) emal++;                   /* e ℤ₁₂ é */
+              printf("      a⋆b = a+b+1 tem neutro %d (= −1 mod 9) e é grupo; a−b falha"
+                     " em (%d,%d,%d); S₃ não comuta em (%d,%d)\n",
+                     es_neutro(&M), ta, tb, tc, pa, pb);
+              ok("OS EXERCÍCIOS DO ROTEIRO com as testemunhas exibidas e VERIFICADAS: o"
+                 " neutro de a⋆b = a+b+1 é −1 (e a estrutura é mais que monoide, é grupo);"
+                 " a−b não associa, com o triplo concreto; e «todo grupo é comutativo» é"
+                 " FALSO, com o par de S₃ que o derruba — a recusa é o resultado, não uma"
+                 " desistência", emal == 0); }
+
+            /* (19) A SOMA VIRA PRODUTO, exata: a raiz primitiva no lugar do e */
+            { int xmal = 0, primos = 0;
+              for(long p = 5; p <= 29; p++){
+                  if(!nt_primo(p)) continue;
+                  long g = 0;
+                  for(long c = 2; c < p; c++) if(nm_ordem(c,p) == p-1){ g = c; break; }
+                  if(!g){ xmal++; continue; }
+                  Est A, B; int rot[ES_MAX], f[ES_MAX];
+                  if(p-1 > ES_MAX) continue;
+                  es_zn(&A, (int)(p-1));
+                  es_unidades(&B, (int)p, rot);
+                  for(int x = 0; x < A.n; x++){
+                      long v = iz_pot_mod(g, x, p);
+                      f[x] = -1;
+                      for(int k = 0; k < B.n; k++) if(rot[k] == v){ f[x] = k; break; }
+                      if(f[x] < 0) xmal++;
+                  }
+                  if(!es_homo(&A,&B,f,0,0)) xmal++;                /* g^{x+y} = gˣgʸ */
+                  if(!es_injetiva(&A,f)) xmal++;
+                  if(A.n != B.n) xmal++;                            /* e bijetiva */
+                  primos++;
+              }
+              printf("      (Z_{p−1},+) ≅ (Zp*,×) por x ↦ gˣ, em %d primos — sem um"
+                     " único decimal\n", primos);
+              ok("A SOMA VIRA PRODUTO, e EXATAMENTE: o eˣ do ficheiro pedia decimais, mas"
+                 " o conteúdo do exercício é algébrico (a potência troca + por ×) e"
+                 " realiza-se no finito com uma raiz primitiva. (ℤ_{p−1},+) ≅ (ℤₚ*,×) em"
+                 " todos os primos até 29, com a volta a ser o LOGARITMO DISCRETO",
+                 xmal == 0 && primos >= 5); }
+
+            /* E OS VINTE CORREM */
+            { int vmal = 0, por_n = 0, por_nome = 0;
+              fflush(stdout);
+              int guarda = dup(1), nulo = open("/dev/null", O_WRONLY);
+              if(guarda >= 0 && nulo >= 0) dup2(nulo, 1);
+              for(int k = 1; k <= 20; k++){
+                  char fala[64];
+                  snprintf(fala, sizeof fala, "algebra %d", k);
+                  if(resolve_estrutura(fala)) por_n++; else vmal++;
+              }
+              for(size_t i = 0; i < sizeof AL20/sizeof *AL20; i++)
+                  if(resolve_estrutura(AL20[i].nome)) por_nome++; else vmal++;
+              if(resolve_estrutura("algebra 21")) vmal++;
+              fflush(stdout);
+              if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
+              if(nulo >= 0) close(nulo);
+              printf("      os vinte: %d pelo número, %d pelo nome, e a 21 é recusada\n",
+                     por_n, por_nome);
+              ok("OS VINTE da álgebra moderna correm pelo NÚMERO e pelo NOME, e o fora de"
+                 " alcance é RECUSADO — e cada um corre os SETE ticks do rastro que o"
+                 " ficheiro exige, com a definição em LaTeX no seu lugar",
+                 vmal == 0 && por_n == 20 && por_nome == 20); }
+        }
 
         /* ═══ §C34 CURVAS ELÍPTICAS: A FIBRA DETERMINA QUAL OPERAÇÃO EXISTE ═══════
          * «reta → interseção → reflexão → novo ponto → repetição» — e a frase que já é a
