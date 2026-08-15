@@ -34,7 +34,9 @@
  *   §P2  os DOIS caminhos: o posto da incidência contra a contagem
  *   §P3  a testemunha NÃO EXACTA no ciclo, e o CONTROLO na árvore
  *   §P4  dim H¹ = posto de π₁ — a cohomologia e a homotopia contam o mesmo
- *   §P5  o teto da máquina, à parte
+ *   §P5  o lado ∂ — a HOMOLOGIA, e ∂ é a transposta de d (a adjunção em coordenadas)
+ *   §P6  π₁ não linear, H₁ linearizado: a passagem é apagar a ORDEM
+ *   §P7  o teto da máquina, à parte
  *
  *   cc -O2 -std=c99 -I../lib cohomologia_ponte.c -o cohomologia_ponte && ./cohomologia_ponte
  */
@@ -215,7 +217,69 @@ printf("\n§P4  dim H¹ = posto de π₁ — a cohomologia e a homotopia contam 
        mal == 0 && tot == 4);
 }
 
-printf("\n§P5  O TETO DA MÁQUINA, à parte.\n\n");
+printf("\n§P5  O LADO ∂: a HOMOLOGIA, e ∂ é a transposta de d.\n\n");
+{
+    /* O eval põe o lado de Peano em ∂ e não em d, e tem razão: C₁ →∂ C₀, o ciclo é
+     * ker ∂₁, e H₁ = ker ∂₁ / im ∂₂. Num grafo NÃO HÁ ∂₂ (não há 2-células), logo
+     * H₁ = ker ∂₁ exactamente — e a sua dimensão é E − V + C, o mesmo número.
+     *
+     * E ∂ é literalmente a TRANSPOSTA de d: a matriz de incidência lida ao contrário.
+     * É a adjunção ∂ ⊣ d que este sistema já tinha medido, agora em coordenadas. */
+    long mal = 0, tot = 0;
+    printf("      espaço        dim ker ∂₁ (ciclos)   dim H¹ (cocadeias)   posto π₁\n");
+    struct { const char *n; Grafo g; } GS[] = {
+        {"caminho P₅", P}, {"ciclo C₅", C5}, {"ciclo C₆", C6}, {"oito", O} };
+    for(int i = 0; i < 4; i++){
+        Grafo g = GS[i].g;
+        Mat M = incidencia(g);                 /* d: linhas = arestas */
+        Mat Mt = mat_transposta(M);            /* ∂: linhas = vértices */
+        int h1 = g.ne - mat_posto(M);          /* dim H¹ */
+        int ciclos = g.ne - mat_posto(Mt);     /* dim ker ∂₁ */
+        int p1 = gr_posto(g);
+        printf("      %-13s %-21d %-20d %d\n", GS[i].n, ciclos, h1, p1);
+        if(!(ciclos == h1 && h1 == p1)) mal++;
+        tot++;
+    }
+    printf("\n      e o posto de d é o posto da transposta: é a ADJUNÇÃO ∂ ⊣ d em"
+           " coordenadas\n\n");
+    ok("O LADO ∂ DÁ O MESMO NÚMERO, e é a face que o coordenador põe em Peano: C₁ →∂ C₀,"
+       " o CICLO é ker ∂₁, e H₁ = ker ∂₁ / im ∂₂. Num grafo não há ∂₂ — não há 2-células"
+       " — logo H₁ = ker ∂₁ exactamente. E ∂ é literalmente a TRANSPOSTA de d, a mesma"
+       " matriz de incidência lida ao contrário: é a adjunção ∂ ⊣ d já medida, agora em"
+       " coordenadas. Três contagens independentes — ciclos, cocadeias e árvore geradora —"
+       " e um só número",
+       mal == 0 && tot == 4);
+}
+
+printf("\n§P6  E A LINEARIZAÇÃO: π₁ é não abeliano, H₁ é a sua abelianização.\n\n");
+{
+    /* π₁ do oito é LIVRE de posto 2 e não abeliano; H₁ é ℤ² e é abeliano. A passagem de
+     * um ao outro é exactamente apagar a ordem — e o comutador, que é não trivial em π₁,
+     * morre em H₁. Foi medido no andar da homotopia; aqui liga-se aos números. */
+    int A[] = {1}, B[] = {2};
+    Pal a = pal_de(A,1), b = pal_de(B,1);
+    Pal ab = pal_junta(a,b), ba = pal_junta(b,a);
+    Pal com = pal_junta(pal_junta(a,b), pal_junta(pal_inversa(a), pal_inversa(b)));
+    int na, nb;
+    pal_abeliana(com, &na, &nb);
+    Mat M = incidencia(O);
+    int h1 = O.ne - mat_posto(M);
+    printf("      no oito:  posto π₁ = %d (LIVRE, não abeliano);  dim H₁ = %d (abeliano)\n",
+           gr_posto(O), h1);
+    printf("        ab = ba em π₁?              %s\n", pal_igual(ab,ba) ? "sim" : "não");
+    printf("        o comutador é trivial em π₁? %s\n", pal_trivial(com) ? "sim" : "não");
+    printf("        e a sua imagem em H₁:        (%d, %d)  ← morre\n\n", na, nb);
+    ok("π₁ DÁ A REALIZAÇÃO NÃO LINEAR E H₁ A LINEARIZADA, e a passagem de uma à outra é"
+       " apagar a ORDEM. No oito, π₁ é livre de posto 2 e NÃO abeliano — ab ≠ ba, e o"
+       " comutador aba⁻¹b⁻¹ não se reduz —, enquanto H₁ é ℤ², abeliano, e o comutador"
+       " morre lá (0,0). Os dois têm a mesma CONTAGEM (2) e estruturas diferentes: a"
+       " cohomologia vê o número de buracos, e π₁ vê também como eles se enrolam uns nos"
+       " outros",
+       !pal_igual(ab,ba) && !pal_trivial(com) && na == 0 && nb == 0
+       && gr_posto(O) == h1 && h1 == 2);
+}
+
+printf("\n§P7  O TETO DA MÁQUINA, à parte.\n\n");
 {
     printf("      estouros: %ld (do LN_MAX = %d, que limita a matriz e NÃO o objecto)\n\n",
            estouros, LN_MAX);

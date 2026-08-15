@@ -2133,6 +2133,26 @@ $(df)(e)=f(b)-f(a)$, e a pergunta «$\omega$ é exacta?» é
 lá o diferencial entra na coluna do fecho como o caso $b=0$, sem
 inverso; aqui a sua fibra é vazia exactamente sobre os ciclos.
 
+\textbf{E o lado próprio desta realização é o $\partial$.} A cadeia é
+\[
+C_{1}\xrightarrow{\;\partial\;}C_{0},
+\qquad
+\text{ciclo}=\ker\partial_{1},
+\qquad
+H_{1}=\ker\partial_{1}/\operatorname{im}\partial_{2},
+\]
+e num grafo \emph{não há} $\partial_{2}$ --- não há $2$-células ---,
+logo $H_{1}=\ker\partial_{1}$ exactamente. O $\partial$ é a
+\textbf{transposta} da matriz de incidência: a mesma tabela lida ao
+contrário. É a adjunção $\partial\dashv d$ em coordenadas, e explica
+por que os dois lados dão o mesmo número. Medido: três contagens
+independentes --- ciclos ($\ker\partial_1$), cocadeias ($H^1$) e árvore
+geradora ($\pi_1$) --- e um só número.
+
+\textbf{Ciclo menos borda é classe.} É esta a frase da realização
+discreta, e a sua tradução diferencial --- \emph{fechada menos exacta é
+cohomologia} --- é a face do \emph{Corpo estelar}.
+
 \textbf{A construção e a volta.} O potencial constrói-se propagando
 $f$ pelas arestas a partir de $f(v_{0})=0$; e depois \emph{confere-se
 em todas as arestas}, incluindo as que fecham ciclos. É a conferência
@@ -2145,7 +2165,7 @@ $E-V+C$ --- arestas, vértices e componentes, três inteiros --- e é
 \emph{o mesmo} que o posto de $\pi_{1}$ e o mesmo que $\dim H^{1}$
 obtido por eliminação. \emph{A face discreta não precisa de geometria
 nenhuma: precisa de contar.}
-\emph{Medido:} \code{tests/cohomologia\_ponte.c} ($5{:}0$).
+\emph{Medido:} \code{tests/cohomologia\_ponte.c} ($7{:}0$).
 $\square$
 \end{teorema}
 

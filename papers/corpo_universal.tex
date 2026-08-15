@@ -1224,10 +1224,24 @@ $\varepsilon$--$\delta$.
 \emph{Medido:} \code{tests/lebesgue\_toro.js} ($7{:}0$).
 \end{observacao}
 
-\begin{teorema}[o buraco é um só, contado por dois caminhos --- a ponte
-para a cohomologia]\label{thm:ponte-cohomologia}
-O complexo do Teorema~\ref{thm:nilpotencia-dual} tem uma realização
-\emph{finita} onde a obstrução deixa de ser $0$ e se mede:
+\begin{teorema}[localmente contráctil não implica globalmente contráctil
+--- e o invariante global é a informação da COLAGEM]\label{thm:ponte-cohomologia}
+\[
+\boxed{\;\text{localmente contráctil}\;\not\Longrightarrow\;
+\text{globalmente contráctil}\;}
+\]
+\textbf{(0) A lei.} A obstrução \emph{não precisa de aparecer em
+vizinhança nenhuma}: ela pode surgir na \textbf{colagem} das
+vizinhanças. Medido no par mais barato que existe: em $C_{8}$ todas as
+$8$ estrelas locais são contrácteis e o todo NÃO é; em $P_{5}$ todas as
+$5$ são contrácteis e o todo É. As duas metades medem-se ao mesmo
+tempo, e é o par que é o teorema --- nenhum teste local separa os dois
+espaços, e eles são diferentes. Logo
+\[
+\boxed{\;\text{invariante global}=\text{informação da colagem}.\;}
+\]
+E o complexo do Teorema~\ref{thm:nilpotencia-dual} tem uma realização
+\emph{finita} onde a obstrução deixa de ser $0$ e se conta:
 \[
 \Lambda^{0}\xrightarrow{\;d\;}\Lambda^{1}\to 0,
 \qquad
@@ -1262,12 +1276,24 @@ não vive naquele anel. A razão de não se ver o buraco era a
 \textbf{representação}, não a matemática. Aqui está ele: o análogo
 discreto da forma do ângulo cabe num grafo de cinco vértices.
 
+\textbf{(iv) E a consequência metodológica.} \emph{O buraco não é
+necessariamente invisível: ele pode ser invisível numa representação e
+aparecer imediatamente noutra.} Foi exactamente o salto
+$\mathbb{Q}[x,y,z]\longrightarrow$ grafo. Daí a exigência que este
+quadro passa a fazer a si próprio: não basta provar que existe uma
+obstrução --- é preciso \textbf{descobrir em que representação ela
+aparece}.
+
 \textbf{Estatuto.} Isto \emph{não} afirma um teorema de cohomologia
-novo: $\dim H^{1}=E-V+C$ para grafos é clássico. O que se acrescenta é a
-leitura --- \emph{o buraco é um objecto só, e a cohomologia e a
-homotopia são dois modos de o contar} ---, e a realização exacta, sem
-aproximação nenhuma. As duas faces estão nos outros dois papers.
-\emph{Medido:} \code{tests/cohomologia\_ponte.c} ($5{:}0$).
+novo: $\dim H^{1}=E-V+C$ para grafos é clássico, e o mesmo vale para
+$\pi_1(S^1)\cong\mathbb{Z}$. O que se acrescenta é a leitura --- \emph{o
+buraco é um objecto só, e a cohomologia e a homotopia são dois modos de
+o contar}, com $\pi_1$ a dar a versão \emph{não linear} e $H^1$ a
+\emph{linearizada} --- e a realização exacta, sem aproximação. As duas
+faces estão nos outros dois papers:
+\emph{Peano} tem $\ker\partial/\operatorname{im}\partial$ e
+\emph{Estelar} tem $\ker d/\operatorname{im}d$.
+\emph{Medido:} \code{tests/cohomologia\_ponte.c} ($7{:}0$).
 $\square$
 \end{teorema}
 
