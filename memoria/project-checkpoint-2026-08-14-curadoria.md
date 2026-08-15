@@ -223,3 +223,28 @@ não nula) — este último em `8dfb094`, detalhe em [[project-escada-aritmetica
 DELE como referência → **mutar a lib e contar as falhas**. Em ℚ e na booleana: seis
 mutações, 3/2/6/1/1/1 falhas, base 0. A mutação é o que separa a asserção que mede da que
 acompanha.
+
+
+### O andar de ℝ fecha a escada (`456fdd5`)
+
+`lib/reais.h` + §C29 (dez unidades). **O real é o CORTE, e nunca um decimal** — e aqui o
+exato deixou de ser disciplina para ser a MATÉRIA do andar: um `double` afirmaria que o
+real é uma tira de casas. Zero doubles no ficheiro; a palavra só aparece no comentário que
+os proíbe. Detalhe em [[project-o-real-e-o-corte]].
+
+**Três caminhos que fecham um contra o outro** — o corte decide (inteiro), o Möbius INTEIRO
+persegue (ponto fixo x² = a), a FC de `lado` escreve (periódica, Lagrange) — e o convergente
+da FC cai DENTRO da caixa que a bisseção fechou, sem que os métodos se conheçam.
+
+**A lição de método**: o `b` do Möbius estava escrito à mão como `2` e a `rz_b` ficou
+MORTA. Ligá-la fez duas asserções passarem a morder na mutação — uma constante à mão é
+sempre uma asserção a menos ([[feedback-a-referencia-escrita-a-mao]]).
+
+**E o terceiro defeito de output da madrugada**: o destino rotativo do `frac2`, pela SEGUNDA
+vez ([[feedback-o-destino-rotativo]]). A sucessão saiu «1, 4/3, 7/5, 24/17, **1**» — o quinto
+termo a sobrescrever o primeiro. Nasceu `tools/bench_destino.sh`, que mede do lado da FONTE
+(48:0, e injetar um quinto derruba-o). Padrão da madrugada, e é o mesmo três vezes: **os
+defeitos que sobraram não estavam nos valores, estavam no que a máquina ESCREVE** — a
+membrana só media a entrada, o parser lia uma notação diferente da que a casa escreve, e o
+buffer de saída rodava por baixo do texto. Nenhum deles tinha asserção possível do lado do
+valor.
