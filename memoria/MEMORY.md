@@ -34,7 +34,7 @@
 - **[Medir só metade do par](feedback-medir-so-metade-do-par.md)** — o bench da membrana varria a ENTRADA e nunca a SAÍDA; e apanhou o `\pmod` OUTRA VEZ, muito depois de ter nascido por causa dele.
 - **[O teto não verificado](feedback-o-teto-nao-verificado.md)** — `an_zn(&R,40)` escreveu 1600 inteiros num array de 24×24 e a máquina deixou de terminar. Um `#define` que ninguém testa é documentação, não limite.
 - **[O ramo que nunca corre](feedback-o-ramo-que-nunca-corre.md)** — mutação que sobrevive tem DUAS doenças: ramo inalcançável (gap meu) ou guarda redundante (está certo). Programa mínimo, não adivinhar.
-- **[Varrer onde nada pode falhar](feedback-varrer-onde-nada-pode-falhar.md)** — varredura completa num regime onde o defeito não vive: esforço alto sem indecisos, ou objeto SIMÉTRICO para um teorema sobre assimetria.
+- **[Varrer onde nada pode falhar](feedback-varrer-onde-nada-pode-falhar.md)** — varredura num regime onde o defeito não vive: esforço alto sem indecisos, objeto SIMÉTRICO num teorema de assimetria, ou TESE SEMPRE VERDADEIRA.
 - **[O destino rotativo](feedback-o-destino-rotativo.md)** — valor certo e TEXTO errado, invisível às asserções: `frac2` a rodar sob o printf, `%-Ns` por bytes, testemunha por estrear, `%ld` dentro de `tique`/`ok` (não formatam). Medir do lado da FONTE.
 - **[Escrever numa notação e ler noutra](feedback-escrever-numa-notacao-ler-noutra.md)** — o `eval.txt` escreve «A + AB = A» e o parser exigia `*`: a fala morria CALADA. Passar pelo leitor as expressões LITERAIS da fonte.
 - **[Compor, não ancorar](feedback-compor-nao-ancorar.md)** — no tradutor NADA se posiciona à mão: todo anexo compõe pelo motor da espiral com a SEMENTE certa. Âncoras minhas são invenção.
@@ -61,7 +61,8 @@
 - **[Teoria dos números](project-teoria-dos-numeros.md)** — Euclides = MDC = Bézout = FC é a MESMA descida em colunas diferentes; e o convergente de ordem 0 NÃO é a melhor aproximação.
 - **[Möbius e as elípticas](project-mobius-e-elipticas.md)** — μ = 1⁻¹ na convolução (a inversão É a deconvolução); e na curva a FIBRA escolhe a operação. Dirichlet mede-se FORMAL.
 - **[Álgebra moderna](project-algebra-moderna-sete-ticks.md)** — a espinha de sete ticks que ele exigiu (hipóteses→…→LEI→TESTEMUNHA→…→volta), com a definição em LaTeX. «Não medir só a conclusão».
-- **[O gume automático](project-gume-automatico.md)** — retirar a hipótese e PROCURAR o contra-exemplo: a regra que eu aplicava à mão virou função. E um buscador precisa de DOIS controlos: um onde tem de achar, outro onde tem de NÃO achar.
+- **[A casa já corria Cayley–Hamilton](project-a-casa-ja-corria-cayley.md)** — a `estaca` (A·(mI−A)=−I) É ele, e as duas cartas são as duas formas quadráticas: o andar novo trouxe o NOME, não o motor. E a raiz nunca se tira.
+- **[O gume automático](project-gume-automatico.md)** — retirar a hipótese e PROCURAR o contra-exemplo: a regra que eu aplicava à mão virou função. Um buscador precisa de DOIS controlos: um onde tem de achar, outro onde não.
 - **[Corpos: a escada fecha](project-corpos-a-escada-fecha.md)** — «toda operação com fibra tem volta» vira estrutura formal, e a exceção é a MESMA: 0⁻¹ não existe.
 
 ## As realizações e o hardware
@@ -86,7 +87,7 @@
 
 ## Checkpoints
 
-- **[14/08 — O DIA LONGO, 36c1fa5 → 71a0b73](project-checkpoint-2026-08-14-curadoria.md)** — curadoria, `lib/universal.js`, fases 3–6, a ronda das pontes, a FUNDAÇÃO VETORIAL, O MARTELO, e a ESCADA: ℕ→ℤ→ℚ→ℝ, números, Möbius, elípticas, álgebra e CORPOS. **468:468.**
+- **[14/08 — O DIA LONGO, 36c1fa5 → 74f4139](project-checkpoint-2026-08-14-curadoria.md)** — curadoria, `lib/universal.js`, fases 3–6, a ronda das pontes, a FUNDAÇÃO VETORIAL, O MARTELO, e a ESCADA inteira: ℕ→ℤ→ℚ→ℝ, números, Möbius, elípticas, álgebra, corpos, linear/dual e o espectro. **468:468.**
 - **[13/08 tarde — O CRISTAL RECUPERADO, c0893a5](project-checkpoint-2026-08-13-cristal.md)** — o cristal grande estava no **broca-so** (75k registos → 4286 conceitos), 10 projeções, volta 13:0 com mutações REOPEN.
 - **[13/08 — O PIPELINE NO AR](project-checkpoint-2026-08-13-pipeline.md)** — IR Claim v1.6 (Claim≠Result), 9 LMS, portão Pátria; commit `1d8af30`, live 200. Spec sem entrega seguinte.
 - **09/08–11/08** — [as 8 leis fecham a torre](project-checkpoint-2026-08-09-oito-leis.md) (8 é a cardinalidade do CONJUNTO, não da dinâmica), 386:386 · [a ronda do gabarito](project-checkpoint-2026-08-10.md) · [a composição dinâmica](project-checkpoint-2026-08-11.md), `cf30baa`

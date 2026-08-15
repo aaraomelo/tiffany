@@ -361,3 +361,20 @@ um onde tem de não achar.**
 
 E o `ok()` também não formata: mais dois `%ld` a saírem literais, e o `bench_destino.sh`
 apanhou mais três ao ser estendido. Sexta forma de [[feedback-o-destino-rotativo]].
+
+
+### Formas e espectro: a busca que respondeu mais que a pergunta (`74f4139`, interno 237:0)
+
+Ele pediu «busca referências sobre matrizes no repo, em teoria.tex ou corpo estelar». A
+busca deu que **o andar já corria sem o nome**: a `estaca` É Cayley–Hamilton, as duas
+cartas são as duas formas quadráticas, e a `M_ij` do corpo estelar é a matriz simétrica
+cuja «massa com direção» é o espectro. Detalhe em
+[[project-a-casa-ja-corria-cayley]].
+
+**A régua que tornou o andar analítico possível aqui**: a raiz NUNCA se tira —
+Cauchy–Schwarz ao quadrado, valores singulares por σ², Gram–Schmidt sem normalizar.
+
+**E a forma nova da asserção vazia**: a TESE SEMPRE VERDADEIRA. Sobre o produto
+euclidiano, Cauchy–Schwarz não pode ser falsa, logo a função que a decide não estava a ser
+testada. A cura foi generalizá-la à forma — e a cura acrescentou medida em vez de a
+afrouxar.

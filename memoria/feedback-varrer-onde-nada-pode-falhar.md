@@ -30,6 +30,12 @@ domínio tem um sentido só» varrido em ℤₘ, onde vale a equivalência. **Qu
 afirma uma ASSIMETRIA, o exemplo tem de ser assimétrico** — S₃ em vez de ℤ₁₂, ℤ em vez de
 ℤₘ. Ver [[project-algebra-moderna-sete-ticks]].
 
+**E a terceira forma: a TESE SEMPRE VERDADEIRA.** Sobre o produto euclidiano,
+Cauchy–Schwarz nunca *pode* ser falsa — logo uma implementação que devolvesse sempre «sim»
+era indistinguível da correta, e a mutação sobrevivia. A cura foi **generalizar a função
+à forma**: alimentada com a indefinida, ela tem de devolver «não». Quando a tese é sempre
+verdadeira no domínio testado, **a função que a decide não está a ser testada**.
+
 E o segundo defeito da mesma família, no mesmo sítio: **«0 choques» podia ser um detetor
 avariado**, e um detetor avariado dá sempre 0. Um contador de desacordos precisa de um
 **caso forjado** que o obrigue a disparar — sem isso, o zero não distingue «concordam» de
