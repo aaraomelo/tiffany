@@ -346,3 +346,18 @@ casa apanha exatamente o defeito para que nasceu, muito depois — vale mais que
 TEXTO ou de DISPATCH (nome comido pelo prefixo, `%ld` dentro do `tique`, coluna por bytes,
 testemunha por estrear). O valor estava certo em todos. É a família de
 [[feedback-o-destino-rotativo]], e a cura é sempre do lado da FONTE.
+
+
+### Álgebra linear e o dual: o gume vira máquina (`c1cb539`, interno 229:0)
+
+O `eval.txt` pediu **mecanismo** e não conteúdo — «se a hipótese for retirada, procurar
+automaticamente um contra-exemplo» — e a regra que eu vinha a aplicar à mão a sessão toda
+virou função. Detalhe em [[project-gume-automatico]].
+
+**O erro que interessa**: o meu controlo do buscador estava errado (pus tese = hipótese, e
+assim ele acha sempre). O controlo certo é uma tese que vale SEMPRE, onde ele tem de vir
+VAZIO. **Um buscador de contra-exemplos precisa de dois controlos: um onde tem de achar e
+um onde tem de não achar.**
+
+E o `ok()` também não formata: mais dois `%ld` a saírem literais, e o `bench_destino.sh`
+apanhou mais três ao ser estendido. Sexta forma de [[feedback-o-destino-rotativo]].

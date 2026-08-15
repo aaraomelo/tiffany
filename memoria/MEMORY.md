@@ -35,7 +35,7 @@
 - **[O teto não verificado](feedback-o-teto-nao-verificado.md)** — `an_zn(&R,40)` escreveu 1600 inteiros num array de 24×24 e a máquina deixou de terminar. Um `#define` que ninguém testa é documentação, não limite.
 - **[O ramo que nunca corre](feedback-o-ramo-que-nunca-corre.md)** — mutação que sobrevive tem DUAS doenças: ramo inalcançável (gap meu) ou guarda redundante (está certo). Programa mínimo, não adivinhar.
 - **[Varrer onde nada pode falhar](feedback-varrer-onde-nada-pode-falhar.md)** — varredura completa num regime onde o defeito não vive: esforço alto sem indecisos, ou objeto SIMÉTRICO para um teorema sobre assimetria.
-- **[O destino rotativo](feedback-o-destino-rotativo.md)** — o valor certo e o TEXTO errado, invisível às asserções: `frac2` a rodar sob o printf, `%-Ns` por bytes sobre acentos, testemunha por estrear, `%ld` dentro do `tique`. Medir do lado da FONTE.
+- **[O destino rotativo](feedback-o-destino-rotativo.md)** — valor certo e TEXTO errado, invisível às asserções: `frac2` a rodar sob o printf, `%-Ns` por bytes, testemunha por estrear, `%ld` dentro de `tique`/`ok` (não formatam). Medir do lado da FONTE.
 - **[Escrever numa notação e ler noutra](feedback-escrever-numa-notacao-ler-noutra.md)** — o `eval.txt` escreve «A + AB = A» e o parser exigia `*`: a fala morria CALADA. Passar pelo leitor as expressões LITERAIS da fonte.
 - **[Compor, não ancorar](feedback-compor-nao-ancorar.md)** — no tradutor NADA se posiciona à mão: todo anexo compõe pelo motor da espiral com a SEMENTE certa. Âncoras minhas são invenção.
 - **[Definição e medida em gavetas diferentes](feedback-definicao-e-medida.md)** — a definição diz o que PODE ser preservado; a medida diz o que FOI. Lei, realização e evidência não se misturam numa frase.
@@ -61,6 +61,7 @@
 - **[Teoria dos números](project-teoria-dos-numeros.md)** — Euclides = MDC = Bézout = FC é a MESMA descida em colunas diferentes; e o convergente de ordem 0 NÃO é a melhor aproximação.
 - **[Möbius e as elípticas](project-mobius-e-elipticas.md)** — μ = 1⁻¹ na convolução (a inversão É a deconvolução); e na curva a FIBRA escolhe a operação. Dirichlet mede-se FORMAL.
 - **[Álgebra moderna](project-algebra-moderna-sete-ticks.md)** — a espinha de sete ticks que ele exigiu (hipóteses→…→LEI→TESTEMUNHA→…→volta), com a definição em LaTeX. «Não medir só a conclusão».
+- **[O gume automático](project-gume-automatico.md)** — retirar a hipótese e PROCURAR o contra-exemplo: a regra que eu aplicava à mão virou função. E um buscador precisa de DOIS controlos: um onde tem de achar, outro onde tem de NÃO achar.
 - **[Corpos: a escada fecha](project-corpos-a-escada-fecha.md)** — «toda operação com fibra tem volta» vira estrutura formal, e a exceção é a MESMA: 0⁻¹ não existe.
 
 ## As realizações e o hardware

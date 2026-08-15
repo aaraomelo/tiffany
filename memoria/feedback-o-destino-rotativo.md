@@ -22,6 +22,8 @@ primeira, e a linha sai com o número errado:
   anterior sem preencher o par de saída, e a linha imprimia memória —
   «f(0·0) = 140720728132432». Regra: **quem devolve testemunha escreve-a em TODOS os
   caminhos de saída**, incluindo os de recusa antecipada.
+- `%ld` escrito dentro de `tique()` ou de `ok()`, que recebem texto PRONTO e **não
+  formatam**: o literal sai para o ecrã. Sete sítios ao todo, alguns a durar sessões.
 - o `%-Ns` a encher por **bytes** sobre texto acentuado («bisseção» tem 8 caracteres em 10
   bytes): a coluna sai torta. Cura: `esc_col`, que conta cabeças de UTF-8.
 
