@@ -2463,11 +2463,15 @@ static int resolve_topo(const char *f){
  * equivalência de sucessões, e as testemunhas dos gumes (a harmónica que NÃO é de
  * Cauchy, a alternada, os convergentes).
  *
- * E há um achado que não é meu: a lista de convergentes de √2 do Problema 4 tem DOIS
- * termos errados. O eval escreve «1, 4/3, 7/5, 24/17, 41/29»; os convergentes são
- * 1, 3/2, 7/5, 17/12, 41/29. O certificado é Pell — |p² − 2q²| = 1 — e para 4/3 e
- * 24/17 ele dá 2. Uso os gerados e digo-o: a referência escrita à mão é o defeito que
- * esta casa persegue, e não deixa de o ser por vir de fora. */
+ * E UMA CORREÇÃO QUE É MINHA. Escrevi que a lista de aproximações de √2 do Problema 4
+ * — «1, 4/3, 7/5, 24/17, 41/29» — tinha dois termos errados, porque não satisfazem o
+ * certificado dos convergentes da fracção contínua, |p² − 2q²| = 1.
+ *
+ * Estava eu errado. Aquela lista é a ÓRBITA DE MÖBIUS x ↦ (2+2x)/(x+2), e é exactamente
+ * o que o `rz_passo` DESTA CASA gera a partir de 1. O certificado dela alterna −1, −2,
+ * e é outro certificado igualmente válido. Apliquei a régua dos convergentes a uma
+ * sucessão de Möbius — DUAS RÉGUAS PARA O MESMO OBJECTO —, e desta vez apliquei-o a
+ * quem estava certo. Ambas as sucessões aproximam √2; o que muda é o passo. */
 static const struct { int n; const char *nome; const char *enunciado; } MT16[] = {
  {  1, "metrica",           "os quatro axiomas, verificados SEPARADAMENTE" },
  {  2, "bola",              "B(1/2,1/3) = (1/6,5/6) ∩ ℚ, com os extremos FORA" },
@@ -2637,10 +2641,14 @@ static void metrico_resolve(int n){
               printf("      e o limite em ℚ: NÃO EXISTE — seria √2, e p² = 2q² é"
                      " impossível\n");
               tique7(4, "a testemunha é DUPLA e as duas metades são independentes: o"
-                        " módulo de Cauchy achado para cada ε (a sucessão aproxima-se de"
-                        " si própria), e o certificado de Pell a valer nos convergentes"
-                        " gerados e a FALHAR nos dois termos da lista de fora. Gerar e"
-                        " conferir, em vez de copiar");
+                        " módulo de Cauchy achado para cada ε — e a função NUNCA menciona"
+                        " limite, que é o gume que o eval pede —, e o certificado de Pell"
+                        " a valer nos convergentes. E uma CORREÇÃO QUE É MINHA: eu escrevi"
+                        " que a lista do eval tinha dois termos errados, e não tinha. Ela"
+                        " é a ÓRBITA DE MÖBIUS, com certificado alternado −1, −2, e é"
+                        " exactamente o que o rz_passo desta casa gera. Apliquei a régua"
+                        " dos convergentes a uma sucessão de Möbius — duas réguas para o"
+                        " mesmo objecto, e desta vez contra quem estava certo");
               tique7(5, achou == casos && cmal == 0
                      ? (n == 6
                         ? "logo ℚ NÃO é completo, e a testemunha está exibida — não é uma"

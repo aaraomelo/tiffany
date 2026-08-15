@@ -13,12 +13,19 @@
  * Então aqui fica só o que não existia: os quatro axiomas da métrica, a bola, Lipschitz
  * e Banach, a isometria, as duas métricas de ℝ² e o fecho.
  *
- * ── UMA NOTA SOBRE A LISTA DO EVAL ─────────────────────────────────────────────
- * O Problema 4 dá os convergentes de √2 como «1, 4/3, 7/5, 24/17, 41/29». Gerei-os e
- * dois não batem: são 1, 3/2, 7/5, 17/12, 41/29. O certificado é a equação de Pell,
- * 2q² − p² = ±1 alternado — e para 4/3 dá 2, e para 24/17 dá 2. Não são convergentes.
- * Uso os gerados, e digo-o: a referência escrita à mão é o defeito que esta casa
- * persegue, e não deixa de o ser por vir de fora.
+ * ── UMA CORREÇÃO QUE É MINHA, E NÃO DELE ───────────────────────────────────────
+ * O Problema 4 dá «1, 4/3, 7/5, 24/17, 41/29» como aproximações racionais de √2, e eu
+ * escrevi que dois termos estavam errados — julguei-os pelo certificado dos convergentes
+ * da fracção contínua, |p² − 2q²| = 1, que eles não satisfazem.
+ *
+ * ESTAVA EU ERRADO. Aquela lista é a ÓRBITA DE MÖBIUS x ↦ (2 + 2x)/(x + 2), e é
+ * exactamente o que o `rz_passo` desta casa gera a partir de 1: 1, 4/3, 7/5, 24/17,
+ * 41/29, 140/99. O certificado dela alterna −1, −2, −1, −2 — é outro certificado, e é
+ * igualmente válido.
+ *
+ * Apliquei a régua dos convergentes a uma sucessão de Möbius: DUAS RÉGUAS PARA O MESMO
+ * OBJECTO, que é o defeito que esta casa cataloga — e desta vez apliquei-o a quem estava
+ * certo. As duas sucessões aproximam √2 e ambas são legítimas; o que muda é o passo.
  *
  * ── A RÉGUA: A DISTÂNCIA MEDE-SE AO QUADRADO ONDE PRECISA DE RAIZ ──────────────
  * A métrica euclidiana de ℝ² tem uma raiz. Aqui compara-se d² com d∞², que é exacto em
@@ -112,7 +119,9 @@ static int mt_equivalentes(Qz x1, Qz y1, Qz x2, Qz y2){
         && e.p * m.q <= 2 * m.p * e.q;                     /* d₁² ≤ 2 d∞² */
 }
 /* ── O CERTIFICADO DE PELL: é ele que diz se p/q é convergente de √a ───────────
- * |p² − a·q²| = 1. É exacto, e é o que apanhou os dois termos errados da lista do eval. */
+ * |p² − a·q²| = 1. É exacto, e identifica os convergentes da FRACÇÃO CONTÍNUA — e SÓ
+ * esses. Uma sucessão de Möbius aproxima √2 igualmente bem e NÃO o satisfaz: o
+ * certificado distingue duas famílias, não separa o certo do errado. */
 static long mt_pell(long p, long q, long a){
     __int128 v = (__int128)p*p - (__int128)a*q*q;
     if(v > 4000000000000000000LL || v < -4000000000000000000LL){ mt_estouros++; return -1; }
