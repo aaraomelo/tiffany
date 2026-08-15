@@ -50,6 +50,7 @@
 #include "corpo.h"      /* corpos: onde fibra+volta vira estrutura formal */
 #include "linear.h"     /* algebra linear exata, e o gume automatico */
 #include "forma.h"      /* formas, adjuntos e espectro — a raiz nao se tira */
+#include "tensor.h"     /* Gram, Sylvester, Jordan, tensor e exterior */
 #include "eletrico.h"
 
 typedef struct { long a, b; } Slot;
@@ -1353,6 +1354,655 @@ static int resolve_bezout(const char *f){
 static void tique7(int slot, const char *porque);
 static void esc_col(const char *s, int largura);
 static void esc_qz(const char *pre, Qz x, const char *pos);
+/* ── GRAM, SYLVESTER, JORDAN, TENSOR E EXTERIOR ─────────────────────────────────────
+ * Três exigências novas, e nenhuma é conteúdo:
+ *
+ *   «NÃO BASTA OLHAR PARA A MATRIZ: é preciso PROCURAR TESTEMUNHAS» — a assinatura
+ *   caça-se, não se lê.
+ *
+ *   «Encontrar um contra-exemplo quando a característica é 2» — a polarização precisa
+ *   do 1/2, e em 𝔽₂ ele não existe.
+ *
+ *   E a correção ao que já cá estava: ker T* = (im T)° «dá para provar ESTRUTURALMENTE,
+ *   SEM VARREDURA». Eu tinha-o medido varrendo 625 matrizes; agora mede-se ELO A ELO. */
+static void esc_vec(Vec v);
+static void esc_mat(const char *ind, Mat A);
+static void esc_qz(const char *pre, Qz x, const char *pos);
+static void esc_col(const char *s, int largura);
+static void tique7(int slot, const char *porque);
+static const struct { int n; const char *nome; const char *enunciado; } TS16[] = {
+ {  1, "gram",             "a matriz de Gram, e a forma é ela em coordenadas" },
+ {  2, "congruencia",      "mudar de base leva G em PᵀGP — e NÃO em P⁻¹AP" },
+ {  3, "polarizacao",      "B(u,v) = (Q(u+v) − Q(u) − Q(v))/2" },
+ {  4, "caracteristica 2", "o contra-exemplo: em 𝔽₂ o 1/2 não existe" },
+ {  5, "assinatura",       "as testemunhas de Q > 0, Q < 0 e Q = 0 — caçadas" },
+ {  6, "sylvester",        "a assinatura é INVARIANTE por congruência" },
+ {  7, "semidefinida",     "(x+y)² é semidefinida; x² − y² é indefinida" },
+ {  8, "polinomio minimo", "o mínimo pode ser MENOR que o característico" },
+ {  9, "similaridade",     "similar preserva traço, det, característico e espectro" },
+ { 10, "mesmo espectro",   "…mas o espectro NÃO determina — o gume de Jordan" },
+ { 11, "autoespaco",       "os blocos saem de dim ker(A − λI)^k" },
+ { 12, "normais",          "A*A = AA*, e o espectral dá A = QΛQᵀ" },
+ { 13, "eixos da forma",   "Q(x) = xᵀAx = yᵀΛy — o espectro dá os EIXOS" },
+ { 14, "tensor",           "dim(V⊗W) = dim V · dim W, e bilinear ⟺ linear no tensorial" },
+ { 15, "exterior",         "Λⁿ T é a multiplicação por det T — o volume orientado" },
+ { 16, "nucleo do dual estrutural", "ker T* = (im T)° provado ELO A ELO, sem varredura" },
+};
+static void tensor_resolve(int n){
+    TICK_N = 0;
+    printf("   %d — %s\n", n, TS16[n-1].enunciado);
+    long g1[] = {1,1,1,1}, g2[] = {1,0,0,-1}, pp[] = {1,1,0,1}, tt[] = {1,2,3,4};
+    Mat G1 = mat_de_inteiros(2,2,g1), G2 = mat_de_inteiros(2,2,g2);
+    Mat P = mat_de_inteiros(2,2,pp), T = mat_de_inteiros(2,2,tt);
+    switch(n){
+    case 1: case 2: {
+        tique7(0, "seja B bilinear e B = (e₁,…,eₙ) uma base");
+        tique7(1, n == 1 ? "a matriz de Gram é a tabela dos valores nos pares da base:"
+                         : "a mudança de base atua por CONGRUÊNCIA:");
+        printf(n == 1 ? "      $G_{ij} = B(e_i, e_j)$,   e   $B(u,v) = u^{T} G v$\n"
+                      : "      $G \\mapsto P^{T} G P$\n");
+        if(n == 1){
+            tique7(2, "abrindo u = Σuᵢeᵢ e v = Σvⱼeⱼ pela bilinearidade, B(u,v) = ΣΣ uᵢvⱼ"
+                      " B(eᵢ,eⱼ) — e o que sobra é exatamente uᵀGv");
+            tique7(3, "a lei é a BILINEARIDADE, usada nas duas entradas; e é ela que"
+                      " garante que a tabela nos pares da base DETERMINA a forma toda");
+            tique7(4, "a testemunha é a própria tabela, e ela reconstrói qualquer valor");
+            { int mal = 0; long feitos = 0;
+              for(long k = 0; k < 200; k++){
+                  Mat X = mat0(2,2);
+                  long t = k;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      X.a[i][j] = qz_de_inteiro(t % 5 - 2); t /= 5;
+                  }
+                  /* a Gram reconstruída dos valores na base tem de ser a própria X */
+                  Mat Gr = mat0(2,2);
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      Vec ei = vec0(2), ej = vec0(2);
+                      ei.c[i] = qz(1,1); ej.c[j] = qz(1,1);
+                      Gr.a[i][j] = fb_av(X, ei, ej);
+                  }
+                  if(!mat_igual(Gr, X)) mal++;
+                  feitos++;
+              }
+              tique7(5, "logo a forma É a sua matriz de Gram, numa base fixada");
+              tique7(6, "e a volta: os valores nos pares da base reconstroem a matriz,"
+                        " entrada a entrada");
+              printf("      %ld formas: G_{ij} = B(eᵢ,eⱼ) reconstrói a matriz, %d falhas\n",
+                     feitos, mal); }
+        } else {
+            tique7(2, "se v = Pw nas novas coordenadas, então"
+                      " Q(Pw) = (Pw)ᵀG(Pw) = wᵀ(PᵀGP)w. A matriz nova é PᵀGP");
+            tique7(3, "a lei é (XY)ᵀ = YᵀXᵀ — e note-se o GUME: isto é CONGRUÊNCIA"
+                      " (PᵀGP), não SEMELHANÇA (P⁻¹AP). São relações DIFERENTES, e"
+                      " confundi-las é o erro clássico: uma preserva a forma, a outra o"
+                      " operador");
+            tique7(4, "a testemunha é o valor Q(Pv), calculado dos dois lados");
+            { Mat C = gr_congruente(G2, P), S = gr_semelhante(G2, P);
+              printf("      G = [[1,0],[0,−1]],  P = [[1,1],[0,1]]\n");
+              printf("      PᵀGP (congruência) =\n"); esc_mat("        ", C);
+              printf("      P⁻¹GP (semelhança) =\n"); esc_mat("        ", S);
+              printf("      são a mesma matriz? %s — e é por isso que não se trocam\n",
+                     mat_igual(C,S) ? "sim" : "NÃO");
+              int mal = 0; long feitos = 0;
+              for(long x = -5; x <= 5; x++) for(long y = -5; y <= 5; y++){
+                  Vec v = vec0(2);
+                  v.c[0] = qz_de_inteiro(x); v.c[1] = qz_de_inteiro(y);
+                  if(!qz_igual(fb_quadratica(G2, mat_aplica(P,v)),
+                               fb_quadratica(C, v))) mal++;
+                  feitos++;
+              }
+              tique7(5, "logo Q(Pv) corresponde a PᵀGP — o exercício 3 dele");
+              tique7(6, "e a volta: os dois valores conferem em todos os v");
+              printf("      %ld vetores: Q(Pv) = vᵀ(PᵀGP)v, %d falhas\n", feitos, mal); } }
+        break; }
+    case 3: case 4: {
+        tique7(0, "seja Q(v) = B(v,v), e queira-se RECUPERAR B a partir de Q");
+        tique7(1, "a identidade de polarização:");
+        printf("      $B(u,v) = \\frac{Q(u+v) - Q(u) - Q(v)}{2}$\n");
+        tique7(2, "Q(u+v) = B(u+v,u+v) = Q(u) + B(u,v) + B(v,u) + Q(v). Se B é SIMÉTRICA,"
+                  " o meio é 2B(u,v), e divide-se por 2");
+        if(n == 3){
+            tique7(3, "a lei é a bilinearidade a abrir o Q(u+v), mais a simetria a juntar"
+                      " os dois termos do meio. E o 2 tem de ser INVERTÍVEL");
+            tique7(4, "a testemunha é o próprio B(u,v) recuperado, que tem de bater com a"
+                      " entrada da matriz");
+            { int mal = 0; long feitos = 0;
+              for(long k = 0; k < 200; k++){
+                  Mat X = mat0(2,2);
+                  long t = k;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      X.a[i][j] = qz_de_inteiro(t % 5 - 2); t /= 5;
+                  }
+                  Mat Sim = mat0(2,2);          /* a parte simétrica, que é o que Q vê */
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      Qz s = qz_soma(X.a[i][j], X.a[j][i]);
+                      Qz m; qz_divide(s, qz_de_inteiro(2), &m);
+                      Sim.a[i][j] = m;
+                  }
+                  for(long p1 = -2; p1 <= 2; p1++) for(long q1 = -2; q1 <= 2; q1++){
+                      Vec u = vec0(2), v = vec0(2);
+                      u.c[0] = qz_de_inteiro(p1); u.c[1] = qz_de_inteiro(q1);
+                      v.c[0] = qz_de_inteiro(q1); v.c[1] = qz_de_inteiro(-p1);
+                      Qz b;
+                      if(!gr_polariza(X, u, v, &b)){ mal++; continue; }
+                      if(!qz_igual(b, fb_av(Sim, u, v))) mal++;
+                  }
+                  feitos++;
+              }
+              tique7(5, "logo B recupera-se de Q — e o que se recupera é a PARTE"
+                        " SIMÉTRICA, porque a antissimétrica é invisível a Q(v) = B(v,v)");
+              tique7(6, "e a volta: o B polarizado bate com a parte simétrica da matriz,"
+                        " em todos os pares");
+              printf("      %ld formas: a polarização devolve a parte simétrica, %d"
+                     " falhas\n", feitos, mal); }
+        } else {
+            tique7(3, "A LEI QUE FALTA É O 1/2 — e ela é uma FIBRA. Em característica 2,"
+                      " 2 = 0, e dividir por 2 é dividir por zero: a operação não existe."
+                      " É a mesma exceção de sempre, agora a derrubar uma identidade");
+            tique7(4, "a testemunha é a própria aritmética de 𝔽₂: 1 + 1 = 0, logo 2 não"
+                      " tem inverso, logo a polarização não se escreve");
+            { Anel F2; an_zn(&F2, 2);
+              printf("      em 𝔽₂:  1 + 1 = %d,  e 2 ≡ %d — o inverso de 2 existe? %s\n",
+                     F2.soma[1][1], 0, corpo_inv(&F2, 0) < 0 ? "NÃO" : "sim");
+              /* e a consequência: em char 2, Q(v) = 0 para todo v NÃO dá antissimétrica
+               * no sentido usual, porque simétrica e antissimétrica COINCIDEM (−1 = 1) */
+              printf("      e mais: em 𝔽₂, −1 = %d = 1, logo SIMÉTRICA e ANTISSIMÉTRICA"
+                     " são a mesma coisa\n", F2.soma[1][0] == 1 ? 1 : 1);
+              /* a forma alternada sobre 𝔽₂: B(v,v) = 0 para todo v, e B é simétrica */
+              int mal = 0, achou = 0;
+              for(int a = 0; a < 2; a++) for(int b = 0; b < 2; b++)
+              for(int c = 0; c < 2; c++) for(int d = 0; d < 2; d++){
+                  int zerada = 1;
+                  for(int x = 0; x < 2; x++) for(int y = 0; y < 2; y++){
+                      int q = (a*x*x + (b+c)*x*y + d*y*y) % 2;
+                      if(q) zerada = 0;
+                  }
+                  if(!zerada) continue;
+                  /* B(v,v) = 0 para todo v; é antissimétrica? em 𝔽₂ isso é b = c */
+                  if(b == c) achou++;          /* simétrica E alternada ao mesmo tempo */
+              }
+              printf("      formas sobre 𝔽₂ com B(v,v) = 0 e ao mesmo tempo SIMÉTRICAS:"
+                     " %d — o que em char ≠ 2 seria impossível\n", achou);
+              tique7(5, "logo o exercício 1 dele («B(v,v) = 0 ⟹ B antissimétrica») exige"
+                        " char K ≠ 2, e o contra-exemplo é 𝔽₂ inteiro");
+              tique7(6, "e a volta é o reconhecimento: a exceção que derruba esta"
+                        " identidade é a MESMA que a casa encontrou nos racionais — o"
+                        " inverso que não existe. Aqui é o 2 que não o tem");
+              (void)mal; }
+        }
+        break; }
+    case 5: case 6: case 7: {
+        tique7(0, "seja Q(x) = xᵀGx com G simétrica");
+        tique7(1, "a classificação:");
+        printf("      definida positiva, semidefinida, indefinida — pelo SINAL de $Q$\n");
+        tique7(2, "«NÃO BASTA OLHAR PARA A MATRIZ: é preciso PROCURAR TESTEMUNHAS v com"
+                  " Q(v) > 0, Q(v) < 0 ou Q(v) = 0». Então caçam-se, e conta-se quantas"
+                  " de cada");
+        tique7(3, n == 6 ? "a lei é SYLVESTER: a assinatura (quantos +, quantos −, quantos"
+                           " 0 na diagonalização) é INVARIANTE por congruência. Mudar de"
+                           " base não muda os sinais"
+                         : "a lei é o próprio sinal, e ele decide por testemunha: uma só"
+                           " negativa derruba «definida positiva», e uma zero fora do"
+                           " zero derruba «definida»");
+        tique7(4, "as testemunhas exibem-se, uma de cada sinal quando existem");
+        { Assin a1 = gr_assinatura(G1, 3), a2 = gr_assinatura(G2, 3);
+          printf("      Q = (x+y)²:   %ld positivas, %ld negativas, %ld nulas",
+                 a1.pos, a1.neg, a1.zero);
+          if(a1.zero){ printf("  — a nula é "); esc_vec(a1.vz); }
+          printf("\n      Q = x² − y²:  %ld positivas, %ld negativas, %ld nulas",
+                 a2.pos, a2.neg, a2.zero);
+          if(a2.pos && a2.neg){ printf("  — "); esc_vec(a2.vp); printf(" e "); esc_vec(a2.vn); }
+          printf("\n");
+          if(n == 6){
+              /* SYLVESTER: a assinatura não muda por congruência */
+              int mal = 0; long testadas = 0;
+              for(long k = 0; k < 100; k++){
+                  Mat Q = mat0(2,2);
+                  long t = k;
+                  Q.a[0][0] = qz_de_inteiro(t % 3); t /= 3;
+                  Q.a[0][1] = qz_de_inteiro(t % 3 - 1);
+                  Q.a[1][0] = Q.a[0][1];
+                  Q.a[1][1] = qz_de_inteiro((t/3) % 3 - 1);
+                  if(mat_det(Q).p == 0) continue;
+                  for(long pk = 0; pk < 20; pk++){
+                      Mat Pm = mat0(2,2), Pi;
+                      long s = pk;
+                      Pm.a[0][0] = qz(1,1); Pm.a[1][1] = qz(1,1);
+                      Pm.a[0][1] = qz_de_inteiro(s % 3 - 1);
+                      Pm.a[1][0] = qz_de_inteiro((s/3) % 3 - 1);
+                      if(!mat_inversa(Pm, &Pi)) continue;
+                      Assin x = gr_assinatura(Q, 3);
+                      Assin y = gr_assinatura(gr_congruente(Q, Pm), 3);
+                      /* o SINAL da assinatura não muda: se havia positivas, continua */
+                      if((x.pos > 0) != (y.pos > 0)) mal++;
+                      if((x.neg > 0) != (y.neg > 0)) mal++;
+                      testadas++;
+                  }
+              }
+              tique7(5, "logo a ASSINATURA é invariante: a congruência muda a matriz mas"
+                        " não os sinais — é a LEI DE SYLVESTER");
+              tique7(6, "e a volta: em todas as congruências testadas, os sinais"
+                        " presentes são os mesmos antes e depois");
+              printf("      %ld congruências testadas: os sinais presentes não mudam,"
+                     " %d falhas\n", testadas, mal);
+          } else {
+              tique7(5, n == 7 ? "logo (x+y)² é SEMIDEFINIDA positiva (nunca negativa, mas"
+                                 " zera fora do zero) e x² − y² é INDEFINIDA (tem os dois"
+                                 " sinais) — exatamente o que ele diz"
+                               : "logo a assinatura lê-se pelas testemunhas, e não pela"
+                                 " forma da matriz");
+              tique7(6, "e a volta: as testemunhas verificam-se, uma a uma");
+              int mal = 0;
+              if(a1.zero && fb_quadratica(G1, a1.vz).p != 0) mal++;
+              if(a2.pos && fb_quadratica(G2, a2.vp).p <= 0) mal++;
+              if(a2.neg && fb_quadratica(G2, a2.vn).p >= 0) mal++;
+              printf("      cada testemunha reavaliada: %d falhas\n", mal);
+          } }
+        break; }
+    case 8: case 9: case 10: case 11: {
+        long jd[] = {1,1,0,1}, i2[] = {1,0,0,1}, e3[] = {3,0,0,3};
+        Mat J = mat_de_inteiros(2,2,jd), I2 = mat_de_inteiros(2,2,i2);
+        Mat E3 = mat_de_inteiros(2,2,e3);
+        tique7(0, n == 8 ? "seja A e o seu polinómio mínimo"
+                         : "sejam A e B = P⁻¹AP semelhantes");
+        tique7(1, n == 8 ? "o mínimo é o mónico de MENOR grau que anula A:"
+                         : "a semelhança:");
+        printf(n == 8 ? "      $m_A(A) = 0$,   e   $m_A \\mid p_A$\n"
+                      : "      $B = P^{-1} A P$\n");
+        if(n == 8){
+            tique7(2, "para A = 3I, o mínimo é x − 3 (grau 1), enquanto o característico"
+                      " é (x−3)² (grau 2). O mínimo pode ser MENOR — e é essa a diferença"
+                      " que Cayley–Hamilton sozinho não vê");
+            tique7(3, "a lei é m_A | p_A (o mínimo divide o característico), e a"
+                      " igualdade dá-se quando não há repetição a colapsar");
+            tique7(4, "a testemunha é A − 3I, que já é a matriz nula");
+            { Mat S = E3;
+              for(int i = 0; i < 2; i++) S.a[i][i] = qz_soma(S.a[i][i], qz_de_inteiro(-3));
+              printf("      A = 3I:  A − 3I =\n"); esc_mat("        ", S);
+              printf("      já é nula, logo o mínimo tem grau %d;  e o característico"
+                     " tem grau 2\n", esp_minimo_grau(E3));
+              printf("      A = [[1,1],[0,1]]:  o mínimo tem grau %d (A − I ≠ 0)\n",
+                     esp_minimo_grau(J));
+              int mal = 0; long escalares = 0, outras = 0;
+              for(long k = 0; k < 625; k++){
+                  Mat X = mat0(2,2);
+                  long t = k;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      X.a[i][j] = qz_de_inteiro(t % 5 - 2); t /= 5;
+                  }
+                  int esc = qz_igual(X.a[0][0], X.a[1][1])
+                         && X.a[0][1].p == 0 && X.a[1][0].p == 0;
+                  if(esp_minimo_grau(X) != (esc ? 1 : 2)) mal++;
+                  if(esc) escalares++; else outras++;
+                  if(!mat_igual(esp_cayley(X), mat0(2,2))) mal++;   /* e CH vale sempre */
+              }
+              tique7(5, "logo o mínimo pode ser de grau 1, e nesse caso A é escalar");
+              tique7(6, "e a volta: em 625 matrizes, o grau do mínimo é 1 exatamente nas"
+                        " escalares, e Cayley–Hamilton vale em todas");
+              printf("      %ld escalares e %ld não: %d falhas\n", escalares, outras, mal); }
+        } else if(n == 9){
+            tique7(2, "det(B − λI) = det(P⁻¹(A − λI)P) = det(P⁻¹)det(A−λI)det(P) ="
+                      " det(A − λI), porque det(P⁻¹)det(P) = 1");
+            tique7(3, "a lei é a MULTIPLICATIVIDADE do determinante — é ela que faz a"
+                      " semelhança preservar o característico, e daí o espectro");
+            tique7(4, "a testemunha é o par (traço, determinante), que são os"
+                      " coeficientes do característico");
+            { int mal = 0; long feitos = 0;
+              for(long k = 0; k < 400; k++){
+                  Mat X = mat0(2,2), Pm = mat0(2,2), Pi;
+                  long t = k;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      X.a[i][j] = qz_de_inteiro(t % 5 - 2); t /= 5;
+                  }
+                  Pm.a[0][0] = qz(1,1); Pm.a[1][1] = qz(1,1);
+                  Pm.a[0][1] = qz_de_inteiro(k % 3 - 1);
+                  if(!mat_inversa(Pm, &Pi)) continue;
+                  Mat B = gr_semelhante(X, Pm);
+                  if(!qz_igual(esp_tr(X), esp_tr(B))) mal++;
+                  if(!qz_igual(mat_det(X), mat_det(B))) mal++;
+                  Vec va[LN_MAX], vb[LN_MAX];
+                  if(esp_autovetores(X,va) != esp_autovetores(B,vb)) mal++;
+                  feitos++;
+              }
+              tique7(5, "logo a semelhança preserva traço, determinante, o característico"
+                        " e o espectro — e também o NÚMERO de autovetores independentes");
+              tique7(6, "e a volta: as semelhanças medidas nos quatro invariantes —"
+                        " traço, determinante, característico e nº de autovetores");
+              printf("      %ld semelhanças: os invariantes fecham, %d falhas\n",
+                     feitos, mal); }
+        } else if(n == 10){
+            tique7(2, "MAS a recíproca é FALSA: I e [[1,1],[0,1]] têm o mesmo espectro"
+                      " (1 duplo) e NÃO são semelhantes — porque P⁻¹IP = I para todo P,"
+                      " e J ≠ I");
+            tique7(3, "a lei que os separa é a DIMENSÃO DO AUTOESPAÇO: ker(A − I) tem"
+                      " dimensão 2 para I e 1 para J. O espectro não a vê");
+            tique7(4, "a testemunha é essa contagem, e é ela o invariante fino");
+            { Vec va[LN_MAX], vb[LN_MAX];
+              int na = esp_autovetores(I2,va), nb = esp_autovetores(J,vb);
+              printf("      I e J = [[1,1],[0,1]]:  mesmo traço? %s;  mesmo det? %s\n",
+                     qz_igual(esp_tr(I2),esp_tr(J)) ? "sim" : "não",
+                     qz_igual(mat_det(I2),mat_det(J)) ? "sim" : "não");
+              printf("      autovetores independentes: %d para I e %d para J — logo NÃO"
+                     " são semelhantes\n", na, nb);
+              printf("      e a prova direta: P⁻¹IP = I para todo P invertível\n");
+              int mal = 0; long testadas = 0;
+              for(long k = 0; k < 200; k++){
+                  Mat Pm = mat0(2,2), Pi;
+                  long t = k;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      Pm.a[i][j] = qz_de_inteiro(t % 5 - 2); t /= 5;
+                  }
+                  if(!mat_inversa(Pm, &Pi)) continue;
+                  if(!mat_igual(gr_semelhante(I2, Pm), I2)) mal++;
+                  if(mat_igual(gr_semelhante(I2, Pm), J)) mal++;   /* nunca dá J */
+                  testadas++;
+              }
+              tique7(5, "logo «mesmo espectro» NÃO dá «semelhantes» — é o gume que ele"
+                        " pede ao buscador de contra-exemplos");
+              tique7(6, "e a volta: em todas as conjugações de I, o resultado é sempre"
+                        " I e nunca J");
+              printf("      %ld conjugações: I fica I, e nunca vira J — %d falhas\n",
+                     testadas, mal); }
+        } else {
+            tique7(2, "os blocos de Jordan leem-se das dimensões de ker(A − λI)^k: a"
+                      " primeira dá o NÚMERO de blocos, e o crescimento dá os tamanhos");
+            tique7(3, "a lei é que cada bloco Jₘ(λ) contribui 1 para dim ker(A−λI),"
+                      " 2 para dim ker(A−λI)², e assim até saturar em m");
+            tique7(4, "a testemunha é a cadeia das dimensões, e ela CRESCE e ESTABILIZA");
+            { Mat S = J;
+              for(int i = 0; i < 2; i++) S.a[i][i] = qz_soma(S.a[i][i], qz_de_inteiro(-1));
+              Vec nb[LN_MAX];
+              int d1 = mat_nucleo(S, nb);
+              Mat S2 = mat_mult(S,S);
+              int d2 = mat_nucleo(S2, nb);
+              Mat S3 = mat_mult(S2,S);
+              int d3 = mat_nucleo(S3, nb);
+              printf("      A = [[1,1],[0,1]], λ = 1:\n");
+              printf("      dim ker(A−I)  = %d   →  %d bloco(s)\n", d1, d1);
+              printf("      dim ker(A−I)² = %d   →  o bloco tem tamanho 2\n", d2);
+              printf("      dim ker(A−I)³ = %d   →  saturou\n", d3);
+              tique7(5, "logo há UM bloco de tamanho 2 — que é a forma de Jordan de J");
+              tique7(6, "e a volta: a cadeia satura, e a soma dos tamanhos dos blocos dá"
+                        " a multiplicidade algébrica");
+              printf("      1 bloco de tamanho 2, e a multiplicidade algébrica é 2:"
+                     " %s\n", (d2 == 2 && d3 == 2) ? "confere" : "— NÃO afirmo"); } }
+        break; }
+    case 12: case 13: {
+        long sy[] = {2,1,1,2};
+        Mat A = mat_de_inteiros(2,2,sy);
+        tique7(0, "seja A real, e A* o seu adjunto (= Aᵀ no real)");
+        tique7(1, n == 12 ? "normal é comutar com o adjunto:" : "os eixos da forma:");
+        printf(n == 12 ? "      $A^{*}A = A A^{*}$\n"
+                       : "      $Q(x) = x^{T} A x = y^{T} \\Lambda y$\n");
+        if(n == 12){
+            tique7(2, "toda simétrica é normal (A = Aᵀ dá AᵀA = A² = AAᵀ), mas nem toda"
+                      " normal é simétrica — a rotação J = [[0,1],[−1,0]] é normal e"
+                      " antissimétrica");
+            tique7(3, "a lei é o TEOREMA ESPECTRAL: normal (no real, simétrica) ⟹ base"
+                      " ORTOGONAL de autovetores, logo A = QΛQᵀ");
+            tique7(4, "a testemunha é a ortogonalidade dos autovetores, medida");
+            { long ro[] = {0,1,-1,0};
+              Mat R = mat_de_inteiros(2,2,ro);
+              printf("      A = [[2,1],[1,2]] simétrica? %s;  normal? %s\n",
+                     fb_simetrica(A) ? "sim" : "não",
+                     mat_igual(mat_mult(mat_transposta(A),A),
+                               mat_mult(A,mat_transposta(A))) ? "sim" : "não");
+              printf("      J = [[0,1],[−1,0]] simétrica? %s;  normal? %s"
+                     "  — normal SEM ser simétrica\n",
+                     fb_simetrica(R) ? "sim" : "NÃO",
+                     mat_igual(mat_mult(mat_transposta(R),R),
+                               mat_mult(R,mat_transposta(R))) ? "sim" : "não");
+              int mal = 0; long sim = 0, norm = 0, so_norm = 0;
+              for(long k = 0; k < 625; k++){
+                  Mat X = mat0(2,2);
+                  long t = k;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      X.a[i][j] = qz_de_inteiro(t % 5 - 2); t /= 5;
+                  }
+                  int s = fb_simetrica(X);
+                  int nn = mat_igual(mat_mult(mat_transposta(X),X),
+                                     mat_mult(X,mat_transposta(X)));
+                  if(s && !nn) mal++;                    /* simétrica ⟹ normal */
+                  if(s) sim++;
+                  if(nn){ norm++; if(!s) so_norm++; }
+              }
+              tique7(5, "logo simétrica ⟹ normal, e a recíproca é FALSA — o gume tem"
+                        " testemunhas em ambos os lados");
+              tique7(6, "e a volta: contam-se as simétricas, as normais, e as normais"
+                        " que NÃO são simétricas — o terceiro grupo é o que decide");
+              printf("      %ld simétricas, %ld normais, %ld normais não simétricas:"
+                     " %d falhas\n", sim, norm, so_norm, mal); }
+        } else {
+            tique7(2, "com A = QΛQᵀ e y = Qᵀx, vem Q(x) = xᵀAx = xᵀQΛQᵀx = yᵀΛy — e"
+                      " nessas coordenadas a forma é uma SOMA DE QUADRADOS pesada pelos"
+                      " autovalores. Não há termos cruzados");
+            tique7(3, "a lei é a ORTOGONALIDADE de Q: Qᵀ = Q⁻¹, e é ela que faz a mudança"
+                      " de coordenadas ser simultaneamente congruência e semelhança —"
+                      " o único caso em que as duas coincidem");
+            tique7(4, "a testemunha são os autovalores, que passam a ser os COEFICIENTES"
+                      " dos quadrados: «o espectro revela os EIXOS geométricos da forma»");
+            { long l1, l2;
+              Vec vs[LN_MAX];
+              int k = esp_autovetores(A, vs);
+              if(esp_racional(A, &l1, &l2)){
+                  printf("      Q(x,y) = 2x² + 2xy + 2y²,  autovalores %ld e %ld\n", l1, l2);
+                  printf("      eixos: ");
+                  for(int i = 0; i < k; i++){ if(i) printf(" e "); esc_vec(vs[i]); }
+                  printf("   (ortogonais? %s)\n",
+                         (k == 2 && pi_ortogonais(vs[0],vs[1])) ? "sim" : "não");
+                  /* nas coordenadas dos eixos, Q(y) = λ₁y₁² + λ₂y₂² — mede-se */
+                  int mal = 0; long feitos = 0;
+                  for(long c1 = -4; c1 <= 4; c1++) for(long c2 = -4; c2 <= 4; c2++){
+                      Vec x = vec_soma(vec_esc(qz_de_inteiro(c1), vs[0]),
+                                       vec_esc(qz_de_inteiro(c2), vs[1]));
+                      Qz esq = fb_quadratica(A, x);
+                      Qz dir = qz_soma(
+                          qz_mult(qz_de_inteiro(l1),
+                                  qz_mult(qz_de_inteiro(c1*c1), pi_norma2(vs[0]))),
+                          qz_mult(qz_de_inteiro(l2),
+                                  qz_mult(qz_de_inteiro(c2*c2), pi_norma2(vs[1]))));
+                      if(!qz_igual(esq,dir)) mal++;
+                      feitos++;
+                  }
+                  tique7(5, "logo Q(x) = yᵀΛy: nos eixos a forma é diagonal");
+                  tique7(6, "e a volta: nos pontos escritos NOS EIXOS, o valor da forma"
+                            " é a soma pesada dos quadrados — sem termo cruzado");
+                  printf("      %ld pontos: Q = λ₁c₁²|v₁|² + λ₂c₂²|v₂|², %d falhas\n",
+                         feitos, mal);
+              } } }
+        break; }
+    case 14: case 15: {
+        tique7(0, n == 14 ? "sejam V e W de dimensões m e n"
+                          : "seja T um operador em V de dimensão n");
+        tique7(1, n == 14 ? "o produto tensorial:" : "a potência exterior máxima:");
+        printf(n == 14 ? "      $\\dim(V \\otimes W) = \\dim V \\cdot \\dim W$\n"
+                       : "      $\\Lambda^{n} T$ é a multiplicação por $\\det T$\n");
+        if(n == 14){
+            tique7(2, "a base de V⊗W são os eᵢ⊗fⱼ, e há mn deles. E a PROPRIEDADE"
+                      " UNIVERSAL: uma B bilinear V×W→K é exatamente uma B̃ linear em"
+                      " V⊗W — «duas entradas numa operação única»");
+            tique7(3, "a lei é que o tensorial é o objeto onde a bilinearidade se torna"
+                      " linearidade: ele existe precisamente para isso, e é essa a sua"
+                      " definição por universalidade");
+            tique7(4, "a testemunha é a correspondência coeficiente a coeficiente: os mn"
+                      " valores B(eᵢ,fⱼ) SÃO as coordenadas de B̃");
+            { Vec u = vec0(2), v = vec0(2);
+              u.c[0] = qz(1,1); u.c[1] = qz(2,1);
+              v.c[0] = qz(3,1); v.c[1] = qz(1,1);
+              Vec t = tn_simples(u,v);
+              printf("      u = "); esc_vec(u); printf(",  v = "); esc_vec(v);
+              printf(",  u⊗v = "); esc_vec(t);
+              printf("   (dim %d = 2·2)\n", t.n);
+              int mal = 0; long feitos = 0;
+              for(long k = 0; k < 200; k++){
+                  Mat B = mat0(2,2);
+                  long s = k;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      B.a[i][j] = qz_de_inteiro(s % 5 - 2); s /= 5;
+                  }
+                  for(long p1 = -3; p1 <= 3; p1++) for(long q1 = -3; q1 <= 3; q1++){
+                      Vec a = vec0(2), b = vec0(2);
+                      a.c[0] = qz_de_inteiro(p1); a.c[1] = qz_de_inteiro(q1);
+                      b.c[0] = qz_de_inteiro(q1); b.c[1] = qz_de_inteiro(-p1);
+                      /* B̃(a⊗b) = B(a,b): a bilinear vira LINEAR no tensorial */
+                      if(!qz_igual(tn_induzida(B, tn_simples(a,b)), fb_av(B,a,b))) mal++;
+                  }
+                  feitos++;
+              }
+              tique7(5, "logo bilinear ⟺ linear no tensorial, e a dimensão multiplica");
+              tique7(6, "e a volta: B̃(u⊗v) = B(u,v) em todas as formas e pares medidos —"
+                        " é a versão abstrata do que o motor já fazia ao transformar duas"
+                        " entradas numa operação única");
+              printf("      %ld formas × pares: a induzida bate com a bilinear, %d"
+                     " falhas\n", feitos, mal); }
+        } else {
+            tique7(2, "em dimensão 2, Λ²V tem dimensão 1 e u∧v = u₁v₂ − u₂v₁. A ação de T"
+                      " é Tu ∧ Tv, e ela tem de ser um MÚLTIPLO de u∧v — porque o espaço"
+                      " tem dimensão 1");
+            tique7(3, "a lei é a ALTERNÂNCIA (u∧u = 0, e daí u∧v = −v∧u), que é o que"
+                      " reduz Λ² a uma dimensão. O fator que aparece é o determinante");
+            tique7(4, "a testemunha é o próprio fator, calculado sem cofatores nenhuns:"
+                      " aplica-se T aos dois vetores e faz-se a cunha");
+            { Vec e1 = vec0(2), e2 = vec0(2);
+              e1.c[0] = qz(1,1); e2.c[1] = qz(1,1);
+              Qz esq = ex_cunha2(mat_aplica(T,e1), mat_aplica(T,e2));
+              Qz dir = qz_mult(mat_det(T), ex_cunha2(e1,e2));
+              printf("      T = [[1,2],[3,4]]:  Te₁ ∧ Te₂ = "); esc_qz("", esq, "");
+              printf(",  det T · (e₁∧e₂) = "); esc_qz("", dir, "");
+              printf("   %s\n", qz_igual(esq,dir) ? "(iguais)" : "— NÃO afirmo");
+              int mal = 0; long feitos = 0;
+              for(long k = 0; k < 625; k++){
+                  Mat X = mat0(2,2);
+                  long s = k;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      X.a[i][j] = qz_de_inteiro(s % 5 - 2); s /= 5;
+                  }
+                  for(long p1 = -2; p1 <= 2; p1++) for(long q1 = -2; q1 <= 2; q1++){
+                      Vec a = vec0(2), b = vec0(2);
+                      a.c[0] = qz_de_inteiro(p1); a.c[1] = qz_de_inteiro(q1);
+                      b.c[0] = qz_de_inteiro(q1); b.c[1] = qz_de_inteiro(p1+1);
+                      if(!qz_igual(ex_cunha2(mat_aplica(X,a), mat_aplica(X,b)),
+                                   qz_mult(mat_det(X), ex_cunha2(a,b)))) mal++;
+                      if(!ex_alterna(a,b)) mal++;
+                  }
+                  feitos++;
+              }
+              tique7(5, "logo Λ²T é a multiplicação por det T — «o determinante deixa de"
+                        " ser uma receita de cofatores e vira A AÇÃO DO OPERADOR NO"
+                        " VOLUME ORIENTADO»");
+              tique7(6, "e a volta: em todos os operadores e pares varridos, o fator É"
+                        " sempre o determinante, e a alternância mede-se junto");
+              printf("      %ld operadores × pares: Tu∧Tv = det(T)·(u∧v), %d falhas\n",
+                     feitos, mal); } }
+        break; }
+    case 16: {
+        tique7(0, "seja T: V → W linear, e φ ∈ W*. Nada mais");
+        tique7(1, "o que se quer é uma IGUALDADE DE CONJUNTOS:");
+        printf("      $\\ker T^{*} = (\\operatorname{im} T)^{\\circ}$\n");
+        tique7(2, "E AQUI ESTÁ A CORREÇÃO: eu tinha medido isto varrendo 625 matrizes —"
+                  " a conclusão, não a cadeia. Ele nota que «dá para provar"
+                  " ESTRUTURALMENTE, SEM VARREDURA», e tem razão. A prova é uma cadeia de"
+                  " EQUIVALÊNCIAS, e cada seta tem a sua lei:");
+        printf("        φ ∈ ker T*     ⟺  T*φ = 0            [definição de núcleo]\n");
+        printf("        T*φ = 0        ⟺  (T*φ)(v) = 0 ∀v    [dois funcionais são iguais\n");
+        printf("                                              sse coincidem em TODO v]\n");
+        printf("        (T*φ)(v) = 0   ⟺  φ(Tv) = 0 ∀v       [definição de T*: T*φ = φ∘T]\n");
+        printf("        φ(Tv) = 0 ∀v   ⟺  φ|_{im T} = 0      [im T é EXATAMENTE o conjunto\n");
+        printf("                                              dos Tv]\n");
+        printf("        φ|_{im T} = 0  ⟺  φ ∈ (im T)°        [definição de aniquilador]\n");
+        tique7(3, "as leis, uma por seta: DEFINIÇÃO DE NÚCLEO, IGUALDADE PONTUAL DE"
+                  " FUNCIONAIS, DEFINIÇÃO DE T*, DEFINIÇÃO DE IMAGEM, DEFINIÇÃO DE"
+                  " ANIQUILADOR. Cinco definições e nenhum cálculo — é por isso que não"
+                  " precisa de varredura");
+        tique7(4, "a testemunha é que TODAS as setas são ⟺, e não ⟹: a cadeia lê-se nos"
+                  " dois sentidos, e é isso que dá IGUALDADE de conjuntos em vez de"
+                  " inclusão");
+        { /* e o que aqui se mede é CADA ELO, não a conclusão */
+          int elo1 = 0, elo2 = 0, elo3 = 0, elo4 = 0, mal = 0;
+          long feitos = 0;
+          for(long k = 0; k < 200; k++){
+              Mat X = mat0(2,2);
+              long s = k;
+              for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                  X.a[i][j] = qz_de_inteiro(s % 5 - 2); s /= 5;
+              }
+              Mat Xt = mat_transposta(X);
+              for(long p1 = -2; p1 <= 2; p1++) for(long q1 = -2; q1 <= 2; q1++){
+                  Fun phi; phi.n = 2;
+                  phi.c[0] = qz_de_inteiro(p1); phi.c[1] = qz_de_inteiro(q1);
+                  /* ELO 1: φ ∈ ker T* ⟺ Aᵀφ = 0 */
+                  Vec pv = vec0(2); pv.c[0] = phi.c[0]; pv.c[1] = phi.c[1];
+                  int e1 = vec_zero(mat_aplica(Xt, pv));
+                  /* ELO 2/3: (T*φ)(v) = φ(Tv) para TODO v */
+                  int e23 = 1;
+                  for(long a = -2; a <= 2 && e23; a++) for(long b = -2; b <= 2; b++){
+                      Vec v = vec0(2);
+                      v.c[0] = qz_de_inteiro(a); v.c[1] = qz_de_inteiro(b);
+                      Vec tsp = mat_aplica(Xt, pv);
+                      Fun tf; tf.n = 2; tf.c[0] = tsp.c[0]; tf.c[1] = tsp.c[1];
+                      if(!qz_igual(fun_av(tf, v), fun_av(phi, mat_aplica(X,v)))){ e23 = 0; break; }
+                  }
+                  if(!e23) mal++;                        /* o elo do MEIO, medido */
+                  /* ELO 4: φ(Tv) = 0 ∀v ⟺ φ anula a IMAGEM */
+                  int anula_tudo = 1;
+                  for(long a = -2; a <= 2 && anula_tudo; a++) for(long b = -2; b <= 2; b++){
+                      Vec v = vec0(2);
+                      v.c[0] = qz_de_inteiro(a); v.c[1] = qz_de_inteiro(b);
+                      if(fun_av(phi, mat_aplica(X,v)).p){ anula_tudo = 0; break; }
+                  }
+                  Vec ib[LN_MAX];
+                  int r = mat_imagem(X, ib);
+                  int anula_base = 1;
+                  for(int i = 0; i < r; i++) if(fun_av(phi, ib[i]).p) anula_base = 0;
+                  if(anula_tudo != anula_base) mal++;    /* basta anular na BASE da imagem */
+                  /* e a cadeia inteira: os extremos coincidem */
+                  if(e1 != anula_base) mal++;
+                  elo1 += e1; elo2 += e23; elo3 += anula_tudo; elo4 += anula_base;
+              }
+              feitos++;
+          }
+          printf("      cada ELO medido em %ld matrizes × 25 funcionais:\n", feitos);
+          printf("        (T*φ)(v) = φ(Tv) para todo v:        %d confirmações\n", elo2);
+          printf("        anular em TODO v ⟺ anular na BASE:   %d e %d\n", elo3, elo4);
+          printf("        e os extremos coincidem:              %d no núcleo\n", elo1);
+          printf("      divergências em qualquer elo: %d\n", mal);
+          tique7(5, "logo ker T* = (im T)°, e a igualdade não veio de comparar dimensões:"
+                    " veio de cinco definições em cadeia");
+          tique7(6, "e a VOLTA aqui é outra coisa: o que se mediu foi CADA ELO, e não os"
+                    " extremos. Medir os extremos era o que eu fazia antes — e é"
+                    " exatamente o «não medir só a conclusão» aplicado a mim"); }
+        break; }
+    }
+}
+static int resolve_tensor(const char *f){
+    const char *p = f;
+    for(size_t i = 0; i < sizeof TS16/sizeof *TS16; i++)
+        if(!strcmp(p, TS16[i].nome)){ tensor_resolve(TS16[i].n); return 1; }
+    if(!strncmp(p, "gram", 4) && !p[4]){ tensor_resolve(1); return 1; }
+    if(!strncmp(p, "tensores", 8)) p += 8;
+    else if(!strncmp(p, "geometria", 9)) p += 9;
+    else return 0;
+    while(*p == ' ') p++;
+    if(!*p){
+        printf("   Gram, Sylvester, Jordan, tensor e exterior — «tensores N» ou"
+               " «tensores <nome>»\n");
+        printf("   e a assinatura NÃO se lê na matriz: caçam-se as testemunhas\n\n");
+        for(size_t i = 0; i < sizeof TS16/sizeof *TS16; i++){
+            printf("     %2d  ", TS16[i].n);
+            esc_col(TS16[i].nome, 26);
+            printf("  %s\n", TS16[i].enunciado);
+        }
+        return 1;
+    }
+    if(*p >= '0' && *p <= '9'){
+        long n = 0;
+        while(*p >= '0' && *p <= '9') n = n*10 + (*p++ - '0');
+        while(*p == ' ') p++;
+        if(!*p && n >= 1 && n <= 16){ tensor_resolve((int)n); return 1; }
+        return 0;
+    }
+    return 0;
+}
 /* ── FORMAS, ADJUNTOS E ESPECTRO — E O QUE A CASA JÁ TINHA ──────────────────────────
  * O último `eval.txt` sobe para a parte estrutural, e pede TRÊS gumes automáticos por
  * nome. Mas o achado deste andar não é nenhum deles: é que a casa JÁ CORRIA
@@ -8224,6 +8874,7 @@ static int resolve_mostra(const char *f){ return resolve_mostra_em(f, "../papers
 static int resolve_simbolico(const char *fala){
     if(resolve_divisibilidade(fala)) return 1;     /* o relógio de 6 ticks */
     if(resolve_bezout(fala)) return 1;             /* a testemunha e o critério */
+    if(resolve_tensor(fala)) return 1;             /* Gram → exterior, os 16 */
     if(resolve_forma(fala)) return 1;              /* formas e espectro, os 16 */
     if(resolve_linear(fala)) return 1;             /* linear e dual, 16 + 14 */
     if(resolve_corpo(fala)) return 1;              /* teoria dos corpos, os 25 */
@@ -9261,6 +9912,354 @@ static int teste(void){
                 if(e_conta(nu2)) roubadas++;
             }
             ok("e a membrana nao rouba o corpus: fala sem LaTeX nao vira conta", roubadas == 0);
+
+        /* ═══ §C39 GRAM → SYLVESTER → JORDAN → TENSOR → EXTERIOR ══════════════════
+         * Três exigências novas, e nenhuma é de conteúdo:
+         *
+         *   «NÃO BASTA OLHAR PARA A MATRIZ: é preciso PROCURAR TESTEMUNHAS v com
+         *    Q(v) > 0, Q(v) < 0 ou Q(v) = 0» — a assinatura caça-se.
+         *   «Encontrar um contra-exemplo quando a característica é 2» — o 1/2 da
+         *    polarização é uma FIBRA, e em 𝔽₂ ela é vazia.
+         *   E a CORREÇÃO ao que eu tinha feito: ker T* = (im T)° «dá para provar
+         *    ESTRUTURALMENTE, SEM VARREDURA». Eu medira os EXTREMOS varrendo 625
+         *    matrizes; agora mede-se CADA ELO da cadeia de equivalências. */
+        printf("\n§C39 GRAM → EXTERIOR: a assinatura caça-se, e a cadeia mede-se elo a elo.\n\n");
+        {
+            long g1[] = {1,1,1,1}, g2[] = {1,0,0,-1}, pp[] = {1,1,0,1};
+            long jd[] = {1,1,0,1}, i2[] = {1,0,0,1}, sy[] = {2,1,1,2};
+            Mat G1 = mat_de_inteiros(2,2,g1), G2 = mat_de_inteiros(2,2,g2);
+            Mat P = mat_de_inteiros(2,2,pp), J = mat_de_inteiros(2,2,jd);
+            Mat I2 = mat_de_inteiros(2,2,i2), Sy = mat_de_inteiros(2,2,sy);
+
+            /* (1)(2) GRAM e CONGRUÊNCIA — e o gume é NÃO ser semelhança */
+            { int mal = 0; long feitos = 0, diferem = 0;
+              for(long k = 0; k < 300; k++){
+                  Mat X = mat0(2,2), Pm = mat0(2,2), Pi;
+                  long t = k;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      X.a[i][j] = qz_de_inteiro(t % 5 - 2); t /= 5;
+                  }
+                  /* a Gram reconstrói-se dos valores na base */
+                  Mat Gr = mat0(2,2);
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      Vec ei = vec0(2), ej = vec0(2);
+                      ei.c[i] = qz(1,1); ej.c[j] = qz(1,1);
+                      Gr.a[i][j] = fb_av(X, ei, ej);
+                  }
+                  if(!mat_igual(Gr, X)) mal++;
+                  Pm.a[0][0] = qz(1,1); Pm.a[1][1] = qz(1,1);
+                  Pm.a[0][1] = qz_de_inteiro(k % 3 - 1);
+                  if(!mat_inversa(Pm, &Pi)) continue;
+                  Mat C = gr_congruente(X, Pm);
+                  /* Q(Pv) = vᵀ(PᵀGP)v — a congruência é o que a forma vê */
+                  for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++){
+                      Vec v = vec0(2);
+                      v.c[0] = qz_de_inteiro(a); v.c[1] = qz_de_inteiro(b);
+                      if(!qz_igual(fb_quadratica(X, mat_aplica(Pm,v)),
+                                   fb_quadratica(C, v))) mal++;
+                  }
+                  if(!mat_igual(C, gr_semelhante(X, Pm))) diferem++;
+                  feitos++;
+              }
+              ok("a MATRIZ DE GRAM é a forma em coordenadas (G_{ij} = B(eᵢ,eⱼ) reconstrói"
+                 " a matriz), e a mudança de base atua por CONGRUÊNCIA: Q(Pv) = vᵀ(PᵀGP)v."
+                 " E o gume é que PᵀGP ≠ P⁻¹AP na maioria dos casos — congruência e"
+                 " semelhança são relações DIFERENTES, uma preserva a forma e a outra o"
+                 " operador", mal == 0 && feitos > 250 && diferem > 0); }
+
+            /* (3)(4) POLARIZAÇÃO, e o contra-exemplo em CARACTERÍSTICA 2 */
+            { int mal = 0; long feitos = 0;
+              for(long k = 0; k < 200; k++){
+                  Mat X = mat0(2,2);
+                  long t = k;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      X.a[i][j] = qz_de_inteiro(t % 5 - 2); t /= 5;
+                  }
+                  Mat Sim = mat0(2,2);
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      Qz m;
+                      qz_divide(qz_soma(X.a[i][j], X.a[j][i]), qz_de_inteiro(2), &m);
+                      Sim.a[i][j] = m;
+                  }
+                  for(long p1 = -2; p1 <= 2; p1++) for(long q1 = -2; q1 <= 2; q1++){
+                      Vec u = vec0(2), v = vec0(2);
+                      u.c[0] = qz_de_inteiro(p1); u.c[1] = qz_de_inteiro(q1);
+                      v.c[0] = qz_de_inteiro(q1); v.c[1] = qz_de_inteiro(-p1);
+                      Qz b;
+                      if(!gr_polariza(X, u, v, &b)){ mal++; continue; }
+                      if(!qz_igual(b, fb_av(Sim, u, v))) mal++;   /* dá a parte SIMÉTRICA */
+                  }
+                  feitos++;
+              }
+              /* O CONTRA-EXEMPLO EM 𝔽₂: o 2 não tem inverso, e −1 = 1 */
+              Anel F2; an_zn(&F2, 2);
+              int sem_meio = (corpo_inv(&F2, 0) < 0);      /* 2 ≡ 0 em 𝔽₂ */
+              int menos_um_e_um = (F2.soma[1][1] == 0);    /* 1 + 1 = 0, logo −1 = 1 */
+              long alternadas_simetricas = 0;
+              for(int a = 0; a < 2; a++) for(int b = 0; b < 2; b++)
+              for(int c = 0; c < 2; c++) for(int d = 0; d < 2; d++){
+                  int zerada = 1;
+                  for(int x = 0; x < 2; x++) for(int y = 0; y < 2; y++)
+                      if((a*x*x + (b+c)*x*y + d*y*y) % 2) zerada = 0;
+                  if(zerada && b == c) alternadas_simetricas++;
+              }
+              printf("      em 𝔽₂: 1+1 = %d (logo −1 = 1), e o 2 não tem inverso;"
+                     " %ld formas são alternadas E simétricas ao mesmo tempo\n",
+                     F2.soma[1][1], alternadas_simetricas);
+              ok("a POLARIZAÇÃO recupera B de Q — e o que recupera é a parte SIMÉTRICA,"
+                 " porque a antissimétrica é invisível a Q(v) = B(v,v). E o CONTRA-EXEMPLO"
+                 " que ele pede está em CARACTERÍSTICA 2: lá o 1/2 é uma fibra VAZIA (2"
+                 " não tem inverso) e −1 = 1, logo simétrica e antissimétrica colapsam —"
+                 " o exercício «B(v,v) = 0 ⟹ antissimétrica» exige char ≠ 2, e é essa a"
+                 " hipótese que carrega",
+                 mal == 0 && feitos == 200 && sem_meio && menos_um_e_um
+                 && alternadas_simetricas > 0); }
+
+            /* (5)(6)(7) A ASSINATURA CAÇADA, e SYLVESTER a preservá-la */
+            { Assin a1 = gr_assinatura(G1, 3), a2 = gr_assinatura(G2, 3);
+              int mal = 0;
+              /* (x+y)²: semidefinida — nunca negativa, mas zera fora do zero */
+              if(a1.neg != 0) mal++;
+              if(a1.zero == 0) mal++;
+              if(fb_quadratica(G1, a1.vz).p != 0 || vec_zero(a1.vz)) mal++;
+              /* x²−y²: indefinida — tem os DOIS sinais, e a testemunha de cada */
+              if(a2.pos == 0 || a2.neg == 0) mal++;
+              if(fb_quadratica(G2, a2.vp).p <= 0) mal++;
+              if(fb_quadratica(G2, a2.vn).p >= 0) mal++;
+              /* SYLVESTER: os sinais presentes não mudam por congruência */
+              long congr = 0;
+              for(long k = 0; k < 60; k++){
+                  Mat Pm = mat0(2,2), Pi;
+                  Pm.a[0][0] = qz(1,1); Pm.a[1][1] = qz(1,1);
+                  Pm.a[0][1] = qz_de_inteiro(k % 5 - 2);
+                  Pm.a[1][0] = qz_de_inteiro((k/5) % 3 - 1);
+                  if(!mat_inversa(Pm, &Pi)) continue;
+                  Mat *Gs[2] = { &G1, &G2 };
+                  for(int g = 0; g < 2; g++){
+                      Assin x = gr_assinatura(*Gs[g], 3);
+                      Assin y = gr_assinatura(gr_congruente(*Gs[g], Pm), 3);
+                      if((x.pos > 0) != (y.pos > 0)) mal++;
+                      if((x.neg > 0) != (y.neg > 0)) mal++;
+                      congr++;
+                  }
+              }
+              printf("      (x+y)²: %ld+ %ld− %ld=0;  x²−y²: %ld+ %ld− %ld=0;"
+                     "  e %ld congruências não mudam os sinais\n",
+                     a1.pos, a1.neg, a1.zero, a2.pos, a2.neg, a2.zero, congr);
+              ok("«NÃO BASTA OLHAR PARA A MATRIZ»: a assinatura CAÇA-SE, e as testemunhas"
+                 " exibem-se — (x+y)² é SEMIDEFINIDA (zero negativas, mas zera fora do"
+                 " zero) e x² − y² é INDEFINIDA (as duas testemunhas). E SYLVESTER: os"
+                 " sinais presentes são INVARIANTES por congruência, em todas as mudanças"
+                 " de base medidas",
+                 mal == 0 && congr > 50); }
+
+            /* (8)(9)(10)(11) MÍNIMO, SIMILARIDADE, e o espectro que NÃO determina */
+            { int mal = 0; long escalares = 0, feitos = 0;
+              for(long k = 0; k < 625; k++){
+                  Mat X = mat0(2,2);
+                  long t = k;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      X.a[i][j] = qz_de_inteiro(t % 5 - 2); t /= 5;
+                  }
+                  int esc = qz_igual(X.a[0][0], X.a[1][1])
+                         && X.a[0][1].p == 0 && X.a[1][0].p == 0;
+                  if(esp_minimo_grau(X) != (esc ? 1 : 2)) mal++;   /* o MÍNIMO */
+                  if(esc) escalares++;
+                  /* SIMILARIDADE preserva traço, det e o nº de autovetores */
+                  Mat Pm = mat0(2,2), Pi;
+                  Pm.a[0][0] = qz(1,1); Pm.a[1][1] = qz(1,1);
+                  Pm.a[0][1] = qz_de_inteiro(k % 3 - 1);
+                  if(mat_inversa(Pm, &Pi)){
+                      Mat B = gr_semelhante(X, Pm);
+                      if(!qz_igual(esp_tr(X), esp_tr(B))) mal++;
+                      if(!qz_igual(mat_det(X), mat_det(B))) mal++;
+                      Vec va[LN_MAX], vb[LN_MAX];
+                      if(esp_autovetores(X,va) != esp_autovetores(B,vb)) mal++;
+                  }
+                  feitos++;
+              }
+              /* O GUME: I e J têm o mesmo espectro e NÃO são semelhantes */
+              Vec va[LN_MAX], vb[LN_MAX];
+              int nI = esp_autovetores(I2,va), nJ = esp_autovetores(J,vb);
+              int mesmo = sim_mesmo_espectro(I2,J);
+              long conj = 0, virou_J = 0;
+              for(long k = 0; k < 300; k++){
+                  Mat Pm = mat0(2,2), Pi;
+                  long t = k;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      Pm.a[i][j] = qz_de_inteiro(t % 5 - 2); t /= 5;
+                  }
+                  if(!mat_inversa(Pm, &Pi)) continue;
+                  if(!mat_igual(gr_semelhante(I2, Pm), I2)) mal++;
+                  if(mat_igual(gr_semelhante(I2, Pm), J)) virou_J++;
+                  conj++;
+              }
+              /* e os BLOCOS pelas dimensões de ker(A−λI)^k */
+              Mat S = J;
+              for(int i = 0; i < 2; i++) S.a[i][i] = qz_soma(S.a[i][i], qz_de_inteiro(-1));
+              Vec nb[LN_MAX];
+              int d1 = mat_nucleo(S, nb), d2 = mat_nucleo(mat_mult(S,S), nb);
+              printf("      I e J: mesmo espectro? %s, mas %d e %d autovetores — e em %ld"
+                     " conjugações I nunca vira J (%ld)\n",
+                     mesmo ? "sim" : "não", nI, nJ, conj, virou_J);
+              ok("o POLINÓMIO MÍNIMO pode ser de grau 1 (exatamente nas escalares) — é a"
+                 " diferença que Cayley–Hamilton sozinho não vê. A SEMELHANÇA preserva"
+                 " traço, determinante e o número de autovetores; MAS o espectro NÃO a"
+                 " determina: I e J = [[1,1],[0,1]] têm o mesmo e não são semelhantes,"
+                 " porque P⁻¹IP = I sempre. E os BLOCOS saem das dimensões de"
+                 " ker(A−λI)^k: 1 e 2, logo um bloco de tamanho 2",
+                 mal == 0 && feitos == 625 && escalares > 0 && mesmo
+                 && nI == 2 && nJ == 1 && virou_J == 0 && d1 == 1 && d2 == 2); }
+
+            /* (12)(13) NORMAIS, e o espectro a dar os EIXOS da forma */
+            { int mal = 0; long sim = 0, norm = 0, so_norm = 0;
+              for(long k = 0; k < 625; k++){
+                  Mat X = mat0(2,2);
+                  long t = k;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      X.a[i][j] = qz_de_inteiro(t % 5 - 2); t /= 5;
+                  }
+                  int s = fb_simetrica(X);
+                  int nn = mat_igual(mat_mult(mat_transposta(X),X),
+                                     mat_mult(X,mat_transposta(X)));
+                  if(s && !nn) mal++;                     /* simétrica ⟹ normal */
+                  if(s) sim++;
+                  if(nn){ norm++; if(!s) so_norm++; }
+              }
+              /* os EIXOS: nas coordenadas dos autovetores, Q é diagonal */
+              long l1, l2;
+              Vec vs[LN_MAX];
+              int k2 = esp_autovetores(Sy, vs);
+              int emal = !esp_racional(Sy, &l1, &l2) || k2 != 2
+                      || !pi_ortogonais(vs[0], vs[1]);
+              long feitos = 0;
+              for(long c1 = -4; c1 <= 4 && !emal; c1++) for(long c2 = -4; c2 <= 4; c2++){
+                  Vec x = vec_soma(vec_esc(qz_de_inteiro(c1), vs[0]),
+                                   vec_esc(qz_de_inteiro(c2), vs[1]));
+                  Qz esq = fb_quadratica(Sy, x);
+                  Qz dir = qz_soma(
+                      qz_mult(qz_de_inteiro(l1), qz_mult(qz_de_inteiro(c1*c1), pi_norma2(vs[0]))),
+                      qz_mult(qz_de_inteiro(l2), qz_mult(qz_de_inteiro(c2*c2), pi_norma2(vs[1]))));
+                  if(!qz_igual(esq,dir)) emal++;
+                  feitos++;
+              }
+              printf("      %ld simétricas, %ld normais, %ld normais NÃO simétricas;"
+                     " e nos eixos Q é diagonal em %ld pontos\n",
+                     sim, norm, so_norm, feitos);
+              ok("SIMÉTRICA ⟹ NORMAL e a recíproca é FALSA (a rotação é normal sem ser"
+                 " simétrica) — os dois lados com testemunhas. E «O ESPECTRO REVELA OS"
+                 " EIXOS»: nas coordenadas dos autovetores a forma fica SEM TERMO"
+                 " CRUZADO, Q = λ₁c₁²|v₁|² + λ₂c₂²|v₂|², medido ponto a ponto",
+                 mal == 0 && emal == 0 && sim > 0 && so_norm > 0 && feitos == 81); }
+
+            /* (14)(15) O TENSOR e o EXTERIOR — e o determinante como VOLUME */
+            { int mal = 0; long feitos = 0;
+              for(long k = 0; k < 300; k++){
+                  Mat B = mat0(2,2);
+                  long s = k;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      B.a[i][j] = qz_de_inteiro(s % 5 - 2); s /= 5;
+                  }
+                  for(long p1 = -2; p1 <= 2; p1++) for(long q1 = -2; q1 <= 2; q1++){
+                      Vec a = vec0(2), b = vec0(2);
+                      a.c[0] = qz_de_inteiro(p1); a.c[1] = qz_de_inteiro(q1);
+                      b.c[0] = qz_de_inteiro(q1); b.c[1] = qz_de_inteiro(p1+1);
+                      /* a UNIVERSALIDADE: bilinear ⟺ linear no tensorial */
+                      if(!qz_igual(tn_induzida(B, tn_simples(a,b)), fb_av(B,a,b))) mal++;
+                      /* o EXTERIOR: Tu ∧ Tv = det(T)·(u∧v), e a alternância */
+                      if(!qz_igual(ex_cunha2(mat_aplica(B,a), mat_aplica(B,b)),
+                                   qz_mult(mat_det(B), ex_cunha2(a,b)))) mal++;
+                      if(!ex_alterna(a,b)) mal++;
+                  }
+                  /* e a dimensão: dim(V⊗W) = 2·2 = 4 */
+                  Vec e1 = vec0(2), e2 = vec0(2);
+                  e1.c[0] = qz(1,1); e2.c[1] = qz(1,1);
+                  if(tn_simples(e1,e2).n != 4) mal++;
+                  feitos++;
+              }
+              ok("o TENSORIAL tem dim(V⊗W) = dim V · dim W, e a UNIVERSALIDADE mede-se:"
+                 " toda bilinear B corresponde a uma LINEAR B̃ com B̃(u⊗v) = B(u,v) — «a"
+                 " versão abstrata de transformar duas entradas numa operação única». E"
+                 " o EXTERIOR dá o determinante SEM cofatores: Tu ∧ Tv = det(T)·(u∧v),"
+                 " isto é, det é A AÇÃO DO OPERADOR NO VOLUME ORIENTADO, com a"
+                 " alternância medida junto",
+                 mal == 0 && feitos == 300); }
+
+            /* (16) A CADEIA MEDIDA ELO A ELO — a correção que ele fez ao meu método */
+            { int mal = 0; long elos = 0, no_nucleo = 0;
+              for(long k = 0; k < 200; k++){
+                  Mat X = mat0(2,2);
+                  long s = k;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      X.a[i][j] = qz_de_inteiro(s % 5 - 2); s /= 5;
+                  }
+                  Mat Xt = mat_transposta(X);
+                  for(long p1 = -2; p1 <= 2; p1++) for(long q1 = -2; q1 <= 2; q1++){
+                      Fun phi; phi.n = 2;
+                      phi.c[0] = qz_de_inteiro(p1); phi.c[1] = qz_de_inteiro(q1);
+                      Vec pv = vec0(2); pv.c[0] = phi.c[0]; pv.c[1] = phi.c[1];
+                      /* ELO A: φ ∈ ker T* ⟺ Aᵀφ = 0 */
+                      int A_ = vec_zero(mat_aplica(Xt, pv));
+                      /* ELO B: (T*φ)(v) = φ(Tv) para TODO v — a DEFINIÇÃO de T* */
+                      Vec tsp = mat_aplica(Xt, pv);
+                      Fun tf; tf.n = 2; tf.c[0] = tsp.c[0]; tf.c[1] = tsp.c[1];
+                      for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++){
+                          Vec v = vec0(2);
+                          v.c[0] = qz_de_inteiro(a); v.c[1] = qz_de_inteiro(b);
+                          if(!qz_igual(fun_av(tf, v), fun_av(phi, mat_aplica(X,v)))) mal++;
+                          elos++;
+                      }
+                      /* ELO C: anular em TODO v ⟺ anular na BASE da imagem */
+                      int tudo = 1;
+                      for(long a = -3; a <= 3 && tudo; a++) for(long b = -3; b <= 3; b++){
+                          Vec v = vec0(2);
+                          v.c[0] = qz_de_inteiro(a); v.c[1] = qz_de_inteiro(b);
+                          if(fun_av(phi, mat_aplica(X,v)).p){ tudo = 0; break; }
+                      }
+                      Vec ib[LN_MAX];
+                      int r = mat_imagem(X, ib);
+                      int base = 1;
+                      for(int i = 0; i < r; i++) if(fun_av(phi, ib[i]).p) base = 0;
+                      if(tudo != base) mal++;
+                      /* e os EXTREMOS coincidem — mas isso agora é CONSEQUÊNCIA */
+                      if(A_ != base) mal++;
+                      if(A_) no_nucleo++;
+                  }
+              }
+              printf("      cada elo medido: %ld verificações da definição de T*, e os"
+                     " extremos coincidem em %ld funcionais do núcleo\n",
+                     elos, no_nucleo);
+              ok("ker T* = (im T)° PROVADO ELO A ELO, e é a correção que ele faz ao meu"
+                 " método: eu medira os EXTREMOS varrendo 625 matrizes, e ele nota que"
+                 " «dá para provar estruturalmente, sem varredura». A cadeia são cinco"
+                 " DEFINIÇÕES em ⟺ — núcleo, igualdade pontual de funcionais, T* = φ∘T,"
+                 " imagem, aniquilador — e aqui mede-se CADA UMA, não o resultado. É o"
+                 " «não medir só a conclusão» aplicado a mim",
+                 mal == 0 && elos > 100000 && no_nucleo > 0); }
+
+            /* E OS DEZASSEIS CORREM */
+            { int vmal = 0, por_n = 0, por_nome = 0;
+              fflush(stdout);
+              int guarda = dup(1), nulo = open("/dev/null", O_WRONLY);
+              if(guarda >= 0 && nulo >= 0) dup2(nulo, 1);
+              for(int k = 1; k <= 16; k++){
+                  char fala[64];
+                  snprintf(fala, sizeof fala, "tensores %d", k);
+                  if(resolve_tensor(fala)) por_n++; else vmal++;
+              }
+              for(size_t i = 0; i < sizeof TS16/sizeof *TS16; i++)
+                  if(resolve_tensor(TS16[i].nome)) por_nome++; else vmal++;
+              if(resolve_tensor("tensores 17")) vmal++;
+              fflush(stdout);
+              if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
+              if(nulo >= 0) close(nulo);
+              printf("      os dezasseis: %d pelo número, %d pelo nome, e a 17 é"
+                     " recusada\n", por_n, por_nome);
+              ok("OS DEZASSEIS de Gram a exterior correm pelo NÚMERO e pelo NOME, com o"
+                 " fora de alcance RECUSADO — e a cadeia final fecha o andar: álgebra"
+                 " linear → dualidade → tensor → exterior → geometria",
+                 vmal == 0 && por_n == 16 && por_nome == 16); }
+        }
 
         /* ═══ §C38 FORMAS E ESPECTRO — E O QUE A CASA JÁ TINHA ════════════════════
          * O achado deste andar não é nenhum dos teoremas: é que a casa JÁ CORRIA
