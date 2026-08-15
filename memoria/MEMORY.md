@@ -59,6 +59,7 @@
 - [A escada do diabo](project-escada-do-diabo.md) — 1/2 é o patamar mais largo; e um revisor apanhou DUAS frases falsas publicadas, incluindo «os convergentes do áureo encolhem mais depressa», que é o contrário.
 - [O fator de potência é a régua](project-fator-de-potencia.md) — |det|=1, fator unitário e inversa inteira são TRÊS NOMES da mesma condição. O motor quer fp=1, o tecido quer fp=0.
 - [O corpo quântico e o cósmico](project-quantico-cosmico.md) — [σi,σj]=2i·ε·σk É o produto cruzado. E: CHAMEI LEI À CONSEQUÊNCIA DE UMA ESCOLHA MINHA (Carnot). Gatilho: que parâmetros do teorema fui eu que escolhi?
+- **[A derivada exterior](project-a-derivada-exterior.md)** — o `d` é UMA operação (grad/rot/div são nomes dela) e Green/Stokes/Gauss são UM teorema: a prova é o PROGRAMA ser um só. Sete objectos de cinco andares, uma gramática — a graduação.
 - **[Cálculo II e III](project-calculo-2-3.md)** — a série é o OBJECTO e o valor é que precisa do limite; local→global; e Green/Stokes/Gauss são UMA frase: ∫_∂R ω = ∫_R Dω, com os dois lados sem código em comum.
 - **[Cálculo I exacto](project-calculo-exacto.md)** — `(f(a+h)−f(a))/h` **É** um polinómio em h, logo a derivada é uma AVALIAÇÃO e não um limite; e a casa já derivava exacto pela parte ε do dual. O ponto do Valor Médio pode ser IRRACIONAL, e isso não é falha.
 - **[A torre: Hurwitz e Gentil](project-torre-hurwitz-gentil.md)** — o eval dos hipercomplexos é METADE (o discreto). Gentil é o contínuo SEM grau, Lebesgue a soma reversível que os casa, e o tecto de 8 é da NORMA, não do objecto.
