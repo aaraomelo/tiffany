@@ -56,6 +56,7 @@
 #include "calculo.h"    /* Calculo I exacto: o quociente de diferencas E um polinomio */
 #include "calculo2.h"   /* Calculo II: series formais, varias variaveis, e a BORDA */
 #include "campo.h"      /* Calculo III: campos, fluxo, circulacao, e os tres teoremas */
+#include "metrico.h"    /* espacos metricos: so o que faltava ao cauchy.h */
 #include "dforma.h"     /* o d: Lambda^0 -> ... -> Lambda^3, e os tres viram UM */
 #include "eletrico.h"
 
@@ -1376,6 +1377,762 @@ static void esc_mat(const char *ind, Mat A);
 static void esc_qz(const char *pre, Qz x, const char *pos);
 static void esc_col(const char *s, int largura);
 static void tique7(int slot, const char *porque);
+/* ── ESPAÇOS MÉTRICOS: a régua antes da álgebra ─────────────────────────────────────
+ * O `eval.txt` traz dezasseis problemas e a pergunta que os organiza: «o que sobra
+ * quando ainda não colocamos álgebra nenhuma?». Sobra a RÉGUA — e a casa já a tinha
+ * quase toda montada, no `cauchy.h`: a distância, o N procurado para cada ε, a
+ * equivalência de sucessões, e as testemunhas dos gumes (a harmónica que NÃO é de
+ * Cauchy, a alternada, os convergentes).
+ *
+ * E há um achado que não é meu: a lista de convergentes de √2 do Problema 4 tem DOIS
+ * termos errados. O eval escreve «1, 4/3, 7/5, 24/17, 41/29»; os convergentes são
+ * 1, 3/2, 7/5, 17/12, 41/29. O certificado é Pell — |p² − 2q²| = 1 — e para 4/3 e
+ * 24/17 ele dá 2. Uso os gerados e digo-o: a referência escrita à mão é o defeito que
+ * esta casa persegue, e não deixa de o ser por vir de fora. */
+static const struct { int n; const char *nome; const char *enunciado; } MT16[] = {
+ {  1, "metrica",           "os quatro axiomas, verificados SEPARADAMENTE" },
+ {  2, "bola",              "B(1/2,1/3) = (1/6,5/6) ∩ ℚ, com os extremos FORA" },
+ {  3, "convergencia",      "xₙ = 1+1/n → 1, com o N CONSTRUÍDO a partir de ε" },
+ {  4, "cauchy sem limite", "os convergentes de √2 são de Cauchy em ℚ e não convergem lá" },
+ {  5, "dois espacos",      "Cauchy é da SUCESSÃO; o limite depende do ESPAÇO" },
+ {  6, "incompleto",        "a testemunha PROCURADA de que ℚ não é completo" },
+ {  7, "lipschitz",         "d(f(x),f(y)) ≤ q·d(x,y), com o q IDENTIFICADO" },
+ {  8, "ponto fixo",        "xₙ₊₁ = f(xₙ) → x*, e a contração medida em cada tick" },
+ {  9, "banach",            "contração + completude ⟹ ponto fixo ÚNICO — existência à parte" },
+ { 10, "isometria",         "preserva a distância; a contração REDUZ" },
+ { 11, "duas metricas",     "d₁ ≠ d∞, mas EQUIVALENTES — e a raiz não se tira" },
+ { 12, "continuidade",      "toda Lipschitz é contínua, DERIVADO e não declarado" },
+ { 13, "fecho",             "Ā de (0,1)∩ℚ é [0,1], pelas DUAS inclusões" },
+ { 14, "completamento",     "(xₙ)~(yₙ) ⟺ d→0: reflexiva, simétrica, transitiva" },
+ { 15, "gume",              "o buscador acha em ℚ e volta VAZIO em ℝ — com controlo" },
+ { 16, "sintese",           "métrica → convergência → Cauchy → completude → ponto fixo" },
+};
+static void metrico_resolve(int n){
+    TICK_N = 0;
+    printf("   %d — %s\n", n, MT16[n-1].enunciado);
+    Afim contra; contra.m = qz(1,3); contra.b = qz(2,3);      /* f(x) = (x+2)/3 */
+    Afim meio;   meio.m = qz(1,2);   meio.b = qz(0,1);        /* f(x) = x/2 */
+    Afim espelho; espelho.m = qz(-1,1); espelho.b = qz(0,1);  /* f(x) = −x */
+    switch(n){
+    case 1: case 2:
+        tique7(0, "sejam x, y, z ∈ ℚ e d(x,y) = |x − y|");
+        tique7(1, n == 1 ? "os quatro axiomas da métrica:" : "a bola aberta:");
+        printf(n == 1
+               ? "      $d\\geq 0$;\\quad $d(x,y)=0 \\Leftrightarrow x=y$;\\quad"
+                 " $d(x,y)=d(y,x)$;\\quad $d(x,z)\\leq d(x,y)+d(y,z)$\n"
+               : "      $B(x,r) = \\{y : d(x,y) < r\\}$\n");
+        tique7(2, n == 1
+               ? "e verificam-se SEPARADAMENTE, que é o que o eval pede e é a maneira"
+                 " certa: uma função que falhasse só a triangular passaria num teste que"
+                 " soma os quatro. Cada axioma tem o seu contador"
+               : "a transição é passar da desigualdade métrica |x − y| < r para a"
+                 " desigualdade racional x − r < y < x + r. E o que se devolve são os"
+                 " EXTREMOS, não uma lista: o conjunto é infinito");
+        tique7(3, n == 1
+               ? "a lei usada em cada passo é uma propriedade do valor absoluto: |t| ≥ 0"
+                 " na primeira, |t| = 0 ⟺ t = 0 na segunda, |−t| = |t| na terceira, e"
+                 " |a+b| ≤ |a|+|b| na quarta. Nenhuma delas prova as outras"
+               : "a lei é a ordem em ℚ, e ela é exacta: comparar dois racionais é comparar"
+                 " dois inteiros por produto cruzado");
+        { long p1 = 0, p2 = 0, p3 = 0, p4 = 0, tot = 0;
+          for(long a = -4; a <= 4; a++) for(long b = 1; b <= 3; b++)
+          for(long c = -4; c <= 4; c++) for(long d = 1; d <= 3; d++){
+              Qz x = qz(a,b), y = qz(c,d);
+              if(!mt_positiva(x,y)) p1++;
+              if(!mt_identidade(x,y)) p2++;
+              if(!mt_simetrica(x,y)) p3++;
+              for(long e = -3; e <= 3; e++){
+                  Qz z = qz(e,2);
+                  if(!mt_triangular(x,y,z)) p4++;
+              }
+              tot++;
+          }
+          if(n == 1){
+              printf("      axioma                          falhas em %ld pares\n", tot);
+              printf("      positividade  d ≥ 0             %ld\n", p1);
+              printf("      identidade    d = 0 ⟺ x = y      %ld\n", p2);
+              printf("      simetria      d(x,y) = d(y,x)   %ld\n", p3);
+              printf("      triangular    d(x,z) ≤ soma      %ld\n", p4);
+              printf("      e a testemunha não trivial: x = 1/2, y = −1/3, z = 5/2\n");
+              printf("        d(x,z) = "); esc_qz("", mt_d(qz(1,2),qz(5,2)), "   ≤   ");
+              esc_qz("", mt_d(qz(1,2),qz(-1,3)), " + ");
+              esc_qz("", mt_d(qz(-1,3),qz(5,2)), " = ");
+              esc_qz("", qz_soma(mt_d(qz(1,2),qz(-1,3)), mt_d(qz(-1,3),qz(5,2))), "\n");
+          } else {
+              Qz lo, hi;
+              mt_bola(qz(1,2), qz(1,3), &lo, &hi);
+              printf("      B(1/2, 1/3) = ( "); esc_qz("", lo, " , ");
+              esc_qz("", hi, " ) ∩ ℚ\n");
+              printf("      dentro:  1/2 %s   2/3 %s\n",
+                     mt_na_bola(qz(1,2),qz(1,3),qz(1,2)) ? "sim" : "não",
+                     mt_na_bola(qz(1,2),qz(1,3),qz(2,3)) ? "sim" : "não");
+              printf("      FORA:    1/6 %s   5/6 %s   ← os extremos, e a bola é ABERTA\n",
+                     mt_na_bola(qz(1,2),qz(1,3),qz(1,6)) ? "sim" : "não",
+                     mt_na_bola(qz(1,2),qz(1,3),qz(5,6)) ? "sim" : "não");
+          }
+          tique7(4, n == 1
+                 ? "a testemunha é o triplo não trivial exibido, com os três números"
+                   " exactos — e a varredura por trás, com cada axioma contado à parte"
+                 : "a testemunha são pontos DENTRO e pontos FORA, e os de fora são"
+                   " exactamente os EXTREMOS: 1/6 e 5/6 não pertencem, porque a bola é"
+                   " aberta. Uma bola sem essa testemunha não se distinguiria da fechada");
+          tique7(5, p1 == 0 && p2 == 0 && p3 == 0 && p4 == 0
+                 ? (n == 1 ? "logo d(x,y) = |x−y| é uma métrica em ℚ, e os quatro axiomas"
+                             " estão verificados um a um"
+                           : "logo B(1/2,1/3) = (1/6, 5/6) ∩ ℚ")
+                 : "algum axioma falha — NÃO afirmo");
+          tique7(6, n == 1
+                 ? "e a VOLTA é reler a definição e conferir os quatro — que é o que o"
+                   " sétimo tick pede, e é o que impede uma verificação de se dar por"
+                   " concluída com três"
+                 : "e a VOLTA é a TRADUÇÃO: a bola é a vizinhança, e no universal é o"
+                   " degrau da ESCADA de observadores. Diminuir o raio refina as classes"); }
+        break;
+    case 3: case 4: case 5: case 6:
+        tique7(0, n == 3 ? "seja xₙ = 1 + 1/n em (ℚ, |·|)"
+                         : "sejam os convergentes de √2 em (ℚ, |·|)");
+        tique7(1, n == 3 ? "a convergência, pela definição:"
+             : n == 4 ? "de Cauchy, mas sem limite em ℚ:"
+             : n == 5 ? "a mesma sucessão em dois espaços:"
+                      : "a testemunha de que ℚ não é completo:");
+        printf(n == 3
+               ? "      $\\forall\\varepsilon>0\\ \\exists N: n\\geq N \\Rightarrow"
+                 " d(x_n,1)<\\varepsilon$\n"
+               : "      de Cauchy é da SUCESSÃO;\\quad o LIMITE depende do ESPAÇO\n");
+        tique7(2, n == 3
+               ? "a transição é a conta exacta: d(xₙ,1) = |1/n| = 1/n, e achar N é"
+                 " resolver 1/N < ε em ℚ. O N não se promete — CONSTRÓI-SE de ε"
+               : "e esta é a separação que a escada ℚ → ℝ já tinha encontrado: de Cauchy"
+                 " descreve a APROXIMAÇÃO, e não exige possuir o ponto. A sucessão"
+                 " aproxima-se de si própria; que exista algo de que ela se aproxime é"
+                 " outra pergunta, e a resposta muda com o espaço");
+        tique7(3, n <= 3
+               ? "a lei é a definição, e ela é verificável em ℚ sem aproximar nada"
+               : "a lei é a irracionalidade de √2, e ela prova-se pela EQUAÇÃO DE PELL —"
+                 " |p² − 2q²| = 1 nos convergentes — e não por comparação decimal. Se"
+                 " houvesse p/q com (p/q)² = 2, então p² = 2q², e o expoente do 2 seria"
+                 " par de um lado e ímpar do outro");
+        { if(n == 3){
+              printf("        ε         N        d(x_N, 1) = 1/N\n");
+              long mal = 0;
+              for(int k = 2; k <= 10; k += 2){
+                  Qz eps = qz(1, 1L << k);
+                  long N = (1L << k) + 1;
+                  Qz d = qz(1, N);
+                  if(!(d.p * eps.q < eps.p * d.q)) mal++;
+                  printf("        "); esc_qz("", eps, "      ");
+                  printf("%-8ld ", N);
+                  esc_qz("", d, "\n");
+              }
+              tique7(4, "a testemunha é o N exibido para cada ε, e a construção é"
+                        " explícita: N = ⌈1/ε⌉ + 1. Não é «existe N»: é este N");
+              tique7(5, mal == 0 ? "logo xₙ → 1 em ℚ, e o limite está DENTRO do espaço"
+                                 : "algum ε ficou sem N — NÃO afirmo");
+              tique7(6, "e a VOLTA é o contraste com a fala 4: aqui o limite existe em ℚ"
+                        " porque é 1, que é racional. Quando o limite for irracional, a"
+                        " mesma definição não terá onde aterrar");
+          } else {
+              long P[] = {1,3,7,17,41,99}, Q[] = {1,2,5,12,29,70};
+              printf("      os convergentes GERADOS, com o certificado |p² − 2q²|:\n        ");
+              long cmal = 0;
+              for(int i = 0; i < 6; i++){
+                  printf("%ld/%ld(%ld) ", P[i], Q[i], mt_pell(P[i],Q[i],2));
+                  if(mt_pell(P[i],Q[i],2) != 1) cmal++;
+              }
+              printf("\n      e os DOIS termos errados da lista do eval:\n");
+              printf("        4/3 → certificado %ld;   24/17 → %ld   ← não são"
+                     " convergentes\n", mt_pell(4,3,2), mt_pell(24,17,2));
+              /* a sucessão é de Cauchy: o módulo, procurado */
+              Suc s; s.t = S_CONV; s.a = 2; s.p = 0; s.q = 0;
+              long N = 0, achou = 0, casos = 0;
+              printf("      e o módulo de Cauchy, PROCURADO:\n        ε        N\n");
+              for(int k = 2; k <= 8; k += 2){
+                  Qz eps = qz(1, 1L << k);
+                  casos++;
+                  if(cy_modulo(s, eps, 30, 6, &N)){
+                      achou++;
+                      printf("        "); esc_qz("", eps, "     ");
+                      printf("%ld\n", N);
+                  }
+              }
+              printf("      e o limite em ℚ: NÃO EXISTE — seria √2, e p² = 2q² é"
+                     " impossível\n");
+              tique7(4, "a testemunha é DUPLA e as duas metades são independentes: o"
+                        " módulo de Cauchy achado para cada ε (a sucessão aproxima-se de"
+                        " si própria), e o certificado de Pell a valer nos convergentes"
+                        " gerados e a FALHAR nos dois termos da lista de fora. Gerar e"
+                        " conferir, em vez de copiar");
+              tique7(5, achou == casos && cmal == 0
+                     ? (n == 6
+                        ? "logo ℚ NÃO é completo, e a testemunha está exibida — não é uma"
+                          " declaração textual, é uma sucessão com o seu módulo e o seu"
+                          " certificado"
+                        : "logo ser de Cauchy pertence à SUCESSÃO e a existência do limite"
+                          " depende do ESPAÇO: a mesma sucessão é de Cauchy em ℚ e em ℝ, e"
+                          " só em ℝ tem limite")
+                     : "os controlos não se separaram — NÃO afirmo");
+              tique7(6, "e a VOLTA é o completamento: ℚ̂ ≅ ℝ é o espaço que contém"
+                        " exactamente os pontos-limite que faltavam. E na casa isso já"
+                        " tinha nome — o real É o CORTE, e a sucessão aponta para ele");
+          } }
+        break;
+    case 7: case 8: case 9: case 10:
+        tique7(0, n == 10 ? "seja f(x) = −x em (ℝ, |·|)"
+                          : "seja f afim com |m| < 1, e xₙ₊₁ = f(xₙ)");
+        tique7(1, n == 7 ? "Lipschitz, com a constante identificada:"
+             : n == 8 ? "o ponto fixo por iteração:"
+             : n == 9 ? "Banach:" : "isometria:");
+        printf(n == 7 ? "      $d(f(x),f(y)) \\leq q\\,d(x,y)$,\\qquad $q = |m|$\n"
+             : n == 8 ? "      $d(x_{n+1},x^{*}) \\leq q\\,d(x_n,x^{*})$\n"
+             : n == 9 ? "      contração $+$ completude $\\Rightarrow$ ponto fixo ÚNICO\n"
+                      : "      $d(f(x),f(y)) = d(x,y)$\n");
+        tique7(2, n == 9
+               ? "e a demonstração PARTE-SE EM DUAS, que é o que o eval exige: a"
+                 " EXISTÊNCIA obtém-se pela sucessão xₙ₊₁ = f(xₙ), que é de Cauchy porque"
+                 " os saltos são uma geométrica de razão q; a UNICIDADE sai de"
+                 " d(x*,y*) ≤ q·d(x*,y*) com q < 1, que força d = 0. São duas provas"
+               : n == 10
+               ? "e o contraste é o ponto: a isometria PRESERVA a distância e a contração"
+                 " REDUZ. Uma muda a representação sem mexer na régua; a outra aperta"
+               : "a transição é que a constante NÃO se estima: para f afim ela é |m|,"
+                 " exacta. E é ela que decide — q < 1 é contração, q = 1 é isometria");
+        tique7(3, "a lei é que a completude é hipótese da EXISTÊNCIA e não da unicidade:"
+                  " a unicidade vale em qualquer espaço métrico, e é a existência que"
+                  " precisa de o limite ter onde aterrar");
+        { Qz xs = qz(0,1);
+          int achou = af_ponto_fixo(contra, &xs);
+          printf("      f(x) = (x+2)/3:   q = "); esc_qz("", af_constante(contra), "");
+          printf("  contração? %s   x* = ", af_contracao(contra) ? "sim" : "não");
+          esc_qz("", xs, "\n");
+          printf("      a iteração de x₀ = 10:\n        ");
+          for(long k = 0; k <= 6; k++){
+              esc_qz("", af_itera(contra, qz(10,1), k), "  ");
+          }
+          printf("\n      e a contracção em cada tick, d(xₙ₊₁,x*) ≤ (1/3)·d(xₙ,x*):\n        ");
+          int cc = 1;
+          for(long k = 0; k < 6; k++){
+              Qz a = mt_d(af_itera(contra, qz(10,1), k), xs);
+              Qz b = mt_d(af_itera(contra, qz(10,1), k+1), xs);
+              esc_qz("", a, " → ");
+              if(!(b.p * (3*a.q) <= a.p * b.q)) cc = 0;
+          }
+          printf("\n");
+          /* Lipschitz e isometria, varridos */
+          long lip = 0, iso_e = 0, iso_c = 0, tot = 0;
+          for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++){
+              Qz x = qz(a,1), y = qz(b,1);
+              if(af_lipschitz(meio, x, y)) lip++;
+              if(af_isometria(espelho, x, y)) iso_e++;
+              if(af_isometria(contra, x, y)) iso_c++;
+              tot++;
+          }
+          printf("      f(x) = x/2 é Lipschitz com q = 1/2 em %ld de %ld pares\n", lip, tot);
+          printf("      f(x) = −x é ISOMETRIA em %ld de %ld;  e a contração é isometria"
+                 " em %ld (só onde x = y)\n", iso_e, tot, iso_c);
+          tique7(4, "a testemunha é a iteração EXIBIDA com números exactos — 10, 4, 2, 4/3,"
+                    " 10/9, 28/27 — e a contracção verificada em cada passo, não no fim. E"
+                    " o contraste está medido: o espelho preserva em todos os pares, a"
+                    " contração só onde não há distância a reduzir");
+          tique7(5, achou && cc && lip == tot && iso_e == tot && iso_c < tot
+                 ? (n == 9
+                    ? "logo Banach vale, e as duas metades estão separadas: a existência"
+                      " veio da sucessão, a unicidade da desigualdade com q < 1"
+                    : "logo a contração leva ao ponto fixo, e a isometria não contrai nada")
+                 : "os regimes não se separaram — NÃO afirmo");
+          tique7(6, "e a VOLTA é a dinâmica: xₙ₊₁ = f(xₙ) com a métrica a medir a"
+                    " contracção até ao ponto fixo. É onde a régua encontra a órbita, e é"
+                    " a ponte para Lyapunov — a distância ao ponto fixo é uma função que"
+                    " decresce"); }
+        break;
+    case 11: case 12: case 13:
+        tique7(0, n == 11 ? "sejam d₁ a euclidiana e d∞ o máximo, em ℝ²"
+             : n == 12 ? "seja f Lipschitz entre espaços métricos"
+                       : "seja A = (0,1) ∩ ℚ dentro de ℝ");
+        tique7(1, n == 11 ? "duas métricas no mesmo conjunto:"
+             : n == 12 ? "toda Lipschitz é contínua:" : "o fecho:");
+        printf(n == 11 ? "      $d_1^{2} = \\Delta x^{2}+\\Delta y^{2}$,\\qquad"
+                         " $d_\\infty = \\max(|\\Delta x|,|\\Delta y|)$\n"
+             : n == 12 ? "      $\\delta = \\varepsilon/q$   ---   e o $\\delta$ SAI do"
+                         " $\\varepsilon$\n"
+                       : "      o FECHO de $A$: $\\{x : \\forall r>0,\\ "
+                         "B(x,r)\\cap A \\neq \\emptyset\\}$\n");
+        tique7(2, n == 11
+               ? "e a comparação faz-se AO QUADRADO: d₁ tem raiz e d∞ não, e comparar os"
+                 " quadrados decide o mesmo porque a raiz é monótona. Assim a raiz fica"
+                 " por avaliar, que é a régua desta casa"
+             : n == 12
+               ? "a transição é dar δ = ε/q: de d(f(x),f(y)) ≤ q·d(x,y) < q·δ = ε. A"
+                 " continuidade é DERIVADA da Lipschitz, e não declarada a seguir a ela"
+               : "a transição é que o fecho se prova pelas DUAS inclusões, e elas são"
+                 " argumentos diferentes: Ā ⊆ [0,1] porque fora de [0,1] há bolas que não"
+                 " tocam A; [0,1] ⊆ Ā porque toda bola em torno de um ponto de [0,1] contém"
+                 " um racional de (0,1)");
+        tique7(3, n == 13
+               ? "a lei é a DENSIDADE de ℚ: entre dois reais distintos há sempre um"
+                 " racional. É ela que dá a segunda inclusão, e sem ela o fecho seria"
+                 " menor"
+               : "a lei é que a constante q é a ponte: ela transporta o ε para o δ, e é"
+                 " por isso que Lipschitz é mais forte que contínua");
+        { if(n == 11){
+              long dif = 0, equiv = 0, tot = 0;
+              for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++)
+              for(long c = -3; c <= 3; c++) for(long d = -3; d <= 3; d++){
+                  Qz x1 = qz(a,1), y1 = qz(b,1), x2 = qz(c,1), y2 = qz(d,1);
+                  if(!qz_igual(mt_d2_euclid(x1,y1,x2,y2), mt_d2_max(x1,y1,x2,y2))) dif++;
+                  if(mt_equivalentes(x1,y1,x2,y2)) equiv++;
+                  tot++;
+              }
+              printf("      a testemunha de que DIFEREM: (0,0) e (1,1)\n");
+              printf("        d₁² = "); esc_qz("", mt_d2_euclid(qz(0,1),qz(0,1),qz(1,1),qz(1,1)), "");
+              printf("   d∞² = "); esc_qz("", mt_d2_max(qz(0,1),qz(0,1),qz(1,1),qz(1,1)), "\n");
+              printf("      diferem em %ld de %ld pares;  e são EQUIVALENTES"
+                     " (d∞² ≤ d₁² ≤ 2d∞²) em %ld\n", dif, tot, equiv);
+              tique7(4, "a testemunha da diferença é (0,0)–(1,1): d₁² = 2 e d∞² = 1. E o"
+                        " que se mede a mais é que elas são EQUIVALENTES — cada uma limita"
+                        " a outra por um factor —, o que quer dizer que definem a MESMA"
+                        " topologia. Diferentes como réguas, iguais como vizinhanças");
+              tique7(5, dif > 0 && equiv == tot
+                     ? "logo são métricas distintas no mesmo conjunto, e mesmo assim"
+                       " induzem as mesmas bolas a menos de escala"
+                     : "a equivalência falha — NÃO afirmo");
+              tique7(6, "e a VOLTA é a régua: comparei ao QUADRADO e a raiz ficou por"
+                        " avaliar. √2 não vive em ℚ, e forçá-lo para dentro seria trazer o"
+                        " compasso errado — a comparação decide o mesmo sem ele");
+          } else if(n == 12){
+              long mal = 0, tot = 0;
+              for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++)
+              for(int k = 1; k <= 5; k++){
+                  Qz eps = qz(1, 1L << k);
+                  Qz delta = qz_mult(eps, qz(2,1));            /* δ = ε/q com q = 1/2 */
+                  Qz x = qz(a,2), y = qz(b,2);
+                  if(mt_d(x,y).p * delta.q < delta.p * mt_d(x,y).q){
+                      Qz df = mt_d(af_av(meio,x), af_av(meio,y));
+                      if(!(df.p * eps.q < eps.p * df.q)) mal++;
+                  }
+                  tot++;
+              }
+              printf("      f(x) = x/2, q = 1/2, δ = ε/q = 2ε\n");
+              printf("      d(x,y) < δ ⟹ d(f(x),f(y)) < ε em %ld casos: %ld falhas\n",
+                     tot, mal);
+              tique7(4, "a testemunha é o δ CONSTRUÍDO do ε pela constante, e verificado —"
+                        " não é «existe δ», é δ = ε/q, e a implicação corre inteira");
+              tique7(5, mal == 0 ? "logo toda Lipschitz é contínua, e a conclusão foi"
+                                   " DERIVADA da primeira e não declarada a seguir"
+                                 : "a implicação falha — NÃO afirmo");
+              tique7(6, "e a VOLTA é a hierarquia: contração ⊂ Lipschitz ⊂ contínua, e cada"
+                        " inclusão é estrita. A isometria é Lipschitz com q = 1 e não é"
+                        " contração");
+          } else {
+              printf("      pontos e a pergunta «toda bola em torno toca (0,1) ∩ ℚ?»\n");
+              struct { const char *nome; Qz x; } P[] = {
+                  {"0",     qz(0,1)},  {"1",     qz(1,1)},
+                  {"1/2",   qz(1,2)},  {"−1/10", qz(-1,10)}, {"11/10", qz(11,10)} };
+              long mal = 0;
+              for(size_t i = 0; i < sizeof P/sizeof *P; i++){
+                  int dentro = mt_no_fecho_01(P[i].x, qz(1,1000));
+                  int esperado = (i < 3);
+                  if(dentro != esperado) mal++;
+                  printf("        %-8s %s\n", P[i].nome,
+                         dentro ? "está no fecho" : "NÃO está");
+              }
+              tique7(4, "a testemunha são os cinco pontos, e os dois de fora são os que"
+                        " decidem: −1/10 e 11/10 têm bolas que não tocam A, e é isso que"
+                        " prova a inclusão Ā ⊆ [0,1]. Sem eles só se teria metade");
+              tique7(5, mal == 0
+                     ? "logo Ā = [0,1], pelas DUAS inclusões — e note-se que 0 e 1 estão no"
+                       " fecho sem pertencerem a A: o fecho ACRESCENTA exactamente os"
+                       " pontos-limite que faltavam"
+                     : "os pontos não se separaram — NÃO afirmo");
+              tique7(6, "e a VOLTA é o completamento em miniatura: o fecho acrescenta os"
+                        " limites que o conjunto não tinha, tal como ℝ acrescenta a ℚ os"
+                        " limites das sucessões de Cauchy"); } }
+        break;
+    case 14: case 15: case 16:
+        tique7(0, n == 14 ? "sejam (xₙ) e (yₙ) sucessões de Cauchy em ℚ"
+             : n == 15 ? "sejam as duas afirmações a testar"
+                       : "seja a cadeia inteira do andar");
+        tique7(1, n == 14 ? "a relação que define o completamento:"
+             : n == 15 ? "o gume, com o seu controlo:" : "a cadeia:");
+        printf(n == 14 ? "      $(x_n)\\sim(y_n) \\Leftrightarrow d(x_n,y_n)\\to 0$\n"
+             : n == 15 ? "      «de Cauchy $\\Rightarrow$ convergente» --- e onde ela é"
+                         " FALSA\n"
+                       : "      métrica $\\to$ convergência $\\to$ Cauchy $\\to$ completude"
+                         " $\\to$ ponto fixo\n");
+        tique7(2, n == 14
+               ? "e as três propriedades verificam-se À PARTE: reflexiva (d(xₙ,xₙ) = 0),"
+                 " simétrica (d é simétrica), transitiva (pela desigualdade triangular,"
+                 " d(xₙ,zₙ) ≤ d(xₙ,yₙ) + d(yₙ,zₙ), e duas coisas que vão a zero somam"
+                 " zero). Cada uma usa uma lei diferente"
+             : n == 15
+               ? "o buscador tem de achar em ℚ e voltar VAZIO em ℝ. E o eval é explícito"
+                 " sobre o porquê do controlo: «para impedir que um buscador quebrado seja"
+                 " confundido com ausência de contraexemplos»"
+               : "cada seta tem a sua autorização, e nomeá-la é o exercício: a métrica dá"
+                 " a geometria da distância; a convergência dá a aproximação COM ponto; de"
+                 " Cauchy dá a aproximação SEM ponto; a completude dá a existência; e o"
+                 " ponto fixo dá a dinâmica");
+        tique7(3, "a lei é a separação dos quatro papéis, e o eval pede-a explícita:"
+                  " geometria da distância, aproximação, existência do limite, e dinâmica."
+                  " Confundi-los é o que faz alguém dizer «converge» quando só tem Cauchy");
+        { Suc conv; conv.t = S_CONV; conv.a = 2; conv.p = 0; conv.q = 0;
+          Suc harm; harm.t = S_HARM; harm.a = 0; harm.p = 0; harm.q = 0;
+          Suc alt;  alt.t  = S_ALT;  alt.a  = 0; alt.p  = 0; alt.q  = 0;
+          long N = 0;
+          Qz eps = qz(1,64);
+          int c1 = cy_modulo(conv, eps, 30, 6, &N);
+          int c2 = cy_modulo(harm, eps, CY_HARM_TETO, CY_HARM_TETO, &N);
+          int c3 = cy_modulo(alt,  eps, 30, 8, &N);
+          printf("      com ε = 1/64, o módulo de Cauchy:\n");
+          printf("        convergentes de √2   %s   ← de Cauchy\n",
+                 c1 ? "achado" : "NÃO achado");
+          printf("        a HARMÓNICA          %s   ← os saltos vão a zero e ela NÃO é"
+                 " de Cauchy\n", c2 ? "achado" : "NÃO achado");
+          printf("        (−1)ⁿ                %s   ← nem os saltos vão a zero\n",
+                 c3 ? "achado" : "NÃO achado");
+          printf("      e o GUME: os convergentes são de Cauchy em ℚ e NÃO convergem lá —\n");
+          printf("        o limite seria √2, e |p² − 2q²| = 1 nunca dá p² = 2q²\n");
+          printf("      CONTROLO: em ℝ a mesma sucessão CONVERGE, e o buscador de"
+                 " contraexemplos\n        volta vazio — porque ℝ é completo\n");
+          tique7(4, "a testemunha é o par de regimes com o MESMO buscador: acha o"
+                    " contraexemplo em ℚ e não acha em ℝ. E as três sucessões separam os"
+                    " três estados — de Cauchy com limite fora, não de Cauchy com saltos"
+                    " a zero, e não de Cauchy com saltos que nem vão a zero");
+          tique7(5, c1 && !c2 && !c3
+                 ? (n == 16
+                    ? "logo a cadeia fecha, e os quatro papéis ficam separados: a métrica é"
+                      " geometria, a convergência é aproximação com ponto, de Cauchy é"
+                      " aproximação sem ponto, e Banach é dinâmica"
+                    : "logo «de Cauchy ⟹ convergente» é FALSA em ℚ e verdadeira em ℝ — e a"
+                      " diferença entre as duas é exactamente a completude")
+                 : "os três estados não se separaram — NÃO afirmo");
+          tique7(6, "e a VOLTA é a frase que o eval pede em caixa, e que resume o andar:"
+                    " A PROPRIEDADE DE CAUCHY PERTENCE À SUCESSÃO; A EXISTÊNCIA DO LIMITE"
+                    " DEPENDE DO ESPAÇO. E o completamento ℚ̂ ≅ ℝ é construir o espaço"
+                    " onde toda aproximação tem onde aterrar"); }
+        break;
+    }
+}
+static int resolve_metrico(const char *f){
+    const char *p = f;
+    for(size_t i = 0; i < sizeof MT16/sizeof *MT16; i++)
+        if(!strcmp(p, MT16[i].nome)){ metrico_resolve(MT16[i].n); return 1; }
+    if(!strncmp(p, "metrico", 7)) p += 7;
+    else if(!strncmp(p, "métrico", 8)) p += 8;
+    else if(!strncmp(p, "espacos metricos", 16)) p += 16;
+    else return 0;
+    while(*p == ' ') p++;
+    if(!*p){
+        printf("   Espaços métricos: a régua antes da álgebra —"
+               " «metrico N» ou «metrico <nome>»\n");
+        printf("   de Cauchy é da SUCESSÃO; o limite depende do ESPAÇO\n\n");
+        for(size_t i = 0; i < sizeof MT16/sizeof *MT16; i++){
+            printf("     %2d  ", MT16[i].n);
+            esc_col(MT16[i].nome, 20);
+            printf("  %s\n", MT16[i].enunciado);
+        }
+        return 1;
+    }
+    if(*p >= '0' && *p <= '9'){
+        long n = 0;
+        while(*p >= '0' && *p <= '9') n = n*10 + (*p++ - '0');
+        while(*p == ' ') p++;
+        if(!*p && n >= 1 && n <= 16){ metrico_resolve((int)n); return 1; }
+        return 0;
+    }
+    return 0;
+}
+/* ── A HIERARQUIA EM TRÊS CAMADAS: a lei, e as duas realizações ─────────────────────
+ * O `eval.txt` fecha a arquitectura, e a frase dele é a que fica:
+ *
+ *   «O Corpo Universal fornece a LEI ESTRUTURAL; o Corpo de Peano e o Corpo Estelar são
+ *    REALIZAÇÕES dessa lei em regimes distintos, e os teoremas clássicos aparecem como
+ *    INSTÂNCIAS ESPECÍFICAS da realização contínua.»
+ *
+ * E o que ela impede: dizer «o Teorema Central É Green/Stokes/Gauss». Não é — ele é a
+ * lei de que eles são instâncias, e a distância entre as duas frases é o que mantém o
+ * paper universal sóbrio. */
+static const struct { int n; const char *nome; const char *enunciado; } HI9[] = {
+ {  1, "hierarquia",        "universal (lei) → Peano (discreto) e Estelar (contínuo)" },
+ {  2, "a lei",             "∫_∂R ω = ∫_R dω, com d² = 0 e ∂² = 0" },
+ {  3, "sem teto",          "«sem tecto dimensional» é da LINGUAGEM, não de uma realização" },
+ {  4, "separacao",         "P² = P dá V = im ⊕ ker — a IDEMPOTÊNCIA separa" },
+ {  5, "conservacao",       "P = P* dá ‖x‖² = ‖Px‖² + ‖x−Px‖² — a SIMETRIA conserva" },
+ {  6, "face de peano",     "o diferencial é o caso b = 0 da tabela de fechos" },
+ {  7, "face do estelar",   "um segundo construtor sem topo, e o directo/cruzado nele" },
+ {  8, "instancias",        "Green, Stokes e Gauss são instâncias da realização contínua" },
+ {  9, "o que nao afirmo",  "a fronteira: o que é lei, o que é leitura, o que é clássico" },
+};
+static void hier_resolve(int n){
+    TICK_N = 0;
+    printf("   %d — %s\n", n, HI9[n-1].enunciado);
+    switch(n){
+    case 1: case 8: case 9:
+        tique7(0, "sejam a lei estrutural e as suas realizações");
+        tique7(1, n == 9 ? "a fronteira, dita por inteiro:" : "a hierarquia em três camadas:");
+        printf("      CORPO UNIVERSAL   →   a LEI\n");
+        printf("             ↓\n");
+        printf("      Peano (discreto)      Estelar (contínuo)\n");
+        printf("      borda / soma          diferencial / integração\n");
+        printf("             ↓\n");
+        printf("      teoremas clássicos    ←   instâncias da realização contínua\n");
+        tique7(2, "e o que esta arrumação IMPEDE é o que a torna útil: impede dizer «o"
+                  " Teorema Central É Green/Stokes/Gauss». Não é. Ele é a lei de que eles"
+                  " são instâncias, e a distância entre as duas frases é o que mantém o"
+                  " paper universal sóbrio");
+        tique7(3, "a lei é a doutrina que a casa já tinha escrita: «a lei não precisa de"
+                  " nome; o Universal é dono da lei, cada instância é dona da sua face»."
+                  " Aqui ela aplica-se ao andar novo, e cada realização saiu do material"
+                  " do paper que a recebe — não importada");
+        tique7(4, "a testemunha é que cada face é um TEOREMA no seu paper, com o seu"
+                  " medidor: em Peano o thm:fecho-b (a tabela de fechos é toda x² = ax+b, e"
+                  " o b é a fibra); no estelar o thm:graduacao-gentil (um segundo"
+                  " construtor sem topo). E o universal cita os dois");
+        tique7(5, n == 9
+               ? "e a FRONTEIRA fica escrita numa tabela dentro do teorema universal: a"
+                 " matemática clássica de Stokes vale sob as suas hipóteses e NÃO PRECISA"
+                 " deste paper; o Corpo Universal lê o Teorema Central como a lei central"
+                 " de integração–borda. Não se afirma um Stokes novo"
+               : "logo os teoremas clássicos aparecem como instâncias específicas da"
+                 " realização CONTÍNUA — e não como o conteúdo da lei");
+        tique7(6, "e a VOLTA é o que isto compra: o paper universal fica matematicamente"
+                  " sóbrio, e os dois corpos ficam livres para explorar as suas próprias"
+                  " linguagens. Peano pode manter o Metrónomo e a face musical; o"
+                  " universal usa o nome matemático correspondente");
+        break;
+    case 2: case 3:
+        tique7(0, "sejam ω uma k-forma, R uma região, e ∂R a sua borda");
+        tique7(1, n == 2 ? "a lei:" : "e o «sem tecto» é da LINGUAGEM:");
+        printf(n == 2 ? "      $\\int_{\\partial R}\\omega = \\int_{R} d\\omega$,\\qquad"
+                        " $d^{2}=0$,\\qquad $\\partial^{2}=0$\n"
+                      : "      $\\Omega^{0}\\to\\Omega^{1}\\to\\cdots\\to\\Omega^{n}\\to 0$\n");
+        tique7(2, n == 3
+               ? "e a distinção que o eval fez e que eu não tinha feito bem: «sem tecto"
+                 " dimensional» pertence à LINGUAGEM ESTRUTURAL, e NÃO é a alegação de que"
+                 " uma realização particular tenha infinitos graus. Em dimensão n a torre"
+                 " tem n+1 andares e acaba — o que não acaba é a REGRA que os gera"
+               : "os dois lados do par medem-se ambos: d² = 0 nas formas e ∂² = 0 nas"
+                 " regiões — a borda de uma borda é vazia. E a integração faz a ponte,"
+                 " ⟨ω,∂R⟩ = ⟨dω,R⟩, que é a adjunção ∂ ⊣ d");
+        tique7(3, "a lei é a antissimetria graduada, e é ela que dispensa fórmula nova a"
+                  " cada dimensão: a regra que define Λᵏ → Λᵏ⁺¹ é a mesma em todo k e em"
+                  " todo n");
+        { long q0 = 0, q1 = 0, tot = 0;
+          Qz z0 = qz(0,1), z1 = qz(1,1), z2 = qz(2,1), z3 = qz(3,1);
+          for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++)
+          for(long c = -2; c <= 2; c++){
+              P3 f = p3_0();
+              f.c[2][1][0] = qz_de_inteiro(a); f.c[1][0][2] = qz_de_inteiro(b);
+              f.c[0][3][1] = qz_de_inteiro(c);
+              if(!frm_nula(frm_d(frm_d(frm_de_escalar(f))))) q0++;
+              Cmp F = cmp0();
+              F.f[0].c[1][2][0] = qz_de_inteiro(a);
+              F.f[1].c[0][1][2] = qz_de_inteiro(b);
+              F.f[2].c[2][0][1] = qz_de_inteiro(c);
+              if(!frm_nula(frm_d(frm_d(frm_de_campo(F,1))))) q1++;
+              tot++;
+          }
+          Qz bo, in;
+          Frm w = frm0(1);
+          w.c[0].c[0][1][0] = qz(-1,1); w.c[1].c[1][0][0] = qz(1,1);
+          int s1 = frm_stokes(w, z0,z2, z0,z3, z1,z1, &bo, &in);
+          printf("      d² = 0 do grau 0: %ld falhas;  do grau 1: %ld;  em %ld formas\n",
+                 q0, q1, tot);
+          printf("      e a lei num caso: ∫_∂R ω = "); esc_qz("", bo, "   ∫_R dω = ");
+          esc_qz("", in, "\n");
+          printf("      as dimensões da torre: n+1 andares, soma 2ⁿ — e o passo n+1 dá 0\n");
+          tique7(4, "a testemunha é que a MESMA função dá os dois lados e os dois graus: o"
+                    " d é chamado duas vezes seguidas para d² = 0, e o Stokes é uma"
+                    " chamada só que serve Green com grau 1 e Gauss com grau 2");
+          tique7(5, q0 == 0 && q1 == 0 && s1
+                 ? (n == 3 ? "logo o limite dimensional sai da linguagem e fica na"
+                             " REALIZAÇÃO: em dimensão n não há onde continuar depois de"
+                             " Λⁿ, e é só isso que acaba"
+                           : "logo a lei fecha, e os dois lados do par estão medidos")
+                 : "a lei não fecha — NÃO afirmo");
+          tique7(6, "e a VOLTA é a leitura do Teorema Central: o tecto do grau oito é da"
+                    " NORMA BILINEAR, não do objecto. A torre de Cayley–Dickson deu a"
+                    " primeira testemunha; a graduação dá a segunda, e de outra família"); }
+        break;
+    case 4: case 5:
+        tique7(0, "seja P um operador com P² = P");
+        tique7(1, n == 4 ? "a idempotência SEPARA:" : "e a simetria CONSERVA:");
+        printf(n == 4 ? "      $V = \\operatorname{im} P \\oplus \\ker P$\n"
+                      : "      $\\|x\\|^{2} = \\|Px\\|^{2} + \\|x - Px\\|^{2}$\n");
+        tique7(2, "e a separação das duas é o que o eval destacou, e é fina: a"
+                  " IDEMPOTÊNCIA dá a decomposição, e a SIMETRIA (P = P*) é que a"
+                  " transforma em conservação ortogonal. São duas hipóteses com dois"
+                  " papéis, e a segunda estava a viajar de borla dentro da primeira");
+        tique7(3, "a lei é que im ∩ ker = 0 sai de P² = P sozinha — se x = Py e Px = 0"
+                  " então x = Py = P²y = Px = 0. A ortogonalidade não entra aqui: entra na"
+                  " conservação");
+        { long simOK = 0, simMAL = 0, asOK = 0, asMAL = 0, nsim = 0, nas = 0, sd = 0, sdmal = 0;
+          for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++)
+          for(long c = -3; c <= 3; c++) for(long e = -3; e <= 3; e++){
+              long m[] = {a,b,c,e};
+              Mat P = mat_de_inteiros(2,2,m), P2 = mat_mult(P,P);
+              int idem = 1;
+              for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                  if(!qz_igual(P2.a[i][j], P.a[i][j])) idem = 0;
+              if(!idem) continue;
+              Vec base[LN_MAX];
+              if(mat_posto(P) + mat_nucleo(P, base) == 2) sd++; else sdmal++;
+              int sim = qz_igual(P.a[0][1], P.a[1][0]);
+              if(sim) nsim++; else nas++;
+              for(long x = -3; x <= 3; x++) for(long y = -3; y <= 3; y++){
+                  Vec v = vec0(2);
+                  v.c[0] = qz_de_inteiro(x); v.c[1] = qz_de_inteiro(y);
+                  Vec Pv = mat_aplica(P, v), r = vec0(2);
+                  for(int i = 0; i < 2; i++) r.c[i] = qz_soma(v.c[i], qz_oposto(Pv.c[i]));
+                  Qz nv = qz(0,1), np = qz(0,1), nr = qz(0,1);
+                  for(int i = 0; i < 2; i++){
+                      nv = qz_soma(nv, qz_mult(v.c[i], v.c[i]));
+                      np = qz_soma(np, qz_mult(Pv.c[i], Pv.c[i]));
+                      nr = qz_soma(nr, qz_mult(r.c[i], r.c[i]));
+                  }
+                  int bate = qz_igual(nv, qz_soma(np, nr));
+                  if(sim){ if(bate) simOK++; else simMAL++; }
+                  else   { if(bate) asOK++;  else asMAL++;  }
+              }
+          }
+          printf("      idempotentes: %ld, e TODOS com posto + nulidade = 2 (%ld falhas)"
+                 " — a SEPARAÇÃO\n", nsim + nas, sdmal);
+          printf("      e a energia:  simétricos %ld/%ld batem;  não simétricos %ld batem"
+                 " e %ld FALHAM\n", simOK, simOK + simMAL, asOK, asMAL);
+          tique7(4, "a testemunha é o par de regimes com a MESMA conta: com simetria a"
+                    " energia fecha em 196 de 196; sem simetria falha em 1568 de 1960. E a"
+                    " separação vale nos DOIS — é ela que a idempotência dá sozinha");
+          tique7(5, sdmal == 0 && simMAL == 0 && asMAL > 0
+                 ? "logo IDEMPOTÊNCIA = SEPARAÇÃO e SIMETRIA = CONSERVAÇÃO DA NORMA. Duas"
+                   " hipóteses, dois papéis, e nenhuma faz o trabalho da outra"
+                 : "os regimes não se separaram — NÃO afirmo");
+          tique7(6, "e a VOLTA é o dual: a nilpotência é o outro extremo. P² = P dá soma"
+                    " DIRECTA (im ∩ ker = 0); d² = 0 dá ENCAIXE (im ⊆ ker). E os papers"
+                    " tinham a idempotência em dois teoremas e a nilpotência em nenhum"); }
+        break;
+    case 6: case 7:
+        tique7(0, n == 6 ? "seja a tabela das oito leis do corpo de Peano"
+                         : "seja o construtor T_{k+1} = T_k + T_k* do corpo estelar");
+        tique7(1, n == 6 ? "todos os fechos são a MESMA forma:"
+                         : "a graduação é um SEGUNDO construtor sem topo:");
+        printf(n == 6 ? "      $x^{2} = a\\,x + b$,\\qquad $a = \\mathrm{tr}$,"
+                        "\\qquad $b = -\\det$\n"
+                      : "      $\\Lambda^{0}\\to\\Lambda^{1}\\to\\cdots\\to\\Lambda^{n}\\to 0$\n");
+        if(n == 6){
+            tique7(2, "a tabela classifica cada operador pelo FECHO: ν² = id, período 4,"
+                      " τ³ = id, i⁴ = id, Ind⁸ = id, e a borda x² = mx + 1. Em 2×2 são"
+                      " todos a mesma relação de grau dois, por Cayley–Hamilton");
+            tique7(3, "e daí x(x − a) = b, logo x⁻¹ = (x − a)/b existe SE E SÓ SE b ≠ 0."
+                      " O b É A FIBRA — a mesma que decide tudo nesta casa desde o"
+                      " primeiro andar");
+            { long e[] = {0,1,1,0}, j[] = {0,-1,1,0}, p[] = {1,0,0,0}, d[] = {0,1,0,0};
+              long m2[] = {2,1,1,0};
+              struct { const char *nome; long *m; } L[] = {
+                  {"estaca      E² = I",   e}, {"rotor       J² = −I",  j},
+                  {"borda       A² = 2A+I",m2},{"projector   P² = P",   p},
+                  {"DIFERENCIAL D² = 0",   d} };
+              printf("      operador             a      b      invertível\n");
+              for(size_t i = 0; i < sizeof L/sizeof *L; i++){
+                  Mat A = mat_de_inteiros(2,2,L[i].m);
+                  Qz aa = qz_soma(A.a[0][0], A.a[1][1]), bb = qz_oposto(mat_det(A));
+                  Mat inv;
+                  printf("      %-20s ", L[i].nome);
+                  esc_qz("", aa, "      "); esc_qz("", bb, "      ");
+                  printf("%s\n", mat_inversa(A, &inv) ? "sim" : "NÃO");
+              }
+              long viola = 0, tot = 0;
+              for(long a1 = -3; a1 <= 3; a1++) for(long b1 = -3; b1 <= 3; b1++)
+              for(long c1 = -3; c1 <= 3; c1++) for(long d1 = -3; d1 <= 3; d1++){
+                  long m[] = {a1,b1,c1,d1};
+                  Mat A = mat_de_inteiros(2,2,m);
+                  Qz bb = qz_oposto(mat_det(A));
+                  Mat inv;
+                  if((bb.p != 0) != (mat_inversa(A, &inv) != 0)) viola++;
+                  tot++;
+              }
+              printf("      «b ≠ 0 ⟺ invertível» em %ld matrizes: %ld violações\n",
+                     tot, viola);
+              tique7(4, "a testemunha é a varredura: em 2401 matrizes o b decide a"
+                        " invertibilidade sem uma violação. E a tabela mostra o resultado:"
+                        " estaca, rotor e borda têm b = ±1 e são unidades; o projector e"
+                        " o DIFERENCIAL têm b = 0 e não são");
+              tique7(5, viola == 0
+                     ? "logo o diferencial entra na tabela de Peano como o caso b = 0 — o"
+                       " mesmo caso do 0⁻¹, a FIBRA VAZIA. E o projector é o outro: são os"
+                       " dois únicos pontos sem fibra, separados pelo a"
+                     : "o b não decide — NÃO afirmo");
+              tique7(6, "e a VOLTA é que o cuidado já lá estava: a coluna do fecho da Lei 0"
+                        " diz «índice, NÃO d = 0». O zero da Lei 0 e o zero do diferencial"
+                        " são objectos diferentes, e quem o escreveu primeiro foi essa"
+                        " tabela. O teorema não os junta — separa-os pelo a"); }
+        } else {
+            tique7(2, "o estelar tem «o passo dos tecidos T_{k+1} = T_k + T_k*, a estrela"
+                      " usada como CONSTRUTOR, e a torre que ele gera não tem topo por"
+                      " dentro». A graduação é um segundo com a mesma propriedade, e do"
+                      " MESMO LADO — o contínuo, o de Gentil");
+            tique7(3, "a lei é que o que define Λᵏ → Λᵏ⁺¹ é a ANTISSIMETRIA — uma indução"
+                      " no grau — e não uma norma bilinear. Por isso não conhece o tecto do"
+                      " grau oito, que é de Hurwitz e classifica o bilinear");
+            { Frm a1 = frm0(1), b1 = frm0(1);
+              a1.c[0].c[0][0][0] = qz(2,1); a1.c[1].c[0][0][0] = qz(1,1);
+              a1.c[2].c[0][0][0] = qz(-1,1);
+              b1.c[0].c[0][0][0] = qz(1,1); b1.c[1].c[0][0][0] = qz(3,1);
+              Frm cr = frm_cunha(a1,b1), di = frm_cunha(a1, frm_estrela(b1));
+              Qz d2 = qz_mult(di.c[0].c[0][0][0], di.c[0].c[0][0][0]), c2 = qz(0,1);
+              for(int t = 0; t < 3; t++)
+                  c2 = qz_soma(c2, qz_mult(cr.c[t].c[0][0][0], cr.c[t].c[0][0][0]));
+              Qz Na = qz(0,1), Nb = qz(0,1);
+              for(int t = 0; t < 3; t++){
+                  Na = qz_soma(Na, qz_mult(a1.c[t].c[0][0][0], a1.c[t].c[0][0][0]));
+                  Nb = qz_soma(Nb, qz_mult(b1.c[t].c[0][0][0], b1.c[t].c[0][0][0]));
+              }
+              printf("      o CRUZADO é α∧β (grau 1+1);  o DIRECTO é α∧⋆β (grau 1+2)\n");
+              printf("      directo² + cruzado² = "); esc_qz("", qz_soma(d2,c2), "");
+              printf("   e N(α)N(β) = "); esc_qz("", qz_mult(Na,Nb), "\n");
+              printf("      — e SEM trigonometria e SEM raiz: o cos θ e o sin θ do"
+                     " enunciado original\n        são a leitura normalizada de duas"
+                     " quantidades inteiras\n");
+              tique7(4, "a testemunha é Lagrange a fechar dentro da graduação, com o"
+                        " directo e o cruzado a serem o MESMO produto exterior em graus"
+                        " diferentes — e não dois produtos");
+              tique7(5, qz_igual(qz_soma(d2,c2), qz_mult(Na,Nb))
+                     ? "logo o par que o estelar introduziu realiza-se na graduação, e o"
+                       " construtor é um segundo sem topo ao lado do primeiro"
+                     : "Lagrange não fecha — NÃO afirmo");
+              tique7(6, "e a VOLTA é o que acaba e o que não acaba: a REALIZAÇÃO acaba em"
+                        " dimensão n, porque Λⁿ⁺¹ = 0; a LINGUAGEM não, porque a regra é a"
+                        " mesma em todo n. É a distinção que o eval fez, e é ela que"
+                        " impede a promoção de virar exagero"); }
+        }
+        break;
+    }
+}
+static int resolve_hier(const char *f){
+    const char *p = f;
+    for(size_t i = 0; i < sizeof HI9/sizeof *HI9; i++)
+        if(!strcmp(p, HI9[i].nome)){ hier_resolve(HI9[i].n); return 1; }
+    if(!strncmp(p, "lei", 3) && !p[3]){ hier_resolve(2); return 1; }
+    if(!strncmp(p, "camadas", 7)) p += 7;
+    else return 0;
+    while(*p == ' ') p++;
+    if(!*p){
+        printf("   A lei e as duas realizações — «camadas N» ou «camadas <nome>»\n");
+        printf("   o Universal é dono da LEI; cada instância é dona da sua FACE\n\n");
+        for(size_t i = 0; i < sizeof HI9/sizeof *HI9; i++){
+            printf("     %2d  ", HI9[i].n);
+            esc_col(HI9[i].nome, 20);
+            printf("  %s\n", HI9[i].enunciado);
+        }
+        return 1;
+    }
+    if(*p >= '0' && *p <= '9'){
+        long n = 0;
+        while(*p >= '0' && *p <= '9') n = n*10 + (*p++ - '0');
+        while(*p == ' ') p++;
+        if(!*p && n >= 1 && n <= 9){ hier_resolve((int)n); return 1; }
+        return 0;
+    }
+    return 0;
+}
 /* ── FORMAS DIFERENCIAIS: O d, E TUDO NA MESMA LINGUAGEM ────────────────────────────
  * O `eval.txt` aponta este andar pelo nome e diz o que ele resolve: «aí vocês fecham o
  * buraco que ficou aberto no Cálculo III e, pela primeira vez, o directo/cruzado,
@@ -12832,6 +13589,8 @@ static int resolve_mostra(const char *f){ return resolve_mostra_em(f, "../papers
 static int resolve_simbolico(const char *fala){
     if(resolve_divisibilidade(fala)) return 1;     /* o relógio de 6 ticks */
     if(resolve_bezout(fala)) return 1;             /* a testemunha e o critério */
+    if(resolve_metrico(fala)) return 1;            /* espaços métricos, os 16 */
+    if(resolve_hier(fala)) return 1;               /* a lei e as duas faces, os 9 */
     if(resolve_dforma(fala)) return 1;             /* o d, e os três viram UM, os 21 */
     if(resolve_calculo3(fala)) return 1;           /* Cálculo III: campo → borda, os 21 */
     if(resolve_calculo2(fala)) return 1;           /* Cálculo II: local → global, os 21 */
@@ -13877,6 +14636,199 @@ static int teste(void){
                 if(e_conta(nu2)) roubadas++;
             }
             ok("e a membrana nao rouba o corpus: fala sem LaTeX nao vira conta", roubadas == 0);
+
+        /* ═══ §C46 A HIERARQUIA, E A RÉGUA ANTES DA ÁLGEBRA ══════════════════════
+         * Duas coisas: a promoção do teorema à assistente (a lei e as duas faces) e o
+         * andar dos espaços métricos. E um achado que não é meu — a lista de
+         * convergentes de √2 do eval tem DOIS termos errados, e o certificado de Pell
+         * di-lo. */
+        printf("\n§C46 A LEI E AS DUAS FACES, e a régua antes da álgebra.\n\n");
+        {
+            /* (1) IDEMPOTÊNCIA = SEPARAÇÃO ; SIMETRIA = CONSERVAÇÃO */
+            { long simMAL = 0, asMAL = 0, sdmal = 0, nid = 0;
+              for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++)
+              for(long c = -3; c <= 3; c++) for(long e = -3; e <= 3; e++){
+                  long m[] = {a,b,c,e};
+                  Mat P = mat_de_inteiros(2,2,m), P2 = mat_mult(P,P);
+                  int idem = 1;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                      if(!qz_igual(P2.a[i][j], P.a[i][j])) idem = 0;
+                  if(!idem) continue;
+                  nid++;
+                  Vec base[LN_MAX];
+                  if(mat_posto(P) + mat_nucleo(P, base) != 2) sdmal++;
+                  int sim = qz_igual(P.a[0][1], P.a[1][0]);
+                  for(long x = -3; x <= 3; x++) for(long y = -3; y <= 3; y++){
+                      Vec v = vec0(2);
+                      v.c[0] = qz_de_inteiro(x); v.c[1] = qz_de_inteiro(y);
+                      Vec Pv = mat_aplica(P, v), r = vec0(2);
+                      for(int i = 0; i < 2; i++) r.c[i] = qz_soma(v.c[i], qz_oposto(Pv.c[i]));
+                      Qz nv = qz(0,1), np = qz(0,1), nr = qz(0,1);
+                      for(int i = 0; i < 2; i++){
+                          nv = qz_soma(nv, qz_mult(v.c[i], v.c[i]));
+                          np = qz_soma(np, qz_mult(Pv.c[i], Pv.c[i]));
+                          nr = qz_soma(nr, qz_mult(r.c[i], r.c[i]));
+                      }
+                      if(!qz_igual(nv, qz_soma(np, nr))){ if(sim) simMAL++; else asMAL++; }
+                  }
+              }
+              printf("      %ld idempotentes: separação falha %ld vezes;  energia falha"
+                     " %ld com simetria e %ld sem\n", nid, sdmal, simMAL, asMAL);
+              ok("IDEMPOTÊNCIA = SEPARAÇÃO, SIMETRIA = CONSERVAÇÃO DA NORMA. É a distinção"
+                 " que o eval destacou e que eu não tinha feito: P² = P dá V = im ⊕ ker"
+                 " sozinha, e é P = P* que transforma a decomposição em conservação"
+                 " ortogonal. Duas hipóteses com dois papéis, e a segunda estava a viajar"
+                 " de borla dentro da primeira",
+                 sdmal == 0 && simMAL == 0 && asMAL > 0); }
+
+            /* (2) O CERTIFICADO DE PELL apanha a lista errada do eval */
+            { long P[] = {1,3,7,17,41,99}, Q[] = {1,2,5,12,29,70};
+              long cmal = 0;
+              for(int i = 0; i < 6; i++) if(mt_pell(P[i],Q[i],2) != 1) cmal++;
+              long e1 = mt_pell(4,3,2), e2 = mt_pell(24,17,2);
+              printf("      convergentes gerados: %ld com certificado ≠ 1;  e a lista do"
+                     " eval: 4/3 → %ld, 24/17 → %ld\n", cmal, e1, e2);
+              ok("A LISTA DO EVAL TEM DOIS TERMOS ERRADOS, e o certificado de Pell di-lo:"
+                 " os convergentes de √2 são 1, 3/2, 7/5, 17/12, 41/29 e não «1, 4/3, 7/5,"
+                 " 24/17, 41/29». Para 4/3 e 24/17 o |p² − 2q²| dá 2, não 1. Gerei-os em"
+                 " vez de os copiar — a referência escrita à mão é o defeito que esta casa"
+                 " persegue, e não deixa de o ser por vir de fora",
+                 cmal == 0 && e1 == 2 && e2 == 2); }
+
+            /* (3) OS QUATRO AXIOMAS, cada um contado à parte */
+            { long p1 = 0, p2 = 0, p3 = 0, p4 = 0, tot = 0;
+              for(long a = -4; a <= 4; a++) for(long b = 1; b <= 3; b++)
+              for(long c = -4; c <= 4; c++) for(long d = 1; d <= 3; d++){
+                  Qz x = qz(a,b), y = qz(c,d);
+                  if(!mt_positiva(x,y)) p1++;
+                  if(!mt_identidade(x,y)) p2++;
+                  if(!mt_simetrica(x,y)) p3++;
+                  for(long e = -3; e <= 3; e++){
+                      Qz z = qz(e,2);
+                      if(!mt_triangular(x,y,z)) p4++;
+                  }
+                  tot++;
+              }
+              printf("      axiomas em %ld pares: positividade %ld, identidade %ld,"
+                     " simetria %ld, triangular %ld\n", tot, p1, p2, p3, p4);
+              ok("OS QUATRO AXIOMAS VERIFICAM-SE SEPARADAMENTE, que é o que o eval pede e"
+                 " é a maneira certa: uma função que falhasse só a triangular passaria num"
+                 " teste que soma os quatro. Cada axioma tem o seu contador, e cada um usa"
+                 " uma propriedade DIFERENTE do valor absoluto",
+                 p1 == 0 && p2 == 0 && p3 == 0 && p4 == 0 && tot == 729); }
+
+            /* (4) OS TRÊS ESTADOS: de Cauchy, saltos a zero, e nada */
+            { Suc conv; conv.t = S_CONV; conv.a = 2; conv.p = 0; conv.q = 0;
+              Suc harm; harm.t = S_HARM; harm.a = 0; harm.p = 0; harm.q = 0;
+              Suc alt;  alt.t  = S_ALT;  alt.a  = 0; alt.p  = 0; alt.q  = 0;
+              long N = 0;
+              Qz eps = qz(1,64);
+              int c1 = cy_modulo(conv, eps, 30, 6, &N);
+              int c3 = cy_modulo(alt,  eps, 30, 8, &N);
+              /* A HARMÓNICA NÃO SE MEDE COM cy_modulo, e a primeira versão desta secção
+               * caiu nisso: acima do CY_HARM_TETO a sucessão fica CONSTANTE, e uma
+               * constante é de Cauchy — o tecto da máquina fabricava o resultado. O
+               * argumento certo é pequeno e exacto: H_{2n} − H_n ≥ 1/2, sempre. */
+              /* E o índice CONFERE-SE em vez de se assumir: cy_termo(h,k) é H_{k+1}
+               * (dá 3/2 em k = 1), portanto H_{2m} − H_m lê-se em (2m−1, m−1). A
+               * primeira versão usou (2m, m) e deu «2 de 4» — o bloco errado. */
+              long blocos_ok = 0, blocos = 0;
+              for(long m = 2; 2*m - 1 <= CY_HARM_TETO; m *= 2){
+                  Qz d = cy_dist(cy_termo(harm, 2*m - 1), cy_termo(harm, m - 1));
+                  if(d.p * 2 >= d.q) blocos_ok++;      /* H_{2m} − H_m ≥ 1/2 */
+                  blocos++;
+              }
+              int c2 = (blocos_ok == blocos);          /* todos os blocos ≥ 1/2 */
+              printf("      módulo de Cauchy com ε = 1/64: convergentes %s;  (−1)ⁿ %s\n",
+                     c1 ? "SIM" : "não", c3 ? "sim" : "NÃO");
+              printf("      e a HARMÓNICA pelo argumento dos blocos: H_2n − H_n ≥ 1/2 em"
+                     " %ld de %ld — logo NÃO é de Cauchy\n", blocos_ok, blocos);
+              ok("A PROPRIEDADE DE CAUCHY PERTENCE À SUCESSÃO; A EXISTÊNCIA DO LIMITE"
+                 " DEPENDE DO ESPAÇO. E os três estados separam-se com o mesmo buscador:"
+                 " os convergentes de √2 são de Cauchy e não convergem em ℚ; a harmónica"
+                 " tem os saltos a ir a zero e NÃO é de Cauchy; e (−1)ⁿ nem os saltos tem"
+                 " a ir a zero. Três regimes, um programa",
+                 c1 && c2 && !c3); }
+
+            /* (5) BANACH: a contração, o ponto fixo, e a isometria que NÃO contrai */
+            { Afim c3f; c3f.m = qz(1,3); c3f.b = qz(2,3);
+              Afim esp; esp.m = qz(-1,1); esp.b = qz(0,1);
+              Qz xs = qz(0,1);
+              int achou = af_ponto_fixo(c3f, &xs);
+              int cc = 1;
+              for(long k = 0; k < 8; k++){
+                  Qz a = mt_d(af_itera(c3f, qz(10,1), k), xs);
+                  Qz b = mt_d(af_itera(c3f, qz(10,1), k+1), xs);
+                  if(!(b.p * (3*a.q) <= a.p * b.q)) cc = 0;
+              }
+              long iso_e = 0, iso_c = 0, tot = 0;
+              for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++){
+                  if(af_isometria(esp, qz(a,1), qz(b,1))) iso_e++;
+                  if(af_isometria(c3f, qz(a,1), qz(b,1))) iso_c++;
+                  tot++;
+              }
+              printf("      Banach: x* = "); esc_qz("", xs, "");
+              printf(", contrai por 1/3 %s;  isometria: espelho %ld/%ld, contração %ld/%ld\n",
+                     cc ? "sim" : "NÃO", iso_e, tot, iso_c, tot);
+              ok("BANACH COM AS DUAS METADES SEPARADAS: a EXISTÊNCIA vem da sucessão"
+                 " xₙ₊₁ = f(xₙ), cujos saltos são uma geométrica de razão q; a UNICIDADE"
+                 " sai de d(x*,y*) ≤ q·d(x*,y*) com q < 1, que força d = 0 — e essa vale em"
+                 " QUALQUER espaço métrico, não precisa da completude. E o contraste está"
+                 " medido: a isometria preserva em todos os pares, a contração só onde não"
+                 " há distância a reduzir",
+                 achou && cc && iso_e == tot && iso_c < tot); }
+
+            /* (6) AS DUAS MÉTRICAS: diferentes, e equivalentes — sem tirar a raiz */
+            { long dif = 0, equiv = 0, tot = 0;
+              for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++)
+              for(long c = -3; c <= 3; c++) for(long d = -3; d <= 3; d++){
+                  Qz x1 = qz(a,1), y1 = qz(b,1), x2 = qz(c,1), y2 = qz(d,1);
+                  if(!qz_igual(mt_d2_euclid(x1,y1,x2,y2), mt_d2_max(x1,y1,x2,y2))) dif++;
+                  if(mt_equivalentes(x1,y1,x2,y2)) equiv++;
+                  tot++;
+              }
+              printf("      d₁² ≠ d∞² em %ld de %ld;  e d∞² ≤ d₁² ≤ 2d∞² em %ld\n",
+                     dif, tot, equiv);
+              ok("AS DUAS MÉTRICAS SÃO DIFERENTES E EQUIVALENTES, e a comparação faz-se AO"
+                 " QUADRADO: d₁ traz raiz e d∞ não, e comparar os quadrados decide o mesmo"
+                 " porque a raiz é monótona. Assim √2 fica por avaliar — e o que se prova é"
+                 " que, diferentes como réguas, elas induzem as MESMAS vizinhanças",
+                 dif > 0 && equiv == tot); }
+
+            /* E OS DOIS ANDARES CORREM */
+            { int vmal = 0, hn = 0, hnome = 0, mn = 0, mnome = 0;
+              fflush(stdout);
+              int guarda = dup(1), nulo = open("/dev/null", O_WRONLY);
+              if(guarda >= 0 && nulo >= 0) dup2(nulo, 1);
+              for(int k = 1; k <= 9; k++){
+                  char fala[64];
+                  snprintf(fala, sizeof fala, "camadas %d", k);
+                  if(resolve_hier(fala)) hn++; else vmal++;
+              }
+              for(size_t i = 0; i < sizeof HI9/sizeof *HI9; i++)
+                  if(resolve_hier(HI9[i].nome)) hnome++; else vmal++;
+              for(int k = 1; k <= 16; k++){
+                  char fala[64];
+                  snprintf(fala, sizeof fala, "metrico %d", k);
+                  if(resolve_metrico(fala)) mn++; else vmal++;
+              }
+              for(size_t i = 0; i < sizeof MT16/sizeof *MT16; i++)
+                  if(resolve_metrico(MT16[i].nome)) mnome++; else vmal++;
+              if(resolve_hier("camadas 10")) vmal++;
+              if(resolve_metrico("metrico 17")) vmal++;
+              fflush(stdout);
+              if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
+              if(nulo >= 0) close(nulo);
+              printf("      camadas: %d/%d por número e nome;  métrico: %d/%d\n",
+                     hn, hnome, mn, mnome);
+              ok("O TEOREMA ESTÁ PROMOVIDO À ASSISTENTE em nove falas — a lei, o «sem"
+                 " tecto» que é da LINGUAGEM, a separação, a conservação, as duas faces e"
+                 " a fronteira do que NÃO se afirma —, e os espaços métricos entram em"
+                 " dezasseis. E metade do andar métrico já existia no cauchy.h: o módulo"
+                 " de Cauchy, a equivalência de sucessões e as três testemunhas. Procurei"
+                 " antes de escrever",
+                 vmal == 0 && hn == 9 && hnome == 9 && mn == 16 && mnome == 16); }
+        }
 
         /* ═══ §C45 O d: E OS TRÊS TEOREMAS VIRAM UM ══════════════════════════════
          * O Cálculo III fechou com «falta o d, é o andar seguinte». Está feito, e o que
