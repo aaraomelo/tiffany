@@ -34,23 +34,31 @@ typedef struct {
 } Est;
 
 /* ── AS ESTRUTURAS DO FICHEIRO ─────────────────────────────────────────────────── */
-static void es_zn(Est *E, int n){                 /* (ℤₙ, +) — grupo abeliano */
+static int es_zn(Est *E, int n){
+    if(n < 1 || n > ES_MAX){ E->n = 0; return 0; }                 /* (ℤₙ, +) — grupo abeliano */
     E->n = n; E->nome = "(Zn,+)";
     for(int a = 0; a < n; a++) for(int b = 0; b < n; b++) E->op[a][b] = (a + b) % n;
+    return 1;
 }
-static void es_zn_mult(Est *E, int n){            /* (ℤₙ, ×) — monoide, e não grupo */
+static int es_zn_mult(Est *E, int n){
+    if(n < 1 || n > ES_MAX){ E->n = 0; return 0; }            /* (ℤₙ, ×) — monoide, e não grupo */
     E->n = n; E->nome = "(Zn,x)";
     for(int a = 0; a < n; a++) for(int b = 0; b < n; b++) E->op[a][b] = (a * b) % n;
+    return 1;
 }
 /* a⋆b = a + b + 1, o exercício do §1 e §3 — fechada em ℤ, e o neutro é −1 */
-static void es_mais_um(Est *E, int n){
+static int es_mais_um(Est *E, int n){
+    if(n < 1 || n > ES_MAX){ E->n = 0; return 0; }
     E->n = n; E->nome = "a*b=a+b+1";
     for(int a = 0; a < n; a++) for(int b = 0; b < n; b++) E->op[a][b] = (a + b + 1) % n;
+    return 1;
 }
 /* a⋆b = a − b: NÃO associativa, e é o contra-exemplo que ele pede no §2 */
-static void es_menos(Est *E, int n){
+static int es_menos(Est *E, int n){
+    if(n < 1 || n > ES_MAX){ E->n = 0; return 0; }
     E->n = n; E->nome = "a*b=a-b";
     for(int a = 0; a < n; a++) for(int b = 0; b < n; b++) E->op[a][b] = ((a - b) % n + n) % n;
+    return 1;
 }
 /* S₃, o grupo simétrico: o gume do §5, porque NÃO é abeliano.
  * Os 6 elementos são as permutações de {0,1,2}, e a operação é a composição. */
@@ -237,12 +245,18 @@ static int es_isomorfas(const Est *A, const Est *B, int *f){
 }
 /* ── ANÉIS: duas operações, e a distributividade a ligá-las ────────────────────── */
 typedef struct { int n; int soma[ES_MAX][ES_MAX]; int mult[ES_MAX][ES_MAX]; } Anel;
-static void an_zn(Anel *R, int n){
+/* O CONSTRUTOR RECUSA acima do teto, e devolve 0 em vez de escrever fora da tábua.
+ * Chamá-lo com n = 40 escrevia 1600 inteiros num array de 24×24 — sobre a pilha, e o
+ * programa entrava em ciclo sem dizer porquê. Um teto que não é verificado não é teto:
+ * é uma suposição sobre quem chama. */
+static int an_zn(Anel *R, int n){
+    if(n < 1 || n > ES_MAX){ R->n = 0; return 0; }
     R->n = n;
     for(int a = 0; a < n; a++) for(int b = 0; b < n; b++){
         R->soma[a][b] = (a + b) % n;
         R->mult[a][b] = (a * b) % n;
     }
+    return 1;
 }
 static int an_distrib(const Anel *R){
     for(int a = 0; a < R->n; a++) for(int b = 0; b < R->n; b++) for(int c = 0; c < R->n; c++)

@@ -47,6 +47,7 @@
 #include "dirichlet.h"  /* a convolucao na arvore dos divisores: mu = 1^-1 */
 #include "eliptica.h"   /* a curva: a fibra decide qual operacao existe */
 #include "estrutura.h"  /* algebra moderna: a estrutura e uma tabua */
+#include "corpo.h"      /* corpos: onde fibra+volta vira estrutura formal */
 #include "eletrico.h"
 
 typedef struct { long a, b; } Slot;
@@ -1347,6 +1348,744 @@ static int resolve_bezout(const char *f){
            a*xs + b*ys == c ? "(resíduo 0)" : "— NÃO afirmo");
     return 1;
 }
+static void tique7(int slot, const char *porque);
+static void esc_col(const char *s, int largura);
+static void esc_qz(const char *pre, Qz x, const char *pos);
+/* ── CORPOS: ONDE «TODA OPERAÇÃO COM FIBRA TEM VOLTA» VIRA ESTRUTURA ────────────────
+ * O `eval.txt` abre confirmando a espinha — HIPÓTESES → DEFINIÇÃO → TRANSIÇÃO → LEI →
+ * TESTEMUNHA → CONCLUSÃO → VOLTA — e fecha com a frase que fecha a escada toda:
+ *
+ *   «corpo é praticamente o ponto em que "toda operação que tem fibra tem volta" vira
+ *    uma estrutura algébrica formal. A EXCEÇÃO continua sendo exatamente a que vocês já
+ *    descobriram: 0⁻¹ não existe.»
+ *
+ * São 25 exercícios em quatro níveis, e quase todos correm em máquina que já existia:
+ * corpo → polinómio → fatoração → irredutibilidade → quociente. */
+static const struct { int n; const char *nome; const char *enunciado; } CP25[] = {
+ {  1, "Q corpo",             "ℚ é um corpo" },
+ {  2, "Z nao corpo",         "ℤ NÃO é corpo: 2⁻¹ = 1/2 ∉ ℤ" },
+ {  3, "unicidade do inverso","o inverso multiplicativo é único" },
+ {  4, "cancelamento multiplicativo", "a ≠ 0 e ab = ac ⟹ b = c" },
+ {  5, "sem divisores de zero","num corpo, ab = 0 ⟹ a = 0 ou b = 0" },
+ {  6, "caracteristica",      "char(ℚ) = char(ℝ) = 0, char(𝔽₅) = 5" },
+ {  7, "Zp corpo",            "ℤₚ é corpo quando p é primo" },
+ {  8, "Z6 nao corpo",        "ℤ₆ não é corpo: 2·3 = 0" },
+ {  9, "inversos em F7",      "os inversos de todos os não nulos de 𝔽₇" },
+ { 10, "carac zero ou primo", "a característica de um corpo é 0 ou prima" },
+ { 11, "p elevado a n",       "todo corpo finito tem pⁿ elementos" },
+ { 12, "x2-2 irredutivel",    "x² − 2 é irredutível em ℚ[x]" },
+ { 13, "Q raiz de 2",         "a construção de ℚ(√2), e [ℚ(√2):ℚ] = 2" },
+ { 14, "constroi F4",         "𝔽₄ = 𝔽₂[x]/(x² + x + 1)" },
+ { 15, "inversos em F4",      "os inversos em 𝔽₄" },
+ { 16, "quociente e corpo",   "K[x]/(p) é corpo quando p é irredutível" },
+ { 17, "polinomio minimo",    "o polinómio mínimo de √3" },
+ { 18, "sem corpo de 6",      "não existe corpo com 6 elementos" },
+ { 19, "sem corpo de 10",     "nem com 10 — e a razão é a mesma" },
+ { 20, "corpo de 9",          "a construção de um corpo com 9 elementos" },
+ { 21, "multiplicativo ciclico", "K× é CÍCLICO quando K é finito" },
+ { 22, "primitivo de F7",     "um elemento primitivo de 𝔽₇" },
+ { 23, "fermat pelo grupo",   "o pequeno Fermat pelo grupo multiplicativo" },
+ { 24, "inverso por euclides","a inversão em 𝔽ₚ por Euclides" },
+ { 25, "a orbita e o corpo",  "Euclides ↔ MDC ↔ Bézout ↔ inverso ↔ corpo" },
+};
+static void corpo_resolve(int n){
+    TICK_N = 0;
+    printf("   %d — %s\n", n, CP25[n-1].enunciado);
+    switch(n){
+    case 1: case 2: {
+        int eZ = (n == 2);
+        tique7(0, eZ ? "seja ℤ com as operações usuais. Ele é anel comutativo com unidade"
+                       " — o que se nega é só a última condição"
+                     : "seja ℚ com as operações usuais");
+        tique7(1, "corpo é (K,+) grupo abeliano, (K∖{0},·) grupo abeliano, e a"
+                  " distributividade a ligar os dois:");
+        printf("      $a + b = b + a$,   $a + (-a) = 0$,   $a a^{-1} = 1$"
+               "   para $a \\neq 0$\n");
+        if(eZ){
+            tique7(2, "a soma cumpre tudo; o produto cumpre tudo MENOS o inverso. Basta"
+                      " um elemento sem inverso para a estrutura não ser corpo");
+            tique7(3, "a lei é a própria definição: «TODO não nulo tem inverso» é uma"
+                      " quantificação universal, e nega-se com UM contra-exemplo");
+            tique7(4, "a testemunha é o 2 — e a prova de que não tem inverso é que 2b = 1"
+                      " não tem solução inteira, porque 2b é sempre par");
+            { long achou = 0, pares = 0;
+              for(long b = -400; b <= 400; b++){ if(2*b == 1) achou++; if(2*b % 2 == 0) pares++; }
+              printf("      2b = 1 em 801 inteiros: %ld soluções;  e 2b é par em %ld\n",
+                     achou, pares);
+              tique7(5, "logo ℤ NÃO é corpo — e é exatamente o salto que ℚ faz");
+              tique7(6, "e a volta: em ℚ o mesmo 2 TEM inverso, e é 1/2. A diferença"
+                        " entre os dois andares cabe neste elemento");
+              Qz meio;
+              qz_divide(qz_de_inteiro(1), qz_de_inteiro(2), &meio);
+              printf("      em ℚ: 2⁻¹ = "); esc_qz("", meio, ",  e 2·");
+              esc_qz("", meio, " = ");
+              { Qz um = qz_mult(qz_de_inteiro(2), meio); esc_qz("", um, "   (resíduo 0)\n"); } }
+        } else {
+            tique7(2, "a soma é grupo abeliano (é o andar de ℤ, já provado); o produto é"
+                      " comutativo e associativo; e todo p/q ≠ 0 tem inverso q/p, porque"
+                      " p ≠ 0 quando a fração não é nula");
+            tique7(3, "a lei é a construção de ℚ por classes de pares: o inverso não se"
+                      " postula, CONSTRÓI-SE trocando numerador e denominador");
+            tique7(4, "a testemunha é o próprio q/p, e verifica-se multiplicando");
+            { int mal = 0; long feitos = 0;
+              for(long p2 = -20; p2 <= 20; p2++) for(long q2 = 1; q2 <= 20; q2++){
+                  Qz x = qz(p2,q2);
+                  Qz inv;
+                  int tem = qz_inverso(x, &inv);
+                  if(tem != (p2 != 0)) mal++;
+                  if(tem){ if(!qz_igual(qz_mult(x,inv), qz_de_inteiro(1))) mal++; feitos++; }
+                  /* e a distributividade, que é a lei que liga as duas operações */
+                  for(long r = -3; r <= 3; r++){
+                      Qz z = qz(r,3), y = qz(p2,q2);
+                      if(!qz_igual(qz_mult(x, qz_soma(y,z)),
+                                   qz_soma(qz_mult(x,y), qz_mult(x,z)))) mal++;
+                  }
+              }
+              tique7(5, "logo ℚ é corpo — e é O corpo que ℤ não era");
+              tique7(6, "e a volta: cada inverso multiplica-se de volta para dar 1, e a"
+                        " distributividade varre-se junto");
+              printf("      %ld inversos verificados e a distributividade varrida:"
+                     " %d falhas\n", feitos, mal);
+              printf("      (e o único que não tem inverso é o 0 — a exceção do andar)\n"); }
+        }
+        break; }
+    case 3: case 4: case 5: {
+        /* os três teoremas que saem TODOS do mesmo instrumento: a existência de a⁻¹ */
+        Anel F7; an_zn(&F7, 7);
+        if(n == 3){
+            tique7(0, "sejam b e c dois inversos de a: ab = 1 e ac = 1");
+            tique7(1, "inverso é o que devolve à unidade:");
+            printf("      $a a^{-1} = 1$\n");
+            tique7(2, "b = b·1 = b(ac) = (ba)c = 1·c = c — o rastro dele, cinco passos");
+            printf("      $b = b \\cdot 1 = b(ac) = (ba)c = 1 \\cdot c = c$\n");
+            tique7(3, "a lei do passo do meio é a ASSOCIATIVIDADE; a do penúltimo é a"
+                      " COMUTATIVIDADE (ba = ab = 1). Sem uma delas a cadeia parte-se");
+            tique7(4, "a testemunha é o produto b·a·c, que se lê de duas maneiras");
+            { int mal = 0;
+              for(int m = 2; m <= 13; m++){
+                  Anel R; an_zn(&R, m);
+                  for(int a = 1; a < m; a++){
+                      int quantos = 0;
+                      for(int b = 0; b < m; b++) if(R.mult[a][b] == 1 % m) quantos++;
+                      if(quantos > 1) mal++;
+                  }
+              }
+              tique7(5, "logo b = c: o inverso é ÚNICO, e a notação a⁻¹ passa a ser legítima");
+              tique7(6, "e a volta: contam-se todos os inversos de cada elemento em ℤₘ de"
+                        " 2 a 13 — nenhum tem dois, e os que não têm nenhum são os não"
+                        " coprimos, que é outra coisa");
+              printf("      ℤₘ de 2 a 13, elemento a elemento: %d com mais de um inverso\n", mal); }
+        } else if(n == 4){
+            tique7(0, "seja a ≠ 0 num corpo, com ab = ac");
+            tique7(1, "cancelar é tirar o a dos dois lados:");
+            printf("      $a \\neq 0$ e $ab = ac$ $\\Rightarrow$ $b = c$\n");
+            tique7(2, "a⁻¹(ab) = a⁻¹(ac), logo (a⁻¹a)b = (a⁻¹a)c, logo 1·b = 1·c");
+            printf("      $a^{-1}ab = a^{-1}ac \\; \\Rightarrow \\; b = c$\n");
+            tique7(3, "as leis são a EXISTÊNCIA do inverso (que a hipótese a ≠ 0 garante"
+                      " num corpo) e a ASSOCIATIVIDADE para reagrupar");
+            tique7(4, "a testemunha é o a⁻¹ — e é ela que a hipótese a ≠ 0 compra");
+            { int mal = 0; long falhas_z6 = 0;
+              for(int a = 1; a < 7; a++) for(int b = 0; b < 7; b++) for(int c = 0; c < 7; c++)
+                  if(F7.mult[a][b] == F7.mult[a][c] && b != c) mal++;
+              Anel Z6; an_zn(&Z6, 6);
+              for(int a = 1; a < 6; a++) for(int b = 0; b < 6; b++) for(int c = 0; c < 6; c++)
+                  if(Z6.mult[a][b] == Z6.mult[a][c] && b != c) falhas_z6++;
+              tique7(5, "logo b = c");
+              tique7(6, "e o GUME: em ℤ₆, que NÃO é corpo, o cancelamento FALHA — 2·1 = 2"
+                        " e 2·4 = 2, com 1 ≠ 4. A hipótese «corpo» é que faz o teorema");
+              printf("      𝔽₇ (corpo): %d falhas;  ℤ₆ (não corpo): %ld falhas\n",
+                     mal, falhas_z6);
+              printf("      e 2·1 = %d, 2·4 = %d em ℤ₆ — o mesmo valor com b ≠ c\n",
+                     Z6.mult[2][1], Z6.mult[2][4]); }
+        } else {
+            tique7(0, "seja ab = 0 num corpo, e suponha-se a ≠ 0");
+            tique7(1, "domínio integral é o anel sem divisores de zero:");
+            printf("      $ab = 0 \\; \\Rightarrow \\; a = 0$ ou $b = 0$\n");
+            tique7(2, "como a ≠ 0, existe a⁻¹. Multiplicando: a⁻¹(ab) = a⁻¹·0, isto é"
+                      " (a⁻¹a)b = 0, isto é b = 0");
+            printf("      $a^{-1}(ab) = a^{-1} \\cdot 0 \\; \\Rightarrow \\; b = 0$\n");
+            tique7(3, "as leis são o INVERSO, a ASSOCIATIVIDADE e r·0 = 0 (que sai da"
+                      " distributividade: 0b = (0+0)b = 0b + 0b)");
+            tique7(4, "«a testemunha é o inverso» — é ele que a hipótese a ≠ 0 entrega, e"
+                      " a prova consome-o de imediato");
+            { int mal = 0, corpos = 0, nao = 0;
+              for(int m = 2; m <= 16; m++){
+                  Anel R; an_zn(&R, m);
+                  int c = an_corpo(&R,0), d = an_dominio(&R,0,0);
+                  if(c && !d) mal++;
+                  if(c) corpos++; else nao++;
+              }
+              int ea = 0, eb = 0;
+              Anel Z6; an_zn(&Z6,6); an_dominio(&Z6,&ea,&eb);
+              tique7(5, "logo b = 0: num corpo não há divisores de zero");
+              tique7(6, "e a volta pelos DOIS lados: os corpos ℤₘ não têm divisores de"
+                        " zero, e o ℤ₆ (que não é corpo) tem — a testemunha exibe-se");
+              printf("      ℤₘ de 2 a 16: %d corpos (nenhum com divisores de zero) e %d"
+                     " não corpos;  em ℤ₆: %d·%d = 0\n", corpos, nao, ea, eb); }
+        }
+        break; }
+    case 6: case 10: {
+        if(n == 6){
+            tique7(0, "seja K um corpo. Pergunta-se pelo menor n > 0 com n·1 = 0");
+            tique7(1, "a característica é esse menor n, e 0 quando ele não existe:");
+            printf("      $\\operatorname{char}(K) = \\min\\{ n > 0 : n \\cdot 1 = 0 \\}$\n");
+            tique7(2, "em ℚ, somar 1 a si próprio nunca dá 0 — os inteiros positivos são"
+                      " todos distintos de zero em ℚ. Em 𝔽ₚ, somar p vezes dá 0 por"
+                      " construção");
+            tique7(3, "a lei é a inclusão ℤ ↪ K: o subanel gerado pelo 1 é ℤ (se char 0)"
+                      " ou ℤₙ (se char n), e é ele que decide");
+            tique7(4, "a testemunha em 𝔽₅ é o próprio 5; em ℚ é a AUSÊNCIA, e a ausência"
+                      " diz-se com o teto varrido");
+            { long soma = 0, achou = 0;
+              for(long k = 1; k <= 2000; k++){ soma += 1; if(soma == 0) achou = k; }
+              printf("      em ℚ: 1 somado 2000 vezes dá %ld, e chegou a 0 em %ld casos"
+                     " — logo char = 0 (varrido até 2000, e o teto diz-se)\n", soma, achou);
+              for(int m = 2; m <= 11; m++){
+                  if(!nt_primo(m)) continue;
+                  Anel R; an_zn(&R,m);
+                  printf("      char(𝔽%d) = %d\n", m, corpo_carac(&R,50));
+              }
+              tique7(5, "logo char(ℚ) = char(ℝ) = char(ℂ) = 0 e char(𝔽ₚ) = p");
+              tique7(6, "e a volta: em 𝔽ₚ o p·1 volta ao 0 exatamente ao fim de p passos,"
+                        " nem antes nem depois — é isso o «menor»");
+              { Anel R5; an_zn(&R5,5);
+                int s = 0;
+                printf("      𝔽₅ passo a passo: ");
+                for(int k = 1; k <= 6; k++){ s = R5.soma[s][1]; printf("%d ", s); }
+                printf("  (volta ao 0 no 5º)\n"); } }
+        } else {
+            tique7(0, "seja K corpo com char(K) = n > 0, e suponha-se n = ab composto,"
+                      " com 1 < a < n e 1 < b < n");
+            tique7(1, "o mesmo min, agora com a hipótese de ser composto:");
+            printf("      $n \\cdot 1 = 0$   e   $n = ab$\n");
+            tique7(2, "n·1 = (ab)·1 = (a·1)(b·1) = 0. Como K é corpo, não há divisores de"
+                      " zero (teorema 5), logo a·1 = 0 ou b·1 = 0");
+            tique7(3, "a lei é o teorema 5 — SEM DIVISORES DE ZERO — e é por isso que"
+                      " este teorema vale em corpos e não em anéis quaisquer");
+            tique7(4, "a testemunha é o a·1 (ou b·1) que se anula, e ele contradiz a"
+                      " MINIMALIDADE de n, porque a < n");
+            { int mal = 0, primos = 0, compostos = 0;
+              for(int m = 2; m <= 20; m++){
+                  Anel R; an_zn(&R,m);
+                  int c = corpo_carac(&R, 60), corpo = an_corpo(&R,0);
+                  if(c != m) mal++;                       /* char(ℤₘ) = m */
+                  if(corpo && !nt_primo(c)) mal++;        /* e se é corpo, é prima */
+                  if(nt_primo(m)) primos++; else compostos++;
+              }
+              /* e o gume: em ℤ₆ (não corpo) a característica é COMPOSTA, e o argumento
+               * cai exatamente onde tem de cair — nos divisores de zero */
+              Anel Z6; an_zn(&Z6,6);
+              int ea = 0, eb = 0; an_dominio(&Z6,&ea,&eb);
+              tique7(5, "contradição, logo n é primo: char(K) = 0 ou p primo");
+              tique7(6, "e a volta com o GUME: em ℤ₆, que NÃO é corpo, a característica é"
+                        " 6 — COMPOSTA. O teorema não é sobre a característica, é sobre"
+                        " o corpo, e é aí que se vê");
+              printf("      ℤₘ de 2 a 20: char = m sempre (%d primos, %d compostos), e"
+                     " char é prima exatamente nos que são corpo: %d falhas\n",
+                     primos, compostos, mal);
+              printf("      ℤ₆: char = %d (composta) e %d·%d = 0 — os divisores de zero"
+                     " são a razão\n", corpo_carac(&Z6,60), ea, eb); }
+        }
+        break; }
+    case 7: case 8: {
+        int eZ6 = (n == 8);
+        tique7(0, eZ6 ? "seja ℤ₆ com as operações módulo 6"
+                      : "seja p primo e ℤₚ = ℤ/pℤ");
+        tique7(1, "corpo pede inverso para todo não nulo:");
+        printf("      $a \\neq 0 \\bmod p \\; \\Rightarrow \\; \\exists a^{-1}$\n");
+        tique7(2, eZ6 ? "6 = 2·3, e nem 2 nem 3 são 0 módulo 6. Mas 2·3 = 6 ≡ 0: há"
+                        " DIVISORES DE ZERO, e o teorema 5 diz que corpo não os tem"
+                      : "para a não nulo, gcd(a,p) = 1 porque p é primo e a < p. Bézout"
+                        " dá x, y com ax + py = 1, isto é ax ≡ 1 (mod p)");
+        tique7(3, eZ6 ? "a lei é o teorema 5 lido ao contrário: exibindo divisores de"
+                        " zero, nega-se o corpo. Um contra-exemplo basta"
+                      : "as leis são a PRIMALIDADE (que dá gcd = 1) e BÉZOUT (que dá a"
+                        " testemunha) — o andar dos números a servir este");
+        tique7(4, eZ6 ? "a testemunha é o par (2,3)" : "a testemunha é o x de Bézout");
+        { long p = eZ6 ? 6 : 7;
+          Anel R; an_zn(&R, (int)p);
+          if(eZ6){
+              int ea = 0, eb = 0;
+              an_dominio(&R,&ea,&eb);
+              printf("      %d·%d = %d (mod 6), com %d ≠ 0 e %d ≠ 0\n",
+                     ea, eb, R.mult[ea][eb], ea, eb);
+              printf("      e o 2 tem inverso em ℤ₆? %s\n",
+                     corpo_inv(&R,2) < 0 ? "NÃO" : "sim");
+          } else {
+              for(long a = 1; a < p; a++){
+                  long x, y; iz_gcd(a, p, &x, &y);
+                  long inv; nm_inv_mod(a, p, &inv);
+                  printf("      %ld·(%ld) + 7·(%ld) = 1  ⟹  %ld⁻¹ = %ld  (e %ld·%ld = %ld ≡ 1)\n",
+                         a, x, y, a, inv, a, inv, a*inv);
+              }
+          }
+          tique7(5, eZ6 ? "logo ℤ₆ NÃO é corpo" : "logo ℤₚ é corpo para todo p primo");
+          tique7(6, "e o GUME é o par: «primo passa, composto cai» — varre-se ℤₘ e"
+                    " compara-se ser corpo com ser primo, nos dois sentidos");
+          { int mal = 0, sim = 0, nao = 0;
+            for(int m = 2; m <= ES_MAX; m++){
+                Anel S; an_zn(&S,m);
+                int c = an_corpo(&S,0);
+                if(c != (nt_primo(m) != 0)) mal++;
+                if(c) sim++; else nao++;
+            }
+            printf("      ℤₘ até ao teto: %d corpos e %d não — e «corpo ⟺ m primo» falha"
+                   " em %d\n", sim, nao, mal); } }
+        break; }
+    case 9: case 22: case 23: case 24: {
+        long p = 7;
+        Anel F7; an_zn(&F7, (int)p);
+        if(n == 9){
+            tique7(0, "seja 𝔽₇, e queiram-se os inversos de todos os não nulos");
+            tique7(1, "o inverso é o parceiro que dá 1:");
+            printf("      $a a^{-1} \\equiv 1 \\bmod 7$\n");
+            tique7(2, "há três caminhos: procurar, Euclides estendido, ou a⁻¹ = a^{p−2}"
+                      " (pelo pequeno Fermat). Os três têm de dar o mesmo");
+            tique7(3, "as leis são BÉZOUT (para o Euclides) e FERMAT (para a potência) —"
+                      " e a concordância dos três é a medida");
+            tique7(4, "a testemunha de cada linha é o produto, que tem de dar 1");
+            { int mal = 0;
+              printf("      a:      "); for(long a=1;a<p;a++) printf("%4ld", a);
+              printf("\n      a⁻¹:    ");
+              for(long a=1;a<p;a++){ long v; nm_inv_mod(a,p,&v); printf("%4ld", v); }
+              printf("\n      a^{p−2}:");
+              for(long a=1;a<p;a++) printf("%4ld", iz_pot_mod(a,p-2,p));
+              printf("\n      a·a⁻¹:  ");
+              for(long a=1;a<p;a++){ long v; nm_inv_mod(a,p,&v);
+                  printf("%4ld", (a*v)%p);
+                  if((a*v)%p != 1) mal++;
+                  if(v != iz_pot_mod(a,p-2,p)) mal++; }
+              printf("\n");
+              tique7(5, "logo todo não nulo de 𝔽₇ tem inverso — e é isso ser corpo");
+              tique7(6, "e a volta: os DOIS caminhos (Euclides e a potência) dão a mesma"
+                        " tabela, e cada produto fecha em 1");
+              printf("      Euclides e a^{p−2} concordam, e todos os produtos dão 1:"
+                     " %d falhas\n", mal); }
+        } else if(n == 22){
+            tique7(0, "seja 𝔽₇ e queira-se g que GERE o grupo multiplicativo");
+            tique7(1, "primitivo é o que percorre tudo:");
+            printf("      $K^{\\times} = \\{ 1, g, g^2, \\ldots, g^{q-2} \\}$\n");
+            tique7(2, "g é primitivo exatamente quando a sua ORDEM é q−1 = 6. Testa-se"
+                      " cada candidato calculando a órbita");
+            tique7(3, "a lei é LAGRANGE: a ordem divide 6, logo só pode ser 1, 2, 3 ou 6,"
+                      " e primitivo é o caso 6");
+            tique7(4, "a testemunha é a órbita inteira, exibida");
+            { int mal = 0;
+              for(long g = 1; g < p; g++){
+                  long o = nm_ordem(g,p);
+                  printf("      g = %ld:  ordem %ld  →  ", g, o);
+                  for(long k = 0; k < 6; k++) printf("%ld ", iz_pot_mod(g,k,p));
+                  printf("  %s\n", o == 6 ? "PRIMITIVO" : "");
+                  if((p-1) % o) mal++;                       /* Lagrange */
+              }
+              tique7(5, "logo 3 e 5 são primitivos em 𝔽₇, e 1, 2, 4, 6 não são");
+              tique7(6, "e a volta: todas as ordens DIVIDEM 6, que é Lagrange a fechar —"
+                        " e o número de primitivos é φ(6) = 2");
+              int prim = 0;
+              for(long g = 1; g < p; g++) if(nm_ordem(g,p) == p-1) prim++;
+              printf("      %d primitivos, e φ(6) = %ld   %s\n",
+                     prim, nm_phi(6), prim == nm_phi(6) ? "(confere)" : "— NÃO afirmo");
+              printf("      e as ordens dividem 6: %d falhas\n", mal); }
+        } else if(n == 23){
+            tique7(0, "seja p primo e a não nulo em 𝔽ₚ");
+            tique7(1, "o pequeno Fermat:");
+            printf("      $a^{p-1} = 1$   em $\\mathbb{F}_p$\n");
+            tique7(2, "𝔽ₚ× é grupo de ordem p−1 (teorema 15). A ordem de a DIVIDE p−1"
+                      " (Lagrange), digamos p−1 = k·ord(a). Então"
+                      " a^{p−1} = (a^{ord})^k = 1^k = 1");
+            tique7(3, "a lei é LAGRANGE, e é ela que faz a prova ser de três linhas — sem"
+                      " o grupo, seria a indução clássica com binómios");
+            tique7(4, "a testemunha é o k = (p−1)/ord(a), e ele exibe-se");
+            { int mal = 0;
+              for(long a = 1; a < p; a++){
+                  long o = nm_ordem(a,p);
+                  printf("      a = %ld:  ord = %ld,  k = %ld,  a^6 = %ld\n",
+                         a, o, (p-1)/o, iz_pot_mod(a,p-1,p));
+                  if(iz_pot_mod(a,p-1,p) != 1) mal++;
+                  if((p-1) % o) mal++;
+              }
+              tique7(5, "logo a^{p−1} = 1 para todo a ≠ 0");
+              tique7(6, "e a volta: a⁻¹ = a^{p−2}, porque a·a^{p−2} = a^{p−1} = 1 — a"
+                        " INVERSÃO VIRA POTÊNCIA, e é isso que o teorema entrega");
+              printf("      todos os a^{p−1} = 1 e as ordens dividem p−1: %d falhas\n", mal); }
+        } else {
+            tique7(0, "seja p primo e a não nulo em 𝔽ₚ. Quer-se o inverso SEM tentativa");
+            tique7(1, "Euclides estendido dá a combinação:");
+            printf("      $ax + py = \\gcd(a,p) = 1 \\; \\Rightarrow \\; ax \\equiv 1"
+                   " \\bmod p$\n");
+            tique7(2, "como p é primo e a < p, o gcd é 1. A descida de Euclides produz x"
+                      " e y; reduzindo x módulo p sai o inverso");
+            tique7(3, "as leis são a PRIMALIDADE (gcd = 1) e BÉZOUT — e o custo é"
+                      " log p em vez dos p passos da tentativa");
+            tique7(4, "a testemunha é o x, e ele sai do MESMO rastro que dá o gcd");
+            { int mal = 0;
+              for(long a = 1; a < 13; a++){
+                  long x, y, g = iz_gcd(a, 13, &x, &y), inv;
+                  nm_inv_mod(a, 13, &inv);
+                  if(g != 1 || (a*inv) % 13 != 1) mal++;
+                  if(inv != ((x % 13) + 13) % 13) mal++;
+                  if(inv != iz_pot_mod(a, 11, 13)) mal++;    /* e concorda com Fermat */
+              }
+              tique7(5, "logo a inversão em 𝔽ₚ é Euclides, e não busca");
+              tique7(6, "e a volta por TRÊS caminhos: o x de Bézout reduzido, a potência"
+                        " a^{p−2} de Fermat, e o produto a dar 1 — os três concordam");
+              printf("      𝔽₁₃, os 12 não nulos: Bézout = Fermat = inverso, %d falhas\n", mal); }
+        }
+        break; }
+    case 11: case 18: case 19: {
+        tique7(0, n == 11 ? "seja K um corpo FINITO"
+                          : "suponha-se um corpo com esse número de elementos");
+        tique7(1, "a cardinalidade de um corpo finito:");
+        printf("      $|K| = p^{n}$,   com $p = \\operatorname{char}(K)$ primo\n");
+        tique7(2, "char(K) = p primo (teorema 10), logo K contém uma cópia de 𝔽ₚ. E K é"
+                  " espaço vetorial sobre essa cópia — de dimensão finita n, porque K é"
+                  " finito. Um espaço de dimensão n sobre 𝔽ₚ tem exatamente pⁿ vetores");
+        tique7(3, "a lei é a CONTAGEM das coordenadas: cada vetor é uma n-upla de 𝔽ₚ, e"
+                  " há p escolhas por coordenada. É o produto cartesiano a contar");
+        tique7(4, n == 11 ? "a testemunha é a base de K sobre 𝔽ₚ"
+                          : "a testemunha é a FATORAÇÃO do número pedido");
+        { if(n == 11){
+              printf("      as cardinalidades possíveis até 30:  ");
+              for(int q = 2; q <= 30; q++){
+                  long pr[NT_FAT]; int ex[NT_FAT];
+                  int k = nt_fatora(q, pr, ex, NT_FAT);
+                  if(k == 1) printf("%d ", q);
+              }
+              printf("\n      e as impossíveis:  ");
+              for(int q = 2; q <= 30; q++){
+                  long pr[NT_FAT]; int ex[NT_FAT];
+                  int k = nt_fatora(q, pr, ex, NT_FAT);
+                  if(k > 1) printf("%d ", q);
+              }
+              printf("\n");
+          } else {
+              long q = (n == 18) ? 6 : 10;
+              long pr[NT_FAT]; int ex[NT_FAT];
+              int k = nt_fatora(q, pr, ex, NT_FAT);
+              printf("      %ld = ", q);
+              for(int i = 0; i < k; i++){ printf("%s%ld", i?"·":"", pr[i]); if(ex[i]>1) printf("^%d", ex[i]); }
+              printf("   — DOIS primos distintos, logo não é pⁿ\n");
+              printf("      e se houvesse, a característica teria de ser %ld e %ld ao"
+                     " mesmo tempo\n", pr[0], pr[1]);
+          }
+          tique7(5, n == 11 ? "logo |K| = pⁿ, sempre"
+                            : "logo NÃO existe corpo com esse número de elementos");
+          tique7(6, "e a volta pelo lado que EXISTE: para cada pⁿ constrói-se mesmo o"
+                    " corpo, e mede-se. Dizer que não existe sem mostrar os que existem"
+                    " seria metade");
+          { int f4[] = {1,1,1}, f9[] = {1,0,1}, f8[] = {1,1,0,1};
+            Anel R;
+            struct { int p, n2; int *f; const char *nome; } cs[3] = {
+                {2,2,f4,"F4"}, {3,2,f9,"F9"}, {2,3,f8,"F8"} };
+            int mal = 0;
+            for(int i = 0; i < 3; i++){
+                if(!corpo_ext(cs[i].p, cs[i].f, cs[i].n2, &R)){ mal++; continue; }
+                printf("      %s: |K| = %d, corpo? %s, char = %d\n",
+                       cs[i].nome, R.n, an_corpo(&R,0) ? "sim" : "NÃO", corpo_carac(&R,20));
+                if(!an_corpo(&R,0)) mal++;
+            }
+            /* e a ausência mede-se: nenhum ℤₘ com m composto é corpo */
+            int falsos = 0;
+            for(int m = 2; m <= ES_MAX; m++){
+                Anel S; an_zn(&S,m);
+                if(an_corpo(&S,0) && !nt_primo(m)) falsos++;
+            }
+            printf("      e nenhum ℤₘ composto é corpo: %d falsos (mais %d falhas na"
+                   " construção)\n", falsos, mal); } }
+        break; }
+    case 12: case 17: {
+        long d = (n == 12) ? 2 : 3;
+        { char pq[220];
+          snprintf(pq, sizeof pq, "seja x² − %ld sobre ℚ, e α = √%ld — que é algébrico"
+                   " sobre ℚ precisamente por ser raiz dele", d, d);
+          tique7(0, pq); }
+        tique7(1, n == 12 ? "irredutível em ℚ[x] é não fatorar em fatores de grau menor:"
+                          : "o polinómio mínimo é o mónico irredutível que anula α:");
+        if(n == 12) printf("      $x^2 - 2$ não é $(x-r)(x-s)$ com $r,s \\in \\mathbb{Q}$\n");
+        else        printf("      $m_{\\alpha}(x) \\in K[x]$ mónico, irredutível,"
+                           " com $m_{\\alpha}(\\alpha) = 0$\n");
+        tique7(2, "grau 2 fatora em ℚ[x] se e só se TEM RAIZ em ℚ. E uma raiz de x² − d"
+                  " seria um racional cujo quadrado é d, isto é √d ∈ ℚ");
+        tique7(3, "a lei é o teorema do andar de ℝ: √d ∈ ℚ ⟺ todo expoente primo de d é"
+                  " PAR. Aqui d tem um expoente ímpar, logo não há raiz");
+        { long pr[NT_FAT]; int ex[NT_FAT];
+          int k = nt_fatora(d, pr, ex, NT_FAT), impar = -1;
+          for(int i = 0; i < k; i++) if(ex[i] % 2) impar = i;
+          printf("      %ld = ", d);
+          for(int i = 0; i < k; i++){ printf("%s%ld", i?"·":"", pr[i]); if(ex[i]>1) printf("^%d", ex[i]); }
+          printf(",  e o primo %ld tem expoente ÍMPAR\n", pr[impar < 0 ? 0 : impar]);
+          tique7(4, "a testemunha é esse primo — o mesmo que provou √d ∉ ℚ no andar de ℝ");
+          { long em_cima = 0, total = 0;
+            for(long q = 1; q <= 60; q++) for(long pp = 1; pp <= (raizi(d)+1)*q; pp++){
+                int bom, s = rz_cmp(qz(pp,q), 2, d, &bom);
+                if(bom){ total++; if(s == 0) em_cima++; }
+            }
+            printf("      %ld racionais testados como raiz: %ld são raiz\n", total, em_cima);
+            tique7(5, n == 12 ? "logo x² − 2 é IRREDUTÍVEL em ℚ[x]"
+                              : "logo m_{√3}(x) = x² − 3, e é único");
+            tique7(6, "e a volta: substitui-se α no polinómio e mede-se que dá zero, em"
+                      " ℚ(√d) exato — não em decimal");
+            Qs alfa = qs(qz(0,1), qz(1,1));
+            Qs a2 = qs_mult(alfa, alfa, d);
+            Qs val = qs_soma(a2, qs(qz_de_inteiro(-d), qz(0,1)));
+            printf("      α² = "); esc_qz("", a2.a, " + ");
+            esc_qz("", a2.b, "√"); printf("%ld,   α² − %ld = ", d, d);
+            esc_qz("", val.a, " + "); esc_qz("", val.b, "√");
+            printf("%ld   %s\n", d,
+                   (val.a.p == 0 && val.b.p == 0) ? "(resíduo 0)" : "— NÃO afirmo"); } }
+        break; }
+    case 13: {
+        tique7(0, "seja ℚ e α = √2, que é algébrico sobre ℚ (raiz de x² − 2)");
+        tique7(1, "a extensão é o menor corpo que contém ℚ e α:");
+        printf("      $\\mathbb{Q}(\\sqrt2) = \\{ a + b\\sqrt2 : a, b \\in \\mathbb{Q} \\}$\n");
+        tique7(2, "o conjunto fecha para + e ×, porque (a+b√2)(c+d√2) = (ac+2bd) +"
+                  " (ad+bc)√2 — o √2·√2 = 2 volta para ℚ, e é por isso que basta grau 1");
+        tique7(3, "a lei é a RELAÇÃO α² = 2: é ela que reduz qualquer potência de α a"
+                  " grau ≤ 1, e é o polinómio mínimo a fazer esse trabalho");
+        tique7(4, "a testemunha do INVERSO é a NORMA: (a+b√2)(a−b√2) = a² − 2b², que só"
+                  " é 0 quando a = b = 0 — porque √2 ∉ ℚ");
+        printf("      $(a + b\\sqrt2)^{-1} = \\frac{a - b\\sqrt2}{a^2 - 2b^2}$\n");
+        { int mal = 0; long feitos = 0;
+          for(long ap = -6; ap <= 6; ap++) for(long bp = -6; bp <= 6; bp++){
+              Qs x = qs(qz_de_inteiro(ap), qz_de_inteiro(bp)), inv;
+              Qz N = qs_norma(x, 2);
+              int nulo = (ap == 0 && bp == 0);
+              if((N.p == 0) != nulo) mal++;              /* a norma só zera no zero */
+              if(nulo) continue;
+              if(!qs_inverso(x, 2, &inv)){ mal++; continue; }
+              Qs um = qs_mult(x, inv, 2);
+              if(um.a.p != 1 || um.a.q != 1 || um.b.p != 0) mal++;
+              feitos++;
+          }
+          Qs y = qs(qz_de_inteiro(3), qz_de_inteiro(2)), iy;
+          qs_inverso(y, 2, &iy);
+          printf("      (3 + 2√2)⁻¹ = "); esc_qz("", iy.a, iy.b.p < 0 ? " − " : " + ");
+          { Qz mb = iy.b.p < 0 ? qz_oposto(iy.b) : iy.b;
+            esc_qz("", mb, "√2   (norma 9 − 8 = 1)\n"); }
+          tique7(5, "logo ℚ(√2) é corpo, e [ℚ(√2):ℚ] = 2 — a base é {1, √2}");
+          tique7(6, "e a volta: cada inverso multiplica-se de volta e dá 1 + 0√2, exato");
+          printf("      %ld inversos verificados em ℚ(√2): %d falhas\n", feitos, mal);
+          printf("      e a norma só é zero no elemento zero — é ela a fibra deste corpo\n"); }
+        break; }
+    case 14: case 20: {
+        int p = (n == 14) ? 2 : 3, gr = 2;
+        int f4[] = {1,1,1}, f9[] = {1,0,1};
+        int *f = (n == 14) ? f4 : f9;
+        tique7(0, "seja 𝔽ₚ e um polinómio mónico de grau 2 sobre ele");
+        tique7(1, "o quociente por um irredutível:");
+        printf(n == 14 ? "      $\\mathbb{F}_4 = \\mathbb{F}_2[x]/(x^2 + x + 1)$\n"
+                       : "      $\\mathbb{F}_9 = \\mathbb{F}_3[x]/(x^2 + 1)$\n");
+        tique7(2, "primeiro prova-se a IRREDUTIBILIDADE: um grau 2 fatora se e só se tem"
+                  " raiz, e testam-se as p raízes possíveis — são finitas, logo a"
+                  " varredura é a prova");
+        { printf("      raízes em 𝔽%d:  ", p);
+          for(int a = 0; a < p; a++){
+              int v = fx_m(f[2]*a*a + f[1]*a + f[0], p);
+              printf("f(%d) = %d%s", a, v, a == p-1 ? "" : ",  ");
+          }
+          printf("   — nenhuma zero\n");
+          tique7(3, "a lei é a mesma dos números: o quociente por um IRREDUTÍVEL é corpo,"
+                    " tal como ℤ/pℤ é corpo por p ser primo. Irredutível está para o"
+                    " polinómio como primo está para o inteiro");
+          tique7(4, "a testemunha é a tábua: constrói-se, e vê-se que todo não nulo tem"
+                    " inverso");
+          Anel R;
+          corpo_ext(p, f, gr, &R);
+          printf("      irredutível? %s;  |K| = %d = %d²;  corpo? %s;  char = %d\n",
+                 fx_irredutivel(f, gr, p) ? "sim" : "NÃO", R.n, p,
+                 an_corpo(&R,0) ? "sim" : "NÃO", corpo_carac(&R, 30));
+          { char pq[160];
+            snprintf(pq, sizeof pq, "logo o quociente é um CORPO com %d elementos, e"
+                     " %d = %d² é uma potência de primo — como tinha de ser", R.n, R.n, p);
+            tique7(5, pq); }
+          tique7(6, "e o GUME: com um polinómio REDUTÍVEL o quociente NÃO é corpo — e"
+                    " mede-se, para se ver que a hipótese carrega o teorema");
+          { int red[] = {1,0,1};                        /* x²+1 = (x+1)² sobre 𝔽₂ */
+            Anel Rr;
+            corpo_ext(2, red, 2, &Rr);
+            int ea = 0, eb = 0;
+            an_dominio(&Rr, &ea, &eb);
+            printf("      x²+1 sobre 𝔽₂ é (x+1)²: irredutível? %s;  o quociente é corpo?"
+                   " %s  (e %d·%d = 0)\n",
+                   fx_irredutivel(red,2,2) ? "sim" : "NÃO",
+                   an_corpo(&Rr,0) ? "sim" : "NÃO", ea, eb); } }
+        break; }
+    case 15: {
+        int f4[] = {1,1,1};
+        Anel R;
+        corpo_ext(2, f4, 2, &R);
+        tique7(0, "seja 𝔽₄ = 𝔽₂[x]/(x²+x+1), com os elementos 0, 1, x, x+1");
+        tique7(1, "o inverso é o parceiro que dá 1:");
+        printf("      $a a^{-1} = 1$   em $\\mathbb{F}_4$\n");
+        tique7(2, "x·(x+1) = x² + x = (x+x+1) + x = 1, usando x² = x + 1 (que é a relação"
+                  " do quociente, porque x²+x+1 = 0 e em característica 2 o sinal é o mesmo)");
+        tique7(3, "a lei é a REDUÇÃO módulo o polinómio: é ela que traz x² de volta ao"
+                  " grau ≤ 1, e é o mesmo mecanismo do resto na divisão de inteiros");
+        tique7(4, "a testemunha é a tábua reduzida, e ela exibe-se");
+        { const char *nm[4] = { "0", "1", "x", "x+1" };
+          int mal = 0;
+          for(int a = 1; a < 4; a++){
+              int inv = corpo_inv(&R, a);
+              printf("      (%s)⁻¹ = %s   porque (%s)·(%s) = %s\n",
+                     nm[a], inv < 0 ? "—" : nm[inv], nm[a],
+                     inv < 0 ? "—" : nm[inv], inv < 0 ? "—" : nm[R.mult[a][inv]]);
+              if(inv < 0 || R.mult[a][inv] != 1) mal++;
+          }
+          printf("      e 0⁻¹ = %s — a exceção do andar, a mesma de sempre\n",
+                 corpo_inv(&R,0) < 0 ? "NÃO EXISTE" : "??");
+          tique7(5, "logo todo não nulo de 𝔽₄ tem inverso — e note-se que x⁻¹ = x + 1,"
+                    " que é o mesmo que x², porque x³ = 1: a inversão é uma POTÊNCIA,"
+                    " tal como em 𝔽ₚ");
+          tique7(6, "e a volta: cada produto a·a⁻¹ dá 1, e o 0 continua sem fibra");
+          printf("      3 inversos, %d falhas;  e o elemento primitivo é %d (ordem 3)\n",
+                 mal, corpo_primitivo(&R)); }
+        break; }
+    case 16: {
+        tique7(0, "seja K corpo e p(x) ∈ K[x] irredutível");
+        tique7(1, "o quociente pelo ideal gerado:");
+        printf("      $K[x]/(p(x))$ é corpo quando $p$ é irredutível\n");
+        tique7(2, "para f ≠ 0 no quociente, gcd(f, p) = 1 (porque p é irredutível e não"
+                  " divide f). Bézout em K[x] dá u, v com fu + pv = 1, logo fu ≡ 1 no"
+                  " quociente: o u é o inverso");
+        tique7(3, "a lei é BÉZOUT — agora em K[x] em vez de ℤ, e é a MESMA descida de"
+                  " Euclides, porque K[x] também tem divisão com resto");
+        tique7(4, "a testemunha é o u, e ele sai do rastro de Euclides sobre polinómios");
+        { int f4[] = {1,1,1}, f9[] = {1,0,1}, f8[] = {1,1,0,1}, red[] = {1,0,1};
+          struct { int p, g; int *f; const char *nome; } cs[4] = {
+              {2,2,f4,"F2[x]/(x²+x+1)"}, {3,2,f9,"F3[x]/(x²+1)"},
+              {2,3,f8,"F2[x]/(x³+x+1)"}, {2,2,red,"F2[x]/(x²+1)"} };
+          int mal = 0;
+          for(int i = 0; i < 4; i++){
+              Anel R;
+              if(!corpo_ext(cs[i].p, cs[i].f, cs[i].g, &R)){ mal++; continue; }
+              int irr = fx_irredutivel(cs[i].f, cs[i].g, cs[i].p);
+              int cor = an_corpo(&R,0);
+              printf("      %-18s irredutível? %-4s  corpo? %-4s\n",
+                     cs[i].nome, irr ? "sim" : "NÃO", cor ? "sim" : "NÃO");
+              if(irr != cor) mal++;                       /* A EQUIVALÊNCIA */
+          }
+          tique7(5, "logo K[x]/(p) é corpo — e a construção transforma"
+                    " corpo → polinómio → fatoração → irredutibilidade → quociente");
+          tique7(6, "e a volta é a EQUIVALÊNCIA medida nos dois sentidos: irredutível ⟹"
+                    " corpo, e redutível ⟹ NÃO corpo. O último caso da lista é o gume");
+          printf("      quatro quocientes: irredutível ⟺ corpo, %d divergências\n", mal); }
+        break; }
+    case 21: {
+        tique7(0, "seja K corpo finito, |K| = q. Quer-se g que gere K× inteiro");
+        tique7(1, "cíclico é ser gerado por um só:");
+        printf("      $K^{\\times} = \\langle g \\rangle$,   com $|K^{\\times}| = q - 1$\n");
+        tique7(2, "para cada d | q−1, o polinómio x^d − 1 tem no MÁXIMO d raízes num"
+                  " corpo (porque um corpo não tem divisores de zero). Isso limita quantos"
+                  " elementos podem ter ordem d, e a contagem só fecha se existir um de"
+                  " ordem q−1");
+        tique7(3, "a lei é «um polinómio de grau d tem ≤ d raízes num CORPO» — e ela"
+                  " depende de não haver divisores de zero, isto é, do teorema 5");
+        tique7(4, "a testemunha é o elemento primitivo, e exibe-se em cada corpo");
+        { int mal = 0, testados = 0;
+          for(int m = 2; m <= 17; m++){
+              Anel R; an_zn(&R,m);
+              if(!an_corpo(&R,0)) continue;
+              int g = corpo_primitivo(&R);
+              if(g < 0){ mal++; continue; }
+              printf("      𝔽%-3d primitivo g = %d,  ordem %ld = %d−1\n",
+                     m, g, nm_ordem(g,m), m);
+              testados++;
+          }
+          /* e nas EXTENSÕES, que é onde o teorema deixa de ser sobre ℤₚ */
+          int f4[] = {1,1,1}, f9[] = {1,0,1}, f8[] = {1,1,0,1};
+          struct { int p, g2; int *f; int q; } cs[3] = {
+              {2,2,f4,4}, {3,2,f9,9}, {2,3,f8,8} };
+          for(int i = 0; i < 3; i++){
+              Anel R;
+              corpo_ext(cs[i].p, cs[i].f, cs[i].g2, &R);
+              int g = corpo_primitivo(&R);
+              if(g < 0) mal++;
+              printf("      |K| = %d:  primitivo = %d\n", cs[i].q, g);
+              testados++;
+          }
+          tique7(5, "logo K× é CÍCLICO — todo corpo finito tem elemento primitivo");
+          tique7(6, "e a volta: em cada corpo achado, as potências de g percorrem TODOS os"
+                    " q−1 não nulos, sem repetir. Se faltasse um, g não era primitivo");
+          printf("      %d corpos (ℤₚ e extensões), todos com primitivo: %d falhas\n",
+                 testados, mal); }
+        break; }
+    case 25: {
+        tique7(0, "sejam a e p com gcd(a,p) = 1. Quer-se ver que cinco coisas são UMA");
+        tique7(1, "a cadeia que ele desenha:");
+        printf("      Euclides $\\leftrightarrow$ MDC $\\leftrightarrow$ Bézout"
+               " $\\leftrightarrow$ inverso $\\leftrightarrow$ corpo\n");
+        tique7(2, "a descida a = pq + r produz, do MESMO rastro: o gcd (último resto não"
+                  " nulo), os coeficientes de Bézout (subindo), o inverso (o x reduzido)"
+                  " e, quando o gcd é sempre 1, o corpo (todo não nulo invertível)");
+        tique7(3, "a lei que atravessa as cinco é uma só — a DIVISÃO COM RESTO. É ela que"
+                  " faz a descida terminar, e é dela que tudo o resto se lê");
+        tique7(4, "a testemunha é a própria cadeia de restos, e mostra-se uma");
+        { long a = 5, p = 13;
+          printf("      Euclides(%ld, %ld):\n", p, a);
+          { long u = p, v = a;
+            while(v){ printf("        %ld = %ld·%ld + %ld\n", u, v, u/v, u%v);
+                      long r = u % v; u = v; v = r; }
+            printf("        gcd = %ld\n", u); }
+          long bx, by, g = iz_gcd(a, p, &bx, &by);
+          long inv; nm_inv_mod(a, p, &inv);
+          printf("      Bézout:  %ld·(%ld) + %ld·(%ld) = %ld\n", a, bx, p, by, g);
+          printf("      inverso: %ld⁻¹ = %ld  (e %ld·%ld = %ld ≡ 1 mod %ld)\n",
+                 a, inv, a, inv, a*inv, p);
+          tique7(5, "logo as cinco são leituras do mesmo rastro — e o CORPO é a afirmação"
+                    " de que isto corre para TODO não nulo");
+          tique7(6, "e a volta é a equivalência medida: 𝔽ₚ é corpo ⟺ todo não nulo tem"
+                    " gcd 1 com p ⟺ Euclides devolve sempre 1 ⟺ Bézout dá sempre inverso");
+          { int mal = 0, corpos = 0;
+            for(int m = 2; m <= ES_MAX; m++){        /* o teto da tábua */
+                int todos = 1;
+                for(int b = 1; b < m; b++) if(iz_gcd(b,m,0,0) != 1) todos = 0;
+                Anel R; an_zn(&R,m);
+                if(todos != an_corpo(&R,0)) mal++;
+                if(todos) corpos++;
+            }
+            printf("      ℤₘ até ao teto: «Euclides dá sempre 1» ⟺ «é corpo» — %d corpos,"
+                   " %d divergências\n", corpos, mal); } }
+        break; }
+    }
+}
+static int resolve_corpo(const char *f){
+    const char *p = f;
+    /* O NOME EXATO PRIMEIRO — porque «corpo de 9» COMEÇA por «corpo», e o prefixo
+     * comia-o: sobrava « de 9», que não é número nem nome, e a fala morria calada.
+     * Foi a varredura do índice que o apanhou, e não a leitura. */
+    for(size_t i = 0; i < sizeof CP25/sizeof *CP25; i++)
+        if(!strcmp(p, CP25[i].nome)){ corpo_resolve(CP25[i].n); return 1; }
+    if(!strncmp(p, "corpos", 6)) p += 6;
+    else if(!strncmp(p, "corpo", 5)) p += 5;
+    else return 0;
+    while(*p == ' ') p++;
+    if(!*p){
+        printf("   teoria dos corpos — «corpos N» ou «corpos <nome>»\n");
+        printf("   e o andar fecha a escada: ℕ → ℤ → ℚ → ℝ → K, uma reversibilidade"
+               " nova em cada salto\n");
+        printf("   (a exceção continua a mesma: 0⁻¹ não existe)\n\n");
+        for(size_t i = 0; i < sizeof CP25/sizeof *CP25; i++){
+            if(i == 0)  printf("   nível 1 — estrutura\n");
+            if(i == 6)  printf("   nível 2 — finitos\n");
+            if(i == 11) printf("   nível 3 — extensões\n");
+            if(i == 20) printf("   nível 4 — máquina pesada\n");
+            printf("     %2d  ", CP25[i].n);
+            esc_col(CP25[i].nome, 26);
+            printf("  %s\n", CP25[i].enunciado);
+        }
+        return 1;
+    }
+    if(*p >= '0' && *p <= '9'){
+        long n = 0;
+        while(*p >= '0' && *p <= '9') n = n*10 + (*p++ - '0');
+        while(*p == ' ') p++;
+        if(!*p && n >= 1 && n <= 25){ corpo_resolve((int)n); return 1; }
+        return 0;
+    }
+    for(size_t i = 0; i < sizeof CP25/sizeof *CP25; i++)
+        if(!strcmp(p, CP25[i].nome)){ corpo_resolve(CP25[i].n); return 1; }
+    return 0;
+}
 /* ── ÁLGEBRA MODERNA: O RASTRO DE SETE TICKS, E A DEFINIÇÃO EM LaTeX ────────────────
  * O `eval.txt` fecha com a exigência de forma, e ela vale para TODOS os teoremas:
  *
@@ -1358,7 +2097,6 @@ static int resolve_bezout(const char *f){
  *
  * A DEFINIÇÃO vai em LaTeX, no seu tick, para o tradutor a compor. É a membrana a
  * carregar a matemática e não só o texto. */
-static void esc_col(const char *s, int largura);
 static const char *ES7[7] = { "HIPÓTESES", "DEFINIÇÃO", "TRANSIÇÃO", "LEI USADA",
                               "TESTEMUNHA", "CONCLUSÃO", "VOLTA" };
 static void tique7(int slot, const char *porque){
@@ -3028,8 +3766,11 @@ static int resolve_identifica(const char *f){
     TICK_N = 0;
     printf("   √%ld por QUATRO portas — e o fecho não pode depender de qual se abre\n", a);
     if(r*r == a){
-        tique("SEM BURACO — %ld é quadrado perfeito e o ponto já estava em ℚ: as quatro"
-              " portas dão o mesmo porque não há nada a fechar");
+        { char pq[200];
+          snprintf(pq, sizeof pq, "SEM BURACO — %ld é quadrado perfeito e o ponto já"
+                   " estava em ℚ: as quatro portas dão o mesmo porque não há nada a"
+                   " fechar", a);
+          tique(pq); }
         printf("      √%ld = %ld, e é aqui que a pergunta não tem conteúdo\n", a, r);
         return 1;
     }
@@ -3618,7 +4359,10 @@ static int resolve_reais(const char *f){
             " (p/d)² < a é p² < a·d², sem divisão nenhuma");
       if(r*r == a){
           printf("      √%ld = %ld: o corte FECHA em ℚ, e o ponto já lá estava\n", a, r);
-          tique("VOLTA — e confere: %ld² = %ld, exato. Não há buraco a preencher aqui");
+          { char pq[160];
+            snprintf(pq, sizeof pq, "VOLTA — e confere: %ld² = %ld, exato. Não há buraco"
+                     " a preencher aqui", r, r*r);
+            tique(pq); }
           printf("      %ld² = %ld   (resíduo 0)\n", r, r*r);
           return 1;
       }
@@ -5765,6 +6509,7 @@ static int resolve_mostra(const char *f){ return resolve_mostra_em(f, "../papers
 static int resolve_simbolico(const char *fala){
     if(resolve_divisibilidade(fala)) return 1;     /* o relógio de 6 ticks */
     if(resolve_bezout(fala)) return 1;             /* a testemunha e o critério */
+    if(resolve_corpo(fala)) return 1;              /* teoria dos corpos, os 25 */
     if(resolve_estrutura(fala)) return 1;          /* álgebra moderna, os 20 */
     if(resolve_eliptica(fala)) return 1;           /* Dirichlet e as elípticas */
     if(resolve_numeros(fala)) return 1;            /* teoria dos números, os 17 */
@@ -6799,6 +7544,318 @@ static int teste(void){
                 if(e_conta(nu2)) roubadas++;
             }
             ok("e a membrana nao rouba o corpus: fala sem LaTeX nao vira conta", roubadas == 0);
+
+        /* ═══ §C36 CORPOS: A ESCADA FECHA, E A EXCEÇÃO É A MESMA ══════════════════
+         * «corpo é praticamente o ponto em que "toda operação que tem fibra tem volta"
+         * vira uma estrutura algébrica formal. A EXCEÇÃO continua sendo exatamente a que
+         * vocês já descobriram: 0⁻¹ não existe.»
+         *
+         *   ℕ: + ×   ℤ: a↦−a   ℚ: a↦a⁻¹ (a≠0)   ℝ: completude   K: inversão fechada
+         *
+         * E o andar reaproveita quase tudo: corpo → polinómio → fatoração →
+         * irredutibilidade → quociente. O 𝔽₄ é medido pelo MESMO `an_corpo` que mediu o
+         * ℤ₅ — não por uma segunda régua. */
+        printf("\n§C36 CORPOS: a escada fecha, e o 0⁻¹ continua a ser a única exceção.\n\n");
+        {
+            int f4[] = {1,1,1}, f9[] = {1,0,1}, f8[] = {1,1,0,1}, red[] = {1,0,1};
+
+            /* (1)(2)(5) ℚ É CORPO, ℤ NÃO É, E A ÚNICA EXCEÇÃO É O ZERO */
+            { int qmal = 0; long com = 0, sem = 0;
+              for(long p2 = -20; p2 <= 20; p2++) for(long q2 = 1; q2 <= 20; q2++){
+                  Qz x = qz(p2,q2), inv;
+                  int tem = qz_inverso(x, &inv);
+                  if(tem != (p2 != 0)) qmal++;            /* existe ⟺ ≠ 0 */
+                  if(tem){ if(!qz_igual(qz_mult(x,inv), qz_de_inteiro(1))) qmal++; com++; }
+                  else sem++;
+                  for(long r = -3; r <= 3; r++){
+                      Qz y = qz(r,3), z = qz(r+1,5);
+                      if(!qz_igual(qz_mult(x, qz_soma(y,z)),
+                                   qz_soma(qz_mult(x,y), qz_mult(x,z)))) qmal++;
+                  }
+              }
+              /* e em ℤ o 2 NÃO tem inverso — a testemunha do salto ℤ → ℚ */
+              long inv2 = 0;
+              for(long b = -500; b <= 500; b++) if(2*b == 1) inv2++;
+              printf("      ℚ: %ld com inverso e %ld sem (só o zero, %ld vezes escrito);"
+                     "  e em ℤ o 2 tem %ld inversos\n", com, sem, sem, inv2);
+              ok("ℚ É CORPO e ℤ NÃO É, e a diferença cabe num elemento: em ℚ todo não"
+                 " nulo tem inverso e a distributividade fecha; em ℤ o 2 não tem inverso"
+                 " nenhum. E a ÚNICA exceção em ℚ é o zero — a mesma que a casa encontrou"
+                 " no andar dos racionais, e que este andar volta a encontrar",
+                 qmal == 0 && com > 700 && inv2 == 0); }
+
+            /* (3)(4) A UNICIDADE DO INVERSO E O CANCELAMENTO, com o gume no não-corpo */
+            { int umal = 0; long falhas_corpo = 0, falhas_z6 = 0;
+              for(int m = 2; m <= 13; m++){
+                  Anel R; an_zn(&R,m);
+                  int corpo = an_corpo(&R,0);
+                  for(int a = 1; a < m; a++){
+                      int quantos = 0;
+                      for(int b = 0; b < m; b++) if(R.mult[a][b] == 1 % m) quantos++;
+                      if(quantos > 1) umal++;             /* o inverso é ÚNICO */
+                      for(int b = 0; b < m; b++) for(int c = 0; c < m; c++)
+                          if(R.mult[a][b] == R.mult[a][c] && b != c){
+                              if(corpo) falhas_corpo++; else falhas_z6++;
+                          }
+                  }
+              }
+              printf("      inverso único em ℤₘ até 13; cancelamento: %ld falhas nos"
+                     " CORPOS e %ld nos que não são\n", falhas_corpo, falhas_z6);
+              ok("o INVERSO É ÚNICO (a cadeia b = b·1 = b(ac) = (ba)c = 1c = c) e o"
+                 " CANCELAMENTO vale — mas SÓ em corpo. Nos ℤₘ que não são corpo ele"
+                 " falha, e conta-se: é a hipótese a pagar-se, não a decorar-se",
+                 umal == 0 && falhas_corpo == 0 && falhas_z6 > 0); }
+
+            /* (6)(10) A CARACTERÍSTICA É 0 OU PRIMA — e o gume é o não-corpo */
+            { int cmal = 0, primos = 0;
+              for(int m = 2; m <= 24; m++){
+                  Anel R; an_zn(&R,m);
+                  int c = corpo_carac(&R, 80);
+                  if(c != m) cmal++;                       /* char(ℤₘ) = m */
+                  if(an_corpo(&R,0)){
+                      if(!nt_primo(c)) cmal++;             /* corpo ⟹ char prima */
+                      primos++;
+                  }
+              }
+              /* nas EXTENSÕES a característica é p e NÃO pⁿ — é aí que o teorema morde */
+              struct { int p, g; int *f; int q; } cs[3] = { {2,2,f4,4}, {3,2,f9,9}, {2,3,f8,8} };
+              int ext_mal = 0;
+              for(int i = 0; i < 3; i++){
+                  Anel R;
+                  corpo_ext(cs[i].p, cs[i].f, cs[i].g, &R);
+                  if(corpo_carac(&R, 80) != cs[i].p) ext_mal++;
+                  printf("      |K| = %d:  char = %d (e NÃO %d — a característica é o"
+                         " primo, não a cardinalidade)\n",
+                         cs[i].q, corpo_carac(&R,80), cs[i].q);
+              }
+              /* e o gume: ℤ₆ não é corpo E tem característica composta */
+              Anel Z6; an_zn(&Z6,6);
+              ok("a CARACTERÍSTICA de um corpo é 0 ou PRIMA — e o gume está nas"
+                 " EXTENSÕES: 𝔽₄ tem 4 elementos e característica 2, 𝔽₉ tem 9 e"
+                 " característica 3. Se eu tivesse medido só em ℤₘ, char = m e o teorema"
+                 " parecia dizer «char = |K|», que é falso. O ℤ₆ (não corpo) tem"
+                 " característica 6, composta — a hipótese decide",
+                 cmal == 0 && ext_mal == 0 && primos > 0 && corpo_carac(&Z6,80) == 6); }
+
+            /* (7)(8) «PRIMO PASSA, COMPOSTO CAI» — a equivalência varrida */
+            { int pmal = 0, sim = 0, nao = 0;
+              for(int m = 2; m <= ES_MAX; m++){        /* o teto da tábua, e é ele que manda */
+                  Anel R; an_zn(&R,m);
+                  int c = an_corpo(&R,0);
+                  if(c != (nt_primo(m) != 0)) pmal++;
+                  if(c) sim++; else nao++;
+                  /* e quando não é corpo, os divisores de zero EXIBEM-SE */
+                  if(!c && m > 2){
+                      int ea = 0, eb = 0;
+                      if(an_dominio(&R,&ea,&eb)) pmal++;   /* tem de haver testemunha */
+                  }
+              }
+              ok("«PRIMO PASSA, COMPOSTO CAI» — ℤₘ é corpo exatamente quando m é primo,"
+                 " varrido até ao teto da tábua nos DOIS sentidos, e em cada composto os"
+                 " divisores de zero exibem-se. Não é o critério a decidir: é a estrutura,"
+                 " e o critério a acompanhá-la", pmal == 0 && sim > 0 && nao > 0); }
+
+            /* (9)(23)(24) OS TRÊS CAMINHOS PARA O INVERSO EM 𝔽ₚ, e têm de concordar */
+            { int imal = 0; long feitos = 0, esperado = 0;
+              /* o total NÃO se escreve à mão: conta-se por um segundo caminho (a soma
+               * dos p−1 sobre os primos do intervalo) e exige-se a igualdade. Um limiar
+               * meu já falhou aqui — `> 300` quando o verdadeiro é 225. */
+              for(long p = 2; p <= 41; p++) if(nt_primo(p)) esperado += p - 1;
+              for(long p = 2; p <= 41; p++){
+                  if(!nt_primo(p)) continue;
+                  for(long a = 1; a < p; a++){
+                      long por_euclides; nm_inv_mod(a, p, &por_euclides);
+                      long por_fermat = iz_pot_mod(a, p-2, p);
+                      long por_busca = 0;
+                      for(long b = 1; b < p; b++) if((a*b) % p == 1){ por_busca = b; break; }
+                      if(por_euclides != por_fermat) imal++;
+                      if(por_euclides != por_busca) imal++;
+                      if((a*por_euclides) % p != 1) imal++;
+                      if(iz_pot_mod(a, p-1, p) != 1) imal++;   /* e o Fermat que o funda */
+                      feitos++;
+                  }
+              }
+              printf("      %ld inversos em 𝔽ₚ (p ≤ 41) por TRÊS caminhos — Euclides,"
+                     " a^{p−2} e a busca;  Σ(p−1) = %ld\n", feitos, esperado);
+              ok("o INVERSO em 𝔽ₚ sai por TRÊS caminhos que têm de concordar: o x de"
+                 " BÉZOUT reduzido, a potência a^{p−2} (que é FERMAT a transformar"
+                 " inversão em potência) e a busca. Concordam em todos, e o Fermat que"
+                 " funda o segundo mede-se junto. E o total confere com Σ(p−1) contado"
+                 " à parte — o limiar não é um número meu",
+                 imal == 0 && feitos == esperado && esperado > 0); }
+
+            /* (11)(18)(19) |K| = pⁿ: os que EXISTEM constroem-se, e os que não, contam-se */
+            { int nmal = 0, construidos = 0;
+              struct { int p, g; int *f; int q; } cs[3] = { {2,2,f4,4}, {3,2,f9,9}, {2,3,f8,8} };
+              for(int i = 0; i < 3; i++){
+                  Anel R;
+                  if(!corpo_ext(cs[i].p, cs[i].f, cs[i].g, &R)){ nmal++; continue; }
+                  if(R.n != cs[i].q) nmal++;
+                  if(!an_corpo(&R,0)) nmal++;
+                  construidos++;
+              }
+              /* e as cardinalidades: potência de primo ⟺ existe corpo (nas que sabemos
+               * construir); as com dois primos distintos NÃO podem existir */
+              int impossiveis = 0, possiveis = 0;
+              for(int q = 2; q <= 30; q++){
+                  long pr[NT_FAT]; int ex[NT_FAT];
+                  int k = nt_fatora(q, pr, ex, NT_FAT);
+                  if(k > 1) impossiveis++; else possiveis++;
+              }
+              /* 6 e 10 são os que ele nomeia */
+              long pr6[NT_FAT], pr10[NT_FAT]; int e6[NT_FAT], e10[NT_FAT];
+              int k6 = nt_fatora(6, pr6, e6, NT_FAT), k10 = nt_fatora(10, pr10, e10, NT_FAT);
+              printf("      construídos: 𝔽₄, 𝔽₈, 𝔽₉ (todos corpos);  6 = %ld·%ld e"
+                     " 10 = %ld·%ld — dois primos distintos, logo impossíveis\n",
+                     pr6[0], pr6[1], pr10[0], pr10[1]);
+              ok("|K| = pⁿ: os que EXISTEM constroem-se e medem-se (𝔽₄, 𝔽₈, 𝔽₉ são"
+                 " corpos pelo mesmo `an_corpo` que mediu o ℤ₅), e os que NÃO existem"
+                 " dizem-se pela fatoração — 6 e 10 têm dois primos distintos, e a"
+                 " característica teria de ser os dois ao mesmo tempo. Dizer que não"
+                 " existem sem construir os que existem seria metade",
+                 nmal == 0 && construidos == 3 && k6 == 2 && k10 == 2
+                 && impossiveis > 0 && possiveis > 0); }
+
+            /* (12)(13)(17) ℚ(√d): a norma é a fibra, e o inverso sai dela */
+            { int emal = 0; long feitos = 0;
+              for(long d = 2; d <= 5; d++){
+                  if(raizi(d)*raizi(d) == d) continue;      /* d quadrado: não é extensão */
+                  for(long ap = -6; ap <= 6; ap++) for(long bp = -6; bp <= 6; bp++){
+                      Qs x = qs(qz_de_inteiro(ap), qz_de_inteiro(bp)), inv;
+                      Qz N = qs_norma(x, d);
+                      int nulo = (ap == 0 && bp == 0);
+                      if((N.p == 0) != nulo) emal++;        /* a norma só zera no zero */
+                      if(nulo) continue;
+                      if(!qs_inverso(x, d, &inv)){ emal++; continue; }
+                      Qs um = qs_mult(x, inv, d);
+                      if(!qs_igual(um, qs(qz_de_inteiro(1), qz(0,1)))) emal++;
+                      /* e o CONJUGADO é o dual: x·x† = N(x), e (x†)† = x */
+                      if(!qz_igual(qs_mult(x, qs_conj(x), d).a, N)) emal++;
+                      if(!qs_igual(qs_conj(qs_conj(x)), x)) emal++;
+                      feitos++;
+                  }
+                  /* e α² − d = 0 exatamente, que é o polinómio mínimo a fechar */
+                  Qs alfa = qs(qz(0,1), qz(1,1));
+                  Qs val = qs_soma(qs_mult(alfa,alfa,d), qs(qz_de_inteiro(-d), qz(0,1)));
+                  if(val.a.p || val.b.p) emal++;
+              }
+              printf("      ℚ(√d) para d = 2, 3, 5: %ld inversos exatos, e a norma só"
+                     " zera no zero\n", feitos);
+              ok("ℚ(√d) é corpo e a FIBRA é a NORMA: (a+b√d)(a−b√d) = a² − db², que só é"
+                 " zero quando a = b = 0 — porque √d ∉ ℚ, que é o andar de ℝ a servir"
+                 " este. O conjugado é o DUAL (x†† = x, e xx† = N(x)), e o polinómio"
+                 " mínimo fecha: α² − d = 0 exato",
+                 emal == 0 && feitos > 400); }
+
+            /* (14)(15)(16)(20) O QUOCIENTE: irredutível ⟺ corpo, nos DOIS sentidos */
+            { int qmal2 = 0;
+              struct { int p, g; int *f; const char *nome; } cs[4] = {
+                  {2,2,f4,"F2[x]/(x²+x+1)"}, {3,2,f9,"F3[x]/(x²+1)"},
+                  {2,3,f8,"F2[x]/(x³+x+1)"}, {2,2,red,"F2[x]/(x²+1)"} };
+              int irr_e_corpo = 0, red_e_nao = 0;
+              for(int i = 0; i < 4; i++){
+                  Anel R;
+                  if(!corpo_ext(cs[i].p, cs[i].f, cs[i].g, &R)){ qmal2++; continue; }
+                  int irr = fx_irredutivel(cs[i].f, cs[i].g, cs[i].p);
+                  int cor = an_corpo(&R,0);
+                  if(irr != cor) qmal2++;                   /* A EQUIVALÊNCIA */
+                  if(irr && cor) irr_e_corpo++;
+                  if(!irr && !cor) red_e_nao++;
+                  /* e quando é corpo, todo não nulo tem inverso e o 0 não tem */
+                  if(cor){
+                      for(int a = 1; a < R.n; a++) if(corpo_inv(&R,a) < 0) qmal2++;
+                      if(corpo_inv(&R,0) >= 0) qmal2++;     /* 0⁻¹ NÃO existe */
+                  }
+              }
+              printf("      quatro quocientes: %d irredutíveis que dão corpo e %d"
+                     " redutíveis que NÃO dão — a equivalência nos dois sentidos\n",
+                     irr_e_corpo, red_e_nao);
+              ok("K[x]/(p) é CORPO exatamente quando p é IRREDUTÍVEL — medido nos dois"
+                 " sentidos, com o x²+1 sobre 𝔽₂ (que é (x+1)²) a dar o lado que falha."
+                 " «Irredutível está para o polinómio como primo está para o inteiro», e"
+                 " em cada corpo construído o 0 continua sem inverso",
+                 qmal2 == 0 && irr_e_corpo == 3 && red_e_nao == 1); }
+
+            /* (21)(22) K× É CÍCLICO — e mede-se nas EXTENSÕES, não só em ℤₚ */
+            { int cmal2 = 0, corpos = 0;
+              for(int m = 2; m <= 23; m++){
+                  Anel R; an_zn(&R,m);
+                  if(!an_corpo(&R,0)) continue;
+                  int g = corpo_primitivo(&R);
+                  if(g < 0){ cmal2++; continue; }
+                  if(nm_ordem(g, m) != m-1) cmal2++;
+                  corpos++;
+              }
+              struct { int p, g; int *f; int q; } cs[3] = { {2,2,f4,4}, {3,2,f9,9}, {2,3,f8,8} };
+              for(int i = 0; i < 3; i++){
+                  Anel R;
+                  corpo_ext(cs[i].p, cs[i].f, cs[i].g, &R);
+                  int g = corpo_primitivo(&R);
+                  if(g < 0){ cmal2++; continue; }
+                  /* e a órbita percorre TODOS os não nulos, sem repetir */
+                  int visto[ES_MAX] = {0}, x = 1 % R.n, distintos = 0;
+                  for(int k = 1; k < R.n; k++){
+                      x = R.mult[x][g];
+                      if(!visto[x]){ visto[x] = 1; distintos++; }
+                  }
+                  if(distintos != R.n - 1) cmal2++;
+                  corpos++;
+              }
+              /* e o número de primitivos é φ(q−1) — a contagem que confirma o teorema */
+              Anel R7; an_zn(&R7,7);
+              int prim7 = 0;
+              for(int g = 1; g < 7; g++) if(nm_ordem(g,7) == 6) prim7++;
+              printf("      %d corpos (ℤₚ e extensões) com primitivo; em 𝔽₇ há %d"
+                     " primitivos e φ(6) = %ld\n", corpos, prim7, nm_phi(6));
+              ok("K× é CÍCLICO em todo corpo finito — e mede-se também nas EXTENSÕES"
+                 " (𝔽₄, 𝔽₈, 𝔽₉), não só em ℤₚ, porque em ℤₚ o teorema podia estar a ser"
+                 " confundido com o das raízes primitivas. A órbita do gerador percorre"
+                 " todos os não nulos sem repetir, e os primitivos são φ(q−1)",
+                 cmal2 == 0 && corpos >= 10 && prim7 == nm_phi(6)); }
+
+            /* (25) A CADEIA: Euclides ↔ MDC ↔ Bézout ↔ inverso ↔ corpo, como EQUIVALÊNCIA */
+            { int amal = 0, corpos = 0;
+              for(int m = 2; m <= ES_MAX; m++){        /* o teto da tábua */
+                  int todos_coprimos = 1;
+                  for(int b = 1; b < m; b++) if(iz_gcd(b,m,0,0) != 1) todos_coprimos = 0;
+                  int todos_invertem = 1;
+                  Anel R; an_zn(&R,m);
+                  for(int b = 1; b < m; b++) if(corpo_inv(&R,b) < 0) todos_invertem = 0;
+                  int e_corpo = an_corpo(&R,0);
+                  /* as TRÊS leituras têm de coincidir, e não duas */
+                  if(todos_coprimos != todos_invertem) amal++;
+                  if(todos_invertem != e_corpo) amal++;
+                  if(e_corpo) corpos++;
+              }
+              ok("A CADEIA FECHA COMO EQUIVALÊNCIA: «Euclides devolve sempre 1» ⟺ «todo"
+                 " não nulo tem inverso» ⟺ «é corpo» — as três leituras coincidem em ℤₘ"
+                 " até ao teto da tábua. Euclides, MDC, Bézout, inverso e corpo não são cinco"
+                 " coisas parecidas: são o mesmo rastro lido em cinco colunas",
+                 amal == 0 && corpos > 0); }
+
+            /* E OS VINTE E CINCO CORREM */
+            { int vmal = 0, por_n = 0, por_nome = 0;
+              fflush(stdout);
+              int guarda = dup(1), nulo = open("/dev/null", O_WRONLY);
+              if(guarda >= 0 && nulo >= 0) dup2(nulo, 1);
+              for(int k = 1; k <= 25; k++){
+                  char fala[64];
+                  snprintf(fala, sizeof fala, "corpos %d", k);
+                  if(resolve_corpo(fala)) por_n++; else vmal++;
+              }
+              for(size_t i = 0; i < sizeof CP25/sizeof *CP25; i++)
+                  if(resolve_corpo(CP25[i].nome)) por_nome++; else vmal++;
+              if(resolve_corpo("corpos 26")) vmal++;
+              fflush(stdout);
+              if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
+              if(nulo >= 0) close(nulo);
+              printf("      os vinte e cinco: %d pelo número, %d pelo nome, e a 26 é"
+                     " recusada\n", por_n, por_nome);
+              ok("OS VINTE E CINCO da teoria dos corpos correm pelo NÚMERO e pelo NOME,"
+                 " com o fora de alcance RECUSADO — e cada um na espinha de sete ticks,"
+                 " que é o que ele confirmou no topo do ficheiro",
+                 vmal == 0 && por_n == 25 && por_nome == 25); }
+        }
 
         /* ═══ §C35 ÁLGEBRA MODERNA: O RASTRO DE SETE TICKS ════════════════════════
          * «Álgebra moderna troca calcular números por ESTUDAR OPERAÇÕES e suas
