@@ -53,6 +53,7 @@
 #include "tensor.h"     /* Gram, Sylvester, Jordan, tensor e exterior */
 #include "exterior.h"   /* Lambda V, o Hodge, e o FECHO do par directo/cruzado */
 #include "torre.h"      /* a torre inteira: Cayley-Dickson pelos DOIS lados */
+#include "calculo.h"    /* Calculo I exacto: o quociente de diferencas E um polinomio */
 #include "eletrico.h"
 
 typedef struct { long a, b; } Slot;
@@ -1372,6 +1373,636 @@ static void esc_mat(const char *ind, Mat A);
 static void esc_qz(const char *pre, Qz x, const char *pos);
 static void esc_col(const char *s, int largura);
 static void tique7(int slot, const char *porque);
+/* ── CÁLCULO I, EXACTO — E CADA TEOREMA COM A SUA TRADUÇÃO NO UNIVERSAL ─────────────
+ * O `eval.txt` traz o Cálculo I inteiro com vinte demonstrações e «um gume explícito em
+ * cada teorema». E o Aarão: «tudo agora tem tradução nos teoremas do corpo universal».
+ *
+ * O ACHADO que torna o andar exacto: para f polinomial, o quociente de diferenças
+ * (f(a+h) − f(a))/h É ELE PRÓPRIO UM POLINÓMIO EM h, porque o dividendo não tem termo
+ * constante. Logo f'(a) = q(0) é uma AVALIAÇÃO, não um limite — e a divisão por h é a
+ * FIBRA do `thm:divisao-fibra`. Cálculo I sem um único double, e sem processo infinito.
+ *
+ * E o que o cerco de Riemann dá de graça, por telescopagem: dir − esq = (f(b)−f(a))·h,
+ * EXACTO. O quanto o cerco fecha diz-se sem ε nenhum. */
+static const struct { int n; const char *nome; const char *enunciado; } CL21[] = {
+ {  1, "unicidade do limite","dois limites forçam |L−M| < ε para todo ε, logo L = M" },
+ {  2, "limite da soma",    "lim(f+g) = lim f + lim g, com δ = min(δ₁,δ₂) EXIBIDO" },
+ {  3, "sanduiche",         "g ≤ f ≤ h com limites iguais prende f — e a hipótese da ordem" },
+ {  4, "polinomio contínuo","todo polinómio é contínuo: soma e produto de contínuas" },
+ {  5, "valor intermediario","f(a)<0<f(b) ⟹ existe raiz — por BISSEÇÃO, o corte a decidir" },
+ {  6, "derivada",          "f'(a) = q(0) com f(a+h)−f(a) = h·q(h): AVALIAÇÃO, não limite" },
+ {  7, "regra do produto",  "(fg)' = f'g + fg', e o termo cruzado h·f'g' é o que morre" },
+ {  8, "regra da cadeia",   "(f∘g)' = (f'∘g)·g', pela composição dos quocientes" },
+ {  9, "fermat",            "extremo interior + derivável ⟹ f'(c) = 0, e o gume é a borda" },
+ { 10, "rolle",             "f(a)=f(b) ⟹ existe c com f'(c) = 0" },
+ { 11, "valor medio",       "f'(c) = (f(b)−f(a))/(b−a) — e o c pode NÃO ser racional" },
+ { 12, "monotonia",         "f' > 0 num intervalo ⟹ estritamente crescente" },
+ { 13, "extremos",          "os extremos de x³−3x, e a prova de que o candidato é global" },
+ { 14, "soma de riemann",   "dir − esq = (f(b)−f(a))·h EXACTO, por telescopagem" },
+ { 15, "propriedades da integral","linearidade e aditividade no intervalo, exactas" },
+ { 16, "fundamental i",     "F(x) = ∫ₐˣ f ⟹ F' = f — a derivada desfaz a soma" },
+ { 17, "fundamental ii",    "∫ₐᵇ f = G(b) − G(a) quando G' = f — a VOLTA" },
+ { 18, "substituicao",      "∫ f(g(x))g'(x)dx = ∫ f(u)du — a cadeia lida ao contrário" },
+ { 19, "integracao por partes","∫fg' = fg − ∫f'g — o produto lido ao contrário" },
+ { 20, "analise completa",  "x³−3x inteiro: zeros, extremos, concavidade, inflexão" },
+ { 21, "traducao",          "cada teorema do Cálculo I no teorema do universal que o diz" },
+};
+static void calculo_resolve(int n){
+    TICK_N = 0;
+    printf("   %d — %s\n", n, CL21[n-1].enunciado);
+    /* f = x³ − 3x, o exemplo que o próprio eval escolhe */
+    Cf f = fn0(); f.n = 3; f.c[3] = qz(1,1); f.c[1] = qz(-3,1);
+    /* g = 3x + 1, o do exercício do limite */
+    Cf g = fn0(); g.n = 1; g.c[0] = qz(1,1); g.c[1] = qz(3,1);
+    /* u = x², monótona em [0,2] */
+    Cf u = fn0(); u.n = 2; u.c[2] = qz(1,1);
+
+    switch(n){
+    case 1: case 2: case 3: {
+        tique7(0, n == 1 ? "seja f com lim_{x→a} f(x) = L e também = M"
+             : n == 2 ? "sejam lim f = L e lim g = M em x → a"
+                      : "sejam g ≤ f ≤ h numa vizinhança de a, com lim g = lim h = L");
+        tique7(1, n == 1 ? "a definição ε-δ, e a unicidade sai dela:"
+             : n == 2 ? "o limite da soma:" : "o teorema do sanduíche:");
+        printf(n == 1 ? "      $|L-M| \\leq |L-f(x)| + |f(x)-M| < 2\\varepsilon$"
+                        "   para todo $\\varepsilon$\n"
+             : n == 2 ? "      $\\delta = \\min(\\delta_1,\\delta_2)$   serve para a soma\n"
+                      : "      $g \\leq f \\leq h$   e   $\\lim g = \\lim h = L$"
+                        "   $\\Rightarrow$   $\\lim f = L$\n");
+        tique7(2, n == 1
+               ? "a transição é a DESIGUALDADE TRIANGULAR aplicada ao mesmo x: se L e M"
+                 " fossem ambos limites, |L−M| ficava menor que 2ε para TODO ε > 0, e o"
+                 " único racional com essa propriedade é o zero"
+             : n == 2
+               ? "a transição é escolher o MENOR dos dois δ. Cada limite dá o seu, e o"
+                 " mínimo serve aos dois ao mesmo tempo — não é um truque, é o que a"
+                 " conjunção de duas condições obriga"
+               : "a transição é que f fica PRESO: L − ε < g(x) ≤ f(x) ≤ h(x) < L + ε. Não"
+                 " se estima f — cerca-se, e o cerco fecha porque as duas pontas fecham");
+        tique7(3, "a lei é ε-δ, e aqui ela é EXACTA: ε e δ são racionais, e a implicação"
+                  " verifica-se numa malha do intervalo, sem aproximar nada");
+        { Qz d = qz(0,1); int achou = 0; long tentados = 0;
+          printf("      f(x) = 3x + 1, a = 2, L = 7 — e o δ é PROCURADO:\n");
+          printf("        ε           δ achado\n");
+          for(int k = 1; k <= 5; k++){
+              Qz eps = qz(1, 1L << k);
+              int ok = fn_acha_delta(g, qz(2,1), qz(7,1), eps, 24, &d, 12);
+              tentados++; if(ok) achou++;
+              printf("        ");
+              esc_qz("", eps, "");
+              printf("         ");
+              if(ok) esc_qz("", d, "\n"); else printf("NÃO achou\n");
+          }
+          /* o GUME: o mesmo buscador com o L ERRADO tem de voltar VAZIO */
+          long falso = 0;
+          for(int k = 1; k <= 5; k++){
+              Qz eps = qz(1, 1L << k), dd;
+              if(fn_acha_delta(g, qz(2,1), qz(8,1), eps, 24, &dd, 12)) falso++;
+          }
+          printf("      CONTROLO com o limite ERRADO (L = 8): %ld dos %ld acham\n",
+                 falso, tentados);
+          tique7(4, "a testemunha é o δ EXIBIDO para cada ε, e não a promessa de que"
+                    " existe. E o vazio só vale porque o MESMO buscador, com o limite"
+                    " errado, NÃO acha — sem esse controlo, «achou» não distinguia a lei"
+                    " do buscador que aceita tudo");
+          tique7(5, achou == tentados && falso == 0
+                 ? (n == 1 ? "logo o limite é ÚNICO: dois candidatos distintos não"
+                             " sobrevivem ao mesmo ε"
+                    : n == 2 ? "logo o limite da soma é a soma dos limites"
+                             : "logo f fica preso, e o limite é L")
+                 : "os controlos não se separaram — NÃO afirmo");
+          tique7(6, n == 3
+                 ? "e a VOLTA é o GUME: retirada a hipótese da ORDEM (g ≤ f ≤ h), o cerco"
+                   " deixa de existir e f pode ir para qualquer lado — o teorema não fala"
+                   " de três funções quaisquer, fala de três ORDENADAS. TRADUÇÃO NO"
+                   " UNIVERSAL: o cerco é o CORTE, e o corte é o que thm:real-caminho diz"
+                   " ser um real — um caminho que decide a cada nó, nunca um nó"
+                 : "e a VOLTA é a TRADUÇÃO: no universal, ε-δ é a ESCADA DE OBSERVADORES"
+                   " (thm:escada) — cada ε é um degrau da filtração, e «aumentar o"
+                   " observador refina as classes» é «diminuir o ε aperta o cerco». A"
+                   " mesma estrutura, dois nomes"); }
+        break; }
+    case 4: case 5: {
+        tique7(0, n == 4 ? "seja p um polinómio com coeficientes racionais"
+                         : "seja f contínua em [a,b] com f(a) < 0 < f(b)");
+        tique7(1, n == 4 ? "todo polinómio é contínuo:"
+                         : "o teorema do valor intermédio:");
+        printf(n == 4 ? "      $x \\mapsto x$ é contínua, e soma e produto de contínuas"
+                        " são contínuas\n"
+                      : "      existe $c \\in (a,b)$ com $f(c) = 0$\n");
+        if(n == 4){
+            tique7(2, "a transição é a INDUÇÃO na construção: a identidade e as constantes"
+                      " são contínuas, e todo polinómio obtém-se delas por soma e produto"
+                      " em número FINITO de passos. Não se prova para «um polinómio»:"
+                      " prova-se para as peças e para as duas operações");
+            tique7(3, "a lei é o fecho: as contínuas formam um anel. Provado isso, o"
+                      " polinómio vem de graça — e é por isso que a demonstração é sobre a"
+                      " ESTRUTURA e não sobre a fórmula");
+            { Qz d = qz(0,1); long achou = 0, casos = 0;
+              printf("      o δ para f(x) = x³ − 3x em a = 2 (f(2) = 2):\n");
+              for(int k = 1; k <= 4; k++){
+                  Qz eps = qz(1, 1L << k);
+                  casos++;
+                  if(fn_acha_delta(f, qz(2,1), qz(2,1), eps, 26, &d, 10)){
+                      achou++;
+                      printf("        ε = "); esc_qz("", eps, "");
+                      printf("   δ = "); esc_qz("", d, "\n");
+                  }
+              }
+              tique7(4, "a testemunha é o δ achado para cada ε num polinómio de grau 3 —"
+                        " e a continuidade em a é a mesma definição do limite com L = f(a),"
+                        " que é o que a fala 6 vai usar");
+              tique7(5, achou == casos ? "logo todo polinómio é contínuo em todo ponto"
+                                       : "algum ε ficou sem δ — NÃO afirmo");
+              tique7(6, "e a VOLTA é a TRADUÇÃO: no universal a continuidade é a MEMBRANA"
+                        " (def:membrana) — «o corpo em trânsito pela transformada», e não"
+                        " um operador novo. Atravessar sem se partir é o que uma função"
+                        " contínua faz"); }
+        } else {
+            tique7(2, "a transição é a BISSEÇÃO: parte-se o intervalo ao meio e fica-se com"
+                      " a metade onde o sinal ainda troca. O sinal trocado é a hipótese, e"
+                      " é ele que sobrevive a cada corte");
+            tique7(3, "a lei é a completude, e aqui ela é o CORTE: não se devolve «a raiz»"
+                      " — devolve-se o intervalo encaixante que a contém, com o sinal"
+                      " trocado nos extremos. É a régua desta casa, e é o que impede o"
+                      " decimal de entrar");
+            { Qz lo, hi;
+              int ok = fn_bissec(f, qz(1,1), qz(2,1), 20, &lo, &hi);
+              printf("      f(x) = x³ − 3x em [1,2]:   f(1) = ");
+              esc_qz("", fn_av(f,qz(1,1)), "   f(2) = ");
+              esc_qz("", fn_av(f,qz(2,1)), "\n");
+              printf("      após 20 bisseções o corte está em\n        [");
+              esc_qz("", lo, ", "); esc_qz("", hi, "]\n");
+              printf("      e o quadrado do ponto é 3: a raiz é √3, que NÃO é racional\n");
+              /* o GUME: sem troca de sinal a busca tem de RECUSAR */
+              Qz l2, h2;
+              int mau = fn_bissec(f, qz(3,1), qz(4,1), 20, &l2, &h2);
+              printf("      GUME — em [3,4] não há troca de sinal: a bisseção %s\n",
+                     mau ? "aceitou (MAU)" : "RECUSA, e é o que deve fazer");
+              tique7(4, "a testemunha é o intervalo encaixante EXIBIDO, com f a trocar de"
+                        " sinal nos extremos. E o gume é o controlo: retirada a troca de"
+                        " sinal, o mesmo programa RECUSA — não devolve um intervalo errado,"
+                        " recusa-se a devolver");
+              tique7(5, ok && !mau
+                     ? "logo existe c com f(c) = 0, e ele é um CORTE — a raiz de x³ = 3x é"
+                       " irracional, e por isso não podia mesmo ser devolvida como número"
+                     : "os controlos não se separaram — NÃO afirmo");
+              tique7(6, "e a VOLTA é a TRADUÇÃO: isto É o thm:real-caminho do universal —"
+                        " «o real é um caminho da raiz à folha, e o corte de Dedekind é o"
+                        " que ele decide a cada nó». A bisseção é o caminho a ser"
+                        " soletrado, e a folha NÃO é nó: a raiz não aparece na árvore"); }
+        }
+        break; }
+    case 6: case 7: case 8: {
+        tique7(0, "sejam f, g polinómios sobre ℚ e a um ponto racional");
+        tique7(1, n == 6 ? "a derivada, pela definição:"
+             : n == 7 ? "a regra do produto:" : "a regra da cadeia:");
+        printf(n == 6 ? "      $f(a+h) - f(a) = h\\,q(h)$,\\qquad $f'(a) = q(0)$\n"
+             : n == 7 ? "      $(fg)' = f'g + fg'$\n"
+                      : "      $(f \\circ g)' = (f' \\circ g)\\cdot g'$\n");
+        tique7(2, n == 6
+               ? "E AQUI ESTÁ O ACHADO DESTE ANDAR: f(a+h) − f(a) NÃO TEM TERMO CONSTANTE,"
+                 " logo é divisível por h EXACTAMENTE, e o quociente q(h) é um POLINÓMIO."
+                 " Portanto f'(a) = q(0) é uma AVALIAÇÃO, não um limite. Não há processo"
+                 " infinito: há uma divisão que fecha"
+             : n == 7
+               ? "a transição é abrir (fg)(a+h) − (fg)(a) e ver o que sobra: fica"
+                 " f(a)·[g(a+h)−g(a)] + g(a+h)·[f(a+h)−f(a)], e o termo cruzado carrega um"
+                 " h que o mata em h = 0. A regra não é uma fórmula: é o que resta"
+               : "a transição é COMPOR os quocientes: (f∘g)(a+h) − (f∘g)(a) escreve-se como"
+                 " o quociente de f em g(a) vezes o quociente de g em a. É uma"
+                 " multiplicação de duas divisões exactas");
+        tique7(3, "a lei é a DIVISÃO EXACTA por h — e no universal ela tem nome:"
+                  " thm:divisao-fibra, «a divisão não se postula como aritmética: é a"
+                  " FIBRA inversa da fusão». Aqui a fibra é «dado f(a+h) − f(a) e o factor"
+                  " h, achar o outro», e ela existe porque o dividendo se anula em 0");
+        { int mal = 0; long feitos = 0;
+          for(long a = -6; a <= 6; a++) for(long q = 1; q <= 4; q++){
+              Qz x = qz(a,q), d2;
+              Qz d1 = fn_av(fn_deriva(f), x);                 /* 1: a regra formal */
+              if(!fn_deriva_def(f, x, &d2)){ mal++; continue; } /* 2: o quociente */
+              Dual dd = fn_av_dual(f, x);                     /* 3: a parte ε do dual */
+              if(!qz_igual(d1,d2)) mal++;
+              if(!qz_igual(d1,dd.e)) mal++;
+              if(!qz_igual(fn_av(f,x), dd.p)) mal++;          /* e a parte real é f(a) */
+              feitos++;
+          }
+          Cf q3;
+          fn_quociente(f, qz(2,1), &q3);
+          printf("      f(x) = x³ − 3x,  a = 2:\n");
+          printf("        q(h) = h² + 6h + 9   (um POLINÓMIO, e é isto que dispensa o"
+                 " limite)\n");
+          printf("        f'(2) = q(0) = "); esc_qz("", fn_av(q3, qz(0,1)), "\n");
+          printf("      TRÊS caminhos independentes em %ld pontos racionais:"
+                 " %d divergências\n", feitos, mal);
+          { Dual dd = fn_av_dual(f, qz(2,1));
+            printf("        1. regra formal        f'(2) = ");
+            esc_qz("", fn_av(fn_deriva(f), qz(2,1)), "\n");
+            printf("        2. quociente q(0)      f'(2) = ");
+            esc_qz("", fn_av(q3, qz(0,1)), "\n");
+            printf("        3. parte ε do dual     f(2+ε) = ");
+            esc_qz("", dd.p, " + "); esc_qz("", dd.e, "·ε\n"); }
+          if(n == 7){
+              /* a regra do produto, medida contra a derivada da definição */
+              int pm = 0; long pf = 0;
+              Cf fg = fn_mult(f, g);
+              Cf lado = fn_soma(fn_mult(fn_deriva(f), g), fn_mult(f, fn_deriva(g)));
+              for(long a = -5; a <= 5; a++) for(long q = 1; q <= 3; q++){
+                  Qz x = qz(a,q), dd;
+                  if(!fn_deriva_def(fg, x, &dd)){ pm++; continue; }
+                  if(!qz_igual(dd, fn_av(lado, x))) pm++;
+                  pf++;
+              }
+              printf("      (fg)' pela DEFINIÇÃO contra f'g + fg' em %ld pontos: %d"
+                     " divergências\n", pf, pm);
+              mal += pm;
+          }
+          if(n == 8){
+              int cm = 0; long cf = 0;
+              Cf comp = fn0();                     /* f∘g com g = 3x+1, grau 3 */
+              { Cf pot = fn_const(qz(1,1));
+                for(int i = 0; i <= f.n; i++){
+                    comp = fn_soma(comp, fn_esc(f.c[i], pot));
+                    if(i < f.n) pot = fn_mult(pot, g);
+                } }
+              Cf lado = fn_mult(fn0(), fn0());
+              { Cf dfg = fn0(), pot = fn_const(qz(1,1)), df = fn_deriva(f);
+                for(int i = 0; i <= df.n; i++){
+                    dfg = fn_soma(dfg, fn_esc(df.c[i], pot));
+                    if(i < df.n) pot = fn_mult(pot, g);
+                }
+                lado = fn_mult(dfg, fn_deriva(g)); }
+              for(long a = -4; a <= 4; a++) for(long q = 1; q <= 3; q++){
+                  Qz x = qz(a,q), dd;
+                  if(!fn_deriva_def(comp, x, &dd)){ cm++; continue; }
+                  if(!qz_igual(dd, fn_av(lado, x))) cm++;
+                  cf++;
+              }
+              printf("      (f∘g)' pela DEFINIÇÃO contra (f'∘g)·g' em %ld pontos: %d"
+                     " divergências\n", cf, cm);
+              mal += cm;
+          }
+          tique7(4, "a testemunha são TRÊS CAMINHOS independentes que têm de concordar, e"
+                    " o terceiro já estava na casa: procurei antes de escrever e o"
+                    " `resolve_calculo` de «deriva …» já derivava exacto pela PARTE ε DO"
+                    " DUAL — f(a+bε) = f(a) + f'(a)·b·ε com ε² = 0. Então não o refiz:"
+                    " meço a concordância. A regra formal, o quociente de diferenças e o"
+                    " número dual dão o mesmo em todo ponto — e a parte REAL do dual"
+                    " devolve f(a), que é o controlo de que ele não está a calcular"
+                    " outra coisa");
+          tique7(5, mal == 0
+                 ? (n == 6 ? "logo a derivada existe e é exacta, sem limite nenhum"
+                    : n == 7 ? "logo (fg)' = f'g + fg', e o termo cruzado h·f'g' é"
+                               " exactamente o que a avaliação em 0 apaga"
+                             : "logo (f∘g)' = (f'∘g)·g', e a cadeia é a composição das"
+                               " duas fibras")
+                 : "os caminhos separam-se — NÃO afirmo");
+          tique7(6, "e a VOLTA é a TRADUÇÃO no universal, e há duas: a divisão por h é a"
+                    " FIBRA (thm:divisao-fibra); e no anel a derivada discreta tem forma"
+                    " fechada — thm:metronomo-fourier diz «Δ ⟺ c_k ↦ (ω^k − 1)c_k: o «ik»"
+                    " do contínuo é ω^k − 1 no anel». A derivada é diagonal no espectro,"
+                    " lá como aqui. E o ε com ε² = 0 do terceiro caminho é o DUAL desta"
+                    " casa outra vez — o mesmo objecto a aparecer no sítio onde a"
+                    " derivada nasce"); }
+        break; }
+    case 9: case 10: case 11: {
+        tique7(0, n == 9 ? "seja c um extremo INTERIOR de f, e f derivável em c"
+             : n == 10 ? "seja f derivável com f(a) = f(b)"
+                       : "seja f contínua em [a,b] e derivável em (a,b)");
+        tique7(1, n == 9 ? "Fermat:" : n == 10 ? "Rolle:" : "o Valor Médio:");
+        printf(n == 9 ? "      $f'(c) = 0$\n"
+             : n == 10 ? "      existe $c \\in (a,b)$ com $f'(c) = 0$\n"
+                       : "      existe $c$ com $f'(c) = \\frac{f(b)-f(a)}{b-a}$\n");
+        tique7(2, n == 9
+               ? "a transição é o SINAL dos dois quocientes: à esquerda de c o quociente"
+                 " tem um sinal e à direita o oposto, e ambos convergem para f'(c). Um"
+                 " número que é ≥ 0 e ≤ 0 é zero"
+             : n == 10
+               ? "a transição é Weierstrass mais Fermat: em [a,b] fechado f atinge máximo"
+                 " e mínimo; se ambos estão nos extremos então f é constante e f' ≡ 0;"
+                 " senão há um extremo INTERIOR, e Fermat mata-o"
+               : "a transição é aplicar Rolle à função inclinada φ(x) = f(x) − rx com"
+                 " r = (f(b)−f(a))/(b−a): ela tem φ(a) = φ(b), e Rolle dá o c");
+        tique7(3, "a lei é Fermat, e as outras duas derivam dela — Rolle é Fermat mais"
+                  " Weierstrass, e o Valor Médio é Rolle depois de inclinar. Três teoremas,"
+                  " uma lei");
+        { Qz c = qz(0,1);
+          Cf r = fn0(); r.n = 2; r.c[2] = qz(1,1); r.c[0] = qz(-1,1);   /* x² − 1 */
+          int mr = fn_acha_c(r, qz(-1,1), qz(1,1), qz(0,1), 24, &c);
+          printf("      ROLLE em f(x) = x² − 1, [−1,1]:  f(−1) = ");
+          esc_qz("", fn_av(r,qz(-1,1)), " = f(1) = ");
+          esc_qz("", fn_av(r,qz(1,1)), "\n");
+          printf("        c achado = "); esc_qz("", c, "   e f'(c) = ");
+          esc_qz("", fn_av(fn_deriva(r), c), "\n");
+          Qz cm = qz(0,1);
+          int mm = fn_acha_c(f, qz(0,1), qz(2,1), qz(1,1), 2000, &cm);
+          printf("      VALOR MÉDIO em x³ − 3x, [0,2]:  a inclinação é ");
+          esc_qz("", qz(1,1), "\n");
+          printf("        e o c %s\n", mm == 1 ? "caiu na malha racional"
+                 : mm == 2 ? "NÃO é racional — a malha não o apanha, e vem por bisseção"
+                           : "não foi achado");
+          printf("        3c² − 3 = 1 dá c² = 4/3, isto é c = 2/√3: IRRACIONAL\n");
+          printf("        o encaixe: c ≈ "); esc_qz("", cm, "\n");
+          /* o GUME de Fermat: retirar «interior» e o teorema CAI */
+          Qz b0 = fn_av(fn_deriva(u), qz(0,1)), b2 = fn_av(fn_deriva(u), qz(2,1));
+          printf("      GUME de FERMAT — x² em [0,2] tem mínimo em 0 e máximo em 2, ambos"
+                 " na BORDA:\n");
+          printf("        f'(0) = "); esc_qz("", b0, "   f'(2) = ");
+          esc_qz("", b2, "   ← e este NÃO é zero\n");
+          tique7(4, "a testemunha do Valor Médio é a mais instrutiva do andar: o c EXISTE e"
+                    " NÃO É RACIONAL. A malha racional não o pode achar — e isso não é uma"
+                    " falha do programa, é o teorema a dizer que o ponto vive no corte. A"
+                    " bisseção entrega o intervalo encaixante, que é o que esta casa"
+                    " chama devolver um real");
+          tique7(5, mr && mm && b2.p != 0
+                 ? "logo Fermat vale no INTERIOR, e o gume mostra-o: em x² sobre [0,2] o"
+                   " máximo está na borda e f'(2) = 4 ≠ 0. Retirada a palavra «interior», o"
+                   " teorema é falso, e o contra-exemplo é o mais simples que há"
+                 : "os controlos não se separaram — NÃO afirmo");
+          tique7(6, "e a VOLTA é a TRADUÇÃO: no universal um extremo é uma TESTEMUNHA a"
+                    " caçar, não uma leitura — é o mesmo método da assinatura de uma forma"
+                    " quadrática, «não basta olhar para a matriz: é preciso PROCURAR"
+                    " testemunhas». Aqui procura-se o c, e quando ele é irracional"
+                    " devolve-se o corte"); }
+        break; }
+    case 12: case 13: case 20: {
+        tique7(0, "seja f(x) = x³ − 3x sobre ℚ");
+        tique7(1, n == 12 ? "monotonia pela derivada:"
+             : n == 13 ? "os extremos:" : "a análise completa:");
+        printf(n == 12 ? "      $f' > 0$ em $I$ $\\Rightarrow$ $f$ estritamente crescente"
+                         " em $I$\n"
+             : n == 13 ? "      $f'(x) = 3x^{2} - 3 = 0 \\Rightarrow x = \\pm 1$\n"
+                       : "      zeros, extremos, concavidade e inflexão --- tudo exacto\n");
+        tique7(2, "a transição é o VALOR MÉDIO: para x < y em I, f(y) − f(x) = f'(c)(y−x)"
+                  " com c entre eles. Se f' > 0 em todo I, o produto é positivo e a"
+                  " desigualdade sai. A monotonia NÃO se prova ponto a ponto — prova-se"
+                  " pelo teorema anterior");
+        tique7(3, "a lei é o Valor Médio, e é por isso que ele é o centro do andar: é ele"
+                  " que transporta a informação LOCAL (a derivada num ponto) para uma"
+                  " conclusão GLOBAL (o comportamento no intervalo)");
+        { Cf d1 = fn_deriva(f), d2 = fn_deriva(d1);
+          printf("      f' = 3x² − 3,  zeros em x = ±1;   f'' = 6x, zero em x = 0\n");
+          printf("      f(−1) = "); esc_qz("", fn_av(f,qz(-1,1)), "  (máximo local)   ");
+          printf("f(1) = "); esc_qz("", fn_av(f,qz(1,1)), "  (mínimo local)\n");
+          printf("      f''(−1) = "); esc_qz("", fn_av(d2,qz(-1,1)), " < 0    f''(1) = ");
+          esc_qz("", fn_av(d2,qz(1,1)), " > 0   — a concavidade decide qual é qual\n");
+          printf("      inflexão em x = 0, onde f'' troca de sinal, e f(0) = ");
+          esc_qz("", fn_av(f,qz(0,1)), "\n");
+          /* a monotonia, VARRIDA onde f' > 0 */
+          int mal = 0; long feitos = 0;
+          for(long a = 2; a <= 12; a++) for(long b = a+1; b <= 13; b++){
+              Qz x = qz(a,4), y = qz(b,4);        /* x,y ≥ 1/2 … onde f' > 0 é x > 1 */
+              if(fn_av(d1,x).p <= 0 || fn_av(d1,y).p <= 0) continue;
+              if(!(fn_av(f,x).p * fn_av(f,y).q < fn_av(f,y).p * fn_av(f,x).q)) mal++;
+              feitos++;
+          }
+          printf("      onde f' > 0: %ld pares com x < y, e %d violações de f(x) < f(y)\n",
+                 feitos, mal);
+          /* o GUME: e onde f' < 0? tem de DECRESCER */
+          long dec = 0, cres = 0;
+          for(long a = -3; a <= 2; a++) for(long b = a+1; b <= 3; b++){
+              Qz x = qz(a,4), y = qz(b,4);
+              if(fn_av(d1,x).p >= 0 || fn_av(d1,y).p >= 0) continue;
+              if(fn_av(f,x).p * fn_av(f,y).q > fn_av(f,y).p * fn_av(f,x).q) dec++;
+              else cres++;
+          }
+          printf("      GUME — onde f' < 0: %ld pares DECRESCEM e %ld crescem\n", dec, cres);
+          tique7(4, "a testemunha é a varredura nos DOIS regimes: onde f' > 0 nenhum par"
+                    " viola o crescimento, e onde f' < 0 todos decrescem. Medir só o"
+                    " primeiro seria medir metade — a tese «f' > 0 ⟹ cresce» não distingue"
+                    " uma f que cresça sempre");
+          tique7(5, mal == 0 && cres == 0
+                 ? "logo f' decide a monotonia, e os extremos de x³ − 3x são máximo local"
+                   " 2 em x = −1 e mínimo local −2 em x = 1 — LOCAIS, e não globais: o"
+                   " polinómio é ilimitado nos dois sentidos"
+                 : "os regimes não se separaram — NÃO afirmo");
+          tique7(6, "e a VOLTA é a honestidade que o eval pede: «provar que o candidato é"
+                    " realmente global». AQUI NÃO É — x³ − 3x não tem extremo global"
+                    " nenhum, e dizer «máximo» sem «local» seria falso. TRADUÇÃO NO"
+                    " UNIVERSAL: é o thm:escada, «cada degrau tem cegueira construtível» —"
+                    " a derivada é um observador, e um observador que vê o local não vê o"
+                    " global"); }
+        break; }
+    case 14: case 15: {
+        tique7(0, "seja f integrável em [a,b] e a partição uniforme de n pedaços");
+        tique7(1, n == 14 ? "a soma de Riemann, e o cerco:"
+                          : "as propriedades da integral:");
+        printf(n == 14
+               ? "      $S_{\\text{dir}} - S_{\\text{esq}} = (f(b)-f(a))\\cdot h$"
+                 "   --- EXACTO, por telescopagem\n"
+               : "      linearidade e aditividade no intervalo\n");
+        tique7(2, n == 14
+               ? "a transição é a TELESCOPAGEM: a soma direita menos a esquerda é"
+                 " Σ[f(x_{k+1}) − f(x_k)]·h, e a soma encolhe até (f(b) − f(a))·h. Isso não"
+                 " é uma estimativa — é uma IGUALDADE, e diz exactamente quanto o cerco"
+                 " ainda está aberto"
+               : "a transição é que a soma de Riemann é LINEAR na função e ADITIVA no"
+                 " intervalo antes de qualquer limite. As propriedades são das somas, e"
+                 " sobrevivem ao limite por serem finitas");
+        tique7(3, "a lei é o cerco, e ele é a régua desta casa: não se diz «a integral é"
+                  " aproximadamente»; diz-se «está entre a soma esquerda e a direita», e"
+                  " exibe-se a distância exacta entre elas");
+        { Cf U; fn_primitiva(u, &U);
+          Qz ex = qz_soma(fn_av(U,qz(2,1)), qz_oposto(fn_av(U,qz(0,1))));
+          printf("      f(x) = x² em [0,2]:   a primitiva é x³/3, e o valor EXACTO é ");
+          esc_qz("", ex, "\n");
+          printf("        n      S_esq            S_dir          dir − esq\n");
+          int cerca = 0; long malhas = 0, tel = 0;
+          for(long nn = 2; nn <= 32; nn *= 2){
+              Qz e = fn_riemann(u, qz(0,1), qz(2,1), nn, 0);
+              Qz d = fn_riemann(u, qz(0,1), qz(2,1), nn, 1);
+              Qz h; qz_divide(qz(2,1), qz_de_inteiro(nn), &h);
+              Qz esp = qz_mult(qz_soma(fn_av(u,qz(2,1)), qz_oposto(fn_av(u,qz(0,1)))), h);
+              Qz dif = qz_soma(d, qz_oposto(e));
+              if(!qz_igual(dif, esp)) tel++;
+              if(!(e.p*ex.q <= ex.p*e.q && ex.p*d.q <= d.p*ex.q)) cerca++;
+              malhas++;
+              printf("        %-6ld ", nn);
+              esc_qz("", e, "   "); esc_qz("", d, "   "); esc_qz("", dif, "\n");
+          }
+          printf("      telescopagem exacta em %ld malhas: %ld falhas;"
+                 " e o cerco falha em %d\n", malhas, tel, cerca);
+          /* o GUME: sem MONOTONIA o cerco pode cair */
+          int q3 = 0; long m3 = 0;
+          for(long nn = 1; nn <= 64; nn++){
+              Qz e = fn_riemann(f, qz(0,1), qz(2,1), nn, 0);
+              Qz d = fn_riemann(f, qz(0,1), qz(2,1), nn, 1), X = qz(-2,1);
+              if(!(e.p*X.q <= X.p*e.q && X.p*d.q <= d.p*X.q)) q3++;
+              m3++;
+          }
+          printf("      GUME — em x³ − 3x, que NÃO é monótona em [0,2]: o cerco falha em"
+                 " %d das %ld malhas\n", q3, m3);
+          tique7(4, "a testemunha é dupla: a telescopagem EXACTA (dir − esq é sempre"
+                    " (f(b)−f(a))·h, sem uma falha) e o cerco a valer para f monótona. E o"
+                    " GUME encontra-se sozinho: retirada a monotonia, o cerco cai — e cai"
+                    " em malhas contadas, não «às vezes»");
+          tique7(5, tel == 0 && cerca == 0 && q3 > 0
+                 ? "logo o cerco é um teorema COM hipótese, e a hipótese é a monotonia —"
+                   " sem ela a soma esquerda pode passar para o outro lado do valor exacto"
+                 : "os regimes não se separaram — NÃO afirmo");
+          tique7(6, "e a VOLTA é a TRADUÇÃO, e é o coração deste andar: no universal a"
+                    " integral é a SOMA REVERSÍVEL de Gentil, Σxₙ + Σ#{xₙ<v} = N·q"
+                    " (obs:triade-central). Hurwitz CONTA o domínio, Lebesgue MEDE a"
+                    " imagem, e Gentil casa os dois — e a igualdade é exacta em inteiros,"
+                    " SEM ESPERAR LIMITE NENHUM, porque cada célula do rectângulo cai de"
+                    " um lado ou do outro e nunca dos dois"); }
+        break; }
+    case 16: case 17: case 18: case 19: {
+        tique7(0, n <= 17 ? "seja f contínua em [a,b] e G uma primitiva de f"
+             : n == 18 ? "sejam f e g com g derivável" : "sejam f e g deriváveis");
+        tique7(1, n == 16 ? "o Teorema Fundamental, primeira forma:"
+             : n == 17 ? "o Teorema Fundamental, segunda forma:"
+             : n == 18 ? "a substituição:" : "a integração por partes:");
+        printf(n == 16 ? "      $F(x) = \\int_{a}^{x} f$ $\\Rightarrow$ $F'(x) = f(x)$\n"
+             : n == 17 ? "      $\\int_{a}^{b} f = G(b) - G(a)$\n"
+             : n == 18 ? "      $\\int f(g(x))g'(x)\\,dx = \\int f(u)\\,du$\n"
+                       : "      $\\int f g' = fg - \\int f' g$\n");
+        tique7(2, n <= 17
+               ? "a transição é que DERIVAR DESFAZ SOMAR: F(x+h) − F(x) é a integral no"
+                 " pedacinho [x, x+h], que vale f(ξ)·h para algum ξ lá dentro; dividir por"
+                 " h e avaliar em 0 devolve f(x). É o Valor Médio outra vez, agora aplicado"
+                 " à integral"
+             : n == 18
+               ? "a transição é a REGRA DA CADEIA lida ao contrário: se F' = f, então"
+                 " (F∘g)' = (f∘g)·g', e integrar os dois lados dá a substituição. Não é uma"
+                 " técnica: é um teorema de derivação virado"
+               : "a transição é a REGRA DO PRODUTO lida ao contrário: (fg)' = f'g + fg',"
+                 " e integrar dá fg = ∫f'g + ∫fg'. Também não é técnica: é o produto"
+                 " virado");
+        tique7(3, "a lei é a VOLTA — e é aqui que o eval toca no que esta casa faz: «uma"
+                  " transformação é realmente fechada quando existe a volta». Derivar e"
+                  " integrar são inversas, e o Teorema Fundamental é a certidão disso");
+        { Cf F; int okp = fn_primitiva(f, &F);
+          Qz ex = qz_soma(fn_av(F,qz(2,1)), qz_oposto(fn_av(F,qz(0,1))));
+          printf("      f = x³ − 3x,   F = x⁴/4 − 3x²/2,   F(2) − F(0) = ");
+          esc_qz("", ex, "\n");
+          /* TFC I: (F)' = f, medido em muitos pontos, pelos DOIS caminhos */
+          int mal = 0; long feitos = 0;
+          for(long a = -6; a <= 6; a++) for(long q = 1; q <= 4; q++){
+              Qz x = qz(a,q), dd;
+              if(!fn_deriva_def(F, x, &dd)){ mal++; continue; }
+              if(!qz_igual(dd, fn_av(f, x))) mal++;
+              feitos++;
+          }
+          printf("      TFC I — a derivada da primitiva é f, em %ld pontos: %d"
+                 " divergências\n", feitos, mal);
+          /* TFC II: a soma de Riemann cerca G(b) − G(a) e a distância é exacta */
+          Qz e = fn_riemann(f, qz(0,1), qz(2,1), 64, 0);
+          Qz d = fn_riemann(f, qz(0,1), qz(2,1), 64, 1);
+          printf("      TFC II — com n = 64:   S_esq = "); esc_qz("", e, "   S_dir = ");
+          esc_qz("", d, "\n");
+          printf("        e o valor exacto "); esc_qz("", ex, " está entre os dois\n");
+          if(n == 19){
+              /* partes, medida: ∫fg' = fg − ∫f'g em [0,2] */
+              Cf P1, P2;
+              Cf fg1 = fn_mult(f, fn_deriva(g)), f1g = fn_mult(fn_deriva(f), g);
+              int o1 = fn_primitiva(fg1, &P1), o2 = fn_primitiva(f1g, &P2);
+              Qz A = qz_soma(fn_av(P1,qz(2,1)), qz_oposto(fn_av(P1,qz(0,1))));
+              Qz B = qz_soma(fn_av(P2,qz(2,1)), qz_oposto(fn_av(P2,qz(0,1))));
+              Cf pr = fn_mult(f,g);
+              Qz C = qz_soma(fn_av(pr,qz(2,1)), qz_oposto(fn_av(pr,qz(0,1))));
+              printf("      PARTES com g = 3x + 1:   ∫fg' = "); esc_qz("", A, "   ");
+              printf("fg| = "); esc_qz("", C, "   ∫f'g = "); esc_qz("", B, "\n");
+              printf("        e "); esc_qz("", A, " = ");
+              esc_qz("", qz_soma(C, qz_oposto(B)), "\n");
+              if(!o1 || !o2 || !qz_igual(A, qz_soma(C, qz_oposto(B)))) mal++;
+          }
+          tique7(4, "a testemunha do TFC I são DOIS CAMINHOS: derivar a primitiva pelo"
+                    " quociente de diferenças e comparar com f, ponto a ponto. E a do TFC"
+                    " II é o cerco: o valor exacto G(b) − G(a) fica ENTRE as duas somas, e"
+                    " a distância entre elas é (f(b)−f(a))·h, exacta");
+          tique7(5, okp && mal == 0
+                 ? "logo derivação e integração são inversas: uma desfaz a outra, e o"
+                   " Teorema Fundamental é a volta a fechar"
+                 : "a volta não fecha — NÃO afirmo");
+          tique7(6, "e a VOLTA é a TRADUÇÃO, e é exacta: no universal isto é o thm:central"
+                    " do corpo estelar — ∫f + ∫f⁻¹ = b·f(b) − a·f(a), a SOMA REVERSÍVEL. O"
+                    " Teorema Fundamental do Cálculo e a bijeção dual Gentil↔Hurwitz são a"
+                    " MESMA identidade: ela diz que contar e integrar são os dois lados de"
+                    " uma bijecção, e que a volta fecha com resíduo 0. «Nunca se avalia uma"
+                    " raiz»"); }
+        break; }
+    case 21:
+        tique7(0, "seja a ordem: «tudo agora tem tradução nos teoremas do corpo universal»");
+        tique7(1, "a tabela, teorema a teorema:");
+        printf("      Cálculo I                →   teorema do Corpo Universal\n");
+        printf("      ─────────────────────────────────────────────────────────────────\n");
+        printf("      limite / cerco           →   o CORTE: thm:real-caminho — «o real é\n");
+        printf("                                   um caminho da raiz à folha, e a folha\n");
+        printf("                                   NÃO é nó»\n");
+        printf("      ε-δ                      →   a ESCADA de observadores: thm:escada —\n");
+        printf("                                   cada ε é um degrau da filtração\n");
+        printf("      continuidade             →   a MEMBRANA: def:membrana — o corpo em\n");
+        printf("                                   trânsito pela transformada\n");
+        printf("      derivada (÷ por h)       →   a FIBRA: thm:divisao-fibra — «a divisão\n");
+        printf("                                   é a fibra inversa da fusão»\n");
+        printf("      derivada no espectro     →   thm:metronomo-fourier — Δ é\n");
+        printf("                                   c_k ↦ (ω^k − 1)c_k: o «ik» do contínuo\n");
+        printf("      valor médio              →   o local a decidir o global: é o que a\n");
+        printf("                                   escada faz, degrau a degrau\n");
+        printf("      integral                 →   a SOMA REVERSÍVEL de Gentil:\n");
+        printf("                                   Σxₙ + Σ#{xₙ<v} = N·q, obs:triade-central\n");
+        printf("      Teorema Fundamental      →   thm:central — ∫f + ∫f⁻¹ = bf(b) − af(a):\n");
+        printf("                                   derivar e integrar são a BIJEÇÃO DUAL,\n");
+        printf("                                   e a volta fecha com resíduo 0\n");
+        printf("      aproximação linear       →   thm:batuta-continuo — o segmento afim\n");
+        printf("                                   sela o contínuo, com erro ≤ 2⁻ᵏ\n");
+        printf("      extremo                  →   a TESTEMUNHA caçada, como a assinatura\n");
+        printf("                                   de uma forma: não se lê, procura-se\n");
+        tique7(2, "e a tradução não é decorativa: ela MUDA O MÉTODO. Porque o limite é o"
+                  " corte, devolve-se um intervalo encaixante e não um decimal; porque a"
+                  " derivada é a fibra, ela sai de uma divisão exacta e não de um processo"
+                  " infinito; porque a integral é a soma reversível, o cerco fecha por"
+                  " telescopagem e a distância diz-se exactamente");
+        tique7(3, "a lei é a mesma dos outros andares: o resultado é o sujeito da frase, e"
+                  " o nome clássico entra como cláusula. Aqui os dois nomes são de fora —"
+                  " Riemann, Rolle, Lagrange — e o que a casa acrescenta é a régua");
+        tique7(4, "a testemunha é o andar inteiro a correr sem um double: 20 demonstrações,"
+                  " os δ PROCURADOS e exibidos, os intervalos encaixantes, a telescopagem"
+                  " exacta, e os gumes a acharem os contra-exemplos sozinhos");
+        tique7(5, "e o achado que fecha o andar: para um polinómio, o quociente de"
+                  " diferenças É um polinómio, portanto a derivada é uma AVALIAÇÃO e não"
+                  " um limite. Cálculo I não precisou de aproximação nenhuma — precisou de"
+                  " uma divisão que fecha");
+        tique7(6, "e a VOLTA é o próprio eval a dizê-lo: «uma transformação é realmente"
+                  " fechada quando existe a volta». Derivar e integrar são inversas, e o"
+                  " Teorema Fundamental é a certidão — que nesta casa já se chamava"
+                  " ν∘ν = id, resíduo 0");
+        break;
+    }
+}
+static int resolve_calculo1(const char *f){
+    const char *p = f;
+    for(size_t i = 0; i < sizeof CL21/sizeof *CL21; i++)
+        if(!strcmp(p, CL21[i].nome)){ calculo_resolve(CL21[i].n); return 1; }
+    if(!strncmp(p, "calculo", 7)) p += 7;
+    else if(!strncmp(p, "cálculo", 8)) p += 8;
+    else return 0;
+    while(*p == ' ') p++;
+    /* «calculo i» (o algarismo romano) é o NOME DO CURSO e dá o índice; «calculo 1» é a
+     * fala 1. A ambiguidade existe e resolve-se à vista, em vez de eu escolher em
+     * silêncio — que foi o que fiz primeiro, e deixou a fala 1 inalcançável. */
+    if((*p == 'i' || *p == 'I') && !p[1]) p++;
+    while(*p == ' ') p++;
+    if(!*p){
+        printf("   Cálculo I, exacto e sem um double — «calculo N» ou «calculo <nome>»\n");
+        printf("   o quociente de diferenças É um polinómio: a derivada é AVALIAÇÃO\n\n");
+        for(size_t i = 0; i < sizeof CL21/sizeof *CL21; i++){
+            printf("     %2d  ", CL21[i].n);
+            esc_col(CL21[i].nome, 24);
+            printf("  %s\n", CL21[i].enunciado);
+        }
+        return 1;
+    }
+    if(*p >= '0' && *p <= '9'){
+        long n = 0;
+        while(*p >= '0' && *p <= '9') n = n*10 + (*p++ - '0');
+        while(*p == ' ') p++;
+        if(!*p && n >= 1 && n <= 21){ calculo_resolve((int)n); return 1; }
+        return 0;
+    }
+    return 0;
+}
 /* ── OS TEOREMAS DO CORPO UNIVERSAL, EM LINGUAGEM CONSAGRADA ────────────────────────
  * O Aarão: «ingere os teoremas do corpo universal na assistente com linguagem traduzida
  * para os termos técnicos consagrados; se não tiver termo técnico usar o proposto no
@@ -10633,6 +11264,7 @@ static int resolve_mostra(const char *f){ return resolve_mostra_em(f, "../papers
 static int resolve_simbolico(const char *fala){
     if(resolve_divisibilidade(fala)) return 1;     /* o relógio de 6 ticks */
     if(resolve_bezout(fala)) return 1;             /* a testemunha e o critério */
+    if(resolve_calculo1(fala)) return 1;           /* Cálculo I exacto, os 21 */
     if(resolve_universal(fala)) return 1;          /* os teoremas do universal, os 23 */
     if(resolve_torre(fala)) return 1;              /* a torre pelos dois lados, os 16 */
     if(resolve_exterior(fala)) return 1;           /* Λ V, Hodge e o fecho, os 15 */
@@ -11674,6 +12306,185 @@ static int teste(void){
                 if(e_conta(nu2)) roubadas++;
             }
             ok("e a membrana nao rouba o corpus: fala sem LaTeX nao vira conta", roubadas == 0);
+
+        /* ═══ §C42 CÁLCULO I EXACTO — E A TRADUÇÃO NO UNIVERSAL ═══════════════════
+         * O `eval.txt` traz o Cálculo I com vinte demonstrações e «um gume explícito em
+         * cada teorema». O que o torna exacto aqui é um facto sobre polinómios:
+         * (f(a+h) − f(a))/h É UM POLINÓMIO em h, logo f'(a) = q(0) é uma AVALIAÇÃO e não
+         * um limite. E a divisão por h é a FIBRA do thm:divisao-fibra. */
+        printf("\n§C42 CÁLCULO I: a derivada é uma AVALIAÇÃO, e a integral é o cerco.\n\n");
+        {
+            Cf cf = fn0(); cf.n = 3; cf.c[3] = qz(1,1); cf.c[1] = qz(-3,1);   /* x³ − 3x */
+            Cf cg = fn0(); cg.n = 1; cg.c[0] = qz(1,1); cg.c[1] = qz(3,1);    /* 3x + 1 */
+            Cf cu = fn0(); cu.n = 2; cu.c[2] = qz(1,1);                        /* x² */
+
+            /* (1) A DERIVADA POR TRÊS CAMINHOS, e o terceiro já era da casa */
+            { int mal = 0; long feitos = 0;
+              for(long a = -6; a <= 6; a++) for(long q = 1; q <= 4; q++){
+                  Qz x = qz(a,q), d2;
+                  Qz d1 = fn_av(fn_deriva(cf), x);
+                  if(!fn_deriva_def(cf, x, &d2)){ mal++; continue; }
+                  Dual dd = fn_av_dual(cf, x);
+                  if(!qz_igual(d1,d2)) mal++;
+                  if(!qz_igual(d1,dd.e)) mal++;
+                  if(!qz_igual(fn_av(cf,x), dd.p)) mal++;
+                  feitos++;
+              }
+              printf("      a derivada por TRÊS caminhos em %ld pontos: %d divergências\n",
+                     feitos, mal);
+              ok("A DERIVADA É UMA AVALIAÇÃO, NÃO UM LIMITE: para f polinomial,"
+                 " f(a+h) − f(a) não tem termo constante, logo é divisível por h EXACTAMENTE"
+                 " e o quociente é um POLINÓMIO — f'(a) = q(0). E a divisão por h é a FIBRA"
+                 " (thm:divisao-fibra). Três caminhos independentes concordam: a regra"
+                 " formal, o quociente de diferenças, e a PARTE ε DO DUAL (ε² = 0), que a"
+                 " casa já corria em «deriva …» e eu não refiz — medi a concordância",
+                 mal == 0 && feitos == 52); }
+
+            /* (2) O δ PROCURADO, com o controlo do limite ERRADO */
+            { Qz d = qz(0,1); long achou = 0, falso = 0, casos = 0;
+              for(int k = 1; k <= 5; k++){
+                  Qz eps = qz(1, 1L << k), dd;
+                  casos++;
+                  if(fn_acha_delta(cg, qz(2,1), qz(7,1), eps, 24, &d, 12)) achou++;
+                  if(fn_acha_delta(cg, qz(2,1), qz(8,1), eps, 24, &dd, 12)) falso++;
+              }
+              printf("      ε-δ para lim_{x→2}(3x+1) = 7: %ld dos %ld com δ achado;"
+                     " e com L = 8 (errado): %ld\n", achou, casos, falso);
+              ok("O δ É PROCURADO E EXIBIDO, não prometido — para cada ε racional acha-se um"
+                 " δ = 1/2^k e VERIFICA-SE a implicação numa malha. E o vazio do controlo é"
+                 " que lhe dá valor: o MESMO buscador com o limite errado (L = 8) não acha"
+                 " nenhum. Sem esse par, «achou» não distinguia a lei de um buscador que"
+                 " aceita tudo",
+                 achou == casos && falso == 0); }
+
+            /* (3) O VALOR INTERMÉDIO: o corte, e a RECUSA quando o sinal não troca */
+            { Qz lo, hi, l2, h2;
+              int ok1 = fn_bissec(cf, qz(1,1), qz(2,1), 20, &lo, &hi);
+              int mau = fn_bissec(cf, qz(3,1), qz(4,1), 20, &l2, &h2);
+              /* o encaixe contém √3: lo² < 3 < hi² */
+              int cerca = qz_mult(lo,lo).p * 1 < 3 * qz_mult(lo,lo).q
+                       && 3 * qz_mult(hi,hi).q < qz_mult(hi,hi).p * 1;
+              printf("      TVI em [1,2]: %s;  em [3,4] sem troca de sinal: %s\n",
+                     ok1 ? "intervalo encaixante devolvido" : "falhou",
+                     mau ? "ACEITOU (mau)" : "RECUSA");
+              printf("      e o encaixe contém √3: %s\n", cerca ? "sim" : "NÃO");
+              ok("O VALOR INTERMÉDIO devolve um CORTE e não um número: a bisseção entrega o"
+                 " intervalo encaixante com o sinal trocado nos extremos, e a raiz de"
+                 " x³ = 3x é √3, irracional — por isso não podia mesmo ser devolvida como"
+                 " valor. TRADUÇÃO: é o thm:real-caminho, «o real é um caminho da raiz à"
+                 " folha, e a folha NÃO é nó». E o gume é a RECUSA: sem troca de sinal o"
+                 " mesmo programa não devolve intervalo errado — recusa-se a devolver",
+                 ok1 && !mau && cerca); }
+
+            /* (4) FERMAT e o gume da BORDA; o Valor Médio e o c IRRACIONAL */
+            { Cf cr = fn0(); cr.n = 2; cr.c[2] = qz(1,1); cr.c[0] = qz(-1,1);
+              Qz c = qz(0,1), cm = qz(0,1);
+              int mr = fn_acha_c(cr, qz(-1,1), qz(1,1), qz(0,1), 24, &c);
+              int mm = fn_acha_c(cf, qz(0,1), qz(2,1), qz(1,1), 2000, &cm);
+              Qz b2 = fn_av(fn_deriva(cu), qz(2,1));
+              printf("      Rolle em x²−1: c = ");
+              esc_qz("", c, "");
+              printf("  (modo %d, na malha);  Valor Médio em x³−3x: modo %d",  mr, mm);
+              printf(" (%s)\n", mm == 2 ? "por bisseção — o c é IRRACIONAL" : "na malha");
+              printf("      GUME de Fermat — x² em [0,2] tem máximo na BORDA e f'(2) = ");
+              esc_qz("", b2, " ≠ 0\n");
+              ok("O VALOR MÉDIO É O CENTRO DO ANDAR, e a sua testemunha é instrutiva: para"
+                 " x³ − 3x em [0,2] a inclinação é 1, logo 3c² − 3 = 1 e c = 2/√3 —"
+                 " IRRACIONAL. A malha racional NÃO o pode achar, e isso não é falha do"
+                 " programa: é o teorema a dizer que o ponto vive no corte, e a bisseção"
+                 " devolve o encaixe. E o gume de Fermat acha-se sozinho: em x² sobre [0,2]"
+                 " o máximo está na BORDA e f'(2) = 4 ≠ 0 — retirada a palavra «interior»,"
+                 " o teorema é falso",
+                 mr == 1 && mm == 2 && qz_igual(b2, qz(4,1)) && c.p == 0); }
+
+            /* (5) RIEMANN: a telescopagem EXACTA, e o gume da MONOTONIA */
+            { Cf U; fn_primitiva(cu, &U);
+              Qz ex = qz_soma(fn_av(U,qz(2,1)), qz_oposto(fn_av(U,qz(0,1))));
+              long tel = 0, cerca = 0, malhas = 0;
+              for(long nn = 1; nn <= 64; nn++){
+                  Qz e = fn_riemann(cu, qz(0,1), qz(2,1), nn, 0);
+                  Qz d = fn_riemann(cu, qz(0,1), qz(2,1), nn, 1);
+                  Qz h; qz_divide(qz(2,1), qz_de_inteiro(nn), &h);
+                  Qz esp = qz_mult(qz_soma(fn_av(cu,qz(2,1)),
+                                           qz_oposto(fn_av(cu,qz(0,1)))), h);
+                  if(!qz_igual(qz_soma(d, qz_oposto(e)), esp)) tel++;
+                  if(!(e.p*ex.q <= ex.p*e.q && ex.p*d.q <= d.p*ex.q)) cerca++;
+                  malhas++;
+              }
+              long q3 = 0;
+              for(long nn = 1; nn <= 64; nn++){
+                  Qz e = fn_riemann(cf, qz(0,1), qz(2,1), nn, 0);
+                  Qz d = fn_riemann(cf, qz(0,1), qz(2,1), nn, 1), X = qz(-2,1);
+                  if(!(e.p*X.q <= X.p*e.q && X.p*d.q <= d.p*X.q)) q3++;
+              }
+              printf("      x² em [0,2]: integral exacta = ");
+              esc_qz("", ex, "");
+              printf(";  telescopagem %ld falhas, cerco %ld falhas em %ld malhas\n",
+                     tel, cerca, malhas);
+              printf("      GUME — x³−3x NÃO é monótona: o cerco falha em %ld das %ld\n",
+                     q3, malhas);
+              ok("O CERCO DE RIEMANN DIZ-SE SEM ε: dir − esq = (f(b)−f(a))·h EXACTAMENTE,"
+                 " por telescopagem — não é estimativa, é igualdade, e diz quanto o cerco"
+                 " ainda está aberto. E o gume acha-se sozinho: com f MONÓTONA o valor"
+                 " exacto fica entre as duas somas nas 64 malhas; retirada a monotonia,"
+                 " falha. A hipótese não estava decorativa",
+                 tel == 0 && cerca == 0 && q3 > 0); }
+
+            /* (6) O TEOREMA FUNDAMENTAL, e a VOLTA */
+            { Cf F; int okp = fn_primitiva(cf, &F);
+              int mal = 0; long feitos = 0;
+              for(long a = -6; a <= 6; a++) for(long q = 1; q <= 4; q++){
+                  Qz x = qz(a,q), dd;
+                  if(!fn_deriva_def(F, x, &dd)){ mal++; continue; }
+                  if(!qz_igual(dd, fn_av(cf, x))) mal++;
+                  feitos++;
+              }
+              Qz ex = qz_soma(fn_av(F,qz(2,1)), qz_oposto(fn_av(F,qz(0,1))));
+              Qz e = fn_riemann(cf, qz(0,1), qz(2,1), 64, 0);
+              Qz d = fn_riemann(cf, qz(0,1), qz(2,1), 64, 1);
+              int entre = (e.p*ex.q <= ex.p*e.q) && (ex.p*d.q <= d.p*ex.q);
+              printf("      TFC I: (∫f)' = f em %ld pontos, %d divergências;"
+                     "  TFC II: o exacto ", feitos, mal);
+              esc_qz("", ex, entre ? " está entre as somas\n" : " NÃO está entre\n");
+              ok("O TEOREMA FUNDAMENTAL É A VOLTA, e a tradução é exacta: no universal ele"
+                 " É o thm:central do corpo estelar — ∫f + ∫f⁻¹ = b·f(b) − a·f(a), a SOMA"
+                 " REVERSÍVEL que casa contar com integrar. Derivar e integrar não são"
+                 " «inversas» por analogia: são os dois lados de uma bijecção dual, e a"
+                 " volta fecha com resíduo 0. É o mesmo ν∘ν = id de todos os outros andares",
+                 okp && mal == 0 && entre); }
+
+            /* (7) O TECTO DA MÁQUINA, à parte do da matemática */
+            { printf("      estouros do grau máximo (%d): %ld\n", CL_MAX, cl_estouros);
+              ok("nenhuma conta do andar passou o grau declarado — e este é o tecto da"
+                 " MÁQUINA, dito à parte da matemática",
+                 cl_estouros == 0); }
+
+            /* E OS VINTE E UM CORREM */
+            { int vmal = 0, por_n = 0, por_nome = 0;
+              fflush(stdout);
+              int guarda = dup(1), nulo = open("/dev/null", O_WRONLY);
+              if(guarda >= 0 && nulo >= 0) dup2(nulo, 1);
+              for(int k = 1; k <= 21; k++){
+                  char fala[64];
+                  snprintf(fala, sizeof fala, "calculo %d", k);
+                  if(resolve_calculo1(fala)) por_n++; else vmal++;
+              }
+              for(size_t i = 0; i < sizeof CL21/sizeof *CL21; i++)
+                  if(resolve_calculo1(CL21[i].nome)) por_nome++; else vmal++;
+              if(resolve_calculo1("calculo 22")) vmal++;
+              if(!resolve_calculo1("calculo i")) vmal++;      /* o índice pelo NOME do curso */
+              fflush(stdout);
+              if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
+              if(nulo >= 0) close(nulo);
+              printf("      os vinte e um: %d pelo número, %d pelo nome\n",
+                     por_n, por_nome);
+              ok("OS VINTE E UM do Cálculo I correm pelo NÚMERO e pelo NOME, com o fora de"
+                 " alcance recusado — e «calculo i» dá o índice do curso enquanto"
+                 " «calculo 1» dá a fala 1. A ambiguidade existia e resolvi-a em SILÊNCIO"
+                 " na primeira versão, deixando a fala 1 inalcançável; agora está à vista"
+                 " e medida",
+                 vmal == 0 && por_n == 21 && por_nome == 21); }
+        }
 
         /* ═══ §C41 A TORRE INTEIRA, E OS TEOREMAS DO UNIVERSAL ════════════════════
          * O `eval.txt` trouxe os hipercomplexos, e o Aarão: «aquilo é metade». Depois:
