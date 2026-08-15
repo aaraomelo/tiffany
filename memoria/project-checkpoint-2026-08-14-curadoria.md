@@ -326,3 +326,23 @@ pela PARTIÇÃO, e o isomorfismo é PROCURADO em vez de declarado.
 ABELIANO, e «corpo ⟹ domínio tem um sentido só» em ℤₘ, onde vale a equivalência. Varreduras
 completas em objetos onde o teorema **não distingue nada**. Regra: **teorema sobre
 assimetria pede exemplo assimétrico** — S₃ em vez de ℤ₁₂, ℤ em vez de ℤₘ.
+
+
+### Corpos: a escada fecha (`71a0b73`, interno 215:0)
+
+O último andar dos `eval.txt` — «corpo é o ponto em que *toda operação que tem fibra tem
+volta* vira estrutura algébrica formal, e a exceção continua a ser 0⁻¹». Detalhe em
+[[project-corpos-a-escada-fecha]].
+
+**O defeito que travou a máquina**: `an_zn(&R, 40)` escreveu 1600 inteiros numa tábua de
+24×24 — por cima da pilha — e o programa deixou de terminar sem dizer porquê. Fui procurar
+o ciclo na lógica antes de olhar para o tamanho. Ver [[feedback-o-teto-nao-verificado]].
+
+**E o `\pmod` outra vez**: o comando que deu ORIGEM ao `bench_membrana.sh` foi
+reintroduzido por mim, e o medidor apanhou-o na hora. É a primeira vez que um medidor da
+casa apanha exatamente o defeito para que nasceu, muito depois — vale mais que a correção.
+
+**Padrão do dia inteiro**: os defeitos que sobreviveram às asserções foram quase todos de
+TEXTO ou de DISPATCH (nome comido pelo prefixo, `%ld` dentro do `tique`, coluna por bytes,
+testemunha por estrear). O valor estava certo em todos. É a família de
+[[feedback-o-destino-rotativo]], e a cura é sempre do lado da FONTE.
