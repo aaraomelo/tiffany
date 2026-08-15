@@ -44,6 +44,8 @@
 #include "cauchy.h"     /* R outra vez, pelo caminho: R = Cauchy(Q)/~ */
 #include "identifica.h" /* o mesmo ponto por quatro portas, e a volta */
 #include "numeros.h"    /* teoria dos numeros: Euclides = MDC = Bezout = FC */
+#include "dirichlet.h"  /* a convolucao na arvore dos divisores: mu = 1^-1 */
+#include "eliptica.h"   /* a curva: a fibra decide qual operacao existe */
 #include "eletrico.h"
 
 typedef struct { long a, b; } Slot;
@@ -1344,6 +1346,403 @@ static int resolve_bezout(const char *f){
            a*xs + b*ys == c ? "(resíduo 0)" : "— NÃO afirmo");
     return 1;
 }
+/* ── MÖBIUS COMO INVERSOR, E A CURVA COMO MÁQUINA DE RASTROS ────────────────────────
+ * Dois pacotes que o `eval.txt` pede em sequência, e que se tocam no mesmo sítio: a
+ * INVERSÃO. Num é μ = 1⁻¹ na álgebra da convolução; no outro é a fibra a decidir qual
+ * operação existe. «Dois tipos de árvore, duas descidas, duas inversões.» */
+static void esc_qz(const char *pre, Qz x, const char *pos);
+static void esc_col(const char *s, int largura);
+static void esc_pt(PtQ P){
+    if(P.inf){ printf("𝒪"); return; }
+    printf("("); esc_qz("", P.x, ", "); esc_qz("", P.y, ")");
+}
+static void dirichlet_resolve(void){
+    TICK_N = 0;
+    Arit um, id, phi, mu, eps, t1, t2;
+    dl_um(&um); dl_id(&id); dl_phi(&phi); dl_mu(&mu); dl_eps(&eps);
+    printf("   a convolução de Dirichlet, e μ = 1⁻¹\n");
+    tique("A OPERAÇÃO — (f*g)(n) = Σ_{d|n} f(d)·g(n/d). Não é o produto ponto a ponto:"
+          " cada n consulta a sua ÁRVORE DE DIVISORES inteira. É esta a multiplicação do"
+          " andar, e é ela que faz o sino ganhar um produto sobre a árvore");
+    printf("      (1*1)(12) = %ld  (o número de divisores de 12)\n",
+           (dl_conv(&um,&um,&t1), t1.v[12]));
+    tique("O NEUTRO — ε(1) = 1 e ε(n) = 0 para n > 1. Não é uma função esquisita: é a"
+          " ÚNICA que deixa tudo quieto, e é isso que a define");
+    { dl_conv(&um, &eps, &t1);
+      printf("      1*ε = 1 ? %s   (nos 240 valores)\n",
+             dl_igual(&t1, &um, DL_MAX) ? "sim" : "NÃO"); }
+    tique("E AQUI ESTÁ O TEOREMA — μ * 1 = ε, isto é: μ é o INVERSO da função constante"
+          " 1 nesta álgebra. O μ deixa de ser uma tabela de sinais e passa a ser aquilo"
+          " que desfaz a soma sobre os divisores");
+    { dl_conv(&mu, &um, &t1);
+      printf("      (μ*1)(n) = Σ_{d|n} μ(d):  n=1 → %ld,  n=2 → %ld,  n=12 → %ld,"
+             "  n=30 → %ld\n", t1.v[1], t1.v[2], t1.v[12], t1.v[30]);
+      printf("      μ*1 = ε ? %s   ⟹   μ = 1⁻¹\n",
+             dl_igual(&t1, &eps, DL_MAX) ? "sim (resíduo 0)" : "— NÃO afirmo"); }
+    tique("A IDENTIDADE DO φ — φ = id * μ. Uma função que parecia de outra família"
+          " transforma-se em CONVOLUÇÃO + CANCELAMENTO, e é essa a graça: não há função"
+          " nova, há a mesma álgebra");
+    { dl_conv(&id, &mu, &t1);
+      printf("      (id*μ)(60) = %ld,  e φ(60) = %ld   %s\n",
+             t1.v[60], phi.v[60], t1.v[60] == phi.v[60] ? "(iguais)" : "— NÃO afirmo");
+      printf("      e nos 240 valores: %s\n",
+             dl_igual(&t1, &phi, DL_MAX) ? "φ = id*μ (resíduo 0)" : "— NÃO afirmo"); }
+    tique("A INVERSÃO DE MÖBIUS, que é a DECONVOLUÇÃO deste andar — se F(n) = Σ_{d|n} f(d)"
+          " então f(n) = Σ_{d|n} μ(d)·F(n/d). Uma soma sobre a árvore, e a sua volta");
+    { dl_soma_divisores(&phi, &t1);            /* F = φ*1, que dá a identidade */
+      dl_inverte(&t1, &t2);                    /* e volta-se com μ */
+      printf("      F = φ*1:  F(12) = %ld;  e a volta dá f(12) = %ld, com φ(12) = %ld\n",
+             t1.v[12], t2.v[12], phi.v[12]);
+      printf("      Σ_{d|n} φ(d) = n ? %s   (é a identidade φ*1 = id)\n",
+             dl_igual(&t1, &id, DL_MAX) ? "sim" : "NÃO");
+      printf("      e a volta reconstrói o φ ? %s\n",
+             dl_igual(&t2, &phi, DL_MAX) ? "sim (resíduo 0)" : "— NÃO afirmo"); }
+    tique("A SÉRIE DE DIRICHLET, E ELA É FORMAL — D_{f*g} = D_f·D_g. Avaliar num s pedia"
+          " análise e decimais; mas a identidade não é sobre o VALOR da soma, é sobre os"
+          " COEFICIENTES: no produto formal o coeficiente de 1/kˢ é Σ_{nm=k} f(n)g(m),"
+          " que É a convolução. O s nunca se avalia, e por isso mede-se exato");
+    { dl_conv(&id, &mu, &t1);
+      int mal = 0;
+      for(long k = 1; k <= 60; k++) if(dl_coef_produto(&id, &mu, k) != t1.v[k]) mal++;
+      printf("      coeficiente de 1/kˢ em D_id·D_μ contra (id*μ)(k), k ≤ 60: %d"
+             " divergências\n", mal); }
+    printf("\n      árvore de divisores → convolução → Möbius → inversão → Dirichlet\n");
+    printf("      (e do outro lado: Euclides → FC. Duas árvores, duas descidas,"
+           " duas inversões)\n");
+    printf("\n   $\\mu * 1 = \\varepsilon$,  logo  $\\mu = 1^{-1}$\n");
+}
+static const struct { int n; const char *nome; const char *enunciado; } EL12[] = {
+ {  1, "infinito",      "o ponto no infinito 𝒪 é o neutro: P + 𝒪 = P" },
+ {  2, "negacao",       "−P = (x, −y), e P + (−P) = 𝒪" },
+ {  3, "soma",          "x₃ = m² − x₁ − x₂ e y₃ = m(x₁ − x₃) − y₁" },
+ {  4, "porque",        "porque a fórmula funciona: Viète na cúbica" },
+ {  5, "dobro",         "2P pela tangente, e o gume y = 0" },
+ {  6, "exemplo",       "P = (0,1) → 2P = (1,0) → 4P = 𝒪" },
+ {  7, "grupo",         "a lei de grupo, com a ASSOCIATIVIDADE" },
+ {  8, "comutatividade","P + Q = Q + P" },
+ {  9, "corpo finito",  "sobre 𝔽ₚ: a divisão é a inversão modular" },
+ { 10, "contar",        "#E(𝔽₁₇) para y² = x³ + 2x + 2, por duas vias" },
+ { 11, "lagrange",      "ord(P) | #E(𝔽ₚ), e NP = 𝒪" },
+ { 12, "double and add","19P por dobras, não por 19 somas" },
+};
+static void eliptica_resolve(int n){
+    TICK_N = 0;
+    Qz a = qz_de_inteiro(-2), b = qz_de_inteiro(1);      /* a curva do ficheiro */
+    PtQ P = eq_pt(qz_de_inteiro(0), qz_de_inteiro(1));
+    printf("   %d — %s\n", n, EL12[n-1].enunciado);
+    switch(n){
+    case 1: {
+        tique("O OBJETO NOVO — a curva não é só o conjunto dos (x,y): acrescenta-se 𝒪, o"
+              " ponto no infinito. E ele não é um remendo, é o NEUTRO: sem ele a soma não"
+              " fecha, porque duas verticais não se cruzam no plano");
+        tique("E É A FORMA DA CASA — objeto + neutro = objeto. O mesmo que o 0 na soma e"
+              " o 1 no produto; aqui chama-se 𝒪 e vive no infinito");
+        { PtQ R = eq_soma(a, b, P, eq_O());
+          printf("      P = "); esc_pt(P); printf(",  P + 𝒪 = "); esc_pt(R);
+          printf("   %s\n", eq_igual(R,P) ? "(resíduo 0)" : "— NÃO afirmo");
+          int mal = 0;
+          for(long k = 1; k <= 8; k++){
+              PtQ Q = eq_mult(a,b,P,k);
+              if(!eq_igual(eq_soma(a,b,Q,eq_O()), Q)) mal++;
+              if(!eq_igual(eq_soma(a,b,eq_O(),Q), Q)) mal++;
+          }
+          printf("      e nos dois lados, em 8 múltiplos de P: %d falhas\n", mal); }
+        break; }
+    case 2: {
+        tique("A NEGAÇÃO É A REFLEXÃO — −P = (x, −y), o espelho no eixo x. E o primeiro"
+              " que se prova é que ela NÃO SAI DA CURVA: a equação só tem y², logo trocar"
+              " o sinal de y não muda nada");
+        { PtQ Q = eq_neg(P);
+          printf("      P = "); esc_pt(P); printf(" está em E ? %s\n",
+                 eq_na_curva(a,b,P) ? "sim" : "NÃO");
+          printf("      −P = "); esc_pt(Q); printf(" está em E ? %s   (é o exercício)\n",
+                 eq_na_curva(a,b,Q) ? "sim" : "NÃO"); }
+        tique("E A VOLTA — P + (−P) = 𝒪, porque a reta que os une é VERTICAL e o terceiro"
+              " ponto de interseção é o infinito. Não é convenção: é a fibra a dizer que"
+              " esta reta não tem terceiro ponto no plano");
+        { PtQ R = eq_soma(a, b, P, eq_neg(P));
+          printf("      P + (−P) = "); esc_pt(R);
+          printf("   %s\n", R.inf ? "(resíduo 0)" : "— NÃO afirmo");
+          int mal = 0;
+          for(long k = 1; k <= 6; k++){
+              PtQ Q = eq_mult(a,b,P,k);
+              if(Q.inf) continue;
+              if(!eq_na_curva(a,b,eq_neg(Q))) mal++;
+              if(!eq_soma(a,b,Q,eq_neg(Q)).inf) mal++;
+          }
+          printf("      varrido em 6 pontos: %d falhas\n", mal); }
+        break; }
+    case 3: case 4: {
+        tique("A RETA — com x₁ ≠ x₂, a secante tem inclinação m = (y₂−y₁)/(x₂−x₁), e o"
+              " terceiro ponto de interseção REFLETE-SE no eixo x. A reflexão não é"
+              " decoração: é ela que faz o neutro cair no infinito e a soma ser um grupo");
+        tique("PORQUE A FÓRMULA FUNCIONA — substituindo y = mx + c na curva vem"
+              " x³ − m²x² + … = 0, uma cúbica cujas TRÊS raízes são exatamente x₁, x₂, x₃."
+              " Por VIÈTE a soma das raízes é o coeficiente de x² com sinal trocado:"
+              " x₁ + x₂ + x₃ = m². Daí x₃ = m² − x₁ − x₂, e a geometria virou identidade");
+        { PtQ P2 = eq_mult(a,b,P,2), R = eq_soma(a,b,P2,P);
+          Qz m = qz(0,1);
+          { Qz num = qz_soma(P.y, qz_oposto(P2.y));
+            Qz den = qz_soma(P.x, qz_oposto(P2.x));
+            qz_divide(num, den, &m); }
+          Qz soma3 = qz_soma(qz_soma(P2.x, P.x), R.x);
+          printf("      P = "); esc_pt(P); printf(",  2P = "); esc_pt(P2); printf("\n");
+          printf("      m = "); esc_qz("", m, ",   x₁ + x₂ + x₃ = ");
+          esc_qz("", soma3, "   e   m² = ");
+          esc_qz("", qz_mult(m,m), "");
+          printf("   %s\n", qz_igual(soma3, qz_mult(m,m)) ? "(Viète, resíduo 0)" : "— NÃO afirmo");
+          printf("      (x₃ é o do TERCEIRO ponto, antes da reflexão — e é o mesmo x)\n"); }
+        break; }
+    case 5: {
+        tique("A TANGENTE — para dobrar, a reta é a tangente, e a inclinação sai da"
+              " derivada implícita: 2y·y' = 3x² + a, logo m = (3x² + a)/(2y)");
+        { Qz m = qz(0,1);
+          Qz num = qz_soma(qz_mult(qz_de_inteiro(3), qz_mult(P.x,P.x)), a);
+          Qz den = qz_mult(qz_de_inteiro(2), P.y);
+          qz_divide(num, den, &m);
+          printf("      em P = "); esc_pt(P); printf(":  m = ");
+          esc_qz("", num, " / "); esc_qz("", den, " = "); esc_qz("", m, "\n"); }
+        tique("O GUME — se y = 0 a tangente é VERTICAL, e então 2P = 𝒪. Não se divide por"
+              " zero nem se aproxima: a fibra muda, e com ela muda a operação. É o mesmo"
+              " gume de ℚ noutro andar");
+        { PtQ P2 = eq_mult(a,b,P,2);
+          printf("      2P = "); esc_pt(P2); printf(",  e a coordenada y é ");
+          esc_qz("", P2.y, " — logo 2(2P) = ");
+          esc_pt(eq_soma(a,b,P2,P2)); printf("\n"); }
+        break; }
+    case 6: {
+        tique("A CURVA E O PONTO — E: y² = x³ − 2x + 1, e P = (0,1). Primeiro verifica-se"
+              " que a curva é NÃO SINGULAR e que o ponto lá está");
+        { Qz disc = qz_soma(qz_mult(qz_de_inteiro(4), qz_mult(a,qz_mult(a,a))),
+                            qz_mult(qz_de_inteiro(27), qz_mult(b,b)));
+          printf("      4a³ + 27b² = "); esc_qz("", disc, " ≠ 0 ? ");
+          printf("%s;   P em E ? %s\n", disc.p ? "sim" : "NÃO",
+                 eq_na_curva(a,b,P) ? "sim" : "NÃO"); }
+        tique("A ÓRBITA — e é ela o resultado: cada ponto é um tick, e o rastro inteiro"
+              " conta mais do que a folha");
+        { PtQ Q = P;
+          for(int k = 1; k <= 4; k++){
+              printf("      %dP = ", k); esc_pt(Q);
+              if(!Q.inf) printf("   (em E ? %s)", eq_na_curva(a,b,Q) ? "sim" : "NÃO");
+              printf("\n");
+              Q = eq_soma(a,b,Q,P);
+          } }
+        tique("A ORDEM — e ela sai da órbita, não de uma tabela: é o primeiro k com"
+              " kP = 𝒪");
+        printf("      ord(P) = %ld,  e o rastro é  P → 2P → 4P → 𝒪\n",
+               eq_ordem(a,b,P,40));
+        tique("A VOLTA POR DOIS CAMINHOS — 3P calculado como (2P) + P e como P + P + P."
+              " Se o grupo é associativo, os dois têm de dar o mesmo ponto");
+        { PtQ v1 = eq_soma(a,b,eq_mult(a,b,P,2), P);
+          PtQ v2 = eq_soma(a,b,eq_soma(a,b,P,P), P);
+          PtQ v3 = eq_mult(a,b,P,3);
+          printf("      (2P)+P = "); esc_pt(v1);
+          printf(";   P+P+P = "); esc_pt(v2);
+          printf(";   3P por dobras = "); esc_pt(v3);
+          printf("   %s\n", (eq_igual(v1,v2) && eq_igual(v2,v3)) ? "(resíduo 0)" : "— NÃO afirmo");
+          printf("      e 3P = −P, o que confere com 4P = 𝒪\n"); }
+        break; }
+    case 7: {
+        tique("OS CINCO — fechamento, neutro, inverso, comutatividade e associatividade."
+              " Os quatro primeiros leem-se das fórmulas; o quinto é o GUME PESADO");
+        tique("A ASSOCIATIVIDADE — «não basta testar alguns pontos e declarar: é uma"
+              " identidade estrutural». Então não se declara: varre-se o grupo INTEIRO"
+              " de uma curva sobre 𝔽ₚ, onde ele é finito e a varredura é exaustiva");
+        { long p = 17, A = 2, B = 2;
+          PtF pts[64]; long np = 0;
+          pts[np++] = ef_O();
+          for(long x = 0; x < p && np < 64; x++) for(long y = 0; y < p && np < 64; y++){
+              PtF T = ef_pt(x,y,p);
+              if(ef_na_curva(A,B,p,T)) pts[np++] = T;
+          }
+          long mal = 0, casos = 0;
+          for(long i = 0; i < np; i++) for(long j = 0; j < np; j++) for(long k = 0; k < np; k++){
+              PtF e = ef_soma(A,B,p, ef_soma(A,B,p,pts[i],pts[j]), pts[k]);
+              PtF d = ef_soma(A,B,p, pts[i], ef_soma(A,B,p,pts[j],pts[k]));
+              if(!ef_igual(e,d)) mal++;
+              casos++;
+          }
+          printf("      E(𝔽₁₇) tem %ld pontos, e (P+Q)+R = P+(Q+R) em %ld triplos:"
+                 " %ld falhas\n", np, casos, mal);
+          long fmal = 0;
+          for(long i = 0; i < np; i++) for(long j = 0; j < np; j++){
+              PtF s = ef_soma(A,B,p,pts[i],pts[j]);
+              if(!ef_na_curva(A,B,p,s)) fmal++;                      /* fechamento */
+              if(!ef_igual(s, ef_soma(A,B,p,pts[j],pts[i]))) fmal++; /* comutatividade */
+          }
+          printf("      e o fechamento e a comutatividade nos %ld pares: %ld falhas\n",
+                 np*np, fmal); }
+        break; }
+    case 8: {
+        tique("A PROVA — para x₁ ≠ x₂, m_PQ = (y₂−y₁)/(x₂−x₁) e m_QP = (y₁−y₂)/(x₁−x₂)."
+              " Numerador e denominador trocam AMBOS de sinal, logo os dois m são iguais");
+        tique("E DAÍ AS FÓRMULAS COINCIDEM — x₃ = m² − x₁ − x₂ é simétrica em x₁ e x₂; e"
+              " o y₃, embora escrito com P, dá o mesmo porque o terceiro ponto da reta é"
+              " o mesmo qualquer que seja a ordem por que se lê a reta");
+        { PtQ P2 = eq_mult(a,b,P,2);
+          PtQ r1 = eq_soma(a,b,P,P2), r2 = eq_soma(a,b,P2,P);
+          printf("      P + 2P = "); esc_pt(r1);
+          printf(";   2P + P = "); esc_pt(r2);
+          printf("   %s\n", eq_igual(r1,r2) ? "(iguais)" : "— NÃO afirmo"); }
+        tique("O GUME — e testa-se também P + (−P) = 𝒪, que é o caso em que x₁ = x₂ e a"
+              " fórmula da secante NÃO se aplica: aí não há inclinação nenhuma a comparar");
+        { PtQ r = eq_soma(a,b,P,eq_neg(P));
+          printf("      P + (−P) = "); esc_pt(r);
+          printf("   %s\n", r.inf ? "(resíduo 0)" : "— NÃO afirmo"); }
+        break; }
+    case 9: {
+        tique("O CORPO MUDA, A GEOMETRIA FICA — sobre 𝔽ₚ as mesmas fórmulas correm, e"
+              " toda a geometria vira aritmética discreta sem se abandonar a operação");
+        tique("E A DIVISÃO É A INVERSÃO MODULAR — «a/b não significa decimal: significa"
+              " a·b⁻¹ (mod p), desde que b ≢ 0». É o andar dos racionais a voltar aqui"
+              " inteiro: onde ℚ punha o inverso, 𝔽ₚ põe o inverso modular");
+        { long inv;
+          nm_inv_mod(2, 17, &inv);
+          printf("      em 𝔽₁₇:  1/2 = 2⁻¹ = %ld,  porque 2·%ld = %ld ≡ %ld (mod 17)\n",
+                 inv, inv, 2*inv, (2*inv) % 17);
+          printf("      e 1/0 ? não existe — a fibra é vazia, tal como em ℚ\n"); }
+        tique("VOLTA — e a soma de dois pontos de 𝔽₁₇ cai na curva, medido");
+        { long p = 17, A = 2, B = 2;
+          PtF G = ef_pt(5,1,p), H = ef_pt(6,3,p);
+          printf("      G = (5,1) em E ? %s;  H = (6,3) em E ? %s\n",
+                 ef_na_curva(A,B,p,G) ? "sim" : "NÃO", ef_na_curva(A,B,p,H) ? "sim" : "NÃO");
+          PtF S = ef_soma(A,B,p,G,H);
+          printf("      G + H = (%ld, %ld),  em E ? %s\n", S.x, S.y,
+                 ef_na_curva(A,B,p,S) ? "sim (resíduo 0)" : "NÃO"); }
+        break; }
+    case 10: {
+        long p = 17, A = 2, B = 2;
+        tique("A PRIMEIRA VIA — varrer os x: para cada x calcula-se x³ + 2x + 2 e contam-se"
+              " os y com y² igual a isso. Mais o 𝒪, que conta como ponto");
+        { long n1 = ef_conta(A,B,p);
+          printf("      pela varredura dos x:  #E(𝔽₁₇) = %ld\n", n1); }
+        tique("A SEGUNDA VIA — tabelar os QUADRADOS de 𝔽₁₇ e olhar para cada x uma vez só:"
+              " o lado direito ou é resíduo quadrático (dois y), ou é zero (um y), ou não"
+              " é (nenhum). São dois caminhos genuinamente diferentes sobre o mesmo objeto");
+        { long quad[32]; for(long i = 0; i < p; i++) quad[i] = 0;
+          for(long y = 0; y < p; y++) quad[(y*y) % p]++;
+          long n2 = 1;
+          for(long x = 0; x < p; x++){
+              long d = ef_m(x*x%p*x + A*x + B, p);
+              n2 += quad[d];
+          }
+          printf("      pela tabela dos quadrados: #E(𝔽₁₇) = %ld\n", n2);
+          printf("      as duas vias: %s\n", n2 == ef_conta(A,B,p)
+                 ? "o MESMO conjunto (resíduo 0)" : "— NÃO afirmo"); }
+        tique("E O CONTROLO DE HASSE — |N − (p+1)| ≤ 2√p, que em inteiros é"
+              " (N − p − 1)² ≤ 4p. Não é a resposta: é a régua que a resposta tem de caber");
+        { long N = ef_conta(A,B,p), t = N - p - 1;
+          printf("      N = %ld, p+1 = %ld, t = %ld, e t² = %ld ≤ 4p = %ld ? %s\n",
+                 N, p+1, t, t*t, 4*p, t*t <= 4*p ? "sim" : "NÃO"); }
+        break; }
+    case 11: {
+        /* A CURVA DESTE ITEM NÃO É A DO §10, E DE PROPÓSITO: ali #E = 19 é PRIMO, e com
+         * ordem prima «todas as ordens dividem N» é quase automático — só há 1 e N. Seria
+         * um caso degenerado a passar por teorema. Aqui usa-se y² = x³ + x + 2 sobre 𝔽₁₇,
+         * onde #E = 24 e aparecem SETE ordens distintas: aí a divisibilidade decide. */
+        long p = 17, A = 1, B = 2;
+        tique("LAGRANGE — num grupo finito a ordem de qualquer elemento DIVIDE a ordem do"
+              " grupo. É o mesmo teorema que ligou Fermat a Euler no andar anterior, agora"
+              " a agir sobre pontos em vez de resíduos");
+        tique("E A CURVA MUDA AQUI — na do §10 o #E é 19, PRIMO, e aí «todas as ordens"
+              " dividem N» seria quase automático (só há 1 e 19). Com y² = x³ + x + 2"
+              " sobre 𝔽₁₇ o #E é composto, e a divisibilidade passa a ter conteúdo");
+        { long N = ef_conta(A,B,p);
+          printf("      E: y² = x³ + x + 2 sobre 𝔽₁₇,  #E = %ld, e as ordens:\n      ", N);
+          long vistas[64], nv = 0;
+          for(long x = 0; x < p; x++) for(long y = 0; y < p; y++){
+              PtF T = ef_pt(x,y,p);
+              if(!ef_na_curva(A,B,p,T)) continue;
+              long o = ef_ordem(A,B,p,T);
+              int novo = 1;
+              for(long i = 0; i < nv; i++) if(vistas[i] == o) novo = 0;
+              if(novo && nv < 64){ vistas[nv++] = o; printf("%ld ", o); }
+          }
+          printf("\n      e todas dividem %ld ? ", N);
+          int mal = 0;
+          for(long i = 0; i < nv; i++) if(vistas[i] == 0 || N % vistas[i]) mal++;
+          printf("%s\n", mal ? "— NÃO afirmo" : "sim (resíduo 0)");
+          tique("E A CONSEQUÊNCIA — NP = 𝒪 para TODO ponto P, seja qual for a sua ordem."
+                " É a ordem do grupo a anular toda a gente");
+          long nmal = 0, contados = 0;
+          for(long x = 0; x < p; x++) for(long y = 0; y < p; y++){
+              PtF T = ef_pt(x,y,p);
+              if(!ef_na_curva(A,B,p,T)) continue;
+              if(!ef_mult(A,B,p,T,N).inf) nmal++;
+              contados++;
+          }
+          printf("      NP = 𝒪 em %ld pontos afins: %ld falhas\n", contados, nmal); }
+        break; }
+    case 12: {
+        tique("O ALGORITMO — «em vez de somar P repetidamente, usamos double-and-add»."
+              " É a quantização por ticks desta casa: a multiplicação inteira desfaz-se em"
+              " DOBRAS e somas, e cada bit do expoente é um tick");
+        printf("      19 = 16 + 2 + 1 = (10011)₂\n");
+        tique("O RASTRO — P → 2P → 4P → 8P → 16P, e depois 16P + 2P + P. São 4 dobras e"
+              " 2 somas, contra 18 somas: é log em vez de linear");
+        { long p = 17, A = 2, B = 2;
+          PtF G = ef_pt(5,1,p), D = G;
+          printf("      em 𝔽₁₇ com G = (5,1):\n");
+          for(int k = 0; k < 5; k++){
+              printf("        %2dG = ", 1 << k);
+              if(D.inf) printf("𝒪\n"); else printf("(%ld, %ld)\n", D.x, D.y);
+              D = ef_soma(A,B,p,D,D);
+          }
+          PtF r16 = ef_mult(A,B,p,G,16), r2 = ef_mult(A,B,p,G,2);
+          PtF soma = ef_soma(A,B,p, ef_soma(A,B,p,r16,r2), G);
+          PtF direto = ef_mult(A,B,p,G,19);
+          printf("      16G + 2G + G = ");
+          if(soma.inf) printf("𝒪"); else printf("(%ld, %ld)", soma.x, soma.y);
+          printf(";   19G por dobras = ");
+          if(direto.inf) printf("𝒪"); else printf("(%ld, %ld)", direto.x, direto.y);
+          printf("   %s\n", ef_igual(soma,direto) ? "(dois caminhos, resíduo 0)" : "— NÃO afirmo");
+          tique("VOLTA — e mede-se contra a soma REPETIDA, que é o caminho lento: se as"
+                " dobras discordassem da soma um a um, uma das duas estava errada");
+          PtF lento = ef_O();
+          for(int k = 0; k < 19; k++) lento = ef_soma(A,B,p,lento,G);
+          printf("      somando 19 vezes: ");
+          if(lento.inf) printf("𝒪"); else printf("(%ld, %ld)", lento.x, lento.y);
+          printf("   %s\n", ef_igual(lento,direto) ? "(resíduo 0)" : "— NÃO afirmo");
+          printf("      (e 19G = 𝒪 porque #E = 19: é Lagrange outra vez)\n"); }
+        break; }
+    }
+}
+static int resolve_eliptica(const char *f){
+    const char *p = f;
+    if(!strncmp(p, "dirichlet", 9) || !strncmp(p, "convolucao", 10)
+       || !strncmp(p, "convolução", 11) || !strncmp(p, "mobius inversao", 15)
+       || !strncmp(p, "möbius inversão", 17)){ dirichlet_resolve(); return 1; }
+    if(!strncmp(p, "eliptica", 8)) p += 8;
+    else if(!strncmp(p, "elíptica", 9)) p += 9;
+    else if(!strncmp(p, "curva", 5)) p += 5;
+    else {
+        for(size_t i = 0; i < sizeof EL12/sizeof *EL12; i++)
+            if(!strcmp(p, EL12[i].nome)){ eliptica_resolve(EL12[i].n); return 1; }
+        return 0;
+    }
+    while(*p == ' ') p++;
+    if(!*p){
+        printf("   curvas elípticas — «eliptica N» ou «eliptica <nome>»\n");
+        printf("   E: y² = x³ + ax + b, com 4a³ + 27b² ≠ 0\n");
+        printf("   (e a frase do andar: a FIBRA determina qual operação existe)\n\n");
+        for(size_t i = 0; i < sizeof EL12/sizeof *EL12; i++){
+            printf("     %2d  ", EL12[i].n);
+            esc_col(EL12[i].nome, 16);
+            printf("  %s\n", EL12[i].enunciado);
+        }
+        return 1;
+    }
+    if(*p >= '0' && *p <= '9'){
+        long n = 0;
+        while(*p >= '0' && *p <= '9') n = n*10 + (*p++ - '0');
+        while(*p == ' ') p++;
+        if(!*p && n >= 1 && n <= 12){ eliptica_resolve((int)n); return 1; }
+        return 0;
+    }
+    for(size_t i = 0; i < sizeof EL12/sizeof *EL12; i++)
+        if(!strcmp(p, EL12[i].nome)){ eliptica_resolve(EL12[i].n); return 1; }
+    return 0;
+}
 /* ── TEORIA DOS NÚMEROS: OS DEZASSETE, E É TUDO A MESMA ÓRBITA ──────────────────────
  * «definição → propriedade → teorema → exercício de demonstração → contraexemplo →
  * volta. Nada de só lista de contas.» E no fim a frase que organiza o andar todo:
@@ -1352,7 +1751,6 @@ static int resolve_bezout(const char *f){
  *
  * Cada exercício corre no relógio; onde ele pede gume, há gume; onde pede volta, a volta
  * substitui e mede. As contas aparecem, mas como TESTEMUNHA, nunca como resposta. */
-static void esc_col(const char *s, int largura);
 static const struct { int n; const char *nome; const char *enunciado; } TN17[] = {
  {  1, "divisibilidade",     "a | b e b | c  ⟹  a | c" },
  {  2, "mdc euclides",       "gcd(a,b) = gcd(b, a − qb)" },
@@ -4663,6 +5061,7 @@ static int resolve_mostra(const char *f){ return resolve_mostra_em(f, "../papers
 static int resolve_simbolico(const char *fala){
     if(resolve_divisibilidade(fala)) return 1;     /* o relógio de 6 ticks */
     if(resolve_bezout(fala)) return 1;             /* a testemunha e o critério */
+    if(resolve_eliptica(fala)) return 1;           /* Dirichlet e as elípticas */
     if(resolve_numeros(fala)) return 1;            /* teoria dos números, os 17 */
     if(resolve_identifica(fala)) return 1;         /* o mesmo ponto, quatro portas */
     if(resolve_prova_real(fala)) return 1;         /* as vinte provas do eval.txt */
@@ -5695,6 +6094,389 @@ static int teste(void){
                 if(e_conta(nu2)) roubadas++;
             }
             ok("e a membrana nao rouba o corpus: fala sem LaTeX nao vira conta", roubadas == 0);
+
+        /* ═══ §C34 CURVAS ELÍPTICAS: A FIBRA DETERMINA QUAL OPERAÇÃO EXISTE ═══════
+         * «reta → interseção → reflexão → novo ponto → repetição» — e a frase que já é a
+         * língua desta casa: «a FIBRA determina qual operação existe». Com x₁ ≠ x₂ há
+         * secante; com x₁ = x₂ há DUAS fibras (opostos ou tangente). Não se aproxima o
+         * denominador zero: muda-se de operação, e diz-se qual.
+         *
+         * E sobre 𝔽ₚ «toda a geometria vira aritmética discreta»: a divisão é a INVERSÃO
+         * MODULAR, isto é, o andar dos racionais a voltar inteiro. */
+        printf("\n§C34 CURVAS ELÍPTICAS: a máquina de rastros, e a fibra a escolher a operação.\n\n");
+        {
+            Qz a = qz_de_inteiro(-2), b = qz_de_inteiro(1);
+            PtQ P = eq_pt(qz_de_inteiro(0), qz_de_inteiro(1));
+
+            /* (§1)(§2)(§6) A CURVA DELE, E OS NÚMEROS DELE — sobre ℚ, exatos */
+            { int emal = 0;
+              if(!eq_regular(a,b)) emal++;                    /* 4a³+27b² = −5 ≠ 0 */
+              if(!eq_na_curva(a,b,P)) emal++;
+              PtQ P2 = eq_mult(a,b,P,2), P3 = eq_mult(a,b,P,3), P4 = eq_mult(a,b,P,4);
+              if(!eq_na_curva(a,b,P2) || !eq_na_curva(a,b,P3)) emal++;
+              if(!eq_igual(P2, eq_pt(qz_de_inteiro(1), qz_de_inteiro(0)))) emal++;
+              if(!eq_igual(P3, eq_neg(P))) emal++;
+              if(!P4.inf) emal++;
+              long ord = eq_ordem(a,b,P,40);
+              /* o neutro e o inverso, varridos na órbita */
+              for(long k = 1; k <= 8; k++){
+                  PtQ Q = eq_mult(a,b,P,k);
+                  if(!eq_igual(eq_soma(a,b,Q,eq_O()), Q)) emal++;
+                  if(!eq_soma(a,b,Q,eq_neg(Q)).inf) emal++;
+                  if(!Q.inf && !eq_na_curva(a,b,eq_neg(Q))) emal++;
+              }
+              printf("      E: y² = x³ − 2x + 1 e P = (0,1):  2P = ");
+              esc_pt(P2); printf(",  3P = "); esc_pt(P3);
+              printf(",  4P = "); esc_pt(P4); printf(",  ord(P) = %ld\n", ord);
+              ok("A CURVA DELE fecha sobre ℚ com coordenadas EXATAS: P = (0,1) dá"
+                 " 2P = (1,0) e 4P = 𝒪, e a ordem de P é 4 — o rastro P → 2P → 4P → 𝒪"
+                 " que ele desenhou. O neutro (P + 𝒪 = P) e o inverso (P + (−P) = 𝒪)"
+                 " valem em toda a órbita, e −P nunca sai da curva",
+                 emal == 0 && ord == 4); }
+
+            /* (§4) VIÈTE: a geometria da reta VIRA identidade algébrica — x₁+x₂+x₃ = m².
+             * É a prova que ele destaca, e mede-se em vez de se citar. */
+            { int vmal = 0, casos = 0;
+              long p = 17, A = 2, B = 2;                      /* em 𝔽ₚ há pontos que cheguem */
+              PtF pts[64]; long np = 0;
+              for(long x = 0; x < p; x++) for(long y = 0; y < p; y++){
+                  PtF T = ef_pt(x,y,p);
+                  if(ef_na_curva(A,B,p,T) && np < 64) pts[np++] = T;
+              }
+              for(long i = 0; i < np; i++) for(long j = 0; j < np; j++){
+                  if(pts[i].x == pts[j].x) continue;          /* só a secante */
+                  long num = ef_m(pts[j].y - pts[i].y, p), den = ef_m(pts[j].x - pts[i].x, p);
+                  long inv; if(!nm_inv_mod(den, p, &inv)) continue;
+                  long m = ef_m(num*inv, p);
+                  PtF S = ef_soma(A,B,p,pts[i],pts[j]);
+                  if(S.inf) continue;
+                  /* x₃ do TERCEIRO ponto é o mesmo x da soma (a reflexão não mexe no x) */
+                  if(ef_m(pts[i].x + pts[j].x + S.x, p) != ef_m(m*m, p)) vmal++;
+                  casos++;
+              }
+              printf("      Viète em 𝔽₁₇: x₁ + x₂ + x₃ = m² em %d secantes\n", casos);
+              ok("VIÈTE — a geometria da reta VIRA identidade algébrica: substituindo a"
+                 " reta na curva sai uma cúbica cujas três raízes são x₁, x₂, x₃, e a soma"
+                 " delas é m². Daí x₃ = m² − x₁ − x₂, e a fórmula deixa de ser uma receita"
+                 " — é a relação de Viète, medida em todas as secantes do grupo",
+                 vmal == 0 && casos > 200); }
+
+            /* (§7) A LEI DE GRUPO, COM A ASSOCIATIVIDADE EXAUSTIVA — «não basta testar
+             * alguns pontos e declarar: é uma identidade estrutural» */
+            { long p = 17, A = 2, B = 2;
+              PtF pts[64]; long np = 0;
+              pts[np++] = ef_O();
+              for(long x = 0; x < p; x++) for(long y = 0; y < p; y++){
+                  PtF T = ef_pt(x,y,p);
+                  if(ef_na_curva(A,B,p,T) && np < 64) pts[np++] = T;
+              }
+              long amal = 0, triplos = 0, pmal = 0;
+              for(long i = 0; i < np; i++) for(long j = 0; j < np; j++){
+                  PtF s = ef_soma(A,B,p,pts[i],pts[j]);
+                  if(!ef_na_curva(A,B,p,s)) pmal++;                        /* fechamento */
+                  if(!ef_igual(s, ef_soma(A,B,p,pts[j],pts[i]))) pmal++;   /* comutativa */
+                  if(!ef_igual(ef_soma(A,B,p,pts[i],ef_O()), pts[i])) pmal++;
+                  if(!ef_soma(A,B,p,pts[i],ef_neg(p,pts[i])).inf) pmal++;
+                  for(long k = 0; k < np; k++){
+                      PtF e = ef_soma(A,B,p, s, pts[k]);
+                      PtF d = ef_soma(A,B,p, pts[i], ef_soma(A,B,p,pts[j],pts[k]));
+                      if(!ef_igual(e,d)) amal++;
+                      triplos++;
+                  }
+              }
+              printf("      E(𝔽₁₇) tem %ld pontos: associatividade em %ld triplos, e o"
+                     " resto em %ld pares\n", np, triplos, np*np);
+              ok("A LEI DE GRUPO com a ASSOCIATIVIDADE varrida EXAUSTIVAMENTE — os 6859"
+                 " triplos do grupo inteiro, não «alguns pontos». É ele que chama a isto o"
+                 " gume pesado, e num grupo finito a varredura completa é possível: não é"
+                 " amostra, é o conjunto todo",
+                 amal == 0 && pmal == 0 && triplos > 6000 && np == 19); }
+
+            /* (§10)(§11) CONTAR POR DUAS VIAS, HASSE, E LAGRANGE COM ORDEM COMPOSTA */
+            { int cmal = 0;
+              long p = 17;
+              /* as duas vias, em várias curvas — e não só na dele */
+              for(long A = 0; A < 6; A++) for(long B = 0; B < 6; B++){
+                  if(ef_m(4*A*A*A + 27*B*B, p) == 0) continue;    /* singular: fora */
+                  long n1 = ef_conta(A,B,p);
+                  long quad[32]; for(long i = 0; i < p; i++) quad[i] = 0;
+                  for(long y = 0; y < p; y++) quad[(y*y) % p]++;
+                  long n2 = 1;
+                  for(long x = 0; x < p; x++) n2 += quad[ef_m(x*x%p*x + A*x + B, p)];
+                  if(n1 != n2) cmal++;                            /* DUAS VIAS concordam */
+                  long t = n1 - p - 1;
+                  if(t*t > 4*p) cmal++;                           /* HASSE, em inteiros */
+                  /* LAGRANGE: toda ordem divide N, e NP = 𝒪 */
+                  for(long x = 0; x < p; x++) for(long y = 0; y < p; y++){
+                      PtF T = ef_pt(x,y,p);
+                      if(!ef_na_curva(A,B,p,T)) continue;
+                      long o = ef_ordem(A,B,p,T);
+                      if(o == 0 || n1 % o) cmal++;
+                      if(!ef_mult(A,B,p,T,n1).inf) cmal++;
+                  }
+              }
+              /* e a curva com ordem COMPOSTA, para o Lagrange não ser degenerado */
+              long N24 = ef_conta(1,2,p), ordens[64], no = 0;
+              for(long x = 0; x < p; x++) for(long y = 0; y < p; y++){
+                  PtF T = ef_pt(x,y,p);
+                  if(!ef_na_curva(1,2,p,T)) continue;
+                  long o = ef_ordem(1,2,p,T);
+                  int novo = 1;
+                  for(long i = 0; i < no; i++) if(ordens[i] == o) novo = 0;
+                  if(novo && no < 64) ordens[no++] = o;
+              }
+              printf("      #E(𝔽₁₇) = %ld para y²=x³+2x+2 (as duas vias), e a curva"
+                     " y²=x³+x+2 tem #E = %ld com %ld ordens distintas\n",
+                     ef_conta(2,2,p), N24, no);
+              ok("CONTAR POR DUAS VIAS (a varredura dos x e a tabela dos quadrados) dá o"
+                 " MESMO conjunto em todas as curvas não singulares de 𝔽₁₇, e o N cabe"
+                 " sempre em HASSE. E LAGRANGE mede-se onde tem conteúdo: numa curva de"
+                 " ordem COMPOSTA (24, com 7 ordens distintas) — com N primo a"
+                 " divisibilidade seria quase automática, e isso era caso degenerado",
+                 cmal == 0 && N24 == 24 && no == 7); }
+
+            /* (§12)(§14) DOUBLE-AND-ADD contra a SOMA REPETIDA, e o GUME DA FIBRA */
+            { int dmal = 0; long p = 17, A = 2, B = 2, casos = 0;
+              for(long x = 0; x < p; x++) for(long y = 0; y < p; y++){
+                  PtF G = ef_pt(x,y,p);
+                  if(!ef_na_curva(A,B,p,G)) continue;
+                  PtF lento = ef_O();
+                  for(long k = 1; k <= 22; k++){
+                      lento = ef_soma(A,B,p,lento,G);
+                      PtF rapido = ef_mult(A,B,p,G,k);          /* por DOBRAS */
+                      if(!ef_igual(lento, rapido)) dmal++;      /* dois caminhos */
+                      casos++;
+                  }
+              }
+              /* O GUME DA FIBRA: com x₁ = x₂ há DUAS operações diferentes, e a escolha
+               * não é aproximação — é a fibra. Conta-se cada ramo, para nenhum ficar por
+               * exercitar (um ramo que não corre não está medido). */
+              long ramo_oposto = 0, ramo_tangente = 0, ramo_secante = 0;
+              for(long x1 = 0; x1 < p; x1++) for(long y1 = 0; y1 < p; y1++){
+                  PtF U = ef_pt(x1,y1,p);
+                  if(!ef_na_curva(A,B,p,U)) continue;
+                  for(long x2 = 0; x2 < p; x2++) for(long y2 = 0; y2 < p; y2++){
+                      PtF V = ef_pt(x2,y2,p);
+                      if(!ef_na_curva(A,B,p,V)) continue;
+                      PtF S = ef_soma(A,B,p,U,V);
+                      if(U.x == V.x && ef_m(U.y+V.y,p) == 0){
+                          if(!S.inf) dmal++;                    /* opostos ⟹ 𝒪 */
+                          ramo_oposto++;
+                      } else if(ef_igual(U,V)){
+                          if(!ef_na_curva(A,B,p,S)) dmal++;     /* tangente */
+                          ramo_tangente++;
+                      } else {
+                          if(!ef_na_curva(A,B,p,S)) dmal++;     /* secante */
+                          ramo_secante++;
+                      }
+                  }
+              }
+              printf("      double-and-add contra soma repetida em %ld casos; e os TRÊS"
+                     " ramos da fibra: %ld opostos, %ld tangentes, %ld secantes\n",
+                     casos, ramo_oposto, ramo_tangente, ramo_secante);
+              ok("DOUBLE-AND-ADD dá o mesmo que a soma repetida em todos os pontos e"
+                 " múltiplos até 22 — dois caminhos, um em log e outro em linear. E o"
+                 " GUME DA FIBRA mede-se por RAMO: os três (opostos, tangente, secante)"
+                 " correm todos e nenhum fica por exercitar, porque um ramo que não corre"
+                 " não está medido",
+                 dmal == 0 && ramo_oposto > 0 && ramo_tangente > 0 && ramo_secante > 0); }
+
+            /* A REDUÇÃO LIGA OS DOIS MUNDOS: a conta feita em ℚ, reduzida mod p, tem de
+             * dar a conta feita em 𝔽ₚ. São duas implementações independentes, e é esta a
+             * medida que as obriga a concordar. */
+            { int rmal = 0, comparados = 0;
+              long p = 11;
+              long A = ((-2) % p + p) % p, B = 1;             /* a curva dele mod 11 */
+              PtF Pf = ef_pt(0, 1, p);
+              if(!ef_na_curva(A,B,p,Pf)) rmal++;
+              for(long k = 1; k <= 8; k++){
+                  PtQ Q = eq_mult(a,b,P,k);
+                  PtF R = ef_mult(A,B,p,Pf,k);
+                  if(Q.inf != R.inf){ rmal++; continue; }
+                  if(Q.inf) continue;
+                  /* reduzir a coordenada racional mod p: p/q ↦ p·q⁻¹ */
+                  long ix, iy, invx, invy;
+                  if(!nm_inv_mod(((Q.x.q % p)+p)%p, p, &invx)) continue;
+                  if(!nm_inv_mod(((Q.y.q % p)+p)%p, p, &invy)) continue;
+                  ix = ef_m(((Q.x.p % p)+p)%p * invx, p);
+                  iy = ef_m(((Q.y.p % p)+p)%p * invy, p);
+                  if(ix != R.x || iy != R.y) rmal++;
+                  comparados++;
+              }
+              printf("      a órbita de ℚ reduzida mod 11 bate com a órbita de 𝔽₁₁ em"
+                     " %d pontos\n", comparados);
+              ok("A REDUÇÃO LIGA OS DOIS MUNDOS: a órbita calculada sobre ℚ com frações"
+                 " exatas, reduzida mod p (numerador vezes o inverso do denominador), dá"
+                 " a órbita calculada diretamente em 𝔽ₚ. São duas implementações"
+                 " independentes obrigadas a concordar — e é aqui que «a divisão é a"
+                 " inversão modular» deixa de ser frase e passa a ser a ponte",
+                 rmal == 0 && comparados >= 3); }
+
+            /* E OS DOZE CORREM, com o fora de alcance recusado */
+            { int lmal = 0, por_n = 0, por_nome = 0;
+              fflush(stdout);
+              int guarda = dup(1), nulo = open("/dev/null", O_WRONLY);
+              if(guarda >= 0 && nulo >= 0) dup2(nulo, 1);
+              for(int k = 1; k <= 12; k++){
+                  char fala[64];
+                  snprintf(fala, sizeof fala, "eliptica %d", k);
+                  if(resolve_eliptica(fala)) por_n++; else lmal++;
+              }
+              for(size_t i = 0; i < sizeof EL12/sizeof *EL12; i++)
+                  if(resolve_eliptica(EL12[i].nome)) por_nome++; else lmal++;
+              if(resolve_eliptica("eliptica 13")) lmal++;
+              if(!resolve_eliptica("dirichlet")) lmal++;
+              fflush(stdout);
+              if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
+              if(nulo >= 0) close(nulo);
+              printf("      os doze: %d pelo número, %d pelo nome, e a 13 é recusada\n",
+                     por_n, por_nome);
+              ok("OS DOZE das curvas elípticas correm pelo NÚMERO e pelo NOME, o fora de"
+                 " alcance é RECUSADO, e a fala do Dirichlet responde — varrido, porque"
+                 " uma fala que morre calada não falha: desaparece",
+                 lmal == 0 && por_n == 12 && por_nome == 12); }
+        }
+
+        /* ═══ §C33 A CONVOLUÇÃO DE DIRICHLET: μ = 1⁻¹, E A INVERSÃO É DECONVOLUÇÃO ═
+         * «funções aritméticas → convolução → multiplicativas → μ como INVERSOR →
+         *  inversão → série de Dirichlet», e o alvo é μ * 1 = ε.
+         *
+         * Ele escreve f: ℕ → ℂ; as funções deste andar (1, id, φ, μ, ε, τ, σ) são TODAS
+         * inteiras e a convolução de inteiras é inteira — o ℂ nunca chega a ser preciso,
+         * e a álgebra corre exata. E a série de Dirichlet mede-se FORMALMENTE: a
+         * identidade D_{f*g} = D_f·D_g é sobre os COEFICIENTES, e o s nunca se avalia. */
+        printf("\n§C33 DIRICHLET: μ é o INVERSO do 1, e a inversão de Möbius é a deconvolução.\n\n");
+        {
+            Arit um, id, phi, mu, eps, tau, sig, t1, t2, t3;
+            dl_um(&um); dl_id(&id); dl_phi(&phi); dl_mu(&mu); dl_eps(&eps);
+            dl_tau(&tau); dl_sigma(&sig);
+
+            /* A ÁLGEBRA: comutativa, ASSOCIATIVA e com neutro ε. A associatividade é o
+             * que faz disto uma álgebra e não uma operação avulsa. */
+            { int cmal = 0;
+              Arit *fs[5] = { &um, &id, &phi, &mu, &tau };
+              for(int i = 0; i < 5; i++){
+                  dl_conv(fs[i], &eps, &t1);
+                  if(!dl_igual(&t1, fs[i], 120)) cmal++;                  /* neutro */
+                  for(int j = 0; j < 5; j++){
+                      dl_conv(fs[i], fs[j], &t1);
+                      dl_conv(fs[j], fs[i], &t2);
+                      if(!dl_igual(&t1, &t2, 120)) cmal++;                /* comutativa */
+                      for(int k = 0; k < 5; k++){
+                          dl_conv(&t1, fs[k], &t2);                       /* (f*g)*h */
+                          Arit gh; dl_conv(fs[j], fs[k], &gh);
+                          dl_conv(fs[i], &gh, &t3);                       /* f*(g*h) */
+                          if(!dl_igual(&t2, &t3, 60)) cmal++;
+                      }
+                  }
+              }
+              ok("a CONVOLUÇÃO DE DIRICHLET é uma ÁLGEBRA: comutativa, ASSOCIATIVA e com"
+                 " neutro ε — varrido em 5 funções, 25 pares e 125 triplos. É o produto"
+                 " sobre a ÁRVORE DOS DIVISORES, e não o ponto a ponto: cada n consulta a"
+                 " sua árvore inteira", cmal == 0); }
+
+            /* O TEOREMA: μ * 1 = ε, isto é μ = 1⁻¹. E o inverso é ÚNICO numa álgebra
+             * associativa com neutro — logo não há outro candidato. */
+            { int mmal = 0;
+              dl_conv(&mu, &um, &t1);
+              if(!dl_igual(&t1, &eps, DL_MAX)) mmal++;
+              dl_conv(&um, &mu, &t2);
+              if(!dl_igual(&t2, &eps, DL_MAX)) mmal++;          /* nos DOIS sentidos */
+              /* e a unicidade: se g*1 = ε então g = μ (varrido nos primeiros valores,
+               * construindo g pela recorrência que o inverso obriga) */
+              Arit g;
+              g.v[1] = 1;
+              for(long n = 2; n <= 120; n++){
+                  long s = 0;
+                  for(long d = 1; d < n; d++) if(n % d == 0) s += g.v[d];
+                  g.v[n] = -s;                                   /* a única escolha possível */
+              }
+              for(long n = 1; n <= 120; n++) if(g.v[n] != mu.v[n]) mmal++;
+              printf("      (μ*1)(n) = ε(n) nos %d valores, e o inverso construído pela"
+                     " recorrência DÁ o μ — logo μ = 1⁻¹ e é único\n", DL_MAX);
+              ok("μ * 1 = ε, ISTO É μ = 1⁻¹ — e nos dois sentidos. O μ deixa de ser uma"
+                 " tabela de sinais e passa a ser o INVERSO da função constante 1 nesta"
+                 " álgebra. E é ÚNICO: construindo o inverso pela recorrência que a"
+                 " definição obriga, o que sai é exatamente o μ", mmal == 0); }
+
+            /* φ = id * μ — «uma função aparentemente diferente vira convolução + cancelamento» */
+            { int fmal = 0;
+              dl_conv(&id, &mu, &t1);
+              if(!dl_igual(&t1, &phi, DL_MAX)) fmal++;
+              dl_conv(&phi, &um, &t2);
+              if(!dl_igual(&t2, &id, DL_MAX)) fmal++;            /* a forma dual: φ*1 = id */
+              /* e as outras duas que caem de graça: τ = 1*1 e σ = id*1 */
+              dl_conv(&um, &um, &t1);
+              if(!dl_igual(&t1, &tau, DL_MAX)) fmal++;
+              dl_conv(&id, &um, &t1);
+              if(!dl_igual(&t1, &sig, DL_MAX)) fmal++;
+              printf("      φ = id*μ e φ*1 = id;  τ = 1*1 e σ = id*1 — as quatro nos %d"
+                     " valores\n", DL_MAX);
+              ok("φ = id * μ, e o par dual φ * 1 = id: a função que parecia de outra"
+                 " família é CONVOLUÇÃO + CANCELAMENTO. E de graça caem τ = 1*1 (o número"
+                 " de divisores) e σ = id*1 (a soma) — não há funções novas, há a mesma"
+                 " álgebra a gerá-las", fmal == 0); }
+
+            /* A INVERSÃO DE MÖBIUS: F = f*1 ⟺ f = F*μ — a DECONVOLUÇÃO, nos dois sentidos */
+            { int imal = 0;
+              Arit *fs[4] = { &um, &id, &phi, &mu };
+              for(int i = 0; i < 4; i++){
+                  dl_soma_divisores(fs[i], &t1);                 /* F = f*1 */
+                  dl_inverte(&t1, &t2);                          /* f = F*μ */
+                  if(!dl_igual(&t2, fs[i], 120)) imal++;         /* a VOLTA */
+                  dl_inverte(fs[i], &t1);                        /* e o outro sentido */
+                  dl_soma_divisores(&t1, &t2);
+                  if(!dl_igual(&t2, fs[i], 120)) imal++;
+              }
+              ok("a INVERSÃO DE MÖBIUS é a DECONVOLUÇÃO: F(n) = Σ_{d|n} f(d) desfaz-se"
+                 " com f(n) = Σ_{d|n} μ(d)F(n/d), e mede-se nos DOIS sentidos (somar e"
+                 " depois inverter, inverter e depois somar) em quatro funções. É a soma"
+                 " sobre a árvore e a sua volta, com resíduo 0", imal == 0); }
+
+            /* MULTIPLICATIVAS: 1, id, φ, μ são-no; a convolução preserva; e o GUME é uma
+             * que NÃO é — sem isso «multiplicativa» não estaria a distinguir nada. */
+            { int mmal2 = 0, viu_falha = 0;
+              Arit *fs[4] = { &um, &id, &phi, &mu };
+              for(int i = 0; i < 4; i++){
+                  if(!dl_multiplicativa(fs[i], 120, 0, 0)) mmal2++;
+                  for(int j = 0; j < 4; j++){
+                      dl_conv(fs[i], fs[j], &t1);
+                      if(!dl_multiplicativa(&t1, 120, 0, 0)) mmal2++;   /* a convolução preserva */
+                  }
+              }
+              /* O GUME, e a função escolhe-se para a testemunha ser GENUÍNA: g(1) = 1
+               * (senão falharia logo nessa condição e o par exibido seria (1,1), que não
+               * ensina nada) e g(n) = n+1 daí em diante. Assim o par que a derruba é um
+               * par coprimo de verdade, e é ele que se mostra. */
+              { Arit g; long pm = 0, pn = 0;
+                g.v[0] = 0; g.v[1] = 1;
+                for(long n = 2; n <= DL_MAX; n++) g.v[n] = n + 1;
+                if(!dl_multiplicativa(&g, 60, &pm, &pn) && pm > 1 && pn > 1){
+                    viu_falha = 1;
+                    printf("      o gume: g(1)=1 e g(n)=n+1 NÃO é multiplicativa —"
+                           " g(%ld·%ld) = %ld e g(%ld)·g(%ld) = %ld\n",
+                           pm, pn, g.v[pm*pn], pm, pn, g.v[pm]*g.v[pn]);
+                } }
+              ok("1, id, φ e μ são MULTIPLICATIVAS e a convolução PRESERVA a"
+                 " multiplicatividade (16 pares medidos) — e o gume exibe uma que não é,"
+                 " f(n) = n+1, com o par que a derruba. Sem esse contra-caso a palavra"
+                 " não estaria a distinguir nada", mmal2 == 0 && viu_falha); }
+
+            /* A SÉRIE DE DIRICHLET, FORMAL: o coeficiente do produto É a convolução */
+            { int dmal = 0;
+              Arit *fs[4] = { &um, &id, &phi, &mu };
+              for(int i = 0; i < 4; i++) for(int j = 0; j < 4; j++){
+                  dl_conv(fs[i], fs[j], &t1);
+                  for(long k = 1; k <= 80; k++)
+                      if(dl_coef_produto(fs[i], fs[j], k) != t1.v[k]) dmal++;
+              }
+              printf("      D_{f*g} = D_f·D_g nos coeficientes, 16 pares × 80 termos —"
+                     " e o s nunca se avalia\n");
+              ok("a SÉRIE DE DIRICHLET transforma CONVOLUÇÃO em PRODUTO, e a identidade"
+                 " mede-se EXATA porque é FORMAL: o coeficiente de 1/kˢ no produto é"
+                 " Σ_{nm=k} f(n)g(m), que é a convolução por definição. Avaliar num s"
+                 " pedia análise e decimais; os coeficientes são inteiros", dmal == 0); }
+        }
 
         /* ═══ §C32 TEORIA DOS NÚMEROS: E É TUDO A MESMA ÓRBITA ════════════════════
          * «definição → propriedade → teorema → exercício de demonstração →
