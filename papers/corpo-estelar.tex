@@ -1561,6 +1561,63 @@ $\text{tex}\to\text{pdf}\to\text{tex}$ fecha com resíduo $0$ por ser inteira, e
 norma que arredonda) quebra-a ($1968$ de $3000$). A \emph{reversibilidade} é o que o separa do octonião
 clássico, que no grau oito perde a associatividade (\code{tests/circuito\_tradutor.c}).}
 
+\begin{teorema}[a graduação é um segundo construtor sem topo --- e está
+do lado de Gentil]\label{thm:graduacao-gentil}
+O passo dos tecidos $T_{k+1}=T_k+T_k^{*}$ é a estrela usada como
+construtor, e a torre que ele gera não tem topo por dentro. Há um
+\textbf{segundo} construtor com a mesma propriedade, e do mesmo lado:
+\[
+\boxed{\;
+\Lambda^{0}\xrightarrow{\;d\;}\Lambda^{1}\xrightarrow{\;d\;}\cdots
+\xrightarrow{\;d\;}\Lambda^{n}\xrightarrow{\;d\;}0,
+\qquad d^{2}=0.
+\;}
+\]
+\textbf{(i) Não pede fórmula nova a cada dimensão.} A regra que define
+$\Lambda^{k}\to\Lambda^{k+1}$ é a mesma em todo $k$ e em todo $n$: os
+índices entram antissimetrizados. O que \emph{acaba} é a
+\textbf{realização} --- em dimensão $n$ não há onde continuar depois de
+$\Lambda^{n}$ ---, não a linguagem. Medido: a torre tem $n{+}1$ andares
+não nulos e soma $2^{n}$, verificado até $n=14$.
+
+\textbf{(ii) E está do lado contínuo.} O que a define é a
+\emph{antissimetria} --- uma indução no grau --- e não uma norma
+bilinear. Por isso ela não conhece o tecto do grau oito: esse é de
+Hurwitz, e classifica o \emph{bilinear}. O mecanismo de $d^{2}=0$ é a
+contracção de um tensor antissimétrico com um simétrico
+($\partial_i\partial_j$ é simétrico), e esse argumento \emph{não
+menciona $n$} --- medido de $n=2$ a $n=40$, com o controlo a separar
+(trocada a antissimetria por simetria, a contracção deixa de anular).
+
+\textbf{(iii) E o directo e o cruzado realizam-se nela.} O par que
+este paper introduziu --- o \emph{directo} $\langle a,b\rangle=\cos\theta$,
+a parte simétrica, e o \emph{cruzado} $\|a\wedge b\|=\sin\theta$, a
+antissimétrica --- é, na graduação, o \textbf{mesmo} produto exterior
+em graus diferentes:
+\[
+\text{cruzado}=\alpha\wedge\beta\ (\text{grau }1{+}1),
+\qquad
+\text{directo}=\alpha\wedge\star\beta\ (\text{grau }1{+}2),
+\]
+e Lagrange fecha entre os dois,
+$\text{directo}^{2}+\text{cruzado}^{2}=N(\alpha)N(\beta)$ --- medido em
+$117\,649$ pares, sem falha, e \emph{sem trigonometria e sem raiz}: o
+$\cos\theta$ e o $\sin\theta$ do enunciado original são a leitura
+normalizada de duas quantidades inteiras.
+
+\textbf{Estatuto.} A lei é do \emph{Corpo Universal} (a nilpotência
+como dual da idempotência, e a graduação a tirar o limite dimensional
+da linguagem). Esta é a face deste paper: um segundo construtor sem
+topo, ao lado do $T_{k+1}=T_k+T_k^{*}$, e a realização do par
+directo/cruzado dentro dele. O par $(\partial,d)$ \emph{não} é uma
+bijeção dual --- a Definição~\ref{def:bijdual} exige
+$\nu\circ\nu=\mathrm{id}$, e $d\circ d=0$ é outra coisa: é uma
+adjunção.
+\emph{Medido:} \code{tests/graduacao\_realiza.c} ($5{:}0$) e
+\code{tests/borda\_sem\_teto.c} ($8{:}0$).
+$\square$
+\end{teorema}
+
 \setcounter{lei}{6}
 \begin{lei}[o octonião dual --- ligar sem fundir]\label{lei:octoniao}
 $\mathbb{O}=\mathbb{H}\times\mathbb{H}^{*}$, dois tecidos ligados pela estrela: $\nu\circ\nu=\mathrm{id}$,

@@ -2072,6 +2072,50 @@ lei & operador & realização & fecho & na torre & na música/partitura \\
 \noindent Não há nona lei: $\operatorname{Ind}^{8}=\mathrm{id}_{\mathcal L}$ é o
 fecho do catálogo --- e \textbf{valida} a coordenada $H$ (Estrela).
 
+\begin{teorema}[a coluna do fecho é uma só forma --- e o diferencial é o
+caso $b=0$]\label{thm:fecho-b}
+Todos os fechos da tabela acima são, em $2\times2$, a \emph{mesma}
+relação de grau dois:
+\[
+\boxed{\;x^{2}=a\,x+b\;}
+\qquad\text{com}\qquad
+a=\operatorname{tr},\quad b=-\det
+\]
+(Cayley--Hamilton). E daí $x\,(x-a)=b$, logo
+\[
+\boxed{\;x^{-1}=\frac{x-a}{b}\ \text{existe}\iff b\neq0\;}
+\]
+--- o $b$ \textbf{é a fibra}. Medido em $2401$ matrizes, sem uma
+violação de «$b\neq0\iff$ invertível».
+\begin{center}\small
+\begin{tabular}{@{}llcl@{}}
+\toprule
+operador & fecho & $b$ & \\
+\midrule
+estaca & $E^{2}=I$ & $+1$ & unidade \\
+rotor (Lei~2) & $J^{2}=-I$ & $-1$ & unidade \\
+borda & $A^{2}=mA+I$ & $+1$ & unidade \\
+projector & $P^{2}=P$ & $0$ & \emph{sem fibra} \\
+\textbf{diferencial} & $d^{2}=0$ & $0$ & \emph{sem fibra} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent \textbf{A realização.} A lei da graduação --- enunciada no
+\emph{Corpo Universal} (a nilpotência como dual da idempotência) ---
+realiza-se aqui \emph{dentro da tabela que já existia}: o diferencial
+entra como o caso $b=0$, que é o mesmo caso do $0^{-1}$. E o projector
+é o outro: são os \textbf{dois únicos} pontos sem fibra, separados pelo
+$a$ ($1$ e $0$). O par idempotente/nilpotente do Universal é, nesta
+coluna, o par dos dois fechos que não invertem.
+
+\noindent \textbf{E a distinção já cá estava.} A coluna do fecho da
+Lei~0 diz «índice, \emph{não} $d=0$»: o zero da Lei~0 e o zero do
+diferencial são objectos diferentes, e quem o escreveu primeiro foi
+esta tabela. O teorema não os junta --- separa-os pelo $a$.
+\emph{Medido:} \code{tests/graduacao\_realiza.c} ($5{:}0$).
+$\square$
+\end{teorema}
+
 \begin{center}\small
 \begin{tabular}{@{}ll@{}}
 bloco & estatuto correcto \\
