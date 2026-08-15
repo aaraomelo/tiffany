@@ -226,3 +226,4 @@ tests/claim_ir
 tests/claim_control
 tests/claim_fronteira
 .tmp-banco-*
+corpus/

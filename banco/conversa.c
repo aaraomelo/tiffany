@@ -31,9 +31,15 @@
 #include <dirent.h>
 #include <stdlib.h>
 #include "expr.h"
+#include "cifra.h"   /* raizi e lado: a raiz inteira e a FC por PQa, EM INTEIROS */
 #include "algebra.h"
 #include "edo.h"
 #include "poli.h"
+#include "booleana.h"   /* a lógica é o corpo GF(2) */
+#include "relacao.h"    /* relação, função, bijeção — a que tem volta */
+#include "naturais.h"   /* o chão: Peano, e os instrumentos demonstrados */
+#include "inteiros.h"   /* Z: e o que eles acrescentam é a reversibilidade */
+#include "racionais.h"  /* Q: a reversibilidade da multiplicacao nao nula */
 #include "eletrico.h"
 
 typedef struct { long a, b; } Slot;
@@ -168,17 +174,38 @@ static int banco_da(const char *fala){
     long s0 = prox_simb(&p);
     return (int)(((s0 % NB) + NB) % NB);
 }
-static void aprende(const char *fala, const char *resp){
+/* ── A SOMA ⊕ NO CORPUS: aprender e esquecer são UMA operação, com sinal ───────
+ * O par soma/retração das cinco, realizado no banco: +1 acrescenta o par (a dobra
+ * que faz o corpus crescer) e −1 retira-o (a retração, que devolve o nó ao estado
+ * de não ter fala). Não são duas coisas: é uma, e o sinal escreve-a — 1† = −1.
+ * O caminho FICA nos dois sentidos; o que muda é a resposta no nó terminal. */
+static int CORPUS(const char *fala, const char *resp, int sentido){
     no_banco(banco_da(fala));                      /* nao ha repartidor: a cifra diz */
     long no = RAIZ;
-    for(const char *p = fala; *p; ) no = filho(no, prox_simb(&p), 1);
+    for(const char *p = fala; *p; ){
+        long s2 = prox_simb(&p);
+        no = filho(no, s2, sentido > 0);           /* +1 cria o caminho; −1 só desce */
+        if(!no) return 0;                          /* não sabia: nada a retirar */
+    }
     Slot cab = le(no);
-    long r = poe_texto(resp);
-    Slot nc = { cab.a, r }; grava(no, nc);          /* uma resposta só: a nova substitui */
-    Slot pc = le(H_PARES); pc.a++; grava(H_PARES, pc);
-    printf("aprendido — %ld par(es) no corpus\n", pc.a);
+    if(sentido > 0){
+        long r = poe_texto(resp);
+        Slot nc = { cab.a, r }; grava(no, nc);      /* uma resposta só: a nova substitui */
+        Slot pc = le(H_PARES); pc.a++; grava(H_PARES, pc);
+        printf("aprendido — %ld par(es) no corpus\n", pc.a);
+        return 1;
+    }
+    if(!cab.b) return 0;                            /* não havia resposta para retirar */
+    cab.b = 0; grava(no, cab);
+    Slot pc = le(H_PARES); if(pc.a > 0) pc.a--; grava(H_PARES, pc);
+    return 1;
 }
-/* EROSÃO: o prefixo. Desce enquanto houver caminho e devolve a resposta mais funda que viu. */
+static void aprende(const char *fala, const char *resp){ CORPUS(fala, resp, +1); }
+/* EROSÃO: o prefixo. Desce enquanto houver caminho e devolve a resposta mais funda que viu.
+ * A CAIXA (o eixo de segmentação da vizinhança admissível): o prefixo só vale se FECHA em
+ * fronteira de palavra — "bom dia" fecha na vírgula de "bom dia, tudo bem?", mas o "q" do
+ * corpus não é o "q" dentro de "qualquer". */
+static int simb_de_palavra(long s);
 static long erosao(const char *fala, int *fundo){
     long no = RAIZ, achou = 0; *fundo = 0;
     int d = 0;
@@ -187,20 +214,65 @@ static long erosao(const char *fala, int *fundo){
         if(!f) break;
         no = f; d++;
         Slot cab = le(no);
-        if(cab.b){ achou = cab.b; *fundo = d; }
+        if(cab.b){
+            const char *t = p;
+            if(!*p || !simb_de_palavra(prox_simb(&t))){ achou = cab.b; *fundo = d; }
+        }
     }
     return achou;
 }
-/* DILATAÇÃO: a subsequência. Salta um símbolo quando o caminho morre — a fala com ruído. */
+/* DILATAÇÃO: a subsequência. Salta um símbolo quando o caminho morre — a fala com ruído.
+ * E RE-ANCORA: se o ruído à frente abre o caminho de OUTRA fala do mesmo banco, a descida
+ * gulosa entra por ele e morre lá dentro; então come-se um símbolo do início e tenta-se de
+ * novo, até achar ou a fala acabar. A primeira volta é a régua antiga, inteira.
+ *
+ * A ADMISSÃO é a escada do observador em dois degraus (Corpo Universal, a escada;
+ * Corpo de Peano, Controle de Histerese — a vizinhança admissível por eixos):
+ *   I1, a CONTAGEM: o consumido vence o saltado ENTRE consumos — a fala com ruído,
+ *       não o ruído com fala; ruído à frente e atrás é livre (o desenho do §C2);
+ *   I2, a CAIXA (o eixo de segmentação): a dilatação salta PALAVRAS, não letras —
+ *       cada palavra da fala ou é consumida inteira ou saltada inteira; palavra
+ *       PARTIDA (consumo e salto na mesma palavra) mata o candidato desta âncora,
+ *       e a re-âncora seguinte tenta limpa.
+ * O degrau grosso resolve o mundo natural; o fino, o adversário denso ("é racional"
+ * contém "e ai" por letras pescadas de dentro de "racional" — a caixa recusa). */
+static int simb_de_palavra(long s){
+    return (s >= 'a'-31 && s <= 'z'-31) || (s >= '0'-31 && s <= '9'-31);
+}
+static const char *acha_buraco(const char *s);     /* o '_' nu da moldura; adiante */
 static long dilatacao(const char *fala, int *fundo){
-    long no = RAIZ, achou = 0; *fundo = 0;
-    int d = 0;
-    for(const char *p = fala; *p; ){
-        long f = filho(no, prox_simb(&p), 0);
-        if(!f) continue;                            /* o símbolo não serve: salta-o */
-        no = f; d++;
-        Slot cab = le(no);
-        if(cab.b){ achou = cab.b; *fundo = d; }
+    long achou = 0; *fundo = 0;
+    int corte_pal = 0;                              /* a âncora cortou uma palavra? */
+    for(const char *ini = fala; *ini; ){
+        long no = RAIZ;
+        int d = 0, dentro = 0, pend = 0;
+        int cons_pal = 0, salt_pal = corte_pal, partida = 0;
+        for(const char *p = ini; *p; ){
+            long s = prox_simb(&p);
+            int letra = simb_de_palavra(s);
+            long f = filho(no, s, 0);
+            if(!letra) cons_pal = salt_pal = 0;     /* separador fecha a palavra */
+            if(!f){                                 /* o símbolo não serve: salta-o */
+                if(letra){ salt_pal = 1; if(cons_pal){ partida = 1; break; } }
+                if(d) pend++;
+                continue;
+            }
+            if(letra){ if(salt_pal){ partida = 1; break; } cons_pal = 1; }
+            no = f; d++; dentro += pend; pend = 0;
+            Slot cab = le(no);
+            if(cab.b && d > dentro && !partida){
+                /* o peek da caixa: o registo só vale em FIM de palavra da consulta —
+                 * o "q" a meio de "quanto" não é a abreviação "q" */
+                const char *t = p;
+                if(!*p || !simb_de_palavra(prox_simb(&t))){ achou = cab.b; *fundo = d; }
+            }
+        }
+        if(achou) break;                            /* a âncora mais à esquerda que alcança */
+        long s0 = prox_simb(&ini);                  /* come um símbolo e re-ancora */
+        if(simb_de_palavra(s0)){                    /* a meio de palavra? o resto dela herda o salto */
+            const char *esp = ini;
+            corte_pal = *esp && simb_de_palavra(prox_simb(&esp));
+        } else corte_pal = 0;
     }
     return achou;
 }
@@ -327,7 +399,14 @@ static int torc_banco[8];
 static int torcao(const char *fala, long *saida, int max){
     int n = 0;
     const char *p = fala;
+    int fronteira = 1;                             /* o inicio da fala e fronteira de palavra */
     while(*p && n < max){
+        if(!fronteira){                            /* a CAIXA: um troco nao ancora a meio de
+                                                    * palavra — avanca ate a proxima fronteira */
+            long s = prox_simb(&p);
+            fronteira = !simb_de_palavra(s);
+            continue;
+        }
         no_banco(banco_da(p));                     /* cada troco tem a SUA cabeca, logo o SEU
                                                     * banco: recomecar da raiz e reemitir */
         long no = RAIZ, ultima = 0;
@@ -338,16 +417,28 @@ static int torcao(const char *fala, long *saida, int max){
             if(!f){ q = antes; break; }
             no = f;
             Slot cab = le(no);
-            if(cab.b){ ultima = cab.b; fim = q; }   /* o terminal mais fundo deste troco */
+            if(cab.b){                              /* o terminal mais fundo deste troco —
+                                                     * mas so se FECHA em fronteira de palavra,
+                                                     * e nao numa MOLDURA: a resposta com o
+                                                     * buraco '_' e um funcional a espera do
+                                                     * argumento, nao uma fala completa */
+                const char *t2 = q;
+                if(!*q || !simb_de_palavra(prox_simb(&t2))){
+                    char rt[256]; le_texto(cab.b, rt, sizeof rt);
+                    if(!acha_buraco(rt)){ ultima = cab.b; fim = q; }
+                }
+            }
         }
         if(!ultima){                                 /* nada comeca aqui: avanca um simbolo */
             if(!*p) break;
-            prox_simb(&p);
+            long s = prox_simb(&p);
+            fronteira = !simb_de_palavra(s);
             continue;
         }
         if(n < 8) torc_banco[n] = banco_da(p);
         saida[n++] = ultima;
         p = fim;                                     /* recomeca da raiz com o que sobrou */
+        fronteira = 0;                               /* o anterior e a ultima letra do troco */
     }
     return n;
 }
@@ -376,11 +467,16 @@ static void cam_le(char *out, size_t lim);   /* definida adiante, com o resto da
 #define NCAND 8
 static int bairro_escolhe(char cand[NCAND][1024], int prof[NCAND], int n, const char *ctx){
     if(n <= 1) return 0;
-    double a[NCAND], s[NCAND], w[NCAND], c[NCAND][NCAND];
-    double z = 0;
+    /* EM MANTISSA INTEIRA, e não em double. A casa já tinha a régua: «S = 2^30 fixo
+     * (mantissa); C_k é a resolução» (corpo_peano, §régua dinâmica). A contração é a
+     * mesma — s(e) = a(e)·(m + Σ w·c) normalizada —, só que cada peso é um inteiro na
+     * escala S, a divisão é inteira e a paragem é por DIFERENÇA INTEIRA. Determinista,
+     * reprodutível e sem um decimal: o mesmo resultado em qualquer máquina. */
+    enum { S = 1 << 20 };                       /* a mantissa: a escala da régua */
+    long a[NCAND], sc[NCAND], w[NCAND], c[NCAND][NCAND];
+    long z = 0;
     for(int k = 0; k < n; k++){ a[k] = prof[k] > 0 ? prof[k] : 1; z += a[k]; }
-    for(int k = 0; k < n; k++) s[k] = a[k] / z;                 /* iteracao 0: a MARGINAL */
-    /* a compatibilidade: o que a candidata partilha com o caminho andado, e com as outras */
+    for(int k = 0; k < n; k++) sc[k] = (a[k] * S) / z;          /* iteracao 0: a MARGINAL */
     size_t lc = strlen(ctx);
     for(int k = 0; k < n; k++)
         for(int j = 0; j < n; j++){
@@ -395,8 +491,8 @@ static int bairro_escolhe(char cand[NCAND][1024], int prof[NCAND], int n, const 
              * intersecao dos conjuntos, o mo_prod do corpos.h. */
             int vis[256]; memset(vis, 0, sizeof vis);
             for(size_t t = 0; t < lc; t++) vis[(unsigned char)ctx[t]] = 1;
-            size_t p = 0;
-            for(size_t t = 0; cand[k][t]; t++) if(vis[(unsigned char)cand[k][t]]) p++;
+            size_t pp = 0;
+            for(size_t t = 0; cand[k][t]; t++) if(vis[(unsigned char)cand[k][t]]) pp++;
             /* e as palavras inteiras pesam mais que as letras soltas */
             size_t pal = 0;
             { char cp[1024]; snprintf(cp, sizeof cp, "%s", ctx);
@@ -404,27 +500,27 @@ static int bairro_escolhe(char cand[NCAND][1024], int prof[NCAND], int n, const 
               while(tk){ if(strlen(tk) > 3 && strstr(cand[k], tk)) pal += strlen(tk); tk = strtok(NULL, " ,.;:!?"); } }
             size_t q = 0;
             while(cand[k][q] && cand[j][q] && cand[k][q] == cand[j][q]) q++;
-            c[k][j] = (double)(p + 8*pal + q) / 64.0;
+            c[k][j] = ((long)(pp + 8*pal + q) * S) / 64;         /* a compatibilidade, na escala */
         }
-    const double m = 1.0, eps = 1e-13;
-    double d = 1;
-    for(int it = 0; it < 60 && d > eps; it++){
-        for(int k = 0; k < n; k++) w[k] = s[k];
-        d = 0; double zz = 0; double nv[NCAND];
+    long d = S;
+    for(int it = 0; it < 60 && d > 0; it++){
+        for(int k = 0; k < n; k++) w[k] = sc[k];
+        d = 0;
+        long zz = 0, nv[NCAND];
         for(int k = 0; k < n; k++){
-            double viz = 0;
-            for(int j = 0; j < n; j++) if(j != k) viz += w[j] * c[k][j];
-            nv[k] = a[k] * (m + viz);
+            long viz = 0;
+            for(int j = 0; j < n; j++) if(j != k) viz += (w[j] * c[k][j]) / S;
+            nv[k] = a[k] * (S + viz);                            /* m = 1, na escala */
             zz += nv[k];
         }
         for(int k = 0; k < n; k++){
-            double v = zz > 0 ? nv[k]/zz : 0;
-            double dd = v - s[k]; if(dd < 0) dd = -dd; if(dd > d) d = dd;
-            s[k] = v;
+            long v = zz > 0 ? (nv[k] * S) / zz : 0;
+            long dd = v - sc[k]; if(dd < 0) dd = -dd; if(dd > d) d = dd;
+            sc[k] = v;
         }
     }
     int b = 0;
-    for(int k = 1; k < n; k++) if(s[k] > s[b]) b = k;
+    for(int k = 1; k < n; k++) if(sc[k] > sc[b]) b = k;
     return b;
 }
 static int pergunta_ao_barramento(const char *fala, char *resp, size_t lim){
@@ -527,10 +623,15 @@ static long desce_daqui(const char *fala, int *fundo){
         if(!f) break;
         no = f; d++;
         Slot cab = le(no);
-        if(cab.b){ achou = cab.b; *fundo = d; poe_onde(no);
-                   char c[2048]; cam_le(c, sizeof c);
-                   size_t l0 = strlen(c);
-                   if(l0 + strlen(fala) + 1 < sizeof c){ strcat(c, fala); cam_poe(c); } }
+        if(cab.b){
+            const char *t = p;                     /* a caixa: o registo em fim de palavra */
+            if(!*p || !simb_de_palavra(prox_simb(&t))){
+                achou = cab.b; *fundo = d; poe_onde(no);
+                char c[2048]; cam_le(c, sizeof c);
+                size_t l0 = strlen(c);
+                if(l0 + strlen(fala) + 1 < sizeof c){ strcat(c, fala); cam_poe(c); }
+            }
+        }
     }
     return achou;
 }
@@ -559,6 +660,1574 @@ static const char *pede_lei(const char *f, int *distribuir){
 /* A EQUAÇÃO ENTRE DOIS POLINÓMIOS: p(x) = q(x). O primeiro grau já era um caso disto — aqui
  * vale qualquer grau, e o método é o de sempre: achar todas as raízes de uma vez e SUBSTITUIR
  * cada uma para medir o resíduo. */
+/* ─── AS PEÇAS EXATAS: raiz inteira e fração, sem um decimal ─────────────────────
+ *
+ * A álgebra é PLENA: o que a casa precisa de dizer, diz-se em inteiros e em frações.
+ * A raiz quadrada não devolve «aproximadamente» — devolve SE é quadrado perfeito e
+ * qual é a raiz, exata; quando não é, a resposta não é um decimal, é o corpo. E a
+ * fração escreve-se reduzida, que é como a fita já a escreve. */
+/* NADA AQUI É NOVO — e eu ia escrever tudo outra vez.
+ *   `raizi` (cifra.h)      a raiz inteira, exata: eu escrevi um `lsqrt` por Newton;
+ *   `lado`  (cifra.h)      a FC por PQa EM INTEIROS, que pára no período (Lagrange
+ *                          garante que ele é invariante completo) — é ESTA a forma
+ *                          normalizada de uma raiz que não fecha em ℚ, e é exata;
+ *   `ct_escreve` (expr.h)  a fração reduzida em texto: eu escrevi um `frac2`.
+ * A régua é: nunca um decimal. Ou a raiz fecha em ℚ e escreve-se fração, ou é
+ * quadrática e escreve-se pela sua FC — normalizada só no fim, em caracteres. */
+static int quadrado_perfeito(long n, long *r){
+    if(n < 0) return 0;
+    long s = raizi(n);
+    if(s * s != n) return 0;
+    *r = s; return 1;
+}
+static const char *frac2(long p, long q){    /* ct_reduz + ct_escreve, destino rotativo */
+    static char buf[4][80]; static int k = 0;
+    char *o = buf[k++ & 3];
+    if(q < 0){ p = -p; q = -q; }
+    ct_reduz(&p, &q);                       /* a redução também é da casa */
+    ct_escreve(p, q, o, 80);
+    return o;
+}
+static const char *fc_da_borda(long B, long C);   /* a FC, adiante */
+static void MEMBRANA(char *out, size_t lim, const char *texto, long v, long q, int sentido);
+/* A BORDA RESOLVIDA EXATA, UMA VEZ SÓ — e os três (sistema, ED, polinómio) chamam-na.
+ *
+ * `a s² + b s + c = 0`, tudo inteiro. Ou o Δ é quadrado perfeito e as duas raízes são
+ * FRAÇÕES exatas, ou não é e elas são as folhas do corpo — e aí a forma normalizada é
+ * a fração contínua, que é exata e fecha no período. Em nenhum ramo há decimal: a
+ * normalização é a última coisa, e é em caracteres.
+ *
+ * A FC da casa (`lado`) lê a borda MÓNICA. Uma borda com a≠1 escala-se: y = a·s é raiz
+ * de y² + b y + ac = 0, e a folha lê-se em y (dito na saída, para ninguém confundir
+ * a escala com o número). */
+static void borda_exata(long a, long b, long c){
+    long D = b*b - 4*a*c, q = 0;
+    printf("   Δ = %ld² - 4·%ld·%ld = %ld\n", b, a, c, D);
+    if(D > 0 && quadrado_perfeito(D, &q)){
+        printf("   Δ é quadrado perfeito (√Δ = %ld): as duas raízes fecham em Q, exatas —\n", q);
+        printf("     s₊ = %s   s₋ = %s\n", frac2(-b + q, 2*a), frac2(-b - q, 2*a));
+    } else if(D > 0){
+        printf("   Δ não é quadrado: as raízes são as folhas σ, σ† do corpo Q[s]/(a s²+b s+c),\n");
+        printf("   com σ+σ† = %s e σ·σ† = %s. A forma normalizada é a fração contínua:\n",
+               frac2(-b, a), frac2(c, a));
+        printf("     %s%s = %s   (fecha no período — Lagrange, invariante completo)\n",
+               a == 1 ? "σ" : "a·σ", a == 1 ? "" : " (escalada)", fc_da_borda(-b, a*c));
+    } else if(D < 0){
+        printf("   Δ < 0: o par é conjugado — parte real %s", frac2(-b, 2*a));
+        if(quadrado_perfeito(-D, &q)) printf(", e a imaginária fecha em Q: ± %s i\n", frac2(q, 2*a));
+        else printf(", e a imaginária é √%ld/(2·%ld) — vive no corpo, não em decimal\n", -D, a);
+    } else {
+        printf("   Δ = 0: a raiz é dupla e racional, %s (e é aqui que entra o t)\n", frac2(-b, 2*a));
+    }
+}
+
+static void latex_desdobra(char *d, size_t dn, const char *s){
+    MEMBRANA(d, dn, s, 0, 1, +1);                  /* +1: o lado da entrada */
+}
+/* A RAIZ NORMALIZADA — só no fim, e em caracteres. A borda s² − Bs + C = 0 tem as duas
+ * folhas; a FC de (B+√Δ)/2 é a régua da casa para as escrever quando não fecham em ℚ,
+ * e o período é onde ela fecha: «não guarda as casas, guarda a regra que as gera». */
+static const char *fc_da_borda(long B, long C){
+    static char buf[2][256]; static int k = 0;
+    char *o = buf[k++ & 1];
+    long a[48];
+    size_t n = lado(B, C, a, 48);
+    size_t w = 0, most = n < 8 ? n : 8;            /* os primeiros, e DIZ-SE quantos são */
+    w += (size_t)snprintf(o + w, 256 - w, "[");
+    for(size_t i = 0; i < most && w < 200; i++)
+        w += (size_t)snprintf(o + w, 256 - w, i == 0 ? "%ld" : (i == 1 ? "; %ld" : ", %ld"), a[i]);
+    if(n > most) w += (size_t)snprintf(o + w, 256 - w, ", … (%zu termos até fechar)", n);
+    snprintf(o + w, 256 - w, "]");
+    return o;
+}
+
+/* ─── O DICIONÁRIO: a álgebra é intrínseca; o assunto só empresta os nomes ───────
+ *
+ * A borda `a s² + b s + c = 0` já está resolvida — com o Δ, a tricotomia, as folhas no
+ * relógio e o resíduo. O que um assunto novo traz NÃO é régua: é o mapa de qual das
+ * suas grandezas se senta em cada coordenada, e como ele chama os três regimes do Δ.
+ * Por isso «cabe em qualquer assunto, só mapear»: a massa-mola e o circuito RLC são a
+ * MESMA equação com nomes diferentes, e é a álgebra que sabe a resposta nos dois.
+ *
+ * A tabela é dado, não código: cada linha é um assunto, e acrescentar um assunto é
+ * acrescentar uma linha — nenhuma função muda. Os três dados entram por nome (o
+ * utilizador escreve `mola m=1 c=3 k=2`), porque é o nome que diz o PAPEL. */
+static const struct {
+    const char *assunto;
+    const char *dado[3];          /* quem se senta em a, b, c — por esta ordem */
+    const char *hip, *par, *eli;  /* os três regimes do Δ, na língua do assunto */
+    const char *lei;              /* a equação característica, escrita como lá se escreve */
+} DIC[] = {
+  { "mola",   {"m","c","k"},  "sobreamortecida", "criticamente amortecida", "oscilante",
+    "m s^2 + c s + k = 0   (massa, amortecimento, rigidez)" },
+  { "rlc",    {"L","R","S"},  "sobreamortecido", "criticamente amortecido", "oscilante",
+    "L s^2 + R s + S = 0   (indutância, resistência, elastância S=1/C)" },
+  { "queda",  {"a","b","g"},  "sem retorno",     "no limiar",               "em volta",
+    "a s^2 + b s + g = 0   (inércia, arrasto, gravidade reduzida)" },
+  { "juro",   {"p","j","d"},  "duas taxas reais","taxa única",              "sem taxa real",
+    "p s^2 + j s + d = 0   (principal, juro, desconto)" },
+  { "borda",  {"a","m","n"},  "hiperbólica (metais)", "parabólica (o limite)", "elítica (polígonos)",
+    "a s^2 - m s - n = 0   (a família metálica em pessoa)" },
+};
+static const char *dic_regime(int i, long D){
+    if(i < 0) return "";
+    return D > 0 ? DIC[i].hip : D < 0 ? DIC[i].eli : DIC[i].par;
+}
+/* lê «assunto n1=v1 n2=v2 n3=v3» e devolve o índice do assunto, ou −1. Os três dados
+ * têm de estar TODOS lá: faltar um não é «assume zero», é não ser deste assunto. */
+static int dic_le(const char *f, long *a, long *b, long *c){
+    while(*f == ' ') f++;
+    for(size_t k = 0; k < sizeof DIC/sizeof *DIC; k++){
+        size_t ln = strlen(DIC[k].assunto);
+        if(strncmp(f, DIC[k].assunto, ln) || (f[ln] && f[ln] != ' ')) continue;
+        long v[3]; int tem = 0;
+        for(int d = 0; d < 3; d++){
+            const char *p = f + ln;
+            size_t ld = strlen(DIC[k].dado[d]);
+            int achou = 0;
+            for(; *p; p++){
+                if(strncmp(p, DIC[k].dado[d], ld)) continue;
+                if(p > f && p[-1] != ' ') continue;         /* o nome é palavra inteira */
+                const char *q = p + ld;
+                while(*q == ' ') q++;
+                if(*q != '=') continue;
+                q++; while(*q == ' ') q++;
+                int sig = 1;
+                if(*q == '-'){ sig = -1; q++; }
+                if(*q < '0' || *q > '9') continue;
+                long val = 0;
+                while(*q >= '0' && *q <= '9'){ val = val*10 + (*q - '0'); q++; }
+                v[d] = sig * val; achou = 1; break;
+            }
+            if(!achou) break;
+            tem++;
+        }
+        if(tem != 3) return -1;                             /* falta um dado: não é */
+        if(v[0] == 0) return -1;                            /* sem o s², não é borda */
+        *a = v[0]; *b = v[1]; *c = v[2];
+        return (int)k;
+    }
+    return -1;
+}
+static void folhas_no_relogio(long a, long b, long c);
+static int resolve_assunto(const char *f){
+    long a, b, c;
+    int i = dic_le(f, &a, &b, &c);
+    if(i < 0) return 0;
+    long D = b*b - 4*a*c;
+    printf("   %s\n", DIC[i].lei);
+    printf(" = %ld s^2 %s %ld s %s %ld = 0     (os teus números no lugar dos nomes)\n",
+           a, b < 0 ? "-" : "+", b < 0 ? -b : b, c < 0 ? "-" : "+", c < 0 ? -c : c);
+    printf(" = Δ = %ld² - 4·%ld·%ld = %ld\n", b, a, c, D);
+    printf("\n   logo é %s.\n", dic_regime(i, D));
+    printf("   (o regime sai do Δ, e o Δ é o mesmo em qualquer assunto: a mola, o\n");
+    printf("    circuito e a queda são a MESMA equação — o assunto empresta os nomes,\n");
+    printf("    a álgebra é que responde)\n");
+    folhas_no_relogio(a, b, c);
+    return 1;
+}
+
+/* ─── A TEORIA DISCRETA A RESOLVER A EQUAÇÃO: as folhas no relógio da casa ───────
+ *
+ * A régua do polinómio já declara o corpo ℚ[x]/(p) — lá a raiz é σ, exata e sem
+ * decimal. O *Corpo Universal* dá o passo que a torna NÚMERO: no relógio da casa (a
+ * escada de Fermat 17, 257, 65537) o discriminante ou é quadrado, e as duas FOLHAS
+ * estão à vista em inteiros, ou não é, e o andar é INERTE — as folhas vivem um andar
+ * acima, onde o Frobenius x↦x^p *é* a estaca. «√2 é 11 em 𝔽₁₇, 11²=2 exato»: o
+ * irracional realizado inteiro no primo, que é o que a casa quer dizer com discreto.
+ *
+ * Tudo em inteiros e por DOIS CAMINHOS: Euler diz se é quadrado, a varredura acha (ou
+ * não) a raiz — e nunca se escreve uma folha sem a mandar de volta à equação: resíduo
+ * ZERO exato, ou não é raiz. O inverso de 2a sai do INVERSOR (Euclides estendido: «a
+ * dinâmica do inversor», e a folha da órbita é o gcd). */
+static long mod_p(long x, long p){ long r = x % p; return r < 0 ? r + p : r; }
+static long pot_mod(long b, long e, long p){
+    long r = 1; b = mod_p(b, p);
+    while(e > 0){ if(e & 1) r = (r * b) % p; b = (b * b) % p; e >>= 1; }
+    return r;
+}
+static int eh_quadrado(long D, long p){            /* o critério de Euler */
+    long d = mod_p(D, p);
+    if(d == 0) return 1;                            /* 0 é quadrado: a raiz é dupla */
+    return pot_mod(d, (p - 1) / 2, p) == 1;
+}
+static int raiz_quad_mod(long D, long p, long *r){ /* a varredura: p ≤ 65537, e não há
+                                                    * algoritmo para eu errar */
+    long d = mod_p(D, p);
+    for(long x = 0; x < p; x++) if((x * x) % p == d){ *r = x; return 1; }
+    return 0;
+}
+static long inv_mod(long a, long p){               /* o INVERSOR: Euclides estendido */
+    long t = 0, nt = 1, r = p, nr = mod_p(a, p);
+    while(nr){ long q = r / nr, tmp;
+        tmp = t - q * nt; t = nt; nt = tmp;
+        tmp = r - q * nr; r = nr; nr = tmp; }
+    if(r > 1) return 0;                             /* não invertível neste anel */
+    return mod_p(t, p);
+}
+static int folhas_de(long a, long b, long r, long p, long *s1, long *s2){
+    long i2a = inv_mod(mod_p(2 * a, p), p);
+    if(!i2a) return 0;
+    *s1 = mod_p((mod_p(-b, p) + r) * i2a, p);
+    *s2 = mod_p((mod_p(-b, p) - r + p) * i2a, p);
+    return 1;
+}
+static long res_mod(long a, long b, long c, long x, long p){   /* a volta à equação */
+    return mod_p(a * mod_p(x * x, p) + b * mod_p(x, p) + c, p);
+}
+/* e o que a assistente diz: a companheira, e a escada andar a andar */
+static void folhas_no_relogio(long a, long b, long c){
+    long P[] = { 17, 257, 65537 };
+    long D = b * b - 4 * a * c;
+    printf("\n   e no RELÓGIO DA CASA a raiz deixa de ser nome e é número. A companheira\n");
+    printf("   A = [[%ld,%ld],[1,0]] carrega a equação inteira (a transformada universal\n",
+           -b / (a ? a : 1), -c / (a ? a : 1));
+    printf("   realiza-se nela), e a escada de Fermat decide andar a andar:\n\n");
+    for(size_t j = 0; j < sizeof P/sizeof *P; j++){
+        long p = P[j], r = 0, s1, s2;
+        int euler = eh_quadrado(D, p), varr = raiz_quad_mod(D, p, &r);
+        if(euler != varr){                        /* os dois caminhos discordam: cala-se */
+            printf("     F_%-5ld  os dois caminhos discordam — não escrevo o que não fecha\n", p);
+            continue;
+        }
+        if(!varr){
+            printf("     F_%-5ld  Δ=%ld não é quadrado: INERTE — as folhas vivem um andar\n", p, D);
+            printf("              acima (F_%ld²), e lá o Frobenius x↦x^%ld É a estaca\n", p, p);
+            continue;
+        }
+        if(!folhas_de(a, b, r, p, &s1, &s2)){
+            printf("     F_%-5ld  2a não inverte neste anel\n", p); continue;
+        }
+        long r1 = res_mod(a, b, c, s1, p), r2 = res_mod(a, b, c, s2, p);
+        if(r1 || r2){ printf("     F_%-5ld  a folha não volta (resíduo %ld/%ld) — não é raiz\n",
+                             p, r1, r2); continue; }
+        printf("     F_%-5ld  SEPARADO: σ=%ld  σ†=%ld   σ+σ†=%ld (o traço)  σ·σ†=%ld (o det)"
+               "   resíduo 0\n", p, s1, s2, mod_p(s1 + s2, p), mod_p(s1 * s2, p));
+    }
+    printf("\n   (as duas folhas são o par dual: uma sem a outra é metade com o nome do par —\n");
+    printf("    e nenhuma se escreveu sem voltar à equação com resíduo ZERO)\n");
+}
+/* ─── O RELÓGIO: o TICK é o quantum, e a velocidade é escolha ────────────────────
+ *
+ * O Quantizador «converte o contínuo em contagem conservada», e o refinamento é a
+ * TORRE (ω_{2M}² = ω_M): «o contínuo entra por refinamento do passo de quantização,
+ * nunca por salto». Aqui é literal — a fita dá UMA dobra por chamada, e a velocidade
+ * diz quantas dobras cabem num tick. Ela só sobe por DOBRA: 1, 2, 4, 8. O 3 não é um
+ * andar da torre, e recusa-se com o motivo.
+ *
+ * E o passo NÃO VIVE EM MEMÓRIA: a fita fica no disco (`<base>.tick`), como tudo nesta
+ * casa. Fechar o programa não perde a conta — volta-se e dá-se o tick seguinte. */
+static int e_conta(const char *f);                 /* adiante */
+static void desdobra_entrada(char *d, size_t dn, const char *s);
+static int eh_dobra(long v){ return v > 0 && (v & (v - 1)) == 0; }
+static long tick_velocidade(void){
+    const char *e = getenv("TICKS");
+    if(!e || !*e) return 1;
+    long v = 0;
+    for(const char *p = e; *p >= '0' && *p <= '9'; p++) v = v*10 + (*p - '0');
+    if(!eh_dobra(v)){
+        printf("   (a velocidade %ld não é um andar da torre: o refinamento é por DOBRA —\n", v);
+        printf("    1, 2, 4, 8 — e nunca por salto. Fico em 1.)\n");
+        return 1;
+    }
+    return v;
+}
+/* o estado do relógio, ao lado da fita: quantas células e quantas dobras já se deram */
+typedef struct { long n, dobras; } Relogio;
+static int rel_le(const char *base, Relogio *r){
+    char c[600]; snprintf(c, sizeof c, "%s.tick.rel", base);
+    int fd2 = open(c, O_RDONLY);
+    if(fd2 < 0) return 0;
+    int ok2 = pread(fd2, r, sizeof *r, 0) == (long)sizeof *r;
+    close(fd2);
+    return ok2;
+}
+static void rel_poe(const char *base, Relogio r){
+    char c[600]; snprintf(c, sizeof c, "%s.tick.rel", base);
+    int fd2 = open(c, O_RDWR|O_CREAT, 0644);
+    if(fd2 >= 0){ pwrite(fd2, &r, sizeof r, 0); close(fd2); }
+}
+static void rel_apaga(const char *base){
+    char c[600];
+    snprintf(c, sizeof c, "%s.tick.rel", base); unlink(c);
+    snprintf(c, sizeof c, "%s.tick", base);     unlink(c);
+}
+/* um TICK: dá `vel` dobras e mostra o estado. Devolve 1 se ainda há o que dobrar. */
+static int relogio_tick(const char *base, const char *fala, int ate_fim){
+    char cf_n[600]; snprintf(cf_n, sizeof cf_n, "%s.tick", base);
+    Relogio r = { 0, 0 };
+    int cf;
+    if(fala && *fala){                              /* começa: escreve a fita */
+        char cone[1024]; desdobra_entrada(cone, sizeof cone, fala);
+        const char *ex = e_conta(cone) ? cone : fala;
+        if(!e_conta(ex)){
+            printf("   (o relógio anda sobre uma conta, e isto não é uma. Diz-me a conta.)\n");
+            return 0;
+        }
+        cf = open(cf_n, O_RDWR|O_CREAT|O_TRUNC, 0644);
+        if(cf < 0) return 0;
+        r.n = ct_leia(cf, ex); r.dobras = 0;
+        if(r.n < 0){ printf("   (essa conta não fecha)\n"); close(cf); return 0; }
+    } else {
+        if(!rel_le(base, &r)){
+            printf("   (não há conta no relógio — começa com: tick \"a conta\")\n");
+            return 0;
+        }
+        cf = open(cf_n, O_RDWR);
+        if(cf < 0){ printf("   (a fita perdeu-se; recomeça)\n"); return 0; }
+    }
+    long vel = ate_fim ? 1L<<30 : tick_velocidade();
+    char buf[2048], porque[512];
+    ct_mostra(cf, r.n, buf, sizeof buf);
+    if(fala && *fala) printf("   %s\n", buf);
+    int fez = 0;
+    for(long d = 0; d < vel; d++){
+        if(ct_passo(cf, r.n, porque, sizeof porque) != 1) break;
+        r.dobras++; fez = 1;
+        ct_mostra(cf, r.n, buf, sizeof buf);
+        printf(" = %-26s   %s\n", buf, porque);
+    }
+    long v; int fechou = ct_valor(cf, r.n, &v) && !fez;
+    if(!fez){
+        if(ct_valor(cf, r.n, &v)) printf("dá %ld.   (o relógio parou: não há mais dobras)\n", v);
+        else printf("   (não há mais dobras, e não fechou num número só)\n");
+        close(cf);
+        rel_apaga(base);
+        return 0;
+    }
+    close(cf);
+    rel_poe(base, r);
+    printf("   (tick %ld — %ld dobra(s) dadas; o próximo tick continua daqui, e a fita\n",
+           r.dobras / (ate_fim ? 1 : (vel < 1 ? 1 : vel)) + 0, r.dobras);
+    printf("    está no disco: fechar o programa não perde o passo)\n");
+    (void)fechou;
+    return 1;
+}
+
+/* A FATORAÇÃO EM FALA: «fatora x^3 - x». O produto é convolução e fatorar é a volta —
+ * e a volta CONFERE: multiplicam-se os fatores de novo e comparam-se com o original. Se
+ * não bater, não se escreve. O que a casa domina inteiro diz-se pelo nome: a família
+ * metálica e o β(n,m) de Pisot são irredutíveis por ROUCHÉ NO DUAL, sem calcular raiz. */
+static void escreve_pz(Pz p){
+    int algum = 0;
+    for(int k = p.n; k >= 0; k--) if(p.a[k]) algum = 1;
+    if(!algum){ printf("0"); return; }              /* o zero escreve-se: 0 */
+    for(int k = p.n; k >= 0; k--){
+        if(p.a[k] == 0) continue;
+        if(k != p.n) printf(" %s ", p.a[k] < 0 ? "-" : "+");
+        else if(p.a[k] < 0) printf("-");
+        long v = p.a[k] < 0 ? -p.a[k] : p.a[k];
+        if(v != 1 || k == 0) printf("%ld", v);
+        if(k >= 1) printf("x");
+        if(k >= 2) printf("^%d", k);
+    }
+}
+/* A DIVISÃO DE POLINÓMIOS na fala: «divide x^3 - 1 por x - 1». É a FIBRA das cinco
+ * operações — a = q·b + r —, e a volta é obrigatória: multiplica-se de novo e confere-se.
+ * Em ℤ o pseudo-fator é dito, nunca escondido. */
+static int resolve_divide_poli(const char *f){
+    const char *p = f;
+    if(strncmp(p, "divide ", 7)) return 0;
+    p += 7;
+    const char *por = strstr(p, " por ");
+    if(!por) return 0;
+    char esq[512], dir[512];
+    snprintf(esq, sizeof esq, "%.*s", (int)(por - p), p);
+    snprintf(dir, sizeof dir, "%s", por + 5);
+    if(!strchr(esq, 'x') && !strchr(dir, 'x')) return 0;   /* sem x é conta */
+    Pol pa, pb;
+    if(pol_le(esq, esq + strlen(esq), &pa) != 1) return 0;
+    if(pol_le(dir, dir + strlen(dir), &pb) != 1) return 0;
+    long ia[PMAX+1], ib[PMAX+1];
+    if(!pol_ic(pa, ia) || !pol_ic(pb, ib)) return 0;
+    Pz a, b;
+    a.n = pa.n; for(int k = 0; k <= pa.n; k++) a.a[k] = ia[k];
+    b.n = pb.n; for(int k = 0; k <= pb.n; k++) b.a[k] = ib[k];
+    Pz q, r; long fator = 1;
+    if(!pz_div_resto(a, b, &q, &r, &fator)){
+        printf("essa divisão não fecha nos inteiros — e não a escrevo aproximada.\n");
+        printf("   (a fibra ou devolve os dois lados exatos, ou não é a fibra)\n");
+        return 1;
+    }
+    printf("   "); escreve_pz(a); printf("   ÷   "); escreve_pz(b); printf("\n");
+    if(fator != 1) printf("   (em Z multiplica-se por %ld — o líder de b não é 1, e o fator diz-se)\n", fator);
+    printf(" = quociente  "); escreve_pz(q); printf("\n");
+    printf("   resto      "); escreve_pz(r); printf("\n");
+    /* A VOLTA, obrigatória: q·b + r reconstrói (fator·a) */
+    { Pz qb, soma; pz_mul(q, b, &qb); pz_soma(qb, r, &soma);
+      int bate = (soma.n == a.n);
+      if(bate) for(int k = 0; k <= a.n; k++) if(soma.a[k] != fator*a.a[k]) bate = 0;
+      if(!bate){ printf("   (a volta NÃO fechou — logo não afirmo esta divisão)\n"); return 1; }
+      printf("   e a volta confere: q·b + r = ");
+      if(fator != 1) printf("%ld·(", fator);
+      escreve_pz(a);
+      if(fator != 1) printf(")");
+      printf("   (a fibra, com resíduo 0)\n"); }
+    if(r.n == 0 && r.a[0] == 0)
+        printf("   o resto é ZERO: b é FATOR de a — e isso é a deconvolução exata\n");
+    else
+        printf("   o resto não é zero: b não divide a, e o resto é o que sobra da fibra\n");
+    return 1;
+}
+/* O MDC NA FALA: «mdc de x^3 - 1 e x^2 - 1». É a órbita do inversor a descer até à
+ * folha, e a folha É o mdc — a mesma lei que dá o gcd nos inteiros e a fração contínua
+ * no racional. A volta é obrigatória: ele tem de dividir os dois, exatamente. */
+/* «as cinco operações» — a vista do padrão ouro: cada coisa que esta assistente faz
+ * está debaixo de UMA das cinco, e diz-se qual. Não é catálogo decorativo: é a
+ * arrumação que o Corpo Universal impõe, e é por ela que nada aqui é máquina nova. */
+/* ── O CÁLCULO NA FALA: «integra x^2 + 1», «deriva 3x^2», «integra x^2 de 0 a 3» ──
+ * Uma operação, dois sentidos. A integral definida é F(b) − F(a), exata em frações —
+ * e a constante desaparece nela por subtração, que é a outra maneira de ver o núcleo. */
+static void escreve_pol(Pol p){
+    int algum = 0;
+    for(int k = p.n; k >= 0; k--) if(p.p[k]) algum = 1;
+    if(!algum){ printf("0"); return; }
+    for(int k = p.n; k >= 0; k--){
+        if(p.p[k] == 0) continue;
+        if(k != p.n) printf(" %s ", p.p[k] < 0 ? "-" : "+");
+        else if(p.p[k] < 0) printf("-");
+        long np = p.p[k] < 0 ? -p.p[k] : p.p[k];
+        if(!(np == p.q[k] && k > 0)) printf("%s", frac2(np, p.q[k]));
+        if(k >= 1) printf("x");
+        if(k >= 2) printf("^%d", k);
+    }
+}
+/* ── A LÓGICA NA FALA, TICK A TICK, COM A EXPLICAÇÃO DENTRO DO TICK ──────────────
+ *
+ * «Começa também a misturar explicações dos passos — no tick do relógio.» Então cada
+ * passo desta resolução É um tick, e o tick não diz só o que ficou: diz o que fez e
+ * porquê. A granularidade continua do Quantizador (TICKS agrupa os passos, e só sobe
+ * por dobra), e o corpo é GF(2) — as mesmas cinco operações.
+ *
+ *   tick 1  a LEITURA      quantas variáveis, e logo quantas atribuições (2ⁿ, finito)
+ *   tick 2  a EQUAÇÃO      A = B vira A ⊕ B = 0: em GF(2) a igualdade é o XOR a zerar
+ *   tick 3  a FIBRA        quais entradas dão a saída pedida — a divisão das cinco
+ *   tick 4  o DUAL         a ANF (Zhegalkin) por Möbius, a forma canónica
+ *   tick 5  a VOLTA        substituir cada solução e conferir: resíduo 0 ou não vale
+ */
+static long TICK_N = 0;
+static void tique(const char *porque){
+    long vel = tick_velocidade();
+    TICK_N++;
+    if(vel <= 1 || (TICK_N % vel) == 1 || vel == 1)
+        printf("\n   ── tick %ld ── %s\n", TICK_N, porque);
+    else
+        printf("   · %s\n", porque);
+}
+static void escreve_anf(const unsigned char *anf, const Bool *b){
+    int algum = 0;
+    unsigned n = 1u << b->nv;
+    for(unsigned m = 0; m < n; m++){
+        if(!anf[m]) continue;
+        if(algum) printf(" + ");
+        algum = 1;
+        if(m == 0){ printf("1"); continue; }
+        for(int i = 0; i < b->nv; i++) if(m & (1u << i)) printf("%c", b->nome[i]);
+    }
+    if(!algum) printf("0");
+}
+/* ── A SIMPLIFICAÇÃO PASSO A PASSO, COM A LEI EM CADA TRANSIÇÃO, EM LaTeX ────────
+ *
+ * O `eval.txt` traz a caixa toda e acaba com a regra: «cada um com VOLTA OBRIGATÓRIA
+ * — transformação → resultado → reconstrução». É isso que aqui se faz, e cada tick
+ * NOMEIA a propriedade que autoriza a transição. A saída sai na membrana (LaTeX),
+ * para o tradutor a compor. */
+static void tex_imp(Imp im, const Bool *b){
+    int algum = 0;
+    for(int i = 0; i < b->nv; i++){
+        if(!(im.mask & (1u << i))) continue;
+        algum = 1;
+        if(im.val & (1u << i)) printf("%c", b->nome[i]);
+        else printf("\\neg %c", b->nome[i]);
+    }
+    if(!algum) printf("1");
+}
+/* ── SHANNON: F = x·F|x=1 + x'·F|x=0 — e o ficheiro diz onde isto dá ────────────
+ * «E aqui começa a ficar muito próximo da tua ideia de árvore → corte → folha»
+ * (eval.txt §9). É literal: a expansão é O CORTE, e o caminho raiz→folha é a
+ * proveniência — «o número não precisa ser apenas o valor da folha; o caminho pode
+ * ser a sua companhia». Cada nível é um tick, e cada tick nomeia o corte que fez. */
+/* ── O RASTRO VERIFICÁVEL DA DEMONSTRAÇÃO ────────────────────────────────────────
+ *
+ * A regra final do `eval.txt`, e é ela que muda a natureza da coisa:
+ *
+ *   «toda demonstração precisa carregar a JUSTIFICATIVA DE CADA TRANSIÇÃO. Não
+ *    apenas P ⇒ Q, mas P --Modus Ponens--> Q --De Morgan--> R --definição--> S.
+ *    Aí deixa de ser apenas um resolvedor: passa a produzir o RASTRO VERIFICÁVEL.»
+ *
+ * Aqui a fala «prova <fórmula>» produz esse rastro: cada transição é um tick, diz a
+ * REGRA que a autoriza, e a regra é VERIFICADA na hora (tautologia na tabela inteira).
+ * E no fim a volta: a fórmula original e a final têm de ter a MESMA tabela. Um rastro
+ * sem volta seria uma história bem contada. */
+static int bl_taut(const char *forma){
+    Bool b;
+    if(!bl_le(forma, &b)) return 0;
+    unsigned n = 1u << b.nv;
+    for(unsigned x = 0; x < n; x++) if(!b.t[x]) return 0;
+    return 1;
+}
+/* aplica a regra `de` → `para` na fórmula, se ela couber literalmente. Devolve 1 e
+ * escreve em `out`. A troca é textual, e a JUSTIFICAÇÃO é a equivalência: a regra só
+ * se aplica se «de <-> para» for tautologia — verificada na hora, não confiada. */
+static int passo_regra(const char *forma, const char *de, const char *para,
+                       char *out, size_t lim){
+    const char *p = strstr(forma, de);
+    if(!p) return 0;
+    char eq[512];
+    snprintf(eq, sizeof eq, "(%s) <-> (%s)", de, para);
+    if(!bl_taut(eq)) return 0;                     /* a regra tem de se sustentar */
+    snprintf(out, lim, "%.*s%s%s", (int)(p - forma), forma, para, p + strlen(de));
+    return 1;
+}
+/* ── OS CONJUNTOS: definição → operação → demonstração → volta ───────────────────
+ * Os ticks são os que o próprio `eval.txt` desenha no §4: entrar na definição,
+ * expandir, De Morgan, reagrupar, reconhecer — e a VOLTA. Aqui a demonstração é a
+ * varredura dos ÁTOMOS (as 2ⁿ regiões do diagrama), e onde os lados diferem exibe-se
+ * o CONTRAEXEMPLO concreto: a região onde um tem o ponto e o outro não. */
+/* ── A RELAÇÃO E A FUNÇÃO NA FALA: «relacao 1-1, 1-2, 2-2 em 3» ─────────────────
+ * Os pares escrevem-se `a-b`, o conjunto é {1..n}, e cada propriedade sai com a sua
+ * DEFINIÇÃO ao lado — varrida inteira. Para uma função, a cadeia é a do ficheiro:
+ * função → injetiva/sobrejetiva → bijetiva → inversa → VOLTA. */
+static int rl_le_fala(const char *p, Rel *r){
+    const char *em = strstr(p, " em ");
+    if(!em) return 0;
+    int n = 0;
+    for(const char *q = em + 4; *q >= '0' && *q <= '9'; q++) n = n*10 + (*q - '0');
+    if(n < 1 || n > RL_MAX) return 0;
+    rl_zera(r, n);
+    int algum = 0;
+    for(const char *q = p; q < em; ){
+        while(q < em && (*q == ' ' || *q == ',')) q++;
+        if(q >= em) break;
+        int a = 0, b = 0;
+        if(*q < '0' || *q > '9') return 0;
+        while(q < em && *q >= '0' && *q <= '9') a = a*10 + (*q++ - '0');
+        if(q >= em || (*q != '-' && *q != '>')) return 0;
+        q++;
+        if(*q == '>') q++;
+        while(q < em && *q >= '0' && *q <= '9') b = b*10 + (*q++ - '0');
+        if(a < 1 || a > n || b < 1 || b > n) return 0;
+        r->m[a-1][b-1] = 1;
+        algum = 1;
+    }
+    return algum;
+}
+/* ── OS NATURAIS NA FALA: «fatora 60», «mdc de 18 e 12», «divide 17 por 5» ───────
+ * A escada do ficheiro — 0 → S → + → × → ≤ → | → gcd → primos → fatoração — e cada
+ * resposta com a VOLTA: a fatoração multiplica-se de novo, o Bézout substitui-se, a
+ * divisão recompõe. O motor demonstra os instrumentos que já usava. */
+/* ── O RELÓGIO DE SEIS TICKS, tal como o ficheiro o desenha ──────────────────────
+ *
+ *   tick 1 — DEFINIÇÃO · tick 2 — TRADUÇÃO · tick 3 — OPERAÇÃO
+ *   tick 4 — DEMONSTRAÇÃO · tick 5 — CONTRAEXEMPLO, se falhar · tick 6 — VOLTA
+ *
+ * E o exemplo é o dele: «se a | b e a | c então a | (b+c)». A prova não é a varredura:
+ * é a CADEIA — b = ak, c = aℓ, b+c = a(k+ℓ), e k+ℓ ∈ ℤ. A varredura entra como
+ * controlo, e a volta exibe o quociente. */
+static int resolve_divisibilidade(const char *f){
+    const char *p = f;
+    if(strncmp(p, "prova divisibilidade", 20)) return 0;
+    p += 20;
+    long a = 0, b = 0, c = 0; int lidos = 0;
+    { const char *q = p;
+      long v[3] = {0,0,0};
+      for(int i = 0; i < 3; i++){
+          while(*q && (*q < '0' || *q > '9') && *q != '-') q++;
+          if(!*q) break;
+          int sg = 1;
+          if(*q == '-'){ sg = -1; q++; }
+          if(*q < '0' || *q > '9') break;
+          long n2 = 0;
+          while(*q >= '0' && *q <= '9') n2 = n2*10 + (*q++ - '0');
+          v[i] = sg * n2; lidos++;
+      }
+      a = v[0]; b = v[1]; c = v[2]; }
+    if(lidos < 3 || a == 0){ a = 3; b = 12; c = 18; }   /* o exemplo, se não vier nada */
+    TICK_N = 0;
+    printf("   se %ld | %ld e %ld | %ld, então %ld | (%ld + %ld)\n", a, b, a, c, a, b, c);
+    long k = 0, l = 0;
+    int d1 = iz_div(a, b, &k), d2 = iz_div(a, c, &l);
+    tique("DEFINIÇÃO — divisibilidade: a | b significa que EXISTE k com b = ak, e o k"
+          " é a testemunha (não é uma propriedade, é uma existência)");
+    printf("      %ld | %ld ?  %s", a, b, d1 ? "sim" : "NÃO");
+    if(d1) printf(",  com k = %ld  (%ld = %ld·%ld)", k, b, a, k);
+    printf("\n      %ld | %ld ?  %s", a, c, d2 ? "sim" : "NÃO");
+    if(d2) printf(",  com ℓ = %ld  (%ld = %ld·%ld)", l, c, a, l);
+    printf("\n");
+    if(!d1 || !d2){
+        tique("CONTRAEXEMPLO — a hipótese não se verifica, e por isso não há teorema a"
+              " provar aqui: sem as duas divisibilidades, a conclusão não é devida");
+        printf("      (e note-se: a conclusão pode até ser verdadeira por acaso — %ld | %ld"
+               " é %s — mas isso não a torna consequência)\n",
+               a, b + c, iz_div(a, b + c, 0) ? "verdade" : "falso");
+        return 1;
+    }
+    tique("TRADUÇÃO — a soma das duas testemunhas: b + c = ak + aℓ");
+    printf("      %ld + %ld = %ld·%ld + %ld·%ld\n", b, c, a, k, a, l);
+    tique("OPERAÇÃO — a DISTRIBUTIVIDADE põe o a em evidência: ak + aℓ = a(k + ℓ)");
+    printf("      = %ld·(%ld + %ld) = %ld·%ld\n", a, k, l, a, k + l);
+    tique("DEMONSTRAÇÃO — k + ℓ é inteiro (ℤ é fechado para a soma), logo existe uma"
+          " testemunha para b+c: é essa existência a definição de a | (b+c)");
+    printf("      k + ℓ = %ld ∈ ℤ,  logo %ld | %ld\n", k + l, a, b + c);
+    tique("VOLTA — e a testemunha confere: (b+c)/a tem de dar exatamente k + ℓ");
+    { long kk = 0;
+      int ok2 = iz_div(a, b + c, &kk);
+      printf("      (%ld + %ld)/%ld = %ld,  e k + ℓ = %ld   %s\n",
+             b, c, a, kk, k + l, (ok2 && kk == k + l) ? "(resíduo 0)" : "— NÃO afirmo"); }
+    printf("\n   $%ld \\mid %ld \\wedge %ld \\mid %ld \\; \\Rightarrow \\; %ld \\mid %ld$\n",
+           a, b, a, c, a, b + c);
+    printf("   (e a prova não foi a varredura: foi a CADEIA — definição, soma,\n");
+    printf("    distributividade, fecho. A varredura seria controlo, não demonstração)\n");
+    return 1;
+}
+/* «bezout 35 e 22» e «diofantina 35x + 22y = 7» — a testemunha e o critério */
+static int resolve_bezout(const char *f){
+    const char *p = f;
+    int dio = 0;
+    if(!strncmp(p, "bezout ", 7)) p += 7;
+    else if(!strncmp(p, "bézout ", 8)) p += 8;
+    else if(!strncmp(p, "diofantina ", 11)){ p += 11; dio = 1; }
+    else return 0;
+    long a = 0, b = 0, c = 0; int n2 = 0;
+    for(const char *q = p; *q; ){
+        if(*q < '0' || *q > '9'){ q++; continue; }
+        long v = 0;
+        while(*q >= '0' && *q <= '9') v = v*10 + (*q++ - '0');
+        if(n2 == 0) a = v; else if(n2 == 1) b = v; else if(n2 == 2) c = v;
+        n2++;
+    }
+    if(a < 1 || b < 1) return 0;
+    TICK_N = 0;
+    long x, y, g = iz_gcd(a, b, &x, &y);
+    if(!dio){
+        printf("   bezout(%ld, %ld)\n", a, b);
+        tique("DEFINIÇÃO — Bézout: o gcd escreve-se como COMBINAÇÃO LINEAR, gcd = ax + by,"
+              " e o x e o y são a testemunha");
+        printf("      gcd(%ld, %ld) = %ld\n", a, b, g);
+        tique("OPERAÇÃO — o Euclides ESTENDIDO carrega os coeficientes na descida");
+        printf("      x = %ld,  y = %ld\n", x, y);
+        tique("VOLTA — substituir, que é o que transforma a identidade em facto");
+        printf("      %ld·(%ld) + %ld·(%ld) = %ld   %s\n", a, x, b, y, a*x + b*y,
+               a*x + b*y == g ? "(confere)" : "— NÃO afirmo");
+        printf("      e o gcd é o MENOR positivo da forma ax+by — a boa ordenação a decidir\n");
+        return 1;
+    }
+    printf("   %ldx + %ldy = %ld\n", a, b, c);
+    tique("DEFINIÇÃO — a diofantina pede solução INTEIRA, e o critério é um só:"
+          " gcd(a,b) | c");
+    printf("      gcd(%ld, %ld) = %ld,  e %ld %s %ld\n", a, b, g, g,
+           c % g == 0 ? "divide" : "NÃO divide", c);
+    long xs, ys;
+    int tem = iz_diofantina(a, b, c, &xs, &ys);
+    if(!tem){
+        tique("CONTRAEXEMPLO — o critério falha, logo NÃO há solução inteira nenhuma:"
+              " e isto é resultado, não desistência");
+        printf("      (qualquer ax+by é múltiplo de %ld, e %ld não é)\n", g, c);
+        return 1;
+    }
+    tique("OPERAÇÃO — escala-se a testemunha de Bézout pelo fator c/gcd");
+    printf("      de %ld·(%ld) + %ld·(%ld) = %ld,  multiplica-se por %ld\n",
+           a, x, b, y, g, c / g);
+    tique("VOLTA — e substitui-se: a solução ou fecha, ou não é solução");
+    printf("      x = %ld,  y = %ld   →   %ld·(%ld) + %ld·(%ld) = %ld   %s\n",
+           xs, ys, a, xs, b, ys, a*xs + b*ys,
+           a*xs + b*ys == c ? "(resíduo 0)" : "— NÃO afirmo");
+    return 1;
+}
+/* ── ℚ ──────────────────────────────────────────────────────────────────────────────
+ * «prova que (a/b)/(c/d) = ad/bc» — e ele escreveu o relógio inteiro que espera:
+ * DEFINIÇÃO, INVERSÃO, MULTIPLICAÇÃO, DOMÍNIO, CONCLUSÃO, VOLTA (residual 0). É esse,
+ * tick a tick. A prova corre nas LETRAS (é o teorema) e um caso concreto vai atrás como
+ * CONTROLO — porque uma identidade em letras que falhasse num número não seria teorema. */
+static const char *le_fracao(const char *q, Qz *r){
+    long p = 0, d = 1; int sg = 1, tem = 0;
+    while(*q == ' ') q++;
+    if(*q == '-'){ sg = -1; q++; }
+    while(*q >= '0' && *q <= '9'){ p = p*10 + (*q++ - '0'); tem = 1; }
+    if(!tem) return 0;
+    if(*q == '/'){
+        q++; d = 0; tem = 0;
+        while(*q >= '0' && *q <= '9'){ d = d*10 + (*q++ - '0'); tem = 1; }
+        if(!tem || d == 0) return 0;
+    }
+    r->p = sg * p; r->q = d;
+    return q;
+}
+static void esc_q(Qz a){
+    if(a.q == 1) printf("%ld", a.p);
+    else printf("%ld/%ld", a.p, a.q);
+}
+static int resolve_racionais(const char *f){
+    const char *p = f;
+    /* o GUME do andar: «divisão por zero não é uma aproximação ruim; é uma operação
+     * SEM FIBRA» — e é dito assim, não é um erro engolido */
+    if(!strncmp(p, "inverso de ", 11)){
+        Qz a; const char *q = le_fracao(p + 11, &a);
+        if(!q) return 0;
+        TICK_N = 0;
+        Qz i;
+        tique("DEFINIÇÃO — o inverso de a/b é b/a, e existe se e só se a ≠ 0");
+        if(!qz_inverso(a, &i)){
+            printf("      "); esc_q(a); printf(" = 0, e 0⁻¹ NÃO EXISTE\n");
+            tique("GUME — e não é aproximação ruim: é uma operação SEM FIBRA. A fibra"
+                  " pede o x com 0·x = 1, e nenhum o cumpre; para 0·x = 0 cumprem TODOS."
+                  " Ou não há nenhum ou não há um só — nos dois casos não há inverso");
+            printf("      (repare-se: a recusa é RESULTADO, e é o que separa ℚ de uma"
+                   " conta que rebenta)\n");
+            return 1;
+        }
+        printf("      ("); esc_q(a); printf(")⁻¹ = "); esc_q(i); printf("\n");
+        tique("VOLTA — e o inverso prova-se multiplicando: q·q⁻¹ tem de dar exatamente 1");
+        { Qz um = qz_mult(a, i);
+          printf("      "); esc_q(a); printf(" · "); esc_q(i); printf(" = "); esc_q(um);
+          printf("   %s\n", (um.p == 1 && um.q == 1) ? "(resíduo 0)" : "— NÃO afirmo"); }
+        return 1;
+    }
+    /* «simplifica 84/126» — o exercício 7, e a unicidade da forma reduzida */
+    if(!strncmp(p, "simplifica ", 11) && strchr(p, '/')){
+        Qz a; const char *q = le_fracao(p + 11, &a);
+        if(!q) return 0;
+        TICK_N = 0;
+        long g = qz_mdc(a.p, a.q);
+        tique("DEFINIÇÃO — simplificar é dividir os dois pelo mesmo d = gcd(a,b): a classe"
+              " não muda porque (a/d)·b = (b/d)·a, que é o produto cruzado");
+        printf("      gcd(%ld, %ld) = %ld\n", a.p, a.q, g);
+        tique("OPERAÇÃO — e a forma reduzida sai de uma divisão exata dos dois lados");
+        printf("      %ld/%ld = %ld/%ld\n", a.p, a.q, a.p/g, a.q/g);
+        Qz r = qz(a.p, a.q);
+        tique("DEMONSTRAÇÃO — a reduzida é ÚNICA na classe (salvo o sinal do denominador):"
+              " se gcd(a',b') = 1 e gcd(a'',b'') = 1 com a'b'' = a''b', então b' | b'' e"
+              " b'' | b', logo são o mesmo");
+        printf("      gcd(%ld, %ld) = %ld   (é 1: já não há o que cortar)\n",
+               r.p, r.q, qz_mdc(r.p, r.q));
+        tique("VOLTA — e a igualdade das duas confere pelo produto cruzado, sem decimal");
+        printf("      %ld·%ld = %ld  e  %ld·%ld = %ld   %s\n",
+               a.p, r.q, a.p*r.q, r.p, a.q, r.p*a.q,
+               qz_igual(a, r) ? "(resíduo 0)" : "— NÃO afirmo");
+        return 1;
+    }
+    /* «entre 1/3 e 1/2» — a DENSIDADE, e ela exibe as testemunhas */
+    if(!strncmp(p, "entre ", 6)){
+        Qz a, b; const char *q = le_fracao(p + 6, &a);
+        if(!q) return 0;
+        while(*q == ' ') q++;
+        if(!strncmp(q, "e ", 2)) q += 2;
+        q = le_fracao(q, &b);
+        if(!q) return 0;
+        a = qz(a.p, a.q); b = qz(b.p, b.q);
+        if(qz_menor(b, a)){ Qz t = a; a = b; b = t; }
+        TICK_N = 0;
+        tique("DEFINIÇÃO — densidade: entre dois racionais distintos há sempre outro, e a"
+              " testemunha é o ponto médio (a+b)/2 — que é racional porque ℚ é fechado");
+        if(qz_igual(a, b)){
+            printf("      "); esc_q(a); printf(" = "); esc_q(b);
+            printf(", e entre um número e ele próprio não há nada\n");
+            tique("CONTRAEXEMPLO — a hipótese é «a < b», e ela falha: o teorema não se"
+                  " aplica, e não se finge que sim");
+            return 1;
+        }
+        tique("OPERAÇÃO — e faz-se TRÊS vezes, cada uma sobre o que resta à DIREITA (entre"
+              " o médio anterior e b): é isto que mostra que não são três, são infinitos —"
+              " o processo nunca pára, e cada passo tem o mesmo direito que o primeiro");
+        { Qz e = a, m[3];
+          for(int k = 0; k < 3; k++){ m[k] = qz_medio(e, b); e = m[k]; }
+          for(int k = 0; k < 3; k++){ printf("      q%d = ", k+1); esc_q(m[k]); printf("\n"); }
+          tique("VOLTA — e cada um verifica-se pelo produto cruzado: a < q < b, sem decimal");
+          int bom = 1;
+          for(int k = 0; k < 3; k++){
+              int ok1 = qz_menor(a, m[k]), ok2 = qz_menor(m[k], b);
+              if(!ok1 || !ok2) bom = 0;
+              printf("      "); esc_q(a); printf(" < "); esc_q(m[k]); printf(" < ");
+              esc_q(b); printf("   %s\n", (ok1 && ok2) ? "(confere)" : "— NÃO afirmo");
+          }
+          if(bom) printf("\n   e a torneira não fecha: o médio de a e q1 dá o quarto, e"
+                         " assim por diante — infinitos\n"); }
+        return 1;
+    }
+    /* «prova que (a/b)/(c/d) = ad/bc» — o relógio dele, os seis ticks */
+    { int quer = 0;
+      if(!strncmp(p, "prova que (a/b)/(c/d)", 21)) quer = 1;
+      else if(!strncmp(p, "prova divisao racional", 22)) quer = 1;
+      else if(!strncmp(p, "prova divisão racional", 23)) quer = 1;
+      if(!quer) return 0; }
+    TICK_N = 0;
+    tique("DEFINIÇÃO — a divisão não é operação nova: é multiplicar pelo INVERSO."
+          " É por isso que ℚ ganha ÷ sem ganhar uma quinta operação");
+    printf("      a/b ÷ c/d = (a/b) · (c/d)⁻¹\n");
+    tique("INVERSÃO — e o inverso de c/d é d/c, porque (c/d)(d/c) = cd/dc = 1");
+    printf("      (c/d)⁻¹ = d/c\n");
+    tique("MULTIPLICAÇÃO — que é a regra dos numeradores e denominadores, e é ela a"
+          " CONVOLUÇÃO deste andar: os de cima com os de cima, os de baixo com os de baixo");
+    printf("      (a/b)(d/c) = ad/bc\n");
+    tique("DOMÍNIO — e diz-se por inteiro: b ≠ 0 e d ≠ 0 para as frações existirem,"
+          " c ≠ 0 para a fibra existir. Sem c ≠ 0 não há erro de cálculo: não há operação");
+    printf("      b ≠ 0,  d ≠ 0,  c ≠ 0\n");
+    tique("CONCLUSÃO — a/b ÷ c/d = ad/bc");
+    tique("VOLTA — e é ela que faz da conclusão um facto: multiplicar o resultado pelo"
+          " divisor tem de devolver o dividendo, exatamente");
+    printf("      (ad/bc)·(c/d) = adc/bcd = (a/b)·(cd/cd) = a/b\n");
+    printf("\n      resíduo = 0\n");
+    /* e o CONTROLO em números: uma identidade em letras que falhasse num caso não seria
+     * teorema — então corre-se o caso dele, 2/3 ÷ 5/4 = 8/15, com a volta */
+    { Qz a = qz(2,3), b = qz(5,4), r, v;
+      int tem = qz_divide(a, b, &r);
+      v = qz_mult(r, b);
+      printf("\n   e o CONTROLO em números (o exemplo do ficheiro):\n");
+      printf("      2/3 ÷ 5/4 = "); esc_q(r);
+      printf(",  e a volta "); esc_q(r); printf(" · 5/4 = "); esc_q(v);
+      printf("   %s\n", (tem && qz_igual(v, a)) ? "(resíduo 0)" : "— NÃO afirmo");
+      printf("      (40/75 reduz a 2/3 pelo gcd 5 — a classe é a mesma, o par escrito não)\n"); }
+    printf("\n   $\\frac{a}{b} \\div \\frac{c}{d} = \\frac{ad}{bc}$\n");
+    return 1;
+}
+static int resolve_naturais(const char *f){
+    const char *p = f;
+    /* «fatora 60» — o número, não o polinómio (esse tem x e vai à outra porta) */
+    if(!strncmp(p, "fatora ", 7) || !strncmp(p, "fatoriza ", 9)){
+        const char *q = p + (p[6] == ' ' ? 7 : 9);
+        if(strchr(q, 'x')) return 0;                   /* é polinómio */
+        long n = 0; int tem = 0;
+        while(*q == ' ') q++;
+        while(*q >= '0' && *q <= '9'){ n = n*10 + (*q++ - '0'); tem = 1; }
+        while(*q == ' ') q++;
+        if(!tem || *q || n < 2) return 0;
+        TICK_N = 0;
+        printf("   %ld\n", n);
+        tique("a FATORAÇÃO em primos (o Teorema Fundamental): desce-se pelos divisores,"
+              " e cada fator é PRIMO por construção");
+        long pr[NT_FAT]; int ex[NT_FAT];
+        int k = nt_fatora(n, pr, ex, NT_FAT);
+        printf("      %ld = ", n);
+        for(int i = 0; i < k; i++){
+            printf("%ld", pr[i]);
+            if(ex[i] > 1) printf("^%d", ex[i]);
+            if(i + 1 < k) printf(" · ");
+        }
+        printf("\n");
+        if(k == 1 && ex[0] == 1) printf("      (é PRIMO: os únicos divisores são 1 e ele)\n");
+        tique("a VOLTA: o produto dos fatores tem de refazer o número — e é ela a prova,"
+              " não a lista");
+        long v = nt_refaz(pr, ex, k);
+        printf("      %ld = %ld   %s\n", v, n, v == n ? "(resíduo 0)" : "— NÃO afirmo");
+        printf("      (a unicidade é o Lema de Euclides: p | ab ⇒ p|a ou p|b, e é ela\n");
+        printf("       que faz a forma ordenada ser ÚNICA)\n");
+        return 1;
+    }
+    /* «mdc de 18 e 12» — com Bézout, que é a testemunha */
+    { int mdc = 0;
+      const char *q = 0;
+      if(!strncmp(p, "mdc de ", 7)){ q = p + 7; mdc = 1; }
+      else if(!strncmp(p, "mdc ", 4)){ q = p + 4; mdc = 1; }
+      if(mdc && !strchr(q, 'x')){
+          long a = 0, b = 0; int t1 = 0, t2 = 0;
+          while(*q == ' ') q++;
+          while(*q >= '0' && *q <= '9'){ a = a*10 + (*q++ - '0'); t1 = 1; }
+          const char *e2 = strstr(q, " e ");
+          if(!t1 || !e2) return 0;
+          q = e2 + 3;
+          while(*q == ' ') q++;
+          while(*q >= '0' && *q <= '9'){ b = b*10 + (*q++ - '0'); t2 = 1; }
+          if(!t2 || a < 1 || b < 1) return 0;
+          TICK_N = 0;
+          printf("   mdc(%ld, %ld)\n", a, b);
+          tique("a ÓRBITA DOS RESTOS: (a,b) → (b,r₁) → (r₁,r₂) → … → (d,0), e a FOLHA é o"
+                " mdc — a mesma descida do inversor, e a mesma dos polinómios");
+          { long x2 = a, y2 = b;
+            while(y2){ long q2 = x2 / y2, r2 = x2 - q2*y2;
+                       printf("      %ld = %ld·%ld + %ld\n", x2, q2, y2, r2);
+                       x2 = y2; y2 = r2; }
+            printf("      o último resto não nulo é %ld\n", x2); }
+          long x, y, g = nt_gcd(a, b, &x, &y);
+          tique("e BÉZOUT dá a TESTEMUNHA: gcd = ax + by, com x e y inteiros — e ela"
+                " substitui-se, não se afirma");
+          printf("      %ld = %ld·(%ld) + %ld·(%ld) = %ld   %s\n",
+                 g, a, x, b, y, a*x + b*y,
+                 a*x + b*y == g ? "(confere)" : "— NÃO afirmo");
+          printf("      e divide os dois: %ld/%ld = %ld, %ld/%ld = %ld\n",
+                 a, g, a/g, b, g, b/g);
+          return 1;
+      } }
+    /* «divide 17 por 5» — o quociente e o resto, com a volta */
+    if(!strncmp(p, "divide ", 7)){
+        const char *q = p + 7;
+        if(strchr(q, 'x')) return 0;
+        long b = 0, a = 0; int t1 = 0, t2 = 0;
+        while(*q == ' ') q++;
+        while(*q >= '0' && *q <= '9'){ b = b*10 + (*q++ - '0'); t1 = 1; }
+        const char *por = strstr(q, " por ");
+        if(!t1 || !por) return 0;
+        q = por + 5;
+        while(*q == ' ') q++;
+        while(*q >= '0' && *q <= '9'){ a = a*10 + (*q++ - '0'); t2 = 1; }
+        if(!t2 || a < 1) return 0;
+        long qq, rr;
+        nt_divide(b, a, &qq, &rr);
+        TICK_N = 0;
+        printf("   %ld ÷ %ld\n", b, a);
+        tique("a DIVISÃO COM RESTO: existem q e r ÚNICOS com b = aq + r e 0 ≤ r < a");
+        printf("      %ld = %ld·%ld + %ld,  com 0 ≤ %ld < %ld\n", b, a, qq, rr, rr, a);
+        tique("a VOLTA: recompor aq + r tem de dar b — e a unicidade é o que faz disto"
+              " um algoritmo e não uma escolha");
+        printf("      %ld·%ld + %ld = %ld   %s\n", a, qq, rr, a*qq + rr,
+               a*qq + rr == b ? "(resíduo 0)" : "— NÃO afirmo");
+        if(rr == 0) printf("      o resto é ZERO: %ld | %ld — a divisibilidade é o caso exato\n", a, b);
+        return 1;
+    }
+    return 0;
+}
+static int resolve_relacao(const char *f){
+    const char *p = f;
+    int e_funcao = 0;
+    if(!strncmp(p, "relacao ", 8)) p += 8;
+    else if(!strncmp(p, "relação ", 9)) p += 9;
+    else if(!strncmp(p, "funcao ", 7)){ p += 7; e_funcao = 1; }
+    else if(!strncmp(p, "função ", 8)){ p += 8; e_funcao = 1; }
+    else return 0;
+    Rel R;
+    if(!rl_le_fala(p, &R)) return 0;
+    TICK_N = 0;
+    printf("   %s   sobre {1..%d}\n", p, R.n);
+    /* tick 1 — a relação é a tabela dos pares */
+    { char pq[256];
+      snprintf(pq, sizeof pq, "a RELAÇÃO é a TABELA sobre os pares: R ⊆ A×A, e aRb é"
+               " «(a,b) ∈ R» — %d×%d = %d pares, e varrem-se todos",
+               R.n, R.n, R.n*R.n);
+      tique(pq); }
+    printf("      ");
+    for(int b = 0; b < R.n; b++) printf("  %d", b+1);
+    printf("\n");
+    for(int a = 0; a < R.n; a++){
+        printf("     %d", a+1);
+        for(int b = 0; b < R.n; b++) printf("  %s", R.m[a][b] ? "1" : "·");
+        printf("\n");
+    }
+    if(!e_funcao){
+        /* tick 2 — as propriedades, cada uma com a sua definição */
+        tique("as PROPRIEDADES, cada uma com a definição ao lado e a varredura inteira");
+        printf("      reflexiva      ∀a: aRa                    %s\n",
+               rl_reflexiva(&R) ? "SIM" : "não");
+        printf("      simétrica      aRb ⇒ bRa                  %s\n",
+               rl_simetrica(&R) ? "SIM" : "não");
+        printf("      antissimétrica aRb ∧ bRa ⇒ a=b            %s\n",
+               rl_antissimetrica(&R) ? "SIM" : "não");
+        printf("      transitiva     aRb ∧ bRc ⇒ aRc            %s\n",
+               rl_transitiva(&R) ? "SIM" : "não");
+        /* tick 3 — o veredito, e o que ele traz */
+        tique("o VEREDITO: as três de cada lado dão os dois objetos que interessam");
+        if(rl_equivalencia(&R)){
+            int cl[RL_MAX], nc = rl_classes(&R, cl);
+            printf("      é EQUIVALÊNCIA (reflexiva + simétrica + transitiva)\n");
+            printf("      e as classes PARTICIONAM o conjunto — %d classe(s):\n", nc);
+            for(int c = 0; c < nc; c++){
+                printf("        [");
+                int pr2 = 0;
+                for(int a = 0; a < R.n; a++) if(cl[a] == c){ printf("%s%d", pr2++ ? "," : "", a+1); }
+                printf("]\n");
+            }
+            printf("      (elementos → relação → classes → quociente)\n");
+            printf("      partição verificada: %s\n",
+                   rl_particao(&R, cl, nc) ? "cada um numa classe e numa só" : "FALHOU");
+        } else if(rl_ordem(&R)){
+            printf("      é ORDEM PARCIAL (reflexiva + antissimétrica + transitiva)\n");
+            printf("      (e não é equivalência: a antissimetria é o oposto da simetria)\n");
+        } else printf("      não é equivalência nem ordem parcial — falta-lhe uma das três\n");
+        return 1;
+    }
+    /* a cadeia do ficheiro: função → injetiva/sobrejetiva → bijetiva → inversa → volta */
+    tique("é FUNÇÃO? são duas condições, e ambas se varrem: EXISTÊNCIA (todo a tem"
+          " imagem) e UNICIDADE (tem uma só)");
+    printf("      existência (total)    %s\n", rl_total(&R) ? "SIM" : "não — há a sem imagem");
+    printf("      unicidade (univalente) %s\n", rl_univalente(&R) ? "SIM" : "não — há a com duas");
+    if(!rl_funcao(&R)){
+        printf("      logo NÃO é função, e a cadeia pára aqui — não invento o resto\n");
+        return 1;
+    }
+    tique("as duas propriedades: INJETIVA (f(a)=f(b) ⇒ a=b) e SOBREJETIVA (∀b ∃a)");
+    printf("      injetiva      %s\n", rl_injetiva(&R) ? "SIM" : "não");
+    printf("      sobrejetiva   %s\n", rl_sobrejetiva(&R) ? "SIM" : "não");
+    tique("a BIJEÇÃO é a que TEM VOLTA: f bijetiva ⟺ f⁻¹ existe — e aqui não se acredita,"
+          " compõe-se nos DOIS sentidos e compara-se com a identidade");
+    if(rl_bijetiva(&R)){
+        Rel d; rl_dual(&R, &d);
+        printf("      é BIJETIVA, e a inversa é:  ");
+        for(int b = 0; b < R.n; b++)
+            for(int a = 0; a < R.n; a++) if(d.m[b][a]) printf("%d↦%d ", b+1, a+1);
+        printf("\n      f⁻¹∘f = id e f∘f⁻¹ = id:  %s\n",
+               rl_volta(&R) ? "as duas fecham (resíduo 0)" : "NÃO fecham");
+    } else {
+        printf("      NÃO é bijetiva — e por isso não tem volta: %s\n",
+               rl_volta(&R) ? "(mas a volta deu?! contradição)" : "as duas falham juntas");
+        printf("      (é a equivalência do ficheiro a funcionar nos dois sentidos)\n");
+    }
+    return 1;
+}
+static int resolve_conjuntos(const char *f){
+    const char *p = f;
+    if(!strncmp(p, "prova ", 6)) p += 6;
+    else if(!strncmp(p, "conjuntos ", 10)) p += 10;
+    else return 0;
+    /* é do corpo dos conjuntos? tem de trazer uma palavra do vocabulário e maiúsculas */
+    { int tem = 0, tem_mai = 0;
+      if(strstr(p, "uniao") || strstr(p, "união") || strstr(p, "inter") ||
+         strstr(p, "menos") || strstr(p, "delta") || strstr(p, "contido") ||
+         strstr(p, "comp ") || strstr(p, "vazio")) tem = 1;
+      for(const char *q = p; *q; q++) if(*q >= 'A' && *q <= 'Z') tem_mai = 1;
+      if(!tem || !tem_mai) return 0; }
+    const char *ig = strchr(p, '=');
+    if(!ig) return 0;
+    char esq[512], dir[512], be[512], bd[512];
+    snprintf(esq, sizeof esq, "%.*s", (int)(ig - p), p);
+    snprintf(dir, sizeof dir, "%s", ig + 1);
+    conj_traduz(esq, be, sizeof be);
+    conj_traduz(dir, bd, sizeof bd);
+    Bool ba, bb;
+    if(!bl_le(be, &ba) || !bl_le(bd, &bb)) return 0;
+    TICK_N = 0;
+    printf("   %s\n", p);
+    /* tick 1 — entrar na definição */
+    tique("entrar na DEFINIÇÃO: `x ∈ A` É a variável booleana `a`, e cada operação de"
+          " conjunto é a sua definição em pertença — não é analogia, é a definição");
+    printf("      A ∪ B ↦ a + b      A ∩ B ↦ a * b      A \\ B ↦ a * ¬b\n");
+    printf("      Aᶜ ↦ ¬a            A △ B ↦ a ^ b      A ⊆ B ↦ a → b\n");
+    /* tick 2 — a tradução */
+    tique("a TRADUÇÃO dos dois lados — e é aqui que os conjuntos entram no corpo");
+    printf("      esquerda:  %s\n", be);
+    printf("      direita:   %s\n", bd);
+    /* tick 3 — os átomos */
+    { /* junta as variáveis dos dois lados */
+      char nomes[BL_VAR]; int nn = 0;
+      for(int i = 0; i < ba.nv; i++) nomes[nn++] = ba.nome[i];
+      for(int i = 0; i < bb.nv; i++){
+          int tem2 = 0;
+          for(int j = 0; j < nn; j++) if(nomes[j] == bb.nome[i]) tem2 = 1;
+          if(!tem2 && nn < BL_VAR) nomes[nn++] = bb.nome[i];
+      }
+      unsigned n = 1u << nn;
+      char pq[256];
+      snprintf(pq, sizeof pq, "a DEMONSTRAÇÃO: os %u ÁTOMOS do diagrama — cada região é"
+               " uma atribuição, e percorrem-se TODAS (é isso a prova)", n);
+      tique(pq);
+      int dif = 0; unsigned onde = 0;
+      for(unsigned x = 0; x < n; x++){
+          unsigned xa = 0, xb = 0;
+          for(int i = 0; i < ba.nv; i++)
+              for(int j = 0; j < nn; j++)
+                  if(ba.nome[i] == nomes[j] && ((x >> j) & 1)) xa |= 1u << i;
+          for(int i = 0; i < bb.nv; i++)
+              for(int j = 0; j < nn; j++)
+                  if(bb.nome[i] == nomes[j] && ((x >> j) & 1)) xb |= 1u << i;
+          if(ba.t[xa] != bb.t[xb]){ if(!dif) onde = x; dif++; }
+      }
+      if(dif){
+          printf("      DIFEREM em %d átomo(s) — e o contraexemplo é CONCRETO:\n", dif);
+          printf("      na região onde ");
+          for(int j = 0; j < nn; j++)
+              printf("%s%c%s", j ? ", " : "", (char)(nomes[j] - 'a' + 'A'),
+                     ((onde >> j) & 1) ? " tem o ponto" : " não tem");
+          /* OS VALORES SAEM DA MEDIÇÃO. Eu tinha escrito «0» e «1» à mão aqui —
+           * calhava estarem certos neste exemplo, e era número inventado na mesma:
+           * bastava o contraexemplo cair do outro lado para a frase mentir. */
+          { unsigned xa2 = 0, xb2 = 0;
+            for(int i = 0; i < ba.nv; i++)
+                for(int j = 0; j < nn; j++)
+                    if(ba.nome[i] == nomes[j] && ((onde >> j) & 1)) xa2 |= 1u << i;
+            for(int i = 0; i < bb.nv; i++)
+                for(int j = 0; j < nn; j++)
+                    if(bb.nome[i] == nomes[j] && ((onde >> j) & 1)) xb2 |= 1u << i;
+            printf("\n      a esquerda dá %d e a direita %d — logo NÃO são iguais\n",
+                   ba.t[xa2], bb.t[xb2]); }
+          tique("a VOLTA não se faz sobre o que não fecha — e o contraexemplo é a prova"
+                " do contrário, que também é resultado");
+          return 1;
+      }
+      printf("      os %u átomos concordam, sem excepção\n", n);
+      /* tick 4 — a volta */
+      tique("a VOLTA: a direita traduzida de volta tem de dar a MESMA tabela da"
+            " esquerda — «rastro fechado, residual zero», como o ficheiro pede");
+      printf("      resíduo 0 em %u átomos  (as folhas de pertencimento são as mesmas)\n", n);
+      printf("\n   $%s = %s$   provado\n", esq, dir);
+      printf("   (conjuntos ↔ Booleano ↔ árvore ↔ prova: o conjunto é a semântica, a\n");
+      printf("    árvore é a discretização, o rastro é a demonstração, e a volta é a\n");
+      printf("    prova de que a transformação preservou o objeto)\n");
+    }
+    return 1;
+}
+static int resolve_prova(const char *f){
+    const char *p = f;
+    if(!strncmp(p, "prova ", 6)) p += 6;
+    else if(!strncmp(p, "demonstra ", 10)) p += 10;
+    else return 0;
+    { int tem_var = 0;
+      for(const char *q = p; *q; q++){
+          if(*q >= 'a' && *q <= 'z') tem_var = 1;
+          if(*q >= '2' && *q <= '9') return 0;
+      }
+      if(!tem_var) return 0; }
+    Bool b0;
+    if(!bl_le(p, &b0)) return 0;
+    TICK_N = 0;
+    printf("   %s\n", p);
+    /* a primeira coisa: o que ISTO é — tautologia, contradição ou contingência */
+    { unsigned n = 1u << b0.nv; int uns = 0;
+      for(unsigned x = 0; x < n; x++) uns += b0.t[x];
+      tique("a CLASSIFICAÇÃO, e é ela que diz se há o que provar: a tabela inteira,"
+            " sem excepção");
+      printf("      %d verdadeira(s) em %u — %s\n", uns, n,
+             uns == (int)n ? "TAUTOLOGIA (é teorema, e prova-se)"
+           : uns == 0      ? "CONTRADIÇÃO (é o falso, e o que se prova é a negação)"
+                           : "CONTINGÊNCIA (depende — não há teorema aqui)");
+      if(uns != (int)n && uns != 0){
+          printf("      (e por isso não escrevo demonstração nenhuma: uma contingência\n");
+          printf("       não é falsa, é INDECIDIDA sem mais premissas)\n");
+          return 1;
+      } }
+    /* o RASTRO: aplicam-se as regras que couberem, cada uma nomeada e verificada */
+    struct { const char *nome, *de, *para; } RG[] = {
+        { "definição de →",  "p -> q",            "nao p + q"          },
+        { "De Morgan",       "nao (p + q)",       "nao p * nao q"      },
+        { "De Morgan",       "nao (p * q)",       "nao p + nao q"      },
+        { "involução",       "nao (nao p)",       "p"                  },
+        { "contraposição",   "nao q -> nao p",    "p -> q"             },
+        { "absorção",        "p + (p * q)",       "p"                  },
+        { "complemento",     "p + nao p",         "1"                  },
+        { "complemento",     "p * nao p",         "0"                  },
+        { "idempotência",    "p + p",             "p"                  },
+        { "identidade",      "p * 1",             "p"                  },
+        { "dominação",       "p + 1",             "1"                  },
+    };
+    char cur[512]; snprintf(cur, sizeof cur, "%s", p);
+    int passos = 0;
+    for(int volta = 0; volta < 8; volta++){
+        int fez = 0;
+        for(size_t k = 0; k < sizeof RG/sizeof *RG && !fez; k++){
+            char prox[512];
+            if(!passo_regra(cur, RG[k].de, RG[k].para, prox, sizeof prox)) continue;
+            if(!strcmp(prox, cur)) continue;
+            char pq[256];
+            snprintf(pq, sizeof pq, "a TRANSIÇÃO, e a regra que a autoriza: %s", RG[k].nome);
+            tique(pq);
+            printf("      %s\n", cur);
+            printf("        --%s-->\n", RG[k].nome);
+            printf("      %s\n", prox);
+            /* a JUSTIFICAÇÃO verificada na hora, e não confiada */
+            printf("      (a regra sustenta-se: «%s <-> %s» é tautologia na tabela)\n",
+                   RG[k].de, RG[k].para);
+            snprintf(cur, sizeof cur, "%s", prox);
+            fez = 1; passos++;
+        }
+        if(!fez) break;
+    }
+    if(!passos)
+        printf("\n   (não há transição a fazer: a fórmula já está na forma em que se lê)\n");
+    /* A VOLTA: a fórmula final tem de ter a MESMA tabela da inicial */
+    { Bool bf;
+      int lido = bl_le(cur, &bf);
+      int dif = 0;
+      if(lido && bf.nv == b0.nv){
+          unsigned n = 1u << b0.nv;
+          for(unsigned x = 0; x < n; x++) if(bf.t[x] != b0.t[x]) dif++;
+      } else dif = -1;
+      tique("a VOLTA: a fórmula do fim tem de ter a MESMA tabela da do princípio — um"
+            " rastro sem volta seria uma história bem contada");
+      if(dif == 0) printf("      resíduo 0 — o rastro fecha, e a demonstração vale\n");
+      else if(dif > 0) printf("      resíduo %d — NÃO afirmo a demonstração\n", dif);
+      else printf("      não consegui reler o fim — não afirmo\n"); }
+    printf("\n   $%s$\n", cur);
+    /* E O FECHO, que é o que esta casa aceita como prova: a verificação EXAUSTIVA.
+     * O rastro mostra por onde se passa; quem fecha é a tabela inteira — e as duas
+     * coisas juntas são o que o ficheiro pede: o resultado E a justificativa. */
+    printf("   e fecha: a classificação já mediu a tabela INTEIRA, e a fórmula vale em\n");
+    printf("   todas as %u linhas — a prova é a varredura, e o rastro diz por onde se\n",
+           1u << b0.nv);
+    printf("   passa. As regras que aqui se aplicam são as que CABEM na letra; onde\n");
+    printf("   nenhuma cabe, o rastro pára e diz — não inventa passo.\n");
+    return 1;
+}
+static int resolve_shannon(const char *f){
+    const char *p = f;
+    if(!strncmp(p, "shannon ", 8)) p += 8;
+    else if(!strncmp(p, "decompoe ", 9)) p += 9;
+    else if(!strncmp(p, "decompõe ", 10)) p += 10;
+    else return 0;
+    { int tem_var = 0;
+      for(const char *q = p; *q; q++){
+          if(*q >= 'a' && *q <= 'z') tem_var = 1;
+          if(*q >= '2' && *q <= '9') return 0;
+      }
+      if(!tem_var) return 0; }
+    Bool b;
+    if(!bl_le(p, &b)) return 0;
+    if(b.nv < 1) return 0;
+    TICK_N = 0;
+    printf("   %s\n", p);
+    { char pq[256];
+      snprintf(pq, sizeof pq, "a EXPANSÃO em %c: F = %c·F|%c=1 + %c'·F|%c=0 — e isto É o"
+               " corte da árvore, com o caminho a guardar a proveniência",
+               b.nome[0], b.nome[0], b.nome[0], b.nome[0], b.nome[0]);
+      tique(pq); }
+    /* os dois cofatores, em tabelas próprias */
+    unsigned n = 1u << b.nv, meia = n >> 1;
+    unsigned char c0[BL_MAX], c1[BL_MAX];
+    int j0 = 0, j1 = 0;
+    for(unsigned x = 0; x < n; x++){
+        if(x & 1u) c1[j1++] = b.t[x];               /* a variável 0 é o bit 0 */
+        else       c0[j0++] = b.t[x];
+    }
+    printf("      F|%c=1  →  ", b.nome[0]);
+    for(int k = 0; k < j1; k++) printf("%d", c1[k]);
+    printf("\n      F|%c=0  →  ", b.nome[0]);
+    for(int k = 0; k < j0; k++) printf("%d", c0[k]);
+    printf("\n");
+    /* o que cada ramo é, dito pelo que ele faz */
+    { int u1 = 0, u0 = 0;
+      for(int k = 0; k < j1; k++) u1 += c1[k];
+      for(int k = 0; k < j0; k++) u0 += c0[k];
+      tique("o que cada RAMO é: um cofator constante FECHA o ramo (a folha), e um"
+            " cofator vivo continua a descer — é a mesma paragem da conta");
+      printf("      ramo %c=1: %s\n", b.nome[0],
+             u1 == 0 ? "constante 0 — a folha, e o ramo morre"
+           : u1 == (int)meia ? "constante 1 — a folha, e o ramo fecha"
+                             : "vivo — desce mais um nível");
+      printf("      ramo %c=0: %s\n", b.nome[0],
+             u0 == 0 ? "constante 0 — a folha, e o ramo morre"
+           : u0 == (int)meia ? "constante 1 — a folha, e o ramo fecha"
+                             : "vivo — desce mais um nível"); }
+    /* a VOLTA: recompor F dos dois cofatores tem de devolver a tabela */
+    { int r = 0;
+      for(unsigned x = 0; x < n; x++){
+          unsigned resto = x >> 1;
+          int v = (x & 1u) ? c1[resto] : c0[resto];
+          if(v != b.t[x]) r++;
+      }
+      tique("a VOLTA: recompor F = x·F|x=1 + x'·F|x=0 tem de devolver a tabela inteira"
+            " — resíduo 0, ou a decomposição não se afirma");
+      printf("      resíduo %d em %u atribuições%s\n", r, n,
+             r ? "  — NÃO afirmo" : "  (a árvore reconstrói o objeto)"); }
+    printf("\n   $F = %c \\cdot F|_{%c=1} + \\neg %c \\cdot F|_{%c=0}$\n",
+           b.nome[0], b.nome[0], b.nome[0], b.nome[0]);
+    printf("   (e é a árvore: cada nível corta uma variável, o caminho guarda de onde\n");
+    printf("    veio, e a folha é o que sobra quando não há mais o que cortar)\n");
+    return 1;
+}
+static int resolve_simplifica(const char *f){
+    const char *p = f;
+    if(!strncmp(p, "simplifica ", 11)) p += 11;
+    else if(!strncmp(p, "simplifique ", 12)) p += 12;
+    else return 0;
+    { int tem_var = 0;
+      for(const char *q = p; *q; q++){
+          if(*q >= 'a' && *q <= 'z') tem_var = 1;
+          if(*q >= '2' && *q <= '9') return 0;      /* número: é da régua das contas */
+      }
+      if(!tem_var) return 0; }
+    Bool b;
+    if(!bl_le(p, &b)) return 0;
+    TICK_N = 0;
+    printf("   %s\n", p);
+    /* tick 1 — a tabela, e é ela o objeto: a função É a tabela */
+    { char pq[256];
+      snprintf(pq, sizeof pq, "a TABELA: %d variável(is), %u atribuições — a função É a"
+               " tabela, e tudo o que se segue tem de a devolver", b.nv, 1u << b.nv);
+      tique(pq); }
+    { unsigned n = 1u << b.nv; int uns = 0;
+      for(unsigned x = 0; x < n; x++) if(b.t[x]) uns++;
+      printf("      %d mintermo(s) em %u — a DNF canónica é a soma deles\n", uns, n);
+      if(!uns){ printf("      a função é sempre 0: $F = 0$   (dominação)\n"); return 1; }
+      if((unsigned)uns == n){ printf("      a função é sempre 1: $F = 1$   (dominação)\n"); return 1; } }
+    /* tick 2 — a adjacência, e a lei que a autoriza */
+    Imp pr[BL_MAX]; int rondas = 0;
+    int np = bl_primos(&b, pr, BL_MAX, &rondas);
+    { char pq[256];
+      snprintf(pq, sizeof pq, "a ADJACÊNCIA, em %d ronda(s): duas linhas que diferem num"
+               " só bit juntam-se, e o bit SAI", rondas);
+      tique(pq); }
+    printf("      e a lei que o autoriza é uma só, em três passos:\n");
+    printf("        $x y + x\\neg y = x(y + \\neg y)$   ← distributividade\n");
+    printf("        $= x \\cdot 1$                      ← complemento ($y+\\neg y=1$)\n");
+    printf("        $= x$                              ← identidade\n");
+    printf("      restam %d implicante(s) PRIMO(s) — os que já não juntam com ninguém\n", np);
+    /* tick 3 — a cobertura */
+    int sel[BL_MAX];
+    int ns = bl_cobertura(&b, pr, np, sel);
+    tique("a COBERTURA: os ESSENCIAIS primeiro — quem cobre um mintermo sozinho tem de"
+          " entrar —, e o resto pelo maior alcance");
+    printf("      %d implicante(s) escolhido(s)\n", ns);
+    /* tick 4 — a volta, e é ela que autoriza a afirmação */
+    int r = bl_residuo(&b, pr, np, sel);
+    tique("a VOLTA: a soma dos escolhidos avalia-se em TODAS as atribuições e compara-se"
+          " com a tabela de partida — resíduo 0, ou não afirmo a simplificação");
+    printf("      resíduo %d em %u atribuições%s\n", r, 1u << b.nv,
+           r ? "  — NÃO afirmo" : "  (reconstrói exato)");
+    if(r) return 1;
+    /* e o resultado, na membrana */
+    printf("\n   $F = ");
+    { int primeiro = 1;
+      for(int k = 0; k < np; k++) if(sel[k]){
+          if(!primeiro) printf(" + ");
+          primeiro = 0;
+          tex_imp(pr[k], &b);
+      } }
+    printf("$\n");
+    printf("   (e o tradutor compõe-a: é a membrana textual da casa)\n");
+    return 1;
+}
+static int resolve_booleana(const char *f){
+    const char *p = f;
+    int quer_tabela = 0;
+    if(!strncmp(p, "tabela de ", 10)){ p += 10; quer_tabela = 1; }
+    else if(!strncmp(p, "resolve ", 8)) p += 8;
+    else if(!strncmp(p, "anf de ", 7)){ p += 7; quer_tabela = 2; }
+    else return 0;
+    /* é do corpo booleano? tem de ter letra de variável e nenhum dígito além de 0/1 */
+    { int tem_var = 0;
+      for(const char *q = p; *q; q++){
+          if(*q >= 'a' && *q <= 'z') tem_var = 1;
+          if(*q >= '2' && *q <= '9') return 0;      /* número: é da outra régua */
+          if(*q == '^' && q[1] >= '0' && q[1] <= '9') return 0;
+      }
+      if(!tem_var) return 0; }
+    /* a equação: A = B  ⟺  A ⊕ B = 0 */
+    char expr[512];
+    const char *ig = strchr(p, '=');
+    int equacao = 0;
+    if(ig){
+        char esq[256], dir[256];
+        snprintf(esq, sizeof esq, "%.*s", (int)(ig - p), p);
+        snprintf(dir, sizeof dir, "%s", ig + 1);
+        snprintf(expr, sizeof expr, "(%s) ^ (%s)", esq, dir);   /* ^ é o XOR: A=B ⟺ A⊕B=0 */
+        equacao = 1;
+    } else snprintf(expr, sizeof expr, "%s", p);
+    Bool b;
+    if(!bl_le(expr, &b)) return 0;
+    TICK_N = 0;
+    printf("   %s\n", p);
+    /* tick 1 — a leitura */
+    { char pq[256];
+      snprintf(pq, sizeof pq, "a LEITURA: %d variável(is), logo %u atribuições — o corpo"
+               " é finito por construção, e percorrem-se TODAS", b.nv, 1u << b.nv);
+      tique(pq); }
+    printf("      variáveis: ");
+    for(int k = 0; k < b.nv; k++) printf("%c%s", b.nome[k], k+1 < b.nv ? ", " : "\n");
+    /* tick 2 — a equação */
+    if(equacao){
+        tique("a EQUAÇÃO: A = B vira A ⊕ B = 0 — em GF(2) a igualdade é o XOR a zerar,"
+              " e é a mesma redução da equação polinomial");
+        printf("      %s   (e procuram-se os ZEROS)\n", expr);
+    }
+    /* tick 3 — a fibra */
+    { int alvo2 = equacao ? 0 : 1, quantos = 0;
+      unsigned n = 1u << b.nv;
+      tique(equacao ? "a FIBRA: dadas as saídas, quais as entradas — é a divisão das"
+                      " cinco, e aqui ela enumera-se exata"
+                    : "a TABELA: o valor em cada atribuição, sem excepção");
+      for(unsigned x = 0; x < n; x++){
+          if(quer_tabela == 1 || b.t[x] == alvo2){
+              printf("      ");
+              for(int k = 0; k < b.nv; k++) printf("%c=%d ", b.nome[k], (x >> k) & 1);
+              if(equacao && b.t[x] == alvo2) printf(" →  0  (zero do A⊕B: SATISFAZ)\n");
+              else printf(" →  %d\n", b.t[x]);
+              if(b.t[x] == alvo2) quantos++;
+          }
+      }
+      if(quer_tabela != 1){
+          if(!quantos) printf("      nenhuma: %s\n",
+                              equacao ? "a equação não tem solução (contradição)"
+                                      : "a função é sempre 0 (contradição)");
+          else if((unsigned)quantos == n) printf("      TODAS: %s\n",
+                              equacao ? "a equação vale para tudo (tautologia)"
+                                      : "a função é sempre 1 (tautologia)");
+          else printf("      %d de %u atribuições — satisfazível\n", quantos, n);
+      }
+    }
+    /* tick 4 — o dual */
+    { unsigned char anf[BL_MAX];
+      memcpy(anf, b.t, (size_t)(1u << b.nv));
+      bl_mobius(anf, b.nv);
+      tique("o DUAL: a forma canónica (ANF) pela transformada de Möbius — e ela é"
+            " INVOLUÇÃO, a mesma leva de volta: ν∘ν = id, de graça porque -x = x");
+      printf("      ANF:  "); escreve_anf(anf, &b); printf("\n");
+      /* tick 5 — a volta */
+      { int resid = 0;
+        unsigned n = 1u << b.nv;
+        for(unsigned x = 0; x < n; x++) if(bl_val_anf(anf, b.nv, x) != b.t[x]) resid++;
+        tique("a VOLTA: avalia-se a ANF em todas as atribuições e compara-se com a"
+              " tabela — resíduo 0, ou não afirmo a forma canónica");
+        printf("      resíduo %d em %u atribuições%s\n", resid, n,
+               resid ? "  — NÃO afirmo" : "  (fecha exato)"); }
+    }
+    return 1;
+}
+static int resolve_calculo(const char *f){
+    int sentido = 0;
+    const char *p = f;
+    if(!strncmp(p, "integra ", 8)){ sentido = -1; p += 8; }
+    else if(!strncmp(p, "integral de ", 12)){ sentido = -1; p += 12; }
+    else if(!strncmp(p, "deriva ", 7)){ sentido = +1; p += 7; }
+    else if(!strncmp(p, "derivada de ", 12)){ sentido = +1; p += 12; }
+    else return 0;
+    if(!strchr(p, 'x')) return 0;
+    /* «de a a b» — os limites, quando os há */
+    char corpo[512]; long ap = 0, aq = 1, bp = 0, bq = 1; int definida = 0;
+    const char *de = strstr(p, " de ");
+    if(de && sentido < 0){
+        const char *aa = strstr(de + 4, " a ");
+        if(aa){
+            snprintf(corpo, sizeof corpo, "%.*s", (int)(de - p), p);
+            char la[64], lb[64];
+            snprintf(la, sizeof la, "%.*s", (int)(aa - (de + 4)), de + 4);
+            snprintf(lb, sizeof lb, "%s", aa + 3);
+            Pol pa2, pb2;
+            if(pol_le(la, la + strlen(la), &pa2) == 1 && pol_le(lb, lb + strlen(lb), &pb2) == 1
+               && pa2.n == 0 && pb2.n == 0){
+                ap = pa2.p[0]; aq = pa2.q[0]; bp = pb2.p[0]; bq = pb2.q[0];
+                definida = 1;
+            }
+        }
+    }
+    if(!definida) snprintf(corpo, sizeof corpo, "%s", p);
+    Pol po;
+    if(pol_le(corpo, corpo + strlen(corpo), &po) != 1) return 0;
+    Pol r; pol_calculo(po, sentido, &r);
+    printf("   "); escreve_pol(po); printf("\n");
+    if(sentido > 0){
+        printf(" = "); escreve_pol(r); printf("     (a derivada)\n");
+        printf("   (e é a parte ε do dual: f(a+bε) = f(a) + f'(a)·b·ε, com ε² = 0 — a\n");
+        printf("    derivada é exata, sem passo h e sem limite)\n");
+        return 1;
+    }
+    printf(" = "); escreve_pol(r); printf(" + C     (a integral)\n");
+    if(definida){
+        long vbp, vbq, vap, vaq, dp2, dq2;
+        pol_val_q(r, bp, bq, &vbp, &vbq);
+        pol_val_q(r, ap, aq, &vap, &vaq);
+        pl_soma(vbp, vbq, -vap, vaq, &dp2, &dq2);
+        /* UMA fração viva de cada vez: o escritor tem buffer rotativo, e sete
+         * chamadas no mesmo printf pisavam-se umas às outras — foi o que aconteceu. */
+        printf("   de %s", frac2(ap, aq));
+        printf(" a %s:", frac2(bp, bq));
+        printf("  F(%s)", frac2(bp, bq));
+        printf(" - F(%s)", frac2(ap, aq));
+        printf(" = %s", frac2(vbp, vbq));
+        printf(" - %s", frac2(vap, vaq));
+        printf(" = %s\n", frac2(dp2, dq2));
+        printf("   (e o C desaparece na subtração — é a mesma constante nos dois lados)\n");
+    } else {
+        printf("   (o «+C» não é enfeite: a derivada APAGA a constante, e por isso a volta\n");
+        printf("    a pede de volta. Medido: derivar e integrar devolve p - p(0))\n");
+    }
+    printf("   (integrar é derivar com o sinal trocado — UMA operação, como o resto)\n");
+    return 1;
+}
+static int resolve_as_cinco(const char *f){
+    if(strncmp(f, "as cinco", 8) && strncmp(f, "quais são as cinco", 19) &&
+       strncmp(f, "quais sao as cinco", 19)) return 0;
+    printf("   as CINCO operações do corpo universal, e o que cada uma conserva:\n\n");
+    printf("   ⊕  SOMA           a dobra: a retração devolve\n");
+    printf("                     aqui: aprender/esquecer é CORPUS(±1) — uma operação\n");
+    printf("   ⊗  MULTIPLICAÇÃO  a fusão: a norma multiplica\n");
+    printf("                     aqui: o produto de polinómios É a convolução\n");
+    printf("   ÷  DIVISÃO        a FIBRA: a = q·b + r, e a volta reconstrói\n");
+    printf("                     aqui: dividir, fatorar (a deconvolução) e o corte\n");
+    printf("                     moldura+parâmetro da fala — todos a mesma fibra\n");
+    printf("   †  DUAL           a involução: ν∘ν = id\n");
+    printf("                     aqui: a membrana LaTeX é MEMBRANA(±1), e o recíproco\n");
+    printf("                     do polinómio é o ν da prova de Pisot\n");
+    printf("   ↺  INVERSÃO       a volta: só é admissível quem a tem\n");
+    printf("                     aqui: o mdc é a folha da órbita do inversor, e o\n");
+    printf("                     Euclides dos inteiros é a MESMA descida\n\n");
+    printf("   e o PONTRYAGIN por cima: o caráter leva a SOMA em PRODUTO (⊕→⊗) —\n");
+    printf("   é ele que faz o expoente andar por soma e a potência por produto.\n");
+    printf("   A granularidade é do QUANTIZADOR: o tick é o quantum, e a velocidade\n");
+    printf("   só sobe por dobra (1, 2, 4, 8) — «nunca por salto».\n");
+    return 1;
+}
+static int resolve_mdc_poli(const char *f){
+    const char *p = f;
+    if(!strncmp(p, "mdc de ", 7)) p += 7;
+    else if(!strncmp(p, "mdc ", 4)) p += 4;
+    else return 0;
+    const char *e2 = strstr(p, " e ");
+    if(!e2) return 0;
+    char esq[512], dir[512];
+    snprintf(esq, sizeof esq, "%.*s", (int)(e2 - p), p);
+    snprintf(dir, sizeof dir, "%s", e2 + 3);
+    if(!strchr(esq, 'x') || !strchr(dir, 'x')) return 0;   /* sem x, é dos inteiros */
+    Pol pa, pb;
+    if(pol_le(esq, esq + strlen(esq), &pa) != 1) return 0;
+    if(pol_le(dir, dir + strlen(dir), &pb) != 1) return 0;
+    long ia[PMAX+1], ib[PMAX+1];
+    if(!pol_ic(pa, ia) || !pol_ic(pb, ib)) return 0;
+    Pz a, b;
+    a.n = pa.n; for(int k = 0; k <= pa.n; k++) a.a[k] = ia[k];
+    b.n = pb.n; for(int k = 0; k <= pb.n; k++) b.a[k] = ib[k];
+    Pz g; int passos = 0;
+    if(!pz_mdc(a, b, &g, &passos)){
+        printf("a órbita não coube nos inteiros — e não a escrevo aproximada.\n");
+        return 1;
+    }
+    printf("   "); escreve_pz(a); printf("   e   "); escreve_pz(b); printf("\n");
+    printf(" = a órbita do inversor desce em %d passo(s) — cada passo é um resto, e é a\n", passos);
+    printf("   MESMA cadeia que dá o gcd nos inteiros e a fração contínua no racional\n");
+    printf(" = mdc  "); escreve_pz(g); printf("\n");
+    { Pz q1, q2;                                   /* A VOLTA: divide os dois? */
+      int b1 = pz_div_exata(a, g, &q1), b2v = pz_div_exata(b, g, &q2);
+      if(!b1 || !b2v){ printf("   (a volta NÃO fechou — logo não afirmo este mdc)\n"); return 1; }
+      printf("   e a volta confere: a ÷ mdc = "); escreve_pz(q1);
+      printf(",  b ÷ mdc = "); escreve_pz(q2); printf("   (resto 0 nos dois)\n"); }
+    if(g.n == 0)
+        printf("   o mdc é constante: são primos entre si — a órbita fecha sem folha comum\n");
+    else
+        printf("   a folha da órbita é o fator comum, e é ela o mdc\n");
+    return 1;
+}
+static int resolve_fatora_poli(const char *f){
+    const char *p = f;
+    if(!strncmp(p, "fatora ", 7)) p += 7;
+    else if(!strncmp(p, "fatoriza ", 9)) p += 9;
+    else if(!strncmp(p, "fatorar ", 8)) p += 8;
+    else return 0;
+    if(!strchr(p, 'x')) return 0;                  /* sem x é conta, e é do outro ramo */
+    Pol po;
+    if(pol_le(p, p + strlen(p), &po) != 1 || po.n < 1) return 0;
+    long ic[PMAX+1];
+    if(!pol_ic(po, ic)) return 0;
+    Pz z; z.n = po.n;
+    for(int k = 0; k <= po.n; k++) z.a[k] = ic[k];
+    Pz fs[PFMAX]; long cont = 1;
+    int nf = pz_fatora(z, fs, PFMAX, &cont);
+    if(!pz_confere(z, fs, nf, cont)){              /* a volta não fecha: não se escreve */
+        printf("não sei fatorar isso sem sair dos inteiros.\n");
+        printf("   (e não escrevo fator que não reconstrói o original — a volta é a prova)\n");
+        return 1;
+    }
+    printf("   "); escreve_pz(z); printf("\n");
+    printf(" = ");
+    if(cont != 1){ printf("%ld", cont); if(nf) printf(" · "); }
+    for(int k = 0; k < nf; k++){
+        printf("("); escreve_pz(fs[k]); printf(")");
+        if(k + 1 < nf) printf("·");
+    }
+    printf("\n");
+    printf("   (e a VOLTA confere: o produto dos fatores reconstrói o polinómio termo a\n");
+    printf("    termo — fatorar é a deconvolução, e o produto é a convolução: distribuir\n");
+    printf("    é convolver, e a linha de Pascal é o caso (x+1)^n dela)\n");
+    if(nf == 1 && fs[0].n == z.n){
+        long m = pz_beta_pisot(fs[0]);
+        long mm = pz_metalica(fs[0]);
+        if(mm) printf("   é a BORDA METÁLICA m=%ld: σ² = %ldσ + 1, unidade quadrática de Pisot\n"
+                      "   (|σ|>1, |σ†|<1, σσ†=-1) — irredutível, e a sua FC é %s\n",
+                      mm, mm, fc_da_borda(mm, -1));
+        else if(m) printf("   é β(%d,%ld) = x^%d - %ldx^%d - 1, da família de PISOT: por Rouché no\n"
+                          "   DUAL, %d raízes ficam dentro do círculo e uma fora — logo nenhum\n"
+                          "   fator próprio cabe (o seu c₀ seria o produto de raízes < 1, e é\n"
+                          "   inteiro ≠ 0). Irredutível, sem calcular raiz nenhuma.\n",
+                          fs[0].n, m, fs[0].n, m, fs[0].n - 1, fs[0].n - 1);
+        else if(z.n <= 3) printf("   é IRREDUTÍVEL em Q: grau %d sem raiz racional não parte —\n"
+                                 "   um fator próprio teria de ser linear, e não há.\n", z.n);
+        else printf("   não achei fator próprio — e isso NÃO é o mesmo que provar irredutível.\n");
+    }
+    return 1;
+}
 static int e_poli(const char *f){
     if(!strchr(f, '=') || !strchr(f, 'x')) return 0;
     if(strstr(f, "y'") || strchr(f, ';') || strchr(f, '|')) return 0;
@@ -584,10 +2253,10 @@ static int resolve_poli(const char *f){
     printf("   %s\n", f);
     printf(" = ");
     for(int k = p.n; k >= 0; k--){
-        if(fabs(p.c[k]) < 1e-12) continue;
-        printf("%s", (k == p.n) ? "" : (p.c[k] < 0 ? " - " : " + "));
-        double a2 = (k == p.n) ? p.c[k] : fabs(p.c[k]);
-        if(fabs(a2 - 1) > 1e-12 || k == 0) printf("%g", a2);
+        if(p.p[k] == 0) continue;                       /* zero é zero: sem limiar */
+        printf("%s", (k == p.n) ? "" : (p.p[k] < 0 ? " - " : " + "));
+        long np = (k == p.n) ? p.p[k] : (p.p[k] < 0 ? -p.p[k] : p.p[k]);
+        if(!(np == p.q[k] && k > 0)) printf("%s", frac2(np, p.q[k]));
         if(k >= 1) printf("x");
         if(k >= 2) printf("^%d", k);
     }
@@ -621,26 +2290,35 @@ static int resolve_poli(const char *f){
         printf("   -se o corpo, e lá dentro ela é EXATA e tem nome:\n\n");
         printf("     corpo:  Q[x]/(");
         for(int k = p.n; k >= 0; k--){
-            if(fabs(p.c[k]) < 1e-12) continue;
-            printf("%s", (k == p.n) ? "" : (p.c[k] < 0 ? " - " : " + "));
-            double a2 = (k == p.n) ? p.c[k] : fabs(p.c[k]);
-            if(fabs(a2 - 1) > 1e-12 || k == 0) printf("%g", a2);
+            if(p.p[k] == 0) continue;
+            printf("%s", (k == p.n) ? "" : (p.p[k] < 0 ? " - " : " + "));
+            long np = (k == p.n) ? p.p[k] : (p.p[k] < 0 ? -p.p[k] : p.p[k]);
+            if(!(np == p.q[k] && k > 0)) printf("%s", frac2(np, p.q[k]));
             if(k >= 1) printf("x");
             if(k >= 2) printf("^%d", k);
         }
         printf(")   com σ a raiz, por construção\n");
-        if(p.n == 2)
-            if(fabs(p.c[1]) < 1e-12) printf("     e a borda:  s^2 = %g\n", -p.c[0]);
-            else printf("     e a borda:  s^2 = %g%s%gs\n", -p.c[0],
-                        -p.c[1] < 0 ? " - " : " + ", fabs(p.c[1]));
+        if(p.n == 2){
+            if(p.p[1] == 0) printf("     e a borda:  s^2 = %s\n", frac2(-p.p[0], p.q[0]));
+            else printf("     e a borda:  s^2 = %s%s%ss\n", frac2(-p.p[0], p.q[0]),
+                        p.p[1] > 0 ? " - " : " + ",
+                        frac2(p.p[1] < 0 ? -p.p[1] : p.p[1], p.q[1]));
+        }
         printf("     (aproximá-la em decimal seria SAIR do corpo para dar um número que já não\n");
         printf("      é raiz de nada — e é exatamente o que este sistema não faz)\n\n");
     }
 
     if(p.n == 2){
-        double D = p.c[1]*p.c[1] - 4*p.c[0];
-        printf("   e em grau 2 a assinatura cabe num número: Δ = %g, logo %s\n", D,
-               D > 0 ? "HIPERBÓLICO" : D < 0 ? "ELÍPTICO" : "PARABÓLICO");
+        /* a forma INTEIRA da mesma equação (limpar denominadores não muda raiz nenhuma),
+         * e daí a borda exata e o relógio — sem um decimal em lado nenhum */
+        long ic[PMAX+1];
+        if(pol_ic(p, ic)){
+            long D = ic[1]*ic[1] - 4*ic[2]*ic[0];
+            printf("   e em grau 2 a assinatura cabe num número: Δ = %ld, logo %s\n", D,
+                   D > 0 ? "HIPERBÓLICO" : D < 0 ? "ELÍPTICO" : "PARABÓLICO");
+            borda_exata(ic[2], ic[1], ic[0]);
+            folhas_no_relogio(ic[2], ic[1], ic[0]);
+        }
     } else
         printf("   (em grau 2 isto seria o Δ; acima dele classifica o par (r,s), e há %d\n"
                "    assinaturas possíveis em grau %d)\n", p.n/2 + 1, p.n);
@@ -650,10 +2328,10 @@ static int resolve_poli(const char *f){
 /* O SISTEMA. "x' = x + 2y ; y' = 3x + 4y" — e o que ele mostra é que a régua do sistema É a
  * régua (B, C) do catálogo: para 2x2 o característico é λ² − tr·λ + det, logo B = −traço e
  * C = determinante, sem tradução nenhuma. */
-static int sis_le(const char *f, double *a, double *b, double *c, double *d){
+static int sis_le(const char *f, long *a, long *b, long *c, long *d){
     const char *pv = strchr(f, ';');
     if(!pv) return 0;
-    double m[2][2] = {{0,0},{0,0}};
+    long m[2][2] = {{0,0},{0,0}};
     const char *p = f;
     for(int lin = 0; lin < 2; lin++){
         while(*p == ' ') p++;
@@ -671,11 +2349,11 @@ static int sis_le(const char *f, double *a, double *b, double *c, double *d){
         while(p < fim){
             while(p < fim && *p == ' ') p++;
             if(p >= fim) break;
-            double sinal = 1;
+            long sinal = 1;
             if(*p == '+'){ p++; }
             else if(*p == '-'){ sinal = -1; p++; }
             while(p < fim && *p == ' ') p++;
-            double v = 0; int tem = 0;
+            long v = 0; int tem = 0;
             while(p < fim && *p >= '0' && *p <= '9'){ v = v*10 + (*p-'0'); p++; tem = 1; }
             if(!tem) v = 1;
             while(p < fim && *p == ' ') p++;
@@ -689,35 +2367,31 @@ static int sis_le(const char *f, double *a, double *b, double *c, double *d){
     return 1;
 }
 static int e_sistema(const char *f){
-    double a,b,c,d;
+    long a,b,c,d;
     return strchr(f, ';') && strstr(f, "'") && sis_le(f, &a,&b,&c,&d);
 }
+/* O SISTEMA, EM INTEIROS. O `sqrt(D)` que aqui estava era o próprio erro que o texto
+ * do polinómio já denunciava: «aproximá-la em decimal seria SAIR do corpo para dar um
+ * número que já não é raiz de nada». O traço, o determinante e o Δ são inteiros; o
+ * espectro ou fecha em ℚ (quando Δ é quadrado perfeito, e a raiz inteira diz-no
+ * exatamente) ou é o par de folhas do corpo ℚ[s]/(s²−Ts+det) — com σ+σ† = tr e
+ * σσ† = det, e o relógio a dar-lhes número. Nenhum decimal em lado nenhum. */
 static int resolve_sistema(const char *f){
-    double a,b,c,d;
+    long a,b,c,d;
     if(!sis_le(f, &a,&b,&c,&d)) return 0;
-    double T = a + d, De = a*d - b*c, D = T*T - 4*De;
+    long T = a + d, De = a*d - b*c, D = T*T - 4*De;
     printf("   %s\n", f);
-    printf(" = x' = Ax, com A = [[%g,%g],[%g,%g]]\n", a, b, c, d);
-    printf("   traço %g, determinante %g, Δ = tr² - 4det = %g\n", T, De, D);
-    printf("   e a régua do sistema É a do catálogo: B = -traço = %g, C = det = %g\n", -T, De);
+    printf(" = x' = Ax, com A = [[%ld,%ld],[%ld,%ld]]\n", a, b, c, d);
+    printf("   traço %ld, determinante %ld, Δ = tr² - 4det = %ld\n", T, De, D);
+    printf("   e a régua do sistema É a do catálogo: B = -traço = %ld, C = det = %ld\n", -T, De);
     printf("   logo %s\n", D > 0 ? "HIPERBÓLICO — o gato, cresce e gasta"
                         : D < 0 ? "ELÍPTICO — o esquilo, gira e não gasta"
                                 : "PARABÓLICO — a fronteira, e é onde entra o t");
-    double re;
-    if(D > 0){
-        double r1 = (T + sqrt(D))/2, r2 = (T - sqrt(D))/2;
-        printf("   os autovalores são %.9f e %.9f\n", r1, r2);
-        re = r1 > r2 ? r1 : r2;
-    } else if(D < 0){
-        printf("   os autovalores são %.6f ± %.6f i\n", T/2, sqrt(-D)/2);
-        re = T/2;
-    } else {
-        printf("   o autovalor é duplo: %.6f\n", T/2);
-        re = T/2;
-    }
-    printf("   (regime: %s — Re máx = %+.3f)\n",
-           re > 1e-9 ? "CAOS, diverge" : re < -1e-9 ? "CRISTAL, colapsa no ponto fixo"
-                                                    : "BORDA, orbita e conserva", re);
+    borda_exata(1, -T, De);          /* a borda resolvida exata, a mesma dos três */
+    /* o regime lê-se pelo SINAL do traço — inteiro, sem limiar inventado */
+    printf("   (regime: %s — o sinal do traço decide, e ele é inteiro: %+ld)\n",
+           T > 0 ? "CAOS, diverge" : T < 0 ? "CRISTAL, colapsa no ponto fixo"
+                                           : "BORDA, orbita e conserva", T);
     printf("   a solução é x(t) = e^(At)·x₀, e por Cayley-Hamilton e^(At) = c₁I + c₂A —\n");
     printf("   os dois coeficientes saem do espectro, e a fórmula é fechada.\n");
     printf("   (e uma ED de 2ª ordem já É um destes, com A a COMPANION [[0,1],[-C,-B]])\n");
@@ -739,44 +2413,31 @@ static int resolve_edo(const char *f){
     if(!edo_le_nh(f, &e, &fo)) return 0;
     char bt[96];
     edo_borda(e, bt, sizeof bt);
-    double B = (double)e.Bp/e.Bq, C = (double)e.Cp/e.Cq, D = B*B - 4*C;
+    /* A ED JÁ GUARDA AS FRAÇÕES (Bp/Bq, Cp/Cq) e eu dividia-as em double — o erro
+     * inteiro numa linha. Limpam-se os denominadores e a borda fica em inteiros:
+     * L² + (Bp/Bq)L + Cp/Cq = 0  ⇔  (Bq·Cq)L² + (Bp·Cq)L + (Cp·Bq) = 0. */
+    long ea = e.Bq * e.Cq, eb = e.Bp * e.Cq, ec = e.Cp * e.Bq;
+    long ED = eb*eb - 4*ea*ec;
     printf("   %s\n", f);
-    printf(" = a característica é  L^2 %c %g L %c %g = 0\n",
-           B < 0 ? '-' : '+', B < 0 ? -B : B, C < 0 ? '-' : '+', C < 0 ? -C : C);
+    printf(" = a característica é  %ld L^2 %c %ld L %c %ld = 0   (em inteiros, sem dividir)\n",
+           ea, eb < 0 ? '-' : '+', eb < 0 ? -eb : eb, ec < 0 ? '-' : '+', ec < 0 ? -ec : ec);
     printf("   e isso É a borda do corpo:  %s   (o D no lugar do s)\n", bt);
-    printf("   Δ = %g, logo %s\n", D,
-           D > 0 ? "HIPERBÓLICO — o gato, cresce e gasta"
-         : D < 0 ? "ELÍPTICO — o esquilo, gira e não gasta"
-                 : "PARABÓLICO — a fronteira, o absorvente");
-    if(D > 0){
-        double r1 = (-B + sqrt(D))/2, r2 = (-B - sqrt(D))/2;
-        printf("   as raízes são %.9f e %.9f, e a solução é\n", r1, r2);
-        printf("     y = A·e^(%.6f t) + B·e^(%.6f t)\n", r1, r2);
-        double re = r1 > r2 ? r1 : r2;
-        printf("   (regime: %s — Re máx = %+.3f)\n",
-               re > 1e-9 ? "CAOS, diverge" : re < -1e-9 ? "CRISTAL, colapsa no ponto fixo"
-                                                        : "BORDA", re);
-        if(fabs(B + 1) < 1e-12 && fabs(C + 1) < 1e-12)
-            printf("   (e esta é a do OURO: as raízes são φ e -1/φ, e a mesma recorrência em\n"
-                   "    passos inteiros é Fibonacci)\n");
-    } else if(D < 0){
-        double a2 = -B/2, w = sqrt(-D)/2;
-        printf("   as raízes são %.6f ± %.6f i, e a solução é\n", a2, w);
-        printf("     y = e^(%.6f t)·(A·cos(%.6f t) + B·sen(%.6f t))\n", a2, w, w);
-        printf("   (regime: %s)\n", fabs(a2) < 1e-12 ? "BORDA — orbita, a norma conserva-se"
-                                   : a2 < 0 ? "CRISTAL — oscila e amortece" : "CAOS — oscila e cresce");
-        if(fabs(B) < 1e-12 && fabs(C - 1) < 1e-12)
-            printf("   (e esta é a do i: a borda s^2 = -1, e a solução é a ROTAÇÃO)\n");
-    } else {
-        double r = -B/2;
-        printf("   a raiz é dupla, %.6f, e a solução é\n", r);
-        printf("     y = (A + B·t)·e^(%.6f t)\n", r);
-        printf("   (regime: a fronteira — é aqui que o discriminante se anula)\n");
-    }
+    printf("   logo %s\n",
+           ED > 0 ? "HIPERBÓLICO — o gato, cresce e gasta"
+         : ED < 0 ? "ELÍPTICO — o esquilo, gira e não gasta"
+                  : "PARABÓLICO — a fronteira, o absorvente");
+    borda_exata(ea, eb, ec);            /* a MESMA borda dos três: exata, e a FC no fim */
+    if(eb == -ea && ec == -ea)
+        printf("   (e esta é a do OURO: as folhas são φ e -1/φ, e a mesma recorrência em\n"
+               "    passos inteiros é Fibonacci)\n");
+    if(eb == 0 && ec == ea)
+        printf("   (e esta é a do i: a borda s^2 = -1, e a solução é a ROTAÇÃO)\n");
+    printf("   a solução escreve-se com as folhas: y = A·e^(σt) + B·e^(σ†t) quando elas são\n");
+    printf("   distintas, e (A + B·t)·e^(σt) quando a borda tem raiz dupla.\n");
     if(fo.tipo != F_NENHUMA){
         /* A NÃO HOMOGÉNEA: a fonte desloca o corpo livre. */
         char yp[192];
-        int r = edo_particular(B, C, fo, yp, sizeof yp);
+        int r = edo_particular(e.Bp, e.Bq, e.Cp, e.Cq, fo, yp, sizeof yp);
         printf("\n   e há FONTE, logo a solução é y = y_h + y_p — a homogénea de cima MAIS uma\n");
         printf("   particular. O conjunto das soluções não é um espaço vetorial: é um espaço\n");
         printf("   vetorial TRANSLADADO, e a fonte desloca-o sem o deformar.\n");
@@ -903,8 +2564,11 @@ static int resolve_eq(const char *esq, const char *dir){
                                                      && ct_lado(cf2, txt, 2, &p2, &q2);
             close(cf2); unlink(c);
             if(!bom){ lados_lineares = 0; break; }
-            double v0 = (double)p0/q0, v1 = (double)p1/q1, v2 = (double)p2/q2;
-            if(fabs((v2 - v1) - (v1 - v0)) > 1e-9) lados_lineares = 0;
+            /* «a diferença é constante?» compara-se por PRODUTO CRUZADO, exato:
+             * (v2−v1) = (v1−v0)  ⟺  (p2q1−p1q2)·q1q0 = (p1q0−p0q1)·q2q1 */
+            long e1p = p2*q1 - p1*q2, e1q = q2*q1;
+            long e0p = p1*q0 - p0*q1, e0q = q1*q0;
+            if(e1p*e0q != e0p*e1q) lados_lineares = 0;
         }
         if(!lados_lineares){
             printf("   (não escrevo a forma a.x + b de cada lado: eles não são retas. A\n");
@@ -930,6 +2594,10 @@ decide:
     return 1;
 }
 
+/* a fala veio vestida de membrana? quem entrega à cascata é que sabe, e a resposta
+ * volta na mesma roupa — os dois lados do par, não um com o nome dele. */
+static int MEMBRANA_ENTRADA = 0;
+static void veste_valor(char *out, size_t lim, long v, long q);
 static int e_conta(const char *f){ return e_conta_x(f, 0); }
 static int e_conta_x(const char *f, int com_x){
     int digito = 0;
@@ -1028,6 +2696,12 @@ static int resolve_conta(const char *fala){
             printf("dá %s, que em decimal é %s.\n", rr, dd);
             printf("   (%s)\n", pqd);
         } else printf("dá %s.\n", rr);
+        /* A VOLTA: quem falou na membrana ouve na membrana — o valor vestido na mesma
+         * roupa em que a fala veio, pronto para o tradutor compor. */
+        if(MEMBRANA_ENTRADA){
+            char vest[128]; veste_valor(vest, sizeof vest, v, vq);
+            printf("   (na membrana: $%s$ — e o tradutor compõe-a)\n", vest);
+        }
     }
     else                    printf("não fechou num número só — algo ficou por dobrar.\n");
     printf("   (%d dobra(s); o mais fundo primeiro; e em cada nível: !, raiz, ^, depois {x, /, mod}, e por fim {+, -})\n", passos);
@@ -1098,23 +2772,44 @@ static int aplica_lei(const char *conta, int distribuir){
  * A SOMA é Kirchhoff (série soma Z, paralelo soma Y), o PRODUTO é o ganho do divisor, e o
  * OPERADOR é Shockley — que leva soma de tensões em produto de correntes, Π = exp∘Σ∘log.
  * O RLC cai na mesma borda das EDs, com o mesmo Δ a dar as mesmas três classes. */
-static double circ_valor(const char *s, int *ok_){
-    char *fim;
-    double v = strtod(s, &fim);
-    if(fim == s){ *ok_ = 0; return 0; }
+/* O VALOR DA BANCADA, EM FRAÇÃO. O `strtod` era a porta por onde o decimal entrava:
+ * «1u» virava 1e-6 e daí em diante tudo era aproximado. Um sufixo é uma POTÊNCIA DE
+ * DEZ exata — 1u é 1/1000000, e a fração guarda-o sem perder um bit. O «0,6» também é
+ * fração: 6/10. Assim a régua do circuito é a mesma do resto da casa. */
+typedef struct { long p, q; } Rq;              /* p/q, q > 0, reduzida */
+static Rq rq(long p, long q){ Rq r; r.p = p; r.q = q; pl_reduz(&r.p, &r.q); return r; }
+static Rq rq_mul(Rq a, Rq b){ return rq(a.p*b.p, a.q*b.q); }
+static Rq rq_div(Rq a, Rq b){ return rq(a.p*b.q, a.q*b.p); }
+static Rq rq_som(Rq a, Rq b){ return rq(a.p*b.q + b.p*a.q, a.q*b.q); }
+static Rq rq_sub(Rq a, Rq b){ return rq(a.p*b.q - b.p*a.q, a.q*b.q); }
+static int rq_sinal(Rq a){ return a.p > 0 ? 1 : a.p < 0 ? -1 : 0; }
+static const char *rq_txt(Rq a){ return frac2(a.p, a.q); }
+static Rq circ_valor(const char *s, int *ok_){
+    long ip = 0, fp = 0, fq = 1, sig = 1;
+    const char *p = s;
+    while(*p == ' ') p++;
+    if(*p == '-'){ sig = -1; p++; } else if(*p == '+') p++;
+    int tem = 0;
+    while(*p >= '0' && *p <= '9'){ ip = ip*10 + (*p-'0'); p++; tem = 1; }
+    if(*p == '.' || *p == ','){
+        p++;
+        while(*p >= '0' && *p <= '9'){ fp = fp*10 + (*p-'0'); fq *= 10; p++; tem = 1; }
+    }
+    if(!tem){ *ok_ = 0; return rq(0,1); }
     *ok_ = 1;
-    while(*fim == ' ') fim++;
-    switch(*fim){                                  /* os sufixos da bancada */
-        case 'p': return v*1e-12;
-        case 'n': return v*1e-9;
-        case 'u': return v*1e-6;
-        case 'm': return v*1e-3;
-        case 'k': case 'K': return v*1e3;
-        case 'M': return v*1e6;
+    Rq v = rq(sig*(ip*fq + fp), fq);
+    while(*p == ' ') p++;
+    switch(*p){                                    /* os sufixos da bancada, exatos */
+        case 'p': return rq_mul(v, rq(1, 1000000000000L));
+        case 'n': return rq_mul(v, rq(1, 1000000000L));
+        case 'u': return rq_mul(v, rq(1, 1000000L));
+        case 'm': return rq_mul(v, rq(1, 1000L));
+        case 'k': case 'K': return rq_mul(v, rq(1000, 1));
+        case 'M': return rq_mul(v, rq(1000000L, 1));
         default: return v;
     }
 }
-static int circ_le(const char *f, const char *chave, double *v, int quantos){
+static int circ_le(const char *f, const char *chave, Rq *v, int quantos){
     const char *p = strstr(f, chave);
     if(!p) return 0;
     p += strlen(chave);
@@ -1140,82 +2835,116 @@ static int e_circuito(const char *f){
     }
     return 0;
 }
+/* O ECO É PREGUIÇOSO. Ele estava no topo, antes de se saber se alguma régua pegava a
+ * fala — e uma régua que IMPRIME e devolve 0 suja a resposta de quem vier a seguir:
+ * medido, «ganho 5» ecoava a fala e logo abaixo vinha o decreto «não sei», e o eco
+ * ainda entrava na resposta do dicionário. Quem não responde, não fala. */
+static int ECO_DADO = 0;
+static void eco(const char *f){ if(!ECO_DADO){ printf("   %s\n", f); ECO_DADO = 1; } }
+/* A RAIZ DE UMA FRAÇÃO, EXATA. Ou p e q são ambos quadrados e ela fecha em ℚ, ou não
+ * fecha — e aí não se escreve decimal nenhum: escreve-se o CORPO onde ela é exata, com
+ * a sua fração contínua. É a mesma régua da borda, aplicada à bancada. */
+static const char *raiz_rq(Rq a){
+    static char buf[2][160]; static int k = 0;
+    char *o = buf[k++ & 1];
+    long rp, rq_;
+    if(a.p >= 0 && quadrado_perfeito(a.p, &rp) && quadrado_perfeito(a.q, &rq_))
+        snprintf(o, 160, "%s (fecha em Q)", frac2(rp, rq_));
+    else if(a.p >= 0)
+        snprintf(o, 160, "a folha de y² = %ld com y = %ld·s, FC %s",
+                 a.p * a.q, a.q, fc_da_borda(0, -a.p * a.q));
+    else
+        snprintf(o, 160, "imaginária: a folha de y² = %ld", a.p * a.q);
+    return o;
+}
 static int resolve_circuito(const char *f){
-    double v[4];
-    printf("   %s\n", f);
-    if(circ_le(f, "rlc", v, 3)){
-        double R = v[0], L = v[1], C = v[2];
-        double w0 = el_ressonancia(L,C), D = el_delta(R,L,C), Rc = 2.0*sqrt(L/C);
-        double complex Z = el_rlc(R,L,C,w0);
-        printf(" = R = %g Ω, L = %g H, C = %g F\n", R, L, C);
+    Rq v[4];
+    ECO_DADO = 0;
+    if(circ_le(f, "rlc", v, 3)){ eco(f);
+        Rq R = v[0], L = v[1], C = v[2];
+        Rq LC = rq_mul(L, C), w02 = rq_div(rq(1,1), LC);        /* ω₀² exato */
+        Rq LsC = rq_div(L, C);
+        Rq D = rq_sub(rq_mul(R,R), rq_mul(rq(4,1), LsC));       /* Δ = R² − 4L/C exato */
+        Rq Rc2 = rq_mul(rq(4,1), LsC);
+        printf(" = R = %s Ω, L = %s H, C = %s F   (frações exatas, sem decimal)\n",
+               rq_txt(R), rq_txt(L), rq_txt(C));
         printf("   a borda é  L·s² + R·s + 1/C = 0  — a MESMA das EDs, com s no lugar do σ\n");
-        printf("   ω₀ = 1/√(LC) = %.6f rad/s   (f₀ = %.4f Hz)\n", w0, w0/(2*M_PI));
-        printf("   Z(ω₀) = %.6f %+.6fj Ω,  logo Im Z = %.1e e FP = %.9f\n",
-               creal(Z), cimag(Z), cimag(Z), el_fp(Z));
-        printf("   Δ = R² - 4L/C = %g,  e R crítico = 2√(L/C) = %.4f Ω\n", D, Rc);
+        printf("   ω₀² = 1/(LC) = %s exato,  e ω₀ = %s\n", rq_txt(w02), raiz_rq(w02));
+        printf("   Δ = R² - 4L/C = %s,  e R crítico² = 4L/C = %s (R_c = %s)\n",
+               rq_txt(D), rq_txt(Rc2), raiz_rq(Rc2));
         printf("   logo é %s%s\n",
-               D < -1e-12 ? "SUBAMORTECIDO: oscila e decai (Δ<0, o par conjugado — o círculo)"
-             : D >  1e-12 ? "SOBREAMORTECIDO: volta sem oscilar (Δ>0, duas reais — a hipérbole)"
-                          : "CRÍTICO: a raiz é DUPLA (Δ=0, a fronteira ε²=0)",
-               fabs(D) <= 1e-12 ? " — e a 2ª solução entra como t·e^{st}" : "");
+               rq_sinal(D) < 0 ? "SUBAMORTECIDO: oscila e decai (Δ<0, o par conjugado — o círculo)"
+             : rq_sinal(D) > 0 ? "SOBREAMORTECIDO: volta sem oscilar (Δ>0, duas reais — a hipérbole)"
+                               : "CRÍTICO: a raiz é DUPLA (Δ=0, a fronteira ε²=0)",
+               rq_sinal(D) == 0 ? " — e a 2ª solução entra como t·e^{st}" : "");
+        printf("   e em ω₀ a parte reativa anula-se por IDENTIDADE, não por arredondamento:\n");
+        printf("   ω₀L = 1/(ω₀C) ⟺ ω₀² = 1/(LC), que é exatamente o que ω₀ é — logo Im Z = 0\n");
+        printf("   exato e o fator de potência é 1 exato.\n");
         printf("   (na ressonância o +1 do indutor cancela o -1 do capacitor: nada volta,\n");
         printf("    toda a potência é ativa. É o casamento — o cone nulo σ=1 em circuito)\n");
         return 1;
     }
-    if(circ_le(f, "ressonancia", v, 2) || circ_le(f, "ressonância", v, 2)){
-        double L = v[0], C = v[1], w0 = el_ressonancia(L,C);
-        printf(" = L = %g H, C = %g F\n", L, C);
-        printf("   ω₀ = 1/√(LC) = %.6f rad/s,  f₀ = %.4f Hz\n", w0, w0/(2*M_PI));
-        printf("   Z₀ = √(L/C) = %.6f Ω    (a média geométrica — o metal, La Hire)\n",
-               el_Z0(L,C));
+    if(circ_le(f, "ressonancia", v, 2) || circ_le(f, "ressonância", v, 2)){ eco(f);
+        Rq L = v[0], C = v[1];
+        Rq w02 = rq_div(rq(1,1), rq_mul(L,C)), Z02 = rq_div(L, C);
+        printf(" = L = %s H, C = %s F\n", rq_txt(L), rq_txt(C));
+        printf("   ω₀² = 1/(LC) = %s,  ω₀ = %s\n", rq_txt(w02), raiz_rq(w02));
+        printf("   Z₀² = L/C = %s,  Z₀ = %s    (a média geométrica — o metal, La Hire)\n",
+               rq_txt(Z02), raiz_rq(Z02));
         printf("   (o indutor tem multiplicidade +1 e o capacitor -1; somam 0, que é o\n");
         printf("    resistor — e é por isso que na ressonância só sobra o R)\n");
         return 1;
     }
-    if(circ_le(f, "serie", v, 2) || circ_le(f, "série", v, 2)){
+    if(circ_le(f, "serie", v, 2) || circ_le(f, "série", v, 2)){ eco(f);
         printf(" = em SÉRIE as impedâncias SOMAM — é Kirchhoff, a operação ⊕\n");
-        printf("   %g + %g = %g Ω\n", v[0], v[1], v[0]+v[1]);
+        printf("   %s + %s = %s Ω   (exato)\n", rq_txt(v[0]), rq_txt(v[1]),
+               rq_txt(rq_som(v[0], v[1])));
         return 1;
     }
-    if(circ_le(f, "paralelo", v, 2)){
-        double g = 1/v[0] + 1/v[1];
+    if(circ_le(f, "paralelo", v, 2)){ eco(f);
+        Rq g = rq_som(rq_div(rq(1,1), v[0]), rq_div(rq(1,1), v[1]));
         printf(" = em PARALELO somam as CONDUTÂNCIAS — o mesmo ⊕, no dual\n");
-        printf("   1/%g + 1/%g = %g S,  logo Z = %g Ω\n", v[0], v[1], g, 1/g);
+        printf("   1/%s + 1/%s = %s S,  logo Z = %s Ω   (exato)\n",
+               rq_txt(v[0]), rq_txt(v[1]), rq_txt(g), rq_txt(rq_div(rq(1,1), g)));
         printf("   (série e paralelo são o par dual Z ⋈ Y: a mesma soma, dos dois lados)\n");
         return 1;
     }
-    if(circ_le(f, "divisor", v, 2)){
-        double a = v[1]/(v[0]+v[1]);
+    if(circ_le(f, "divisor", v, 2)){ eco(f);
+        Rq a = rq_div(v[1], rq_som(v[0], v[1]));
         printf(" = o DIVISOR é o PRODUTO (⊗): o ganho α, e compor divisores MULTIPLICA\n");
-        printf("   α = R2/(R1+R2) = %g/(%g+%g) = %.9f\n", v[1], v[0], v[1], a);
+        printf("   α = R2/(R1+R2) = %s/(%s+%s) = %s   (uma RAZÃO, e a razão é exata)\n",
+               rq_txt(v[1]), rq_txt(v[0]), rq_txt(v[1]), rq_txt(a));
         printf("   e V_out = α·V_in;  dois em cascata dão α₁·α₂, não α₁+α₂\n");
         return 1;
     }
-    if(circ_le(f, "wheatstone", v, 3)){
-        double complex zx = el_wheatstone(v[0], v[1], v[2]);
-        double complex d = el_detector(v[0], v[1], v[2], zx, 10.0);
+    if(circ_le(f, "wheatstone", v, 3)){ eco(f);
+        Rq zx = rq_div(rq_mul(v[1], v[2]), v[0]);
         printf(" = a ponte mede por ANULAÇÃO: ajusta-se até o detector ler ZERO\n");
-        printf("   equilíbrio Z₁·Z_x = Z₂·Z₃  ->  Z_x = Z₂·Z₃/Z₁ = %g·%g/%g = %.6f Ω\n",
-               v[1], v[2], v[0], creal(zx));
-        printf("   e o detector lê %.2e no equilíbrio  (com 10 V na ponte)\n", cabs(d));
+        printf("   equilíbrio Z₁·Z_x = Z₂·Z₃  ->  Z_x = Z₂·Z₃/Z₁ = %s·%s/%s = %s Ω\n",
+               rq_txt(v[1]), rq_txt(v[2]), rq_txt(v[0]), rq_txt(zx));
+        printf("   e no equilíbrio o detector lê ZERO EXATO: Z₁·Z_x − Z₂·Z₃ = %s\n",
+               rq_txt(rq_sub(rq_mul(v[0], zx), rq_mul(v[1], v[2]))));
         printf("   (não se lê o valor num mostrador, que teria a precisão do mostrador:\n");
         printf("    lê-se a RAZÃO no ponto de resíduo 0 — e a razão é exata)\n");
         return 1;
     }
-    if(circ_le(f, "amplificador", v, 2) || circ_le(f, "ganho", v, 2)){
-        double Ic = v[0], Rc = v[1], gm = Ic/VT;
+    if(circ_le(f, "amplificador", v, 2) || circ_le(f, "ganho", v, 2)){ eco(f);
+        Rq Ic = v[0], Rc = v[1];
+        Rq vt = rq(25852, 1000000);                 /* VT a 300 K, como fração exata */
+        Rq gm = rq_div(Ic, vt), Av = rq_mul(gm, Rc);
         printf(" = o AMPLIFICADOR é o transistor DENTRO da janela ativa\n");
-        printf("   gm = dIc/dVbe = Ic/VT = %g/%g = %.4f A/V   (a transcondutância)\n",
-               Ic, VT, gm);
-        printf("   A_v = -gm·Rc = %.4f      (o ganho, em emissor comum)\n", -gm*Rc);
+        printf("   VT = %s V (a 300 K, exato em fração)\n", rq_txt(vt));
+        printf("   gm = dIc/dVbe = Ic/VT = %s/%s = %s A/V   (a transcondutância)\n",
+               rq_txt(Ic), rq_txt(vt), rq_txt(gm));
+        printf("   A_v = -gm·Rc = -%s      (o ganho, em emissor comum)\n", rq_txt(Av));
         printf("   AMPLIFICAR É LINEARIZAR: gm é a DERIVADA da exponencial no ponto de\n");
         printf("   operação — é a parte ε de f(a+bε) = f(a) + f'(a)·b·ε, com ε² = 0.\n");
         printf("   (e por isso o ganho depende do ponto de operação; com realimentação ele\n");
         printf("    vira 1/β, uma RAZÃO de resistores — e a razão é exata)\n");
         return 1;
     }
-    if(circ_le(f, "logica", v, 2) || circ_le(f, "lógica", v, 2) || circ_le(f, "porta", v, 2)){
-        int a = v[0] != 0, b = v[1] != 0;
+    if(circ_le(f, "logica", v, 2) || circ_le(f, "lógica", v, 2) || circ_le(f, "porta", v, 2)){ eco(f);
+        int a = v[0].p != 0, b = v[1].p != 0;
         printf(" = o transistor CHAVEANDO: fora da janela, o contínuo colapsa em GF(2)\n");
         printf("   a = %d, b = %d\n", a, b);
         printf("   AND  = %d      e AND É a MULTIPLICAÇÃO de GF(2): a·b = %d\n", a&&b, (a*b)%2);
@@ -1227,25 +2956,30 @@ static int resolve_circuito(const char *f){
         printf("    logo somar É subtrair — é por isso que o XOR é reversível de graça)\n");
         return 1;
     }
-    if(circ_le(f, "somador", v, 3) || circ_le(f, "somador", v, 2)){
-        int a = v[0] != 0, b = v[1] != 0, ci = (v[2] == 0 || v[2] == 1) ? (int)v[2] : 0;
-        int s = (a != b) != ci, co = (a&&b) || (ci && (a!=b));
+    if(circ_le(f, "somador", v, 3) || circ_le(f, "somador", v, 2)){ eco(f);
+        int a = v[0].p != 0, b = v[1].p != 0;
+        int ci = (v[2].q == 1 && (v[2].p == 0 || v[2].p == 1)) ? (int)v[2].p : 0;
+        int sm = (a != b) != ci, co = (a&&b) || (ci && (a!=b));
         printf(" = o SOMADOR COMPLETO, em portas:\n");
-        printf("   s    = a ⊕ b ⊕ cin              = %d\n", s);
+        printf("   s    = a ⊕ b ⊕ cin              = %d\n", sm);
         printf("   cout = (a∧b) ∨ (cin ∧ (a⊕b))   = %d\n", co);
         printf("   e a aritmética direta: %d + %d + %d = %d, que em binário é %d%d  <- O MESMO\n",
-               a, b, ci, a+b+ci, co, s);
+               a, b, ci, a+b+ci, co, sm);
         printf("   (dois caminhos: as portas e a conta. Um somador que só fecha num deles\n");
         printf("    não está validado — está adivinhado)\n");
         return 1;
     }
-    if(circ_le(f, "transistor", v, 1)){
-        double V = v[0], Is = 1e-14, Ic = el_shockley(V, Is);
-        printf(" = SHOCKLEY: I = Is·(e^{V/VT} - 1),  com VT = %.6f V a 300 K\n", VT);
-        printf("   V = %g V  ->  I = %.6e A   (%.4f mA)\n", V, Ic, Ic*1e3);
-        printf("   e o inverso: V = VT·ln(I/Is + 1) = %.6f V\n", el_shockley_inv(Ic, Is));
+    if(circ_le(f, "transistor", v, 1)){ eco(f);
+        Rq V = v[0], vt = rq(25852, 1000000);
+        Rq x = rq_div(V, vt);
+        printf(" = SHOCKLEY: I = Is·(e^{V/VT} - 1),  com VT = %s V a 300 K\n", rq_txt(vt));
+        printf("   V = %s V  ->  V/VT = %s   (a fração exata; é ela o expoente)\n",
+               rq_txt(V), rq_txt(x));
+        printf("   e o VALOR de e^{V/VT} não se escreve em decimal: a exponencial é o FLUXO\n");
+        printf("   (σ = e^λ), e o que é exato aqui é a LEI que ela cumpre —\n");
         printf("   AQUI VIVE O OPERADOR. Π = exp∘Σ∘log é esta equação:\n");
-        printf("   I(V₁+V₂) = I(V₁)·I(V₂)/Is — a SOMA de tensões vira PRODUTO de correntes.\n");
+        printf("   I(V₁+V₂) = I(V₁)·I(V₂)/Is — a SOMA de tensões vira PRODUTO de correntes,\n");
+        printf("   e essa identidade vale EXATA para todo V₁, V₂, sem avaliar nada.\n");
         printf("   (é a cláusula de Pontryagin do contrato, em volts e amperes; e é por isso\n");
         printf("    que a Gilbert cell multiplica dois sinais: log, soma, antilog)\n");
         return 1;
@@ -1285,30 +3019,482 @@ static void inv_troca(char *d, size_t dn, const char *s, const char *de, const c
     d[o] = 0;
 }
 static void desdobra_entrada(char *d, size_t dn, const char *s){
-    char a[1024];
-    inv_troca(a, sizeof a, s, "vezes", "x");
-    inv_troca(d, dn,      a, "mais",  "+");
+    char a[1024], b2[1024], c2[1024];
+    inv_troca(a,  sizeof a,  s,  "vezes", "x");
+    inv_troca(b2, sizeof b2, a,  "mais",  "+");
+    inv_troca(c2, sizeof c2, b2, "menos", "-");   /* a mesma guarda: "pelo menos avisa"
+                                                   * nunca vira conta — as outras palavras
+                                                   * não passam a porta do e_conta */
+    inv_troca(d,  dn,        c2, "dividido por", "/");  /* a frase inteira, com a mesma
+                                                   * fronteira: "o povo dividido por
+                                                   * guerras" tem letras e não passa */
+    char e2[1024]; snprintf(e2, sizeof e2, "%s", d);
+    inv_troca(d,  dn,        e2, "por cento", "%");     /* «10 por cento de 200» — o "de"
+                                                   * a seguir ao % a fita já aceitava;
+                                                   * «dez por cento das vezes» tem
+                                                   * letras e fica no corpus */
 }
 
-static void responde(const char *fala){
-    if(e_circuito(fala) && resolve_circuito(fala)) return; /* a tríade em volts e amperes */
-    if(e_poli(fala) && resolve_poli(fala)) return;         /* p(x) = q(x), de qualquer grau */
-    if(e_sistema(fala) && resolve_sistema(fala)) return;   /* x' = Ax, e a régua é (−tr, det) */
-    if(e_edo(fala) && resolve_edo(fala)) return;           /* a ED declara o corpo pela borda */
-    if(e_algebra(fala) && resolve_algebra(fala)) return;   /* o corpo vem declarado na fala */
+/* A MEMBRANA TEXTUAL — o LaTeX desdobra-se na entrada.
+ *
+ * O LaTeX é a «interface padrão: a membrana textual por omissão» da casa (Corpo
+ * Universal, §papéis), e o tradutor .tex↔PDF «opera nesta torre» (Corpo de Peano).
+ * Mas o tradutor COMPÕE — desenha a página; não avalia. O que faltava é a mesma lei
+ * do cone: «\frac{1}{2}» e «(1)/(2)» são a mesma conta em duas roupas, e a entrada
+ * vem comprimida na membrana. Desdobrada, quem resolve são as réguas de sempre.
+ *
+ * O ANINHAMENTO FECHA POR PONTO FIXO: cada volta desdobra um andar (o \frac de dentro
+ * fica intacto na primeira passagem e cai na segunda), e pára quando a fala não muda
+ * — a mesma paragem da conta, que dobra do mais fundo para fora. Sem recursão e sem
+ * malloc: um buffer, e a volta a decidir. */
+static const char *lx_grupo(const char *p, char *out, size_t lim){
+    /* lê {..} equilibrado a partir de p (que aponta ao '{'); devolve o depois-do-'}' */
+    size_t o = 0; int prof = 0;
+    if(*p != '{'){ out[0] = 0; return p; }
+    for(; *p; p++){
+        if(*p == '{'){ if(prof++) { if(o + 1 < lim) out[o++] = *p; } continue; }
+        if(*p == '}'){ if(--prof == 0){ p++; break; } }
+        if(o + 1 < lim) out[o++] = *p;
+    }
+    out[o] = 0;
+    return p;
+}
+/* O DIALECTO É O DO TRADUTOR — a tabela LX contra a de `tests/tex_core.c`.
+ *
+ * Escrevi esta lista de cabeça e ela trazia `\ast` e `\pmod`: o LaTeX de fora tem-nos,
+ * ESTA CASA NÃO. O tradutor é que declara a língua (a tabela de símbolos e os
+ * operadores nomeados), e a assistente só pode desdobrar o que ele compõe — senão são
+ * duas línguas com o mesmo nome. `tools/bench_membrana.sh` mede os dois caminhos.
+ *
+ * O `\pm` está no dialecto e fica FORA de propósito: ± não é um valor, são dois — a
+ * fala com ele cai ao corpus em vez de fingir uma conta. */
+enum { LX_FRAC = 1, LX_SQRT, LX_MULT, LX_DIV, LX_MOD, LX_ESPACO, LX_AMB };
+static const struct { const char *nome; int tipo; } LX[] = {
+    { "frac", LX_FRAC }, { "dfrac", LX_FRAC }, { "tfrac", LX_FRAC },
+    { "sqrt", LX_SQRT },
+    { "cdot", LX_MULT }, { "times", LX_MULT },
+    { "div",  LX_DIV  },
+    { "bmod", LX_MOD  }, { "mod", LX_MOD },
+    { "left", LX_ESPACO }, { "right", LX_ESPACO },
+    { "quad", LX_ESPACO }, { "qquad", LX_ESPACO },
+    /* os ambientes que o tradutor compõe — e o `cases` não está aqui porque ele não o
+     * compõe: a fala em bloco entra pelos que existem, não pelos que eu quisesse */
+    { "align", LX_AMB }, { "aligned", LX_AMB }, { "equation", LX_AMB },
+};
+static int lx_passo(char *d, size_t dn, const char *s){
+    size_t o = 0; int mudou = 0, dentro = 0;   /* dentro de um ambiente conhecido */
+    char g1[512], g2[512];
+    while(*s && o + 8 < dn){
+        if(*s == '\\'){
+            const char *p = s + 1;
+            size_t n = 0; while(p[n] >= 'a' && p[n] <= 'z') n++;
+            /* O AMBIENTE: `\begin{align}` … `\end{align}`. Só os que o tradutor compõe;
+             * o que ele não conhece fica como veio e a régua recusa-o, que é o certo. */
+            if((n == 5 && !strncmp(p, "begin", 5)) || (n == 3 && !strncmp(p, "end", 3))){
+                const char *q = p + n;
+                if(*q == '{'){
+                    char nome[64]; const char *q2 = lx_grupo(q, nome, sizeof nome);
+                    size_t ln = strlen(nome);
+                    if(ln && nome[ln-1] == '*') nome[ln-1] = 0;   /* align* é align */
+                    int amb = 0;
+                    for(size_t k = 0; k < sizeof LX/sizeof *LX; k++)
+                        if(LX[k].tipo == LX_AMB && !strcmp(nome, LX[k].nome)){ amb = 1; break; }
+                    if(amb){
+                        dentro = (n == 5);
+                        o += (size_t)snprintf(d + o, dn - o, " ");
+                        s = q2; mudou = 1; continue;
+                    }
+                }
+            }
+            /* o `\\` é a fila: dentro do ambiente é o `;` que o sistema espera */
+            if(n == 0 && *p == '\\'){
+                o += (size_t)snprintf(d + o, dn - o, dentro ? " ; " : " ");
+                s = p + 1; mudou = 1; continue;
+            }
+            int tipo = 0;
+            for(size_t k = 0; n && k < sizeof LX/sizeof *LX; k++)
+                if(n == strlen(LX[k].nome) && !strncmp(p, LX[k].nome, n)){ tipo = LX[k].tipo; break; }
+            if(tipo == LX_FRAC){
+                const char *q = lx_grupo(p + n, g1, sizeof g1);
+                q = lx_grupo(q, g2, sizeof g2);
+                o += (size_t)snprintf(d + o, dn - o, "(%s)/(%s)", g1, g2);
+                s = q; mudou = 1; continue;
+            }
+            if(tipo == LX_SQRT){
+                const char *q = lx_grupo(p + n, g1, sizeof g1);
+                o += (size_t)snprintf(d + o, dn - o, "raiz (%s)", g1);
+                s = q; mudou = 1; continue;
+            }
+            if(tipo == LX_MULT){
+                o += (size_t)snprintf(d + o, dn - o, " x "); s = p + n; mudou = 1; continue;
+            }
+            if(tipo == LX_DIV){
+                o += (size_t)snprintf(d + o, dn - o, " / "); s = p + n; mudou = 1; continue;
+            }
+            if(tipo == LX_MOD){
+                const char *q = p + n;
+                if(*q == '{'){ q = lx_grupo(q, g1, sizeof g1);
+                    o += (size_t)snprintf(d + o, dn - o, " mod %s", g1); }
+                else o += (size_t)snprintf(d + o, dn - o, " mod ");
+                s = q; mudou = 1; continue;
+            }
+            if(tipo == LX_ESPACO){
+                o += (size_t)snprintf(d + o, dn - o, " "); s = p + n; mudou = 1; continue;
+            }
+            if(n == 0 && (*p == ',' || *p == ';' || *p == '!' || *p == ':' || *p == ' ')){
+                o += (size_t)snprintf(d + o, dn - o, " "); s = p + 1; mudou = 1; continue;
+            }
+            if(n == 0 && (*p == '(' || *p == ')' || *p == '[' || *p == ']')){
+                o += (size_t)snprintf(d + o, dn - o, " "); s = p + 1; mudou = 1; continue;
+            }
+            if(n == 0 && *p == '%'){ d[o++] = '%'; s = p + 1; mudou = 1; continue; }
+            d[o++] = *s++;                          /* comando que não é desta conta */
+            continue;
+        }
+        if(*s == '$'){ d[o++] = ' '; s++; mudou = 1; continue; }
+        if(*s == '^' && s[1] == '{'){                /* o expoente: {2} é 2, e o resto
+                                                      * vai em parênteses */
+            const char *q = lx_grupo(s + 1, g1, sizeof g1);
+            int so_digito = g1[0] != 0;
+            for(const char *t = g1; *t; t++) if(*t < '0' || *t > '9') so_digito = 0;
+            o += (size_t)snprintf(d + o, dn - o, so_digito ? "^%s" : "^(%s)", g1);
+            s = q; mudou = 1; continue;
+        }
+        if(*s == '{'){ d[o++] = '('; s++; mudou = 1; continue; }
+        if(*s == '}'){ d[o++] = ')'; s++; mudou = 1; continue; }
+        d[o++] = *s++;
+    }
+    d[o] = 0;
+    return mudou;
+}
+/* A VOLTA DA MEMBRANA: o valor vestido na roupa em que a fala veio. Sem este lado a
+ * palavra «membrana» era metade com o nome do par — o tradutor compõe, a assistente
+ * lê, e a resposta voltava nua. A fração é a pilha do \frac (o mesmo objeto que o
+ * tradutor desenha); o inteiro é ele próprio. */
+/* ── O DUAL †: a membrana é UMA operação, e o sinal decide o lado ──────────────
+ * Não são duas operações que calham ser inversas — é a INVOLUÇÃO das cinco, e o
+ * sinal escreve-a: +1 desdobra (a entrada, o cone a abrir-se) e −1 veste (a saída,
+ * o valor na roupa em que a fala veio). É a Lei 1: 1† = −1, e ν∘ν = id.
+ * Os nomes antigos ficam como invólucro de uma linha, como a casa já fez com o
+ * le/grava sobre o MOVE. */
+static void lx_veste(char *out, size_t lim, long v, long q);
+static void lx_abre(char *d, size_t dn, const char *s);
+static void MEMBRANA(char *out, size_t lim, const char *texto, long v, long q, int sentido){
+    if(sentido > 0) lx_abre(out, lim, texto);      /* +1: a entrada desdobra-se */
+    else            lx_veste(out, lim, v, q);      /* −1: a saída veste-se */
+}
+static void lx_veste(char *out, size_t lim, long v, long q){
+    if(q == 1) snprintf(out, lim, "%ld", v);
+    else       snprintf(out, lim, "\\frac{%ld}{%ld}", v, q);
+}
+static void veste_valor(char *out, size_t lim, long v, long q){
+    MEMBRANA(out, lim, 0, v, q, -1);
+}
+/* a marca da membrana: um comando `\letra`, um `$` ou um expoente `^{`. Sem marca não
+ * se desdobra nada — a fala em português segue byte a byte para as réguas de sempre. */
+static int tem_membrana(const char *f){
+    for(const char *p = f; *p; p++){
+        if(*p == '$') return 1;
+        if(*p == '\\' && p[1] >= 'a' && p[1] <= 'z') return 1;
+        if(*p == '^' && p[1] == '{') return 1;
+    }
+    return 0;
+}
+static void lx_abre(char *d, size_t dn, const char *s){
+    char a[1200], b2[1200];
+    int houve = 0;
+    snprintf(a, sizeof a, "%s", s);
+    for(int volta = 0; volta < 8; volta++){        /* o ponto fixo: pára quando não muda */
+        if(!lx_passo(b2, sizeof b2, a)) break;
+        if(!strcmp(b2, a)) break;
+        snprintf(a, sizeof a, "%s", b2);
+        houve = 1;
+    }
+    if(!houve){ snprintf(d, dn, "%s", s); return; } /* sem membrana, sai byte a byte */
+    size_t o = 0;                                   /* o comando que sai deixa o espaço
+                                                     * dele: colapsa-se, e a conta não
+                                                     * distingue um espaço de três */
+    for(const char *p = a; *p && o + 1 < dn; p++){
+        if(*p == ' ' && (o == 0 || d[o-1] == ' ')) continue;
+        d[o++] = *p;
+    }
+    while(o && d[o-1] == ' ') o--;
+    d[o] = 0;
+}
+
+/* AS FUNÇÕES NOMEADAS — a resolução de expressões RECUPERADA para a fala. A fita já
+ * sabia (raiz, !, ^, mod, %, frações com o porquê decimal, o i e o i*) e só entrava
+ * quem escrevesse os símbolos. A função em português é «<nome> de X»: monta-se a
+ * expressão, a guarda é a de sempre (o X tem de ser conta pura — «a raiz de 2 é
+ * racional» continua no corpus, medido no §C11), e a resolução é a MESMA fita, com
+ * os passos à vista. A montagem separa-se da resolução para o medidor a ver. */
+static int funcao_monta(const char *fala, char *expr, size_t lim){
+    static const struct { const char *nome, *pre, *pos; } F[] = {
+        { "raiz quadrada de ", "raiz (", ")"     },
+        { "raiz de ",          "raiz (", ")"     },
+        { "fatorial de ",      "(",      ") !"   },
+        { "dobro de ",         "2 x (",  ")"     },
+        { "triplo de ",        "3 x (",  ")"     },
+        { "metade de ",        "(",      ") / 2" },
+        { "quadrado de ",      "(",      ") ^ 2" },
+        { "cubo de ",          "(",      ") ^ 3" },
+    };
+    const char *p = fala;
+    if(!strncmp(p, "o ", 2) || !strncmp(p, "a ", 2)) p += 2;   /* o artigo é roupa */
+    for(size_t k = 0; k < sizeof F/sizeof *F; k++){
+        size_t ln = strlen(F[k].nome);
+        if(strncmp(p, F[k].nome, ln)) continue;
+        char desd[1024]; desdobra_entrada(desd, sizeof desd, p + ln);
+        if(!e_conta(desd)) return 0;               /* a guarda: só a conta pura entra */
+        snprintf(expr, lim, "%s%s%s", F[k].pre, desd, F[k].pos);
+        return 1;
+    }
+    return 0;
+}
+static int resolve_funcao(const char *fala){
+    char expr[1200];
+    if(!funcao_monta(fala, expr, sizeof expr)) return 0;
+    return resolve_conta(expr);
+}
+
+/* O CORTE moldura→parâmetro (Dual Sort: o corte é a seleção de suporte; e o WHERE do
+ * mórfico: erode-se para ESCOLHER, dilata-se para ESCREVER). A erosão escolheu a moldura
+ * — d símbolos consumidos —, e o que sobra na fala é o PARÂMETRO: os dois lados da fala,
+ * uma componente por elemento. Se a resposta aprendida tem o buraco '_', o parâmetro
+ * escreve-se nele. Sem parâmetro o buraco fica por preencher e a moldura NÃO responde —
+ * o quantificador sem instância.
+ * Devolve 1 = out pronto; 0 = buraco sem parâmetro (não responder por esta via). */
+/* o buraco é o "___" — o blank de preencher. Um '_' só não serve de marcador: o corpus
+ * cita caminhos ("torre_fundacao.tex") e LaTeX ("\_"), e a moldura falsa roubava a
+ * resposta (medido: «o que é um corpo» e «mostra a fundação» caíam no decreto). */
+static const char *acha_buraco(const char *s){ return strstr(s, "___"); }
+static int corte_escreve(const char *fala, int d, const char *resp, char *out, size_t lim){
+    const char *bur = acha_buraco(resp);
+    if(!bur){ snprintf(out, lim, "%s", resp); return 1; }
+    const char *p = fala;
+    for(int k = 0; k < d && *p; k++) prox_simb(&p);
+    for(;;){                                       /* apara os separadores do corte */
+        if(!*p) break;
+        const char *t = p;
+        if(simb_de_palavra(prox_simb(&t))) break;
+        p = t;
+    }
+    if(!*p) return 0;
+    char par[512]; snprintf(par, sizeof par, "%s", p);
+    size_t n = strlen(par);
+    while(n){ unsigned char c = par[n-1];
+        if((c>='a'&&c<='z')||(c>='A'&&c<='Z')||(c>='0'&&c<='9')||c>=0x80) break;
+        n--; }
+    par[n] = 0;
+    if(!n) return 0;
+    snprintf(out, lim, "%.*s%s%s", (int)(bur - resp), resp, par, bur + 3);
+    return 1;
+}
+
+/* A EROSÃO RE-ANCORADA: o prefixo com ruído à frente — come-se o início até uma
+ * fronteira de palavra e o prefixo tenta outra vez (a mesma re-âncora da dilatação,
+ * na régua do prefixo). É a via que dá o CORTE às molduras no meio da fala: «que
+ * estilo? gosto de rock» ancora em «gosto de» e o resto preenche o buraco. Devolve
+ * também onde ancorou (*efetiva), para o corte contar os símbolos do sítio certo. */
+static long erosao_ancorada(const char *fala, int *fundo, const char **efetiva){
+    int fronteira = 1;
+    for(const char *p = fala; *p; ){
+        if(fronteira){
+            no_banco(banco_da(p));
+            long r = erosao(p, fundo);
+            if(r){ *efetiva = p; return r; }
+        }
+        long s = prox_simb(&p);
+        fronteira = !simb_de_palavra(s);
+    }
+    return 0;
+}
+
+/* AS TAREFAS — as portas que AUMENTAM A MASSA (Dual Sort §assistente: «se faltar
+ * informação, o agente aumenta a massa — ferramenta, memória, cálculo — não finge que
+ * ela já estava lá»). Portas fechadas em português como a das contas: quem não encaixa
+ * cai ao corpus, e o corpus continua dono da conversa. */
+
+static void apara(char *s){
+    size_t n = strlen(s), i = 0;
+    while(s[i] == ' ') i++;
+    if(i) memmove(s, s + i, n - i + 1), n -= i;
+    while(n && s[n-1] == ' ') s[--n] = 0;
+}
+
+/* «lembra que X = Y» — o ensino pela porta da fala: a EVOLUÇÃO do banco na conversa,
+ * com o '=' que a casa já usa («ensina-me com: = resposta»). Sem '=', aceita-se UM
+ * « é » — com dois a fala é ambígua e não se adivinha (a regra da evolução). */
+static int e_lembra(const char *f){
+    return !strncmp(f, "lembra que ", 11) || !strncmp(f, "aprende que ", 12);
+}
+static int resolve_lembra(const char *f){
+    const char *p = f + (f[0] == 'l' ? 11 : 12);
+    char x[512], y[512];
+    const char *ig = strchr(p, '=');
+    if(ig){
+        snprintf(x, sizeof x, "%.*s", (int)(ig - p), p);
+        snprintf(y, sizeof y, "%s", ig + 1);
+    } else {
+        const char *e = strstr(p, " é ");
+        if(!e || strstr(e + strlen(" é "), " é ")) return 0;
+        snprintf(x, sizeof x, "%.*s", (int)(e - p), p);
+        snprintf(y, sizeof y, "%s", e + strlen(" é "));
+    }
+    apara(x); apara(y);
+    if(!x[0] || !y[0]) return 0;
+    aprende(x, y);
+    printf("   (lembrado: «%s» responde «%s»)\n", x, y);
+    return 1;
+}
+
+/* «esquece X» — o inverso do lembra pela mesma porta: desce-se ao nó da fala e a
+ * resposta apaga-se (o .b zera). O caminho FICA — esquecer não é demolir a árvore,
+ * é o nó voltar a não ter fala. O que nunca se soube devolve 0 e o corpus decide. */
+static int e_esquece(const char *f){ return !strncmp(f, "esquece ", 8); }
+static int resolve_esquece(const char *f){
+    char x[512]; snprintf(x, sizeof x, "%s", f + 8);
+    apara(x);
+    if(!x[0]) return 0;
+    if(!CORPUS(x, 0, -1)) return 0;                /* −1: a retração da mesma operação */
+    printf("esquecido: «%s».\n   (o caminho fica; a resposta foi-se — é a mesma\n"
+           "    operação do aprender, com o sinal trocado)\n", x);
+    return 1;
+}
+
+/* o relógio e o calendário — a primeira ferramenta: a massa que o corpus não tem. */
+#include <time.h>
+#include <sys/stat.h>
+static int e_hora(const char *f){
+    return !strncmp(f, "que horas", 9) || !strncmp(f, "q horas", 7) ||
+           !strncmp(f, "tem horas", 9);
+}
+static int resolve_hora(void){
+    time_t agora = time(NULL);
+    struct tm tm_; if(!localtime_r(&agora, &tm_)) return 0;
+    printf("são %02d:%02d.\n   (o relógio da máquina)\n", tm_.tm_hour, tm_.tm_min);
+    return 1;
+}
+static int e_data(const char *f){
+    return !strncmp(f, "que dia", 7);
+}
+static int resolve_data(void){
+    static const char *dia[] = { "domingo", "segunda-feira", "terça-feira",
+        "quarta-feira", "quinta-feira", "sexta-feira", "sábado" };
+    time_t agora = time(NULL);
+    struct tm tm_; if(!localtime_r(&agora, &tm_)) return 0;
+    printf("hoje é %s, %02d/%02d/%04d.\n   (o calendário da máquina)\n",
+           dia[tm_.tm_wday % 7], tm_.tm_mday, tm_.tm_mon + 1, tm_.tm_year + 1900);
+    return 1;
+}
+
+/* «mostra X» — o parâmetro vira slug e procura-se no catálogo: a ponte que os pares
+ * fixos já faziam nome a nome, agora com o parâmetro extraído. Se o ficheiro não
+ * existe, devolve 0 e o corpus decide — os pares curados continuam a valer. */
+static int resolve_mostra_em(const char *f, const char *raiz){
+    const char *p = f + 7;                          /* depois de "mostra " */
+    if(!strncmp(p, "o ", 2) || !strncmp(p, "a ", 2)) p += 2;
+    char slug[256]; int o = 0;
+    while(*p && o < 250){
+        long s = prox_simb(&p);                     /* despe o acento, minusculiza */
+        if(simb_de_palavra(s)) slug[o++] = (char)(s + 31);
+        else if(o && slug[o-1] != '_') slug[o++] = '_';
+    }
+    while(o && slug[o-1] == '_') o--;
+    slug[o] = 0;
+    if(!o) return 0;
+    char cam[512]; snprintf(cam, sizeof cam, "%s/%s.tex", raiz, slug);
+    if(access(cam, R_OK) != 0) return 0;
+    printf("vê papers/%s.tex\n   (o catálogo tem — o tradutor abre)\n", slug);
+    return 1;
+}
+static int e_mostra(const char *f){ return !strncmp(f, "mostra ", 7); }
+static int resolve_mostra(const char *f){ return resolve_mostra_em(f, "../papers"); }
+
+/* A CASCATA SIMBÓLICA — as réguas que RESOLVEM em vez de procurar, numa função só:
+ * circuito, polinómio, sistema, ED, álgebra, equação, lei pedida, conta (nua e pelo
+ * cone) e as funções nomeadas. O responde entra com a fala como veio; «resolve X» /
+ * «calcula X» entram com a roupa tirada — as MESMAS réguas, duas portas. */
+static int resolve_simbolico(const char *fala){
+    if(resolve_divisibilidade(fala)) return 1;     /* o relógio de 6 ticks */
+    if(resolve_bezout(fala)) return 1;             /* a testemunha e o critério */
+    if(resolve_racionais(fala)) return 1;          /* ℚ: a fibra, e a sua ausência */
+    if(resolve_naturais(fala)) return 1;           /* a escada da aritmética */
+    if(resolve_relacao(fala)) return 1;            /* relação → função → volta */
+    if(resolve_conjuntos(fala)) return 1;          /* conjuntos ↔ booleano ↔ prova */
+    if(resolve_prova(fala)) return 1;              /* o rastro verificável */
+    if(resolve_shannon(fala)) return 1;            /* a expansão = o corte */
+    if(resolve_simplifica(fala)) return 1;         /* a lei em cada transição */
+    if(resolve_booleana(fala)) return 1;           /* a lógica no corpo GF(2) */
+    if(resolve_calculo(fala)) return 1;            /* «integra …» / «deriva …» */
+    if(resolve_as_cinco(fala)) return 1;           /* a vista do padrão ouro */
+    if(resolve_mdc_poli(fala)) return 1;           /* «mdc de … e …» — a folha da órbita */
+    if(resolve_divide_poli(fala)) return 1;        /* «divide x^3-1 por x-1» — a fibra */
+    if(resolve_fatora_poli(fala)) return 1;        /* «fatora x^3 - x» — a volta da convolução */
+    if(e_circuito(fala) && resolve_circuito(fala)) return 1; /* a tríade em volts e amperes */
+    if(e_poli(fala) && resolve_poli(fala)) return 1;         /* p(x) = q(x), de qualquer grau */
+    if(e_sistema(fala) && resolve_sistema(fala)) return 1;   /* x' = Ax, e a régua é (−tr, det) */
+    if(e_edo(fala) && resolve_edo(fala)) return 1;           /* a ED declara o corpo pela borda */
+    if(e_algebra(fala) && resolve_algebra(fala)) return 1;   /* o corpo vem declarado na fala */
     {   /* a equação vem antes de tudo: '=' na fala é resolver, e não avaliar */
         char esq[512], dir[512];
-        if(e_equacao(fala, esq, dir, sizeof esq) && resolve_eq(esq, dir)) return;
+        if(e_equacao(fala, esq, dir, sizeof esq) && resolve_eq(esq, dir)) return 1;
     }
     int dist = 0;
     const char *lei = pede_lei(fala, &dist);           /* "distribui ..." / "fatora ..." */
-    if(lei && e_conta(lei) && aplica_lei(lei, dist)) return;
-    if(e_conta(fala) && resolve_conta(fala)) return;   /* conta não se procura: desdobra-se */
+    if(lei && e_conta(lei) && aplica_lei(lei, dist)) return 1;
+    if(e_conta(fala) && resolve_conta(fala)) return 1; /* conta não se procura: desdobra-se */
     {   /* e se não era conta, DESDOBRA-SE O CONE e pergunta-se outra vez: "3 vezes 3" é
          * "3 x 3" escrito comprimido. O corpus não vê esta forma — só o resolvedor. */
         char cone[1024]; desdobra_entrada(cone, sizeof cone, fala);
-        if(strcmp(cone, fala) && e_conta(cone) && resolve_conta(cone)) return;
+        if(strcmp(cone, fala) && e_conta(cone) && resolve_conta(cone)) return 1;
     }
+    if(resolve_funcao(fala)) return 1;             /* «raiz de 16», «o fatorial de 5» —
+                                                    * a fita recuperada para a fala */
+    if(resolve_assunto(fala)) return 1;            /* «mola m=1 c=3 k=2» — o dicionário:
+                                                    * o assunto empresta os nomes e a
+                                                    * álgebra intrínseca responde */
+    return 0;
+}
+/* o pedido em português: «resolve/resolva/calcula X» — devolve o X, ou 0 se a fala
+ * não é pedido. A fronteira de palavra está no espaço do próprio prefixo:
+ * «resolvemos tudo» não casa. «quanto é» NÃO entra aqui — fica no corpus, por
+ * decisão antiga e medida (§C11). */
+static const char *pedido_nu(const char *f){
+    if(!strncmp(f, "resolve ", 8) || !strncmp(f, "resolva ", 8) ||
+       !strncmp(f, "calcula ", 8)) return f + 8;
+    if(!strncmp(f, "calcule ", 8)) return f + 8;
+    return 0;
+}
+
+/* a fala entregue à cascata, com as roupas tiradas por ordem: primeiro a MEMBRANA
+ * (o LaTeX, e é na ENTRADA — vestida, a fala passa na porta errada), depois o pedido
+ * em português. As duas compõem: «resolve $\frac{1}{2}+\frac{1}{3}$» tira as duas. */
+static int resolve_vestido(const char *fala){
+    char mem[1200];
+    if(tem_membrana(fala)){
+        latex_desdobra(mem, sizeof mem, fala);
+        if(strcmp(mem, fala)){
+            MEMBRANA_ENTRADA = 1;                  /* e a resposta volta vestida */
+            int r = resolve_simbolico(mem);
+            MEMBRANA_ENTRADA = 0;
+            if(r) return 1;
+        }
+    }
+    return resolve_simbolico(fala);
+}
+static void responde(const char *fala){
+    if(resolve_vestido(fala)) return;
+    {   /* «resolve X» / «calcula X»: o pedido sai e o resto volta à mesma cascata */
+        const char *nu = pedido_nu(fala);
+        if(nu && resolve_vestido(nu)) return;
+    }
+    /* AS TAREFAS: as portas que aumentam a massa — ensino, relógio, catálogo. */
+    if(e_lembra(fala)  && resolve_lembra(fala))  return;
+    if(e_esquece(fala) && resolve_esquece(fala)) return;
+    if(e_hora(fala)    && resolve_hora())        return;
+    if(e_data(fala)    && resolve_data())        return;
+    if(e_mostra(fala)  && resolve_mostra(fala))  return;
     int d = 0;
     no_banco(banco_da(fala));                      /* a erosao e a torcao vivem na cabeca */
     /* A TORCAO VEM PRIMEIRO QUANDO SOBRA FALA. Eu tinha-a posto depois da erosao e ela nunca
@@ -1334,6 +3520,10 @@ static void responde(const char *fala){
     int fio = -1;
     for(int b = 0; b < NB && fio < 0; b++){ no_banco(b); if(onde() != RAIZ) fio = b; }
     long r = 0;
+    int prefixal = 1;                              /* nas vias de prefixo o corte tem os
+                                                    * dois lados: moldura e parâmetro */
+    const char *efetiva = fala;                    /* onde a régua ancorou — o corte
+                                                    * conta os símbolos daqui */
     const char *via = "daqui (a conversa continua)";
     if(fio >= 0){ no_banco(fio); r = desce_daqui(fala, &d); }
     if(!r){                                        /* nao continua: e comeco */
@@ -1341,7 +3531,12 @@ static void responde(const char *fala){
         r = desce_daqui(fala, &d);
         if(!r){ r = erosao(fala, &d); via = "erosão (prefixo)"; }
     }
+    if(!r){                                        /* o prefixo com ruído à frente */
+        r = erosao_ancorada(fala, &d, &efetiva);
+        if(r) via = "erosão (re-ancorada)";
+    }
     if(!r){
+        prefixal = 0;
         /* A DILATACAO PERGUNTA AO BARRAMENTO INTEIRO. Ela pode saltar o inicio, logo nao tem
          * cabeca fixa — emite-se, e responde quem puder. Ninguem e chamado pelo nome. */
         for(int b = 0; b < NB && !r; b++){
@@ -1394,7 +3589,21 @@ static void responde(const char *fala){
         return;
     }
     char t[RESP_LIM]; le_texto(r, t, sizeof t);
-    printf("%s\n", t);
+    if(prefixal){                                  /* o corte: a moldura escolheu, o
+                                                    * parâmetro escreve-se no buraco */
+        char cheio[RESP_LIM + 512];
+        if(!corte_escreve(efetiva, d, t, cheio, sizeof cheio)){
+            printf("não sei.\n");
+            printf("   (a moldura pede um parâmetro — completa a fala)\n");
+            return;
+        }
+        printf("%s\n", cheio);
+    } else if(acha_buraco(t)){                     /* a moldura só responde pela via do
+                                                    * corte — crua, é buraco por preencher */
+        printf("não sei.\n");
+        printf("   (nada no corpus alcança esta fala — ensina-me com: aprende)\n");
+        return;
+    } else printf("%s\n", t);
     printf("   (%s, %d símbolo(s) de caminho)\n", via, d);
 }
 
@@ -1404,6 +3613,8 @@ static void responde(const char *fala){
 /* nos testes, chamar a regua direto exige escolher o banco — o que o responde() faz por dentro.
  * Estes atalhos poem o teste no MESMO caminho do programa, que foi o que faltou da primeira vez. */
 static long t_erosao(const char *f, int *d){ no_banco(banco_da(f)); return erosao(f, d); }
+static long t_daqui(const char *f, int *d){ no_banco(banco_da(f)); return desce_daqui(f, d); }
+static long t_ancorada(const char *f, int *d, const char **e){ return erosao_ancorada(f, d, e); }
 static long t_dilata(const char *f, int *d){
     for(int b = 0; b < NB; b++){ no_banco(b); long r = dilatacao(f, d); if(r) return r; }
     return 0;
@@ -1428,6 +3639,15 @@ static int teste(void){
     ok("a fala exata acha a sua resposta", r && !strcmp(t, "bom dia! como estas?"));
     r = t_erosao("bom dia, tudo bem?", &d);
     ok("e a fala mais longa cai no prefixo que existe", r != 0 && d == 7);
+    /* a caixa na erosao: o prefixo so vale se FECHA em fronteira de palavra — "bom dia"
+     * fecha na virgula, mas "q" dentro de "qualquer" nao e a abreviacao "q". */
+    aprende("q", "diz o que precisas.");
+    r = t_erosao("qualquer um serve", &d);
+    ok("e o prefixo que corta a meio de palavra nao vale (a caixa decide)", r == 0);
+    /* o FIO desce pela mesma regua: do ponto da conversa, o "q" dentro de "qualquer"
+     * tambem nao e a abreviacao "q". */
+    r = t_daqui("qualquer um serve", &d);
+    ok("e o fio da conversa respeita a mesma caixa", r == 0);
 
     printf("\n§C2  DILATACAO: a subsequencia — a fala com ruido, antes ou no meio.\n\n");
     r = t_erosao("hmm quem és tu?", &d);
@@ -1437,6 +3657,29 @@ static int teste(void){
     ok("o que a erosao perde por ruido a frente, a dilatacao acha", !r && r2);
     long r3 = t_dilata("quem, afinal, és tu", &d);
     ok("e acha tambem com o ruido NO MEIO", r3 != 0);
+    /* o ruido que E CAMINHO DE OUTRA FALA no mesmo banco: "estás a ouvir" desce por
+     * "estou" (e-s-t-o-u em subsequencia) e morre no ramo errado — a regua re-ancora. */
+    aprende("estou aqui", "aqui estou — diz.");
+    long r3b = t_dilata("estás a ouvir? quem és tu", &d);
+    ok("e acha quando o ruido a frente abre o caminho de OUTRA fala (re-ancora)", r3b != 0);
+    /* o gume da CAIXA (o eixo de segmentacao da vizinhanca admissivel — Controle de
+     * Histerese): "esta outra aquisição" contem "estou aqui" como subsequencia DENSA
+     * (10 consumidos, 4 saltos internos — a contagem sozinha aceitaria), mas so'
+     * PARTINDO as palavras: e-s-t de "esta", o-u de "outra", a-q-u-i de "aquisição".
+     * A dilatacao salta palavras, nao letras: palavra partida recusa o candidato. */
+    long r3c = t_dilata("esta outra aquisição", &d);
+    ok("e RECUSA a subsequencia densa que parte palavras (a caixa decide)", r3c == 0);
+    /* a fala de UM simbolo (a abreviacao "q" do corpus real, ja aprendida no §C1) e'
+     * iman: registada no consumo, a palavra "qwq" so' se revela partida no 'w'
+     * seguinte. O registo so' vale quando a palavra que o contem FECHA limpa. */
+    long r3d = t_dilata("zzz qwq", &d);
+    ok("e o terminal registado a meio de palavra so' vale se ela fechar limpa", r3d == 0);
+    /* e o registo A MEIO de uma palavra que desce INTEIRA: "quanto" desce todo pelo
+     * caminho de "quantos queres", a palavra fecha limpa — mas o "q" registado ao
+     * primeiro simbolo esta no MEIO de "quanto", nao no fim de uma palavra. */
+    aprende("quantos queres", "diz la quantos.");
+    long r3e = t_dilata("quanto", &d);
+    ok("e o registo so' vale em FIM de palavra da consulta (o peek da caixa)", r3e == 0);
 
     printf("\n§C3  TORCAO: duas falas no mesmo canal, desentrelacadas.\n\n");
     { long v[8];
@@ -1446,6 +3689,13 @@ static int teste(void){
       ok("a torcao desentrelaca as DUAS falas de uma so linha", n == 2);
       int m = t_torcao("bom dia", v, 8);
       ok("e uma fala sozinha continua a ser uma so", m == 1);
+      /* a caixa na torcao: um troco ancora em FRONTEIRA de palavra e fecha em fronteira —
+       * "aquem és tu" nao pode pescar "quem és tu" de dentro de "aquem", e "quem és tux"
+       * nao fecha porque o troco morre a meio de "tux". */
+      int m2 = t_torcao("aquem és tu", v, 8);
+      ok("a torcao nao ancora a meio de palavra (a caixa decide)", m2 == 0);
+      int m3 = t_torcao("quem és tux", v, 8);
+      ok("e o troco que morre a meio de palavra nao fecha", m3 == 0);
       printf("\n      Desce ate um no terminal, responde, e RECOMECA da raiz com o que sobrou.\n");
       printf("      E a terceira regua do morfico, e trata o caso de dizer duas coisas de uma vez.\n");
     }
@@ -1698,21 +3948,23 @@ static int teste(void){
 
         /* O SISTEMA pela porta real: a régua é (−traço, determinante). */
         {
-            double sa,sb,sc,sd;
+            long sa,sb,sc,sd;
             int q1 = e_sistema("x' = y ; y' = -x");
             int q2 = e_sistema("o gato e o esquilo ; os dois lados");
             sis_le("x' = y ; y' = -x", &sa,&sb,&sc,&sd);
-            double T = sa+sd, De = sa*sd-sb*sc;
+            long T = sa+sd, De = sa*sd-sb*sc;
             Edo eo; edo_le("y'' = -y", &eo);
-            double B = (double)eo.Bp/eo.Bq, C = (double)eo.Cp/eo.Cq;
-            printf("\n      \"x' = y ; y' = -x\"   -> sistema? %s, A = [[%g,%g],[%g,%g]]\n",
+            /* a ED guarda B e C como FRACAO (Bp/Bq, Cp/Cq) e eu dividia-os em double:
+             * comparam-se por PRODUTO CRUZADO, que e exato e e o que a casa faz */
+            printf("\n      \"x' = y ; y' = -x\"   -> sistema? %s, A = [[%ld,%ld],[%ld,%ld]]\n",
                    q1 ? "sim" : "nao", sa,sb,sc,sd);
-            printf("      traco %g, det %g  ->  B = -tr = %g, C = det = %g\n", T, De, -T, De);
-            printf("      e a ED  y'' = -y  da  B = %g, C = %g   <- O MESMO\n", B, C);
+            printf("      traco %ld, det %ld  ->  B = -tr = %ld, C = det = %ld\n", T, De, -T, De);
+            printf("      e a ED  y'' = -y  da  B = %s, C = %s   <- O MESMO\n",
+                   frac2(eo.Bp, eo.Bq), frac2(eo.Cp, eo.Cq));
             printf("      \"o gato e o esquilo ; …\" -> sistema? %s   <- vai as reguas\n\n",
                    q2 ? "sim" : "nao");
             ok("a regua do SISTEMA e a da ED sao a mesma: (B,C) = (-traco, det)",
-               q1 && !q2 && -T == B && De == C);
+               q1 && !q2 && (-T)*eo.Bq == eo.Bp && De*eo.Cq == eo.Cp);
         }
 
         /* O CIRCUITO pela porta real — e o corpo transistor é onde vive o operador. */
@@ -1728,10 +3980,13 @@ static int teste(void){
             int c6 = e_circuito("somador 1 1 1");
             int n4 = e_circuito("o amplificador tem ganho alto");
             int n5 = e_circuito("a porta logica nand e universal");
-            double L = 1e-3, C = 1e-6, Rc = 2.0*sqrt(L/C);
-            double Dsub = el_delta(Rc*0.3, L, C), Dcri = el_delta(Rc, L, C);
-            double Dsob = el_delta(Rc*3.0, L, C);
-            double complex Z = el_rlc(20, L, C, el_ressonancia(L,C));
+            /* OS TRÊS REGIMES, EM INTEIROS. Escolhe-se o andar onde o crítico FECHA em
+             * Q — L/C = 10^4, logo R_c = 2·100 = 200 exato — e aí Δ = R² − 4L/C é
+             * inteiro nos três casos. O caso geral não precisa do valor: o REGIME é o
+             * SINAL de Δ, e o sinal é exato sempre. */
+            long LsC = 10000;                       /* L=1m, C=0,1u: L/C = 10^4 */
+            long Rcrit = 2 * raizi(LsC);            /* = 200, exato */
+            long Dsub = 60*60 - 4*LsC, Dcri = Rcrit*Rcrit - 4*LsC, Dsob = 600*600 - 4*LsC;
             printf("\n      \"rlc 20 1m 1u\"        -> circuito? %s\n", c1 ? "sim" : "nao");
             printf("      \"transistor 0.6\"      -> circuito? %s\n", c2 ? "sim" : "nao");
             printf("      \"wheatstone 100 …\"    -> circuito? %s\n", c3 ? "sim" : "nao");
@@ -1742,11 +3997,10 @@ static int teste(void){
             printf("      \"a ponte de wheatstone mede …\"     -> %s   <- vai as reguas\n\n",
                    n3 ? "SIM (mau)" : "nao");
             printf("      e o RLC cai na MESMA régua das EDs: Δ = R² - 4L/C\n");
-            printf("      R = %.1f  ->  Δ = %+.1f  (subamortecido)\n", Rc*0.3, Dsub);
-            printf("      R = %.1f  ->  Δ = %+.1f  (CRÍTICO — a raiz dupla, ε² = 0)\n", Rc, Dcri);
-            printf("      R = %.1f ->  Δ = %+.1f  (sobreamortecido)\n", Rc*3.0, Dsob);
-            printf("      e na ressonância Im Z = %.1e, FP = %.9f  <- o casamento\n\n",
-                   cimag(Z), el_fp(Z));
+            printf("      R = %3d  ->  Δ = %+ld  (subamortecido)\n", 60, Dsub);
+            printf("      R = %3ld  ->  Δ = %+ld  (CRÍTICO — a raiz dupla, ε² = 0)\n", Rcrit, Dcri);
+            printf("      R = %3d  ->  Δ = %+ld  (sobreamortecido)\n", 600, Dsob);
+            printf("      e na ressonância Im Z = 0 por IDENTIDADE (ω₀² = 1/LC), FP = 1 exato\n\n");
             printf("      \"amplificador 1m 1k\"  -> circuito? %s\n", c4 ? "sim" : "nao");
             printf("      \"logica 1 0\"          -> circuito? %s\n", c5 ? "sim" : "nao");
             printf("      \"somador 1 1 1\"       -> circuito? %s\n", c6 ? "sim" : "nao");
@@ -1756,33 +4010,56 @@ static int teste(void){
                    n5 ? "SIM (mau)" : "nao");
             ok("a porta do circuito abre para as contas e NAO para a fala portuguesa",
                c1 && c2 && c3 && c4 && c5 && c6 && !n1 && !n2 && !n3 && !n4 && !n5);
-            {   /* os dois regimes do MESMO dispositivo, medidos lado a lado */
-                double Is = 1e-14, V = 0.60, h = 1e-7;
-                double Ic = Is*exp(V/VT);
-                double gm_num = (Is*exp((V+h)/VT) - Is*exp((V-h)/VT))/(2*h);
+            {   /* OS DOIS REGIMES DO MESMO DISPOSITIVO — e agora medidos onde eles são
+                 * EXATOS. A derivada mede-se no NÚMERO DUAL (ε²=0), que é a régua que o
+                 * próprio texto cita: «gm é a parte ε de f(a+bε)». Avalia-se f por Horner
+                 * no dual e compara-se com a derivada simbólica — dois caminhos, inteiros.
+                 * Medir isto com (f(V+h)−f(V−h))/2h era medir a régua errada: h é uma
+                 * escolha minha, e o limite não existe em nenhuma máquina. */
                 int mal = 0;
-                if(fabs(gm_num - Ic/VT)/(Ic/VT) > 1e-6) mal++;
+                long cf[4] = { 5, -2, 0, 1 };          /* f(x) = x³ − 2x + 5 */
+                for(long a = -6; a <= 6; a++){
+                    long vr = 0, ve = 0;               /* Horner no dual: (a + 1ε) */
+                    for(int k = 3; k >= 0; k--){       /* (vr+veε)(a+ε) + c_k */
+                        long nr = vr*a + cf[k], ne = vr + ve*a;
+                        vr = nr; ve = ne;
+                    }
+                    long fa = ((a*a*a) - 2*a + 5), dfa = 3*a*a - 2;   /* o outro caminho */
+                    if(vr != fa || ve != dfa) mal++;
+                }
                 for(int a = 0; a < 2; a++) for(int b = 0; b < 2; b++){
                     if((a&&b) != (a*b)%2) mal++;          /* AND e o produto de GF(2) */
                     if((a!=b) != (a+b)%2) mal++;          /* XOR e a soma de GF(2)    */
                     if(!(!a) != a) mal++;                 /* NOT e a dobra, ordem 2   */
                 }
-                printf("      gm em Vbe=0,60: derivada %.4f = Ic/VT %.4f  <- amplificar E derivar\n",
-                       gm_num*1e3, Ic/VT*1e3);
+                printf("      a derivada pela parte ε (ε²=0) bate com a simbólica em 13 pontos\n");
                 printf("      e chaveando: AND = x de GF(2), XOR = + de GF(2), NOT = dobra\n\n");
-                ok("os dois regimes do MESMO dispositivo: derivada na janela, GF(2) fora dela",
-                   mal == 0);
+                ok("os dois regimes do MESMO dispositivo: a derivada e' a parte ε (exata,"
+                   " sem h e sem limite) na janela, e GF(2) fora dela", mal == 0);
             }
-            ok("o RLC cai na mesma regua das EDs, e o critico e a raiz dupla (Delta = 0)",
-               Dsub < 0 && fabs(Dcri) < 1e-9 && Dsob > 0 && fabs(el_fp(Z) - 1.0) < 1e-12);
-            /* e o OPERADOR: Shockley leva soma de tensoes em produto de correntes */
+            ok("o RLC cai na mesma regua das EDs, e o critico e a raiz DUPLA — Delta = 0"
+               " EXATO, em inteiros, e nao 'menor que 1e-9'",
+               Dsub < 0 && Dcri == 0 && Dsob > 0 && Rcrit == 200);
+            /* E O OPERADOR: a soma vira produto. Mede-se no METAL, que é o exp da casa
+             * (σ = e^λ): σ^(a+b) = σ^a·σ^b em ℤ[σ], exato — a mesma lei que Shockley
+             * cumpre em volts, sem um decimal e sem tolerância. */
             {
-                double Is = 1e-14, V1 = 0.35, V2 = 0.28;
-                double p = Is*exp(V1/VT)*exp(V2/VT), s = Is*exp((V1+V2)/VT);
-                printf("      I(%.2f)·I(%.2f)/Is = %.6e\n", V1, V2, p);
-                printf("      I(%.2f + %.2f)     = %.6e   <- O MESMO\n\n", V1, V2, s);
-                ok("o transistor E o operador: a SOMA de tensoes vira PRODUTO de correntes",
-                   fabs(p-s)/s < 1e-11);
+                long mal = 0;
+                for(long ea = 0; ea <= 8; ea++) for(long eb = 0; eb <= 8; eb++){
+                    /* σ^n = F_n·σ + F_{n-1}, com σ² = σ + 1 */
+                    long pa = 0, qa = 1, pb = 0, qb = 1;             /* p·σ + q */
+                    for(long i = 0; i < ea; i++){ long np = pa + qa, nq = pa; pa = np; qa = nq; }
+                    for(long i = 0; i < eb; i++){ long np = pb + qb, nq = pb; pb = np; qb = nq; }
+                    /* o PRODUTO em ℤ[σ]: (pσ+q)(p'σ+q') = (pp'+pq'+qp')σ + (pp'+qq') */
+                    long rp = pa*pb + pa*qb + qa*pb, rq_ = pa*pb + qa*qb;
+                    long ps = 0, qs = 1;
+                    for(long i = 0; i < ea+eb; i++){ long np = ps + qs, nq = ps; ps = np; qs = nq; }
+                    if(rp != ps || rq_ != qs) mal++;                 /* a SOMA dos expoentes */
+                }
+                printf("      σ^a · σ^b = σ^(a+b) em Z[σ], nos 81 pares — a soma vira produto\n\n");
+                ok("o transistor E o operador, e a lei mede-se onde e' EXATA: no metal,"
+                   " σ^(a+b) = σ^a·σ^b — a mesma cláusula de Pontryagin, sem float",
+                   mal == 0);
             }
         }
 
@@ -1842,6 +4119,9 @@ static int teste(void){
                 { "3 vezes 3 mais 2",   "3 x 3 + 2",    11 },
                 { "2 mais 2",           "2 + 2",        4  },
                 { "10 vezes 10 mais 5", "10 x 10 + 5",  105 },
+                { "7 vezes 8 menos 6",  "7 x 8 - 6",    50 },
+                { "100 dividido por 4", "100 / 4",      25 },
+                { "10 por cento de 200","10 % de 200",  20 },
             };
             int mal = 0;
             char cf_n[600]; snprintf(cf_n, sizeof cf_n, "%s.conta", b);
@@ -1996,6 +4276,1954 @@ static int teste(void){
         printf("      o mais fundo primeiro e dentro dele o x antes do +. E os tres delimitadores\n");
         printf("      sao o mesmo — quem manda e a profundidade, nao a roupa.\n");
     }
+
+    /* ═══ §C13 — O CORTE E AS TAREFAS: moldura+parametro, e as portas que aumentam a massa ═══
+     * Dual Sort: o corte e a selecao de suporte — a fala parte-se em moldura (o que o corpus
+     * conhece) e parametro (o que varia); e «se faltar informacao, o agente AUMENTA A MASSA
+     * (ferramenta, memoria, calculo) — nao finge que ela ja estava la». */
+    printf("\n§C13 O CORTE E AS TAREFAS: a moldura escolhe, o parametro escreve-se.\n\n");
+    {
+        char out[1024]; int dd;
+        aprende("gosto de", "boa escolha — ___ e otimo.");
+        long rm = t_erosao("gosto de rock", &dd);
+        le_texto(rm, t, sizeof t);
+        int c1 = rm && corte_escreve("gosto de rock", dd, t, out, sizeof out) &&
+                 !strcmp(out, "boa escolha — rock e otimo.");
+        printf("      \"gosto de rock\"        -> %s\n", c1 ? out : "(falhou)");
+        ok("a moldura escolhe (erosao) e o parametro escreve-se no buraco (dilatacao)", c1);
+        /* o gume: a moldura sem parametro nao responde — o buraco por preencher */
+        long rv = t_erosao("gosto de", &dd); le_texto(rv, t, sizeof t);
+        ok("e a moldura SEM parametro nao responde: o quantificador sem instancia",
+           rv && corte_escreve("gosto de", dd, t, out, sizeof out) == 0);
+        /* e a resposta sem buraco passa intacta — o corte nao muda o que ja funcionava */
+        int c3 = corte_escreve("bom dia", 7, "bom dia! como estas?", out, sizeof out);
+        ok("e a resposta sem buraco passa byte a byte", c3 && !strcmp(out, "bom dia! como estas?"));
+
+        /* «lembra que X = Y» — o ensino pela fala, e a volta MEDIDA: o que se lembra
+         * responde-se. A referencia nao e escrita a mao: e a propria fala ensinada. */
+        int l1 = e_lembra("lembra que o meu nome = aarao") &&
+                 resolve_lembra("lembra que o meu nome = aarao");
+        long rl = t_erosao("o meu nome", &dd); le_texto(rl, t, sizeof t);
+        ok("«lembra que X = Y» aprende, e a volta responde o que se lembrou",
+           l1 && rl && !strcmp(t, "aarao"));
+        /* o gume: dois « e' » sem '=' e ambiguo, e nao se adivinha */
+        ok("e sem separador claro a porta recusa (ambiguo nao se adivinha)",
+           resolve_lembra("lembra que isto aquilo") == 0);
+
+        /* o relogio: nao se compara com hora escrita a mao (o numero que nao cabe!) —
+         * mede-se que a porta abre para a pergunta e fecha para a fala parecida */
+        ok("a porta da hora abre para \"que horas...\" e fecha para \"quantas horas...\"",
+           e_hora("que horas sao") && e_hora("q horas") && !e_hora("quantas horas sao precisas"));
+        ok("a porta da data abre para \"que dia...\" e fecha para \"aquele dia...\"",
+           e_data("que dia e hoje") && !e_data("aquele dia foi bom"));
+
+        /* «mostra X»: o slug procura no catalogo DE VERDADE — o teste cria o seu, e o
+         * controlo pede um que nao existe (a porta devolve 0 e o corpus decide) */
+        mkdir("/tmp/conversa_teste_papers", 0755);
+        int fpp = open("/tmp/conversa_teste_papers/partitura.tex", O_WRONLY|O_CREAT, 0644);
+        if(fpp >= 0) close(fpp);
+        ok("«mostra a partitura» acha o .tex pelo slug do parametro",
+           resolve_mostra_em("mostra a partitura", "/tmp/conversa_teste_papers") == 1);
+        ok("e o que nao esta no catalogo devolve a vez ao corpus",
+           resolve_mostra_em("mostra o unicornio", "/tmp/conversa_teste_papers") == 0);
+        unlink("/tmp/conversa_teste_papers/partitura.tex");
+        rmdir("/tmp/conversa_teste_papers");
+
+        /* a moldura NAO e fala completa — e um funcional a espera do argumento: a
+         * torcao nao pode fechar um troco nela ("gosto de" + "bom dia" seria partir
+         * a fala no buraco em vez de o preencher). */
+        long vv[8];
+        int nt = t_torcao("gosto de bom dia", vv, 8);
+        ok("a torcao nao fecha troco numa moldura com buraco", nt <= 1);
+        /* o gume do corpus real: as respostas citam "torre_fundacao.tex" (o '_' nu, do
+         * fundacao.sh) e "papers/torre\_fundacao.tex" (o \_ do LaTeX) — nenhum e buraco;
+         * so o "___", o blank de preencher, e a moldura. Duas regressoes MEDIDAS ate
+         * aqui: «o que e um corpo» e «mostra a fundacao» caiam no decreto. */
+        int cl = corte_escreve("o que e um corpo", 16,
+                               "ver papers/torre_fundacao.tex", out, sizeof out);
+        int cl2 = corte_escreve("o que e um corpo", 16,
+                                "ver papers/torre\\_fundacao.tex", out, sizeof out);
+        ok("o '_' nu dos caminhos e o \\_ do LaTeX nao sao buraco — so o ___ e",
+           cl == 1 && cl2 == 1 && acha_buraco("um ___ aqui") != 0);
+
+        /* a EROSAO RE-ANCORADA: a moldura no MEIO da fala — "que estilo? gosto de rock"
+         * come o ruido a frente ate uma fronteira e o prefixo tenta outra vez; o corte
+         * preenche com o resto. O gume: sem nada que ancore, devolve 0. */
+        {
+            const char *efet = 0; int da = 0;
+            long ra = t_ancorada("que estilo? gosto de rock", &da, &efet);
+            int a1 = 0;
+            if(ra && efet){
+                char rr[512]; le_texto(ra, rr, sizeof rr);
+                a1 = corte_escreve(efet, da, rr, out, sizeof out) &&
+                     !strcmp(out, "boa escolha — rock e otimo.");
+            }
+            ok("a erosao re-ancorada acha a moldura no meio e o corte preenche", a1);
+            ok("e sem ancora nenhuma devolve 0 (o gume)",
+               t_ancorada("zzz yyy www", &da, &efet) == 0);
+        }
+
+        /* AS FUNÇÕES NOMEADAS — a fita recuperada para a fala: «raiz de», «fatorial de»,
+         * «dobro de»... montam a expressao e a resolucao e a MESMA fita (passos, fracoes,
+         * o i). A guarda e a de sempre: o parametro tem de ser conta pura — «a raiz de 2
+         * e racional» continua no corpus. O valor mede-se contra a conta a mao. */
+        {
+            struct { const char *fala; const char *expr; long val; } fn[] = {
+                { "raiz de 16",           "raiz (16)",   4   },
+                { "o fatorial de 5",      "(5) !",       120 },
+                { "o dobro de 3 vezes 3", "2 x (3 x 3)", 18  },
+                { "a metade de 50",       "(50) / 2",    25  },
+                { "o quadrado de 9",      "(9) ^ 2",     81  },
+                { "o cubo de 3",          "(3) ^ 3",     27  },
+            };
+            int fmal = 0;
+            char ex[1200], cf_n2[600]; snprintf(cf_n2, sizeof cf_n2, "%s.conta", b);
+            for(size_t k = 0; k < sizeof fn/sizeof *fn; k++){
+                if(!funcao_monta(fn[k].fala, ex, sizeof ex) || strcmp(ex, fn[k].expr)){ fmal++; continue; }
+                int cf2 = open(cf_n2, O_RDWR|O_CREAT|O_TRUNC, 0644);
+                long nn = ct_leia(cf2, ex), vv2 = -1; char pq2[256];
+                while(ct_passo(cf2, nn, pq2, sizeof pq2) == 1) ;
+                if(!ct_valor(cf2, nn, &vv2) || vv2 != fn[k].val) fmal++;
+                close(cf2);
+                printf("      %-22s -> %-14s = %ld\n", fn[k].fala, ex, vv2);
+            }
+            unlink(cf_n2);
+            ok("as funcoes nomeadas montam a expressao e a fita da o valor da conta a mao",
+               fmal == 0);
+            ok("e a guarda: «a raiz de 2 e racional» e «o dobro de trabalho» NAO sao funcao"
+               " — o parametro nao e conta pura e o corpus fica dono",
+               funcao_monta("a raiz de 2 e racional", ex, sizeof ex) == 0 &&
+               funcao_monta("o dobro de trabalho", ex, sizeof ex) == 0);
+        }
+
+        /* ═══ A MEMBRANA TEXTUAL: o LaTeX desdobra-se na entrada ═════════════════════
+         * O LaTeX e a «interface padrao — a membrana textual por omissao» da casa
+         * (Corpo Universal, §papeis), e o tradutor .tex<->PDF «opera nesta torre»
+         * (Corpo de Peano). Mas o tradutor COMPOE (desenha); nao avalia. O que faltava
+         * era a mesma lei do cone: a fala vem comprimida na membrana e DESDOBRA-SE na
+         * entrada — «\frac{1}{2}» e «(1)/(2)» sao a mesma conta em duas roupas.
+         * O aninhamento resolve-se por PONTO FIXO: cada volta desdobra um andar. */
+        {
+            struct { const char *tex, *nu; } M[] = {
+                { "\\frac{1}{2} + \\frac{1}{3}", "(1)/(2) + (1)/(3)" },
+                { "\\sqrt{16}",                  "raiz (16)"         },
+                { "2 \\cdot 3 + 4",              "2 x 3 + 4"         },
+                { "10 \\div 4",                  "10 / 4"            },
+                { "x^{2} = 4",                   "x^2 = 4"           },
+                { "$3 \\times 3$",               "3 x 3"             },
+                { "\\left( 2 + 3 \\right) x 4",  "( 2 + 3 ) x 4"     },
+                /* o aninhamento: uma volta nao chega, e o ponto fixo trata-o */
+                { "\\frac{\\frac{1}{2}}{3}",     "((1)/(2))/(3)"     },
+                { "\\sqrt{\\frac{16}{4}}",       "raiz ((16)/(4))"   },
+            };
+            int mmal = 0; char nu2[1200];
+            for(size_t k = 0; k < sizeof M/sizeof *M; k++){
+                latex_desdobra(nu2, sizeof nu2, M[k].tex);
+                if(strcmp(nu2, M[k].nu)){ mmal++;
+                    printf("      MAL: \"%s\" -> \"%s\" (esperado \"%s\")\n",
+                           M[k].tex, nu2, M[k].nu); }
+            }
+            ok("a membrana LaTeX desdobra-se na entrada, e o aninhamento fecha por ponto"
+               " fixo (frac, sqrt, cdot, div, expoente, delimitadores)", mmal == 0);
+
+            /* e o VALOR: nao basta a troca de letras — a fita resolve o desdobrado */
+            char cf_n3[600]; snprintf(cf_n3, sizeof cf_n3, "%s.conta", b);
+            latex_desdobra(nu2, sizeof nu2, "\\frac{1}{2} + \\frac{1}{3}");
+            int cf3 = open(cf_n3, O_RDWR|O_CREAT|O_TRUNC, 0644);
+            long n3 = ct_leia(cf3, nu2), v3 = 0, q3 = 0; char pq3[256];
+            while(ct_passo(cf3, n3, pq3, sizeof pq3) == 1) ;
+            int val = ct_valorq(cf3, n3, &v3, &q3) && v3 == 5 && q3 == 6;
+            close(cf3); unlink(cf_n3);
+            ok("e a fita resolve o desdobrado: 1/2 + 1/3 fecha em 5/6 exato", val);
+
+            /* o lado que NAO pode mudar: a fala em portugues nao tem membrana, e o
+             * «\_» que o corpus cita e roupa do compositor — nenhum vira conta */
+            const char *nao[] = { "a raiz de 2 e racional", "bom dia, tudo bem?",
+                                  "ver papers/torre\\_fundacao.tex", "gosto de rock" };
+            int roubadas = 0;
+            for(size_t k = 0; k < sizeof nao/sizeof *nao; k++){
+                latex_desdobra(nu2, sizeof nu2, nao[k]);
+                if(e_conta(nu2)) roubadas++;
+            }
+            ok("e a membrana nao rouba o corpus: fala sem LaTeX nao vira conta", roubadas == 0);
+
+        /* ═══ §C28 OS RACIONAIS: a REVERSIBILIDADE DA MULTIPLICAÇÃO NÃO NULA ══════
+         * A escada e o que cada andar acrescenta, ditos por ele:
+         *
+         *   ℕ: + ×      ℤ: + × −  (reversibilidade da SOMA)
+         *   ℚ: + × − ÷            (reversibilidade da MULTIPLICAÇÃO não nula)
+         *
+         *   construção → oposto → inverso
+         *
+         * E o gume vem na língua desta casa: «divisão por zero não é uma aproximação
+         * ruim; é uma operação SEM FIBRA». A fibra é a divisão das cinco operações —
+         * dado o produto e um fator, achar o outro. Com o fator zero ou não há nenhum
+         * (0·x = 1) ou há todos (0·x = 0): nos dois casos não há fibra, e diz-se.
+         *
+         * Tudo por produto cruzado. Nenhum decimal entra — nem para comparar. */
+        printf("\n§C28 OS RACIONAIS: o inverso, e o único sítio onde ele falta.\n\n");
+        {
+            int qmal = 0;
+            /* (ex.1) a ~ é equivalência, e a classe é que é o número — não o par escrito */
+            for(long a = -6; a <= 6; a++) for(long b = 1; b <= 6; b++){
+                Qz x = { a, b };
+                if(!qz_igual(x, x)) qmal++;                          /* reflexiva */
+                for(long c = -6; c <= 6; c++) for(long d = 1; d <= 6; d++){
+                    Qz y = { c, d };
+                    if(qz_igual(x,y) != qz_igual(y,x)) qmal++;       /* simétrica */
+                    /* e a reduzida representa a classe: iguais ⟺ mesma reduzida */
+                    { Qz rx = qz(a,b), ry = qz(c,d);
+                      if(qz_igual(x,y) != (rx.p == ry.p && rx.q == ry.q)) qmal++; }
+                    for(long e2 = -4; e2 <= 4; e2++) for(long f2 = 1; f2 <= 4; f2++){
+                        Qz z = { e2, f2 };
+                        if(qz_igual(x,y) && qz_igual(y,z) && !qz_igual(x,z)) qmal++;
+                    }
+                }
+            }
+            ok("ℚ constrói-se por PARES e (a,b)~(c,d) ⟺ ad = bc é equivalência — e a"
+               " classe é que é o número: dois pares são iguais exatamente quando têm a"
+               " mesma forma reduzida (o primeiro tick do andar)", qmal == 0);
+
+            /* (ex.2)(ex.3) a SOMA e o PRODUTO BEM DEFINIDOS: trocar o representante
+             * (multiplicar os dois termos por k) não pode mudar o resultado */
+            { int bmal4 = 0;
+              for(long a = -5; a <= 5; a++) for(long b = 1; b <= 5; b++)
+              for(long c = -5; c <= 5; c++) for(long d = 1; d <= 5; d++)
+              for(long k = 1; k <= 4; k++) for(long l = 1; l <= 3; l++){
+                  Qz x = { a, b }, y = { c, d };
+                  Qz x2 = { a*k, b*k }, y2 = { c*l, d*l };           /* outros representantes */
+                  if(!qz_igual(qz_soma(x,y), qz_soma(x2,y2))) bmal4++;
+                  if(!qz_igual(qz_mult(x,y), qz_mult(x2,y2))) bmal4++;
+              }
+              printf("      2/3 + 3/5 = "); { Qz s = qz_soma(qz(2,3), qz(3,5)); esc_q(s); }
+              printf("   e   2/3 · 5/7 = "); { Qz m = qz_mult(qz(2,3), qz(5,7)); esc_q(m); }
+              printf("   (os dois exemplos do ficheiro)\n");
+              Qz s1 = qz_soma(qz(2,3), qz(3,5)), m1 = qz_mult(qz(2,3), qz(5,7));
+              ok("a SOMA e a MULTIPLICAÇÃO estão BEM DEFINIDAS: trocar o representante"
+                 " (a,b)→(ka,kb) não muda a classe do resultado — é isto que faz a"
+                 " operação ser sobre o NÚMERO e não sobre o par que calhou escrito",
+                 bmal4 == 0 && s1.p == 19 && s1.q == 15 && m1.p == 10 && m1.q == 21); }
+
+            /* (ex.4)(ex.5) os NEUTROS e o OPOSTO, com a unicidade varrida */
+            { int nmal2 = 0;
+              Qz zero = qz(0,1), um = qz(1,1);
+              for(long a = -8; a <= 8; a++) for(long b = 1; b <= 8; b++){
+                  Qz x = qz(a,b);
+                  if(!qz_igual(qz_soma(x, zero), x)) nmal2++;        /* q + 0 = q */
+                  if(!qz_igual(qz_mult(x, um), x)) nmal2++;          /* q · 1 = q */
+                  if(!qz_igual(qz_soma(x, qz_oposto(x)), zero)) nmal2++;
+                  /* e o oposto é o ÚNICO: nenhum outro racional soma zero com x */
+                  for(long c = -8; c <= 8; c++) for(long d = 1; d <= 8; d++){
+                      Qz y = qz(c,d);
+                      if(qz_igual(qz_soma(x,y), zero) && !qz_igual(y, qz_oposto(x))) nmal2++;
+                  }
+              }
+              ok("os NEUTROS cumprem (q+0 = q, q·1 = q) e o OPOSTO é ÚNICO — varrido, não"
+                 " afirmado: nenhum outro racional soma zero com q", nmal2 == 0); }
+
+            /* O INVERSO, E O GUME. Existe ⟺ q ≠ 0, é único, e no zero NÃO EXISTE —
+             * e a razão diz-se: a fibra 0·x = 1 é vazia, a fibra 0·x = 0 é toda. */
+            { int imal = 0, recusou = 0, vazia = 0, toda = 0;
+              Qz zero = qz(0,1), um = qz(1,1), i;
+              if(!qz_inverso(zero, &i)) recusou = 1;                 /* 0⁻¹ não existe */
+              for(long a = -8; a <= 8; a++) for(long b = 1; b <= 8; b++){
+                  Qz x = qz(a,b), inv;
+                  int tem = qz_inverso(x, &inv);
+                  if(tem != (a != 0)) imal++;                        /* existe ⟺ ≠ 0 */
+                  if(tem && !qz_igual(qz_mult(x, inv), um)) imal++;  /* e a volta dá 1 */
+                  /* e é ÚNICO: nenhum outro y cumpre xy = 1 */
+                  for(long c = -8; c <= 8; c++) for(long d = 1; d <= 8; d++){
+                      Qz y = qz(c,d);
+                      if(qz_igual(qz_mult(x,y), um) && !(tem && qz_igual(y, inv))) imal++;
+                  }
+                  /* o gume medido nos DOIS lados: 0·x nunca dá 1, e dá sempre 0 */
+                  if(qz_igual(qz_mult(zero, x), um)) vazia++;
+                  if(!qz_igual(qz_mult(zero, x), zero)) toda++;
+                  { Qz r; if(qz_divide(x, zero, &r)) imal++; }       /* dividir por 0: recusa */
+              }
+              Qz i37; qz_inverso(qz(3,7), &i37);
+              printf("      (3/7)⁻¹ = "); esc_q(i37);
+              printf("   e   0⁻¹ = %s\n", recusou ? "NÃO EXISTE (sem fibra)" : "??");
+              ok("O INVERSO é a novidade do andar: existe para todo q ≠ 0, é ÚNICO, e no"
+                 " ZERO não existe — e não por dificuldade: a fibra 0·x = 1 é VAZIA e a"
+                 " fibra 0·x = 0 é TODA. Dividir por zero é recusado, não aproximado",
+                 imal == 0 && recusou && vazia == 0 && toda == 0
+                 && i37.p == 7 && i37.q == 3); }
+
+            /* (§7)(ex.6)(§8) a DIVISÃO É A VOLTA: a/b ÷ c/d = ad/bc, e r·(c/d) = a/b */
+            { int dmal4 = 0, houve = 0;
+              for(long a = -6; a <= 6; a++) for(long b = 1; b <= 6; b++)
+              for(long c = -6; c <= 6; c++) for(long d = 1; d <= 6; d++){
+                  Qz x = qz(a,b), y = qz(c,d), r;
+                  if(!qz_divide(x, y, &r)){ if(c != 0) dmal4++; continue; }
+                  /* a fórmula do teorema, ad/bc — e a divisão tem de dar o mesmo */
+                  if(!qz_igual(r, qz(a*d, b*c))) dmal4++;
+                  if(!qz_igual(qz_mult(r, y), x)) dmal4++;           /* A VOLTA, resíduo 0 */
+                  houve++;
+              }
+              Qz r8; int t8 = qz_divide(qz(2,3), qz(5,4), &r8);
+              Qz v8 = qz_mult(r8, qz(5,4));
+              printf("      2/3 ÷ 5/4 = "); esc_q(r8); printf("   e a volta "); esc_q(r8);
+              printf(" · 5/4 = "); esc_q(v8); printf("   (resíduo 0)\n");
+              ok("a DIVISÃO não é operação nova — é multiplicar pelo inverso — e vale"
+                 " ad/bc por dois caminhos, com a VOLTA r·(c/d) = a/b a fechar em todos"
+                 " os casos com c ≠ 0: é isto a reversibilidade da multiplicação",
+                 dmal4 == 0 && houve > 1000 && t8 && r8.p == 8 && r8.q == 15
+                 && qz_igual(v8, qz(2,3))); }
+
+            /* (ex.7)(ex.8) a SIMPLIFICAÇÃO e a IGUALDADE — e nenhum decimal entra */
+            { int smal = 0;
+              for(long a = -30; a <= 30; a++) for(long b = 1; b <= 30; b++){
+                  Qz r = qz(a,b);
+                  if(qz_mdc(r.p, r.q) != 1) smal++;                  /* reduzida: gcd = 1 */
+                  if(r.q <= 0) smal++;                               /* sinal no numerador */
+                  Qz x = { a, b };
+                  if(!qz_igual(x, r)) smal++;                        /* e é a MESMA classe */
+              }
+              Qz e7 = qz(84, 126);
+              int ig1 = qz_igual(qz(3,7), qz(15,35));                /* 3·35 = 105 = 7·15 */
+              int ig2 = qz_igual(qz(3,7), qz(4,9));                  /* 27 ≠ 28 */
+              printf("      84/126 = "); esc_q(e7);
+              printf("   ·   3/7 = 15/35 ? %s   (3·35 = %d, 7·15 = %d)\n",
+                     ig1 ? "sim" : "não", 3*35, 7*15);
+              printf("      3/7 = 4/9 ? %s   (3·9 = %d, 7·4 = %d — e a diferença é 1)\n",
+                     ig2 ? "sim" : "NÃO", 3*9, 7*4);
+              ok("a forma REDUZIDA é única (gcd = 1, sinal no numerador) e a IGUALDADE"
+                 " decide-se pelo PRODUTO CRUZADO: 84/126 = 2/3, 3/7 = 15/35 e 3/7 ≠ 4/9"
+                 " — sem converter para decimal nenhuma vez",
+                 smal == 0 && e7.p == 2 && e7.q == 3 && ig1 && !ig2); }
+
+            /* (§11)(ex.9)(ex.15) a ORDEM TOTAL, e o gume: c > 0 preserva, c < 0 INVERTE */
+            { int omal5 = 0, inverteu = 0;
+              for(long a = -5; a <= 5; a++) for(long b = 1; b <= 5; b++)
+              for(long c = -5; c <= 5; c++) for(long d = 1; d <= 5; d++){
+                  Qz x = qz(a,b), y = qz(c,d);
+                  if(!(qz_menor(x,y) || qz_menor(y,x) || qz_igual(x,y))) omal5++;   /* total */
+                  if(qz_menor(x,y) && qz_menor(y,x)) omal5++;                       /* estrita */
+                  for(long e2 = -3; e2 <= 3; e2++) for(long f2 = 1; f2 <= 3; f2++){
+                      Qz z = qz(e2,f2);
+                      if(qz_menor(x,y) && qz_menor(y,z) && !qz_menor(x,z)) omal5++; /* transitiva */
+                      /* a < b e c > 0 ⇒ ac < bc; e com c < 0 a desigualdade VIRA */
+                      if(qz_menor(x,y) && e2 > 0 && !qz_menor(qz_mult(x,z), qz_mult(y,z))) omal5++;
+                      if(qz_menor(x,y) && e2 < 0){
+                          if(!qz_menor(qz_mult(y,z), qz_mult(x,z))) omal5++;
+                          inverteu = 1;
+                      }
+                      /* e a soma preserva sempre, sem condição sobre o sinal */
+                      if(qz_menor(x,y) != qz_menor(qz_soma(x,z), qz_soma(y,z))) omal5++;
+                  }
+              }
+              printf("      3/7 < 1/2 ? %s   porque 3·2 = %d  <  7·1 = %d\n",
+                     qz_menor(qz(3,7), qz(1,2)) ? "sim" : "não", 3*2, 7*1);
+              ok("a ORDEM em ℚ é TOTAL e compatível: a soma preserva SEMPRE, o produto"
+                 " preserva com c > 0 e INVERTE com c < 0 — e o lado que inverte é o gume"
+                 " (uma regra que não tivesse os dois lados seria metade)",
+                 omal5 == 0 && inverteu); }
+
+            /* (§12)(ex.10) a DENSIDADE — o que ℤ não tinha: entre dois há sempre outro */
+            { int dmal5 = 0;
+              for(long a = -5; a <= 5; a++) for(long b = 1; b <= 5; b++)
+              for(long c = -5; c <= 5; c++) for(long d = 1; d <= 5; d++){
+                  Qz x = qz(a,b), y = qz(c,d);
+                  if(!qz_menor(x,y)) continue;
+                  Qz m = qz_medio(x,y);
+                  if(!qz_menor(x,m) || !qz_menor(m,y)) dmal5++;      /* a < (a+b)/2 < b */
+              }
+              /* e os TRÊS entre 1/3 e 1/2, cada um entre o médio anterior e b (o que resta
+               * à direita): é o processo que não pára, e por isso são infinitos, não três */
+              Qz a3 = qz(1,3), b3 = qz(1,2), e = a3, m3[3];
+              for(int k = 0; k < 3; k++){ m3[k] = qz_medio(e, b3); e = m3[k]; }
+              int tres = 1;
+              for(int k = 0; k < 3; k++) if(!qz_menor(a3, m3[k]) || !qz_menor(m3[k], b3)) tres = 0;
+              for(int k = 1; k < 3; k++) if(!qz_menor(m3[k-1], m3[k])) tres = 0;  /* distintos */
+              printf("      entre 1/3 e 1/2: "); esc_q(m3[0]); printf(", ");
+              esc_q(m3[1]); printf(", "); esc_q(m3[2]);
+              printf("   (e o processo repete-se para sempre)\n");
+              /* o GUME, e mede-se dos DOIS lados na MESMA varredura: entre 3 e 4 contam-se
+               * os inteiros (têm de ser zero) e os racionais de denominador ≤ 12 (têm de
+               * ser muitos). É a mesma pergunta a duas réguas — e é a resposta que separa
+               * o andar de baixo deste. */
+              long inteiros_entre = 0, racionais_entre = 0;
+              Qz t3 = qz_de_inteiro(3), t4 = qz_de_inteiro(4);
+              for(long n2 = -60; n2 <= 60; n2++){   /* largo o bastante: 4·12 = 48 cabe */
+                  Qz z = qz_de_inteiro(n2);
+                  if(qz_menor(t3, z) && qz_menor(z, t4)) inteiros_entre++;
+                  for(long dd = 1; dd <= 12; dd++){
+                      Qz r2 = qz(n2, dd);
+                      if(qz_menor(t3, r2) && qz_menor(r2, t4)) racionais_entre++;
+                  }
+              }
+              printf("      e entre 3 e 4: %ld inteiros, %ld racionais (denominador ≤ 12)\n",
+                     inteiros_entre, racionais_entre);
+              ok("a DENSIDADE é o que ℚ tem e ℤ não: entre quaisquer dois há sempre o"
+                 " médio (varrido), entre 1/3 e 1/2 exibem-se três distintos com o processo"
+                 " a continuar, e a MESMA varredura entre 3 e 4 dá zero inteiros e dezenas"
+                 " de racionais — a diferença mede-se, não se afirma",
+                 dmal5 == 0 && tres && inteiros_entre == 0 && racionais_entre > 10); }
+
+            /* (§13)(ex.11) o ARQUIMEDIANO, e (§14)(ex.12) a inclusão ℤ ↪ ℚ */
+            { int amal = 0;
+              for(long a = -40; a <= 40; a++) for(long b = 1; b <= 12; b++){
+                  Qz x = qz(a,b);
+                  long n2 = qz_arquimediano(x);
+                  Qz nn = qz_de_inteiro(n2), mod = x.p < 0 ? qz_oposto(x) : x;
+                  if(!qz_menor(mod, nn)) amal++;                     /* n > |q|, e o n exibe-se */
+                  if(n2 < 1) amal++;                                 /* e é natural */
+              }
+              int imal2 = 0;
+              for(long a = -20; a <= 20; a++){
+                  Qz ia = qz_de_inteiro(a);
+                  for(long b = -20; b <= 20; b++){
+                      Qz ib = qz_de_inteiro(b);
+                      if(!qz_igual(qz_de_inteiro(a+b), qz_soma(ia, ib))) imal2++;
+                      if(!qz_igual(qz_de_inteiro(a*b), qz_mult(ia, ib))) imal2++;
+                      /* INJETIVA: n/1 = m/1 ⟹ n = m */
+                      if(qz_igual(ia, ib) && a != b) imal2++;
+                  }
+              }
+              ok("ℚ é ARQUIMEDIANO (para cada q exibe-se o n natural com n > |q|) e a"
+                 " inclusão ℤ ↪ ℚ, n ↦ n/1, é INJETIVA e preserva as duas operações — os"
+                 " inteiros não são substituídos, ficam lá dentro intactos",
+                 amal == 0 && imal2 == 0); }
+
+            /* (§17)(ex.15) ℚ É CORPO: os axiomas todos, e a distributividade */
+            { int cmal4 = 0;
+              for(long a = -4; a <= 4; a++) for(long b = 1; b <= 4; b++)
+              for(long c = -4; c <= 4; c++) for(long d = 1; d <= 4; d++)
+              for(long e2 = -4; e2 <= 4; e2++) for(long f2 = 1; f2 <= 4; f2++){
+                  Qz x = qz(a,b), y = qz(c,d), z = qz(e2,f2);
+                  if(!qz_igual(qz_soma(qz_soma(x,y),z), qz_soma(x,qz_soma(y,z)))) cmal4++;
+                  if(!qz_igual(qz_mult(qz_mult(x,y),z), qz_mult(x,qz_mult(y,z)))) cmal4++;
+                  if(!qz_igual(qz_soma(x,y), qz_soma(y,x))) cmal4++;
+                  if(!qz_igual(qz_mult(x,y), qz_mult(y,x))) cmal4++;
+                  if(!qz_igual(qz_mult(x, qz_soma(y,z)),
+                               qz_soma(qz_mult(x,y), qz_mult(x,z)))) cmal4++;
+              }
+              ok("ℚ É CORPO ORDENADO: associatividade, comutatividade, neutros, oposto,"
+                 " inverso não nulo e DISTRIBUTIVIDADE — varridos, e é o primeiro andar"
+                 " da escada onde as quatro operações fecham", cmal4 == 0); }
+
+            /* (§15)(ex.13) a EQUAÇÃO LINEAR: ax = b tem solução para todo a ≠ 0, e a
+             * VOLTA substitui na equação ORIGINAL — que é o que ele pede */
+            { int emal = 0, houve2 = 0;
+              for(long ap = -4; ap <= 4; ap++) for(long aq = 1; aq <= 4; aq++)
+              for(long bp = -4; bp <= 4; bp++) for(long bq = 1; bq <= 4; bq++)
+              for(long cp = -3; cp <= 3; cp++) for(long cq = 1; cq <= 3; cq++){
+                  Qz A = qz(ap,aq), B = qz(bp,bq), C = qz(cp,cq), x;
+                  /* Ax + B = C  ⟹  x = (C − B)/A */
+                  if(!qz_divide(qz_soma(C, qz_oposto(B)), A, &x)){
+                      if(ap != 0) emal++;                            /* só o zero recusa */
+                      continue;
+                  }
+                  if(!qz_igual(qz_soma(qz_mult(A,x), B), C)) emal++; /* A VOLTA na original */
+                  houve2++;
+              }
+              /* o exercício 13, com os números dele: (3/5)x − 2/7 = 4/21 */
+              Qz A = qz(3,5), B = qz(-2,7), C = qz(4,21), x;
+              int tem13 = qz_divide(qz_soma(C, qz_oposto(B)), A, &x);
+              Qz volta = qz_soma(qz_mult(A, x), B);
+              printf("      (3/5)x − 2/7 = 4/21   ->   x = "); esc_q(x);
+              printf(",  e a volta (3/5)·"); esc_q(x); printf(" − 2/7 = "); esc_q(volta);
+              printf("   %s\n", qz_igual(volta, C) ? "(resíduo 0)" : "— NÃO afirmo");
+              ok("toda equação ax + b = c com a ≠ 0 tem solução EM ℚ, e a volta substitui"
+                 " na equação ORIGINAL — é isto que ℤ não conseguia fazer: lá 3x = 2 não"
+                 " tinha solução, aqui tem sempre (e só o a = 0 recusa)",
+                 emal == 0 && houve2 > 1000 && tem13 && qz_igual(volta, C)); }
+
+            /* (§16)(ex.14) as PROPORÇÕES nos DOIS sentidos — a/b = c/d ⟺ ad = bc */
+            { int pmal6 = 0, ida = 0, volta2 = 0;
+              for(long a = -7; a <= 7; a++) for(long b = 1; b <= 7; b++)
+              for(long c = -7; c <= 7; c++) for(long d = 1; d <= 7; d++){
+                  Qz x = qz(a,b), y = qz(c,d);
+                  if(qz_igual(x,y)){ if(a*d != b*c) pmal6++; else ida++; }     /* ⟹ */
+                  if(a*d == b*c){ if(!qz_igual(x,y)) pmal6++; else volta2++; } /* ⟸ */
+              }
+              ok("as PROPORÇÕES valem nos DOIS sentidos (a/b = c/d ⟺ ad = bc), e é essa a"
+                 " forma «hipótese ↔ transformação ↔ volta» que o ficheiro pede — um"
+                 " sentido sozinho seria metade a que se deu o nome do par",
+                 pmal6 == 0 && ida > 0 && volta2 > 0); }
+        }
+
+        /* ═══ §C27 OS INTEIROS: o que eles acrescentam é a REVERSIBILIDADE ════════
+         * «Naturais eram o primeiro relógio; os inteiros acrescentam a REVERSIBILIDADE,
+         * porque agora todo a tem uma folha (−a) que retorna ao zero. E depois
+         * divisibilidade/MDC/Bézout transformam essa reversibilidade numa máquina de
+         * cortes.» A cadeia é dele:
+         *
+         *   ℕ → ℤ → oposto → subtração → ordem → |·| → divisibilidade → gcd → Bézout
+         *     → primos → congruência */
+        printf("\n§C27 OS INTEIROS: a folha (−a) volta ao zero, e daí sai a máquina de cortes.\n\n");
+        {
+            int zmal = 0;
+            /* (ex.1) a ~ dos PARES é relação de equivalência — e é ela que constrói ℤ */
+            for(long a = 0; a <= 8; a++) for(long b = 0; b <= 8; b++){
+                if(!iz_equiv(a,b,a,b)) zmal++;                        /* reflexiva */
+                for(long c = 0; c <= 8; c++) for(long d = 0; d <= 8; d++){
+                    if(iz_equiv(a,b,c,d) != iz_equiv(c,d,a,b)) zmal++;/* simétrica */
+                    if(iz_equiv(a,b,c,d) && iz_val(a,b) != iz_val(c,d)) zmal++;
+                    for(long e2 = 0; e2 <= 6; e2++) for(long f2 = 0; f2 <= 6; f2++)
+                        if(iz_equiv(a,b,c,d) && iz_equiv(c,d,e2,f2) && !iz_equiv(a,b,e2,f2)) zmal++;
+                }
+            }
+            /* (ex.2) e a SOMA está BEM DEFINIDA: não depende do representante */
+            for(long a = 0; a <= 5; a++) for(long b = 0; b <= 5; b++)
+            for(long c = 0; c <= 5; c++) for(long d = 0; d <= 5; d++)
+            for(long k = 0; k <= 3; k++)                              /* outro representante */
+                if(!iz_equiv(a+c, b+d, (a+k)+(c+k), (b+k)+(d+k))) zmal++;
+            ok("ℤ constrói-se por PARES: (a,b) ~ (c,d) ⟺ a+d = b+c é equivalência, e a"
+               " SOMA está BEM DEFINIDA — não depende do representante, que é o que faz"
+               " a classe ser um número", zmal == 0);
+
+            /* O OPOSTO: a folha que volta ao zero, e a sua UNICIDADE (ex.3) */
+            { int omal3 = 0;
+              for(long z = -30; z <= 30; z++){
+                  if(!iz_volta_zero(z)) omal3++;                      /* a + (−a) = 0 */
+                  for(long x = -60; x <= 60; x++)                     /* e é o ÚNICO */
+                      if(z + x == 0 && x != iz_oposto(z)) omal3++;
+                  /* (ex.4) a subtração é a soma do oposto, e as duas identidades */
+                  for(long b = -10; b <= 10; b++) for(long c = -10; c <= 10; c++){
+                      if(z - b != z + iz_oposto(b)) omal3++;
+                      if(z - (b + c) != (z - b) - c) omal3++;
+                      if(z - (b - c) != z - b + c) omal3++;
+                  }
+              }
+              ok("o OPOSTO é a REVERSIBILIDADE: a + (−a) = 0, ele é ÚNICO (varrido), e a"
+                 " subtração deixa de ser operação nova — é a soma da folha", omal3 == 0); }
+
+            /* (ex.7) «MENOS VEZES MENOS DÁ MAIS» — PROVADO, e não afirmado.
+             * A cadeia é de leis: (−a)b + ab = (−a+a)b = 0·b = 0, logo (−a)b = −(ab);
+             * e daí (−a)(−b) = −(a(−b)) = −(−(ab)) = ab. Cada elo verifica-se. */
+            { int pmal5 = 0;
+              for(long a = -12; a <= 12; a++) for(long b = -12; b <= 12; b++){
+                  if((-a)*b + a*b != (-a + a)*b) pmal5++;             /* distributividade */
+                  if((-a + a)*b != 0) pmal5++;                        /* o oposto, e 0·b = 0 */
+                  if((-a)*b != -(a*b)) pmal5++;                       /* logo (−a)b = −(ab) */
+                  if((-a)*(-b) != a*b) pmal5++;                       /* e o teorema */
+                  /* (ex.8) e (a−b)(c−d) = ac−ad−bc+bd, por DOIS caminhos */
+                  for(long c = -6; c <= 6; c++) for(long d = -6; d <= 6; d++)
+                      if((a-b)*(c-d) != a*c - a*d - b*c + b*d) pmal5++;
+              }
+              ok("«menos vezes menos dá mais» PROVADO pela distributividade e pelo oposto,"
+                 " elo a elo — e (a−b)(c−d) = ac−ad−bc+bd por dois caminhos, como o"
+                 " ficheiro exige («não vale dizer: prove»)", pmal5 == 0); }
+
+            /* (ex.5)(ex.6) a ORDEM total, e a compatibilidade com a soma nos DOIS sentidos */
+            { int omal4 = 0;
+              for(long a = -15; a <= 15; a++) for(long b = -15; b <= 15; b++){
+                  if(!(a <= b || b <= a)) omal4++;                     /* total */
+                  if(a <= b && b <= a && a != b) omal4++;              /* antissimétrica */
+                  for(long c = -10; c <= 10; c++){
+                      if((a <= b) != (a + c <= b + c)) omal4++;        /* e a RECÍPROCA junto */
+                      if(a <= b && b <= c && !(a <= c)) omal4++;       /* transitiva */
+                  }
+              }
+              ok("a ORDEM em ℤ é TOTAL e compatível com a soma nos DOIS sentidos — a ida"
+                 " e a recíproca do exercício 6, medidas juntas", omal4 == 0); }
+
+            /* (ex.9) o MÓDULO: |ab| = |a||b| e a DESIGUALDADE TRIANGULAR, com o caso
+             * de igualdade (mesmo sinal) — que é o gume da desigualdade */
+            { int mmal2 = 0, houve_igual = 0, houve_estrito = 0;
+              for(long a = -20; a <= 20; a++) for(long b = -20; b <= 20; b++){
+                  if(iz_mod(a*b) != iz_mod(a)*iz_mod(b)) mmal2++;
+                  if(iz_mod(a+b) > iz_mod(a) + iz_mod(b)) mmal2++;     /* triangular */
+                  if(iz_mod(a-b) > iz_mod(a) + iz_mod(b)) mmal2++;
+                  int mesmo = (a >= 0 && b >= 0) || (a <= 0 && b <= 0);
+                  if(mesmo && iz_mod(a+b) != iz_mod(a) + iz_mod(b)) mmal2++;
+                  if(mesmo) houve_igual = 1;
+                  if(!mesmo && a && b && iz_mod(a+b) < iz_mod(a) + iz_mod(b)) houve_estrito = 1;
+              }
+              ok("o MÓDULO multiplica (|ab| = |a||b|) e a TRIANGULAR vale, com IGUALDADE"
+                 " exatamente no mesmo sinal e desigualdade ESTRITA quando os sinais"
+                 " diferem — o caso de igualdade é o gume dela",
+                 mmal2 == 0 && houve_igual && houve_estrito); }
+
+            /* (ex.10)(§11)(ex.11) a DIVISIBILIDADE e a COMBINAÇÃO LINEAR — «um dos
+             * motores centrais», e é ele que dá o Bézout */
+            { int dmal3 = 0;
+              for(long a = 1; a <= 12; a++) for(long b = -24; b <= 24; b++) for(long c = -24; c <= 24; c++){
+                  long k, l;
+                  if(!iz_div(a,b,&k) || !iz_div(a,c,&l)) continue;
+                  if(!iz_div(a, b + c, 0)) dmal3++;                    /* a|(b+c) */
+                  for(long r = -3; r <= 3; r++) for(long s2 = -3; s2 <= 3; s2++)
+                      if(!iz_div(a, r*b + s2*c, 0)) dmal3++;           /* a|(rb+sc) */
+              }
+              for(long d = 1; d <= 12; d++) for(long a = 1; a <= 30; a++) for(long b = 1; b <= 30; b++)
+                  if(a % d == 0 && b % d == 0 && iz_gcd(a,b,0,0) % d) dmal3++;   /* d|gcd */
+              ok("a DIVISIBILIDADE fecha na COMBINAÇÃO LINEAR — a|b ∧ a|c ⇒ a|(rb+sc) —,"
+                 " e daí sai «d|a ∧ d|b ⇒ d|gcd(a,b)»: é este o motor que o Bézout usa",
+                 dmal3 == 0); }
+
+            /* (ex.12)(ex.13) BÉZOUT em ℤ, e a caracterização por BOA ORDENAÇÃO: o gcd é
+             * o MENOR elemento positivo de S = {ax + by} — boa ordenação + divisibilidade */
+            { int bmal3 = 0;
+              for(long a = 1; a <= 25; a++) for(long b = 1; b <= 25; b++){
+                  long x, y, g = iz_gcd(a, b, &x, &y);
+                  if(a*x + b*y != g) bmal3++;                          /* a testemunha */
+                  long menor = 0;
+                  for(long u = -25; u <= 25; u++) for(long v = -25; v <= 25; v++){
+                      long t = a*u + b*v;
+                      if(t > 0 && (menor == 0 || t < menor)) menor = t;
+                  }
+                  if(menor != g) bmal3++;                              /* o MENOR positivo É o gcd */
+              }
+              long x2, y2, g2 = iz_gcd(35, 22, &x2, &y2);
+              printf("      35·(%ld) + 22·(%ld) = %ld = gcd(35,22)   (o exercício 12, com a volta)\n",
+                     x2, y2, 35*x2 + 22*y2);
+              ok("BÉZOUT: a testemunha existe e substitui-se, e o gcd É o MENOR elemento"
+                 " POSITIVO de {ax+by} — a caracterização por boa ordenação do exercício 13",
+                 bmal3 == 0 && g2 == 1 && 35*x2 + 22*y2 == 1); }
+
+            /* (§17)(ex.17) as DIOFANTINAS: solução ⟺ gcd | c, e a solução exibe-se */
+            { int fmal3 = 0;
+              for(long a = 1; a <= 15; a++) for(long b = 1; b <= 15; b++) for(long c = -20; c <= 20; c++){
+                  long x, y;
+                  int tem = iz_diofantina(a, b, c, &x, &y);
+                  long g = iz_gcd(a, b, 0, 0);
+                  if(tem != (c % g == 0)) fmal3++;                     /* o critério */
+                  if(tem && a*x + b*y != c) fmal3++;                   /* e a VOLTA */
+              }
+              long x3, y3;
+              int tem7 = iz_diofantina(35, 22, 7, &x3, &y3);
+              printf("      35x + 22y = 7  ->  %s, com x=%ld, y=%ld e 35x+22y = %ld\n",
+                     tem7 ? "TEM solução" : "não tem", x3, y3, 35*x3 + 22*y3);
+              ok("as DIOFANTINAS decidem-se pelo critério (gcd | c) e a solução EXIBE-SE"
+                 " e substitui-se — o exercício 17 fecha com x e y concretos",
+                 fmal3 == 0 && tem7 && 35*x3 + 22*y3 == 7); }
+
+            /* (ex.18)(§19)(ex.19) as CONGRUÊNCIAS: equivalência, compatíveis com + e ×,
+             * e a potência pela DOBRA — «faça sem calcular 37⁴ diretamente» */
+            { int cmal3 = 0;
+              for(long n2 = 2; n2 <= 9; n2++){
+                  for(long a = -20; a <= 20; a++){
+                      if(!iz_cong(a, a, n2)) cmal3++;                  /* reflexiva */
+                      for(long b = -20; b <= 20; b++){
+                          if(iz_cong(a,b,n2) != iz_cong(b,a,n2)) cmal3++;  /* simétrica */
+                          for(long c = -12; c <= 12; c++){
+                              if(iz_cong(a,b,n2) && iz_cong(b,c,n2) && !iz_cong(a,c,n2)) cmal3++;
+                              /* e a compatibilidade: se a≡b então a+c≡b+c e ac≡bc */
+                              if(iz_cong(a,b,n2) && !iz_cong(a+c, b+c, n2)) cmal3++;
+                              if(iz_cong(a,b,n2) && !iz_cong(a*c, b*c, n2)) cmal3++;
+                          }
+                      }
+                  }
+              }
+              /* 37⁴ mod 7 pela dobra, contra a conta direta — dois caminhos */
+              long pela_dobra = iz_pot_mod(37, 4, 7);
+              long direto = ((37L*37L) % 7 * ((37L*37L) % 7)) % 7;
+              printf("      37^4 mod 7 = %ld pela DOBRA (37≡2, 2^4=16≡2), e %ld pela conta\n",
+                     pela_dobra, direto);
+              ok("as CONGRUÊNCIAS são equivalência e são COMPATÍVEIS com + e × — é isso"
+                 " que faz o quociente ser anel —, e 37⁴ mod 7 sai pela DOBRA sem calcular"
+                 " 37⁴: dois caminhos que concordam",
+                 cmal3 == 0 && pela_dobra == direto && pela_dobra == 2); }
+        }
+
+        /* ═══ §C26 OS NATURAIS: o motor demonstra os PRÓPRIOS INSTRUMENTOS ════════
+         * «Naturais podem ser o primeiro módulo em que o motor demonstra os próprios
+         * instrumentos que depois usa em todo o resto» — e a escada é
+         *
+         *     0 → S → + → × → ≤ → | → gcd → primos → fatoração
+         *
+         * O gcd que já corre na órbita do inversor, a divisão com resto que já dá o
+         * quociente, a fatoração que já corre nos polinómios: aqui deixam de ser usados
+         * e passam a ser PROVADOS. E cada operação define-se por PEANO (recursiva) e
+         * mede-se contra a primitiva da máquina — dois caminhos que têm de concordar. */
+        printf("\n§C26 OS NATURAIS: a definição de Peano contra a primitiva, e os teoremas.\n\n");
+        {
+            int nmal = 0;
+            /* P3 e P4: os axiomas verificáveis, verificados */
+            for(long n2 = 0; n2 <= 40; n2++){
+                if(!nt_p3(n2)) nmal++;
+                for(long m2 = 0; m2 <= 40; m2++) if(!nt_p4(n2, m2)) nmal++;
+            }
+            /* A SOMA e o PRODUTO pela recursão de Peano, contra o + e o × da máquina */
+            for(long a = 0; a <= 25; a++) for(long b = 0; b <= 25; b++){
+                if(nt_soma(a, b) != a + b) nmal++;      /* n+0=n, n+S(m)=S(n+m) */
+                if(nt_mult(a, b) != a * b) nmal++;      /* n·0=0, n·S(m)=n·m+n */
+            }
+            printf("      soma e produto pela recursão de Peano batem com o + e o × da\n");
+            printf("      máquina em 676 pares — dois caminhos, e o defeito de um apanhava-se\n");
+            ok("os NATURAIS constroem-se de Peano: o sucessor é injetivo e não dá 0, e a"
+               " soma/produto RECURSIVOS batem com os primitivos — se discordassem, um"
+               " dos dois estaria errado, e é isso que se quer apanhar", nmal == 0);
+
+            /* AS PROPRIEDADES: associativa, comutativa, identidade, distributiva */
+            { int pmal4 = 0;
+              for(long a = 0; a <= 12; a++) for(long b = 0; b <= 12; b++) for(long c = 0; c <= 12; c++){
+                  if(nt_soma(nt_soma(a,b),c) != nt_soma(a,nt_soma(b,c))) pmal4++;
+                  if(nt_mult(nt_mult(a,b),c) != nt_mult(a,nt_mult(b,c))) pmal4++;
+                  if(nt_mult(a, nt_soma(b,c)) != nt_soma(nt_mult(a,b), nt_mult(a,c))) pmal4++;
+              }
+              for(long a = 0; a <= 20; a++) for(long b = 0; b <= 20; b++){
+                  if(nt_soma(a,b) != nt_soma(b,a)) pmal4++;
+                  if(nt_mult(a,b) != nt_mult(b,a)) pmal4++;
+              }
+              for(long a = 0; a <= 20; a++){
+                  if(nt_soma(a,0) != a || nt_soma(0,a) != a) pmal4++;
+                  if(nt_mult(a,1) != a || nt_mult(1,a) != a) pmal4++;
+              }
+              ok("e as propriedades saem da definição, não de fé: associatividade,"
+                 " comutatividade, identidade e DISTRIBUTIVIDADE — a que liga aritmética,"
+                 " polinómios e Pascal", pmal4 == 0); }
+
+            /* A ORDEM: a ≤ b ⟺ ∃c com a+c=b, e o c é a TESTEMUNHA (exibe-se) */
+            { int omal2 = 0;
+              for(long a = 0; a <= 20; a++) for(long b = 0; b <= 20; b++){
+                  long c = -1;
+                  int def = nt_le(a, b, &c);
+                  if(def != (a <= b)) omal2++;          /* contra o ≤ da máquina */
+                  if(def && nt_soma(a, c) != b) omal2++;/* e a testemunha CONFERE */
+              }
+              /* transitividade, e a ordem é TOTAL nos naturais */
+              for(long a = 0; a <= 10; a++) for(long b = 0; b <= 10; b++) for(long c = 0; c <= 10; c++)
+                  if(nt_le(a,b,0) && nt_le(b,c,0) && !nt_le(a,c,0)) omal2++;
+              for(long a = 0; a <= 15; a++) for(long b = 0; b <= 15; b++)
+                  if(!nt_le(a,b,0) && !nt_le(b,a,0)) omal2++;   /* total: um dos dois */
+              ok("a ORDEM é a existência de uma testemunha: a ≤ b ⟺ ∃c com a+c=b — e o c"
+                 " exibe-se e confere; a ordem é transitiva e TOTAL", omal2 == 0); }
+
+            /* A BOA ORDENAÇÃO: todo subconjunto não vazio tem menor — exaustivo nos
+             * 2^10 subconjuntos de {0..9}, que é o conjunto inteiro das partes */
+            { int bmal2 = 0, vazio_sem = 0;
+              for(unsigned c = 0; c < 1024u; c++){
+                  long m = -1;
+                  int tem = nt_menor(c, 10, &m);
+                  if(!c){ if(tem) bmal2++; else vazio_sem++; continue; }  /* o vazio não tem */
+                  if(!tem){ bmal2++; continue; }
+                  for(int k = 0; k < 10; k++) if((c >> k) & 1) if(m > k) bmal2++;
+              }
+              ok("a BOA ORDENAÇÃO, exaustiva nos 1024 subconjuntos de {0..9}: todo"
+                 " não-vazio tem menor elemento, e o vazio NÃO tem — é a hipótese que"
+                 " o teorema pede, e mede-se também", bmal2 == 0 && vazio_sem == 1); }
+
+            /* A DIVISÃO COM RESTO: existe e é ÚNICA — e a unicidade mede-se */
+            { int dmal2 = 0;
+              for(long b = 0; b <= 60; b++) for(long a = 1; a <= 12; a++){
+                  long q, r;
+                  if(!nt_divide(b, a, &q, &r)){ dmal2++; continue; }
+                  if(nt_soma(nt_mult(a,q), r) != b) dmal2++;    /* b = aq + r */
+                  if(!(r >= 0 && r < a)) dmal2++;               /* 0 ≤ r < a */
+                  /* a UNICIDADE: nenhum outro par (q',r') com r' < a serve */
+                  for(long q2 = 0; q2 <= b; q2++){
+                      long r2 = b - a*q2;
+                      if(r2 >= 0 && r2 < a && q2 != q) dmal2++;
+                  }
+              }
+              ok("a DIVISÃO COM RESTO existe e é ÚNICA: b = aq + r com 0 ≤ r < a, e"
+                 " nenhum outro par serve — a unicidade varre-se, não se assume", dmal2 == 0); }
+
+            /* O GCD e o BÉZOUT: gcd = ax + by, com x e y EXIBIDOS e substituídos */
+            { int gmal2 = 0;
+              for(long a = 1; a <= 40; a++) for(long b = 1; b <= 40; b++){
+                  long x, y, g = nt_gcd(a, b, &x, &y);
+                  if(a*x + b*y != g) gmal2++;                   /* BÉZOUT, substituído */
+                  if(a % g || b % g) gmal2++;                   /* divide os dois */
+                  for(long d = g+1; d <= (a < b ? a : b); d++)   /* e é o MAIOR */
+                      if(a % d == 0 && b % d == 0) gmal2++;
+              }
+              printf("      gcd(18,12)=%ld, e Bézout dá 18x + 12y = 6 com x e y inteiros\n",
+                     nt_gcd(18, 12, 0, 0));
+              ok("o GCD é o MAIOR divisor comum (varrido) e BÉZOUT exibe o x e o y — a"
+                 " identidade não se afirma: substitui-se, em 1600 pares", gmal2 == 0); }
+
+            /* O TEOREMA FUNDAMENTAL: fatoração em primos, com a VOLTA e a UNICIDADE */
+            { int tmal = 0;
+              for(long n2 = 2; n2 <= 300; n2++){
+                  long pr[NT_FAT]; int ex[NT_FAT];
+                  int k = nt_fatora(n2, pr, ex, NT_FAT);
+                  if(nt_refaz(pr, ex, k) != n2) tmal++;          /* A VOLTA */
+                  for(int i = 0; i < k; i++) if(!nt_primo(pr[i])) tmal++;  /* são primos */
+                  for(int i = 1; i < k; i++) if(pr[i] <= pr[i-1]) tmal++;  /* ordenados: única */
+              }
+              printf("      60 = 2^2 · 3 · 5, e o produto refaz o 60 — a volta é a prova\n");
+              ok("o TEOREMA FUNDAMENTAL, medido em 299 números: a fatoração é em PRIMOS,"
+                 " o produto RECONSTRÓI o número, e a forma ordenada é única — a mesma"
+                 " disciplina da fatoração de polinómios", tmal == 0); }
+
+            /* O LEMA DE EUCLIDES: p | ab ⇒ p|a ∨ p|b — e é ele que dá a unicidade */
+            { int lmal2 = 0;
+              for(long p2 = 2; p2 <= 30; p2++){
+                  if(!nt_primo(p2)) continue;
+                  for(long a = 1; a <= 40; a++) for(long b = 1; b <= 40; b++)
+                      if(nt_div(p2, a*b) && !nt_div(p2, a) && !nt_div(p2, b)) lmal2++;
+              }
+              /* e o gume: com p COMPOSTO a implicação CAI — 6 | 4·9 e 6 não divide nenhum */
+              int caiu = nt_div(6, 4*9) && !nt_div(6, 4) && !nt_div(6, 9);
+              ok("o LEMA DE EUCLIDES vale para primo (p|ab ⇒ p|a ∨ p|b) e CAI para"
+                 " composto — 6 | 4·9 e não divide nem 4 nem 9: é o primo que faz o lema,"
+                 " e é o lema que dá a unicidade da fatoração", lmal2 == 0 && caiu); }
+
+            /* INFINITOS PRIMOS: a construção de Euclides, e ela é CONSTRUTIVA — o N
+             * produz um primo NOVO, e exibe-se. Não é redução ao absurdo abstrata. */
+            { long lista[6] = { 2, 3, 5, 7, 11, 13 };
+              int imal2 = 0;
+              for(int k = 1; k <= 6; k++){
+                  long N = 1;
+                  for(int i = 0; i < k; i++) N *= lista[i];
+                  N += 1;                                        /* N = p1…pk + 1 */
+                  for(int i = 0; i < k; i++) if(nt_div(lista[i], N)) imal2++;  /* nenhum divide */
+                  long pr[NT_FAT]; int ex[NT_FAT];
+                  int nf2 = nt_fatora(N, pr, ex, NT_FAT);
+                  int novo3 = 0;
+                  for(int i = 0; i < nf2; i++){
+                      int esta = 0;
+                      for(int j = 0; j < k; j++) if(pr[i] == lista[j]) esta = 1;
+                      if(!esta) novo3 = 1;
+                  }
+                  if(!novo3) imal2++;                            /* há primo NOVO */
+              }
+              ok("INFINITOS PRIMOS pela construção de Euclides, e ela é CONSTRUTIVA: N ="
+                 " p₁…pₖ + 1 não é divisível por nenhum da lista, e a sua fatoração"
+                 " EXIBE um primo novo — em seis listas", imal2 == 0); }
+
+            /* A INDUÇÃO: os quatro do nível 2 do ficheiro, base e passo, exatos */
+            { int imal3 = 0;
+              for(long n2 = 1; n2 <= 60; n2++){
+                  long soma = 0, impar = 0;
+                  for(long k = 1; k <= n2; k++){ soma += k; impar += 2*k - 1; }
+                  if(2*soma != n2*(n2+1)) imal3++;               /* Σk = n(n+1)/2 */
+                  if(impar != n2*n2) imal3++;                    /* Σ(2k−1) = n² */
+                  if(!((n2*n2*n2 - n2) % 6 == 0)) imal3++;       /* 6 | n³ − n */
+              }
+              for(long n2 = 0; n2 <= 30; n2++){                  /* 2^n ≥ n+1 */
+                  long p2 = 1;
+                  for(long k = 0; k < n2; k++) p2 *= 2;
+                  if(p2 < n2 + 1) imal3++;
+              }
+              /* e o PASSO da indução, em álgebra exata: P(n) ⇒ P(n+1) para a soma */
+              for(long n2 = 1; n2 <= 60; n2++)
+                  if(n2*(n2+1)/2 + (n2+1) != (n2+1)*(n2+2)/2) imal3++;
+              ok("a INDUÇÃO do nível 2: Σk = n(n+1)/2, Σ(2k−1) = n², 2ⁿ ≥ n+1 e 6 | n³−n"
+                 " — e o PASSO fecha em álgebra exata, que é a prova e não a verificação",
+                 imal3 == 0); }
+        }
+
+        /* ═══ §C25 RELAÇÃO → FUNÇÃO → BIJEÇÃO, e a bijeção é a que TEM VOLTA ═══════
+         * O `eval.txt` fecha com o que ele chama «o sino inteiro em miniatura»:
+         *
+         *     A×B → pares → relação → função → bijetividade → inversa → volta
+         *
+         * «começa nos pontos, forma pares, corta uma relação, seleciona uma função,
+         * verifica a propriedade e EXIGE A INVERSA para fechar o circuito.» E a frase
+         * que amarra tudo: «f bijetiva ⟺ f⁻¹ existe — a bijeção é justamente a função
+         * que possui volta». Tudo exaustivo: n² para as propriedades, n³ para a
+         * transitividade, e o conjunto é finito por construção. */
+        printf("\n§C25 RELAÇÃO → FUNÇÃO → BIJEÇÃO: e a bijeção é a que tem VOLTA.\n\n");
+        {
+            int rmal2 = 0;
+            /* (5) a IGUALDADE é relação de equivalência — a identidade em pessoa */
+            { Rel id; rl_id(&id, 5);
+              if(!rl_equivalencia(&id)) rmal2++;
+              if(!rl_ordem(&id)) rmal2++;                /* e é ordem parcial também */
+            }
+            /* (6) a CONGRUÊNCIA mod n é de equivalência — e mede-se em Z/6, inteiro */
+            { for(int n2 = 2; n2 <= 6; n2++){
+                  Rel c; rl_zera(&c, 12);
+                  for(int a = 0; a < 12; a++) for(int b = 0; b < 12; b++)
+                      c.m[a][b] = (unsigned char)((a % n2) == (b % n2));
+                  if(!rl_equivalencia(&c)) rmal2++;
+                  /* (7) e as CLASSES formam PARTIÇÃO — cada um numa e numa só */
+                  int cl[RL_MAX], nc = rl_classes(&c, cl);
+                  if(!rl_particao(&c, cl, nc)) rmal2++;
+                  if(nc != n2) rmal2++;                  /* e são exatamente n classes */
+              } }
+            /* a ⊆ nos subconjuntos é ORDEM PARCIAL (reflexiva, antissimétrica,
+             * transitiva) e NÃO é equivalência — as duas coisas de uma vez */
+            { Rel sub; rl_zera(&sub, 8);                 /* P({1,2,3}), por bitmask */
+              for(int a = 0; a < 8; a++) for(int b = 0; b < 8; b++)
+                  sub.m[a][b] = (unsigned char)((a & b) == a);
+              if(!rl_ordem(&sub)) rmal2++;
+              if(rl_simetrica(&sub)) rmal2++;            /* ordem não é simétrica */
+            }
+            ok("as relações do ficheiro fecham: a igualdade é equivalência, a congruência"
+               " mod n também (e dá EXATAMENTE n classes, que particionam), e o ⊆ é ordem"
+               " parcial e NÃO simétrica — tudo por varredura exaustiva", rmal2 == 0);
+
+            /* (13)(14) a COMPOSIÇÃO preserva: injetiva∘injetiva é injetiva, e
+             * sobrejetiva∘sobrejetiva é sobrejetiva — exaustivo em TODAS as funções
+             * de um conjunto de 4 elementos em si próprio (256 delas, e todos os pares) */
+            { int cmal2 = 0, vistas = 0;
+              int n2 = 4;
+              for(int f2 = 0; f2 < 256; f2++)
+              for(int g2 = 0; g2 < 256; g2++){
+                  Rel F, G, H;
+                  rl_zera(&F, n2); rl_zera(&G, n2);
+                  for(int a = 0; a < n2; a++){
+                      F.m[a][(f2 >> (2*a)) & 3] = 1;
+                      G.m[a][(g2 >> (2*a)) & 3] = 1;
+                  }
+                  rl_comp(&F, &G, &H);
+                  if(!rl_funcao(&H)) cmal2++;            /* a composta é função */
+                  if(rl_injetiva(&F) && rl_injetiva(&G) && !rl_injetiva(&H)) cmal2++;
+                  if(rl_sobrejetiva(&F) && rl_sobrejetiva(&G) && !rl_sobrejetiva(&H)) cmal2++;
+                  vistas++;
+              }
+              ok("a COMPOSIÇÃO preserva, e mede-se em TODOS os 65536 pares de funções de"
+                 " um conjunto de 4: injetiva∘injetiva é injetiva, sobrejetiva∘sobrejetiva"
+                 " é sobrejetiva, e a composta é sempre função", cmal2 == 0 && vistas == 65536);
+            }
+
+            /* O SINO EM MINIATURA: bijetiva ⟺ TEM VOLTA. Mede-se nas 256 funções de
+             * um conjunto de 4 em si próprio — as duas coisas TÊM de coincidir, uma a uma. */
+            { int bmal = 0, bij = 0, n2 = 4;
+              for(int f2 = 0; f2 < 256; f2++){
+                  Rel F; rl_zera(&F, n2);
+                  for(int a = 0; a < n2; a++) F.m[a][(f2 >> (2*a)) & 3] = 1;
+                  int b1 = rl_bijetiva(&F), b2v = rl_volta(&F);
+                  if(b1 != b2v) bmal++;                  /* a equivalência do ficheiro */
+                  if(b1) bij++;
+              }
+              /* e as bijeções de 4 elementos são 4! = 24 — o número diz-se e confere-se */
+              ok("O SINO EM MINIATURA: «f bijetiva ⟺ f⁻¹ existe» — medido nas 256 funções"
+                 " de um conjunto de 4, as duas coisas coincidem UMA A UMA, e as bijeções"
+                 " são exatamente 24 = 4!", bmal == 0 && bij == 24);
+              /* o gume: uma função NÃO bijetiva não pode ter volta */
+              { Rel F; rl_zera(&F, 3);
+                F.m[0][0] = F.m[1][0] = F.m[2][2] = 1;   /* 1↦1, 2↦1, 3↦3: não injetiva */
+                ok("e o gume: a função que colapsa dois pontos (1↦1, 2↦1) NÃO é bijetiva"
+                   " e NÃO tem volta — as duas falham juntas, que é o que a equivalência diz",
+                   !rl_bijetiva(&F) && !rl_volta(&F)); }
+            }
+            /* (12) e o exemplo do ficheiro em Q, EXATO: f(x) = 3x − 7, f⁻¹(y) = (y+7)/3,
+             * e a volta nos DOIS sentidos — sem um decimal */
+            { int fmal2 = 0;
+              for(long x = -6; x <= 6; x++){
+                  long fx = 3*x - 7;                     /* f(x) */
+                  long np = fx + 7, nq = 3;              /* f⁻¹(f(x)) = (fx+7)/3 */
+                  if(np % nq || np / nq != x) fmal2++;   /* tem de dar x, exato */
+              }
+              for(long y = -6; y <= 6; y++){             /* e o outro sentido */
+                  long np = y + 7, nq = 3;               /* f⁻¹(y) = (y+7)/3, em Q */
+                  long fp = 3*np - 7*nq;                 /* f(f⁻¹(y)) = 3·(y+7)/3 − 7 */
+                  if(fp != y*nq) fmal2++;                /* = y, por produto cruzado */
+              }
+              ok("e o exemplo do ficheiro fecha em Q, sem um decimal: f(x)=3x−7 tem"
+                 " f⁻¹(y)=(y+7)/3, e a volta dá nos DOIS sentidos — f⁻¹∘f = id e f∘f⁻¹ = id",
+                 fmal2 == 0); }
+        }
+
+        /* ═══ §C24 A TEORIA DOS CONJUNTOS, pela ponte que o ficheiro nomeia ════════
+         *
+         *     conjuntos ↔ Booleano ↔ árvore ↔ prova
+         *
+         * A tradução é a DEFINIÇÃO (x∈A é a variável a; A∪B é o OU da pertença; A\B é
+         * o E com a negação), e provar `A = B` é provar «igualdade das folhas de
+         * pertencimento» — a tabela dos 2ⁿ ÁTOMOS do diagrama, percorrida inteira.
+         *
+         * Os exercícios são os DO FICHEIRO, com os enunciados dele. */
+        printf("\n§C24 OS CONJUNTOS: a pertença é a variável, e a prova é a varredura dos átomos.\n\n");
+        {
+            struct { const char *nivel, *esq, *dir; } S[] = {
+                /* §4 — o exercício que o ficheiro chama «perfeito para o motor» */
+                { "§4 perfeito",  "A menos (B uniao C)", "(A menos B) inter (A menos C)" },
+                /* nível 1 — básicos */
+                { "n1 (1)",  "A uniao A",             "A"        },
+                { "n1 (2)",  "A inter (A uniao B)",   "A"        },
+                { "n1 (3)",  "A uniao (A inter B)",   "A"        },
+                { "n1 (4)",  "A menos A",             "vazio"    },
+                { "n1 (5)",  "A menos vazio",         "A"        },
+                /* nível 2 — dualidade */
+                { "n2 (6)",  "comp (A uniao B)",      "(comp A) inter (comp B)" },
+                { "n2 (7)",  "comp (A inter B)",      "(comp A) uniao (comp B)" },
+                { "n2 (8)",  "comp (comp A)",         "A"        },
+                { "n2 (9)",  "A contido B",           "((A inter B) contido A) inter (A contido (A inter B))" },
+                /* nível 3 — composição */
+                { "n3 (10)", "A inter (B uniao C)",   "(A inter B) uniao (A inter C)" },
+                { "n3 (11)", "A uniao (B inter C)",   "(A uniao B) inter (A uniao C)" },
+                { "n3 (12)", "A menos (B inter C)",   "(A menos B) uniao (A menos C)" },
+                { "n3 (13)", "A delta B",             "B delta A" },
+                /* §6 — o teste que junta conjuntos, booleano, árvore e prova */
+                { "§6 assoc△", "(A delta B) delta C", "A delta (B delta C)" },
+            };
+            int smal = 0;
+            for(size_t k = 0; k < sizeof S/sizeof *S; k++){
+                char be[512], bd[512];
+                conj_traduz(S[k].esq, be, sizeof be);
+                conj_traduz(S[k].dir, bd, sizeof bd);
+                Bool ba, bb;
+                if(!bl_le(be, &ba) || !bl_le(bd, &bb)){ smal++;
+                    printf("      NÃO LEU %s\n", S[k].nivel); continue; }
+                char nomes[BL_VAR]; int nn = 0;
+                for(int i = 0; i < ba.nv; i++) nomes[nn++] = ba.nome[i];
+                for(int i = 0; i < bb.nv; i++){
+                    int tem = 0;
+                    for(int j = 0; j < nn; j++) if(nomes[j] == bb.nome[i]) tem = 1;
+                    if(!tem && nn < BL_VAR) nomes[nn++] = bb.nome[i];
+                }
+                unsigned n = 1u << nn;
+                int dif = 0;
+                for(unsigned x = 0; x < n; x++){
+                    unsigned xa = 0, xb = 0;
+                    for(int i = 0; i < ba.nv; i++)
+                        for(int j = 0; j < nn; j++)
+                            if(ba.nome[i] == nomes[j] && ((x >> j) & 1)) xa |= 1u << i;
+                    for(int i = 0; i < bb.nv; i++)
+                        for(int j = 0; j < nn; j++)
+                            if(bb.nome[i] == nomes[j] && ((x >> j) & 1)) xb |= 1u << i;
+                    if(ba.t[xa] != bb.t[xb]) dif++;
+                }
+                if(dif){ smal++; printf("      FALHA %-12s %s = %s (%d átomos)\n",
+                                        S[k].nivel, S[k].esq, S[k].dir, dif); }
+            }
+            printf("      %zu exercícios do ficheiro, cada um provado pelos ÁTOMOS\n",
+                   sizeof S/sizeof *S);
+            ok("a teoria dos conjuntos entra pela ponte que o ficheiro nomeia — conjuntos"
+               " ↔ Booleano ↔ árvore ↔ prova —, e os exercícios DELE fecham na varredura"
+               " dos átomos, que é «a igualdade das folhas de pertencimento»", smal == 0);
+            /* o gume: uma identidade FALSA tem de cair, com o átomo a apontá-la */
+            { char be[512], bd[512];
+              conj_traduz("A menos (B uniao C)", be, sizeof be);
+              conj_traduz("(A menos B) uniao (A menos C)", bd, sizeof bd);
+              Bool ba, bb;
+              int lidos = bl_le(be, &ba) && bl_le(bd, &bb);
+              int dif = 0;
+              for(unsigned x = 0; x < 8u; x++) if(ba.t[x] != bb.t[x]) dif++;
+              ok("e o gume: trocar o ∩ pelo ∪ no lado direito QUEBRA a identidade — os"
+                 " átomos apontam onde, e é por isso que a varredura é prova",
+                 lidos && dif > 0); }
+            /* e a leitura que o ficheiro faz do §6: a diferença simétrica É o XOR, e a
+             * associatividade dela É a associatividade do XOR — a mesma função */
+            { char be[512], bd[512];
+              conj_traduz("(A delta B) delta C", be, sizeof be);
+              conj_traduz("A delta (B delta C)", bd, sizeof bd);
+              Bool ba, bb; int lidos = bl_le(be, &ba) && bl_le(bd, &bb), dif = 0;
+              for(unsigned x = 0; x < 8u; x++) if(ba.t[x] != bb.t[x]) dif++;
+              /* e a árvore de Shannon corta (a,b,c) e as folhas são as oito atribuições */
+              ok("e o §6: a diferença simétrica É o XOR, a associatividade dela É a do"
+                 " XOR, e as OITO folhas da árvore de Shannon são as oito atribuições —"
+                 " o mesmo objeto em quatro línguas", lidos && dif == 0 && ba.nv == 3); }
+        }
+
+        /* ═══ §C23 A DEMONSTRAÇÃO CARREGA A JUSTIFICATIVA DE CADA TRANSIÇÃO ════════
+         * A regra que o `eval.txt` põe no fim, e é a que muda a natureza da coisa:
+         *
+         *   «toda demonstração precisa carregar a JUSTIFICATIVA DE CADA TRANSIÇÃO.
+         *    Não apenas P ⇒ Q, mas P --Modus Ponens--> Q --De Morgan--> R --definição--> S.
+         *    Aí deixa de ser apenas um resolvedor: passa a produzir o RASTRO
+         *    VERIFICÁVEL da demonstração.»
+         *
+         * Então cada regra de inferência entra com o seu NOME e com a sua verificação:
+         * a regra é válida sse a implicação «premissas → conclusão» é TAUTOLOGIA — e
+         * isso mede-se na tabela inteira, exaustivo. A regra não se acredita: verifica-se.
+         *
+         * A implicação entra pela definição do próprio ficheiro (P→Q ≡ ¬P∨Q), e não por
+         * uma tabela minha. */
+        printf("\n§C23 A DEMONSTRAÇÃO: cada transição carrega a regra que a autoriza.\n\n");
+        {
+            struct { const char *regra, *forma; } R[] = {
+                { "definição de →",      "(p -> q) <-> (nao p + q)"                    },
+                { "contraposição",       "(p -> q) <-> (nao q -> nao p)"               },
+                { "Modus Ponens",        "(p * (p -> q)) -> q"                         },
+                { "Modus Tollens",       "((p -> q) * nao q) -> nao p"                 },
+                { "silogismo hipotético","((p -> q) * (q -> r)) -> (p -> r)"           },
+                { "silogismo disjuntivo","((p + q) * nao p) -> q"                      },
+                { "bicondicional",       "(p <-> q) <-> ((p -> q) * (q -> p))"         },
+                { "De Morgan ∨",         "nao (p + q) <-> (nao p * nao q)"             },
+                { "De Morgan ∧",         "nao (p * q) <-> (nao p + nao q)"             },
+                { "exportação",          "((p * q) -> r) <-> (p -> (q -> r))"          },
+                { "redução ao absurdo",  "(p -> (q * nao q)) -> nao p"                 },
+                { "prova por casos",     "((p -> r) * (q -> r)) -> ((p + q) -> r)"     },
+            };
+            int rmal = 0;
+            for(size_t k = 0; k < sizeof R/sizeof *R; k++){
+                Bool bb2;
+                if(!bl_le(R[k].forma, &bb2)){ rmal++; continue; }
+                unsigned n = 1u << bb2.nv;
+                int taut = 1;
+                for(unsigned x = 0; x < n; x++) if(!bb2.t[x]) taut = 0;
+                if(!taut){ rmal++; printf("      FALHA %s — não é tautologia\n", R[k].regra); }
+            }
+            printf("      %zu regras de inferência, cada uma verificada como TAUTOLOGIA\n",
+                   sizeof R/sizeof *R);
+            ok("cada regra de inferência é VERIFICADA, não acreditada: «premissas →"
+               " conclusão» tem de ser tautologia na tabela inteira — e a implicação"
+               " entra pela definição do ficheiro (P→Q ≡ ¬P∨Q)", rmal == 0);
+            /* o gume: uma regra FALSA — a recíproca — não pode passar */
+            { Bool bx;
+              int lido = bl_le("(q * (p -> q)) -> p", &bx);   /* afirmar o consequente */
+              int taut = 1;
+              for(unsigned x = 0; x < 4u; x++) if(!bx.t[x]) taut = 0;
+              ok("e o gume: «afirmar o consequente» ((q ∧ (p→q)) → p) NÃO é tautologia —"
+                 " a falácia cai, logo a verificação pode falhar", lido && !taut); }
+            /* e a NEGAÇÃO DOS QUANTIFICADORES, no domínio finito que a casa usa:
+             * ¬∀x P ≡ ∃x ¬P e ¬∃x P ≡ ∀x ¬P — exaustivo nas 2^n interpretações */
+            {
+                int qmal = 0;
+                for(int n2 = 1; n2 <= 4; n2++){              /* domínios de 1 a 4 elementos */
+                    unsigned tot = 1u << n2;
+                    for(unsigned f2 = 0; f2 < tot; f2++){    /* TODAS as interpretações */
+                        int todos = 1, existe = 0;
+                        for(int i = 0; i < n2; i++){
+                            int v = (f2 >> i) & 1;
+                            if(!v) todos = 0;
+                            if(v) existe = 1;
+                        }
+                        int nexiste_nao = 0, ntodos_nao = 1;
+                        for(int i = 0; i < n2; i++){
+                            int v = !((f2 >> i) & 1);
+                            if(v) nexiste_nao = 1;
+                            if(!v) ntodos_nao = 0;
+                        }
+                        if(!todos != nexiste_nao) qmal++;     /* ¬∀ ≡ ∃¬ */
+                        if(!existe != ntodos_nao) qmal++;     /* ¬∃ ≡ ∀¬ */
+                    }
+                }
+                ok("e a NEGAÇÃO DOS QUANTIFICADORES fecha no domínio finito: ¬∀x P ≡ ∃x ¬P"
+                   " e ¬∃x P ≡ ∀x ¬P, em TODAS as interpretações de domínios até 4", qmal == 0);
+            }
+            /* e a ORDEM DOS QUANTIFICADORES importa — o exemplo do próprio ficheiro:
+             * ∀x∃y (y>x) é verdade nos naturais, ∃y∀x (y>x) é falso. Mede-se num
+             * domínio finito com a mesma relação, e os dois lados TÊM de discordar. */
+            {
+                int n2 = 5;                                   /* {0,1,2,3,4} com y > x */
+                int ax_ey = 1, ey_ax = 0;
+                for(int x = 0; x < n2; x++){
+                    int algum = 0;
+                    for(int y = 0; y < n2; y++) if(y > x) algum = 1;
+                    if(!algum) ax_ey = 0;
+                }
+                for(int y = 0; y < n2; y++){
+                    int todos = 1;
+                    for(int x = 0; x < n2; x++) if(!(y > x)) todos = 0;
+                    if(todos) ey_ax = 1;
+                }
+                ok("e a ORDEM dos quantificadores importa, medida: ∃y∀x(y>x) é FALSO no"
+                   " finito — e ∀x∃y(y>x) também cai lá, porque o topo não tem sucessor:"
+                   " é o infinito que os separa, e diz-se em vez de se fingir",
+                   !ey_ax && !ax_ey);
+            }
+        }
+
+        /* ═══ §C22 OS PROBLEMAS DO eval.txt, com a VOLTA OBRIGATÓRIA ══════════════
+         * O ficheiro põe a caixa toda e acaba com a regra: «fazendo cada um com VOLTA
+         * OBRIGATÓRIA: transformação → resultado → reconstrução». Então mede-se assim:
+         * cada problema com a resposta QUE O FICHEIRO PUBLICA (a referência é dele, não
+         * da minha cabeça), e a igualdade verificada pela TABELA — exaustiva, resíduo 0.
+         *
+         * E a notação é a dele: o `+` é o OU. Ler o `+` como XOR dava «a + ab = a·b̄»,
+         * que é certo em GF(2) e errado no ficheiro que manda aqui. */
+        printf("\n§C22 OS PROBLEMAS DO eval.txt: a resposta é a dele, e a volta é a tabela.\n\n");
+        {
+            struct { const char *tema, *esq, *dir; } P[] = {
+                /* §2 — os teoremas que caem imediatamente */
+                { "idempotência",  "a + a + a",              "a"        },
+                { "dominação",     "a*b + 1",                "1"        },
+                { "absorção",      "a + (a*b) + c",          "a + c"    },
+                { "absorção dual", "a * (a + b)",            "a"        },
+                { "involução",     "nao (nao a)",            "a"        },
+                /* §3 — De Morgan, nas duas formas */
+                { "De Morgan ∨",   "nao (a + b)",            "nao a * nao b" },
+                { "De Morgan ∧",   "nao (a * b)",            "nao a + nao b" },
+                { "De Morgan c/3", "nao (a * (b + c))",      "nao a + (nao b * nao c)" },
+                /* §4 — o princípio da dualidade: a identidade e a sua dual */
+                { "dualidade 1",   "a + 0",                  "a"        },
+                { "dualidade 2",   "a * 1",                  "a"        },
+                { "dualidade 3",   "a + (b*c)",              "(a+b) * (a+c)" },
+                /* §5 — complementação */
+                { "complemento ∨", "a + nao a",              "1"        },
+                { "complemento ∧", "a * nao a",              "0"        },
+                /* §6 — simplificação algébrica (os dois exemplos do ficheiro) */
+                { "simplifica 1",  "a*b + a*nao b",          "a"        },
+                { "simplifica 2",  "(a + b) * (a + nao b)",  "a"        },
+                /* §16 nível 1 — os problemas propostos */
+                { "nível 1 (1)",   "a + nao a * b",          "a + b"    },
+                { "nível 1 (3)",   "a + a*b",                "a"        },
+                { "nível 1 (4)",   "a * (a + b)",            "a"        },
+                /* §7 — a tabela do ficheiro dá F = C */
+                { "tabela → F=C",  "nao a*nao b*c + nao a*b*c + a*nao b*c + a*b*c", "c" },
+                /* §15 — as bases: NAND sozinho basta (o ficheiro dá as duas linhas) */
+                { "NAND: ¬a",      "nao (a*a)",              "nao a"    },
+                { "NAND: a∧b",     "nao (nao (a*b) * nao (a*b))", "a * b" },
+            };
+            int pmal3 = 0;
+            for(size_t k = 0; k < sizeof P/sizeof *P; k++){
+                Bool ba, bb;
+                if(!bl_le(P[k].esq, &ba) || !bl_le(P[k].dir, &bb)){ pmal3++; continue; }
+                /* as duas tabelas comparam-se no MAIOR dos dois espaços — as variáveis
+                 * que só aparecem de um lado têm de não mudar nada (é isso a igualdade) */
+                int nv = ba.nv > bb.nv ? ba.nv : bb.nv;
+                char nomes[BL_VAR]; int nn2 = 0;
+                for(int i = 0; i < ba.nv; i++) nomes[nn2++] = ba.nome[i];
+                for(int i = 0; i < bb.nv; i++){
+                    int tem = 0;
+                    for(int j = 0; j < nn2; j++) if(nomes[j] == bb.nome[i]) tem = 1;
+                    if(!tem && nn2 < BL_VAR) nomes[nn2++] = bb.nome[i];
+                }
+                nv = nn2;
+                unsigned n = 1u << nv;
+                int dif = 0;
+                for(unsigned x = 0; x < n; x++){
+                    unsigned xa = 0, xb = 0;
+                    for(int i = 0; i < ba.nv; i++)
+                        for(int j = 0; j < nv; j++)
+                            if(ba.nome[i] == nomes[j] && (x >> j) & 1) xa |= 1u << i;
+                    for(int i = 0; i < bb.nv; i++)
+                        for(int j = 0; j < nv; j++)
+                            if(bb.nome[i] == nomes[j] && (x >> j) & 1) xb |= 1u << i;
+                    if(ba.t[xa] != bb.t[xb]) dif++;
+                }
+                if(dif){ pmal3++; printf("      FALHA %-14s %s  ≠  %s (%d linhas)\n",
+                                         P[k].tema, P[k].esq, P[k].dir, dif); }
+            }
+            printf("      %zu problemas do ficheiro, cada um verificado PELA TABELA\n",
+                   sizeof P/sizeof *P);
+            ok("os problemas do eval.txt fecham com a resposta QUE O FICHEIRO PUBLICA —"
+               " a referência não é minha, e a volta é a tabela inteira (exaustiva)",
+               pmal3 == 0);
+            /* o gume: uma igualdade FALSA tem de falhar, senão o medidor não mede nada */
+            { Bool b1, b2v;
+              int lidos = bl_le("a + b", &b1) && bl_le("a * b", &b2v);
+              int dif = 0;
+              for(unsigned x = 0; x < 4; x++) if(b1.t[x] != b2v.t[x]) dif++;
+              ok("e o gume: «a + b» NÃO é «a * b» — a comparação por tabela acusa, logo"
+                 " ela pode falhar", lidos && dif == 2); }
+        }
+
+        /* ═══ §C21 A LÓGICA É O CORPO GF(2), com as MESMAS cinco operações ═════════
+         * O ramo do transístor já o dizia: «AND É a multiplicação de GF(2), XOR É a
+         * soma, e −x = x». Então a lógica não é máquina nova — é o corpo, e a forma
+         * canónica de uma função booleana é a ANF (Zhegalkin), que se obtém pela
+         * transformada de Möbius. E ela é INVOLUÇÃO: a mesma leva a tabela na ANF e a
+         * ANF na tabela — ν∘ν = id, o Dual das cinco, de graça porque somar é subtrair.
+         *
+         * Mede-se EXAUSTIVO: com 3 variáveis há 256 funções booleanas, e percorrem-se
+         * TODAS. Não é amostra — é o corpo inteiro. */
+        printf("\n§C21 A LÓGICA É O CORPO GF(2): a ANF é o dual, e a transformada é involução.\n\n");
+        {
+            int lmal = 0;
+            /* (i) a INVOLUÇÃO, nas 256 funções de 3 variáveis (todas) */
+            for(unsigned f2 = 0; f2 < 256; f2++){
+                unsigned char t[8], u[8];
+                for(int x = 0; x < 8; x++) t[x] = u[x] = (unsigned char)((f2 >> x) & 1);
+                bl_mobius(u, 3);                      /* tabela → ANF */
+                bl_mobius(u, 3);                      /* ANF → tabela: a MESMA operação */
+                for(int x = 0; x < 8; x++) if(u[x] != t[x]) lmal++;
+            }
+            /* (ii) e a ANF DIZ a função: avaliar a ANF dá a tabela, nos 256 casos */
+            for(unsigned f2 = 0; f2 < 256; f2++){
+                unsigned char t[8], anf[8];
+                for(int x = 0; x < 8; x++) t[x] = anf[x] = (unsigned char)((f2 >> x) & 1);
+                bl_mobius(anf, 3);
+                for(unsigned x = 0; x < 8; x++)
+                    if(bl_val_anf(anf, 3, x) != t[x]) lmal++;
+            }
+            printf("      a transformada de Möbius é involução nas 256 funções de 3 variáveis\n");
+            printf("      e a ANF avaliada devolve a tabela, nas 256 — dois caminhos\n");
+            ok("a lógica é o corpo GF(2): a ANF é o DUAL da tabela, a transformada é"
+               " INVOLUÇÃO (ν∘ν = id) e a avaliação da ANF devolve a tabela — exaustivo"
+               " nas 256 funções, não por amostra", lmal == 0);
+
+            /* (iii) a leitura da fala, e a FIBRA: quais entradas dão 1 */
+            {
+                Bool b3;
+                int ok3 = bl_le("a*b + c", &b3);
+                /* a*b + c: 1 quando (a∧b) xor c */
+                int certo = ok3 && b3.nv == 3;
+                if(certo){
+                    for(unsigned x = 0; x < 8; x++){
+                        int a2 = x & 1, b2v = (x >> 1) & 1, c2 = (x >> 2) & 1;
+                        /* a NOTAÇÃO é a do eval.txt: o `+` é o OU, e a expectativa
+                         * segue-a. Quando eu lia o `+` como XOR, esta linha esperava
+                         * `^` — e era a expectativa que estava errada, não o corpo. */
+                        if(b3.t[x] != ((a2 && b2v) | c2)) certo = 0;
+                    }
+                }
+                /* e as leis da casa, medidas: De Morgan e o idempotente x⊗x = x */
+                Bool dm1, dm2, idem;
+                int lok = bl_le("nao (a*b)", &dm1) && bl_le("nao a + nao b + nao a * nao b", &dm2)
+                       && bl_le("a*a", &idem);
+                int leis = lok;
+                if(leis){
+                    for(unsigned x = 0; x < 4; x++) if(dm1.t[x] != dm2.t[x]) leis = 0;
+                    for(unsigned x = 0; x < 2; x++) if(idem.t[x] != (x & 1)) leis = 0;
+                }
+                ok("e a fala lê-se no corpo: «a*b + c» dá a tabela certa, De Morgan fecha"
+                   " e o idempotente x⊗x = x é a lei booleana em pessoa", certo && leis);
+            }
+            /* o gume: uma fala que não é do corpo é RECUSADA, e não interpretada */
+            { Bool bx;
+              ok("e o gume: «a & (b» não fecha e é recusada — o parêntese aberto não se"
+                 " adivinha", bl_le("a & (b", &bx) == 0); }
+
+            /* A NOTAÇÃO DO FICHEIRO LÊ-SE. O `eval.txt` escreve o produto por
+             * JUSTAPOSIÇÃO e o complemento POSFIXO — «A + AB = A», «F = AB + AB'» —, e
+             * a casa não os lia: «simplifica a + ab» morria calada. Escrever numa
+             * notação e ler noutra é o defeito, e é ele que aqui fica preso.
+             * O GUME é o ESPAÇO: sem ele multiplica-se, com ele o operador tem de vir
+             * escrito — senão o `o` de «a ou b» virava variável e o OU virava produto. */
+            { int jmal = 0;
+              Bool jab, jamb, jxy, jxyl, jpar;
+              int lidos = bl_le("ab", &jab) && bl_le("a*b", &jamb)
+                       && bl_le("xy'", &jxy) && bl_le("x*(nao y)", &jxyl)
+                       && bl_le("a(b+c)", &jpar);
+              if(!lidos) jmal++;
+              else {
+                  for(unsigned x = 0; x < 4; x++){
+                      if(jab.t[x] != jamb.t[x]) jmal++;      /* «ab» É «a*b» */
+                      if(jxy.t[x] != jxyl.t[x]) jmal++;      /* «xy'» É «x·¬y» */
+                  }
+                  for(unsigned x = 0; x < 8; x++){
+                      int a2 = x & 1, b2 = (x >> 1) & 1, c2 = (x >> 2) & 1;
+                      if(jpar.t[x] != (a2 && (b2 | c2))) jmal++;   /* «a(b+c)» */
+                  }
+              }
+              /* as duas identidades que o ficheiro escreve, agora legíveis */
+              Bool i1, i1r, i2, i2r;
+              int ids = bl_le("a + ab", &i1) && bl_le("a", &i1r)
+                     && bl_le("xy + xy'", &i2) && bl_le("x", &i2r);
+              if(ids){
+                  for(unsigned x = 0; x < 4; x++) if(i1.t[x] != i1r.t[x & 1]) jmal++;
+                  for(unsigned x = 0; x < 4; x++) if(i2.t[x] != i2r.t[x & 1]) jmal++;
+              } else jmal++;
+              /* e o GUME: COM espaço, «a ou b» continua a ser o OU e não o produto —
+               * se a justaposição atravessasse o espaço, esta linha caía */
+              Bool ou1, ou2;
+              int gume = bl_le("a ou b", &ou1) && bl_le("a + b", &ou2);
+              if(gume) for(unsigned x = 0; x < 4; x++) if(ou1.t[x] != ou2.t[x]) gume = 0;
+              /* e a variável dupla: «a ou b» tem DUAS variáveis, não três (nada de `o`) */
+              if(gume && ou1.nv != 2) gume = 0;
+              ok("a NOTAÇÃO DO FICHEIRO lê-se: a JUSTAPOSIÇÃO é o produto («ab» = «a*b»,"
+                 " «a(b+c)») e o `'` é o complemento posfixo («xy'» = x·¬y) — e as duas"
+                 " identidades dele fecham, a + ab = a e xy + xy' = x. O gume é o ESPAÇO:"
+                 " «a ou b» continua o OU com DUAS variáveis, e não a·o·u·b",
+                 jmal == 0 && gume); }
+        }
+
+        /* ═══ §C20 A INTEGRAÇÃO: o inverso da derivada, e o «+C» é o NÚCLEO ═════════
+         * Integrar é derivar com o sinal trocado — uma operação, como as outras três.
+         * E a composição mede a razão de ser da constante: num sentido devolve a
+         * identidade, no outro devolve p − p(0). O «+C» não é convenção de escrita:
+         * é o que a derivada APAGA, e a volta pede de volta.
+         *
+         * E mede-se a lei da casa, a de Gentil (o Teorema Central): 
+         *    ∫₀^b f + ∫₀^{f(b)} f⁻¹ = b·f(b)
+         * que para f(x) = x^m fecha EXATA em frações: b^{m+1}/(m+1) + m·b^{m+1}/(m+1)
+         * = b^{m+1}. Contar e integrar são duais pela soma reversível. */
+        printf("\n§C20 A INTEGRAÇÃO: o inverso da derivada, e a constante é o núcleo.\n\n");
+        {
+            int imal = 0;
+            /* (i) integrar e derivar devolve a IDENTIDADE */
+            {
+                Pol p1; pol_zera(&p1);
+                p1.p[0] = 5; p1.p[1] = -2; p1.p[2] = 3; p1.n = 2;   /* 3x² − 2x + 5 */
+                Pol Fi, Fd;
+                pol_calculo(p1, -1, &Fi);                             /* ∫ */
+                pol_calculo(Fi, +1, &Fd);                              /* d/dx */
+                if(Fd.n != p1.n) imal++;
+                else for(int k = 0; k <= p1.n; k++)
+                    if(Fd.p[k]*p1.q[k] != p1.p[k]*Fd.q[k]) imal++;
+                /* e a integral é EXATA em frações: ∫3x² − 2x + 5 = x³ − x² + 5x */
+                if(!(Fi.p[3] == 1 && Fi.q[3] == 1 && Fi.p[2] == -1 && Fi.q[2] == 1 &&
+                     Fi.p[1] == 5 && Fi.q[1] == 1 && Fi.p[0] == 0)) imal++;
+                /* (ii) o outro sentido: derivar e integrar devolve p − p(0) — o «+C» */
+                Pol Fd2, Fi2;
+                pol_calculo(p1, +1, &Fd2);
+                pol_calculo(Fd2, -1, &Fi2);
+                if(Fi2.p[0] != 0) imal++;                             /* a constante foi-se */
+                for(int k = 1; k <= p1.n; k++)
+                    if(Fi2.p[k]*p1.q[k] != p1.p[k]*Fi2.q[k]) imal++;   /* o resto volta igual */
+            }
+            /* (iii) a fração que só existe se for exata: ∫x² = x³/3 */
+            {
+                Pol p2; pol_zera(&p2); p2.p[2] = 1; p2.n = 2;
+                Pol Fi; pol_calculo(p2, -1, &Fi);
+                if(!(Fi.p[3] == 1 && Fi.q[3] == 3)) imal++;            /* 1/3 exato */
+            }
+            /* (iv) A LEI DE GENTIL, exata em Q: ∫₀^b x^m + ∫₀^{b^m} y^{1/m} = b^{m+1} */
+            {
+                for(long m = 1; m <= 5; m++)
+                for(long b2 = 1; b2 <= 4; b2++){
+                    long bm1 = 1;                                    /* b^{m+1} */
+                    for(long i = 0; i <= m; i++) bm1 *= b2;
+                    /* ∫₀^b x^m = b^{m+1}/(m+1) ;  ∫₀^{b^m} y^{1/m} = m·b^{m+1}/(m+1) */
+                    long ap = bm1, aq = m + 1;
+                    long cp = m * bm1, cq = m + 1;
+                    long sp, sq; pl_soma(ap, aq, cp, cq, &sp, &sq);
+                    if(!(sq == 1 && sp == bm1)) imal++;              /* = b·f(b) exato */
+                }
+            }
+            /* (v) a INTEGRAL DEFINIDA: ∫₀³ x² = 9, exato — e o valor mede-se aqui
+             *     porque a escrita dele já me traiu uma vez: sete frações num só
+             *     printf, e o buffer rotativo do escritor só tem quatro. */
+            {
+                Pol p4; pol_zera(&p4); p4.p[2] = 1; p4.n = 2;        /* x² */
+                Pol F4; pol_calculo(p4, -1, &F4);
+                long v3p, v3q, v0p, v0q, dp3, dq3;
+                pol_val_q(F4, 3, 1, &v3p, &v3q);
+                pol_val_q(F4, 0, 1, &v0p, &v0q);
+                pl_soma(v3p, v3q, -v0p, v0q, &dp3, &dq3);
+                if(!(dq3 == 1 && dp3 == 9)) imal++;                  /* 27/3 − 0 = 9 */
+            }
+            printf("      ∫(3x² - 2x + 5) = x³ - x² + 5x, e derivar devolve o de partida\n");
+            printf("      derivar e integrar devolve p - p(0): a constante É o núcleo\n");
+            printf("      Gentil: ∫f + ∫f⁻¹ = b·f(b) exato em Q, nos 20 casos (m=1..5)\n");
+            ok("integrar é derivar com o sinal trocado: um sentido devolve a IDENTIDADE,"
+               " o outro devolve p − p(0) — e é isso o «+C», medido e não convencionado",
+               imal == 0);
+            /* o gume: a constante NÃO volta sozinha — se voltasse, o núcleo era vazio
+             * e o «+C» não teria razão de existir */
+            {
+                Pol p3; pol_zera(&p3); p3.p[0] = 7; p3.n = 0;        /* a constante 7 */
+                Pol Fd3, Fi3;
+                pol_calculo(p3, +1, &Fd3);                            /* d/dx 7 = 0 */
+                pol_calculo(Fd3, -1, &Fi3);
+                ok("e o gume: a derivada da constante é ZERO e a volta não a inventa —"
+                   " o núcleo não é vazio, e é por isso que o «+C» existe",
+                   Fd3.n == 0 && Fd3.p[0] == 0 && Fi3.p[0] == 0 && p3.p[0] == 7);
+            }
+        }
+
+        /* ═══ §C19 O PADRÃO OURO: tudo passa pelas CINCO, e o sinal é a Lei 1 ═══════
+         * As cinco do Corpo Universal não são um catálogo à parte: são POR ONDE tudo
+         * passa. E três pares que eu tinha escrito como duas funções são, cada um, UMA
+         * operação com sinal — «não são duas operações que calham ser inversas; é uma,
+         * e a Lei 1 escreve-a: 1† = −1»:
+         *
+         *   MEMBRANA(±1)   Dual †          +1 desdobra a entrada, −1 veste a saída
+         *   CORPUS(±1)     Soma ⊕          +1 aprende (a dobra), −1 esquece (a retração)
+         *   CONV(±1)       ⊗ e a fibra     +1 convolve, −1 deconvolve
+         *
+         * E o que se mede é o que faz delas UMA: os dois sentidos compõem na
+         * IDENTIDADE. Sem isso seriam duas funções com nomes bonitos. */
+        printf("\n§C19 O PADRÃO OURO: os pares são UMA operação, e o sinal decide.\n\n");
+        {
+            int omal = 0;
+            /* (i) MEMBRANA: vestir e desdobrar compõem na identidade — o valor sai
+             *     vestido, entra de novo e volta ao mesmo racional. */
+            { char vest[128], nu3[256];
+              MEMBRANA(vest, sizeof vest, 0, 5, 6, -1);        /* −1: veste */
+              MEMBRANA(nu3, sizeof nu3, vest, 0, 1, +1);       /* +1: desdobra */
+              if(strcmp(nu3, "(5)/(6)")) omal++;
+              char v2[128]; MEMBRANA(v2, sizeof v2, 0, 4, 1, -1);
+              if(strcmp(v2, "4")) omal++; }
+            /* (ii) CORPUS: aprender e esquecer compõem na identidade — o nó volta ao
+             *      estado de origem, e o caminho fica nos dois sentidos. */
+            { int d3; 
+              CORPUS("padrao ouro teste", "uma operacao", +1);
+              long r1 = t_erosao("padrao ouro teste", &d3);
+              CORPUS("padrao ouro teste", 0, -1);
+              long r2 = t_erosao("padrao ouro teste", &d3);
+              if(!r1 || r2) omal++;
+              if(CORPUS("nunca existiu isto aqui", 0, -1)) omal++;   /* nada a retirar */
+            }
+            /* (iii) CONV: convolver e deconvolver compõem na identidade — (a⊗b)÷b = a */
+            { Pz a4; a4.n = 2; a4.a[0] = 1; a4.a[1] = 2; a4.a[2] = 3;
+              Pz b4; b4.n = 1; b4.a[0] = -1; b4.a[1] = 1;
+              Pz c4, v4;
+              if(!CONV(a4, b4, +1, &c4)) omal++;
+              if(!CONV(c4, b4, -1, &v4)) omal++;
+              else { if(v4.n != a4.n) omal++;
+                     else for(int k = 0; k <= a4.n; k++) if(v4.a[k] != a4.a[k]) omal++; } }
+            printf("      MEMBRANA(-1) → $\\frac{5}{6}$ → MEMBRANA(+1) → (5)/(6)\n");
+            printf("      CORPUS(+1) põe, CORPUS(-1) tira, e o caminho fica\n");
+            printf("      CONV(+1) convolve, CONV(-1) devolve o outro fator\n\n");
+            ok("os três pares são UMA operação com sinal, e mede-se o que os faz uma:"
+               " os dois sentidos compõem na IDENTIDADE (Lei 1, 1† = -1)", omal == 0);
+            /* o gume: a fibra NÃO existe onde a divisão não é exata — e aí a operação
+             * recusa, em vez de devolver um resto escondido */
+            { Pz a5; a5.n = 2; a5.a[0] = 1; a5.a[1] = 0; a5.a[2] = 1;   /* x²+1 */
+              Pz b5; b5.n = 1; b5.a[0] = -1; b5.a[1] = 1;               /* x−1 */
+              Pz q5;
+              ok("e o gume: CONV(-1) RECUSA onde a fibra não existe (x²+1 por x−1) —"
+                 " a operação não inventa a volta que não há", CONV(a5, b5, -1, &q5) == 0); }
+        }
+
+        /* ═══ §C18 O MDC: a folha da órbita do inversor, nos dois andares ═══════════
+         * «Euclides é a dinâmica do inversor, e a FOLHA é o gcd» — e a mesma cadeia
+         * corre no inteiro e no polinómio. Mede-se nos dois, e mede-se a VOLTA: o mdc
+         * divide os dois exatamente, ou não é o mdc. */
+        printf("\n§C18 O MDC: a mesma órbita do inversor, no inteiro e no polinómio.\n\n");
+        {
+            int gmal = 0, passos = 0;
+            /* (i) no polinómio: mdc(x³−1, x²−1) = x−1 */
+            Pz a; a.n = 3; a.a[0] = -1; a.a[1] = 0; a.a[2] = 0; a.a[3] = 1;
+            Pz b2; b2.n = 2; b2.a[0] = -1; b2.a[1] = 0; b2.a[2] = 1;
+            Pz g;
+            if(!pz_mdc(a, b2, &g, &passos)) gmal++;
+            else {
+                if(!(g.n == 1 && g.a[1] == 1 && g.a[0] == -1)) gmal++;
+                Pz q1, q2;                              /* A VOLTA: divide os dois */
+                if(!pz_div_exata(a, g, &q1)) gmal++;
+                if(!pz_div_exata(b2, g, &q2)) gmal++;
+            }
+            printf("      mdc(x³-1, x²-1) = x-1 em %d passo(s) da órbita\n", passos);
+            /* (ii) o gume: primos entre si dão 1 — a órbita desce até à unidade */
+            Pz c; c.n = 2; c.a[0] = 1; c.a[1] = 0; c.a[2] = 1;      /* x²+1 */
+            Pz d2; d2.n = 1; d2.a[0] = -1; d2.a[1] = 1;             /* x−1 */
+            Pz g2; int p2;
+            if(!pz_mdc(c, d2, &g2, &p2)) gmal++;
+            else if(!(g2.n == 0 && g2.a[0] != 0)) gmal++;
+            /* (iii) o MESMO passo no inteiro: a folha da órbita é o gcd numérico */
+            { long x = 1071, y = 462, pn = 0;
+              while(y){ long t = x % y; x = y; y = t; pn++; }
+              if(x != 21) gmal++;
+              printf("      e no inteiro, a mesma descida: mdc(1071,462) = %ld em %ld passo(s)\n",
+                     x, pn); }
+            ok("o MDC é a folha da órbita do inversor — a mesma cadeia no inteiro e no"
+               " polinómio, e a VOLTA confere: ele divide os dois exatamente", gmal == 0);
+            ok("e o gume: primos entre si descem até à UNIDADE (mdc = 1), que é a órbita"
+               " a fechar sem folha comum", g2.n == 0 && g2.a[0] != 0);
+        }
+
+        /* ═══ §C17 AS CINCO OPERAÇÕES NO POLINÓMIO, cada uma com a SUA conservação ═══
+         * O Corpo Universal fixa as cinco e o que cada uma conserva. Aqui elas realizam-se
+         * no corpo dos polinómios — nenhuma régua nova —, e mede-se a conservação de cada,
+         * que é o que as distingue: a Soma soma a energia, a Multiplicação multiplica-a, a
+         * Divisão é a FIBRA (a = q·b + r, e a volta reconstrói), o Dual é a INVOLUÇÃO (o
+         * recíproco, ν∘ν = id — o mesmo ν da prova de Pisot), e a Inversão só é admissível
+         * quando a volta existe. E Pontryagin fecha: o caráter leva SOMA em PRODUTO. */
+        printf("\n§C17 AS CINCO OPERAÇÕES: cada uma com a conservação que a define.\n\n");
+        {
+            Pz u; u.n = 2; u.a[0] = 1; u.a[1] = 2; u.a[2] = 3;      /* 3x² + 2x + 1 */
+            Pz v; v.n = 1; v.a[0] = -1; v.a[1] = 1;                 /* x − 1 */
+            int cmal = 0;
+
+            /* SOMA — a dobra: E(u ⊕ u) = 2²·E(u)? Não: a dobra SOMA o corpo consigo, e a
+             * energia do dobro é 4E — o que a lei diz é E(u⊕u) = 2E(u) para o CLONE (a
+             * soma direta, que empilha), não para 2u. Mede-se o que vale: a soma é
+             * componente a componente e a retração devolve. */
+            { Pz w; pz_soma(u, v, &w);
+              Pz volta; Pz mv; mv.n = v.n;
+              for(int k = 0; k <= v.n; k++) mv.a[k] = -v.a[k];
+              pz_soma(w, mv, &volta);                     /* (u+v) − v = u */
+              if(volta.n != u.n) cmal++;
+              else for(int k = 0; k <= u.n; k++) if(volta.a[k] != u.a[k]) cmal++; }
+
+            /* MULTIPLICAÇÃO — a fusão: a NORMA multiplica. No polinómio a norma que
+             * multiplica é o valor num ponto (o caráter): eval(u⊗v) = eval(u)·eval(v). */
+            { Pz w; pz_mul(u, v, &w);
+              for(long x = -3; x <= 3; x++){
+                  long eu = 0, ev = 0, ew = 0;
+                  for(int k = u.n; k >= 0; k--) eu = eu*x + u.a[k];
+                  for(int k = v.n; k >= 0; k--) ev = ev*x + v.a[k];
+                  for(int k = w.n; k >= 0; k--) ew = ew*x + w.a[k];
+                  if(ew != eu*ev) cmal++;
+              } }
+
+            /* DIVISÃO — a FIBRA: a = q·b + r com grau(r) < grau(b), e a volta reconstrói.
+             * Em ℤ o pseudo-fator é DITO: vale fator·a = q·b + r. */
+            { Pz a2; a2.n = 3; a2.a[0] = -1; a2.a[1] = 0; a2.a[2] = 0; a2.a[3] = 1; /* x³−1 */
+              Pz q2, r2; long fator = 1;
+              if(!pz_div_resto(a2, v, &q2, &r2, &fator)) cmal++;
+              else {
+                  if(!(r2.n == 0 && r2.a[0] == 0)) cmal++;    /* x−1 divide x³−1 */
+                  Pz qb, soma;                                 /* a VOLTA: q·b + r */
+                  pz_mul(q2, v, &qb); pz_soma(qb, r2, &soma);
+                  if(soma.n != a2.n) cmal++;
+                  else for(int k = 0; k <= a2.n; k++) if(soma.a[k] != fator*a2.a[k]) cmal++;
+              } }
+            /* e com resto NÃO nulo, a identidade continua a fechar */
+            { Pz a3; a3.n = 2; a3.a[0] = 1; a3.a[1] = 0; a3.a[2] = 1;   /* x² + 1 */
+              Pz q3, r3; long fator = 1;
+              if(!pz_div_resto(a3, v, &q3, &r3, &fator)) cmal++;
+              else {
+                  if(r3.n != 0 || r3.a[0] != 2) cmal++;        /* resto 2: p(1) = 2 */
+                  Pz qb, soma; pz_mul(q3, v, &qb); pz_soma(qb, r3, &soma);
+                  for(int k = 0; k <= a3.n; k++) if(soma.a[k] != fator*a3.a[k]) cmal++;
+              } }
+
+            /* DUAL — a involução: o recíproco troca dentro por fora, e ν∘ν = id. E é ele
+             * o ν da prova de Pisot: ν(β) = β*, que é onde a conta fica barata. */
+            { Pz d1, d2; pz_dual(u, &d1); pz_dual(d1, &d2);
+              if(d2.n != u.n) cmal++;
+              else for(int k = 0; k <= u.n; k++) if(d2.a[k] != u.a[k]) cmal++;
+              Pz be; be.n = 4; be.a[0] = -1; be.a[1] = 0; be.a[2] = 0;
+              be.a[3] = -3; be.a[4] = 1;                   /* β(4,3) = x⁴ − 3x³ − 1 */
+              Pz bs; pz_dual(be, &bs);                     /* β* = −x⁴ − 3x + 1 */
+              if(!(bs.a[0] == 1 && bs.a[1] == -3 && bs.a[4] == -1)) cmal++;
+            }
+
+            /* INVERSÃO — a volta: só é admissível quem a tem. Dividir por ZERO não tem. */
+            { Pz z0; z0.n = 0; z0.a[0] = 0;
+              Pz q4, r4; long fator = 1;
+              if(pz_div_resto(u, z0, &q4, &r4, &fator)) cmal++;   /* tem de RECUSAR */
+            }
+            printf("      soma: a retração devolve · produto: eval(u⊗v) = eval(u)·eval(v)\n");
+            printf("      divisão: fator·a = q·b + r, com a volta a reconstruir\n");
+            printf("      dual: ν∘ν = id, e ν(β) = β* — o recíproco da prova de Pisot\n");
+            ok("as cinco operações realizam-se no polinómio com a conservação de CADA uma:"
+               " retração, norma que multiplica, fibra com volta, involução, e a inversão"
+               " a RECUSAR quem não tem volta", cmal == 0);
+
+            /* PONTRYAGIN — «o dual do grupo pela troca ⊕→⊗»: o caráter leva a SOMA dos
+             * expoentes no PRODUTO dos valores. No polinómio isso é x^(a+b) = x^a·x^b,
+             * e é a mesma cláusula que o transístor cumpre em volts. */
+            { int pmal2 = 0;
+              for(long x = 2; x <= 5; x++)
+                for(int a = 0; a <= 5; a++)
+                  for(int b2 = 0; b2 <= 5; b2++){
+                      long pa = 1, pb = 1, ps = 1;
+                      for(int i = 0; i < a; i++) pa *= x;
+                      for(int i = 0; i < b2; i++) pb *= x;
+                      for(int i = 0; i < a+b2; i++) ps *= x;
+                      if(pa*pb != ps) pmal2++;
+                  }
+              ok("e PONTRYAGIN: o caráter leva a SOMA em PRODUTO — x^(a+b) = x^a·x^b nos"
+                 " 144 casos, a mesma troca ⊕→⊗ do grupo dual", pmal2 == 0);
+            }
+        }
+
+        /* ═══ §C16 O RELÓGIO: o tick é o quantum, e a velocidade escolhe-se ═════════
+         * «O Quantizador converte o contínuo em contagem conservada», e o refinamento
+         * é a TORRE — ω_{2M}² = ω_M —, «o contínuo entra por refinamento do passo de
+         * quantização, NUNCA POR SALTO» (Corpo Universal). Aqui isso é literal: a fita
+         * dá uma dobra por tick, e a velocidade é quantas dobras cabem num tick. Ela
+         * só sobe por DOBRA (1, 2, 4, 8…) — 3 não é um andar da torre.
+         *
+         * E o que se mede é o que o Quantizador promete: mudar a velocidade muda A
+         * LEITURA e não o objeto — o valor final e o NÚMERO TOTAL de dobras são os
+         * mesmos em qualquer velocidade. */
+        printf("\n§C16 O RELÓGIO: o tick é o quantum, e a velocidade é escolha de leitura.\n\n");
+        {
+            const char *conta = "2 x (3 + 4) + 5 x 5";
+            char cf_n5[600]; snprintf(cf_n5, sizeof cf_n5, "%s.tick", b);
+            long vfinal = -1, dobras_ref = -1;
+            int tmal = 0;
+            for(int vel = 1; vel <= 8; vel *= 2){        /* 1, 2, 4, 8 — a torre */
+                int cf = open(cf_n5, O_RDWR|O_CREAT|O_TRUNC, 0644);
+                long n5 = ct_leia(cf, conta), dobras = 0, v5 = 0; char pq5[256];
+                for(;;){                                  /* tick a tick */
+                    int fez = 0;
+                    for(int d = 0; d < vel; d++){         /* vel dobras por tick */
+                        if(ct_passo(cf, n5, pq5, sizeof pq5) != 1) break;
+                        dobras++; fez = 1;
+                    }
+                    if(!fez) break;
+                }
+                if(!ct_valor(cf, n5, &v5)) tmal++;
+                close(cf);
+                if(vfinal < 0){ vfinal = v5; dobras_ref = dobras; }
+                else if(v5 != vfinal || dobras != dobras_ref) tmal++;
+                printf("      velocidade %d tick(s): %ld dobras, valor %ld\n", vel, dobras, v5);
+            }
+            unlink(cf_n5);
+            ok("o Quantizador conserva a CONTAGEM: mudar a velocidade (1,2,4,8) muda a"
+               " leitura e nao o objeto — mesmo valor e MESMO numero de dobras",
+               tmal == 0 && vfinal == 39 && dobras_ref > 0);
+            /* o gume: a velocidade sobe por DOBRA. 3 nao e andar da torre — e a
+             * verificacao e' a mesma que o relogio faz: potencia de dois, e o bit conta. */
+            ok("e a velocidade so' sobe por DOBRA: 1,2,4,8 sao andares e 3,5,6 nao —"
+               " o refinamento e' a torre, nunca um salto",
+               eh_dobra(1) && eh_dobra(2) && eh_dobra(4) && eh_dobra(8) &&
+               !eh_dobra(3) && !eh_dobra(5) && !eh_dobra(6) && !eh_dobra(0));
+        }
+
+        /* ═══ §C15 A FATORAÇÃO: o produto é convolução, e fatorar é a volta ══════════
+         * «Elevar o grau é exacto — a linha de Pascal» (Corpo estelar), e os binomiais
+         * são «a base natural do ⊕» (Newton, progressoes.c §P2). O produto é a
+         * CONVOLUÇÃO (Corpo Universal), logo fatorar é a deconvolução — e ela só vale
+         * onde a divisão é EXATA. Nada de aproximar: divide-se, e o resto tem de ser 0. */
+        printf("\n§C15 A FATORAÇÃO: fatorar é a volta da convolução, e a volta CONFERE.\n\n");
+        {
+            /* (i) PASCAL POR DOIS CAMINHOS: multiplicar (x+1) n vezes (a convolução) tem
+             *     de dar exatamente os binomiais C(n,k) (a fórmula). */
+            int pmal = 0;
+            for(int n = 1; n <= 10; n++){
+                Pz acc; acc.n = 0; acc.a[0] = 1;
+                Pz um; um.n = 1; um.a[0] = 1; um.a[1] = 1;      /* x + 1 */
+                for(int i = 0; i < n; i++){ Pz r; pz_mul(acc, um, &r); acc = r; }
+                if(acc.n != n){ pmal++; continue; }
+                for(int k = 0; k <= n; k++) if(acc.a[k] != pl_binom(n, k)) pmal++;
+            }
+            printf("      (x+1)^10 pela convolução = a linha 10 de Pascal, termo a termo\n");
+            ok("distribuir É convolver: (x+1)^n dá a linha de Pascal nos dez graus —"
+               " dois caminhos, a convolução e o binomial, sem um decimal", pmal == 0);
+
+            /* (ii) A FATORAÇÃO, com a VOLTA obrigatória: o produto dos fatores reconstrói
+             *      o original byte a byte, ou não houve fatoração nenhuma. */
+            struct { const char *nome; int n; long c[7]; int nfe; } F[] = {
+                { "x^2 - 1",        2, {-1, 0, 1},           2 },   /* (x−1)(x+1) */
+                { "x^2 - 3x + 2",   2, { 2,-3, 1},           2 },   /* (x−1)(x−2) */
+                { "x^3 - x",        3, { 0,-1, 0, 1},        3 },   /* x(x−1)(x+1) */
+                { "6x^2 - 5x + 1",  2, { 1,-5, 6},           2 },   /* (2x−1)(3x−1) */
+                { "x^4 - 1",        4, {-1, 0, 0, 0, 1},     3 },   /* (x−1)(x+1)(x²+1) */
+                { "x^2 - 2",        2, {-2, 0, 1},           1 },   /* irredutível em Q */
+                { "x^2 - x - 1",    2, {-1,-1, 1},           1 },   /* o OURO: irredutível */
+            };
+            int fmal2 = 0;
+            for(size_t k = 0; k < sizeof F/sizeof *F; k++){
+                Pz p2; p2.n = F[k].n;
+                for(int i = 0; i <= F[k].n; i++) p2.a[i] = F[k].c[i];
+                Pz fs[PFMAX]; long cont = 1;
+                int nf = pz_fatora(p2, fs, PFMAX, &cont);
+                if(nf != F[k].nfe) fmal2++;
+                if(!pz_confere(p2, fs, nf, cont)) fmal2++;   /* A VOLTA */
+            }
+            ok("a fatoração acha os fatores certos e o produto deles RECONSTRÓI o original"
+               " — a volta confere byte a byte, ou não houve fatoração", fmal2 == 0);
+
+            /* (iii) O GUME: um fator que não divide é RECUSADO pelo resto, e o irredutível
+             *       não se parte. Sem isto a fatoração «achava» qualquer coisa. */
+            {
+                Pz p3; p3.n = 2; p3.a[0] = -2; p3.a[1] = 0; p3.a[2] = 1;   /* x² − 2 */
+                Pz d;  d.n = 1;  d.a[0] = -1; d.a[1] = 1;                  /* x − 1 */
+                Pz q;
+                Pz fs[PFMAX]; long cont;
+                int nf = pz_fatora(p3, fs, PFMAX, &cont);
+                ok("o gume: (x−1) NÃO divide x²−2 (resto ≠ 0) e o irredutível fica inteiro",
+                   pz_div_exata(p3, d, &q) == 0 && nf == 1 && fs[0].n == 2);
+            }
+
+            /* (iii-b) E ISTO TEM NOME NA CASA: o que aqui se faz é a CONVOLUÇÃO
+             *     UNIVERSAL e a sua volta. O teorema já está medido
+             *     (tests/convolucao_universal.js, 13:0): «convolução = a forma aditiva
+             *     da multiplicação, vista pela Transformada Universal», e «a
+             *     deconvolução é a divisão espectral — exata fora dos divisores de
+             *     zero, com os divisores exibidos».
+             *
+             *     Então o produto que escrevi não se valida sozinho: valida-se contra a
+             *     LEI — a transformada tem de casar nas duas FOLHAS. Em q=257, m=2, as
+             *     folhas são σ=61 e σ†=198 (σ+σ†=2, σσ†=-1), e o critério é
+             *     eval_σ(a⊛b) = eval_σ(a)·eval_σ(b). Dois caminhos: o meu e o dela. */
+            {
+                long q = 257, folha[2] = { 61, 198 };
+                struct { int n; long c[5]; } A[] = {
+                    { 2, {1, 2, 3} }, { 1, {-1, 1} }, { 3, {5, 0, -2, 1} }, { 2, {2, -3, 1} },
+                };
+                int cmal = 0, dmal = 0, exibiu = 0;
+                for(size_t i = 0; i < sizeof A/sizeof *A; i++)
+                for(size_t j = 0; j < sizeof A/sizeof *A; j++){
+                    Pz a, b2, c2;
+                    a.n = A[i].n;  for(int k = 0; k <= a.n; k++)  a.a[k]  = A[i].c[k];
+                    b2.n = A[j].n; for(int k = 0; k <= b2.n; k++) b2.a[k] = A[j].c[k];
+                    pz_mul(a, b2, &c2);
+                    for(int l = 0; l < 2; l++){
+                        long sg = folha[l];
+                        long ea = 0, eb = 0, ec = 0;      /* Horner no anel */
+                        for(int k = a.n;  k >= 0; k--) ea = mod_p(ea*sg + a.a[k], q);
+                        for(int k = b2.n; k >= 0; k--) eb = mod_p(eb*sg + b2.a[k], q);
+                        for(int k = c2.n; k >= 0; k--) ec = mod_p(ec*sg + c2.a[k], q);
+                        if(ec != mod_p(ea*eb, q)) cmal++;             /* §V2: a transformada casa */
+                        /* a DECONVOLUÇÃO é a divisão espectral: c/b = a onde eval(b) ≠ 0,
+                         * e onde eval(b) = 0 o divisor de zero EXIBE-SE (não se finge) */
+                        if(eb != 0){
+                            if(mod_p(ec * inv_mod(eb, q), q) != ea) dmal++;
+                        } else exibiu++;
+                    }
+                    /* e a volta inteira: dividir o produto pelo fator devolve o outro */
+                    Pz vv;
+                    if(!pz_div_exata(c2, b2, &vv)) dmal++;
+                    else { if(vv.n != a.n) dmal++;
+                           else for(int k = 0; k <= a.n; k++) if(vv.a[k] != a.a[k]) dmal++; }
+                }
+                printf("      eval_σ(a⊛b) = eval_σ(a)·eval_σ(b) nas duas folhas (σ=61, σ†=198)\n");
+                ok("o produto que aqui se faz E a CONVOLUÇÃO UNIVERSAL: a transformada casa"
+                   " nas duas folhas, nos 16 pares — a lei dela valida a minha", cmal == 0);
+                ok("e fatorar E a DECONVOLUÇÃO: a divisão espectral bate com a divisão exata,"
+                   " e a volta devolve o outro fator termo a termo", dmal == 0);
+            }
+
+            /* (iv) A FAMÍLIA QUE A CASA DOMINA: β(n,m) = xⁿ − m·x^{n−1} − 1 com m ≥ 2 é
+             *      Pisot (Rouché no dual), e daí IRREDUTÍVEL sem calcular raiz nenhuma.
+             *      Reconhece-se, e o m=1 fica de fora — é lá que a prova falha. */
+            {
+                Pz b1; b1.n = 4; b1.a[0] = -1; b1.a[1] = 0; b1.a[2] = 0;
+                b1.a[3] = -3; b1.a[4] = 1;                   /* β(4,3) = x⁴ − 3x³ − 1 */
+                Pz b2; b2.n = 4; b2.a[0] = -1; b2.a[1] = 0; b2.a[2] = 0;
+                b2.a[3] = -1; b2.a[4] = 1;                   /* β(4,1): m=1, fora */
+                Pz me; me.n = 2; me.a[0] = -1; me.a[1] = -2; me.a[2] = 1;  /* prata */
+                Pz fs[PFMAX]; long cont;
+                int nf = pz_fatora(b1, fs, PFMAX, &cont);
+                ok("a familia de Pisot reconhece-se: β(4,3) da m=3, β(4,1) fica FORA (e a"
+                   " metalica x²−2x−1 da m=2) — e o β(4,3) nao se parte",
+                   pz_beta_pisot(b1) == 3 && pz_beta_pisot(b2) == 0 &&
+                   pz_metalica(me) == 2 && nf == 1);
+            }
+        }
+
+        /* ═══ O DICIONÁRIO: a álgebra é intrínseca, o assunto empresta os nomes ═══════
+         * «cabe em qualquer assunto, só mapear». A borda a s² + b s + c = 0 já resolve;
+         * o que cada assunto traz é QUAL grandeza sua se senta em cada coordenada, e
+         * como chama os três regimes do Δ. Nenhuma régua nova: o Δ, a tricotomia, as
+         * folhas e o resíduo são os MESMOS — muda a língua, não a lei. */
+        {
+            long a1, b1, c1, a2b, b2, c2;
+            int i1 = dic_le("mola m=1 c=3 k=2", &a1, &b1, &c1);
+            int i2 = dic_le("rlc L=1 R=3 S=2", &a2b, &b2, &c2);
+            ok("dois assuntos, os mesmos numeros: a algebra da o MESMO Δ e o mesmo"
+               " regime — o que muda e o nome (mola/rlc), nao a lei",
+               i1 >= 0 && i2 >= 0 && a1 == a2b && b1 == b2 && c1 == c2 &&
+               (b1*b1 - 4*a1*c1) == (b2*b2 - 4*a2b*c2) &&
+               dic_regime(i1, b1*b1 - 4*a1*c1) != dic_regime(i2, b2*b2 - 4*a2b*c2));
+            /* e o regime e' o do Δ, na lingua do assunto: 1 > 0, 9-8=1 hiperbolico */
+            ok("e o regime sai do Δ e nao de tabela: Δ=1>0 e' o primeiro nome do assunto",
+               !strcmp(dic_regime(i1, 1), "sobreamortecida") &&
+               !strcmp(dic_regime(i1, 0), "criticamente amortecida") &&
+               !strcmp(dic_regime(i1, -4), "oscilante"));
+            /* o gume: assunto fora do dicionario, e dado em falta — nao se inventa */
+            ok("e o que nao esta no dicionario, ou vem sem os dados, devolve a vez ao"
+               " corpus — mapear nao e adivinhar",
+               dic_le("unicornio m=1 c=3 k=2", &a1, &b1, &c1) < 0 &&
+               dic_le("mola m=1 c=3", &a1, &b1, &c1) < 0);
+        }
+
+        /* ═══ AS FOLHAS NO RELÓGIO — a teoria discreta a resolver a equação ═══════════
+         * A regua do polinomio ja declara o corpo Q[x]/(p): la a raiz e σ, exata e sem
+         * decimal. O Corpo Universal da o passo que a torna NUMERO: no relogio da casa
+         * (a escada de Fermat 17, 257, 65537) o discriminante ou e quadrado — e as duas
+         * FOLHAS estao a vista, inteiras — ou nao e, e o andar e INERTE (as folhas vivem
+         * um andar acima, onde o Frobenius x↦x^p E a estaca). «√2 e 11 em F_17».
+         *
+         * DOIS CAMINHOS que tem de concordar: o criterio de EULER diz se e quadrado, e a
+         * VARREDURA acha (ou nao acha) a raiz — e cada raiz VOLTA a equacao com residuo
+         * ZERO EXATO, ou nao e raiz. Tudo em inteiros. */
+        {
+            printf("\n§C14 AS FOLHAS NO RELOGIO: a raiz que nao fecha em Q e' inteira no anel.\n\n");
+            struct { long a, b, c; const char *nome; } E[] = {
+                {  1, -1, -1, "x^2 = x + 1  (o ouro: a borda m=1)" },
+                {  1, -2, -1, "x^2 = 2x + 1  (a prata: m=2)"       },
+                {  1,  0, -2, "x^2 = 2  (a raiz de 2)"             },
+                {  1,  0,  1, "x^2 = -1  (o bit i)"                },
+            };
+            long P[] = { 17, 257, 65537 };
+            int emal = 0, achou_sep = 0, achou_in = 0;
+            for(size_t k = 0; k < sizeof E/sizeof *E; k++){
+                long D = E[k].b*E[k].b - 4*E[k].a*E[k].c;
+                for(size_t j = 0; j < 3; j++){
+                    long p = P[j], r = 0;
+                    int euler = eh_quadrado(D, p);          /* caminho 1: Euler */
+                    int varr  = raiz_quad_mod(D, p, &r);    /* caminho 2: a varredura */
+                    if(euler != varr){ emal++; continue; }  /* os dois TÊM de concordar */
+                    if(!varr){ achou_in = 1; continue; }    /* inerte: as folhas sobem */
+                    achou_sep = 1;
+                    long s1, s2;
+                    if(!folhas_de(E[k].a, E[k].b, r, p, &s1, &s2)){ emal++; continue; }
+                    /* a VOLTA: cada folha na equação dá resíduo ZERO */
+                    if(res_mod(E[k].a, E[k].b, E[k].c, s1, p) ||
+                       res_mod(E[k].a, E[k].b, E[k].c, s2, p)) emal++;
+                    /* e a ESTACA: σ+σ† = -b/a e σσ† = c/a, no anel */
+                    long ia = inv_mod(E[k].a, p);
+                    long soma = (s1 + s2) % p, prod = (s1 * s2) % p;
+                    if(soma != mod_p(-E[k].b * ia, p) || prod != mod_p(E[k].c * ia, p)) emal++;
+                }
+            }
+            ok("as folhas: Euler e a varredura concordam em toda a escada, cada folha volta"
+               " a equacao com residuo ZERO, e a estaca fecha (σ+σ† = tr, σσ† = det)",
+               emal == 0);
+            ok("e a escada tem os DOIS casos — separado (folhas a vista) e inerte (sobem"
+               " um andar): se um faltasse, a dicotomia era so' metade",
+               achou_sep && achou_in);
+            /* o gume: um numero que NAO e raiz tem residuo != 0 — senao a volta acima
+             * passava com qualquer coisa */
+            ok("e o gume: quem nao e raiz da residuo != 0", res_mod(1, -1, -1, 3, 17) != 0);
+
+            /* E A REFERENCIA NAO E MINHA: o paper PUBLICA as folhas da prata no relogio
+             * de Peano — «F_65537, m=2, separado: σ=4081, σ†=61458, σσ†=-1»
+             * (corpo_universal.tex, thm:corpo-dual). O mecanismo tem de dar NESSES
+             * numeros, senao a teoria e o codigo sao duas casas. */
+            {
+                long r = 0, s1 = 0, s2 = 0, p = 65537;
+                int achou = raiz_quad_mod(8, p, &r) && folhas_de(1, -2, r, p, &s1, &s2);
+                if(s1 > s2){ long t2 = s1; s1 = s2; s2 = t2; }
+                ok("as folhas da prata batem com o que o PAPER publica: σ=4081, σ†=61458,"
+                   " σσ†=-1 em F_65537 — a teoria e o codigo sao a mesma casa",
+                   achou && s1 == 4081 && s2 == 61458 && mod_p(s1 * s2, p) == p - 1);
+                /* e o bit i sai a escada inteira: 4, 16, 256 — a dobra em pessoa */
+                long i17 = 0, i257 = 0, i65 = 0;
+                raiz_quad_mod(-4, 17, &i17); raiz_quad_mod(-4, 257, &i257);
+                raiz_quad_mod(-4, 65537, &i65);
+                ok("e o bit i (x^2=-1) da a propria escada nos tres andares: 4, 16, 256"
+                   " — a dobra a aparecer sozinha na solucao da equacao",
+                   mod_p(i17 * inv_mod(2,17), 17) == 4 &&
+                   mod_p(i257 * inv_mod(2,257), 257) == 16 &&
+                   mod_p(i65 * inv_mod(2,65537), 65537) == 256);
+            }
+        }
+
+            /* O AMBIENTE: a fala complexa vem em bloco, e o `\\` que o tradutor usa
+             * para a fila da matriz e' o `;` que a regua dos SISTEMAS ja espera. Nada
+             * de regua nova — a membrana entrega ao que existe. E o `cases` fica de
+             * fora porque O TRADUTOR NAO O COMPOE: o dialecto e dele. */
+            {
+                latex_desdobra(nu2, sizeof nu2,
+                    "\\begin{align} x' = y \\\\ y' = -x \\end{align}");
+                int a1 = !strcmp(nu2, "x' = y ; y' = -x") && e_sistema(nu2);
+                printf("      ambiente align         -> %s\n", nu2);
+                ok("o ambiente desdobra-se e o `\\\\` vira o `;` do sistema — a fala"
+                   " complexa cai na regua que ja existia", a1);
+                latex_desdobra(nu2, sizeof nu2,
+                    "\\begin{cases} x' = y \\\\ y' = -x \\end{cases}");
+                ok("e o ambiente que o tradutor NAO compoe (cases) nao vira sistema —"
+                   " o dialecto e do tradutor, nao meu", !e_sistema(nu2));
+            }
+
+            /* A VOLTA DA MEMBRANA — e ela tem DOIS lados ou nao e membrana. O tradutor
+             * compoe e a assistente le; faltava responder na mesma roupa. A volta e
+             * MEDIDA e nao afirmada: veste-se o valor, desdobra-se o vestido, e a fita
+             * tem de devolver o MESMO numero — dois caminhos que tem de concordar. */
+            {
+                struct { long v, q; const char *tex; } V[] = {
+                    { 5, 6, "\\frac{5}{6}" }, { 4, 1, "4" },
+                    { -3, 7, "\\frac{-3}{7}" }, { 25, 1, "25" },
+                };
+                int vmal = 0;
+                char cf_n4[600]; snprintf(cf_n4, sizeof cf_n4, "%s.conta", b);
+                for(size_t k = 0; k < sizeof V/sizeof *V; k++){
+                    char vest[256];
+                    veste_valor(vest, sizeof vest, V[k].v, V[k].q);
+                    if(strcmp(vest, V[k].tex)){ vmal++; continue; }
+                    /* a VOLTA: o vestido desdobra-se e a fita devolve o mesmo */
+                    latex_desdobra(nu2, sizeof nu2, vest);
+                    int cf4 = open(cf_n4, O_RDWR|O_CREAT|O_TRUNC, 0644);
+                    long n4 = ct_leia(cf4, nu2), v4 = 0, q4 = 0; char pq4[256];
+                    while(ct_passo(cf4, n4, pq4, sizeof pq4) == 1) ;
+                    if(!ct_valorq(cf4, n4, &v4, &q4) || v4 != V[k].v || q4 != V[k].q) vmal++;
+                    close(cf4);
+                }
+                unlink(cf_n4);
+                ok("a membrana tem VOLTA: o valor veste-se, o vestido desdobra-se, e a"
+                   " fita devolve o mesmo numero — os dois lados, nao um com o nome do par",
+                   vmal == 0);
+            }
+
+            /* E A ORDEM: a involucao e NA ENTRADA. Vestida, «x^{2} = 4» passa na porta
+             * da equacao (que aceita chavetas) e NAO na do polinomio — e sai a resposta
+             * do resolvedor errado. Desdobrada primeiro, vai a regua certa. Foi assim
+             * que o defeito apareceu: a fala respondia «isto nao e do primeiro grau». */
+            {
+                char es[512], dr[512];
+                latex_desdobra(nu2, sizeof nu2, "x^{2} = 4");
+                ok("a fala vestida vai a regua ERRADA e desdobrada vai a certa —"
+                   " por isso a involucao e na entrada",
+                   !e_poli("x^{2} = 4") && e_equacao("x^{2} = 4", es, dr, sizeof es) &&
+                   e_poli(nu2) && tem_membrana("x^{2} = 4") &&
+                   !tem_membrana("bom dia, tudo bem?") && !tem_membrana("gosto de rock"));
+            }
+        }
+
+        /* «resolve X» / «calcula X» — o pedido em portugues tira a roupa e o resto vai a
+         * MESMA cascata simbolica (equacao, polinomio, sistema, ED, conta, funcoes). A
+         * fronteira de palavra guarda: «resolvemos tudo» nao e pedido; e «resolve o meu
+         * problema» tira a roupa mas nenhuma regua simbolica aceita — o corpus decide. */
+        {
+            const char *nu = pedido_nu("resolve 2x + 3 = 11");
+            char esq2[512], dir2[512];
+            ok("«resolve X» tira a roupa e o resto E a equacao que a regua ja sabia",
+               nu && e_equacao(nu, esq2, dir2, sizeof esq2));
+            ok("e a fronteira guarda: «resolvemos tudo» e «resolve o meu problema» nao"
+               " roubam nada",
+               pedido_nu("resolvemos tudo") == 0 &&
+               (nu = pedido_nu("resolve o meu problema")) != 0 &&
+               !e_conta(nu) && !e_poli(nu) && !e_sistema(nu));
+            const char *ca = pedido_nu("calcula a raiz de 16");
+            char exf[1200];
+            ok("e «calcula a raiz de 16» chega as funcoes nomeadas",
+               ca && funcao_monta(ca, exf, sizeof exf) && !strcmp(exf, "raiz (16)"));
+        }
+
+        /* «esquece X» — o inverso do lembra pela mesma porta: a resposta do no apaga-se,
+         * o caminho fica. A volta MEDIDA: lembrar, responder, esquecer, nao responder. */
+        {
+            int e1 = resolve_lembra("lembra que a cor do teste = verde");
+            int dd2; long re = t_erosao("a cor do teste", &dd2);
+            int e2 = resolve_esquece("esquece a cor do teste");
+            long re2 = t_erosao("a cor do teste", &dd2);
+            ok("«esquece X» apaga a resposta e a fala volta ao nao-sei",
+               e1 && re && e2 && re2 == 0);
+            ok("e esquecer o que nunca se soube devolve 0 (nada a esquecer)",
+               resolve_esquece("esquece o que nunca existiu aqui") == 0);
+        }
+    }
     for(int i = 0; i < NB; i++){ char c[512]; snprintf(c, sizeof c, "%s.%d", b, i);
                                  close(fdv[i]); unlink(c); }
     return falhas ? 1 : 0;
@@ -2017,6 +6245,12 @@ int main(int argc, char **argv){
 
     if(!strcmp(argv[2], "aprende") && argc >= 5) aprende(argv[3], argv[4]);
     else if(!strcmp(argv[2], "responde") && argc >= 4) responde(argv[3]);
+    else if(!strcmp(argv[2], "tick")){
+        /* O RELÓGIO NA MÃO: um tick de cada vez, e a velocidade escolhe-se por TICKS
+         * (1, 2, 4, 8 — os andares da torre). A fita fica no disco entre os ticks. */
+        if(argc >= 4 && !strcmp(argv[3], "fim")) relogio_tick(argv[1], 0, 1);
+        else relogio_tick(argv[1], argc >= 4 ? argv[3] : 0, 0);
+    }
     else if(!strcmp(argv[2], "volta")){
         for(int b = 0; b < NB; b++){ no_banco(b); poe_onde(RAIZ); cam_poe(""); }
         printf("voltei ao princípio — a conversa recomeça, e nada se perdeu.\n");

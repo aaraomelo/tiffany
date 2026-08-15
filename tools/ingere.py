@@ -16,8 +16,24 @@ import re, sys, unicodedata
 def limpa(t):
     t = re.sub(r'\\(section|subsection|subsubsection|item|textbf|emph|code|texttt)\*?\{', '', t)
     t = re.sub(r'\\begin\{verbatim\}.*?\\end\{verbatim\}', ' ', t, flags=re.S)
+    # O AMBIENTE LEVA O NOME CONSIGO. O `\[a-zA-Z]+` abaixo come o `\end` e deixa
+    # `{document}`, que a linha das chavetas transforma na palavra «document» — colada
+    # ao fim da última secção de TODOS os papers. Não é conteúdo: é o nome do ambiente.
+    t = re.sub(r'\\(?:begin|end)\s*\{[a-zA-Z*]+\}', ' ', t)
     t = re.sub(r'\\[a-zA-Z]+\*?', ' ', t)
-    t = t.replace('}', ' ').replace('{', ' ').replace('$', '').replace('--', '—')
+    # A ROUPA DO LaTeX SAI ANTES DAS CHAVETAS, e a ORDEM é o defeito: o `\^{}` é o
+    # idioma inteiro (o acento a valer por si), e se as chavetas virarem espaço
+    # primeiro sobra «x^  2». Medido nas duas voltas: o `\_` de
+    # `torre\_fundacao.tex` e o `\^{}` de `x\^{}2` — o `\[a-zA-Z]+` acima não os
+    # apanha, porque nem `_` nem `^` são letras.
+    t = t.replace('\\^{}', '^').replace('\\~{}', '~')
+    for esc in ('_', '%', '&', '#', '$', '{', '}', '^', '~'):
+        t = t.replace('\\' + esc, esc)
+    # OS TRAVESSÕES SÃO TRÊS COMPRIMENTOS, e o mais longo tem de sair PRIMEIRO: com
+    # `--`→`—` sozinho, o `---` do TeX dá «—-» — o em-dash e um hífen órfão colado, em
+    # 29 das 59 peças deste paper. É a regra do TeX, e a ordem é que a cumpre.
+    t = t.replace('}', ' ').replace('{', ' ').replace('$', '')
+    t = t.replace('---', '—').replace('--', '–')
     t = re.sub(r'\s+', ' ', t)
     return t.strip()
 

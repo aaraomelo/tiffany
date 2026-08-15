@@ -13,6 +13,16 @@ CV="$ROOT/banco/bin/conversa"
 [ -x "$CV" ] || { echo "falta $CV"; exit 1; }
 mkdir -p "$B"
 
+# A SEMENTE SUJA A BASE: os pares técnicos («suporte=... borda=... I=...») viram
+# respostas de CONVERSA se semeados na base de produção (medido a 14/08: 31 falas
+# comuns — «música», «janela», «computador» — respondiam diagnóstico). O bench corre
+# numa CÓPIA FORA da pasta: dentro dela a cópia suja entrava no BARRAMENTO e as
+# outras assistentes aprendiam o diagnóstico como fala. A limpeza é garantida.
+BC=$(mktemp -u "${TMPDIR:-/tmp}/bench_histerese_XXXXXX")
+trap 'rm -f "$BC".*' EXIT
+for f in "$B".*; do [ -e "$f" ] && cp "$f" "$BC${f#"$B"}"; done
+B="$BC"
+
 responde(){ "$CV" "$B" responde "$1" 2>/dev/null | head -1 | tr -d '\r'; }
 aprende(){ "$CV" "$B" aprende "$1" "$2" >/dev/null; }
 

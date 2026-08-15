@@ -1644,6 +1644,49 @@ papel & função no universal & onde o medidor fechou \\
 \end{tabular}
 \end{center}
 
+\begin{observacao}[a membrana lê-se na entrada, e o dialecto é um só]
+\label{obs:membrana-entrada}
+A interface padrão tem agora os \emph{dois} sentidos. O tradutor \textbf{compõe} a
+membrana (desenha a página: a pilha do \code{$\backslash$frac}, o radicando, o
+expoente); a assistente \textbf{desdobra-a na entrada} --- $\frac{1}{2}$ e
+\code{(1)/(2)} são a mesma conta em duas roupas --- e quem resolve são as réguas de
+sempre. É a lei da involução na entrada (\emph{Corpo de Peano}, a batuta e o cone),
+agora aplicada à membrana textual: o aninhamento fecha por \textbf{ponto fixo} (cada
+volta desdobra um andar, e pára quando a fala não muda).
+\textbf{E o dialecto não é escolhido duas vezes}: cada comando que a assistente
+desdobra tem de ser um comando que o tradutor compõe --- dois caminhos que têm de
+concordar, e foi assim que caíram o \code{$\backslash$ast} e o \code{$\backslash$pmod},
+que o \LaTeX{} de fora tem e esta casa não. O \code{$\backslash$pm} fica de fora
+\emph{de propósito}: $\pm$ não é um valor, são dois, e a fala com ele vai ao corpus em
+vez de fingir uma conta.
+\textbf{E a membrana tem os dois membros, ou não é membrana}: quem fala vestido ouve
+vestido --- o valor volta na roupa em que a fala veio ($\frac{5}{6}$ pela pilha do
+\code{$\backslash$frac}, que é o mesmo objeto que o tradutor desenha), e a
+\textbf{volta é medida, não afirmada}: veste-se o valor, desdobra-se o vestido, e a
+fita devolve o \emph{mesmo} número --- dois caminhos que têm de concordar. Ponta a
+ponta: a resposta vestida, devolvida à assistente, fecha no mesmo racional.
+\textbf{O gume}: a fala \emph{vestida} passa na porta errada --- \code{x\^{}\{2\} = 4}
+é aceite pela régua da equação (que admite chavetas) e recusada pela do polinómio, e
+respondia «isto não é do primeiro grau»; desdobrada na entrada, vai à régua certa.
+\textbf{Uma resposta, três roupas --- e o backend é o tradutor}: a prosa («o dobro de
+$7$ vezes $3$»), o ASCII (\code{2*3 + 4}) e a membrana
+(\code{$\backslash$frac\{1\}\{2\}}) entram na \emph{mesma} cascata, e o bloco entra
+pelos ambientes que o tradutor \textbf{compõe} --- \code{align} desdobra-se e o
+\code{$\backslash\backslash$} (a fila da matriz) vira o \code{;} que a régua dos
+sistemas já esperava: a fala complexa cai na régua que já existia, sem régua nova. E a
+resposta \textbf{compõe-se pelo tradutor}: o desenho já estava escrito no próprio
+\code{tests/tex.c} --- «o shell \code{ABRE} um \code{.tex} e o \code{STORE} escreve no
+backend; os backends do banco (martelo, canal, pool) são destinos que o banco não
+precisa de conhecer, \emph{e o PDF é mais um}». A cadeia fecha
+fala\,$\to$\,resolução\,$\to$\,membrana\,$\to$\,\textbf{backend}\,$\to$\,\textbf{volta},
+com o \code{-volta} do tradutor a ler o PDF de novo: um objecto que só emite é o buraco
+branco. \emph{Medido:} o valor declarado atravessa o backend e volta, e a chave de uma
+resposta \emph{não} aparece no PDF da outra --- a asserção pode falhar.
+\emph{Medido:} \code{tools/bench\_membrana.sh} ($13{:}0$, com o comando inventado a
+acusar); \code{tools/compoe.sh} (a resposta composta e a volta lida, $2{:}0$ por fala);
+\code{banco/conversa.c} \S C13.
+\end{observacao}
+
 %======================================================================
 \section{O Corpo de Peano é instância}\label{sec:instancia}
 

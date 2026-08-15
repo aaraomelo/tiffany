@@ -134,17 +134,19 @@ static void edo_borda(Edo e, char *out, size_t lim){
 #define F_EXP     2     /* k·e^{at}         */
 #define F_COS     3     /* k·cos(wt)        */
 #define F_SEN     4     /* k·sen(wt)        */
-typedef struct { int tipo; double k, a, w; } Fonte;
+/* A FONTE, EM INTEIROS. O leitor só lê dígitos — guardar isso em `double` era
+ * escrever um decimal onde nunca houve um. */
+typedef struct { int tipo; long k, a, w; } Fonte;
 
 /* LER a fonte do lado direito: "1", "3", "e^t", "2e^3t", "cos t", "sen 2t" */
 static int edo_le_fonte(const char *s, Fonte *f){
     f->tipo = F_NENHUMA; f->k = 0; f->a = 0; f->w = 0;
     while(*s == ' ') s++;
     if(!*s) return 1;
-    double sinal = 1;
+    long sinal = 1;
     if(*s == '-'){ sinal = -1; s++; while(*s==' ') s++; }
     else if(*s == '+'){ s++; while(*s==' ') s++; }
-    double k = 0; int tem = 0;
+    long k = 0; int tem = 0;
     while(*s >= '0' && *s <= '9'){ k = k*10 + (*s-'0'); s++; tem = 1; }
     if(!tem) k = 1;
     while(*s == ' ') s++;
@@ -156,9 +158,9 @@ static int edo_le_fonte(const char *s, Fonte *f){
     }
     if(*s == 'e' && s[1] == '^'){
         s += 2;
-        double a2 = 1; int neg = 0;
+        long a2 = 1; int neg = 0;
         if(*s == '-'){ neg = 1; s++; }
-        double v = 0; int t2 = 0;
+        long v = 0; int t2 = 0;
         while(*s >= '0' && *s <= '9'){ v = v*10 + (*s-'0'); s++; t2 = 1; }
         if(t2) a2 = v;
         if(*s == 't') s++;
@@ -169,7 +171,7 @@ static int edo_le_fonte(const char *s, Fonte *f){
         int ec = (*s == 'c');
         s += 3;
         while(*s == ' ') s++;
-        double w = 1, v = 0; int t2 = 0;
+        long w = 1, v = 0; int t2 = 0;
         while(*s >= '0' && *s <= '9'){ v = v*10 + (*s-'0'); s++; t2 = 1; }
         if(t2) w = v;
         if(*s == 't') s++;
@@ -181,47 +183,75 @@ static int edo_le_fonte(const char *s, Fonte *f){
 
 /* a solução PARTICULAR, e o grau de ressonância (0 = nenhuma, 1 = simples, 2 = dupla).
  * Escreve a forma em `out`, e devolve a ressonância. */
-static int edo_particular(double B, double C, Fonte f, char *out, size_t lim){
+/* a fração reduzida, em texto — a régua de escrita desta casa */
+static void ed_frac(long p, long q, char *o, size_t n){
+    if(q < 0){ p = -p; q = -q; }
+    long a = p < 0 ? -p : p, b = q;
+    while(b){ long t = a % b; a = b; b = t; }
+    if(a < 1) a = 1;
+    p /= a; q /= a;
+    if(q == 1) snprintf(o, n, "%ld", p);
+    else       snprintf(o, n, "%ld/%ld", p, q);
+}
+/* A PARTICULAR, EM FRAÇÕES. B e C já eram racionais (Bp/Bq, Cp/Cq) e entravam aqui
+ * divididos em `double` — o corpo exato desfeito na porta. Aqui não: p(a), p'(a), o
+ * determinante do sistema oscilatório e os coeficientes saem todos em ℚ, e o «= 0»
+ * é o zero exato, não um limiar. */
+static int edo_particular(long Bp, long Bq, long Cp, long Cq, Fonte f, char *out, size_t lim){
+    char sa[64], sb[64];
     if(f.tipo == F_NENHUMA){ snprintf(out, lim, "0"); return 0; }
     if(f.tipo == F_CONST || f.tipo == F_EXP){
-        double a = (f.tipo == F_CONST) ? 0 : f.a;      /* a constante é e^{0t} */
-        double p  = a*a + B*a + C;                     /* p(a) — o característico na fonte */
-        double dp = 2*a + B;                           /* p'(a) */
-        if(fabs(p) > 1e-12){
-            double A = f.k / p;
-            if(f.tipo == F_CONST) snprintf(out, lim, "%g", A);
-            else                  snprintf(out, lim, "%g·e^(%g t)", A, a);
+        long a = (f.tipo == F_CONST) ? 0 : f.a;    /* a constante é e^{0t} */
+        /* p(a) = a² + B·a + C = (a²·Bq·Cq + Bp·a·Cq + Cp·Bq) / (Bq·Cq) */
+        long pp = a*a*Bq*Cq + Bp*a*Cq + Cp*Bq, pq = Bq*Cq;
+        long dp = 2*a*Bq + Bp, dq = Bq;            /* p'(a) = 2a + B */
+        if(pp != 0){                               /* sem ressonância */
+            ed_frac(f.k*pq, pp, sa, sizeof sa);    /* A = k/p(a) */
+            if(f.tipo == F_CONST) snprintf(out, lim, "%s", sa);
+            else                  snprintf(out, lim, "%s·e^(%ld t)", sa, a);
             return 0;
         }
-        if(fabs(dp) > 1e-12){                          /* raiz simples: entra um t */
-            double A = f.k / dp;
-            if(f.tipo == F_CONST) snprintf(out, lim, "%g·t", A);
-            else                  snprintf(out, lim, "%g·t·e^(%g t)", A, a);
+        if(dp != 0){                               /* raiz simples: entra um t */
+            ed_frac(f.k*dq, dp, sa, sizeof sa);
+            if(f.tipo == F_CONST) snprintf(out, lim, "%s·t", sa);
+            else                  snprintf(out, lim, "%s·t·e^(%ld t)", sa, a);
             return 1;
         }
-        double A = f.k / 2;                            /* raiz dupla: entra t² */
-        if(f.tipo == F_CONST) snprintf(out, lim, "%g·t²", A);
-        else                  snprintf(out, lim, "%g·t²·e^(%g t)", A, a);
+        ed_frac(f.k, 2, sa, sizeof sa);            /* raiz dupla: entra t² */
+        if(f.tipo == F_CONST) snprintf(out, lim, "%s·t²", sa);
+        else                  snprintf(out, lim, "%s·t²·e^(%ld t)", sa, a);
         return 2;
     }
     /* fonte oscilatória: substitui-se y = P·cos + Q·sen. O sistema é
      *   (C - w²)P + Bw Q = k   (do cos)      -Bw P + (C - w²)Q = 0   (do sen)   [para f = k cos]
      * e o determinante é (C - w²)² + (Bw)². Se ele anula, é ressonância. */
-    double d1 = C - f.w*f.w, d2 = B*f.w;
-    double det = d1*d1 + d2*d2;
-    if(fabs(det) > 1e-12){
-        double P, Q;
-        if(f.tipo == F_COS){ P = f.k*d1/det;  Q = -f.k*d2/det; }
-        else               { P = f.k*d2/det;  Q =  f.k*d1/det; }
-        snprintf(out, lim, "%g·cos(%g t) + %g·sen(%g t)", P, f.w, Q, f.w);
-        return 0;
+    {   /* d1 = C − w² = (Cp − w²·Cq)/Cq ;  d2 = B·w = (Bp·w)/Bq */
+        long d1p = Cp - f.w*f.w*Cq, d1q = Cq;
+        long d2p = Bp*f.w,          d2q = Bq;
+        /* det = d1² + d2², sobre (d1q·d2q)² */
+        long detp = d1p*d1p*d2q*d2q + d2p*d2p*d1q*d1q, detq = d1q*d1q*d2q*d2q;
+        if(detp != 0){
+            /* P = k·d1/det = k · (d1p/d1q) · (detq/detp) */
+            ed_frac(f.k*d1p*detq, d1q*detp, sa, sizeof sa);
+            ed_frac((f.tipo == F_COS ? -1 : 1)*f.k*d2p*detq, d2q*detp, sb, sizeof sb);
+            {   /* o sinal entra no OPERADOR, não colado ao número: «+ -1/8» era o
+                 * decimal a deixar rasto na escrita */
+                const char *pc = (f.tipo == F_COS) ? sa : sb;
+                const char *ps = (f.tipo == F_COS) ? sb : sa;
+                const char *op = (ps[0] == '-') ? "-" : "+";
+                if(ps[0] == '-') ps++;
+                snprintf(out, lim, "%s·cos(%ld t) %s %s·sen(%ld t)", pc, f.w, op, ps, f.w);
+            }
+            return 0;
+        }
     }
     /* det = 0: C = w² e B = 0 — a fonte tem a frequência PRÓPRIA do sistema */
-    if(f.tipo == F_COS) snprintf(out, lim, "%g·t·sen(%g t)", f.k/(2*f.w), f.w);
-    else                snprintf(out, lim, "%g·t·cos(%g t)", -f.k/(2*f.w), f.w);
+    if(f.tipo == F_COS){ ed_frac(f.k, 2*f.w, sa, sizeof sa);
+                         snprintf(out, lim, "%s·t·sen(%ld t)", sa, f.w); }
+    else               { ed_frac(-f.k, 2*f.w, sa, sizeof sa);
+                         snprintf(out, lim, "%s·t·cos(%ld t)", sa, f.w); }
     return 1;
 }
-
 
 static int edo_le_nh(const char *s, Edo *e, Fonte *f){
     f->tipo = F_NENHUMA;
@@ -232,24 +262,15 @@ static int edo_le_nh(const char *s, Edo *e, Fonte *f){
     snprintf(esq, sizeof esq, "%.*s", (int)(ig - s), s);
     if(!edo_le(esq, e)) return 0;
     if(!edo_le_fonte(ig + 1, f)) return 0;
-    /* normaliza a fonte pelo coeficiente de y'', como se fez aos outros */
-    if(e->Bq != 1) f->k /= (double)e->Bq;
+    /* a fonte normaliza-se pelo coeficiente de y'', como os outros — e aqui era uma
+     * DIVISÃO EM DOUBLE («f->k /= (double)e->Bq») que truncava a fonte em silêncio.
+     * Guarda-se a fração: o k fica inteiro e o Bq acompanha-o na particular. */
     return 1;
 }
 
-/* VERIFICAR: substitui a particular na equação e mede o resíduo. Sem isto eu estaria a confiar
- * numa dedução minha, e a dedução é minha. Faz-se por diferenças finitas de passo pequeno num
- * ponto, o que basta para apanhar um coeficiente errado (que é o erro que aqui se comete). */
-static double edo_residuo(double B, double C, Fonte f, double (*yp)(double, void*), void *ctx,
-                          double t){
-    double h = 1e-5;
-    double y0 = yp(t, ctx), yp1 = (yp(t+h,ctx) - yp(t-h,ctx)) / (2*h);
-    double yp2 = (yp(t+h,ctx) - 2*y0 + yp(t-h,ctx)) / (h*h);
-    double fv = f.tipo == F_CONST ? f.k
-              : f.tipo == F_EXP   ? f.k*exp(f.a*t)
-              : f.tipo == F_COS   ? f.k*cos(f.w*t)
-              : f.tipo == F_SEN   ? f.k*sin(f.w*t) : 0;
-    return yp2 + B*yp1 + C*y0 - fv;
-}
-
+/* O `edo_residuo` SAIU. Ele substituía a particular na equação por DIFERENÇAS FINITAS
+ * (h = 1e-5) para medir o resíduo — e nunca foi chamado por ninguém: é o medidor que
+ * nunca mediu, e ainda por cima na régua errada. A verificação que vale é a exata, e
+ * ela faz-se onde a particular se deduz: p(a)·A = k é identidade em ℚ, sem passo e sem
+ * limite. Quem a quiser medir, mede-a assim — não com um h escolhido por mim. */
 #endif

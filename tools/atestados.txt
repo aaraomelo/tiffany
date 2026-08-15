@@ -12,6 +12,7 @@ analiticas e839e3fbf00311e4 0
 analog 04ade86bdec3cc0c 0
 antissimetrico 5c13e7c1c00d85b1 0
 app_arranca abb24b0fe22e3ae2 0
+arquimedes_area 3fb4925bc7f62b48 0
 arraytermico e4a2d53b3a3ef1da 0
 artefato d7a764740ef476b0 0
 assinatura 382c0f6005c44274 0
@@ -79,7 +80,7 @@ continuo b98335aed4401267 0
 contorno_riemann 6cf7ea38b2e3b6b7 0
 contrato 5fffd2633c0858b1 0
 controlo_front e94ce67fbef877c1 0
-conversa 8e01428ae94ab806 0
+conversa 3e3859f368656174 0
 converte fe99f74438556e46 0
 convolucao_universal 14db429c007982da 0
 coroa bf5f52e1e6e43aea 0
@@ -149,7 +150,7 @@ dualrn 8a91b8108dcd0df5 0
 dualsort 3298ebc60a6b388c 0
 dualsort_banco 32ec1211d142f264 0
 duas_pontes a50961f0657e4654 0
-edo 17b331411cdf37ee 0
+edo 05c7da22e0a16ca2 0
 einstein a8ce9f96f9b3109a 0
 eletrico 3367df7bc35a0e03 0
 elipses f2e2baa850da0069 0
@@ -202,6 +203,7 @@ fusao 13c9bc056928be95 0
 fusao_conceitos 3c406248b1261cc4 0
 gauss 77024247661e4422 0
 geometria_corpo 99c0472d0316ad9f 0
+geometrico e4a6fce5bd91e395 0
 gerador 2373ad5c9d2e6e8c 0
 gerador_analog 6a7abcf53c950b0b 0
 gerador_primos dccf9257d62b61f2 0
