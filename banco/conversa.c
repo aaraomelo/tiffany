@@ -1580,41 +1580,47 @@ static void universal_resolve(int n){
         break;
     case 8:
         tique7(0, "seja A_m o passo do nível, com entradas inteiras");
-        tique7(1, "a raiz quadrada do próprio passo NÃO existe no nível:");
-        printf("      nao existe $D \\in M_2(\\mathbb{Z})$ com $D^{2} = A_m$\n");
+        tique7(1, "a raiz quadrada do próprio passo NÃO existe no nível — mas existe"
+                  " um nível acima:");
+        printf("      não existe $D \\in M_2(\\mathbb{Z})$ com $D^{2} = A_m$;"
+               "   e no andar acima $D = (0, I; A_m, 0)$ dá"
+               " $D^{2} = A_m \\oplus A_m$\n");
         tique7(2, "TRADUÇÃO: isto é uma OBSTRUÇÃO (consagrado) — a impossibilidade de"
-                  " levantar uma estrutura a um nível superior. O paper chama-lhe «o furo"
-                  " na torre», e o termo consagrado é obstrução");
-        tique7(3, "a lei é a aritmética do determinante e do traço: se D² = A_m, então"
-                  " (det D)² = det A_m = −1, e nenhum inteiro tem quadrado −1. A obstrução"
-                  " é EXACTAMENTE a mesma que faz i não estar em ℤ");
-        tique7(4, "a testemunha é a impossibilidade DERIVADA, não varrida: não se procura"
-                  " D nenhum, mostra-se que o determinante teria de ser raiz de −1. Uma"
-                  " varredura aqui não provava nada — só dizia que não achou");
-        tique7(5, "logo o furo é real e está onde a aritmética o põe: a raiz do passo pede"
-                  " o nível de cima");
-        tique7(6, "e a VOLTA é que a obstrução é a razão de haver TORRE: se a raiz existisse"
-                  " no nível, não era preciso subir. ATENÇÃO: este teorema NÃO cita medidor"
-                  " no paper — é um dos 7 (de 22) que não citam, e digo-o em vez de o"
-                  " esconder");
+                  " levantar uma estrutura dentro do nível. O paper chama-lhe «o furo na"
+                  " torre», e o nome é bom porque o furo é o que OBRIGA a subir");
+        tique7(3, "a lei é a aritmética do determinante: se D² = A_m então"
+                  " (det D)² = det A_m = −1, e nenhum inteiro tem quadrado −1. E o paper"
+                  " diz de onde vem: a obstrução é O PREÇO DO DUAL, σσ† = −1 — é a mesma"
+                  " coisa que põe o i fora de ℤ");
+        tique7(4, "a testemunha é DUPLA, e é aqui que eu tinha escrito só metade. O paper"
+                  " mede as duas: uma BUSCA EXAUSTIVA que volta vazia no 2×2, e a"
+                  " construção explícita 4×4 que RESOLVE — D = [[0,I],[A_m,0]] dá"
+                  " D² = A_m ⊕ A_m exacto para m = 1..6, com det D = −1 e inversa inteira"
+                  " (D⁻¹D = I₄). Não é «não existe»: é «não existe AQUI, e existe ALI»");
+        tique7(5, "logo o furo é real e tem sítio: a raiz do passo pede o nível de cima, e"
+                  " lá ela é INTEIRA e unitária");
+        tique7(6, "e a VOLTA é a torre: se a raiz existisse no nível, não era preciso"
+                  " subir — a obstrução é a razão de haver andares. Medido em §D2–D3 do"
+                  " paper, por secção e não por ficheiro");
         break;
     case 9:
-        tique7(0, "seja D o operador do passo e (x,y) um par do relógio discreto");
-        tique7(1, "D aterra na diagonal SE E SÓ SE o par é transição verdadeira:");
-        printf("      $D(x,y) \\in \\{(z,z)\\} \\Leftrightarrow (x,y)$ é transição do Metrónomo\n");
-        tique7(2, "TRADUÇÃO: é uma EQUIVALÊNCIA (⟺), e não uma implicação — o operador"
-                  " CARACTERIZA as transições em vez de as detectar. «Metrónomo» é termo"
-                  " do paper e não tem consagrado: fica como ele propõe. O que é consagrado"
-                  " é o objecto — a DIAGONAL do produto, e o conjunto dos pontos fixos");
-        tique7(3, "a lei é que aterrar na diagonal é uma condição fechada e verificável, e"
-                  " a ida e a volta medem-se SEPARADAMENTE — provar ⟸ não prova ⟹");
-        tique7(4, "a testemunha tem de ser DUPLA: um par que é transição e aterra, e um par"
-                  " que aterra e é transição. Uma equivalência com uma testemunha só está"
-                  " medida pela metade");
-        tique7(5, "logo o operador não indica as transições: É elas, escrito como operador");
+        tique7(0, "seja D o operador e (x,y) um par do relógio discreto");
+        tique7(1, "D aterra na diagonal SE E SÓ SE y é a imagem de x pelo passo:");
+        printf("      $D(x,y) \\in \\text{diagonal} \\Leftrightarrow y = A_m x$\n");
+        tique7(2, "TRADUÇÃO: é uma EQUIVALÊNCIA, e o lado direito diz o que uma transição"
+                  " É — y = A_m x, e não uma noção informal. O operador CARACTERIZA as"
+                  " transições em vez de as detectar. Consagrado: a DIAGONAL do produto e"
+                  " o conjunto de aterragem");
+        tique7(3, "a lei é que a ida e a volta se medem SEPARADAMENTE: provar ⟸ não prova"
+                  " ⟹, e uma equivalência com uma testemunha só está medida pela metade");
+        tique7(4, "a testemunha é DUPLA e o paper mede-a assim: 100/100 transições"
+                  " ATERRAM na diagonal, e 100/100 não-transições ficam FORA. Os dois"
+                  " sentidos com o mesmo número, o que é o que uma ⟺ exige. E o Inversor"
+                  " aceita D: 30 corpos com a escada (E,Φ,Φ₂) restaurada idêntica");
+        tique7(5, "logo o operador não indica as transições: É elas, escrito como"
+                  " operador — e o critério é uma igualdade, não um limiar");
         tique7(6, "e a VOLTA é a fala 7: o mesmo D que caracteriza as transições é o que"
-                  " satisfaz D² = mD + I. Um objecto, dois papéis. ESTE TEOREMA NÃO CITA"
-                  " MEDIDOR no paper");
+                  " satisfaz D² = mD + I. Um objecto, dois papéis. Medido em §D4–D5");
         break;
     case 11:
         tique7(0, "seja x² = mx + 1 a equação do nível");
@@ -1627,61 +1633,105 @@ static void universal_resolve(int n){
         tique7(3, "a lei é que completar o quadrado É passar ao recobrimento — e por isso"
                   " «a dobra é o discriminante»: o objecto que mede a separação das folhas"
                   " é o mesmo que descreve a duplicação");
-        tique7(4, "a testemunha são as duas folhas exibidas com a sua soma e o seu produto:"
-                  " somam m e multiplicam −1, que são exactamente os coeficientes. É"
-                  " VIÈTE, e é a verificação que não pode passar por acaso");
+        tique7(4, "a testemunha tem dois lados, e o primeiro é uma ENUMERAÇÃO COMPLETA:"
+                  " sobre ℤ a curva w² = m²+4 toca apenas a Lei 0, porque os divisores de"
+                  " (w−m)(w+m) = 4 dão só (m,w) = (0,±2), isto é x = ±1 — o par"
+                  " (+1) ⊕ (−1). Não é uma busca que não achou: é a lista inteira");
         tique7(5, "logo o discriminante não é um número auxiliar da fórmula: é a estrutura"
-                  " do recobrimento");
-        tique7(6, "e a VOLTA é o conjugado galoisiano σ† = m − σ (a «estaca» do paper): as"
-                  " duas raízes trocam-se pela involução, e σσ† = −1. ESTE TEOREMA NÃO"
-                  " CITA MEDIDOR no paper");
+                  " do recobrimento — e o segundo lado da testemunha é que um andar ACIMA"
+                  " a curva se realiza INTEIRA: W = 2A_m − mI satisfaz W² = (m²+4)I, com"
+                  " tr W = 0 e det W = −(m²+4), exacto para m = 0..8");
+        tique7(6, "e a VOLTA é a troca de folha, que É a estaca: A·(mI − A) = −I — o"
+                  " x·x† = −1 da Lei 1, involução exacta, e a casa já a corria sem lhe dar"
+                  " o nome. Medido em §S0–S2");
         break;
-    case 12: case 13: case 17: case 18:
-        tique7(0, n == 17 || n == 18
-                  ? "sejam A, C subconjuntos e δ, ε as operações morfológicas"
-                  : "seja o plano do nível com a sua estrutura de contornos");
-        tique7(1, n == 17 ? "dilatação e erosão são ADJUNTAS:"
-                : n == 18 ? "a torção tem duas realizações que concordam:"
-                : n == 13 ? "J² = −I legitima a carta (x, Jx):"
-                          : "a geometria dos 52 contornos reais:");
-        printf(n == 17 ? "      $\\delta(A) \\subseteq C \\Leftrightarrow A \\subseteq \\varepsilon(C)$\n"
-             : n == 18 ? "      $J(a,b) = (b,-a),\\quad J^{2} = -I,\\quad J^{4}"
-                         " = \\mathrm{id},\\quad |\\det J| = 1$\n"
-             : n == 13 ? "      $\\{aI + bJ\\} \\cong \\mathbb{C},\\qquad"
-                         " (a,b)(c,d) = (ac-bd,\; ad+bc)$\n"
-                       : "      $52$ contornos, e a sua classificação no plano\n");
-        tique7(2, n == 17
-               ? "TRADUÇÃO: isto é uma CONEXÃO DE GALOIS (consagrado) — o par adjunto da"
-                 " MORFOLOGIA MATEMÁTICA (consagrado), e δ⊣ε é a definição de adjunção. O"
-                 " paper chama-lhe «par morfológico»; o termo consagrado é adjunção"
-               : n == 18
-               ? "TRADUÇÃO: J é uma ESTRUTURA COMPLEXA (consagrado): J² = −I é exactamente"
-                 " o que define uma. O «esquilo» é o nome do paper para ela"
-               : n == 13
-               ? "TRADUÇÃO: {aI + bJ} ≅ ℂ é a REPRESENTAÇÃO MATRICIAL DOS COMPLEXOS"
-                 " (consagrado), e (x, Jx) é uma CARTA de um atlas (consagrado). A regra"
-                 " (ac−bd, ad+bc) é a multiplicação complexa, exacta em inteiros"
-               : "TRADUÇÃO: «contorno» aqui é o termo do paper; o objecto consagrado mais"
-                 " próximo é a CURVA DE NÍVEL, e o 52 é uma CONTAGEM COMPLETA, não uma"
-                 " amostra");
-        tique7(3, n == 17
-               ? "a lei é a adjunção, e ela FORÇA tudo o resto: δ preserva uniões, ε"
-                 " preserva intersecções, e εδ é um fecho. Nenhuma dessas se postula"
-               : "a lei é J² = −I, que dá período 4 e determinante 1 — a torção é uma"
-                 " ROTAÇÃO e não uma escala, e é por isso que não é dilatação escondida");
-        tique7(4, n == 17
-               ? "a testemunha é a VARREDURA COMPLETA: 4096 de 4096 pares, os dois sentidos"
-                 " da equivalência. Numa adjunção medir um lado só é medir metade"
-               : "a testemunha são as DUAS realizações a concordar — e concordarem é o que"
-                 " as valida, porque uma sozinha não tem contra quê ser comparada");
-        tique7(5, n == 17
-               ? "logo erode-se para ESCOLHER e dilata-se para ESCREVER: é o par dual deste"
-                 " andar"
-               : "logo a torção é rotação exacta, com norma preservada");
-        tique7(6, n == 18 ? "e a VOLTA é J⁴ = id: quatro quartos de volta devolvem. Medido:"
-                            " tests/morfologia_universal.js"
-                          : "e a VOLTA fecha o par. ESTE TEOREMA NÃO CITA MEDIDOR no paper"
-                            " (os 7 de 22 dizem-se)");
+    case 12:
+        tique7(0, "sejam as 52 fusões da curadoria e o contorno traçado de cada uma");
+        tique7(1, "o contorno FECHA, não cruza, e é PLANO:");
+        printf("      $E_{\partial} - E(\mathrm{id}) = E(\text{moldura}) = 295\\,589$"
+               "   --- a mesma constante nas $52$\n");
+        tique7(2, "TRADUÇÃO — e aqui eu tinha traduzido MAL: «contorno» não é curva de"
+                  " nível. É o CONTORNO TRAÇADO, no sentido de emparelhamento de"
+                  " delimitadores: a pilha acaba vazia e nunca fica negativa, e cada"
+                  " abridor fecha com o seu tipo, o que torna o traçado ORIENTÁVEL");
+        tique7(3, "a lei é que toda a variação do contorno é o ENDEREÇO: subtraída a"
+                  " moldura, as 52 dão a mesma constante. É o que quer dizer «plano»");
+        tique7(4, "a testemunha tem três partes. No nível do array vivem DUAS COMPONENTES"
+                  " (as folhas) e UM CORTE SÓ, lido por dois caminhos concordantes — a"
+                  " fibra cega e a leitura com estado de corda. A MONODROMIA ν troca as"
+                  " folhas, volta byte a byte (ν∘ν = id) e SÓ PAGA O ENDEREÇO:"
+                  " E(νz) − E(z) = E(id_y) − E(id_x), exacto");
+        tique7(5, "e a terceira parte é a que decide o nome: ponto fixo de ν ⟺ as folhas"
+                  " coincidem, e NENHUMA das 52 é fixa — logo o recobrimento é"
+                  " NÃO-RAMIFICADO sobre o corpus real. A conclusão sai da ausência de"
+                  " pontos fixos, e essa ausência foi contada, não suposta");
+        tique7(6, "e a VOLTA é ν∘ν = id byte a byte: a estrela outra vez, agora sobre o"
+                  " contorno. Medido em §C0, §C1, §C4, §C7 e §S3–S5");
+        break;
+    case 13:
+        tique7(0, "seja J a estrutura complexa (J² = −I, período 4, det J = +1)");
+        tique7(1, "J legitima a carta (x, Jx), e o anel {aI + bJ} é ℂ:");
+        printf("      $(a,b)(c,d) = (ac-bd,\; ad+bc)$ --- exacto, e comuta\n");
+        tique7(2, "TRADUÇÃO: {aI + bJ} ≅ ℂ é a REPRESENTAÇÃO MATRICIAL DOS COMPLEXOS"
+                  " (consagrado), (x,Jx) é uma CARTA (consagrado), e a regra é a"
+                  " multiplicação complexa. Tudo exacto em inteiros");
+        tique7(3, "a lei é que o DETERMINANTE é multiplicativo nas duas cartas (Lei 7), e é"
+                  " isso que permite pô-las lado a lado e comparar as ASSINATURAS");
+        tique7(4, "a testemunha é o par de assinaturas medido lado a lado, e é o coração do"
+                  " teorema: det(aI + bJ) = a² + b² é DEFINIDA — o círculo da torção;"
+                  " det(aI + bA_m) = a² + mab − b² é INDEFINIDA — a hipérbole do corpo, que"
+                  " muda de sinal e só zera na origem. Duas cartas, dois regimes, o mesmo"
+                  " determinante multiplicativo");
+        tique7(5, "e o DUAL tem as duas partes na mesma frase, que é como esta casa exige:"
+                  " o espelho R (R² = I, det R = −1, RJ = −JR) CONJUGA — R(aI + bJ)R"
+                  " = aI − bJ — e NÃO comuta quando b ≠ 0. O par holomorfo/anti-holomorfo é"
+                  " o par roda/espelha das duas torres");
+        tique7(6, "e a VOLTA fecha o cociclo: ⟨J,R⟩ tem ordem EXACTAMENTE 8, fechado e com"
+                  " inversos, e toda volta é exacta (J⁴ = I, R² = I, ν∘ν = id). Medido em"
+                  " §C2, §C3 e §C5–C7");
+        break;
+    case 17:
+        tique7(0, "sejam A, C subconjuntos e δ, ε a dilatação e a erosão");
+        tique7(1, "elas são o par ADJUNTO:");
+        printf("      $\\delta(A) \\subseteq C \\Leftrightarrow A \\subseteq"
+               " \\varepsilon(C)$\n");
+        tique7(2, "TRADUÇÃO: isto é uma CONEXÃO DE GALOIS (consagrado) — a adjunção da"
+                  " MORFOLOGIA MATEMÁTICA. O paper chama-lhe «par morfológico»; o termo"
+                  " consagrado é adjunção, e δ ⊣ ε é a sua definição");
+        tique7(3, "a lei é a adjunção, e o que ela dá NÃO se postula: a abertura e o fecho"
+                  " clássicos EMERGEM dela — α = δ∘ε ≤ id ≤ ε∘δ = φ, ambos IDEMPOTENTES");
+        tique7(4, "a testemunha é a VARREDURA COMPLETA: 4096 de 4096 pares, os dois sentidos"
+                  " da equivalência. Numa adjunção medir um lado só é medir metade");
+        tique7(5, "e a volta EXISTE, mas só na fronteira admissível: δ(ε(A)) = A"
+                  " exactamente nos conjuntos B-abertos — 29 de 64 no universo medido. Não"
+                  " é «a volta funciona»: é «a volta funciona AQUI», com a fronteira"
+                  " contada. E o invariante é a ORDEM DO PARÂMETRO: o raio SOMA"
+                  " (dil_r ∘ dil_s = dil_{r+s}, Minkowski)");
+        tique7(6, "e a VOLTA é que o par MUDA O CORPO: δ cria (A ⊆ δA), ε remove (εA ⊆ A) —"
+                  " a massa sobe e desce, medida. Erode-se para ESCOLHER, dilata-se para"
+                  " ESCREVER. E o medidor está na própria frase do teorema, 4096/4096, e"
+                  " não numa linha «Medido:» à parte");
+        break;
+    case 18:
+        tique7(0, "seja a torção, e a pergunta se ela é dilatação disfarçada");
+        tique7(1, "ela tem DUAS realizações que concordam:");
+        printf("      $J(a,b) = (b,-a)$: $J^{2} = -I$, $J^{4} = \\mathrm{id}$,"
+               " $|\\det J| = 1$\n");
+        tique7(2, "TRADUÇÃO: J é uma ESTRUTURA COMPLEXA (consagrado) — J² = −I é o que"
+                  " define uma. E a segunda realização é a ÓRBITA DO ANEL: a torção w"
+                  " (3^256 em ℤ_65537) fecha em 256 e em nenhum divisor próprio, isto é, a"
+                  " base É a órbita da torção");
+        tique7(3, "a lei é que J TRANSPORTA a coordenada para o eixo dual sem criar nem"
+                  " remover — a norma conserva-se exacta. É isso que a separa da dilatação");
+        tique7(4, "a testemunha é o par de realizações A CONCORDAR, e concordarem é o que"
+                  " as valida: uma sozinha não tem contra quê ser comparada. E a segunda"
+                  " dá de graça o degrau DISCRETO de Pontryagin — o dual do dual devolve o"
+                  " grupo: ida pelos caracteres, volta pela órbita inversa, resíduo 0");
+        tique7(5, "logo a distinção fica escrita numa linha, e é a frase do teorema:"
+                  " EROSÃO E DILATAÇÃO MUDAM O CORPO; A TORÇÃO MUDA O REPRESENTANTE SEM O"
+                  " DESTRUIR. Uma mexe na massa, a outra na coordenada");
+        tique7(6, "e a VOLTA é J⁴ = id: quatro quartos de volta devolvem. Medido:"
+                  " tests/morfologia_universal.js");
         break;
     case 14: case 15: case 16:
         tique7(0, n == 14 ? "seja T = A_m a agir no toro discreto (ℤ/q)², q = 257 = 2⁸+1"
@@ -1704,9 +1754,12 @@ static void universal_resolve(int n){
                  " derivá-lo no relógio FINITO das raízes da unidade, onde o 2πi da versão"
                  " clássica é substituído pela ordem M — a volta completa conta o relógio"
                  " inteiro, em vez de integrar"
-               : "TRADUÇÃO: o «produto dual» é o produto de um elemento pelo seu conjugado,"
-                 " isto é, a NORMA (consagrado). O que o teorema afirma é a INVARIÂNCIA da"
-                 " norma sob a involução — e é o mesmo N(x) = xx̄ da torre");
+               : "TRADUÇÃO — e eu tinha reduzido isto a «é a norma», que é só o segundo"
+                 " dos QUATRO andares. O produto dual é UM invariante lido em quatro"
+                 " sítios: (1) no núcleo é o ROTOR, S·X = J e X·S = J⁻¹, com |det| = 1;"
+                 " (2) no corpo é CENTRAL, MM† = M†M = det(M)·I com a estaca"
+                 " M† = (tr M)I − M, e o † é um ANTI-AUTOMORFISMO, (MN)† = N†M†;"
+                 " (3) no espectro é PARSEVAL; (4) na órbita é o FATOR DE POTÊNCIA");
         tique7(3, n == 14
                ? "a lei é que o censo é COMPLETO: os 66049 pontos do toro são todos"
                  " visitados, e por isso as contagens de órbitas são exactas e não"
@@ -1714,16 +1767,21 @@ static void universal_resolve(int n){
                : n == 15
                ? "a lei é a ortogonalidade das raízes da unidade: Σ_k ω^{jk} vale M quando"
                  " M divide j e 0 caso contrário. É ela que faz o papel do 2πi"
-               : "a lei é |N| = 1 nas unidades: a conservação nos corpos é MULTIPLICATIVA e"
-                 " não aditiva, e é por isso que a involução a preserva");
+               : "a lei é a centralidade: MM† = det(M)·I cai no CENTRO, e por isso o valor"
+                 " na unidade diz a CARTA — círculo +1, hipérbole −1. As MEMBRANAS são os"
+                 " valores do produto dual, e d ↦ d² com |d| = 1 fixa exactamente {±1}");
         tique7(4, n == 14
                ? "a testemunha é o censo inteiro, e a conta fecha EM INTEIROS — sem um"
                  " logaritmo, sem uma série truncada"
                : n == 15
                ? "a testemunha é a soma a dar M no caso ressonante e 0 fora: dois valores"
                  " distintos e exactos, e não «aproximadamente zero»"
-               : "a testemunha é o MESMO valor lido em quatro níveis diferentes — quatro"
-                 " leituras independentes que têm de coincidir");
+               : "a testemunha é o mesmo invariante em quatro leituras independentes. E no"
+                 " espectro o emparelhamento faz-se PELO ESPELHO NO ÍNDICE (k ↔ −k):"
+                 " M⟨u,v⟩ = Σ û_k v̂_{−k}, e SEM o espelho a soma não fecha. Na órbita,"
+                 " det(A^k) = (−1)^k com |d| = 1 ao longo do fluxo, e no relógio"
+                 " cos²u + sin²u = 1 em TODOS os ticks — a identidade pitagórica é o"
+                 " produto dual constante na membrana +1");
         tique7(5, n == 14 ? "logo a zeta dinâmica é DERIVADA e fecha em inteiros"
              : n == 15 ? "logo o teorema dos resíduos não precisa do contínuo para existir"
                        : "logo o produto dual é invariante, e a dualidade inverte sem mudar");
@@ -1731,7 +1789,11 @@ static void universal_resolve(int n){
                             " tests/zeta_universal.js (10:0) e tests/toro_histerese.js (16:0)"
              : n == 15 ? "e a VOLTA é o relógio a fechar. Medido: tests/residuo_universal.js"
                          " (12:0)"
-                       : "e a VOLTA é a involução. Medido: tests/produto_dual.js (15:0)");
+                       : "e a VOLTA é a involução — mas o paper faz mais: MARCA onde o gume"
+                         " não pode morder. «No par ortogonal (suportes pares/ímpares"
+                         " disjuntos) as duas somas dão 0 = 0 e não há o que falhar.» Dizer"
+                         " onde o teste é vazio é parte do teste. Medido:"
+                         " tests/produto_dual.js (15:0)");
         break;
     case 19:
         tique7(0, "sejam as cinco operações medidas em cada nível da torre");
@@ -1781,20 +1843,32 @@ static void universal_resolve(int n){
                   " tests/real_caminho.js (8:0)");
         break;
     case 21:
-        tique7(0, "seja a pergunta «que estrutura as operações determinam?»");
-        tique7(1, "a geometria é o par (forma, grupo):");
-        printf("      a geometria de um espaço é determinada pelo GRUPO que a preserva\n");
-        tique7(2, "TRADUÇÃO: isto é o PROGRAMA DE ERLANGEN de Klein (consagrado), e o paper"
-                  " usa-o no sentido exacto — uma geometria identifica-se com o grupo de"
-                  " transformações que deixam a forma invariante");
-        tique7(3, "a lei é Erlangen: fixada a forma, o grupo determina a geometria; e as"
-                  " operações do núcleo determinam-no com precisão, em vez de o sugerirem");
-        tique7(4, "a testemunha é o grupo EXIBIDO — quais transformações preservam a forma"
-                  " e quais não. Uma geometria afirmada sem o grupo não está determinada");
-        tique7(5, "logo a geometria não é trazida de fora: sai das operações que já lá"
-                  " estavam");
-        tique7(6, "e a VOLTA é a forma: (forma, grupo) é um PAR, e nomear um sem o outro é"
-                  " meio teorema. Medido: tests/geometria_corpo.js (9:0)");
+        tique7(0, "seja a pergunta da mesa: «que estrutura as operações determinam?»");
+        tique7(1, "a geometria é o par (forma, grupo), e o grupo é D₄:");
+        printf("      $\{\pm I, \pm J, \pm S, \pm X\}$,\qquad $J^{4} = S^{2} = I$,"
+               "\qquad $SJS = J^{-1}$\n");
+        tique7(2, "TRADUÇÃO: isto é o PROGRAMA DE ERLANGEN de Klein (consagrado) — uma"
+                  " geometria identifica-se com o grupo que deixa a forma invariante. E o"
+                  " grupo NOMEIA-SE: é D₄, o DIEDRAL de ordem 8, graduado pelo determinante"
+                  " em 4 rotações e 4 reflexões, com cada inverso dentro do conjunto");
+        tique7(3, "a lei é Erlangen, e o que o teorema acrescenta é que D₄ é a INTERSEÇÃO"
+                  " DE DUAS GEOMETRIAS: os oito preservam o círculo x² + y² EXACTAMENTE e a"
+                  " hipérbole x² − y² A MENOS DE SINAL — e o sinal é um segundo carácter");
+        tique7(4, "a testemunha é o fecho medido (64/64 produtos) e a SEPARAÇÃO pelos dois"
+                  " caracteres: (det, sinal-D) partem D₄ em 4 classes de 2, que é a"
+                  " abelianização ℤ/2 × ℤ/2, medida elemento a elemento. E a carta W"
+                  " diagonaliza a forma metálica, 4N(a,b) = (2a+mb)² − (m²+4)b² — NELA A"
+                  " ESTACA É O ESPELHO: a conjugação (a,b) ↦ (a+mb, −b) vira (u,v) ↦ (u,−v)."
+                  " Álgebra e geometria, a mesma involução em cartas diferentes");
+        tique7(5, "e há GUME, que eu tinha deixado de fora: cada membrana estende o núcleo"
+                  " com o seu fluxo — o relógio (compacto, preserva o círculo) e o Pell"
+                  " (σ^k, com N a alternar (−1)^k) —, e OS FLUXOS NÃO SE TROCAM: σ quebra o"
+                  " círculo e a rotação genérica quebra a hipérbole");
+        tique7(6, "e a VOLTA é a resposta inteira: a estrutura que as operações determinam é"
+                  " o PAR DE GEOMETRIAS — o círculo compacto e a hipérbole de Pell — com um"
+                  " só núcleo por interseção, que é D₄. As membranas d = ±1 são as duas"
+                  " formas; o núcleo é o que elas partilham. Medido:"
+                  " tests/geometria_corpo.js (9:0)");
         break;
     case 22:
         tique7(0, "seja a pergunta «a memória vem do projector espectral com o gerador temporal?»");
@@ -1848,9 +1922,11 @@ static void universal_resolve(int n){
         printf("      pera·vareta·ponta  →   ponto-base · vector director · extremos\n");
         printf("      Orquestra          →   a composição dos operadores\n");
         printf("      Conservatório      →   o espaço dos invariantes\n");
+        printf("      contorno           →   contorno TRAÇADO (pilha que fecha),\n");
+        printf("                             e NÃO curva de nível — eu tinha errado\n");
         printf("\n      E SEM CONSAGRADO — ficam como o paper os propõe:\n");
         printf("      Quantizador · Inversor · membrana · endereço · estresse ·\n");
-        printf("      contorno · as oito leis\n");
+        printf("      as oito leis\n");
         printf("\n      E OS MUSICAIS SAÍRAM DO UNIVERSAL: Maestro, Metrónomo, Batuta,\n");
         printf("      Orquestra e Conservatório vivem agora só no CORPO DE PEANO, que é\n");
         printf("      a realização. No universal cada papel chama-se pela função, e os\n");
@@ -1865,12 +1941,15 @@ static void universal_resolve(int n){
                   " sujeito da frase é o resultado. Traduzir não é substituir o objecto"
                   " pelo nome do morto");
         tique7(4, "a testemunha é a VARREDURA do paper: 2935 linhas, 80 blocos (57 teoremas,"
-                  " 8 definições, 1 proposição, 2 corolários, 12 observações), 22 teoremas"
-                  " etiquetados, e desses 15 citam medidor. Os 17 ficheiros citados existem"
-                  " todos — foram verificados um a um");
-        tique7(5, "e os 7 que NÃO citam medidor dizem-no na própria fala: obstrução, Dirac"
-                  " nas transições, dobra temporal, recobrimento, contornos, cartas e par"
-                  " morfológico. A ausência é um facto e regista-se");
+                  " 8 definições, 1 proposição, 2 corolários, 12 observações) e 22 teoremas"
+                  " etiquetados. Os 17 ficheiros citados existem todos — verificados um a"
+                  " um");
+        tique7(5, "e A CORREÇÃO que a revisão obrigou: eu tinha dito «15 citam medidor, 7"
+                  " não». É FALSO. Os VINTE E DOIS estão medidos — 15 citam um FICHEIRO, 6"
+                  " citam por SECÇÃO (§D2–D3, §D4–D5, §D6, §S0–S2, §C0–C7) ou por CONTAGEM"
+                  " (100/100), e 1 traz a medida dentro do próprio enunciado (4096/4096). O"
+                  " meu extractor procurava um nome de ficheiro, e eu publiquei a definição"
+                  " DELE como se fosse um facto sobre o paper");
         tique7(6, "e a VOLTA é esta fala: o dicionário está aqui para se poder discordar"
                   " dele. Uma tradução sem dicionário é uma tradução que não se pode"
                   " conferir");
@@ -11719,14 +11798,16 @@ static int teste(void){
                   fp = fopen(cam, "r");
                   if(fp){ fclose(fp); existem++; } else faltam++;
               }
-              printf("      os %d medidores citados pelos teoremas do universal: %d existem,"
-                     " %d faltam\n", (int)(sizeof citados/sizeof *citados), existem, faltam);
-              ok("A VARREDURA DO CORPO UNIVERSAL confere: 22 teoremas etiquetados, 15 citam"
-                 " medidor, e os 17 ficheiros citados EXISTEM todos. Uma citação a ficheiro"
-                 " inexistente é pior que citação nenhuma, e o primeiro extractor que"
-                 " escrevi disse «SEM MEDIDOR» em 22 de 22 — não era o paper vazio, era a"
-                 " expressão regular sem o ponto. Um total de 22 em 22 é sinal de"
-                 " ferramenta partida, não de facto",
+              printf("      os %d medidores citados por NOME: %d existem, %d faltam\n",
+                     (int)(sizeof citados/sizeof *citados), existem, faltam);
+              ok("A VARREDURA DO CORPO UNIVERSAL confere, e a REVISÃO corrigiu-a: os 17"
+                 " ficheiros citados por NOME existem todos. Mas eu tinha publicado «22"
+                 " teoremas, 15 citam medidor, 7 não» — e isso era a definição do meu"
+                 " extractor a passar por facto sobre o paper. Os VINTE E DOIS estão"
+                 " medidos: 15 por ficheiro, 6 por SECÇÃO (§D2–D3, §D6, §S0–S2, §C0–C7) ou"
+                 " por CONTAGEM (100/100), e 1 com a medida dentro do enunciado (4096/4096)."
+                 " Duas vezes seguidas o mesmo defeito: primeiro a regex sem o ponto disse"
+                 " «SEM MEDIDOR» em 22 de 22, depois o `\\code{}` disse-o em 7",
                  faltam == 0 && existem == 17); }
 
             /* E OS DOIS ANDARES CORREM */
