@@ -44,7 +44,31 @@ O **gume** da irracionalidade ficou no quadrado perfeito: a prova por fatoraçã
 todo expoente primo par — geral, e a paridade é só o caso a = 2) **PARA** quando a é
 quadrado, e diz porquê. Uma cadeia que corresse na mesma provaria o falso.
 
-Falas: `corte de raiz N`, `prova que raiz de N nao é racional`.
+Falas: `corte de raiz N`, `prova que raiz de N nao é racional`, `prova as provas` (o
+índice das vinte), `prova N` e `prova <nome>`.
+
+## Cauchy — a construção DUAL (`lib/cauchy.h`, commit `7081fec`)
+
+O corte diz **onde** o ponto está (decisão sobre ℚ, estática); a sucessão **vai lá**
+(caminho por ℚ, dinâmica). O mesmo real sai dos dois, e a equivalência mede-se: «os três
+caminhos são o mesmo real» deixou de ser figura e passou a ser `aₙ − bₙ → 0`.
+
+- **A sucessão é a REGRA, não a tabela** — nenhum termo se guarda, cada aₙ recalcula-se
+  do princípio. É o [[feedback-nunca-usar-ram]] aplicado à análise.
+- **O ε é um RACIONAL e o N exibe-se sempre**: 1/10 → N=1, 1/10³ → 4, 1/10⁵ → 7, 1/10⁷ → 9.
+  Não há épsilon-delta com vírgula; há frações e um índice.
+- **O GUME é a HARMÓNICA**: os saltos consecutivos são 1/(n+2) e vão a zero, e ela NÃO é de
+  Cauchy (H₂ₙ − Hₙ ≥ 1/2). É o contra-caso que impede a definição de colapsar em «os termos
+  consecutivos aproximam-se». Mutá-la para Basel (que É de Cauchy) derruba duas asserções.
+- **Onde a completude se paga**: a MESMA sucessão, com os MESMOS termos, converge em ℝ e não
+  em ℚ. A diferença entre os andares não é uma definição — é este par de medidas sobre o
+  mesmo objeto.
+
+**O defeito que quase passou**: escrevi `cy_equiv` a devolver o PRIMEIRO k com
+|aₖ − bₖ| < ε, e as três sucessões do andar arrancam todas em ⌊√a⌋ — dava N = 0 por
+COINCIDÊNCIA no arranque, e a asserção passava sem medir convergência nenhuma. «→ 0» é
+sobre a **cauda**. Corrigido, os N passaram a 17, 6 e 17. Ver
+[[feedback-assercoes-vazias]]: a forma nova é *a asserção que passa pelo arranque*.
 
 **O que ele anunciou a seguir**: a construção geométrica da reta — «a reta não precisa ser
 postulada como uma coleção contínua de pontos; o ponto real é o corte que separa tudo o

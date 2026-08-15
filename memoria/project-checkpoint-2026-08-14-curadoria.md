@@ -248,3 +248,15 @@ defeitos que sobraram não estavam nos valores, estavam no que a máquina ESCREV
 membrana só media a entrada, o parser lia uma notação diferente da que a casa escreve, e o
 buffer de saída rodava por baixo do texto. Nenhum deles tinha asserção possível do lado do
 valor.
+
+
+### As vinte provas e Cauchy (`7081fec`, interno 163:0)
+
+Os vinte exercícios do `eval.txt` correm na assistente (`prova as provas` / `prova N` /
+`prova <nome>`), cada tick a nomear a lei que autoriza a transição. E `lib/cauchy.h` entrou
+como a construção **dual** do corte — detalhe em [[project-o-real-e-o-corte]].
+
+**Unidade nova que vale para tudo**: varrer o ÍNDICE INTEIRO das falas (as vinte, pelo
+número e pelo nome) e exigir que o fora-de-alcance seja RECUSADO. É o
+[[feedback-o-medidor-que-nunca-mediu]] aplicado às falas: uma fala que morre calada não
+falha, **desaparece** — e confiar em ter escrito as vinte não é medir que as vinte correm.
