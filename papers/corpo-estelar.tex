@@ -1618,6 +1618,46 @@ adjunção.
 $\square$
 \end{teorema}
 
+\begin{teorema}[a face graduada da ponte --- onde a obstrução deixa de ser
+zero]\label{thm:ponte-graduada}
+A graduação do teorema anterior tem uma propriedade que só se vê quando
+a obstrução \emph{não} é nula, e num domínio em estrela ela é sempre
+nula. É a face que falta:
+\[
+\Lambda^{0}\xrightarrow{\;d\;}\Lambda^{1}\xrightarrow{\;d\;}\cdots,
+\qquad
+\operatorname{im}d\subseteq\ker d,
+\qquad
+H^{k}=\ker d/\operatorname{im}d .
+\]
+\textbf{(i) A imagem cabe no núcleo; a pergunta é se o PREENCHE.} Isso é
+o que $d^{2}=0$ garante e não decide. Num domínio em estrela toda
+fechada é exacta (Poincaré) e $H^{1}=0$ --- e é esse o regime dos
+polinómios. O buraco precisa de um domínio com buraco.
+
+\textbf{(ii) E a testemunha clássica não é polinomial.} A forma do
+ângulo $(-y\,dx+x\,dy)/(x^{2}+y^{2})$ é fechada e não exacta em
+$\mathbb{R}^{2}\setminus\{0\}$, e não vive no anel $\mathbb{Q}[x,y,z]$.
+Registou-se em tempo próprio que \emph{a razão de não se ver o buraco
+era a representação, não a matemática}.
+
+\textbf{(iii) A realização que o mostra.} Sobre um grafo, o mesmo
+complexo dá $\dim H^{1}=E-V+C$, e no ciclo $C_{n}$ a cocadeia
+$\omega\equiv1$ é o análogo discreto exacto da forma do ângulo: soma
+$n\neq0$ ao longo do ciclo, e toda exacta soma zero. \emph{O contínuo
+descreve o buraco; o discreto exibe-o} --- e as duas descrições contam o
+mesmo número, que é também o posto de $\pi_{1}$.
+
+\textbf{Estatuto.} A lei é do \emph{Corpo Universal}; a face discreta é
+do \emph{Corpo de Peano} (o potencial como fibra, e a contagem
+$E-V+C$); esta é a face graduada --- o lugar onde a obstrução se define
+e onde se diz \emph{porque} ela some nos polinómios. Nenhuma das três
+afirma cohomologia nova: $\dim H^{1}=E-V+C$ é clássico, e o que se
+acrescenta é que o buraco é \emph{um objecto só}, contado de dois modos.
+\emph{Medido:} \code{tests/cohomologia\_ponte.c} ($5{:}0$).
+$\square$
+\end{teorema}
+
 \setcounter{lei}{6}
 \begin{lei}[o octonião dual --- ligar sem fundir]\label{lei:octoniao}
 $\mathbb{O}=\mathbb{H}\times\mathbb{H}^{*}$, dois tecidos ligados pela estrela: $\nu\circ\nu=\mathrm{id}$,

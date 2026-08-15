@@ -2118,6 +2118,37 @@ esta tabela. O teorema não os junta --- separa-os pelo $a$.
 $\square$
 \end{teorema}
 
+\begin{teorema}[a face discreta da ponte --- o potencial é a fibra, e ela
+esvazia-se no ciclo]\label{thm:ponte-discreta}
+A realização discreta da ponte
+(\emph{Corpo Universal}, Teor.~da ponte para a cohomologia) é um
+\textbf{grafo}, e nela a obstrução tem a forma que esta tabela já
+conhece. O complexo é
+$\Lambda^{0}\xrightarrow{d}\Lambda^{1}\to0$ com
+$(df)(e)=f(b)-f(a)$, e a pergunta «$\omega$ é exacta?» é
+\[
+\boxed{\;\exists f:\ df=\omega\;}
+\]
+--- uma \textbf{fibra}, e a mesma que o Teor.~\ref{thm:fecho-b} isolou:
+lá o diferencial entra na coluna do fecho como o caso $b=0$, sem
+inverso; aqui a sua fibra é vazia exactamente sobre os ciclos.
+
+\textbf{A construção e a volta.} O potencial constrói-se propagando
+$f$ pelas arestas a partir de $f(v_{0})=0$; e depois \emph{confere-se
+em todas as arestas}, incluindo as que fecham ciclos. É a conferência
+que decide: numa árvore ela passa sempre ($40$ de $40$ cocadeias
+aleatórias), e no ciclo $C_{5}$ ela falha para $\omega\equiv1$, porque
+$\sum_{\text{ciclo}}\omega=5\neq0$ e toda exacta telescopa para zero.
+
+\textbf{A contagem.} O número de obstruções independentes é
+$E-V+C$ --- arestas, vértices e componentes, três inteiros --- e é
+\emph{o mesmo} que o posto de $\pi_{1}$ e o mesmo que $\dim H^{1}$
+obtido por eliminação. \emph{A face discreta não precisa de geometria
+nenhuma: precisa de contar.}
+\emph{Medido:} \code{tests/cohomologia\_ponte.c} ($5{:}0$).
+$\square$
+\end{teorema}
+
 \begin{center}\small
 \begin{tabular}{@{}ll@{}}
 bloco & estatuto correcto \\

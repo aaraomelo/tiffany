@@ -1224,6 +1224,53 @@ $\varepsilon$--$\delta$.
 \emph{Medido:} \code{tests/lebesgue\_toro.js} ($7{:}0$).
 \end{observacao}
 
+\begin{teorema}[o buraco é um só, contado por dois caminhos --- a ponte
+para a cohomologia]\label{thm:ponte-cohomologia}
+O complexo do Teorema~\ref{thm:nilpotencia-dual} tem uma realização
+\emph{finita} onde a obstrução deixa de ser $0$ e se mede:
+\[
+\Lambda^{0}\xrightarrow{\;d\;}\Lambda^{1}\to 0,
+\qquad
+(df)(e)=f(\text{cabeça})-f(\text{cauda}),
+\]
+o mesmo $d$ de grau zero --- o gradiente --- escrito num grafo. E então
+\[
+\boxed{\;
+\dim H^{1}=E-V+C=\operatorname{posto}\pi_{1}\;}
+\]
+\textbf{(i) Dois caminhos que não partilham nada.} O lado esquerdo sai
+de \emph{eliminação de Gauss} na matriz de incidência: $\dim\ker d=C$,
+$\dim\operatorname{im}d=V-C$, e $\dim H^{1}=E-\operatorname{posto}$. O
+lado direito sai de \emph{escolher uma árvore geradora} e contar as
+arestas que sobram. Um é álgebra linear exacta, o outro é aritmética de
+inteiros --- e darem o mesmo número é o teorema, não uma reescrita.
+
+\textbf{(ii) A testemunha explícita, e ela é a fibra.} No ciclo $C_{n}$
+a cocadeia $\omega\equiv1$ soma $n\neq0$ ao longo do ciclo; e \emph{toda}
+cocadeia exacta soma zero, porque telescopa. Logo $\omega$ não é exacta,
+e a busca do potencial \textbf{recusa}: $\omega=df$ é a fibra, e ela é
+vazia exactamente quando o buraco existe. Controlo nos dois sentidos ---
+uma $\omega$ construída como $df$ é achada, e numa \emph{árvore} as $40$
+cocadeias aleatórias testadas são todas exactas, porque lá não há ciclo
+onde a soma possa não fechar.
+
+\textbf{(iii) O que isto fecha.} O andar das formas diferenciais
+mediu $d^{2}=0$ e o lema de Poincaré em $\mathbb{Q}[x,y,z]$, onde toda
+fechada é exacta --- e registou o limite: a testemunha clássica, a forma
+do ângulo $(-y\,dx+x\,dy)/(x^{2}+y^{2})$, \emph{não é polinomial}, logo
+não vive naquele anel. A razão de não se ver o buraco era a
+\textbf{representação}, não a matemática. Aqui está ele: o análogo
+discreto da forma do ângulo cabe num grafo de cinco vértices.
+
+\textbf{Estatuto.} Isto \emph{não} afirma um teorema de cohomologia
+novo: $\dim H^{1}=E-V+C$ para grafos é clássico. O que se acrescenta é a
+leitura --- \emph{o buraco é um objecto só, e a cohomologia e a
+homotopia são dois modos de o contar} ---, e a realização exacta, sem
+aproximação nenhuma. As duas faces estão nos outros dois papers.
+\emph{Medido:} \code{tests/cohomologia\_ponte.c} ($5{:}0$).
+$\square$
+\end{teorema}
+
 \begin{teorema}[a nilpotência é o dual da idempotência --- e a leitura do
 Teorema Central sem limite dimensional]\label{thm:nilpotencia-dual}
 Aplicar um operador \emph{duas vezes} tem dois extremos, e a casa só tinha
