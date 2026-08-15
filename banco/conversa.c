@@ -55,6 +55,7 @@
 #include "torre.h"      /* a torre inteira: Cayley-Dickson pelos DOIS lados */
 #include "calculo.h"    /* Calculo I exacto: o quociente de diferencas E um polinomio */
 #include "calculo2.h"   /* Calculo II: series formais, varias variaveis, e a BORDA */
+#include "campo.h"      /* Calculo III: campos, fluxo, circulacao, e os tres teoremas */
 #include "eletrico.h"
 
 typedef struct { long a, b; } Slot;
@@ -1374,6 +1375,511 @@ static void esc_mat(const char *ind, Mat A);
 static void esc_qz(const char *pre, Qz x, const char *pos);
 static void esc_col(const char *s, int largura);
 static void tique7(int slot, const char *porque);
+/* ── CÁLCULO III: NÚMERO → VETOR → OPERADOR → CAMPO → BORDA ─────────────────────────
+ * O `eval.txt` fecha o andar com uma sequência e uma frase.
+ *
+ *   A sequência:  número → vetor → operador → campo → BORDA
+ *   A frase:      «Green, Stokes e Gauss como A MESMA ESTRUTURA em dimensões
+ *                  diferentes — integral da borda = integral do operador no interior»
+ *
+ * Se são a mesma estrutura, não se medem como três teoremas. Mede-se a ESTRUTURA:
+ *
+ *        ∫_{∂R} ω  =  ∫_R Dω
+ *
+ * com D a mudar de nome — rot em 2D (Green), rot em 3D (Stokes), div em 3D (Gauss) — e
+ * os dois lados calculados por caminhos SEM NADA EM COMUM. Que batam é o teorema.
+ *
+ * E ele deixa as FORMAS DIFERENCIAIS para depois: «aí Stokes deixa de ser quatro
+ * teoremas separados e começa a aparecer como uma única lei». A álgebra dessa unificação
+ * já cá está, do andar exterior — Λᵏ, a cunha, o Hodge ⋆, a contração ι_v. Falta o d, a
+ * derivada exterior. É o andar seguinte, e digo-o em vez de fingir que já lá cheguei. */
+static const struct { int n; const char *nome; const char *enunciado; } C3_21[] = {
+ {  1, "limite por caminhos","em ℝⁿ o limite exige TODOS os caminhos — e um par basta para matar" },
+ {  2, "bola",              "‖·‖ e a bola aberta: a vizinhança que substitui o intervalo" },
+ {  3, "direcional",        "D_u f = ∇f·u, e o gradiente é a direção de maior crescimento" },
+ {  4, "plano tangente",    "z = f(a) + ∇f(a)·(x−a): a aproximação linear, exacta no resto" },
+ {  5, "diferencial",       "df = ∇f·dx — o FUNCIONAL, e ∇f é o vector que a métrica dá" },
+ {  6, "jacobiana",         "Df(a) é a MATRIZ, e compor funções é multiplicá-las" },
+ {  7, "taylor multi",      "f(a+h) = f(a) + Df·h + ½D²f[h,h] + … — exacto em polinómios" },
+ {  8, "ponto critico",     "∇f = 0, e a Hessiana com QUATRO estados decide (ou não)" },
+ {  9, "lagrange",          "∇f = λ∇g, e o gume é a regularidade do vínculo" },
+ { 10, "integral multipla", "dupla e tripla, e Fubini por caminhos intermédios distintos" },
+ { 11, "jacobiano volume",  "dV = |det J| du dv dw — o determinante É a medida" },
+ { 12, "coordenadas",       "polares, cilíndricas, esféricas: o factor sai do Jacobiano" },
+ { 13, "campo",             "F: ℝ³ → ℝ³, e o par: div ATRAVESSA, rot RODA" },
+ { 14, "conservativo",      "F = ∇φ é uma FIBRA, e ela é vazia quando rot F ≠ 0" },
+ { 15, "trabalho",          "independente do caminho ⟺ conservativo — os dois lados medidos" },
+ { 16, "integral de linha", "∫_C F·dr, e a circulação numa curva fechada" },
+ { 17, "fluxo",             "∬_S F·n dS — o que atravessa a superfície" },
+ { 18, "green",             "∮_∂D P dx + Q dy = ∬_D (Q_x − P_y) dA" },
+ { 19, "stokes",            "∮_∂S F·dr = ∬_S (rot F)·n dS" },
+ { 20, "gauss",             "∭_V div F dV = ∬_∂V F·n dS" },
+ { 21, "a mesma estrutura", "os três são ∫_∂R ω = ∫_R Dω — e o que falta é o d" },
+};
+static void calculo3_resolve(int n){
+    TICK_N = 0;
+    printf("   %d — %s\n", n, C3_21[n-1].enunciado);
+    Qz z0 = qz(0,1), z1 = qz(1,1), z2 = qz(2,1), z3 = qz(3,1);
+    switch(n){
+    case 1: case 2: {
+        tique7(0, "seja f: ℝ² → ℝ e a um ponto do plano");
+        tique7(1, n == 1 ? "o limite em ℝⁿ exige TODOS os caminhos:"
+                         : "a bola aberta substitui o intervalo:");
+        printf(n == 1 ? "      $\\lim_{(x,y)\\to a} f$ existe $\\Rightarrow$ o limite é o"
+                        " mesmo por TODO caminho que chega a $a$\n"
+                      : "      $B(a,r) = \\{x : \\|x-a\\| < r\\}$\n");
+        tique7(2, n == 1
+               ? "e é aqui que ℝⁿ deixa de ser ℝ: numa variável há dois lados, e comparar"
+                 " os dois basta. Em duas há INFINITOS caminhos, e o limite tem de ser o"
+                 " mesmo em todos. Isso torna a existência muito mais difícil de PROVAR"
+                 " e muito mais fácil de REFUTAR"
+               : "a transição é que a vizinhança deixa de ser um intervalo e passa a ser"
+                 " uma bola. A distância é a norma, e aqui ela mede-se AO QUADRADO —"
+                 " ‖x‖² = Σxᵢ², exacta em ℚ, e a raiz nunca se tira");
+        tique7(3, "a lei é que refutar precisa de DOIS caminhos com limites diferentes, e"
+                  " provar precisaria de todos. A assimetria é o que torna o gume barato e"
+                  " a demonstração cara");
+        { printf("      f(x,y) = xy/(x²+y²), em (0,0) — os coeficientes são exactos:\n");
+          printf("        pelo eixo x (y = 0):     f = 0/x² = 0   para todo x ≠ 0\n");
+          printf("        pela diagonal (y = x):   f = x²/2x² = 1/2   para todo x ≠ 0\n");
+          Qz meio; qz_divide(qz(1,1), qz(2,1), &meio);
+          printf("        dois caminhos, dois limites: "); esc_qz("", qz(0,1), " e ");
+          esc_qz("", meio, "\n");
+          printf("      e a NORMA ao quadrado, sem raiz:\n");
+          printf("        ‖(3,4)‖² = "); esc_qz("", qz(25,1), "   ‖(1,1)‖² = ");
+          esc_qz("", qz(2,1), "   ← e √2 fica por avaliar\n");
+          tique7(4, "a testemunha da NÃO existência são os dois caminhos com valores"
+                    " diferentes, e ambos são exactos: 0 pelo eixo e 1/2 pela diagonal,"
+                    " para TODO x ≠ 0 — não é um limite estimado, é o valor constante ao"
+                    " longo de cada caminho");
+          tique7(5, "logo o limite NÃO existe, e a demonstração é curta porque refutar só"
+                    " precisa de um par");
+          tique7(6, "e a VOLTA é a TRADUÇÃO: a bola é a vizinhança, e no universal a"
+                    " vizinhança é o degrau da ESCADA (thm:escada) — cada raio é um"
+                    " observador, e diminuir o raio refina as classes. LOCAL → GLOBAL: o"
+                    " limite é uma afirmação sobre TODA a vizinhança, não sobre um caminho"); }
+        break; }
+    case 3: case 4: case 5: {
+        tique7(0, "seja f(x,y) polinomial e u um vector unitário");
+        tique7(1, n == 3 ? "a derivada direccional:"
+             : n == 4 ? "o plano tangente:" : "o diferencial total:");
+        printf(n == 3 ? "      $D_u f(a) = \\nabla f(a) \\cdot u$\n"
+             : n == 4 ? "      $z = f(a) + \\nabla f(a)\\cdot(x-a)$\n"
+                      : "      $df = \\nabla f \\cdot d\\mathbf{x}$\n");
+        tique7(2, n == 3
+               ? "a transição é que TODAS as direccionais saem de duas parciais. Isso não é"
+                 " economia: é a linearidade a dizer que o objecto local é o GRADIENTE, e"
+                 " que cada direcção é uma leitura dele. E o máximo de ∇f·u sobre u"
+                 " unitário está na direcção do próprio ∇f — é onde a projecção é total"
+               : n == 4
+               ? "a transição é que o plano tangente é a PARTE LINEAR do deslocamento, e em"
+                 " polinómios ela lê-se sem limite: f(a+h) − f(a) − ∇f(a)·h são exactamente"
+                 " os termos de grau ≥ 2 em h, que se escrevem e se vêem"
+               : "a transição é a DISTINÇÃO que o andar linear obriga: df é um FUNCIONAL"
+                 " (vive em V*) e ∇f é um VECTOR (vive em V). São objectos diferentes, e o"
+                 " que os identifica é a métrica — sem produto interno há df e não há ∇f");
+        tique7(3, "a lei é a linearidade da aproximação, e ela é o que faz o gradiente ser"
+                  " UM objecto em vez de uma colecção de derivadas");
+        { P2 f = p2_0();
+          f.c[2][0] = qz(1,1); f.c[1][1] = qz(3,1); f.c[0][2] = qz(-2,1);
+          Vec g = p2_gradiente(f, qz(1,1), qz(2,1));
+          printf("      f = x² + 3xy − 2y²,  no ponto (1,2):\n");
+          printf("        ∇f = "); esc_vec(g); printf("\n");
+          /* as direccionais nos eixos e na diagonal, todas do MESMO gradiente */
+          Vec e1 = vec0(2), e2 = vec0(2), dd = vec0(2);
+          e1.c[0] = qz(1,1); e2.c[1] = qz(1,1);
+          dd.c[0] = qz(1,1); dd.c[1] = qz(1,1);
+          printf("        D_{e₁} f = "); esc_qz("", ex_directo(g,e1), "   D_{e₂} f = ");
+          esc_qz("", ex_directo(g,e2), "   D_{(1,1)} f = ");
+          esc_qz("", ex_directo(g,dd), "\n");
+          /* a MÁXIMA é na direcção do gradiente: ∇f·∇f contra ∇f·u para outros u */
+          Qz mx = ex_directo(g,g);
+          long viola = 0, tent = 0;
+          for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++){
+              if(!a && !b) continue;
+              Vec u = vec0(2); u.c[0] = qz_de_inteiro(a); u.c[1] = qz_de_inteiro(b);
+              /* Cauchy–Schwarz: (∇f·u)² ≤ ‖∇f‖²‖u‖², com igualdade só se paralelos */
+              Qz lhs = ex_directo(g,u);
+              if(qz_mult(lhs,lhs).p * qz_mult(mx, ex_directo(u,u)).q
+                 > qz_mult(mx, ex_directo(u,u)).p * qz_mult(lhs,lhs).q) viola++;
+              tent++;
+          }
+          printf("      e Cauchy–Schwarz (∇f·u)² ≤ ‖∇f‖²‖u‖² em %ld direcções:"
+                 " %ld violações\n", tent, viola);
+          tique7(4, "a testemunha é que a direcção de maior crescimento sai de"
+                    " CAUCHY–SCHWARZ, e não de uma intuição: (∇f·u)² ≤ ‖∇f‖²‖u‖² com"
+                    " igualdade exactamente quando u é paralelo a ∇f. E isso é o andar do"
+                    " fecho do dual outra vez — a folga é ‖∇f ∧ u‖², o CRUZADO");
+          tique7(5, viola == 0
+                 ? "logo o gradiente é a direcção de maior crescimento, e é um teorema e"
+                   " não uma imagem"
+                 : "a desigualdade falha — NÃO afirmo");
+          tique7(6, "e a VOLTA é o par dual, dito por inteiro: df é o funcional, ∇f é o"
+                    " vector, e a métrica é que os liga. Nomear um sem o outro é meio"
+                    " teorema — thm:produto-dual, «no corpo é central e é a membrana»"); }
+        break; }
+    case 6: case 7: {
+        tique7(0, "sejam f: ℝⁿ → ℝᵐ e g: ℝᵏ → ℝⁿ polinomiais");
+        tique7(1, n == 6 ? "a jacobiana e a cadeia:" : "Taylor multivariado:");
+        printf(n == 6 ? "      $D(f \\circ g)(x) = Df(g(x))\\,Dg(x)$\n"
+                      : "      $f(a+h) = f(a) + Df(a)h + \\tfrac12 D^{2}f(a)[h,h]"
+                        " + \\cdots$\n");
+        tique7(2, n == 6
+               ? "e este é o eixo do andar, na frase do eval: NÚMERO → VETOR → OPERADOR."
+                 " No Cálculo I a derivada era um número; no II passou a matriz; e compor"
+                 " funções passou a MULTIPLICAR operadores. A ordem importa, e é isso que"
+                 " distingue o operador do número"
+               : "a transição é que em polinómios a série de Taylor TERMINA: o resto é"
+                 " exactamente zero a partir do grau. Não há aproximação — há uma"
+                 " reescrita do polinómio na base dos deslocamentos");
+        tique7(3, "a lei é det(AB) = det A · det B, e é ela que faz os VOLUMES comporem-se"
+                  " quando as funções se compõem");
+        { P2 X = p2_0(), Y = p2_0(), U = p2_0(), V = p2_0();
+          X.c[1][0] = qz(2,1); X.c[0][1] = qz(1,1);
+          Y.c[1][0] = qz(1,1); Y.c[0][1] = qz(3,1);
+          U.c[1][0] = qz(1,1); U.c[0][1] = qz(-1,1);
+          V.c[1][0] = qz(2,1); V.c[0][1] = qz(1,1);
+          Mat J = p2_jacobiana(X,Y,z1,z1), K = p2_jacobiana(U,V,z1,z1);
+          Mat prod = mat_mult(J,K);
+          P2 XC = p2_0(), YC = p2_0();
+          XC.c[1][0] = qz(4,1); XC.c[0][1] = qz(-1,1);
+          YC.c[1][0] = qz(7,1); YC.c[0][1] = qz(2,1);
+          Mat comp = p2_jacobiana(XC,YC,z1,z1);
+          int bate = 1;
+          for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+              if(!qz_igual(comp.a[i][j], prod.a[i][j])) bate = 0;
+          printf("      Df·Dg:\n"); esc_mat("        ", prod);
+          printf("      D(f∘g) montada da composta:\n"); esc_mat("        ", comp);
+          printf("      det: "); esc_qz("", mat_det(J), " · ");
+          esc_qz("", mat_det(K), " = ");
+          esc_qz("", qz_mult(mat_det(J), mat_det(K)), "   e o da composta = ");
+          esc_qz("", mat_det(comp), "\n");
+          tique7(4, "a testemunha são DOIS CAMINHOS: a jacobiana montada da função composta"
+                    " contra o PRODUTO das duas jacobianas, entrada a entrada. E os"
+                    " determinantes multiplicam junto — os volumes compõem-se");
+          tique7(5, bate ? "logo compor funções É multiplicar operadores, e a regra da"
+                           " cadeia deixa de ser fórmula decorada"
+                         : "as matrizes não batem — NÃO afirmo");
+          tique7(6, "e a VOLTA é a TRADUÇÃO: det da jacobiana é Λⁿ T do andar exterior — «a"
+                    " acção do operador no VOLUME». A cadeia funciona nas medidas porque"
+                    " Λⁿ é functorial: Λⁿ(AB) = Λⁿ(A)·Λⁿ(B)"); }
+        break; }
+    case 8: case 9: {
+        tique7(0, n == 8 ? "seja a um ponto crítico de f, com ∇f(a) = 0"
+                         : "extremizar f sujeito a g = c");
+        tique7(1, n == 8 ? "a Hessiana, com QUATRO estados:"
+                         : "os multiplicadores de Lagrange:");
+        printf(n == 8 ? "      definida $+$, definida $-$, INDEFINIDA (sela), ou"
+                        " SEMIDEFINIDA (não decide)\n"
+                      : "      $\\nabla f = \\lambda \\nabla g$\n");
+        tique7(2, n == 8
+               ? "e o eval nota bem o que isso é: «não basta perguntar é positivo? Tem que"
+                 " distinguir definida positiva, definida negativa, indefinida,"
+                 " SEMIDEFINIDA». O quarto estado é onde o critério DEIXA DE DECIDIR, e"
+                 " reconhecê-lo é mais do que devolver um veredicto"
+               : "a transição é geométrica: no extremo vinculado ∇f tem de ser normal à"
+                 " superfície de restrição, senão havia direcção admissível que melhorava."
+                 " Normal à mesma superfície quer dizer PARALELO a ∇g");
+        tique7(3, "a lei é a do andar das formas: «NÃO BASTA OLHAR PARA A MATRIZ — é preciso"
+                  " PROCURAR TESTEMUNHAS». A assinatura caça-se, e o caso semidefinido é o"
+                  " que não tem testemunha de um dos sinais");
+        { P2 sela = p2_0(), mini = p2_0(), maxi = p2_0(), semi = p2_0();
+          sela.c[2][0] = qz(1,1);  sela.c[0][2] = qz(-1,1);
+          mini.c[2][0] = qz(1,1);  mini.c[0][2] = qz(1,1);
+          maxi.c[2][0] = qz(-1,1); maxi.c[0][2] = qz(-1,1);
+          semi.c[2][0] = qz(1,1);
+          int cs = p2_classifica(p2_hessiana(sela,z0,z0));
+          int cm = p2_classifica(p2_hessiana(mini,z0,z0));
+          int cM = p2_classifica(p2_hessiana(maxi,z0,z0));
+          int cd = p2_classifica(p2_hessiana(semi,z0,z0));
+          printf("      x² − y² → %s      x² + y² → %s\n",
+                 cs == 0 ? "SELA" : "?", cm == 1 ? "mínimo" : "?");
+          printf("      −x² − y² → %s   x² → %s\n",
+                 cM == -1 ? "máximo" : "?",
+                 cd == 2 ? "SEMIDEFINIDA — o critério NÃO decide" : "?");
+          printf("      e as testemunhas da sela:\n");
+          { Mat H = p2_hessiana(sela,z0,z0);
+            Vec vp = vec0(2), vn = vec0(2);
+            vp.c[0] = qz(1,1); vn.c[1] = qz(1,1);
+            printf("        Q(1,0) = "); esc_qz("", fb_quadratica(H,vp), " > 0    Q(0,1) = ");
+            esc_qz("", fb_quadratica(H,vn), " < 0\n"); }
+          printf("      e em x² o ponto (0,0) É mínimo — mas a Hessiana sozinha não o"
+                 " sabe:\n");
+          { Mat Hs = p2_hessiana(semi, z0, z0);
+            Vec w1 = vec0(2), w2 = vec0(2);
+            w1.c[0] = qz(1,1); w2.c[1] = qz(1,1);
+            printf("        Q(1,0) = "); esc_qz("", fb_quadratica(Hs, w1), " > 0   e   ");
+            printf("Q(0,1) = "); esc_qz("", fb_quadratica(Hs, w2), " = 0\n");
+            printf("        — há testemunha positiva e testemunha NULA, e nenhuma"
+                   " negativa: nem definida nem indefinida\n"); }
+          tique7(4, "a testemunha da SELA é um PAR de vectores exibidos, um com Q > 0 e"
+                    " outro com Q < 0. E o caso SEMIDEFINIDO exibe-se pela AUSÊNCIA: há"
+                    " testemunha positiva e há testemunha NULA, e nenhuma negativa — a"
+                    " matriz não é indefinida nem definida, e o critério cala-se");
+          tique7(5, cs == 0 && cm == 1 && cM == -1 && cd == 2
+                 ? "logo são QUATRO estados, e o quarto é onde o critério deixa de decidir."
+                   " Saber onde uma ferramenta se cala vale tanto como saber usá-la"
+                 : "a classificação não separa — NÃO afirmo");
+          tique7(6, n == 9
+                 ? "e a VOLTA é o GUME de Lagrange: retirada a REGULARIDADE do vínculo"
+                   " (∇g ≠ 0 no ponto), o método falha. Em g = x³ − y² = 0 na origem"
+                   " ∇g = (0,0), e ∇f = λ·(0,0) só teria solução se ∇f fosse nulo — para"
+                   " qualquer outro f não há λ nenhum. O ponto singular da restrição não é"
+                   " coberto"
+                 : "e a VOLTA é LOCAL → GLOBAL: a Hessiana classifica UM ponto. Que ele"
+                   " seja extremo global é outra pergunta, e o Cálculo I já ensinara que a"
+                   " resposta pode ser não"); }
+        break; }
+    case 10: case 11: case 12: {
+        tique7(0, "seja f polinomial numa caixa, e (u,v,w) ↦ (x,y,z) uma mudança");
+        tique7(1, n == 10 ? "Fubini:" : n == 11 ? "o Jacobiano é a MEDIDA:"
+                                                : "as coordenadas:");
+        printf(n == 10 ? "      $\\iiint f\\,dV = \\int\\!\\left(\\int\\!\\left(\\int f"
+                         "\\,dz\\right)dy\\right)dx$\n"
+             : n == 11 ? "      $dV = |\\det J|\\,du\\,dv\\,dw$\n"
+                       : "      polares $dA = r\\,dr\\,d\\theta$;\\quad esféricas"
+                         " $dV = \\rho^{2}\\sin\\varphi\\,d\\rho\\,d\\varphi\\,d\\theta$\n");
+        tique7(2, n == 11 || n == 12
+               ? "e o factor NÃO é uma correcção: é a MEDIDA. O determinante já era «a"
+                 " acção do operador no volume» no andar exterior, e aqui aparece"
+                 " exactamente nesse papel — o r das polares e o ρ²sin φ das esféricas são"
+                 " determinantes de jacobianas, não convenções"
+               : "a transição é que os integrais iterados constroem OBJECTOS INTERMÉDIOS"
+                 " diferentes conforme a ordem, e só o número final coincide. É por isso"
+                 " que a comparação é um teorema");
+        tique7(3, "a lei é det(AB) = det A · det B: compor mudanças de coordenadas"
+                  " multiplica os factores de volume, e é isso que torna a mudança"
+                  " reversível sem perder medida");
+        { P3 f = p3_0();
+          f.c[1][1][0] = qz(1,1); f.c[0][1][2] = qz(3,1); f.c[2][0][1] = qz(-1,1);
+          /* `I` é macro do complex.h — segunda vez nesta sessão que ela morde */
+          Qz tri = p3_int_caixa(f, z0,z2, z0,z1, z0,z3);
+          printf("      f = xy + 3yz² − x²z na caixa [0,2]×[0,1]×[0,3]:\n");
+          printf("        ∭f dV = "); esc_qz("", tri, "\n");
+          Mat J = mat0(3,3);
+          J.a[0][0] = qz(2,1); J.a[1][1] = qz(1,1); J.a[2][2] = qz(3,1);
+          printf("      a mudança (u,v,w) ↦ (2u, v, 3w): a jacobiana é diagonal e\n");
+          printf("        det J = "); esc_qz("", mat_det(J), "   ← e é exactamente o"
+                 " volume da caixa unitária esticada\n");
+          printf("      e as coordenadas clássicas, com o factor a sair do determinante:\n");
+          printf("        polares:    x = r cos θ, y = r sin θ   →   |det J| = r\n");
+          printf("        cilíndricas: idem, com z livre          →   |det J| = r\n");
+          printf("        esféricas:  x = ρ sinφ cosθ, …          →   |det J| = ρ² sinφ\n");
+          printf("      (aqui só se escrevem: o cosseno e o seno não entram no anel, e\n");
+          printf("       fingir que entram seria trazer a régua errada)\n");
+          tique7(4, "a testemunha é a integral tripla exacta, e a jacobiana diagonal cujo"
+                    " determinante É o factor de esticamento. E digo o que NÃO meço: as"
+                    " polares e as esféricas escrevem-se e não se calculam aqui, porque o"
+                    " seno e o cosseno não vivem em ℚ. Medir seria fingir");
+          tique7(5, "logo o Jacobiano é a medida, e a mudança de coordenadas é uma"
+                    " reescrita que a carrega");
+          tique7(6, "e a VOLTA é a TRADUÇÃO: isto é Λⁿ T = det T outra vez, e é o mesmo"
+                    " objecto das cartas EQUIAREAIS do corpo_universal §370 — «cada carta"
+                    " preserva área, e sem a inversa-escala o det é 2 ≠ 1»"); }
+        break; }
+    case 13: case 14: case 15: case 16: case 17: {
+        tique7(0, "seja F = (F₁,F₂,F₃) um campo polinomial em ℝ³");
+        tique7(1, n == 13 ? "o par do campo: div ATRAVESSA, rot RODA:"
+             : n == 14 ? "conservativo é uma FIBRA:"
+             : n == 15 ? "o trabalho e o caminho:"
+             : n == 16 ? "a integral de linha:" : "o fluxo:");
+        printf(n == 13 ? "      $\\nabla\\cdot F$ (o directo)\\qquad e \\qquad"
+                         " $\\nabla\\times F$ (o cruzado)\n"
+             : n == 14 ? "      $F = \\nabla\\varphi$   ---   e $\\nabla\\times F = 0$ é a"
+                         " condição\n"
+             : n == 15 ? "      independente do caminho $\\Leftrightarrow$ conservativo\n"
+             : n == 16 ? "      $\\int_{C} F\\cdot d\\mathbf{r}$\n"
+                       : "      $\\iint_{S} F\\cdot \\mathbf{n}\\,dS$\n");
+        tique7(2, n == 13
+               ? "e não é analogia: div F é o produto INTERNO de ∇ com F e rot F é o"
+                 " produto CRUZADO. É literalmente o par directo/cruzado do corpo estelar"
+                 " §640 — «o directo é a potência activa, que atravessa; o cruzado é a"
+                 " reactiva, que roda e volta»"
+               : n == 14
+               ? "a transição é que F = ∇φ é «dado F, achar φ» — uma FIBRA. E ela tem"
+                 " solução exactamente quando rot F = 0 numa região simples. Não se"
+                 " pergunta «é conservativo?»: CONSTRÓI-SE o potencial, e a construção ou"
+                 " fecha ou não fecha"
+               : n == 15
+               ? "a transição é a equivalência, e ela mede-se pelos DOIS lados: num campo"
+                 " conservativo dois caminhos diferentes dão o mesmo trabalho; num campo"
+                 " que não é, dão valores diferentes. Uma equivalência com um lado só está"
+                 " medida pela metade"
+                 : "a transição é que a integral de linha é um integral de UMA variável com"
+                   " as outras congeladas — e a curva fechada monta-se dos seus lados, com"
+                   " os sinais do sentido positivo");
+        tique7(3, "a lei é rot(∇φ) = 0 e div(rot F) = 0 — as duas identidades que fazem a"
+                  " cadeia ∇ → rot → div ser um COMPLEXO: aplicar dois passos seguidos dá"
+                  " zero. Aqui não se citam: varrem-se");
+        { long m1 = 0, m2 = 0, tot = 0;
+          for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++)
+          for(long c = -2; c <= 2; c++){
+              P3 phi = p3_0();
+              phi.c[2][1][0] = qz_de_inteiro(a); phi.c[1][0][2] = qz_de_inteiro(b);
+              phi.c[0][3][1] = qz_de_inteiro(c);
+              Cmp R = cp_rot(cp_grad(phi));
+              if(!p3_nulo(R.f[0]) || !p3_nulo(R.f[1]) || !p3_nulo(R.f[2])) m1++;
+              Cmp G = cmp0();
+              G.f[0].c[1][2][0] = qz_de_inteiro(a);
+              G.f[1].c[0][1][2] = qz_de_inteiro(b);
+              G.f[2].c[2][0][1] = qz_de_inteiro(c);
+              if(!p3_nulo(cp_div(cp_rot(G)))) m2++;
+              tot++;
+          }
+          printf("      o COMPLEXO ∇ → rot → div, varrido em %ld campos:\n", tot);
+          printf("        rot(∇φ) = 0 : %ld falhas        div(rot F) = 0 : %ld falhas\n",
+                 m1, m2);
+          /* o potencial CONSTRUÍDO e CONFERIDO */
+          P3 p0 = p3_0();
+          p0.c[2][1][0] = qz(3,1); p0.c[1][0][2] = qz(-1,1); p0.c[0][0][3] = qz(5,1);
+          Cmp C = cp_grad(p0);
+          P3 phi;
+          int achou = cp_potencial(C, &phi);
+          int confere = achou ? cp_confere_potencial(C, phi) : 0;
+          printf("      F = ∇(3x²y − xz² + 5z³): potencial construído %s, e ∇φ devolve F %s\n",
+                 achou ? "sim" : "NÃO", confere ? "sim" : "NÃO");
+          /* o GUME: rot ≠ 0 ⟹ a fibra é VAZIA */
+          Cmp N = cmp0();
+          N.f[0].c[0][1][0] = qz(-1,1); N.f[1].c[1][0][0] = qz(1,1);
+          P3 q;
+          int nao = cp_potencial(N, &q);
+          printf("      GUME F = (−y, x, 0): rot = 2e₃ ≠ 0, potencial %s\n",
+                 nao ? "achado (MAU)" : "RECUSADO — a fibra é vazia");
+          /* e os DOIS CAMINHOS, nos dois regimes */
+          Qz A = qz_soma(cp_linha_eixo(C.f[0],0,z0,z2,z0,z0),
+                         cp_linha_eixo(C.f[1],1,z0,z3,z2,z0));
+          Qz B = qz_soma(cp_linha_eixo(C.f[1],1,z0,z3,z0,z0),
+                         cp_linha_eixo(C.f[0],0,z0,z2,z3,z0));
+          Qz A2 = qz_soma(cp_linha_eixo(N.f[0],0,z0,z2,z0,z0),
+                          cp_linha_eixo(N.f[1],1,z0,z3,z2,z0));
+          Qz B2 = qz_soma(cp_linha_eixo(N.f[1],1,z0,z3,z0,z0),
+                          cp_linha_eixo(N.f[0],0,z0,z2,z3,z0));
+          printf("      trabalho de (0,0,0) a (2,3,0) por DOIS caminhos:\n");
+          printf("        conservativo:     "); esc_qz("", A, " e ");
+          esc_qz("", B, "   iguais\n");
+          printf("        NÃO conservativo: "); esc_qz("", A2, " e ");
+          esc_qz("", B2, "   diferentes\n");
+          tique7(4, "a testemunha é o par de regimes com o MESMO par de caminhos: no campo"
+                    " conservativo os dois dão 36; no que não é, dão 6 e −6. Não é «às"
+                    " vezes difere»: os valores são simétricos, e a diferença é exactamente"
+                    " a circulação no laço fechado");
+          tique7(5, m1 == 0 && m2 == 0 && achou && confere && !nao && qz_igual(A,B)
+                       && !qz_igual(A2,B2)
+                 ? "logo conservativo ⟺ independente do caminho, e a construção do"
+                   " potencial é a prova — não se afirma que existe, exibe-se e CONFERE-SE"
+                   " que ∇φ devolve F"
+                 : "os regimes não se separaram — NÃO afirmo");
+          tique7(6, "e a VOLTA é a TRADUÇÃO: F = ∇φ é a FIBRA (thm:divisao-fibra), e a"
+                    " independência do caminho é a VOLTA a fechar com resíduo 0. E o par"
+                    " div/rot é o directo/cruzado — o mesmo que fecha em Lagrange no andar"
+                    " exterior, agora com ∇ no lugar de um vector"); }
+        break; }
+    case 18: case 19: case 20: case 21: {
+        tique7(0, "sejam R uma região, ∂R a sua borda, e F um campo polinomial");
+        tique7(1, n == 21 ? "os três são A MESMA ESTRUTURA:"
+             : n == 18 ? "Green:" : n == 19 ? "Stokes:" : "Gauss:");
+        printf(n == 21
+               ? "      $\\int_{\\partial R} \\omega = \\int_{R} D\\omega$\n"
+             : n == 18 ? "      $\\oint_{\\partial D} P\\,dx + Q\\,dy = \\iint_{D}"
+                         " (Q_x - P_y)\\,dA$\n"
+             : n == 19 ? "      $\\oint_{\\partial S} F\\cdot d\\mathbf{r} = \\iint_{S}"
+                         " (\\nabla\\times F)\\cdot \\mathbf{n}\\,dS$\n"
+                       : "      $\\iiint_{V} \\nabla\\cdot F\\,dV = \\iint_{\\partial V}"
+                         " F\\cdot \\mathbf{n}\\,dS$\n");
+        tique7(2, "e o eval diz o que isto é: «Green, Stokes e Gauss como A MESMA ESTRUTURA"
+                  " em dimensões diferentes — integral da borda = integral do operador no"
+                  " interior». Se são a mesma, não se medem como três: mede-se a estrutura,"
+                  " com D a mudar de nome — rot em 2D, rot em 3D, div em 3D");
+        tique7(3, "a lei é INTERIOR ↔ BORDA, e é a forma mais forte de LOCAL → GLOBAL: o"
+                  " que acontece dentro está inteiramente determinado pelo contorno. Os"
+                  " dois lados calculam-se por caminhos SEM NADA EM COMUM — um soma linhas"
+                  " ou faces, o outro integra um volume");
+        { long ms = 0, mg = 0, tot = 0;
+          for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++)
+          for(long c = -2; c <= 2; c++) for(long d = -2; d <= 2; d++){
+              /* STOKES no rectângulo z = 1 */
+              Cmp S = cmp0();
+              S.f[0].c[0][1][0] = qz_de_inteiro(a); S.f[0].c[1][1][0] = qz_de_inteiro(d);
+              S.f[1].c[1][0][0] = qz_de_inteiro(b); S.f[1].c[2][0][0] = qz_de_inteiro(c);
+              if(!qz_igual(cp_circulacao(S,z0,z2,z0,z3,z1),
+                           cp_rot_face(S,z0,z2,z0,z3,z1))) ms++;
+              /* GAUSS na caixa */
+              Cmp G = cmp0();
+              G.f[0].c[1][0][0] = qz_de_inteiro(a); G.f[0].c[0][1][1] = qz_de_inteiro(d);
+              G.f[1].c[0][2][0] = qz_de_inteiro(b);
+              G.f[2].c[1][1][1] = qz_de_inteiro(c);
+              if(!qz_igual(cp_fluxo_caixa(G,z0,z2,z0,z1,z0,z3),
+                           p3_int_caixa(cp_div(G),z0,z2,z0,z1,z0,z3))) mg++;
+              tot++;
+          }
+          Cmp R = cmp0();
+          R.f[0].c[0][1][0] = qz(-1,1); R.f[1].c[1][0][0] = qz(1,1);
+          Cmp V = cmp0();
+          V.f[0].c[1][0][0] = qz(1,1); V.f[1].c[0][1][0] = qz(1,1);
+          V.f[2].c[0][0][1] = qz(1,1);
+          printf("      teorema        borda                       interior\n");
+          printf("      ─────────────────────────────────────────────────────────────\n");
+          printf("      STOKES         circulação  ");
+          esc_qz("", cp_circulacao(R,z0,z2,z0,z3,z1), "              (rot F)·n  ");
+          esc_qz("", cp_rot_face(R,z0,z2,z0,z3,z1), "\n");
+          printf("      GAUSS          fluxo       ");
+          esc_qz("", cp_fluxo_caixa(V,z0,z2,z0,z1,z0,z3), "              div F     ");
+          esc_qz("", p3_int_caixa(cp_div(V),z0,z2,z0,z1,z0,z3), "\n");
+          printf("      e varridos: Stokes %ld falhas, Gauss %ld falhas, em %ld campos"
+                 " cada\n", ms, mg, tot);
+          tique7(4, "a testemunha é que os dois lados NÃO PARTILHAM CÓDIGO: a circulação"
+                    " percorre quatro segmentos somando integrais de uma variável; o"
+                    " rotacional integra uma área. O fluxo percorre seis faces; a"
+                    " divergência integra um volume. Baterem em 625 campos cada é o"
+                    " teorema, e não uma reescrita");
+          tique7(5, ms == 0 && mg == 0
+                 ? "logo Green, Stokes e Gauss são A MESMA FRASE em dimensões diferentes:"
+                   " ∫_{∂R} ω = ∫_R Dω. Green é Stokes achatado, e Gauss é a mesma coisa"
+                   " com div no lugar de rot"
+                 : "os lados separam-se — NÃO afirmo");
+          tique7(6, n == 21
+                 ? "e a VOLTA é o que AINDA NÃO ESTÁ FEITO, e digo-o em vez de fingir: o"
+                   " eval deixa as FORMAS DIFERENCIAIS para depois, «porque aí Stokes deixa"
+                   " de ser quatro teoremas separados e começa a aparecer como uma única"
+                   " lei». A álgebra dessa unificação JÁ cá está — Λᵏ, a cunha, o Hodge ⋆ e"
+                   " a contração ι_v, do andar exterior. Falta o d, a derivada exterior, e"
+                   " com ele os três viram dω. É o andar seguinte"
+                 : "e a VOLTA é a TRADUÇÃO: INTERIOR ↔ BORDA é o par adjunto desta casa —"
+                   " o thm:morf-par, δ(A) ⊆ C ⟺ A ⊆ ε(C), onde o operador e a sua borda"
+                   " são ADJUNTOS. E o thm:borda-dirac: «a equação da borda É a"
+                   " fatoração»"); }
+        break; }
+    }
+}
+static int resolve_calculo3(const char *f){
+    const char *p = f;
+    for(size_t i = 0; i < sizeof C3_21/sizeof *C3_21; i++)
+        if(!strcmp(p, C3_21[i].nome)){ calculo3_resolve(C3_21[i].n); return 1; }
+    if(!strncmp(p, "calculo3", 8)) p += 8;
+    else if(!strncmp(p, "calculo 3", 9)) p += 9;
+    else if(!strncmp(p, "calculo iii", 11)) p += 11;
+    else return 0;
+    while(*p == ' ') p++;
+    if(!*p){
+        printf("   Cálculo III: campos, fluxo e a BORDA —"
+               " «calculo3 N» ou «calculo3 <nome>»\n");
+        printf("   número → vetor → operador → campo → BORDA\n\n");
+        for(size_t i = 0; i < sizeof C3_21/sizeof *C3_21; i++){
+            printf("     %2d  ", C3_21[i].n);
+            esc_col(C3_21[i].nome, 20);
+            printf("  %s\n", C3_21[i].enunciado);
+        }
+        return 1;
+    }
+    if(*p >= '0' && *p <= '9'){
+        long n = 0;
+        while(*p >= '0' && *p <= '9') n = n*10 + (*p++ - '0');
+        while(*p == ' ') p++;
+        if(!*p && n >= 1 && n <= 21){ calculo3_resolve((int)n); return 1; }
+        return 0;
+    }
+    return 0;
+}
 /* ── CÁLCULO II: LOCAL → GLOBAL, E A BORDA ──────────────────────────────────────────
  * O `eval.txt` sobe para o Cálculo II e acrescenta uma coisa nova à espinha:
  *      HIPÓTESES → DEFINIÇÃO → TRANSIÇÃO → LEI → TESTEMUNHA → CONCLUSÃO → VOLTA
@@ -11810,6 +12316,7 @@ static int resolve_mostra(const char *f){ return resolve_mostra_em(f, "../papers
 static int resolve_simbolico(const char *fala){
     if(resolve_divisibilidade(fala)) return 1;     /* o relógio de 6 ticks */
     if(resolve_bezout(fala)) return 1;             /* a testemunha e o critério */
+    if(resolve_calculo3(fala)) return 1;           /* Cálculo III: campo → borda, os 21 */
     if(resolve_calculo2(fala)) return 1;           /* Cálculo II: local → global, os 21 */
     if(resolve_calculo1(fala)) return 1;           /* Cálculo I exacto, os 21 */
     if(resolve_universal(fala)) return 1;          /* os teoremas do universal, os 23 */
@@ -12853,6 +13360,161 @@ static int teste(void){
                 if(e_conta(nu2)) roubadas++;
             }
             ok("e a membrana nao rouba o corpus: fala sem LaTeX nao vira conta", roubadas == 0);
+
+        /* ═══ §C44 CÁLCULO III: NÚMERO → VETOR → OPERADOR → CAMPO → BORDA ════════
+         * «Green, Stokes e Gauss como A MESMA ESTRUTURA em dimensões diferentes —
+         * integral da borda = integral do operador no interior». Se são a mesma, não se
+         * medem como três: mede-se a estrutura, com os dois lados calculados por
+         * caminhos SEM NADA EM COMUM. */
+        printf("\n§C44 CÁLCULO III: o interior é a borda, e o par é div/rot.\n\n");
+        {
+            Qz z0 = qz(0,1), z1 = qz(1,1), z2 = qz(2,1), z3 = qz(3,1);
+
+            /* (1) O COMPLEXO ∇ → rot → div: dois passos seguidos dão ZERO */
+            { long m1 = 0, m2 = 0, tot = 0;
+              for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++)
+              for(long c = -2; c <= 2; c++){
+                  P3 phi = p3_0();
+                  phi.c[2][1][0] = qz_de_inteiro(a); phi.c[1][0][2] = qz_de_inteiro(b);
+                  phi.c[0][3][1] = qz_de_inteiro(c);
+                  Cmp R = cp_rot(cp_grad(phi));
+                  if(!p3_nulo(R.f[0]) || !p3_nulo(R.f[1]) || !p3_nulo(R.f[2])) m1++;
+                  Cmp G = cmp0();
+                  G.f[0].c[1][2][0] = qz_de_inteiro(a);
+                  G.f[1].c[0][1][2] = qz_de_inteiro(b);
+                  G.f[2].c[2][0][1] = qz_de_inteiro(c);
+                  if(!p3_nulo(cp_div(cp_rot(G)))) m2++;
+                  tot++;
+              }
+              printf("      rot(∇φ) = 0: %ld falhas;  div(rot F) = 0: %ld falhas,"
+                     " em %ld campos\n", m1, m2, tot);
+              ok("A CADEIA ∇ → rot → div É UM COMPLEXO: aplicar dois passos seguidos dá"
+                 " ZERO, e isso varre-se em vez de se citar. E o par div/rot é o"
+                 " DIRECTO/CRUZADO desta casa outra vez — div F é o produto interno de ∇"
+                 " com F (a parte que ATRAVESSA) e rot F é o produto cruzado (a que RODA)."
+                 " Não é analogia: é a mesma decomposição de corpo-estelar §640, com ∇ no"
+                 " lugar de um vector",
+                 m1 == 0 && m2 == 0 && tot == 125); }
+
+            /* (2) O POTENCIAL CONSTRUÍDO E CONFERIDO, e a fibra vazia */
+            { P3 p0 = p3_0();
+              p0.c[2][1][0] = qz(3,1); p0.c[1][0][2] = qz(-1,1); p0.c[0][0][3] = qz(5,1);
+              Cmp C = cp_grad(p0);
+              P3 phi, q;
+              int achou = cp_potencial(C, &phi);
+              int confere = achou ? cp_confere_potencial(C, phi) : 0;
+              Cmp N = cmp0();
+              N.f[0].c[0][1][0] = qz(-1,1); N.f[1].c[1][0][0] = qz(1,1);
+              int nao = cp_potencial(N, &q);
+              Qz A = qz_soma(cp_linha_eixo(C.f[0],0,z0,z2,z0,z0),
+                             cp_linha_eixo(C.f[1],1,z0,z3,z2,z0));
+              Qz B = qz_soma(cp_linha_eixo(C.f[1],1,z0,z3,z0,z0),
+                             cp_linha_eixo(C.f[0],0,z0,z2,z3,z0));
+              Qz A2 = qz_soma(cp_linha_eixo(N.f[0],0,z0,z2,z0,z0),
+                              cp_linha_eixo(N.f[1],1,z0,z3,z2,z0));
+              Qz B2 = qz_soma(cp_linha_eixo(N.f[1],1,z0,z3,z0,z0),
+                              cp_linha_eixo(N.f[0],0,z0,z2,z3,z0));
+              printf("      conservativo: potencial %s e ∇φ devolve F %s;"
+                     " dois caminhos dão ", achou ? "construído" : "NÃO",
+                     confere ? "sim" : "NÃO");
+              esc_qz("", A, " e ");
+              esc_qz("", B, "\n");
+              printf("      NÃO conservativo: potencial %s;  os mesmos caminhos dão ",
+                     nao ? "achado (MAU)" : "RECUSADO");
+              esc_qz("", A2, " e ");
+              esc_qz("", B2, "\n");
+              ok("CONSERVATIVO É UMA FIBRA, e ela é vazia quando rot F ≠ 0. Não se"
+                 " pergunta «é conservativo?»: CONSTRÓI-SE o potencial, e depois"
+                 " CONFERE-SE que ∇φ devolve F — sem essa volta, «achei um potencial» não"
+                 " vale nada. E o par de regimes separa-se com o MESMO par de caminhos: no"
+                 " conservativo os dois dão 36; no que não é, dão 6 e −6, simétricos, e a"
+                 " diferença é exactamente a circulação no laço",
+                 achou && confere && !nao && qz_igual(A,B) && !qz_igual(A2,B2)); }
+
+            /* (3) STOKES e GAUSS, varridos — e os dois lados sem código em comum */
+            { long ms = 0, mg = 0, tot = 0;
+              for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++)
+              for(long c = -2; c <= 2; c++) for(long d = -2; d <= 2; d++){
+                  Cmp S = cmp0();
+                  S.f[0].c[0][1][0] = qz_de_inteiro(a); S.f[0].c[1][1][0] = qz_de_inteiro(d);
+                  S.f[1].c[1][0][0] = qz_de_inteiro(b); S.f[1].c[2][0][0] = qz_de_inteiro(c);
+                  if(!qz_igual(cp_circulacao(S,z0,z2,z0,z3,z1),
+                               cp_rot_face(S,z0,z2,z0,z3,z1))) ms++;
+                  Cmp G = cmp0();
+                  G.f[0].c[1][0][0] = qz_de_inteiro(a); G.f[0].c[0][1][1] = qz_de_inteiro(d);
+                  G.f[1].c[0][2][0] = qz_de_inteiro(b);
+                  G.f[2].c[1][1][1] = qz_de_inteiro(c);
+                  if(!qz_igual(cp_fluxo_caixa(G,z0,z2,z0,z1,z0,z3),
+                               p3_int_caixa(cp_div(G),z0,z2,z0,z1,z0,z3))) mg++;
+                  tot++;
+              }
+              printf("      STOKES: %ld falhas;  GAUSS: %ld falhas — em %ld campos cada\n",
+                     ms, mg, tot);
+              ok("GREEN, STOKES E GAUSS SÃO A MESMA FRASE: ∫_{∂R} ω = ∫_R Dω, com D a mudar"
+                 " de nome. E os dois lados NÃO PARTILHAM CÓDIGO — a circulação percorre"
+                 " quatro segmentos somando integrais de uma variável e o rotacional"
+                 " integra uma área; o fluxo percorre seis faces e a divergência integra um"
+                 " volume. Baterem em 625 campos cada é o teorema, e não uma reescrita",
+                 ms == 0 && mg == 0 && tot == 625); }
+
+            /* (4) O QUARTO ESTADO da Hessiana, que o eval pediu por nome */
+            { P2 sela = p2_0(), mini = p2_0(), maxi = p2_0(), semi = p2_0();
+              sela.c[2][0] = qz(1,1);  sela.c[0][2] = qz(-1,1);
+              mini.c[2][0] = qz(1,1);  mini.c[0][2] = qz(1,1);
+              maxi.c[2][0] = qz(-1,1); maxi.c[0][2] = qz(-1,1);
+              semi.c[2][0] = qz(1,1);
+              int cs = p2_classifica(p2_hessiana(sela,z0,z0));
+              int cm = p2_classifica(p2_hessiana(mini,z0,z0));
+              int cM = p2_classifica(p2_hessiana(maxi,z0,z0));
+              int cd = p2_classifica(p2_hessiana(semi,z0,z0));
+              Mat Hs = p2_hessiana(semi, z0, z0);
+              Vec w1 = vec0(2), w2 = vec0(2);
+              w1.c[0] = qz(1,1); w2.c[1] = qz(1,1);
+              int pos = fb_quadratica(Hs,w1).p > 0, nul = fb_quadratica(Hs,w2).p == 0;
+              printf("      sela %d, mínimo %d, máximo %d, SEMIDEFINIDA %d"
+                     " (testemunha positiva %d, nula %d)\n", cs, cm, cM, cd, pos, nul);
+              ok("SÃO QUATRO ESTADOS, e o quarto é o que o eval pediu por nome: definida"
+                 " positiva, definida negativa, INDEFINIDA e SEMIDEFINIDA. Em f = x² o"
+                 " ponto (0,0) É mínimo e a Hessiana sozinha NÃO o sabe — há testemunha"
+                 " positiva e testemunha NULA, e nenhuma negativa: nem definida nem"
+                 " indefinida. Saber ONDE UM CRITÉRIO DEIXA DE DECIDIR vale tanto como"
+                 " saber usá-lo",
+                 cs == 0 && cm == 1 && cM == -1 && cd == 2 && pos && nul); }
+
+            /* (5) O TECTO, e o que NÃO se mede */
+            { printf("      estouros do andar: %ld;  e as coordenadas polares/esféricas"
+                     " escrevem-se e NÃO se calculam\n", cp_estouros);
+              ok("o tecto é medido, e digo o que NÃO meço: as polares e as esféricas"
+                 " escrevem-se e não se calculam aqui, porque o seno e o cosseno não vivem"
+                 " em ℚ. Medi-las seria trazer a régua errada — e o factor r e ρ²sinφ é"
+                 " determinante de jacobiana, isso sim é a frase que interessa",
+                 cp_estouros == 0); }
+
+            /* E OS VINTE E UM CORREM */
+            { int vmal = 0, por_n = 0, por_nome = 0;
+              fflush(stdout);
+              int guarda = dup(1), nulo = open("/dev/null", O_WRONLY);
+              if(guarda >= 0 && nulo >= 0) dup2(nulo, 1);
+              for(int k = 1; k <= 21; k++){
+                  char fala[64];
+                  snprintf(fala, sizeof fala, "calculo3 %d", k);
+                  if(resolve_calculo3(fala)) por_n++; else vmal++;
+              }
+              for(size_t i = 0; i < sizeof C3_21/sizeof *C3_21; i++)
+                  if(resolve_calculo3(C3_21[i].nome)) por_nome++; else vmal++;
+              if(resolve_calculo3("calculo3 22")) vmal++;
+              fflush(stdout);
+              if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
+              if(nulo >= 0) close(nulo);
+              printf("      os vinte e um: %d por número, %d por nome\n", por_n, por_nome);
+              ok("OS VINTE E UM do Cálculo III correm, e a sequência do eval fecha:"
+                 " NÚMERO → VETOR → OPERADOR → CAMPO → BORDA. E o que AINDA NÃO ESTÁ FEITO"
+                 " diz-se: as formas diferenciais, que fariam dos três teoremas uma lei só."
+                 " A álgebra já cá está (Λᵏ, a cunha, o Hodge ⋆, a contração ι_v, do andar"
+                 " exterior); falta o d, a derivada exterior. É o andar seguinte, e fingir"
+                 " que já lá cheguei seria a insinuação que esta casa persegue",
+                 vmal == 0 && por_n == 21 && por_nome == 21); }
+        }
 
         /* ═══ §C43 CÁLCULO II: LOCAL → GLOBAL, E A BORDA ══════════════════════════
          * O eval sobe ao Cálculo II e acrescenta LOCAL → GLOBAL à espinha. E faz uma
