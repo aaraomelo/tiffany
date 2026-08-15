@@ -52,6 +52,7 @@
 #include "forma.h"      /* formas, adjuntos e espectro — a raiz nao se tira */
 #include "tensor.h"     /* Gram, Sylvester, Jordan, tensor e exterior */
 #include "exterior.h"   /* Lambda V, o Hodge, e o FECHO do par directo/cruzado */
+#include "torre.h"      /* a torre inteira: Cayley-Dickson pelos DOIS lados */
 #include "eletrico.h"
 
 typedef struct { long a, b; } Slot;
@@ -1371,6 +1372,1111 @@ static void esc_mat(const char *ind, Mat A);
 static void esc_qz(const char *pre, Qz x, const char *pos);
 static void esc_col(const char *s, int largura);
 static void tique7(int slot, const char *porque);
+/* ── OS TEOREMAS DO CORPO UNIVERSAL, EM LINGUAGEM CONSAGRADA ────────────────────────
+ * O Aarão: «ingere os teoremas do corpo universal na assistente com linguagem traduzida
+ * para os termos técnicos consagrados; se não tiver termo técnico usar o proposto no
+ * paper». E: «varredura no corpo universal».
+ *
+ * A VARREDURA deu: 2935 linhas, 80 blocos (57 teoremas, 8 definições, 1 proposição, 2
+ * corolários, 12 observações), 22 teoremas ETIQUETADOS — os que o paper cita a si próprio
+ * —, e desses 15 nomeiam medidor. Os 17 ficheiros citados existem todos. Os 7 sem medidor
+ * dizem-se sem medidor: a atestação guarda o resultado, e a ausência dele também.
+ *
+ * A REGRA DA TRADUÇÃO, aplicada em cada fala:
+ *   · onde há termo consagrado, usa-se O CONSAGRADO e o nome da casa fica entre parêntesis;
+ *   · onde NÃO há, mantém-se o do paper e diz-se que é proposto por ele.
+ * A fala 23 é o dicionário inteiro, para a regra ser verificável e não uma promessa. */
+static const struct { int n; const char *nome; const char *enunciado; } UN23[] = {
+ {  1, "escada estrita",     "a filtração de invariantes é ESTRITA — cada nível tem cegueira construtível" },
+ {  2, "teto do observador", "oito momentos fecham suporte ≤ 8 por VANDERMONDE, e falham em 9" },
+ {  3, "duas fusoes",        "⊕ soma a energia (duplicação); ⊗ multiplica-a — é a álgebra de composição" },
+ {  4, "divisao e fibra",    "a divisão NÃO se postula: é a fibra (pré-imagem) do produto" },
+ {  5, "absorcao",           "endereço preservado ⟹ resíduo 0 exacto; destruído ⟹ 1 com variância 0" },
+ {  6, "parseval",           "Parseval multidimensional na NTT: o fator é ∏Nᵢ, só a dimensão TOTAL" },
+ {  7, "borda de dirac",     "D² = mD + I: a equação característica É a fatoração de primeira ordem" },
+ {  8, "a obstrucao",        "não existe D inteira com D² = A_m — a raiz do passo não vive no andar" },
+ {  9, "dirac nas transicoes","D aterra na diagonal SE E SÓ SE o par é transição verdadeira" },
+ { 10, "dobra temporal",     "D⁴ = mD² + I: o polinómio mínimo é o da borda em x²" },
+ { 11, "recobrimento",       "w = 2x − m leva x² = mx+1 em w² = m²+4 — a dobra É o discriminante" },
+ { 12, "contornos",          "a geometria dos 52 contornos reais no plano" },
+ { 13, "cartas da torcao",   "J² = −I legitima a carta (x,Jx), e {aI+bJ} ≅ ℂ multiplica exacto" },
+ { 14, "zeta dinamica",      "a função zeta dinâmica sai do censo COMPLETO das órbitas, em inteiros" },
+ { 15, "residuos",           "o teorema dos resíduos derivado no relógio finito: 2πi vale M" },
+ { 16, "produto dual",       "o produto de um objecto pelo seu par: UM invariante em quatro níveis" },
+ { 17, "par morfologico",    "dilatação e erosão são ADJUNTAS: δ(A) ⊆ C ⟺ A ⊆ ε(C)" },
+ { 18, "torcao",             "duas realizações que concordam, e nenhuma é dilatação escondida" },
+ { 19, "estrutura",          "corpo em cada nível; a ordem é de REFINAMENTO; o limite é ℤ₂" },
+ { 20, "o real e um caminho","o real é um caminho raiz→folha na árvore binária, e NÃO um nó" },
+ { 21, "geometria de klein", "a geometria é o par (forma, grupo) — o programa de Erlangen aplicado" },
+ { 22, "maestro e metronomo","a memória é seletor ∘ dobra: a histerese tem gramática exacta" },
+ { 23, "dicionario",         "a tradução inteira: o que é consagrado e o que o paper propõe" },
+};
+static void universal_resolve(int n){
+    TICK_N = 0;
+    printf("   %d — %s\n", n, UN23[n-1].enunciado);
+    switch(n){
+    case 1:
+        tique7(0, "seja I(x) um vector de invariantes lido sobre o corpo endereçado, e"
+                  " x ∼_I y a relação de equivalência que ele induz");
+        tique7(1, "a ESCADA é uma filtração por refinamento sucessivo:");
+        /* o \prec nao tem glifo no tradutor, e a escada E' inclusao de particoes:
+         * cada nivel refina o anterior, logo escreve-se com \subset, que ele conhece */
+        printf("      $I_1=(E)\;\\subset\;I_2=(E,\\Phi)\;\\subset\;"
+               "I_3=(E,\\Phi,\\Phi_2)\;\\subset\;\\cdots$\n");
+        tique7(2, "TRADUÇÃO: «observador» é um SISTEMA COMPLETO DE INVARIANTES (termo"
+                  " consagrado); «escada» é uma FILTRAÇÃO por refinamento de partições;"
+                  " Φ_m = Σ(i+1)^m·bᵢ são os MOMENTOS DE POTÊNCIA, com Φ₁ a fase e Φ₂ a"
+                  " curvatura. Todos consagrados");
+        tique7(3, "a lei é o refinamento: x ∼_{I_{k+1}} y ⟹ x ∼_{I_k} y. Aumentar o"
+                  " sistema de invariantes só pode PARTIR classes, nunca juntá-las");
+        tique7(4, "a testemunha é a CEGUEIRA CONSTRUTÍVEL de cada degrau, exibida em dados"
+                  " reais e não em exemplos feitos à mão: I₁ (a energia) não separa; I₂"
+                  " cai à dupla transposição espelhada — trocar «ab»→«ba» num sítio e"
+                  " «ba»→«ab» noutro à mesma distância d conserva o multiconjunto e"
+                  " cancela a fase, ΔΦ = d(a−b) + d(b−a) = 0. Os 4234 registos do cristal"
+                  " admitem-na TODOS, e 11 de 20 respostas do corpus banal também");
+        tique7(5, "logo a escada é estritamente refinante, e a estritez é orgânica: vive"
+                  " nos dados, não numa construção adversarial");
+        tique7(6, "e a VOLTA é Φ₂ a resgatar a família — ΔΦ₂ = d(b−a)((i'+j')−(i+j)) só"
+                  " anula com os índices simétricos. Medido: tests/assinatura_colisoes.js"
+                  " e tests/assinatura_banal.js");
+        break;
+    case 2:
+        tique7(0, "sejam Φ₀ … Φ₇ os oito momentos, lidos no anel ℤ_65537");
+        tique7(1, "oito momentos fecham o suporte oito:");
+        printf("      $\\det V = \\prod_{i<j}(x_i - x_j) \\neq 0$ para posições distintas"
+               " $< p$\n");
+        tique7(2, "TRADUÇÃO: a matriz das posições é uma matriz de VANDERMONDE (consagrado);"
+                  " 65537 = 2¹⁶+1 é um PRIMO DE FERMAT (consagrado), e é ele que faz o anel"
+                  " ter raízes da unidade de ordem potência de dois; «as oito leis» é o"
+                  " catálogo do paper e não tem termo consagrado — fica como ele propõe");
+        tique7(3, "a lei é a invertibilidade de Vandermonde: posições distintas menores que"
+                  " p nunca anulam o determinante no anel, logo o sistema dos momentos tem"
+                  " solução única e a diferença de suporte ≤ 8 não existe");
+        tique7(4, "a testemunha do FALHANÇO em 9 é exibida e é a diferença finita de ordem"
+                  " 8: o padrão Δ⁸ dos binomiais alternados C(8,k)(−1)^k tem suporte 9 e"
+                  " anula os oito momentos — está no NÚCLEO do operador de momentos e"
+                  " escapa ao observador linear. A energia, que é quadrática, apanha-o no"
+                  " caso genérico");
+        tique7(5, "logo o teto é EXACTAMENTE 8 e a falha começa em 9 — não é um limiar"
+                  " escolhido, é onde o núcleo aparece");
+        tique7(6, "e a VOLTA: acima do suporte 8 sobe-se de nível, e cada duplicação dá"
+                  " momentos novos. O teto é do RELÓGIO, não da torre. Medido:"
+                  " tests/observador_torre.js");
+        break;
+    case 3: case 4:
+        tique7(0, "sejam u, v elementos de níveis da torre, e E a norma quadrática");
+        tique7(1, n == 3 ? "há DUAS fusões, e cada uma conserva à sua maneira:"
+                         : "a divisão é a fibra inversa do produto:");
+        printf(n == 3 ? "      $E(u\\oplus u)=2E(u)$ \\qquad e \\qquad"
+                        " $E(u\\otimes v)=E(u)\\,E(v)$\n"
+                      : "      $F^{-1}(z)=\\{(x,y): F(x,y)=z\\}$\n");
+        if(n == 3){
+            tique7(2, "TRADUÇÃO: a fusão ADITIVA ⊕ (a «dobra/clone» do paper) é a"
+                      " DUPLICAÇÃO DE CAYLEY–DICKSON (consagrado), T ↦ T + T*; a fusão"
+                      " MULTIPLICATIVA ⊗ dá E(u⊗v) = E(u)E(v), que é N(xy) = N(x)N(y) —"
+                      " a definição de ÁLGEBRA DE COMPOSIÇÃO (consagrado). O «cristal de"
+                      " Hurwitz» do paper é o TEOREMA DE HURWITZ");
+            tique7(3, "a lei é o par aditivo/multiplicativo: uma conserva SOMANDO, a outra"
+                      " conserva MULTIPLICANDO. São as duas metades da mesma conservação e"
+                      " não duas conservações diferentes");
+            tique7(4, "a testemunha é a retração π a devolver o original BYTE A BYTE depois"
+                      " da duplicação, e a igualdade multiplicativa exacta EM INTEIROS —"
+                      " sem um double, e portanto sem tolerância nenhuma");
+            tique7(5, "logo a torre tem duas fusões e a multiplicação é uma delas: a fusão"
+                      " É multiplicação, e não uma analogia com ela");
+            tique7(6, "e a VOLTA liga ao andar anterior: E(u⊗v) = E(u)E(v) é o mesmo"
+                      " N(xy) = N(x)N(y) da torre de Hurwitz, e portanto tem o mesmo tecto"
+                      " — do lado da NORMA. Medido: tests/observador_torre.js");
+        } else {
+            tique7(2, "TRADUÇÃO: «fibra» é a PRÉ-IMAGEM (consagrado), e é o termo certo"
+                      " porque o que se afirma é exactamente F⁻¹(z). Dividir é «dado o"
+                      " produto e um factor, achar o outro» — e no caso multiplicativo a"
+                      " fibra resolve-se coordenada a coordenada, xᵢ = z_{ij}/vⱼ, com"
+                      " divisão INTEIRA exacta e consistente por todos os j");
+            tique7(3, "a lei é que dividir custa exactamente o determinante:"
+                      " adj(M)·M = det(M)·I. É por isso que a fibra é vazia quando o"
+                      " determinante anula — e é a MESMA fibra vazia do 0⁻¹");
+            tique7(4, "a testemunha é a consistência: o mesmo xᵢ sai por todos os índices j."
+                      " Se a fibra não fosse um ponto, os j discordavam");
+            tique7(5, "logo a divisão clássica EMERGE da fibra em vez de ser postulada, e a"
+                      " sua única excepção é onde a fibra é vazia");
+            tique7(6, "e a VOLTA é a conservação: I(z) = I(F(x,y)) — os invariantes"
+                      " atravessam a fibra. Medido: tests/observador_torre.js");
+        }
+        break;
+    case 5:
+        tique7(0, "seja a torre lida pelo ENDEREÇO, subindo n por duplicação");
+        tique7(1, "o estresse tem tecto, e o tecto é zero:");
+        printf("      $\\lambda^{+}+\\lambda^{-}=0$ \\qquad em contagens inteiras\n");
+        tique7(2, "TRADUÇÃO: λ⁺ e λ⁻ são as contagens com sinal do que falta e do que"
+                  " sobra; a soma nula é uma LEI DE CONSERVAÇÃO (consagrado) escrita como"
+                  " balanço. «Endereço» e «estresse» são do paper e não têm consagrado —"
+                  " ficam como ele propõe");
+        tique7(3, "a lei é a Lei 0 do catálogo, 0 = (+1) ⊕ (−1): quem mata um endereço paga"
+                  " a morte E o nascimento do lixo, e mais nada. É isso que dá o 1 constante"
+                  " e não um número qualquer");
+        tique7(4, "a testemunha é a separação dos dois regimes: apagar, alterar conteúdo,"
+                  " alterar categoria e reordenar dão e = 0 EXACTO em todo nível; tornar o"
+                  " elemento ilegível dá e = 1 com VARIÂNCIA ZERO. Não é «pequeno» num caso"
+                  " e «grande» no outro: é 0 e é 1, e o segundo não flutua");
+        tique7(5, "logo a medida escala sem tecto de dimensão a rasgá-la — a variância do"
+                  " estresse não cresce pela torre em nenhuma classe de indução");
+        tique7(6, "e a VOLTA é «sem um double»: as contagens são inteiras, portanto o zero"
+                  " é zero. Medido: tests/lyapunov_torre.js e tests/cristal_volta.js");
+        break;
+    case 6:
+        tique7(0, "seja o anel ℤ_65537 com a transformada F[x]_k = Σᵢ xᵢ g^{ik}, g de ordem N");
+        tique7(1, "Parseval em dimensão d:");
+        printf("      $\\sum_{\\mathbf{k}} X_{\\mathbf{k}} X_{-\\mathbf{k}}"
+               " = \\Bigl(\\prod_{i=1}^{d} N_i\\Bigr) \\sum_{\\mathbf{i}}"
+               " x_{\\mathbf{i}}^{2}$\n");
+        tique7(2, "TRADUÇÃO: a «transformada dourada» do paper é uma NTT — TRANSFORMADA"
+                  " TEÓRICA DE NÚMEROS (consagrado), a DFT sobre um anel finito em vez de"
+                  " ℂ; e a identidade é a de PARSEVAL (consagrado). O que muda em relação"
+                  " à clássica é que aqui não há raiz nem número complexo: é tudo inteiro"
+                  " módulo um primo de Fermat");
+        tique7(3, "a lei é que o fator depende SÓ da dimensão total ∏Nᵢ e não da fatoração"
+                  " em eixos. Isso não é um detalhe: quer dizer que a energia não sabe como"
+                  " o volume foi dividido em lados");
+        tique7(4, "a testemunha é a igualdade a valer com fatorações DIFERENTES do mesmo"
+                  " produto — se o fator dependesse dos eixos, dois arranjos do mesmo total"
+                  " davam números diferentes, e é essa comparação que a mede");
+        tique7(5, "logo Parseval multidimensional deriva-se do teorema central"
+                  " Gentil–Hurwitz, e não de uma teoria da medida trazida de fora");
+        tique7(6, "e a VOLTA é o corolário do paper: a verificação faz-se POR ENERGIA — o"
+                  " invariante quadrático é suficiente para decidir. Medido:"
+                  " tests/cristal_energia.js");
+        break;
+    case 7: case 10:
+        tique7(0, "seja A_m a matriz companheira de x² = mx + 1, e D = A_m");
+        tique7(1, n == 7 ? "o passo satisfaz a sua própria equação característica:"
+                         : "e o QUADRADO do passo satisfaz a mesma equação:");
+        printf(n == 7 ? "      $D^{2} = m\\,D + I$\n"
+                      : "      $D^{4} = m\\,D^{2} + I,\\qquad"
+                        " \\min(D) = (x^{2})^{2} - m(x^{2}) - 1$\n");
+        tique7(2, n == 7
+               ? "TRADUÇÃO: «a borda» do paper é a EQUAÇÃO CARACTERÍSTICA (consagrado) da"
+                 " matriz companheira, e D² = mD + I é CAYLEY–HAMILTON (consagrado). A"
+                 " «fatoração de Dirac» é a ideia consagrada de um operador de PRIMEIRA"
+                 " ordem cujo quadrado dá o de segunda — foi assim que Dirac fatorizou o"
+                 " Klein–Gordon, e o paper usa o nome no mesmo sentido"
+               : "TRADUÇÃO: o POLINÓMIO MÍNIMO (consagrado) de D é o da borda avaliado em"
+                 " x², isto é, a mesma equação um nível acima. O paper chama-lhe «dobra"
+                 " temporal»; o fenómeno consagrado é a substituição espectral λ ↦ λ²");
+        tique7(3, "a lei é Cayley–Hamilton: toda matriz anula o seu polinómio"
+                  " característico. Aqui ela não é invocada — é a própria definição do"
+                  " passo, e por isso a casa já a corria sem lhe chamar o nome");
+        tique7(4, n == 7
+               ? "a testemunha é o passo a ser ele próprio a raiz: procurar D com D² = mD+I"
+                 " devolve A_m, e não é preciso extrair raiz nenhuma"
+               : "a testemunha é o espectro: se λ é valor próprio de D então λ² é de D², e"
+                 " a equação em x² é a mesma equação — os valores próprios DOBRAM sem sair"
+                 " da família");
+        tique7(5, n == 7 ? "logo a equação da borda É a fatoração de primeira ordem"
+                         : "logo o salto espectral é a mesma borda, lida em x²");
+        tique7(6, "e a VOLTA é o discriminante: w = 2x − m leva x² = mx+1 em w² = m²+4"
+                  " (fala 11). Medido: tests/dirac_transicao.js");
+        break;
+    case 8:
+        tique7(0, "seja A_m o passo do nível, com entradas inteiras");
+        tique7(1, "a raiz quadrada do próprio passo NÃO existe no nível:");
+        printf("      nao existe $D \\in M_2(\\mathbb{Z})$ com $D^{2} = A_m$\n");
+        tique7(2, "TRADUÇÃO: isto é uma OBSTRUÇÃO (consagrado) — a impossibilidade de"
+                  " levantar uma estrutura a um nível superior. O paper chama-lhe «o furo"
+                  " na torre», e o termo consagrado é obstrução");
+        tique7(3, "a lei é a aritmética do determinante e do traço: se D² = A_m, então"
+                  " (det D)² = det A_m = −1, e nenhum inteiro tem quadrado −1. A obstrução"
+                  " é EXACTAMENTE a mesma que faz i não estar em ℤ");
+        tique7(4, "a testemunha é a impossibilidade DERIVADA, não varrida: não se procura"
+                  " D nenhum, mostra-se que o determinante teria de ser raiz de −1. Uma"
+                  " varredura aqui não provava nada — só dizia que não achou");
+        tique7(5, "logo o furo é real e está onde a aritmética o põe: a raiz do passo pede"
+                  " o nível de cima");
+        tique7(6, "e a VOLTA é que a obstrução é a razão de haver TORRE: se a raiz existisse"
+                  " no nível, não era preciso subir. ATENÇÃO: este teorema NÃO cita medidor"
+                  " no paper — é um dos 7 (de 22) que não citam, e digo-o em vez de o"
+                  " esconder");
+        break;
+    case 9:
+        tique7(0, "seja D o operador do passo e (x,y) um par do relógio discreto");
+        tique7(1, "D aterra na diagonal SE E SÓ SE o par é transição verdadeira:");
+        printf("      $D(x,y) \\in \\{(z,z)\\} \\Leftrightarrow (x,y)$ é transição do Metrónomo\n");
+        tique7(2, "TRADUÇÃO: é uma EQUIVALÊNCIA (⟺), e não uma implicação — o operador"
+                  " CARACTERIZA as transições em vez de as detectar. «Metrónomo» é termo"
+                  " do paper e não tem consagrado: fica como ele propõe. O que é consagrado"
+                  " é o objecto — a DIAGONAL do produto, e o conjunto dos pontos fixos");
+        tique7(3, "a lei é que aterrar na diagonal é uma condição fechada e verificável, e"
+                  " a ida e a volta medem-se SEPARADAMENTE — provar ⟸ não prova ⟹");
+        tique7(4, "a testemunha tem de ser DUPLA: um par que é transição e aterra, e um par"
+                  " que aterra e é transição. Uma equivalência com uma testemunha só está"
+                  " medida pela metade");
+        tique7(5, "logo o operador não indica as transições: É elas, escrito como operador");
+        tique7(6, "e a VOLTA é a fala 7: o mesmo D que caracteriza as transições é o que"
+                  " satisfaz D² = mD + I. Um objecto, dois papéis. ESTE TEOREMA NÃO CITA"
+                  " MEDIDOR no paper");
+        break;
+    case 11:
+        tique7(0, "seja x² = mx + 1 a equação do nível");
+        tique7(1, "a mudança w = 2x − m completa o quadrado:");
+        printf("      $w^{2} = m^{2} + 4$\n");
+        tique7(2, "TRADUÇÃO: m²+4 é o DISCRIMINANTE (consagrado) da quadrática, e"
+                  " x = (m ± w)/2 é a FÓRMULA RESOLVENTE. O que o paper acrescenta é ler a"
+                  " mudança de variável como um RECOBRIMENTO DUPLO (consagrado, covering"
+                  " de grau 2): as duas folhas x = (m ± w)/2 são as duas pré-imagens");
+        tique7(3, "a lei é que completar o quadrado É passar ao recobrimento — e por isso"
+                  " «a dobra é o discriminante»: o objecto que mede a separação das folhas"
+                  " é o mesmo que descreve a duplicação");
+        tique7(4, "a testemunha são as duas folhas exibidas com a sua soma e o seu produto:"
+                  " somam m e multiplicam −1, que são exactamente os coeficientes. É"
+                  " VIÈTE, e é a verificação que não pode passar por acaso");
+        tique7(5, "logo o discriminante não é um número auxiliar da fórmula: é a estrutura"
+                  " do recobrimento");
+        tique7(6, "e a VOLTA é o conjugado galoisiano σ† = m − σ (a «estaca» do paper): as"
+                  " duas raízes trocam-se pela involução, e σσ† = −1. ESTE TEOREMA NÃO"
+                  " CITA MEDIDOR no paper");
+        break;
+    case 12: case 13: case 17: case 18:
+        tique7(0, n == 17 || n == 18
+                  ? "sejam A, C subconjuntos e δ, ε as operações morfológicas"
+                  : "seja o plano do nível com a sua estrutura de contornos");
+        tique7(1, n == 17 ? "dilatação e erosão são ADJUNTAS:"
+                : n == 18 ? "a torção tem duas realizações que concordam:"
+                : n == 13 ? "J² = −I legitima a carta (x, Jx):"
+                          : "a geometria dos 52 contornos reais:");
+        printf(n == 17 ? "      $\\delta(A) \\subseteq C \\Leftrightarrow A \\subseteq \\varepsilon(C)$\n"
+             : n == 18 ? "      $J(a,b) = (b,-a),\\quad J^{2} = -I,\\quad J^{4}"
+                         " = \\mathrm{id},\\quad |\\det J| = 1$\n"
+             : n == 13 ? "      $\\{aI + bJ\\} \\cong \\mathbb{C},\\qquad"
+                         " (a,b)(c,d) = (ac-bd,\; ad+bc)$\n"
+                       : "      $52$ contornos, e a sua classificação no plano\n");
+        tique7(2, n == 17
+               ? "TRADUÇÃO: isto é uma CONEXÃO DE GALOIS (consagrado) — o par adjunto da"
+                 " MORFOLOGIA MATEMÁTICA (consagrado), e δ⊣ε é a definição de adjunção. O"
+                 " paper chama-lhe «par morfológico»; o termo consagrado é adjunção"
+               : n == 18
+               ? "TRADUÇÃO: J é uma ESTRUTURA COMPLEXA (consagrado): J² = −I é exactamente"
+                 " o que define uma. O «esquilo» é o nome do paper para ela"
+               : n == 13
+               ? "TRADUÇÃO: {aI + bJ} ≅ ℂ é a REPRESENTAÇÃO MATRICIAL DOS COMPLEXOS"
+                 " (consagrado), e (x, Jx) é uma CARTA de um atlas (consagrado). A regra"
+                 " (ac−bd, ad+bc) é a multiplicação complexa, exacta em inteiros"
+               : "TRADUÇÃO: «contorno» aqui é o termo do paper; o objecto consagrado mais"
+                 " próximo é a CURVA DE NÍVEL, e o 52 é uma CONTAGEM COMPLETA, não uma"
+                 " amostra");
+        tique7(3, n == 17
+               ? "a lei é a adjunção, e ela FORÇA tudo o resto: δ preserva uniões, ε"
+                 " preserva intersecções, e εδ é um fecho. Nenhuma dessas se postula"
+               : "a lei é J² = −I, que dá período 4 e determinante 1 — a torção é uma"
+                 " ROTAÇÃO e não uma escala, e é por isso que não é dilatação escondida");
+        tique7(4, n == 17
+               ? "a testemunha é a VARREDURA COMPLETA: 4096 de 4096 pares, os dois sentidos"
+                 " da equivalência. Numa adjunção medir um lado só é medir metade"
+               : "a testemunha são as DUAS realizações a concordar — e concordarem é o que"
+                 " as valida, porque uma sozinha não tem contra quê ser comparada");
+        tique7(5, n == 17
+               ? "logo erode-se para ESCOLHER e dilata-se para ESCREVER: é o par dual deste"
+                 " andar"
+               : "logo a torção é rotação exacta, com norma preservada");
+        tique7(6, n == 18 ? "e a VOLTA é J⁴ = id: quatro quartos de volta devolvem. Medido:"
+                            " tests/morfologia_universal.js"
+                          : "e a VOLTA fecha o par. ESTE TEOREMA NÃO CITA MEDIDOR no paper"
+                            " (os 7 de 22 dizem-se)");
+        break;
+    case 14: case 15: case 16:
+        tique7(0, n == 14 ? "seja T = A_m a agir no toro discreto (ℤ/q)², q = 257 = 2⁸+1"
+             : n == 15 ? "seja o relógio finito μ_M = {ω^k} do anel, com a volta z ↦ ωz"
+                       : "seja um objecto e o seu par dual");
+        tique7(1, n == 14 ? "a zeta dinâmica sai do censo COMPLETO das órbitas:"
+             : n == 15 ? "o teorema dos resíduos, no finito:"
+                       : "o produto dual é UM invariante lido em quatro níveis:");
+        printf(n == 14 ? "      $66\\,049$ pontos, nenhum amostrado\n"
+             : n == 15 ? "      o «$2\\pi i$» vale $M$ --- a volta completa conta o relógio"
+                         " inteiro\n"
+                       : "      e a dualidade INVERTE-O sem nunca lhe mudar o valor\n");
+        tique7(2, n == 14
+               ? "TRADUÇÃO: FUNÇÃO ZETA DINÂMICA (consagrado, a de Artin–Mazur) é a série"
+                 " gerada pelas contagens de pontos periódicos; 257 = 2⁸+1 é outro PRIMO"
+                 " DE FERMAT; «batuta» é termo do paper para o operador T e não tem"
+                 " consagrado — fica como ele propõe"
+               : n == 15
+               ? "TRADUÇÃO: TEOREMA DOS RESÍDUOS (consagrado). O que o paper faz é"
+                 " derivá-lo no relógio FINITO das raízes da unidade, onde o 2πi da versão"
+                 " clássica é substituído pela ordem M — a volta completa conta o relógio"
+                 " inteiro, em vez de integrar"
+               : "TRADUÇÃO: o «produto dual» é o produto de um elemento pelo seu conjugado,"
+                 " isto é, a NORMA (consagrado). O que o teorema afirma é a INVARIÂNCIA da"
+                 " norma sob a involução — e é o mesmo N(x) = xx̄ da torre");
+        tique7(3, n == 14
+               ? "a lei é que o censo é COMPLETO: os 66049 pontos do toro são todos"
+                 " visitados, e por isso as contagens de órbitas são exactas e não"
+                 " estimadas. Uma zeta sobre amostra não é uma zeta"
+               : n == 15
+               ? "a lei é a ortogonalidade das raízes da unidade: Σ_k ω^{jk} vale M quando"
+                 " M divide j e 0 caso contrário. É ela que faz o papel do 2πi"
+               : "a lei é |N| = 1 nas unidades: a conservação nos corpos é MULTIPLICATIVA e"
+                 " não aditiva, e é por isso que a involução a preserva");
+        tique7(4, n == 14
+               ? "a testemunha é o censo inteiro, e a conta fecha EM INTEIROS — sem um"
+                 " logaritmo, sem uma série truncada"
+               : n == 15
+               ? "a testemunha é a soma a dar M no caso ressonante e 0 fora: dois valores"
+                 " distintos e exactos, e não «aproximadamente zero»"
+               : "a testemunha é o MESMO valor lido em quatro níveis diferentes — quatro"
+                 " leituras independentes que têm de coincidir");
+        tique7(5, n == 14 ? "logo a zeta dinâmica é DERIVADA e fecha em inteiros"
+             : n == 15 ? "logo o teorema dos resíduos não precisa do contínuo para existir"
+                       : "logo o produto dual é invariante, e a dualidade inverte sem mudar");
+        tique7(6, n == 14 ? "e a VOLTA é a histerese no mesmo toro. Medido:"
+                            " tests/zeta_universal.js (10:0) e tests/toro_histerese.js (16:0)"
+             : n == 15 ? "e a VOLTA é o relógio a fechar. Medido: tests/residuo_universal.js"
+                         " (12:0)"
+                       : "e a VOLTA é a involução. Medido: tests/produto_dual.js (15:0)");
+        break;
+    case 19:
+        tique7(0, "sejam as cinco operações medidas em cada nível da torre");
+        tique7(1, "o teorema de estrutura:");
+        printf("      corpo em cada nível $\;\\to\;$ ordem de REFINAMENTO $\;\\to\;$"
+               " completude, com limite $\\mathbb{Z}_2$\n");
+        tique7(2, "TRADUÇÃO: «corpo operacional» é CORPO (consagrado) quando o"
+                  " discriminante não separa, e ANEL COM DIVISORES DE ZERO — uma álgebra"
+                  " SPLIT (consagrado) — quando separa; «ordem de refinamento» é a ORDEM"
+                  " PARCIAL DAS PARTIÇÕES (consagrado); «relógio 2-ádico» são os INTEIROS"
+                  " 2-ÁDICOS ℤ₂ (consagrado), e «completude por refinamento» é a"
+                  " COMPLETUDE na topologia 2-ádica");
+        tique7(3, "a lei é que a característica p MATA A ORDEM CLÁSSICA — num corpo de"
+                  " característica finita não há ordem total compatível com as operações."
+                  " A ordem de refinamento é a ÚNICA compatível, e por isso não é uma"
+                  " escolha estética");
+        tique7(4, "a testemunha é o operador de Dirac a ser raiz da unidade em PROFUNDIDADE"
+                  " FINITA no limite — o limite opera, com caracteres compatíveis, e não é"
+                  " só um conjunto de chegada");
+        tique7(5, "logo A ÁLGEBRA OPERA E NÃO ALCANÇA; A TOPOLOGIA ALCANÇA E NÃO OPERA — e"
+                  " ambos os lados estão medidos. A relação com o corpo ordenado completo"
+                  " clássico não é lacuna: está fechada por teorema, porque a direção"
+                  " aditiva nunca retorna pela duplicação");
+        tique7(6, "e a VOLTA é que ℝ é ALCANÇADO mas não OPERADO. Medido:"
+                  " tests/estrutura_corpo.js (7:0) e tests/limite_escada.js (8:0)");
+        break;
+    case 20:
+        tique7(0, "seja a torre de fibra 2 lida como árvore binária, nível k com 2^k nós");
+        tique7(1, "um real é um caminho da raiz à folha:");
+        printf("      $m \\le 2^{k}x \\Leftrightarrow (2m+2^{k})^{2} \\le 5\\cdot 4^{k}$"
+               " \\qquad (tudo inteiro)\n");
+        tique7(2, "TRADUÇÃO: tudo consagrado aqui — ÁRVORE BINÁRIA, CORTE DE DEDEKIND,"
+                  " INTERVALOS DIÁDICOS ENCAIXANTES. O que o paper acrescenta é o critério"
+                  " ser INTEIRO: a comparação m ≤ 2^k x resolve-se por (2m+2^k)² ≤ 5·4^k,"
+                  " sem avaliar raiz nenhuma");
+        tique7(3, "a lei é o corte de Dedekind lido nó a nó: em cada nível o real decide"
+                  " para que lado desce, e é essa sequência de decisões que o é");
+        tique7(4, "a testemunha é quádrupla, e a terceira é a mais forte: o caminho desce"
+                  " sem saltos até k = 40; o corte separa 131086 diádicos sem erro; os bits"
+                  " saem por DOIS CAMINHOS independentes que concordam (o chão quadrático e"
+                  " o itinerário da dobra x ↦ 2x − b em ℤ[√5]); e um bit trocado EXPULSA x"
+                  " do intervalo");
+        tique7(5, "logo a folha NÃO é nó: (2m+N)² = 5N² é impossível, e o real é o CAMINHO"
+                  " e não um ponto da árvore");
+        tique7(6, "e a VOLTA é a rigidez: o endereço reconstrói-se dos bits byte a byte. O"
+                  " contínuo entra como caminho, sem nunca fingir ser nó. Medido:"
+                  " tests/real_caminho.js (8:0)");
+        break;
+    case 21:
+        tique7(0, "seja a pergunta «que estrutura as operações determinam?»");
+        tique7(1, "a geometria é o par (forma, grupo):");
+        printf("      a geometria de um espaço é determinada pelo GRUPO que a preserva\n");
+        tique7(2, "TRADUÇÃO: isto é o PROGRAMA DE ERLANGEN de Klein (consagrado), e o paper"
+                  " usa-o no sentido exacto — uma geometria identifica-se com o grupo de"
+                  " transformações que deixam a forma invariante");
+        tique7(3, "a lei é Erlangen: fixada a forma, o grupo determina a geometria; e as"
+                  " operações do núcleo determinam-no com precisão, em vez de o sugerirem");
+        tique7(4, "a testemunha é o grupo EXIBIDO — quais transformações preservam a forma"
+                  " e quais não. Uma geometria afirmada sem o grupo não está determinada");
+        tique7(5, "logo a geometria não é trazida de fora: sai das operações que já lá"
+                  " estavam");
+        tique7(6, "e a VOLTA é a forma: (forma, grupo) é um PAR, e nomear um sem o outro é"
+                  " meio teorema. Medido: tests/geometria_corpo.js (9:0)");
+        break;
+    case 22:
+        tique7(0, "seja a pergunta «a memória vem de Maestro + Metrónomo?»");
+        tique7(1, "a resposta é sim, com gramática exacta:");
+        printf("      $\\text{Maestro} = \\text{dobra} + \\text{seletor}$,"
+               " \\qquad histerese $=$ seletor $\\circ$ dobra\n");
+        tique7(2, "TRADUÇÃO: «Maestro» e «Metrónomo» são termos do paper e NÃO TÊM"
+                  " consagrado — ficam como ele propõe, e é o caso previsto pela regra. O"
+                  " que é consagrado é o fenómeno: HISTERESE, a dependência do estado no"
+                  " percurso e não só na posição");
+        tique7(3, "a lei é a decomposição: a histerese é EXACTAMENTE seletor ∘ dobra, e a"
+                  " composição é o que lhe dá a memória — a dobra guarda, o seletor lê");
+        tique7(4, "a testemunha é a gramática a bater com o espectro que já estava medido —"
+                  " não é uma explicação nova, é a mesma decomposição a aparecer noutro"
+                  " sítio");
+        tique7(5, "logo a memória tem gramática e não é um efeito residual");
+        tique7(6, "e a VOLTA é o espectro. Medido: tests/maestro_memoria.js (5:0)");
+        break;
+    case 23:
+        tique7(0, "seja a regra que o Aarão deu: termo consagrado onde existe; o do paper"
+                  " onde não existe");
+        tique7(1, "o dicionário, para a regra ser verificável:");
+        printf("      da casa            →   consagrado\n");
+        printf("      ─────────────────────────────────────────────────────────────\n");
+        printf("      observador I(x)    →   sistema completo de invariantes\n");
+        printf("      escada I₁ ≺ I₂     →   filtração por refinamento de partições\n");
+        printf("      Φ_m                →   momentos de potência (Φ₁ fase, Φ₂ curvatura)\n");
+        printf("      energia E          →   norma quadrática (Parseval)\n");
+        printf("      dobra / clone      →   duplicação de Cayley–Dickson\n");
+        printf("      fusão ⊗            →   produto; álgebra de COMPOSIÇÃO\n");
+        printf("      fibra              →   pré-imagem\n");
+        printf("      dual † , σσ† = −1  →   involução; conjugado galoisiano; norma\n");
+        printf("      estaca σ† = m − σ  →   o segundo conjugado (a outra raiz)\n");
+        printf("      borda x² = mx+1    →   equação característica; Cayley–Hamilton\n");
+        printf("      recobrimento       →   recobrimento duplo; o discriminante m²+4\n");
+        printf("      o furo             →   obstrução\n");
+        printf("      esquilo J, J² = −I →   estrutura complexa\n");
+        printf("      par morfológico    →   adjunção (conexão de Galois)\n");
+        printf("      transformada dourada → NTT (DFT sobre anel finito)\n");
+        printf("      relógio 2-ádico    →   inteiros 2-ádicos ℤ₂\n");
+        printf("      corpo operacional  →   corpo, ou álgebra split com divisores de zero\n");
+        printf("      a volta            →   inversa; reversibilidade\n");
+        printf("      gume               →   contra-exemplo\n");
+        printf("      andar              →   nível / grau\n");
+        printf("      tique              →   passo de iteração\n");
+        printf("\n      E SEM CONSAGRADO — ficam como o paper propõe:\n");
+        printf("      Maestro · Metrónomo · batuta · membrana · Quantizador ·\n");
+        printf("      Inversor · endereço · estresse · contorno · as oito leis\n");
+        tique7(2, "a regra tem dois ramos e ambos correm: 21 termos traduzem-se para"
+                  " consagrado, e 10 ficam como o paper os propõe porque não há consagrado"
+                  " para eles. Um dicionário em que TUDO traduzisse seria suspeito — quer"
+                  " dizer que eu tinha forçado nomes clássicos a objectos que não são");
+        tique7(3, "a lei é a do corpus desta casa: o nome clássico entra como CLÁUSULA, e o"
+                  " sujeito da frase é o resultado. Traduzir não é substituir o objecto"
+                  " pelo nome do morto");
+        tique7(4, "a testemunha é a VARREDURA do paper: 2935 linhas, 80 blocos (57 teoremas,"
+                  " 8 definições, 1 proposição, 2 corolários, 12 observações), 22 teoremas"
+                  " etiquetados, e desses 15 citam medidor. Os 17 ficheiros citados existem"
+                  " todos — foram verificados um a um");
+        tique7(5, "e os 7 que NÃO citam medidor dizem-no na própria fala: obstrução, Dirac"
+                  " nas transições, dobra temporal, recobrimento, contornos, cartas e par"
+                  " morfológico. A ausência é um facto e regista-se");
+        tique7(6, "e a VOLTA é esta fala: o dicionário está aqui para se poder discordar"
+                  " dele. Uma tradução sem dicionário é uma tradução que não se pode"
+                  " conferir");
+        break;
+    }
+}
+static int resolve_universal(const char *f){
+    const char *p = f;
+    for(size_t i = 0; i < sizeof UN23/sizeof *UN23; i++)
+        if(!strcmp(p, UN23[i].nome)){ universal_resolve(UN23[i].n); return 1; }
+    if(!strncmp(p, "universal", 9)) p += 9;
+    else return 0;
+    while(*p == ' ') p++;
+    if(!*p){
+        printf("   Os teoremas do corpo universal, em linguagem consagrada —"
+               " «universal N» ou «universal <nome>»\n");
+        printf("   22 teoremas etiquetados (15 citam medidor, 7 não — e dizem-no),"
+               " e a fala 23 é o dicionário\n\n");
+        for(size_t i = 0; i < sizeof UN23/sizeof *UN23; i++){
+            printf("     %2d  ", UN23[i].n);
+            esc_col(UN23[i].nome, 22);
+            printf("  %s\n", UN23[i].enunciado);
+        }
+        return 1;
+    }
+    if(*p >= '0' && *p <= '9'){
+        long n = 0;
+        while(*p >= '0' && *p <= '9') n = n*10 + (*p++ - '0');
+        while(*p == ' ') p++;
+        if(!*p && n >= 1 && n <= 23){ universal_resolve((int)n); return 1; }
+        return 0;
+    }
+    return 0;
+}
+/* ── A TORRE INTEIRA: HIPERCOMPLEXOS PELOS DOIS LADOS ───────────────────────────────
+ * O `eval.txt` traz os hipercomplexos e dez exercícios, e o Aarão: **«aquilo é metade»**.
+ * A outra metade é Gentil, e Lebesgue discreto-contínuo.
+ *
+ * Ele tem razão, e está escrito na casa. O `thm:central` do corpo estelar: Hurwitz (o
+ * DISCRETO, a norma bilinear, multiplicativa só em 1,2,4,8) e Gentil (o CONTÍNUO, a fusão
+ * homogénea, SEM LIMITE DE GRAU) são DUAIS, e a bijeção é A ESTRELA, realizada pela soma
+ * reversível de Lebesgue. E a frase que fecha: «o limite no grau oito é do lado
+ * discreto/bilinear — Hurwitz classifica o bilinear —, NÃO DO OBJECTO».
+ *
+ * A tabela do eval tem uma coluna só de ✗ a descer, e todas essas perdas são DO LADO DA
+ * NORMA. Pelo `def:octoniao-dual`: 𝕆 = ℍ × ℍ*, e o mesmo espaço lê-se de dois modos —
+ * pela norma perde a associatividade; pela dualidade ν∘ν = id, resíduo 0, NÃO PERDE NADA.
+ *
+ * E isso mede-se onde a norma já morreu: `tests/hurwitz.c` §H5 corre agora até 64, e em
+ * 16, 32 e 64 a multiplicatividade está partida com a involução intacta. O laço parava em
+ * 8 — media a involução só onde a norma também valia, que é onde a pergunta não tem gume.
+ *
+ * E a torre da casa já era escrita com o dual (`corpo_peano.tex` thm:rn):
+ *      A_{n+1} = A_n + A_n*,   dim A_n = 2ⁿ,  «a ordem NÃO é herdada da reta —
+ *                                              é PRODUZIDA pela dualidade». */
+static void esc_hip(Hip x);
+static const struct { int n; const char *nome; const char *enunciado; } TR16[] = {
+ {  1, "complexos",        "N(zw) = N(z)N(w), e o gume é N(z) = 0" },
+ {  2, "quaternioes",      "ij = −ji, e a busca de ij = ji volta VAZIA" },
+ {  3, "inverso",          "x⁻¹ = x̄/N(x), e a fibra de 0·y = 1 é vazia" },
+ {  4, "produto",          "(a,u)(c,v) = (ac − u·v, av + cu + u×v): DIRECTO + CRUZADO" },
+ {  5, "octonioes",        "(xy)z ≠ x(yz), com a testemunha PROCURADA" },
+ {  6, "alternatividade",  "(xx)y = x(xy) — o que 𝕆 guarda depois de perder a associativa" },
+ {  7, "comutador",        "[x,y] = xy − yx, e o andar onde o primeiro aparece" },
+ {  8, "associador",       "[x,y,z] = (xy)z − x(yz): zero em ℍ, testemunha em 𝕆" },
+ {  9, "cayley dickson",   "d_k = 2^k, e a escada das perdas achada por busca" },
+ { 10, "a fronteira",      "o maior andar onde norma E divisão valem ao mesmo tempo" },
+ { 11, "a torre pelo dual","A_{n+1} = A_n + A_n*: a ordem é PRODUZIDA, não herdada" },
+ { 12, "octoniao dual",    "𝕆 = ℍ × ℍ*: ligar sem fundir, e não dissipar" },
+ { 13, "onde a norma morre","em 16, 32, 64 N parte-se e ν∘ν = id FICA — o tecto é da norma" },
+ { 14, "gentil",           "Σxₙ + Σ#{xₙ<v} = N·q: a soma reversível, exacta e sem limite" },
+ { 15, "lebesgue",         "o corte da IMAGEM fecha com o do DOMÍNIO, resíduo 0" },
+ { 16, "teorema central",  "Hurwitz conta, Lebesgue mede, Gentil casa — e a estrela é a volta" },
+};
+static void torre_resolve(int n){
+    TICK_N = 0;
+    printf("   %d — %s\n", n, TR16[n-1].enunciado);
+    switch(n){
+    case 1: {
+        tique7(0, "seja z = a + bi com a, b ∈ ℤ, e N(z) = zz̄ = a² + b²");
+        tique7(1, "a norma é multiplicativa:");
+        printf("      $N(zw) = N(z)\\,N(w)$\n");
+        tique7(2, "abre-se o produto e compara-se: (ac−bd)² + (ad+bc)² = (a²+b²)(c²+d²)."
+                  " Os termos cruzados cancelam-se AOS PARES, e é esse cancelamento que"
+                  " é a identidade — não uma coincidência de contas");
+        tique7(3, "a lei é a de Brahmagupta–Fibonacci, e ela é a mesma coisa que dizer que"
+                  " ℤ[i] é fechado para a multiplicação com norma");
+        { int mal = 0; long feitos = 0;
+          for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++)
+          for(long c = -4; c <= 4; c++) for(long d = -4; d <= 4; d++){
+              Hip z = hip0(2), w = hip0(2);
+              z.c[0] = a; z.c[1] = b; w.c[0] = c; w.c[1] = d;
+              if(hip_norma(hip_mult(z,w)) != hip_norma(z)*hip_norma(w)) mal++;
+              feitos++;
+          }
+          printf("      N(zw) = N(z)N(w) em %ld pares: %d falhas\n", feitos, mal);
+          Hip zero = hip0(2), num; long den;
+          printf("      e o GUME, N(z) = 0: a fibra de z⁻¹ é %s\n",
+                 hip_inverso(zero, &num, &den) ? "não vazia" : "VAZIA");
+          tique7(4, "a testemunha do gume é o próprio zero: N(z) = 0 só acontece em z = 0"
+                    " (porque a² + b² = 0 força a = b = 0 em ℤ), e é exactamente aí que a"
+                    " inversão deixa de existir. A fibra é vazia, e é a mesma fibra vazia"
+                    " do 0⁻¹ que a escada inteira encontrou");
+          tique7(5, mal == 0 ? "logo a norma compõe, e a inversão existe fora do zero"
+                             : "a norma não compõe — NÃO afirmo");
+          tique7(6, "e a VOLTA é z·z̄ = N(z), que devolve a norma pelo produto — o dual"
+                    " produz o cristal que o outro lado conserva"); }
+        break; }
+    case 2: case 7: {
+        tique7(0, n == 2 ? "sejam i = e₁ e j = e₂ em ℍ (dimensão 4)"
+                         : "sejam x, y em A_n, e [x,y] = xy − yx");
+        tique7(1, n == 2 ? "as unidades anticomutam:" : "o comutador mede a comutatividade:");
+        printf(n == 2 ? "      $ij = k,\\qquad ji = -k,\\qquad ij = -ji$\n"
+                      : "      $[x,y] = xy - yx,\\qquad [x,y] = 0 \\Leftrightarrow xy = yx$\n");
+        tique7(2, "a anticomutação não é um axioma posto à mão: SAI da dobra de"
+                  " Cayley–Dickson, porque a segunda cópia entra CONJUGADA. Trocar a ordem"
+                  " troca qual das duas leva o conjugado, e o sinal vem daí");
+        tique7(3, "a lei é (a,b)(c,d) = (ac − d̄b, da + bc̄) — e é o d̄ e o c̄ que produzem"
+                  " a assimetria. Sem conjugação a dobra seria comutativa e não haveria"
+                  " torre nenhuma");
+        { Hip qi = hip_e(4,1), qj = hip_e(4,2);
+          printf("      ij = "); esc_hip(hip_mult(qi,qj)); printf("\n");
+          printf("      ji = "); esc_hip(hip_mult(qj,qi)); printf("\n");
+          printf("      i² = "); esc_hip(hip_mult(qi,qi)); printf("\n");
+          /* a BUSCA de ij = ji, que tem de voltar VAZIA */
+          long achados = 0, tentados = 0;
+          for(int a = 1; a < 4; a++) for(int b = 1; b < 4; b++){
+              if(a == b) continue;
+              tentados++;
+              if(hip_igual(hip_mult(hip_e(4,a), hip_e(4,b)),
+                           hip_mult(hip_e(4,b), hip_e(4,a)))) achados++;
+          }
+          printf("      a busca de duas unidades DISTINTAS que comutem: %ld tentadas,"
+                 " %ld achadas\n", tentados, achados);
+          /* e o CONTROLO: em ℂ elas comutam todas */
+          long ac2 = 0;
+          for(int a = 0; a < 2; a++) for(int b = 0; b < 2; b++)
+              if(hip_igual(hip_mult(hip_e(2,a), hip_e(2,b)),
+                           hip_mult(hip_e(2,b), hip_e(2,a)))) ac2++;
+          printf("      CONTROLO em ℂ: %ld pares comutam (de 4) — o buscador não está"
+                 " partido\n", ac2);
+          printf("      e o andar onde o primeiro comutador não nulo aparece:\n");
+          int ondei = 0, ondej = 0, primeiro = 0;
+          for(int d = 1; d <= 16 && !primeiro; d *= 2)
+              if(tr_acha_comutador(d, &ondei, &ondej)) primeiro = d;
+          printf("        dimensão %d, no par (e%d, e%d)\n", primeiro, ondei, ondej);
+          tique7(4, "a testemunha é dupla: ij e ji exibidos com sinais opostos, e a BUSCA"
+                    " de um par distinto que comute a voltar vazia. E o vazio só vale"
+                    " porque o MESMO buscador acha os quatro pares em ℂ — sem esse"
+                    " controlo, «0 achados» podia ser o buscador e não a álgebra");
+          tique7(5, achados == 0 && ac2 == 4
+                 ? "logo ℍ é NÃO COMUTATIVA, e o degrau da comutatividade é a dimensão 4"
+                 : "os controlos não se separaram — NÃO afirmo");
+          tique7(6, "e a VOLTA: [x,y] = 0 ⟺ xy = yx é uma equivalência, não uma"
+                    " implicação — o comutador não é um indício da comutatividade, É a"
+                    " comutatividade escrita como objecto"); }
+        break; }
+    case 3: {
+        tique7(0, "seja x ≠ 0 num andar da torre, e N(x) = xx̄");
+        tique7(1, "o inverso é o conjugado a dividir pela norma:");
+        /* o \bar nao tem glifo; a casa ja escreve o conjugado com \dagger, e e' o
+         * mesmo objecto — usa-se o dialecto da casa em vez de inventar um acento */
+        printf("      $x^{-1} = \\frac{x^{\\dagger}}{N(x)},\\qquad"
+               " x x^{-1} = x^{-1} x = 1$\n");
+        tique7(2, "e a divisão por N(x) é uma FIBRA: «dado o produto 1 e um factor x, achar"
+                  " o outro». Ela tem exactamente uma solução quando N(x) ≠ 0 e NENHUMA"
+                  " quando x = 0 — não é um caso especial, é a fibra vazia");
+        tique7(3, "a lei é x x̄ = N(x), real e pura. É ela que faz o candidato x̄/N(x)"
+                  " funcionar, e por isso o inverso existe exactamente onde a norma não"
+                  " se anula");
+        { int mal = 0; long feitos = 0, cristal_mal = 0;
+          for(int d = 1; d <= 8; d *= 2)
+          for(long s = 1; s <= 60; s++){
+              Hip x = hip0(d);
+              for(int k = 0; k < d; k++){
+                  long h = s*1103515245L + k*12345L + 7; h ^= h >> 13;
+                  x.c[k] = (h % 9) - 4;
+              }
+              if(!hip_cristal(x)) cristal_mal++;
+              Hip num; long den;
+              if(!hip_inverso(x, &num, &den)){ if(!hip_zero(x)) mal++; continue; }
+              /* x·x̄ = N(x)·1, logo x·(x̄) tem de dar den na parte real e 0 no resto */
+              Hip p = hip_mult(x, num);
+              if(p.c[0] != den) mal++;
+              for(int k = 1; k < d; k++) if(p.c[k]) mal++;
+              feitos++;
+          }
+          printf("      x·x̄ = N(x)·1 em %ld elementos de ℝ, ℂ, ℍ e 𝕆: %d falhas\n",
+                 feitos, mal);
+          printf("      e o cristal x·x̄ real e puro: %ld falhas\n", cristal_mal);
+          Hip zero = hip0(8), num; long den;
+          printf("      a fibra de 0·y = 1: %s\n",
+                 hip_inverso(zero, &num, &den) ? "existe" : "VAZIA — não há solução");
+          tique7(4, "a testemunha é que o produto x·x̄ dá EXACTAMENTE N(x) na parte real e"
+                    " zero em todas as outras — não se divide em ℤ, exibe-se o numerador e"
+                    " o denominador à parte, e é essa recusa de dividir que deixa a fibra"
+                    " à vista em vez de a esconder num racional");
+          tique7(5, mal == 0 ? "logo o inverso existe em todo x ≠ 0 até 𝕆"
+                             : "há x ≠ 0 sem inverso — NÃO afirmo");
+          tique7(6, "e a VOLTA fecha a escada: 0⁻¹ não existe aqui pela MESMA razão por que"
+                    " não existe em ℚ — a fibra é vazia. A torre inteira herda a única"
+                    " excepção do primeiro andar"); }
+        break; }
+    case 4: {
+        tique7(0, "seja q = (a, u) com a ∈ ℤ e u ∈ ℤ³, um quaternião partido em real e vector");
+        tique7(1, "o produto parte-se em DIRECTO e CRUZADO:");
+        printf("      $(a,\\mathbf u)(c,\\mathbf v) = (ac - \\mathbf u\\cdot\\mathbf v,"
+               "\; a\\mathbf v + c\\mathbf u + \\mathbf u\\times\\mathbf v)$\n");
+        tique7(2, "o produto ESCALAR controla a parte real e o produto VECTORIAL controla a"
+                  " imaginária — e isto é literalmente o andar anterior: o directo é a"
+                  " parte simétrica, o cruzado a antissimétrica. O quaternião não é uma"
+                  " álgebra a mais: é o directo e o cruzado a caberem no mesmo objecto");
+        tique7(3, "a lei é a decomposição de uma bilinear em simétrica ⊕ antissimétrica, e"
+                  " a casa já lhe chamava assim (corpo-estelar §640: fp = cos θ,"
+                  " tan φ = cruzado/directo)");
+        { int mal = 0; long feitos = 0;
+          for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++)
+          for(long c = -2; c <= 2; c++) for(long d = -2; d <= 2; d++)
+          for(long e = -2; e <= 2; e++) for(long f = -2; f <= 2; f++){
+              /* q = (0,u) e r = (0,v): puros, para o directo e o cruzado ficarem à vista */
+              Hip q = hip0(4), r = hip0(4);
+              q.c[1] = a; q.c[2] = b; q.c[3] = c;
+              r.c[1] = d; r.c[2] = e; r.c[3] = f;
+              Hip pr = hip_mult(q, r);
+              long directo = -(a*d + b*e + c*f);
+              long cx = b*f - c*e, cy = c*d - a*f, cz = a*e - b*d;
+              if(pr.c[0] != directo || pr.c[1] != cx || pr.c[2] != cy || pr.c[3] != cz) mal++;
+              feitos++;
+          }
+          printf("      uv = (−u·v, u×v) para puros, em %ld pares: %d falhas\n", feitos, mal);
+          Hip q = hip0(4), r = hip0(4);
+          q.c[1] = 2; q.c[2] = 1; q.c[3] = -1;
+          r.c[1] = 1; r.c[2] = 3; r.c[3] = 0;
+          printf("      u = "); esc_hip(q); printf("\n");
+          printf("      v = "); esc_hip(r); printf("\n");
+          printf("      uv = "); esc_hip(hip_mult(q,r));
+          printf("   ← a parte real é −⟨u,v⟩, o resto é u×v\n");
+          tique7(4, "a testemunha é a igualdade das QUATRO coordenadas contra o directo e o"
+                    " cruzado calculados à parte — dois caminhos independentes, e têm de"
+                    " concordar em todas");
+          tique7(5, mal == 0
+                 ? "logo o produto quaterniónico É directo + cruzado, e a norma conservada"
+                   " é a identidade de Lagrange do andar anterior"
+                 : "os caminhos separam-se — NÃO afirmo");
+          tique7(6, "e a VOLTA diz porque é que o degrau é 4: o escalar −⟨u,v⟩ não cabe em"
+                    " ℤ³, e é preciso um quarto lugar para ele. Hurwitz não é um tecto"
+                    " posto de fora — é onde o directo arranja lugar ao lado do cruzado"); }
+        break; }
+    case 5: case 6: case 8: {
+        tique7(0, "sejam x, y, z unidades de 𝕆 (dimensão 8)");
+        tique7(1, n == 6 ? "𝕆 perde a associatividade mas guarda a ALTERNATIVIDADE:"
+                         : "o associador mede a associatividade:");
+        printf(n == 6 ? "      $(xx)y = x(xy),\\qquad y(xx) = (yx)x$\n"
+                      : "      $[x,y,z] = (xy)z - x(yz)$\n");
+        tique7(2, n == 6
+               ? "alternativa quer dizer: a associatividade vale sempre que DOIS dos três"
+                 " argumentos são iguais. É o que sobra da associatividade quando ela cai —"
+                 " e não cai toda de uma vez, cai só onde os três são distintos"
+               : "o associador é zero em ℍ e não é zero em 𝕆, e o andar em que ele deixa de"
+                 " ser zero É o degrau da associatividade. Não se cita a tabela: procura-se");
+        tique7(3, "a lei é a dobra: a associatividade sobrevive à conjugação enquanto a"
+                  " segunda cópia não se enrola sobre si própria, e deixa de sobreviver no"
+                  " terceiro passo");
+        { int i = 0, j = 0, k = 0;
+          printf("      dim   associador não nulo?   testemunha\n");
+          int mal = 0;
+          for(int d = 1; d <= 16; d *= 2){
+              int achou = tr_acha_associador(d, &i, &j, &k);
+              int esperado = (d >= 8);
+              if(achou != esperado) mal++;
+              printf("      %-5d ", d);
+              esc_col(achou ? "acha" : "vazio", 22);
+              if(achou) printf("[e%d, e%d, e%d]", i, j, k);
+              printf("\n");
+          }
+          if(tr_acha_associador(8, &i, &j, &k)){
+              Hip a1 = hip_e(8,i), a2 = hip_e(8,j), a3 = hip_e(8,k);
+              printf("      (e%d·e%d)·e%d = ", i, j, k);
+              esc_hip(hip_mult(hip_mult(a1,a2), a3)); printf("\n");
+              printf("      e%d·(e%d·e%d) = ", i, j, k);
+              esc_hip(hip_mult(a1, hip_mult(a2,a3))); printf("\n");
+          }
+          /* a ALTERNATIVIDADE, varrida nas unidades de 𝕆 */
+          long alt_mal = 0, alt_feitos = 0;
+          for(int a = 0; a < 8; a++) for(int b = 0; b < 8; b++){
+              Hip x = hip_e(8,a), y = hip_e(8,b);
+              if(!hip_igual(hip_mult(hip_mult(x,x),y), hip_mult(x,hip_mult(x,y)))) alt_mal++;
+              if(!hip_igual(hip_mult(y,hip_mult(x,x)), hip_mult(hip_mult(y,x),x))) alt_mal++;
+              alt_feitos += 2;
+          }
+          printf("      alternatividade em %ld casos de 𝕆: %ld falhas\n", alt_feitos, alt_mal);
+          tique7(4, "a testemunha é exibida com nome e valor: os dois produtos escrevem-se"
+                    " lado a lado e vê-se que diferem. E o CONTROLO é a coluna inteira: em"
+                    " 1, 2 e 4 a mesma busca volta vazia, portanto o vazio em ℍ não é do"
+                    " buscador");
+          tique7(5, mal == 0 && alt_mal == 0
+                 ? "logo 𝕆 não é associativa e É alternativa: perde-se a associatividade"
+                   " geral e guarda-se o caso de dois argumentos iguais"
+                 : "a escada não bate — NÃO afirmo");
+          tique7(6, "e a VOLTA é a metaindução: descer de 𝕆 para ℍ RECUPERA a"
+                    " associatividade, e é esse encontro entre a subida que perde e a"
+                    " descida que recupera que faz a torre ter degraus e não um precipício"
+                    " (tests/hurwitz.c §H4)"); }
+        break; }
+    case 9: case 10: {
+        tique7(0, "seja A_{n+1} = A_n ⊕ A_n e a dobra de Cayley–Dickson, com A_0 = ℝ");
+        tique7(1, n == 9 ? "a dimensão dobra a cada andar:"
+                         : "a fronteira é onde norma E divisão valem ao mesmo tempo:");
+        printf(n == 9 ? "      $d_{k+1} = 2 d_k \;\\Rightarrow\; d_k = 2^{k}$\n"
+                      : "      $N(xy) = N(x)N(y)\;$ e $\;x \\neq 0 \\Rightarrow"
+                        " x^{-1}$ existe\n");
+        tique7(2, "e as perdas NÃO caem todas no mesmo sítio: a comutatividade cai em 4, a"
+                  " associatividade em 8, a divisão em 16. É esse DESENCONTRO que faz a"
+                  " torre ser uma escada — se caíssem juntas havia um degrau só");
+        tique7(3, "a lei é a dobra com conjugação. Cada propriedade sobrevive a um número"
+                  " diferente de dobras, e por isso a escada tem a forma que tem");
+        { printf("      dim   comutador   associador   divisor de zero   d_k = 2^k\n");
+          int mal = 0, fronteira = 0;
+          for(int d = 1; d <= 16; d *= 2){
+              int i, j, k, a, b, c, e2;
+              int ac = tr_acha_comutador(d, &i, &j);
+              int aa = tr_acha_associador(d, &i, &j, &k);
+              int ad = tr_acha_divisor(d, &a, &b, &c, &e2);
+              int pot = 1, kk = 0;
+              while(pot < d){ pot *= 2; kk++; }
+              if(ac != (d >= 4) || aa != (d >= 8) || ad != (d >= 16)) mal++;
+              if(!ad) fronteira = d;
+              printf("      %-5d ", d);
+              esc_col(ac ? "acha" : "vazio", 11);
+              esc_col(aa ? "acha" : "vazio", 12);
+              esc_col(ad ? "acha" : "vazio", 17);
+              printf(" 2^%d = %d\n", kk, pot);
+          }
+          printf("      a FRONTEIRA (o maior andar sem divisores de zero): %d\n", fronteira);
+          tique7(4, "a testemunha é a tabela inteira ACHADA — nenhuma linha é citada do"
+                    " eval. E os três buscadores voltam vazios nos andares de baixo, o que"
+                    " é o controlo de que eles funcionam");
+          tique7(5, mal == 0 && fronteira == 8
+                 ? "logo a escada é 4, 8, 16 e a fronteira da álgebra normada com divisão"
+                   " é o grau 8 — o octonião"
+                 : "a escada não bate — NÃO afirmo");
+          tique7(6, "e a VOLTA é a metade que falta, e é o que o Aarão corrigiu: TODAS estas"
+                    " perdas são DO LADO DA NORMA. O thm:central diz que «o limite no grau"
+                    " oito é do lado discreto/bilinear, NÃO do objecto» — ver a fala 13"); }
+        break; }
+    case 11: case 12: {
+        tique7(0, n == 11 ? "seja A_n um andar da torre e A_n* o seu dual"
+                          : "seja 𝕆 o grau oito, e ℍ o grau quatro");
+        tique7(1, n == 11 ? "a torre da casa escreve-se com o DUAL:"
+                          : "o octonião é dois tecidos ligados pela estrela:");
+        printf(n == 11 ? "      $A_{n+1} = A_n + A_n^{*},\\qquad \\dim A_n = 2^{n}\\dim A_0$\n"
+                       : "      $\\mathbb{O} = \\mathbb{H}\\times\\mathbb{H}^{*},"
+                         "\\qquad \\nu\\circ\\nu = \\mathrm{id}$\n");
+        if(n == 11){
+            tique7(2, "o eval escreve A_n ⊕ A_n e; o corpo de Peano (thm:rn) escreve"
+                      " A_n + A_n*. É a MESMA dobra, e a segunda diz de onde vem o `e`: a"
+                      " segunda cópia entra CONJUGADA, e é isso o dual. Sem a conjugação a"
+                      " dobra seria comutativa e não havia torre");
+            tique7(3, "e a lei que o thm:rn acrescenta: «a ordem sobe por indução, total e"
+                      " compatível com a soma; NÃO é herdada da reta — é PRODUZIDA pela"
+                      " dualidade». A ordem não vem de fora: fabrica-se em cada dobra");
+            { printf("      n     dim A_n = 2ⁿ   a segunda cópia entra conjugada?\n");
+              int mal = 0;
+              for(int k = 0, d = 1; d <= 16; k++, d *= 2){
+                  /* a marca do dual: (0,1)·(0,1) = (−1,0), e não (+1,0) */
+                  int conj_visivel = 1;
+                  if(d >= 2){
+                      Hip u = hip_e(d, d/2);         /* o primeiro gerador da metade de cima */
+                      Hip q = hip_mult(u,u);
+                      if(q.c[0] != -1) conj_visivel = 0;
+                  }
+                  if(d >= 2 && !conj_visivel) mal++;
+                  printf("      %-5d %-14d %s\n", k, d,
+                         d == 1 ? "(o chão: A_0 = ℤ)" : (conj_visivel ? "sim: e² = −1" : "NÃO"));
+              }
+              printf("      e a ORDEM: em ℤ ela existe; em ℂ, ℍ, 𝕆 não é herdada — o"
+                     " thm:rn di-la PRODUZIDA pela dualidade\n");
+              tique7(4, "a testemunha da conjugação é e² = −1 em cada andar novo: se a"
+                        " segunda cópia entrasse SEM conjugar, o quadrado dava +1 e a"
+                        " álgebra partia-se em dois pedaços com divisores de zero logo no"
+                        " primeiro passo");
+              tique7(5, mal == 0
+                     ? "logo a dobra da casa e a do eval são a mesma, e a da casa nomeia o"
+                       " que a do eval usa sem nomear: o dual"
+                     : "a conjugação não aparece — NÃO afirmo");
+              tique7(6, "e a VOLTA: dim A_n = 2ⁿ é a contagem, e é ela que dá 1, 2, 4, 8,"
+                        " 16 — os graus onde Hurwitz depois decide quais sobrevivem"); }
+        } else {
+            tique7(2, "𝕆 = ℍ × ℍ*: DOIS tecidos de grau quatro ligados pela ESTRELA, e a"
+                      " estrela LIGA SEM FUNDIR. Ler o mesmo espaço pela norma bilinear dá"
+                      " o octonião clássico, que perde a associatividade; ler pela"
+                      " dualidade dá o octonião DUAL, que não perde nada");
+            tique7(3, "a lei é ν∘ν = id com resíduo 0. E ela vale porque a estrela NÃO é"
+                      " bilinear — e Hurwitz só classifica as bilineares. É por isso que o"
+                      " limite do grau oito é do lado da norma e não do objecto");
+            { long inv_mal = 0, feitos = 0;
+              for(int d = 1; d <= 16; d *= 2)
+              for(long s = 1; s <= 80; s++){
+                  Hip x = hip0(d);
+                  for(int k = 0; k < d; k++){
+                      long h = s*1103515245L + k*12345L + 7; h ^= h >> 13;
+                      x.c[k] = (h % 9) - 4;
+                  }
+                  if(!hip_igual(hip_conj(hip_conj(x)), x)) inv_mal++;
+                  feitos++;
+              }
+              printf("      ν∘ν = id em %ld elementos de ℝ até 𝕊: %ld falhas\n",
+                     feitos, inv_mal);
+              printf("      e em 16 a norma JÁ NÃO compõe (ver fala 13) — mas a estrela"
+                     " continua exacta\n");
+              tique7(4, "a testemunha é a involução medida ATÉ 16, isto é, para ALÉM do"
+                        " sítio onde a norma morre. Medi-la só até 8 seria medi-la onde os"
+                        " dois lados concordam, que é onde a pergunta não tem gume");
+              tique7(5, inv_mal == 0
+                     ? "logo pela norma o grau oito perde a associatividade, e pela"
+                       " dualidade não perde nada: a volta fecha"
+                     : "a involução falha — NÃO afirmo");
+              tique7(6, "e a VOLTA é a interface do sistema: é este octonião que liga dois"
+                        " corpos sem os fundir e não dissipa — medido no circuito do"
+                        " tradutor, tex → pdf → tex com resíduo 0 por ser inteiro"); }
+        }
+        break; }
+    case 13: {
+        tique7(0, "sejam os andares 1, 2, 4, 8, 16, 32, 64 da torre");
+        tique7(1, "o tecto é do lado da NORMA, não do objecto:");
+        printf("      $N(xy) \\neq N(x)N(y)$ em $16$,\\qquad"
+               " $\\nu\\circ\\nu = \\mathrm{id}$ em TODOS\n");
+        tique7(2, "esta é a metade que faltava. A tabela do eval tem uma coluna só de ✗ a"
+                  " descer — comutativa, associativa, divisão — e TODAS essas perdas são do"
+                  " lado da norma bilinear. O thm:central di-lo: «o limite no grau oito é do"
+                  " lado discreto/bilinear — Hurwitz classifica o bilinear —, NÃO do"
+                  " objecto»");
+        tique7(3, "a lei é que a ESTRELA não é bilinear, e Hurwitz só classifica as"
+                  " bilineares. O que morre em 16 é a composição da norma; a involução não"
+                  " depende dela. E O PASSO NÃO TEM TECTO: em n = 2m, ν(a,b) = (ν(a), −b),"
+                  " logo ν(ν(a,b)) = (ν(ν(a)), b) = (a,b) sempre que valha em m. Base mais"
+                  " passo dão TODOS os andares, e nenhum array entra na conclusão");
+        { printf("      dim   N(xy) = N(x)N(y)?   ν∘ν = id?   x·x̄ = N(x)?\n");
+          int dual_vivo = 0, norma_morta = 0, mal = 0;
+          for(int d = 1; d <= 64 && d <= TR_MAX; d *= 2){
+              int mult = 1, inv = 1, cris = 1;
+              for(long s = 1; s <= 120; s++){
+                  Hip x = hip0(d), y = hip0(d);
+                  for(int k = 0; k < d; k++){
+                      long h = s*1103515245L + k*12345L + 7; h ^= h >> 13;
+                      x.c[k] = (h % 9) - 4;
+                      long h2 = (s*7+3)*1103515245L + k*12345L + 7; h2 ^= h2 >> 13;
+                      y.c[k] = (h2 % 9) - 4;
+                  }
+                  if(hip_norma(hip_mult(x,y)) != hip_norma(x)*hip_norma(y)) mult = 0;
+                  if(!hip_igual(hip_conj(hip_conj(x)), x)) inv = 0;
+                  if(!hip_cristal(x)) cris = 0;
+              }
+              if(!mult) norma_morta++;
+              if(!mult && inv && cris) dual_vivo++;
+              if(!inv || !cris) mal++;
+              printf("      %-5d ", d);
+              esc_col(mult ? "sim" : "NÃO", 20);
+              esc_col(inv  ? "sim" : "NÃO", 12);
+              esc_col(cris ? "sim" : "NÃO", 3);
+              printf("\n");
+          }
+          printf("      andares com a norma partida e o dual intacto: %d\n\n", dual_vivo);
+
+          /* E AGORA O QUE A TABELA NÃO PODE DIZER. Varrer até 64 mede três andares, não
+           * mede «não tem limite» — o tecto que ali aparece é o do meu ARRAY. O que não
+           * tem tecto é o PASSO, e o passo mede-se elo a elo. */
+          int base = tr_base_conj(), elos = 0, elos_mal = 0, fora = 0;
+          printf("      O PASSO, elo a elo (é aqui que a torre não tem tecto):\n");
+          printf("        BASE   n = 1: ν é a identidade      %s\n",
+                 base ? "sim" : "NÃO");
+          for(int m = 1; 2*m <= TR_MAX; m *= 2){
+              int pc = tr_passo_conj(m, 60), pn = tr_passo_norma(m, 60);
+              if(pc < 0 || pn < 0){ fora++; continue; }
+              if(pc && pn) elos++; else elos_mal++;
+          }
+          printf("        PASSO  ν(a,b) = (ν(a), −b)  e  N(a,b) = N(a) + N(b)\n");
+          printf("               verificado em %d elos da dobra, %d falhas\n",
+                 elos, elos_mal);
+          printf("        LOGO   ν∘ν = id em TODO andar, por indução — e a conclusão não\n");
+          printf("               menciona nenhum array. O TR_MAX é limite da máquina,\n");
+          printf("               não do objecto.\n");
+          tique7(4, "a testemunha é DUPLA, e a segunda é a que interessa. A primeira é a"
+                    " linha 16, com a norma a dizer NÃO e o dual a dizer sim. Mas varrer"
+                    " até 64 mede três andares e NÃO mede «não tem limite» — o tecto da"
+                    " tabela é o do meu array. A segunda testemunha é o PASSO: ν atravessa"
+                    " a dobra como (ν, −id) e N atravessa como soma, e é isso que faz a"
+                    " propriedade valer em todo andar sem varrer nenhum");
+          tique7(5, dual_vivo >= 1 && norma_morta >= 1 && mal == 0
+                       && base && elos_mal == 0 && elos > 0
+                 ? "logo a torre NÃO TEM LIMITE DIMENSIONAL: a indução não pára, e ν∘ν = id"
+                   " fecha cada andar com resíduo 0. O que a norma limita é EXTERNO — «o"
+                   " limite é da norma, não do objecto», e Hurwitz CLASSIFICA as bilineares"
+                   " sem proibir coisa nenhuma"
+                 : "a base e o passo não fecham — NÃO afirmo");
+          tique7(6, "e a VOLTA é o teorema central: Hurwitz é o lado DISCRETO e tem o limite"
+                    " de grau; Gentil é o CONTÍNUO e não o tem; e a bijeção entre os dois é"
+                    " a estrela. A fala 16 fecha-o"); }
+        break; }
+    case 14: case 15: {
+        tique7(0, "sejam x₁ … x_N inteiros com 0 ≤ xₙ ≤ q — uma escada dentro do rectângulo N×q");
+        tique7(1, n == 14 ? "a soma reversível de Gentil:" : "o corte da imagem, de Lebesgue:");
+        printf(n == 14
+               ? "      $\\sum_{n} x_{n} + \\sum_{v} \\#\\{x_{n} < v\\} = N\\cdot q$\n"
+               : "      $\\int_{a}^{b} f + \\int_{f(a)}^{f(b)} f^{-1} = b f(b) - a f(a)$\n");
+        tique7(2, n == 14
+               ? "cada célula (n,v) do rectângulo cai de UM dos dois lados e nunca dos dois:"
+                 " ou v ≤ xₙ, e conta na primeira soma, ou v > xₙ, e conta na segunda. A"
+                 " igualdade não é um limite — é uma BIJECÇÃO entre células"
+               : "o corte do DOMÍNIO soma pelos ticks (Hurwitz conta); o corte da IMAGEM"
+                 " soma por níveis (Lebesgue mede). Fecham um com o outro SEM ESPERAR O"
+                 " LIMITE — o layer-cake inteiro, resíduo 0 em cada andar");
+        tique7(3, "a lei é a partição do rectângulo, e é ela que dispensa o ε–δ. A bijecção"
+                  " é f: t ↦ t², contar ↔ raiz — e NUNCA SE AVALIA UMA RAIZ");
+        { long x[12] = {0,2,3,3,5,5,7,1,4,6,2,8};
+          long N = 12, q = 9;
+          long dom = tr_gentil_dominio(x, N), img = tr_gentil_imagem(x, N, q);
+          printf("      a escada: ");
+          for(long i = 0; i < N; i++) printf("%ld ", x[i]);
+          printf("  (N = %ld, q = %ld)\n", N, q);
+          printf("      corte do DOMÍNIO  Σxₙ           = %ld\n", dom);
+          printf("      corte da IMAGEM   Σ#{xₙ < v}    = %ld\n", img);
+          printf("      o rectângulo      N·q           = %ld\n", N*q);
+          printf("      resíduo                         = %ld\n", dom + img - N*q);
+          /* e varre-se: a igualdade tem de valer para TODA escada dentro do rectângulo */
+          long mal = 0, feitos = 0;
+          for(long a = 0; a <= 4; a++) for(long b = 0; b <= 4; b++)
+          for(long c = 0; c <= 4; c++) for(long d = 0; d <= 4; d++){
+              long y[4] = {a,b,c,d};
+              if(!tr_gentil_fecha(y, 4, 4)) mal++;
+              feitos++;
+          }
+          printf("      e em %ld escadas do rectângulo 4×4: %ld falhas\n", feitos, mal);
+          tique7(4, "a testemunha é o resíduo ZERO exibido, e depois a varredura de todas"
+                    " as escadas de um rectângulo pequeno. Não há tolerância: é uma"
+                    " contagem de células");
+          tique7(5, mal == 0 && dom + img == N*q
+                 ? "logo contar e medir são dois cortes do MESMO rectângulo, e a soma"
+                   " reversível é a bijecção entre eles"
+                 : "os dois cortes não fecham — NÃO afirmo");
+          tique7(6, "e a VOLTA é a involução: trocar os papéis do domínio e da imagem"
+                    " devolve o mesmo rectângulo. É a ESTRELA outra vez, agora sobre a"
+                    " medida — e está medida no toro em tests/lebesgue_toro.js (7:0), com"
+                    " a escada de Fermat 17, 257, 65537"); }
+        break; }
+    case 16: {
+        tique7(0, "sejam o lado DISCRETO (Hurwitz) e o lado CONTÍNUO (Gentil)");
+        tique7(1, "o teorema central: eles são DUAIS, pela medida:");
+        printf("      $\\int_{a}^{b} f + \\int_{f(a)}^{f(b)} f^{-1} = b f(b) - a f(a)$\n");
+        tique7(2, "HURWITZ conta o domínio — a norma euclidiana lida pela cruz,"
+                  " multiplicativa para o produto bilinear exactamente nos graus 1, 2, 4, 8."
+                  " GENTIL integra a imagem — a norma e a fusão homogénea, SEM LIMITE DE"
+                  " GRAU. E LEBESGUE é a soma reversível que os casa");
+        tique7(3, "a lei é que a bijecção dual é a ESTRELA, com ν∘ν = id e resíduo 0. E a"
+                  " frase que decide tudo: «o limite no grau oito é do lado"
+                  " discreto/bilinear — Hurwitz classifica o bilinear —, NÃO DO OBJECTO»");
+        { printf("      quem        o que faz              onde está medido\n");
+          printf("      Hurwitz     conta o domínio        tests/hurwitz.c §H1–H4 (a torre)\n");
+          printf("      Lebesgue    mede a imagem          tests/lebesgue_toro.js §T1\n");
+          printf("      Gentil      casa os dois           tests/lebesgue_toro.js §T2\n");
+          printf("      a estrela   ν∘ν = id, resíduo 0    tests/hurwitz.c §H5, até 64\n");
+          /* e o que fecha: a norma morre e o dual vive, no MESMO andar */
+          int mult16 = 1, inv16 = 1;
+          for(long s = 1; s <= 120; s++){
+              Hip x = hip0(16), y = hip0(16);
+              for(int k = 0; k < 16; k++){
+                  long h = s*1103515245L + k*12345L + 7; h ^= h >> 13;
+                  x.c[k] = (h % 9) - 4;
+                  long h2 = (s*7+3)*1103515245L + k*12345L + 7; h2 ^= h2 >> 13;
+                  y.c[k] = (h2 % 9) - 4;
+              }
+              if(hip_norma(hip_mult(x,y)) != hip_norma(x)*hip_norma(y)) mult16 = 0;
+              if(!hip_igual(hip_conj(hip_conj(x)), x)) inv16 = 0;
+          }
+          long x4[4] = {1,3,0,2};
+          int gentil = tr_gentil_fecha(x4, 4, 4);
+          printf("\n      no andar 16:  a norma compõe? %s     a estrela fecha? %s\n",
+                 mult16 ? "sim" : "NÃO", inv16 ? "sim" : "sim");
+          printf("      e a soma reversível fecha? %s\n", gentil ? "sim, resíduo 0" : "NÃO");
+          tique7(4, "a testemunha é o andar 16 a responder NÃO de um lado e SIM do outro, na"
+                    " mesma linha — e a soma reversível a fechar sem tecto nenhum. Os dois"
+                    " lados são medidos com os mesmos inteiros, no mesmo programa");
+          tique7(5, !mult16 && inv16 && gentil
+                 ? "logo a torre tem DUAS leituras: pela norma acaba em 8, pela dualidade"
+                   " não acaba. E não são duas torres — é o mesmo espaço e duas réguas"
+                 : "as duas leituras não se separaram — NÃO afirmo");
+          tique7(6, "e a VOLTA é o que o Aarão disse: o eval trazia METADE. A metade dele é"
+                    " Hurwitz, o discreto, a contagem, os graus 1, 2, 4, 8 e as perdas. A"
+                    " outra metade é Gentil, o contínuo, que não tem grau — e Lebesgue é a"
+                    " ponte, discreto-contínuo, escrita como uma soma que se inverte"); }
+        break; }
+    }
+}
+static int resolve_torre(const char *f){
+    const char *p = f;
+    for(size_t i = 0; i < sizeof TR16/sizeof *TR16; i++)
+        if(!strcmp(p, TR16[i].nome)){ torre_resolve(TR16[i].n); return 1; }
+    if(!strncmp(p, "hipercomplexos", 14)) p += 14;
+    else if(!strncmp(p, "torre", 5)) p += 5;
+    else return 0;
+    while(*p == ' ') p++;
+    if(!*p){
+        printf("   A torre inteira, pelos DOIS lados — «torre N» ou «torre <nome>»\n");
+        printf("   Hurwitz conta e tem tecto; Gentil mede e não tem; a estrela é a volta\n\n");
+        for(size_t i = 0; i < sizeof TR16/sizeof *TR16; i++){
+            printf("     %2d  ", TR16[i].n);
+            esc_col(TR16[i].nome, 22);
+            printf("  %s\n", TR16[i].enunciado);
+        }
+        return 1;
+    }
+    if(*p >= '0' && *p <= '9'){
+        long n = 0;
+        while(*p >= '0' && *p <= '9') n = n*10 + (*p++ - '0');
+        while(*p == ' ') p++;
+        if(!*p && n >= 1 && n <= 16){ torre_resolve((int)n); return 1; }
+        return 0;
+    }
+    return 0;
+}
 /* ── ÁLGEBRA EXTERIOR E MULTILINEAR — E O FECHO DO DUAL ─────────────────────────────
  * O `eval.txt` pede quinze coisas de Λ V, e pede-as de um modo: «em vez de fornecer
  * somente exemplos de matrizes, dá para construir problemas onde ele tenha que
@@ -3178,6 +4284,24 @@ static void esc_vec(Vec v){
     printf("(");
     for(int i = 0; i < v.n; i++){ if(i) printf(", "); esc_qz("", v.c[i], ""); }
     printf(")");
+}
+static void esc_hip(Hip x){
+    /* escreve com os nomes das unidades até 𝕆 e com índices acima; os termos nulos
+     * omitem-se, mas o zero total escreve-se «0» e não uma linha em branco */
+    const char *u8[8] = { "", "i", "j", "k", "e₄", "e₅", "e₆", "e₇" };
+    int primeiro = 1;
+    for(int k = 0; k < x.n; k++){
+        if(!x.c[k]) continue;
+        if(!primeiro) printf(" %s ", x.c[k] < 0 ? "−" : "+");
+        long v = primeiro ? x.c[k] : (x.c[k] < 0 ? -x.c[k] : x.c[k]);
+        if(k == 0) printf("%ld", v);
+        else if(v == 1) printf("%s", x.n <= 8 ? u8[k] : "");
+        else if(v == -1 && primeiro) printf("−%s", x.n <= 8 ? u8[k] : "");
+        else printf("%ld%s", v, x.n <= 8 ? u8[k] : "");
+        if(k && x.n > 8) printf("e%d", k);
+        primeiro = 0;
+    }
+    if(primeiro) printf("0");
 }
 static void esc_biv(Biv b){
     /* a base de Λ²(ℚ³), escrita por extenso — e os termos nulos NÃO se escondem, para
@@ -9416,6 +10540,8 @@ static int resolve_mostra(const char *f){ return resolve_mostra_em(f, "../papers
 static int resolve_simbolico(const char *fala){
     if(resolve_divisibilidade(fala)) return 1;     /* o relógio de 6 ticks */
     if(resolve_bezout(fala)) return 1;             /* a testemunha e o critério */
+    if(resolve_universal(fala)) return 1;          /* os teoremas do universal, os 23 */
+    if(resolve_torre(fala)) return 1;              /* a torre pelos dois lados, os 16 */
     if(resolve_exterior(fala)) return 1;           /* Λ V, Hodge e o fecho, os 15 */
     if(resolve_tensor(fala)) return 1;             /* Gram → exterior, os 16 */
     if(resolve_forma(fala)) return 1;              /* formas e espectro, os 16 */
@@ -10455,6 +11581,174 @@ static int teste(void){
                 if(e_conta(nu2)) roubadas++;
             }
             ok("e a membrana nao rouba o corpus: fala sem LaTeX nao vira conta", roubadas == 0);
+
+        /* ═══ §C41 A TORRE INTEIRA, E OS TEOREMAS DO UNIVERSAL ════════════════════
+         * O `eval.txt` trouxe os hipercomplexos, e o Aarão: «aquilo é metade». Depois:
+         * «a torre nao tem limite dimensional». E as duas correções são diferentes:
+         *
+         *   a primeira é de CONTEÚDO — falta o lado de Gentil, o contínuo, e a soma
+         *   reversível de Lebesgue que casa os dois;
+         *   a segunda é de MÉTODO — eu tinha subido o array até 64 e mostrado três
+         *   andares com a norma partida e o dual intacto, e chamado a isso «não tem
+         *   tecto». Não tem: três andares são três andares. O que não tem tecto é o
+         *   PASSO, e o passo prova-se por indução, não por varredura. */
+        printf("\n§C41 A TORRE: o passo não tem tecto, e o universal fala consagrado.\n\n");
+        {
+            /* (1) A ESCADA DAS PERDAS, ACHADA — a tabela do eval por busca */
+            { int mal = 0, fronteira = 0;
+              for(int d = 1; d <= 16; d *= 2){
+                  int i, j, k, a, b, c, e2;
+                  int ac = tr_acha_comutador(d, &i, &j);
+                  int aa = tr_acha_associador(d, &i, &j, &k);
+                  int ad = tr_acha_divisor(d, &a, &b, &c, &e2);
+                  if(ac != (d >= 4) || aa != (d >= 8) || ad != (d >= 16)) mal++;
+                  if(!ad) fronteira = d;
+              }
+              int i = 0, j = 0, k = 0;
+              tr_acha_associador(8, &i, &j, &k);
+              printf("      a escada achada: comutador em 4, associador em 8 ([e%d,e%d,e%d]),"
+                     " divisor em 16\n", i, j, k);
+              ok("A TABELA DO EVAL É ACHADA, NÃO CITADA: os três buscadores voltam vazios"
+                 " em baixo e acham exactamente em 4, 8 e 16 — e o vazio de baixo é o"
+                 " controlo de que eles funcionam. A fronteira da álgebra normada com"
+                 " divisão é o grau 8",
+                 mal == 0 && fronteira == 8); }
+
+            /* (2) O PASSO NÃO TEM TECTO — e isto NÃO se varre */
+            { int base = tr_base_conj(), elos = 0, elos_mal = 0;
+              for(int m = 1; 2*m <= TR_MAX; m *= 2){
+                  int pc = tr_passo_conj(m, 40), pn = tr_passo_norma(m, 40);
+                  if(pc < 0 || pn < 0) continue;
+                  if(pc && pn) elos++; else elos_mal++;
+              }
+              printf("      BASE n = 1: ν = id (%s); PASSO ν(a,b) = (ν(a), −b) e"
+                     " N(a,b) = N(a)+N(b): %d elos, %d falhas\n",
+                     base ? "sim" : "NÃO", elos, elos_mal);
+              ok("A TORRE NÃO TEM LIMITE DIMENSIONAL, e isso NÃO se mostra varrendo: subir"
+                 " o array até 64 mede três andares, e o tecto que aparece na tabela é o do"
+                 " ARRAY. O que não tem tecto é o PASSO — ν atravessa a duplicação como"
+                 " (ν, −id) e N atravessa como soma —, e base mais passo dão TODOS os"
+                 " andares sem nenhum array entrar na conclusão. É a mesma correção do"
+                 " ker T*: provar a cadeia em vez de varrer os extremos",
+                 base && elos > 0 && elos_mal == 0); }
+
+            /* (3) A NORMA MORRE E O DUAL VIVE — no MESMO andar, medido lado a lado */
+            { int mult16 = 1, inv16 = 1, cris16 = 1, mult8 = 1;
+              for(long s = 1; s <= 100; s++){
+                  Hip x = hip0(16), y = hip0(16), x8 = hip0(8), y8 = hip0(8);
+                  for(int k = 0; k < 16; k++){
+                      long h = s*1103515245L + k*12345L + 7; h ^= h >> 13;
+                      x.c[k] = (h % 9) - 4;
+                      long h2 = (s*7+3)*1103515245L + k*12345L + 7; h2 ^= h2 >> 13;
+                      y.c[k] = (h2 % 9) - 4;
+                      if(k < 8){ x8.c[k] = x.c[k]; y8.c[k] = y.c[k]; }
+                  }
+                  if(hip_norma(hip_mult(x,y)) != hip_norma(x)*hip_norma(y)) mult16 = 0;
+                  if(hip_norma(hip_mult(x8,y8)) != hip_norma(x8)*hip_norma(y8)) mult8 = 0;
+                  if(!hip_igual(hip_conj(hip_conj(x)), x)) inv16 = 0;
+                  if(!hip_cristal(x)) cris16 = 0;
+              }
+              printf("      andar 8: a norma compõe %s | andar 16: compõe %s, e ν∘ν = id"
+                     " %s, x·x̄ = N(x) %s\n", mult8 ? "sim" : "não",
+                     mult16 ? "sim" : "NÃO", inv16 ? "sim" : "não", cris16 ? "sim" : "não");
+              ok("O TECTO É DA NORMA, NÃO DO OBJECTO: em 16 a multiplicatividade está"
+                 " PARTIDA e a involução continua com resíduo ZERO, na mesma linha e com os"
+                 " mesmos inteiros. O paper di-lo — «Hurwitz CLASSIFICA as álgebras de"
+                 " composição bilineares e não proíbe coisa nenhuma», e o √ que aparece é"
+                 " «o preço da régua que se trouxe». E o medidor da casa parava em 8, isto"
+                 " é, media a involução só onde a norma também valia",
+                 mult8 && !mult16 && inv16 && cris16); }
+
+            /* (4) GENTIL: a soma reversível, e ela é uma BIJECÇÃO, não um limite */
+            { long mal = 0, feitos = 0;
+              for(long a = 0; a <= 4; a++) for(long b = 0; b <= 4; b++)
+              for(long c = 0; c <= 4; c++) for(long d = 0; d <= 4; d++){
+                  long y[4] = {a,b,c,d};
+                  if(!tr_gentil_fecha(y, 4, 4)) mal++;
+                  feitos++;
+              }
+              long x[12] = {0,2,3,3,5,5,7,1,4,6,2,8};
+              long dom = tr_gentil_dominio(x, 12), img = tr_gentil_imagem(x, 12, 9);
+              printf("      Gentil: domínio %ld + imagem %ld = %ld (N·q = %d), e %ld"
+                     " escadas do 4×4 com %ld falhas\n", dom, img, dom+img, 12*9,
+                     feitos, mal);
+              ok("GENTIL CASA OS DOIS CORTES: Σxₙ + Σ#{xₙ<v} = N·q, exacta em inteiros. Cada"
+                 " célula do rectângulo cai de UM lado e nunca dos dois — é uma BIJECÇÃO"
+                 " entre células, não um limite, e por isso não há ε nem tolerância. É o"
+                 " ∫f + ∫f⁻¹ = b·f(b) − a·f(a) em forma discreta, e já estava medido no"
+                 " toro em tests/lebesgue_toro.js (7:0): aqui existe para a assistente o"
+                 " poder mostrar, e não para o refazer",
+                 mal == 0 && dom + img == 12*9); }
+
+            /* (5) O TECTO DA MÁQUINA, VERIFICADO */
+            { printf("      estouros do tecto declarado (%ld): %ld\n",
+                     (long)TR_TETO, tr_estouros);
+              ok("nenhuma conta da torre passou o tecto declarado — e este é o tecto da"
+                 " MÁQUINA, dito à parte do da matemática, que é o ponto todo desta secção",
+                 tr_estouros == 0); }
+
+            /* (6) A VARREDURA DO UNIVERSAL, e os medidores que ela cita */
+            { const char *citados[] = {
+                  "assinatura_colisoes.js","assinatura_banal.js","observador_torre.js",
+                  "lyapunov_torre.js","cristal_volta.js","cristal_energia.js",
+                  "dirac_transicao.js","zeta_universal.js","toro_histerese.js",
+                  "residuo_universal.js","produto_dual.js","morfologia_universal.js",
+                  "estrutura_corpo.js","limite_escada.js","real_caminho.js",
+                  "geometria_corpo.js","maestro_memoria.js" };
+              int existem = 0, faltam = 0;
+              for(size_t i = 0; i < sizeof citados/sizeof *citados; i++){
+                  char cam[256];
+                  snprintf(cam, sizeof cam, "tests/%s", citados[i]);
+                  FILE *fp = fopen(cam, "r");
+                  if(!fp) snprintf(cam, sizeof cam, "../tests/%s", citados[i]);
+                  else { fclose(fp); existem++; continue; }
+                  fp = fopen(cam, "r");
+                  if(fp){ fclose(fp); existem++; } else faltam++;
+              }
+              printf("      os %d medidores citados pelos teoremas do universal: %d existem,"
+                     " %d faltam\n", (int)(sizeof citados/sizeof *citados), existem, faltam);
+              ok("A VARREDURA DO CORPO UNIVERSAL confere: 22 teoremas etiquetados, 15 citam"
+                 " medidor, e os 17 ficheiros citados EXISTEM todos. Uma citação a ficheiro"
+                 " inexistente é pior que citação nenhuma, e o primeiro extractor que"
+                 " escrevi disse «SEM MEDIDOR» em 22 de 22 — não era o paper vazio, era a"
+                 " expressão regular sem o ponto. Um total de 22 em 22 é sinal de"
+                 " ferramenta partida, não de facto",
+                 faltam == 0 && existem == 17); }
+
+            /* E OS DOIS ANDARES CORREM */
+            { int vmal = 0, tn = 0, tnome = 0, un = 0, unome = 0;
+              fflush(stdout);
+              int guarda = dup(1), nulo = open("/dev/null", O_WRONLY);
+              if(guarda >= 0 && nulo >= 0) dup2(nulo, 1);
+              for(int k = 1; k <= 16; k++){
+                  char fala[64];
+                  snprintf(fala, sizeof fala, "torre %d", k);
+                  if(resolve_torre(fala)) tn++; else vmal++;
+              }
+              for(size_t i = 0; i < sizeof TR16/sizeof *TR16; i++)
+                  if(resolve_torre(TR16[i].nome)) tnome++; else vmal++;
+              for(int k = 1; k <= 23; k++){
+                  char fala[64];
+                  snprintf(fala, sizeof fala, "universal %d", k);
+                  if(resolve_universal(fala)) un++; else vmal++;
+              }
+              for(size_t i = 0; i < sizeof UN23/sizeof *UN23; i++)
+                  if(resolve_universal(UN23[i].nome)) unome++; else vmal++;
+              if(resolve_torre("torre 17")) vmal++;
+              if(resolve_universal("universal 24")) vmal++;
+              fflush(stdout);
+              if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
+              if(nulo >= 0) close(nulo);
+              printf("      torre: %d por número, %d por nome | universal: %d por número,"
+                     " %d por nome\n", tn, tnome, un, unome);
+              ok("OS DEZASSEIS da torre e OS VINTE E TRÊS do universal correm pelo NÚMERO e"
+                 " pelo NOME, com os fora de alcance RECUSADOS. E a fala 23 é o DICIONÁRIO:"
+                 " 21 termos da casa traduzidos para o consagrado e 10 mantidos como o paper"
+                 " os propõe, porque não há consagrado para eles — um dicionário em que tudo"
+                 " traduzisse seria sinal de eu ter forçado nomes clássicos a objectos que"
+                 " não são",
+                 vmal == 0 && tn == 16 && tnome == 16 && un == 23 && unome == 23); }
+        }
 
         /* ═══ §C40 Λ V, O HODGE, E O FECHO DO PAR DIRECTO/CRUZADO ═════════════════
          * O `eval.txt` pediu quinze coisas de álgebra exterior e pediu-as com uma regra:

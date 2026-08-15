@@ -48,7 +48,7 @@
 #include <string.h>
 #include "unidade.h"
 
-#define DMAX 16
+#define DMAX 64
 /* O TETO, e ele VERIFICA-SE. As entradas do gerador vivem em [−28, 9]; a dobra em dimensão 16
  * multiplica e soma 16 delas, e o pior caso de (xy)z fica na ordem de 10^7. A norma eleva ao
  * quadrado e soma 16, o que dá ~10^15 — dentro de long (9.2·10^18). Mas um teto que ninguém
@@ -86,6 +86,13 @@ static void gera(long *x, int n, long s){
         h ^= h >> 13;
         x[k] = (h % 19) - 9;
     }
+}
+/* «NÃO» tem 3 caracteres e 4 BYTES: o %-Ns paga por bytes e come uma coluna. Conta-se em
+ * caracteres, que é o que o Aarão vê — o valor pode estar certo e o texto errado. */
+static void col(const char *r, int largura){
+    fputs(r, stdout);
+    for(const char *q = r; *q; q++) if((*q & 0xC0) != 0x80) largura--;
+    while(largura-- > 0) putchar(' ');
 }
 static int iguais(const long *a, const long *b, int n){
     for(int k = 0; k < n; k++) if(a[k] != b[k]) return 0;
@@ -150,8 +157,9 @@ printf("\n§H2  O CRISTAL: N(xy) = N(x)N(y) — e onde ele se parte.\n\n");
         int multiplicativa = (pior == 0);
         if(n <= 8 && !multiplicativa) falha8++;
         if(n == 16 && multiplicativa) passou16++;
-        printf("      %-6d %-10s %-20s %ld\n", n, nome[n],
-               multiplicativa ? "sim" : "NÃO", pior);
+        printf("      %-6d %-10s ", n, nome[n]);
+        col(multiplicativa ? "sim" : "NÃO", 20);
+        printf(" %ld\n", pior);
     }
     printf("\n");
     ok("a norma é multiplicativa em R, C, H e O — o cristal aguenta os quatro, com resíduo"
@@ -204,8 +212,10 @@ printf("\n§H3  SUBINDO perde-se, um degrau de cada vez.\n\n");
         /* a escada esperada: comuta até 2, associa até 4, sem divisores até 8 */
         int esp_c = (n <= 2), esp_a = (n <= 4), esp_d = (n <= 8);
         if(comuta != esp_c || associa != esp_a || sem_div != esp_d) mau_esperado++;
-        printf("      %-5d %-9s %-10s %s\n", n,
-               comuta ? "sim" : "não", associa ? "sim" : "não", sem_div ? "sim" : "NÃO");
+        printf("      %-5d ", n);
+        col(comuta ? "sim" : "não", 9);  printf(" ");
+        col(associa ? "sim" : "não", 10); printf(" ");
+        col(sem_div ? "sim" : "NÃO", 3);  printf("\n");
     }
     printf("\n");
     ok("a escada das perdas é exatamente 2, 4, 8 — e nenhuma cai fora do seu degrau",
@@ -255,14 +265,26 @@ printf("\n§H5  E O TELÓMERO É A TORRE DUAL: o lado que desce, com o sinal tro
     /* O Aarao: "o telomero e' a torre de Hurwitz dual". O que se mede aqui e' o que torna essa
      * frase verificavel: a conjugacao — que e' trocar o sinal da parte imaginaria, isto e', o
      * sinal da multiplicacao no sentido do furos.c §F4 — e' uma INVOLUCAO em todo andar, e e'
-     * ela que faz a norma sair: N(x) = x·conjuga(x). O lado que desce é o lado conjugado. */
-    int mau_inv = 0, mau_norma = 0;
-    printf("      dim   conj∘conj = id?   x·conjuga(x) = N(x)?\n");
-    for(int n = 1; n <= 8; n *= 2){
-        int inv = 1, nrm = 1;
+     * ela que faz a norma sair: N(x) = x·conjuga(x). O lado que desce é o lado conjugado.
+     *
+     * ── E ESTE LAÇO PARAVA EM 8 ──────────────────────────────────────────────────────
+     * Media a involução só até onde a NORMA também vale — isto é, no sítio onde os dois
+     * lados concordam, que é o sítio onde a pergunta não tem gume. A frase que interessa
+     * está em `corpo-estelar.tex` def:octoniao-dual: o mesmo espaço lê-se de dois modos,
+     * «pela norma bilinear PERDE a associatividade; pela dualidade NÃO PERDE NADA — a
+     * volta fecha». Isso só se pode medir ONDE A NORMA JÁ MORREU, e eu nunca lá tinha
+     * corrido. Vai agora a 64: em 16, 32 e 64 a multiplicatividade está partida e a
+     * involução continua com resíduo ZERO. O tecto é do lado da NORMA, não do objecto. */
+    int mau_inv = 0, mau_norma = 0, dual_vivo = 0, norma_morta = 0;
+    printf("      dim   N(xy)=N(x)N(y)?   conj∘conj = id?   x·conjuga(x) = N(x)?\n");
+    for(int n = 1; n <= 64; n *= 2){
+        int inv = 1, nrm = 1, mult = 1;
         for(long s = 1; s <= 200; s++){
-            long x[DMAX] = {0}, c1[DMAX] = {0}, c2[DMAX] = {0}, p[DMAX] = {0};
+            long x[DMAX] = {0}, y[DMAX] = {0}, c1[DMAX] = {0}, c2[DMAX] = {0}, p[DMAX] = {0};
             gera(x, n, s);
+            gera(y, n, s*7+3);
+            cd(x, y, n, p);
+            if(norma2(p,n) != norma2(x,n)*norma2(y,n)) mult = 0;
             conjuga(x, n, c1); conjuga(c1, n, c2);
             if(!iguais(c2, x, n)) inv = 0;
             cd(x, c1, n, p);
@@ -271,16 +293,28 @@ printf("\n§H5  E O TELÓMERO É A TORRE DUAL: o lado que desce, com o sinal tro
         }
         if(!inv) mau_inv++;
         if(!nrm) mau_norma++;
-        printf("      %-5d %-17s %s\n", n, inv ? "sim" : "NÃO", nrm ? "sim" : "NÃO");
+        if(!mult && inv && nrm) dual_vivo++;      /* a norma partida E o dual inteiro */
+        if(!mult) norma_morta++;
+        printf("      %-5d ", n);
+        col(mult ? "sim" : "NÃO", 17); printf(" ");
+        col(inv  ? "sim" : "NÃO", 17); printf(" ");
+        col(nrm  ? "sim" : "NÃO", 3);  printf("\n");
     }
     printf("\n");
     ok("a conjugação é involução em todo andar — trocar duas vezes devolve, com resíduo 0"
        " EXATO e não «abaixo de 1e-12»", mau_inv == 0);
     ok("e x·conjuga(x) dá a norma, real e pura: o dual é quem produz o cristal", mau_norma == 0);
+    ok("E O TECTO É DO LADO DA NORMA, NÃO DO OBJECTO: em 16, 32 e 64 a multiplicatividade"
+       " está PARTIDA e a involução continua com resíduo ZERO. É o def:octoniao-dual do"
+       " corpo estelar medido — «pela norma perde; pela dualidade não perde nada» — e este"
+       " laço parava em 8, isto é, media a involução só onde a norma também valia, que é"
+       " onde a pergunta não tem gume",
+       dual_vivo == 3 && norma_morta == 3);
     printf("      É a mesma involução do furos.c §F4 (σ·σ' = −1) e do ribossomo.c §Y5 (as duas\n");
     printf("      fitas): trocar o sinal de uma peça, e trocar duas vezes devolver. O telómero\n");
     printf("      é a torre dual porque é o lado conjugado — o que desce, e o que ao descer\n");
-    printf("      produz a norma que o outro lado conserva.\n");
+    printf("      produz a norma que o outro lado conserva. E a torre NÃO ACABA em 8: acaba\n");
+    printf("      em 8 do lado que se mede pela norma. Do lado do dual não tem tecto.\n");
 }
 
 printf("\n§H6  O FECHO DO DUAL: directo² + cruzado² = N(u)N(v).\n\n");
@@ -400,12 +434,9 @@ printf("\n§H7  O GUME: a soma de k quadrados é fechada para o produto?\n\n");
         if(achou == esperado_fecha) mau++;
         /* «NÃO» tem 3 caracteres e 4 BYTES: o %-Ns paga por bytes e come uma coluna.
          * Conta-se em caracteres, que é o que o leitor vê. */
-        { const char *r = achou ? "NÃO" : "sim";
-          int largura = 23;
-          for(const char *q = r; *q; q++) if((*q & 0xC0) != 0x80) largura--;
-          printf("      %-4d %s", k, r);
-          for(int i = 0; i < largura; i++) putchar(' ');
-          putchar(' '); }
+        printf("      %-4d ", k);
+        col(achou ? "NÃO" : "sim", 23);
+        putchar(' ');
         if(achou) printf("%ld · %ld = %ld", tx, ty, tx*ty);
         printf("\n");
     }
