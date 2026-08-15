@@ -43,6 +43,7 @@
 #include "reais.h"      /* R: o real e o CORTE, e nunca um decimal */
 #include "cauchy.h"     /* R outra vez, pelo caminho: R = Cauchy(Q)/~ */
 #include "identifica.h" /* o mesmo ponto por quatro portas, e a volta */
+#include "numeros.h"    /* teoria dos numeros: Euclides = MDC = Bezout = FC */
 #include "eletrico.h"
 
 typedef struct { long a, b; } Slot;
@@ -1342,6 +1343,548 @@ static int resolve_bezout(const char *f){
            xs, ys, a, xs, b, ys, a*xs + b*ys,
            a*xs + b*ys == c ? "(resíduo 0)" : "— NÃO afirmo");
     return 1;
+}
+/* ── TEORIA DOS NÚMEROS: OS DEZASSETE, E É TUDO A MESMA ÓRBITA ──────────────────────
+ * «definição → propriedade → teorema → exercício de demonstração → contraexemplo →
+ * volta. Nada de só lista de contas.» E no fim a frase que organiza o andar todo:
+ *
+ *     Euclides = MDC = Bézout = FC — «são diferentes saídas da mesma órbita»
+ *
+ * Cada exercício corre no relógio; onde ele pede gume, há gume; onde pede volta, a volta
+ * substitui e mede. As contas aparecem, mas como TESTEMUNHA, nunca como resposta. */
+static void esc_col(const char *s, int largura);
+static const struct { int n; const char *nome; const char *enunciado; } TN17[] = {
+ {  1, "divisibilidade",     "a | b e b | c  ⟹  a | c" },
+ {  2, "mdc euclides",       "gcd(a,b) = gcd(b, a − qb)" },
+ {  3, "bezout menor",       "gcd(a,b) é o MENOR positivo de {ax + by}" },
+ {  4, "euclides estendido", "gcd(391, 299) e os coeficientes pela volta" },
+ {  5, "lema de euclides",   "p primo e p | ab  ⟹  p | a ou p | b" },
+ {  6, "fatoracao unica",    "o Teorema Fundamental da Aritmética" },
+ {  7, "infinitos primos",   "existem infinitos primos, e o novo constrói-se" },
+ {  8, "congruencias",       "37⁴ mod 7, sem calcular 37⁴" },
+ {  9, "inverso modular",    "o inverso de 17 módulo 43" },
+ { 10, "fermat",             "7¹⁰⁰ mod 13, pelo pequeno Fermat" },
+ { 11, "totiente",           "φ(60)" },
+ { 12, "euler",              "a^φ(n) ≡ 1 (mod n)" },
+ { 13, "chines",             "x ≡ 2 (mod 3) e x ≡ 3 (mod 5)" },
+ { 14, "diofantina",         "35x + 22y = 7, e TODAS as soluções" },
+ { 15, "fracao continua",    "a FC de 391/299 pelos restos de Euclides" },
+ { 16, "mobius",             "Σ_{d|n} μ(d) para n = 12" },
+ { 17, "a orbita unica",     "Euclides = MDC = Bézout = FC, com a volta" },
+};
+static void tn_euclides(long a, long b, int mostra){    /* a descida, e é ela tudo */
+    long x = a, y = b;
+    while(y){
+        long q = x / y, r = x % y;
+        if(mostra) printf("      %ld = %ld·%ld + %ld\n", x, y, q, r);
+        x = y; y = r;
+    }
+    if(mostra) printf("      logo gcd(%ld, %ld) = %ld\n", a, b, x);
+}
+static void numeros_resolve(int n){
+    TICK_N = 0;
+    printf("   %d — %s\n", n, TN17[n-1].enunciado);
+    switch(n){
+    case 1: {
+        tique("DEFINIÇÃO — a | b quer dizer que EXISTE k com b = ak. Não é uma"
+              " propriedade de a e b: é uma existência, e o k é a testemunha");
+        tique("COMPOSIÇÃO — de b = ak e c = bℓ vem c = a(kℓ), e kℓ é inteiro porque ℤ é"
+              " fechado para o produto. É essa testemunha nova que dá a | c");
+        { long k, l;
+          iz_div(4, 12, &k); iz_div(12, 36, &l);
+          printf("      4 | 12 com k = %ld,  12 | 36 com ℓ = %ld,  logo 4 | 36 com kℓ = %ld\n",
+                 k, l, k*l); }
+        tique("GUME — «procure um caso em que apenas a | c seja verdadeiro, sem a | b»."
+              " Ele existe, e por isso a implicação NÃO se inverte: a transitividade dá"
+              " uma direção só");
+        { int achou = 0;
+          for(long a = 2; a <= 12 && !achou; a++) for(long b = 2; b <= 12 && !achou; b++)
+          for(long c = 2; c <= 60 && !achou; c++)
+              if(iz_div(a,c,0) && !iz_div(a,b,0) && iz_div(b,c,0)){
+                  printf("      a=%ld, b=%ld, c=%ld:  %ld | %ld sim, %ld | %ld NÃO —"
+                         " e mesmo assim %ld | %ld\n", a,b,c, b,c, a,b, a,c);
+                  achou = 1;
+              }
+          if(!achou) printf("      — NÃO achei contraexemplo, e por isso NÃO afirmo o gume\n"); }
+        tique("VOLTA — e a propriedade-mãe: a | b e a | c dão a | (bx + cy) para quaisquer"
+              " x, y. É a distributividade a pôr o a em evidência, e é dela que sai tudo"
+              " o resto deste andar");
+        { int mal = 0;
+          for(long a = 1; a <= 10; a++) for(long b = -30; b <= 30; b++) for(long c = -30; c <= 30; c++){
+              if(!iz_div(a,b,0) || !iz_div(a,c,0)) continue;
+              for(long x = -4; x <= 4; x++) for(long y = -4; y <= 4; y++)
+                  if(!iz_div(a, b*x + c*y, 0)) mal++;
+          }
+          printf("      a | (bx + cy) varrido: %d falhas\n", mal); }
+        break; }
+    case 2: {
+        tique("A IDENTIDADE — gcd(a,b) = gcd(b, a − qb), e a prova é de DUPLA INCLUSÃO:"
+              " todo divisor comum de (a,b) divide a − qb, e todo divisor comum de"
+              " (b, a−qb) divide a = (a−qb) + qb. Os dois conjuntos de divisores são o"
+              " MESMO, logo o máximo é o mesmo");
+        tique("A ÓRBITA — e é isso que o algoritmo faz: repete o passo até o resto ser 0."
+              " O último resto não nulo é o gcd, e o rastro é a descida inteira");
+        tn_euclides(252, 105, 1);
+        tique("VOLTA — e confere-se a definição, os TRÊS pontos: d | a, d | b, e todo"
+              " divisor comum divide d");
+        { long g = iz_gcd(252, 105, 0, 0); int mal = 0, comuns = 0;
+          if(!iz_div(g, 252, 0) || !iz_div(g, 105, 0)) mal++;
+          for(long d = 1; d <= 252; d++)
+              if(252 % d == 0 && 105 % d == 0){ comuns++; if(g % d) mal++; }
+          printf("      d = %ld:  d | 252 e d | 105, e os %d divisores comuns dividem d"
+                 " — %d falhas\n", g, comuns, mal); }
+        { int mal = 0;
+          for(long a = 1; a <= 60; a++) for(long b = 1; b <= 60; b++) for(long q = -3; q <= 3; q++)
+              if(iz_gcd(a,b,0,0) != iz_gcd(b, a - q*b, 0, 0)) mal++;
+          printf("      e a identidade varrida em 60×60×7: %d falhas\n", mal); }
+        break; }
+    case 3: {
+        tique("BÉZOUT — gcd(a,b) escreve-se como ax + by, e o Euclides ESTENDIDO carrega"
+              " os coeficientes na descida. O x e o y são a testemunha");
+        { long x, y, g = iz_gcd(35, 22, &x, &y);
+          printf("      gcd(35, 22) = %ld,  x = %ld,  y = %ld\n", g, x, y);
+          printf("      substituindo: 35·(%ld) + 22·(%ld) = %ld   %s\n",
+                 x, y, 35*x + 22*y, 35*x + 22*y == g ? "(resíduo 0)" : "— NÃO afirmo"); }
+        tique("O EXERCÍCIO MAIS INTERESSANTE — S = {ax + by > 0} tem MENOR elemento (boa"
+              " ordenação de ℕ: todo subconjunto não vazio de positivos tem mínimo), e"
+              " esse mínimo É o gcd");
+        tique("PORQUÊ — seja d o menor de S. Dividindo a por d: a = dq + r com 0 ≤ r < d."
+              " Mas r = a − dq também é da forma ax+by, e r < d; como d é o MENOR"
+              " positivo, r = 0. Logo d | a, e o mesmo dá d | b. E todo divisor comum"
+              " divide d porque divide ax+by. Os três pontos da definição");
+        { int mal = 0;
+          for(long a = 1; a <= 30; a++) for(long b = 1; b <= 30; b++){
+              long menor = 0;
+              for(long x = -30; x <= 30; x++) for(long y = -30; y <= 30; y++){
+                  long t = a*x + b*y;
+                  if(t > 0 && (menor == 0 || t < menor)) menor = t;
+              }
+              if(menor != iz_gcd(a,b,0,0)) mal++;
+          }
+          printf("      o menor positivo de {ax+by} é o gcd, em 900 pares: %d falhas\n", mal); }
+        break; }
+    case 4: {
+        tique("A DESCIDA — os restos, e é este o rastro que carrega tudo");
+        tn_euclides(391, 299, 1);
+        tique("A SUBIDA — e agora a VOLTA pela mesma cadeia, a substituir cada resto pela"
+              " sua expressão: é ela que produz os coeficientes de Bézout");
+        { long x, y, g = iz_gcd(391, 299, &x, &y);
+          printf("      391·(%ld) + 299·(%ld) = %ld = gcd   %s\n",
+                 x, y, 391*x + 299*y, 391*x + 299*y == g ? "(resíduo 0)" : "— NÃO afirmo");
+          printf("      e o mesmo para o exemplo dele, 252 e 105:\n");
+          long x2, y2, g2 = iz_gcd(252, 105, &x2, &y2);
+          printf("      252·(%ld) + 105·(%ld) = %ld = gcd   %s\n",
+                 x2, y2, 252*x2 + 105*y2, 252*x2 + 105*y2 == g2 ? "(confere)" : "— NÃO afirmo"); }
+        break; }
+    case 5: {
+        tique("HIPÓTESE — p primo, p | ab, e suponha-se p ∤ a. É deste «suponha-se» que"
+              " sai tudo: se p não divide a, então gcd(p,a) = 1, porque os únicos"
+              " divisores de p são 1 e p");
+        tique("BÉZOUT — logo existem x, y com px + ay = 1. Note-se que o teorema anterior"
+              " é que faz este: sem Bézout esta prova não existe");
+        tique("MULTIPLICAR POR b — pbx + aby = b. O primeiro termo tem p; o segundo tem ab,"
+              " que p divide por hipótese. Logo p divide a soma, que é b");
+        { long p = 7, a = 10, b = 21;
+          long x, y; iz_gcd(p, a, &x, &y);
+          printf("      p=%ld, a=%ld, b=%ld:  p·(%ld) + a·(%ld) = %ld\n", p,a,b,x,y, p*x+a*y);
+          printf("      ×b:  %ld·(%ld) + %ld·(%ld) = %ld,  e p | ab = %ld ? %s\n",
+                 p, x*b, a*b, y, p*x*b + a*b*y, a*b, iz_div(p, a*b, 0) ? "sim" : "não");
+          printf("      logo p | b = %ld ? %s\n", b, iz_div(p, b, 0) ? "sim (resíduo 0)" : "NÃO"); }
+        tique("GUME — e é ESSENCIAL que p seja primo: com 4 (composto) o teorema é FALSO."
+              " 4 | 2·6 e 4 não divide nem 2 nem 6. A hipótese não é decoração");
+        printf("      4 | 12 sim;  4 | 2 ? %s;  4 | 6 ? %s  — o teorema cai\n",
+               iz_div(4,2,0) ? "sim" : "NÃO", iz_div(4,6,0) ? "sim" : "NÃO");
+        { int mal = 0, viu = 0;
+          for(long q = 2; q <= 40; q++){
+              if(!nt_primo(q)) continue;
+              for(long a = 1; a <= 40; a++) for(long b = 1; b <= 40; b++)
+                  if(iz_div(q, a*b, 0)){ viu++; if(!iz_div(q,a,0) && !iz_div(q,b,0)) mal++; }
+          }
+          printf("      varrido em %d casos com p primo: %d falhas\n", viu, mal); }
+        break; }
+    case 6: {
+        tique("EXISTÊNCIA, por indução forte — se n é primo, está feito; se não, n = ab"
+              " com 1 < a,b < n, e por hipótese de indução a e b fatoram-se. O produto"
+              " das duas fatorações é a de n. A descida termina porque os fatores"
+              " ENCOLHEM, e ℕ é bem ordenado");
+        tique("UNICIDADE, pelo LEMA DE EUCLIDES — se p₁…pₖ = q₁…qₘ, então p₁ divide o"
+              " produto da direita, logo divide algum qⱼ (é o lema), e como qⱼ é primo,"
+              " p₁ = qⱼ. Corta-se e repete-se. São DUAS provas diferentes a chegar ao"
+              " mesmo objeto — e é isso que ele queria");
+        { long pr[NT_FAT]; int ex[NT_FAT];
+          int k = nt_fatora(360, pr, ex, NT_FAT);
+          printf("      360 = ");
+          for(int i = 0; i < k; i++){ printf("%s%ld", i?"·":"", pr[i]); if(ex[i]>1) printf("^%d", ex[i]); }
+          printf("\n"); }
+        tique("VOLTA — e a fatoração multiplica-se de volta: se não devolvesse o número,"
+              " não era fatoração dele");
+        { int mal = 0, feitos = 0;
+          for(long m = 2; m <= 3000; m++){
+              long pr[NT_FAT]; int ex[NT_FAT];
+              int k = nt_fatora(m, pr, ex, NT_FAT);
+              if(nt_refaz(pr, ex, k) != m) mal++;
+              for(int i = 0; i < k; i++) if(!nt_primo(pr[i])) mal++;   /* e são PRIMOS */
+              feitos++;
+          }
+          printf("      %d números fatorados e refeitos, todos os fatores primos:"
+                 " %d falhas\n", feitos, mal); }
+        break; }
+    case 7: {
+        tique("ABSURDO — suponha-se que são só p₁,…,pₙ. Constrói-se N = p₁p₂…pₙ + 1");
+        tique("NENHUM DIVIDE — N ≡ 1 (mod pᵢ) para cada i, porque o produto é ≡ 0 e"
+              " sobra o 1. Logo nenhum pᵢ divide N");
+        tique("MAS N > 1 — logo tem um divisor primo (pelo Teorema Fundamental), e esse"
+              " primo não está na lista. Contradição");
+        tique("E O EXERCÍCIO — «não apenas reproduza a prova: construa explicitamente o"
+              " novo primo para 2, 3, 5, 7». Então constrói-se");
+        { long p[4] = {2,3,5,7}, N;
+          long novo = nm_primo_novo(p, 4, &N);
+          printf("      N = 2·3·5·7 + 1 = %ld", N);
+          printf(",  e o menor fator primo de N é %ld", novo);
+          printf("   (primo? %s)\n", nt_primo(novo) ? "sim" : "NÃO");
+          for(int i = 0; i < 4; i++)
+              printf("      N mod %ld = %ld%s", p[i], N % p[i], i==3?"\n":"; ");
+          printf("      e %ld não está em {2,3,5,7} — é o primo novo\n", novo);
+          /* e repete-se: cada lista dá um primo fora dela */
+          long lista[8] = {2,3,5,7,11,13,17,19}; int mal = 0;
+          for(int n2 = 1; n2 <= 6; n2++){
+              long NN, nv = nm_primo_novo(lista, n2, &NN);
+              if(!nt_primo(nv)) mal++;
+              for(int i = 0; i < n2; i++) if(nv == lista[i]) mal++;
+          }
+          printf("      e em 6 listas seguidas o primo construído é sempre NOVO:"
+                 " %d falhas\n", mal); }
+        break; }
+    case 8: {
+        tique("DEFINIÇÃO — a ≡ b (mod n) quer dizer n | (a − b). É uma equivalência, e é"
+              " COMPATÍVEL com + e ×: é isso que faz do quociente um anel e que autoriza"
+              " substituir antes de calcular");
+        tique("REDUZIR PRIMEIRO — «calcule sem calcular 37⁴». 37 ≡ 2 (mod 7), e a"
+              " compatibilidade deixa trocar 37 por 2 ANTES de elevar");
+        printf("      37 ≡ %ld (mod 7),  logo 37⁴ ≡ 2⁴ = 16 ≡ %ld (mod 7)\n",
+               37L % 7, 16L % 7);
+        tique("VOLTA — e mede-se pelos DOIS caminhos: a redução e a conta direta têm de"
+               " dar o mesmo, senão a compatibilidade era falsa");
+        { long dobra = iz_pot_mod(37, 4, 7);
+          long direto = ((37L*37L) % 7) * ((37L*37L) % 7) % 7;
+          printf("      pela dobra: %ld;  pela conta: %ld   %s\n",
+                 dobra, direto, dobra == direto ? "(resíduo 0)" : "— NÃO afirmo");
+          int mal = 0;
+          for(long n2 = 2; n2 <= 12; n2++) for(long a = -20; a <= 20; a++)
+          for(long b = -20; b <= 20; b++) for(long c = -6; c <= 6; c++){
+              if(!iz_cong(a,b,n2)) continue;
+              if(!iz_cong(a+c, b+c, n2)) mal++;
+              if(!iz_cong(a*c, b*c, n2)) mal++;
+          }
+          printf("      a compatibilidade com + e × varrida: %d falhas\n", mal); }
+        break; }
+    case 9: {
+        tique("QUANDO EXISTE — ax ≡ 1 (mod n) tem solução exatamente quando gcd(a,n) = 1."
+              " Se um primo dividisse os dois, dividia 1");
+        tique("EUCLIDES ESTENDIDO, NÃO TENTATIVA — e a diferença não é de estilo: a"
+              " tentativa custa n passos, a órbita custa log n. De ax + ny = 1 vem"
+              " ax ≡ 1, e o x é o inverso");
+        { long x, y, g = iz_gcd(17, 43, &x, &y);
+          printf("      gcd(17, 43) = %ld,  17·(%ld) + 43·(%ld) = %ld\n", g, x, y, 17*x+43*y);
+          long inv;
+          nm_inv_mod(17, 43, &inv);
+          printf("      logo 17⁻¹ ≡ %ld (mod 43)\n", inv);
+          tique("VOLTA — e multiplica-se para conferir: 17·inv tem de dar 1 módulo 43");
+          printf("      17·%ld = %ld = %ld·43 + %ld   %s\n",
+                 inv, 17*inv, 17*inv/43, (17*inv) % 43,
+                 (17*inv) % 43 == 1 ? "(resíduo 0)" : "— NÃO afirmo"); }
+        { int mal = 0, existe = 0, nao = 0;
+          for(long n2 = 2; n2 <= 60; n2++) for(long a = 1; a < n2; a++){
+              long inv;
+              int tem = nm_inv_mod(a, n2, &inv);
+              if(tem != (iz_gcd(a,n2,0,0) == 1)) mal++;      /* o critério */
+              if(tem){ if((a*inv) % n2 != 1 % n2) mal++; existe++; } else nao++;
+          }
+          printf("      o critério e a volta em %d com inverso e %d sem: %d falhas\n",
+                 existe, nao, mal); }
+        break; }
+    case 10: {
+        tique("PEQUENO FERMAT — p primo e p ∤ a dão a^(p−1) ≡ 1 (mod p). O porquê é a"
+              " ORDEM: os a^k percorrem um ciclo dentro dos p−1 resíduos não nulos, e o"
+              " comprimento do ciclo DIVIDE p−1");
+        { long ord = nm_ordem(7, 13);
+          printf("      a ordem de 7 módulo 13 é %ld, e %ld | 12 ? %s\n",
+                 ord, ord, 12 % ord == 0 ? "sim" : "NÃO"); }
+        tique("O EXERCÍCIO — 7¹⁰⁰ mod 13. Por Fermat 7¹² ≡ 1, e 100 = 12·8 + 4, logo"
+              " 7¹⁰⁰ ≡ 7⁴. É a divisão com resto a fazer o trabalho todo");
+        { printf("      100 = 12·%ld + %ld,  logo 7¹⁰⁰ ≡ 7^%ld (mod 13)\n",
+                 100L/12, 100L%12, 100L%12);
+          long p4 = iz_pot_mod(7, 4, 13), p100 = iz_pot_mod(7, 100, 13);
+          printf("      7⁴ mod 13 = %ld,  e 7¹⁰⁰ mod 13 pela dobra = %ld   %s\n",
+                 p4, p100, p4 == p100 ? "(dois caminhos, resíduo 0)" : "— NÃO afirmo"); }
+        tique("GUME — e a hipótese «p primo» não é decoração: com n = 15 (composto) e"
+              " a = 2, 2¹⁴ mod 15 NÃO dá 1");
+        printf("      2^14 mod 15 = %ld  (e não 1 — Fermat exige o primo)\n",
+               iz_pot_mod(2, 14, 15));
+        { int mal = 0, viu = 0;
+          for(long q = 2; q <= 60; q++){
+              if(!nt_primo(q)) continue;
+              for(long a = 1; a < q; a++){ if(iz_pot_mod(a, q-1, q) != 1) mal++; viu++; }
+          }
+          printf("      Fermat varrido em %d pares (a, p): %d falhas\n", viu, mal); }
+        break; }
+    case 11: {
+        tique("DEFINIÇÃO — φ(n) conta os k em [1,n] com gcd(k,n) = 1. É uma CONTAGEM,"
+              " e por isso tem sempre o caminho de a fazer à mão");
+        tique("A FÓRMULA — φ(n) = n·∏(1 − 1/p), e faz-se em INTEIROS: n/p·(p−1) por cada"
+              " primo DISTINTO. O expoente não entra, só o primo");
+        { long pr[NT_FAT]; int ex[NT_FAT];
+          int k = nt_fatora(60, pr, ex, NT_FAT);
+          printf("      60 = ");
+          for(int i = 0; i < k; i++){ printf("%s%ld", i?"·":"", pr[i]); if(ex[i]>1) printf("^%d", ex[i]); }
+          printf(",  e os primos distintos são ");
+          for(int i = 0; i < k; i++) printf("%s%ld", i?", ":"", pr[i]);
+          printf("\n      φ(60) = 60·(1−1/2)(1−1/3)(1−1/5) = %ld\n", nm_phi(60)); }
+        tique("VOLTA — pelos DOIS caminhos: a fórmula e a contagem à mão. Se"
+              " discordassem, uma das duas estava errada, e é isso que se quer apanhar");
+        { printf("      pela fórmula: %ld;  contando os coprimos: %ld   %s\n",
+                 nm_phi(60), nm_phi_conta(60),
+                 nm_phi(60) == nm_phi_conta(60) ? "(resíduo 0)" : "— NÃO afirmo");
+          int mal = 0;
+          for(long m = 1; m <= 400; m++) if(nm_phi(m) != nm_phi_conta(m)) mal++;
+          printf("      e em 400 números os dois caminhos concordam: %d falhas\n", mal);
+          printf("      (e os casos dele: φ(p) = p−1, φ(pq) = (p−1)(q−1) —"
+                 " φ(7) = %ld, φ(35) = %ld = 6·4)\n", nm_phi(7), nm_phi(35)); }
+        break; }
+    case 12: {
+        tique("EULER GENERALIZA FERMAT — com gcd(a,n) = 1 vale a^φ(n) ≡ 1 (mod n)."
+              " Quando n = p é primo, φ(p) = p−1 e recupera-se o pequeno Fermat:"
+              " é o MESMO teorema, e o φ é que estava escondido");
+        tique("PORQUÊ — os resíduos coprimos formam um grupo de ordem φ(n) sob a"
+              " multiplicação, e a ordem de qualquer elemento DIVIDE a ordem do grupo."
+              " É Lagrange, e é ele que faz os dois teoremas serem um");
+        { printf("      n = 15: φ = %ld, e as ordens dos coprimos dividem-no:  ", nm_phi(15));
+          for(long a = 1; a < 15; a++) if(iz_gcd(a,15,0,0)==1) printf("%ld ", nm_ordem(a,15));
+          printf("\n      2^φ(15) mod 15 = %ld\n", iz_pot_mod(2, nm_phi(15), 15)); }
+        tique("VOLTA — varrido: para todo n e todo a coprimo, a^φ(n) ≡ 1, e a ordem"
+              " divide φ(n). As duas coisas juntas, porque uma sem a outra é metade");
+        { int mal = 0, viu = 0;
+          for(long n2 = 2; n2 <= 80; n2++){
+              long f = nm_phi(n2);
+              for(long a = 1; a < n2; a++){
+                  if(iz_gcd(a,n2,0,0) != 1) continue;
+                  if(iz_pot_mod(a, f, n2) != 1 % n2) mal++;
+                  long o = nm_ordem(a, n2);
+                  if(o == 0 || f % o) mal++;                 /* a ordem divide φ */
+                  viu++;
+              }
+          }
+          printf("      %d pares (a, n) com gcd = 1: %d falhas\n", viu, mal); }
+        break; }
+    case 13: {
+        tique("O TEOREMA — com gcd(m,n) = 1, o sistema x ≡ a (mod m), x ≡ b (mod n) tem"
+              " solução ÚNICA módulo mn. A unicidade é tão teorema como a existência");
+        tique("A CONSTRUÇÃO — não se procura: escreve-se x = a + m·t e obriga-se"
+              " a + mt ≡ b (mod n), isto é t ≡ (b−a)·m⁻¹ (mod n). O inverso existe"
+              " porque m e n são coprimos — é o exercício 9 a servir este");
+        { long x, mod;
+          long inv; nm_inv_mod(3 % 5, 5, &inv);
+          printf("      m=3, n=5, a=2, b=3:  m⁻¹ mod n = %ld,  t ≡ (3−2)·%ld ≡ %ld (mod 5)\n",
+                 inv, inv, ((3-2)*inv) % 5);
+          if(nm_tcr(2, 3, 3, 5, &x, &mod)){
+              printf("      x = 2 + 3·%ld = %ld,  e a solução é x ≡ %ld (mod %ld)\n",
+                     ((3-2)*inv) % 5, x, x, mod);
+              tique("VOLTA — e substitui-se nas DUAS congruências, que é o que faz da"
+                    " construção uma solução");
+              printf("      %ld mod 3 = %ld (queria 2);  %ld mod 5 = %ld (queria 3)   %s\n",
+                     x, x%3, x, x%5,
+                     (x%3 == 2 && x%5 == 3) ? "(resíduo 0)" : "— NÃO afirmo");
+              printf("      e a UNICIDADE: nos %ld resíduos módulo %ld só um serve —",
+                     mod, mod);
+              long quantos = 0;
+              for(long v = 0; v < mod; v++) if(v%3 == 2 && v%5 == 3) quantos++;
+              printf(" achei %ld\n", quantos);
+          } }
+        tique("GUME — e sem a coprimalidade o teorema CAI: x ≡ 0 (mod 2) e x ≡ 1 (mod 4)"
+              " não tem solução nenhuma, porque 2 e 4 não são coprimos");
+        { long x, mod;
+          printf("      gcd(2,4) = %ld, e o sistema tem solução? %s\n",
+                 iz_gcd(2,4,0,0), nm_tcr(0,2,1,4,&x,&mod) ? "sim (?!)" : "NÃO"); }
+        break; }
+    case 14: {
+        tique("O CRITÉRIO — ax + by = c tem solução inteira exatamente quando"
+              " gcd(a,b) | c. A ida é Bézout escalado; a volta é que todo ax+by é"
+              " múltiplo do gcd");
+        { long g = iz_gcd(35, 22, 0, 0);
+          printf("      gcd(35, 22) = %ld, e %ld | 7 ? %s\n", g, g, 7 % g == 0 ? "sim" : "não"); }
+        tique("UMA SOLUÇÃO — escala-se a testemunha de Bézout pelo fator c/gcd");
+        { long x, y;
+          iz_diofantina(35, 22, 7, &x, &y);
+          printf("      x = %ld,  y = %ld:  35·(%ld) + 22·(%ld) = %ld   %s\n",
+                 x, y, x, y, 35*x + 22*y, 35*x + 22*y == 7 ? "(resíduo 0)" : "— NÃO afirmo");
+          tique("TODAS AS SOLUÇÕES — «depois descreva TODAS». A geral é"
+                " x = x₀ + (b/g)t, y = y₀ − (a/g)t, com t a correr ℤ: o que se soma a x"
+                " tem de ser cancelado por y, e o menor passo que o faz é b/g");
+          long g = iz_gcd(35, 22, 0, 0);
+          printf("      x = %ld + %ldt,  y = %ld − %ldt\n", x, 22/g, y, 35/g);
+          int mal = 0;
+          for(long t = -4; t <= 4; t++){
+              long xx = x + (22/g)*t, yy = y - (35/g)*t;
+              if(35*xx + 22*yy != 7) mal++;
+              if(t >= -2 && t <= 2) printf("        t=%2ld:  x=%4ld, y=%5ld  →  %ld\n",
+                                           t, xx, yy, 35*xx + 22*yy);
+          }
+          printf("      nove valores de t, todos soluções: %d falhas\n", mal);
+          /* e a COMPLETUDE da família: nenhuma solução fica de fora */
+          long fora = 0;
+          for(long xx = -200; xx <= 200; xx++){
+              long resto = 7 - 35*xx;
+              if(resto % 22) continue;
+              long yy = resto / 22, tt = (xx - x) / (22/g);
+              if(x + (22/g)*tt != xx || y - (35/g)*tt != yy) fora++;
+          }
+          printf("      e nenhuma solução de x ∈ [−200,200] fica FORA da família:"
+                 " %ld fora\n", fora); }
+        break; }
+    case 15: {
+        tique("A COINCIDÊNCIA — «a própria descida de Euclides produz os coeficientes»."
+              " Os termos da fração contínua SÃO os quocientes da mesma cadeia de restos"
+              " que dá o gcd. Não é analogia: é o mesmo rastro lido noutra coluna");
+        tn_euclides(391, 299, 1);
+        { long q[32];
+          size_t k = nm_fc(391, 299, q, 32);
+          printf("      e os quocientes, na ordem: [");
+          for(size_t i = 0; i < k; i++) printf(i==0?"%ld":(i==1?"; %ld":", %ld"), q[i]);
+          printf("]\n");
+          tique("VOLTA — e a FC reconstrói a fração: o convergente do ÚLTIMO termo tem de"
+                " dar 391/299 reduzido, ou não era a FC dela");
+          long p, d;
+          nm_convergente(q, k-1, &p, &d);
+          long g = iz_gcd(391, 299, 0, 0);
+          printf("      convergente final: %ld/%ld;  391/299 reduzido: %ld/%ld   %s\n",
+                 p, d, 391/g, 299/g,
+                 (p == 391/g && d == 299/g) ? "(resíduo 0)" : "— NÃO afirmo");
+          printf("      e o exemplo dele, 43/19 = ");
+          long q2[32]; size_t k2 = nm_fc(43, 19, q2, 32);
+          printf("[");
+          for(size_t i = 0; i < k2; i++) printf(i==0?"%ld":(i==1?"; %ld":", %ld"), q2[i]);
+          printf("]\n"); }
+        break; }
+    case 16: {
+        tique("DEFINIÇÃO — μ(1) = 1; μ(n) = 0 se algum expoente > 1; μ(n) = (−1)^k se n é"
+              " livre de quadrados com k primos. O zero não é um caso à parte: é o"
+              " cancelamento a acontecer");
+        tique("A IDENTIDADE — Σ_{d|n} μ(d) dá 1 em n = 1 e ZERO em n > 1. É"
+              " «cancelamento na árvore dos divisores»: os divisores livres de quadrados"
+              " emparelham-se por paridade do número de primos, e anulam-se");
+        { printf("      n = 12, divisores: ");
+          for(long d = 1; d <= 12; d++) if(12 % d == 0) printf("%ld ", d);
+          printf("\n      μ:  ");
+          for(long d = 1; d <= 12; d++) if(12 % d == 0) printf("μ(%ld)=%d  ", d, nm_mu(d));
+          printf("\n      soma = %ld\n", nm_soma_mu(12)); }
+        tique("VOLTA — e varre-se: 1 em n=1 e 0 em todo o resto, sem excepção nenhuma."
+              " Uma identidade com uma excepção não medida não é identidade");
+        { int mal = 0;
+          if(nm_soma_mu(1) != 1) mal++;
+          for(long m = 2; m <= 500; m++) if(nm_soma_mu(m) != 0) mal++;
+          printf("      n de 1 a 500: %d falhas\n", mal);
+          /* e o porquê medido: os livres de quadrados emparelham-se por paridade */
+          long pares = 0, impares = 0;
+          for(long d = 1; d <= 30; d++) if(30 % d == 0){
+              int m2 = nm_mu(d);
+              if(m2 == 1) pares++; else if(m2 == -1) impares++;
+          }
+          printf("      em n=30: %ld divisores com μ=+1 e %ld com μ=−1 — e é o"
+                 " emparelhamento que dá zero\n", pares, impares); }
+        break; }
+    case 17: {
+        tique("A TESE — «a fração contínua do quociente a/b é produzida pelo algoritmo de"
+              " Euclides, e os seus convergentes são as melhores aproximações racionais»."
+              " São duas afirmações, e as duas se medem");
+        tique("A PRIMEIRA — o rastro. A descida de a/b dá quocientes e restos; os"
+              " quocientes SÃO os termos da FC. Mede-se comparando os dois caminhos: os"
+              " quocientes tirados da descida e os termos da FC calculada");
+        { long a = 391, b = 299, q[32];
+          size_t k = nm_fc(a, b, q, 32);
+          long x = a, y = b; int i = 0, mal = 0;
+          while(y && i < (int)k){
+              if(x / y != q[i]) mal++;
+              long r = x % y; x = y; y = r; i++;
+          }
+          printf("      %zu quocientes da descida contra %zu termos da FC: %d divergências\n",
+                 k, k, mal); }
+        tique("A SEGUNDA — a MELHOR APROXIMAÇÃO, e com a EXCEÇÃO dita. Um convergente de"
+              " ordem ≥ 1 é melhor que qualquer fração de denominador ≤ o dele. O de"
+              " ordem ZERO é ⌊x⌋/1 e falha quando a parte que sobra passa de 1/2 — em"
+              " 5/3 ≈ 1,667 o mais perto com denominador 1 é 2, não 1. Eu tinha escrito"
+              " a versão sem exceção e a medida derrubou-ma");
+        { long a = 391, b = 299, q[32];
+          size_t k = nm_fc(a, b, q, 32);
+          for(size_t j = 0; j + 1 < k; j++){
+              long p, d;
+              nm_convergente(q, j, &p, &d);
+              /* |a/b − p/d| contra |a/b − u/v| para todo v ≤ d: em inteiros, compara-se
+               * |a·d − p·b|·v  com  |a·v − u·b|·d */
+              long melhor = 1, quantos = 0;
+              for(long v = 1; v <= d; v++) for(long u = 0; u <= (a*v)/b + 1; u++){
+                  if(u == p && v == d) continue;
+                  long e1 = a*d - p*b; if(e1 < 0) e1 = -e1;
+                  long e2 = a*v - u*b; if(e2 < 0) e2 = -e2;
+                  if(e2 * d < e1 * v) melhor = 0;      /* alguém mais perto: cai */
+                  quantos++;
+              }
+              printf("      ordem %zu — %ld/%ld: melhor que as %ld frações de"
+                     " denominador ≤ %ld ? %s\n", j, p, d, quantos, d, melhor ? "sim" : "NÃO");
+          }
+          printf("      e o caso onde a ordem 0 cai: 5/3 = [1; 1, 2], convergente 1/1,\n");
+          printf("      mas 2/1 está mais perto (|5−3| = 2 contra |5−6| = 1)\n"); }
+        tique("A VOLTA OBRIGATÓRIA — FC → convergente → fração original. Se o último"
+              " convergente não devolvesse a fração de partida, o rastro tinha perdido"
+              " informação, e o andar todo caía");
+        { int mal = 0, feitos = 0;
+          for(long a = 2; a <= 120; a++) for(long b = 1; b < a; b++){
+              long q[40];
+              size_t k = nm_fc(a, b, q, 40);
+              if(!k) continue;
+              long p, d;
+              nm_convergente(q, k-1, &p, &d);
+              long g = iz_gcd(a, b, 0, 0);
+              if(p != a/g || d != b/g) mal++;
+              feitos++;
+          }
+          printf("      %d frações: FC → convergente → original, %d falhas\n", feitos, mal);
+          printf("\n      Euclides = MDC = Bézout = FC — a mesma órbita, quatro saídas\n"); }
+        break; }
+    }
+}
+static int resolve_numeros(const char *f){
+    const char *p = f;
+    if(!strncmp(p, "numeros", 7)) p += 7;
+    else if(!strncmp(p, "números", 8)) p += 8;
+    else if(!strncmp(p, "teoria dos numeros", 18)) p += 18;
+    else if(!strncmp(p, "teoria dos números", 19)) p += 19;
+    else {
+        /* pelo NOME sozinho, que é como ele escreveria */
+        for(size_t i = 0; i < sizeof TN17/sizeof *TN17; i++)
+            if(!strcmp(p, TN17[i].nome)){ numeros_resolve(TN17[i].n); return 1; }
+        return 0;
+    }
+    while(*p == ' ') p++;
+    if(!*p){                                     /* o ÍNDICE */
+        printf("   teoria dos números — «numeros N» ou «numeros <nome>»\n");
+        printf("   (e a órbita é uma só: Euclides = MDC = Bézout = FC)\n\n");
+        for(size_t i = 0; i < sizeof TN17/sizeof *TN17; i++){
+            printf("     %2d  ", TN17[i].n);
+            esc_col(TN17[i].nome, 20);
+            printf("  %s\n", TN17[i].enunciado);
+        }
+        return 1;
+    }
+    if(*p >= '0' && *p <= '9'){
+        long n = 0;
+        while(*p >= '0' && *p <= '9') n = n*10 + (*p++ - '0');
+        while(*p == ' ') p++;
+        if(!*p && n >= 1 && n <= 17){ numeros_resolve((int)n); return 1; }
+        return 0;
+    }
+    for(size_t i = 0; i < sizeof TN17/sizeof *TN17; i++)
+        if(!strcmp(p, TN17[i].nome)){ numeros_resolve(TN17[i].n); return 1; }
+    return 0;
 }
 /* ── O MESMO PONTO POR QUATRO PORTAS ────────────────────────────────────────────────
  * O salto que o `eval.txt` pede no fim: «mostrar que esse fechamento NÃO DEPENDE DO
@@ -4120,6 +4663,7 @@ static int resolve_mostra(const char *f){ return resolve_mostra_em(f, "../papers
 static int resolve_simbolico(const char *fala){
     if(resolve_divisibilidade(fala)) return 1;     /* o relógio de 6 ticks */
     if(resolve_bezout(fala)) return 1;             /* a testemunha e o critério */
+    if(resolve_numeros(fala)) return 1;            /* teoria dos números, os 17 */
     if(resolve_identifica(fala)) return 1;         /* o mesmo ponto, quatro portas */
     if(resolve_prova_real(fala)) return 1;         /* as vinte provas do eval.txt */
     if(resolve_reais(fala)) return 1;              /* ℝ: o corte, e nunca um decimal */
@@ -5151,6 +5695,344 @@ static int teste(void){
                 if(e_conta(nu2)) roubadas++;
             }
             ok("e a membrana nao rouba o corpus: fala sem LaTeX nao vira conta", roubadas == 0);
+
+        /* ═══ §C32 TEORIA DOS NÚMEROS: E É TUDO A MESMA ÓRBITA ════════════════════
+         * «definição → propriedade → teorema → exercício de demonstração →
+         *  contraexemplo → volta. Nada de só lista de contas.»
+         *
+         * E a frase que organiza o andar todo, que é a descoberta e não o resumo:
+         *
+         *     Euclides = MDC = Bézout = FC — «diferentes saídas da MESMA órbita»
+         *
+         * Literal: a descida a = bq + r produz, do mesmo rastro, o gcd (o último resto
+         * não nulo), os coeficientes de Bézout (subindo) e os termos da fração contínua
+         * (os quocientes). Uma órbita, quatro leituras. */
+        printf("\n§C32 TEORIA DOS NÚMEROS: uma órbita, quatro saídas — e cada gume no lugar.\n\n");
+        {
+            /* (§1) A DIVISIBILIDADE, e o GUME que ele pede: a implicação não se inverte */
+            { int dmal = 0; long contra = 0;
+              for(long a = 1; a <= 10; a++) for(long b = -30; b <= 30; b++) for(long c = -30; c <= 30; c++){
+                  if(iz_div(a,b,0) && iz_div(b,c,0) && !iz_div(a,c,0)) dmal++;   /* transitiva */
+                  if(!iz_div(a,b,0) || !iz_div(a,c,0)) continue;
+                  for(long x = -4; x <= 4; x++) for(long y = -4; y <= 4; y++)
+                      if(!iz_div(a, b*x + c*y, 0)) dmal++;                       /* a|(bx+cy) */
+              }
+              /* «procure um caso em que apenas a|c seja verdadeiro, sem a|b» — e acha-se */
+              for(long a = 2; a <= 12; a++) for(long b = 2; b <= 12; b++) for(long c = 2; c <= 60; c++)
+                  if(iz_div(b,c,0) && !iz_div(a,b,0) && iz_div(a,c,0)) contra++;
+              ok("a DIVISIBILIDADE é transitiva e fecha na COMBINAÇÃO LINEAR — a|b ∧ a|c"
+                 " ⟹ a|(bx+cy), que é a distributividade a pôr o a em evidência e é a"
+                 " mãe de todo o andar. E o GUME que ele pede EXISTE: há casos com a|c"
+                 " sem a|b, logo a implicação não se inverte",
+                 dmal == 0 && contra > 0); }
+
+            /* (§2)(§3) EUCLIDES e BÉZOUT: a identidade do passo, a definição em TRÊS
+             * pontos, e o gcd como MENOR positivo de {ax+by} — a boa ordenação */
+            { int emal = 0;
+              for(long a = 1; a <= 60; a++) for(long b = 1; b <= 60; b++){
+                  long g = iz_gcd(a,b,0,0);
+                  for(long q = -3; q <= 3; q++)
+                      if(g != iz_gcd(b, a - q*b, 0, 0)) emal++;      /* o passo da órbita */
+                  if(!iz_div(g,a,0) || !iz_div(g,b,0)) emal++;       /* d|a e d|b */
+                  for(long d = 1; d <= a && d <= b; d++)             /* e todo comum divide d */
+                      if(a % d == 0 && b % d == 0 && g % d) emal++;
+              }
+              for(long a = 1; a <= 30; a++) for(long b = 1; b <= 30; b++){
+                  long menor = 0, x, y, g = iz_gcd(a,b,&x,&y);
+                  if(a*x + b*y != g) emal++;                          /* a testemunha */
+                  for(long u = -30; u <= 30; u++) for(long v = -30; v <= 30; v++){
+                      long t = a*u + b*v;
+                      if(t > 0 && (menor == 0 || t < menor)) menor = t;
+                  }
+                  if(menor != g) emal++;                              /* o MENOR positivo É o gcd */
+              }
+              long x4, y4, g4 = iz_gcd(391, 299, &x4, &y4);
+              printf("      gcd(391,299) = %ld, e 391·(%ld) + 299·(%ld) = %ld\n",
+                     g4, x4, y4, 391*x4 + 299*y4);
+              ok("EUCLIDES: o passo gcd(a,b) = gcd(b, a−qb) vale por DUPLA INCLUSÃO dos"
+                 " divisores, a definição confere nos TRÊS pontos (d|a, d|b, todo comum"
+                 " divide d), e BÉZOUT fecha: o gcd É o MENOR positivo de {ax+by} — a boa"
+                 " ordenação a decidir, não uma busca",
+                 emal == 0 && g4 == 23 && 391*x4 + 299*y4 == 23); }
+
+            /* (§5)(§6) O LEMA DE EUCLIDES e o TEOREMA FUNDAMENTAL — e o gume do lema é o
+             * composto, onde ele é FALSO. Sem esse gume, «primo» seria decoração. */
+            { int lmal = 0; long viu = 0, falhou_composto = 0;
+              for(long p = 2; p <= 40; p++){
+                  if(!nt_primo(p)) continue;
+                  for(long a = 1; a <= 40; a++) for(long b = 1; b <= 40; b++)
+                      if(iz_div(p, a*b, 0)){ viu++; if(!iz_div(p,a,0) && !iz_div(p,b,0)) lmal++; }
+              }
+              /* e com COMPOSTO o teorema cai — conta-se onde */
+              for(long n2 = 4; n2 <= 30; n2++){
+                  if(nt_primo(n2)) continue;
+                  for(long a = 2; a <= 30; a++) for(long b = 2; b <= 30; b++)
+                      if(iz_div(n2, a*b, 0) && !iz_div(n2,a,0) && !iz_div(n2,b,0)) falhou_composto++;
+              }
+              /* o TFA: a volta da fatoração, e os fatores são todos primos */
+              int fmal = 0;
+              for(long m = 2; m <= 3000; m++){
+                  long pr[NT_FAT]; int ex[NT_FAT];
+                  int k = nt_fatora(m, pr, ex, NT_FAT);
+                  if(nt_refaz(pr, ex, k) != m) fmal++;
+                  for(int i = 0; i < k; i++) if(!nt_primo(pr[i])) fmal++;
+                  for(int i = 1; i < k; i++) if(pr[i] <= pr[i-1]) fmal++;   /* e ordenados: a forma é ÚNICA */
+              }
+              printf("      o lema vale em %ld casos com p primo, e FALHA em %ld com"
+                     " composto — é aí que a hipótese se paga\n", viu, falhou_composto);
+              ok("o LEMA DE EUCLIDES (p|ab ⟹ p|a ou p|b) vale sempre com p PRIMO e falha"
+                 " com composto — e é ele que dá a UNICIDADE do Teorema Fundamental,"
+                 " cuja existência vem da indução: duas provas diferentes ao mesmo objeto."
+                 " A volta refaz 2999 fatorações, com os fatores primos e ordenados",
+                 lmal == 0 && fmal == 0 && viu > 1000 && falhou_composto > 0); }
+
+            /* (§7) A INFINITUDE, com o primo CONSTRUÍDO — «não apenas reproduza a prova» */
+            { int imal = 0; long p[9] = {2,3,5,7,11,13,17,19,23};
+              for(int n2 = 1; n2 <= 7; n2++){
+                  long N, novo = nm_primo_novo(p, n2, &N);
+                  if(!nt_primo(novo)) imal++;                       /* é primo */
+                  for(int i = 0; i < n2; i++){
+                      if(novo == p[i]) imal++;                      /* e é NOVO */
+                      if(N % p[i] != 1) imal++;                     /* N ≡ 1 (mod pᵢ) */
+                  }
+              }
+              long N4, novo4 = nm_primo_novo(p, 4, &N4);
+              printf("      2·3·5·7 + 1 = %ld, e o primo novo é %ld\n", N4, novo4);
+              ok("A INFINITUDE dos primos com o novo CONSTRUÍDO: N = p₁…pₙ + 1 deixa resto"
+                 " 1 em cada pᵢ (medido), logo o seu menor fator primo está FORA da lista"
+                 " — e em sete listas seguidas ele é sempre primo e sempre novo",
+                 imal == 0 && N4 == 211 && novo4 == 211); }
+
+            /* (§8)(§9)(§10)(§12) O ANEL MODULAR INTEIRO: congruência, inverso, Fermat,
+             * Euler — e a ORDEM é que os liga, porque ela DIVIDE φ (Lagrange) */
+            { int mmal = 0; long com_inv = 0, sem_inv = 0, pares = 0;
+              for(long n2 = 2; n2 <= 60; n2++){
+                  long f = nm_phi(n2);
+                  for(long a = 1; a < n2; a++){
+                      long inv;
+                      int tem = nm_inv_mod(a, n2, &inv);
+                      if(tem != (iz_gcd(a,n2,0,0) == 1)) mmal++;     /* o critério */
+                      if(tem){
+                          if((a*inv) % n2 != 1 % n2) mmal++;         /* e a volta */
+                          if(iz_pot_mod(a, f, n2) != 1 % n2) mmal++; /* EULER */
+                          long o = nm_ordem(a, n2);
+                          if(o == 0 || f % o) mmal++;                /* a ordem DIVIDE φ */
+                          com_inv++; pares++;
+                      } else sem_inv++;
+                  }
+                  if(nt_primo(n2)){
+                      if(nm_phi(n2) != n2 - 1) mmal++;               /* φ(p) = p−1 */
+                      for(long a = 1; a < n2; a++)
+                          if(iz_pot_mod(a, n2-1, n2) != 1) mmal++;   /* FERMAT */
+                  }
+              }
+              long inv17; nm_inv_mod(17, 43, &inv17);
+              printf("      17⁻¹ mod 43 = %ld (17·%ld = %ld ≡ %ld);  7¹⁰⁰ mod 13 = %ld\n",
+                     inv17, inv17, 17*inv17, (17*inv17) % 43, iz_pot_mod(7,100,13));
+              ok("O ANEL MODULAR fecha: o inverso existe ⟺ gcd = 1 e a volta confere;"
+                 " FERMAT e EULER são o MESMO teorema, e o que os une é a ORDEM dividir"
+                 " φ(n) (Lagrange) — medido em todos os coprimos até 60. φ(p) = p−1"
+                 " recupera um do outro",
+                 mmal == 0 && com_inv > 500 && sem_inv > 100 && inv17 == 38
+                 && iz_pot_mod(7,100,13) == 9); }
+
+            /* (§11) φ PELOS DOIS CAMINHOS — a fórmula do produto e a contagem à mão */
+            { int pmal = 0;
+              for(long m = 1; m <= 400; m++) if(nm_phi(m) != nm_phi_conta(m)) pmal++;
+              /* e os casos dele: φ(p) = p−1 e φ(pq) = (p−1)(q−1) */
+              int casos = 0;
+              for(long p1 = 2; p1 <= 20; p1++) for(long p2 = 2; p2 <= 20; p2++){
+                  if(!nt_primo(p1) || !nt_primo(p2) || p1 == p2) continue;
+                  if(nm_phi(p1*p2) != (p1-1)*(p2-1)) pmal++;
+                  casos++;
+              }
+              printf("      φ(60) = %ld pela fórmula e %ld pela contagem;"
+                     " φ(pq) = (p−1)(q−1) em %d pares\n",
+                     nm_phi(60), nm_phi_conta(60), casos);
+              ok("φ por DOIS CAMINHOS que têm de concordar — a fórmula n·∏(1−1/p) feita em"
+                 " inteiros e a contagem directa dos coprimos, iguais em 400 números — e"
+                 " os dois casos dele (φ(p) = p−1, φ(pq) = (p−1)(q−1)) medidos à parte",
+                 pmal == 0 && nm_phi(60) == 16 && casos > 40); }
+
+            /* (§13) O TEOREMA CHINÊS, com a UNICIDADE medida e o gume da coprimalidade */
+            { int cmal = 0; long resolvidos = 0, recusados = 0;
+              for(long m = 2; m <= 20; m++) for(long n2 = 2; n2 <= 20; n2++)
+              for(long a = 0; a < m; a++) for(long b = 0; b < n2; b++){
+                  long x, mod;
+                  int tem = nm_tcr(a, m, b, n2, &x, &mod);
+                  if(tem != (iz_gcd(m,n2,0,0) == 1)) cmal++;         /* o critério */
+                  if(!tem){ recusados++; continue; }
+                  if(x % m != a || x % n2 != b) cmal++;              /* a VOLTA */
+                  if(mod != m*n2) cmal++;
+                  long quantos = 0;                                  /* e a UNICIDADE */
+                  for(long v = 0; v < mod; v++) if(v % m == a && v % n2 == b) quantos++;
+                  if(quantos != 1) cmal++;
+                  resolvidos++;
+              }
+              long x13, m13;
+              nm_tcr(2, 3, 3, 5, &x13, &m13);
+              printf("      x ≡ 2 (mod 3), x ≡ 3 (mod 5)  →  x ≡ %ld (mod %ld);"
+                     " %ld sistemas resolvidos e %ld recusados\n",
+                     x13, m13, resolvidos, recusados);
+              ok("o TEOREMA CHINÊS: solução ÚNICA módulo mn quando gcd(m,n) = 1 — e a"
+                 " unicidade mede-se contando os resíduos que servem (tem de ser 1, nunca"
+                 " 2). Sem a coprimalidade o sistema é RECUSADO, e isso também se conta:"
+                 " o gume tem casos dos dois lados",
+                 cmal == 0 && x13 == 8 && m13 == 15 && resolvidos > 1000 && recusados > 100); }
+
+            /* (§14) AS DIOFANTINAS, e «descreva TODAS»: a família tem de ser COMPLETA —
+             * não basta gerar soluções, nenhuma pode ficar de fora */
+            { int dmal2 = 0;
+              for(long a = 1; a <= 12; a++) for(long b = 1; b <= 12; b++) for(long c = -12; c <= 12; c++){
+                  long x, y, g = iz_gcd(a,b,0,0);
+                  int tem = iz_diofantina(a,b,c,&x,&y);
+                  if(tem != (c % g == 0)) dmal2++;
+                  if(!tem) continue;
+                  if(a*x + b*y != c) dmal2++;
+                  for(long t = -5; t <= 5; t++)                      /* a família gera */
+                      if(a*(x + (b/g)*t) + b*(y - (a/g)*t) != c) dmal2++;
+                  for(long xx = -80; xx <= 80; xx++){                /* e é COMPLETA */
+                      long resto = c - a*xx;
+                      if(resto % b) continue;
+                      long yy = resto / b;
+                      if((xx - x) % (b/g)) { dmal2++; continue; }
+                      long tt = (xx - x) / (b/g);
+                      if(x + (b/g)*tt != xx || y - (a/g)*tt != yy) dmal2++;
+                  }
+              }
+              ok("as DIOFANTINAS decidem-se pelo critério gcd|c, a solução exibe-se, e a"
+                 " família x = x₀+(b/g)t, y = y₀−(a/g)t é COMPLETA — nenhuma solução do"
+                 " intervalo fica de fora dela. «Descreva todas» não é gerar algumas:"
+                 " é não deixar nenhuma escapar, e é isso que aqui se mede", dmal2 == 0); }
+
+            /* (§15)(§17) A ÓRBITA ÚNICA: os quocientes da descida SÃO os termos da FC, a
+             * volta reconstrói a fração, e os convergentes são as MELHORES aproximações */
+            /* E OS NUMERADORES NEGATIVOS ENTRAM, porque é só com eles que o quociente
+             * pelo CHÃO se distingue do truncado: em C o `/` trunca para zero, e para
+             * positivos as duas convenções coincidem. Sem negativos o ramo da correção
+             * NUNCA CORRE — e a mutação que o apagava sobrevivia à varredura inteira. */
+            { int omal = 0, feitos = 0, negativos = 0;
+              for(long a = -120; a <= 120; a++) for(long b = 1; b <= 120; b++){
+                  if(a == 0) continue;
+                  long q[40];
+                  size_t k = nm_fc(a, b, q, 40);
+                  if(!k) continue;
+                  if(a < 0) negativos++;
+                  /* os quocientes são os da descida, feita pelo CHÃO — que é a convenção
+                   * da FC — e são dois caminhos sobre o mesmo rastro */
+                  long x = a, y = b; size_t i = 0;
+                  while(y && i < k){
+                      long tq = x / y, r = x - tq*y;
+                      if(r < 0){ tq--; r += y; }
+                      if(tq != q[i]) omal++;
+                      x = y; y = r; i++;
+                  }
+                  if(i != k) omal++;
+                  long g = iz_gcd(a, b, 0, 0);
+                  if(x != g && x != -g) omal++;         /* e o último resto É o gcd */
+                  long p2, d2;
+                  nm_convergente(q, k-1, &p2, &d2);     /* A VOLTA */
+                  if(p2 * b != a * d2) omal++;          /* produto cruzado: a mesma fração */
+                  feitos++;
+              }
+              /* A MELHOR APROXIMAÇÃO, E A EXCEÇÃO QUE A MEDIDA ENCONTROU.
+               * Eu tinha escrito «todo convergente é a melhor aproximação do seu
+               * denominador» e a asserção CAIU — sempre em j = 0. E com razão: o
+               * convergente de ordem zero é ⌊x⌋/1, e para 5/3 ≈ 1,667 o mais perto com
+               * denominador 1 é 2, não 1. A partir de j ≥ 1 o teorema vale; o j = 0 falha
+               * EXATAMENTE quando a parte fracionária passa de 1/2 — e isso não se
+               * esconde alargando o enunciado: mede-se nos dois sentidos. */
+              int amal = 0, testados = 0, zero_mal = 0, zero_falhou = 0, zero_bem = 0;
+              for(long a = 5; a <= 60; a++) for(long b = 1; b < a; b++){
+                  long q[40];
+                  size_t k = nm_fc(a, b, q, 40);
+                  for(size_t j = 0; j + 1 < k; j++){
+                      long p2, d2;
+                      nm_convergente(q, j, &p2, &d2);
+                      int bateram = 0;
+                      for(long v = 1; v <= d2; v++) for(long u = 0; u <= (a*v)/b + 1; u++){
+                          if(u == p2 && v == d2) continue;
+                          long e1 = a*d2 - p2*b; if(e1 < 0) e1 = -e1;
+                          long e2 = a*v - u*b;   if(e2 < 0) e2 = -e2;
+                          if(e2 * d2 < e1 * v) bateram = 1;
+                      }
+                      if(j == 0){
+                          /* o critério exato: falha ⟺ a fração que sobra passa de 1/2,
+                           * isto é 2·(a − q₀b) > b */
+                          int passa_meio = 2*(a - q[0]*b) > b;
+                          if(bateram != passa_meio) zero_mal++;
+                          if(bateram) zero_falhou++; else zero_bem++;
+                      } else {
+                          if(bateram) amal++;            /* de j ≥ 1 nenhum pode cair */
+                          testados++;
+                      }
+                  }
+              }
+              long q43[16]; size_t k43 = nm_fc(43, 19, q43, 16);
+              printf("      43/19 = [%ld; %ld, %ld, %ld] (o exemplo dele), e %d frações"
+                     " fazem a volta — %d com numerador NEGATIVO, que é onde o quociente"
+                     " pelo chão se distingue do truncado\n",
+                     q43[0], q43[1], q43[2], q43[3], feitos, negativos);
+              printf("      e a melhor aproximação: 0 falhas de j ≥ 1, e o j = 0 falha em"
+                     " %d casos e acerta em %d — exatamente quando a parte que sobra"
+                     " passa de 1/2\n", zero_falhou, zero_bem);
+              ok("A ÓRBITA É UMA SÓ: os quocientes da descida de Euclides SÃO os termos da"
+                 " fração contínua e o último resto É o gcd — medido nas duas colunas do"
+                 " mesmo rastro; a volta FC → convergente → fração reconstrói 7140"
+                 " frações. E os convergentes de ordem ≥ 1 são as MELHORES aproximações do"
+                 " seu denominador, com a EXCEÇÃO do de ordem 0 (que é ⌊x⌋/1) a falhar"
+                 " exatamente quando a parte fracionária passa de 1/2 — medido nos dois"
+                 " sentidos, porque foi a medida que a encontrou",
+                 omal == 0 && amal == 0 && zero_mal == 0 && zero_falhou > 0 && zero_bem > 0
+                 && feitos > 7000 && testados > 100 && negativos > 1000
+                 && k43 == 4 && q43[0] == 2 && q43[1] == 3 && q43[2] == 1 && q43[3] == 4); }
+
+            /* (§16) MÖBIUS — o cancelamento na árvore dos divisores */
+            { int mumal = 0;
+              if(nm_soma_mu(1) != 1) mumal++;
+              for(long m = 2; m <= 500; m++) if(nm_soma_mu(m) != 0) mumal++;
+              /* e a definição confere com a fatoração, caso a caso */
+              for(long m = 1; m <= 300; m++){
+                  long pr[NT_FAT]; int ex[NT_FAT];
+                  int k = nt_fatora(m, pr, ex, NT_FAT), quad = 0;
+                  for(int i = 0; i < k; i++) if(ex[i] > 1) quad = 1;
+                  int esperado = (m == 1) ? 1 : quad ? 0 : ((k % 2) ? -1 : 1);
+                  if(nm_mu(m) != esperado) mumal++;
+              }
+              printf("      n=12: μ(1)+μ(2)+μ(3)+μ(4)+μ(6)+μ(12) = %d%+d%+d%+d%+d%+d = %ld\n",
+                     nm_mu(1), nm_mu(2), nm_mu(3), nm_mu(4), nm_mu(6), nm_mu(12),
+                     nm_soma_mu(12));
+              ok("MÖBIUS: Σ_{d|n} μ(d) dá 1 em n=1 e ZERO em todo o resto até 500 — é o"
+                 " «cancelamento na árvore dos divisores», e os livres de quadrados"
+                 " emparelham-se por paridade. Uma identidade com uma excepção não medida"
+                 " não era identidade",
+                 mumal == 0 && nm_soma_mu(12) == 0 && nm_soma_mu(1) == 1); }
+
+            /* E OS DEZASSETE CORREM — pelo número e pelo nome, com o fora de alcance
+             * recusado. Uma fala que morre calada não falha: desaparece. */
+            { int nmal2 = 0, por_n = 0, por_nome = 0;
+              fflush(stdout);
+              int guarda = dup(1), nulo = open("/dev/null", O_WRONLY);
+              if(guarda >= 0 && nulo >= 0) dup2(nulo, 1);
+              for(int k = 1; k <= 17; k++){
+                  char fala[64];
+                  snprintf(fala, sizeof fala, "numeros %d", k);
+                  if(resolve_numeros(fala)) por_n++; else nmal2++;
+              }
+              for(size_t i = 0; i < sizeof TN17/sizeof *TN17; i++)
+                  if(resolve_numeros(TN17[i].nome)) por_nome++; else nmal2++;
+              if(resolve_numeros("numeros 18")) nmal2++;
+              if(resolve_numeros("numeros 0")) nmal2++;
+              fflush(stdout);
+              if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
+              if(nulo >= 0) close(nulo);
+              printf("      os dezassete: %d pelo número, %d pelo nome, e a 18 é recusada\n",
+                     por_n, por_nome);
+              ok("OS DEZASSETE do `eval.txt` correm todos, pelo NÚMERO e pelo NOME, e o"
+                 " índice fora de alcance é RECUSADO — varrido, porque confiar em ter"
+                 " escrito os dezassete não é medir que os dezassete correm",
+                 nmal2 == 0 && por_n == 17 && por_nome == 17); }
+        }
 
         /* ═══ §C31 O MESMO PONTO POR QUATRO PORTAS — E A VOLTA A IDENTIFICAR ══════
          * É o que o `eval.txt` pede no fim, e é o salto que fecha o andar:
