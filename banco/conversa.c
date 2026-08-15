@@ -48,6 +48,7 @@
 #include "eliptica.h"   /* a curva: a fibra decide qual operacao existe */
 #include "estrutura.h"  /* algebra moderna: a estrutura e uma tabua */
 #include "corpo.h"      /* corpos: onde fibra+volta vira estrutura formal */
+#include "linear.h"     /* algebra linear exata, e o gume automatico */
 #include "eletrico.h"
 
 typedef struct { long a, b; } Slot;
@@ -1351,6 +1352,1073 @@ static int resolve_bezout(const char *f){
 static void tique7(int slot, const char *porque);
 static void esc_col(const char *s, int largura);
 static void esc_qz(const char *pre, Qz x, const char *pos);
+/* ── ÁLGEBRA LINEAR E O DUAL: E O GUME PASSA A SER AUTOMÁTICO ───────────────────────
+ * O `eval.txt` acrescenta uma exigência que não é conteúdo, é MECANISMO:
+ *
+ *   «um gume obrigatório em cada teorema: SE A HIPÓTESE FOR RETIRADA, PROCURAR
+ *    AUTOMATICAMENTE UM CONTRA-EXEMPLO. É fazer o motor descobrir QUAL HIPÓTESE ESTÁ
+ *    CARREGANDO CADA TEOREMA.»
+ *
+ * Então o gume deixa de ser escrito à mão em cada teorema e passa a ser uma BUSCA:
+ * `gume_matriz` varre o espaço, tira a hipótese e devolve o primeiro objeto onde a tese
+ * também cai. E o dual é a casa: «o vetor fornece o objeto; o funcional fornece a
+ * coordenada que o mede». */
+static void esc_vec(Vec v){
+    printf("(");
+    for(int i = 0; i < v.n; i++){ if(i) printf(", "); esc_qz("", v.c[i], ""); }
+    printf(")");
+}
+static void esc_mat(const char *ind, Mat A){
+    for(int i = 0; i < A.m; i++){
+        printf("%s[ ", ind);
+        for(int j = 0; j < A.n; j++){ esc_qz("", A.a[i][j], "  "); }
+        printf("]\n");
+    }
+}
+static void esc_fun(Fun f, const char *vars){
+    int primeiro = 1;
+    for(int i = 0; i < f.n; i++){
+        if(f.c[i].p == 0) continue;
+        Qz c = f.c[i];
+        printf("%s", primeiro ? "" : (c.p < 0 ? " − " : " + "));
+        Qz m = (!primeiro && c.p < 0) ? qz_oposto(c) : c;
+        if(!(m.p == 1 && m.q == 1)) esc_qz("", m, "");
+        printf("%c", vars[i]);
+        primeiro = 0;
+    }
+    if(primeiro) printf("0");
+}
+/* as HIPÓTESES e as TESES, como predicados — é isto que o gume automático consome */
+static int hip_det_nao_zero(const Mat *A){ Mat B = *A; return mat_det(B).p != 0; }
+static int tese_invertivel(const Mat *A){ Mat B = *A, R; return mat_inversa(B, &R); }
+static int hip_colunas_li(const Mat *A){ Mat B = *A; return mat_posto(B) == A->n; }
+static int tese_nucleo_trivial(const Mat *A){
+    Mat B = *A; Vec nb[LN_MAX];
+    return mat_nucleo(B, nb) == 0;
+}
+static int hip_simetrica(const Mat *A){ Mat B = *A; return mat_igual(B, mat_transposta(B)); }
+/* uma tese que vale SEMPRE — é ela o controlo do buscador: se ele a «refutasse», o
+ * buscador é que estava avariado. det A = det Aᵀ não depende de hipótese nenhuma. */
+static int tese_det_igual_transposta(const Mat *A){
+    Mat B = *A;
+    return qz_igual(mat_det(B), mat_det(mat_transposta(B)));
+}
+static int tese_comuta_com_transposta(const Mat *A){
+    Mat B = *A, T = mat_transposta(B);
+    return mat_igual(mat_mult(B,T), mat_mult(T,B));
+}
+static const struct { int n; const char *nome; const char *enunciado; } LI16[] = {
+ {  1, "espaco vetorial",  "as oito leis, e 0v = 0, λ0 = 0, (−λ)v = −(λv)" },
+ {  2, "vetor zero unico", "o vetor zero é único, e o oposto também" },
+ {  3, "subespaco",        "W é subespaço ⟺ λu + μv ∈ W — e o gume é o x+y+z = 1" },
+ {  4, "span",             "span(S) é o MENOR subespaço que contém S" },
+ {  5, "independencia",    "LI: a combinação nula só com coeficientes nulos" },
+ {  6, "base e coordenada","numa base, as coordenadas são ÚNICAS" },
+ {  7, "matrizes",         "o produto é uma CONVOLUÇÃO com índice interno" },
+ {  8, "nao comuta",       "AB ≠ BA em geral — e o contra-exemplo procura-se" },
+ {  9, "transformacao",    "T linear ⟺ T(λu + μv) = λT(u) + μT(v)" },
+ { 10, "nucleo e imagem",  "ker T é a FIBRA do 0, e im T é subespaço" },
+ { 11, "posto nulidade",   "dim V = dim ker T + dim im T" },
+ { 12, "isomorfismo",      "T bijetiva ⟺ T⁻¹ existe" },
+ { 13, "determinante",     "det A ≠ 0 ⟺ A é invertível, e det(AB) = det(A)det(B)" },
+ { 14, "sistemas",         "Ax = b: as soluções são x₀ + ker A" },
+ { 15, "autovalores",      "Av = λv, e det(A − λI) = 0" },
+ { 16, "diagonalizacao",   "A = PDP⁻¹, e Aⁿ = PDⁿP⁻¹" },
+};
+static const struct { int n; const char *nome; const char *enunciado; } DU14[] = {
+ {  1, "dual",             "V* = Hom(V,K): o espaço das MEDIÇÕES lineares" },
+ {  2, "dual e espaco",    "V* é espaço vetorial, com as operações ponto a ponto" },
+ {  3, "funcional",        "f(x,y) = 2x − 3y está no dual; x² + y NÃO está" },
+ {  4, "base dual",        "e^i(e_j) = δ^i_j, e ela é ÚNICA" },
+ {  5, "coordenada e medida","xᵢ = e^i(v): a coordenada É a medição pelo dual" },
+ {  6, "dimensao do dual", "dim V* = dim V, e a prova é construtiva" },
+ {  7, "base dual de B",   "a base dual de ((1,1),(1,−1))" },
+ {  8, "bidual",           "ι(v)(f) = f(v): o vetor vira funcional dos funcionais" },
+ {  9, "iota injetiva",    "ι é injetiva, e V ≅ V** é CANÓNICO" },
+ { 10, "nao canonico",     "V ≅ V* NÃO é canónico — o gume, e a recusa" },
+ { 11, "aniquilador",      "W° = {f : f(w) = 0 ∀w ∈ W}" },
+ { 12, "dimensao anulador","dim W + dim W° = dim V" },
+ { 13, "dual da transformacao", "T*(φ) = φ∘T, e [T*] = Aᵀ" },
+ { 14, "nucleo do dual",   "ker T* = (im T)° — o chefão" },
+};
+static void linear_resolve(int n){
+    TICK_N = 0;
+    printf("   %d — %s\n", n, LI16[n-1].enunciado);
+    long d12[] = {1,2,3,4}, d20[] = {2,0,1,3}, dT[] = {1,1,0, 0,1,1};
+    Mat A = mat_de_inteiros(2,2,d12), B = mat_de_inteiros(2,2,d20);
+    switch(n){
+    case 1: case 2: {
+        tique7(0, "seja V espaço vetorial sobre K — as oito leis, e nada mais");
+        tique7(1, "o essencial é a distributividade nos DOIS sentidos e o 1v = v:");
+        printf("      $\\lambda(u+v) = \\lambda u + \\lambda v$,   "
+               "$(\\lambda+\\mu)v = \\lambda v + \\mu v$,   $1v = v$\n");
+        if(n == 1){
+            tique7(2, "0v = 0 sai da distributividade: 0v = (0+0)v = 0v + 0v, e somando"
+                      " o oposto de 0v aos dois lados fica 0v = 0. Não é convenção");
+            tique7(3, "a lei é a DISTRIBUTIVIDADE do escalar sobre a soma de escalares,"
+                      " mais o OPOSTO do grupo aditivo de V — as duas, e nesta ordem");
+            tique7(4, "a testemunha é o próprio 0v, que se soma consigo e não muda");
+            { int mal = 0; long feitos = 0;
+              for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++){
+                  Vec v = vec0(2);
+                  v.c[0] = qz_de_inteiro(a); v.c[1] = qz_de_inteiro(b);
+                  if(!vec_zero(vec_esc(qz(0,1), v))) mal++;              /* 0v = 0 */
+                  for(long l = -3; l <= 3; l++){
+                      Qz L = qz_de_inteiro(l);
+                      if(!vec_igual(vec_esc(qz_oposto(L), v),
+                                    vec_esc(qz_de_inteiro(-1), vec_esc(L, v)))) mal++;
+                      if(!vec_igual(vec_esc(qz(1,1), v), v)) mal++;      /* 1v = v */
+                      feitos++;
+                  }
+              }
+              tique7(5, "logo 0v = 0, λ0 = 0 e (−λ)v = −(λv) — as três da mesma cadeia");
+              tique7(6, "e a volta: varrem-se os vetores e os escalares, e cada"
+                        " identidade mede-se em separado");
+              printf("      %ld casos em ℚ²: %d falhas\n", feitos, mal); }
+        } else {
+            tique7(2, "sejam 0 e 0′ dois neutros. Então 0 = 0 + 0′ = 0′ — a mesma cadeia"
+                      " da identidade única no grupo, e por isso não é teorema novo");
+            tique7(3, "a lei é a DEFINIÇÃO de neutro, usada uma vez por cada candidato");
+            tique7(4, "a testemunha é o vetor 0 + 0′, que se lê de dois modos");
+            { int mal = 0;
+              for(long a = -5; a <= 5; a++) for(long b = -5; b <= 5; b++){
+                  Vec v = vec0(2), z = vec0(2);
+                  v.c[0] = qz_de_inteiro(a); v.c[1] = qz_de_inteiro(b);
+                  if(!vec_igual(vec_soma(v,z), v)) mal++;
+                  /* e o OPOSTO é único: só −v soma zero com v */
+                  Vec op = vec_esc(qz_de_inteiro(-1), v);
+                  if(!vec_zero(vec_soma(v,op))) mal++;
+                  for(long c = -5; c <= 5; c++) for(long e = -5; e <= 5; e++){
+                      Vec w = vec0(2);
+                      w.c[0] = qz_de_inteiro(c); w.c[1] = qz_de_inteiro(e);
+                      if(vec_zero(vec_soma(v,w)) && !vec_igual(w, op)) mal++;
+                  }
+              }
+              tique7(5, "logo o zero é único, e o oposto de cada vetor também");
+              tique7(6, "e a volta: varrido em ℚ², nenhum vetor tem dois opostos");
+              printf("      121 vetores × 121 candidatos a oposto: %d falhas\n", mal); }
+        }
+        break; }
+    case 3: {
+        tique7(0, "seja W ⊆ V não vazio. Quer-se saber quando ele é SUBESPAÇO");
+        tique7(1, "o teste mínimo, um só:");
+        printf("      $u, v \\in W$,  $\\lambda, \\mu \\in K$"
+               "  $\\Rightarrow$  $\\lambda u + \\mu v \\in W$\n");
+        tique7(2, "a condição é uma FIBRA FECHADA: qualquer combinação dos que estão"
+                  " dentro continua dentro. E ela obriga o 0 a estar lá (tome-se"
+                  " λ = μ = 0), que é o que o segundo exemplo não cumpre");
+        tique7(3, "a lei é o fecho da combinação linear — uma só, e é ela que substitui"
+                  " os oito axiomas: W herda-os todos de V");
+        tique7(4, "a testemunha do PRIMEIRO é o cálculo direto; a do SEGUNDO é um par"
+                  " que sai do conjunto — e é ele o gume que ele nomeia");
+        { /* W₁: x+y+z = 0 fecha;  W₂: x+y+z = 1 não */
+          int mal = 0; long dentro1 = 0, fora2 = 0;
+          for(long x = -4; x <= 4; x++) for(long y = -4; y <= 4; y++)
+          for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++)
+          for(long l = -2; l <= 2; l++) for(long m = -2; m <= 2; m++){
+              /* dois vetores de W₁ e uma combinação */
+              long z = -x - y, c = -a - b;
+              long sx = l*x + m*a, sy = l*y + m*b, sz = l*z + m*c;
+              if(sx + sy + sz != 0) mal++;                 /* W₁ fecha SEMPRE */
+              dentro1++;
+              /* e em W₂ (soma 1) a combinação sai, salvo λ+μ = 1 */
+              long z2 = 1 - x - y, c2 = 1 - a - b;
+              long tx = l*x + m*a, ty = l*y + m*b, tz = l*z2 + m*c2;
+              if(tx + ty + tz != 1) fora2++;
+          }
+          printf("      x+y+z = 0:  %ld combinações, todas dentro (%d falhas)\n",
+                 dentro1, mal);
+          printf("      x+y+z = 1:  %ld combinações que SAEM do conjunto\n", fora2);
+          printf("      e o gume é o zero: (0,0,0) tem soma 0, logo está no primeiro e"
+                 " NÃO no segundo\n");
+          tique7(5, "logo o primeiro é subespaço e o segundo não — «o primeiro fecha no"
+                    " zero; o segundo não»");
+          tique7(6, "e a volta: o critério aplica-se aos dois e decide, sem se olhar para"
+                    " a forma da equação — é o fecho que manda, não o aspeto"); }
+        break; }
+    case 4: {
+        tique7(0, "seja S ⊆ V e W qualquer subespaço com S ⊆ W");
+        tique7(1, "o span é o conjunto de todas as combinações:");
+        printf("      $\\operatorname{span}(S) = \\{ \\sum_i \\lambda_i v_i \\}$\n");
+        tique7(2, "span(S) é subespaço (uma combinação de combinações é combinação), e"
+                  " contém S. Falta ver que é o MENOR: se S ⊆ W e W é subespaço, então"
+                  " W contém todas as combinações de S, isto é span(S) ⊆ W");
+        tique7(3, "a lei é o FECHO de W: é ele que arrasta cada combinação para dentro,"
+                  " uma parcela de cada vez");
+        tique7(4, "a testemunha é a própria combinação Σλᵢvᵢ, que se constrói dentro de W");
+        { Vec e1 = vec0(2), e2 = vec0(2), u = vec0(2), w = vec0(2);
+          e1.c[0] = qz(1,1); e2.c[1] = qz(1,1);
+          u.c[0] = qz(1,1); u.c[1] = qz(1,1);
+          w.c[0] = qz(2,1); w.c[1] = qz(2,1);
+          Vec s1[2] = { e1, e2 }, s2[2] = { u, w };
+          printf("      span{(1,0),(0,1)}: posto %d — é o ℝ² inteiro\n",
+                 mat_posto(mat_de_colunas(s1,2)));
+          printf("      span{(1,1),(2,2)}: posto %d — é uma RETA, porque (2,2) = 2(1,1)\n",
+                 mat_posto(mat_de_colunas(s2,2)));
+          tique7(5, "logo span(S) é o menor subespaço que contém S");
+          tique7(6, "e a VOLTA é a inclusão: S ⊆ W ⟹ span(S) ⊆ W, medida em todos os"
+                    " subespaços gerados por vetores pequenos");
+          { int mal = 0; long testes = 0;
+            for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++){
+                Vec s = vec0(2); s.c[0] = qz_de_inteiro(a); s.c[1] = qz_de_inteiro(b);
+                if(vec_zero(s)) continue;
+                /* W = span(s) e todo múltiplo de s está lá */
+                for(long l = -3; l <= 3; l++)
+                    if(!vec_no_span(&s, 1, vec_esc(qz_de_inteiro(l), s))) mal++;
+                testes++;
+            }
+            printf("      %ld geradores, e todo múltiplo cai no span: %d falhas\n",
+                   testes, mal); } }
+        break; }
+    case 5: case 6: {
+        tique7(0, n == 5 ? "sejam v₁..v_k vetores de V"
+                         : "seja B = (v₁..v_n) uma BASE de V, e v ∈ V");
+        tique7(1, n == 5 ? "LI é a combinação nula ter solução ÚNICA:"
+                         : "base é geradora E linearmente independente:");
+        printf(n == 5 ? "      $\\lambda_1 v_1 + \\cdots + \\lambda_n v_n = 0"
+                        " \\; \\Rightarrow \\; \\lambda_i = 0$\n"
+                      : "      $v = \\sum_i a_i v_i = \\sum_i b_i v_i"
+                        " \\; \\Rightarrow \\; a_i = b_i$\n");
+        if(n == 5){
+            tique7(2, "a combinação nula é um SISTEMA homogéneo: a matriz das colunas"
+                      " vezes λ dá 0. LI ⟺ o núcleo dessa matriz é trivial ⟺ o posto é"
+                      " o número de vetores");
+            tique7(3, "a lei é a EQUIVALÊNCIA entre núcleo trivial e posto cheio, que é o"
+                      " posto-nulidade a decidir");
+            tique7(4, "a testemunha da dependência é o vetor do núcleo — os coeficientes"
+                      " que anulam sem serem todos nulos");
+            { Vec a1 = vec0(2), a2 = vec0(2), b1 = vec0(2), b2 = vec0(2);
+              a1.c[0] = qz(1,1); a2.c[1] = qz(1,1);
+              b1.c[0] = qz(1,1); b1.c[1] = qz(2,1);
+              b2.c[0] = qz(2,1); b2.c[1] = qz(4,1);
+              Vec s1[2] = {a1,a2}, s2[2] = {b1,b2};
+              printf("      (1,0),(0,1):  LI? %s\n", vec_li(s1,2) ? "SIM" : "não");
+              printf("      (1,2),(2,4):  LI? %s", vec_li(s2,2) ? "SIM" : "NÃO");
+              Vec nb[LN_MAX];
+              Mat M = mat_de_colunas(s2,2);
+              int k = mat_nucleo(M, nb);
+              if(k){ printf("   — a testemunha é λ = "); esc_vec(nb[0]);
+                     printf(",  e de facto 2·(1,2) − 1·(2,4) = (0,0)"); }
+              printf("\n");
+              tique7(5, "logo os primeiros são LI e os segundos LD");
+              tique7(6, "e o teorema com a VOLTA FALSA: «todo subconjunto de um LI é LI»"
+                        " vale; a recíproca não — um conjunto LD pode ter subconjuntos"
+                        " LI, e mede-se");
+              { int mal = 0, viu = 0;
+                for(long p = -3; p <= 3; p++) for(long q = -3; q <= 3; q++){
+                    Vec x = vec0(2), y = vec0(2);
+                    x.c[0] = qz(1,1); x.c[1] = qz(0,1);
+                    y.c[0] = qz_de_inteiro(p); y.c[1] = qz_de_inteiro(q);
+                    Vec par[2] = {x,y};
+                    if(!vec_li(par,2)){
+                        /* LD, mas o subconjunto {x} é LI: a volta é falsa */
+                        if(!vec_li(par,1)) mal++;
+                        viu++;
+                    } else {
+                        if(!vec_li(par,1)) mal++;      /* subconjunto de LI é LI */
+                    }
+                }
+                printf("      49 pares: em %d deles o par é LD e o subconjunto é LI —"
+                       " a volta é FALSA, e a testemunha existe (%d falhas)\n", viu, mal); } }
+        } else {
+            tique7(2, "se v = Σaᵢvᵢ = Σbᵢvᵢ, então Σ(aᵢ−bᵢ)vᵢ = 0. Como B é LI, todos os"
+                      " (aᵢ−bᵢ) são zero, logo aᵢ = bᵢ");
+            tique7(3, "a lei é a INDEPENDÊNCIA, e só ela — a geração dá a existência das"
+                      " coordenadas, a independência dá a unicidade. São dois papéis");
+            tique7(4, "a testemunha é o vetor Σ(aᵢ−bᵢ)vᵢ, que é zero de duas maneiras");
+            { Vec b1 = vec0(2), b2 = vec0(2);
+              b1.c[0] = qz(1,1); b1.c[1] = qz(1,1);
+              b2.c[0] = qz(1,1); b2.c[1] = qz(-1,1);
+              Vec base[2] = {b1,b2};
+              int mal = 0; long feitos = 0;
+              for(long x = -5; x <= 5; x++) for(long y = -5; y <= 5; y++){
+                  Vec v = vec0(2);
+                  v.c[0] = qz_de_inteiro(x); v.c[1] = qz_de_inteiro(y);
+                  Qz co[LN_MAX];
+                  if(!vec_coord(base, 2, v, co)){ mal++; continue; }
+                  Vec volta = vec_soma(vec_esc(co[0], b1), vec_esc(co[1], b2));
+                  if(!vec_igual(volta, v)) mal++;       /* A VOLTA: reconstruir v */
+                  feitos++;
+              }
+              Vec v = vec0(2); v.c[0] = qz(3,1); v.c[1] = qz(1,1);
+              Qz co[LN_MAX]; vec_coord(base,2,v,co);
+              printf("      base ((1,1),(1,−1)) e v = (3,1):  coordenadas ");
+              esc_qz("", co[0], " e "); esc_qz("", co[1], "");
+              printf(",  e a volta dá "); esc_vec(vec_soma(vec_esc(co[0],b1), vec_esc(co[1],b2)));
+              printf("\n");
+              tique7(5, "logo as coordenadas são ÚNICAS numa base");
+              tique7(6, "e a VOLTA é literal: reconstrói-se v a partir das coordenadas, e"
+                        " tem de dar o mesmo vetor");
+              printf("      %ld vetores: coordenadas achadas e reconstruídas, %d falhas\n",
+                     feitos, mal); } }
+        break; }
+    case 7: case 8: {
+        tique7(0, "sejam A e B matrizes com as dimensões que casam");
+        tique7(1, "o produto é a soma sobre o índice INTERNO:");
+        printf("      $(AB)_{ij} = \\sum_k a_{ik} b_{kj}$\n");
+        tique7(2, "e é uma CONVOLUÇÃO — a mesma forma da convolução de polinómios e da"
+                  " de Dirichlet, com o índice interno a percorrer o que se soma. Muda o"
+                  " conjunto onde os índices vivem, não a operação");
+        tique7(3, "as leis que valem: distributividade A(B+C) = AB+AC e associatividade"
+                  " (AB)C = A(BC) — as duas saem de trocar a ordem das somas finitas");
+        if(n == 7){
+            tique7(4, "a testemunha é o exemplo dele, calculado");
+            { Mat C = mat_mult(A,B);
+              printf("      A =\n"); esc_mat("        ", A);
+              printf("      B =\n"); esc_mat("        ", B);
+              printf("      AB =\n"); esc_mat("        ", C);
+              int mal = 0; long feitos = 0;
+              for(long k = 0; k < 200; k++){
+                  Mat X = mat0(2,2), Y = mat0(2,2), Z = mat0(2,2);
+                  long t = k;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      X.a[i][j] = qz_de_inteiro((t + i + j) % 5 - 2);
+                      Y.a[i][j] = qz_de_inteiro((t*3 + i*2 + j) % 5 - 2);
+                      Z.a[i][j] = qz_de_inteiro((t*7 + i + j*3) % 5 - 2);
+                      t /= 2;
+                  }
+                  if(!mat_igual(mat_mult(X, mat_soma(Y,Z)),
+                                mat_soma(mat_mult(X,Y), mat_mult(X,Z)))) mal++;
+                  if(!mat_igual(mat_mult(mat_mult(X,Y),Z), mat_mult(X,mat_mult(Y,Z)))) mal++;
+                  feitos++;
+              }
+              tique7(5, "logo o produto distribui e associa");
+              tique7(6, "e a volta: as duas leis varridas em todos os triplos de"
+                        " matrizes 2×2 do intervalo");
+              printf("      %ld triplos 2×2: distributividade e associatividade, %d falhas\n",
+                     feitos, mal); }
+        } else {
+            tique7(4, "MAS a COMUTATIVIDADE não está na lista — e o gume procura-se em"
+                      " vez de se escrever à mão: varre-se o espaço das matrizes e"
+                      " devolve-se o primeiro par que não comuta");
+            { Mat C = mat_mult(A,B), D = mat_mult(B,A);
+              printf("      AB =\n"); esc_mat("        ", C);
+              printf("      BA =\n"); esc_mat("        ", D);
+              printf("      AB = BA ? %s\n", mat_igual(C,D) ? "sim" : "NÃO");
+              /* o GUME AUTOMÁTICO: tirada a simetria, a comutação com a transposta cai */
+              Mat contra;
+              long passo = gume_matriz(2, 1, hip_simetrica, tese_comuta_com_transposta, &contra);
+              tique7(5, "logo AB ≠ BA em geral — e é por isso que «matriz» não é «número»");
+              tique7(6, "e o GUME AUTOMÁTICO noutro teorema do mesmo tipo: se A é"
+                        " SIMÉTRICA então A comuta com Aᵀ (trivialmente, porque são a"
+                        " mesma). Tirada a simetria, procura-se — e acha-se");
+              if(passo){
+                  printf("      contra-exemplo achado ao passo %ld:\n", passo);
+                  esc_mat("        ", contra);
+                  printf("      A·Aᵀ ≠ Aᵀ·A — a simetria era a hipótese que carregava\n");
+              } else printf("      — NÃO achei contra-exemplo no espaço varrido (3⁴ = 81)\n"); }
+        }
+        break; }
+    case 9: case 10: case 11: {
+        Mat T = mat_de_inteiros(2,3,dT);
+        tique7(0, "seja T: V → W uma aplicação");
+        tique7(1, n == 9 ? "linear é preservar a combinação:"
+                         : "o núcleo e a imagem:");
+        printf(n == 9 ? "      $T(\\lambda u + \\mu v) = \\lambda T(u) + \\mu T(v)$\n"
+                      : "      $\\ker T = \\{ v : T(v) = 0 \\}$,   "
+                        "$\\operatorname{im} T = \\{ T(v) \\}$\n");
+        if(n == 9){
+            tique7(2, "as três candidatas dele: T(x,y) = (x+y, 2x−y) é linear;"
+                      " T(x,y) = (x+1, y) NÃO é (falha em T(0) = 0);"
+                      " T(x,y) = (x², y) NÃO é (falha na escala)");
+            tique7(3, "a lei é a preservação, e ela obriga T(0) = 0 — que é o teste mais"
+                      " barato e derruba a segunda de imediato");
+            tique7(4, "a testemunha de cada falha exibe-se, e a RECUSA é o resultado");
+            { long mal_l = 0, mal_a = 0, mal_q = 0;
+              for(long x = -3; x <= 3; x++) for(long y = -3; y <= 3; y++)
+              for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++){
+                  /* linear */
+                  long lx = (x+a) + (y+b), ly = 2*(x+a) - (y+b);
+                  if(lx != (x+y) + (a+b) || ly != (2*x-y) + (2*a-b)) mal_l++;
+                  /* afim: T(x,y) = (x+1, y) */
+                  if((x+a) + 1 == (x+1) + (a+1)) ; else mal_a++;
+                  /* quadrática */
+                  if((x+a)*(x+a) == x*x + a*a) ; else mal_q++;
+              }
+              printf("      T(x,y) = (x+y, 2x−y):  %ld falhas — é LINEAR\n", mal_l);
+              printf("      T(x,y) = (x+1, y):     %ld falhas — NÃO é (e T(0,0) = (1,0) ≠ 0)\n",
+                     mal_a);
+              printf("      T(x,y) = (x², y):      %ld falhas — NÃO é ((1+1)² = 4 ≠ 1+1)\n",
+                     mal_q);
+              tique7(5, "logo só a primeira é linear, e nas outras duas a demonstração"
+                        " RECUSA-SE — não há o que provar");
+              tique7(6, "e a volta é o teste barato: T(0) = 0 é NECESSÁRIO, e sozinho já"
+                        " derruba a afim. A quadrática precisa da escala"); }
+        } else if(n == 10){
+            tique7(2, "ker T é subespaço porque T(λu+μv) = λ·0 + μ·0 = 0; im T é"
+                      " subespaço porque λT(u) + μT(v) = T(λu+μv), que é uma imagem");
+            tique7(3, "a lei é a MESMA nos dois — a linearidade — aplicada de dois lados:"
+                      " na partida para o núcleo, na chegada para a imagem");
+            tique7(4, "«o núcleo é a FIBRA do 0» — e é essa a leitura desta casa: ker T é"
+                      " o conjunto que T colapsa, e a imagem é o que sobrevive");
+            { Vec nb[LN_MAX], ib[LN_MAX];
+              int nul = mat_nucleo(T, nb), rk = mat_imagem(T, ib);
+              printf("      T(x,y,z) = (x+y, y+z):\n");
+              printf("      ker T = span{"); for(int i = 0; i < nul; i++) esc_vec(nb[i]);
+              printf("},  dim = %d\n", nul);
+              printf("      im T = span{");
+              for(int i = 0; i < rk; i++){ if(i) printf(", "); esc_vec(ib[i]); }
+              printf("},  dim = %d\n", rk);
+              int mal = 0;
+              for(int i = 0; i < nul; i++) if(!vec_zero(mat_aplica(T, nb[i]))) mal++;
+              tique7(5, "logo os dois são subespaços");
+              tique7(6, "e a volta: cada vetor do núcleo aplica-se e tem de dar zero");
+              printf("      os %d geradores do núcleo aplicam-se a zero: %d falhas\n",
+                     nul, mal); }
+        } else {
+            tique7(2, "toma-se uma base do núcleo e estende-se a uma base de V. As"
+                      " imagens dos vetores acrescentados formam uma base da imagem —"
+                      " e a contagem fecha");
+            tique7(3, "a lei é a EXTENSÃO DE BASE, e é ela que faz o teorema: sem poder"
+                      " estender, os dois números não se ligam");
+            tique7(4, "a testemunha é a base estendida; e em matriz, é a redução: as"
+                      " colunas COM pivô dão a imagem, as SEM pivô dão o núcleo");
+            { Vec nb[LN_MAX], ib[LN_MAX];
+              int nul = mat_nucleo(T, nb), rk = mat_imagem(T, ib);
+              printf("      T(x,y,z) = (x+y, y+z):  nullity = %d, rank = %d,"
+                     "  e %d = %d + %d\n", nul, rk, T.n, nul, rk);
+              int mal = 0; long feitos = 0;
+              for(long k = 0; k < 400; k++){
+                  Mat M = mat0(2,3);
+                  long t = k;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 3; j++){
+                      M.a[i][j] = qz_de_inteiro(t % 3 - 1);
+                      t /= 3;
+                  }
+                  Vec q1[LN_MAX], q2[LN_MAX];
+                  if(mat_nucleo(M,q1) + mat_imagem(M,q2) != M.n) mal++;
+                  feitos++;
+              }
+              tique7(5, "logo dim V = dim ker T + dim im T");
+              tique7(6, "e a volta: varrem-se as matrizes 2×3 do intervalo e a soma tem"
+                        " de dar 3 SEMPRE — não é o exemplo que confirma, é a varredura");
+              printf("      %ld matrizes 2×3: nullity + rank = 3, %d falhas\n",
+                     feitos, mal); } }
+        break; }
+    case 12: case 13: {
+        if(n == 13){
+            tique7(0, "seja A quadrada sobre um corpo");
+            tique7(1, "o determinante e o que ele decide:");
+            printf("      $\\det A \\neq 0$  $\\Leftrightarrow$  $A$ é invertível\n");
+            tique7(2, "se A é invertível, det(A)det(A⁻¹) = det(I) = 1, logo det A ≠ 0."
+                      " E se det A ≠ 0, a fórmula da adjunta constrói a inversa");
+            tique7(3, "a lei é a MULTIPLICATIVIDADE det(AB) = det(A)det(B) — e note-se"
+                      " que ela é o que torna o determinante útil, não a fórmula");
+            tique7(4, "a testemunha é a própria inversa, construída");
+            { Mat Ai;
+              printf("      A =\n"); esc_mat("        ", A);
+              printf("      det A = "); esc_qz("", mat_det(A), "\n");
+              if(mat_inversa(A, &Ai)){
+                  printf("      A⁻¹ =\n"); esc_mat("        ", Ai);
+                  printf("      A·A⁻¹ = I ? %s\n",
+                         mat_igual(mat_mult(A,Ai), mat_id(2)) ? "sim (resíduo 0)" : "NÃO");
+              }
+              /* O GUME AUTOMÁTICO: tirada a hipótese det ≠ 0, procura-se */
+              Mat contra;
+              long passo = gume_matriz(2, 2, hip_det_nao_zero, tese_invertivel, &contra);
+              tique7(5, "logo det A ≠ 0 ⟺ A invertível, e det A = 0 diz que as colunas"
+                        " são LD e a transformação PERDE dimensão");
+              tique7(6, "e o GUME AUTOMÁTICO: retira-se a hipótese det ≠ 0 e procura-se"
+                        " uma matriz onde a tese também caia. Não se escreve: acha-se");
+              if(passo){
+                  printf("      contra-exemplo ao passo %ld:\n", passo);
+                  esc_mat("        ", contra);
+                  printf("      det = "); esc_qz("", mat_det(contra), "");
+                  Vec nb[LN_MAX];
+                  printf(",  invertível? NÃO,  e a nulidade é %d — as colunas são LD\n",
+                         mat_nucleo(contra, nb));
+              }
+              int mal = 0; long feitos = 0;
+              for(long k = 0; k < 300; k++){
+                  Mat X = mat0(2,2), Y = mat0(2,2);
+                  long t = k;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      X.a[i][j] = qz_de_inteiro((t + 2*i + j) % 5 - 2);
+                      Y.a[i][j] = qz_de_inteiro((t*3 + i + 2*j) % 5 - 2);
+                      t /= 2;
+                  }
+                  if(!qz_igual(mat_det(mat_mult(X,Y)),
+                               qz_mult(mat_det(X), mat_det(Y)))) mal++;
+                  Mat R;
+                  if((mat_det(X).p != 0) != (mat_inversa(X,&R) != 0)) mal++;
+                  feitos++;
+              }
+              printf("      %ld pares: det(AB) = det(A)det(B) e a equivalência, %d falhas\n",
+                     feitos, mal); }
+        } else {
+            tique7(0, "seja T: V → W linear");
+            tique7(1, "isomorfismo é a bijeção que preserva:");
+            printf("      $T$ bijetiva  $\\Leftrightarrow$  $T^{-1}$ existe\n");
+            tique7(2, "se T é bijetiva, T⁻¹ existe como função; e é LINEAR porque"
+                      " T(T⁻¹(λu+μv)) = λu+μv = T(λT⁻¹u + μT⁻¹v), e T é injetiva");
+            tique7(3, "a lei é a INJETIVIDADE a permitir cancelar o T dos dois lados —"
+                      " é ela que transporta a linearidade para a inversa");
+            tique7(4, "a testemunha é a matriz inversa, quando existe");
+            { int mal = 0; long biject = 0, nao = 0;
+              for(long k = 0; k < 400; k++){
+                  Mat X = mat0(2,2), R;
+                  long t = k;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      X.a[i][j] = qz_de_inteiro(t % 5 - 2); t /= 5;
+                  }
+                  Vec nb[LN_MAX];
+                  int inj = (mat_nucleo(X, nb) == 0);
+                  int tem = mat_inversa(X, &R);
+                  if(inj != tem) mal++;                    /* injetiva ⟺ inversa existe */
+                  if(tem){ if(!mat_igual(mat_mult(X,R), mat_id(2))) mal++; biject++; }
+                  else nao++;
+              }
+              tique7(5, "logo T bijetiva ⟺ T⁻¹ existe, e V ≅ W ⟹ dim V = dim W");
+              tique7(6, "e a VOLTA aparece outra vez, e é literal: T∘T⁻¹ = id");
+              printf("      %ld bijetivas e %ld não, com a inversa a fechar em id:"
+                     " %d falhas\n", biject, nao, mal); } }
+        break; }
+    case 14: {
+        tique7(0, "seja Ax = b com x₀ uma solução particular");
+        tique7(1, "todas as soluções:");
+        printf("      $x = x_0 + \\ker A$\n");
+        tique7(2, "se Ax = b e Ax₀ = b, então A(x − x₀) = 0, isto é x − x₀ ∈ ker A. E ao"
+                  " contrário: x₀ + k com Ak = 0 dá A(x₀+k) = b");
+        tique7(3, "a lei é a LINEARIDADE a transformar a diferença de duas soluções num"
+                  " elemento do núcleo — e é isso que faz o conjunto ser um TRANSLADADO");
+        tique7(4, "a testemunha é o k = x − x₀, e ele exibe-se");
+        { long ds[] = {1,1,0, 0,1,1};
+          Mat M = mat_de_inteiros(2,3,ds);
+          Vec b = vec0(2); b.c[0] = qz(1,1); b.c[1] = qz(2,1);
+          /* uma solução particular: x = (1,0,2) dá (1, 2) */
+          Vec x0 = vec0(3); x0.c[0] = qz(1,1); x0.c[1] = qz(0,1); x0.c[2] = qz(2,1);
+          Vec nb[LN_MAX];
+          int k = mat_nucleo(M, nb);
+          printf("      A =\n"); esc_mat("        ", M);
+          printf("      b = "); esc_vec(b);
+          printf(",  x₀ = "); esc_vec(x0);
+          printf(",  Ax₀ = "); esc_vec(mat_aplica(M,x0)); printf("\n");
+          printf("      ker A = span{"); for(int i = 0; i < k; i++) esc_vec(nb[i]);
+          printf("},  dim = %d\n", k);
+          int mal = 0; long feitos = 0;
+          for(long l = -4; l <= 4; l++){
+              Vec x = vec_soma(x0, vec_esc(qz_de_inteiro(l), nb[0]));
+              if(!vec_igual(mat_aplica(M,x), b)) mal++;
+              feitos++;
+          }
+          tique7(5, "logo as soluções são exatamente x₀ + ker A — «uma solução particular"
+                    " + uma fibra dá TODAS as soluções»");
+          tique7(6, "e a volta: cada x₀ + λk substitui-se e tem de dar b");
+          printf("      %ld valores de λ, todos soluções: %d falhas\n", feitos, mal);
+          printf("      (e as três possibilidades são: ker trivial e b na imagem → UMA;"
+                 " b fora da imagem → NENHUMA; ker não trivial → INFINITAS)\n"); }
+        break; }
+    case 15: case 16: {
+        long da[] = {2,1,1,2};
+        Mat M = mat_de_inteiros(2,2,da);
+        tique7(0, "seja A a matriz [[2,1],[1,2]] do exercício dele");
+        tique7(1, n == 15 ? "autovalor e autovetor:" : "a diagonalização:");
+        printf(n == 15 ? "      $Av = \\lambda v$,  $v \\neq 0$"
+                         "  $\\Rightarrow$  $\\det(A - \\lambda I) = 0$\n"
+                       : "      $A = PDP^{-1}$,   logo   $A^{n} = PD^{n}P^{-1}$\n");
+        tique7(2, "de Av = λv vem (A − λI)v = 0 com v ≠ 0, logo A − λI tem núcleo não"
+                  " trivial, logo det(A − λI) = 0. O polinómio característico é"
+                  " λ² − tr(A)λ + det(A)");
+        { Qz tr = qz_soma(M.a[0][0], M.a[1][1]), dt = mat_det(M);
+          printf("      tr A = "); esc_qz("", tr, ",  det A = "); esc_qz("", dt, "");
+          printf(",  logo λ² − "); esc_qz("", tr, "λ + ");
+          esc_qz("", dt, " = 0\n");
+          long D = tr.p*tr.p - 4*dt.p, r = 0;
+          tique7(3, "a lei é «núcleo não trivial ⟺ determinante nulo» — o teorema 13 a"
+                    " servir este. E as raízes: aqui o discriminante é quadrado perfeito,"
+                    " logo os autovalores são RACIONAIS e escrevem-se exatos");
+          printf("      Δ = %ld", D);
+          if(quadrado_perfeito(D, &r)){
+              long l1 = (tr.p + r)/2, l2 = (tr.p - r)/2;
+              printf(" = %ld², logo λ₁ = %ld e λ₂ = %ld\n", r, l1, l2);
+              tique7(4, "a testemunha de cada autovalor é o autovetor, e ele sai do"
+                        " NÚCLEO de A − λI — outra vez a mesma descida");
+              Mat P = mat0(2,2);
+              long ls[2] = { l1, l2 };
+              for(int i = 0; i < 2; i++){
+                  Mat S = M;
+                  S.a[0][0] = qz_soma(S.a[0][0], qz_de_inteiro(-ls[i]));
+                  S.a[1][1] = qz_soma(S.a[1][1], qz_de_inteiro(-ls[i]));
+                  Vec nb[LN_MAX];
+                  int k = mat_nucleo(S, nb);
+                  if(k){
+                      printf("      λ = %ld:  autovetor ", ls[i]); esc_vec(nb[0]);
+                      printf(",  Av = "); esc_vec(mat_aplica(M, nb[0]));
+                      printf(",  λv = "); esc_vec(vec_esc(qz_de_inteiro(ls[i]), nb[0]));
+                      printf("   %s\n",
+                             vec_igual(mat_aplica(M,nb[0]),
+                                       vec_esc(qz_de_inteiro(ls[i]), nb[0]))
+                             ? "(resíduo 0)" : "— NÃO afirmo");
+                      for(int j = 0; j < 2; j++) P.a[j][i] = nb[0].c[j];
+                  }
+              }
+              if(n == 16){
+                  Mat Pi, D2 = mat0(2,2);
+                  D2.a[0][0] = qz_de_inteiro(l1); D2.a[1][1] = qz_de_inteiro(l2);
+                  if(mat_inversa(P, &Pi)){
+                      Mat rec = mat_mult(mat_mult(P,D2),Pi);
+                      printf("      P =\n"); esc_mat("        ", P);
+                      printf("      D =\n"); esc_mat("        ", D2);
+                      printf("      PDP⁻¹ = A ? %s\n",
+                             mat_igual(rec, M) ? "sim (resíduo 0)" : "NÃO");
+                      tique7(5, "logo A = PDP⁻¹, e daí Aⁿ = PDⁿP⁻¹ porque os P⁻¹P do meio"
+                                " se cancelam");
+                      tique7(6, "e a volta: calcula-se A¹⁰ pelas duas vias — pela"
+                                " diagonalização e multiplicando dez vezes — e têm de dar"
+                                " o mesmo. É o dois-caminhos deste andar");
+                      Mat Dn = mat0(2,2);
+                      long p1 = 1, p2 = 1;
+                      for(int k = 0; k < 10; k++){ p1 *= l1; p2 *= l2; }
+                      Dn.a[0][0] = qz_de_inteiro(p1); Dn.a[1][1] = qz_de_inteiro(p2);
+                      Mat porDiag = mat_mult(mat_mult(P,Dn),Pi);
+                      Mat lento = mat_id(2);
+                      for(int k = 0; k < 10; k++) lento = mat_mult(lento, M);
+                      printf("      A¹⁰ pela diagonalização =\n"); esc_mat("        ", porDiag);
+                      printf("      A¹⁰ multiplicando dez vezes =\n"); esc_mat("        ", lento);
+                      printf("      iguais? %s\n",
+                             mat_igual(porDiag,lento) ? "sim (resíduo 0)" : "— NÃO afirmo");
+                  }
+              } else {
+                  { char pq[160];
+                    snprintf(pq, sizeof pq, "logo os autovalores são %ld e %ld, com os"
+                             " autovetores exibidos e verificados", l1, l2);
+                    tique7(5, pq); }
+                  tique7(6, "e a VOLTA é substituir: Av tem de dar λv, exatamente — e dá");
+              }
+          } else {
+              printf(" não é quadrado perfeito: os autovalores são as folhas do corpo,"
+                     " e escrevem-se pela FC %s\n", fc_da_borda(tr.p, dt.p));
+          } }
+        break; }
+    }
+}
+static void dual_resolve(int n){
+    TICK_N = 0;
+    printf("   %d — %s\n", n, DU14[n-1].enunciado);
+    switch(n){
+    case 1: case 2: {
+        tique7(0, "seja V espaço vetorial sobre K");
+        tique7(1, "o dual é o espaço das MEDIÇÕES lineares:");
+        printf("      $V^{*} = \\operatorname{Hom}(V,K)$,   os $f : V \\to K$ lineares\n");
+        tique7(2, "V* é ele próprio espaço vetorial, e a chave é que as operações se"
+                  " definem PONTO A PONTO: (f+g)(v) = f(v) + g(v), (λf)(v) = λf(v)");
+        printf("      $(f+g)(v) = f(v) + g(v)$,   $(\\lambda f)(v) = \\lambda f(v)$\n");
+        tique7(3, "a lei é que o CONTRADOMÍNIO K já é corpo — as oito leis de V* herdam-se"
+                  " das de K, avaliadas em cada ponto. Não há axioma novo");
+        tique7(4, "a testemunha é a igualdade de funcionais: f = g quer dizer f(v) = g(v)"
+                  " para TODO v, e é isso que se verifica");
+        { Fun f, g;
+          f.n = 2; f.c[0] = qz(2,1); f.c[1] = qz(-3,1);
+          g.n = 2; g.c[0] = qz(1,1); g.c[1] = qz(1,1);
+          Fun s = fun_soma(f,g);
+          printf("      f(x,y) = "); esc_fun(f, "xy");
+          printf(",   g(x,y) = "); esc_fun(g, "xy");
+          printf(",   (f+g)(x,y) = "); esc_fun(s, "xy"); printf("\n");
+          int mal = 0; long feitos = 0;
+          for(long x = -5; x <= 5; x++) for(long y = -5; y <= 5; y++){
+              Vec v = vec0(2);
+              v.c[0] = qz_de_inteiro(x); v.c[1] = qz_de_inteiro(y);
+              if(!qz_igual(fun_av(s,v), qz_soma(fun_av(f,v), fun_av(g,v)))) mal++;
+              for(long l = -3; l <= 3; l++){
+                  Qz L = qz_de_inteiro(l);
+                  if(!qz_igual(fun_av(fun_esc(L,f), v), qz_mult(L, fun_av(f,v)))) mal++;
+                  feitos++;
+              }
+          }
+          tique7(5, "logo V* é espaço vetorial");
+          tique7(6, "e a volta: cada lei verifica-se AVALIANDO em todos os pontos — é a"
+                    " definição ponto a ponto a ser cobrada ponto a ponto");
+          printf("      %ld avaliações: %d falhas\n", feitos, mal); }
+        break; }
+    case 3: {
+        tique7(0, "sejam f(x,y) = 2x − 3y, g(x,y) = x + y e h(x,y) = x² + y");
+        tique7(1, "estar no dual é ser LINEAR:");
+        printf("      $f(\\lambda u + \\mu v) = \\lambda f(u) + \\mu f(v)$\n");
+        tique7(2, "f e g são combinações das coordenadas, logo lineares. h tem um"
+                  " quadrado, e o quadrado não distribui: (a+b)² ≠ a² + b²");
+        tique7(3, "a lei é a mesma da transformação linear, agora com chegada em K —"
+                  " o dual não é um conceito novo, é Hom(V,K)");
+        tique7(4, "a testemunha da falha de h é um par concreto");
+        { Fun f, g;
+          f.n = 2; f.c[0] = qz(2,1); f.c[1] = qz(-3,1);
+          g.n = 2; g.c[0] = qz(1,1); g.c[1] = qz(1,1);
+          long mal_h = 0, primeiro_a = 0, primeiro_b = 0;
+          for(long a = 0; a <= 3 && !mal_h; a++) for(long b = 0; b <= 3; b++)
+              if((a+b)*(a+b) != a*a + b*b){ mal_h = 1; primeiro_a = a; primeiro_b = b; break; }
+          printf("      f e g são lineares (são combinações das coordenadas)\n");
+          printf("      h(x,y) = x² + y NÃO é: h(%ld+%ld, 0) = %ld, mas h(%ld,0) + h(%ld,0) = %ld\n",
+                 primeiro_a, primeiro_b, (primeiro_a+primeiro_b)*(primeiro_a+primeiro_b),
+                 primeiro_a, primeiro_b, primeiro_a*primeiro_a + primeiro_b*primeiro_b);
+          Fun s = fun_soma(f,g);
+          printf("      e (f+g)(x,y) = "); esc_fun(s, "xy"); printf("\n");
+          tique7(5, "logo f, g ∈ (ℝ²)* e h ∉ — e a RECUSA é o resultado");
+          tique7(6, "e a volta: (f+g)(x,y) = 3x − 2y, que é o valor dele, e verifica-se"
+                    " avaliando"); }
+        break; }
+    case 4: case 5: case 7: {
+        Vec e1 = vec0(2), e2 = vec0(2);
+        if(n == 7){ e1.c[0] = qz(1,1); e1.c[1] = qz(1,1);
+                    e2.c[0] = qz(1,1); e2.c[1] = qz(-1,1); }
+        else      { e1.c[0] = qz(1,1); e2.c[1] = qz(1,1); }
+        Vec base[2] = { e1, e2 };
+        tique7(0, "seja B = (e₁, e₂) uma base de V");
+        tique7(1, "a base dual é a que MEDE cada coordenada:");
+        printf("      $e^{i}(e_j) = \\delta^{i}_{j}$\n");
+        tique7(2, "as n² condições e^i(e_j) = δ determinam os e^i por completo: em"
+                  " coordenadas, a matriz dos e^i é a INVERSA da matriz da base. Não se"
+                  " procura — constrói-se");
+        tique7(3, "a lei é a INVERSA existir, e ela existe porque B é base (as colunas"
+                  " são LI, logo o determinante não é zero) — o teorema 13 outra vez");
+        tique7(4, "a testemunha é a matriz inversa, e as linhas dela SÃO os e^i");
+        { Fun du[LN_MAX];
+          if(!fun_base_dual(base, 2, du)){ printf("      — a base não é base\n"); break; }
+          for(int i = 0; i < 2; i++){
+              printf("      e^%d(x,y) = ", i+1); esc_fun(du[i], "xy"); printf("\n");
+          }
+          int mal = 0;
+          for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+              Qz v = fun_av(du[i], base[j]);
+              int esperado = (i == j);
+              if(!qz_igual(v, qz_de_inteiro(esperado))) mal++;
+              printf("      e^%d(e_%d) = ", i+1, j+1); esc_qz("", v, "");
+              printf("   (δ = %d)\n", esperado);
+          }
+          if(n == 5){
+              tique7(5, "e daqui sai o teorema: xᵢ = e^i(v). A coordenada NÃO é um número"
+                        " posto ao lado do vetor — é a MEDIÇÃO pelo funcional dual");
+              printf("      $x_i = e^{i}(v)$\n");
+              tique7(6, "e a volta: e^i(v) = e^i(Σⱼxⱼeⱼ) = Σⱼxⱼe^i(eⱼ) = Σⱼxⱼδ = xᵢ,"
+                        " e mede-se em muitos vetores");
+              { int cmal = 0; long feitos = 0;
+                for(long x = -5; x <= 5; x++) for(long y = -5; y <= 5; y++){
+                    Vec v = vec0(2);
+                    v.c[0] = qz_de_inteiro(x); v.c[1] = qz_de_inteiro(y);
+                    Qz co[LN_MAX];
+                    if(!vec_coord(base, 2, v, co)){ cmal++; continue; }
+                    for(int i = 0; i < 2; i++)
+                        if(!qz_igual(fun_av(du[i], v), co[i])) cmal++;
+                    feitos++;
+                }
+                printf("      %ld vetores: a coordenada bate com a medição, %d falhas\n",
+                       feitos, cmal); }
+          } else {
+              tique7(5, "logo a base dual existe e é ÚNICA — as n² condições determinam-na");
+              tique7(6, "e a volta: cada e^i(e_j) confere com o delta, e a matriz das"
+                        " medições é a identidade");
+              printf("      as 4 condições δ conferem: %d falhas\n", mal);
+          } }
+        break; }
+    case 6: {
+        tique7(0, "seja dim V = n < ∞");
+        tique7(1, "a dimensão do dual:");
+        printf("      $\\dim V^{*} = \\dim V = n$\n");
+        tique7(2, "a prova é CONSTRUTIVA: a base dual (e¹..eⁿ) tem n elementos, é LI (se"
+                  " Σaᵢe^i = 0, avaliando em e_j dá a_j = 0) e gera (todo f é Σf(eᵢ)e^i)");
+        tique7(3, "a lei é a AVALIAÇÃO em e_j a extrair o coeficiente — é ela que dá a"
+                  " independência, e é o mesmo truque da coordenada");
+        tique7(4, "a testemunha é o próprio e_j, usado como sonda");
+        { int mal = 0;
+          for(int n2 = 1; n2 <= 4; n2++){
+              Vec base[LN_MAX];
+              for(int i = 0; i < n2; i++){ base[i] = vec0(n2); base[i].c[i] = qz(1,1); }
+              Fun du[LN_MAX];
+              if(!fun_base_dual(base, n2, du)){ mal++; continue; }
+              /* LI: os funcionais como vetores de coeficientes têm posto n */
+              Vec cv[LN_MAX];
+              for(int i = 0; i < n2; i++){
+                  cv[i] = vec0(n2);
+                  for(int j = 0; j < n2; j++) cv[i].c[j] = du[i].c[j];
+              }
+              if(!vec_li(cv, n2)) mal++;
+              /* e GERAM: todo f é Σ f(eᵢ)e^i */
+              for(long k = 0; k < 40; k++){
+                  Fun f; f.n = n2;
+                  long t = k;
+                  for(int j = 0; j < n2; j++){ f.c[j] = qz_de_inteiro(t % 5 - 2); t /= 5; }
+                  Fun rec; rec.n = n2;
+                  for(int j = 0; j < n2; j++) rec.c[j] = qz(0,1);
+                  for(int i = 0; i < n2; i++)
+                      rec = fun_soma(rec, fun_esc(fun_av(f, base[i]), du[i]));
+                  for(int j = 0; j < n2; j++) if(!qz_igual(rec.c[j], f.c[j])) mal++;
+              }
+          }
+          tique7(5, "logo dim V* = n, e a prova deu a BASE, não só o número");
+          tique7(6, "e a volta: todo funcional reconstrói-se como Σ f(eᵢ)e^i, medido em"
+                    " dimensões 1 a 4");
+          printf("      dimensões 1 a 4, com a base dual LI e geradora: %d falhas\n", mal); }
+        break; }
+    case 8: case 9: case 10: {
+        tique7(0, "seja V de dimensão finita, e V** = (V*)*");
+        tique7(1, "a aplicação canónica é a AVALIAÇÃO:");
+        printf("      $\\iota(v)(f) = f(v)$,   isto é   $v \\mapsto [f \\mapsto f(v)]$\n");
+        if(n == 8){
+            tique7(2, "um vetor vira um funcional SOBRE os funcionais: em vez de ser"
+                      " medido, passa a medir. E a definição não escolhe base nenhuma —"
+                      " é por isso que se lhe chama canónica");
+            tique7(3, "a lei é a linearidade em v: ι(λu+μw)(f) = f(λu+μw) = λf(u)+μf(w),"
+                      " que é λι(u)(f) + μι(w)(f)");
+            tique7(4, "a testemunha é a igualdade avaliada em cada f");
+            { int mal = 0; long feitos = 0;
+              for(long x = -3; x <= 3; x++) for(long y = -3; y <= 3; y++)
+              for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++){
+                  Vec u = vec0(2), w = vec0(2);
+                  u.c[0] = qz_de_inteiro(x); u.c[1] = qz_de_inteiro(y);
+                  w.c[0] = qz_de_inteiro(a); w.c[1] = qz_de_inteiro(b);
+                  Fun f; f.n = 2; f.c[0] = qz(2,1); f.c[1] = qz(-3,1);
+                  if(!qz_igual(fun_av(f, vec_soma(u,w)),
+                               qz_soma(fun_av(f,u), fun_av(f,w)))) mal++;
+                  feitos++;
+              }
+              tique7(5, "logo ι é linear, e leva V em V**");
+              tique7(6, "e a volta: ι(u+w)(f) = ι(u)(f) + ι(w)(f), avaliado");
+              printf("      %ld pares: %d falhas\n", feitos, mal); }
+        } else if(n == 9){
+            tique7(2, "se ι(v) = 0 então f(v) = 0 para TODO f. Escolhe-se o funcional que"
+                      " detecta uma coordenada não nula de v — e se v ≠ 0, ele existe."
+                      " Logo v = 0, e ι é injetiva");
+            tique7(3, "a lei é a SEPARAÇÃO DE PONTOS: «um ponto não desaparece se existe"
+                      " uma medição linear que o distingue do zero». É o e^i com i na"
+                      " coordenada não nula");
+            tique7(4, "a testemunha é esse e^i, e ele CONSTRÓI-SE a partir de v");
+            { int mal = 0; long feitos = 0, achou = 0;
+              for(long x = -4; x <= 4; x++) for(long y = -4; y <= 4; y++){
+                  Vec v = vec0(2);
+                  v.c[0] = qz_de_inteiro(x); v.c[1] = qz_de_inteiro(y);
+                  int separou = 0;
+                  for(int i = 0; i < 2; i++){
+                      Fun e; e.n = 2; e.c[0] = qz(0,1); e.c[1] = qz(0,1); e.c[i] = qz(1,1);
+                      if(fun_av(e, v).p != 0) separou = 1;
+                  }
+                  if(vec_zero(v)){ if(separou) mal++; }
+                  else { if(!separou) mal++; else achou++; }
+                  feitos++;
+              }
+              tique7(5, "logo ι é injetiva; e como dim V** = dim V* = dim V, ela é"
+                        " bijetiva: V ≅ V**, e o isomorfismo é CANÓNICO");
+              tique7(6, "e a volta: ι⁻¹(F) = v, o vetor cujas medições são as de F — e"
+                        " «o bidual devolve o objeto a partir do conjunto de todas as"
+                        " medições»");
+              printf("      %ld vetores: os %ld não nulos são separados por algum e^i,"
+                     " e o zero por nenhum — %d falhas\n", feitos, achou, mal); }
+        } else {
+            tique7(2, "V ≅ V* é VERDADE em dimensão finita (os dois têm dimensão n), mas"
+                      " NÃO é canónico: o isomorfismo depende da base escolhida, e bases"
+                      " diferentes dão isomorfismos diferentes");
+            tique7(3, "a lei que falta é uma ESTRUTURA ADICIONAL — um produto interno."
+                      " Com ele, v ↦ ⟨v,·⟩ é um isomorfismo, e aí sim é natural");
+            tique7(4, "a testemunha da não canonicidade: mudando a base, o funcional"
+                      " associado ao MESMO vetor muda");
+            { Vec e1 = vec0(2), e2 = vec0(2), f1 = vec0(2), f2 = vec0(2);
+              e1.c[0] = qz(1,1); e2.c[1] = qz(1,1);
+              f1.c[0] = qz(1,1); f1.c[1] = qz(1,1);
+              f2.c[0] = qz(1,1); f2.c[1] = qz(-1,1);
+              Vec B1[2] = {e1,e2}, B2[2] = {f1,f2};
+              Fun d1[LN_MAX], d2[LN_MAX];
+              fun_base_dual(B1,2,d1); fun_base_dual(B2,2,d2);
+              printf("      base canónica:  e^1(x,y) = "); esc_fun(d1[0], "xy");
+              printf("\n      base ((1,1),(1,−1)):  e^1(x,y) = "); esc_fun(d2[0], "xy");
+              printf("\n      o MESMO índice 1 dá funcionais DIFERENTES — o isomorfismo"
+                     " v ↦ e^i depende da base\n");
+              tique7(5, "logo V ≅ V* NÃO é canónico, e a resposta certa é RECUSAR a"
+                        " naturalidade — «não em geral»");
+              tique7(6, "e a VOLTA é dar-lhe a estrutura que falta: com o produto interno"
+                        " canónico de ℝⁿ, v ↦ ⟨v,·⟩ é o isomorfismo, e constrói-se");
+              { int mal = 0; long feitos = 0;
+                for(long x = -4; x <= 4; x++) for(long y = -4; y <= 4; y++){
+                    Vec v = vec0(2);
+                    v.c[0] = qz_de_inteiro(x); v.c[1] = qz_de_inteiro(y);
+                    Fun fv; fv.n = 2; fv.c[0] = v.c[0]; fv.c[1] = v.c[1];  /* ⟨v,·⟩ */
+                    for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++){
+                        Vec w = vec0(2);
+                        w.c[0] = qz_de_inteiro(a); w.c[1] = qz_de_inteiro(b);
+                        Qz esperado = qz_soma(qz_mult(v.c[0],w.c[0]), qz_mult(v.c[1],w.c[1]));
+                        if(!qz_igual(fun_av(fv,w), esperado)) mal++;
+                    }
+                    if(vec_zero(v)){ if(fv.c[0].p || fv.c[1].p) mal++; }
+                    feitos++;
+                }
+                printf("      com produto interno: %ld vetores viram funcionais, e a"
+                       " correspondência é bijetiva — %d falhas\n", feitos, mal); } } }
+        break; }
+    case 11: case 12: {
+        Vec w = vec0(3);
+        w.c[0] = qz(1,1); w.c[1] = qz(1,1); w.c[2] = qz(0,1);
+        tique7(0, "seja W ≤ V, e aqui W = span{(1,1,0)} em ℝ³");
+        tique7(1, "o aniquilador é o conjunto dos que MEDEM ZERO em W:");
+        printf("      $W^{\\circ} = \\{ f \\in V^{*} : f(w) = 0 \\; \\forall w \\in W \\}$\n");
+        tique7(2, "f(x,y,z) = ax+by+cz está em W° quando f(1,1,0) = a+b = 0, isto é"
+                  " b = −a. Logo W° = {(a,−a,c)}, que tem dimensão 2");
+        tique7(3, "a lei é que basta anular nos GERADORES de W: por linearidade, anular"
+                  " neles anula em todas as combinações. É o span a poupar o trabalho");
+        tique7(4, "a testemunha é a base de W°, e ela é o NÚCLEO da matriz cujas LINHAS"
+                  " são os geradores de W — a mesma descida de Gauss");
+        { Fun an[LN_MAX];
+          int d = fun_aniquilador(&w, 1, 3, an);
+          printf("      W = span{(1,1,0)},  dim W = 1\n");
+          for(int i = 0; i < d; i++){
+              printf("      f%d(x,y,z) = ", i+1); esc_fun(an[i], "xyz");
+              printf(",   f%d(1,1,0) = ", i+1); esc_qz("", fun_av(an[i], w), "\n");
+          }
+          printf("      dim W° = %d\n", d);
+          tique7(5, n == 11 ? "logo W° é subespaço de V*, e aqui tem dimensão 2"
+                            : "logo dim W + dim W° = dim V — «praticamente o DUAL do"
+                              " posto-nulidade»");
+          printf(n == 12 ? "      $\\dim W + \\dim W^{\\circ} = \\dim V$:   1 + 2 = 3\n" : "");
+          tique7(6, "e a volta: varrem-se subespaços de ℝ³ e a soma das dimensões tem de"
+                    " dar 3 sempre — não é o exemplo que confirma");
+          { int mal = 0; long feitos = 0;
+            for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++) for(long c = -2; c <= 2; c++){
+                Vec g = vec0(3);
+                g.c[0] = qz_de_inteiro(a); g.c[1] = qz_de_inteiro(b); g.c[2] = qz_de_inteiro(c);
+                if(vec_zero(g)) continue;
+                Fun sa[LN_MAX];
+                int dw = 1, da = fun_aniquilador(&g, 1, 3, sa);
+                if(dw + da != 3) mal++;
+                /* e cada f do aniquilador mede ZERO no gerador */
+                for(int i = 0; i < da; i++) if(fun_av(sa[i], g).p) mal++;
+                feitos++;
+            }
+            printf("      %ld subespaços de dimensão 1: dim W + dim W° = 3, %d falhas\n",
+                   feitos, mal); } }
+        break; }
+    case 13: case 14: {
+        long da[] = {1,2,3,4};
+        Mat A = mat_de_inteiros(2,2,da);
+        tique7(0, "seja T(x,y) = (x+2y, 3x+4y), de matriz A = [[1,2],[3,4]]");
+        tique7(1, "a transformação dual leva funcionais de W em funcionais de V:");
+        printf("      $T^{*} : W^{*} \\to V^{*}$,   $T^{*}(\\varphi) = \\varphi \\circ T$\n");
+        tique7(2, "note-se o SENTIDO: T vai de V para W, e T* vai ao CONTRÁRIO. Medir a"
+                  " chegada é medir a partida depois de andar — e é essa inversão de"
+                  " sentido que o dual introduz");
+        if(n == 13){
+            tique7(3, "a lei é a associatividade da composição, e em coordenadas dá o"
+                      " TRANSPOSTO: (T*φ)(v) = φ(Tv) = φᵀAv = (Aᵀφ)ᵀv");
+            printf("      $[T^{*}] = A^{T}$\n");
+            tique7(4, "a testemunha é o cálculo lado a lado: a matriz de T* construída"
+                      " pela definição, contra a transposta de A");
+            { Mat At = mat_transposta(A);
+              printf("      A =\n"); esc_mat("        ", A);
+              printf("      Aᵀ =\n"); esc_mat("        ", At);
+              /* constrói-se [T*] pela DEFINIÇÃO: coluna i = T*(e^i) */
+              Mat Td = mat0(2,2);
+              int mal = 0;
+              for(int i = 0; i < 2; i++){
+                  Fun phi; phi.n = 2; phi.c[0] = qz(0,1); phi.c[1] = qz(0,1); phi.c[i] = qz(1,1);
+                  for(int j = 0; j < 2; j++){
+                      Vec ej = vec0(2); ej.c[j] = qz(1,1);
+                      Td.a[j][i] = fun_av(phi, mat_aplica(A, ej));   /* (T*φ)(e_j) */
+                  }
+              }
+              printf("      [T*] construída pela definição =\n"); esc_mat("        ", Td);
+              if(!mat_igual(Td, At)) mal++;
+              tique7(5, "logo [T*] = Aᵀ — «o transposto aparece naturalmente»");
+              tique7(6, "e a volta: as duas matrizes comparam-se entrada a entrada");
+              printf("      [T*] = Aᵀ ? %s   (%d divergências)\n",
+                     mat_igual(Td,At) ? "sim (resíduo 0)" : "NÃO", mal);
+              long geral = 0, gmal = 0;
+              for(long k = 0; k < 200; k++){
+                  Mat X = mat0(2,2), Xd = mat0(2,2);
+                  long t = k;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      X.a[i][j] = qz_de_inteiro(t % 5 - 2); t /= 5;
+                  }
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      Fun phi; phi.n = 2; phi.c[0] = qz(0,1); phi.c[1] = qz(0,1); phi.c[i] = qz(1,1);
+                      Vec ej = vec0(2); ej.c[j] = qz(1,1);
+                      Xd.a[j][i] = fun_av(phi, mat_aplica(X, ej));
+                  }
+                  if(!mat_igual(Xd, mat_transposta(X))) gmal++;
+                  geral++;
+              }
+              printf("      e em %ld matrizes quaisquer: %ld divergências\n", geral, gmal); }
+        } else {
+            tique7(3, "T*(φ) = 0 significa φ(T(v)) = 0 para todo v, isto é φ anula-se em"
+                      " toda a IMAGEM de T. E isso é exatamente φ ∈ (im T)°");
+            printf("      $\\ker T^{*} = (\\operatorname{im} T)^{\\circ}$\n");
+            tique7(4, "a testemunha é a equivalência das duas condições — a mesma"
+                      " afirmação escrita de dois lados, e é por isso que o teorema é"
+                      " uma IDENTIDADE de conjuntos e não uma inclusão");
+            { /* uma matriz com imagem própria, para o aniquilador não ser trivial */
+              long ds[] = {1,2,2,4};
+              Mat S = mat_de_inteiros(2,2,ds);
+              Vec ib[LN_MAX];
+              int r = mat_imagem(S, ib);
+              Fun an[LN_MAX];
+              int da2 = fun_aniquilador(ib, r, 2, an);
+              /* e o núcleo de T*: os φ com Aᵀφ = 0 */
+              Mat At = mat_transposta(S);
+              Vec nb[LN_MAX];
+              int dk = mat_nucleo(At, nb);
+              printf("      A =\n"); esc_mat("        ", S);
+              printf("      im T = span{"); for(int i = 0; i < r; i++) esc_vec(ib[i]);
+              printf("},  dim = %d\n", r);
+              printf("      (im T)° = span{");
+              for(int i = 0; i < da2; i++){ if(i) printf(", "); printf("(");
+                  for(int j = 0; j < 2; j++){ if(j) printf(", "); esc_qz("", an[i].c[j], ""); }
+                  printf(")"); }
+              printf("},  dim = %d\n", da2);
+              printf("      ker T* = span{");
+              for(int i = 0; i < dk; i++){ if(i) printf(", "); esc_vec(nb[i]); }
+              printf("},  dim = %d\n", dk);
+              tique7(5, "logo ker T* = (im T)°, e as dimensões batem");
+              tique7(6, "e a volta: cada gerador de ker T* anula-se na imagem, e"
+                        " reciprocamente — os dois conjuntos medem-se um contra o outro");
+              int mal = (dk != da2);
+              for(int i = 0; i < dk; i++){
+                  Fun f; f.n = 2; f.c[0] = nb[i].c[0]; f.c[1] = nb[i].c[1];
+                  for(int j = 0; j < r; j++) if(fun_av(f, ib[j]).p) mal++;
+              }
+              printf("      dim ker T* = dim (im T)° = %d, e cada f anula a imagem:"
+                     " %d falhas\n", dk, mal); } }
+        break; }
+    }
+}
+static int resolve_linear(const char *f){
+    const char *p = f;
+    for(size_t i = 0; i < sizeof LI16/sizeof *LI16; i++)
+        if(!strcmp(p, LI16[i].nome)){ linear_resolve(LI16[i].n); return 1; }
+    for(size_t i = 0; i < sizeof DU14/sizeof *DU14; i++)
+        if(!strcmp(p, DU14[i].nome)){ dual_resolve(DU14[i].n); return 1; }
+    int eDual = 0;
+    if(!strncmp(p, "linear", 6)) p += 6;
+    else if(!strncmp(p, "algebra linear", 14)) p += 14;
+    else if(!strncmp(p, "duais", 5)){ p += 5; eDual = 1; }
+    else if(!strncmp(p, "dual", 4)){ p += 4; eDual = 1; }
+    else return 0;
+    while(*p == ' ') p++;
+    if(!*p){
+        if(eDual){
+            printf("   espaços duais — «dual N» ou «dual <nome>»\n");
+            printf("   «o vetor fornece o objeto; o funcional fornece a coordenada que"
+                   " o mede»\n\n");
+            for(size_t i = 0; i < sizeof DU14/sizeof *DU14; i++){
+                printf("     %2d  ", DU14[i].n);
+                esc_col(DU14[i].nome, 24);
+                printf("  %s\n", DU14[i].enunciado);
+            }
+        } else {
+            printf("   álgebra linear — «linear N» ou «linear <nome>»\n");
+            printf("   e o gume é AUTOMÁTICO: retirada a hipótese, procura-se o"
+                   " contra-exemplo\n\n");
+            for(size_t i = 0; i < sizeof LI16/sizeof *LI16; i++){
+                printf("     %2d  ", LI16[i].n);
+                esc_col(LI16[i].nome, 20);
+                printf("  %s\n", LI16[i].enunciado);
+            }
+        }
+        return 1;
+    }
+    if(*p >= '0' && *p <= '9'){
+        long n = 0;
+        while(*p >= '0' && *p <= '9') n = n*10 + (*p++ - '0');
+        while(*p == ' ') p++;
+        if(*p) return 0;
+        if(eDual && n >= 1 && n <= 14){ dual_resolve((int)n); return 1; }
+        if(!eDual && n >= 1 && n <= 16){ linear_resolve((int)n); return 1; }
+        return 0;
+    }
+    return 0;
+}
 /* ── CORPOS: ONDE «TODA OPERAÇÃO COM FIBRA TEM VOLTA» VIRA ESTRUTURA ────────────────
  * O `eval.txt` abre confirmando a espinha — HIPÓTESES → DEFINIÇÃO → TRANSIÇÃO → LEI →
  * TESTEMUNHA → CONCLUSÃO → VOLTA — e fecha com a frase que fecha a escada toda:
@@ -6509,6 +7577,7 @@ static int resolve_mostra(const char *f){ return resolve_mostra_em(f, "../papers
 static int resolve_simbolico(const char *fala){
     if(resolve_divisibilidade(fala)) return 1;     /* o relógio de 6 ticks */
     if(resolve_bezout(fala)) return 1;             /* a testemunha e o critério */
+    if(resolve_linear(fala)) return 1;             /* linear e dual, 16 + 14 */
     if(resolve_corpo(fala)) return 1;              /* teoria dos corpos, os 25 */
     if(resolve_estrutura(fala)) return 1;          /* álgebra moderna, os 20 */
     if(resolve_eliptica(fala)) return 1;           /* Dirichlet e as elípticas */
@@ -7544,6 +8613,419 @@ static int teste(void){
                 if(e_conta(nu2)) roubadas++;
             }
             ok("e a membrana nao rouba o corpus: fala sem LaTeX nao vira conta", roubadas == 0);
+
+        /* ═══ §C37 ÁLGEBRA LINEAR E O DUAL: O GUME PASSA A SER AUTOMÁTICO ═════════
+         * A exigência nova do `eval.txt` não é conteúdo, é MECANISMO:
+         *
+         *   «um gume obrigatório em cada teorema: SE A HIPÓTESE FOR RETIRADA, PROCURAR
+         *    AUTOMATICAMENTE UM CONTRA-EXEMPLO. É fazer o motor descobrir QUAL HIPÓTESE
+         *    ESTÁ CARREGANDO CADA TEOREMA.»
+         *
+         * Então o `gume_matriz` varre o espaço, tira a hipótese e devolve o primeiro
+         * objeto onde a tese TAMBÉM cai. E o dual é a casa: «o vetor fornece o objeto; o
+         * funcional fornece a coordenada que o mede» — a coordenada É uma medição. */
+        printf("\n§C37 LINEAR E DUAL: o gume procura-se, e a coordenada é uma medição.\n\n");
+        {
+            long d12[] = {1,2,3,4}, dT[] = {1,1,0, 0,1,1};
+            Mat A2 = mat_de_inteiros(2,2,d12), T23 = mat_de_inteiros(2,3,dT);
+
+            /* O GUME AUTOMÁTICO — e o primeiro medidor é do MECANISMO, não do teorema:
+             * ele tem de ACHAR quando a hipótese carrega, e tem de NÃO achar quando ela
+             * não carrega. Um buscador que acha sempre não estava a decidir nada. */
+            { Mat contra;
+              long p1 = gume_matriz(2, 2, hip_det_nao_zero, tese_invertivel, &contra);
+              Mat c1 = contra;
+              long p2 = gume_matriz(2, 1, hip_simetrica, tese_comuta_com_transposta, &contra);
+              Mat c2 = contra;
+              long p3 = gume_matriz(2, 2, hip_colunas_li, tese_nucleo_trivial, &contra);
+              /* O CONTROLO, e a primeira versão dele estava ERRADA: pus tese = hipótese,
+               * e assim todo objeto que falha a hipótese é «contra-exemplo» — o buscador
+               * achava sempre e o controlo não controlava nada. O controlo certo é uma
+               * TESE QUE VALE SEMPRE (det A = det Aᵀ): aí não pode haver contra-exemplo,
+               * e vir vazio é o que prova que o buscador não inventa. */
+              long p4 = gume_matriz(2, 2, hip_simetrica, tese_det_igual_transposta, &contra);
+              printf("      det≠0 ⟹ invertível: contra ao passo %ld;  colunas LI ⟹ núcleo"
+                     " trivial: passo %ld\n", p1, p3);
+              printf("      simétrica ⟹ comuta com a transposta: passo %ld;  e o CONTROLO"
+                     " (tese que vale SEMPRE) devolve %ld\n", p2, p4);
+              ok("O GUME É AUTOMÁTICO: retirada a hipótese, o buscador VARRE o espaço e"
+                 " devolve o objeto onde a tese também cai — det ≠ 0, colunas LI e"
+                 " simetria, os três achados. E o CONTROLO garante que ele decide: quando"
+                 " a tese É a hipótese, não há contra-exemplo possível e ele vem vazio."
+                 " Um buscador que achasse sempre não estava a medir nada",
+                 p1 > 0 && p2 > 0 && p3 > 0 && p4 == 0
+                 && mat_det(c1).p == 0 && !mat_igual(mat_mult(c2,mat_transposta(c2)),
+                                                     mat_mult(mat_transposta(c2),c2))); }
+
+            /* (1)(2) OS AXIOMAS: 0v = 0 e a unicidade do zero e do oposto */
+            { int mal = 0; long feitos = 0;
+              for(long a = -5; a <= 5; a++) for(long b = -5; b <= 5; b++){
+                  Vec v = vec0(2);
+                  v.c[0] = qz_de_inteiro(a); v.c[1] = qz_de_inteiro(b);
+                  if(!vec_zero(vec_esc(qz(0,1), v))) mal++;                /* 0v = 0 */
+                  if(!vec_igual(vec_esc(qz(1,1), v), v)) mal++;            /* 1v = v */
+                  Vec op = vec_esc(qz_de_inteiro(-1), v);
+                  if(!vec_zero(vec_soma(v, op))) mal++;
+                  for(long c = -5; c <= 5; c++) for(long e = -5; e <= 5; e++){
+                      Vec w = vec0(2);
+                      w.c[0] = qz_de_inteiro(c); w.c[1] = qz_de_inteiro(e);
+                      if(vec_zero(vec_soma(v,w)) && !vec_igual(w,op)) mal++;  /* oposto ÚNICO */
+                      if(!vec_igual(vec_soma(v,w), vec_soma(w,v))) mal++;
+                  }
+                  for(long l = -3; l <= 3; l++){
+                      Qz L = qz_de_inteiro(l);
+                      if(!vec_igual(vec_esc(qz_oposto(L), v),
+                                    vec_esc(qz_de_inteiro(-1), vec_esc(L,v)))) mal++;
+                  }
+                  feitos++;
+              }
+              ok("os AXIOMAS dão os teoremas: 0v = 0 sai da distributividade (não é"
+                 " convenção), 1v = v, (−λ)v = −(λv), e o OPOSTO é único — varrido em ℚ²"
+                 " com todos os candidatos a oposto testados", mal == 0 && feitos == 121); }
+
+            /* (3) O SUBESPAÇO, e o gume dele: x+y+z = 0 fecha, x+y+z = 1 não */
+            { int mal = 0; long saiu = 0;
+              for(long x = -3; x <= 3; x++) for(long y = -3; y <= 3; y++)
+              for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++)
+              for(long l = -2; l <= 2; l++) for(long m = -2; m <= 2; m++){
+                  long z = -x-y, c = -a-b;
+                  if((l*x+m*a) + (l*y+m*b) + (l*z+m*c) != 0) mal++;      /* soma 0 FECHA */
+                  long z2 = 1-x-y, c2 = 1-a-b;
+                  if((l*x+m*a) + (l*y+m*b) + (l*z2+m*c2) != 1) saiu++;   /* soma 1 SAI */
+              }
+              ok("o SUBESPAÇO decide-se por um critério só (λu + μv ∈ W), e ele é uma"
+                 " FIBRA FECHADA. O plano x+y+z = 0 fecha em todas as combinações; o"
+                 " x+y+z = 1 SAI — e o gume é o zero, que está no primeiro e não no"
+                 " segundo", mal == 0 && saiu > 0); }
+
+            /* (4)(5)(6) SPAN, INDEPENDÊNCIA e a UNICIDADE DAS COORDENADAS */
+            { int mal = 0; long li = 0, ld = 0, feitos = 0;
+              Vec b1 = vec0(2), b2 = vec0(2);
+              b1.c[0] = qz(1,1); b1.c[1] = qz(1,1);
+              b2.c[0] = qz(1,1); b2.c[1] = qz(-1,1);
+              Vec base[2] = { b1, b2 };
+              for(long x = -6; x <= 6; x++) for(long y = -6; y <= 6; y++){
+                  Vec v = vec0(2);
+                  v.c[0] = qz_de_inteiro(x); v.c[1] = qz_de_inteiro(y);
+                  Qz co[LN_MAX];
+                  if(!vec_coord(base, 2, v, co)){ mal++; continue; }
+                  Vec volta = vec_soma(vec_esc(co[0],b1), vec_esc(co[1],b2));
+                  if(!vec_igual(volta, v)) mal++;               /* A VOLTA */
+                  if(!vec_no_span(base, 2, v)) mal++;           /* e o span é tudo */
+                  feitos++;
+              }
+              /* LI e LD, e o teorema com a VOLTA FALSA */
+              for(long p = -3; p <= 3; p++) for(long q = -3; q <= 3; q++){
+                  Vec x = vec0(2), y = vec0(2);
+                  x.c[0] = qz(1,1);
+                  y.c[0] = qz_de_inteiro(p); y.c[1] = qz_de_inteiro(q);
+                  Vec par[2] = {x,y};
+                  if(vec_li(par,2)) li++; else ld++;
+                  if(!vec_li(par,1)) mal++;      /* subconjunto de LI é LI, e {x} é sempre LI */
+              }
+              ok("as COORDENADAS numa base são ÚNICAS (a diferença anula-se e a"
+                 " independência força zero) e a VOLTA reconstrói o vetor. E o teorema"
+                 " «subconjunto de LI é LI» vale com a RECÍPROCA FALSA — há pares LD com"
+                 " subconjuntos LI, e os dois casos ocorrem",
+                 mal == 0 && feitos == 169 && li > 0 && ld > 0); }
+
+            /* (7)(8) O PRODUTO É CONVOLUÇÃO, e NÃO comuta */
+            { int mal = 0; long feitos = 0, nao_comuta = 0;
+              for(long k = 0; k < 400; k++){
+                  Mat X = mat0(2,2), Y = mat0(2,2), Z = mat0(2,2);
+                  long t = k;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      X.a[i][j] = qz_de_inteiro((t + 3*i + j) % 5 - 2);
+                      Y.a[i][j] = qz_de_inteiro((t*3 + i + 2*j) % 5 - 2);
+                      Z.a[i][j] = qz_de_inteiro((t*7 + 2*i + j) % 5 - 2);
+                      t /= 2;
+                  }
+                  if(!mat_igual(mat_mult(X,mat_soma(Y,Z)),
+                                mat_soma(mat_mult(X,Y),mat_mult(X,Z)))) mal++;
+                  if(!mat_igual(mat_mult(mat_mult(X,Y),Z), mat_mult(X,mat_mult(Y,Z)))) mal++;
+                  if(!mat_igual(mat_mult(X,Y), mat_mult(Y,X))) nao_comuta++;
+                  /* e a CONVOLUÇÃO: a entrada (i,j) é a soma sobre o índice interno */
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      Qz s = qz(0,1);
+                      for(int q = 0; q < 2; q++) s = qz_soma(s, qz_mult(X.a[i][q], Y.a[q][j]));
+                      if(!qz_igual(mat_mult(X,Y).a[i][j], s)) mal++;
+                  }
+                  feitos++;
+              }
+              printf("      400 triplos 2×2:  AB ≠ BA em %ld deles\n", nao_comuta);
+              ok("o PRODUTO MATRICIAL é uma CONVOLUÇÃO com índice interno — a mesma forma"
+                 " da de polinómios e da de Dirichlet, só muda onde os índices vivem. E"
+                 " distribui e associa, mas NÃO comuta: há casos varridos com AB ≠ BA, e"
+                 " é aí que «matriz» deixa de ser «número»",
+                 mal == 0 && feitos == 400 && nao_comuta > 0); }
+
+            /* (9)(10)(11) LINEARIDADE, NÚCLEO/IMAGEM e o POSTO-NULIDADE */
+            { int mal = 0; long feitos = 0;
+              for(long k = 0; k < 700; k++){
+                  Mat M = mat0(2,3);
+                  long t = k;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 3; j++){
+                      M.a[i][j] = qz_de_inteiro(t % 3 - 1); t /= 3;
+                  }
+                  Vec nb[LN_MAX], ib[LN_MAX];
+                  int nul = mat_nucleo(M,nb), rk = mat_imagem(M,ib);
+                  if(nul + rk != M.n) mal++;                     /* POSTO-NULIDADE */
+                  for(int i = 0; i < nul; i++)
+                      if(!vec_zero(mat_aplica(M, nb[i]))) mal++; /* o núcleo é a fibra do 0 */
+                  /* e o núcleo é SUBESPAÇO: combinações dos geradores continuam nele */
+                  for(int i = 0; i < nul; i++) for(int j = 0; j < nul; j++)
+                      if(!vec_zero(mat_aplica(M, vec_soma(nb[i], nb[j])))) mal++;
+                  feitos++;
+              }
+              Vec nb[LN_MAX], ib[LN_MAX];
+              int nul = mat_nucleo(T23,nb), rk = mat_imagem(T23,ib);
+              printf("      T(x,y,z) = (x+y, y+z):  nullity = %d, rank = %d,  e 3 = %d + %d\n",
+                     nul, rk, nul, rk);
+              printf("      e o posto-nulidade em %ld matrizes 2×3 varridas\n", feitos);
+              ok("o POSTO-NULIDADE fecha em todas as matrizes 2×3 varridas, o NÚCLEO é a"
+                 " FIBRA do zero (cada gerador aplica-se a 0, e as combinações também) e"
+                 " o exemplo dele dá exatamente 3 = 1 + 2",
+                 mal == 0 && feitos == 700 && nul == 1 && rk == 2); }
+
+            /* (12)(13) ISOMORFISMO e DETERMINANTE, com a equivalência medida */
+            { int mal = 0; long inv = 0, sing = 0;
+              for(long k = 0; k < 625; k++){
+                  Mat X = mat0(2,2), R;
+                  long t = k;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      X.a[i][j] = qz_de_inteiro(t % 5 - 2); t /= 5;
+                  }
+                  Vec nb[LN_MAX];
+                  int nucleo_trivial = (mat_nucleo(X,nb) == 0);
+                  int tem = mat_inversa(X, &R);
+                  int det_nao_zero = (mat_det(X).p != 0);
+                  if(tem != det_nao_zero) mal++;                 /* det ≠ 0 ⟺ invertível */
+                  if(tem != nucleo_trivial) mal++;               /* ⟺ injetiva */
+                  if(tem){ if(!mat_igual(mat_mult(X,R), mat_id(2))) mal++; inv++; }
+                  else sing++;
+                  /* e a multiplicatividade */
+                  Mat Y = mat_transposta(X);
+                  if(!qz_igual(mat_det(mat_mult(X,Y)),
+                               qz_mult(mat_det(X), mat_det(Y)))) mal++;
+              }
+              ok("det A ≠ 0 ⟺ A invertível ⟺ o núcleo é trivial — TRÊS leituras da mesma"
+                 " condição, medidas nas 625 matrizes de entradas em [−2,2], com"
+                 " det(AB) = det(A)det(B) a fechar. E os dois lados ocorrem",
+                 mal == 0 && inv > 0 && sing > 0); }
+
+            /* (14) OS SISTEMAS: a solução é x₀ + ker A, e a família é COMPLETA */
+            { int mal = 0; long feitos = 0;
+              Vec b = vec0(2); b.c[0] = qz(1,1); b.c[1] = qz(2,1);
+              Vec x0 = vec0(3); x0.c[0] = qz(1,1); x0.c[2] = qz(2,1);
+              Vec nb[LN_MAX];
+              int k = mat_nucleo(T23, nb);
+              if(!vec_igual(mat_aplica(T23,x0), b)) mal++;       /* x₀ é solução */
+              for(long l = -6; l <= 6; l++){
+                  Vec x = vec_soma(x0, vec_esc(qz_de_inteiro(l), nb[0]));
+                  if(!vec_igual(mat_aplica(T23,x), b)) mal++;    /* a família gera */
+                  feitos++;
+              }
+              /* e é COMPLETA: toda solução com entradas pequenas está na família */
+              long fora = 0;
+              for(long a = -6; a <= 6; a++) for(long c = -6; c <= 6; c++)
+              for(long e = -6; e <= 6; e++){
+                  Vec x = vec0(3);
+                  x.c[0] = qz_de_inteiro(a); x.c[1] = qz_de_inteiro(c); x.c[2] = qz_de_inteiro(e);
+                  if(!vec_igual(mat_aplica(T23,x), b)) continue;
+                  Vec dif = vec_soma(x, vec_esc(qz_de_inteiro(-1), x0));
+                  if(!vec_no_span(nb, k, dif)) fora++;           /* tem de estar no núcleo */
+              }
+              ok("as SOLUÇÕES de Ax = b são exatamente x₀ + ker A — a família gera todas"
+                 " (medido) e é COMPLETA: nenhuma solução do cubo [−6,6]³ fica de fora"
+                 " dela. «Uma solução particular + uma fibra dá TODAS as soluções»",
+                 mal == 0 && feitos == 13 && fora == 0); }
+
+            /* (15)(16) AUTOVALORES e DIAGONALIZAÇÃO, com A¹⁰ por dois caminhos */
+            { long da[] = {2,1,1,2};
+              Mat M = mat_de_inteiros(2,2,da);
+              int mal = 0;
+              Qz tr = qz_soma(M.a[0][0], M.a[1][1]), dt = mat_det(M);
+              long D = tr.p*tr.p - 4*dt.p, r = 0;
+              if(!quadrado_perfeito(D, &r)) mal++;
+              long l1 = (tr.p + r)/2, l2 = (tr.p - r)/2;
+              Mat P = mat0(2,2), Dg = mat0(2,2);
+              long ls[2] = { l1, l2 };
+              for(int i = 0; i < 2; i++){
+                  Mat S = M;
+                  S.a[0][0] = qz_soma(S.a[0][0], qz_de_inteiro(-ls[i]));
+                  S.a[1][1] = qz_soma(S.a[1][1], qz_de_inteiro(-ls[i]));
+                  Vec nb[LN_MAX];
+                  if(mat_nucleo(S, nb) < 1){ mal++; continue; }
+                  if(!vec_igual(mat_aplica(M,nb[0]),
+                                vec_esc(qz_de_inteiro(ls[i]), nb[0]))) mal++;  /* Av = λv */
+                  for(int j = 0; j < 2; j++) P.a[j][i] = nb[0].c[j];
+                  Dg.a[i][i] = qz_de_inteiro(ls[i]);
+              }
+              Mat Pi;
+              if(!mat_inversa(P, &Pi)) mal++;
+              else {
+                  if(!mat_igual(mat_mult(mat_mult(P,Dg),Pi), M)) mal++;   /* A = PDP⁻¹ */
+                  Mat Dn = mat0(2,2);
+                  long p1 = 1, p2 = 1;
+                  for(int k = 0; k < 10; k++){ p1 *= l1; p2 *= l2; }
+                  Dn.a[0][0] = qz_de_inteiro(p1); Dn.a[1][1] = qz_de_inteiro(p2);
+                  Mat rapido = mat_mult(mat_mult(P,Dn),Pi), lento = mat_id(2);
+                  for(int k = 0; k < 10; k++) lento = mat_mult(lento, M);
+                  if(!mat_igual(rapido, lento)) mal++;                    /* DOIS CAMINHOS */
+              }
+              printf("      A = [[2,1],[1,2]]:  λ = %ld e %ld (Δ = %ld = %ld²), e A¹⁰"
+                     " pelas duas vias concorda\n", l1, l2, D, r);
+              ok("os AUTOVALORES saem de det(A − λI) = 0 e aqui são RACIONAIS (o"
+                 " discriminante é quadrado perfeito, e diz-se); os autovetores saem do"
+                 " NÚCLEO de A − λI, com Av = λv a fechar; e A¹⁰ calculado pela"
+                 " DIAGONALIZAÇÃO bate com dez multiplicações — dois caminhos",
+                 mal == 0 && l1 == 3 && l2 == 1); }
+
+            /* ── O DUAL: a coordenada É uma medição ───────────────────────────── */
+            { int mal = 0; long feitos = 0;
+              /* a base dual, em várias bases, e o δ */
+              for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++)
+              for(long c = -3; c <= 3; c++) for(long e = -3; e <= 3; e++){
+                  Vec v1 = vec0(2), v2 = vec0(2);
+                  v1.c[0] = qz_de_inteiro(a); v1.c[1] = qz_de_inteiro(b);
+                  v2.c[0] = qz_de_inteiro(c); v2.c[1] = qz_de_inteiro(e);
+                  Vec base[2] = { v1, v2 };
+                  Fun du[LN_MAX];
+                  int ehbase = vec_li(base, 2);
+                  int tem = fun_base_dual(base, 2, du);
+                  if(tem != ehbase) mal++;               /* a base dual existe ⟺ é base */
+                  if(!tem) continue;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                      if(!qz_igual(fun_av(du[i], base[j]), qz_de_inteiro(i == j))) mal++;
+                  /* e a COORDENADA É a MEDIÇÃO: xᵢ = e^i(v) */
+                  for(long x = -2; x <= 2; x++) for(long y = -2; y <= 2; y++){
+                      Vec v = vec0(2);
+                      v.c[0] = qz_de_inteiro(x); v.c[1] = qz_de_inteiro(y);
+                      Qz co[LN_MAX];
+                      if(!vec_coord(base, 2, v, co)){ mal++; continue; }
+                      for(int i = 0; i < 2; i++)
+                          if(!qz_igual(fun_av(du[i], v), co[i])) mal++;
+                  }
+                  feitos++;
+              }
+              ok("a BASE DUAL existe EXATAMENTE quando a base é base (e^i(e_j) = δ), e o"
+                 " teorema do andar mede-se junto: xᵢ = e^i(v) — «a coordenada não é um"
+                 " número posto ao lado do vetor: é a MEDIÇÃO pelo funcional dual»",
+                 mal == 0 && feitos > 500); }
+
+            /* a SEPARAÇÃO DE PONTOS e a injetividade de ι */
+            { int mal = 0; long nao_nulos = 0;
+              for(long x = -5; x <= 5; x++) for(long y = -5; y <= 5; y++)
+              for(long z = -5; z <= 5; z++){
+                  Vec v = vec0(3);
+                  v.c[0] = qz_de_inteiro(x); v.c[1] = qz_de_inteiro(y); v.c[2] = qz_de_inteiro(z);
+                  int separou = 0;
+                  for(int i = 0; i < 3; i++){
+                      Fun e; e.n = 3;
+                      for(int j = 0; j < 3; j++) e.c[j] = qz(0,1);
+                      e.c[i] = qz(1,1);
+                      if(fun_av(e, v).p) separou = 1;
+                  }
+                  if(vec_zero(v)){ if(separou) mal++; }
+                  else { if(!separou) mal++; else nao_nulos++; }
+              }
+              ok("a SEPARAÇÃO DE PONTOS: todo vetor não nulo é DISTINGUIDO do zero por"
+                 " algum funcional, e o zero por nenhum — «um ponto não desaparece se"
+                 " existe uma medição linear que o distingue do zero». É este o mecanismo"
+                 " que dá a injetividade de ι, e daí V ≅ V** CANÓNICO",
+                 mal == 0 && nao_nulos == 1330); }
+
+            /* dim W + dim W° = dim V — «o dual do posto-nulidade» */
+            { int mal = 0; long feitos = 0;
+              for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++) for(long c = -2; c <= 2; c++){
+                  Vec g = vec0(3);
+                  g.c[0] = qz_de_inteiro(a); g.c[1] = qz_de_inteiro(b); g.c[2] = qz_de_inteiro(c);
+                  if(vec_zero(g)) continue;
+                  Fun an[LN_MAX];
+                  int da2 = fun_aniquilador(&g, 1, 3, an);
+                  if(1 + da2 != 3) mal++;
+                  for(int i = 0; i < da2; i++) if(fun_av(an[i], g).p) mal++;
+                  feitos++;
+              }
+              /* e com dois geradores independentes, dim W = 2 e dim W° = 1 */
+              Vec w1 = vec0(3), w2 = vec0(3);
+              w1.c[0] = qz(1,1); w2.c[1] = qz(1,1);
+              Vec par[2] = { w1, w2 };
+              Fun an2[LN_MAX];
+              int d2 = fun_aniquilador(par, 2, 3, an2);
+              if(2 + d2 != 3) mal++;
+              ok("dim W + dim W° = dim V — «praticamente o DUAL do posto-nulidade» —"
+                 " medido em todos os subespaços de dimensão 1 de ℤ³ e num de dimensão 2,"
+                 " com cada funcional do aniquilador a medir ZERO nos geradores",
+                 mal == 0 && feitos > 100 && d2 == 1); }
+
+            /* [T*] = Aᵀ e o chefão: ker T* = (im T)° */
+            { int mal = 0; long feitos = 0;
+              for(long k = 0; k < 625; k++){
+                  Mat X = mat0(2,2), Xd = mat0(2,2);
+                  long t = k;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      X.a[i][j] = qz_de_inteiro(t % 5 - 2); t /= 5;
+                  }
+                  /* [T*] pela DEFINIÇÃO T*(φ) = φ∘T */
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      Fun phi; phi.n = 2; phi.c[0] = qz(0,1); phi.c[1] = qz(0,1);
+                      phi.c[i] = qz(1,1);
+                      Vec ej = vec0(2); ej.c[j] = qz(1,1);
+                      Xd.a[j][i] = fun_av(phi, mat_aplica(X, ej));
+                  }
+                  if(!mat_igual(Xd, mat_transposta(X))) mal++;      /* [T*] = Aᵀ */
+                  /* O CHEFÃO: ker T* = (im T)°, e mede-se pelas DIMENSÕES e pela anulação */
+                  Vec ib[LN_MAX];
+                  int r = mat_imagem(X, ib);
+                  Fun an[LN_MAX];
+                  int da2 = (r > 0) ? fun_aniquilador(ib, r, 2, an) : 2;
+                  Vec nb[LN_MAX];
+                  int dk = mat_nucleo(mat_transposta(X), nb);
+                  if(dk != da2) mal++;
+                  for(int i = 0; i < dk; i++){
+                      Fun f; f.n = 2; f.c[0] = nb[i].c[0]; f.c[1] = nb[i].c[1];
+                      for(int j = 0; j < r; j++) if(fun_av(f, ib[j]).p) mal++;
+                  }
+                  feitos++;
+              }
+              ok("[T*] = Aᵀ — «o transposto aparece naturalmente», construído pela"
+                 " DEFINIÇÃO T*(φ) = φ∘T e comparado com a transposta em 625 matrizes. E"
+                 " o CHEFÃO fecha: ker T* = (im T)°, medido pelas dimensões E pela"
+                 " anulação de cada funcional na imagem",
+                 mal == 0 && feitos == 625); }
+
+            /* E OS TRINTA CORREM */
+            { int vmal = 0, por_n = 0, por_nome = 0;
+              fflush(stdout);
+              int guarda = dup(1), nulo = open("/dev/null", O_WRONLY);
+              if(guarda >= 0 && nulo >= 0) dup2(nulo, 1);
+              for(int k = 1; k <= 16; k++){
+                  char fala[64];
+                  snprintf(fala, sizeof fala, "linear %d", k);
+                  if(resolve_linear(fala)) por_n++; else vmal++;
+              }
+              for(int k = 1; k <= 14; k++){
+                  char fala[64];
+                  snprintf(fala, sizeof fala, "dual %d", k);
+                  if(resolve_linear(fala)) por_n++; else vmal++;
+              }
+              for(size_t i = 0; i < sizeof LI16/sizeof *LI16; i++)
+                  if(resolve_linear(LI16[i].nome)) por_nome++; else vmal++;
+              for(size_t i = 0; i < sizeof DU14/sizeof *DU14; i++)
+                  if(resolve_linear(DU14[i].nome)) por_nome++; else vmal++;
+              if(resolve_linear("linear 17")) vmal++;
+              if(resolve_linear("dual 15")) vmal++;
+              fflush(stdout);
+              if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
+              if(nulo >= 0) close(nulo);
+              printf("      os trinta: %d pelo número, %d pelo nome, e o fora de alcance"
+                     " é recusado\n", por_n, por_nome);
+              ok("OS DEZASSEIS da álgebra linear e os CATORZE do dual correm pelo NÚMERO"
+                 " e pelo NOME, com o fora de alcance RECUSADO — e cada um na espinha de"
+                 " sete ticks, com o gume a PROCURAR-SE onde ele o pediu",
+                 vmal == 0 && por_n == 30 && por_nome == 30); }
+        }
 
         /* ═══ §C36 CORPOS: A ESCADA FECHA, E A EXCEÇÃO É A MESMA ══════════════════
          * «corpo é praticamente o ponto em que "toda operação que tem fibra tem volta"

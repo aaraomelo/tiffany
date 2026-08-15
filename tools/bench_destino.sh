@@ -94,16 +94,17 @@ done
 # QUATRO sítios, dois deles a imprimir «%ld» desde sessões anteriores sem ninguém dar por
 # isso. A cura é `snprintf` num buffer e passar o buffer.
 echo
-for ln in $(grep -n 'tique7\?(' "$CONV" | cut -d: -f1); do
+# o `ok()` também recebe texto PRONTO — e caiu na mesma armadilha duas vezes
+for ln in $(grep -n 'tique7\?(\|[^_a-z]ok(' "$CONV" | cut -d: -f1); do
   linha=$(sed -n "${ln}p" "$CONV")
   # a DEFINIÇÃO de tique/tique7 não é uma chamada — e é ela que legitimamente formata
-  case "$linha" in *"static void tique"*) ok=$((ok+1)); continue;; esac
+  case "$linha" in *"static void tique"*|*"static void ok"*) ok=$((ok+1)); continue;; esac
   # junta a chamada até ao `);` — que pode NÃO estar no fim da linha (há `); }`), e
   # parar só no fim arrastava as linhas seguintes para dentro: eram 4 falsos alarmes
-  bloco=$(sed -n "${ln},$((ln+6))p" "$CONV" | awk '{ acc = acc $0; print acc; if (/\);/) exit }' | tail -1)
+  bloco=$(sed -n "${ln},$((ln+9))p" "$CONV" | awk '{ acc = acc $0; print acc; if (/\);/) exit }' | tail -1)
   # o texto literal entre aspas; um % seguido de letra de conversão é o defeito
   if printf '%s\n' "$bloco" | grep -q '"[^"]*%[-0-9.]*[dilsufxzc]'; then
-    echo "  FAIL conversa.c:$ln — %-conversão dentro de tique(): ele NÃO formata,"
+    echo "  FAIL conversa.c:$ln — %-conversão dentro de tique()/ok(): não formatam,"
     echo "       o literal sai para o ecrã. Usar snprintf num buffer e passar o buffer"
     fail=$((fail+1))
   else
