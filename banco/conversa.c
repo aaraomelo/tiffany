@@ -54,6 +54,7 @@
 #include "exterior.h"   /* Lambda V, o Hodge, e o FECHO do par directo/cruzado */
 #include "torre.h"      /* a torre inteira: Cayley-Dickson pelos DOIS lados */
 #include "calculo.h"    /* Calculo I exacto: o quociente de diferencas E um polinomio */
+#include "calculo2.h"   /* Calculo II: series formais, varias variaveis, e a BORDA */
 #include "eletrico.h"
 
 typedef struct { long a, b; } Slot;
@@ -1373,6 +1374,543 @@ static void esc_mat(const char *ind, Mat A);
 static void esc_qz(const char *pre, Qz x, const char *pos);
 static void esc_col(const char *s, int largura);
 static void tique7(int slot, const char *porque);
+/* ── CÁLCULO II: LOCAL → GLOBAL, E A BORDA ──────────────────────────────────────────
+ * O `eval.txt` sobe para o Cálculo II e acrescenta uma coisa nova à espinha:
+ *      HIPÓTESES → DEFINIÇÃO → TRANSIÇÃO → LEI → TESTEMUNHA → CONCLUSÃO → VOLTA
+ *      e, por cima de tudo,           LOCAL → GLOBAL
+ * «porque é justamente isso que aparece quando passamos de derivadas locais para
+ * integrais, séries, campos e teoremas de borda». É o eixo do andar, e cada fala diz
+ * onde o salto acontece.
+ *
+ * E ele faz uma CORREÇÃO ao andar anterior, que eu aceitei e apliquei: identificar o
+ * Teorema Fundamental do Cálculo com a fórmula do `thm:central` era exagero. São
+ * teoremas distintos — um inverte OPERAÇÕES, o outro inverte FUNÇÕES —, e a
+ * correspondência entre eles é uma camada ACIMA, proposta por esta casa. */
+static const struct { int n; const char *nome; const char *enunciado; } C2_21[] = {
+ {  1, "partes",            "∫u dv = uv − ∫v du, e sai DIRECTO da regra do produto" },
+ {  2, "impropria",         "∫₁^∞ dx/x^p converge exactamente quando p > 1" },
+ {  3, "sequencia",         "aₙ = n/(n+1) → 1, com o N PROCURADO — e (−1)ⁿ é o gume" },
+ {  4, "bolzano",           "limitada + monótona ⟹ convergente; e só limitada NÃO basta" },
+ {  5, "serie",             "a série é o objecto; o VALOR é que precisa do limite" },
+ {  6, "termo geral",       "aₙ → 0 é NECESSÁRIO e não suficiente — a harmónica é o gume" },
+ {  7, "serie p",           "Σ1/n^p: a comparação que TELESCOPA, e a soma exacta ESTOURA" },
+ {  8, "geometrica",        "(1−x)·Σxⁿ = 1 como série FORMAL, sem convergência nenhuma" },
+ {  9, "raio",              "|x−c| < R converge, > R diverge, e os extremos à parte" },
+ { 10, "taylor",            "f pelos seus coeficientes — e são os MOMENTOS do observador" },
+ { 11, "exp seno cosseno",  "exp' = exp, sin' = cos, cos' = −sin: nos COEFICIENTES" },
+ { 12, "parciais",          "∂f/∂x e ∂f/∂y formais e exactas" },
+ { 13, "gradiente",         "∇f é o DUAL: o funcional df lido como vector" },
+ { 14, "schwarz",           "f_xy = f_yx — VERIFICADO nos coeficientes, não assumido" },
+ { 15, "derivada linear",   "Df(a) NÃO é um número: é um OPERADOR LINEAR local" },
+ { 16, "cadeia multi",      "D(f∘g) = Df(g(x))·Dg(x): compor vira MULTIPLICAR matrizes" },
+ { 17, "hessiana",          "H simétrica, e a assinatura decide: mínimo, máximo ou SELA" },
+ { 18, "lagrange",          "∇f = λ∇g no extremo — e o gume é a regularidade do vínculo" },
+ { 19, "fubini",            "as duas ordens dão o mesmo, por caminhos intermédios DISTINTOS" },
+ { 20, "jacobiano",         "dV = |det J| du dv — o determinante como MEDIDA DE VOLUME" },
+ { 21, "green",             "∮_∂D = ∬_D: o INTERIOR contra a BORDA, medido dos dois lados" },
+};
+static void calculo2_resolve(int n){
+    TICK_N = 0;
+    printf("   %d — %s\n", n, C2_21[n-1].enunciado);
+    switch(n){
+    case 1: {
+        tique7(0, "sejam u, v deriváveis num intervalo");
+        tique7(1, "a integração por partes:");
+        printf("      $\\int u\\,dv = uv - \\int v\\,du$\n");
+        tique7(2, "a transição é a REGRA DO PRODUTO lida ao contrário: (uv)' = u'v + uv',"
+                  " e integrar os dois lados dá uv = ∫u'v + ∫uv'. Não é uma técnica: é um"
+                  " teorema de derivação virado do avesso");
+        tique7(3, "a lei é o Teorema Fundamental a permitir integrar a identidade — e é"
+                  " por isso que partes e substituição não são truques: são o produto e a"
+                  " cadeia, lidos no outro sentido");
+        { Cf cf = fn0(); cf.n = 3; cf.c[3] = qz(1,1); cf.c[1] = qz(-3,1);
+          Cf cg = fn0(); cg.n = 1; cg.c[0] = qz(1,1); cg.c[1] = qz(3,1);
+          Cf P1, P2f;
+          Cf fg1 = fn_mult(cf, fn_deriva(cg)), f1g = fn_mult(fn_deriva(cf), cg);
+          int o1 = fn_primitiva(fg1, &P1), o2 = fn_primitiva(f1g, &P2f);
+          Qz A = qz_soma(fn_av(P1,qz(2,1)), qz_oposto(fn_av(P1,qz(0,1))));
+          Qz B = qz_soma(fn_av(P2f,qz(2,1)), qz_oposto(fn_av(P2f,qz(0,1))));
+          Cf pr = fn_mult(cf,cg);
+          Qz C = qz_soma(fn_av(pr,qz(2,1)), qz_oposto(fn_av(pr,qz(0,1))));
+          printf("      f = x³ − 3x,  g = 3x + 1,  em [0,2]:\n");
+          printf("        ∫f·g' = "); esc_qz("", A, "\n");
+          printf("        f·g|  = "); esc_qz("", C, "\n");
+          printf("        ∫f'·g = "); esc_qz("", B, "\n");
+          printf("        e f·g| − ∫f'·g = "); esc_qz("", qz_soma(C, qz_oposto(B)), "\n");
+          int bate = qz_igual(A, qz_soma(C, qz_oposto(B)));
+          tique7(4, "a testemunha são DOIS CAMINHOS: o lado esquerdo integrado"
+                    " directamente, e o lado direito montado com o produto avaliado nos"
+                    " extremos menos a outra integral. Se a fórmula estivesse decorada em"
+                    " vez de derivada, os dois números separavam-se");
+          tique7(5, o1 && o2 && bate
+                 ? "logo ∫u dv = uv − ∫v du, e a fórmula é a regra do produto integrada"
+                 : "os dois lados não batem — NÃO afirmo");
+          tique7(6, "e a VOLTA é LOCAL → GLOBAL, que é o eixo deste andar: a regra do"
+                    " produto é LOCAL (vale em cada ponto), e integrá-la torna-a GLOBAL"
+                    " (uma afirmação sobre o intervalo inteiro). O trânsito é o Teorema"
+                    " Fundamental"); }
+        break; }
+    case 2: case 6: case 7: {
+        tique7(0, "seja p ≥ 1 inteiro e a série Σ_{n≥1} 1/n^p");
+        tique7(1, n == 6 ? "o critério do termo geral:" : "a série-p:");
+        printf(n == 6 ? "      $\\sum a_n$ converge $\\Rightarrow$ $a_n \\to 0$"
+                        "   --- e a recíproca é FALSA\n"
+                      : "      $\\sum 1/n^{p}$ converge exactamente quando $p > 1$\n");
+        tique7(2, "e AQUI A PRIMEIRA VERSÃO ERROU, e o erro vale mais que o teorema: eu"
+                  " acumulava a soma parcial como UMA fracção exacta. Em p = 3, N = 40 o"
+                  " resultado saiu NEGATIVO — o denominador é da ordem de lcm(1..40)³ e"
+                  " estourou o long. E o meu contador de estouros não o viu, porque eu"
+                  " guardava a potência e não a SOMA");
+        tique7(3, "a lei é que O OBJECTO ESTAVA ERRADO, não o guarda. A convergência não se"
+                  " decide olhando para o valor da soma: decide-se por COMPARAÇÃO com uma"
+                  " soma que TELESCOPA, e essa fica pequena. Para p ≥ 2 e n ≥ 2:"
+                  " 1/n^p ≤ 1/n² ≤ 1/(n(n−1)) = 1/(n−1) − 1/n, logo Σ ≤ 1 − 1/N < 1");
+        { Qz so, fe; sr_telescopa(64, &so, &fe);
+          printf("      a telescopagem: Σ_{n=2}^{64} [1/(n−1) − 1/n]\n");
+          printf("        somado termo a termo = "); esc_qz("", so, "\n");
+          printf("        forma fechada 1 − 1/N = "); esc_qz("", fe, "\n");
+          printf("      p    majoração 1/n^p ≤ 1/(n(n−1)) até n=200\n");
+          long f1 = sr_majora(1,200), f2 = sr_majora(2,200), f3 = sr_majora(3,200);
+          printf("        1    %ld falhas   ← É AQUI QUE MORDE: a harmónica não se majora\n", f1);
+          printf("        2    %ld falhas\n", f2);
+          printf("        3    %ld falhas\n", f3);
+          Qz mi; long blocos = sr_harmonica_blocos(12, &mi);
+          printf("      e a DIVERGÊNCIA da harmónica, por blocos: %ld de 12 blocos valem"
+                 " ≥ 1/2,\n", blocos);
+          printf("        logo S_4096 ≥ "); esc_qz("", mi, "   e cresce sem limite\n");
+          Qz tg; sr_termo_a_zero(1, 4096, &tg);
+          printf("      GUME do termo geral: em p = 1 o termo vale ");
+          esc_qz("", tg, " e vai a ZERO — e a série DIVERGE na mesma\n");
+          tique7(4, "a testemunha é a majoração a valer termo a termo em p ≥ 2 e a FALHAR"
+                    " em p = 1, com as falhas CONTADAS (198 de 199). Não é «o critério não"
+                    " se aplica»: é a desigualdade a ser falsa, em números pequenos e"
+                    " exactos");
+          tique7(5, f1 > 0 && f2 == 0 && f3 == 0 && blocos == 12 && qz_igual(so,fe)
+                 ? "logo Σ1/n^p converge para p ≥ 2 e diverge em p = 1 — e o termo geral ir"
+                   " a zero é NECESSÁRIO e não suficiente, com a harmónica a prová-lo"
+                 : "os regimes não se separaram — NÃO afirmo");
+          tique7(6, "e a VOLTA é LOCAL → GLOBAL na sua forma mais crua: o termo geral é"
+                    " LOCAL (o que acontece a um n) e a convergência é GLOBAL (o que"
+                    " acontece à soma). A harmónica mostra que o local pode ir a zero e o"
+                    " global divergir — o salto NÃO É automático, e é isso que este andar"
+                    " ensina"); }
+        break; }
+    case 3: case 4: {
+        tique7(0, n == 3 ? "seja aₙ = n/(n+1)" : "seja (aₙ) limitada");
+        tique7(1, n == 3 ? "a convergência, com o N procurado:"
+                         : "limitada e MONÓTONA implica convergente:");
+        printf(n == 3
+               ? "      $\\forall\\varepsilon>0\;\\exists N: n>N \\Rightarrow"
+                 " |a_n - 1| < \\varepsilon$\n"
+               : "      limitada $+$ monótona $\\Rightarrow$ convergente\n");
+        tique7(2, n == 3
+               ? "a transição é a conta exacta: |n/(n+1) − 1| = 1/(n+1), que é uma fracção"
+                 " e não uma estimativa. Achar N é resolver 1/(N+1) < ε em ℚ"
+               : "a transição é a completude: uma sucessão crescente e limitada tem"
+                 " supremo, e ela converge para ele. A monotonia é o que impede a"
+                 " oscilação, e a limitação é o que impede a fuga");
+        tique7(3, "a lei é a mesma do δ do Cálculo I: o N não se promete, PROCURA-SE — e"
+                  " verifica-se numa janela de termos, exactamente");
+        { long N = 0, achou = 0, casos = 0;
+          printf("        ε           N achado\n");
+          for(int k = 2; k <= 10; k += 2){
+              Qz e = qz(1, 1L << k);
+              casos++;
+              printf("        "); esc_qz("", e, "         ");
+              if(sq_acha_N(e, &N, 60)){ achou++; printf("%ld\n", N); }
+              else printf("NÃO achou\n");
+          }
+          /* o GUME: (−1)ⁿ é limitada e NÃO converge — e nem é monótona */
+          printf("      GUME — aₙ = (−1)ⁿ: os termos são +1, −1, +1, −1, …\n");
+          printf("        limitada? sim, entre −1 e 1.   monótona? NÃO.   converge? NÃO\n");
+          printf("        as subsucessões dos pares e dos ímpares vão para 1 e para −1:\n");
+          printf("        DOIS limites de subsucessão distintos, logo não há limite\n");
+          tique7(4, "a testemunha é o N exibido para cada ε; e o gume é (−1)ⁿ, que é"
+                    " LIMITADA e não converge. Retirada a monotonia, o teorema cai — e o"
+                    " contra-exemplo é o mais simples que existe. Bolzano–Weierstrass"
+                    " salva o que se pode: dela extrai-se uma SUBSUCESSÃO convergente, e"
+                    " são duas, com limites diferentes");
+          tique7(5, achou == casos
+                 ? "logo n/(n+1) → 1 com N = ⌈1/ε⌉, e limitada sozinha NÃO chega:"
+                   " a monotonia é hipótese operacional"
+                 : "algum ε ficou sem N — NÃO afirmo");
+          tique7(6, "e a VOLTA é a TRADUÇÃO: no universal cada ε é um degrau da ESCADA de"
+                    " observadores (thm:escada), e «aumentar o observador refina as"
+                    " classes». A sucessão que não converge é a que nunca estabiliza numa"
+                    " classe, por mais que se suba a escada"); }
+        break; }
+    case 5: case 8: case 9: {
+        tique7(0, "seja Σ aₙ xⁿ uma série de potências com coeficientes racionais");
+        tique7(1, n == 5 ? "a série é o OBJECTO; o valor é que precisa do limite:"
+             : n == 8 ? "a geométrica, como identidade FORMAL:"
+                      : "o raio de convergência:");
+        printf(n == 5 ? "      $S_N = \\sum_{n=0}^{N} a_n$,\\qquad"
+                        " $\\sum a_n$ converge $\\Leftrightarrow S_N \\to S$\n"
+             : n == 8 ? "      $(1-x)\\sum_{n\\geq 0} x^{n} = 1$\n"
+                      : "      $|x-c| < R$ converge,\\qquad $|x-c| > R$ diverge\n");
+        tique7(2, n == 8
+               ? "a transição é o produto de CAUCHY, e ele é EXACTO: multiplicar (1 − x)"
+                 " pela série dá coeficientes que se cancelam aos pares, e sobra 1. Isto"
+                 " NÃO usa convergência nenhuma — é uma identidade entre vectores de"
+                 " coeficientes"
+               : "o eval nota que «a série é uma soma que só existe depois do limite das"
+                 " somas finitas». A resposta desta casa é mais fina: o OBJECTO existe"
+                 " antes — é o vector de coeficientes, e soma-se, multiplica-se e"
+                 " deriva-se sem limite nenhum. O que precisa do limite é o VALOR");
+        tique7(3, "a lei é a SÉRIE FORMAL, e a casa já a corria: o `dirichlet.h` manipula"
+                  " séries de Dirichlet pelos coeficientes e NUNCA avalia o s. Aqui é o"
+                  " mesmo, com x no lugar de s");
+        { Sr G = sr_geometrica(), umx = sr0();
+          umx.a[0] = qz(1,1); umx.a[1] = qz(-1,1);
+          Sr pr = sr_mult(umx, G);
+          long naonulos = 0;
+          for(int i = 1; i <= C2_MAX; i++) if(pr.a[i].p) naonulos++;
+          printf("      (1 − x)·Σxⁿ, coeficiente a coeficiente:\n");
+          printf("        a₀ = "); esc_qz("", pr.a[0], "");
+          printf("   e %ld coeficientes não nulos acima de 0\n", naonulos);
+          printf("      as somas parciais em x = 1/2, contra a forma fechada 1/(1−x) = 2:\n");
+          for(int N = 2; N <= 16; N *= 2){
+              printf("        N = %-3d  S_N = ", N);
+              esc_qz("", sr_parcial(G, qz(1,2), N), "\n");
+          }
+          printf("      e o RAIO: Σxⁿ/n tem R = 1 — em x = 1 diverge (harmónica),\n");
+          printf("        e em x = −1 converge (alternada). Os extremos são casos à"
+                 " parte, e não se decidem pelo raio\n");
+          tique7(4, "a testemunha é a identidade formal a fechar com resíduo ZERO: um só"
+                    " coeficiente não nulo, o a₀ = 1, e todos os outros exactamente zero."
+                    " Não é «converge para 1/(1−x)»: é uma igualdade algébrica que vale"
+                    " antes de haver convergência");
+          tique7(5, pr.a[0].p == 1 && pr.a[0].q == 1 && naonulos == 0
+                 ? "logo a série geométrica é uma identidade FORMAL, e a convergência é uma"
+                   " pergunta SEPARADA — sobre o valor, não sobre o objecto"
+                 : "a identidade não fecha — NÃO afirmo");
+          tique7(6, "e a VOLTA é LOCAL → GLOBAL outra vez: os coeficientes são LOCAIS (cada"
+                    " um é um número) e a convergência é GLOBAL (uma propriedade do todo)."
+                    " E os EXTREMOS do intervalo são exactamente onde o salto não se faz"
+                    " sozinho — por isso «precisam ser examinados separadamente»"); }
+        break; }
+    case 10: case 11: {
+        tique7(0, "seja f suficientemente derivável em torno de a");
+        tique7(1, n == 10 ? "a série de Taylor:" : "as três séries fundamentais:");
+        printf(n == 10
+               ? "      $f(x) = \\sum_{n=0}^{N} \\frac{f^{(n)}(a)}{n!}(x-a)^{n} + R_N(x)$\n"
+               : "      $e^{x} = \\sum \\frac{x^{n}}{n!}$,\\qquad"
+                 " $\\sin x = \\sum (-1)^{n}\\frac{x^{2n+1}}{(2n+1)!}$\n");
+        tique7(2, "a transição é ler a função pelos seus COEFICIENTES em vez do seu valor —"
+                  " e o eval nota bem o que isso é: «uma função contínua sendo reconstruída"
+                  " por uma sequência de objectos algébricos FINITOS». O grau do truncamento"
+                  " é o quanto se vê");
+        tique7(3, "a lei é que as identidades de derivação passam a ser identidades de"
+                  " COEFICIENTES: exp' = exp, sin' = cos e cos' = −sin verificam-se termo a"
+                  " termo, sem avaliar nada");
+        { Sr E = sr_exp(12), S = sr_sin(12), C = sr_cos(12);
+          Sr dE = sr_deriva(E), dS = sr_deriva(S), dC = sr_deriva(C);
+          long me = 0, ms = 0, mc = 0;
+          for(int i = 0; i <= 10; i++){
+              if(!qz_igual(E.a[i], dE.a[i])) me++;
+              if(!qz_igual(dS.a[i], C.a[i])) ms++;
+              if(!qz_igual(dC.a[i], qz_oposto(S.a[i]))) mc++;
+          }
+          Sr id = sr_soma(sr_mult(S,S), sr_mult(C,C));
+          long mi = 0;
+          for(int i = 1; i <= 10; i++) if(id.a[i].p) mi++;
+          printf("      exp:  ");
+          for(int i = 0; i <= 5; i++){ esc_qz("", E.a[i], "  "); }
+          printf("…\n");
+          printf("      exp' = exp: %ld falhas   sin' = cos: %ld   cos' = −sin: %ld\n",
+                 me, ms, mc);
+          printf("      e sin² + cos² = 1 nos coeficientes: a₀ = ");
+          esc_qz("", id.a[0], "");
+          printf("   e %ld coeficientes não nulos acima\n", mi);
+          tique7(4, "a testemunha é sin² + cos² = 1 COMO SÉRIE: o coeficiente constante dá"
+                    " exactamente 1 e todos os outros dão exactamente zero, até à ordem"
+                    " guardada. É a identidade pitagórica provada nos coeficientes, sem"
+                    " um ângulo e sem um decimal");
+          tique7(5, me == 0 && ms == 0 && mc == 0 && mi == 0
+                 ? "logo Taylor lê a função pelos coeficientes, e as identidades de"
+                   " derivação sobrevivem à leitura"
+                 : "as identidades não fecham — NÃO afirmo");
+          tique7(6, "e a VOLTA é a TRADUÇÃO: no universal os coeficientes de Taylor são os"
+                    " MOMENTOS Φ_m do observador (thm:escada) — «Φ_m = Σ(i+1)^m bᵢ», a"
+                    " função lida por momentos sucessivos. E o thm:teto-oito diz o resto:"
+                    " oito momentos fecham suporte ≤ 8 por Vandermonde, e falham em 9. A"
+                    " ordem do truncamento É o degrau do observador"); }
+        break; }
+    case 12: case 13: case 14: {
+        tique7(0, "seja f(x,y) polinomial com coeficientes racionais");
+        tique7(1, n == 13 ? "o gradiente:" : n == 14 ? "a simetria de Schwarz:"
+                                                     : "as derivadas parciais:");
+        printf(n == 13 ? "      $\\nabla f = (\\partial f/\\partial x,"
+                         " \\partial f/\\partial y)$\n"
+             : n == 14 ? "      $f_{xy} = f_{yx}$\n"
+                       : "      $\\partial f/\\partial x$ e $\\partial f/\\partial y$,"
+                         " formais e exactas\n");
+        tique7(2, n == 14
+               ? "a transição é que a simetria NÃO se assume: nos coeficientes ela é uma"
+                 " identidade verificável — derivar em x e depois em y multiplica por i e"
+                 " por j, e a ordem dos dois factores não importa em ℚ"
+               : "a transição é que a parcial é a derivada formal num índice, com o outro"
+                 " congelado. É a mesma operação do Cálculo I, aplicada a uma das duas"
+                 " famílias de índices");
+        tique7(3, n == 13
+               ? "a lei é que ∇f é um VECTOR e df é um FUNCIONAL — e são objectos"
+                 " diferentes que a métrica identifica. É o par dual do andar linear:"
+                 " sem produto interno há df e não há ∇f"
+               : "a lei é a comutatividade da multiplicação em ℚ, e é ela que dá Schwarz"
+                 " para polinómios sem precisar de continuidade das segundas derivadas");
+        { P2 f = p2_0();
+          f.c[3][1] = qz(1,1); f.c[1][2] = qz(-2,1);
+          f.c[2][2] = qz(5,1); f.c[0][3] = qz(7,1);
+          int sim = p2_igual(p2_dy(p2_dx(f)), p2_dx(p2_dy(f)));
+          Vec g = p2_gradiente(f, qz(1,1), qz(2,1));
+          printf("      f = x³y − 2xy² + 5x²y² + 7y³\n");
+          printf("      ∇f em (1,2) = "); esc_vec(g); printf("\n");
+          printf("      f_xy = f_yx nos coeficientes: %s\n", sim ? "sim" : "NÃO");
+          /* a varredura: Schwarz em muitos polinómios */
+          long mal = 0, feitos = 0;
+          for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++)
+          for(long c = -2; c <= 2; c++) for(long d = -2; d <= 2; d++){
+              P2 h = p2_0();
+              h.c[2][1] = qz_de_inteiro(a); h.c[1][2] = qz_de_inteiro(b);
+              h.c[3][2] = qz_de_inteiro(c); h.c[2][3] = qz_de_inteiro(d);
+              if(!p2_igual(p2_dy(p2_dx(h)), p2_dx(p2_dy(h)))) mal++;
+              feitos++;
+          }
+          printf("      e em %ld polinómios varridos: %ld falhas\n", feitos, mal);
+          tique7(4, "a testemunha é a varredura: em 625 polinómios de duas variáveis a"
+                    " ordem das parciais NUNCA importa. E o gradiente é EXIBIDO num ponto,"
+                    " com as duas coordenadas exactas");
+          tique7(5, sim && mal == 0
+                 ? "logo as parciais comutam para polinómios, e ∇f é o par ordenado das"
+                   " duas"
+                 : "a simetria falha — NÃO afirmo");
+          tique7(6, "e a VOLTA é a TRADUÇÃO, e é o par dual: df é o FUNCIONAL (vive em V*)"
+                    " e ∇f é o VECTOR (vive em V), e o que os liga é a métrica — o"
+                    " thm:produto-dual, «no corpo é central e é a membrana». Sem forma não"
+                    " há gradiente, só há diferencial. Nomear um sem o outro é meio"
+                    " teorema"); }
+        break; }
+    case 15: case 16: {
+        tique7(0, "sejam f: ℝⁿ → ℝᵐ e g: ℝᵏ → ℝⁿ deriváveis");
+        tique7(1, n == 15 ? "a derivada é um OPERADOR LINEAR:" : "a cadeia multivariável:");
+        printf(n == 15 ? "      $Df(a): \\mathbb{R}^{n} \\to \\mathbb{R}^{m}$"
+                         "   --- e não um número\n"
+                       : "      $D(f \\circ g)(x) = Df(g(x))\\,Dg(x)$\n");
+        tique7(2, n == 15
+               ? "e este é o salto do andar: no Cálculo I a derivada era um NÚMERO — a"
+                 " inclinação. Aqui é uma MATRIZ, e a matriz é a melhor aproximação linear"
+                 " local. O objecto muda de tipo, e é isso que liga o cálculo à álgebra"
+                 " linear que já cá estava"
+               : "a transição é que COMPOR funções vira MULTIPLICAR matrizes. A regra da"
+                 " cadeia de uma variável era um produto de números; aqui é um produto de"
+                 " operadores, e a ordem importa");
+        tique7(3, "a lei é a linearidade da aproximação: Df(a) é o único operador linear L"
+                  " com f(a+h) = f(a) + Lh + o(h). E em polinómios o o(h) é EXACTO — são os"
+                  " termos de grau ≥ 2 do deslocamento, que se escrevem e se vêem");
+        { P2 X = p2_0(), Y = p2_0();
+          X.c[1][0] = qz(2,1); X.c[0][1] = qz(1,1);      /* x = 2u + v */
+          Y.c[1][0] = qz(1,1); Y.c[0][1] = qz(3,1);      /* y = u + 3v */
+          Mat J = p2_jacobiana(X, Y, qz(1,1), qz(1,1));
+          printf("      a aplicação (u,v) ↦ (2u+v, u+3v), com a sua matriz:\n");
+          esc_mat("        ", J);
+          printf("      det = "); esc_qz("", mat_det(J), "   ← e é o factor de VOLUME\n");
+          /* a CADEIA: compor duas lineares e comparar com o produto das matrizes */
+          P2 U = p2_0(), V = p2_0();
+          U.c[1][0] = qz(1,1); U.c[0][1] = qz(-1,1);     /* u = s − t */
+          V.c[1][0] = qz(2,1); V.c[0][1] = qz(1,1);      /* v = 2s + t */
+          Mat K = p2_jacobiana(U, V, qz(1,1), qz(1,1));
+          Mat prod = mat_mult(J, K);
+          /* e a composta, montada à mão: x(s,t) = 2(s−t) + (2s+t) = 4s − t */
+          P2 XC = p2_0(), YC = p2_0();
+          XC.c[1][0] = qz(4,1); XC.c[0][1] = qz(-1,1);
+          YC.c[1][0] = qz(7,1); YC.c[0][1] = qz(2,1);    /* y = (s−t) + 3(2s+t) = 7s + 2t */
+          Mat comp = p2_jacobiana(XC, YC, qz(1,1), qz(1,1));
+          printf("      D(f∘g) montada da composta:\n"); esc_mat("        ", comp);
+          printf("      Df·Dg, o produto das matrizes:\n"); esc_mat("        ", prod);
+          int bate = 1;
+          for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+              if(!qz_igual(comp.a[i][j], prod.a[i][j])) bate = 0;
+          printf("      det da composta = "); esc_qz("", mat_det(comp), "   e o produto");
+          printf(" dos determinantes = "); esc_qz("", qz_mult(mat_det(J), mat_det(K)), "\n");
+          tique7(4, "a testemunha são DOIS CAMINHOS: a jacobiana da função composta,"
+                    " montada da composta, contra o PRODUTO das duas jacobianas. Se a"
+                    " cadeia fosse decorada, as quatro entradas separavam-se");
+          tique7(5, bate
+                 ? "logo compor funções É multiplicar operadores, e o determinante"
+                   " multiplica junto — os volumes compõem-se"
+                 : "as matrizes não batem — NÃO afirmo");
+          tique7(6, "e a VOLTA é a TRADUÇÃO: o determinante da jacobiana é Λⁿ T = det T do"
+                    " andar exterior — «a acção do operador no VOLUME». E det(AB) ="
+                    " det A · det B é o que faz a cadeia funcionar nas medidas. LOCAL →"
+                    " GLOBAL: a matriz é local, o volume que ela move é global"); }
+        break; }
+    case 17: case 18: {
+        tique7(0, n == 17 ? "seja a um ponto crítico de f, com ∇f(a) = 0"
+                          : "extremizar f(x,y) sujeito a g(x,y) = c");
+        tique7(1, n == 17 ? "a Hessiana decide, pela ASSINATURA:"
+                          : "os multiplicadores de Lagrange:");
+        printf(n == 17 ? "      $H > 0 \\Rightarrow$ mínimo,\\quad $H < 0 \\Rightarrow$"
+                         " máximo,\\quad indefinida $\\Rightarrow$ SELA\n"
+                       : "      $\\nabla f = \\lambda \\nabla g$\n");
+        tique7(2, n == 17
+               ? "a transição é o desenvolvimento de segunda ordem: perto de um ponto"
+                 " crítico, f(a+h) − f(a) = ½hᵀHh + termos maiores, e o SINAL dessa forma"
+                 " quadrática decide. Não é a Hessiana que decide: é a ASSINATURA dela"
+               : "a transição é geométrica: no extremo vinculado, o gradiente de f tem de"
+                 " ser perpendicular à curva de nível de g — senão havia direcção"
+                 " admissível que melhorava. Perpendicular à mesma curva quer dizer"
+                 " PARALELO ao gradiente de g");
+        tique7(3, "a lei é a do andar das formas quadráticas, e é literal: «NÃO BASTA OLHAR"
+                  " PARA A MATRIZ; é preciso PROCURAR TESTEMUNHAS». A assinatura caça-se");
+        { P2 sela = p2_0(), mini = p2_0(), maxi = p2_0(), deg = p2_0();
+          sela.c[2][0] = qz(1,1);  sela.c[0][2] = qz(-1,1);     /* x² − y²  */
+          mini.c[2][0] = qz(1,1);  mini.c[0][2] = qz(1,1);      /* x² + y²  */
+          maxi.c[2][0] = qz(-1,1); maxi.c[0][2] = qz(-1,1);     /* −x² − y² */
+          deg.c[2][0]  = qz(1,1);                               /* x²: DEGENERADA */
+          Qz z = qz(0,1);
+          int cs = p2_classifica(p2_hessiana(sela,z,z));
+          int cm = p2_classifica(p2_hessiana(mini,z,z));
+          int cM = p2_classifica(p2_hessiana(maxi,z,z));
+          int cd = p2_classifica(p2_hessiana(deg,z,z));
+          printf("      f = x² − y²   →   %s\n", cs == 0 ? "SELA" : "?");
+          printf("      f = x² + y²   →   %s\n", cm == 1 ? "mínimo" : "?");
+          printf("      f = −x² − y²  →   %s\n", cM == -1 ? "máximo" : "?");
+          printf("      f = x²        →   %s\n",
+                 cd == 2 ? "DEGENERADA: o critério NÃO DECIDE" : "?");
+          /* as testemunhas da sela, CAÇADAS */
+          Mat H = p2_hessiana(sela, z, z);
+          printf("      e as testemunhas da sela, procuradas:\n");
+          { Vec vp = vec0(2), vn = vec0(2);
+            vp.c[0] = qz(1,1); vn.c[1] = qz(1,1);
+            printf("        Q("); esc_vec(vp); printf(") = ");
+            esc_qz("", fb_quadratica(H, vp), "  > 0     Q(");
+            esc_vec(vn); printf(") = ");
+            esc_qz("", fb_quadratica(H, vn), "  < 0\n"); }
+          tique7(4, "a testemunha da SELA é um par de vectores EXIBIDOS: um em que a forma"
+                    " é positiva e outro em que é negativa. É isso que «indefinida»"
+                    " significa, e é isso que se mostra — não o sinal de um determinante");
+          tique7(5, cs == 0 && cm == 1 && cM == -1 && cd == 2
+                 ? "logo a assinatura classifica, e o caso DEGENERADO é um quarto estado: o"
+                   " critério não decide, e dizê-lo é parte do teorema. Em f = x² o ponto"
+                   " (0,0) é mínimo, mas a Hessiana sozinha não o sabe"
+                 : "a classificação não separa — NÃO afirmo");
+          tique7(6, n == 18
+                 ? "e a VOLTA é o GUME de Lagrange, que o eval pede: retirada a"
+                   " REGULARIDADE do vínculo (∇g ≠ 0 no ponto), a condição ∇f = λ∇g falha."
+                   " Em g(x,y) = x³ − y² = 0 na origem, ∇g = (0,0), e nenhum λ existe —"
+                   " o método não se aplica a um ponto singular da restrição"
+                 : "e a VOLTA é a TRADUÇÃO: a Hessiana é uma FORMA QUADRÁTICA, e o andar"
+                   " das formas já dizia como se lê — pela assinatura, caçando testemunhas."
+                   " LOCAL → GLOBAL: a Hessiana é local e classifica um ponto; para ser"
+                   " global falta o que o Cálculo I já tinha ensinado, que um extremo"
+                   " local não é um extremo global"); }
+        break; }
+    case 19: case 20: case 21: {
+        tique7(0, n == 21 ? "seja R = [x₀,x₁]×[y₀,y₁] e (P,Q) um campo polinomial"
+                          : "seja f polinomial no rectângulo R");
+        tique7(1, n == 19 ? "Fubini:" : n == 20 ? "a mudança de coordenadas:"
+                                               : "o teorema de Green:");
+        printf(n == 19 ? "      $\\iint_R f\\,dA = \\int\\left(\\int f\\,dy\\right)dx"
+                         " = \\int\\left(\\int f\\,dx\\right)dy$\n"
+             : n == 20 ? "      $dV = |\\det J|\\,du\\,dv$\n"
+                       : "      $\\oint_{\\partial R} P\\,dx + Q\\,dy = \\iint_{R}"
+                         " (Q_x - P_y)\\,dA$\n");
+        tique7(2, n == 19
+               ? "a transição é que os dois integrais iterados constroem OBJECTOS"
+                 " INTERMÉDIOS DIFERENTES: um colapsa y e deixa um polinómio em x, o outro"
+                 " colapsa x e deixa um polinómio em y. Só o número final coincide — e é"
+                 " por isso que a comparação é um teorema e não uma tautologia"
+             : n == 20
+               ? "a transição é que o factor |det J| não é uma correcção: é a MEDIDA. O"
+                 " determinante já era «a acção do operador no volume» no andar exterior,"
+                 " e aqui ele aparece exactamente nesse papel"
+               : "a transição é o salto que dá nome ao andar: o lado esquerdo é uma soma"
+                 " sobre a BORDA (quatro segmentos) e o direito uma soma sobre o INTERIOR"
+                 " (uma área). São contas completamente diferentes, e o teorema diz que"
+                 " dão o mesmo número");
+        tique7(3, "a lei é INTERIOR ↔ BORDA, e é a forma mais forte de LOCAL → GLOBAL: o"
+                  " que acontece dentro está inteiramente determinado pelo que acontece no"
+                  " contorno");
+        { P2 f = p2_0();
+          f.c[3][1] = qz(1,1); f.c[1][2] = qz(-2,1); f.c[2][2] = qz(5,1); f.c[0][3] = qz(7,1);
+          Qz A = p2_int_dy_dx(f, qz(0,1), qz(2,1), qz(0,1), qz(3,1));
+          Qz B = p2_int_dx_dy(f, qz(0,1), qz(2,1), qz(0,1), qz(3,1));
+          printf("      f = x³y − 2xy² + 5x²y² + 7y³ em [0,2]×[0,3]:\n");
+          printf("        ∫dy depois ∫dx = "); esc_qz("", A, "\n");
+          printf("        ∫dx depois ∫dy = "); esc_qz("", B, "\n");
+          /* GREEN com P = −y, Q = x: o rotacional é 2, e o resultado é 2·área */
+          P2 P = p2_0(), Q = p2_0();
+          P.c[0][1] = qz(-1,1); Q.c[1][0] = qz(1,1);
+          Qz bo = p2_green_borda(P, Q, qz(0,1), qz(2,1), qz(0,1), qz(3,1));
+          Qz ar = p2_green_area(P, Q, qz(0,1), qz(2,1), qz(0,1), qz(3,1));
+          printf("      GREEN com P = −y, Q = x (logo Q_x − P_y = 2):\n");
+          printf("        a BORDA, somando os quatro lados = "); esc_qz("", bo, "\n");
+          printf("        o INTERIOR, integrando a área    = "); esc_qz("", ar, "\n");
+          printf("        e 2 × área do rectângulo 2×3 = 12\n");
+          /* varredura de Green em vários campos */
+          long mal = 0, feitos = 0;
+          for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++)
+          for(long c = -2; c <= 2; c++) for(long d = -2; d <= 2; d++){
+              P2 PP = p2_0(), QQ = p2_0();
+              PP.c[1][0] = qz_de_inteiro(a); PP.c[0][1] = qz_de_inteiro(b);
+              QQ.c[1][1] = qz_de_inteiro(c); QQ.c[2][0] = qz_de_inteiro(d);
+              if(!qz_igual(p2_green_borda(PP,QQ,qz(0,1),qz(2,1),qz(0,1),qz(3,1)),
+                           p2_green_area (PP,QQ,qz(0,1),qz(2,1),qz(0,1),qz(3,1)))) mal++;
+              feitos++;
+          }
+          printf("      e em %ld campos varridos: %ld divergências entre borda e"
+                 " interior\n", feitos, mal);
+          Mat J = mat0(2,2);
+          J.a[0][0] = qz(2,1); J.a[0][1] = qz(1,1);
+          J.a[1][0] = qz(1,1); J.a[1][1] = qz(3,1);
+          printf("      e o JACOBIANO de (u,v) ↦ (2u+v, u+3v): det = ");
+          esc_qz("", mat_det(J), "   ← o factor de volume\n");
+          tique7(4, "a testemunha de Green são DOIS CÁLCULOS SEM NADA EM COMUM: um percorre"
+                    " os quatro lados do rectângulo somando integrais de uma variável; o"
+                    " outro integra uma área. Baterem em 625 campos é o teorema, e não uma"
+                    " reescrita");
+          tique7(5, qz_igual(A,B) && qz_igual(bo,ar) && mal == 0
+                 ? "logo Fubini vale (as duas ordens dão o mesmo por caminhos distintos) e"
+                   " Green liga o interior à borda — o global determinado pelo contorno"
+                 : "os caminhos separam-se — NÃO afirmo");
+          tique7(6, "e a VOLTA é a TRADUÇÃO, e fecha o andar: INTERIOR ↔ BORDA é o par dual"
+                    " desta casa. No universal é o thm:borda-dirac — «a equação da borda É"
+                    " a fatoração» — e é o par adjunto δ ⊣ ε da morfologia, onde o operador"
+                    " e a sua borda são adjuntos. Green, Gauss e Stokes são a mesma frase"
+                    " em dimensões diferentes: o operador de borda tem adjunto, e integrar"
+                    " o derivado dentro é integrar o original na fronteira"); }
+        break; }
+    }
+}
+static int resolve_calculo2(const char *f){
+    const char *p = f;
+    for(size_t i = 0; i < sizeof C2_21/sizeof *C2_21; i++)
+        if(!strcmp(p, C2_21[i].nome)){ calculo2_resolve(C2_21[i].n); return 1; }
+    if(!strncmp(p, "calculo2", 8)) p += 8;
+    else if(!strncmp(p, "calculo 2", 9)) p += 9;
+    else if(!strncmp(p, "calculo ii", 10)) p += 10;
+    else return 0;
+    while(*p == ' ') p++;
+    if(!*p){
+        printf("   Cálculo II: séries, várias variáveis e a borda —"
+               " «calculo2 N» ou «calculo2 <nome>»\n");
+        printf("   e a espinha ganha um eixo novo: LOCAL → GLOBAL\n\n");
+        for(size_t i = 0; i < sizeof C2_21/sizeof *C2_21; i++){
+            printf("     %2d  ", C2_21[i].n);
+            esc_col(C2_21[i].nome, 20);
+            printf("  %s\n", C2_21[i].enunciado);
+        }
+        return 1;
+    }
+    if(*p >= '0' && *p <= '9'){
+        long n = 0;
+        while(*p >= '0' && *p <= '9') n = n*10 + (*p++ - '0');
+        while(*p == ' ') p++;
+        if(!*p && n >= 1 && n <= 21){ calculo2_resolve((int)n); return 1; }
+        return 0;
+    }
+    return 0;
+}
 /* ── CÁLCULO I, EXACTO — E CADA TEOREMA COM A SUA TRADUÇÃO NO UNIVERSAL ─────────────
  * O `eval.txt` traz o Cálculo I inteiro com vinte demonstrações e «um gume explícito em
  * cada teorema». E o Aarão: «tudo agora tem tradução nos teoremas do corpo universal».
@@ -1915,12 +2453,16 @@ static void calculo_resolve(int n){
                  ? "logo derivação e integração são inversas: uma desfaz a outra, e o"
                    " Teorema Fundamental é a volta a fechar"
                  : "a volta não fecha — NÃO afirmo");
-          tique7(6, "e a VOLTA é a TRADUÇÃO, e é exacta: no universal isto é o thm:central"
-                    " do corpo estelar — ∫f + ∫f⁻¹ = b·f(b) − a·f(a), a SOMA REVERSÍVEL. O"
-                    " Teorema Fundamental do Cálculo e a bijeção dual Gentil↔Hurwitz são a"
-                    " MESMA identidade: ela diz que contar e integrar são os dois lados de"
-                    " uma bijecção, e que a volta fecha com resíduo 0. «Nunca se avalia uma"
-                    " raiz»"); }
+          tique7(6, "e a VOLTA é a TRADUÇÃO — mas COM UMA DISTINÇÃO que eu não tinha feito"
+                    " e que o Aarão exigiu. Eu escrevi que o TFC «É» o thm:central do corpo"
+                    " estelar (∫f + ∫f⁻¹ = bf(b) − af(a)). NÃO É: são teoremas DIFERENTES."
+                    " O TFC diz que ∫ e d/dx são OPERAÇÕES inversas; a identidade da casa é"
+                    " a da integral da FUNÇÃO INVERSA — clássica, verdadeira, e DERIVADA do"
+                    " TFC por partes. Uma inverte operações, a outra inverte funções. O que"
+                    " a casa PROPÕE é que as duas são instâncias de «a volta fecha com"
+                    " resíduo 0» — e isso é uma correspondência ARQUITECTURAL, uma camada"
+                    " acima, não uma identificação. A matemática clássica do TFC é sólida"
+                    " sozinha e não precisa desta casa"); }
         break; }
     case 21:
         tique7(0, "seja a ordem: «tudo agora tem tradução nos teoremas do corpo universal»");
@@ -1942,9 +2484,13 @@ static void calculo_resolve(int n){
         printf("                                   escada faz, degrau a degrau\n");
         printf("      integral                 →   a SOMA REVERSÍVEL de Gentil:\n");
         printf("                                   Σxₙ + Σ#{xₙ<v} = N·q, obs:triade-central\n");
-        printf("      Teorema Fundamental      →   thm:central — ∫f + ∫f⁻¹ = bf(b) − af(a):\n");
-        printf("                                   derivar e integrar são a BIJEÇÃO DUAL,\n");
-        printf("                                   e a volta fecha com resíduo 0\n");
+        printf("      Teorema Fundamental      →   a VOLTA: ∫ e d/dx são operações\n");
+        printf("                                   inversas, e a volta fecha com resíduo 0\n");
+        printf("        ⚠ e NÃO é o thm:central. Aquele é ∫f + ∫f⁻¹ = bf(b) − af(a),\n");
+        printf("          a integral da FUNÇÃO inversa — teorema clássico distinto, que\n");
+        printf("          DERIVA do TFC. Uma inverte operações, a outra inverte funções.\n");
+        printf("          A correspondência entre as duas é PROPOSTA por esta casa, e é\n");
+        printf("          uma camada acima — não uma identificação.\n");
         printf("      aproximação linear       →   thm:batuta-continuo — o segmento afim\n");
         printf("                                   sela o contínuo, com erro ≤ 2⁻ᵏ\n");
         printf("      extremo                  →   a TESTEMUNHA caçada, como a assinatura\n");
@@ -11264,6 +11810,7 @@ static int resolve_mostra(const char *f){ return resolve_mostra_em(f, "../papers
 static int resolve_simbolico(const char *fala){
     if(resolve_divisibilidade(fala)) return 1;     /* o relógio de 6 ticks */
     if(resolve_bezout(fala)) return 1;             /* a testemunha e o critério */
+    if(resolve_calculo2(fala)) return 1;           /* Cálculo II: local → global, os 21 */
     if(resolve_calculo1(fala)) return 1;           /* Cálculo I exacto, os 21 */
     if(resolve_universal(fala)) return 1;          /* os teoremas do universal, os 23 */
     if(resolve_torre(fala)) return 1;              /* a torre pelos dois lados, os 16 */
@@ -12307,6 +12854,172 @@ static int teste(void){
             }
             ok("e a membrana nao rouba o corpus: fala sem LaTeX nao vira conta", roubadas == 0);
 
+        /* ═══ §C43 CÁLCULO II: LOCAL → GLOBAL, E A BORDA ══════════════════════════
+         * O eval sobe ao Cálculo II e acrescenta LOCAL → GLOBAL à espinha. E faz uma
+         * correção ao andar anterior que eu aceitei: identificar o TFC com a fórmula do
+         * thm:central era exagero — são teoremas distintos, e a correspondência é uma
+         * camada acima. Corrigido nos três sítios onde eu o tinha escrito. */
+        printf("\n§C43 CÁLCULO II: a série é o objecto, e o interior é a borda.\n\n");
+        {
+            /* (1) A SÉRIE FORMAL: a identidade que vale ANTES da convergência */
+            { Sr G = sr_geometrica(), umx = sr0();
+              umx.a[0] = qz(1,1); umx.a[1] = qz(-1,1);
+              Sr pr = sr_mult(umx, G);
+              long naonulos = 0;
+              for(int i = 1; i <= C2_MAX; i++) if(pr.a[i].p) naonulos++;
+              Sr E = sr_exp(12), S = sr_sin(12), C = sr_cos(12);
+              long me = 0, ms = 0, mc = 0, mi = 0;
+              Sr dE = sr_deriva(E), dS = sr_deriva(S), dC = sr_deriva(C);
+              for(int i = 0; i <= 10; i++){
+                  if(!qz_igual(E.a[i], dE.a[i])) me++;
+                  if(!qz_igual(dS.a[i], C.a[i])) ms++;
+                  if(!qz_igual(dC.a[i], qz_oposto(S.a[i]))) mc++;
+              }
+              Sr id = sr_soma(sr_mult(S,S), sr_mult(C,C));
+              for(int i = 1; i <= 10; i++) if(id.a[i].p) mi++;
+              printf("      (1−x)·Σxⁿ = 1 com %ld coefs não nulos acima;"
+                     " exp'=exp %ld, sin'=cos %ld, cos'=−sin %ld falhas\n",
+                     naonulos, me, ms, mc);
+              printf("      e sin² + cos² = 1 nos COEFICIENTES: %ld não nulos acima do a₀\n",
+                     mi);
+              ok("A SÉRIE É O OBJECTO; o VALOR é que precisa do limite. (1−x)·Σxⁿ = 1 é uma"
+                 " identidade entre vectores de coeficientes e vale ANTES de haver"
+                 " convergência — e sin² + cos² = 1 prova-se nos coeficientes, sem um"
+                 " ângulo e sem um decimal. É o que o dirichlet.h já fazia com as séries"
+                 " de Dirichlet: manipular coeficientes e nunca avaliar o s",
+                 naonulos == 0 && me == 0 && ms == 0 && mc == 0 && mi == 0
+                 && pr.a[0].p == 1 && pr.a[0].q == 1); }
+
+            /* (2) A SÉRIE-p, e o ERRO que a primeira versão cometeu */
+            { Qz so, fe; sr_telescopa(64, &so, &fe);
+              long f1 = sr_majora(1,200), f2 = sr_majora(2,200), f3 = sr_majora(3,200);
+              Qz mi2; long blocos = sr_harmonica_blocos(12, &mi2);
+              Qz lixo;
+              int estourou = !sr_p_parcial(3, 40, &lixo);
+              printf("      telescopagem: somado = ");
+              esc_qz("", so, "  fechado = ");
+              esc_qz("", fe, "");
+              printf(";  majoração falha %ld vezes em p=1 e %ld em p≥2\n", f1, f2+f3);
+              printf("      harmónica: %ld de 12 blocos ≥ 1/2;  e a soma exacta de"
+                     " Σ1/n³ até 40 %s\n", blocos,
+                     estourou ? "ESTOURA — e diz-se" : "cabe");
+              ok("O OBJECTO ESTAVA ERRADO, NÃO O GUARDA. A primeira versão acumulava a soma"
+                 " parcial exacta de Σ1/n^p: em p = 3, N = 40 saiu NEGATIVA, porque o"
+                 " denominador é lcm(1..40)³, e o meu contador não viu — eu guardava a"
+                 " potência e não a SOMA. A convergência não se decide pelo valor: por"
+                 " COMPARAÇÃO que TELESCOPA, e aí os números ficam minúsculos"
+                 " (1/n^p ≤ 1/(n−1) − 1/n, soma = 1 − 1/N). E a divergência da harmónica"
+                 " também é exacta, por blocos de ≥ 1/2 — sem somar bloco nenhum, só"
+                 " verificando a desigualdade e a contagem",
+                 qz_igual(so,fe) && f1 > 0 && f2 == 0 && f3 == 0 && blocos == 12
+                 && estourou); }
+
+            /* (3) SCHWARZ varrido, e o gradiente como DUAL */
+            { long mal = 0, feitos = 0;
+              for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++)
+              for(long c = -2; c <= 2; c++) for(long d = -2; d <= 2; d++){
+                  P2 h = p2_0();
+                  h.c[2][1] = qz_de_inteiro(a); h.c[1][2] = qz_de_inteiro(b);
+                  h.c[3][2] = qz_de_inteiro(c); h.c[2][3] = qz_de_inteiro(d);
+                  if(!p2_igual(p2_dy(p2_dx(h)), p2_dx(p2_dy(h)))) mal++;
+                  feitos++;
+              }
+              printf("      Schwarz f_xy = f_yx em %ld polinómios: %ld falhas\n",
+                     feitos, mal);
+              ok("SCHWARZ VERIFICA-SE, não se assume: nos coeficientes a ordem das parciais"
+                 " multiplica por i e por j, e a comutatividade de ℚ dá o resto. E o par"
+                 " dual do gradiente diz-se por inteiro: df é o FUNCIONAL (vive em V*) e"
+                 " ∇f é o VECTOR (vive em V) — sem métrica há diferencial e NÃO há"
+                 " gradiente",
+                 mal == 0 && feitos == 625); }
+
+            /* (4) A HESSIANA e os QUATRO estados, com o degenerado a contar */
+            { P2 sela = p2_0(), mini = p2_0(), maxi = p2_0(), deg = p2_0();
+              sela.c[2][0] = qz(1,1);  sela.c[0][2] = qz(-1,1);
+              mini.c[2][0] = qz(1,1);  mini.c[0][2] = qz(1,1);
+              maxi.c[2][0] = qz(-1,1); maxi.c[0][2] = qz(-1,1);
+              deg.c[2][0]  = qz(1,1);
+              Qz z = qz(0,1);
+              int cs = p2_classifica(p2_hessiana(sela,z,z));
+              int cm = p2_classifica(p2_hessiana(mini,z,z));
+              int cM = p2_classifica(p2_hessiana(maxi,z,z));
+              int cd = p2_classifica(p2_hessiana(deg,z,z));
+              Mat H = p2_hessiana(sela, z, z);
+              Vec vp = vec0(2), vn = vec0(2);
+              vp.c[0] = qz(1,1); vn.c[1] = qz(1,1);
+              int test = fb_quadratica(H,vp).p > 0 && fb_quadratica(H,vn).p < 0;
+              printf("      classificação: sela %d, mínimo %d, máximo %d, degenerada %d\n",
+                     cs, cm, cM, cd);
+              ok("A ASSINATURA CLASSIFICA, E O DEGENERADO É UM QUARTO ESTADO: em f = x² o"
+                 " ponto (0,0) É mínimo e a Hessiana sozinha NÃO o sabe — o critério não"
+                 " decide, e dizê-lo faz parte do teorema. E a testemunha da SELA é um PAR"
+                 " de vectores exibidos, um com Q > 0 e outro com Q < 0: é isso que"
+                 " «indefinida» quer dizer, e não o sinal de um determinante",
+                 cs == 0 && cm == 1 && cM == -1 && cd == 2 && test); }
+
+            /* (5) FUBINI por caminhos intermédios DISTINTOS, e GREEN varrido */
+            { P2 f = p2_0();
+              f.c[3][1] = qz(1,1); f.c[1][2] = qz(-2,1);
+              f.c[2][2] = qz(5,1); f.c[0][3] = qz(7,1);
+              Qz A = p2_int_dy_dx(f, qz(0,1), qz(2,1), qz(0,1), qz(3,1));
+              Qz B = p2_int_dx_dy(f, qz(0,1), qz(2,1), qz(0,1), qz(3,1));
+              long mal = 0, feitos = 0;
+              for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++)
+              for(long c = -2; c <= 2; c++) for(long d = -2; d <= 2; d++){
+                  P2 PP = p2_0(), QQ = p2_0();
+                  PP.c[1][0] = qz_de_inteiro(a); PP.c[0][1] = qz_de_inteiro(b);
+                  QQ.c[1][1] = qz_de_inteiro(c); QQ.c[2][0] = qz_de_inteiro(d);
+                  if(!qz_igual(p2_green_borda(PP,QQ,qz(0,1),qz(2,1),qz(0,1),qz(3,1)),
+                               p2_green_area (PP,QQ,qz(0,1),qz(2,1),qz(0,1),qz(3,1)))) mal++;
+                  feitos++;
+              }
+              printf("      Fubini: ");
+              esc_qz("", A, " e ");
+              esc_qz("", B, "");
+              printf(";  Green em %ld campos: %ld divergências borda/interior\n",
+                     feitos, mal);
+              ok("FUBINI NÃO É TAUTOLOGIA AQUI, e a primeira versão quase o foi: eu tinha"
+                 " um parâmetro `ordem` que a função IGNORAVA, o que tornaria a comparação"
+                 " vazia. Agora os dois integrais iterados constroem objectos intermédios"
+                 " DIFERENTES — um colapsa y e deixa um polinómio em x, o outro colapsa x"
+                 " —, e só o número final coincide. E GREEN liga o INTERIOR à BORDA por"
+                 " dois cálculos sem nada em comum: quatro integrais de linha contra uma"
+                 " de área, iguais em 625 campos",
+                 qz_igual(A,B) && mal == 0 && feitos == 625); }
+
+            /* (6) O TECTO, dito à parte */
+            { printf("      estouros detectados no andar: %ld"
+                     " (e são REAIS — a série-p não cabe)\n", c2_estouros);
+              ok("os estouros são CONTADOS e DITOS em vez de escondidos — foi o que faltou"
+                 " na primeira versão, onde uma soma negativa passou por resultado",
+                 c2_estouros > 0); }
+
+            /* E OS VINTE E UM CORREM */
+            { int vmal = 0, por_n = 0, por_nome = 0;
+              fflush(stdout);
+              int guarda = dup(1), nulo = open("/dev/null", O_WRONLY);
+              if(guarda >= 0 && nulo >= 0) dup2(nulo, 1);
+              for(int k = 1; k <= 21; k++){
+                  char fala[64];
+                  snprintf(fala, sizeof fala, "calculo2 %d", k);
+                  if(resolve_calculo2(fala)) por_n++; else vmal++;
+              }
+              for(size_t i = 0; i < sizeof C2_21/sizeof *C2_21; i++)
+                  if(resolve_calculo2(C2_21[i].nome)) por_nome++; else vmal++;
+              if(resolve_calculo2("calculo2 22")) vmal++;
+              fflush(stdout);
+              if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
+              if(nulo >= 0) close(nulo);
+              printf("      os vinte e um: %d por número, %d por nome\n", por_n, por_nome);
+              ok("OS VINTE E UM do Cálculo II correm, e a espinha ganhou o eixo que o eval"
+                 " pediu: LOCAL → GLOBAL. Ele aparece em toda a parte — o termo geral é"
+                 " local e a convergência é global (e a harmónica mostra que o salto NÃO é"
+                 " automático); a Hessiana é local e o extremo global é outra pergunta; e"
+                 " Green é a forma mais forte: o interior inteiramente determinado pela"
+                 " BORDA",
+                 vmal == 0 && por_n == 21 && por_nome == 21); }
+        }
+
         /* ═══ §C42 CÁLCULO I EXACTO — E A TRADUÇÃO NO UNIVERSAL ═══════════════════
          * O `eval.txt` traz o Cálculo I com vinte demonstrações e «um gume explícito em
          * cada teorema». O que o torna exacto aqui é um facto sobre polinómios:
@@ -12446,11 +13159,15 @@ static int teste(void){
               printf("      TFC I: (∫f)' = f em %ld pontos, %d divergências;"
                      "  TFC II: o exacto ", feitos, mal);
               esc_qz("", ex, entre ? " está entre as somas\n" : " NÃO está entre\n");
-              ok("O TEOREMA FUNDAMENTAL É A VOLTA, e a tradução é exacta: no universal ele"
-                 " É o thm:central do corpo estelar — ∫f + ∫f⁻¹ = b·f(b) − a·f(a), a SOMA"
-                 " REVERSÍVEL que casa contar com integrar. Derivar e integrar não são"
-                 " «inversas» por analogia: são os dois lados de uma bijecção dual, e a"
-                 " volta fecha com resíduo 0. É o mesmo ν∘ν = id de todos os outros andares",
+              ok("O TEOREMA FUNDAMENTAL É A VOLTA: (∫f)' = f medido ponto a ponto, e o"
+                 " exacto G(b) − G(a) cercado pelas duas somas. E A DISTINÇÃO QUE O AARÃO"
+                 " EXIGIU, porque eu tinha exagerado: escrevi que o TFC «É» o thm:central"
+                 " do corpo estelar. NÃO É. O TFC diz que ∫ e d/dx são OPERAÇÕES inversas;"
+                 " o thm:central usa ∫f + ∫f⁻¹ = bf(b) − af(a), que é a identidade da"
+                 " integral da FUNÇÃO inversa — clássica, distinta, e derivável do TFC por"
+                 " partes. Dizer que uma É a outra é insinuação arquitectónica. O que a"
+                 " casa propõe é que ambas realizam «a volta fecha com resíduo 0», e isso"
+                 " é uma camada ACIMA da matemática clássica, que se sustenta sozinha",
                  okp && mal == 0 && entre); }
 
             /* (7) O TECTO DA MÁQUINA, à parte do da matemática */
