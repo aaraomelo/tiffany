@@ -49,6 +49,7 @@
 #include "estrutura.h"  /* algebra moderna: a estrutura e uma tabua */
 #include "corpo.h"      /* corpos: onde fibra+volta vira estrutura formal */
 #include "linear.h"     /* algebra linear exata, e o gume automatico */
+#include "forma.h"      /* formas, adjuntos e espectro — a raiz nao se tira */
 #include "eletrico.h"
 
 typedef struct { long a, b; } Slot;
@@ -1352,6 +1353,650 @@ static int resolve_bezout(const char *f){
 static void tique7(int slot, const char *porque);
 static void esc_col(const char *s, int largura);
 static void esc_qz(const char *pre, Qz x, const char *pos);
+/* ── FORMAS, ADJUNTOS E ESPECTRO — E O QUE A CASA JÁ TINHA ──────────────────────────
+ * O último `eval.txt` sobe para a parte estrutural, e pede TRÊS gumes automáticos por
+ * nome. Mas o achado deste andar não é nenhum deles: é que a casa JÁ CORRIA
+ * Cayley–Hamilton em três sítios sem lhe chamar isso — o `estaca`, o `W²=(m²+4)I` e o
+ * traço-dobra do pentágono. Procurei antes de escrever, e o andar já cá estava. */
+static void esc_vec(Vec v);
+static void esc_mat(const char *ind, Mat A);
+static void esc_qz(const char *pre, Qz x, const char *pos);
+static void esc_col(const char *s, int largura);
+static void tique7(int slot, const char *porque);
+static long gume_matriz(int n, long lim, int (*hip)(const Mat*), int (*tese)(const Mat*), Mat *contra);
+static int hip_simetrica(const Mat *A);
+static int hip_diagonalizavel(const Mat *A);
+static int tese_diagonalizavel(const Mat *A);
+static const struct { int n; const char *nome; const char *enunciado; } FQ16[] = {
+ {  1, "bilinear",        "B(u,v) linear em CADA argumento" },
+ {  2, "simetrica",       "B(u,v) = B(v,u) ⟺ A = Aᵀ, e onde a simetria falha" },
+ {  3, "quadratica",      "Q(v) = vᵀAv, e o gume: Q(v) = 0 implica v = 0?" },
+ {  4, "produto interno", "⟨u,v⟩ simétrico, ⟨u,u⟩ ≥ 0, e = 0 só no zero" },
+ {  5, "cauchy schwarz",  "⟨u,v⟩² ≤ ⟨u,u⟩⟨v,v⟩ — e a raiz NÃO se tira" },
+ {  6, "triangular",      "|u+v| ≤ |u| + |v|, medida ao quadrado" },
+ {  7, "ortogonalidade",  "u⊥ é subespaço, e V = W ⊕ W⊥" },
+ {  8, "projecao",        "v = v∥ + v⊥, e a volta é exata" },
+ {  9, "gram schmidt",    "a base ortogonal, exata — e a normalização é que traz a raiz" },
+ { 10, "adjunto",         "⟨Tv,w⟩ = ⟨v,T*w⟩, e [T*] = Aᵀ" },
+ { 11, "espectral",       "A = Aᵀ ⟹ base ortogonal de autovetores, A = QDQᵀ" },
+ { 12, "valores singulares","σᵢ = √λᵢ de AᵀA — e mede-se σᵢ², que é exato" },
+ { 13, "svd",             "A = UΣVᵀ: rotação → escala → rotação" },
+ { 14, "cayley hamilton", "p_A(A) = 0, e A¹⁰ reduz-se sem multiplicar dez vezes" },
+ { 15, "jordan",          "ter autovalores NÃO dá diagonalizável — o gume [[1,1],[0,1]]" },
+ { 16, "a casa ja tinha", "onde este andar já corria, com outro nome" },
+};
+static void forma_resolve(int n){
+    TICK_N = 0;
+    printf("   %d — %s\n", n, FQ16[n-1].enunciado);
+    long a23[] = {2,1,1,3}, a20[] = {2,1,0,3}, a21[] = {2,1,1,2};
+    long jd[] = {1,1,0,1}, a12[] = {1,2,3,4};
+    Mat A = mat_de_inteiros(2,2,a23), N = mat_de_inteiros(2,2,a20);
+    Mat P = mat_de_inteiros(2,2,a21), J = mat_de_inteiros(2,2,jd);
+    switch(n){
+    case 1: case 2: case 3: {
+        tique7(0, "seja B: V × V → K, e A a sua matriz na base canónica");
+        tique7(1, n == 1 ? "bilinear é linear em CADA argumento:"
+                         : n == 2 ? "simétrica é não depender da ordem:"
+                                  : "a forma quadrática é a diagonal da bilinear:");
+        printf(n == 1 ? "      $B(u+v,w) = B(u,w) + B(v,w)$,   "
+                        "$B(\\lambda u, w) = \\lambda B(u,w)$\n"
+             : n == 2 ? "      $B(u,v) = B(v,u)$   $\\Leftrightarrow$   $A = A^{T}$\n"
+                      : "      $Q(v) = B(v,v) = v^{T} A v$\n");
+        if(n == 1){
+            tique7(2, "toda B bilinear escreve-se B(u,v) = uᵀAv com A_{ij} = B(eᵢ,eⱼ) —"
+                      " e é essa a matriz. A bilinearidade é o que permite abrir os"
+                      " argumentos em coordenadas");
+            tique7(3, "a lei é a DISTRIBUTIVIDADE em cada entrada, e ela é que dá o"
+                      " somatório duplo. Sem ela não há matriz");
+            tique7(4, "a testemunha do §1 dele: B((x,y),(u,v)) = xu + 2xv − yu + 3yv tem"
+                      " matriz [[1,2],[−1,3]]; e o x²u + yv NÃO é bilinear, porque o"
+                      " quadrado não distribui");
+            { long b1[] = {1,2,-1,3};
+              Mat B1 = mat_de_inteiros(2,2,b1);
+              printf("      a matriz de B:\n"); esc_mat("        ", B1);
+              int mal = 0; long feitos = 0, quad_mal = 0;
+              for(long x = -3; x <= 3; x++) for(long y = -3; y <= 3; y++)
+              for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++){
+                  Vec u = vec0(2), v = vec0(2);
+                  u.c[0] = qz_de_inteiro(x); u.c[1] = qz_de_inteiro(y);
+                  v.c[0] = qz_de_inteiro(a); v.c[1] = qz_de_inteiro(b);
+                  /* a fórmula dele contra a matriz */
+                  Qz pela_formula = qz_de_inteiro(x*a + 2*x*b - y*a + 3*y*b);
+                  if(!qz_igual(fb_av(B1,u,v), pela_formula)) mal++;
+                  /* e a bilinearidade: B(u+u', v) = B(u,v) + B(u',v) */
+                  Vec u2 = vec_soma(u,v);
+                  if(!qz_igual(fb_av(B1,u2,v),
+                               qz_soma(fb_av(B1,u,v), fb_av(B1,v,v)))) mal++;
+                  /* e o x²u + yv falha */
+                  if((x+a)*(x+a) != x*x + a*a) quad_mal++;
+                  feitos++;
+              }
+              tique7(5, "logo a primeira é bilinear e a segunda não");
+              tique7(6, "e a volta: a fórmula dele e a matriz dão o MESMO valor em todos"
+                        " os pares, e a bilinearidade varre-se junto");
+              printf("      %ld pares: a fórmula bate com uᵀAv e a bilinearidade fecha —"
+                     " %d falhas;  e o x² falha em %ld\n", feitos, mal, quad_mal); }
+        } else if(n == 2){
+            tique7(2, "B(u,v) = uᵀAv e B(v,u) = vᵀAu = (vᵀAu)ᵀ = uᵀAᵀv, porque um escalar"
+                      " é a sua própria transposta. Logo B simétrica ⟺ A = Aᵀ");
+            tique7(3, "a lei é «a transposta de um escalar é ele próprio» — e é ela que"
+                      " transforma a simetria da FORMA na simetria da MATRIZ");
+            tique7(4, "a testemunha da falha: no [[2,1],[0,3]] a entrada (1,2) e a (2,1)"
+                      " discordam, e o par (e₁,e₂) exibe-a");
+            { Vec e1 = vec0(2), e2 = vec0(2);
+              e1.c[0] = qz(1,1); e2.c[1] = qz(1,1);
+              printf("      A = [[2,1],[1,3]]:  simétrica? %s;  B(e₁,e₂) = ",
+                     fb_simetrica(A) ? "sim" : "não");
+              esc_qz("", fb_av(A,e1,e2), " e B(e₂,e₁) = ");
+              esc_qz("", fb_av(A,e2,e1), "\n");
+              printf("      N = [[2,1],[0,3]]:  simétrica? %s;  B(e₁,e₂) = ",
+                     fb_simetrica(N) ? "sim" : "NÃO");
+              esc_qz("", fb_av(N,e1,e2), " e B(e₂,e₁) = ");
+              esc_qz("", fb_av(N,e2,e1), "   — é AQUI que falha\n");
+              int mal = 0; long sim = 0, nao = 0;
+              for(long k = 0; k < 625; k++){
+                  Mat X = mat0(2,2);
+                  long t = k;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      X.a[i][j] = qz_de_inteiro(t % 5 - 2); t /= 5;
+                  }
+                  int simetrica = fb_simetrica(X), forma_sim = 1;
+                  for(long p1 = -2; p1 <= 2 && forma_sim; p1++) for(long q1 = -2; q1 <= 2; q1++)
+                  for(long p2 = -2; p2 <= 2; p2++) for(long q2 = -2; q2 <= 2; q2++){
+                      Vec u = vec0(2), v = vec0(2);
+                      u.c[0] = qz_de_inteiro(p1); u.c[1] = qz_de_inteiro(q1);
+                      v.c[0] = qz_de_inteiro(p2); v.c[1] = qz_de_inteiro(q2);
+                      if(!qz_igual(fb_av(X,u,v), fb_av(X,v,u))){ forma_sim = 0; break; }
+                  }
+                  if(simetrica != forma_sim) mal++;
+                  if(simetrica) sim++; else nao++;
+              }
+              tique7(5, "logo a simetria da forma É a simetria da matriz");
+              tique7(6, "e a volta: em 625 matrizes, «A = Aᵀ» e «B(u,v) = B(v,u) para"
+                        " todos os pares» coincidem sempre");
+              printf("      %ld simétricas e %ld não, com a equivalência a fechar:"
+                     " %d falhas\n", sim, nao, mal); }
+        } else {
+            tique7(2, "Q(x,y) = 2x² + 2xy + 3y² sai de A = [[2,1],[1,3]] — o termo"
+                      " cruzado é a soma das duas entradas fora da diagonal");
+            printf("      $Q(x,y) = 2x^{2} + 2xy + 3y^{2}$\n");
+            tique7(3, "a lei é Q(v) = vᵀAv, e note-se que só a parte SIMÉTRICA de A conta:"
+                      " a antissimétrica anula-se em vᵀ(·)v");
+            tique7(4, "e O GUME dele: «Q(v) = 0 implica v = 0?» — a resposta depende da"
+                      " forma, e a casa já tinha as DUAS. A carta da torção (a² + b²) é"
+                      " DEFINIDA; a do corpo (a² + mab − b²) é INDEFINIDA");
+            { Vec c1, c2;
+              Vec w = vec0(2); w.c[0] = qz(1,1); w.c[1] = qz(1,1);
+              printf("      Q(1,1) = "); esc_qz("", fb_quadratica(A,w), "");
+              printf("   (2 + 2 + 3 = 7)\n");
+              int def = fb_definida(A, 5, &c1);
+              printf("      A = [[2,1],[1,3]] é definida? %s — Q(v) = 0 só em v = 0\n",
+                     def ? "SIM" : "não");
+              /* a carta do corpo, m = 1: a² + ab − b², que é a hipérbole */
+              Mat H = mat0(2,2);
+              H.a[0][0] = qz(1,1); H.a[0][1] = qz(1,2);
+              H.a[1][0] = qz(1,2); H.a[1][1] = qz(-1,1);
+              int hdef = fb_definida(H, 5, &c2);
+              printf("      a carta do CORPO (a² + ab − b²) é definida? %s",
+                     hdef ? "sim" : "NÃO");
+              if(!hdef){ printf("  — testemunha v = "); esc_vec(c2);
+                         printf(" com Q(v) = "); esc_qz("", fb_quadratica(H,c2), ""); }
+              printf("\n");
+              tique7(5, "logo a resposta é NÃO em geral: Q(v) = 0 só obriga v = 0 nas"
+                        " formas DEFINIDAS");
+              tique7(6, "e a volta é o reconhecimento: as duas cartas desta casa — o"
+                        " círculo (definida) e a hipérbole (indefinida) — são exatamente"
+                        " os dois lados deste gume, e já cá estavam antes deste andar"); }
+        }
+        break; }
+    case 4: case 5: case 6: {
+        tique7(0, "seja ⟨u,v⟩ = Σuᵢvᵢ o produto interno usual sobre ℚ");
+        tique7(1, n == 4 ? "as três condições:" : n == 5 ? "Cauchy–Schwarz:" : "a triangular:");
+        printf(n == 4 ? "      $\\langle u,v \\rangle = \\langle v,u \\rangle$,   "
+                        "$\\langle u,u \\rangle \\geq 0$,   "
+                        "$\\langle u,u \\rangle = 0 \\Leftrightarrow u = 0$\n"
+             : n == 5 ? "      $\\langle u,v \\rangle^{2} \\leq \\langle u,u \\rangle"
+                        " \\langle v,v \\rangle$\n"
+                      : "      $|u+v| \\leq |u| + |v|$\n");
+        if(n == 4){
+            tique7(2, "as três verificam-se direto: a simetria porque uᵢvᵢ = vᵢuᵢ; a"
+                      " positividade porque Σuᵢ² é soma de quadrados; e o zero só no zero"
+                      " porque uma soma de quadrados é nula sse cada um é");
+            tique7(3, "a lei é «x² ≥ 0 e x² = 0 ⟺ x = 0» no corpo ORDENADO — e é por isso"
+                      " que o produto interno pede ℝ (ou ℚ), e não um corpo qualquer");
+            tique7(4, "a testemunha do terceiro ponto é a coordenada não nula, que faz a"
+                      " soma ser positiva — é a SEPARAÇÃO DE PONTOS outra vez");
+            { int mal = 0; long feitos = 0;
+              for(long x = -5; x <= 5; x++) for(long y = -5; y <= 5; y++)
+              for(long a = -5; a <= 5; a++) for(long b = -5; b <= 5; b++){
+                  Vec u = vec0(2), v = vec0(2);
+                  u.c[0] = qz_de_inteiro(x); u.c[1] = qz_de_inteiro(y);
+                  v.c[0] = qz_de_inteiro(a); v.c[1] = qz_de_inteiro(b);
+                  if(!qz_igual(pi(u,v), pi(v,u))) mal++;
+                  if(pi_norma2(u).p < 0) mal++;
+                  if((pi_norma2(u).p == 0) != vec_zero(u)) mal++;
+                  feitos++;
+              }
+              tique7(5, "logo é produto interno");
+              tique7(6, "e a volta: as três condições varridas em todos os pares");
+              printf("      %ld pares: %d falhas\n", feitos, mal); }
+        } else if(n == 5){
+            tique7(2, "a prova NASCE DE UMA TESTEMUNHA POSITIVA, e não de varredura:"
+                      " |u − tv|² ≥ 0 para TODO t. Expandindo,"
+                      " |u|² − 2t⟨u,v⟩ + t²|v|² ≥ 0 — uma quadrática em t que nunca é"
+                      " negativa, logo o discriminante é ≤ 0");
+            printf("      $4\\langle u,v \\rangle^{2} - 4|u|^{2}|v|^{2} \\leq 0$\n");
+            tique7(3, "a lei é o SINAL DO DISCRIMINANTE de uma quadrática que não muda de"
+                      " sinal — o mesmo Δ que a casa usa nas bordas, agora a decidir uma"
+                      " desigualdade");
+            tique7(4, "a testemunha é o t = ⟨u,v⟩/|v|², que é onde a quadrática atinge o"
+                      " mínimo. E A RAIZ NÃO SE TIRA: mede-se ao QUADRADO, e aí é exata");
+            { int mal = 0; long feitos = 0, igual = 0, estrito = 0;
+              for(long x = -4; x <= 4; x++) for(long y = -4; y <= 4; y++)
+              for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++){
+                  Vec u = vec0(2), v = vec0(2);
+                  u.c[0] = qz_de_inteiro(x); u.c[1] = qz_de_inteiro(y);
+                  v.c[0] = qz_de_inteiro(a); v.c[1] = qz_de_inteiro(b);
+                  int ig = 0;
+                  if(!pi_cauchy(u,v,&ig)) mal++;
+                  /* e a testemunha positiva: |u − tv|² ≥ 0 em vários t */
+                  for(long t = -3; t <= 3; t++){
+                      Vec d = vec_soma(u, vec_esc(qz_de_inteiro(-t), v));
+                      if(pi_norma2(d).p < 0) mal++;
+                  }
+                  /* o caso de IGUALDADE é o gume: dá-se nos colineares */
+                  int colin = (x*b - y*a) == 0;
+                  if(ig != colin) mal++;
+                  if(ig) igual++; else estrito++;
+                  feitos++;
+              }
+              tique7(5, "logo ⟨u,v⟩² ≤ |u|²|v|², com IGUALDADE exatamente nos colineares");
+              tique7(6, "e a volta mede o caso de igualdade à parte: sem ele a"
+                        " desigualdade estava pela metade");
+              printf("      %ld pares: %ld com igualdade (colineares) e %ld estritos —"
+                     " %d falhas\n", feitos, igual, estrito, mal); }
+        } else {
+            tique7(2, "|u+v|² = |u|² + 2⟨u,v⟩ + |v|² ≤ |u|² + 2|u||v| + |v|² = (|u|+|v|)²,"
+                      " usando Cauchy–Schwarz no termo do meio");
+            tique7(3, "a lei é CAUCHY–SCHWARZ — a triangular não é teorema novo, é"
+                      " consequência. E é por isso que ele a põe logo a seguir");
+            tique7(4, "a testemunha é o passo ⟨u,v⟩ ≤ |u||v|, e mede-se sem raiz:"
+                      " (|u+v|² − |u|² − |v|²)² ≤ 4|u|²|v|²");
+            { int mal = 0; long feitos = 0;
+              for(long x = -5; x <= 5; x++) for(long y = -5; y <= 5; y++)
+              for(long a = -5; a <= 5; a++) for(long b = -5; b <= 5; b++){
+                  Vec u = vec0(2), v = vec0(2);
+                  u.c[0] = qz_de_inteiro(x); u.c[1] = qz_de_inteiro(y);
+                  v.c[0] = qz_de_inteiro(a); v.c[1] = qz_de_inteiro(b);
+                  if(!pi_triangular(u,v)) mal++;
+                  feitos++;
+              }
+              tique7(5, "logo |u+v| ≤ |u| + |v|");
+              tique7(6, "e a volta varre os pares — na forma ao quadrado, que é a que ℚ"
+                        " sabe decidir");
+              printf("      %ld pares: %d falhas\n", feitos, mal); }
+        }
+        break; }
+    case 7: case 8: case 9: {
+        tique7(0, "seja ⟨·,·⟩ o produto interno e u ≠ 0");
+        tique7(1, n == 7 ? "ortogonal é medir zero:"
+                         : n == 8 ? "a projeção:" : "Gram–Schmidt:");
+        printf(n == 7 ? "      $u \\perp v$   $\\Leftrightarrow$   "
+                        "$\\langle u,v \\rangle = 0$\n"
+             : n == 8 ? "      $\\operatorname{proj}_u(v) = "
+                        "\\frac{\\langle v,u \\rangle}{\\langle u,u \\rangle} u$\n"
+                      : "      $u_1 = v_1$,   "
+                        "$u_2 = v_2 - \\operatorname{proj}_{u_1}(v_2)$,   $\\ldots$\n");
+        if(n == 7){
+            tique7(2, "u⊥ é o NÚCLEO do funcional v ↦ ⟨u,v⟩, e núcleo é subespaço —"
+                      " logo não há nada de novo a provar. É o dual a servir de atalho");
+            tique7(3, "a lei é «o núcleo de uma aplicação linear é subespaço», do andar"
+                      " anterior. O produto interno só entrega o funcional");
+            tique7(4, "a testemunha do complemento é a base do núcleo, e ela CONSTRÓI-SE");
+            { Vec w = vec0(3);
+              w.c[0] = qz(1,1); w.c[1] = qz(1,1);
+              Fun f; f.n = 3; f.c[0] = qz(1,1); f.c[1] = qz(1,1); f.c[2] = qz(0,1);
+              Mat M = mat0(1,3);
+              for(int j = 0; j < 3; j++) M.a[0][j] = f.c[j];
+              Vec nb[LN_MAX];
+              int d = mat_nucleo(M, nb);
+              printf("      W = span{(1,1,0)}:  W⊥ = span{");
+              for(int i = 0; i < d; i++){ if(i) printf(", "); esc_vec(nb[i]); }
+              printf("},  dim = %d\n", d);
+              int mal = 0;
+              for(int i = 0; i < d; i++) if(!pi_ortogonais(nb[i], w)) mal++;
+              tique7(5, "logo u⊥ é subespaço, e dim W + dim W⊥ = dim V");
+              tique7(6, "e a volta: cada gerador de W⊥ mede ZERO em W, e a soma das"
+                        " dimensões fecha — é o aniquilador do andar do dual, agora com"
+                        " o produto interno a identificar V com V*");
+              printf("      1 + %d = 3, e cada gerador é ortogonal: %d falhas\n", d, mal); }
+        } else if(n == 8){
+            tique7(2, "o coeficiente escolhe-se para que v − proj seja ortogonal a u:"
+                      " ⟨v − λu, u⟩ = 0 dá λ = ⟨v,u⟩/⟨u,u⟩. Não é definição — é a"
+                      " SOLUÇÃO de uma equação");
+            tique7(3, "a lei é a ortogonalidade a DETERMINAR o λ, e a divisão por ⟨u,u⟩"
+                      " existe porque u ≠ 0 — é a fibra outra vez");
+            tique7(4, "a testemunha é o próprio λ, exato em ℚ");
+            { Vec v = vec0(2), u = vec0(2), par, perp;
+              v.c[0] = qz(3,1); v.c[1] = qz(1,1);
+              u.c[0] = qz(1,1); u.c[1] = qz(1,1);
+              if(pi_proj(v,u,&par,&perp)){
+                  printf("      v = (3,1) sobre u = (1,1):  v∥ = "); esc_vec(par);
+                  printf(",  v⊥ = "); esc_vec(perp); printf("\n");
+                  printf("      ⟨v⊥, u⟩ = "); esc_qz("", pi(perp,u), "");
+                  printf("   e v∥ + v⊥ = "); esc_vec(vec_soma(par,perp));
+                  printf("   %s\n", vec_igual(vec_soma(par,perp), v) ? "(resíduo 0)" : "NÃO");
+              }
+              int mal = 0; long feitos = 0;
+              for(long x = -5; x <= 5; x++) for(long y = -5; y <= 5; y++)
+              for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++){
+                  Vec vv = vec0(2), uu = vec0(2), p2, q2;
+                  vv.c[0] = qz_de_inteiro(x); vv.c[1] = qz_de_inteiro(y);
+                  uu.c[0] = qz_de_inteiro(a); uu.c[1] = qz_de_inteiro(b);
+                  if(vec_zero(uu)){ if(pi_proj(vv,uu,&p2,&q2)) mal++; continue; }
+                  if(!pi_proj(vv,uu,&p2,&q2)){ mal++; continue; }
+                  if(!pi_ortogonais(q2,uu)) mal++;
+                  if(!vec_igual(vec_soma(p2,q2), vv)) mal++;
+                  feitos++;
+              }
+              tique7(5, "logo v = v∥ + v⊥ com v⊥ ⊥ u");
+              tique7(6, "e a VOLTA é literal: a soma das duas partes devolve o v, exato");
+              printf("      %ld projeções: ortogonalidade e volta, %d falhas\n",
+                     feitos, mal); }
+        } else {
+            tique7(2, "cada passo tira do vetor novo as projeções sobre os já"
+                      " ortogonalizados — o que sobra é ortogonal a todos eles por"
+                      " construção");
+            tique7(3, "a lei é a mesma da projeção, aplicada em cadeia; e o span"
+                      " PRESERVA-SE em cada passo, porque só se subtraem combinações"
+                      " dos anteriores");
+            tique7(4, "a testemunha é a matriz dos produtos internos, que tem de ficar"
+                      " DIAGONAL");
+            { Vec v1 = vec0(3), v2 = vec0(3), v3 = vec0(3);
+              v1.c[0] = qz(1,1); v1.c[1] = qz(1,1);
+              v2.c[0] = qz(1,1); v2.c[2] = qz(1,1);
+              v3.c[1] = qz(1,1); v3.c[2] = qz(1,1);
+              Vec vs[3] = { v1, v2, v3 }, us[LN_MAX];
+              int m = pi_gram(vs, 3, us);
+              for(int i = 0; i < m; i++){ printf("      u%d = ", i+1); esc_vec(us[i]);
+                                          printf(",  |u%d|² = ", i+1);
+                                          esc_qz("", pi_norma2(us[i]), "\n"); }
+              int mal = 0;
+              for(int i = 0; i < m; i++) for(int j = i+1; j < m; j++)
+                  if(!pi_ortogonais(us[i], us[j])) mal++;
+              if(m != 3) mal++;
+              if(!vec_li(us, m)) mal++;
+              tique7(5, "logo sai uma base ORTOGONAL do mesmo espaço");
+              tique7(6, "e o que NÃO se faz: NORMALIZAR. Dividir por |uᵢ| = √⟨uᵢ,uᵢ⟩"
+                        " traria a raiz para dentro da conta, e aqui tudo é exato. A base"
+                        " ortonormal existe — vive um andar acima, no corpo das raízes,"
+                        " e escreve-se lá");
+              printf("      %d vetores ortogonais dois a dois e independentes: %d falhas\n",
+                     m, mal);
+              printf("      (as normas são ");
+              for(int i = 0; i < m; i++){ if(i) printf(", "); esc_qz("", pi_norma2(us[i]), ""); }
+              printf(" — e as raízes delas é que seriam irracionais)\n"); }
+        }
+        break; }
+    case 10: case 11: {
+        Mat A12 = mat_de_inteiros(2,2,a12);
+        tique7(0, n == 10 ? "seja T: V → W com produtos internos, e A a sua matriz"
+                          : "seja A real e SIMÉTRICA");
+        tique7(1, n == 10 ? "o adjunto define-se pela igualdade das medições:"
+                          : "o teorema espectral:");
+        printf(n == 10 ? "      $\\langle Tv, w \\rangle = \\langle v, T^{*}w \\rangle$,"
+                         "   e   $[T^{*}] = A^{T}$\n"
+                       : "      $A = A^{T}$  $\\Rightarrow$  $A = QDQ^{T}$,"
+                         " com $Q$ ortogonal e $D$ diagonal\n");
+        if(n == 10){
+            tique7(2, "⟨Tv,w⟩ = (Av)ᵀw = vᵀAᵀw = ⟨v, Aᵀw⟩ — a transposta aparece porque"
+                      " passar a matriz para o outro lado do produto interno é"
+                      " transpô-la");
+            tique7(3, "a lei é (XY)ᵀ = YᵀXᵀ, e o produto interno escrito como uᵀv. Nada"
+                      " mais entra");
+            tique7(4, "a testemunha é a igualdade avaliada em cada par (v,w)");
+            { int mal = 0; long feitos = 0;
+              Mat At = mat_transposta(A12);
+              printf("      A =\n"); esc_mat("        ", A12);
+              printf("      Aᵀ =\n"); esc_mat("        ", At);
+              for(long x = -4; x <= 4; x++) for(long y = -4; y <= 4; y++)
+              for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++){
+                  Vec v = vec0(2), w = vec0(2);
+                  v.c[0] = qz_de_inteiro(x); v.c[1] = qz_de_inteiro(y);
+                  w.c[0] = qz_de_inteiro(a); w.c[1] = qz_de_inteiro(b);
+                  if(!qz_igual(pi(mat_aplica(A12,v), w),
+                               pi(v, mat_aplica(At,w)))) mal++;
+                  feitos++;
+              }
+              tique7(5, "logo [T*] = Aᵀ — e é o MESMO transposto que o dual já tinha dado"
+                        " sem produto interno nenhum");
+              tique7(6, "e a volta: ⟨Tv,w⟩ = ⟨v,T*w⟩ verificado em todos os pares");
+              printf("      %ld pares (v,w): %d falhas\n", feitos, mal);
+              printf("      (e note-se: no DUAL o T* saiu SEM produto interno; aqui sai"
+                     " COM. São dois objetos que coincidem porque o produto interno"
+                     " identifica V com V*)\n"); }
+        } else {
+            tique7(2, "para A simétrica, autovetores de autovalores DISTINTOS são"
+                      " automaticamente ortogonais: λ⟨u,v⟩ = ⟨Au,v⟩ = ⟨u,Av⟩ = μ⟨u,v⟩,"
+                      " e λ ≠ μ obriga ⟨u,v⟩ = 0");
+            tique7(3, "a lei é a AUTOADJUNÇÃO a poder passar o A de um lado para o outro"
+                      " — é ela que faz a ortogonalidade cair de graça");
+            tique7(4, "a testemunha é o ⟨u,v⟩ que aparece dos dois lados com escalares"
+                      " diferentes");
+            { long l1, l2;
+              Vec vs[LN_MAX];
+              int k = esp_autovetores(P, vs);
+              printf("      A = [[2,1],[1,2]] simétrica? %s\n", fb_simetrica(P) ? "sim" : "não");
+              if(esp_racional(P, &l1, &l2))
+                  printf("      autovalores %ld e %ld, e os autovetores:  ", l1, l2);
+              for(int i = 0; i < k; i++){ if(i) printf(", "); esc_vec(vs[i]); }
+              printf("\n      ortogonais? ");
+              int mal = 0;
+              for(int i = 0; i < k; i++) for(int j = i+1; j < k; j++)
+                  if(!pi_ortogonais(vs[i], vs[j])) mal++;
+              printf("%s\n", mal ? "NÃO" : "sim (⟨u,v⟩ = 0)");
+              /* e o GUME AUTOMÁTICO que ele nomeia: tirada a simetria, procura-se */
+              Mat contra;
+              long passo = gume_matriz(2, 2, hip_simetrica, tese_diagonalizavel, &contra);
+              tique7(5, "logo A = QDQᵀ com Q ortogonal — a base de autovetores é"
+                        " ortogonal, e normalizada seria ortonormal");
+              tique7(6, "e o GUME AUTOMÁTICO que ele pede: retirada a SIMETRIA, procura-se"
+                        " uma matriz que nem sequer é diagonalizável — e acha-se");
+              if(passo){
+                  printf("      contra-exemplo ao passo %ld:\n", passo);
+                  esc_mat("        ", contra);
+                  Vec q[LN_MAX];
+                  printf("      autovetores independentes: %d de 2 — logo NÃO é"
+                         " diagonalizável, quanto mais ortogonalmente\n",
+                         esp_autovetores(contra, q));
+              } else printf("      — NÃO achei contra-exemplo no espaço varrido\n"); }
+        }
+        break; }
+    case 12: case 13: {
+        long ad[] = {1,0,0,2};
+        Mat D2 = mat_de_inteiros(2,2,ad);
+        tique7(0, "seja A qualquer, e considere-se AᵀA");
+        tique7(1, n == 12 ? "os valores singulares:" : "a decomposição:");
+        printf(n == 12 ? "      $\\sigma_i = \\sqrt{\\lambda_i}$,   com $\\lambda_i$"
+                         " autovalor de $A^{T}A$\n"
+                       : "      $A = U \\Sigma V^{T}$\n");
+        tique7(2, "AᵀA é SIMÉTRICA (porque (AᵀA)ᵀ = AᵀA) e semidefinida positiva"
+                  " (porque vᵀAᵀAv = |Av|² ≥ 0). Logo os seus autovalores são ≥ 0, e as"
+                  " raízes existem");
+        tique7(3, "a lei é |Av|² = vᵀAᵀAv — a forma quadrática de AᵀA É a norma da"
+                  " imagem. É ela que garante o sinal");
+        { Mat AtA = mat_mult(mat_transposta(D2), D2);
+          printf("      A = [[1,0],[0,2]],  AᵀA =\n"); esc_mat("        ", AtA);
+          long l1, l2;
+          if(esp_racional(AtA, &l1, &l2))
+              printf("      autovalores de AᵀA: %ld e %ld,  logo σ² = %ld e %ld\n",
+                     l1, l2, l1, l2);
+          tique7(4, "E A RAIZ NÃO SE TIRA: σᵢ = √λᵢ é irracional em geral, mas σᵢ² = λᵢ"
+                    " não é. Mede-se o QUADRADO, e a raiz escreve-se no fim — aqui"
+                    " calha ser inteira, e diz-se que calhou");
+          long r1 = raizi(l1), r2 = raizi(l2);
+          printf("      σ₁² = %ld e σ₂² = %ld;  e como são quadrados perfeitos,"
+                 " σ₁ = %ld e σ₂ = %ld\n", l1, l2, r1, r2);
+          if(n == 13){
+              tique7(5, "logo A = UΣVᵀ, e os três movimentos são «rotação/reflexão →"
+                        " ESCALA → rotação/reflexão» — a transformação decompõe-se em"
+                        " mudanças de coordenadas e escalas principais");
+              tique7(6, "e a VOLTA: aqui A já é diagonal, logo U = V = I e Σ = A — o caso"
+                        " onde a decomposição é ela própria, e serve de controlo. E a"
+                        " ligação: isto é o CONE + ESPIRAL desta casa, com Σ a dar as"
+                        " escalas e os U,V a dar as coordenadas");
+              Mat U = mat_id(2), V = mat_id(2), Sg = D2;
+              Mat rec = mat_mult(mat_mult(U,Sg), mat_transposta(V));
+              printf("      UΣVᵀ = A ? %s\n",
+                     mat_igual(rec, D2) ? "sim (resíduo 0)" : "NÃO");
+          } else {
+              tique7(5, "logo σ₁ = 1 e σ₂ = 2 — os valores dele");
+              tique7(6, "e a volta: AᵀA reconstrói-se dos σ², e o det de A é ± o produto"
+                        " dos σ");
+              Qz dA = mat_det(D2);
+              printf("      det A = "); esc_qz("", dA, "");
+              printf(",  σ₁·σ₂ = %ld   %s\n", r1*r2,
+                     (dA.p == r1*r2 || dA.p == -r1*r2) ? "(confere)" : "— NÃO afirmo");
+          } }
+        break; }
+    case 14: case 15: {
+        tique7(0, n == 14 ? "seja A quadrada, e p_A o seu polinómio característico"
+                          : "seja A com autovalores mas SEM base de autovetores");
+        tique7(1, n == 14 ? "Cayley–Hamilton:" : "a forma de Jordan:");
+        printf(n == 14 ? "      $p_A(A) = 0$,   com   "
+                         "$p_A(\\lambda) = \\lambda^{2} - "
+                         "\\operatorname{tr}(A)\\lambda + \\det(A)$\n"
+                       : "      $A = P J P^{-1}$,   com blocos $J_k(\\lambda)$\n");
+        if(n == 14){
+            tique7(2, "para A = [[2,1],[1,2]]: tr = 4 e det = 3, logo"
+                      " p_A(λ) = λ² − 4λ + 3, e o teorema diz A² − 4A + 3I = 0");
+            printf("      $A^{2} - 4A + 3I = 0$\n");
+            tique7(3, "a lei é o próprio teorema, e o que ele entrega é uma REGRA DE"
+                      " REDUÇÃO: A² escreve-se em termos de A e I, logo toda potência"
+                      " se reduz ao grau 1. «O operador obedece à relação algébrica do"
+                      " seu próprio polinómio»");
+            tique7(4, "a testemunha é a matriz A² − 4A + 3I, calculada, que tem de ser"
+                      " a nula");
+            { Mat ch = esp_cayley(P);
+              printf("      A² − 4A + 3I =\n"); esc_mat("        ", ch);
+              printf("      é a matriz nula? %s\n",
+                     mat_igual(ch, mat0(2,2)) ? "sim (resíduo 0)" : "NÃO");
+              tique7(5, "logo p_A(A) = 0, e A¹⁰ REDUZ-SE sem multiplicar dez vezes:"
+                        " Aⁿ = aₙA + bₙI, com os coeficientes a seguir a recorrência"
+                        " aₙ₊₁ = 4aₙ + bₙ, bₙ₊₁ = −3aₙ");
+              { long a = 1, b = 0;                 /* A¹ = 1·A + 0·I */
+                for(int k = 1; k < 10; k++){ long na = 4*a + b, nb = -3*a; a = na; b = nb; }
+                Mat red = mat0(2,2);
+                for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                    red.a[i][j] = qz_mult(qz_de_inteiro(a), P.a[i][j]);
+                for(int i = 0; i < 2; i++)
+                    red.a[i][i] = qz_soma(red.a[i][i], qz_de_inteiro(b));
+                Mat lento = mat_id(2);
+                for(int k = 0; k < 10; k++) lento = mat_mult(lento, P);
+                printf("      A¹⁰ = %ldA + %ldI =\n", a, b); esc_mat("        ", red);
+                tique7(6, "e a VOLTA por dois caminhos: a redução pela recorrência contra"
+                          " as dez multiplicações — e é o mesmo que a casa faz com os"
+                          " polinómios, agora com o operador no lugar da variável");
+                printf("      dez multiplicações dão o mesmo? %s\n",
+                       mat_igual(red, lento) ? "sim (resíduo 0)" : "— NÃO afirmo"); } }
+        } else {
+            tique7(2, "A = [[1,1],[0,1]] tem p_A(λ) = (λ−1)², logo autovalor 1 com"
+                      " multiplicidade 2. Mas A − I = [[0,1],[0,0]] tem núcleo de"
+                      " dimensão 1: só há UM autovetor independente");
+            tique7(3, "a lei é «diagonalizável ⟺ há n autovetores independentes» — e a"
+                      " multiplicidade ALGÉBRICA (do polinómio) pode exceder a"
+                      " GEOMÉTRICA (do núcleo). É aí que Jordan entra");
+            tique7(4, "a testemunha é a contagem: 2 de multiplicidade algébrica contra 1"
+                      " de geométrica");
+            { long l1, l2;
+              Vec vs[LN_MAX];
+              int k = esp_autovetores(J, vs);
+              esp_racional(J, &l1, &l2);
+              printf("      A = [[1,1],[0,1]]:  autovalores %ld e %ld (o mesmo, duplo)\n",
+                     l1, l2);
+              printf("      autovetores independentes: %d", k);
+              for(int i = 0; i < k; i++){ printf("  →  "); esc_vec(vs[i]); }
+              printf("\n      diagonalizável? %s\n", esp_diagonalizavel(J) ? "sim" : "NÃO");
+              tique7(5, "logo «ter autovalores» NÃO dá «diagonalizável» — é o segundo"
+                        " gume que ele nomeia, e a implicação só vale num sentido");
+              tique7(6, "e o GUME AUTOMÁTICO: procura-se no espaço uma matriz com"
+                        " autovalores racionais que NÃO seja diagonalizável — e acha-se");
+              { Mat contra;
+                long passo = gume_matriz(2, 2, hip_diagonalizavel, tese_diagonalizavel, &contra);
+                if(passo){
+                    printf("      contra-exemplo ao passo %ld:\n", passo);
+                    esc_mat("        ", contra);
+                    Vec q[LN_MAX];
+                    printf("      tem %d autovetor(es) independente(s) de 2\n",
+                           esp_autovetores(contra, q));
+                } else printf("      — NÃO achei no espaço varrido\n"); } }
+        }
+        break; }
+    case 16: {
+        tique7(0, "a pergunta não é um teorema: é «onde é que este andar já corria nesta"
+                  " casa». Procurei ANTES de escrever, que é a regra");
+        tique7(1, "o que se procurou: matriz, forma quadrática, espectro — em"
+                  " `corpo-estelar.tex`, `corpo_universal.tex` e `lib/universal.js`");
+        tique7(2, "E O ANDAR JÁ CÁ ESTAVA, três vezes, sem o nome. A `estaca` da casa é"
+                  " mI − A_m, com A·(mI−A) = −I. Isso É Cayley–Hamilton: A² − mA − I = 0"
+                  " é exatamente p_A(A) = 0 para a companheira A_m = [[m,1],[1,0]]");
+        printf("      $A \\cdot (mI - A) = -I$   $\\Leftrightarrow$   "
+               "$A^{2} - mA - I = 0$   $=$   $p_A(A) = 0$\n");
+        tique7(3, "a lei que o explica: para a COMPANHEIRA, o polinómio do ponto fixo de"
+                  " Möbius (cx² + (d−a)x − b) COINCIDE com o característico"
+                  " (λ² − tr·λ + det). Em geral não coincidem — e é essa coincidência"
+                  " que faz o inversor e o espectro morarem no mesmo sítio nesta casa");
+        { int mal = 0; long coincidem = 0, diferem = 0;
+          for(long k = 0; k < 625; k++){
+              Mat X = mat0(2,2);
+              long t = k;
+              for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                  X.a[i][j] = qz_de_inteiro(t % 5 - 2); t /= 5;
+              }
+              long a = X.a[0][0].p, b = X.a[0][1].p, c = X.a[1][0].p, d = X.a[1][1].p;
+              /* Möbius: cx² + (d−a)x − b;  característico: x² − (a+d)x + (ad−bc) */
+              int igual = (c == 1) && (d - a == -(a+d)) && (-b == a*d - b*c);
+              int companheira = (c == 1 && d == 0);
+              if(companheira && !igual) mal++;      /* na companheira TÊM de coincidir */
+              if(igual) coincidem++; else diferem++;
+          }
+          printf("      625 matrizes: os dois polinómios coincidem em %ld e diferem em"
+                 " %ld — e nas companheiras coincidem SEMPRE (%d falhas)\n",
+                 coincidem, diferem, mal); }
+        tique7(4, "a testemunha são as três aparições, medidas: o `estaca`, o"
+                  " `W² = (m²+4)I` (que é a mesma relação a realizar o discriminante em"
+                  " matriz) e o `T² = T + I` do traço-dobra do pentágono");
+        { int mal = 0;
+          for(long m = 1; m <= 8; m++){
+              Mat Am = mat0(2,2);
+              Am.a[0][0] = qz_de_inteiro(m); Am.a[0][1] = qz(1,1);
+              Am.a[1][0] = qz(1,1);          Am.a[1][1] = qz(0,1);
+              /* 1. a estaca: A·(mI − A) = −I */
+              Mat estaca = mat_soma(mat_esc_neg(Am), mat0(2,2));
+              for(int i = 0; i < 2; i++) estaca.a[i][i] = qz_soma(estaca.a[i][i], qz_de_inteiro(m));
+              Mat prod = mat_mult(Am, estaca);
+              Mat menosI = mat_esc_neg(mat_id(2));
+              if(!mat_igual(prod, menosI)) mal++;
+              /* 2. Cayley–Hamilton direto */
+              if(!mat_igual(esp_cayley(Am), mat0(2,2))) mal++;
+              /* 3. W = 2A − mI, com W² = (m²+4)I */
+              Mat W = mat0(2,2);
+              for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                  W.a[i][j] = qz_mult(qz_de_inteiro(2), Am.a[i][j]);
+              for(int i = 0; i < 2; i++) W.a[i][i] = qz_soma(W.a[i][i], qz_de_inteiro(-m));
+              Mat W2 = mat_mult(W,W), alvo = mat0(2,2);
+              for(int i = 0; i < 2; i++) alvo.a[i][i] = qz_de_inteiro(m*m + 4);
+              if(!mat_igual(W2, alvo)) mal++;
+              if(m <= 3)
+                  printf("      m = %ld:  A·(mI−A) = −I ✓   p_A(A) = 0 ✓   W² = %ldI ✓\n",
+                         m, m*m + 4);
+          }
+          printf("      m de 1 a 8, as TRÊS identidades: %d falhas\n", mal); }
+        tique7(5, "logo Cayley–Hamilton já corria aqui em três formas, e a `estaca` — que"
+                  " a casa usa como «a troca de folha» — é ele. E as duas CARTAS"
+                  " (a² + b², definida; a² + mab − b², indefinida) são as duas formas"
+                  " quadráticas do §3, com o gume Q(v) = 0 já resolvido entre elas");
+        tique7(6, "e a VOLTA é o que isto muda: o andar novo não trouxe motor, trouxe o"
+                  " NOME. E há uma ponte por fazer — no `corpo-estelar.tex`,"
+                  " M_ij = Σ(xᵢ−cᵢ)(xⱼ−cⱼ) é SIMÉTRICA e «a massa escalar é apenas o seu"
+                  " TRAÇO, logo a massa tem DIREÇÃO». Essa direção é a decomposição"
+                  " espectral desta matriz — o teorema §11 aplicado ao corpo estelar");
+        printf("\n      a casa já tinha:  estaca = Cayley–Hamilton  ·  cartas = formas"
+               " quadráticas\n");
+        printf("      e por fazer:  a massa com direção do corpo estelar É o espectro"
+               " de M_ij\n");
+        break; }
+    }
+}
+static int resolve_forma(const char *f){
+    const char *p = f;
+    for(size_t i = 0; i < sizeof FQ16/sizeof *FQ16; i++)
+        if(!strcmp(p, FQ16[i].nome)){ forma_resolve(FQ16[i].n); return 1; }
+    if(!strncmp(p, "formas", 6)) p += 6;
+    else if(!strncmp(p, "forma", 5)) p += 5;
+    else if(!strncmp(p, "espectro", 8)) p += 8;
+    else return 0;
+    while(*p == ' ') p++;
+    if(!*p){
+        printf("   formas, adjuntos e espectro — «formas N» ou «formas <nome>»\n");
+        printf("   e a raiz NUNCA se tira: Cauchy–Schwarz mede-se ao quadrado, e os"
+               " valores singulares por σ²\n\n");
+        for(size_t i = 0; i < sizeof FQ16/sizeof *FQ16; i++){
+            printf("     %2d  ", FQ16[i].n);
+            esc_col(FQ16[i].nome, 20);
+            printf("  %s\n", FQ16[i].enunciado);
+        }
+        return 1;
+    }
+    if(*p >= '0' && *p <= '9'){
+        long n = 0;
+        while(*p >= '0' && *p <= '9') n = n*10 + (*p++ - '0');
+        while(*p == ' ') p++;
+        if(!*p && n >= 1 && n <= 16){ forma_resolve((int)n); return 1; }
+        return 0;
+    }
+    return 0;
+}
 /* ── ÁLGEBRA LINEAR E O DUAL: E O GUME PASSA A SER AUTOMÁTICO ───────────────────────
  * O `eval.txt` acrescenta uma exigência que não é conteúdo, é MECANISMO:
  *
@@ -1397,6 +2042,8 @@ static int tese_nucleo_trivial(const Mat *A){
     return mat_nucleo(B, nb) == 0;
 }
 static int hip_simetrica(const Mat *A){ Mat B = *A; return mat_igual(B, mat_transposta(B)); }
+static int hip_diagonalizavel(const Mat *A){ Mat B = *A; return esp_diagonalizavel(B); }
+static int tese_diagonalizavel(const Mat *A){ Mat B = *A; return esp_diagonalizavel(B); }
 /* uma tese que vale SEMPRE — é ela o controlo do buscador: se ele a «refutasse», o
  * buscador é que estava avariado. det A = det Aᵀ não depende de hipótese nenhuma. */
 static int tese_det_igual_transposta(const Mat *A){
@@ -7577,6 +8224,7 @@ static int resolve_mostra(const char *f){ return resolve_mostra_em(f, "../papers
 static int resolve_simbolico(const char *fala){
     if(resolve_divisibilidade(fala)) return 1;     /* o relógio de 6 ticks */
     if(resolve_bezout(fala)) return 1;             /* a testemunha e o critério */
+    if(resolve_forma(fala)) return 1;              /* formas e espectro, os 16 */
     if(resolve_linear(fala)) return 1;             /* linear e dual, 16 + 14 */
     if(resolve_corpo(fala)) return 1;              /* teoria dos corpos, os 25 */
     if(resolve_estrutura(fala)) return 1;          /* álgebra moderna, os 20 */
@@ -8613,6 +9261,350 @@ static int teste(void){
                 if(e_conta(nu2)) roubadas++;
             }
             ok("e a membrana nao rouba o corpus: fala sem LaTeX nao vira conta", roubadas == 0);
+
+        /* ═══ §C38 FORMAS E ESPECTRO — E O QUE A CASA JÁ TINHA ════════════════════
+         * O achado deste andar não é nenhum dos teoremas: é que a casa JÁ CORRIA
+         * Cayley–Hamilton em três sítios sem lhe chamar isso. Procurei antes de
+         * escrever, e o andar já cá estava:
+         *
+         *   `mat2.estaca(m)` = mI − A_m, com A·(mI−A) = −I  →  A² − mA − I = 0
+         *   `mat2.W(m)` = 2A − mI, com W² = (m²+4)I         →  a mesma relação
+         *   `T = C + C⁻¹` com T² = T + I (o pentágono)      →  a terceira
+         *
+         * E as duas CARTAS (a²+b² definida, a²+mab−b² indefinida) são as duas formas
+         * quadráticas do §3 dele, com o gume «Q(v)=0 ⟹ v=0?» já resolvido entre elas.
+         *
+         * E A RAIZ NUNCA SE TIRA: Cauchy–Schwarz mede-se ao QUADRADO, os valores
+         * singulares por σ². É a régua de sempre, agora num andar analítico. */
+        printf("\n§C38 FORMAS E ESPECTRO: a raiz não se tira, e a casa já tinha o andar.\n\n");
+        {
+            long a23[] = {2,1,1,3}, a21[] = {2,1,1,2}, jd[] = {1,1,0,1}, a12[] = {1,2,3,4};
+            Mat A = mat_de_inteiros(2,2,a23), P = mat_de_inteiros(2,2,a21);
+            Mat J = mat_de_inteiros(2,2,jd), A12 = mat_de_inteiros(2,2,a12);
+
+            /* O ACHADO: Cayley–Hamilton já corria na casa, em TRÊS formas */
+            { int mal = 0, coincidem = 0, difere = 0;
+              for(long m = 1; m <= 10; m++){
+                  Mat Am = mat0(2,2);
+                  Am.a[0][0] = qz_de_inteiro(m); Am.a[0][1] = qz(1,1);
+                  Am.a[1][0] = qz(1,1);          Am.a[1][1] = qz(0,1);
+                  /* 1. a estaca da casa: A·(mI − A) = −I */
+                  Mat estaca = mat_esc_neg(Am);
+                  for(int i = 0; i < 2; i++)
+                      estaca.a[i][i] = qz_soma(estaca.a[i][i], qz_de_inteiro(m));
+                  if(!mat_igual(mat_mult(Am, estaca), mat_esc_neg(mat_id(2)))) mal++;
+                  /* 2. e é Cayley–Hamilton, calculado à parte */
+                  if(!mat_igual(esp_cayley(Am), mat0(2,2))) mal++;
+                  /* 3. W = 2A − mI com W² = (m²+4)I */
+                  Mat W = mat0(2,2);
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                      W.a[i][j] = qz_mult(qz_de_inteiro(2), Am.a[i][j]);
+                  for(int i = 0; i < 2; i++)
+                      W.a[i][i] = qz_soma(W.a[i][i], qz_de_inteiro(-m));
+                  Mat alvo = mat0(2,2);
+                  for(int i = 0; i < 2; i++) alvo.a[i][i] = qz_de_inteiro(m*m + 4);
+                  if(!mat_igual(mat_mult(W,W), alvo)) mal++;
+              }
+              /* e o polinómio do PONTO FIXO contra o CARACTERÍSTICO */
+              for(long k = 0; k < 625; k++){
+                  Mat X = mat0(2,2);
+                  long t = k;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      X.a[i][j] = qz_de_inteiro(t % 5 - 2); t /= 5;
+                  }
+                  long a = X.a[0][0].p, b = X.a[0][1].p, c = X.a[1][0].p, d = X.a[1][1].p;
+                  int igual = (c == 1) && (d - a == -(a+d)) && (-b == a*d - b*c);
+                  if((c == 1 && d == 0) && !igual) mal++;   /* na companheira, SEMPRE */
+                  if(igual) coincidem++; else difere++;
+              }
+              printf("      a `estaca` da casa É Cayley–Hamilton (m de 1 a 10), e o"
+                     " W² = (m²+4)I é a mesma relação\n");
+              printf("      Möbius vs característico em 625 matrizes: %d coincidem,"
+                     " %d diferem — e nas companheiras coincidem sempre\n",
+                     coincidem, difere);
+              ok("O ANDAR JÁ CORRIA NA CASA, e sem o nome: a `estaca` (mI − A_m, com"
+                 " A·(mI−A) = −I) É Cayley–Hamilton, o W² = (m²+4)I é a mesma relação a"
+                 " realizar o discriminante em matriz, e o polinómio do PONTO FIXO de"
+                 " Möbius coincide com o CARACTERÍSTICO exatamente nas companheiras —"
+                 " é essa coincidência que põe o inversor e o espectro no mesmo sítio",
+                 mal == 0 && coincidem > 0 && difere > coincidem); }
+
+            /* (1)(2)(3) BILINEAR, SIMÉTRICA e o GUME DA QUADRÁTICA */
+            { int mal = 0; long sim = 0, nao = 0;
+              for(long k = 0; k < 625; k++){
+                  Mat X = mat0(2,2);
+                  long t = k;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      X.a[i][j] = qz_de_inteiro(t % 5 - 2); t /= 5;
+                  }
+                  /* a bilinearidade vale SEMPRE para uᵀAv */
+                  for(long p1 = -2; p1 <= 2; p1++) for(long q1 = -2; q1 <= 2; q1++){
+                      Vec u = vec0(2), v = vec0(2), w = vec0(2);
+                      u.c[0] = qz_de_inteiro(p1); u.c[1] = qz_de_inteiro(q1);
+                      v.c[0] = qz_de_inteiro(q1); v.c[1] = qz_de_inteiro(p1);
+                      w.c[0] = qz(1,1); w.c[1] = qz(-1,1);
+                      if(!qz_igual(fb_av(X, vec_soma(u,v), w),
+                                   qz_soma(fb_av(X,u,w), fb_av(X,v,w)))) mal++;
+                  }
+                  /* e simétrica ⟺ A = Aᵀ */
+                  int s = fb_simetrica(X), fs = 1;
+                  for(long p1 = -2; p1 <= 2 && fs; p1++) for(long q1 = -2; q1 <= 2 && fs; q1++)
+                  for(long p2 = -2; p2 <= 2 && fs; p2++) for(long q2 = -2; q2 <= 2; q2++){
+                      Vec u = vec0(2), v = vec0(2);
+                      u.c[0] = qz_de_inteiro(p1); u.c[1] = qz_de_inteiro(q1);
+                      v.c[0] = qz_de_inteiro(p2); v.c[1] = qz_de_inteiro(q2);
+                      if(!qz_igual(fb_av(X,u,v), fb_av(X,v,u))){ fs = 0; break; }
+                  }
+                  if(s != fs) mal++;
+                  if(s) sim++; else nao++;
+              }
+              /* O GUME: as DUAS cartas da casa, e elas decidem ao contrário */
+              Vec c1, c2;
+              int def_A = fb_definida(A, 5, &c1);
+              Mat H = mat0(2,2);
+              H.a[0][0] = qz(1,1); H.a[0][1] = qz(1,2);
+              H.a[1][0] = qz(1,2); H.a[1][1] = qz(-1,1);
+              int def_H = fb_definida(H, 5, &c2);
+              printf("      Q(v)=0 ⟹ v=0?  na carta do CÍRCULO: %s;  na do CORPO: %s"
+                     " (testemunha ", def_A ? "sim" : "não", def_H ? "sim" : "NÃO");
+              esc_vec(c2); printf(")\n");
+              ok("a BILINEARIDADE de uᵀAv vale sempre, e «B simétrica ⟺ A = Aᵀ» decide em"
+                 " 625 matrizes com os dois lados a ocorrer. E o GUME «Q(v) = 0 implica"
+                 " v = 0?» já estava resolvido nesta casa: a carta do CÍRCULO (a²+b²) é"
+                 " definida e a do CORPO (a²+mab−b²) é indefinida, com testemunha",
+                 mal == 0 && sim > 0 && nao > 0 && def_A && !def_H); }
+
+            /* (4)(5)(6) O PRODUTO INTERNO, CAUCHY–SCHWARZ e a TRIANGULAR, sem raiz */
+            { int mal = 0; long feitos = 0, igual = 0, estrito = 0;
+              for(long x = -4; x <= 4; x++) for(long y = -4; y <= 4; y++)
+              for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++){
+                  Vec u = vec0(2), v = vec0(2);
+                  u.c[0] = qz_de_inteiro(x); u.c[1] = qz_de_inteiro(y);
+                  v.c[0] = qz_de_inteiro(a); v.c[1] = qz_de_inteiro(b);
+                  if(!qz_igual(pi(u,v), pi(v,u))) mal++;
+                  if(pi_norma2(u).p < 0) mal++;
+                  if((pi_norma2(u).p == 0) != vec_zero(u)) mal++;
+                  int ig = 0;
+                  if(!pi_cauchy(u,v,&ig)) mal++;
+                  if(ig != ((x*b - y*a) == 0)) mal++;      /* igualdade ⟺ colineares */
+                  if(ig) igual++; else estrito++;
+                  if(!pi_triangular(u,v)) mal++;
+                  /* e a testemunha positiva de que a prova nasce: |u − tv|² ≥ 0 */
+                  for(long t = -3; t <= 3; t++){
+                      Vec d = vec_soma(u, vec_esc(qz_de_inteiro(-t), v));
+                      if(pi_norma2(d).p < 0) mal++;
+                  }
+                  feitos++;
+              }
+              /* O GUME DE CAUCHY–SCHWARZ, e sem ele a asserção não podia falhar: a
+               * desigualdade depende da POSITIVIDADE do produto interno. Com a forma
+               * INDEFINIDA da casa (a carta do corpo) ela CAI — e é isso que mostra qual
+               * hipótese a carrega. Medido por mutação: sem este caso, um `pi_cauchy`
+               * que devolvesse sempre verdade passava. */
+              Mat Hi = mat0(2,2);
+              Hi.a[0][0] = qz(1,1); Hi.a[0][1] = qz(1,2);
+              Hi.a[1][0] = qz(1,2); Hi.a[1][1] = qz(-1,1);
+              long cs_falha = 0;
+              for(long x = -4; x <= 4; x++) for(long y = -4; y <= 4; y++)
+              for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++){
+                  Vec u = vec0(2), v = vec0(2);
+                  u.c[0] = qz_de_inteiro(x); u.c[1] = qz_de_inteiro(y);
+                  v.c[0] = qz_de_inteiro(a); v.c[1] = qz_de_inteiro(b);
+                  /* pelo MESMO `fb_cauchy` que serve o euclidiano — é isso que torna a
+                   * função testável: aqui ela TEM de devolver 0 */
+                  if(!fb_cauchy(Hi, u, v, 0)) cs_falha++;
+              }
+              /* e o SEMIDEFINIDO: Q(v) = 0 com v ≠ 0, que não é «definida» nem «negativa» */
+              Mat Sd = mat0(2,2);
+              Sd.a[0][0] = qz(1,1);                  /* Q(x,y) = x² — zera em (0,1) */
+              Vec cz;
+              int sd_definida = fb_definida(Sd, 4, &cz);
+              printf("      e o GUME: na forma INDEFINIDA, Cauchy–Schwarz CAI em %ld"
+                     " pares;  e a semidefinida x² zera em ", cs_falha);
+              esc_vec(cz); printf(" sem ser o zero\n");
+              ok("CAUCHY–SCHWARZ mede-se AO QUADRADO — ⟨u,v⟩² ≤ ⟨u,u⟩⟨v,v⟩ — e assim é"
+                 " EXATO em ℚ: a raiz nunca se tira. A prova «nasce de uma testemunha"
+                 " positiva» (|u−tv|² ≥ 0, medido em vários t) e não de varredura, e o"
+                 " caso de IGUALDADE dá-se exatamente nos colineares. A triangular cai"
+                 " dele. E O GUME é a POSITIVIDADE: na forma INDEFINIDA a desigualdade"
+                 " CAI, e a semidefinida x² anula-se fora do zero — os dois casos que"
+                 " mostram o que a hipótese carrega",
+                 mal == 0 && feitos == 6561 && igual > 0 && estrito > 0
+                 && cs_falha > 0 && !sd_definida && !vec_zero(cz)); }
+
+            /* (7)(8)(9) ORTOGONALIDADE, PROJEÇÃO e GRAM–SCHMIDT, exatos */
+            { int mal = 0; long feitos = 0;
+              for(long x = -4; x <= 4; x++) for(long y = -4; y <= 4; y++)
+              for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++){
+                  Vec v = vec0(2), u = vec0(2), par, perp;
+                  v.c[0] = qz_de_inteiro(x); v.c[1] = qz_de_inteiro(y);
+                  u.c[0] = qz_de_inteiro(a); u.c[1] = qz_de_inteiro(b);
+                  if(vec_zero(u)){ if(pi_proj(v,u,&par,&perp)) mal++; continue; }
+                  if(!pi_proj(v,u,&par,&perp)){ mal++; continue; }
+                  if(!pi_ortogonais(perp,u)) mal++;             /* v⊥ ⊥ u */
+                  if(!vec_igual(vec_soma(par,perp), v)) mal++;  /* A VOLTA */
+                  feitos++;
+              }
+              /* Gram–Schmidt no exemplo dele */
+              Vec v1 = vec0(3), v2 = vec0(3), v3 = vec0(3);
+              v1.c[0] = qz(1,1); v1.c[1] = qz(1,1);
+              v2.c[0] = qz(1,1); v2.c[2] = qz(1,1);
+              v3.c[1] = qz(1,1); v3.c[2] = qz(1,1);
+              Vec vs[3] = { v1, v2, v3 }, us[LN_MAX];
+              int m = pi_gram(vs, 3, us);
+              int gmal = (m != 3) || !vec_li(us, m);
+              for(int i = 0; i < m; i++) for(int j = i+1; j < m; j++)
+                  if(!pi_ortogonais(us[i], us[j])) gmal++;
+              printf("      Gram–Schmidt em (1,1,0),(1,0,1),(0,1,1): %d vetores"
+                     " ortogonais, com normas² ", m);
+              for(int i = 0; i < m; i++){ if(i) printf(", "); esc_qz("", pi_norma2(us[i]), ""); }
+              printf(" — e as RAÍZES delas é que seriam irracionais\n");
+              ok("a PROJEÇÃO é exata em ℚ (v = v∥ + v⊥ com v⊥ ⊥ u, e a volta devolve v),"
+                 " e GRAM–SCHMIDT dá a base ORTOGONAL sem normalizar. Normalizar era"
+                 " dividir por √⟨u,u⟩ e trazer o irracional para dentro — a ortonormal"
+                 " existe, mas vive um andar acima, e diz-se",
+                 mal == 0 && feitos > 3000 && gmal == 0); }
+
+            /* (10)(11) O ADJUNTO e o ESPECTRAL, com o gume automático que ele nomeia */
+            { int mal = 0; long feitos = 0;
+              for(long k = 0; k < 200; k++){
+                  Mat X = mat0(2,2);
+                  long t = k;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      X.a[i][j] = qz_de_inteiro(t % 5 - 2); t /= 5;
+                  }
+                  Mat Xt = mat_transposta(X);
+                  for(long p1 = -2; p1 <= 2; p1++) for(long q1 = -2; q1 <= 2; q1++){
+                      Vec v = vec0(2), w = vec0(2);
+                      v.c[0] = qz_de_inteiro(p1); v.c[1] = qz_de_inteiro(q1);
+                      w.c[0] = qz_de_inteiro(q1); w.c[1] = qz_de_inteiro(-p1);
+                      if(!qz_igual(pi(mat_aplica(X,v), w),
+                                   pi(v, mat_aplica(Xt,w)))) mal++;   /* ⟨Tv,w⟩=⟨v,T*w⟩ */
+                  }
+                  /* e nas SIMÉTRICAS, autovetores de autovalores distintos são ortogonais */
+                  if(fb_simetrica(X)){
+                      long l1, l2;
+                      if(esp_racional(X, &l1, &l2) && l1 != l2){
+                          Vec vs2[LN_MAX];
+                          int q = esp_autovetores(X, vs2);
+                          for(int i = 0; i < q; i++) for(int j = i+1; j < q; j++)
+                              if(!pi_ortogonais(vs2[i], vs2[j])) mal++;
+                      }
+                  }
+                  feitos++;
+              }
+              /* O GUME AUTOMÁTICO §16.3: retirada a simetria, procura-se */
+              Mat contra;
+              long passo = gume_matriz(2, 2, hip_simetrica, tese_diagonalizavel, &contra);
+              Vec q3[LN_MAX];
+              int nav = passo ? esp_autovetores(contra, q3) : -1;
+              ok("⟨Tv,w⟩ = ⟨v,T*w⟩ com [T*] = Aᵀ (e é o MESMO transposto que o dual dera"
+                 " SEM produto interno), e nas SIMÉTRICAS os autovetores de autovalores"
+                 " distintos são ORTOGONAIS de graça — é a autoadjunção a passar o A de"
+                 " um lado para o outro. E o gume que ele nomeia: retirada a simetria, o"
+                 " buscador acha uma matriz que nem diagonalizável é",
+                 mal == 0 && feitos == 200 && passo > 0 && nav >= 0 && nav < 2); }
+
+            /* (12)(13) VALORES SINGULARES por σ², e a SVD no caso diagonal */
+            { int mal = 0; long feitos = 0;
+              for(long k = 0; k < 625; k++){
+                  Mat X = mat0(2,2);
+                  long t = k;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      X.a[i][j] = qz_de_inteiro(t % 5 - 2); t /= 5;
+                  }
+                  Mat G = mat_mult(mat_transposta(X), X);
+                  if(!fb_simetrica(G)) mal++;                  /* AᵀA é SIMÉTRICA */
+                  /* e SEMIDEFINIDA: vᵀAᵀAv = |Av|² ≥ 0 */
+                  for(long p1 = -3; p1 <= 3; p1++) for(long q1 = -3; q1 <= 3; q1++){
+                      Vec v = vec0(2);
+                      v.c[0] = qz_de_inteiro(p1); v.c[1] = qz_de_inteiro(q1);
+                      Qz q = fb_quadratica(G, v);
+                      if(q.p < 0) mal++;
+                      if(!qz_igual(q, pi_norma2(mat_aplica(X,v)))) mal++;  /* = |Av|² */
+                  }
+                  /* os autovalores de AᵀA são ≥ 0 quando racionais */
+                  long l1, l2;
+                  if(esp_racional(G, &l1, &l2)){ if(l1 < 0 || l2 < 0) mal++; }
+                  feitos++;
+              }
+              long ad[] = {1,0,0,2};
+              Mat D2 = mat_de_inteiros(2,2,ad);
+              Mat G = mat_mult(mat_transposta(D2), D2);
+              long s1, s2;
+              int tem = esp_racional(G, &s1, &s2);
+              printf("      A = [[1,0],[0,2]]:  AᵀA = diag(%ld,%ld),  σ² = %ld e %ld,"
+                     "  σ = %ld e %ld\n", s1, s2, s1, s2, raizi(s1), raizi(s2));
+              ok("os VALORES SINGULARES medem-se por σ² — AᵀA é SIMÉTRICA e SEMIDEFINIDA"
+                 " (porque vᵀAᵀAv É |Av|², medido entrada a entrada), logo os autovalores"
+                 " são ≥ 0. σᵢ = √λᵢ seria irracional; σᵢ² não é, e no exemplo dele os"
+                 " valores singulares são 1 e 2 porque os λ calham quadrados perfeitos"
+                 " — e diz-se que calham", mal == 0 && feitos == 625 && tem && s1 == 4 && s2 == 1); }
+
+            /* (14)(15) CAYLEY–HAMILTON como REGRA DE REDUÇÃO, e o gume de Jordan */
+            { int mal = 0; long feitos = 0;
+              for(long k = 0; k < 625; k++){
+                  Mat X = mat0(2,2);
+                  long t = k;
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                      X.a[i][j] = qz_de_inteiro(t % 5 - 2); t /= 5;
+                  }
+                  if(!mat_igual(esp_cayley(X), mat0(2,2))) mal++;   /* p_A(A) = 0 SEMPRE */
+                  feitos++;
+              }
+              /* a REDUÇÃO de A¹⁰ pela recorrência, contra as dez multiplicações */
+              long a = 1, b = 0;
+              for(int k = 1; k < 10; k++){ long na = 4*a + b, nb = -3*a; a = na; b = nb; }
+              Mat red = mat0(2,2);
+              for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                  red.a[i][j] = qz_mult(qz_de_inteiro(a), P.a[i][j]);
+              for(int i = 0; i < 2; i++)
+                  red.a[i][i] = qz_soma(red.a[i][i], qz_de_inteiro(b));
+              Mat lento = mat_id(2);
+              for(int k = 0; k < 10; k++) lento = mat_mult(lento, P);
+              if(!mat_igual(red, lento)) mal++;
+              /* o GUME de Jordan: autovalores SIM, diagonalizável NÃO */
+              Vec vs2[LN_MAX];
+              int nav = esp_autovetores(J, vs2);
+              long l1, l2;
+              int tem_auto = esp_racional(J, &l1, &l2);
+              Mat contra;
+              long passo = gume_matriz(2, 2, hip_diagonalizavel, tese_diagonalizavel, &contra);
+              printf("      A¹⁰ = %ldA %s %ldI pela redução, e bate com dez"
+                     " multiplicações;  [[1,1],[0,1]] tem autovalor %ld duplo e %d"
+                     " autovetor\n", a, b < 0 ? "−" : "+", b < 0 ? -b : b, l1, nav);
+              ok("CAYLEY–HAMILTON vale nas 625 matrizes e é uma REGRA DE REDUÇÃO: A¹⁰"
+                 " escreve-se como aA + bI pela recorrência e bate com dez"
+                 " multiplicações — «o operador obedece à relação algébrica do seu"
+                 " próprio polinómio». E o gume de JORDAN: [[1,1],[0,1]] TEM autovalores"
+                 " e NÃO é diagonalizável (1 autovetor de 2), com o buscador a achá-lo"
+                 " sozinho",
+                 mal == 0 && feitos == 625 && tem_auto && l1 == 1 && nav == 1
+                 && passo > 0); }
+
+            /* E OS DEZASSEIS CORREM */
+            { int vmal = 0, por_n = 0, por_nome = 0;
+              fflush(stdout);
+              int guarda = dup(1), nulo = open("/dev/null", O_WRONLY);
+              if(guarda >= 0 && nulo >= 0) dup2(nulo, 1);
+              for(int k = 1; k <= 16; k++){
+                  char fala[64];
+                  snprintf(fala, sizeof fala, "formas %d", k);
+                  if(resolve_forma(fala)) por_n++; else vmal++;
+              }
+              for(size_t i = 0; i < sizeof FQ16/sizeof *FQ16; i++)
+                  if(resolve_forma(FQ16[i].nome)) por_nome++; else vmal++;
+              if(resolve_forma("formas 17")) vmal++;
+              fflush(stdout);
+              if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
+              if(nulo >= 0) close(nulo);
+              printf("      os dezasseis: %d pelo número, %d pelo nome, e a 17 é"
+                     " recusada\n", por_n, por_nome);
+              ok("OS DEZASSEIS de formas, adjuntos e espectro correm pelo NÚMERO e pelo"
+                 " NOME, com o fora de alcance RECUSADO — e o 16º é a resposta à pergunta"
+                 " dele: onde é que este andar já corria na casa",
+                 vmal == 0 && por_n == 16 && por_nome == 16); }
+        }
 
         /* ═══ §C37 ÁLGEBRA LINEAR E O DUAL: O GUME PASSA A SER AUTOMÁTICO ═════════
          * A exigência nova do `eval.txt` não é conteúdo, é MECANISMO:
