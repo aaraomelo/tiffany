@@ -41,6 +41,7 @@
 - **[Compor, não ancorar](feedback-compor-nao-ancorar.md)** — no tradutor NADA se posiciona à mão: todo anexo compõe pelo motor da espiral com a SEMENTE certa. Âncoras minhas são invenção.
 - **[Definição e medida em gavetas diferentes](feedback-definicao-e-medida.md)** — a definição diz o que PODE ser preservado; a medida diz o que FOI. Lei, realização e evidência não se misturam numa frase.
 - [Forks confundem-se de papel](feedback-fork-role-confusion.md) — herdam o meu papel de orquestrador. Para editar ficheiros em paralelo, agentes FRESCOS, não forks.
+- **[O tecto do array](feedback-o-tecto-do-array.md)** — subi `TR_MAX` para 64 e chamei-lhe «não tem tecto». Se a conclusão menciona um número do meu código, medi a MÁQUINA. Tese com «todo/sempre/sem limite» não se varre: prova-se o PASSO.
 - **[O double que só transportava](feedback-o-double-que-so-transportava.md)** — 20 doubles sobre dados que SEMPRE foram inteiros: não carregavam vírgula, traziam um limiar `1e-9` de borla. «É zero» é mais forte que «é menor que a régua que eu escolhi».
 - **[Revisores em paralelo](feedback-revisores-externos.md)** — compensam MUITO e é preciso REPICAR. Os graves são todos do mesmo tipo: A ASSERÇÃO ERA O DEFEITO.
 
@@ -55,6 +56,7 @@
 - [A escada do diabo](project-escada-do-diabo.md) — 1/2 é o patamar mais largo; e um revisor apanhou DUAS frases falsas publicadas, incluindo «os convergentes do áureo encolhem mais depressa», que é o contrário.
 - [O fator de potência é a régua](project-fator-de-potencia.md) — |det|=1, fator unitário e inversa inteira são TRÊS NOMES da mesma condição. O motor quer fp=1, o tecido quer fp=0.
 - [O corpo quântico e o cósmico](project-quantico-cosmico.md) — [σi,σj]=2i·ε·σk É o produto cruzado. E: CHAMEI LEI À CONSEQUÊNCIA DE UMA ESCOLHA MINHA (Carnot). Gatilho: que parâmetros do teorema fui eu que escolhi?
+- **[A torre: Hurwitz e Gentil](project-torre-hurwitz-gentil.md)** — o eval dos hipercomplexos é METADE (o discreto). Gentil é o contínuo SEM grau, Lebesgue a soma reversível que os casa, e o tecto de 8 é da NORMA, não do objecto.
 - **[O fecho do dual: Lagrange](project-o-fecho-do-dual-lagrange.md)** — directo² + cruzado² = N(u)N(v). A casa tinha o split num paper e a conservação da norma noutro, e nunca escreveu que são a MESMA frase; e o degrau 4 de Hurwitz é onde o escalar arranja lugar.
 - [O WHERE é o corpo mórfico](project-where-morfico.md) — erosão/dilatação são o par dual: erode-se para escolher, dilata-se para escrever.
 ### A ESCADA que os `eval.txt` construíram (cada ficheiro um andar, tudo exato, tudo com gume)
