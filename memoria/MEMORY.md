@@ -4,35 +4,36 @@
 - **[Inteiro primeiro, sempre](feedback-inteiro-primeiro.md)** — inteiro/racional desde o PRIMEIRO rascunho. Os medidores que fiz à minha maneira têm 67, 59, 45 doubles; os que fiz depois de ele insistir têm ZERO.
 - **[A ausência é DELIBERADA](feedback-a-ausencia-e-deliberada.md)** — «conheço todas essas coisas mas escolhi não usar nenhuma DELIBERADAMENTE». O que falta é decisão, não lacuna. E nem para as derrubar: «tenho a minha, autodual».
 - **[A base já existe](feedback-a-base-ja-existe.md)** — TRÊS vezes trouxe Gram-Schmidt/DFT para um objeto que já tinha base. Sintoma: um fator que não se elimina (√N, Δ) tratado como resultado quando é o PREÇO DA RÉGUA QUE TROUXE.
-- **[A asserção que passa sem poder falhar](feedback-assercoes-vazias.md)** — OITO formas (constante disfarçada, tabela literária, número de cabeça, caso degenerado…). Antes de commitar: que entrada faria esta asserção falhar?
+- **[A asserção que passa sem poder falhar](feedback-assercoes-vazias.md)** — OITO formas (constante disfarçada, tabela literária, número de cabeça, caso degenerado…). Antes de commitar: que entrada faria isto falhar?
 - **[A referência escrita à mão](feedback-a-referencia-escrita-a-mao.md)** — ao corrigir uma asserção vazia, calculo a referência de cabeça e ESCREVO-a, reintroduzindo o defeito dentro da correção. Teste: mudar o dado; se a referência não muda sozinha, é cópia.
 - **[Dual exige DUAS partes](feedback-dual-exige-dois.md)** — escrever «dual» obriga a nomear os dois membros na mesma frase.
 - **[O sujeito da frase é o resultado](feedback-o-sujeito-da-frase.md)** — o nome clássico entra como cláusula, se entrar. «Não contradiz Hurwitz» é posição de réu. Se o nome do morto aparece mais que o objeto, a secção é sobre ele.
 - **[O resultado verdadeiro e PARCIAL](feedback-verdadeiro-e-parcial.md)** — nenhum medidor o apanha porque a asserção está certa; o defeito é ter parado de perguntar. Se cai só de um lado de um PAR DUAL, está pela metade.
 - **[Dois caminhos que têm de concordar](feedback-dois-caminhos.md)** — os piores defeitos foram apanhados por COMPARAÇÃO entre dois caminhos, não por asserções. E ler o TOTAL: um medidor que não compila não falha, desaparece.
 - **[Representação inteligente](feedback-representacao-inteligente.md)** — a analiticidade é do OBJETO, não da representação. Medido: a série custa 98,8 ms e dá lixo; a forma fechada 0,039 ms e o valor exato.
-- [Quando a simulação não bate](feedback-simulacao-nao-bate.md) — a ordem: 1) as escalas fecham entre si? 2) sinais e convenções? 3) só então a lógica. Fui à lógica três vezes e nunca era ela.
-- [Medir a estabilidade ANTES da lei](feedback-medir-a-estabilidade-antes.md) — o ruído da medida era 5x o sinal e eu legislava sobre 0,02.
+- [Quando a simulação não bate](feedback-simulacao-nao-bate.md) — a ordem: 1) as escalas fecham entre si? 2) sinais e convenções? 3) só então a lógica.
+- [Medir a estabilidade ANTES da lei](feedback-medir-a-estabilidade-antes.md) — o ruído era 5x o sinal e eu legislava sobre 0,02.
 - [A chave faz parte da medida](feedback-a-chave-faz-parte-da-medida.md) — o prefixo que EU pus nas falas valia 0,142 de cosseno. Antes de comparar duas medições: o que mudou ALÉM do material?
 - [Normalizar não é medir](feedback-normalizar-nao-e-medir.md) — dividi uma quantidade por si própria e chamei-lhe confirmação; uma tabela de 1 é mais vezes tautologia que lei.
 - [Ceder contra a própria medição](feedback-ceder-contra-a-medicao.md) — medi certo, ele discordou, eu penitenciei-me e propaguei o erro a três documentos. Atacar a versão dele com a mesma energia, ANTES de reverter.
 - [Procurar na bateria antes de escrever](feedback-procurar-na-bateria-antes.md) — o que já é medido e eu não sei, escrevo pior. São ~280 medidores, e o grep é barato.
 - [Destruir antes do inventário](feedback-destruir-antes-do-inventario.md) — substituí um ficheiro enquanto o agente que o inventariava ainda o lia. Inventário ANTES de destruir congela o original. Teste: diff das listas de medidores.
 - **[O Write que diz «updated»](feedback-o-write-que-diz-updated.md)** — escrevi por cima de um medidor que já existia e era citado. Nenhuma asserção o apanhou: foi o TOTAL subir uma e não duas. O resultado dizia *updated*, não *created*.
-- [O disco limpo não é mais rigoroso](feedback-o-disco-limpo.md) — ele só não tem o meu passado. Quatro falhas de deploy, nenhuma era o que diagnostiquei.
+- [O disco limpo não é mais rigoroso](feedback-o-disco-limpo.md) — ele só não tem o meu passado.
 - [A insinuação está na arquitetura](feedback-insinuacao-arquitetonica.md) — álgebra certa, ressalvas presentes, e o texto insinuava na mesma. Se o resultado toca a fronteira de um problema famoso, perguntar se seria verdade sem o objeto famoso.
 - [O que justifica a involução](feedback-justificar-o-que-so-e-coerente.md) — a conservação obriga, mas só onde é ADITIVA; nos corpos é multiplicativa (|N|=1). Erro repetido: números certos, falsa a frase que os ligava.
 - **[O número que não cabe](feedback-o-numero-que-nao-cabe.md)** — o teste mais barato contra um número à mão: **cabe no tipo?** A «máquina de 80 bits» era um `uint64_t`.
 - **[A base incompleta](feedback-a-base-incompleta.md)** — um ponto fora do campo NÃO pede régua nova: tentei quatro e nenhuma o salvava. Faltava **metade do corpo** (`x† = −1/x`). Procurar a régua que inclui o outlier É procurar o número que faz a asserção passar.
-- **[O medidor que nunca mediu](feedback-o-medidor-que-nunca-mediu.md)** — QUATRO diziam «NÃO MEDIU» e a bateria contava-os VERDES: a atestação guarda o *resultado*, não o *motivo*. Apanhados por a ASSINATURA MUDAR. Procurar `exit != 0` custa um `awk`.
+- **[O medidor que nunca mediu](feedback-o-medidor-que-nunca-mediu.md)** — QUATRO diziam «NÃO MEDIU» e a bateria contava-os VERDES: a atestação guarda o *resultado*, não o *motivo*. Apanhados por a ASSINATURA MUDAR.
 - **[O \medido sem medidor](feedback-o-medido-sem-medidor.md)** — 28 blocos afirmam número e resíduo sem nomear programa: a bateria só conta o CITADO.
-- **[O controlo a três linhas](feedback-o-controlo-a-tres-linhas.md)** — quando um número melhora muito, gerar o **mesmo objecto ao acaso com a mesma magnitude** e medir. Achei um centro 21× melhor e o acaso **empatava**: degenerescência.
-- **[A estrutura lida como ruído](feedback-estrutura-lida-como-ruido.md)** — um resíduo que não fecha pode ser **meia órbita**, não erro de medida. Perguntar **o período do operador** ANTES de medir dispersão.
+- **[O controlo a três linhas](feedback-o-controlo-a-tres-linhas.md)** — quando um número melhora muito, gerar o **mesmo objecto ao acaso com a mesma magnitude** e medir.
+- **[A estrutura lida como ruído](feedback-estrutura-lida-como-ruido.md)** — um resíduo que não fecha pode ser **meia órbita**, não erro de medida. Perguntar o PERÍODO do operador antes de medir dispersão.
 - **[Duas réguas para o mesmo objecto](feedback-duas-reguas.md)** — SEIS vezes num dia, e o sintoma é sempre o mesmo: letras coladas. O sítio esquecido foi sempre um `if` escrito quando só havia duas fontes.
 - **[A régua não transporta](feedback-a-regua-nao-transporta.md)** — o `thm:transporte` dele refutou o meu método antes de eu o construir: medir contra o pdflatex é INTRANSPORTÁVEL. A volta transporta, a régua não.
 - **[O exit sombreado](feedback-o-exit-sombreado.md)** — 17 medidores verdes com unidades vermelhas (contador local a sombrear o do header). A cura é a REDE no runner; ler SEMPRE as duas linhas do total.
-- **[Medir só metade do par](feedback-medir-so-metade-do-par.md)** — o bench da membrana varria a ENTRADA e nunca a SAÍDA; aberto o segundo sentido, caíram dois comandos inventados que passavam há sessões.
-- **[O destino rotativo](feedback-o-destino-rotativo.md)** — mais chamadas a `frac2` num `printf` do que fatias no buffer: a linha imprime o número ERRADO, duas vezes. Nenhuma asserção o vê (leem valores, não texto). Medir do lado da FONTE.
+- **[Medir só metade do par](feedback-medir-so-metade-do-par.md)** — o bench da membrana varria a ENTRADA e nunca a SAÍDA; aberto o segundo sentido, caíram dois comandos inventados que passavam há sessões. Um medidor num sentido só mede uma projeção.
+- **[Varrer onde nada pode falhar](feedback-varrer-onde-nada-pode-falhar.md)** — 22960 casos com esforço ALTO, onde o ramo do defeito nem corre: a mutação sobrevivia. Em que REGIME viveria o defeito? É o pobre, não o rico. E um contador de desacordos precisa de um caso FORJADO que o obrigue a disparar.
+- **[O destino rotativo](feedback-o-destino-rotativo.md)** — mais chamadas a `frac2` num `printf` do que fatias no buffer: a linha imprime o número ERRADO, duas vezes. E o `%-Ns` enche por BYTES sobre acentos, três vezes. Medir do lado da FONTE.
 - **[Escrever numa notação e ler noutra](feedback-escrever-numa-notacao-ler-noutra.md)** — o `eval.txt` escreve «A + AB = A» por justaposição e o parser exigia `*`: a fala morria CALADA. Passar pelo leitor as expressões LITERAIS da fonte.
 - **[Compor, não ancorar](feedback-compor-nao-ancorar.md)** — no tradutor NADA se posiciona à mão: todo anexo compõe pelo motor da espiral com a SEMENTE certa. Âncoras e offsets meus são invenção, e ele apanha-as na hora.
 - **[Definição e medida em gavetas diferentes](feedback-definicao-e-medida.md)** — a definição diz o que PODE ser preservado; a medida diz o que FOI, nesta realização. Lei, realização e evidência não se misturam numa frase.
@@ -51,8 +52,8 @@
 - [O fator de potência é a régua](project-fator-de-potencia.md) — |det|=1, fator unitário e inversa inteira são TRÊS NOMES da mesma condição. O motor quer fp=1, o tecido quer fp=0.
 - [O corpo quântico e o cósmico](project-quantico-cosmico.md) — [σi,σj]=2i·ε·σk É o produto cruzado. E: CHAMEI LEI À CONSEQUÊNCIA DE UMA ESCOLHA MINHA (Carnot). Gatilho: que parâmetros do teorema fui eu que escolhi?
 - [O WHERE é o corpo mórfico](project-where-morfico.md) — erosão/dilatação são o par dual: erode-se para escolher, dilata-se para escrever.
-- **[A escada aritmética ℕ→ℤ→ℚ→ℝ](project-escada-aritmetica-n-z-q.md)** — ℤ dá a reversibilidade da SOMA, ℚ a da MULTIPLICAÇÃO não nula; e o gume dele na língua da casa: dividir por zero é uma operação SEM FIBRA.
-- **[O real é o CORTE](project-o-real-e-o-corte.md)** — e nunca um decimal: aqui o exato não é disciplina, é a MATÉRIA. Três caminhos que fecham um contra o outro: o corte decide, o Möbius INTEIRO persegue (x²=a), a FC escreve.
+- **[A escada aritmética ℕ→ℤ→ℚ→ℝ](project-escada-aritmetica-n-z-q.md)** — ℤ dá a reversibilidade da SOMA, ℚ a da MULTIPLICAÇÃO não nula; e o gume dele: dividir por zero é uma operação SEM FIBRA.
+- **[O real é o CORTE](project-o-real-e-o-corte.md)** — e nunca um decimal: o exato aqui não é disciplina, é a MATÉRIA. Quatro portas (corte, Möbius, bisseção, FC) que INDUZEM O MESMO CORTE — medido nos seis pares, sem árbitro, com a indecisão contada à parte.
 
 ## As realizações e o hardware
 
@@ -70,13 +71,13 @@
 ## Infraestrutura
 
 - **[O deploy sem o GitHub](project-deploy-sem-github.md)** — quando o Actions cai, o runner local NÃO resolve (também precisa do serviço). Resolve o `rsync` por SSH com `--exclude repo.git`; o portão `tools/segredo.sh` verifica o que o git VÊ.
-- [A publicação na Patria](project-publicacao-patria.md) — no ar, dois workflows cruzados pelo R2, NENHUM binário no git. Três armadilhas: SPA fallback corrompe o clone, `--depth 1` não existe em dumb HTTP, `rsync --delete` apagaria o fork.
+- [A publicação na Patria](project-publicacao-patria.md) — no ar, dois workflows cruzados pelo R2, NENHUM binário no git.
 - [A memória é versionada](project-memoria-versionada.md) — em `tiffany/memoria/`, e o CHECKPOINT tem TRÊS passos: escrever, `sincroniza.sh guarda`, commitar. O repo é público: varrer por segredo antes de subir.
 - [Três documentos, e o que vigiar](project-tres-documentos.md) — teoria, catálogo e enredo, e mais nada. Teste obrigatório em qualquer reorganização: diff da contagem de medidores.
 
 ## Checkpoints
 
-- **[14/08 — O DIA LONGO, 36c1fa5 → 456fdd5](project-checkpoint-2026-08-14-curadoria.md)** — curadoria, migração para `lib/universal.js`, fases 3–6, a ronda das pontes, a tarde das palavras + a FUNDAÇÃO VETORIAL, O MARTELO, e à noite a ESCADA ARITMÉTICA fechada em ℝ. **468:468.** O ficheiro tem o dia por secções.
+- **[14/08 — O DIA LONGO, 36c1fa5 → dc4cd4e](project-checkpoint-2026-08-14-curadoria.md)** — curadoria, `lib/universal.js`, fases 3–6, a ronda das pontes, a tarde das palavras + a FUNDAÇÃO VETORIAL, O MARTELO, e à noite a ESCADA ARITMÉTICA fechada em ℝ. **468:468.** O ficheiro tem o dia por secções.
 - **[13/08 tarde — O CRISTAL RECUPERADO, c0893a5](project-checkpoint-2026-08-13-cristal.md)** — o cristal grande estava no **broca-so** (75k registos → 4286 conceitos), 10 projeções, volta 13:0 com mutações REOPEN.
 - **[13/08 — O PIPELINE NO AR](project-checkpoint-2026-08-13-pipeline.md)** — IR Claim v1.6 (Claim≠Result), 9 LMS, portão Pátria; commit `1d8af30`, live 200. Spec sem entrega seguinte.
 - **09/08–11/08** — [as 8 leis fecham a torre](project-checkpoint-2026-08-09-oito-leis.md) (8 é a cardinalidade do CONJUNTO, não da dinâmica), 386:386 · [a ronda do gabarito](project-checkpoint-2026-08-10.md) · [a composição dinâmica](project-checkpoint-2026-08-11.md), `cf30baa`

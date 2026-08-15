@@ -260,3 +260,21 @@ como a construção **dual** do corte — detalhe em [[project-o-real-e-o-corte]
 número e pelo nome) e exigir que o fora-de-alcance seja RECUSADO. É o
 [[feedback-o-medidor-que-nunca-mediu]] aplicado às falas: uma fala que morre calada não
 falha, **desaparece** — e confiar em ter escrito as vinte não é medir que as vinte correm.
+
+
+### O fecho independente do método (`dc4cd4e`, interno 168:0)
+
+O último pedido do `eval.txt` — corte, Cauchy, bisseção e FC têm de dar **o mesmo ponto**,
+e «sem simplesmente declarar que são iguais». Critério: **induzem o mesmo corte**, medido
+nos SEIS pares sem árbitro, com a **indecisão contada à parte**. Detalhe em
+[[project-o-real-e-o-corte]].
+
+**A lição do dia, e é a mais dura**: eu varria 22960 racionais com esforço 14 — onde a
+caixa é tão apertada que **o ramo do indeciso nunca corre** — e a mutação «bisseção finge
+decidir» sobrevivia. Volume não é cobertura: exaustivo dentro de um regime onde o defeito
+não existe é o mesmo que não medir, e o volume dá confiança a mais.
+Ver [[feedback-varrer-onde-nada-pode-falhar]].
+
+E a segunda, no mesmo sítio: **«0 choques» podia ser um detetor avariado**. Um contador de
+desacordos precisa de um caso FORJADO que o obrigue a disparar, senão o zero não distingue
+«concordam» de «não estou a olhar».

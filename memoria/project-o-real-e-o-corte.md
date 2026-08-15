@@ -70,6 +70,30 @@ COINCIDÊNCIA no arranque, e a asserção passava sem medir convergência nenhum
 sobre a **cauda**. Corrigido, os N passaram a 17, 6 e 17. Ver
 [[feedback-assercoes-vazias]]: a forma nova é *a asserção que passa pelo arranque*.
 
+## O fecho não depende do método (`dc4cd4e`, `lib/identifica.h`)
+
+O último pedido do `eval.txt`, e o que fecha o andar: corte, Cauchy, bisseção e FC têm de
+dar **o mesmo ponto**, com a volta a verificar a identificação — e «SEM SIMPLESMENTE
+DECLARAR QUE SÃO IGUAIS».
+
+**O critério que evita a declaração**: o real É o corte, logo dois métodos dão o mesmo
+ponto exatamente quando **induzem o mesmo corte** — para cada racional, o mesmo lado.
+Medido nos SEIS pares, não contra um árbitro (eleger um seria a declaração com outro nome).
+
+**O gume é a INDECISÃO**: um método de esforço finito não decide os racionais que ainda
+caem na sua caixa — isso é 0, não é um lado. Contá-lo como acordo daria o teorema de graça.
+Medidos: 1860 → 40 → 0 → 0 conforme o esforço sobe.
+
+**A volta**: de cada porta sai uma caixa racional, com profundidades diferentes **de
+propósito**, e as quatro intersetam-se com o corte lá dentro.
+
+As duas frases dele, medidas: «ℚ tem o rastro, mas não tem a folha» (os rastros são
+inteiramente de ℚ e nenhum é a folha) e o **sino** — os rastros diferem termo a termo e são
+a mesma classe; se fossem o mesmo rastro não havia identificação a fazer.
+
+Aqui aprendi [[feedback-varrer-onde-nada-pode-falhar]]: eu varria só o esforço alto, onde
+não há indecisos, e a mutação «bisseção finge decidir» sobrevivia a 22960 casos.
+
 **O que ele anunciou a seguir**: a construção geométrica da reta — «a reta não precisa ser
 postulada como uma coleção contínua de pontos; o ponto real é o corte que separa tudo o
 que ficou abaixo de tudo o que ficou acima». É o «raiz → corte → folha» que o motor já usa,
