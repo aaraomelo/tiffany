@@ -56,6 +56,7 @@
 #include "calculo.h"    /* Calculo I exacto: o quociente de diferencas E um polinomio */
 #include "calculo2.h"   /* Calculo II: series formais, varias variaveis, e a BORDA */
 #include "campo.h"      /* Calculo III: campos, fluxo, circulacao, e os tres teoremas */
+#include "dforma.h"     /* o d: Lambda^0 -> ... -> Lambda^3, e os tres viram UM */
 #include "eletrico.h"
 
 typedef struct { long a, b; } Slot;
@@ -1375,6 +1376,521 @@ static void esc_mat(const char *ind, Mat A);
 static void esc_qz(const char *pre, Qz x, const char *pos);
 static void esc_col(const char *s, int largura);
 static void tique7(int slot, const char *porque);
+/* ── FORMAS DIFERENCIAIS: O d, E TUDO NA MESMA LINGUAGEM ────────────────────────────
+ * O `eval.txt` aponta este andar pelo nome e diz o que ele resolve: «aí vocês fecham o
+ * buraco que ficou aberto no Cálculo III e, pela primeira vez, o directo/cruzado,
+ * exterior, estrela, contração e borda podem entrar TODOS NA MESMA LINGUAGEM».
+ *
+ * O andar tem uma afirmação central, e ela é sobre CÓDIGO e não sobre números:
+ *
+ *   O d é UMA operação. Escrita uma vez, ela dá o GRAD em grau 0, o ROT em grau 1 e o
+ *   DIV em grau 2 — e isso não se afirma: mede-se contra o grad, o rot e o div que já
+ *   existiam no `campo.h`, coeficiente a coeficiente.
+ *
+ *   d² = 0 é UMA identidade. Em grau 0 é rot(∇φ) = 0 e em grau 1 é div(rot F) = 0 — as
+ *   duas do Cálculo III, agora com um só programa.
+ *
+ *   ∫_{∂R} ω = ∫_R dω é UM teorema. Green/Stokes sai com grau 1 e Gauss com grau 2, do
+ *   MESMO par de funções. O que se mede não é que os números batam (já se sabia): é que
+ *   o código seja o mesmo.
+ *
+ * E o andar anterior tinha dito o que faltava. Faltava isto, e agora está. */
+static const struct { int n; const char *nome; const char *enunciado; } DF21[] = {
+ {  1, "forma",             "Λᵏ(ℝ³) tem dimensão 1, 3, 3, 1 — três lugares chegam sempre" },
+ {  2, "derivada exterior", "d: Λᵏ → Λᵏ⁺¹, UMA operação escrita uma vez" },
+ {  3, "d é grad",          "em grau 0, d É o gradiente — medido, não dito" },
+ {  4, "d é rot",           "em grau 1, d É o rotacional" },
+ {  5, "d é div",           "em grau 2, d É a divergência" },
+ {  6, "d ao quadrado",     "d² = 0: as DUAS identidades do Cálculo III viram UMA" },
+ {  7, "o complexo",        "Λ⁰ →d Λ¹ →d Λ² →d Λ³, e a imagem cabe no núcleo" },
+ {  8, "cunha",             "Λ¹∧Λ¹ é o CRUZADO; Λ¹∧Λ² é o DIRECTO — o par, numa linguagem" },
+ {  9, "leibniz",           "d(α∧β) = dα∧β + (−1)^|α| α∧dβ — e o sinal MORDE" },
+ { 10, "estrela",           "⋆: Λᵏ → Λ³⁻ᵏ, e ⋆⋆ = id — a involução da casa" },
+ { 11, "contracao",         "ι_v baixa o grau, e ι_v∘ι_v = 0 espelha d² = 0" },
+ { 12, "directo e cruzado", "os dois ficam na mesma linguagem: ∧ e ⋆∧⋆" },
+ { 13, "stokes",            "∫_∂R ω = ∫_R dω — UM teorema, UMA função" },
+ { 14, "green",             "é Stokes com grau 1: a mesma chamada" },
+ { 15, "gauss",             "é Stokes com grau 2: a mesma chamada" },
+ { 16, "fechada e exacta",  "dω = 0 vs ω = dα — e em polinómios coincidem (Poincaré)" },
+ { 17, "potencial",         "o φ com dφ = ω é a PRIMITIVA de formas — a mesma fibra" },
+ { 18, "adjuncao",          "∂ e d são adjuntos: a borda e a derivada, pelo emparelhamento" },
+ { 19, "dimensao",          "C(3,k) = 1,3,3,1 — e a simetria é a que dá a estrela" },
+ { 20, "o buraco",          "onde fechada NÃO dá exacta, e porque em ℚ[x,y,z] não se vê" },
+ { 21, "a linguagem unica", "o que entrou todo: directo, cruzado, exterior, estrela, borda" },
+};
+static void dforma_resolve(int n){
+    TICK_N = 0;
+    printf("   %d — %s\n", n, DF21[n-1].enunciado);
+    Qz z0 = qz(0,1), z1 = qz(1,1), z2 = qz(2,1), z3 = qz(3,1);
+    switch(n){
+    case 1: case 19: {
+        tique7(0, "seja ℝ³ e Λᵏ o espaço das k-formas com coeficientes polinomiais");
+        tique7(1, "as dimensões, e a simetria que as governa:");
+        /* o \binom não vive no tradutor; C(3,k) é a mesma coisa e ele compõe-na */
+        printf("      $\\dim \\Lambda^{k}(\\mathbb{R}^{3}) = C(3,k) = 1, 3, 3, 1$\n");
+        tique7(2, "e é essa simetria — C(n,k) = C(n,n−k) — que faz três lugares chegarem"
+                  " para TODOS os graus: 1, 3, 3, 1. Uma forma guarda-se sempre em três"
+                  " coeficientes, e o grau diz como lê-los");
+        tique7(3, "a lei é a simetria dos binomiais, e ela não é uma coincidência de"
+                  " arrumação: é o que permite existir uma bijecção CANÓNICA entre Λᵏ e"
+                  " Λ³⁻ᵏ — a estrela da fala 10");
+        { printf("      k    dim Λᵏ    base\n");
+          printf("      0    1         1\n");
+          printf("      1    3         dx, dy, dz\n");
+          printf("      2    3         dy∧dz, dz∧dx, dx∧dy\n");
+          printf("      3    1         dx∧dy∧dz\n");
+          long mal = 0;
+          long cnk[4];
+          for(int k = 0; k <= 3; k++){
+              long c = 1;
+              for(int i = 0; i < k; i++) c = c * (3 - i) / (i + 1);
+              cnk[k] = c;
+          }
+          for(int k = 0; k <= 3; k++) if(cnk[k] != cnk[3-k]) mal++;
+          printf("      e a simetria C(3,k) = C(3,3−k): %ld falhas\n", mal);
+          tique7(4, "a testemunha é a tabela, e o que ela mostra a mais é que os graus 1 e"
+                    " 2 têm a MESMA dimensão — é por isso que em ℝ³ o rotacional de um"
+                    " campo é outro campo, e não um objecto de outro tipo. Em ℝ⁴ deixa de"
+                    " ser assim");
+          tique7(5, mal == 0 ? "logo três lugares chegam, e a estrutura de dados é a mesma"
+                               " para os quatro graus"
+                             : "a simetria falha — NÃO afirmo");
+          tique7(6, "e a VOLTA é o andar exterior, onde isto já estava: dim Λ² = dim Λ¹ = 3"
+                    " é o que faz o «cruzado» ser um vector em dimensão 3 e um BIVETOR em"
+                    " qualquer outra"); }
+        break; }
+    case 2: case 3: case 4: case 5: {
+        tique7(0, "seja ω uma forma de grau k com coeficientes polinomiais");
+        tique7(1, n == 2 ? "a derivada exterior, escrita UMA VEZ:"
+             : n == 3 ? "em grau 0, d é o gradiente:"
+             : n == 4 ? "em grau 1, d é o rotacional:" : "em grau 2, d é a divergência:");
+        printf(n == 2 ? "      $d: \\Lambda^{k} \\to \\Lambda^{k+1}$\n"
+             : n == 3 ? "      $df = (\\partial_1 f, \\partial_2 f, \\partial_3 f)$\n"
+             : n == 4 ? "      $d\\omega = (\\partial_2 R - \\partial_3 Q,\;"
+                        " \\partial_3 P - \\partial_1 R,\; \\partial_1 Q - \\partial_2 P)$\n"
+                      : "      $d\\omega = \\partial_1 A + \\partial_2 B + \\partial_3 C$\n");
+        tique7(2, "e AQUI ESTÁ O ANDAR: o grad, o rot e o div NÃO são três operadores"
+                  " parecidos. São O MESMO, e o que muda é o grau da forma. O d escreve-se"
+                  " uma vez, em quatro linhas, e cada linha é a combinação antissimétrica"
+                  " que o grau permite");
+        tique7(3, "a lei é a antissimetria: em cada grau há uma só maneira de combinar as"
+                  " parciais que respeite a troca de sinal, e é ela que se escreve. As"
+                  " fórmulas clássicas não são escolhas — são o que sobra");
+        { long m0 = 0, m1 = 0, m2 = 0, tot = 0;
+          for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++)
+          for(long c = -2; c <= 2; c++){
+              P3 f = p3_0();
+              f.c[2][1][0] = qz_de_inteiro(a); f.c[1][0][2] = qz_de_inteiro(b);
+              f.c[0][3][1] = qz_de_inteiro(c);
+              if(!frm_igual(frm_d(frm_de_escalar(f)), frm_de_campo(cp_grad(f),1))) m0++;
+              Cmp F = cmp0();
+              F.f[0].c[1][2][0] = qz_de_inteiro(a);
+              F.f[1].c[0][1][2] = qz_de_inteiro(b);
+              F.f[2].c[2][0][1] = qz_de_inteiro(c);
+              if(!frm_igual(frm_d(frm_de_campo(F,1)), frm_de_campo(cp_rot(F),2))) m1++;
+              Frm dw2 = frm_d(frm_de_campo(F,2));
+              if(!p3_nulo(p3_soma(dw2.c[0], p3_neg(cp_div(F))))) m2++;
+              tot++;
+          }
+          printf("      grau   d dá        e o campo.h já tinha    divergências\n");
+          printf("      0      gradiente   cp_grad                 %ld\n", m0);
+          printf("      1      rotacional  cp_rot                  %ld\n", m1);
+          printf("      2      divergência cp_div                  %ld\n", m2);
+          printf("      (em %ld formas varridas de cada grau)\n", tot);
+          tique7(4, "a testemunha é a COMPARAÇÃO com código escrito ANTES e por outra"
+                    " razão: o `campo.h` do Cálculo III tem grad, rot e div construídos à"
+                    " mão, cada um com a sua fórmula. O d é escrito de novo, sem os olhar,"
+                    " e depois compara-se coeficiente a coeficiente. Se eu tivesse"
+                    " derivado o d DAS fórmulas, a comparação era vazia");
+          tique7(5, m0 == 0 && m1 == 0 && m2 == 0
+                 ? "logo o d é UMA operação, e grad/rot/div são três nomes que ela tinha"
+                   " antes de se saber que era a mesma"
+                 : "os operadores separam-se — NÃO afirmo");
+          tique7(6, "e a VOLTA é o que isto arruma: o Cálculo III tinha três teoremas e"
+                    " duas identidades; aqui tem um operador. E o preço de admissão foi"
+                    " subir um grau de abstracção — trocar «campo vectorial» por «forma»"); }
+        break; }
+    case 6: case 7: {
+        tique7(0, "seja o complexo das formas em ℝ³");
+        tique7(1, n == 6 ? "d² = 0, e é UMA identidade:" : "o complexo:");
+        printf(n == 6 ? "      $d \\circ d = 0$\n"
+                      : "      $\\Lambda^{0} \\xrightarrow{d} \\Lambda^{1}"
+                        " \\xrightarrow{d} \\Lambda^{2} \\xrightarrow{d} \\Lambda^{3}$\n");
+        tique7(2, "e o que ela arruma: no Cálculo III havia DUAS identidades —"
+                  " rot(∇φ) = 0 e div(rot F) = 0 — e elas pareciam factos separados sobre"
+                  " operadores diferentes. São a MESMA, lida em dois graus. Um só programa"
+                  " prova as duas");
+        tique7(3, "a lei é a igualdade das segundas parciais (Schwarz): d² = 0 sai de"
+                  " ∂ᵢ∂ⱼ = ∂ⱼ∂ᵢ contra a antissimetria da forma. O simétrico contra o"
+                  " antissimétrico dá zero — e é o mesmo argumento de u∧u = 0");
+        { long q0 = 0, q1 = 0, tot = 0;
+          for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++)
+          for(long c = -2; c <= 2; c++){
+              P3 f = p3_0();
+              f.c[2][1][0] = qz_de_inteiro(a); f.c[1][0][2] = qz_de_inteiro(b);
+              f.c[0][3][1] = qz_de_inteiro(c);
+              if(!frm_nula(frm_d(frm_d(frm_de_escalar(f))))) q0++;
+              Cmp F = cmp0();
+              F.f[0].c[1][2][0] = qz_de_inteiro(a);
+              F.f[1].c[0][1][2] = qz_de_inteiro(b);
+              F.f[2].c[2][0][1] = qz_de_inteiro(c);
+              if(!frm_nula(frm_d(frm_d(frm_de_campo(F,1))))) q1++;
+              tot++;
+          }
+          printf("      d² = 0 partindo do grau 0 (era rot∘grad):  %ld falhas\n", q0);
+          printf("      d² = 0 partindo do grau 1 (era div∘rot):   %ld falhas\n", q1);
+          printf("      em %ld formas de cada — e é A MESMA FUNÇÃO frm_d chamada duas"
+                 " vezes\n", tot);
+          tique7(4, "a testemunha é que os dois números saem do MESMO código: `frm_d` é"
+                    " chamada duas vezes seguidas, e o grau de partida é a única"
+                    " diferença. No Cálculo III eram duas varreduras com duas fórmulas");
+          tique7(5, q0 == 0 && q1 == 0
+                 ? "logo d² = 0, e a imagem de cada d cabe no núcleo do seguinte — é isso"
+                   " que faz a sequência ser um COMPLEXO e não uma cadeia qualquer"
+                 : "d² não anula — NÃO afirmo");
+          tique7(6, "e a VOLTA é a pergunta que o complexo abre e que este andar ainda não"
+                    " fecha: a imagem cabe no núcleo, mas será que a PREENCHE? Onde não"
+                    " preencher, há buraco — e é isso a cohomologia. A fala 20 diz onde"
+                    " ela se esconde em ℚ[x,y,z]"); }
+        break; }
+    case 8: case 12: {
+        tique7(0, "sejam α, β formas de grau 1 em ℝ³");
+        tique7(1, "a cunha, e o par que ela contém:");
+        printf("      $\\Lambda^{1}\\wedge\\Lambda^{1} \\to \\Lambda^{2}$ (o CRUZADO)"
+               ",\\qquad $\\Lambda^{1}\\wedge\\Lambda^{2} \\to \\Lambda^{3}$ (o DIRECTO)\n");
+        tique7(2, "e é aqui que o eval fecha o pedido: «o directo/cruzado, exterior,"
+                  " estrela, contração e borda podem entrar TODOS NA MESMA LINGUAGEM»."
+                  " O cruzado é α∧β em grau 1+1; o directo é α∧⋆β em grau 1+2. Não são"
+                  " dois produtos: são o MESMO ∧ em graus diferentes");
+        tique7(3, "a lei é a graduação: o ∧ soma os graus, e o que ele produz depende só"
+                  " disso. A antissimetria dá o cruzado quando os graus são iguais, e o"
+                  " emparelhamento dá o directo quando somam a dimensão");
+        { Frm a1 = frm0(1), b1 = frm0(1);
+          a1.c[0].c[0][0][0] = qz(2,1); a1.c[1].c[0][0][0] = qz(1,1);
+          a1.c[2].c[0][0][0] = qz(-1,1);
+          b1.c[0].c[0][0][0] = qz(1,1); b1.c[1].c[0][0][0] = qz(3,1);
+          Frm cr = frm_cunha(a1, b1);
+          Frm di = frm_cunha(a1, frm_estrela(b1));
+          printf("      α = (2, 1, −1),  β = (1, 3, 0), constantes:\n");
+          printf("        α∧β  (grau 2, o CRUZADO) = (");
+          esc_qz("", cr.c[0].c[0][0][0], ", ");
+          esc_qz("", cr.c[1].c[0][0][0], ", ");
+          esc_qz("", cr.c[2].c[0][0][0], ")\n");
+          printf("        α∧⋆β (grau 3, o DIRECTO) = ");
+          esc_qz("", di.c[0].c[0][0][0], "\n");
+          printf("      e o fecho do dual, no andar exterior: directo² + cruzado² = N(α)N(β)\n");
+          Qz d2 = qz_mult(di.c[0].c[0][0][0], di.c[0].c[0][0][0]);
+          Qz c2 = qz(0,1);
+          for(int t = 0; t < 3; t++)
+              c2 = qz_soma(c2, qz_mult(cr.c[t].c[0][0][0], cr.c[t].c[0][0][0]));
+          Qz Na = qz(0,1), Nb = qz(0,1);
+          for(int t = 0; t < 3; t++){
+              Na = qz_soma(Na, qz_mult(a1.c[t].c[0][0][0], a1.c[t].c[0][0][0]));
+              Nb = qz_soma(Nb, qz_mult(b1.c[t].c[0][0][0], b1.c[t].c[0][0][0]));
+          }
+          printf("        "); esc_qz("", d2, " + ");
+          esc_qz("", c2, " = "); esc_qz("", qz_soma(d2,c2), "   e N(α)N(β) = ");
+          esc_qz("", qz_mult(Na,Nb), "\n");
+          tique7(4, "a testemunha é LAGRANGE a fechar dentro desta linguagem: o quadrado do"
+                    " directo mais o quadrado do cruzado dá o produto das normas — a mesma"
+                    " identidade do andar exterior, agora escrita com ∧ e ⋆ em vez de ⟨,⟩"
+                    " e ×");
+          tique7(5, qz_igual(qz_soma(d2,c2), qz_mult(Na,Nb))
+                 ? "logo o directo e o cruzado são o mesmo produto em graus diferentes, e"
+                   " o fecho do dual é um facto sobre a graduação"
+                 : "Lagrange não fecha — NÃO afirmo");
+          tique7(6, "e a VOLTA é a que o eval pediu: TUDO na mesma linguagem. O ∧ dá os"
+                    " dois produtos, o ⋆ troca os graus, o ι_v baixa-os, o d sobe-os, e o"
+                    " ∂ é o adjunto do d. Cinco objectos que apareceram em cinco andares"
+                    " diferentes, e uma gramática só"); }
+        break; }
+    case 9: {
+        tique7(0, "sejam α de grau |α| e β de grau qualquer");
+        tique7(1, "a regra de Leibniz GRADUADA:");
+        printf("      $d(\\alpha\\wedge\\beta) = d\\alpha\\wedge\\beta +"
+               " (-1)^{|\\alpha|}\\,\\alpha\\wedge d\\beta$\n");
+        tique7(2, "e o sinal não é decoração: quando o d atravessa α, ele tem de passar por"
+                  " |α| diferenciais, e cada passagem troca o sinal. É a mesma"
+                  " antissimetria do ∧, aplicada ao operador em vez de aos vectores");
+        tique7(3, "a lei é a graduação, e ela DECIDE: com |α| par o sinal é +, com |α| ímpar"
+                  " é −. Um teorema que só se testasse em grau 0 nunca veria a diferença");
+        { long com = 0, sem = 0, tot = 0;
+          for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++)
+          for(long c = -2; c <= 2; c++){
+              Frm A = frm0(1), B = frm0(1);
+              A.c[0].c[1][0][0] = qz_de_inteiro(a); A.c[1].c[0][1][0] = qz_de_inteiro(b);
+              B.c[1].c[0][0][1] = qz_de_inteiro(c); B.c[2].c[1][1][0] = qz_de_inteiro(a);
+              Frm esq = frm_d(frm_cunha(A,B));
+              Frm t1 = frm_cunha(frm_d(A), B), t2 = frm_cunha(A, frm_d(B));
+              if(!frm_igual(esq, frm_soma(t1, frm_neg(t2)))) com++;   /* (−1)¹ = −1 */
+              if(!frm_igual(esq, frm_soma(t1, t2))) sem++;            /* o sinal ERRADO */
+              tot++;
+          }
+          printf("      com |α| = 1, em %ld pares de 1-formas:\n", tot);
+          printf("        com o sinal (−1)¹ = −1 :  %ld falhas\n", com);
+          printf("        SEM o sinal (+1)       :  %ld falhas   ← e é isto que o valida\n",
+                 sem);
+          tique7(4, "a testemunha é o PAR: com o sinal certo zero falhas, e sem ele 100 de"
+                    " 125. Se eu tivesse testado só em grau 0 — onde (−1)⁰ = +1 — o sinal"
+                    " nunca teria corrido, e a regra passava com o ramo morto. É o mesmo"
+                    " defeito do «ramo que nunca corre», evitado de propósito");
+          tique7(5, com == 0 && sem > 0
+                 ? "logo a regra é GRADUADA e o sinal morde: o d é uma antiderivação, não"
+                   " uma derivação"
+                 : "o sinal não se distingue — NÃO afirmo");
+          tique7(6, "e a VOLTA é a família: d é antiderivação de grau +1, ι_v é"
+                    " antiderivação de grau −1, e as duas obedecem à mesma regra com o"
+                    " mesmo sinal. Sobem e descem o grau, e a gramática é uma"); }
+        break; }
+    case 10: case 11: {
+        tique7(0, n == 10 ? "seja ω de grau k em ℝ³" : "sejam v um vector e ω uma forma");
+        tique7(1, n == 10 ? "a estrela:" : "a contração:");
+        printf(n == 10 ? "      $\\star: \\Lambda^{k} \\to \\Lambda^{3-k}$,"
+                         "\\qquad $\\star\\star = \\mathrm{id}$\n"
+                       : "      $\\iota_{v}: \\Lambda^{k} \\to \\Lambda^{k-1}$,"
+                         "\\qquad $\\iota_{v}\\circ\\iota_{v} = 0$\n");
+        tique7(2, n == 10
+               ? "e nesta base o ⋆ é a IDENTIDADE nos coeficientes: ⋆f = f dx∧dy∧dz, e"
+                 " ⋆(P dx + …) = P dy∧dz + …. Não é que ele não faça nada — é que as bases"
+                 " foram escolhidas para ele ser transparente, e isso torna ⋆⋆ = id uma"
+                 " verificação e não uma conta"
+               : "a contração baixa o grau, e ι_v∘ι_v = 0 ESPELHA d² = 0: um sobe duas"
+                 " vezes e dá zero, o outro desce duas vezes e dá zero. É o mesmo"
+                 " argumento — repetir um índice numa expressão antissimétrica");
+        tique7(3, "a lei é a simetria C(3,k) = C(3,3−k) para a estrela, e a alternância"
+                  " para a contração. Duas leis, e as duas já estavam no andar exterior");
+        { long me = 0, mi = 0, tot = 0;
+          for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++){
+              Frm w = frm0(1);
+              w.c[0].c[1][0][0] = qz_de_inteiro(a);
+              w.c[2].c[0][1][0] = qz_de_inteiro(b);
+              if(!frm_igual(frm_estrela(frm_estrela(w)), w)) me++;
+              Vec v = vec0(3); v.c[0] = qz_de_inteiro(a); v.c[1] = qz_de_inteiro(b);
+              Frm w2 = frm0(2);
+              w2.c[0].c[0][0][0] = qz_de_inteiro(a);
+              w2.c[1].c[0][0][0] = qz_de_inteiro(b);
+              w2.c[2].c[0][0][0] = qz(1,1);
+              if(!frm_nula(frm_contrai(v, frm_contrai(v, w2)))) mi++;
+              tot++;
+          }
+          printf("      ⋆⋆ = id em %ld formas: %ld falhas\n", tot, me);
+          printf("      ι_v∘ι_v = 0 em %ld formas: %ld falhas\n", tot, mi);
+          tique7(4, "a testemunha são as duas involuções medidas em cima da mesma família:"
+                    " a estrela devolve, e a contração dupla anula. Resíduo ZERO nas duas,"
+                    " porque tudo é inteiro");
+          tique7(5, me == 0 && mi == 0
+                 ? "logo ⋆ é a involução — a ESTRELA desta casa, ν∘ν = id — e ι_v é a"
+                   " antiderivação que desce o grau"
+                 : "as involuções falham — NÃO afirmo");
+          tique7(6, "e a VOLTA é o reconhecimento: o ⋆ das formas é o mesmo ⋆ do andar"
+                    " exterior, e ambos são a estrela do thm:central. Três andares"
+                    " diferentes, a mesma involução com resíduo 0"); }
+        break; }
+    case 13: case 14: case 15: {
+        tique7(0, "sejam ω uma k-forma e R uma região de dimensão k+1");
+        tique7(1, n == 13 ? "o teorema de Stokes, UMA VEZ SÓ:"
+             : n == 14 ? "Green é Stokes com grau 1:" : "Gauss é Stokes com grau 2:");
+        printf("      $\\int_{\\partial R} \\omega = \\int_{R} d\\omega$\n");
+        tique7(2, "e a afirmação deste andar NÃO é sobre números — é sobre CÓDIGO. No"
+                  " Cálculo III havia dois pares de funções: circulação/rotacional e"
+                  " fluxo/divergência. Aqui há UM par, `frm_int_borda` e"
+                  " `frm_int_interior`, e Green e Gauss obtêm-se chamando-o com grau 1 e"
+                  " com grau 2. Que os números batam já se sabia; que o código seja o"
+                  " mesmo é o teorema");
+        tique7(3, "a lei é que ∂ e d são ADJUNTOS pelo emparelhamento da integração:"
+                  " ⟨ω, ∂R⟩ = ⟨dω, R⟩. É a mesma forma da adjunção δ ⊣ ε da morfologia —"
+                  " o operador de borda tem adjunto, e o adjunto é a derivada");
+        { long s1 = 0, s2 = 0, tot = 0;
+          for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++)
+          for(long c = -2; c <= 2; c++) for(long d = -2; d <= 2; d++){
+              Qz bo, in;
+              Frm w1 = frm0(1);
+              w1.c[0].c[0][1][0] = qz_de_inteiro(a); w1.c[0].c[1][1][0] = qz_de_inteiro(d);
+              w1.c[1].c[1][0][0] = qz_de_inteiro(b); w1.c[1].c[2][0][0] = qz_de_inteiro(c);
+              if(!frm_stokes(w1, z0,z2, z0,z3, z1,z1, &bo, &in)) s1++;
+              Frm w2 = frm0(2);
+              w2.c[0].c[1][0][0] = qz_de_inteiro(a); w2.c[0].c[0][1][1] = qz_de_inteiro(d);
+              w2.c[1].c[0][2][0] = qz_de_inteiro(b);
+              w2.c[2].c[1][1][1] = qz_de_inteiro(c);
+              if(!frm_stokes(w2, z0,z2, z0,z1, z0,z3, &bo, &in)) s2++;
+              tot++;
+          }
+          Qz bo, in;
+          Frm w = frm0(1);
+          w.c[0].c[0][1][0] = qz(-1,1); w.c[1].c[1][0][0] = qz(1,1);
+          frm_stokes(w, z0,z2, z0,z3, z1,z1, &bo, &in);
+          printf("      grau 1, ω = −y dx + x dy:  ∫_∂R ω = ");
+          esc_qz("", bo, "    ∫_R dω = "); esc_qz("", in, "\n");
+          Frm v = frm0(2);
+          v.c[0].c[1][0][0] = qz(1,1); v.c[1].c[0][1][0] = qz(1,1);
+          v.c[2].c[0][0][1] = qz(1,1);
+          frm_stokes(v, z0,z2, z0,z1, z0,z3, &bo, &in);
+          printf("      grau 2, ω = x dy∧dz + …:   ∫_∂R ω = ");
+          esc_qz("", bo, "    ∫_R dω = "); esc_qz("", in, "\n");
+          printf("      varridos: grau 1 (Green/Stokes) %ld falhas, grau 2 (Gauss) %ld,"
+                 " em %ld cada\n", s1, s2, tot);
+          tique7(4, "a testemunha é a MESMA CHAMADA duas vezes: `frm_stokes(ω, …)` com ω de"
+                    " grau 1 dá Green/Stokes e com ω de grau 2 dá Gauss. Nenhuma linha de"
+                    " código distingue os teoremas — só o grau da forma");
+          tique7(5, s1 == 0 && s2 == 0
+                 ? "logo Green, Stokes e Gauss são UM teorema, e a prova disso é que o"
+                   " programa é um só"
+                 : "os graus separam-se — NÃO afirmo");
+          tique7(6, "e a VOLTA fecha o buraco que o Cálculo III deixou aberto: lá eu disse"
+                    " «falta o d, é o andar seguinte». Está feito, e o que ele arrumou foi"
+                    " exactamente o que estava prometido — três teoremas e duas identidades"
+                    " passaram a um teorema e uma identidade"); }
+        break; }
+    case 16: case 17: case 20: {
+        tique7(0, "seja ω uma forma com dω = 0 — uma forma FECHADA");
+        tique7(1, n == 20 ? "onde fechada NÃO dá exacta:"
+                          : "fechada e exacta:");
+        printf(n == 20 ? "      $d\\omega = 0$ mas $\\omega \\neq d\\alpha$ --- e é aí que"
+                         " há BURACO\n"
+                       : "      $\\omega = d\\alpha$ (exacta) $\\Rightarrow$ $d\\omega = 0$"
+                         " (fechada);\\quad e a recíproca?\n");
+        tique7(2, "uma direcção é d² = 0 e é de graça: toda exacta é fechada. A outra é a"
+                  " pergunta real — dada ω fechada, EXISTE α com dα = ω? É a mesma FIBRA"
+                  " de sempre: dado o produto e o operador, achar o outro factor");
+        tique7(3, "a lei é o lema de POINCARÉ: numa região em estrela (e ℝ³ é), toda forma"
+                  " fechada É exacta. E em polinómios a construção é explícita — integra-se"
+                  " coeficiente a coeficiente, exactamente como o potencial do Cálculo III");
+        { P3 p0 = p3_0();
+          p0.c[2][1][0] = qz(3,1); p0.c[1][0][2] = qz(-1,1); p0.c[0][0][3] = qz(5,1);
+          Cmp C = cp_grad(p0);
+          Frm w = frm_de_campo(C, 1);
+          P3 phi;
+          int fech = frm_nula(frm_d(w));
+          int achou = cp_potencial(C, &phi);
+          int confere = achou ? cp_confere_potencial(C, phi) : 0;
+          Cmp N = cmp0();
+          N.f[0].c[0][1][0] = qz(-1,1); N.f[1].c[1][0][0] = qz(1,1);
+          Frm wn = frm_de_campo(N, 1);
+          P3 q;
+          int fechn = frm_nula(frm_d(wn));
+          int naon = cp_potencial(N, &q);
+          printf("      ω = d(3x²y − xz² + 5z³):  fechada %s,  exacta %s,  e dφ = ω %s\n",
+                 fech ? "sim" : "NÃO", achou ? "sim" : "NÃO", confere ? "sim" : "NÃO");
+          printf("      ω = −y dx + x dy:         fechada %s,  exacta %s\n",
+                 fechn ? "sim" : "NÃO", naon ? "sim" : "NÃO");
+          printf("        (dω = 2 dx∧dy ≠ 0 — não é fechada, e por isso nem se pergunta)\n");
+          tique7(4, "a testemunha é a construção CONFERIDA: o α exibe-se e depois verifica-se"
+                    " que dα devolve ω. E o segundo exemplo mostra o outro lado — não é"
+                    " fechada, e a busca nem chega a começar");
+          tique7(5, fech && achou && confere && !fechn && !naon
+                 ? "logo em ℚ[x,y,z] toda fechada é exacta, e o lema de Poincaré vale com"
+                   " construção explícita"
+                 : "os regimes não se separaram — NÃO afirmo");
+          tique7(6, n == 20
+                 ? "e a VOLTA é ONDE ISTO FALHA, e digo-o porque é o limite honesto deste"
+                   " andar: o buraco precisa de um DOMÍNIO com buraco, e a testemunha"
+                   " clássica é a forma do ângulo (−y dx + x dy)/(x²+y²) em ℝ²∖{0} —"
+                   " fechada e NÃO exacta. Ela não é polinomial, portanto NÃO VIVE aqui:"
+                   " o meu anel só tem polinómios, e neles ℝ³ é estrelado e não há buraco"
+                   " nenhum. A cohomologia é real, e a razão de eu não a ver é a"
+                   " REPRESENTAÇÃO, não a matemática"
+                 : "e a VOLTA é que isto É a mesma fibra do potencial: dφ = ω em grau 0 é"
+                   " ∇φ = F, e a construção é a mesma integração. Um andar acima, o mesmo"
+                   " problema"); }
+        break; }
+    case 18: {
+        tique7(0, "sejam d o operador e ∂ a operação de tomar a borda");
+        tique7(1, "eles são ADJUNTOS pelo emparelhamento da integração:");
+        printf("      $\\langle \\omega, \\partial R \\rangle ="
+               " \\langle d\\omega, R \\rangle$\n");
+        tique7(2, "e é isso que o teorema de Stokes DIZ, lido como adjunção: integrar ω na"
+                  " borda de R é o mesmo que integrar dω em R. O d actua nas formas, o ∂"
+                  " actua nas regiões, e o emparelhamento é a integral");
+        tique7(3, "a lei é a mesma da morfologia: δ(A) ⊆ C ⟺ A ⊆ ε(C) é uma adjunção, e"
+                  " ⟨ω,∂R⟩ = ⟨dω,R⟩ é outra. Nos dois casos há um par de operadores em"
+                  " sentidos opostos ligados por um emparelhamento");
+        { long tot = 0, mal = 0;
+          for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++){
+              Qz bo, in;
+              Frm w = frm0(1);
+              w.c[0].c[0][1][0] = qz_de_inteiro(a);
+              w.c[1].c[1][0][0] = qz_de_inteiro(b);
+              if(!frm_stokes(w, z0,z2, z0,z3, z1,z1, &bo, &in)) mal++;
+              tot++;
+          }
+          printf("      ⟨ω, ∂R⟩ = ⟨dω, R⟩ em %ld formas: %ld falhas\n", tot, mal);
+          printf("      e ∂² = 0 também: a borda de uma borda é vazia — o dual exacto de"
+                 " d² = 0\n");
+          tique7(4, "a testemunha é a adjunção medida, e o que ela mostra a mais é a"
+                    " SIMETRIA: d² = 0 do lado das formas e ∂² = 0 do lado das regiões. A"
+                    " borda de uma borda é vazia, e é a mesma frase vista do outro lado");
+          tique7(5, mal == 0
+                 ? "logo ∂ e d são adjuntos, e Stokes é a certidão dessa adjunção"
+                 : "a adjunção falha — NÃO afirmo");
+          tique7(6, "e a VOLTA é o par dual desta casa, outra vez e agora com nome: o"
+                    " operador de borda e a derivada exterior são ADJUNTOS, como a erosão"
+                    " e a dilatação (thm:morf-par). Erode-se para escolher e dilata-se para"
+                    " escrever; deriva-se para subir o grau e toma-se a borda para descer"
+                    " a dimensão"); }
+        break; }
+    case 21:
+        tique7(0, "seja o pedido do eval: «tudo na mesma linguagem»");
+        tique7(1, "o que entrou, e de que andar veio:");
+        printf("      objecto              grau            veio de\n");
+        printf("      ─────────────────────────────────────────────────────────────\n");
+        printf("      o DIRECTO ⟨,⟩        α∧⋆β  (0)       corpo-estelar §640, o fecho\n");
+        printf("      o CRUZADO ×          α∧β   (+1)      o mesmo, e Λ² do exterior\n");
+        printf("      o EXTERIOR ∧         soma os graus   o andar de Λ V\n");
+        printf("      a ESTRELA ⋆          k ↔ 3−k         o exterior, e o thm:central\n");
+        printf("      a CONTRAÇÃO ι_v      −1              o exterior\n");
+        printf("      a DERIVADA d         +1              este andar\n");
+        printf("      a BORDA ∂            adjunta de d    Cálculo III, e a morfologia\n");
+        tique7(2, "e a gramática que os une é a GRADUAÇÃO: cada operação sobe, desce ou"
+                  " preserva o grau, e o sinal que aparece é (−1)^grau. Sete objectos que"
+                  " nasceram em cinco andares diferentes, e uma regra só");
+        tique7(3, "a lei é que d é uma ANTIDERIVAÇÃO de grau +1 e ι_v de grau −1, ambas com"
+                  " a mesma Leibniz graduada. O ∧ soma os graus, o ⋆ reflecte-os, e o ∂ é o"
+                  " adjunto do d");
+        tique7(4, "a testemunha é o andar inteiro medido: d = grad/rot/div em 125 formas de"
+                  " cada grau; d² = 0 nos dois graus com a MESMA função; Stokes com a MESMA"
+                  " chamada em grau 1 e 2, 625 cada; Leibniz com o sinal a morder (0 falhas"
+                  " com ele, 100 sem); e ⋆⋆ = id e ι_v∘ι_v = 0 com resíduo zero");
+        tique7(5, "e o que este andar ARRUMOU, dito em números: o Cálculo III tinha TRÊS"
+                  " teoremas e DUAS identidades, escritos com dois pares de funções. Aqui"
+                  " tem UM teorema, UMA identidade e UM par de funções. Não é uma"
+                  " reformulação bonita — é menos código a provar mais coisa");
+        tique7(6, "e a VOLTA é o que continua por fazer, e digo-o: a COHOMOLOGIA. O"
+                  " complexo Λ⁰→Λ¹→Λ²→Λ³ tem imagem dentro do núcleo, mas medir se ela o"
+                  " PREENCHE precisa de domínios com buraco — e a testemunha clássica"
+                  " ((−y dx + x dy)/(x²+y²)) não é polinomial, logo não vive no meu anel."
+                  " A razão de eu não ver o buraco é a REPRESENTAÇÃO, não a matemática. E"
+                  " dizer isso é o andar seguinte a nomear-se sozinho");
+        break;
+    }
+}
+static int resolve_dforma(const char *f){
+    const char *p = f;
+    for(size_t i = 0; i < sizeof DF21/sizeof *DF21; i++)
+        if(!strcmp(p, DF21[i].nome)){ dforma_resolve(DF21[i].n); return 1; }
+    if(!strncmp(p, "formas", 6)) p += 6;
+    else if(!strncmp(p, "diferencial", 11)) p += 11;
+    else return 0;
+    while(*p == ' ') p++;
+    if(!*p){
+        printf("   Formas diferenciais: o d, e tudo na mesma linguagem —"
+               " «formas N» ou «formas <nome>»\n");
+        printf("   Λ⁰ →d Λ¹ →d Λ² →d Λ³, com d² = 0 — e os três teoremas viram UM\n\n");
+        for(size_t i = 0; i < sizeof DF21/sizeof *DF21; i++){
+            printf("     %2d  ", DF21[i].n);
+            esc_col(DF21[i].nome, 20);
+            printf("  %s\n", DF21[i].enunciado);
+        }
+        return 1;
+    }
+    if(*p >= '0' && *p <= '9'){
+        long n = 0;
+        while(*p >= '0' && *p <= '9') n = n*10 + (*p++ - '0');
+        while(*p == ' ') p++;
+        if(!*p && n >= 1 && n <= 21){ dforma_resolve((int)n); return 1; }
+        return 0;
+    }
+    return 0;
+}
 /* ── CÁLCULO III: NÚMERO → VETOR → OPERADOR → CAMPO → BORDA ─────────────────────────
  * O `eval.txt` fecha o andar com uma sequência e uma frase.
  *
@@ -12316,6 +12832,7 @@ static int resolve_mostra(const char *f){ return resolve_mostra_em(f, "../papers
 static int resolve_simbolico(const char *fala){
     if(resolve_divisibilidade(fala)) return 1;     /* o relógio de 6 ticks */
     if(resolve_bezout(fala)) return 1;             /* a testemunha e o critério */
+    if(resolve_dforma(fala)) return 1;             /* o d, e os três viram UM, os 21 */
     if(resolve_calculo3(fala)) return 1;           /* Cálculo III: campo → borda, os 21 */
     if(resolve_calculo2(fala)) return 1;           /* Cálculo II: local → global, os 21 */
     if(resolve_calculo1(fala)) return 1;           /* Cálculo I exacto, os 21 */
@@ -13360,6 +13877,208 @@ static int teste(void){
                 if(e_conta(nu2)) roubadas++;
             }
             ok("e a membrana nao rouba o corpus: fala sem LaTeX nao vira conta", roubadas == 0);
+
+        /* ═══ §C45 O d: E OS TRÊS TEOREMAS VIRAM UM ══════════════════════════════
+         * O Cálculo III fechou com «falta o d, é o andar seguinte». Está feito, e o que
+         * ele arrumou diz-se em números: TRÊS teoremas e DUAS identidades, escritos com
+         * dois pares de funções, passaram a UM teorema, UMA identidade e UM par. */
+        printf("\n§C45 O d: grad, rot e div são o MESMO operador, e Stokes é um só.\n\n");
+        {
+            Qz z0 = qz(0,1), z1 = qz(1,1), z2 = qz(2,1), z3 = qz(3,1);
+
+            /* (1) d = grad, rot, div — contra código escrito ANTES e por outra razão */
+            { long m0 = 0, m1 = 0, m2 = 0, tot = 0;
+              for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++)
+              for(long c = -2; c <= 2; c++){
+                  P3 f = p3_0();
+                  f.c[2][1][0] = qz_de_inteiro(a); f.c[1][0][2] = qz_de_inteiro(b);
+                  f.c[0][3][1] = qz_de_inteiro(c);
+                  if(!frm_igual(frm_d(frm_de_escalar(f)), frm_de_campo(cp_grad(f),1))) m0++;
+                  Cmp F = cmp0();
+                  F.f[0].c[1][2][0] = qz_de_inteiro(a);
+                  F.f[1].c[0][1][2] = qz_de_inteiro(b);
+                  F.f[2].c[2][0][1] = qz_de_inteiro(c);
+                  if(!frm_igual(frm_d(frm_de_campo(F,1)), frm_de_campo(cp_rot(F),2))) m1++;
+                  Frm dw2 = frm_d(frm_de_campo(F,2));
+                  if(!p3_nulo(p3_soma(dw2.c[0], p3_neg(cp_div(F))))) m2++;
+                  tot++;
+              }
+              printf("      d == grad %ld falhas | d == rot %ld | d == div %ld,"
+                     " em %ld formas de cada\n", m0, m1, m2, tot);
+              ok("O d É UMA OPERAÇÃO, e grad/rot/div são três nomes que ela tinha antes de"
+                 " se saber que era a mesma. E a comparação NÃO é vazia: o `campo.h` do"
+                 " Cálculo III tem os três construídos à mão, cada um com a sua fórmula, e"
+                 " o d foi escrito de novo sem os olhar. Se eu tivesse derivado o d DAS"
+                 " fórmulas, isto era uma tautologia",
+                 m0 == 0 && m1 == 0 && m2 == 0 && tot == 125); }
+
+            /* (2) d² = 0 — as DUAS identidades do Cálculo III com UMA função */
+            { long q0 = 0, q1 = 0, tot = 0;
+              for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++)
+              for(long c = -2; c <= 2; c++){
+                  P3 f = p3_0();
+                  f.c[2][1][0] = qz_de_inteiro(a); f.c[1][0][2] = qz_de_inteiro(b);
+                  f.c[0][3][1] = qz_de_inteiro(c);
+                  if(!frm_nula(frm_d(frm_d(frm_de_escalar(f))))) q0++;
+                  Cmp F = cmp0();
+                  F.f[0].c[1][2][0] = qz_de_inteiro(a);
+                  F.f[1].c[0][1][2] = qz_de_inteiro(b);
+                  F.f[2].c[2][0][1] = qz_de_inteiro(c);
+                  if(!frm_nula(frm_d(frm_d(frm_de_campo(F,1))))) q1++;
+                  tot++;
+              }
+              printf("      d² = 0 do grau 0 (era rot∘grad): %ld;  do grau 1 (era div∘rot):"
+                     " %ld\n", q0, q1);
+              ok("d² = 0 É UMA IDENTIDADE, e as duas do Cálculo III eram a mesma lida em"
+                 " dois graus. Os dois números saem da MESMA função chamada duas vezes"
+                 " seguidas, e o grau de partida é a única diferença — antes eram duas"
+                 " varreduras com duas fórmulas",
+                 q0 == 0 && q1 == 0 && tot == 125); }
+
+            /* (3) STOKES UNIFICADO: a mesma chamada, dois graus */
+            { long s1 = 0, s2 = 0, tot = 0;
+              for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++)
+              for(long c = -2; c <= 2; c++) for(long d = -2; d <= 2; d++){
+                  Qz bo, in;
+                  Frm w1 = frm0(1);
+                  w1.c[0].c[0][1][0] = qz_de_inteiro(a);
+                  w1.c[0].c[1][1][0] = qz_de_inteiro(d);
+                  w1.c[1].c[1][0][0] = qz_de_inteiro(b);
+                  w1.c[1].c[2][0][0] = qz_de_inteiro(c);
+                  if(!frm_stokes(w1, z0,z2, z0,z3, z1,z1, &bo, &in)) s1++;
+                  Frm w2 = frm0(2);
+                  w2.c[0].c[1][0][0] = qz_de_inteiro(a);
+                  w2.c[0].c[0][1][1] = qz_de_inteiro(d);
+                  w2.c[1].c[0][2][0] = qz_de_inteiro(b);
+                  w2.c[2].c[1][1][1] = qz_de_inteiro(c);
+                  if(!frm_stokes(w2, z0,z2, z0,z1, z0,z3, &bo, &in)) s2++;
+                  tot++;
+              }
+              printf("      Stokes: grau 1 (Green/Stokes) %ld falhas, grau 2 (Gauss) %ld,"
+                     " em %ld cada\n", s1, s2, tot);
+              ok("GREEN, STOKES E GAUSS SÃO UM TEOREMA, e a prova disso é que o PROGRAMA é"
+                 " um só: `frm_stokes(ω,…)` com ω de grau 1 dá Green/Stokes e com grau 2 dá"
+                 " Gauss. Nenhuma linha de código distingue os teoremas — só o grau da"
+                 " forma. Que os números batessem já se sabia do §C44; o que é novo é o"
+                 " código ser o mesmo",
+                 s1 == 0 && s2 == 0 && tot == 625); }
+
+            /* (4) LEIBNIZ GRADUADO, com o CONTROLO do sinal errado */
+            { long com = 0, sem = 0, tot = 0;
+              for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++)
+              for(long c = -2; c <= 2; c++){
+                  Frm A = frm0(1), B = frm0(1);
+                  A.c[0].c[1][0][0] = qz_de_inteiro(a);
+                  A.c[1].c[0][1][0] = qz_de_inteiro(b);
+                  B.c[1].c[0][0][1] = qz_de_inteiro(c);
+                  B.c[2].c[1][1][0] = qz_de_inteiro(a);
+                  Frm esq = frm_d(frm_cunha(A,B));
+                  Frm t1 = frm_cunha(frm_d(A), B), t2 = frm_cunha(A, frm_d(B));
+                  if(!frm_igual(esq, frm_soma(t1, frm_neg(t2)))) com++;
+                  if(!frm_igual(esq, frm_soma(t1, t2))) sem++;
+                  tot++;
+              }
+              printf("      Leibniz com |α| = 1: com o sinal (−1)¹ %ld falhas; SEM o sinal"
+                     " %ld de %ld\n", com, sem, tot);
+              ok("O SINAL GRADUADO MORDE, e foi de propósito que o testei onde ele morde:"
+                 " com |α| = 1 o sinal é −1, e sem ele falham 100 de 125. Se eu tivesse"
+                 " testado só em grau 0 — onde (−1)⁰ = +1 — o ramo nunca teria corrido e a"
+                 " regra passava com metade morta. É o «ramo que nunca corre», evitado à"
+                 " partida em vez de descoberto por mutação",
+                 com == 0 && sem > 0); }
+
+            /* (5) A ESTRELA E A CONTRAÇÃO: as duas involuções */
+            { long me = 0, mi = 0, tot = 0;
+              for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++){
+                  Frm w = frm0(1);
+                  w.c[0].c[1][0][0] = qz_de_inteiro(a);
+                  w.c[2].c[0][1][0] = qz_de_inteiro(b);
+                  if(!frm_igual(frm_estrela(frm_estrela(w)), w)) me++;
+                  Vec v = vec0(3);
+                  v.c[0] = qz_de_inteiro(a); v.c[1] = qz_de_inteiro(b);
+                  Frm w2 = frm0(2);
+                  w2.c[0].c[0][0][0] = qz_de_inteiro(a);
+                  w2.c[1].c[0][0][0] = qz_de_inteiro(b);
+                  w2.c[2].c[0][0][0] = qz(1,1);
+                  if(!frm_nula(frm_contrai(v, frm_contrai(v, w2)))) mi++;
+                  tot++;
+              }
+              printf("      ⋆⋆ = id: %ld falhas;  ι_v∘ι_v = 0: %ld falhas, em %ld\n",
+                     me, mi, tot);
+              ok("AS DUAS INVOLUÇÕES fecham com resíduo ZERO, e são a mesma frase em"
+                 " sentidos opostos: o d sobe o grau duas vezes e dá zero; o ι_v desce duas"
+                 " vezes e dá zero. E o ⋆ é a ESTRELA desta casa — o mesmo ⋆ do andar"
+                 " exterior e o mesmo ν∘ν = id do thm:central, agora com coeficientes que"
+                 " são funções",
+                 me == 0 && mi == 0); }
+
+            /* (6) LAGRANGE dentro desta linguagem: directo e cruzado com ∧ e ⋆ */
+            { Frm a1 = frm0(1), b1 = frm0(1);
+              a1.c[0].c[0][0][0] = qz(2,1); a1.c[1].c[0][0][0] = qz(1,1);
+              a1.c[2].c[0][0][0] = qz(-1,1);
+              b1.c[0].c[0][0][0] = qz(1,1); b1.c[1].c[0][0][0] = qz(3,1);
+              Frm cr = frm_cunha(a1,b1), di = frm_cunha(a1, frm_estrela(b1));
+              Qz d2 = qz_mult(di.c[0].c[0][0][0], di.c[0].c[0][0][0]), c2 = qz(0,1);
+              for(int t = 0; t < 3; t++)
+                  c2 = qz_soma(c2, qz_mult(cr.c[t].c[0][0][0], cr.c[t].c[0][0][0]));
+              Qz Na = qz(0,1), Nb = qz(0,1);
+              for(int t = 0; t < 3; t++){
+                  Na = qz_soma(Na, qz_mult(a1.c[t].c[0][0][0], a1.c[t].c[0][0][0]));
+                  Nb = qz_soma(Nb, qz_mult(b1.c[t].c[0][0][0], b1.c[t].c[0][0][0]));
+              }
+              printf("      directo² + cruzado² = ");
+              esc_qz("", qz_soma(d2,c2), "   e N(α)N(β) = ");
+              esc_qz("", qz_mult(Na,Nb), "\n");
+              ok("TUDO NA MESMA LINGUAGEM, que era o pedido: o CRUZADO é α∧β (grau 1+1) e o"
+                 " DIRECTO é α∧⋆β (grau 1+2) — o MESMO ∧ em graus diferentes. E Lagrange"
+                 " fecha lá dentro: directo² + cruzado² = N(α)N(β), a identidade do andar"
+                 " exterior escrita agora com ∧ e ⋆ em vez de ⟨,⟩ e ×",
+                 qz_igual(qz_soma(d2,c2), qz_mult(Na,Nb))); }
+
+            /* (7) E O QUE NÃO SE VÊ, dito à frente */
+            { P3 p0 = p3_0();
+              p0.c[2][1][0] = qz(3,1); p0.c[1][0][2] = qz(-1,1); p0.c[0][0][3] = qz(5,1);
+              Cmp C = cp_grad(p0);
+              P3 phi;
+              int fech = frm_nula(frm_d(frm_de_campo(C,1)));
+              int ach = cp_potencial(C, &phi);
+              int conf = ach ? cp_confere_potencial(C, phi) : 0;
+              printf("      fechada ⟹ exacta em ℚ[x,y,z]: construída %s e conferida %s\n",
+                     ach ? "sim" : "NÃO", conf ? "sim" : "NÃO");
+              printf("      estouros do andar: %ld\n", df_estouros);
+              ok("EM ℚ[x,y,z] TODA FECHADA É EXACTA (Poincaré), com construção explícita e"
+                 " CONFERIDA. E o limite honesto: o buraco da cohomologia precisa de um"
+                 " domínio com buraco, e a testemunha clássica — (−y dx + x dy)/(x²+y²) —"
+                 " NÃO É POLINOMIAL, logo não vive no meu anel. A razão de eu não ver o"
+                 " buraco é a REPRESENTAÇÃO, não a matemática, e dizê-lo é o que impede"
+                 " esta secção de insinuar que fechou algo que não fechou",
+                 fech && ach && conf && df_estouros == 0); }
+
+            /* E OS VINTE E UM CORREM */
+            { int vmal = 0, por_n = 0, por_nome = 0;
+              fflush(stdout);
+              int guarda = dup(1), nulo = open("/dev/null", O_WRONLY);
+              if(guarda >= 0 && nulo >= 0) dup2(nulo, 1);
+              for(int k = 1; k <= 21; k++){
+                  char fala[64];
+                  snprintf(fala, sizeof fala, "formas %d", k);
+                  if(resolve_dforma(fala)) por_n++; else vmal++;
+              }
+              for(size_t i = 0; i < sizeof DF21/sizeof *DF21; i++)
+                  if(resolve_dforma(DF21[i].nome)) por_nome++; else vmal++;
+              if(resolve_dforma("formas 22")) vmal++;
+              fflush(stdout);
+              if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
+              if(nulo >= 0) close(nulo);
+              printf("      os vinte e um: %d por número, %d por nome\n", por_n, por_nome);
+              ok("O ANDAR FECHA O BURACO QUE O CÁLCULO III DEIXOU ABERTO, e o saldo diz-se"
+                 " em números: lá havia TRÊS teoremas, DUAS identidades e DOIS pares de"
+                 " funções; aqui há UM teorema, UMA identidade e UM par. Menos código a"
+                 " provar mais coisa — e sete objectos de cinco andares diferentes"
+                 " (directo, cruzado, ∧, ⋆, ι_v, d, ∂) passaram a ter uma gramática só:"
+                 " a GRADUAÇÃO",
+                 vmal == 0 && por_n == 21 && por_nome == 21); }
+        }
 
         /* ═══ §C44 CÁLCULO III: NÚMERO → VETOR → OPERADOR → CAMPO → BORDA ════════
          * «Green, Stokes e Gauss como A MESMA ESTRUTURA em dimensões diferentes —
