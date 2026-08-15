@@ -42,6 +42,7 @@
 #include "racionais.h"  /* Q: a reversibilidade da multiplicacao nao nula */
 #include "reais.h"      /* R: o real e o CORTE, e nunca um decimal */
 #include "cauchy.h"     /* R outra vez, pelo caminho: R = Cauchy(Q)/~ */
+#include "identifica.h" /* o mesmo ponto por quatro portas, e a volta */
 #include "eletrico.h"
 
 typedef struct { long a, b; } Slot;
@@ -1340,6 +1341,125 @@ static int resolve_bezout(const char *f){
     printf("      x = %ld,  y = %ld   →   %ld·(%ld) + %ld·(%ld) = %ld   %s\n",
            xs, ys, a, xs, b, ys, a*xs + b*ys,
            a*xs + b*ys == c ? "(resíduo 0)" : "— NÃO afirmo");
+    return 1;
+}
+/* ── O MESMO PONTO POR QUATRO PORTAS ────────────────────────────────────────────────
+ * O salto que o `eval.txt` pede no fim: «mostrar que esse fechamento NÃO DEPENDE DO
+ * MÉTODO ESCOLHIDO: corte, Cauchy, bisseção e FC têm de produzir O MESMO PONTO, com a
+ * VOLTA verificando a identificação». E a proibição do atalho, dita antes: identificar
+ * «SEM SIMPLESMENTE DECLARAR QUE SÃO IGUAIS».
+ *
+ * Então não se declara. O real É o corte, logo dois métodos dão o mesmo ponto exatamente
+ * quando INDUZEM O MESMO CORTE — e é isso que a fala corre, à frente de quem pergunta. */
+static void esc_qz(const char *pre, Qz x, const char *pos);
+/* A COLUNA MEDE-SE EM CARACTERES, NÃO EM BYTES. O `%-9s` do printf conta bytes, e
+ * «bisseção» ou «Möbius» têm acentos: a coluna sai torta e a coluna torta é o que ele lê.
+ * Conta-se as cabeças de UTF-8 (os bytes que não são 10xxxxxx) e enche-se à mão. */
+static int larg_utf8(const char *s){
+    int n = 0;
+    for(const unsigned char *q = (const unsigned char *)s; *q; q++)
+        if((*q & 0xC0) != 0x80) n++;          /* só as cabeças; 10xxxxxx é continuação */
+    return n;
+}
+static void esc_col(const char *s, int largura){
+    printf("%s", s);
+    for(int k = larg_utf8(s); k < largura; k++) putchar(' ');
+}
+static int resolve_identifica(const char *f){
+    const char *p = f;
+    int quer = 0;
+    if(!strncmp(p, "o mesmo ponto", 13)) quer = 1;
+    else if(!strncmp(p, "identifica raiz", 15)) quer = 1;
+    else if(!strncmp(p, "os quatro metodos", 17) || !strncmp(p, "os quatro métodos", 18)) quer = 1;
+    else if(!strncmp(p, "as quatro portas", 16)) quer = 1;
+    if(!quer) return 0;
+    long a = 2;
+    { const char *q = p;
+      while(*q && (*q < '0' || *q > '9')) q++;
+      if(*q >= '0' && *q <= '9'){ long v = 0;
+          while(*q >= '0' && *q <= '9') v = v*10 + (*q++ - '0');
+          if(v >= 2) a = v; } }
+    long r = raizi(a);
+    TICK_N = 0;
+    printf("   √%ld por QUATRO portas — e o fecho não pode depender de qual se abre\n", a);
+    if(r*r == a){
+        tique("SEM BURACO — %ld é quadrado perfeito e o ponto já estava em ℚ: as quatro"
+              " portas dão o mesmo porque não há nada a fechar");
+        printf("      √%ld = %ld, e é aqui que a pergunta não tem conteúdo\n", a, r);
+        return 1;
+    }
+    tique("O CRITÉRIO — e é o que impede o atalho: NÃO se declara que são iguais. O real"
+          " É o corte, portanto dois métodos dão o mesmo ponto exatamente quando INDUZEM"
+          " O MESMO CORTE — para cada racional, o mesmo lado. É uma medida, não um acordo");
+    tique("AS QUATRO PORTAS, e cada uma traz o seu rastro — que é o que as torna quatro"
+          " e não uma:");
+    for(int i = 0; i < 4; i++){
+        printf("        "); esc_col(id_nome(i), 10);
+        printf("→  %s\n", id_rastro(i));
+    }
+    tique("A VARREDURA — cada racional passa pelas quatro, e comparam-se os SEIS pares."
+          " Não há árbitro: eleger um e chamar-lhe acordo seria a mesma declaração com"
+          " outro nome");
+    { long choques = 0, decididos = 0, ind = 0, n = 0;
+      for(long d = 1; d <= 30; d++) for(long pp = 1; pp <= (r+1)*d; pp++){
+          Quatro Q = id_quatro(a, qz(pp,d), 12);
+          choques += id_choques(Q); ind += id_indecisos(Q);
+          decididos += 4 - id_indecisos(Q); n++;
+      }
+      printf("      %ld racionais, %ld decisões, %ld choques em %ld comparações\n",
+             n, decididos, choques, n*6); }
+    tique("A INDECISÃO DIZ-SE — um método de esforço finito não decide os racionais que"
+          " ainda caem dentro da sua caixa, e isso é 0, não é um lado. Contá-lo como"
+          " acordo dava o teorema de graça: bastava não medir nada");
+    { long ind0 = 0, ind5 = 0;
+      for(long d = 1; d <= 30; d++) for(long pp = 1; pp <= (r+1)*d; pp++){
+          ind0 += id_indecisos(id_quatro(a, qz(pp,d), 0));
+          ind5 += id_indecisos(id_quatro(a, qz(pp,d), 5));
+      }
+      printf("      indecisos com esforço 0: %ld;  com esforço 5: %ld — e o esforço é que"
+             " os mata\n", ind0, ind5); }
+    tique("A VOLTA VERIFICA A IDENTIFICAÇÃO — de cada porta sai uma CAIXA racional, com"
+          " profundidades diferentes de propósito, e as quatro têm de se intersetar com o"
+          " corte lá dentro. Se fossem pontos diferentes, separavam-se ao apertar");
+    { Corte c = { a, 2 };
+      Qz lo[4], hi[4];
+      rz_caixa_inicial(c, &lo[0], &hi[0]); rz_encaixota(c, &lo[0], &hi[0], 15);
+      { long b = rz_b(a); Qz x = qz_de_inteiro(r), y = qz_de_inteiro(r+1);
+        for(int k = 0; k < 5; k++){ x = rz_passo(a,b,x); y = rz_passo(a,b,y); }
+        lo[1] = x; hi[1] = y; }
+      rz_caixa_inicial(c, &lo[2], &hi[2]); rz_encaixota(c, &lo[2], &hi[2], 11);
+      { long t[48]; size_t nt = lado(0, -a, t, 48);
+        long pn = 1, qn = 0, pa = 0, qa = 1; Qz par = qz_de_inteiro(r), imp = qz_de_inteiro(r+1);
+        for(int i = 0; i < 9 && nt; i++){
+            long ai = t[(size_t)i < nt ? (size_t)i : (1 + (i-1) % (int)(nt>1?nt-1:1))];
+            long p2 = ai*pn + pa, q2 = ai*qn + qa;
+            if(q2 > (1L<<26)) break;
+            pa = pn; qa = qn; pn = p2; qn = q2;
+            if(i % 2 == 0) par = qz(pn,qn); else imp = qz(pn,qn);
+        }
+        lo[3] = par; hi[3] = imp; }
+      Qz mlo = lo[0], mhi = hi[0];
+      for(int i = 0; i < 4; i++){
+          printf("        "); esc_col(id_nome(i), 10);
+          esc_qz("", lo[i], "  …  ");
+          esc_qz("", hi[i], "\n");
+          if(qz_menor(mlo, lo[i])) mlo = lo[i];
+          if(qz_menor(hi[i], mhi)) mhi = hi[i];
+      }
+      int b1, b2;
+      int fecha = qz_menor(mlo, mhi)
+               && rz_cmp(mlo, 2, a, &b1) < 0 && b1
+               && rz_cmp(mhi, 2, a, &b2) > 0 && b2;
+      printf("      interseção  ");
+      esc_qz("", mlo, "  …  ");
+      esc_qz("", mhi, "");
+      printf("   %s\n", fecha ? "— e o corte está lá dentro (resíduo 0)" : "— NÃO afirmo"); }
+    tique("E O QUE ISTO DIZ — o objeto não é só a folha: O CAMINHO FAZ PARTE DA"
+          " INFORMAÇÃO. Os quatro rastros DIFEREM termo a termo e dão o mesmo ponto; se"
+          " fossem o mesmo rastro não havia identificação nenhuma a fazer");
+    printf("\n      ℚ tem o rastro, mas não tem a folha.\n");
+    printf("      ℝ acrescenta a folha que fecha o rastro.\n");
+    printf("\n   $\\sqrt{%ld}$ — quatro portas, um ponto.\n", a);
     return 1;
 }
 /* ── AS VINTE PROVAS DO `eval.txt` ──────────────────────────────────────────────────
@@ -4000,6 +4120,7 @@ static int resolve_mostra(const char *f){ return resolve_mostra_em(f, "../papers
 static int resolve_simbolico(const char *fala){
     if(resolve_divisibilidade(fala)) return 1;     /* o relógio de 6 ticks */
     if(resolve_bezout(fala)) return 1;             /* a testemunha e o critério */
+    if(resolve_identifica(fala)) return 1;         /* o mesmo ponto, quatro portas */
     if(resolve_prova_real(fala)) return 1;         /* as vinte provas do eval.txt */
     if(resolve_reais(fala)) return 1;              /* ℝ: o corte, e nunca um decimal */
     if(resolve_racionais(fala)) return 1;          /* ℚ: a fibra, e a sua ausência */
@@ -5030,6 +5151,201 @@ static int teste(void){
                 if(e_conta(nu2)) roubadas++;
             }
             ok("e a membrana nao rouba o corpus: fala sem LaTeX nao vira conta", roubadas == 0);
+
+        /* ═══ §C31 O MESMO PONTO POR QUATRO PORTAS — E A VOLTA A IDENTIFICAR ══════
+         * É o que o `eval.txt` pede no fim, e é o salto que fecha o andar:
+         *
+         *   «mostrar que esse fechamento NÃO DEPENDE DO MÉTODO ESCOLHIDO: corte, Cauchy,
+         *    bisseção e FC têm de produzir O MESMO PONTO, com a VOLTA verificando a
+         *    identificação.»
+         *
+         * E antes, a regra que proíbe o atalho: a ponte «permite identificar os dois SEM
+         * SIMPLESMENTE DECLARAR QUE SÃO IGUAIS». Então não se declara.
+         *
+         * O real É o corte. Logo dois métodos dão o mesmo ponto exatamente quando
+         * INDUZEM O MESMO CORTE — para cada racional, o mesmo lado. Mede-se nos SEIS
+         * pares e não contra um árbitro, porque eleger um árbitro e chamar-lhe acordo
+         * seria a mesma declaração por outro nome.
+         *
+         * E A INDECISÃO DIZ-SE. Um método de esforço finito não decide os racionais que
+         * ainda caem dentro da sua caixa: isso é 0, não é um lado. Contar o indeciso como
+         * acordo daria o teorema de graça — é o gume desta secção. */
+        printf("\n§C31 O MESMO PONTO: quatro portas, seis pares, e a indecisão contada.\n\n");
+        {
+            /* AS QUATRO PORTAS CONCORDAM — em todos os racionais varridos, e em todos os
+             * pares. Zero choques, e o indeciso separado do acordo. */
+            { long choques = 0, decididos = 0, varridos = 0;
+              /* A ESCADA DE ESFORÇO, e ela é o essencial. Varrer só com esforço alto era
+               * medir a região onde já ninguém pode errar: com a caixa apertada nenhum
+               * racional lá cai dentro, o caminho do INDECISO nunca corre, e um método
+               * que FINGISSE decidir passava sem ser visto. Foi a mutação que o mostrou:
+               * «bisseção finge decidir» sobrevivia à varredura de esforço 14. */
+              int esf[4] = { 1, 2, 5, 14 };
+              long ind_por_esf[4] = {0,0,0,0};
+              for(int e = 0; e < 4; e++)
+              for(long a2 = 2; a2 <= 12; a2++){
+                  long r = raizi(a2);
+                  if(r*r == a2) continue;                 /* fecha em ℚ: sem buraco */
+                  for(long d = 1; d <= 40; d++) for(long p = 1; p <= (r+1)*d; p++){
+                      Qz q = qz(p, d);
+                      Quatro Q = id_quatro(a2, q, esf[e]);
+                      choques += id_choques(Q);
+                      ind_por_esf[e] += id_indecisos(Q);
+                      decididos += 4 - id_indecisos(Q);
+                      varridos++;
+                  }
+              }
+              /* O CONTROLO DO DETETOR: um quadro FORJADO, com duas portas a decidir ao
+               * contrário, tem de dar choques. Sem isto, «0 choques» podia ser um
+               * detetor avariado em vez de um acordo — e um detetor avariado dá sempre 0. */
+              Quatro forjado = { { ID_ABAIXO, ID_ACIMA, ID_INDECISO, ID_ABAIXO } };
+              int detetou = id_choques(forjado);          /* 0-1 e 1-3: dois choques */
+              printf("      %ld leituras (esforços 1, 2, 5 e 14): %ld choques em 6 pares,"
+                     " %ld decisões\n", varridos, choques, decididos);
+              printf("      indecisos por esforço: %ld, %ld, %ld, %ld — o caminho do"
+                     " indeciso CORRE, e por isso um método que fingisse era apanhado\n",
+                     ind_por_esf[0], ind_por_esf[1], ind_por_esf[2], ind_por_esf[3]);
+              printf("      e o detetor prova que dispara: num quadro forjado com duas"
+                     " portas ao contrário dá %d choque(s)\n", detetou);
+              ok("AS QUATRO PORTAS INDUZEM O MESMO CORTE — varrido em QUATRO esforços,"
+                 " dos baixos (onde há milhares de indecisos e um método que fingisse"
+                 " decidir chocava na hora) ao alto. Nenhum dos SEIS pares decide ao"
+                 " contrário; não há árbitro, e o detetor prova que sabe disparar",
+                 choques == 0 && decididos > 10000 && varridos > 8000
+                 && ind_por_esf[0] > 1000 && detetou == 2); }
+
+            /* O GUME: o INDECISO NÃO É ACORDO. Se contasse, o teorema saía de graça —
+             * bastava dar esforço zero a toda a gente e ninguém discordava de ninguém.
+             * Mede-se que com esforço 0 há MUITOS indecisos, e que eles CAEM quando o
+             * esforço sobe: é a identificação a acontecer, e não a ser suposta. */
+            { long ind[4] = {0,0,0,0};
+              int esf[4] = { 0, 4, 10, 18 };
+              for(int e = 0; e < 4; e++)
+                  for(long d = 1; d <= 30; d++) for(long p = 1; p <= 2*d; p++){
+                      Quatro Q = id_quatro(2, qz(p,d), esf[e]);
+                      ind[e] += id_indecisos(Q);
+                  }
+              printf("      indecisos com esforço 0, 4, 10, 18: %ld, %ld, %ld, %ld"
+                     " — caem a zero, e é o esforço que os mata\n",
+                     ind[0], ind[1], ind[2], ind[3]);
+              ok("O INDECISO NÃO É ACORDO, e é este o gume: com esforço 0 há 1860"
+                 " indecisos, e eles CAEM ESTRITAMENTE até zero quando o esforço sobe."
+                 " Se o indeciso contasse como concordância, o teorema saía de graça —"
+                 " bastava não medir nada e ninguém discordava de ninguém",
+                 ind[0] > ind[1] && ind[1] > ind[2] && ind[3] == 0 && ind[0] > 1000); }
+
+            /* A VOLTA VERIFICA A IDENTIFICAÇÃO — e a volta aqui é a RECONSTRUÇÃO: de cada
+             * método sai uma caixa racional, e as quatro caixas têm de se INTERSETAR, com
+             * a interseção a conter o corte. Se duas fossem pontos diferentes, as caixas
+             * separavam-se ao apertar — e é isso que aqui não acontece. */
+            { int vmal = 0;
+              long a2 = 2;
+              Corte c = { a2, 2 };
+              Qz lo[4], hi[4];
+              /* 1. o corte, pela sua própria caixa */
+              rz_caixa_inicial(c, &lo[0], &hi[0]); rz_encaixota(c, &lo[0], &hi[0], 16);
+              /* 2. o Möbius: as duas órbitas SÃO a caixa (o par dual a fechar) */
+              { long b = rz_b(a2);
+                Qz x = qz_de_inteiro(raizi(a2)), y = qz_de_inteiro(raizi(a2)+1);
+                for(int k = 0; k < 5; k++){ x = rz_passo(a2,b,x); y = rz_passo(a2,b,y); }
+                lo[1] = x; hi[1] = y; }
+              /* 3. a bisseção, com outra profundidade — de propósito, para as caixas não
+               *    serem a mesma por construção */
+              rz_caixa_inicial(c, &lo[2], &hi[2]); rz_encaixota(c, &lo[2], &hi[2], 12);
+              /* 4. a FC: dois convergentes consecutivos são a caixa */
+              { long t[48]; size_t nt = lado(0, -a2, t, 48);
+                long pn = 1, qn = 0, pa = 0, qa = 1; Qz par = qz(1,1), imp = qz(2,1);
+                for(int i = 0; i < 9 && nt; i++){
+                    long ai = t[(size_t)i < nt ? (size_t)i : (1 + (i-1) % (int)(nt>1?nt-1:1))];
+                    long pp = ai*pn + pa, qq = ai*qn + qa;
+                    if(qq > (1L<<26)) break;
+                    pa = pn; qa = qn; pn = pp; qn = qq;
+                    if(i % 2 == 0) par = qz(pn,qn); else imp = qz(pn,qn);
+                }
+                lo[3] = par; hi[3] = imp; }
+              /* cada caixa contém o corte, nos DOIS lados */
+              for(int i = 0; i < 4; i++){
+                  int b1, b2;
+                  if(rz_cmp(lo[i], 2, a2, &b1) >= 0 || !b1) vmal++;
+                  if(rz_cmp(hi[i], 2, a2, &b2) <= 0 || !b2) vmal++;
+              }
+              /* e as quatro INTERSETAM-SE: o maior dos lo é menor que o menor dos hi */
+              Qz maior_lo = lo[0], menor_hi = hi[0];
+              for(int i = 1; i < 4; i++){
+                  if(qz_menor(maior_lo, lo[i])) maior_lo = lo[i];
+                  if(qz_menor(hi[i], menor_hi)) menor_hi = hi[i];
+              }
+              if(!qz_menor(maior_lo, menor_hi)) vmal++;
+              for(int i = 0; i < 4; i++){
+                  /* sem larguras de campo: `%-9s` conta BYTES e «bisseção» tem acentos —
+                   * a coluna saía torta, e a coluna torta é o que ele lê */
+                  printf("      "); esc_col(id_nome(i), 9);
+                  printf("(o rastro é a %s)", id_rastro(i));
+                  esc_col("", 24 - larg_utf8(id_rastro(i)));   /* em CARACTERES, não em bytes */
+                  printf("  ");
+                  esc_qz("", lo[i], " … ");
+                  esc_qz("", hi[i], "\n");
+              }
+              printf("      interseção das quatro: ");
+              esc_qz("", maior_lo, " … ");
+              esc_qz("", menor_hi, "   e o corte está lá dentro\n");
+              ok("A VOLTA VERIFICA A IDENTIFICAÇÃO: de cada método sai uma caixa racional"
+                 " — com profundidades DIFERENTES, para não serem a mesma por construção —"
+                 " e as quatro intersetam-se, com o corte dentro da interseção. Se duas"
+                 " fossem pontos diferentes, as caixas separavam-se ao apertar",
+                 vmal == 0); }
+
+            /* «ℚ TEM O RASTRO, MAS NÃO TEM A FOLHA» — a frase dele, e é medível: os
+             * quatro rastros existem INTEIROS em ℚ (todos os termos são frações) e o
+             * ponto que eles determinam NÃO está lá. É a completude sem a palavra. */
+            { int fmal = 0;
+              long racionais_no_rastro = 0, folhas_em_Q = 0;
+              Suc mob = { S_MOBIUS, 2, 0, 0 };
+              for(long k = 0; k <= 10; k++){
+                  Qz t = cy_termo(mob, k);
+                  if(t.q != 0) racionais_no_rastro++;    /* o rastro é todo de ℚ */
+                  if(rz_no_corte((Corte){2,2}, t)) folhas_em_Q++;
+              }
+              Qz lo, hi; rz_caixa_inicial((Corte){2,2}, &lo, &hi);
+              for(int k = 0; k < 12; k++){
+                  rz_encaixota((Corte){2,2}, &lo, &hi, 1);
+                  if(lo.q == 0 || hi.q == 0) fmal++;     /* as pontas também são de ℚ */
+                  if(rz_no_corte((Corte){2,2}, lo) || rz_no_corte((Corte){2,2}, hi))
+                      folhas_em_Q++;
+              }
+              printf("      o rastro: %ld termos, TODOS racionais — e %ld folhas em ℚ\n",
+                     racionais_no_rastro, folhas_em_Q);
+              ok("«ℚ TEM O RASTRO, MAS NÃO TEM A FOLHA», e a frase mede-se: os rastros dos"
+                 " quatro métodos são INTEIRAMENTE de ℚ (cada termo e cada ponta é uma"
+                 " fração) e nenhum deles é a folha. ℝ é o que acrescenta a folha que"
+                 " fecha o rastro — e isso é a completude dita sem a palavra",
+                 fmal == 0 && racionais_no_rastro == 11 && folhas_em_Q == 0); }
+
+            /* E O SINO: o objeto não é só a folha — O CAMINHO FAZ PARTE DA INFORMAÇÃO.
+             * Os quatro rastros dão o mesmo ponto e NÃO são o mesmo rastro: se fossem,
+             * não haveria nada a identificar. Mede-se que os caminhos DIFEREM enquanto o
+             * destino é um só — que é a coisa toda. */
+            { int smal = 0; long diferem = 0, iguais = 0;
+              Suc mob = { S_MOBIUS, 2, 0, 0 }, bis = { S_LO, 2, 0, 0 }, fc = { S_CONV, 2, 0, 0 };
+              for(long k = 1; k <= 10; k++){
+                  Qz m = cy_termo(mob, k), b = cy_termo(bis, k), f = cy_termo(fc, k);
+                  if(!qz_igual(m,b) || !qz_igual(m,f) || !qz_igual(b,f)) diferem++;
+                  else iguais++;
+              }
+              /* e mesmo assim são a MESMA classe: as diferenças vão a zero */
+              long N1 = -1, N2 = -1;
+              Qz eps = qz(1, 1000000);
+              if(!cy_equiv(mob, bis, eps, 30, &N1)) smal++;
+              if(!cy_equiv(mob, fc,  eps, 30, &N2)) smal++;
+              printf("      os três rastros diferem em %ld dos 10 índices e coincidem em"
+                     " %ld — e mesmo assim são a mesma classe (N = %ld e %ld)\n",
+                     diferem, iguais, N1, N2);
+              ok("O SINO: o caminho FAZ PARTE da informação. Os três rastros DIFEREM termo"
+                 " a termo e mesmo assim são a mesma classe — se fossem o mesmo rastro não"
+                 " haveria identificação nenhuma a fazer, e o teorema era vazio. O ponto é"
+                 " um; os caminhos até ele, não",
+                 smal == 0 && diferem > 0); }
+        }
 
         /* ═══ §C30 CAUCHY: ℝ = Cauchy(ℚ)/∼, E O CAMINHO É O DUAL DO CORTE ═════════
          * O `eval.txt` dá a SEGUNDA construção, e ela é o dual da primeira: o CORTE diz

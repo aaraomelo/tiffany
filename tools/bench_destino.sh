@@ -57,6 +57,37 @@ while read -r v ln n; do
 done < /tmp/bench_destino.$$
 rm -f /tmp/bench_destino.$$
 
+# ── E A COLUNA QUE CONTA BYTES ────────────────────────────────────────────────────
+# `printf("%-9s", "bisseção")` enche até NOVE BYTES, e «bisseção» tem 8 caracteres em 10
+# bytes: a coluna sai curta e a tabela sai torta. Aconteceu duas vezes na mesma sessão —
+# no medidor e outra vez na fala, logo a seguir a eu o ter corrigido. A cura é `esc_col`,
+# que conta as cabeças de UTF-8; o que aqui se mede é que ninguém volta ao `%-Ns`.
+#
+# E A REGRA NÃO SE ESCREVE À MÃO: para cada `%-Ns`, tiram-se os ACESSORES chamados na
+# linha (`nome(`) e vai-se ver se a definição deles devolve texto com acentos. Assim o
+# `%-20s` sobre os nomes ASCII da tabela das provas NÃO é acusado — um medidor que grita
+# sem defeito é um medidor que se passa a ignorar.
+echo
+FONTES="$CONV $ROOT/lib/identifica.h $ROOT/lib/reais.h $ROOT/lib/racionais.h"
+acentuado(){   # 1 se a definição da função $1 devolve literais com bytes ≥ 0x80
+  grep -h -A4 "\\*$1(" $FONTES 2>/dev/null | grep -q -P '[\x80-\xFF]'
+}
+for ln in $(grep -n '%-[0-9]*s' "$CONV" | cut -d: -f1); do
+  linha=$(sed -n "${ln}p" "$CONV")
+  risco=""
+  for acc in $(printf '%s\n' "$linha" | grep -o '[a-z_][a-z_0-9]*(' | tr -d '(' | sort -u); do
+    case "$acc" in printf|snprintf|sizeof|strlen|if|for|while) continue;; esac
+    if acentuado "$acc"; then risco="$acc"; fi
+  done
+  if [ -n "$risco" ]; then
+    echo "  FAIL conversa.c:$ln — %-Ns enche por BYTES e $risco() devolve texto acentuado:"
+    echo "       a coluna sai torta. Usar esc_col(), que conta caracteres"
+    fail=$((fail+1))
+  else
+    ok=$((ok+1))
+  fi
+done
+
 echo
 echo "PASS=$ok FAIL=$fail (chamadas rotativas por printf, contra o tamanho que a fonte declara)"
 echo "o valor pode estar certo e o texto errado — e é o texto que o Aarão lê."
