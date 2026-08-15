@@ -80,7 +80,7 @@ continuo b98335aed4401267 0
 contorno_riemann 6cf7ea38b2e3b6b7 0
 contrato 5fffd2633c0858b1 0
 controlo_front e94ce67fbef877c1 0
-conversa 437ba5e59e25fa3f 0
+conversa 43a673b8bb8837c1 0
 converte fe99f74438556e46 0
 convolucao_universal 14db429c007982da 0
 coroa bf5f52e1e6e43aea 0
@@ -222,7 +222,7 @@ hipociclo 514fec9334344cf9 0
 histerese_navier ed3e0f5791f828fd 0
 hodge_viviani 9e53debee8151fb9 0
 hopfield 9009b4f6ecdc43a3 0
-hurwitz c3d6c02377a0072b 0
+hurwitz c976203ae0711acb 0
 icc a1b66e7969752be4 0
 inducao 08eb20f9b21c6338 0
 instrumento 7e6416b6f2a92ecd 0

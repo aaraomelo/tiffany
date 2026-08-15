@@ -51,6 +51,7 @@
 #include "linear.h"     /* algebra linear exata, e o gume automatico */
 #include "forma.h"      /* formas, adjuntos e espectro — a raiz nao se tira */
 #include "tensor.h"     /* Gram, Sylvester, Jordan, tensor e exterior */
+#include "exterior.h"   /* Lambda V, o Hodge, e o FECHO do par directo/cruzado */
 #include "eletrico.h"
 
 typedef struct { long a, b; } Slot;
@@ -1370,6 +1371,521 @@ static void esc_mat(const char *ind, Mat A);
 static void esc_qz(const char *pre, Qz x, const char *pos);
 static void esc_col(const char *s, int largura);
 static void tique7(int slot, const char *porque);
+/* ── ÁLGEBRA EXTERIOR E MULTILINEAR — E O FECHO DO DUAL ─────────────────────────────
+ * O `eval.txt` pede quinze coisas de Λ V, e pede-as de um modo: «em vez de fornecer
+ * somente exemplos de matrizes, dá para construir problemas onde ele tenha que
+ * PROCURAR A TESTEMUNHA DA FALHA DA HIPÓTESE». O gume deixa de ser acessório.
+ *
+ * Mas o andar não se escreveu como ele veio. Antes de o pôr de pé, o Aarão mandou ler
+ * as álgebras de Gentil, o dual de Hurwitz, e FECHAR o dual — «gentil conserva norma».
+ * E ele tinha razão sobre um defeito meu que nenhum medidor apanhava: eu tinha
+ * construído o CRUZADO (Λ², a antissimétrica) e deixado o DIRECTO do outro lado sem
+ * a frase que os junta. O par estava PARTIDO AO MEIO.
+ *
+ * A frase é uma linha, e é exata em inteiros:
+ *
+ *        ⟨u,v⟩² + ‖u∧v‖² = N(u)·N(v)        (Lagrange)
+ *
+ * e ela é, ao mesmo tempo:
+ *   · a decomposição simétrica ⊕ antissimétrica  (corpo-estelar §640: fp = cos θ,
+ *     tan φ = cruzado/directo — o directo é a potência ACTIVA, o cruzado a REACTIVA);
+ *   · a CONSERVAÇÃO DA NORMA que a torre de Hurwitz mede (tests/hurwitz.c §H2);
+ *   · e cos²θ + sin²θ = 1 com a norma por dentro, medida ao QUADRADO — a raiz não se
+ *     tira, que é a régua da casa.
+ *
+ * A casa tinha as duas metades em ficheiros diferentes e nunca escrevera que a segunda
+ * É a primeira. Agora está medido: `tests/hurwitz.c` §H6, 117649 pares, resíduo 0.
+ *
+ * E o `thm:central` do corpo estelar diz que a bijeção dual Gentil↔Hurwitz É A ESTRELA,
+ * com ν∘ν = id. O ⋆ de Hodge deste andar é uma estrela com a mesma propriedade — mas
+ * NÃO é o «Hodge» das teorias, que ali é a CONJECTURA (ciclos algébricos, o milénio).
+ * Mesmo nome, coisas diferentes, e não se juntam. */
+static void esc_biv(Biv b);
+static void esc_biv4(Biv4 b);
+static const struct { int n; const char *nome; const char *enunciado; } EX15[] = {
+ {  1, "produto tensorial",  "dim(V⊗W) = dim V · dim W — as tabelas multiplicam-se" },
+ {  2, "propriedade universal","bilinear em V×W ⟺ LINEAR em V⊗W: o tensor é a fibra" },
+ {  3, "formas multilineares","lineares em CADA argumento, e as alternantes são Λ" },
+ {  4, "algebra exterior",   "Λ V pela relação v∧v = 0 — e daí sai a antissimetria" },
+ {  5, "wedge",              "u∧v: os menores 2×2, e u∧u = 0 é a definição, não corolário" },
+ {  6, "determinante",       "Λⁿ T é a multiplicação por det T — o volume orientado" },
+ {  7, "orientacao",         "sgn(det): +1 preserva, −1 inverte, 0 esmaga" },
+ {  8, "hodge",              "⋆: Λᵏ → Λⁿ⁻ᵏ, e ⋆⋆ = id — a ESTRELA, resíduo 0" },
+ {  9, "identificacao",      "B não degenerada dá V ≃ V*, e a testemunha é a inversa" },
+ { 10, "contracao",          "ι_v: Λᵏ → Λᵏ⁻¹, a antiderivação — e ι_v∘ι_v = 0" },
+ { 11, "dualidade exterior", "(Λᵏ V)* ≃ Λᵏ(V*), e as duas dimensões batem" },
+ { 12, "produto misto",      "u∧v∧w = det[u,v,w] — o volume, e o sinal é a orientação" },
+ { 13, "pfaffiano",          "Pf² = det, a raiz que É polinomial — e Pf = 0 ⟺ simples" },
+ { 14, "cruzado",            "u×v = ⋆(u∧v), e só é VETOR em dimensão 3" },
+ { 15, "fecho do dual",      "directo² + cruzado² = N(u)N(v) — e porque o degrau é 4" },
+};
+static void exterior_resolve(int n){
+    TICK_N = 0;
+    printf("   %d — %s\n", n, EX15[n-1].enunciado);
+    Vec e3[3], e4[4];
+    for(int i = 0; i < 3; i++){ e3[i] = vec0(3); e3[i].c[i] = qz(1,1); }
+    for(int i = 0; i < 4; i++){ e4[i] = vec0(4); e4[i].c[i] = qz(1,1); }
+    Vec u = vec0(3), v = vec0(3), w = vec0(3);
+    u.c[0] = qz(2,1);  u.c[1] = qz(1,1);  u.c[2] = qz(-1,1);
+    v.c[0] = qz(1,1);  v.c[1] = qz(3,1);  v.c[2] = qz(0,1);
+    w.c[0] = qz(0,1);  w.c[1] = qz(1,1);  w.c[2] = qz(2,1);
+    long tt[] = {2,1,0, 1,3,1, 0,1,2};
+    Mat T = mat_de_inteiros(3,3,tt);
+
+    switch(n){
+    case 1: case 2: {
+        tique7(0, "sejam V e W de dimensão finita sobre ℚ, e B: V × W → ℚ bilinear");
+        tique7(1, n == 1 ? "o produto tensorial é o espaço onde os pares se tornam vetores:"
+                         : "a propriedade universal é a FIBRA do tensor:");
+        printf(n == 1 ? "      $\\dim(V \\otimes W) = \\dim V \\cdot \\dim W$\n"
+                      : "      $\\mathrm{Bil}(V\\times W,\\mathbb{Q}) \\;\\cong\\;"
+                        " (V\\otimes W)^{*}$\n");
+        tique7(2, n == 1
+               ? "a base de V⊗W são os eᵢ⊗fⱼ, e por isso a dimensão MULTIPLICA em vez de"
+                 " somar — é a diferença entre ⊗ e ⊕, e é toda a razão de o tensor existir"
+               : "toda B bilinear FATORIZA de modo único por ⊗: B = B̃ ∘ ⊗, com B̃ linear."
+                 " A passagem de bilinear a linear é o que o tensor compra");
+        tique7(3, "a lei é a bilinearidade, e ela é que permite abrir os argumentos em"
+                  " coordenadas. Sem ela não há tabela, e sem tabela não há tensor");
+        { long b1[] = {1,2,-1,3};
+          Mat B1 = mat_de_inteiros(2,2,b1);
+          printf("      a matriz de B:\n"); esc_mat("        ", B1);
+          int mal = 0; long feitos = 0, dims = 0;
+          for(long x = -3; x <= 3; x++) for(long y = -3; y <= 3; y++)
+          for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++){
+              Vec p = vec0(2), q = vec0(2);
+              p.c[0] = qz_de_inteiro(x); p.c[1] = qz_de_inteiro(y);
+              q.c[0] = qz_de_inteiro(a); q.c[1] = qz_de_inteiro(b);
+              Qz direto = fb_av(B1, p, q);                 /* pᵀ B q, a bilinear */
+              Qz pelo_tensor = tn_induzida(B1, tn_simples(p,q));
+              feitos++;
+              if(!qz_igual(direto, pelo_tensor)) mal++;
+          }
+          dims = 2*2;
+          tique7(4, "a testemunha é a IGUALDADE DOS DOIS CAMINHOS: avaliar B(u,v)"
+                    " diretamente, e avaliar o funcional induzido em u⊗v. Se o tensor"
+                    " fosse outra coisa, os dois números separavam-se");
+          printf("      B(u,v) e B̃(u⊗v) em ");
+          printf("%ld", feitos);
+          printf(" pares: %ld divergências\n", (long)mal);
+          printf("      dim(V⊗W) = 2 · 2 = %ld, e a tabela de B tem %ld coeficientes —"
+                 " é a MESMA tabela\n", dims, dims);
+          tique7(5, mal == 0
+                 ? "logo bilinear em V×W e linear em V⊗W são o mesmo objeto"
+                 : "os caminhos separam-se — NÃO afirmo");
+          tique7(6, "e a VOLTA: dado o funcional em V⊗W, restringi-lo aos tensores"
+                    " SIMPLES u⊗v devolve a bilinear de partida. A ida e a volta são a"
+                    " leitura da mesma tabela por linhas e por colunas"); }
+        break; }
+    case 3: case 4: case 5: {
+        tique7(0, "seja V = ℚ³ e ω uma forma bilinear ALTERNANTE, ω(v,v) = 0");
+        tique7(1, "a álgebra exterior é o quociente pela relação que anula o repetido:");
+        printf("      $\\Lambda V = T(V)/\\langle v\\otimes v\\rangle,\\qquad"
+               " v\\wedge v = 0$\n");
+        tique7(2, "e a ANTISSIMETRIA não é um axioma à parte — SAI dali: de"
+                  " (u+v)∧(u+v) = 0 abre-se e sobra u∧v + v∧u = 0. A hipótese é o"
+                  " quadrado nulo; a troca de sinal é consequência");
+        tique7(3, "a lei é a bilinearidade, aplicada ao vetor SOMA. É o mesmo truque da"
+                  " polarização, ao contrário: lá tirava-se a bilinear da quadrática,"
+                  " aqui tira-se a antissimetria do quadrado nulo");
+        { int mal_zero = 0, mal_troca = 0; long feitos = 0;
+          for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++) for(long c = -3; c <= 3; c++)
+          for(long d = -3; d <= 3; d++) for(long e = -3; e <= 3; e++) for(long f = -3; f <= 3; f++){
+              Vec p = vec0(3), q = vec0(3);
+              p.c[0] = qz_de_inteiro(a); p.c[1] = qz_de_inteiro(b); p.c[2] = qz_de_inteiro(c);
+              q.c[0] = qz_de_inteiro(d); q.c[1] = qz_de_inteiro(e); q.c[2] = qz_de_inteiro(f);
+              if(!biv_zero(ex_wedge(p,p))) mal_zero++;
+              Biv i = ex_wedge(p,q), j = ex_wedge(q,p);
+              if(!biv_igual(i, biv_esc(qz(-1,1), j))) mal_troca++;
+              feitos++;
+          }
+          printf("      u∧u = 0 em %ld vetores: %d falhas\n", feitos, mal_zero);
+          printf("      u∧v = −(v∧u) em %ld pares: %d falhas\n", feitos, mal_troca);
+          printf("      e em coordenadas u∧v são os MENORES 2×2:\n");
+          printf("        u = "); esc_vec(u); printf("   v = "); esc_vec(v); printf("\n");
+          printf("        u∧v = "); esc_biv(ex_wedge(u,v)); printf("\n");
+          tique7(4, "a testemunha é a varredura das duas identidades — e note-se que a"
+                    " SEGUNDA não foi programada: ela sai da primeira, e mede-se para"
+                    " confirmar que sai mesmo");
+          tique7(5, mal_zero == 0 && mal_troca == 0
+                 ? "logo Λ²(ℚ³) tem dimensão 3, com base e₁∧e₂, e₁∧e₃, e₂∧e₃"
+                 : "alguma das duas falha — NÃO afirmo");
+          tique7(6, "e a VOLTA é reconstruir: dos três menores recuperam-se todos os"
+                    " valores de ω(u,v) para qualquer alternante ω, porque a alternante"
+                    " está determinada pelo que faz na base"); }
+        break; }
+    case 6: case 12: {
+        tique7(0, "seja T: ℚ³ → ℚ³ linear, e u, v, w três vetores");
+        tique7(1, n == 6 ? "o determinante é a ação de T no espaço de VOLUME:"
+                         : "o produto misto é o elemento de volume:");
+        printf(n == 6 ? "      $T(u\\wedge v\\wedge w) = Tu\\wedge Tv\\wedge Tw ="
+                        " \\det(T)\\,(u\\wedge v\\wedge w)$\n"
+                      : "      $u\\wedge v\\wedge w = \\det[u\\,v\\,w] \\;"
+                        "e_{1}\\wedge e_{2}\\wedge e_{3}$\n");
+        tique7(2, "Λ³(ℚ³) tem dimensão 1 — há um só grau de liberdade no topo. Logo T"
+                  " age lá por um ESCALAR, e a pergunta passa a ser qual. Não se calcula"
+                  " o determinante: descobre-se que o escalar é ele");
+        tique7(3, "a lei é dim Λⁿ V = 1, que vem de C(n,n) = 1. É ela que força a ação a"
+                  " ser uma multiplicação, e não uma matriz");
+        { printf("      T =\n"); esc_mat("        ", T);
+          Qz d = mat_det(T);
+          Qz vol = ex_misto(e3[0], e3[1], e3[2]);
+          Qz volT = ex_misto(mat_aplica(T,e3[0]), mat_aplica(T,e3[1]), mat_aplica(T,e3[2]));
+          esc_qz("      det T = ", d, "\n");
+          esc_qz("      e₁∧e₂∧e₃ = ", vol, "\n");
+          esc_qz("      Te₁∧Te₂∧Te₃ = ", volT, "");
+          printf("   ← o FATOR, e é o determinante\n");
+          int mal = 0; long feitos = 0;
+          for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++) for(long c = -2; c <= 2; c++)
+          for(long d2 = -2; d2 <= 2; d2++) for(long e = -2; e <= 2; e++) for(long f = -2; f <= 2; f++){
+              Vec p = vec0(3), q = vec0(3);
+              p.c[0] = qz_de_inteiro(a); p.c[1] = qz_de_inteiro(b); p.c[2] = qz_de_inteiro(c);
+              q.c[0] = qz_de_inteiro(d2); q.c[1] = qz_de_inteiro(e); q.c[2] = qz_de_inteiro(f);
+              Qz esq = ex_misto(mat_aplica(T,p), mat_aplica(T,q), mat_aplica(T,w));
+              Qz dir = qz_mult(d, ex_misto(p, q, w));
+              feitos++;
+              if(!qz_igual(esq, dir)) mal++;
+          }
+          printf("      Tu∧Tv∧Tw = det(T)·(u∧v∧w) em %ld triplos: %d falhas\n", feitos, mal);
+          tique7(4, "a testemunha é a varredura com o TERCEIRO vetor fixo e os dois"
+                    " primeiros a correr — se o fator dependesse dos vetores, não era um"
+                    " escalar, e a igualdade partia-se em algum lado");
+          tique7(5, mal == 0
+                 ? "logo o determinante NÃO é uma receita de cofatores: é o fator pelo"
+                   " qual T atua no volume, e a receita é só como se calcula"
+                 : "o fator não é constante — NÃO afirmo");
+          tique7(6, "e a VOLTA fecha com a casa: em `corpo_universal.tex` §370 as cartas"
+                    " são EQUIAREAIS, «o determinante do sector… cada carta preserva"
+                    " área», e «sem a inversa-escala o det é 2 ≠ 1». Isso é det = 1, isto"
+                    " é, Λⁿ T = id. A conservação de área que a casa já media É este"
+                    " teorema, medida em `tests/arquimedes_area.js` (21:0)"); }
+        break; }
+    case 7: case 14: {
+        tique7(0, n == 7 ? "seja T invertível sobre ℚ" : "sejam u, v ∈ ℚ³");
+        tique7(1, n == 7 ? "a orientação é o SINAL do determinante:"
+                         : "o produto cruzado é a cunha seguida da estrela:");
+        printf(n == 7 ? "      $\\mathrm{or}(T) = \\mathrm{sgn}\\det T \\in"
+                        " \\{+1,-1\\}$\n"
+                      : "      $u\\times v \\;=\\; \\star(u\\wedge v)$\n");
+        if(n == 7){
+            tique7(2, "duas bases têm a mesma orientação quando a matriz de passagem tem"
+                      " det > 0. Como Λⁿ tem dimensão 1 e o fator é det T, o SINAL do"
+                      " fator é tudo o que sobra — e é por isso que só há DUAS classes");
+            tique7(3, "a lei é a mesma: dim Λⁿ V = 1. As classes de orientação são as"
+                      " componentes de ℚ* pela multiplicação por quadrados — duas");
+            { long r1[] = {0,1,0, 1,0,0, 0,0,1};      /* troca duas colunas */
+              long r2[] = {1,0,0, 0,1,0, 0,0,1};
+              long r3[] = {1,0,0, 0,1,0, 0,0,0};      /* esmaga */
+              Mat R1 = mat_de_inteiros(3,3,r1), R2 = mat_de_inteiros(3,3,r2);
+              Mat R3 = mat_de_inteiros(3,3,r3);
+              printf("      a troca de duas colunas:  or = %d\n", ex_orientacao(R1));
+              printf("      a identidade:             or = %d\n", ex_orientacao(R2));
+              printf("      a que esmaga o volume:    or = %d\n", ex_orientacao(R3));
+              printf("      e T de cima:              or = %d\n", ex_orientacao(T));
+              tique7(4, "a testemunha são as três: a troca inverte, a identidade preserva,"
+                        " e a singular NÃO tem orientação nenhuma — não é −1, é 0. O caso"
+                        " degenerado é um terceiro estado e não um dos dois");
+              tique7(5, "logo a orientação é a leitura do sinal do fator de volume");
+              tique7(6, "e a VOLTA: aplicar duas vezes a mesma troca devolve a orientação"
+                        " de partida, porque (−1)² = 1. É a involução outra vez"); }
+        } else {
+            tique7(2, "u∧v vive em Λ²(ℚ³), que tem dimensão 3 — a MESMA de ℚ³. É essa"
+                      " coincidência, e só ela, que permite escrever o resultado como um"
+                      " VETOR. A estrela é o dicionário entre os dois espaços");
+            tique7(3, "a lei é dim Λᵏ(ℚⁿ) = C(n,k): em n = 3, C(3,2) = 3 = C(3,1). Em"
+                      " n = 4, C(4,2) = 6 ≠ 4, e aí o cruzado NÃO CABE em ℚ⁴");
+            { printf("      u = "); esc_vec(u); printf("   v = "); esc_vec(v); printf("\n");
+              printf("      u∧v = "); esc_biv(ex_wedge(u,v)); printf("   (em Λ²)\n");
+              printf("      ⋆(u∧v) = "); esc_vec(ex_cruzado(u,v)); printf("   (em ℚ³)\n");
+              printf("      e em dimensão 4: dim Λ² = 6, dim Λ¹ = 4\n");
+              printf("      e₁∧e₂ + e₃∧e₄ = "); esc_biv4(biv4_soma(ex_wedge4(e4[0],e4[1]),
+                                                                  ex_wedge4(e4[2],e4[3])));
+              printf("\n");
+              tique7(4, "a testemunha da IMPOSSIBILIDADE em dimensão 4 é o bivetor"
+                        " e₁∧e₂ + e₃∧e₄: ele não é u∧v para vetor nenhum, e portanto não"
+                        " há vetor que o represente. O Pfaffiano prova-o, e é a fala 13");
+              tique7(5, "logo o «produto cruzado» é um acidente da dimensão 3, e o objeto"
+                        " geral é o BIVETOR");
+              tique7(6, "e a VOLTA é a casa: `corpo-estelar.tex` §637 chama-lhe «o"
+                        " cruzado, ‖a∧b‖ = sin θ, a parte ANTISSIMÉTRICA, a potência"
+                        " REACTIVA que roda e volta — o torque É o produto cruzado». A"
+                        " casa já lhe chamava cruzado; o que faltava era o nome Λ²"); }
+        }
+        break; }
+    case 8: {
+        tique7(0, "seja ℚ³ com o produto interno usual, e ⋆ a estrela de Hodge");
+        tique7(1, "a estrela troca o grau pelo complementar:");
+        printf("      $\\star : \\Lambda^{k}V \\to \\Lambda^{n-k}V,\\qquad"
+               " \\star\\star = \\mathrm{id}$\n");
+        tique7(2, "como C(n,k) = C(n,n−k), os dois espaços têm a MESMA dimensão — e é"
+                  " isso, e não uma escolha, que permite haver bijeção. A métrica é que"
+                  " escolhe QUAL bijeção");
+        tique7(3, "a lei é a simetria dos binomiais. Sem produto interno havia isomorfismo"
+                  " mas não havia ⋆ CANÓNICO: a métrica é a estrutura adicional");
+        { int mal = 0; long feitos = 0;
+          for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++) for(long c = -3; c <= 3; c++){
+              Vec p = vec0(3);
+              p.c[0] = qz_de_inteiro(a); p.c[1] = qz_de_inteiro(b); p.c[2] = qz_de_inteiro(c);
+              if(!vec_igual(p, ex_hodge2(ex_hodge1(p)))) mal++;
+              feitos++;
+          }
+          printf("      ⋆e₁ = "); esc_biv(ex_hodge1(e3[0])); printf("\n");
+          printf("      ⋆e₂ = "); esc_biv(ex_hodge1(e3[1])); printf("\n");
+          printf("      ⋆e₃ = "); esc_biv(ex_hodge1(e3[2])); printf("\n");
+          printf("      ⋆⋆v = v em %ld vetores: %d falhas\n", feitos, mal);
+          tique7(4, "a testemunha é a involução medida, e ela vale com resíduo ZERO —"
+                    " não «abaixo de um limiar», porque tudo aqui é inteiro");
+          tique7(5, mal == 0 ? "logo ⋆ é uma involução exata em ℚ³"
+                             : "a involução falha — NÃO afirmo");
+          tique7(6, "e a VOLTA liga ao teorema central: `corpo-estelar.tex` thm:central diz"
+                    " que a bijeção dual entre Gentil e Hurwitz É A ESTRELA, com"
+                    " ν∘ν = id e resíduo 0. Aqui aparece outra estrela com a mesma"
+                    " propriedade, entre Λᵏ e Λⁿ⁻ᵏ. E AVISO: o «Hodge» das teorias é a"
+                    " CONJECTURA de Hodge, dos ciclos algébricos — mesmo nome, outro"
+                    " objeto, e não os junto"); }
+        break; }
+    case 9: case 11: {
+        tique7(0, n == 9 ? "seja B bilinear NÃO DEGENERADA sobre V de dimensão finita"
+                         : "seja V de dimensão finita e k ≤ dim V");
+        tique7(1, n == 9 ? "a forma dá um isomorfismo entre o espaço e o seu dual:"
+                         : "a dualidade comuta com a potência exterior:");
+        printf(n == 9 ? "      $\\varphi_{B}: V \\to V^{*},\\qquad v \\mapsto B(v,\\cdot)$\n"
+                      : "      $(\\Lambda^{k}V)^{*} \\;\\cong\\; \\Lambda^{k}(V^{*})$\n");
+        if(n == 9){
+            tique7(2, "não degenerada quer dizer: se B(v,·) é o funcional nulo então v = 0."
+                      " Isso é exatamente ker φ_B = 0, e em dimensão finita injetiva já dá"
+                      " bijetiva. O isomorfismo NÃO é canónico — depende de B");
+            tique7(3, "a lei é dim V = dim V*, que é o que transforma injetiva em bijetiva."
+                      " Em dimensão infinita a implicação cai");
+            { long g1[] = {1,0,0, 0,1,0, 0,0,1}, g2[] = {1,0,0, 0,1,0, 0,0,0};
+              Mat G1 = mat_de_inteiros(3,3,g1), G2 = mat_de_inteiros(3,3,g2);
+              Mat inv;
+              int ok1 = mat_inversa(G1, &inv), ok2 = mat_inversa(G2, &inv);
+              printf("      B = I₃:      det = "); esc_qz("", mat_det(G1), "");
+              printf("   inversa? %s\n", ok1 ? "sim — logo φ_B é bijeção" : "não");
+              printf("      B degenerada: det = "); esc_qz("", mat_det(G2), "");
+              printf("   inversa? %s\n", ok2 ? "sim" : "NÃO — e e₃ morre");
+              Vec z = vec0(3); z.c[2] = qz(1,1);
+              printf("      a testemunha do núcleo: v = "); esc_vec(z);
+              printf("   e B(v,·) = "); esc_vec(mat_aplica(G2, z)); printf("\n");
+              tique7(4, "a testemunha da DEGENERAÇÃO é exibida: e₃ é não nulo e o seu"
+                        " funcional é nulo. Não se afirma que B é degenerada — mostra-se"
+                        " QUEM morre");
+              tique7(5, "logo a não degenerescência é a hipótese que não se pode largar");
+              tique7(6, "e a VOLTA é a inversa φ_B⁻¹, que existe exatamente quando det B ≠ 0 —"
+                        " a FIBRA outra vez: dado o funcional, achar o vetor"); }
+        } else {
+            tique7(2, "as duas dimensões são C(n,k) — a do dual de Λᵏ porque dualizar"
+                      " preserva dimensão, e a de Λᵏ(V*) porque V* tem dimensão n. Iguais,"
+                      " logo isomorfos; e o isomorfismo é o emparelhamento pelos menores");
+            tique7(3, "a lei é dim W* = dim W em dimensão finita. É a MESMA lei do §9, e é"
+                      " ela que faz o bidual fechar");
+            { long cnk[5][5]; int mal = 0;
+              for(int nn = 0; nn <= 4; nn++) for(int kk = 0; kk <= 4; kk++){
+                  long c = 1;
+                  if(kk > nn) c = 0;
+                  else for(int i = 0; i < kk; i++) c = c * (nn - i) / (i + 1);
+                  cnk[nn][kk] = c;
+              }
+              printf("      n   k   dim Λᵏ V   dim (Λᵏ V)*   dim Λᵏ(V*)\n");
+              for(int nn = 2; nn <= 4; nn++) for(int kk = 0; kk <= nn; kk++){
+                  printf("      %-3d %-3d %-10ld %-13ld %ld\n", nn, kk,
+                         cnk[nn][kk], cnk[nn][kk], cnk[nn][kk]);
+                  if(cnk[nn][kk] != cnk[nn][nn-kk] && kk != nn-kk) mal++;
+              }
+              printf("      e a simetria C(n,k) = C(n,n−k): %d falhas\n", mal);
+              tique7(4, "a testemunha é a tabela, e o que ela mostra a mais é a SIMETRIA"
+                        " C(n,k) = C(n,n−k) — que é o que dá lugar à estrela do §8");
+              tique7(5, "logo dualizar e exteriorizar comutam em dimensão finita");
+              tique7(6, "e a VOLTA é o bidual: (Λᵏ V)** ≃ Λᵏ V, canonicamente, e sem"
+                        " precisar de forma nenhuma — ao contrário do §9"); }
+        }
+        break; }
+    case 10: {
+        tique7(0, "seja v ∈ ℚ³ e ω ∈ Λ²(ℚ³)");
+        tique7(1, "a contração baixa o grau, e é uma ANTIDERIVAÇÃO:");
+        printf("      $\\iota_{v}:\\Lambda^{k}V \\to \\Lambda^{k-1}V,\\qquad"
+               " \\iota_{v}\\circ\\iota_{v} = 0$\n");
+        tique7(2, "o zero duplo não é um extra: é a alternância vista de outro lado."
+                  " Contrair duas vezes pelo MESMO v repete um argumento, e o repetido"
+                  " anula-se — é v∧v = 0 outra vez, do lado dual");
+        tique7(3, "a lei é a alternância. A regra de Leibniz com sinal (a antiderivação)"
+                  " é a forma que ela toma quando desce de grau");
+        { int mal = 0; long feitos = 0;
+          for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++) for(long c = -3; c <= 3; c++){
+              Vec p = vec0(3);
+              p.c[0] = qz_de_inteiro(a); p.c[1] = qz_de_inteiro(b); p.c[2] = qz_de_inteiro(c);
+              Vec r = ex_contrai(p, ex_hodge1(p));
+              Qz s = ex_directo(r, p);
+              feitos++;
+              if(s.p) mal++;
+          }
+          printf("      v = "); esc_vec(u); printf("   ω = u∧v = "); esc_biv(ex_wedge(u,v));
+          printf("\n");
+          printf("      ι_u ω = "); esc_vec(ex_contrai(u, ex_wedge(u,v))); printf("\n");
+          printf("      ι_v(⋆v) ⊥ v em %ld vetores: %d falhas\n", feitos, mal);
+          tique7(4, "a testemunha é que ι_v(⋆v) é sempre ORTOGONAL a v — o que mostra que"
+                    " contrair não é projetar: tira a direção de v e o que sobra já não"
+                    " tem componente nela");
+          tique7(5, mal == 0 ? "logo ι_v desce o grau e mata a direção contraída"
+                             : "há resíduo na direção de v — NÃO afirmo");
+          tique7(6, "e a VOLTA: ι_v e v∧· são ADJUNTOS pelo produto interno,"
+                    " ⟨ι_v α, β⟩ = ⟨α, v∧β⟩. Subir e descer de grau são o par dual deste"
+                    " andar — e por isso ι_v∘ι_v = 0 espelha v∧v = 0"); }
+        break; }
+    case 13: {
+        tique7(0, "seja A antissimétrica 4×4 sobre ℚ, e ω o bivetor correspondente");
+        tique7(1, "o Pfaffiano é a raiz quadrada POLINOMIAL do determinante:");
+        printf("      $\\mathrm{Pf}(A) = a_{12}a_{34} - a_{13}a_{24} + a_{14}a_{23},"
+               "\\qquad \\mathrm{Pf}(A)^{2} = \\det A$\n");
+        tique7(2, "e é a MESMA conta de ω∧ω, que vive em Λ⁴ (dimensão 1): ω∧ω = 2 Pf(ω)."
+                  " Por isso Pf(ω) = 0 é exatamente ω ser SIMPLES, isto é, ω = u∧v para"
+                  " algum par");
+        tique7(3, "a lei é dim Λ⁴(ℚ⁴) = 1 outra vez. E o que faz o Pfaffiano interessar a"
+                  " esta casa é que aqui a raiz NÃO traz irracional: é polinomial nas"
+                  " entradas, e portanto exata em inteiros");
+        { long aa[] = {0,1,2,3, -1,0,4,5, -2,-4,0,6, -3,-5,-6,0};
+          Mat A = mat_de_inteiros(4,4,aa);
+          printf("      A =\n"); esc_mat("        ", A);
+          printf("      antissimétrica? %s\n", ex_antissimetrica(A) ? "sim" : "NÃO");
+          Qz pf = ex_pfaffiano(A);
+          esc_qz("      Pf(A) = ", pf, "");
+          esc_qz("      Pf² = ", qz_mult(pf,pf), "");
+          esc_qz("      det A = ", mat_det(A), "\n");
+          Biv4 simples = ex_wedge4(e4[0], e4[1]);
+          Biv4 nao = biv4_soma(ex_wedge4(e4[0],e4[1]), ex_wedge4(e4[2],e4[3]));
+          printf("      e₁∧e₂:            Pf = "); esc_qz("", ex_pf_biv(simples), "");
+          printf("   → SIMPLES\n");
+          printf("      e₁∧e₂ + e₃∧e₄:    Pf = "); esc_qz("", ex_pf_biv(nao), "");
+          printf("   → NÃO é u∧v para par nenhum\n");
+          /* E PROCURA-SE o par que o realizaria. Mas uma busca que tem de voltar VAZIA
+           * não prova nada sozinha — «0 achados» tanto pode ser a ausência do objeto
+           * como o buscador partido. Por isso corre DUAS vezes, com o MESMO código e o
+           * MESMO alcance: sobre o bivetor SIMPLES, onde tem de achar, e sobre o outro,
+           * onde tem de voltar vazia. É o par de controlos que o gume exige. */
+          long achados[2] = {0,0}, tentados[2] = {0,0};
+          Biv4 alvo[2]; alvo[0] = simples; alvo[1] = nao;
+          for(int t = 0; t < 2; t++)
+          for(long a = -2; a <= 2 && !achados[t]; a++) for(long b = -2; b <= 2 && !achados[t]; b++)
+          for(long c = -2; c <= 2 && !achados[t]; c++) for(long d = -2; d <= 2 && !achados[t]; d++)
+          for(long e = -2; e <= 2 && !achados[t]; e++) for(long f = -2; f <= 2 && !achados[t]; f++)
+          for(long g = -2; g <= 2 && !achados[t]; g++) for(long h = -2; h <= 2 && !achados[t]; h++){
+              Vec p = vec0(4), q = vec0(4);
+              p.c[0]=qz_de_inteiro(a); p.c[1]=qz_de_inteiro(b);
+              p.c[2]=qz_de_inteiro(c); p.c[3]=qz_de_inteiro(d);
+              q.c[0]=qz_de_inteiro(e); q.c[1]=qz_de_inteiro(f);
+              q.c[2]=qz_de_inteiro(g); q.c[3]=qz_de_inteiro(h);
+              tentados[t]++;
+              if(biv4_igual(ex_wedge4(p,q), alvo[t])) achados[t]++;
+          }
+          printf("      CONTROLO — busca do par para e₁∧e₂ (simples): %ld tentados,"
+                 " %ld achado\n", tentados[0], achados[0]);
+          printf("      GUME     — busca do par para e₁∧e₂+e₃∧e₄:     %ld tentados,"
+                 " %ld achados\n", tentados[1], achados[1]);
+          tique7(4, "a testemunha é dupla: Pf² = det no exemplo, e o PAR DE BUSCAS. Não"
+                    " se afirma «não é simples» — procura-se o par que o seria. E não"
+                    " basta ela voltar vazia: o mesmo buscador tem de ACHAR no bivetor"
+                    " simples, senão o vazio podia ser dele e não do objeto");
+          tique7(5, achados[0] > 0 && achados[1] == 0
+                 ? "logo Pf é a obstrução exata à simplicidade, e em dimensão 4 há"
+                   " bivetores que não são cunha de vetores nenhuns"
+                 : "os dois controlos não se separaram — NÃO afirmo");
+          tique7(6, "e a VOLTA fecha em dimensão 3: lá NÃO há Pfaffiano (a ordem é ímpar,"
+                    " e det de uma antissimétrica ímpar é 0), e por isso TODO bivetor é"
+                    " simples. A ausência do obstáculo e a simplicidade são a mesma"
+                    " frase, lida nos dois sentidos"); }
+        break; }
+    case 15: {
+        tique7(0, "sejam u, v ∈ ℚ³, ⟨·,·⟩ o produto interno e ∧ a cunha");
+        tique7(1, "o par directo/cruzado FECHA na conservação da norma:");
+        printf("      $\\langle u,v\\rangle^{2} + \\|u\\wedge v\\|^{2}"
+               " \\;=\\; N(u)\\,N(v)$\n");
+        tique7(2, "toda bilinear parte-se em SIMÉTRICA e ANTISSIMÉTRICA, e esta casa já"
+                  " lhes chamava DIRECTO (a potência activa, cos θ) e CRUZADO (a"
+                  " reactiva, sin θ) em corpo-estelar §640. A identidade de Lagrange diz"
+                  " que os quadrados das duas SOMAM a norma conservada — é"
+                  " cos²θ + sin²θ = 1 com a norma por dentro");
+        tique7(3, "a lei é a identidade de Lagrange, e mede-se AO QUADRADO: a raiz nunca"
+                  " se tira, que é a régua desta casa. Aqui isso não é uma cautela — é o"
+                  " que torna a conta exata em inteiros");
+        { Qz cons, part;
+          ex_lagrange(u, v, &cons, &part);
+          printf("      u = "); esc_vec(u); printf("   v = "); esc_vec(v); printf("\n");
+          esc_qz("      directo ⟨u,v⟩ = ", ex_directo(u,v), "\n");
+          esc_qz("      cruzado ‖u∧v‖² = ", ex_cruzado2(u,v), "\n");
+          esc_qz("      N(u)N(v) = ", cons, "");
+          esc_qz("      directo² + cruzado² = ", part, "\n");
+          int mal = 0, folga_mal = 0; long feitos = 0;
+          for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++) for(long c = -3; c <= 3; c++)
+          for(long d = -3; d <= 3; d++) for(long e = -3; e <= 3; e++) for(long f = -3; f <= 3; f++){
+              Vec p = vec0(3), q = vec0(3);
+              p.c[0]=qz_de_inteiro(a); p.c[1]=qz_de_inteiro(b); p.c[2]=qz_de_inteiro(c);
+              q.c[0]=qz_de_inteiro(d); q.c[1]=qz_de_inteiro(e); q.c[2]=qz_de_inteiro(f);
+              Qz A2, B2; ex_lagrange(p, q, &A2, &B2);
+              feitos++;
+              if(!qz_igual(A2, B2)) mal++;
+              if(!qz_igual(ex_folga_cs(p,q), ex_cruzado2(p,q))) folga_mal++;
+          }
+          printf("      Lagrange em %ld pares: %d falhas\n", feitos, mal);
+          printf("      e a FOLGA de Cauchy–Schwarz é o cruzado: %d falhas\n", folga_mal);
+          /* o gume de Hurwitz, PROCURADO */
+          printf("      k    a soma de k quadrados fecha para o produto?   testemunha\n");
+          int gume_mal = 0;
+          for(int k = 1; k <= 4; k++){
+              long tx = 0, ty = 0;
+              int achou = ex_gume_hurwitz(k, 40, &tx, &ty);
+              if(achou != (k == 3)) gume_mal++;
+              printf("      %-4d ", k);
+              esc_col(achou ? "NÃO" : "sim", 45);          /* por CARACTERES, não bytes */
+              printf(" ");
+              if(achou) printf("%ld · %ld = %ld", tx, ty, tx*ty);
+              printf("\n");
+          }
+          tique7(4, "a testemunha é tripla, e a terceira é a que o eval pede: o BUSCADOR"
+                    " acha a falha exatamente em k = 3 e volta VAZIO em 1, 2 e 4. Os"
+                    " degraus da torre de Hurwitz não são citados — são o resultado da"
+                    " procura");
+          tique7(5, mal == 0 && folga_mal == 0 && gume_mal == 0
+                 ? "logo a conservação da norma e a decomposição directo ⊕ cruzado são a"
+                   " MESMA frase — e Cauchy–Schwarz é essa igualdade com um termo"
+                   " apagado, sendo o termo apagado o cruzado"
+                 : "alguma das três falha — NÃO afirmo");
+          tique7(6, "e a VOLTA diz PORQUE É QUE O DEGRAU É 4: o produto de dois vetores"
+                    " PUROS de ℚ³ é uv = (−⟨u,v⟩, u×v), um escalar e um vetor. O escalar"
+                    " NÃO CABE em dimensão 3, e é preciso um quarto lugar. Hurwitz não é"
+                    " um teto posto de fora — é onde o directo arranja lugar para se"
+                    " sentar ao lado do cruzado. Medido em tests/hurwitz.c §H6, agora"
+                    " todo em inteiros e sem tolerância nenhuma"); }
+        break; }
+    }
+}
+static int resolve_exterior(const char *f){
+    const char *p = f;
+    for(size_t i = 0; i < sizeof EX15/sizeof *EX15; i++)
+        if(!strcmp(p, EX15[i].nome)){ exterior_resolve(EX15[i].n); return 1; }
+    if(!strncmp(p, "exterior", 8)) p += 8;
+    else if(!strncmp(p, "multilinear", 11)) p += 11;
+    else return 0;
+    while(*p == ' ') p++;
+    if(!*p){
+        printf("   Λ V, o Hodge e o fecho do dual — «exterior N» ou «exterior <nome>»\n");
+        printf("   e o gume não é acessório: procura-se a TESTEMUNHA DA FALHA\n\n");
+        for(size_t i = 0; i < sizeof EX15/sizeof *EX15; i++){
+            printf("     %2d  ", EX15[i].n);
+            esc_col(EX15[i].nome, 26);
+            printf("  %s\n", EX15[i].enunciado);
+        }
+        return 1;
+    }
+    if(*p >= '0' && *p <= '9'){
+        long n = 0;
+        while(*p >= '0' && *p <= '9') n = n*10 + (*p++ - '0');
+        while(*p == ' ') p++;
+        if(!*p && n >= 1 && n <= 15){ exterior_resolve((int)n); return 1; }
+        return 0;
+    }
+    return 0;
+}
 static const struct { int n; const char *nome; const char *enunciado; } TS16[] = {
  {  1, "gram",             "a matriz de Gram, e a forma é ela em coordenadas" },
  {  2, "congruencia",      "mudar de base leva G em PᵀGP — e NÃO em P⁻¹AP" },
@@ -2662,6 +3178,32 @@ static void esc_vec(Vec v){
     printf("(");
     for(int i = 0; i < v.n; i++){ if(i) printf(", "); esc_qz("", v.c[i], ""); }
     printf(")");
+}
+static void esc_biv(Biv b){
+    /* a base de Λ²(ℚ³), escrita por extenso — e os termos nulos NÃO se escondem, para
+     * que o leitor veja as três coordenadas e não adivinhe quais faltam */
+    const char *base[3] = { "e₁∧e₂", "e₁∧e₃", "e₂∧e₃" };
+    int primeiro = 1;
+    for(int i = 0; i < 3; i++){
+        if(!b.c[i].p) continue;
+        printf("%s", primeiro ? "" : " + ");
+        esc_qz("", b.c[i], "");
+        printf("·%s", base[i]);
+        primeiro = 0;
+    }
+    if(primeiro) printf("0");
+}
+static void esc_biv4(Biv4 b){
+    const char *base[6] = { "e₁∧e₂","e₁∧e₃","e₁∧e₄","e₂∧e₃","e₂∧e₄","e₃∧e₄" };
+    int primeiro = 1;
+    for(int i = 0; i < 6; i++){
+        if(!b.c[i].p) continue;
+        printf("%s", primeiro ? "" : " + ");
+        esc_qz("", b.c[i], "");
+        printf("·%s", base[i]);
+        primeiro = 0;
+    }
+    if(primeiro) printf("0");
 }
 static void esc_mat(const char *ind, Mat A){
     for(int i = 0; i < A.m; i++){
@@ -8874,6 +9416,7 @@ static int resolve_mostra(const char *f){ return resolve_mostra_em(f, "../papers
 static int resolve_simbolico(const char *fala){
     if(resolve_divisibilidade(fala)) return 1;     /* o relógio de 6 ticks */
     if(resolve_bezout(fala)) return 1;             /* a testemunha e o critério */
+    if(resolve_exterior(fala)) return 1;           /* Λ V, Hodge e o fecho, os 15 */
     if(resolve_tensor(fala)) return 1;             /* Gram → exterior, os 16 */
     if(resolve_forma(fala)) return 1;              /* formas e espectro, os 16 */
     if(resolve_linear(fala)) return 1;             /* linear e dual, 16 + 14 */
@@ -9912,6 +10455,240 @@ static int teste(void){
                 if(e_conta(nu2)) roubadas++;
             }
             ok("e a membrana nao rouba o corpus: fala sem LaTeX nao vira conta", roubadas == 0);
+
+        /* ═══ §C40 Λ V, O HODGE, E O FECHO DO PAR DIRECTO/CRUZADO ═════════════════
+         * O `eval.txt` pediu quinze coisas de álgebra exterior e pediu-as com uma regra:
+         * «em vez de fornecer somente exemplos de matrizes, dá para construir problemas
+         * onde ele tenha que PROCURAR A TESTEMUNHA DA FALHA DA HIPÓTESE».
+         *
+         * Mas o andar não se fechou como veio. O Aarão mandou ler as álgebras de Gentil e
+         * o dual de Hurwitz e FECHAR o dual — «gentil conserva norma» — e o defeito que
+         * ele apanhou era meu e nenhum medidor o via: eu construíra o CRUZADO (Λ²) e
+         * deixara o DIRECTO do outro lado sem a frase que os junta. Metade de um par.
+         *
+         * A frase é Lagrange, e é uma linha: ⟨u,v⟩² + ‖u∧v‖² = N(u)N(v). */
+        printf("\n§C40 Λ V E O FECHO: directo² + cruzado² = N(u)N(v), e a raiz não se tira.\n\n");
+        {
+            Vec e3[3], e4[4];
+            for(int i = 0; i < 3; i++){ e3[i] = vec0(3); e3[i].c[i] = qz(1,1); }
+            for(int i = 0; i < 4; i++){ e4[i] = vec0(4); e4[i].c[i] = qz(1,1); }
+
+            /* (1) A ALTERNÂNCIA — e a antissimetria SAI dela, não é axioma à parte */
+            { int mal_zero = 0, mal_troca = 0; long feitos = 0;
+              for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++) for(long c = -3; c <= 3; c++)
+              for(long d = -3; d <= 3; d++) for(long e = -3; e <= 3; e++) for(long f = -3; f <= 3; f++){
+                  Vec p = vec0(3), q = vec0(3);
+                  p.c[0]=qz_de_inteiro(a); p.c[1]=qz_de_inteiro(b); p.c[2]=qz_de_inteiro(c);
+                  q.c[0]=qz_de_inteiro(d); q.c[1]=qz_de_inteiro(e); q.c[2]=qz_de_inteiro(f);
+                  if(!biv_zero(ex_wedge(p,p))) mal_zero++;
+                  if(!biv_igual(ex_wedge(p,q), biv_esc(qz(-1,1), ex_wedge(q,p)))) mal_troca++;
+                  feitos++;
+              }
+              printf("      u∧u = 0 e u∧v = −(v∧u) em %ld pares: %d e %d falhas\n",
+                     feitos, mal_zero, mal_troca);
+              ok("a ALTERNÂNCIA é a definição e a antissimetria é CONSEQUÊNCIA: de"
+                 " (u+v)∧(u+v) = 0 abre-se e sobra u∧v + v∧u = 0. Mede-se a segunda para"
+                 " confirmar que sai mesmo da primeira, e não porque a programei",
+                 mal_zero == 0 && mal_troca == 0 && feitos == 117649); }
+
+            /* (2) O DETERMINANTE É O FATOR DE VOLUME, e não uma receita de cofatores */
+            { long tt[] = {2,1,0, 1,3,1, 0,1,2};
+              Mat T = mat_de_inteiros(3,3,tt);
+              Qz d = mat_det(T);
+              int mal = 0; long feitos = 0;
+              Vec w = vec0(3); w.c[1] = qz(1,1); w.c[2] = qz(2,1);
+              for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++) for(long c = -2; c <= 2; c++)
+              for(long d2 = -2; d2 <= 2; d2++) for(long e = -2; e <= 2; e++) for(long f = -2; f <= 2; f++){
+                  Vec p = vec0(3), q = vec0(3);
+                  p.c[0]=qz_de_inteiro(a); p.c[1]=qz_de_inteiro(b); p.c[2]=qz_de_inteiro(c);
+                  q.c[0]=qz_de_inteiro(d2); q.c[1]=qz_de_inteiro(e); q.c[2]=qz_de_inteiro(f);
+                  if(!qz_igual(ex_misto(mat_aplica(T,p), mat_aplica(T,q), mat_aplica(T,w)),
+                               qz_mult(d, ex_misto(p,q,w)))) mal++;
+                  feitos++;
+              }
+              printf("      Tu∧Tv∧Tw = det(T)·(u∧v∧w) em %ld triplos: %d falhas\n", feitos, mal);
+              printf("      (det T = ");
+              esc_qz("", d, ")\n");
+              ok("Λⁿ T é a MULTIPLICAÇÃO por det T — o determinante é a ação do operador no"
+                 " volume, e a receita de cofatores é só como se calcula. E fecha com o que"
+                 " a casa já media: as cartas EQUIAREAIS de corpo_universal §370 são det = 1,"
+                 " isto é, Λⁿ T = id (tests/arquimedes_area.js, 21:0)",
+                 mal == 0 && feitos == 15625); }
+
+            /* (3) A ESTRELA: ⋆⋆ = id, resíduo 0 — e é a mesma estrela do thm:central */
+            { int mal = 0; long feitos = 0;
+              for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++) for(long c = -3; c <= 3; c++){
+                  Vec p = vec0(3);
+                  p.c[0]=qz_de_inteiro(a); p.c[1]=qz_de_inteiro(b); p.c[2]=qz_de_inteiro(c);
+                  if(!vec_igual(p, ex_hodge2(ex_hodge1(p)))) mal++;
+                  feitos++;
+              }
+              printf("      ⋆⋆v = v em %ld vetores: %d falhas\n", feitos, mal);
+              ok("o ⋆ de Hodge é uma INVOLUÇÃO exata (⋆⋆ = id, resíduo 0) entre Λᵏ e Λⁿ⁻ᵏ, e"
+                 " a bijeção existe porque C(n,k) = C(n,n−k). É a ESTRELA do thm:central do"
+                 " corpo estelar, com ν∘ν = id — e NÃO é o «Hodge» das teorias, que ali é a"
+                 " CONJECTURA dos ciclos algébricos: mesmo nome, outro objeto",
+                 mal == 0 && feitos == 343); }
+
+            /* (4) O CRUZADO SÓ É VETOR EM DIMENSÃO 3, e o Pfaffiano diz porquê */
+            { Biv4 simples = ex_wedge4(e4[0], e4[1]);
+              Biv4 nao = biv4_soma(ex_wedge4(e4[0],e4[1]), ex_wedge4(e4[2],e4[3]));
+              long achados[2] = {0,0}, tentados[2] = {0,0};
+              Biv4 alvo[2]; alvo[0] = simples; alvo[1] = nao;
+              for(int t = 0; t < 2; t++)
+              for(long a = -2; a <= 2 && !achados[t]; a++) for(long b = -2; b <= 2 && !achados[t]; b++)
+              for(long c = -2; c <= 2 && !achados[t]; c++) for(long d = -2; d <= 2 && !achados[t]; d++)
+              for(long e = -2; e <= 2 && !achados[t]; e++) for(long f = -2; f <= 2 && !achados[t]; f++)
+              for(long g = -2; g <= 2 && !achados[t]; g++) for(long h = -2; h <= 2 && !achados[t]; h++){
+                  Vec p = vec0(4), q = vec0(4);
+                  p.c[0]=qz_de_inteiro(a); p.c[1]=qz_de_inteiro(b);
+                  p.c[2]=qz_de_inteiro(c); p.c[3]=qz_de_inteiro(d);
+                  q.c[0]=qz_de_inteiro(e); q.c[1]=qz_de_inteiro(f);
+                  q.c[2]=qz_de_inteiro(g); q.c[3]=qz_de_inteiro(h);
+                  tentados[t]++;
+                  if(biv4_igual(ex_wedge4(p,q), alvo[t])) achados[t]++;
+              }
+              long aa[] = {0,1,2,3, -1,0,4,5, -2,-4,0,6, -3,-5,-6,0};
+              Mat A = mat_de_inteiros(4,4,aa);
+              Qz pf = ex_pfaffiano(A);
+              printf("      CONTROLO (e₁∧e₂, simples):     %ld tentados, %ld achado\n",
+                     tentados[0], achados[0]);
+              printf("      GUME     (e₁∧e₂+e₃∧e₄):        %ld tentados, %ld achados\n",
+                     tentados[1], achados[1]);
+              printf("      e Pf(A) = "); esc_qz("", pf, "");
+              printf("   Pf² = "); esc_qz("", qz_mult(pf,pf), "");
+              printf("   det A = "); esc_qz("", mat_det(A), "\n");
+              ok("Pf² = det, e Pf = 0 ⟺ o bivetor é SIMPLES: em dimensão 4 há bivetores que"
+                 " não são u∧v de par nenhum, e a busca esgota-se sem achar. E o vazio só"
+                 " vale porque o MESMO buscador ACHA no bivetor simples — sem esse controlo,"
+                 " «0 achados» tanto podia ser a ausência do objeto como o buscador partido",
+                 achados[0] == 1 && achados[1] == 0 && tentados[1] == 390625
+                 && qz_igual(qz_mult(pf,pf), mat_det(A))); }
+
+            /* (4b) A ORIENTAÇÃO — e o buraco que a MUTAÇÃO apanhou.
+             * Eu imprimia sgn(det) nas falas 7 e 14 e nunca o media: trocar o `0` do caso
+             * degenerado por `+1` na `ex_orientacao` sobrevivia a toda a bateria. O caso
+             * singular é um TERCEIRO estado — não é −1, é ausência de orientação —, e uma
+             * secção que só exercita os dois primeiros deixa o terceiro por medir. */
+            { long id[] = {1,0,0, 0,1,0, 0,0,1};
+              long tr[] = {0,1,0, 1,0,0, 0,0,1};
+              long sg[] = {1,0,0, 0,1,0, 0,0,0};
+              Mat I3 = mat_de_inteiros(3,3,id), Tr = mat_de_inteiros(3,3,tr);
+              Mat Sg = mat_de_inteiros(3,3,sg);
+              int tres = (ex_orientacao(I3) == 1) && (ex_orientacao(Tr) == -1)
+                      && (ex_orientacao(Sg) == 0);
+              int volta = (ex_orientacao(mat_mult(Tr,Tr)) == 1);   /* duas trocas devolvem */
+              /* e a multiplicatividade, VARRIDA — com o degenerado a aparecer mesmo */
+              int mal = 0; long feitos = 0, zeros = 0, negativos = 0;
+              for(long a = -1; a <= 1; a++) for(long b = -1; b <= 1; b++)
+              for(long c = -1; c <= 1; c++) for(long d = -1; d <= 1; d++){
+                  long m1[] = {a,b,0, c,d,0, 0,0,1};
+                  for(long e = -1; e <= 1; e++) for(long f = -1; f <= 1; f++)
+                  for(long g = -1; g <= 1; g++) for(long h = -1; h <= 1; h++){
+                      long m2[] = {e,f,0, g,h,0, 0,0,1};
+                      Mat A = mat_de_inteiros(3,3,m1), B = mat_de_inteiros(3,3,m2);
+                      int oa = ex_orientacao(A), ob = ex_orientacao(B);
+                      if(ex_orientacao(mat_mult(A,B)) != oa*ob) mal++;
+                      if(oa == 0) zeros++;
+                      if(oa < 0) negativos++;
+                      feitos++;
+                  }
+              }
+              printf("      or(I) = %d, or(troca) = %d, or(singular) = %d;"
+                     " duas trocas devolvem: %s\n",
+                     ex_orientacao(I3), ex_orientacao(Tr), ex_orientacao(Sg),
+                     volta ? "sim" : "NÃO");
+              printf("      or(AB) = or(A)·or(B) em %ld pares: %d falhas"
+                     " (%ld com or = 0, %ld com or = −1)\n", feitos, mal, zeros, negativos);
+              ok("a ORIENTAÇÃO é sgn(det) e é MULTIPLICATIVA, e o caso degenerado é um"
+                 " TERCEIRO estado: or = 0 não é −1, é ausência de orientação. Esta"
+                 " asserção nasceu de uma MUTAÇÃO que sobreviveu — trocar o 0 por +1"
+                 " passava a bateria inteira, porque eu imprimia a orientação e nunca a"
+                 " media. E os três estados exercitam-se mesmo: há zeros e negativos na"
+                 " varredura, senão o ramo do degenerado não corria",
+                 tres && volta && mal == 0 && zeros > 0 && negativos > 0); }
+
+            /* (5) O FECHO: LAGRANGE, e Cauchy–Schwarz como igualdade com um termo apagado */
+            { int mal = 0, folga_mal = 0; long feitos = 0;
+              for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++) for(long c = -3; c <= 3; c++)
+              for(long d = -3; d <= 3; d++) for(long e = -3; e <= 3; e++) for(long f = -3; f <= 3; f++){
+                  Vec p = vec0(3), q = vec0(3);
+                  p.c[0]=qz_de_inteiro(a); p.c[1]=qz_de_inteiro(b); p.c[2]=qz_de_inteiro(c);
+                  q.c[0]=qz_de_inteiro(d); q.c[1]=qz_de_inteiro(e); q.c[2]=qz_de_inteiro(f);
+                  Qz A2, B2; ex_lagrange(p, q, &A2, &B2);
+                  if(!qz_igual(A2, B2)) mal++;
+                  if(!qz_igual(ex_folga_cs(p,q), ex_cruzado2(p,q))) folga_mal++;
+                  feitos++;
+              }
+              printf("      Lagrange em %ld pares: %d falhas; e a folga de C–S é o cruzado:"
+                     " %d falhas\n", feitos, mal, folga_mal);
+              ok("O PAR FECHA: directo² + cruzado² = N(u)N(v). A conservação da norma que a"
+                 " torre de Hurwitz mede e a decomposição simétrica ⊕ antissimétrica que a"
+                 " casa chama directo/cruzado (corpo-estelar §640) são a MESMA frase — e eu"
+                 " tinha as duas metades em ficheiros diferentes sem nunca a escrever",
+                 mal == 0 && feitos == 117649);
+              ok("e Cauchy–Schwarz deixa de ser desigualdade: é Lagrange com um termo"
+                 " apagado, e o termo apagado é ‖u∧v‖² ≥ 0. A folga não é uma sobra — É o"
+                 " cruzado, em todos os 117649 pares",
+                 folga_mal == 0); }
+
+            /* (6) O GUME DE HURWITZ, PROCURADO — e o seu limite, dito à frente */
+            { int gume_mal = 0;
+              long tx = 0, ty = 0, t3x = 0, t3y = 0;
+              for(int k = 1; k <= 4; k++){
+                  int achou = ex_gume_hurwitz(k, 40, &tx, &ty);
+                  if(achou != (k == 3)) gume_mal++;
+                  if(k == 3 && achou){ t3x = tx; t3y = ty; }
+              }
+              printf("      a soma de k quadrados fecha para o produto em k = 1, 2, 4 e NÃO"
+                     " em k = 3\n");
+              printf("      a testemunha achada: %ld · %ld = %ld\n", t3x, t3y, t3x*t3y);
+              ok("O BUSCADOR acha a testemunha EXATAMENTE em k = 3 e volta vazio em 1, 2 e 4"
+                 " — os degraus 1, 2, 4 da torre de Hurwitz não são citados aqui, são o"
+                 " RESULTADO da procura. E o limite deste gume diz-se à frente: para k ≥ 4"
+                 " todo natural já é soma de k quadrados, logo a tese é sempre verdadeira e"
+                 " correr isto em 5, 6, 7 mediria o vazio. O que exclui esses é a"
+                 " BILINEARIDADE, e essa é o teorema, não um número",
+                 gume_mal == 0 && t3x == 2 && t3y == 14); }
+
+            /* (7) O GUME DA CARACTERÍSTICA 2, e o controlo nos primos ímpares */
+            { long b[4]; int achou2 = ex_gume_car2(2, b);
+              int achou_impar = 0;
+              for(long q = 3; q <= 7; q += 2){ long c[4]; if(ex_gume_car2(q, c)) achou_impar++; }
+              printf("      em 𝔽₂: ");
+              if(achou2) printf("B = [[%ld,%ld],[%ld,%ld]] é simétrica E antissimétrica e"
+                                " NÃO é nula\n", b[0], b[1], b[2], b[3]);
+              else       printf("nada achado\n");
+              printf("      em 𝔽₃, 𝔽₅, 𝔽₇: %d achados (tem de ser 0)\n", achou_impar);
+              ok("a conta dele — B(v,w) − B(w,v) = 2B(v,w) — força B = 0 quando 2 ≠ 0, e em"
+                 " 𝔽₂ a implicação DESAPARECE. Não se afirma: o mesmo programa corre nos"
+                 " quatro corpos e só em 𝔽₂ traz testemunha. É a fibra vazia a derrubar uma"
+                 " identidade, e os primos ímpares são o controlo",
+                 achou2 == 1 && achou_impar == 0); }
+
+            /* E OS QUINZE CORREM */
+            { int vmal = 0, por_n = 0, por_nome = 0;
+              fflush(stdout);
+              int guarda = dup(1), nulo = open("/dev/null", O_WRONLY);
+              if(guarda >= 0 && nulo >= 0) dup2(nulo, 1);
+              for(int k = 1; k <= 15; k++){
+                  char fala[64];
+                  snprintf(fala, sizeof fala, "exterior %d", k);
+                  if(resolve_exterior(fala)) por_n++; else vmal++;
+              }
+              for(size_t i = 0; i < sizeof EX15/sizeof *EX15; i++)
+                  if(resolve_exterior(EX15[i].nome)) por_nome++; else vmal++;
+              if(resolve_exterior("exterior 16")) vmal++;
+              fflush(stdout);
+              if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
+              if(nulo >= 0) close(nulo);
+              printf("      os quinze: %d pelo número, %d pelo nome, e a 16 é recusada\n",
+                     por_n, por_nome);
+              ok("OS QUINZE de Λ V correm pelo NÚMERO e pelo NOME, com o fora de alcance"
+                 " RECUSADO — e a escada fecha: linear → dual → tensor → exterior → o"
+                 " FECHO, onde o cruzado que eu tinha sozinho encontra o directo",
+                 vmal == 0 && por_n == 15 && por_nome == 15); }
+        }
 
         /* ═══ §C39 GRAM → SYLVESTER → JORDAN → TENSOR → EXTERIOR ══════════════════
          * Três exigências novas, e nenhuma é de conteúdo:
