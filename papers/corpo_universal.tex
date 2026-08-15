@@ -1224,6 +1224,73 @@ $\varepsilon$--$\delta$.
 \emph{Medido:} \code{tests/lebesgue\_toro.js} ($7{:}0$).
 \end{observacao}
 
+\begin{teorema}[a nilpotência é o dual da idempotência --- e a leitura do
+Teorema Central sem limite dimensional]\label{thm:nilpotencia-dual}
+Aplicar um operador \emph{duas vezes} tem dois extremos, e a casa só tinha
+um deles escrito:
+\[
+\boxed{
+P^{2}=P\ \text{(idempotente)}:\ V=\operatorname{im}P\oplus\ker P
+\qquad\text{contra}\qquad
+d^{2}=0\ \text{(nilpotente)}:\ \operatorname{im}d\subseteq\ker d.
+}
+\]
+\textbf{(i) O dual estava por escrever.} A \emph{idempotência} aparece em
+dois teoremas --- o projector espectral
+$2^{-1}(\mathrm{id}+T^{N/2})$ com «partição da unidade e idempotência
+exatas» (Teor.~\ref{thm:metronomo-fourier}) e a abertura/fecho
+$\alpha=\delta\varepsilon\le\mathrm{id}\le\varepsilon\delta=\varphi$,
+«ambos idempotentes» (Teor.~\ref{thm:morf-par}). A \emph{nilpotência}
+não aparecia em nenhum. São os dois extremos: um preserva inteiramente
+a sua imagem, o outro aniquila-a inteiramente; um dá soma
+\textbf{directa} ($\operatorname{im}\cap\ker=0$), o outro dá
+\textbf{encaixe} ($\operatorname{im}\subseteq\ker$). Medido:
+$44$ idempotentes $2\times2$ com posto $+$ nulidade $=2$, sem falha.
+
+\textbf{(ii) O operador que realiza a nilpotência.} A derivada exterior
+$d:\Lambda^{k}\to\Lambda^{k+1}$ é \emph{uma} operação, e em
+$\mathbb{R}^{3}$ ela dá o gradiente em grau $0$, o rotacional em grau
+$1$ e a divergência em grau $2$ --- medido contra as três construídas
+à parte, $125$ formas de cada grau, sem divergência. E então
+$\operatorname{rot}\nabla=0$ e $\operatorname{div}\operatorname{rot}=0$
+deixam de ser duas identidades e passam a $d^{2}=0$, uma só.
+
+\textbf{(iii) E a energia: a idempotência sozinha NÃO a conserva.} O
+que separa não é o que conserva. Para $P$ idempotente
+\emph{e simétrico} (o projector ortogonal),
+$\|x\|^{2}=\|Px\|^{2}+\|x-Px\|^{2}$ em $196$ de $196$; retirada a
+simetria, falha em $1568$ de $1960$. A partição da unidade dá a
+\emph{separação}; a ortogonalidade dá a \emph{energia}
+(Teor.~\ref{thm:parseval-multi}). Duas hipóteses, dois papéis --- e a
+segunda estava a viajar de borla dentro da primeira.
+
+\textbf{(iv) A leitura do Teorema Central, sem limite dimensional.} O
+Teorema Central diz que o limite no grau oito é do lado
+\emph{discreto/bilinear} --- Hurwitz classifica o bilinear ---
+e \textbf{não do objecto}. A torre de Cayley--Dickson deu a primeira
+testemunha: em dimensão $16$ a norma parte-se e a involução fica.
+O par $(\partial,d)$ dá uma \emph{segunda}, de outra família e do mesmo
+lado. E ela não se estabelece varrendo dimensões --- isso mediria as
+dimensões varridas ---, mas pelo \textbf{mecanismo}: em $d^{2}\omega$
+os índices entram antissimetrizados e as segundas parciais
+$\partial_i\partial_j$ são simétricas, e a contracção de um tensor
+antissimétrico com um simétrico é nula \emph{sem que o argumento
+mencione $n$}. Medido de $n=2$ a $n=40$, com o controlo a separar
+(trocada a antissimetria por simetria, a contracção deixa de anular) e
+o tecto do \code{long} declarado à parte.
+
+\textbf{Estatuto, dito à frente.} O par $(\partial,d)$ \emph{não} é uma
+bijeção dual no sentido da casa: a Definição de bijeção dual exige
+$\nu\circ\nu=\mathrm{id}$, e aqui $d\circ d=0$, que é outra coisa. É
+uma \textbf{adjunção}, $\langle\omega,\partial R\rangle=\langle
+d\omega,R\rangle$, da mesma família do par
+erosão/dilatação. E a correspondência com o Teorema Central é uma
+\emph{leitura} --- uma segunda instância do mesmo fenómeno, e não uma
+identificação de teoremas.
+\emph{Medido:} \code{tests/borda\_sem\_teto.c} ($7{:}0$).
+$\square$
+\end{teorema}
+
 \begin{teorema}[a renormalização do espectro --- multiespectral,
 autossimilar, com núcleo invariável]\label{thm:renormalizacao}
 A lei de transição entre escalas não se inventa: \textbf{é a dobra}
