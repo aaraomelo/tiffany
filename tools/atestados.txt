@@ -81,7 +81,7 @@ continuo b98335aed4401267 0
 contorno_riemann 6cf7ea38b2e3b6b7 0
 contrato 5fffd2633c0858b1 0
 controlo_front e94ce67fbef877c1 0
-conversa 549d248f444c7062 0
+conversa 2907c829976360e7 0
 converte fe99f74438556e46 0
 convolucao_universal 14db429c007982da 0
 coroa bf5f52e1e6e43aea 0
@@ -211,7 +211,7 @@ gerador_primos dccf9257d62b61f2 0
 geral 8b348cb631664831 0
 gguf e0586cfef6b9f200 0
 gitb c558deae4b86e995 0
-graduacao_realiza 7e066e509a6159db 0
+graduacao_realiza 56c51e03f27a2292 0
 grau 875760f31c09ce87 0
 grupo 17bb34c3fdd2c251 0
 guarda 6e9ee3952f6cb691 0

@@ -15,7 +15,9 @@
  *
  *        x² = a·x + b        (Cayley--Hamilton: a = traço, b = −determinante)
  *
- * e daí x·(x − a) = b, logo x⁻¹ = (x − a)/b existe SE E SÓ SE b ≠ 0. O b é a fibra.
+ * e daí x·(x − a) = b, logo x⁻¹ = (x − a)/b existe SE E SÓ SE b ≠ 0 — e portanto,
+ * DENTRO DESTA CLASSE de fechos quadráticos, é o b que controla o inverso. Não se
+ * afirma que «b é a fibra» em geral: o medido é sobre x² = ax + b.
  *
  *   estaca    E² = I        b = +1     unidade
  *   rotor     J² = −I       b = −1     unidade      (Lei 2)
@@ -41,7 +43,7 @@
  * E o par directo/cruzado do estelar realiza-se nela: o cruzado é α∧β e o directo é
  * α∧⋆β, o MESMO ∧ em graus diferentes, com Lagrange a fechar entre os dois.
  *
- *   §G1  a tabela de fechos do Peano é toda x² = ax + b, e b decide a fibra
+ *   §G1  a tabela de fechos do Peano é toda x² = ax + b, e nesta classe o b decide
  *   §G2  o diferencial entra como b = 0 — e o projector é o outro
  *   §G3  o construtor da graduação não tem topo: só a REALIZAÇÃO acaba, em Ωⁿ → 0
  *   §G4  o directo e o cruzado do estelar, realizados por ∧ e ⋆, com Lagrange
@@ -86,7 +88,7 @@ printf("    mede-se o que Peano e o Estelar fazem com a nilpotência.\n");
 long e[] = {0,1,1,0}, j[] = {0,-1,1,0}, p[] = {1,0,0,0}, d[] = {0,1,0,0};
 long m2[] = {2,1,1,0}, m3[] = {3,1,1,0};
 
-printf("\n§G1  A TABELA DE FECHOS DO PEANO é toda x² = a·x + b — e b é a FIBRA.\n\n");
+printf("\n§G1  A TABELA DE FECHOS é toda x² = a·x + b — e NESTA CLASSE o b decide.\n\n");
 {
     printf("      operador                 relação de fecho          b       invertível\n");
     mostra("estaca  E² = I",      mat_de_inteiros(2,2,e));
@@ -112,8 +114,10 @@ printf("\n§G1  A TABELA DE FECHOS DO PEANO é toda x² = a·x + b — e b é a 
     printf("      VARRIDO em %ld matrizes: %ld violações de «b ≠ 0 ⟺ invertível»,"
            " e %ld fechos que não fecham\n\n", tot, viola, ch_mal);
     ok("TODA A TABELA DE FECHOS DO PEANO É A MESMA FORMA: x² = a·x + b, com a = traço e"
-       " b = −determinante. E o b É A FIBRA: de x·(x−a) = b sai x⁻¹ = (x−a)/b, que existe"
-       " exactamente quando b ≠ 0 — medido em 2401 matrizes sem uma violação. A estaca,"
+       " b = −determinante. E DENTRO DESTA CLASSE é o b que controla o inverso: de"
+       " x·(x−a) = b sai x⁻¹ = (x−a)/b, que existe exactamente quando b ≠ 0 — medido em"
+       " 2401 matrizes sem uma violação. O enunciado é sobre x² = ax + b, e não uma"
+       " afirmação geral sobre fibras. A estaca,"
        " o rotor e a borda têm b = ±1 e são unidades; o projector e o diferencial têm"
        " b = 0 e não são",
        viola == 0 && ch_mal == 0);

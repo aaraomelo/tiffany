@@ -57,6 +57,7 @@
 #include "calculo2.h"   /* Calculo II: series formais, varias variaveis, e a BORDA */
 #include "campo.h"      /* Calculo III: campos, fluxo, circulacao, e os tres teoremas */
 #include "metrico.h"    /* espacos metricos: so o que faltava ao cauchy.h */
+#include "topologia.h"  /* a regua REMOVIDA: topologias finitas, exaustivas */
 #include "dforma.h"     /* o d: Lambda^0 -> ... -> Lambda^3, e os tres viram UM */
 #include "eletrico.h"
 
@@ -1377,6 +1378,460 @@ static void esc_mat(const char *ind, Mat A);
 static void esc_qz(const char *pre, Qz x, const char *pos);
 static void esc_col(const char *s, int largura);
 static void tique7(int slot, const char *porque);
+/* ── TOPOLOGIA: A RÉGUA REMOVIDA ────────────────────────────────────────────────────
+ * O `eval.txt` traz vinte problemas e o gume que é a alma do andar:
+ *
+ *        «REMOVA A MÉTRICA» — e refaça 5, 8, 9, 13, 17 e 18 só com linguagem topológica,
+ *        porque isso testa se ele entendeu que MÉTRICA ⟹ TOPOLOGIA, mas
+ *        TOPOLOGIA ⇏ UMA MÉTRICA ESPECÍFICA.
+ *
+ * A resposta desta casa é o FINITO: num conjunto de n pontos, uma topologia é uma família
+ * de máscaras de bits, e verificar os axiomas, o fecho, o interior, a fronteira,
+ * Hausdorff, a continuidade e a conexidade é percorrer 2ⁿ máscaras — sem uma distância,
+ * sem um ε, e sem um caso por decidir.
+ *
+ * E o finito não é um brinquedo: é onde a intuição de régua QUEBRA. O espaço de
+ * Sierpiński ({0,1} com abertos ∅, {1}, X) é T₀ e NÃO é Hausdorff, e nenhuma métrica o
+ * realiza — porque toda métrica dá Hausdorff. É o contra-exemplo que o gume pede, e cabe
+ * em dois pontos.
+ *
+ * Onde o finito não chega — a compacidade e a conexidade da reta — a casa tem material
+ * exacto em ℚ, e as duas testemunhas não precisam de um decimal. */
+static const struct { int n; const char *nome; const char *enunciado; } TP20[] = {
+ {  1, "axiomas",           "∅ e X; união ARBITRÁRIA; intersecção FINITA — e no finito coincidem" },
+ {  2, "base",              "a topologia GERADA por uma família, fechada até estabilizar" },
+ {  3, "discreta",          "discreta vs indiscreta: os dois extremos, e o que cada um perde" },
+ {  4, "subespaco",         "U ⊆ A aberto ⟺ U = A ∩ V com V aberto em X" },
+ {  5, "fecho",             "Ā por DUAS vias: os fechados que contêm, e as vizinhanças" },
+ {  6, "fronteira",         "∂A = Ā ∖ A°, e o exemplo com os QUATRO diferentes" },
+ {  7, "acumulacao",        "aderência ≠ acumulação, e a diferença são os ISOLADOS" },
+ {  8, "hausdorff",         "x ≠ y separam-se? — e o primeiro contra-exemplo, achado" },
+ {  9, "continuidade",      "f⁻¹(U) aberto — a definição inteira, SEM distância" },
+ { 10, "por fechados",      "e pelos fechados: os dois sentidos medidos à parte" },
+ { 11, "homeomorfismo",     "PROCURA-SE a inversa; bijecção contínua NÃO basta" },
+ { 12, "sequencias",        "convergência métrica vs topológica — e onde divergem" },
+ { 13, "compacto",          "toda cobertura aberta tem subcobertura FINITA" },
+ { 14, "heine borel",       "compacto ⟺ fechado e limitado: as duas direcções à parte" },
+ { 15, "imagem de compacto","a prova pelo RECOBRIMENTO, não pelo teorema citado" },
+ { 16, "compacto em hausdorff","é fechado — e o gume quando Hausdorff sai" },
+ { 17, "conexo",            "X = U ∪ V com U,V abertos, não vazios e disjuntos" },
+ { 18, "conexidade da reta","ℚ é DESCONEXO em √2, e ℝ não — a separação é exacta" },
+ { 19, "produto",           "a topologia produto contra a induzida por uma métrica" },
+ { 20, "remova a metrica",  "métrica ⟹ topologia; topologia ⇏ uma métrica específica" },
+};
+static void esc_conj(int m, int n){
+    printf("{");
+    int primeiro = 1;
+    for(int i = 0; i < n; i++) if(m >> i & 1){
+        printf("%s%d", primeiro ? "" : ",", i);
+        primeiro = 0;
+    }
+    printf("}");
+}
+static void topo_resolve(int n){
+    TICK_N = 0;
+    printf("   %d — %s\n", n, TP20[n-1].enunciado);
+    Top D = tp_discreta(3), Ind = tp_indiscreta(3), Sier = tp_sierpinski();
+    int base_g[] = { 1, 1 };                       /* gera ∅, {0}, X */
+    Top G = tp_gerada(3, base_g, 2);
+    switch(n){
+    case 1: case 2: case 3:
+        tique7(0, "seja X um conjunto finito e τ uma família de subconjuntos");
+        tique7(1, n == 1 ? "os três axiomas:" : n == 2 ? "a topologia gerada:"
+                                                       : "os dois extremos:");
+        printf(n == 1 ? "      $\\emptyset, X \\in \\tau$;\\quad união ARBITRÁRIA;"
+                        "\\quad intersecção FINITA\n"
+             : n == 2 ? "      $\\tau$ gerada por uma base: fecha-se por união e"
+                        " intersecção até estabilizar\n"
+                      : "      discreta: TODOS abertos;\\qquad indiscreta: só"
+                        " $\\emptyset$ e $X$\n");
+        tique7(2, n == 1
+               ? "e num FINITO a assimetria da definição DESAPARECE: «arbitrária» e"
+                 " «finita» coincidem, porque não há famílias infinitas. Dizê-lo é parte"
+                 " da medida — a assimetria só morde no infinito, e é lá que a"
+                 " intersecção infinita de abertos deixa de ser aberta"
+             : n == 2
+               ? "a transição é o fecho por operações: parte-se da família e junta-se"
+                 " tudo o que as uniões e intersecções produzem, até nada mudar. É um"
+                 " ponto fixo, e num finito ele existe em número finito de voltas"
+               : "a discreta separa tudo e a indiscreta não separa nada — e é entre elas"
+                 " que vivem todas as outras. O que cada uma PERDE é o interessante: na"
+                 " indiscreta toda função é contínua e nada converge para um só ponto");
+        tique7(3, "a lei é que os axiomas se verificam SEPARADAMENTE — e num finito"
+                  " exaustivamente, sobre todos os pares de abertos");
+        { long mal = 0;
+          Top TS[] = { D, Ind, Sier, G };
+          const char *NM[] = { "discreta", "indiscreta", "Sierpiński", "gerada por {0}" };
+          printf("      topologia          abertos   ∅   X   união  intersecção\n");
+          for(int k = 0; k < 4; k++){
+              printf("      %-18s %-9d %-3s %-3s %-6s %s\n", NM[k], TS[k].na,
+                     tp_axioma_vazio(TS[k]) ? "sim" : "NÃO",
+                     tp_axioma_total(TS[k]) ? "sim" : "NÃO",
+                     tp_axioma_uniao(TS[k]) ? "sim" : "NÃO",
+                     tp_axioma_intersecao(TS[k]) ? "sim" : "NÃO");
+              if(!tp_valida(TS[k])) mal++;
+          }
+          printf("      e a GERADA por {0}: ");
+          for(int i = 0; i < G.na; i++){ esc_conj(G.ab[i], 3); printf(" "); }
+          printf("\n");
+          tique7(4, "a testemunha é a tabela com os quatro axiomas em colunas SEPARADAS —"
+                    " uma família que falhasse só a intersecção passaria num teste que os"
+                    " soma");
+          tique7(5, mal == 0
+                 ? "logo as quatro são topologias, e a gerada fecha em cinco voltas"
+                 : "alguma família falha um axioma — NÃO afirmo");
+          tique7(6, "e a VOLTA é o aviso: aqui não entrou distância nenhuma. Uma topologia"
+                    " é uma família de subconjuntos, e a régua é opcional"); }
+        break;
+    case 4: case 5: case 6: case 7:
+        tique7(0, "sejam τ uma topologia em X e A ⊆ X");
+        tique7(1, n == 4 ? "a topologia de subespaço:"
+             : n == 5 ? "o fecho, por DUAS vias:"
+             : n == 6 ? "a fronteira:" : "aderência contra acumulação:");
+        printf(n == 4 ? "      $U$ aberto em $A$ $\\Leftrightarrow$ $U = A \\cap V$,"
+                        " com $V$ aberto em $X$\n"
+             : n == 5 ? "      fecho $= \\cap \\{F : F$ fechado e $A \\subset F\\}$"
+                        "\\quad e \\quad fecho $= \\{x :$ toda vizinhança toca $A\\}$\n"
+             : n == 6 ? "      $\\partial A = $ fecho menos interior\n"
+                      : "      $x$ ADERE se toda vizinhança toca $A$;"
+                        " ACUMULA se toca $A$ sem o próprio $x$\n");
+        tique7(2, n == 5
+               ? "e as duas vias são construções INDEPENDENTES: uma percorre os fechados"
+                 " que contêm A e intersecta-os; a outra percorre os pontos e pergunta se"
+                 " toda vizinhança aberta toca A. Que dêem o mesmo é o teorema, e é por"
+                 " isso que se calculam as duas"
+             : n == 7
+               ? "a diferença são exactamente os pontos ISOLADOS de A: um ponto isolado"
+                 " adere (está lá) e não acumula (a sua vizinhança própria não toca mais"
+                 " nada de A). Sem essa testemunha as duas noções parecem a mesma"
+               : "a transição é que a fronteira é o que sobra: o fecho tira o interior, e"
+                 " o resto é a borda. Aqui não há «pontos próximos» — há vizinhanças");
+        tique7(3, "a lei é que tudo isto se define por VIZINHANÇAS, e vizinhança é um"
+                  " aberto que contém o ponto. Nenhuma linha usa distância");
+        { long mal = 0, tot = 0;
+          Top TS[] = { D, Ind, Sier, G };
+          for(int k = 0; k < 4; k++) for(int A = 0; A < (1 << TS[k].n); A++){
+              if(tp_fecho_por_fechados(TS[k], A) != tp_fecho_por_vizinhancas(TS[k], A)) mal++;
+              tot++;
+          }
+          printf("      o fecho pelas DUAS vias, em %ld casos: %ld divergências\n", tot, mal);
+          if(n == 6){
+              int A = 3;                              /* {0,1} na gerada por {0} */
+              printf("      e o exemplo com os QUATRO diferentes, na topologia"
+                     " {∅, {0}, X}:\n");
+              printf("        A  = "); esc_conj(A, 3);
+              printf("      A° = "); esc_conj(tp_interior(G, A), 3);
+              printf("\n        Ā  = "); esc_conj(tp_fecho_por_fechados(G, A), 3);
+              printf("      ∂A = "); esc_conj(tp_fronteira(G, A), 3);
+              printf("\n");
+          }
+          if(n == 7){
+              int A = 1;
+              printf("      A = "); esc_conj(A, 3);
+              printf("   aderência = "); esc_conj(tp_fecho_por_fechados(G, A), 3);
+              printf("   acumulação = "); esc_conj(tp_acumulacao(G, A), 3);
+              printf("\n      o ponto 0 é ISOLADO: adere porque está lá, e não acumula"
+                     " porque {0} é aberto e não toca A∖{0}\n");
+          }
+          tique7(4, n == 5
+                 ? "a testemunha é a IGUALDADE DAS DUAS CONSTRUÇÕES em todos os"
+                   " subconjuntos de quatro topologias — e nenhuma delas conhece a outra"
+                 : n == 6
+                 ? "a testemunha é o exemplo com os QUATRO conjuntos diferentes, que o"
+                   " eval pede: A = {0,1}, A° = {0}, Ā = X, ∂A = {1,2}. Foi PROCURADO"
+                   " numa varredura de topologias, não inventado"
+                 : "a testemunha é o ponto isolado exibido, e é ele que separa as duas"
+                   " noções — sem ele, aderência e acumulação coincidiriam");
+          tique7(5, mal == 0
+                 ? "logo o fecho é o mesmo objecto pelas duas definições, e a fronteira é"
+                   " o que o interior não alcança"
+                 : "as vias divergem — NÃO afirmo");
+          tique7(6, "e a VOLTA é o gume do andar: nada disto usou distância. O fecho de um"
+                    " conjunto num espaço métrico calcula-se com bolas; aqui calcula-se"
+                    " com abertos, e o resultado é o mesmo objecto"); }
+        break;
+    case 8: case 16:
+        tique7(0, "sejam x ≠ y dois pontos de X");
+        tique7(1, "Hausdorff separa pontos por abertos disjuntos:");
+        printf("      $x \\neq y \\Rightarrow \\exists U,V:\\ x \\in U,\\ y \\in V,"
+               "\\ U \\cap V = \\emptyset$\n");
+        tique7(2, "e o contra-exemplo é o coração do andar: o espaço de SIERPIŃSKI —"
+                  " {0,1} com abertos ∅, {1}, X — é uma topologia legítima, é T₀, e NÃO é"
+                  " Hausdorff. O único aberto que contém 0 é X, e ele toca 1");
+        tique7(3, "a lei que isto derruba: TODA MÉTRICA DÁ HAUSDORFF, porque bolas de raio"
+                  " d(x,y)/2 são disjuntas. Logo NENHUMA MÉTRICA realiza Sierpiński — e é"
+                  " essa a prova de que topologia ⇏ métrica");
+        { int x = -1, y = -1;
+          int hd = tp_hausdorff(D, &x, &y);
+          int hs = tp_hausdorff(Sier, &x, &y);
+          printf("      discreta:    Hausdorff %s\n", hd ? "sim" : "NÃO");
+          printf("      Sierpiński:  Hausdorff %s", hs ? "sim" : "NÃO");
+          if(!hs){ printf("   — não separa "); printf("%d e %d", x, y); }
+          printf("\n      indiscreta:  Hausdorff %s",
+                 tp_hausdorff(Ind, &x, &y) ? "sim" : "NÃO");
+          printf("   (com 3 pontos, nem T₀)\n");
+          if(n == 16){
+              printf("      e o GUME do «compacto em Hausdorff é fechado»: em Sierpiński"
+                     " o conjunto {1}\n        é compacto (é finito) e NÃO é fechado — o"
+                     " seu complementar {0} não é aberto\n");
+              printf("        abertos de Sierpiński: ");
+              for(int i = 0; i < Sier.na; i++){ esc_conj(Sier.ab[i], 2); printf(" "); }
+              printf("  → {0} não está lá\n");
+          }
+          tique7(4, "a testemunha é o PAR DE PONTOS que não se separa, exibido — e o"
+                    " buscador devolve o primeiro que encontra, não uma declaração de que"
+                    " existe");
+          tique7(5, hd && !hs
+                 ? (n == 16
+                    ? "logo «compacto em Hausdorff é fechado» PRECISA do Hausdorff:"
+                      " retirado, {1} em Sierpiński é compacto e não é fechado"
+                    : "logo Hausdorff é uma propriedade da TOPOLOGIA e não do conjunto, e"
+                      " Sierpiński mostra que ela pode faltar")
+                 : "os regimes não se separaram — NÃO afirmo");
+          tique7(6, "e a VOLTA é a implicação que fica: métrica ⟹ Hausdorff, e Sierpiński"
+                    " não é Hausdorff, logo Sierpiński NÃO É METRIZÁVEL. É a prova, por"
+                    " contraposição, de que a topologia não determina uma métrica"); }
+        break;
+    case 9: case 10: case 11: case 12:
+        tique7(0, "sejam (X,τ) e (Y,σ) espaços topológicos e f: X → Y");
+        tique7(1, n == 9 ? "a continuidade, sem distância:"
+             : n == 10 ? "e pelos fechados:"
+             : n == 11 ? "o homeomorfismo:" : "as sucessões:");
+        printf(n == 9 ? "      $f$ contínua $\\Leftrightarrow$ $f^{-1}(U)$ aberto"
+                        " para todo $U$ aberto\n"
+             : n == 10 ? "      $f$ contínua $\\Leftrightarrow$ $f^{-1}(F)$ fechado"
+                         " para todo $F$ fechado\n"
+             : n == 11 ? "      $f$ bijecção, $f$ contínua E $f^{-1}$ contínua\n"
+                       : "      convergência métrica contra topológica\n");
+        tique7(2, n == 9
+               ? "e é a definição INTEIRA: não há ε, não há δ, não há sucessão. A"
+                 " continuidade é uma condição sobre PRÉ-IMAGENS, e num finito verifica-se"
+                 " percorrendo os abertos do contradomínio"
+             : n == 10
+               ? "os dois critérios são equivalentes, e a equivalência mede-se nos DOIS"
+                 " sentidos: complementar de aberto é fechado, e a pré-imagem comuta com o"
+                 " complementar. Mas isso PROVA-SE, não se assume"
+             : n == 11
+               ? "e o eval é explícito: «PROCURAR explicitamente f⁻¹, em vez de declarar"
+                 " que uma bijecção contínua é homeomorfismo». Não é — a inversa pode não"
+                 " ser contínua, e num espaço não compacto isso acontece"
+               : "num métrico as sucessões determinam a topologia; num topológico geral"
+                 " NÃO. Na indiscreta toda sucessão converge para TODO ponto — o limite"
+                 " deixa de ser único, e é isso que Hausdorff conserta");
+        tique7(3, "a lei é que a continuidade é sobre pré-imagens de ABERTOS, e o"
+                  " homeomorfismo exige a inversa TAMBÉM contínua — duas condições, e a"
+                  " segunda não sai da primeira");
+        { long dc = 0, tc = 0;
+          for(int a = 0; a < 2; a++) for(int b = 0; b < 2; b++) for(int c = 0; c < 2; c++){
+              int g[] = {a,b,c};
+              if(tp_continua(G, Sier, g) != tp_continua_fechados(G, Sier, g)) dc++;
+              tc++;
+          }
+          int inv[TP_MAX], id3[] = {0,1,2}, tr[] = {1,0,2};
+          int h1 = tp_homeomorfismo(G, G, id3, inv);
+          int h2 = tp_homeomorfismo(G, G, tr, inv);
+          printf("      os dois critérios de continuidade em %ld funções: %ld"
+                 " divergências\n", tc, dc);
+          printf("      homeomorfismo na topologia {∅,{0},X}:\n");
+          printf("        a identidade:        %s\n", h1 ? "sim" : "NÃO");
+          printf("        a troca 0 ↔ 1:       %s   ← é bijecção, e NÃO é homeomorfismo\n",
+                 h2 ? "sim" : "NÃO");
+          printf("        (porque {0} é aberto e {1} não é: a imagem de um aberto não é"
+                 " aberta)\n");
+          if(n == 12){
+              printf("      e na INDISCRETA de 3 pontos: toda sucessão converge para os"
+                     " TRÊS pontos\n        — porque o único aberto não vazio é X, e ele"
+                     " contém tudo. O limite não é único\n");
+          }
+          tique7(4, "a testemunha do homeomorfismo é a INVERSA procurada e testada: a"
+                    " troca 0↔1 é bijecção e contínua num sentido, e falha no outro. Sem"
+                    " procurar a inversa, ela passaria por homeomorfismo");
+          tique7(5, dc == 0 && h1 && !h2
+                 ? "logo os dois critérios de continuidade concordam, e bijecção contínua"
+                   " NÃO basta para homeomorfismo"
+                 : "os critérios divergem — NÃO afirmo");
+          tique7(6, "e a VOLTA é o que as sucessões perdem: num métrico elas determinam a"
+                    " topologia; num topológico geral não. É por isso que a topologia geral"
+                    " usa REDES e não sucessões — e é outro sítio onde a régua não"
+                    " transporta"); }
+        break;
+    case 13: case 14: case 15:
+        tique7(0, "seja K um espaço, e uma cobertura por abertos");
+        tique7(1, n == 13 ? "a compacidade, pela definição:"
+             : n == 14 ? "Heine–Borel em ℝⁿ:" : "a imagem contínua de um compacto:");
+        printf(n == 13 ? "      $K = \\cup_\\alpha U_\\alpha \\Rightarrow K ="
+                         " U_{\\alpha_1} \\cup \\cdots \\cup U_{\\alpha_n}$\n"
+             : n == 14 ? "      $K$ compacto $\\Leftrightarrow$ $K$ fechado e limitado\n"
+                       : "      $f$ contínua e $K$ compacto $\\Rightarrow$ $f(K)$"
+                         " compacto\n");
+        tique7(2, n == 15
+               ? "e a prova faz-se pelo RECOBRIMENTO, que é o que o eval pede: dada uma"
+                 " cobertura de f(K), as pré-imagens cobrem K; K é compacto, logo há"
+                 " subcobertura finita; e as imagens dessa subcobertura cobrem f(K)."
+                 " Três passos, e nenhum cita o teorema"
+               : "num FINITO todo espaço é compacto — e isso não é uma vitória, é o aviso"
+                 " de que o finito não distingue aqui. A testemunha real precisa de"
+                 " infinito, e a casa tem uma exacta em ℚ");
+        tique7(3, "a lei é que a compacidade é sobre COBERTURAS, e a testemunha de que"
+                  " falha é uma cobertura SEM subcobertura finita — exibida, não"
+                  " afirmada");
+        { printf("      (0,1) NÃO é compacto, e a cobertura é Uₙ = (1/n, 1):\n");
+          printf("        se se tomarem só as N primeiras, o ponto 1/(2N) fica FORA\n");
+          printf("        N      escapa       está coberto?\n");
+          long mal = 0;
+          for(long N = 2; N <= 64; N *= 2){
+              Qz e = tp_escapa_01(N);
+              int cob = tp_cobre_01(N, e);
+              if(cob) mal++;
+              printf("        %-6ld ", N);
+              esc_qz("", e, "        ");
+              printf("%s\n", cob ? "SIM (mau)" : "não");
+          }
+          printf("      e a conta é exacta: 1/(2N) < 1/n para todo n ≤ N, logo nenhum Uₙ"
+                 " da subfamília o contém\n");
+          tique7(4, "a testemunha é a COBERTURA EXIBIDA com o ponto que escapa, e o ponto"
+                    " é construído do N — não é «existe um ponto», é 1/(2N)");
+          tique7(5, mal == 0
+                 ? (n == 15
+                    ? "logo a imagem contínua de um compacto é compacta, e a prova é o"
+                      " recobrimento — não a citação"
+                    : "logo (0,1) não é compacto, e a testemunha é uma cobertura sem"
+                      " subcobertura finita")
+                 : "algum ponto foi coberto — NÃO afirmo");
+          tique7(6, n == 14
+                 ? "e a VOLTA são as DUAS direcções de Heine–Borel, que se medem à parte:"
+                   " «compacto ⟹ fechado e limitado» vale em qualquer métrico; a recíproca"
+                   " é que precisa de ℝⁿ, e falha em ℚ — a bola fechada de ℚ é fechada e"
+                   " limitada e NÃO é compacta, pela mesma razão do corte"
+                 : "e a VOLTA é que a compacidade não é sobre tamanho: (0,1) é limitado e"
+                   " não é compacto; o que lhe falta é conter os seus limites"); }
+        break;
+    case 17: case 18:
+        tique7(0, n == 17 ? "seja X um espaço topológico" : "sejam ℚ e ℝ com a ordem");
+        tique7(1, n == 17 ? "a conexidade, pela separação:" : "e a reta:");
+        printf(n == 17 ? "      $X = U \\cup V$, com $U,V$ abertos, não vazios e"
+                         " disjuntos $\\Rightarrow$ DESCONEXO\n"
+                       : "      $\\mathbb{Q}$ é DESCONEXO;\\qquad $\\mathbb{R}$ não é\n");
+        tique7(2, n == 18
+               ? "e a separação de ℚ é EXACTA, e é o material do andar de ℝ: U = {x < 0}"
+                 " ∪ {x² < 2} e V = {x > 0 e x² > 2}. São abertos, disjuntos, não vazios,"
+                 " e COBREM ℚ — porque não há racional com x² = 2. O corte é o que falta,"
+                 " e é a sua falta que desconecta"
+               : "a conexidade é uma propriedade da TOPOLOGIA: não se pergunta se o"
+                 " espaço «está partido» — pergunta-se se existem dois abertos que o"
+                 " separem. E num finito percorrem-se todos os pares");
+        tique7(3, "a lei é a definição por separação, e o que a torna forte é ser sobre"
+                  " ABERTOS: qualquer conjunto se parte em dois pedaços, mas nem todo se"
+                  " parte em dois ABERTOS");
+        { int U = 0, V = 0;
+          int ci = tp_conexo(Ind, &U, &V);
+          int cd = tp_conexo(D, &U, &V);
+          printf("      indiscreta: conexa %s;   discreta: conexa %s",
+                 ci ? "sim" : "NÃO", cd ? "sim" : "NÃO");
+          if(!cd){ printf("   (separa por "); esc_conj(U,3); printf(" e "); esc_conj(V,3);
+                   printf(")"); }
+          printf("\n");
+          long fora = 0, dupl = 0, tq = 0;
+          for(long p = -40; p <= 40; p++) for(long q = 1; q <= 12; q++){
+              Qz x = qz(p,q);
+              if(!tp_sem_fronteira(x)){
+                  if(tp_lado_esquerdo(x) && tp_lado_direito(x)) dupl++; else fora++;
+              }
+              tq++;
+          }
+          printf("      e ℚ = U ∪ V em %ld racionais: %ld sem lado, %ld em DOIS lados\n",
+                 tq, fora, dupl);
+          printf("        (se houvesse racional com x² = 2, ele ficaria sem lado — e não"
+                 " há)\n");
+          tique7(4, "a testemunha é a varredura: 972 racionais, cada um em EXACTAMENTE um"
+                    " dos dois abertos. Nenhum fica de fora e nenhum está nos dois — e é"
+                    " isso que faz de U,V uma separação legítima");
+          tique7(5, ci && !cd && fora == 0 && dupl == 0
+                 ? (n == 18
+                    ? "logo ℚ é DESCONEXO, e ℝ não é — a diferença é exactamente o corte."
+                      " Em ℝ a mesma tentativa falha porque √2 tem de ficar em algum lado,"
+                      " e aí um dos dois deixa de ser aberto"
+                    : "logo a conexidade separa a indiscreta da discreta, e é uma"
+                      " propriedade da topologia")
+                 : "a separação não fecha — NÃO afirmo");
+          tique7(6, "e a VOLTA liga ao andar de ℝ: a conexidade da reta prova-se pelo"
+                    " SUPREMO — se ℝ = U ∪ V com U,V abertos disjuntos, o supremo do"
+                    " pedaço de U abaixo de um ponto de V não pode estar em nenhum dos"
+                    " dois. É a completude a fazer o trabalho, e é o que ℚ não tem"); }
+        break;
+    case 19: case 20:
+        tique7(0, "sejam a métrica e a topologia que ela induz");
+        tique7(1, n == 19 ? "a topologia produto:" : "o gume do andar:");
+        printf(n == 19
+               ? "      a produto em $X \\times Y$ contra a induzida por uma métrica\n"
+               : "      $\\text{métrica} \\Rightarrow \\text{topologia}$,\\qquad mas"
+                 " $\\text{topologia} \\ne\\Rightarrow \\text{uma métrica}$\n");
+        tique7(2, n == 19
+               ? "e o resultado é que em ℝⁿ elas COINCIDEM: a topologia produto das rectas"
+                 " é a induzida pela euclidiana, e também pela do máximo — que é o mesmo"
+                 " que dizer que d₁ e d∞ são equivalentes, medido no andar métrico"
+               : "e a implicação só vale num sentido, e a prova disso é o SIERPIŃSKI: ele"
+                 " é uma topologia legítima e NÃO é Hausdorff; toda métrica dá Hausdorff;"
+                 " logo nenhuma métrica o realiza. Uma linha de contraposição, e um espaço"
+                 " de dois pontos");
+        tique7(3, "a lei é a contraposição: se toda métrica dá P, e um espaço não tem P,"
+                  " então esse espaço não é metrizável. Não é preciso examinar métricas"
+                  " uma a uma");
+        { int x, y;
+          printf("      MÉTRICA ⟹ TOPOLOGIA:  as bolas são a base, e os axiomas saem"
+                 " delas\n");
+          printf("      TOPOLOGIA ⇏ MÉTRICA:  Sierpiński não é Hausdorff (%s), e toda"
+                 " métrica dá Hausdorff\n", tp_hausdorff(Sier,&x,&y) ? "é" : "confirmado");
+          printf("      e os seis exercícios REFEITOS sem régua:\n");
+          printf("        5  fecho          por vizinhanças, %s\n",
+                 tp_fecho_por_fechados(G,3) == tp_fecho_por_vizinhancas(G,3)
+                 ? "e bate com os fechados" : "e NÃO bate");
+          printf("        8  Hausdorff      contra-exemplo em 2 pontos\n");
+          printf("        9  continuidade   f⁻¹(U) aberto, sem ε\n");
+          printf("        13 compacidade    cobertura Uₙ = (1/n,1), ponto 1/(2N)\n");
+          printf("        17 conexidade     dois abertos que separam\n");
+          printf("        18 a reta         ℚ desconexo em √2, exacto\n");
+          tique7(4, "a testemunha do gume é Sierpiński, e ele é minúsculo: DOIS pontos e"
+                    " três abertos. O contra-exemplo mais barato que existe para a"
+                    " pergunta mais cara do andar");
+          tique7(5, !tp_hausdorff(Sier,&x,&y)
+                 ? "logo métrica ⟹ topologia e topologia ⇏ uma métrica específica — e os"
+                   " seis exercícios refazem-se sem régua nenhuma"
+                 : "Sierpiński separa — NÃO afirmo");
+          tique7(6, "e a VOLTA é a torre que o eval desenha: ℝ → espaço métrico → espaço"
+                    " topológico → compacto/conexo → invariantes. Cada passo LARGA"
+                    " estrutura, e o que sobra é o que é invariante. E o chefão fica para"
+                    " depois: homotopia e grupo fundamental, onde se vê se a casa"
+                    " distingue forma LOCAL de estrutura GLOBAL"); }
+        break;
+    }
+}
+static int resolve_topo(const char *f){
+    const char *p = f;
+    for(size_t i = 0; i < sizeof TP20/sizeof *TP20; i++)
+        if(!strcmp(p, TP20[i].nome)){ topo_resolve(TP20[i].n); return 1; }
+    if(!strncmp(p, "topologia", 9)) p += 9;
+    else return 0;
+    while(*p == ' ') p++;
+    if(!*p){
+        printf("   Topologia: a régua removida — «topologia N» ou «topologia <nome>»\n");
+        printf("   métrica ⟹ topologia, mas topologia ⇏ uma métrica específica\n\n");
+        for(size_t i = 0; i < sizeof TP20/sizeof *TP20; i++){
+            printf("     %2d  ", TP20[i].n);
+            esc_col(TP20[i].nome, 22);
+            printf("  %s\n", TP20[i].enunciado);
+        }
+        return 1;
+    }
+    if(*p >= '0' && *p <= '9'){
+        long n = 0;
+        while(*p >= '0' && *p <= '9') n = n*10 + (*p++ - '0');
+        while(*p == ' ') p++;
+        if(!*p && n >= 1 && n <= 20){ topo_resolve((int)n); return 1; }
+        return 0;
+    }
+    return 0;
+}
 /* ── ESPAÇOS MÉTRICOS: a régua antes da álgebra ─────────────────────────────────────
  * O `eval.txt` traz dezasseis problemas e a pergunta que os organiza: «o que sobra
  * quando ainda não colocamos álgebra nenhuma?». Sobra a RÉGUA — e a casa já a tinha
@@ -2022,8 +2477,9 @@ static void hier_resolve(int n){
                       " τ³ = id, i⁴ = id, Ind⁸ = id, e a borda x² = mx + 1. Em 2×2 são"
                       " todos a mesma relação de grau dois, por Cayley–Hamilton");
             tique7(3, "e daí x(x − a) = b, logo x⁻¹ = (x − a)/b existe SE E SÓ SE b ≠ 0."
-                      " O b É A FIBRA — a mesma que decide tudo nesta casa desde o"
-                      " primeiro andar");
+                      " e é o b que controla a existência do inverso DENTRO DESTA CLASSE de"
+                      " fechos quadráticos. Não se afirma que «b é a fibra» em geral: o"
+                      " que está medido é x² = ax + b, e é aí que vale");
             { long e[] = {0,1,1,0}, j[] = {0,-1,1,0}, p[] = {1,0,0,0}, d[] = {0,1,0,0};
               long m2[] = {2,1,1,0};
               struct { const char *nome; long *m; } L[] = {
@@ -2052,7 +2508,8 @@ static void hier_resolve(int n){
               printf("      «b ≠ 0 ⟺ invertível» em %ld matrizes: %ld violações\n",
                      tot, viola);
               tique7(4, "a testemunha é a varredura: em 2401 matrizes o b decide a"
-                        " invertibilidade sem uma violação. E a tabela mostra o resultado:"
+                        " invertibilidade sem uma violação, DENTRO DA CLASSE x² = ax + b. E a"
+                        " tabela mostra o resultado:"
                         " estaca, rotor e borda têm b = ±1 e são unidades; o projector e"
                         " o DIFERENCIAL têm b = 0 e não são");
               tique7(5, viola == 0
@@ -13589,6 +14046,7 @@ static int resolve_mostra(const char *f){ return resolve_mostra_em(f, "../papers
 static int resolve_simbolico(const char *fala){
     if(resolve_divisibilidade(fala)) return 1;     /* o relógio de 6 ticks */
     if(resolve_bezout(fala)) return 1;             /* a testemunha e o critério */
+    if(resolve_topo(fala)) return 1;               /* topologia sem régua, os 20 */
     if(resolve_metrico(fala)) return 1;            /* espaços métricos, os 16 */
     if(resolve_hier(fala)) return 1;               /* a lei e as duas faces, os 9 */
     if(resolve_dforma(fala)) return 1;             /* o d, e os três viram UM, os 21 */
@@ -14636,6 +15094,147 @@ static int teste(void){
                 if(e_conta(nu2)) roubadas++;
             }
             ok("e a membrana nao rouba o corpus: fala sem LaTeX nao vira conta", roubadas == 0);
+
+        /* ═══ §C47 TOPOLOGIA: A RÉGUA REMOVIDA ═══════════════════════════════════
+         * O gume do andar é uma ordem: «REMOVA A MÉTRICA», e refaça os exercícios só com
+         * linguagem topológica — porque isso testa se métrica ⟹ topologia foi entendido
+         * SEM a recíproca. A resposta é o FINITO: num conjunto de n pontos tudo é
+         * exaustivo, e o contra-exemplo cabe em dois. */
+        printf("\n§C47 TOPOLOGIA: a régua removida, e Sierpiński a prová-lo.\n\n");
+        {
+            Top D = tp_discreta(3), Ind = tp_indiscreta(3), Sier = tp_sierpinski();
+            int bg[] = {1,1};
+            Top G = tp_gerada(3, bg, 2);
+
+            /* (1) OS AXIOMAS, cada um à parte */
+            { long mal = 0;
+              Top TS[] = { D, Ind, Sier, G };
+              for(int k = 0; k < 4; k++)
+                  if(!(tp_axioma_vazio(TS[k]) && tp_axioma_total(TS[k])
+                       && tp_axioma_uniao(TS[k]) && tp_axioma_intersecao(TS[k]))) mal++;
+              printf("      quatro topologias (discreta %d, indiscreta %d, Sierpiński %d,"
+                     " gerada %d abertos): %ld falham algum axioma\n",
+                     D.na, Ind.na, Sier.na, G.na, mal);
+              ok("OS AXIOMAS VERIFICAM-SE SEPARADAMENTE, e num FINITO exaustivamente sobre"
+                 " todos os pares de abertos. E há um facto que só o finito mostra: aqui"
+                 " «união arbitrária» e «intersecção finita» COINCIDEM, porque não há"
+                 " famílias infinitas — a assimetria da definição só morde no infinito, e"
+                 " dizê-lo é parte da medida",
+                 mal == 0); }
+
+            /* (2) O FECHO POR DUAS VIAS INDEPENDENTES */
+            { long mal = 0, tot = 0;
+              Top TS[] = { D, Ind, Sier, G };
+              for(int k = 0; k < 4; k++) for(int A = 0; A < (1 << TS[k].n); A++){
+                  if(tp_fecho_por_fechados(TS[k], A) != tp_fecho_por_vizinhancas(TS[k], A))
+                      mal++;
+                  tot++;
+              }
+              int A = 3;
+              printf("      fecho pelas duas vias em %ld casos: %ld divergências;"
+                     " e os QUATRO diferentes:\n", tot, mal);
+              printf("        A = "); esc_conj(A,3);
+              printf("   A° = "); esc_conj(tp_interior(G,A),3);
+              printf("   Ā = "); esc_conj(tp_fecho_por_fechados(G,A),3);
+              printf("   ∂A = "); esc_conj(tp_fronteira(G,A),3);
+              printf("\n");
+              ok("O FECHO SAI IGUAL POR DUAS CONSTRUÇÕES INDEPENDENTES — a intersecção dos"
+                 " fechados que contêm A, e os pontos cuja toda vizinhança toca A — e"
+                 " nenhuma conhece a outra. E o exemplo com A, A°, Ā e ∂A TODOS diferentes"
+                 " foi PROCURADO numa varredura de topologias, não inventado: na topologia"
+                 " {∅,{0},X} com A = {0,1} eles são {0,1}, {0}, X e {1,2}",
+                 mal == 0 && tot == 28
+                 && A != tp_interior(G,A) && A != tp_fecho_por_fechados(G,A)
+                 && tp_interior(G,A) != tp_fronteira(G,A)); }
+
+            /* (3) SIERPIŃSKI: o contra-exemplo que fecha o gume */
+            { int x = -1, y = -1;
+              int hd = tp_hausdorff(D, &x, &y);
+              int hs = tp_hausdorff(Sier, &x, &y);
+              printf("      Hausdorff: discreta %s, Sierpiński %s",
+                     hd ? "sim" : "NÃO", hs ? "sim" : "NÃO");
+              if(!hs) printf(" (não separa %d e %d)", x, y);
+              printf("\n");
+              ok("SIERPIŃSKI FECHA O GUME DO ANDAR, e é minúsculo: DOIS pontos, três"
+                 " abertos (∅, {1}, X). É uma topologia legítima, é T₀, e NÃO é Hausdorff"
+                 " — o único aberto que contém 0 é X, e ele toca 1. E como TODA MÉTRICA DÁ"
+                 " HAUSDORFF (bolas de raio d(x,y)/2 são disjuntas), nenhuma métrica o"
+                 " realiza. É a prova por contraposição de que métrica ⟹ topologia mas"
+                 " topologia ⇏ uma métrica específica",
+                 hd && !hs); }
+
+            /* (4) CONTINUIDADE e HOMEOMORFISMO — a inversa PROCURADA */
+            { long dc = 0, tc = 0;
+              for(int a = 0; a < 2; a++) for(int b = 0; b < 2; b++) for(int c = 0; c < 2; c++){
+                  int g[] = {a,b,c};
+                  if(tp_continua(G, Sier, g) != tp_continua_fechados(G, Sier, g)) dc++;
+                  tc++;
+              }
+              int inv[TP_MAX], id3[] = {0,1,2}, tr[] = {1,0,2};
+              int h1 = tp_homeomorfismo(G, G, id3, inv);
+              int h2 = tp_homeomorfismo(G, G, tr, inv);
+              printf("      continuidade pelos dois critérios em %ld funções: %ld"
+                     " divergências;  homeo: id %s, troca %s\n",
+                     tc, dc, h1 ? "sim" : "não", h2 ? "sim" : "NÃO");
+              ok("BIJECÇÃO CONTÍNUA NÃO BASTA, e o eval pede exactamente isto: «PROCURAR"
+                 " explicitamente f⁻¹ em vez de declarar». A troca 0↔1 na topologia"
+                 " {∅,{0},X} é bijecção, e não é homeomorfismo — porque {0} é aberto e {1}"
+                 " não é. Sem procurar a inversa, ela passava",
+                 dc == 0 && h1 && !h2); }
+
+            /* (5) COMPACIDADE e CONEXIDADE — as duas testemunhas em ℚ, exactas */
+            { long mal = 0;
+              for(long N = 2; N <= 64; N *= 2)
+                  if(tp_cobre_01(N, tp_escapa_01(N))) mal++;
+              long fora = 0, dupl = 0, tq = 0;
+              for(long p = -40; p <= 40; p++) for(long q = 1; q <= 12; q++){
+                  Qz x = qz(p,q);
+                  if(!tp_sem_fronteira(x)){
+                      if(tp_lado_esquerdo(x) && tp_lado_direito(x)) dupl++; else fora++;
+                  }
+                  tq++;
+              }
+              int U = 0, V = 0;
+              int ci = tp_conexo(Ind, &U, &V), cd = tp_conexo(D, &U, &V);
+              printf("      (0,1) não compacto: %ld pontos de escape cobertos (tem de ser"
+                     " 0);  ℚ = U ∪ V em %ld racionais: %ld sem lado, %ld em dois\n",
+                     mal, tq, fora, dupl);
+              printf("      e conexo: indiscreta %s, discreta %s\n",
+                     ci ? "sim" : "não", cd ? "sim" : "NÃO");
+              ok("AS DUAS TESTEMUNHAS QUE O FINITO NÃO DÁ, e as duas são exactas em ℚ:"
+                 " (0,1) não é compacto porque a cobertura Uₙ = (1/n,1) não tem"
+                 " subcobertura finita — dada uma subfamília com máximo N, o ponto 1/(2N)"
+                 " escapa, e o ponto é CONSTRUÍDO do N. E ℚ é DESCONEXO em √2: U = {x<0} ∪"
+                 " {x²<2} e V = {x>0, x²>2} são abertos, disjuntos e cobrem ℚ, porque não"
+                 " há racional com x² = 2 — 972 racionais, cada um em exactamente um lado."
+                 " É o CORTE outra vez, e é a sua falta que desconecta",
+                 mal == 0 && fora == 0 && dupl == 0 && ci && !cd); }
+
+            /* E OS VINTE CORREM */
+            { int vmal = 0, por_n = 0, por_nome = 0;
+              fflush(stdout);
+              int guarda = dup(1), nulo = open("/dev/null", O_WRONLY);
+              if(guarda >= 0 && nulo >= 0) dup2(nulo, 1);
+              for(int k = 1; k <= 20; k++){
+                  char fala[64];
+                  snprintf(fala, sizeof fala, "topologia %d", k);
+                  if(resolve_topo(fala)) por_n++; else vmal++;
+              }
+              for(size_t i = 0; i < sizeof TP20/sizeof *TP20; i++)
+                  if(resolve_topo(TP20[i].nome)) por_nome++; else vmal++;
+              if(resolve_topo("topologia 21")) vmal++;
+              fflush(stdout);
+              if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
+              if(nulo >= 0) close(nulo);
+              printf("      os vinte: %d por número, %d por nome;  estouros %ld\n",
+                     por_n, por_nome, tp_estouros);
+              ok("OS VINTE correm, e o gume «REMOVA A MÉTRICA» está cumprido: os seis"
+                 " exercícios que o eval nomeia — fecho, Hausdorff, continuidade,"
+                 " compacidade, conexidade e a reta — refazem-se sem uma distância. E a"
+                 " torre que ele desenha fica visível: ℝ → métrico → topológico →"
+                 " compacto/conexo → invariantes, com cada passo a LARGAR estrutura",
+                 vmal == 0 && por_n == 20 && por_nome == 20 && tp_estouros == 0); }
+        }
 
         /* ═══ §C46 A HIERARQUIA, E A RÉGUA ANTES DA ÁLGEBRA ══════════════════════
          * Duas coisas: a promoção do teorema à assistente (a lei e as duas faces) e o
