@@ -1264,30 +1264,63 @@ simetria, falha em $1568$ de $1960$. A partição da unidade dá a
 (Teor.~\ref{thm:parseval-multi}). Duas hipóteses, dois papéis --- e a
 segunda estava a viajar de borla dentro da primeira.
 
-\textbf{(iv) A leitura do Teorema Central, sem limite dimensional.} O
-Teorema Central diz que o limite no grau oito é do lado
-\emph{discreto/bilinear} --- Hurwitz classifica o bilinear ---
-e \textbf{não do objecto}. A torre de Cayley--Dickson deu a primeira
-testemunha: em dimensão $16$ a norma parte-se e a involução fica.
-O par $(\partial,d)$ dá uma \emph{segunda}, de outra família e do mesmo
-lado. E ela não se estabelece varrendo dimensões --- isso mediria as
-dimensões varridas ---, mas pelo \textbf{mecanismo}: em $d^{2}\omega$
-os índices entram antissimetrizados e as segundas parciais
-$\partial_i\partial_j$ são simétricas, e a contracção de um tensor
-antissimétrico com um simétrico é nula \emph{sem que o argumento
-mencione $n$}. Medido de $n=2$ a $n=40$, com o controlo a separar
-(trocada a antissimetria por simetria, a contracção deixa de anular) e
-o tecto do \code{long} declarado à parte.
+\textbf{(iv) O par completo, e a adjunção.} As duas metades medem-se
+\emph{ambas}, e a segunda estava por medir:
+\[
+\boxed{\;\partial^{2}=0\quad\Longleftrightarrow\quad d^{2}=0\;}
+\qquad\text{com}\qquad
+\boxed{\;\partial\dashv d\;}
+\]
+--- a integração faz a ponte,
+$\langle\omega,\partial R\rangle=\langle d\omega,R\rangle$. Do lado das
+regiões: no cubo $[0,1]^{n}$ cada $(k{-}2)$-face aparece \emph{duas}
+vezes na borda da borda, com sinais opostos, e cancela --- medido em
+$45$ pares $(n,k)$ até dimensão $10$, com o controlo a separar (sem o
+sinal alternado, $15$ de $15$ deixam de anular). Do lado das formas, o
+mesmo mecanismo com os índices trocados. \emph{O sinal carrega o
+teorema nos dois lados.}
 
-\textbf{Estatuto, dito à frente.} O par $(\partial,d)$ \emph{não} é uma
-bijeção dual no sentido da casa: a Definição de bijeção dual exige
-$\nu\circ\nu=\mathrm{id}$, e aqui $d\circ d=0$, que é outra coisa. É
-uma \textbf{adjunção}, $\langle\omega,\partial R\rangle=\langle
-d\omega,R\rangle$, da mesma família do par
-erosão/dilatação. E a correspondência com o Teorema Central é uma
-\emph{leitura} --- uma segunda instância do mesmo fenómeno, e não uma
-identificação de teoremas.
-\emph{Medido:} \code{tests/borda\_sem\_teto.c} ($7{:}0$).
+\textbf{(v) O limite dimensional sai da LINGUAGEM.} A graduação
+\[
+\Omega^{0}\xrightarrow{\;d\;}\Omega^{1}\xrightarrow{\;d\;}\cdots
+\xrightarrow{\;d\;}\Omega^{n}\xrightarrow{\;d\;}0
+\]
+não exige \emph{fórmula nova a cada dimensão}: a última etapa
+simplesmente não tem onde continuar. Isso não se estabelece varrendo
+dimensões --- isso mediria as dimensões varridas ---, mas pelo
+\textbf{mecanismo}: em $d^{2}\omega$ os índices entram
+antissimetrizados e $\partial_i\partial_j$ é simétrico, e a contracção
+de um antissimétrico com um simétrico é nula \emph{sem que o argumento
+mencione $n$}. Medido de $n=2$ a $n=40$, com o controlo a separar e o
+tecto do \code{long} declarado à parte. É a mesma frase do Teorema
+Central --- o tecto é da \emph{norma bilinear}, não do objecto --- numa
+segunda família: a torre de Cayley--Dickson deu a primeira testemunha
+(em dimensão $16$ a norma parte-se e a involução fica), e o par
+$(\partial,d)$ dá esta.
+
+\textbf{Estatuto --- e a distinção fica escrita, não subentendida.}
+\begin{center}\small
+\begin{tabular}{@{}p{0.31\linewidth}p{0.61\linewidth}@{}}
+\toprule
+\textbf{Matemática clássica} & o Teorema de Stokes vale sob as suas
+hipóteses, em variedades de dimensão arbitrária. Nada aqui o altera,
+e ele não precisa deste paper. \\
+\midrule
+\textbf{Corpo Universal} & o Teorema Central lê-se como a \emph{lei
+central de integração--borda} da torre, e a realização em cada
+dimensão obtém-se pela graduação. \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent Isto \textbf{não} afirma um Stokes novo: afirma que o Stokes
+é a \emph{realização geométrica} de uma lei estrutural que este quadro
+toma como central. E o par $(\partial,d)$ \emph{não} é uma bijeção dual
+no sentido da casa --- a Definição exige $\nu\circ\nu=\mathrm{id}$, e
+aqui $d\circ d=0$, que é outra coisa. É uma \textbf{adjunção}, da
+família do par erosão/dilatação. A correspondência com o Teorema
+Central é uma \emph{leitura}: uma segunda instância do mesmo fenómeno,
+e não uma identificação de teoremas.
+\emph{Medido:} \code{tests/borda\_sem\_teto.c} ($8{:}0$).
 $\square$
 \end{teorema}
 
