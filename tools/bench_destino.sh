@@ -13,6 +13,10 @@
 # a medida é do lado da FONTE — contar as chamadas por `printf` e recusar acima do
 # tamanho da rotação, que a própria fonte declara.
 #
+# O `esc_qz` NÃO se conta, e por construção: ele imprime dentro de si próprio, portanto
+# consome a fatia antes de devolver. É o padrão seguro, e quem escrever muitas frações
+# numa linha deve usá-lo em vez de contar chamadas à mão.
+#
 #   ./tools/bench_destino.sh
 #
 set -u

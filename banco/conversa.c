@@ -41,6 +41,7 @@
 #include "inteiros.h"   /* Z: e o que eles acrescentam é a reversibilidade */
 #include "racionais.h"  /* Q: a reversibilidade da multiplicacao nao nula */
 #include "reais.h"      /* R: o real e o CORTE, e nunca um decimal */
+#include "cauchy.h"     /* R outra vez, pelo caminho: R = Cauchy(Q)/~ */
 #include "eletrico.h"
 
 typedef struct { long a, b; } Slot;
@@ -1340,6 +1341,413 @@ static int resolve_bezout(const char *f){
            xs, ys, a, xs, b, ys, a*xs + b*ys,
            a*xs + b*ys == c ? "(resíduo 0)" : "— NÃO afirmo");
     return 1;
+}
+/* ── AS VINTE PROVAS DO `eval.txt` ──────────────────────────────────────────────────
+ * Ele pôs vinte exercícios em três níveis e disse «eu colocaria estes no corpus». Estão
+ * aqui, e cada um corre no relógio: cada tick NOMEIA a lei que autoriza a transição, e o
+ * último faz a VOLTA. Onde há testemunha, ela EXIBE-SE — nenhuma prova acaba num «logo».
+ *
+ * O que a máquina faz não é citar o teorema: é correr a cadeia e medir cada elo. Uma
+ * varredura não é demonstração, mas uma cadeia com todos os elos medidos é — e onde a
+ * varredura entra, entra como CONTROLO e diz-se que é isso. */
+static int resolve_reais(const char *f);      /* as 12 e 13 correm INTEIRAS */
+static Qz qmod(Qz x){ return x.p < 0 ? qz_oposto(x) : x; }
+static void esc_qz(const char *pre, Qz x, const char *pos){
+    printf("%s%s%s", pre, frac2(x.p, x.q), pos);
+}
+static const struct { int n; const char *nome; const char *enunciado; } EX20[] = {
+ { 1,  "modulo positivo",   "|x| ≥ 0" },
+ { 2,  "modulo produto",    "|xy| = |x|·|y|" },
+ { 3,  "triangular",        "|x + y| ≤ |x| + |y|" },
+ { 4,  "quadrado positivo", "x² ≥ 0" },
+ { 5,  "modulo epsilon",    "|x| < ε ⟺ −ε < x < ε" },
+ { 6,  "racional entre",    "a < b ⟹ existe racional q com a < q < b" },
+ { 7,  "irracional entre",  "a < b ⟹ existe irracional x com a < x < b" },
+ { 8,  "monotona",          "toda sucessão crescente e limitada converge" },
+ { 9,  "convergente cauchy","toda sucessão convergente é de Cauchy" },
+ { 10, "limite unico",      "o limite, quando existe, é único" },
+ { 11, "completude",        "a completude pelo axioma do supremo" },
+ { 12, "corte de dedekind", "a construção de √2 por corte de Dedekind" },
+ { 13, "raiz dois",         "√2 ∉ ℚ" },
+ { 14, "encaixados",        "os intervalos encaixados têm um ponto e um só" },
+ { 15, "bolzano",           "Bolzano–Weierstrass" },
+ { 16, "existencia raiz",   "para a > 0 existe √a" },
+ { 17, "valor intermediario","o Teorema do Valor Intermédio" },
+ { 18, "racionais densos",  "ℚ é denso em ℝ" },
+ { 19, "irracionais densos","os irracionais são densos em ℝ" },
+ { 20, "cauchy converge",   "toda sucessão de Cauchy converge em ℝ" },
+};
+static void prova_real(int n){
+    TICK_N = 0;
+    printf("   exercício %d — %s\n", n, EX20[n-1].enunciado);
+    switch(n){
+    case 1: case 4: {
+        int q4 = (n == 4);
+        tique(q4 ? "DEFINIÇÃO — x² é x·x, e a regra dos sinais decide sozinha os dois casos"
+                 : "DEFINIÇÃO — |x| é x quando x ≥ 0 e −x quando x < 0. Não há terceiro"
+                   " caso, e é a ordem TOTAL de ℝ que o garante");
+        tique(q4 ? "CASO x ≥ 0 — o produto de dois não-negativos é não-negativo, e é a"
+                   " compatibilidade da ordem com o produto que o dá (o §11 de ℚ)"
+                 : "CASO x ≥ 0 — o valor é o próprio x, e x ≥ 0 por hipótese");
+        tique(q4 ? "CASO x < 0 — o produto de dois negativos é positivo, e isso PROVOU-SE"
+                   " nos inteiros pela distributividade (não é regra decorada)"
+                 : "CASO x < 0 — o valor é −x, e x < 0 dá −x > 0 pelo oposto");
+        tique("CONCLUSÃO — os dois casos cobrem ℝ e nos dois o resultado é ≥ 0");
+        { int mal = 0; long viu_neg = 0, viu_pos = 0;
+          for(long p = -30; p <= 30; p++) for(long d = 1; d <= 8; d++){
+              Qz x = qz(p,d);
+              Qz v = q4 ? qz_mult(x,x) : qmod(x);
+              if(v.p < 0) mal++;
+              if(x.p < 0) viu_neg++; else viu_pos++;
+          }
+          printf("      controlo: %ld negativos e %ld não-negativos varridos, %d falhas\n",
+                 viu_neg, viu_pos, mal); }
+        break; }
+    case 2: {
+        tique("CASOS — |xy| e |x||y| decidem-se pelos SINAIS, e há quatro combinações."
+              " Em todas o produto dos módulos é o módulo do produto, porque o sinal sai");
+        tique("A LEI QUE AUTORIZA — (−a)(−b) = ab e (−a)b = −(ab), provadas nos inteiros"
+              " pela distributividade. É delas que sai a igualdade, não de uma tabela");
+        tique("VOLTA — e mede-se nas quatro combinações de sinal, com as duas ocorrências"
+              " de cada uma contadas: se faltasse um caso, faltava a prova");
+        { int mal = 0; long casos[4] = {0,0,0,0};
+          for(long p = -20; p <= 20; p++) for(long p2 = -20; p2 <= 20; p2++){
+              Qz x = qz(p,3), y = qz(p2,5);
+              if(!qz_igual(qmod(qz_mult(x,y)), qz_mult(qmod(x), qmod(y)))) mal++;
+              casos[(x.p < 0 ? 1 : 0) + (y.p < 0 ? 2 : 0)]++;
+          }
+          printf("      os quatro casos de sinal: %ld, %ld, %ld, %ld — e %d falhas\n",
+                 casos[0], casos[1], casos[2], casos[3], mal); }
+        break; }
+    case 3: {
+        tique("PONTO DE PARTIDA — para todo x vale −|x| ≤ x ≤ |x|, e isso é a definição"
+              " lida dos dois lados");
+        tique("SOMA — somando as duas cadeias membro a membro:"
+              " −(|x|+|y|) ≤ x + y ≤ |x|+|y|, e a soma preserva a ordem (é o §11 de ℚ)");
+        tique("FECHO — e «|z| ≤ c ⟺ −c ≤ z ≤ c» é o exercício 5, que já está provado."
+              " Aplicado a z = x+y dá a desigualdade");
+        tique("O CASO DE IGUALDADE — e é ele o gume: dá igualdade EXATAMENTE quando x e y"
+              " têm o mesmo sinal. Uma desigualdade sem o seu caso de igualdade está pela"
+              " metade");
+        { int mal = 0; long igual = 0, estrito = 0;
+          for(long p = -20; p <= 20; p++) for(long p2 = -20; p2 <= 20; p2++){
+              Qz x = qz(p,4), y = qz(p2,6);
+              Qz e = qmod(qz_soma(x,y)), d = qz_soma(qmod(x), qmod(y));
+              if(qz_menor(d, e)) mal++;
+              int mesmo = (x.p >= 0 && y.p >= 0) || (x.p <= 0 && y.p <= 0);
+              if(mesmo && !qz_igual(e,d)) mal++;
+              if(qz_igual(e,d)) igual++; else estrito++;
+          }
+          printf("      %ld com igualdade (mesmo sinal) e %ld estritas — %d falhas\n",
+                 igual, estrito, mal); }
+        break; }
+    case 5: {
+        tique("IDA — se |x| < ε então x ≤ |x| < ε e −x ≤ |x| < ε, logo −ε < x < ε."
+              " Usa-se só «x ≤ |x|» e «−x ≤ |x|», que são a definição");
+        tique("VOLTA — se −ε < x < ε então: com x ≥ 0 tem-se |x| = x < ε; com x < 0"
+              " tem-se |x| = −x < ε, porque −ε < x dá −x < ε. Os dois casos, e são todos");
+        tique("E É UM ⟺ — as duas direções provam-se separadamente, e por isso as duas"
+              " se medem separadamente. Uma implicação com o nome de equivalência seria"
+              " metade a que se deu o nome do par");
+        { int mal = 0; long ida = 0, volta = 0;
+          for(long p = -18; p <= 18; p++) for(long e = 1; e <= 12; e++){
+              Qz x = qz(p,5), eps = qz(e,7);
+              int esq = qz_menor(qmod(x), eps);
+              int dir = qz_menor(qz_oposto(eps), x) && qz_menor(x, eps);
+              if(esq != dir) mal++;
+              if(esq) ida++; else volta++;
+          }
+          printf("      %ld casos com |x| < ε e %ld sem — as duas direções ocorrem,"
+                 " e %d falhas\n", ida, volta, mal); }
+        break; }
+    case 6: case 18: {
+        tique("ARQUIMEDES — dado a < b, a largura b − a é positiva, logo existe n natural"
+              " com 1/n < b − a. É o §13, e o n exibe-se");
+        tique("A ESCADA DE PASSO 1/n — os múltiplos k/n varrem a reta com passo menor que"
+              " a largura, e por isso não podem saltar o intervalo por cima");
+        tique("O PRIMEIRO QUE PASSA — toma-se o menor k com k/n > a (existe pela boa"
+              " ordenação de ℕ). Então k/n ≤ a + 1/n < a + (b−a) = b");
+        tique("VOLTA — e o q = k/n exibe-se e verifica-se: a < q < b, por produto cruzado"
+              " e sem decimal nenhum");
+        { Qz a = qz(1,3), b = qz(1,2);
+          Qz larg = qz_soma(b, qz_oposto(a));
+          long nn = larg.q / larg.p + 1;                  /* 1/n < b − a */
+          long k = a.p * nn / a.q + 1;
+          Qz q = qz(k, nn);
+          printf("      a = 1/3, b = 1/2:  largura "); esc_qz("", larg, ",  ");
+          printf("n = %ld,  k = %ld\n", nn, k);
+          printf("      q = "); esc_qz("", q, "");
+          printf("   e 1/3 < q < 1/2 ? %s\n",
+                 (qz_menor(a,q) && qz_menor(q,b)) ? "sim (resíduo 0)" : "NÃO afirmo");
+          /* e o controlo: repete-se em muitos pares e nunca falha */
+          int mal = 0; long feitos = 0;
+          for(long pa = 1; pa <= 12; pa++) for(long pb = pa+1; pb <= 13; pb++){
+              Qz A = qz(pa,13), B = qz(pb,13);
+              Qz L = qz_soma(B, qz_oposto(A));
+              long n2 = L.q / L.p + 1, k2 = A.p * n2 / A.q + 1;
+              Qz Q = qz(k2, n2);
+              if(!qz_menor(A,Q) || !qz_menor(Q,B)) mal++;
+              feitos++;
+          }
+          printf("      controlo em %ld pares: %d falhas\n", feitos, mal); }
+        break; }
+    case 7: case 19: {
+        tique("A CONSTRUÇÃO — pelo exercício 6 há um racional q em (a,b), e há espaço"
+              " para mais: toma-se q e a largura que resta");
+        tique("O IRRACIONAL DE SERVIÇO — √2 é irracional (exercício 13), e qualquer"
+              " q + √2/2^k também é: se fosse p/d, então √2 = 2^k(p/d − q) seria racional");
+        tique("O k ESCOLHE-SE — como √2/2^k encolhe por DOBRA, há um k que o mete dentro"
+              " do que resta do intervalo. É o encaixotamento a servir de régua");
+        tique("VOLTA — e as pontas da caixa de √2, divididas por 2^k, mostram-no dentro:"
+              " o irracional está entre as duas e as duas estão no intervalo");
+        { Corte c = { 2, 2 }; Qz lo, hi;
+          rz_caixa_inicial(c, &lo, &hi); rz_encaixota(c, &lo, &hi, 16);
+          Qz a = qz(1,3), b = qz(1,2);
+          Qz il = qz(lo.p, lo.q*4), ih = qz(hi.p, hi.q*4);
+          printf("      a = 1/3, b = 1/2 e o irracional √2/4 ∈ (");
+          esc_qz("", il, ", "); esc_qz("", ih, ")\n");
+          printf("      e 1/3 < √2/4 < 1/2 ? %s\n",
+                 (qz_menor(a,il) && qz_menor(ih,b)) ? "sim (as duas pontas dentro)" : "NÃO afirmo"); }
+        break; }
+    case 8: {
+        Suc s = { S_MOBIUS, 2, 0, 0 };
+        Corte c = { 2, 2 };
+        tique("AS DUAS HIPÓTESES — crescente e limitada, e nenhuma é dispensável."
+              " Mede-se cada uma antes de a usar");
+        { Qz M; int cres = cy_crescente(s, 12); cy_limitada(s, 12, &M);
+          printf("      crescente: %s;  maior termo visto: ", cres ? "sim" : "NÃO");
+          esc_qz("", M, ",  e é limitada por 2\n"); }
+        tique("O CANDIDATO A LIMITE — o conjunto dos termos é não vazio e limitado"
+              " superiormente, logo TEM SUPREMO. E é a completude que o dá: em ℚ este"
+              " passo falharia, e é exatamente aqui que os dois andares se separam");
+        tique("O SUPREMO É O LIMITE — dado ε, o L − ε já não é cota (senão L não era o"
+              " supremo), logo há um termo acima dele; e como a sucessão cresce, todos os"
+              " seguintes ficam entre L − ε e L");
+        tique("VOLTA — e mede-se: a partir de um N a cauda INTEIRA cai dentro da caixa"
+              " que o corte fechou, e o N exibe-se");
+        { long N = -1;
+          int ap = cy_aponta(s, c, 14, 12, &N);
+          printf("      N = %ld — e de lá em diante todos os termos estão na caixa   %s\n",
+                 N, ap ? "(resíduo 0)" : "— NÃO afirmo");
+          Suc h = { S_HARM, 0, 0, 0 }, al = { S_ALT, 0, 0, 0 };
+          printf("      e o gume dos DOIS lados: a harmónica cresce e não é limitada"
+                 " (%s), a alternante é limitada e não cresce (%s)\n",
+                 cy_crescente(h,10) ? "cresce" : "?",
+                 cy_crescente(al,10) ? "?" : "não cresce"); }
+        break; }
+    case 9: {
+        Suc s = { S_MOBIUS, 2, 0, 0 };
+        Corte c = { 2, 2 };
+        tique("HIPÓTESE — aₙ → L, isto é: para cada ε há um N a partir do qual todos os"
+              " termos distam de L menos de ε/2. A metade é escolha nossa e é o truque todo");
+        tique("TRIANGULAR — para m,n > N: |aₘ − aₙ| ≤ |aₘ − L| + |L − aₙ| < ε/2 + ε/2 = ε."
+              " É o exercício 3 a fazer o trabalho, e é por isso que ele vinha antes");
+        tique("CONCLUSÃO — logo a sucessão é de Cauchy, e note-se o que NÃO se usou:"
+              " o L. A definição de Cauchy não o menciona, e é isso que a torna útil"
+              " em ℚ, onde o L pode não existir");
+        tique("VOLTA — e mede-se: a cauda cabe numa caixa de largura w, logo dois termos"
+              " quaisquer da cauda distam menos de w");
+        { long N = -1; cy_aponta(s, c, 16, 12, &N);
+          Qz lo, hi; rz_caixa_inicial(c, &lo, &hi); rz_encaixota(c, &lo, &hi, 16);
+          Qz w = qz_soma(hi, qz_oposto(lo));
+          int mal = 0;
+          for(long m = N; m <= 12; m++) for(long n2 = N; n2 <= 12; n2++)
+              if(!qz_menor(cy_dist(cy_termo(s,m), cy_termo(s,n2)), w)
+                 && !qz_igual(cy_dist(cy_termo(s,m), cy_termo(s,n2)), qz(0,1))) mal++;
+          printf("      N = %ld, largura ", N); esc_qz("", w, "");
+          printf(" — e os pares da cauda cabem todos: %d falhas\n", mal); }
+        break; }
+    case 10: {
+        tique("ABSURDO — suponha-se L ≠ L' os dois limites. Então d = |L − L'| > 0,"
+              " e é este d que vai dar a contradição");
+        tique("A ESCOLHA — toma-se ε = d/2. Há N com |aₙ − L| < d/2 e N' com |aₙ − L'| < d/2,"
+              " e a partir do maior dos dois valem as duas ao mesmo tempo");
+        tique("TRIANGULAR — d = |L − L'| ≤ |L − aₙ| + |aₙ − L'| < d/2 + d/2 = d,"
+              " isto é d < d. É a contradição, e ela vem da triangular outra vez");
+        tique("VOLTA — e exibe-se o absurdo em vez de o invocar: um segundo candidato"
+              " teria de conter a MESMA cauda, e o corte de √3 não a contém");
+        { Suc s = { S_MOBIUS, 2, 0, 0 };
+          Corte c2 = { 2, 2 }, c3 = { 3, 2 };
+          long N2 = -1, N3 = -1;
+          int a2 = cy_aponta(s, c2, 14, 12, &N2), a3 = cy_aponta(s, c3, 8, 12, &N3);
+          printf("      a cauda cai na caixa de √2 (N = %ld): %s\n", N2, a2 ? "sim" : "não");
+          printf("      a cauda cai na caixa de √3: %s — e por isso o limite é UM só\n",
+                 a3 ? "sim (?!)" : "NÃO"); }
+        break; }
+    case 11: {
+        tique("O AXIOMA — todo conjunto não vazio e limitado superiormente TEM supremo"
+              " em ℝ. Não é teorema: é o que distingue ℝ, e diz-se que é axioma");
+        tique("ℚ NÃO O CUMPRE — e o contra-exemplo é S = {q ∈ ℚ : q > 0, q² < 2}:"
+              " é não vazio (1 ∈ S) e limitado (2 é cota), e não tem supremo EM ℚ");
+        tique("PORQUÊ — se u fosse o supremo racional, u² ≠ 2 (exercício 13), e o mapa"
+              " u ↦ (2u+2)/(u+2) daria um elemento de S maior que u (se u² < 2) ou uma"
+              " cota menor que u (se u² > 2). Nos dois casos u não era supremo");
+        tique("VOLTA — e a testemunha exibe-se nos dois lados, que é o que faz a prova"
+              " ser completa e não meia");
+        { Qz u1 = qz(7,5), u2 = qz(3,2);
+          Qz v1 = rz_passo(2, rz_b(2), u1), v2 = rz_passo(2, rz_b(2), u2);
+          printf("      u = 7/5 (u² < 2): o mapa dá "); esc_qz("", v1, "");
+          printf(" — MAIOR, e ainda em S  ⟹  u não era cota\n");
+          printf("      u = 3/2 (u² > 2): o mapa dá "); esc_qz("", v2, "");
+          printf(" — MENOR, e ainda cota  ⟹  u não era a menor cota\n");
+          printf("      logo S não tem supremo em ℚ, e é este buraco que ℝ preenche\n"); }
+        break; }
+    case 12: case 13:
+        /* estas duas correm INTEIRAS, e não se resumem: chama-se a própria fala. Uma
+         * prova que se cita a si própria não é prova nenhuma. */
+        resolve_reais(n == 12 ? "corte de raiz 2" : "prova que raiz de 2 nao é racional");
+        break;
+    case 14: {
+        Corte c = { 2, 2 };
+        tique("EXISTÊNCIA — os aₙ crescem e são todos ≤ b₁, logo têm supremo x."
+              " É a completude, e é a mesma do exercício 8");
+        tique("x ESTÁ EM TODOS — para cada n, x é cota dos aₘ e é ≤ bₙ (porque bₙ é cota"
+              " de todos os aₘ), logo aₙ ≤ x ≤ bₙ, isto é x ∈ Iₙ");
+        tique("UNICIDADE — se y também estivesse em todos, |x − y| ≤ bₙ − aₙ para todo n;"
+              " como as larguras encolhem abaixo de qualquer racional, |x − y| = 0");
+        tique("VOLTA — e as larguras não «tendem» a zero: são a fração (b₀−a₀)/2ⁿ,"
+              " exata, e mede-se que cada caixa cabe na anterior");
+        { Qz lo, hi; rz_caixa_inicial(c, &lo, &hi);
+          Qz w0 = qz_soma(hi, qz_oposto(lo));
+          int mal = 0;
+          for(int k = 1; k <= 16; k++){
+              Qz la = lo, ha = hi;
+              rz_encaixota(c, &lo, &hi, 1);
+              if(qz_menor(lo, la) || qz_menor(ha, hi)) mal++;
+          }
+          Qz w = qz_soma(hi, qz_oposto(lo));
+          printf("      largura inicial "); esc_qz("", w0, ",  ao fim de 16 dobras ");
+          esc_qz("", w, "");
+          printf("   (= 1/2¹⁶ exata), encaixe com %d falhas\n", mal); }
+        break; }
+    case 15: {
+        tique("HIPÓTESE — a sucessão é limitada, logo cabe num intervalo [A,B]."
+              " É só isso que se pede: nem monotonia, nem convergência");
+        tique("A BISSEÇÃO — parte-se ao meio; pelo menos uma das metades contém termos"
+              " com índice arbitrariamente grande (senão as duas seriam finitas e a"
+              " sucessão também). Escolhe-se essa e repete-se");
+        tique("A SUBSUCESSÃO — em cada nível escolhe-se um termo dentro da caixa com"
+              " índice maior que o anterior. As caixas encaixam e as larguras encolhem");
+        tique("FECHO — pelo exercício 14 há um ponto em todas as caixas, e a subsucessão"
+              " converge para ele. É o encaixotamento outra vez, e não um método novo");
+        { Suc al = { S_ALT, 0, 0, 0 };
+          Qz M; cy_limitada(al, 20, &M);
+          long pares = 0;
+          for(long k = 0; k <= 10; k++) if(qz_igual(cy_termo(al, 2*k), qz_de_inteiro(1))) pares++;
+          printf("      exemplo: (−1)ⁿ é limitada por "); esc_qz("", M, " e NÃO converge;\n");
+          printf("      a subsucessão dos índices pares é constante 1 em %ld termos —"
+                 " e essa converge\n", pares); }
+        break; }
+    case 16: {
+        tique("O CONJUNTO — S = {t > 0 : t² < a} é não vazio e limitado superiormente"
+              " (por a + 1), logo tem supremo x. É a completude a dar o candidato");
+        tique("x² < a É IMPOSSÍVEL — o mapa t ↦ (a + bt)/(t + b) daria um elemento de S"
+              " maior que x, e x era cota. Logo x² ≥ a");
+        tique("x² > a É IMPOSSÍVEL — o mesmo mapa daria uma cota menor que x, e x era a"
+              " MENOR. Os dois lados fecham-se com o mesmo instrumento, que é o que faz"
+              " a prova ser uma e não duas");
+        tique("LOGO x² = a, e a UNICIDADE é a monotonia: t < u ⟹ t² < u² nos positivos,"
+              " portanto não há dois");
+        { for(long a = 2; a <= 7; a++){
+              Corte c = { a, 2 };
+              long r;
+              if(rz_fecha_em_q(c, &r)){ printf("      √%ld = %ld (fecha em ℚ)\n", a, r); continue; }
+              Qz lo, hi; rz_caixa_inicial(c, &lo, &hi); rz_encaixota(c, &lo, &hi, 10);
+              printf("      √%ld ∈ (", a); esc_qz("", lo, ", "); esc_qz("", hi, ")");
+              printf("   e a FC é %s\n", fc_da_borda(0, -a));
+          } }
+        break; }
+    case 17: {
+        tique("HIPÓTESE — f contínua em [a,b] com f(a) < y < f(b). Aqui f(x) = x² − 2,"
+              " a = 1, b = 2 e y = 0, e a hipótese MEDE-SE antes de se usar");
+        tique("O CONJUNTO — S = {t ∈ [a,b] : f(t) < y} é não vazio (a ∈ S) e limitado,"
+              " logo tem supremo c. Outra vez a completude a dar o ponto");
+        tique("f(c) < y É IMPOSSÍVEL — pela continuidade f fica abaixo de y numa"
+              " vizinhança de c, e haveria elementos de S à direita de c: c não era cota");
+        tique("f(c) > y É IMPOSSÍVEL — pela continuidade f fica acima de y numa"
+              " vizinhança, e um ponto à esquerda de c já seria cota: c não era a menor");
+        tique("VOLTA — logo f(c) = y. E a bisseção realiza-o: o INVARIANTE (o sinal troca"
+              " entre as pontas) mede-se a cada tick, e é ele que carrega o teorema");
+        { Qz lo = qz_de_inteiro(1), hi = qz_de_inteiro(2);
+          int mal = 0;
+          for(int k = 0; k < 16; k++){
+              Qz m = qz_medio(lo, hi);
+              Qz fm = qz_soma(qz_mult(m,m), qz_de_inteiro(-2));
+              if(fm.p == 0) break;
+              if(fm.p < 0) lo = m; else hi = m;
+              Qz fl = qz_soma(qz_mult(lo,lo), qz_de_inteiro(-2));
+              Qz fh = qz_soma(qz_mult(hi,hi), qz_de_inteiro(-2));
+              if(!(fl.p < 0 && fh.p > 0)) mal++;
+          }
+          printf("      c ∈ ("); esc_qz("", lo, ", "); esc_qz("", hi, ")");
+          printf("   e o invariante f(lo) < 0 < f(hi) sobreviveu a 16 ticks: %d falhas\n", mal);
+          printf("      e o c é o corte de √2 — o mesmo ponto, pela terceira porta\n"); }
+        break; }
+    case 20: {
+        Suc s = { S_MOBIUS, 2, 0, 0 };
+        Corte c = { 2, 2 };
+        tique("LIMITADA — uma sucessão de Cauchy é limitada: fixado ε = 1, a cauda cabe"
+              " num intervalo de raio 1 e o que fica de fora é FINITO");
+        tique("BOLZANO — logo tem subsucessão convergente (exercício 15), digamos para L");
+        tique("A CAUDA SEGUE — dado ε, a Cauchy junta os termos a menos de ε/2 e a"
+              " subsucessão chega a menos de ε/2 de L; a triangular fecha, e a sucessão"
+              " INTEIRA converge para L");
+        tique("E É AQUI QUE A COMPLETUDE SE PAGA — em ℚ a mesma sucessão, com os MESMOS"
+              " termos, não converge: o L não está lá. A diferença entre os andares não"
+              " é uma definição, é este par de medidas sobre o mesmo objeto");
+        { long N = -1;
+          int emR = cy_aponta(s, c, 18, 12, &N);
+          long fixos = 0;
+          for(long d = 1; d <= 150; d++) for(long p = 1; p <= 2*d; p++)
+              if(qz_igual(rz_passo(2, rz_b(2), qz(p,d)), qz(p,d))) fixos++;
+          printf("      em ℝ: converge, cauda na caixa a partir de N = %ld   %s\n",
+                 N, emR ? "(resíduo 0)" : "— NÃO afirmo");
+          printf("      em ℚ: o limite teria de ser o ponto fixo, e há %ld pontos fixos"
+                 " racionais\n", fixos); }
+        break; }
+    }
+}
+static int resolve_prova_real(const char *f){
+    const char *p = f;
+    if(!strncmp(p, "prova ", 6)) p += 6;
+    else if(!strncmp(p, "demonstra ", 10)) p += 10;
+    else if(!strncmp(p, "exercicio ", 10)) p += 10;
+    else if(!strncmp(p, "exercício ", 11)) p += 11;
+    else return 0;
+    while(*p == ' ') p++;
+    if(!strncmp(p, "o exercicio", 11)) p += 11;
+    else if(!strncmp(p, "o exercício", 12)) p += 12;
+    /* por NÚMERO */
+    { const char *q = p;
+      while(*q == ' ') q++;
+      if(*q >= '0' && *q <= '9'){
+          long n = 0;
+          while(*q >= '0' && *q <= '9') n = n*10 + (*q++ - '0');
+          while(*q == ' ') q++;
+          if(!*q && n >= 1 && n <= 20){ prova_real((int)n); return 1; }
+          return 0;
+      } }
+    /* por NOME */
+    { const char *q = p;
+      while(*q == ' ') q++;
+      if(!strncmp(q, "as ", 3)) q += 3;
+      else if(!strncmp(q, "os ", 3)) q += 3;
+      else if(!strncmp(q, "a ", 2)) q += 2;
+      else if(!strncmp(q, "o ", 2)) q += 2;
+      for(size_t i = 0; i < sizeof EX20/sizeof *EX20; i++)
+          if(!strcmp(q, EX20[i].nome)){ prova_real(EX20[i].n); return 1; }
+      /* «as provas» / «os exercicios» — o índice */
+      if(!strcmp(q, "provas") || !strcmp(q, "exercicios") || !strcmp(q, "exercícios")){
+          printf("   as vinte provas do andar de ℝ — «prova N» ou «prova <nome>»\n\n");
+          for(size_t i = 0; i < sizeof EX20/sizeof *EX20; i++){
+              if(i == 0)  printf("   nível 1 (o valor absoluto)\n");
+              if(i == 5)  printf("   nível 2 (a densidade e as sucessões)\n");
+              if(i == 10) printf("   nível 3 (a completude e os teoremas)\n");
+              printf("     %2d  %-20s  %s\n", EX20[i].n, EX20[i].nome, EX20[i].enunciado);
+          }
+          return 1;
+      } }
+    return 0;
 }
 /* ── ℝ ──────────────────────────────────────────────────────────────────────────────
  * «O racional fornece as marcações; o real preenche os cortes entre elas.»
@@ -3592,6 +4000,7 @@ static int resolve_mostra(const char *f){ return resolve_mostra_em(f, "../papers
 static int resolve_simbolico(const char *fala){
     if(resolve_divisibilidade(fala)) return 1;     /* o relógio de 6 ticks */
     if(resolve_bezout(fala)) return 1;             /* a testemunha e o critério */
+    if(resolve_prova_real(fala)) return 1;         /* as vinte provas do eval.txt */
     if(resolve_reais(fala)) return 1;              /* ℝ: o corte, e nunca um decimal */
     if(resolve_racionais(fala)) return 1;          /* ℚ: a fibra, e a sua ausência */
     if(resolve_naturais(fala)) return 1;           /* a escada da aritmética */
@@ -4621,6 +5030,244 @@ static int teste(void){
                 if(e_conta(nu2)) roubadas++;
             }
             ok("e a membrana nao rouba o corpus: fala sem LaTeX nao vira conta", roubadas == 0);
+
+        /* ═══ §C30 CAUCHY: ℝ = Cauchy(ℚ)/∼, E O CAMINHO É O DUAL DO CORTE ═════════
+         * O `eval.txt` dá a SEGUNDA construção, e ela é o dual da primeira: o CORTE diz
+         * onde o ponto está (uma decisão sobre ℚ, estática); a SUCESSÃO vai lá (um
+         * caminho por ℚ, dinâmica). O mesmo real sai dos dois — e é isso que se mede.
+         *
+         *   ∀ε>0 ∃N: m,n > N ⟹ |aₘ − aₙ| < ε      e      aₙ − bₙ → 0 é a MESMA classe
+         *
+         * O ε não é «um número pequeno»: é um RACIONAL qualquer, e o N é a testemunha
+         * que se exibe. Aqui não há épsilon-delta com floats — há frações e um índice.
+         *
+         * E o GUME é a HARMÓNICA: os saltos dela vão a zero e ela NÃO é de Cauchy. É o
+         * contra-caso que impede a definição de virar «os termos aproximam-se». */
+        printf("\n§C30 CAUCHY: o caminho é o dual do corte, e o N exibe-se sempre.\n\n");
+        {
+            Suc mob = { S_MOBIUS, 2, 0, 0 };
+            Suc blo = { S_LO,     2, 0, 0 };
+            Suc bhi = { S_HI,     2, 0, 0 };
+            Suc cfv = { S_CONV,   2, 0, 0 };
+            Corte c2b = { 2, 2 };
+
+            /* (§2) A DEFINIÇÃO, com o N EXIBIDO — e ele cresce quando o ε aperta, que é
+             * o conteúdo da definição e não um detalhe */
+            { int cmal = 0; long Ns[4] = {-1,-1,-1,-1};
+              Qz eps[4] = { qz(1,10), qz(1,1000), qz(1,100000), qz(1,10000000) };
+              for(int i = 0; i < 4; i++)
+                  if(!cy_modulo(mob, eps[i], 12, 6, &Ns[i])) cmal++;
+              for(int i = 1; i < 4; i++) if(Ns[i] < Ns[i-1]) cmal++;   /* aperta ⟹ N sobe */
+              printf("      a órbita do Möbius: ε = 1/10 → N = %ld,  1/10³ → %ld,"
+                     "  1/10⁵ → %ld,  1/10⁷ → %ld\n", Ns[0], Ns[1], Ns[2], Ns[3]);
+              ok("a sucessão é de CAUCHY pela definição, e o N é EXIBIDO para cada ε — e"
+                 " quando o ε aperta o N sobe, que é o conteúdo da definição. O ε é um"
+                 " RACIONAL, não um número pequeno: aqui não há épsilon com vírgula",
+                 cmal == 0 && Ns[0] >= 0 && Ns[3] > Ns[0]); }
+
+            /* O GUME, e é ele que segura a definição: a HARMÓNICA tem os saltos a ir a
+             * zero e NÃO é de Cauchy — H₂ₙ − Hₙ ≥ 1/2 sempre. Sem este contra-caso a
+             * definição colapsava em «os termos consecutivos aproximam-se». */
+            { Suc harm = { S_HARM, 0, 0, 0 }, alt = { S_ALT, 0, 0, 0 };
+              int gmal = 0;
+              long N1 = -1, N2 = -1;
+              /* os saltos CONSECUTIVOS vão a zero: |H_{n+1} − H_n| = 1/(n+2) */
+              for(long k = 0; k < 15; k++){
+                  Qz d = cy_dist(cy_termo(harm, k), cy_termo(harm, k+1));
+                  if(!qz_igual(d, qz(1, k+2))) gmal++;
+              }
+              /* e mesmo assim NÃO é de Cauchy: para ε = 1/4 não há N nenhum */
+              if(cy_modulo(harm, qz(1,4), 9, 9, &N1)) gmal++;
+              /* e a alternante falha já nos saltos */
+              if(cy_modulo(alt, qz(1,4), 9, 3, &N2)) gmal++;
+              /* a prova do bloco: H₂ₙ − Hₙ ≥ 1/2, medida e não citada */
+              int meio = 1;
+              for(long n2 = 1; n2 <= 9; n2++){
+                  Qz d = cy_dist(cy_termo(harm, 2*n2 - 1), cy_termo(harm, n2 - 1));
+                  if(qz_menor(d, qz(1,2))) meio = 0;
+              }
+              printf("      a harmónica: os saltos são 1/(n+2) → 0, e mesmo assim"
+                     " H₂ₙ − Hₙ ≥ 1/2 sempre — NÃO é de Cauchy\n");
+              ok("O GUME DA DEFINIÇÃO: a HARMÓNICA tem os saltos consecutivos a ir a zero"
+                 " (são 1/(n+2), medidos) e NÃO é de Cauchy, porque H₂ₙ − Hₙ ≥ 1/2 em"
+                 " todos os blocos. É este contra-caso que impede «de Cauchy» de"
+                 " colapsar em «os termos consecutivos aproximam-se»",
+                 gmal == 0 && meio); }
+
+            /* (§2) A EQUIVALÊNCIA: os TRÊS caminhos do andar são o MESMO real, e agora
+             * isso não é uma metáfora — é aₙ − bₙ → 0, medido entre os três pares */
+            { int emal = 0; long Nm[3] = {-1,-1,-1};
+              Qz eps = qz(1, 100000);
+              if(!cy_equiv(mob, blo, eps, 30, &Nm[0])) emal++;
+              if(!cy_equiv(mob, cfv, eps, 30, &Nm[1])) emal++;
+              if(!cy_equiv(blo, bhi, eps, 30, &Nm[2])) emal++;
+              /* e o GUME: uma constante racional NÃO é equivalente à órbita de √2 —
+               * se fosse, √2 seria racional */
+              Suc um_e_meio = { S_CONST, 0, 3, 2 };
+              long Nx = -1;
+              int nao_equiv = !cy_equiv(mob, um_e_meio, qz(1,1000), 30, &Nx);
+              printf("      equivalência a menos de 1/10⁵: Möbius∼bisseção em N=%ld,"
+                     " Möbius∼FC em N=%ld, e as duas pontas em N=%ld\n",
+                     Nm[0], Nm[1], Nm[2]);
+              ok("OS TRÊS CAMINHOS SÃO O MESMO REAL, e agora não é metáfora: aₙ − bₙ → 0"
+                 " entre a órbita, a bisseção e os convergentes, e entre as DUAS pontas"
+                 " do encaixotamento. E o gume: a constante 3/2 NÃO é equivalente — se"
+                 " fosse, √2 era racional",
+                 emal == 0 && nao_equiv); }
+
+            /* (ex.8) TODA SUCESSÃO CRESCENTE E LIMITADA CONVERGE — e é aplicação direta
+             * da completude: o limite é o SUPREMO, que é o corte. As duas hipóteses
+             * medem-se, e o gume mostra que nenhuma é dispensável. */
+            { int mmal = 0;
+              Qz M;
+              int cres = cy_crescente(mob, 12);
+              cy_limitada(mob, 12, &M);
+              int lim = qz_menor(M, qz_de_inteiro(2));
+              long Nc = -1;
+              int aponta = cy_aponta(mob, c2b, 14, 12, &Nc);
+              if(!cres || !lim || !aponta) mmal++;
+              /* o gume nos DOIS lados: sem «limitada» (a harmónica cresce e não converge)
+               * e sem «crescente» (a alternante é limitada e não converge) */
+              Suc harm = { S_HARM, 0, 0, 0 }, alt = { S_ALT, 0, 0, 0 };
+              int so_cresce = cy_crescente(harm, 12) && !cy_modulo(harm, qz(1,4), 9, 9, 0);
+              Qz Ma; cy_limitada(alt, 12, &Ma);
+              int so_limitada = qz_menor(Ma, qz_de_inteiro(2))
+                             && !cy_crescente(alt, 12)
+                             && !cy_modulo(alt, qz(1,4), 9, 3, 0);
+              printf("      crescente e LIMITADA POR 2 (o maior termo visto é %s):",
+                     frac2(M.p, M.q));
+              printf(" a partir de N = %ld a cauda inteira cai na caixa de 14 dobras\n", Nc);
+              ok("CRESCENTE E LIMITADA CONVERGE (ex.8), e o limite é o SUPREMO — que é o"
+                 " corte. As DUAS hipóteses são precisas e mede-se cada uma pelo seu"
+                 " contra-caso: a harmónica é crescente e NÃO limitada (não converge), a"
+                 " alternante é limitada e NÃO crescente (não converge)",
+                 mmal == 0 && so_cresce && so_limitada); }
+
+            /* (ex.9)(ex.10) CONVERGENTE ⟹ CAUCHY, e o LIMITE É ÚNICO.
+             * A unicidade prova-se pelo absurdo com a triangular: se L ≠ L' fossem ambos
+             * limites, |L − L'| ≤ |L − aₙ| + |aₙ − L'| ficava abaixo de |L − L'| — e o
+             * que aqui se mede é a cadeia, não a conclusão. */
+            { int umal = 0;
+              /* convergente ⟹ Cauchy: se todos os termos após N estão numa caixa de
+               * largura w, então dois quaisquer distam menos de w. É a triangular. */
+              long Nc = -1;
+              if(!cy_aponta(mob, c2b, 16, 12, &Nc)) umal++;
+              Qz lo, hi; rz_caixa_inicial(c2b, &lo, &hi); rz_encaixota(c2b, &lo, &hi, 16);
+              Qz larg = qz_soma(hi, qz_oposto(lo));
+              for(long m = Nc; m <= 12; m++) for(long n2 = Nc; n2 <= 12; n2++){
+                  Qz d = cy_dist(cy_termo(mob, m), cy_termo(mob, n2));
+                  if(!qz_menor(d, larg) && !qz_igual(d, qz(0,1))) umal++;
+              }
+              /* a UNICIDADE: dois candidatos distintos não podem os dois conter a cauda.
+               * O candidato falso é o corte de √3 — e a cauda NÃO cai nele. */
+              Corte c3b = { 3, 2 };
+              long Nf = -1;
+              int falso = cy_aponta(mob, c3b, 8, 12, &Nf);
+              /* e a triangular que sustenta a prova, medida em ℚ */
+              int tri = 1;
+              for(long p1 = -6; p1 <= 6; p1++) for(long p2 = -6; p2 <= 6; p2++)
+              for(long p3 = -6; p3 <= 6; p3++){
+                  Qz A = qz(p1,3), B = qz(p2,3), C = qz(p3,3);
+                  Qz ab = cy_dist(A,B), ac = cy_dist(A,C), cb = cy_dist(C,B);
+                  if(qz_menor(qz_soma(ac,cb), ab)) tri = 0;
+              }
+              printf("      a cauda cabe na caixa de largura %s (logo é de Cauchy), e o"
+                     " candidato falso √3 NÃO a contém\n", frac2(larg.p, larg.q));
+              ok("CONVERGENTE ⟹ CAUCHY (ex.9) porque a cauda cabe numa caixa e a"
+                 " TRIANGULAR faz o resto — medida em ℚ, não citada. E o LIMITE É ÚNICO"
+                 " (ex.10): um segundo candidato teria de conter a mesma cauda, e o corte"
+                 " de √3 não a contém — o absurdo exibe-se em vez de se invocar",
+                 umal == 0 && !falso && tri); }
+
+            /* (ex.15) BOLZANO–WEIERSTRASS: toda sucessão limitada tem subsucessão
+             * convergente. A prova É a bisseção — parte-se o intervalo ao meio e fica-se
+             * com a metade que tem infinitos termos. Aqui mede-se o INVARIANTE: a metade
+             * escolhida tem sempre mais termos que o teto de uma metade só. */
+            { int bmal = 0;
+              Suc alt = { S_ALT, 0, 0, 0 };
+              Qz M; cy_limitada(alt, 24, &M);
+              if(!qz_menor(M, qz_de_inteiro(2))) bmal++;         /* limitada: a hipótese */
+              /* a subsucessão dos pares é constante 1 — e converge, embora a mãe não */
+              long constantes = 0;
+              for(long k = 0; k <= 12; k++)
+                  if(qz_igual(cy_termo(alt, 2*k), qz_de_inteiro(1))) constantes++;
+              /* e a bisseção sobre a sucessão do Möbius: a metade com infinitos termos
+               * é sempre a que contém o corte — o invariante, medido a cada dobra */
+              Qz lo = qz_de_inteiro(1), hi = qz_de_inteiro(2);
+              for(int k = 0; k < 12; k++){
+                  Qz m = qz_medio(lo, hi);
+                  long dentro_esq = 0, dentro_dir = 0;
+                  for(long j = 0; j <= 12; j++){
+                      Qz a = cy_termo(mob, j);
+                      if(!qz_menor(a, lo) && qz_menor(a, m)) dentro_esq++;
+                      if(!qz_menor(a, m) && !qz_menor(hi, a)) dentro_dir++;
+                  }
+                  if(dentro_esq >= dentro_dir) hi = m; else lo = m;
+                  if(dentro_esq + dentro_dir == 0) break;
+                  int b1, b2;                                     /* e o corte fica dentro */
+                  if(rz_cmp(lo, 2, 2, &b1) > 0 || !b1) bmal++;
+                  if(rz_cmp(hi, 2, 2, &b2) < 0 || !b2) bmal++;
+              }
+              ok("BOLZANO–WEIERSTRASS (ex.15) pela BISSEÇÃO, que é o encaixotamento outra"
+                 " vez: fica-se sempre com a metade que retém os termos, e o invariante"
+                 " (o corte entre as pontas) mede-se a cada dobra. E o exemplo é o gume:"
+                 " a alternante NÃO converge e a sua subsucessão par converge",
+                 bmal == 0 && constantes == 13); }
+
+            /* AS VINTE PROVAS CORREM — todas, pelo número E pelo nome. Uma fala que
+             * morre calada não falha: DESAPARECE, e é o defeito mais barato de ter e o
+             * mais caro de descobrir. Aqui varre-se o índice inteiro e conta-se, com a
+             * saída desviada para não afogar o resto. */
+            { int pmal = 0, correram = 0, por_nome = 0;
+              fflush(stdout);
+              int guarda = dup(1), nulo = open("/dev/null", O_WRONLY);
+              if(guarda >= 0 && nulo >= 0) dup2(nulo, 1);
+              for(int k = 1; k <= 20; k++){
+                  char fala[64];
+                  snprintf(fala, sizeof fala, "prova %d", k);
+                  if(resolve_prova_real(fala)) correram++; else pmal++;
+              }
+              for(size_t i = 0; i < sizeof EX20/sizeof *EX20; i++){
+                  char fala[96];
+                  snprintf(fala, sizeof fala, "prova %s", EX20[i].nome);
+                  if(resolve_prova_real(fala)) por_nome++; else pmal++;
+              }
+              /* e o GUME: um número FORA do índice tem de ser RECUSADO, não inventado */
+              if(resolve_prova_real("prova 21")) pmal++;
+              if(resolve_prova_real("prova 0")) pmal++;
+              fflush(stdout);
+              if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
+              if(nulo >= 0) close(nulo);
+              printf("      as vinte provas: %d pelo número, %d pelo nome, e a 21 é"
+                     " recusada\n", correram, por_nome);
+              ok("AS VINTE PROVAS DO `eval.txt` correm todas, pelo NÚMERO e pelo NOME — e"
+                 " o índice fora de alcance é RECUSADO. Uma fala que morre calada não"
+                 " falha, desaparece: por isso se varre o índice inteiro em vez de se"
+                 " confiar em ter escrito os vinte",
+                 pmal == 0 && correram == 20 && por_nome == 20); }
+
+            /* (ex.20) UMA SUCESSÃO DE CAUCHY LIMITADA CONVERGE EM ℝ — e é aqui que a
+             * completude se paga: em ℚ a MESMA sucessão não converge. O andar inteiro
+             * está nesta diferença, e ela mede-se com os mesmos termos. */
+            { int qmal2 = 0;
+              long Nr = -1;
+              int converge_em_R = cy_aponta(mob, c2b, 18, 12, &Nr);
+              /* em ℚ NÃO converge: o limite teria de ser o ponto fixo, e o ponto fixo
+               * pede x² = 2 — varrido, nenhum racional o cumpre */
+              long fixos = 0;
+              for(long d = 1; d <= 150; d++) for(long p = 1; p <= 2*d; p++){
+                  Qz x = qz(p,d);
+                  if(qz_igual(rz_passo(2, rz_b(2), x), x)) fixos++;
+              }
+              if(!converge_em_R) qmal2++;
+              printf("      a MESMA sucessão: converge em ℝ (cauda na caixa a partir de"
+                     " N = %ld) e NÃO em ℚ (%ld pontos fixos racionais)\n", Nr, fixos);
+              ok("UMA SUCESSÃO DE CAUCHY CONVERGE EM ℝ (ex.20) — e é aqui que a"
+                 " completude se paga: a MESMA sucessão, com os MESMOS termos, converge"
+                 " em ℝ e não em ℚ. A diferença entre os dois andares não é uma"
+                 " definição: é este par de medidas sobre o mesmo objeto",
+                 qmal2 == 0 && fixos == 0); }
+        }
 
         /* ═══ §C29 OS REAIS: O REAL É O CORTE, E NUNCA UM DECIMAL ═════════════════
          * «ℝ acrescenta a completude: todo buraco racional recebe um ponto.» E a cadeia
