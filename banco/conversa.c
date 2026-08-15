@@ -58,6 +58,7 @@
 #include "campo.h"      /* Calculo III: campos, fluxo, circulacao, e os tres teoremas */
 #include "metrico.h"    /* espacos metricos: so o que faltava ao cauchy.h */
 #include "topologia.h"  /* a regua REMOVIDA: topologias finitas, exaustivas */
+#include "homotopia.h"  /* o buraco que nenhum ponto ve: pi1 combinatorio */
 #include "dforma.h"     /* o d: Lambda^0 -> ... -> Lambda^3, e os tres viram UM */
 #include "eletrico.h"
 
@@ -1378,6 +1379,309 @@ static void esc_mat(const char *ind, Mat A);
 static void esc_qz(const char *pre, Qz x, const char *pos);
 static void esc_col(const char *s, int largura);
 static void tique7(int slot, const char *porque);
+/* ── HOMOTOPIA: O BURACO QUE NENHUM PONTO VÊ ────────────────────────────────────────
+ * O `eval.txt` põe o desafio numa frase: «o círculo força a distinguir LOCALMENTE IGUAL
+ * ≠ GLOBALMENTE IGUAL. A reta pode ser contraída a um ponto; o círculo não. Aí vamos
+ * descobrir se ele consegue capturar um BURACO QUE NÃO É VISÍVEL POR NENHUM PONTO
+ * ISOLADAMENTE.»
+ *
+ * A resposta desta casa é COMBINATÓRIA, e por isso exacta: um grafo conexo tem π₁ LIVRE
+ * de posto E − V + 1. O círculo é o ciclo Cₙ (posto 1), a reta é uma árvore (posto 0), e
+ * o oito é dois ciclos colados (posto 2, e NÃO abeliano).
+ *
+ * E o buraco mede-se assim: percorrem-se TODOS os vértices e vê-se que a vizinhança de
+ * cada um é uma árvore — contráctil, posto 0. Depois vê-se que o todo tem posto 1. As
+ * duas coisas AO MESMO TEMPO são o teorema: nenhum teste local distingue o círculo da
+ * reta, e eles são diferentes. A diferença não vive em ponto nenhum — vive na COLAGEM. */
+static const struct { int n; const char *nome; const char *enunciado; } HM14[] = {
+ {  1, "posto",             "π₁ de um grafo conexo é LIVRE de posto E − V + 1" },
+ {  2, "contractil",        "posto 0 é contráctil: a reta contrai, o círculo não" },
+ {  3, "euler",             "χ = V − E, e posto = 1 − χ nos conexos" },
+ {  4, "o buraco",          "TODA vizinhança é contráctil e o TODO não é" },
+ {  5, "voltas",            "o número de voltas é um INTEIRO, e conta-se aresta a aresta" },
+ {  6, "pi1 do circulo",    "w(αβ) = w(α) + w(β): π₁(S¹) ≅ ℤ, medido" },
+ {  7, "laco trivial",      "ir e voltar dá w = 0 — e é o único que contrai" },
+ {  8, "o oito",            "posto 2, e ab ≠ ba: o primeiro grupo NÃO abeliano da casa" },
+ {  9, "comutador",         "aba⁻¹b⁻¹ não se reduz — e some na abelianização" },
+ { 10, "abelianizacao",     "apagar a ordem: é aí que o oito e o toro se separam" },
+ { 11, "invariante",        "π₁ é invariante topológico: mesmo π₁ ⇏ homeomorfos" },
+ { 12, "local e global",    "a mesma vizinhança, dois espaços diferentes" },
+ { 13, "recobrimento",      "o levantamento: a volta é a diferença dos extremos" },
+ { 14, "a torre",           "métrica → topologia → homotopia → π₁ → invariantes" },
+};
+static int hm_laco(int n, int r, int *v){
+    int k = 0; v[k] = 0;
+    int passos = n * (r < 0 ? -r : r), d = (r < 0) ? n - 1 : 1;
+    for(int i = 0; i < passos; i++){ v[k+1] = (v[k] + d) % n; k++; }
+    return k + 1;
+}
+static void homo_resolve(int n){
+    TICK_N = 0;
+    printf("   %d — %s\n", n, HM14[n-1].enunciado);
+    Grafo P = gr_caminho(5), C5 = gr_ciclo(5), C8 = gr_ciclo(8), O = gr_oito(4);
+    switch(n){
+    case 1: case 2: case 3:
+        tique7(0, "seja G um grafo conexo com V vértices e E arestas");
+        tique7(1, n == 3 ? "a característica de Euler:" : "o posto de π₁:");
+        printf(n == 3 ? "      $\\chi = V - E$,\\qquad e posto $= 1 - \\chi$ nos conexos\n"
+                      : "      $\\pi_1(G)$ é LIVRE de posto $E - V + 1$\n");
+        tique7(2, "e a razão é uma escolha: fixa-se uma ÁRVORE GERADORA, que tem V − 1"
+                  " arestas e é contráctil. Cada uma das E − V + 1 arestas que sobram"
+                  " fecha um laço independente, e não há relações entre eles — o grupo é"
+                  " LIVRE nesses geradores");
+        tique7(3, "a lei é que a árvore não contribui: contrair uma árvore a um ponto não"
+                  " muda o tipo de homotopia. O que sobra são as arestas que a árvore não"
+                  " apanhou, e são elas que contam");
+        { long mal = 0;
+          struct { const char *n; Grafo g; } GS[] = {
+              {"caminho P₅ (a reta)", P}, {"ciclo C₅ (o círculo)", C5},
+              {"ciclo C₈", C8}, {"oito (dois C₄)", O} };
+          printf("      espaço                   V    E    χ = V−E   posto π₁  contráctil\n");
+          for(int i = 0; i < 4; i++){
+              printf("      %-24s %-4d %-4d %-9d %-9d %s\n", GS[i].n,
+                     GS[i].g.nv, GS[i].g.ne, gr_euler(GS[i].g), gr_posto(GS[i].g),
+                     gr_contractil(GS[i].g) ? "SIM" : "não");
+              if(gr_posto(GS[i].g) != 1 - gr_euler(GS[i].g)) mal++;
+          }
+          printf("      e posto = 1 − χ nos quatro: %ld falhas\n", mal);
+          tique7(4, "a testemunha é a tabela: o caminho tem posto 0 e CONTRAI; os ciclos"
+                    " têm posto 1 e não; o oito tem posto 2. E a relação posto = 1 − χ"
+                    " vale nos quatro — dois números que não se conhecem a bater");
+          tique7(5, mal == 0
+                 ? "logo o posto é E − V + 1, e um posto ZERO é exactamente a"
+                   " contractilidade"
+                 : "a relação falha — NÃO afirmo");
+          tique7(6, "e a VOLTA é que isto é aritmética de INTEIROS: contar vértices e"
+                    " arestas. A homotopia de um grafo decide-se sem uma distância, sem um"
+                    " limite, e sem um decimal"); }
+        break;
+    case 4: case 12:
+        tique7(0, "seja C₈ o círculo, e v um dos seus vértices");
+        tique7(1, "o buraco que nenhum ponto vê:");
+        printf("      TODA vizinhança é contráctil,\\qquad e o TODO não é\n");
+        tique7(2, "e é este o pedido do eval, por inteiro. A vizinhança de um vértice num"
+                  " ciclo é uma ESTRELA de três vértices — um caminho, uma árvore, posto"
+                  " 0. Ela é indistinguível da vizinhança de um ponto da reta. Logo NENHUM"
+                  " teste local separa o círculo da reta");
+        tique7(3, "a lei é que a homotopia não é uma propriedade dos pontos: é uma"
+                  " propriedade da COLAGEM. Duas coisas iguais em toda a parte podem ser"
+                  " diferentes no todo, e é isso que «global» quer dizer");
+        { long todas = 0, tot = 0;
+          for(int v = 0; v < C8.nv; v++){
+              Grafo s = gr_estrela(C8, v);
+              if(gr_contractil(s)) todas++;
+              tot++;
+              if(v < 3) printf("      v = %d:  V = %d, E = %d, posto = %d  →  %s\n",
+                               v, s.nv, s.ne, gr_posto(s),
+                               gr_contractil(s) ? "CONTRÁCTIL" : "não");
+          }
+          printf("      …  e as %ld vizinhanças todas contrácteis: %ld\n", tot, todas);
+          printf("      e o TODO: posto = %d  →  contráctil? %s\n",
+                 gr_posto(C8), gr_contractil(C8) ? "sim" : "NÃO");
+          /* e o CONTROLO: na reta acontece o mesmo localmente E o todo contrai */
+          long tr = 0;
+          for(int v = 0; v < P.nv; v++) if(gr_contractil(gr_estrela(P, v))) tr++;
+          printf("      CONTROLO na reta P₅: %ld de %d vizinhanças contrácteis, e o TODO"
+                 " %s\n", tr, P.nv, gr_contractil(P) ? "CONTRAI" : "não contrai");
+          tique7(4, "a testemunha é o PAR: as oito vizinhanças do círculo são contrácteis"
+                    " — exactamente como as cinco da reta — e o círculo não contrai"
+                    " enquanto a reta contrai. Localmente iguais, globalmente diferentes,"
+                    " e as duas metades medidas ao mesmo tempo");
+          tique7(5, todas == tot && !gr_contractil(C8) && tr == P.nv && gr_contractil(P)
+                 ? "logo o buraco NÃO vive em ponto nenhum: nenhum ponto o vê, e ele está"
+                   " lá. Vive na maneira como os pontos estão COLADOS"
+                 : "os regimes não se separaram — NÃO afirmo");
+          tique7(6, "e a VOLTA é o que isto arruma no andar anterior: em topologia o"
+                    " círculo e a reta já se distinguiam (um é compacto, o outro não), mas"
+                    " aqui a distinção é de outra natureza — é sobre LAÇOS, e sobrevive a"
+                    " deformação contínua. É por isso que π₁ é um invariante mais fino"); }
+        break;
+    case 5: case 6: case 7: case 13:
+        tique7(0, "seja um laço em C₅ dado pela lista de vértices visitados");
+        tique7(1, n == 6 ? "o número de voltas é um HOMOMORFISMO:"
+             : n == 13 ? "o levantamento ao recobrimento:"
+                       : "o número de voltas:");
+        printf(n == 6 ? "      $w(\\alpha\\beta) = w(\\alpha) + w(\\beta)$"
+                        "\\qquad logo $\\pi_1(S^{1}) \\cong \\mathbb{Z}$\n"
+             : n == 13 ? "      o laço levanta-se a um caminho em $\\mathbb{Z}$, e"
+                         " $w$ é a diferença dos extremos\n"
+                       : "      cada passo conta $+1$ ou $-1$; o total dividido por $n$"
+                         " é $w$\n");
+        tique7(2, n == 13
+               ? "o recobrimento de Cₙ é ℤ: cada vértice tem infinitas cópias, uma por"
+                 " volta. Levantar o laço é seguir os passos em ℤ sem reduzir módulo n, e"
+                 " o ponto de chegada menos o de partida é n·w. É onde a volta deixa de se"
+                 " esconder"
+               : "e conta-se ARESTA A ARESTA: de i para i+1 é +1, de i para i−1 é −1, e"
+                 " qualquer outro passo NÃO É ARESTA e recusa-se. O total tem de ser"
+                 " múltiplo de n, senão o laço não fechou");
+        tique7(3, "a lei é que w é completo: dois laços são homotópicos SE E SÓ SE têm o"
+                  " mesmo w. É por isso que π₁(S¹) é ℤ e não outra coisa");
+        { int v[128], w = 0;
+          printf("      laço                       w\n");
+          struct { const char *nome; int r; } L[] = {
+              {"0→1→2→3→4→0",  1}, {"duas voltas",  2},
+              {"ao contrário", -1}, {"ficar parado",  0} };
+          for(int i = 0; i < 4; i++){
+              int len = hm_laco(5, L[i].r, v);
+              int ok_l = ht_volta(5, v, len, &w);
+              printf("      %-26s %s%d\n", L[i].nome, ok_l ? "" : "recusado ",
+                     ok_l ? w : 0);
+          }
+          /* o homomorfismo, varrido */
+          long mal = 0, tot = 0;
+          for(int r = -3; r <= 3; r++) for(int s = -3; s <= 3; s++){
+              int va[64], vb[64], vc[128];
+              int na = hm_laco(5, r, va), nb = hm_laco(5, s, vb), nc = 0;
+              for(int i = 0; i < na; i++) vc[nc++] = va[i];
+              for(int i = 1; i < nb; i++) vc[nc++] = vb[i];
+              int ww;
+              if(!ht_volta(5, vc, nc, &ww)){ if(r || s) mal++; }
+              else if(ww != r + s) mal++;
+              tot++;
+          }
+          int aberto[] = {0,1,2}, salto[] = {0,2,0};
+          int r1 = ht_volta(5, aberto, 3, &w), r2 = ht_volta(5, salto, 3, &w);
+          printf("      w(αβ) = w(α) + w(β) em %ld pares: %ld falhas\n", tot, mal);
+          printf("      CONTROLOS: percurso que não fecha %s;  passo que não é aresta %s\n",
+                 r1 ? "ACEITE (mau)" : "recusado", r2 ? "ACEITE (mau)" : "recusado");
+          tique7(4, "a testemunha é o homomorfismo varrido em 49 pares, e os DOIS"
+                    " controlos: um percurso aberto e um salto que não é aresta são"
+                    " RECUSADOS. Sem eles, «w deu um número» não distinguia um laço de"
+                    " qualquer lista de vértices");
+          tique7(5, mal == 0 && !r1 && !r2
+                 ? "logo π₁(S¹) ≅ ℤ, e o isomorfismo É o número de voltas — a estrutura de"
+                   " grupo do laço é a soma dos inteiros"
+                 : "os controlos não separaram — NÃO afirmo");
+          tique7(6, n == 7
+                 ? "e a VOLTA é o laço trivial: ir e voltar dá w = 0, e é o ÚNICO que"
+                   " contrai. Um laço com w ≠ 0 não se pode encolher a um ponto sem sair"
+                   " do círculo — e é isso o buraco"
+                 : "e a VOLTA é o recobrimento: em ℤ o laço deixa de fechar, e a volta"
+                   " aparece como a DIFERENÇA dos extremos. O buraco desaparece quando se"
+                   " desenrola, e é essa a razão de o recobrimento ser universal"); }
+        break;
+    case 8: case 9: case 10:
+        tique7(0, "seja o oito — dois ciclos colados num ponto — e a, b os dois laços");
+        tique7(1, n == 8 ? "π₁ é livre de posto 2, e NÃO é abeliano:"
+             : n == 9 ? "o comutador:" : "a abelianização:");
+        printf(n == 8 ? "      $ab \\neq ba$\n"
+             : n == 9 ? "      $aba^{-1}b^{-1} \\neq 1$\n"
+                      : "      apagar a ORDEM e ficar só com a contagem\n");
+        tique7(2, "e este é o primeiro grupo NÃO ABELIANO desta casa sem uma matriz por"
+                  " trás. A não comutatividade não vem de uma representação: vem das"
+                  " PALAVRAS. ab e ba são palavras reduzidas diferentes, e no grupo livre"
+                  " duas palavras são iguais exactamente quando as reduzidas coincidem");
+        tique7(3, "a lei é a redução: apagar pares xx⁻¹ até nada mudar, e o resultado é"
+                  " único. É um algoritmo, e por isso a igualdade no grupo livre DECIDE-SE"
+                  " — não se estima");
+        { int A[] = {1}, B[] = {2};
+          Pal a = pal_de(A,1), b = pal_de(B,1);
+          Pal ab = pal_junta(a,b), ba = pal_junta(b,a);
+          Pal com = pal_junta(pal_junta(a,b), pal_junta(pal_inversa(a), pal_inversa(b)));
+          Pal aa = pal_junta(a, pal_inversa(a));
+          int na, nb;
+          pal_abeliana(com, &na, &nb);
+          printf("      posto do oito: %d\n", gr_posto(O));
+          printf("      ab = ba?                    %s   ← NÃO abeliano\n",
+                 pal_igual(ab,ba) ? "sim" : "não");
+          printf("      aba⁻¹b⁻¹ é trivial?         %s   ← não se reduz\n",
+                 pal_trivial(com) ? "sim" : "não");
+          printf("      a·a⁻¹ é trivial?            %s   ← a redução apaga o par\n",
+                 pal_trivial(aa) ? "sim" : "não");
+          printf("      e na ABELIANIZAÇÃO o comutador some: (a = %d, b = %d)\n", na, nb);
+          tique7(4, "a testemunha é o PAR: o comutador NÃO se reduz a nada (logo é não"
+                    " trivial no grupo livre), e a sua abelianização é (0,0) (logo some"
+                    " assim que se apaga a ordem). As duas medidas ao mesmo tempo dizem"
+                    " exactamente ONDE está a não comutatividade");
+          tique7(5, !pal_igual(ab,ba) && !pal_trivial(com) && pal_trivial(aa)
+                       && na == 0 && nb == 0 && gr_posto(O) == 2
+                 ? "logo π₁ do oito é livre de posto 2 e NÃO é abeliano — e a"
+                   " abelianização dele é ℤ², que é o π₁ do TORO. Os dois têm a mesma"
+                   " contagem de geradores e grupos diferentes: a diferença é a ORDEM"
+                 : "as palavras não se separaram — NÃO afirmo");
+          tique7(6, "e a VOLTA é o que isto ensina sobre invariantes: a abelianização"
+                    " PERDE informação, e a informação que ela perde é exactamente a que"
+                    " distingue o oito do toro. Um invariante mais grosso é mais fácil de"
+                    " calcular e vê menos"); }
+        break;
+    case 11: case 14:
+        tique7(0, n == 11 ? "sejam dois espaços e a pergunta se são homeomorfos"
+                          : "seja a torre inteira do percurso");
+        tique7(1, n == 11 ? "π₁ é invariante, e a implicação é só num sentido:"
+                          : "a torre:");
+        printf(n == 11
+               ? "      homeomorfos $\\Rightarrow$ mesmo $\\pi_1$;\\qquad mas mesmo"
+                 " $\\pi_1 \\neq\\Rightarrow$ homeomorfos\n"
+               : "      métrica $\\to$ topologia $\\to$ homotopia $\\to$ $\\pi_1$ $\\to$"
+                 " invariantes\n");
+        tique7(2, n == 11
+               ? "e o uso correcto é a CONTRAPOSIÇÃO: se dois espaços têm π₁ diferentes,"
+                 " NÃO são homeomorfos — e isso prova-se. O contrário não: C₅ e C₈ têm"
+                 " ambos π₁ = ℤ e são homeomorfos, mas o círculo e o cilindro também têm"
+                 " o mesmo π₁ e não são"
+               : "cada passo LARGA estrutura. A métrica larga a álgebra; a topologia larga"
+                 " a régua; a homotopia larga a topologia fina, e fica só com o que"
+                 " sobrevive a deformação. E o que sobra em cada nível chama-se"
+                 " INVARIANTE");
+        tique7(3, "a lei é que um invariante só serve para DISTINGUIR, e nunca para"
+                  " identificar. Achar a diferença prova que não são iguais; não achar não"
+                  " prova nada — e é a mesma regra do gume automático desta casa");
+        { printf("      espaço          posto π₁    e o que ele distingue\n");
+          printf("      reta P₅         %-11d contrai\n", gr_posto(P));
+          printf("      círculo C₅      %-11d não contrai  ← posto diferente da reta\n",
+                 gr_posto(C5));
+          printf("      círculo C₈      %-11d o MESMO da C₅: são homeomorfos\n",
+                 gr_posto(C8));
+          printf("      oito            %-11d diferente dos dois\n", gr_posto(O));
+          printf("      e a conclusão CORRECTA: posto(C₅) ≠ posto(P₅) PROVA que a reta e o"
+                 " círculo\n        não são homeomorfos. Mas posto(C₅) = posto(C₈) NÃO"
+                 " prova que o são —\n        prova-se exibindo o homeomorfismo, e é outro"
+                 " trabalho\n");
+          tique7(4, "a testemunha é a assimetria: o posto SEPARA a reta do círculo (0 ≠ 1)"
+                    " e não IDENTIFICA C₅ com C₈. Usar um invariante para concluir"
+                    " igualdade é o erro que este andar existe para impedir");
+          tique7(5, gr_posto(P) != gr_posto(C5) && gr_posto(C5) == gr_posto(C8)
+                 ? "logo π₁ é invariante topológico, e serve para distinguir — nunca para"
+                   " identificar"
+                 : "os postos não se separaram — NÃO afirmo");
+          tique7(6, "e a VOLTA é o que a casa ganhou: em `formas 20` eu disse que o buraco"
+                    " da cohomologia não se via porque a testemunha não era polinomial —"
+                    " «a razão de eu não ver o buraco é a REPRESENTAÇÃO». Aqui está ele,"
+                    " noutra representação: o círculo combinatório, e o buraco é o posto"
+                    " 1. A mesma coisa que não cabia em ℚ[x,y,z] cabe num grafo de oito"
+                    " vértices"); }
+        break;
+    }
+}
+static int resolve_homo(const char *f){
+    const char *p = f;
+    for(size_t i = 0; i < sizeof HM14/sizeof *HM14; i++)
+        if(!strcmp(p, HM14[i].nome)){ homo_resolve(HM14[i].n); return 1; }
+    if(!strncmp(p, "homotopia", 9)) p += 9;
+    else if(!strncmp(p, "pi1", 3)) p += 3;
+    else return 0;
+    while(*p == ' ') p++;
+    if(!*p){
+        printf("   Homotopia: o buraco que nenhum ponto vê —"
+               " «homotopia N» ou «homotopia <nome>»\n");
+        printf("   localmente igual ≠ globalmente igual\n\n");
+        for(size_t i = 0; i < sizeof HM14/sizeof *HM14; i++){
+            printf("     %2d  ", HM14[i].n);
+            esc_col(HM14[i].nome, 20);
+            printf("  %s\n", HM14[i].enunciado);
+        }
+        return 1;
+    }
+    if(*p >= '0' && *p <= '9'){
+        long n = 0;
+        while(*p >= '0' && *p <= '9') n = n*10 + (*p++ - '0');
+        while(*p == ' ') p++;
+        if(!*p && n >= 1 && n <= 14){ homo_resolve((int)n); return 1; }
+        return 0;
+    }
+    return 0;
+}
 /* ── TOPOLOGIA: A RÉGUA REMOVIDA ────────────────────────────────────────────────────
  * O `eval.txt` traz vinte problemas e o gume que é a alma do andar:
  *
@@ -14046,6 +14350,7 @@ static int resolve_mostra(const char *f){ return resolve_mostra_em(f, "../papers
 static int resolve_simbolico(const char *fala){
     if(resolve_divisibilidade(fala)) return 1;     /* o relógio de 6 ticks */
     if(resolve_bezout(fala)) return 1;             /* a testemunha e o critério */
+    if(resolve_homo(fala)) return 1;               /* homotopia: o buraco, os 14 */
     if(resolve_topo(fala)) return 1;               /* topologia sem régua, os 20 */
     if(resolve_metrico(fala)) return 1;            /* espaços métricos, os 16 */
     if(resolve_hier(fala)) return 1;               /* a lei e as duas faces, os 9 */
@@ -15094,6 +15399,133 @@ static int teste(void){
                 if(e_conta(nu2)) roubadas++;
             }
             ok("e a membrana nao rouba o corpus: fala sem LaTeX nao vira conta", roubadas == 0);
+
+        /* ═══ §C48 HOMOTOPIA: O BURACO QUE NENHUM PONTO VÊ ═══════════════════════
+         * «O círculo força a distinguir LOCALMENTE IGUAL ≠ GLOBALMENTE IGUAL. Vamos
+         * descobrir se ele consegue capturar um BURACO QUE NÃO É VISÍVEL POR NENHUM
+         * PONTO ISOLADAMENTE.» A resposta é combinatória, e por isso exacta. */
+        printf("\n§C48 HOMOTOPIA: nenhum ponto vê o buraco, e ele está lá.\n\n");
+        {
+            Grafo P = gr_caminho(5), C5 = gr_ciclo(5), C8 = gr_ciclo(8), O = gr_oito(4);
+
+            /* (1) O POSTO, e a relação com Euler */
+            { long mal = 0;
+              Grafo GS[] = { P, C5, C8, O };
+              for(int i = 0; i < 4; i++)
+                  if(gr_posto(GS[i]) != 1 - gr_euler(GS[i])) mal++;
+              printf("      postos: reta %d, C₅ %d, C₈ %d, oito %d;  e posto = 1 − χ:"
+                     " %ld falhas\n", gr_posto(P), gr_posto(C5), gr_posto(C8),
+                     gr_posto(O), mal);
+              ok("π₁ DE UM GRAFO CONEXO É LIVRE DE POSTO E − V + 1, e isso é aritmética de"
+                 " INTEIROS: fixa-se uma árvore geradora (V−1 arestas, contráctil) e cada"
+                 " aresta que sobra fecha um laço independente. A homotopia de um grafo"
+                 " decide-se sem uma distância, sem um limite e sem um decimal — e a"
+                 " relação posto = 1 − χ bate nos quatro espaços",
+                 mal == 0 && gr_posto(P) == 0 && gr_posto(C5) == 1 && gr_posto(O) == 2); }
+
+            /* (2) O BURACO — e é o pedido do eval, medido nas DUAS metades */
+            { long todas = 0, tot = 0, tr = 0;
+              for(int v = 0; v < C8.nv; v++){
+                  if(gr_contractil(gr_estrela(C8, v))) todas++;
+                  tot++;
+              }
+              for(int v = 0; v < P.nv; v++) if(gr_contractil(gr_estrela(P, v))) tr++;
+              printf("      C₈: %ld de %ld vizinhanças CONTRÁCTEIS, e o todo NÃO contrai"
+                     " (posto %d)\n", todas, tot, gr_posto(C8));
+              printf("      P₅: %ld de %d vizinhanças contrácteis, e o todo CONTRAI\n",
+                     tr, P.nv);
+              ok("O BURACO NÃO VIVE EM PONTO NENHUM. A vizinhança de cada vértice do"
+                 " círculo é uma ESTRELA de três vértices — um caminho, uma árvore, posto"
+                 " 0 —, indistinguível da vizinhança de um ponto da reta. Nenhum teste"
+                 " LOCAL separa os dois espaços, e eles são diferentes: um contrai e o"
+                 " outro não. As duas metades medem-se AO MESMO TEMPO, e é o par que é o"
+                 " teorema — a diferença vive na COLAGEM, não nos pontos",
+                 todas == tot && !gr_contractil(C8) && tr == P.nv && gr_contractil(P)); }
+
+            /* (3) π₁(S¹) ≅ ℤ, com os DOIS controlos */
+            { long mal = 0, tot = 0;
+              for(int r = -3; r <= 3; r++) for(int s = -3; s <= 3; s++){
+                  int va[64], vb[64], vc[128];
+                  int na = hm_laco(5, r, va), nb = hm_laco(5, s, vb), nc = 0;
+                  for(int i = 0; i < na; i++) vc[nc++] = va[i];
+                  for(int i = 1; i < nb; i++) vc[nc++] = vb[i];
+                  int ww;
+                  if(!ht_volta(5, vc, nc, &ww)){ if(r || s) mal++; }
+                  else if(ww != r + s) mal++;
+                  tot++;
+              }
+              int aberto[] = {0,1,2}, salto[] = {0,2,0}, w;
+              int r1 = ht_volta(5, aberto, 3, &w), r2 = ht_volta(5, salto, 3, &w);
+              printf("      w(αβ) = w(α)+w(β) em %ld pares: %ld falhas;  controlos:"
+                     " aberto %s, salto %s\n", tot, mal,
+                     r1 ? "ACEITE" : "recusado", r2 ? "ACEITE" : "recusado");
+              ok("π₁(S¹) ≅ ℤ, E O ISOMORFISMO É O NÚMERO DE VOLTAS: ele é um HOMOMORFISMO,"
+                 " w(αβ) = w(α) + w(β), medido em 49 pares. E os DOIS controlos são o que"
+                 " lhe dá valor: um percurso que não fecha e um passo que não é aresta são"
+                 " RECUSADOS — sem eles, «w deu um número» não distinguia um laço de uma"
+                 " lista qualquer de vértices",
+                 mal == 0 && !r1 && !r2 && tot == 49); }
+
+            /* (4) O OITO: o primeiro grupo NÃO abeliano sem matriz por trás */
+            { int A[] = {1}, B[] = {2};
+              Pal a = pal_de(A,1), b = pal_de(B,1);
+              Pal ab = pal_junta(a,b), ba = pal_junta(b,a);
+              Pal com = pal_junta(pal_junta(a,b), pal_junta(pal_inversa(a), pal_inversa(b)));
+              Pal aa = pal_junta(a, pal_inversa(a));
+              int na, nb;
+              pal_abeliana(com, &na, &nb);
+              printf("      oito (posto %d): ab = ba? %s;  comutador trivial? %s;"
+                     "  a·a⁻¹ trivial? %s;  abelianização (%d,%d)\n",
+                     gr_posto(O), pal_igual(ab,ba) ? "sim" : "não",
+                     pal_trivial(com) ? "sim" : "não", pal_trivial(aa) ? "sim" : "não",
+                     na, nb);
+              ok("O OITO É O PRIMEIRO GRUPO NÃO ABELIANO DESTA CASA SEM UMA MATRIZ POR"
+                 " TRÁS: a não comutatividade vem das PALAVRAS, e decide-se por redução —"
+                 " apagar pares xx⁻¹ até nada mudar. E o par de medidas diz ONDE ela está:"
+                 " o comutador aba⁻¹b⁻¹ NÃO se reduz (é não trivial no grupo livre) e a sua"
+                 " ABELIANIZAÇÃO é (0,0) (some quando se apaga a ordem). O oito e o toro"
+                 " têm a mesma contagem de geradores e grupos diferentes — a diferença é a"
+                 " ORDEM",
+                 !pal_igual(ab,ba) && !pal_trivial(com) && pal_trivial(aa)
+                 && na == 0 && nb == 0 && gr_posto(O) == 2); }
+
+            /* (5) O INVARIANTE SÓ DISTINGUE — nunca identifica */
+            { int p1 = gr_posto(P), p5 = gr_posto(C5), p8 = gr_posto(C8);
+              printf("      posto(P₅) = %d ≠ posto(C₅) = %d → PROVA que não são"
+                     " homeomorfos;  posto(C₅) = posto(C₈) = %d → não prova nada\n",
+                     p1, p5, p8);
+              ok("UM INVARIANTE SÓ SERVE PARA DISTINGUIR, NUNCA PARA IDENTIFICAR — e é a"
+                 " mesma regra do gume automático desta casa. posto(P₅) ≠ posto(C₅) PROVA"
+                 " que a reta e o círculo não são homeomorfos; posto(C₅) = posto(C₈) NÃO"
+                 " prova que o sejam, e para isso é preciso exibir o homeomorfismo, que é"
+                 " outro trabalho. Achar a diferença conclui; não achar não conclui",
+                 p1 != p5 && p5 == p8); }
+
+            /* E OS CATORZE CORREM */
+            { int vmal = 0, por_n = 0, por_nome = 0;
+              fflush(stdout);
+              int guarda = dup(1), nulo = open("/dev/null", O_WRONLY);
+              if(guarda >= 0 && nulo >= 0) dup2(nulo, 1);
+              for(int k = 1; k <= 14; k++){
+                  char fala[64];
+                  snprintf(fala, sizeof fala, "homotopia %d", k);
+                  if(resolve_homo(fala)) por_n++; else vmal++;
+              }
+              for(size_t i = 0; i < sizeof HM14/sizeof *HM14; i++)
+                  if(resolve_homo(HM14[i].nome)) por_nome++; else vmal++;
+              if(resolve_homo("homotopia 15")) vmal++;
+              fflush(stdout);
+              if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
+              if(nulo >= 0) close(nulo);
+              printf("      os catorze: %d por número, %d por nome;  estouros %ld\n",
+                     por_n, por_nome, ht_estouros);
+              ok("E O ANDAR FECHA UMA CONTA ANTIGA: em «formas 20» eu disse que o buraco da"
+                 " cohomologia não se via porque a testemunha não era polinomial — «a razão"
+                 " de eu não ver o buraco é a REPRESENTAÇÃO, não a matemática». Aqui está"
+                 " ele, noutra representação: o círculo combinatório, e o buraco é o posto"
+                 " 1. O que não cabia em ℚ[x,y,z] cabe num grafo de oito vértices",
+                 vmal == 0 && por_n == 14 && por_nome == 14 && ht_estouros == 0); }
+        }
 
         /* ═══ §C47 TOPOLOGIA: A RÉGUA REMOVIDA ═══════════════════════════════════
          * O gume do andar é uma ordem: «REMOVA A MÉTRICA», e refaça os exercícios só com
