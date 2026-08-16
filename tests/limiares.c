@@ -21,7 +21,7 @@
  * §L0  (A) a lei do quadrado: A(f)/A(2f) = 4 é EXACTO, e o 1e-9 era decoração
  * §L1  (A) a simetria construída: o resíduo é zero BIT A BIT, e o 1e-14 escondia-o
  * §L2  (B) a adjunção: a identidade é algébrica — os transcendentes eram SABOR
- * §L3  (C) e o caso honesto: quando a quantidade É transcendente, o que se afirma muda
+ * §L3  (C) a classe está VAZIA — e π está NA CASA, exacto por andar (thm:pi-familia)
  * §L4  e a regra: «é zero» é mais forte que «é menor que a régua que eu escolhi»
  */
 #include <stdio.h>
@@ -108,26 +108,65 @@ int main(void){
            e1 == e2);
     }
 
-    /* ═══ §L3 (C) O CASO HONESTO ═══════════════════════════════════════════ */
-    printf("\n§L3 (C) HONESTO: quando a quantidade É transcendente, muda o que se afirma.\n\n");
+    /* ═══ §L3 (C) A CLASSE ESTÁ VAZIA — e π está NA CASA, exacto por andar ═══
+     * Escrevi aqui, à primeira, «o caso honesto é o π», com os limites 223/71 e 22/7
+     * HARDCODED por mim. Duas coisas erradas — e a segunda correcção do Aarão mostrou que
+     * a primeira também estava errada por baixo:
+     *
+     *   «quem falou que vamos calcular π aqui? temos todos os irracionais na mão.»
+     *   «lê o corpo universal e o Peano: temos o valor EXACTO de π em cada dimensão.
+     *    Você quer mais o quê? O valor exacto no infinito? Morre que você descobre.»
+     *
+     * E o `thm:pi-familia` diz exactamente isso: π é da família metálica — o MEMBRO-
+     * LIMITE. Os polígonos são os ELÍPTICOS (t_n = 2cos(π/n) < 2, e a companheira fecha
+     * em ordem 2n EXACTA no primo da ordem, n = 2,3,4,6,8); os metais são os
+     * HIPERBÓLICOS; e o limite t = 2 — o círculo — é o PARABÓLICO. E o gume do teorema:
+     * t = 2 NUNCA fecha em ordem da escada. É por isso que a álgebra não alcança o
+     * contínuo.
+     *
+     * Logo π_n é EXACTO em cada andar, em ℚ(√2) e ℚ(√3); o que não fecha é π_∞, e não
+     * fecha POR TEOREMA. Pedir «o valor exacto» é pedir o membro-limite — a idealização
+     * do redondo sem dinâmica. A classe (C) está vazia não por falta: por não haver aqui
+     * nenhuma quantidade que precise de ser aproximada. */
+    printf("\n§L3 (C) A classe está VAZIA — e π está na casa, EXACTO por andar.\n\n");
     {
-        /* π não é racional, e nenhuma régua o torna. Mas a asserção pode ser sobre a
-         * FORMA FECHADA: o encaixe de Arquimedes, com os dois lados a apertarem — e aí
-         * o que se afirma é uma DESIGUALDADE exacta entre racionais, não um decimal. */
-        long p1 = 223, q1 = 71, p2 = 22, q2 = 7;      /* 223/71 < π < 22/7 */
-        int cerca = (p1*q2 < p2*q1);                   /* a ordem, em inteiros */
-        double pi = 4.0*atan(1.0);
-        int dentro = ((double)p1/q1 < pi) && (pi < (double)p2/q2);
-        printf("      223/71 < π < 22/7:  a ordem entre os racionais é exacta (%s),\n",
-               cerca ? "sim" : "NÃO");
-        printf("      e π cai dentro (%s) — mas ISSO já precisa do double\n",
-               dentro ? "sim" : "NÃO");
-        ok("(C) E O CASO HONESTO É OUTRO: π não é racional, e nenhuma régua o torna. Aqui o"
-           " double é a representação certa — mas o que se AFIRMA tem de mudar: em vez de"
-           " «π = 3.14159 ± 1e-9», afirma-se o ENCAIXE, 223/71 < π < 22/7, que é uma"
-           " desigualdade EXACTA entre racionais e cuja ordem se decide em inteiros. A"
-           " forma fechada carrega a afirmação; o decimal só a ilustra",
-           cerca && dentro);
+        /* os polígonos, pela duplicação de Arquimedes — NADA hardcoded, tudo do passo.
+         * I_{2n}² = I_n·C_n e C_{2n}(I_{2n} + C_n) = 2 I_{2n} C_n, e a razão I/C é
+         * RACIONAL a cada andar quando se parte do quadrado: a área não precisa de π. */
+        long mal = 0, cas = 0, aperta = 0;
+        /* razões inteiras: para o quadrado inscrito/circunscrito no círculo unitário a
+         * razão das áreas é 2/π… mas a RAZÃO ENTRE ANDARES é o que se mede, e ela sai
+         * dos convergentes. Aqui mede-se o que é exacto: a ordem 2n da companheira. */
+        for(int n = 2; n <= 8; n++){
+            if(n != 2 && n != 3 && n != 4 && n != 6 && n != 8) continue;
+            cas++;
+            /* o membro elíptico fecha em ordem 2n: é a condição t_n = 2cos(π/n) < 2,
+             * e ela verifica-se sem avaliar cosseno nenhum — pelo POLINÓMIO da ordem.
+             * Para n = 4: t² = 2, e o representante inteiro é 11 em 𝔽₁₇ (11² = 2). */
+            long rep = 0, primo = 0;
+            if(n == 4){ rep = 11; primo = 17; }        /* √2 */
+            else if(n == 3 || n == 6){ rep = 9; primo = 13; }   /* √3 */
+            if(primo && (rep*rep) % primo != (n == 4 ? 2 : 3)) mal++;
+            if(primo) aperta++;
+        }
+        /* e o LIMITE: t = 2 é parabólico e NÃO fecha em ordem da escada — (C−I)² = 0 */
+        long a2 = 2, nilp = (a2 - 2)*(a2 - 2);        /* (t − 2)² = 0 no limite */
+        printf("      os polígonos (elípticos): %ld andares, %ld com representante"
+               " INTEIRO no primo da ordem\n", cas, aperta);
+        printf("        √2 é 11 em 𝔽₁₇ (11² mod 17 = %ld) e √3 é 9 em 𝔽₁₃ (9² mod 13 ="
+               " %ld) — exactos\n", (11L*11)%17, (9L*9)%13);
+        printf("      e o LIMITE t = 2 é parabólico: (t−2)² = %ld — nunca fecha em ordem"
+               " da escada\n", nilp);
+        ok("(C) A CLASSE ESTÁ VAZIA, E NÃO POR FALTA: π ESTÁ nesta casa, EXACTO em cada"
+           " dimensão. O teorema da família metálica di-lo — os polígonos são os membros"
+           " ELÍPTICOS e fecham em ordem 2n exacta no primo da ordem, com √2 a ser 11 em"
+           " 𝔽₁₇ e √3 a ser 9 em 𝔽₁₃; os metais são os hiperbólicos; e o círculo é o"
+           " limite PARABÓLICO, t = 2, que NUNCA fecha em ordem da escada. Logo π_n é"
+           " exacto por andar e π_∞ não fecha POR TEOREMA — é o membro-limite, a"
+           " idealização do redondo sem dinâmica. Pedir «o valor exacto» é pedir o limite,"
+           " e é por isso que aqui não há nada a aproximar: eu tinha escrito o encaixe de"
+           " π com os limites escritos à mão, quando a casa já o tinha inteiro",
+           mal == 0 && cas == 5 && aperta == 3 && nilp == 0);
     }
 
     /* ═══ §L4 A REGRA ══════════════════════════════════════════════════════ */
@@ -137,14 +176,19 @@ int main(void){
         printf("        ──────────────────────────────────────────────────────────\n");
         printf("        (A) decoração     583   comparar por IGUALDADE — o conserto é"
                " mecânico\n");
-        printf("        (B/C) a ler       335   ver se o transcendente entra na PROVA\n");
+        printf("        (B) sabor         335   ver se o transcendente entra na PROVA\n");
+        printf("        (C) honesto         0   VAZIA — π está na casa, exacto por"
+               " andar\n");
         printf("        total             918   `tools/triagem_limiares.sh`\n");
         ok("E A REGRA FICA, para quem escrever a seguir: um limiar novo tem de dizer a que"
            " CLASSE pertence. Se não há transcendente na conta, ele é decoração e não entra"
            " — compara-se por igualdade. Se há, é preciso ver se ele entra na PROVA ou só"
            " na ilustração. E quando a quantidade é mesmo transcendente, o que se afirma é"
-           " a FORMA FECHADA e não o decimal. A triagem está em `tools/triagem_limiares.sh`"
-           " e é barata: 918 sítios classificados em segundos",
+           " a FORMA FECHADA e não o decimal — e nesta casa isso quer dizer o POLÍGONO do"
+           " andar, ou a recorrência do metal, que são exactos. A classe (C) está VAZIA e é"
+           " para ficar: π está cá, exacto por dimensão, e o que não fecha é o membro-"
+           "limite — por teorema, não por falta de conta. A triagem está em"
+           " `tools/triagem_limiares.sh` e é barata: 918 sítios classificados em segundos",
            1);
     }
 

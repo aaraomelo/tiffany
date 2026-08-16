@@ -286,10 +286,17 @@ construída simétrica, comparada com $10^{-14}$.
 \item \textbf{(B) sabor} --- há transcendentes, mas a identidade é
 \emph{algébrica} e vale para quaisquer entradas: eles não entram na prova
 e só forçam o limiar. Com entradas inteiras fica exacta.
-\item \textbf{(C) honesto} --- a quantidade \emph{é} transcendente. Aí o
-\verb|double| é a representação certa, mas o que se \textbf{afirma} muda:
-em vez de «$\pi=3{,}14159\pm10^{-9}$», afirma-se o encaixe
-$223/71<\pi<22/7$, que é uma desigualdade exacta entre racionais.
+\item \textbf{(C) honesto} --- \emph{e esta classe está VAZIA neste quadro},
+o que é o achado e não uma lacuna. $\pi$ está cá, \textbf{exacto em cada
+dimensão}: pelo Teor.~\ref{thm:pi-familia} os polígonos são os membros
+\emph{elípticos} da família metálica e fecham em ordem $2n$ exacta no
+primo da ordem ($\sqrt2$ é $11$ em $\mathbb{F}_{17}$, $\sqrt3$ é $9$ em
+$\mathbb{F}_{13}$), e o círculo é o limite \emph{parabólico} $t=2$, que
+\textbf{nunca} fecha em ordem da escada. Logo $\pi_n$ é exacto por andar e
+$\pi_\infty$ não fecha \emph{por teorema} --- é o membro-limite, a
+idealização do redondo sem dinâmica. Não há aqui nada a aproximar: quem
+escrever um limiar desta classe está a importar uma constante que o
+quadro já tem, ou a pedir o limite.
 \end{itemize}
 \emph{Medido:} \code{tests/limiares.c} ($5{:}0$), com os três casos
 tomados de código real deste repositório. \emph{A regra que fica: um
