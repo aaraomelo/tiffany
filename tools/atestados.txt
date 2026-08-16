@@ -167,7 +167,7 @@ eliptica_viviani 6202e1b445210d57 0
 encaixa 12b97f8add189a61 0
 encaixe_continuo fb85476766754fcb 0
 encaixotamento 0f9c4a6716e901fe 0
-encanamento 045b4f98e950e3c9 0
+encanamento 545dabf8895fe820 0
 enche a2861fc14a9fd7f9 0
 entre c9d4cbfc7a5a9307 0
 entropia_dual 9e1e8357b68c4eb5 0
@@ -359,7 +359,7 @@ po_corpo bd31fce254616bbc 0
 polar 26b7d896d0e8809e 0
 poligonos 4a132f94a847e701 0
 ponte_universal_metalica 6bdedb0d4a48d0b8 0
-pontofixo 8970f01c1addedf1 0
+pontofixo 0f106b073e9273c8 0
 pontryagin 1859961af08854d9 0
 posto_viviani d6eeac3d7d845b41 0
 potencia cc93709e0a87f0db 0

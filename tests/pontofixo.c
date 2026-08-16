@@ -223,8 +223,34 @@ int main(void){
         printf("        discordancias entre BUSCA DIRETA e CRITERIO DO DELTA: %ld\n\n", discord);
         ok("os DOIS caminhos concordam caso a caso — a fatorizacao e' regida por Delta, nao por sorte",
            discord == 0 && tot == 884 && fatZ > 0 && fatZ < tot);
-        ok("e sobre R e' SEMPRE possivel: traco^2 + 4 > 0, logo ha x com Delta > 0 em toda a matriz",
-           (trM*trM + 4) > 0);
+        /* E ISTO NAO PODIA FALHAR: trM^2 + 4 > 0 e verdade para qualquer inteiro, e o trM
+         * nem era o das matrizes varridas — era o de UMA matriz fixada la em cima. Uma
+         * constante disfarcada.
+         *
+         * A tese e' que Delta = x^2·(traco^2+4) - 4bc fica POSITIVO para algum x, em TODA
+         * a matriz do varrimento. Isso mede-se, e depende do bc de cada uma: como o
+         * coeficiente traco^2+4 e' positivo, basta x grande — e o x que serve EXIBE-SE,
+         * em inteiros, com o menor que funciona. */
+        {
+            L semx = 0, piorx = 0;
+            for(L a=-9;a<=9;a++) for(L b=-9;b<=9;b++)
+            for(L c=-9;c<=9;c++) for(L d=-9;d<=9;d++){
+                if(a*d - b*c != -1) continue;
+                L tr = a + d, achou = 0;
+                for(L x=1; x<=12 && !achou; x++)
+                    if(x*x*(tr*tr + 4) - 4*b*c > 0){ achou = x; }
+                if(!achou) semx++;
+                else if(achou > piorx) piorx = achou;
+            }
+            printf("        e sobre R: em todas as %ld matrizes ha x com Delta > 0 — o maior x\n"
+                   "        necessario e' %ld, e as que nao tem: %ld\n\n", tot, piorx, semx);
+            ok("e sobre R e' SEMPRE possivel: Delta = x^2(traco^2+4) - 4bc fica positivo para"
+               " algum x em TODA a matriz do varrimento, e o x que serve exibe-se — o maior"
+               " necessario e pequeno. Estava aqui `(trM*trM + 4) > 0`, que e verdade para"
+               " qualquer inteiro e nem sequer usava as matrizes varridas: era o traco de UMA"
+               " matriz fixada acima. Uma constante disfarcada",
+               semx == 0 && piorx > 0 && tot > 0);
+        }
         conclui("sao DUAS equacoes e nao uma funcao com duas propriedades. O nivel 0 mede, o");
         conclui("nivel 1 gera — e o gerador CONTEM o espelho como fator. Ler e escrever com a");
         conclui("mesma regua: e' isso a bidualidade, e aqui ela e' uma igualdade de matrizes.");

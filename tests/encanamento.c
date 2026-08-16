@@ -294,8 +294,34 @@ int main(void){
         double snr_saida = snr_entrada / F;
         ok("a CADEIA INTEIRA preserva o sinal: a relacao sinal-ruido sobrevive ao encanamento",
            snr_saida > 100);
-        ok("e o que ela custa e mensuravel: o SNR cai pelo fator de ruido, e por nada mais",
-           fabs(snr_entrada/snr_saida - F) < 1e-12);
+        /* E ISTO ERA A DEFINICAO A FAZER DE MEDIDA. Na linha de cima escreve-se
+         *   snr_saida = snr_entrada / F;
+         * e aqui perguntava-se se snr_entrada/snr_saida da F — isto e', se
+         * snr_entrada/(snr_entrada/F) da F. Verdade para qualquer F, e a assercao nao
+         * podia falhar.
+         *
+         * O que TEM conteudo e a formula de FRIIS: o F da cadeia nao e um numero solto,
+         * e sai dos andares por
+         *
+         *     F = F1 + (F2-1)/G1 + (F3-1)/(G1G2) + ...
+         *
+         * e daqui vem a tese desta casa: o PRIMEIRO andar decide. Mede-se assim — o F da
+         * cadeia contra a soma explicita dos andares, que e uma segunda rota; e o peso do
+         * primeiro andar contra o dos outros, que e a tese. */
+        {
+            double F1 = cadeia[0].F, soma = F1, ganho = 1.0;
+            for(int i = 1; i < 4; i++){ ganho *= cadeia[i-1].G; soma += (cadeia[i].F - 1.0)/ganho; }
+            double resto = soma - F1;                 /* o que os outros tres acrescentam */
+            printf("     -> Friis por andares: F1 = %.3f, e os outros tres acrescentam %.4f\n",
+                   F1, resto);
+            ok("e o que ela custa e mensuravel, e e FRIIS quem o diz: o F da cadeia sai da"
+               " soma por andares, F1 + (F2-1)/G1 + ..., e bate com a rota da funcao. E daqui"
+               " a tese: O PRIMEIRO ANDAR DECIDE — sozinho ele responde por quase todo o F, e"
+               " os outros tres juntos acrescentam menos que ele. Estava aqui"
+               " snr_entrada/snr_saida == F com snr_saida definido como snr_entrada/F: a"
+               " definicao a fazer de medida",
+               fabs(soma - F) < 1e-12 && resto < F1);
+        }
         printf("     -> SNR a entrada %.0f; fator de ruido da cadeia %.3f; SNR a saida %.0f.\n",
                snr_entrada, F, snr_saida);
         puts("        O encanamento nao acrescenta nada ao sinal — so lhe tira. E o que ele tira");
