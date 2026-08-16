@@ -458,6 +458,97 @@ printf("    E o par dual FECHA: directo² + cruzado² = N(u)N(v). A conservaçã
 printf("    e a decomposição simétrica ⊕ antissimétrica são a mesma frase, e o degrau 4\n");
 printf("    é onde o escalar arranja lugar. Zero doubles, zero tolerâncias.\n\n");
 /* ══════════════════════════════════════════════════════════════════════════════
+ * POR QUE A SOMA TEM TECTO 8 — E A RESPOSTA ESTÁ NA BASE
+ * ══════════════════════════════════════════════════════════════════════════════
+ * O Aarão: «porquê o tecto 8? a justificação está na base ortonormal, que tem 8
+ * elementos» — e depois: «8 elementos na base saturam todo o andar; quando satura passa
+ * ao próximo andar.»
+ *
+ * A leitura está certa, e a prova clássica de Hurwitz é literalmente essa. De
+ * N(xy) = N(x)N(y) com N = Σxᵢ², polarizando em y, sai
+ *
+ *      ⟨xy, xz⟩ = N(x)·⟨y,z⟩          o produto PRESERVA A ORTOGONALIDADE
+ *
+ * e numa base ortonormal e₀ = 1, e₁, …, e_{n−1} isso força eᵢ² = −1 e eᵢeⱼ = −eⱼeᵢ. São
+ * as relações de Clifford, e é a base que as carrega — não o número.
+ *
+ * ── MAS A SATURAÇÃO SOZINHA NÃO É O TECTO, E ISSO MEDE-SE ─────────────────────
+ * A tabela eᵢ·eⱼ SATURA a base em 1, 2, 4, 8 — os produtos cobrem todos os elementos.
+ * E satura também em 16. Logo a saturação é o que faz a torre SUBIR («quando satura
+ * passa ao próximo andar»), e não o que a faz parar.
+ *
+ * O que a faz parar é o que a saturação CUSTA: a cada dobra perde-se uma propriedade —
+ * a ordem, a comutatividade, a associatividade —, e em 16 cai a última que a norma
+ * precisava. Aí aparecem x, y ≠ 0 com xy = 0.
+ *
+ * ── E ESSE xy = 0 É A FACTORIZAÇÃO DO ZERO ───────────────────────────────────
+ * É o mesmo fenómeno do outro lado da casa: o zero parte-se quando o andar deixa de ser
+ * corpo. Lá era o polinómio a factorizar; aqui é a álgebra a passar dos oito. Nos dois
+ * casos a norma multiplicativa é a primeira coisa que cai. */
+{
+    printf("\n§H9  A base SATURA em cada andar — e o tecto é o que a saturação custa.\n\n");
+    long andares = 0, satura = 0, norma_ok = 0, div0 = 0;
+    printf("      dim   a tabela eᵢ·eⱼ cobre a base?   a norma sobrevive?   xy = 0 com x,y ≠ 0?\n");
+    for(int n = 1; n <= 16; n *= 2){
+        /* a tabela nos vectores da base: eᵢ·eⱼ é ±e_k ? e quantos k distintos aparecem? */
+        int visto[16] = {0}; long fora = 0;
+        for(int i = 0; i < n; i++) for(int j = 0; j < n; j++){
+            long a[16] = {0}, b[16] = {0}, c[16] = {0};
+            a[i] = 1; b[j] = 1;
+            cd(a, b, n, c);
+            int nz = 0, kk = -1;
+            for(int t = 0; t < n; t++) if(c[t]){ nz++; kk = t; }
+            if(nz == 1) visto[kk] = 1; else fora++;       /* não é ±e_k: sai da base */
+        }
+        int cobre = 0;
+        for(int t = 0; t < n; t++) if(visto[t]) cobre++;
+        /* a norma sobrevive? e há divisores de zero? — nos mesmos vectores */
+        long mau = 0, zero = 0;
+        for(long t = 0; t < 300; t++){
+            long x[16], y[16], z[16];
+            gera(x, n, t*3 + 1); gera(y, n, t*5 + 2);
+            cd(x, y, n, z);
+            if(norma2(z, n) != norma2(x, n)*norma2(y, n)) mau++;
+        }
+        /* o divisor de zero de dimensão 16, que a casa já conhece: (e_i+e_j)(e_k+e_l) */
+        if(n == 16){
+            for(int i = 1; i < n && !zero; i++) for(int j = 1; j < n; j++)
+            for(int k = 1; k < n; k++) for(int l = 1; l < n; l++){
+                if(i == j || k == l) continue;
+                long a[16] = {0}, b[16] = {0}, c[16] = {0};
+                a[i] = 1; a[j] = 1; b[k] = 1; b[l] = 1;
+                cd(a, b, n, c);
+                int nulo16 = 1;
+                for(int t = 0; t < n; t++) if(c[t]) nulo16 = 0;
+                if(nulo16){ zero = 1; break; }
+            }
+        }
+        andares++;
+        if(cobre == n && fora == 0) satura++;
+        if(!mau) norma_ok++;
+        if(zero) div0++;
+        printf("      %-5d %-30s %-20s %s\n", n,
+               (cobre == n && fora == 0) ? "sim, SATURA" : "não",
+               mau ? "NÃO" : "sim",
+               (n == 16) ? (zero ? "SIM — o zero parte-se" : "não achado") : "—");
+    }
+    printf("\n      ⟹ a saturação faz a torre SUBIR, e está em TODOS os andares medidos;\n");
+    printf("        o que a faz PARAR é o que a saturação custa — em 16 cai a última\n");
+    printf("        propriedade que a norma precisava, e o zero parte-se.\n\n");
+    ok("A BASE SATURA EM CADA ANDAR, E O TECTO É O QUE A SATURAÇÃO CUSTA — não a"
+       " saturação: a tabela eᵢ·eⱼ cobre TODOS os elementos da base em 1, 2, 4, 8 e"
+       " TAMBÉM em 16, logo saturar é o que faz a torre SUBIR e não o que a faz parar. E a"
+       " justificação pela base é a prova clássica: de N(xy) = N(x)N(y) com N = Σxᵢ²,"
+       " polarizando, sai ⟨xy,xz⟩ = N(x)⟨y,z⟩ — o produto PRESERVA A ORTOGONALIDADE —, e"
+       " numa base ortonormal isso força eᵢ² = −1 e eᵢeⱼ = −eⱼeᵢ, que são as relações de"
+       " Clifford. É a BASE que as carrega. O que cai em 16 é a última propriedade que a"
+       " norma precisava, e aí aparecem x, y ≠ 0 com xy = 0 — que é a MESMA factorização"
+       " do zero do outro lado da casa: lá o polinómio a factorizar, aqui a álgebra a"
+       " passar dos oito, e nos dois a norma multiplicativa é a primeira a cair",
+       andares == 5 && satura == andares && norma_ok == 4 && div0 == 1);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
  * O OUTRO LADO DO PAR: GENTIL PRESERVA NORMA, E A NORMA DELE NÃO TEM TECTO
  * ══════════════════════════════════════════════════════════════════════════════
  * O Aarão: «os andares são em pares, os ímpares projectam os pares; vê a dualidade
