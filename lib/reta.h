@@ -540,6 +540,62 @@ static long rt_traco(const long *M, int n){
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════════
+ * ℤ[√D] — O CORPO ONDE A RAIZ NÃO SE FORMA.
+ *
+ * O ponto fixo da família metálica é σ = (m + √D)/2 com D = m² + 4, e ele é irracional
+ * sempre que D não é quadrado perfeito (`thm:fixo-dual`). Formá-lo em vírgula é a coisa
+ * errada a fazer: o que se quer dele são somas, produtos e potências, e essas fazem-se
+ * no anel ℤ[√D] sem a raiz aparecer uma única vez —
+ *
+ *      (a₁ + b₁√D)(a₂ + b₂√D) = (a₁a₂ + D·b₁b₂) + (a₁b₂ + a₂b₁)√D
+ *
+ * — porque √D·√D é D, um INTEIRO, e é aí que a raiz se cancela contra si própria. O par
+ * (a,b) é a coordenada, e a conjugação é a DOBRA: b ↦ −b, com o mesmo espectro {+1,−1}
+ * da Lei 1. A norma N(a+b√D) = a² − D·b² é o produto do elemento pelo seu dual, e é ela
+ * que vale ±1 nas unidades — a condição do `thm:cruzado-potencia`.
+ *
+ * ── E É AQUI QUE O 2 ENTRA ──────────────────────────────────────────────────────────
+ * σ tem um meio: 2σ = m + √D. Por isso guarda-se 2σ e não σ, e as potências saem como
+ * (2σ)ᵏ = A_k + B_k√D com A e B inteiros; o traço, que é σᵏ + σ'ᵏ, lê-se daí por
+ *
+ *      σᵏ + σ'ᵏ = ((2σ)ᵏ + (2σ')ᵏ) / 2ᵏ = 2A_k / 2ᵏ = A_k / 2^{k−1}
+ *
+ * e essa divisão é EXACTA — o que se verifica, e não se assume.
+ * ═══════════════════════════════════════════════════════════════════════════════════ */
+
+/* o produto em ℤ[√D]: (a₁+b₁√D)(a₂+b₂√D) */
+static void rt_zd_mul(long a1, long b1, long a2, long b2, long D, long *a, long *b){
+    *a = a1*a2 + D*b1*b2;
+    *b = a1*b2 + a2*b1;
+}
+/* a potência k-ésima, por multiplicação repetida — e o passo não menciona k */
+static void rt_zd_pot(long a0, long b0, long D, int k, long *a, long *b){
+    long ra = 1, rb = 0;                       /* o 1 do anel */
+    for(int t = 0; t < k; t++){
+        long na, nb;
+        rt_zd_mul(ra, rb, a0, b0, D, &na, &nb);
+        ra = na; rb = nb;
+    }
+    *a = ra; *b = rb;
+}
+/* a NORMA, que é o elemento vezes o seu dual: (a+b√D)(a−b√D) = a² − D·b². Nas unidades
+ * vale ±1, e é essa a condição que faz o cruzado atravessar a órbita. */
+static long rt_zd_norma(long a, long b, long D){ return a*a - D*b*b; }
+
+/* O TRAÇO σᵏ + σ'ᵏ, EM INTEIROS E SEM RAIZ. Guarda-se 2σ = m + √D, eleva-se a k, e o
+ * resultado é A_k/2^{k−1} — divisão exacta, e devolve-se 0 se ela não for (o que não pode
+ * acontecer, e por isso se verifica). D = m² + 4 é assumido. */
+static long rt_traco_metalico(long m, int k){
+    if(k == 0) return 2;
+    long D = m*m + 4, A, B;
+    rt_zd_pot(m, 1, D, k, &A, &B);             /* (2σ)ᵏ = A + B√D */
+    long den = 1;
+    for(int t = 1; t < k; t++) den *= 2;       /* 2^{k−1} */
+    if(A % den != 0) return 0;                 /* a divisão TEM de ser exacta */
+    return A / den;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════════
  * O CRUZADO, O BIVECTOR E A ORDEM SEM RAIZ — `thm:cruzado-potencia`.
  *
  * O teorema diz que o cruzado se transforma pelo determinante:

@@ -989,6 +989,107 @@ printf("\n§R21 O cruzado, o bivector e a ordem sem raiz — e o quadrado perfei
        qp_acha == qp_tot && qp_recusa == qp_tot - 1 && qp_falso == 0);
 }
 
+
+/* ─── §R22 ────────────────────────────────────────────────────────────────────────────
+ * ℤ[√D] — O CORPO ONDE A RAIZ NÃO SE FORMA.
+ * √D·√D é D, um inteiro, e é aí que a raiz se cancela contra si própria. O par (a,b) é a
+ * coordenada, a conjugação é a dobra b ↦ −b, e a norma a² − D·b² é o elemento vezes o
+ * seu dual — a mesma norma que vale ±1 nas unidades do `thm:cruzado-potencia`.
+ * ──────────────────────────────────────────────────────────────────────────────────── */
+printf("\n§R22 ℤ[√D]: a raiz cancela-se contra si própria, e o traço sai inteiro.\n\n");
+{
+    /* (a) a norma é MULTIPLICATIVA: N(xy) = N(x)·N(y). É a identidade de Brahmagupta,
+     *     e é o `project-o-fecho-do-dual-lagrange` neste andar. */
+    long nm_tot = 0, nm_ok = 0, nm_vivo = 0;
+    for(long D = 2; D <= 12; D++)
+    for(long a1 = -4; a1 <= 4; a1++) for(long b1 = -4; b1 <= 4; b1++)
+    for(long a2 = -4; a2 <= 4; a2++) for(long b2 = -4; b2 <= 4; b2++){
+        long a, b;
+        rt_zd_mul(a1, b1, a2, b2, D, &a, &b);
+        nm_tot++;
+        if(rt_zd_norma(a, b, D) == rt_zd_norma(a1, b1, D) * rt_zd_norma(a2, b2, D)) nm_ok++;
+        if(rt_zd_norma(a1, b1, D) != 0) nm_vivo++;
+    }
+
+    /* (b) σ é UNIDADE: N(2σ) = m² − D = m² − (m²+4) = −4, e (2σ)ᵏ tem norma (−4)ᵏ.
+     *     Em σ propriamente a norma é −1, que é a condição do cruzado invariante. */
+    long un_tot = 0, un_ok = 0;
+    for(long m = 1; m <= 8; m++){
+        long D = m*m + 4;
+        for(int k = 1; k <= 8; k++){
+            long A, B;
+            rt_zd_pot(m, 1, D, k, &A, &B);
+            long esperado = 1;
+            for(int t = 0; t < k; t++) esperado *= -4;      /* N(2σ)ᵏ = (−4)ᵏ */
+            un_tot++;
+            if(rt_zd_norma(A, B, D) == esperado) un_ok++;
+        }
+    }
+
+    /* (c) o TRAÇO por três rotas que não se tocam: a recorrência, ℤ[√D], e a companheira
+     *     da lib (matrizes). E a de matrizes é `rt_tracos`, que já cá estava. */
+    long tr_tot = 0, tr_zd = 0, tr_mat = 0;
+    for(long m = 1; m <= 6; m++){
+        long t[12]; t[0] = 2; t[1] = m;
+        for(int k = 2; k < 12; k++) t[k] = m*t[k-1] + t[k-2];
+        /* a companheira de x² = m·x + 1, e o traço das suas potências */
+        long c[2] = { 1, m }, C[4], TR[12];
+        rt_companheira(c, 2, C);
+        rt_tracos(C, 2, TR, 12);
+        for(int k = 0; k <= 10; k++){
+            tr_tot++;
+            if(rt_traco_metalico(m, k) == t[k]) tr_zd++;
+            if(TR[k] == t[k]) tr_mat++;
+        }
+    }
+
+    /* (d) o GUME: com D um quadrado perfeito o «irracional» é racional, e √D existe em ℤ.
+     *     É o `thm:fixo-dual` — e a `rt_raiz_exacta` decide-o sem vírgula nenhuma. */
+    long qd_tot = 0, qd_metal = 0, qd_quadrado = 0;
+    for(long m = 1; m <= 200; m++){
+        long D = m*m + 4, r;
+        qd_tot++;
+        if(rt_raiz_exacta(D, &r)) qd_quadrado++; else qd_metal++;
+    }
+
+    printf("      a norma e' MULTIPLICATIVA em %ld de %ld produtos (nao nula em %ld)\n",
+           nm_ok, nm_tot, nm_vivo);
+    printf("      e (2σ)^k tem norma (−4)^k em %ld de %ld — σ e' UNIDADE\n", un_ok, un_tot);
+    printf("      o traço bate por ℤ[√D] em %ld e por MATRIZES em %ld, de %ld\n",
+           tr_zd, tr_mat, tr_tot);
+    printf("      e D = m²+4 nunca e' quadrado perfeito em m de 1 a 200: %ld metais,"
+           " %ld quadrados\n\n", qd_metal, qd_quadrado);
+
+    /* o total escreve-se como EXPRESSÃO e não como o produto já feito: onze valores de D
+     * por 9⁴ pares. Escrevi 59535 de cabeça e são 72171 — é a terceira contagem que erro
+     * hoje, e a que não erra é a que o compilador faz. */
+    ok("A NORMA DE ℤ[√D] E' MULTIPLICATIVA — N(xy) = N(x).N(y) em todos os 11.9^4 produtos,"
+       " sobre onze D diferentes. E' a identidade de Brahmagupta, e e' o mesmo fecho de"
+       " Lagrange um andar acima: o elemento vezes o seu dual. E ha' normas nao nulas, sem"
+       " o que a igualdade valia por 0 = 0",
+       nm_ok == nm_tot && nm_vivo > nm_tot/2 && nm_tot == 11L*9*9*9*9);
+
+    ok("E σ E' UNIDADE, que e' a condicao do thm:cruzado-potencia: N(2σ) = m² − D = −4, e"
+       " N((2σ)^k) = (−4)^k nos 64 casos. Em σ propriamente a norma e' −1 — |det| = 1 —, e"
+       " e' por isso que o cruzado atravessa a orbita inteira",
+       un_ok == un_tot && un_tot == 8L*8);
+
+    ok("E O TRAÇO SAI POR TRES ROTAS QUE NAO SE TOCAM: a recorrencia t_k = m.t_{k-1} +"
+       " t_{k-2}, a algebra em ℤ[√D] com o traço a ler-se como A_k/2^{k-1} (divisao"
+       " EXACTA, e verifica-se que e'), e o traço das potencias da COMPANHEIRA, que e' o"
+       " `rt_tracos` que ja' ca' estava. Nenhuma delas forma a raiz, e as tres concordam"
+       " nos 66 andares. A numerica, pow(σ,k) + pow(σ',k), passa a ser a QUARTA e a"
+       " confirmar — que e' a ordem certa",
+       tr_zd == tr_tot && tr_mat == tr_tot && tr_tot == 6L*11);
+
+    ok("E D = m² + 4 NUNCA E' QUADRADO PERFEITO, o que e' dizer que o ponto fixo metalico e'"
+       " sempre irracional: entre m² e (m+2)² so' cabe (m+1)², e (m+1)² = m²+4 exigiria"
+       " 2m = 3. Medido em m de 1 a 200 com a `rt_raiz_exacta`, que decide por busca binaria"
+       " em INTEIROS — a unica pergunta em que a raiz e' mesmo a resposta, e mesmo essa se"
+       " responde sem virgula",
+       qd_metal == qd_tot && qd_quadrado == 0 && qd_tot == 200);
+}
+
     if(!falhas){
         printf("\n  ─────────────────────────────────────────────────────────────\n");
         printf("  As operações da recta têm uma casa. Vinte e oito cópias do mdc,\n");

@@ -46,6 +46,7 @@
  */
 #include <stdio.h>
 #include "unidade.h"
+#include "reta.h"
 #include <math.h>
 
 typedef long long L;
@@ -58,7 +59,7 @@ int main(void){
     /* ---------------- §C1 — os traços crescem como σ^k ---------------- */
     printf("\n§C1 os traços t_k são INTEIROS, e crescem como σ^k — daí o raio ser 1/σ\n");
     {
-        int metais=0, inteiros=0, razao_ok=0;
+        int metais=0, inteiros=0, razao_ok=0, zd_ok=0;
         printf("      m    σ         t_1..t_5                t_12/t_11    σ\n");
         for(L m=1; m<=8; m++){
             double d = sqrt((double)(m*m+4));
@@ -66,12 +67,21 @@ int main(void){
             L t[16]; t[0]=2; t[1]=m;
             for(int k=2;k<16;k++) t[k] = m*t[k-1] + t[k-2];   /* até 12: cabe folgado */
             metais++;
-            int bate = 1;
+            /* t_k = σ^k + σ'^k EM INTEIROS, sem formar a raiz uma única vez. A conta faz-se
+             * em ℤ[√D], onde √D·√D é D e a raiz se cancela contra si própria: guarda-se
+             * 2σ = m + √D, eleva-se a k, e o traço é A_k/2^{k−1} com divisão exacta. É a
+             * `rt_traco_metalico` da reta.h, e é a rota que este ficheiro não tinha — o que
+             * aqui estava comparava a recorrência inteira com pow(s,k) + pow(sl,k), que é a
+             * APROXIMAÇÃO NUMÉRICA de uma quantidade que já era inteira, com um limiar
+             * relativo por cima para a segurar. */
+            int bate = 1, bate_zd = 1;
             for(int k=1;k<=10;k++){
-                double v = pow(s,k) + pow(sl,k);
+                if(rt_traco_metalico(m, k) != t[k]) bate_zd = 0;      /* EXACTO, em ℤ[√D] */
+                double v = pow(s,k) + pow(sl,k);                      /* e a numérica, a confirmar */
                 if(fabs(v - (double)t[k]) > 1e-9 * fabs(v) + 1e-9) bate = 0;
             }
-            if(bate) inteiros++;
+            if(bate && bate_zd) inteiros++;
+            if(bate_zd) zd_ok++;
             double r = (double)t[12]/(double)t[11];
             /* t_k/t_{k−1} → σ com erro O(|σ'/σ|^k); a tolerância acompanha o erro real */
             double tol = 3.0 * pow(fabs(sl/s), 11) * s + 1e-12;
@@ -80,7 +90,14 @@ int main(void){
                             m, s, t[1],t[2],t[3],t[4],t[5], 12, "", r, s);
         }
         printf("      metais testados: %d\n", metais);
-        ok("t_k = σ^k + σ'^k é INTEIRO — o traço cai no anel", inteiros==metais);
+        printf("      e por ℤ[√D], sem formar a raiz: %d dos %d metais batem EXACTO\n", zd_ok, metais);
+        ok("t_k = σ^k + σ'^k é INTEIRO — o traço cai no anel. E mede-se por TRÊS rotas: a"
+           " recorrência t_k = m.t_{k-1} + t_{k-2}, a álgebra em ℤ[√D] (onde √D.√D é D e a"
+           " raiz se cancela contra si própria, e o traço sai como A_k/2^{k-1} com divisão"
+           " exacta), e a numérica pow(s,k) + pow(sl,k), que passa a CONFIRMAR as duas"
+           " primeiras em vez de ser a única. Para m = 1 os t_k são 2, 1, 3, 4, 7, 11 — os"
+           " números de LUCAS, os mesmos que o §G2 do geral.c tira por Newton",
+           inteiros==metais && zd_ok==metais);
         ok("t_k/t_{k−1} → σ dentro do erro O(|σ'/σ|^k): o raio é 1/σ", razao_ok==metais);
         conclui("a série tem raio finito porque o coeficiente cresce. Não é defeito: é o polo a");
         conclui("anunciar-se de dentro do disco.");
