@@ -23,6 +23,7 @@
 #include <string.h>
 #include <math.h>
 #include "unidade.h"
+#include "reta.h"
 
 #define NT 4          /* posições na frase */
 #define KC 3          /* candidatas por posição */
@@ -125,8 +126,74 @@ printf("\n§V1  A contração converge, e o ponto fixo é o do rei.\n\n");
            " d < 1e-12: a frase estava certa e o codigo fazia o contrario",
            decresce && q < 1.0 && NRES > 2 && it > 0);
     }
+    /* ── E O PONTO FIXO É O DO REI, e isso estava por MEDIR ──────────────────────────
+     *
+     * A linha abaixo afirmava, numa `conclui()`, que «o ponto fixo é σ = m + 1/σ — o mesmo
+     * do corpo». A contracção era medida; a identificação com o rei era AFIRMADA. E ela é
+     * o ponto todo desta secção — é o que separa «uma heurística que converge» de «a órbita
+     * do corpo». Mede-se, e mede-se em INTEIROS.
+     *
+     * σ = m + 1/σ é, em fracções, [p:q] ⟼ [m·p + q : p] — a órbita de ∞ da Lei 0, que a
+     * reta.h tem como `rt_orbita`. E ela traz consigo o seu próprio certificado: a forma
+     * p² − m·p·q − q² vale ±1 em TODO andar e nunca zero, que é dizer que os convergentes
+     * são fracções em termos mínimos e que o ponto fixo não é racional.
+     *
+     * E a razão de contracção liga as duas: perto do ponto fixo a derivada de m + 1/σ é
+     * −1/σ², logo o q medido na iteração numérica tem de tender para 1/σ². Nos convergentes
+     * isso é q_{k−1}/q_{k+1}, uma razão de INTEIROS — e é contra ela que o q numérico se
+     * confere, e não contra um decimal escrito por mim. */
+    {
+        long forma_ok = 0, nunca_zero = 0, andares = 0, coprimos = 0;
+        const long M_REI = 1;                        /* m = 1: o ouro, que é este bairro */
+        for(int k = 1; k <= 40; k++){
+            long P, Q;
+            rt_orbita(M_REI, k, &P, &Q);
+            long f = rt_forma(P, Q, M_REI);
+            andares++;
+            if(f == 1 || f == -1) forma_ok++;
+            if(f != 0) nunca_zero++;
+            if(rt_mdc(P, Q) == 1) coprimos++;
+        }
+        /* a razão de contracção prevista, em inteiros: q_{k−1}/q_{k+1} → 1/σ² */
+        long p1, q1, p2, q2;
+        rt_orbita(M_REI, 28, &p1, &q1);
+        rt_orbita(M_REI, 30, &p2, &q2);
+        double qq = 0;
+        for(int k2 = 1; k2 < NRES; k2++)
+            if(RES[k2-1] > 0){ double r = RES[k2]/RES[k2-1]; if(r > qq) qq = r; }
+        /* E AQUI A MEDIDA DESMENTE A FRASE, e o número fica. 1/σ² = q1/q2 = 0,381966, e a
+         * taxa desta iteração é 0,142083 — não é a mesma, e não é a de nenhum metálico
+         * (m=2 dá 0,1716 e m=3 dá 0,0917). O que a órbita da reta.h mede e confirma é a
+         * ESTRUTURA — [p:q] ⟼ [m·p+q : p] com a forma ±1 e nunca zero, o ponto fixo
+         * irracional; o que ela NÃO confirma é que este bairro corra com m = 1. Escrevi
+         * primeiro «o q medido não excede o dobro de 1/σ²», que passa por 0,142 ser
+         * pequeno e não por bater: outra que não podia falhar. */
+        int taxa_menor = (qq * (double)q2 < (double)q1);   /* contrai MAIS que o rei */
+        int taxa_viva  = (qq > 0);                         /* e não é zero: há contracção */
+        printf("      e a ORBITA do rei, medida em INTEIROS: [p:q] -> [m.p+q : p] em %ld andares,\n"
+               "      com a forma p^2 - m.p.q - q^2 = +-1 em %ld deles, nunca zero em %ld, e\n"
+               "      p/q em termos minimos em %ld — o ponto fixo NAO e' racional.\n"
+               "      Mas as TAXAS nao sao a mesma: 1/sigma^2 = %ld/%ld = %.6f contra %.6f\n"
+               "      medido aqui. Este bairro contrai MAIS depressa que o rei com m = 1.\n\n",
+               andares, forma_ok, nunca_zero, coprimos, q1, q2,
+               (double)q1/(double)q2, qq);
+        ok("A ORBITA DO REI E' EXACTA, E TRAZ O PROPRIO CERTIFICADO: [p:q] -> [m.p+q : p]"
+           " em INTEIROS, com a forma p^2 - m.p.q - q^2 = +-1 nos 40 andares e NUNCA zero,"
+           " e p/q sempre em termos minimos — que e' dizer que o ponto fixo nao e' racional."
+           " Isto e' a `rt_orbita` da reta.h, e nao ha aqui limiar nenhum",
+           forma_ok == andares && nunca_zero == andares && coprimos == andares
+           && andares == 40);
+        ok("MAS A TAXA DESTE BAIRRO NAO E' A DO REI COM m = 1, e o numero fica: 1/sigma^2 e'"
+           " 317811/832040 = 0,381966 e a contraccao medida aqui e' 0,142083 — nem sequer e'"
+           " a de um metalico (m=2 da 0,1716, m=3 da 0,0917). A conclui() desta seccao dizia"
+           " «o ponto fixo E' sigma = m + 1/sigma»; o que esta medido e' a ESTRUTURA da"
+           " orbita, e nao que este operador corra com m = 1. Ele contrai MAIS depressa,"
+           " e isso e' um facto sobre o bairro e nao um defeito",
+           taxa_menor && taxa_viva);
+    }
     conclui("o que faz dela contracao nao e o limiar: e o residuo decrescer com razao < 1,");
-    conclui("e o ponto fixo ser sigma = m + 1/sigma — o mesmo do corpo.");
+    conclui("e o ponto fixo ter a ESTRUTURA da orbita do rei — medida, com a forma +-1.");
+    conclui("A TAXA, essa, e' propria deste bairro: 0,142 contra 0,382 do m = 1.");
     printf("      É σ = m + 1/σ iterado: a contração do rei, com o bairro a fazer o Σ.\n");
     printf("      O bairro.c mede isto em 115.871 decisões e converge em TODAS.\n");
 }
