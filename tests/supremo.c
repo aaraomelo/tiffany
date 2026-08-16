@@ -45,6 +45,7 @@
 #include "unidade.h"
 
 #define SP_K   26          /* profundidade: 2^26, e os quadrados cabem em long */
+#define SP_D   24          /* profundidade da amostra diádica do §S4 — escolha, e nomeada */
 #define SP_N    4          /* conjuntos S medidos */
 
 /* Os conjuntos. Cada um dá o teste «existe x ∈ S com m/2^k < x», em INTEIROS.
@@ -277,14 +278,14 @@ int main(void){
         long m = 0, pot = 1;
         while(sp_existe(m + 1, 1, 2)) m++;
         printf("      k     m_k        2^k       (m_k)+1 = 2^k ?   algum x ∈ S atinge 1?\n");
-        for(int k = 1; k <= 24; k++){
+        for(int k = 1; k <= SP_D; k++){
             pot *= 2; m = sp_bit(2*m, pot, 2);
             niveis++;
             if(m + 1 == pot) casa++;                  /* os dois caminhos, à distância 1 */
             if(m < pot) por_baixo++;                  /* a construção fica do lado de baixo */
             /* e nenhum 1−1/n é 1: o supremo NÃO está em S, que é o ponto todo */
             if(!sp_existe(pot, pot, 2)) nunca_atinge++;
-            if(k <= 3 || k == 24)
+            if(k <= 3 || k == SP_D)
                 printf("      %-5d %-10ld %-9ld %-17s %s\n", k, m, pot,
                        (m + 1 == pot) ? "sim" : "NÃO", nunca_atinge == k ? "não" : "SIM");
         }
@@ -296,7 +297,7 @@ int main(void){
            " todos os níveis — a soma geométrica fecha, e ∼ identifica-os, logo é UM"
            " elemento e não dois. E o supremo NÃO pertence a S: nenhum 1−1/n atinge 1, o"
            " que é exactamente o caso em que a continuidade tem de trabalhar",
-           casa == niveis && por_baixo == niveis && nunca_atinge == niveis && niveis == 24);
+           casa == niveis && por_baixo == niveis && nunca_atinge == niveis && niveis == SP_D);
     }
 
     /* ═══ §S5  DUAS ROTAS PARA O MESMO — E A BIBLIOTECA ESTAVA MORTA ════════ */

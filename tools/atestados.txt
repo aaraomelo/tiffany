@@ -322,7 +322,7 @@ nucleo_unificado ac7c6cf9a9960bc6 0
 numerica 2d1d6e20b7f87362 0
 observador_torre 3d55320445a27093 0
 octeto 3be2809a3655f8e0 0
-operacao 01809dad50f42b2c 0
+operacao 85d1ca616b118bd1 0
 operador_dual 4d874f9b9b8aee4d 0
 orbita_real 76d42a35f89973a2 0
 orbitas d3aa3021fb5ddff0 0
@@ -434,7 +434,7 @@ sql dd9f1021d22ed500 0
 sshb 867d3328b082b67a 0
 str2dbl_dual 74601c0ca36de56f 0
 superficie_tate 42631bd983dc985c 0
-supremo 295a37127eff1778 0
+supremo 08f61704a4139001 0
 sustento 159daa95a6bc46b6 0
 tecido a71972ce13c4429d 0
 teletransporte 8b13cc6bf9acf1a0 0

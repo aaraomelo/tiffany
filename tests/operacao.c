@@ -56,6 +56,14 @@
 #define N 8                     /* a base: oito */
 #define D (N*N)                 /* e o espaço onde o espelho age: as n² coordenadas */
 
+/* AS AMOSTRAS DECLARAM-SE, e num sítio só. O tamanho de uma amostra é uma ESCOLHA — e
+ * por isso tem nome e vive aqui, para que mude sozinha se eu a mudar. O que nunca pode
+ * ser escolha é a PREVISÃO: 36, 28, 64, 112, 120, 128 saem todos de fórmulas sobre N,
+ * e é isso que os separa de um número escrito à mão. */
+#define AM_PAR  600             /* pares (a,b) do directo e do cruzado — §O1, §O2 */
+#define AM_OP   400             /* operações na base — §O5, §O6 */
+#define AM_MAT  300             /* matrizes de teste — §O8, §O10 */
+
 /* o produto de dois operadores D×D, em inteiros — é ele que dá às identidades dos
  * projectores (§O9) como falhar, coisa que aplicar τ trocando índices não daria */
 static void mul(const long A[D][D], const long B[D][D], long C[D][D]){
@@ -122,7 +130,7 @@ int main(void){
          * obrigatória — a soma delas tem de devolver ⋆, coordenada a coordenada. Isso
          * mede-se, e sem ele «duas metades» seria uma maneira de falar. */
         long pares = 0, volta = 0, unica = 0;
-        for(long t = 0; t < 600; t++){
+        for(long t = 0; t < AM_PAR; t++){
             long a[N], b[N];
             for(int i = 0; i < N; i++){
                 a[i] = ((t*7 + i*3) % 7) - 3;
@@ -165,7 +173,7 @@ int main(void){
            " decomposição não é uma escolha: dado ⋆, as metades são o que são — e o que"
            " garante isso é que uma matriz simultaneamente simétrica e antissimétrica é"
            " ZERO, medido no cruzado, que tem parte simétrica nula e diagonal nula",
-           volta == pares && unica == pares && pares == 600);
+           volta == pares && unica == pares && pares == AM_PAR);
     }
 
     /* ═══ §O2  O ESPELHO É INVOLUÇÃO, E É ELE QUE REPARTE ═══════════════════ */
@@ -175,7 +183,7 @@ int main(void){
          * fixos e invertidos só existe porque trocar duas vezes devolve. É a propriedade
          * que faz o par ser um PAR, e mede-se nela própria. */
         long casos = 0, invol = 0, direto_fica = 0, cruzado_inverte = 0, vivos = 0;
-        for(long t = 0; t < 600; t++){
+        for(long t = 0; t < AM_PAR; t++){
             long a[N], b[N];
             for(int i = 0; i < N; i++){
                 a[i] = ((t*13 + i*7) % 7) - 3;
@@ -214,7 +222,7 @@ int main(void){
            " cruzados não são todos nulos: sem esse controlo, «inverte» valia por 0 == −0,"
            " que é verdade e não é a tese",
            invol == casos && direto_fica == casos && cruzado_inverte == casos
-           && vivos > casos/2 && casos == 600);
+           && vivos > casos/2 && casos == AM_PAR);
     }
 
     /* ═══ §O3  NA BASE 8: O DIRECTO É A IDENTIDADE ══════════════════════════ */
@@ -314,7 +322,7 @@ int main(void){
          *   (c) ABRE    — o índice vive em ℤ/8ℤ, e o passo 8 devolve o princípio: o andar
          *                 seguinte é o MESMO oito, deslocado. Autossimilar. */
         long ops = 0, todas_juntas = 0, min_tocadas = N, max_tocadas = 0;
-        for(long t = 0; t < 400; t++){
+        for(long t = 0; t < AM_OP; t++){
             long a[N], b[N];
             for(int i = 0; i < N; i++){
                 a[i] = ((t*5 + i*3) % 5) - 2;
@@ -366,7 +374,7 @@ int main(void){
            " das oito leis. É por isso que a base se REUTILIZA bloco a bloco em vez de"
            " crescer: o que cresce é o objecto, não a máquina",
            todas_juntas == ops && min_tocadas == N && max_tocadas == N
-           && passo_saturou == N && volta_em == N && ops == 400);
+           && passo_saturou == N && volta_em == N && ops == AM_OP);
     }
 
     /* ═══ §O6  AS DUAS LEITURAS REALIZAM-SE — NÃO SE CHAMAM ════════════════ */
@@ -389,7 +397,7 @@ int main(void){
          *
          * Só depois disto se pode dizer «a diagonal mede» e «fora dela há área». */
         long casos = 0, dir_leitura = 0, cruz_det = 0;
-        for(long t = 0; t < 400; t++){
+        for(long t = 0; t < AM_OP; t++){
             long a[N], b[N];
             for(int i = 0; i < N; i++){
                 a[i] = ((t*3 + i*5) % 7) - 3;
@@ -438,7 +446,7 @@ int main(void){
            " e não a mesma expressão com outro nome —, que é o mesmo det que"
            " serve de medida no Teorema do Gato. É essa coincidência, e não o nome, que"
            " autoriza dizer depois «a diagonal mede» e «fora dela há área»",
-           dir_leitura == casos && cruz_det == casos && casos == 400);
+           dir_leitura == casos && cruz_det == casos && casos == AM_OP);
     }
 
     /* ═══ §O7  O BLOCO FECHA: B₈ × B₈ → B₈ ══════════════════════════════════ */
@@ -534,7 +542,7 @@ int main(void){
         /* a base de E₋: as antissimétricas E_ij − E_ji (i < j) */
         for(int i = 0; i < N; i++) for(int j = i+1; j < N; j++) dim_menos++;
         /* e que juntas GERAM: toda M decompõe-se, e a decomposição é única */
-        for(long t = 0; t < 300; t++){
+        for(long t = 0; t < AM_MAT; t++){
             long M[N][N], S[N][N], A[N][N], R[N][N];
             for(int i = 0; i < N; i++) for(int j = 0; j < N; j++)
                 M[i][j] = ((t*7 + i*11 + j*13) % 9) - 4;
@@ -600,7 +608,7 @@ int main(void){
            " E₋ é a matriz zero, e sem os separar o valor próprio −1 valeria em oito casos"
            " por vacuidade — o mesmo 0 == −0 que o §O2 já tinha apanhado",
            dim_mais == N*(N+1)/2 && dim_menos == N*(N-1)/2
-           && dim_mais + dim_menos == N*N && gera == casos && casos == 300
+           && dim_mais + dim_menos == N*N && gera == casos && casos == AM_MAT
            && prop_mais == testes && prop_menos == testes
            && vivos_mais == testes && vivos_menos == N*(N-1));
     }
@@ -798,7 +806,7 @@ int main(void){
          * diagonal MORRE, e com ela a métrica do §O3. Onde 2 é invertível ela sobrevive,
          * e é esse o par que se mede — o sítio onde cai e o sítio onde não cai. */
         long diag_morre = 0, diag_vive = 0, amostras = 0;
-        for(long t = 0; t < 300; t++){
+        for(long t = 0; t < AM_MAT; t++){
             long M[N][N];
             for(int i = 0; i < N; i++) for(int j = 0; j < N; j++)
                 M[i][j] = ((t*5 + i*17 + j*7) % 11) - 5;
@@ -834,9 +842,9 @@ int main(void){
            " não afirmada: as oito leis dão a OPERAÇÃO sobre qualquer corpo de"
            " característica ≠ 2, e a realização da recta é um teorema POSTERIOR, não uma"
            " hipótese usada para a definir",
-           corpos == 4 && fecha == corpos
+           corpos == (long)(sizeof ps/sizeof *ps) && fecha == corpos
            && ra2 == N*(N-1)/2 && rb2 == N*(N-1)/2 && ra2 + rb2 == D - N
-           && diag_morre == amostras && diag_vive == amostras && amostras == 300);
+           && diag_morre == amostras && diag_vive == amostras && amostras == AM_MAT);
     }
 
     if(!falhas){
