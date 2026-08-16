@@ -170,6 +170,7 @@ encaixotamento 0f9c4a6716e901fe 0
 encanamento 545dabf8895fe820 0
 enche a2861fc14a9fd7f9 0
 entre c9d4cbfc7a5a9307 0
+entrega 298b77e1be12683e 0
 entropia_dual e455b61b6d1075f9 0
 equivalencia_universal 4f70e8b809338078 0
 erg 24fd5a4ae1cb1739 0

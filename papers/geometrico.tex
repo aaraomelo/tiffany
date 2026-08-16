@@ -1682,6 +1682,38 @@ resto zero, o último convergente dá $a/b$ \textbf{exacto} --- não aproximado
 por convenção canónica.
 \end{definicao}
 
+\begin{corolario}[e por isso a ENTREGA é a palavra, e não um
+decimal]\label{cor:entrega}
+Se a palavra $(a_k)$ \emph{é} o objecto, então nada obriga um programa a
+entregar o seu resultado em decimal --- e entregá-lo assim é converter o
+objecto numa das suas leituras, perdendo as outras. O que sai são os
+$a_k$, inteiros; quem recebe reconstrói o corte que precisar:
+\[
+\text{texto}\ \longrightarrow\ \frac{p}{q}\ \text{exacto}\ \longrightarrow\
+[a_0;a_1,\ldots,a_n]\ \longrightarrow\ \frac{p}{q}\ \longrightarrow\
+\text{decimal, convergentes, ou o que for.}
+\]
+As duas pontas merecem ser ditas porque nenhuma é óbvia. \textbf{À entrada},
+um decimal escrito não é um número aproximado: \code{3.14159} \emph{é}
+$314159/100000$, e o que o estraga é convertê-lo a vírgula flutuante --- em
+base dois $0{,}1$ não é $1/10$, e não é por imprecisão do formato mas porque
+$10\nmid 2^k$. \textbf{À saída}, a mesma palavra dá \emph{todas} as
+representações, e não uma: de \code{3.14159} saem $22/7$ e $355/113$ sem
+ninguém os pedir, porque os convergentes são o que a recorrência do
+$q_k$ produz.
+
+\emph{Verificado:} \code{tests/entrega.c} ($9{:}0$). A ida e volta pela
+palavra é exacta nos $10\,000$ decimais de três casas e a comparação é por
+produto cruzado --- a \emph{mesma} fracção, não uma que difere abaixo de uma
+régua; pelo \code{double}, com os mesmos números, $175$ deles não voltam, e
+é esse par de números lado a lado que dá conteúdo ao primeiro. Mede-se
+ainda que a palavra \textbf{é} Euclides --- os seus quocientes são os do
+algoritmo do mdc, um a um e na mesma ordem, em $3600$ pares --- e que os
+dois tectos têm onde bater, com a palavra mais comprida a ser a do ouro:
+dois Fibonacci consecutivos dão a fracção contínua toda de uns, que é a
+Teorema~\ref{thm:ouro} lido como \emph{pior caso da representação}.
+\end{corolario}
+
 \begin{teorema}[a construção corre sobre quocientes arbitrários]\label{thm:todos}
 Para uma sucessão \textbf{qualquer} --- não só a periódica ---:
 $p_kq_{k-1}-p_{k-1}q_k=(-1)^{k-1}$, logo $\abs{\det}=1$ em todos os passos; os

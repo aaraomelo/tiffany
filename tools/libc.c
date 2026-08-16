@@ -189,10 +189,82 @@ long strtol(char *s, char **fim, int base){
 int atoi(char *s){ return (int)strtol(s, 0, 10); }
 long atol(char *s){ return strtol(s, 0, 10); }
 
-/* o `atof` lê o sinal, a parte inteira, a fracção e o expoente. A fracção divide-se por dez
- * uma vez por casa em vez de se multiplicar por 10^-k: são as mesmas contas na mesma ordem
- * que o formatador do sistema faz, e é assim que o último bit bate. */
+/* ── A LEITURA DE UM DECIMAL, E ELA É INTEIRA ────────────────────────────────────────
+ *
+ * Um decimal escrito NÃO é um número aproximado: «3.14159» é 314159/100000, um racional
+ * exacto, e as duas metades dele são inteiros. O `atofr` lê essas metades e mais nada —
+ * nenhuma vírgula aparece aqui, e o expoente entra a multiplicar em cima ou em baixo.
+ *
+ * Devolve 1 se leu e coube; 0 se o texto não é um decimal ou se os inteiros não chegam,
+ * e nesse caso quem chama decide — não se finge exactidão que não há. */
+long atofr(char *s, long *p, long *q, int *sinal){
+    int i = 0;
+    while(isspace(s[i] & 255)) i++;
+    *sinal = 1;
+    if(s[i] == 45){ *sinal = -1; i++; }
+    else if(s[i] == 43) i++;
+    long v = 0, d = 1;
+    int digitos = 0;
+    while(isdigit(s[i] & 255)){
+        if(v > 922337203685477580L) return 0;
+        v = v*10 + ((s[i] & 255) - 48); i++; digitos++;
+    }
+    if(s[i] == 46){
+        i++;
+        while(isdigit(s[i] & 255)){
+            if(v > 922337203685477580L || d > 922337203685477580L) return 0;
+            v = v*10 + ((s[i] & 255) - 48); d = d*10; i++; digitos++;
+        }
+    }
+    if(!digitos) return 0;
+    if(s[i] == 101 || s[i] == 69){
+        i++;
+        int es = 1;
+        if(s[i] == 45){ es = -1; i++; }
+        else if(s[i] == 43) i++;
+        int e = 0;
+        while(isdigit(s[i] & 255)){ e = e*10 + ((s[i] & 255) - 48); i++; if(e > 30) return 0; }
+        for(int k = 0; k < e; k++){
+            if(es > 0){ if(v > 922337203685477580L) return 0; v = v*10; }
+            else       { if(d > 922337203685477580L) return 0; d = d*10; }
+        }
+    }
+    *p = v; *q = d;
+    return 1;
+}
+
+/* ── E A ENTREGA VAI ATÉ AO FIM: a FRACÇÃO CONTÍNUA ──────────────────────────────────
+ *
+ * O Aarão: «essa representação vai até ao fim e entrega assim mesmo em long int, daí ele
+ * pode reconstruir depois em qualquer representação».
+ *
+ * O que este ficheiro faz é a metade dele: lê o texto e entrega o racional EXACTO. A
+ * palavra [a₀; a₁, …, aₙ] tira-se dele por Euclides, e essa vive na lib — `rt_cf_de` e
+ * `rt_cf_para` da lib/reta.h, sobre a `nt_fc` da lib/aritmetica.h. Não se repete aqui:
+ * uma segunda cópia que ninguém confronta diverge, e este ficheiro não tem como a
+ * confrontar — é o chão, não depende de nada, e não pode incluir a lib.
+ *
+ * A divisão do trabalho fica assim, e é a mesma do resto da casa:
+ *
+ *      libc.c   texto  ⟶  p/q exacto          (o parser, que é o que ele sabe fazer)
+ *      reta.h   p/q    ⟶  [a₀; …, aₙ]  ⟶  p/q  (a palavra, e a volta)
+ *
+ * Medido em tests/entrega.c (9:0), e o `atof` deste ficheiro em tests/libc_wasm.js,
+ * contra a glibc, resposta a resposta. */
+
+/* O `atof` DA NORMA, que devolve `double` porque o contrato dele obriga. A conta passou a
+ * ser outra: lê-se p/q em INTEIROS e divide-se UMA vez, em vez de acumular casa a casa —
+ * uma só divisão arredonda uma só vez, e é o mesmo que o `strtod` do sistema faz. Onde os
+ * inteiros não chegam (mais de dezoito algarismos), cai-se no caminho antigo, e é o único
+ * sítio onde isso acontece. */
 double atof(char *s){
+    long p = 0, q = 1;
+    int sg = 1;
+    if(atofr(s, &p, &q, &sg)){
+        double v = (double)p / (double)q;
+        return sg < 0 ? -v : v;
+    }
+    /* o caminho antigo, para o que não coube nos inteiros */
     int i = 0;
     while(isspace(s[i] & 255)) i++;
     double sinal = 1.0;
@@ -202,10 +274,10 @@ double atof(char *s){
     while(isdigit(s[i] & 255)){ v = v * 10.0 + (double)((s[i] & 255) - 48); i++; }
     if(s[i] == 46){
         i++;
-        double p = 1.0;
+        double pp = 1.0;
         while(isdigit(s[i] & 255)){
-            p = p / 10.0;
-            v = v + p * (double)((s[i] & 255) - 48);
+            pp = pp / 10.0;
+            v = v + pp * (double)((s[i] & 255) - 48);
             i++;
         }
     }

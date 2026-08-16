@@ -540,6 +540,127 @@ static long rt_traco(const long *M, int n){
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════════
+ * A ENTREGA — o número sai em FRACÇÃO CONTÍNUA, e o cliente reconstrói o que quiser.
+ *
+ * O Aarão: «essa representação vai até ao fim e entrega assim mesmo em long int, daí ele
+ * pode reconstruir depois em qualquer representação».
+ *
+ * É o `def:real` e o `prop:alfabeto` levados à saída. Um decimal escrito NÃO é um número
+ * aproximado: «3.14159» é 314159/100000, um racional EXACTO, e o que o perde é convertê-lo
+ * a `double` — 0,1 não é 1/10 em base dois, e nunca foi. A fracção contínua desse racional
+ * é uma palavra de inteiros, sai por Euclides, e reconstrói o racional de volta sem perder
+ * um bit. O que se entrega são longs; o que o cliente faz com eles é dele.
+ *
+ *      texto  ──►  p/q exacto  ──►  [a₀; a₁, …, aₙ]  ──►  p/q  ──►  a representação que quiser
+ *
+ * A fracção contínua propriamente já vive em `aritmetica.h` — `nt_fc`, `nt_convergentes`,
+ * `nt_cmp`, `nt_mediante`, sobre ℕ e com a saturação contada à parte. Aqui está só o que
+ * falta para a ponte: a leitura do TEXTO, o sinal, e a reconstrução.
+ *
+ * E O SINAL VAI À PARTE, que não é preguiça: é a Lei 1. ℤ = ℕ + o SINAL, e o sinal é a
+ * DOBRA de espectro {+1,−1} — a mesma involução que reparte Dir e Cruz um andar acima.
+ * A fracção contínua é a palavra sobre ℕ; o sinal é a dobra que a leva a ℤ.
+ * ═══════════════════════════════════════════════════════════════════════════════════ */
+
+#define RT_CF_MAX 48
+
+typedef struct { int sinal; long a[RT_CF_MAX]; int n; int saturou; } RtCf;
+
+/* «−3.14159» ⟼ sinal −1, p = 314159, q = 100000. EXACTO, e sem uma divisão de reais.
+ * Devolve 1 se leu, 0 se o texto não é um decimal ou se os inteiros não chegam.
+ * O expoente («1e3») também entra, e multiplica p ou q por 10 tantas vezes. */
+static int rt_le_decimal(const char *s, int *sinal, long *p, long *q){
+    int i = 0;
+    while(s[i] == ' ' || s[i] == '\t') i++;
+    *sinal = 1;
+    if(s[i] == '-'){ *sinal = -1; i++; }
+    else if(s[i] == '+') i++;
+    long v = 0, d = 1;
+    int digitos = 0;
+    while(s[i] >= '0' && s[i] <= '9'){
+        if(v > 922337203685477580L) return 0;              /* não cabe: diz-se, não se finge */
+        v = v*10 + (s[i]-'0'); i++; digitos++;
+    }
+    if(s[i] == '.'){
+        i++;
+        while(s[i] >= '0' && s[i] <= '9'){
+            if(v > 922337203685477580L || d > 922337203685477580L) return 0;
+            v = v*10 + (s[i]-'0'); d *= 10; i++; digitos++;
+        }
+    }
+    if(!digitos) return 0;
+    if(s[i] == 'e' || s[i] == 'E'){
+        i++;
+        int es = 1;
+        if(s[i] == '-'){ es = -1; i++; }
+        else if(s[i] == '+') i++;
+        int e = 0;
+        while(s[i] >= '0' && s[i] <= '9'){ e = e*10 + (s[i]-'0'); i++; if(e > 30) return 0; }
+        for(int k = 0; k < e; k++){
+            if(es > 0){ if(v > 922337203685477580L) return 0; v *= 10; }
+            else       { if(d > 922337203685477580L) return 0; d *= 10; }
+        }
+    }
+    *p = v; *q = d;
+    return 1;
+}
+
+/* p/q ⟼ a palavra [a₀; a₁, …, aₙ]. É EUCLIDES — a mesma descida do mdc, lida noutra coluna.
+ * O sinal entra como está e não se mistura com os quocientes. */
+static void rt_cf_de(int sinal, long p, long q, RtCf *c){
+    c->sinal = (p == 0) ? 1 : sinal;
+    c->n = 0; c->saturou = 0;
+    long P = p < 0 ? -p : p, Q = q < 0 ? -q : q;
+    while(Q != 0){
+        if(c->n >= RT_CF_MAX){ c->saturou = 1; return; }    /* conta-se, não se corta calado */
+        c->a[c->n++] = P / Q;
+        long r = P % Q;
+        P = Q; Q = r;
+    }
+}
+
+/* e a VOLTA: da palavra ao racional, pela recorrência dos convergentes lida de trás para a
+ * frente. Devolve 1, ou 0 se um produto não coubesse. */
+static int rt_cf_para(const RtCf *c, long *p, long *q){
+    if(c->n == 0){ *p = 0; *q = 1; return 1; }
+    long P = 1, Q = 0;                                      /* ∞ = [1:0], como em rt_orbita */
+    for(int k = c->n - 1; k >= 0; k--){
+        long ak = c->a[k];
+        if(ak != 0 && P > 4611686018427387903L / (ak > 1 ? ak : 1)) return 0;
+        long np = ak*P + Q;
+        Q = P; P = np;
+    }
+    *p = c->sinal * P; *q = Q;
+    return 1;
+}
+
+/* A RECONSTRUÇÃO DO CLIENTE: de p/q sai o decimal com quantas casas ele pedir, por DIVISÃO
+ * LONGA em inteiros — o resto é sempre menor que q, logo nada transborda e nada arredonda
+ * por acaso. Escreve em `d` e devolve o número de bytes. Isto não é «converter a double e
+ * imprimir»: é o cliente a ler a palavra na base que lhe apetecer. */
+static int rt_escreve_decimal(int sinal, long p, long q, int casas, char *d, int max){
+    int k = 0;
+    if(q == 0){ if(max > 3){ d[0]='n'; d[1]='a'; d[2]='n'; d[3]=0; } return 3; }
+    long P = p < 0 ? -p : p;
+    if(sinal < 0 && (P != 0) && k < max-1) d[k++] = '-';
+    long inteiro = P / q, r = P % q;
+    char buf[24]; int nb = 0;
+    if(inteiro == 0) buf[nb++] = '0';
+    while(inteiro > 0){ buf[nb++] = (char)('0' + inteiro % 10); inteiro /= 10; }
+    while(nb > 0 && k < max-1) d[k++] = buf[--nb];
+    if(casas > 0 && k < max-1){
+        d[k++] = '.';
+        for(int i = 0; i < casas && k < max-1; i++){
+            r *= 10;
+            d[k++] = (char)('0' + r / q);
+            r %= q;
+        }
+    }
+    d[k] = 0;
+    return k;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════════
  * A INDUÇÃO E A META-INDUÇÃO — a recursão formalizada, e sem casos especiais.
  *
  * `def:inducao` e `thm:meta-inducao` do Corpo Universal. O par é o de sempre:
