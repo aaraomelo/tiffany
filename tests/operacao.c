@@ -51,6 +51,7 @@
  *   cc -O2 -std=c99 -I. -I../lib operacao.c -o operacao && ./operacao
  */
 #include <stdio.h>
+#include "reta.h"        /* as operações da recta, centralizadas */
 #include "unidade.h"
 
 #define N 8                     /* a base: oito */
@@ -74,13 +75,6 @@ static void mul(const long A[D][D], const long B[D][D], long C[D][D]){
     }
 }
 
-/* o inverso em 𝔽ₚ, por Fermat: a^(p−2). Nenhuma divisão, e nenhum real (§O10) */
-static long inv_mod(long a, long p){
-    long r = 1, e = p - 2;
-    a = ((a % p) + p) % p;
-    while(e){ if(e & 1) r = r*a % p; a = a*a % p; e >>= 1; }
-    return r;
-}
 
 /* a característica de um operador que interessa aqui é o POSTO: dim im. Eliminação em
  * 𝔽ₚ, e é ela que decide se a decomposição existe naquele corpo. */
@@ -91,7 +85,7 @@ static int posto_mod(long A[D][D], long p){
         for(int i = r; i < D; i++) if(((A[i][c] % p) + p) % p){ piv = i; break; }
         if(piv < 0) continue;
         for(int j = 0; j < D; j++){ long t = A[r][j]; A[r][j] = A[piv][j]; A[piv][j] = t; }
-        long iv = inv_mod(A[r][c], p);
+        long iv = rt_inv_mod(A[r][c], p);
         for(int j = 0; j < D; j++) A[r][j] = ((A[r][j] % p) + p) % p * iv % p;
         for(int i = 0; i < D; i++){
             if(i == r) continue;

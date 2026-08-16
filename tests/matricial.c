@@ -48,6 +48,7 @@
 #include "unidade.h"
 #include "racionais.h"
 #include "poli.h"
+#include "reta.h"        /* as operações da recta, centralizadas */
 
 typedef struct { long a, b, c, d; } M2;                 /* [[a,b],[c,d]] */
 static M2 mul(M2 X, M2 Y){
@@ -57,95 +58,10 @@ static M2 mul(M2 X, M2 Y){
 }
 static long det(M2 X){ return X.a*X.d - X.b*X.c; }
 
-/* E O DETERMINANTE DE ORDEM QUALQUER, TAMBÉM EXACTO — por BAREISS. A eliminação de
- * Gauss divide, e por isso pedia doubles e um limiar para o pivô; a de Bareiss divide
- * pelo pivô ANTERIOR, e essa divisão é exacta em ℤ (é o teorema). Fica tudo inteiro, o
- * determinante sai sem resíduo, e o limiar do pivô desaparece: `== 0` é uma pergunta
- * sobre o número, e `fabs(.) < 1e-14` era uma pergunta sobre a régua que escolhi.
- *
- * n é a ordem; a matriz é dada em G com passo `passo`, e é consumida. */
-static long det_bareiss(long *G, int n, int passo){
-    long ant = 1;
-    int sinal = 1;
-    for(int k = 0; k < n - 1; k++){
-        if(G[k*passo + k] == 0){                       /* troca por uma linha com pivô */
-            int t = -1;
-            for(int i = k + 1; i < n; i++) if(G[i*passo + k]){ t = i; break; }
-            if(t < 0) return 0;                        /* coluna nula: o det É zero */
-            for(int j = 0; j < n; j++){
-                long v = G[k*passo + j];
-                G[k*passo + j] = G[t*passo + j];
-                G[t*passo + j] = v;
-            }
-            sinal = -sinal;
-        }
-        for(int i = k + 1; i < n; i++)
-            for(int j = k + 1; j < n; j++)
-                G[i*passo + j] = (G[i*passo + j]*G[k*passo + k]
-                                  - G[i*passo + k]*G[k*passo + j]) / ant;
-        ant = G[k*passo + k];
-    }
-    return sinal*G[(n-1)*passo + (n-1)];
-}
 
-/* o inverso em 𝔽ₚ por Fermat — nenhuma divisão, e nenhum real */
-static long inv_mod(long a, long p){
-    long r = 1, e = p - 2;
-    a = ((a % p) + p) % p;
-    while(e){ if(e & 1) r = r*a % p; a = a*a % p; e >>= 1; }
-    return r;
-}
 
-/* E O MESMO DETERMINANTE EM 𝔽ₚ, para quando os intermédios não cabem. O Bareiss é
- * exacto em ℤ, mas os seus intermédios são MENORES da matriz: numa 5×5 com entradas
- * da ordem de 10^10 eles chegam a 10^42, e o `long` enrola calado — o resultado final
- * cabia (10^14) e mesmo assim saía errado. Em 𝔽ₚ nada cresce. */
-static long det_mod(long *G, int n, int passo, long p){
-    long d = 1;
-    for(int k = 0; k < n; k++){
-        int piv = -1;
-        for(int i = k; i < n; i++) if(((G[i*passo+k] % p) + p) % p){ piv = i; break; }
-        if(piv < 0) return 0;
-        if(piv != k){
-            for(int j = 0; j < n; j++){
-                long t = G[k*passo+j]; G[k*passo+j] = G[piv*passo+j]; G[piv*passo+j] = t;
-            }
-            d = (p - d) % p;
-        }
-        long a = ((G[k*passo+k] % p) + p) % p;
-        d = d*a % p;
-        long iv = inv_mod(a, p);
-        for(int i = k+1; i < n; i++){
-            long f = ((G[i*passo+k] % p) + p) % p * iv % p;
-            if(!f) continue;
-            for(int j = k; j < n; j++)
-                G[i*passo+j] = (((G[i*passo+j] - f*G[k*passo+j]) % p) + p) % p;
-        }
-    }
-    return d;
-}
 
-/* O PONTO FIXO NÃO SE AVALIA: MOSTRA-SE PELA ÓRBITA. O paper diz que a órbita de ∞ são
- * os convergentes, e que a acção é a matriz vezes o vector «sem uma divisão»:
- *
- *      [p:q] ⟼ [m·p + q : p],     a partir de [1:0] = ∞
- *
- * Um ponto fixo não cabe no andar — é isso o corte —, e um double não o resolve: dá um
- * decimal truncado que não é o objecto. O que se mostra é o CONVERGENTE, que é exacto e
- * inteiro; e o próprio σ, um andar acima, é a UNIDADE de ℤ[σ], escrita (0,1). */
-static void orbita_inf(long m, int k, long *p, long *q){
-    long P = 1, Q = 0;                       /* ∞ = [1:0], pela Lei 0 */
-    for(int t = 0; t < k; t++){ long np = m*P + Q; Q = P; P = np; }
-    *p = P; *q = Q;
-}
 
-/* e a potência inteira, para a lei det(A⊗B) = det(A)^b · det(B)^a — `pow` devolvia um
- * double e obrigava a comparar com margem */
-static long ipow(long base, int e){
-    long r = 1;
-    while(e-- > 0) r *= base;
-    return r;
-}
 static M2 Mq(long a){ M2 r = { a, 1, 1, 0 }; return r; }   /* a matriz de um quociente parcial */
 static const M2 I2 = { 1, 0, 0, 1 };
 
@@ -343,12 +259,12 @@ printf("\n§M4  ⊕ é a SOMA DIRETA e ⊗ é KRONECKER — as dimensões do cor
         /* det da matriz CONSTRUÍDA, por BAREISS — inteiro, e sem pivô com limiar */
         long G[NX][NX];
         memcpy(G, K, sizeof G);
-        long dK = det_bareiss(&G[0][0], nk, NX);
+        long dK = rt_det_bareiss(&G[0][0], nk, NX);
         /* e os de A e de B, pelo mesmo método, para a lei clássica */
         long dAB[2] = {0, 0};
         for(int caso = 0; caso < 2; caso++){
             memcpy(G, caso ? B : A, sizeof G);
-            dAB[caso] = det_bareiss(&G[0][0], caso ? b : a, NX);
+            dAB[caso] = rt_det_bareiss(&G[0][0], caso ? b : a, NX);
         }
         /* e o BAREISS confere-se contra a régua que este ficheiro já tinha: para ordem 2
          * o det é ad − bc, escrito na linha 58 e usado em todo o §M2. Duas rotas para o
@@ -362,7 +278,7 @@ printf("\n§M4  ⊕ é a SOMA DIRETA e ⊗ é KRONECKER — as dimensões do cor
             M2 Y = { B[0][0], B[0][1], B[1][0], B[1][1] };
             if(det(Y) != dAB[1]) mauDet++; else bareiss_bate++;
         }
-        long lei = ipow(dAB[0], b) * ipow(dAB[1], a);
+        long lei = rt_ipow(dAB[0], b) * rt_ipow(dAB[1], a);
         if(dK != lei) mauDet++;                      /* IGUALDADE, e não margem */
         if(a <= 2 && b <= 2)
             printf("      %d   %d   %-14d %-14d %-12ld %-17ld %s\n",
@@ -695,7 +611,7 @@ printf("\n§M9  A dimensão ABAIXO expande na mesma medida que a de CIMA contrai
         long pv = u1*v2 + u2*v1 + a*v1*v2;
         if(pu != -1 || pv != 0) mauSig++;
         voltas2++;
-        long cp, cq; orbita_inf(a, 12, &cp, &cq);     /* o convergente, exacto */
+        long cp, cq; rt_orbita(a, 12, &cp, &cq);     /* o convergente, exacto */
         printf("      %-4ld %-10ld %-14s %-7s %ld/%ld\n", a, dt,
                pv == 0 ? (pu == -1 ? "−1" : "≠ −1") : "tem parte σ",
                (pu == -1 && pv == 0) ? "sim" : "NÃO", cp, cq);
@@ -960,7 +876,7 @@ printf("\n§M11 K(n,m) É SÓ UM LADO — e com o dual dá R^n de facto.\n\n");
 
         /* (iii) disc = det G, por Bareiss — inteiro, sem pivô com limiar */
         long Gb[8][8]; memcpy(Gb, G, sizeof Gb);
-        long disc = det_bareiss(&Gb[0][0], n, 8);
+        long disc = rt_det_bareiss(&Gb[0][0], n, 8);
         if(disc == 0) mauPosto++;                   /* posto cheio ⟺ disc ≠ 0, EXACTO */
 
         /* (iv) o DUAL é a adjunta, e constrói-se por cofactores — tudo inteiro */
@@ -976,7 +892,7 @@ printf("\n§M11 K(n,m) É SÓ UM LADO — e com o dual dá R^n de facto.\n\n");
                 }
                 u++;
             }
-            long men = (n == 1) ? 1 : det_bareiss(&Sub[0][0], n-1, 8);
+            long men = (n == 1) ? 1 : rt_det_bareiss(&Sub[0][0], n-1, 8);
             Adj[i][j] = ((i + j) % 2 ? -men : men);
         }
         /* e a IDENTIDADE que define o dual: G·adj(G) = disc·I, entrada a entrada */
@@ -1002,7 +918,7 @@ printf("\n§M11 K(n,m) É SÓ UM LADO — e com o dual dá R^n de facto.\n\n");
             long Ab[8][8];
             for(int i = 0; i < n; i++) for(int j = 0; j < n; j++)
                 Ab[i][j] = ((Adj[i][j] % q) + q) % q;
-            long dAdj = det_mod(&Ab[0][0], n, 8, q);
+            long dAdj = rt_det_mod(&Ab[0][0], n, 8, q);
             long prev = 1, dq = ((disc % q) + q) % q;
             for(int e = 0; e < n-1; e++) prev = prev*dq % q;
             if(dAdj != prev) modOK = 0;
@@ -1219,7 +1135,7 @@ printf("\n§M13 A BASE SAI DAS MÖBIUS: o que fica invariante é da base, e é g
          * descida mostra que isso não tem solução em ℤ; nos convergentes ela vale a
          * unidade, que é o |det| = 1 a atravessar tudo. Um decimal aqui não resolvia
          * nada — o ponto fixo não cabe neste andar, e é isso que se está a medir. */
-        long cp, cq; orbita_inf(a, 12, &cp, &cq);
+        long cp, cq; rt_orbita(a, 12, &cp, &cq);
         long forma = cp*cp - a*cp*cq - cq*cq;
         if(forma == 1 || forma == -1) decimal_bate++;
         linhas++;

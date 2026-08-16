@@ -275,7 +275,7 @@ lyapunov_refletido 1e9f698b6ae0aab6 0
 lyapunov_torre 6d18b7610f966dc9 0
 maestro_memoria d89b11e2c1b7a549 0
 maisum 06d588623bce168e 0
-matricial ca69544210a67054 0
+matricial 47f7f049f24101d7 0
 maxcut 6e3f503ba23045de 0
 mcu ab518f13dc30a9da 0
 mecanica 122a11b4b3090e35 0
@@ -322,7 +322,7 @@ nucleo_unificado ac7c6cf9a9960bc6 0
 numerica 2d1d6e20b7f87362 0
 observador_torre 3d55320445a27093 0
 octeto 3be2809a3655f8e0 0
-operacao 85d1ca616b118bd1 0
+operacao 83b71894068bb608 0
 operador_dual db67e7115ba83fae 0
 orbita_real 76d42a35f89973a2 0
 orbitas d3aa3021fb5ddff0 0
@@ -404,6 +404,7 @@ renormaliza ca31a22ea5e1ff3f 0
 residuo_gerador 300a6b6e998ef497 0
 residuo_universal 0f3aadabb52d8da3 0
 residuos_totais 52cf778fe4c28b37 0
+reta 0639f0f8c4de7751 0
 reversao 6ce3ed15e79f47b7 0
 ribossomo 5d80dbc0f2781041 0
 rn 25c631e3bc440aab 0
