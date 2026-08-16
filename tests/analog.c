@@ -589,7 +589,7 @@ static void B8_mult_Rn(void) {
     printf("     a_i·b_j = o translinear (§B.4); c_k=Σ = o Kirchhoff (§B.5); a redução\n");
     printf("     σ^n=m·σ^{n-1}+1 são mais somas (m=1). oráculo: o produto do corpo ℝⁿ (real).\n\n");
     const long m = 1; const double TOL = 1e-9;
-    long passou = 0, tot = 0; int dente_quebrou = 0;
+    long passou = 0, tot = 0, tab_ok = 0, tab_tot = 0; int dente_quebrou = 0;
     for (int n = 2; n <= 6; n++) {
         /* A tabela das potências é INTEIRA e sempre foi: nasce de 0 e 1, e a redução
          * σ^n = m·σ^{n−1} + 1 só soma e copia. Era `double` e não carregava vírgula
@@ -600,6 +600,28 @@ static void B8_mult_Rn(void) {
             pot[d][0] = pot[d-1][n-1];
             for (int k = 1; k < n; k++) pot[d][k] = pot[d-1][k-1];
             pot[d][n-1] += m*pot[d-1][n-1];
+        }
+        /* E A TABELA TEM UMA LEI, E ELA É EXACTA. `pot[d]` diz ser σ^d reduzido pela
+           borda σⁿ = m·σⁿ⁻¹ + 1 — e isso verifica-se por uma SEGUNDA rota inteira, que
+           é a companheira: pot[d] tem de ser e₀·Cᵈ, com C a matriz da borda. Duas
+           leituras que não partilham código, e o resíduo é ZERO. Sem isto, a tabela
+           entrava em todos os produtos abaixo sem nada a garanti-la. */
+        {
+            long C[8][8] = {{0}}, P[8][8] = {{0}};
+            /* a multiplicação por σ actua nas LINHAS — v_d = v_{d−1}·M —, logo o índice
+               sobe na coluna e não na linha. Escrevi-a transposta à primeira, e a
+               asserção deu 91 de 160: um oráculo errado é pior que nenhum, e foi ele
+               que se corrigiu, não a tabela. */
+            for (int i = 0; i + 1 < n; i++) C[i][i+1] = 1;    /* σ·σ^k = σ^{k+1} */
+            C[n-1][0] = 1; C[n-1][n-1] += m;                 /* e a borda: σⁿ = m σⁿ⁻¹ + 1 */
+            for (int i = 0; i < n; i++) P[i][i] = 1;
+            for (int d = 0; d < 2*n-1; d++) {
+                for (int k = 0; k < n; k++) { tab_tot++; if (P[0][k] == pot[d][k]) tab_ok++; }
+                long N[8][8] = {{0}};
+                for (int i = 0; i < n; i++) for (int j = 0; j < n; j++)
+                    for (int l = 0; l < n; l++) N[i][j] += P[i][l]*C[l][j];
+                memcpy(P, N, sizeof P);
+            }
         }
         double pior_n = 0;
         for (int t = 0; t < 50; t++) {
@@ -626,6 +648,11 @@ static void B8_mult_Rn(void) {
         printf("     n=%d: 50 casos, coordenadas contínuas (reais), erro relativo máximo %.1e\n", n, pior_n);
     }
     printf("\n");
+    printf("     e a TABELA das potências confere com a companheira: %ld de %ld coeficientes,\n"
+           "     resíduo ZERO — duas rotas inteiras, e a tabela deixa de entrar sem garantia\n\n",
+           tab_ok, tab_tot);
+    pulso("B.8b", "a tabela σ^d é e₀·Cᵈ — a borda, por duas rotas",
+          "a companheira de σⁿ = mσⁿ⁻¹+1", tab_ok, tab_tot, 1);
     pulso("B.8", "o circuito analógico dá a mult. em ℝⁿ (coords contínuas)",
           "o produto do corpo ℝⁿ", passou, tot, dente_quebrou);
 }
