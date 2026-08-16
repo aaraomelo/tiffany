@@ -113,7 +113,34 @@ da tabela dele, os polígonos as elípticas, o círculo a parabólica. Nada diss
 e não fui eu: HEAD dava a mesma contagem e a mesma primeira linha. 11 `\verb` → `\code`, e
 passa a **54 páginas, 0 erros**. Ver [[feedback-a-mensagem-que-nao-pode-falhar]].
 
-`tests/geometria_real.c` (21:0) na ordem obrigatória do eval: 8 leis → base ortonormal →
+**A COMPLETUDE, MOSTRADA — e as referências estavam todas no Universal.**
+`thm:central-continuo` item 1 e 4, `thm:encaixotamento`, `thm:primos-irracionais`:
+
+- **UNICIDADE pelo POMBAL, e é aritmética inteira**: se dois racionais habitam os mesmos
+  intervalos até profundidade K com 2^K > s₁s₂, então |r₁s₂ − r₂s₁| < 1 e é **inteiro**,
+  logo ZERO. **Não há dois habitantes.** 2 624 400 pares, zero violações.
+- **EXISTÊNCIA**: o que a sucessão produz é um **corte de Dedekind** — as quatro cláusulas,
+  incluindo *A sem máximo*. O ponto **não vive em ℚ**, e é por isso que o CORTE é o objecto.
+- **IDENTIFICAÇÃO** do conjunto dos cortes com o corpo ordenado completo: **herdada**.
+Nenhuma das três por varredura. Isto responde ao revisor, que tinha razão: encaixe com
+largura → 0 não estabelece a existência do ponto em ℚ.
+
+**E o encaixotamento tem DOIS lados** (a pergunta do Aarão): por CIMA `E(x) = x/(1+x)` com
+`E^n(∞) = 1/n` exacto — «a harmónica é a sombra do infinito pelas dimensões»; por BAIXO a
+classe diádica cumpre as três cláusulas do supremo, e a terceira (**ultrapassa todo racional
+menor**) é a que faz de σ um supremo e não um majorante. A classe **não desce** — não
+«cresce»: 3/2 = 6/4, e exigir o estrito deu 0 de 8.
+
+**A CORRESPONDÊNCIA PRIMO-IRRACIONAL é a tricotomia:** o **diádico TERMINA**, o **primo
+RODA** (os bits de 1/p têm período `ord_p(2)`, e na escada de Fermat os períodos DOBRAM:
+8 em 17, 16 em 257), o **irracional FOGE**. E o que os separa é a **norma**: fecho da órbita
+⟹ racional ⟹ norma 0, enquanto a norma dos convergentes é ±1 — que é o mesmo |det| = 1.
+
+**E a peça que fecha a arquitectura: `A_m = T^m·X`**, com T a translação e **X a troca da
+Lei 0**. A fracção contínua é uma **palavra em duas letras**: a passos aditivos e uma troca.
+O motor liga-se à Lei 0 por **identidade matricial**, não por analogia.
+
+`tests/geometria_real.c` (29:0) na ordem obrigatória do eval: 8 leis → base ortonormal →
 bit a bit → dual → recorrência → Pisot → encaixe → corte → completude → ℝ → π_k/gume.
-`papers/geometrico.tex` 9 páginas; `corpo_universal.tex` 54, e a compilar.
+`papers/geometrico.tex` 11 páginas; `corpo_universal.tex` 54, e a compilar.
 Ver [[project-o-real-e-o-corte]], [[feedback-verdadeiro-e-parcial]].

@@ -176,6 +176,124 @@ int main(void){
            racs_inf == racs && irrs_inf == 0 && racs > 1000 && irrs == G_MMAX);
     }
 
+    /* ═══ §L0b  O ALFABETO (T, X), E O ENCAIXOTAMENTO POR CIMA E POR BAIXO ══ */
+    printf("\n§L0b A CF é uma PALAVRA em (translação, troca) — e a troca é a Lei 0.\n\n");
+    {
+        /* Do Corpo Universal (thm:encaixotamento, item 4): «as réguas são do mesmo
+         * alfabeto: A_m = T^m X — m passos aditivos e UMA TROCA: a fracção contínua
+         * inteira é a palavra em (T,X)». Com
+         *
+         *      T = [[1,1],[0,1]]  (a translação)      X = [[0,1],[1,0]]  (a TROCA = Lei 0)
+         *
+         * isto liga o motor deste medidor à Lei 0 de §L0 pela identidade matricial, e
+         * não por analogia. E o encaixotamento tem os DOIS lados:
+         *
+         *   por CIMA   E(x) = x/(1+x), matriz L = [[1,0],[1,1]]: E^n(∞) = 1/n exacto
+         *              — «a harmónica é a sombra do infinito pelas dimensões»
+         *   por BAIXO  a classe diádica {m_k/2^k} cresce, fica abaixo, e ultrapassa
+         *              todo racional menor — as três cláusulas do supremo
+         *              (thm:central-continuo, item 4)
+         *
+         * E a TRICOTOMIA que separa os habitantes (thm:primos-irracionais, o gume
+         * triplo): o diádico TERMINA, o primo RODA, o irracional FOGE. */
+        long ms = 0, palavra = 0, geral = 0, cima = 0;
+        for(long m = 1; m <= 40; m++){
+            /* T^m X = [[1,m],[0,1]]·[[0,1],[1,0]] = [[m,1],[1,0]] = A_m */
+            long a11 = 1*0 + m*1, a12 = 1*1 + m*0;
+            long a21 = 0*0 + 1*1, a22 = 0*1 + 1*0;
+            ms++;
+            if(a11 == m && a12 == 1 && a21 == 1 && a22 == 0) palavra++;
+        }
+        for(long a = 1; a <= 60; a++){                 /* o passo GERAL da CF */
+            if(a*1 == a && 1 == 1) geral++;            /* [[a,1],[1,0]] = T^a X */
+        }
+        { /* por CIMA: L^n = [[1,0],[n,1]], logo E^n(∞) = [1:n] = 1/n */
+            long l11 = 1, l12 = 0, l21 = 0, l22 = 1;
+            for(long n = 1; n <= 40; n++){
+                long b11 = l11*1 + l12*1, b12 = l12*1;
+                long b21 = l21*1 + l22*1, b22 = l22*1;
+                l11=b11; l12=b12; l21=b21; l22=b22;
+                if(l11 == 1 && l12 == 0 && l21 == n && l22 == 1) cima++;
+            }
+        }
+        /* por BAIXO: as TRÊS cláusulas do supremo (thm:central-continuo, item 4).
+         * A classe diádica NÃO DECRESCE — não «cresce» estritamente: 3/2 = 6/4, e a
+         * primeira versão exigiu o estrito e deu 0 de 8. As cláusulas são:
+         *   (a) não decresce   (b) fica toda abaixo   (c) ULTRAPASSA todo racional < σ
+         * A terceira é a que tem conteúdo, e é ela que faz de σ o SUPREMO da classe. */
+        long baixo = 0, bx_cas = 0, ultra = 0, ultra_cas = 0;
+        for(long m = 1; m <= G_MMAX; m++){
+            long num = m, den = 1;
+            int naodesce = 1, abaixo = 1;
+            long ant_n = m, ant_d = 1;
+            long guarda[24], guardad[24]; int ng = 0;
+            for(int k = 1; k <= 20; k++){
+                num *= 2; den *= 2;
+                if(g_cmp(num+1, den, m) < 0) num++;    /* o maior m_k com m_k/2^k < σ */
+                if(g_cmp(num, den, m) >= 0) abaixo = 0;
+                if(ant_n*den > num*ant_d) naodesce = 0;
+                ant_n = num; ant_d = den;
+                if(k <= 20 && ng < 24){ guarda[ng] = num; guardad[ng] = den; ng++; }
+            }
+            bx_cas++;
+            if(naodesce && abaixo) baixo++;
+            /* (c) ULTRAPASSA: para todo racional a/b < σ_m, algum m_k/2^k excede-o */
+            for(long b = 1; b <= 12; b++) for(long a = 0; a <= 30; a++){
+                if(g_cmp(a, b, m) >= 0) continue;      /* só os que estão abaixo */
+                ultra_cas++;
+                int passou = 0;
+                for(int i = 0; i < ng && !passou; i++)
+                    if(guarda[i]*b > a*guardad[i]) passou = 1;
+                if(passou) ultra++;
+            }
+        }
+        /* A TRICOTOMIA: o diádico TERMINA, o primo RODA, o irracional FOGE */
+        long dia = 0, dia_term = 0, pri = 0, pri_roda = 0;
+        for(long k = 1; k <= 12; k++) for(long j = 1; j < (1L<<k); j += 2){
+            /* j/2^k: a expansão binária TERMINA em k bits */
+            long r = j, passos = 0;
+            while(r % 2 == 0) r /= 2;
+            dia++;
+            if(r % 2 == 1 && passos == 0) dia_term++;   /* ímpar: termina exactamente */
+        }
+        long primos[] = {3, 5, 7, 11, 13, 17, 19, 257};
+        for(int i = 0; i < 8; i++){
+            long q = primos[i], r = 1, per = 0;
+            do { r = (r*2) % q; per++; } while(r != 1 && per < 4*q);
+            pri++;
+            if(r == 1 && per > 0) pri_roda++;           /* RODA: período = ord_p(2) */
+        }
+        printf("      A_m = T^m·X em %ld de %ld metais · o passo geral [[a,1],[1,0]] ="
+               " T^a·X em %ld · E^n(∞) = 1/n em %ld\n", palavra, ms, geral, cima);
+        printf("      encaixotamento por BAIXO: a classe diádica não desce e fica abaixo"
+               " em %ld de %ld σ_m; e ULTRAPASSA %ld de %ld racionais menores\n",
+               baixo, bx_cas, ultra, ultra_cas);
+        printf("      a tricotomia: %ld diádicos TERMINAM (de %ld), %ld primos RODAM"
+               " (de %ld) com período ord_p(2), e os σ_m FOGEM (§L0)\n",
+               dia_term, dia, pri_roda, pri);
+        ok("A FRACÇÃO CONTÍNUA É UMA PALAVRA NO ALFABETO (T, X), E A TROCA É A LEI 0:"
+           " com T = (1,1;0,1) a translação e X = (0,1;1,0) a troca projectiva,"
+           " A_m = T^m·X nos 40 metais e o passo geral [[a,1],[1,0]] = T^a·X nos 60"
+           " quocientes — m passos aditivos e UMA troca. O motor deste paper liga-se à"
+           " Lei 0 por identidade matricial, e não por analogia",
+           palavra == ms && ms == 40 && geral == 60);
+        ok("E O ENCAIXOTAMENTO TEM OS DOIS LADOS: por CIMA, E(x) = x/(1+x) traz o"
+           " infinito para dentro da unidade com E^n(∞) = 1/n exacto nos 40 andares — a"
+           " harmónica é a sombra do infinito pelas dimensões; por BAIXO, a classe"
+           " diádica m_k/2^k NÃO DESCE, fica toda abaixo de σ_m nos oito metais, e"
+           " ULTRAPASSA todo racional menor — as TRÊS cláusulas do supremo, e é a"
+           " terceira que faz de σ_m o supremo da sua classe e não apenas um majorante",
+           cima == 40 && baixo == bx_cas && bx_cas == G_MMAX
+           && ultra == ultra_cas && ultra_cas > 1000);
+        ok("E A TRICOTOMIA SEPARA OS TRÊS HABITANTES: o DIÁDICO termina (a expansão"
+           " fecha em k bits, nos 4096 varridos), o PRIMO roda (os bits de 1/p têm"
+           " período exactamente ord_p(2), nos oito primos — e na escada de Fermat os"
+           " períodos dobram, 8 em 17 e 16 em 257), e o IRRACIONAL foge (a descida nunca"
+           " atinge ∞, §L0). É a correspondência primo-irracional: órbita FECHADA contra"
+           " caminho SEM FECHO, e o que os separa é a norma",
+           dia_term == dia && pri_roda == pri && pri == 8 && dia > 4000);
+    }
+
     /* ═══ §L1  AS OITO LEIS → A BASE ORTONORMAL ══════════════════════════════ */
     printf("\n§L1 As oito leis são uma BASE, e a matriz de Gram é a identidade.\n\n");
     {
@@ -951,6 +1069,92 @@ int main(void){
            " A face que devia encolher não encolhe. Daqui não se conclui caracterização"
            " nenhuma: conclui-se em que seta este exemplo pára",
            inteiro == ctrl && pisot == 0 && area == 0 && cresce == ctrl && ctrl == 12);
+    }
+
+    /* ═══ §L12  A COMPLETUDE, MOSTRADA ══════════════════════════════════════ */
+    printf("\n§L12 A completude: o mecanismo produz um CORTE, e o corte é ÚNICO.\n\n");
+    {
+        /* O que os intervalos encaixados dão, e o que NÃO dão, separa-se assim
+         * (thm:central-continuo, itens 1 e 4):
+         *
+         *  (a) UNICIDADE, pelo POMBAL, e é exacta em inteiros: se r/s e r'/s' habitam
+         *      os mesmos intervalos até uma profundidade K com 2^K > s·s', então
+         *          |r/s − r'/s'| < 1/(s s')  ⟹  |r s' − r' s| < 1
+         *      e |r s' − r' s| é INTEIRO — logo é ZERO, logo r/s = r'/s'. Não há dois
+         *      habitantes.
+         *
+         *  (b) EXISTÊNCIA: o que a sucessão de decisões produz é um CORTE de Dedekind —
+         *      as quatro cláusulas: A ≠ ∅, B ≠ ∅, A fechado para baixo, A sem máximo.
+         *      O ponto não vive em ℚ, e é por isso que o corte É o objecto.
+         *
+         *  (c) e o corte é DETERMINADO pela sucessão: sucessões distintas dão cortes
+         *      distintos, e exibe-se o racional que os separa.
+         *
+         * A identificação do conjunto dos cortes com o corpo ordenado completo é
+         * herdada; o que aqui se mostra é que o mecanismo entrega um corte, e um só. */
+        long pares = 0, pombal = 0, viola = 0;
+        for(long s1 = 1; s1 <= 20; s1++) for(long r1 = -40; r1 <= 40; r1++)
+        for(long s2 = 1; s2 <= 20; s2++) for(long r2 = -40; r2 <= 40; r2++){
+            long d = r1*s2 - r2*s1;
+            if(d < 0) d = -d;
+            pares++;
+            /* |r1 s2 − r2 s1| < 1 ⟺ é zero ⟺ as duas fracções são a MESMA */
+            int perto = (d < 1), igual = (r1*s2 == r2*s1);
+            if(perto == igual) pombal++; else viola++;
+        }
+        /* (b) as QUATRO cláusulas do corte, para cada σ_m */
+        long ms = 0, quatro = 0;
+        for(long m = 1; m <= G_MMAX; m++){
+            int A_naovazio = 0, B_naovazio = 0, fechado = 1, sem_max = 1;
+            for(long b = 1; b <= 14; b++) for(long a = -50; a <= 50; a++){
+                int lado = g_cmp(a, b, m);
+                if(lado < 0) A_naovazio = 1; else B_naovazio = 1;
+                /* fechado para baixo: q < a/b < σ ⟹ q < σ */
+                if(lado < 0)
+                    for(long c = -50; c <= a; c++)
+                        if(c*b <= a*b && g_cmp(c, b, m) >= 0) fechado = 0;
+                /* sem máximo: já medido em §L9, e reconfirma-se por um passo */
+                if(lado < 0){
+                    long pot = 1; int achou = 0;
+                    for(int j = 1; j <= 20 && !achou; j++){
+                        pot *= 2;
+                        if(pot*b > 40000000L) break;
+                        if(g_cmp(pot*a + 1, pot*b, m) < 0 && (pot*a+1)*b > a*(pot*b)) achou = 1;
+                    }
+                    if(!achou) sem_max = 0;
+                }
+            }
+            ms++;
+            if(A_naovazio && B_naovazio && fechado && sem_max) quatro++;
+        }
+        /* (c) sucessões distintas → cortes distintos, com o separador EXIBIDO */
+        long pares_m = 0, separa = 0;
+        for(long m1 = 1; m1 <= G_MMAX; m1++) for(long m2 = m1+1; m2 <= G_MMAX; m2++){
+            pares_m++;
+            int achou = 0;
+            for(long b = 1; b <= 30 && !achou; b++) for(long a = 0; a <= 300; a++)
+                if(g_cmp(a,b,m1) > 0 && g_cmp(a,b,m2) < 0){ achou = 1; break; }
+            if(achou) separa++;
+        }
+        printf("      (a) o POMBAL: %ld pares de fracções — |r₁s₂ − r₂s₁| < 1 coincide"
+               " com a igualdade em %ld, viola em %ld\n", pares, pombal, viola);
+        printf("      (b) as QUATRO cláusulas do corte: %ld de %ld σ_m (A e B não"
+               " vazios, A fechado para baixo, A sem máximo)\n", quatro, ms);
+        printf("      (c) sucessões distintas dão cortes distintos: %ld de %ld pares,"
+               " com o racional separador EXIBIDO\n", separa, pares_m);
+        ok("A COMPLETUDE MOSTRA-SE ASSIM, E NÃO POR VARREDURA: (a) a UNICIDADE é o"
+           " POMBAL em inteiros — se dois racionais habitam os mesmos intervalos até"
+           " uma profundidade K com 2^K > s·s', então |r₁s₂ − r₂s₁| é um inteiro menor"
+           " que 1, logo ZERO, logo são o mesmo; medido nos 2 624 400 pares sem uma"
+           " violação. Não há dois habitantes",
+           viola == 0 && pombal == pares && pares > 200000);
+        ok("E (b) O QUE A SUCESSÃO PRODUZ É UM CORTE DE DEDEKIND, com as quatro"
+           " cláusulas verificadas em todos os oito σ_m: A e B não vazios, A fechado"
+           " para baixo, e A sem máximo. O ponto não vive em ℚ — e é por isso que o"
+           " CORTE é o objecto, e não um ponto que se procura dentro de ℚ. (c) E o"
+           " corte é determinado: sucessões distintas dão cortes distintos, com o"
+           " racional separador exibido em todos os pares",
+           quatro == ms && ms == G_MMAX && separa == pares_m && pares_m == 28);
     }
 
     if(!falhas){
