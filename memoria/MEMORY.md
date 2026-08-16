@@ -46,6 +46,7 @@
 - **[A definição do extractor](feedback-a-definicao-do-extractor.md)** — publiquei «15 de 22 citam medidor»: era a definição da MINHA consulta, não um facto sobre o paper. Os 22 estavam medidos. E foi a 2.ª vez no dia — passou porque o número deixou de ser absurdo. Ler os que caem do lado NEGATIVO.
 - **[O tecto do array](feedback-o-tecto-do-array.md)** — subi `TR_MAX` para 64 e chamei-lhe «não tem tecto». Se a conclusão menciona um número do meu código, medi a MÁQUINA. Tese com «todo/sempre/sem limite» não se varre: prova-se o PASSO.
 - **[O double que só transportava](feedback-o-double-que-so-transportava.md)** — 20 doubles sobre dados que SEMPRE foram inteiros: não carregavam vírgula, traziam um limiar `1e-9` de borla. «É zero» é mais forte que «é menor que a régua que eu escolhi».
+- **[A genealogia das constantes](feedback-genealogia-das-constantes.md)** — cada uma apresenta a sua ou sai fora. E π ESTÁ na casa, exacto por andar: o que não fecha é o limite, por teorema.
 - **[O limiar tem três causas](feedback-o-limiar-tem-tres-causas.md)** — 918 no repo, **583 pura decoração**. O pior: o limiar a dar cara de medição a uma TAUTOLOGIA.
 - **[O escopo da afirmação](feedback-o-escopo-da-afirmacao.md)** — escrevi «não ordenado» sem escopo NA PORTA DE ENTRADA, e o documento já provava o contrário. As duas ocorrências do termo eram minhas.
 - **[O Write diz «updated»](feedback-o-write-diz-updated.md)** — escrevi por cima de DOIS medidores no mesmo dia. A palavra que o Write devolve é o alarme; `git ls-files` antes.

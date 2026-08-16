@@ -170,7 +170,7 @@ entre c9d4cbfc7a5a9307 0
 entropia_dual 9e1e8357b68c4eb5 0
 equivalencia_universal 4f70e8b809338078 0
 erg 24fd5a4ae1cb1739 0
-escada 5b25d287f60365e5 0
+escada 0eba2e6eb28c6529 0
 escala d6e3ee5a8e38e0cc 0
 escala_dourada 7ae60b0712a0b7cf 0
 escala_espaco 849fe8fea9a4b7d9 0
@@ -242,7 +242,7 @@ isa_wasm 4e171d4c0561ad48 0
 isomorfo 43f497a869f80c7a 0
 isserlis 4b042bb92727c85e 0
 kernelb f0c87f33a589ee14 0
-koch 334811739968c34f 0
+koch 44a7b75f17d2e345 0
 lahire_universal 843cfa03c5e214ba 0
 lambert c7ac2d933f35cb14 0
 latex_corpo dc511e8c18bbea1d 0
@@ -414,7 +414,7 @@ significado ff504aa181796ca5 0
 simula ec8b4e5edec62a25 0
 sistema b93be799ff62ae01 0
 smartcontract 2686bef07a252cfb 0
-solar bdc476d2250886a9 0
+solar 37470dc0e4812701 0
 solucoes_primitivas a317586c48866d16 0
 sombra_cone 2b75f89f2187feac 0
 sombras bb1e5441b87d7cb5 0

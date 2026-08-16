@@ -34,7 +34,29 @@
 #include "eletrico.h"
 #include "unidade.h"
 
-#define PHI 1.6180339887498948482
+/* ── A GENEALOGIA DE φ, EM VEZ DO DECIMAL ─────────────────────────────────────
+ * Estava aqui `#define PHI 1.6180339887498948482` — vinte dígitos escritos à mão. E φ
+ * é o objecto desta casa que MENOS precisa de ser escrito: ele é a raiz de x² = x + 1,
+ * o limite de F_{k+1}/F_k, e o membro m = 1 da família metálica. Tem recorrência, tem
+ * operador (o gato A₁) e tem convergentes inteiros.
+ *
+ * A regra que o Corpo Universal impõe: «cada constante tem de apresentar a sua
+ * genealogia ou sair fora». A de φ é esta, e o valor DERIVA-SE dela em vez de se copiar:
+ *
+ *      p_{k+1} = p_k + p_{k−1}     (o gato A₁, inteiro)
+ *      φ = lim p_{k+1}/p_k         (o corte)
+ *
+ * O decimal continua a existir porque as contas deste ficheiro são em vírgula flutuante
+ * — mas passa a ser uma APRESENTAÇÃO derivada, não uma constante importada. */
+static double phi_da_recorrencia(void){
+    long a = 1, b = 1;                       /* F₁ = F₂ = 1 */
+    for(int k = 0; k < 78; k++){             /* até onde o long carrega exacto */
+        long c = a + b;
+        a = b; b = c;
+    }
+    return (double)b / (double)a;            /* o convergente, e o corte é o limite */
+}
+#define PHI phi_da_recorrencia()
 
 /* ---- PA de ordem m: a_{n,m} = a_{n-1,m} + a_{n-1,m-1}, com a_{n,0} = r ------------------ */
 #define MM 6

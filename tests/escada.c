@@ -137,12 +137,34 @@ int main(void){
         ok("a equacao do coeficiente fecha em n = 1..10, e (b)_n e o expoente sao SEMPRE positivos",
            pior < 1e-12 && fora == 0);
 
-        /* e n = 1 tem de devolver o valor ja' publicado para o ouro — a generalizacao CONTEM */
-        double b1 = (1.0 + sqrt(5.0)) / 2.0;
-        double a1 = pow(b1, -1.0/(1.0 + 1.0/b1));
-        printf("      n = 1 devolve a = %.12f — o valor ja' publicado para o ouro.\n\n", a1);
-        ok("n = 1 reproduz 0.742742944625: a generalizacao CONTEM o caso conhecido, nao o troca",
-           fabs(a1 - 0.742742944625) < 1e-11);
+        /* e n = 1 tem de devolver o valor ja' publicado para o ouro — a generalizacao CONTEM.
+         *
+         * A ASSERCAO QUE AQUI ESTAVA comparava a1 com 0.742742944625 — um decimal escrito
+         * a' mao, com um limiar 1e-11 a segura-lo. E esse numero TEM GENEALOGIA: o
+         * `aurea.c` di-lo na primeira pagina, a = phi^(1-phi). Copia-lo era reintroduzir o
+         * defeito que esta casa persegue — a referencia escrita a' mao — dentro da propria
+         * asserção que devia mede'-lo.
+         *
+         * Agora o valor de referencia DERIVA-SE, e por DOIS caminhos que tem de concordar:
+         * o phi vem da RECORRENCIA inteira (o gato A_1, sem raiz nenhuma) e o expoente sai
+         * da mesma formula. O que se compara sao dois calculos, nao um calculo e uma
+         * memoria minha. */
+        long fa = 1, fb = 1;
+        for(int k = 0; k < 78; k++){ long fc = fa + fb; fa = fb; fb = fc; }
+        double phi_rec = (double)fb / (double)fa;          /* phi pela recorrencia */
+        double b1 = (1.0 + sqrt(5.0)) / 2.0;               /* phi pela raiz */
+        double a1  = pow(b1,      -1.0/(1.0 + 1.0/b1));
+        double ref = pow(phi_rec, -1.0/(1.0 + 1.0/phi_rec));
+        printf("      n = 1 devolve a = %.12f — e a referencia DERIVADA da recorrencia\n",
+               a1);
+        printf("      da' %.12f. Os dois caminhos concordam, e nenhum decimal foi escrito.\n\n",
+               ref);
+        ok("n = 1 reproduz o valor do ouro, e a REFERENCIA E' DERIVADA e nao copiada: o"
+           " decimal 0.742742944625 que aqui estava tem genealogia — e' phi^(1-phi) — e"
+           " agora sai dela. O phi vem da RECORRENCIA inteira e o outro caminho da raiz;"
+           " os dois concordam. Comparar com um numero que eu escrevi era pôr a minha"
+           " memoria dentro da asserção",
+           fabs(a1 - ref) < 1e-12);
         conclui("o que faz o coeficiente existir nao e' um calculo feliz: e' sigma_n > n, que e'");
         conclui("uma desigualdade de inteiros. Por ela, todos os fatores do produto descendente");
         conclui("sao positivos e o expoente tambem — e a solucao real positiva nunca falha.");

@@ -298,9 +298,37 @@ idealização do redondo sem dinâmica. Não há aqui nada a aproximar: quem
 escrever um limiar desta classe está a importar uma constante que o
 quadro já tem, ou a pedir o limite.
 \end{itemize}
-\emph{Medido:} \code{tests/limiares.c} ($5{:}0$), com os três casos
-tomados de código real deste repositório. \emph{A regra que fica: um
-limiar novo tem de dizer a que classe pertence.}
+\emph{Medido:} \code{tests/limiares.c} ($5{:}0$), com os casos tomados de
+código real deste repositório. \emph{A regra que fica: um limiar novo tem
+de dizer a que classe pertence.}
+
+\medskip
+\noindent\textbf{E a regra irmã, sobre as constantes:}
+\[
+\boxed{\;\text{cada constante apresenta a sua GENEALOGIA, ou sai fora.}\;}
+\]
+Um literal decimal na fonte é uma afirmação \emph{sem proveniência}. As
+genealogias que este quadro reconhece são quatro, e as três primeiras
+obrigam o valor a \emph{derivar-se} em vez de se escrever:
+\begin{itemize}
+\item \textbf{limite} --- $\pi$ é o membro parabólico
+(Teor.~\ref{thm:pi-familia}): fronteira, não constante operacional;
+\item \textbf{recorrência} --- $\varphi$, $\sigma_m$, $\sqrt2$, $\sqrt3$:
+têm passo inteiro por trás, e o valor sai dele;
+\item \textbf{definição} --- $c=299\,792\,458$ é exacto no SI: um inteiro
+disfarçado de decimal;
+\item \textbf{experimento} --- uma medida do mundo. É genealogia honesta,
+mas tem de ser \textbf{declarada}: um número medido não é um número
+derivado.
+\end{itemize}
+\emph{Auditado:} \code{tools/genealogia.sh}, sobre os $191$ literais
+decimais do repositório. E o caso sem desculpa é o literal que é o
+\emph{resultado} de uma conta que o programa podia fazer --- foi o que se
+encontrou em \code{tests/escada.c}, a comparar com
+$0{,}742742944625$ e um limiar $10^{-11}$ a segurá-lo, quando esse número
+é $\varphi^{1-\varphi}$ e a própria casa o dizia noutro ficheiro. A
+referência escrita à mão reintroduz o defeito \emph{dentro} da asserção
+que devia medi-lo.
 
 \subsection*{E as duas faces, que é como o sistema trabalha}
 $\mathbb{Q}$ é a face exacta e \emph{prova}; $\mathbb{F}_p$ é a face
