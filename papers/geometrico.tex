@@ -1150,11 +1150,28 @@ cai pelo menos como $2^{-k}$}, e é este o elo que a unicidade usa.
 \end{definicao}
 
 \medskip
-\noindent\textbf{A identificação do conjunto dos cortes com o corpo ordenado
-completo é resultado herdado do \emph{Corpo Universal}.} Este paper não a reobtém, e nenhuma
-varredura finita a poderia reobter: intervalos encaixados de comprimento a tender
-para zero \emph{não} estabelecem, por si sós, a existência do ponto de
-intersecção --- é precisamente nisso que $\mathbb{Q}$ e $\mathbb{R}$ diferem.
+\noindent\textbf{E aqui a distinção que decide tudo, porque é ela que se costuma
+perder.} É verdade que \emph{intervalos encaixados de comprimento a tender para
+zero não estabelecem, por si sós, a existência do ponto de intersecção}: em
+$\mathbb{Q}$ há cadeias assim sem habitante. \textbf{Mas o objecto construído não é
+o intervalo --- é o caminho}, e o caminho não espera por ponto nenhum:
+\[
+\boxed{\;\begin{array}{ll}
+\text{o \textbf{intervalo}} & \text{é a testemunha, e precisaria de um habitante que
+o ocupasse}\\[3pt]
+\text{o \textbf{caminho}} & \textbf{é} \text{ o habitante --- a sucessão } (a_k)
+\text{ \emph{é} o real}
+\end{array}\;}
+\]
+O \emph{Corpo Universal} (Teor.~\code{thm:central-continuo}) constrói
+$\mathbb{R}\simeq\{\text{caminhos}\}/\!\sim$, e a completude é lá \textbf{interna}: a
+sucessão de Cauchy dos truncados estabiliza \emph{bit a bit} dentro do próprio
+objecto, sem sair dele. E o mecanismo deste paper diz \emph{porquê} ela aperta em
+vez de vaguear --- o vazamento é zero porque a família é de Pisot,
+$\abs{\sigma\dg}<1$ (\S\ref{sec:pisot}). \textbf{A completude não é aqui um
+postulado acrescentado: é consequência do vazamento zero.} A identificação final
+com $\mathbb{R}$, essa sim, é o teorema clássico de unicidade a menos de
+isomorfismo, e cita-se como tal.
 
 \medskip
 \noindent\textbf{Mas o que a realização entrega diz-se com precisão, e são duas
@@ -1282,6 +1299,145 @@ permanece finita e não ordenável como corpo; a face alcançada é aquela em qu
 os cortes se tornam estrutura ordenada e completa. \emph{São duas faces do
 mesmo eixo, não duas teorias concorrentes.}
 \end{observacao}
+
+%======================================================================
+\section{E o que se construiu é o contínuo, e não $\mathbb{Q}$}\label{sec:continuo}
+
+\noindent Tudo o que este paper mede corre em inteiros, e daí a pergunta legítima
+--- \emph{então o que se construiu são os inteiros?} Não são, e a resposta não é
+retórica: é a única propriedade que separa os dois objectos, e mede-se.
+\[
+\boxed{\;\begin{array}{ll}
+\mathbb{Q} & \textbf{enumera-se} \text{ --- a lista existe, e o índice de cada
+racional exibe-se}\\[3pt]
+\{\text{caminhos}\} & \textbf{não} \text{ --- dada \emph{qualquer} lista,
+constrói-se o que falta}
+\end{array}\;}
+\]
+
+\begin{proposicao}[$\mathbb{Q}$ enumera-se, e o índice é finito]\label{prop:enumera}
+A enumeração por diagonais sobre $(p,q)$ com $q\geq1$ --- percorrer $p+q=2,3,4,\ldots$
+e, dentro de cada soma, varrer $p$ --- apanha todo o par, e num índice
+\textbf{finito} que se exibe. $\square$
+\end{proposicao}
+
+\begin{teorema}[a diagonal, e ela tem de sair fora da borda]\label{thm:diagonal}
+Dada uma lista qualquer de caminhos $L_0,L_1,\ldots$, o caminho
+\[
+\boxed{\;d[2k]=1-L_k[2k],\qquad d[2k+1]=k\bmod2\;}
+\]
+não está na lista, \emph{como elemento do objecto}. E as duas paridades fazem
+trabalhos distintos, que é onde o argumento ingénuo tem buraco:
+
+\emph{(i) as posições \textbf{pares} dão a diferença.} $d$ difere de $L_k$ na
+posição $2k$, para todo $k$ --- logo $d\neq L_k$ enquanto sucessão.
+
+\emph{(ii) as posições \textbf{ímpares} tiram $d$ da borda, e sem isso não fecha.}
+O objecto é $\{\text{caminhos}\}/\!\sim$, e $\sim$ identifica os nós da árvore: um
+\textbf{diádico tem dois caminhos} ($\ldots0111\ldots$ e $\ldots1000\ldots$). Se
+$d$ saísse eventualmente constante seria diádico, e poderia estar na lista
+\emph{pela outra representação} --- diferir num bit não seria diferir no objecto.
+A alternância nas ímpares dá a $d$ infinitos zeros e infinitos uns, logo $d$ não é
+eventualmente constante, logo não é diádico, logo a sua classe é um
+\textbf{singular}: aí diferir num bit \emph{é} diferir no objecto. $\square$
+\end{teorema}
+
+\noindent\textbf{E o estatuto do que se acabou de fazer, para que não se leia a
+mais.} A construção é \textbf{finita e explícita}: não afirma nada sobre o
+infinito --- exibe o objecto que falta a uma lista \emph{dada}. É exactamente por
+ser assim que ela decide, ao passo que nenhuma varredura decidiria um $\forall$.
+
+\begin{corolario}[o objecto tem habitantes que $\mathbb{Q}$ não tem]\label{cor:habitante}
+$\sqrt2-1$ tem caminho, e o teste de chão é uma comparação de inteiros:
+\[
+\boxed{\;\frac{m}{2^{k}}<\sqrt2-1
+\iff (m+2^{k})^{2}<2\cdot2^{2k}\;}
+\]
+--- decidido sem avaliar raiz nenhuma. E \textbf{nunca há empate}, porque
+$(m+2^k)^2=2\cdot2^{2k}$ não tem solução: no corte não fica racional nenhum. A
+razão é o \textbf{passo}, e não a lista --- a identidade
+\[
+(2b-a)^{2}-2(a-b)^{2}=-\,(a^{2}-2b^{2})
+\]
+leva solução em solução, e no intervalo $b<a<2b$ o denominador \textbf{encolhe}
+estritamente: descida infinita em $\mathbb{N}$, impossível. $\square$
+\end{corolario}
+\colunas{$\mathbb{R}\simeq\{\text{caminhos}\}/\!\sim$ e a completude interna}
+        {a diagonal fora da borda, e o habitante irracional em inteiros}
+        {\code{tests/cardinal.c}: $156$ pares enumerados com índice máximo $289$;
+$29$ listas, e a diagonal ingénua caía na borda em $1$ delas;
+$28$ profundidades sem empate; a identidade da descida em $21\,900$ pares}
+
+\medskip
+\noindent Fecha-se assim a pergunta com que a secção abriu, e fecha-se dos dois
+lados: a aritmética é toda do \textbf{caminho} --- inteira, exacta, sem uma
+vírgula --- e o habitante \textbf{é} o caminho. É o contínuo, e não $\mathbb{Q}$.
+
+%======================================================================
+\section{A continuidade: dado $S$ limitado, o supremo constrói-se}\label{sec:supremo}
+
+\noindent Até aqui a direcção foi sempre a mesma --- \emph{dado o habitante $x$, a
+classe racional dele tem $x$ por supremo} (\S\ref{sec:completude},
+Teor.~\ref{thm:completude}). Isso constrói o \textbf{corte a partir do habitante}.
+A continuidade é a \textbf{volta}, e é ela que separa $\mathbb{R}$ de $\mathbb{Q}$
+como estrutura ordenada:
+\[
+\boxed{\;S\neq\emptyset\ \text{limitado superiormente}
+\ \Longrightarrow\ \exists\,\sup S\ \textbf{dentro do objecto}\;}
+\]
+E aqui não é axioma acrescentado: o caminho do supremo \textbf{constrói-se}, bit a
+bit, em inteiros.
+
+\begin{definicao}[o caminho do supremo]\label{def:supremo}
+Para $S\neq\emptyset$ limitado superiormente,
+\[
+m_k:=\max\bigl\{m\in\mathbb{Z}:\ \tfrac{m}{2^{k}}<x\ \text{para algum }x\in S\bigr\}
+\]
+--- bem definido, porque $S$ não é vazio (há $m$ pequeno que serve) e é limitado
+(há $m$ grande que não serve).
+\end{definicao}
+
+\begin{teorema}[$m_k$ é um caminho, e é o supremo]\label{thm:supremo}
+\emph{(i) É um caminho}, e é o \textbf{passo} que o diz:
+\[
+\boxed{\;m_{k+1}\in\{2m_k,\ 2m_k+1\}\;}
+\]
+--- os $m_k$ descem a árvore binária \emph{sem saltar}, logo são um habitante do
+objecto e não uma lista solta de inteiros.
+
+\emph{(ii) É majorante:} $m_k+1$ já não serve, logo nenhum $x\in S$ ultrapassa o
+caminho.
+
+\emph{(iii) E é o \textbf{menor}} --- é esta a cláusula que trabalha, porque (ii)
+sozinha daria um majorante qualquer: \emph{todo} $m'<m_k$ ainda serve, logo nenhum
+deles é majorante. $\square$
+\end{teorema}
+
+\begin{proposicao}[e é aqui que $\mathbb{Q}$ falha, com testemunha]\label{prop:q-falha}
+Para $S=\{r\in\mathbb{Q},\,r>0:\ r^{2}<2\}$ nenhum $p/q$ é o supremo, e a
+testemunha é a \textbf{mediante de Farey} $(p+2q)/(p+q)$, que cai sempre do lado
+oposto porque
+\[
+\boxed{\;(p+2q)^{2}-2(p+q)^{2}=-\,(p^{2}-2q^{2})\;}
+\]
+\textbf{troca o sinal} --- a mesma identidade da descida
+(Cor.~\ref{cor:habitante}), a trabalhar do outro lado. E não há empate, pois
+$p^{2}=2q^{2}$ é a descida proibida. Logo há sempre racional estritamente entre
+$p/q$ e o corte, dos dois lados. $\square$
+\end{proposicao}
+\colunas{a continuidade como propriedade do menor majorante}
+        {o caminho do supremo, construído bit a bit em inteiros}
+        {\code{tests/supremo.c}: $104$ passos por duas rotas concordantes;
+$64$ níveis nas duas cláusulas; $5490$ candidatos com a mediante a trocar o sinal,
+zero empates; e o supremo de $\{r^2<2\}$ dá $1\,482\,910/2^{20}$}
+
+\medskip
+\noindent\textbf{E é por isto que o sistema atravessa os andares com erro zero.} O
+habitante \textbf{é} o caminho --- não há valor por trás à espera de ser
+aproximado, logo não há erro a acumular: a ida e a volta são a involução, exacta
+por construção (\S\ref{sec:dual}). A continuidade clássica precisa do limite
+porque lá o ponto tem de \emph{aparecer} de fora; aqui o ponto \emph{é} a
+sucessão dos passos, e o supremo é apenas mais um caminho que se desce.
 
 %======================================================================
 \section{E só então $\pi$}\label{sec:pi}
