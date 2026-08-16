@@ -74,6 +74,25 @@ static void cd(const long *x, const long *y, int n, long *o){
     conjuga(c, m, dc);  cd(b, dc, m, bc);
     for(int k = 0; k < m; k++){ o[k] = guarda(ac[k] - db[k]); o[m+k] = guarda(da[k] + bc[k]); }
 }
+/* o determinante EXACTO em ℤ, por Bareiss — divisão exacta por teorema, sem fracções */
+static long det_bareiss(long M[8][8], int n){
+    long A[8][8];
+    for(int i = 0; i < n; i++) for(int j = 0; j < n; j++) A[i][j] = M[i][j];
+    long prev = 1; int sinal = 1;
+    for(int c = 0; c < n-1; c++){
+        if(A[c][c] == 0){
+            int p2 = -1;
+            for(int i = c+1; i < n; i++) if(A[i][c]){ p2 = i; break; }
+            if(p2 < 0) return 0;
+            for(int j = 0; j < n; j++){ long t = A[c][j]; A[c][j] = A[p2][j]; A[p2][j] = t; }
+            sinal = -sinal;
+        }
+        for(int i = c+1; i < n; i++) for(int j = c+1; j < n; j++)
+            A[i][j] = (A[i][j]*A[c][c] - A[i][c]*A[c][j]) / prev;
+        prev = A[c][c];
+    }
+    return sinal * A[n-1][n-1];
+}
 static long norma2(const long *x, int n){
     long s = 0;
     for(int k = 0; k < n; k++) s += x[k]*x[k];
@@ -485,6 +504,110 @@ printf("    é onde o escalar arranja lugar. Zero doubles, zero tolerâncias.\n\
  * É o mesmo fenómeno do outro lado da casa: o zero parte-se quando o andar deixa de ser
  * corpo. Lá era o polinómio a factorizar; aqui é a álgebra a passar dos oito. Nos dois
  * casos a norma multiplicativa é a primeira coisa que cai. */
+/* ══════════════════════════════════════════════════════════════════════════════
+ * E O OBJECTO É O POLINÓMIO — O TECTO ERA DA REPRESENTAÇÃO ESCALAR
+ * ══════════════════════════════════════════════════════════════════════════════
+ * O Aarão: «aqui os números são polinómios, não estamos nos escalares.»
+ *
+ * E isso desfaz o enquadramento todo. Tudo o que este ficheiro mede acima corre sobre
+ * TUPLOS DE ESCALARES — `long x[64]`, com a norma Σxᵢ² a somar quadrados de coordenadas.
+ * Mas o `thm:posicional` desta casa diz que um número É um polinómio, e com o objecto
+ * certo a norma é outra:
+ *
+ *      N(z) = det(M_z),   onde M_z é a matriz de MULTIPLICAR por z em ℤ[x]/(μ)
+ *
+ * — a norma do corpo, o produto dos conjugados. E ela é multiplicativa POR TEOREMA, em
+ * TODO grau, sem excepção e sem tecto:
+ *
+ *      det(M_{zw}) = det(M_z · M_w) = det(M_z)·det(M_w)
+ *
+ * porque z ↦ M_z é morfismo de anéis e o determinante é multiplicativo. Não há dimensão
+ * onde isto falhe — não porque a torre «aguente mais», mas porque a pergunta mudou de
+ * objecto.
+ *
+ * ── LOGO O TECTO DE 8 É DA REPRESENTAÇÃO, E NÃO DO NÚMERO ─────────────────────
+ * Σxᵢ² é a soma de quadrados das COORDENADAS de uma representação escalar escolhida. Pedir
+ * que ELA seja multiplicativa é uma exigência sobre a carta, não sobre o objecto — e é
+ * exactamente a «exigência estética» que o Aarão nomeou. O det não a tem.
+ *
+ * E fecha o par: a norma de Gentil, medida no §H8 como ∏xᵢ, É esta — o determinante de
+ * diag(x), que é o M_z do produto componente a componente. As duas leituras da casa dão o
+ * mesmo objecto. */
+{
+    printf("\n§H11 O objecto é o POLINÓMIO: N(z) = det(M_z), e ela não tem tecto.\n\n");
+    long graus = 0, mult_ok = 0, casos_tot = 0;
+    printf("      grau   μ                        N(zw) = N(z)N(w) em ℤ[x]/(μ)?   casos\n");
+    /* uma família de módulos, um por grau: x^n − x − 1 */
+    for(int n = 2; n <= 6; n++){
+        long MU2[8] = {0};
+        MU2[n] = 1; MU2[1] += -1; MU2[0] += -1;              /* x^n − x − 1 */
+        long mau = 0, casos = 0;
+        for(long t = 0; t < 120; t++){
+            long z[8] = {0}, w[8] = {0}, zw[8] = {0};
+            for(int k = 0; k < n; k++){
+                z[k] = ((t*7 + k*3) % 7) - 3;
+                w[k] = ((t*11 + k*5) % 7) - 3;
+            }
+            /* zw = z·w reduzido por μ, em ℤ */
+            long C[16] = {0};
+            for(int a2 = 0; a2 < n; a2++) for(int b2 = 0; b2 < n; b2++) C[a2+b2] += z[a2]*w[b2];
+            for(int d = 2*n-2; d >= n; d--){
+                long c = C[d];
+                if(!c) continue;
+                C[d] -= c;
+                C[d-n+1] += c; C[d-n] += c;      /* x^n ≡ x + 1 — UMA vez só */
+            }
+            for(int k = 0; k < n; k++) zw[k] = C[k];
+            /* M_z: a matriz de multiplicar por z — coluna j é z·x^j reduzido */
+            long Mz[8][8] = {{0}}, Mw[8][8] = {{0}}, Mzw[8][8] = {{0}};
+            for(int j = 0; j < n; j++){
+                long col[16] = {0};
+                for(int a2 = 0; a2 < n; a2++) col[a2+j] += z[a2];
+                for(int d = 2*n-2; d >= n; d--){
+                    long c = col[d]; if(!c) continue;
+                    col[d] -= c; col[d-n+1] += c; col[d-n] += c;
+                }
+                for(int i2 = 0; i2 < n; i2++) Mz[i2][j] = col[i2];
+                long cw[16] = {0};
+                for(int a2 = 0; a2 < n; a2++) cw[a2+j] += w[a2];
+                for(int d = 2*n-2; d >= n; d--){
+                    long c = cw[d]; if(!c) continue;
+                    cw[d] -= c; cw[d-n+1] += c; cw[d-n] += c;
+                }
+                for(int i2 = 0; i2 < n; i2++) Mw[i2][j] = cw[i2];
+                long cz[16] = {0};
+                for(int a2 = 0; a2 < n; a2++) cz[a2+j] += zw[a2];
+                for(int d = 2*n-2; d >= n; d--){
+                    long c = cz[d]; if(!c) continue;
+                    cz[d] -= c; cz[d-n+1] += c; cz[d-n] += c;
+                }
+                for(int i2 = 0; i2 < n; i2++) Mzw[i2][j] = cz[i2];
+            }
+            /* det por Bareiss, exacto em ℤ */
+            long dz = det_bareiss(Mz, n), dw = det_bareiss(Mw, n), dzw = det_bareiss(Mzw, n);
+            casos++;
+            if(dzw != dz*dw) mau++;
+        }
+        graus++; casos_tot += casos;
+        if(!mau) mult_ok++;
+        printf("      %-6d x^%d − x − 1              %-30s %ld\n", n, n,
+               mau ? "NÃO" : "sim, EXACTA", casos);
+    }
+    printf("\n      ⟹ multiplicativa em TODO grau — e não porque a torre «aguente mais»:\n");
+    printf("        porque a pergunta mudou de OBJECTO. Σxᵢ² é a soma de quadrados das\n");
+    printf("        COORDENADAS de uma carta escolhida; det(M_z) é do número.\n\n");
+    ok("O OBJECTO É O POLINÓMIO, E COM ELE A NORMA NÃO TEM TECTO: N(z) = det(M_z) — a"
+       " matriz de multiplicar por z em ℤ[x]/(μ) — é multiplicativa POR TEOREMA em todo"
+       " grau, porque z ↦ M_z é morfismo de anéis e o determinante é multiplicativo."
+       " Medido exacto por Bareiss em graus 2 a 6. E isto não é a torre a «aguentar mais»:"
+       " é a pergunta a mudar de objecto. Σxᵢ² soma quadrados das COORDENADAS de uma"
+       " representação escalar escolhida, e exigir que ELA seja multiplicativa é uma"
+       " exigência sobre a carta e não sobre o número — que é exactamente a «exigência"
+       " estética» nomeada. E fecha o par: a norma de Gentil do §H8, ∏xᵢ, É esta — o"
+       " determinante do M_z do produto componente a componente",
+       mult_ok == graus && graus == 5 && casos_tot == 600);
+}
+
 /* ══════════════════════════════════════════════════════════════════════════════
  * A TORRE NÃO PÁRA: PREENCHER OS ANDARES NA ORDEM, COMPLETOS, JÁ É SUFICIENTE
  * ══════════════════════════════════════════════════════════════════════════════

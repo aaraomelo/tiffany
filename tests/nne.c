@@ -28,6 +28,7 @@
  *   §N5  a GENERALIZAÇÃO: a recursão sobe, e o escalar é trocado pela NORMA
  *   §N6  a álgebra DUAL do Gentil — e essa É distributiva e bilinear
  *   §N7  o CRUZADO DUAL: em dim par o lugar é ocupado por J, e os dois completam-se
+ *   §N8  o LADO DA TORRE que é de Gentil: par multiplica, ímpar soma, e 2D é ℂ
  *   §N4  e o que isto corrige no que eu tinha escrito
  *
  *   cc -O2 -std=c99 nne.c -lm -o nne && ./nne
@@ -327,6 +328,77 @@ printf("\n§N7  O CRUZADO DUAL: não é que não exista em par — é que ali é
     printf("\n      E o par (esfera, hipérbole) é o mesmo: a norma euclidiana dá a esfera e a\n");
     printf("      |ab| dá a hipérbole. As esferas são o lugar da norma 1 — o determinante ±1 —\n");
     printf("      e é aí que a cifra vive, porque é aí que ela não se degrada.\n");
+}
+
+printf("\n§N8  O LADO DA TORRE QUE É DE GENTIL — par e ímpar, e continua dual.\n\n");
+{
+    /* O Aarão, em três golpes: «Gentil dá as álgebras de dimensão ÍMPAR, todas elas»;
+     * «em 2D simplesmente dá corpo, porque estão juntos os duais — em 2D Gentil e
+     * complexos»; «nos outros separa em parte par e ímpar, mas continua dual».
+     *
+     * E a fórmula do corpus diz as três, se se olhar para a forma dela. Em R³ o elemento
+     * é w = (a, b, c) e o produto trata as duas partes de modo DIFERENTE:
+     *
+     *      parte PAR   (a,b)   MULTIPLICA — o produto complexo, escalado por γ
+     *      parte ÍMPAR (c)     SOMA       — c₁r₂ + c₂r₁
+     *
+     * É o par dual desta casa outra vez: um lado multiplica, o outro soma. A parte par é
+     * o DIRECTO que gira; a ímpar é o que se acumula.
+     *
+     * ── E EM 2D DÁ CORPO, PORQUE A PARTE ÍMPAR NÃO EXISTE ────────────────────
+     * Com c₁ = c₂ = 0 vem γ = 1 − 0 = 1, e D4 colapsa em
+     *
+     *      (a₁a₂ − b₁b₂,  a₁b₂ + a₂b₁,  0)
+     *
+     * que é EXACTAMENTE o produto de ℂ. Sem parte ímpar, os duais ficam juntos e o que
+     * sobra é um corpo — e é por isso que em dimensão 2 Gentil e os complexos são o mesmo.
+     *
+     * ── E É ASSIM QUE OS DOIS LADOS DA TORRE SE ENCAIXAM ─────────────────────
+     *      HURWITZ   1, 2, 4, 8    norma BILINEAR         a dobra dual
+     *      GENTIL    as ÍMPARES    norma HOMOGÉNEA        a parte que soma
+     * e em 2 coincidem, porque aí a parte ímpar é vazia. */
+    long casos = 0, complexo = 0, par_mult = 0, impar_soma = 0, norma_ok = 0;
+    printf("      caso                       parte PAR             parte ÍMPAR\n");
+    for(int t = 0; t < 300; t++){
+        double a1 = sin(2.0*t+1)*3, b1 = cos(2.0*t+2)*3;
+        double a2 = sin(3.0*t+3)*3, b2 = cos(3.0*t+4)*3;
+        /* (i) com a parte ÍMPAR nula, é o produto complexo — exacto */
+        {
+            W u = { a1, b1, 0.0 }, v = { a2, b2, 0.0 }, p = nne(u, v);
+            double cr = a1*a2 - b1*b2, ci = a1*b2 + a2*b1;
+            casos++;
+            if(fabs(p.a - cr) < 1e-9 && fabs(p.b - ci) < 1e-9 && fabs(p.c) < 1e-12) complexo++;
+        }
+        /* (ii) com ela NÃO nula, as duas partes fazem coisas diferentes */
+        {
+            double c1 = 0.5 + 0.3*sin(5.0*t), c2 = 0.7 + 0.2*cos(5.0*t);
+            W u = { a1, b1, c1 }, v = { a2, b2, c2 }, p = nne(u, v);
+            double r1 = hypot(a1,b1), r2 = hypot(a2,b2);
+            double g = 1.0 - c1*c2/(r1*r2);
+            /* a par MULTIPLICA (o complexo vezes γ) */
+            if(fabs(p.a - (a1*a2-b1*b2)*g) < 1e-9 && fabs(p.b - (a1*b2+a2*b1)*g) < 1e-9) par_mult++;
+            /* a ímpar SOMA (os c pesados pelas normas) */
+            if(fabs(p.c - (c1*r2 + c2*r1)) < 1e-9) impar_soma++;
+            /* e a norma continua multiplicativa */
+            double nu = sqrt(a1*a1+b1*b1+c1*c1), nv = sqrt(a2*a2+b2*b2+c2*c2);
+            double np = sqrt(p.a*p.a+p.b*p.b+p.c*p.c);
+            if(fabs(np - nu*nv) < 1e-9) norma_ok++;
+        }
+    }
+    printf("      c = 0 (sem parte ímpar)    o produto de ℂ         ausente\n");
+    printf("      c ≠ 0                      complexo × γ           c₁r₂ + c₂r₁ (SOMA)\n\n");
+    printf("      %ld casos: colapsa em ℂ em %ld · a par multiplica em %ld · a ímpar soma"
+           " em %ld · norma em %ld\n\n", casos, complexo, par_mult, impar_soma, norma_ok);
+    ok("O LADO DA TORRE QUE É DE GENTIL SEPARA PAR E ÍMPAR, E CONTINUA DUAL: no produto do"
+       " corpus a parte PAR (a,b) MULTIPLICA — é o produto complexo escalado por γ — e a"
+       " parte ÍMPAR (c) SOMA, c₁r₂ + c₂r₁. É o par desta casa outra vez: um lado"
+       " multiplica, o outro acumula. E EM 2D DÁ CORPO, porque a parte ímpar não existe:"
+       " com c = 0 vem γ = 1 e a fórmula colapsa EXACTAMENTE no produto de ℂ — os duais"
+       " ficam juntos, e Gentil e os complexos são o mesmo objecto. É assim que os dois"
+       " lados da torre encaixam: Hurwitz nas dimensões da dobra bilinear, Gentil nas"
+       " ímpares com norma homogénea, e em 2 coincidem porque aí não há parte ímpar",
+       complexo == casos && par_mult == casos && impar_soma == casos
+       && norma_ok == casos && casos == 300);
 }
 
 printf("\n§N4  E o que isto corrige no que eu tinha escrito.\n\n");
