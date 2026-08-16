@@ -766,7 +766,7 @@ printf("\n§M11 K(n,m) É SÓ UM LADO — e com o dual dá R^n de facto.\n\n");
      *
      * E o "R^n + R^n*" mede-se: o reticulado L e o seu dual L* têm volumes RECÍPROCOS. */
     printf("      n   m   r₁   r₂   r₁+2r₂   posto   vol(L)      vol(L*)     vol·vol*\n");
-    int mauPosto = 0, mauVol = 0, casos = 0;
+    int mauPosto = 0, mauVol = 0, casos = 0, mauDual2 = 0;
     for(int n = 2; n <= 5; n++)
     for(int m = 1; m <= 2; m++){
         /* as raízes por Durand–Kerner (como no §M10) */
@@ -826,10 +826,69 @@ printf("\n§M11 K(n,m) É SÓ UM LADO — e com o dual dá R^n de facto.\n\n");
             }
         }
         vol = fabs(vol);
-        double vold = (vol > 0) ? 1.0/vol : 0;
+        /* E O DUAL CONSTRÓI-SE, e não se escreve 1/vol. Estava aqui
+         *
+         *      double vold = 1.0/vol;   ...   if(fabs(vol*vold - 1.0) > 1e-9) mauVol++;
+         *
+         * que é vol·(1/vol) = 1: uma quantidade dividida por si própria, e o resultado
+         * chamado confirmação. A asserção não podia falhar, e o que ela dizia — «o
+         * reticulado e o dual têm volumes recíprocos» — nunca chegou a ser medido,
+         * porque o dual nunca foi construído.
+         *
+         * O reticulado dual é L* = (Mᵀ)⁻¹. Constrói-se resolvendo M·X = I por eliminação,
+         * transpõe-se, e o VOLUME DELE calcula-se pela mesma rotina, a partir das suas
+         * próprias entradas. Só então vol·vol* = 1 compara dois determinantes de duas
+         * matrizes distintas — e há como falhar. */
+        double Inv[8][8], Aug[8][16];
+        for(int i = 0; i < N; i++){
+            for(int j = 0; j < N; j++){ Aug[i][j] = M[i][j]; Aug[i][N+j] = (i==j) ? 1 : 0; }
+        }
+        int invertivel = 1;
+        for(int c = 0; c < N && invertivel; c++){
+            int piv = c;
+            for(int r = c; r < N; r++) if(fabs(Aug[r][c]) > fabs(Aug[piv][c])) piv = r;
+            if(fabs(Aug[piv][c]) < 1e-12){ invertivel = 0; break; }
+            if(piv != c) for(int j = 0; j < 2*N; j++){
+                double t = Aug[c][j]; Aug[c][j] = Aug[piv][j]; Aug[piv][j] = t;
+            }
+            double d0 = Aug[c][c];
+            for(int j = 0; j < 2*N; j++) Aug[c][j] /= d0;
+            for(int r = 0; r < N; r++){
+                if(r == c) continue;
+                double f = Aug[r][c];
+                for(int j = 0; j < 2*N; j++) Aug[r][j] -= f*Aug[c][j];
+            }
+        }
+        double Md[8][8];
+        for(int i = 0; i < N; i++) for(int j = 0; j < N; j++)
+            Inv[i][j] = Aug[i][N+j], Md[j][i] = Aug[i][N+j];   /* Md = (M⁻¹)ᵀ */
+        /* (i) a construção verifica-se: M·Mdᵀ = I, que é a DEFINIÇÃO de dual */
+        double piorI = 0;
+        for(int i = 0; i < N; i++) for(int j = 0; j < N; j++){
+            double sdd = 0;
+            for(int l = 0; l < N; l++) sdd += M[i][l]*Md[j][l];
+            double alvo = (i==j) ? 1 : 0, e = fabs(sdd - alvo);
+            if(e > piorI) piorI = e;
+        }
+        if(!invertivel || piorI > 1e-6) mauDual2++;
+        /* (ii) e o volume do dual sai das entradas DELE, pela mesma eliminação */
+        double Gd[8][8]; memcpy(Gd, Md, sizeof Gd);
+        double vold = 1;
+        for(int c = 0; c < N; c++){
+            int piv = c;
+            for(int r = c; r < N; r++) if(fabs(Gd[r][c]) > fabs(Gd[piv][c])) piv = r;
+            if(fabs(Gd[piv][c]) < 1e-12){ vold = 0; break; }
+            if(piv != c){ for(int j=0;j<N;j++){ double t=Gd[c][j]; Gd[c][j]=Gd[piv][j]; Gd[piv][j]=t; } vold = -vold; }
+            vold *= Gd[c][c];
+            for(int r = c+1; r < N; r++){
+                double f = Gd[r][c]/Gd[c][c];
+                for(int j = c; j < N; j++) Gd[r][j] -= f*Gd[c][j];
+            }
+        }
+        vold = fabs(vold);
         int posto = (vol > 1e-12) ? N : 0;
         if(posto != N) mauPosto++;
-        if(fabs(vol*vold - 1.0) > 1e-9) mauVol++;
+        if(fabs(vol*vold - 1.0) > 1e-6) mauVol++;
         if(r1 + 2*r2 != N) mauPosto++;
         casos++;
         printf("      %-3d %-3d %-4d %-4d %-8d %-7d %-11.6f %-11.8f %.8f\n",
@@ -837,7 +896,17 @@ printf("\n§M11 K(n,m) É SÓ UM LADO — e com o dual dá R^n de facto.\n\n");
     }
     printf("\n      %d casos\n\n", casos);
     ok("os n mergulhos dão r₁+2r₂ = n e o reticulado tem posto CHEIO — K⊗R é R^n", mauPosto == 0);
-    ok("e vol(L)·vol(L*) = 1: o reticulado e o dual têm volumes recíprocos", mauVol == 0);
+    printf("      e o dual foi CONSTRUÍDO: M·M*ᵀ = I em %d de %d casos\n\n",
+           casos - mauDual2, casos);
+    ok("E vol(L)·vol(L*) = 1: O RETICULADO E O DUAL TÊM VOLUMES RECÍPROCOS — e agora"
+       " isto é uma medida. Estava aqui `vold = 1.0/vol` seguido de"
+       " `|vol·vold − 1| < 1e-9`, que é uma quantidade dividida por si própria com o"
+       " resultado chamado confirmação: a asserção não podia falhar, e o dual nunca"
+       " chegou a ser construído. Agora L* = (Mᵀ)⁻¹ constrói-se por eliminação, a"
+       " construção verifica-se pela DEFINIÇÃO — M·M*ᵀ = I —, e o volume dele sai das"
+       " SUAS próprias entradas pela mesma rotina. Só então vol·vol* = 1 compara dois"
+       " determinantes de duas matrizes distintas, e há como falhar",
+       mauVol == 0 && mauDual2 == 0);
     printf("      Portanto as duas coisas são verdade e não se contradizem: K(n,m) NÃO é R^n\n");
     printf("      (é enumerável, grau n sobre Q) e ao mesmo tempo K ⊗_Q R É R^n, pelo mergulho\n");
     printf("      de Minkowski. A revisão falava do corpo; o Aarão falava do espaço que ele\n");
