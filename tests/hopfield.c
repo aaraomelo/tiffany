@@ -57,6 +57,7 @@
  */
 #include <stdio.h>
 #include "../lib/disco.h"
+#include "reta.h"
 #define H DISCO_FIXO2(signed char, N, 25)
 #include <stdlib.h>
 #include <string.h>
@@ -92,18 +93,22 @@ static void grava(Rede *r){
         }
 }
 
-/* a energia de Hopfield: E = -½ Σ w_ij s_i s_j */
-static double energia(const Rede *r, const signed char *s){
-    double E = 0;
+/* a energia de Hopfield: E = -½ Σ w_ij s_i s_j, medida em unidades de −2N.
+ * O W já é N·w (a linha do grava diz «W = N·w, sem dividir»), e o −½ e o /N são a MESMA
+ * normalização a ser desfeita e refeita: uma constante POSITIVA multiplica os dois lados de
+ * toda comparação e de toda diferença, logo não muda nenhuma. O que ela mudava era o tipo. */
+static long energia2N(const Rede *r, const signed char *s){
+    long E = 0;
     for(int i = 0; i < N; i++)
-        for(int j = 0; j < N; j++) E += (double)r->W[i][j]/N * s[i] * s[j];
-    return -0.5 * E;
+        for(int j = 0; j < N; j++) E += (long)r->W[i][j] * s[i] * s[j];
+    return -E;                    /* = 2N·E_de_Hopfield, e o sinal é o mesmo */
 }
 
-/* um passo assíncrono: escolhe i e alinha s_i com o campo local. É a DESCIDA. */
+/* um passo assíncrono: escolhe i e alinha s_i com o campo local. É a DESCIDA.
+ * O campo vem em N-vezes, e o sinal de h é o de N·h porque N > 0. */
 static int passo(const Rede *r, signed char *s, int i){
-    double h = 0;
-    for(int j = 0; j < N; j++) h += (double)r->W[i][j]/N * s[j];
+    long h = 0;
+    for(int j = 0; j < N; j++) h += (long)r->W[i][j] * s[j];
     signed char novo = (h >= 0) ? 1 : -1;
     if(novo == s[i]) return 0;
     s[i] = novo;
@@ -120,12 +125,16 @@ static int recupera(const Rede *r, signed char *s, int limite){
     return limite;
 }
 
-/* a sobreposição: o produto interno normalizado. 1 = igual, -1 = o negativo, 0 = ortogonal. */
-static double sobrepoe(const signed char *a, const signed char *b){
-    double s = 0;
-    for(int i = 0; i < N; i++) s += a[i] * b[i];
-    return s / N;
+/* a sobreposição, em N-vezes: Σ aᵢbᵢ ∈ [−N, N]. É `rt_dir` — o produto DIRECTO da Lei da
+ * operação — e o /N era só a normalização. Dois factos que ela escondia e que aqui se leem:
+ * Σ aᵢbᵢ ≡ N (mod 2), logo tem a PARIDADE de N; e se d bits diferem, Σ = N − 2d. */
+static long sobrepoeN(const signed char *a, const signed char *b){
+    long s = 0;
+    for(int i = 0; i < N; i++) s += (long)a[i] * b[i];
+    return s;
 }
+/* quantos bits diferem — a leitura dual da mesma quantidade: d = (N − Σ)/2 */
+static int diferem(const signed char *a, const signed char *b){ return (int)((N - sobrepoeN(a,b))/2); }
 
 /* ───────────────────────────────────────────────────────────────────────────
  * §F3  OS PADRÕES EM ÁRVORE — e é aqui que a identidade aparece
@@ -207,26 +216,19 @@ static void parte_n(const long (*B)[N], long (*S)[N], long (*A)[N]){
             A[i][j] = B[i][j] - B[j][i];      /* = 2·A, em inteiros */
         }
 }
-static void parte(const double (*B)[N], double (*S)[N], double (*A)[N]){
-    for(int i = 0; i < N; i++)
-        for(int j = 0; j < N; j++){
-            S[i][j] = (B[i][j] + B[j][i]) / 2.0;
-            A[i][j] = (B[i][j] - B[j][i]) / 2.0;
-        }
-}
 
 /* o passo SÍNCRONO: todos os neurônios mudam ao mesmo tempo. É aqui que os ciclos aparecem —
  * o assíncrono do §F1 nunca cicla, e é por isso que ele só vê a torre branca. */
-static void sincrono(const double (*W)[N], const signed char *s, signed char *o){
+static void sincrono(const long (*W)[N], const signed char *s, signed char *o){
     for(int i = 0; i < N; i++){
-        double h = 0;
+        long h = 0;
         for(int j = 0; j < N; j++) h += W[i][j] * s[j];
         o[i] = (h >= 0) ? 1 : -1;
     }
 }
 
 /* o período do ciclo em que a órbita cai: 1 = ponto fixo, 2 = alterna, 0 = não fechou */
-static int periodo(const double (*W)[N], const signed char *ini, int limite){
+static int periodo(const long (*W)[N], const signed char *ini, int limite){
     signed char (*hist)[N] = DISCO_FIXO2(signed char, N, 92);
     disco_prende(DISCO_BASE(92),"dados/hist_92.bin",(size_t)((64)*(N)),sizeof(signed char));
     disco_zera(hist,(size_t)((64)*(N)),sizeof(signed char));
@@ -271,24 +273,25 @@ int main(void){
         for(int p = 0; p < R.p; p++) for(int i = 0; i < N; i++) R.x[p][i] = (signed char)bit();
         grava(&R);
 
-        int sempre_desce = 1, ensaios = 0; double maior_subida = 0;
+        int sempre_desce = 1, ensaios = 0; long maior_subida = 0;
         for(int e = 0; e < 40; e++){
             signed char s[N];
             for(int i = 0; i < N; i++) s[i] = (signed char)bit();
-            double E = energia(&R, s);
+            long E = energia2N(&R, s);
             for(int t = 0; t < 400; t++){
                 int i = (int)(xs() % N);
                 if(!passo(&R, s, i)) continue;
-                double E2 = energia(&R, s);
-                double d = E2 - E;
-                if(d > 0.0){ sempre_desce = 0; if(d > maior_subida) maior_subida = d; }
+                long E2 = energia2N(&R, s);
+                long d = E2 - E;
+                if(d > 0){ sempre_desce = 0; if(d > maior_subida) maior_subida = d; }
                 E = E2;
                 ensaios++;
             }
         }
         ok("a energia NUNCA sobe num passo assincrono — em milhares de passos, sem excecao",
            sempre_desce);
-        printf("     -> %d passos que mudaram estado, %d arranques aleatorios, maior subida %.1e.\n",
+        printf("     -> %d passos que mudaram estado, %d arranques aleatorios, maior subida %ld\n"
+               "        (em unidades de 2N; o ZERO aqui e' o zero, e nao um numero pequeno).\n",
                ensaios, 40, maior_subida);
 
         /* e a recuperação: partindo de um padrão corrompido, volta-se ao original */
@@ -298,7 +301,7 @@ int main(void){
             memcpy(s, R.x[p], N);
             for(int k = 0; k < N/10; k++) s[xs() % N] *= -1;      /* 10% corrompido */
             recupera(&R, s, 20);
-            if(sobrepoe(s, R.x[p]) > 0.99) voltou++;
+            if(diferem(s, R.x[p]) == 0) voltou++;    /* «>0,99» com N=128 ERA isto */
         }
         ok("e RECUPERA: 8 padroes corrompidos a 10% voltam todos ao original",
            voltou == R.p);
@@ -322,22 +325,23 @@ int main(void){
                 memcpy(s, R.x[p], N);
                 for(int k = 0; k < N/20; k++) s[xs() % N] *= -1;   /* 5% corrompido */
                 recupera(&R, s, 20);
-                if(sobrepoe(s, R.x[p]) > 0.95) bons++;
+                if(diferem(s, R.x[p]) <= 3) bons++;  /* «>0,95» com N=128 ERA isto */
             }
-            double frac = (double)bons/P;
-            if(P % 6 == 2 || frac < 0.95)
-                printf("     %6d %8.4f %9.0f%%\n", P, (double)P/N, 100*frac);
-            if(frac >= 0.95) ultimo_bom = P;
+            /* «95%» compara-se por multiplicação cruzada: bons/P ≥ 95/100 ⟺ 100·bons ≥ 95·P */
+            if(P % 6 == 2 || 100*bons < 95*P)
+                printf("     %6d   %4d/%-4d %8ld%%\n", P, P, N, (100L*bons)/P);
+            if(100*bons >= 95*P) ultimo_bom = P;
         }
-        double alpha = (double)ultimo_bom / N;
         ok("a Hopfield SATURA: acima de um certo P ela deixa de recuperar — nao guarda sem limite",
            ultimo_bom < PMAX);
         /* a capacidade medida tem de cair na vizinhanca do 0,138 — e a margem e larga de
          * proposito, porque N=128 e pequeno e o 0,138 e assintotico */
+        /* alpha = ultimo_bom/N, e a vizinhança lê-se sem o dividir: 5/100 < α < 30/100 */
         ok("e a capacidade medida cai na vizinhanca do 0,138.N da literatura (N=128 e pequeno)",
-           alpha > 0.05 && alpha < 0.30);
-        printf("     -> ultimo P com 95%% de recuperacao: %d, ou alpha = %.3f (a teoria: 0,138).\n",
-               ultimo_bom, alpha);
+           100L*ultimo_bom > 5L*N && 100L*ultimo_bom < 30L*N);
+        printf("     -> ultimo P com 95%% de recuperacao: %d, ou alpha = %d/%d = %ld milesimos\n"
+               "        (a teoria: 138 milesimos). A fraccao e' EXACTA; o decimal e' que arredondava.\n",
+               ultimo_bom, ultimo_bom, N, (1000L*ultimo_bom)/N);
         puts("        A razao da saturacao e estrutural: os pesos sao uma SOMA, e as memorias");
         puts("        interferem umas nas outras. Guardar mais ESTRAGA o que ja la estava.\n");
     }
@@ -347,29 +351,32 @@ int main(void){
     puts("     Um caminho de profundidade D com N/D neuronios por nivel: dois caminhos que");
     puts("     partilham k niveis partilham k.(N/D) neuronios. Logo a sobreposicao E k/D.\n");
     {
-        int pares = 0, exatos = 0; double pior = 0;
+        int pares = 0, exatos = 0; long pior = 0;
         for(int a = 0; a < 64; a++){
             for(int b = 0; b < 64; b++){
                 signed char pa[N], pb[N];
                 caminho(a, pa); caminho(b, pb);
-                double so = sobrepoe(pa, pb);
+                long so = sobrepoeN(pa, pb);
                 int k = prefixo(a, b);
                 /* o prefixo dá k blocos iguais; os restantes D-k blocos são independentes,
                  * e o valor esperado deles é o desacordo medido — mede-se o EXATO, não o médio */
-                double desacordo = 0;
+                long desacordo = 0;
                 for(int d = k; d < PROF; d++){
                     int ea = (a >> (PROF-1-d)) & 1, eb = (b >> (PROF-1-d)) & 1;
-                    desacordo += (ea == eb) ? 1.0 : -1.0;
+                    desacordo += (ea == eb) ? 1 : -1;
                 }
-                double previsto = (k + desacordo) / PROF;
-                double e = fabs(so - previsto);
-                if(e > pior) pior = e;
-                if(e == 0.0) exatos++;
+                /* so/N = (k+desacordo)/PROF  ⟺  so·PROF = (k+desacordo)·N. Sem divisão
+                 * nenhuma, e o resíduo é um INTEIRO: «zero» aqui quer mesmo dizer zero. */
+                long e = so*PROF - (k + desacordo)*(long)N;
+                if(rt_modulo(e) > pior) pior = rt_modulo(e);
+                if(e == 0) exatos++;
                 pares++;
             }
         }
-        ok("a sobreposicao e EXATAMENTE a conta dos niveis que concordam — em 4096 pares, sem erro",
-           exatos == pares && pior == 0.0);
+        ok("a sobreposicao e EXATAMENTE a conta dos niveis que concordam — em 4096 pares, sem erro."
+           " E «sem erro» quer dizer o que diz: o residuo so.PROF - (k+desacordo).N e um INTEIRO,"
+           " e e' ZERO, nao um numero menor que uma regua escolhida por mim",
+           exatos == pares && pior == 0);
         /* e a consequência que interessa: mais prefixo comum, mais sobreposição — monótona */
         int monotona = 1;
         for(int k = 0; k <= PROF; k++){
@@ -383,13 +390,13 @@ int main(void){
             }
             signed char pa[N], pb[N];
             caminho(a, pa); caminho(b, pb);
-            double so = sobrepoe(pa, pb);
-            double esperado = (double)(k - (PROF - k)) / PROF;
-            if(so != esperado) monotona = 0;
+            long so = sobrepoeN(pa, pb);
+            /* so/N = (2k − PROF)/PROF  ⟺  so·PROF = (2k − PROF)·N */
+            if(so*PROF != (2L*k - PROF)*(long)N) monotona = 0;
         }
         ok("e ela CRESCE com o prefixo: partilhar mais niveis e sobrepor mais, exatamente",
            monotona);
-        printf("     -> %d pares medidos, %d exatos, pior desvio %.1e. O prefixo comum nao se\n",
+        printf("     -> %d pares medidos, %d exatos, pior desvio %ld (inteiro). O prefixo comum nao se\n",
                pares, exatos, pior);
         puts("        PARECE com a sobreposicao: e ela, escrita na outra coordenada.\n");
     }
@@ -419,7 +426,7 @@ int main(void){
             recupera(&R, s1, 30);
             int niveis; int cam = arv_recupera(&A, s2, &niveis);
             signed char alvo[N]; caminho(guardados[p], alvo);
-            int h = sobrepoe(s1, alvo) > 0.99;
+            int h = (diferem(s1, alvo) == 0);
             int a = (cam == guardados[p]);
             hop_ok += h; arv_ok += a;
             if(h == a) concordam++;
@@ -461,10 +468,10 @@ int main(void){
                 memcpy(s2, s1, N);
                 recupera(&R, s1, 30);
                 signed char alvo[N]; caminho(g[p], alvo);
-                if(sobrepoe(s1, alvo) > 0.99) h++;
+                if(diferem(s1, alvo) == 0) h++;
                 int niv; if(arv_recupera(&A, s2, &niv) == g[p]) a++;
             }
-            printf("     %6d %11.0f%% %11.0f%%\n", P, 100.0*h/P, 100.0*a/P);
+            printf("     %6d %10ld%% %11ld%%\n", P, (100L*h)/P, (100L*a)/P);
             /* "< 0,8" era outro limiar de cabeca (o pior deu 0,83). A relacao mede-se sem
              * constante: a arvore nunca fica ABAIXO da Hopfield, e ha P onde fica acima. */
             if(a < h) arv_manteve = 0;
@@ -472,13 +479,25 @@ int main(void){
         }
         ok("a arvore NUNCA fica abaixo da Hopfield, e fica ACIMA em pelo menos um P — sem limiar",
            arv_manteve && hop_caiu);
-        /* e o preço: o espaço. A Hopfield é N² fixo; a árvore cresce com o que guarda. */
-        long hop_bytes = (long)N*N*sizeof(double);
-        long arv_bytes = (long)48*sizeof(int);
-        ok("e o PRECO e o espaco: a Hopfield e N^2 FIXO, a arvore cresce com o que guarda",
-           hop_bytes > 0 && arv_bytes > 0);
-        printf("     -> Hopfield %ld bytes (fixos, %d^2 pesos); arvore %ld bytes para 48 caminhos,\n",
-               hop_bytes, N, arv_bytes);
+        /* E O PREÇO: o espaço. A tese é que UM não cresce e o outro cresce — e o que aqui
+         * estava («hop_bytes > 0 && arv_bytes > 0») são dois `sizeof`, que são sempre
+         * positivos: a asserção não podia falhar, e a palavra FIXO nunca foi medida.
+         * Mede-se varrendo o número de caminhos guardados e vendo os dois números. */
+        long hop_ant = -1, arv_ant = -1, hop_mexeu = 0, arv_subiu = 0, passos = 0;
+        for(int g = 8; g <= 48; g += 8){
+            long hb = (long)N*N*(long)sizeof(R.W[0][0]);   /* a Hopfield: N² pesos, e mais nada */
+            long ab = (long)g*(long)sizeof(int);           /* a árvore: um inteiro por caminho */
+            if(hop_ant >= 0){ if(hb != hop_ant) hop_mexeu++; if(ab > arv_ant) arv_subiu++; passos++; }
+            hop_ant = hb; arv_ant = ab;
+        }
+        long hop_bytes = (long)N*N*(long)sizeof(R.W[0][0]), arv_bytes = (long)48*sizeof(int);
+        ok("e o PRECO e o espaco: a Hopfield e N^2 FIXO e a arvore CRESCE com o que guarda —"
+           " e as duas metades medem-se, varrendo de 8 a 48 caminhos: o numero da Hopfield nao"
+           " mexe em passo nenhum, e o da arvore sobe em TODOS",
+           hop_mexeu == 0 && arv_subiu == passos && passos == 5);
+        printf("     -> Hopfield %ld bytes (fixos, %d^2 pesos; nao mexeu em %ld passos); arvore\n"
+               "        %ld bytes para 48 caminhos, e subiu nos %ld,\n",
+               hop_bytes, N, passos, arv_bytes, arv_subiu);
         puts("        e a crescer. A Hopfield paga tudo a frente e satura; a arvore paga por");
         puts("        memoria e nao satura. Nao ha almoco gratis — ha uma TROCA, e esta medida.\n");
     }
@@ -502,12 +521,12 @@ int main(void){
         /* e a formalização tem de deixar residuo, senão é prosa */
         signed char a[N], b[N];
         caminho(0xF0, a); caminho(0xFF, b);
-        double so = sobrepoe(a, b);
+        long so = sobrepoeN(a, b);
         int k = prefixo(0xF0, 0xFF);
         ok("e a formalizacao fecha num numero: prefixo 4 de 8 niveis da sobreposicao 0 (ortogonais)",
-           k == 4 && so == 0.0);   /* sobrepoe divide por N = 128: exacto */
-        printf("     -> 0xF0 e 0xFF partilham %d niveis de %d, e a sobreposicao e %.1f: metade a\n",
-               k, PROF, so);
+           k == 4 && so == 0);
+        printf("     -> 0xF0 e 0xFF partilham %d niveis de %d, e a sobreposicao e %ld/%d: metade a\n",
+               k, PROF, so, N);
         puts("        favor, metade contra, e o cancelamento e exato. A ortogonalidade da");
         puts("        Hopfield E o meio-prefixo da arvore.\n");
     }
@@ -518,31 +537,27 @@ int main(void){
     puts("     Entao tem ciclos sim, mas ANTISSIMETRICOS.' O §F1 so via a branca, e a razao");
     puts("     era esta: Hebb da uma matriz SIMETRICA, e uma simetrica so sabe descer.\n");
     {
-        double (*S)[N] = DISCO_FIXO2(double, N, 155);
-        disco_prende(DISCO_BASE(155),"dados/hp_S_155.bin",(size_t)(N)*(N),sizeof(double));
-        disco_zera(S,(size_t)(N)*(N),sizeof(double));
-        double (*A)[N] = DISCO_FIXO2(double, N, 156);
-        disco_prende(DISCO_BASE(156),"dados/hp_A_156.bin",(size_t)(N)*(N),sizeof(double));
-        disco_zera(A,(size_t)(N)*(N),sizeof(double));
         R.p = 6;
         for(int p = 0; p < R.p; p++) for(int i = 0; i < N; i++) R.x[p][i] = (signed char)bit();
         grava(&R);
 
         /* Hebb É simétrica — e isso mede-se, não se assume */
-        double pior_as = 0;
+        long pior_as = 0, vivas = 0;
         for(int i = 0; i < N; i++)
             for(int j = 0; j < N; j++){
-                double d = (double)(R.W[i][j] - R.W[j][i]);   /* em N-vezes: o zero é o mesmo */
+                long d = rt_modulo((long)R.W[i][j] - (long)R.W[j][i]);   /* em N-vezes: o zero é o mesmo */
                 if(d > pior_as) pior_as = d;
+                if(R.W[i][j] != 0) vivas++;
             }
-        ok("Hebb da uma matriz SIMETRICA: w_ij = w_ji em todas as 16384 entradas",
-           pior_as == 0.0);       /* N = 128 é potência de 2: a divisão é exacta */
+        ok("Hebb da uma matriz SIMETRICA: w_ij = w_ji em todas as 16384 entradas — e a matriz"
+           " NAO e' nula (as entradas nao-nulas contam-se), sem o que a simetria valia por"
+           " 0 = 0 em toda a parte",
+           pior_as == 0 && vivas > N);
 
-        /* agora a antissimétrica: uma matriz aleatória, e fica-se só com a metade B_a */
-        double (*Q)[N] = DISCO_FIXO2(double, N, 154);
-        disco_prende(DISCO_BASE(154),"dados/hp_Q_154.bin",(size_t)(N)*(N),sizeof(double));
-        disco_zera(Q,(size_t)(N)*(N),sizeof(double));
-        /* os NUMERADORES: Q_ij = Qn_ij/1000, com Qn inteiro em [−1000, 999] */
+        /* agora a antissimétrica: uma matriz aleatória, e fica-se só com a metade B_a.
+         * Os NUMERADORES: Q_ij = Qn_ij/1000, com Qn inteiro em [−1000, 999] — e o /1000 nunca
+         * chega a acontecer, porque nada aqui pergunta pelo valor: pergunta-se pela SIMETRIA
+         * (que uma escala comum não vê) e pelo PERÍODO da órbita (que só lê o sinal do campo). */
         long (*Qn)[N] = DISCO_FIXO2(long, N, 251);
         long (*Sn)[N] = DISCO_FIXO2(long, N, 252);
         long (*An)[N] = DISCO_FIXO2(long, N, 253);
@@ -552,10 +567,8 @@ int main(void){
         for(int i = 0; i < N; i++)
             for(int j = 0; j < N; j++){
                 Qn[i][j] = (long)(xs() % 2000) - 1000;
-                Q[i][j] = (double)Qn[i][j] / 1000.0;      /* só para o resto do medidor */
             }
         parte_n(Qn, Sn, An);
-        parte(Q, S, A);
 
         /* a partição é única e exata — e agora mede-se em INTEIROS, por IGUALDADE:
          *      Sn + An = 2·Qn,   Sn simétrica,   An antissimétrica
@@ -586,8 +599,10 @@ int main(void){
         for(int e = 0; e < ensaios; e++){
             signed char ini[N];
             for(int i = 0; i < N; i++) ini[i] = (signed char)bit();
-            int pS = periodo((const double(*)[N])S, ini, 200);
-            int pA = periodo((const double(*)[N])A, ini, 200);
+            /* Sn e An são 2·S e 2·A: o factor 2 é positivo e comum, e o período da órbita
+             * só depende do SINAL de Σ W s — logo é o mesmo, e não há nada por dividir. */
+            int pS = periodo((const long(*)[N])Sn, ini, 200);
+            int pA = periodo((const long(*)[N])An, ini, 200);
             per_S[pS < 8 ? pS : 8]++;
             per_A[pA < 8 ? pA : 8]++;
         }
@@ -613,29 +628,40 @@ int main(void){
     {
         /* a mesma partição, no produto de R^n: (a₀,a)(b₀,b) tem interno simétrico e cruzado
          * antissimétrico. Mede-se sobre vetores de R³, com os mesmos critérios do §F8. */
-        double a[3] = { 0.37, -1.20, 0.85 }, b[3] = { -0.62, 0.44, 1.31 };
-        double ip_ab = a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
-        double ip_ba = b[0]*a[0] + b[1]*a[1] + b[2]*a[2];
-        double cr_ab[3] = { a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0] };
-        double cr_ba[3] = { b[1]*a[2]-b[2]*a[1], b[2]*a[0]-b[0]*a[2], b[0]*a[1]-b[1]*a[0] };
+        /* Os vectores vinham em centésimos escritos com vírgula; em centésimos INTEIROS são
+         * o mesmo par, e o interno sai em 10⁴-avos e o cruzado também — uma escala comum, que
+         * nenhuma das duas perguntas (simetria, antissimetria) consegue ver. E as duas operações
+         * NÃO se reescrevem aqui: são `rt_dir` e `rt_cruz3` da reta.h, que é onde a Lei da
+         * operação as pôs — este bloco fala da partição Dir/Cruz, e agora chama-a pelo nome. */
+        long a[3] = { 37, -120, 85 }, b[3] = { -62, 44, 131 };
+        long ip_ab = rt_dir(a, b, 3);
+        long ip_ba = rt_dir(b, a, 3);
+        long cr_ab[3], cr_ba[3];
+        rt_cruz3(a, b, cr_ab);
+        rt_cruz3(b, a, cr_ba);
         int interno_sim = (ip_ab == ip_ba);
         int cruzado_anti = 1;
-        for(int k = 0; k < 3; k++) if(cr_ab[k] + cr_ba[k] != 0.0) cruzado_anti = 0;
+        for(int k = 0; k < 3; k++) if(cr_ab[k] + cr_ba[k] != 0) cruzado_anti = 0;
         ok("no R^n o INTERNO e simetrico e o CRUZADO e antissimetrico — a mesma particao",
            interno_sim && cruzado_anti);
 
         /* e a correspondência, que é o ponto: o que MEDE dá ponto fixo, o que ORDENA dá ciclo.
          * O cruzado aplicado duas vezes ao mesmo par troca o sinal — período 2, tal como a rede. */
-        double volta[3];
+        long volta[3];
         for(int k = 0; k < 3; k++) volta[k] = -cr_ab[k];
         int per2_cruz = 1;
         for(int k = 0; k < 3; k++) if(volta[k] != cr_ba[k]) per2_cruz = 0;
-        ok("e trocar a ordem no cruzado E o periodo 2 da rede: a x b = -(b x a), vai e volta",
-           per2_cruz);
+        /* e o gume: o cruzado NÃO é sempre nulo — se fosse, «a×b = −(b×a)» valia por 0 = −0 */
+        int cruz_vivo = 0;
+        for(int k = 0; k < 3; k++) if(cr_ab[k] != 0) cruz_vivo = 1;
+        ok("e trocar a ordem no cruzado E o periodo 2 da rede: a x b = -(b x a), vai e volta"
+           " — e o cruzado NAO e' nulo, sem o que a igualdade valia por 0 = -0",
+           per2_cruz && cruz_vivo);
         /* o interno, esse, NAO tem periodo: trocar a ordem nao muda nada */
         ok("enquanto trocar a ordem no interno nao muda NADA — ele para, como o ponto fixo",
            ip_ab == ip_ba);
-        printf("     -> interno %.6f nos dois sentidos; cruzado (%.3f,%.3f,%.3f) e o seu negativo.\n",
+        printf("     -> interno %ld/10000 nos dois sentidos; cruzado (%ld,%ld,%ld)/10000 e o seu\n"
+               "        negativo — e os cinco numeros sao EXACTOS, nao arredondados a seis casas.\n",
                ip_ab, cr_ab[0], cr_ab[1], cr_ab[2]);
         puts("        NAO e uma analogia entre rede e algebra: e a MESMA particao B = B_s + B_a,");
         puts("        e ela e unica. O que mede para; o que ordena cicla.\n");
@@ -646,38 +672,38 @@ int main(void){
     puts("     O §B12: 'cada torre e antissimetrica, as duas juntas sao simetricas'. Entao a");
     puts("     rede completa nao e a simetrica nem a antissimetrica: e a SOMA das duas.\n");
     {
-        double (*S)[N] = DISCO_FIXO2(double, N, 150);
-        disco_prende(DISCO_BASE(150),"dados/hp_S_150.bin",(size_t)(N)*(N),sizeof(double));
-        disco_zera(S,(size_t)(N)*(N),sizeof(double));
-        double (*A)[N] = DISCO_FIXO2(double, N, 151);
-        disco_prende(DISCO_BASE(151),"dados/hp_A_151.bin",(size_t)(N)*(N),sizeof(double));
-        disco_zera(A,(size_t)(N)*(N),sizeof(double));
-        double (*Q)[N] = DISCO_FIXO2(double, N, 152);
-        disco_prende(DISCO_BASE(152),"dados/hp_Q_152.bin",(size_t)(N)*(N),sizeof(double));
-        disco_zera(Q,(size_t)(N)*(N),sizeof(double));
-        double (*MIST)[N] = DISCO_FIXO2(double, N, 153);
-        disco_prende(DISCO_BASE(153),"dados/hp_MIST_153.bin",(size_t)(N)*(N),sizeof(double));
-        disco_zera(MIST,(size_t)(N)*(N),sizeof(double));
+        /* A ESCALA COMUM. Quer-se MIST = W/N + (3/5)·A, com A = (Qn_ij − Qn_ji)/2000. Em
+         * unidades de 1/(10000·N) os dois termos são inteiros de uma vez:
+         *      W/N  ↦  10000·W        e        (3/5)·A = 3·An/10000  ↦  3·An·N = 384·An
+         * e o `periodo` só lê o SINAL de Σ W·s, que uma escala positiva comum não vê. */
+        long (*S)[N]    = DISCO_FIXO2(long, N, 150);
+        long (*A)[N]    = DISCO_FIXO2(long, N, 151);
+        long (*Q)[N]    = DISCO_FIXO2(long, N, 152);
+        long (*MIST)[N] = DISCO_FIXO2(long, N, 153);
+        disco_prende(DISCO_BASE(150),"dados/hp_S_150.bin",(size_t)(N)*(N),sizeof(long));
+        disco_prende(DISCO_BASE(151),"dados/hp_A_151.bin",(size_t)(N)*(N),sizeof(long));
+        disco_prende(DISCO_BASE(152),"dados/hp_Q_152.bin",(size_t)(N)*(N),sizeof(long));
+        disco_prende(DISCO_BASE(153),"dados/hp_MIST_153.bin",(size_t)(N)*(N),sizeof(long));
         R.p = 6;
         for(int p = 0; p < R.p; p++) for(int i = 0; i < N; i++) R.x[p][i] = (signed char)bit();
         grava(&R);
         for(int i = 0; i < N; i++)
-            for(int j = 0; j < N; j++) Q[i][j] = ((double)(xs() % 2000) - 1000.0) / 1000.0;
-        parte(Q, S, A);
+            for(int j = 0; j < N; j++) Q[i][j] = (long)(xs() % 2000) - 1000;   /* milésimos */
+        parte_n((const long(*)[N])Q, S, A);          /* S = 2·S_real, A = 2·A_real */
 
         /* a mistura: a memória de Hebb mais um pouco da torre negra */
         int fixo_puro = 0, ciclo_misto = 0, ensaios = 12;
         for(int e = 0; e < ensaios; e++){
             for(int i = 0; i < N; i++)
-                for(int j = 0; j < N; j++) MIST[i][j] = (double)R.W[i][j]/N + 0.60 * A[i][j];
+                for(int j = 0; j < N; j++) MIST[i][j] = 10000L*R.W[i][j] + 192L*A[i][j];
             signed char ini[N];
             for(int i = 0; i < N; i++) ini[i] = (signed char)bit();
             /* a matriz em N-vezes, escalada para o `periodo`, que trabalha na versão w */
-            static double wd[N][N];
+            static long wd[N][N];
             for(int i2 = 0; i2 < N; i2++) for(int j2 = 0; j2 < N; j2++)
-                wd[i2][j2] = (double)R.W[i2][j2]/N;
-            int p1 = periodo((const double(*)[N])wd, ini, 200);
-            int p2 = periodo((const double(*)[N])MIST, ini, 200);
+                wd[i2][j2] = 10000L*R.W[i2][j2];
+            int p1 = periodo((const long(*)[N])wd, ini, 200);
+            int p2 = periodo((const long(*)[N])MIST, ini, 200);
             if(p1 == 1) fixo_puro++;
             if(p2 > 1) ciclo_misto++;
         }
@@ -712,16 +738,20 @@ int main(void){
            dobras == 7 && (1 << dobras) == N);
 
         /* e ela e ortonormal — medido em TODOS os pares, nao num escolhido */
-        int pares = 0, ortos = 0; double pior = 0;
+        int pares = 0, ortos = 0; long pior = 0;
         for(int i = 0; i < N; i++)
             for(int j = i+1; j < N; j++){
-                double s = 0;
-                for(int k = 0; k < N; k++) s += H[i][k] * H[j][k];
-                if(s == 0.0) ortos++; else if(fabs(s) > pior) pior = fabs(s);
+                long s = sobrepoeN(H[i], H[j]);      /* o mesmo produto DIRECTO do §F1 */
+                if(s == 0) ortos++; else if(rt_modulo(s) > pior) pior = rt_modulo(s);
                 pares++;
             }
-        ok("e ela e ORTONORMAL: os 8128 pares tem produto interno EXATAMENTE zero",
-           ortos == pares);
+        /* e o gume: uma linha consigo própria NÃO dá zero — dá N. Sem isto, «ortogonais»
+         * valia por o produto devolver zero a toda a gente. */
+        long diag = 0;
+        for(int i = 0; i < N; i++) if(sobrepoeN(H[i], H[i]) == N) diag++;
+        ok("e ela e ORTONORMAL: os 8128 pares tem produto interno EXATAMENTE zero, e cada"
+           " linha consigo propria da N — que e' o lado sem o qual «zero» nao media nada",
+           ortos == pares && diag == N);
 
         /* AGORA O TESTE. Gravam-se linhas da base e mede-se: (a) elas sao pontos fixos, e
          * (b) quantas VARREDURAS a recuperacao precisa. Se nao ha o que procurar, e uma. */
@@ -734,7 +764,7 @@ int main(void){
             signed char s[N];
             memcpy(s, R.x[p], N);
             int v = recupera(&R, s, 20);
-            if(sobrepoe(s, R.x[p]) > 0.999) fixos++;
+            if(diferem(s, R.x[p]) == 0) fixos++;
             if(v == 1) uma_varredura++;
             if(v > pior_varr) pior_varr = v;
         }
@@ -858,24 +888,32 @@ int main(void){
         R.p = P;
         for(int p = 0; p < P; p++) memcpy(R.x[p], H[p], N);
 
-        /* a identidade: Hebb (sem diagonal) contra a soma de projetores, entrada a entrada */
-        double pior = 0;
+        /* a identidade: Hebb contra a soma de projetores, entrada a entrada.
+         *
+         * Aqui estavam DOIS laços iguais letra por letra — `bk` e `hebb` somavam ambos
+         * x[p][i]·x[p][j] — e a asserção comparava uma expressão consigo própria: não podia
+         * falhar. O lado direito certo não se escreve aqui: é o que a `grava()` produz, que é
+         * o código de produção deste ficheiro e não passa por nenhuma linha deste bloco. */
+        grava(&R);
+        long erradas = 0, vivas = 0, nulas = 0;
         for(int i = 0; i < N; i++)
             for(int j = 0; j < N; j++){
                 if(i == j) continue;
-                double bk = 0;
-                for(int p = 0; p < P; p++) bk += (double)R.x[p][i] * R.x[p][j];   /* |xi><xi| */
-                bk /= N;
-                double d = fabs(bk - (i==j ? 0 : bk));
-                (void)d;
-                double hebb = 0;
-                for(int p = 0; p < P; p++) hebb += R.x[p][i] * R.x[p][j];
-                hebb /= N;
-                double e = fabs(bk - hebb);
-                if(e > pior) pior = e;
+                long bk = 0;
+                for(int p = 0; p < P; p++) bk += (long)R.x[p][i] * R.x[p][j];   /* Σ|xp><xp| */
+                if(bk != R.W[i][j]) erradas++;
+                if(bk != 0) vivas++; else nulas++;
             }
-        ok("a matriz de Hebb E a soma dos bra-kets |xi><xi|, entrada a entrada, sem resto",
-           pior == 0.0);   /* ambos dividem por N = 128 */
+        ok("a matriz de Hebb E a soma dos bra-kets |xp><xp|, entrada a entrada e sem resto —"
+           " e as duas rotas nao partilham uma linha: a soma e feita aqui, e o W vem do"
+           " `grava()`, que e' o codigo de producao. E o controlo esta' nos DOIS lados: ha'"
+           " entradas nao-nulas (sem o que a igualdade valia por ser 0 = 0 em toda a parte) e"
+           " ha' entradas NULAS — que e' o que a ortogonalidade de Hadamard obriga, e nao um"
+           " numero escolhido por mim: o controlo que aqui estava, «mais de metade nao-nulas»,"
+           " era um palpite meu e era FALSO",
+           erradas == 0 && vivas > 0 && nulas > 0 && vivas + nulas == (long)N*N - N);
+        printf("     -> %ld entradas fora da diagonal: %ld nao-nulas e %ld nulas, e as %ld batem\n"
+               "        com o `grava()` sem uma excepcao.\n", vivas+nulas, vivas, nulas, vivas+nulas);
 
         /* ESTICA-CONTRAI: aplicar w a um padrao guardado ESTICA-o (o valor proprio e ~P/N.N);
          * aplicar a um vetor ORTOGONAL a todos CONTRAI-o a zero. E o gato e o esquilo:

@@ -198,7 +198,7 @@ int main(void){
 
     /* ── §L4  a DUCTILIDADE ──────────────────────────────────────────────── */
     puts("§L4  A DUCTILIDADE: a regra das misturas, e ela CAI com o reforco");
-    puts("     O estanho e muito ductil (45%% de alongamento); o grafeno e rigido e frag il no");
+    puts("     O estanho e muito ductil (45% de alongamento); o grafeno e rigido e frag il no");
     puts("     composito. Juntar um ao outro nao faz media — faz troca.\n");
     {
         printf("     %12s %14s %14s %14s\n", "fracao p", "E (GPa)", "alongam. (%)", "sigma (S/m)");
@@ -251,7 +251,7 @@ int main(void){
         double al_5 = alongamento(0.05), al_0 = alongamento(0.0);
         /* "a maior parte" era exagero meu: perde-se 14%. Digo o que a formula da, e ela ja
          * mostra a tendencia sem eu precisar de a inflacionar. */
-        ok("com 5%% de grafeno perde-se ja uma parte mensuravel do alongamento — e ela cresce",
+        ok("com 5% de grafeno perde-se ja uma parte mensuravel do alongamento — e ela cresce",
            al_5 < al_0*0.9 && alongamento(0.20) < al_0*0.7);
         printf("     -> com 5%% de grafeno o alongamento cai de %.1f%% para %.1f%% (menos %.0f%%),\n",
                al_0, al_5, 100*(1 - al_5/al_0));
@@ -303,10 +303,10 @@ int main(void){
         puts("        resolvesse o que o DESENHO tem de resolver.");
         puts("");
         puts("        A resposta e um EMPILHAMENTO, e ele sai ordenado sozinho:");
-        puts("           camada 1 (fora)   p ~ 0,002%%   absorve      (casa os 377 ohm)");
-        puts("           camada 2          p ~ 2%%       estrutura    (ainda ductil)");
-        puts("           camada 3          p ~ 10%%      antena       (conduz E)");
-        puts("           camada 4 (dentro) p ~ 20%%      dissipador   (conduz calor)");
+        puts("           camada 1 (fora)   p ~ 0,002%   absorve      (casa os 377 ohm)");
+        puts("           camada 2          p ~ 2%       estrutura    (ainda ductil)");
+        puts("           camada 3          p ~ 10%      antena       (conduz E)");
+        puts("           camada 4 (dentro) p ~ 20%      dissipador   (conduz calor)");
         puts("");
         puts("        Quatro camadas, quatro fracoes, um material so. E isso e melhor que uma");
         puts("        liga otima: e a mesma quimica a fazer quatro papeis por GRADIENTE.\n");
@@ -315,10 +315,10 @@ int main(void){
     puts("──────────────────────────────────────────────────────────────────────────────");
     puts("O que isto fecha:");
     puts("");
-    puts("  A liga grafeno+estanho nao INTERPOLA: ela percola. Ha um limiar em 0,1%% e acima");
+    puts("  A liga grafeno+estanho nao INTERPOLA: ela percola. Ha um limiar em 0,1% e acima");
     puts("  dele sigma cresce com (p-pc)^2 — o que decide nao e a quantidade, e a geometria.");
     puts("");
-    puts("  E a janela de casamento e larga em relativo (11%%) e minuscula em absoluto (1e-4 de");
+    puts("  E a janela de casamento e larga em relativo (11%) e minuscula em absoluto (1e-4 de");
   puts("  fracao) — e e o absoluto que o fabrico ve. O problema desta");
     puts("  liga nao e a fisica — e o fabrico, e e por isso que os absorvedores comerciais usam");
     puts("  carbono e nao grafeno.");

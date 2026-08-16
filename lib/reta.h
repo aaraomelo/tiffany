@@ -527,4 +527,66 @@ static long rt_traco(const long *M, int n){
     return s;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════════════
+ * A INDUÇÃO E A META-INDUÇÃO — a recursão formalizada, e sem casos especiais.
+ *
+ * `def:inducao` e `thm:meta-inducao` do Corpo Universal. O par é o de sempre:
+ *
+ *      INDUÇÃO       o passo SOBE: base em 0, e P(n) ⟹ P(n+1)      projecta (λ⁺)
+ *      DESCIDA       o dual: nega-se a tese — «há um PRIMEIRO andar N onde P falha» —
+ *                    e mostra-se que esse N não existe                    lê (λ⁻)
+ *      META-INDUÇÃO  o passo SOBRE os passos: mede a indução e valida o que ela
+ *                    conservou
+ *
+ * As duas primeiras usam o mesmo facto e nada mais: ℕ é bem ordenado. São duais no
+ * sentido desta casa — a involução é inverter a ordem, e ν∘ν = id: a indução diz o que
+ * HÁ no andar seguinte, a descida diz o que NÃO HÁ em andar nenhum, e é a mesma frase.
+ *
+ * ── E O QUE A META-INDUÇÃO MEDE É O PASSO ───────────────────────────────────────────
+ *
+ * Se o passo C(n) → C(n+1) é uma construção cujo corpo NÃO MENCIONA n, então ∀n C(n)
+ * segue da FORMA do passo. O resultado não é C(0), …, C(N):
+ *
+ *      ∀ n ≥ 0,  C(n)
+ *
+ * e a ausência de tecto é consequência da forma da construção, não de uma varredura.
+ *
+ *      «Uma tabela de andares prova os andares da tabela.»
+ *
+ * É a frase que esta sessão andou a aprender à sua custa: a cláusula do supremo estava
+ * verificada numa janela de quarenta valores com a asserção a dizer «todos», e o
+ * conserto não foi alargar a janela — foi medir o PASSO e deixar a indução dar o resto.
+ *
+ * ── E A SATURAÇÃO NÃO É UM RESULTADO ────────────────────────────────────────────────
+ *
+ *      falha de representação  ≠  contra-exemplo matemático
+ *
+ * Se a realização finita transborda ao k-ésimo passo, mediu-se o tamanho do tipo e não a
+ * lei. A regra que daí sai é obrigatória: quando a primeira realização atinge o limite,
+ * verifica-se numa SEGUNDA independente, e a saturação conta-se em lugar SEPARADO dos
+ * defeitos. (É por isso que `rt_det_mod` existe ao lado de `rt_det_bareiss`.)
+ * ═══════════════════════════════════════════════════════════════════════════════════ */
+
+/* a INDUÇÃO: verifica o PASSO P(n) ⟹ P(n+1) em toda a gama, e a base. Devolve 1 se o
+ * passo nunca falha; se falhar, escreve em `onde` o primeiro n em que falhou.
+ * O passo recebe n e um contexto opaco — o corpo dele é que não pode mencionar n para
+ * a meta-indução valer, e isso é do chamador, não desta função. */
+static int rt_induz(int (*base)(void*), int (*passo)(long, void*),
+                    long ate, void *ctx, long *onde){
+    if(onde) *onde = -1;
+    if(base && !base(ctx)){ if(onde) *onde = 0; return 0; }
+    for(long n = 0; n < ate; n++)
+        if(!passo(n, ctx)){ if(onde) *onde = n; return 0; }
+    return 1;
+}
+
+/* a DESCIDA: o dual. Procura o PRIMEIRO andar onde P falha e devolve-o, ou −1 se não
+ * existe. É a mesma varredura da indução lida ao contrário — e o que a torna prova é
+ * voltar VAZIA quando o passo é verdadeiro, com um controlo que mostra que ela sabe
+ * achar quando há. */
+static long rt_desce(int (*P)(long, void*), long ate, void *ctx){
+    for(long n = 0; n <= ate; n++) if(!P(n, ctx)) return n;
+    return -1;
+}
+
 #endif /* RETA_H */

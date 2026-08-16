@@ -46,6 +46,38 @@ static long det_perm(const long *M, int n, int passo){
     return tot;
 }
 
+typedef struct { long m, a, b, sinal, p; int sabota, saturou; } ctx_u;
+
+/* o PASSO: de (U(n−1),U(n)) para (U(n),U(n+1)), medindo Cassini no andar novo.
+ * Repare-se que `n` entra na assinatura e NÃO entra no corpo — é isso que o torna forma. */
+static int passo_cassini(long n, void *v){
+    ctx_u *c = (ctx_u*)v;
+    (void)n;
+    if(c->p){                                   /* a SEGUNDA realização: em 𝔽ₚ, sem tecto */
+        long prox = rt_mod(c->m * c->b + c->a, c->p);
+        if(c->sabota) prox = rt_mod(2 * c->b, c->p);
+        long lhs = rt_mod(prox * c->a - c->b * c->b, c->p);
+        c->sinal = -c->sinal;
+        int bem = (lhs == rt_mod(c->sinal, c->p));
+        c->a = c->b; c->b = prox;
+        return bem;
+    }
+    /* a PRIMEIRA realização: em ℤ, e ela tem tecto. Pára ANTES de transbordar e marca —
+     * o que se mede aqui é o tamanho do tipo, e isso não é um contra-exemplo. */
+    if(c->b != 0 && (c->m * rt_modulo(c->b) + rt_modulo(c->a) > 3037000499L ||
+                     rt_modulo(c->b) > 3037000499L)){ c->saturou = 1; return 1; }
+    long prox = c->m * c->b + c->a;
+    if(c->sabota) prox = 2 * c->b;
+    long lhs = prox * c->a - c->b * c->b;
+    c->sinal = -c->sinal;
+    int bem = (lhs == c->sinal);
+    c->a = c->b; c->b = prox;
+    return bem;
+}
+/* o predicado que a DESCIDA lê: «o andar n é bom». É o mesmo passo, lido ao contrário. */
+static int nao_falha_ate(long n, void *v){ return passo_cassini(n, v); }
+
+
 int main(void){
     printf("\n=== A RECTA GEOMÉTRICA: as operações, todas inteiras ===\n");
 
@@ -763,7 +795,7 @@ int main(void){
                "      a identidade é neutra em %ld, e o traço não a vê em %ld\n\n",
                esp, ttot, id, mm, tr);
         ok("O MÓDULO, A TRANSPOSTA, O PRODUTO E O TRAÇO — as quatro que mais se repetiam"
-           " depois das primeiras: 23 cópias do ((x%%p)+p)%%p, 15 da transposta, 11 do"
+           " depois das primeiras: 23 cópias do ((x%p)+p)%p, 15 da transposta, 11 do"
            " produto de matrizes, 4 do traço. E a TRANSPOSTA não é um utilitário: é o"
            " ESPELHO τ que reparte Dir e Cruz nas matrizes, e mede-se como tal — involução,"
            " e NÃO a identidade, que é o controlo sem o qual «τ² = id» valia por τ não fazer"
@@ -772,6 +804,83 @@ int main(void){
            " invariante",
            md == mdt && esp == ttot && mm == ttot && tr == ttot && id > ttot/2);
     }
+
+
+/* ─── §R20 ────────────────────────────────────────────────────────────────────────────
+ * A INDUÇÃO E A DESCIDA — e o que se mede é o PASSO, não a tabela.
+ *
+ * `def:inducao` e `thm:meta-inducao`: a indução sobe (λ⁺), a descida lê o que não há (λ⁻),
+ * e as duas usam o MESMO facto e nada mais — ℕ é bem ordenado. O objecto é a recorrência
+ * metálica U(n+1) = m·U(n) + U(n−1) com a identidade de Cassini
+ *
+ *      U(n+1)·U(n−1) − U(n)² = (−1)ⁿ
+ *
+ * escolhida porque o corpo do passo NÃO MENCIONA n: só vê o andar corrente. É essa forma,
+ * e não o comprimento da varredura, que dá o ∀n.
+ * ──────────────────────────────────────────────────────────────────────────────────── */
+printf("\n§R20 A indução sobe, a descida lê o que não há — e o que se mede é o PASSO.\n\n");
+{
+    long subiu = 0, subtot = 0, saturados = 0, achou_certo = 0, achou_sabot = 0;
+    long fp_ok = 0, fp_tot = 0, fp_andares = 0;
+    const long PS[] = { 1009, 2003, 7919 };
+
+    printf("      m   indução (ℤ)   descida (ℤ)   saturou em ℤ   descida em 𝔽ₚ (2ª rota)\n");
+    for(long m = 1; m <= 6; m++){
+        /* (1) a INDUÇÃO: o passo verdadeiro, em ℤ */
+        ctx_u c = { m, 0, 1, 1, 0, 0, 0 };
+        long onde = -1;
+        int subiu_bem = rt_induz(NULL, passo_cassini, 400, &c, &onde);
+        subtot++; if(subiu_bem) subiu++;
+        if(c.saturou) saturados++;
+
+        /* (2) a DESCIDA: procura o PRIMEIRO andar onde falha — e volta VAZIA */
+        ctx_u d = { m, 0, 1, 1, 0, 0, 0 };
+        long primeiro = rt_desce(nao_falha_ate, 400, &d);
+        if(primeiro < 0) achou_certo++;      /* vazia: é o que se quer */
+
+        /* (3) o GUME: o MESMO buscador com o passo SABOTADO tem de ACHAR — sem isto,
+         *     «volta vazia» valia por a descida não saber achar. */
+        ctx_u g = { m, 0, 1, 1, 0, 1, 0 };
+        long sab = rt_desce(nao_falha_ate, 400, &g);
+        if(sab >= 0 && sab <= 2) achou_sabot++;
+
+        /* (4) a SEGUNDA REALIZAÇÃO, independente: em 𝔽ₚ não há tecto, e a mesma descida
+         *     corre 400 andares inteiros sem nunca saturar. */
+        int todas = 1;
+        for(int i = 0; i < 3; i++){
+            ctx_u f = { m, 0, 1, 1, PS[i], 0, 0 };
+            fp_tot++;
+            if(rt_desce(nao_falha_ate, 400, &f) < 0){ fp_ok++; fp_andares += 401; }
+            else todas = 0;
+        }
+        printf("      %ld   %-11s   %-11s   %-12s   %s (%d primos)\n", m,
+               subiu_bem ? "passo ok" : "FALHA",
+               primeiro < 0 ? "vazia" : "achou",
+               c.saturou ? "sim, e conta à parte" : "não",
+               todas ? "vazia nos três" : "ACHOU", 3);
+    }
+    printf("\n      o passo sabotado (duplicar em vez de recorrer) é achado ao andar ≤2 em %ld dos %ld m\n",
+           achou_sabot, subtot);
+    printf("      e em 𝔽ₚ a descida corre %ld andares sem tecto, em %ld das %ld corridas\n\n",
+           fp_andares, fp_ok, fp_tot);
+
+    ok("A INDUÇÃO E A DESCIDA SÃO A MESMA FRASE, E O QUE SE MEDE É O PASSO. A indução diz"
+       " o que HÁ no andar seguinte; a descida nega a tese — «há um PRIMEIRO andar onde"
+       " Cassini falha» — e volta VAZIA. As duas usam o mesmo facto e nada mais: ℕ é bem"
+       " ordenado. E a procura vale porque o gume mostra que ela SABE achar: com o passo"
+       " sabotado, que duplica em vez de recorrer, ela acha ao segundo andar. O corpo do"
+       " passo não menciona n — recebe-o e não o usa —, e é dessa FORMA que sai o ∀n, não"
+       " do comprimento da varredura: uma tabela de andares prova os andares da tabela",
+       subiu == subtot && achou_certo == subtot && achou_sabot == subtot);
+
+    ok("E A SATURAÇÃO NÃO É UM RESULTADO: falha de representação ≠ contra-exemplo. Em ℤ o"
+       " U(n) metálico transborda o long por volta do andar 45 e a primeira realização"
+       " PÁRA — o que ali se mediu foi o tamanho do tipo. A regra que daí sai é obrigatória"
+       " e está cumprida aqui: a conservação verifica-se numa SEGUNDA realização"
+       " independente, 𝔽ₚ, onde não há tecto nenhum, e a saturação conta-se em lugar"
+       " SEPARADO dos defeitos — está na coluna dela, e não entra nesta asserção",
+       fp_ok == fp_tot && fp_andares == 6*3*401 && saturados > 0);
+}
 
     if(!falhas){
         printf("\n  ─────────────────────────────────────────────────────────────\n");

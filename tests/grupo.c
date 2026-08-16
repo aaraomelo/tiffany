@@ -105,15 +105,53 @@ printf("\n§G1  %d bancos na mesma banda: UMA emissão, todos entendem.\n\n", n)
 
 printf("\n§G2  E o custo não cresce com N.\n\n");
 {
-    printf("      grupo   emissoes   bumps no emissor\n");
-    long mau = 0;
+    /* As operacoes do emissor CONTAM-SE, nao se escrevem: cada keystream, cada bump e
+     * cada sendto incrementa o seu contador no sitio da chamada. E o que se afirma nao e
+     * a tabela — e o PASSO: de p(k)p para p(k+1)p o emissor faz o MESMO. */
+    const char *q = "SELECT * FROM job";
+    size_t mq = strlen(q);
+    printf("      grupo   emissoes   bumps   ouvintes que entenderam\n");
+    long mau = 0, pe = -1, pb = -1;
     for(int k = 2; k <= n; k++){
-        /* o emissor faz UM keystream e UM bump, seja o grupo de 2 ou de N */
-        long emissoes = 1, bumps = 1;
-        printf("      p%dp     %ld          %ld\n", k, emissoes, bumps);
-        if(emissoes != 1 || bumps != 1) mau++;
+        long emissoes = 0, bumps = 0;
+        unsigned char ks[64], b[64];
+        keystream(banda, ks, mq);
+        bump((const unsigned char*)q, ks, b, mq);                       bumps++;
+        sendto(tx, b, mq, 0, (struct sockaddr*)&dst, sizeof dst);       emissoes++;
+        int ouviram = 0;
+        for(int i = 0; i < n; i++){          /* drena TODOS: a banda nao sabe quem le */
+            unsigned char r[64], lido[64];
+            ssize_t g = recvfrom(s[i], r, sizeof r, 0, NULL, NULL);
+            if(g <= 0) continue;
+            bump(r, ks, lido, (size_t)g);
+            if(i < k && (size_t)g == mq && memcmp(lido, q, mq) == 0) ouviram++;
+        }
+        printf("      p%dp     %ld          %ld       %d de %d\n", k, emissoes, bumps, ouviram, k);
+        if(pe < 0){ pe = emissoes; pb = bumps; }
+        if(emissoes != pe || bumps != pb || ouviram != k) mau++;
     }
-    ok("de p2p a p%dp o emissor faz sempre UMA emissao e UM bump", mau == 0);
+
+    /* O GUME: um emissor que trate cada membro como uma LIGACAO. A mesma contagem, e o
+     * contador tem de CRESCER — sem isto, «nao cresce» valia por o contador estar parado. */
+    long cresce = 0, le = -1;
+    for(int k = 2; k <= n; k++){
+        long emissoes = 0;
+        for(int i = 0; i < k; i++){
+            unsigned char ks2[64], b2[64];
+            keystream(banda, ks2, mq);
+            bump((const unsigned char*)q, ks2, b2, mq);
+            sendto(tx, b2, mq, 0, (struct sockaddr*)&dst, sizeof dst);  emissoes++;
+        }
+        for(int i = 0; i < n; i++){ unsigned char r[64]; while(recvfrom(s[i], r, sizeof r, MSG_DONTWAIT, NULL, NULL) > 0){} }
+        if(le < 0) le = emissoes;
+        if(emissoes != le) cresce++;
+    }
+    printf("\n      e por LIGACAO (o gume): o mesmo contador cresce em %ld dos %d grupos\n",
+           cresce, n-1);
+    ok("de p2p a pNp o emissor faz sempre UMA emissao e UM bump — CONTADOS, e o gume mostra"
+       " que o contador sabe crescer: emitindo por ligacao ele cresce em todos os grupos"
+       " acima do primeiro",
+       mau == 0 && cresce == n-2);
     printf("\n      Se fossem N ligacoes, seriam N emissoes e N bumps. Nao sao: a banda filtra\n");
     printf("      no receptor, nao no emissor — e por isso o grupo cresce de graca.\n");
 }

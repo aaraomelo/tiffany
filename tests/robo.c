@@ -105,7 +105,7 @@ printf("\n§R1  N motores, cada um um corpo, e correm independentes.\n\n");
         if(dentro <= 1900) mal++;
     }
     printf("\n");
-    ok("os %d motores fecham cada um no seu corpo, com a sua régua", mal == 0);
+    ok("os NJ motores fecham cada um no seu corpo, com a sua régua", mal == 0);
     printf("      São N corpos, e o que faz deles uma REDE não é partilharem o controlador — é\n");
     printf("      partilharem a estrutura. Cada um tem a sua borda, a sua régua e o seu resíduo;\n");
     printf("      o que os liga vem a seguir, e é uma derivada.\n");

@@ -231,7 +231,7 @@ int main(void){
            perdido/P_cerebro > 0.99);
         printf("     -> %.3f W dos %.0f nao voltam (%.2f%%). E nao e desperdicio evitavel: e o\n",
                perdido, P_cerebro, 100*perdido/P_cerebro);
-        puts("        segundo principio. Com dT de 5 K em 310 K, Carnot ja limita a 1,6%%.\n");
+        puts("        segundo principio. Com dT de 5 K em 310 K, Carnot ja limita a 1,6%.\n");
     }
 
     /* ── §A6  o circuito ─────────────────────────────────────────────────── */
@@ -299,8 +299,8 @@ int main(void){
     puts("  E o par fecha EXATO na contagem: o dipolo tem 3 graus, B da 2 e P da 1. Nem a mais");
     puts("  nem a menos. O que sobra e um bit — o sinal do radial — e ele fica na garrafa.");
     puts("");
-    puts("  E o calor volta como eletricidade, mas pouco: 1,6%% de Carnot com dT de 5 K, e o");
-    puts("  Bi2Te3 tira 0,05%% dos 20 W. Nao alimenta o array; alimenta um no. E o que nao");
+    puts("  E o calor volta como eletricidade, mas pouco: 1,6% de Carnot com dT de 5 K, e o");
+    puts("  Bi2Te3 tira 0,05% dos 20 W. Nao alimenta o array; alimenta um no. E o que nao");
     puts("  volta esta nomeado, que e o que faz o balanco fechar em vez de arredondar.");
     puts("");
     printf("unidades: %d   falhas: %d\n", feitas, falhas);

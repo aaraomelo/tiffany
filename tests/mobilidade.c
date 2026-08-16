@@ -221,8 +221,8 @@ int main(void){
      * ~28 ao lance 20. A razao e' geometrica e obvia depois de vista: as 32 pecas comecam
      * empilhadas em duas filas, tapando-se umas as outras; ao espalharem-se DESTAPAM-SE. */
     printf("      mobilidade inicial %d, ao lance 20 %d  ->  SOBE %+d\n", m0, m20, m20-m0);
-    ok("a mobilidade nao decresce: SOBE de %d para ~28 — as pecas comecam tapadas e"
-       " espalhar-se destapa-as", m20 > m0);
+    ok("a mobilidade nao decresce entre o lance 0 e o 20 — as pecas comecam tapadas e"
+       " espalhar-se destapa-as (os dois numeros estao na linha acima, medidos)", m20 > m0);
 
     /* ═══ §X3 — a previsao ═══════════════════════════════════════════════════════════ */
     printf("\n      %d corridas: bloqueio ao fim de %d lances em media (min %d, max %d)\n",

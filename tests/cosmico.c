@@ -195,7 +195,7 @@ int main(void){
         double e_real = carnot(T_CORPO, T_CEU_SECO) * 0.3;   /* 30% de Carnot, otimista */
         double Wr = Q*e_real, Qfr = Q - Wr;
         double dS_real = -Q/T_CORPO + Qfr/T_CEU_SECO;
-        ok("e numa maquina REAL ela CRESCE: com 30%% de Carnot a entropia sobe, e mede-se",
+        ok("e numa maquina REAL ela CRESCE: com 30% de Carnot a entropia sobe, e mede-se",
            dS_real > 1e-6);
         printf("        com uma maquina a 30%% de Carnot: dS = %.5f W/K > 0.\n", dS_real);
         puts("        'Nada se perde' e da ENERGIA. O que se perde e a DISPONIBILIDADE, e as");

@@ -313,7 +313,7 @@ printf("\n§S6  A escada: casar N níveis da torre, e η -> 100%%.\n\n");
         antEta = eta;
     }
     printf("\n");
-    ok("cada nível casado sobe a eficiência, e ela tende a 100%% — a escada de Fibonacci",
+    ok("cada nível casado sobe a eficiência, e ela tende a 100% — a escada de Fibonacci",
        mal == 0 && antEta > 0.99);
     printf("      E é o mesmo movimento do motor.c §M6: o inversor multinível não muda a lei,\n");
     printf("      muda a RESOLUÇÃO com que ela se aplica. Lá era o erro angular a cair; aqui é a\n");

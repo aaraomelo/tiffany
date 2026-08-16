@@ -14,7 +14,7 @@ antissimetrico 5c13e7c1c00d85b1 0
 app_arranca abb24b0fe22e3ae2 0
 aritmetica d327b96d450212d6 0
 arquimedes_area 3fb4925bc7f62b48 0
-arraytermico d277e9bb9b19b982 0
+arraytermico fc47114c9a053a67 0
 artefato b97e52865f77c53b 0
 assinatura 382c0f6005c44274 0
 assinatura_banal 807a95526f24eccf 0
@@ -104,7 +104,7 @@ corpo_unico d21a078aa8bd7aa5 0
 corpo_viveiro 35c96afeadd012b8 0
 corpodecorpos 8d2cbc90ae332e67 0
 corte_ponto_fixo ebd7191a1453f1d8 0
-cosmico ad551a25ab7b7917 0
+cosmico 69c665c4c6c9ad3b 0
 cosmologia ba6dd5df9be09b0a 0
 costura_mecanica 3300d90fae0bb568 0
 cristal_adversarial a5b592f03e349608 0
@@ -224,7 +224,7 @@ gguf e0586cfef6b9f200 0
 gitb c558deae4b86e995 0
 graduacao_realiza d148bf0f42a0c44c 0
 grau 875760f31c09ce87 0
-grupo 60afba16f136035c 0
+grupo ff24076404998111 0
 guarda 6e9ee3952f6cb691 0
 gume_calculo dfbe6cf281569b1e 0
 hawking 09fe7a28606897a6 0
@@ -235,7 +235,7 @@ hipercubo32 ea42d6c98082dcd2 0
 hipociclo 514fec9334344cf9 0
 histerese_navier ed3e0f5791f828fd 0
 hodge_viviani 9e53debee8151fb9 0
-hopfield 01fa02d8eb07d0dc 0
+hopfield 7522614f0d0a95bf 0
 hurwitz 40161d10726c09e0 0
 icc a1b66e7969752be4 0
 inducao 08eb20f9b21c6338 0
@@ -261,7 +261,7 @@ leis_no_tradutor b021c11d75457674 0
 lemniscata 72425a6ff1117151 0
 letra_assinatura ac69847f7bec6136 0
 libc_wasm fc834bc8eeefe10a 0
-liga 9a74373ac9338675 0
+liga 7dead0af26f57aa0 0
 limiares 4dec8ea3c1266e52 0
 limite_escada 582f8604e39f093d 0
 linear 59ceee580cbe6d72 0
@@ -296,7 +296,7 @@ migracao_universal 7bbcce67bc1915a2 0
 milenio 3ae5c1319f2be093 0
 milenio_trial 7faaeb0465d7c296 0
 mmu 3e46735bb1cec005 0
-mobilidade b4ceb2c3dd1a218a 0
+mobilidade d6dad8e3185fb9d4 0
 modelo_no_banco 3795f1d2b9ee4e73 0
 moe 9807b0dd3762d993 0
 monoide 0340fc40391e17db 0
@@ -404,11 +404,11 @@ renormaliza ca31a22ea5e1ff3f 0
 residuo_gerador 300a6b6e998ef497 0
 residuo_universal 0f3aadabb52d8da3 0
 residuos_totais 52cf778fe4c28b37 0
-reta e44a8f3e51b1b8a3 0
+reta 66818f3718440b3c 0
 reversao 6ce3ed15e79f47b7 0
 ribossomo 5d80dbc0f2781041 0
 rn 6a6a258280263c85 0
-robo b1af06aa747c26cc 0
+robo 584b5a523259b6e8 0
 rotacao 1dd03ecf0025d4d2 0
 rotaciona d5e304bfd7d6ea7b 0
 rotulos da58cb7659dcef98 0
@@ -425,7 +425,7 @@ significado ff504aa181796ca5 0
 simula ec8b4e5edec62a25 0
 sistema b93be799ff62ae01 0
 smartcontract 2686bef07a252cfb 0
-solar 629611050846cded 0
+solar de38736acf2fc6ff 0
 solucoes_primitivas a317586c48866d16 0
 sombra_cone 2b75f89f2187feac 0
 sombras bb1e5441b87d7cb5 0
