@@ -1772,6 +1772,50 @@ J_{V} \;=\; f^{*}\circ J_{W}\circ f,
 E transporta \emph{sem mais} quando isto vale para todo $f$. A pergunta é se alguma escolha de réguas
 consegue isso --- e a resposta tem duas metades, uma por cada seta.
 
+\begin{teorema}[o gerador define o andar, e o zero desce quando
+factoriza]\label{thm:gerador-andar}
+O texto usa $\Q(\sigma)$ --- «a classe de racionais com o gerador irracional» --- sem dizer
+\emph{quando} $\sigma$ gera. Diz-se agora, e a lei é curta.
+
+\emph{(i) O gerador define o andar.}
+\[
+\boxed{\;\sigma\ \text{gera o andar } n
+\iff \mu_\sigma\ \text{é \textbf{irredutível} de grau } n\;}
+\]
+
+\emph{(ii) E quando não é, o zero DESCE.} Se $\mu=f\cdot g$ com graus menores, $\sigma$ é
+raiz de \emph{um} dos factores, e o andar que ele gera é o grau desse factor. \textbf{O
+zero não desaparece ao factorizar: muda de andar.} E a soma dos graus é $n$ --- nenhum grau
+se cria nem se destrói, ele reparte-se, e é isso que distingue \emph{descer} de
+\emph{perder}.
+
+\emph{(iii) A descida é efectiva, e não só existencial.} Por Gauss, um mónico inteiro que
+factoriza sobre $\Q$ factoriza sobre $\Z$ em mónicos; e o termo constante $\pm1$ força cada
+factor a ter termo constante $\pm1$. Logo a busca é \textbf{finita}: exibe-se o factor, não
+se afirma que existe. Na família $x^{n}-mx^{n-1}-1$ com $n\leq6$, um só desce:
+\[
+\boxed{\;x^{5}-x^{4}-1=(x^{2}-x+1)\,(x^{3}-x-1)\;}
+\]
+--- o zero do andar $5$ vive no andar $3$, e esse é a razão \textbf{plástica}, o menor
+número de Pisot. E os dois factores são os dois regimes deste texto: o quadrático tem
+$D=-3<0$ e as raízes no \emph{círculo}, que roda e não acrescenta grau à parte que cresce;
+o cúbico muda de sinal entre $1$ e $2$, que é a raiz que \emph{cresce}.
+
+\emph{(iv) E a face finita diz o contrário, que é o que fundamenta.} Em $\F_p$ um polinómio
+de grau $2$ tem \emph{sempre} onde descer: ou tem raiz, e o zero cai no andar $1$; ou é
+irredutível, e o zero vive no andar $2$, que é $\F_{p^{2}}$. Não há terceiro sítio, e a soma
+dos dois fecha nos $126$ metais de $\F_{127}$ --- $62$ e $64$. \textbf{É por não haver esse
+fecho em $\Q$ que os andares lá existem como objectos e não como etapas}: em $\Q$ o andar
+$1$ tem zero metais, para todo $m$, e o zero fica onde está.
+
+\medido{$10$ polinómios da família decididos por busca finita, com um só a factorizar;
+o factor exibido e a volta a reconstruir o original coeficiente a coeficiente; a soma dos
+graus $2+3=5$; e os $126$ metais de $\F_{127}$ repartidos em $62$ que descem ao andar $1$ e
+$64$ que ficam no $2$, exaustivamente. \emph{Verificado:} \texttt{tests/gerador\_andar.c}
+($4{:}0$).}
+$\square$
+\end{teorema}
+
 \begin{teorema}[a volta transporta; a régua não]\label{thm:transporte}
 Seja $V$ de dimensão finita e não nula sobre $\Q(\sigma)$ --- o corpo deste texto, a classe de
 racionais com o gerador irracional.
