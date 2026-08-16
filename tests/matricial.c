@@ -740,76 +740,85 @@ printf("\n§M10 TODA DIMENSÃO — e onde a condição de Pisot FALHA.\n\n");
      *
      * (A primeira correção que escrevi dizia "Pisot falha a partir de n=5" sem a distinção, e
      * estava errada em n=5 pela mesma razão: confundia o número com o polinómio.) */
-    printf("      m   n    σ (dominante)   2º maior |λ|   Pisot?   ∏|λ| (= |det|)\n");
-    int mauProd = 0, pisotFalha = 0, casos = 0, solverLonge = 0;
-    for(int m = 1; m <= 2; m++)
-    for(int n = 2; n <= 8; n++){
-        /* raízes de xⁿ − m xⁿ⁻¹ − 1 por Durand–Kerner, no plano complexo */
-        int N = n;
-        double re[16], im[16];
-        for(int k = 0; k < N; k++){ re[k] = cos(0.9+2.0*k); im[k] = sin(0.9+2.0*k); }
-        for(int it = 0; it < 6000; it++){
-            for(int k = 0; k < N; k++){
-                /* p(z) = zⁿ − m zⁿ⁻¹ − 1 */
-                double pr = 1, pi = 0;
-                for(int t = 0; t < N; t++){ double a = pr*re[k]-pi*im[k], b = pr*im[k]+pi*re[k]; pr=a; pi=b; }
-                double qr = 1, qi = 0;
-                for(int t = 0; t < N-1; t++){ double a = qr*re[k]-qi*im[k], b = qr*im[k]+qi*re[k]; qr=a; qi=b; }
-                pr -= m*qr + 1; pi -= m*qi;
-                /* denominador: ∏_{j≠k}(z_k − z_j) */
-                double dr = 1, di = 0;
-                for(int j = 0; j < N; j++){
-                    if(j == k) continue;
-                    double ar = re[k]-re[j], ai = im[k]-im[j];
-                    double a = dr*ar - di*ai, b = dr*ai + di*ar; dr=a; di=b;
-                }
-                double den = dr*dr + di*di;
-                if(den < 1e-300) continue;
-                double cr = (pr*dr + pi*di)/den, ci = (pi*dr - pr*di)/den;
-                re[k] -= cr; im[k] -= ci;
-            }
-        }
-        /* a dominante real, e o MÁXIMO dos outros módulos — que é o que testa Pisot */
-        int idom = 0; double mdom = 0;
-        for(int k = 0; k < N; k++){ double mo = hypot(re[k],im[k]); if(mo > mdom){ mdom = mo; idom = k; } }
-        double seg = 0, prod = 1;
-        for(int k = 0; k < N; k++){
-            double mo = hypot(re[k],im[k]);
-            prod *= mo;
-            if(k != idom && mo > seg) seg = mo;
-        }
-        int pisot = (seg < 1.0 - 1e-6);
-        if(!pisot) pisotFalha++;
-        /* E ∏|λ| = 1 NÃO SE MEDE NO SOLVER: é o termo constante, e sai inteiro. Para
-         * xⁿ − m xⁿ⁻¹ − 1 o produto das raízes é (−1)ⁿ·(termo constante) = (−1)^(n+1),
-         * logo o módulo é 1 SEMPRE, por Viète e sem avaliar raiz nenhuma. Deixar a tese
-         * pendurada num |prod − 1| < 1e-6 era pedir ao Durand–Kerner que provasse o que
-         * o polinómio já diz. Aqui a tese fica na rota EXACTA, e o limiar passa a medir
-         * outra coisa — a qualidade do solver, que é o que ele pode mesmo dizer. */
-        long prod_exacto = (n % 2 == 0) ? -1 : 1;      /* (−1)ⁿ · (−1) */
-        if(prod_exacto != 1 && prod_exacto != -1) mauProd++;      /* |∏λ| = 1, exacto */
-        if(fabs(prod - (double)(prod_exacto < 0 ? -prod_exacto : prod_exacto)) > 1e-6)
-            solverLonge++;                             /* e o solver bate com ela */
+    /* E NENHUMA RAIZ SE CALCULA. Estava aqui um Durand–Kerner de 6000 iterações a
+     * devolver os módulos em vírgula flutuante, e a decisão «é Pisot?» saía de
+     * seg < 1.0 − 1e-6 — um teorema julgado por uma régua de seis casas. As duas
+     * afirmações desta secção têm prova INTEIRA, e uma delas já estava na casa:
+     *
+     *   m ≥ 2   `lib/poli.h` reconhece a família β(n,m) = xⁿ − m·x^{n−1} − 1 em
+     *           `pz_beta_pisot`, e o comentário dela traz o argumento: por ROUCHÉ NO
+     *           DUAL, n−1 raízes ficam dentro do círculo e uma fora. A função estava
+     *           MORTA — escrita, e nunca chamada por ninguém.
+     *
+     *   (5,1)   não é polinómio de Pisot, e a testemunha é exacta: Φ₆ = x² − x + 1
+     *           DIVIDE β(5,1), e Φ₆ divide x⁶ − 1. Da segunda vem λ⁶ = 1, logo |λ| = 1
+     *           para as raízes de Φ₆; da primeira, que essas raízes são de β. Há
+     *           portanto uma raiz não dominante de módulo exactamente 1 — e Pisot exige
+     *           todas abaixo. As duas divisões são exactas em ℤ[x], com resto ZERO.
+     *
+     * E o que NÃO se afirma aqui: para m = 1 e n ≥ 6 o resultado é o mesmo, mas a prova
+     * não é esta e não está neste ficheiro. Mede-se o que se prova. */
+    printf("      caso        rota                                    veredicto\n");
+    int mauProd = 0, pisotFalha = 0, casos = 0, rouche = 0;
+    for(int n = 2; n <= 8; n++)
+    for(int m = 2; m <= 2; m++){
+        Pz b; b.n = n;
+        for(int k = 0; k <= n; k++) b.a[k] = 0;
+        b.a[n] = 1; b.a[n-1] = -m; b.a[0] = -1;
+        long rec = pz_beta_pisot(b);               /* a lib, e por Rouché no dual */
         casos++;
-        if((m == 1 && n >= 3 && n <= 7) || (m == 2 && n == 8))
-            printf("      %-3d %-4d %-15.10f %-14.6f %-8s %.10f\n",
-                   m, n, mdom, seg, pisot ? "sim" : "NÃO", prod);
+        if(rec == m) rouche++;
+        /* e ∏|λ| = 1 continua a sair do TERMO CONSTANTE, por Viète */
+        long prod_exacto = (n % 2 == 0) ? -1 : 1;
+        if(prod_exacto != 1 && prod_exacto != -1) mauProd++;
     }
-    printf("      …\n\n      %d casos; a propriedade de Pisot FALHA em %d deles\n\n", casos, pisotFalha);
-    printf("      e ∏|λ| = 1 sai do TERMO CONSTANTE, por Viète: o solver concorda com a"
-           " rota exacta em %d de %d\n\n", casos - solverLonge, casos);
+    printf("      β(n,2), n=2..8   pz_beta_pisot (Rouché no dual)          %d de %d\n",
+           rouche, casos);
+    /* (5,1): a testemunha exacta, por divisão de polinómios inteiros */
+    Pz b51; b51.n = 5;
+    for(int k = 0; k <= 5; k++) b51.a[k] = 0;
+    b51.a[5] = 1; b51.a[4] = -1; b51.a[0] = -1;    /* x⁵ − x⁴ − 1 */
+    Pz f6; f6.n = 2; f6.a[0] = 1; f6.a[1] = -1; f6.a[2] = 1;   /* Φ₆ = x² − x + 1 */
+    Pz x6; x6.n = 6;
+    for(int k = 0; k <= 6; k++) x6.a[k] = 0;
+    x6.a[6] = 1; x6.a[0] = -1;                      /* x⁶ − 1 */
+    Pz q1, q2, q3;
+    int divBeta = pz_div_exata(b51, f6, &q1);       /* Φ₆ | β(5,1) */
+    int divCiclo = pz_div_exata(x6, f6, &q2);       /* Φ₆ | x⁶ − 1 ⟹ |λ| = 1 */
+    if(divBeta && divCiclo) pisotFalha++;
+    /* O GUME: sem um caso onde a divisão FALHA, «Φ₆ divide β» podia valer por
+     * pz_div_exata devolver sempre 1. Em β(4,1) = x⁴ − x³ − 1 ela tem de dar zero. */
+    Pz b41; b41.n = 4;
+    for(int k = 0; k <= 4; k++) b41.a[k] = 0;
+    b41.a[4] = 1; b41.a[3] = -1; b41.a[0] = -1;
+    int naoDiv = !pz_div_exata(b41, f6, &q3);
+    printf("      β(5,1)           Φ₆ | β  (resto zero)                     %s\n",
+           divBeta ? "sim" : "NÃO");
+    printf("      Φ₆               Φ₆ | x⁶ − 1  ⟹  λ⁶ = 1  ⟹  |λ| = 1        %s\n",
+           divCiclo ? "sim" : "NÃO");
+    printf("      GUME             Φ₆ ∤ β(4,1) — a divisão exacta sabe dizer que NÃO       %s\n",
+           naoDiv ? "sim" : "NÃO");
+    printf("      logo             β(5,1) tem raiz não dominante de módulo 1 — NÃO é Pisot\n\n");
     ok("∏|λ| = |det| = 1 EM TODOS, E POR VIÈTE E NÃO PELO SOLVER: para xⁿ − m xⁿ⁻¹ − 1 o"
        " produto das raízes é (−1)ⁿ vezes o termo constante, logo o módulo é 1 sempre —"
-       " sem avaliar raiz nenhuma. Antes a tese estava pendurada num |∏|λ| − 1| < 1e-6,"
-       " que é pedir ao Durand–Kerner que prove o que o polinómio já diz. Agora a tese"
-       " está na rota exacta e o limiar mede o que pode mesmo medir: que o solver bate"
-       " com ela",
-       mauProd == 0 && solverLonge == 0 && casos == 14);
-    ok("mas β NÃO é polinómio de Pisot sempre: falha para m = 1 a partir de n = 5", pisotFalha > 0);
+       " sem avaliar raiz nenhuma",
+       mauProd == 0 && casos == 7);
+    ok("MAS β NÃO É POLINÓMIO DE PISOT SEMPRE: FALHA PARA m = 1 EM n = 5, e agora a"
+       " testemunha é EXACTA em vez de numérica. Estava aqui um Durand–Kerner de 6000"
+       " iterações com a decisão a sair de seg < 1.0 − 1e-6 — um teorema julgado por uma"
+       " régua de seis casas. Agora: Φ₆ = x² − x + 1 divide β(5,1) com resto ZERO, e Φ₆"
+       " divide x⁶ − 1 com resto ZERO; da segunda vem λ⁶ = 1 e portanto |λ| = 1, da"
+       " primeira que essa raiz é de β. Há uma raiz não dominante de módulo exactamente 1,"
+       " e Pisot exige todas abaixo. E do outro lado a família com m ≥ 2 é reconhecida por"
+       " `pz_beta_pisot`, do `lib/poli.h`, que traz o argumento de ROUCHÉ NO DUAL — e que"
+       " estava MORTA no repositório, escrita e nunca chamada. E com o gume: Φ₆ NÃO divide"
+       " β(4,1), sem o que «divide» valia por a função devolver sempre sim",
+       pisotFalha == 1 && divBeta && divCiclo && naoDiv && rouche == casos);
     printf("      As duas asserções acima são o ponto. A primeira vale SEMPRE — e é por isso que\n");
-    printf("      ela não serve para concluir a segunda. Em n = 6, m = 1 o produto dá 1,000000 e\n");
-    printf("      mesmo assim o segundo módulo é 1,0328: o produto ser 1 é compatível com um\n");
-    printf("      fator maior que 1. Medir a conservação e concluir Pisot é um non sequitur, e\n");
+    printf("      ela não serve para concluir a segunda: o produto dos módulos ser 1 é\n");
+    printf("      compatível com um fator maior que 1 — e o caso (5,1) exibe-o, com a raiz de\n");
+    printf("      Φ₆ em módulo exactamente 1. Medir a conservação e concluir Pisot é um non\n");
+    printf("      sequitur, e\n");
     printf("      foi o que a primeira versão desta secção fez.\n\n");
 
     /* e a fatorização explícita, que é o contraexemplo mais limpo */

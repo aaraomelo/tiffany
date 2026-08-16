@@ -275,7 +275,7 @@ lyapunov_refletido 1e9f698b6ae0aab6 0
 lyapunov_torre 6d18b7610f966dc9 0
 maestro_memoria d89b11e2c1b7a549 0
 maisum 06d588623bce168e 0
-matricial 8ddeb004154a4a41 0
+matricial 4f037c36ad7e4875 0
 maxcut 6e3f503ba23045de 0
 mcu ab518f13dc30a9da 0
 mecanica 122a11b4b3090e35 0
