@@ -34,8 +34,8 @@
  *   · o potencial é o cruzado ao quadrado vezes a secção (Π = 1−s² = sin²), o que faz do
  *     imposto uma ÁREA e não um comprimento.
  *
- *   §H1  a FORÇA sai por derivada do imposto — e bate com a diferença finita
- *   §H2  EULER–LAGRANGE devolve s̈ = 2s, sem se lá pôr
+ *   §H1  a FORÇA sai por derivada do imposto — resíduo ZERO por DUAS rotas exactas
+ *   §H2  EULER–LAGRANGE devolve s̈ = 2s exacto, sem se lá pôr
  *   §H3  HAMILTON dá o mesmo por outro caminho — dois caminhos que têm de concordar
  *   §H4  o TRABALHO é −ΔV, e a POTÊNCIA é dT/dt: medidas, não afirmadas
  *   §H5  o IMPULSO é Δp, e o momento conserva-se quando a força se anula
@@ -47,93 +47,213 @@
 #include <string.h>
 #include <math.h>
 #include "unidade.h"
+#include "racionais.h"
+#include "calculo.h"
 
 /* O ÚNICO dado declarado: o imposto. Tudo o resto é derivada dele. */
 static double S_glob = 1.0;
 static double V(double s){ return (1.0 - s*s) * S_glob; }
 
-/* e as derivadas NUMÉRICAS, que são o juiz — não se confia na fórmula que eu escrevi */
-static double dVds(double s){ double h = 1e-6; return (V(s+h) - V(s-h))/(2*h); }
+/* E O JUIZ NÃO É UMA DIFERENÇA FINITA COM h PEQUENO — é a derivada EXACTA.
+ *
+ * V(s) = (1 − s²)·S é um POLINÓMIO, e a casa já tem o teorema (lib/calculo.h): o
+ * quociente de diferenças (f(a+h) − f(a))/h É ELE PRÓPRIO um polinómio em h, porque o
+ * numerador se anula em h = 0 e portanto é divisível por h EXACTAMENTE. Logo f'(a) é
+ * uma AVALIAÇÃO — q(0) — e não um limite. A diferença central de um polinómio de grau 2
+ * é exacta para TODO h:
+ *
+ *      (V(s+h) − V(s−h))/(2h) = −2sS        sem erro, e sem depender de h
+ *
+ * O h = 1e-6 que aqui estava não media nada: fabricava o erro de arredondamento que o
+ * `fabs(...) < 1e-6` a seguir tolerava. Aqui as duas rotas são EXACTAS e concordam bit
+ * a bit, e o que era «bate dentro de 1e-6» passa a ser ZERO.
+ *
+ *   rota A   fn_deriva      a regra formal do polinómio, avaliada em s
+ *   rota B   fn_deriva_def  a DEFINIÇÃO, pela fibra da divisão por h
+ *
+ * O double fica onde tem função: nos integradores dos §H3–§H6, que simulam uma EDO no
+ * tempo. Mas a FORÇA que eles usam passa a ser a exacta, derivada aqui. */
+static Cf V_ex;                 /* V como polinómio em Qz */
+static Qz S_ex;                 /* a secção, exacta */
+
+/* E a derivada que os integradores dos §H3--§H6 usam é a EXACTA, não uma diferença
+ * finita: V′(s) = −2sS. Ela não é postulada aqui — é o que o §H1 mede, por duas rotas
+ * independentes e com resíduo ZERO. Usar a fórmula depois de a provar é o movimento
+ * normal; usar uma diferença finita com h = 1e-6 seria pôr de volta o erro que o §H1
+ * acabou de mostrar não existir. */
+static double dVds(double s){ return -2.0*s*S_glob; }
 
 int main(void){
 printf("\n=== O CORPO FÍSICO: declara-se o IMPOSTO, e a mecânica deriva ==============\n");
 printf("    Um dado só: V(s) = (1−s²)·S. Massa, força, momento, lagrangiano,\n");
 printf("    hamiltoniano, trabalho, potência e impulso saem dele por derivada.\n");
 
-double a[3] = {1.0, 0.4, -0.2}, b[3] = {0.3, -0.6, 0.8};
-double c[3] = { a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0] };
-S_glob = c[0]*c[0] + c[1]*c[1] + c[2]*c[2];
-printf("\n    a = (%.1f, %.1f, %.1f)   b = (%.1f, %.1f, %.1f)\n", a[0],a[1],a[2],b[0],b[1],b[2]);
-printf("    S = ‖a×b‖² = %.6f   ← e esta é a MASSA, porque a massa é o cruzado\n", S_glob);
+/* Os vectores são racionais, e por isso o cruzado e a secção são EXACTOS: escrevem-se
+ * como inteiros sobre 10, e o produto vectorial de inteiros é inteiro. Escrevê-los como
+ * 1.0, 0.4, −0.2 dava a S um arredondamento antes de a mecânica começar. */
+long A[3] = {10, 4, -2}, B[3] = {3, -6, 8};              /* = a·10 e b·10 */
+long C[3] = { A[1]*B[2]-A[2]*B[1], A[2]*B[0]-A[0]*B[2], A[0]*B[1]-A[1]*B[0] };
+long n2 = C[0]*C[0] + C[1]*C[1] + C[2]*C[2];             /* ‖A×B‖², inteiro */
+S_ex = qz(n2, 10000);                                     /* S = ‖a×b‖² = ‖A×B‖²/10⁴ */
+V_ex = fn0(); V_ex.n = 2; V_ex.c[0] = S_ex; V_ex.c[2] = qz_oposto(S_ex);
+S_glob = (double)S_ex.p / (double)S_ex.q;                 /* só para os integradores */
+printf("\n    a = (%ld, %ld, %ld)/10   b = (%ld, %ld, %ld)/10\n",
+       A[0],A[1],A[2], B[0],B[1],B[2]);
+printf("    a×b = (%ld, %ld, %ld)/100   e   S = ‖a×b‖² = %d/%d   EXACTO\n",
+       C[0],C[1],C[2], S_ex.p, S_ex.q);
+printf("    ← e esta é a MASSA, porque a massa é o cruzado\n");
 
-printf("\n§H1  A FORÇA sai por DERIVADA do imposto — e bate com a diferença finita.\n\n");
+printf("\n§H1  A FORÇA sai por DERIVADA do imposto — e o resíduo é ZERO EXACTO.\n\n");
 {
-    /* F = -dV/ds. A formula fechada da' 2sS. Mede-se contra a derivada numerica do V
-     * declarado — se eu tivesse escrito a formula errada, a diferenca aparecia aqui. */
-    printf("      s        V(s)        F fechada = 2sS   F = −dV/ds (numérica)   |dif|\n");
-    double pior = 0;
+    /* F = −dV/ds, e a fórmula fechada dá 2sS. Mede-se por DUAS rotas exactas, que têm de
+     * concordar — se eu tivesse escrito a fórmula errada, a discordância aparecia aqui.
+     * E o que se mede é resíduo ZERO, não «menor que a régua que eu escolhi». */
+    printf("      s        V(s)          V′ pela REGRA   V′ pela DEFINIÇÃO   iguais?  −V′ = 2sS?\n");
+    long pontos = 0, concordam = 0, fechada = 0, def_ok = 0;
+    Cf dV = fn_deriva(V_ex);
     for(int i = -3; i <= 3; i++){
-        double s = i*0.35;
-        double Ff = 2*s*S_glob, Fn = -dVds(s), d = fabs(Ff - Fn);
-        if(d > pior) pior = d;
-        printf("      %+7.3f  %-11.6f %-17.6f %-22.6f %.2e\n", s, V(s), Ff, Fn, d);
+        Qz sq = qz(7*i, 20);                          /* s = 0,35·i, exacto */
+        Qz reg = fn_av(dV, sq);                       /* rota A: a regra formal */
+        Qz def = qz(0,1); int achou = fn_deriva_def(V_ex, sq, &def);  /* rota B: a fibra */
+        Qz Ff = qz_mult(qz(2,1), qz_mult(sq, S_ex));  /* a fechada: 2sS */
+        Qz Vs = fn_av(V_ex, sq);
+        pontos++;
+        if(achou) def_ok++;
+        if(achou && qz_igual(reg, def)) concordam++;
+        if(qz_igual(qz_oposto(reg), Ff)) fechada++;
+        printf("      %+3d/20   %+6d/%-6d %+6d/%-6d  %+6d/%-6d      %-8s %s\n",
+               7*i, Vs.p, Vs.q, reg.p, reg.q, def.p, def.q,
+               (achou && qz_igual(reg,def)) ? "sim" : "NÃO",
+               qz_igual(qz_oposto(reg), Ff) ? "sim" : "NÃO");
     }
-    printf("\n      pior diferença: %.3e\n\n", pior);
-    ok("a força é MENOS a derivada do imposto — 2sS não foi postulado, saiu", pior < 1e-6);
+    printf("\n      %ld pontos: a definição resolveu em %ld, as duas rotas concordam em %ld,"
+           " e −V′ = 2sS em %ld\n", pontos, def_ok, concordam, fechada);
+    printf("      resíduo: ZERO EXACTO — não «menor que 1e-6»\n\n");
+    ok("A FORÇA É MENOS A DERIVADA DO IMPOSTO, E O RESÍDUO É ZERO EXACTO: 2sS não foi"
+       " postulado, saiu — e sai por DUAS rotas independentes que concordam bit a bit, a"
+       " regra formal do polinómio e a DEFINIÇÃO pela fibra da divisão por h. Nenhuma"
+       " diferença finita com h pequeno: V é um polinómio, logo (V(s+h)−V(s−h))/(2h) é"
+       " exacto para TODO h, e o 1e-6 que aqui estava só fabricava o arredondamento que a"
+       " tolerância a seguir perdoava",
+       concordam == pontos && fechada == pontos && def_ok == pontos && pontos == 7
+       && qz_saturou == 0 && cl_estouros == 0);
     printf("      E repare-se onde ela se anula: em s = 0 (o direto é zero) e em S = 0 (não há\n");
     printf("      cruzado). A força é o produto dos dois, e morre de qualquer um dos lados.\n");
 }
 
 printf("\n§H2  EULER–LAGRANGE devolve s̈ = 2s — sem se lá pôr.\n\n");
 {
-    /* L = T - V = (1/2)S ṡ² - (1-s²)S. Euler-Lagrange: d/dt(dL/dṡ) - dL/ds = 0.
-     * dL/dṡ = S ṡ  ->  d/dt = S s̈ ;   dL/ds = 2sS.  Logo S s̈ = 2sS -> s̈ = 2s.
-     * Mede-se com derivadas NUMERICAS do L, para nao ser eu a dizer o que dá. */
-    printf("      s       ṡ       ∂L/∂ṡ (num)   ∂L/∂s (num)   s̈ = (∂L/∂s)/m   2s      |dif|\n");
-    double pior = 0, h = 1e-6;
+    /* L = T − V = ½S ṡ² − (1−s²)S. Euler–Lagrange: d/dt(∂L/∂ṡ) − ∂L/∂s = 0, com
+     * ∂L/∂ṡ = S ṡ  →  d/dt = S s̈ ,  e  ∂L/∂s = 2sS.  Logo S s̈ = 2sS  →  s̈ = 2s.
+     *
+     * E L é polinómio em CADA variável — grau 2 em ṡ, grau 2 em s —, logo as duas
+     * derivadas parciais são exactas e nenhum h entra. O que se mede é a igualdade
+     * s̈ = 2s com resíduo ZERO, e não «pior diferença 3e-10». */
+    printf("      s       ṡ       ∂L/∂ṡ = Sṡ = p      ∂L/∂s = 2sS         s̈ = (∂L/∂s)/S   = 2s?\n");
+    long pontos = 0, bate_p = 0, bate_a = 0;
     for(int i = -2; i <= 2; i++){
-        double s = i*0.4, v = 0.3 + 0.1*i;
-        /* L como função de (s, v), com o V declarado lá em cima */
-        double Lv1 = 0.5*S_glob*(v+h)*(v+h) - V(s), Lv0 = 0.5*S_glob*(v-h)*(v-h) - V(s);
-        double dLdv = (Lv1 - Lv0)/(2*h);                       /* = m ṡ = p */
-        double Ls1 = 0.5*S_glob*v*v - V(s+h), Ls0 = 0.5*S_glob*v*v - V(s-h);
-        double dLds = (Ls1 - Ls0)/(2*h);                       /* = 2sS */
-        double acel = dLds / S_glob;                            /* m = S */
-        double d = fabs(acel - 2*s);
-        if(d > pior) pior = d;
-        printf("      %+6.2f  %+6.2f  %-13.6f %-13.6f %-16.6f %-7.3f %.2e\n",
-               s, v, dLdv, dLds, acel, 2*s, d);
+        Qz sq = qz(2*i, 5), vq = qz(3 + i, 10);          /* s = 0,4i ; ṡ = 0,3 + 0,1i */
+        /* L como polinómio em ṡ, com s fixo: ½S·ṡ² − V(s) */
+        Cf Lv = fn0(); Lv.n = 2;
+        Lv.c[0] = qz_oposto(fn_av(V_ex, sq));
+        Lv.c[2] = qz_mult(qz(1,2), S_ex);
+        Qz dLdv = fn_av(fn_deriva(Lv), vq);              /* = S ṡ = p */
+        /* e como polinómio em s, com ṡ fixo: ½S·ṡ² − V(s) */
+        Cf Ls = fn_esc(qz(-1,1), V_ex);
+        Ls.c[0] = qz_soma(Ls.c[0], qz_mult(qz(1,2), qz_mult(S_ex, qz_mult(vq,vq))));
+        Qz dLds = fn_av(fn_deriva(Ls), sq);              /* = 2sS */
+        Qz acel = qz(0,1); int div_ok = qz_divide(dLds, S_ex, &acel);   /* m = S */
+        Qz p_esp = qz_mult(S_ex, vq), a_esp = qz_mult(qz(2,1), sq);
+        pontos++;
+        if(qz_igual(dLdv, p_esp)) bate_p++;
+        if(div_ok && qz_igual(acel, a_esp)) bate_a++;
+        printf("      %+3d/5   %+3d/10  %+7d/%-9d %+7d/%-9d  %+6d/%-7d %s\n",
+               2*i, 3+i, dLdv.p, dLdv.q, dLds.p, dLds.q, acel.p, acel.q,
+               (div_ok && qz_igual(acel, a_esp)) ? "sim" : "NÃO");
     }
-    printf("\n      pior diferença: %.3e\n\n", pior);
-    ok("Euler–Lagrange sobre L = T − V dá s̈ = 2s, e a massa que aparece É S", pior < 1e-5);
+    printf("\n      %ld pontos: ∂L/∂ṡ = Sṡ em %ld, e s̈ = 2s em %ld — resíduo ZERO EXACTO\n\n",
+           pontos, bate_p, bate_a);
+    ok("EULER–LAGRANGE SOBRE L = T − V DÁ s̈ = 2s COM RESÍDUO ZERO, E A MASSA QUE APARECE"
+       " É S: as duas derivadas parciais são exactas porque L é polinómio em CADA"
+       " variável — grau 2 em ṡ e grau 2 em s —, logo nenhum h entra e a igualdade não é"
+       " «menor que 1e-5», é IGUALDADE. E a massa cancela sozinha: o S que divide é o"
+       " mesmo cruzado que multiplica",
+       bate_p == pontos && bate_a == pontos && pontos == 5
+       && qz_saturou == 0 && cl_estouros == 0);
     printf("      A equação universal do paper_A não é um postulado do modelo: é o que sai de\n");
     printf("      derivar o imposto duas vezes. E o m que cancela é a secção, o cruzado.\n");
 }
 
-printf("\n§H3  HAMILTON dá o mesmo por OUTRO caminho — e os dois têm de concordar.\n\n");
+printf("\n§H3  HAMILTON e LAGRANGE contra a FORMA FECHADA — e o erro tem de cair com h.\n\n");
 {
-    /* H(s,p) = p²/(2m) + V(s). Hamilton: ṡ = dH/dp, ṗ = -dH/ds. Se a mecanica esta' certa,
-     * integrar por Hamilton e por Lagrange tem de dar a MESMA trajetoria. Dois caminhos. */
-    double s1 = 0.2, v1 = 0.1;                 /* Lagrange: s̈ = 2s */
-    double s2 = 0.2, p2 = S_glob*0.1;          /* Hamilton: (s, p) */
-    double h = 1e-6; long N = 500000;
-    printf("      passo       Lagrange s      Hamilton s      |dif|\n");
-    double pior = 0;
-    for(long i = 1; i <= N; i++){
-        /* Lagrange */
-        v1 += 2*s1*h; s1 += v1*h;
-        /* Hamilton, com as derivadas NUMÉRICAS de H */
-        double dHdp = p2/S_glob;                                  /* ṡ */
-        double dHds = dVds(s2);                                   /* ∂V/∂s */
-        p2 += (-dHds)*h; s2 += dHdp*h;
-        double d = fabs(s1 - s2);
-        if(d > pior) pior = d;
-        if(i % 125000 == 0) printf("      %-11ld %-15.8f %-15.8f %.2e\n", i, s1, s2, d);
+    /* Com a força exacta do §H1, integrar por Lagrange e por Hamilton é literalmente a
+     * MESMA conta: Hamilton faz p += 2sSh e depois divide por S, o que é v += 2sh, que é
+     * a linha do Lagrange. Compará-los mediria só a ordem das operações em vírgula
+     * flutuante — uma asserção que não pode falhar.
+     *
+     * O que se mede é outra coisa, e é a que decide: a EDO s̈ = 2s tem FORMA FECHADA,
+     *
+     *      s(t) = s₀·cosh(√2 t) + (v₀/√2)·sinh(√2 t)
+     *
+     * e os dois integradores medem-se contra ELA. E a tese não é «o erro é pequeno» — é
+     * que ele CAI COM h: Euler é de primeira ordem, logo dividir h por dez divide o erro
+     * por dez. Isso é uma afirmação que a força errada não cumpre, e por isso mede.
+     *
+     * O CONTROLO está aqui dentro: repete-se tudo com s̈ = 3s, que é a força errada, e
+     * aí o erro contra a MESMA forma fechada NÃO cai — estabiliza. Um refinamento que
+     * não melhora é a assinatura de estar a convergir para outra coisa. */
+    const double T_FIM = 0.5, r2 = sqrt(2.0);
+    double sx = 0.2*cosh(r2*T_FIM) + (0.1/r2)*sinh(r2*T_FIM);   /* a forma fechada */
+    printf("      h        Lagrange s(½)    Hamilton s(½)    fechada s(½)     erro L      razão\n");
+    /* E os DOIS medem-se contra ela — não um contra o outro. Comparar os dois pediria um
+     * limiar fixo, e a diferença entre eles é da ordem de h: escala, logo nenhum número
+     * fixo serve. A tese que não precisa de limiar é que AMBOS caem na razão de Euler. */
+    double ant = 0, antH = 0; long niveis = 0, caiu = 0, ordem_um = 0, ordem_um_H = 0;
+    for(int e = 4; e <= 6; e++){
+        double h = pow(10.0, -e); long N = (long)(T_FIM/h + 0.5);
+        double s1 = 0.2, v1 = 0.1;                       /* Lagrange: s̈ = 2s */
+        double s2 = 0.2, p2 = S_glob*0.1;                /* Hamilton: (s, p) */
+        for(long i = 0; i < N; i++){
+            v1 += 2*s1*h; s1 += v1*h;
+            double dHdp = p2/S_glob, dHds = dVds(s2);
+            p2 += (-dHds)*h; s2 += dHdp*h;
+        }
+        double eL = fabs(s1 - sx), eH = fabs(s2 - sx);
+        double razao = ant > 0 ? ant/eL : 0, razaoH = antH > 0 ? antH/eH : 0;
+        niveis++;
+        if(ant > 0 && eL < ant) caiu++;
+        if(ant > 0 && razao  > 5 && razao  < 20) ordem_um++;    /* Euler: razão ≈ 10 */
+        if(antH > 0 && razaoH > 5 && razaoH < 20) ordem_um_H++;
+        printf("      1e-%d    %-16.10f %-16.10f %-16.10f %-11.3e %s\n", e, s1, s2, sx, eL,
+               ant > 0 ? (razao > 5 && razao < 20 ? "≈10  (1.ª ordem)" : "FORA") : "—");
+        ant = eL; antH = eH;
     }
-    printf("\n      pior divergência entre os dois formalismos: %.3e\n\n", pior);
-    ok("Lagrange e Hamilton dão a MESMA trajetória — dois caminhos, um corpo", pior < 1e-6);
-    printf("      Não é redundância: é o teste. Uma força errada passaria num formalismo e\n");
-    printf("      falharia no outro, porque um deriva de L e o outro de H.\n");
+    /* O CONTROLO: a força errada, contra a MESMA forma fechada */
+    printf("\n      controlo — a força ERRADA (s̈ = 3s), contra a mesma forma fechada:\n");
+    double ant2 = 0; long nao_cai = 0;
+    for(int e = 4; e <= 6; e++){
+        double h = pow(10.0, -e); long N = (long)(T_FIM/h + 0.5);
+        double s = 0.2, v = 0.1;
+        for(long i = 0; i < N; i++){ v += 3*s*h; s += v*h; }
+        double er = fabs(s - sx);
+        printf("      1e-%d    erro = %.6f   %s\n", e, er,
+               ant2 > 0 ? (er < ant2*0.5 ? "caiu" : "NÃO cai — estabilizou") : "—");
+        if(ant2 > 0 && er >= ant2*0.5) nao_cai++;
+        ant2 = er;
+    }
+    printf("\n      %ld níveis: o erro caiu em %ld · razão de 1.ª ordem em %ld pelo"
+           " Lagrange e em %ld pelo Hamilton\n", niveis, caiu, ordem_um, ordem_um_H);
+    printf("      e o controlo NÃO convergiu em %ld dos 2 refinamentos\n\n", nao_cai);
+    ok("OS DOIS FORMALISMOS SÃO A MESMA CONTA, E O QUE MEDE É A FORMA FECHADA: com a"
+       " força exacta do §H1, Hamilton faz p += 2sSh e divide por S, que é a linha do"
+       " Lagrange — compará-los mediria a ordem das operações, e não a mecânica. Mede-se"
+       " contra s(t) = s₀·cosh(√2 t) + (v₀/√2)·sinh(√2 t), e a tese não é «o erro é"
+       " pequeno»: é que ele CAI COM h na razão de primeira ordem de Euler. E o CONTROLO"
+       " está aqui dentro — com s̈ = 3s o erro contra a mesma fechada NÃO cai, estabiliza:"
+       " refinar sem melhorar é a assinatura de convergir para outra coisa. E os DOIS caem"
+       " na mesma razão, que é a afirmação sem limiar: comparar um com o outro precisaria"
+       " de um número fixo, e a diferença entre eles escala com h",
+       caiu == 2 && ordem_um == 2 && ordem_um_H == 2 && niveis == 3 && nao_cai == 2);
 }
 
 printf("\n§H4  O TRABALHO é −ΔV e a POTÊNCIA é dT/dt — medidos, não afirmados.\n\n");
@@ -318,7 +438,8 @@ printf("\n§H7  O SINAL DA INVOLUÇÃO: sem ele não gira — e é Lenz, é aç�
             double s = i*0.3;
             double nu = -s, nunu = -nu;         /* ν(s) = −s ; ν(ν(s)) */
             double d = fabs(nunu - s);
-            if(d > pior) pior = d; n++;
+            if(d > pior) pior = d;
+            n++;
         }
         printf("      INVOLUÇÃO  ν(s) = −s,  ν∘ν = id em %d pontos, pior resíduo %.2e\n\n", n, pior);
         ok("ν∘ν = id exatamente — a troca de sinal é involução, logo serve de dual", pior == 0.0);
