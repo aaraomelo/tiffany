@@ -12,7 +12,7 @@ analiticas 9ef41198052b919a 0
 analog c7b0e78650f4493f 0
 antissimetrico 5c13e7c1c00d85b1 0
 app_arranca abb24b0fe22e3ae2 0
-aritmetica 67f71240db27105e 0
+aritmetica d327b96d450212d6 0
 arquimedes_area 3fb4925bc7f62b48 0
 arraytermico e4a2d53b3a3ef1da 0
 artefato b97e52865f77c53b 0
