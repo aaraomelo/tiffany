@@ -1271,13 +1271,26 @@ printf("\n§M15 A RESTRIÇÃO DA BASE: o traço, e o período que lê o primo.\n
     double sg; { double lo=1,hi=3; for(int i=0;i<200;i++){ double md=(lo+hi)/2;
         if(md*md*md-md*md-1>0) hi=md; else lo=md; } sg=(lo+hi)/2; }
     /* com c arbitrário (1,0,0) o valor é σ^k, irracional */
-    int mauLivre = 0;
+    int mauLivre = 0, raizes_racionais = 0;
     {
+        /* E «σ NÃO é inteiro» PROVA-SE, e não se arredonda. Estava aqui um
+         * fabs(u1 − round(u1)) < 1e-9 sobre o σ calculado por bisseção — que decide a
+         * irracionalidade por uma régua de nove casas. O teste da RAIZ RACIONAL fecha-o
+         * em duas linhas: x³ − x² − 1 é mónico com termo constante −1, logo uma raiz
+         * racional teria de ser inteira e dividir 1, isto é ±1. E
+         *
+         *      p(+1) = 1 − 1 − 1 = −1 ≠ 0        p(−1) = −1 − 1 − 1 = −3 ≠ 0
+         *
+         * Não há nenhuma: σ é irracional, e portanto σ, σ² e σ³ não caem em ℤ. É uma
+         * pergunta sobre o polinómio, e responde-se em inteiros. */
+        for(long r = -1; r <= 1; r += 2)
+            if(r*r*r - r*r - 1 == 0) raizes_racionais++;
+        if(raizes_racionais) mauLivre++;               /* se houvesse, a tese caía */
         double u1 = sg, u2 = sg*sg, u3 = sg*sg*sg;
-        int ints = (fabs(u1-round(u1))<1e-9 && fabs(u2-round(u2))<1e-9);
-        if(ints) mauLivre++;
         printf("      %-24s %-10.4f %-10.4f %-9.4f %s\n", "(1,0,0) livre", u1, u2, u3,
-               ints ? "sim" : "NÃO");
+               raizes_racionais ? "sim" : "NÃO");
+        printf("      (e é o teste da raiz racional que o decide: os candidatos são os"
+               " divisores de 1, e p(±1) = −1 e −3)\n");
     }
     /* (b) com os conjugados de um mesmo c, a soma é o TRAÇO e cai em Z.
      * Tr(σ^k) obtém-se pelas identidades de Newton a partir da borda, em INTEIROS:
@@ -1287,22 +1300,52 @@ printf("\n§M15 A RESTRIÇÃO DA BASE: o traço, e o período que lê o primo.\n
     t[1] = 1;                                /* Tr(σ) = m = 1 (soma das raízes) */
     t[2] = 1;                                /* Tr(σ²) = m·t1 + 0 = 1 */
     for(int k = 3; k < 12; k++) t[k] = t[k-1] + t[k-3];
-    printf("      k        Tr(σ^k)   é inteiro?   (pela recorrência t_k = t_{k−1} + t_{k−3})\n");
-    int mauTr = 0;
+    /* E A SEGUNDA ROTA TAMBÉM É INTEIRA. Estava aqui uma reconstrução em double —
+     * σ^k mais as potências do par conjugado por uma recorrência com 1/σ — comparada
+     * com margem de 1e-6. Mas Tr(σ^k) tem uma segunda leitura EXACTA e é a desta casa:
+     * é o TRAÇO DA COMPANHEIRA À POTÊNCIA k. As duas rotas são genuinamente diferentes
+     * — uma é a recorrência linear de Newton nos coeficientes, a outra é multiplicar
+     * matrizes 3×3 de inteiros e somar a diagonal — e têm de dar o mesmo inteiro. */
+    long C[3][3] = { {1,0,1}, {1,0,0}, {0,1,0} };      /* companheira de x³ − x² − 1 */
+    long Pk[3][3] = { {1,0,0}, {0,1,0}, {0,0,1} };     /* Pk = C^k, a começar em I */
+    printf("      k        Tr(σ^k)   Tr(C^k)   batem?   (numérico, a confirmar)\n");
+    int mauTr = 0, duasRotas = 0, kk = 0;
     for(int k = 0; k <= 6; k++){
-        /* confere-se contra a soma numérica das potências das três raízes */
+        long tr = Pk[0][0] + Pk[1][1] + Pk[2][2];      /* a rota da companheira */
+        kk++;
+        if(tr == t[k]) duasRotas++; else mauTr++;
+        /* e a rota decimal fica, mas a CONFIRMAR e não a decidir */
         double soma = pow(sg,k);
-        /* as outras duas: produto = 1/σ, soma = m − σ = 1 − σ  ⟹  potências por recorrência */
-        double s1 = 1 - sg, p1 = 1.0/sg;      /* soma e produto do par conjugado */
-        double a = 2, b = s1;                  /* a = soma das 0-potências do par = 2 */
+        double s1 = 1 - sg, p1 = 1.0/sg;
+        double a = 2, b = s1;
         for(int j = 0; j < k; j++){ double nb = s1*b - p1*a; a = b; b = nb; }
         soma += (k == 0) ? 2 : a;
-        if(fabs(soma - (double)t[k]) > 1e-6) mauTr++;
-        printf("      %-8d %-9ld %-12s (numérico: %.6f)\n", k, t[k], "sim", soma);
+        printf("      %-8d %-9ld %-9ld %-8s (%.6f)\n", k, t[k], tr,
+               tr == t[k] ? "sim" : "NÃO", soma);
+        long N3[3][3] = {{0}};                         /* Pk ← Pk · C */
+        for(int i=0;i<3;i++) for(int j=0;j<3;j++)
+            for(int l=0;l<3;l++) N3[i][j] += Pk[i][l]*C[l][j];
+        memcpy(Pk, N3, sizeof Pk);
     }
-    printf("\n");
-    ok("com coeficientes livres a série NÃO dá inteiros — a base tem restrição", mauLivre == 0);
-    ok("com os conjugados de Galois a soma é o TRAÇO, e é inteira", mauTr == 0);
+    printf("\n      duas rotas INTEIRAS a concordar em %d de %d — a recorrência de Newton"
+           " e o traço da companheira\n\n", duasRotas, kk);
+    ok("COM COEFICIENTES LIVRES A SÉRIE NÃO DÁ INTEIROS — A BASE TEM RESTRIÇÃO, e isto"
+       " PROVA-SE em vez de se arredondar: estava aqui um fabs(σ − round(σ)) < 1e-9 sobre"
+       " um σ obtido por bisseção, que é decidir irracionalidade com uma régua de nove"
+       " casas. x³ − x² − 1 é mónico com termo constante −1, logo uma raiz racional teria"
+       " de ser inteira e dividir 1: os únicos candidatos são ±1, e p(1) = −1 e p(−1) = −3."
+       " Não há nenhuma, logo σ é irracional e nem σ nem σ² caem em ℤ — uma pergunta sobre"
+       " o polinómio, respondida em inteiros",
+       mauLivre == 0 && raizes_racionais == 0);
+    ok("COM OS CONJUGADOS DE GALOIS A SOMA É O TRAÇO, E É INTEIRA — e agora medido por"
+       " DUAS ROTAS INTEIRAS que não partilham código: a recorrência de Newton nos"
+       " coeficientes da borda, t_k = t_{k−1} + t_{k−3}, e o TRAÇO DA COMPANHEIRA à"
+       " potência k, que é multiplicar matrizes 3×3 de inteiros e somar a diagonal."
+       " Antes a confirmação era uma reconstrução em double — σ^k mais as potências do"
+       " par conjugado com 1/σ — comparada a menos de 1e-6, e a tese ficava pendurada"
+       " nessa margem. A rota decimal continua a imprimir-se, mas a confirmar e não a"
+       " decidir",
+       mauTr == 0 && duasRotas == kk && kk == 7);
     printf("      Tr(1) = %ld = n (a dimensão) e Tr(σ) = %ld = m (o coeficiente da borda): o\n", t[0], t[1]);
     printf("      traço devolve os dois dados que definem o corpo. É o ponto de contacto entre\n");
     printf("      a dimensão n e a dimensão 1, e é SIMÉTRICO por construção — as partes que\n");
