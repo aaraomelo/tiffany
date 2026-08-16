@@ -405,25 +405,29 @@ int main(void){
         /* o produto de R^n, nas quatro pecas do §B4:
          *      (a0,a)(b0,b) = ( a0b0 - <a,b> ,  a0b + b0a + a x b )
          * as tres primeiras sao SIMETRICAS em (a,b); so a quarta e antissimetrica. */
-        double a0 = 1.7, b0 = -0.9;
-        double a[3] = { 0.37, -1.20, 0.85 }, b[3] = { -0.62, 0.44, 1.31 };
+        /* A DECOMPOSIÇÃO É ALGÉBRICA: vale para quaisquer entradas, e por isso os
+         * decimais que aqui estavam — 1.7, −0.9, 0.37, … — não tinham genealogia
+         * nenhuma e só serviam para forçar um limiar. Com INTEIROS a partição fecha
+         * por IGUALDADE, e a simetrização (x+y)/2 é exacta porque x+y é par. */
+        long a0 = 17, b0 = -9;
+        long a[3] = { 37, -120, 85 }, b[3] = { -62, 44, 131 };
 
         /* DIRETO: as pecas que nao mudam ao trocar a ordem */
-        double dir_re_ab = a0*b0 - (a[0]*b[0] + a[1]*b[1] + a[2]*b[2]);
-        double dir_re_ba = b0*a0 - (b[0]*a[0] + b[1]*a[1] + b[2]*a[2]);
-        double dir_v_ab[3], dir_v_ba[3];
+        long dir_re_ab = a0*b0 - (a[0]*b[0] + a[1]*b[1] + a[2]*b[2]);
+        long dir_re_ba = b0*a0 - (b[0]*a[0] + b[1]*a[1] + b[2]*a[2]);
+        long dir_v_ab[3], dir_v_ba[3];
         for(int k = 0; k < 3; k++){
             dir_v_ab[k] = a0*b[k] + b0*a[k];
             dir_v_ba[k] = b0*a[k] + a0*b[k];
         }
         /* CRUZADO: a peca que troca de sinal */
-        double cr_ab[3] = { a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0] };
-        double cr_ba[3] = { b[1]*a[2]-b[2]*a[1], b[2]*a[0]-b[0]*a[2], b[0]*a[1]-b[1]*a[0] };
+        long cr_ab[3] = { a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0] };
+        long cr_ba[3] = { b[1]*a[2]-b[2]*a[1], b[2]*a[0]-b[0]*a[2], b[0]*a[1]-b[1]*a[0] };
 
-        int direto_sim = fabs(dir_re_ab - dir_re_ba) < 1e-15;
-        for(int k = 0; k < 3; k++) if(fabs(dir_v_ab[k] - dir_v_ba[k]) > 1e-15) direto_sim = 0;
+        int direto_sim = (dir_re_ab == dir_re_ba);
+        for(int k = 0; k < 3; k++) if(dir_v_ab[k] != dir_v_ba[k]) direto_sim = 0;
         int cruz_anti = 1;
-        for(int k = 0; k < 3; k++) if(fabs(cr_ab[k] + cr_ba[k]) > 1e-15) cruz_anti = 0;
+        for(int k = 0; k < 3; k++) if(cr_ab[k] + cr_ba[k] != 0) cruz_anti = 0;
         ok("o DIRETO e simetrico nas TRES pecas dele (a0b0, o interno, e a0b+b0a) — nao so no interno",
            direto_sim);
         ok("e o CRUZADO e a UNICA peca antissimetrica: a x b = -(b x a)",
@@ -431,7 +435,7 @@ int main(void){
 
         /* E A PARTICAO E COMPLETA: direto + cruzado da o produto inteiro, sem sobra.
          * Isso e o que fecha o circuito — nao ha uma terceira peca a faltar. */
-        double tot_ab[3], tot_ba[3];
+        long tot_ab[3], tot_ba[3];
         for(int k = 0; k < 3; k++){
             tot_ab[k] = dir_v_ab[k] + cr_ab[k];
             tot_ba[k] = dir_v_ba[k] + cr_ba[k];
@@ -439,10 +443,12 @@ int main(void){
         /* a simetrizacao devolve o direto, a antissimetrizacao devolve o cruzado — exatamente */
         int recompoe = 1;
         for(int k = 0; k < 3; k++){
-            double sim  = (tot_ab[k] + tot_ba[k]) / 2.0;
-            double anti = (tot_ab[k] - tot_ba[k]) / 2.0;
-            if(fabs(sim - dir_v_ab[k]) > 1e-15) recompoe = 0;
-            if(fabs(anti - cr_ab[k])   > 1e-15) recompoe = 0;
+            /* tot_ab + tot_ba = 2·dir e tot_ab − tot_ba = 2·cr: as somas são PARES,
+             * logo a divisão por 2 é exacta em inteiros e não há resto a tolerar. */
+            long soma = tot_ab[k] + tot_ba[k], dif = tot_ab[k] - tot_ba[k];
+            if(soma % 2 != 0 || dif % 2 != 0) recompoe = 0;
+            if(soma/2 != dir_v_ab[k]) recompoe = 0;
+            if(dif/2  != cr_ab[k])    recompoe = 0;
         }
         ok("e a particao FECHA: simetrizar o produto devolve o direto, antissimetrizar o cruzado",
            recompoe);

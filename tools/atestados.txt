@@ -230,7 +230,7 @@ hipercubo32 ea42d6c98082dcd2 0
 hipociclo 514fec9334344cf9 0
 histerese_navier ed3e0f5791f828fd 0
 hodge_viviani 9e53debee8151fb9 0
-hopfield 9009b4f6ecdc43a3 0
+hopfield d2eff341b1a41c84 0
 hurwitz 8756c2f3caf5a2f5 0
 icc a1b66e7969752be4 0
 inducao 08eb20f9b21c6338 0
@@ -378,7 +378,7 @@ rastro 26e475d85d748049 0
 reais 621a5430042c6845 0
 real_caminho 8e59cbaaf2b0ed87 0
 recaman e67ba263ef7dfb38 0
-reconstroi ebee793f4c68d7b0 0
+reconstroi abfe632ae04b142f 0
 recursao 7b5ddd4dbc13c83b 0
 rede_dual 982122481c4d95f5 0
 reducao 28c5896c5ab674d0 0

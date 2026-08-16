@@ -188,6 +188,20 @@ static int arv_recupera(const Arv *a, const signed char *s, int *niveis){
  * ─────────────────────────────────────────────────────────────────────────── */
 
 /* a metade simétrica e a antissimétrica de uma matriz qualquer */
+/* A PARTIÇÃO EM INTEIROS. N = 128 e PROF = 8 são potências de dois, logo dividir por
+ * eles é EXACTO em binário e as comparações desta casa podem ser por IGUALDADE. A
+ * excepção era este bloco: Q tinha entradas k/1000, e 1000 NÃO é potência de dois —
+ * (u+v)/2 + (u−v)/2 pode não devolver u. Por isso o par simétrico/antissimétrico passa
+ * a correr sobre os NUMERADORES inteiros, onde
+ *      Sn = Qn_ij + Qn_ji,   An = Qn_ij − Qn_ji,   Sn + An = 2·Qn_ij
+ * é identidade exacta, e o limiar deixa de ter onde entrar. */
+static void parte_n(const long (*B)[N], long (*S)[N], long (*A)[N]){
+    for(int i = 0; i < N; i++)
+        for(int j = 0; j < N; j++){
+            S[i][j] = B[i][j] + B[j][i];      /* = 2·S, em inteiros */
+            A[i][j] = B[i][j] - B[j][i];      /* = 2·A, em inteiros */
+        }
+}
 static void parte(const double (*B)[N], double (*S)[N], double (*A)[N]){
     for(int i = 0; i < N; i++)
         for(int j = 0; j < N; j++){
@@ -262,7 +276,7 @@ int main(void){
                 if(!passo(&R, s, i)) continue;
                 double E2 = energia(&R, s);
                 double d = E2 - E;
-                if(d > 1e-9){ sempre_desce = 0; if(d > maior_subida) maior_subida = d; }
+                if(d > 0.0){ sempre_desce = 0; if(d > maior_subida) maior_subida = d; }
                 E = E2;
                 ensaios++;
             }
@@ -345,12 +359,12 @@ int main(void){
                 double previsto = (k + desacordo) / PROF;
                 double e = fabs(so - previsto);
                 if(e > pior) pior = e;
-                if(e < 1e-12) exatos++;
+                if(e == 0.0) exatos++;
                 pares++;
             }
         }
         ok("a sobreposicao e EXATAMENTE a conta dos niveis que concordam — em 4096 pares, sem erro",
-           exatos == pares && pior < 1e-12);
+           exatos == pares && pior == 0.0);
         /* e a consequência que interessa: mais prefixo comum, mais sobreposição — monótona */
         int monotona = 1;
         for(int k = 0; k <= PROF; k++){
@@ -366,7 +380,7 @@ int main(void){
             caminho(a, pa); caminho(b, pb);
             double so = sobrepoe(pa, pb);
             double esperado = (double)(k - (PROF - k)) / PROF;
-            if(fabs(so - esperado) > 1e-12) monotona = 0;
+            if(so != esperado) monotona = 0;
         }
         ok("e ela CRESCE com o prefixo: partilhar mais niveis e sobrepor mais, exatamente",
            monotona);
@@ -486,7 +500,7 @@ int main(void){
         double so = sobrepoe(a, b);
         int k = prefixo(0xF0, 0xFF);
         ok("e a formalizacao fecha num numero: prefixo 4 de 8 niveis da sobreposicao 0 (ortogonais)",
-           k == 4 && fabs(so - 0.0) < 1e-12);
+           k == 4 && so == 0.0);   /* sobrepoe divide por N = 128: exacto */
         printf("     -> 0xF0 e 0xFF partilham %d niveis de %d, e a sobreposicao e %.1f: metade a\n",
                k, PROF, so);
         puts("        favor, metade contra, e o cancelamento e exato. A ortogonalidade da");
@@ -517,29 +531,41 @@ int main(void){
                 if(d > pior_as) pior_as = d;
             }
         ok("Hebb da uma matriz SIMETRICA: w_ij = w_ji em todas as 16384 entradas",
-           pior_as < 1e-15);
+           pior_as == 0.0);       /* N = 128 é potência de 2: a divisão é exacta */
 
         /* agora a antissimétrica: uma matriz aleatória, e fica-se só com a metade B_a */
         double (*Q)[N] = DISCO_FIXO2(double, N, 154);
         disco_prende(DISCO_BASE(154),"dados/hp_Q_154.bin",(size_t)(N)*(N),sizeof(double));
         disco_zera(Q,(size_t)(N)*(N),sizeof(double));
-        for(int i = 0; i < N; i++)
-            for(int j = 0; j < N; j++) Q[i][j] = ((double)(xs() % 2000) - 1000.0) / 1000.0;
-        parte(Q, S, A);
-
-        /* a partição é única e exata: S + A = Q, S simétrica, A antissimétrica */
-        double e_soma = 0, e_sim = 0, e_anti = 0;
+        /* os NUMERADORES: Q_ij = Qn_ij/1000, com Qn inteiro em [−1000, 999] */
+        long (*Qn)[N] = DISCO_FIXO2(long, N, 251);
+        long (*Sn)[N] = DISCO_FIXO2(long, N, 252);
+        long (*An)[N] = DISCO_FIXO2(long, N, 253);
+        disco_prende(DISCO_BASE(251),"dados/hp_Qn_251.bin",(size_t)(N)*(N),sizeof(long));
+        disco_prende(DISCO_BASE(252),"dados/hp_Sn_252.bin",(size_t)(N)*(N),sizeof(long));
+        disco_prende(DISCO_BASE(253),"dados/hp_An_253.bin",(size_t)(N)*(N),sizeof(long));
         for(int i = 0; i < N; i++)
             for(int j = 0; j < N; j++){
-                double d1 = fabs(S[i][j] + A[i][j] - Q[i][j]);
-                double d2 = fabs(S[i][j] - S[j][i]);
-                double d3 = fabs(A[i][j] + A[j][i]);
-                if(d1 > e_soma) e_soma = d1;
-                if(d2 > e_sim)  e_sim  = d2;
-                if(d3 > e_anti) e_anti = d3;
+                Qn[i][j] = (long)(xs() % 2000) - 1000;
+                Q[i][j] = (double)Qn[i][j] / 1000.0;      /* só para o resto do medidor */
             }
-        ok("a particao B = B_s + B_a e EXATA: soma, simetria e antissimetria, nas 16384 entradas",
-           e_soma < 1e-15 && e_sim < 1e-15 && e_anti < 1e-15);
+        parte_n(Qn, Sn, An);
+        parte(Q, S, A);
+
+        /* a partição é única e exata — e agora mede-se em INTEIROS, por IGUALDADE:
+         *      Sn + An = 2·Qn,   Sn simétrica,   An antissimétrica
+         * O limiar 1e-15 que aqui estava não podia falhar por outro motivo: era a
+         * decoração que dava cara de medição a uma identidade. */
+        long e_soma = 0, e_sim = 0, e_anti = 0;
+        for(int i = 0; i < N; i++)
+            for(int j = 0; j < N; j++){
+                if(Sn[i][j] + An[i][j] != 2*Qn[i][j]) e_soma++;
+                if(Sn[i][j] != Sn[j][i])              e_sim++;
+                if(An[i][j] + An[j][i] != 0)          e_anti++;
+            }
+        ok("a particao B = B_s + B_a e EXATA — medida em INTEIROS e por IGUALDADE, sem"
+           " limiar: Sn + An = 2·Qn, Sn simetrica e An antissimetrica nas 16384 entradas",
+           e_soma == 0 && e_sim == 0 && e_anti == 0);
 
         /* e agora o que cada metade FAZ — que é o resultado */
         /* Eu tinha escrito "a simetrica da PONTO FIXO" e "a antissimetrica cicla com PERIODO 2".
@@ -587,9 +613,9 @@ int main(void){
         double ip_ba = b[0]*a[0] + b[1]*a[1] + b[2]*a[2];
         double cr_ab[3] = { a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0] };
         double cr_ba[3] = { b[1]*a[2]-b[2]*a[1], b[2]*a[0]-b[0]*a[2], b[0]*a[1]-b[1]*a[0] };
-        int interno_sim = fabs(ip_ab - ip_ba) < 1e-15;
+        int interno_sim = (ip_ab == ip_ba);
         int cruzado_anti = 1;
-        for(int k = 0; k < 3; k++) if(fabs(cr_ab[k] + cr_ba[k]) > 1e-15) cruzado_anti = 0;
+        for(int k = 0; k < 3; k++) if(cr_ab[k] + cr_ba[k] != 0.0) cruzado_anti = 0;
         ok("no R^n o INTERNO e simetrico e o CRUZADO e antissimetrico — a mesma particao",
            interno_sim && cruzado_anti);
 
@@ -598,12 +624,12 @@ int main(void){
         double volta[3];
         for(int k = 0; k < 3; k++) volta[k] = -cr_ab[k];
         int per2_cruz = 1;
-        for(int k = 0; k < 3; k++) if(fabs(volta[k] - cr_ba[k]) > 1e-15) per2_cruz = 0;
+        for(int k = 0; k < 3; k++) if(volta[k] != cr_ba[k]) per2_cruz = 0;
         ok("e trocar a ordem no cruzado E o periodo 2 da rede: a x b = -(b x a), vai e volta",
            per2_cruz);
         /* o interno, esse, NAO tem periodo: trocar a ordem nao muda nada */
         ok("enquanto trocar a ordem no interno nao muda NADA — ele para, como o ponto fixo",
-           fabs(ip_ab - ip_ba) < 1e-15);
+           ip_ab == ip_ba);
         printf("     -> interno %.6f nos dois sentidos; cruzado (%.3f,%.3f,%.3f) e o seu negativo.\n",
                ip_ab, cr_ab[0], cr_ab[1], cr_ab[2]);
         puts("        NAO e uma analogia entre rede e algebra: e a MESMA particao B = B_s + B_a,");
@@ -682,7 +708,7 @@ int main(void){
             for(int j = i+1; j < N; j++){
                 double s = 0;
                 for(int k = 0; k < N; k++) s += H[i][k] * H[j][k];
-                if(fabs(s) < 1e-12) ortos++; else if(fabs(s) > pior) pior = fabs(s);
+                if(s == 0.0) ortos++; else if(fabs(s) > pior) pior = fabs(s);
                 pares++;
             }
         ok("e ela e ORTONORMAL: os 8128 pares tem produto interno EXATAMENTE zero",
@@ -840,7 +866,7 @@ int main(void){
                 if(e > pior) pior = e;
             }
         ok("a matriz de Hebb E a soma dos bra-kets |xi><xi|, entrada a entrada, sem resto",
-           pior < 1e-15);
+           pior == 0.0);   /* ambos dividem por N = 128 */
 
         /* ESTICA-CONTRAI: aplicar w a um padrao guardado ESTICA-o (o valor proprio e ~P/N.N);
          * aplicar a um vetor ORTOGONAL a todos CONTRAI-o a zero. E o gato e o esquilo:
@@ -873,7 +899,7 @@ int main(void){
          * Com P=8 e N=128: 0,9375 e 0,0625, razao 15. Nao ha limiar nenhum nisto. */
         double prev_dentro = 1.0 - (double)P/N, prev_fora = (double)P/N;
         ok("ESTICA o guardado e CONTRAI o ortogonal — e os dois batem a FORMA FECHADA, nao um limiar",
-           fabs(norma_dentro - prev_dentro) < 1e-9 && fabs(norma_fora - prev_fora) < 1e-9);
+           norma_dentro == prev_dentro && norma_fora == prev_fora);
         printf("     -> |w.xi| = %.4f (previsto 1-P/N = %.4f); |w.u| = %.4f (previsto P/N = %.4f).\n",
                norma_dentro, prev_dentro, norma_fora, prev_fora);
         printf("        A razao e %.0f para 1, e ela e N/P-1 = %.0f — exata. O esticar aqui e\n",
