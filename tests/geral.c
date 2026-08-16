@@ -32,15 +32,21 @@
 #include <string.h>
 #include <complex.h>
 #include "unidade.h"
+#include "reta.h"
+#include "poli.h"
 
-static long resto_bareiss = 0, caminhos = 0, concordam = 0;   /* Bareiss: a divisao tem de ser exacta */
+static long caminhos = 0, concordam = 0;   /* Bareiss: a divisao tem de ser exacta — a vigia
+                                            * do resto vive agora na reta.h, `rt_bareiss_resto` */
 #define GMAX 12                 /* a caixa desta máquina — da caixa, e não da matemática */
 
-/* p(x) = c[0] + c[1]x + … + c[n]x^n, com c[n] = 1 (mónico) */
-typedef struct { double c[GMAX+1]; int n; } Poli;
+/* p(x) = c[0] + c[1]x + … + c[n]x^n, com c[n] = 1 (mónico).
+ * OS COEFICIENTES SÃO INTEIROS — sempre foram: os cinco polinómios deste ficheiro têm
+ * coeficientes em {−1,0,1,2}. Estavam declarados `double` e o único sítio que precisa de
+ * vírgula é a busca NUMÉRICA das raízes, que converte à entrada. */
+typedef struct { long c[GMAX+1]; int n; } Poli;
 
 static double complex peval(Poli p, double complex z){
-    double complex r = 0;
+    double complex r = 0;   /* a avaliação numérica: os coeficientes entram como inteiros */
     for(int k = p.n; k >= 0; k--) r = r*z + p.c[k];
     return r;
 }
@@ -130,37 +136,20 @@ printf("\n§G1  A companion de grau n devolve o característico — em qualquer 
      * o objecto não tinha nenhuma, e depois pedia um limiar para a esconder. */
     for(int k = 0; k < 5; k++){
         int n = ps[k].n;
-        long A[GMAX][GMAX];
-        for(int i = 0; i < n; i++) for(int j = 0; j < n; j++) A[i][j] = 0;
-        for(int i = 1; i < n; i++) A[i][i-1] = 1;
-        for(int i = 0; i < n; i++) A[i][n-1] = -(long)ps[k].c[i];
-        long tr = 0;
-        for(int i = 0; i < n; i++) tr += A[i][i];
+        /* A COMPANHEIRA E O BAREISS NÃO SE REESCREVEM AQUI. Estavam os dois em linha neste
+         * laço — a matriz montada à mão e a eliminação inteira copiada — e ambos vivem na
+         * reta.h, onde a Lei do ponto fixo os pôs. A convenção da lib é xⁿ = c₁xⁿ⁻¹ + … + cₙ
+         * e a deste ficheiro é p(x) = c[0] + c[1]x + … + xⁿ, logo lib_c[j] = −c[j]. */
+        long cl[GMAX], A[GMAX*GMAX];
+        for(int j = 0; j < n; j++) cl[j] = -ps[k].c[j];
+        rt_companheira(cl, n, A);
+        long tr = rt_traco(A, n);
 
-        /* BAREISS, e o resto da divisão vigia-se: se não for zero, é defeito. */
-        long M[GMAX][GMAX];
-        for(int i = 0; i < n; i++) for(int j = 0; j < n; j++) M[i][j] = A[i][j];
-        long det = 1, prev = 1;
-        int sinal = 1, singular = 0;
-        for(int c = 0; c < n-1 && !singular; c++){
-            if(M[c][c] == 0){
-                int p2 = -1;
-                for(int r = c+1; r < n; r++) if(M[r][c] != 0){ p2 = r; break; }
-                if(p2 < 0){ singular = 1; break; }
-                for(int j = 0; j < n; j++){ long t2=M[c][j]; M[c][j]=M[p2][j]; M[p2][j]=t2; }
-                sinal = -sinal;
-            }
-            for(int i = c+1; i < n; i++)
-                for(int j = c+1; j < n; j++){
-                    long num = M[i][j]*M[c][c] - M[i][c]*M[c][j];
-                    if(num % prev != 0) resto_bareiss++;      /* não pode acontecer */
-                    M[i][j] = num / prev;
-                }
-            prev = M[c][c];
-        }
-        det = singular ? 0 : sinal * M[n-1][n-1];
+        long M[GMAX*GMAX];
+        for(int i = 0; i < n*n; i++) M[i] = A[i];
+        long det = rt_det_bareiss(M, n, n);
 
-        long esp_tr = -(long)ps[k].c[n-1], esp_det = ((n%2)?-1:1)*(long)ps[k].c[0];
+        long esp_tr = -ps[k].c[n-1], esp_det = ((n%2)?-1:1)*ps[k].c[0];
 
         /* E AQUI ESTAVA UMA TAUTOLOGIA, que a sabotagem apanhou: tr = -c_{n-1} vale POR
          * CONSTRUÇÃO da companion — só a última entrada da diagonal é não nula —, logo o
@@ -172,30 +161,24 @@ printf("\n§G1  A companion de grau n devolve o característico — em qualquer 
          *   (N) P_k       — a recorrência de NEWTON sobre os COEFICIENTES, sem matriz
          *
          * Se a companion não realizasse p, os dois separavam-se. */
-        long Pw[GMAX][GMAX], T[GMAX][GMAX];
-        for(int i = 0; i < n; i++) for(int j = 0; j < n; j++) Pw[i][j] = (i==j);
         long PN[16]; PN[0] = n;
         for(int q = 1; q <= 6; q++){
             long v = 0;
             if(q <= n){
-                for(int j = 1; j < q; j++) v += (-(long)ps[k].c[n-j]) * PN[q-j];
-                v += (long)q * (-(long)ps[k].c[n-q]);
+                for(int j = 1; j < q; j++) v += (-ps[k].c[n-j]) * PN[q-j];
+                v += (long)q * (-ps[k].c[n-q]);
             } else {
-                for(int j = 1; j <= n; j++) v += (-(long)ps[k].c[n-j]) * PN[q-j];
+                for(int j = 1; j <= n; j++) v += (-ps[k].c[n-j]) * PN[q-j];
             }
             PN[q] = v;
         }
+        /* e os traços das potências vêm de `rt_tracos`, que é o Tr(σᵏ) de Newton lido nas
+         * matrizes — a segunda rota, e sem uma linha em comum com a recorrência acima */
+        long TRK[16];
+        rt_tracos(A, n, TRK, 7);
         for(int q = 1; q <= 6; q++){
-            for(int i = 0; i < n; i++) for(int j = 0; j < n; j++){
-                long acc = 0;
-                for(int t2 = 0; t2 < n; t2++) acc += Pw[i][t2]*A[t2][j];
-                T[i][j] = acc;
-            }
-            for(int i = 0; i < n; i++) for(int j = 0; j < n; j++) Pw[i][j] = T[i][j];
-            long trk = 0;
-            for(int i = 0; i < n; i++) trk += Pw[i][i];
             caminhos++;
-            if(trk == PN[q]) concordam++;
+            if(TRK[q] == PN[q]) concordam++;
         }
 
         printf("      %-5d %-32s %+6ld  %+7ld  %+6ld  %+ld\n", n, nomes[k], tr, esp_tr, det, esp_det);
@@ -215,7 +198,7 @@ printf("\n§G1  A companion de grau n devolve o característico — em qualquer 
        " fraccoes, cuja divisao intermedia e exacta por teorema — o resto vigia-se e e"
        " zero. A eliminacao com f = M[r][c]/M[c][c] punha a virgula onde o objecto nao"
        " tinha nenhuma, e depois pedia um limiar para a esconder",
-       mal == 0 && resto_bareiss == 0);
+       mal == 0 && rt_bareiss_resto == 0);
     printf("      Traço e determinante são a SOMA e o PRODUTO das raízes, sempre — em grau 2 eles\n");
     printf("      são os dois coeficientes e nada mais falta; em grau n são dois dos n, e os\n");
     printf("      outros n-2 também dizem alguma coisa. É a primeira coisa que muda ao subir.\n");
@@ -249,6 +232,63 @@ printf("\n§G2  As raízes acham-se e VERIFICAM-SE por substituição, em graus 
     }
     printf("\n");
     ok("todas as raízes substituídas dão p(z) = 0 a menos de 1e-9", mal == 0);
+
+    /* E O LADO EXACTO, que é o que falta a uma verificação numérica: substituir cada raiz
+     * em p e ver o resíduo é AUTO-CONSISTÊNCIA — mede a raiz contra o polinómio de onde
+     * ela saiu. A soma das potências das raízes, essa, é um INTEIRO conhecido de antemão:
+     *
+     *      P_k = Σ zᵢᵏ    obedece à recorrência de Newton sobre os COEFICIENTES
+     *
+     * e o inteiro não vem das raízes. Sete somas por polinómio, cada uma a testar todas
+     * as raízes ao mesmo tempo — e o resíduo tem agora um lado que não é do método. */
+    {
+        long bate = 0, tot_n = 0; double pior_n = 0;
+        printf("      polinómio          Σzᵢ^k contra P_k de Newton (k = 1..6)\n");
+        for(int k = 0; k < 6; k++){
+            int n = ps[k].n;
+            double complex z[GMAX];
+            raizes(ps[k], z);
+            long PN[16]; PN[0] = n;
+            for(int q = 1; q <= 6; q++){
+                long v = 0;
+                if(q <= n){
+                    for(int j = 1; j < q; j++) v += (-ps[k].c[n-j]) * PN[q-j];
+                    v += (long)q * (-ps[k].c[n-q]);
+                } else {
+                    for(int j = 1; j <= n; j++) v += (-ps[k].c[n-j]) * PN[q-j];
+                }
+                PN[q] = v;
+            }
+            double piorp = 0;
+            for(int q = 1; q <= 6; q++){
+                double complex sp = 0;
+                for(int i = 0; i < n; i++){
+                    double complex pw = 1;
+                    for(int e = 0; e < q; e++) pw *= z[i];
+                    sp += pw;
+                }
+                double d = cabs(sp - (double)PN[q]);
+                if(d > piorp) piorp = d;
+                if(d > pior_n) pior_n = d;
+                tot_n++;
+                if(d < 1e-6) bate++;
+            }
+            printf("      %-18s  P_1..P_6 = %+ld %+ld %+ld %+ld %+ld %+ld   pior desvio %.1e\n",
+                   nm[k], PN[1], PN[2], PN[3], PN[4], PN[5], PN[6], piorp);
+        }
+        printf("\n");
+        ok("E AS RAIZES BATEM COM UM INTEIRO QUE NAO VEIO DELAS: a soma das potencias"
+           " Sigma z_i^k obedece a recorrencia de NEWTON sobre os coeficientes, e esse inteiro"
+           " conhece-se antes de haver raiz nenhuma. Substituir a raiz no polinomio de onde ela"
+           " saiu e' auto-consistencia; isto sao 36 somas, cada uma a testar todas as raizes"
+           " ao mesmo tempo contra um numero que o metodo nunca viu. E ele mostra DUAS coisas"
+           " que o residuo |p(z)| nao mostrava: no ouro os P_k sao 1, 3, 4, 7, 11, 18 — a"
+           " sucessao de LUCAS, tirada dos coeficientes sem raiz nenhuma —, e o x^4+2x^2+1,"
+           " que e' (x^2+1)^2, e' o pior de longe (1e-8 contra 1e-15 dos outros), porque tem"
+           " raiz DUPLA: perto de uma raiz dupla o polinomio e' plano e |p(z)| fica pequeno"
+           " sem a raiz estar certa. A soma das potencias nao se deixa enganar por isso",
+           bate == tot_n && tot_n == 36);
+    }
     printf("      Durand-Kerner acha-as TODAS ao mesmo tempo, sem deflação e sem escolher qual\n");
     printf("      primeiro — o que evita o erro de deflação acumulado. E não se confia nele: cada\n");
     printf("      raiz é SUBSTITUÍDA e o resíduo medido, que é a mesma disciplina do resto.\n");
@@ -332,29 +372,12 @@ printf("\n§G4  O regime é o sinal de max Re(λ) — e ISSO generaliza.\n\n");
             int n = t[k].p.n;
             long a[GMAX+1];
             for(int i = 0; i <= n; i++) a[i] = (long)t[k].p.c[n-i];   /* do maior grau ao menor */
-            /* a matriz de Hurwitz e os seus menores principais, por eliminacao em Q com
-               denominador acumulado — aqui basta o SINAL, e ele sai do produto dos pivos */
-            int todos_pos = 1;
-            for(int mtam = 1; mtam <= n && todos_pos; mtam++){
-                double H[GMAX][GMAX] = {{0}};
-                for(int i = 0; i < mtam; i++) for(int j = 0; j < mtam; j++){
-                    int idx = n - 2*(i+1) + (j+1);
-                    H[i][j] = (idx >= 0 && idx <= n) ? (double)a[n-idx] : 0.0;
-                }
-                double det = 1; int sinal = 1;
-                for(int c = 0; c < mtam; c++){
-                    int piv = -1;
-                    for(int r = c; r < mtam; r++) if(H[r][c] != 0){ piv = r; break; }
-                    if(piv < 0){ det = 0; break; }
-                    if(piv != c){ for(int j2=0;j2<mtam;j2++){ double tt=H[c][j2]; H[c][j2]=H[piv][j2]; H[piv][j2]=tt; } sinal = -sinal; }
-                    det *= H[c][c];
-                    for(int r = c+1; r < mtam; r++){
-                        double f = H[r][c]/H[c][c];
-                        for(int j2 = c; j2 < mtam; j2++) H[r][j2] -= f*H[c][j2];
-                    }
-                }
-                if(sinal*det <= 0) todos_pos = 0;
-            }
+            /* A MATRIZ DE HURWITZ E OS SEUS MENORES, e agora é mesmo em inteiros: o
+             * comentário acima já dizia «a segunda rota, em INTEIROS» e o que estava aqui
+             * era eliminação gaussiana em `double`, com f = H[r][c]/H[c][c] — a vírgula
+             * dentro da rota que devia ser a exacta. É `rt_hurwitz_est` da reta.h, que
+             * monta a mesma matriz e tira cada menor por BAREISS. */
+            int todos_pos = rt_hurwitz_est(a, n);
             /* e o factor x² + c, por divisao EXACTA em Z[x] */
             long cfac = 0;
             for(long c2 = 1; c2 <= 64 && !cfac; c2++){
@@ -423,22 +446,42 @@ printf("\n§G5  E A CLASSIFICAÇÃO GENERALIZA — pela ASSINATURA. Eu tinha lid
         { "x⁴ - 1",               { { -1, 0, 0, 0, 1 }, 4 },     2, 1 },
         { "x⁵ - x⁴ - 1 (o furo)", { { -1, 0, 0, 0, -1, 1 }, 5 }, 1, 2 },
     };
-    int mau2 = 0;
-    printf("\n      polinómio                 assinatura   o que é\n");
+    /* A ASSINATURA CONTA-SE POR STURM, e não por olhar para a parte imaginária de uma raiz
+     * numérica. O que aqui estava era `fabs(cimag(z)) < 1e-9` — uma régua escolhida por mim
+     * a decidir se um número é real —, e a pergunta «quantas raízes reais tem p» responde-se
+     * em INTEIROS, sem calcular raiz nenhuma: é a cadeia de Sturm, que a casa tem em
+     * `lib/poli.h`. Os seis polinómios são livres de quadrados, logo distintas = todas.
+     * O Durand–Kerner fica, mas como SEGUNDA rota: a numérica confirma a inteira. */
+    int mau2 = 0, sturm_bate = 0, sturm_casos = 0;
+    printf("\n      polinómio                 (r,s) Sturm   (r,s) numérico   o que é\n");
     for(size_t k = 0; k < sizeof t/sizeof *t; k++){
+        int n2 = t[k].p.n;
+        Pol pp; pol_zera(&pp); pp.n = n2;
+        for(int i2 = 0; i2 <= n2; i2++){ pp.p[i2] = t[k].p.c[i2]; pp.q[i2] = 1; }
+        int r_st = pol_sturm_reais(pp);          /* EXACTO, em inteiros */
+        int s_st = (r_st >= 0) ? (n2 - r_st)/2 : -1;
+
         double complex z[GMAX];
         raizes(t[k].p, z);
         int r = 0, sp = 0;
-        for(int i2 = 0; i2 < t[k].p.n; i2++){
+        for(int i2 = 0; i2 < n2; i2++){
             if(fabs(cimag(z[i2])) < 1e-9) r++; else sp++;
         }
         sp /= 2;
-        printf("      %-25s (%d, %d)       %s\n", t[k].nome, r, sp,
-               t[k].p.n == 2 ? (sp ? "elíptico" : "hiperbólico") : "e em grau 2 chamar-se-ia assim");
-        if(r != t[k].r || sp != t[k].s) mau2++;
+        printf("      %-25s (%d, %d)         (%d, %d)          %s\n", t[k].nome, r_st, s_st, r, sp,
+               n2 == 2 ? (sp ? "elíptico" : "hiperbólico") : "e em grau 2 chamar-se-ia assim");
+        if(r_st != t[k].r || s_st != t[k].s) mau2++;
+        sturm_casos++;
+        if(r_st == r && s_st == sp) sturm_bate++;
     }
     printf("\n");
-    ok("a assinatura medida bate a esperada nos seis, de grau 2 a 5", mau2 == 0);
+    ok("a assinatura sai por STURM — em INTEIROS e sem calcular raiz nenhuma — e bate a"
+       " esperada nos seis, de grau 2 a 5. O que aqui estava contava as raizes reais por"
+       " |Im(z)| < 1e-9, que e' uma regua minha a decidir se um numero e' real",
+       mau2 == 0 && sturm_casos == 6);
+    ok("e o Durand-Kerner CONFIRMA a conta inteira nos seis — a rota numerica passa a"
+       " confirmar a exacta em vez de a substituir, que e' a ordem certa das duas",
+       sturm_bate == sturm_casos);
     printf("      Então É O MESMO CORPO, e nem sequer outra roupa: outra INTERPRETAÇÃO. Em grau 2\n");
     printf("      a assinatura cabe no sinal de um número, e por isso lhe chamamos Δ e falamos em\n");
     printf("      três classes; em grau n ela precisa do par (r,s), e o número de classes cresce\n");

@@ -127,6 +127,12 @@ static long rt_inv_mod(long a, long p){
  * `rt_det_mod` em vários primos.
  *
  * A matriz é dada em G com passo `passo`, e é CONSUMIDA. */
+/* O RESTO DA DIVISÃO DE BAREISS vigia-se aqui, e não em cada chamador. A divisão pelo
+ * pivô anterior é EXACTA por teorema — os intermédios são menores da matriz —, logo um
+ * resto não nulo não é imprecisão: é defeito, e conta-se. O `geral.c` tinha esta vigia
+ * escrita à mão dentro do seu laço; agora quem chama a lib herda-a de graça. */
+static long rt_bareiss_resto = 0;
+
 static long rt_det_bareiss(long *G, int n, int passo){
     long ant = 1;
     int sinal = 1;
@@ -144,8 +150,11 @@ static long rt_det_bareiss(long *G, int n, int passo){
         }
         for(int i = k + 1; i < n; i++)
             for(int j = k + 1; j < n; j++)
-                G[i*passo + j] = (G[i*passo + j]*G[k*passo + k]
-                                  - G[i*passo + k]*G[k*passo + j]) / ant;
+            {
+                long num = G[i*passo + j]*G[k*passo + k] - G[i*passo + k]*G[k*passo + j];
+                if(num % ant != 0) rt_bareiss_resto++;      /* não pode acontecer */
+                G[i*passo + j] = num / ant;
+            }
         ant = G[k*passo + k];
     }
     return sinal*G[(n-1)*passo + (n-1)];
@@ -518,8 +527,11 @@ static void rt_mul_mat(const long *A, const long *B, int n, long *C){
         C[i*n + j] = s;
     }
 }
-static void rt_identidade(long *I, int n){
-    for(int i = 0; i < n; i++) for(int j = 0; j < n; j++) I[i*n + j] = (i == j);
+/* (o parâmetro chamava-se `I`, e `I` é a unidade imaginária de <complex.h>: qualquer
+ *  ficheiro que inclua os dois deixava de compilar. Um nome de uma letra num header é um
+ *  nome que colide.) */
+static void rt_identidade(long *Id, int n){
+    for(int i = 0; i < n; i++) for(int j = 0; j < n; j++) Id[i*n + j] = (i == j);
 }
 static long rt_traco(const long *M, int n){
     long s = 0;
