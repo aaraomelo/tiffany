@@ -57,3 +57,35 @@ Atacar o que acabei de publicar, antes de o revisor voltar. Duas das quatro corr
 E uma nota antiga minha travou-me a tempo pela primeira vez — *"a norma da agulha é aditiva e o
 objeto é multiplicativo"* (ver [[project-transformada-universal]]) — que foi o que me impediu de
 colar `|Γ|²+T=1` com `N(x)=x·x'` como se fossem a mesma conta.
+
+
+## Quarta escala, 16/08/2026: a identidade certa e a testemunha falsa
+
+Na `prop:q-falha` (que ℚ não tem `sup{r>0 : r²<2}`) escrevi que a testemunha era a **mediante de
+Farey** `(p+2q)/(p+q)`, porque
+
+```
+(p+2q)² − 2(p+q)² = −(p² − 2q²)      TROCA o sinal
+```
+
+A identidade é **verdadeira**. A conclusão era **falsa**: trocar o sinal significa que a mediante
+*atravessa* o corte e cai do **lado oposto** — logo não fica entre `p/q` e ele, e não testemunha
+nada. Escrevi-a na véspera e passou o meu próprio medidor, porque o medidor verificava **a
+identidade**, que estava certa.
+
+A testemunha certa é a mediante aplicada **duas vezes**:
+
+```
+(p,q) ⟼ (3p+4q, 2p+3q)        det [[3,4],[2,3]] = 1 = a unidade fundamental de ℤ[√2] ao quadrado
+
+(3p+4q)² − 2(2p+3q)² = p² − 2q²        PRESERVA o lado
+(3p+4q)q − p(2p+3q)  = 2(2q² − p²)     e MOVE na direcção dele
+```
+
+**São precisas as duas.** Preservar o lado sem mover não refuta nada; mover sem preservar o lado
+salta para fora do conjunto.
+
+**Sinal operacional, e é novo:** quando a justificação é uma identidade algébrica, medir a
+identidade **não** mede a inferência. Perguntar em voz alta *o que é que este sinal me dá* — e se
+a resposta for «cai do outro lado», isso é o **contrário** de uma testemunha entre dois pontos.
+Ver [[project-continuidade-duas-direccoes]].

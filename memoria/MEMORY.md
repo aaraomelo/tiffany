@@ -53,6 +53,8 @@
 - **[O replace sem limite](feedback-o-replace-sem-limite.md)** — TRÊS vezes num dia: mudou laços e asserções noutros andares. O código idiomático é o que torna o replace global uma arma.
 - **[Saturação não é resultado](feedback-saturacao-nao-e-resultado.md)** — «falha travestida de teorema». Ia publicar «5 de 8» e as três em falta eram o `long`. A tese é do PASSO: virou 1040/1040.
 - **[A desinvestigação](feedback-desinvestigacao.md)** — se a frase responde «como descobrimos isto?», SAI do paper. Achar erro no pai não é «o pai errou»: é interpretação que faltou lá.
+- **[A identidade certa, a testemunha falsa](feedback-justificar-o-que-so-e-coerente.md)** — a mediante de Farey TROCA o sinal, logo atravessa o corte: medir a identidade não mede a inferência.
+- **[Duas réguas: a convenção longe do 1.º uso](feedback-duas-reguas.md)** — declarei «D e não Δ» na linha 741 e o primeiro uso era na 201.
 - **[Revisores em paralelo](feedback-revisores-externos.md)** — compensam MUITO e é preciso REPICAR. Os graves são todos do mesmo tipo: A ASSERÇÃO ERA O DEFEITO.
 
 ## A teoria
@@ -68,6 +70,8 @@
 - [O corpo quântico e o cósmico](project-quantico-cosmico.md) — [σi,σj]=2i·ε·σk É o produto cruzado. E: CHAMEI LEI À CONSEQUÊNCIA DE UMA ESCOLHA MINHA (Carnot). Gatilho: que parâmetros do teorema fui eu que escolhi?
 - **[A escada paga uma fibra por andar](project-escada-paga-uma-fibra.md)** — «não eliminamos as excepções; descobrimos em que andar elas são o preço». Os `if` vêm da normalização: 10 → 0.
 - **[A RETA CONSTRUÍDA](project-a-reta-construida.md)** — ℝ INTEIRO nas oito leis: o ouro é o real mais lento e limita todos. E a lição: não virar JUIZ da teoria, executar a construção.
+- **[A CONTINUIDADE nas duas direcções](project-continuidade-duas-direccoes.md)** — a casa media só «o habitante É o supremo da sua classe»; a volta — dado S limitado, EXISTE sup S — constrói-se em inteiros, e a diagonal tem de sair FORA DA BORDA.
+- **[A condição do encaixe é n ≤ t](project-condicao-pisot-n-menor-t.md)** — a unidade era SUFICIENTE e eu escrevi «necessária»: x²−3x−3 tem |det|=3 e É Pisot. E a fronteira n=t+1 FACTORIZA.
 - **[O TEOREMA DO GATO](project-teorema-do-gato.md)** — det É a medida; sobe em espiral, desce discreto; e o dual do gato é o PASSARINHO — conservar a medida é ser o seu próprio dual métrico.
 - **[A derivada exterior](project-a-derivada-exterior.md)** — o `d` é UMA operação (grad/rot/div são nomes dela) e Green/Stokes/Gauss são UM teorema: a prova é o PROGRAMA ser um só. Sete objectos de cinco andares, uma gramática — a graduação.
 - **[Cálculo II e III](project-calculo-2-3.md)** — a série é o OBJECTO e o valor é que precisa do limite; local→global; e Green/Stokes/Gauss são UMA frase: ∫_∂R ω = ∫_R Dω, com os dois lados sem código em comum.

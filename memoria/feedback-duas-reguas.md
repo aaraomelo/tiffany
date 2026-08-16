@@ -1,6 +1,6 @@
 ---
 name: feedback-duas-reguas
-description: SEIS vezes num dia — medir por uma fonte e desenhar por outra. O sintoma é sempre letras por cima de letras
+description: SEIS vezes num dia — medir por uma fonte e desenhar por outra. E a variante do texto: a convenção declarada LONGE do primeiro uso
 metadata: 
   node_type: memory
   type: feedback
@@ -45,3 +45,23 @@ asserção minha o podia apanhar, porque **as asserções comparavam a conta com
 (`U^{(m)}`) — e a defesa é medir a DIVERGÊNCIA: `U^{(m)}` coincide com `F` em exactamente
 um dos oito metais, e diverge já em `k = 2`. Isso transforma a confusão de nome num
 número que falha se eu voltar a colá-las. Ver [[project-a-reta-construida]].
+
+
+## E a variante do TEXTO: a convenção declarada longe do primeiro uso
+
+16/08/2026, na revisão do `geometrico.tex`. O paper **declarava**, na §`sec:reta`:
+
+> o discriminante `D = tr² − 4det` — **escrito `D`, e não `Δ`, que fica reservado à diferença
+> finita**
+
+e depois usava `Δ` para o discriminante em **oito linhas** (10 ocorrências). Duas réguas para o
+mesmo objecto, em LaTeX, num paper que declara a régua no próprio texto.
+
+**A causa é posicional:** a declaração estava na linha 741 e o **primeiro uso** na 201 — 540
+linhas acima. Uma convenção que nasce a meio do documento não governa o que veio antes, e
+ninguém a lê duas vezes.
+
+**How to apply:** `grep` do símbolo antes de dar por fechado, e comparar a **primeira** ocorrência
+com o sítio onde a convenção é declarada. Se a declaração não é a primeira, ela não é convenção —
+é nota de rodapé. E o gume barato: se dois objectos distintos partilham símbolo, o compilador não
+se queixa e nenhum medidor apanha, porque **o texto não corre**.
