@@ -48,6 +48,7 @@
 #include <math.h>
 #include "unidade.h"
 #include "racionais.h"
+#include "poli.h"
 
 typedef struct { long a, b, c, d; } M2;                 /* [[a,b],[c,d]] */
 static M2 mul(M2 X, M2 Y){
@@ -86,6 +87,43 @@ static long det_bareiss(long *G, int n, int passo){
         ant = G[k*passo + k];
     }
     return sinal*G[(n-1)*passo + (n-1)];
+}
+
+/* o inverso em 𝔽ₚ por Fermat — nenhuma divisão, e nenhum real */
+static long inv_mod(long a, long p){
+    long r = 1, e = p - 2;
+    a = ((a % p) + p) % p;
+    while(e){ if(e & 1) r = r*a % p; a = a*a % p; e >>= 1; }
+    return r;
+}
+
+/* E O MESMO DETERMINANTE EM 𝔽ₚ, para quando os intermédios não cabem. O Bareiss é
+ * exacto em ℤ, mas os seus intermédios são MENORES da matriz: numa 5×5 com entradas
+ * da ordem de 10^10 eles chegam a 10^42, e o `long` enrola calado — o resultado final
+ * cabia (10^14) e mesmo assim saía errado. Em 𝔽ₚ nada cresce. */
+static long det_mod(long *G, int n, int passo, long p){
+    long d = 1;
+    for(int k = 0; k < n; k++){
+        int piv = -1;
+        for(int i = k; i < n; i++) if(((G[i*passo+k] % p) + p) % p){ piv = i; break; }
+        if(piv < 0) return 0;
+        if(piv != k){
+            for(int j = 0; j < n; j++){
+                long t = G[k*passo+j]; G[k*passo+j] = G[piv*passo+j]; G[piv*passo+j] = t;
+            }
+            d = (p - d) % p;
+        }
+        long a = ((G[k*passo+k] % p) + p) % p;
+        d = d*a % p;
+        long iv = inv_mod(a, p);
+        for(int i = k+1; i < n; i++){
+            long f = ((G[i*passo+k] % p) + p) % p * iv % p;
+            if(!f) continue;
+            for(int j = k; j < n; j++)
+                G[i*passo+j] = (((G[i*passo+j] - f*G[k*passo+j]) % p) + p) % p;
+        }
+    }
+    return d;
 }
 
 /* e a potência inteira, para a lei det(A⊗B) = det(A)^b · det(B)^a — `pow` devolvia um
@@ -765,147 +803,135 @@ printf("\n§M11 K(n,m) É SÓ UM LADO — e com o dual dá R^n de facto.\n\n");
      * do outro lado do mergulho) — não se contradizem, porque falam de coisas diferentes.
      *
      * E o "R^n + R^n*" mede-se: o reticulado L e o seu dual L* têm volumes RECÍPROCOS. */
-    printf("      n   m   r₁   r₂   r₁+2r₂   posto   vol(L)      vol(L*)     vol·vol*\n");
+    /* E NADA DISTO PRECISA DE UM DOUBLE. A primeira versão contava as raízes reais com
+     * Durand–Kerner, montava a matriz de Minkowski com os mergulhos em vírgula
+     * flutuante e tirava o volume por eliminação com pivô a 1e-12. Mas um irracional
+     * NÃO é um decimal truncado: nesta casa ele é o CAMINHO, e o que dele se precisa
+     * aqui — quantos mergulhos são reais, e qual o volume do reticulado — sai tudo de
+     * inteiros. O double era a representação amputada, e entrava no NÚCLEO; a vírgula
+     * é da apresentação, e fica para o fim, fora do sistema.
+     *
+     *   r₁   pela SEQUÊNCIA DE STURM: `lib/poli.h` já a tinha, e conta as raízes reais
+     *        sem avaliar nenhuma — «os extremos são estrutura, não números».
+     *
+     *   vol  o volume do reticulado de Minkowski cumpre vol² = |disc(K)|, e o
+     *        DISCRIMINANTE é o determinante da matriz de TRAÇOS G_ij = Tr(σ^{i+j}) —
+     *        inteira, e com os traços a virem da companheira, que este ficheiro já
+     *        calcula no §M14.
+     *
+     *   L*   o dual é a ADJUNTA, e a relação recíproca é uma identidade INTEIRA:
+     *
+     *            G·adj(G) = det(G)·I        e        det(adj G) = det(G)^{n−1}
+     *
+     *        donde det(G⁻¹) = det(G)^{n−1}/det(G)^n = 1/det(G). É o vol·vol* = 1, agora
+     *        sem uma divisão e sem um limiar. */
+    printf("      n   m   r₁   r₂   r₁+2r₂   disc = det G   G·adj G = disc·I   det adj = disc^(n−1)\n");
     int mauPosto = 0, mauVol = 0, casos = 0, mauDual2 = 0;
     for(int n = 2; n <= 5; n++)
     for(int m = 1; m <= 2; m++){
-        /* as raízes por Durand–Kerner (como no §M10) */
-        int N = n; double re[8], im[8];
-        for(int k = 0; k < N; k++){ re[k] = cos(0.9+2.0*k); im[k] = sin(0.9+2.0*k); }
-        for(int it = 0; it < 6000; it++)
-        for(int k = 0; k < N; k++){
-            double pr = 1, pi = 0;
-            for(int t = 0; t < N; t++){ double a = pr*re[k]-pi*im[k], b = pr*im[k]+pi*re[k]; pr=a; pi=b; }
-            double qr = 1, qi = 0;
-            for(int t = 0; t < N-1; t++){ double a = qr*re[k]-qi*im[k], b = qr*im[k]+qi*re[k]; qr=a; qi=b; }
-            pr -= m*qr + 1; pi -= m*qi;
-            double dr = 1, di = 0;
-            for(int j = 0; j < N; j++){
-                if(j == k) continue;
-                double ar = re[k]-re[j], ai = im[k]-im[j];
-                double a = dr*ar - di*ai, b = dr*ai + di*ar; dr=a; di=b;
-            }
-            double den = dr*dr + di*di;
-            if(den < 1e-300) continue;
-            re[k] -= (pr*dr + pi*di)/den; im[k] -= (pi*dr - pr*di)/den;
+        /* (i) r₁ POR STURM, em inteiros: β(n,m) = xⁿ − m·x^{n−1} − 1 */
+        Pol pb; pb.n = n;
+        for(int k = 0; k <= n; k++){ pb.p[k] = 0; pb.q[k] = 1; }
+        pb.p[n] = 1; pb.p[n-1] = -m; pb.p[0] = -1;
+        int r1 = pol_sturm_reais(pb);
+        if(r1 < 0){ continue; }
+        int r2 = (n - r1)/2;
+        if(r1 + 2*r2 != n) mauPosto++;
+
+        /* (ii) os TRAÇOS pela companheira de β, e a matriz de traços G */
+        long C[8][8] = {{0}}, Pk[8][8] = {{0}}, tr[16];
+        for(int j = 0; j < n; j++) C[0][j] = 0;
+        C[0][0] = m; C[0][n-1] = 1;                 /* xⁿ = m·x^{n−1} + 1 */
+        for(int i = 1; i < n; i++) C[i][i-1] = 1;
+        for(int i = 0; i < n; i++) Pk[i][i] = 1;
+        for(int k = 0; k <= 2*n-2; k++){
+            long s = 0;
+            for(int i = 0; i < n; i++) s += Pk[i][i];
+            tr[k] = s;
+            long NN[8][8] = {{0}};
+            for(int i=0;i<n;i++) for(int j=0;j<n;j++)
+                for(int l=0;l<n;l++) NN[i][j] += Pk[i][l]*C[l][j];
+            memcpy(Pk, NN, sizeof Pk);
         }
-        /* contar r₁ e r₂, e montar a matriz de Minkowski: linhas = 1, x, …, xⁿ⁻¹ */
-        int r1 = 0; for(int k = 0; k < N; k++) if(fabs(im[k]) < 1e-7) r1++;
-        int r2 = (N - r1)/2;
-        double M[8][8];
-        for(int k = 0; k < N; k++){
-            /* a linha k é a base x^k avaliada em cada mergulho */
-            int col = 0;
-            for(int j = 0; j < N; j++){
-                if(fabs(im[j]) >= 1e-7) continue;
-                double vr = 1;
-                for(int t = 0; t < k; t++) vr *= re[j];
-                M[k][col++] = vr;
+        long G[8][8];
+        for(int i = 0; i < n; i++) for(int j = 0; j < n; j++) G[i][j] = tr[i+j];
+
+        /* (iii) disc = det G, por Bareiss — inteiro, sem pivô com limiar */
+        long Gb[8][8]; memcpy(Gb, G, sizeof Gb);
+        long disc = det_bareiss(&Gb[0][0], n, 8);
+        if(disc == 0) mauPosto++;                   /* posto cheio ⟺ disc ≠ 0, EXACTO */
+
+        /* (iv) o DUAL é a adjunta, e constrói-se por cofactores — tudo inteiro */
+        long Adj[8][8];
+        for(int i = 0; i < n; i++) for(int j = 0; j < n; j++){
+            long Sub[8][8]; int u = 0;
+            for(int a2 = 0; a2 < n; a2++){
+                if(a2 == j) continue;               /* adj = transposta dos cofactores */
+                int v = 0;
+                for(int b2 = 0; b2 < n; b2++){
+                    if(b2 == i) continue;
+                    Sub[u][v++] = G[a2][b2];
+                }
+                u++;
             }
-            /* os pares complexos: um representante de cada, como (Re, Im) */
-            for(int j = 0; j < N; j++){
-                if(fabs(im[j]) < 1e-7 || im[j] < 0) continue;    /* só a metade de cima */
-                double vr = 1, vi = 0;
-                for(int t = 0; t < k; t++){ double a = vr*re[j]-vi*im[j], b = vr*im[j]+vi*re[j]; vr=a; vi=b; }
-                M[k][col++] = vr; M[k][col++] = vi;
-            }
-            if(col != N) mauPosto++;
+            long men = (n == 1) ? 1 : det_bareiss(&Sub[0][0], n-1, 8);
+            Adj[i][j] = ((i + j) % 2 ? -men : men);
         }
-        /* volume = |det M| ; e o dual tem det 1/|det M| */
-        double G[8][8]; memcpy(G, M, sizeof G);
-        double vol = 1;
-        for(int c = 0; c < N; c++){
-            int piv = c;
-            for(int r = c; r < N; r++) if(fabs(G[r][c]) > fabs(G[piv][c])) piv = r;
-            if(fabs(G[piv][c]) < 1e-12){ vol = 0; break; }
-            if(piv != c){ for(int j=0;j<N;j++){ double t=G[c][j]; G[c][j]=G[piv][j]; G[piv][j]=t; } vol = -vol; }
-            vol *= G[c][c];
-            for(int r = c+1; r < N; r++){
-                double f = G[r][c]/G[c][c];
-                for(int j = c; j < N; j++) G[r][j] -= f*G[c][j];
-            }
+        /* e a IDENTIDADE que define o dual: G·adj(G) = disc·I, entrada a entrada */
+        int idOK = 1;
+        for(int i = 0; i < n && idOK; i++) for(int j = 0; j < n; j++){
+            long s = 0;
+            for(int l = 0; l < n; l++) s += G[i][l]*Adj[l][j];
+            if(s != (i == j ? disc : 0)){ idOK = 0; break; }
         }
-        vol = fabs(vol);
-        /* E O DUAL CONSTRÓI-SE, e não se escreve 1/vol. Estava aqui
+        if(!idOK) mauDual2++;
+
+        /* (v) e daí vol·vol* = 1, por det(adj G) = disc^{n−1}.
          *
-         *      double vold = 1.0/vol;   ...   if(fabs(vol*vold - 1.0) > 1e-9) mauVol++;
-         *
-         * que é vol·(1/vol) = 1: uma quantidade dividida por si própria, e o resultado
-         * chamado confirmação. A asserção não podia falhar, e o que ela dizia — «o
-         * reticulado e o dual têm volumes recíprocos» — nunca chegou a ser medido,
-         * porque o dual nunca foi construído.
-         *
-         * O reticulado dual é L* = (Mᵀ)⁻¹. Constrói-se resolvendo M·X = I por eliminação,
-         * transpõe-se, e o VOLUME DELE calcula-se pela mesma rotina, a partir das suas
-         * próprias entradas. Só então vol·vol* = 1 compara dois determinantes de duas
-         * matrizes distintas — e há como falhar. */
-        double Inv[8][8], Aug[8][16];
-        for(int i = 0; i < N; i++){
-            for(int j = 0; j < N; j++){ Aug[i][j] = M[i][j]; Aug[i][N+j] = (i==j) ? 1 : 0; }
+         * E ESTA MEDE-SE EM 𝔽ₚ, porque em ℤ NÃO CABE — e foi a própria asserção que o
+         * disse. As entradas de adj(G) já vão a 10^12 para n = 5, e os intermédios do
+         * Bareiss são menores da matriz: chegam a 10^42 e o `long` enrola calado. O
+         * resultado final cabia (10^14) e saía errado à mesma, que é o pior modo de
+         * falhar. Em três primos nada cresce, e a identidade fecha nos oito casos. */
+        const long PR[3] = {1000003, 1000033, 1000037};
+        int modOK = 1;
+        for(int t2 = 0; t2 < 3; t2++){
+            long q = PR[t2];
+            long Ab[8][8];
+            for(int i = 0; i < n; i++) for(int j = 0; j < n; j++)
+                Ab[i][j] = ((Adj[i][j] % q) + q) % q;
+            long dAdj = det_mod(&Ab[0][0], n, 8, q);
+            long prev = 1, dq = ((disc % q) + q) % q;
+            for(int e = 0; e < n-1; e++) prev = prev*dq % q;
+            if(dAdj != prev) modOK = 0;
         }
-        int invertivel = 1;
-        for(int c = 0; c < N && invertivel; c++){
-            int piv = c;
-            for(int r = c; r < N; r++) if(fabs(Aug[r][c]) > fabs(Aug[piv][c])) piv = r;
-            if(fabs(Aug[piv][c]) < 1e-12){ invertivel = 0; break; }
-            if(piv != c) for(int j = 0; j < 2*N; j++){
-                double t = Aug[c][j]; Aug[c][j] = Aug[piv][j]; Aug[piv][j] = t;
-            }
-            double d0 = Aug[c][c];
-            for(int j = 0; j < 2*N; j++) Aug[c][j] /= d0;
-            for(int r = 0; r < N; r++){
-                if(r == c) continue;
-                double f = Aug[r][c];
-                for(int j = 0; j < 2*N; j++) Aug[r][j] -= f*Aug[c][j];
-            }
-        }
-        double Md[8][8];
-        for(int i = 0; i < N; i++) for(int j = 0; j < N; j++)
-            Inv[i][j] = Aug[i][N+j], Md[j][i] = Aug[i][N+j];   /* Md = (M⁻¹)ᵀ */
-        /* (i) a construção verifica-se: M·Mdᵀ = I, que é a DEFINIÇÃO de dual */
-        double piorI = 0;
-        for(int i = 0; i < N; i++) for(int j = 0; j < N; j++){
-            double sdd = 0;
-            for(int l = 0; l < N; l++) sdd += M[i][l]*Md[j][l];
-            double alvo = (i==j) ? 1 : 0, e = fabs(sdd - alvo);
-            if(e > piorI) piorI = e;
-        }
-        if(!invertivel || piorI > 1e-6) mauDual2++;
-        /* (ii) e o volume do dual sai das entradas DELE, pela mesma eliminação */
-        double Gd[8][8]; memcpy(Gd, Md, sizeof Gd);
-        double vold = 1;
-        for(int c = 0; c < N; c++){
-            int piv = c;
-            for(int r = c; r < N; r++) if(fabs(Gd[r][c]) > fabs(Gd[piv][c])) piv = r;
-            if(fabs(Gd[piv][c]) < 1e-12){ vold = 0; break; }
-            if(piv != c){ for(int j=0;j<N;j++){ double t=Gd[c][j]; Gd[c][j]=Gd[piv][j]; Gd[piv][j]=t; } vold = -vold; }
-            vold *= Gd[c][c];
-            for(int r = c+1; r < N; r++){
-                double f = Gd[r][c]/Gd[c][c];
-                for(int j = c; j < N; j++) Gd[r][j] -= f*Gd[c][j];
-            }
-        }
-        vold = fabs(vold);
-        int posto = (vol > 1e-12) ? N : 0;
-        if(posto != N) mauPosto++;
-        if(fabs(vol*vold - 1.0) > 1e-6) mauVol++;
-        if(r1 + 2*r2 != N) mauPosto++;
+        if(!modOK) mauVol++;
         casos++;
-        printf("      %-3d %-3d %-4d %-4d %-8d %-7d %-11.6f %-11.8f %.8f\n",
-               n, m, r1, r2, r1+2*r2, posto, vol, vold, vol*vold);
+        printf("      %-3d %-3d %-4d %-4d %-8d %-14ld %-17s %s\n",
+               n, m, r1, r2, r1+2*r2, disc, idOK ? "sim" : "NÃO",
+               modOK ? "sim (3 primos)" : "NÃO");
     }
-    printf("\n      %d casos\n\n", casos);
-    ok("os n mergulhos dão r₁+2r₂ = n e o reticulado tem posto CHEIO — K⊗R é R^n", mauPosto == 0);
-    printf("      e o dual foi CONSTRUÍDO: M·M*ᵀ = I em %d de %d casos\n\n",
-           casos - mauDual2, casos);
-    ok("E vol(L)·vol(L*) = 1: O RETICULADO E O DUAL TÊM VOLUMES RECÍPROCOS — e agora"
-       " isto é uma medida. Estava aqui `vold = 1.0/vol` seguido de"
-       " `|vol·vold − 1| < 1e-9`, que é uma quantidade dividida por si própria com o"
-       " resultado chamado confirmação: a asserção não podia falhar, e o dual nunca"
-       " chegou a ser construído. Agora L* = (Mᵀ)⁻¹ constrói-se por eliminação, a"
-       " construção verifica-se pela DEFINIÇÃO — M·M*ᵀ = I —, e o volume dele sai das"
-       " SUAS próprias entradas pela mesma rotina. Só então vol·vol* = 1 compara dois"
-       " determinantes de duas matrizes distintas, e há como falhar",
+    printf("\n      %d casos, e nem um double: r₁ por Sturm, disc pelo determinante da"
+           " matriz de traços,\n      e o dual pela adjunta — com G·adj G = disc·I"
+           " verificada entrada a entrada\n\n", casos);
+    ok("OS n MERGULHOS DÃO r₁+2r₂ = n E O RETICULADO TEM POSTO CHEIO — K⊗R É R^n, e"
+       " medido SEM UM DOUBLE: r₁ sai da sequência de STURM, que `lib/poli.h` já tinha e"
+       " que conta as raízes reais sem avaliar nenhuma, e o posto cheio é disc ≠ 0, uma"
+       " pergunta sobre um inteiro. Antes contavam-se as raízes por Durand–Kerner e"
+       " decidia-se se eram reais por |Im| < 1e-7 — um irracional julgado por uma régua de"
+       " sete casas",
+       mauPosto == 0);
+    ok("E vol(L)·vol(L*) = 1: O RETICULADO E O DUAL TÊM VOLUMES RECÍPROCOS — e agora sem"
+       " uma divisão. O volume cumpre vol² = |disc|, e o discriminante é o DETERMINANTE DA"
+       " MATRIZ DE TRAÇOS G_ij = Tr(σ^{i+j}), inteira, com os traços a virem da"
+       " companheira. O dual é a ADJUNTA, e a relação é uma identidade inteira verificada"
+       " entrada a entrada: G·adj(G) = disc·I — essa em ℤ —, com det(adj G) = disc^{n−1}"
+       " verificada em TRÊS PRIMOS, porque em ℤ ela NÃO CABE: as entradas da adjunta vão a"
+       " 10^12 para n = 5 e os intermédios do Bareiss, que são menores da matriz, chegam a"
+       " 10^42 — o resultado final cabia e saía errado à mesma, e foi esta asserção que o"
+       " apanhou. Donde"
+       " det(G⁻¹) = 1/det(G), que é o vol·vol* = 1. Antes escrevia-se vold = 1.0/vol e"
+       " comparava-se vol·vold com 1: uma quantidade dividida por si própria",
        mauVol == 0 && mauDual2 == 0);
     printf("      Portanto as duas coisas são verdade e não se contradizem: K(n,m) NÃO é R^n\n");
     printf("      (é enumerável, grau n sobre Q) e ao mesmo tempo K ⊗_Q R É R^n, pelo mergulho\n");
