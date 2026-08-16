@@ -634,7 +634,7 @@ printf("\n§M10 TODA DIMENSÃO — e onde a condição de Pisot FALHA.\n\n");
      * (A primeira correção que escrevi dizia "Pisot falha a partir de n=5" sem a distinção, e
      * estava errada em n=5 pela mesma razão: confundia o número com o polinómio.) */
     printf("      m   n    σ (dominante)   2º maior |λ|   Pisot?   ∏|λ| (= |det|)\n");
-    int mauProd = 0, pisotFalha = 0, casos = 0;
+    int mauProd = 0, pisotFalha = 0, casos = 0, solverLonge = 0;
     for(int m = 1; m <= 2; m++)
     for(int n = 2; n <= 8; n++){
         /* raízes de xⁿ − m xⁿ⁻¹ − 1 por Durand–Kerner, no plano complexo */
@@ -673,14 +673,31 @@ printf("\n§M10 TODA DIMENSÃO — e onde a condição de Pisot FALHA.\n\n");
         }
         int pisot = (seg < 1.0 - 1e-6);
         if(!pisot) pisotFalha++;
-        if(fabs(prod - 1.0) > 1e-6) mauProd++;
+        /* E ∏|λ| = 1 NÃO SE MEDE NO SOLVER: é o termo constante, e sai inteiro. Para
+         * xⁿ − m xⁿ⁻¹ − 1 o produto das raízes é (−1)ⁿ·(termo constante) = (−1)^(n+1),
+         * logo o módulo é 1 SEMPRE, por Viète e sem avaliar raiz nenhuma. Deixar a tese
+         * pendurada num |prod − 1| < 1e-6 era pedir ao Durand–Kerner que provasse o que
+         * o polinómio já diz. Aqui a tese fica na rota EXACTA, e o limiar passa a medir
+         * outra coisa — a qualidade do solver, que é o que ele pode mesmo dizer. */
+        long prod_exacto = (n % 2 == 0) ? -1 : 1;      /* (−1)ⁿ · (−1) */
+        if(prod_exacto != 1 && prod_exacto != -1) mauProd++;      /* |∏λ| = 1, exacto */
+        if(fabs(prod - (double)(prod_exacto < 0 ? -prod_exacto : prod_exacto)) > 1e-6)
+            solverLonge++;                             /* e o solver bate com ela */
         casos++;
         if((m == 1 && n >= 3 && n <= 7) || (m == 2 && n == 8))
             printf("      %-3d %-4d %-15.10f %-14.6f %-8s %.10f\n",
                    m, n, mdom, seg, pisot ? "sim" : "NÃO", prod);
     }
     printf("      …\n\n      %d casos; a propriedade de Pisot FALHA em %d deles\n\n", casos, pisotFalha);
-    ok("∏|λ| = |det| = 1 em todos — a conservação vale sempre", mauProd == 0);
+    printf("      e ∏|λ| = 1 sai do TERMO CONSTANTE, por Viète: o solver concorda com a"
+           " rota exacta em %d de %d\n\n", casos - solverLonge, casos);
+    ok("∏|λ| = |det| = 1 EM TODOS, E POR VIÈTE E NÃO PELO SOLVER: para xⁿ − m xⁿ⁻¹ − 1 o"
+       " produto das raízes é (−1)ⁿ vezes o termo constante, logo o módulo é 1 sempre —"
+       " sem avaliar raiz nenhuma. Antes a tese estava pendurada num |∏|λ| − 1| < 1e-6,"
+       " que é pedir ao Durand–Kerner que prove o que o polinómio já diz. Agora a tese"
+       " está na rota exacta e o limiar mede o que pode mesmo medir: que o solver bate"
+       " com ela",
+       mauProd == 0 && solverLonge == 0 && casos == 14);
     ok("mas β NÃO é polinómio de Pisot sempre: falha para m = 1 a partir de n = 5", pisotFalha > 0);
     printf("      As duas asserções acima são o ponto. A primeira vale SEMPRE — e é por isso que\n");
     printf("      ela não serve para concluir a segunda. Em n = 6, m = 1 o produto dá 1,000000 e\n");
@@ -693,16 +710,36 @@ printf("\n§M10 TODA DIMENSÃO — e onde a condição de Pisot FALHA.\n\n");
         printf("      o contraexemplo exato, n = 5, m = 1:\n\n");
         printf("        x⁵ − x⁴ − 1 = (x² − x + 1)(x³ − x − 1)\n\n");
         /* verifica-se o produto dos dois fatores, coeficiente a coeficiente */
-        double A[3] = {1,-1,1};                 /* x² − x + 1 */
-        double B[4] = {1,0,-1,-1};              /* x³ − x − 1 */
-        double C[6] = {0};
+        /* E ISTO É CONVOLUÇÃO DE INTEIROS: multiplicar polinómios de ℤ[x] é convolver
+         * os coeficientes, e o resíduo é ZERO ou não é nada. O double e o 1e-12 que
+         * aqui estavam não tinham de onde vir — nenhum destes números tem vírgula. É a
+         * mesma factorização que o `residuo_gerador.c` mede e que o §sec:residuo do
+         * geometrico usa para separar o gerador que RODA do que CRESCE. */
+        const long A[3] = {1,-1,1};             /* x² − x + 1  (Φ₆) */
+        const long B[4] = {1,0,-1,-1};          /* x³ − x − 1  (a plástica) */
+        long C[6] = {0};
         for(int i = 0; i < 3; i++) for(int j = 0; j < 4; j++) C[i+j] += A[i]*B[j];
-        double alvo[6] = {1,-1,0,0,0,-1};       /* x⁵ − x⁴ − 1 */
-        double pior = 0;
-        for(int k = 0; k < 6; k++){ double d = fabs(C[k]-alvo[k]); if(d > pior) pior = d; }
-        printf("        o produto dos fatores bate coeficiente a coeficiente: erro %.1e\n", pior);
+        const long alvo[6] = {1,-1,0,0,0,-1};   /* x⁵ − x⁴ − 1 */
+        int bate = 0, difere = 0;
+        for(int k = 0; k < 6; k++) if(C[k] == alvo[k]) bate++; else difere++;
+        /* e o CONTROLO: mexer num coeficiente tem de partir a igualdade, senão
+         * «bate em 6 de 6» não distinguia esta factorização de outra qualquer */
+        long D[6] = {0};
+        for(int i = 0; i < 3; i++) for(int j = 0; j < 4; j++) D[i+j] += A[i]*(B[j] + (j==1));
+        int falso = 0;
+        for(int k = 0; k < 6; k++) if(D[k] != alvo[k]) falso++;
+        printf("        o produto dos fatores bate coeficiente a coeficiente: %d de 6,"
+               " resíduo ZERO\n", bate);
+        printf("        e o controlo: mexendo UM coeficiente de x³ − x − 1, deixam de bater"
+               " %d\n", falso);
         printf("        e x² − x + 1 tem as raízes em |λ| = 1 (sextas da unidade)\n\n");
-        ok("β(5,1) é REDUTÍVEL — logo Q[x]/(β) não é corpo, tem divisores de zero", pior < 1e-12);
+        ok("β(5,1) É REDUTÍVEL — logo ℚ[x]/(β) não é corpo, e tem divisores de zero. E a"
+           " factorização mede-se em INTEIROS: multiplicar em ℤ[x] é convolver os"
+           " coeficientes, e a igualdade é exacta, coeficiente a coeficiente — o double e"
+           " o 1e-12 que aqui estavam não tinham de onde vir, porque nenhum destes números"
+           " tem vírgula. Com o controlo: mexendo um só coeficiente de x³ − x − 1, o"
+           " produto deixa de bater",
+           bate == 6 && difere == 0 && falso > 0);
     }
     printf("      Portanto o enunciado certo é condicional: QUANDO β é irredutível, o corpo\n");
     printf("      K(n,m) = Q[x]/(β) mergulha em R por x ↦ σ e herda a ordem. E K(n,m) não é\n");
@@ -961,20 +998,45 @@ printf("\n§M13 A BASE SAI DAS MÖBIUS: o que fica invariante é da base, e é g
      * homogéneas o ponto fixo z é o AUTOVETOR (z,1). A base é o conjunto dos pontos fixos. */
     printf("      (a) os pontos FIXOS da Möbius são os autovetores — e são duais\n\n");
     printf("      a    σ (fixo +)     σ' (fixo −)    σ·σ'      é autovetor?\n");
-    int mauFix = 0, mauDual = 0;
+    /* E NENHUMA RAIZ SE AVALIA. Media-se aqui σ = (a + √(a²+4))/2 em double e depois
+     * |σ·σ' + 1| < 1e-12 — mas o que garante σ·σ' = −1 não é a conta decimal: é
+     * CAYLEY–HAMILTON, e ele é uma identidade de matrizes INTEIRAS,
+     *
+     *      A(a)² − a·A(a) − I = 0,      A(a) = [[a,1],[1,0]],
+     *
+     * que se verifica entrada a entrada, sem vírgula. Daí saem os dois de uma vez, por
+     * Viète: σ + σ' = tr A = a e σ·σ' = det A = −1. É o mesmo thm:fixo-dual do
+     * `geometrico.tex`, e é o que a casa já usa em todo o lado. A rota decimal fica —
+     * mas como CONFIRMAÇÃO da exacta, e não como a prova. */
+    int mauFix = 0, mauDual = 0, ch = 0, decimal_bate = 0, linhas = 0;
     for(long a = 1; a <= 5; a++){
+        /* a rota EXACTA: Cayley–Hamilton entrada a entrada, e o traço e o determinante */
+        M2 A = Mq(a), AA = mul(A, A);
+        int ok_ch = (AA.a - a*A.a - 1 == 0) && (AA.b - a*A.b == 0)
+                 && (AA.c - a*A.c == 0)     && (AA.d - a*A.d - 1 == 0);
+        if(ok_ch) ch++; else mauFix++;
+        if(det(A) != -1) mauDual++;                    /* σ·σ' = det = −1, EXACTO */
+        /* e a rota decimal, agora só a confirmar */
         double d = sqrt((double)(a*a + 4));
         double s1 = (a + d)/2, s2 = (a - d)/2;
-        /* ponto fixo: M(a)·z = (az+1)/z = z  ⟺  z² − az − 1 = 0 */
-        double f1 = (a*s1 + 1)/s1, f2 = (a*s2 + 1)/s2;
-        if(fabs(f1 - s1) > 1e-12 || fabs(f2 - s2) > 1e-12) mauFix++;
-        if(fabs(s1*s2 + 1.0) > 1e-12) mauDual++;
-        printf("      %-4ld %-14.8f %-14.8f %-9.4f %s\n", a, s1, s2, s1*s2,
-               (fabs(f1-s1) < 1e-12 && fabs(f2-s2) < 1e-12) ? "sim" : "NÃO");
+        if(fabs(s1 + s2 - (double)(A.a + A.d)) < 1e-12
+           && fabs(s1*s2 - (double)det(A)) < 1e-12) decimal_bate++;
+        linhas++;
+        printf("      %-4ld %-14.8f %-14.8f %-9ld %s\n", a, s1, s2, det(A),
+               ok_ch ? "sim" : "NÃO");
     }
-    printf("\n");
-    ok("os pontos fixos da Möbius resolvem a BORDA — a base sai da transformação", mauFix == 0);
-    ok("e σ·σ' = −1: os dois pontos fixos são DUAIS um do outro", mauDual == 0);
+    printf("\n      Cayley–Hamilton fecha em %d de %d, e a rota decimal confirma em %d\n\n",
+           ch, linhas, decimal_bate);
+    ok("OS PONTOS FIXOS DA MÖBIUS RESOLVEM A BORDA, E MEDE-SE SEM AVALIAR RAIZ NENHUMA:"
+       " o que os garante é CAYLEY–HAMILTON, A² − aA − I = 0, uma identidade de matrizes"
+       " INTEIRAS verificada entrada a entrada. Antes calculava-se σ = (a + √(a²+4))/2 em"
+       " double e comparava-se com margem — a raiz era sabor, e trazia o limiar atrás. A"
+       " rota decimal fica, mas como CONFIRMAÇÃO da exacta e não como prova",
+       mauFix == 0 && ch == linhas && decimal_bate == linhas && linhas == 5);
+    ok("E σ·σ' = −1: OS DOIS PONTOS FIXOS SÃO DUAIS UM DO OUTRO — e isto é det A, um"
+       " inteiro, e não um produto de dois decimais comparado com margem. Por Viète os"
+       " dois saem juntos: σ + σ' = tr A = a e σ·σ' = det A = −1",
+       mauDual == 0);
     printf("      A base não é escolhida: é o que a transformação deixa quieto. E os dois pontos\n");
     printf("      fixos são o metal e o seu dual — a mesma involução de sempre, agora como os\n");
     printf("      dois lugares que a Möbius não move.\n");
@@ -984,20 +1046,57 @@ printf("\n§M13 A BASE SAI DAS MÖBIUS: o que fica invariante é da base, e é g
         /* O invariante das Mobius e' a razao cruzada de quatro pontos. Mede-se: aplica-se
          * M(a) aos quatro e compara-se. O que fica invariante e' o que pertence a' estrutura;
          * o resto e' coordenada. */
-        double P[4] = {0.3, 1.7, 2.9, 5.1};
-        printf("      a    razão cruzada antes   depois            |dif|\n");
-        double pior = 0;
+        /* E OS QUATRO PONTOS SÃO RACIONAIS, porque a razão cruzada é uma IDENTIDADE
+         * algébrica: ela vale para quaisquer quatro pontos, logo os decimais 0.3, 1.7,
+         * 2.9 e 5.1 eram sabor — e traziam o double e o 1e-12 atrás. Este ficheiro já
+         * incluía `racionais.h`, com o Qz e a comparação por PRODUTO CRUZADO: a
+         * invariância mede-se por IGUALDADE exacta, sem uma divisão. */
+        const Qz P[4] = { {3,10}, {17,10}, {29,10}, {51,10} };   /* os mesmos pontos, exactos */
+        printf("      a    razão cruzada antes   depois            igual\n");
+        int inv = 0, voltas = 0, distintos = 0;
+        long sat0 = qz_saturou;         /* o Qz é de 32 bits, e conta o que não coube */
         for(long a = 1; a <= 5; a++){
-            double Q[4];
-            for(int i = 0; i < 4; i++) Q[i] = (a*P[i] + 1)/P[i];
-            double r0 = ((P[0]-P[2])*(P[1]-P[3]))/((P[0]-P[3])*(P[1]-P[2]));
-            double r1 = ((Q[0]-Q[2])*(Q[1]-Q[3]))/((Q[0]-Q[3])*(Q[1]-Q[2]));
-            double d = fabs(r0 - r1);
-            if(d > pior) pior = d;
-            printf("      %-4ld %-21.10f %-17.10f %.2e\n", a, r0, r1, d);
+            Qz Q[4];
+            int viavel = 1;
+            for(int i = 0; i < 4 && viavel; i++){           /* z ↦ (az + 1)/z */
+                Qz num = qz_soma(qz_mult(qz(a,1), P[i]), qz(1,1));
+                viavel = qz_divide(num, P[i], &Q[i]);
+            }
+            if(!viavel) continue;
+            /* r = (z0−z2)(z1−z3) / ((z0−z3)(z1−z2)), nos dois conjuntos */
+            Qz r0, r1;
+            int b0 = qz_divide(qz_mult(qz_soma(P[0], qz_oposto(P[2])),
+                                       qz_soma(P[1], qz_oposto(P[3]))),
+                               qz_mult(qz_soma(P[0], qz_oposto(P[3])),
+                                       qz_soma(P[1], qz_oposto(P[2]))), &r0);
+            int b1 = qz_divide(qz_mult(qz_soma(Q[0], qz_oposto(Q[2])),
+                                       qz_soma(Q[1], qz_oposto(Q[3]))),
+                               qz_mult(qz_soma(Q[0], qz_oposto(Q[3])),
+                                       qz_soma(Q[1], qz_oposto(Q[2]))), &r1);
+            if(!b0 || !b1) continue;
+            voltas++;
+            if(qz_igual(r0, r1)) inv++;
+            /* o CONTROLO: os pontos MOVERAM-SE. Sem isto, «a razão não mudou» valia por
+             * a Möbius não ter feito nada. */
+            if(!qz_igual(P[0], Q[0])) distintos++;
+            printf("      %-4ld %-21s %-17s %s\n", a,
+                   "(p/q exacto)", "(p/q exacto)", qz_igual(r0, r1) ? "sim" : "NÃO");
         }
-        printf("\n");
-        ok("a razão cruzada é invariante sob Möbius — é o que a estrutura conserva", pior < 1e-12);
+        printf("\n      invariante em %d de %d, por igualdade exacta — e os pontos"
+               " MOVERAM-SE em %d\n", inv, voltas, distintos);
+        printf("      e nada saturou os 32 bits do Qz: %ld a mais\n\n",
+               qz_saturou - sat0);
+        ok("A RAZÃO CRUZADA É INVARIANTE SOB MÖBIUS, E MEDE-SE POR IGUALDADE EXACTA: a"
+           " invariância é uma identidade algébrica e vale para quaisquer quatro pontos,"
+           " logo os decimais 0.3, 1.7, 2.9 e 5.1 eram sabor — e traziam o double e o"
+           " 1e-12 atrás. Com os mesmos pontos em Qz, que este ficheiro já incluía, a"
+           " comparação é por PRODUTO CRUZADO e não sobra resíduo nenhum. Com o controlo:"
+           " os pontos moveram-se sob a transformação, sem o que «a razão não mudou» valia"
+           " por a Möbius não ter feito nada. E a saturação LÊ-SE: o Qz é de 32 bits e"
+           " conta à parte o que não coube, e aqui não coube nada de fora — sem esse"
+           " controlo, um racional enrolado dava igualdade por acidente",
+           inv == voltas && voltas == 5 && distintos == voltas
+           && qz_saturou == sat0);
         printf("      Quatro pontos têm um número que a transformação não toca. É esse número que\n");
         printf("      é da estrutura; as coordenadas dos pontos são só a roupa.\n");
     }
