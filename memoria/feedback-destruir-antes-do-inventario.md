@@ -53,3 +53,13 @@ inteira.
 
 E os `.tex` que a bateria lê não são "papers soltos" — são **fontes da lista**. Estão em
 `tools/bateria.sh` linha ~76.
+
+**E a variante que quase passou:** reescrevi UMA secção de um medidor com
+`s[:i] + novo` onde `novo` terminava em `s[j:]` — e entre `i` e `j` havia **outras três
+secções**. Apaguei 242 linhas e **três** secções (§L11m, §L11n, §L11o) sem tocar em nada
+delas. O alarme foi o TOTAL: **57 → 52**.
+
+**How to apply:** um `s[:i] + novo + s[j:]` só é seguro se eu SOUBER o que está entre i e j.
+Antes de recortar por índices, listar o que o intervalo contém — `grep -o "§L[0-9]*[a-z]*"` —
+e depois do write conferir o TOTAL. E a recuperação é barata quando o commit anterior existe:
+`git show HEAD:ficheiro` dá o bloco de volta letra por letra. Ver [[feedback-o-write-diz-updated]].

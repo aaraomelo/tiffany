@@ -47,7 +47,7 @@ reconstrói o sistema nem decide se ele é permitido: \textbf{realiza
 geometricamente a construção que o Universal já fechou}, na ordem
 \[
 \boxed{\;
-\text{Lei 0}\to\text{as oito leis }(0,\ldots,7)\to\text{base ortonormal}\to\text{bit a bit}\to\text{dual}
+\underbrace{\text{Lei 0}}_{\text{fundação}}\to\text{leis }0,\ldots,7\to\text{base ortonormal}\to\text{bit a bit}\to\text{dual}
 \to\text{recorrência}\to\text{Pisot}\to\text{encaixe}\to\text{corte}
 \to\mathbb{R}\to\pi_k .\;}
 \]
@@ -81,7 +81,7 @@ dos convergentes} entre as expansões com $a_k\geq1$, e por isso uma só taxa
 limita a construção inteira. A família metálica não é o escopo: é o caso
 \textbf{extremo}, o pior caso do mecanismo.
 
-\smallskip\noindent\emph{Medido:} \code{tests/geometria\_real.c} ($57{:}0$).
+\smallskip\noindent\emph{Medido:} \code{tests/geometria\_real.c} ($58{:}0$).
 \end{abstract}
 
 %======================================================================
@@ -115,12 +115,17 @@ com sentido fixo --- \textbf{demonstra} (deriva das hipóteses), \textbf{realiza
 (instancia a construção), \textbf{verifica} (execução finita).
 
 \medskip
-\noindent E a regra editorial que governa a ordem: \textbf{nenhuma definição
-geométrica antes da construção do corte}, com duas excepções nomeadas ---
-a distância no cubo (\S\ref{sec:orto}), que toma valores em $\{0,\ldots,8\}$
-e é contagem de bits, e a área do \S\ref{sec:det}, que nomeia um
-\emph{determinante} e portanto um inteiro. Uma regra que o próprio texto viola
-sem avisar é pior do que nenhuma.
+\noindent E a regra editorial que governa a ordem:
+\[
+\boxed{\;\text{\textbf{nenhuma definição de comprimento, área ou limite geométrico}}\\
+\text{\textbf{contínuo antes da construção do corte.}}\;}
+\]
+Assim formulada, ela é cumprível e o texto cumpre-a: antes do corte há
+$\mathbb{P}^1$, Möbius, o alfabeto $(T,X)$, o encaixotador, o cone, a espiral,
+poliedros e Euler --- todos \emph{discretos ou combinatórios} ---, e nenhum
+comprimento, nenhuma área contínua e nenhum limite. A distância do
+\S\ref{sec:orto} toma valores em $\{0,\ldots,8\}$, e a «área» do
+\S\ref{sec:det} nomeia um determinante: ambas inteiras.
 
 %======================================================================
 \section{A Lei 0: $0\dg=\infty$, e é ela que dá o arranque}\label{sec:lei0}
@@ -489,14 +494,14 @@ seja o caso geral, mas porque é o caso que não se move.
 \[
 \boxed{
 \begin{array}{ll}
-\textbf{Hurwitz} & \text{o resultado de contagem do domínio usado pelo Universal}\\
+\textbf{Hurwitz} & \text{a contagem do domínio \emph{assim denominada no Universal}}\\
 \textbf{Lebesgue} & \text{fornece a medida da imagem}\\
 \textbf{Gentil} & \text{estabelece a compatibilidade, pela soma reversível}
 \end{array}}
 \]
 A soma de Gentil, em inteiros,
 \[
-x_n\in\mathbb{N},\qquad
+0\leq x_n\leq q\ \Longrightarrow\
 \sum_n x_n \;+\; \sum_{v=1}^{q} \#\{x_n<v\} \;=\; N\!\cdot\!q ,
 \]
 é --- \emph{pela identidade de Gentil estabelecida no Corpo Universal} --- a forma
@@ -582,8 +587,8 @@ $\square$
 \end{corolario}
 
 \begin{teorema}[a leitura ALGÉBRICA]\label{thm:numero-poli}
-Para $\alpha$ \textbf{algébrico} com polinómio mínimo $\mu_\alpha\in\mathbb{Z}[x]$
-mónico e irredutível,
+Para $\alpha$ \textbf{inteiro algébrico} --- que é o que a hipótese de $\mu_\alpha$
+mónico em $\mathbb{Z}[x]$ já força --- com polinómio mínimo irredutível,
 \[
 \mathbb{Z}[\alpha]\cong\mathbb{Z}[x]/(\mu_\alpha),
 \qquad
@@ -640,18 +645,28 @@ exactamente aí que o mecanismo quebra.
 %======================================================================
 \section{E um polinómio é amplitude e fase: o espectro}\label{sec:espectro}
 
-\begin{teorema}[o polinómio é o seu espectro]\label{thm:espectro}
-Num polinómio, o coeficiente $c_k$ é a \textbf{amplitude} do andar $k$ e
-$\omega^{k}$ é a \textbf{fase}; avaliar em $\omega^{j}$, com $\omega$ raiz
-primitiva $N$-ésima da unidade, \emph{é ler o espectro}. Com $\omega=2$ de ordem
-$8$ em $\mathbb{F}_{17}$ isto é \textbf{exacto em inteiros}, e daí:
+\begin{teorema}[a transformada universal: avaliação nas folhas]\label{thm:espectro}
+A transformada deste quadro é a \textbf{avaliação nas folhas} $\sigma,\sigma\dg$
+--- não em raízes da unidade ---, realizada \emph{inteira} pela matriz
+companheira. Em $\mathbb{F}_q$ com $D$ resíduo quadrático, as folhas cumprem
+$\sigma+\sigma\dg=m$ e $\sigma\sigma\dg=-1$, e
 \[
-\boxed{\;\text{multiplicar NÚMEROS}\;=\;\text{convolver DÍGITOS}\;=\;
-\text{multiplicar ESPECTROS ponto a ponto}\;}
+\boxed{\;\operatorname{eval}_{\sigma}(a\cdot b)
+=\operatorname{eval}_{\sigma}(a)\cdot\operatorname{eval}_{\sigma}(b)\;}
 \]
-E a delta de Kronecker tem \textbf{espectro constante $1$} --- é a identidade dos
-dois lados. $\square$
+nas \textbf{duas} folhas --- é o teorema da convolução aqui, com o produto de
+$\mathbb{Z}[x]/(x^{2}-mx-1)$. A \textbf{dourada} é o caso mais simples. $\square$
 \end{teorema}
+
+\begin{corolario}[e Fourier sozinho é metade]\label{cor:fourier-metade}
+As raízes da unidade estão \textbf{no círculo}, e aí o traço fica \emph{limitado}
+($\abs{t}\leq2$: o regime elíptico). As folhas do metal são \textbf{recíprocas},
+$\abs{\sigma}>1>\abs{\sigma\dg}$ com produto um, e o traço \emph{cresce} --- o
+regime hiperbólico. \emph{As raízes do metal não estão no círculo}, e por isso a
+DFT avalia no círculo e cobre o elíptico e mais nada. \emph{Gume}: onde $D\equiv0$
+em $\mathbb{F}_q$ as folhas \textbf{colapsam} --- é o parabólico na
+característica, a recta do \S\ref{sec:reta}. $\square$
+\end{corolario}
 \colunas{a transformada e a convolução}
         {o número lido como amplitude e fase por andar}
         {\code{geometria\_real.c} \S L11k: $60$ casos, $\mathbb{F}_{17}$}
@@ -661,7 +676,7 @@ dois lados. $\square$
 faz do número um polinómio, e o espectro diz o que esse polinómio é em cada andar.
 
 %======================================================================
-\section{A torre dos graus: a diferença baixa um, e daí o $\mathbb{R}^{n}$}\label{sec:torre-graus}
+\section{A torre dos graus: a diferença baixa um, e $\mathcal{P}_n\simeq\mathbb{R}^{n+1}$}\label{sec:torre-graus}
 
 \begin{proposicao}[alta frequência num andar é recta no seguinte]\label{prop:baixa-grau}
 A diferença finita $\Delta$ baixa o grau em \textbf{um}: um polinómio de grau $d$
@@ -670,13 +685,13 @@ e o grau $1$ já é recta no andar zero. \emph{Cada andar consome um grau, e a
 oscilação vai-se com ele.} $\square$
 \end{proposicao}
 
-\begin{teorema}[e as diferenças são as coordenadas: o $\mathbb{R}^{n}$]\label{thm:rn}
-Pela fórmula de Newton,
+\begin{teorema}[as diferenças são as coordenadas: $\mathcal{P}_n\simeq\mathbb{R}^{n+1}$]\label{thm:rn}
+Pela fórmula de Newton, $p(x)=\sum_{k}\Delta^{k}p(0)\binom{x}{k}$, o espaço
+$\mathcal{P}_n$ dos polinómios de grau $\leq n$ é isomorfo a $\mathbb{R}^{n+1}$:
 \[
-\boxed{\;p(x)=\sum_{k}\Delta^{k}p(0)\binom{x}{k}\;}
-\]
-um polinómio de grau $n$ fica determinado pelas suas $n+1$ diferenças em $0$, e
-\emph{essas $n+1$ diferenças são as $n+1$ coordenadas}. Cada andar é um grau, e
+\boxed{\;\mathcal{P}_n\ \xrightarrow{\ \sim\ }\ \mathbb{R}^{n+1},
+\qquad p\longmapsto\bigl(\Delta^{0}p(0),\ldots,\Delta^{n}p(0)\bigr).\;}
+\] Cada andar é um grau, e
 cada grau é uma coordenada. $\square$
 \end{teorema}
 \colunas{a torre e a dobra}
@@ -709,12 +724,13 @@ das diferenças, e é por isso que a soma reconstrói. $\square$
 \section{E no infinito tudo vira recta}\label{sec:reta}
 
 \begin{teorema}[o colapso do discriminante]\label{thm:colapso}
-Nos andares elípticos exactos o discriminante $\Delta=\operatorname{tr}^{2}-4\det$
-é \textbf{inteiro} e desce em módulo:
+Nos andares elípticos exactos o discriminante $D=\operatorname{tr}^{2}-4\det$ ---
+escrito $D$, e não $\Delta$, que fica reservado à diferença finita --- é
+\textbf{inteiro} e desce em módulo:
 \[
-n=3:\ \Delta=-3,\qquad n=4:\ \Delta=-2,\qquad n=6:\ \Delta=-1,\qquad \ldots\ \to 0 .
+n=3:\ D=-3,\qquad n=4:\ D=-2,\qquad n=6:\ D=-1,\qquad \ldots\ \to 0 .
 \]
-O limite $\Delta=0$ é a \textbf{raiz dupla}: as duas faces colapsam numa só. Aí
+O limite $D=0$ é a \textbf{raiz dupla}: as duas faces colapsam numa só. Aí
 $C=I+N$ com $N^{2}=0$ e
 \[
 \boxed{\;C^{k}=I+k\,N\;}
@@ -728,14 +744,14 @@ $\square$
 \[
 \boxed{
 \begin{array}{lll}
-\Delta<0 & \text{elíptico} & \text{rotação --- \textbf{periódico}}\\[2pt]
-\Delta=0 & \text{\textbf{parabólico}} & I+kN\ \text{--- \textbf{PA}, a recta, a frequência infinita}\\[2pt]
-\Delta>0 & \text{hiperbólico} & \sigma^{k}\ \text{--- \textbf{PG}, o metálico}
+D<0 & \text{elíptico} & \text{rotação; \emph{periódico nos representantes de ordem finita}}\\[2pt]
+D=0 & \text{\textbf{parabólico}} & I+kN\ \text{--- \textbf{PA}, a recta, a frequência infinita}\\[2pt]
+D>0 & \text{hiperbólico} & \sigma^{k}\ \text{--- \textbf{PG}, o metálico}
 \end{array}}
 \]
 As três progressões são os três regimes do discriminante. E o contraste mede-se
-pela \emph{segunda} diferença: $\Delta^{2}\equiv0$ no parabólico, e
-$\Delta^{2}\not\equiv0$ em nenhum dos metais. $\square$
+pela \emph{segunda diferença finita}: $\Delta^{2}u\equiv0$ no parabólico, e
+$\Delta^{2}u\not\equiv0$ em nenhum dos metais. $\square$
 \end{corolario}
 \colunas{a tricotomia do traço}
         {o colapso como causa da linearidade}
@@ -1020,7 +1036,8 @@ A conservação do Gato é multiplicativa; o logaritmo torna-a aditiva:
 \]
 Expansão e contração exactamente inversas. E em inteiros o logaritmo realiza-se por
 \textbf{contagem}: o número de dígitos de $t_k$ cresce linearmente em $k$, com
-declive $\log\sigma$, e os saltos de oito em oito repetem-se. Não é preciso avaliar
+declive $\log_{10}\sigma$ --- a base é decimal ---, e os saltos de oito em oito
+repetem-se. Não é preciso avaliar
 transcendente nenhuma para o ter.
 \end{observacao}
 
@@ -1197,7 +1214,7 @@ espectral, exacta onde o espectro não tem zeros ---, os elementos desta base
 \[
 \boxed{\;e_t=\delta_t,
 \qquad \langle b,e_t\rangle=b_t\ \text{é a peneira},
-\qquad b\ast\delta_{-t}\ \text{devolve } b\;}
+\qquad (b\ast\delta_{t})\ast\delta_{-t}=b\;}
 \]
 --- e portanto, \emph{nessa leitura}, ler uma coordenada e localizar um ponto são
 a mesma operação. O espectro de um $\delta$ não tem zeros, e é por isso que a
@@ -1363,10 +1380,11 @@ A_n^{\rm in}=\frac{n\,t_n}{4}\sqrt{4-t_n^{2}}
 A_n^{\rm circ}=\frac{n\sqrt{4-t_n^{2}}}{t_n}\;}
 \]
 --- a do polígono inscrito e a do circunscrito, no círculo unitário. --- notação distinta da companheira $C_n$ do
-Teor.~\ref{thm:pi}, que é outra coisa. Elas satisfazem
+Teor.~\ref{thm:pi}, que é outra coisa. Elas satisfazem, \emph{sem que $\pi$ entre}:
 \[
-A_n^{\rm in}<\pi<A_n^{\rm circ},\qquad
-A_n^{\rm in}\uparrow\pi,\quad A_n^{\rm circ}\downarrow\pi .
+A_n^{\rm in}<A_n^{\rm circ},\qquad
+A_n^{\rm in}\uparrow,\qquad A_n^{\rm circ}\downarrow,\qquad
+\abs{\pi_n}\to0 .
 \]
 Nos andares $3,4,6$ os quadrados são racionais --- $(A_3^{\rm in})^{2}=27/16$ e
 $(A_3^{\rm circ})^{2}=27$; $A_4^{\rm in}=2$ e $A_4^{\rm circ}=4$;
@@ -1389,7 +1407,8 @@ paper:
 --- \textbf{$\pi_n$ é o intervalo do andar}, com as duas bordas exactas nele, e a
 cadeia é \emph{encaixada}. Donde
 \[
-\boxed{\;\pi\ \text{é o \textbf{corte} que a cadeia } (\pi_n)\ \text{determina.}\;}
+\boxed{\;\pi:=\bigcap_n\pi_n\ \text{---\ o \textbf{único habitante} do corte que
+a cadeia determina.}\;}
 \]
 Não é constante importada nem aproximação numérica: é um corte, produzido pelo
 mesmo mecanismo de \S\ref{sec:completude}, com bordas algébricas em cada andar.
@@ -1461,10 +1480,10 @@ Universal}, e é nessa realização que a recta real aparece como o corpo ordena
 completo.
 
 \medskip
-\emph{Medido:} \code{tests/geometria\_real.c} ($57{:}0$), com
+\emph{Medido:} \code{tests/geometria\_real.c} ($58{:}0$), com
 \code{tests/ortonormal.c} ($6{:}0$), \code{tests/metalica.c},
 \code{tests/pisotbase.c}, \code{tests/ordenado.c} ($7{:}0$),
 \code{tests/pi\_familia.js} ($7{:}0$),
-\code{tests/arquimedes\_area.js} ($57{:}0$) e \code{tests/geometrico.js}.
+\code{tests/arquimedes\_area.js} ($58{:}0$) e \code{tests/geometrico.js}.
 
 \end{document}

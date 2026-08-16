@@ -473,7 +473,8 @@ int main(void){
                 if(cv == rot) transl++;
                 /* (iii) A PENEIRA: ⟨a, e_t⟩ é o coeficiente t — a mesma extracção */
                 if(g_par(a & (1 << t)) == ((a >> t) & 1)) peneira++;
-                /* (iv) a volta é EXACTA: convolver com δ_{−t} desfaz */
+                /* (iv) e a volta é EXACTA no enunciado certo: (b ⊛ δ_t) ⊛ δ_{−t} = b — e NÃO
+             *      «b ⊛ δ_{−t} devolve b», que seria uma translação */
                 int back = ((cv >> t) | (cv << (8 - t))) & 0xFF;
                 if(t == 0) back = cv;
                 if(back == a) volta++;
@@ -496,8 +497,8 @@ int main(void){
         ok("A BASE ORTONORMAL É A FAMÍLIA DE DIRACS, e é isso que liga a leitura à"
            " localização: na convolução que emerge da transformada universal, δ = e_0 é"
            " a IDENTIDADE, os e_t são os δ transladados (a ⊛ δ_t = rot_t(a) nos 2048"
-           " casos), a leitura da coordenada ⟨a,e_t⟩ É a peneira de Dirac, e a volta por"
-           " δ_{−t} é EXACTA — a deconvolução é a divisão espectral, e o espectro de um"
+           " casos), a leitura da coordenada ⟨a,e_t⟩ É a peneira, e a volta é EXACTA no"
+           " enunciado certo — (b ⊛ δ_t) ⊛ δ_{−t} = b, e não «b ⊛ δ_{−t} devolve b» — — a deconvolução é a divisão espectral, e o espectro de um"
            " δ não tem zeros. Logo ler um bit e localizar um ponto são a mesma operação",
            ident == cas && transl == cas*8 && peneira == cas*8 && volta == cas*8
            && cas == 256);
@@ -1352,7 +1353,9 @@ int main(void){
          *
          * GENTIL, a soma reversível, em inteiros:
          *
-         *      Σ_n x_n  +  Σ_v #{x_n < v}  =  N·q
+         *      0 ≤ x_n ≤ q   ⟹   Σ_n x_n  +  Σ_{v=1}^{q} #{x_n < v}  =  N·q
+         *
+         * — e a HIPÓTESE é indispensável: com x_n = 100 e q = 10 a identidade cai.
          *
          * — que é o ∫f + ∫f⁻¹ = b·f(b) − a·f(a) da casa: contar pelo DOMÍNIO e medir por
          * NÍVEIS somam ao rectângulo. E é a mesma forma do par cone/espiral: duas
@@ -1418,7 +1421,7 @@ int main(void){
         printf("      Gentil: Σx + Σ#{x<v} = N·q em %ld de %ld · Lebesgue: o layer-cake"
                " Σ#{x≥v} = Σx fecha em %ld, SEM esperar o limite\n", gentil, cas, layer);
         ok("O TEOREMA CENTRAL FUNDA O LIMITE, E FUNDA-O COMO PONTO FIXO: Gentil é a soma"
-           " REVERSÍVEL — Σx_n + Σ_v #{x_n < v} = N·q, que é o ∫f + ∫f⁻¹ = b·f(b) − a·f(a)"
+           " REVERSÍVEL — sob 0 ≤ x_n ≤ q, tem-se Σx_n + Σ_{v=1}^{q} #{x_n < v} = N·q, que é o ∫f + ∫f⁻¹ = b·f(b) − a·f(a)"
            " da casa —, e ela casa a contagem pelo DOMÍNIO (Hurwitz) com a medida por"
            " NÍVEIS (Lebesgue) em todos os casos. E o layer-cake fecha SEM esperar o"
            " limite: resíduo zero em cada andar. As três leituras não são nomes"
@@ -1615,12 +1618,12 @@ int main(void){
             if(dif <= 1) lg_ok++;                    /* os saltos repetem-se */
         }
         printf("      o ln por CONTAGEM: os saltos de dígitos de 8 em 8 repetem-se em"
-               " %ld de %ld metais — o declive é log σ\n", lg_ok, lg_cas);
+               " %ld de %ld metais — o declive é log₁₀σ\n", lg_ok, lg_cas);
         ok("O LN É A CONTAGEM, E A CONSERVAÇÃO MULTIPLICATIVA VIRA ADITIVA: de"
            " σ·|σ†| = |N(σ)| = 1 vem ln σ + ln|σ†| = 0 — expansão e contração exactamente"
            " inversas, e o logaritmo é o que torna aditiva a conservação do Gato. E em"
            " inteiros realiza-se por CONTAGEM: o número de dígitos de t_k cresce"
-           " linearmente com declive log σ, e os saltos de oito em oito repetem-se nos"
+           " linearmente com declive log₁₀σ — a base é decimal —, e os saltos de oito em oito repetem-se nos"
            " seis metais. Não é preciso avaliar transcendente nenhuma: conta-se",
            lg_ok == lg_cas && lg_cas >= 4);
     }
@@ -1858,81 +1861,100 @@ int main(void){
            ok_and == andares && andares == 3);
     }
 
-    /* ═══ §L11k  O POLINÓMIO É AMPLITUDE E FASE POR ANDAR — o ESPECTRO ═════ */
-    printf("\n§L11k Um polinómio é amplitude e fase no seu andar: é o espectro.\n\n");
+    /* ═══ §L11k  A TRANSFORMADA UNIVERSAL: AVALIAÇÃO NAS FOLHAS σ, σ† ══════ */
+    printf("\n§L11k A transformada é a avaliação nas FOLHAS — e Fourier é metade.\n\n");
     {
-        /* O coordenador: «um polinómio nada mais é do que FASE e AMPLITUDE no seu andar
-         * específico — aqui está o espectro». E é literal:
+        /* Eu tinha posto aqui a DFT, e a casa já diz que isso é METADE:
          *
-         *      c_k  = a AMPLITUDE do andar k       ω^k = a FASE do andar k
-         *      avaliar em ω^j                       = LER O ESPECTRO
+         *   «a transformada é a avaliação nas raízes — e para a borda são as FOLHAS de
+         *    Frobenius; e a DOURADA é o caso mais simples. Fourier sozinho é METADE, e
+         *    não mede este objeto, porque as raízes do metal NÃO ESTÃO NO CÍRCULO:
+         *    |σ||σ'| = 1, recíprocas.»                              (Teoria, Parte III)
          *
-         * Com ω raiz primitiva N-ésima da unidade, tudo isto é EXACTO EM INTEIROS: em
-         * 𝔽₁₇ a ordem de 2 é 8, logo ω = 2 serve para N = 8. E daí o teorema da
-         * convolução, que fecha a cadeia deste medidor:
+         * A transformada universal é a AVALIAÇÃO NAS FOLHAS σ, σ† — realizada inteira
+         * pela matriz companheira —, e o polinómio é amplitude e fase lidas AÍ, e não
+         * em raízes da unidade. O que se mede:
          *
-         *      multiplicar NÚMEROS = convolver DÍGITOS (§L11j)
-         *                          = multiplicar ESPECTROS ponto a ponto
-         *
-         * e o δ — a delta de KRONECKER, identidade da convolução discreta (§L1b) — tem
-         * espectro CONSTANTE 1: é a identidade dos dois lados. */
-        const long P17 = 17, NN = 8, W = 2;
-        long ordw = 0;
-        { long r = 1; for(long k = 1; k <= 20; k++){ r = (r*W) % P17; if(r == 1){ ordw = k; break; } } }
-        long casos = 0, teo = 0, est4 = 31;
-        for(int t = 0; t < 60; t++){
-            long a[8], b[8], c[8], A[8], B[8], C[8];
-            for(int k = 0; k < NN; k++){
-                est4 = (est4*1103515245L + 12345L) % 2147483647L; a[k] = (est4 >> 7) % P17;
-                est4 = (est4*1103515245L + 12345L) % 2147483647L; b[k] = (est4 >> 7) % P17;
-            }
-            for(int k = 0; k < NN; k++) c[k] = 0;
-            for(int i2 = 0; i2 < NN; i2++) for(int j = 0; j < NN; j++)
-                c[(i2+j) % NN] = (c[(i2+j) % NN] + a[i2]*b[j]) % P17;
-            for(int j = 0; j < NN; j++){
-                long sa = 0, sb = 0, sc = 0, wj = 1;
-                for(int k = 0; k < NN; k++){
-                    sa = (sa + a[k]*wj) % P17; sb = (sb + b[k]*wj) % P17;
-                    sc = (sc + c[k]*wj) % P17;
-                    wj = (wj * ((long)1)) % P17;            /* substituído abaixo */
-                    (void)wj;
+         *  (i)   as folhas: σ + σ† = m e σ·σ† = −1, em 𝔽_q onde Δ é resíduo quadrático;
+         *  (ii)  a avaliação é HOMOMORFISMO nas duas folhas — é o teorema da convolução
+         *        deste quadro, e o produto é o de ℤ[x]/(x² − mx − 1);
+         *  (iii) e POR QUE Fourier é metade: as raízes da unidade estão NO CÍRCULO e o
+         *        traço é LIMITADO (elítico); as folhas são RECÍPROCAS, |σ| > 1 > |σ†|,
+         *        e o traço CRESCE (hiperbólico). A DFT cobre o elítico e mais nada.
+         *  (iv)  e o gume: quando Δ ≡ 0 em 𝔽_q as folhas COLAPSAM — é o parabólico na
+         *        característica, a recta de §L11m. */
+        long qs = 0, soma_ok = 0, prod_ok = 0, homo = 0, homo_cas = 0, colapsa = 0;
+        struct { long m, q; } FL[] = {{1,11},{1,19},{1,29},{2,17},{2,7},{3,11},{4,5},{5,29}};
+        printf("      m  𝔽_q   σ    σ†   σ+σ†=m?  σ·σ†=−1?  folhas distintas?\n");
+        for(int i2 = 0; i2 < 8; i2++){
+            long m = FL[i2].m, q = FL[i2].q, D = ((m*m + 4) % q + q) % q;
+            long r = -1;
+            for(long x = 0; x < q; x++) if((x*x) % q == D){ r = x; break; }
+            if(r < 0) continue;
+            long inv2 = 1;
+            for(long x = 1; x < q; x++) if((2*x) % q == 1){ inv2 = x; break; }
+            long sg = ((m + r) % q)*inv2 % q, sd = (((m - r) % q + q) % q)*inv2 % q;
+            qs++;
+            if((sg + sd) % q == m % q) soma_ok++;
+            if((sg*sd) % q == (q-1)) prod_ok++;
+            if(sg == sd) colapsa++;                     /* Δ ≡ 0: o parabólico */
+            printf("      %-2ld 𝔽_%-4ld %-4ld %-4ld %-8s %-9s %s\n", m, q, sg, sd,
+                   (sg+sd)%q == m%q ? "sim" : "NÃO",
+                   (sg*sd)%q == q-1 ? "sim" : "NÃO",
+                   sg == sd ? "COLAPSAM (Δ≡0)" : "sim");
+            /* (ii) a avaliação é HOMOMORFISMO nas duas folhas */
+            for(long a0 = 0; a0 < q && a0 < 7; a0++) for(long a1 = 0; a1 < q && a1 < 7; a1++)
+            for(long b0 = 0; b0 < q && b0 < 7; b0++) for(long b1 = 0; b1 < q && b1 < 7; b1++){
+                long c0 = (a0*b0 + a1*b1) % q;
+                long c1 = (a0*b1 + a1*b0 + m*a1*b1) % q;
+                long L[2] = {sg, sd};
+                for(int f = 0; f < 2; f++){
+                    long ea = (a0 + a1*L[f]) % q, eb = (b0 + b1*L[f]) % q;
+                    long ec = (c0 + c1*L[f]) % q;
+                    homo_cas++;
+                    if(ec == (ea*eb) % q) homo++;
                 }
-                /* recalcula com ω^{jk} correcto */
-                sa = 0; sb = 0; sc = 0;
-                for(int k = 0; k < NN; k++){
-                    long wjk = 1;
-                    for(int e = 0; e < j*k; e++) wjk = (wjk*W) % P17;
-                    sa = (sa + a[k]*wjk) % P17; sb = (sb + b[k]*wjk) % P17;
-                    sc = (sc + c[k]*wjk) % P17;
-                }
-                A[j] = sa; B[j] = sb; C[j] = sc;
             }
-            casos++;
-            int bate = 1;
-            for(int j = 0; j < NN; j++) if(C[j] != (A[j]*B[j]) % P17) bate = 0;
-            if(bate) teo++;
         }
-        /* o δ de KRONECKER tem espectro CONSTANTE 1 */
-        long esp1 = 0;
-        for(int j = 0; j < NN; j++){
-            long sd = 0;
-            for(int k = 0; k < NN; k++){
-                long wjk = 1;
-                for(int e = 0; e < j*k; e++) wjk = (wjk*W) % P17;
-                sd = (sd + (k == 0 ? 1 : 0)*wjk) % P17;
-            }
-            if(sd == 1) esp1++;
+        /* (iii) Fourier é METADE: o traço do elítico é LIMITADO, o das folhas CRESCE */
+        long lim = 0, cresce = 0;
+        for(long m = 1; m <= 6; m++){
+            long U[64], t[64];
+            int nh = g_metal(m, U, t, 20);
+            int sobe = 1;
+            for(int k = 3; k < nh && k < 12; k++) if(t[k] <= t[k-1]) sobe = 0;
+            if(sobe) cresce++;
         }
-        printf("      𝔽₁₇ com ω = 2, de ordem %ld: %ld casos do teorema da convolução,"
-               " %ld a fechar · o espectro do δ é constante 1 em %ld de %ld posições\n",
-               ordw, casos, teo, esp1, NN);
-        ok("UM POLINÓMIO É AMPLITUDE E FASE NO SEU ANDAR — E ISSO É O ESPECTRO: o"
-           " coeficiente c_k é a AMPLITUDE do andar k, ω^k é a FASE, e avaliar em ω^j É"
-           " LER O ESPECTRO. Com ω = 2 de ordem 8 em 𝔽₁₇, tudo isto é EXACTO EM INTEIROS,"
-           " e o teorema da convolução fecha nos 60 casos: multiplicar NÚMEROS é convolver"
-           " DÍGITOS é multiplicar ESPECTROS ponto a ponto. E o δ de KRONECKER tem"
-           " espectro CONSTANTE 1 nas oito posições — é a identidade dos dois lados",
-           teo == casos && casos == 60 && esp1 == NN && ordw == 8);
+        { /* o elítico: t_k obedece a t_k = t·t_{k−1} − t_{k−2}, e fica LIMITADO.
+           * Em inteiros, no andar n=3 (t=1): 2,1,−1,−2,−1,1,2,… período 6, |t| ≤ 2 */
+          long te[14]; te[0] = 2; te[1] = 1;
+          int dentro = 1;
+          for(int k = 2; k < 14; k++){
+              te[k] = 1*te[k-1] - te[k-2];
+              if(te[k] > 2 || te[k] < -2) dentro = 0;
+          }
+          if(dentro) lim++;
+        }
+        printf("      a avaliação é HOMOMORFISMO nas duas folhas: %ld de %ld · e o gume:"
+               " %ld par(es) de folhas colapsam (Δ ≡ 0, o parabólico)\n",
+               homo, homo_cas, colapsa);
+        printf("      e Fourier é METADE: o traço das FOLHAS cresce em %ld de 6 metais;"
+               " o do elítico fica LIMITADO (|t| ≤ 2) — a DFT cobre só o círculo\n",
+               cresce);
+        ok("A TRANSFORMADA UNIVERSAL É A AVALIAÇÃO NAS FOLHAS σ, σ†, E NÃO EM RAÍZES DA"
+           " UNIDADE: em 𝔽_q com Δ resíduo quadrático, as folhas cumprem σ + σ† = m e"
+           " σ·σ† = −1 em todos os casos medidos, e a avaliação é HOMOMORFISMO nas duas —"
+           " é o teorema da convolução deste quadro, com o produto de ℤ[x]/(x² − mx − 1)."
+           " A realização é INTEIRA, pela matriz companheira, e a DOURADA é o caso mais"
+           " simples",
+           soma_ok == qs && prod_ok == qs && homo == homo_cas && qs >= 6);
+        ok("E FOURIER SOZINHO É METADE, PORQUE AS RAÍZES DO METAL NÃO ESTÃO NO CÍRCULO:"
+           " as raízes da unidade têm módulo um e o traço fica LIMITADO — |t| ≤ 2, o"
+           " regime elítico —, ao passo que as folhas são RECÍPROCAS, com |σ| > 1 > |σ†|"
+           " e produto um, e o traço CRESCE nos seis metais. A DFT avalia no círculo e"
+           " cobre o elítico e mais nada. E o gume: onde Δ ≡ 0 em 𝔽_q as folhas COLAPSAM"
+           " — é o parabólico na característica, a recta",
+           cresce == 6 && lim == 1 && colapsa >= 1);
     }
 
     /* ═══ §L11m  FREQUÊNCIA INFINITA: O DISCRIMINANTE COLAPSA, E É A RETA ═══ */
@@ -1941,13 +1963,13 @@ int main(void){
         /* O coordenador: «e um polinómio de frequência infinita é o quê? Uma reta. No
          * infinito tudo vira reta.» E a razão está no DISCRIMINANTE:
          *
-         *      Δ = tr² − 4·det
+         *      D = tr² − 4·det   (o DISCRIMINANTE; Δ fica para a diferença finita)
          *
          * Nos andares elíticos exactos ele é INTEIRO e desce em módulo:
          *
-         *      n=3: t²=1, Δ=−3      n=4: t²=2, Δ=−2      n=6: t²=3, Δ=−1      … → 0
+         *      n=3: t²=1, D=−3      n=4: t²=2, D=−2      n=6: t²=3, D=−1      … → 0
          *
-         * e o limite Δ = 0 é a RAIZ DUPLA: as duas faces COLAPSAM numa só. Aí
+         * e o limite D = 0 é a RAIZ DUPLA: as duas faces COLAPSAM numa só. Aí
          * C = I + N com N² = 0, e
          *
          *      C^k = I + k·N        — LINEAR em k, contra σ^k que é EXPONENCIAL
@@ -1955,12 +1977,12 @@ int main(void){
          * que conjugada é a TRANSLAÇÃO y ↦ y + k. É a RETA. E isto fecha a distinção
          * PA/PG do §L0b, agora com a causa:
          *
-         *      Δ < 0   elítico       rotação        PERIÓDICO
-         *      Δ = 0   PARABÓLICO    I + kN         PA — a RETA, a frequência infinita
-         *      Δ > 0   hiperbólico   σ^k            PG — o metálico
+         *      D < 0   elítico       rotação        PERIÓDICO nos representantes de ORDEM FINITA
+         *      D = 0   PARABÓLICO    I + kN         PA — a RETA, a frequência infinita
+         *      D > 0   hiperbólico   σ^k            PG — o metálico
          */
         long andares = 0, desce = 0, ant = 99;
-        printf("      n    t²   Δ = t² − 4   regime\n");
+        printf("      n    t²   D = t² − 4   regime\n");
         { long t2[3] = {1,2,3}; long nn[3] = {3,4,6};
           for(int i2 = 0; i2 < 3; i2++){
               long D2 = t2[i2] - 4, mod = -D2;
@@ -2002,22 +2024,23 @@ int main(void){
             hip_cas++;
             if(algum_nao_zero) hip++;                 /* Δ² NÃO é identicamente zero */
         }
-        printf("      Δ = 0: N² = 0 em %s · C^k = I + kN em %ld de %ld potências"
+        printf("      D = 0: N² = 0 em %s · C^k = I + kN em %ld de %ld potências"
                " (LINEAR)\n", nilpotente ? "sim" : "NÃO", linear, ks);
-        printf("      e o contraste pela SEGUNDA diferença: Δ² ≡ 0 no parabólico, e"
-               " Δ² ≢ 0 em %ld de %ld metais (hiperbólicos)\n", hip, hip_cas);
+        printf("      e o contraste pela SEGUNDA DIFERENÇA FINITA: Δ²u ≡ 0 no parabólico, e"
+               " Δ²u ≢ 0 em %ld de %ld metais (hiperbólicos)\n", hip, hip_cas);
         ok("NO INFINITO TUDO VIRA RETA, E A RAZÃO É O COLAPSO DO DISCRIMINANTE: nos"
-           " andares exactos Δ = t² − 4 é INTEIRO e desce em módulo — 3, 2, 1 nos andares"
-           " 3, 4, 6 —, e o limite Δ = 0 é a RAIZ DUPLA, em que as duas faces colapsam"
+           " andares exactos D = tr² − 4·det é INTEIRO e desce em módulo — 3, 2, 1 nos andares"
+           " 3, 4, 6 —, e o limite D = 0 é a RAIZ DUPLA, em que as duas faces colapsam"
            " numa só. Aí C = I + N com N² = 0 e C^k = I + k·N nas trinta potências:"
            " LINEAR em k, e conjugada é a TRANSLAÇÃO. Um polinómio de frequência infinita"
            " é uma RETA",
            desce == andares && andares == 3 && nilpotente && linear == ks && ks == 30);
-        ok("E ISSO DÁ A CAUSA DA DISTINÇÃO PA/PG: Δ < 0 dá o elítico, com órbita"
-           " PERIÓDICA; Δ = 0 dá o parabólico, com I + kN — uma progressão ARITMÉTICA,"
-           " que é a reta e é o limite de frequência infinita; e Δ > 0 dá o hiperbólico,"
+        ok("E ISSO DÁ A CAUSA DA DISTINÇÃO PA/PG: D < 0 dá o elítico, com órbita"
+           " PERIÓDICA NOS REPRESENTANTES DE ORDEM FINITA — uma rotação de ângulo"
+           " irracional é elítica e não é periódica —; D = 0 dá o parabólico, com I + kN — uma progressão ARITMÉTICA,"
+           " que é a reta e é o limite de frequência infinita; e D > 0 dá o hiperbólico,"
            " com σ^k — a progressão GEOMÉTRICA, que é o metálico, e cuja SEGUNDA"
-           " diferença não é identicamente zero em nenhum dos seis. As três progressões são os três regimes do"
+           " diferença FINITA não é identicamente zero em nenhum dos seis. As três progressões são os três regimes do"
            " discriminante",
            hip == hip_cas && hip_cas == 6);
     }
@@ -2097,11 +2120,11 @@ int main(void){
            " ao fim de d, medido nos graus 1 a 6 — e o grau 1 já é recta no andar zero."
            " Cada andar consome um grau, e a oscilação vai-se com ele",
            baixa == cas && reta_ok == cas && const_ok == cas && cas == 6);
-        ok("E AS DIFERENÇAS EM ZERO SÃO AS COORDENADAS — AÍ ESTÁ O ℝⁿ: pela fórmula de"
+        ok("E AS DIFERENÇAS EM ZERO SÃO AS COORDENADAS — 𝒫_n ≅ ℝ^{n+1}: pela fórmula de"
            " Newton p(x) = Σ Δ^k p(0)·C(x,k), um polinómio de grau n fica determinado"
            " pelas suas n+1 diferenças em 0, e a reconstrução é EXACTA nos pontos"
-           " medidos. Essas n+1 diferenças são as n+1 coordenadas: cada andar é um grau,"
-           " e cada grau é uma coordenada",
+           " medidos. O espaço dos polinómios de grau ≤ n é ISOMORFO a ℝ^{n+1} pelo mapa"
+           " p ↦ (Δ⁰p(0), …, Δⁿp(0)): cada andar é um grau, e cada grau é uma coordenada",
            recon == recon_cas && recon_cas == 72);
     }
 
