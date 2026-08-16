@@ -890,26 +890,31 @@ e_{n-1}$ isso força $e_i^{2}=-1$ e $e_ie_j=-e_je_i$, que são as relações de 
 \textbf{é a base que as carrega}, e é ela que a base ortonormal do \S\ref{sec:orto}
 realiza.
 
-\noindent\textbf{Mas a saturação não é o tecto, e isso mede-se.} A tabela $e_ie_j$
-\emph{satura} a base --- os produtos cobrem todos os elementos --- em $1,2,4,8$
-\emph{e também em $16$}. Logo saturar é o que faz a torre \textbf{subir}, e não o que a
-faz parar:
+\noindent\textbf{Mas a saturação não é o tecto --- e a torre não pára.} A tabela
+$e_ie_j$ \emph{satura} a base em todos os andares medidos, até $64$: os produtos caem
+todos nela, e cada andar sai \textbf{completo}. Saturar é o que manda \emph{dobrar}.
 \[
 \boxed{
 \begin{array}{ll}
-\text{a \textbf{saturação}} & \text{está em todos os andares: é o que manda dobrar}\\[3pt]
-\text{o \textbf{tecto}} & \text{é o que a saturação \emph{custa} --- em }16\text{ cai a
-última}\\
-& \text{propriedade que a norma precisava}
+\text{preencher os andares \textbf{na ordem}, completos} & \text{é o que a construção
+faz --- e basta}\\[3pt]
+\text{o «tecto» de }8 & \text{é \textbf{uma exigência} posta de fora}
 \end{array}}
 \]
-E aí aparecem $x,y\neq0$ com $xy=0$ --- que é \textbf{a mesma factorização do zero} do
-Teor.~\ref{thm:divzero}: lá o polinómio a factorizar, aqui a álgebra a passar dos oito,
-e nos dois a norma multiplicativa é a primeira a cair.
+A exigência é que a norma \emph{euclidiana} seja multiplicativa e que não haja divisores
+de zero. Ela não é a torre: é um pedido que se lhe faz. E cada propriedade que cai pelo
+caminho --- a ordem em $2$, a comutatividade em $4$, a associatividade em $8$ --- é
+\textbf{uma exigência a cair, e não o objecto a falhar}. O outro lado do par mostra-o:
+com a norma de Gentil não há tecto nenhum.
+
+\noindent E o que aparece em $16$, $x,y\neq0$ com $xy=0$, é \textbf{a mesma factorização
+do zero} do Teor.~\ref{thm:divzero}: lá o polinómio a factorizar, aqui a álgebra a
+passar dos oito, e nos dois casos a norma multiplicativa é a primeira exigência a cair.
 \colunas{a base ortonormal das oito leis (\code{thm:ortonormal})}
-        {a polarização, a saturação em todos os andares, e o preço em $16$}
-        {\code{tests/hurwitz.c} \S H9: a base satura nos cinco andares, a norma sobrevive
-em quatro, e o divisor de zero de dimensão $16$ exibido}
+        {a polarização, os andares completos, e o tecto como exigência}
+        {\code{tests/hurwitz.c} \S H9--H10: a base satura e os produtos caem nela nos
+SETE andares até $64$, com a norma euclidiana a sobreviver em quatro e o divisor de zero
+de dimensão $16$ exibido}
 
 %======================================================================
 \section{Um número é um polinómio}\label{sec:polinomio}

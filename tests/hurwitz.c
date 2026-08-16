@@ -485,6 +485,65 @@ printf("    é onde o escalar arranja lugar. Zero doubles, zero tolerâncias.\n\
  * É o mesmo fenómeno do outro lado da casa: o zero parte-se quando o andar deixa de ser
  * corpo. Lá era o polinómio a factorizar; aqui é a álgebra a passar dos oito. Nos dois
  * casos a norma multiplicativa é a primeira coisa que cai. */
+/* ══════════════════════════════════════════════════════════════════════════════
+ * A TORRE NÃO PÁRA: PREENCHER OS ANDARES NA ORDEM, COMPLETOS, JÁ É SUFICIENTE
+ * ══════════════════════════════════════════════════════════════════════════════
+ * O Aarão: «se preenche todos os andares na ordem, completos, isso é suficiente; o resto
+ * é exigência estética descabida.»
+ *
+ * E é uma correcção ao enquadramento, não uma nuance. Eu tinha escrito que «em 16 cai a
+ * última propriedade que a norma precisava», como se 16 fosse um limite da CONSTRUÇÃO.
+ * Não é: a dobra de Cayley--Dickson continua indefinidamente, e cada andar sai COMPLETO —
+ * a base satura, os produtos caem na base, e o andar seguinte é o dobro.
+ *
+ * O que pára em 8 é UMA EXIGÊNCIA — que a norma euclidiana seja multiplicativa e que não
+ * haja divisores de zero. Essa exigência é posta de FORA; ela não é a torre.
+ *
+ * E a casa já o dizia de um lado — «o tecto é do lado da NORMA, não do objecto» — e
+ * mede-o do outro no §H8: com a norma de Gentil não há tecto nenhum. As duas metades
+ * dizem a mesma coisa, e esta secção fecha-a: a construção preenche, na ordem, para
+ * sempre; e cada propriedade que se perde é uma exigência a cair, não o objecto. */
+{
+    printf("\n§H10 A torre não pára: os andares saem COMPLETOS, e o que cai são exigências.\n\n");
+    long andares = 0, completos = 0;
+    printf("      dim    a base satura?   os produtos caem na base?   e as exigências:\n");
+    for(int n = 1; n <= 64; n *= 2){
+        int visto[64] = {0}; long fora = 0;
+        for(int i = 0; i < n; i++) for(int j = 0; j < n; j++){
+            long a[64] = {0}, b[64] = {0}, c[64] = {0};
+            a[i] = 1; b[j] = 1;
+            cd(a, b, n, c);
+            int nz = 0, kk = -1;
+            for(int t = 0; t < n; t++) if(c[t]){ nz++; kk = t; }
+            if(nz == 1) visto[kk] = 1; else fora++;
+        }
+        int cobre = 0;
+        for(int t = 0; t < n; t++) if(visto[t]) cobre++;
+        andares++;
+        if(cobre == n && fora == 0) completos++;
+        const char *ex = (n <= 1) ? "todas" : (n <= 2) ? "perde a ordem"
+                       : (n <= 4) ? "perde a comutatividade" : (n <= 8) ? "perde a associatividade"
+                       : "perde a norma euclidiana";
+        printf("      %-6d %-16s %-26s %s\n", n,
+               (cobre == n) ? "sim, SATURA" : "NÃO",
+               (fora == 0) ? "sim, TODOS" : "não", ex);
+    }
+    printf("\n      ⟹ os SETE andares medidos saem completos — a construção não tem tecto.\n");
+    printf("        O que pára em 8 é uma EXIGÊNCIA posta de fora (norma euclidiana\n");
+    printf("        multiplicativa e sem divisores de zero), e o §H8 mostra o outro lado:\n");
+    printf("        com a norma de Gentil não há tecto nenhum.\n\n");
+    ok("A TORRE NÃO PÁRA, E PREENCHER OS ANDARES NA ORDEM JÁ É SUFICIENTE: a dobra de"
+       " Cayley–Dickson continua indefinidamente, e cada andar sai COMPLETO — a base"
+       " satura, os produtos caem todos nela, e o seguinte é o dobro. Medido em sete"
+       " andares, até 64. O que pára em 8 não é a construção: é UMA EXIGÊNCIA posta de"
+       " fora — que a norma euclidiana seja multiplicativa e que não haja divisores de"
+       " zero. Cada propriedade que se perde pelo caminho é uma exigência a cair, não o"
+       " objecto a falhar; e o §H8 fecha-o pelo outro lado, com a norma de Gentil a não"
+       " ter tecto nenhum. Eu tinha escrito que «em 16 cai a última propriedade que a"
+       " norma precisava», como se 16 fosse um limite da torre — e não é",
+       andares == 7 && completos == andares);
+}
+
 {
     printf("\n§H9  A base SATURA em cada andar — e o tecto é o que a saturação custa.\n\n");
     long andares = 0, satura = 0, norma_ok = 0, div0 = 0;
