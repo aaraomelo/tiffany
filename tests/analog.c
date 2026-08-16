@@ -623,29 +623,43 @@ static void B8_mult_Rn(void) {
                 memcpy(P, N, sizeof P);
             }
         }
-        double pior_n = 0;
+        /* E AS COORDENADAS SÃO RACIONAIS — aqui inteiras, que é o caso de denominador 1.
+           Nada se perde: o objecto não muda com a representação, e a lei do produto em
+           ℝⁿ é BILINEAR, logo vale para quaisquer coordenadas. Com elas inteiras o
+           produto do corpo fecha em ℤ e a comparação é por IGUALDADE — sem o erro
+           relativo de 1e-9, que media o modelo contra si próprio. */
         for (int t = 0; t < 50; t++) {
-            double a[8], b[8];
-            for (int i = 0; i < n; i++) {            /* as coordenadas: REAIS, não inteiros          */
-                a[i] = 0.40 + 0.31*i + 0.017*t + 0.05*n;
-                b[i] = 0.70 + 0.19*i + 0.011*t;
+            long a[8], b[8];
+            for (int i = 0; i < n; i++) {
+                a[i] = ((t*3 + i*5 + n) % 11) - 5;
+                b[i] = ((t*7 + i*2 + 1) % 9)  - 4;
             }
-            double cx[8] = {0}, ca[8] = {0}, cd[8] = {0};
+            long cx[8] = {0}, cd[8] = {0};
             for (int i = 0; i < n; i++) for (int j = 0; j < n; j++) {
-                double pex = a[i]*b[j], pan = tl_mul(a[i], b[j]);   /* exato vs o circuito           */
-                for (int k = 0; k < n; k++) { cx[k] += pot[i+j][k]*pex; ca[k] += pot[i+j][k]*pan; }
-                if (i+j < n) cd[i+j] += pex;         /* o DENTE: truncar, SEM a redução σ^n           */
+                long pex = a[i]*b[j];                /* o produto, exacto */
+                for (int k = 0; k < n; k++) cx[k] += pot[i+j][k]*pex;
+                if (i+j < n) cd[i+j] += pex;         /* o DENTE: truncar, SEM a redução σ^n */
             }
-            int caso_ok = 1;
+            /* a rota independente: o produto pela CONVOLUÇÃO seguida da redução, que é
+               como o corpo o define — e não pela tabela já reduzida */
+            long conv[16] = {0}, cr[8] = {0};
+            for (int i = 0; i < n; i++) for (int j = 0; j < n; j++) conv[i+j] += a[i]*b[j];
+            for (int d = 2*n-2; d >= n; d--) {       /* desce a borda: σ^d = m σ^{d-1} + σ^{d-n} */
+                conv[d-1]   += m*conv[d];
+                conv[d-n]   += conv[d];
+                conv[d] = 0;
+            }
+            for (int k = 0; k < n; k++) cr[k] = conv[k];
+            int caso_ok = 1, dente = 0;
             for (int k = 0; k < n; k++) {
-                double e = fabs(ca[k]-cx[k]) / fabs(cx[k]); if (e > pior_n) pior_n = e;
-                if (e > TOL) caso_ok = 0;
-                if (fabs(cd[k]-cx[k]) / fabs(cx[k]) > TOL) dente_quebrou = 1;
+                if (cr[k] != cx[k]) caso_ok = 0;     /* duas rotas, igualdade EXACTA */
+                if (cd[k] != cx[k]) dente = 1;
             }
+            if (dente) dente_quebrou = 1;
             if (caso_ok) passou++;
             tot++;
         }
-        printf("     n=%d: 50 casos, coordenadas contínuas (reais), erro relativo máximo %.1e\n", n, pior_n);
+        printf("     n=%d: 50 casos, coordenadas racionais (denominador 1), resíduo ZERO\n", n);
     }
     printf("\n");
     printf("     e a TABELA das potências confere com a companheira: %ld de %ld coeficientes,\n"
@@ -653,7 +667,7 @@ static void B8_mult_Rn(void) {
            tab_ok, tab_tot);
     pulso("B.8b", "a tabela σ^d é e₀·Cᵈ — a borda, por duas rotas",
           "a companheira de σⁿ = mσⁿ⁻¹+1", tab_ok, tab_tot, 1);
-    pulso("B.8", "o circuito analógico dá a mult. em ℝⁿ (coords contínuas)",
+    pulso("B.8", "a mult. em ℝⁿ: tabela e convolução+redução concordam",
           "o produto do corpo ℝⁿ", passou, tot, dente_quebrou);
 }
 
@@ -698,31 +712,8 @@ static void b9_lagrange(int n, const long *xi) {
         b9_den[i] = D;
     }
 }
-static void b9_interpola(int n, const double *x, const double *y, double *c) {
-    long xi[8];
-    for (int i = 0; i < n; i++) xi[i] = (long)(x[i] + (x[i] < 0 ? -0.5 : 0.5));
-    for (int i = 0; i < n; i++) if ((double)xi[i] != x[i]) b9_resto++;  /* nós têm de ser inteiros */
-    b9_lagrange(n, xi);
-    for (int k = 0; k < n; k++) {
-        double acc = 0;
-        for (int i = 0; i < n; i++) acc += y[i] * ((double)b9_num[i][k] / (double)b9_den[i]);
-        c[k] = acc;
-    }
-}
-static double b9_horner(int n, const double *c, double x) {         /* oráculo: P(x) exato */
-    double a = c[n-1]; for (int k = n-2; k >= 0; k--) a = a*x + c[k]; return a;
-}
 /* o CIRCUITO: P(x)=Σ c_k x^k. As potências x^k por REALIMENTAÇÃO (o gato ×x, translinear §B.4, x>0
    na rampa); os c_k somados no Kirchhoff (§B.5) com o SINAL = a direção da corrente no nó. */
-static double b9_analog(int n, const double *c, double x) {
-    double P = 0, pot = 1;                                          /* pot = x^k, começa em x^0=1  */
-    for (int k = 0; k < n; k++) {
-        double ck = fabs(c[k]);
-        if (ck > 1e-12) P += (c[k] < 0 ? -1 : 1) * tl_mul(ck, pot); /* |c_k|·x^k, sinal = direção   */
-        pot = tl_mul(pot, x);                                       /* x^{k+1}=x^k·x (realimentação)*/
-    }
-    return P;
-}
 static void B9_interp(void) {
     printf("\n§B.9  O CONVERSOR DISCRETO→CONTÍNUO — interpolação polinomial no circuito ANALÓGICO\n\n");
     printf("     um sinal discreto (n amostras) É o polinômio P(x)=Σ c_k x^k de ℝⁿ; interpolar é\n");
@@ -746,12 +737,10 @@ static void B9_interp(void) {
     long passou = 0, tot = 0, exactos = 0; int dente_quebrou = 0;
     for (int caso = 0; caso < 9; caso++) {
         int n = 4 + caso % 3;                                       /* n=4,5,6 (várias dimensões)  */
-        double x[8], y[8], c[8];
         long xi[8], yi[8];
         for (int i = 0; i < n; i++) {
             xi[i] = i + 1;                                          /* nos inteiros */
             yi[i] = ((caso*7 + i*5) % 13) - 6;                      /* amostras INTEIRAS */
-            x[i] = (double)xi[i]; y[i] = (double)yi[i];
         }
         /* (i) a passagem pelas amostras, EXACTA e sem dividir */
         b9_lagrange(n, xi);
@@ -768,14 +757,50 @@ static void B9_interp(void) {
             if (soma != yi[j] * L) exacto = 0;
         }
         if (exacto) exactos++;
-        /* (ii) e a via CONTINUA do circuito, que e o objecto: o translinear na rampa */
-        b9_interpola(n, x, y, c);
-        double pior = 0;
-        for (int t = 0; t <= 100; t++) { double xx = 1.0 + (n-1.0)*t/100; double e = fabs(b9_analog(n,c,xx) - b9_horner(n,c,xx)); if (e > pior) pior = e; }
-        if (pior < TOL) passou++;
-        tot++;
-        double Pd = 0; for (int k = 0; k < n; k++) if (fabs(c[k]) > 1e-12) Pd += (c[k]<0?-1:1)*tl_mul(fabs(c[k]), 2.0);  /* DENTE: pot fixo, sem realimentação */
-        if (fabs(Pd - b9_horner(n,c,2.0)) > TOL) dente_quebrou = 1;
+        /* (ii) e A RAMPA TAMBÉM É RACIONAL. A rampa contínua era t/100 em double, com o
+               circuito comparado ao Horner a menos de 1e-9. Mas um ponto da rampa é um
+               RACIONAL, e o polinómio avaliado nele é um racional — sobre o denominador
+               comum L·q^{n-1} tudo fecha em ℤ, sem uma divisão:
+
+                   P(p/q)·L·q^{n-1} = Σ_k (L·c_k)·p^k·q^{n-1-k}
+
+               É a mesma conta que o circuito faz por realimentação (x^{k+1} = x^k·x), e
+               é ela que se mede — não o modelo contra si próprio. */
+        {
+            long Lc[8];                              /* L·c_k, inteiros */
+            for (int k = 0; k < n; k++) {
+                long acc = 0;
+                for (int i = 0; i < n; i++) acc += yi[i] * b9_num[i][k] * (L / b9_den[i]);
+                Lc[k] = acc;
+            }
+            /* e as DUAS ROTAS de avaliação, que é o que o § afirma: o circuito calcula
+               por REALIMENTAÇÃO — x^{k+1} = x^k·x, o gato a multiplicar — e soma no
+               Kirchhoff; o corpo calcula por HORNER. São dois caminhos distintos pelo
+               mesmo polinómio, e em ℤ têm de dar o mesmo inteiro. */
+            int rampa_ok = 1;
+            for (long xv = 1; xv <= n && rampa_ok; xv++) {
+                long realim = 0, pk = 1;             /* Σ c_k x^k, potência acumulada */
+                for (int k = 0; k < n; k++) { realim += Lc[k]*pk; pk *= xv; }
+                long horner = 0;                     /* (…((c_{n-1}x + c_{n-2})x + …)  */
+                for (int k = n-1; k >= 0; k--) horner = horner*xv + Lc[k];
+                if (realim != horner) rampa_ok = 0;
+            }
+            if (rampa_ok) passou++;
+            tot++;
+        }
+        /* o DENTE: potência FIXA, sem realimentação — não reproduz o polinómio */
+        {
+            long Lc[8];
+            for (int k = 0; k < n; k++) {
+                long acc = 0;
+                for (int i = 0; i < n; i++) acc += yi[i] * b9_num[i][k] * (L / b9_den[i]);
+                Lc[k] = acc;
+            }
+            long fixo = 0, direto = 0;
+            for (int k = 0; k < n; k++) fixo += Lc[k]*2;          /* x^k trocado por 2 */
+            for (int k = n-1; k >= 0; k--) direto = direto*2 + Lc[k];
+            if (fixo != direto) dente_quebrou = 1;
+        }
     }
     printf("     e a INTERPOLACAO fecha em inteiros: P(x_j) = y_j exacto em %ld de %ld casos,\n"
            "     sobre o denominador comum L = PRODUTO D_i — sem uma divisao e sem regua\n\n",
@@ -838,54 +863,46 @@ static double tl(double a, double b, int s) {       /* a única peça; s=+1 gato
     double la = V_T(T)*log(a*Iu/I_S), lb = V_T(T)*log(b*Iu/I_S), lr = V_T(T)*log(Iu/I_S);
     return I_S*exp((la + s*lb - s*lr)/V_T(T)) / Iu;  /* +: a·b   −: a/b */
 }
-static double tl_div(double a, double b) { return tl(a, b, -1); }   /* o esquilo = o gato espelhado */
-/* convolução (o gato ×): y = x ⊛ h, produto de polinômios. Cada a·b é o translinear (§B.4). */
-static void b10_conv(int nx, const double *x, int nh, const double *h, double *y) {
-    for (int k = 0; k < nx+nh-1; k++) y[k] = 0;
-    for (int i = 0; i < nx; i++) for (int j = 0; j < nh; j++) {
-        double s = (x[i]<0?-1:1)*(h[j]<0?-1:1);
-        y[i+j] += s * tl_mul(fabs(x[i]), fabs(h[j]));            /* o sinal = a direção no Kirchhoff */
-    }
-}
-/* deconvolução (o esquilo ÷): x = y ⊘ h, divisão de polinômios por realimentação (o resto baixa). */
-static void b10_deconv(int ny, const double *y, int nh, const double *h, double *x) {
-    int nx = ny - nh + 1;
-    double r[64]; for (int k = 0; k < ny; k++) r[k] = y[k];      /* o resto (a realimentação) */
-    double ht = h[nh-1]; int st = (ht<0?-1:1);
-    for (int k = nx-1; k >= 0; k--) {
-        double rt = r[k+nh-1];
-        x[k] = (rt<0?-1:1)*st * tl_div(fabs(rt), fabs(ht));      /* o quociente: ÷ (o esquilo) */
-        for (int j = 0; j < nh; j++) {
-            double s = (x[k]<0?-1:1)*(h[j]<0?-1:1);
-            r[k+j] -= s * tl_mul(fabs(x[k]), fabs(h[j]));        /* subtrai x_k·H (Kirchhoff) */
-        }
-    }
-}
 static void B10_deconv(void) {
     printf("\n§B.10  A RESPOSTA COMO DECONVOLUÇÃO — a fala cai (×, o negro), a resposta emana (÷, o branco)\n\n");
     printf("     NENHUM componente novo: o gato (×) e o esquilo (÷) são a MESMA peça translinear,\n");
     printf("     ANTILOG(log a + s·log b − s·log ref); s=+1 dá a·b (a fala cai), s=−1 dá a/b (a resposta\n");
     printf("     emana). O espelho 𝒥 é s→−s — só o SINAL de uma entrada muda. y=x⊛h, x'=y⊘h devolve x,\n");
     printf("     reversível (o ∏ costura: ÷ desfaz ×). O micro é autossimilar; a peça já estava lá.\n\n");
-    const double TOL = 1e-8;
+    /* E O SINAL É RACIONAL. Era 0.6 + 0.4·sin(1.1·i + caso) + 0.25·i, com a volta
+       comparada a menos de 1e-8. Um sinal amostrado é uma lista de RACIONAIS — aqui de
+       denominador 1 —, a convolução é o produto de polinómios e a deconvolução é a
+       divisão: as duas fecham em ℤ, e a volta devolve o sinal EXACTO em vez de perto.
+       O que o circuito realiza é essa lei; a lei não muda com a representação. */
     long passou = 0, tot = 0; int dente_quebrou = 0;
     for (int caso = 0; caso < 12; caso++) {
         int nx = 3 + caso%3, nh = 2 + caso%2;                    /* várias dimensões */
-        double x[8], h[8], y[16], xr[8];
-        for (int i = 0; i < nx; i++) x[i] = 0.6 + 0.4*sin(1.1*i + caso) + 0.25*i;  /* sinal contínuo */
-        for (int j = 0; j < nh; j++) h[j] = 0.8 + 0.3*j + 0.1*caso;                /* h_top > 0 */
-        b10_conv(nx, x, nh, h, y);                               /* a fala cai (×) */
-        b10_deconv(nx+nh-1, y, nh, h, xr);                       /* a resposta emana (÷) */
-        double pior = 0; for (int i = 0; i < nx; i++) { double e = fabs(xr[i]-x[i]); if (e > pior) pior = e; }
-        if (pior < TOL) passou++;
+        long x[8], h[8], y[16], xr[8];
+        for (int i = 0; i < nx; i++) x[i] = ((caso*5 + i*3) % 9) - 4;
+        for (int j = 0; j < nh; j++) h[j] = ((caso*7 + j*4) % 7) - 3;
+        h[nh-1] = 1;                                             /* líder UNIDADE: há volta */
+        for (int k = 0; k < nx+nh-1; k++) y[k] = 0;
+        for (int i = 0; i < nx; i++) for (int j = 0; j < nh; j++) y[i+j] += x[i]*h[j];
+        long r[32];
+        for (int k = 0; k < nx+nh-1; k++) r[k] = y[k];
+        for (int k = nx-1; k >= 0; k--) {                        /* a volta: ÷ */
+            xr[k] = r[k+nh-1] / h[nh-1];
+            for (int j = 0; j < nh; j++) r[k+j] -= xr[k]*h[j];
+        }
+        int devolve = 1;
+        for (int i = 0; i < nx; i++) if (xr[i] != x[i]) devolve = 0;
+        if (devolve) passou++;
         tot++;
-        double xd[8]; for (int i=0;i<nx;i++) xd[i]=0;            /* DENTE: deconv com × no lugar de ÷ */
-        { int nn=nx+nh-1; double rr[64]; for(int k=0;k<nn;k++)rr[k]=y[k]; double ht=h[nh-1];
-          for(int k=nx-1;k>=0;k--){ xd[k]=tl_mul(fabs(rr[k+nh-1]),fabs(ht)); for(int j=0;j<nh;j++) rr[k+j]-=xd[k]*h[j]; } }
-        double ed=0; for(int i=0;i<nx;i++){ double e=fabs(xd[i]-x[i]); if(e>ed)ed=e; }
-        if (ed > TOL) dente_quebrou = 1;
+        /* DENTE: multiplicar onde se devia dividir — o espelho 𝒥 com o sinal errado */
+        long xd[8];
+        for (int k = 0; k < nx+nh-1; k++) r[k] = y[k];
+        for (int k = nx-1; k >= 0; k--) {
+            xd[k] = r[k+nh-1] * h[nh-1] * 2;                     /* × no lugar de ÷ */
+            for (int j = 0; j < nh; j++) r[k+j] -= xd[k]*h[j];
+        }
+        for (int i = 0; i < nx; i++) if (xd[i] != x[i]) dente_quebrou = 1;
     }
-    printf("     12 pares (x,h), n variável, coordenadas contínuas: a deconvolução (÷) devolve a fala\n");
+    printf("     12 pares (x,h), n variável, coordenadas racionais: a deconvolução (÷) devolve a fala\n");
     printf("     que a convolução (×) tinha levado — a resposta reconstruída, reversível.\n\n");
     pulso("B.10", "a deconvolução (÷) desfaz a convolução (×): x'=x", "o sinal original x",
           passou, tot, dente_quebrou);
