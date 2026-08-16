@@ -61,6 +61,7 @@
 #include "homotopia.h"  /* o buraco que nenhum ponto ve: pi1 combinatorio */
 #include "analise.h"    /* Analise Real: as CINCO VIAS da completude, sem arbitro */
 #include "dual32.h"     /* 64 bits sao dois duais de 32 */
+#include "ramos.h"      /* os dois ramos de |det| = 1: a leitura metrica */
 #include "medida.h"     /* a conservacao metrica por dualidade, e a meta-inducao */
 #include "dforma.h"     /* o d: Lambda^0 -> ... -> Lambda^3, e os tres viram UM */
 #include "eletrico.h"
@@ -1412,6 +1413,8 @@ static const struct { int n; const char *nome; const char *enunciado; } CM10[] =
  {12, "a pata",         "a marca NÃO é o estado: conserva a medida, perde a FIBRA" },
  {13, "dois duais de 32","64 bits são dois de 32 — o alto é a metade que ORDENA" },
  {14, "livro razao",    "o que cada etapa conserva e o que esquece — as duas colunas" },
+ {15, "dois ramos",     "|det| = 1 tem DOIS: o que mede e cresce, e o que roda" },
+ {16, "lei 8",          "no anel o gato ganha período — o ramo é da REALIZAÇÃO" },
 };
 static void cmetrica_resolve(int n){
     TICK_N = 0;
@@ -1704,6 +1707,98 @@ static void cmetrica_resolve(int n){
                     " estava como regra de cálculo, e o que este andar acrescenta é o"
                     " NOME dela — o Jacobiano não é um factor de correcção, é a medida"); }
         break;
+    case 15: case 16: {
+        tique7(0, n == 15 ? "seja uma matriz inteira 2×2 que conserva a medida"
+                          : "seja o gato, e o anel da Lei 8");
+        tique7(1, n == 15 ? "os DOIS ramos de |det| = 1:" : "a Lei 8:");
+        printf(n == 15
+               ? "      $\\det = -1$: o GATO, hiperbólico;\\qquad $\\det = +1$:"
+                 " o ESQUILO, elíptico\n"
+               : "      $\\mathbb{Z}_{65537}$,\\qquad $65537 = 2^{16} + 1$\n");
+        tique7(2, n == 15
+               ? "e o esquilo NÃO É REMENDO, é DUAL. Quando corrigi o teorema do Gato disse"
+                 " que |det| = 1 também admite σσ′ = +1 «e essa é a identidade, que não é"
+                 " gato nenhum» — estava certo e era PARCIAL: o +1 não é a identidade"
+                 " sozinha, é uma família inteira, e ela é a Lei 2 desta casa. Um lado é a"
+                 " lei, o outro é a realização, e nenhum é melhor"
+               : "e no anel o grupo é FINITO, logo toda órbita fecha — inclusive a do gato,"
+                 " que sobre ℤ cresce sem parar. E a leitura não é «o anel salva o gato»:"
+                 " é que ser hiperbólico ou elíptico é propriedade da REALIZAÇÃO");
+        tique7(3, "a lei é o discriminante t² − 4d, e ele decide sem avaliar raiz nenhuma —"
+                  " sai dos COEFICIENTES, que são inteiros");
+        { if(n == 15){
+              long g = 0, e = 0, bd = 0, fora = 0;
+              for(long a = -6; a <= 6; a++) for(long b = -6; b <= 6; b++)
+              for(long c = -6; c <= 6; c++) for(long d = -6; d <= 6; d++){
+                  Sq2 x = { a,b,c,d };
+                  int r = sq_ramo(sq_traco(x), sq_det(x));
+                  if(r == SQ_NEM) continue;
+                  if(r == SQ_GATO) g++; else if(r == SQ_ESQUILO) e++;
+                  else if(r == SQ_BORDA) bd++; else fora++;
+              }
+              printf("      em 28561 matrizes: gato %ld · esquilo %ld · borda %ld ·"
+                     " FORA %ld\n\n", g, e, bd, fora);
+              printf("        objecto       traço  det  período   satura no passo\n");
+              long gs = 0, es = 0;
+              for(long m = 1; m <= 3; m++){
+                  Sq2 x = sq_gato(m);
+                  long per = sq_periodo(x, 400), sat = sq_passo_que_satura(x, 1000000000L);
+                  if(per == 0) gs++;
+                  printf("        gato A_%-6ld %-6ld %-4ld %-9s %ld\n", m, sq_traco(x),
+                         sq_det(x), per ? "tem" : "NENHUM", sat);
+              }
+              Sq2 rr[3]; rr[0] = sq_rotor();
+              { Sq2 t = {0,-1,1,-1}; rr[1] = t; }
+              { Sq2 t = {1,-1,1,0};  rr[2] = t; }
+              for(int i = 0; i < 3; i++){
+                  long per = sq_periodo(rr[i], 400);
+                  long sat = sq_passo_que_satura(rr[i], 1000000000L);
+                  if(sat == 0) es++;
+                  printf("        esquilo t=%-3ld %-6ld %-4ld %-9ld %s\n",
+                         sq_traco(rr[i]), sq_traco(rr[i]), sq_det(rr[i]), per,
+                         sat ? "satura" : "NUNCA");
+              }
+              tique7(4, "a testemunha são as DUAS colunas da direita, e elas trocam de lado:"
+                        " o gato não tem período nenhum e satura sempre; o esquilo tem"
+                        " período 3, 4 ou 6 e nunca satura. Cada um tem exactamente o que"
+                        " falta ao outro — e é por isso que nenhum sozinho é o teorema");
+              tique7(5, fora == 0 && gs == 3 && es == 3
+                     ? "logo os dois ramos ESGOTAM a lei e nenhum lado é vazio: o gato"
+                       " conserva MEDINDO (tem eixo real, e paga com o crescimento) e o"
+                       " esquilo conserva SEM MEDIR (não tem eixo, e paga com a falta de"
+                       " régua)"
+                     : "os ramos não esgotaram — NÃO afirmo");
+          } else {
+              printf("        metal   período em ℤ    período em ℤ_65537\n");
+              long sz = 0, ca = 0;
+              for(long m = 1; m <= 4; m++){
+                  Sq2 x = sq_gato(m);
+                  long pz = sq_periodo(x, 400);
+                  long pa = sq_periodo_anel(x, SQ_LEI8, 300000);
+                  if(pz == 0) sz++;
+                  if(pa > 0) ca++;
+                  printf("        A_%-6ld %-15s %ld\n", m, pz ? "tem" : "NENHUM", pa);
+              }
+              printf("      → sobre ℤ o gato não fecha; no anel da Lei 8 fecha sempre\n");
+              tique7(4, "a testemunha é a mesma matriz a mudar de comportamento ao mudar de"
+                        " corpo, sem mudar de determinante. É isso que separa a LEI da FACE:"
+                        " o |det| = 1 não se move, e o ramo move-se");
+              tique7(5, sz == 4 && ca == 4
+                     ? "logo ser hiperbólico ou elíptico é propriedade da REALIZAÇÃO, e"
+                       " |det| = 1 é a mesma em todas — a lei é universal, a face é da"
+                       " instância"
+                     : "o anel não fechou — NÃO afirmo");
+          }
+          tique7(6, n == 15
+                 ? "e a VOLTA é a unidade: ambos têm |det| = 1 e diferem no SINAL — o gato"
+                   " inverte a orientação, o esquilo não. A medida não vê o sinal, e é por"
+                   " isso que a lei é a mesma; a orientação vê, e é por isso que as faces"
+                   " são diferentes"
+                 : "e a VOLTA é uma coisa que apareceu sozinha ao varrer: rodar E ser"
+                   " inteiro só permite três traços — −1, 0 e 1 —, com ordens 3, 4 e 6. É a"
+                   " restrição cristalográfica, as únicas rotações que um reticulado"
+                   " admite, e ninguém a foi buscar"); }
+        break; }
     case 14: {
         tique7(0, "seja a cadeia inteira, do coqueiro à marca no chão");
         tique7(1, "e o que cada etapa faz às duas colunas:");
@@ -2011,7 +2106,7 @@ static int resolve_cmetrica(const char *f){
         long n = 0;
         while(*p >= '0' && *p <= '9') n = n*10 + (*p++ - '0');
         while(*p == ' ') p++;
-        if(!*p && n >= 1 && n <= 14){ cmetrica_resolve((int)n); return 1; }
+        if(!*p && n >= 1 && n <= 16){ cmetrica_resolve((int)n); return 1; }
         return 0;
     }
     return 0;
@@ -17408,18 +17503,18 @@ static int teste(void){
               fflush(stdout);
               int guarda = dup(1), nulo = open("/dev/null", O_WRONLY);
               if(guarda >= 0 && nulo >= 0) dup2(nulo, 1);
-              for(int k = 1; k <= 14; k++){
+              for(int k = 1; k <= 16; k++){
                   char fala[64];
                   snprintf(fala, sizeof fala, "medida %d", k);
                   if(resolve_cmetrica(fala)) por_n++; else vmal++;
               }
               for(size_t i = 0; i < sizeof CM10/sizeof *CM10; i++)
                   if(resolve_cmetrica(CM10[i].nome)) por_nome++; else vmal++;
-              if(resolve_cmetrica("medida 15")) vmal++;
+              if(resolve_cmetrica("medida 17")) vmal++;
               fflush(stdout);
               if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
               if(nulo >= 0) close(nulo);
-              printf("      os catorze: %d por número, %d por nome\n", por_n, por_nome);
+              printf("      os dezasseis: %d por número, %d por nome\n", por_n, por_nome);
               ok("O TEOREMA ESTÁ PROMOVIDO À ASSISTENTE em dez falas, e as três camadas"
                  " ficam alinhadas: o UNIVERSAL tem a lei — a conservação métrica por"
                  " dualidade —, o PEANO dá det|·| (a face discreta, e a contagem do"
@@ -17428,7 +17523,7 @@ static int teste(void){
                  " A passagem entre elas é σ_k σ_k′ = −1, que é a hipótese ESTRUTURAL já"
                  " estabelecida pela torre — e sem ela não há teorema, há uma definição a"
                  " olhar para si própria",
-                 vmal == 0 && por_n == 14 && por_nome == 14); }
+                 vmal == 0 && por_n == 16 && por_nome == 16); }
         }
 
         /* ═══ §C50 ANÁLISE REAL: as CINCO VIAS, e nenhuma arbitra as outras ══════
@@ -17707,7 +17802,7 @@ static int teste(void){
               fflush(stdout);
               if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
               if(nulo >= 0) close(nulo);
-              printf("      os catorze: %d por número, %d por nome\n", por_n, por_nome);
+              printf("      os dez: %d por número, %d por nome\n", por_n, por_nome);
               ok("O TEOREMA ESTÁ PROMOVIDO À ASSISTENTE em dez falas, e as três camadas"
                  " ficam alinhadas com as duas frases lado a lado: CICLO − BORDA = CLASSE"
                  " no discreto (Peano, ker ∂/im ∂) e FECHADA − EXACTA = COHOMOLOGIA no"

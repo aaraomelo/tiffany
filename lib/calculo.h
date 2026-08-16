@@ -182,6 +182,20 @@ static int fn_acha_delta(Cf f, Qz a, Qz L, Qz eps, int kmax, Qz *delta, long mal
  * trocado nos extremos. É a régua desta casa — o real é o corte, nunca um decimal. */
 static long cl_saturou = 0;    /* passos que a REPRESENTAÇÃO não deu, contados à parte */
 
+/* o maior denominador que sobrevive a ser elevado ao grau — a pergunta do Gato feita ao
+ * grau e não só ao número: «cabe no tipo?» depende de quantas vezes ele se multiplica */
+static long cl_tecto_grau(int grau){
+    /* q^d ≤ 10¹⁸, e não 9·10¹⁸ — a folga é para as SOMAS que vêm a seguir. Encostar o
+     * tecto ao limite do tipo é a mesma miopia de não ter tecto nenhum: o que estoura é
+     * sempre a operação seguinte àquela que se vigiou. */
+    if(grau <= 1) return 1000000000L;
+    if(grau == 2) return 1000000000L;   /* q² = 10¹⁸ */
+    if(grau == 3) return 1000000L;      /* q³ = 10¹⁸ */
+    if(grau == 4) return 31600L;
+    if(grau == 5) return 3980L;
+    return 1000L;
+}
+
 static int fn_bissec(Cf f, Qz a, Qz b, int passos, Qz *lo, Qz *hi){
     Qz fa = fn_av(f,a), fb = fn_av(f,b);
     if(fa.p == 0){ *lo = *hi = a; return 1; }
@@ -189,17 +203,28 @@ static int fn_bissec(Cf f, Qz a, Qz b, int passos, Qz *lo, Qz *hi){
     if((fa.p > 0) == (fb.p > 0)) return 0;         /* sem troca de sinal: sem garantia */
     Qz meio;
     for(int k = 0; k < passos; k++){
-        /* O TECTO, E ELE FALTAVA. O denominador DUPLICA a cada bisseção, e a soma
-         * qz_soma(a,b) faz a.q·b.q — logo ao passo 32 o produto passa de 2⁶⁴ e enrola
-         * em silêncio. Pedia-se 40 passos e os últimos nove corriam sobre inteiros já
-         * enrolados, com a função a devolver 1 na mesma: uma SATURAÇÃO a sair como
-         * veredicto, que é exactamente o que o Teorema do Gato proíbe.
+        /* O TECTO, E ELE DEPENDE DO GRAU — que foi a segunda vez que me enganei aqui.
          *
-         * Agora pára antes de enrolar e conta-o em `cl_saturou`, que é um sítio
-         * separado dos defeitos — e devolve o que TEM, que é um intervalo mais largo e
-         * verdadeiro em vez de um estreito e falso. */
-        if(a.q > 1500000000L || b.q > 1500000000L){ cl_saturou++; break; }
+         * À primeira não havia guarda nenhuma: pedia-se profundidade 40, o denominador
+         * DUPLICA a cada bisseção, e ao passo 32 a soma qz_soma(a,b) — que faz a.q·b.q —
+         * enrolava em silêncio. Os últimos nove passos corriam sobre inteiros já
+         * enrolados e a função devolvia 1 na mesma: uma SATURAÇÃO a sair como veredicto.
+         *
+         * Pus então um tecto no denominador do MEIO, e continuou a estourar — porque o
+         * que estoura não é o meio, é `fn_av` a AVALIAR nele. Por Horner, um polinómio de
+         * grau d avaliado em p/q carrega q^d, e com d = 3 e q ≈ 10⁹ isso é 10²⁷. O tecto
+         * não é do número: é do NÚMERO ELEVADO AO GRAU, e eu não tinha perguntado o grau.
+         *
+         * Logo q^d ≤ 9·10¹⁸, e o tecto sai daí — 9·10¹⁸ para grau 1, 3·10⁹ para grau 2,
+         * 2·10⁶ para grau 3, 5,5·10⁴ para grau 4. A profundidade honesta da bisseção é a
+         * que o grau permite, e não a que eu escrevi na chamada. Conta-se em
+         * `cl_saturou`, à parte dos defeitos, e devolve-se o intervalo que se TEM — mais
+         * largo e verdadeiro em vez de estreito e falso. */
         qz_divide(qz_soma(a,b), qz_de_inteiro(2), &meio);
+        /* e a guarda vai no MEIO, que é quem vai ser avaliado — pô-la em a e b ainda me
+         * deixou estourar, porque o denominador do meio é MAIOR que os dois. O número a
+         * vigiar é aquele que entra na conta seguinte, não os que lá estavam. */
+        if(meio.q > cl_tecto_grau(f.n)){ cl_saturou++; break; }
         Qz fm = fn_av(f, meio);
         if(fm.p == 0){ *lo = *hi = meio; return 1; }
         if((fa.p > 0) != (fm.p > 0)){ b = meio; fb = fm; }

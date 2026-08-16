@@ -1062,6 +1062,79 @@ sem sobra nem falta); e o zero não tem dual --- a mesma fibra vazia de
 $0^{-1}$ que a escada aritmética encontrou em todo andar. $\square$
 \end{corolario}
 
+\begin{teorema}[\textsc{Teorema do Esquilo} --- a acção à direita completa
+o corpo, e os dois são uma unidade]\label{thm:esquilo}
+O gato anda \textbf{à esquerda} ($x\mapsto Ax$); o esquilo anda
+\textbf{à direita} ($x\mapsto xB$). Não é duplicação: a acção à direita é
+o mesmo $\mathbb{H}$ espelhado --- a álgebra oposta
+$\mathbb{H}^{\mathrm{op}}\cong\mathbb{H}$ pela transposta, que
+\emph{inverte} a ordem, $(AB)^{\mathsf T}=B^{\mathsf T}A^{\mathsf T}$.
+E então:
+\[
+\boxed{\;A\,(x\,B)=(A\,x)\,B\quad\text{sempre},\;}
+\]
+enquanto duas acções à esquerda \textbf{não} comutam. \emph{A
+comutatividade que faltava volta com o dual: o corpo completa-se.}
+
+\textbf{(0) Por que isto é um teorema e não uma imagem.} $\mathbb{H}=M_2$
+é incompleto: com só o gato, existe $A$ com $GA\neq AG$ --- não é corpo.
+O que falta não é mais estrutura do mesmo lado: é \emph{o outro lado}.
+Com os dois, a composição fecha e comuta.
+
+\textbf{(1) Nenhum é melhor, e é isso que faz deles um dual.} Um escape é
+assimétrico --- há um caminho bom e um remédio. Um dual é simétrico: há
+uma lei e duas faces, e a lei é o que elas têm em comum. Um lado é o
+\emph{Corpo Universal} (a lei), o outro a realização
+(\emph{Corpo de Peano}, por exemplo); e \textbf{nenhum sozinho é o
+teorema}. Vai-se pelo gato na seta do tempo e volta-se pelo esquilo no
+espelho --- a conjugação $x\mapsto AxA^{-1}$ e a sua inversa ---,
+saltando entre órbitas em qualquer direcção.
+
+\textbf{(2) E o lado negro comuta.} O gato $G$ e o seu espelho conjugado
+$\operatorname{adj}(G)=\operatorname{tr}(G)\,I-G$ vivem ambos em
+$\mathbb{Z}_p[G]\cong\mathbb{C}$ e comutam --- logo o esquilo
+$\sigma'=\bar\sigma$ não duplica nada: é a direcção contrária dentro do
+\emph{mesmo} corpo, com
+$\sigma+\sigma'=\operatorname{tr}=m$ e $\sigma\sigma'=\det=-1$. É a
+mesma relação de passagem do Teorema~\ref{thm:gato}, agora lida como
+\emph{lado} e não como valor próprio.
+
+\textbf{(3) A Lei 8, e é ela que dá o chão.} Tudo isto se mede no anel
+$\mathbb{Z}_p$ --- a Lei~8 desta casa ---, onde o grupo é finito e as
+órbitas fecham. É por isso que a Lei~8 é operacional e não decorativa:
+ela é o corpo onde o par gato/esquilo se verifica \emph{exaustivamente},
+sem tecto de representação nenhum. E a hipótese que ela exige diz-se:
+$x^{2}-mx-1$ tem de ser irredutível mod $p$, senão o corpo cinde e o par
+deixa de estar definido.
+
+\textbf{(4) A leitura métrica, e ela é complementar.} No
+Teorema~\ref{thm:gato} corrigi a seta: $|\det|=1$ também se cumpre com
+$\sigma\sigma'=+1$, e escrevi «e essa é a identidade, que não é gato
+nenhum». Era certo e \emph{parcial}: o $+1$ é a família elíptica ---
+próprios $\pm i$, órbita \emph{periódica} e limitada ---, contra a
+hiperbólica do gato, de próprios reais e órbita que cresce como
+$\sigma^{k}$. A conservação da medida é a mesma nas duas; o que muda é
+que uma \emph{mede} (tem eixo real, e paga com o crescimento) e a outra
+\emph{roda} (não tem eixo, e nunca satura). É a mesma assimetria
+esquerda/direita lida na métrica, e nenhuma das duas leituras substitui
+a outra.
+
+\emph{Prova (operacional, medida).} A leitura métrica do (4) está em
+\code{tests/ramos.c} ($6{:}0$): os dois ramos esgotam $|\det|=1$ ($588$
+gatos, $50$ esquilos, $106$ na borda, \emph{zero} fora, em $28\,561$
+matrizes); os metais não têm período e saturam nos passos $44,24,18,15,13$
+enquanto os três rotores inteiros têm períodos $4$, $3$, $6$ e nunca
+saturam; e no anel da Lei~8 o gato \emph{ganha} período ($A_1$: $14\,564$),
+o que mostra que o ramo é propriedade da realização e $|\det|=1$ não.
+
+E o teorema propriamente dito mede-se em \code{tests/esquilo.c}, em
+$\mathbb{Z}_p$: $\mathbb{H}$ não comuta só com o gato ($\S$1); a
+transposta inverte a ordem e \emph{não} é a ordem directa, logo é reflexo
+e não cópia ($\S$2); $A(xB)=(Ax)B$ sem uma violação nos $p^{4}$ estados
+($\S$3); e $G$ comuta com $\operatorname{adj}(G)$, com
+$\sigma+\sigma'=m$ e $\sigma\sigma'=-1$ ($\S$4). $\square$
+\end{teorema}
+
 \begin{corolario}[a pata que some na marca: a projecção conserva a medida e
 perde a fibra]\label{cor:pata}
 O gato desce ao plano e anda; uma pata pisa a marca da outra. A marca
