@@ -210,7 +210,7 @@ fusao 13c9bc056928be95 0
 fusao_conceitos 3c406248b1261cc4 0
 gauss 77024247661e4422 0
 geometria_corpo 99c0472d0316ad9f 0
-geometria_real c9581a3adbf2ba73 0
+geometria_real 9c80929d92f2cb35 0
 geometrico e4a6fce5bd91e395 0
 gerador 2373ad5c9d2e6e8c 0
 gerador_analog 6a7abcf53c950b0b 0

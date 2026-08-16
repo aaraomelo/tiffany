@@ -201,7 +201,43 @@ Defeito meu na ronda: medi «a borda é magra» por nós contra folhas, e essa f
 para ½. O que emagrece é a QUOTA DO LADO CONTÁVEL: 22 racionais fixos ocupando 22 de 64 e
 depois 22 de 4096.
 
-`tests/geometria_real.c` (36:0) na ordem obrigatória do eval: 8 leis → base ortonormal →
+**A CLASSIFICAÇÃO ERA MINHA E ESTAVA CONFUSA — a certa é LAGRANGE, POR NÍVEL.** Eu classificava
+a expansão BINÁRIA («diádico / primo / irracional»), misturando dois níveis. O Aarão: «racional
+é sequência periódica, PA ou PG; irracional o período é 1 no nível e continua no nível acima
+como racional; usa PA e PG de ordem m». A classificação lê-se na FRACÇÃO CONTÍNUA:
+
+    CF FINITA                        → RACIONAL
+    CF eventualmente PERIÓDICA (p)   → IRRACIONAL QUADRÁTICO      (Lagrange)
+         · p = 1 é o METÁLICO
+    CF NÃO periódica                 → irracional NÃO quadrático
+
+E o elo entre os níveis: **o nível acima — os convergentes — continua RACIONAL**, obedecendo a
+uma **PG de ordem 2 nos blocos de p**:
+
+    u_{k+p} = T·u_k − det(M)·u_{k−p}        T = traço da matriz do bloco
+
+**O período é a ORDEM DO SALTO; o traço do bloco é o coeficiente.** Medido em seis famílias
+(p = 1, 2, 4). E **PA separa-se de PG**: quocientes em progressão aritmética de razão d ≠ 0 não
+são periódicos, logo não são quadráticos; **a PA de razão 0 É a PG de período 1** — o metálico.
+A periodicidade não é propriedade do número: é da sucessão de quocientes.
+
+**E π_n GANHOU DEFINIÇÃO** — era o único ponto vermelho do revisor. Não é «fecho geométrico do
+andar», que descreve: é
+
+    π_n := [A^in_n, A^circ_n],   π_{2n} ⊂ π_n,   |π_n| → 0
+
+um **INTERVALO**, com as duas bordas exactas no andar, formando uma cadeia encaixada. **Donde π
+é o CORTE que a cadeia determina** — pelo mesmo mecanismo do resto do paper. O que é exacto por
+andar são as BORDAS; π continua a ser o corte.
+
+E dez amarelos: o metálico é ponto fixo da **Möbius associada** (não «do cone»); q_k é **não
+decrescente** com estrito a partir de k=1; o teorema da completude fala de CF **infinita** e A
+é **definido** por extensão; o **pombal dá UNICIDADE, não existência** — o mecanismo entrega o
+corte e o Universal identifica-o; a identidade de **Gentil é herdada**, não provada aqui; a
+quota decrescente declara a **discretização**; a contagem das oito leis fixa-se em (0,…,7); e as
+leis são **realizadas por** vectores, não iguais a eles.
+
+`tests/geometria_real.c` (38:0) na ordem obrigatória do eval: 8 leis → base ortonormal →
 bit a bit → dual → recorrência → Pisot → encaixe → corte → completude → ℝ → π_k/gume.
 `papers/geometrico.tex` 14 páginas; `corpo_universal.tex` 54, e a compilar.
 Ver [[project-o-real-e-o-corte]], [[feedback-verdadeiro-e-parcial]].

@@ -47,7 +47,7 @@ reconstrói o sistema nem decide se ele é permitido: \textbf{realiza
 geometricamente a construção que o Universal já fechou}, na ordem
 \[
 \boxed{\;
-\text{Lei 0}\to\text{8 leis}\to\text{base ortonormal}\to\text{bit a bit}\to\text{dual}
+\text{Lei 0}\to\text{as oito leis }(0,\ldots,7)\to\text{base ortonormal}\to\text{bit a bit}\to\text{dual}
 \to\text{recorrência}\to\text{Pisot}\to\text{encaixe}\to\text{corte}
 \to\mathbb{R}\to\pi_k .\;}
 \]
@@ -81,7 +81,7 @@ dos convergentes} entre as expansões com $a_k\geq1$, e por isso uma só taxa
 limita a construção inteira. A família metálica não é o escopo: é o caso
 \textbf{extremo}, o pior caso do mecanismo.
 
-\smallskip\noindent\emph{Medido:} \code{tests/geometria\_real.c} ($36{:}0$).
+\smallskip\noindent\emph{Medido:} \code{tests/geometria\_real.c} ($38{:}0$).
 \end{abstract}
 
 %======================================================================
@@ -233,62 +233,51 @@ um majorante.
 $2110$ racionais ultrapassados}
 
 %======================================================================
-\section{A tricotomia: termina, roda, foge}\label{sec:tricotomia}
+\section{A classificação é por nível --- e é Lagrange}\label{sec:lagrange}
 
-O mesmo processo separa três habitantes, e a separação é a correspondência entre
-primos e irracionais.
+O mesmo processo separa os habitantes, e a separação lê-se na \textbf{fracção
+contínua}, pelo \textbf{período}.
 
-O critério é o da \textbf{quinta primitiva} --- a Inversão, cuja admissibilidade
-o \emph{Corpo Universal} enuncia como \emph{ter volta e conservar a escada} --- e
-o seu par morfológico $\delta\dashv\varepsilon$, em que $\delta$ \emph{cria}
-($A\subseteq\delta A$), $\varepsilon$ \emph{remove} ($\varepsilon A\subseteq A$),
-e a volta existe exactamente onde a abertura devolve o objecto,
-$\delta(\varepsilon(A))=A$.
-
-\begin{teorema}[a tricotomia pela volta]\label{thm:tricotomia}
-Na dobra $x\mapsto2x\bmod1$ --- o \emph{shift} nos bits --- classifica-se pelo
-critério da volta, e a classificação é \textbf{exaustiva e exclusiva}:
+\begin{teorema}[a classificação, e o nível acima]\label{thm:lagrange}
 \[
 \boxed{
 \begin{array}{lll}
-\text{a volta \textbf{não} existe} & \textbf{FOGE}
- & \text{irracional: expansão não eventualmente periódica}\\[2pt]
-\text{a volta existe, ciclo} \neq\{0\} & \textbf{RODA}
- & \text{racional não diádico: eventualmente periódica}\\[2pt]
-\text{a volta existe, ciclo} =\{0\} & \textbf{TERMINA}
- & \text{diádico: expansão binária finita}
+\text{CF \textbf{finita}} & \longrightarrow & \text{RACIONAL}\\[2pt]
+\text{CF eventualmente \textbf{periódica} de período } p
+ & \longrightarrow & \text{IRRACIONAL \textbf{QUADRÁTICO}}\quad(\text{Lagrange})\\[2pt]
+\text{CF \textbf{não periódica}} & \longrightarrow & \text{irracional não quadrático}
 \end{array}}
 \]
-Operacionalmente, para $a/b$ reduzido com $b=2^{s}b'$ e $b'$ ímpar: $b'=1$ dá
-\textbf{TERMINA}; $b'>1$ dá \textbf{RODA}, com pré-período $s$ e período
-$\operatorname{ord}_{b'}(2)$. $\square$
+O caso $p=1$ é a família metálica. E o \textbf{nível acima} --- os convergentes ---
+continua \emph{racional}, obedecendo a uma \textbf{progressão geométrica de ordem
+$2$ nos blocos de $p$}:
+\[
+\boxed{\;u_{k+p}=T\,u_k-\det(M)\,u_{k-p}\;}
+\]
+onde $M$ é o produto das $p$ companheiras do bloco e $T=\operatorname{tr}M$.
+\emph{O período é a ordem do salto; o traço do bloco é o coeficiente.} $\square$
 \end{teorema}
+\colunas{Lagrange, e a leitura por níveis do Corpo Universal}
+        {a classificação pelo período, e a PG de ordem $2$ nos blocos}
+        {\code{geometria\_real.c} \S L0b: seis famílias, $p=1,2,4$}
 
-\begin{corolario}[o primo é subcaso, não classe]\label{cor:primo-subcaso}
-$p$ primo ímpar $\Longrightarrow$ $\operatorname{per}(1/p)=\operatorname{ord}_p(2)$,
-com pré-período $0$: \emph{puramente} periódico. É o caso $b'=p$, $s=0$ --- e não
-uma das três classes. Assim $1/6$ roda \textbf{sem} ser diádico e \textbf{sem} ter
-denominador primo. Na escada de Fermat os períodos \emph{dobram}
-($\operatorname{ord}(2)=8$ em $17$ e $16$ em $257$): a torre dos períodos é a torre
-$2$-ádica, lida do lado dos primos. $\square$
+\begin{corolario}[PA e PG separam-se]\label{cor:papg}
+Quocientes em progressão \textbf{aritmética} de razão $d\neq0$ não são periódicos,
+logo os números não são quadráticos; e a PA de razão $0$ \emph{é} a PG de período
+$1$, que é o metálico. \emph{A periodicidade não é propriedade do número --- é da
+sucessão de quocientes, e é ela que Lagrange liga ao grau dois.} $\square$
 \end{corolario}
-\colunas{«os primos são duais de irracionais no limite», com estatuto de
-\textbf{fronteira}: contável fechado contra incontável sem fecho}
-        {a tricotomia lida na mesma descida que produz os cortes}
-        {\code{geometria\_real.c} \S L0b: $4095$ diádicos, $8$ primos;
-\S L0: a fuga dos $\sigma_m$}
 
-\begin{observacao}[o estatuto da correspondência]
-A dualidade primo/irracional é enunciada \emph{no limite}, e é uma
-\textbf{fronteira} --- o contável fechado contra o incontável sem fecho. As duas
-metades finitas medem-se; a fronteira não se atravessa aqui. E o que distingue
-quem fecha de quem foge é a \emph{existência da volta}, não uma norma: a norma
-algébrica $N(\sigma^{k})$ e o determinante $\det M_k$ são objectos do
-\S\ref{sec:det}, e ficam lá.
+\begin{observacao}[e o critério é o da quinta primitiva]
+Fechar é \emph{ter volta}. O par morfológico $\delta\dashv\varepsilon$ dá o
+critério do \emph{Corpo Universal} --- \emph{admissível $\iff$ tem volta e conserva
+a escada} ---, com $\delta$ a criar, $\varepsilon$ a remover, e a volta a existir
+onde a abertura devolve o objecto. A classificação por período é essa volta lida na
+sucessão de quocientes.
 \end{observacao}
 
 %======================================================================
-\section{As oito leis são uma base ortonormal}\label{sec:orto}
+\section{As oito leis, realizadas por uma base ortonormal}\label{sec:orto}
 
 \textbf{A estrutura vem do Universal, e diz-se qual é:} o par
 $\bigl(\mathbb{F}_2^{8},\ \langle\cdot,\cdot\rangle,\ e_0,\ldots,e_7\bigr)$
@@ -307,7 +296,9 @@ delas alternante, e ser alternante é invariante por mudança de base. Adopta-se
 aqui a forma padrão acima, para a qual a base canónica é ortonormal.
 
 \begin{proposicao}[leitura coordenada da base]\label{thm:orto}
-Com $e_k=2^{k}$ reservado à Lei $k$, a matriz de Gram é a identidade:
+As oito leis $(0,\ldots,7)$ são \emph{realizadas} pelos oito vectores
+$e_k=2^{k}$, com a posição $k$ reservada à Lei $k$ --- uma lei não é literalmente um
+vector de $\mathbb{F}_2^{8}$. Nessa realização a matriz de Gram é a identidade:
 $\langle e_i,e_j\rangle=\delta_{ij}$. Logo
 \[
 \boxed{\;b_i=\langle b,e_i\rangle\;}
@@ -449,7 +440,8 @@ $\square$
         {\code{geometria\_real.c} \S L11c: $3600$ racionais, $\Sigma\circ\Pi=\mathrm{Id}$
 em todos}
 
-\noindent\textbf{E o metálico é o ponto fixo do cone} --- a sucessão de quociente
+\noindent\textbf{E o metálico é o ponto fixo da
+transformação de Möbius associada ao cone, $x\mapsto m+1/x$} --- a sucessão de quociente
 constante. É por isso que ele dá o mecanismo \emph{extremo explícito}: não porque
 seja o caso geral, mas porque é o caso que não se move.
 
@@ -460,16 +452,17 @@ seja o caso geral, mas porque é o caso que não se move.
 \[
 \boxed{
 \begin{array}{ll}
-\textbf{Hurwitz} & \text{conta o domínio}\\
-\textbf{Lebesgue} & \text{mede a imagem}\\
-\textbf{Gentil} & \text{casa os dois, pela soma reversível}
+\textbf{Hurwitz} & \text{fornece a contagem do domínio}\\
+\textbf{Lebesgue} & \text{fornece a medida da imagem}\\
+\textbf{Gentil} & \text{estabelece a compatibilidade, pela soma reversível}
 \end{array}}
 \]
 A soma de Gentil, em inteiros,
 \[
 \sum_n x_n \;+\; \sum_{v} \#\{x_n<v\} \;=\; N\!\cdot\!q ,
 \]
-é o $\int f+\int f^{-1}=b\,f(b)-a\,f(a)$ desta casa: contar pelo \emph{domínio} e
+é --- \emph{pela identidade de Gentil estabelecida no Corpo Universal} --- a forma
+discreta de $\int f+\int f^{-1}=b\,f(b)-a\,f(a)$: contar pelo \emph{domínio} e
 medir por \emph{níveis} somam ao rectângulo. E o \emph{layer-cake}
 $\sum_v\#\{x_n\geq v\}=\sum_n x_n$ fecha \textbf{sem esperar o limite}, com
 resíduo zero em cada andar. $\square$
@@ -484,8 +477,8 @@ não um processo }\varepsilon\text{--}\delta.\;}
 \begin{corolario}[a tricotomia distribui-se pelas três leituras]\label{cor:distribui}
 \textbf{TERMINA} e \textbf{RODA} são o lado \emph{contável}, que Hurwitz conta:
 fixado $D$, os racionais de denominador $\leq D$ são em número finito, e a quota
-que ocupam nos $2^{K}$ intervalos de profundidade $K$ \textbf{decresce
-estritamente} com $K$ --- a borda é magra, e é Lebesgue que o mede.
+que ocupam nos $2^{K}$ intervalos de profundidade $K$ decresce estritamente com
+$K$ \emph{na discretização diádica utilizada pelo medidor} --- a borda é magra.
 \textbf{FOGE} é o que sobra. $\square$
 \end{corolario}
 \colunas{a tríade Hurwitz--Gentil--Lebesgue como eixo do Teorema Central}
@@ -567,7 +560,8 @@ requer adicionalmente a condição $\abs{\sigma\dg}^{k}<\tfrac12$:
 \ \Longrightarrow\ t_k=\operatorname{round}(\sigma^{k})
 \ \Longrightarrow\ \operatorname{dist}(\sigma^{k},\mathbb{Z})=\abs{\sigma\dg}^{k}.\;}
 \]
-A condição escreve-se sem raízes, por
+A condição escreve-se sem raízes --- para $k\geq1$, onde
+$\sqrt\Delta\,U^{(m)}_k>0$, de $2(\sigma\dg)^{k}=t_k-\sqrt\Delta\,U^{(m)}_k$ ---, por
 $(t_k-1)^{2}<\Delta\,(U^{(m)}_k)^{2}<(t_k+1)^{2}$ com $\Delta=m^{2}+4$, forma
 equivalente à que se obtém da identidade
 \[
@@ -681,7 +675,7 @@ por convenção canónica.
 Para uma sucessão \textbf{qualquer} --- não só a periódica ---:
 $p_kq_{k-1}-p_{k-1}q_k=(-1)^{k-1}$, logo $\abs{\det}=1$ em todos os passos; os
 convergentes alternam de lado; os intervalos formam uma cadeia
-encaixada; e $q_k$ cresce.
+encaixada; e $q_k$ é não decrescente, com crescimento estrito a partir de $k=1$.
 \emph{O metálico é o caso de quociente parcial constante --- periódico, mas não
 o único periódico, e muito menos o único caso.} $\square$
 \end{teorema}
@@ -816,8 +810,12 @@ intersecção --- é precisamente nisso que $\mathbb{Q}$ e $\mathbb{R}$ diferem.
 coisas.}
 
 \begin{teorema}[o mecanismo produz um corte, e um só]\label{thm:completude}
-Seja $(a_k)$ uma sucessão de quocientes parciais e $A$ a classe dos racionais que
-as decisões do \S\ref{sec:corte} põem abaixo. Então:
+Seja $(a_k)_{k\geq1}$ uma sucessão \textbf{infinita} de quocientes parciais --- o
+caso finito é o racional, e a sua representação termina (Def.~\ref{def:real}) --- e
+\[
+A_{(a_k)}=\bigl\{r\in\mathbb{Q}:\ \text{a comparação do \S\ref{sec:corte} decide }
+r\ \text{abaixo}\bigr\}.
+\] Então:
 
 \emph{(i) $A$ é um corte de Dedekind.} As quatro cláusulas verificam-se: $A$ e o
 seu complementar são não vazios, $A$ é fechado para baixo, e $A$ \textbf{não tem
@@ -846,10 +844,18 @@ distintos, com o racional separador exibido. $\square$
 quatro cláusulas nos oito $\sigma_m$; $28$ pares separados}
 
 \medskip
-\noindent Assim a divisão fica limpa: a \textbf{existência do objecto} é o corte,
-que a construção entrega; a \textbf{unicidade} é o pombal, que é aritmética
-inteira; e a \textbf{identificação} do conjunto dos cortes com $\mathbb{R}$ é
-herdada. Nenhuma das três é obtida por varredura.
+\noindent Assim a divisão fica limpa, e cada peça faz exactamente o seu trabalho:
+\[
+\boxed{
+\begin{array}{ll}
+\text{o \textbf{mecanismo} entrega o corte}
+ & \text{---\ e o Universal identifica os cortes com o corpo completo}\\[2pt]
+\text{o \textbf{pombal} dá a UNICIDADE}
+ & \text{---\ há no máximo um habitante racional compatível}
+\end{array}}
+\]
+O pombal prova unicidade, \emph{não} existência: a existência vem do corte, e a
+identificação é herdada. Nenhuma das três se obtém por varredura.
 
 \medskip
 \noindent\textbf{Correspondência estrutural herdada} (não é ingrediente da prova
@@ -985,7 +991,7 @@ $1\leq k<p$ e $C^{p}=I$, portanto
 $\square$
 \end{teorema}
 
-\begin{definicao}[$\pi_n$, por fórmula]\label{def:pin}
+\begin{definicao}[$\pi_n$ --- e ele é um intervalo]\label{def:pin}
 Do traço $t_n=2\cos(\pi/n)$ do andar saem as duas áreas, ambas \textbf{algébricas
 em $t_n$}:
 \[
@@ -1008,17 +1014,33 @@ $(A_8^{\rm in})^{2}=8$. O encaixe $A_8^{\rm in}<333/106<22/7<A_8^{\rm circ}$
 decide-se por comparação de inteiros.
 \end{definicao}
 
-\noindent\textbf{E «exacto» qualifica-se:} $A_n^{\rm in}$ e $A_n^{\rm circ}$ são
-exactos \emph{no andar} --- números algébricos, não aproximações ---, e tendem
-para $\pi$ quando o refinamento é tomado. Nunca $A_n^{\rm in}=\pi$. O que o quadro
+\medskip
+\noindent E daqui sai a definição que faltava, e ela usa o mecanismo do próprio
+paper:
+\[
+\boxed{\;\pi_n:=\bigl[A_n^{\rm in},\,A_n^{\rm circ}\bigr],
+\qquad
+\pi_{2n}\subset\pi_n,
+\qquad
+\abs{\pi_n}\longrightarrow0\;}
+\]
+--- \textbf{$\pi_n$ é o intervalo do andar}, com as duas bordas exactas nele, e a
+cadeia é \emph{encaixada}. Donde
+\[
+\boxed{\;\pi\ \text{é o \textbf{corte} que a cadeia } (\pi_n)\ \text{determina.}\;}
+\]
+Não é constante importada nem aproximação numérica: é um corte, produzido pelo
+mesmo mecanismo de \S\ref{sec:completude}, com bordas algébricas em cada andar.
+\emph{O que é exacto por andar são as bordas}; $\pi$ continua a ser o corte. O que o quadro
 dispensa é \emph{importar} uma constante: cada andar apresenta o seu.
 
 \noindent Nenhuma constante foi importada: \textbf{cada andar apresenta a sua}.
 E na realização modular adoptada, a ordem do operador elíptico fecha em
 características adequadas, ao passo que a do parabólico é $p$ --- a mesma
 fronteira do eixo, agora como propriedade da representação escolhida do
-membro-limite, e não como propriedade universal da geometria circular. \emph{Assim o círculo não é usado para construir a reta: é nessa realização que
-ele reaparece como gume geométrico da construção.}
+membro-limite, e não como propriedade universal da geometria circular. \emph{Assim o círculo não é usado para construir a reta: nesta realização, ele
+reaparece como gume geométrico} --- e a palavra é \emph{reaparece}, não
+\emph{portanto}: não há aqui um teorema causal entre a completude e o círculo.
 \colunas{$\pi$ é o membro-limite da família (\code{thm:pi-familia})}
         {$\pi_k$ exacto por andar, realizado nos primos das ordens}
         {\code{geometria\_real.c} \S L10; \code{pi\_familia.js} ($7{:}0$)}
@@ -1077,10 +1099,10 @@ Universal}, e é nessa realização que a recta real aparece como o corpo ordena
 completo.
 
 \medskip
-\emph{Medido:} \code{tests/geometria\_real.c} ($36{:}0$), com
+\emph{Medido:} \code{tests/geometria\_real.c} ($38{:}0$), com
 \code{tests/ortonormal.c} ($6{:}0$), \code{tests/metalica.c},
 \code{tests/pisotbase.c}, \code{tests/ordenado.c} ($7{:}0$),
 \code{tests/pi\_familia.js} ($7{:}0$),
-\code{tests/arquimedes\_area.js} ($36{:}0$) e \code{tests/geometrico.js}.
+\code{tests/arquimedes\_area.js} ($38{:}0$) e \code{tests/geometrico.js}.
 
 \end{document}

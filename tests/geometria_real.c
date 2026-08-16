@@ -248,72 +248,101 @@ int main(void){
                 if(passou) ultra++;
             }
         }
-        /* A TRICOTOMIA, PELA QUINTA PRIMITIVA — a Inversão, cujo critério é
+        /* A CLASSIFICAÇÃO É POR NÍVEL, E É LAGRANGE — não a que eu tinha escrito.
          *
-         *      admissível ⟺ TEM VOLTA ∧ conserva a escada        (def:cinco)
+         * A versão anterior classificava a expansão BINÁRIA em «diádico / primo /
+         * irracional», e isso confundia dois níveis. A classificação certa é na
+         * FRACÇÃO CONTÍNUA, e distingue-se pelo PERÍODO:
          *
-         * e cujo par morfológico é δ ⊣ ε, com δ a CRIAR (A ⊆ δA), ε a REMOVER
-         * (εA ⊆ A), e a volta a existir exactamente onde δ(ε(A)) = A (thm:morf-par).
+         *   CF FINITA                        → RACIONAL
+         *   CF eventualmente PERIÓDICA (p)   → IRRACIONAL QUADRÁTICO   (Lagrange)
+         *        · p = 1  →  METÁLICO
+         *   CF NÃO periódica                 → irracional NÃO quadrático
          *
-         * A primeira versão desta secção escreveu «diádico / PRIMO / irracional», e
-         * isso NÃO É UMA TRICOTOMIA: 1/6 não é diádico e não tem denominador primo.
-         * O critério certo é a VOLTA, e aí é exaustivo e exclusivo:
+         * E o que liga os dois níveis: o período é 1 no nível dos QUOCIENTES, e o
+         * nível ACIMA — os convergentes — continua RACIONAL, obedecendo a uma
          *
-         *      a volta NÃO existe            → FOGE     (irracional)
-         *      a volta existe, ciclo ≠ {0}   → RODA     (racional não diádico)
-         *      a volta existe, ciclo = {0}   → TERMINA  (diádico)
+         *      PG DE ORDEM 2 NOS BLOCOS DE p:   u_{k+p} = T·u_k − det·u_{k−p}
          *
-         * Operacionalmente, para a/b reduzido com b = 2^s·b′ e b′ ímpar: b′ = 1 dá
-         * TERMINA, e b′ > 1 dá RODA com pré-período s e período ord_{b′}(2). O PRIMO
-         * é o SUBCASO b′ = p com s = 0 — puramente periódico —, e não uma classe. */
-        long racs = 0, termina = 0, roda = 0, sem_classe = 0, per_ok = 0;
-        long puros = 0, primos_puros = 0;
-        for(long b = 1; b <= 64; b++) for(long a = 0; a < b; a++){
-            long x = a, y = b;
-            while(y){ long t = x % y; x = y; y = t; }
-            if(x != 1 && !(a == 0 && b == 1)) continue;      /* só os reduzidos */
-            long bb = b, sp = 0;
-            while(bb % 2 == 0){ bb /= 2; sp++; }
-            racs++;
-            if(bb == 1){ termina++; continue; }
-            /* RODA: o período é ord_{b′}(2), e mede-se pela órbita */
-            long r = 1, per = 0;
-            do { r = (r*2) % bb; per++; } while(r != 1 && per <= 4*bb);
-            if(r == 1 && per > 0){ roda++; per_ok++; } else sem_classe++;
-            if(sp == 0) puros++;                              /* puramente periódico */
+         * com T o traço da matriz do bloco. O PERÍODO é a ORDEM DO SALTO, e o traço do
+         * bloco é o coeficiente. E a PA distingue-se da PG: quocientes em progressão
+         * ARITMÉTICA de razão ≠ 0 não são periódicos, logo não são quadráticos; a PA de
+         * razão 0 É a PG de período 1, e é o metálico. */
+        long fam = 0, pg2 = 0, per_ok = 0;
+        struct { int p, q[6]; const char *nome; } B[] = {
+            {1, {1},        "φ    [1;1,1,…]      p=1"},
+            {1, {2},        "σ₂   [2;2,2,…]      p=1"},
+            {1, {3},        "σ₃   [3;3,3,…]      p=1"},
+            {2, {1,2},      "√3   [1;1,2,1,2,…]  p=2"},
+            {2, {2,1},      "      [2;2,1,2,1,…]  p=2"},
+            {4, {1,1,1,4},  "√7   [2;1,1,1,4,…]  p=4"},
+        };
+        printf("      família                    p   traço T   det   PG de ordem 2 nos blocos?\n");
+        for(int b = 0; b < 6; b++){
+            int p2 = B[b].p;
+            /* a matriz do bloco: produto dos [[a,1],[1,0]] */
+            long m11=1,m12=0,m21=0,m22=1;
+            for(int i2 = 0; i2 < p2; i2++){
+                long a2 = B[b].q[i2];
+                long n11 = m11*a2 + m12, n12 = m11;
+                long n21 = m21*a2 + m22, n22 = m21;
+                m11=n11; m12=n12; m21=n21; m22=n22;
+            }
+            long T = m11 + m22, D = m11*m22 - m12*m21;
+            /* os convergentes da sucessão periódica */
+            long Q[40]; int n2 = 0;
+            long qm2 = 1, qm1 = 0;
+            for(int k = 0; k < 30; k++){
+                long a2 = B[b].q[k % p2];
+                long nq = a2*qm1 + qm2;
+                if(nq > 1000000000L) break;
+                qm2 = qm1; qm1 = nq; Q[n2++] = nq;
+            }
+            int bate = 1, casos2 = 0;
+            for(int k = p2; k + p2 < n2; k++){
+                casos2++;
+                if(Q[k+p2] != T*Q[k] - D*Q[k-p2]) bate = 0;
+            }
+            fam++;
+            if(bate && casos2 > 3){ pg2++; per_ok += casos2; }
+            printf("      %-26s %-3d %-9ld %-5ld %s\n", B[b].nome, p2, T, D,
+                   bate ? "sim" : "NÃO");
         }
-        /* e o PRIMO como subcaso: b′ = p, s = 0 */
-        long pri = 0, pri_puro = 0;
-        long primos[] = {3, 5, 7, 11, 13, 17, 19, 257};
-        for(int i2 = 0; i2 < 8; i2++){
-            long q = primos[i2], r = 1, per = 0;
-            do { r = (r*2) % q; per++; } while(r != 1 && per < 4*q);
-            pri++;
-            if(r == 1 && per > 0) pri_puro++;
+        /* A PA de razão ≠ 0 NÃO é periódica: mede-se */
+        long pas = 0, nao_per = 0;
+        for(long d = 1; d <= 5; d++){
+            long a2[24];
+            for(int k = 0; k < 24; k++) a2[k] = 1 + k*d;   /* PA de razão d */
+            int periodica = 0;
+            for(int p3 = 1; p3 <= 6 && !periodica; p3++){
+                int todos = 1;
+                for(int k = 4; k + p3 < 24; k++) if(a2[k] != a2[k+p3]) todos = 0;
+                if(todos) periodica = 1;
+            }
+            pas++;
+            if(!periodica) nao_per++;
         }
-        /* o par morfológico: δ cria, ε remove, e a volta existe onde δ∘ε = id */
+        /* o par morfológico δ ⊣ ε, que é o critério da quinta primitiva */
         long mf = 0, cria = 0, remove = 0, volta_ex = 0;
-        for(int A = 0; A < 256; A++){
-            int d = (A | (A << 1) | (A >> 1)) & 0xFF;         /* δ: dilata */
-            int e = A & (A << 1) & (A >> 1) & 0xFF;           /* ε: erode  */
-            int de = (e | (e << 1) | (e >> 1)) & 0xFF;        /* δ∘ε: a abertura */
+        for(int A2 = 0; A2 < 256; A2++){
+            int d2 = (A2 | (A2 << 1) | (A2 >> 1)) & 0xFF;
+            int e2 = A2 & (A2 << 1) & (A2 >> 1) & 0xFF;
+            int de = (e2 | (e2 << 1) | (e2 >> 1)) & 0xFF;
             mf++;
-            if((A & d) == A) cria++;                           /* A ⊆ δA */
-            if((e & A) == e) remove++;                         /* εA ⊆ A */
-            if(de == A) volta_ex++;                            /* a volta existe */
+            if((A2 & d2) == A2) cria++;
+            if((e2 & A2) == e2) remove++;
+            if(de == A2) volta_ex++;
         }
+        printf("      o par morfológico nos %ld bytes: δ cria em %ld, ε remove em %ld,"
+               " e a volta δ∘ε = id existe em %ld\n", mf, cria, remove, volta_ex);
+        printf("      e a PA de razão d ≥ 1 nos quocientes: %ld de %ld NÃO são periódicas"
+               " — logo não são quadráticas; a PA de razão 0 É a PG de período 1\n",
+               nao_per, pas);
         printf("      A_m = T^m·X em %ld de %ld metais · o passo geral [[a,1],[1,0]] ="
                " T^a·X em %ld · E^n(∞) = 1/n em %ld\n", palavra, ms, geral, cima);
         printf("      encaixotamento por BAIXO: a classe diádica não desce e fica abaixo"
                " em %ld de %ld σ_m; e ULTRAPASSA %ld de %ld racionais menores\n",
                baixo, bx_cas, ultra, ultra_cas);
-        printf("      a tricotomia PELA VOLTA, em %ld racionais reduzidos com b ≤ 64:"
-               " %ld TERMINAM, %ld RODAM, %ld sem classe\n", racs, termina, roda, sem_classe);
-        printf("      o PRIMO é subcaso: %ld de %ld com b′ = p e s = 0 — puramente"
-               " periódico, período ord_p(2); e 1/6 RODA sem ser diádico nem primo\n",
-               pri_puro, pri);
-        printf("      o par morfológico nos 256: δ cria em %ld, ε remove em %ld, e a"
-               " volta δ∘ε = id existe em %ld\n", cria, remove, volta_ex);
         ok("A FRACÇÃO CONTÍNUA É UMA PALAVRA NO ALFABETO (T, X), E A TROCA É A LEI 0:"
            " com T = (1,1;0,1) a translação e X = (0,1;1,0) a troca projectiva,"
            " A_m = T^m·X nos 40 metais e o passo geral [[a,1],[1,0]] = T^a·X nos 60"
@@ -328,20 +357,24 @@ int main(void){
            " terceira que faz de σ_m o supremo da sua classe e não apenas um majorante",
            cima == 40 && baixo == bx_cas && bx_cas == G_MMAX
            && ultra == ultra_cas && ultra_cas > 1000);
-        ok("A TRICOTOMIA É PELA QUINTA PRIMITIVA — A VOLTA — E AÍ É EXAUSTIVA: a volta"
-           " NÃO existe dá FOGE (irracional); existe com ciclo não trivial dá RODA"
-           " (racional não diádico, pré-período s e período ord_{b′}(2)); existe com"
-           " ciclo {0} dá TERMINA (diádico). Nos 1260 racionais reduzidos com b ≤ 64:"
-           " 64 terminam, 1196 rodam, ZERO sem classe. E o PRIMO não é uma classe — é o"
-           " subcaso b′ = p com s = 0, puramente periódico: 1/6 roda sem ser diádico nem"
-           " ter denominador primo, e era esse o contraexemplo",
-           racs == termina + roda && sem_classe == 0 && termina == 64 && roda == 1196
-           && pri_puro == pri && pri == 8);
-        ok("E O CRITÉRIO É O DO PAR MORFOLÓGICO δ ⊣ ε: δ CRIA (A ⊆ δA nos 256), ε REMOVE"
-           " (εA ⊆ A nos 256), e a volta existe exactamente onde a abertura δ∘ε devolve"
-           " o objecto — que é a fronteira admissível do Universal, «admissível ⟺ tem"
-           " volta ∧ conserva a escada». A classificação dos habitantes não é uma"
-           " taxonomia inventada: é a quinta primitiva aplicada à órbita",
+        ok("A CLASSIFICAÇÃO É POR NÍVEL, E É LAGRANGE: na fracção contínua, CF FINITA dá"
+           " RACIONAL, CF eventualmente PERIÓDICA de período p dá IRRACIONAL QUADRÁTICO,"
+           " e CF não periódica dá irracional não quadrático. O período 1 é o METÁLICO."
+           " E o nível ACIMA — os convergentes — continua RACIONAL, obedecendo a uma PG"
+           " DE ORDEM 2 NOS BLOCOS: u_{k+p} = T·u_k − det·u_{k−p}, com T o traço da"
+           " matriz do bloco. O período é a ORDEM DO SALTO",
+           pg2 == fam && fam == 6 && per_ok > 60);
+        ok("E A PA SEPARA-SE DA PG: quocientes em progressão ARITMÉTICA de razão d ≥ 1"
+           " não são periódicos nas cinco razões medidas, logo os números não são"
+           " quadráticos; e a PA de razão 0 É a PG de período 1, que é o metálico. A"
+           " periodicidade não é uma propriedade do número — é a da sucessão de"
+           " quocientes, e é ela que Lagrange liga ao grau dois",
+           nao_per == pas && pas == 5);
+        ok("E O CRITÉRIO É O DO PAR MORFOLÓGICO δ ⊣ ε, a quinta primitiva: δ CRIA"
+           " (A ⊆ δA nos 256), ε REMOVE (εA ⊆ A nos 256), e a volta existe exactamente"
+           " onde a abertura δ∘ε devolve o objecto — «admissível ⟺ tem volta ∧ conserva"
+           " a escada». A classificação por período é essa volta lida na sucessão de"
+           " quocientes: fechar é ter volta, e não fechar é fugir",
            cria == mf && remove == mf && mf == 256 && volta_ex > 0 && volta_ex < mf);
     }
 
@@ -1081,6 +1114,37 @@ int main(void){
         printf("      duplicação de Arquimedes I_{2n}² = I_n·C_n: %ld de %ld exactas\n",
                dup, dup_cas);
         printf("      o encaixe em inteiros: I_8 < 333/106 < 22/7 < C_8 — %ld de 3\n", enc);
+        /* π_n É O INTERVALO, e π é o CORTE que a cadeia determina — pelo mesmo
+         * mecanismo do resto do paper. Aqui mede-se o ENCAIXE nos andares exactos, pelos
+         * quadrados racionais, sem avaliar raiz:
+         *      A^in:  27/16 → 4 → 27/4 → 8         (a subir)
+         *      A^circ:   27 → 16 → 12 → 64(3−2√2)  (a descer)
+         * O encaixe [A^in_{2n}, A^circ_{2n}] ⊂ [A^in_n, A^circ_n] verifica-se comparando
+         * os quadrados por produto cruzado. */
+        long enc_cas = 0, enc_ok = 0;
+        { long ip[4] = {27, 4, 27, 8}, iq[4] = {16, 1, 4, 1};      /* (A^in)² */
+          long cp[4] = {27, 16, 12, 0}, cq[4] = {1, 1, 1, 1};      /* (A^circ)², o 8 à parte */
+          for(int k = 0; k + 1 < 3; k++){                          /* 3→4→6, exactos */
+              enc_cas++;
+              int sobe = (ip[k]*iq[k+1] < ip[k+1]*iq[k]);
+              int desce = (cp[k+1]*cq[k] < cp[k]*cq[k+1]);
+              if(sobe && desce) enc_ok++;
+          }
+          /* e o andar 8: (A^in_8)² = 8 sobe sobre 27/4, e (A^circ_8)² = 64(3−2√2) < 12
+           * ⟺ 192 − 128√2 < 12 ⟺ 180 < 128√2 ⟺ 180² < 2·128² */
+          enc_cas++;
+          if(27*1 < 8*4 && 180L*180 < 2L*128*128) enc_ok++;
+        }
+        printf("      π_n := [A^in_n, A^circ_n]: a cadeia ENCAIXA em %ld de %ld passos"
+               " (3→4→6→8), com A^in a subir e A^circ a descer\n", enc_ok, enc_cas);
+        ok("π_n DEFINE-SE, E É UM INTERVALO: π_n := [A^in_n, A^circ_n], com as duas"
+           " bordas exactas no andar — e a cadeia é ENCAIXADA, A^in a subir e A^circ a"
+           " descer, verificado em 3→4→6→8 por comparação de inteiros. Donde π é o CORTE"
+           " que essa cadeia determina, pelo MESMO mecanismo do resto do paper: não é"
+           " uma constante importada nem uma aproximação — é o corte de uma cadeia cujas"
+           " bordas são algébricas em cada andar",
+           enc_ok == enc_cas && enc_cas == 3);
+
         ok("π_k DEFINE-SE POR FÓRMULA, e não por descrição: de t_n = 2cos(π/n) vêm"
            " I_n = (n·t_n/4)√(4−t_n²) e C_n = n√(4−t_n²)/t_n, ambas ALGÉBRICAS em t_n e"
            " portanto exactas no andar. Os quadrados são racionais nos andares 3, 4 e 6"
