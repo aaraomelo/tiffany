@@ -212,25 +212,68 @@ printf("\n§M3  A FAMÍLIA REAL é a régua com UM quociente só, repetido.\n\n"
     /* A observacao que junta as duas pecas: A_m = [[m,1],[1,0]] E' M(m). Logo o metal sigma_m
      * e' o numero cuja regua e' [m; m, m, m, ...] — periodica de periodo 1. Mede-se: expandir
      * sigma_m e verificar que todos os quocientes sao m. */
-    printf("      m    σ_m           a régua de σ_m          todos iguais a m?\n");
+    /* E A EXPANSÃO NÃO SE FAZ EM DOUBLE. A linha 62 deste ficheiro já diz que a régua é
+     * exacta em inteiros «porque o cone_espiral.c mostrou porque não pode ser em
+     * double», e logo aqui expandia-se σ_m com sqrt e floor, sete termos, «porque os
+     * primeiros são estáveis». Sete são; o vigésimo não é — e a periodicidade é uma
+     * afirmação sobre TODOS.
+     *
+     * Ela prova-se em duas linhas, e sem avaliar σ:
+     *
+     *   ⌊σ⌋ = m      porque m < σ < m+1, e as duas desigualdades são INTEIRAS:
+     *                σ > m ⟺ √(m²+4) > m ⟺ 4 > 0
+     *                σ < m+1 ⟺ √(m²+4) < m+2 ⟺ m²+4 < m²+4m+4 ⟺ 0 < 4m
+     *
+     *   1/(σ−m) = σ  porque σ(σ−m) = σ² − mσ = 1, pela própria lei σ² = mσ + 1
+     *
+     * A segunda é o PASSO: o resto da expansão é σ outra vez, logo o quociente seguinte
+     * é m outra vez, e por indução TODOS são m. Não são sete: são todos, e a prova é do
+     * passo — como no supremo. */
+    printf("      m    ⌊σ⌋ = m?   4 > 0   0 < 4m   σ(σ−m) = 1 em Z[σ]   régua\n");
     int mau = 0;
     for(long m = 1; m <= 5; m++){
-        double s = (m + sqrt((double)(m*m + 4)))/2.0;
-        /* expansão em double, mas só se lê o padrão — os primeiros termos são estáveis */
-        double x = s; int todos = 1;
-        printf("      %-4ld %-13.8f [", m, s);
-        for(int k = 0; k < 7; k++){
-            double f = floor(x);
-            if((long)f != m) todos = 0;
-            printf("%ld%s", (long)f, k<6?";":"");
-            x = 1.0/(x - f);
-        }
-        printf("…]");
-        if(!todos) mau++;
-        printf("      %s\n", todos ? "sim" : "NÃO");
+        /* AS DUAS DESIGUALDADES DO CHÃO, e escritas na forma GERAL. Simplifiquei-as
+         * primeiro até «4 > 0» e «0 < 4m» — e o primeiro é uma CONSTANTE, que passa
+         * sempre e não mede nada. Na forma que depende do objecto, com D = m² + 4:
+         *
+         *      σ > m    ⟺  D > m²           σ < m+1  ⟺  D < (m+2)²
+         *
+         * e agora elas podem falhar. Para a família geral x² − t·x − n vale D = t² + 4n,
+         * e a segunda dá t² + 4n < t² + 4t + 4, isto é n ≤ t — que é EXACTAMENTE a
+         * condição do encaixe (thm:condicao). A mesma desigualdade, no mesmo sítio. */
+        long D = m*m + 4;
+        int baixo = (D > m*m);                        /* σ > m */
+        int cima  = (D < (m+2)*(m+2));                /* σ < m+1 */
+        /* e o PASSO, em ℤ[σ]: σ·(σ − m) = σ² − mσ = (mσ + 1) − mσ = 1 */
+        long u1 = 0, v1 = 1, u2 = -m, v2 = 1;         /* σ e (σ − m) */
+        long pu = u1*u2 + v1*v2;                      /* σ² = mσ + 1 */
+        long pv = u1*v2 + u2*v1 + m*v1*v2;
+        int passo = (pu == 1 && pv == 0);
+        if(!(baixo && cima && passo)) mau++;
+        printf("      %-4ld %-11s %-7s %-8s %-20s [%ld; %ld, %ld, …]\n",
+               m, (baixo && cima) ? "sim" : "NÃO", baixo ? "sim" : "NÃO",
+               cima ? "sim" : "NÃO", passo ? "sim" : "NÃO", m, m, m);
     }
-    printf("\n");
-    ok("σ_m tem régua [m; m, m, …] — a família real é a régua de período 1", mau == 0);
+    /* E O CONTROLO, que é a mesma conta a falhar onde tem de falhar: para x² − t·x − n
+     * com n > t o chão deixa de ser t, porque D = t² + 4n passa de (t+2)². */
+    long tc = 2, nc = 4, Dc = tc*tc + 4*nc;
+    int cai = !(Dc < (tc+2)*(tc+2));
+    printf("\n      GUME: x² − 2x − 4 tem D = %ld e (t+2)² = %ld, logo ⌊σ⌋ ≠ t — a mesma"
+           " conta FALHA onde n > t\n", Dc, (tc+2)*(tc+2));
+    printf("      e é uma prova do PASSO, não uma amostra: o resto da expansão é σ outra"
+           " vez,\n      logo o quociente seguinte é m outra vez — por indução, TODOS\n\n");
+    ok("σ_m TEM RÉGUA [m; m, m, …] — A FAMÍLIA REAL É A RÉGUA DE PERÍODO 1, e prova-se em"
+       " inteiros. Antes expandia-se σ_m em double com sqrt e floor e olhavam-se SETE"
+       " termos, «porque os primeiros são estáveis» — sete são, e a periodicidade é uma"
+       " afirmação sobre todos. Agora: ⌊σ⌋ = m sai de duas desigualdades inteiras (σ > m"
+       " ⟺ 4 > 0, e σ < m+1 ⟺ 0 < 4m), e o PASSO 1/(σ−m) = σ sai da própria lei"
+       " σ² = mσ + 1, medido em ℤ[σ] com parte em σ nula. Do passo a indução dá todos os"
+       " quocientes de uma vez — a mesma forma que corrigiu o supremo. E as desigualdades"
+       " escrevem-se na forma GERAL, com D = m²+4 contra m² e (m+2)²: simplificadas até"
+       " «4 > 0» passavam por serem constantes, e nesta forma FALHAM onde têm de falhar —"
+       " para x² − t·x − n com n > t, que é a condição do encaixe a aparecer no mesmo"
+       " sítio",
+       mau == 0 && cai);
     printf("      Portanto A_m do familia_real.c É M(m) deste ficheiro: o gato de cada metal é\n");
     printf("      a matriz de um quociente parcial. Os dois estudos falavam da mesma peça.\n");
 }
@@ -602,35 +645,61 @@ printf("\n§M9  A dimensão ABAIXO expande na mesma medida que a de CIMA contrai
      *
      * É a mesma frase do metal: |σ|·|σ'| = 1, com σ' = −1/σ. A matriz e o metal dizem-no com
      * as mesmas letras porque M(m) É o gato de σ_m (§M3). */
-    printf("      a    λ₁ (expande)   λ₂ (contrai)   |λ₁|·|λ₂|   det   σ_a         |σ|·|σ'|\n");
-    double pior = 0, piorS = 0;
+    /* E O COMENTÁRIO ACIMA JÁ TEM A PROVA: «λ₁λ₂ = det = −1, logo |λ₁|·|λ₂| = 1
+     * EXATAMENTE». O produto dos valores próprios É o determinante, por Viète — e o
+     * determinante de [[a,1],[1,0]] é um INTEIRO, −1, escrito na linha 58 deste
+     * ficheiro. Não há raiz nenhuma para avaliar, e a tese não tem margem: ou o
+     * determinante é −1 ou não é.
+     *
+     * E o segundo par era tautologia: escrevia-se σ' = −1.0/σ e media-se |σ|·|σ'| = 1,
+     * que é σ·(1/σ) — a mesma quantidade dividida por si própria, como no §M11. O
+     * conjugado NÃO é «um sobre sigma»: é a OUTRA RAIZ, σ' = a − σ, e o produto delas
+     * sai da lei σ² = aσ + 1 sem sair de ℤ[σ]:
+     *
+     *      σ·(a − σ) = aσ − σ² = aσ − (aσ + 1) = −1
+     *
+     * Aritmética em ℤ[σ]: (u₁+v₁σ)(u₂+v₂σ) = (u₁u₂ + v₁v₂) + (u₁v₂ + u₂v₁ + a·v₁v₂)σ. */
+    printf("      a    det M(a)   σ·σ' em Z[σ]   é −1?   λ₁ (só para ver)\n");
+    long mauDet2 = 0, mauSig = 0, voltas2 = 0;
     for(long a = 1; a <= 6; a++){
-        /* valores próprios de [[a,1],[1,0]]: λ² − aλ − 1 = 0 */
-        double disc = sqrt((double)(a*a + 4));
-        double l1 = (a + disc)/2, l2 = (a - disc)/2;
-        double prod = fabs(l1)*fabs(l2);
-        double d = fabs(prod - 1.0);
-        if(d > pior) pior = d;
-        /* e o metal, pelo outro lado: σ e σ' = −1/σ */
-        double sg = (a + disc)/2, sgl = -1.0/sg;
-        double ps = fabs(sg)*fabs(sgl);
-        if(fabs(ps - 1.0) > piorS) piorS = fabs(ps - 1.0);
-        printf("      %-4ld %-14.8f %-14.8f %-11.10f %-5.1f %-11.8f %.10f\n",
-               a, l1, l2, prod, l1*l2, sg, ps);
+        M2 Ma = Mq(a);
+        long dt = det(Ma);                       /* λ₁λ₂ = det, por Viète — INTEIRO */
+        if(dt != -1) mauDet2++;
+        /* σ = 0 + 1·σ, σ' = a − 1·σ, e o produto em ℤ[σ] com σ² = aσ + 1 */
+        long u1 = 0, v1 = 1, u2 = a, v2 = -1;
+        long pu = u1*u2 + v1*v2;
+        long pv = u1*v2 + u2*v1 + a*v1*v2;
+        if(pu != -1 || pv != 0) mauSig++;
+        voltas2++;
+        printf("      %-4ld %-10ld %-14s %-7s (%.8f)\n", a, dt,
+               pv == 0 ? (pu == -1 ? "−1" : "≠ −1") : "tem parte σ",
+               (pu == -1 && pv == 0) ? "sim" : "NÃO",
+               (a + sqrt((double)(a*a + 4)))/2);
     }
-    printf("\n      pior desvio de 1: matriz %.2e,  metal %.2e\n\n", pior, piorS);
-    ok("|λ₁|·|λ₂| = 1: o que uma direção expande, a outra contrai na mesma medida", pior < 1e-14);
-    ok("e o metal diz o mesmo: |σ|·|σ'| = 1, porque M(m) É o gato de σ_m", piorS < 1e-14);
-    /* e o CONTROLO: uma matriz com det ≠ ±1 NÃO conserva — mede-se para separar */
+    printf("\n      %ld valores de a, e o resíduo é ZERO — nem uma raiz avaliada\n\n",
+           voltas2);
+    ok("|λ₁|·|λ₂| = 1: O QUE UMA DIRECÇÃO EXPANDE, A OUTRA CONTRAI NA MESMA MEDIDA — e"
+       " isto é det M(a) = −1, um INTEIRO. O produto dos valores próprios É o"
+       " determinante, por Viète, e o comentário desta secção já o dizia: «λ₁λ₂ = det ="
+       " −1, logo |λ₁|·|λ₂| = 1 EXATAMENTE». Media-se com sqrt(a²+4) e um desvio de"
+       " 1e-14 uma coisa que não tem margem — ou o determinante é −1 ou não é",
+       mauDet2 == 0);
+    ok("E O METAL DIZ O MESMO: σ·σ' = −1, PORQUE M(m) É O GATO DE σ_m — e agora isto"
+       " mede alguma coisa. Estava escrito σ' = −1.0/σ seguido de |σ|·|σ'| = 1, que é"
+       " σ·(1/σ): a mesma quantidade dividida por si própria, o mesmo defeito do §M11. O"
+       " conjugado não é «um sobre sigma»: é a OUTRA RAIZ, σ' = a − σ, e o produto sai da"
+       " lei σ² = aσ + 1 sem sair de ℤ[σ] — σ(a−σ) = aσ − σ² = −1, com parte em σ nula",
+       mauSig == 0 && voltas2 == 6);
+    /* e o CONTROLO: uma matriz com det ≠ ±1 NÃO conserva — e também em inteiros */
     {
-        double a2 = 3, b2 = 1, c2 = 1, d2 = 1;        /* det = 2, não ±1 */
-        double tr = a2 + d2, dt = a2*d2 - b2*c2;
-        double disc = sqrt(tr*tr - 4*dt);
-        double l1 = (tr + disc)/2, l2 = (tr - disc)/2;
-        double prod = fabs(l1*l2);
-        printf("      controlo: [[3,1],[1,1]] tem det = %.0f e |λ₁||λ₂| = %.4f ≠ 1\n\n", dt, prod);
-        ok("com det ≠ ±1 a conservação FALHA — |det| = 1 é a condição, não um acaso",
-           fabs(prod - 1.0) > 0.5);
+        M2 X2 = { 3, 1, 1, 1 };                  /* det = 2, não ±1 */
+        long dt2 = det(X2);
+        printf("      controlo: [[3,1],[1,1]] tem det = %ld e |λ₁||λ₂| = %ld ≠ 1\n\n",
+               dt2, dt2 < 0 ? -dt2 : dt2);
+        ok("COM det ≠ ±1 A CONSERVAÇÃO FALHA — |det| = 1 é a condição, e não um acaso. E o"
+           " controlo também é inteiro: |λ₁||λ₂| = |det| = 2, e a pergunta «é 1?» responde-se"
+           " comparando dois inteiros",
+           (dt2 < 0 ? -dt2 : dt2) != 1);
     }
     printf("      Portanto o cone e a espiral não são duas máquinas: são a mesma medida lida\n");
     printf("      nos dois sentidos. O cone contrai um nível e a espiral expande-o exatamente\n");
