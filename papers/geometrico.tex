@@ -70,7 +70,8 @@ não é escolhida. Daí o encaixe, e daí o corte.
 E a construção é de $\mathbb{R}$ \textbf{inteiro}. Corre sobre quocientes
 parciais \emph{arbitrários} --- cada real tem uma representação canónica por
 fracção contínua, infinita se irracional e finita se racional ---, e o metálico é
-o caso \emph{periódico}, não o caso único. Com $a_k\geq1$,
+o caso de \emph{quociente parcial constante}, e portanto periódico --- há
+infinitas CF periódicas que não são metálicas. Com $a_k\geq1$,
 \[
 \boxed{\;q_k\geq F_{k+1},\quad\text{com igualdade em TODO }k
 \text{ só na sucessão de uns}\;}
@@ -80,7 +81,7 @@ dos convergentes} entre as expansões com $a_k\geq1$, e por isso uma só taxa
 limita a construção inteira. A família metálica não é o escopo: é o caso
 \textbf{extremo}, o pior caso do mecanismo.
 
-\smallskip\noindent\emph{Medido:} \code{tests/geometria\_real.c} ($29{:}0$).
+\smallskip\noindent\emph{Medido:} \code{tests/geometria\_real.c} ($30{:}0$).
 \end{abstract}
 
 %======================================================================
@@ -100,8 +101,18 @@ as oito leis, a base ortonormal, o Gato, Pisot, o corpo ordenado completo
 \end{tabular}
 \end{center}
 
-\noindent Cada peça deste paper leva, no fim, a linha das três colunas. Se uma
-afirmação não tiver as três, não está pronta.
+\noindent\textbf{A trava.} A identificação dos cortes com o corpo ordenado
+completo é \emph{herdada}; a contribuição deste paper é a \textbf{realização
+geométrica do mecanismo que os produz}. Não é uma prova independente da existência
+de $\mathbb{R}$.
+
+\medskip
+\noindent\textbf{Regra metodológica.} Cada afirmação é apresentada segundo o seu
+estatuto: \emph{resultado estrutural herdado}, \emph{realização geométrica} neste
+paper, e \emph{verificação computacional} quando aplicável. Uma verificação
+computacional não substitui uma demonstração matemática, e os três verbos usam-se
+com sentido fixo --- \textbf{demonstra} (deriva das hipóteses), \textbf{realiza}
+(instancia a construção), \textbf{verifica} (execução finita).
 
 \medskip
 \noindent E a regra editorial que governa a ordem: \textbf{nenhuma definição
@@ -125,7 +136,8 @@ de escala, e a inversão é a \textbf{troca}
 \boxed{\;[p:q]\ \longmapsto\ [q:p],
 \qquad S=\begin{pmatrix}0&1\\1&0\end{pmatrix},\ \det S=-1 .\;}
 \]
-Não há divisão, não há teste, não há ramo. E daí
+\emph{Na realização projectiva não se executa uma divisão}: a inversão é a troca
+das coordenadas, sem teste e sem ramo. E daí
 \[
 \frac10=[1:0]=\infty,
 \qquad
@@ -155,13 +167,14 @@ processo.} $\square$
         {\code{geometria\_real.c} \S L0}
 
 \begin{observacao}[as duas primeiras leis nas duas Möbius da construção]
-As duas primeiras leis aparecem aqui nas duas transformações de Möbius
-fundamentais da construção:
+Uma \emph{realização geométrica} das duas primeiras leis aparece nas duas
+transformações de Möbius fundamentais desta construção --- e o que se afirma é a
+realização, não uma igualdade entre a lei e a matriz:
 \[
 \begin{array}{llll}
 \text{\textbf{Lei 1}} & 1\dg=-1 & \text{a Möbius \textbf{involutiva}, traço }0
 & \nu(x)=-1/x=\begin{psmallmatrix}0&-1\\1&0\end{psmallmatrix}\\[3pt]
-\text{\textbf{Lei 2}} & T\dg=-T & \text{a Möbius de \textbf{Fibonacci}, }\det=-1
+\text{\textbf{Lei 2}} & T\dg=-T & \text{a Möbius \textbf{metálica}, }\det=-1
 & A_m=\begin{psmallmatrix}m&1\\1&0\end{psmallmatrix}
 \end{array}
 \]
@@ -225,23 +238,40 @@ $2110$ racionais ultrapassados}
 O mesmo processo separa três habitantes, e a separação é a correspondência entre
 primos e irracionais.
 
-\begin{teorema}[o gume triplo]\label{thm:tricotomia}
-Na dobra $x\mapsto2x\bmod1$ --- o \emph{shift} nos bits:
+O critério é o da \textbf{quinta primitiva} --- a Inversão, cuja admissibilidade
+o \emph{Corpo Universal} enuncia como \emph{ter volta e conservar a escada} --- e
+o seu par morfológico $\delta\dashv\varepsilon$, em que $\delta$ \emph{cria}
+($A\subseteq\delta A$), $\varepsilon$ \emph{remove} ($\varepsilon A\subseteq A$),
+e a volta existe exactamente onde a abertura devolve o objecto,
+$\delta(\varepsilon(A))=A$.
+
+\begin{teorema}[a tricotomia pela volta]\label{thm:tricotomia}
+Na dobra $x\mapsto2x\bmod1$ --- o \emph{shift} nos bits --- classifica-se pelo
+critério da volta, e a classificação é \textbf{exaustiva e exclusiva}:
 \[
 \boxed{
 \begin{array}{lll}
-\text{o \textbf{diádico}} & \textbf{TERMINA} & \text{a expansão fecha em $k$ bits}\\[2pt]
-\text{o \textbf{primo}} & \textbf{RODA} & \text{os bits de $1/p$ têm período
-exactamente } \operatorname{ord}_p(2)\\[2pt]
-\text{o \textbf{irracional}} & \textbf{FOGE} & \text{a órbita não fecha}
+\text{a volta \textbf{não} existe} & \textbf{FOGE}
+ & \text{irracional: expansão não eventualmente periódica}\\[2pt]
+\text{a volta existe, ciclo} \neq\{0\} & \textbf{RODA}
+ & \text{racional não diádico: eventualmente periódica}\\[2pt]
+\text{a volta existe, ciclo} =\{0\} & \textbf{TERMINA}
+ & \text{diádico: expansão binária finita}
 \end{array}}
 \]
-E o que os separa é a \textbf{norma}: fecho da órbita $\Rightarrow$ racional
-$\Rightarrow$ norma $0$, ao passo que a norma dos convergentes é $\pm1$ --- que é
-exactamente o $\abs{\det}=1$ do \S\ref{sec:det}. Na escada de Fermat os períodos
-\emph{dobram} ($\operatorname{ord}(2)=8$ em $17$ e $16$ em $257$): a torre dos
-períodos é a torre $2$-ádica, lida do lado dos primos. $\square$
+Operacionalmente, para $a/b$ reduzido com $b=2^{s}b'$ e $b'$ ímpar: $b'=1$ dá
+\textbf{TERMINA}; $b'>1$ dá \textbf{RODA}, com pré-período $s$ e período
+$\operatorname{ord}_{b'}(2)$. $\square$
 \end{teorema}
+
+\begin{corolario}[o primo é subcaso, não classe]\label{cor:primo-subcaso}
+$p$ primo ímpar $\Longrightarrow$ $\operatorname{per}(1/p)=\operatorname{ord}_p(2)$,
+com pré-período $0$: \emph{puramente} periódico. É o caso $b'=p$, $s=0$ --- e não
+uma das três classes. Assim $1/6$ roda \textbf{sem} ser diádico e \textbf{sem} ter
+denominador primo. Na escada de Fermat os períodos \emph{dobram}
+($\operatorname{ord}(2)=8$ em $17$ e $16$ em $257$): a torre dos períodos é a torre
+$2$-ádica, lida do lado dos primos. $\square$
+\end{corolario}
 \colunas{«os primos são duais de irracionais no limite», com estatuto de
 \textbf{fronteira}: contável fechado contra incontável sem fecho}
         {a tricotomia lida na mesma descida que produz os cortes}
@@ -251,9 +281,10 @@ períodos é a torre $2$-ádica, lida do lado dos primos. $\square$
 \begin{observacao}[o estatuto da correspondência]
 A dualidade primo/irracional é enunciada \emph{no limite}, e é uma
 \textbf{fronteira} --- o contável fechado contra o incontável sem fecho. As duas
-metades finitas medem-se; a fronteira não se atravessa aqui. E é a mesma norma
-$\pm1$ que, do lado dos convergentes, dá o encaixe, e do lado das órbitas,
-distingue quem fecha de quem foge.
+metades finitas medem-se; a fronteira não se atravessa aqui. E o que distingue
+quem fecha de quem foge é a \emph{existência da volta}, não uma norma: a norma
+algébrica $N(\sigma^{k})$ e o determinante $\det M_k$ são objectos do
+\S\ref{sec:det}, e ficam lá.
 \end{observacao}
 
 %======================================================================
@@ -409,9 +440,11 @@ t_k^{2}-(m^{2}+4)\bigl(U^{(m)}_k\bigr)^{2}=4(-1)^{k}
 Em $m=1$ ela é $L_k^{2}-5F_k^{2}=4(-1)^{k}$, e só aí.
 
 \emph{Não há escolha de aproximação: o inteiro $t_k$ é produzido pelo próprio
-operador.} $\square$
+operador.} \emph{(Chama-se aqui \textbf{vazamento} à parcela dual
+$\abs{\sigma\dg}^{k}$ --- linguagem interna deste quadro; ela tende para zero, e
+não é zero.)} $\square$
 \end{teorema}
-\colunas{$\abs{\sigma}>1$, $\abs{\sigma\dg}<1$, vazamento zero (\code{thm:pisot})}
+\colunas{$\abs{\sigma}>1$, $\abs{\sigma\dg}<1$ (\code{thm:pisot})}
         {a distância ao inteiro como quantidade PRODUZIDA}
         {\code{geometria\_real.c} \S L5: $131$ andares, $0$ discrepâncias;
 \code{pisotbase.c} \S B4}
@@ -435,10 +468,10 @@ um pelas entradas da matriz, outro pelo produto das duas faces espectrais.
 \[
 \underbrace{\det A_m^{k}=U^{(m)}_{k+1}U^{(m)}_{k-1}-\bigl(U^{(m)}_k\bigr)^{2}}_{\text{das ENTRADAS, em }\mathbb{Z}}
 \qquad\text{e}\qquad
-\underbrace{\sigma^{k}(\sigma\dg)^{k}=N(\sigma^{k})=a^{2}+mab-b^{2}}_{\text{ESPECTRAL, o produto das duas faces}}
+\underbrace{\sigma^{k}(\sigma\dg)^{k}=N(\sigma^{k})=a_k^{2}+ma_kb_k-b_k^{2}}_{\text{ESPECTRAL, o produto das duas faces}}
 \]
-O primeiro não sabe que existem valores próprios; o segundo não olha para uma
-entrada da matriz. Coincidem --- ambos $(-1)^{k}$, nos $115$ andares, e junto
+onde $a_k,b_k\in\mathbb{Z}$ são os coeficientes de $\sigma^{k}=a_k+b_k\sigma$ em
+$\mathbb{Z}[\sigma]$. Coincidem --- ambos $(-1)^{k}$, nos $115$ andares, e junto
 com a multiplicatividade $N(\sigma)^{k}=(-1)^{k}$ --- por «$\det$ é o produto do
 espectro», \emph{que é o teorema}. É a coincidência que se mede, não a
 definição. $\square$
@@ -511,8 +544,10 @@ por convenção canónica.
 \begin{teorema}[a construção corre sobre quocientes arbitrários]\label{thm:todos}
 Para uma sucessão \textbf{qualquer} --- não só a periódica ---:
 $p_kq_{k-1}-p_{k-1}q_k=(-1)^{k-1}$, logo $\abs{\det}=1$ em todos os passos; os
-convergentes alternam de lado; os intervalos aninham; e $q_k$ cresce.
-\emph{O metálico é o caso periódico, e não o caso único.} $\square$
+convergentes alternam de lado; os intervalos formam uma cadeia
+encaixada; e $q_k$ cresce.
+\emph{O metálico é o caso de quociente parcial constante --- periódico, mas não
+o único periódico, e muito menos o único caso.} $\square$
 \end{teorema}
 
 \begin{teorema}[a extremalidade da régua: $\varphi$ minimiza o crescimento]\label{thm:ouro}
@@ -527,14 +562,16 @@ $q_k\geq F_k$. Donde a resolução da régua,
 \[
 \abs{c_{k+1}-c_k}=\frac{1}{q_kq_{k+1}}\ \leq\ \frac{1}{F_{k+1}F_{k+2}}
 \]
---- \textbf{limitada superiormente pela taxa de Fibonacci}: \textbf{uma só taxa
-limita a construção inteira}, e é a do ouro. A família metálica não é o escopo
+--- \textbf{a taxa de Fibonacci fornece o pior caso universal para o crescimento
+dos denominadores} entre as expansões infinitas com $a_k\geq1$. A família metálica não é o escopo
 --- é o caso \textbf{extremo}. $\square$
 
 \medskip
 \noindent\emph{E o escopo da palavra «lento» diz-se}, para não privilegiar
-ninguém: $\varphi$ é o \textbf{irracional de crescimento mínimo dos
-denominadores dos convergentes, entre as expansões com $a_k\geq1$}. Não é uma
+ninguém: o que está demonstrado é $q_k\geq F_{k+1}$ \emph{para cada $k$}, isto é,
+$\varphi=[1;1,1,\ldots]$ \textbf{minimiza ponto a ponto o crescimento dos
+denominadores $q_k$} entre as expansões infinitas com $a_k\geq1$ --- e, como
+consequência assintótica, $F_k\sim\varphi^{k}/\sqrt5$. Não é uma
 propriedade de $\varphi$ contra os outros reais em geral --- os racionais nem
 sequer têm expansão infinita ---, é a \textbf{extremalidade da própria régua}:
 o pior caso do mecanismo, e por isso o que o limita.
@@ -601,8 +638,39 @@ como \textbf{a máquina de leitura de cada bloco de decisões}. $\square$
 %======================================================================
 \section{A completude}\label{sec:completude}
 
-\textbf{A identificação do conjunto dos cortes com o corpo ordenado completo é
-resultado herdado do \emph{Corpo Universal}.} Este paper não a reobtém, e nenhuma
+\noindent\textbf{Primeiro, as duas caixas, que são duas.} O \S\ref{sec:corte}
+decidiu $a/b<\sigma_m$: é o corte de um metálico \emph{específico}. O mecanismo
+geral é outro, e enuncia-se agora:
+\[
+\boxed{
+\begin{array}{ll}
+\text{mecanismo \textbf{extremo explícito}} &
+\text{a família metálica: } \sigma_m,\ t_k,\ \abs{\sigma\dg}^{k}\\[3pt]
+\text{mecanismo \textbf{geral}} &
+\text{CF arbitrária: } (a_k)\to(p_k/q_k)\to\abs{\det M_k}=1\to I_k
+\end{array}}
+\]
+
+\begin{definicao}[os intervalos do mecanismo geral]\label{def:Ik}
+Dada $(a_0;a_1,a_2,\ldots)$ com $a_k\geq1$, e $p_k/q_k$ os convergentes
+(Def.~\ref{def:real}), põe-se para $k\geq0$
+\[
+I_k=\Bigl[\min\Bigl(\tfrac{p_k}{q_k},\tfrac{p_{k+1}}{q_{k+1}}\Bigr),\
+\max\Bigl(\tfrac{p_k}{q_k},\tfrac{p_{k+1}}{q_{k+1}}\Bigr)\Bigr].
+\]
+Então, de $\abs{p_kq_{k-1}-p_{k-1}q_k}=1$:
+\[
+\boxed{\;I_{k+1}\subset I_k,\qquad \abs{I_k}=\frac{1}{q_kq_{k+1}}\;}
+\]
+--- uma cadeia \textbf{encaixada} cujo comprimento é dado em inteiros. E, por
+$q_k\geq F_{k+1}$ (Teor.~\ref{thm:ouro}),
+$\abs{I_k}\leq 1/(F_{k+1}F_{k+2})\leq2^{-k}$ para $k\geq1$: \emph{o comprimento
+cai pelo menos como $2^{-k}$}, e é este o elo que a unicidade usa.
+\end{definicao}
+
+\medskip
+\noindent\textbf{A identificação do conjunto dos cortes com o corpo ordenado
+completo é resultado herdado do \emph{Corpo Universal}.} Este paper não a reobtém, e nenhuma
 varredura finita a poderia reobter: intervalos encaixados de comprimento a tender
 para zero \emph{não} estabelecem, por si sós, a existência do ponto de
 intersecção --- é precisamente nisso que $\mathbb{Q}$ e $\mathbb{R}$ diferem.
@@ -622,8 +690,9 @@ máximo} --- para cada $a/b\in A$ exibe-se $a'/b'\in A$ maior
 \emph{o corte é o objecto}, e não um ponto a procurar dentro de $\mathbb{Q}$.
 
 \emph{(ii) O habitante é único, pelo princípio do pombal, e a conta é inteira.}
-Se $r_1/s_1$ e $r_2/s_2$ habitam os mesmos intervalos até uma profundidade $K$
-com $2^{K}>s_1s_2$, então
+Por Def.~\ref{def:Ik} tem-se $\abs{I_K}\leq2^{-K}$; logo, se $r_1/s_1$ e
+$r_2/s_2$ habitam $I_K$ com $2^{K}>s_1s_2$, então
+$\abs{I_K}\leq2^{-K}<1/(s_1s_2)$ e portanto
 \[
 \Bigl|\frac{r_1}{s_1}-\frac{r_2}{s_2}\Bigr|<\frac{1}{s_1s_2}
 \quad\Longrightarrow\quad
@@ -750,7 +819,8 @@ t_n=2\cos\frac{\pi}{n}\in\mathbb{R}
 \bar t_n\in\mathbb{F}_p ,
 \]
 sendo o segundo uma \textbf{realização modular de uma relação algébrica}, e não
-«o mesmo número». É isso que faz $\pi_k$ ser \textbf{realizado} e não aproximado.
+«o mesmo número». É isso que faz $\pi_n$ ser uma \textbf{realização algébrica exacta do andar}, e
+não uma aproximação numérica introduzida externamente.
 
 \begin{teorema}\label{thm:pi}
 \emph{(i) os elíticos.} Com $t_n=2\cos(\pi/n)$ realizado no primo da ordem,
@@ -808,9 +878,10 @@ para $\pi$ quando o refinamento é tomado. Nunca $A_n^{\rm in}=\pi$. O que o qua
 dispensa é \emph{importar} uma constante: cada andar apresenta o seu.
 
 \noindent Nenhuma constante foi importada: \textbf{cada andar apresenta a sua}.
-E ao chegar ao círculo a família muda de natureza, de fechar na escada para
-fechar só no primo --- é a mesma fronteira do eixo, agora como propriedade do
-membro-limite. \emph{Assim o círculo não é usado para construir a reta: é nessa realização que
+E na realização modular adoptada, a ordem do operador elíptico fecha em
+características adequadas, ao passo que a do parabólico é $p$ --- a mesma
+fronteira do eixo, agora como propriedade da representação escolhida do
+membro-limite, e não como propriedade universal da geometria circular. \emph{Assim o círculo não é usado para construir a reta: é nessa realização que
 ele reaparece como gume geométrico da construção.}
 \colunas{$\pi$ é o membro-limite da família (\code{thm:pi-familia})}
         {$\pi_k$ exacto por andar, realizado nos primos das ordens}
@@ -870,10 +941,10 @@ Universal}, e é nessa realização que a recta real aparece como o corpo ordena
 completo.
 
 \medskip
-\emph{Medido:} \code{tests/geometria\_real.c} ($29{:}0$), com
+\emph{Medido:} \code{tests/geometria\_real.c} ($30{:}0$), com
 \code{tests/ortonormal.c} ($6{:}0$), \code{tests/metalica.c},
 \code{tests/pisotbase.c}, \code{tests/ordenado.c} ($7{:}0$),
 \code{tests/pi\_familia.js} ($7{:}0$),
-\code{tests/arquimedes\_area.js} ($29{:}0$) e \code{tests/geometrico.js}.
+\code{tests/arquimedes\_area.js} ($30{:}0$) e \code{tests/geometrico.js}.
 
 \end{document}

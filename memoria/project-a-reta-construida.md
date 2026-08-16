@@ -140,7 +140,35 @@ RODA** (os bits de 1/p têm período `ord_p(2)`, e na escada de Fermat os perío
 Lei 0**. A fracção contínua é uma **palavra em duas letras**: a passos aditivos e uma troca.
 O motor liga-se à Lei 0 por **identidade matricial**, não por analogia.
 
-`tests/geometria_real.c` (29:0) na ordem obrigatória do eval: 8 leis → base ortonormal →
+**A TRICOTOMIA ESTAVA ERRADA, E A RESOLUÇÃO É A QUINTA PRIMITIVA.** Escrevi
+«diádico / PRIMO / irracional», e isso não é uma tricotomia: **1/6 não é diádico e não tem
+denominador primo**. O Aarão apontou: «tem 5 primitivas lá, vê a última morfológica, tá
+tricotomia e resolve». A quinta primitiva é a **Inversão**, cujo critério é
+
+    admissível ⟺ TEM VOLTA ∧ conserva a escada          (def:cinco)
+
+com o par morfológico `δ ⊣ ε` — δ CRIA (A ⊆ δA), ε REMOVE (εA ⊆ A), e a volta existe onde
+`δ(ε(A)) = A` (thm:morf-par). Classificando **pela volta**, fica exaustivo e exclusivo:
+
+    a volta NÃO existe          → FOGE      irracional
+    a volta existe, ciclo ≠ {0} → RODA      racional não diádico
+    a volta existe, ciclo = {0} → TERMINA   diádico
+
+Operacionalmente, para a/b reduzido com b = 2^s·b′ e b′ ímpar: b′ = 1 TERMINA; b′ > 1 RODA
+com pré-período s e período `ord_{b′}(2)`. **1260 racionais com b ≤ 64: 64 terminam, 1196
+rodam, ZERO sem classe.** E **o primo não é classe — é o subcaso b′ = p, s = 0**.
+
+**E saiu o «norma 0»**, que era afirmação sem objecto: havia três normas a rondar o paper
+(a algébrica N(σ), o determinante, e uma «norma da órbita»). A norma algébrica e o
+determinante ficam no §det; o que separa os habitantes é a **existência da volta**.
+
+**O outro bloqueador: o salto entre as duas caixas.** O §corte decide `a/b < σ_m` — o corte
+de um metálico *específico* — e o teorema da completude falava de `(a_k)` arbitrária. Agora
+declaram-se as duas antes: **metálico = mecanismo extremo explícito; CF geral = extensão**,
+com `I_k` definido, `I_{k+1} ⊂ I_k`, `|I_k| = 1/(q_k q_{k+1})` e — o elo que o pombal usava
+sem ter — **`|I_k| ≤ 2^{-k}`**, que vem de `q_k ≥ F_{k+1}`.
+
+`tests/geometria_real.c` (30:0) na ordem obrigatória do eval: 8 leis → base ortonormal →
 bit a bit → dual → recorrência → Pisot → encaixe → corte → completude → ℝ → π_k/gume.
-`papers/geometrico.tex` 11 páginas; `corpo_universal.tex` 54, e a compilar.
+`papers/geometrico.tex` 12 páginas; `corpo_universal.tex` 54, e a compilar.
 Ver [[project-o-real-e-o-corte]], [[feedback-verdadeiro-e-parcial]].

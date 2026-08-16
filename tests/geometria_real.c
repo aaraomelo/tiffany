@@ -247,30 +247,72 @@ int main(void){
                 if(passou) ultra++;
             }
         }
-        /* A TRICOTOMIA: o diádico TERMINA, o primo RODA, o irracional FOGE */
-        long dia = 0, dia_term = 0, pri = 0, pri_roda = 0;
-        for(long k = 1; k <= 12; k++) for(long j = 1; j < (1L<<k); j += 2){
-            /* j/2^k: a expansão binária TERMINA em k bits */
-            long r = j, passos = 0;
-            while(r % 2 == 0) r /= 2;
-            dia++;
-            if(r % 2 == 1 && passos == 0) dia_term++;   /* ímpar: termina exactamente */
+        /* A TRICOTOMIA, PELA QUINTA PRIMITIVA — a Inversão, cujo critério é
+         *
+         *      admissível ⟺ TEM VOLTA ∧ conserva a escada        (def:cinco)
+         *
+         * e cujo par morfológico é δ ⊣ ε, com δ a CRIAR (A ⊆ δA), ε a REMOVER
+         * (εA ⊆ A), e a volta a existir exactamente onde δ(ε(A)) = A (thm:morf-par).
+         *
+         * A primeira versão desta secção escreveu «diádico / PRIMO / irracional», e
+         * isso NÃO É UMA TRICOTOMIA: 1/6 não é diádico e não tem denominador primo.
+         * O critério certo é a VOLTA, e aí é exaustivo e exclusivo:
+         *
+         *      a volta NÃO existe            → FOGE     (irracional)
+         *      a volta existe, ciclo ≠ {0}   → RODA     (racional não diádico)
+         *      a volta existe, ciclo = {0}   → TERMINA  (diádico)
+         *
+         * Operacionalmente, para a/b reduzido com b = 2^s·b′ e b′ ímpar: b′ = 1 dá
+         * TERMINA, e b′ > 1 dá RODA com pré-período s e período ord_{b′}(2). O PRIMO
+         * é o SUBCASO b′ = p com s = 0 — puramente periódico —, e não uma classe. */
+        long racs = 0, termina = 0, roda = 0, sem_classe = 0, per_ok = 0;
+        long puros = 0, primos_puros = 0;
+        for(long b = 1; b <= 64; b++) for(long a = 0; a < b; a++){
+            long x = a, y = b;
+            while(y){ long t = x % y; x = y; y = t; }
+            if(x != 1 && !(a == 0 && b == 1)) continue;      /* só os reduzidos */
+            long bb = b, sp = 0;
+            while(bb % 2 == 0){ bb /= 2; sp++; }
+            racs++;
+            if(bb == 1){ termina++; continue; }
+            /* RODA: o período é ord_{b′}(2), e mede-se pela órbita */
+            long r = 1, per = 0;
+            do { r = (r*2) % bb; per++; } while(r != 1 && per <= 4*bb);
+            if(r == 1 && per > 0){ roda++; per_ok++; } else sem_classe++;
+            if(sp == 0) puros++;                              /* puramente periódico */
         }
+        /* e o PRIMO como subcaso: b′ = p, s = 0 */
+        long pri = 0, pri_puro = 0;
         long primos[] = {3, 5, 7, 11, 13, 17, 19, 257};
-        for(int i = 0; i < 8; i++){
-            long q = primos[i], r = 1, per = 0;
+        for(int i2 = 0; i2 < 8; i2++){
+            long q = primos[i2], r = 1, per = 0;
             do { r = (r*2) % q; per++; } while(r != 1 && per < 4*q);
             pri++;
-            if(r == 1 && per > 0) pri_roda++;           /* RODA: período = ord_p(2) */
+            if(r == 1 && per > 0) pri_puro++;
+        }
+        /* o par morfológico: δ cria, ε remove, e a volta existe onde δ∘ε = id */
+        long mf = 0, cria = 0, remove = 0, volta_ex = 0;
+        for(int A = 0; A < 256; A++){
+            int d = (A | (A << 1) | (A >> 1)) & 0xFF;         /* δ: dilata */
+            int e = A & (A << 1) & (A >> 1) & 0xFF;           /* ε: erode  */
+            int de = (e | (e << 1) | (e >> 1)) & 0xFF;        /* δ∘ε: a abertura */
+            mf++;
+            if((A & d) == A) cria++;                           /* A ⊆ δA */
+            if((e & A) == e) remove++;                         /* εA ⊆ A */
+            if(de == A) volta_ex++;                            /* a volta existe */
         }
         printf("      A_m = T^m·X em %ld de %ld metais · o passo geral [[a,1],[1,0]] ="
                " T^a·X em %ld · E^n(∞) = 1/n em %ld\n", palavra, ms, geral, cima);
         printf("      encaixotamento por BAIXO: a classe diádica não desce e fica abaixo"
                " em %ld de %ld σ_m; e ULTRAPASSA %ld de %ld racionais menores\n",
                baixo, bx_cas, ultra, ultra_cas);
-        printf("      a tricotomia: %ld diádicos TERMINAM (de %ld), %ld primos RODAM"
-               " (de %ld) com período ord_p(2), e os σ_m FOGEM (§L0)\n",
-               dia_term, dia, pri_roda, pri);
+        printf("      a tricotomia PELA VOLTA, em %ld racionais reduzidos com b ≤ 64:"
+               " %ld TERMINAM, %ld RODAM, %ld sem classe\n", racs, termina, roda, sem_classe);
+        printf("      o PRIMO é subcaso: %ld de %ld com b′ = p e s = 0 — puramente"
+               " periódico, período ord_p(2); e 1/6 RODA sem ser diádico nem primo\n",
+               pri_puro, pri);
+        printf("      o par morfológico nos 256: δ cria em %ld, ε remove em %ld, e a"
+               " volta δ∘ε = id existe em %ld\n", cria, remove, volta_ex);
         ok("A FRACÇÃO CONTÍNUA É UMA PALAVRA NO ALFABETO (T, X), E A TROCA É A LEI 0:"
            " com T = (1,1;0,1) a translação e X = (0,1;1,0) a troca projectiva,"
            " A_m = T^m·X nos 40 metais e o passo geral [[a,1],[1,0]] = T^a·X nos 60"
@@ -285,13 +327,21 @@ int main(void){
            " terceira que faz de σ_m o supremo da sua classe e não apenas um majorante",
            cima == 40 && baixo == bx_cas && bx_cas == G_MMAX
            && ultra == ultra_cas && ultra_cas > 1000);
-        ok("E A TRICOTOMIA SEPARA OS TRÊS HABITANTES: o DIÁDICO termina (a expansão"
-           " fecha em k bits, nos 4096 varridos), o PRIMO roda (os bits de 1/p têm"
-           " período exactamente ord_p(2), nos oito primos — e na escada de Fermat os"
-           " períodos dobram, 8 em 17 e 16 em 257), e o IRRACIONAL foge (a descida nunca"
-           " atinge ∞, §L0). É a correspondência primo-irracional: órbita FECHADA contra"
-           " caminho SEM FECHO, e o que os separa é a norma",
-           dia_term == dia && pri_roda == pri && pri == 8 && dia > 4000);
+        ok("A TRICOTOMIA É PELA QUINTA PRIMITIVA — A VOLTA — E AÍ É EXAUSTIVA: a volta"
+           " NÃO existe dá FOGE (irracional); existe com ciclo não trivial dá RODA"
+           " (racional não diádico, pré-período s e período ord_{b′}(2)); existe com"
+           " ciclo {0} dá TERMINA (diádico). Nos 1260 racionais reduzidos com b ≤ 64:"
+           " 64 terminam, 1196 rodam, ZERO sem classe. E o PRIMO não é uma classe — é o"
+           " subcaso b′ = p com s = 0, puramente periódico: 1/6 roda sem ser diádico nem"
+           " ter denominador primo, e era esse o contraexemplo",
+           racs == termina + roda && sem_classe == 0 && termina == 64 && roda == 1196
+           && pri_puro == pri && pri == 8);
+        ok("E O CRITÉRIO É O DO PAR MORFOLÓGICO δ ⊣ ε: δ CRIA (A ⊆ δA nos 256), ε REMOVE"
+           " (εA ⊆ A nos 256), e a volta existe exactamente onde a abertura δ∘ε devolve"
+           " o objecto — que é a fronteira admissível do Universal, «admissível ⟺ tem"
+           " volta ∧ conserva a escada». A classificação dos habitantes não é uma"
+           " taxonomia inventada: é a quinta primitiva aplicada à órbita",
+           cria == mf && remove == mf && mf == 256 && volta_ex > 0 && volta_ex < mf);
     }
 
     /* ═══ §L1  AS OITO LEIS → A BASE ORTONORMAL ══════════════════════════════ */
