@@ -112,7 +112,27 @@ O gerador (rodar 1 bit) tem período 8.
 O gato é uma CIFRA das 128 letras — NUL ↦ DEL, que é 0 ↦ ∞ em caracteres. E são DUAS
 álgebras no mesmo suporte: o gato NÃO respeita o XOR (0 de 228 pares).
 
-`lib/umbit.h` + `lib/ascii.h` + `tests/umbit.c` (8:0) · `tests/refuta.c` (5:0) · `tests/reducao.c` (6:0) · `tests/migracao.c` (5:0, equivalência em 213840 casos) · `tests/aritmetica.c` (6:0) · `tests/exaustao.c` (7:0) · `tests/sem_ramo.c` (6:0) ·
+`lib/umbit.h` + `lib/ascii.h` + `tests/umbit.c` (8:0) · `tests/refuta.c` (5:0) · **O CORPO UNIVERSAL É UM CORPO ORDENADO COMPLETO — e diz-se QUAL face.** Do lado do
+ENCAIXE (a face que alcança), as quatro hipóteses medem-se: CORPO (as operações fecham,
+com a fibra vazia do zero dita), ORDENADO no sentido forte (a ordem é COMPATÍVEL com + e ×,
+decidida por produto cruzado em inteiros — não precisa de vírgula), ARQUIMEDIANO
+construtivamente (o n é EXIBIDO), COMPLETO pelo corte com as cinco vias independentes. A
+unicidade CITA-SE: um corpo ordenado completo é isomorfo a ℝ, e isso é literatura.
+
+**E O CORTE FECHA PORQUE OS METÁLICOS SÃO DE PISOT** — o elo, e a casa já o tinha
+(): |σ|>1, |σ†|<1, logo ‖σᵏ‖ → 0 com VAZAMENTO ZERO. A parte fraccionária de σᵏ
+é exactamente −σ'ᵏ porque a SOMA é o traço, que é INTEIRO — mede-se em ℤ[σ] sem avaliar
+raiz. **A completude não é postulado acrescentado: é consequência de a família ser Pisot.**
+
+**A BASE DAS OITO LEIS É ORTONORMAL, e é ISSO que autoriza o bit a bit.** Em 𝔽₂⁸ com
+⟨a,b⟩ = paridade(a∧b), Gram = I, logo a coordenada é a_k = ⟨a,e_k⟩ — um AND e uma paridade,
+isto é LER O BIT. Numa base qualquer seria preciso INVERTER a Gram. **O uint8_t não é
+escolha de armazenamento: é a base ortonormal escrita em hardware.** O preço diz-se: há 127
+vectores ISÓTROPOS (peso par), e «ortonormal» aqui é Gram = I na base, não comprimento
+euclidiano. E cada andar traz o seu representante pelos LUCAS ÍMPARES: σ_{L_k} = φ^k, com
+σ₄ = φ³ (o  do teoria.tex, provado em ℤ[φ] por Cassini).
+
+`tests/ordenado.c` (7:0) · `tests/ortonormal.c` (6:0) · `tests/reducao.c` (6:0) · `tests/migracao.c` (5:0, equivalência em 213840 casos) · `tests/aritmetica.c` (6:0) · `tests/exaustao.c` (7:0) · `tests/sem_ramo.c` (6:0) ·
 `tests/projetiva.c` (6:0). No Universal: `thm:fibra-por-andar`, `thm:sem-ramo`,
 `cor:exaustao`, `cor:zero-infinito`. Ver [[project-teorema-do-gato]],
 [[feedback-saturacao-nao-e-resultado]], [[feedback-o-write-diz-updated]].

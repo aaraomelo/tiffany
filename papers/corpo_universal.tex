@@ -124,6 +124,7 @@ sistema é, sem ter de percorrer o resto --- e sabe, sobretudo,
 \text{as OITO POSIÇÕES}\\[2pt]
 \downarrow\ \text{(a dobra: }1\to2\to4\to8)\\[2pt]
 \text{o BYTE}\\[2pt]
+\downarrow\ \text{(a base é ORTONORMAL: }G=I\text{, logo a coordenada é o BIT)}\\[2pt]
 \downarrow\ \text{(a base }e_k=x^{k}\text{, e o produto mod }p(x))\\[2pt]
 \text{o CORPO de }256\ \text{(a face que OPERA)}\\[2pt]
 \downarrow\ \text{(o reticulado booleano, }\code{lib/booleana.h})\\[2pt]
@@ -1491,6 +1492,143 @@ mentir.
 \code{sem\_ramo.h}. As camadas intermédias não descem a zero, e é isso
 que torna a última um resultado em vez de uma escolha de ficheiro vazio.
 $\square$
+\end{teorema}
+
+\begin{teorema}[o Corpo Universal É um corpo ordenado completo --- e diz-se
+QUAL face o é]\label{thm:ordenado-completo}
+Do lado do \textbf{encaixe} --- a face que \emph{alcança} --- este quadro
+é um \textbf{corpo ordenado completo}, e portanto isomorfo a $\mathbb{R}$.
+As quatro hipóteses medem-se; a conclusão é o teorema clássico, e cita-se
+como tal.
+
+\textbf{(0) O escopo vem primeiro}, porque sem ele o enunciado é falso.
+As duas faces do eixo de Pontryagin:
+\[
+\boxed{
+\begin{array}{ll}
+\text{a face que OPERA} & \mathbb{F}_2,\ \mathbb{F}_{127},\
+\mathbb{F}_{2^8},\ \text{o }2\text{-ádico: finita, \textbf{sem} ordem}\\
+\text{a face que ALCANÇA} & \text{o encaixe, o corte: \textbf{ordenada e
+completa}}
+\end{array}}
+\]
+Na primeira, $1+1=0$ impede qualquer ordem compatível --- e isso é
+teorema (Teor.~\ref{thm:espaco-oito}). É a segunda que é o corpo
+ordenado completo.
+
+\textbf{(1) CORPO.} As operações fecham, associam e distribuem, e todo
+não nulo tem inversa --- com a única excepção dita e medida, o zero, cuja
+fibra é vazia. E essa excepção não é falha do corpo: é o preço deste
+andar, já pago no projectivo com $0\leftrightarrow\infty$
+(Cor.~\ref{cor:zero-infinito}).
+
+\textbf{(2) ORDENADO}, no sentido forte --- a ordem é \emph{compatível}
+com as operações, e não apenas existe: tricotomia, transitividade,
+$a<b\Rightarrow a+c<b+c$, e $a,b>0\Rightarrow ab>0$. Tudo decidido pelo
+\emph{produto cruzado} em inteiros: \emph{a ordem não precisa de vírgula}.
+
+\textbf{(3) ARQUIMEDIANO}, e construtivamente: para cada $\varepsilon$ o
+$n$ não é postulado --- é exibido, $n=\lfloor q/p\rfloor+1$, e
+verifica-se. É ele que impede um elemento de ser infinitamente pequeno.
+
+\textbf{(4) COMPLETO}, pelo \textbf{corte} --- e as cinco vias
+(Dedekind por Möbius, Cauchy pelo módulo, supremo por Newton, os
+encaixantes por bisseção, Bolzano pela caixa) medem-no por caminhos
+\emph{independentes}, nenhuma chamando outra, e todas falham em
+$\mathbb{Q}$ no mesmo sítio.
+
+\textbf{(5) E o corte fecha porque os metálicos são de PISOT} --- o elo,
+e esta casa já o tinha (\emph{Corpo de Peano}, Cor.~Pisot):
+\[
+|\sigma|>1,\quad|\sigma^{\dagger}|<1
+\ \Longrightarrow\ \|\sigma^{k}\|\to0\ \text{como}\ |\sigma'|^{k}
+\qquad\text{(\textbf{vazamento zero}).}
+\]
+A parte fraccionária de $\sigma^{k}$ é exactamente $-\sigma'^{k}$, porque
+a \emph{soma} dos dois é o traço, que é inteiro --- e mede-se assim, em
+$\mathbb{Z}[\sigma]$, sem avaliar uma raiz. É ela que faz o encaixe
+apertar \emph{geometricamente} em vez de vaguear. \emph{A completude não
+é um postulado acrescentado: é consequência de a família ser de Pisot.}
+E os polígonos de cada andar são exactos pelos Lucas ímpares
+(Teor.~\ref{thm:ortonormal}(4)), pelo que nenhum andar importa constante
+nenhuma.
+
+\textbf{(6) A unicidade CITA-SE.} Um corpo ordenado completo é isomorfo a
+$\mathbb{R}$, e único a menos de isomorfismo --- teorema clássico, não
+deste quadro. Aqui medem-se as \emph{hipóteses}; a conclusão é
+literatura, e misturar as duas coisas seria dar ao trabalho um crédito
+que não é dele.
+
+\emph{Medido:} \code{tests/ordenado.c} ($7{:}0$). $\square$
+\end{teorema}
+
+\begin{teorema}[a base das oito leis é ORTONORMAL --- e é isso que autoriza
+o bit a bit]\label{thm:ortonormal}
+Em $\mathbb{F}_2^{8}$ com a forma bilinear
+\[
+\langle a,b\rangle=\operatorname{paridade}(a\wedge b)
+\]
+--- a única que $\mathbb{F}_2$ tem --- a base das oito leis $e_k=2^{k}$
+satisfaz
+\[
+\boxed{\;\langle e_i,e_j\rangle=\delta_{ij}\;}
+\]
+e a matriz de Gram é a \textbf{identidade}. Donde a consequência que
+importa:
+\[
+\boxed{\;a_k=\langle a,e_k\rangle\;}
+\]
+--- a coordenada recupera-se por um AND seguido de uma paridade, isto é,
+\textbf{lendo o bit}.
+
+\textbf{(0) E é isto que faltava provar.} Numa base qualquer, recuperar a
+coordenada exige \emph{inverter} a matriz de Gram. Aqui $G=I$ --- e
+$G\cdot G=G$, logo ela é a sua própria inversa ---, e a extracção não
+custa sistema nenhum. Portanto:
+\[
+\boxed{\;\text{o \texttt{uint8\_t} não é escolha de armazenamento: é a
+base ortonormal escrita em hardware.}\;}
+\]
+O bit a bit é \emph{consequência} da ortonormalidade, e não uma decisão
+de implementação.
+
+\textbf{(1) E a reconstrução fecha}, que é a fórmula de Fourier nesta
+base: $a=\sum_k\langle a,e_k\rangle\,e_k$ nos $256$ bytes, sem uma falha
+--- e aqui ela não custa nada.
+
+\textbf{(2) O preço, dito.} A forma é bilinear e simétrica, mas
+\textbf{não} é definida positiva --- em $\mathbb{F}_2$ isso nem faz
+sentido. Há vectores \emph{isótropos}: todo byte de peso \emph{par} é
+ortogonal a si próprio ($127$ dos $255$). «Ortonormal» aqui quer dizer
+$G=I$ \emph{na base}, e é essa a propriedade que autoriza o bit a bit ---
+não um comprimento euclidiano, que este corpo não tem. Importar a outra
+noção seria dar ao resultado uma força que ele não pede.
+
+\textbf{(3) O gume.} Torcida a base para $f_k=e_k+e_{k+1}$, a Gram deixa
+de ser a identidade ($24$ dos $64$ pares saem dela) --- e com ela vai-se
+o bit a bit, porque a coordenada passa a exigir um sistema. A
+ortonormalidade não é decoração: é a condição.
+
+\textbf{(4) E cada andar tem a sua representação --- pelos Lucas
+ímpares.} O \emph{Teoria} já tinha o teorema
+(\emph{a dimensão quatro é o ouro ao cubo}): $\sigma_n$ é potência de
+$\varphi$ \textbf{exactamente} nos índices de Lucas de ordem ímpar,
+\[
+\sigma_{L_k}=\varphi^{k},\qquad L_k=1,4,11,29,76,\ldots,
+\qquad \sigma_4=\varphi^{3},
+\]
+e a prova corre em $\mathbb{Z}[\varphi]$ \emph{sem avaliar uma raiz}:
+$\varphi^{k}=F_k\varphi+F_{k-1}$, $L_k=F_k+2F_{k-1}$, e é a identidade de
+\textbf{Cassini} que decide a paridade, porque muda de sinal com ela.
+Junto com o Teor.~\ref{thm:pi-familia} --- os polígonos são os membros
+elípticos, exactos por andar --- isto fecha a razão de nenhum andar
+precisar de uma constante importada: \emph{cada um traz o seu próprio
+representante, e ele é um Pisot metálico}.
+
+\emph{Medido:} \code{tests/ortonormal.c} ($6{:}0$): a Gram nos $64$ pares,
+a coordenada em $2048$ casos, a reconstrução nos $256$ bytes, os $127$
+isótropos contados, o gume na base torcida, e os Lucas ímpares em
+$\mathbb{Z}[\varphi]$. $\square$
 \end{teorema}
 
 \begin{teorema}[as oito leis são a BASE de um corpo de $256$ elementos ---
