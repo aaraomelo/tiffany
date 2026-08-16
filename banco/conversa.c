@@ -1415,6 +1415,7 @@ static const struct { int n; const char *nome; const char *enunciado; } CM10[] =
  {14, "livro razao",    "o que cada etapa conserva e o que esquece — as duas colunas" },
  {15, "dois ramos",     "|det| = 1 tem DOIS: o que mede e cresce, e o que roda" },
  {16, "lei 8",          "no anel o gato ganha período — o ramo é da REALIZAÇÃO" },
+ {17, "as cinco",       "as 5 primitivas são UMA: o dual emparelha com cada uma" },
 };
 static void cmetrica_resolve(int n){
     TICK_N = 0;
@@ -1707,6 +1708,55 @@ static void cmetrica_resolve(int n){
                     " estava como regra de cálculo, e o que este andar acrescenta é o"
                     " NOME dela — o Jacobiano não é um factor de correcção, é a medida"); }
         break;
+    case 17: {
+        tique7(0, "sejam as cinco operações do corpo universal");
+        tique7(1, "e o mesmo emparelhamento, em DUAS categorias:");
+        printf("      na álgebra: $M + M^{\\dagger} = \\mathrm{tr}\\,M \\cdot I$,"
+               " $M M^{\\dagger} = \\det M \\cdot I$, $M^{-1} ="
+               " M^{\\dagger}/\\det M$\n");
+        printf("      na ordem:  $\\varepsilon(A) = \\neg\\, \\delta(\\neg A)$\n");
+        tique7(2, "e a quinta linha NÃO é um corolário. A parte morfológica estava num"
+                  " teorema à parte como se fosse outra coisa, e não é: a erosão é a"
+                  " dilatação do dual, exactamente como a inversão é a divisão do dual. O"
+                  " que muda é só quem é o dual — a adjunta na matriz, o complemento no"
+                  " reticulado");
+        tique7(3, "a lei é que o DUAL é transversal: ele não é uma operação ao lado das"
+                  " outras quatro, é o que as liga");
+        { printf("        operação      + o dual dá        e o dual é\n");
+          printf("        soma          o CENTRO (traço)   a adjunta\n");
+          printf("        multiplicação a MEMBRANA (det)   a adjunta\n");
+          printf("        divisão       a INVERSÃO         a adjunta\n");
+          printf("        dilatação     a EROSÃO           o COMPLEMENTO\n");
+          printf("        soma          a DIFERENÇA        o sinal\n\n");
+          long mal = 0, cas = 0;
+          for(long ap = -12; ap <= 12; ap++) for(long aq = 1; aq <= 5; aq++)
+          for(long bp = -12; bp <= 12; bp++) for(long bq = 1; bq <= 5; bq++){
+              Qz a = qz(ap,aq), b = qz(bp,bq);
+              cas++;
+              if(!qz_igual(qz_soma(a, qz_oposto(b)), qz(ap*bq - bp*aq, aq*bq))) mal++;
+          }
+          long vm = 0, vc = 0;
+          for(long p2 = -30; p2 <= 30; p2++) for(long q2 = 1; q2 <= 8; q2++){
+              Qz x = qz(p2,q2); vc++;
+              if(!qz_igual(qz_oposto(qz_oposto(x)), x)) vm++;
+          }
+          printf("      a diferença como soma + sinal em %ld pares: %ld divergências\n",
+                 cas, mal);
+          printf("      e †∘† = id (a Lei 1) em %ld racionais: %ld divergências\n", vc, vm);
+          tique7(4, "a testemunha é a DIFERENÇA, que é o emparelhamento mais barato que há:"
+                    " a − b é a soma composta com o sinal, e o sinal é o dual. É ela que"
+                    " mostra por que a lista tem CINCO e não sete — cada operação"
+                    " emparelhada com o dual dá a sua parceira, e a parceira não entra na"
+                    " lista");
+          tique7(5, mal == 0 && vm == 0
+                 ? "logo as cinco primitivas são UMA coisa vista de cinco lados, e a"
+                   " morfológica é a quinta linha do mesmo teorema — não um apêndice"
+                 : "o emparelhamento não fechou — NÃO afirmo");
+          tique7(6, "e a VOLTA é o que NÃO se junta, senão a unificação era atalho: na"
+                    " álgebra o dual é uma INVOLUÇÃO (adj∘adj = id); na ordem é uma"
+                    " ADJUNÇÃO (δε ⊆ A ⊆ εδ, e nenhum é a identidade). É a mesma distinção"
+                    " que o cone e a espiral obrigaram a fazer entre ν∘ν = id e Σ∘Π = Id"); }
+        break; }
     case 15: case 16: {
         tique7(0, n == 15 ? "seja uma matriz inteira 2×2 que conserva a medida"
                           : "seja o gato, e o anel da Lei 8");
@@ -2106,7 +2156,7 @@ static int resolve_cmetrica(const char *f){
         long n = 0;
         while(*p >= '0' && *p <= '9') n = n*10 + (*p++ - '0');
         while(*p == ' ') p++;
-        if(!*p && n >= 1 && n <= 16){ cmetrica_resolve((int)n); return 1; }
+        if(!*p && n >= 1 && n <= 17){ cmetrica_resolve((int)n); return 1; }
         return 0;
     }
     return 0;
@@ -17503,18 +17553,18 @@ static int teste(void){
               fflush(stdout);
               int guarda = dup(1), nulo = open("/dev/null", O_WRONLY);
               if(guarda >= 0 && nulo >= 0) dup2(nulo, 1);
-              for(int k = 1; k <= 16; k++){
+              for(int k = 1; k <= 17; k++){
                   char fala[64];
                   snprintf(fala, sizeof fala, "medida %d", k);
                   if(resolve_cmetrica(fala)) por_n++; else vmal++;
               }
               for(size_t i = 0; i < sizeof CM10/sizeof *CM10; i++)
                   if(resolve_cmetrica(CM10[i].nome)) por_nome++; else vmal++;
-              if(resolve_cmetrica("medida 17")) vmal++;
+              if(resolve_cmetrica("medida 18")) vmal++;
               fflush(stdout);
               if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
               if(nulo >= 0) close(nulo);
-              printf("      os dezasseis: %d por número, %d por nome\n", por_n, por_nome);
+              printf("      os dezassete: %d por número, %d por nome\n", por_n, por_nome);
               ok("O TEOREMA ESTÁ PROMOVIDO À ASSISTENTE em dez falas, e as três camadas"
                  " ficam alinhadas: o UNIVERSAL tem a lei — a conservação métrica por"
                  " dualidade —, o PEANO dá det|·| (a face discreta, e a contagem do"
@@ -17523,7 +17573,7 @@ static int teste(void){
                  " A passagem entre elas é σ_k σ_k′ = −1, que é a hipótese ESTRUTURAL já"
                  " estabelecida pela torre — e sem ela não há teorema, há uma definição a"
                  " olhar para si própria",
-                 vmal == 0 && por_n == 16 && por_nome == 16); }
+                 vmal == 0 && por_n == 17 && por_nome == 17); }
         }
 
         /* ═══ §C50 ANÁLISE REAL: as CINCO VIAS, e nenhuma arbitra as outras ══════

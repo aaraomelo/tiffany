@@ -83,7 +83,7 @@ continuo b98335aed4401267 0
 contorno_riemann 6cf7ea38b2e3b6b7 0
 contrato 5fffd2633c0858b1 0
 controlo_front e94ce67fbef877c1 0
-conversa aeee6c300de16aa1 0
+conversa 5d7783252b967ba3 0
 converte fe99f74438556e46 0
 convolucao_universal 14db429c007982da 0
 coroa bf5f52e1e6e43aea 0
@@ -350,6 +350,7 @@ pontryagin 1859961af08854d9 0
 posto_viviani d6eeac3d7d845b41 0
 potencia cc93709e0a87f0db 0
 prensor e1992045bed94bb2 0
+primitivas 78e6f610f0043451 0
 primos_irracionais 1535759cdad94d4b 0
 prisma af1d7b9d723bc06c 0
 produto_dual ddd1edbd32b0678a 0

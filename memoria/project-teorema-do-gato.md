@@ -67,7 +67,25 @@ ORDENA**: comparar só pelo baixo erra em 12158 de 40000. Substituiu o `__int128
 como `a·b − c·d` em vez de `a·d − b·c` — 6560 divergências em 6561, e uma varredura só
 com matrizes simétricas não o teria visto.
 
-`tests/conservacao_metrica.c` (14:0) · `thm:gato`, `thm:meta-inducao`, `cor:bidualidade`,
-`obs:passarinho` no Universal · `thm:det-volume`, `cor:passarinho-peano` no Peano ·
-`thm:medida-jacobiano` no Estelar. Ver [[feedback-saturacao-nao-e-resultado]],
-[[project-a-lei-em-dois-niveis]], [[feedback-justificar-o-que-so-e-coerente]].
+**AS CINCO PRIMITIVAS SÃO UMA** (`tests/primitivas.c`, 6:0). O dual emparelha com cada
+operação, e é o MESMO emparelhamento em duas categorias: na álgebra `M + M† = tr·I` (o
+centro), `M·M† = det·I` (a membrana), `M⁻¹ = M†/det` (a inversão é a divisão do dual); na
+ORDEM `ε(A) = ¬δ(¬A)` — a erosão é a dilatação do dual, com o complemento no lugar da
+adjunta. A parte MORFOLÓGICA deixou de ser corolário: é a quinta linha do mesmo teorema.
+E a DIFERENÇA explica por que são cinco e não sete: `a − b = a ⊕ b†`, a soma composta com
+o sinal, e a parceira não entra na lista. O que NÃO se junta, dito: na álgebra o dual é
+INVOLUÇÃO (`adj∘adj = id`), na ordem é ADJUNÇÃO (`δε ⊆ A ⊆ εδ`, e nenhum é a identidade).
+
+**O ESQUILO É A AÇÃO À DIREITA** (`tests/esquilo.c` — que eu apaguei e repus). ℍ = M₂ é
+incompleto com só o gato (à esquerda, não comuta); a acção à direita é ℍ^op, a transposta
+que INVERTE a ordem; e `A(xB) = (Ax)B` SEMPRE — a comutatividade que faltava volta com o
+dual, e o corpo completa-se. Não é remendo: um lado é o Universal, o outro a realização,
+nenhum melhor, os dois uma unidade. A Lei 8 (ℤ_65537) é o chão onde o par se verifica
+exaustivamente, sem tecto de representação.
+
+`tests/conservacao_metrica.c` (14:0) · `tests/primitivas.c` (6:0) · `tests/esquilo.c` ·
+`tests/ramos.c` (6:0) · `tests/dual32.c` (6:0). No Universal: `thm:gato`,
+`thm:meta-inducao`, `thm:esquilo`, `cor:bidualidade`, `cor:pata`, `cor:dual32`,
+`obs:razao`, `obs:passarinho`, e `thm:derivacao-primitivas` com as cinco unificadas.
+Ver [[feedback-saturacao-nao-e-resultado]], [[feedback-o-replace-sem-limite]],
+[[project-a-lei-em-dois-niveis]].

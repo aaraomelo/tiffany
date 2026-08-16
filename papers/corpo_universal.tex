@@ -3386,14 +3386,60 @@ $\mathcal{M}$).
 $\square$
 \end{teorema}
 
-\begin{teorema}[a derivação pelas primitivas --- as quatro pontes são
-palavras nas cinco operações]\label{thm:derivacao-primitivas}
-As cinco operações (\S\ref{sec:cinco}) \textbf{não são independentes
---- o dual emparelha com cada uma}: soma com o dual dá o \emph{centro}
-($M+M^{\dagger}=\mathrm{tr}\,M\cdot I$), multiplicação com o dual dá a
-\emph{membrana} ($M M^{\dagger}=\det M\cdot I$), e a \textbf{inversão
-é a divisão do dual} ($M^{-1}=M^{\dagger}/\det M$); Cayley--Hamilton
-é a \emph{concordância} dos três emparelhamentos, derivada. E as
+\begin{teorema}[a derivação pelas primitivas --- as CINCO são UMA, e as
+quatro pontes são palavras nelas]\label{thm:derivacao-primitivas}
+As cinco operações (\S\ref{sec:cinco}) \textbf{não são independentes ---
+o dual emparelha com cada uma}, e o emparelhamento é o mesmo \emph{em
+duas categorias}:
+\[
+\boxed{
+\begin{array}{lll}
+\text{na \'ALGEBRA} &
+M+M^{\dagger}=\mathrm{tr}\,M\cdot I & \text{o \textbf{centro}}\\[2pt]
+& M\,M^{\dagger}=\det M\cdot I & \text{a \textbf{membrana}}\\[2pt]
+& M^{-1}=M^{\dagger}/\det M & \text{a \textbf{invers\~ao} \'e a divis\~ao do dual}\\[4pt]
+\text{na ORDEM} &
+\varepsilon(A)=\neg\,\delta(\neg A) & \text{a \textbf{eros\~ao} \'e a dilata\c c\~ao do dual}
+\end{array}}
+\]
+Cayley--Hamilton é a \emph{concordância} dos emparelhamentos algébricos,
+derivada.
+
+\textbf{E a quinta linha não é um corolário.} A parte morfológica estava
+num teorema à parte (\emph{Corpo de Peano}, o Morfológico) como se fosse
+outra coisa, e não é: $\varepsilon=\neg\delta\neg$ é o \emph{mesmo}
+gesto das três primeiras, com o dual a ser o \textbf{complemento} em vez
+da adjunta. A erosão não é uma operação independente da dilatação --- é a
+dilatação do dual, exactamente como a inversão é a divisão do dual. Logo
+entra na tabela, e o teorema tem cinco linhas e não quatro mais um
+apêndice.
+
+\textbf{E a diferença mostra por que são CINCO e não sete.} A subtracção
+não está na lista das operações, e não falta: $a-b=a\oplus b^{\dagger}$,
+a soma composta com o \emph{sinal} --- e o sinal é o dual, com
+$\dagger\circ\dagger=\mathrm{id}$ (Lei~1). É o emparelhamento mais barato
+que há, e é ele que dá o padrão: \emph{cada operação, emparelhada com o
+dual, dá a sua parceira, e a parceira não entra na lista}. Pela mesma
+conta a divisão é o produto pela inversa, e a inversão é o dual a dividir
+pelo determinante.
+
+\textbf{E o que NÃO se junta, dito.} Na álgebra o dual é uma
+\textbf{involução}: $\operatorname{adj}\circ\operatorname{adj}
+=\mathrm{id}$. Na ordem \emph{não é}: $\delta\varepsilon\subseteq A
+\subseteq\varepsilon\delta$, e nenhum dos dois é a identidade senão numa
+minoria dos conjuntos --- é uma \textbf{adjunção}, que é a mesma
+distinção que o cone e a espiral obrigaram a fazer entre
+$\nu\circ\nu=\mathrm{id}$ e $\Sigma\circ\Pi=\mathrm{Id}$. O
+emparelhamento é o mesmo; a natureza do par não é, e juntá-los seria o
+atalho que este teorema existe para não tomar.
+
+\emph{Medido:} \code{tests/primitivas.c} ($6{:}0$): as três identidades
+algébricas sem divergência em $14\,641$ matrizes cada; a inversão em
+$13\,808$ invertíveis com as $833$ de $\det=0$ contadas à parte (a fibra
+vazia); $\varepsilon=\neg\delta\neg$ nos $4096$ subconjuntos de
+$\mathbb{Z}_{12}$, e a hipótese a trabalhar --- com vizinhança
+\emph{assimétrica} a lei quebra em $2596$ deles; e a diferença
+$a-b=a\oplus b^{\dagger}$ em $107\,584$ pares. E as
 quatro pontes que saíram do mapa (\S\ref{sec:extensoes}) são
 \textbf{palavras} nessas operações:
 \textbf{(i) Clifford $=$ $\otimes$ $+$ $\dagger$}: gerador $\iff$
