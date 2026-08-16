@@ -239,15 +239,43 @@ int main(void){
     {
         /* a conservação: a corrente sem dual arde; o que arde radia (mede-se) e uma fração
          * volta por Seebeck. Nada some sem nome — e é isso que se verifica. */
-        double P_total = 20.0;
+        /* E O BALANCO NAO ERA UMA MEDIDA. Estava aqui
+         *
+         *      volta = P_total * e;   radia = P_total - volta;   soma = volta + radia;
+         *      ok(..., fabs(soma - P_total)/P_total < 1e-12);
+         *
+         * e `radia` e definida COMO O RESTO: a soma da P_total por construcao algebrica,
+         * qualquer que seja `e`. A assercao nao podia falhar, e a frase «sem sobra»
+         * ficava por medir.
+         *
+         * A identidade e a medida vao para gavetas diferentes:
+         *
+         *   IDENTIDADE  volta + radia = P_total — por definicao de radia, e diz-se assim
+         *   MEDIDA      a particao e uma PARTICAO: as duas parcelas sao NAO NEGATIVAS e
+         *               nenhuma passa o total. Isso PODE falhar — basta a fracao que
+         *               volta passar de 1 — e e o que «nada some sem nome» quer dizer.
+         *
+         * E em racionais exactos: com a fraccao que volta escrita p/q, a particao e
+         * P·p/q + P·(q-p)/q = P, e o resíduo e ZERO em vez de menor que 1e-12. */
+        const long P_total_i = 20;                  /* watts, inteiro */
         double e = eficiencia(T_QUENTE, T_FRIO, MATERIAIS[0].ZT);
-        double volta = P_total * e;
-        double radia = P_total - volta;
-        double soma = volta + radia;
-        ok("O BALANCO FECHA: o que volta mais o que radia da o que entrou, sem sobra",
-           fabs(soma - P_total)/P_total < 1e-12);
-        printf("     -> entrou %.4f W; voltou %.6f W; radiou %.6f W; soma %.4f W.\n",
-               P_total, volta, radia, soma);
+        const long q = 1000000;                     /* a fraccao que volta, em partes por milhao */
+        long p = (long)(e*q + 0.5);
+        long volta_i = P_total_i * p, radia_i = P_total_i * (q - p);   /* sobre q */
+        int identidade = (volta_i + radia_i == P_total_i * q);         /* exacta em Q */
+        int particao   = (p >= 0 && p <= q && volta_i >= 0 && radia_i >= 0);
+        ok("A PARTICAO E UMA PARTICAO: as duas parcelas sao nao negativas e nenhuma passa o"
+           " total — e ISSO pode falhar, bastando a fraccao que volta passar de 1. O que"
+           " aqui estava media `volta + (P - volta) == P`, que e verdade por construcao"
+           " qualquer que seja a eficiencia: a soma fechava por definicao de `radia`, e a"
+           " frase «sem sobra» ficava por medir. A identidade fica dita como identidade, e"
+           " o residuo dela e ZERO porque a particao corre em racionais exactos",
+           particao && identidade);
+        printf("     -> entrou %ld W; voltou %ld/%ld W; radiou %ld/%ld W; soma %s\n",
+               P_total_i, volta_i, q, radia_i, q,
+               identidade ? "= P_total EXACTO (identidade)" : "NAO fecha");
+        printf("     (a fraccao que volta e %ld/%ld, e e ela que tem de ficar em [0,1])\n",
+               p, q);
         puts("");
         puts("        E o percurso inteiro, com cada passo medido noutro medidor:");
         puts("");
