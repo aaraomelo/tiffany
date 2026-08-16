@@ -874,6 +874,24 @@ Donde o par, e ele explica o tecto:
 a norma tira o tecto e paga a divisão --- e o preço exibe-se: com uma coordenada nula o
 produto tem norma zero sem que nenhum factor seja nulo, logo há \emph{divisores de zero},
 que é exactamente o que a hipótese de Hurwitz proíbe.
+\medskip
+\noindent\textbf{E as operações, andar a andar.} A soma é grupo abeliano em \emph{toda} a
+torre, dos dois lados: \textbf{tudo o que se perde perde-se do lado do produto}. Esse
+perde um axioma por degrau --- comuta até $, associa até $, sem divisores de zero até
+$ ---, e a \textbf{distributividade} é a fronteira dura: Cayley--Dickson tem-na em todos
+os andares, e o lado de Gentil não. Donde os nomes, que dizem o que se pode fazer:
+\[
+\boxed{
+\begin{array}{lll}
+1,\ 2 & \mathbb{R},\mathbb{C} & \textbf{corpo}\\[2pt]
+4,\ 8 & \mathbb{H},\mathbb{O} & \text{álgebra de divisão}\\[2pt]
+16 & \text{sedeniões} & \text{anel --- há divisores de zero}\\[2pt]
+3 & \text{Gentil} & \text{\emph{nem} anel --- falha a distributividade}
+\end{array}}
+\]
+--- e \emph{«quase um corpo» não existe}: falhar um axioma não é gradação, é outro objecto.
+\emph{Verificado:} \code{tests/torre\_corpo.c} ($4{:}0$).
+
 \colunas{a tríade, e o tecto como propriedade da norma}
         {a norma que Gentil preserva, e o preço que ela cobra}
         {\code{tests/hurwitz.c} \S H8: a norma-produto multiplicativa em $2,4,8,16,32$,
