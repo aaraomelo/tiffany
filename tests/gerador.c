@@ -465,7 +465,12 @@ int main(void){
           "     mesmo g com outro rótulo. Escolher outro é escolher outra projeção do mesmo, e é por\n"
           "     isso que fundir/abrir não vê diferença (§G5): a permutação é interna à cadeia."
           : "REVER");
-        if(nao_pot) passou=0;
+        /* E O DENOMINADOR TAMBÉM CONTA:  passaria por VACUIDADE se
+         *  fosse zero — nenhum gerador encontrado, nenhuma potência falhada, e
+         * o ✓ no ecrã sem uma única verificação por trás. O que a tese diz é que TODOS os
+         * geradores são potências de g, e «todos» de um conjunto vazio é verdade que não
+         * mede nada. */
+        if(nao_pot || testados == 0 || achei != testados) passou=0;
     }
 
     /* ---------- G10: as ordens CONFORME A NECESSIDADE, abertas de BAIXO PARA CIMA ---------- */

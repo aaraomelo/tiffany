@@ -135,8 +135,12 @@ int main(void){
            " POSIÇÃO 2k, e d[2k+1] alterna, o que dá infinitos zeros e infinitos uns —"
            " logo d NÃO é diádico, logo a classe dele é um SINGULAR e diferir num bit É"
            " diferir no objecto. Verificado nas 29 listas, e a construção é FINITA: não"
-           " afirma nada sobre o infinito, exibe o que falta a uma lista DADA",
-           difere == listas && fora_borda == listas && listas == 29);
+           " afirma nada sobre o infinito, exibe o que falta a uma lista DADA. E o"
+           " CONTROLO conta: a diagonal ingénua CAI mesmo na borda em pelo menos uma das"
+           " listas — sem isso, «construí fora da borda» seria uma precaução sem evidência"
+           " de ser precisa, e eu não saberia se o buraco existe",
+           difere == listas && fora_borda == listas && listas == 29
+           && ingenua_na_borda > 0);
     }
 
     /* ═══ §C3  √2−1 TEM CAMINHO, POR TESTE DE CHÃO INTEIRO ═══════════════════ */
@@ -187,11 +191,11 @@ int main(void){
          * prova-se pelo PASSO, não pela lista. Mede-se o passo: se (p+q)² = 2q² com q
          * mínimo, então (2q−p−q)² = 2(p+q−q)² com denominador MENOR — descida infinita,
          * impossível em ℕ. Aqui exibe-se a descida a partir de qualquer candidato. */
-        long cands = 0, no_corte = 0;
+        long no_corte = 0;
         for(long q = 1; q <= 200; q++) for(long p = 0; p <= 2*q; p++){
             long e = p + q;
             if(e*e != 2*q*q) continue;                 /* não está no corte */
-            cands++; no_corte++;
+            no_corte++;
         }
         /* E O PASSO DA DESCIDA, medido como IDENTIDADE — que é o que PODE falhar.
          * Contar zero soluções não mede nada: mede-se a implicação que as proibiria.
@@ -214,7 +218,7 @@ int main(void){
                 if(0 < a-b && a-b < b) encolhe++;
             }
         }
-        printf("      %ld racionais p/q com q ≤ 200 no corte de √2−1: %ld\n", cands, no_corte);
+        printf("      racionais p/q com q ≤ 200 no corte de √2−1: %ld\n", no_corte);
         printf("      e o PASSO, medido como identidade: (2b−a)² − 2(a−b)² = −(a²−2b²) em"
                " %ld de %ld pares · e encolhe (0 < a−b < b) em %ld de %ld no intervalo\n",
                ident, pares, encolhe, enc_cas);

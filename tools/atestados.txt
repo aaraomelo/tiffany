@@ -46,7 +46,7 @@ canal 19f659a3a41832ea 0
 cantor 37a78d4f6d91e54f 0
 cantor_julia_dual 2a215f46ac3417d6 0
 canvas_front f5106644abd9858b 0
-cardinal dec9f07707694433 0
+cardinal b77e94f58106708e 0
 cards 43b08164685d307d 0
 carnot 8d04da08cd5af623 0
 catalogo fd8969387f25f550 0
@@ -215,7 +215,7 @@ gauss 77024247661e4422 0
 geometria_corpo 99c0472d0316ad9f 0
 geometria_real 06be9b4d15617575 0
 geometrico e4a6fce5bd91e395 0
-gerador 2373ad5c9d2e6e8c 0
+gerador d0c790752b0fac3a 0
 gerador_analog 6a7abcf53c950b0b 0
 gerador_andar 5314d20fa27c125f 0
 gerador_primos dccf9257d62b61f2 0
