@@ -295,7 +295,38 @@ unicidade dos APROXIMANTES RACIONAIS**, não do real; o cone separa-se em **duas
 dimensão (S¹→D² e S²→B³); a CF de e tem a PA na **subsequência central**, não na sucessão
 inteira; e «o convergente par seguinte» → «ALGUM convergente par posterior».
 
-`tests/geometria_real.c` (48:0) na ordem obrigatória do eval: 8 leis → base ortonormal →
+**OS POLINÓMIOS SÃO OS NATURAIS — e daí a cadeia.** O Aarão: «os polinómios podem ser os
+naturais, e daí segue a cadeia inteiros, racionais e reais». É literal: `n = Σ d_k b^k` é a
+classe do polinómio de dígitos, e **avaliar em b É REDUZIR mod (x − b)** — logo
+`ℤ[x]/(x−b) ≅ ℤ`, o grau UM, o escalar. E as operações são as dos polinómios:
+
+    SOMA = soma de coeficientes + CARRY       PRODUTO = CONVOLUÇÃO + CARRY
+
+com o **carry a ser a redução `b·x^k → x^{k+1}`** — a mesma forma de `x² → mx+1`. A
+multiplicação de números **É** a convolução dos dígitos. E a cadeia sai por acrescento:
+ℕ finito → ℤ + o sinal → ℚ + expoentes negativos (eventualmente periódica) → **ℝ série
+infinita, e aí o polinómio deixa de ser finito: é o CORTE**.
+
+**E isso resolve a objecção do revisor** («nem todo real é algébrico»): são **DUAS leituras
+polinomiais, e o módulo é que difere** — `ℤ[x]/(x−b)` dá o posicional (todos os reais, por
+série), `ℤ[x]/(μ_α)` dá os **algébricos**, e só eles.
+
+**E UM POLINÓMIO É AMPLITUDE E FASE NO SEU ANDAR — É O ESPECTRO.** `c_k` é a amplitude do
+andar k, `ω^k` é a fase, e avaliar em `ω^j` é ler o espectro. Com ω = 2 de ordem 8 em 𝔽₁₇ é
+**exacto em inteiros**, e o teorema da convolução fecha:
+
+    multiplicar NÚMEROS = convolver DÍGITOS = multiplicar ESPECTROS ponto a ponto
+
+E a delta de **Kronecker** tem espectro **constante 1** — a identidade dos dois lados.
+
+E as quatro obrigatórias do revisor: (1) «um número é um polinómio» restringe-se aos
+**algébricos**, com a leitura posicional à parte; (2) «termo constante ±1 ⟺ raiz é unidade»
+precisa de **μ_α mónico irredutível** — sem isso só a primeira equivalência vale; (3) a ordem
+**não escolhe o ramo** (há mais de uma companheira de ordem 2n), e fixa-se `t_n` como o
+**maior traço real**; (4) elíptica/parabólica/hiperbólica classificam **transformações**, não
+objectos geométricos. Mais: Dirac → **Kronecker** na convolução discreta.
+
+`tests/geometria_real.c` (51:0) na ordem obrigatória do eval: 8 leis → base ortonormal →
 bit a bit → dual → recorrência → Pisot → encaixe → corte → completude → ℝ → π_k/gume.
-`papers/geometrico.tex` 17 páginas; `corpo_universal.tex` 54, e a compilar.
+`papers/geometrico.tex` 18 páginas; `corpo_universal.tex` 54, e a compilar.
 Ver [[project-o-real-e-o-corte]], [[feedback-verdadeiro-e-parcial]].

@@ -81,7 +81,7 @@ dos convergentes} entre as expansões com $a_k\geq1$, e por isso uma só taxa
 limita a construção inteira. A família metálica não é o escopo: é o caso
 \textbf{extremo}, o pior caso do mecanismo.
 
-\smallskip\noindent\emph{Medido:} \code{tests/geometria\_real.c} ($48{:}0$).
+\smallskip\noindent\emph{Medido:} \code{tests/geometria\_real.c} ($51{:}0$).
 \end{abstract}
 
 %======================================================================
@@ -178,9 +178,15 @@ realização, não uma igualdade entre a lei e a matriz:
 & A_m=\begin{psmallmatrix}m&1\\1&0\end{psmallmatrix}
 \end{array}
 \]
-E a tricotomia do \S\ref{sec:pi} é a classificação de $\Delta=\operatorname{tr}^2-4\det$
-do mesmo texto: para $A_m$ dá $\Delta=m^{2}+4>0$ --- \textbf{hiperbólica}, «onde
-vive $\sigma$» ---, os polígonos são as elípticas, e o círculo a parabólica.
+E a tricotomia do \S\ref{sec:pi} classifica as \textbf{transformações}, e não os
+objectos geométricos --- em $\det=1$:
+\[
+\text{elíptica: }\abs{\operatorname{tr}}<2,\qquad
+\text{parabólica: }\abs{\operatorname{tr}}=2,\qquad
+\text{hiperbólica: }\abs{\operatorname{tr}}>2 .
+\]
+Donde: as \emph{rotações associadas aos polígonos} caem no regime elíptico; $t=2$
+no parabólico; e a companheira $A_m$, com $\Delta=m^{2}+4>0$, no hiperbólico.
 Estas transformações são, portanto, casos particulares da classificação por traço
 e determinante utilizada pelo \emph{Corpo Universal}.
 \end{observacao}
@@ -263,8 +269,8 @@ onde $M$ é o produto das $p$ companheiras do bloco e $T=\operatorname{tr}M$.
 
 \begin{corolario}[PA e PG separam-se]\label{cor:papg}
 Quocientes em progressão \textbf{aritmética} de razão $d\neq0$ não são periódicos,
-logo os números não são quadráticos; e a PA de razão $0$ \emph{é} a PG de período
-$1$, que é o metálico. \emph{A periodicidade não é propriedade do número --- é da
+logo os números não são quadráticos; e a razão zero produz a sucessão \textbf{constante},
+que é periódica de período $1$ e dá o caso metálico. \emph{A periodicidade não é propriedade do número --- é da
 sucessão de quocientes, e é ela que Lagrange liga ao grau dois.} $\square$
 \end{corolario}
 
@@ -406,8 +412,8 @@ $1$ --- e \textbf{$1$ é o $\chi$ do ponto}: o cone é contráctil, colapsa a
 \boxed{\;\chi=2\ \text{ou}\ 0 \quad\xrightarrow{\ \text{cone pelo centro}\ }\quad
 \chi=1\ \text{---\ a \textbf{passagem}}\;}
 \]
-É ela que faz as \textbf{áreas} existirem: sem o cone, o polígono é só a sua borda
-e não tem área para medir. $\square$
+É ela que faz as \textbf{áreas} existirem: sem o preenchimento produzido pelo cone temos
+apenas a borda: a região cuja área será medida ainda não foi realizada. $\square$
 \end{proposicao}
 
 \noindent E é a \textbf{mesma forma} do invariante métrico deste paper:
@@ -490,7 +496,8 @@ seja o caso geral, mas porque é o caso que não se move.
 \]
 A soma de Gentil, em inteiros,
 \[
-\sum_n x_n \;+\; \sum_{v} \#\{x_n<v\} \;=\; N\!\cdot\!q ,
+x_n\in\mathbb{N},\qquad
+\sum_n x_n \;+\; \sum_{v=1}^{q} \#\{x_n<v\} \;=\; N\!\cdot\!q ,
 \]
 é --- \emph{pela identidade de Gentil estabelecida no Corpo Universal} --- a forma
 discreta de $\int f+\int f^{-1}=b\,f(b)-a\,f(a)$: contar pelo \emph{domínio} e
@@ -499,10 +506,11 @@ $\sum_v\#\{x_n\geq v\}=\sum_n x_n$ fecha \textbf{sem esperar o limite}, com
 resíduo zero em cada andar. $\square$
 \end{teorema}
 
-\noindent E é isto que funda o corte, com o estatuto certo:
+\noindent E é isto que se lê no corte --- \emph{sem substituir a teoria clássica
+de limite}, que é herdada:
 \[
-\boxed{\;\text{o limite é o \textbf{PONTO FIXO} onde as três medem igual ---
-não um processo }\varepsilon\text{--}\delta.\;}
+\boxed{\;\text{\emph{nesta realização}, o limite lê-se como o \textbf{ponto fixo}}\\
+\text{da compatibilidade entre as três contagens.}\;}
 \]
 
 \begin{corolario}[a tricotomia distribui-se pelas três leituras]\label{cor:distribui}
@@ -538,31 +546,68 @@ $p(x)=x^{n}-c_1x^{n-1}-\cdots-c_n$, mónico, em $\mathbb{Z}[x]$. Dele saem
 e são as raízes que são as \emph{soluções}.
 \end{definicao}
 
-\begin{teorema}[um número é uma classe de polinómio]\label{thm:numero-poli}
-Um elemento é a classe de um polinómio em
-\[
-\boxed{\;\mathbb{Z}[x]/(p(x)),\qquad \text{de grau} < n\;}
-\]
-e as operações são as \textbf{dos polinómios}, reduzidas por $p$. O produto em
-$\mathbb{Z}[\sigma]$ coincide com o produto de polinómios seguido da redução
---- para $n=2$, $x^{2}\mapsto mx+1$.
+\noindent\textbf{E há duas leituras polinomiais, com módulos diferentes.} Dizer
+sem mais que «um número é um polinómio» seria amplo demais --- nem todo real é
+algébrico. As duas são estas:
 
-\textbf{E o escalar é o caso do grau um}: $\mathbb{Z}[x]/(x-a)\cong\mathbb{Z}$,
-em que a classe tem um só coeficiente. \emph{O escalar não é o objecto --- é o
-andar térreo.} $\square$
+\begin{teorema}[a leitura POSICIONAL: os polinómios são os naturais]\label{thm:posicional}
+Um natural é a classe do seu \textbf{polinómio de dígitos},
+\[
+n=\sum_k d_k\,b^{k},\qquad d_k\in\{0,\ldots,b-1\},
+\]
+e \emph{avaliar em $b$ é reduzir módulo $(x-b)$}: $\mathbb{Z}[x]/(x-b)\cong
+\mathbb{Z}$ --- o \textbf{grau um}, que é o escalar. As operações são as dos
+polinómios:
+\[
+\boxed{\;\text{SOMA}=\text{soma de coeficientes}+\text{carry},
+\qquad
+\text{PRODUTO}=\textbf{CONVOLUÇÃO}+\text{carry}\;}
+\]
+e o \emph{carry} é a redução $b\cdot x^{k}\mapsto x^{k+1}$ --- a mesma forma de
+$x^{2}\mapsto mx+1$. \emph{A multiplicação de números é a convolução dos
+dígitos.} $\square$
+\end{teorema}
+
+\begin{corolario}[e daí a cadeia, por acrescento ao polinómio]\label{cor:cadeia}
+\[
+\boxed{
+\begin{array}{ll}
+\mathbb{N} & \text{polinómio \textbf{finito}, coeficientes em }\{0,\ldots,b-1\}\\[2pt]
+\mathbb{Z} & +\ \text{o \textbf{sinal}}\\[2pt]
+\mathbb{Q} & +\ \text{\textbf{expoentes negativos}}\ \to\ \text{expansão eventualmente periódica}\\[2pt]
+\mathbb{R} & \textbf{série infinita}\ \to\ \text{o polinómio deixa de ser finito: é o \textbf{corte}}
+\end{array}}
+\]
+$\square$
+\end{corolario}
+
+\begin{teorema}[a leitura ALGÉBRICA]\label{thm:numero-poli}
+Para $\alpha$ \textbf{algébrico} com polinómio mínimo $\mu_\alpha\in\mathbb{Z}[x]$
+mónico e irredutível,
+\[
+\mathbb{Z}[\alpha]\cong\mathbb{Z}[x]/(\mu_\alpha),
+\qquad
+\mathbb{Q}(\alpha)\cong\mathbb{Q}[x]/(\mu_\alpha),
+\]
+e as operações são as dos polinómios reduzidas por $\mu_\alpha$ --- para $n=2$,
+$x^{2}\mapsto mx+1$. \emph{Esta leitura cobre os algébricos, e só eles}; é por
+isso que $\mathbb{R}$ precisa da série e do corte. $\square$
 \end{teorema}
 \colunas{o corpo como quociente polinomial}
         {a aritmética como polinómios reduzidos}
         {\code{geometria\_real.c} \S L11i: $171\,366$ produtos}
 
 \begin{teorema}[o determinante é o termo constante]\label{thm:det-termo}
+Para \emph{qualquer} $p$ mónico, $\abs{\det A_p}=\abs{c_n}$ --- é estrutural da
+companheira. E, \textbf{sob a hipótese de $p$ ser o polinómio mínimo}, mónico e
+irredutível, de um inteiro algébrico $\alpha$:
 \[
-\boxed{\;\abs{\det A_p}=\abs{c_n}
-\qquad\Longrightarrow\qquad
-\abs{\det}=1\iff \text{termo constante }\pm1\iff\text{a raiz é \textbf{unidade}}\;}
+\boxed{\;\alpha\in\mathbb{Z}[\alpha]^{\times}
+\iff \abs{c_n}=1\;}
 \]
---- verificado em dez polinómios de graus $2$, $3$ e $4$. \emph{Não é propriedade
-de uma família de números: é do polinómio.} $\square$
+--- $\alpha$ é unidade se e só se o termo constante de $\mu_\alpha$ é $\pm1$. A
+segunda equivalência \emph{precisa} dessa hipótese; sem ela, só a primeira vale.
+$\square$
 \end{teorema}
 
 \begin{teorema}[o inteiro vem de Newton]\label{thm:newton}
@@ -591,6 +636,29 @@ a ser o polinómio.}}}
 \noindent E o contraexemplo do \S\ref{sec:contra} lê-se agora sem esforço:
 $x^{2}-2x-4$ tem termo constante $4$, logo \textbf{a raiz não é unidade} --- e é
 exactamente aí que o mecanismo quebra.
+
+%======================================================================
+\section{E um polinómio é amplitude e fase: o espectro}\label{sec:espectro}
+
+\begin{teorema}[o polinómio é o seu espectro]\label{thm:espectro}
+Num polinómio, o coeficiente $c_k$ é a \textbf{amplitude} do andar $k$ e
+$\omega^{k}$ é a \textbf{fase}; avaliar em $\omega^{j}$, com $\omega$ raiz
+primitiva $N$-ésima da unidade, \emph{é ler o espectro}. Com $\omega=2$ de ordem
+$8$ em $\mathbb{F}_{17}$ isto é \textbf{exacto em inteiros}, e daí:
+\[
+\boxed{\;\text{multiplicar NÚMEROS}\;=\;\text{convolver DÍGITOS}\;=\;
+\text{multiplicar ESPECTROS ponto a ponto}\;}
+\]
+E a delta de Kronecker tem \textbf{espectro constante $1$} --- é a identidade dos
+dois lados. $\square$
+\end{teorema}
+\colunas{a transformada e a convolução}
+        {o número lido como amplitude e fase por andar}
+        {\code{geometria\_real.c} \S L11k: $60$ casos, $\mathbb{F}_{17}$}
+
+\noindent É esta a leitura que fecha a cadeia deste paper: a base ortonormal do
+\S\ref{sec:orto} dá as coordenadas, a leitura posicional do \S\ref{sec:polinomio}
+faz do número um polinómio, e o espectro diz o que esse polinómio é em cada andar.
 
 %======================================================================
 \section{O dual produz a recorrência}\label{sec:dual}
@@ -841,7 +909,7 @@ cada uma da mesma torre:
  & e^{x}\ \text{é a sua \emph{própria derivada}}\\[6pt]
 \textbf{seu próprio inverso}
  & e^{x}\ast e^{-x}=\delta
- & \text{e o }\delta\ \text{é o \textbf{Dirac} da base}
+ & \delta\ \text{é a delta de \textbf{Kronecker}}
 \end{array}
 \]
 A última mede-se pelos binomiais: o coeficiente do produto é
@@ -1132,7 +1200,13 @@ $C=\begin{psmallmatrix}t&-1\\1&0\end{psmallmatrix}$, de determinante $1$, tal qu
 \[
 \boxed{\;C^{n}=-I\quad\text{e}\quad C^{k}\neq\pm I\ \text{ para } 0<k<n\;}
 \]
---- pura condição de \textbf{ordem}, sem nenhuma constante.
+--- pura condição de \textbf{ordem}, sem nenhuma constante. \textbf{Mas a ordem
+não escolhe o ramo}: há mais de uma companheira de ordem $2n$, com traços
+distintos. Fixa-se então o representante:
+\[
+\boxed{\;t_n:=\text{o \textbf{maior} traço real entre as companheiras de ordem }2n\;}
+\]
+--- e assim $t_n$ fica determinado sem que nenhuma constante entre.
 \end{definicao}
 
 \noindent E \emph{só então}, como \textbf{identificação posterior}, escreve-se
@@ -1174,8 +1248,10 @@ n=6: & t_6=\sqrt3\equiv9\ (\mathrm{mod}\ 13) & 9^{2}=3\ \text{em }\mathbb{F}_{13
      & \operatorname{ord}C_6=12
 \end{array}
 \]
---- ordem exactamente $2n$ em cada caso, e a raiz é a \emph{outra} raiz também
-($6$ em $\mathbb{F}_{17}$, $4$ em $\mathbb{F}_{13}$: os dois sinais).
+--- ordem exactamente $2n$ em cada caso. As duas raízes conjugadas realizam a
+\emph{mesma relação algébrica} e, nestes exemplos, ambas produzem ordem $2n$ ($6$
+em $\mathbb{F}_{17}$, $4$ em $\mathbb{F}_{13}$); a construção fixa uma delas como
+representante do ramo escolhido.
 
 \emph{(ii) os hiperbólicos} são os metais, o motor dos
 \S\S\ref{sec:dual}--\ref{sec:todos}.
@@ -1258,7 +1334,7 @@ Seja $B=\begin{psmallmatrix}2&4\\1&0\end{psmallmatrix}$, a companheira de
 $x^{2}-2x-4$, com $\det B=-4$ --- e note-se que \emph{não} é a $A_m$ usada até
 aqui, cujo determinante é $-1$. A recorrência é inteira e o traço é inteiro
 --- \emph{as primeiras setas passam} --- e mesmo assim o critério do
-\S\ref{sec:pisot} falha nos $12$ e $\abs{\det}=1$ em nenhum, porque
+\S\ref{sec:pisot} falha nos $12$ andares testados e $\abs{\det}=1$ em nenhum, porque
 $\det B^{k}=(-4)^{k}$ \textbf{cresce} em módulo a cada andar. A face que devia
 encolher não encolhe. $\square$
 \end{proposicao}
@@ -1304,10 +1380,10 @@ Universal}, e é nessa realização que a recta real aparece como o corpo ordena
 completo.
 
 \medskip
-\emph{Medido:} \code{tests/geometria\_real.c} ($48{:}0$), com
+\emph{Medido:} \code{tests/geometria\_real.c} ($51{:}0$), com
 \code{tests/ortonormal.c} ($6{:}0$), \code{tests/metalica.c},
 \code{tests/pisotbase.c}, \code{tests/ordenado.c} ($7{:}0$),
 \code{tests/pi\_familia.js} ($7{:}0$),
-\code{tests/arquimedes\_area.js} ($48{:}0$) e \code{tests/geometrico.js}.
+\code{tests/arquimedes\_area.js} ($51{:}0$) e \code{tests/geometrico.js}.
 
 \end{document}

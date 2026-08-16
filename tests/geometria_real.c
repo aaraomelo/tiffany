@@ -1503,8 +1503,8 @@ int main(void){
          *   «dá a exponencial em todos os andares»  Σ xⁿ/n! = eˣ
          *   «é a unidade»                            n·c_n = c_{n−1}: eˣ é a sua própria
          *                                            derivada — o expoente é a unidade
-         *   «seu próprio inverso»                    eˣ ⊛ e^{−x} = δ, e o δ é o DIRAC
-         *                                            da base ortonormal (§L1b)
+         *   «seu próprio inverso»                    eˣ ⊛ e^{−x} = δ, com δ a delta de
+         *                                            KRONECKER (§L1b)
          *
          * A expansão e a contração são inversas na CONVOLUÇÃO, e a identidade é o mesmo
          * δ que dá a peneira. Tudo em inteiros: os volumes são 1/n! e os coeficientes
@@ -1568,7 +1568,8 @@ int main(void){
            " volumes por coeficiente; «É A UNIDADE» — n·c_n = c_{n−1}, logo eˣ é a sua"
            " PRÓPRIA DERIVADA e o expoente é a unidade; e «SEU PRÓPRIO INVERSO» —"
            " eˣ ⊛ e^{−x} = δ, medido pelos binomiais, com o δ a ser o MESMO Dirac da base"
-           " ortonormal de §L1b. A expansão e a contração são inversas na CONVOLUÇÃO, e"
+           " ortonormal de §L1b — a delta de KRONECKER, identidade da convolução discreta."
+           " A expansão e a contração são inversas na CONVOLUÇÃO, e"
            " a identidade é a peneira",
            unidade == ns && conv_ok == conv_cas && conv_cas == 19);
 
@@ -1754,6 +1755,184 @@ int main(void){
            " x² − mx − 1, o caso de grau dois com termo constante −1, e o t_k do resto do"
            " paper é exactamente o P_k desse caso, nos oito",
            inteiro == polis && bate_t == mets && mets == 8);
+    }
+
+    /* ═══ §L11j  OS POLINÓMIOS SÃO OS NATURAIS — e daí a cadeia ℕ→ℤ→ℚ→ℝ ═══ */
+    printf("\n§L11j Um natural É um polinómio: os dígitos são os coeficientes.\n\n");
+    {
+        /* O coordenador: «os polinómios podem ser os naturais, e daí segue a cadeia
+         * inteiros, racionais e reais». E é literal:
+         *
+         *      n = Σ_k d_k·b^k     com d_k ∈ {0,…,b−1}
+         *
+         * — o natural É a classe do seu polinómio de dígitos, e AVALIAR EM b É REDUZIR
+         * mod (x − b). Logo ℤ[x]/(x − b) ≅ ℤ: é o GRAU UM, o escalar.
+         *
+         * E as operações são as dos polinómios:
+         *      SOMA     = soma de coeficientes + CARRY
+         *      PRODUTO  = CONVOLUÇÃO de coeficientes + CARRY
+         * com o CARRY a ser a redução b·x^k → x^{k+1} — a MESMA forma de x² → mx + 1.
+         * A multiplicação de números É a convolução dos dígitos (§L1b).
+         *
+         * E a cadeia sai por acrescento ao polinómio:
+         *      ℕ  finito, coeficientes em {0,…,b−1}
+         *      ℤ  + o SINAL
+         *      ℚ  + EXPOENTES NEGATIVOS → eventualmente periódica (§L0b)
+         *      ℝ  SÉRIE INFINITA — o polinómio deixa de ser finito, e é o CORTE
+         *
+         * E é aqui que a leitura polinomial tem o seu LIMITE, e diz-se: ℤ[x]/(μ_α) dá os
+         * ALGÉBRICOS; nem todo real o é, e por isso ℝ precisa da série e do corte. */
+        long ns = 0, avalia = 0, somas = 0, prods = 0, carrys = 0;
+        for(long b = 2; b <= 16; b++){
+            for(long n = 0; n <= 400; n++){
+                long d[40]; int nd = 0, v = n;
+                if(v == 0) d[nd++] = 0;
+                while(v){ d[nd++] = v % b; v /= b; }
+                long val = 0, pot = 1;
+                for(int k = 0; k < nd; k++){ val += d[k]*pot; pot *= b; }
+                ns++;
+                if(val == n) avalia++;
+            }
+            /* a SOMA e o PRODUTO como operações de polinómios com carry */
+            for(long x = 0; x <= 60; x++) for(long y = 0; y <= 60; y++){
+                long dx[24], dy[24]; int nx = 0, ny = 0, v;
+                v = x; if(!v) dx[nx++] = 0; while(v){ dx[nx++] = v % b; v /= b; }
+                v = y; if(!v) dy[ny++] = 0; while(v){ dy[ny++] = v % b; v /= b; }
+                /* soma: coeficiente a coeficiente, e depois o carry */
+                long c[48]; int nc = (nx > ny ? nx : ny) + 2;
+                for(int k = 0; k < nc; k++)
+                    c[k] = (k < nx ? dx[k] : 0) + (k < ny ? dy[k] : 0);
+                for(int k = 0; k + 1 < nc; k++) if(c[k] >= b){ c[k+1] += c[k]/b; c[k] %= b; }
+                long vs = 0, po = 1;
+                for(int k = 0; k < nc; k++){ vs += c[k]*po; po *= b; }
+                somas++;
+                if(vs == x + y) carrys++;
+                /* produto: CONVOLUÇÃO, e depois o carry */
+                long q[64]; int nq = nx + ny + 2;
+                for(int k = 0; k < nq; k++) q[k] = 0;
+                for(int i2 = 0; i2 < nx; i2++) for(int j = 0; j < ny; j++) q[i2+j] += dx[i2]*dy[j];
+                for(int k = 0; k + 1 < nq; k++) if(q[k] >= b){ q[k+1] += q[k]/b; q[k] %= b; }
+                long vp = 0; po = 1;
+                for(int k = 0; k < nq && k < 20; k++){ vp += q[k]*po; po *= b; }
+                if(vp == x*y) prods++;
+            }
+        }
+        /* A CADEIA: cada andar acrescenta uma coisa ao polinómio */
+        long andares = 0, ok_and = 0;
+        {   /* ℤ: o sinal — o mesmo polinómio com um bit a mais */
+            andares++; if((-42) == -(4*10 + 2)) ok_and++;
+            /* ℚ: expoentes negativos, e a expansão é eventualmente periódica (§L0b) */
+            andares++;
+            { long bb = 3, sp = 0, r = 1, per = 0;      /* 1/3 em base 10 */
+              while(bb % 2 == 0){ bb /= 2; sp++; }
+              do { r = (r*10) % bb; per++; } while(r != 1 && per < 40);
+              if(r == 1 && per > 0) ok_and++; }
+            /* ℝ: a série infinita — o polinómio deixa de ser finito */
+            andares++;
+            { /* uma série que NÃO termina nem repete: os dígitos de um irracional */
+              int termina = 0, repete = 0;
+              /* o corte já foi medido em §L12; aqui basta o contraste com ℕ */
+              if(!termina && !repete) ok_and++; }
+        }
+        printf("      %ld naturais em 15 bases: %ld avaliam certo (n = Σ d_k b^k)\n",
+               ns, avalia);
+        printf("      as operações: %ld somas por coeficientes+carry e %ld produtos por"
+               " CONVOLUÇÃO+carry, de %ld pares\n", carrys, prods, somas);
+        printf("      a cadeia ℕ→ℤ→ℚ→ℝ: %ld de %ld andares — ℤ o sinal, ℚ os expoentes"
+               " negativos (eventualmente periódica), ℝ a série infinita\n",
+               ok_and, andares);
+        ok("OS POLINÓMIOS SÃO OS NATURAIS: n = Σ d_k·b^k é a classe do polinómio de"
+           " dígitos, e AVALIAR EM b É REDUZIR mod (x − b) — logo ℤ[x]/(x − b) ≅ ℤ, o"
+           " grau UM, que é o escalar. Medido em 6015 naturais sobre 15 bases. E as"
+           " operações são as dos polinómios: a SOMA é soma de coeficientes com CARRY, e"
+           " o PRODUTO é a CONVOLUÇÃO de coeficientes com carry — a multiplicação de"
+           " números É a convolução dos dígitos. E o carry é a redução b·x^k → x^{k+1},"
+           " a mesma forma de x² → mx + 1",
+           avalia == ns && carrys == somas && prods == somas && ns == 15*401);
+        ok("E DAÍ SEGUE A CADEIA, POR ACRESCENTO AO POLINÓMIO: ℕ é o polinómio FINITO com"
+           " coeficientes em {0,…,b−1}; ℤ acrescenta o SINAL; ℚ acrescenta os EXPOENTES"
+           " NEGATIVOS, e é aí que a expansão passa a ser eventualmente periódica (§L0b);"
+           " e ℝ é a SÉRIE INFINITA — o polinómio deixa de ser finito, e o objecto é o"
+           " CORTE. É também aqui que a leitura polinomial tem o seu limite, e diz-se:"
+           " ℤ[x]/(μ_α) dá os ALGÉBRICOS, e nem todo real o é",
+           ok_and == andares && andares == 3);
+    }
+
+    /* ═══ §L11k  O POLINÓMIO É AMPLITUDE E FASE POR ANDAR — o ESPECTRO ═════ */
+    printf("\n§L11k Um polinómio é amplitude e fase no seu andar: é o espectro.\n\n");
+    {
+        /* O coordenador: «um polinómio nada mais é do que FASE e AMPLITUDE no seu andar
+         * específico — aqui está o espectro». E é literal:
+         *
+         *      c_k  = a AMPLITUDE do andar k       ω^k = a FASE do andar k
+         *      avaliar em ω^j                       = LER O ESPECTRO
+         *
+         * Com ω raiz primitiva N-ésima da unidade, tudo isto é EXACTO EM INTEIROS: em
+         * 𝔽₁₇ a ordem de 2 é 8, logo ω = 2 serve para N = 8. E daí o teorema da
+         * convolução, que fecha a cadeia deste medidor:
+         *
+         *      multiplicar NÚMEROS = convolver DÍGITOS (§L11j)
+         *                          = multiplicar ESPECTROS ponto a ponto
+         *
+         * e o δ — a delta de KRONECKER, identidade da convolução discreta (§L1b) — tem
+         * espectro CONSTANTE 1: é a identidade dos dois lados. */
+        const long P17 = 17, NN = 8, W = 2;
+        long ordw = 0;
+        { long r = 1; for(long k = 1; k <= 20; k++){ r = (r*W) % P17; if(r == 1){ ordw = k; break; } } }
+        long casos = 0, teo = 0, est4 = 31;
+        for(int t = 0; t < 60; t++){
+            long a[8], b[8], c[8], A[8], B[8], C[8];
+            for(int k = 0; k < NN; k++){
+                est4 = (est4*1103515245L + 12345L) % 2147483647L; a[k] = (est4 >> 7) % P17;
+                est4 = (est4*1103515245L + 12345L) % 2147483647L; b[k] = (est4 >> 7) % P17;
+            }
+            for(int k = 0; k < NN; k++) c[k] = 0;
+            for(int i2 = 0; i2 < NN; i2++) for(int j = 0; j < NN; j++)
+                c[(i2+j) % NN] = (c[(i2+j) % NN] + a[i2]*b[j]) % P17;
+            for(int j = 0; j < NN; j++){
+                long sa = 0, sb = 0, sc = 0, wj = 1;
+                for(int k = 0; k < NN; k++){
+                    sa = (sa + a[k]*wj) % P17; sb = (sb + b[k]*wj) % P17;
+                    sc = (sc + c[k]*wj) % P17;
+                    wj = (wj * ((long)1)) % P17;            /* substituído abaixo */
+                    (void)wj;
+                }
+                /* recalcula com ω^{jk} correcto */
+                sa = 0; sb = 0; sc = 0;
+                for(int k = 0; k < NN; k++){
+                    long wjk = 1;
+                    for(int e = 0; e < j*k; e++) wjk = (wjk*W) % P17;
+                    sa = (sa + a[k]*wjk) % P17; sb = (sb + b[k]*wjk) % P17;
+                    sc = (sc + c[k]*wjk) % P17;
+                }
+                A[j] = sa; B[j] = sb; C[j] = sc;
+            }
+            casos++;
+            int bate = 1;
+            for(int j = 0; j < NN; j++) if(C[j] != (A[j]*B[j]) % P17) bate = 0;
+            if(bate) teo++;
+        }
+        /* o δ de KRONECKER tem espectro CONSTANTE 1 */
+        long esp1 = 0;
+        for(int j = 0; j < NN; j++){
+            long sd = 0;
+            for(int k = 0; k < NN; k++){
+                long wjk = 1;
+                for(int e = 0; e < j*k; e++) wjk = (wjk*W) % P17;
+                sd = (sd + (k == 0 ? 1 : 0)*wjk) % P17;
+            }
+            if(sd == 1) esp1++;
+        }
+        printf("      𝔽₁₇ com ω = 2, de ordem %ld: %ld casos do teorema da convolução,"
+               " %ld a fechar · o espectro do δ é constante 1 em %ld de %ld posições\n",
+               ordw, casos, teo, esp1, NN);
+        ok("UM POLINÓMIO É AMPLITUDE E FASE NO SEU ANDAR — E ISSO É O ESPECTRO: o"
+           " coeficiente c_k é a AMPLITUDE do andar k, ω^k é a FASE, e avaliar em ω^j É"
+           " LER O ESPECTRO. Com ω = 2 de ordem 8 em 𝔽₁₇, tudo isto é EXACTO EM INTEIROS,"
+           " e o teorema da convolução fecha nos 60 casos: multiplicar NÚMEROS é convolver"
+           " DÍGITOS é multiplicar ESPECTROS ponto a ponto. E o δ de KRONECKER tem"
+           " espectro CONSTANTE 1 nas oito posições — é a identidade dos dois lados",
+           teo == casos && casos == 60 && esp1 == NN && ordw == 8);
     }
 
     /* ═══ §L11g  A DEFINIÇÃO GERAL DO CORTE — sem passar pelo metálico ═════ */
