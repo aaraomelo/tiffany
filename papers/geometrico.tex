@@ -52,7 +52,9 @@ geometricamente a construção que o Universal já fechou}, na ordem
 \[
 \boxed{\;\begin{gathered}
 \underbrace{\text{Lei 0}}_{\text{fundação}}\ \to\ \text{leis }0,\ldots,7\ \to\
-\text{base ortonormal}\ \to\ \text{bit a bit}\ \to\ \text{dual}\\
+\text{base ortonormal}\ \to\ \text{bit a bit}\\
+\to\ \underbrace{\star\ \to\ \tau\ \to\ E_{+}\oplus E_{-}\ \to\ B_8}_{\text{a operação}}
+\ \to\ \text{dual}\\
 \to\ \text{recorrência}\ \to\ \text{Pisot}\ \to\ \text{encaixe}\\
 \to\ \text{ponto fixo}\ \to\ \text{corte}\ \to\ \text{supremo}
 \ \to\ \mathbb{R}\ \to\ \pi_k
@@ -72,6 +74,17 @@ o inteiro $t_k=\sigma^{k}+(\sigma\dg)^{k}$, e com ele
 \]
 --- \emph{são duas afirmações, e a condição faz parte da segunda}. A aproximação
 não é escolhida. Daí o encaixe, e daí o corte.
+
+\smallskip\noindent
+E a operação é \textbf{uma}. As oito leis geram $a\star b$ sobre um bloco de oito
+coordenadas, e as duas leituras não são duas operações a coexistir: são os
+\textbf{espaços próprios} do espelho $\tau(a,b)=(b,a)$. De $\tau^{2}=\mathrm{id}$ o
+polinómio mínimo divide $(t-1)(t+1)$, de raízes distintas em $\mathbb{R}$, logo $\tau$ é
+diagonalizável com espectro $\{+1,-1\}$ --- \emph{dois sectores, e exactamente dois} ---
+e $\operatorname{Dir}$ e $\operatorname{Cruz}$ são os projectores
+$(\mathrm{id}\pm\tau)/2$, com $\dim E_{+}+\dim E_{-}=36+28=64=n^{2}$. \textbf{Nada disto
+é importado}: nem norma, nem associatividade, nem distributividade. Os nomes clássicos
+entram \emph{depois}, como comparação com o objecto construído.
 
 \smallskip\noindent
 E a construção é de \textbf{todo} $\mathbb{R}$. Corre sobre quocientes
@@ -394,6 +407,206 @@ não da codificação utilizada para as armazenar.} $\square$
 \colunas{a operação completa é coordenada (\S\,«a operação completa»)}
         {o custo da coordenada numa base não ortonormal}
         {\code{geometria\_real.c} \S L2}
+
+%======================================================================
+\section{A OPERAÇÃO --- e as duas leis são as duas metades dela}\label{sec:operacao}
+
+\noindent Há \textbf{uma} operação, e ela escreve-se numa linha:
+\[
+\boxed{\;a\star b\;}
+\]
+Não é «a soma» nem «o produto»: é a operação, e o que dela sai são duas
+\emph{leituras}, separadas por trocar a ordem. \textbf{Elas têm nomes internos}, e não os
+nomes que queremos provar que realizam:
+\[
+\boxed{
+\begin{array}{lll}
+\operatorname{Dir}(a,b)=\tfrac12(a\star b+b\star a) & \text{a leitura que \textbf{não
+muda}}\\[3pt]
+\operatorname{Cruz}(a,b)=\tfrac12(a\star b-b\star a) & \text{a leitura que \textbf{troca
+de sinal}}
+\end{array}}
+\]
+\emph{Chamar «produto» a uma leitura de $a\star b$ antes de o demonstrar seria importar a
+semântica} --- o mesmo defeito de importar a régua, um nível acima. Prova-se primeiro que
+elas \textbf{realizam}: $\operatorname{Dir}(a,e_i)$ devolve a coordenada $a_i$ --- a
+peneira do \S\ref{sec:orto} --- e $\operatorname{Cruz}$ coincide com o determinante $2\times2$
+calculado \emph{por permutações}. Só depois se lhes pode chamar medida e área.
+e a volta é imediata, $a\star b=\langle a,b\rangle+a\wedge b$. \textbf{Não há duas
+operações a coexistir: há uma, e um espelho} --- e o espelho é trocar a ordem.
+
+\begin{teorema}[as propriedades são dela, e leem-se todas no espelho]\label{thm:operacao}
+\emph{(i) A decomposição é única.} Dado $\star$, as metades são o que são: a diferença
+entre duas repartições seria simultaneamente simétrica e antissimétrica, logo \emph{zero}.
+
+\emph{(ii) O espelho é involução}, e é por isso que as metades são \textbf{duas}: uma
+repartição em fixos e invertidos só existe porque trocar duas vezes devolve.
+
+\emph{(iii) Uma fica, a outra inverte.} Sob o espelho o directo é fixo e o cruzado muda de
+sinal --- e os cruzados não são todos nulos, sem o que «inverte» valeria por $0=-0$.
+
+\emph{(iv) Na base de oito, ela parte-se sozinha}: $e_i\star e_j$ tem parte directa
+$\delta_{ij}$ --- a Gram do \S\ref{sec:orto}, que é a identidade --- e parte cruzada em
+tudo o resto. \textbf{A diagonal mede; fora dela há área.} $\square$
+\end{teorema}
+
+\begin{teorema}[as oito trabalham juntas, e a seguinte abre autossimilar]\label{thm:juntas}
+Os andares \textbf{não} se enchem em fila, como uma jarra a encher copos. As oito
+dimensões são \emph{um bloco}, e nele:
+\[
+\boxed{
+\begin{array}{ll}
+\text{trabalham \textbf{juntas}} & \text{as oito coordenadas entram na mesma operação}\\[3pt]
+\text{saturam \textbf{juntas}} & \text{o que satura é o CONJUNTO, no passo oito}\\[3pt]
+\text{e a seguinte \textbf{abre}} & \text{não uma dimensão nova: OUTRO BLOCO DE OITO}
+\end{array}}
+\]
+O índice vive em $\mathbb{Z}/8\mathbb{Z}$ e o passo oito devolve o princípio --- é a
+\textbf{Lei 8 $\equiv$ Lei 0} das oito leis. É por isso que a base se \emph{reutiliza}
+bloco a bloco em vez de crescer: \emph{o que cresce é o objecto, não a máquina}. E a
+órbita percorre as oito coordenadas, cada uma uma vez antes de qualquer repetição --- que
+é o que «completa e ordenadamente» quer dizer. $\square$
+\end{teorema}
+\begin{teorema}[«duas metades» é o espectro da involução]\label{thm:espectro-tau}
+Que as leituras sejam \emph{duas} não é uma escolha de apresentação: \textbf{é uma
+dedução}. O espelho $\tau(a,b)=(b,a)$ satisfaz $\tau^{2}=\mathrm{id}$, donde
+\[
+\boxed{\;\tau^{2}=\mathrm{id}\ \Longrightarrow\ \lambda^{2}=1\ \Longrightarrow\
+\lambda\in\{+1,-1\}\;}
+\]
+\textbf{E a frase diz-se com a qualificação que a torna verdadeira}, sobre este espaço
+real: $\tau^{2}=\mathrm{id}$ obriga o polinómio mínimo a \emph{dividir}
+\[
+t^{2}-1=(t-1)(t+1),
+\]
+que tem \textbf{duas raízes distintas} em $\mathbb{R}$; logo $\tau$ é
+\textbf{diagonalizável} e os seus únicos valores próprios são $+1$ e $-1$. Não é uma
+proibição abstracta de um terceiro valor próprio: é o mínimo a dividir um polinómio de
+raízes simples. E os dois factores não servem sozinhos --- uma matriz não simétrica mata
+$t-1$, uma não antissimétrica mata $t+1$ ---, pelo que o mínimo é $t^{2}-1$
+\emph{exactamente}. \textbf{Há portanto dois sectores espectrais, e exactamente dois},
+sem que nada tenha sido importado.
+
+E o que fecha o argumento é a \textbf{contagem}: os espaços próprios somam o espaço
+inteiro,
+\[
+\dim E_{+}=\tfrac{n(n+1)}2=36,\qquad
+\dim E_{-}=\tfrac{n(n-1)}2=28,\qquad
+36+28=64=n^{2},
+\]
+sem sobra nem falta. As duas geram --- toda $M$ se escreve numa soma delas --- e a
+decomposição é única porque um elemento dos dois espaços ao mesmo tempo é zero. Com
+$\operatorname{Dir}\circ\tau=\operatorname{Dir}$ e
+$\operatorname{Cruz}\circ\tau=-\operatorname{Cruz}$, as duas leituras \emph{são} os dois
+espaços próprios. $\square$
+\end{teorema}
+
+\begin{teorema}[e a decomposição não se observa: constrói-se]\label{thm:projectores}
+O teorema anterior \emph{conta} as duas metades; este \textbf{fabrica-as}. As duas
+leituras são exactamente os \textbf{projectores} nos espaços próprios,
+\[
+\boxed{\;P_{+}=\frac{\mathrm{id}+\tau}{2},
+\qquad
+P_{-}=\frac{\mathrm{id}-\tau}{2},\;}
+\]
+e de $\tau^{2}=\mathrm{id}$ saem, sem mais nada,
+\[
+P_{+}^{2}=P_{+},\qquad
+P_{-}^{2}=P_{-},\qquad
+P_{+}P_{-}=P_{-}P_{+}=0,\qquad
+P_{+}+P_{-}=\mathrm{id}.
+\]
+\textbf{É a involução que produz a decomposição}, e não uma repartição observada numa
+tabela: $\operatorname{Dir}=P_{+}$ e $\operatorname{Cruz}=P_{-}$, aplicados ao par.
+Em inteiros escreve-se sem a divisão, pondo $Q_{\pm}=2P_{\pm}=\mathrm{id}\pm\tau$:
+\[
+Q_{\pm}^{2}=2Q_{\pm},\qquad Q_{+}Q_{-}=0,\qquad Q_{+}+Q_{-}=2\,\mathrm{id},
+\]
+--- o factor dois é o preço de não ter vírgula, e paga-se uma vez.
+
+E o \textbf{traço} devolve as dimensões do Teor.~\ref{thm:espectro-tau} por outra rota:
+o traço de um projector é a dimensão da sua imagem, e com $\operatorname{tr}\tau=n$
+(os pares $(i,i)$ são os fixos),
+\[
+\boxed{\;\operatorname{tr}P_{+}=\frac{n^{2}+n}{2}=36,
+\qquad
+\operatorname{tr}P_{-}=\frac{n^{2}-n}{2}=28\;}
+\]
+--- os mesmos $36$ e $28$, agora somados na diagonal de uma matriz $64\times64$ em vez de
+contados por pares $(i,j)$. $\square$
+\end{teorema}
+
+\begin{teorema}[o bloco fecha, e o oito é o período]\label{thm:bloco}
+\[
+\boxed{\;B_8\times B_8\longrightarrow B_8\;}
+\]
+--- nos $64$ pares, e nenhum resultado sai: $\operatorname{Cruz}(e_i,e_j)$ só ocupa as
+posições $(i,j)$ e $(j,i)$, e ocupa-as mesmo (sem esse controlo, «não espalha» valeria por
+não ter entrada nenhuma). O índice $(i+j)\bmod 8$ cobre os oito resíduos, cada um oito
+vezes. \textbf{É o fecho que faz do bloco um objecto, e não um saco de oito coisas}: a
+operação não precisa de nada fora dele para se completar. $\square$
+\end{teorema}
+
+\medskip
+\noindent\textbf{E daqui sai a ordem da construção, que é esta e não outra:}
+\[
+\boxed{\;\begin{gathered}
+L_0,\ldots,L_7
+\ \longrightarrow\ \star
+\ \longrightarrow\ \tau
+\ \longrightarrow\ E_{+}\oplus E_{-}
+\ \longrightarrow\ \operatorname{Dir},\operatorname{Cruz}\\[3pt]
+\longrightarrow\ B_8
+\ \longrightarrow\ \text{saturação conjunta}
+\ \longrightarrow\ \text{autossimilaridade}
+\end{gathered}\;}
+\]
+\textbf{E os espaços próprios vêm antes das leituras, e não depois}: são eles que $\tau$
+produz, e $\operatorname{Dir}$ e $\operatorname{Cruz}$ são os projectores neles
+(Teor.~\ref{thm:projectores}). \emph{Nada nesta cadeia é importado} --- nem Clifford, nem
+uma norma, nem um axioma de associatividade. Os nomes clássicos entram
+\textbf{depois} dela e por fora, como comparação com um objecto já construído: é o
+estatuto que o \S\ref{sec:central} dá à tríade Hurwitz--Gentil--Lebesgue.
+Tudo o que se pergunta \emph{depois} --- se há associatividade, distributividade, uma
+norma multiplicativa --- fica \textbf{abaixo} disto, e muda de forma: a pergunta deixa de
+ser \emph{«que operação satisfaz estes axiomas?»} e passa a ser \emph{«que comportamento
+esta operação tem?»}. É a mesma inversão que este paper fará com o corte
+(\S\ref{sec:pontofixo}): não se acrescenta o ponto que falta --- mostra-se que ele
+\textbf{é} o ponto fixo que o andar não contém.
+
+\medskip
+\noindent\textbf{E daí a ordem em que as coisas podem ser ditas}, que é o que impede a
+semântica de entrar antes da prova:
+\[
+\boxed{\;\text{definir}\ \to\ \text{medir}\ \to\ \text{provar}\ \to\
+\text{nomear / comparar}\;}
+\]
+--- e \emph{não} nomear $\to$ supor $\to$ medir. Por isso as leituras chamam-se
+$\operatorname{Dir}$ e $\operatorname{Cruz}$ neste paper, e não «soma» e «produto»:
+enquanto não estiver demonstrado que elas realizam a estrutura aditiva e multiplicativa
+da recta, chamar-lhes isso seria supor o que falta provar. Os nomes clássicos entram
+depois, e como \emph{comparação}.
+
+\medskip
+\noindent E a afirmação estrutural, que é anterior a qualquer axioma:
+\[
+\boxed{\;\text{as oito leis geram uma \textbf{única} operação sobre um bloco de oito
+coordenadas}\;}
+\]
+--- o resto deste paper mede o que ela faz.
+\colunas{as oito leis e a base ortonormal (\code{thm:ortonormal})}
+        {a operação única, o espelho que a reparte, e o bloco que fecha e satura}
+        {\code{tests/operacao.c} ($9{:}0$): a volta das duas leituras em $600$ pares; o espectro
+de $\tau$ com $\dim E_+ + \dim E_- = 36+28 = 64$ e os $56$ não nulos separados dos oito
+zeros; os \textbf{projectores} medidos como matrizes $64\times64$ --- $Q^{2}=2Q$,
+$Q_+Q_-=0$ e $Q_++Q_-=2\,\mathrm{id}$ por multiplicação, com os traços $72=2\cdot36$ e
+$56=2\cdot28$ a repetirem as dimensões por outra rota, o mínimo com os dois factores
+mortos em $112$ e $120$ entradas, e o gume a derrubar a idempotência nas $128$ entradas
+previstas onde $\rho^{2}\neq\mathrm{id}$; o espelho
+involutivo com $514$ cruzados não nulos; os $64$ pares da base com a diagonal a medir e o
+resto com área $\pm1$; o bloco a saturar no passo oito e a fechar nos $64$, com o suporte
+ocupado em $56$; e as duas leituras a realizarem-se --- a peneira e o determinante por
+permutações --- em $400$ casos}
 
 %======================================================================
 \section{A torre $1\to2\to4\to8$, e o reuso}\label{sec:torre}
@@ -802,6 +1015,15 @@ irredutível em zero}
 
 %======================================================================
 \section{O Teorema Central funda o limite}\label{sec:central}
+
+\noindent\textbf{E o estatuto desta secção diz-se à entrada, porque ele mudou.} A
+tríade Hurwitz--Gentil--Lebesgue \emph{não} está na cadeia principal da construção ---
+essa é a do \S\ref{sec:operacao}, $L_0,\ldots,L_7\to\star\to\tau\to E_{+}\oplus E_{-}\to
+\operatorname{Dir},\operatorname{Cruz}\to B_8$, e nela não entra nenhum nome de fora.
+O que segue é \textbf{comparação com o objecto já construído}: três nomes clássicos
+postos ao lado dele para dizer o que coincide e o que não, depois de a construção estar
+feita e medida. \emph{Nenhuma peça do \S\ref{sec:supremo} ou do \S\ref{sec:completude}
+depende do que se diz aqui.}
 
 \begin{teorema}[contar pelo domínio e medir por níveis somam ao rectângulo]\label{thm:central}
 \[
@@ -2110,145 +2332,6 @@ sob a condição mais larga $n\leq t$. \emph{São duas exigências, e não uma:}
 \abs{N(\sigma)}=1\ \ (n=1) & \text{o \textbf{comprimento} do intervalo é } 1/(q_kq_{k+1})
 \end{array}}
 \]
-
-%======================================================================
-\section{A OPERAÇÃO --- e as duas leis são as duas metades dela}\label{sec:operacao}
-
-\noindent Há \textbf{uma} operação, e ela escreve-se numa linha:
-\[
-\boxed{\;a\star b\;}
-\]
-Não é «a soma» nem «o produto»: é a operação, e o que dela sai são duas
-\emph{leituras}, separadas por trocar a ordem. \textbf{Elas têm nomes internos}, e não os
-nomes que queremos provar que realizam:
-\[
-\boxed{
-\begin{array}{lll}
-\operatorname{Dir}(a,b)=\tfrac12(a\star b+b\star a) & \text{a leitura que \textbf{não
-muda}}\\[3pt]
-\operatorname{Cruz}(a,b)=\tfrac12(a\star b-b\star a) & \text{a leitura que \textbf{troca
-de sinal}}
-\end{array}}
-\]
-\emph{Chamar «produto» a uma leitura de $a\star b$ antes de o demonstrar seria importar a
-semântica} --- o mesmo defeito de importar a régua, um nível acima. Prova-se primeiro que
-elas \textbf{realizam}: $\operatorname{Dir}(a,e_i)$ devolve a coordenada $a_i$ --- a
-peneira do \S\ref{sec:orto} --- e $\operatorname{Cruz}$ coincide com o determinante $2\times2$
-calculado \emph{por permutações}. Só depois se lhes pode chamar medida e área.
-e a volta é imediata, $a\star b=\langle a,b\rangle+a\wedge b$. \textbf{Não há duas
-operações a coexistir: há uma, e um espelho} --- e o espelho é trocar a ordem.
-
-\begin{teorema}[as propriedades são dela, e leem-se todas no espelho]\label{thm:operacao}
-\emph{(i) A decomposição é única.} Dado $\star$, as metades são o que são: a diferença
-entre duas repartições seria simultaneamente simétrica e antissimétrica, logo \emph{zero}.
-
-\emph{(ii) O espelho é involução}, e é por isso que as metades são \textbf{duas}: uma
-repartição em fixos e invertidos só existe porque trocar duas vezes devolve.
-
-\emph{(iii) Uma fica, a outra inverte.} Sob o espelho o directo é fixo e o cruzado muda de
-sinal --- e os cruzados não são todos nulos, sem o que «inverte» valeria por $0=-0$.
-
-\emph{(iv) Na base de oito, ela parte-se sozinha}: $e_i\star e_j$ tem parte directa
-$\delta_{ij}$ --- a Gram do \S\ref{sec:orto}, que é a identidade --- e parte cruzada em
-tudo o resto. \textbf{A diagonal mede; fora dela há área.} $\square$
-\end{teorema}
-
-\begin{teorema}[as oito trabalham juntas, e a seguinte abre autossimilar]\label{thm:juntas}
-Os andares \textbf{não} se enchem em fila, como uma jarra a encher copos. As oito
-dimensões são \emph{um bloco}, e nele:
-\[
-\boxed{
-\begin{array}{ll}
-\text{trabalham \textbf{juntas}} & \text{as oito coordenadas entram na mesma operação}\\[3pt]
-\text{saturam \textbf{juntas}} & \text{o que satura é o CONJUNTO, no passo oito}\\[3pt]
-\text{e a seguinte \textbf{abre}} & \text{não uma dimensão nova: OUTRO BLOCO DE OITO}
-\end{array}}
-\]
-O índice vive em $\mathbb{Z}/8\mathbb{Z}$ e o passo oito devolve o princípio --- é a
-\textbf{Lei 8 $\equiv$ Lei 0} das oito leis. É por isso que a base se \emph{reutiliza}
-bloco a bloco em vez de crescer: \emph{o que cresce é o objecto, não a máquina}. E a
-órbita percorre as oito coordenadas, cada uma uma vez antes de qualquer repetição --- que
-é o que «completa e ordenadamente» quer dizer. $\square$
-\end{teorema}
-\begin{teorema}[«duas metades» é o espectro da involução]\label{thm:espectro-tau}
-Que as leituras sejam \emph{duas} não é uma escolha de apresentação: \textbf{é uma
-dedução}. O espelho $\tau(a,b)=(b,a)$ satisfaz $\tau^{2}=\mathrm{id}$, donde
-\[
-\boxed{\;\tau^{2}=\mathrm{id}\ \Longrightarrow\ \lambda^{2}=1\ \Longrightarrow\
-\lambda\in\{+1,-1\}\;}
-\]
---- não há terceiro valor próprio, logo não há terceira leitura. E o que fecha o
-argumento é a \textbf{contagem}: os espaços próprios somam o espaço inteiro,
-\[
-\dim E_{+}=\tfrac{n(n+1)}2=36,\qquad
-\dim E_{-}=\tfrac{n(n-1)}2=28,\qquad
-36+28=64=n^{2},
-\]
-sem sobra nem falta. As duas geram --- toda $M$ se escreve numa soma delas --- e a
-decomposição é única porque um elemento dos dois espaços ao mesmo tempo é zero. Com
-$\operatorname{Dir}\circ\tau=\operatorname{Dir}$ e
-$\operatorname{Cruz}\circ\tau=-\operatorname{Cruz}$, as duas leituras \emph{são} os dois
-espaços próprios. $\square$
-\end{teorema}
-
-\begin{teorema}[o bloco fecha, e o oito é o período]\label{thm:bloco}
-\[
-\boxed{\;B_8\times B_8\longrightarrow B_8\;}
-\]
---- nos $64$ pares, e nenhum resultado sai: $\operatorname{Cruz}(e_i,e_j)$ só ocupa as
-posições $(i,j)$ e $(j,i)$, e ocupa-as mesmo (sem esse controlo, «não espalha» valeria por
-não ter entrada nenhuma). O índice $(i+j)\bmod 8$ cobre os oito resíduos, cada um oito
-vezes. \textbf{É o fecho que faz do bloco um objecto, e não um saco de oito coisas}: a
-operação não precisa de nada fora dele para se completar. $\square$
-\end{teorema}
-
-\medskip
-\noindent\textbf{E daqui sai a ordem da construção, que é esta e não outra:}
-\[
-\boxed{\;\begin{gathered}
-\text{Leis }0\text{--}7
-\ \to\ \text{a \textbf{operação}}
-\ \to\ \text{a \textbf{involução}}
-\ \to\ \operatorname{Dir}/\operatorname{Cruz}\\[3pt]
-\to\ \text{a \textbf{base 8}}
-\ \to\ \text{saturação conjunta}
-\ \to\ \text{abertura autossimilar}
-\end{gathered}\;}
-\]
-Tudo o que se pergunta \emph{depois} --- se há associatividade, distributividade, uma
-norma multiplicativa --- fica \textbf{abaixo} disto, e muda de forma: a pergunta deixa de
-ser \emph{«que operação satisfaz estes axiomas?»} e passa a ser \emph{«que comportamento
-esta operação tem?»}. É a mesma inversão que este paper já fez com o corte.
-
-\medskip
-\noindent\textbf{E daí a ordem em que as coisas podem ser ditas}, que é o que impede a
-semântica de entrar antes da prova:
-\[
-\boxed{\;\text{definir}\ \to\ \text{medir}\ \to\ \text{provar}\ \to\
-\text{nomear / comparar}\;}
-\]
---- e \emph{não} nomear $\to$ supor $\to$ medir. Por isso as leituras chamam-se
-$\operatorname{Dir}$ e $\operatorname{Cruz}$ neste paper, e não «soma» e «produto»:
-enquanto não estiver demonstrado que elas realizam a estrutura aditiva e multiplicativa
-da recta, chamar-lhes isso seria supor o que falta provar. Os nomes clássicos entram
-depois, e como \emph{comparação}.
-
-\medskip
-\noindent E a afirmação estrutural, que é anterior a qualquer axioma:
-\[
-\boxed{\;\text{as oito leis geram uma \textbf{única} operação sobre um bloco de oito
-coordenadas}\;}
-\]
---- o resto deste paper mede o que ela faz.
-\colunas{as oito leis e a base ortonormal (\code{thm:ortonormal})}
-        {a operação única, o espelho que a reparte, e o bloco que fecha e satura}
-        {\code{tests/operacao.c} ($8{:}0$): a volta das duas leituras em $600$ pares; o espectro
-de $\tau$ com $\dim E_+ + \dim E_- = 36+28 = 64$ e os $56$ não nulos separados dos oito
-zeros; o espelho
-involutivo com $514$ cruzados não nulos; os $64$ pares da base com a diagonal a medir e o
-resto com área $\pm1$; o bloco a saturar no passo oito e a fechar nos $64$, com o suporte
-ocupado em $56$; e as duas leituras a realizarem-se --- a peneira e o determinante por
-permutações --- em $400$ casos}
 
 %======================================================================
 \section{A construção está fechada}\label{sec:fechada}

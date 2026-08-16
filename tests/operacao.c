@@ -42,6 +42,7 @@
  *   §O6  Dir e Cruz REALIZAM-SE — a semântica prova-se, não se importa
  *   §O7  o BLOCO fecha: B₈ × B₈ → B₈, e o 8 é o PERÍODO estrutural
  *   §O8  e «duas metades» é o ESPECTRO de τ: {+1,−1}, com as dimensões a fechar
+ *   §O9  e a decomposição CONSTRÓI-SE: Dir e Cruz SÃO os projectores de τ
  *
  * Tudo em inteiros. Nenhum limiar, nenhuma norma importada, nenhum nome de fora a fazer de
  * hipótese.
@@ -52,6 +53,17 @@
 #include "unidade.h"
 
 #define N 8                     /* a base: oito */
+#define D (N*N)                 /* e o espaço onde o espelho age: as n² coordenadas */
+
+/* o produto de dois operadores D×D, em inteiros — é ele que dá às identidades dos
+ * projectores (§O9) como falhar, coisa que aplicar τ trocando índices não daria */
+static void mul(const long A[D][D], const long B[D][D], long C[D][D]){
+    for(int u = 0; u < D; u++) for(int w = 0; w < D; w++){
+        long s = 0;
+        for(int k = 0; k < D; k++) s += A[u][k]*B[k][w];
+        C[u][w] = s;
+    }
+}
 
 /* Um elemento é um par (escalar, vector) na base de oito — o directo e o cruzado juntos.
  * A operação ⋆ é o produto geométrico: leva dois vectores num escalar mais um bivector. */
@@ -469,9 +481,14 @@ int main(void){
          *
          *      τ² = id   ⟹   λ² = 1   ⟹   λ ∈ {+1, −1}
          *
-         * Não há terceiro valor próprio possível, logo não há terceira metade. E o que
-         * fecha o argumento é a CONTAGEM: os dois espaços próprios têm de somar o espaço
-         * inteiro, sem sobra nem falta.
+         * E a frase QUALIFICA-SE, senão diz de mais. Não é «não existe terceiro valor
+         * próprio» em abstracto: é que τ² = id obriga o polinómio mínimo a DIVIDIR
+         * t² − 1 = (t−1)(t+1), que tem duas raízes DISTINTAS em ℝ — logo τ é
+         * diagonalizável sobre este espaço real e os seus únicos valores próprios são
+         * +1 e −1. Quem mede o mínimo, e exibe que ele é exactamente t² − 1, é o §O9.
+         *
+         * E o que fecha o argumento é a CONTAGEM: os dois espaços próprios têm de somar o
+         * espaço inteiro, sem sobra nem falta.
          *
          *      E₊ = { M : τM = +M }    as simétricas          dim = n(n+1)/2 = 36
          *      E₋ = { M : τM = −M }    as antissimétricas     dim = n(n−1)/2 = 28
@@ -541,8 +558,9 @@ int main(void){
                " zero,\n        e sem os separar «τ0 = −0» faria o valor próprio valer por"
                " vacuidade\n\n", vivos_mais, vivos_menos);
         ok("AS DUAS METADES SÃO O ESPECTRO DA INVOLUÇÃO, E ISSO É UMA DEDUÇÃO E NÃO UMA"
-           " ESCOLHA: de τ² = id vem λ² = 1, logo λ ∈ {+1, −1} — não há terceiro valor"
-           " próprio possível, logo não há terceira metade. E o que fecha o argumento é a"
+           " ESCOLHA: de τ² = id vem λ² = 1, logo λ ∈ {+1, −1} — dito com a qualificação"
+           " que o torna verdadeiro: o mínimo divide (t−1)(t+1), de raízes distintas em ℝ,"
+           " logo τ é diagonalizável e não há terceira leitura. E o que fecha o argumento é a"
            " CONTAGEM: dim E₊ = n(n+1)/2 = 36 e dim E₋ = n(n−1)/2 = 28 somam 64 = n², o"
            " espaço inteiro, sem sobra nem falta. As duas geram — toda M se escreve numa"
            " soma delas — e a decomposição é única porque uma matriz nos dois espaços ao"
@@ -554,6 +572,131 @@ int main(void){
            && dim_mais + dim_menos == N*N && gera == casos && casos == 300
            && prop_mais == testes && prop_menos == testes
            && vivos_mais == testes && vivos_menos == N*(N-1));
+    }
+
+    /* ═══ §O9  A DECOMPOSIÇÃO NÃO SE OBSERVA: CONSTRÓI-SE ═══════════════════ */
+    printf("\n§O9 E ela CONSTRÓI-SE: Dir e Cruz SÃO os dois projectores da involução.\n\n");
+    {
+        /* O revisor: «Dir e Cruz deixam de ser nomes arbitrários — são exactamente os
+         * projectores nos dois espaços próprios:
+         *
+         *      P₊ = (I + τ)/2                    P₋ = (I − τ)/2
+         *      P₊² = P₊,  P₋² = P₋,  P₊P₋ = 0,  P₊ + P₋ = I
+         *
+         * Ou seja: a decomposição é CONSTRUÍDA pela involução.»
+         *
+         * E é outra frase: o §O8 CONTOU as duas metades, este FABRICA-AS. Contar dimensões
+         * mostra que cabem; o projector mostra de onde vêm.
+         *
+         * Aqui não se divide por dois. Com Q± := 2P± = I ± τ, as quatro identidades ficam
+         *
+         *      Q₊² = 2Q₊,     Q₋² = 2Q₋,     Q₊Q₋ = Q₋Q₊ = 0,     Q₊ + Q₋ = 2·id
+         *
+         * exactas em ℤ. O factor dois é o preço de não ter vírgula, e paga-se uma vez.
+         *
+         * E o POLINÓMIO MÍNIMO é a peça que faltava à frase do §O8. τ² = id diz que μ_τ
+         * DIVIDE t² − 1 = (t−1)(t+1); os divisores mónicos são t−1, t+1 e o próprio. Uma
+         * matriz com Mᵀ ≠ M mata t−1; uma com Mᵀ ≠ −M mata t+1. Sobra t² − 1
+         * EXACTAMENTE, e as suas raízes são distintas em ℝ — é isso, e não uma proibição
+         * abstracta, que dá τ diagonalizável com espectro {+1, −1}. */
+        /* E MEDE-SE A MATRIZ, e não a construção. Aplicar τ trocando os índices e depois
+         * verificar «Q₊M é simétrica» seria comparar a construção consigo própria: Q₊M sai
+         * simétrica por como foi escrita, e a identidade não podia falhar. Por isso τ
+         * escreve-se aqui como OPERADOR — a matriz D×D com D = n² = 64 que permuta a
+         * coordenada (i,j) com a (j,i) —, e as identidades medem-se por MULTIPLICAÇÃO
+         * de matrizes, onde há como errar.
+         *
+         * E o traço paga um segundo caminho para o §O8: o traço de um projector É a
+         * dimensão da sua imagem. Aqui tr(τ) = 8 (os pares com i = j são os fixos), donde
+         *
+         *      tr Q₊ = D + 8 = 72 = 2·36        tr Q₋ = D − 8 = 56 = 2·28
+         *
+         * — as MESMAS dimensões que o §O8 contou por pares (i,j), agora saídas de uma
+         * soma sobre a diagonal de uma matriz de 64 por 64. Duas rotas, um resultado. */
+        static long T[D][D], Q[2][D][D], P[D][D], R[D][D];
+        for(int i = 0; i < N; i++) for(int j = 0; j < N; j++)
+            T[i*N + j][j*N + i] = 1;                       /* τ como permutação */
+        for(int u = 0; u < D; u++) for(int w = 0; w < D; w++){
+            Q[0][u][w] = (u == w ? 1 : 0) + T[u][w];        /* Q₊ = id + τ */
+            Q[1][u][w] = (u == w ? 1 : 0) - T[u][w];        /* Q₋ = id − τ */
+        }
+        /* τ² = id, medido pela multiplicação */
+        mul(T, T, P);
+        long invol = 0;
+        for(int u = 0; u < D; u++) for(int w = 0; w < D; w++)
+            if(P[u][w] == (u == w ? 1 : 0)) invol++;
+        /* Q² = 2Q para cada um; Q₊Q₋ = Q₋Q₊ = 0; Q₊ + Q₋ = 2·id */
+        long idem = 0, orto = 0, completo = 0, tr[2] = {0, 0};
+        for(int s = 0; s < 2; s++){
+            mul(Q[s], Q[s], P);
+            for(int u = 0; u < D; u++) for(int w = 0; w < D; w++)
+                if(P[u][w] == 2*Q[s][u][w]) idem++;
+            for(int u = 0; u < D; u++) tr[s] += Q[s][u][u];
+        }
+        mul(Q[0], Q[1], P);
+        mul(Q[1], Q[0], R);
+        for(int u = 0; u < D; u++) for(int w = 0; w < D; w++){
+            if(P[u][w] == 0 && R[u][w] == 0) orto++;
+            if(Q[0][u][w] + Q[1][u][w] == 2*(u == w ? 1 : 0)) completo++;
+        }
+        /* as TESTEMUNHAS do mínimo: μ_τ divide (t−1)(t+1), e nenhum factor sozinho serve */
+        long mata_menos = 0, mata_mais = 0;      /* entradas onde τ ≠ id e onde τ ≠ −id */
+        for(int u = 0; u < D; u++) for(int w = 0; w < D; w++){
+            if(T[u][w] != (u == w ? 1 : 0))  mata_menos++;
+            if(T[u][w] != -(u == w ? 1 : 0)) mata_mais++;
+        }
+        /* O GUME, e precisa dos DOIS lados: sem a involução não há projector. Com ρ a rodar
+         * as coordenadas (ρ⁸ = id, mas ρ² ≠ id) a idempotência tem de CAIR. Se passasse, o
+         * que está acima não estaria a medir a hipótese τ² = id — estaria a medir nada. */
+        static long Rho[D][D], Qr[D][D];
+        for(int u = 0; u < D; u++) Rho[u][(u + 1) % D] = 1;
+        for(int u = 0; u < D; u++) for(int w = 0; w < D; w++)
+            Qr[u][w] = (u == w ? 1 : 0) + Rho[u][w];
+        mul(Rho, Rho, R);                                  /* R = ρ² */
+        mul(Qr,  Qr,  P);                                  /* P = (id + ρ)² */
+        long rho_dif = 0, rho_cai = 0, mesmo_sitio = 0;
+        for(int u = 0; u < D; u++) for(int w = 0; w < D; w++){
+            int a = (R[u][w] != (u == w ? 1 : 0));         /* aqui ρ² ≠ id */
+            int b = (P[u][w] != 2*Qr[u][w]);               /* e aqui a idempotência cai */
+            rho_dif += a;
+            rho_cai += b;
+            mesmo_sitio += (a && b);                       /* e são as MESMAS entradas */
+        }
+        printf("      τ como operador: matriz %d×%d, e τ² = id em %ld das %ld entradas\n",
+               D, D, invol, (long)D*D);
+        printf("      Q₊ = id + τ e Q₋ = id − τ, por MULTIPLICAÇÃO e não por construção:\n");
+        printf("        Q² = 2Q em %ld de %ld · Q₊Q₋ = Q₋Q₊ = 0 em %ld · Q₊ + Q₋ = 2·id em"
+               " %ld  de %ld\n", idem, 2*(long)D*D, orto, completo, (long)D*D);
+        printf("      e as DIMENSÕES saem do TRAÇO, que é a segunda rota do §O8:"
+               " tr Q₊ = %ld = 2·%ld e tr Q₋ = %ld = 2·%ld\n",
+               tr[0], tr[0]/2, tr[1], tr[1]/2);
+        printf("      o mínimo é EXACTAMENTE t² − 1: %ld entradas matam t − 1 e %ld matam"
+               " t + 1\n", mata_menos, mata_mais);
+        printf("      GUME: ρ² difere de id em %ld entradas — as 2·%d previstas —, a"
+               " idempotência cai em %ld, e são as MESMAS %ld\n\n",
+               rho_dif, D, rho_cai, mesmo_sitio);
+        ok("A DECOMPOSIÇÃO NÃO É OBSERVADA — É CONSTRUÍDA PELA INVOLUÇÃO. Dir e Cruz não são"
+           " dois nomes postos a duas metades que se viram na tabela: são os PROJECTORES"
+           " P₊ = (id + τ)/2 e P₋ = (id − τ)/2, e as quatro identidades que fazem deles"
+           " projectores medem-se em ℤ, sem uma divisão, na forma Q± = 2P±: Q² = 2Q,"
+           " Q₊Q₋ = 0, Q₊ + Q₋ = 2·id. E o polinómio mínimo fecha a frase do §O8 com a"
+           " qualificação que ela precisa: τ² = id obriga μ_τ a dividir (t−1)(t+1), e as"
+           " testemunhas exibidas — uma matriz não simétrica e uma não antissimétrica —"
+           " matam os dois factores, logo μ_τ = t² − 1, de raízes DISTINTAS em ℝ, logo τ"
+           " diagonalizável com espectro exactamente {+1, −1}. E as DIMENSÕES do §O8 saem"
+           " outra vez, agora do TRAÇO do projector — 72 = 2·36 e"
+           " 56 = 2·28 —, que é uma segunda rota e não a mesma conta com outro nome. E o"
+           " gume tem os dois lados: trocando τ por ρ, que não é involução, a idempotência"
+           " cai — e cai nas 128 entradas PREVISTAS, que são exactamente onde ρ² difere de"
+           " id. É a hipótese τ² = id que está a trabalhar, e mede-se por multiplicação de"
+           " matrizes, onde há como errar: aplicar τ trocando índices e depois verificar que"
+           " o resultado é simétrico seria comparar a construção consigo própria",
+           invol == (long)D*D && idem == 2*(long)D*D && orto == (long)D*D
+           && completo == (long)D*D
+           && tr[0] == D + N && tr[1] == D - N
+           && tr[0] == 2*(N*(N+1)/2) && tr[1] == 2*(N*(N-1)/2)
+           && mata_menos == 2*(long)(D - N) && mata_mais == (long)(D - N) + D
+           && rho_dif == 2*(long)D && rho_cai == rho_dif && mesmo_sitio == rho_dif);
     }
 
     if(!falhas){
