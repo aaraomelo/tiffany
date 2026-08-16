@@ -252,16 +252,37 @@ static void B2_juncao(void) {
        contra o ORÁCULO DE FORA: o produto inteiro nativo u₁·u₂.
        o DENTE: a mesma malha com a lei do DIODO (o "-1") entrega I_s(E₁E₂-1),
        que NÃO é o produto — tem de quebrar. */
+    /* E A MALHA TEM DE SER CALCULADA. Estava aqui
+     *
+     *      long malha = u1 * u2;              // exp(ln u1 + ln u2)
+     *      if (malha == u1*u2) passou++;      // vs o * nativo
+     *
+     * isto é x == x: a malha nunca chegava a ser calculada, e 40000 casos passavam sem
+     * medir nada. O comentário dizia «exp(ln u1 + ln u2)» e o código escrevia o produto.
+     *
+     * A malha realiza-se pela LEI DO EXP, e essa lei é a convolução da série (§B.4c):
+     * exp leva soma em produto, e nos coeficientes isso é o binómio. Aqui a via é a
+     * PADRÃO da casa — a exponenciação por quadrados sobre a soma dos expoentes:
+     *
+     *      u1 = b^e1, u2 = b^e2  →  ANTILOG(e1 + e2) = b^(e1+e2) = u1·u2
+     *
+     * com b, e1, e2 inteiros, exacto, e por um caminho que NÃO escreve u1*u2. */
     long passou = 0, tot = 0; int algum_diodo_bateu = 0;
-    for (long u1 = 1; u1 <= 200; u1++)
-        for (long u2 = 1; u2 <= 200; u2 += 3) {
-            long malha = u1 * u2;                          /* exp(ln u1 + ln u2) */
-            if (malha == u1*u2) passou++;                      /* vs o * nativo */
-            /* o dente: E=u+1 (Shockley), a malha do diodo dá E1*E2-1 */
-            long E1 = u1 + 1, E2 = u2 + 1, malha_diodo = E1*E2 - 1;
-            if (malha_diodo == u1*u2) algum_diodo_bateu = 1;
-            tot++;
-        }
+    for (long b = 2; b <= 6; b++)
+        for (long e1 = 0; e1 <= 6; e1++)
+            for (long e2 = 0; e2 <= 6; e2++) {
+                long u1 = 1, u2 = 1;
+                for (long t = 0; t < e1; t++) u1 *= b;      /* u1 = b^e1 */
+                for (long t = 0; t < e2; t++) u2 *= b;      /* u2 = b^e2 */
+                /* a MALHA: soma os logaritmos (os expoentes) e devolve o antilog */
+                long malha = 1, soma = e1 + e2;
+                for (long t = 0; t < soma; t++) malha *= b;
+                tot++;
+                if (malha == u1*u2) passou++;               /* vs o * nativo */
+                /* o dente: E=u+1 (Shockley), a malha do diodo dá E1*E2-1 */
+                long E1 = u1 + 1, E2 = u2 + 1, malha_diodo = E1*E2 - 1;
+                if (malha_diodo == u1*u2) algum_diodo_bateu = 1;
+            }
     printf("     a malha entrega u₁·u₂ (a lei do exp); o DENTE é a lei do diodo (o \"-1\"),\n");
     printf("     que dá (E₁-1)(E₂-1) escrito como E₁E₂-1 — e não é o produto.\n\n");
     pulso("B.2", "LOG+LOG→ANTILOG dá o produto u₁·u₂", "o * nativo", passou, tot, !algum_diodo_bateu);

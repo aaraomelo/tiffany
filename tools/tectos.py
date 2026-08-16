@@ -76,25 +76,29 @@ COMBINA = re.compile(r'[*/]')
 
 
 def recíprocas(bloco):
-    """pares (v, w) em que v é DEFINIDA a partir de w e depois as duas se combinam
-    directamente num produto ou quociente comparado com uma constante.
+    """duas formas do mesmo defeito, e cada uma com o seu critério.
 
-    Afiado contra o ruído da primeira versão, que deu 119 num ficheiro só: exigia-se
-    apenas que os dois nomes aparecessem na mesma linha, e isso apanha todos os índices
-    de laço (`M3[r][t] -= f*M3[c][t]`). Agora pede-se que v e w se toquem —
-    `v*w`, `v/w`, `fabs(v)*fabs(w)` — e que a linha compare com um número."""
-    dep, ordem, achados = {}, [], []
+    P3a  v é DEFINIDA a partir de w, e depois as duas TOCAM-SE num produto ou
+         quociente comparado com um número:   vold = 1.0/vol ; fabs(vol*vold - 1.0) < 1e-9
+
+    P3b  v é definida por uma expressão E, e depois COMPARA-SE com a mesma expressão:
+         long malha = u1 * u2 ;  if (malha == u1*u2)     — x == x, o mais nu de todos
+
+    O critério de P3b é a IGUALDADE das expressões normalizadas, e não «v aparece perto
+    de w»: com o critério largo o repositório dava 2338 candidatos em 237 ficheiros, que
+    é ruído puro — `if (v == a && w > 0)` entrava. Normalizado, dá o defeito e mais nada.
+    """
+    def norm(e):
+        return re.sub(r'\s+', '', e)
+
+    dep, defs, ordem, achados = {}, {}, [], []
     for m in ATRIB.finditer(bloco):
         v, expr = m.group(1), m.group(2)
-        if len(v) < 2:                        # índices de laço não contam
+        if len(v) < 2:
             continue
-        # `double g1 = ..., g2 = ...` é UMA declaração com DUAS variáveis: cortar na
-        # primeira vírgula de topo, senão g2 aparece como dependência de g1 — e no
-        # `amplifica.c` isso fazia passar por tautologia o par derivada numérica /
-        # derivada analítica, que são justamente DUAS ROTAS independentes.
         prof, corte = 0, len(expr)
         for k, ch in enumerate(expr):
-            if ch in '([':  prof += 1
+            if ch in '([':   prof += 1
             elif ch in ')]': prof -= 1
             elif ch == ',' and prof == 0: corte = k; break
         expr = expr[:corte]
@@ -102,11 +106,25 @@ def recíprocas(bloco):
                   if n != v and len(n) > 1 and n not in IGNORA}
         if usados:
             dep[v] = usados
+            defs[v] = norm(expr)
             ordem.append((m.end(), v))
+
     for fim, v in ordem:
+        ve = re.escape(v)
+        alvo = defs[v]
+        achou = False
+        # P3b: v comparado com a MESMA expressão que o definiu
+        for m2 in re.finditer(r'\b' + ve + r'\b\s*([=!<>]=)\s*([^;)]*)', bloco[fim:]):
+            if norm(m2.group(2)) == alvo and alvo:
+                ln = bloco[fim:][max(0, m2.start()-30):m2.end()+10]
+                achados.append((v, sorted(dep[v])[0], ln.strip().replace(chr(10), ' ')[:70]))
+                achou = True
+                break
+        if achou:
+            continue
+        # P3a: v e w tocam-se num produto/quociente comparado com um número
         for w in dep.get(v, ()):
-            ve, we = re.escape(v), re.escape(w)
-            # v e w a TOCAREM-SE, em qualquer ordem, com fabs opcional à volta
+            we = re.escape(w)
             junto = re.compile(
                 r'(?:fabs\s*\(\s*)?\b(?:' + ve + r'|' + we + r')\b\s*\)?'
                 r'\s*[*/]\s*'
@@ -114,11 +132,12 @@ def recíprocas(bloco):
             for linha in bloco[fim:].split(chr(10)):
                 if not junto.search(linha):
                     continue
-                if not (re.search(ve, linha) and re.search(we, linha)):
-                    continue
                 if re.search(r'[<>]\s*[\d.]|[=!]=\s*[\d.]|-\s*[\d.]+\s*\)', linha):
                     achados.append((v, w, linha.strip()[:70]))
+                    achou = True
                     break
+            if achou:
+                break
     return achados
 
 
@@ -127,7 +146,7 @@ def texto_do_veredicto(src, i):
     n, j, dentro = 0, i, False
     while j < len(src):
         c = src[j]
-        if c == '"':                      # salta a string, contando-a
+        if c == '"':
             j += 1
             while j < len(src) and not (src[j] == '"' and src[j-1] != '\\'):
                 j += 1
