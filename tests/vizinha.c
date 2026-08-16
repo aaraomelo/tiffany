@@ -28,8 +28,10 @@
 #define KC 3          /* candidatas por posição */
 
 /* a contração do bairro, tal como o bairro.c a mede: s = a·(m + Σ_viz w·c) até ao ponto fixo */
+static double RES[128]; static int NRES;      /* a sequencia de residuos: a LEI vive nela */
 static int contrai(int nt, int nk[NT], double a[NT][KC], double c[NT][KC][NT][KC],
                    double s[NT][KC], int raio, double *dfim){
+    NRES = 0;
     const double m = 1.0, eps = 1e-13;
     double w[NT][KC];
     for(int t = 0; t < nt; t++){                       /* iteração 0: a MARGINAL, e mais nada */
@@ -59,6 +61,7 @@ static int contrai(int nt, int nk[NT], double a[NT][KC], double c[NT][KC][NT][KC
                 s[t][j] = v;
             }
         }
+        if(NRES < 128) RES[NRES++] = dmax;        /* o residuo desta batida */
     }
     *dfim = dmax;
     return it;
@@ -97,8 +100,31 @@ printf("\n§V1  A contração converge, e o ponto fixo é o do rei.\n\n");
      * batida com razao < 1. Medir `d < 1e-12` e medir a minha paciencia; medir que o
      * residuo encolhe monotonamente e medir a contracao. E `it < 60` so diz que nao
      * esgotou o tecto — nada sobre convergir. */
-    ok("a contracao converge: o residuo encolhe e o ponto fixo e alcancado",
-       d < 1e-12 && it > 0 && it < 60);
+    /* E AGORA MEDE-SE O QUE O COMENTARIO ACIMA MANDA. Ele dizia, com todas as letras,
+     * que «medir d < 1e-12 e medir a minha paciencia; medir que o residuo encolhe
+     * monotonamente e medir a contracao» — e a assercao media d < 1e-12. A frase estava
+     * certa e o codigo fazia o contrario.
+     *
+     * A LEI de uma contracao e: existe q < 1 tal que r_{k+1} <= q·r_k em TODA a batida. O
+     * q mede-se — e' o maior quociente da sequencia —, e dele sai tudo o resto: a
+     * convergencia e' consequencia, e nao um limiar. */
+    {
+        int decresce = 1; double q = 0;
+        for(int k = 1; k < NRES; k++){
+            if(RES[k] > RES[k-1]) decresce = 0;                 /* monotona */
+            if(RES[k-1] > 0){ double r = RES[k]/RES[k-1]; if(r > q) q = r; }
+        }
+        printf("      a LEI: o residuo decresce em todas as %d batidas, e a razao de\n"
+               "      contracao medida e q = %.6f < 1 — a convergencia e' CONSEQUENCIA\n\n",
+               NRES, q);
+        ok("A CONTRACAO CONVERGE, E O QUE SE MEDE E' A LEI E NAO O LIMIAR: existe q < 1 com"
+           " r_{k+1} <= q·r_k em TODA a batida, e o q mede-se — e o maior quociente da"
+           " sequencia de residuos. Dele a convergencia sai por consequencia. O comentario"
+           " desta seccao ja o dizia — «medir d < 1e-12 e medir a minha paciencia; medir que"
+           " o residuo encolhe monotonamente e medir a contracao» — e a assercao media"
+           " d < 1e-12: a frase estava certa e o codigo fazia o contrario",
+           decresce && q < 1.0 && NRES > 2 && it > 0);
+    }
     conclui("o que faz dela contracao nao e o limiar: e o residuo decrescer com razao < 1,");
     conclui("e o ponto fixo ser sigma = m + 1/sigma — o mesmo do corpo.");
     printf("      É σ = m + 1/σ iterado: a contração do rei, com o bairro a fazer o Σ.\n");
