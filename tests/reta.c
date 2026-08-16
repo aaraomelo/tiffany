@@ -525,6 +525,62 @@ int main(void){
            desfaz == casos && encolhe == casos && chega == 8 && casos == 112);
     }
 
+    /* ═══ §R15 O MDC, E A DIVERGÊNCIA DAS 28 CÓPIAS ════════════════════════ */
+    printf("\n§R15 rt_mdc — e as 28 cópias do repositório não concordavam.\n\n");
+    {
+        long casos = 0, divide = 0, maximo = 0, naoneg = 0, bezout = 0;
+        for(long a = -30; a <= 30; a++) for(long b = -30; b <= 30; b++){
+            long g = rt_mdc(a, b);
+            casos++;
+            if(g >= 0) naoneg++;
+            /* o caso (0,0): mdc = 0, todo inteiro o divide, e Bézout dá 0 = 0·x + 0·y.
+               Estava a saltar com `continue` ANTES de contar o Bézout, e por isso o
+               total vinha 3720 em vez de 3721 — o contador é que estava errado, e não
+               a lib: verifiquei à parte que o Bézout concorda nos 3721. */
+            if(g == 0){
+                if(a == 0 && b == 0){
+                    long x0, y0, g0 = iz_gcd(a, b, &x0, &y0);
+                    divide++; maximo++;
+                    if(g0 == 0 && a*x0 + b*y0 == 0) bezout++;
+                }
+                continue;
+            }
+            if(a % g == 0 && b % g == 0) divide++;      /* é divisor COMUM */
+            /* e é o MÁXIMO: nenhum divisor comum maior que g */
+            int e_max = 1;
+            for(long d = g + 1; d <= 30 && e_max; d++)
+                if(a % d == 0 && b % d == 0) e_max = 0;
+            if(e_max) maximo++;
+            /* e Bézout: existe x,y com ax + by = g — a segunda rota, pela lib canónica */
+            long x, y, gz = iz_gcd(a, b, &x, &y);
+            if((gz < 0 ? -gz : gz) == g && a*x + b*y == gz) bezout++;
+        }
+        /* e a DIVERGÊNCIA que ele resolve, exibida: a versão sem tratar o sinal */
+        long sem_sinal, div_par = 0;
+        { long a = -40, b = -40; while(b){ long t = a % b; a = b; b = t; } sem_sinal = a; }
+        for(long a = -40; a <= 40; a++) for(long b = -40; b <= 40; b++){
+            long x = a, y = b;
+            while(y){ long t = x % y; x = y; y = t; }
+            if(x != rt_mdc(a, b)) div_par++;           /* onde as duas famílias divergem */
+        }
+        printf("      %ld pares em [−30,30]²: divisor comum em %ld, MÁXIMO em %ld,\n"
+               "      não negativo em %ld, e Bézout confirma em %ld\n",
+               casos, divide, maximo, naoneg, bezout);
+        printf("      e a divergência: mdc(−40,−40) dá %ld sem tratar o sinal e %ld com,\n"
+               "      e as duas famílias divergem em %ld dos 6561 pares de [−40,40]²\n\n",
+               sem_sinal, rt_mdc(-40,-40), div_par);
+        ok("O MÁXIMO DIVISOR COMUM, E ELE TINHA 28 CÓPIAS QUE NÃO CONCORDAVAM: vinte não"
+           " tratavam o sinal e davam mdc(−40,−40) = −40, oito davam 40 — e divergem em 3280"
+           " dos 6561 pares de [−40,40]². Não é estilo: é a mesma pergunta com duas"
+           " respostas, e o que as separa é o PRIMEIRO argumento negativo, porque em C o"
+           " resto herda o sinal do DIVIDENDO. A canónica é não"
+           " negativa, que é o que «máximo» quer dizer. Medido nos 3721 pares de [−30,30]²:"
+           " é divisor comum, é o MAIOR deles por varredura, é não negativo, e a segunda"
+           " rota — o Bézout do iz_gcd, com ax + by = g — confirma-o",
+           divide == casos && maximo == casos && naoneg == casos && bezout == casos
+           && sem_sinal == -40 && rt_mdc(-40,-40) == 40 && div_par == 3280);
+    }
+
     if(!falhas){
         printf("\n  ─────────────────────────────────────────────────────────────\n");
         printf("  As operações da recta têm uma casa. Vinte e oito cópias do mdc,\n");

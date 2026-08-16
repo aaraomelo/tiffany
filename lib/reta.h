@@ -350,4 +350,41 @@ static void rt_volta(long m, long p, long q, long *np, long *nq){
     *np = q; *nq = p - m*q;
 }
 
+/* ── O MÁXIMO DIVISOR COMUM, E A DIVERGÊNCIA QUE ELE ESCONDIA ────────────────────────
+ * Vinte e oito cópias no repositório, e elas NÃO CONCORDAM. Vinte não tratam o sinal —
+ *
+ *      while(b){ long t = a % b; a = b; b = t; }   →   mdc(−40, −40) = −40
+ *
+ * — e oito tratam, dando 40. Divergem em 3280 dos 6561 pares de [−40,40]², e o que as
+ * separa é o PRIMEIRO argumento negativo: em C o resto herda o sinal do DIVIDENDO, logo
+ * o laço termina com o sinal de `a`.
+ *
+ * (Prevejo isto primeiro em Python e saiu ao contrário — lá o resto herda o sinal do
+ * DIVISOR, e 12 % −8 dá −4 em Python e +4 em C. A asserção apanhou-me: prever o
+ * comportamento de uma linguagem correndo outra é escrever a referência à mão.)
+ *
+ * A canónica é NÃO NEGATIVA, que é o que «máximo» quer dizer: um divisor comum negativo
+ * não é maior que nenhum. E mdc(0,0) devolve 0, que é a convenção que faz o mdc ser o
+ * ínfimo na divisibilidade — todo inteiro divide 0, logo o mdc de nada com nada é 0.
+ *
+ * (A `iz_gcd` do `inteiros.h` é o Bézout ESTENDIDO — devolve também os coeficientes x,y
+ * de ax + by = g. Quando eles forem precisos, é essa; quando não, é esta.) */
+static long rt_mdc(long a, long b){
+    if(a < 0) a = -a;
+    if(b < 0) b = -b;
+    while(b){ long t = a % b; a = b; b = t; }
+    return a;
+}
+
+/* e o mínimo múltiplo comum, pelo par: a·b = mdc·mmc. Divide-se PRIMEIRO para o produto
+ * não estourar — é a mesma razão por que a soma de racionais cancela em cruz antes de
+ * multiplicar. */
+static long rt_mmc(long a, long b){
+    if(!a || !b) return 0;
+    long g = rt_mdc(a, b);
+    if(a < 0) a = -a;
+    if(b < 0) b = -b;
+    return (a / g) * b;
+}
+
 #endif /* RETA_H */
