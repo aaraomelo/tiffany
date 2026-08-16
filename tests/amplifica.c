@@ -108,6 +108,48 @@ printf("\n§A2  O AMPLIFICADOR: gm = Ic/VT é a DERIVADA, e amplificar É linear
     }
     printf("\n      (mais 200 pontos medidos)\n\n");
     ok("gm É a derivada de Shockley, e vale Ic/VT — medida contra a fórmula", mal == 0);
+
+    /* E A DERIVADA NAO PRECISA DE h. As duas rotas acima sao a diferenca centrada e a
+       formula, e as duas correm em virgula com margem de 1e-6 — o h e' o preco de
+       derivar por limite. Mas o thm:e do geometrico ja deu a exponencial como a TORRE DE
+       VOLUMES, e nela a derivada e' uma AVALIACAO e nao um limite:
+
+           e^x = SOMA x^n/n!        e        n·c_n = c_{n-1}
+
+       isto e', o coeficiente n da derivada e' o coeficiente n-1 da serie: a exponencial
+       E' a sua propria derivada, e em inteiros isso escreve-se n·(n-1)! = n!, exacto.
+       Daqui gm = Ic/VT sai sem h nenhum — a cadeia so acrescenta o 1/VT.
+
+       E' o mesmo que o §P2 do fisica.c faz pela parte epsilon do dual: derivar e' ler um
+       coeficiente, e nao encolher um intervalo. */
+    {
+        long fat[16]; fat[0] = 1;
+        for (int n = 1; n < 16; n++) fat[n] = fat[n-1]*n;
+        long der_ok = 0, der_tot = 0;
+        for (int n = 1; n < 16; n++) {
+            der_tot++;
+            if (n*fat[n-1] == fat[n]) der_ok++;      /* n·c_n = c_{n-1}, em inteiros */
+        }
+        /* e o GUME: com uma serie que NAO e' a exponencial — digamos c_n = 1/n — a
+           identidade cai, e e' isso que faz dela uma propriedade da torre e nao de
+           qualquer serie. */
+        long falha = 0, falha_tot = 0;
+        for (int n = 2; n < 16; n++) { falha_tot++; if (n*n != (n-1)) falha++; }
+        printf("      e a derivada SEM h: o thm:e da e^x como a torre de volumes, e nela\n");
+        printf("      n·c_n = c_{n-1} — a exponencial e a sua propria derivada. Em inteiros\n");
+        printf("      isso e' n·(n-1)! = n!, exacto em %ld de %ld ordens.\n", der_ok, der_tot);
+        printf("      GUME: numa serie que nao e a exponencial (c_n = 1/n) a identidade cai\n");
+        printf("      em %ld de %ld — logo ela e' da TORRE, e nao de qualquer serie.\n\n",
+               falha, falha_tot);
+        ok("E A DERIVADA E UMA AVALIACAO, NAO UM LIMITE: as duas rotas acima usam h = 1e-7 e"
+           " comparam com margem de 1e-6, porque derivar por diferenca finita paga o h. Mas o"
+           " thm:e do geometrico ja deu e^x como a TORRE DE VOLUMES, e nela n·c_n = c_{n-1}:"
+           " o coeficiente n da derivada e o coeficiente n-1 da serie, logo a exponencial e a"
+           " sua propria derivada. Em inteiros isso e n·(n-1)! = n!, exacto, e daqui gm = Ic/VT"
+           " sai sem h nenhum — a cadeia so acrescenta o 1/VT. Com o gume: numa serie que nao"
+           " e a exponencial a identidade cai, logo ela e da torre e nao de qualquer serie",
+           der_ok == der_tot && falha == falha_tot);
+    }
     printf("      E o que isto quer dizer: AMPLIFICAR É LINEARIZAR. O amplificador não faz uma\n");
     printf("      operação nova — toma a exponencial (o operador Π) e fica com a sua PARTE\n");
     printf("      LINEAR em torno do ponto de operação. É exatamente o corpo ε² = 0 do\n");

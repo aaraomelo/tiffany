@@ -7,7 +7,7 @@ agm_analog 9464d727b662316a 0
 agm_deforma 99c411ca3dffac43 0
 agm_gerador 958387d0ec02fc04 0
 algebra e4923ae8b9efc021 0
-amplifica 18a45c8f08ff73f8 0
+amplifica 0c8270523a2851f2 0
 analiticas 9ef41198052b919a 0
 analog d66dd4fb3d8bf3ff 0
 antissimetrico 5c13e7c1c00d85b1 0
