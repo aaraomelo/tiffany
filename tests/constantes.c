@@ -47,6 +47,7 @@
  *   cc -O2 -std=c99 -Wall -I../lib constantes.c -o constantes && ./constantes
  */
 #include <stdio.h>
+#include "oito.h"
 #include "unidade.h"
 
 /* o posto de uma lista de vectores de expoentes, por eliminacao inteira */
@@ -692,16 +693,35 @@ int main(void)
          * dimensao 2 a troca move, e e' por isso que o vector aponta e o escalar nao.
          * Aqui estava `if(v != v)`, que o compilador denunciou: comparava v consigo
          * proprio em vez de aplicar a troca. */
-        for(long v = -8; v <= 8; v++){
-            if(v == 0) continue;
-            long e1[1] = { v }, de1[1];            /* escalar: dimensao 1 */
-            de1[0] = e1[0];                         /* a troca em dimensao 1 e' a identidade */
-            if(de1[0] != e1[0]) esc_com_dual++;
-            long v2[2] = { v, 0 }, dv2[2];          /* vector: dimensao 2 */
-            dv2[0] = v2[1]; dv2[1] = v2[0];         /* a TROCA, aplicada */
-            if(dv2[0] != v2[0] || dv2[1] != v2[1]) vec_com_dual++;
+        /* E AQUI A LEI 0 DISPENSA A VARREDURA, que era minha: `for(v = -8; v <= 8)` com
+         * um tecto que escolhi, e `if(v == 0) continue;` a excluir o unico ponto que a
+         * lei nomeia. O Corpo Universal ja o diz (cor:exaustao): em P^1(F_127) ha 128
+         * pontos e varrem-se TODOS — «a unica varredura deste quadro que nao pode estar a
+         * deixar de fora o caso interessante, porque nao ha caso de fora».
+         *
+         * E 0† = INFINITO: o zero nao e' um caso degenerado a saltar, e' um ponto com
+         * dual como os outros. A troca [p:q] -> [q:p] e' TOTAL, sem teste e sem ramo, e
+         * por isso a medida corre nos 128 sem uma excepcao.
+         *
+         * A tese ganha forma exacta: os pontos que sao o SEU PROPRIO dual sao os fixos da
+         * involucao, e sao exactamente as solucoes de x^2 = 1 — dois deles, +1 e -1. Todos
+         * os outros 126 movem, e o par 0 <-> INF esta entre eles, contado e nao excluido. */
+        long fixos = 0, movem = 0, involucao = 0, par_zero_inf = 0;
+        for(int i = 0; i < OT_PONTOS; i++){
+            Pt x = (Pt)i, dx = ot_inverte(x), ddx = ot_inverte(dx);
             tot++;
+            if(ddx == x) involucao++;               /* a troca e' involucao nos 128 */
+            if(dx == x) fixos++; else movem++;      /* fixo = e' o seu proprio dual */
+            if((x == 0 && dx == OT_INF) || (x == OT_INF && dx == 0)) par_zero_inf++;
         }
+        esc_com_dual = fixos;      /* os que NAO apontam: sao o seu proprio dual */
+        vec_com_dual = movem;      /* os que apontam: o dual e' outro ponto */
+        printf("        e em P^1(F_127), EXAUSTIVO nos %ld pontos: a troca e' involucao em"
+               " %ld, com %ld pontos fixos (x^2 = 1) e %ld a mover\n",
+               tot, involucao, fixos, movem);
+        printf("        e o par 0 <-> INF aparece %ld vezes — contado, e nao excluido:"
+               " 0† = INF e' a Lei 0\n", par_zero_inf);
+        if(involucao != tot || par_zero_inf != 2 || fixos != 2) tot = -1;
         /* E A MEDIDA DA ORDEM: quantas ordens distintas o escalar distingue, contra quantas
          * existem. Com n partes ha' n! ordens; a soma nao as separa — colapsa-as todas. */
         long fact = 1; for(long k = 2; k <= 5; k++) fact *= k;   /* 5! */
@@ -720,8 +740,9 @@ int main(void)
         somas_distintas = nv;
         printf("        e a ORDEM: %ld ordens de 5 partes colapsam em %ld somas —"
                " o escalar perde %ld\n", contadas, somas_distintas, contadas - somas_distintas);
-        printf("        e a RAZAO: escalares com dual distinto %ld, vectores %ld de %ld —"
-               " um escalar nao tem para onde apontar\n\n", esc_com_dual, vec_com_dual, tot);
+        printf("        e a RAZAO: pontos que sao o SEU PROPRIO dual %ld, pontos que"
+               " APONTAM %ld de %ld — e a exaustao nao tem tecto meu\n\n",
+               esc_com_dual, vec_com_dual, tot);
         ok("a MASSA E' VECTORIAL, e o escalar e' so' o traco dela. Em R^n a segunda coordenada"
            " da cruz nao e' um numero: e' a MATRIZ M_ij = SOMA (x_i - c_i)(x_j - c_j), e a massa"
            " escalar e' apenas o seu traco — logo a massa tem DIRECCAO, e um corpo pode ter massa"
@@ -739,7 +760,8 @@ int main(void)
            " reconstrucao ORDENADA, e cada parte tem de saber onde vai. Se a massa fosse um"
            " numero, essa informacao nao estava em lado nenhum",
            perdidas > 0 && distintas_tensor > distintas_traco && com_direccao > isotropicas
-           && casos == 168 && esc_com_dual == 0 && vec_com_dual == tot && tot == 16
+           && casos == 168 && esc_com_dual == 2 && vec_com_dual == tot - 2
+           && tot == OT_PONTOS
            && contadas == 120 && somas_distintas == 1);
     }
 

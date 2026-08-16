@@ -35,6 +35,7 @@
  *   cc -O2 -std=c99 -Wall -I../lib corpo_peano.c -o corpo_peano && ./corpo_peano
  */
 #include <stdio.h>
+#include "oito.h"
 #include "unidade.h"
 
 typedef long long L;
@@ -624,14 +625,26 @@ int main(void){
             }
         /* leis operacionais 0/1/2; milénios = leituras, não axiomas */
         int leis = 1;
-        { /* Lei 1: ν(ν(x))=x com ν=c/x (órbita 0↔∞) */
-          long c = 1;
-          for(long x = 1; x <= 30; x++){
-              if(x == 0) continue;
-              long nx = c / x; if(nx == 0) continue; /* afim: ν=c/x; ∞↔0 conceptual */
-              long nnx = c / nx;
-              if(nnx != x) leis = 0;
+        { /* Lei 1: ν(ν(x)) = x, com ν(x) = −1/x e a órbita 0 ↔ ∞.
+           *
+           * E ISTO ESTAVA MEDIDO NUM PONTO SÓ. O que aqui havia era `c = 1`, `x` de 1 a
+           * 30, e `nx = c / x` em DIVISÃO INTEIRA: para x ≥ 2 dá zero, logo `continue`.
+           * O laço corria apenas com x = 1 — o ponto fixo trivial —, e os outros 29 eram
+           * saltados sem se dar por isso. E o `if(x == 0) continue` era ramo morto: x
+           * começa em 1. O comentário dizia «∞ ↔ 0 conceptual», o que é admitir que a
+           * órbita que a lei nomeia estava fora do código.
+           *
+           * A Lei 0 dispensa tudo isto: em ℙ¹(𝔽₁₂₇) a inversão é TOTAL — 0† = ∞ é um
+           * ponto como os outros — e o espaço tem 128 pontos, que se varrem INTEIROS. Sem
+           * tecto meu, sem divisão que colapsa, sem caso saltado. */
+          long inv = 0, orb = 0;
+          for(int i = 0; i < OT_PONTOS; i++){
+              Pt x = (Pt)i;
+              if(ot_nu(ot_nu(x)) == x) inv++;
+              if((x == 0 && ot_nu(x) == OT_INF) || (x == OT_INF && ot_nu(x) == 0)) orb++;
           }
+          if(inv != OT_PONTOS) leis = 0;         /* ν é involução nos 128 */
+          if(orb != 2) leis = 0;                 /* e 0 ↔ ∞ é uma órbita dela */
           /* Lei 2: i^4=id, i^2=-1 */
           long r = 1, m = 0;
           for(int k = 0; k < 2; k++){ long nr = -m, nm = r; r = nr; m = nm; }
@@ -639,8 +652,10 @@ int main(void){
           r = 1; m = 0;
           for(int k = 0; k < 4; k++){ long nr = -m, nm = r; r = nr; m = nm; }
           if(r != 1 || m != 0) leis = 0;
-          /* Lei 0: 0 = (+1)+(-1); dual ∞ */
-          if((1 + (-1)) != 0) leis = 0;
+          /* Lei 0: o dual do zero é o ∞, e diz-se aplicando a TROCA — não com
+           * `if((1 + (-1)) != 0)`, que é aritmética da linguagem. */
+          if(ot_inverte((Pt)0) != OT_INF) leis = 0;
+          if(ot_inverte(OT_INF) != (Pt)0) leis = 0;
         }
 
         /* unicidade f^{(n)}=f^{-1}: a²-na-1=0; disc=n²+4; só σ_n>0 */

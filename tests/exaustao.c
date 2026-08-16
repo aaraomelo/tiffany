@@ -13,7 +13,7 @@
  * fora o caso interessante, porque não há caso de fora.
  *
  * §X0  os 128 pontos existem e são distintos — e o ∞ é [1:0], não um número grande
- * §X1  a INVERSÃO é total e involutiva nos 128, e 0 ↔ ∞
+ * §X1  a INVERSÃO é total e involutiva nos 128, e 0 ↔ ∞ — e ν = −1/x também
  * §X2  o GATO é bijecção dos 128 para todo metal — os 126 metais, exaustivo
  * §X3  a órbita do gato FECHA sempre, e o período mede-se (nada cresce)
  * §X4  a Möbius com det ≠ 0 é bijecção — exaustivo nos pontos, amostrado nas matrizes
@@ -72,6 +72,31 @@ int main(void){
                " %ld\n", n, OT_PONTOS, mal, colide);
         printf("      1/0 = ∞ ? %s      1/∞ = 0 ? %s\n", zi ? "sim" : "NÃO",
                iz ? "sim" : "NÃO");
+        /* E A OUTRA INVOLUÇÃO DA CASA, ν(x) = −1/x, que é a Lei 1 — e que vivia em
+         * `lib/oito.h` SEM UM ÚNICO CHAMADOR, logo sem nunca ter sido medida. Ao pô-la a
+         * correr nos 128 apareceu que não era involução: o oposto de ∞ estava escrito
+         * como zero, o que dava ν(∞) = ∞ e portanto ν(ν(0)) = ∞ ≠ 0 — falhava exactamente
+         * no par que a Lei 0 nomeia. Com o oposto certo (−∞ = ∞) fecha nos 128.
+         *
+         * E ν não tem ponto fixo nenhum, o que também é lei e não acaso: ν(x) = x pede
+         * x² = −1, e −1 não é resíduo quadrático módulo 127 (porque 127 ≡ 3 mod 4). O i
+         * não vive nesta face — e é por isso que aqui ν roda sem nada ficar parado. */
+        long nu_inv = 0, nu_fix = 0, nu_orb = 0;
+        for(int i = 0; i < OT_PONTOS; i++){
+            Pt x = (Pt)i, y = ot_nu(x);
+            if(ot_nu(y) == x) nu_inv++;
+            if(y == x) nu_fix++;
+            if((x == 0 && y == OT_INF) || (x == OT_INF && y == 0)) nu_orb++;
+        }
+        printf("      ν∘ν = id em %ld/%d · pontos fixos de ν: %ld (x² = −1 não tem solução"
+               " em 𝔽₁₂₇) · a órbita 0 ↔ ∞: %ld\n", nu_inv, OT_PONTOS, nu_fix, nu_orb);
+        ok("E ν(x) = −1/x É INVOLUÇÃO NOS 128, COM O PAR 0 ↔ ∞ COMO ÓRBITA: esta função"
+           " vivia na biblioteca sem um único chamador, logo nunca tinha sido medida — e"
+           " ao correr apareceu que falhava, porque o oposto de ∞ estava escrito como"
+           " zero. Falhava exactamente no par que a Lei 0 nomeia, que é onde só a"
+           " exaustão olha. E ν não tem ponto fixo, o que é lei: ν(x) = x pede x² = −1, e"
+           " −1 não é resíduo quadrático módulo 127",
+           nu_inv == OT_PONTOS && nu_fix == 0 && nu_orb == 2);
         ok("A INVERSÃO É TOTAL, INVOLUTIVA E BIJECTIVA NOS 128 PONTOS — e isto é EXAUSTIVO,"
            " não uma amostra: são todos os pontos que existem. O zero tem inversa (o ∞) e"
            " o ∞ tem inversa (o zero), e nenhum ponto colide com outro. A fibra vazia que"
@@ -226,7 +251,7 @@ int main(void){
            car == OT_P);
     }
 
-    printf("\n=== %ld asserções, %ld falhas, %ld fora do tipo ===\n",
+    printf("\n=== %d asserções, %d falhas, %ld fora do tipo ===\n",
            unidades, falhas, ot_fora);
     return falhas ? 1 : 0;
 }

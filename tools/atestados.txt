@@ -77,7 +77,7 @@ config_corpo 058335e53d3b487e 0
 conico db6e0cef9c0d6c26 0
 conjunto ee3b0d585a79668e 0
 conservacao_metrica afadb92daf50a069 0
-constantes cdadc1f929bcfc81 0
+constantes 15b26b66c7f64742 0
 constroi 2c60273bdc7acb47 0
 conta b61d39344f09ecf3 0
 contagem_cifra 950b2e07602b7dad 0
@@ -99,7 +99,7 @@ corpo_do_numero 235bf71b3ace5cac 0
 corpo_dual 829b5470e1022d51 0
 corpo_fisico 2a6b8f6180ed1f24 0
 corpo_front 6d9be918caa521db 0
-corpo_peano d0fa5b7e1da0f137 0
+corpo_peano 3c134a3db72ab710 0
 corpo_unico d21a078aa8bd7aa5 0
 corpo_viveiro 35c96afeadd012b8 0
 corpodecorpos 7833ffa700f335cd 0
@@ -190,7 +190,7 @@ estrela_pontofixo 28214a4f49ddadcb 0
 estrela_unifica 5e2f9d7b477e452a 0
 estrutura_corpo 2f62a80aac5c3a03 0
 evolutivo 0d23ff55520f5c59 0
-exaustao e585271daf22f8dd 0
+exaustao d04b44954e1d48e3 0
 expressao 92d06c014898a2ea 0
 fala 710144c0e4bd433c 0
 familia_real 63bd209ecb10c32e 0

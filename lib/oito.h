@@ -111,8 +111,18 @@ static int ot_mobius(F a, F b, F c, F d, Pt x, Pt *r){
 }
 /* o GATO A_m sobre 𝔽ₚ: x ↦ (m x + 1)/x — e leva 0 a ∞, ∞ a m */
 static int ot_gato(F m, Pt x, Pt *r){ return ot_mobius(m, 1, 1, 0, x, r); }
-/* a involução da casa, ν(x) = −1/x, em ℙ¹ */
-static Pt ot_nu(Pt x){ return ot_inverte(ot_e_inf(x) ? (Pt)0 : (Pt)ot_oposto((F)x)); }
+/* a involução da casa, ν(x) = −1/x, em ℙ¹.
+ *
+ * E O OPOSTO DE ∞ É ∞, não zero. Estava escrito `ot_e_inf(x) ? (Pt)0 : …`, o que dava
+ * ν(∞) = inverte(0) = ∞ — e então ν(ν(0)) = ν(∞) = ∞ ≠ 0: a involução falhava
+ * exactamente no par que a Lei 0 nomeia. Com o oposto certo, ν(∞) = inverte(∞) = 0 e
+ * ν(0) = inverte(0) = ∞, logo o par 0 ↔ ∞ é uma órbita de ν como deve ser.
+ *
+ * Nunca foi medida: esta função vivia na biblioteca sem um único chamador. */
+static Pt ot_nu(Pt x){
+    Pt op = ot_e_inf(x) ? OT_INF : (Pt)ot_oposto((F)x);   /* −∞ = ∞ */
+    return ot_inverte(op);
+}
 
 /* ── E O PERÍODO, que num corpo finito é sempre finito e mede-se ───────────────*/
 static int ot_periodo_gato(F m, long *per){
