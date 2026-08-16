@@ -37,6 +37,7 @@
 #include <string.h>
 #include <math.h>
 #include "unidade.h"
+#include "reta.h"
 
 /* ---------------- o corpo: a mesma convenção do fecha.c ---------------- */
 typedef struct { long B, C; int fechou; } Regua;
@@ -74,17 +75,21 @@ static void secao_X1(void){
     /* HOSPEDAR: os pesos, em bytes. É a conta que eu fiz, e ela não é sobre transfusão. */
     printf("     HOSPEDAR o doador — a conta que eu fiz, e que responde a outra pergunta:\n");
     printf("        modelo        parâmetros    em 4 bits      cabe em 159 GB?   corre em 15 GB?\n");
-    struct { const char *n; double B; } mods[] = {
-        { "8B      ",   8.0 }, { "20B     ",  20.0 }, { "70B     ",  70.0 },
-        { "120B    ", 120.0 }, { "314B    ", 314.0 },
+    /* Os parâmetros contam-se em mil milhões, e são inteiros. E «4 bits por parâmetro» é
+     * meio byte — dividir por dois, não multiplicar por 0,5: a resposta é GB = B/2, uma
+     * fracção de inteiros, e «cabe em 159 GB» é B < 318 sem se formar o quociente. */
+    struct { const char *n; long B; } mods[] = {
+        { "8B      ",   8 }, { "20B     ",  20 }, { "70B     ",  70 },
+        { "120B    ", 120 }, { "314B    ", 314 },
     };
     int cabe_disco = 0, cabe_ram = 0;
     for(int i = 0; i < 5; i++){
-        double gb = mods[i].B * 0.5;               /* 4 bits = 0,5 byte por parâmetro */
-        int cd = gb < 159.0, cr = gb < 13.0;
+        long B = mods[i].B;
+        int cd = (B < 2*159), cr = (B < 2*13);     /* B/2 < 159  ⟺  B < 318 */
         cabe_disco += cd; cabe_ram += cr;
-        printf("        %s %8.0f B    %7.1f GB      %-16s  %s\n",
-               mods[i].n, mods[i].B, gb, cd ? "sim" : "NÃO", cr ? "sim" : "NÃO");
+        char gb[24]; rt_escreve_decimal(1, B, 2, 1, gb, sizeof gb);
+        printf("        %s %8ld B    %7s GB      %-16s  %s\n",
+               mods[i].n, B, gb, cd ? "sim" : "NÃO", cr ? "sim" : "NÃO");
     }
     /* E A MEDIDA CORRIGIU-ME OUTRA VEZ. Eu tinha dito ao Aarão que o 314 B "não cabe" — cabe:
      * 157 GB dos 159 livres, por dois de margem. Escrevi a asserção a afirmar que algum não
@@ -184,9 +189,12 @@ static void secao_X3(void){
     ok("as 16 coordenadas fecham com 4 termos cada", fechou == D);
     ok("e preveem os inéditos com resíduo 0 — a medula regenera", prev_ok == prev_tot && prev_tot > 0);
 
-    double razao = (double)TOTAL / COLHE;
-    printf("        a razão             %.1f×      (o que se obtém pelo que se colheu)\n", razao);
-    ok("colhe-se menos do que se obtém — senão não era medula, era cópia", razao > 1.0);
+    /* a razão é TOTAL/COLHE, dois inteiros — e «maior que um» é TOTAL > COLHE, sem os
+     * dividir. O decimal que se mostra é uma LEITURA da fracção, não o número. */
+    { char r[24]; rt_escreve_decimal(1, TOTAL, COLHE, 1, r, sizeof r);
+      printf("        a razão             %ld/%d = %s×   (o que se obtém pelo que se colheu)\n",
+             (long)TOTAL, COLHE, r); }
+    ok("colhe-se menos do que se obtém — senão não era medula, era cópia", TOTAL > COLHE);
 
     conclui("prever o que se colheu não prova nada; o que decide é o inédito.");
 }
@@ -251,25 +259,34 @@ static void secao_X5(void){
     const long DIM = 768, NMAIS2 = 4, SLOT = 16;
     long por_corpo = DIM * NMAIS2 * SLOT;
     printf("        um corpo transfundido:\n");
-    printf("           %ld dimensões × %ld termos × %ld bytes = %ld bytes  (%.1f KB)\n",
-           DIM, NMAIS2, SLOT, por_corpo, por_corpo/1024.0);
+    { char kb[24]; rt_escreve_decimal(1, por_corpo, 1024, 1, kb, sizeof kb);
+      printf("           %ld dimensões × %ld termos × %ld bytes = %ld bytes  (%s KB)\n",
+             DIM, NMAIS2, SLOT, por_corpo, kb); }
 
-    double livre = 159.0 * 1024 * 1024 * 1024;
-    double quantos = livre / por_corpo;
-    printf("\n        nos 159 GB livres da Patria cabem %.0f corpos desses\n", quantos);
+    /* 159 GB são 159·1024³ bytes — um inteiro, e cabe folgado no long (1,7e11). Quantos
+     * corpos lá cabem é uma divisão de inteiros, e a pergunta «cabem mais de um milhão?»
+     * responde-se sem a fazer: livre > 1000000·por_corpo. */
+    const long livre = 159L * 1024 * 1024 * 1024;
+    long quantos = livre / por_corpo;
+    printf("\n        nos 159 GB livres da Patria cabem %ld corpos desses\n", quantos);
     printf("        (o doador de 314 B cabe UMA vez, e deixa 2 GB — mas não corre)\n");
 
     ok("um corpo transfundido cabe em dezenas de KB, não em GB", por_corpo < 100L*1024);
-    ok("e cabem milhões deles no que temos — o espaço deixou de ser a pergunta",
-       quantos > 1000000.0);
+    ok("e cabem milhões deles no que temos — o espaço deixou de ser a pergunta, e a conta"
+       " e' de inteiros: 159.1024^3 bytes contra um milhao de corpos, sem dividir",
+       livre > 1000000L * por_corpo);
 
     /* E A COMPARAÇÃO QUE FECHA: a razão entre hospedar e transfundir. */
-    double hospedar = 314.0 * 0.5 * 1024 * 1024 * 1024;      /* 314 B params em 4 bits */
-    printf("\n        hospedar o 314 B (4 bits)   %.0f bytes\n", hospedar);
+    /* 314 mil milhões de parâmetros a meio byte cada: 157·1024³ bytes, um inteiro. E «mais
+     * de seis ordens de grandeza» é hospedar > 1000000·por_corpo, sem dividir. */
+    const long hospedar = 157L * 1024 * 1024 * 1024;         /* 314 B params em 4 bits */
+    printf("\n        hospedar o 314 B (4 bits)   %ld bytes\n", hospedar);
     printf("        transfundir um corpo        %ld bytes\n", por_corpo);
-    printf("        a razão                     %.1e ×\n", hospedar / por_corpo);
-    ok("a diferença é de mais de seis ordens de grandeza — e é por isso que a pergunta muda",
-       hospedar / por_corpo > 1e6);
+    printf("        a razão                     %ld × (exacta, %ld/%ld)\n",
+           hospedar / por_corpo, hospedar, por_corpo);
+    ok("a diferença é de mais de seis ordens de grandeza — e é por isso que a pergunta muda."
+       " A conta e' de inteiros: 157.1024^3 bytes contra um milhao de corpos, sem dividir",
+       hospedar > 1000000L * por_corpo);
 
     printf("\n     O QUE ISTO NÃO DIZ, e tem de ser dito: 768×4 números captam o CORPO — a régua,\n");
     printf("     o dual, o regime. Não captam o que o doador SABE. A transfusão leva a estrutura\n");

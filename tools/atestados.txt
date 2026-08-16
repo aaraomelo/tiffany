@@ -118,7 +118,7 @@ cristalino 6988eca8676626b1 0
 cruza b5fd026db2e5f02a 0
 cruzamento 33bb8f715e706c30 0
 cruzamento_geral cf316e8c0219b742 0
-curvatura 464cd1c988ed0669 0
+curvatura b79c8368f1490b91 0
 deforma a65d0d53edf428fc 0
 deforma_d fb144a649a4dcf70 0
 demonstracoes a685d9fad33b9705 0
@@ -465,7 +465,7 @@ traduz_volta 9302ea3367def892 0
 transforma 25258f5c9679fa5e 0
 transformada 23899586ee0774d4 0
 transformada_andar a05f9db457978c4c 0
-transfusao 103d2692f48b184b 0
+transfusao 645d63bf8859beed 0
 travessia 4d90fe8423093207 0
 tres_pontos 43ad5af8747edc63 0
 tres_reconstroi 1f48f7d032a33b62 0

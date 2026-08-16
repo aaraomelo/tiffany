@@ -33,6 +33,7 @@
  */
 #include <stdio.h>
 #include "unidade.h"
+#include "reta.h"
 
 /* Z[raizD] com D = m^2+4: um elemento e' (a + b.raizD)/2, guardado como (a,b) inteiros.
  * sigma = (m + raizD)/2 -> (m, 1). O produto: (a+b r)(c+d r)/4 = (ac + bd D + (ad+bc) r)/4 */
@@ -110,7 +111,10 @@ int main(void){
          * escreve em Z[raizD] e compara-se por multiplicacao cruzada, sem dividir.
          * Se a conservacao NAO valesse, os dois lados divergiam. */
         long mau = 0, casos = 0;
-        double res1 = 0, res10 = 0, res60 = 0;
+        /* os resíduos como FRACÇÕES: guardam-se os pares (r, escala) e comparam-se por
+         * produto cruzado. Antes eram três doubles em três pontos — m = 1, 10 e 60 —, e a
+         * asserção dizia «desce MONÓTONO» a partir de três amostras. */
+        long rn[64], rd[64]; int nr = 0;
         for(long m = 1; m <= 60; m++){
             long D = m*m + 4;
             /* 2.sigma = m + raizD ; sigma^2 = (m^2+2 + m.raizD)/2 (pela borda, §K1) */
@@ -135,20 +139,39 @@ int main(void){
             long long r = (long long)(esq_a - dir_a);
             if(r < 0) r = -r;
             long long escala = (long long)esq_a; if(escala < 0) escala = -escala;
-            if(m == 1)  res1  = (double)r/(double)escala;
-            if(m == 10) res10 = (double)r/(double)escala;
-            if(m == 60) res60 = (double)r/(double)escala;
+            rn[nr] = (long)r; rd[nr] = (long)escala; nr++;
         }
+        /* a monotonia, em TODOS os 59 passos e por produto cruzado: r_k/e_k > r_{k+1}/e_{k+1}
+         * é r_k·e_{k+1} > r_{k+1}·e_k, e não há uma divisão em lado nenhum */
+        long desce = 0, passos = 0, positivos = 0;
+        for(int i = 0; i + 1 < nr; i++){
+            passos++;
+            if(rn[i]*rd[i+1] > rn[i+1]*rd[i]) desce++;
+        }
+        for(int i = 0; i < nr; i++) if(rn[i] > 0) positivos++;
         printf("      os DOIS caminhos para k'/k discordam em %ld de %ld — a conservacao"
                " NAO E' EXACTA\n", mau, casos);
-        printf("      e o residuo relativo DESCE:  m=1 %.4f   m=10 %.4f   m=60 %.6f\n",
-               res1, res10, res60);
+        {   /* e os três de sempre, agora como FRACÇÕES exactas e reconstruídos pelo
+             * `rt_escreve_decimal` — o decimal é uma leitura da fracção, e não o número */
+            char d1[32], d2[32], d3[32];
+            long g1 = rt_mdc(rn[0],rd[0]), g2 = rt_mdc(rn[9],rd[9]), g3 = rt_mdc(rn[59],rd[59]);
+            rt_escreve_decimal(1, rn[0],  rd[0],  6, d1, sizeof d1);
+            rt_escreve_decimal(1, rn[9],  rd[9],  6, d2, sizeof d2);
+            rt_escreve_decimal(1, rn[59], rd[59], 8, d3, sizeof d3);
+            rn[0] /= g1; rd[0] /= g1; rn[9] /= g2; rd[9] /= g2; rn[59] /= g3; rd[59] /= g3;
+            printf("      e o residuo relativo DESCE em TODOS os %ld passos (nao em tres pontos):\n"
+                   "        m=1  %ld/%ld = %s\n        m=10 %ld/%ld = %s\n        m=60 %ld/%ld = %s\n",
+                   passos, rn[0], rd[0], d1, rn[9], rd[9], d2, rn[59], rd[59], d3);
+        }
         ok("A CONSERVACAO k.D^(3/2) NAO E' EXACTA, e este medidor apanhou-me a escreve-la"
            " como se fosse: os dois caminhos para k'/k discordam em TODOS os m. O que vale"
            " e' que o residuo DESCE monotono com m — a conservacao e' ASSINTOTICA, e o"
            " limite 1/raiz(2) e' um limite e nao uma identidade. E o gradiente continua"
-           " obrigatorio, porque ele sai da FORMA FECHADA, que essa e' exacta",
-           mau == casos && res1 > res10 && res10 > res60 && res60 > 0);
+           " obrigatorio, porque ele sai da FORMA FECHADA, que essa e' exacta. E «desce"
+           " monotono» e' agora varrido nos 59 passos e comparado por PRODUTO CRUZADO — o"
+           " que aqui estava eram tres doubles em tres pontos (m = 1, 10 e 60), e tres"
+           " amostras nao sao uma monotonia",
+           mau == casos && desce == passos && passos == 59 && positivos == nr && nr == 60);
     }
 
     /* ═══ §K5 — o CONTROLO ═════════════════════════════════════════════════════════

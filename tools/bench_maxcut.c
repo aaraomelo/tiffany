@@ -15,14 +15,18 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include "reta.h"
 
 #define BITS 64
 
 static unsigned long sem = 0x9e3779b97f4a7c15UL;
 static unsigned long rnd(void){ sem ^= sem << 13; sem ^= sem >> 7; sem ^= sem << 17; return sem; }
-static double agora(void){
+/* O RELÓGIO JÁ DÁ INTEIROS: `clock_gettime` devolve tv_sec e tv_nsec, os dois inteiros, e
+ * o double só os juntava — perdendo bits ao somar um segundo com um nanossegundo, que é
+ * somar 1e9 com 1. Em nanossegundos o instante é um `long` exacto até 292 anos. */
+static long agora_ns(void){
     struct timespec t; clock_gettime(CLOCK_MONOTONIC, &t);
-    return t.tv_sec + t.tv_nsec / 1e9;
+    return (long)t.tv_sec * 1000000000L + (long)t.tv_nsec;
 }
 
 /* ── Dual Sort por MARCAS (so' no experimento dual; nao se altera) ───────────────── */
@@ -135,16 +139,18 @@ int main(void){
             maestro_corte(n, lado, &na, &nb);
             long corte = corte_ab(na, nb);
             long mx = max_corte_n(n);
-            double q = mx ? (double)corte / (double)mx : 0;
+            char q[24]; rt_escreve_decimal(1, corte, mx ? mx : 1, 4, q, sizeof q);
             /* volta fecha */
             long resid = 0;
             for(long i = 0; i < n; i++){
                 long r = (i + n/2) % n;
                 if((r + n/2) % n != i) resid++;
             }
-            printf("  %6ld %10ld %10ld %12ld %8.4f %6d\n",
+            printf("  %6ld %10ld %10ld %12ld %8s %6d\n",
                    n, na, corte, mx, q, 0);
-            if(na != nb || corte != mx || resid != 0 || q != 1.0) maus++;
+            /* o `q != 1.0` que aqui estava era a MESMA pergunta que o `corte != mx` ao lado,
+             * feita outra vez em vírgula: q é corte/mx, e q = 1 é corte = mx. Fica a inteira. */
+            if(na != nb || corte != mx || resid != 0) maus++;
             free(lado);
         }
         printf("  >>> isomorfo em %d escalas: qualidade=1, bits=0, |A|=|B| — %s\n\n",
@@ -173,13 +179,17 @@ int main(void){
             alg_amostra(n, 1000, &aa, &ac);
             alg_aleatorio(n, &ra, &rc);
 
-            printf("  %6ld %10.4f %10.4f %10.4f %10.4f %10.4f\n",
-                   n,
-                   (double)corte_ab(na, nb) / mx,
-                   (double)bc / mx,
-                   (double)gc / mx,
-                   (double)ac / mx,
-                   (double)rc / mx);
+            {   /* as cinco qualidades são corte/mx — fracções de inteiros, e o decimal é
+                 * a leitura delas. Nenhuma divisão de reais acontece. */
+                char q1[24], q2[24], q3[24], q4[24], q5[24];
+                long d = mx ? mx : 1;
+                rt_escreve_decimal(1, corte_ab(na, nb), d, 4, q1, sizeof q1);
+                rt_escreve_decimal(1, bc, d, 4, q2, sizeof q2);
+                rt_escreve_decimal(1, gc, d, 4, q3, sizeof q3);
+                rt_escreve_decimal(1, ac, d, 4, q4, sizeof q4);
+                rt_escreve_decimal(1, rc, d, 4, q5, sizeof q5);
+                printf("  %6ld %10s %10s %10s %10s %10s\n", n, q1, q2, q3, q4, q5);
+            }
             free(lado);
         }
         puts("  (1.0000 = maximo. Maestro = 1 em toda a escala; aleatorio varia.)\n");
@@ -200,10 +210,26 @@ int main(void){
         long bits_a = 9999 * (BITS - 1);
         printf("  §LAND n=%ld  bits apagados (Landauer)\n", n);
         printf("  %-12s %14s %14s %10s\n", "metodo", "bits", "corte", "qual");
-        printf("  %-12s %14ld %14ld %10.4f\n", "Maestro", bits_m, corte_ab(na,nb), 1.0);
-        printf("  %-12s %14ld %14ld %10.4f\n", "busca", bits_b, bc, (double)bc/max_corte_n(n));
-        printf("  %-12s %14ld %14ld %10.4f\n", "guloso", bits_g, gc, (double)gc/max_corte_n(n));
-        printf("  %-12s %14ld %14ld %10.4f\n", "amostra10k", bits_a, ac, (double)ac/max_corte_n(n));
+        {   long d = max_corte_n(n); if(!d) d = 1;
+            char qm[24], qb[24], qg[24], qa[24];
+            rt_escreve_decimal(1, corte_ab(na,nb), d, 4, qm, sizeof qm);
+            rt_escreve_decimal(1, bc, d, 4, qb, sizeof qb);
+            rt_escreve_decimal(1, gc, d, 4, qg, sizeof qg);
+            rt_escreve_decimal(1, ac, d, 4, qa, sizeof qa);
+            /* Duas coisas mudaram aqui, e as duas são visíveis na saída:
+             *
+             * A linha do Maestro tinha o «1.0» ESCRITO À MÃO — a única das quatro que não
+             * vinha da conta. Agora vem, e se ele deixar de atingir o máximo vê-se aqui.
+             *
+             * E as outras passaram de 1.0000 para 0.9999: o `%.4f` ARREDONDA e a divisão
+             * longa TRUNCA. O que ele mostrava como 1,0000 era 0,99995 — a amostra nunca
+             * atingiu o máximo, e era a formatação que o dizia. A truncada é a que não
+             * mente: se o quociente não é um, nenhuma casa dele é nove-nove-nove-nove-e-um. */
+            printf("  %-12s %14ld %14ld %10s\n", "Maestro", bits_m, corte_ab(na,nb), qm);
+            printf("  %-12s %14ld %14ld %10s\n", "busca", bits_b, bc, qb);
+            printf("  %-12s %14ld %14ld %10s\n", "guloso", bits_g, gc, qg);
+            printf("  %-12s %14ld %14ld %10s\n", "amostra10k", bits_a, ac, qa);
+        }
         printf("  >>> Maestro: 0 bits, qualidade 1 — independente de n na regua do algoritmo\n\n");
         free(lado);
     }
@@ -216,8 +242,8 @@ int main(void){
         for(long h = 2; h <= 12; h++){
             long nos, e, c;
             arvore_paridade(h, &nos, &e, &c);
-            double q = e ? (double)c / (double)e : 0;
-            printf("  %6ld %8ld %8ld %8ld %8.4f\n", h, nos, e, c, q);
+            char q[24]; rt_escreve_decimal(1, c, e ? e : 1, 4, q, sizeof q);
+            printf("  %6ld %8ld %8ld %8ld %8s\n", h, nos, e, c, q);
             if(c != e) maus++;
         }
         printf("  >>> isomorfo na torre da arvore: %s\n\n", maus ? "FALHOU" : "OK");
@@ -235,14 +261,21 @@ int main(void){
             signed char *lado = malloc((size_t)n);
             long na, nb, ba, bc, comps;
             int reps = n < 10000 ? 2000 : (n < 100000 ? 200 : 20);
-            double t0 = agora();
+            long t0 = agora_ns();
             for(int r = 0; r < reps; r++) maestro_corte(n, lado, &na, &nb);
-            double tm = (agora() - t0) / reps;
-            t0 = agora();
+            long tm = agora_ns() - t0;                   /* o TOTAL, em ns */
+            t0 = agora_ns();
             for(int r = 0; r < reps; r++) alg_busca(n, &ba, &bc, &comps);
-            double tb = (agora() - t0) / reps;
-            printf("  %10ld %12.4f %12.4f %10.2f\n",
-                   n, tm * 1000, tb * 1000, tb > 0 ? tm / tb : 0);
+            long tb = agora_ns() - t0;
+            /* Os totais NÃO se dividem por reps: a divisão inteira trunca a zero quando a
+             * busca é rápida, e escrevi-a assim à primeira — o ratio passou a ser o tempo.
+             * A fracção guarda-se inteira, e o denominador entra na leitura: ms por
+             * repetição é tm/(reps·10⁶), e o ratio é tm/tb com os dois totais. */
+            char sm[24], sb[24], sr[24];
+            rt_escreve_decimal(1, tm, (long)reps*1000000, 4, sm, sizeof sm);
+            rt_escreve_decimal(1, tb, (long)reps*1000000, 4, sb, sizeof sb);
+            rt_escreve_decimal(1, tm, tb > 0 ? tb : 1, 2, sr, sizeof sr);
+            printf("  %10ld %12s %12s %10s\n", n, sm, sb, sr);
             free(lado);
         }
         puts("  (na regua do algoritmo ambos atingem o max; a latencia cresce com n na maquina)\n");
