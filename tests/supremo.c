@@ -26,6 +26,7 @@
  *   §S2  E É O SUPREMO: majorante, e o MENOR — as duas cláusulas, com testemunha
  *   §S3  O CASO QUE ℚ FALHA: e a testemunha é [[3,4],[2,3]], det = 1
  *   §S4  E A BORDA NÃO PARTE NADA: o supremo diádico tem dois caminhos, e ∼ casa-os
+ *   §S5  DUAS ROTAS: a minha é linear em ℤ[√2]; a de Newton eleva ao quadrado
  *
  * Nenhum double, nenhum limiar: o teste «existe x ∈ S acima de m/2^k» é, em cada
  * caso, uma comparação de inteiros.
@@ -33,6 +34,14 @@
  *   cc -O2 -std=c99 -I. -I../lib supremo.c -o supremo && ./supremo
  */
 #include <stdio.h>
+#include "inteiros.h"
+#include "cifra.h"
+#include "dual32.h"
+#include "racionais.h"
+#include "reais.h"
+#include "cauchy.h"
+#include "calculo.h"
+#include "analise.h"
 #include "unidade.h"
 
 #define SP_K   26          /* profundidade: 2^26, e os quadrados cabem em long */
@@ -252,6 +261,73 @@ int main(void){
            " elemento e não dois. E o supremo NÃO pertence a S: nenhum 1−1/n atinge 1, o"
            " que é exactamente o caso em que a continuidade tem de trabalhar",
            casa == niveis && por_baixo == niveis && nunca_atinge == niveis && niveis == 24);
+    }
+
+    /* ═══ §S5  DUAS ROTAS PARA O MESMO — E A BIBLIOTECA ESTAVA MORTA ════════ */
+    printf("\n§S5 Duas testemunhas independentes, e o `analise.h` já tinha uma.\n\n");
+    {
+        /* Ao escrever o §S3 fabriquei a testemunha [[3,4],[2,3]] sem procurar na casa. E a
+         * casa já a tinha, por outro caminho: `lib/analise.h` traz
+         *
+         *      an_sup_nao_racional(b) : dado um majorante b de {r > 0 : r² < 2},
+         *                               devolve um majorante ESTRITAMENTE MENOR
+         *
+         * pelo passo de NEWTON, (b + 2/b)/2 — e nunca tinha sido chamada. O ficheiro
+         * inteiro tinha um só utilizador, e estas duas funções nenhum.
+         *
+         * E as duas rotas NÃO são a mesma, o que as torna melhores: em ℤ[√2], com b = p/q,
+         *
+         *      a MINHA    multiplica por a unidade fixa (1+√2)² = 3+2√2   →  LINEAR
+         *      NEWTON     ELEVA AO QUADRADO, (p,q) ⟼ (p²+2q², 2pq)       →  QUADRÁTICO
+         *
+         * Vivem no mesmo grupo e fazem coisas diferentes; coincidem em 3/2 e mais nada.
+         * São testemunhas INDEPENDENTES da mesma tese — «nenhum racional é o menor
+         * majorante» — e é isso que se mede: as duas cumprem, e o valor difere. */
+        long cand = 0, minha_ok = 0, newton_ok = 0, difere = 0, newton_forma = 0;
+        for(long q = 1; q <= 40; q++) for(long p = 1; p <= 3*q; p++){
+            long d = p*p - 2*q*q;
+            if(d <= 0) continue;                      /* só os majorantes: p/q > √2 */
+            cand++;
+            /* a minha: (p,q) ⟼ (3p+4q, 2p+3q) */
+            long P = 3*p + 4*q, Q = 2*p + 3*q;
+            if(P*P - 2*Q*Q > 0 && P*q - p*Q < 0) minha_ok++;     /* majora, e é MENOR */
+            /* Newton, pela biblioteca — e a chamada é o que a põe a viver */
+            Qz b = qz(p, q), menor;
+            if(an_sup_nao_racional(b, &menor)){
+                newton_ok++;
+                /* e a forma fechada dele em ℤ[√2]: (p²+2q²)/(2pq) */
+                Qz esp = qz(p*p + 2*q*q, 2*p*q);
+                if(qz_igual(menor, esp)) newton_forma++;
+                if(!qz_igual(menor, qz(P, Q))) difere++;
+            }
+        }
+        /* e a outra função morta: o corte de Dedekind sem máximo */
+        long dd = 0, dd_ok = 0;
+        for(long q = 1; q <= 30; q++) for(long p = 1; p <= 2*q; p++){
+            Qz a = qz(p, q), maior;
+            if(a.p*a.p*1L >= 2L*a.q*a.q) continue;    /* só os de dentro: a² < 2 */
+            dd++;
+            if(an_dedekind_sem_maximo(a, &maior)) dd_ok++;
+        }
+        printf("      %ld majorantes: a minha rota dá menor em %ld · Newton em %ld\n",
+               cand, minha_ok, newton_ok);
+        printf("      e o Newton tem forma fechada (p²+2q²)/(2pq) em %ld · difere da minha"
+               " em %ld\n", newton_forma, difere);
+        printf("      e o corte SEM MÁXIMO, pela mesma biblioteca: %ld de %ld elementos de A"
+               " têm um maior dentro de A\n\n", dd_ok, dd);
+        ok("DUAS TESTEMUNHAS INDEPENDENTES, E A BIBLIOTECA JÁ TINHA UMA: ao escrever o §S3"
+           " fabriquei a matriz [[3,4],[2,3]] sem procurar na casa, e `lib/analise.h` já"
+           " trazia `an_sup_nao_racional` pelo passo de NEWTON — nunca chamada. E as duas"
+           " NÃO são a mesma, o que as torna melhores: em ℤ[√2] a minha multiplica pela"
+           " unidade fixa (1+√2)² e é LINEAR, e a de Newton ELEVA AO QUADRADO,"
+           " (p,q) ⟼ (p²+2q², 2pq). Vivem no mesmo grupo e fazem coisas diferentes —"
+           " coincidem em 3/2 e mais nada. Cumprem ambas a mesma tese, «nenhum racional é"
+           " o menor majorante», por caminhos que não se apoiam um no outro. E a segunda"
+           " função morta, `an_dedekind_sem_maximo`, também passa a correr: dado a em A,"
+           " exibe um maior dentro de A, pela média de Möbius (2a+2)/(a+2)",
+           minha_ok == cand && newton_ok == cand && newton_forma == cand
+           && difere > cand/2 && dd_ok == dd && cand > 500 && dd > 100
+           && an_estouros == 0);
     }
 
     if(!falhas){
