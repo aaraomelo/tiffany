@@ -179,6 +179,15 @@ na matriz, e \textbf{o sinal em $\mathbb{Z}$ é a mesma dobra}: $\mathbb{Z}=\mat
 sinal (Cor.~\ref{cor:cadeia}) com a involução da Lei 1, o mesmo espectro $\{+1,-1\}$, e o
 $\operatorname{mdc}$ a viver do lado que ela fixa. Seis coisas que pareciam seis operações
 são leituras de uma só.
+
+\medskip
+\noindent E \textbf{normalizar não é dividir}: dividir por $\lVert v\rVert$ traz uma raiz,
+a raiz traz a vírgula e a vírgula traz o limiar. Em $\mathbb{Z}$ normaliza-se guardando o
+\textbf{par}, $\cos^{2}(a,b)=\langle a,b\rangle^{2}/(\lVert a\rVert^{2}\lVert
+b\rVert^{2})$, um racional exacto --- e as perguntas que a normalização servia cabem todas
+no quadrado: paralelos é $\cos^{2}=1$, perpendiculares é o directo nulo, e «mais alinhado»
+compara-se por produto cruzado. \emph{A raiz só apareceria se alguém pedisse o cosseno em
+vez do seu quadrado, e ninguém precisa.}
 E não são só utilitários: são as \textbf{peças} --- a recorrência $u_{k+1}=m\,u_k+u_{k-1}$
 \emph{é} a régua e aparecia inline em \textbf{quarenta} ficheiros, a convolução \emph{é}
 o produto de polinómios, o cruzado \emph{é} a metade que inverte, e
@@ -190,7 +199,7 @@ que é a \textbf{Lei 8} a dizer o contrário: $62$ dos $126$ metais de $\mathbb{
 o mesmo número que o \emph{Corpo Universal} publica, obtido por uma implementação que não
 o conhecia. E a \textbf{volta} está lá inteira, $[p:q]\mapsto[q:p-mq]$, a desfazer a ida
 e a chegar ao $\infty=[1:0]$ exacto.
-\emph{Verificado:} \code{tests/reta.c} ($17{:}0$), cada operação por duas rotas que não
+\emph{Verificado:} \code{tests/reta.c} ($19{:}0$), cada operação por duas rotas que não
 partilham código e cada uma com o seu controlo negativo.
 
 \medskip
@@ -2546,7 +2555,7 @@ medidor & unidades \\
 \code{tests/supremo.c}            & $4{:}0$ \\
 \code{tests/cardinal.c}           & $4{:}0$ \\
 \code{tests/condicao\_pisot.c}    & $4{:}0$ \\
-\code{tests/reta.c}              & $17{:}0$ \\
+\code{tests/reta.c}              & $19{:}0$ \\
 \bottomrule
 \end{tabular}
 \end{center}

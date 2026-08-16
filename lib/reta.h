@@ -444,4 +444,87 @@ static long rt_mmc(long a, long b){
     return (a / g) * b;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════════════
+ * A NORMALIZAÇÃO, E O QUE MAIS SE REPETE — o levantamento por padrão, segunda volta.
+ *
+ *      25×  o produto interno  Σ a[i]·b[i]        ← já era rt_dir, e 25 reescrevem-no
+ *      23×  o módulo positivo  ((x%p)+p)%p
+ *      15×  a transposta       M[j][i]
+ *      11×  a norma²           Σ x[i]·x[i]        ← já era rt_norma
+ *      11×  a potência de matriz  P ← P·C
+ *       9×  a NORMALIZAÇÃO    v/‖v‖, v/z
+ *       5×  a troca           t=a; a=b; b=t
+ *       4×  o traço           Σ M[i][i]
+ *       4×  a identidade      (i==j) ? 1 : 0
+ *
+ * ── E NORMALIZAR NÃO É DIVIDIR ──────────────────────────────────────────────────────
+ *
+ * É a peça que mais custa, e a que mais engana. Dividir por ‖v‖ traz uma RAIZ, a raiz
+ * traz a vírgula, e a vírgula traz o limiar — foi assim que o `forca.c` acabou a medir
+ * cos²+sin²=1 com uma régua de quinze casas, quando a identidade que ele queria era
+ * Lagrange, e Lagrange é inteira.
+ *
+ * Em ℤ normalizar é GUARDAR O PAR. O cosseno ao quadrado entre dois vectores é
+ *
+ *      cos²(a,b)  =  ⟨a,b⟩² / (‖a‖²·‖b‖²)
+ *
+ * um racional EXACTO — numerador e denominador inteiros, sem uma raiz —, e as
+ * comparações entre direcções fazem-se por produto cruzado. A raiz só apareceria se
+ * alguém pedisse o cosseno em vez do seu quadrado, e ninguém precisa: as perguntas
+ * («são paralelos?», «são perpendiculares?», «qual é mais alinhado?») respondem-se
+ * todas no quadrado.
+ * ═══════════════════════════════════════════════════════════════════════════════════ */
+
+/* o cos² como PAR (numerador, denominador) — a normalização sem dividir e sem raiz */
+static void rt_cos2(const long *a, const long *b, int n, long *num, long *den){
+    long d = rt_dir(a, b, n);
+    *num = d*d;
+    *den = rt_norma(a, n) * rt_norma(b, n);
+}
+
+/* e as três perguntas que a normalização servia, respondidas no quadrado:
+ *   paralelos      ⟺ cos² = 1  ⟺  ⟨a,b⟩² = ‖a‖²‖b‖²   (Lagrange: o cruzado é nulo)
+ *   perpendiculares⟺ cos² = 0  ⟺  ⟨a,b⟩ = 0
+ *   mais alinhado  ⟺ compara-se cos² por PRODUTO CRUZADO, sem dividir */
+static int rt_paralelos(const long *a, const long *b, int n){
+    long nu, de; rt_cos2(a, b, n, &nu, &de);
+    return nu == de;
+}
+static int rt_perp(const long *a, const long *b, int n){ return rt_dir(a, b, n) == 0; }
+static int rt_mais_alinhado(const long *a, const long *b, const long *c, const long *d, int n){
+    long n1, d1, n2, d2;
+    rt_cos2(a, b, n, &n1, &d1);
+    rt_cos2(c, d, n, &n2, &d2);
+    return n1*d2 > n2*d1;                     /* cruzado, e sem uma divisão */
+}
+
+/* ── O MÓDULO POSITIVO: 23 cópias ────────────────────────────────────────────────────
+ * Em C o resto herda o sinal do dividendo, logo −3 % 7 dá −3 e não 4. O representante
+ * canónico em ℤ/pℤ é o não negativo — é a mesma dobra do sinal, um andar acima. */
+static long rt_mod(long x, long p){ return ((x % p) + p) % p; }
+
+/* ── A TRANSPOSTA: 15 cópias — e ela É o espelho τ ───────────────────────────────────
+ * τ(M) = Mᵀ é a involução que reparte Dir e Cruz nas matrizes. Não é um utilitário: é
+ * a dobra, escrita como operação. */
+static void rt_transpoe(const long *M, int n, long *T){
+    for(int i = 0; i < n; i++) for(int j = 0; j < n; j++) T[i*n + j] = M[j*n + i];
+}
+
+/* ── O PRODUTO E A POTÊNCIA DE MATRIZES: 11 cópias ───────────────────────────────────*/
+static void rt_mul_mat(const long *A, const long *B, int n, long *C){
+    for(int i = 0; i < n; i++) for(int j = 0; j < n; j++){
+        long s = 0;
+        for(int k = 0; k < n; k++) s += A[i*n + k]*B[k*n + j];
+        C[i*n + j] = s;
+    }
+}
+static void rt_identidade(long *I, int n){
+    for(int i = 0; i < n; i++) for(int j = 0; j < n; j++) I[i*n + j] = (i == j);
+}
+static long rt_traco(const long *M, int n){
+    long s = 0;
+    for(int i = 0; i < n; i++) s += M[i*n + i];
+    return s;
+}
+
 #endif /* RETA_H */

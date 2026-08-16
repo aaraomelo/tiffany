@@ -680,6 +680,99 @@ int main(void){
            && viv > casos/2 && dob == dtot);
     }
 
+    /* ═══ §R18 A NORMALIZAÇÃO SEM DIVIDIR — o par, e não a raiz ════════════ */
+    printf("\n§R18 rt_cos2 — normalizar é guardar o PAR, e as perguntas cabem no quadrado.\n\n");
+    {
+        long casos = 0, lagr = 0, par_ok = 0, perp_ok = 0, ali = 0;
+        for(long t = 0; t < 300; t++){
+            long a[3], b[3], c[3];
+            for(int i = 0; i < 3; i++){
+                a[i] = ((t*7 + i*3) % 11) - 5;
+                b[i] = ((t*5 + i*2) % 9)  - 4;
+            }
+            long nu, de;
+            rt_cos2(a, b, 3, &nu, &de);
+            rt_cruz3(a, b, c);
+            casos++;
+            /* (i) e a NORMALIZAÇÃO é Lagrange: den − num = ‖a×b‖², sem uma raiz */
+            if(de - nu == rt_norma(c, 3)) lagr++;
+            /* (ii) paralelos ⟺ cos² = 1 ⟺ o cruzado é nulo — as duas rotas concordam */
+            if(rt_paralelos(a, b, 3) == (rt_norma(c, 3) == 0)) par_ok++;
+            /* (iii) perpendiculares ⟺ o directo é zero */
+            if(rt_perp(a, b, 3) == (rt_dir(a, b, 3) == 0)) perp_ok++;
+        }
+        /* (iv) e «mais alinhado» decide-se por produto cruzado, sem dividir: um par
+               paralelo é mais alinhado que um perpendicular, e isso PODE falhar */
+        {
+            long u[3] = {1,0,0}, v[3] = {2,0,0};    /* paralelos: cos² = 1 */
+            long w[3] = {1,0,0}, z[3] = {0,1,0};    /* perpendiculares: cos² = 0 */
+            if(rt_mais_alinhado(u, v, w, z, 3) && !rt_mais_alinhado(w, z, u, v, 3)) ali = 1;
+        }
+        printf("      %ld pares: den − num = ‖a×b‖² (Lagrange) em %ld, o teste de paralelos\n"
+               "      bate com «cruzado nulo» em %ld, e o de perpendiculares em %ld\n",
+               casos, lagr, par_ok, perp_ok);
+        printf("      e «mais alinhado» decide por produto cruzado, nos dois sentidos: %s\n\n",
+               ali ? "sim" : "NÃO");
+        ok("NORMALIZAR NÃO É DIVIDIR — É GUARDAR O PAR. Dividir por ‖v‖ traz uma RAIZ, a"
+           " raiz traz a vírgula e a vírgula traz o limiar: foi assim que o forca.c acabou a"
+           " medir cos²+sin²=1 com uma régua de quinze casas, quando a identidade que ele"
+           " queria era LAGRANGE, e Lagrange é inteira. Aqui cos²(a,b) = ⟨a,b⟩²/(‖a‖²‖b‖²) é"
+           " um racional EXACTO, e as três perguntas que a normalização servia cabem todas"
+           " no quadrado: paralelos é cos² = 1 e bate com o cruzado nulo; perpendiculares é"
+           " o directo zero; e «mais alinhado» compara-se por PRODUTO CRUZADO. A raiz só"
+           " apareceria se alguém pedisse o cosseno em vez do seu quadrado, e ninguém precisa",
+           lagr == casos && par_ok == casos && perp_ok == casos && ali && casos == 300);
+    }
+
+    /* ═══ §R19 O MÓDULO, A TRANSPOSTA, O PRODUTO E O TRAÇO ═════════════════ */
+    printf("\n§R19 rt_mod, rt_transpoe, rt_mul_mat, rt_traco — e a transposta É o espelho.\n\n");
+    {
+        long md = 0, mdt = 0;
+        for(long x = -50; x <= 50; x++) for(long p = 2; p <= 13; p++){
+            long r = rt_mod(x, p);
+            mdt++;
+            /* o representante canónico: está em [0,p) e é congruente com x */
+            if(r >= 0 && r < p && (x - r) % p == 0) md++;
+        }
+        long tr = 0, ttot = 0, mm = 0, id = 0, esp = 0;
+        for(long t = 0; t < 100; t++){
+            long M[16], T[16], TT[16], I[16], P[16], Q[16];
+            for(int i = 0; i < 16; i++) M[i] = ((t*11 + i*3) % 13) - 6;
+            rt_transpoe(M, 4, T);
+            rt_transpoe(T, 4, TT);
+            rt_identidade(I, 4);
+            rt_mul_mat(M, I, 4, P);              /* M·I = M */
+            rt_mul_mat(I, M, 4, Q);              /* I·M = M */
+            ttot++;
+            /* a transposta é INVOLUÇÃO — é o espelho τ, o mesmo de Dir e Cruz */
+            int inv = 1, neutro = 1, difere = 0;
+            for(int i = 0; i < 16; i++){
+                if(TT[i] != M[i]) inv = 0;
+                if(P[i] != M[i] || Q[i] != M[i]) neutro = 0;
+                if(T[i] != M[i]) difere = 1;
+            }
+            if(inv) esp++;
+            if(neutro) mm++;
+            if(difere) id++;                     /* e não é a identidade */
+            /* e o traço é invariante pela transposta */
+            if(rt_traco(M, 4) == rt_traco(T, 4)) tr++;
+        }
+        printf("      rt_mod: o representante fica em [0,p) e é congruente em %ld de %ld\n",
+               md, mdt);
+        printf("      a transposta é INVOLUÇÃO em %ld de %ld (e não é a identidade em %ld),\n"
+               "      a identidade é neutra em %ld, e o traço não a vê em %ld\n\n",
+               esp, ttot, id, mm, tr);
+        ok("O MÓDULO, A TRANSPOSTA, O PRODUTO E O TRAÇO — as quatro que mais se repetiam"
+           " depois das primeiras: 23 cópias do ((x%%p)+p)%%p, 15 da transposta, 11 do"
+           " produto de matrizes, 4 do traço. E a TRANSPOSTA não é um utilitário: é o"
+           " ESPELHO τ que reparte Dir e Cruz nas matrizes, e mede-se como tal — involução,"
+           " e NÃO a identidade, que é o controlo sem o qual «τ² = id» valia por τ não fazer"
+           " nada. O módulo devolve o representante canónico em [0,p), que é a mesma dobra"
+           " do sinal um andar acima; e o traço não vê a transposta, que é o que o torna"
+           " invariante",
+           md == mdt && esp == ttot && mm == ttot && tr == ttot && id > ttot/2);
+    }
+
     if(!falhas){
         printf("\n  ─────────────────────────────────────────────────────────────\n");
         printf("  As operações da recta têm uma casa. Vinte e oito cópias do mdc,\n");
