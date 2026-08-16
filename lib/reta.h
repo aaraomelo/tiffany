@@ -291,4 +291,63 @@ static void rt_kron(const long *A, int a, const long *B, int b, long *K, int pk)
         K[(i*b+k)*pk + (j*b+l)] = A[i*a+j]*B[k*b+l];
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════════════
+ * O TEOREMA DO PONTO FIXO, E A LEI 8 — as três peças que o fecham.
+ *
+ * `thm:corte-ponto-fixo` do Corpo Universal, e a Lei 8 que lhe dá o chão. O enunciado:
+ *
+ *   (i)   a órbita de ∞ é [p:q] ⟼ [m·p+q : p], sem uma divisão — e o ponto de partida
+ *         só existe pela Lei 0, porque num corpo sem ela «começar no infinito» não quer
+ *         dizer nada
+ *   (ii)  o ponto fixo é o VECTOR PRÓPRIO: x² = m·x + 1, com soma tr = m e produto
+ *         det = −1, os dois INTEIROS
+ *   (iii) e o corte é a FALTA dele. Completando o quadrado,
+ *
+ *              4(p² − m·p·q − q²) = (2p − m·q)² − D·q²,   D = m² + 4
+ *
+ *         logo o ponto fixo vive em ℙ¹(ℚ) ⟺ D é QUADRADO PERFEITO. E aí decide-se em
+ *         duas linhas para todo m ≥ 1: m² < D < (m+2)², o único quadrado possível no
+ *         meio é (m+1)², e D = (m+1)² pede 2m = 3, que não tem solução em ℤ.
+ *         É o PASSO, e não a lista.
+ *   (iv)  e a FACE FINITA diz o contrário: em 𝔽ₚ a mesma equação tem raiz exactamente
+ *         quando D é resíduo quadrático — aí o ponto fixo ESTÁ no andar, a órbita cai
+ *         nele, e não há corte nenhum a fazer. É a Lei 8: o anel onde o grupo é finito
+ *         e as órbitas fecham, e onde tudo se verifica EXAUSTIVAMENTE.
+ *   (v)   e há VOLTA, que é a metade dual: det A_m = −1 torna a inversa INTEIRA, e a
+ *         acção dela é [p:q] ⟼ [q : p − m·q] — letra por letra, a descida de (iii).
+ * ═══════════════════════════════════════════════════════════════════════════════════ */
+
+/* ── (iii) O PONTO FIXO EM ℙ¹(ℚ): decide-se pelo DISCRIMINANTE ───────────────────────
+ * Devolve 1 se D = m² + 4 é quadrado perfeito — isto é, se o ponto fixo cabe no andar.
+ * Para m ≥ 1 devolve sempre 0, e a razão é o intervalo, não uma varredura. */
+static int rt_fixo_racional(long m){
+    long D = m*m + 4, r = 0;
+    while(r*r < D) r++;
+    return r*r == D;
+}
+
+/* e o PASSO que o prova, exibido: entre m² e (m+2)² só cabe (m+1)², e esse pede 2m = 3.
+ * Devolve o único candidato, ou 0 se nem ele cabe no intervalo. */
+static long rt_fixo_candidato(long m){
+    long D = m*m + 4;
+    return (D > m*m && D < (m+2)*(m+2)) ? (m+1)*(m+1) : 0;
+}
+
+/* ── (iv) A LEI 8: em 𝔽ₚ o ponto fixo EXISTE quando D é resíduo quadrático ───────────
+ * O critério de Euler: a é resíduo quadrático mod p ⟺ a^((p−1)/2) ≡ 1. Devolve 1 se
+ * o ponto fixo cai no andar finito, 0 se não — e é o contrário exacto do caso racional,
+ * que é o que torna o corte ESTRUTURAL e não um defeito de ℚ. */
+static int rt_fixo_em_fp(long m, long p){
+    long D = ((m*m + 4) % p + p) % p;
+    if(D == 0) return 1;                                  /* raiz dupla: o ponto está lá */
+    return rt_pot_mod(D, (p-1)/2, p) == 1;
+}
+
+/* ── (v) A VOLTA: a órbita para trás, e ela é INTEIRA ────────────────────────────────
+ * [p:q] ⟼ [q : p − m·q], que é A_m⁻¹ = [[0,1],[1,−m]] — inteira porque det A_m = −1.
+ * A ida cresce como σᵏ e a volta desce pelo mesmo caminho, até ao ∞ exacto. */
+static void rt_volta(long m, long p, long q, long *np, long *nq){
+    *np = q; *nq = p - m*q;
+}
+
 #endif /* RETA_H */

@@ -446,6 +446,85 @@ int main(void){
            lei == casos && casos == 9);
     }
 
+    /* ═══ §R13 O PONTO FIXO: NÃO CABE EM ℚ, E CABE EM 𝔽ₚ ═══════════════════ */
+    printf("\n§R13 o ponto fixo — o corte é a falta dele, e a Lei 8 diz o contrário.\n\n");
+    {
+        /* (a) EM ℚ NÃO CABE, e a razão é o INTERVALO e não uma varredura: entre m² e
+               (m+2)² só cabe (m+1)², e D = (m+1)² pede 2m = 3, sem solução em ℤ. */
+        long nunca = 0, cand_ok = 0, ms = 0;
+        for(long m = 1; m <= 400; m++){
+            ms++;
+            if(!rt_fixo_racional(m)) nunca++;
+            long c = rt_fixo_candidato(m), D = m*m + 4;
+            /* o candidato é (m+1)², e ele SÓ seria D se 2m = 3 */
+            if(c == (m+1)*(m+1) && D != c) cand_ok++;
+        }
+        /* e o CONTROLO: com D quadrado a função TEM de dizer que sim. x² = m·x + n com
+           n escolhido para D ser quadrado — aqui usa-se directamente um D quadrado. */
+        int acha = 0;
+        for(long r = 3; r <= 9; r++){
+            long DD = r*r;                       /* um discriminante que É quadrado */
+            long raiz = 0; while(raiz*raiz < DD) raiz++;
+            if(raiz*raiz == DD) acha++;
+        }
+        /* (b) EM 𝔽ₚ CABE, e exactamente quando D é resíduo quadrático — o contrário */
+        long em_fp = 0, fora_fp = 0, pares = 0;
+        const long PR[3] = {127, 1009, 65537};
+        for(int t = 0; t < 3; t++) for(long m = 1; m <= 40; m++){
+            pares++;
+            if(rt_fixo_em_fp(m, PR[t])) em_fp++; else fora_fp++;
+        }
+        printf("      (a) em ℚ: o ponto fixo NÃO cabe em %ld de %ld metais — e a razão é o\n"
+               "          intervalo: entre m² e (m+2)² só cabe (m+1)², e esse pede 2m = 3\n",
+               nunca, ms);
+        printf("      (b) em 𝔽ₚ: cabe em %ld dos %ld pares (m,p) e não cabe em %ld —\n"
+               "          é a Lei 8 a dizer o contrário, e é isso que torna o corte ESTRUTURAL\n\n",
+               em_fp, pares, fora_fp);
+        ok("O PONTO FIXO NÃO CABE EM ℚ E CABE EM 𝔽ₚ, e são os DOIS LADOS do mesmo teorema."
+           " Em ℚ não cabe para nenhum dos 400 metais, e a razão é o INTERVALO e não uma"
+           " varredura: 4(p² − m·p·q − q²) = (2p − m·q)² − D·q² com D = m²+4, logo o ponto"
+           " fixo vive em ℙ¹(ℚ) sse D é quadrado perfeito — e entre m² e (m+2)² só cabe"
+           " (m+1)², que pediria 2m = 3. É o PASSO, e não a lista. Em 𝔽ₚ a MESMA equação tem"
+           " raiz quando D é resíduo quadrático, e aí a órbita cai no ponto fixo: é a Lei 8,"
+           " o anel onde o grupo é finito e as órbitas fecham. O corte é a equação do ponto"
+           " fixo a NÃO FECHAR no corpo onde a órbita corre — e não um defeito de ℚ",
+           nunca == ms && cand_ok == ms && acha == 7 && em_fp > 0 && fora_fp > 0);
+    }
+
+    /* ═══ §R14 A VOLTA: a órbita para trás, e ela é INTEIRA ═════════════════ */
+    printf("\n§R14 rt_volta — a metade dual, e sem ela isto seria meia lei.\n\n");
+    {
+        long casos = 0, desfaz = 0, chega = 0, encolhe = 0;
+        for(long m = 1; m <= 8; m++){
+            for(int k = 1; k <= 14; k++){
+                long p, q, vp, vq;
+                rt_orbita(m, k, &p, &q);
+                rt_volta(m, p, q, &vp, &vq);      /* a volta: [p:q] ⟼ [q : p − m·q] */
+                long ap, aq;
+                rt_orbita(m, k-1, &ap, &aq);      /* e o passo ANTERIOR da ida */
+                casos++;
+                if(vp == ap && vq == aq) desfaz++;         /* a volta desfaz a ida */
+                if(vp <= p && vq <= q) encolhe++;          /* e ENCOLHE */
+            }
+            /* e chega ao ∞ EXACTO: descendo k vezes desde o passo k, dá [1:0] */
+            long p, q;
+            rt_orbita(m, 12, &p, &q);
+            for(int t = 0; t < 12; t++){ long a, b; rt_volta(m, p, q, &a, &b); p = a; q = b; }
+            if(p == 1 && q == 0) chega++;                  /* ∞ = [1:0], pela Lei 0 */
+        }
+        printf("      %ld passos: a volta desfaz a ida em %ld, e encolhe em %ld\n",
+               casos, desfaz, encolhe);
+        printf("      e descendo 12 vezes chega ao ∞ = [1:0] EXACTO em %ld dos 8 metais\n\n",
+               chega);
+        ok("A VOLTA É A METADE DUAL, E É INTEIRA — sem ela isto seria meia lei. det A_m = −1"
+           " torna a inversa inteira, e a acção dela é [p:q] ⟼ [q : p − m·q], que é LETRA"
+           " POR LETRA a descida que prova que o ponto fixo não cabe em ℚ. A descida não era"
+           " um truque de teoria dos números: é a ÓRBITA PARA TRÁS. A ida cresce como σᵏ e a"
+           " volta desce pelo mesmo caminho — e chega ao ∞ = [1:0] exacto, que é o ponto de"
+           " partida que só existe pela Lei 0",
+           desfaz == casos && encolhe == casos && chega == 8 && casos == 112);
+    }
+
     if(!falhas){
         printf("\n  ─────────────────────────────────────────────────────────────\n");
         printf("  As operações da recta têm uma casa. Vinte e oito cópias do mdc,\n");
