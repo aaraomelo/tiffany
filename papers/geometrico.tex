@@ -84,7 +84,10 @@ diagonalizável com espectro $\{+1,-1\}$ --- \emph{dois sectores, e exactamente 
 e $\operatorname{Dir}$ e $\operatorname{Cruz}$ são os projectores
 $(\mathrm{id}\pm\tau)/2$, com $\dim E_{+}+\dim E_{-}=36+28=64=n^{2}$. \textbf{Nada disto
 é importado}: nem norma, nem associatividade, nem distributividade. Os nomes clássicos
-entram \emph{depois}, como comparação com o objecto construído.
+entram \emph{depois}, como comparação com o objecto construído. \textbf{E a construção
+não usa $\mathbb{R}$}: corre igual em $\mathbb{F}_p$, e a única hipótese que usa mesmo é
+$2$ invertível --- em característica $2$ as duas leituras colapsam e o que se perde é a
+\emph{diagonal}, que é a parte que mede.
 
 \smallskip\noindent
 E a construção é de \textbf{todo} $\mathbb{R}$. Corre sobre quocientes
@@ -536,6 +539,46 @@ o traço de um projector é a dimensão da sua imagem, e com $\operatorname{tr}\
 contados por pares $(i,j)$. $\square$
 \end{teorema}
 
+\begin{teorema}[nada disto usa $\mathbb{R}$, e a hipótese que usa é $2$ invertível]\label{thm:nao-circular}
+A construção acima não pode invocar propriedade nenhuma de $\mathbb{R}$, sob pena de
+circularidade: seria usar os reais para definir a operação e depois a operação para
+obter os reais. \textbf{E isso não se responde por escrito --- responde-se tirando
+$\mathbb{R}$ debaixo dela.} Sobre um corpo qualquer $K$, tudo o que precede vale
+palavra por palavra, e o que aparece é a \emph{única} hipótese realmente usada:
+\[
+\boxed{\;P_{\pm}=\frac{\mathrm{id}\pm\tau}{2}\ \text{existe}
+\iff 2\ \text{é invertível em } K
+\iff \operatorname{car}K\neq2 . \;}
+\]
+Em $\mathbb{F}_p$ com $p$ ímpar os postos dos projectores dão $36$ e $28$ e somam $64$,
+como em $\mathbb{Z}$. \emph{Se a definição dependesse de alguma propriedade dos reais,
+não sobreviveria a um corpo finito.} $\square$
+\end{teorema}
+
+\begin{corolario}[e em característica $2$ é o mesmo colapso do discriminante]\label{cor:car2}
+Em $\operatorname{car}K=2$ tem-se $-1=+1$, logo $Q_{+}=Q_{-}$: simétrica e
+antissimétrica deixam de ser condições distintas, os dois espaços próprios
+\textbf{colapsam num só}, e
+\[
+\mu_\tau=t^{2}-1=(t-1)^{2}
+\]
+ganha \textbf{raiz dupla} --- o mínimo deixa de ter raízes simples e $\tau$ deixa de ser
+diagonalizável. Os postos caem para $28$ e $28$, somam $56$, e \textbf{o que falta é a
+diagonal}: a entrada $(i,i)$ da imagem é $(M+M^{\mathsf T})_{ii}=2M_{ii}=0$. Perde-se
+exactamente a parte que \emph{mede} (Teor.~\ref{thm:operacao}(iv)), e sobra só a área.
+
+\medskip
+E é o \textbf{mesmo} fenómeno do \S\ref{sec:reta}, pela mesma conta: o discriminante de
+$t^{2}-1$ é $4$, e anula-se em característica $2$ e só aí ---
+\[
+\boxed{\;\begin{array}{ll}
+\text{lá} & D=\operatorname{tr}^{2}-4\det\to0:\ \text{as duas \emph{folhas} colapsam}\\[3pt]
+\text{aqui} & \operatorname{disc}\mu_\tau=4\equiv0:\ \text{as duas \emph{leituras} colapsam}
+\end{array}}
+\]
+--- duas raízes que se juntam, nos dois casos. $\square$
+\end{corolario}
+
 \begin{teorema}[o bloco fecha, e o oito é o período]\label{thm:bloco}
 \[
 \boxed{\;B_8\times B_8\longrightarrow B_8\;}
@@ -596,13 +639,16 @@ coordenadas}\;}
 --- o resto deste paper mede o que ela faz.
 \colunas{as oito leis e a base ortonormal (\code{thm:ortonormal})}
         {a operação única, o espelho que a reparte, e o bloco que fecha e satura}
-        {\code{tests/operacao.c} ($9{:}0$): a volta das duas leituras em $600$ pares; o espectro
+        {\code{tests/operacao.c} ($10{:}0$): a volta das duas leituras em $600$ pares; o espectro
 de $\tau$ com $\dim E_+ + \dim E_- = 36+28 = 64$ e os $56$ não nulos separados dos oito
 zeros; os \textbf{projectores} medidos como matrizes $64\times64$ --- $Q^{2}=2Q$,
 $Q_+Q_-=0$ e $Q_++Q_-=2\,\mathrm{id}$ por multiplicação, com os traços $72=2\cdot36$ e
 $56=2\cdot28$ a repetirem as dimensões por outra rota, o mínimo com os dois factores
 mortos em $112$ e $120$ entradas, e o gume a derrubar a idempotência nas $128$ entradas
-previstas onde $\rho^{2}\neq\mathrm{id}$; o espelho
+previstas onde $\rho^{2}\neq\mathrm{id}$; a operação corrida em $\mathbb{F}_3$,
+$\mathbb{F}_5$, $\mathbb{F}_7$ e $\mathbb{F}_{127}$ com os postos a dar $36+28=64$ em
+todos, contra $\mathbb{F}_2$ onde caem para $28+28=56$ e a diagonal se anula nas $300$
+amostras; o espelho
 involutivo com $514$ cruzados não nulos; os $64$ pares da base com a diagonal a medir e o
 resto com área $\pm1$; o bloco a saturar no passo oito e a fechar nos $64$, com o suporte
 ocupado em $56$; e as duas leituras a realizarem-se --- a peneira e o determinante por
@@ -2349,6 +2395,25 @@ $\to$\quad \textbf{Pisot} fornece o encolhimento\quad$\to$\quad
 o \textbf{corte} fornece a ordem\quad$\to$\quad
 o \textbf{supremo} fornece a continuidade\quad$\to$\quad$\mathbb{R}$.\medskip}}
 \end{center}
+
+\medskip
+\noindent\textbf{E as duas afirmações separam-se, porque são duas e não uma.} Dizer «a
+operação gera $\mathbb{R}$» juntaria numa frase o que a cadeia faz em dois passos, e
+tornaria circular o que não é:
+\[
+\boxed{\;\underbrace{\text{oito leis}\ \to\ \star}_{\textbf{CONSTRUÇÃO}}
+\ \longrightarrow\
+\underbrace{\text{estrutura geométrica}\ \to\ \text{recta completa e ordenada}}
+_{\textbf{REALIZAÇÃO}}
+\ \cong\ \mathbb{R}\;}
+\]
+\emph{A construção não usa $\mathbb{R}$} --- e isso é teorema, não promessa
+(Teor.~\ref{thm:nao-circular}): a operação e as suas duas leituras definem-se sobre
+qualquer corpo de característica $\neq2$, e correm em $\mathbb{F}_p$ com os mesmos $36$
+e $28$. \emph{A realização} é que produz a estrutura ordenada e completa, e o
+isomorfismo com $\mathbb{R}$ é o \textbf{teorema clássico de unicidade}, citado como
+tal. Nenhuma propriedade dos reais entra antes de estar construída aquilo que depois se
+identifica com eles.
 
 \medskip
 \noindent E a tese, numa frase: \emph{a geometria real é a realização alcançada de

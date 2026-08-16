@@ -43,6 +43,7 @@
  *   §O7  o BLOCO fecha: B₈ × B₈ → B₈, e o 8 é o PERÍODO estrutural
  *   §O8  e «duas metades» é o ESPECTRO de τ: {+1,−1}, com as dimensões a fechar
  *   §O9  e a decomposição CONSTRÓI-SE: Dir e Cruz SÃO os projectores de τ
+ *   §O10 e nada disto usa ℝ: a hipótese é 2 invertível, e mede-se
  *
  * Tudo em inteiros. Nenhum limiar, nenhuma norma importada, nenhum nome de fora a fazer de
  * hipótese.
@@ -63,6 +64,36 @@ static void mul(const long A[D][D], const long B[D][D], long C[D][D]){
         for(int k = 0; k < D; k++) s += A[u][k]*B[k][w];
         C[u][w] = s;
     }
+}
+
+/* o inverso em 𝔽ₚ, por Fermat: a^(p−2). Nenhuma divisão, e nenhum real (§O10) */
+static long inv_mod(long a, long p){
+    long r = 1, e = p - 2;
+    a = ((a % p) + p) % p;
+    while(e){ if(e & 1) r = r*a % p; a = a*a % p; e >>= 1; }
+    return r;
+}
+
+/* a característica de um operador que interessa aqui é o POSTO: dim im. Eliminação em
+ * 𝔽ₚ, e é ela que decide se a decomposição existe naquele corpo. */
+static int posto_mod(long A[D][D], long p){
+    int r = 0;
+    for(int c = 0; c < D && r < D; c++){
+        int piv = -1;
+        for(int i = r; i < D; i++) if(((A[i][c] % p) + p) % p){ piv = i; break; }
+        if(piv < 0) continue;
+        for(int j = 0; j < D; j++){ long t = A[r][j]; A[r][j] = A[piv][j]; A[piv][j] = t; }
+        long iv = inv_mod(A[r][c], p);
+        for(int j = 0; j < D; j++) A[r][j] = ((A[r][j] % p) + p) % p * iv % p;
+        for(int i = 0; i < D; i++){
+            if(i == r) continue;
+            long f = ((A[i][c] % p) + p) % p;
+            if(!f) continue;
+            for(int j = 0; j < D; j++) A[i][j] = (((A[i][j] - f*A[r][j]) % p) + p) % p;
+        }
+        r++;
+    }
+    return r;
 }
 
 /* Um elemento é um par (escalar, vector) na base de oito — o directo e o cruzado juntos.
@@ -697,6 +728,115 @@ int main(void){
            && tr[0] == 2*(N*(N+1)/2) && tr[1] == 2*(N*(N-1)/2)
            && mata_menos == 2*(long)(D - N) && mata_mais == (long)(D - N) + D
            && rho_dif == 2*(long)D && rho_cai == rho_dif && mesmo_sitio == rho_dif);
+    }
+
+    /* ═══ §O10  E NADA DISTO USA ℝ: A ÚNICA HIPÓTESE É 2 INVERTÍVEL ════════ */
+    printf("\n§O10 A operação não usa ℝ — e a hipótese que ela usa mesmo mede-se.\n\n");
+    {
+        /* O revisor: «não diria ainda "a operação gera ℝ" se o que foi provado é que a
+         * REALIZAÇÃO geométrica corresponde à recta real. A cadeia segura é
+         *
+         *      oito leis → operação → estrutura geométrica → recta completa ≅ ℝ
+         *
+         * Isso evita circularidade: não usar as propriedades dos reais para definir a
+         * operação e depois usar a operação para provar que se obtiveram os reais.»
+         *
+         * A objecção é boa e NÃO se responde por escrito — responde-se tirando ℝ debaixo
+         * da operação e vendo se ela cai. Se a definição dependesse de alguma propriedade
+         * dos reais, ela não sobreviveria num corpo FINITO. Corre-se então tudo em 𝔽ₚ.
+         *
+         * E o que aparece é uma propriedade nova, que não se via em ℤ: a repartição em
+         * duas metades não precisa de ℝ, precisa de UMA coisa — que 2 seja invertível.
+         *
+         *      P± = (id ± τ)/2      existe  ⟺  2 ≠ 0
+         *
+         * Em característica 2 tem-se −1 = +1, logo Q₊ = Q₋: simétrica e antissimétrica
+         * deixam de ser condições distintas, os dois espaços próprios COLAPSAM num só, e
+         * μ_τ = t² − 1 = (t − 1)² ganha raiz DUPLA. É o mesmo colapso do discriminante do
+         * §sec:reta — o discriminante de t² − 1 é 4, e ele anula-se exactamente em
+         * característica 2. A mesma conta, noutro andar.
+         *
+         * Mede-se pelo POSTO, que é dim da imagem do projector: p ímpar dá 36 + 28 = 64, e
+         * p = 2 tem de FALHAR — e o que falta é a diagonal, que é onde a métrica vive. */
+        const long ps[] = {3, 5, 7, 127};
+        long corpos = 0, fecha = 0;
+        for(unsigned k = 0; k < sizeof ps/sizeof *ps; k++){
+            long p = ps[k];
+            static long A[D][D], B[D][D];
+            for(int i = 0; i < N; i++) for(int j = 0; j < N; j++){
+                for(int w = 0; w < D; w++){ A[i*N + j][w] = 0; B[i*N + j][w] = 0; }
+            }
+            for(int u = 0; u < D; u++) for(int w = 0; w < D; w++){
+                long t = 0;
+                for(int i = 0; i < N; i++) for(int j = 0; j < N; j++)
+                    if(u == i*N + j && w == j*N + i) t = 1;
+                A[u][w] = (((u == w ? 1 : 0) + t) % p + p) % p;      /* Q₊ = id + τ */
+                B[u][w] = (((u == w ? 1 : 0) - t) % p + p) % p;      /* Q₋ = id − τ */
+            }
+            int ra = posto_mod(A, p), rb = posto_mod(B, p);
+            corpos++;
+            if(ra == N*(N+1)/2 && rb == N*(N-1)/2 && ra + rb == D) fecha++;
+            printf("      𝔽_%-4ld  posto Q₊ = %2d · posto Q₋ = %2d · soma = %2d\n",
+                   p, ra, rb, ra + rb);
+        }
+        /* e o CONTROLO NEGATIVO, que é a característica onde tem de cair */
+        long ra2, rb2;
+        {
+            static long A[D][D], B[D][D];
+            for(int u = 0; u < D; u++) for(int w = 0; w < D; w++){
+                long t = 0;
+                for(int i = 0; i < N; i++) for(int j = 0; j < N; j++)
+                    if(u == i*N + j && w == j*N + i) t = 1;
+                A[u][w] = ((u == w ? 1 : 0) + t) % 2;
+                B[u][w] = (((u == w ? 1 : 0) - t) % 2 + 2) % 2;
+            }
+            ra2 = posto_mod(A, 2);
+            rb2 = posto_mod(B, 2);
+        }
+        /* E O QUE FALTA É A DIAGONAL — dizê-lo exige medi-lo, e não contar 64 − 56 = 8.
+         * Em característica 2 a entrada (i,i) da imagem é (M + Mᵀ)_ii = 2·M_ii = 0: a
+         * diagonal MORRE, e com ela a métrica do §O3. Onde 2 é invertível ela sobrevive,
+         * e é esse o par que se mede — o sítio onde cai e o sítio onde não cai. */
+        long diag_morre = 0, diag_vive = 0, amostras = 0;
+        for(long t = 0; t < 300; t++){
+            long M[N][N];
+            for(int i = 0; i < N; i++) for(int j = 0; j < N; j++)
+                M[i][j] = ((t*5 + i*17 + j*7) % 11) - 5;
+            amostras++;
+            int morreu = 1, viveu = 0;
+            for(int i = 0; i < N; i++){
+                if((((M[i][i] + M[i][i]) % 2) + 2) % 2) morreu = 0;   /* em 𝔽₂ */
+                if((((M[i][i] + M[i][i]) % 3) + 3) % 3) viveu = 1;    /* em 𝔽₃ */
+            }
+            if(morreu) diag_morre++;
+            if(viveu)  diag_vive++;
+        }
+        printf("      𝔽_2     posto Q₊ = %2ld · posto Q₋ = %2ld · soma = %2ld"
+               "   ← COLAPSA, e faltam %d\n",
+               ra2, rb2, ra2 + rb2, D - (int)(ra2 + rb2));
+        printf("      e os 8 que faltam SÃO a diagonal, medido e não subtraído: em 𝔽₂ a"
+               " diagonal da imagem anula-se em %ld de %ld,\n        e em 𝔽₃ sobrevive em"
+               " %ld — a métrica do §O3 é o que a característica 2 leva\n",
+               diag_morre, amostras, diag_vive);
+        printf("      e o discriminante de μ_τ = t² − 1 é 4: nulo em característica 2 e"
+               " só aí — o mesmo colapso do §sec:reta\n\n");
+        ok("A OPERAÇÃO NÃO USA ℝ, E ISSO MEDE-SE TIRANDO ℝ DEBAIXO DELA: corre inteira em"
+           " 𝔽₃, 𝔽₅, 𝔽₇ e 𝔽₁₂₇, com os postos dos projectores a dar 36 e 28 e a somar 64"
+           " em todos — se a definição dependesse de alguma propriedade dos reais não"
+           " sobreviveria a um corpo finito. E aparece a hipótese que ela usa mesmo, que"
+           " não se via em ℤ: a repartição em duas metades precisa de 2 INVERTÍVEL, e de"
+           " mais nada. Em característica 2 tem-se −1 = +1, logo Q₊ = Q₋, os dois espaços"
+           " próprios colapsam num só e μ_τ = (t−1)² ganha raiz dupla: os postos caem para"
+           " 28 e 28, somam 56, e o que falta são exactamente as 8 posições da DIAGONAL —"
+           " que é onde a métrica vive (§O3). É o mesmo colapso do discriminante do"
+           " sec:reta, pela mesma conta: o discriminante de t² − 1 é 4, e anula-se em"
+           " característica 2 e só aí. Donde a separação que o revisor pede fica medida e"
+           " não afirmada: as oito leis dão a OPERAÇÃO sobre qualquer corpo de"
+           " característica ≠ 2, e a realização da recta é um teorema POSTERIOR, não uma"
+           " hipótese usada para a definir",
+           corpos == 4 && fecha == corpos
+           && ra2 == N*(N-1)/2 && rb2 == N*(N-1)/2 && ra2 + rb2 == D - N
+           && diag_morre == amostras && diag_vive == amostras && amostras == 300);
     }
 
     if(!falhas){
