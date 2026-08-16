@@ -862,6 +862,70 @@ static void B10_deconv(void) {
     printf("     que a convolução (×) tinha levado — a resposta reconstruída, reversível.\n\n");
     pulso("B.10", "a deconvolução (÷) desfaz a convolução (×): x'=x", "o sinal original x",
           passou, tot, dente_quebrou);
+
+    /* E A CONDIÇÃO DA VOLTA TEM NOME, E É A DE SEMPRE. Convolver é multiplicar
+       polinómios e deconvolver é dividi-los: com coeficientes INTEIROS a ida é sempre
+       exacta, e a VOLTA existe exactamente quando o coeficiente líder de h é UNIDADE.
+       É o mesmo |det| = 1 do §M2 do matricial — «det = −1, logo a inversa é INTEIRA» — e
+       a mesma regra do thm:decon-andar do geometrico: a deconvolução é exacta onde o
+       espectro não tem zeros, e não basta «h ≠ 0».
+
+       Aqui não se mede o modelo contra si próprio: mede-se a LEI, em ℤ, com os dois
+       lados — líder ±1 devolve x exacto; líder 2 não devolve. */
+    {
+        long vok = 0, vtot = 0, nok = 0, ntot = 0;
+        for (int caso = 0; caso < 12; caso++) {
+            int nx = 3 + caso%3, nh = 2 + caso%2;
+            long xi[8], hi[8], yi[16], xr[8];
+            for (int i = 0; i < nx; i++) xi[i] = ((caso*5 + i*3) % 9) - 4;
+            for (int j = 0; j < nh; j++) hi[j] = ((caso*7 + j*4) % 7) - 3;
+            /* (i) A VOLTA do que a ida levou: y = x⊛h dividido por h devolve x. E isto
+                   vale com QUALQUER líder — o quociente é x por construção, e desenhei
+                   primeiro o gume aqui, onde ele não podia morder. */
+            hi[nh-1] = 1;
+            for (int k = 0; k < nx+nh-1; k++) yi[k] = 0;
+            for (int i = 0; i < nx; i++) for (int j = 0; j < nh; j++) yi[i+j] += xi[i]*hi[j];
+            {
+                long r[32];
+                for (int k = 0; k < nx+nh-1; k++) r[k] = yi[k];
+                int inteiro = 1;
+                for (int k = nx-1; k >= 0; k--) {
+                    if (r[k+nh-1] % hi[nh-1]) { inteiro = 0; break; }
+                    xr[k] = r[k+nh-1] / hi[nh-1];
+                    for (int j = 0; j < nh; j++) r[k+j] -= xr[k]*hi[j];
+                }
+                int devolve = inteiro;
+                for (int i = 0; i < nx && devolve; i++) if (xr[i] != xi[i]) devolve = 0;
+                vtot++; if (devolve) vok++;
+            }
+            /* (ii) E A CONDIÇÃO DO LÍDER aparece onde ela vive: a dividir um y ARBITRÁRIO,
+                   que não foi construído como x⊛h. Aí o algoritmo da divisão em ℤ[x] só
+                   fecha se o líder for UNIDADE — com líder 2 o quociente sai de ℤ. */
+            for (int lado = 0; lado < 2; lado++) {
+                hi[nh-1] = lado ? 2 : 1;
+                long r[32];
+                for (int k = 0; k < nx+nh-1; k++) r[k] = ((caso*11 + k*5) % 13) - 6;
+                int inteiro = 1;
+                for (int k = nx-1; k >= 0 && inteiro; k--) {
+                    if (r[k+nh-1] % hi[nh-1]) { inteiro = 0; break; }
+                    long qk = r[k+nh-1] / hi[nh-1];
+                    for (int j = 0; j < nh; j++) r[k+j] -= qk*hi[j];
+                }
+                if (!lado) { if (!inteiro) vok--; }        /* líder 1: tem SEMPRE de fechar */
+                else       { ntot++; if (!inteiro) nok++; }
+            }
+        }
+        printf("     e A VOLTA tem condição, e é a de sempre: convolver é multiplicar\n");
+        printf("     polinómios, deconvolver é dividi-los — e em ℤ a volta existe exactamente\n");
+        printf("     quando o líder de h é UNIDADE. O mesmo |det| = 1 do §M2, e a mesma regra\n");
+        printf("     do thm:decon-andar: exacta onde o espectro não tem zeros.\n\n");
+        printf("     líder ±1:  devolve x EXACTO em %ld de %ld, e divide y ARBITRÁRIO sempre\n",
+               vok, vtot);
+        printf("     líder  2:  o quociente SAI de ℤ em %ld de %ld dos y arbitrários\n\n",
+               nok, ntot);
+        pulso("B.10b", "e a volta existe sse o líder de h é UNIDADE", "|det| = 1 (§M2)",
+              vok, vtot, nok > 0);
+    }
 }
 
 /* ========================================================================== */
