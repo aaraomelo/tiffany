@@ -40,12 +40,11 @@
  *   §M5  ν na forma matricial: conjugação por J, e ν∘ν = id porque J² = I
  *   §M6  e operar corpos: ⊕ e ⊗ compõem, com neutros e associatividade medidos
  *
- *   cc -O2 -std=c99 -I. matricial.c -lm -o matricial && ./matricial
+ *   cc -O2 -std=c99 -I. matricial.c -o matricial && ./matricial      (sem -lm: não há vírgula)
  */
 #include <stdio.h>
 #include "../lib/disco.h"
 #include <string.h>
-#include <math.h>
 #include "unidade.h"
 #include "racionais.h"
 #include "poli.h"
@@ -124,6 +123,20 @@ static long det_mod(long *G, int n, int passo, long p){
         }
     }
     return d;
+}
+
+/* O PONTO FIXO NÃO SE AVALIA: MOSTRA-SE PELA ÓRBITA. O paper diz que a órbita de ∞ são
+ * os convergentes, e que a acção é a matriz vezes o vector «sem uma divisão»:
+ *
+ *      [p:q] ⟼ [m·p + q : p],     a partir de [1:0] = ∞
+ *
+ * Um ponto fixo não cabe no andar — é isso o corte —, e um double não o resolve: dá um
+ * decimal truncado que não é o objecto. O que se mostra é o CONVERGENTE, que é exacto e
+ * inteiro; e o próprio σ, um andar acima, é a UNIDADE de ℤ[σ], escrita (0,1). */
+static void orbita_inf(long m, int k, long *p, long *q){
+    long P = 1, Q = 0;                       /* ∞ = [1:0], pela Lei 0 */
+    for(int t = 0; t < k; t++){ long np = m*P + Q; Q = P; P = np; }
+    *p = P; *q = Q;
 }
 
 /* e a potência inteira, para a lei det(A⊗B) = det(A)^b · det(B)^a — `pow` devolvia um
@@ -670,7 +683,7 @@ printf("\n§M9  A dimensão ABAIXO expande na mesma medida que a de CIMA contrai
      *      σ·(a − σ) = aσ − σ² = aσ − (aσ + 1) = −1
      *
      * Aritmética em ℤ[σ]: (u₁+v₁σ)(u₂+v₂σ) = (u₁u₂ + v₁v₂) + (u₁v₂ + u₂v₁ + a·v₁v₂)σ. */
-    printf("      a    det M(a)   σ·σ' em Z[σ]   é −1?   λ₁ (só para ver)\n");
+    printf("      a    det M(a)   σ·σ' em Z[σ]   é −1?   σ pela órbita: p₁₂/q₁₂\n");
     long mauDet2 = 0, mauSig = 0, voltas2 = 0;
     for(long a = 1; a <= 6; a++){
         M2 Ma = Mq(a);
@@ -682,10 +695,10 @@ printf("\n§M9  A dimensão ABAIXO expande na mesma medida que a de CIMA contrai
         long pv = u1*v2 + u2*v1 + a*v1*v2;
         if(pu != -1 || pv != 0) mauSig++;
         voltas2++;
-        printf("      %-4ld %-10ld %-14s %-7s (%.8f)\n", a, dt,
+        long cp, cq; orbita_inf(a, 12, &cp, &cq);     /* o convergente, exacto */
+        printf("      %-4ld %-10ld %-14s %-7s %ld/%ld\n", a, dt,
                pv == 0 ? (pu == -1 ? "−1" : "≠ −1") : "tem parte σ",
-               (pu == -1 && pv == 0) ? "sim" : "NÃO",
-               (a + sqrt((double)(a*a + 4)))/2);
+               (pu == -1 && pv == 0) ? "sim" : "NÃO", cp, cq);
     }
     printf("\n      %ld valores de a, e o resíduo é ZERO — nem uma raiz avaliada\n\n",
            voltas2);
@@ -1181,7 +1194,7 @@ printf("\n§M13 A BASE SAI DAS MÖBIUS: o que fica invariante é da base, e é g
      * Logo os pontos fixos são σ e σ' = −1/σ: o metal e o seu dual. E em coordenadas
      * homogéneas o ponto fixo z é o AUTOVETOR (z,1). A base é o conjunto dos pontos fixos. */
     printf("      (a) os pontos FIXOS da Möbius são os autovetores — e são duais\n\n");
-    printf("      a    σ (fixo +)     σ' (fixo −)    σ·σ'      é autovetor?\n");
+    printf("      a    p₁₂ (órbita)    q₁₂            p²−apq−q²  Cayley−Hamilton?\n");
     /* E NENHUMA RAIZ SE AVALIA. Media-se aqui σ = (a + √(a²+4))/2 em double e depois
      * |σ·σ' + 1| < 1e-12 — mas o que garante σ·σ' = −1 não é a conta decimal: é
      * CAYLEY–HAMILTON, e ele é uma identidade de matrizes INTEIRAS,
@@ -1200,25 +1213,32 @@ printf("\n§M13 A BASE SAI DAS MÖBIUS: o que fica invariante é da base, e é g
                  && (AA.c - a*A.c == 0)     && (AA.d - a*A.d - 1 == 0);
         if(ok_ch) ch++; else mauFix++;
         if(det(A) != -1) mauDual++;                    /* σ·σ' = det = −1, EXACTO */
-        /* e a rota decimal, agora só a confirmar */
-        double d = sqrt((double)(a*a + 4));
-        double s1 = (a + d)/2, s2 = (a - d)/2;
-        if(fabs(s1 + s2 - (double)(A.a + A.d)) < 1e-12
-           && fabs(s1*s2 - (double)det(A)) < 1e-12) decimal_bate++;
+        /* E A SEGUNDA ROTA TAMBÉM É INTEIRA, e é a do paper: a forma que o ponto fixo
+         * ANULA — p² − a·p·q − q² — avaliada nos CONVERGENTES vale ±1 e nunca zero.
+         * É o Teor. do corte lido de frente: o ponto fixo pediria a forma = 0, e a
+         * descida mostra que isso não tem solução em ℤ; nos convergentes ela vale a
+         * unidade, que é o |det| = 1 a atravessar tudo. Um decimal aqui não resolvia
+         * nada — o ponto fixo não cabe neste andar, e é isso que se está a medir. */
+        long cp, cq; orbita_inf(a, 12, &cp, &cq);
+        long forma = cp*cp - a*cp*cq - cq*cq;
+        if(forma == 1 || forma == -1) decimal_bate++;
         linhas++;
-        printf("      %-4ld %-14.8f %-14.8f %-9ld %s\n", a, s1, s2, det(A),
+        printf("      %-4ld %-16ld %-14ld %-9ld %s\n", a, cp, cq, forma,
                ok_ch ? "sim" : "NÃO");
     }
-    printf("\n      Cayley–Hamilton fecha em %d de %d, e a rota decimal confirma em %d\n\n",
-           ch, linhas, decimal_bate);
+    printf("\n      Cayley–Hamilton fecha em %d de %d, e a forma vale ±1 nos convergentes"
+           " em %d\n      — nunca ZERO, que é precisamente o ponto fixo a não caber neste"
+           " andar\n\n", ch, linhas, decimal_bate);
     ok("OS PONTOS FIXOS DA MÖBIUS RESOLVEM A BORDA, E MEDE-SE SEM AVALIAR RAIZ NENHUMA:"
        " o que os garante é CAYLEY–HAMILTON, A² − aA − I = 0, uma identidade de matrizes"
        " INTEIRAS verificada entrada a entrada. Antes calculava-se σ = (a + √(a²+4))/2 em"
        " double e comparava-se com margem — a raiz era sabor, e trazia o limiar atrás. A"
-       " rota decimal fica, mas como CONFIRMAÇÃO da exacta e não como prova — e por isso"
-       " NÃO entra nesta condição: o número que se imprime é apresentação, e a asserção"
-       " assenta só em Cayley–Hamilton e no determinante, ambos inteiros",
-       mauFix == 0 && ch == linhas && linhas == 5);
+       " segunda rota é a do paper e também é inteira: a forma p² − a·p·q − q², que o"
+       " ponto fixo ANULARIA, vale ±1 nos convergentes da órbita de ∞ e nunca zero — o"
+       " ponto fixo não cabe neste andar, e é isso o corte. Nenhum decimal resolveria"
+       " isto: um decimal truncado não é o objecto, e o objecto está um andar acima, onde"
+       " σ é a UNIDADE de ℤ[σ]",
+       mauFix == 0 && ch == linhas && decimal_bate == linhas && linhas == 5);
     ok("E σ·σ' = −1: OS DOIS PONTOS FIXOS SÃO DUAIS UM DO OUTRO — e isto é det A, um"
        " inteiro, e não um produto de dois decimais comparado com margem. Por Viète os"
        " dois saem juntos: σ + σ' = tr A = a e σ·σ' = det A = −1",
@@ -1487,10 +1507,14 @@ printf("\n§M15 A RESTRIÇÃO DA BASE: o traço, e o período que lê o primo.\n
      * transporta de K para Q. As partes oscilantes cancelam-se aos pares (λ com λ̄), e o que
      * sobrevive à passagem é o simétrico. */
     printf("      (a) com coeficientes LIVRES, a série sai do reticulado\n\n");
-    printf("      c                        u_1        u_2        u_3      inteiros?\n");
-    /* K(3,1): σ³ = σ² + 1 */
-    double sg; { double lo=1,hi=3; for(int i=0;i<200;i++){ double md=(lo+hi)/2;
-        if(md*md*md-md*md-1>0) hi=md; else lo=md; } sg=(lo+hi)/2; }
+    printf("      c                        σ em Z[σ]  σ² em Z[σ] σ³        inteiros?\n");
+    /* K(3,1): σ³ = σ² + 1. E σ NÃO se calcula: mostra-se pelo CONVERGENTE. Estava aqui
+     * uma bisseção de 200 passos a produzir um decimal — e um decimal truncado não é o
+     * ponto fixo, é outro número. O ponto fixo não cabe neste andar (é isso o corte), e
+     * um andar acima ele é a UNIDADE de ℤ[σ], escrita (0,1). Do lado de baixo, o que o
+     * representa é a razão de termos consecutivos da recorrência, exacta em ℤ. */
+    long V[24]; V[0]=0; V[1]=0; V[2]=1;
+    for(int t = 3; t < 24; t++) V[t] = V[t-1] + V[t-3];   /* a recorrência de σ³=σ²+1 */
     /* com c arbitrário (1,0,0) o valor é σ^k, irracional */
     int mauLivre = 0, raizes_racionais = 0;
     {
@@ -1507,9 +1531,11 @@ printf("\n§M15 A RESTRIÇÃO DA BASE: o traço, e o período que lê o primo.\n
         for(long r = -1; r <= 1; r += 2)
             if(r*r*r - r*r - 1 == 0) raizes_racionais++;
         if(raizes_racionais) mauLivre++;               /* se houvesse, a tese caía */
-        double u1 = sg, u2 = sg*sg, u3 = sg*sg*sg;
-        printf("      %-24s %-10.4f %-10.4f %-9.4f %s\n", "(1,0,0) livre", u1, u2, u3,
-               raizes_racionais ? "sim" : "NÃO");
+        /* e σ, σ², σ³ exibem-se em ℤ[σ] — as coordenadas, que são inteiras */
+        printf("      %-24s %-10s %-10s %-9s %s\n", "(1,0,0) livre",
+               "(0,1,0)", "(0,0,1)", "(1,1,0)", raizes_racionais ? "sim" : "NÃO");
+        printf("      σ pelo convergente do andar de baixo: %ld/%ld  (razão da recorrência)\n",
+               V[23], V[22]);
         printf("      (e é o teste da raiz racional que o decide: os candidatos são os"
                " divisores de 1, e p(±1) = −1 e −3)\n");
     }
@@ -1529,20 +1555,16 @@ printf("\n§M15 A RESTRIÇÃO DA BASE: o traço, e o período que lê o primo.\n
      * matrizes 3×3 de inteiros e somar a diagonal — e têm de dar o mesmo inteiro. */
     long C[3][3] = { {1,0,1}, {1,0,0}, {0,1,0} };      /* companheira de x³ − x² − 1 */
     long Pk[3][3] = { {1,0,0}, {0,1,0}, {0,0,1} };     /* Pk = C^k, a começar em I */
-    printf("      k        Tr(σ^k)   Tr(C^k)   batem?   (numérico, a confirmar)\n");
+    printf("      k        Tr(σ^k)   Tr(C^k)   batem?   convergente p/q\n");
     int mauTr = 0, duasRotas = 0, kk = 0;
     for(int k = 0; k <= 6; k++){
         long tr = Pk[0][0] + Pk[1][1] + Pk[2][2];      /* a rota da companheira */
         kk++;
         if(tr == t[k]) duasRotas++; else mauTr++;
-        /* e a rota decimal fica, mas a CONFIRMAR e não a decidir */
-        double soma = pow(sg,k);
-        double s1 = 1 - sg, p1 = 1.0/sg;
-        double a = 2, b = s1;
-        for(int j = 0; j < k; j++){ double nb = s1*b - p1*a; a = b; b = nb; }
-        soma += (k == 0) ? 2 : a;
-        printf("      %-8d %-9ld %-9ld %-8s (%.6f)\n", k, t[k], tr,
-               tr == t[k] ? "sim" : "NÃO", soma);
+        /* e a terceira leitura, também inteira: o convergente do andar de baixo */
+        printf("      %-8d %-9ld %-9ld %-8s %ld/%ld\n", k, t[k], tr,
+               tr == t[k] ? "sim" : "NÃO",
+               V[k+3 < 24 ? k+3 : 23], V[k+2 < 24 ? k+2 : 22]);
         long N3[3][3] = {{0}};                         /* Pk ← Pk · C */
         for(int i=0;i<3;i++) for(int j=0;j<3;j++)
             for(int l=0;l<3;l++) N3[i][j] += Pk[i][l]*C[l][j];
