@@ -30,17 +30,13 @@
  *   cc -O2 -std=c99 rn.c -lm -o rn && ./rn
  */
 #include <stdio.h>
+#include "reta.h"      /* Dir e Cruz: a operação */
 #include "unidade.h"
 
 static long interno(const long *a, const long *b, int n){
     long s = 0;
     for(int k = 0; k < n; k++) s += a[k]*b[k];
     return s;
-}
-static void cruz3(const long *a, const long *b, long *c){
-    c[0] = a[1]*b[2] - a[2]*b[1];
-    c[1] = a[2]*b[0] - a[0]*b[2];
-    c[2] = a[0]*b[1] - a[1]*b[0];
 }
 /* o produto de R^(1+m): escalar + vetor de dimensão m. cruz = 0 quando não há cruzado. */
 static void prod(const long *A, const long *B, int m, void (*cruz)(const long*,const long*,long*),
@@ -79,7 +75,7 @@ printf("\n§R1  A decomposição bate C e H, sem tabela de multiplicação nenhu
     /* H: escalar + vetor de dim 3, com cruzado */
     printf("\n      em H (vetor de dim 3, com cruzado):\n");
     long A[4] = {1,2,3,4}, B[4] = {5,6,7,8}, R[4];
-    prod(A, B, 3, cruz3, R);
+    prod(A, B, 3, rt_cruz3, R);
     printf("        (1,2,3,4)·(5,6,7,8) = (%ld,%ld,%ld,%ld)\n", R[0],R[1],R[2],R[3]);
     /* E A TABELA DE HAMILTON CALCULA-SE, em vez de o resultado ser escrito. Estava aqui
      *
@@ -122,7 +118,7 @@ printf("\n§R1  A decomposição bate C e H, sem tabela de multiplicação nenhu
 printf("\n§R2  O cruzado é o ÚNICO termo antissimétrico — e a não-comutatividade É ele.\n\n");
 {
     long a[3] = {1,2,3}, b[3] = {4,5,6}, ab[3], ba[3];
-    cruz3(a,b,ab); cruz3(b,a,ba);
+    rt_cruz3(a,b,ab); rt_cruz3(b,a,ba);
     printf("      <a,b> = %ld   <b,a> = %ld          simétrico\n", interno(a,b,3), interno(b,a,3));
     printf("      a×b = (%ld,%ld,%ld)   b×a = (%ld,%ld,%ld)   ANTIssimétrico\n\n",
            ab[0],ab[1],ab[2], ba[0],ba[1],ba[2]);
@@ -133,8 +129,8 @@ printf("\n§R2  O cruzado é o ÚNICO termo antissimétrico — e a não-comutat
 
     /* e daí: a diferenca ab - ba e EXATAMENTE 2(a×b) */
     long A[4] = {1,2,3,4}, B[4] = {5,6,7,8}, P[4], Q[4];
-    prod(A,B,3,cruz3,P); prod(B,A,3,cruz3,Q);
-    long vc[3]; cruz3(A+1, B+1, vc);
+    prod(A,B,3,rt_cruz3,P); prod(B,A,3,rt_cruz3,Q);
+    long vc[3]; rt_cruz3(A+1, B+1, vc);
     printf("      a·b = (%ld,%ld,%ld,%ld)\n", P[0],P[1],P[2],P[3]);
     printf("      b·a = (%ld,%ld,%ld,%ld)\n", Q[0],Q[1],Q[2],Q[3]);
     printf("      a·b - b·a = (%ld,%ld,%ld,%ld)\n", P[0]-Q[0],P[1]-Q[1],P[2]-Q[2],P[3]-Q[3]);

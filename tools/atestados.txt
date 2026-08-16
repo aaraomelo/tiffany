@@ -407,7 +407,7 @@ residuos_totais 52cf778fe4c28b37 0
 reta 1d38978c4eac814b 0
 reversao 6ce3ed15e79f47b7 0
 ribossomo 5d80dbc0f2781041 0
-rn 25c631e3bc440aab 0
+rn 8e45c8a7b161345f 0
 robo b1af06aa747c26cc 0
 rotacao 1dd03ecf0025d4d2 0
 rotaciona d5e304bfd7d6ea7b 0
