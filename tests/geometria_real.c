@@ -1935,6 +1935,269 @@ int main(void){
            teo == casos && casos == 60 && esp1 == NN && ordw == 8);
     }
 
+    /* ═══ §L11m  FREQUÊNCIA INFINITA: O DISCRIMINANTE COLAPSA, E É A RETA ═══ */
+    printf("\n§L11m No infinito tudo vira reta — e a razão é o colapso do discriminante.\n\n");
+    {
+        /* O coordenador: «e um polinómio de frequência infinita é o quê? Uma reta. No
+         * infinito tudo vira reta.» E a razão está no DISCRIMINANTE:
+         *
+         *      Δ = tr² − 4·det
+         *
+         * Nos andares elíticos exactos ele é INTEIRO e desce em módulo:
+         *
+         *      n=3: t²=1, Δ=−3      n=4: t²=2, Δ=−2      n=6: t²=3, Δ=−1      … → 0
+         *
+         * e o limite Δ = 0 é a RAIZ DUPLA: as duas faces COLAPSAM numa só. Aí
+         * C = I + N com N² = 0, e
+         *
+         *      C^k = I + k·N        — LINEAR em k, contra σ^k que é EXPONENCIAL
+         *
+         * que conjugada é a TRANSLAÇÃO y ↦ y + k. É a RETA. E isto fecha a distinção
+         * PA/PG do §L0b, agora com a causa:
+         *
+         *      Δ < 0   elítico       rotação        PERIÓDICO
+         *      Δ = 0   PARABÓLICO    I + kN         PA — a RETA, a frequência infinita
+         *      Δ > 0   hiperbólico   σ^k            PG — o metálico
+         */
+        long andares = 0, desce = 0, ant = 99;
+        printf("      n    t²   Δ = t² − 4   regime\n");
+        { long t2[3] = {1,2,3}; long nn[3] = {3,4,6};
+          for(int i2 = 0; i2 < 3; i2++){
+              long D2 = t2[i2] - 4, mod = -D2;
+              andares++;
+              if(mod < ant) desce++;
+              ant = mod;
+              printf("      %-4ld %-4ld %-12ld %s\n", nn[i2], t2[i2], D2,
+                     D2 < 0 ? "elítico (rotação)" : "parabólico");
+          }
+          printf("      ∞    4    0            PARABÓLICO — a raiz DUPLA: as faces COLAPSAM\n");
+        }
+        /* Δ = 0 dá C = I + N com N² = 0, e C^k = I + kN — LINEAR */
+        long ks = 0, linear = 0;
+        long c11 = 2, c12 = -1, c21 = 1, c22 = 0;          /* t = 2, det = 1 */
+        long n11 = c11-1, n12 = c12, n21 = c21, n22 = c22-1;
+        long nq11 = n11*n11 + n12*n21, nq12 = n11*n12 + n12*n22;
+        long nq21 = n21*n11 + n22*n21, nq22 = n21*n12 + n22*n22;
+        int nilpotente = (nq11 == 0 && nq12 == 0 && nq21 == 0 && nq22 == 0);
+        long p11 = 1, p12 = 0, p21 = 0, p22 = 1;
+        for(long k = 1; k <= 30; k++){
+            long q11 = p11*c11 + p12*c21, q12 = p11*c12 + p12*c22;
+            long q21 = p21*c11 + p22*c21, q22 = p21*c12 + p22*c22;
+            p11=q11; p12=q12; p21=q21; p22=q22;
+            ks++;
+            if(p11 == 1 + k*n11 && p12 == k*n12 && p21 == k*n21 && p22 == 1 + k*n22) linear++;
+        }
+        /* O CONTRASTE CERTO É A SEGUNDA DIFERENÇA. A primeira versão exigiu que as
+         * diferenças CRESCESSEM estritamente, e o ouro falha — U = 0,1,1,2,3,5 tem
+         * diferenças 1,0,1,1,2, com repetições. «Linear» quer dizer Δ² ≡ 0, e é isso
+         * que separa: no parabólico a segunda diferença é IDENTICAMENTE zero; no
+         * hiperbólico não é, em nenhum metal. */
+        long hip = 0, hip_cas = 0;
+        for(long m = 1; m <= 6; m++){
+            long U[64], t[64];
+            int nh = g_metal(m, U, t, 20);
+            int algum_nao_zero = 0;
+            for(int k = 2; k < nh && k < 12; k++)
+                if(U[k] - 2*U[k-1] + U[k-2] != 0) algum_nao_zero = 1;
+            hip_cas++;
+            if(algum_nao_zero) hip++;                 /* Δ² NÃO é identicamente zero */
+        }
+        printf("      Δ = 0: N² = 0 em %s · C^k = I + kN em %ld de %ld potências"
+               " (LINEAR)\n", nilpotente ? "sim" : "NÃO", linear, ks);
+        printf("      e o contraste pela SEGUNDA diferença: Δ² ≡ 0 no parabólico, e"
+               " Δ² ≢ 0 em %ld de %ld metais (hiperbólicos)\n", hip, hip_cas);
+        ok("NO INFINITO TUDO VIRA RETA, E A RAZÃO É O COLAPSO DO DISCRIMINANTE: nos"
+           " andares exactos Δ = t² − 4 é INTEIRO e desce em módulo — 3, 2, 1 nos andares"
+           " 3, 4, 6 —, e o limite Δ = 0 é a RAIZ DUPLA, em que as duas faces colapsam"
+           " numa só. Aí C = I + N com N² = 0 e C^k = I + k·N nas trinta potências:"
+           " LINEAR em k, e conjugada é a TRANSLAÇÃO. Um polinómio de frequência infinita"
+           " é uma RETA",
+           desce == andares && andares == 3 && nilpotente && linear == ks && ks == 30);
+        ok("E ISSO DÁ A CAUSA DA DISTINÇÃO PA/PG: Δ < 0 dá o elítico, com órbita"
+           " PERIÓDICA; Δ = 0 dá o parabólico, com I + kN — uma progressão ARITMÉTICA,"
+           " que é a reta e é o limite de frequência infinita; e Δ > 0 dá o hiperbólico,"
+           " com σ^k — a progressão GEOMÉTRICA, que é o metálico, e cuja SEGUNDA"
+           " diferença não é identicamente zero em nenhum dos seis. As três progressões são os três regimes do"
+           " discriminante",
+           hip == hip_cas && hip_cas == 6);
+    }
+
+    /* ═══ §L11n  A DIFERENÇA BAIXA O GRAU — e as diferenças SÃO o ℝⁿ ═══════ */
+    printf("\n§L11n Alta frequência num andar vira RETA no próximo: é a construção do ℝⁿ.\n\n");
+    {
+        /* O coordenador: «um polinómio de alta frequência em um andar vira reta no
+         * próximo — aí está a construção do ℝⁿ». E é literal:
+         *
+         *      a DIFERENÇA FINITA baixa o grau em UM. Cada andar, um grau.
+         *
+         * Um polinómio de grau d é RETA ao fim de d−1 andares e CONSTANTE ao fim de d.
+         * E as diferenças em ZERO são as COORDENADAS — a fórmula de Newton:
+         *
+         *      p(x) = Σ_k Δ^k p(0) · C(x,k)
+         *
+         * Logo um polinómio de grau n é determinado pelas suas n+1 diferenças em 0, e
+         * essas n+1 diferenças SÃO as coordenadas: é o ℝ^{n+1}. Cada andar é um grau, e
+         * cada grau é uma coordenada. */
+        long cas = 0, baixa = 0, reta_ok = 0, const_ok = 0, recon = 0, recon_cas = 0;
+        for(int g = 1; g <= 6; g++){
+            /* um polinómio de grau g, com coeficientes inteiros */
+            long v[24];
+            for(int x = 0; x < 20; x++){
+                long acc = 0, pot = 1;
+                for(int j = 0; j <= g; j++){ acc += ((j % 2) ? -(j+2) : (j+3)) * pot; pot *= x; }
+                v[x] = acc;
+            }
+            /* baixar o grau: g diferenças, e a última é CONSTANTE */
+            long a2[24]; int n2 = 20;
+            for(int x = 0; x < n2; x++) a2[x] = v[x];
+            long d0[12]; int nd = 0;
+            d0[nd++] = a2[0];
+            int virou_reta = -1;
+            {   /* o grau 1 JÁ é recta no andar zero: verifica-se ANTES do primeiro passo */
+                int e_reta = 1;
+                for(int x = 0; x + 2 < n2; x++)
+                    if(a2[x+2] - 2*a2[x+1] + a2[x] != 0) e_reta = 0;
+                if(e_reta) virou_reta = 0;
+            }
+            for(int passo = 1; passo <= g; passo++){
+                for(int x = 0; x + 1 < n2; x++) a2[x] = a2[x+1] - a2[x];
+                n2--;
+                d0[nd++] = a2[0];
+                /* é RETA quando a segunda diferença dá zero em todos */
+                int e_reta = 1;
+                for(int x = 0; x + 2 < n2; x++)
+                    if(a2[x+2] - 2*a2[x+1] + a2[x] != 0) e_reta = 0;
+                if(e_reta && virou_reta < 0 && n2 >= 3) virou_reta = passo;
+            }
+            cas++;
+            /* a g-ésima diferença é CONSTANTE */
+            int e_const = 1;
+            for(int x = 0; x + 1 < n2; x++) if(a2[x+1] != a2[x]) e_const = 0;
+            if(e_const) const_ok++;
+            if(virou_reta >= 0 && virou_reta <= (g > 1 ? g-1 : 0)) reta_ok++;
+            baixa++;
+            /* NEWTON: p(x) = Σ Δ^k p(0)·C(x,k) — as diferenças SÃO as coordenadas */
+            for(int x = 0; x < 12; x++){
+                long acc = 0, C = 1;
+                for(int k = 0; k <= g; k++){
+                    acc += d0[k]*C;
+                    C = C*(x - k)/(k + 1);
+                }
+                recon_cas++;
+                if(acc == v[x]) recon++;
+            }
+        }
+        printf("      %ld polinómios de graus 1..6: %ld baixam o grau a cada diferença,"
+               " %ld viram RETA antes do fim, %ld terminam CONSTANTES\n",
+               cas, baixa, reta_ok, const_ok);
+        printf("      e a fórmula de Newton p(x) = Σ Δ^k p(0)·C(x,k) reconstrói em %ld de"
+               " %ld pontos — as diferenças em 0 SÃO as coordenadas\n", recon, recon_cas);
+        ok("A DIFERENÇA FINITA BAIXA O GRAU EM UM — ALTA FREQUÊNCIA NUM ANDAR VIRA RETA"
+           " NO PRÓXIMO: um polinómio de grau d é RETA ao fim de d−1 andares e CONSTANTE"
+           " ao fim de d, medido nos graus 1 a 6 — e o grau 1 já é recta no andar zero."
+           " Cada andar consome um grau, e a oscilação vai-se com ele",
+           baixa == cas && reta_ok == cas && const_ok == cas && cas == 6);
+        ok("E AS DIFERENÇAS EM ZERO SÃO AS COORDENADAS — AÍ ESTÁ O ℝⁿ: pela fórmula de"
+           " Newton p(x) = Σ Δ^k p(0)·C(x,k), um polinómio de grau n fica determinado"
+           " pelas suas n+1 diferenças em 0, e a reconstrução é EXACTA nos pontos"
+           " medidos. Essas n+1 diferenças são as n+1 coordenadas: cada andar é um grau,"
+           " e cada grau é uma coordenada",
+           recon == recon_cas && recon_cas == 72);
+    }
+
+    /* ═══ §L11o  A ORDENAÇÃO, E O PONTO ACIMA QUE É POLINÓMIO ABAIXO ═══════ */
+    printf("\n§L11o Cada dimensão dá um EIXO à seguinte — e daí a ordem.\n\n");
+    {
+        /* O coordenador: «e está aí a ordenação também, porque cada dimensão fornece um
+         * eixo de coordenadas para a próxima»; e «cada ponto numa reta acima é um
+         * polinómio abaixo».
+         *
+         * (i) A ORDEM é LEXICOGRÁFICA nas coordenadas-diferença, do TOPO para baixo: o
+         *     eixo de maior grau decide primeiro, e só em caso de empate se desce. É a
+         *     mesma ordem dos VALORES, e é a mesma da leitura posicional — comparar dois
+         *     naturais é comparar os dígitos do mais significativo para baixo.
+         *
+         * (ii) E os dois níveis são DUAIS: pela fórmula de Newton, a coordenada
+         *      Δ^k p(0) — um PONTO no andar k — emparelha com o binómio C(x,k), que é um
+         *      POLINÓMIO de grau k no andar abaixo. E o emparelhamento é ortonormal:
+         *
+         *          Δ^j C(x,k)|₀ = δ_{jk}          — Gram = I, outra vez (§L1)
+         *
+         *      Cada ponto acima É um polinómio abaixo, e a base dos binómios é a base
+         *      DUAL das diferenças. */
+        long cas = 0, lex_ok = 0, maior = 0, menor = 0, est5 = 41;
+        for(int t = 0; t < 400; t++){
+            long c1[4], c2[4]; int d = 1 + (t % 3);
+            for(int j = 0; j <= d; j++){
+                est5 = (est5*1103515245L + 12345L) % 2147483647L; c1[j] = ((est5>>7) % 9) - 4;
+                est5 = (est5*1103515245L + 12345L) % 2147483647L; c2[j] = ((est5>>7) % 9) - 4;
+            }
+            if(c1[d] == 0 || c2[d] == 0) continue;
+            /* as coordenadas-diferença */
+            long A[8], B[8];
+            for(int q = 0; q < 2; q++){
+                long *c = q ? c2 : c1, *O = q ? B : A;
+                long v[12];
+                for(int x = 0; x < d+3; x++){
+                    long acc = 0, pot = 1;
+                    for(int j = 0; j <= d; j++){ acc += c[j]*pot; pot *= x; }
+                    v[x] = acc;
+                }
+                int nv = d+3;
+                for(int k = 0; k <= d; k++){
+                    O[k] = v[0];
+                    for(int x = 0; x + 1 < nv; x++) v[x] = v[x+1] - v[x];
+                    nv--;
+                }
+            }
+            /* lexicográfico do TOPO para baixo */
+            int lex = 0;
+            for(int k = d; k >= 0 && !lex; k--) if(A[k] != B[k]) lex = (A[k] > B[k]) ? 1 : -1;
+            /* contra a ordem dos VALORES num x grande */
+            long X = 60, v1 = 0, v2 = 0, pot = 1;
+            for(int j = 0; j <= d; j++){ v1 += c1[j]*pot; v2 += c2[j]*pot; pot *= X; }
+            int val = (v1 > v2) ? 1 : ((v1 < v2) ? -1 : 0);
+            cas++;
+            if(lex == val) lex_ok++;
+            if(val > 0) maior++; else if(val < 0) menor++;
+        }
+        /* (ii) a base DUAL: Δ^j C(x,k)|₀ = δ_{jk} */
+        long pares = 0, dual_ok = 0;
+        for(int k = 0; k <= 6; k++) for(int j = 0; j <= 6; j++){
+            /* C(x,k) avaliado em x = 0..10, e depois j diferenças */
+            long v[14]; int nv = 12;
+            for(int x = 0; x < nv; x++){
+                long C = 1;
+                for(int i2 = 0; i2 < k; i2++) C = C*(x - i2)/(i2 + 1);
+                v[x] = (k == 0) ? 1 : C;
+            }
+            for(int passo = 0; passo < j; passo++){
+                for(int x = 0; x + 1 < nv; x++) v[x] = v[x+1] - v[x];
+                nv--;
+            }
+            pares++;
+            if(v[0] == (j == k ? 1 : 0)) dual_ok++;
+        }
+        printf("      a ORDEM lexicográfica nas coordenadas-diferença bate com a ordem"
+               " dos VALORES em %ld de %ld (%ld maiores, %ld menores: a comparação"
+               " NÃO é constante)\n", lex_ok, cas, maior, menor);
+        printf("      e a base DUAL: Δ^j C(x,k)|₀ = δ_{jk} em %ld de %ld pares — Gram = I"
+               " outra vez\n", dual_ok, pares);
+        ok("A ORDENAÇÃO SAI DA MESMA CONSTRUÇÃO, PORQUE CADA DIMENSÃO DÁ UM EIXO À"
+           " SEGUINTE: a ordem é LEXICOGRÁFICA nas coordenadas-diferença, do topo para"
+           " baixo — o eixo de maior grau decide primeiro e só em empate se desce —, e"
+           " ela coincide com a ordem dos VALORES em todos os casos medidos. É também a"
+           " ordem da leitura posicional: comparar dois naturais é comparar os dígitos do"
+           " mais significativo para baixo",
+           lex_ok == cas && maior > 100 && menor > 100);
+        ok("E CADA PONTO NUMA RECTA ACIMA É UM POLINÓMIO ABAIXO: pela fórmula de Newton, a"
+           " coordenada Δ^k p(0) — um PONTO no andar k — emparelha com o binómio C(x,k),"
+           " que é um POLINÓMIO de grau k no andar de baixo. E o emparelhamento é"
+           " ORTONORMAL: Δ^j C(x,k)|₀ = δ_{jk} nos 49 pares, Gram = I outra vez. Os"
+           " binómios são a base DUAL das diferenças, e é por isso que a soma reconstrói",
+           dual_ok == pares && pares == 49);
+    }
+
     /* ═══ §L11g  A DEFINIÇÃO GERAL DO CORTE — sem passar pelo metálico ═════ */
     printf("\n§L11g A classe A define-se pelos CONVERGENTES, e não pelo §metálico.\n\n");
     {

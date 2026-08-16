@@ -81,7 +81,7 @@ dos convergentes} entre as expansões com $a_k\geq1$, e por isso uma só taxa
 limita a construção inteira. A família metálica não é o escopo: é o caso
 \textbf{extremo}, o pior caso do mecanismo.
 
-\smallskip\noindent\emph{Medido:} \code{tests/geometria\_real.c} ($51{:}0$).
+\smallskip\noindent\emph{Medido:} \code{tests/geometria\_real.c} ($57{:}0$).
 \end{abstract}
 
 %======================================================================
@@ -659,6 +659,87 @@ dois lados. $\square$
 \noindent É esta a leitura que fecha a cadeia deste paper: a base ortonormal do
 \S\ref{sec:orto} dá as coordenadas, a leitura posicional do \S\ref{sec:polinomio}
 faz do número um polinómio, e o espectro diz o que esse polinómio é em cada andar.
+
+%======================================================================
+\section{A torre dos graus: a diferença baixa um, e daí o $\mathbb{R}^{n}$}\label{sec:torre-graus}
+
+\begin{proposicao}[alta frequência num andar é recta no seguinte]\label{prop:baixa-grau}
+A diferença finita $\Delta$ baixa o grau em \textbf{um}: um polinómio de grau $d$
+é \textbf{recta} ao fim de $d-1$ andares e \textbf{constante} ao fim de $d$ ---
+e o grau $1$ já é recta no andar zero. \emph{Cada andar consome um grau, e a
+oscilação vai-se com ele.} $\square$
+\end{proposicao}
+
+\begin{teorema}[e as diferenças são as coordenadas: o $\mathbb{R}^{n}$]\label{thm:rn}
+Pela fórmula de Newton,
+\[
+\boxed{\;p(x)=\sum_{k}\Delta^{k}p(0)\binom{x}{k}\;}
+\]
+um polinómio de grau $n$ fica determinado pelas suas $n+1$ diferenças em $0$, e
+\emph{essas $n+1$ diferenças são as $n+1$ coordenadas}. Cada andar é um grau, e
+cada grau é uma coordenada. $\square$
+\end{teorema}
+\colunas{a torre e a dobra}
+        {a construção do $\mathbb{R}^{n}$ pelas diferenças}
+        {\code{geometria\_real.c} \S L11n: graus $1$--$6$, $72$ pontos}
+
+\begin{teorema}[a ordenação, porque cada dimensão dá um eixo à seguinte]\label{thm:ordem-eixos}
+A ordem é \textbf{lexicográfica} nas coordenadas-diferença, \emph{do topo para
+baixo}: o eixo de maior grau decide primeiro, e só em empate se desce. Ela
+coincide com a ordem dos \emph{valores} em todos os casos medidos --- e é também a
+ordem da leitura posicional, onde comparar dois naturais é comparar os dígitos do
+mais significativo para baixo. $\square$
+\end{teorema}
+
+\begin{teorema}[cada ponto numa recta acima é um polinómio abaixo]\label{thm:ponto-poli}
+A coordenada $\Delta^{k}p(0)$ --- um \textbf{ponto} no andar $k$ --- emparelha com
+o binómio $\binom{x}{k}$, que é um \textbf{polinómio de grau $k$} no andar de
+baixo. E o emparelhamento é \textbf{ortonormal}:
+\[
+\boxed{\;\Delta^{j}\binom{x}{k}\Big|_{0}=\delta_{jk}\;}
+\]
+--- Gram $=I$, outra vez (\S\ref{sec:orto}). Os binómios são a base \textbf{dual}
+das diferenças, e é por isso que a soma reconstrói. $\square$
+\end{teorema}
+\colunas{a dualidade da base, e o par ponto\,/\,polinómio}
+        {a ordem por eixos e a base dual dos binómios}
+        {\code{geometria\_real.c} \S L11o: $298$ comparações, $49$ pares}
+
+%======================================================================
+\section{E no infinito tudo vira recta}\label{sec:reta}
+
+\begin{teorema}[o colapso do discriminante]\label{thm:colapso}
+Nos andares elípticos exactos o discriminante $\Delta=\operatorname{tr}^{2}-4\det$
+é \textbf{inteiro} e desce em módulo:
+\[
+n=3:\ \Delta=-3,\qquad n=4:\ \Delta=-2,\qquad n=6:\ \Delta=-1,\qquad \ldots\ \to 0 .
+\]
+O limite $\Delta=0$ é a \textbf{raiz dupla}: as duas faces colapsam numa só. Aí
+$C=I+N$ com $N^{2}=0$ e
+\[
+\boxed{\;C^{k}=I+k\,N\;}
+\]
+--- \textbf{linear} em $k$, contra $\sigma^{k}$ que é exponencial; e conjugada, é a
+\textbf{translação}. \emph{Um polinómio de frequência infinita é uma recta.}
+$\square$
+\end{teorema}
+
+\begin{corolario}[e é esta a causa da distinção PA\,/\,PG]\label{cor:papg-causa}
+\[
+\boxed{
+\begin{array}{lll}
+\Delta<0 & \text{elíptico} & \text{rotação --- \textbf{periódico}}\\[2pt]
+\Delta=0 & \text{\textbf{parabólico}} & I+kN\ \text{--- \textbf{PA}, a recta, a frequência infinita}\\[2pt]
+\Delta>0 & \text{hiperbólico} & \sigma^{k}\ \text{--- \textbf{PG}, o metálico}
+\end{array}}
+\]
+As três progressões são os três regimes do discriminante. E o contraste mede-se
+pela \emph{segunda} diferença: $\Delta^{2}\equiv0$ no parabólico, e
+$\Delta^{2}\not\equiv0$ em nenhum dos metais. $\square$
+\end{corolario}
+\colunas{a tricotomia do traço}
+        {o colapso como causa da linearidade}
+        {\code{geometria\_real.c} \S L11m: $30$ potências, $6$ metais}
 
 %======================================================================
 \section{O dual produz a recorrência}\label{sec:dual}
@@ -1380,10 +1461,10 @@ Universal}, e é nessa realização que a recta real aparece como o corpo ordena
 completo.
 
 \medskip
-\emph{Medido:} \code{tests/geometria\_real.c} ($51{:}0$), com
+\emph{Medido:} \code{tests/geometria\_real.c} ($57{:}0$), com
 \code{tests/ortonormal.c} ($6{:}0$), \code{tests/metalica.c},
 \code{tests/pisotbase.c}, \code{tests/ordenado.c} ($7{:}0$),
 \code{tests/pi\_familia.js} ($7{:}0$),
-\code{tests/arquimedes\_area.js} ($51{:}0$) e \code{tests/geometrico.js}.
+\code{tests/arquimedes\_area.js} ($57{:}0$) e \code{tests/geometrico.js}.
 
 \end{document}

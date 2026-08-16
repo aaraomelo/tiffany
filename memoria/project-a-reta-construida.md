@@ -326,7 +326,33 @@ precisa de **μ_α mónico irredutível** — sem isso só a primeira equivalên
 **maior traço real**; (4) elíptica/parabólica/hiperbólica classificam **transformações**, não
 objectos geométricos. Mais: Dirac → **Kronecker** na convolução discreta.
 
-`tests/geometria_real.c` (51:0) na ordem obrigatória do eval: 8 leis → base ortonormal →
+**A TORRE DOS GRAUS, E A CONSTRUÇÃO DO ℝⁿ.** O Aarão, em quatro frases seguidas:
+
+- «um polinómio de frequência infinita é o quê? Uma reta. No infinito tudo vira reta» — e a
+  razão é o **colapso do discriminante**. Nos andares exactos `Δ = t² − 4` é INTEIRO e desce:
+  `−3, −2, −1 → 0`. O limite `Δ = 0` é a **raiz dupla**: as duas faces colapsam. Aí
+  `C = I + N` com `N² = 0` e **`C^k = I + kN` — LINEAR**, que conjugada é a translação.
+  **E é essa a causa da distinção PA/PG**: `Δ<0` periódico, **`Δ=0` PA (a recta)**,
+  `Δ>0` PG (o metálico). O contraste mede-se pela **segunda diferença**: `Δ² ≡ 0` no
+  parabólico, `Δ² ≢ 0` em nenhum metal.
+- «um polinómio de alta frequência num andar vira reta no próximo — aí está a construção do
+  ℝⁿ» — a **diferença finita baixa o grau em um**. Grau d é recta ao fim de d−1 andares e
+  constante ao fim de d. E pela **fórmula de Newton** `p(x) = Σ Δ^k p(0)·C(x,k)`, as **n+1
+  diferenças em 0 SÃO as n+1 coordenadas**: cada andar é um grau, cada grau é uma coordenada.
+- «e está aí a ordenação também, porque cada dimensão fornece um eixo para a próxima» — a
+  ordem é **lexicográfica nas coordenadas-diferença, do topo para baixo**, e coincide com a
+  ordem dos valores (298 de 298). É a mesma da leitura posicional.
+- «cada ponto numa reta acima é um polinómio abaixo» — a coordenada `Δ^k p(0)` (um PONTO no
+  andar k) emparelha com o binómio `C(x,k)` (um POLINÓMIO de grau k abaixo), e o
+  emparelhamento é **ortonormal**: `Δ^j C(x,k)|₀ = δ_{jk}` nos 49 pares. **Gram = I outra
+  vez** — os binómios são a base DUAL das diferenças.
+
+Defeitos meus na ronda: exigi crescimento **estrito** das diferenças e o ouro falhou (tem
+`1,1`) — o certo é `Δ² ≢ 0`; o grau 1 **já é** recta no andar zero; e mais um limiar à mão
+(«> 300» quando eram 298), trocado pelo guarda que interessa: **que a comparação não seja
+constante** (157 maiores, 140 menores).
+
+`tests/geometria_real.c` (57:0) na ordem obrigatória do eval: 8 leis → base ortonormal →
 bit a bit → dual → recorrência → Pisot → encaixe → corte → completude → ℝ → π_k/gume.
-`papers/geometrico.tex` 18 páginas; `corpo_universal.tex` 54, e a compilar.
+`papers/geometrico.tex` 19 páginas; `corpo_universal.tex` 54, e a compilar.
 Ver [[project-o-real-e-o-corte]], [[feedback-verdadeiro-e-parcial]].
