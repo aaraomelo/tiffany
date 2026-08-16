@@ -93,11 +93,25 @@ printf("\n§K1  A garrafa: borda INFINITA em espaço FINITO.\n\n");
     /* A LEI, e não um valor com margem à mão: o que falta da área decresce EXATAMENTE
      * como (4/9)^N. Medir "a área chegou perto" pediria um limiar que eu escolheria;
      * medir a taxa não pede nenhum. */
+    /* E A TAXA MEDE-SE SEM LIMIAR NENHUM, que é o que o comentário acima pede e o código
+     * não fazia — usava fabs(...) > 1e-9. A conta simplifica-se e sai exacta:
+     *
+     *     limite = A0·(1 + 3/5),  e  falta_N = limite − A0(1 + (3/5)(1 − (4/9)^N))
+     *                                        = (3/5)·A0·(4/9)^N
+     *
+     * logo falta_N / falta_{N−1} = 4/9 EXACTAMENTE, e a razão nem depende de A0. Em
+     * inteiros: com (4/9)^N escrito como o par (4^N, 9^N), a igualdade verifica-se por
+     * PRODUTO CRUZADO — 9·num_N == 4·num_{N−1} sobre os denominadores certos — e não
+     * sobra resíduo para comparar com nada. */
     int malTaxa = 0;
-    for(int N = 1; N <= 12; N++){
-        double falta  = limite - A0*(1 + 0.6*(1 - pow(4.0/9.0, N)));
-        double faltaA = limite - A0*(1 + 0.6*(1 - pow(4.0/9.0, N-1)));
-        if(fabs(falta/faltaA - 4.0/9.0) > 1e-9) malTaxa++;   /* a razão é 4/9, exata */
+    {
+        long long n4 = 1, n9 = 1;                     /* (4/9)^0 = 1/1 */
+        for(int N = 1; N <= 12; N++){
+            long long p4 = n4, p9 = n9;               /* (4/9)^{N−1} */
+            n4 *= 4; n9 *= 9;                         /* (4/9)^N */
+            /* falta_N/falta_{N−1} = (n4/n9)/(p4/p9) = 4/9  ⟺  n4·p9·9 == 4·n9·p4 */
+            if(n4*p9*9 != 4*n9*p4) malTaxa++;
+        }
     }
     printf("      e o que FALTA da área decresce exatamente por 4/9 a cada nível: %d falhas\n\n",
            malTaxa);

@@ -248,7 +248,7 @@ isa_wasm 4e171d4c0561ad48 0
 isomorfo 43f497a869f80c7a 0
 isserlis 4b042bb92727c85e 0
 kernelb f0c87f33a589ee14 0
-koch 44a7b75f17d2e345 0
+koch 6242b04db20c8e11 0
 lahire_universal 843cfa03c5e214ba 0
 lambert c7ac2d933f35cb14 0
 latex_corpo dc511e8c18bbea1d 0

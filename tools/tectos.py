@@ -47,6 +47,16 @@
 #       O conserto nunca foi apertar o limiar: foi construir o segundo objecto por um
 #       caminho que não passe pelo primeiro.
 #
+#   P4  O COMENTÁRIO QUE DESACONSELHA A RÉGUA, COM A RÉGUA POR BAIXO. Esta casa escreve
+#       nos comentários o que aprendeu — «a LEI, e não um limiar», «medir d < 1e-12 é
+#       medir a minha paciência» — e às vezes a lição fica no comentário e não chega ao
+#       código. No `vizinha.c` a frase dizia com todas as letras que medir o limiar era
+#       medir a paciência, e a asserção logo abaixo media `d < 1e-12`.
+#
+#       Rende pouco e vale: quatro candidatos no repositório, três já corrigidos e um a
+#       corrigir (o `koch.c`, onde o comentário dizia «medir a taxa não pede nenhum
+#       limiar» e o código comparava a razão com 1e-9 — sendo que ela é 4/9 EXACTA).
+#
 # O controlo é correr nos ficheiros onde a resposta já se sabe: o `supremo.c` de hoje não
 # pode dar P1, e a versão anterior tinha de dar.
 #
