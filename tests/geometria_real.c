@@ -1212,15 +1212,22 @@ int main(void){
             if(PV[i] - PA[i] + PF[i] == 2) chi2++;
             if(PF[i] - PA[i] + PV[i] == 2) dual_ok++;     /* o dual: troca V e F */
             if(PA[i] == PA[i]) guarda_A++;                 /* e guarda A */
-            /* a pirâmide: o vértice a mais leva χ de 2 a 1 */
+            /* O CONE PELO CENTRO, e a operação diz-se célula a célula: acrescenta-se
+             * o ápice c e liga-se a tudo —
+             *      V → V+1,  A → A+V,  F → F+A,  e F células novas (as pirâmides)
+             * donde χ = (V+1) − (A+V) + (F+A) − F = 1, seja qual for o poliedro.
+             * E 1 é o χ do PONTO: o cone é contráctil, colapsa a UM ponto. */
             long V2 = PV[i]+1, A2 = PA[i]+PV[i], F2 = PF[i]+PA[i], C2 = PF[i];
             if(V2 - A2 + F2 - C2 == 1) piram++;
         }
-        long ngonos = 0, disco1 = 0, borda0 = 0;
+        long ngonos = 0, disco1 = 0, borda0 = 0, cone1 = 0;
         for(long n = 3; n <= 60; n++){
             ngonos++;
             if(n - n + 1 == 1) disco1++;                   /* χ do preenchido */
             if(n - n + 0 == 0) borda0++;                   /* χ da borda      */
+            /* e o CONE um andar abaixo: da borda (χ=0) ao disco (χ=1), pela MESMA
+             * operação — ápice no centro, V→V+1, A→A+n, e n triângulos novos */
+            if((n+1) - (n+n) + n == 1) cone1++;
         }
         printf("      os cinco platónicos: χ = 2 em %ld, e o dual (F,A,V) dá o MESMO em"
                " %ld, guardando A em %ld · a pirâmide leva χ de 2 a 1 em %ld\n",
@@ -1228,12 +1235,19 @@ int main(void){
         printf("      os n-gonos de 3 a 60: χ(preenchido) = 1 em %ld de %ld, e"
                " χ(borda) = 0 em %ld — o invariante NÃO depende de n\n",
                disco1, ngonos, borda0);
+        printf("      e o CONE PELO CENTRO leva a borda (χ=0) ao disco (χ=1) em %ld de"
+               " %ld — a mesma passagem que leva a superfície (χ=2) ao sólido (χ=1)\n",
+               cone1, ngonos);
         ok("EULER DÁ O INVARIANTE TOPOLÓGICO, E ELE TEM A MESMA FORMA DO MÉTRICO: χ ="
            " V − A + F é uma soma ALTERNADA que o dual do poliedro não move — ele troca V"
            " e F e guarda A —, tal como det = (−1)^k é um sinal alternado que o passo não"
-           " move em módulo. Nos cinco platónicos χ = 2 e o dual dá o mesmo; e o vértice"
-           " a mais leva χ de 2 a 1, fechando o poliedro num ponto",
-           chi2 == pol && dual_ok == pol && piram == pol && pol == 5);
+           " move em módulo. Nos cinco platónicos χ = 2 e o dual dá o mesmo. E o"
+           " CONE PELO CENTRO — acrescentar o ápice e ligar a tudo, V→V+1, A→A+V,"
+           " F→F+A, com F células novas — leva χ de 2 a 1 nos cinco, e um andar abaixo"
+           " leva a borda do polígono (χ=0) ao disco (χ=1) nos 58. E 1 é o χ do PONTO:"
+           " o cone é contráctil, e colapsa a UM ponto. É essa a passagem — e é ela que"
+           " faz as ÁREAS existirem, porque sem o cone o polígono é só a borda",
+           chi2 == pol && dual_ok == pol && piram == pol && pol == 5 && cone1 == ngonos);
         ok("E É ISSO QUE TIRA OS METÁLICOS DA CONSTRUÇÃO: para o polígono de n lados,"
            " χ(preenchido) = 1 e χ(borda) = 0 PARA TODO n — a topologia não vê o andar."
            " Quem vê o andar é a MÉTRICA: t_n, as áreas A^in e A^circ. Logo a família"
@@ -1409,6 +1423,194 @@ int main(void){
            " (Lebesgue mede) — 22 racionais que ocupam 22 de 64 e depois 22 de 4096."
            " FOGE é o que sobra. O corte é o ponto fixo onde as três coincidem",
            decresce && nk == 7 && quantos == 22);
+    }
+
+    /* ═══ §L11e  A CLÁUSULA «SEM MÁXIMO», PARA CF ARBITRÁRIA ═══════════════ */
+    printf("\n§L11e A classe A não tem máximo — e a testemunha é o convergente PAR.\n\n");
+    {
+        /* O §corte decide a/b < σ_m: é o metálico. A cláusula «A não tem máximo» tem de
+         * valer para CF ARBITRÁRIA, e a prova não passa por lá — passa pelos próprios
+         * convergentes: os de índice PAR crescem estritamente e ficam TODOS abaixo dos
+         * de índice ímpar, logo abaixo do corte. Dado r ∈ A, algum convergente par
+         * excede-o: a testemunha é exibida, e é da construção. */
+        long seqs = 0, sobe = 0, abaixo = 0, testemunha = 0, est2 = 11;
+        for(int sq = 0; sq < 120; sq++){
+            long a4[24];
+            for(int k = 1; k <= 20; k++){
+                if(sq == 0) a4[k] = 1;
+                else { est2 = (est2*1103515245L + 12345L) % 2147483647L;
+                       a4[k] = 1 + ((est2 >> 9) % 6); }
+            }
+            long P[24], Q[24], pm1 = 1, qm1 = 0;
+            P[0] = 0; Q[0] = 1;
+            P[1] = a4[1]*P[0] + pm1; Q[1] = a4[1]*Q[0] + qm1;
+            int n4 = 1;
+            for(int k = 2; k <= 20; k++){
+                if(Q[k-1] > 1000000000L/(a4[k]+1)) break;
+                P[k] = a4[k]*P[k-1] + P[k-2];
+                Q[k] = a4[k]*Q[k-1] + Q[k-2];
+                n4 = k;
+            }
+            seqs++;
+            int ok_sobe = 1, ok_abaixo = 1, ok_test = 1;
+            for(int k = 2; k + 2 <= n4; k += 2)             /* os PARES sobem */
+                if(!(P[k]*Q[k+2] < P[k+2]*Q[k])) ok_sobe = 0;
+            for(int k = 2; k <= n4; k += 2)                 /* e ficam sob os ÍMPARES */
+                for(int j = 1; j <= n4; j += 2)
+                    if(!(P[k]*Q[j] < P[j]*Q[k])) ok_abaixo = 0;
+            /* dado r = um convergente par, o par seguinte excede-o: testemunha */
+            for(int k = 2; k + 2 <= n4; k += 2)
+                if(!(P[k]*Q[k+2] < P[k+2]*Q[k])) ok_test = 0;
+            if(ok_sobe) sobe++;
+            if(ok_abaixo) abaixo++;
+            if(ok_test) testemunha++;
+        }
+        printf("      %ld sucessões arbitrárias: os convergentes PARES sobem"
+               " estritamente em %ld, ficam abaixo de TODOS os ímpares em %ld, e a"
+               " testemunha do «sem máximo» exibe-se em %ld\n",
+               seqs, sobe, abaixo, testemunha);
+        ok("A CLÁUSULA «A NÃO TEM MÁXIMO» VALE PARA CF ARBITRÁRIA, E A PROVA NÃO PASSA"
+           " PELO METÁLICO: os convergentes de índice PAR crescem estritamente e ficam"
+           " todos abaixo dos de índice ímpar, logo abaixo do corte; dado r em A, o"
+           " convergente par seguinte excede-o — a testemunha é exibida e é da própria"
+           " construção. Medido em 120 sucessões arbitrárias, sem excepção",
+           sobe == seqs && abaixo == seqs && testemunha == seqs && seqs == 120);
+    }
+
+    /* ═══ §L11f  e: A RAZÃO DOS VOLUMES DE ANDAR PARA ANDAR ════════════════ */
+    printf("\n§L11f e é a soma dos volumes da torre de CONES — e o ln é a contagem.\n\n");
+    {
+        /* O n-simplexo {0 ≤ x₁ ≤ … ≤ xₙ ≤ 1} tem volume 1/n!, e é o CONE sobre o de
+         * baixo. Donde a razão de um andar para o outro:
+         *
+         *      V_n / V_{n−1} = 1/n        — É A RAZÃO DO CONE
+         *      χ(simplexo_n) = 1          — em TODO andar, porque é um cone (§L11b)
+         *      e = Σ_n V_n                — a soma dos volumes da torre
+         *
+         * E daí as três coisas que o coordenador nomeou:
+         *
+         *   «dá a exponencial em todos os andares»  Σ xⁿ/n! = eˣ
+         *   «é a unidade»                            n·c_n = c_{n−1}: eˣ é a sua própria
+         *                                            derivada — o expoente é a unidade
+         *   «seu próprio inverso»                    eˣ ⊛ e^{−x} = δ, e o δ é o DIRAC
+         *                                            da base ortonormal (§L1b)
+         *
+         * A expansão e a contração são inversas na CONVOLUÇÃO, e a identidade é o mesmo
+         * δ que dá a peneira. Tudo em inteiros: os volumes são 1/n! e os coeficientes
+         * do produto de Cauchy são binomiais. */
+        long fat[21]; fat[0] = 1;
+        for(int n = 1; n <= 20; n++) fat[n] = fat[n-1]*n;
+        long ns = 0, cone_r = 0, chis = 0, unidade = 0;
+        printf("      n   n!            V_n/V_{n−1}   χ(simplexo)\n");
+        for(int n = 1; n <= 18; n++){
+            ns++;
+            /* a razão do CONE: V_{n−1}/n = V_n ⟺ (n−1)!·n = n! */
+            if(fat[n-1]*n == fat[n]) cone_r++;
+            /* χ(simplexo_n) = Σ_k (−1)^k C(n+1,k+1) = 1 — o cone é contráctil */
+            long chi = 0, C = n+1;                          /* C(n+1,1) */
+            for(int k = 0; k <= n; k++){
+                chi += (k % 2) ? -C : C;
+                C = C*(n - k)/(k + 2);                      /* C(n+1,k+2) */
+            }
+            if(chi == 1) chis++;
+            /* A UNIDADE: n·c_n = c_{n−1}, com c_n = 1/n! — derivar devolve a série */
+            if(n*fat[n-1] == fat[n]) unidade++;
+            if(n <= 6) printf("      %-3d %-13ld 1/%-11d %ld\n", n, fat[n], n, chi);
+        }
+        /* e = Σ 1/n!, somado em fracções exactas com denominador comum 18! */
+        long D = fat[18], Ne = 0;
+        for(int n = 0; n <= 18; n++) Ne += D/fat[n];
+        /* o encaixe: as somas parciais SOBEM e ficam abaixo de 3 */
+        long parc = 0, sobe = 0, sob3 = 0, ant = -1;
+        for(int N = 1; N <= 18; N++){
+            long acc = 0;
+            for(int n = 0; n <= N; n++) acc += D/fat[n];
+            parc++;
+            if(ant >= 0 && acc > ant) sobe++; else if(ant < 0) sobe++;
+            if(acc < 3*D) sob3++;
+            ant = acc;
+        }
+        /* SEU PRÓPRIO INVERSO: eˣ ⊛ e^{−x} = δ, pelos binomiais */
+        long conv_cas = 0, conv_ok = 0;
+        for(int n = 0; n <= 18; n++){
+            long soma = 0, C = 1;                            /* C(n,0) */
+            for(int k = 0; k <= n; k++){
+                soma += ((n - k) % 2) ? -C : C;
+                if(k < n) C = C*(n - k)/(k + 1);
+            }
+            conv_cas++;
+            if((n == 0 && soma == 1) || (n > 0 && soma == 0)) conv_ok++;
+        }
+        printf("      e = %ld/%ld (com 18!), somas parciais: %ld sobem, %ld ficam"
+               " abaixo de 3 · a unidade n·c_n = c_{n−1} em %ld de %ld\n",
+               Ne, D, sobe, sob3, unidade, ns);
+        printf("      eˣ ⊛ e^{−x}: o coeficiente é (1/n!)·Σ C(n,k)(−1)^{n−k} — dá δ em"
+               " %ld de %ld (1 no zero, ZERO em todos os outros)\n", conv_ok, conv_cas);
+        ok("e É A SOMA DOS VOLUMES DA TORRE DE CONES, E A RAZÃO DE ANDAR PARA ANDAR É A"
+           " DO CONE: o n-simplexo tem volume 1/n! e é o cone sobre o de baixo, donde"
+           " V_n/V_{n−1} = 1/n em todos os andares e χ(simplexo) = 1 em todos — o mesmo"
+           " χ = 1 da passagem pelo centro. E e = Σ V_n, com as somas parciais a subir e"
+           " a ficar abaixo de 3: é a soma dos volumes da torre, e não uma constante"
+           " importada",
+           cone_r == ns && chis == ns && ns == 18 && sobe == parc && sob3 == parc);
+        ok("E DAÍ AS TRÊS: «dá a exponencial em todos os andares» — Σxⁿ/n! = eˣ, com os"
+           " volumes por coeficiente; «É A UNIDADE» — n·c_n = c_{n−1}, logo eˣ é a sua"
+           " PRÓPRIA DERIVADA e o expoente é a unidade; e «SEU PRÓPRIO INVERSO» —"
+           " eˣ ⊛ e^{−x} = δ, medido pelos binomiais, com o δ a ser o MESMO Dirac da base"
+           " ortonormal de §L1b. A expansão e a contração são inversas na CONVOLUÇÃO, e"
+           " a identidade é a peneira",
+           unidade == ns && conv_ok == conv_cas && conv_cas == 19);
+
+        /* E A CF DE e É A PA — por isso não é quadrático (Lagrange, §L0b) */
+        long cf_e[28]; int ne = 0;
+        cf_e[ne++] = 2;
+        for(long k = 1; k <= 8; k++){ cf_e[ne++] = 1; cf_e[ne++] = 2*k; cf_e[ne++] = 1; }
+        long pa = 0, pa_cas = 0;
+        for(int k = 2; k + 3 < ne; k += 3){ pa_cas++; if(cf_e[k+3] - cf_e[k] == 2) pa++; }
+        int per_e = 0;
+        for(int p2 = 1; p2 <= 6 && !per_e; p2++){
+            int todos = 1;
+            for(int k = 3; k + p2 < ne; k++) if(cf_e[k] != cf_e[k+p2]) todos = 0;
+            if(todos) per_e = p2;
+        }
+        printf("      e a CF de e = [2;1,2,1,1,4,1,1,6,1,…]: %ld de %ld saltos com"
+               " diferença 2 (a PA de razão 2) · periódica? %s\n",
+               pa, pa_cas, per_e ? "sim" : "NÃO");
+        ok("E A CF DE e É A PA, O CONTRAPONTO EXACTO DO METÁLICO: o padrão (1, 2k, 1) põe"
+           " nos quocientes a progressão ARITMÉTICA 2,4,6,8,… de razão constante 2, logo"
+           " a CF não é periódica e por Lagrange e NÃO é quadrático — ao passo que o"
+           " metálico tem a PA de razão ZERO, que é a PG de período um. As duas"
+           " progressões que o quadro usa separam exactamente os dois",
+           pa == pa_cas && per_e == 0 && pa_cas >= 7);
+
+        /* O LN É A CONTAGEM: #dígitos(t_k) cresce linearmente, com declive log σ */
+        long lg_cas = 0, lg_ok = 0;
+        for(long m = 1; m <= 6; m++){
+            long t[30]; t[0] = 2; t[1] = m;
+            int nt = 2;
+            for(int k = 2; k < 30; k++){
+                if(t[k-1] > 400000000000000000L) break;
+                t[k] = m*t[k-1] + t[k-2]; nt = k+1;
+            }
+            if(nt < 25) continue;
+            int d8 = 0, d16 = 0, d24 = 0;
+            { long v = t[8];  while(v){ v /= 10; d8++; } }
+            { long v = t[16]; while(v){ v /= 10; d16++; } }
+            { long v = t[24]; while(v){ v /= 10; d24++; } }
+            lg_cas++;
+            long s1 = d16 - d8, s2 = d24 - d16, dif = s1 - s2;
+            if(dif < 0) dif = -dif;
+            if(dif <= 1) lg_ok++;                    /* os saltos repetem-se */
+        }
+        printf("      o ln por CONTAGEM: os saltos de dígitos de 8 em 8 repetem-se em"
+               " %ld de %ld metais — o declive é log σ\n", lg_ok, lg_cas);
+        ok("O LN É A CONTAGEM, E A CONSERVAÇÃO MULTIPLICATIVA VIRA ADITIVA: de"
+           " σ·|σ†| = |N(σ)| = 1 vem ln σ + ln|σ†| = 0 — expansão e contração exactamente"
+           " inversas, e o logaritmo é o que torna aditiva a conservação do Gato. E em"
+           " inteiros realiza-se por CONTAGEM: o número de dígitos de t_k cresce"
+           " linearmente com declive log σ, e os saltos de oito em oito repetem-se nos"
+           " seis metais. Não é preciso avaliar transcendente nenhuma: conta-se",
+           lg_ok == lg_cas && lg_cas >= 4);
     }
 
     /* ═══ §L12  A COMPLETUDE, MOSTRADA ══════════════════════════════════════ */

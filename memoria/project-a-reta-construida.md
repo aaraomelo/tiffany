@@ -237,7 +237,37 @@ corte e o Universal identifica-o; a identidade de **Gentil é herdada**, não pr
 quota decrescente declara a **discretização**; a contagem das oito leis fixa-se em (0,…,7); e as
 leis são **realizadas por** vectores, não iguais a eles.
 
-`tests/geometria_real.c` (38:0) na ordem obrigatória do eval: 8 leis → base ortonormal →
+**EULER PASSA PELO CENTRO — É A PASSAGEM.** O Aarão: «sobre a contagem, é justamente Euler
+que passa pelo centro, é a passagem». A operação diz-se célula a célula: acrescenta-se o
+ápice no centro e liga-se a tudo — `V→V+1, A→A+V, F→F+A`, com F células novas — donde
+
+    χ = (V+1) − (A+V) + (F+A) − F = 1,   seja qual for o poliedro
+
+e um andar abaixo o mesmo cone leva a borda do polígono (χ=0) ao disco (χ=1). **E 1 é o χ do
+PONTO: o cone é contráctil, colapsa a UM ponto.** É essa a passagem, e é ela que faz as ÁREAS
+existirem — sem o cone, o polígono é só a borda e não tem área para medir.
+
+**E DAÍ SAI e, PELOS VOLUMES.** «É a razão entre os volumes de um andar para outro; dá a
+exponencial em todos os andares; é a unidade; seu próprio inverso.» O n-simplexo tem volume
+`1/n!` e **é o cone sobre o de baixo**, donde
+
+    V_n / V_{n−1} = 1/n   ← A RAZÃO DO CONE       χ(simplexo) = 1 em todo andar
+    e = Σ V_n                                      a soma dos volumes da torre
+
+E as três propriedades saem da mesma torre:
+- **a exponencial em todos os andares**: `Σ xⁿ/n! = eˣ`, com os volumes por coeficiente;
+- **é a unidade**: `n·c_n = c_{n−1}` — eˣ é a sua PRÓPRIA DERIVADA;
+- **seu próprio inverso**: `eˣ ⊛ e^{−x} = δ`, medido pelos binomiais — e **o δ é o mesmo
+  Dirac da base ortonormal**. Expansão e contração são inversas na CONVOLUÇÃO.
+
+**E a CF de e é a PA** — `[2;1,2,1,1,4,1,1,6,1,…]`, padrão (1,2k,1), com a progressão
+aritmética de razão 2 nos quocientes: não periódica, logo por Lagrange **e não é quadrático**.
+É o contraponto exacto do metálico, cuja PA tem razão **zero** — a PG de período um.
+
+**E o ln é a CONTAGEM**: de `σ·|σ†| = 1` vem `ln σ + ln|σ†| = 0`, e em inteiros o logaritmo
+realiza-se contando dígitos — `#dig(t_k)` cresce linearmente com declive `log σ`.
+
+`tests/geometria_real.c` (43:0) na ordem obrigatória do eval: 8 leis → base ortonormal →
 bit a bit → dual → recorrência → Pisot → encaixe → corte → completude → ℝ → π_k/gume.
-`papers/geometrico.tex` 14 páginas; `corpo_universal.tex` 54, e a compilar.
+`papers/geometrico.tex` 16 páginas; `corpo_universal.tex` 54, e a compilar.
 Ver [[project-o-real-e-o-corte]], [[feedback-verdadeiro-e-parcial]].

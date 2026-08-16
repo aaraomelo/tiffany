@@ -81,7 +81,7 @@ dos convergentes} entre as expansões com $a_k\geq1$, e por isso uma só taxa
 limita a construção inteira. A família metálica não é o escopo: é o caso
 \textbf{extremo}, o pior caso do mecanismo.
 
-\smallskip\noindent\emph{Medido:} \code{tests/geometria\_real.c} ($38{:}0$).
+\smallskip\noindent\emph{Medido:} \code{tests/geometria\_real.c} ($43{:}0$).
 \end{abstract}
 
 %======================================================================
@@ -374,9 +374,31 @@ porque quase nada depende.
 
 \begin{proposicao}[a característica não se move]\label{prop:euler}
 Para os poliedros convexos, $\chi=V-A+F=2$, e o \textbf{dual troca $V$ e $F$
-guardando $A$}: a característica não se move. Nos cinco platónicos verifica-se nos
-dois sentidos; e o vértice a mais --- a pirâmide --- leva $\chi$ de $2$ a $1$,
-fechando o poliedro num ponto. $\square$
+guardando $A$}: a característica não se move. $\square$
+\end{proposicao}
+
+\begin{definicao}[o cone pelo centro --- e a operação diz-se]\label{def:cone-centro}
+Acrescenta-se o ápice $c$ no centro e liga-se a todas as células:
+\[
+V\mapsto V+1,\qquad A\mapsto A+V,\qquad F\mapsto F+A,
+\qquad\text{e } F \text{ células novas.}
+\]
+\end{definicao}
+
+\begin{proposicao}[e é essa a passagem]\label{prop:passagem}
+Do cone pelo centro vem
+\[
+\chi=(V+1)-(A+V)+(F+A)-F=1 ,
+\]
+seja qual for o poliedro; e um andar abaixo, a mesma operação leva a borda do
+polígono ($\chi=0$) ao disco ($\chi=1$). E \textbf{$1$ é o $\chi$ do ponto}: o cone
+é contráctil --- colapsa a \emph{um} ponto.
+\[
+\boxed{\;\chi=2\ \text{ou}\ 0 \quad\xrightarrow{\ \text{cone pelo centro}\ }\quad
+\chi=1\ \text{---\ a \textbf{passagem}}\;}
+\]
+É ela que faz as \textbf{áreas} existirem: sem o cone, o polígono é só a sua borda
+e não tem área para medir. $\square$
 \end{proposicao}
 
 \noindent E é a \textbf{mesma forma} do invariante métrico deste paper:
@@ -452,7 +474,7 @@ seja o caso geral, mas porque é o caso que não se move.
 \[
 \boxed{
 \begin{array}{ll}
-\textbf{Hurwitz} & \text{fornece a contagem do domínio}\\
+\textbf{Hurwitz} & \text{o resultado de contagem do domínio usado pelo Universal}\\
 \textbf{Lebesgue} & \text{fornece a medida da imagem}\\
 \textbf{Gentil} & \text{estabelece a compatibilidade, pela soma reversível}
 \end{array}}
@@ -638,7 +660,8 @@ a largura é
 \[
 \boxed{\;\abs{c_{k+1}-c_k}=\frac{1}{U^{(m)}_kU^{(m)}_{k+1}}\;}
 \]
-exacta e sem uma divisão. Em $m=1$ isto é a identidade de Fibonacci, e só aí. $\square$
+exacta, calculável a partir de inteiros e \emph{sem avaliação de nenhuma raiz}. Em
+$m=1$ isto é a identidade de Fibonacci, e só aí. $\square$
 \end{teorema}
 \colunas{o encaixe alcança $\mathbb{R}$ (\code{thm:encaixe})}
         {os intervalos, com largura inteira}
@@ -675,7 +698,9 @@ por convenção canónica.
 Para uma sucessão \textbf{qualquer} --- não só a periódica ---:
 $p_kq_{k-1}-p_{k-1}q_k=(-1)^{k-1}$, logo $\abs{\det}=1$ em todos os passos; os
 convergentes alternam de lado; os intervalos formam uma cadeia
-encaixada; e $q_k$ é não decrescente, com crescimento estrito a partir de $k=1$.
+encaixada; e $q_{k}\geq q_{k-1}$ para $k\geq1$, com crescimento \emph{estrito}
+$q_{k+1}>q_k$ para $k\geq1$ --- pois com $q_{-1}=0$, $q_0=1$ e $a_1=1$ vem
+$q_1=q_0$.
 \emph{O metálico é o caso de quociente parcial constante --- periódico, mas não
 o único periódico, e muito menos o único caso.} $\square$
 \end{teorema}
@@ -717,6 +742,73 @@ A igualdade num índice isolado não caracteriza a sucessão de uns: a caracteri
 \end{observacao}
 
 %======================================================================
+\section{$e$: a razão dos volumes de andar para andar}\label{sec:e}
+
+O cone pelo centro (Prop.~\ref{prop:passagem}) não é só uma passagem topológica:
+ele mede.
+
+\begin{proposicao}[a torre de cones]\label{prop:torre-cones}
+O $n$-simplexo $\{0\leq x_1\leq\cdots\leq x_n\leq1\}$ tem volume $1/n!$, e é o
+\textbf{cone} sobre o de baixo. Donde, em cada andar,
+\[
+\boxed{\;\frac{V_n}{V_{n-1}}=\frac1n\;}
+\qquad\text{e}\qquad
+\chi(\text{simplexo}_n)=1
+\]
+--- a razão de um andar para o outro \emph{é a do cone}, e a característica é a do
+ponto em todos. $\square$
+\end{proposicao}
+
+\begin{teorema}[$e$ é a soma dos volumes da torre]\label{thm:e}
+\[
+\boxed{\;e=\sum_{n\geq0}V_n=\sum_{n\geq0}\frac1{n!}\;}
+\]
+com as somas parciais a subir e a ficar abaixo de $3$. E daí as três propriedades,
+cada uma da mesma torre:
+\[
+\begin{array}{lll}
+\textbf{a exponencial em todos os andares}
+ & \displaystyle\sum_n \frac{x^n}{n!}=e^{x}
+ & \text{os volumes são os coeficientes}\\[8pt]
+\textbf{é a unidade}
+ & n\,c_n=c_{n-1}
+ & e^{x}\ \text{é a sua \emph{própria derivada}}\\[6pt]
+\textbf{seu próprio inverso}
+ & e^{x}\ast e^{-x}=\delta
+ & \text{e o }\delta\ \text{é o \textbf{Dirac} da base}
+\end{array}
+\]
+A última mede-se pelos binomiais: o coeficiente do produto é
+$(1/n!)\sum_k\binom nk(-1)^{n-k}=(1/n!)(1-1)^n$, que é $1$ em $n=0$ e zero nos
+outros. \emph{A expansão e a contração são inversas na convolução, e a identidade é
+a mesma peneira do \S\ref{sec:orto}.} $\square$
+\end{teorema}
+\colunas{a torre, o cone, e o $\delta$ da convolução}
+        {$e$ como soma dos volumes, e as três propriedades numa só origem}
+        {\code{geometria\_real.c} \S L11f: $18$ andares, $19$ coeficientes}
+
+\begin{corolario}[e a CF de $e$ é a PA]\label{cor:e-pa}
+$\mathrm{CF}(e)=[2;1,2,1,\ 1,4,1,\ 1,6,1,\ldots]$: o padrão $(1,2k,1)$ põe nos
+quocientes a progressão \textbf{aritmética} de razão $2$, logo a CF não é periódica
+e, por Lagrange (Teor.~\ref{thm:lagrange}), $e$ \textbf{não é quadrático}. É o
+contraponto exacto do metálico, cuja PA tem razão \textbf{zero} --- isto é, a PG de
+período um. \emph{As duas progressões separam exactamente os dois.} $\square$
+\end{corolario}
+
+\begin{observacao}[e o logaritmo é a contagem]\label{obs:ln}
+A conservação do Gato é multiplicativa; o logaritmo torna-a aditiva:
+\[
+\sigma\cdot\abs{\sigma\dg}=\abs{N(\sigma)}=1
+\qquad\Longrightarrow\qquad
+\ln\sigma+\ln\abs{\sigma\dg}=0 .
+\]
+Expansão e contração exactamente inversas. E em inteiros o logaritmo realiza-se por
+\textbf{contagem}: o número de dígitos de $t_k$ cresce linearmente em $k$, com
+declive $\log\sigma$, e os saltos de oito em oito repetem-se. Não é preciso avaliar
+transcendente nenhuma para o ter.
+\end{observacao}
+
+%======================================================================
 \section{O corte, e o bit que decide}\label{sec:corte}
 
 O corte não é uma técnica adicional: é a \textbf{leitura ordenada da mesma
@@ -749,6 +841,12 @@ Este paper \emph{realiza} o corte; a varredura confirma que a realização não
 diverge do que o Universal prova. $\square$
 \end{teorema}
 
+\noindent\textbf{E o mesmo alfabeto binário é reutilizado em dois níveis}: primeiro
+como \emph{coordenada} da base, $b_i=\langle b,e_i\rangle$; depois como \emph{símbolo
+da decisão} de corte, o lado esquerdo ou direito. São dois usos, e a passagem entre
+eles é esta secção --- não uma identidade automática.
+
+\medskip
 \noindent Portanto o bit não apenas \emph{representa} o número:
 
 \begin{corolario}\label{cor:bitdecide}
@@ -817,11 +915,12 @@ A_{(a_k)}=\bigl\{r\in\mathbb{Q}:\ \text{a comparação do \S\ref{sec:corte} deci
 r\ \text{abaixo}\bigr\}.
 \] Então:
 
-\emph{(i) $A$ é um corte de Dedekind.} As quatro cláusulas verificam-se: $A$ e o
-seu complementar são não vazios, $A$ é fechado para baixo, e $A$ \textbf{não tem
-máximo} --- para cada $a/b\in A$ exibe-se $a'/b'\in A$ maior
-(\S\ref{sec:corte}). O ponto não vive em $\mathbb{Q}$: é por isso que
-\emph{o corte é o objecto}, e não um ponto a procurar dentro de $\mathbb{Q}$.
+\emph{(i) $A$ é um corte de Dedekind.} $A$ e o seu complementar são não vazios, e
+$A$ é fechado para baixo. E \textbf{$A$ não tem máximo}, com a testemunha dada pela
+\emph{própria construção} --- não pelo \S metálico: os convergentes de índice
+\textbf{par} crescem estritamente e ficam todos abaixo dos de índice ímpar, logo
+todos em $A$; dado $r\in A$, o convergente par seguinte excede-o. O ponto não vive
+em $\mathbb{Q}$: é por isso que \emph{o corte é o objecto}.
 
 \emph{(ii) O habitante é único, pelo princípio do pombal, e a conta é inteira.}
 Por Def.~\ref{def:Ik} tem-se $\abs{I_K}\leq2^{-K}$; logo, se $r_1/s_1$ e
@@ -926,13 +1025,13 @@ $\mathbb{Q}$. Separam-se:
 \begin{array}{ll}
 p\ \text{é \textbf{primo de realização} de } n
  & \iff\ \mu_n\ \text{tem raiz } \bar t_n\in\mathbb{F}_p\\[3pt]
-p\ \text{é \textbf{primo de ordem} } n
- & \iff\ \operatorname{ord}(C_n)=2n\ \text{em } \mathbb{F}_p
+(p,\bar t_n)\ \text{\textbf{realiza a ordem} } n
+ & \iff\ \mu_n(\bar t_n)=0\ \text{e}\ \operatorname{ord}\bigl(C_n(\bar t_n)\bigr)=2n
 \end{array}\;}
 \]
 O primeiro é condição sobre a \emph{existência} da realização modular do traço; o
-segundo é uma propriedade da \emph{ordem} da companheira, e não decorre do
-primeiro. Os exemplos usados aqui cumprem ambos, e isso verifica-se:
+segundo é propriedade do \textbf{par} $(p,\bar t_n)$ --- porque a companheira depende
+da raiz escolhida --- e não decorre do primeiro. Os exemplos usados aqui cumprem ambos, e isso verifica-se:
 \[
 \begin{array}{lll}
 n=4: & \mu_4=x^{2}-2,\ p=17 & \bar t_4\in\{11,6\}\\
@@ -961,8 +1060,13 @@ t_n=2\cos\frac{\pi}{n}\in\mathbb{R}
 \bar t_n\in\mathbb{F}_p ,
 \]
 sendo o segundo uma \textbf{realização modular de uma relação algébrica}, e não
-«o mesmo número». É isso que faz $\pi_n$ ser uma \textbf{realização algébrica exacta do andar}, e
-não uma aproximação numérica introduzida externamente.
+«o mesmo número». E o alcance disso limita-se, porque as áreas usam
+$\sqrt{4-t_n^{2}}$ e a passagem da raiz real para uma raiz em $\mathbb{F}_p$ exigiria
+estrutura adicional:
+\[
+\boxed{\;\text{a realização modular fecha a \textbf{relação algébrica do traço};}
+\quad\text{as áreas e }\pi_n\text{ permanecem na realização \textbf{real}.}\;}
+\]
 
 \begin{teorema}\label{thm:pi}
 \emph{(i) os elíticos.} Com $t_n=2\cos(\pi/n)$ realizado no primo da ordem,
@@ -1099,10 +1203,10 @@ Universal}, e é nessa realização que a recta real aparece como o corpo ordena
 completo.
 
 \medskip
-\emph{Medido:} \code{tests/geometria\_real.c} ($38{:}0$), com
+\emph{Medido:} \code{tests/geometria\_real.c} ($43{:}0$), com
 \code{tests/ortonormal.c} ($6{:}0$), \code{tests/metalica.c},
 \code{tests/pisotbase.c}, \code{tests/ordenado.c} ($7{:}0$),
 \code{tests/pi\_familia.js} ($7{:}0$),
-\code{tests/arquimedes\_area.js} ($38{:}0$) e \code{tests/geometrico.js}.
+\code{tests/arquimedes\_area.js} ($43{:}0$) e \code{tests/geometrico.js}.
 
 \end{document}
