@@ -33,17 +33,13 @@
 #include "reta.h"      /* Dir e Cruz: a operação */
 #include "unidade.h"
 
-static long interno(const long *a, const long *b, int n){
-    long s = 0;
-    for(int k = 0; k < n; k++) s += a[k]*b[k];
-    return s;
-}
+
 /* o produto de R^(1+m): escalar + vetor de dimensão m. cruz = 0 quando não há cruzado. */
 static void prod(const long *A, const long *B, int m, void (*cruz)(const long*,const long*,long*),
                  long *R){
     long a0 = A[0], b0 = B[0];
     const long *a = A+1, *b = B+1;
-    R[0] = a0*b0 - interno(a, b, m);
+    R[0] = a0*b0 - rt_dir(a, b, m);
     long c[8] = {0};
     if(cruz) cruz(a, b, c);
     for(int k = 0; k < m; k++) R[1+k] = a0*b[k] + b0*a[k] + c[k];
@@ -119,10 +115,10 @@ printf("\n§R2  O cruzado é o ÚNICO termo antissimétrico — e a não-comutat
 {
     long a[3] = {1,2,3}, b[3] = {4,5,6}, ab[3], ba[3];
     rt_cruz3(a,b,ab); rt_cruz3(b,a,ba);
-    printf("      <a,b> = %ld   <b,a> = %ld          simétrico\n", interno(a,b,3), interno(b,a,3));
+    printf("      <a,b> = %ld   <b,a> = %ld          simétrico\n", rt_dir(a,b,3), rt_dir(b,a,3));
     printf("      a×b = (%ld,%ld,%ld)   b×a = (%ld,%ld,%ld)   ANTIssimétrico\n\n",
            ab[0],ab[1],ab[2], ba[0],ba[1],ba[2]);
-    int sim = (interno(a,b,3) == interno(b,a,3));
+    int sim = (rt_dir(a,b,3) == rt_dir(b,a,3));
     int anti = 1;
     for(int k = 0; k < 3; k++) if(ab[k] != -ba[k]) anti = 0;
     ok("o interno é simétrico e o cruzado é antissimétrico", sim && anti);

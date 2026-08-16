@@ -98,7 +98,27 @@ printf("\n§B1  A base é ortonormal, e os e_i são pontos da esfera.\n\n");
         }
     printf("      <e_i, e_j> = δ_ij, em toda dimensão de 1 a %d: %d pares, %d falhas\n\n",
            D, quantos, mal);
+    /* e as DUAS FORMAS do directo dão o mesmo: a recursiva deste ficheiro, que destaca a
+     * última coordenada e mostra a dobra, e a fechada da `reta.h`. A recursão não é uma
+     * implementação diferente — é a MESMA operação lida como recorrência. */
+    long duas = 0, dtot = 0;
+    for(long t = 0; t < 200; t++){
+        long u[D], v[D];
+        for(int i = 0; i < D; i++){
+            u[i] = ((t*7 + i*3) % 11) - 5;
+            v[i] = ((t*5 + i*2) % 9)  - 4;
+        }
+        for(int n = 1; n <= D; n++){ dtot++; if(dir_rec(u, v, n) == rt_dir(u, v, n)) duas++; }
+    }
+    printf("      e as duas formas do DIRETO — a recursiva e a fechada da reta.h — dão o\n"
+           "      mesmo em %ld de %ld leituras\n\n", duas, dtot);
     ok("a base é ortonormal — e o produto que o diz é o DIRETO", mal == 0);
+    ok("E AS DUAS FORMAS DO DIRECTO SÃO A MESMA OPERAÇÃO: a recursiva deste ficheiro"
+       " destaca a última coordenada — e é isso que faz a torre 1→2→4→8 dobrar —, e a"
+       " fechada da `reta.h` soma de uma vez. Não são duas implementações: é a mesma"
+       " operação lida como recorrência e como forma fechada, e dão o mesmo inteiro em"
+       " todas as dimensões de 1 a 8",
+       duas == dtot && dtot == 200*D);
     printf("      E os e_i estão na esfera: ‖e_i‖ = 1 por construção. Logo a base é n PONTOS DA\n");
     printf("      ESFERA, dois a dois perpendiculares — e é por isso que ela é o objeto natural\n");
     printf("      aqui: a esfera é o lugar da norma 1, e o determinante ±1 vive nela.\n");
