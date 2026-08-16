@@ -35,15 +35,58 @@ printf '%-28s %6s %8s %8s\n' "FICHEIRO" "limiar" "(A) dec" "(B/C)"
 printf '%s\n' "------------------------------------------------------"
 
 TRANS='sin|cos|tan|exp|log|sqrt|M_PI|pow|atan|cbrt|hypot'
+
+# E CONTA-SE O CÓDIGO, E NÃO O TEXTO. A primeira versão contava o ficheiro inteiro, e
+# por isso um comentário a EXPLICAR que um limiar foi removido contava como limiar: ao
+# migrar o `matricial.c` o total SUBIU de 914 para 916, e os dois a mais eram a frase
+# que dizia quais tinham saído. O filtro apaga comentários e strings, substituindo-os
+# por espaços e preservando as quebras de linha — os números de linha não se movem, e
+# o contexto do transcendente continua a ler-se onde estava.
+DESPIR=$(mktemp -d)
+trap 'rm -rf "$DESPIR"' EXIT INT TERM
+
+# E É UM SCANNER, e não dois regex em fila. A primeira tentativa apagava comentários e
+# depois strings, em passagens separadas — e isso erra nos dois sentidos, porque cada um
+# dos dois contextos pode conter o abre-aspas do outro: uma string que contenha «/*» faz
+# a primeira passagem comer código até ao «*/» seguinte. Medido: no `matricial.c` dava
+# 1 onde há 4. Um scanner de um só percurso sabe sempre em que contexto está.
+despe() {
+  python3 -c '
+import sys
+s = open(sys.argv[1], encoding="utf-8", errors="replace").read()
+out, i, n = [], 0, len(s)
+while i < n:
+    c = s[i]
+    if c == "/" and i+1 < n and s[i+1] == "*":          # comentário de bloco
+        j = s.find("*/", i+2)
+        j = n if j < 0 else j+2
+    elif c == "/" and i+1 < n and s[i+1] == "/":        # comentário de linha
+        j = s.find("\n", i)
+        j = n if j < 0 else j
+    elif c in "\"\x27":                                  # literal de texto ou de carácter
+        j, q = i+1, c
+        while j < n and s[j] != q:
+            j += 2 if s[j] == "\\" else 1
+        j = min(j+1, n)
+    else:
+        out.append(c); i += 1; continue
+    out.append("".join(ch if ch == "\n" else " " for ch in s[i:j]))
+    i = j
+sys.stdout.write("".join(out))
+' "$1"
+}
+
 ta=0; tb=0; tn=0; nf=0
 for f in ${1:-lib/*.h tests/*.c tools/*.c banco/*.c}; do
   [ -f "$f" ] || continue
-  n=$(grep -cE "1e-[0-9]+" "$f" 2>/dev/null)
+  g="$DESPIR/$(echo "$f" | tr '/' '_')"
+  despe "$f" > "$g" 2>/dev/null || continue
+  n=$(grep -cE "1e-[0-9]+" "$g" 2>/dev/null)
   [ "$n" -gt 0 ] || continue
   # (A): a LINHA do limiar e as duas à volta não têm transcendente
-  a=$(grep -nE "1e-[0-9]+" "$f" | cut -d: -f1 | while read -r l; do
+  a=$(grep -nE "1e-[0-9]+" "$g" | cut -d: -f1 | while read -r l; do
         s=$((l-2)); [ "$s" -lt 1 ] && s=1
-        sed -n "${s},$((l+2))p" "$f" | grep -qE "$TRANS" || echo x
+        sed -n "${s},$((l+2))p" "$g" | grep -qE "$TRANS" || echo x
       done | wc -l)
   b=$((n - a))
   printf '%-28s %6d %8d %8d\n' "$f" "$n" "$a" "$b"

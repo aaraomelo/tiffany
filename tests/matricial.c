@@ -56,6 +56,45 @@ static M2 mul(M2 X, M2 Y){
     return r;
 }
 static long det(M2 X){ return X.a*X.d - X.b*X.c; }
+
+/* E O DETERMINANTE DE ORDEM QUALQUER, TAMBÉM EXACTO — por BAREISS. A eliminação de
+ * Gauss divide, e por isso pedia doubles e um limiar para o pivô; a de Bareiss divide
+ * pelo pivô ANTERIOR, e essa divisão é exacta em ℤ (é o teorema). Fica tudo inteiro, o
+ * determinante sai sem resíduo, e o limiar do pivô desaparece: `== 0` é uma pergunta
+ * sobre o número, e `fabs(.) < 1e-14` era uma pergunta sobre a régua que escolhi.
+ *
+ * n é a ordem; a matriz é dada em G com passo `passo`, e é consumida. */
+static long det_bareiss(long *G, int n, int passo){
+    long ant = 1;
+    int sinal = 1;
+    for(int k = 0; k < n - 1; k++){
+        if(G[k*passo + k] == 0){                       /* troca por uma linha com pivô */
+            int t = -1;
+            for(int i = k + 1; i < n; i++) if(G[i*passo + k]){ t = i; break; }
+            if(t < 0) return 0;                        /* coluna nula: o det É zero */
+            for(int j = 0; j < n; j++){
+                long v = G[k*passo + j];
+                G[k*passo + j] = G[t*passo + j];
+                G[t*passo + j] = v;
+            }
+            sinal = -sinal;
+        }
+        for(int i = k + 1; i < n; i++)
+            for(int j = k + 1; j < n; j++)
+                G[i*passo + j] = (G[i*passo + j]*G[k*passo + k]
+                                  - G[i*passo + k]*G[k*passo + j]) / ant;
+        ant = G[k*passo + k];
+    }
+    return sinal*G[(n-1)*passo + (n-1)];
+}
+
+/* e a potência inteira, para a lei det(A⊗B) = det(A)^b · det(B)^a — `pow` devolvia um
+ * double e obrigava a comparar com margem */
+static long ipow(long base, int e){
+    long r = 1;
+    while(e-- > 0) r *= base;
+    return r;
+}
 static M2 Mq(long a){ M2 r = { a, 1, 1, 0 }; return r; }   /* a matriz de um quociente parcial */
 static const M2 I2 = { 1, 0, 0, 1 };
 
@@ -164,27 +203,32 @@ printf("\n§M4  ⊕ é a SOMA DIRETA e ⊗ é KRONECKER — as dimensões do cor
      * matrizes — o bloco diagonal e o Kronecker — e mede-se a dimensao contando a ordem da
      * matriz construida, e o determinante calculando-o por eliminacao. Se eu tivesse escrito
      * a construcao errada, a dimensao ou o determinante denunciavam-na. */
+    /* E TUDO ISTO É INTEIRO. A lei det(A⊗B) = det(A)^b·det(B)^a é ALGÉBRICA: vale para
+     * quaisquer entradas, e as decimais 0.3 e 0.2 que aqui estavam eram sabor — traziam
+     * o double, o double trazia a eliminação com divisão, e a divisão trazia dois
+     * limiares (o do pivô, 1e-14, e o da comparação final, 1e-6 relativo mais 1e-9). Com
+     * entradas inteiras e o determinante por Bareiss, a lei fecha por IGUALDADE. */
     #define NX 16
-    double (*A)[NX] = DISCO_FIXO2(double, NX, 363);
-    double (*B)[NX] = DISCO_FIXO2(double, NX, 364);
-    double (*R)[NX] = DISCO_FIXO2(double, NX, 365);
-    disco_prende(DISCO_BASE(363),"dados/A_363.bin",(size_t)((NX)*(NX)),sizeof(double));
-    disco_zera(A,(size_t)((NX)*(NX)),sizeof(double));
-    disco_prende(DISCO_BASE(364),"dados/B_364.bin",(size_t)((NX)*(NX)),sizeof(double));
-    disco_zera(B,(size_t)((NX)*(NX)),sizeof(double));
-    disco_prende(DISCO_BASE(365),"dados/R_365.bin",(size_t)((NX)*(NX)),sizeof(double));
-    disco_zera(R,(size_t)((NX)*(NX)),sizeof(double));
-    printf("      a   b   ordem de A⊕B   ordem de A⊗B   det(A⊗B)     det A^b·det B^a   |dif|\n");
-    int mauDim = 0, mauDet = 0;
+    long (*A)[NX] = DISCO_FIXO2(long, NX, 363);
+    long (*B)[NX] = DISCO_FIXO2(long, NX, 364);
+    long (*R)[NX] = DISCO_FIXO2(long, NX, 365);
+    disco_prende(DISCO_BASE(363),"dados/A_363.bin",(size_t)((NX)*(NX)),sizeof(long));
+    disco_zera(A,(size_t)((NX)*(NX)),sizeof(long));
+    disco_prende(DISCO_BASE(364),"dados/B_364.bin",(size_t)((NX)*(NX)),sizeof(long));
+    disco_zera(B,(size_t)((NX)*(NX)),sizeof(long));
+    disco_prende(DISCO_BASE(365),"dados/R_365.bin",(size_t)((NX)*(NX)),sizeof(long));
+    disco_zera(R,(size_t)((NX)*(NX)),sizeof(long));
+    printf("      a   b   ordem de A⊕B   ordem de A⊗B   det(A⊗B)     det A^b·det B^a   igual\n");
+    int mauDim = 0, mauDet = 0, bareiss_bate = 0;
     for(int a = 1; a <= 3; a++)
     for(int b = 1; b <= 3; b++){
-        /* A é a×a e B é b×b, com entradas concretas */
-        for(int i = 0; i < a; i++) for(int j = 0; j < a; j++) A[i][j] = (i==j) ? 2.0 : 0.3*(i-j);
-        for(int i = 0; i < b; i++) for(int j = 0; j < b; j++) B[i][j] = (i==j) ? 3.0 : 0.2*(i+j);
+        /* A é a×a e B é b×b, com entradas concretas — e INTEIRAS */
+        for(int i = 0; i < a; i++) for(int j = 0; j < a; j++) A[i][j] = (i==j) ? 2 : (i-j);
+        for(int i = 0; i < b; i++) for(int j = 0; j < b; j++) B[i][j] = (i==j) ? 3 : (i+j);
         /* ⊕: o BLOCO DIAGONAL, construído */
         /* limpar a matriz INTEIRA e não só ns×ns: a ordem conta-se varrendo até NX, e o lixo
          * da iteração anterior fazia a contagem dar mais — foi o que a asserção apanhou. */
-        memset(R, 0, ((size_t)((NX)*(NX))*sizeof(double)));
+        memset(R, 0, ((size_t)((NX)*(NX))*sizeof(long)));
         for(int i = 0; i < a; i++) for(int j = 0; j < a; j++) R[i][j] = A[i][j];
         for(int i = 0; i < b; i++) for(int j = 0; j < b; j++) R[a+i][a+j] = B[i][j];
         /* conta-se a ordem PELA matriz: a maior linha/coluna não-nula */
@@ -193,59 +237,56 @@ printf("\n§M4  ⊕ é a SOMA DIRETA e ⊗ é KRONECKER — as dimensões do cor
         if(ordS != a+b) mauDim++;
         /* ⊗: KRONECKER, construído entrada a entrada */
         int nk = a*b;
-        double (*K)[NX] = DISCO_FIXO2(double, NX, 218);
-        disco_prende(DISCO_BASE(218),"dados/K_218.bin",(size_t)((NX)*(NX)),sizeof(double));
-        memset(K, 0, ((size_t)((NX)*(NX))*sizeof(double)));
+        long (*K)[NX] = DISCO_FIXO2(long, NX, 218);
+        disco_prende(DISCO_BASE(218),"dados/K_218.bin",(size_t)((NX)*(NX)),sizeof(long));
+        memset(K, 0, ((size_t)((NX)*(NX))*sizeof(long)));
         for(int i = 0; i < a; i++) for(int j = 0; j < a; j++)
         for(int k = 0; k < b; k++) for(int l = 0; l < b; l++)
             K[i*b+k][j*b+l] = A[i][j]*B[k][l];
         int ordK = 0;
         for(int i = 0; i < NX; i++){ int nz=0; for(int j=0;j<NX;j++) if(K[i][j]!=0) nz=1; if(nz) ordK=i+1; }
         if(ordK != a*b) mauDim++;
-        /* det por eliminação de Gauss, da matriz CONSTRUÍDA */
-        double G[NX][NX];
+        /* det da matriz CONSTRUÍDA, por BAREISS — inteiro, e sem pivô com limiar */
+        long G[NX][NX];
         memcpy(G, K, sizeof G);
-        double dK = 1;
-        for(int c = 0; c < nk; c++){
-            int piv = c;
-            for(int r = c; r < nk; r++) if(fabs(G[r][c]) > fabs(G[piv][c])) piv = r;
-            if(fabs(G[piv][c]) < 1e-14){ dK = 0; break; }
-            if(piv != c){ for(int j=0;j<nk;j++){ double t=G[c][j]; G[c][j]=G[piv][j]; G[piv][j]=t; } dK = -dK; }
-            dK *= G[c][c];
-            for(int r = c+1; r < nk; r++){
-                double f = G[r][c]/G[c][c];
-                for(int j = c; j < nk; j++) G[r][j] -= f*G[c][j];
-            }
-        }
-        /* e o det de A e de B, pelo mesmo método, para a lei clássica */
-        double dA = 1, dB = 1;
+        long dK = det_bareiss(&G[0][0], nk, NX);
+        /* e os de A e de B, pelo mesmo método, para a lei clássica */
+        long dAB[2] = {0, 0};
         for(int caso = 0; caso < 2; caso++){
-            int m = caso ? b : a;
             memcpy(G, caso ? B : A, sizeof G);
-            double d = 1;
-            for(int c = 0; c < m; c++){
-                int piv = c;
-                for(int r = c; r < m; r++) if(fabs(G[r][c]) > fabs(G[piv][c])) piv = r;
-                if(fabs(G[piv][c]) < 1e-14){ d = 0; break; }
-                if(piv != c){ for(int j=0;j<m;j++){ double t=G[c][j]; G[c][j]=G[piv][j]; G[piv][j]=t; } d = -d; }
-                d *= G[c][c];
-                for(int r = c+1; r < m; r++){
-                    double f = G[r][c]/G[c][c];
-                    for(int j = c; j < m; j++) G[r][j] -= f*G[c][j];
-                }
-            }
-            if(caso) dB = d; else dA = d;
+            dAB[caso] = det_bareiss(&G[0][0], caso ? b : a, NX);
         }
-        double lei = pow(dA, b) * pow(dB, a);
-        double dif = fabs(dK - lei);
-        if(dif > 1e-6*fabs(lei) + 1e-9) mauDet++;
+        /* e o BAREISS confere-se contra a régua que este ficheiro já tinha: para ordem 2
+         * o det é ad − bc, escrito na linha 58 e usado em todo o §M2. Duas rotas para o
+         * mesmo número — sem isto, um Bareiss errado passava despercebido nas DUAS
+         * pontas da lei, que é onde ele é usado. */
+        if(a == 2){
+            M2 X = { A[0][0], A[0][1], A[1][0], A[1][1] };
+            if(det(X) != dAB[0]) mauDet++; else bareiss_bate++;
+        }
+        if(b == 2){
+            M2 Y = { B[0][0], B[0][1], B[1][0], B[1][1] };
+            if(det(Y) != dAB[1]) mauDet++; else bareiss_bate++;
+        }
+        long lei = ipow(dAB[0], b) * ipow(dAB[1], a);
+        if(dK != lei) mauDet++;                      /* IGUALDADE, e não margem */
         if(a <= 2 && b <= 2)
-            printf("      %d   %d   %-14d %-14d %-12.4f %-17.4f %.2e\n",
-                   a, b, ordS, ordK, dK, lei, dif);
+            printf("      %d   %d   %-14d %-14d %-12ld %-17ld %s\n",
+                   a, b, ordS, ordK, dK, lei, dK == lei ? "sim" : "NÃO");
     }
     printf("      …\n\n");
+    printf("      e o Bareiss confere com o det 2×2 (ad − bc) que o §M2 usa: %d de 6\n\n",
+           bareiss_bate);
     ok("as matrizes CONSTRUÍDAS têm ordem a+b e a·b — as dimensões do corpo de corpos", mauDim == 0);
-    ok("e det(A⊗B) calculado por Gauss bate com det A^b·det B^a", mauDet == 0);
+    ok("E det(A⊗B) BATE COM det A^b·det B^a, POR IGUALDADE E EM INTEIROS: a lei é"
+       " algébrica e vale para quaisquer entradas, logo as decimais 0.3 e 0.2 que aqui"
+       " estavam eram sabor — e traziam o double, o double trazia a eliminação com"
+       " divisão, e a divisão trazia TRÊS limiares: o do pivô (1e-14) e os dois da"
+       " comparação final (1e-6 relativo mais 1e-9). Com entradas inteiras e o"
+       " determinante por BAREISS — cuja divisão pelo pivô anterior é exacta em ℤ — o"
+       " resíduo deixa de existir: mede-se `dK == lei`, que é uma pergunta sobre o"
+       " número, e não `|dK − lei| < régua`, que é uma pergunta sobre a régua",
+       mauDet == 0 && bareiss_bate == 6);
     printf("      Logo \"operar corpos\" é literal: combinam-se dois corpos com uma operação de\n");
     printf("      álgebra linear, e não se reescreve multiplicação nenhuma. São as operações\n");
     printf("      TENSORIAIS, e o corpo de corpos já as pedia sem lhes chamar o nome.\n");
@@ -366,27 +407,64 @@ printf("\n§M7  NÃO É SEMIANEL: o inverso vem do DUAL, e são as duas torres.\
     printf("      NEGRA     sobe (reverte)     antissimétrica  o DIRETO: mede, volta\n");
     printf("      as duas   o ciclo fecha      SIMÉTRICA       o corpo inteiro\n\n");
     {
-        /* a medida: um bilinear qualquer B(x,y) parte-se em S (simétrica) e A (antissimétrica),
-         * e mede-se que S(x,y) = S(y,x) e A(x,y) = −A(y,x), e que a soma devolve B. */
-        double pior = 0, piorS = 0, piorA = 0;
-        for(int i = 1; i <= 4; i++) for(int j = 1; j <= 4; j++){
-            double x[2] = {0.3*i, -0.2*j}, y[2] = {0.5*j, 0.7*i};
-            /* um bilinear qualquer, com matriz não simétrica */
-            double Mb[2][2] = {{1.0, 2.0},{-0.5, 3.0}};
-            double Bxy = 0, Byx = 0;
-            for(int u=0;u<2;u++) for(int v=0;v<2;v++){ Bxy += x[u]*Mb[u][v]*y[v]; Byx += y[u]*Mb[u][v]*x[v]; }
-            double S = (Bxy + Byx)/2, A = (Bxy - Byx)/2;
-            /* S é simétrica, A é antissimétrica, e S + A = B */
-            double Sxy = S, Syx = (Byx + Bxy)/2, Axy = A, Ayx = (Byx - Bxy)/2;
-            if(fabs(Sxy - Syx) > piorS) piorS = fabs(Sxy - Syx);
-            if(fabs(Axy + Ayx) > piorA) piorA = fabs(Axy + Ayx);
-            if(fabs((S + A) - Bxy) > pior) pior = fabs((S + A) - Bxy);
+        /* A MEDIDA ESTAVA VAZIA, e o defeito é o que o §O1 do `operacao.c` já tinha
+         * apanhado. Escrevia-se
+         *
+         *      S = (Bxy + Byx)/2      e      Syx = (Byx + Bxy)/2
+         *
+         * e comparava-se um com o outro: é a MESMA expressão com as parcelas trocadas. O
+         * que dava zero era a soma de doubles comutar, e não B ter parte simétrica. As
+         * três asserções deste bloco não podiam falhar — e o limiar 1e-14 dava-lhes cara
+         * de medição.
+         *
+         * A tese é sobre a FORMA, e mede-se avaliando-a nos argumentos trocados. Com
+         * Ms = M + Mᵀ e Ma = M − Mᵀ (em dobro, para não dividir):
+         *
+         *      x·Ms·y = y·Ms·x        e        x·Ma·y = − y·Ma·x
+         *
+         * e agora há como falhar: se Ms fosse construída mal, falhava. Tudo em INTEIROS,
+         * e por isso o resíduo é ZERO EXACTO — e não «menor que a régua que escolhi». */
+        const long Mb[2][2] = {{1, 2}, {-1, 3}};       /* uma bilinear NÃO simétrica */
+        long Ms[2][2], Ma[2][2];
+        for(int u=0;u<2;u++) for(int v=0;v<2;v++){
+            Ms[u][v] = Mb[u][v] + Mb[v][u];
+            Ma[u][v] = Mb[u][v] - Mb[v][u];
         }
-        printf("      a parte simétrica não muda ao trocar: pior desvio %.2e\n", piorS);
-        printf("      a antissimétrica troca de SINAL:      pior desvio %.2e\n", piorA);
-        printf("      e as duas somadas devolvem o original: pior desvio %.2e\n\n", pior);
-        ok("cada torre é antissimétrica, as duas juntas dão o simétrico — e a soma devolve",
-           piorS < 1e-14 && piorA < 1e-14 && pior < 1e-14);
+        long casos = 0, sim = 0, anti = 0, volta = 0, assim = 0, vivos = 0;
+        for(int i = 1; i <= 4; i++) for(int j = 1; j <= 4; j++){
+            long x[2] = {3*i, -2*j}, y[2] = {5*j, 7*i};
+            long sxy=0, syx=0, axy=0, ayx=0, bxy=0, byx=0;
+            for(int u=0;u<2;u++) for(int v=0;v<2;v++){
+                sxy += x[u]*Ms[u][v]*y[v];   syx += y[u]*Ms[u][v]*x[v];
+                axy += x[u]*Ma[u][v]*y[v];   ayx += y[u]*Ma[u][v]*x[v];
+                bxy += x[u]*Mb[u][v]*y[v];   byx += y[u]*Mb[u][v]*x[v];
+            }
+            casos++;
+            if(sxy == syx)          sim++;      /* a simétrica não vê a ordem */
+            if(axy == -ayx)         anti++;     /* e a antissimétrica troca de sinal */
+            if(axy != 0)            vivos++;    /* e NÃO é zero: senão «troca» valia por 0 = −0 */
+            if(sxy + axy == 2*bxy)  volta++;    /* e as duas devolvem B, em dobro */
+            /* O GUME: se B fosse já simétrica, «S é simétrica» não distinguiria nada. */
+            if(bxy != byx)          assim++;
+        }
+        printf("      a parte simétrica não vê a ordem:      %ld de %ld, resíduo ZERO\n",
+               sim, casos);
+        printf("      a antissimétrica troca de SINAL:       %ld, e não nulos em %ld\n",
+               anti, vivos);
+        printf("      e as duas somadas devolvem o original: %ld  (em dobro, sem dividir)\n",
+               volta);
+        printf("      GUME: a bilinear de partida NÃO é simétrica em %ld — sem isso, «S é"
+               " simétrica» não distinguia nada\n\n", assim);
+        ok("CADA TORRE É ANTISSIMÉTRICA, AS DUAS JUNTAS DÃO O SIMÉTRICO, E A SOMA DEVOLVE —"
+           " agora medido na FORMA e em inteiros. Antes comparava-se (Bxy+Byx)/2 com"
+           " (Byx+Bxy)/2, que é a mesma expressão com as parcelas trocadas: o zero vinha da"
+           " soma comutar, e não da simetria — três asserções que não podiam falhar, com um"
+           " limiar 1e-14 a dar-lhes cara de medição. Agora avalia-se a forma nos argumentos"
+           " TROCADOS, com Ms = M + Mᵀ e Ma = M − Mᵀ, e o resíduo é ZERO EXACTO. Os cruzados"
+           " não são nulos, sem o que «troca de sinal» valia por 0 = −0; e a bilinear de"
+           " partida não é simétrica, sem o que a tese não distinguia nada",
+           sim == casos && anti == casos && volta == casos && vivos == casos
+           && assim == casos && casos == 16);
     }
     printf("      É o par direto/cruzado outra vez, e o que separa as torres é o SINAL: trocar\n");
     printf("      a ordem da multiplicação é trocar de torre. Uma sozinha desce e não volta; a\n");
