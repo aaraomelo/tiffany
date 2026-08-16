@@ -62,6 +62,7 @@
 #include "analise.h"    /* Analise Real: as CINCO VIAS da completude, sem arbitro */
 #include "dual32.h"     /* 64 bits sao dois duais de 32 */
 #include "ramos.h"      /* os dois ramos de |det| = 1: a leitura metrica */
+#include "projetiva.h"  /* zero e infinito sao inversos: P1 e Mobius */
 #include "medida.h"     /* a conservacao metrica por dualidade, e a meta-inducao */
 #include "dforma.h"     /* o d: Lambda^0 -> ... -> Lambda^3, e os tres viram UM */
 #include "eletrico.h"
@@ -1416,6 +1417,7 @@ static const struct { int n; const char *nome; const char *enunciado; } CM10[] =
  {15, "dois ramos",     "|det| = 1 tem DOIS: o que mede e cresce, e o que roda" },
  {16, "lei 8",          "no anel o gato ganha período — o ramo é da REALIZAÇÃO" },
  {17, "as cinco",       "as 5 primitivas são UMA: o dual emparelha com cada uma" },
+ {18, "zero e infinito", "são INVERSOS — e não há regra especial para o zero" },
 };
 static void cmetrica_resolve(int n){
     TICK_N = 0;
@@ -1708,6 +1710,53 @@ static void cmetrica_resolve(int n){
                     " estava como regra de cálculo, e o que este andar acrescenta é o"
                     " NOME dela — o Jacobiano não é um factor de correcção, é a medida"); }
         break;
+    case 18: {
+        tique7(0, "seja a inversão, e a recta projectiva");
+        tique7(1, "em coordenadas homogéneas ela é uma TROCA:");
+        printf("      $\\iota : [p : q] \\mapsto [q : p]$,\\qquad $(p,q) \\neq"
+               " (0,0)$\n");
+        tique7(2, "e esta casa tinha isto errado em todo andar: repete «0⁻¹ NÃO EXISTE, a"
+                  " fibra é vazia» como se fosse A excepção. Não era uma verdade sobre o"
+                  " objecto — era sobre a CARTA. Em ℚ a inversão é uma divisão, e uma"
+                  " divisão tem de perguntar se o denominador é zero; em ℙ¹ é uma troca, e"
+                  " a pergunta não tem onde ser feita");
+        tique7(3, "a lei é a acção de Möbius com det ≠ 0 — e com |det| = 1 é a do Gato: a"
+                  " bijecção de ℙ¹ que preserva o reticulado");
+        { Pj z = pj_zero(), inf = pj_infinito();
+          printf("        1/0 = "); { Pj r = pj_inverte(z); printf("[%d:%d] = ∞", r.p, r.q); }
+          printf("        1/∞ = "); { Pj r = pj_inverte(inf); printf("[%d:%d] = 0\n", r.p, r.q); }
+          long mal = 0, cas = 0, sem = 0;
+          for(long p = -30; p <= 30; p++) for(long q = -30; q <= 30; q++){
+              Pj x; if(!pj(p,q,&x)) continue;
+              cas++;
+              if(!pj_igual(pj_inverte(pj_inverte(x)), x)) mal++;
+              Pj c2; if(!pj(pj_inverte(x).p, pj_inverte(x).q, &c2)) sem++;
+          }
+          printf("        ι∘ι = id em %ld pontos: %ld divergências;  sem inversa: %ld\n",
+                 cas, mal, sem);
+          printf("        e o GATO: 0 ↦ ");
+          Pj a2, b2;
+          pj_gato(2, z, &a2); pj_gato(2, a2, &b2);
+          printf("[%d:%d] ↦ [%d:%d] — ele ATRAVESSA o infinito\n", a2.p,a2.q, b2.p,b2.q);
+          Pj r2;
+          int si = pj_soma(inf, inf, &r2), mz = pj_mult(z, inf, &r2);
+          printf("        e o PREÇO: ∞ + ∞ %s, 0·∞ %s — ℙ¹ não é corpo\n",
+                 si ? "dá" : "RECUSA", mz ? "dá" : "RECUSA");
+          tique7(4, "a testemunha é o CÓDIGO: a função de inversão é «troca p com q», não"
+                    " divide, logo não tem onde perguntar pelo zero. E a segunda metade é"
+                    " o preço, que se conta em vez de se esconder — a soma deixa de ser"
+                    " total, porque ∞ + ∞ daria [0:0], que não é ponto");
+          tique7(5, mal == 0 && sem == 0 && !si && !mz
+                 ? "logo ZERO E INFINITO SÃO INVERSOS pela mesma operação, e a excepção não"
+                   " foi abolida — foi MUDADA DE SÍTIO, para onde ela é consequência da"
+                   " construção em vez de um ramo escrito à mão"
+                 : "a inversão não fechou — NÃO afirmo");
+          tique7(6, "e a VOLTA é que isto NÃO é uma primitiva nova: sai do mecanismo de"
+                    " inversão que já está no teorema, lido na extensão projectiva."
+                    " Inventar uma aritmética especial para 0 ↔ ∞ seria criar a excepção"
+                    " que o corolário existe para dissolver — a geometria projectiva já"
+                    " dá a casa"); }
+        break; }
     case 17: {
         tique7(0, "sejam as cinco operações do corpo universal");
         tique7(1, "e o mesmo emparelhamento, em DUAS categorias:");
@@ -2156,7 +2205,7 @@ static int resolve_cmetrica(const char *f){
         long n = 0;
         while(*p >= '0' && *p <= '9') n = n*10 + (*p++ - '0');
         while(*p == ' ') p++;
-        if(!*p && n >= 1 && n <= 17){ cmetrica_resolve((int)n); return 1; }
+        if(!*p && n >= 1 && n <= 18){ cmetrica_resolve((int)n); return 1; }
         return 0;
     }
     return 0;
@@ -17553,18 +17602,18 @@ static int teste(void){
               fflush(stdout);
               int guarda = dup(1), nulo = open("/dev/null", O_WRONLY);
               if(guarda >= 0 && nulo >= 0) dup2(nulo, 1);
-              for(int k = 1; k <= 17; k++){
+              for(int k = 1; k <= 18; k++){
                   char fala[64];
                   snprintf(fala, sizeof fala, "medida %d", k);
                   if(resolve_cmetrica(fala)) por_n++; else vmal++;
               }
               for(size_t i = 0; i < sizeof CM10/sizeof *CM10; i++)
                   if(resolve_cmetrica(CM10[i].nome)) por_nome++; else vmal++;
-              if(resolve_cmetrica("medida 18")) vmal++;
+              if(resolve_cmetrica("medida 19")) vmal++;
               fflush(stdout);
               if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
               if(nulo >= 0) close(nulo);
-              printf("      os dezassete: %d por número, %d por nome\n", por_n, por_nome);
+              printf("      os dezoito: %d por número, %d por nome\n", por_n, por_nome);
               ok("O TEOREMA ESTÁ PROMOVIDO À ASSISTENTE em dez falas, e as três camadas"
                  " ficam alinhadas: o UNIVERSAL tem a lei — a conservação métrica por"
                  " dualidade —, o PEANO dá det|·| (a face discreta, e a contagem do"
@@ -17573,7 +17622,7 @@ static int teste(void){
                  " A passagem entre elas é σ_k σ_k′ = −1, que é a hipótese ESTRUTURAL já"
                  " estabelecida pela torre — e sem ela não há teorema, há uma definição a"
                  " olhar para si própria",
-                 vmal == 0 && por_n == 17 && por_nome == 17); }
+                 vmal == 0 && por_n == 18 && por_nome == 18); }
         }
 
         /* ═══ §C50 ANÁLISE REAL: as CINCO VIAS, e nenhuma arbitra as outras ══════

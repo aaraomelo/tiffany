@@ -1135,6 +1135,72 @@ e não cópia ($\S$2); $A(xB)=(Ax)B$ sem uma violação nos $p^{4}$ estados
 $\sigma+\sigma'=m$ e $\sigma\sigma'=-1$ ($\S$4). $\square$
 \end{teorema}
 
+\begin{corolario}[zero e infinito são inversos --- e não há regra especial
+para o zero]\label{cor:zero-infinito}
+Seja $\iota$ a inversão induzida pela acção de Möbius na recta
+projectiva $\widehat{\mathbb{K}}=\mathbb{K}\cup\{\infty\}$, isto é, em
+coordenadas homogéneas
+\[
+\iota:[p:q]\longmapsto[q:p],\qquad (p,q)\neq(0,0).
+\]
+Então $\iota(0)=\infty$, $\iota(\infty)=0$, e $\iota(z)=z^{-1}$ para todo
+$z\in\mathbb{K}\setminus\{0\}$; e $\iota^{2}=\mathrm{id}$. Logo
+\[
+\boxed{\;0\longleftrightarrow\infty\;}
+\]
+é um par dual sob a \emph{mesma} operação, e não há regra especial para o
+zero: ele é apenas o ponto finito cuja imagem pela inversão é o ponto no
+infinito.
+
+\textbf{(0) O que isto corrige, e o erro era nosso.} Este quadro repete,
+andar após andar, «$0^{-1}$ não existe --- a fibra é vazia», e trata-o
+como \emph{a} excepção, a que sobrevive a toda a escada. Não era uma
+verdade sobre o objecto: era sobre a \textbf{carta}. Em $\mathbb{K}$ a
+inversão é uma divisão, e uma divisão tem de perguntar se o denominador é
+zero; em $\widehat{\mathbb{K}}$ ela é uma \textbf{troca}, e a pergunta
+não tem onde ser feita. Isto vê-se no código antes de se ver na álgebra:
+a função de inversão deixa de ter o ramo do zero.
+
+\textbf{(1) E não é uma primitiva nova.} O corolário sai do mecanismo de
+inversão que já está no teorema --- é a mesma involução, lida na
+extensão projectiva --- e é essa a razão de entrar como corolário e não
+como sexta operação: inventar aritmética especial para
+$0\leftrightarrow\infty$ seria criar a excepção que ele existe para
+dissolver. A geometria projectiva já fornece a casa.
+
+\textbf{(2) O preço, e ele diz-se.} $\widehat{\mathbb{K}}$ \textbf{não} é
+um corpo. A inversão torna-se total e a \emph{soma} deixa de o ser:
+$\infty+\infty$ e $0\cdot\infty$ não têm valor, porque dariam $[0:0]$,
+que não é ponto. A excepção não foi abolida --- foi \textbf{mudada de
+sítio}, e o sítio novo é o certo, porque lá ela é consequência da
+construção ($[0:0]$ é o único par excluído, por definição) em vez de um
+ramo escrito à mão em cada função que divide.
+
+\textbf{(3) E o gato já precisava do ponto que este quadro dizia não
+existir.} $A_{m}$ lida como Möbius é $z\mapsto(mz+1)/z$: leva $0$ a
+$\infty$ e $\infty$ a $m$. O objecto central desta casa \emph{atravessa}
+o infinito em dois passos, e a órbita a partir do zero só fecha em
+$\widehat{\mathbb{K}}$ --- em $\mathbb{K}$ ela morria ao primeiro passo,
+e a isso chamávamos a fibra vazia.
+
+\textbf{(4) E o período muda com o sítio, o que também se mediu.} A
+involução da casa $\nu(z)=-1/z$ é $[p:q]\mapsto[-q:p]$: no \emph{par}
+tem período \textbf{quatro} (o quarto de volta, «o bit é $i$»); em
+$\widehat{\mathbb{K}}$ tem período \textbf{dois}, porque $[-p:-q]$ é o
+mesmo ponto. A projectivização mata o sinal --- que é a frase do
+Teorema~\ref{thm:gato} dita noutro sítio: \emph{a medida não vê o sinal}.
+
+\emph{Medido:} \code{tests/projetiva.c} ($6{:}0$): a inversão é
+involutiva em $6560$ pontos e nenhum fica sem inversa; onde
+$\mathbb{K}$ e $\widehat{\mathbb{K}}$ se sobrepõem dão o mesmo ($3200$
+pontos, zero divergências) e a projectiva ainda responde onde a outra se
+calava; o gato leva $0$ a $\infty$ nos cinco metais e a órbita de $12$
+passos atravessa o infinito uma vez; a soma recusa em $576$ dos
+$389\,376$ pares (o preço, contado); e o gume --- com $\det=0$ a acção
+colapsa a recta e é recusada nas $545$ matrizes degeneradas, enquanto com
+$|\det|=1$ é injectiva sem colisões. $\square$
+\end{corolario}
+
 \begin{corolario}[a pata que some na marca: a projecção conserva a medida e
 perde a fibra]\label{cor:pata}
 O gato desce ao plano e anda; uma pata pisa a marca da outra. A marca
