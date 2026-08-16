@@ -470,9 +470,16 @@ bloco a bloco em vez de crescer: \emph{o que cresce é o objecto, não a máquin
 órbita percorre as oito coordenadas, cada uma uma vez antes de qualquer repetição --- que
 é o que «completa e ordenadamente» quer dizer. $\square$
 \end{teorema}
-\begin{teorema}[«duas metades» é o espectro da involução]\label{thm:espectro-tau}
-Que as leituras sejam \emph{duas} não é uma escolha de apresentação: \textbf{é uma
-dedução}. O espelho $\tau(a,b)=(b,a)$ satisfaz $\tau^{2}=\mathrm{id}$, donde
+\begin{teorema}[«duas metades» é o espectro da involução, em $\operatorname{car}K\neq2$]\label{thm:espectro-tau}
+\textbf{A hipótese diz-se à entrada, porque o enunciado não vale sem ela}: sobre um
+corpo $K$ com $\operatorname{car}K\neq2$,
+\[
+\boxed{\;\operatorname{car}K\neq2\ \Longrightarrow\ E=E_{+}\oplus E_{-}\;}
+\]
+--- e \emph{não} «há sempre duas partes». Em característica $2$ a decomposição colapsa,
+e o Cor.~\ref{cor:car2} exibe-o. Posto isso: que as leituras sejam \emph{duas} não é uma
+escolha de apresentação, \textbf{é uma dedução}. O espelho $\tau(a,b)=(b,a)$ satisfaz
+$\tau^{2}=\mathrm{id}$, donde
 \[
 \boxed{\;\tau^{2}=\mathrm{id}\ \Longrightarrow\ \lambda^{2}=1\ \Longrightarrow\
 \lambda\in\{+1,-1\}\;}
@@ -563,21 +570,32 @@ antissimétrica deixam de ser condições distintas, os dois espaços próprios
 \mu_\tau=t^{2}-1=(t-1)^{2}
 \]
 ganha \textbf{raiz dupla} --- o mínimo deixa de ter raízes simples e $\tau$ deixa de ser
-diagonalizável. Os postos caem para $28$ e $28$, somam $56$, e \textbf{o que falta é a
-diagonal}: a entrada $(i,i)$ da imagem é $(M+M^{\mathsf T})_{ii}=2M_{ii}=0$. Perde-se
-exactamente a parte que \emph{mede} (Teor.~\ref{thm:operacao}(iv)), e sobra só a área.
+diagonalizável. \emph{Algebricamente}, os postos caem para $28$ e $28$, somam $56$, e a
+contribuição diagonal desaparece:
+\[
+\boxed{\;(M+M^{\mathsf T})_{ii}=2M_{ii}=0\quad\text{em }\operatorname{car}K=2 .\;}
+\]
+$\square$
+\end{corolario}
+
+\noindent\textbf{E a leitura geométrica vem depois, e à parte}, para que se veja o que é
+teorema e o que é interpretação: a componente que se anula é precisamente aquela que
+esta construção lê como \emph{medida} (Teor.~\ref{thm:operacao}(iv), «a diagonal mede»);
+o sector antissimétrico permanece. \emph{Em característica $2$ sobra a área e perde-se a
+medida} --- e isto é a leitura da construção sobre o facto algébrico acima, não um
+enunciado independente.
 
 \medskip
-E é o \textbf{mesmo} fenómeno do \S\ref{sec:reta}, pela mesma conta: o discriminante de
-$t^{2}-1$ é $4$, e anula-se em característica $2$ e só aí ---
+\noindent\textbf{E o mecanismo é o mesmo do \S\ref{sec:reta} --- o mecanismo, não o
+teorema.} Não se afirma aqui que os dois fenómenos sejam o mesmo enunciado: não foi
+exibido o mapa estrutural que os identificaria. O que é comum é a regra
 \[
-\boxed{\;\begin{array}{ll}
-\text{lá} & D=\operatorname{tr}^{2}-4\det\to0:\ \text{as duas \emph{folhas} colapsam}\\[3pt]
-\text{aqui} & \operatorname{disc}\mu_\tau=4\equiv0:\ \text{as duas \emph{leituras} colapsam}
-\end{array}}
+\boxed{\;\operatorname{disc}=0
+\iff \text{duas raízes distintas se fundem}\;}
 \]
---- duas raízes que se juntam, nos dois casos. $\square$
-\end{corolario}
+aplicada a dois objectos diferentes: lá $D=\operatorname{tr}^{2}-4\det\to0$ e as duas
+\emph{folhas} colapsam; aqui $\operatorname{disc}\mu_\tau=4\equiv0$ e as duas
+\emph{leituras} colapsam. \emph{Mesmo mecanismo discriminante, dois objectos.}
 
 \begin{teorema}[o bloco fecha, e o oito é o período]\label{thm:bloco}
 \[
@@ -1066,6 +1084,11 @@ irredutível em zero}
 tríade Hurwitz--Gentil--Lebesgue \emph{não} está na cadeia principal da construção ---
 essa é a do \S\ref{sec:operacao}, $L_0,\ldots,L_7\to\star\to\tau\to E_{+}\oplus E_{-}\to
 \operatorname{Dir},\operatorname{Cruz}\to B_8$, e nela não entra nenhum nome de fora.
+\[
+\boxed{\;\text{Hurwitz / Gentil / Lebesgue}\ \not\to\ \text{construção};
+\qquad
+\text{construção}\ \to\ \text{resultado}\ \to\ \text{comparação}\;}
+\]
 O que segue é \textbf{comparação com o objecto já construído}: três nomes clássicos
 postos ao lado dele para dizer o que coincide e o que não, depois de a construção estar
 feita e medida. \emph{Nenhuma peça do \S\ref{sec:supremo} ou do \S\ref{sec:completude}
@@ -2073,8 +2096,21 @@ objecto e não uma lista solta de inteiros.
 caminho.
 
 \emph{(iii) E é o \textbf{menor}} --- é esta a cláusula que trabalha, porque (ii)
-sozinha daria um majorante qualquer: \emph{todo} $m'<m_k$ ainda serve, logo nenhum
-deles é majorante. $\square$
+sozinha daria um majorante qualquer. \textbf{E ela não se varre: prova-se}, e a prova é
+a \emph{monotonia}. Ponha-se
+\[
+E_k(m):\quad \exists\,x\in S:\ \tfrac{m}{2^{k}}<x .
+\]
+Então $E_k$ é \textbf{decrescente} em $m$ --- se $m'\leq m$ e $E_k(m)$, o mesmo $x$
+serve --- e daí, numa linha,
+\[
+\boxed{\;m'<m_k\ \Longrightarrow\ \tfrac{m'}{2^{k}}<\tfrac{m_k}{2^{k}}<x
+\ \Longrightarrow\ E_k(m')\;}
+\]
+para \emph{todo} $m'$ abaixo, sem excepção e sem varredura: nenhum deles é majorante.
+\emph{O que se verifica computacionalmente é o \textbf{passo}} $E_k(m+1)\Rightarrow
+E_k(m)$, de onde a indução dá a cláusula inteira --- e não uma amostra dos $m'$, que
+seria substituir a prova por uma janela. $\square$
 \end{teorema}
 
 \begin{proposicao}[e é aqui que $\mathbb{Q}$ falha, com testemunha]\label{prop:q-falha}
@@ -2110,8 +2146,11 @@ $\det=1$ acima, que é a mediante \emph{aplicada duas vezes}.
 \end{observacao}
 \colunas{a continuidade como propriedade do menor majorante}
         {o caminho do supremo, construído bit a bit em inteiros}
-        {\code{tests/supremo.c}: $104$ passos por duas rotas concordantes;
-$64$ níveis nas duas cláusulas; $5490$ candidatos com as duas identidades da
+        {\code{tests/supremo.c} ($5{:}0$): $104$ passos por duas rotas concordantes;
+$64$ níveis com a cláusula (a) e com o \textbf{passo} da monotonia sem uma violação em
+$761\,859$ verificações --- e não numa janela dos últimos $40$, que era o que aqui
+estava com a asserção a dizer «todos»; o gume com uma condição não monótona a violar o
+passo as $429$ vezes previstas; $5490$ candidatos com as duas identidades da
 testemunha e zero empates; e o supremo de $\{r^2<2\}$ dá $1\,482\,910/2^{20}$}
 
 \medskip
@@ -2401,11 +2440,14 @@ o \textbf{supremo} fornece a continuidade\quad$\to$\quad$\mathbb{R}$.\medskip}}
 operação gera $\mathbb{R}$» juntaria numa frase o que a cadeia faz em dois passos, e
 tornaria circular o que não é:
 \[
-\boxed{\;\underbrace{\text{oito leis}\ \to\ \star}_{\textbf{CONSTRUÇÃO}}
-\ \longrightarrow\
-\underbrace{\text{estrutura geométrica}\ \to\ \text{recta completa e ordenada}}
+\boxed{\;\begin{gathered}
+\underbrace{\text{oito leis}\ \to\ \text{operação \textbf{binária}}\ \star}
+_{\textbf{CONSTRUÇÃO}}\\[3pt]
+\longrightarrow\
+\underbrace{\text{estrutura geométrica}\ \to\ \text{recta ordenada e completa}}
 _{\textbf{REALIZAÇÃO}}
-\ \cong\ \mathbb{R}\;}
+\ \cong\ \mathbb{R}
+\end{gathered}\;}
 \]
 \emph{A construção não usa $\mathbb{R}$} --- e isso é teorema, não promessa
 (Teor.~\ref{thm:nao-circular}): a operação e as suas duas leituras definem-se sobre

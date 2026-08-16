@@ -130,34 +130,70 @@ int main(void){
          *   (a) nenhum x ∈ S passa o caminho:   m_k/2^k < x  ⟹  falso a partir de m_k+1
          *   (b) nada abaixo é majorante:        para todo m < m_k há x ∈ S com m/2^k < x
          *
-         * A (b) mede-se em TODOS os m estritamente abaixo, e é ela que faz a prova. */
-        long alvos = 0, maj = 0, menor = 0;
-        printf("      conjunto                       (a) majorante   (b) nada abaixo é majorante\n");
+         * E A (b) NÃO SE VARRE. Estava aqui uma janela dos ÚLTIMOS 40 valores de m' com a
+         * asserção a dizer «TODOS os m' abaixo»: a afirmação era mais larga que o laço, e
+         * o 40 era um tecto meu — com m_k a chegar aos 92681, viam-se 40. A cláusula (b)
+         * cabe numa linha:
+         *
+         *      m' < m_k  ⟹  m'/2^k < m_k/2^k  ⟹  (por definição de m_k) existe x ∈ S com
+         *                                        m'/2^k < x — logo m' não é majorante
+         *
+         * e o que a sustenta é a MONOTONIA de E(m) := «existe x ∈ S com m/2^k < x», que é
+         * decrescente em m. Mede-se então o PASSO,
+         *
+         *      E(m+1) ⟹ E(m),
+         *
+         * de onde a indução dá todos os m' de uma vez — sem janela e sem tecto. E a gama
+         * do passo é a que o OBJECTO determina, [0, m_k], e não um número escolhido. */
+        long alvos = 0, maj = 0, mono = 0, passos_mono = 0;
+        printf("      conjunto                       (a) majorante   (b) passo E(m+1)=>E(m)\n");
         for(int c = 0; c < SP_N; c++){
-            long m = 0, pot = 1, a = 0, b = 0, n = 0, testados = 0;
+            long m = 0, pot = 1, a = 0, b = 0, n = 0, vistos = 0;
             while(sp_existe(m + 1, 1, c)) m++;
             for(int k = 1; k <= 16; k++){
                 pot *= 2; m = sp_bit(2*m, pot, c);
                 n++;
                 /* (a) o passo seguinte já não serve: nada em S o ultrapassa */
                 if(!sp_existe(m + 1, pot, c)) a++;
-                /* (b) e todo m' < m ainda serve: nenhum deles é majorante */
-                long todos = 1, base = (m > 40) ? m - 40 : 0;
-                for(long mm = base; mm < m; mm++){ testados++; if(!sp_existe(mm, pot, c)) todos = 0; }
-                if(todos) b++;
+                /* (b) o PASSO da monotonia, em toda a gama que o objecto determina */
+                long viola = 0;
+                for(long mm = 0; mm < m; mm++){
+                    vistos++;
+                    if(sp_existe(mm + 1, pot, c) && !sp_existe(mm, pot, c)) viola++;
+                }
+                if(!viola) b++;
             }
-            alvos += n; maj += a; menor += b;
-            printf("      %-30s %-15s %s (%ld m' testados)\n", sp_nome[c],
-                   a == n ? "sim" : "NÃO", b == n ? "sim" : "NÃO", testados);
+            alvos += n; maj += a; mono += b; passos_mono += vistos;
+            printf("      %-30s %-15s %s (%ld passos)\n", sp_nome[c],
+                   a == n ? "sim" : "NÃO", b == n ? "sim" : "NÃO", vistos);
         }
-        printf("      %ld níveis: majorante em %ld, e menor majorante em %ld\n",
-               alvos, maj, menor);
+        /* E O GUME: se a monotonia não valesse, (b) não se seguiria. Com uma condição NÃO
+         * monótona — E'(m) = (m mod 7 ≠ 3) — o passo tem de falhar, e falha onde se
+         * prevê: uma vez em cada bloco de sete. */
+        const long FM = 3000, FQ = 7, FR = 3;      /* E'(m) = (m mod FQ ≠ FR) */
+        long falso_viola = 0;
+        for(long mm = 0; mm < FM; mm++)
+            if((mm + 1) % FQ != FR && (mm % FQ) == FR) falso_viola++;
+        /* e a PREVISÃO sai da fórmula, não de uma divisão à mão: a violação dá-se
+         * exactamente nos m ≡ FR (mod FQ), e em [0, FM) esses são */
+        long falso_prev = (FM - 1 - FR)/FQ + 1;    /* e não FM/FQ, que erra por um */
+        printf("      %ld níveis: majorante em %ld, monotonia sem violação em %ld"
+               " (%ld passos verificados)\n", alvos, maj, mono, passos_mono);
+        printf("      GUME: uma condição não monótona viola o passo %ld vezes em 3000 — as"
+               " %ld previstas\n", falso_viola, falso_prev);
         ok("E É O SUPREMO, PELAS DUAS CLÁUSULAS, COM A SEGUNDA A FAZER O TRABALHO: (a) o"
            " passo seguinte já não serve, logo nada em S ultrapassa o caminho — é"
            " majorante; e (b) TODO m' estritamente abaixo ainda serve, logo nenhum deles"
            " é majorante — é o MENOR. Dizer só (a) daria um majorante qualquer; é (b) que"
-           " faz dele o supremo, e é ela que se varreu em todos os m' abaixo",
-           maj == alvos && menor == alvos && alvos == SP_N*16);
+           " faz dele o supremo. E (b) NÃO SE VARRE: sai da MONOTONIA de E(m) por indução,"
+           " e o que se mede é o PASSO E(m+1) ⟹ E(m), sem uma violação em toda a gama que"
+           " o OBJECTO determina. Antes estava aqui uma janela dos últimos 40 valores com a"
+           " asserção a dizer «todos os m' abaixo» — a afirmação mais larga que o laço, e o"
+           " 40 um tecto meu, com m_k a chegar aos 92681. E o gume mostra que a medida"
+           " morde: uma condição não monótona viola o passo, e viola-o o número PREVISTO de"
+           " vezes",
+           maj == alvos && mono == alvos && alvos == SP_N*16
+           && falso_viola == falso_prev && falso_prev > 0);
     }
 
     /* ═══ §S3  O CASO QUE ℚ FALHA ════════════════════════════════════════════ */
