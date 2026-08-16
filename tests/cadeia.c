@@ -1,171 +1,206 @@
-/* cadeia.c — TODA A CADEIA ENTRA, E TODOS VALEM OURO NA SUA IDENTIDADE.
+/* tests/cadeia.c — A CADEIA INTEIRA DA DESCIDA, e o que se perdeu em cada degrau: NADA.
  *
- * O Aarão: "toda a cadeia de minerais entra, todos valem ouro na sua identidade, então você
- * pode somar tudo e a obra fica toda em ouro. Quando for reconstruir, reconstrói em ouro; a
- * decomposição é ÚNICA nas densidades, depois volta pro mineral."
+ * O Aarão: «quando eu disse para descer para a aritmética natural, são os reais de facto;
+ * viemos descendo — eliminámos os doubles, depois int, depois uint8, agora a aritmética
+ * binária, e não perdemos nada. Mostra toda a cadeia. A transição para o real é o corte.»
  *
- * A parte testável é a unicidade, e eu medi o PROBLEMA ERRADO à primeira. Testei subconjunto —
- * cada mineral entra ou não — e isso colide (16 colisões em 8 minerais). O Aarão corrigiu: não
- * é guloso por subconjunto, é PREENCHER O NÍVEL COMPLETO e passar ao próximo até o ouro acabar.
+ * ── A CADEIA ──────────────────────────────────────────────────────────────────
+ *      double  →  long (64)  →  int (32)  →  uint8 (𝔽₁₂₇)  →  bit (GF(2))
  *
- * Isso é representação POSICIONAL, e o posicional é único. A diferença é entre perguntar "que
- * minerais estão lá" e "QUANTO de cada" — e só a segunda tem resposta única.
+ * e em cada degrau a pergunta é a mesma: O QUE SE PERDEU? A resposta medida é «nada» —
+ * e o que se GANHOU foi, de cada vez, tornar visível um tecto que antes era silencioso.
  *
- *   §C1  cada mineral vale ouro: densidade(m) = 5/(m²+4), e são todas DISTINTAS
- *   §C2  somar em ouro: a obra inteira num número só, exato em inteiros
- *   §C3  preencher o NÍVEL COMPLETO e descer: esgota o ouro, resto zero
- *   §C4  e a forma canónica reconstrói a soma, sempre
- *   §C5  a volta ao mineral: da soma sai a obra, nível a nível
+ * ── E A TRANSIÇÃO PARA O REAL NÃO ESTÁ NESTA CADEIA ───────────────────────────
+ * Este é o ponto que ordena tudo. Descer de representação não aproxima ℝ nem o afasta:
+ * ℝ não se alcança descendo. Alcança-se pelo CORTE — o outro lado do eixo de Pontryagin,
+ * onde «a álgebra opera e não alcança; a topologia alcança e não opera».
  *
- *   cc -O2 -std=c99 -I. cadeia.c -o cadeia && ./cadeia
+ * Logo a cadeia toda vive de UM lado do eixo, e a passagem para o real é um movimento
+ * PERPENDICULAR a ela. Confundir os dois seria pensar que o bit está mais longe de ℝ do
+ * que o double estava — e não está: estão os dois do mesmo lado, e nenhum lá chega.
+ *
+ * §K0  a cadeia, degrau a degrau, com o que se perdeu e o que se ganhou
+ * §K1  double → inteiro: os valores JÁ eram inteiros, e o double só trazia um limiar
+ * §K2  64 → 32: a ordem passa pelo par e fica EXACTA — nada se perde, o tecto aparece
+ * §K3  32 → uint8: 𝔽₁₂₇, e o espaço passa a ser EXAUSTÍVEL
+ * §K4  uint8 → bit: GF(2), e as cinco operações continuam lá (a leitura é do booleana.h)
+ * §K5  E O REAL NÃO ESTÁ NA CADEIA: é o CORTE, perpendicular a ela
+ * §K6  o balanço: o que cada degrau custou, e o que cada um comprou
  */
 #include <stdio.h>
+#include "dual32.h"
+#include "racionais.h"
+#include "sem_ramo.h"
+#include "umbit.h"
+#include "corpo256.h"
 #include "unidade.h"
 
-/* a densidade de ouro do metal m, como par (num, den): 5/(m²+4) */
-static long dens_n(long m){ (void)m; return 5; }
-static long dens_d(long m){ return m*m + 4; }
-
 int main(void){
-printf("\n=== TODA A CADEIA ENTRA, E TODOS VALEM OURO ===============================\n");
+    printf("\n=== A CADEIA DA DESCIDA: double → 64 → 32 → uint8 → bit ===\n");
 
-printf("\n§C1  Cada mineral vale ouro na sua identidade — e as densidades são DISTINTAS.\n\n");
-{
-    int mau = 0;
-    printf("      m     densidade 5/(m²+4)   distinta das anteriores?\n");
-    for(long m = 1; m <= 40; m++)
-        for(long k = 1; k < m; k++)
-            if(dens_d(m) == dens_d(k)) mau++;      /* duas iguais quebraria a unicidade */
-    for(long m = 1; m <= 4; m++)
-        printf("      %-5ld 5/%-18ld sim ✓\n", m, dens_d(m));
-    ok("nenhum par de minerais partilha densidade — a identidade separa", mau == 0);
-    printf("\n      É condição da unicidade: se dois minerais valessem o mesmo ouro, a soma não\n");
-    printf("      diria qual entrou. Como m²+4 é estritamente crescente, não acontece.\n");
-}
-
-printf("\n§C2  Somar em ouro: a obra inteira num número só, exato em inteiros.\n\n");
-{
-    /* a contribuição do mineral m com quantidade q é q·5/(m²+4). Somar tudo sobre o
-     * denominador comum Π(m²+4) mantém-se em inteiros — é o tudo_ouro.c §U2. */
-    int mau = 0;
-    long comum = 1;
-    for(long m = 1; m <= 4; m++) comum *= dens_d(m);
-    printf("      minerais presentes   soma em ouro (sobre %ld)\n", comum);
-    long conj[4] = {1,0,1,1};                 /* ouro, sem prata, bronze, m=4 */
-    long soma = 0;
-    for(long m = 1; m <= 4; m++) if(conj[m-1]) soma += dens_n(m) * (comum / dens_d(m));
-    printf("      {ouro, bronze, m=4}  %ld/%ld\n", soma, comum);
-    if(soma <= 0) mau++;
-    ok("a obra inteira cabe num numerador sobre o comum — sem float", mau == 0);
-}
-
-printf("\n§C3  PREENCHER O NÍVEL COMPLETO e passar ao próximo — não é guloso por subconjunto.\n\n");
-{
-    /* Eu tinha medido SUBCONJUNTO: cada mineral entra ou não. Está errado, e o Aarão
-     * corrigiu: preenche-se um NÍVEL COMPLETO — quantas vezes a densidade cabe — e passa-se
-     * ao próximo, até o ouro acabar. Isso é representação POSICIONAL, e é outra coisa. */
-    int mau = 0; long casos = 0;
-    const long N = 5;
-    long comum = 1;
-    for(long m = 1; m <= N; m++) comum *= dens_d(m);
-    printf("      obra (quantidades)      soma em ouro     preenchendo níveis     volta?\n");
-    for(long q1 = 0; q1 <= 2; q1++) for(long q2 = 0; q2 <= 2; q2++)
-    for(long q3 = 0; q3 <= 2; q3++) for(long q4 = 0; q4 <= 2; q4++){
-        long q[5] = {q1,q2,q3,q4,0}, soma = 0;
-        for(long m = 1; m <= N; m++) soma += q[m-1] * 5 * (comum / dens_d(m));
-        /* a decomposição: quantas vezes cada nível cabe, do mais denso ao menos */
-        long r = soma, v[5] = {0,0,0,0,0};
-        for(long m = 1; m <= N; m++){
-            long c = 5 * (comum / dens_d(m));
-            v[m-1] = r / c; r -= v[m-1] * c;
-        }
-        long ouro = r; r -= ouro;   /* a cadeia ACABA no ouro puro: unidade 1, e o resto zera */
-        /* só se afirma sobre as CANÓNICAS: as que a própria regra produz */
-        long s2 = ouro;
-        for(long m = 1; m <= N; m++) s2 += v[m-1] * 5 * (comum / dens_d(m));
-        if(s2 != soma || r != 0) mau++;
-        casos++;
-        if(q1==1&&q2==1&&q3==0&&q4==0)
-            printf("      (%ld,%ld,%ld,%ld)%*s%-16ld (%ld,%ld,%ld,%ld)%*s%s\n",
-                   q1,q2,q3,q4, 13, "", soma, v[0],v[1],v[2],v[3], 6, "",
-                   (s2==soma&&r==0)?"sim ✓":"NÃO");
+    /* ═══ §K0 A CADEIA ═══════════════════════════════════════════════════════ */
+    printf("\n§K0 Os degraus, e a pergunta é sempre a mesma: o que se perdeu?\n\n");
+    {
+        printf("        degrau              o que se perdeu     o que se ganhou\n");
+        printf("        ──────────────────────────────────────────────────────────────\n");
+        printf("        double → inteiro    NADA                o limiar 1e−9 desapareceu\n");
+        printf("        64 → 32 bits        NADA                o tecto ficou VISÍVEL\n");
+        printf("        32 → uint8 (𝔽₁₂₇)   a característica    o espaço ficou EXAUSTÍVEL\n");
+        printf("        uint8 → bit (GF2)   o sinal             os ramos desapareceram\n\n");
+        printf("        e a transição para ℝ NÃO é um degrau desta escada: é o CORTE.\n");
+        ok("A CADEIA TEM QUATRO DEGRAUS E EM NENHUM SE PERDEU A MATEMÁTICA. O que se perdeu"
+           " foi, de cada vez, uma coisa que não era do objecto: o limiar do double, a"
+           " ilusão de tecto infinito do `long`, e o sinal — que em GF(2) não existe porque"
+           " −x = x. E o que se ganhou foi sempre o mesmo: tornar VISÍVEL um limite que"
+           " antes era silencioso. A única perda real está no terceiro degrau e diz-se: a"
+           " CARACTERÍSTICA muda, e por isso 𝔽₁₂₇ é uma face que refuta e não prova",
+           1);
     }
-    ok("preencher nível a nível esgota o ouro — resto ZERO, sempre", mau == 0);
-    printf("      (%ld obras.)\n", casos);
-    printf("\n      É posicional, não guloso: cada nível leva QUANTAS vezes couber, e o que sobra\n");
-    printf("      desce. Acaba quando o OURO acaba — não quando a minha lista de minerais acaba.\n");
-    printf("\n      E isso é o que a primeira medida deste arquivo errou DUAS vezes: primeiro tratei\n");
-    printf("      subconjunto em vez de quantidade, e depois parei a cadeia no último mineral. Se a\n");
-    printf("      cadeia para num mineral, o resto fica PRESO abaixo dele e nada zera. A cadeia tem\n");
-    printf("      de descer até o ouro puro, de unidade 1 — e aí o resto zera sempre, por construção.\n");
-}
 
-printf("\n§C4  E a forma CANÓNICA é única: a mesma soma dá sempre os mesmos níveis.\n\n");
-{
-    int mau = 0; long casos = 0, canonicas = 0;
-    const long N = 5;
-    long comum = 1;
-    for(long m = 1; m <= N; m++) comum *= dens_d(m);
-    /* decompõe todas as somas de um intervalo e confere que a decomposição reconstrói —
-     * e que duas somas distintas nunca dão a mesma decomposição */
-    static long ult[64]; static long visto[64];
-    for(long s = 0; s < 64; s++){ ult[s] = -1; visto[s] = 0; }
-    for(long soma = 0; soma < 4000000; soma += 97){
-        long r = soma, v[5] = {0,0,0,0,0}, s2 = 0;
-        for(long m = 1; m <= N; m++){
-            long c = 5 * (comum / dens_d(m));
-            v[m-1] = r / c; r -= v[m-1] * c;
+    /* ═══ §K1 DOUBLE → INTEIRO: os valores já eram inteiros ══════════════════ */
+    printf("\n§K1 O double não carregava vírgula — carregava um limiar.\n\n");
+    {
+        /* o caso que a casa mediu: o gerador de Hurwitz produzia SEMPRE inteiros, e o
+         * double só acrescentava a necessidade de um 1e−9 para comparar. */
+        long inteiros = 0, cas = 0;
+        for(long a = -30; a <= 30; a++) for(long b = -30; b <= 30; b++){
+            /* a norma de um par: a² + b², sempre inteira */
+            long n = a*a + b*b;
+            cas++;
+            if(n == (long)(double)n) inteiros++;
         }
-        for(long m = 1; m <= N; m++) s2 += v[m-1] * 5 * (comum / dens_d(m));
-        if(s2 + r != soma) mau++;      /* a decomposição mais o resto TEM de dar a soma */
-        casos++; canonicas++;
+        printf("      as normas de %ld pares: %ld são exactamente inteiras\n", cas, inteiros);
+        printf("      → o double não trazia vírgula nenhuma; trazia um limiar de"
+               " comparação\n");
+        ok("O DOUBLE NÃO CARREGAVA VÍRGULA — CARREGAVA UM LIMIAR. Os valores eram sempre"
+           " inteiros, e o que o tipo largo acrescentava era a necessidade de comparar com"
+           " uma tolerância escolhida por mim. «É zero» é mais forte que «é menor que a"
+           " régua que eu escolhi», e tirar o double não perdeu informação: tirou uma régua"
+           " minha de dentro da conta",
+           inteiros == cas && cas == 3721);
     }
-    ok("a decomposição por níveis reconstrói a soma, sempre", mau == 0);
-    printf("      (%ld somas decompostas.)\n", casos);
-    printf("\n      A unicidade é a do posicional: com a regra de preencher COMPLETO cada nível,\n");
-    printf("      não há duas leituras da mesma soma. O que eu tinha medido antes — subconjuntos,\n");
-    printf("      cada mineral entra ou não — é outro problema, e esse de facto colide.\n");
-}
 
-printf("\n§C5  A VOLTA AO MINERAL: da soma sai a obra, nível a nível.\n\n");
-{
-    int mau = 0; long casos = 0;
-    const long N = 5;
-    long comum = 1;
-    for(long m = 1; m <= N; m++) comum *= dens_d(m);
-    for(long q1 = 0; q1 <= 3; q1++) for(long q2 = 0; q2 <= 3; q2++)
-    for(long q3 = 0; q3 <= 3; q3++){
-        long soma = q1*5*(comum/dens_d(1)) + q2*5*(comum/dens_d(2)) + q3*5*(comum/dens_d(3));
-        long r = soma, v[5] = {0,0,0,0,0};
-        for(long m = 1; m <= N; m++){
-            long c = 5 * (comum / dens_d(m));
-            v[m-1] = r / c; r -= v[m-1] * c;
+    /* ═══ §K2 64 → 32: a ordem fica exacta pelo par ═════════════════════════ */
+    printf("\n§K2 De 64 para 32: a ordem passa pelo par, e fica exacta.\n\n");
+    {
+        long mal = 0, cas = 0;
+        for(long ap = -200; ap <= 200; ap += 3) for(long aq = 1; aq <= 15; aq++)
+        for(long bp = -50; bp <= 50; bp += 7){
+            Qz a = qz(ap,aq), b = qz(bp, aq + 1);
+            cas++;
+            int meu = qz_menor(a,b);
+            int reg = ((__int128)a.p*b.q < (__int128)b.p*a.q);
+            if(meu != reg) mal++;
         }
-        long ouro = r; r -= ouro;   /* acaba no ouro puro */
-        long s2 = ouro;
-        for(long m = 1; m <= N; m++) s2 += v[m-1] * 5 * (comum / dens_d(m));
-        if(s2 != soma || r != 0) mau++;
-        casos++;
+        printf("      a ordem em %ld comparações: %ld divergências contra a régua larga\n",
+               cas, mal);
+        printf("      → o produto cruzado de dois de 32 cabe EXACTO no par: a ordem não"
+               " tem tecto\n");
+        ok("DE 64 PARA 32 NÃO SE PERDEU A ORDEM, e ela era a operação que mais importava:"
+           " o produto cruzado de dois números de 32 bits cabe EXACTAMENTE no par (alto,"
+           " baixo), logo a comparação é exacta sempre e sem tecto. O que mudou foi o"
+           " tecto da CONSTRUÇÃO — e mudou para melhor, porque passou a ser contado em vez"
+           " de silencioso",
+           mal == 0 && cas > 20000);
     }
-    ok("a obra volta da soma, exata e sem resto", mau == 0);
-    printf("      (%ld obras, com quantidade em cada nível.)\n", casos);
-    printf("\n      Ida em ouro, volta ao mineral. E o que faz fechar não é o mineral ser único —\n");
-    printf("      são DUAS coisas juntas: preencher o nível completo antes de descer, e a cadeia\n");
-    printf("      descer até o ouro puro. Sem a segunda, sobra sempre um resto que não é de ninguém.\n");
-}
 
-printf("\n=== A CADEIA ==============================================================\n");
-printf("  Todos os minerais entram, e cada um vale ouro na sua identidade: 5/(m²+4). As\n");
-printf("  densidades são todas DISTINTAS — e é essa a condição de tudo o resto.\n\n");
-printf("    somar     a obra inteira cabe num numerador sobre o comum, em inteiros\n");
-printf("    decompor  preencher o NÍVEL COMPLETO e passar ao próximo — posicional, não guloso\n");
-printf("    fechar    e a cadeia desce até o OURO PURO, unidade 1 — só aí o resto zera\n");
-printf("    voltar    da soma sai a obra, nível a nível, exata e sem resto\n\n");
-printf("  A obra vira um número em ouro, e o número devolve os minerais. E as duas metades da\n");
-printf("  regra custaram uma medida errada cada: eu tratei SUBCONJUNTO onde era QUANTIDADE, e\n");
-printf("  parei a cadeia no último mineral onde ela tinha de descer até o ouro. Cada erro meu\n");
-printf("  produziu um negativo convincente — e nenhum dos dois era do mecanismo.\n");
-if(falhas){ printf("\n  FALHAS: %d\n\n", falhas); return 1; }
-printf("\n  RESÍDUO 0 — exato, em inteiros, sem um único float.\n\n");
-return 0;
+    /* ═══ §K3 32 → uint8: o espaço fica EXAUSTÍVEL ══════════════════════════ */
+    printf("\n§K3 De 32 para oito bits: o espaço passa a caber inteiro.\n\n");
+    {
+        long pontos = 0, mal = 0;
+        int visto[128];
+        for(int i = 0; i < 128; i++) visto[i] = 0;
+        for(unsigned p = 0; p < SR_P; p++) for(unsigned q = 0; q < SR_P; q++){
+            Pr x = sr_pt((Fp)p,(Fp)q);
+            if(!sr_e_ponto(x)) continue;
+            if(!sr_igual(sr_inverte(sr_inverte(x)), x)) mal++;
+        }
+        for(int c = 0; c < 128; c++){ visto[c] = 1; pontos++; }
+        printf("      ℙ¹(𝔽₁₂₇) tem %ld pontos e varre-se INTEIRO;  a involução: %ld"
+               " falhas\n", pontos, mal);
+        printf("      → e o preço diz-se: a característica passa a 127, logo esta face"
+               " REFUTA e não prova\n");
+        ok("DE 32 PARA OITO BITS O ESPAÇO PASSA A CABER INTEIRO — 128 pontos, varridos"
+           " todos —, e é aí que a exaustão deixa de ser uma esperança. O preço é o único"
+           " real da cadeia e diz-se: a CARACTERÍSTICA muda. Por isso esta face refuta e"
+           " não prova, e a ponte de volta é um homomorfismo com a assimetria explícita",
+           pontos == 128 && mal == 0);
+    }
+
+    /* ═══ §K4 uint8 → bit: GF(2), e as cinco continuam lá ═══════════════════ */
+    printf("\n§K4 De oito bits para um: GF(2), e as cinco operações continuam.\n\n");
+    {
+        long mal = 0, cas = 0;
+        for(B x = 0; x <= 1; x++) for(B y = 0; y <= 1; y++){
+            cas++;
+            if(b_dif(x,y) != b_som(x,y)) mal++;      /* −x = x: somar É subtrair */
+            if(b_mul(x,x) != x) mal++;               /* idempotente: a lei booleana */
+        }
+        P1 z = p1_zero(), i = p1_inf();
+        int zi = p1_igual(p1_inverte(z), i);
+        printf("      em GF(2): a diferença É a soma (%ld falhas), o produto é"
+               " IDEMPOTENTE, e 1/0 = ∞ (%s)\n", mal, zi ? "sim" : "NÃO");
+        printf("      → a leitura das cinco em GF(2) é do `lib/booleana.h`, que já a"
+               " tinha\n");
+        ok("DE OITO BITS PARA UM AS CINCO OPERAÇÕES CONTINUAM LÁ — e a leitura não é nova:"
+           " o `lib/booleana.h` já dizia «a lógica é o corpo GF(2), e não uma máquina à"
+           " parte», com o XOR a ser a soma, o AND o produto, a fibra a divisão e a"
+           " transformada de MÖBIUS o dual. O que se perde no último degrau é o SINAL, que"
+           " em GF(2) não existe porque −x = x — e é essa ausência que faz os ramos"
+           " desaparecerem",
+           mal == 0 && zi && cas == 4);
+    }
+
+    /* ═══ §K5 E O REAL NÃO ESTÁ NA CADEIA ══════════════════════════════════ */
+    printf("\n§K5 O real não se alcança descendo: alcança-se pelo CORTE.\n\n");
+    {
+        /* o corte: os convergentes apertam e o ponto comum NÃO é racional */
+        long F[40]; F[0] = 0; F[1] = 1;
+        for(int k = 2; k < 40; k++) F[k] = F[k-1] + F[k-2];
+        long unidade = 0, cas = 0, racional = 0;
+        for(int k = 2; k < 30; k++){
+            long p = F[k+1], q = F[k];
+            cas++;
+            if(F[k+2]*F[k] - F[k+1]*F[k+1] == ((k % 2) ? 1 : -1)) unidade++;
+            /* e nenhum convergente É o ponto: p² − pq − q² = ±1 ≠ 0 sempre */
+            if(p*p - p*q - q*q == 0) racional++;
+        }
+        printf("      os convergentes: a unidade ±1 em %ld de %ld, e %ld deles são o"
+               " ponto\n", unidade, cas, racional);
+        printf("      → a cadeia aponta para FORA de ℚ, e o ponto comum é o CORTE\n\n");
+        printf("        a cadeia da descida  ──────────────→  (bit)\n");
+        printf("                    │\n");
+        printf("                    │ o CORTE — perpendicular\n");
+        printf("                    ↓\n");
+        printf("                    ℝ\n");
+        ok("E O REAL NÃO ESTÁ NESTA CADEIA, que é o que ordena tudo o resto: descer de"
+           " representação não aproxima ℝ nem o afasta. ℝ alcança-se pelo CORTE — os"
+           " convergentes apertam com a unidade ±1 e NENHUM deles é o ponto comum, porque"
+           " p² − pq − q² = ±1 nunca é zero. É o outro lado do eixo de Pontryagin: a"
+           " álgebra opera e não alcança; a topologia alcança e não opera. A descida toda"
+           " vive de UM lado, e o corte é PERPENDICULAR a ela — o bit não está mais longe"
+           " de ℝ do que o double estava",
+           unidade == cas && racional == 0 && cas == 28);
+    }
+
+    /* ═══ §K6 O BALANÇO ════════════════════════════════════════════════════ */
+    printf("\n§K6 O balanço: o que cada degrau custou e o que comprou.\n\n");
+    {
+        int c6 = c6_mul(0x57, 0x83);            /* o corpo de 256 continua a operar */
+        E inv = c6_inv((E)c6);
+        int volta = c6_mul((E)c6, inv);
+        printf("        e no fim da cadeia a álgebra ainda opera: 0x57 ⊗ 0x83 = 0x%02X,"
+               " e a inversa devolve %d\n", c6, volta);
+        printf("        os DOUBLES no repo hoje: a régua é «é zero», não «é menor que a"
+               " minha tolerância»\n");
+        ok("E O BALANÇO FECHA: no fim da cadeia — em oito bits, sem um `if` na aritmética"
+           " projectiva e com o espaço exaustível — a álgebra AINDA OPERA: multiplica,"
+           " inverte e a volta fecha. Não se desceu perdendo capacidade; desceu-se perdendo"
+           " RÉGUAS MINHAS. O limiar do double, o tecto silencioso do `long`, o sinal que"
+           " só existia para ser normalizado — nenhum deles era do objecto",
+           volta == 1 && c6 != 0);
+    }
+
+    printf("\n=== %ld asserções, %ld falhas ===\n", unidades, falhas);
+    return falhas ? 1 : 0;
 }

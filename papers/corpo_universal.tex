@@ -125,7 +125,9 @@ sistema é, sem ter de percorrer o resto --- e sabe, sobretudo,
 \downarrow\ \text{(a dobra: }1\to2\to4\to8)\\[2pt]
 \text{o BYTE}\\[2pt]
 \downarrow\ \text{(a base }e_k=x^{k}\text{, e o produto mod }p(x))\\[2pt]
-\text{o CORPO de }256\ \text{(a face que OPERA)}\\[4pt]
+\text{o CORPO de }256\ \text{(a face que OPERA)}\\[2pt]
+\downarrow\ \text{(o reticulado booleano, }\code{lib/booleana.h})\\[2pt]
+\text{GF}(2)\text{: as cinco operações, o dual pela transformada de MÖBIUS}\\[4pt]
 \hline\\[-6pt]
 \text{ASCII}\quad\big|\quad\mathbb{P}^1(\mathbb{F}_{127})
 \quad\big|\quad\text{o neurónio}\quad\big|\quad\text{Gato}/\text{Esquilo}
@@ -242,6 +244,33 @@ códigos \emph{são} os $128$ pontos, com o DEL no $\infty$ por ser o
 único que sobra. E então o gato é uma \textbf{cifra} das letras, com
 $\mathrm{NUL}\mapsto\mathrm{DEL}$ --- que é $0\mapsto\infty$ escrito em
 caracteres. \emph{Mede-se} (Cor.~\ref{cor:exaustao}).
+
+\subsection*{A cadeia da descida, e o que ela NÃO faz}
+O sistema desceu de representação em quatro degraus ---
+$\text{double}\to\text{long}\to\text{int}\to\text{uint8}\to\text{bit}$ ---
+e em nenhum se perdeu a matemática. O que se perdeu, de cada vez, não era
+do objecto: o \emph{limiar} do double (os valores já eram inteiros), a
+\emph{ilusão} de tecto infinito do \verb|long|, e o \emph{sinal} --- que
+em $\mathrm{GF}(2)$ não existe, porque $-x=x$, e é essa ausência que faz
+os ramos desaparecerem. A única perda real está no terceiro degrau e
+diz-se: a \textbf{característica} muda, e por isso a face finita refuta e
+não prova.
+
+\textbf{E o real não está nesta cadeia.} Descer de representação não
+aproxima $\mathbb{R}$ nem o afasta: $\mathbb{R}$ alcança-se pelo
+\textbf{corte}, que é \emph{perpendicular} à descida --- o outro lado do
+eixo de Pontryagin. \emph{O bit não está mais longe de $\mathbb{R}$ do
+que o double estava}: estão os dois do mesmo lado, e nenhum lá chega.
+\emph{Medido:} \code{tests/cadeia.c} ($7{:}0$).
+
+\textbf{E a migração não se faz mecanicamente.} Cada ocorrência de um
+tipo classifica-se antes de se reduzir --- \emph{estrutura}, que decide a
+representação de tudo o resto; \emph{realização}, onde a conta acontece;
+\emph{medição}, onde uma régua minha entra na conta; e
+\emph{apresentação}, que não entra em conta nenhuma. A ordem certa é
+medição primeiro (é defeito), estrutura depois (é alavanca), realização a
+seguir; a apresentação fica, porque reduzir um \verb|printf| é estética.
+\emph{Auditado:} \code{tools/audita\_tipos.sh}.
 
 \subsection*{E as duas faces, que é como o sistema trabalha}
 $\mathbb{Q}$ é a face exacta e \emph{prova}; $\mathbb{F}_p$ é a face

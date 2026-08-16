@@ -3,7 +3,17 @@
  * O Aarão: «agora migramos para 1 bit, vamos tabelar ASCII e formalizar a realização
  * ASCII da álgebra universal, e usa neuronio.c para ver como operador bit a bit.»
  *
- * ── O QUE ACONTECE ÀS CINCO PRIMITIVAS EM 𝔽₂ ──────────────────────────────────
+ * ── E A BASE JÁ EXISTIA: `booleana.h` ─────────────────────────────────────────
+ * Escrevi este ficheiro sem procurar, e o `lib/booleana.h` já dizia a frase inteira:
+ * «A LÓGICA É O CORPO GF(2), E NÃO UMA MÁQUINA À PARTE», com as MESMAS cinco operações —
+ * ⊕ o XOR, ⊗ o AND, ÷ a fibra, † a ANF pela transformada de MÖBIUS, ↺ a volta. É a quarta
+ * vez que trago para um objecto uma coisa que ele já tinha.
+ *
+ * O que aqui é novo, e só isso: a recta projectiva ℙ¹(𝔽₂) com os seus três pontos, as
+ * OITO LEIS como transformações do byte, e o corpo de 256 (`corpo256.h`). A leitura das
+ * cinco primitivas em GF(2) é do `booleana.h`, e cita-se.
+ *
+ * ── O QUE ACONTECE ÀS CINCO PRIMITIVAS EM 𝔽₂ (a leitura é do `booleana.h`) ─────
  * Em 𝔽₂ a álgebra não fica mais pobre: fica NUA. Cada primitiva colapsa numa porta
  * lógica, e o colapso diz o que ela era.
  *
