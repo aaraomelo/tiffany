@@ -31,6 +31,22 @@
 #       Ficam de fora 0, 1 e 2: «zero falhas» e «duas metades» são estruturais, não
 #       previsões. O que interessa são os números que alguém teve de calcular.
 #
+#   P3  A QUANTIDADE DIVIDIDA POR SI PRÓPRIA. Encontrei QUATRO destas no mesmo ficheiro,
+#       o `matricial.c`, e nenhuma podia falhar:
+#
+#           vold = 1.0/vol      →  fabs(vol*vold − 1.0) < 1e-9      «volumes recíprocos»
+#           sgl  = −1.0/sg      →  fabs(sg)*fabs(sgl)  ≈ 1          «σ·σ' = −1»
+#           meio = tr/2         →  razao = meio/tr     ≈ 0.5        «a coordenada é 1/2»
+#           zin  = 1/sig        →  prod = zin*sig      ≈ 1          «ν troca dentro/fora»
+#
+#       Quatro frases com conteúdo, e por baixo de cada uma um x·(1/x). O padrão é
+#       sempre o mesmo: uma variável DEFINIDA a partir de outra, e depois as duas
+#       combinadas numa expressão que se compara com uma constante. O que se mede é a
+#       aritmética, não a tese — e a tese fica por medir sem que nada acuse.
+#
+#       O conserto nunca foi apertar o limiar: foi construir o segundo objecto por um
+#       caminho que não passe pelo primeiro.
+#
 # O controlo é correr nos ficheiros onde a resposta já se sabe: o `supremo.c` de hoje não
 # pode dar P1, e a versão anterior tinha de dar.
 #
@@ -49,6 +65,61 @@ NU = re.compile(r'[=!]=\s*(\d{1,})\b')
 
 # o veredicto: a chamada e o seu texto
 VERED = re.compile(r'\b(ok|VD|pulso|tique)\s*\(')
+
+# P3: uma atribuição `v = expr`, para saber de QUEM v depende
+ATRIB = re.compile(r'\b(?:double|float|long|int)?\s*(\w+)\s*=\s*([^;=][^;]*);')
+NOMES = re.compile(r'\b([A-Za-z_]\w*)\b')
+IGNORA = {'fabs','sqrt','pow','hypot','double','long','int','float','if','return',
+          'sizeof','for','while','else','const','static','unsigned','printf'}
+# e a combinação das duas na mesma expressão, comparada com um número
+COMBINA = re.compile(r'[*/]')
+
+
+def recíprocas(bloco):
+    """pares (v, w) em que v é DEFINIDA a partir de w e depois as duas se combinam
+    directamente num produto ou quociente comparado com uma constante.
+
+    Afiado contra o ruído da primeira versão, que deu 119 num ficheiro só: exigia-se
+    apenas que os dois nomes aparecessem na mesma linha, e isso apanha todos os índices
+    de laço (`M3[r][t] -= f*M3[c][t]`). Agora pede-se que v e w se toquem —
+    `v*w`, `v/w`, `fabs(v)*fabs(w)` — e que a linha compare com um número."""
+    dep, ordem, achados = {}, [], []
+    for m in ATRIB.finditer(bloco):
+        v, expr = m.group(1), m.group(2)
+        if len(v) < 2:                        # índices de laço não contam
+            continue
+        # `double g1 = ..., g2 = ...` é UMA declaração com DUAS variáveis: cortar na
+        # primeira vírgula de topo, senão g2 aparece como dependência de g1 — e no
+        # `amplifica.c` isso fazia passar por tautologia o par derivada numérica /
+        # derivada analítica, que são justamente DUAS ROTAS independentes.
+        prof, corte = 0, len(expr)
+        for k, ch in enumerate(expr):
+            if ch in '([':  prof += 1
+            elif ch in ')]': prof -= 1
+            elif ch == ',' and prof == 0: corte = k; break
+        expr = expr[:corte]
+        usados = {n for n in NOMES.findall(expr)
+                  if n != v and len(n) > 1 and n not in IGNORA}
+        if usados:
+            dep[v] = usados
+            ordem.append((m.end(), v))
+    for fim, v in ordem:
+        for w in dep.get(v, ()):
+            ve, we = re.escape(v), re.escape(w)
+            # v e w a TOCAREM-SE, em qualquer ordem, com fabs opcional à volta
+            junto = re.compile(
+                r'(?:fabs\s*\(\s*)?\b(?:' + ve + r'|' + we + r')\b\s*\)?'
+                r'\s*[*/]\s*'
+                r'(?:fabs\s*\(\s*)?\b(?:' + ve + r'|' + we + r')\b')
+            for linha in bloco[fim:].split(chr(10)):
+                if not junto.search(linha):
+                    continue
+                if not (re.search(ve, linha) and re.search(we, linha)):
+                    continue
+                if re.search(r'[<>]\s*[\d.]|[=!]=\s*[\d.]|-\s*[\d.]+\s*\)', linha):
+                    achados.append((v, w, linha.strip()[:70]))
+                    break
+    return achados
 
 
 def texto_do_veredicto(src, i):
@@ -70,6 +141,29 @@ def texto_do_veredicto(src, i):
     return src[i:i+2000]
 
 
+def despe(s):
+    """apaga comentários E literais de texto, preservando as quebras de linha — um
+    scanner de um percurso, porque dois regex em fila erram quando uma string contém
+    «/*» (o `triagem_limiares.sh` deu 1 onde havia 4 antes de levar isto)"""
+    out, i, n = [], 0, len(s)
+    while i < n:
+        c = s[i]
+        if c == '/' and i+1 < n and s[i+1] == '*':
+            j = s.find('*/', i+2); j = n if j < 0 else j+2
+        elif c == '/' and i+1 < n and s[i+1] == '/':
+            j = s.find(chr(10), i); j = n if j < 0 else j
+        elif c in '"\'':
+            j, q = i+1, c
+            while j < n and s[j] != q:
+                j += 2 if s[j] == '\\' else 1
+            j = min(j+1, n)
+        else:
+            out.append(c); i += 1; continue
+        out.append(''.join(ch if ch == chr(10) else ' ' for ch in s[i:j]))
+        i = j
+    return ''.join(out)
+
+
 def blocos(src):
     """parte o ficheiro nos blocos { ... } de primeiro nível dentro da main"""
     saida, ini, n = [], None, 0
@@ -89,7 +183,7 @@ def blocos(src):
 def main():
     fich = sorted(glob.glob('tests/*.c') + glob.glob('tests/*.js') +
                   glob.glob('tools/*.c'))
-    p1, p2, vistos = [], [], 0
+    p1, p2, p3, vistos = [], [], [], 0
     for f in fich:
         try:
             src = open(f, encoding='utf-8').read()
@@ -97,13 +191,14 @@ def main():
             continue
         # o comentário do próprio detector, e as menções ao defeito já corrigido, não
         # contam: só o CÓDIGO. Tira-se comentário de bloco e de linha.
-        codigo = re.sub(r'/\*.*?\*/', ' ', src, flags=re.S)
-        codigo = re.sub(r'//[^\n]*', ' ', codigo)
+        codigo = despe(src)
         for m in JANELA.finditer(codigo):
             linha = codigo[:m.start()].count('\n') + 1
             p1.append((f, linha, m.group(0)))
         for ini, bl in blocos(codigo):
             vistos += 1
+            for v, w, ln in recíprocas(bl):
+                p3.append((f, codigo[:ini].count('\n') + 1, v, w, ln))
             for v in VERED.finditer(bl):
                 txt = texto_do_veredicto(bl, v.start())
                 # só a CONDIÇÃO: o que vem depois da última string do veredicto
@@ -129,6 +224,16 @@ def main():
     print("\n  Para cada um a pergunta é a mesma: esse número vem de uma FÓRMULA sobre o"
           "\n  objecto, ou foi calculado à mão e escrito? Se o objecto mudar, ele muda"
           " sozinho?")
+    fich_p3 = len({f for f, *_ in p3})
+    print(f"\n  P3 — a quantidade dividida por si própria: {len(p3)}"
+          f" em {fich_p3} ficheiros")
+    for f, l, v, w, ln in p3[:25]:
+        print(f"      {f}:{l}   {v} vem de {w}   →   {ln}")
+    if len(p3) > 25:
+        print(f"      ... e mais {len(p3)-25}")
+    print("\n  Em cada um: o segundo objecto foi CONSTRUÍDO por um caminho que não passa"
+          "\n  pelo primeiro, ou foi escrito a partir dele? Se foi escrito, a asserção mede"
+          "\n  aritmética e a tese fica por medir.")
     return 1 if p1 else 0
 
 
