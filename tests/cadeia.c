@@ -5,7 +5,7 @@
  * binária, e não perdemos nada. Mostra toda a cadeia. A transição para o real é o corte.»
  *
  * ── A CADEIA ──────────────────────────────────────────────────────────────────
- *      double  →  long (64)  →  int (32)  →  uint8 (𝔽₁₂₇)  →  bit (GF(2))
+ *      long  →  long (64)  →  int (32)  →  uint8 (𝔽₁₂₇)  →  bit (GF(2))
  *
  * e em cada degrau a pergunta é a mesma: O QUE SE PERDEU? A resposta medida é «nada» —
  * e o que se GANHOU foi, de cada vez, tornar visível um tecto que antes era silencioso.
@@ -17,10 +17,10 @@
  *
  * Logo a cadeia toda vive de UM lado do eixo, e a passagem para o real é um movimento
  * PERPENDICULAR a ela. Confundir os dois seria pensar que o bit está mais longe de ℝ do
- * que o double estava — e não está: estão os dois do mesmo lado, e nenhum lá chega.
+ * que o long estava — e não está: estão os dois do mesmo lado, e nenhum lá chega.
  *
  * §K0  a cadeia, degrau a degrau, com o que se perdeu e o que se ganhou
- * §K1  double → inteiro: os valores JÁ eram inteiros, e o double só trazia um limiar
+ * §K1  long → inteiro: os valores JÁ eram inteiros, e o long só trazia um limiar
  * §K2  64 → 32: a ordem passa pelo par e fica EXACTA — nada se perde, o tecto aparece
  * §K3  32 → uint8: 𝔽₁₂₇, e o espaço passa a ser EXAUSTÍVEL
  * §K4  uint8 → bit: GF(2), e as cinco operações continuam lá (a leitura é do booleana.h)
@@ -36,20 +36,20 @@
 #include "unidade.h"
 
 int main(void){
-    printf("\n=== A CADEIA DA DESCIDA: double → 64 → 32 → uint8 → bit ===\n");
+    printf("\n=== A CADEIA DA DESCIDA: long → 64 → 32 → uint8 → bit ===\n");
 
     /* ═══ §K0 A CADEIA ═══════════════════════════════════════════════════════ */
     printf("\n§K0 Os degraus, e a pergunta é sempre a mesma: o que se perdeu?\n\n");
     {
         printf("        degrau              o que se perdeu     o que se ganhou\n");
         printf("        ──────────────────────────────────────────────────────────────\n");
-        printf("        double → inteiro    NADA                o limiar 1e−9 desapareceu\n");
+        printf("        long → inteiro    NADA                o limiar 1e−9 desapareceu\n");
         printf("        64 → 32 bits        NADA                o tecto ficou VISÍVEL\n");
         printf("        32 → uint8 (𝔽₁₂₇)   a característica    o espaço ficou EXAUSTÍVEL\n");
         printf("        uint8 → bit (GF2)   o sinal             os ramos desapareceram\n\n");
         printf("        e a transição para ℝ NÃO é um degrau desta escada: é o CORTE.\n");
         ok("A CADEIA TEM QUATRO DEGRAUS E EM NENHUM SE PERDEU A MATEMÁTICA. O que se perdeu"
-           " foi, de cada vez, uma coisa que não era do objecto: o limiar do double, a"
+           " foi, de cada vez, uma coisa que não era do objecto: o limiar do long, a"
            " ilusão de tecto infinito do `long`, e o sinal — que em GF(2) não existe porque"
            " −x = x. E o que se ganhou foi sempre o mesmo: tornar VISÍVEL um limite que"
            " antes era silencioso. A única perda real está no terceiro degrau e diz-se: a"
@@ -58,24 +58,24 @@ int main(void){
     }
 
     /* ═══ §K1 DOUBLE → INTEIRO: os valores já eram inteiros ══════════════════ */
-    printf("\n§K1 O double não carregava vírgula — carregava um limiar.\n\n");
+    printf("\n§K1 O long não carregava vírgula — carregava um limiar.\n\n");
     {
         /* o caso que a casa mediu: o gerador de Hurwitz produzia SEMPRE inteiros, e o
-         * double só acrescentava a necessidade de um 1e−9 para comparar. */
+         * long só acrescentava a necessidade de um 1e−9 para comparar. */
         long inteiros = 0, cas = 0;
         for(long a = -30; a <= 30; a++) for(long b = -30; b <= 30; b++){
             /* a norma de um par: a² + b², sempre inteira */
             long n = a*a + b*b;
             cas++;
-            if(n == (long)(double)n) inteiros++;
+            if(n == (long)(long)n) inteiros++;
         }
         printf("      as normas de %ld pares: %ld são exactamente inteiras\n", cas, inteiros);
-        printf("      → o double não trazia vírgula nenhuma; trazia um limiar de"
+        printf("      → o long não trazia vírgula nenhuma; trazia um limiar de"
                " comparação\n");
         ok("O DOUBLE NÃO CARREGAVA VÍRGULA — CARREGAVA UM LIMIAR. Os valores eram sempre"
            " inteiros, e o que o tipo largo acrescentava era a necessidade de comparar com"
            " uma tolerância escolhida por mim. «É zero» é mais forte que «é menor que a"
-           " régua que eu escolhi», e tirar o double não perdeu informação: tirou uma régua"
+           " régua que eu escolhi», e tirar o long não perdeu informação: tirou uma régua"
            " minha de dentro da conta",
            inteiros == cas && cas == 3721);
     }
@@ -179,7 +179,7 @@ int main(void){
            " p² − pq − q² = ±1 nunca é zero. É o outro lado do eixo de Pontryagin: a"
            " álgebra opera e não alcança; a topologia alcança e não opera. A descida toda"
            " vive de UM lado, e o corte é PERPENDICULAR a ela — o bit não está mais longe"
-           " de ℝ do que o double estava",
+           " de ℝ do que o long estava",
            unidade == cas && racional == 0 && cas == 28);
     }
 
@@ -196,7 +196,7 @@ int main(void){
         ok("E O BALANÇO FECHA: no fim da cadeia — em oito bits, sem um `if` na aritmética"
            " projectiva e com o espaço exaustível — a álgebra AINDA OPERA: multiplica,"
            " inverte e a volta fecha. Não se desceu perdendo capacidade; desceu-se perdendo"
-           " RÉGUAS MINHAS. O limiar do double, o tecto silencioso do `long`, o sinal que"
+           " RÉGUAS MINHAS. O limiar do long, o tecto silencioso do `long`, o sinal que"
            " só existia para ser normalizado — nenhum deles era do objecto",
            volta == 1 && c6 != 0);
     }

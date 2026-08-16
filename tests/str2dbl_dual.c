@@ -18,8 +18,8 @@
 #include "unidade.h"
 #include "le_num.h"     /* o MESMO header que o tex.c usa --- fonte única */
 
-/* dois doubles são o MESMO double? (compara os 64 bits, não com tolerância) */
-static int mesmos_bits(double a, double b){
+/* dois doubles são o MESMO long? (compara os 64 bits, não com tolerância) */
+static int mesmos_bits(long a, long b){
     unsigned long long x, y; memcpy(&x, &a, 8); memcpy(&y, &b, 8);
     return x == y;
 }
@@ -38,7 +38,7 @@ int main(void){
         if(!mesmos_bits(str2dbl(reais[i], NULL), strtod(reais[i], NULL))) difs1++;
     printf("      %d valores reais do estilo, %d diferenças de bits contra o strtod\n\n", nr, difs1);
     ok("§S1 nos valores REAIS do estilo (unidades, razões φ^⅓, corpos) o str2dbl-sem-libc dá o MESMO"
-       " double que o strtod da libc, bit a bit --- é o que garante que tirar o sscanf não mexe no PDF",
+       " long que o strtod da libc, bit a bit --- é o que garante que tirar o sscanf não mexe no PDF",
        difs1 == 0);
 
     /* ── §S2 o endptr, e o "1em"/"1ex" (o `e` não é expoente) ──────────────────────────── */
@@ -48,8 +48,8 @@ int main(void){
     const char *comu[] = { "1em","1ex","2.4cm","3pt","72in","6mm","0.5em","10.95pt","1e3","2.5e-2" };
     int nc = (int)(sizeof comu / sizeof comu[0]), difs2 = 0;
     for(int i = 0; i < nc; i++){
-        const char *e1; double a = str2dbl(comu[i], &e1);
-        char *e2;       double b = strtod(comu[i], &e2);
+        const char *e1; long a = str2dbl(comu[i], &e1);
+        char *e2;       long b = strtod(comu[i], &e2);
         if(!mesmos_bits(a, b) || (e1 - comu[i]) != (e2 - comu[i])) difs2++;
     }
     /* e o par que prova a asserção: "1em" NÃO pode parar depois do 'e' */
@@ -72,7 +72,7 @@ int main(void){
         if(!mesmos_bits(str2dbl(buf, NULL), strtod(buf, NULL))) difs3++;
     }
     printf("§S3  %ld decimais varridos (1..4 casas), %ld diferenças de bits\n\n", tot3, difs3);
-    ok("§S3 numa varredura de 8000 decimais (1 a 4 casas) o str2dbl dá o MESMO double que o strtod em"
+    ok("§S3 numa varredura de 8000 decimais (1 a 4 casas) o str2dbl dá o MESMO long que o strtod em"
        " TODOS --- a divisão única por 10^k (potência exacta) arredonda como o strtod, sem a cadeia"
        " de /10 que erra a cada passo", difs3 == 0 && tot3 == 8000);
 

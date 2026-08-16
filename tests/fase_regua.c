@@ -171,8 +171,8 @@ int main(void){
         for(long p = 0; p < q; p++){ if(orbita(p, q) <= 2) ficam++; else saem++; }
         printf("      %ld circulos (q de 2 a 512, %ld pares e %ld impares): %ld discordancias\n",
                casos, pares, impares, mau);
-        printf("      num circulo de %ld marcas: %ld fases ficam no eixo, %ld saem (%.4f%%)\n",
-               q, ficam, saem, 100.0 * (double)ficam / (double)q);
+        printf("      num circulo de %ld marcas: %ld fases ficam no eixo, %ld saem (%ld%%)\n",
+               q, ficam, saem, 100.0 * (long)ficam / (long)q);
         /* as que saem contam-se a' parte, e o que se exige delas sai do proprio q e das que
          * ficam: nao ha' limiar escrito a' mao */
         ok("o raio no diametro E' OBRIGADO A DESVIAR: das q fases ficam no eixo DUAS se q e'"

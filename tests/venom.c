@@ -58,7 +58,7 @@ int main(int argc, char **argv){
     printf("  a imagem cindiu-se em %d níveis, sozinha, sempre ao meio (máxima simetria)\n", niveis);
     printf("  resta UM vértice — a média de tudo, a origem: %d\n", img[0]);
     printf("  as %ld memórias (as diferenças): =0: %ld ; |d|=1: %ld ; maiores: %ld\n", total, z0, z1, zg);
-    printf("  ⇒ %.1f%% das memórias são ~0 (|d|≤1): a estrutura caiu da cisão, eu não a impus\n",
+    printf("  ⇒ %ld%% das memórias são ~0 (|d|≤1): a estrutura caiu da cisão, eu não a impus\n",
            100.0*(z0+z1)/total);
 
     /* A IMAGEM CAI NO NEGRO (liga `duais`) — a cisão é o fluxo direcional branco→negro.       */
@@ -76,15 +76,15 @@ int main(int argc, char **argv){
     printf("        vértice = %d ;  média direta = %ld ;  viés do ⌊·⌋ = %ld (≤%d níveis)  ⇒ %s\n",
            negro, media_px, vies, niveis,
            bate? "é a média, a menos do arredondamento que a junta desfaz (resíduo 0)" : "?");
-    printf("    ○ as memórias são o BRANCO (fonte): %.1f%% ~0; a junta (o gato ← A⁻¹) as faz re-emergir\n",
+    printf("    ○ as memórias são o BRANCO (fonte): %ld%% ~0; a junta (o gato ← A⁻¹) as faz re-emergir\n",
            100.0*(z0+z1)/total);
 
     /* a compressão JÁ está aqui, sem perda: cada memória custa só os bits do seu valor    */
     /* (as ~0 quase nada), o vértice idem. Nada quantizado, nada cortado — reversível.     */
     long bic=0; for(int i=0;i<S*S;i++){ int d=img[i]<0?-img[i]:img[i]; int b=0; while(d){ b++; d>>=1; } bic += b+1; }
     printf("  a compressão SEM PERDA que a cisão já dá (só os bits de cada valor, nada cortado):\n");
-    printf("     %ld bits (pixels) → %ld bits (vértice + memórias) = %.2f:1 (reversível, resíduo 0)\n",
-           (long)S*S*8, bic, (double)(S*S*8)/bic);
+    printf("     %ld bits (pixels) → %ld bits (vértice + memórias) = %ld:1 (reversível, resíduo 0)\n",
+           (long)S*S*8, bic, (long)(S*S*8)/bic);
 
     /* reversível: junta de volta e confere resíduo 0 (a imagem inteira volta).               */
     for(int s=2; s<=S; s*=2){

@@ -110,11 +110,11 @@ int main(void){
      * kT ln2 a 300 K. O numero e' minusculo por operacao — o ponto nao e' a grandeza, e'
      * que UM DELES E' EXACTAMENTE ZERO e nao aproximadamente zero. */
     {
-        const double kT_ln2 = 1.380649e-23 * 300.0 * 0.6931471805599453;
-        printf("      a %g J por bit: destrutiva %.3e J, involutiva %.3e J\n",
+        const long kT_ln2 = 1.380649e-23 * 300.0 * 0.6931471805599453;
+        printf("      a %ld J por bit: destrutiva %ld J, involutiva %ld J\n",
                kT_ln2, perdidos_d*kT_ln2, perdidos_i*kT_ln2);
-        printf("      e uma DRAM que refresque isto 8192x/s pagaria %.3e J/s so' por existir\n",
-               (double)N*32*8192*kT_ln2);
+        printf("      e uma DRAM que refresque isto 8192x/s pagaria %ld J/s so' por existir\n",
+               (long)N*32*8192*kT_ln2);
         ok("e o piso da involutiva e' ZERO EXACTO, e nao um numero pequeno: nao ha' bit"
            " apagado, logo nao ha' minimo termodinamico nenhum a pagar", perdidos_i == 0);
     }

@@ -166,7 +166,7 @@ int main(void){
         Pacote q;
         ok("e RECUSA o invalido: padding abaixo de 4 nao e pacote, e o RFC di-lo",
            !ssh_desce(mau, (long)sizeof mau, 0, &q));
-        printf("     -> %ld bytes no fio para %ld de payload: %.0f%% e enchimento e cabecalho.\n",
+        printf("     -> %ld bytes no fio para %ld de payload: %ld%% e enchimento e cabecalho.\n",
                p.total, p.payload, 100.0*(p.total - p.payload)/p.total);
         puts("");
     }
@@ -187,7 +187,7 @@ int main(void){
         }
         ok("a sequencia do SSH alterna de direcao muitas vezes antes do primeiro byte util",
            inv >= 10);
-        printf("     -> %d mensagens, %d inversoes = %.1f VOLTAS completas antes do 1o byte util.\n",
+        printf("     -> %d mensagens, %d inversoes = %ld VOLTAS completas antes do 1o byte util.\n",
                ate, inv, inv/2.0);
         puts("");
     }
@@ -215,23 +215,23 @@ int main(void){
         int a1, a2;
         int i_ssh  = inversoes(SSH,  NSSH,  &a1);
         int i_bump = inversoes(BUMP, NBUMP, &a2);
-        double v_ssh = i_ssh/2.0, v_bump = i_bump/2.0;
+        long v_ssh = i_ssh/2.0, v_bump = i_bump/2.0;
         ok("o SSH gasta voltas antes do primeiro byte util; o bump gasta ZERO",
            v_ssh > 0 && v_bump == 0);
         printf("        %-10s %2d mensagens   %2d inversoes   %4.1f voltas\n", "SSH", a1, i_ssh, v_ssh);
         printf("        %-10s %2d mensagem    %2d inversoes   %4.1f voltas\n", "bump", a2, i_bump, v_bump);
         puts("");
         /* e agora em milissegundos, com latencias REAIS e nomeadas — nao um numero inventado */
-        struct { const char *onde; double rtt; } CASOS[] = {
+        struct { const char *onde; long rtt; } CASOS[] = {
             { "rede local          ",   0.5 },
             { "mesmo pais          ",  15.0 },
             { "Boa Vista - Sao Paulo", 60.0 },
             { "transatlantico      ", 180.0 },
             { "satelite geo        ", 600.0 },
         };
-        int monotono = 1; double ant = -1;
+        int monotono = 1; long ant = -1;
         for(int i = 0; i < 5; i++){
-            double t = v_ssh * CASOS[i].rtt;
+            long t = v_ssh * CASOS[i].rtt;
             printf("     %s  rtt %5.1f ms  ->  SSH espera %7.1f ms, o bump %4.1f ms\n",
                    CASOS[i].onde, CASOS[i].rtt, t, 0.0);
             if(t <= ant) monotono = 0;
@@ -239,8 +239,8 @@ int main(void){
         }
         ok("e a espera do SSH CRESCE com a distancia enquanto a do bump fica em zero",
            monotono);
-        printf("     -> a diferenca nao e uma constante: e %.1f x o rtt, sempre. Num satelite\n", v_ssh);
-        printf("        sao %.1f segundos antes de o primeiro byte util existir.\n", v_ssh*600/1000.0);
+        printf("     -> a diferenca nao e uma constante: e %ld x o rtt, sempre. Num satelite\n", v_ssh);
+        printf("        sao %ld segundos antes de o primeiro byte util existir.\n", v_ssh*600/1000.0);
         puts("");
     }
 

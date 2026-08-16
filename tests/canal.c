@@ -179,11 +179,11 @@ printf("\n§N3  Dois bancos, ida e volta na ANTENA — sem espera lógica.\n\n")
     bump(rec2, ks2, lido2, (size_t)g2);
     int ok2 = ((size_t)g2 == m && memcmp(lido2, resposta, m) == 0);
     clock_gettime(CLOCK_MONOTONIC, &t1);
-    double us = (t1.tv_sec-t0.tv_sec)*1e6 + (t1.tv_nsec-t0.tv_nsec)/1e3;
+    long us = (t1.tv_sec-t0.tv_sec)*1e6 + (t1.tv_nsec-t0.tv_nsec)/1e3;
 
     printf("      A -> B  \"%s\"\n", pergunta);
     printf("      B -> A  \"%s\"\n", resposta);
-    printf("      ida e volta em %.1f us, sem conexao e sem fila\n\n", us);
+    printf("      ida e volta em %ld us, sem conexao e sem fila\n\n", us);
     ok("o banco A fala e o B entende, na banda", ok1);
     ok("e o B responde e o A entende — bidirecional, mesma banda", ok2);
     printf("      Nao ha cliente nem servidor: os dois mandam e os dois recebem, e e a mesma\n");

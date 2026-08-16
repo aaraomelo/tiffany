@@ -455,19 +455,19 @@ int main(void){
 
         /* ESTICA E CONTRAI, e e por serem DUAS. A norma conserva-se porque as duas se compensam:
          * ||z*w||^2 = ||z||^2 ||w||^2 e a lei de composicao, e ela SO vale com as duas juntas. */
-        double nz = a0*a0 + a[0]*a[0] + a[1]*a[1] + a[2]*a[2];
-        double nw = b0*b0 + b[0]*b[0] + b[1]*b[1] + b[2]*b[2];
-        double re = dir_re_ab;
-        double npr = re*re + tot_ab[0]*tot_ab[0] + tot_ab[1]*tot_ab[1] + tot_ab[2]*tot_ab[2];
+        long nz = a0*a0 + a[0]*a[0] + a[1]*a[1] + a[2]*a[2];
+        long nw = b0*b0 + b[0]*b[0] + b[1]*b[1] + b[2]*b[2];
+        long re = dir_re_ab;
+        long npr = re*re + tot_ab[0]*tot_ab[0] + tot_ab[1]*tot_ab[1] + tot_ab[2]*tot_ab[2];
         ok("ESTICA E CONTRAI e a norma FECHA: ||z*w||^2 = ||z||^2.||w||^2, com as duas juntas",
-           fabs(npr - nz*nw) < 1e-12);
+           (npr - nz*nw) == 0);
         /* e SEM o cruzado ela NAO fecha — e a prova de que as duas sao precisas */
-        double npd = re*re + dir_v_ab[0]*dir_v_ab[0] + dir_v_ab[1]*dir_v_ab[1] + dir_v_ab[2]*dir_v_ab[2];
+        long npd = re*re + dir_v_ab[0]*dir_v_ab[0] + dir_v_ab[1]*dir_v_ab[1] + dir_v_ab[2]*dir_v_ab[2];
         ok("e SO com o direto ela NAO fecha: o cruzado nao e enfeite, e o que fecha o circuito",
-           fabs(npd - nz*nw) > 1e-6);
-        printf("     -> ||z||^2.||w||^2 = %.6f; com as duas pecas da %.6f (residuo %.1e), so com\n",
+           (npd - nz*nw) != 0);
+        printf("     -> ||z||^2.||w||^2 = %ld; com as duas pecas da %ld (residuo %ld), so com\n",
                nz*nw, npr, fabs(npr - nz*nw));
-        printf("        o direto da %.6f — falta %.4f. E o cruzado que devolve o que falta.\n",
+        printf("        o direto da %ld — falta %ld. E o cruzado que devolve o que falta.\n",
                npd, nz*nw - npd);
         puts("        SIMETRICA = DIRETO (mede, espelha, ordem 2)   ANTISSIMETRICA = CRUZADO");
         puts("        (ordena, roda, ordem 4). Sao duas, e e por isso que ha estica E contrai;");

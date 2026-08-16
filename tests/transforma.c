@@ -225,8 +225,8 @@ int main(int argc, char **argv){
         }
         printf("§T3  COMPOSIÇÃO (só cisalhamentos): A→B %ld/%ld %s ; B→A %ld/%ld %s\n",
                ida,tot, ida==tot?"resíduo 0":"FALHA", volta,tot, volta==tot?"resíduo 0":"FALHA");
-        printf("     operações: média %.2f, máximo %ld  (teto 2n+2 = %d) — nenhuma ESCALA foi\n",
-               tot?(double)somaops/tot:0, maxops, 2*n+2);
+        printf("     operações: média %ld, máximo %ld  (teto 2n+2 = %d) — nenhuma ESCALA foi\n",
+               tot?(long)somaops/tot:0, maxops, 2*n+2);
         printf("     necessária: SL_n já é transitivo; a escala só ajusta o determinante.\n");
         if(ida!=tot||volta!=tot) ok=0;
     }

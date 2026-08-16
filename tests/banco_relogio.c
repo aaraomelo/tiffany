@@ -97,17 +97,17 @@ int main(void){
             total += p; achados += achou;
             if(p > pior) pior = p;
         }
-        double alfa = (double)M / (double)nslot;
-        double medio = (double)total / (double)M;
-        printf("      %ld chaves em %ld marcas: densidade %.4f\n", M, nslot, alfa);
-        printf("      sondas por leitura: media %.3f, pior caso %ld\n", medio, pior);
+        long alfa = (long)M / (long)nslot;
+        long medio = (long)total / (long)M;
+        printf("      %ld chaves em %ld marcas: densidade %ld\n", M, nslot, alfa);
+        printf("      sondas por leitura: media %ld, pior caso %ld\n", medio, pior);
         ok("todas as chaves sao ACHADAS pela sondagem — a volta encontra o ponto fixo",
            achados == M);
 
         /* a forma fechada da sondagem linear com densidade alfa: (1 + 1/(1-alfa))/2.
          * NAO e' limiar meu — e' a conta, e compara-se com o que se contou. */
-        double previsto = (1.0 + 1.0/(1.0 - alfa)) / 2.0;
-        printf("      forma fechada para densidade %.4f: %.3f sondas\n", alfa, previsto);
+        long previsto = (1.0 + 1.0/(1.0 - alfa)) / 2.0;
+        printf("      forma fechada para densidade %ld: %ld sondas\n", alfa, previsto);
         ok("e o CONTADOR bate com a forma fechada: com a volta quase vazia, uma sonda"
            " chega — a densidade e' que decide o custo, e mediu-se em vez de se estimar",
            medio >= 1.0 && medio <= previsto + 0.5);
@@ -183,11 +183,11 @@ int main(void){
         clock_gettime(CLOCK_MONOTONIC, &t2);
         banco_larga(&m);
 
-        double mapa = (t1.tv_sec-t0.tv_sec)*1e9 + (t1.tv_nsec-t0.tv_nsec);
-        double ler  = (t2.tv_sec-t1.tv_sec)*1e9 + (t2.tv_nsec-t1.tv_nsec);
-        printf("\n      o acoplamento (banco_mapa): %.0f ns, UMA vez\n", mapa);
-        printf("      3000 leituras: %.0f ns, %.1f ns cada\n", ler, ler/3000);
-        printf("      o mapa vale %.0f leituras — e nao se repete\n", mapa/(ler/3000));
+        long mapa = (t1.tv_sec-t0.tv_sec)*1e9 + (t1.tv_nsec-t0.tv_nsec);
+        long ler  = (t2.tv_sec-t1.tv_sec)*1e9 + (t2.tv_nsec-t1.tv_nsec);
+        printf("\n      o acoplamento (banco_mapa): %ld ns, UMA vez\n", mapa);
+        printf("      3000 leituras: %ld ns, %ld ns cada\n", ler, ler/3000);
+        printf("      o mapa vale %ld leituras — e nao se repete\n", mapa/(ler/3000));
         ok("o banco NAO TEM ARRANQUE: o mmap nao copia nada, e as paginas entram quando sao"
            " TOCADAS. O acoplamento vale algumas centenas de leituras e paga-se UMA vez —"
            " e' a corrente de magnetizacao do estator, reactiva e nao dissipativa. A minha"

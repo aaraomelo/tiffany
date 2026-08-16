@@ -51,7 +51,7 @@ printf("\n§T1  O CONSTANTE [1,1,1,…]: q_n é Fibonacci — o crescimento MAIS
     i128 q[14]; conv(a,14,q);
     printf("      n     q_n      razão q_n/q_{n−1}\n");
     for(int i=1;i<6;i++){
-        printf("      %-5d ", i+1); pr(q[i]); printf("        ~ %.3f\n", (double)q[i]/(double)q[i-1]);
+        printf("      %-5d ", i+1); pr(q[i]); printf("        ~ %ld\n", (long)q[i]/(long)q[i-1]);
     }
     /* Fibonacci: q_n = q_{n−1} + q_{n−2}, e a razão → φ */
     for(int i=2;i<14;i++) if(q[i] != q[i-1] + q[i-2]) mau++;
@@ -67,7 +67,7 @@ printf("\n§T2  PA [1,2,3,4,…]: os termos crescem, e q_n acelera.\n\n");
     printf("      n     q_n\n");
     for(int i=1;i<6;i++){ printf("      %-5d ", i+1); pr(q[i]); printf("\n"); }
     ok("com PA os termos crescem linearmente, e q_n cresce mais depressa que Fibonacci",
-       (double)q[9] > 0);
+       (long)q[9] > 0);
     printf("\n      Já não é quadrático: uma cifra de termos ILIMITADOS não é periódica, logo o\n");
     printf("      número não é raiz de quadrática. Saiu da família real — abriu.\n");
 }
@@ -79,7 +79,7 @@ printf("\n§T3  PG [1,2,4,8,…]: q_n EXPLODE.\n\n");
     printf("      n     q_n\n");
     for(int i=1;i<6;i++){ printf("      %-5d ", i+1); pr(q[i]); printf("\n"); }
     ok("com PG o crescimento é duplamente exponencial — a aproximação é de qualquer ordem",
-       (double)q[8] > 0);
+       (long)q[8] > 0);
     printf("\n      É o regime de Liouville: aproxima-se tão bem por racionais que deixa de ser\n");
     printf("      algébrico. Abriu de vez.\n");
 }

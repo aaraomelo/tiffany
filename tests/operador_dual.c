@@ -45,7 +45,7 @@ typedef struct { long a, b; } Par;
 static Par nu_quad(Par x, long B){ Par r = { x.a + B*x.b, -x.b }; return r; }   /* régua */
 static Par nu_conj(Par x){ Par r = { x.a, -x.b }; return r; }                    /* complexo: B=0 */
 static long nu_exp(long e, long n){ return ((-e) % n + n) % n; }                 /* transformada */
-static double nu_forca(double F){ return -F; }                                   /* mecânica */
+static long nu_forca(long F){ return -F; }                                   /* mecânica */
 
 /* e um NÃO-dual, para o controlo: uma operação que parece um dual e não é involução */
 static Par nao_dual(Par x){ Par r = { x.a + 1, -x.b }; return r; }
@@ -105,14 +105,14 @@ printf("\n§D1  TODO corpo tem ν, e ν∘ν = id — com o controlo de quem NÃ
     }
     /* (d) a mecânica: a força */
     {
-        double pior = 0;
+        long pior = 0;
         for(int i = -8; i <= 8; i++){
-            double F = i*0.37, y = nu_forca(nu_forca(F));
-            double d = fabs(y - F);
+            long F = i*0.37, y = nu_forca(nu_forca(F));
+            long d = fabs(y - F);
             if(d > pior) pior = d;
         }
         if(pior > 0) mau++;
-        printf("      %-19s %-26s %-11s %.0f\n", "mecânica (força)", "F ↦ −F",
+        printf("      %-19s %-26s %-11s %ld\n", "mecânica (força)", "F ↦ −F",
                pior==0?"sim":"NÃO", pior);
     }
     printf("\n");

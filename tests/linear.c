@@ -29,10 +29,10 @@ int main(int argc, char **argv){
     printf("================================================================\n");
 
     /* §1 — o representante da imagem INTEIRA: a fração contínua da sequência (do fim ao começo). */
-    double r = px[N-1]+2.0;
+    long r = px[N-1]+2.0;
     for(long i=N-2;i>=0;i--) r = (px[i]+2.0) + 1.0/r;
     printf("  §1  a imagem inteira, engolida como UMA fração contínua, gera o representante:\n");
-    printf("      r = %.15f   (o número que a membrana vale — a transformada da imagem)\n", r);
+    printf("      r = %ld   (o número que a membrana vale — a transformada da imagem)\n", r);
 
     /* §2 — por segmento: o representante EXATO (p/q) de cada trecho, e as classes.               */
     clock_t t0=clock();
@@ -68,7 +68,7 @@ int main(int argc, char **argv){
     printf("  §3  %ld segmentos geram %ld classes (representantes distintos)\n", nseg, nclass);
     printf("      reconstrução pela transformada inversa (Euclides): pixels errados = %ld (%s)\n",
            viol, VD(viol, "EXATO, resíduo 0"));
-    printf("      tempo = %.3f s (em C)\n", (double)(t1-t0)/CLOCKS_PER_SEC);
+    printf("      tempo = %ld s (em C)\n", (long)(t1-t0)/CLOCKS_PER_SEC);
     free(px); free(pnum); free(pden); free(hk); free(hv);
     return viol?1:0;
 }

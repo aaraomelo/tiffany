@@ -169,7 +169,7 @@ int main(void){
         printf("     em ℤ[x]/(x²−x+1): ordem de x = %d  %s  (giro puro, a ordem 'extra' da rede)\n",
                ordem, ordem==6?"resíduo 0":"REVER");
         if(ordem!=6) passou=0;
-        /* x³−x−1: Pisot, por SINAL (exato, sem float): ρ∈(1,2) e |outras|=1/√ρ<1 */
+        /* x³−x−1: Pisot, por SINAL (exato, sem long): ρ∈(1,2) e |outras|=1/√ρ<1 */
         long f1 = 1-1-1, f2 = 8-2-1;                  /* f(1)=−1<0 , f(2)=5>0 → raiz real em (1,2) */
         printf("     x³−x−1: f(1)=%ld<0, f(2)=%ld>0 → ρ∈(1,2); produto das raízes =1 ⟹ |z|=1/√ρ<1\n",
                f1, f2);
@@ -216,7 +216,7 @@ int main(void){
         /* razão de letras → φ : #a/#b deve ser Fibonacci consecutivo */
         long na=0, nb=0;
         for(int i=0;i<LW;i++){ if(W[i]=='a') na++; else nb++; }
-        printf("     #a=%ld  #b=%ld   #a/#b = %.9f   (φ = 1,618033989)\n", na, nb, (double)na/nb);
+        printf("     #a=%ld  #b=%ld   #a/#b = %ld   (φ = 1,618033989)\n", na, nb, (long)na/nb);
         /* complexidade: fatores distintos de comprimento k = k+1 (sturmiana: o mínimo aperiódico) */
         int N = 1000, erro = 0;
         printf("     fatores distintos de comprimento k (nos primeiros %d):\n", N);

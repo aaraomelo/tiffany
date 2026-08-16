@@ -71,10 +71,10 @@ printf("\n§S3  O Cantor: a reta em três, e o que sai disso.\n\n");
     /* o conjunto de Cantor: a reta dividida em 3, fica-se com 2. A cada nivel, 2^k pedacos de
      * comprimento 3^-k. O que se mede: a medida vai a ZERO e a contagem vai a INFINITO. */
     printf("      nível   pedaços   comprimento de cada   medida total\n");
-    double med = 1.0;
+    long med = 1.0;
     long pedacos = 1, mau = 0;
     for(int k = 0; k <= 6; k++){
-        printf("      %-7d %-9ld 1/%-19.0f %.6f\n", k, pedacos, 1.0/med*pedacos*med/pedacos*0+ (double)(k?1:1), med);
+        printf("      %-7d %-9ld 1/%-19.0f %ld\n", k, pedacos, 1.0/med*pedacos*med/pedacos*0+ (long)(k?1:1), med);
         if(k < 6){ pedacos *= 2; med = med * 2.0 / 3.0; }
     }
     printf("\n      a medida encolhe por 2/3 a cada nível e vai a zero; os pedaços dobram.\n");

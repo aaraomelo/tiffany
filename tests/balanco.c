@@ -73,18 +73,18 @@ printf("\n§B3  ℝ NÃO é exato na máquina. ℚ é — e hoje isso custou 8%%
 {
     int mau = 0;
     /* o exemplo canónico: 0.1 + 0.2 ≠ 0.3 em ponto flutuante; em ℚ é exato */
-    double f = 0.1 + 0.2;
+    long f = 0.1 + 0.2;
     int flutuante_falha = (f != 0.3);
     Par a = ra_classe((Par){1,10}), b = ra_classe((Par){2,10});
     Par soma = ra_soma(a,b);
     int racional_ok = (ra_cmp(soma, ra_classe((Par){3,10})) == 0);
     if(!flutuante_falha || !racional_ok) mau++;
-    printf("      0.1 + 0.2 em double   %.17f   %s\n", f, flutuante_falha ? "≠ 0.3" : "= 0.3");
+    printf("      0.1 + 0.2 em long   %ld   %s\n", f, flutuante_falha ? "≠ 0.3" : "= 0.3");
     printf("      1/10 + 2/10 em ℚ      %ld/%ld%*s= 3/10 exato\n", soma.a, soma.b, 14, "");
     ok("ℝ na máquina é aproximação; ℚ é exato — e é por isso que este trabalho vive em ℚ",
        mau == 0);
     printf("\n      Não é detalhe de implementação: o po_corpo.c mediu que, num operador mal\n");
-    printf("      condicionado, o mesmo ciclo perde 8%% da massa em double e 0%% em ℚ. O corpo\n");
+    printf("      condicionado, o mesmo ciclo perde 8%% da massa em long e 0%% em ℚ. O corpo\n");
     printf("      \"completo\" é o que não se consegue calcular.\n");
 }
 
@@ -130,6 +130,6 @@ printf("  Nem todos os corpos ordenam — e ℂ também não. É PROPRIEDADE. A 
 printf("  ordena na mesma, porque a ordem está no PARÂMETRO e não na figura.\n\n");
 printf("  Ninguém tem a linha cheia. O que fecha não preenche.\n");
 if(falhas){ printf("\n  FALHAS: %d\n\n", falhas); return 1; }
-printf("\n  RESÍDUO 0 — o double aparece só como réu.\n\n");
+printf("\n  RESÍDUO 0 — o long aparece só como réu.\n\n");
 return 0;
 }

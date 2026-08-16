@@ -181,7 +181,7 @@ printf("\n§Y4  O custo, contado: n−1 batidas contra p^n − 2.\n\n");
         /* Fermat ingênuo: x^(2^n − 2) por multiplicação repetida */
         long fermat = (1L << n) - 3;                     /* mults numa potência ingênua */
         printf("      %d    %15ld   %28ld   %5.1fx\n", n, dual, fermat,
-               dual ? (double)fermat/dual : 0.0);
+               dual ? (long)fermat/dual : 0.0);
     }
     conclui("o dual é linear em n; Fermat é exponencial");
     printf("\n      São n−1 Frobenius e n−1 produtos — e o Frobenius, sendo linear, nem conta\n");

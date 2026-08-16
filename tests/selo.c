@@ -27,7 +27,7 @@
 #include <math.h>
 #include <string.h>
 
-typedef long double LD;
+typedef long long LD;
 #include "unidade.h"
 
 /* ---- posto de uma matriz inteira por eliminação em Q (sem divisão: Bareiss simples) ---- */
@@ -115,7 +115,7 @@ printf("\n§S3  A soma fecha em zero — e as fases do código já são raízes 
      *
      * A CICLOTOMIA É EXATA e não precisa de cosseno nenhum: ω = e^{iπ/8} tem ω^8 = −1, logo
      * cada fase o EMPARELHA com o+8 e as duas cancelam-se. A soma é zero por emparelhamento,
-     * e isso conta-se em inteiros. A versão anterior somava 16 cossenos em long double e
+     * e isso conta-se em inteiros. A versão anterior somava 16 cossenos em long long e
      * comparava com 1e-15 — media o arredondamento e não a ciclotomia. */
     {
         int usado[16]; for(int i=0;i<16;i++) usado[i]=0;
