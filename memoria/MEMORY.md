@@ -53,6 +53,7 @@
 - **[O replace sem limite](feedback-o-replace-sem-limite.md)** — TRÊS vezes num dia: mudou laços e asserções noutros andares. O código idiomático é o que torna o replace global uma arma.
 - **[Saturação não é resultado](feedback-saturacao-nao-e-resultado.md)** — «falha travestida de teorema». Ia publicar «5 de 8» e as três em falta eram o `long`. A tese é do PASSO: virou 1040/1040.
 - **[A desinvestigação](feedback-desinvestigacao.md)** — se a frase responde «como descobrimos isto?», SAI do paper. Achar erro no pai não é «o pai errou»: é interpretação que faltou lá.
+- **[O laço que para no primeiro](feedback-o-laco-que-para-no-primeiro.md)** — a busca por EXISTÊNCIA decide e não mede: de 91 pares varria UM. Quando um gume não morde, perguntar QUANTOS casos ele viu.
 - **[A identidade certa, a testemunha falsa](feedback-justificar-o-que-so-e-coerente.md)** — a mediante de Farey TROCA o sinal, logo atravessa o corte: medir a identidade não mede a inferência.
 - **[Duas réguas: a convenção longe do 1.º uso](feedback-duas-reguas.md)** — declarei «D e não Δ» na linha 741 e o primeiro uso era na 201.
 - **[Revisores em paralelo](feedback-revisores-externos.md)** — compensam MUITO e é preciso REPICAR. Os graves são todos do mesmo tipo: A ASSERÇÃO ERA O DEFEITO.
