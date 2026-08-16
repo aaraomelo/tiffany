@@ -196,6 +196,26 @@ a ter \textbf{três} pontos ($0$, $1$, $\infty$) e a inversão torna-se a
 zero», $0^{\dagger}=\infty$ --- e ela tem o índice zero porque é a que
 dá o arranque: sem ela nada mais é total. \emph{Deriva-se e mede-se.}
 
+\subsection*{A Lei 0 em coordenadas, e por que ela dá o arranque}
+A simbologia da Lei 0 é a de Möbius, e é uma \textbf{troca}:
+\[
+\boxed{\;[p:q]\ \longmapsto\ [q:p],
+\qquad S=\begin{pmatrix}0&1\\1&0\end{pmatrix},\ \det S=-1
+\qquad\Longrightarrow\qquad
+\tfrac10=[1:0]=\infty,\quad \tfrac1\infty=[0:1]=0 .\;}
+\]
+Não há divisão, não há teste, não há ramo --- e é por isso que ela é a que dá o
+arranque: a inversão passa a ser total, involutiva e bijectiva.
+
+\textbf{E o alcance disto vê-se onde há um algoritmo.} O passo da fracção
+contínua é $x\mapsto1/(x-a)$, que em $\mathbb{Q}$ \emph{morre} quando $x-a=0$; em
+$\mathbb{P}^1$ aterra em $[1:0]$ e o passo é total. Na descida racional o
+denominador nulo corresponde ao ponto $\infty$; nos irracionais de expansão
+infinita esse evento não ocorre. \emph{A Lei 0 distingue assim,
+operacionalmente, a terminação racional da continuação infinita do processo}
+--- e é essa a sua realização geométrica (\emph{A Construção de $\mathbb{R}$},
+\S Lei 0). \emph{Verificado:} \code{tests/geometria\_real.c} \S L0.
+
 \subsection*{As oito, e por que são oito}
 A involução do complemento e o seu regresso dão as Leis $1$ e $2$; os
 três pontos dão a Lei $3$; a dobra $T\oplus T^{*}$ dobra a dimensão e
@@ -1596,20 +1616,33 @@ de implementação.
 base: $a=\sum_k\langle a,e_k\rangle\,e_k$ nos $256$ bytes, sem uma falha
 --- e aqui ela não custa nada.
 
-\textbf{(1b) E a forma ESCOLHE-SE --- não é a única, e a versão anterior deste
-teorema dizia que era.} Estava aqui escrito «a única que $\mathbb{F}_2$ tem», e é
-\textbf{falso}: só sobre $\mathbb{F}_2^{2}$ há \textbf{quatro} formas bilineares
-simétricas não degeneradas, uma delas \emph{alternante} (diagonal nula) --- e ser
-alternante é invariante por mudança de base, logo há pelo menos \textbf{duas
-classes}. Em característica $2$ a classificação é mais delicada, e não é preciso
-nenhuma afirmação classificatória para o que aqui se quer.
+\textbf{(1b) A forma faz parte dos dados estruturais, e especifica-se.} Não há
+unicidade da forma bilinear simétrica não degenerada sobre $\mathbb{F}_2^{n}$: já
+sobre $\mathbb{F}_2^{2}$ existem \textbf{quatro}, uma delas \emph{alternante}
+(diagonal nula), e ser alternante é invariante por mudança de base --- logo há
+pelo menos duas classes. Fixa-se aqui a forma padrão, para a qual a base canónica
+é ortonormal.
 
-O enunciado honesto é mais forte, e não mais fraco: \emph{fixa-se} a forma padrão,
-e o que se prova não é que a base seja ortonormal --- isso seria escolher a métrica
-que torna verdadeira a conclusão --- mas \textbf{o que a ortonormalidade custa a
-quem não a tem}: numa base sem $G=I$ a coordenada exige inverter a Gram, e o
-\S(3) mede o preço. \emph{Medido:} \code{tests/geometria\_real.c} \S L1 conta as
-quatro formas e a alternante.
+Donde o que se demonstra não é a ortonormalidade --- que a escolha da forma já dá
+--- mas \textbf{o que ela custa a quem não a tem}: numa base sem $G=I$ a
+coordenada exige inverter a Gram, e o \S(3) mede o preço.
+\emph{Verificado:} \code{tests/geometria\_real.c} \S L1.
+
+\textbf{(1c) E os $e_k$ são os Diracs.} Na convolução que emerge da transformada
+universal, $\delta$ é a \textbf{identidade} e a deconvolução é a divisão
+espectral, exacta onde o espectro não tem zeros
+(\code{tests/convolucao\_universal.js}). Nessa leitura os elementos desta base
+\emph{são} os $\delta$ transladados:
+\[
+\boxed{\;e_t=\delta_t,\qquad
+\langle b,e_t\rangle=b_t\ \text{(a peneira)},\qquad
+b\ast\delta_{-t}\ \text{devolve } b .\;}
+\]
+Portanto \textbf{ler uma coordenada e localizar um ponto são a mesma operação}, e
+a volta é exacta porque o espectro de um $\delta$ não tem zeros --- onde o
+espectro zera, a informação perde-se. É este o elo entre a base e o mecanismo de
+localização que realiza os cortes. \emph{Verificado:}
+\code{tests/geometria\_real.c} \S L1b.
 
 \textbf{(2) O preço, dito.} A forma é bilinear e simétrica, mas
 \textbf{não} é definida positiva --- em $\mathbb{F}_2$ isso nem faz

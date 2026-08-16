@@ -52,6 +52,7 @@
 - **[O Write diz «updated»](feedback-o-write-diz-updated.md)** — escrevi por cima de DOIS medidores no mesmo dia. A palavra que o Write devolve é o alarme; `git ls-files` antes.
 - **[O replace sem limite](feedback-o-replace-sem-limite.md)** — TRÊS vezes num dia: mudou laços e asserções noutros andares. O código idiomático é o que torna o replace global uma arma.
 - **[Saturação não é resultado](feedback-saturacao-nao-e-resultado.md)** — «falha travestida de teorema». Ia publicar «5 de 8» e as três em falta eram o `long`. A tese é do PASSO: virou 1040/1040.
+- **[A desinvestigação](feedback-desinvestigacao.md)** — se a frase responde «como descobrimos isto?», SAI do paper. Achar erro no pai não é «o pai errou»: é interpretação que faltou lá.
 - **[Revisores em paralelo](feedback-revisores-externos.md)** — compensam MUITO e é preciso REPICAR. Os graves são todos do mesmo tipo: A ASSERÇÃO ERA O DEFEITO.
 
 ## A teoria

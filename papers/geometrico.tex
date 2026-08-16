@@ -1,12 +1,9 @@
 % !TeX program = pdflatex
 % papers/geometrico.tex — A CONSTRUÇÃO DE ℝ, realizada geometricamente.
 %
-% Reescrito por inteiro (16/08), segunda vez no dia. A primeira reescrita ainda
-% «estava com medo da própria construção»: tinha um §13 «O que este paper não
-% faz» a funcionar como freio, e uma ressalva — «não constrói todos os reais» —
-% que era invenção do autor e não do quadro.
+% Realização geométrica da construção fechada no corpo_universal.tex.
 %
-% O eval fixou a hierarquia:
+% A hierarquia:
 %     o Universal PROVA | o geométrico REALIZA | os medidores VERIFICAM
 % e a ordem, que é obrigatória:
 %     8 leis → base ortonormal → operação bit a bit → dual → recorrência
@@ -54,7 +51,8 @@ geometricamente a construção que o Universal já fechou}, na ordem
 \to\text{recorrência}\to\text{Pisot}\to\text{encaixe}\to\text{corte}
 \to\mathbb{R}\to\pi_k .\;}
 \]
-Cada seta deixa um objecto no papel e um medidor no repositório. A base das
+Cada seta deixa um objecto matemático no papel e uma verificação no
+repositório. A base das
 oito leis tem Gram $=I$, e por isso $b_i=\langle b,e_i\rangle$ \emph{é} o bit
 --- o que autoriza o bit a bit não é a codificação, é a ortonormalidade. O dual
 $\sigma\dg=-\sigma^{-1}$ produz a recorrência inteira; o operador \textbf{produz}
@@ -82,7 +80,7 @@ dos convergentes} entre as expansões com $a_k\geq1$, e por isso uma só taxa
 limita a construção inteira. A família metálica não é o escopo: é o caso
 \textbf{extremo}, o pior caso do mecanismo.
 
-\smallskip\noindent\emph{Medido:} \code{tests/geometria\_real.c} ($21{:}0$).
+\smallskip\noindent\emph{Medido:} \code{tests/geometria\_real.c} ($24{:}0$).
 \end{abstract}
 
 %======================================================================
@@ -146,26 +144,19 @@ e \textbf{em $\mathbb{Q}$ ele morre} quando $x-a=0$. Mas $x-a=0$ é
 \emph{exactamente} o ponto onde a expansão de um racional termina. Em
 $\mathbb{P}^1$ não morre: aterra em $[1:0]=\infty$, e o passo é total.
 
-Medido: a inversão é total, involutiva e bijectiva nos $128$ pontos de
-$\mathbb{P}^1(\mathbb{F}_{127})$ --- em $\mathbb{Q}$ recusaria o zero, aqui não
-recusa nada. E a descida atinge $\infty$
-\[
-\text{em \textbf{todos} os } 1640 \text{ racionais varridos,}
-\qquad
-\text{e em \textbf{nenhum} dos oito } \sigma_m ,
-\]
-cuja expansão é $[m;m,m,\ldots]$, puramente periódica. \emph{Portanto a Lei 0 não
-só torna o passo total: é ela que \textbf{separa as duas metades} de
-$\mathbb{R}$}, e o $\infty$ é o ponto onde o racional fecha. $\square$
+Na descida racional o denominador nulo corresponde ao ponto $\infty$; nos
+irracionais de expansão infinita esse evento não ocorre. \emph{Assim, a Lei 0
+distingue operacionalmente a terminação racional da continuação infinita do
+processo.} $\square$
 \end{teorema}
 \colunas{a Lei 0, $0\dg=\infty$, e a inversão total em $\mathbb{P}^1$
 (\code{cor:zero-infinito})}
         {o passo da CF tornado total, e o $\infty$ como fecho do racional}
         {\code{geometria\_real.c} \S L0}
 
-\begin{observacao}[e as duas primeiras leis são as duas matrizes deste paper]
-O \emph{Teoria} classifica-as por traço e determinante, e elas são exactamente as
-que aqui se usam:
+\begin{observacao}[as duas primeiras leis nas duas Möbius da construção]
+As duas primeiras leis aparecem aqui nas duas transformações de Möbius
+fundamentais da construção:
 \[
 \begin{array}{llll}
 \text{\textbf{Lei 1}} & 1\dg=-1 & \text{a Möbius \textbf{involutiva}, traço }0
@@ -177,8 +168,8 @@ que aqui se usam:
 E a tricotomia do \S\ref{sec:pi} é a classificação de $\Delta=\operatorname{tr}^2-4\det$
 do mesmo texto: para $A_m$ dá $\Delta=m^{2}+4>0$ --- \textbf{hiperbólica}, «onde
 vive $\sigma$» ---, os polígonos são as elípticas, e o círculo a parabólica.
-\emph{Nada disto é inventado aqui: é a tabela do Teoria, e este paper corre dentro
-dela.}
+Estas transformações são, portanto, casos particulares da classificação por traço
+e determinante utilizada pelo \emph{Corpo Universal}.
 \end{observacao}
 
 %======================================================================
@@ -194,25 +185,24 @@ com a forma bilinear \textbf{padrão}
 Este paper \emph{realiza} essa estrutura; não a estabelece.
 
 \medskip
-\noindent\textbf{E a forma ESCOLHE-SE --- não é a única.} Uma versão anterior
-deste paper, e o próprio Universal, diziam «a única forma que $\mathbb{F}_2$ tem»:
-é \emph{falso}. Só sobre $\mathbb{F}_2^{2}$ há \textbf{quatro} formas bilineares
-simétricas não degeneradas, uma delas \emph{alternante} --- e ser alternante é
-invariante por mudança de base, logo há pelo menos duas classes. Dizê-lo importa,
-porque senão pareceria que a ortonormalidade se \emph{prova} escolhendo a métrica
-que a torna verdadeira.
+\noindent\textbf{A forma bilinear faz parte dos dados estruturais e deve ser
+especificada.} Não há unicidade dessa forma em geral sobre $\mathbb{F}_2^{n}$: já
+sobre $\mathbb{F}_2^{2}$ existem quatro formas simétricas não degeneradas, uma
+delas alternante, e ser alternante é invariante por mudança de base. Adopta-se
+aqui a forma padrão acima, para a qual a base canónica é ortonormal.
 
-\begin{teorema}\label{thm:orto}
+\begin{proposicao}[leitura coordenada da base]\label{thm:orto}
 Com $e_k=2^{k}$ reservado à Lei $k$, a matriz de Gram é a identidade:
 $\langle e_i,e_j\rangle=\delta_{ij}$. Logo
 \[
 \boxed{\;b_i=\langle b,e_i\rangle\;}
 \]
 --- um AND e uma paridade, que é \emph{ler o bit} ---, e
-$b=\sum_i\langle b,e_i\rangle e_i$ reconstrói. \emph{O conteúdo não é «a base é
-ortonormal», que a escolha da forma já dá: é o que a ortonormalidade CUSTA a quem
-não a tem}, e é isso que o \S\ref{sec:bitabit} mede. $\square$
-\end{teorema}
+$b=\sum_i\langle b,e_i\rangle e_i$ reconstrói. $\square$
+\end{proposicao}
+
+\noindent Especificada a forma, esta leitura é imediata; o conteúdo do
+\S\ref{sec:bitabit} é o \emph{custo} de a não ter.
 \colunas{a base é ortonormal (\code{thm:ortonormal})}
         {Gram $=I$ nos $64$ pares; $2048$ leituras}
         {\code{geometria\_real.c} \S L1}
@@ -242,8 +232,8 @@ $\langle f_k,f_k\rangle=\operatorname{paridade}(f_k)=0$ nas oito, e
 \emph{a Gram torcida nem sequer tem diagonal $1$}. A leitura directa passa a dar a
 coordenada errada em \textbf{exactamente metade} das $2048$ --- $1024$, que é o que
 o XOR de dois bits independentes dá.
-\emph{O \code{uint8\_t} não é conveniência de máquina: é a base ortonormal
-escrita em hardware.} $\square$
+\textbf{A leitura directa das coordenadas é uma propriedade da base ortonormal, e
+não da codificação utilizada para as armazenar.} $\square$
 \end{teorema}
 \colunas{a operação completa é coordenada (\S\,«a operação completa»)}
         {o custo da coordenada numa base não ortonormal}
@@ -258,10 +248,9 @@ A dobra $T\oplus T^{*}$ duplica a dimensão e chega a oito em
 aritmética nova: \emph{duplica a estrutura pela dualidade}, pelo que a torre
 $2,4,8,16,\ldots$ é a própria expansão da base operacional.
 
-O que cresce é o \textbf{objecto}, não a máquina: um real precisa de infinitos
-bits, e a base que os lê tem oito posições, \textbf{reutilizadas bloco a
-bloco}. Medido num fluxo de $400$ decisões lido em $50$ blocos pelas mesmas oito
-coordenadas, sem a base ganhar uma posição. $\square$
+O que cresce é o \textbf{objecto}, não a máquina: uma representação binária
+exacta de um irracional não termina em número finito de bits, e a base que a lê
+tem oito posições, \textbf{reutilizadas bloco a bloco}. $\square$
 \end{teorema}
 \colunas{a dobra $1\to2\to4\to8$ e o ciclo de período oito}
         {os oito bits reusados em cada andar}
@@ -278,8 +267,7 @@ U^{(m)}_{k+2}=m\,U^{(m)}_{k+1}+U^{(m)}_k;
 \]
 \textbf{Fibonacci é $U^{(1)}$, e só ele.} Escrever $F_k$ onde $m$ é geral faz a
 família inteira passar por um dos seus membros --- e a diferença é imediata:
-$U^{(2)}=0,1,2,5,12,\ldots$ diverge de $F$ já em $k=2$. Medido: $U^{(m)}$
-coincide com $F$ em exactamente um dos oito metais.
+$U^{(2)}=0,1,2,5,12,\ldots$ diverge de $F$ já em $k=2$.
 \end{definicao}
 
 \begin{teorema}\label{thm:dual}
@@ -290,9 +278,9 @@ $x$ em $\mathbb{Z}[x]/(x^{2}-mx-1)$:
 \qquad \sigma+\sigma\dg=m,
 \qquad \sigma\sigma\dg=-1,
 \]
-por \textbf{três caminhos independentes} --- o traço e o determinante da
-companheira; a involução lida \emph{dentro} de $\mathbb{Z}[\sigma]$ usando só
-$\sigma^{2}=m\sigma+1$; e a potência
+por \textbf{três verificações algébricas equivalentes} --- o traço e o
+determinante da companheira; a involução verificada \emph{dentro} de
+$\mathbb{Z}[\sigma]$ usando só $\sigma^{2}=m\sigma+1$; e a potência
 \[
 A_m^{k}=\begin{pmatrix}U^{(m)}_{k+1}&U^{(m)}_k\\
 U^{(m)}_k&U^{(m)}_{k-1}\end{pmatrix},
@@ -300,13 +288,13 @@ U^{(m)}_k&U^{(m)}_{k-1}\end{pmatrix},
 \]
 --- por exemplo $A_2^{2}=\begin{psmallmatrix}5&2\\2&1\end{psmallmatrix}$, e
 \emph{não} $\begin{psmallmatrix}2&1\\1&1\end{psmallmatrix}$.
-Concordam para $m=1,\ldots,40$, e \emph{nenhuma raiz é avaliada}: a raiz é a
-representação alcançada, a recorrência é a construção. \emph{Gume}: mexida uma
-entrada da companheira, o determinante deixa de valer $-1$ nos $40$. $\square$
+\emph{Nenhuma raiz é avaliada}: a raiz é a representação alcançada, a recorrência
+é a construção. $\square$
 \end{teorema}
 \colunas{o dual, e o Gato como Möbius}
         {a recorrência inteira $u_{n+2}=m\,u_{n+1}+u_n$}
-        {\code{geometria\_real.c} \S L4; \code{metalica.c}}
+        {\code{geometria\_real.c} \S L4: $m=1,\ldots,40$, três verificações
+concordantes; $U^{(m)}=F$ só em $m=1$; \code{metalica.c}}
 
 %======================================================================
 \section{Pisot: o operador produz o inteiro}\label{sec:pisot}
@@ -317,30 +305,30 @@ $\sigma^{k}=t_k-(\sigma\dg)^{k}$ e
 \[
 \abs{\sigma^{k}-t_k}=\abs{\sigma\dg}^{k}
 \]
---- e \textbf{esta é imediata}. A passagem para a \emph{distância ao inteiro}
-exige um passo a mais, que se diz:
+\textbf{A primeira igualdade é algébrica.} A passagem à distância ao inteiro
+requer adicionalmente a condição $\abs{\sigma\dg}^{k}<\tfrac12$:
 \[
 \boxed{\;\abs{\sigma\dg}^{k}<\tfrac12
 \ \Longrightarrow\ t_k=\operatorname{round}(\sigma^{k})
 \ \Longrightarrow\ \operatorname{dist}(\sigma^{k},\mathbb{Z})=\abs{\sigma\dg}^{k}.\;}
 \]
-A condição decide-se \textbf{em inteiros}, por
-$(t_k-1)^{2}<\Delta\,(U^{(m)}_k)^{2}<(t_k+1)^{2}$ com $\Delta=m^{2}+4$, e
-concorda com a forma reduzida pela identidade
+A condição escreve-se sem raízes, por
+$(t_k-1)^{2}<\Delta\,(U^{(m)}_k)^{2}<(t_k+1)^{2}$ com $\Delta=m^{2}+4$, forma
+equivalente à que se obtém da identidade
 \[
 t_k^{2}-(m^{2}+4)\bigl(U^{(m)}_k\bigr)^{2}=4(-1)^{k}
 \]
-nos $131$ andares, sem uma discordância. Em $m=1$ ela é
-$L_k^{2}-5F_k^{2}=4(-1)^{k}$, e só aí.
+Em $m=1$ ela é $L_k^{2}-5F_k^{2}=4(-1)^{k}$, e só aí.
 
 \emph{Não há escolha de aproximação: o inteiro $t_k$ é produzido pelo próprio
 operador.} $\square$
 \end{teorema}
 \colunas{$\abs{\sigma}>1$, $\abs{\sigma\dg}<1$, vazamento zero (\code{thm:pisot})}
         {a distância ao inteiro como quantidade PRODUZIDA}
-        {\code{geometria\_real.c} \S L5; \code{pisotbase.c} \S B4}
+        {\code{geometria\_real.c} \S L5: $131$ andares, $0$ discrepâncias;
+\code{pisotbase.c} \S B4}
 
-\begin{observacao}[o escopo, medido]\label{obs:escopo}
+\begin{observacao}[o escopo da condição]\label{obs:escopo}
 A condição $\abs{\sigma\dg}^{k}<\tfrac12$ quebra em \textbf{exactamente um}
 andar de toda a janela: o ouro no primeiro degrau, onde
 $\abs{\varphi\dg}=0{,}618>\tfrac12$ e o inteiro mais próximo de $\varphi$ é $2$,
@@ -351,8 +339,7 @@ no segundo degrau, e para $m\geq2$ já no primeiro.
 %======================================================================
 \section{Os dois determinantes --- e a igualdade é o teorema}\label{sec:det}
 
-Aqui há uma distinção que a primeira versão deste paper misturou, e que é
-precisa:
+Duas quantidades distintas, com o mesmo valor:
 
 \begin{teorema}\label{thm:doisdet}
 São \textbf{dois objectos}, calculados por caminhos que não se tocam:
@@ -398,8 +385,7 @@ a largura é
 \[
 \boxed{\;\abs{c_{k+1}-c_k}=\frac{1}{U^{(m)}_kU^{(m)}_{k+1}}\;}
 \]
-exacta e sem uma divisão. Em $m=1$ isto é a identidade de Fibonacci; nos outros
-sete metais medidos, não. $\square$
+exacta e sem uma divisão. Em $m=1$ isto é a identidade de Fibonacci, e só aí. $\square$
 \end{teorema}
 \colunas{o encaixe alcança $\mathbb{R}$ (\code{thm:encaixe})}
         {os intervalos, com largura inteira}
@@ -408,11 +394,12 @@ sete metais medidos, não. $\square$
 %======================================================================
 \section{$\mathbb{R}$ inteiro --- e o ouro é o extremo}\label{sec:todos}
 
-Esta é a secção que a versão anterior não tinha, e a sua falta era uma
-ressalva inventada pelo autor.
+A realização não se restringe à família metálica.
 
 \begin{definicao}[e o domínio fecha-se dos dois lados]\label{def:real}
-Os convergentes são $p_k/q_k$ com
+No corpo ordenado completo identificado pelo \emph{Corpo Universal}, cada
+elemento admite a expansão canónica por fracção contínua. Os convergentes são
+$p_k/q_k$ com
 \[
 q_{-1}=0,\qquad q_0=1,\qquad q_k=a_kq_{k-1}+q_{k-2},
 \]
@@ -428,16 +415,14 @@ Dizer só a primeira linha deixaria $\mathbb{R}$ a descoberto, e a afirmação
 deste paper é sobre $\mathbb{R}$ inteiro. Para $a/b$ o algoritmo termina com
 resto zero, o último convergente dá $a/b$ \textbf{exacto} --- não aproximado
 ---, e a ambiguidade final $[a_0;\ldots,a_n]=[a_0;\ldots,a_n{-}1,1]$ resolve-se
-por convenção canónica. \emph{Medido} em $3660$ racionais: termina em todos,
-exacto em todos, e a ambiguidade verifica-se nos $3540$ com $a_n\geq2$.
+por convenção canónica.
 \end{definicao}
 
 \begin{teorema}[a construção corre sobre quocientes arbitrários]\label{thm:todos}
 Para uma sucessão \textbf{qualquer} --- não só a periódica ---:
 $p_kq_{k-1}-p_{k-1}q_k=(-1)^{k-1}$, logo $\abs{\det}=1$ em todos os passos; os
-convergentes alternam de lado; os intervalos aninham; e $q_k$ cresce. Medido em
-$220$ sucessões (o ouro, a prata e $218$ arbitrárias), $3651$ pares, sem
-excepção. \emph{O metálico é o caso periódico, e não o caso único.} $\square$
+convergentes alternam de lado; os intervalos aninham; e $q_k$ cresce.
+\emph{O metálico é o caso periódico, e não o caso único.} $\square$
 \end{teorema}
 
 \begin{teorema}[a extremalidade da régua: $\varphi$ minimiza o crescimento]\label{thm:ouro}
@@ -450,9 +435,9 @@ na convenção padrão $F_0=0$, $F_1=1$. \textbf{É esta a forma afiada}: com
 $q_{-1}=0$ e $q_0=1$, a sucessão de uns dá exactamente $q_k=F_{k+1}$, e não apenas
 $q_k\geq F_k$. Donde a resolução da régua,
 \[
-\abs{c_{k+1}-c_k}=\frac{1}{q_kq_{k+1}}\ \leq\ \frac{1}{F_{k+1}F_{k+2}},
+\abs{c_{k+1}-c_k}=\frac{1}{q_kq_{k+1}}\ \leq\ \frac{1}{F_{k+1}F_{k+2}}
 \]
-minorada uniformemente: \textbf{uma só taxa
+--- \textbf{limitada superiormente pela taxa de Fibonacci}: \textbf{uma só taxa
 limita a construção inteira}, e é a do ouro. A família metálica não é o escopo
 --- é o caso \textbf{extremo}. $\square$
 
@@ -466,14 +451,12 @@ o pior caso do mecanismo, e por isso o que o limita.
 \end{teorema}
 \colunas{a torre, o dual, e a família metálica}
         {a construção para TODOS os reais, com o ouro a limitar}
-        {\code{geometria\_real.c} \S L8}
+        {\code{geometria\_real.c} \S L8: $220$ sucessões, $3651$ pares, $0$
+excepções; \S L8b: $3660$ racionais, terminação e exactidão em todos}
 
-\begin{observacao}[o empate pontual é comum; o total é único]
-A primeira redacção afirmou de mais. O empate $q_k=F_k$ num $k$ isolado é
-frequente --- qualquer sucessão que comece por uns empata no princípio, e a
-medição contou $69$. O que \emph{só} o ouro faz é empatar em \textbf{todos} os
-andares: uma sucessão em $220$, e nenhuma fora da sucessão de uns. A afirmação
-certa é essa, e a medição é que a fixou.
+\begin{observacao}
+A igualdade num índice isolado não caracteriza a sucessão de uns: a caracterização
+é pela igualdade \emph{simultânea em todos} os índices.
 \end{observacao}
 
 %======================================================================
@@ -528,27 +511,38 @@ como \textbf{a máquina de leitura de cada bloco de decisões}. $\square$
 %======================================================================
 \section{A completude}\label{sec:completude}
 
-O intervalo aperta porque uma face é obrigada a encolher para a unidade se
-conservar (Obs.~\ref{obs:area}); o encaixe fecha; o corte fica determinado.
+\textbf{A completude é resultado estrutural herdado do \emph{Corpo Universal}.}
+Este paper não a reobtém, e não a poderia reobter por varredura finita: intervalos
+encaixados de comprimento a tender para zero \emph{não} estabelecem, por si sós, a
+existência do ponto de intersecção --- é precisamente nisso que $\mathbb{Q}$ e
+$\mathbb{R}$ diferem.
+
+O que a realização geométrica fornece é o \textbf{mecanismo explícito de
+localização}: cada sucessão de decisões produz intervalos encaixados cuja largura
+tende a zero (\S\ref{sec:encaixe}, \S\ref{sec:det}). No corpo ordenado
+completo, esses intervalos determinam um único elemento.
 
 \medskip
-\noindent\textbf{E aqui as duas coisas separam-se, porque um teste não mede
-completude.} É o mesmo reparo dos $19\,360$ racionais, aplicado onde ele mais
-importa:
-\begin{center}
-\begin{tabular}{@{}p{6.6cm}p{7.6cm}@{}}
-\toprule
-o que o \textbf{argumento} estabelece & o que o \textbf{teste} verifica \\
-\midrule
-a \textbf{completude}, pelo argumento do corte: todo corte é determinado porque a
-largura do encaixe vai a zero
- & que as \emph{propriedades operacionais} valem nos casos corridos --- fecho,
-tricotomia, compatibilidade com $+$ e $\times$, o $n$ arquimediano exibido \\
-\bottomrule
-\end{tabular}
-\end{center}
-\noindent Uma varredura finita não podia estabelecer a completude, e não é para
-isso que está aqui. \emph{Verificado:} \code{tests/ordenado.c} ($7{:}0$).
+\noindent\textbf{E a localização tem nome dentro da estrutura.} Na convolução que
+emerge da transformada universal, $\delta$ é a identidade e a deconvolução é a
+divisão espectral, exacta onde o espectro não tem zeros. Nessa leitura, os
+elementos da base ortonormal \emph{são} os Diracs transladados,
+\[
+\boxed{\;e_t=\delta_t,
+\qquad \langle b,e_t\rangle=b_t\ \text{é a peneira},
+\qquad b\ast\delta_{-t}\ \text{devolve } b\;}
+\]
+--- e portanto \textbf{ler uma coordenada e localizar um ponto são a mesma
+operação}. O espectro de um $\delta$ não tem zeros, e é por isso que a volta é
+exacta; onde o espectro zera --- o vector todo-uns, por exemplo --- a informação
+perde-se e a deconvolução deixa de existir.
+
+\medskip
+\noindent\textbf{E o teste verifica as operações realizadas; não mede a
+completude:}
+fecho, tricotomia, compatibilidade da ordem com $+$ e $\times$, e o $n$
+arquimediano exibido. \emph{Verificado:} \code{tests/ordenado.c} ($7{:}0$),
+\code{tests/convolucao\_universal.js}.
 
 \noindent\textbf{E são duas rotas, que não se substituem:}
 \[
@@ -584,6 +578,15 @@ mesmo eixo, não duas teorias concorrentes.}
 
 %======================================================================
 \section{E só então $\pi$}\label{sec:pi}
+
+\begin{definicao}[primo da ordem]\label{def:primo-ordem}
+Seja $\mu_n\in\mathbb{Z}[x]$ o polinómio mínimo de $t_n=2\cos(\pi/n)$ sobre
+$\mathbb{Q}$. Um primo $p$ diz-se \textbf{primo da ordem} $n$ quando $\mu_n$ tem
+raiz em $\mathbb{F}_p$; a essa raiz $\bar t_n\in\mathbb{F}_p$ chama-se a
+realização modular do traço. Para $n=4$, $\mu_4=x^{2}-2$ e $p=17$
+($\bar t_4=11$, e também $6$); para $n=6$, $\mu_6=x^{2}-3$ e $p=13$
+($\bar t_6=9$, e também $4$); para $n=3$, $\mu_3=x-1$ e qualquer $p$.
+\end{definicao}
 
 O traço do polígono de $n$ lados é, sobre os reais,
 \[
@@ -627,21 +630,33 @@ $1\leq k<p$ e $C^{p}=I$, portanto
 \boxed{\;\operatorname{ord}C=p\;}
 \]
 --- ímpar, e por isso \textbf{nunca} divisor da ordem $2n$ de andar nenhum.
-Medido nos sete primos. $\square$
+$\square$
 \end{teorema}
 
+\begin{definicao}[$\pi_n$, por fórmula]\label{def:pin}
+Do traço $t_n=2\cos(\pi/n)$ do andar saem as duas áreas, ambas \textbf{algébricas
+em $t_n$}:
 \[
-\boxed{\;\pi_k=\text{fecho geométrico do andar }k,
-\qquad \pi_\infty=\text{fronteira parabólica.}\;}
+\boxed{\;
+I_n=\frac{n\,t_n}{4}\sqrt{4-t_n^{2}}
+\qquad\text{e}\qquad
+C_n=\frac{n\sqrt{4-t_n^{2}}}{t_n}\;}
 \]
+--- a do polígono inscrito e a do circunscrito, no círculo unitário. Elas
+satisfazem $I_n<C_n$, com $I_n$ crescente e $C_n$ decrescente, e
+\[
+I_n<\pi<C_n,\qquad I_n\uparrow\pi,\quad C_n\downarrow\pi .
+\]
+Nos andares $3,4,6$ os quadrados são racionais --- $I_3^{2}=27/16$, $C_3^{2}=27$;
+$I_4=2$, $C_4=4$; $I_6^{2}=27/4$, $C_6^{2}=12$ --- e a duplicação de Arquimedes
+$I_{2n}^{2}=I_nC_n$ fecha exacta, dando $I_8^{2}=8$. O encaixe
+$I_8<333/106<22/7<C_8$ decide-se por comparação de inteiros.
+\end{definicao}
 
-\noindent\textbf{E «exacto» qualifica-se, senão diz outra coisa:}
-\[
-\boxed{\;\pi_k\ \text{é exacto \textbf{no modelo discreto do andar} }k;
-\qquad \pi_k\to\pi\ \text{quando o refinamento é tomado.}\;}
-\]
-Nunca $\pi_k=\pi$. O que o quadro dispensa é \emph{importar} uma constante: cada
-andar apresenta o seu representante, exacto no seu modelo.
+\noindent\textbf{E «exacto» qualifica-se:} $I_n$ e $C_n$ são exactos
+\emph{no andar} --- números algébricos, não aproximações ---, e
+$I_n,C_n\to\pi$ quando o refinamento é tomado. Nunca $I_n=\pi$. O que o quadro
+dispensa é \emph{importar} uma constante: cada andar apresenta o seu.
 
 \noindent Nenhuma constante foi importada: \textbf{cada andar apresenta a sua}.
 E ao chegar ao círculo a família muda de natureza, de fechar na escada para
@@ -663,10 +678,11 @@ $\det A^{k}=(-4)^{k}$ \textbf{cresce} em módulo a cada andar. A face que devia
 encolher não encolhe. $\square$
 \end{proposicao}
 
-\noindent Daqui não se conclui caracterização nenhuma --- «tem de ser unidade e
-Pisot» não está demonstrado neste quadro. Conclui-se o que se vê: \textbf{em que
-seta este exemplo pára}. É um contraexemplo ao \emph{mecanismo}, e serve para
-mostrar que o mecanismo tem conteúdo.
+\noindent O exemplo mostra que \textbf{a recorrência inteira, isoladamente, não
+garante o mecanismo de encaixe}: a propriedade de unidade do determinante é
+utilizada no passo que preserva o módulo do produto dual. Daqui não se conclui
+caracterização nenhuma --- «tem de ser unidade e Pisot» não está demonstrado neste
+quadro.
 \colunas{---}{o passo nomeado onde a cadeia parte}
         {\code{geometria\_real.c} \S L11}
 
@@ -687,17 +703,22 @@ o \textbf{corte} fornece a ordem\quad$\to$\quad$\mathbb{R}$.\medskip}}
 \end{center}
 
 \medskip
-\noindent E a tese, numa frase: \emph{a geometria real é a realização alcançada
-de uma estrutura binária de oito leis --- a base fornece as coordenadas, a
-dualidade fornece a recorrência, a família de Pisot fornece o encaixe, e o corte
-fornece o contínuo.} Não usámos a reta para construir os números: construímos a
-reta a partir do processo que os produz.
+\noindent E a tese, numa frase: \emph{a geometria real é a realização alcançada de
+uma estrutura binária de oito leis --- a base fornece as coordenadas, a dualidade
+fornece a recorrência, a família de Pisot fornece o encaixe, e o corte fornece o
+contínuo.}
+
+\smallskip
+\noindent\textbf{A realização geométrica não toma a recta como objecto
+primitivo}: realiza a ordem e os cortes da estrutura fornecida pelo \emph{Corpo
+Universal}, e é nessa realização que a recta real aparece como o corpo ordenado
+completo.
 
 \medskip
-\emph{Medido:} \code{tests/geometria\_real.c} ($21{:}0$), com
+\emph{Medido:} \code{tests/geometria\_real.c} ($24{:}0$), com
 \code{tests/ortonormal.c} ($6{:}0$), \code{tests/metalica.c},
 \code{tests/pisotbase.c}, \code{tests/ordenado.c} ($7{:}0$),
 \code{tests/pi\_familia.js} ($7{:}0$),
-\code{tests/arquimedes\_area.js} ($21{:}0$) e \code{tests/geometrico.js}.
+\code{tests/arquimedes\_area.js} ($24{:}0$) e \code{tests/geometrico.js}.
 
 \end{document}

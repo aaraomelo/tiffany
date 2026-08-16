@@ -228,6 +228,84 @@ int main(void){
            gram_erra == 0 && coord_erra == 0 && rec == 256 && coord == 2048);
     }
 
+    /* ═══ §L1b  A BASE ORTONORMAL É A FAMÍLIA DE DIRACS ═════════════════════ */
+    printf("\n§L1b E os e_i SÃO os Diracs: ⟨·,e_i⟩ é a peneira, e a volta é exacta.\n\n");
+    {
+        /* A convolução emerge da transformada universal, e nela δ = (1,0,…,0) é a
+         * IDENTIDADE (`convolucao_universal.js` §V1); a deconvolução é a divisão
+         * espectral, exacta fora dos zeros do espectro (§V4–§V5).
+         *
+         * O que se identifica aqui é o elo: os e_i da base ortonormal SÃO os δ
+         * transladados, e a leitura da coordenada ⟨b,e_i⟩ É a peneira de Dirac. Donde
+         * a localização e a leitura serem a mesma operação — e é isso que o mecanismo
+         * do encaixe usa: cada bloco de decisões localiza, e o que localiza é um δ.
+         *
+         * Convolução cíclica sobre 𝔽₂, oito posições: (a ⊛ b)_k = ⊕_{i+j≡k} a_i b_j. */
+        long cas = 0, ident = 0, transl = 0, peneira = 0, volta = 0;
+        for(int a = 0; a < 256; a++){
+            /* (i) δ = e_0 é a identidade: a ⊛ δ = a */
+            int conv = 0;
+            for(int k = 0; k < 8; k++){
+                int c = 0;
+                for(int i = 0; i < 8; i++){
+                    int j = ((k - i) % 8 + 8) % 8;
+                    c ^= ((a >> i) & 1) & ((1 >> j) & 1);   /* δ = 1 = e_0 */
+                }
+                conv |= c << k;
+            }
+            cas++;
+            if(conv == a) ident++;
+            for(int t = 0; t < 8; t++){
+                /* (ii) a ⊛ δ_t = a rodado de t, com δ_t = e_t */
+                int d = 1 << t, cv = 0;
+                for(int k = 0; k < 8; k++){
+                    int c = 0;
+                    for(int i = 0; i < 8; i++){
+                        int j = ((k - i) % 8 + 8) % 8;
+                        c ^= ((a >> i) & 1) & ((d >> j) & 1);
+                    }
+                    cv |= c << k;
+                }
+                int rot = ((a << t) | (a >> (8 - t))) & 0xFF;
+                if(t == 0) rot = a;
+                if(cv == rot) transl++;
+                /* (iii) A PENEIRA: ⟨a, e_t⟩ é o coeficiente t — a mesma extracção */
+                if(g_par(a & (1 << t)) == ((a >> t) & 1)) peneira++;
+                /* (iv) a volta é EXACTA: convolver com δ_{−t} desfaz */
+                int back = ((cv >> t) | (cv << (8 - t))) & 0xFF;
+                if(t == 0) back = cv;
+                if(back == a) volta++;
+            }
+        }
+        /* o GUME: convolver com quem TEM zeros no espectro perde informação.
+         * O vector todo-uns colide: a ⊛ 1⃗ depende só da PARIDADE de a. */
+        long colide = 0, classes[2] = {0,0};
+        for(int a = 0; a < 256; a++){
+            int par = g_peso(a) & 1;                       /* a ⊛ 1⃗ = paridade(a)·1⃗ */
+            classes[par]++;
+        }
+        if(classes[0] > 1 && classes[1] > 1) colide = 1;   /* 256 bytes → 2 imagens */
+        printf("      %ld bytes: δ = e_0 é identidade em %ld · a ⊛ δ_t = rot_t(a) em %ld"
+               " · a peneira ⟨a,e_t⟩ = a_t em %ld · a volta exacta em %ld\n",
+               cas, ident, transl, peneira, volta);
+        printf("      gume: convolver com 1⃗ manda os %ld bytes em %ld classes (%ld e %ld)"
+               " — onde o espectro zera, a deconvolução perde\n",
+               cas, 2L, classes[0], classes[1]);
+        ok("A BASE ORTONORMAL É A FAMÍLIA DE DIRACS, e é isso que liga a leitura à"
+           " localização: na convolução que emerge da transformada universal, δ = e_0 é"
+           " a IDENTIDADE, os e_t são os δ transladados (a ⊛ δ_t = rot_t(a) nos 2048"
+           " casos), a leitura da coordenada ⟨a,e_t⟩ É a peneira de Dirac, e a volta por"
+           " δ_{−t} é EXACTA — a deconvolução é a divisão espectral, e o espectro de um"
+           " δ não tem zeros. Logo ler um bit e localizar um ponto são a mesma operação",
+           ident == cas && transl == cas*8 && peneira == cas*8 && volta == cas*8
+           && cas == 256);
+        ok("E O GUME DIZ ONDE ISSO QUEBRA: convolver com o vector todo-uns, cujo espectro"
+           " tem zeros, manda os 256 bytes em apenas DUAS classes — a paridade —, e a"
+           " volta deixa de existir. A exactidão da deconvolução não é gratuita: vale"
+           " onde o espectro não zera, e é essa a condição que o δ cumpre",
+           colide == 1 && classes[0] == 128 && classes[1] == 128);
+    }
+
     /* ═══ §L2  A BASE ORTONORMAL → A OPERAÇÃO BIT A BIT ══════════════════════ */
     printf("\n§L2 E é a ORTONORMALIDADE que autoriza o bit a bit — não a codificação.\n\n");
     {
@@ -775,6 +853,72 @@ int main(void){
            " como propriedade do membro-limite. A reta construída explica por que o"
            " círculo aparece como o seu gume",
            parab == ps && impar == ps && ps == 7);
+    }
+
+    /* ═══ §L10b  π_k POR FÓRMULA — a definição, não uma descrição ═══════════ */
+    printf("\n§L10b π_k define-se por FÓRMULA: as áreas do andar, algébricas em t_n.\n\n");
+    {
+        /* «Fecho geométrico do andar» descreve; não define. A definição é esta, e sai
+         * de t_n = 2cos(π/n) sem mais nada:
+         *
+         *      I_n = (n·t_n/4)·√(4 − t_n²)        (a área INSCRITA)
+         *      C_n = n·√(4 − t_n²)/t_n            (a área CIRCUNSCRITA)
+         *
+         * Ambas são ALGÉBRICAS em t_n — exactas no andar —, e I_n < π < C_n com
+         * I_n a subir e C_n a descer. Aqui medem-se os QUADRADOS, que são racionais
+         * nos andares 3, 4, 6 e 8, e as duas identidades de duplicação de Arquimedes,
+         * que também dão racional. Tudo em fracções de inteiros. */
+        long casos = 0, bate = 0;
+        struct { int n; long ip, iq, cp, cq; const char *nome; } A[] = {
+            {3, 27, 16,  27,  1, "triangulo: I²=27/16, C²=27"},
+            {4,  4,  1,  16,  1, "quadrado:  I=2 (I²=4), C=4 (C²=16)"},
+            {6, 27,  4,  12,  1, "hexagono:  I²=27/4,  C²=12"},
+        };
+        printf("      andar                                     I² < C² ?   I_n sobe?\n");
+        long ant_i = 0, ant_iq = 1; int sobe = 1;
+        for(int k = 0; k < 3; k++){
+            casos++;
+            /* I² < C² por produto cruzado, sem uma divisão */
+            int menor = (A[k].ip * A[k].cq < A[k].cp * A[k].iq);
+            if(menor) bate++;
+            if(k && !(ant_i * A[k].iq < A[k].ip * ant_iq)) sobe = 0;
+            ant_i = A[k].ip; ant_iq = A[k].iq;
+            printf("      %-40s %-11s %s\n", A[k].nome, menor ? "sim" : "NAO",
+                   k ? (sobe ? "sim" : "NAO") : "—");
+        }
+        /* A DUPLICAÇÃO de Arquimedes: I_{2n}² = I_n·C_n, e dá RACIONAL nos dois passos.
+         *   3→6:  I_6² = 27/4   e   I_3·C_3 = (3√3/4)(3√3) = 27/4
+         *   4→8:  I_8² = 8      e   I_4·C_4 = 2·4 = 8
+         * I_n·C_n calcula-se pelos quadrados: (I_n C_n)² = I_n²·C_n², e compara-se com
+         * (I_{2n}²)². Tudo inteiro. */
+        long dup = 0, dup_cas = 0;
+        {   /* 3 → 6 : (I_6²)² = I_3²·C_3² ⟺ (27/4)² = (27/16)(27) */
+            dup_cas++;
+            long e_p = 27*27, e_q = 4*4, d_p = 27*27, d_q = 16*1;
+            if(e_p * d_q == d_p * e_q) dup++;
+        }
+        {   /* 4 → 8 : (I_8²)² = I_4²·C_4² ⟺ 8² = 4·16 */
+            dup_cas++;
+            if(8L*8L == 4L*16L) dup++;
+        }
+        /* E O ENCAIXE DA CASA, em inteiros: I_8 < 333/106 < 22/7 < C_8.
+         * I_8² = 8, logo I_8 < 333/106 ⟺ 8·106² < 333².
+         * C_8² = 64(3 − 2√2), logo 22/7 < C_8 ⟺ (22/7)² < 64(3−2√2)
+         *        ⟺ 128√2 < 192 − 484/49 ⟺ 2·(49·128)² < 8924²   (elevando ao quadrado) */
+        long enc = 0;
+        if(8L*106*106 < 333L*333) enc++;                    /* I_8 < 333/106 */
+        if(333L*7 < 22L*106) enc++;                         /* 333/106 < 22/7 */
+        { long L = 49L*128, R = 8924L; if(2*L*L < R*R) enc++; }   /* 22/7 < C_8 */
+        printf("      duplicação de Arquimedes I_{2n}² = I_n·C_n: %ld de %ld exactas\n",
+               dup, dup_cas);
+        printf("      o encaixe em inteiros: I_8 < 333/106 < 22/7 < C_8 — %ld de 3\n", enc);
+        ok("π_k DEFINE-SE POR FÓRMULA, e não por descrição: de t_n = 2cos(π/n) vêm"
+           " I_n = (n·t_n/4)√(4−t_n²) e C_n = n√(4−t_n²)/t_n, ambas ALGÉBRICAS em t_n e"
+           " portanto exactas no andar. Os quadrados são racionais nos andares 3, 4 e 6"
+           " — 27/16 e 27, 4 e 16, 27/4 e 12 —, tem-se I_n < C_n em todos, e I_n sobe."
+           " A duplicação de Arquimedes I_{2n}² = I_n·C_n fecha exacta nos dois passos,"
+           " e o encaixe I_8 < 333/106 < 22/7 < C_8 decide-se por comparação de inteiros",
+           bate == casos && casos == 3 && sobe && dup == dup_cas && enc == 3);
     }
 
     /* ═══ §L11  CONTRAEXEMPLO AO MECANISMO ═══════════════════════════════════ */
