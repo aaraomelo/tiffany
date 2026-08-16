@@ -1484,15 +1484,24 @@ int main(void){
         /* espiral áurea = realização m=1, não axioma: φ²=φ+1 */
         {
             /* Fibonacci: F_{n+1}/F_n → φ; identidade F_n² = F_{n-1}F_{n+1}+(-1)^{n+1} */
-            long a = 1, b = 1;
-            int metalica = 1;
-            for(int n = 0; n < 8; n++){
-                long c = a + b;              /* recorrência m=1 */
-                if(c != a + b) metalica = 0;
-                a = b; b = c;
+            /* O COMENTÁRIO NOMEIA A IDENTIDADE E O CÓDIGO NÃO A MEDIA: aqui estava
+             * `long c = a + b; if(c != a + b)` — c comparado consigo próprio — e
+             * `if(a + b != b + a)`, a comutatividade do `+` da linguagem. Mede-se agora
+             * a identidade que o comentário promete, que é CASSINI:
+             *
+             *      F_n² − F_{n−1}·F_{n+1} = (−1)^{n+1}
+             *
+             * inteira, exacta, e falsa se a recorrência não for a metálica de m = 1. */
+            long a = 1, b = 1, ant = 0;      /* ant = F_{n−1}, a = F_n, b = F_{n+1} */
+            int metalica = 1; long cas_n = 0;
+            for(int n = 1; n <= 8; n++){
+                long esq = a*a - ant*b;
+                long dir = (n % 2 == 0) ? -1 : 1;        /* (−1)^{n+1} */
+                cas_n++;
+                if(esq != dir) metalica = 0;
+                ant = a; a = b; b = a + ant;             /* recorrência m = 1 */
             }
-            /* σ² = σ+1 não é lei nova: já está na metálica do corpo */
-            if(a + b != b + a) metalica = 0;
+            if(cas_n != 8) metalica = 0;
             if(!metalica) ok38 = 0;
         }
 

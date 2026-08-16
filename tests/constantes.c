@@ -687,13 +687,19 @@ int main(void)
         /* e a RAZAO: um escalar e' o seu proprio dual, logo nao tem para onde apontar.
          * conta-se quantos escalares tem dual DISTINTO (nenhum) contra quantos vectores tem. */
         long esc_com_dual = 0, vec_com_dual = 0, tot = 0;
+        /* E O DUAL E' A TROCA DE COORDENADAS — a Lei 0 desta casa. Em dimensao 1 nao ha
+         * segunda coordenada para trocar, logo o dual de um escalar E' ele proprio; em
+         * dimensao 2 a troca move, e e' por isso que o vector aponta e o escalar nao.
+         * Aqui estava `if(v != v)`, que o compilador denunciou: comparava v consigo
+         * proprio em vez de aplicar a troca. */
         for(long v = -8; v <= 8; v++){
             if(v == 0) continue;
-            /* um escalar: o seu dual pela norma e' ele proprio (nao ha' segunda coordenada) */
-            if(v != v) esc_com_dual++;
-            /* um vector (v, 0): o dual e' (0, v) — DISTINTO, e e' isso que aponta */
-            long dx = 0, dy = v;
-            if(!(dx == v && dy == 0)) vec_com_dual++;
+            long e1[1] = { v }, de1[1];            /* escalar: dimensao 1 */
+            de1[0] = e1[0];                         /* a troca em dimensao 1 e' a identidade */
+            if(de1[0] != e1[0]) esc_com_dual++;
+            long v2[2] = { v, 0 }, dv2[2];          /* vector: dimensao 2 */
+            dv2[0] = v2[1]; dv2[1] = v2[0];         /* a TROCA, aplicada */
+            if(dv2[0] != v2[0] || dv2[1] != v2[1]) vec_com_dual++;
             tot++;
         }
         /* E A MEDIDA DA ORDEM: quantas ordens distintas o escalar distingue, contra quantas

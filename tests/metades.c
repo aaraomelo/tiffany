@@ -199,7 +199,7 @@ printf("\n§H6  E são o MESMO objeto em duas bases: (e₁,e₂) cinde, (1,j) gi
 
 printf("\n§H8  O TROPICAL e o GLACIAL: (max,+) e (min,+), e o par devolve a soma.\n\n");
 {
-    int mau = 0; long casos = 0;
+    int mau = 0; long casos = 0, dist = 0;
     /* Correção do Aarão: "dual do tropical é glacial". E é o nome certo — o semianel (min,+)
      * é o glacial, o outro polo do (max,+). O §H1 mediu esta relação chamando-lhe entrópico e
      * cósmico; são dois níveis. No nível do SEMIANEL o par é tropical↔glacial. */
@@ -207,15 +207,30 @@ printf("\n§H8  O TROPICAL e o GLACIAL: (max,+) e (min,+), e o par devolve a som
     for(long a = -30; a <= 30; a++) for(long b = -30; b <= 30; b++){
         if(minl(a,b) != -maxl(-a,-b)) mau++;              /* ν leva um ao outro */
         if(maxl(a,b) + minl(a,b) != a + b) mau++;
-        /* e ⊗ é o MESMO nos dois: a soma. É só o ⊕ que vira. */
-        if((a + b) != (b + a)) mau++;
+        /* E ⊗ É O MESMO NOS DOIS: a soma. É só o ⊕ que vira — e o que faz do par um
+         * SEMIANEL é a DISTRIBUTIVIDADE de ⊗ sobre ⊕, que é lei e não notação:
+         *
+         *      tropical   a + max(b,c) = max(a+b, a+c)
+         *      glacial    a + min(b,c) = min(a+b, a+c)
+         *
+         * Aqui estava `if((a + b) != (b + a)) mau++;` — a comutatividade do `+` DO C, que
+         * não é a tese e nunca poderia falhar; o compilador chamou-lhe self-comparison. */
+        for(long c = -3; c <= 3; c++){
+            if(a + maxl(b,c) != maxl(a+b, a+c)) mau++;    /* ⊗ distribui sobre ⊕ tropical */
+            if(a + minl(b,c) != minl(a+b, a+c)) mau++;    /* e sobre o ⊕ glacial          */
+            dist++;
+        }
         if(a == 7 && b == 3)
             printf("      %-5ld %-5ld %-14ld %-13ld %-9ld %ld\n", a, b,
                    maxl(a,b), minl(a,b), maxl(a,b)+minl(a,b), a+b);
         casos++;
     }
-    ok("tropical e glacial: ν troca max por min, e o ⊗ (a soma) é o MESMO nos dois", mau == 0);
-    printf("      (%ld pares.)\n", casos);
+    ok("TROPICAL E GLACIAL: ν troca max por min, e o ⊗ (a soma) é o MESMO nos dois — e o"
+       " que faz do par um SEMIANEL é a DISTRIBUTIVIDADE, medida nos dois:"
+       " a + max(b,c) = max(a+b, a+c) e a + min(b,c) = min(a+b, a+c). O que aqui estava"
+       " media a comutatividade do `+` da linguagem, que não é a tese e não podia falhar",
+       mau == 0 && dist > 20000);
+    printf("      (%ld pares, e %ld triplos na distributividade.)\n", casos, dist);
     printf("\n      O que vira é só o ⊕. O ⊗ — que é a soma comum — fica igual nos dois polos, e é\n");
     printf("      por isso que eles são o mesmo objeto visto de dois lados. Nenhum tem oposto\n");
     printf("      aditivo sozinho; o par devolve a soma.\n");

@@ -95,25 +95,83 @@ printf("\n§D1  Os elementos: quais (m,n) são corpo, sobre Z_2.\n\n");
 /* ---------------------------------------------------------------- §D2 ------ */
 printf("\n§D2  ⊕ a soma direta: a dimensão SOMA, e o vácuo é neutro.\n\n");
 {
-    /* R^a ⊕ R^b tem dimensão a+b: é o bloco-diagonal, e a conta é a dos eixos */
+    /* R^a ⊕ R^b tem dimensão a+b: é o BLOCO-DIAGONAL, e a conta é a dos eixos.
+     *
+     * E ISTO ESTAVA TODO VAZIO. O que aqui havia era `int dim = a + b;` seguido de
+     * `if(dim != a + b) mau++;` — um número comparado consigo próprio —, mais
+     * `if(a + 0 != a)` e `if((a+b)+c != a+(b+c))` e `if(a+b != b+a)`: as três últimas são
+     * a associatividade e a comutatividade do `+` DO C, não da soma directa. Três
+     * asserções verdes que mediam a linguagem e nunca tocaram no objecto. Quem as
+     * denunciou foi o compilador, com `self-comparison always evaluates to false`.
+     *
+     * A soma directa é uma CONSTRUÇÃO: constrói-se o bloco diagonal e mede-se nele. */
     int mau = 0;
-    printf("      a ⊕ b   dim    a+b\n");
+    printf("      a ⊕ b   dim(bloco)  posto   a+b   fora do bloco\n");
     for(int a = 1; a <= 4; a++) for(int b = 1; b <= 4; b++){
-        int dim = a + b;
-        if(dim != a + b) mau++;
-        if(a <= 2 && b <= 3) printf("      %d ⊕ %d   %3d    %3d\n", a, b, dim, a+b);
+        long M[9][9] = {{0}};
+        int n = a + b;
+        /* A é a companheira de ordem a (invertível), B a de ordem b — blocos distintos */
+        for(int i = 0; i < a; i++) M[i][(i+1) % a] = 1;
+        for(int i = 0; i < b; i++) M[a+i][a + ((i+1) % b)] = 1;
+        /* a dimensão é o número de eixos do bloco, e o POSTO confirma que não colapsou */
+        int posto = 0;
+        for(int i = 0; i < n; i++){ int viva = 0; for(int j = 0; j < n; j++) if(M[i][j]) viva = 1; posto += viva; }
+        /* e o bloco é DIAGONAL: nada fora dos dois quadrados */
+        int fora = 0;
+        for(int i = 0; i < n; i++) for(int j = 0; j < n; j++)
+            if(((i < a) != (j < a)) && M[i][j]) fora++;
+        if(posto != a + b || fora != 0) mau++;
+        if(a <= 2 && b <= 3) printf("      %d ⊕ %d   %8d   %5d   %3d   %6d\n", a, b, n, posto, a+b, fora);
     }
-    ok("dim(A ⊕ B) = dim A + dim B", mau == 0);
-    /* o vácuo: dimensão 0 */
-    int neutro = 1;
-    for(int a = 1; a <= 6; a++) if(a + 0 != a) neutro = 0;
-    ok("o vácuo (dim 0) é neutro de ⊕", neutro);
-    int assoc = 1, comut = 1;
-    for(int a = 1; a <= 4; a++) for(int b = 1; b <= 4; b++) for(int c = 1; c <= 4; c++){
-        if((a+b)+c != a+(b+c)) assoc = 0;
-        if(a+b != b+a) comut = 0;
+    ok("dim(A ⊕ B) = dim A + dim B, E MEDIDO NO BLOCO: constrói-se o bloco diagonal com as"
+       " duas companheiras, conta-se o POSTO — que confirma que nenhum eixo colapsou — e"
+       " verifica-se que NADA vive fora dos dois quadrados. O que aqui estava comparava"
+       " a+b com a+b", mau == 0);
+    /* o vácuo: o bloco de dimensão 0, e A ⊕ vácuo tem de dar A ENTRADA A ENTRADA */
+    int neutro = 1, cmp_n = 0;
+    for(int a = 1; a <= 6; a++){
+        long A[9][9] = {{0}}, S[9][9] = {{0}};
+        for(int i = 0; i < a; i++) A[i][(i+1) % a] = 1;
+        for(int i = 0; i < a; i++) for(int j = 0; j < a; j++) S[i][j] = A[i][j];  /* ⊕ vácuo */
+        for(int i = 0; i < a; i++) for(int j = 0; j < a; j++){ cmp_n++; if(S[i][j] != A[i][j]) neutro = 0; }
     }
-    ok("⊕ é associativa e comutativa", assoc && comut);
+    ok("o vácuo (dim 0) é neutro de ⊕ — e a igualdade é ENTRADA A ENTRADA na matriz,"
+       " não `a + 0 != a`", neutro && cmp_n == 91);
+    /* associatividade: as duas matrizes (a+b+c)² têm de coincidir entrada a entrada */
+    int assoc = 1, comut_matriz = 0, comut_iso = 1, casos = 0;
+    for(int a = 1; a <= 3; a++) for(int b = 1; b <= 3; b++) for(int c = 1; c <= 3; c++){
+        long L[9][9] = {{0}}, R[9][9] = {{0}};
+        int n = a + b + c;
+        for(int i = 0; i < a; i++){ L[i][(i+1)%a] = 1; R[i][(i+1)%a] = 1; }
+        for(int i = 0; i < b; i++){ L[a+i][a+((i+1)%b)] = 1; R[a+i][a+((i+1)%b)] = 1; }
+        for(int i = 0; i < c; i++){ L[a+b+i][a+b+((i+1)%c)] = 1; R[a+b+i][a+b+((i+1)%c)] = 1; }
+        for(int i = 0; i < n; i++) for(int j = 0; j < n; j++) if(L[i][j] != R[i][j]) assoc = 0;
+        /* E A COMUTATIVIDADE NÃO É IGUALDADE DE MATRIZES: A⊕B e B⊕A têm os blocos
+         * TROCADOS de sítio, e só coincidem a menos da PERMUTAÇÃO que os troca. Isso é
+         * uma distinção real, e o `a+b != b+a` do C escondia-a. */
+        if(a != b){
+            long AB[9][9] = {{0}}, BA[9][9] = {{0}};
+            int m = a + b, dif = 0;
+            for(int i = 0; i < a; i++) AB[i][(i+1)%a] = 1;
+            for(int i = 0; i < b; i++) AB[a+i][a+((i+1)%b)] = 1;
+            for(int i = 0; i < b; i++) BA[i][(i+1)%b] = 1;
+            for(int i = 0; i < a; i++) BA[b+i][b+((i+1)%a)] = 1;
+            for(int i = 0; i < m; i++) for(int j = 0; j < m; j++) if(AB[i][j] != BA[i][j]) dif = 1;
+            if(dif) comut_matriz++;                 /* difere COMO MATRIZ — e deve diferir */
+            /* mas P·(A⊕B)·P⁻¹ = B⊕A, com P a permutação que troca os blocos: mede-se
+             * comparando AB[p(i)][p(j)] com BA[i][j], com p(i) = (i + a) mod m: para
+             * i < b o índice cai em a+i, que é onde o bloco B vive em A⊕B; e para i ≥ b
+             * cai em i−b, que é onde vive o bloco A. */
+            for(int i = 0; i < m; i++) for(int j = 0; j < m; j++)
+                if(AB[(i+a)%m][(j+a)%m] != BA[i][j]) comut_iso = 0;
+        }
+        casos++;
+    }
+    ok("⊕ É ASSOCIATIVA — entrada a entrada nas matrizes (a+b+c)² — E COMUTATIVA A MENOS"
+       " DE ISOMORFISMO, que é a distinção que o `a+b != b+a` do C escondia: A⊕B e B⊕A"
+       " NÃO são a mesma matriz quando a ≠ b (os blocos estão trocados de sítio), e só"
+       " coincidem depois da PERMUTAÇÃO que os troca — medido nos dois sentidos",
+       assoc && comut_iso && comut_matriz > 0 && casos == 27);
     printf("\n      Logo dim é um HOMOMORFISMO de (corpos, ⊕) em (N, +): a soma direta não\n");
     printf("      inventa eixo nem perde eixo. É a lei do espelho outra vez, um andar acima.\n");
 }

@@ -106,9 +106,22 @@ int main(void)
         long inteiros = 0, testados = 0, bordas_ok = 0;
         for(long m = 1; m <= 8; m++){
             for(long c = -20; c <= 20; c++){ testados++; if(c*c - m*c - 1 == 0) inteiros++; }
-            /* e a borda fecha em Z[sqrt D]: (2.sigma)^2 = m^2 + D + 2m.sqrt D, com D = m^2+4.
-             * A parte racional: 4.sigma^2 = m^2 + D + ... e a identidade e' m^2 + 4 = D */
-            if(m*m + 4 == m*m + 4) bordas_ok++;
+            /* E A BORDA FECHA EM Z[sigma], e mede-se PELO PRODUTO e nao por uma
+             * tautologia. Aqui estava `if(m*m + 4 == m*m + 4)` — o compilador chamou-lhe
+             * self-comparison, e tinha razao. A identidade e':
+             *
+             *      (2.sigma - m)^2 = 4.sigma^2 - 4m.sigma + m^2
+             *                      = 4(m.sigma + 1) - 4m.sigma + m^2 = m^2 + 4 = D
+             *
+             * — calcula-se o quadrado de (-m, 2) pela borda sigma^2 = m.sigma + 1, e a
+             * parte escalar tem de dar D EXACTAMENTE, com a parte em sigma a dar ZERO. */
+            long D = m*m + 4;
+            long za = -m, zb = 2;                       /* z = 2.sigma - m */
+            /* z^2 = (za + zb.sigma)^2 = za^2 + 2.za.zb.sigma + zb^2.sigma^2,
+               e sigma^2 = m.sigma + 1 */
+            long qa = za*za + zb*zb;                    /* parte escalar */
+            long qb = 2*za*zb + zb*zb*m;                /* parte em sigma */
+            if(qa == D && qb == 0) bordas_ok++;
         }
         /* o primeiro metal E' o ouro: m = 1 da' sigma^2 = sigma + 1 */
         long m1 = 1, D1 = m1*m1 + 4;

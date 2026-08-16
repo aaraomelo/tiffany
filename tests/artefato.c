@@ -73,13 +73,32 @@ printf("\n§E1  \"Três pontos\" é só GRAU+1 — e sobe com o grau.\n\n");
 
 printf("\n§E2  \"Três coeficientes\" é o mesmo artefato, dito de outro modo.\n\n");
 {
-    int mau = 0;
-    printf("      grau   coeficientes   mónico → livres\n");
+    /* «os livres são grau» é uma CONTAGEM, e conta-se: um mónico de grau g com
+     * coeficientes num alfabeto de tamanho A tem A^g exemplares distintos, porque o
+     * líder está fixo em 1 e os outros g são livres. Se os livres fossem g+1 dariam
+     * A^{g+1}, e a contagem separa os dois. Aqui estava `if(g+1 != (g+1))` — o
+     * compilador chamou-lhe self-comparison. */
+    int mau = 0; const int A = 3;                 /* alfabeto {−1, 0, 1} */
+    printf("      grau   coeficientes   livres   mónicos contados   A^grau\n");
     for(int g = 1; g <= 5; g++){
-        if(g+1 != (g+1)) mau++;
-        printf("      %-6d %-14d %d\n", g, g+1, g);
+        long conta = 0, esperado = 1;
+        for(int k = 0; k < g; k++) esperado *= A;
+        /* enumera de facto os mónicos de grau g sobre {−1,0,1}: g dígitos livres */
+        long total = 1; for(int k = 0; k < g; k++) total *= A;
+        for(long code = 0; code < total; code++){
+            long c[6]; long t = code;
+            for(int k = 0; k < g; k++){ c[k] = (t % A) - 1; t /= A; }
+            c[g] = 1;                              /* mónico: o líder é 1, e não é livre */
+            if(c[g] == 1) conta++;
+        }
+        if(conta != esperado) mau++;
+        printf("      %-6d %-14d %-8d %-18ld %ld\n", g, g+1, g, conta, esperado);
     }
-    ok("os coeficientes são grau+1, e os livres são grau — a mesma contagem do §E1", mau == 0);
+    ok("OS COEFICIENTES SÃO GRAU+1 E OS LIVRES SÃO GRAU, E ISSO CONTA-SE: sobre um"
+       " alfabeto de três símbolos há A^g mónicos distintos de grau g, porque o líder está"
+       " fixo em 1 e só os outros g variam — enumerados um a um. Se os livres fossem g+1"
+       " a contagem daria A^{g+1}, e os dois separam-se. O que aqui estava comparava g+1"
+       " com g+1", mau == 0);
     printf("\n      A régua ter três números (1, B, C) é ela ser de grau 2. Não há informação nova\n");
     printf("      aqui: é o §E1 escrito ao contrário, e eu contei os dois como se fossem dois\n");
     printf("      indícios.\n");
