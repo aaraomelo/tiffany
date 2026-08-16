@@ -46,6 +46,7 @@ canal 19f659a3a41832ea 0
 cantor 37a78d4f6d91e54f 0
 cantor_julia_dual 2a215f46ac3417d6 0
 canvas_front f5106644abd9858b 0
+cardinal dec9f07707694433 0
 cards 43b08164685d307d 0
 carnot 8d04da08cd5af623 0
 catalogo fd8969387f25f550 0
@@ -210,7 +211,7 @@ fusao 13c9bc056928be95 0
 fusao_conceitos 3c406248b1261cc4 0
 gauss 77024247661e4422 0
 geometria_corpo 99c0472d0316ad9f 0
-geometria_real 68b73b61a9c6a9d5 0
+geometria_real c6fd0ab5e565de7c 0
 geometrico e4a6fce5bd91e395 0
 gerador 2373ad5c9d2e6e8c 0
 gerador_analog 6a7abcf53c950b0b 0
@@ -427,6 +428,7 @@ sql dd9f1021d22ed500 0
 sshb 867d3328b082b67a 0
 str2dbl_dual 74601c0ca36de56f 0
 superficie_tate 42631bd983dc985c 0
+supremo 02181b6d1bbe856b 0
 sustento 159daa95a6bc46b6 0
 tecido a71972ce13c4429d 0
 teletransporte 8b13cc6bf9acf1a0 0

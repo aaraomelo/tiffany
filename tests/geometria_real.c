@@ -1162,36 +1162,73 @@ int main(void){
            bate == casos && casos == 3 && sobe && dup == dup_cas && enc == 3);
     }
 
-    /* ═══ §L11  CONTRAEXEMPLO AO MECANISMO ═══════════════════════════════════ */
-    printf("\n§L11 O contraexemplo: qual SETA é que ele não atravessa.\n\n");
+    /* ═══ §L11  O CONTRAEXEMPLO — e o que eu tinha era o OURO ESCALADO ══════ */
+    printf("\n§L11 O contraexemplo verdadeiro, e o falso que eu tinha posto no lugar.\n\n");
     {
-        /* O eval corrigiu o estatuto disto. NÃO se afirma «tem de ser unidade e Pisot» —
-         * essa caracterização não está demonstrada neste quadro. Afirma-se o que se vê:
-         * uma recorrência inteira onde o MECANISMO falha, e o passo que falha tem nome. */
-        long u[32], w[32], Dc = 20;             /* x² − 2x − 4: traço 2, norma −4 */
-        u[0]=0; u[1]=1; w[0]=2; w[1]=2;
-        for(int k = 2; k < 15; k++){ u[k] = 2*u[k-1] + 4*u[k-2]; w[k] = 2*w[k-1] + 4*w[k-2]; }
-        long ctrl = 0, pisot = 0, area = 0, cresce = 0, inteiro = 0;
-        for(int k = 2; k < 14; k++){
-            ctrl++;
-            if(w[k] == 2*w[k-1] + 4*w[k-2]) inteiro++;      /* a 1.ª seta PASSA */
-            if((w[k]-1)*(w[k]-1) < Dc*u[k]*u[k] && Dc*u[k]*u[k] < (w[k]+1)*(w[k]+1)) pisot++;
-            long d  = 4*(u[k+1]*u[k-1] - u[k]*u[k]);
-            long dp = 4*(u[k]*u[k-2] - u[k-1]*u[k-1]);
-            long da = d < 0 ? -d : d, dpa = dp < 0 ? -dp : dp;
-            if(da == 1) area++;
-            if(da > dpa) cresce++;                          /* o det CRESCE em módulo */
+        /* O Aarão: «ainda não engoli esse teorema 40 — a torre é antissimétrica ou não?
+         * a Lei 8 funciona ou não?» E as duas perguntas derrubam o exemplo que eu tinha.
+         *
+         * x² − 2x − 4 tem raízes 1 ± √5 = 2φ e 2φ† — É O OURO ESCALADO POR 2, e o 2 é
+         * exactamente a dobra da torre. A sucessão é u_k = 2^{k−1}·F_k, e o det = −4 é
+         * 2²·(−1): a unidade VOLTA ao normalizar pela escala. E na LEI 8 — o anel ℤ_p —
+         * o 4 é invertível para todo p ∤ 4. Portanto não quebrava nada: era o mesmo
+         * objecto um andar acima, e eu não tinha normalizado.
+         *
+         * O CONTRAEXEMPLO VERDADEIRO precisa de que NENHUMA escala inteira o traga de
+         * volta, e isso é uma condição sobre o termo constante:
+         *
+         *      x² − mx − c   com c NÃO quadrado perfeito
+         *
+         * porque escalar x por t leva o det a −c·t², e para dar ±1 seria preciso
+         * t² = 1/c. Em x² − x − 3: |σ†| = 1,303 > 1 — não há direcção que encolha — e 3
+         * não é quadrado, logo não há escala que salve. */
+        long fake[16], F[16];
+        fake[0]=0; fake[1]=1; F[0]=0; F[1]=1;
+        for(int k=2;k<12;k++){ fake[k]=2*fake[k-1]+4*fake[k-2]; F[k]=F[k-1]+F[k-2]; }
+        long esc = 0, esc_cas = 0;
+        for(int k=1;k<12;k++){
+            long pot = 1;
+            for(int e=0;e<k-1;e++) pot *= 2;
+            esc_cas++;
+            if(fake[k] == pot*F[k]) esc++;              /* u_k = 2^{k−1}·F_k */
         }
-        printf("      x² − 2x − 4 (traço 2, norma −4, det A^k = (−4)^k): %ld andares ·"
-               " recorrência inteira em %ld · Pisot em %ld · |det| = 1 em %ld ·"
-               " det a CRESCER em %ld\n", ctrl, inteiro, pisot, area, cresce);
-        ok("O CONTRAEXEMPLO É AO MECANISMO, E A SETA QUE ELE NÃO ATRAVESSA TEM NOME: em"
-           " x² − 2x − 4 a recorrência é inteira e o traço é inteiro nos 12 andares — as"
-           " primeiras setas PASSAM — e mesmo assim o critério de §L5 falha nos 12 e"
-           " |det| = 1 em nenhum, porque det A^k = (−4)^k CRESCE em módulo a cada andar."
-           " A face que devia encolher não encolhe. Daqui não se conclui caracterização"
-           " nenhuma: conclui-se em que seta este exemplo pára",
-           inteiro == ctrl && pisot == 0 && area == 0 && cresce == ctrl && ctrl == 12);
+        /* e o 4 é quadrado perfeito — é isso que deixa a escala inteira salvar */
+        long q4 = 0; while(q4*q4 < 4) q4++;
+        int quatro_quadrado = (q4*q4 == 4);
+        printf("      x² − 2x − 4: u_k = 2^{k−1}·F_k em %ld de %ld — é O OURO ESCALADO"
+               " por 2, e 4 é quadrado (%s): a escala inteira traz de volta\n",
+               esc, esc_cas, quatro_quadrado ? "sim" : "NÃO");
+
+        /* O VERDADEIRO: x² − x − 3, e mede-se em inteiros pelos dois lados */
+        long m3 = 1, c3 = 3, D3 = m3*m3 + 4*c3;         /* Δ = 1 + 12 = 13 */
+        long U3[16], t3[16];
+        U3[0]=0; U3[1]=1; t3[0]=2; t3[1]=m3;
+        for(int k=2;k<12;k++){ U3[k]=m3*U3[k-1]+c3*U3[k-2]; t3[k]=m3*t3[k-1]+c3*t3[k-2]; }
+        /* (a) NÃO é quadrado: nenhuma escala inteira o traz de volta */
+        long q3 = 0; while(q3*q3 < c3) q3++;
+        int nao_quadrado = (q3*q3 != c3);
+        /* (b) NÃO há contração: |σ†| > 1 ⟺ (m − √Δ)² > 4 ⟺ ... em inteiros,
+         *     |σ†| > 1 ⟺ σ† < −1 (aqui é negativo) ⟺ m − √Δ < −2 ⟺ √Δ > m + 2
+         *     ⟺ Δ > (m+2)²                                                        */
+        int sem_contracao = (D3 > (m3+2)*(m3+2));
+        /* (c) e o critério de Pisot de §L5 falha em todo andar */
+        long and3 = 0, falha3 = 0;
+        for(int k=1;k<10;k++){
+            and3++;
+            int c1 = ((t3[k]-1)*(t3[k]-1) < D3*U3[k]*U3[k])
+                  && (D3*U3[k]*U3[k] < (t3[k]+1)*(t3[k]+1));
+            if(!c1) falha3++;
+        }
+        printf("      x² − x − 3: Δ = %ld > (m+2)² = %ld, logo |σ†| > 1 e NÃO há contração"
+               " · 3 é quadrado? %s · o critério de §L5 falha em %ld de %ld\n",
+               D3, (m3+2)*(m3+2), nao_quadrado ? "NÃO" : "sim", falha3, and3);
+        ok("E O VERDADEIRO É x² − x − 3, PORQUE NENHUMA ESCALA INTEIRA O TRAZ DE VOLTA:"
+           " escalar x por t leva det a −c·t², logo só um c QUADRADO PERFEITO se deixa"
+           " normalizar — e 3 não é. Além disso Δ = 13 > (m+2)² = 9, donde |σ†| > 1 e não"
+           " há direcção nenhuma que encolha; e o critério de Pisot falha nos nove"
+           " andares. Aqui a hipótese da unidade é mesmo usada, e a sua falta parte o"
+           " mecanismo",
+           nao_quadrado && sem_contracao && falha3 == and3 && and3 == 9);
     }
 
     /* ═══ §L11b  EULER, E A PURGA DOS METÁLICOS DA CONSTRUÇÃO ══════════════ */
