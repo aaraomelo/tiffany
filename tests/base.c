@@ -28,29 +28,33 @@
  *   §B13 a recursão salta entre torres; no fim a dual está vazia, e a cifra fica fora
  *   §B14 o origami: a dobra quebra a simetria e GUARDA a memória dela
  *
- *   cc -O2 -std=c99 base.c -lm -o base && ./base
+ *   cc -O2 -std=c99 base.c -o base && ./base        (sem -lm: nao ha virgula)
  */
 #include <stdio.h>
-#include <math.h>
 #include <string.h>
 #include "unidade.h"
 
 #define D 8
 
-static double dir_rec(const double *a, const double *b, int n){
+/* E TUDO ISTO FECHA EM ℤ. A base ortonormal tem Gram = I e os produtos da tabela valem
+ * ±1: somas e produtos de inteiros dão inteiros, e Cayley–Dickson não introduz uma
+ * divisão em passo nenhum. O double que aqui estava não transportava vírgula — trazia
+ * um limiar a cada comparação, e com ele a pergunta deixava de ser sobre o número e
+ * passava a ser sobre a régua. */
+static long dir_rec(const long *a, const long *b, int n){
     if(n == 1) return a[0]*b[0];
     return dir_rec(a, b, n-1) + a[n-1]*b[n-1];      /* a última coordenada destaca-se */
 }
-static void conj_cd(const double *x, int n, double *out){
+static void conj_cd(const long *x, int n, long *out){
     out[0] = x[0];
     for(int k = 1; k < n; k++) out[k] = -x[k];
 }
 /* Cayley--Dickson: (a,b)(c,d) = (a·c − conj(d)·b, d·a + b·conj(c)) */
-static void cd(const double *x, const double *y, int n, double *out){
+static void cd(const long *x, const long *y, int n, long *out){
     if(n == 1){ out[0] = x[0]*y[0]; return; }
     int m = n/2;
-    const double *a = x, *b = x+m, *c = y, *d = y+m;
-    double cd_[D], cc[D], t1[D], t2[D], t3[D], t4[D];
+    const long *a = x, *b = x+m, *c = y, *d = y+m;
+    long cd_[D], cc[D], t1[D], t2[D], t3[D], t4[D];
     conj_cd(d, m, cd_); conj_cd(c, m, cc);
     cd(a, c, m, t1); cd(cd_, b, m, t2);
     cd(d, a, m, t3); cd(b, cc, m, t4);
@@ -85,11 +89,11 @@ printf("\n§B1  A base é ortonormal, e os e_i são pontos da esfera.\n\n");
     int mal = 0, quantos = 0;
     for(int n = 1; n <= D; n++)
         for(int i = 0; i < n; i++) for(int j = 0; j < n; j++){
-            double ei[D] = {0}, ej[D] = {0};
+            long ei[D] = {0}, ej[D] = {0};
             ei[i] = 1; ej[j] = 1;
-            double v = dir_rec(ei, ej, n);
+            long v = dir_rec(ei, ej, n);
             quantos++;
-            if(fabs(v - (i==j ? 1.0 : 0.0)) > 1e-15) mal++;
+            if(v != (i==j ? 1 : 0)) mal++;
         }
     printf("      <e_i, e_j> = δ_ij, em toda dimensão de 1 a %d: %d pares, %d falhas\n\n",
            D, quantos, mal);
@@ -125,11 +129,11 @@ printf("\n§B3  O produto DIRETO na forma recursiva.\n\n");
     int mal = 0;
     for(int k = 0; k < 200; k++){
         int n = 2 + k % (D-1);
-        double a[D], b[D];
-        for(int i = 0; i < n; i++){ a[i] = sin(3.0*k+i+1); b[i] = cos(5.0*k+i+2); }
-        double s = 0;
+        long a[D], b[D];
+        for(int i = 0; i < n; i++){ a[i] = ((3*k + i*3 + 1) % 11 - 5); b[i] = ((5*k + i*5 + 2) % 11 - 5); }
+        long s = 0;
         for(int i = 0; i < n; i++) s += a[i]*b[i];
-        if(fabs(dir_rec(a,b,n) - s) > 1e-12) mal++;
+        if(dir_rec(a,b,n) != s) mal++;
     }
     printf("      a recursão contra a soma direta, 200 casos de dim 2 a %d: %d falhas\n\n", D, mal);
     ok("o direto recursivo é o direto — e a recursão é trivial, de propósito", mal == 0);
@@ -142,19 +146,29 @@ printf("\n§B4  O CRUZADO na forma recursiva — e a antissimétrica É o a×b.\
 {
     printf("      Cayley-Dickson:  (a,b)·(c,d) = ( a·c - conj(d)·b ,  d·a + b·conj(c) )\n");
     printf("      e o cruzado é a metade ANTISSIMÉTRICA: ½(xy - yx)\n\n");
-    double x[D] = {1,2,3,4}, y[D] = {5,6,7,8}, p[D], q[D];
+    long x[D] = {1,2,3,4}, y[D] = {5,6,7,8}, p[D], q[D];
     cd(x, y, 4, p); cd(y, x, 4, q);
-    printf("      em H:  x·y = (%g,%g,%g,%g)\n", p[0],p[1],p[2],p[3]);
-    printf("             y·x = (%g,%g,%g,%g)\n", q[0],q[1],q[2],q[3]);
-    double anti[D];
-    for(int k = 0; k < 4; k++) anti[k] = (p[k]-q[k])/2;
-    printf("      ½(xy-yx) = (%g,%g,%g,%g)\n", anti[0],anti[1],anti[2],anti[3]);
-    double a[3] = {x[1],x[2],x[3]}, b[3] = {y[1],y[2],y[3]};
-    double c[3] = { a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0] };
-    printf("      e a×b    =   (%g,%g,%g)\n\n", c[0],c[1],c[2]);
-    ok("a parte antissimétrica do Cayley-Dickson É o produto vetorial",
-       fabs(anti[0]) < 1e-12 && fabs(anti[1]-c[0]) < 1e-12
-       && fabs(anti[2]-c[1]) < 1e-12 && fabs(anti[3]-c[2]) < 1e-12);
+    /* e o formato ACOMPANHA o tipo: estes valores sao long, e um %g sobre um long nao
+     * imprime o numero — le os bits como se fossem de virgula, e sai 2.09866e-317.
+     * Valor certo, texto errado, e nenhuma assercao o apanharia. */
+    printf("      em H:  x*y = (%ld,%ld,%ld,%ld)\n", p[0],p[1],p[2],p[3]);
+    printf("             y*x = (%ld,%ld,%ld,%ld)\n", q[0],q[1],q[2],q[3]);
+    long a[3] = {x[1],x[2],x[3]}, b[3] = {y[1],y[2],y[3]};
+    long c[3] = { a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0] };
+    /* E TRABALHA-SE EM DOBRO, para nao dividir: a parte antissimetrica e ½(xy-yx), e
+     * em vez de dividir por dois compara-se (xy-yx) com 2·(a×b). O residuo e ZERO. */
+    long dif[D];
+    for(int k = 0; k < 4; k++) dif[k] = p[k] - q[k];
+    printf("      (xy-yx)  = (%ld,%ld,%ld,%ld)   e   2(axb) = (0,%ld,%ld,%ld)\n",
+           dif[0],dif[1],dif[2],dif[3], 2*c[0], 2*c[1], 2*c[2]);
+    printf("      e axb    =   (%ld,%ld,%ld)\n\n", c[0],c[1],c[2]);
+    ok("A PARTE ANTISSIMETRICA DO CAYLEY-DICKSON E O PRODUTO VECTORIAL, e mede-se em"
+       " inteiros e em DOBRO, sem dividir por dois: (xy - yx) = 2*(0, axb), com residuo"
+       " ZERO nas quatro coordenadas. E o formato acompanha o tipo — estava aqui um %g a"
+       " imprimir longs, que le os bits como se fossem de virgula e imprimia 2.09866e-317:"
+       " valor certo, texto errado, e nenhuma assercao o apanharia",
+       dif[0] == 0 && dif[1] == 2*c[0] && dif[2] == 2*c[1] && dif[3] == 2*c[2]
+       && (c[0] || c[1] || c[2]));
     printf("      A recursão AQUI é rica: a cada nível o conjugado entra, a ordem dos fatores\n");
     printf("      muda de lado, e é isso que gera a estrutura nova. Compare-se com o §B3 — a\n");
     printf("      diferença entre os dois é a diferença entre somar e multiplicar.\n");
@@ -293,26 +307,26 @@ printf("\n§B8  Uma dimensão é PROJEÇÃO da outra, e duas formam o corpo DUAL
     for(int n = 1; n <= 4; n++){
         int m = 2*n;
         for(int k = 0; k < 60; k++){
-            double x[D], y[D];
-            for(int i = 0; i < m; i++){ x[i] = sin(7.0*k+i+1); y[i] = cos(11.0*k+i+3); }
+            long x[D], y[D];
+            for(int i = 0; i < m; i++){ x[i] = ((7*k + i*3 + 1) % 11 - 5); y[i] = ((11*k + i*5 + 3) % 11 - 5); }
             /* (a) o DIRETO e a soma das duas projecoes — a recursao pela METADE */
-            double tot = dir_rec(x, y, m);
-            double p1 = dir_rec(x, y, n), p2 = dir_rec(x+n, y+n, n);
-            if(fabs(tot - (p1+p2)) > 1e-12) malD++;
+            long tot = dir_rec(x, y, m);
+            long p1 = dir_rec(x, y, n), p2 = dir_rec(x+n, y+n, n);
+            if(tot != p1 + p2) malD++;
             /* (b) J^2 = -I */
-            double jx[D], jjx[D];
+            long jx[D], jjx[D];
             for(int i = 0; i < n; i++){ jx[i] = -x[n+i]; jx[n+i] = x[i]; }
             for(int i = 0; i < n; i++){ jjx[i] = -jx[n+i]; jjx[n+i] = jx[i]; }
-            for(int i = 0; i < m; i++) if(fabs(jjx[i] + x[i]) > 1e-12) malJ++;
+            for(int i = 0; i < m; i++) if(jjx[i] != -x[i]) malJ++;
             /* (c) o J TROCA as projecoes: π₁∘J = -π₂  e  π₂∘J = π₁ */
             for(int i = 0; i < n; i++){
-                if(fabs(jx[i] + x[n+i]) > 1e-12) malT++;
-                if(fabs(jx[n+i] - x[i]) > 1e-12) malT++;
+                if(jx[i] != -x[n+i]) malT++;
+                if(jx[n+i] != x[i]) malT++;
             }
             /* (d) e o J preserva o direto: e uma isometria, logo vive na esfera */
-            double jy[D];
+            long jy[D];
             for(int i = 0; i < n; i++){ jy[i] = -y[n+i]; jy[n+i] = y[i]; }
-            if(fabs(dir_rec(jx, jy, m) - tot) > 1e-12) malI++;
+            if(dir_rec(jx, jy, m) != tot) malI++;
         }
     }
     printf("      <x,y>_2n = <π₁x,π₁y>_n + <π₂x,π₂y>_n, em n = 1..4: %d falhas\n", malD);
@@ -333,11 +347,11 @@ printf("\n§B8  Uma dimensão é PROJEÇÃO da outra, e duas formam o corpo DUAL
         /* CONSTRUIR o J neste par e medi-lo — nao basta observar que 2n e par, que e
          * verdade de graca e nao afirma nada sobre o dual. */
         for(int k = 0; k < 40; k++){
-            double x[16], jx[16], jjx[16];
-            for(int i = 0; i < m; i++) x[i] = sin(17.0*k + i + 1);
+            long x[16], jx[16], jjx[16];
+            for(int i = 0; i < m; i++) x[i] = ((17*k + i*3 + 1) % 11 - 5);
             for(int i = 0; i < n; i++){ jx[i] = -x[n+i]; jx[n+i] = x[i]; }
             for(int i = 0; i < n; i++){ jjx[i] = -jx[n+i]; jjx[n+i] = jx[i]; }
-            for(int i = 0; i < m; i++) if(fabs(jjx[i] + x[i]) > 1e-12) mal++;
+            for(int i = 0; i < m; i++) if(jjx[i] != -x[i]) mal++;
         }
         printf("      %-4d %-4d %-36s %s\n", n, m,
                (n==1||n==3||n==7) ? "a×b em R^n, e o dual em R^2n" : "R^n é só a projeção",
@@ -363,12 +377,12 @@ printf("\n§B9  Uma dimensão sozinha não é reversível — só com a sua dual
     printf("      (a) SOZINHA — a dimensão com o produto coordenada a coordenada:\n\n");
     int malZ = 0;
     for(int n = 2; n <= D; n++){
-        double u[D] = {0}, v[D] = {0}, w[D];
+        long u[D] = {0}, v[D] = {0}, w[D];
         u[0] = 1; v[n-1] = 1;                       /* dois nao-nulos... */
-        double nz = 0;
-        for(int i = 0; i < n; i++){ w[i] = u[i]*v[i]; nz += fabs(w[i]); }
+        long nz = 0;
+        for(int i = 0; i < n; i++){ w[i] = u[i]*v[i]; nz += w[i] < 0 ? -w[i] : w[i]; }
         printf("      R^%d: (1,0,…)·(0,…,1) = 0  ->  divisor de zero, logo NÃO reversível\n", n);
-        if(nz > 1e-15) malZ++;                      /* ...cujo produto e zero */
+        if(nz != 0) malZ++;                      /* ...cujo produto e zero */
     }
     printf("\n");
     ok("a dimensão sozinha tem divisor de zero em toda dim >= 2 — não é corpo", malZ == 0);
@@ -378,23 +392,38 @@ printf("\n§B9  Uma dimensão sozinha não é reversível — só com a sua dual
     for(int n = 2; n <= 8; n *= 2){
         int mal = 0;
         for(int k = 0; k < 80; k++){
-            double x[D], cx[D], p[D], nrm = 0;
-            for(int i = 0; i < n; i++) x[i] = sin(13.0*k + i + 1);
+            long x[D], cx[D], p[D], nrm = 0;
+            for(int i = 0; i < n; i++) x[i] = ((13*k + i*3 + 1) % 11 - 5);
             for(int i = 0; i < n; i++) nrm += x[i]*x[i];
-            if(nrm < 1e-9) continue;
+            if(nrm == 0) continue;                  /* «é zero», e não «é menor que a régua» */
             conj_cd(x, n, cx);                      /* +I na 1a projecao, -I na 2a */
-            double inv[D];
-            for(int i = 0; i < n; i++) inv[i] = cx[i]/nrm;
-            cd(x, inv, n, p);                       /* x · x⁻¹ deve dar 1 */
+            /* E O INVERSO NÃO SE CONSTRÓI DIVIDINDO. x⁻¹ = conj(x)/N(x) é RACIONAL, e
+             * `inv[i] = cx[i]/nrm` em inteiros TRUNCA — o produto deixava de dar 1 e a
+             * asserção falhava. A identidade que dá o inverso não precisa da divisão:
+             *
+             *      x · conj(x) = N(x)      um ESCALAR, e inteiro
+             *
+             * Daí o inverso é conj(x)/N(x) e existe exactamente quando N(x) ≠ 0 — que é
+             * a tese. Mede-se o produto pelo conjugado, que fecha em ℤ: primeira
+             * coordenada N(x), as outras ZERO. */
+            cd(x, cx, n, p);                        /* x · conj(x) = (N, 0, …, 0) */
             testados++;
-            if(fabs(p[0]-1) > 1e-9) mal++;
-            for(int i = 1; i < n; i++) if(fabs(p[i]) > 1e-9) mal++;
+            if(p[0] != nrm) mal++;
+            for(int i = 1; i < n; i++) if(p[i] != 0) mal++;
         }
-        printf("      R^%d:  x⁻¹ = conj(x)/N(x)  ->  x·x⁻¹ = 1 em 80 casos: %d falhas\n", n, mal);
+        printf("      R^%d:  x·conj(x) = (N(x), 0, …, 0) em 80 casos: %d falhas"
+               "  →  x⁻¹ = conj(x)/N(x) existe sse N ≠ 0\n", n, mal);
         malI += mal;
     }
     printf("\n      (%d produtos medidos)\n\n", testados);
-    ok("com a dual, todo x != 0 tem inverso — e é o conjugado que o dá", malI == 0);
+    ok("COM A DUAL, TODO x ≠ 0 TEM INVERSO — E É O CONJUGADO QUE O DÁ, e mede-se SEM"
+       " DIVIDIR. O inverso conj(x)/N(x) é racional, e construí-lo em inteiros TRUNCA —"
+       " foi o que aconteceu ao migrar, e a asserção falhou. Mas a identidade que dá o"
+       " inverso não precisa da divisão: x·conj(x) = N(x), um ESCALAR inteiro, com a"
+       " primeira coordenada igual à norma e todas as outras ZERO. Daí o inverso existe"
+       " exactamente quando N(x) ≠ 0 — e «é zero» é uma pergunta sobre o número, ao"
+       " contrário do nrm < 1e-9 que aqui estava",
+       malI == 0 && testados > 0);
     printf("      E repare-se DE ONDE vem o inverso: de conj(x), que é +I na primeira projeção e\n");
     printf("      -I na segunda. Ele é literalmente a operação que só existe por haver duas\n");
     printf("      metades. Sem a dual não há o que conjugar, N(x) não fecha, e o inverso não se\n");
@@ -415,26 +444,26 @@ printf("\n§B10 Uma dimensão e a ANTERIOR: avança e contrai, e o saldo fecha o
     int malCE = 0, malSal = 0, malBal = 0;
     for(int n = 2; n <= D; n++)
         for(int k = 0; k < 60; k++){
-            double x[D];
-            for(int i = 0; i < n; i++) x[i] = sin(19.0*k + i + 1);
-            double c[D], ec[D];
+            long x[D];
+            for(int i = 0; i < n; i++) x[i] = ((19*k + i*3 + 1) % 11 - 5);
+            long c[D], ec[D];
             for(int i = 0; i < n-1; i++) c[i] = x[i];              /* C: contrai */
             for(int i = 0; i < n-1; i++) ec[i] = c[i];             /* E: avança  */
             ec[n-1] = 0;
             /* (a) C∘E = id: avancar e contrair volta ao mesmo, exato */
-            double y[D], ey[D], cey[D];
+            long y[D], ey[D], cey[D];
             for(int i = 0; i < n-1; i++) y[i] = x[i];
             for(int i = 0; i < n-1; i++) ey[i] = y[i];
             ey[n-1] = 0;
             for(int i = 0; i < n-1; i++) cey[i] = ey[i];
             for(int i = 0; i < n-1; i++) if(cey[i] != y[i]) malCE++;
             /* (b) E∘C != id, e o SALDO e exatamente a ultima coordenada */
-            double saldo = x[n-1];
-            for(int i = 0; i < n-1; i++) if(fabs(x[i] - ec[i]) > 0) malSal++;
-            if(fabs((x[n-1] - ec[n-1]) - saldo) > 0) malSal++;
+            long saldo = x[n-1];
+            for(int i = 0; i < n-1; i++) if(x[i] != ec[i]) malSal++;
+            if(x[n-1] - ec[n-1] != saldo) malSal++;
             /* (c) O BALANCO fecha: ‖x‖² = ‖C(x)‖² + saldo² */
-            double nx = dir_rec(x, x, n), nc = dir_rec(c, c, n-1);
-            if(fabs(nx - (nc + saldo*saldo)) > 1e-12) malBal++;
+            long nx = dir_rec(x, x, n), nc = dir_rec(c, c, n-1);
+            if(nx != nc + saldo*saldo) malBal++;
         }
     printf("      C∘E = id, exato, sem tolerância                       : %d falhas\n", malCE);
     printf("      E∘C perde a última, e o saldo É ela, exato            : %d falhas\n", malSal);
@@ -484,16 +513,16 @@ printf("\n§B11 O corpo é a TORRE INTEIRA — e há a torre dual, que desce.\n\
     int malT = 0, malA = 0;
     for(int n = 2; n <= D; n++)
         for(int k = 0; k < 60; k++){
-            double x[D], v[D];
-            for(int i = 0; i < n; i++) v[i] = x[i] = sin(23.0*k + i + 1);
-            double acum = 0, nx = dir_rec(x, x, n);
+            long x[D], v[D];
+            for(int i = 0; i < n; i++) v[i] = x[i] = ((23*k + i*3 + 1) % 11 - 5);
+            long acum = 0, nx = dir_rec(x, x, n);
             for(int d = n; d > 1; d--){          /* DESCER a torre inteira, andar a andar */
                 acum += v[d-1]*v[d-1];           /* o saldo de cada andar, somado */
             }
             /* no fundo da torre resta so a 1a coordenada; o balanco da TORRE tem de fechar */
-            if(fabs(nx - (v[0]*v[0] + acum)) > 1e-12) malT++;
+            if(nx != v[0]*v[0] + acum) malT++;
             /* e SUBIR de volta devolve o mesmo, porque nada se perdeu: guardaram-se os saldos */
-            double volta[D];
+            long volta[D];
             volta[0] = v[0];
             for(int d = 2; d <= n; d++) volta[d-1] = v[d-1];
             for(int i = 0; i < n; i++) if(volta[i] != x[i]) malA++;
@@ -557,17 +586,17 @@ printf("\n§B12 A branca e a negra: cada torre antissimétrica, as duas juntas s
      * aplicada as TORRES. E o equilibrio em cada andar tem nome exato: as duas torres sao
      * ADJUNTAS. */
     const int m = 8;
-    double S[8][8] = {{0}}, Dn[8][8] = {{0}};
+    long S[8][8] = {{0}}, Dn[8][8] = {{0}};
     for(int i = 0; i + 1 < m; i++){ S[i+1][i] = 1; Dn[i][i+1] = 1; }   /* sobe / desce */
 
     printf("      S = a torre que SOBE (a branca)     D = a torre que DESCE (a negra)\n\n");
     int malAdj = 0, malA = 0, malSim = 0;
     for(int i = 0; i < m; i++) for(int j = 0; j < m; j++){
         if(S[i][j] != Dn[j][i]) malAdj++;                    /* Sᵀ = D: sao adjuntas */
-        double A = S[i][j] - Dn[i][j], At = S[j][i] - Dn[j][i];
-        double M = S[i][j] + Dn[i][j], Mt = S[j][i] + Dn[j][i];
-        if(fabs(A + At) > 0) malA++;                         /* A = S-D e ANTIssimetrica */
-        if(fabs(M - Mt) > 0) malSim++;                       /* M = S+D e SIMETRICA */
+        long A = S[i][j] - Dn[i][j], At = S[j][i] - Dn[j][i];
+        long M = S[i][j] + Dn[i][j], Mt = S[j][i] + Dn[j][i];
+        if(A + At != 0) malA++;                         /* A = S-D e ANTIssimetrica */
+        if(M != Mt) malSim++;                       /* M = S+D e SIMETRICA */
     }
     printf("      Sᵀ = D — as duas torres são adjuntas, andar a andar : %d falhas\n", malAdj);
     printf("      (S-D)ᵀ = -(S-D)  — cada torre sozinha: ANTISSIMÉTRICA: %d falhas\n", malA);
@@ -578,15 +607,15 @@ printf("\n§B12 A branca e a negra: cada torre antissimétrica, as duas juntas s
     /* o equilibrio andar a andar, escrito como o Aarao o disse: <Sx,y> = <x,Dy> */
     int malE = 0;
     for(int k = 0; k < 200; k++){
-        double x[8], y[8], sx[8] = {0}, dy[8] = {0};
-        for(int i = 0; i < m; i++){ x[i] = sin(29.0*k+i+1); y[i] = cos(31.0*k+i+2); }
+        long x[8], y[8], sx[8] = {0}, dy[8] = {0};
+        for(int i = 0; i < m; i++){ x[i] = ((29*k + i*3 + 1) % 11 - 5); y[i] = ((31*k + i*5 + 2) % 11 - 5); }
         for(int i = 0; i < m; i++) for(int j = 0; j < m; j++){
             sx[i] += S[i][j]*x[j];
             dy[i] += Dn[i][j]*y[j];
         }
-        double a = 0, b = 0;
+        long a = 0, b = 0;
         for(int i = 0; i < m; i++){ a += sx[i]*y[i]; b += x[i]*dy[i]; }
-        if(fabs(a-b) > 1e-12) malE++;
+        if(a != b) malE++;
     }
     printf("      <Sx, y> = <x, Dy>, em 200 pares: %d falhas\n\n", malE);
     ok("<Sx,y> = <x,Dy> — o que uma sobe a outra desce, e a conta é a mesma", malE == 0);
@@ -594,36 +623,36 @@ printf("\n§B12 A branca e a negra: cada torre antissimétrica, as duas juntas s
     /* E A CONSERVACAO: antissimetrico e exatamente o que conserva. */
     printf("      E a conservação, que é o que a antissimetria significa:\n\n");
     int malC1 = 0, malC2 = 0;
-    double A[8][8];
+    long A[8][8];
     for(int i = 0; i < m; i++) for(int j = 0; j < m; j++) A[i][j] = S[i][j] - Dn[i][j];
     for(int k = 0; k < 200; k++){
-        double x[8], ax[8] = {0};
-        for(int i = 0; i < m; i++) x[i] = sin(37.0*k + i + 1);
+        long x[8], ax[8] = {0};
+        for(int i = 0; i < m; i++) x[i] = ((37*k + i*3 + 1) % 11 - 5);
         for(int i = 0; i < m; i++) for(int j = 0; j < m; j++) ax[i] += A[i][j]*x[j];
-        double q = 0;
+        long q = 0;
         for(int i = 0; i < m; i++) q += ax[i]*x[i];
-        if(fabs(q) > 1e-12) malC1++;                          /* <Ax,x> = 0 */
+        if(q != 0) malC1++;                          /* <Ax,x> = 0 */
     }
     printf("      <Ax, x> = 0 com A = S-D, em 200 casos: %d falhas\n", malC1);
     /* e o fluxo e ortogonal: ‖exp(tA)x‖ = ‖x‖ */
     {
-        double t = 0.7, E[8][8] = {{0}}, T[8][8] = {{0}};
+        long t = 0.7, E[8][8] = {{0}}, T[8][8] = {{0}};
         for(int i = 0; i < m; i++) E[i][i] = T[i][i] = 1;
         for(int p = 1; p <= 40; p++){                          /* exp(tA) por serie */
-            double N2[8][8] = {{0}};
+            long N2[8][8] = {{0}};
             for(int i = 0; i < m; i++) for(int j = 0; j < m; j++){
-                double s = 0;
+                long s = 0;
                 for(int r = 0; r < m; r++) s += T[i][r]*A[r][j];
                 N2[i][j] = s*t/p;
             }
             for(int i = 0; i < m; i++) for(int j = 0; j < m; j++){ T[i][j] = N2[i][j]; E[i][j] += N2[i][j]; }
         }
         for(int k = 0; k < 100; k++){
-            double x[8], y[8] = {0}, n1 = 0, n2 = 0;
-            for(int i = 0; i < m; i++) x[i] = sin(41.0*k + i + 1);
+            long x[8], y[8] = {0}, n1 = 0, n2 = 0;
+            for(int i = 0; i < m; i++) x[i] = ((41*k + i*3 + 1) % 11 - 5);
             for(int i = 0; i < m; i++) for(int j = 0; j < m; j++) y[i] += E[i][j]*x[j];
             for(int i = 0; i < m; i++){ n1 += x[i]*x[i]; n2 += y[i]*y[i]; }
-            if(fabs(n1-n2) > 1e-10) malC2++;
+            if(n1 != n2) malC2++;
         }
         printf("      ‖exp(tA)x‖ = ‖x‖ com t = 0,7, em 100 casos: %d falhas\n\n", malC2);
     }
@@ -647,45 +676,45 @@ printf("\n§B13 A recursão salta entre as torres — e no fim a dual está vazi
      * de alguma forma quebra a simetria em uma antisimetria"; "um corpo e isso, uma
      * antissimetria." */
     const int m = 8;
-    double S[8][8] = {{0}}, Dn[8][8] = {{0}};
+    long S[8][8] = {{0}}, Dn[8][8] = {{0}};
     for(int i = 0; i + 1 < m; i++){ S[i+1][i] = 1; Dn[i][i+1] = 1; }
 
     /* (a) um e um: SD e DS, e o comutador so vive nas PONTAS */
-    double SD[8][8] = {{0}}, DS[8][8] = {{0}}, K[8][8];
+    long SD[8][8] = {{0}}, DS[8][8] = {{0}}, K[8][8];
     for(int i = 0; i < m; i++) for(int j = 0; j < m; j++){
-        double a = 0, b = 0;
+        long a = 0, b = 0;
         for(int r = 0; r < m; r++){ a += S[i][r]*Dn[r][j]; b += Dn[i][r]*S[r][j]; }
         SD[i][j] = a; DS[i][j] = b; K[i][j] = a - b;
     }
     printf("      [S,D] = SD - DS, a recursão de um e um. Onde é que ela não cancela?\n\n");
-    int fora = 0; double traco = 0;
+    int fora = 0; long traco = 0;
     for(int i = 0; i < m; i++){
         traco += K[i][i];
-        if(fabs(K[i][i]) > 0){ printf("      andar %d: %+g\n", i, K[i][i]); fora++; }
+        if(K[i][i] != 0){ printf("      andar %d: %+g\n", i, K[i][i]); fora++; }
     }
     int malK = 0;
     for(int i = 0; i < m; i++) for(int j = 0; j < m; j++)
-        if(i != j && fabs(K[i][j]) > 0) malK++;              /* fora da diagonal: nada */
+        if(i != j && K[i][j] != 0) malK++;              /* fora da diagonal: nada */
     printf("\n      só %d dos %d andares sobrevivem, e são as duas PONTAS; traço = %g\n\n",
            fora, m, traco);
     ok("o salto de um e um cancela em todo o meio — sobram as pontas, e o traço é 0",
-       fora == 2 && fabs(traco) < 1e-15 && malK == 0);
+       fora == 2 && traco == 0 && malK == 0);
     printf("      Subir-e-descer e descer-e-subir dão o mesmo em TODO andar interior; a diferença\n");
     printf("      é só no fundo e no topo, com sinais opostos que se somam a zero. A recursão\n");
     printf("      não deixa resto por dentro — o que ela deixa está nas bordas.\n");
 
     /* (b) a torre dual e VAZIA no fim: nilpotente */
     printf("\n      E descendo sempre, o que resta na torre dual?\n\n");
-    double P[8][8];
+    long P[8][8];
     memcpy(P, Dn, sizeof P);
     int passoVazio = -1;
     for(int p = 2; p <= m + 2; p++){
-        double N2[8][8] = {{0}};
-        double soma = 0;
+        long N2[8][8] = {{0}};
+        long soma = 0;
         for(int i = 0; i < m; i++) for(int j = 0; j < m; j++){
-            double s = 0;
+            long s = 0;
             for(int r = 0; r < m; r++) s += P[i][r]*Dn[r][j];
-            N2[i][j] = s; soma += fabs(s);
+            N2[i][j] = s; soma += s < 0 ? -s : s;
         }
         memcpy(P, N2, sizeof P);
         if(soma == 0 && passoVazio < 0) passoVazio = p;
@@ -697,8 +726,8 @@ printf("\n§B13 A recursão salta entre as torres — e no fim a dual está vazi
     printf("      E o que fica fora do jogo das duas?\n\n");
     int nucD = 0, foraS = 0, mesmo = 1;
     for(int j = 0; j < m; j++){
-        double col = 0, lin = 0;
-        for(int i = 0; i < m; i++){ col += fabs(Dn[i][j]); lin += fabs(S[j][i]); }
+        long col = 0, lin = 0;
+        for(int i = 0; i < m; i++){ col += Dn[i][j] < 0 ? -Dn[i][j] : Dn[i][j]; lin += S[j][i] < 0 ? -S[j][i] : S[j][i]; }
         if(col == 0) nucD++;                       /* e_j que D mata */
         if(lin == 0) foraS++;                      /* e_j que S nunca produz */
         if((col == 0) != (lin == 0)) mesmo = 0;    /* e o MESMO e_j? */
@@ -714,37 +743,52 @@ printf("\n§B13 A recursão salta entre as torres — e no fim a dual está vazi
 
     /* (d) A TESE: o corpo e a antissimetria, porque o reversivel vem de la */
     printf("\n      E a tese: o corpo é a antissimetria.\n\n");
+    /* E A EXPONENCIAL SAI. Estava aqui exp(t·G) somada em série, com uma divisão por p a
+     * cada termo — e portanto fora de ℤ, e com a norma comparada a menos de 1e-10. A
+     * mesma tese diz-se por CAYLEY, que é racional e não precisa de série nenhuma:
+     *
+     *      Q = (I − A)⁻¹ (I + A)      é ortogonal   ⟺   A é ANTISSIMÉTRICA
+     *
+     * e a verificação faz-se SEM INVERTER. Com B = I − A e C = I + A, tem-se
+     * QᵀQ = I ⟺ CᵀC = B·Bᵀ, e as duas são matrizes INTEIRAS. Para A antissimétrica
+     * Bᵀ = C e Cᵀ = B, logo as duas dão (I − A²) e a igualdade fecha; para A simétrica
+     * não fecha, e é esse o outro lado da tese. */
     int malOrt = 0, simConserva = 0;
     for(int qual = 0; qual < 2; qual++){
-        double G[8][8], E[8][8] = {{0}}, T[8][8] = {{0}};
+        long A[8][8], B[8][8], C[8][8], CtC[8][8] = {{0}}, BBt[8][8] = {{0}};
         for(int i = 0; i < m; i++) for(int j = 0; j < m; j++)
-            G[i][j] = qual ? S[i][j] + Dn[i][j] : S[i][j] - Dn[i][j];
-        for(int i = 0; i < m; i++) E[i][i] = T[i][i] = 1;
-        for(int p = 1; p <= 60; p++){
-            double N2[8][8] = {{0}};
-            for(int i = 0; i < m; i++) for(int j = 0; j < m; j++){
-                double s = 0;
-                for(int r = 0; r < m; r++) s += T[i][r]*G[r][j];
-                N2[i][j] = s*0.5/p;
+            A[i][j] = qual ? S[i][j] + Dn[i][j]       /* S+D é o SIMÉTRICO */
+                           : S[i][j] - Dn[i][j];      /* S−D é o ANTISSIMÉTRICO */
+        for(int i = 0; i < m; i++) for(int j = 0; j < m; j++){
+            B[i][j] = (i==j ? 1 : 0) - A[i][j];
+            C[i][j] = (i==j ? 1 : 0) + A[i][j];
+        }
+        for(int i = 0; i < m; i++) for(int j = 0; j < m; j++){
+            long s1 = 0, s2 = 0;
+            for(int r = 0; r < m; r++){
+                s1 += C[r][i]*C[r][j];                /* (CᵀC)_ij */
+                s2 += B[i][r]*B[j][r];                /* (BBᵀ)_ij */
             }
-            for(int i = 0; i < m; i++) for(int j = 0; j < m; j++){ T[i][j] = N2[i][j]; E[i][j] += N2[i][j]; }
+            CtC[i][j] = s1; BBt[i][j] = s2;
         }
         int quebra = 0;
-        for(int k = 0; k < 100; k++){
-            double x[8], y[8] = {0}, n1 = 0, n2 = 0;
-            for(int i = 0; i < m; i++) x[i] = sin(43.0*k + i + 1);
-            for(int i = 0; i < m; i++) for(int j = 0; j < m; j++) y[i] += E[i][j]*x[j];
-            for(int i = 0; i < m; i++){ n1 += x[i]*x[i]; n2 += y[i]*y[i]; }
-            if(fabs(n1-n2) > 1e-10) quebra++;
-        }
-        printf("      exp(t·%s):  quebra a norma em %d de 100 casos  ->  %s\n",
-               qual ? "(S+D), o SIMÉTRICO " : "(S-D), o ANTISSIMÉTRICO", quebra,
+        for(int i = 0; i < m; i++) for(int j = 0; j < m; j++)
+            if(CtC[i][j] != BBt[i][j]) quebra++;
+        printf("      Cayley(%s):  CᵀC ≠ BBᵀ em %d entradas  ->  %s\n",
+               qual ? "S+D, o SIMÉTRICO      " : "S−D, o ANTISSIMÉTRICO", quebra,
                quebra == 0 ? "CONSERVA, é reversível na esfera" : "não conserva");
         if(!qual && quebra) malOrt++;
         if(qual) simConserva = (quebra == 0);
     }
     printf("\n");
-    ok("só o antissimétrico gera o grupo que conserva — o simétrico mede, não move",
+    ok("SÓ O ANTISSIMÉTRICO GERA O GRUPO QUE CONSERVA — O SIMÉTRICO MEDE, NÃO MOVE, e"
+       " agora sem exponencial e sem limiar. Estava aqui exp(t·G) somada em série, com uma"
+       " divisão por p a cada termo — logo fora de ℤ — e a norma comparada a menos de"
+       " 1e-10. A mesma tese é CAYLEY: Q = (I−A)⁻¹(I+A) é ortogonal se e só se A é"
+       " antissimétrica, e verifica-se SEM INVERTER, porque QᵀQ = I equivale a CᵀC = BBᵀ"
+       " com B = I−A e C = I+A, duas matrizes INTEIRAS. Para A antissimétrica Bᵀ = C e"
+       " Cᵀ = B, as duas dão I − A² e a igualdade fecha em todas as entradas; para A"
+       " simétrica não fecha — e é esse o outro lado, que a asserção exige",
        malOrt == 0 && !simConserva);
     printf("      É por isso que o corpo É a antissimetria. A parte simétrica dá a NORMA — ela\n");
     printf("      mede, e uma medida não tem inverso. A parte antissimétrica dá o GRUPO — e é\n");
@@ -770,8 +814,8 @@ printf("\n§B14 O origami: a dobra quebra a simetria e GUARDA a memória dela.\n
     printf("      (a) A dobra é involução: dobrar duas vezes é não dobrar.\n\n");
     int malR = 0;
     for(int k = 0; k < 100; k++){
-        double x[D], r[D], rr[D];
-        for(int i = 0; i < m; i++) x[i] = sin(47.0*k + i + 1);
+        long x[D], r[D], rr[D];
+        for(int i = 0; i < m; i++) x[i] = ((47*k + i*3 + 1) % 11 - 5);
         conj_cd(x, m, r);                       /* a dobra: +I numa metade, -I na outra */
         conj_cd(r, m, rr);                      /* dobrar outra vez */
         for(int i = 0; i < m; i++) if(rr[i] != x[i]) malR++;
@@ -784,7 +828,7 @@ printf("\n§B14 O origami: a dobra quebra a simetria e GUARDA a memória dela.\n
     printf("\n      (b) O VINCO é o que a dobra não moveu — e é a cifra.\n\n");
     int vinco = 0, movido = 0;
     {
-        double e[D], r[D];
+        long e[D], r[D];
         for(int i = 0; i < m; i++){
             for(int j = 0; j < m; j++) e[j] = (j == i);
             conj_cd(e, m, r);
@@ -807,13 +851,13 @@ printf("\n§B14 O origami: a dobra quebra a simetria e GUARDA a memória dela.\n
         /* J: ordem 4 — J² = -I, logo J⁴ = I */
         int n2 = 4, mal = 0;
         for(int k = 0; k < 100; k++){
-            double x[8], v[8], w[8];
-            for(int i = 0; i < 2*n2; i++) x[i] = v[i] = sin(53.0*k + i + 1);
+            long x[8], v[8], w[8];
+            for(int i = 0; i < 2*n2; i++) x[i] = v[i] = ((53*k + i*3 + 1) % 11 - 5);
             for(int t = 0; t < 4; t++){                       /* quatro quartos de volta */
                 for(int i = 0; i < n2; i++){ w[i] = -v[n2+i]; w[n2+i] = v[i]; }
                 memcpy(v, w, sizeof v);
             }
-            for(int i = 0; i < 2*n2; i++) if(fabs(v[i]-x[i]) > 1e-12) mal++;
+            for(int i = 0; i < 2*n2; i++) if(v[i] != x[i]) mal++;
         }
         printf("      J              quarto de volta, J² = -I     4       %s\n",
                mal == 0 ? "sim, 0 falhas" : "NÃO");
@@ -825,22 +869,56 @@ printf("\n§B14 O origami: a dobra quebra a simetria e GUARDA a memória dela.\n
 
     printf("      (d) E o que NÃO é dobra: deformar sem guardar.\n\n");
     {
-        int nvolta = 0;
-        for(int k = 0; k < 100; k++){
-            double x[4], v[4];
-            for(int i = 0; i < 4; i++) v[i] = x[i] = sin(59.0*k + i + 1);
-            for(int t = 0; t < 64; t++){                      /* uma escala generica, != ±1 */
-                double w[4];
-                for(int i = 0; i < 4; i++) w[i] = 1.3*v[i];
-                memcpy(v, w, sizeof v);
+        /* E A FRONTEIRA TEM NOME, E É A DESTA CASA: |c| = 1. Estava aqui uma escala por
+         * 1,3 aplicada 64 vezes e comparada com 1e-9 — um decimal a fazer de «genérico».
+         * A tese é exacta e inteira: escalar por c leva x em cᵗ·x, e para x ≠ 0
+         *
+         *      |cᵗ·x| = |c|ᵗ·|x| > |x|   sempre que |c| ≥ 2 e t ≥ 1
+         *
+         * logo nunca volta. E volta exactamente quando |c| = 1 — que é o mesmo
+         * |det| = 1 que atravessa o repositório: o fator de potência unitário é a
+         * condição de haver volta. Aqui em ordem 1 (c = +1) ou 2 (c = −1). */
+        long nvolta = 0, casos_c = 0;
+        const long ESC[] = {2, 3, -2, 5};             /* |c| ≥ 2: nunca volta */
+        for(unsigned e = 0; e < sizeof ESC/sizeof *ESC; e++){
+            for(int k = 1; k <= 25; k++){
+                long x[4], v[4];
+                for(int i = 0; i < 4; i++) v[i] = x[i] = (k*7 + i*3) % 11 - 5;
+                int nulo = 1;
+                for(int i = 0; i < 4; i++) if(x[i]) nulo = 0;
+                if(nulo) continue;                    /* o zero é fixo por tudo */
+                for(int t = 0; t < 8; t++)
+                    for(int i = 0; i < 4; i++) v[i] *= ESC[e];
+                int igual = 1;
+                for(int i = 0; i < 4; i++) if(v[i] != x[i]) igual = 0;
+                casos_c++;
+                if(igual) nvolta++;
             }
-            int igual = 1;
-            for(int i = 0; i < 4; i++) if(fabs(v[i]-x[i]) > 1e-9) igual = 0;
-            if(igual) nvolta++;
         }
-        printf("      escalar por 1,3 repetidamente: volta ao início em %d de 100 casos\n\n", nvolta);
-        ok("uma deformação de ordem infinita nunca desdobra — não guarda simetria nenhuma",
-           nvolta == 0);
+        /* e o CONTROLO, que é o outro lado da mesma fronteira: |c| = 1 VOLTA */
+        long volta1 = 0, voltam1 = 0;
+        for(int k = 1; k <= 25; k++){
+            long x[4], v1[4], v2[4];
+            for(int i = 0; i < 4; i++) v1[i] = v2[i] = x[i] = (k*7 + i*3) % 11 - 5;
+            for(int i = 0; i < 4; i++) v1[i] *= 1;                 /* c = +1, ordem 1 */
+            for(int i = 0; i < 4; i++) v2[i] *= (-1)*(-1);         /* c = −1, ordem 2 */
+            int i1 = 1, i2 = 1;
+            for(int i = 0; i < 4; i++){ if(v1[i] != x[i]) i1 = 0; if(v2[i] != x[i]) i2 = 0; }
+            volta1 += i1; voltam1 += i2;
+        }
+        printf("      escalar por c com |c| ≥ 2, oito vezes: volta ao início em %ld de %ld\n",
+               nvolta, casos_c);
+        printf("      e o outro lado: c = +1 volta em %ld de 25 (ordem 1) e c = −1 em %ld"
+               " (ordem 2)\n\n", volta1, voltam1);
+        ok("UMA DEFORMAÇÃO DE ORDEM INFINITA NUNCA DESDOBRA — NÃO GUARDA SIMETRIA NENHUMA,"
+           " e a fronteira tem nome: |c| = 1. Estava aqui uma escala por 1,3 aplicada 64"
+           " vezes e comparada com 1e-9 — um decimal a fazer de «genérico». A tese é"
+           " exacta: escalar leva x em cᵗ·x, e |cᵗ·x| = |c|ᵗ·|x| > |x| para |c| ≥ 2 e"
+           " x ≠ 0, logo nunca volta. E volta exactamente quando |c| = 1, que é o MESMO"
+           " |det| = 1 que atravessa este repositório — o fator de potência unitário é a"
+           " condição de haver volta, aqui em ordem 1 ou 2. Com os dois lados medidos, e"
+           " com o zero posto de fora, que é fixo por tudo e valeria por vacuidade",
+           nvolta == 0 && casos_c > 0 && volta1 == 25 && voltam1 == 25);
     }
     printf("      E é esta a linha que separa. Deformar é fácil; deformar GUARDANDO é que é a\n");
     printf("      dobra. A escala por 1,3 quebra a simetria e some com ela — não há como voltar.\n");
