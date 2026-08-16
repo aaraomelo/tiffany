@@ -280,7 +280,7 @@ um majorante.
 $2110$ racionais ultrapassados}
 
 %======================================================================
-\section{A classificação é por nível --- e é Lagrange}\label{sec:lagrange}
+\section{A classificação é pelo PERÍODO da fracção contínua}\label{sec:lagrange}
 
 O mesmo processo separa os habitantes, e a separação lê-se na \textbf{fracção
 contínua}, pelo \textbf{período}.
@@ -413,7 +413,7 @@ tem oito posições, \textbf{reutilizadas bloco a bloco}. $\square$
         {\code{geometria\_real.c} \S L3}
 
 %======================================================================
-\section{Euler: o invariante topológico não vê o andar}\label{sec:euler}
+\section{O invariante topológico não vê o andar}\label{sec:euler}
 
 Antes de decidir cortes, convém saber \emph{o que na construção depende do andar} ---
 porque quase nada depende.
@@ -803,7 +803,7 @@ irredutível em zero}
 %======================================================================
 \section{O Teorema Central funda o limite}\label{sec:central}
 
-\begin{teorema}[Hurwitz conta, Lebesgue mede, Gentil casa]\label{thm:central}
+\begin{teorema}[contar pelo domínio e medir por níveis somam ao rectângulo]\label{thm:central}
 \[
 \boxed{
 \begin{array}{ll}
@@ -1016,7 +1016,7 @@ segunda equivalência \emph{precisa} dessa hipótese; sem ela, só a primeira va
 $\square$
 \end{teorema}
 
-\begin{teorema}[o inteiro vem de Newton]\label{thm:newton}
+\begin{teorema}[as somas de potências são inteiras, e obedecem à recorrência do polinómio]\label{thm:newton}
 As somas de potências $P_k=\sum_i r_i^{\,k}$ das raízes são \textbf{inteiras}, e
 obedecem à recorrência \emph{do próprio polinómio}:
 \[
@@ -2110,6 +2110,66 @@ sob a condição mais larga $n\leq t$. \emph{São duas exigências, e não uma:}
 \abs{N(\sigma)}=1\ \ (n=1) & \text{o \textbf{comprimento} do intervalo é } 1/(q_kq_{k+1})
 \end{array}}
 \]
+
+%======================================================================
+\section{A OPERAÇÃO --- e as duas leis são as duas metades dela}\label{sec:operacao}
+
+\noindent Há \textbf{uma} operação, e ela escreve-se numa linha:
+\[
+\boxed{\;a\star b\;}
+\]
+Não é «a soma» nem «o produto»: é a operação, e a soma e o produto são as suas duas
+\emph{metades}, que saem por trocar a ordem:
+\[
+\boxed{
+\begin{array}{lll}
+\langle a,b\rangle=\tfrac12(a\star b+b\star a) & \text{a metade que \textbf{não muda}} &
+\text{o DIRECTO}\\[3pt]
+a\wedge b=\tfrac12(a\star b-b\star a) & \text{a metade que \textbf{troca de sinal}} &
+\text{o CRUZADO}
+\end{array}}
+\]
+e a volta é imediata, $a\star b=\langle a,b\rangle+a\wedge b$. \textbf{Não há duas
+operações a coexistir: há uma, e um espelho} --- e o espelho é trocar a ordem.
+
+\begin{teorema}[as propriedades são dela, e leem-se todas no espelho]\label{thm:operacao}
+\emph{(i) A decomposição é única.} Dado $\star$, as metades são o que são: a diferença
+entre duas repartições seria simultaneamente simétrica e antissimétrica, logo \emph{zero}.
+
+\emph{(ii) O espelho é involução}, e é por isso que as metades são \textbf{duas}: uma
+repartição em fixos e invertidos só existe porque trocar duas vezes devolve.
+
+\emph{(iii) Uma fica, a outra inverte.} Sob o espelho o directo é fixo e o cruzado muda de
+sinal --- e os cruzados não são todos nulos, sem o que «inverte» valeria por $0=-0$.
+
+\emph{(iv) Na base de oito, ela parte-se sozinha}: $e_i\star e_j$ tem parte directa
+$\delta_{ij}$ --- a Gram do \S\ref{sec:orto}, que é a identidade --- e parte cruzada em
+tudo o resto. \textbf{A diagonal mede; fora dela há área.} $\square$
+\end{teorema}
+
+\begin{teorema}[as oito trabalham juntas, e a seguinte abre autossimilar]\label{thm:juntas}
+Os andares \textbf{não} se enchem em fila, como uma jarra a encher copos. As oito
+dimensões são \emph{um bloco}, e nele:
+\[
+\boxed{
+\begin{array}{ll}
+\text{trabalham \textbf{juntas}} & \text{as oito coordenadas entram na mesma operação}\\[3pt]
+\text{saturam \textbf{juntas}} & \text{o que satura é o CONJUNTO, no passo oito}\\[3pt]
+\text{e a seguinte \textbf{abre}} & \text{não uma dimensão nova: OUTRO BLOCO DE OITO}
+\end{array}}
+\]
+O índice vive em $\mathbb{Z}/8\mathbb{Z}$ e o passo oito devolve o princípio --- é a
+\textbf{Lei 8 $\equiv$ Lei 0} das oito leis. É por isso que a base se \emph{reutiliza}
+bloco a bloco em vez de crescer: \emph{o que cresce é o objecto, não a máquina}. E a
+órbita percorre as oito coordenadas, cada uma uma vez antes de qualquer repetição --- que
+é o que «completa e ordenadamente» quer dizer. $\square$
+\end{teorema}
+\colunas{as oito leis e a base ortonormal (\code{thm:ortonormal})}
+        {a operação única, o espelho que a reparte, e o bloco que satura}
+        {\code{tests/operacao.c} ($5{:}0$): a volta das duas metades em $600$ pares; o
+espelho involutivo com $514$ cruzados não nulos; os $64$ pares da base com a diagonal a
+medir e o resto com área $\pm1$; e o bloco a saturar no passo oito, com o índice a voltar
+ao princípio}
 
 %======================================================================
 \section{A construção está fechada}\label{sec:fechada}
