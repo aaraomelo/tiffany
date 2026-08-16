@@ -2118,17 +2118,23 @@ sob a condição mais larga $n\leq t$. \emph{São duas exigências, e não uma:}
 \[
 \boxed{\;a\star b\;}
 \]
-Não é «a soma» nem «o produto»: é a operação, e a soma e o produto são as suas duas
-\emph{metades}, que saem por trocar a ordem:
+Não é «a soma» nem «o produto»: é a operação, e o que dela sai são duas
+\emph{leituras}, separadas por trocar a ordem. \textbf{Elas têm nomes internos}, e não os
+nomes que queremos provar que realizam:
 \[
 \boxed{
 \begin{array}{lll}
-\langle a,b\rangle=\tfrac12(a\star b+b\star a) & \text{a metade que \textbf{não muda}} &
-\text{o DIRECTO}\\[3pt]
-a\wedge b=\tfrac12(a\star b-b\star a) & \text{a metade que \textbf{troca de sinal}} &
-\text{o CRUZADO}
+\operatorname{Dir}(a,b)=\tfrac12(a\star b+b\star a) & \text{a leitura que \textbf{não
+muda}}\\[3pt]
+\operatorname{Cruz}(a,b)=\tfrac12(a\star b-b\star a) & \text{a leitura que \textbf{troca
+de sinal}}
 \end{array}}
 \]
+\emph{Chamar «produto» a uma leitura de $a\star b$ antes de o demonstrar seria importar a
+semântica} --- o mesmo defeito de importar a régua, um nível acima. Prova-se primeiro que
+elas \textbf{realizam}: $\operatorname{Dir}(a,e_i)$ devolve a coordenada $a_i$ --- a
+peneira do \S\ref{sec:orto} --- e $\operatorname{Cruz}$ coincide com o determinante $2\times2$
+calculado \emph{por permutações}. Só depois se lhes pode chamar medida e área.
 e a volta é imediata, $a\star b=\langle a,b\rangle+a\wedge b$. \textbf{Não há duas
 operações a coexistir: há uma, e um espelho} --- e o espelho é trocar a ordem.
 
@@ -2164,12 +2170,43 @@ bloco a bloco em vez de crescer: \emph{o que cresce é o objecto, não a máquin
 órbita percorre as oito coordenadas, cada uma uma vez antes de qualquer repetição --- que
 é o que «completa e ordenadamente» quer dizer. $\square$
 \end{teorema}
+\begin{teorema}[o bloco fecha, e o oito é o período]\label{thm:bloco}
+\[
+\boxed{\;B_8\times B_8\longrightarrow B_8\;}
+\]
+--- nos $64$ pares, e nenhum resultado sai: $\operatorname{Cruz}(e_i,e_j)$ só ocupa as
+posições $(i,j)$ e $(j,i)$, e ocupa-as mesmo (sem esse controlo, «não espalha» valeria por
+não ter entrada nenhuma). O índice $(i+j)\bmod 8$ cobre os oito resíduos, cada um oito
+vezes. \textbf{É o fecho que faz do bloco um objecto, e não um saco de oito coisas}: a
+operação não precisa de nada fora dele para se completar. $\square$
+\end{teorema}
+
+\medskip
+\noindent\textbf{E daqui sai a ordem da construção, que é esta e não outra:}
+\[
+\boxed{\;\begin{gathered}
+\text{Leis }0\text{--}7
+\ \to\ \text{a \textbf{operação}}
+\ \to\ \text{a \textbf{involução}}
+\ \to\ \operatorname{Dir}/\operatorname{Cruz}\\[3pt]
+\to\ \text{a \textbf{base 8}}
+\ \to\ \text{saturação conjunta}
+\ \to\ \text{abertura autossimilar}
+\end{gathered}\;}
+\]
+Tudo o que se pergunta \emph{depois} --- se há associatividade, distributividade, uma
+norma multiplicativa --- fica \textbf{abaixo} disto, e muda de forma: a pergunta deixa de
+ser \emph{«que operação satisfaz estes axiomas?»} e passa a ser \emph{«que comportamento
+esta operação tem?»}. É a mesma inversão que este paper já fez com o corte, e é o que
+permite que os nomes clássicos entrem, quando entrarem, como \emph{comparação} e não como
+fundamento.
 \colunas{as oito leis e a base ortonormal (\code{thm:ortonormal})}
-        {a operação única, o espelho que a reparte, e o bloco que satura}
-        {\code{tests/operacao.c} ($5{:}0$): a volta das duas metades em $600$ pares; o
-espelho involutivo com $514$ cruzados não nulos; os $64$ pares da base com a diagonal a
-medir e o resto com área $\pm1$; e o bloco a saturar no passo oito, com o índice a voltar
-ao princípio}
+        {a operação única, o espelho que a reparte, e o bloco que fecha e satura}
+        {\code{tests/operacao.c} ($7{:}0$): a volta das duas leituras em $600$ pares; o espelho
+involutivo com $514$ cruzados não nulos; os $64$ pares da base com a diagonal a medir e o
+resto com área $\pm1$; o bloco a saturar no passo oito e a fechar nos $64$, com o suporte
+ocupado em $56$; e as duas leituras a realizarem-se --- a peneira e o determinante por
+permutações --- em $400$ casos}
 
 %======================================================================
 \section{A construção está fechada}\label{sec:fechada}

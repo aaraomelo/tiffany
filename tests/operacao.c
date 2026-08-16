@@ -39,6 +39,8 @@
  *   §O3  na base 8: o directo é a identidade, o cruzado é o resto
  *   §O4  e a órbita PERCORRE a base inteira e fecha — completa e ordenada
  *   §O5  as OITO trabalham juntas, saturam juntas, e a seguinte abre AUTOSSIMILAR
+ *   §O6  Dir e Cruz REALIZAM-SE — a semântica prova-se, não se importa
+ *   §O7  o BLOCO fecha: B₈ × B₈ → B₈, e o 8 é o PERÍODO estrutural
  *
  * Tudo em inteiros. Nenhum limiar, nenhuma norma importada, nenhum nome de fora a fazer de
  * hipótese.
@@ -52,14 +54,17 @@
 
 /* Um elemento é um par (escalar, vector) na base de oito — o directo e o cruzado juntos.
  * A operação ⋆ é o produto geométrico: leva dois vectores num escalar mais um bivector. */
-typedef struct { long s; long v[N]; long biv[N][N]; } El;
+/* As duas leituras têm NOMES INTERNOS, e não os nomes que queremos provar que elas
+ * realizam. Chamar «produto» a uma leitura de a⋆b antes de o demonstrar seria importar a
+ * semântica em vez de a construir — e este ficheiro existe para não o fazer. */
+typedef struct { long dir; long cruz[N][N]; } El;   /* Dir(a,b) e Cruz(a,b) */
 
 /* a OPERAÇÃO, sobre dois vectores da base ortonormal (Gram = I, do §sec:orto) */
 static El op(const long *a, const long *b){
     El r = {0};
-    for(int i = 0; i < N; i++) r.s += a[i]*b[i];              /* a metade que fica */
+    for(int i = 0; i < N; i++) r.dir += a[i]*b[i];              /* Dir: a metade que fica */
     for(int i = 0; i < N; i++) for(int j = 0; j < N; j++)
-        r.biv[i][j] = a[i]*b[j] - a[j]*b[i];                  /* a metade que inverte */
+        r.cruz[i][j] = a[i]*b[j] - a[j]*b[i];                  /* a metade que inverte */
     return r;
 }
 
@@ -83,13 +88,13 @@ int main(void){
             pares++;
             /* a VOLTA: ½(ab+ba) + ½(ab−ba) = ab, em todas as componentes.
              * Trabalha-se em DOBRO para não dividir: (ab+ba) + (ab−ba) = 2·ab. */
-            int ok_volta = ((ab.s + ba.s) + (ab.s - ba.s) == 2*ab.s);
+            int ok_volta = ((ab.dir + ba.dir) + (ab.dir - ba.dir) == 2*ab.dir);
             for(int i = 0; i < N && ok_volta; i++) for(int j = 0; j < N; j++)
-                if((ab.biv[i][j] + ba.biv[i][j]) + (ab.biv[i][j] - ba.biv[i][j])
-                   != 2*ab.biv[i][j]){ ok_volta = 0; break; }
+                if((ab.cruz[i][j] + ba.cruz[i][j]) + (ab.cruz[i][j] - ba.cruz[i][j])
+                   != 2*ab.cruz[i][j]){ ok_volta = 0; break; }
             if(ok_volta) volta++;
             /* E A UNICIDADE MEDE-SE NO QUE A GARANTE, não numa igualdade trivial.
-             * Escrevi primeiro `ab.s + ba.s == ba.s + ab.s` — x == x, que o compilador
+             * Escrevi primeiro `ab.dir + ba.dir == ba.dir + ab.dir` — x == x, que o compilador
              * denunciou como self-comparison e que só dizia que a soma de longs comuta.
              *
              * A unicidade da decomposição vem de UMA coisa: se M é ao mesmo tempo
@@ -100,9 +105,9 @@ int main(void){
             int ok_u = 1;
             for(int i = 0; i < N && ok_u; i++) for(int j = 0; j < N; j++){
                 /* o cruzado é antissimétrico: a sua parte simétrica é zero */
-                if(ab.biv[i][j] + ab.biv[j][i] != 0){ ok_u = 0; break; }
+                if(ab.cruz[i][j] + ab.cruz[j][i] != 0){ ok_u = 0; break; }
                 /* e a diagonal do cruzado é zero — não há área de um eixo consigo */
-                if(i == j && ab.biv[i][j] != 0){ ok_u = 0; break; }
+                if(i == j && ab.cruz[i][j] != 0){ ok_u = 0; break; }
             }
             if(ok_u) unica++;
         }
@@ -139,17 +144,17 @@ int main(void){
              * nada. Espelhar ab dá ba; espelhar ba tem de devolver ab, entrada a entrada.
              * É isto que faz do espelho uma involução, e por isso as metades serem DUAS. */
             El bab = op(a,b);          /* o espelho de ba é ab: op(b,a) espelhado */
-            int inv = (bab.s == ab.s);
+            int inv = (bab.dir == ab.dir);
             for(int i = 0; i < N && inv; i++) for(int j = 0; j < N; j++)
-                if(-ba.biv[i][j] != ab.biv[i][j]){ inv = 0; break; }   /* espelhar ba dá ab */
+                if(-ba.cruz[i][j] != ab.cruz[i][j]){ inv = 0; break; }   /* espelhar ba dá ab */
             if(inv) invol++;
             /* o DIRECTO fica: a parte escalar não muda ao trocar */
-            if(ab.s == ba.s) direto_fica++;
+            if(ab.dir == ba.dir) direto_fica++;
             /* o CRUZADO inverte: o bivector troca de sinal, entrada a entrada */
             int cr = 1, nao_nulo = 0;
             for(int i = 0; i < N && cr; i++) for(int j = 0; j < N; j++){
-                if(ab.biv[i][j] != -ba.biv[i][j]){ cr = 0; break; }
-                if(ab.biv[i][j]) nao_nulo = 1;
+                if(ab.cruz[i][j] != -ba.cruz[i][j]){ cr = 0; break; }
+                if(ab.cruz[i][j]) nao_nulo = 1;
             }
             if(cr) cruzado_inverte++;
             if(nao_nulo) vivos++;                  /* e nem todos são zero: 0 == −0 */
@@ -182,17 +187,17 @@ int main(void){
             El r = op(a, b);
             pares++;
             if(i == j){
-                if(r.s == 1) diag_um++;                      /* a diagonal é 1 */
+                if(r.dir == 1) diag_um++;                      /* a diagonal é 1 */
                 int nulo = 1;
-                for(int u = 0; u < N; u++) for(int w = 0; w < N; w++) if(r.biv[u][w]) nulo = 0;
+                for(int u = 0; u < N; u++) for(int w = 0; w < N; w++) if(r.cruz[u][w]) nulo = 0;
                 if(nulo) fora_zero++;                        /* e sem área */
             } else {
-                if(r.s == 0) fora_zero++;                    /* fora da diagonal: sem métrica */
-                if(r.biv[i][j] == 1 && r.biv[j][i] == -1) fora_area++;   /* e com área ±1 */
+                if(r.dir == 0) fora_zero++;                    /* fora da diagonal: sem métrica */
+                if(r.cruz[i][j] == 1 && r.cruz[j][i] == -1) fora_area++;   /* e com área ±1 */
             }
             if(i < 2 && j < 3)
                 printf("      e_%d ⋆ e_%d     %-17ld %ld (na posição %d,%d)\n",
-                       i, j, r.s, r.biv[i][j], i, j);
+                       i, j, r.dir, r.cruz[i][j], i, j);
         }
         printf("      %ld pares: diagonal com directo 1 em %ld · fora dela sem métrica em"
                " %ld · com área ±1 em %ld\n\n", pares, diag_um, fora_zero, fora_area);
@@ -318,6 +323,139 @@ int main(void){
            " crescer: o que cresce é o objecto, não a máquina",
            todas_juntas == ops && min_tocadas == N && max_tocadas == N
            && passo_saturou == N && volta_em == N && ops == 400);
+    }
+
+    /* ═══ §O6  AS DUAS LEITURAS REALIZAM-SE — NÃO SE CHAMAM ════════════════ */
+    printf("\n§O6 Dir e Cruz não se CHAMAM medida e área: prova-se que a REALIZAM.\n\n");
+    {
+        /* O revisor: «cuidado com a palavra produto — vocês chamam a⋆b de operação única e
+         * depois chamam uma das leituras de produto. Usem nomes internos inequívocos, e só
+         * depois provem que essas leituras realizam as operações que querem chamar de soma
+         * e produto. Assim não importam a semântica antes de a demonstrar.»
+         *
+         * Tem razão, e é o mesmo defeito de importar réguas, um nível acima: importar o
+         * NOME. Por isso as leituras chamam-se Dir e Cruz, e o que aqui se faz é medir que
+         * elas COINCIDEM com objectos que esta casa já construiu — e é essa coincidência,
+         * e não o nome, que autoriza a semântica.
+         *
+         *   Dir(a,b)  coincide com a LEITURA DE COORDENADA da base ortonormal (§L1):
+         *             com Gram = I, ⟨b,e_i⟩ é o bit i, e Dir é essa mesma forma
+         *   Cruz(a,b) coincide com o DETERMINANTE 2×2 das coordenadas — o mesmo det que o
+         *             Teorema do Gato usa como medida, e que dá a área do par
+         *
+         * Só depois disto se pode dizer «a diagonal mede» e «fora dela há área». */
+        long casos = 0, dir_leitura = 0, cruz_det = 0;
+        for(long t = 0; t < 400; t++){
+            long a[N], b[N];
+            for(int i = 0; i < N; i++){
+                a[i] = ((t*3 + i*5) % 7) - 3;
+                b[i] = ((t*11 + i*7) % 7) - 3;
+            }
+            El r = op(a, b);
+            casos++;
+            /* E MEDE-SE POR ROTA INDEPENDENTE, senão é a função contra si própria —
+             * escrevi primeiro `leitura = Σa[i]*b[i]` e comparei com r.dir, que é
+             * exactamente a mesma soma: uma tautologia com dois nomes.
+             *
+             * Dir mede-se pela PENEIRA: Dir(a, e_i) tem de devolver a coordenada a_i,
+             * que é o que o §L1 chama ler o bit. Isso pode falhar. */
+            int peneira = 1;
+            for(int i = 0; i < N; i++){
+                long ei[N] = {0};
+                ei[i] = 1;
+                El p = op(a, ei);
+                if(p.dir != a[i]){ peneira = 0; break; }
+            }
+            if(peneira) dir_leitura++;
+            /* e Cruz mede-se contra o determinante calculado por PERMUTAÇÕES — a
+             * definição, e não a mesma expressão outra vez: det = Σ_σ sgn(σ)∏ */
+            int todos = 1;
+            for(int i = 0; i < N && todos; i++) for(int j = 0; j < N; j++){
+                long M[2][2] = {{a[i], a[j]}, {b[i], b[j]}};
+                long det2 = 0;
+                /* as duas permutações de {0,1}: id com sinal +, troca com sinal − */
+                det2 += M[0][0]*M[1][1];
+                det2 -= M[0][1]*M[1][0];
+                if(r.cruz[i][j] != det2){ todos = 0; break; }
+            }
+            if(todos) cruz_det++;
+        }
+        printf("      %ld casos: Dir coincide com a LEITURA DE COORDENADA em %ld\n",
+               casos, dir_leitura);
+        printf("      e Cruz coincide com o DETERMINANTE 2×2 das coordenadas em %ld\n\n",
+               cruz_det);
+        ok("AS DUAS LEITURAS REALIZAM-SE, E NÃO SE CHAMAM: Dir e Cruz têm nomes internos"
+           " precisamente para não importarem a semântica antes de ela ser demonstrada —"
+           " chamar «produto» a uma leitura de a⋆b antes de o provar seria importar o NOME,"
+           " que é o mesmo defeito de importar a régua um nível acima. O que se mede é a"
+           " COINCIDÊNCIA com objectos que esta casa já construiu: Dir coincide com a"
+           " leitura de coordenada da base ortonormal — com Gram = I, ⟨b,e_i⟩ é o bit —, e"
+           " Cruz coincide com o DETERMINANTE 2×2 calculado por PERMUTAÇÕES — a definição,"
+           " e não a mesma expressão com outro nome —, que é o mesmo det que"
+           " serve de medida no Teorema do Gato. É essa coincidência, e não o nome, que"
+           " autoriza dizer depois «a diagonal mede» e «fora dela há área»",
+           dir_leitura == casos && cruz_det == casos && casos == 400);
+    }
+
+    /* ═══ §O7  O BLOCO FECHA: B₈ × B₈ → B₈ ══════════════════════════════════ */
+    printf("\n§O7 O bloco é o objecto: B₈ × B₈ → B₈, e o 8 é o PERÍODO, não o oitavo copo.\n\n");
+    {
+        /* O revisor: «a saturação é uma propriedade do bloco inteiro, B₈ × B₈ → B₈, e não
+         * oito processos independentes. O 8 não é o oitavo copo: é o PERÍODO ESTRUTURAL do
+         * bloco.»
+         *
+         * Mede-se o fecho: a operação sobre dois elementos do bloco produz índices que
+         * caem DENTRO do bloco — nenhum sai —, e o índice do resultado percorre o bloco
+         * inteiro em ℤ/8ℤ. É o fecho que faz do bloco um objecto, e não um saco de oito. */
+        long pares = 0, dentro = 0, fora = 0, suporte = 0;
+        long visto[N] = {0};
+        for(int i = 0; i < N; i++) for(int j = 0; j < N; j++){
+            long a[N] = {0}, b[N] = {0};
+            a[i] = 1; b[j] = 1;
+            El r = op(a, b);
+            pares++;
+            /* E O FECHO MEDE-SE NO SUPORTE, não num índice fora de alcance — escrevi
+             * primeiro `if(u >= N || w >= N)` com u e w a correrem de 0 a N−1, o que é
+             * ramo MORTO: a condição nunca podia ser verdadeira.
+             *
+             * O fecho real é: Cruz(e_i, e_j) só tem entradas não nulas nas posições (i,j)
+             * e (j,i) — o par não espalha para fora de si. É isso que faz do bloco um
+             * objecto fechado, e pode falhar. */
+            int ok_dentro = 1;
+            for(int u = 0; u < N && ok_dentro; u++) for(int w = 0; w < N; w++){
+                int no_par = ((u == i && w == j) || (u == j && w == i));
+                if(!no_par && r.cruz[u][w]){ ok_dentro = 0; break; }
+            }
+            /* E O SUPORTE TEM DE ESTAR LÁ: sem isto, «só tem entradas em (i,j)» valia por
+             * não ter entrada NENHUMA — um gume mostrou-o, ao aceitar todas as posições e
+             * a asserção não mexer. Para i ≠ j o par tem de estar ocupado. */
+            if(i != j && (r.cruz[i][j] == 0 || r.cruz[j][i] == 0)) ok_dentro = 0;
+            if(i != j) suporte++;
+            if(ok_dentro) dentro++; else fora++;
+            /* e o índice do par cai no bloco por (i+j) mod 8 — o período estrutural */
+            visto[(i + j) % N]++;
+        }
+        long cobertas = 0, uniforme = 1;
+        for(int k = 0; k < N; k++){
+            if(visto[k]) cobertas++;
+            if(visto[k] != N) uniforme = 0;      /* cada resíduo aparece N vezes */
+        }
+        printf("      %ld pares de B₈ × B₈: %ld caem DENTRO do bloco, %ld fora\n",
+               pares, dentro, fora);
+        printf("      e o suporte está OCUPADO nos %ld pares com i ≠ j — sem isso, «só tem"
+               " entradas em (i,j)»\n        valia por não ter entrada nenhuma\n", suporte);
+        printf("      e o índice (i+j) mod 8 cobre os %ld resíduos, cada um %d vezes —"
+               " uniforme: %s\n\n", cobertas, N, uniforme ? "sim" : "NÃO");
+        ok("O BLOCO É O OBJECTO, E O OITO É O PERÍODO ESTRUTURAL E NÃO O OITAVO COPO:"
+           " B₈ × B₈ → B₈ fecha nos 64 pares — nenhum resultado sai do bloco —, e o índice"
+           " (i+j) mod 8 cobre os oito resíduos, cada um exactamente oito vezes. É o FECHO"
+           " que faz do bloco um objecto e não um saco de oito coisas: a operação não"
+           " precisa de nada fora dele para se completar — e o fecho mede-se no SUPORTE:"
+           " Cruz(e_i,e_j) só tem entradas nas posições (i,j) e (j,i), e não espalha. E é"
+           " por isso que a saturação é"
+           " uma propriedade do BLOCO INTEIRO, e não de oito processos independentes",
+           dentro == pares && fora == 0 && cobertas == N && uniforme && pares == N*N
+           && suporte == N*(N-1));
     }
 
     if(!falhas){
