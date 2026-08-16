@@ -334,6 +334,60 @@ static void B4_translinear(void) {
     printf("     o DENTE: sem o -LOG(I_ref) o produto vem 1e5× maior — nunca bate.\n\n");
     pulso("B.4", "a malha em nA reproduz I₁·I₂", "o * nativo (§A.1)", passou, tot,
           !algum_sem_ref_bateu);
+
+    /* E «O T NÃO ENTRA» ESTAVA AFIRMADO E NUNCA MEDIDO. O quadro acima corre inteiro com
+       T = T_AMB fixo: varre 40000 pares num regime onde a tese nem pode falhar, porque a
+       variável de que ela fala não se move. E o mesmo vale para I_s.
+
+       A identidade é algébrica e cancela os dois:
+
+           exp((V1 + V2 - Vr)/V_T) = (a·Iu/Is)(b·Iu/Is)/(Iu/Is) = a·b·Iu/Is
+
+       logo I_out/Iu = a·b, sem V_T e sem I_s. É POR ISSO que é uma lei do circuito e não
+       um ajuste ao ponto de operação — e mede-se movendo justamente o que ela diz não
+       contar: a temperatura de −40 ºC a 125 ºC, e o I_s por três décadas. */
+    {
+        long inv_ok = 0, inv_tot = 0;
+        const double TT[5] = {233.15, 273.15, 300.15, 350.15, 398.15};   /* -40 a 125 ºC */
+        const double IS[3] = {1e-15, 1e-14, 1e-13};                      /* três décadas */
+        printf("     e a INVARIÂNCIA, que é o que faz dela uma lei — move-se o que ela diz\n");
+        printf("     não contar:  T de -40 a 125 ºC, e I_s por três décadas\n\n");
+        printf("     T (ºC)   I_s      a·b em 25 pares   bate?\n");
+        for (int t = 0; t < 5; t++) for (int q = 0; q < 3; q++) {
+            double T = TT[t], Is = IS[q], vt = V_T(T);
+            long bons = 0, n = 0;
+            for (int a = 3; a <= 7; a++) for (int b = 3; b <= 7; b++) {
+                double V1 = vt*log(a*Iu/Is), V2 = vt*log(b*Iu/Is), Vr = vt*log(Iu/Is);
+                double com = Is*exp((V1 + V2 - Vr)/vt);
+                n++;
+                if (llround(com/Iu) == (long long)a*b) bons++;
+            }
+            inv_ok += bons; inv_tot += n;
+            if (q == 1) printf("     %-8.1f %-8.0e %ld de %ld            %s\n",
+                               T - 273.15, Is, bons, n, bons == n ? "sim" : "NÃO");
+        }
+        printf("\n     %ld de %ld em 15 pontos de operação distintos — nem V_T nem I_s entram\n\n",
+               inv_ok, inv_tot);
+        /* E O GUME: sem o -LOG(I_ref) a expressão fica a·b·Iu²/I_s, que DEPENDE de I_s —
+           logo o mesmo par (a,b) dá resultados DIFERENTES em I_s diferentes. É isso que
+           mostra que este teste distingue: a invariância não é uma propriedade de
+           qualquer fórmula, é o terceiro termo que a produz. */
+        int varia_sem_ref = 0;
+        {
+            double T = T_AMB, vt = V_T(T);
+            long r0 = 0;
+            for (int q = 0; q < 3; q++) {
+                double Is = IS[q];
+                double V1 = vt*log(5*Iu/Is), V2 = vt*log(7*Iu/Is);
+                long r = llround(Is*exp((V1 + V2)/vt)/Iu);      /* sem o -Vr */
+                if (q == 0) r0 = r; else if (r != r0) varia_sem_ref = 1;
+            }
+        }
+        printf("     GUME: sem o -LOG(I_ref) o resultado DEPENDE de I_s (a·b·Iu²/I_s) e"
+               " muda com ele: %s\n\n", varia_sem_ref ? "muda" : "NÃO muda");
+        pulso("B.4b", "e a lei é INVARIANTE em T e em I_s", "o * nativo, 15 pontos",
+              inv_ok, inv_tot, varia_sem_ref);
+    }
 }
 
 /* ==========================================================================
