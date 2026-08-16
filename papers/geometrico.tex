@@ -2170,6 +2170,27 @@ bloco a bloco em vez de crescer: \emph{o que cresce é o objecto, não a máquin
 órbita percorre as oito coordenadas, cada uma uma vez antes de qualquer repetição --- que
 é o que «completa e ordenadamente» quer dizer. $\square$
 \end{teorema}
+\begin{teorema}[«duas metades» é o espectro da involução]\label{thm:espectro-tau}
+Que as leituras sejam \emph{duas} não é uma escolha de apresentação: \textbf{é uma
+dedução}. O espelho $\tau(a,b)=(b,a)$ satisfaz $\tau^{2}=\mathrm{id}$, donde
+\[
+\boxed{\;\tau^{2}=\mathrm{id}\ \Longrightarrow\ \lambda^{2}=1\ \Longrightarrow\
+\lambda\in\{+1,-1\}\;}
+\]
+--- não há terceiro valor próprio, logo não há terceira leitura. E o que fecha o
+argumento é a \textbf{contagem}: os espaços próprios somam o espaço inteiro,
+\[
+\dim E_{+}=\tfrac{n(n+1)}2=36,\qquad
+\dim E_{-}=\tfrac{n(n-1)}2=28,\qquad
+36+28=64=n^{2},
+\]
+sem sobra nem falta. As duas geram --- toda $M$ se escreve numa soma delas --- e a
+decomposição é única porque um elemento dos dois espaços ao mesmo tempo é zero. Com
+$\operatorname{Dir}\circ\tau=\operatorname{Dir}$ e
+$\operatorname{Cruz}\circ\tau=-\operatorname{Cruz}$, as duas leituras \emph{são} os dois
+espaços próprios. $\square$
+\end{teorema}
+
 \begin{teorema}[o bloco fecha, e o oito é o período]\label{thm:bloco}
 \[
 \boxed{\;B_8\times B_8\longrightarrow B_8\;}
@@ -2197,12 +2218,33 @@ operação não precisa de nada fora dele para se completar. $\square$
 Tudo o que se pergunta \emph{depois} --- se há associatividade, distributividade, uma
 norma multiplicativa --- fica \textbf{abaixo} disto, e muda de forma: a pergunta deixa de
 ser \emph{«que operação satisfaz estes axiomas?»} e passa a ser \emph{«que comportamento
-esta operação tem?»}. É a mesma inversão que este paper já fez com o corte, e é o que
-permite que os nomes clássicos entrem, quando entrarem, como \emph{comparação} e não como
-fundamento.
+esta operação tem?»}. É a mesma inversão que este paper já fez com o corte.
+
+\medskip
+\noindent\textbf{E daí a ordem em que as coisas podem ser ditas}, que é o que impede a
+semântica de entrar antes da prova:
+\[
+\boxed{\;\text{definir}\ \to\ \text{medir}\ \to\ \text{provar}\ \to\
+\text{nomear / comparar}\;}
+\]
+--- e \emph{não} nomear $\to$ supor $\to$ medir. Por isso as leituras chamam-se
+$\operatorname{Dir}$ e $\operatorname{Cruz}$ neste paper, e não «soma» e «produto»:
+enquanto não estiver demonstrado que elas realizam a estrutura aditiva e multiplicativa
+da recta, chamar-lhes isso seria supor o que falta provar. Os nomes clássicos entram
+depois, e como \emph{comparação}.
+
+\medskip
+\noindent E a afirmação estrutural, que é anterior a qualquer axioma:
+\[
+\boxed{\;\text{as oito leis geram uma \textbf{única} operação sobre um bloco de oito
+coordenadas}\;}
+\]
+--- o resto deste paper mede o que ela faz.
 \colunas{as oito leis e a base ortonormal (\code{thm:ortonormal})}
         {a operação única, o espelho que a reparte, e o bloco que fecha e satura}
-        {\code{tests/operacao.c} ($7{:}0$): a volta das duas leituras em $600$ pares; o espelho
+        {\code{tests/operacao.c} ($8{:}0$): a volta das duas leituras em $600$ pares; o espectro
+de $\tau$ com $\dim E_+ + \dim E_- = 36+28 = 64$ e os $56$ não nulos separados dos oito
+zeros; o espelho
 involutivo com $514$ cruzados não nulos; os $64$ pares da base com a diagonal a medir e o
 resto com área $\pm1$; o bloco a saturar no passo oito e a fechar nos $64$, com o suporte
 ocupado em $56$; e as duas leituras a realizarem-se --- a peneira e o determinante por

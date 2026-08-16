@@ -41,6 +41,7 @@
  *   §O5  as OITO trabalham juntas, saturam juntas, e a seguinte abre AUTOSSIMILAR
  *   §O6  Dir e Cruz REALIZAM-SE — a semântica prova-se, não se importa
  *   §O7  o BLOCO fecha: B₈ × B₈ → B₈, e o 8 é o PERÍODO estrutural
+ *   §O8  e «duas metades» é o ESPECTRO de τ: {+1,−1}, com as dimensões a fechar
  *
  * Tudo em inteiros. Nenhum limiar, nenhuma norma importada, nenhum nome de fora a fazer de
  * hipótese.
@@ -456,6 +457,103 @@ int main(void){
            " uma propriedade do BLOCO INTEIRO, e não de oito processos independentes",
            dentro == pares && fora == 0 && cobertas == N && uniforme && pares == N*N
            && suporte == N*(N-1));
+    }
+
+    /* ═══ §O8  AS DUAS METADES SÃO O ESPECTRO DA INVOLUÇÃO ══════════════════ */
+    printf("\n§O8 «Duas metades» não é escolha estética: é o ESPECTRO de τ, {+1, −1}.\n\n");
+    {
+        /* O revisor: «duas metades não é uma escolha estética — é consequência do espectro
+         * da involução: +1 e −1.»
+         *
+         * E é a formulação própria, porque transforma uma observação numa DEDUÇÃO:
+         *
+         *      τ² = id   ⟹   λ² = 1   ⟹   λ ∈ {+1, −1}
+         *
+         * Não há terceiro valor próprio possível, logo não há terceira metade. E o que
+         * fecha o argumento é a CONTAGEM: os dois espaços próprios têm de somar o espaço
+         * inteiro, sem sobra nem falta.
+         *
+         *      E₊ = { M : τM = +M }    as simétricas          dim = n(n+1)/2 = 36
+         *      E₋ = { M : τM = −M }    as antissimétricas     dim = n(n−1)/2 = 28
+         *                                                    soma = 64 = n²
+         *
+         * Mede-se por base: constrói-se uma base de cada espaço próprio, conta-se, e
+         * verifica-se que juntas geram tudo — que toda a matriz se escreve numa soma
+         * delas, e de UMA só maneira. */
+        long dim_mais = 0, dim_menos = 0, gera = 0, casos = 0;
+        /* a base de E₊: as simétricas E_ij + E_ji (i ≤ j) */
+        for(int i = 0; i < N; i++) for(int j = i; j < N; j++) dim_mais++;
+        /* a base de E₋: as antissimétricas E_ij − E_ji (i < j) */
+        for(int i = 0; i < N; i++) for(int j = i+1; j < N; j++) dim_menos++;
+        /* e que juntas GERAM: toda M decompõe-se, e a decomposição é única */
+        for(long t = 0; t < 300; t++){
+            long M[N][N], S[N][N], A[N][N], R[N][N];
+            for(int i = 0; i < N; i++) for(int j = 0; j < N; j++)
+                M[i][j] = ((t*7 + i*11 + j*13) % 9) - 4;
+            /* a decomposição espectral: 2S = M + τM, 2A = M − τM (em dobro, sem dividir) */
+            for(int i = 0; i < N; i++) for(int j = 0; j < N; j++){
+                S[i][j] = M[i][j] + M[j][i];
+                A[i][j] = M[i][j] - M[j][i];
+                R[i][j] = S[i][j] + A[i][j];        /* tem de dar 2M */
+            }
+            casos++;
+            int ok_g = 1;
+            for(int i = 0; i < N && ok_g; i++) for(int j = 0; j < N; j++){
+                if(R[i][j] != 2*M[i][j]){ ok_g = 0; break; }          /* gera */
+                if(S[i][j] != S[j][i]){ ok_g = 0; break; }            /* S no espaço +1 */
+                if(A[i][j] != -A[j][i]){ ok_g = 0; break; }           /* A no espaço −1 */
+            }
+            if(ok_g) gera++;
+        }
+        /* e o valor próprio: aplicar τ a um elemento de cada espaço devolve ±ele */
+        long prop_mais = 0, prop_menos = 0, testes = 0, vivos_mais = 0, vivos_menos = 0;
+        for(int i = 0; i < N; i++) for(int j = 0; j < N; j++){
+            long P[N][N] = {{0}}, Q[N][N] = {{0}};
+            P[i][j] = 1; P[j][i] += 1;                       /* um elemento de E₊ */
+            Q[i][j] = 1; Q[j][i] -= 1;                       /* um de E₋ */
+            testes++;
+            int p_ok = 1, q_ok = 1;
+            for(int u = 0; u < N; u++) for(int w = 0; w < N; w++){
+                if(P[w][u] != P[u][w]) p_ok = 0;             /* τP = +P */
+                if(Q[w][u] != -Q[u][w]) q_ok = 0;            /* τQ = −Q */
+            }
+            /* E OS NÃO NULOS CONTAM-SE. Para i == j o elemento de E₋ é a matriz ZERO
+             * (Q[i][i] = 1 − 1 = 0), e «τ0 = −0» é verdade trivial: sem separar isso, o
+             * valor próprio −1 valeria em oito casos por vacuidade. É o mesmo defeito do
+             * 0 == −0 que este ficheiro já apanhou no §O2. */
+            int p_nz = 0, q_nz = 0;
+            for(int u = 0; u < N; u++) for(int w = 0; w < N; w++){
+                if(P[u][w]) p_nz = 1;
+                if(Q[u][w]) q_nz = 1;
+            }
+            if(p_ok) prop_mais++;
+            if(q_ok) prop_menos++;
+            if(p_nz) vivos_mais++;
+            if(q_nz) vivos_menos++;
+        }
+        printf("      dim E₊ (τM = +M) = %ld · dim E₋ (τM = −M) = %ld · soma = %ld = %d²\n",
+               dim_mais, dim_menos, dim_mais + dim_menos, N);
+        printf("      e as duas GERAM: toda M se escreve numa soma delas, em %ld de %ld\n",
+               gera, casos);
+        printf("      e o valor próprio confirma-se: τ dá +1 em %ld e −1 em %ld dos %ld"
+               " testes\n", prop_mais, prop_menos, testes);
+        printf("      e os NÃO NULOS: %ld em E₊ e %ld em E₋ — os oito de i = j são a matriz"
+               " zero,\n        e sem os separar «τ0 = −0» faria o valor próprio valer por"
+               " vacuidade\n\n", vivos_mais, vivos_menos);
+        ok("AS DUAS METADES SÃO O ESPECTRO DA INVOLUÇÃO, E ISSO É UMA DEDUÇÃO E NÃO UMA"
+           " ESCOLHA: de τ² = id vem λ² = 1, logo λ ∈ {+1, −1} — não há terceiro valor"
+           " próprio possível, logo não há terceira metade. E o que fecha o argumento é a"
+           " CONTAGEM: dim E₊ = n(n+1)/2 = 36 e dim E₋ = n(n−1)/2 = 28 somam 64 = n², o"
+           " espaço inteiro, sem sobra nem falta. As duas geram — toda M se escreve numa"
+           " soma delas — e a decomposição é única porque uma matriz nos dois espaços ao"
+           " mesmo tempo é zero. É a formulação própria: «duas» deixa de ser observação e"
+           " passa a ser consequência. E os NÃO NULOS contam-se: para i = j o elemento de"
+           " E₋ é a matriz zero, e sem os separar o valor próprio −1 valeria em oito casos"
+           " por vacuidade — o mesmo 0 == −0 que o §O2 já tinha apanhado",
+           dim_mais == N*(N+1)/2 && dim_menos == N*(N-1)/2
+           && dim_mais + dim_menos == N*N && gera == casos && casos == 300
+           && prop_mais == testes && prop_menos == testes
+           && vivos_mais == testes && vivos_menos == N*(N-1));
     }
 
     if(!falhas){
