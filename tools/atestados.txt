@@ -145,7 +145,7 @@ dourada_escala 690b7dc3b9608a7a 0
 dourada_lei2 f46d69dbe7d4e582 0
 dtc_viveiro 36453a570fa98d62 0
 dtcn cf607d0c0a75e3d5 0
-duais 28dc625dbb3da8b3 0
+duais 0df04b5273fb6a25 0
 dual 869340d98961353e 0
 dual32 c489f54924157885 0
 dual_cadeia c7280a378e486134 0

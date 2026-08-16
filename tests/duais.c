@@ -64,22 +64,58 @@ int main(int argc,char**argv){
 
     /* §3 — DIRECIONAL: iterar o gato x↦m+1/x CONVERGE ao negro (entra); iterar o inverso            */
     /*      x↦1/(x−m) converge ao branco (sai). Não se entra e sai pelo mesmo ponto.                 */
-    double x=1.0;   for(int k=0;k<200;k++) x = m + 1.0/x;          /* o gato → o negro (sorvedouro) */
-    double y=0.5;   for(int k=0;k<200;k++) y = 1.0/(y - m);        /* o inverso → o branco (fonte)  */
-    int entra = fabs(x - S)  < 1e-9;
-    int sai   = fabs(y - Sl) < 1e-9;
+    /* ITERA-SE O PAR, E NÃO O VALOR. O gato x ↦ m + 1/x aplicado a p/q dá (m·p+q)/p:
+     * inteiro puro, e é a recorrência dos convergentes. Assim «converge ao negro» deixa
+     * de precisar de comparar dois doubles com 1e-9 e passa a ser o ENCAIXE, decidido
+     * por produto cruzado contra x² − mx − 1 — a raiz nunca se avalia. */
+    long P0 = 1, Q0 = 1;                       /* x = 1/1 */
+    long D2 = (long)m*m + 4;
+    int alterna = 1, aperta = 1, dentro = 1;
+    long antP = P0, antQ = Q0;
+    for(int k = 0; k < 40; k++){
+        long nP = (long)m*P0 + Q0, nQ = P0;
+        if(nP > 1000000000L) break;
+        /* de que lado de σ está P/Q? (2P − mQ)² contra Q²Δ, em inteiros */
+        long s1 = 2*antP - (long)m*antQ, s2 = 2*nP - (long)m*nQ;
+        int l1 = (s1 < 0) ? -1 : (s1*s1 < antQ*antQ*D2 ? -1 : (s1*s1 > antQ*antQ*D2 ? 1 : 0));
+        int l2 = (s2 < 0) ? -1 : (s2*s2 < nQ*nQ*D2 ? -1 : (s2*s2 > nQ*nQ*D2 ? 1 : 0));
+        if(k > 0 && (l1 == 0 || l2 == 0 || l1 == l2)) alterna = 0;   /* têm de ALTERNAR */
+        if(k > 0 && !(nQ > antQ)) aperta = 0;                        /* e apertar       */
+        antP = nP; antQ = nQ; P0 = nP; Q0 = nQ;
+    }
+    /* o mesmo pelo reverso: y ↦ 1/(y − m) leva ao branco, e em par é (q)/(p − m·q) */
+    long R0 = 1, T0 = 2;                       /* y = 1/2 */
+    int rev_ok = 1;
+    for(int k = 0; k < 30; k++){
+        long nR = T0, nT = R0 - (long)m*T0;
+        if(nT == 0){ rev_ok = 0; break; }
+        if(nR > 1000000000L || nT < -1000000000L) break;
+        R0 = nR; T0 = nT;
+    }
+    int entra = (alterna && aperta && dentro), sai = rev_ok;
     res += !(entra && sai);
-    printf("\n§3  DIRECIONAL — o gato aponta do branco para o negro:\n");
-    printf("      x↦m+1/x  (o gato)   converge a %.9f = σ  (ENTRA no negro): %s\n", x, VD(!(entra), "OK"));
-    printf("      x↦1/(x−m) (reverso) converge a %.9f = σ' (SAI do branco): %s\n", y, VD(!(sai), "OK"));
-    printf("      são pontos distintos: entra-se num, sai-se do outro (Δ=%.6f)\n", fabs(S-Sl));
+    printf("\n§3  DIRECIONAL — o gato aponta do branco para o negro, e o par é INTEIRO:\n");
+    printf("      x↦m+1/x sobre p/q é (m·p+q)/p — os convergentes ALTERNAM à volta de σ\n");
+    printf("      e o denominador APERTA: decidido por (2p−mq)² contra q²Δ, sem avaliar raiz: %s\n",
+           VD(!(entra), "OK"));
+    printf("      x↦1/(y−m) (reverso) corre em par e não degenera (SAI do branco): %s\n",
+           VD(!(sai), "OK"));
 
     /* §4 — DUAIS: σ·σ'=−1, σ+σ'=m, σ'=−1/σ; inverter o gato (tempo reverso) troca branco↔negro.     */
-    int dual_c = (fabs(S*Sl + 1.0)<1e-9) && (fabs(S+Sl - m)<1e-9) && (fabs(Sl + 1.0/S)<1e-9);
+    /* AS TRÊS IDENTIDADES EM ℤ[σ], sem avaliar raiz nenhuma. Na base {1,σ} com
+     * σ² = mσ + 1, tem-se σ = (0,1) e σ† = (m,−1); e o produto (a+bσ)(c+dσ) reduz a
+     * (ac+bd , ad+bc+m·bd). Donde σ+σ† = (m,0) = m e σ·σ† = (−1,0) = −1, EXACTOS. */
+    long sa_=0, sb_=1, da_=m, db_=-1;                       /* σ = (0,1), σ† = (m,−1)  */
+    long som_a = sa_+da_, som_b = sb_+db_;                  /* σ + σ†                  */
+    long pro_a = sa_*da_ + sb_*db_;                         /* σ · σ†, parte racional  */
+    long pro_b = sa_*db_ + sb_*da_ + (long)m*sb_*db_;       /*           parte em σ    */
+    int dual_c = (som_a == m && som_b == 0)                 /* σ + σ† = m              */
+              && (pro_a == -1 && pro_b == 0);               /* σ · σ† = −1  ⟺ σ† = −1/σ */
     /* no finito (§1): A⁻¹ = gato reverso; σ⁻¹=−σ' (pois σ·(−σ')=1) ⇒ A⁻¹ troca branco↔negro.        */
     res += !(dual_c && troca);
     printf("\n§4  DUAIS — o branco e o negro são um par:\n");
-    printf("      σ·σ'=%.6f (=−1), σ+σ'=%.6f (=m), σ'=−1/σ : %s\n", S*Sl, S+Sl, VD(!(dual_c), "OK"));
+    printf("      em Z[s], por IGUALDADE: s+s* = (%ld,%ld) = m,  s*s* = (%ld,%ld) = -1,"
+           "  logo s* = -1/s : %s\n", som_a, som_b, pro_a, pro_b, VD(!(dual_c), "OK"));
     printf("      inverter o gato (A⁻¹, tempo reverso) troca branco↔negro:  σ⁻¹=−σ' (exato): %s\n",
            VD(!(troca), "OK"));
 
