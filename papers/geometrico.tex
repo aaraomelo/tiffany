@@ -495,8 +495,8 @@ seja o caso geral, mas porque é o caso que não se move.
 \boxed{
 \begin{array}{ll}
 \textbf{Hurwitz} & \text{a contagem do domínio \emph{assim denominada no Universal}}\\
-\textbf{Lebesgue} & \text{fornece a medida da imagem}\\
-\textbf{Gentil} & \text{estabelece a compatibilidade, pela soma reversível}
+\textbf{Gentil} & \text{a \textbf{identidade discreta} que estabelece a compatibilidade}\\
+\textbf{Lebesgue} & \text{a \textbf{interpretação estrutural} da medida da imagem}
 \end{array}}
 \]
 A soma de Gentil, em inteiros,
@@ -511,8 +511,10 @@ $\sum_v\#\{x_n\geq v\}=\sum_n x_n$ fecha \textbf{sem esperar o limite}, com
 resíduo zero em cada andar. $\square$
 \end{teorema}
 
-\noindent E é isto que se lê no corte --- \emph{sem substituir a teoria clássica
-de limite}, que é herdada:
+\noindent\textbf{E onde cada um entra, para que não fique dúvida:} \emph{Gentil} é
+a identidade discreta, e é a única das três que se \emph{usa} na conta;
+\emph{Lebesgue} entra como interpretação estrutural, e não como ingrediente; e a
+\textbf{completude é herdada} do Universal. Nada aqui constrói o limite clássico:
 \[
 \boxed{\;\text{\emph{nesta realização}, o limite lê-se como o \textbf{ponto fixo}}\\
 \text{da compatibilidade entre as três contagens.}\;}
@@ -669,7 +671,8 @@ característica, a recta do \S\ref{sec:reta}. $\square$
 \end{corolario}
 \colunas{a transformada e a convolução}
         {o número lido como amplitude e fase por andar}
-        {\code{geometria\_real.c} \S L11k: $60$ casos, $\mathbb{F}_{17}$}
+        {\code{geometria\_real.c} \S L11k: sete pares de folhas, $30\,062$
+avaliações}
 
 \noindent É esta a leitura que fecha a cadeia deste paper: a base ortonormal do
 \S\ref{sec:orto} dá as coordenadas, a leitura posicional do \S\ref{sec:polinomio}
@@ -929,8 +932,13 @@ por convenção canónica.
 Para uma sucessão \textbf{qualquer} --- não só a periódica ---:
 $p_kq_{k-1}-p_{k-1}q_k=(-1)^{k-1}$, logo $\abs{\det}=1$ em todos os passos; os
 convergentes alternam de lado; os intervalos formam uma cadeia
-encaixada; e $q_{k}\geq q_{k-1}$ para $k\geq1$, com crescimento \emph{estrito}
-$q_{k+1}>q_k$ para $k\geq1$ --- pois com $q_{-1}=0$, $q_0=1$ e $a_1=1$ vem
+encaixada; e a monotonia lê-se directamente da recorrência:
+\[
+q_1\geq q_0,
+\qquad
+q_{k+1}=a_{k+1}q_k+q_{k-1}>q_k\quad(k\geq1)
+\]
+--- o estrito começa em $k\geq1$ porque, com $q_{-1}=0$, $q_0=1$ e $a_1=1$, tem-se
 $q_1=q_0$.
 \emph{O metálico é o caso de quociente parcial constante --- periódico, mas não
 o único periódico, e muito menos o único caso.} $\square$
@@ -978,9 +986,13 @@ A igualdade num índice isolado não caracteriza a sucessão de uns: a caracteri
 O cone pelo centro (Prop.~\ref{prop:passagem}) não é só uma passagem topológica:
 ele mede.
 
+\begin{definicao}[o simplexo do andar]\label{def:simplexo}
+$S_n=\{(x_1,\ldots,x_n): 0\leq x_1\leq\cdots\leq x_n\leq1\}$, e $S_0$ é o ponto.
+\end{definicao}
+
 \begin{proposicao}[a torre de cones]\label{prop:torre-cones}
-O $n$-simplexo $\{0\leq x_1\leq\cdots\leq x_n\leq1\}$ tem volume $1/n!$, e é o
-\textbf{cone} sobre o de baixo. Donde, em cada andar,
+$S_n$ é o \textbf{cone} sobre $S_{n-1}$ --- o ápice é a origem, e a base é a face
+$x_n=1$, que é uma cópia de $S_{n-1}$ --- e tem volume $1/n!$. Donde, em cada andar,
 \[
 \boxed{\;\frac{V_n}{V_{n-1}}=\frac1n\;}
 \qquad\text{e}\qquad
@@ -1289,7 +1301,10 @@ n=3: & \mu_3=x-1 & \bar t_3=1\ \text{em toda a característica}
 \]
 Para $n=3$, $\mu_3=x-1$ e portanto \emph{toda} característica admite a raiz; mas
 para a afirmação de ordem $6$ restringe-se às características em que $-I\neq I$,
-em particular $p\neq2$ --- em característica $2$ a ordem colapsa.
+em particular $p\neq2$ --- em característica $2$ a ordem colapsa. \textbf{Em geral},
+nos casos usados $p$ é escolhido \emph{fora das características que degeneram a
+relação algébrica relevante} --- em particular fora das que anulam o discriminante,
+onde as folhas colapsam (Cor.~\ref{cor:fourier-metade}).
 \end{definicao}
 
 \begin{definicao}[$t_n$, pela ordem --- sem $\pi$]\label{def:tn}
@@ -1339,10 +1354,10 @@ estrutura adicional:
 \emph{(i) os elíticos.} Com $t_n=2\cos(\pi/n)$ realizado no primo da ordem,
 \[
 \begin{array}{llll}
-n=3: & t_3=1 & \text{já inteiro} & \operatorname{ord}C_3=6\\
-n=4: & t_4=\sqrt2\equiv11\ (\mathrm{mod}\ 17) & 11^{2}=2\ \text{em }\mathbb{F}_{17}
+n=3: & \mu_3=x-1 & \bar t_3=1\in\mathbb{F}_p & \operatorname{ord}C_3=6\\
+n=4: & \mu_4=x^{2}-2 & \bar t_4=11\in\mathbb{F}_{17},\ \mu_4(11)\equiv0
      & \operatorname{ord}C_4=8\\
-n=6: & t_6=\sqrt3\equiv9\ (\mathrm{mod}\ 13) & 9^{2}=3\ \text{em }\mathbb{F}_{13}
+n=6: & \mu_6=x^{2}-3 & \bar t_6=9\in\mathbb{F}_{13},\ \mu_6(9)\equiv0
      & \operatorname{ord}C_6=12
 \end{array}
 \]
@@ -1404,11 +1419,13 @@ paper:
 \qquad
 \abs{\pi_n}\longrightarrow0\;}
 \]
---- \textbf{$\pi_n$ é o intervalo do andar}, com as duas bordas exactas nele, e a
-cadeia é \emph{encaixada}. Donde
+--- \textbf{$\pi_n$ é o intervalo do andar}, com as duas bordas exactas nele. O
+encaixe está demonstrado ao longo da \emph{duplicação} $n\mapsto2n$
+(Def.~\ref{def:pin}), pelo que a família encaixada é a cadeia
+$\pi_{n_0}\supset\pi_{2n_0}\supset\pi_{4n_0}\supset\cdots$. Donde
 \[
-\boxed{\;\pi:=\bigcap_n\pi_n\ \text{---\ o \textbf{único habitante} do corte que
-a cadeia determina.}\;}
+\boxed{\;\pi:=\bigcap_{j\geq0}\pi_{2^{j}n_0}\ \text{---\ o \textbf{único habitante}
+do corte que a cadeia de duplicações determina.}\;}
 \]
 Não é constante importada nem aproximação numérica: é um corte, produzido pelo
 mesmo mecanismo de \S\ref{sec:completude}, com bordas algébricas em cada andar.

@@ -352,7 +352,34 @@ Defeitos meus na ronda: exigi crescimento **estrito** das diferenças e o ouro f
 («> 300» quando eram 298), trocado pelo guarda que interessa: **que a comparação não seja
 constante** (157 maiores, 140 menores).
 
-`tests/geometria_real.c` (57:0) na ordem obrigatória do eval: 8 leis → base ortonormal →
+**A TRANSFORMADA É A AVALIAÇÃO NAS FOLHAS — a DFT era metade.** O Aarão: «vc meteu DFT aqui,
+que é metade». E o `teoria.tex` diz à letra: «Fourier sozinho é METADE, e não mede este
+objeto, porque as raízes do metal NÃO ESTÃO NO CÍRCULO: |σ||σ'| = 1, recíprocas». A
+transformada universal é a **avaliação nas folhas σ, σ†**, realizada inteira pela companheira;
+`eval_σ` é homomorfismo nas DUAS folhas (30 062 casos), e a **dourada é o caso mais simples**.
+Fourier avalia no círculo, onde o traço fica **limitado** (|t| ≤ 2, elíptico); as folhas são
+**recíprocas** e o traço **cresce** (hiperbólico). E onde `D ≡ 0` as folhas **colapsam** — o
+parabólico na característica.
+
+**E APAGUEI TRÊS SECÇÕES A FAZER ISSO.** `s[:i] + novo` com `novo` a acabar em `s[j:]`, e
+entre i e j estavam §L11m, §L11n, §L11o — 242 linhas. O alarme foi o **TOTAL: 57 → 52**.
+Restauradas de `git show`. Ver [[feedback-destruir-antes-do-inventario]].
+
+**E A PASSADA DE FECHO**, com os doze reparos do revisor. Três eram erros: `b ∗ δ_{−t} = b` é
+**falso** (translada; o certo é `(b ∗ δ_t) ∗ δ_{−t} = b`); «o ℝⁿ» é **𝒫_n ≅ ℝ^{n+1}**; e a
+**regra editorial era incumprível** — P¹, Möbius, cone e Euler são geométricos —, e passa a
+«nenhum comprimento, área ou limite **contínuo** antes do corte». Mais: π sai da desigualdade
+antes de ser definido (`π := ⋂_j π_{2^j n₀}`, sobre a cadeia de **duplicações**); o
+discriminante passa a **D** para não colidir com a diferença finita Δ; «elíptico = periódico»
+restringe-se aos representantes de **ordem finita**; Gentil ganha `0 ≤ x_n ≤ q`; **Lebesgue é
+interpretação estrutural, não ingrediente** — só Gentil entra na conta; e o simplexo
+define-se antes de se dizer que é cone.
+
+E a varredura final: **zero rastro de investigação**, os 28 números do paper **todos** batem
+com a saída do medidor, 5/5 medidores citados existem, e uma **referência morta**
+(`prop:arquimedes`, fóssil de reestruturação) corrigida.
+
+`tests/geometria_real.c` (58:0) na ordem obrigatória do eval: 8 leis → base ortonormal →
 bit a bit → dual → recorrência → Pisot → encaixe → corte → completude → ℝ → π_k/gume.
 `papers/geometrico.tex` 19 páginas; `corpo_universal.tex` 54, e a compilar.
 Ver [[project-o-real-e-o-corte]], [[feedback-verdadeiro-e-parcial]].
