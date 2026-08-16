@@ -98,7 +98,26 @@ int main(int argc,char**argv){
         int tr_esc=1, n_esc=1; for(int i=1;i<k;i++){ if(soma[i]) tr_esc=0; if(prod[i]) n_esc=0; }
         /* z está num subcorpo próprio? (algum conjugado φ^d(z)=z com d|k, d<k) — não, z primitivo    */
         int subcorpo=0; for(int d=1;d<k;d++){ if(k%d==0){ int c[32]; frob_iter(z,d,f,k,c); int eq=1; for(int i=0;i<k;i++) if(c[i]!=z[i]) eq=0; if(eq) subcorpo=1; } }
+        /* E AQUI APLICA-SE O GERADOR (thm:gerador-andar da teoria), que estava CALCULADO
+         * e NÃO MEDIDO: a coluna «z num subcorpo?» era impressa e o `res` só olhava para
+         * tr_esc e n_esc. Mas ela é a condição do resultado, e não um adorno.
+         *
+         * O traço e a norma são a soma e o produto dos k conjugados — e só são os do corpo
+         * INTEIRO se z gerar esse corpo. Se z vivesse num subcorpo próprio, os conjugados
+         * repetir-se-iam e o que se estaria a medir seria o traço de OUTRO andar, com o
+         * mesmo aspecto no ecrã.
+         *
+         * Duas metades, e agora contam as duas: f é irredutível de grau k (verificado no
+         * find_f, que é o que faz do quociente um corpo), e z não está em subcorpo próprio
+         * (verificado aqui, e é o que faz de z um gerador). São exactamente (i) e (ii) do
+         * teorema: o gerador define o andar, e sem ele o zero desce sem se dar por isso. */
+        int f_irred = is_irred(f, k);
         res += !(tr_esc && n_esc);
+        res += !!subcorpo;                    /* z TEM de gerar: senão é outro andar */
+        res += !f_irred;                      /* e o quociente TEM de ser corpo */
+        if(subcorpo || !f_irred)
+            printf("      ↑ e este NÃO conta: f irredutível %s, z gera %s\n",
+                   f_irred ? "sim" : "NÃO", subcorpo ? "NÃO" : "sim");
         printf("    %-2d      %-14d   %-16d   %-19s   %s\n",
                k, soma[0], prod[0], (tr_esc&&n_esc)?"sim (em ℤ_p)":"NÃO",
                subcorpo?"sim (parte)":"NÃO — z é completo");
@@ -133,6 +152,10 @@ int main(int argc,char**argv){
     printf("     nenhuma dimensão anterior comporta z; a soma/produto das k projeções desce ao fundo, conservado.\n");
 
     printf("\n----------------------------------------------------------------\n");
+    printf("     E AS DUAS CONDIÇÕES CONTAM: f irredutível de grau k faz do quociente um\n");
+    printf("     CORPO, e z fora de todo subcorpo próprio faz dele um GERADOR. Sem a\n");
+    printf("     segunda, os k conjugados repetir-se-iam e o traço medido seria o de\n");
+    printf("     OUTRO andar, com o mesmo aspecto no ecrã. (thm:gerador-andar)\n");
     printf("GF(%d^k): Tr=Σ e N=∏ dos k conjugados descem a ℤ_%d (conservados)   resíduo total = %d   %s\n",
            p, p, res, VD(res, "A NORMA DE CORPO CONSERVA — OS k CONJUGADOS SE SOMAM (TRAÇO) E MULTIPLICAM (NORMA) NO FUNDO"));
     return res?1:0;

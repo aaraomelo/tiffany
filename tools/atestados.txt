@@ -315,7 +315,7 @@ neuronio_analog e35af23bd347d431 0
 nginxb 5646b82457d23418 0
 nne e8c9fd4826459d1c 0
 nomeia 71483f3f6333df06 0
-norma bdf69591c85236b2 0
+norma 7a26a4611ed1f937 0
 normal_circulo 3cdc5e43a8d97101 0
 nove_periodico c18299871152ca54 0
 nucleo_unificado ac7c6cf9a9960bc6 0
