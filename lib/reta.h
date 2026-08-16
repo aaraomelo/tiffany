@@ -56,6 +56,48 @@
 #define RT_MAX 64          /* a ordem máxima das matrizes aqui — e ela VERIFICA-SE */
 #endif
 
+/* ═══════════════════════════════════════════════════════════════════════════════════
+ * A OPERAÇÃO — e tudo o que se segue sai dela.
+ *
+ * Há UMA operação, e escreve-se numa linha: a ⋆ b. O que dela sai são duas LEITURAS,
+ * separadas por trocar a ordem — e o que as separa é o espelho τ(a,b) = (b,a):
+ *
+ *      Dir(a,b)  = ½(a⋆b + b⋆a)      a leitura que NÃO muda        o directo
+ *      Cruz(a,b) = ½(a⋆b − b⋆a)      a leitura que TROCA DE SINAL  o cruzado
+ *
+ * Que sejam DUAS é dedução e não escolha: τ² = id obriga o polinómio mínimo a dividir
+ * (t−1)(t+1), de raízes distintas — logo τ é diagonalizável com espectro {+1,−1}, e
+ * Dir e Cruz são os PROJECTORES nos dois espaços próprios, (id ± τ)/2. Em característica
+ * 2 os dois colapsam, e é a única hipótese que isto usa.
+ *
+ * E DAQUI SAI O RESTO DESTE CABEÇALHO, que é a razão de estar no topo:
+ *
+ *      o produto interno       é  Dir              a métrica, a diagonal
+ *      a norma                 é  Dir(a,a)
+ *      o produto vectorial     é  Cruz em ℝ³       a área, fora da diagonal
+ *      o determinante 2×2      é  Cruz             a mesma área, lida na matriz
+ *      o simétrico/antissim.   é  Dir/Cruz de matrizes
+ *      o SINAL                 é  a mesma dobra em ℤ, com o mesmo espectro {+1,−1}
+ *
+ * Não são seis operações que por acaso se parecem: são leituras de uma só, e é por isso
+ * que vivem no mesmo sítio. Tudo em DOBRO, para não dividir por dois — o factor 2 é o
+ * preço de não ter vírgula, e paga-se uma vez.
+ * ═══════════════════════════════════════════════════════════════════════════════════ */
+
+/* as duas leituras, EM DOBRO: 2·Dir e 2·Cruz de dois vectores de dimensão n. O directo
+ * é um escalar (a métrica); o cruzado é a matriz antissimétrica a_i b_j − a_j b_i. */
+static long rt_dir(const long *a, const long *b, int n){
+    long s = 0;
+    for(int i = 0; i < n; i++) s += a[i]*b[i];
+    return s;                                    /* Dir(a,b) = ⟨a,b⟩ */
+}
+static void rt_cruz(const long *a, const long *b, int n, long *C){
+    for(int i = 0; i < n; i++) for(int j = 0; j < n; j++)
+        C[i*n + j] = a[i]*b[j] - a[j]*b[i];      /* Cruz(a,b) = a∧b */
+}
+/* e a norma é o directo consigo próprio — não é uma operação nova */
+static long rt_norma(const long *a, int n){ return rt_dir(a, a, n); }
+
 /* ── A POTÊNCIA INTEIRA ──────────────────────────────────────────────────────────────
  * Cinco cópias no repositório antes disto. Sem vírgula e sem `pow`. */
 static long rt_ipow(long base, int e){
@@ -224,16 +266,19 @@ static void rt_conv(const long *a, int na, const long *b, int nb, long *r){
     for(int i = 0; i < na; i++) for(int j = 0; j < nb; j++) r[i+j] += a[i]*b[j];
 }
 
-/* ── O CRUZADO EM ℝ³: a metade que INVERTE ao trocar a ordem ─────────────────────────
- * É antissimétrico — a×b = −(b×a) — e é ele que precisa de três dimensões para viver. */
+/* ── O CRUZADO EM ℝ³: um CASO de rt_cruz, não uma operação nova ──────────────────────
+ * Em ℝ³ a matriz antissimétrica Cruz(a,b) tem três entradas independentes, e o vector
+ * (c₀,c₁,c₂) é a leitura delas — é o mesmo objecto com outra roupa, e é por isso que o
+ * produto vectorial só existe em três dimensões: é onde n(n−1)/2 = n. */
 static void rt_cruz3(const long *a, const long *b, long *c){
     c[0] = a[1]*b[2] - a[2]*b[1];
     c[1] = a[2]*b[0] - a[0]*b[2];
     c[2] = a[0]*b[1] - a[1]*b[0];
 }
 
-/* ── A DECOMPOSIÇÃO EM DIRECTO E CRUZADO ─────────────────────────────────────────────
- * As duas leituras da mesma operação, separadas pelo espelho τ(a,b) = (b,a). Devolvidas
+/* ── A MESMA DECOMPOSIÇÃO, AGORA EM MATRIZES ─────────────────────────────────────────
+ * Dir e Cruz aplicados a uma matriz em vez de a um par de vectores — o espelho é o
+ * mesmo, τ(M) = Mᵀ, e os projectores são os mesmos (id ± τ)/2. Devolvidas
  * EM DOBRO, para não dividir: 2S = M + Mᵀ e 2A = M − Mᵀ. A decomposição existe quando 2
  * é invertível — em característica 2 as duas colapsam (medido em operacao.c §O10). */
 static void rt_dir_cruz(const long *M, int n, long *S2, long *A2){
@@ -350,25 +395,37 @@ static void rt_volta(long m, long p, long q, long *np, long *nq){
     *np = q; *nq = p - m*q;
 }
 
-/* ── O MÁXIMO DIVISOR COMUM, E A DIVERGÊNCIA QUE ELE ESCONDIA ────────────────────────
- * Vinte e oito cópias no repositório, e elas NÃO CONCORDAM. Vinte não tratam o sinal —
+/* ── O SINAL É UMA DOBRA, E O MDC VIVE DO LADO QUE ELA NÃO MOVE ──────────────────────
+ * O `geometrico.tex` trata isto, e não como caso particular: `cor:cadeia` diz que
  *
- *      while(b){ long t = a % b; a = b; b = t; }   →   mdc(−40, −40) = −40
+ *      ℤ  =  ℕ  +  o SINAL
  *
- * — e oito tratam, dando 40. Divergem em 3280 dos 6561 pares de [−40,40]², e o que as
- * separa é o PRIMEIRO argumento negativo: em C o resto herda o sinal do DIVIDENDO, logo
- * o laço termina com o sinal de `a`.
+ * e a Lei 1 diz o que o sinal é — 1† = −1, a Möbius INVOLUTIVA de traço 0, ν(x) = −1/x.
+ * É a MESMA dobra que reparte a operação em Dir e Cruz: uma involução, com espectro
+ * {+1, −1}, e portanto com dois lados — o que ela FIXA e o que ela INVERTE.
  *
- * (Prevejo isto primeiro em Python e saiu ao contrário — lá o resto herda o sinal do
- * DIVISOR, e 12 % −8 dá −4 em Python e +4 em C. A asserção apanhou-me: prever o
- * comportamento de uma linguagem correndo outra é escrever a referência à mão.)
+ *      x  =  |x| · sinal(x)          o que fica  ·  o que inverte
  *
- * A canónica é NÃO NEGATIVA, que é o que «máximo» quer dizer: um divisor comum negativo
- * não é maior que nenhum. E mdc(0,0) devolve 0, que é a convenção que faz o mdc ser o
- * ínfimo na divisibilidade — todo inteiro divide 0, logo o mdc de nada com nada é 0.
+ * E o mdc é uma função da CLASSE, não do representante: a divisibilidade não vê o sinal,
+ * porque d | a ⟺ d | (−a). Logo o mdc vive do lado FIXO da dobra.
  *
- * (A `iz_gcd` do `inteiros.h` é o Bézout ESTENDIDO — devolve também os coeficientes x,y
- * de ax + by = g. Quando eles forem precisos, é essa; quando não, é esta.) */
+ * ── E É ISSO QUE EXPLICA AS 28 CÓPIAS ───────────────────────────────────────────────
+ * Vinte não tratam o sinal e oito tratam, e divergem em 3280 dos 6561 pares de
+ * [−40,40]² — mdc(−40,−40) dá −40 numas e 40 noutras. Escrevi primeiro que eram «duas
+ * respostas para a mesma pergunta», e não é: são DOIS REPRESENTANTES DA MESMA CLASSE.
+ * As que não tratam devolvem o representante com o sinal de `a`, porque em C o resto
+ * herda o sinal do dividendo; as que tratam devolvem o representante NÃO NEGATIVO.
+ *
+ * A canónica é o não negativo, e a razão não é gosto: é que «MÁXIMO» divisor comum pede
+ * uma ordem, e na ordem dos inteiros um divisor negativo nunca é o maior. O
+ * representante certo é o do lado que a dobra fixa. */
+
+/* a DOBRA do sinal, explícita: x ↦ (|x|, s) com s ∈ {+1,−1,0}, e a volta x = |x|·s.
+ * É a decomposição de ℤ em ℕ × {±1} que a `cor:cadeia` enuncia, e ν∘ν = id é o que a
+ * torna uma dobra e não uma projecção — nada se perde, e a volta devolve. */
+static long rt_sinal(long x){ return x > 0 ? 1 : (x < 0 ? -1 : 0); }
+static long rt_modulo(long x){ return x < 0 ? -x : x; }
+
 static long rt_mdc(long a, long b){
     if(a < 0) a = -a;
     if(b < 0) b = -b;

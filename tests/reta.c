@@ -569,16 +569,115 @@ int main(void){
         printf("      e a divergência: mdc(−40,−40) dá %ld sem tratar o sinal e %ld com,\n"
                "      e as duas famílias divergem em %ld dos 6561 pares de [−40,40]²\n\n",
                sem_sinal, rt_mdc(-40,-40), div_par);
-        ok("O MÁXIMO DIVISOR COMUM, E ELE TINHA 28 CÓPIAS QUE NÃO CONCORDAVAM: vinte não"
-           " tratavam o sinal e davam mdc(−40,−40) = −40, oito davam 40 — e divergem em 3280"
-           " dos 6561 pares de [−40,40]². Não é estilo: é a mesma pergunta com duas"
-           " respostas, e o que as separa é o PRIMEIRO argumento negativo, porque em C o"
-           " resto herda o sinal do DIVIDENDO. A canónica é não"
-           " negativa, que é o que «máximo» quer dizer. Medido nos 3721 pares de [−30,30]²:"
-           " é divisor comum, é o MAIOR deles por varredura, é não negativo, e a segunda"
-           " rota — o Bézout do iz_gcd, com ax + by = g — confirma-o",
+        ok("O MÁXIMO DIVISOR COMUM VIVE DO LADO QUE A DOBRA NÃO MOVE. As 28 cópias do"
+           " repositório divergem em 3280 dos 6561 pares — mdc(−40,−40) dá −40 em vinte e 40"
+           " em oito —, e escrevi primeiro que eram «duas respostas para a mesma pergunta»."
+           " Não são: são DOIS REPRESENTANTES DA MESMA CLASSE. O `cor:cadeia` do geometrico"
+           " diz que ℤ = ℕ + o SINAL, e a Lei 1 diz o que o sinal é: 1† = −1, a Möbius"
+           " involutiva de traço 0 — a MESMA dobra que reparte a operação em Dir e Cruz, com"
+           " espectro {+1,−1} e portanto com um lado que fica e um que inverte. A"
+           " divisibilidade não vê o sinal, porque d | a ⟺ d | (−a), logo o mdc é função da"
+           " CLASSE. As que não tratam devolvem o representante com o sinal de `a`; a"
+           " canónica devolve o NÃO NEGATIVO, e a razão não é gosto: «máximo» pede uma ordem,"
+           " e na dos inteiros um divisor negativo nunca é o maior",
            divide == casos && maximo == casos && naoneg == casos && bezout == casos
            && sem_sinal == -40 && rt_mdc(-40,-40) == 40 && div_par == 3280);
+    }
+
+    /* ═══ §R16 O SINAL É UMA DOBRA — e o mdc é da classe ═══════════════════ */
+    printf("\n§R16 o sinal é a Lei 1 lida em ℤ: uma involução, e o mdc vive no lado fixo.\n\n");
+    {
+        long casos = 0, volta = 0, invol = 0, classe = 0, vivos = 0;
+        for(long x = -50; x <= 50; x++){
+            casos++;
+            /* (i) a DOBRA: x = |x|·sinal(x), e nada se perde — a volta devolve */
+            if(rt_modulo(x)*rt_sinal(x) == x) volta++;
+            /* (ii) e é INVOLUÇÃO: dobrar duas vezes devolve, que é ν∘ν = id */
+            if(-(-x) == x) invol++;
+            if(x != 0) vivos++;                       /* e não é a identidade */
+        }
+        /* (iii) e o mdc é função da CLASSE: os quatro representantes dão o mesmo */
+        long cl = 0, ctot = 0;
+        for(long a = 1; a <= 40; a++) for(long b = 1; b <= 40; b++){
+            long g = rt_mdc(a,b);
+            ctot++;
+            if(rt_mdc(-a,b) == g && rt_mdc(a,-b) == g && rt_mdc(-a,-b) == g) cl++;
+        }
+        classe = cl;
+        /* (iv) e o ESPECTRO da dobra é {+1,−1}, como o de τ: os pontos fixos são o zero,
+                e os invertidos são todos os outros — as duas metades da Lei 1 */
+        long fixos = 0, invertidos = 0;
+        for(long x = -50; x <= 50; x++){
+            if(-x == x) fixos++; else invertidos++;
+        }
+        printf("      %ld inteiros: a volta |x|·sinal(x) = x em %ld, a involução em %ld,\n"
+               "      e os não nulos são %ld — sem isso «inverte» valia por 0 = −0\n",
+               casos, volta, invol, vivos);
+        printf("      o mdc é da CLASSE: os quatro representantes (±a,±b) dão o mesmo em %ld de %ld\n",
+               classe, ctot);
+        printf("      e o espectro da dobra é {+1,−1}: %ld fixo (o zero) e %ld invertidos\n\n",
+               fixos, invertidos);
+        ok("O SINAL É UMA DOBRA, E É A LEI 1 LIDA EM ℤ: x = |x|·sinal(x) é a decomposição"
+           " que o cor:cadeia enuncia — ℤ = ℕ + o SINAL —, e ela é uma INVOLUÇÃO, com a"
+           " volta a devolver e com espectro {+1,−1}, exactamente como o τ que reparte a"
+           " operação em Dir e Cruz. O único ponto fixo é o ZERO, e todos os outros são"
+           " invertidos. E daqui sai porque o mdc é NÃO NEGATIVO: ele é função da CLASSE, e"
+           " os quatro representantes (±a,±b) dão o mesmo nos 1600 pares — a divisibilidade"
+           " não vê o sinal, porque d | a ⟺ d | (−a)",
+           volta == casos && invol == casos && classe == ctot && fixos == 1
+           && invertidos == casos - 1 && vivos == casos - 1);
+    }
+
+    /* ═══ §R17 A OPERAÇÃO É UMA — e as outras SAEM dela ════════════════════ */
+    printf("\n§R17 rt_dir e rt_cruz: as outras não se parecem com elas, SÃO elas.\n\n");
+    {
+        long casos = 0, vec = 0, det2 = 0, nor = 0, sim = 0, viv = 0;
+        for(long t = 0; t < 200; t++){
+            long a[3], b[3], C[9];
+            for(int i = 0; i < 3; i++){
+                a[i] = ((t*7 + i*3) % 11) - 5;
+                b[i] = ((t*5 + i*2) % 9)  - 4;
+            }
+            rt_cruz(a, b, 3, C);
+            casos++;
+            /* (i) o PRODUTO VECTORIAL é a leitura das três entradas de Cruz em ℝ³ */
+            long v[3];
+            rt_cruz3(a, b, v);
+            if(v[0] == C[1*3+2] && v[1] == C[2*3+0] && v[2] == C[0*3+1]) vec++;
+            if(v[0] || v[1] || v[2]) viv++;                 /* e não é o vector nulo */
+            /* (ii) o DETERMINANTE 2×2 é a MESMA entrada de Cruz, lida na matriz */
+            long M[4] = {a[0], a[1], b[0], b[1]};
+            /* det[[a₀,a₁],[b₀,b₁]] = a₀b₁ − a₁b₀, que É a entrada C[0][1] — pus-lhe um
+               sinal a mais à primeira, e passavam 6 de 200: exactamente os casos em que
+               a entrada é ZERO, onde +0 = −0. O gume do 0 == −0 apanhou o meu erro. */
+            if(rt_det_bareiss(M, 2, 2) == C[0*3+1]) det2++;
+            /* (iii) a NORMA é o directo consigo próprio */
+            long n2 = 0;
+            for(int i = 0; i < 3; i++) n2 += a[i]*a[i];
+            if(rt_norma(a, 3) == n2) nor++;
+            /* (iv) e Cruz é antissimétrico, que é o que faz dele a metade que inverte */
+            int an = 1;
+            for(int i = 0; i < 3; i++) for(int j = 0; j < 3; j++)
+                if(C[i*3+j] != -C[j*3+i]) an = 0;
+            if(an) sim++;
+        }
+        /* (v) e o SINAL é a MESMA dobra: espectro {+1,−1}, um ponto fixo, o resto invertido */
+        long dob = 0, dtot = 0;
+        for(long x = -20; x <= 20; x++){ dtot++; if(rt_modulo(x)*rt_sinal(x) == x) dob++; }
+        printf("      %ld pares: o produto vectorial é a leitura de Cruz em %ld (e não nulo em %ld),\n"
+               "      o det 2×2 é a mesma entrada em %ld, a norma é Dir(a,a) em %ld,\n"
+               "      e Cruz é antissimétrico em %ld\n", casos, vec, viv, det2, nor, sim);
+        printf("      e o SINAL é a mesma dobra em ℤ: |x|·sinal(x) = x em %ld de %ld\n\n",
+               dob, dtot);
+        ok("A OPERAÇÃO É UMA, E AS OUTRAS SAEM DELA — não se parecem com ela, SÃO ela. O"
+           " produto VECTORIAL é a leitura das três entradas independentes de Cruz em ℝ³, e"
+           " só existe em três dimensões porque é lá que n(n−1)/2 = n; o DETERMINANTE 2×2 é"
+           " a mesma entrada de Cruz lida na matriz — a área, outra vez; a NORMA é Dir(a,a),"
+           " o directo consigo próprio; e o SINAL em ℤ é a MESMA dobra, com o mesmo espectro"
+           " {+1,−1} da Lei 1. Seis coisas que pareciam seis operações são leituras de uma"
+           " só, e é por isso que vivem no mesmo sítio",
+           vec == casos && det2 == casos && nor == casos && sim == casos
+           && viv > casos/2 && dob == dtot);
     }
 
     if(!falhas){

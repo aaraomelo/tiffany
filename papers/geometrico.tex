@@ -171,6 +171,14 @@ sete do inverso modular, cinco da potência inteira. Estão agora em \code{lib/r
 \textbf{todas inteiras e sem um limiar}, e o cabeçalho não é uma cópia a mais: onde já
 havia uma canónica --- \code{iz\_gcd}, \code{qz}, \code{pz\_div\_exata},
 \code{mat\_posto} --- ela é apontada, e o que fica é só o que não tinha casa.
+E \textbf{a operação está no topo, e as outras saem dela}: o produto interno \emph{é} o
+directo, a norma \emph{é} $\operatorname{Dir}(a,a)$, o produto vectorial \emph{é} a
+leitura das três entradas de $\operatorname{Cruz}$ em $\mathbb{R}^3$ --- e só existe aí
+porque é onde $n(n-1)/2=n$ ---, o determinante $2\times2$ \emph{é} a mesma entrada lida
+na matriz, e \textbf{o sinal em $\mathbb{Z}$ é a mesma dobra}: $\mathbb{Z}=\mathbb{N}+{}$o
+sinal (Cor.~\ref{cor:cadeia}) com a involução da Lei 1, o mesmo espectro $\{+1,-1\}$, e o
+$\operatorname{mdc}$ a viver do lado que ela fixa. Seis coisas que pareciam seis operações
+são leituras de uma só.
 E não são só utilitários: são as \textbf{peças} --- a recorrência $u_{k+1}=m\,u_k+u_{k-1}$
 \emph{é} a régua e aparecia inline em \textbf{quarenta} ficheiros, a convolução \emph{é}
 o produto de polinómios, o cruzado \emph{é} a metade que inverte, e
@@ -182,7 +190,7 @@ que é a \textbf{Lei 8} a dizer o contrário: $62$ dos $126$ metais de $\mathbb{
 o mesmo número que o \emph{Corpo Universal} publica, obtido por uma implementação que não
 o conhecia. E a \textbf{volta} está lá inteira, $[p:q]\mapsto[q:p-mq]$, a desfazer a ida
 e a chegar ao $\infty=[1:0]$ exacto.
-\emph{Verificado:} \code{tests/reta.c} ($15{:}0$), cada operação por duas rotas que não
+\emph{Verificado:} \code{tests/reta.c} ($17{:}0$), cada operação por duas rotas que não
 partilham código e cada uma com o seu controlo negativo.
 
 \medskip
@@ -2538,7 +2546,7 @@ medidor & unidades \\
 \code{tests/supremo.c}            & $4{:}0$ \\
 \code{tests/cardinal.c}           & $4{:}0$ \\
 \code{tests/condicao\_pisot.c}    & $4{:}0$ \\
-\code{tests/reta.c}              & $15{:}0$ \\
+\code{tests/reta.c}              & $17{:}0$ \\
 \bottomrule
 \end{tabular}
 \end{center}
