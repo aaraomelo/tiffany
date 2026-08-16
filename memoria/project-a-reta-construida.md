@@ -168,7 +168,40 @@ declaram-se as duas antes: **metálico = mecanismo extremo explícito; CF geral 
 com `I_k` definido, `I_{k+1} ⊂ I_k`, `|I_k| = 1/(q_k q_{k+1})` e — o elo que o pombal usava
 sem ter — **`|I_k| ≤ 2^{-k}`**, que vem de `q_k ≥ F_{k+1}`.
 
-`tests/geometria_real.c` (30:0) na ordem obrigatória do eval: 8 leis → base ortonormal →
+**A PURGA DOS METÁLICOS, E EULER É QUE A FAZ.** O Aarão: «traz a lei de Euler dos poliedros
+para ver se resolve isso dos metais — **isso é realização específica**; traz a justificativa no
+cone e espiral, e expurga os metálicos». Resolve, e a conta é de três linhas:
+
+    χ(polígono preenchido) = n − n + 1 = 1        para TODO n
+    χ(só a borda)          = n − n     = 0        para TODO n
+
+**A topologia NÃO VÊ O ANDAR.** Quem vê o andar é a MÉTRICA — t_n, as áreas. Logo a família
+metálica **não é ingrediente da construção: é uma realização específica na camada métrica**.
+E o invariante topológico tem a MESMA FORMA do métrico: `χ = V − A + F` é soma ALTERNADA que
+o dual do poliedro não move (troca V e F, guarda A — já estava em `pontofixo.c` §3), tal como
+`det = (−1)^k` é sinal alternado que o passo não move em módulo.
+
+**O MOTOR, sem metálico nenhum, já estava no repo** (`lib/medida.h`, `tests/cone_espiral.c`):
+`Π` o CONE desce por Euclides escrevendo os quocientes, `Σ` a ESPIRAL sobe recompondo, e cada
+passo do cone é `[[a,1],[1,0]]` com `det = −1`. **`Σ∘Π = Id` mas `Π∘Σ ≠ Id`** — e isso separa
+dois duais que eu tratava como um: **INVOLUÇÃO** (ν∘ν = id, mesmo espaço) contra **RETRAÇÃO**
+(espaços diferentes, só um lado fecha). O preço de Π∘Σ não fechar são as duas representações
+de todo racional. **E o metálico é o PONTO FIXO do cone** — a sucessão constante: é por isso
+que dá o mecanismo extremo, não por ser o caso geral.
+
+**E O TEOREMA CENTRAL FUNDA O LIMITE** (obs:triade-central): **Hurwitz conta o domínio,
+Lebesgue mede a imagem, Gentil casa os dois** pela soma reversível
+`Σx_n + Σ_v #{x_n < v} = N·q` — o `∫f + ∫f⁻¹ = b·f(b) − a·f(a)` da casa. E o layer-cake fecha
+**sem esperar o limite**. Donde o estatuto certo: **o limite é o PONTO FIXO onde as três medem
+igual, e não um processo ε-δ**. A tricotomia distribui-se: TERMINA e RODA são o lado contável
+que Hurwitz conta (e a quota deles nos 2^K intervalos DECRESCE — a borda é magra), FOGE é o
+que Lebesgue mede. E o par cone/espiral tem a mesma forma da soma reversível de Gentil.
+
+Defeito meu na ronda: medi «a borda é magra» por nós contra folhas, e essa fracção **cresce**
+para ½. O que emagrece é a QUOTA DO LADO CONTÁVEL: 22 racionais fixos ocupando 22 de 64 e
+depois 22 de 4096.
+
+`tests/geometria_real.c` (36:0) na ordem obrigatória do eval: 8 leis → base ortonormal →
 bit a bit → dual → recorrência → Pisot → encaixe → corte → completude → ℝ → π_k/gume.
-`papers/geometrico.tex` 12 páginas; `corpo_universal.tex` 54, e a compilar.
+`papers/geometrico.tex` 14 páginas; `corpo_universal.tex` 54, e a compilar.
 Ver [[project-o-real-e-o-corte]], [[feedback-verdadeiro-e-parcial]].

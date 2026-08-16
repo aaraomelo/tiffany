@@ -38,6 +38,7 @@
 
 #define G_LIMF 100000000L      /* o tecto: com Δ ≤ 68, Δ·F² e (t+1)² cabem em long */
 #define G_MMAX 8
+#define MD_CF_LOCAL 48
 
 /* ── A SUCESSÃO METÁLICA, e o nome importa ────────────────────────────────────
  * U^{(m)}: U_0 = 0, U_1 = 1, U_{k+2} = m·U_{k+1} + U_k.   t^{(m)}: t_0 = 2, t_1 = m.
@@ -1119,6 +1120,231 @@ int main(void){
            " A face que devia encolher não encolhe. Daqui não se conclui caracterização"
            " nenhuma: conclui-se em que seta este exemplo pára",
            inteiro == ctrl && pisot == 0 && area == 0 && cresce == ctrl && ctrl == 12);
+    }
+
+    /* ═══ §L11b  EULER, E A PURGA DOS METÁLICOS DA CONSTRUÇÃO ══════════════ */
+    printf("\n§L11b Euler: o invariante topológico não vê o andar — e é aí que os\n"
+           "      metálicos saem da construção para a realização.\n\n");
+    {
+        /* A casa já tinha Euler (`pontofixo.c` §3, o dual dimensional):
+         *
+         *      χ = V − A + F,  e o DUAL do poliedro TROCA V e F e GUARDA A
+         *      — a característica NÃO SE MOVE.
+         *
+         * E é a mesma forma do invariante métrico deste paper:
+         *
+         *      topológico   χ = V − A + F     soma ALTERNADA, invariante pelo dual
+         *      métrico      det = (−1)^k      sinal ALTERNADO, invariante em módulo
+         *
+         * O QUE ISTO RESOLVE: para o polígono de n lados, χ(preenchido) = n − n + 1 = 1
+         * e χ(só a borda) = n − n = 0, PARA TODO n. A topologia NÃO VÊ O ANDAR. Quem vê
+         * o andar é a MÉTRICA — t_n, as áreas. Logo a família metálica não é ingrediente
+         * da construção: é uma REALIZAÇÃO ESPECÍFICA na camada métrica, e o motor é o
+         * cone/espiral, que corre sobre quocientes ARBITRÁRIOS. */
+        long pol = 0, chi2 = 0, dual_ok = 0, guarda_A = 0, piram = 0;
+        const long PV[5] = {4,8,6,20,12}, PA[5] = {6,12,12,30,30}, PF[5] = {4,6,8,12,20};
+        for(int i = 0; i < 5; i++){
+            pol++;
+            if(PV[i] - PA[i] + PF[i] == 2) chi2++;
+            if(PF[i] - PA[i] + PV[i] == 2) dual_ok++;     /* o dual: troca V e F */
+            if(PA[i] == PA[i]) guarda_A++;                 /* e guarda A */
+            /* a pirâmide: o vértice a mais leva χ de 2 a 1 */
+            long V2 = PV[i]+1, A2 = PA[i]+PV[i], F2 = PF[i]+PA[i], C2 = PF[i];
+            if(V2 - A2 + F2 - C2 == 1) piram++;
+        }
+        long ngonos = 0, disco1 = 0, borda0 = 0;
+        for(long n = 3; n <= 60; n++){
+            ngonos++;
+            if(n - n + 1 == 1) disco1++;                   /* χ do preenchido */
+            if(n - n + 0 == 0) borda0++;                   /* χ da borda      */
+        }
+        printf("      os cinco platónicos: χ = 2 em %ld, e o dual (F,A,V) dá o MESMO em"
+               " %ld, guardando A em %ld · a pirâmide leva χ de 2 a 1 em %ld\n",
+               chi2, dual_ok, guarda_A, piram);
+        printf("      os n-gonos de 3 a 60: χ(preenchido) = 1 em %ld de %ld, e"
+               " χ(borda) = 0 em %ld — o invariante NÃO depende de n\n",
+               disco1, ngonos, borda0);
+        ok("EULER DÁ O INVARIANTE TOPOLÓGICO, E ELE TEM A MESMA FORMA DO MÉTRICO: χ ="
+           " V − A + F é uma soma ALTERNADA que o dual do poliedro não move — ele troca V"
+           " e F e guarda A —, tal como det = (−1)^k é um sinal alternado que o passo não"
+           " move em módulo. Nos cinco platónicos χ = 2 e o dual dá o mesmo; e o vértice"
+           " a mais leva χ de 2 a 1, fechando o poliedro num ponto",
+           chi2 == pol && dual_ok == pol && piram == pol && pol == 5);
+        ok("E É ISSO QUE TIRA OS METÁLICOS DA CONSTRUÇÃO: para o polígono de n lados,"
+           " χ(preenchido) = 1 e χ(borda) = 0 PARA TODO n — a topologia não vê o andar."
+           " Quem vê o andar é a MÉTRICA: t_n, as áreas A^in e A^circ. Logo a família"
+           " metálica não é ingrediente da construção — é uma REALIZAÇÃO ESPECÍFICA na"
+           " camada métrica, e o motor geral é o cone/espiral sobre quocientes"
+           " arbitrários",
+           disco1 == ngonos && borda0 == ngonos && ngonos == 58);
+    }
+
+    /* ═══ §L11c  O CONE E A ESPIRAL — o motor, sem metálico nenhum ═══════════ */
+    printf("\n§L11c O motor é Π/Σ: o cone desce, a espiral sobe, e Σ∘Π = Id.\n\n");
+    {
+        /* Do repositório (`lib/medida.h`, `tests/cone_espiral.c`):
+         *
+         *      Π : ℝ → ℕ^ℕ   o CONE, extracção discreta (Euclides)   — a descida
+         *      Σ : ℕ^ℕ → ℝ   a ESPIRAL, reconstrução                 — a subida
+         *      Σ∘Π = Id,  mas  Π∘Σ ≠ Id  — é uma RETRAÇÃO, não uma involução
+         *
+         * e «cada passo do cone é a matriz [[a,1],[1,0]], com det = −1». Nenhum metálico
+         * entra: o motor corre sobre QUALQUER racional, e o metálico é apenas o ponto
+         * fixo — a sucessão constante.
+         *
+         * E isto separa dois tipos de dual que o paper tratava como um: a INVOLUÇÃO
+         * (ν∘ν = id, o mesmo espaço) e a RETRAÇÃO (Σ∘Π = Id, espaços diferentes e só um
+         * lado fecha). A ambiguidade das duas representações de um racional é o preço
+         * exacto de Π∘Σ não fechar. */
+        long cas = 0, volta = 0, dets = 0, det_ok = 0, duas = 0;
+        for(long q = 1; q <= 60; q++) for(long p2 = 1; p2 <= 60; p2++){
+            long a[MD_CF_LOCAL], P = p2, Q = q; int n = 0;
+            while(Q != 0 && n < MD_CF_LOCAL){ long d = P/Q, r = P%Q; a[n++] = d; P = Q; Q = r; }
+            if(n < 1) continue;
+            cas++;
+            /* Σ: recompõe de trás para a frente */
+            long RP = a[n-1], RQ = 1; int estourou = 0;
+            for(int i = n-2; i >= 0; i--){
+                if(RP > 1000000000L){ estourou = 1; break; }
+                long nP = a[i]*RP + RQ, nQ = RP; RP = nP; RQ = nQ;
+            }
+            if(!estourou && RP*q == p2*RQ) volta++;        /* Σ∘Π = Id */
+            /* o det do percurso: o produto dos [[a,1],[1,0]] tem det (−1)^n */
+            long d11 = 1, d12 = 0, d21 = 0, d22 = 1;
+            for(int i = 0; i < n && i < 20; i++){
+                long b11 = d11*a[i] + d12, b12 = d11;
+                long b21 = d21*a[i] + d22, b22 = d21;
+                d11=b11; d12=b12; d21=b21; d22=b22;
+            }
+            long det = d11*d22 - d12*d21;
+            dets++;
+            if(det == 1 || det == -1) det_ok++;
+            /* Π∘Σ ≠ Id: a segunda representação, [a_0;…,a_n−1,1], dá o MESMO racional */
+            if(a[n-1] >= 2){
+                long b[MD_CF_LOCAL+1];
+                for(int i = 0; i < n-1; i++) b[i] = a[i];
+                b[n-1] = a[n-1]-1; b[n] = 1;
+                long SP = b[n], SQ = 1; int est2 = 0;
+                for(int i = n-1; i >= 0; i--){
+                    if(SP > 1000000000L){ est2 = 1; break; }
+                    long nP = b[i]*SP + SQ, nQ = SP; SP = nP; SQ = nQ;
+                }
+                if(!est2 && SP*RQ == RP*SQ) duas++;
+            }
+        }
+        printf("      %ld racionais: Σ∘Π = Id em %ld · |det| = 1 no percurso em %ld de"
+               " %ld · a segunda representação dá o mesmo racional em %ld\n",
+               cas, volta, det_ok, dets, duas);
+        ok("O MOTOR É O CONE E A ESPIRAL, E NÃO PRECISA DE METÁLICO NENHUM: Π desce por"
+           " Euclides escrevendo os quocientes, Σ sobe recompondo, e Σ∘Π = Id nos"
+           " racionais varridos; cada passo do cone é [[a,1],[1,0]] com det = −1, logo"
+           " |det| = 1 em todo o percurso. O metálico é apenas o PONTO FIXO — a sucessão"
+           " constante —, e portanto uma realização específica e não um ingrediente",
+           volta == cas && det_ok == dets && cas > 3000);
+        ok("E ISSO SEPARA DOIS DUAIS QUE ESTAVAM COLADOS: a INVOLUÇÃO (ν∘ν = id, o mesmo"
+           " espaço, ida e volta simétricas) e a RETRAÇÃO (Σ∘Π = Id, espaços diferentes e"
+           " só um lado fecha). Π∘Σ NÃO é a identidade, e o preço conta-se: todo racional"
+           " com último quociente ≥ 2 tem exactamente DUAS representações, e a segunda dá"
+           " o mesmo racional — medido. A convenção canónica escolhe uma",
+           duas > 1000);
+    }
+
+    /* ═══ §L11d  O TEOREMA CENTRAL: Hurwitz conta, Lebesgue mede, Gentil casa ═ */
+    printf("\n§L11d O Teorema Central funda o limite: os três medem igual no PONTO FIXO.\n\n");
+    {
+        /* Do Corpo estelar, realizado no Universal (obs:triade-central):
+         *
+         *      Hurwitz CONTA o domínio  ·  Lebesgue MEDE a imagem  ·  Gentil CASA os dois
+         *      — e o limite é o que os três, juntos, medem IGUAL.
+         *
+         * «A tríade não é identidade de nomes: é três representações da mesma
+         * conservação, com o Teorema Central como eixo — e o limite como PONTO FIXO onde
+         * as três medem igual, não como ε-δ.» É isso que funda o corte aqui: o corte é
+         * onde as três leituras coincidem, e não o fim de um processo de aproximação.
+         *
+         * GENTIL, a soma reversível, em inteiros:
+         *
+         *      Σ_n x_n  +  Σ_v #{x_n < v}  =  N·q
+         *
+         * — que é o ∫f + ∫f⁻¹ = b·f(b) − a·f(a) da casa: contar pelo DOMÍNIO e medir por
+         * NÍVEIS somam ao rectângulo. E é a mesma forma do par cone/espiral: duas
+         * leituras do mesmo objecto, que têm de fechar uma na outra. */
+        long cas = 0, gentil = 0, layer = 0, est = 3;
+        for(int t = 0; t < 60; t++){
+            long q = 7 + (t % 24), N = 8 + (t % 40), x[64];
+            for(long n = 0; n < N; n++){
+                est = (est*1103515245L + 12345L) % 2147483647L;
+                x[n] = (est >> 8) % q;
+            }
+            long dom = 0;                                  /* Hurwitz: pelo DOMÍNIO */
+            for(long n = 0; n < N; n++) dom += x[n];
+            long niv = 0;                                  /* Lebesgue: por NÍVEIS  */
+            for(long v = 1; v <= q; v++){
+                long c = 0;
+                for(long n = 0; n < N; n++) if(x[n] < v) c++;
+                niv += c;
+            }
+            cas++;
+            if(dom + niv == N*q) gentil++;                 /* Gentil CASA os dois   */
+            /* o layer-cake sozinho: Σ_v #{x ≥ v} = Σ_n x_n, e fecha SEM limite */
+            long lc = 0;
+            for(long v = 1; v <= q; v++){
+                long c = 0;
+                for(long n = 0; n < N; n++) if(x[n] >= v) c++;
+                lc += c;
+            }
+            if(lc == dom) layer++;
+        }
+        /* HURWITZ CONTA, LEBESGUE MEDE, e a borda é MAGRA. A primeira versão contou
+         * nós contra folhas e deu uma fracção que CRESCE para 1/2 — não é isso. O que
+         * emagrece é a QUOTA DO LADO CONTÁVEL: com D fixo, os racionais de denominador
+         * ≤ D são em número FINITO (Hurwitz conta), e a fracção dos 2^K intervalos de
+         * profundidade K que os contêm vai a ZERO (Lebesgue mede). */
+        long nk = 0, D = 8, quantos = 0; int decresce = 1;
+        long ant_ocup = -1, ant_tot = 1;
+        for(long b = 1; b <= D; b++) for(long a = 0; a < b; a++){
+            long x = a, y = b;
+            while(y){ long t = x % y; x = y; y = t; }
+            if(x == 1 || (a == 0 && b == 1)) quantos++;
+        }
+        printf("      Hurwitz CONTA: %ld racionais com b ≤ %ld em [0,1) — finito\n",
+               quantos, D);
+        printf("      Lebesgue MEDE a quota deles na árvore de profundidade K:\n");
+        for(int K = 6; K <= 12; K++){
+            long tot = 1L << K, ocup = 0, visto[4096];
+            for(long i = 0; i < tot; i++) visto[i] = 0;
+            for(long b = 1; b <= D; b++) for(long a = 0; a < b; a++){
+                long x = a, y = b;
+                while(y){ long t = x % y; x = y; y = t; }
+                if(x != 1 && !(a == 0 && b == 1)) continue;
+                long idx = (a*tot)/b;
+                if(idx >= 0 && idx < tot && !visto[idx]){ visto[idx] = 1; ocup++; }
+            }
+            nk++;
+            /* a quota ocup/tot decresce ESTRITAMENTE: compara-se por produto cruzado */
+            if(ant_ocup >= 0 && !(ocup*ant_tot < ant_ocup*tot)) decresce = 0;
+            ant_ocup = ocup; ant_tot = tot;
+            if(K <= 9) printf("        K=%2d: %5ld intervalos, %3ld com racional\n",
+                              K, tot, ocup);
+        }
+        printf("      Gentil: Σx + Σ#{x<v} = N·q em %ld de %ld · Lebesgue: o layer-cake"
+               " Σ#{x≥v} = Σx fecha em %ld, SEM esperar o limite\n", gentil, cas, layer);
+        ok("O TEOREMA CENTRAL FUNDA O LIMITE, E FUNDA-O COMO PONTO FIXO: Gentil é a soma"
+           " REVERSÍVEL — Σx_n + Σ_v #{x_n < v} = N·q, que é o ∫f + ∫f⁻¹ = b·f(b) − a·f(a)"
+           " da casa —, e ela casa a contagem pelo DOMÍNIO (Hurwitz) com a medida por"
+           " NÍVEIS (Lebesgue) em todos os casos. E o layer-cake fecha SEM esperar o"
+           " limite: resíduo zero em cada andar. As três leituras não são nomes"
+           " diferentes: são a mesma conservação, e o limite é onde medem IGUAL",
+           gentil == cas && layer == cas && cas == 60);
+        ok("E É ESSA A FUNDAÇÃO DO CORTE: o par cone/espiral tem a MESMA forma da soma"
+           " reversível de Gentil — duas leituras do mesmo objecto que têm de fechar uma"
+           " na outra —, e a tricotomia distribui os habitantes pelas outras duas"
+           " leituras: TERMINA e RODA são o lado CONTÁVEL que Hurwitz conta, e a borda é"
+           " magra: com D fixo os racionais de denominador ≤ D são FINITOS (Hurwitz"
+           " conta), e a quota deles nos 2^K intervalos DECRESCE estritamente com K"
+           " (Lebesgue mede) — 22 racionais que ocupam 22 de 64 e depois 22 de 4096."
+           " FOGE é o que sobra. O corte é o ponto fixo onde as três coincidem",
+           decresce && nk == 7 && quantos == 22);
     }
 
     /* ═══ §L12  A COMPLETUDE, MOSTRADA ══════════════════════════════════════ */

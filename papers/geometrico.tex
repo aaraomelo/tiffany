@@ -81,7 +81,7 @@ dos convergentes} entre as expansões com $a_k\geq1$, e por isso uma só taxa
 limita a construção inteira. A família metálica não é o escopo: é o caso
 \textbf{extremo}, o pior caso do mecanismo.
 
-\smallskip\noindent\emph{Medido:} \code{tests/geometria\_real.c} ($30{:}0$).
+\smallskip\noindent\emph{Medido:} \code{tests/geometria\_real.c} ($36{:}0$).
 \end{abstract}
 
 %======================================================================
@@ -374,6 +374,142 @@ tem oito posições, \textbf{reutilizadas bloco a bloco}. $\square$
 \colunas{a dobra $1\to2\to4\to8$ e o ciclo de período oito}
         {os oito bits reusados em cada andar}
         {\code{geometria\_real.c} \S L3}
+
+%======================================================================
+\section{Euler: o invariante topológico não vê o andar}\label{sec:euler}
+
+Antes de decidir cortes, convém saber \emph{o que na construção depende do andar} ---
+porque quase nada depende.
+
+\begin{proposicao}[a característica não se move]\label{prop:euler}
+Para os poliedros convexos, $\chi=V-A+F=2$, e o \textbf{dual troca $V$ e $F$
+guardando $A$}: a característica não se move. Nos cinco platónicos verifica-se nos
+dois sentidos; e o vértice a mais --- a pirâmide --- leva $\chi$ de $2$ a $1$,
+fechando o poliedro num ponto. $\square$
+\end{proposicao}
+
+\noindent E é a \textbf{mesma forma} do invariante métrico deste paper:
+\[
+\boxed{
+\begin{array}{lll}
+\text{topológico} & \chi=V-A+F & \text{soma ALTERNADA, invariante pelo dual }(V\leftrightarrow F)\\[2pt]
+\text{métrico} & \det M_k=(-1)^{k} & \text{sinal ALTERNADO, invariante em módulo pelo passo}
+\end{array}}
+\]
+
+\begin{corolario}[e daqui saem os metálicos da construção]\label{cor:purga}
+Para o polígono de $n$ lados,
+\[
+\chi(\text{preenchido})=n-n+1=1,
+\qquad
+\chi(\text{só a borda})=n-n=0,
+\qquad\text{para \textbf{todo} } n .
+\]
+\textbf{A topologia não vê o andar.} Quem vê o andar é a \emph{métrica} --- o traço
+$t_n$ e as áreas $A_n^{\rm in}$, $A_n^{\rm circ}$. Portanto a família metálica
+\textbf{não é ingrediente da construção}: é uma \textbf{realização específica} na
+camada métrica. $\square$
+\end{corolario}
+\colunas{a dualidade dimensional de Euler ($V\leftrightarrow F$, $A$ guardado)}
+        {a separação entre o que é da construção e o que é do andar}
+        {\code{geometria\_real.c} \S L11b: cinco platónicos, $58$ polígonos}
+
+%======================================================================
+\section{O motor: o cone e a espiral}\label{sec:cone}
+
+Purgados os metálicos, o que fica é o motor --- e ele já estava no repositório.
+
+\begin{definicao}[o par $\Pi/\Sigma$]\label{def:cone}
+\[
+\Pi:\ \text{o \textbf{CONE}, extracção discreta (Euclides)} \qquad
+\Sigma:\ \text{a \textbf{ESPIRAL}, reconstrução}
+\]
+$\Pi$ desce escrevendo os quocientes; $\Sigma$ sobe recompondo. Cada passo do cone
+é a matriz $\begin{psmallmatrix}a&1\\1&0\end{psmallmatrix}$, com $\det=-1$.
+\end{definicao}
+
+\begin{teorema}[o motor, e o dual que ele é]\label{thm:cone}
+$\Sigma\circ\Pi=\mathrm{Id}$, e $\abs{\det}=1$ em todo o percurso --- para
+quocientes \emph{arbitrários}, sem metálico nenhum. Mas
+$\Pi\circ\Sigma\neq\mathrm{Id}$: todo racional com último quociente $\geq2$ tem
+\textbf{exactamente duas} representações, $[a_0;\ldots,a_n]$ e
+$[a_0;\ldots,a_n{-}1,1]$, e a convenção canónica escolhe uma. Logo o par é uma
+\textbf{retração}, e não uma involução:
+\[
+\boxed{
+\begin{array}{lll}
+\text{INVOLUÇÃO} & \nu\circ\nu=\mathrm{id} & \text{o mesmo espaço, ida e volta simétricas}\\[2pt]
+\text{RETRAÇÃO} & \Sigma\circ\Pi=\mathrm{Id} & \text{espaços diferentes, e só um lado fecha}
+\end{array}}
+\]
+$\square$
+\end{teorema}
+\colunas{o par cone/espiral e a distinção involução\,/\,retração}
+        {o motor da construção, independente da família metálica}
+        {\code{geometria\_real.c} \S L11c: $3600$ racionais, $\Sigma\circ\Pi=\mathrm{Id}$
+em todos}
+
+\noindent\textbf{E o metálico é o ponto fixo do cone} --- a sucessão de quociente
+constante. É por isso que ele dá o mecanismo \emph{extremo explícito}: não porque
+seja o caso geral, mas porque é o caso que não se move.
+
+%======================================================================
+\section{O Teorema Central funda o limite}\label{sec:central}
+
+\begin{teorema}[Hurwitz conta, Lebesgue mede, Gentil casa]\label{thm:central}
+\[
+\boxed{
+\begin{array}{ll}
+\textbf{Hurwitz} & \text{conta o domínio}\\
+\textbf{Lebesgue} & \text{mede a imagem}\\
+\textbf{Gentil} & \text{casa os dois, pela soma reversível}
+\end{array}}
+\]
+A soma de Gentil, em inteiros,
+\[
+\sum_n x_n \;+\; \sum_{v} \#\{x_n<v\} \;=\; N\!\cdot\!q ,
+\]
+é o $\int f+\int f^{-1}=b\,f(b)-a\,f(a)$ desta casa: contar pelo \emph{domínio} e
+medir por \emph{níveis} somam ao rectângulo. E o \emph{layer-cake}
+$\sum_v\#\{x_n\geq v\}=\sum_n x_n$ fecha \textbf{sem esperar o limite}, com
+resíduo zero em cada andar. $\square$
+\end{teorema}
+
+\noindent E é isto que funda o corte, com o estatuto certo:
+\[
+\boxed{\;\text{o limite é o \textbf{PONTO FIXO} onde as três medem igual ---
+não um processo }\varepsilon\text{--}\delta.\;}
+\]
+
+\begin{corolario}[a tricotomia distribui-se pelas três leituras]\label{cor:distribui}
+\textbf{TERMINA} e \textbf{RODA} são o lado \emph{contável}, que Hurwitz conta:
+fixado $D$, os racionais de denominador $\leq D$ são em número finito, e a quota
+que ocupam nos $2^{K}$ intervalos de profundidade $K$ \textbf{decresce
+estritamente} com $K$ --- a borda é magra, e é Lebesgue que o mede.
+\textbf{FOGE} é o que sobra. $\square$
+\end{corolario}
+\colunas{a tríade Hurwitz--Gentil--Lebesgue como eixo do Teorema Central}
+        {a fundação do corte como ponto fixo, e a distribuição da tricotomia}
+        {\code{geometria\_real.c} \S L11d: $60$ casos de Gentil e do layer-cake;
+$22$ racionais, quota de $22/64$ a $22/4096$}
+
+\noindent\emph{E o par cone/espiral tem a mesma forma da soma reversível}: duas
+leituras do mesmo objecto, que têm de fechar uma na outra.
+
+%======================================================================
+\section{A partir daqui, a realização específica}\label{sec:especifica}
+
+O que precede é a construção: a Lei 0, a base, o motor $\Pi/\Sigma$ e a sua
+fundação. Nada disso depende de um andar.
+
+\begin{center}
+\fbox{\parbox{0.92\textwidth}{\centering
+As secções seguintes tratam da \textbf{família metálica}, e ela entra com o
+estatuto que o Cor.~\ref{cor:purga} lhe fixa: \emph{uma realização específica na
+camada métrica}. Ela dá o \textbf{mecanismo extremo explícito} --- é o ponto fixo
+do cone, a sucessão de quociente constante ---, e não é ingrediente da construção
+geral.}}
+\end{center}
 
 %======================================================================
 \section{O dual produz a recorrência}\label{sec:dual}
@@ -941,10 +1077,10 @@ Universal}, e é nessa realização que a recta real aparece como o corpo ordena
 completo.
 
 \medskip
-\emph{Medido:} \code{tests/geometria\_real.c} ($30{:}0$), com
+\emph{Medido:} \code{tests/geometria\_real.c} ($36{:}0$), com
 \code{tests/ortonormal.c} ($6{:}0$), \code{tests/metalica.c},
 \code{tests/pisotbase.c}, \code{tests/ordenado.c} ($7{:}0$),
 \code{tests/pi\_familia.js} ($7{:}0$),
-\code{tests/arquimedes\_area.js} ($30{:}0$) e \code{tests/geometrico.js}.
+\code{tests/arquimedes\_area.js} ($36{:}0$) e \code{tests/geometrico.js}.
 
 \end{document}
