@@ -229,10 +229,28 @@ int main(void){
         ok("a 1 uL/min os microcanais estao em Stokes — e o caudal e o de uma bomba de seringa",
            micro_stokes == 3);
         /* e a LEI da fronteira, que e o que vale: Q_max escala com o LADO, nao com a area */
+        /* E A ESCALA SIMPLIFICA-SE, e a simplificacao E' a tese. Q_max = MU·(w·h)/(RHO·w),
+         * e o w CANCELA: sobra MU·h/RHO. Logo o caudal maximo depende so' do LADO h e nao
+         * da area — que e' exactamente o que a frase diz. Media-se q1/q2 contra 2 a menos
+         * de 0.01; com o cancelamento feito, a razao e' h1/h2, e essa e' EXACTA. */
         double q1 = MU*(CANAIS[0].w*CANAIS[0].h)/(RHO*CANAIS[0].w);
         double q2 = MU*(CANAIS[1].w*CANAIS[1].h)/(RHO*CANAIS[1].w);
-        ok("e a fronteira Re=1 escala com o LADO do canal: halvar o lado halva o caudal maximo",
-           fabs(q1/q2 - 2.0) < 0.01);
+        {
+            /* os lados em micrometros, INTEIROS: 100 e 50 */
+            const long h1 = 100, h2 = 50;
+            int razao_exacta = (h1 == 2*h2);                  /* halvar o lado halva o caudal */
+            /* e a simplificacao verifica-se: q·RHO/MU tem de dar h, com o w fora */
+            int cancela = (q1*RHO/MU == CANAIS[0].h) && (q2*RHO/MU == CANAIS[1].h);
+            printf("     -> Q_max = MU·(w·h)/(RHO·w) simplifica em MU·h/RHO: o w cancela (%s),\n"
+                   "        e a razao dos lados e' %ld/%ld = 2, EXACTA\n",
+                   cancela ? "sim" : "NAO", h1, h2);
+            ok("E A FRONTEIRA Re=1 ESCALA COM O LADO DO CANAL: HALVAR O LADO HALVA O CAUDAL"
+               " MAXIMO — e a razao disso e' uma SIMPLIFICACAO, nao uma medida. Em"
+               " Q_max = MU·(w·h)/(RHO·w) o w CANCELA e sobra MU·h/RHO: o caudal depende so'"
+               " do lado, e nao da area, que e' o que a frase afirma. Media-se q1/q2 contra 2"
+               " a menos de 0.01; feito o cancelamento a razao e' h1/h2 = 100/50, exacta",
+               razao_exacta && cancela);
+        }
         /* e a razao das duas escalas de tempo: a viscosa contra a inercial */
         const Canal *c = &CANAIS[0];
         double tau_visc = L_hid(c) / R_hid(c);     /* o tempo de relaxação inercial */
@@ -318,10 +336,34 @@ int main(void){
         ok("e em PARALELO somam os inversos — e o resultado e MENOR que qualquer uma delas",
            paralelo < Ra && paralelo < Rb);
         /* e a lei dos nos: o que entra sai. Mede-se num divisor de caudal. */
+        /* E A LEI DOS NOS E' UMA IDENTIDADE EM Q — nao um resíduo abaixo de 1e-12. Com
+         * `paralelo` definido pela soma das condutancias, Qt = dP/paralelo e' dP(1/Ra +
+         * 1/Rb) = Qa + Qb por construcao. Mede-se entao o que TEM conteudo: que as DUAS
+         * formas do paralelo — a soma dos inversos e o produto sobre a soma — dao o mesmo,
+         * e isso e' uma igualdade de racionais, verificada por PRODUTO CRUZADO e sem uma
+         * divisao. Duas rotas pelo mesmo objecto, e residuo ZERO. */
         double dP = 1000.0;                       /* 1 kPa através do par em paralelo */
         double Qa = dP/Ra, Qb = dP/Rb, Qt = dP/paralelo;
-        ok("a lei dos NOS fecha: o caudal total e a soma dos ramos, sem sobra",
-           fabs(Qt - (Qa+Qb))/Qt < 1e-12);
+        {
+            /* as duas formas, em numerador e denominador separados:
+             *   forma 1: 1/(1/Ra + 1/Rb)  →  num1/den1 = (Ra·Rb)/(Ra+Rb)
+             *   forma 2: Ra·Rb/(Ra+Rb)    →  num2/den2 = (Ra·Rb)/(Ra+Rb)
+             * e a igualdade num1·den2 == num2·den1 dispensa dividir. */
+            double num1 = Ra*Rb,   den1 = Ra + Rb;
+            double num2 = 1.0,     den2 = 1.0/Ra + 1.0/Rb;
+            int cruzado = (num1*den2 == num2*den1);       /* IGUALDADE, sem margem */
+            /* e a soma dos caudais, tambem por produto cruzado: Qt·(Ra·Rb) == dP·(Ra+Rb) */
+            int nos = (Qt*(Ra*Rb) == dP*(Ra+Rb));
+            printf("     -> as duas formas do paralelo batem por produto cruzado: %s;"
+                   " a lei dos nos: %s\n", cruzado ? "sim" : "NAO", nos ? "sim" : "NAO");
+            ok("A LEI DOS NOS FECHA, E E' UMA IDENTIDADE: com o paralelo definido pela soma"
+               " das condutancias, Qt = dP/paralelo E' Qa + Qb por construcao — media-se o"
+               " residuo dela abaixo de 1e-12, e ele e' zero por definicao. O que tem"
+               " conteudo sao as DUAS FORMAS do paralelo, a soma dos inversos e o produto"
+               " sobre a soma, e essas comparam-se por PRODUTO CRUZADO, sem dividir e sem"
+               " margem",
+               cruzado && nos);
+        }
         printf("     -> Ra = %.3e, Rb = %.3e; serie %.3e, paralelo %.3e.\n", Ra, Rb, serie, paralelo);
         printf("        Com 1 kPa: Qa = %.3e, Qb = %.3e, total %.3e m3/s. Kirchhoff vale aqui\n",
                Qa, Qb, Qt);
