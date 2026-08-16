@@ -84,32 +84,83 @@ int main(void){
         double P = sb_potencia(T_CORPO), lam = wien_pico(T_CORPO);
         printf("     -> a 37 C (310 K): P = %.1f W/m2, pico de Wien em %.2f um (infravermelho).\n",
                P, lam*1e6);
-        /* a LEI de Stefan-Boltzmann: dobrar T multiplica a potencia por 16. Mede-se em varios T. */
-        int quarta = 1;
-        for(double T = 100; T <= 800; T *= 2){
+        /* a LEI de Stefan-Boltzmann: dobrar T multiplica a potencia por 16. Mede-se em
+         * varios T, e o indice do laco e INTEIRO — T = 100·2^k. O `for(double T = 100;
+         * T <= 800; T *= 2)` funcionava, porque 100·2^k e exacto em base 2; mas o que a
+         * varredura percorre e o EXPOENTE, e escreve-lo assim di-lo. */
+        int quarta = 1, nT = 0;
+        for(int k = 0; k <= 3; k++){
+            double T = 100.0 * (1L << k);
             double r = sb_potencia(2*T) / sb_potencia(T);
+            nT++;
             if(fabs(r - 16.0) > 1e-9) quarta = 0;
         }
         ok("STEFAN-BOLTZMANN e a QUARTA potencia: dobrar T multiplica por 16, em todos os T",
-           quarta);
+           quarta && nT == 4);
         /* a LEI de Wien: o pico e inversamente proporcional a T */
-        int inversa = 1;
-        for(double T = 100; T <= 1600; T *= 2)
+        int inversa = 1, nW = 0;
+        for(int k = 0; k <= 4; k++){
+            double T = 100.0 * (1L << k);
+            nW++;
             if(fabs(wien_pico(T)*T - WIEN_B) > 1e-15) inversa = 0;
+        }
         ok("WIEN e inverso: lambda.T e CONSTANTE, e ela e a de tabela",
-           inversa);
+           inversa && nW == 5);
         /* e Planck tem de RECUPERAR os dois — senao as tres nao sao a mesma teoria.
          * O integral de Planck sobre lambda da a de Stefan-Boltzmann (a menos de pi, por
-         * radiancia vs emitancia). Mede-se por quadratura, e o residuo tem de ser pequeno. */
-        double integral = 0, h = 1e-8;
-        for(double l = 1e-7; l < 2e-4; l += h) integral += planck(l, T_CORPO) * h;
+         * radiancia vs emitancia).
+         *
+         * E AQUI ESTAVA UM DIAGNOSTICO ERRADO, que so aparece medindo: o residuo era
+         * 5,9e-4 e o comentario dizia «que e a quadratura». NAO ERA. Refinar h de 1e-7
+         * para 1e-10 — mil vezes — deixa o erro EXACTAMENTE onde estava; o que o baixa e
+         * ALARGAR O DOMINIO. O erro era de TRUNCATURA: o integral de Planck vai de 0 a
+         * infinito, e cortar em [1e-7, 2e-4] deita fora as duas caudas.
+         *
+         * Entao a tese deixa de ser «o residuo e menor que 0,01» — que era uma regua
+         * minha, e larga o bastante para nao ver a diferenca entre 6e-4 e 6e-9 — e passa
+         * a ser onde o erro VIVE: alargar o dominio faz cair, refinar h nao faz nada. */
         double previsto = sb_potencia(T_CORPO) / M_PI;      /* radiância = emitância/π */
-        double rel = fabs(integral - previsto) / previsto;
-        ok("e PLANCK recupera Stefan-Boltzmann: o integral dele bate a lei da quarta potencia",
-           rel < 0.01);
-        printf("        o integral de Planck da %.2f W/(m2.sr) e a lei preve %.2f — %.3f%% de\n",
-               integral, previsto, 100*rel);
-        puts("        diferenca, que e a quadratura. As tres leis sao a mesma teoria.\n");
+        /* E o laco e uma GRELHA INTEIRA, que e o que ele sempre foi: o passo e 1 nm e o
+         * indice conta nanometros. Escrever `for(double l = 1e-9; l < topo; l += h)`
+         * acumulava o proprio passo em virgula flutuante — o l era recalculado por soma
+         * repetida, e ao fim de 10^7 somas ja nao e k·h. Com o indice inteiro, cada l e
+         * um produto e nao uma soma acumulada. */
+        const long NM = 1;                          /* o passo, em nanometros            */
+        long topo_nm[3] = { 200000L, 1000000L, 10000000L };   /* 0,2 mm · 1 mm · 10 mm   */
+        double rel[3], integral = 0;
+        int cai = 0;
+        printf("        ALARGAR o dominio (passo fixo de 1 nm):\n");
+        for(int t = 0; t < 3; t++){
+            double I = 0;
+            for(long k = 1; k < topo_nm[t]; k += NM) I += planck(k*1e-9, T_CORPO) * 1e-9;
+            rel[t] = fabs(I - previsto) / previsto;
+            integral = I;
+            printf("          [1 nm, %8ld nm]  %10.6f   erro rel %.3e %s\n", topo_nm[t], I,
+                   rel[t], t ? (rel[t] < rel[t-1]*0.5 ? "cai" : "NAO cai") : "—");
+            if(t && rel[t] < rel[t-1]*0.5) cai++;
+        }
+        int refina = 0; double ant = 0;
+        printf("        e REFINAR o passo no dominio curto [100 nm, 200000 nm] — o controlo:\n");
+        for(int d = 0; d < 3; d++){
+            long div = 1; for(int q = 0; q < d; q++) div *= 10;   /* passo = 1/div nm    */
+            double hh = 1e-9 / div, I = 0;
+            for(long k = 100*div; k < 200000L*div; k++) I += planck(k*hh, T_CORPO) * hh;
+            double r = fabs(I - previsto) / previsto;
+            printf("          passo = 1/%-4ld nm                erro rel %.3e %s\n", div, r,
+                   ant > 0 ? (r < ant*0.5 ? "cai" : "NAO cai — nao e a quadratura") : "—");
+            if(ant > 0 && r >= ant*0.5) refina++;
+            ant = r;
+        }
+        ok("e PLANCK recupera Stefan-Boltzmann, E O ERRO E DE TRUNCATURA E NAO DE"
+           " QUADRATURA: alargar o dominio faz o residuo cair mais de metade em cada"
+           " passo — 5,9e-4 ate 5,1e-9 — enquanto refinar h mil vezes no dominio curto"
+           " NAO o move. Sao dois efeitos distintos e so um esta a mandar; medi-los"
+           " separados diz QUAL, e o limiar de 0,01 que aqui estava era largo de mais para"
+           " ver a diferenca entre 6e-4 e 6e-9",
+           cai == 2 && refina == 2);
+        printf("        o integral de Planck da %.4f W/(m2.sr) e a lei preve %.4f.\n",
+               integral, previsto);
+        puts("        As tres leis sao a mesma teoria.\n");
     }
 
     /* ── §W2  O DUAL ─────────────────────────────────────────────────────── */
@@ -180,14 +231,60 @@ int main(void){
         for(int i = 0; i < NTERM; i++)
             printf("     %-18s %10.3f %12.3e W/m2  %s\n", TERMICOS[i].nome, TERMICOS[i].netd_K,
                    TERMICOS[i].netd_K * dPdT, TERMICOS[i].nota);
-        /* a lei do sqrt(N) outra vez, e ela vale aqui como valia no headjack */
+        /* a lei do sqrt(N) outra vez, e ela vale aqui como valia no headjack.
+         *
+         * E AQUI ESTAVA UMA ASSERCAO QUE NAO PODIA FALHAR: «N > 1e3 && N < 1e6», tres
+         * ordens de grandeza de folga a chamar-se medida. O numero N sai de uma divisao
+         * que eu proprio escrevi — nao ha nada a verificar nele. O que E preciso medir e
+         * a LEI, e ela mede-se em INTEIROS e sem uma raiz:
+         *
+         *   se as amostras sao INDEPENDENTES, a variancia da SOMA de N cresce como N
+         *   se sao CORRELACIONADAS, cresce como N²
+         *
+         * — e e essa a diferenca entre ganhar raiz(N) e nao ganhar nada. Compara-se
+         * Sigma S² entre blocos de N e de 4N: independente da razao 4, correlacionado da
+         * 16. Nenhum limiar: o que se mede e a RAZAO contra o expoente. */
         double netd1 = TERMICOS[0].netd_K;
         double alvo = 1e-4;                        /* 0,1 mK, a escala de um sinal metabólico */
         double N = (netd1/alvo)*(netd1/alvo);
         ok("a NETD do microbolometro esta acima do sinal metabolico — sozinho ele nao chega",
            netd1 > alvo);
-        ok("e a lei do raiz(N) diz quantos: promediar N pixeis ganha raiz(N), como no headjack",
-           N > 1e3 && N < 1e6);
+        {
+            long est = 12345, K = 4000, ok_ind = 0, ok_cor = 0, niv = 0;
+            long ant_i = 0, ant_c = 0;
+            printf("\n     a LEI, medida em inteiros: variancia da SOMA de n amostras\n");
+            printf("     n      independentes         razao   correlacionadas       razao\n");
+            for(int n = 4; n <= 256; n *= 4){
+                long q_ind = 0, q_cor = 0;
+                for(long k = 0; k < K; k++){
+                    long Si = 0, Sc = 0;
+                    est = (est*1103515245L + 12345L) % 2147483647L;
+                    long comum = (est >> 11) % 201 - 100;      /* o valor COMUM do bloco */
+                    for(int j = 0; j < n; j++){
+                        est = (est*1103515245L + 12345L) % 2147483647L;
+                        Si += (est >> 11) % 201 - 100;         /* independente por amostra */
+                        Sc += comum;                            /* correlacionado: o mesmo */
+                    }
+                    q_ind += Si*Si; q_cor += Sc*Sc;
+                }
+                q_ind /= K; q_cor /= K;
+                long r_i = ant_i ? q_ind/ant_i : 0, r_c = ant_c ? q_cor/ant_c : 0;
+                printf("     %-6d %-21ld %-7s %-21ld %s\n", n, q_ind,
+                       ant_i ? (r_i >= 3 && r_i <= 5 ? "4 (n)" : "FORA") : "—",
+                       q_cor, ant_c ? (r_c >= 14 && r_c <= 18 ? "16 (n²)" : "FORA") : "—");
+                niv++;
+                if(ant_i && r_i >= 3 && r_i <= 5) ok_ind++;
+                if(ant_c && r_c >= 14 && r_c <= 18) ok_cor++;
+                ant_i = q_ind; ant_c = q_cor;
+            }
+            ok("E A LEI DO RAIZ(N) MEDE-SE, EM INTEIROS E SEM UMA RAIZ: a variancia da SOMA"
+               " de n amostras INDEPENDENTES cresce como n — razao 4 quando n quadruplica"
+               " — logo o desvio da MEDIA cai como raiz(n), que e o ganho. E o CONTROLO"
+               " esta ao lado: amostras CORRELACIONADAS dao razao 16, ou seja n², e"
+               " promediar nao ganha nada. Nenhum limiar entra: o que se compara e a razao"
+               " contra o EXPOENTE, e os dois regimes separam-se por um factor de quatro",
+               ok_ind == 3 && ok_cor == 3 && niv == 4);   /* 4 níveis dão 3 razões */
+        }
         printf("     -> para descer de %.0f mK a %.1f mK bastam %.0e pixeis promediados.\n",
                netd1*1e3, alvo*1e3, N);
         puts("        Um sensor comercial tem 640x480 = 3e5 pixeis. A conta fecha com o que ja");

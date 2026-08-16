@@ -374,7 +374,7 @@ quasi c1eae084a401bc3d 0
 quatro 7ab68ac6a57ef1f7 0
 quebra 789cef502f39fd13 0
 racional_pg 62d5f52b3aa7c179 0
-radiacao 803b45791ce8714f 0
+radiacao 4ed320224cabedd5 0
 ramos 2c80ff07ed03e9e8 0
 rastro 26e475d85d748049 0
 reais 621a5430042c6845 0
