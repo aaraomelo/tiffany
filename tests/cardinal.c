@@ -153,8 +153,22 @@ int main(void){
          * inteiro puro, e decide sem avaliar raiz nenhuma. Mede-se que o caminho existe
          * em toda a profundidade, que o encaixe aperta, e que x é IRRACIONAL — porque
          * (m+2^k)² = 2·2^{2k} não tem solução: 2 não é quadrado perfeito. */
+        /* E «O ENCAIXE APERTA» ESTAVA A MEDIR 2x > x. A cláusula era
+         *
+         *      if(pot > ant_den) aperta++;   ant_den = pot;
+         *
+         * com `pot` acabado de dobrar na linha de cima: verdade sempre, meça-se o que se
+         * medir. Uma constante disfarçada dentro de uma asserção que no resto é forte.
+         *
+         * O que «aperta» quer dizer é o ENCAIXE: o intervalo do passo k+1 está DENTRO do
+         * do passo k. Em inteiros isso é o PASSO da árvore binária,
+         *
+         *      m_{k+1} ∈ {2·m_k, 2·m_k + 1}
+         *
+         * — o mesmo passo que o `supremo.c` mede, e que é o que faz dos m_k um CAMINHO e
+         * não uma lista solta. E este pode falhar: basta o bit escolher outra coisa. */
         long prof = 0, decide = 0, aperta = 0, empate = 0;
-        long m = 0, pot = 1, ant_den = 1;
+        long m = 0, pot = 1, ant_den = 1, ant_m = 0;
         printf("      k     m/2^k          (m+2^k)² < 2·2^{2k} ?   empate?\n");
         for(int k = 1; k <= 28; k++){
             m *= 2; pot *= 2;
@@ -165,9 +179,9 @@ int main(void){
             /* o teste DECIDE: nunca há empate, porque 2 não é quadrado */
             long b = m + pot;
             if(b*b != 2*pot*pot) decide++; else empate++;
-            /* e o encaixe aperta: o denominador dobra */
-            if(pot > ant_den) aperta++;
-            ant_den = pot;
+            /* e o ENCAIXE: o filho é 2m ou 2m+1, logo o intervalo novo cabe no antigo */
+            if(m == 2*ant_m || m == 2*ant_m + 1) aperta++;
+            ant_den = pot; ant_m = m;
             if(k <= 4 || k == 28)
                 printf("      %-5d %-14s %-23s %s\n", k, "…",
                        (b*b < 2*pot*pot) ? "sim" : "não", (b*b == 2*pot*pot) ? "SIM" : "nunca");
@@ -179,7 +193,11 @@ int main(void){
            " m/2^k < √2−1 ⟺ (m+2^k)² < 2·2^{2k}, decidido sem avaliar raiz nenhuma nas 28"
            " profundidades. E NUNCA HÁ EMPATE — (m+2^k)² = 2·2^{2k} não tem solução porque"
            " 2 não é quadrado perfeito —, o que é dizer que o habitante é IRRACIONAL: o"
-           " caminho existe, e nenhum diádico está nele",
+           " caminho existe, e nenhum diádico está nele. E O ENCAIXE MEDE-SE PELO PASSO:"
+           " m_{k+1} ∈ {2m_k, 2m_k+1}, que é o que faz dos m_k um CAMINHO na árvore e não"
+           " uma lista solta de inteiros — o mesmo passo do supremo.c. Estava aqui"
+           " `pot > ant_den` com o pot acabado de dobrar, isto é 2x > x: verdade sempre,"
+           " medisse-se o que se medisse",
            decide == prof && empate == 0 && aperta == prof && prof == 28);
     }
 
