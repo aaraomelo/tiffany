@@ -633,6 +633,77 @@ rotas concordantes --- contra ZERO em $\mathbb{Q}$, para todo $m$; e a volta, co
 $16\,128$ pares a fechar na face finita}
 
 %======================================================================
+\section{O teorema dos resíduos, e ele é o mesmo ponto fixo}\label{sec:residuo}
+
+\noindent O \emph{Corpo Universal} já diz (\code{thm:residuo}) que \textbf{o resíduo é
+o ponto fixo da monodromia}: a volta age no espectro por
+$\hat c_k\mapsto\omega^{k}\hat c_k$, e o \emph{único modo invariante} é o que carrega
+o resíduo. E o \S\ref{sec:pontofixo} diz que \textbf{o corte é o ponto fixo da
+Möbius}. \emph{É a mesma palavra}, e o que os separa é o regime --- que é o
+discriminante deste paper:
+\[
+\boxed{
+\begin{array}{lll}
+\omega & \text{ponto fixo da \textbf{monodromia}} & \abs{\omega}=1,\ \text{ordem
+FINITA},\ D<0\ \text{--- \textbf{roda}}\\[3pt]
+\sigma & \text{ponto fixo da \textbf{Möbius}} & \abs{\sigma}>1,\ \text{ordem
+INFINITA},\ D>0\ \text{--- \textbf{cresce}}
+\end{array}}
+\]
+
+\begin{teorema}[a volta lê uma coordenada, e é a que o gerador deixa fixa]\label{thm:residuo-geo}
+\emph{(i) O contorno é a órbita de um gerador de ordem finita.} Com
+$\omega$ raiz de $\Phi_6=x^{2}-x+1$ e a aritmética em $\mathbb{Z}[\omega]$ por
+$\omega^{2}=\omega-1$ --- \emph{inteira, e sem avaliar raiz nenhuma} ---, tem-se
+$\omega^{6}=1$ e nenhuma potência menor o dá: \textbf{a órbita fecha}, e é por isso
+que a soma de contorno tem um número finito de termos.
+
+\emph{(ii) E a volta lê um modo só:}
+\[
+\boxed{\;\sum_{k=0}^{5}\omega^{jk}=6\cdot[\,6\mid j\,]\;}
+\]
+--- exacto em $\mathbb{Z}[\omega]$. Os outros modos cancelam-se
+\textbf{exactamente}, não aproximadamente, e é por isso que a soma selecciona o
+resíduo e mais nada. O modo que sobra é $j\equiv0\pmod 6$: \emph{o único que
+$\omega$ não move}. $\square$
+\end{teorema}
+
+\begin{teorema}[e a factorização separa os dois geradores]\label{thm:separa}
+O único polinómio da família que factoriza (Teor.~\ref{thm:condicao} e o
+\emph{gerador} do \emph{Teoria}) parte-se exactamente nos dois regimes:
+\[
+\boxed{\;x^{5}-x^{4}-1=\underbrace{(x^{2}-x+1)}_{\Phi_6:\ \text{o }\omega,\ \text{ordem }6}
+\cdot\underbrace{(x^{3}-x-1)}_{\text{a plástica: o }\sigma}\;}
+\]
+O factor quadrático \textbf{é} o sexto ciclotómico --- divide $x^{6}-1$ e \emph{não}
+divide $x^{3}-1$ nem $x^{2}-1$, logo as raízes têm ordem exactamente $6$ ---, e é o
+$\omega$ do teorema dos resíduos; o cúbico é a razão plástica, e é o $\sigma$ do
+corte. \emph{A mesma divisão exacta que diz que o zero desce, lida de outro lado,
+separa o gerador que roda do gerador que cresce.} $\square$
+\end{teorema}
+
+\medskip
+\noindent\textbf{E a ida e volta é a mesma frase nos dois:}
+\[
+\boxed{
+\begin{array}{ll}
+\text{no \textbf{resíduo}} & \text{a volta (soma de contorno) lê \emph{uma}
+coordenada: } \sum f(z)\,z=M\,c_{-1}\\[3pt]
+\text{no \textbf{corte}} & \text{a volta (a Möbius inversa) chega ao } \infty\
+\text{\emph{exacto}}
+\end{array}}
+\]
+--- em ambos, \textbf{a volta lê exactamente o que o gerador deixa fixo}. Lá uma
+coordenada do espectro; aqui o $\infty$ de onde a órbita partiu.
+\colunas{\code{thm:residuo} (o resíduo é o ponto fixo da monodromia)}
+        {os dois regimes separados pela factorização, em $\mathbb{Z}[\omega]$ e
+$\mathbb{Z}[\sigma]$}
+        {\code{tests/residuo\_gerador.c} ($4{:}0$): ordem de $\omega$ exactamente $6$;
+$\sigma^{k}\neq1$ em $24$ potências com a aritmética medida pela lei definidora e por
+$\sigma^{i}\sigma^{j}=\sigma^{i+j}$ em $64$ pares; a soma de contorno em $19$ valores
+de $j$; e a factorização com a volta a reconstruir}
+
+%======================================================================
 \section{O Teorema Central funda o limite}\label{sec:central}
 
 \begin{teorema}[Hurwitz conta, Lebesgue mede, Gentil casa]\label{thm:central}
