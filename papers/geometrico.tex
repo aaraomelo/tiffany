@@ -639,6 +639,85 @@ contribuição diagonal desaparece:
 $\square$
 \end{corolario}
 
+\begin{teorema}[o CRUZADO não vê a potência --- e é por isso que a raiz não é
+precisa]\label{thm:cruzado-potencia}
+Seja $A$ um operador linear e $\operatorname{Cruz}(u,v)=\tfrac12(u\star v-v\star u)$ a
+metade antissimétrica do Teorema~\ref{thm:espectro-tau}. Então:
+
+\textbf{(1) O cruzado transforma-se pelo determinante.} Em dimensão~$2$,
+$\operatorname{Cruz}(u,v)$ tem uma entrada independente --- $u_0v_1-u_1v_0$ --- que
+\emph{é} $\det\begin{psmallmatrix}u_0&v_0\\u_1&v_1\end{psmallmatrix}$; em dimensão~$n$ a
+$n$-forma alternante é única a menos de escalar. Da multiplicatividade do determinante
+sai, sem contas:
+\[
+\boxed{\;\operatorname{Cruz}(Au,Av)=\det(A)\cdot\operatorname{Cruz}(u,v). \;}
+\]
+\emph{Nada aqui é sobre $\mathbb{R}$}: vale sobre qualquer $K$ com $\operatorname{car}K\neq2$,
+pela mesma hipótese do Teorema~\ref{thm:nao-circular}.
+
+\textbf{(2) Logo a potência só entra pelo expoente.} Por indução no passo, e o corpo do
+passo não menciona $k$:
+\[
+\operatorname{Cruz}(A^{k}u,A^{k}v)=(\det A)^{k}\,\operatorname{Cruz}(u,v),
+\qquad \forall k\geq0 .
+\]
+
+\textbf{(3) E na órbita da unidade ele é INVARIANTE.} Se $|\det A|=1$ --- que é a condição
+da unidade, e é a que a família metálica satisfaz por $\det M_m=-1$
+(Teor.~\ref{thm:doisdet}) --- então
+\[
+\boxed{\;\bigl|\operatorname{Cruz}(A^{k}u,A^{k}v)\bigr|
+=\bigl|\operatorname{Cruz}(u,v)\bigr|\quad\text{para \textbf{todo} }k,\;}
+\]
+e o sinal alterna com $(-1)^{k}$. \emph{Isto não é um facto novo desta secção}: é a linha
+$\det M_k=(-1)^{k}$ da tabela do §\ref{sec:euler}, que ali estava dita como observação
+sobre o determinante. O determinante \textbf{é} o cruzado --- a área ---, e essa linha era
+já esta invariância sem o enunciar.
+
+\textbf{(4) E é daqui que a raiz sai de cena.} A norma $\|A^{k}v\|$ cresce como $\sigma^{k}$
+e é irracional em quase todo $k$: perguntar por ela traz $\sqrt{\ }$, e a raiz traz a
+vírgula. Mas a raiz é a \emph{inversa} da potência, e o cruzado não vê nem uma nem outra
+--- as duas passam por ele multiplicando por $(\det A)^{\pm k}$, que é $\pm1$. As perguntas
+métricas sobre a órbita respondem-se então no par $(\operatorname{Dir},\operatorname{Cruz})$,
+ambos inteiros, e o par fecha por \textbf{Lagrange}:
+\[
+\boxed{\;\operatorname{Dir}(u,v)^{2}+\operatorname{Cruz}(u,v)^{2}
+=\operatorname{Dir}(u,u)\cdot\operatorname{Dir}(v,v)\;}
+\]
+--- a identidade que dá $\cos^{2}+\sin^{2}=1$ sem nunca formar nem o cosseno nem o seno.
+\textbf{Normalizado pelo invariante, tudo sai inteiro}, e é esta a razão pela qual esta
+casa mede $\cos^{2}$ e não $\cos$: não é uma economia, é que o objecto que se conserva ao
+longo da órbita é o quadrado, e a raiz dele é a única parte que a órbita não preserva.
+
+\textbf{(5) E a fronteira do resultado, que a medida obrigou a escrever.} Preservar a
+\emph{área} não é preservar a \emph{métrica}, e a órbita do rei só cumpre a primeira:
+$A_m$ tem $|\det|=1$ mas \textbf{não é ortogonal}. Daí que as duas perguntas se separem,
+e cada uma pelo seu membro do par:
+\[
+\boxed{
+\begin{array}{lll}
+\text{PARALELOS} & \operatorname{Cruz}(u,v)=0 & \text{ATRAVESSA a órbita: o cruzado
+transforma-se por }\det=\pm1\\[2pt]
+\text{PERPENDICULARES} & \operatorname{Dir}(u,v)=0 & \text{NÃO atravessa: o directo não
+tem lei de transformação}
+\end{array}}
+\]
+Isto \emph{é} a assimetria $\operatorname{Dir}/\operatorname{Cruz}$ do
+Teorema~\ref{thm:espectro-tau} lida na acção, e é ela que dá conteúdo à palavra
+\emph{invariante} --- se tudo atravessasse, nada estava a mexer.
+
+\emph{Verificado:} \code{tests/cruzado\_potencia.c} ($6{:}0$). A identidade (1) é exacta em
+$\mathbb{Z}$ em $1\,190\,896$ ternos $(M,u,v)$, com o gume nos dois lados: com
+$|\det|=1$ o módulo do cruzado não se move, e com $|\det|\neq1$ ele move-se em
+\emph{todos}. Na órbita metálica o cruzado fica constante nos $52$ andares dos quatro
+metais enquanto a norma cresce em todos os passos --- e é a mesma órbita e os mesmos
+vectores, o que separa as duas é o $\det$. O par $(1,0)\perp(0,1)$ perde a
+perpendicularidade já no primeiro andar com o cruzado a alternar $\pm1$: ali $\operatorname{Dir}$
+percorre $0,1,3,8,21,55$, os Fibonacci de índice par, e $\operatorname{Cruz}$ não sai de
+$\pm1$. Lagrange fecha em $28\,561$ pares, e a ordem pelos quadrados coincide com a das
+somas em $130\,321$, com as três respostas presentes. $\square$
+\end{teorema}
+
 \noindent\textbf{E a leitura geométrica vem depois, e à parte}, para que se veja o que é
 teorema e o que é interpretação: a componente que se anula é precisamente aquela que
 esta construção lê como \emph{medida} (Teor.~\ref{thm:operacao}(iv), «a diagonal mede»);
