@@ -540,6 +540,113 @@ static long rt_traco(const long *M, int n){
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════════
+ * O CRUZADO, O BIVECTOR E A ORDEM SEM RAIZ — `thm:cruzado-potencia`.
+ *
+ * O teorema diz que o cruzado se transforma pelo determinante:
+ *
+ *      Cruz(Au, Av) = det(A)·Cruz(u,v)      e logo      (det A)^k na potência
+ *      |det A| = 1  ⟹  |Cruz| INVARIANTE em toda a órbita
+ *
+ * e daqui a raiz sai de cena, porque a raiz é a INVERSA da potência e o cruzado não vê
+ * nem uma nem outra. As perguntas métricas respondem-se no par (Dir, Cruz), ambos
+ * inteiros, e o par fecha por LAGRANGE:
+ *
+ *      Dir(u,v)² + ‖u∧v‖² = Dir(u,u)·Dir(v,v)
+ *
+ * que é cos² + sin² = 1 sem nunca formar nem o cosseno nem o seno.
+ *
+ * ── E ESTAS SÃO AS CÓPIAS QUE ISTO RECOLHE ──────────────────────────────────────────
+ *
+ *      298  sqrt/hypot em 85 ficheiros      — quase todos a decidir uma ORDEM
+ *       79  produto interno em laço, 39     — é rt_dir, e já cá estava
+ *       33  o determinante 2×2 à mão, 19    — `a*d − b*c` e `u[0]*v[1] − u[1]*v[0]`
+ *       14  norma ao quadrado em laço, 9    — é rt_norma
+ *
+ * A FRONTEIRA, dita: onde o valor da raiz é o RESULTADO — um comprimento a entregar ao
+ * cliente —, ela faz-se no fim e fora do núcleo, como todo o resto da representação.
+ * O que estas funções tiram são as raízes que apareciam para responder a uma pergunta
+ * que nunca foi sobre o comprimento.
+ * ═══════════════════════════════════════════════════════════════════════════════════ */
+
+/* O CRUZADO EM ℤ²: a entrada independente de Cruz, e É o determinante da matriz que os
+ * dois vectores formam. Uma coisa, dois nomes — e é a área. */
+static long rt_cruz2(const long *u, const long *v){ return u[0]*v[1] - u[1]*v[0]; }
+
+/* o mesmo, com as quatro entradas soltas: o `a*d − b*c` que aparece 23 vezes no repo */
+static long rt_det2(long a, long b, long c, long d){ return a*d - b*c; }
+
+/* aplicar uma matriz n×n a um vector, e o caso 2×2 que é o da órbita */
+static void rt_aplica(const long *M, const long *v, int n, long *r){
+    for(int i = 0; i < n; i++){
+        long s = 0;
+        for(int j = 0; j < n; j++) s += M[i*n + j] * v[j];
+        r[i] = s;
+    }
+}
+
+/* ‖u∧v‖² PELA FORMA FECHADA: Dir(u,u)·Dir(v,v) − Dir(u,v)². É o que se usa; existe em
+ * TODA a dimensão (ao contrário do produto vectorial, que só vive em 3 e 7 por Hurwitz),
+ * e não se constrói a matriz n×n para um número que sai em três produtos. */
+static long rt_bivetor2(const long *a, const long *b, int n){
+    long aa = rt_dir(a, a, n), bb = rt_dir(b, b, n), ab = rt_dir(a, b, n);
+    return aa*bb - ab*ab;
+}
+
+/* e PELA SOMA DAS COMPONENTES: Σ_{i<j} (aᵢbⱼ − aⱼbᵢ)², a norma de Frobenius do bivector.
+ * É a SEGUNDA ROTA, e existe por uma razão precisa: sem ela, verificar Lagrange contra
+ * `rt_bivetor2` seria comparar a definição consigo própria — foi esse o defeito que o
+ * §S3 do semantico.c tinha, com um limiar de 1e-12 por cima a dar-lhe cara de medição.
+ * Custa O(n²) e a outra custa O(n): usa-se para MEDIR, não para calcular. */
+static long rt_bivetor_soma(const long *a, const long *b, int n){
+    long s = 0;
+    for(int i = 0; i < n; i++)
+        for(int j = i + 1; j < n; j++){
+            long c = a[i]*b[j] - a[j]*b[i];
+            s += c*c;
+        }
+    return s;
+}
+
+/* LAGRANGE: devolve 1 se as duas rotas fecham. A identidade é HOMOGÉNEA de grau 4, logo
+ * escalar os dois vectores por um factor comum não a move — é isso que permite medi-la
+ * exacta sobre dados que chegaram em vírgula, depois de escalados a inteiros. */
+static int rt_lagrange(const long *a, const long *b, int n){
+    return rt_bivetor_soma(a, b, n) == rt_bivetor2(a, b, n);
+}
+
+/* A ORDEM SEM RAIZ: −1 se ‖a‖ < ‖b‖, +1 se maior, 0 se iguais. Não é uma aproximação da
+ * comparação de normas: É ela, porque x ↦ x² é monótona nos não negativos e a pergunta
+ * nunca foi sobre o comprimento — era sobre a ORDEM. Aqui estão as 298 raízes. */
+static int rt_ordem_norma(const long *a, const long *b, int n){
+    long na = rt_dir(a, a, n), nb = rt_dir(b, b, n);
+    return na < nb ? -1 : (na > nb ? 1 : 0);
+}
+
+/* e a mesma pergunta sobre dois escalares não negativos, que é onde o sqrt aparecia para
+ * comparar: |x| < |y| ⟺ x² < y², e os quadrados são inteiros */
+static int rt_ordem_abs(long x, long y){
+    long ax = x < 0 ? -x : x, ay = y < 0 ? -y : y;
+    return ax < ay ? -1 : (ax > ay ? 1 : 0);
+}
+
+/* E O QUADRADO PERFEITO, que é a única pergunta em que a raiz é mesmo a resposta: existe
+ * r inteiro com r² = x? Por busca binária em inteiros, sem uma única operação de vírgula.
+ * Devolve 1 e escreve r, ou 0 se x não é quadrado (ou é negativo). É o que decide o
+ * `rt_fixo_candidato`: D = m²+4 ser quadrado perfeito é o ponto fixo cair no racional. */
+static int rt_raiz_exacta(long x, long *r){
+    if(x < 0) return 0;
+    if(x < 2){ if(r) *r = x; return 1; }
+    long lo = 1, hi = 3037000499L;
+    while(lo < hi){
+        long mid = lo + (hi - lo + 1)/2;
+        if(mid <= x / mid) lo = mid; else hi = mid - 1;
+    }
+    if(lo*lo != x) return 0;
+    if(r) *r = lo;
+    return 1;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════════
  * A ENTREGA — o número sai em FRACÇÃO CONTÍNUA, e o cliente reconstrói o que quiser.
  *
  * O Aarão: «essa representação vai até ao fim e entrega assim mesmo em long int, daí ele

@@ -116,7 +116,7 @@ cristal_modelo 9b6bb9fc9a03a96e 0
 cristal_volta 6c3f48541ae31045 0
 cristalino 6988eca8676626b1 0
 cruza b5fd026db2e5f02a 0
-cruzado_potencia 68ca0c925500704d 0
+cruzado_potencia 42aaeaca8afdc64f 0
 cruzamento 33bb8f715e706c30 0
 cruzamento_geral cf316e8c0219b742 0
 curvatura b79c8368f1490b91 0
@@ -406,7 +406,7 @@ renormaliza ca31a22ea5e1ff3f 0
 residuo_gerador 300a6b6e998ef497 0
 residuo_universal 0f3aadabb52d8da3 0
 residuos_totais 52cf778fe4c28b37 0
-reta 66818f3718440b3c 0
+reta 37bc189e5b6d761c 0
 reversao 6ce3ed15e79f47b7 0
 ribossomo 5d80dbc0f2781041 0
 rn 6a6a258280263c85 0

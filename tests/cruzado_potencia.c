@@ -28,15 +28,11 @@
 #include "unidade.h"
 #include "reta.h"
 
-/* o cruzado de dois vectores de ℤ², que é a entrada independente de Cruz — e é o
- * determinante da matriz que eles formam. Uma coisa, dois nomes. */
-static long cruz2(const long *u, const long *v){ return u[0]*v[1] - u[1]*v[0]; }
-
-/* aplica a matriz 2×2 M a v */
-static void aplica(const long *M, const long *v, long *r){
-    r[0] = M[0]*v[0] + M[1]*v[1];
-    r[1] = M[2]*v[0] + M[3]*v[1];
-}
+/* o cruzado e a aplicação da matriz são da lib — `rt_cruz2` e `rt_aplica` da reta.h, para
+ * onde foram depois deste medidor as ter escrito à mão. Ficam os nomes curtos, que é o que
+ * torna os laços abaixo legíveis. */
+#define cruz2(u,v)   rt_cruz2((u),(v))
+static void aplica(const long *M, const long *v, long *r){ rt_aplica(M, v, 2, r); }
 
 int main(void){
 printf("\n=== O CRUZADO NÃO VÊ A POTÊNCIA ============================================\n");

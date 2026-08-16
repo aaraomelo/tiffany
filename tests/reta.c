@@ -882,6 +882,113 @@ printf("\n§R20 A indução sobe, a descida lê o que não há — e o que se me
        fp_ok == fp_tot && fp_andares == 6*3*401 && saturados > 0);
 }
 
+
+/* ─── §R21 ────────────────────────────────────────────────────────────────────────────
+ * O CRUZADO, O BIVECTOR E A ORDEM SEM RAIZ — as peças do `thm:cruzado-potencia`.
+ * Cada uma por DUAS rotas, e o bivector é o caso em que a segunda rota não é um luxo:
+ * sem ela, medir Lagrange contra a forma fechada é comparar a definição consigo própria.
+ * ──────────────────────────────────────────────────────────────────────────────────── */
+printf("\n§R21 O cruzado, o bivector e a ordem sem raiz — e o quadrado perfeito.\n\n");
+{
+    /* (a) o cruzado 2D É o determinante, e a lei de transformação é det(A) */
+    long cr_igual = 0, cr_tot = 0, lei = 0, lei_tot = 0;
+    for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++)
+    for(long c = -4; c <= 4; c++) for(long d = -4; d <= 4; d++){
+        long u[2] = { a, b }, v[2] = { c, d };
+        cr_tot++;
+        /* rota 1: rt_cruz2 sobre os vectores ; rota 2: rt_det2 sobre as entradas */
+        if(rt_cruz2(u, v) == rt_det2(a, c, b, d)) cr_igual++;
+        /* e a lei: Cruz(Mu,Mv) = det(M)·Cruz(u,v), com M a companheira do metal m=2 */
+        long M[4] = { 2, 1, 1, 0 }, Mu[2], Mv[2];
+        rt_aplica(M, u, 2, Mu); rt_aplica(M, v, 2, Mv);
+        lei_tot++;
+        if(rt_cruz2(Mu, Mv) == rt_det2(2,1,1,0) * rt_cruz2(u, v)) lei++;
+    }
+
+    /* (b) o bivector pelas DUAS rotas, e Lagrange a fechar */
+    long bv_tot = 0, bv_igual = 0, bv_vivo = 0, lag = 0;
+    for(long t = 0; t < 300; t++){
+        long a[6], b[6];
+        for(int i = 0; i < 6; i++){
+            a[i] = ((t*7 + i*13) % 21) - 10;
+            b[i] = ((t*11 + i*5) % 19) - 9;
+        }
+        for(int n = 2; n <= 6; n++){
+            bv_tot++;
+            if(rt_bivetor_soma(a, b, n) == rt_bivetor2(a, b, n)) bv_igual++;
+            if(rt_bivetor2(a, b, n) != 0) bv_vivo++;
+            if(rt_lagrange(a, b, n)) lag++;
+        }
+    }
+
+    /* (c) a ordem sem raiz: a comparação dos quadrados É a das normas, e as três
+     *     respostas aparecem — sem isso, «coincidem» valia por dar sempre o mesmo lado */
+    long ord_tot = 0, menor = 0, maior = 0, igual = 0, ord_bate = 0;
+    for(long x0 = -7; x0 <= 7; x0++) for(long x1 = -7; x1 <= 7; x1++)
+    for(long y0 = -7; y0 <= 7; y0++) for(long y1 = -7; y1 <= 7; y1++){
+        long u[2] = { x0, x1 }, v[2] = { y0, y1 };
+        int o = rt_ordem_norma(u, v, 2);
+        ord_tot++;
+        if(o < 0) menor++; else if(o > 0) maior++; else igual++;
+        /* a segunda rota: a mesma ordem lida nas somas de quadrados, escritas aqui */
+        long na = x0*x0 + x1*x1, nb = y0*y0 + y1*y1;
+        int o2 = na < nb ? -1 : (na > nb ? 1 : 0);
+        if(o == o2) ord_bate++;
+    }
+
+    /* (d) o quadrado perfeito, e é a única pergunta em que a raiz É a resposta */
+    long qp_tot = 0, qp_acha = 0, qp_recusa = 0, qp_falso = 0;
+    for(long r = 0; r <= 3000; r++){
+        long v;
+        qp_tot++;
+        if(rt_raiz_exacta(r*r, &v) && v == r) qp_acha++;
+        /* e entre dois quadrados consecutivos NÃO há quadrado nenhum: o gume */
+        if(r > 0){
+            long meio = r*r + r;                    /* estritamente entre r² e (r+1)² */
+            if(!rt_raiz_exacta(meio, &v)) qp_recusa++; else qp_falso++;
+        }
+    }
+
+    printf("      o cruzado 2D e o det2 sao o mesmo em %ld de %ld, e a lei Cruz(Mu,Mv) =\n"
+           "      det(M).Cruz(u,v) vale em %ld de %ld\n", cr_igual, cr_tot, lei, lei_tot);
+    printf("      o bivector pelas duas rotas bate em %ld de %ld (nao nulo em %ld), e\n"
+           "      rt_lagrange fecha em %ld\n", bv_igual, bv_tot, bv_vivo, lag);
+    printf("      a ordem sem raiz bate a das somas em %ld de %ld, com menor %ld, maior %ld\n"
+           "      e iguais %ld — as tres respostas aparecem\n", ord_bate, ord_tot, menor, maior, igual);
+    printf("      a raiz exacta acha os %ld quadrados e RECUSA os %ld nao-quadrados\n\n",
+           qp_acha, qp_recusa);
+
+    ok("O CRUZADO E' O DETERMINANTE, E TRANSFORMA-SE POR ELE. As duas rotas — rt_cruz2"
+       " sobre os vectores e rt_det2 sobre as quatro entradas — dao o mesmo nas 6561"
+       " matrizes, e a lei do thm:cruzado-potencia, Cruz(Mu,Mv) = det(M).Cruz(u,v), vale"
+       " em todas com a companheira do metal m = 2",
+       cr_igual == cr_tot && lei == lei_tot && cr_tot == 6561);
+
+    ok("E O BIVECTOR TEM DUAS ROTAS QUE NAO SE TOCAM, e e' por isso que ele esta' aqui:"
+       " a FORMA FECHADA custa tres produtos e a SOMA DAS COMPONENTES custa n(n-1)/2, e"
+       " sao iguais em todos os 1500 casos de dimensao 2 a 6. Sem a segunda, medir Lagrange"
+       " contra a primeira seria comparar a definicao consigo propria — que foi exactamente"
+       " o defeito do §S3 do semantico.c, com um limiar de 1e-12 por cima. E o bivector nao"
+       " e' nulo, sem o que a igualdade valia por 0 = 0",
+       bv_igual == bv_tot && lag == bv_tot && bv_vivo > bv_tot/2 && bv_tot == 1500);
+
+    ok("A ORDEM DAS NORMAS E' A DOS QUADRADOS, e nao uma aproximacao dela: x -> x^2 e'"
+       " monotona nos nao negativos, logo a pergunta «qual e' maior» nunca precisou da raiz."
+       " Aqui estao as 298 chamadas a sqrt que o repo tem em 85 ficheiros, quase todas a"
+       " decidir uma ordem. Varridos 50625 pares (que sao 15^4, e eu tinha escrito 14^4 de"
+       " cabeca — o medidor apanhou-mo), e as TRES respostas aparecem: sem isso, «as duas"
+       " rotas coincidem» valia por a comparacao devolver sempre o mesmo lado",
+       ord_bate == ord_tot && ord_tot == 50625 && menor > 0 && maior > 0 && igual > 0);
+
+    ok("E A RAIZ EXACTA E' A UNICA PERGUNTA EM QUE A RAIZ E' MESMO A RESPOSTA: existe r"
+       " inteiro com r^2 = x? Por busca binaria, sem uma operacao de virgula. Acha os 3001"
+       " quadrados e RECUSA os 3000 numeros r^2 + r, que estao estritamente entre dois"
+       " quadrados consecutivos — e essa metade e' o que separa «acha o que ha'» de «diz"
+       " sim a tudo». E' ela que decide o thm:fixo-dual: D = m^2 + 4 ser quadrado perfeito"
+       " e' o ponto fixo cair no racional",
+       qp_acha == qp_tot && qp_recusa == qp_tot - 1 && qp_falso == 0);
+}
+
     if(!falhas){
         printf("\n  ─────────────────────────────────────────────────────────────\n");
         printf("  As operações da recta têm uma casa. Vinte e oito cópias do mdc,\n");
