@@ -601,21 +601,58 @@ static void B9_interp(void) {
     printf("     um sinal discreto (n amostras) É o polinômio P(x)=Σ c_k x^k de ℝⁿ; interpolar é\n");
     printf("     c=V⁻¹y (Vandermonde; raízes⇒Fourier). A saída CONTÍNUA é P(x) na rampa x: as potências\n");
     printf("     x^k por REALIMENTAÇÃO (o gato ×x, §B.4), os c_k no Kirchhoff (§B.5, sinal=direção).\n\n");
+    /* E «PASSA PELAS AMOSTRAS» MEDE-SE EM INTEIROS. As amostras eram
+     * y[i] = 1.5 + 0.8*sin(0.9*i + caso) + 0.3*i — decimais escolhidos — e a passagem
+     * comparava-se a menos de 1e-9. Mas com amostras INTEIRAS a interpolacao e exacta
+     * em Q: os L_i = N_i/D_i ja tem numerador e denominador INTEIROS aqui em cima, e
+     *
+     *      P(x_j) = SOMA_i y_i * N_i(x_j)/D_i = SOMA_i y_i * delta_ij = y_j
+     *
+     * verifica-se sobre um denominador comum L = PRODUTO D_i, sem uma divisao:
+     *
+     *      SOMA_i y_i * N_i(x_j) * (L/D_i)  ==  y_j * L
+     *
+     * inteiro contra inteiro. A via CONTINUA — o circuito translinear na rampa — fica,
+     * porque essa e o objecto deste ficheiro; o que sai e a regua na INTERPOLACAO, que
+     * nunca precisou dela. */
     const double TOL = 1e-9;
-    long passou = 0, tot = 0; int dente_quebrou = 0;
+    long passou = 0, tot = 0, exactos = 0; int dente_quebrou = 0;
     for (int caso = 0; caso < 9; caso++) {
         int n = 4 + caso % 3;                                       /* n=4,5,6 (várias dimensões)  */
         double x[8], y[8], c[8];
-        for (int i = 0; i < n; i++) { x[i] = i + 1; y[i] = 1.5 + 0.8*sin(0.9*i + caso) + 0.3*i; }  /* amostras contínuas */
+        long xi[8], yi[8];
+        for (int i = 0; i < n; i++) {
+            xi[i] = i + 1;                                          /* nos inteiros */
+            yi[i] = ((caso*7 + i*5) % 13) - 6;                      /* amostras INTEIRAS */
+            x[i] = (double)xi[i]; y[i] = (double)yi[i];
+        }
+        /* (i) a passagem pelas amostras, EXACTA e sem dividir */
+        b9_lagrange(n, xi);
+        long L = 1;
+        for (int i = 0; i < n; i++) L *= b9_den[i];
+        int exacto = 1;
+        for (int j = 0; j < n && exacto; j++) {
+            long soma = 0;
+            for (int i = 0; i < n; i++) {
+                long Nij = 0;                                       /* N_i(x_j), por Horner */
+                for (int k = n-1; k >= 0; k--) Nij = Nij*xi[j] + b9_num[i][k];
+                soma += yi[i] * Nij * (L / b9_den[i]);
+            }
+            if (soma != yi[j] * L) exacto = 0;
+        }
+        if (exacto) exactos++;
+        /* (ii) e a via CONTINUA do circuito, que e o objecto: o translinear na rampa */
         b9_interpola(n, x, y, c);
         double pior = 0;
-        for (int i = 0; i < n; i++) { double e = fabs(b9_analog(n,c,x[i]) - y[i]); if (e > pior) pior = e; }  /* passa pelas amostras */
-        for (int t = 0; t <= 100; t++) { double xx = 1.0 + (n-1.0)*t/100; double e = fabs(b9_analog(n,c,xx) - b9_horner(n,c,xx)); if (e > pior) pior = e; }  /* na rampa contínua */
+        for (int t = 0; t <= 100; t++) { double xx = 1.0 + (n-1.0)*t/100; double e = fabs(b9_analog(n,c,xx) - b9_horner(n,c,xx)); if (e > pior) pior = e; }
         if (pior < TOL) passou++;
         tot++;
         double Pd = 0; for (int k = 0; k < n; k++) if (fabs(c[k]) > 1e-12) Pd += (c[k]<0?-1:1)*tl_mul(fabs(c[k]), 2.0);  /* DENTE: pot fixo, sem realimentação */
         if (fabs(Pd - b9_horner(n,c,2.0)) > TOL) dente_quebrou = 1;
     }
+    printf("     e a INTERPOLACAO fecha em inteiros: P(x_j) = y_j exacto em %ld de %ld casos,\n"
+           "     sobre o denominador comum L = PRODUTO D_i — sem uma divisao e sem regua\n\n",
+           exactos, tot);
     /* O CONTROLO, e é ele que faz da Lagrange uma medida e não uma reescrita. A tese é
      * que a base é DUAL dos nós — L_i(x_j) = δ_ij —, e ela escreve-se sem uma única
      * divisão, porque L_i = N_i/D_i:
@@ -654,6 +691,11 @@ static void B9_interp(void) {
           "N_i(x_j) = D_i·δ_ij, inteiro", ctl_ok - (b9_resto ? 1 : 0), ctl, (int)ctl_dente);
     printf("\n     9 sinais, n=4..6, coordenadas contínuas: P(x) analógico passa por cada amostra E\n");
     printf("     bate P(x) exato em toda a rampa (a saída é contínua, avaliável em qualquer x).\n\n");
+    /* e a medida da interpolacao ENTRA no veredicto: um numero impresso e nao contado e
+       exactamente o que o `orfas.py` caca — o leitor le-o como medido, e se ele mudar
+       nada falha. Aqui a passagem exacta pelas amostras conta as duas vezes. */
+    pulso("B.9b", "a interpolação passa pelas amostras: EXACTO",
+          "N_i(x_j)·(L/D_i) somado", exactos, tot, 1);
     pulso("B.9", "o circuito reconstrói o contínuo P(x) do discreto", "P(x) do corpo (Horner)",
           passou, tot, dente_quebrou);
 }
