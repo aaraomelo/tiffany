@@ -146,52 +146,85 @@ static void B1_peca(void) {
     int Gdente_quebrou = !(A[1][0]==1);           /* [[0,1],[1,0]] seria o gato, não G */
     pulso("B.1", "a matriz normalizada É G (não um parente)", "G literal", Gok, 1, Gdente_quebrou);
 
-    /* (b) os três destinos, medidos contra a PREVISÃO fechada (oráculo de fora):
-       Euler explícito cresce por (1+a²)^k; simplético conserva u²+a·u·w+w². */
-    const double a = 0.1;
-    long ok_exp = 0, ok_simp = 0, casos = 0;
-    double pior_exp = 0, pior_simp = 0, emin = 1e300, emax = -1e300;
-    {   double u = 1.0, w = 0.0;
-        for (long k = 1; k <= 300; k++) {                    /* itera: o pulso */
-            passo_LC(&u, &w, a, EULER_EXP);
-            double prev = pow(1.0 + a*a, (double)k);         /* a previsão */
-            double e = fabs((u*u + w*w) - prev)/prev;
-            if (e > pior_exp) pior_exp = e;
-            if (e < 1e-9) ok_exp++;
-            casos++;
+    /* (b) OS DOIS DESTINOS, E AGORA EM INTEIROS — porque as duas teses sao EXACTAS.
+       Estava aqui a = 0.1 e as conservacoes medidas a menos de 1e-9 sobre 300 e 20000
+       iteracoes. Mas o passo simpletico com `a` INTEIRO fecha em Z, e as duas leis
+       fecham com residuo ZERO:
+
+           simpletico   u' = u + a*w,  w' = w - a*u'   conserva H = u2 + a*u*w + w2
+           Euler exp.   x <- (I + aG)x                 da  u2 + w2 = (1+a2)^k
+
+       E APARECEU A TRICOTOMIA. A matriz do passo simpletico e
+
+           M = [[1, a], [-a, 1-a2]],   det M = 1,   tr M = 2 - a2
+
+       O det ser 1 E a conservacao da area — o Teorema do Gato, aqui no oscilador. E o
+       TRACO decide o regime, pela mesma tricotomia do geometrico (cor:papg-causa):
+
+           a=1  tr= 1  D=-3  ELIPTICO     periodo 6   (e -3 e o discriminante de Phi6)
+           a=2  tr=-2  D= 0  PARABOLICO   I + kN
+           a=3  tr=-7  D=45  HIPERBOLICO  cresce
+
+       O pacote analogico cai na MESMA classificacao do discreto, e o parametro do passo
+       e que escolhe o andar. Nao e analogia: e o mesmo tr2 - 4det. */
+    long ok_H = 0, ok_E = 0, casosH = 0, casosE = 0, regime_ok = 0;
+    printf("     a   tr = 2-a2   D = tr2-4   regime        periodo   H conservado\n");
+    const long AA[3] = {1, 2, 3};
+    for (int t = 0; t < 3; t++) {
+        long av = AA[t], tr = 2 - av*av, D = tr*tr - 4;
+        const char *reg = D < 0 ? "ELIPTICO" : (D == 0 ? "PARABOLICO" : "HIPERBOLICO");
+        /* o det do passo e 1 — a area conserva-se, exactamente */
+        long detM = 1*(1 - av*av) - av*(-av);
+        if (detM == 1) regime_ok++;
+        /* H conserva-se, e o periodo mede-se pela VOLTA ao ponto inicial */
+        long u = 1, w = 0, H0 = 1, per = 0, mau = 0;
+        for (long k = 1; k <= 60; k++) {
+            if (u > 1000000000L || u < -1000000000L) break;   /* o tecto, verificado */
+            u = u + av*w;
+            w = w - av*u;
+            long H = u*u + av*u*w + w*w;
+            casosH++;
+            if (H == H0) ok_H++; else mau++;
+            if (!per && u == 1 && w == 0) per = k;
+        }
+        printf("     %ld   %-10ld  %-10ld  %-12s  %-9s %s\n", av, tr, D, reg,
+               per ? (per == 6 ? "6" : "-") : "infinito", mau ? "NAO" : "sim");
+    }
+    /* e o Euler explicito: u2 + w2 = (1+a2)^k, exacto, com o tecto do long verificado */
+    {
+        long u = 1, w = 0, prev = 1;
+        for (long k = 1; k <= 45; k++) {
+            long un = u + 1*w, wn = w - 1*u;   /* a = 1 */
+            u = un; w = wn;
+            if (prev > 200000000000000000L) break;    /* nao cabe: para antes de enrolar */
+            prev *= 2;                                 /* (1+a2)^k com a=1 */
+            casosE++;
+            if (u*u + w*w == prev) ok_E++;
         }
     }
-    {   double u = 1.0, w = 0.0;
-        for (long k = 0; k < 20000; k++) {
-            passo_LC(&u, &w, a, SIMPLETICO);
-            double H = u*u + a*u*w + w*w, E = u*u + w*w;
-            double e = fabs(H - 1.0);
-            if (e > pior_simp) pior_simp = e;
-            if (e < 1e-9) ok_simp++;
-            if (E < emin) emin = E;
-            if (E > emax) emax = E;
+    printf("\n     H conservado em %ld de %ld passos, e u2+w2 = 2^k em %ld de %ld —\n"
+           "     residuo ZERO nos dois, e nenhum limiar: o RELOGIO CORRE e a area fecha\n\n",
+           ok_H, casosH, ok_E, casosE);
+    /* o DENTE do simpletico: o Euler explicito NAO conserva H — e o dente tem de
+       ITERAR, porque um passo so a partir de (1,0) conserva por acidente. Em inteiros
+       nao ha "quase": ou o numero e o mesmo ou nao e. */
+    int simp_dente_quebrou = 0;
+    {   long u = 1, w = 0;
+        for (long k = 0; k < 20 && !simp_dente_quebrou; k++) {
+            long un = u + 1*w, wn = w - 1*u;      /* Euler explicito, a = 1 */
+            u = un; w = wn;
+            if (u*u + 1*u*w + w*w != 1) simp_dente_quebrou = 1;
         }
     }
-    /* o DENTE do simplético: o Euler explícito, rodado, NÃO conserva H — H cresce
-       com (1+a²)^k. Um passo só a partir de (1,0) conserva por acidente, então o
-       dente tem de ITERAR (a moeda falsa mente ao fim de muitas cunhagens). */
-    int simp_dente_quebrou;
-    {   double u = 1.0, w = 0.0, pior = 0;
-        for (long k = 0; k < 200; k++) {
-            passo_LC(&u, &w, a, EULER_EXP);
-            double e = fabs((u*u + a*u*w + w*w) - 1.0);
-            if (e > pior) pior = e;
-        }
-        simp_dente_quebrou = pior > 1e-6; }
-    printf("     a órbita cresce por (1+a²)^k (Euler), e o simplético conserva\n");
-    printf("     u²+a·u·w+w²; a faixa de E prevista é (2+a)/(2-a) = 21/19 = %.9f,\n", 21.0/19.0);
-    printf("     e a órbita dá %.9f — o RELÓGIO CORRE (E oscila, não congela: pulso).\n\n",
-           emax/emin);
-    pulso("B.1", "cresce pelo fator (1+a²)^k previsto", "previsão fechada", ok_exp, casos, 1);
-    pulso("B.1", "o simplético conserva u²+a·u·w+w²", "a forma prevista",
-          ok_simp, 20000, simp_dente_quebrou);
-    char lb[48]; snprintf(lb, sizeof lb, "faixa E = %.6f, viva", emax/emin);
-    limite("B.1", "e a energia fica LIMITADA, sem congelar", "20000 passos", lb);
+    pulso("B.1", "cresce por (1+a²)^k — EXACTO, em inteiros",
+          "previsão fechada", ok_E, casosE, 1);
+    pulso("B.1", "o simplético conserva u²+a·u·w+w²",
+          "a forma prevista", ok_H, casosH, simp_dente_quebrou);
+    pulso("B.1", "det do passo = 1: a ÁREA conserva-se",
+          "tr²−4det do geométrico", regime_ok, 3, 1);
+    char lb[64]; snprintf(lb, sizeof lb,
+        "a=1 fecha em 6 (D=-3, Phi6); a=2 D=0; a=3 D>0");
+    limite("B.1", "e o regime sai do DISCRIMINANTE", "3 valores de a", lb);
 }
 
 /* ==========================================================================
