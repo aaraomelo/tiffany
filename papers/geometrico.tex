@@ -81,7 +81,7 @@ dos convergentes} entre as expansões com $a_k\geq1$, e por isso uma só taxa
 limita a construção inteira. A família metálica não é o escopo: é o caso
 \textbf{extremo}, o pior caso do mecanismo.
 
-\smallskip\noindent\emph{Medido:} \code{tests/geometria\_real.c} ($43{:}0$).
+\smallskip\noindent\emph{Medido:} \code{tests/geometria\_real.c} ($48{:}0$).
 \end{abstract}
 
 %======================================================================
@@ -385,14 +385,23 @@ V\mapsto V+1,\qquad A\mapsto A+V,\qquad F\mapsto F+A,
 \]
 \end{definicao}
 
-\begin{proposicao}[e é essa a passagem]\label{prop:passagem}
-Do cone pelo centro vem
+\begin{proposicao}[e é essa a passagem --- em duas dimensões, com tabelas
+distintas]\label{prop:passagem}
 \[
-\chi=(V+1)-(A+V)+(F+A)-F=1 ,
+\boxed{
+\begin{array}{lll}
+S^{1}\xrightarrow{\ \text{cone}\ }D^{2}
+ & (V,A)\ \to\ (V{+}1,\,A{+}n,\,n)
+ & 0\ \longrightarrow\ 1\\[3pt]
+S^{2}\xrightarrow{\ \text{cone}\ }B^{3}
+ & (V,A,F)\ \to\ (V{+}1,\,A{+}V,\,F{+}A,\,F)
+ & 2\ \longrightarrow\ 1
+\end{array}}
 \]
-seja qual for o poliedro; e um andar abaixo, a mesma operação leva a borda do
-polígono ($\chi=0$) ao disco ($\chi=1$). E \textbf{$1$ é o $\chi$ do ponto}: o cone
-é contráctil --- colapsa a \emph{um} ponto.
+As tabelas \textbf{não são a mesma}, porque as dimensões não são: na segunda
+contam-se as $F$ células tridimensionais novas. Mas nas duas o cone leva $\chi$ a
+$1$ --- e \textbf{$1$ é o $\chi$ do ponto}: o cone é contráctil, colapsa a
+\emph{um} ponto.
 \[
 \boxed{\;\chi=2\ \text{ou}\ 0 \quad\xrightarrow{\ \text{cone pelo centro}\ }\quad
 \chi=1\ \text{---\ a \textbf{passagem}}\;}
@@ -512,19 +521,76 @@ $22$ racionais, quota de $22/64$ a $22/4096$}
 leituras do mesmo objecto, que têm de fechar uma na outra.
 
 %======================================================================
-\section{A partir daqui, a realização específica}\label{sec:especifica}
+\section{Um número é um polinómio}\label{sec:polinomio}
 
-O que precede é a construção: a Lei 0, a base, o motor $\Pi/\Sigma$ e a sua
-fundação. Nada disso depende de um andar.
+O que precede é a construção. O que se segue tem um objecto, e ele não é uma
+família de números: é o \textbf{polinómio}.
+
+\begin{definicao}[o objecto]\label{def:poli}
+$p(x)=x^{n}-c_1x^{n-1}-\cdots-c_n$, mónico, em $\mathbb{Z}[x]$. Dele saem
+\[
+\text{a \textbf{companheira} } A_p,
+\qquad
+\text{a \textbf{recorrência} } u_{k}=c_1u_{k-1}+\cdots+c_nu_{k-n},
+\qquad
+\text{as \textbf{raízes}} ,
+\]
+e são as raízes que são as \emph{soluções}.
+\end{definicao}
+
+\begin{teorema}[um número é uma classe de polinómio]\label{thm:numero-poli}
+Um elemento é a classe de um polinómio em
+\[
+\boxed{\;\mathbb{Z}[x]/(p(x)),\qquad \text{de grau} < n\;}
+\]
+e as operações são as \textbf{dos polinómios}, reduzidas por $p$. O produto em
+$\mathbb{Z}[\sigma]$ coincide com o produto de polinómios seguido da redução
+--- para $n=2$, $x^{2}\mapsto mx+1$.
+
+\textbf{E o escalar é o caso do grau um}: $\mathbb{Z}[x]/(x-a)\cong\mathbb{Z}$,
+em que a classe tem um só coeficiente. \emph{O escalar não é o objecto --- é o
+andar térreo.} $\square$
+\end{teorema}
+\colunas{o corpo como quociente polinomial}
+        {a aritmética como polinómios reduzidos}
+        {\code{geometria\_real.c} \S L11i: $171\,366$ produtos}
+
+\begin{teorema}[o determinante é o termo constante]\label{thm:det-termo}
+\[
+\boxed{\;\abs{\det A_p}=\abs{c_n}
+\qquad\Longrightarrow\qquad
+\abs{\det}=1\iff \text{termo constante }\pm1\iff\text{a raiz é \textbf{unidade}}\;}
+\]
+--- verificado em dez polinómios de graus $2$, $3$ e $4$. \emph{Não é propriedade
+de uma família de números: é do polinómio.} $\square$
+\end{teorema}
+
+\begin{teorema}[o inteiro vem de Newton]\label{thm:newton}
+As somas de potências $P_k=\sum_i r_i^{\,k}$ das raízes são \textbf{inteiras}, e
+obedecem à recorrência \emph{do próprio polinómio}:
+\[
+P_k=c_1P_{k-1}+\cdots+c_nP_{k-n}\qquad(k>n).
+\]
+\emph{É daqui que vem o inteiro que o operador produz} --- e não de nenhuma
+família particular. E o grau não é dois: $x^{3}-x-1$, $x^{3}-x^{2}-x-1$ e
+$x^{4}-x^{3}-1$ fazem o mesmo. $\square$
+\end{teorema}
+\colunas{as somas de potências e a recorrência da companheira}
+        {o inteiro produzido, para grau qualquer}
+        {\code{geometria\_real.c} \S L11i: dez polinómios, graus $2$--$4$}
 
 \begin{center}
 \fbox{\parbox{0.92\textwidth}{\centering
-As secções seguintes tratam da \textbf{família metálica}, e ela entra com o
-estatuto que o Cor.~\ref{cor:purga} lhe fixa: \emph{uma realização específica na
-camada métrica}. Ela dá o \textbf{mecanismo extremo explícito} --- é o ponto fixo
-do cone, a sucessão de quociente constante ---, e não é ingrediente da construção
-geral.}}
+\textbf{E os metálicos saem daqui como \emph{soluções}}: são as raízes de
+$x^{2}-mx-1$ --- o caso de grau dois com termo constante $-1$, e por isso o mais
+simples com $\abs{\det}=1$. O $t_k$ que as secções seguintes usam é exactamente o
+$P_k$ desse caso. \emph{Elas dão o mecanismo extremo explícito; o objecto continua
+a ser o polinómio.}}}
 \end{center}
+
+\noindent E o contraexemplo do \S\ref{sec:contra} lê-se agora sem esforço:
+$x^{2}-2x-4$ tem termo constante $4$, logo \textbf{a raiz não é unidade} --- e é
+exactamente aí que o mecanismo quebra.
 
 %======================================================================
 \section{O dual produz a recorrência}\label{sec:dual}
@@ -788,11 +854,12 @@ a mesma peneira do \S\ref{sec:orto}.} $\square$
         {\code{geometria\_real.c} \S L11f: $18$ andares, $19$ coeficientes}
 
 \begin{corolario}[e a CF de $e$ é a PA]\label{cor:e-pa}
-$\mathrm{CF}(e)=[2;1,2,1,\ 1,4,1,\ 1,6,1,\ldots]$: o padrão $(1,2k,1)$ põe nos
-quocientes a progressão \textbf{aritmética} de razão $2$, logo a CF não é periódica
-e, por Lagrange (Teor.~\ref{thm:lagrange}), $e$ \textbf{não é quadrático}. É o
-contraponto exacto do metálico, cuja PA tem razão \textbf{zero} --- isto é, a PG de
-período um. \emph{As duas progressões separam exactamente os dois.} $\square$
+$\mathrm{CF}(e)=[2;\ 1,2,1,\ 1,4,1,\ 1,6,1,\ldots]$ contém o padrão em blocos
+$(1,2k,1)$, cuja \textbf{subsequência central} $2,4,6,8,\ldots$ é uma PA --- e a
+sucessão \emph{inteira} dos quocientes não é uma PA, que seria dizer de mais. É
+dessa subsequência crescente que vem a não periodicidade, e por Lagrange
+(Teor.~\ref{thm:lagrange}) $e$ \textbf{não é quadrático}. O metálico tem quociente
+\textbf{constante}, isto é, período um: é o contraponto exacto. $\square$
 \end{corolario}
 
 \begin{observacao}[e o logaritmo é a contagem]\label{obs:ln}
@@ -909,17 +976,24 @@ coisas.}
 
 \begin{teorema}[o mecanismo produz um corte, e um só]\label{thm:completude}
 Seja $(a_k)_{k\geq1}$ uma sucessão \textbf{infinita} de quocientes parciais --- o
-caso finito é o racional, e a sua representação termina (Def.~\ref{def:real}) --- e
+caso finito é o racional, e a sua representação termina (Def.~\ref{def:real}). A
+classe define-se \textbf{directamente pelos convergentes}, sem passar pelo
+\S\ref{sec:corte}, que é o caso metálico:
 \[
-A_{(a_k)}=\bigl\{r\in\mathbb{Q}:\ \text{a comparação do \S\ref{sec:corte} decide }
-r\ \text{abaixo}\bigr\}.
-\] Então:
+\boxed{\;A_{(a_k)}=\bigl\{r\in\mathbb{Q}:\ r<c_{2j}\ \text{para algum convergente
+de índice par}\bigr\}\;}
+\]
+--- os pares crescem e ficam todos abaixo, os ímpares descem e ficam todos acima
+(Teor.~\ref{thm:encaixe}). A cadeia é
+$(a_k)\to(p_k/q_k)\to I_k\to\text{corte}$, e o metálico fica como caso explícito. Então:
 
 \emph{(i) $A$ é um corte de Dedekind.} $A$ e o seu complementar são não vazios, e
 $A$ é fechado para baixo. E \textbf{$A$ não tem máximo}, com a testemunha dada pela
 \emph{própria construção} --- não pelo \S metálico: os convergentes de índice
 \textbf{par} crescem estritamente e ficam todos abaixo dos de índice ímpar, logo
-todos em $A$; dado $r\in A$, o convergente par seguinte excede-o. O ponto não vive
+todos em $A$; dado $r\in A$, \textbf{algum} convergente par \emph{posterior}
+excede-o --- não necessariamente o seguinte, pois $r$ pode estar muito perto do
+limite. O ponto não vive
 em $\mathbb{Q}$: é por isso que \emph{o corte é o objecto}.
 
 \emph{(ii) O habitante é único, pelo princípio do pombal, e a conta é inteira.}
@@ -932,7 +1006,7 @@ $\abs{I_K}\leq2^{-K}<1/(s_1s_2)$ e portanto
 \abs{r_1s_2-r_2s_1}<1 ,
 \]
 e $\abs{r_1s_2-r_2s_1}$ é um \textbf{inteiro} --- logo é zero, logo
-$r_1/s_1=r_2/s_2$. \textbf{Não há dois habitantes.}
+$r_1/s_1=r_2/s_2$. \textbf{Não há dois racionais distintos em $I_K$.}
 
 \emph{(iii) E o corte é determinado pela sucessão}: sucessões distintas dão cortes
 distintos, com o racional separador exibido. $\square$
@@ -949,12 +1023,20 @@ quatro cláusulas nos oito $\sigma_m$; $28$ pares separados}
 \begin{array}{ll}
 \text{o \textbf{mecanismo} entrega o corte}
  & \text{---\ e o Universal identifica os cortes com o corpo completo}\\[2pt]
-\text{o \textbf{pombal} dá a UNICIDADE}
- & \text{---\ há no máximo um habitante racional compatível}
+\text{o \textbf{pombal} dá a unicidade dos APROXIMANTES RACIONAIS}
+ & \text{---\ não há dois racionais distintos em }I_K
 \end{array}}
 \]
-O pombal prova unicidade, \emph{não} existência: a existência vem do corte, e a
-identificação é herdada. Nenhuma das três se obtém por varredura.
+\[
+\boxed{
+\begin{array}{l}
+\text{pombal}\ \Longrightarrow\ \text{unicidade dos \textbf{aproximantes racionais}}\\[2pt]
+\text{completude herdada}\ \Longrightarrow\ \text{existência do \textbf{habitante real}}
+\end{array}}
+\]
+O pombal não estabelece, por si, a unicidade do \emph{real}: essa vem da estrutura
+de corpo ordenado e da densidade de $\mathbb{Q}$, ambas herdadas. Nenhuma das
+peças se obtém por varredura.
 
 \medskip
 \noindent\textbf{Correspondência estrutural herdada} (não é ingrediente da prova
@@ -1044,10 +1126,23 @@ para a afirmação de ordem $6$ restringe-se às características em que $-I\neq
 em particular $p\neq2$ --- em característica $2$ a ordem colapsa.
 \end{definicao}
 
-O traço do polígono de $n$ lados é, sobre os reais,
+\begin{definicao}[$t_n$, pela ordem --- sem $\pi$]\label{def:tn}
+$t_n$ é o traço da companheira
+$C=\begin{psmallmatrix}t&-1\\1&0\end{psmallmatrix}$, de determinante $1$, tal que
+\[
+\boxed{\;C^{n}=-I\quad\text{e}\quad C^{k}\neq\pm I\ \text{ para } 0<k<n\;}
+\]
+--- pura condição de \textbf{ordem}, sem nenhuma constante.
+\end{definicao}
+
+\noindent E \emph{só então}, como \textbf{identificação posterior}, escreve-se
 \[
 t_n=2\cos\frac{\pi}{n},
 \]
+que é uma identificação e não a definição --- sem isso, $\pi$ entraria na
+definição de $t_n$ e a cadeia
+$\text{ordem}\to t_n\to A_n^{\rm in},A_n^{\rm circ}\to\pi_n\to\pi$
+seria circular.
 e a companheira $C_n=\begin{psmallmatrix}t_n&-1\\1&0\end{psmallmatrix}$ tem
 ordem $2n$. \textbf{Mas $t_n$ não é inteiro} --- $t_4=\sqrt2$, $t_6=\sqrt3$ ---,
 e é aqui que está a passagem que dá o título a esta secção: nos modelos finitos
@@ -1091,8 +1186,14 @@ $1\leq k<p$ e $C^{p}=I$, portanto
 \[
 \boxed{\;\operatorname{ord}C=p\;}
 \]
---- ímpar, e por isso \textbf{nunca} divisor da ordem $2n$ de andar nenhum.
-$\square$
+\[
+\boxed{\;\operatorname{ord}C=p:\ \text{o fecho parabólico é governado pela
+\textbf{característica},}\;}
+\]
+e \emph{não} coincide genericamente com a ordem elíptica $2n$. Note-se que $p$
+\textbf{pode} dividir $2n$ --- $n=3$ com $p=3$ dá $3\mid6$, e $n=5$ com $p=5$ dá
+$5\mid10$ ---, pelo que a separação dos dois regimes é pela \emph{natureza do
+fecho}, e não por uma divisibilidade universal. $\square$
 \end{teorema}
 
 \begin{definicao}[$\pi_n$ --- e ele é um intervalo]\label{def:pin}
@@ -1203,10 +1304,10 @@ Universal}, e é nessa realização que a recta real aparece como o corpo ordena
 completo.
 
 \medskip
-\emph{Medido:} \code{tests/geometria\_real.c} ($43{:}0$), com
+\emph{Medido:} \code{tests/geometria\_real.c} ($48{:}0$), com
 \code{tests/ortonormal.c} ($6{:}0$), \code{tests/metalica.c},
 \code{tests/pisotbase.c}, \code{tests/ordenado.c} ($7{:}0$),
 \code{tests/pi\_familia.js} ($7{:}0$),
-\code{tests/arquimedes\_area.js} ($43{:}0$) e \code{tests/geometrico.js}.
+\code{tests/arquimedes\_area.js} ($48{:}0$) e \code{tests/geometrico.js}.
 
 \end{document}

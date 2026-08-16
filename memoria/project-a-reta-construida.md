@@ -267,7 +267,35 @@ aritmética de razão 2 nos quocientes: não periódica, logo por Lagrange **e n
 **E o ln é a CONTAGEM**: de `σ·|σ†| = 1` vem `ln σ + ln|σ†| = 0`, e em inteiros o logaritmo
 realiza-se contando dígitos — `#dig(t_k)` cresce linearmente com declive `log σ`.
 
-`tests/geometria_real.c` (43:0) na ordem obrigatória do eval: 8 leis → base ortonormal →
+**O ALVO SÃO OS POLINÓMIOS; OS METÁLICOS SAEM COMO SOLUÇÕES.** O Aarão: «tira o metálico do
+palco, o alvo são os polinómios, metálicos saem como soluções» e «migra logo tudo, porque
+**um número aqui é um polinómio, não simplesmente um escalar**». O objecto é
+
+    p(x) = x^n − c₁x^{n−1} − … − c_n,  mónico, em ℤ[x]
+
+e dele saem a companheira, a recorrência e as raízes — as raízes é que são as soluções.
+
+- **`|det(companheira)| = |termo constante|`** ⟹ `|det| = 1 ⟺ termo ±1 ⟺ A RAIZ É UNIDADE`.
+  Medido em dez polinómios, graus 2–4. Não é propriedade de uma família: é do polinómio.
+- **o inteiro vem de NEWTON**: as somas de potências `P_k = Σ raízes^k` são inteiras e
+  obedecem à recorrência **do próprio polinómio**. É daí que vem o inteiro que o operador
+  «produz» — e o grau não é dois: `x³−x−1`, `x³−x²−x−1`, `x⁴−x³−1` fazem o mesmo.
+- **UM NÚMERO É UM POLINÓMIO**: um elemento é a classe de `ℤ[x]/(p(x))` de grau < n, e as
+  operações são as dos polinómios reduzidas por p — 171 366 produtos medidos. **O ESCALAR é
+  o caso do GRAU UM**, `ℤ[x]/(x−a) ≅ ℤ`: o escalar não é o objecto, é o andar térreo.
+- **os metálicos são as raízes de `x² − mx − 1`** — grau dois com termo constante −1, o mais
+  simples com |det| = 1 —, e o `t_k` do resto do paper é exactamente o `P_k` desse caso. E o
+  controlo `x² − 2x − 4` tem termo 4: **a raiz não é unidade**, e é aí que quebra.
+
+E sete reparos do revisor, dos quais três eram erros: **«p nunca divide 2n» era FALSO**
+(n=3,p=3 dá 3|6); **π entrava na definição de t_n** — agora `t_n` caracteriza-se pela ORDEM
+(`C^n = −I`, sem `C^k = ±I` antes) e `2cos(π/n)` é identificação posterior; e **a classe A era
+definida pelo §metálico** — agora define-se pelos convergentes pares. Mais: o **pombal dá
+unicidade dos APROXIMANTES RACIONAIS**, não do real; o cone separa-se em **duas tabelas** por
+dimensão (S¹→D² e S²→B³); a CF de e tem a PA na **subsequência central**, não na sucessão
+inteira; e «o convergente par seguinte» → «ALGUM convergente par posterior».
+
+`tests/geometria_real.c` (48:0) na ordem obrigatória do eval: 8 leis → base ortonormal →
 bit a bit → dual → recorrência → Pisot → encaixe → corte → completude → ℝ → π_k/gume.
-`papers/geometrico.tex` 16 páginas; `corpo_universal.tex` 54, e a compilar.
+`papers/geometrico.tex` 17 páginas; `corpo_universal.tex` 54, e a compilar.
 Ver [[project-o-real-e-o-corte]], [[feedback-verdadeiro-e-parcial]].

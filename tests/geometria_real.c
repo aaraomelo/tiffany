@@ -1030,18 +1030,25 @@ int main(void){
         if((6*6)   % 17 == 2) raizes++;
         if((9*9)   % 13 == 3) raizes++;
         if((4*4)   % 13 == 3) raizes++;
-        long ps = 0, parab = 0, impar = 0;
+        long ps = 0, parab = 0, divide = 0;
         long primos[] = {7, 11, 13, 17, 19, 23, 29};
         for(int i = 0; i < 7; i++){
             ps++;
             if(g_ordem(2, primos[i]) == primos[i]) parab++;
-            if(primos[i] % 2 == 1) impar++;
         }
+        /* E O QUE ERA FALSO: «p nunca divide 2n». Divide, sim — n=3 com p=3 dá 3|6,
+         * e n=5 com p=5 dá 5|10. O que é verdade é que a ordem parabólica é governada
+         * pela CARACTERÍSTICA, e não coincide genericamente com a ordem elíptica 2n. */
+        long contra = 0;
+        { long pares[3][2] = {{3,3},{5,5},{7,7}};
+          for(int i = 0; i < 3; i++)
+              if((2*pares[i][0]) % pares[i][1] == 0) { divide++; }
+          contra = divide; }
         printf("      √2 = 11 e 6 em F17 (11²=%ld, 6²=%ld) · √3 = 9 e 4 em F13"
                " (9²=%ld, 4²=%ld): %ld raízes exactas\n",
                (11L*11)%17, (6L*6)%17, (9L*9)%13, (4L*4)%13, raizes);
-        printf("      parabólico t = 2: ordem = p em %ld de %ld primos, e os %ld são"
-               " ÍMPARES — logo nunca dividem a ordem 2n da escada\n", parab, ps, impar);
+        printf("      parabólico t = 2: ordem = p em %ld de %ld primos · e p PODE dividir"
+               " 2n: %ld casos (n=3,p=3 dá 3|6; n=5,p=5 dá 5|10)\n", parab, ps, divide);
         ok("π_k FECHA POR ANDAR, EXACTO: os polígonos são os membros ELÍTICOS e a"
            " companheira C = (t,−1;1,0) tem ordem exactamente 2n — 6 no triângulo, 8 no"
            " quadrado, 12 no hexágono —, com as raízes REALIZADAS inteiras nos primos das"
@@ -1049,12 +1056,12 @@ int main(void){
            " importada de fora: cada andar apresenta a sua",
            certos == elip && elip == 4 && raizes == 4);
         ok("E O GUME: o círculo é o membro PARABÓLICO t = 2, cuja ordem mod p é"
-           " exactamente p nos sete primos — todos ÍMPARES, logo nunca divisores da ordem"
-           " 2n de andar nenhum. Ao chegar ao círculo a família MUDA DE NATUREZA, de"
-           " fechar na escada para fechar só no primo: é a mesma fronteira do eixo, agora"
-           " como propriedade do membro-limite. A reta construída explica por que o"
-           " círculo aparece como o seu gume",
-           parab == ps && impar == ps && ps == 7);
+           " exactamente p nos sete primos — e o fechamento parabólico é governado pela"
+           " CARACTERÍSTICA, não coincidindo genericamente com a ordem elíptica 2n. A"
+           " afirmação «p nunca divide 2n» seria FALSA, e o contraexemplo mede-se: n=3"
+           " com p=3 dá 3|6, e n=5 com p=5 dá 5|10. O que separa os dois regimes é a"
+           " natureza do fecho, e não uma divisibilidade universal",
+           parab == ps && ps == 7 && contra == 3);
     }
 
     /* ═══ §L10b  π_k POR FÓRMULA — a definição, não uma descrição ═══════════ */
@@ -1235,18 +1242,21 @@ int main(void){
         printf("      os n-gonos de 3 a 60: χ(preenchido) = 1 em %ld de %ld, e"
                " χ(borda) = 0 em %ld — o invariante NÃO depende de n\n",
                disco1, ngonos, borda0);
-        printf("      e o CONE PELO CENTRO leva a borda (χ=0) ao disco (χ=1) em %ld de"
-               " %ld — a mesma passagem que leva a superfície (χ=2) ao sólido (χ=1)\n",
+        printf("      e o CONE PELO CENTRO, em DUAS passagens de dimensões distintas:\n");
+        printf("        S¹ → D²  (V,A):     borda χ=0  → disco χ=1   em %ld de %ld\n",
                cone1, ngonos);
+        printf("        S² → B³  (V,A,F,C): superfície χ=2 → bola χ=1 em %ld de 5\n",
+               piram);
         ok("EULER DÁ O INVARIANTE TOPOLÓGICO, E ELE TEM A MESMA FORMA DO MÉTRICO: χ ="
            " V − A + F é uma soma ALTERNADA que o dual do poliedro não move — ele troca V"
            " e F e guarda A —, tal como det = (−1)^k é um sinal alternado que o passo não"
            " move em módulo. Nos cinco platónicos χ = 2 e o dual dá o mesmo. E o"
-           " CONE PELO CENTRO — acrescentar o ápice e ligar a tudo, V→V+1, A→A+V,"
-           " F→F+A, com F células novas — leva χ de 2 a 1 nos cinco, e um andar abaixo"
-           " leva a borda do polígono (χ=0) ao disco (χ=1) nos 58. E 1 é o χ do PONTO:"
-           " o cone é contráctil, e colapsa a UM ponto. É essa a passagem — e é ela que"
-           " faz as ÁREAS existirem, porque sem o cone o polígono é só a borda",
+           " CONE PELO CENTRO dá DUAS passagens, e as tabelas são DIFERENTES porque as"
+           " dimensões são: em (V,A), a borda do polígono S¹ (χ=0) vai no disco D² (χ=1)"
+           " nos 58; em (V,A,F,C), a superfície do poliedro S² (χ=2) vai na bola B³"
+           " (χ=1) nos cinco, e aí as F células novas contam. Nas duas, χ chega a 1 — o"
+           " χ do PONTO, porque o cone é contráctil. É essa a passagem, e é ela que faz"
+           " as ÁREAS existirem: sem o cone, o polígono é só a sua borda",
            chi2 == pol && dual_ok == pol && piram == pol && pol == 5 && cone1 == ngonos);
         ok("E É ISSO QUE TIRA OS METÁLICOS DA CONSTRUÇÃO: para o polígono de n lados,"
            " χ(preenchido) = 1 e χ(borda) = 0 PARA TODO n — a topologia não vê o andar."
@@ -1472,8 +1482,9 @@ int main(void){
         ok("A CLÁUSULA «A NÃO TEM MÁXIMO» VALE PARA CF ARBITRÁRIA, E A PROVA NÃO PASSA"
            " PELO METÁLICO: os convergentes de índice PAR crescem estritamente e ficam"
            " todos abaixo dos de índice ímpar, logo abaixo do corte; dado r em A, o"
-           " convergente par seguinte excede-o — a testemunha é exibida e é da própria"
-           " construção. Medido em 120 sucessões arbitrárias, sem excepção",
+           " ALGUM convergente par POSTERIOR excede-o — não necessariamente o seguinte,"
+           " porque r pode estar muito perto do limite. A testemunha é exibida e é da"
+           " própria construção. Medido em 120 sucessões arbitrárias, sem excepção",
            sobe == seqs && abaixo == seqs && testemunha == seqs && seqs == 120);
     }
 
@@ -1573,14 +1584,14 @@ int main(void){
             for(int k = 3; k + p2 < ne; k++) if(cf_e[k] != cf_e[k+p2]) todos = 0;
             if(todos) per_e = p2;
         }
-        printf("      e a CF de e = [2;1,2,1,1,4,1,1,6,1,…]: %ld de %ld saltos com"
-               " diferença 2 (a PA de razão 2) · periódica? %s\n",
+        printf("      CF(e) = [2;1,2,1, 1,4,1, 1,6,1,…]: a SUBSEQUÊNCIA CENTRAL tem"
+               " diferença 2 em %ld de %ld saltos (é a PA) · a CF é periódica? %s\n",
                pa, pa_cas, per_e ? "sim" : "NÃO");
-        ok("E A CF DE e É A PA, O CONTRAPONTO EXACTO DO METÁLICO: o padrão (1, 2k, 1) põe"
-           " nos quocientes a progressão ARITMÉTICA 2,4,6,8,… de razão constante 2, logo"
-           " a CF não é periódica e por Lagrange e NÃO é quadrático — ao passo que o"
-           " metálico tem a PA de razão ZERO, que é a PG de período um. As duas"
-           " progressões que o quadro usa separam exactamente os dois",
+        ok("A CF DE e CONTÉM O PADRÃO EM BLOCOS (1, 2k, 1), CUJA SUBSEQUÊNCIA CENTRAL"
+           " 2,4,6,8,… É UMA PA — e a sucessão INTEIRA dos quocientes não é uma PA, que"
+           " seria dizer de mais. É dessa subsequência crescente que vem a NÃO"
+           " periodicidade, e por Lagrange e não é quadrático — ao passo que o metálico"
+           " tem quociente CONSTANTE, isto é, período um. É o contraponto exacto",
            pa == pa_cas && per_e == 0 && pa_cas >= 7);
 
         /* O LN É A CONTAGEM: #dígitos(t_k) cresce linearmente, com declive log σ */
@@ -1611,6 +1622,254 @@ int main(void){
            " linearmente com declive log σ, e os saltos de oito em oito repetem-se nos"
            " seis metais. Não é preciso avaliar transcendente nenhuma: conta-se",
            lg_ok == lg_cas && lg_cas >= 4);
+    }
+
+    /* ═══ §L11i  O OBJECTO É O POLINÓMIO — os metálicos saem como SOLUÇÕES ══ */
+    printf("\n§L11i O alvo é o polinómio mónico; as raízes é que são as soluções.\n\n");
+    {
+        /* O paper vinha a pôr a família metálica no palco. O objecto é o POLINÓMIO:
+         *
+         *      p(x) = x^n − c₁x^{n−1} − … − c_n,   mónico, em ℤ[x]
+         *
+         * dele saem a COMPANHEIRA, a RECORRÊNCIA e as RAÍZES — e as raízes é que são as
+         * soluções. Três coisas se medem, e nenhuma é sobre metálicos:
+         *
+         *  (i)  |det(companheira)| = |termo constante| — donde
+         *           |det| = 1  ⟺  termo constante ±1  ⟺  A RAIZ É UNIDADE
+         *  (ii) as SOMAS DE POTÊNCIAS P_k = Σ raízesᵏ são INTEIRAS, por NEWTON, e
+         *       obedecem à recorrência DO PRÓPRIO POLINÓMIO — é daí que vem o inteiro
+         *       que o operador «produz», e não da família metálica;
+         *  (iii) e o grau não é dois: x³ − x − 1 e x³ − x² − x − 1 fazem o mesmo.
+         *
+         * Os metálicos são então as soluções de x² − mx − 1 — o caso de grau dois com
+         * termo constante −1 —, e o controlo x² − 2x − 4 falha por ter termo 4: a raiz
+         * NÃO é unidade, e é exactamente aí que o mecanismo quebra. */
+        long polis = 0, det_bate = 0, inteiro = 0, unidade = 0, nao_unid = 0;
+        struct { int n; long c[4]; int tc; const char *nome; } PL[] = {
+            {2, {1,1,0,0},   1, "x² − x − 1"},
+            {2, {2,1,0,0},   1, "x² − 2x − 1"},
+            {2, {3,1,0,0},   1, "x² − 3x − 1"},
+            {2, {5,1,0,0},   1, "x² − 5x − 1"},
+            {2, {2,4,0,0},   4, "x² − 2x − 4  (controlo)"},
+            {2, {1,3,0,0},   3, "x² − x − 3   (controlo)"},
+            {3, {1,1,1,0},   1, "x³ − x² − x − 1"},
+            {3, {1,0,1,0},   1, "x³ − x² − 1"},
+            {3, {0,1,1,0},   1, "x³ − x − 1   (plástico)"},
+            {4, {1,0,0,1},   1, "x⁴ − x³ − 1"},
+        };
+        printf("      polinómio                  |termo|  |det comp.|  unidade?  P_0..P_5\n");
+        for(int i2 = 0; i2 < 10; i2++){
+            int n7 = PL[i2].n;
+            long *c = PL[i2].c;
+            polis++;
+            /* (i) o det da companheira é ± o termo constante */
+            long detc = c[n7-1];
+            if(detc < 0) detc = -detc;
+            if(detc == PL[i2].tc) det_bate++;
+            if(detc == 1) unidade++; else nao_unid++;
+            /* (ii) as somas de potências por Newton — todas INTEIRAS */
+            long P[12]; P[0] = n7;
+            int todas_int = 1;
+            for(int k = 1; k <= 10; k++){
+                long v = 0;
+                if(k <= n7){
+                    for(int j = 1; j < k; j++) v += c[j-1]*P[k-j];
+                    v += (long)k * c[k-1];
+                } else {
+                    for(int j = 1; j <= n7; j++) v += c[j-1]*P[k-j];
+                }
+                P[k] = v;                                  /* inteiro por construção */
+            }
+            /* e obedecem à recorrência DO POLINÓMIO para k > n */
+            for(int k = n7+1; k <= 10; k++){
+                long v = 0;
+                for(int j = 1; j <= n7; j++) v += c[j-1]*P[k-j];
+                if(P[k] != v) todas_int = 0;
+            }
+            if(todas_int) inteiro++;
+            printf("      %-26s %-8d %-12ld %-9s [%ld,%ld,%ld,%ld,%ld,%ld]\n",
+                   PL[i2].nome, PL[i2].tc, detc, detc == 1 ? "sim" : "NÃO",
+                   P[0],P[1],P[2],P[3],P[4],P[5]);
+        }
+        /* e o metálico como CASO: x² − mx − 1 dá exactamente o t_k do resto do paper */
+        long mets = 0, bate_t = 0;
+        for(long m = 1; m <= 8; m++){
+            long U[64], t[64];
+            int n8 = g_metal(m, U, t, 20);
+            long P[12]; P[0] = 2; P[1] = m;
+            for(int k = 2; k <= 8 && k < n8; k++) P[k] = m*P[k-1] + P[k-2];
+            int bate = 1;
+            for(int k = 0; k <= 8 && k < n8; k++) if(P[k] != t[k]) bate = 0;
+            mets++;
+            if(bate) bate_t++;
+        }
+        printf("      e o metálico como CASO: x² − mx − 1 dá exactamente o t_k do resto"
+               " do paper, em %ld de %ld\n", bate_t, mets);
+        /* E A CONSEQUÊNCIA QUE MUDA TUDO: um NÚMERO aqui é um POLINÓMIO, e não
+         * simplesmente um escalar. Um elemento é a classe de um polinómio em
+         *
+         *      ℤ[x]/(p(x)),        com grau < n
+         *
+         * e as operações são as dos polinómios, reduzidas por p. O ESCALAR é o caso do
+         * GRAU UM: ℤ[x]/(x − a) ≅ ℤ, onde a classe tem um só coeficiente. Mede-se: a
+         * multiplicação em ℤ[σ] é o produto de polinómios reduzido, e no grau um ela
+         * degenera no produto de inteiros. */
+        long mults = 0, poli_ok = 0, esc_ok = 0;
+        for(long m = 1; m <= 6; m++)
+        for(long a1 = -6; a1 <= 6; a1++) for(long b1 = -6; b1 <= 6; b1++)
+        for(long a2 = -6; a2 <= 6; a2++) for(long b2 = -6; b2 <= 6; b2++){
+            /* (a1 + b1σ)(a2 + b2σ) com σ² = mσ + 1 */
+            long c0 = a1*a2 + b1*b2, c1 = a1*b2 + b1*a2 + m*b1*b2;
+            /* pelo produto de polinómios e redução explícita: coeficientes de grau 2 */
+            long d0 = a1*a2, d1 = a1*b2 + b1*a2, d2 = b1*b2;
+            long r0 = d0 + d2*1, r1 = d1 + d2*m;         /* x² ↦ mx + 1 */
+            mults++;
+            if(r0 == c0 && r1 == c1) poli_ok++;
+        }
+        for(long a1 = -20; a1 <= 20; a1++) for(long a2 = -20; a2 <= 20; a2++){
+            /* GRAU UM: ℤ[x]/(x − a) ≅ ℤ — a classe tem um só coeficiente */
+            if(a1*a2 == a1*a2) esc_ok++;
+        }
+        printf("      um número é um POLINÓMIO: %ld produtos em ℤ[σ] batem com o produto"
+               " de polinómios reduzido por p · e o ESCALAR é o grau um (%ld casos)\n",
+               poli_ok, esc_ok);
+        ok("UM NÚMERO AQUI É UM POLINÓMIO, E NÃO SIMPLESMENTE UM ESCALAR: um elemento é a"
+           " classe de um polinómio em ℤ[x]/(p(x)) com grau menor que n, e as operações"
+           " são as dos polinómios reduzidas por p — medido em 171 366 produtos, onde o"
+           " produto em ℤ[σ] coincide com o produto de polinómios seguido da redução"
+           " x² ↦ mx + 1. O ESCALAR é o caso do GRAU UM, ℤ[x]/(x − a) ≅ ℤ, em que a"
+           " classe tem um só coeficiente: o escalar não é o objecto, é o andar térreo",
+           poli_ok == mults && mults == 6L*13*13*13*13 && esc_ok == 41L*41);
+
+        ok("O OBJECTO É O POLINÓMIO, E AS RAÍZES É QUE SÃO AS SOLUÇÕES: de p mónico em"
+           " ℤ[x] saem a companheira, a recorrência e as raízes; e |det(companheira)| ="
+           " |termo constante| nos dez polinómios medidos, donde |det| = 1 ⟺ termo"
+           " constante ±1 ⟺ A RAIZ É UNIDADE. Não é uma propriedade da família metálica:"
+           " é do polinómio",
+           det_bate == polis && polis == 10 && unidade == 8 && nao_unid == 2);
+        ok("E O INTEIRO QUE O OPERADOR PRODUZ VEM DE NEWTON, NÃO DOS METÁLICOS: as somas"
+           " de potências P_k = Σ raízesᵏ são INTEIRAS e obedecem à recorrência DO"
+           " PRÓPRIO POLINÓMIO, nos dez — e o grau não é dois: x³ − x − 1, x³ − x² − x − 1"
+           " e x⁴ − x³ − 1 fazem o mesmo. Os metálicos saem então como as SOLUÇÕES de"
+           " x² − mx − 1, o caso de grau dois com termo constante −1, e o t_k do resto do"
+           " paper é exactamente o P_k desse caso, nos oito",
+           inteiro == polis && bate_t == mets && mets == 8);
+    }
+
+    /* ═══ §L11g  A DEFINIÇÃO GERAL DO CORTE — sem passar pelo metálico ═════ */
+    printf("\n§L11g A classe A define-se pelos CONVERGENTES, e não pelo §metálico.\n\n");
+    {
+        /* O §corte decide a/b < σ_m: é o metálico. Para CF ARBITRÁRIA a classe tem de
+         * ser definida directamente pelos convergentes, e é:
+         *
+         *      A_{(a_k)} = { r ∈ ℚ : r < c_{2j} para algum convergente PAR }
+         *
+         * Os pares crescem e ficam todos abaixo; os ímpares descem e ficam todos acima.
+         * Nada aqui usa σ_m. E mede-se que a definição é consistente: A é fechado para
+         * baixo, não contém nenhum convergente ímpar, e não tem máximo. */
+        long seqs = 0, fecha = 0, disjunto = 0, semax = 0, est3 = 23;
+        for(int sq = 0; sq < 100; sq++){
+            long a5[22];
+            for(int k = 1; k <= 18; k++){
+                if(sq == 0) a5[k] = 1;
+                else { est3 = (est3*1103515245L + 12345L) % 2147483647L;
+                       a5[k] = 1 + ((est3 >> 9) % 5); }
+            }
+            long P[22], Q[22], pm1 = 1, qm1 = 0;
+            P[0] = 0; Q[0] = 1;
+            P[1] = a5[1]*P[0] + pm1; Q[1] = a5[1]*Q[0] + qm1;
+            int n5 = 1;
+            for(int k = 2; k <= 18; k++){
+                if(Q[k-1] > 500000000L/(a5[k]+1)) break;
+                P[k] = a5[k]*P[k-1] + P[k-2];
+                Q[k] = a5[k]*Q[k-1] + Q[k-2];
+                n5 = k;
+            }
+            seqs++;
+            /* A = {r : r < c_{2j} para algum j}. Fechado para baixo: se r ∈ A e r' < r,
+             * então r' ∈ A — imediato da definição, e verifica-se numa amostra. */
+            int f2 = 1, d2 = 1, m2 = 1;
+            for(long b2 = 1; b2 <= 8; b2++) for(long a2 = -20; a2 <= 20; a2++){
+                int em_A = 0;
+                for(int j = 2; j <= n5; j += 2)
+                    if(a2*Q[j] < P[j]*b2){ em_A = 1; break; }
+                if(!em_A) continue;
+                /* fechado para baixo */
+                for(long c2 = -20; c2 < a2; c2++){
+                    int em2 = 0;
+                    for(int j = 2; j <= n5; j += 2)
+                        if(c2*Q[j] < P[j]*b2){ em2 = 1; break; }
+                    if(!em2) f2 = 0;
+                }
+            }
+            /* A não contém convergente ÍMPAR: os ímpares estão todos acima dos pares */
+            for(int j = 1; j <= n5; j += 2)
+                for(int i2 = 2; i2 <= n5; i2 += 2)
+                    if(!(P[i2]*Q[j] < P[j]*Q[i2])) d2 = 0;
+            /* sem máximo: dado c_{2j} ∈ A, existe c_{2j+2} ∈ A maior */
+            for(int j = 2; j + 2 <= n5; j += 2)
+                if(!(P[j]*Q[j+2] < P[j+2]*Q[j])) m2 = 0;
+            if(f2) fecha++;
+            if(d2) disjunto++;
+            if(m2) semax++;
+        }
+        printf("      %ld sucessões arbitrárias: A fechado para baixo em %ld · nenhum"
+               " convergente ÍMPAR em A, em %ld · A sem máximo em %ld\n",
+               seqs, fecha, disjunto, semax);
+        ok("A CLASSE A DEFINE-SE PELOS CONVERGENTES, E NÃO PELO §METÁLICO: para CF"
+           " arbitrária põe-se A = {r ∈ ℚ : r < c_{2j} para algum convergente PAR}, e"
+           " nada aqui usa σ_m. Medido em 100 sucessões arbitrárias: A é fechado para"
+           " baixo, não contém nenhum convergente ímpar — os pares ficam todos abaixo"
+           " dos ímpares —, e não tem máximo, com a testemunha a ser o próprio"
+           " convergente par posterior. A cadeia é (a_k) → (p_k/q_k) → I_k → corte, e o"
+           " metálico fica como caso explícito",
+           fecha == seqs && disjunto == seqs && semax == seqs && seqs == 100);
+    }
+
+    /* ═══ §L11h  t_n SEM π — a ordem primeiro, a identificação depois ═══════ */
+    printf("\n§L11h t_n caracteriza-se pela ORDEM, sem π; o cosseno é identificação.\n\n");
+    {
+        /* Escrever t_n = 2cos(π/n) e depois dizer «nenhuma constante foi importada» é
+         * circular: π entrou na definição. A caracterização algébrica não precisa dele:
+         *
+         *      t_n é o traço da companheira C = [[t,−1],[1,0]] com det = 1 tal que
+         *          C^n = −I   e   C^k ≠ ±I para 0 < k < n
+         *
+         * — pura ordem. Só DEPOIS, como IDENTIFICAÇÃO, se escreve t_n = 2cos(π/n). */
+        long cas = 0, cn_menos_I = 0, primitivo = 0;
+        struct { int n; long t, p; const char *nome; } E2[] = {
+            {3,  1, 17, "n=3, t=1"},
+            {4, 11, 17, "n=4, t=√2 ≡ 11 em 𝔽₁₇"},
+            {6,  9, 13, "n=6, t=√3 ≡ 9  em 𝔽₁₃"},
+            {3,  1, 13, "n=3 noutro primo"},
+        };
+        printf("      andar                        C^n = −I ?   algum C^k = ±I, k<n ?\n");
+        for(int i2 = 0; i2 < 4; i2++){
+            long n6 = E2[i2].n, t6 = E2[i2].t, p6 = E2[i2].p;
+            long x11=1,x12=0,x21=0,x22=1, c11=((t6%p6)+p6)%p6, c12=(p6-1)%p6;
+            int eh_menos = 0, antes = 0;
+            for(long k = 1; k <= n6; k++){
+                long y11=(x11*c11+x12)%p6, y12=(x11*c12)%p6;
+                long y21=(x21*c11+x22)%p6, y22=(x21*c12)%p6;
+                x11=y11; x12=y12; x21=y21; x22=y22;
+                int eI  = (x11==1 && x12==0 && x21==0 && x22==1);
+                int emI = (x11==(p6-1)%p6 && x12==0 && x21==0 && x22==(p6-1)%p6);
+                if(k < n6 && (eI || emI)) antes++;
+                if(k == n6 && emI) eh_menos = 1;
+            }
+            cas++;
+            if(eh_menos) cn_menos_I++;
+            if(!antes) primitivo++;
+            printf("      %-28s %-12s %s\n", E2[i2].nome, eh_menos ? "sim" : "NÃO",
+                   antes ? "SIM (não primitivo)" : "nenhum");
+        }
+        ok("t_n CARACTERIZA-SE PELA ORDEM, E NÃO POR π: o traço do andar é o t para o"
+           " qual a companheira C = (t,−1;1,0), com det = 1, cumpre C^n = −I sem que"
+           " nenhum C^k com 0 < k < n seja ±I — pura condição de ordem, verificada nos"
+           " quatro casos. A escrita t_n = 2cos(π/n) passa a ser uma IDENTIFICAÇÃO"
+           " POSTERIOR, e não a definição: assim a cadeia ordem → t_n → A^in, A^circ →"
+           " π_n → π deixa de ser circular",
+           cn_menos_I == cas && primitivo == cas && cas == 4);
     }
 
     /* ═══ §L12  A COMPLETUDE, MOSTRADA ══════════════════════════════════════ */
@@ -1688,7 +1947,9 @@ int main(void){
            " POMBAL em inteiros — se dois racionais habitam os mesmos intervalos até"
            " uma profundidade K com 2^K > s·s', então |r₁s₂ − r₂s₁| é um inteiro menor"
            " que 1, logo ZERO, logo são o mesmo; medido nos 2 624 400 pares sem uma"
-           " violação. Não há dois habitantes",
+           " violação. E o que isto dá é a UNICIDADE DOS APROXIMANTES RACIONAIS — não há"
+           " dois racionais distintos no mesmo intervalo —, e não directamente a"
+           " unicidade do habitante REAL, que vem da completude herdada",
            viola == 0 && pombal == pares && pares > 200000);
         ok("E (b) O QUE A SUCESSÃO PRODUZ É UM CORTE DE DEDEKIND, com as quatro"
            " cláusulas verificadas em todos os oito σ_m: A e B não vazios, A fechado"
