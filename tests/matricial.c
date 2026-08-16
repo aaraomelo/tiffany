@@ -748,7 +748,7 @@ printf("\n§M12 O POSTO ENCHE, E AÍ SOBE A DIMENSÃO — indução e meta-indu�
         long V[20][2]; int nv = 0;
         V[nv][0] = p1; V[nv][1] = q1; nv++;
         int postoFinal = 0, saturou = 1;
-        long cassini_mau = 0, cassini_n = 0;
+        long cassini_mau = 0, cassini_n = 0, pares_n = 0, pares_lei = 0;
         for(int k = 1; k < 14; k++){
             long pn = p1 + p0, qn = q1 + q0;     /* a_k = 1 para φ */
             p0 = p1; q0 = q1; p1 = pn; q1 = qn;
@@ -765,32 +765,51 @@ printf("\n§M12 O POSTO ENCHE, E AÍ SOBE A DIMENSÃO — indução e meta-indu�
             int r = 0;
             long nao_nula = 0, menor_vivo = 0;
             for(int i = 0; i < nv; i++) if(V[i][0] || V[i][1]) nao_nula = 1;
-            for(int i = 0; i < nv && !menor_vivo; i++)
-                for(int j = i+1; j < nv; j++)
-                    if(V[i][0]*V[j][1] - V[i][1]*V[j][0] != 0){ menor_vivo = 1; break; }
-            r = menor_vivo ? 2 : (nao_nula ? 1 : 0);
-            /* e o menor CONSECUTIVO é ±1 — Cassini, exacto */
-            if(nv >= 2){
-                long cas = V[nv-2][0]*V[nv-1][1] - V[nv-2][1]*V[nv-1][0];
-                if(cas != 1 && cas != -1) cassini_mau++;
-                cassini_n++;
+            /* E NÃO SE PARA NO PRIMEIRO. Sair assim que um menor é não nulo basta para
+             * DECIDIR o posto, mas não mede nada: o primeiro par testado é sempre (0,1),
+             * onde p₁q₂ − q₁p₂ e p₁q₂ + q₁p₂ são ambos não nulos porque os convergentes
+             * são todos positivos. De 91 pares, a varredura examinava UM, sempre o mesmo.
+             *
+             * Varrem-se TODOS, e contra a FORMA FECHADA, que existe:
+             *
+             *      p_i q_j − p_j q_i = (−1)^{i+1} · F_{j−i}
+             *
+             * — o menor não é «não nulo»: é um Fibonacci com sinal alternado, e o CASSINI
+             * é o caso j = i+1, onde F₁ = 1. Uma lei em vez de um teste de não-nulidade,
+             * e agora trocar o sinal do menor falha em todos os pares em vez de nenhum. */
+            for(int i = 0; i < nv; i++) for(int j = i+1; j < nv; j++){
+                long men = V[i][0]*V[j][1] - V[i][1]*V[j][0];
+                if(men != 0) menor_vivo = 1;
+                /* F_{j−i} lê-se dos próprios convergentes: q_n = F_{n+1}, logo F_k = q_{k−1} */
+                long Fk = V[j-i-1][1];
+                long prev = ((i+1) % 2 == 0) ? Fk : -Fk;
+                pares_n++;
+                if(men == prev) pares_lei++;
+                if(j == i+1 && (men != 1 && men != -1)) cassini_mau++;
+                if(j == i+1) cassini_n++;
             }
+            r = menor_vivo ? 2 : (nao_nula ? 1 : 0);
             postoFinal = r;
             if(r > 2) saturou = 0;
             if(k == 1 || k == 3 || k == 6 || k == 9 || k == 13)
                 printf("      %-8d %-20d %d\n", k+1, nv, r);
         }
         printf("\n");
-        printf("      e o menor CONSECUTIVO é ±1 (Cassini) em %ld de %ld — é ele que dá o\n",
+        printf("      e TODOS os menores seguem a forma fechada (−1)^(i+1)·F_(j−i): %ld de %ld\n",
+               pares_lei, pares_n);
+        printf("      pares — não «algum é não nulo», que se decidiria com UM par. O Cassini é o\n");
+        printf("      caso j = i+1, onde F₁ = 1: ±1 em %ld de %ld\n\n",
                cassini_n - cassini_mau, cassini_n);
-        printf("      posto 2, e não um pivô ter passado uma régua de 1e-9\n\n");
         ok("O POSTO SATURA EM 2 E NÃO SOBE, E O POSTO É INTEIRO: numa matriz nv×2 de"
            " inteiros ele sai dos MENORES — zero se tudo é nulo, um se todos os menores"
            " p_i q_j − p_j q_i são zero, dois se algum não é —, sem eliminação e sem pivô."
            " E o menor de convergentes CONSECUTIVOS é o Cassini, que vale ±1 em todos os"
            " passos: o posto é 2 por uma razão com nome, e não por um número ter passado"
-           " um limiar",
-           saturou && postoFinal == 2 && cassini_mau == 0 && cassini_n > 10);
+           " um limiar. E varrem-se TODOS os pares contra a forma fechada"
+           " (−1)^(i+1)·F_(j−i) — parar no primeiro decidiria o posto e não mediria nada,"
+           " porque o par (0,1) tem menor não nulo com qualquer sinal",
+           saturou && postoFinal == 2 && cassini_mau == 0 && cassini_n > 10
+           && pares_lei == pares_n && pares_n > 400);
         printf("      Acrescentar quocientes refina a aproximação e NÃO acrescenta dimensão: os\n");
         printf("      convergentes novos são combinações inteiras dos dois últimos. É a indução\n");
         printf("      a esgotar-se dentro do seu andar.\n");
