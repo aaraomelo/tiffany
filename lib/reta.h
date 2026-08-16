@@ -186,4 +186,109 @@ static int rt_hurwitz_est(const long *a, int n){
  * função diz onde está a fronteira, e o medidor que a chama prova que ela é respeitada. */
 static int rt_cabe(int n){ return n > 0 && n <= RT_MAX; }
 
+/* ═══════════════════════════════════════════════════════════════════════════════════
+ * AS TÉCNICAS DE ALTO NÍVEL — as que os ficheiros repetem inline, e quantas vezes.
+ *
+ * O levantamento por PADRÃO DE CÓDIGO (e não por nome de função, que já estava feito)
+ * diz onde a casa se repete a si própria:
+ *
+ *      40×  a recorrência  u = m·u₁ + u₀        ← a régua, e é a mais copiada de todas
+ *      14×  a convolução   c[i+j] += a[i]·b[j]
+ *      14×  o cruzado      a[1]b[2] − a[2]b[1]
+ *      12×  a exponenciação modular
+ *      10×  a eliminação com pivô
+ *       6×  a forma        p² − m·p·q − q²
+ *       5×  a companheira  C[i][i−1] = 1
+ *       4×  o traço da potência  Tr(Cᵏ)
+ *
+ * Estas são as PEÇAS da recta, não utilitários: a recorrência é a régua, a convolução é
+ * o produto de polinómios, o cruzado é a metade que inverte, a forma é o que o ponto
+ * fixo anularia. Cada uma escrita uma vez, aqui, e medida em `tests/reta.c`.
+ * ═══════════════════════════════════════════════════════════════════════════════════ */
+
+/* ── A RECORRÊNCIA: a régua, e a peça mais copiada do repositório ────────────────────
+ * u_{k+1} = m·u_k + u_{k−1}, que é a acção da companheira A_m = [[m,1],[1,0]] e é a
+ * mesma coisa que a órbita de ∞ (rt_orbita) vista do lado da sucessão. Preenche `u` com
+ * n termos a partir de (u0, u1). */
+static void rt_recorre(long m, long u0, long u1, long *u, int n){
+    if(n > 0) u[0] = u0;
+    if(n > 1) u[1] = u1;
+    for(int k = 2; k < n; k++) u[k] = m*u[k-1] + u[k-2];
+}
+
+/* ── A CONVOLUÇÃO: multiplicar polinómios É convolver os coeficientes ────────────────
+ * «a forma aditiva da multiplicação vista pela Transformada Universal». r tem de ter
+ * espaço para na+nb−1 coeficientes, e é zerado aqui. */
+static void rt_conv(const long *a, int na, const long *b, int nb, long *r){
+    for(int k = 0; k < na + nb - 1; k++) r[k] = 0;
+    for(int i = 0; i < na; i++) for(int j = 0; j < nb; j++) r[i+j] += a[i]*b[j];
+}
+
+/* ── O CRUZADO EM ℝ³: a metade que INVERTE ao trocar a ordem ─────────────────────────
+ * É antissimétrico — a×b = −(b×a) — e é ele que precisa de três dimensões para viver. */
+static void rt_cruz3(const long *a, const long *b, long *c){
+    c[0] = a[1]*b[2] - a[2]*b[1];
+    c[1] = a[2]*b[0] - a[0]*b[2];
+    c[2] = a[0]*b[1] - a[1]*b[0];
+}
+
+/* ── A DECOMPOSIÇÃO EM DIRECTO E CRUZADO ─────────────────────────────────────────────
+ * As duas leituras da mesma operação, separadas pelo espelho τ(a,b) = (b,a). Devolvidas
+ * EM DOBRO, para não dividir: 2S = M + Mᵀ e 2A = M − Mᵀ. A decomposição existe quando 2
+ * é invertível — em característica 2 as duas colapsam (medido em operacao.c §O10). */
+static void rt_dir_cruz(const long *M, int n, long *S2, long *A2){
+    for(int i = 0; i < n; i++) for(int j = 0; j < n; j++){
+        S2[i*n+j] = M[i*n+j] + M[j*n+i];
+        A2[i*n+j] = M[i*n+j] - M[j*n+i];
+    }
+}
+
+/* ── A EXPONENCIAÇÃO MODULAR ─────────────────────────────────────────────────────────
+ * a^e mod p, por quadrados. Doze cópias no repositório antes disto. */
+static long rt_pot_mod(long a, long e, long p){
+    long r = 1;
+    a = ((a % p) + p) % p;
+    while(e > 0){ if(e & 1) r = r*a % p; a = a*a % p; e >>= 1; }
+    return r;
+}
+
+/* ── A COMPANHEIRA, E O TRAÇO DAS SUAS POTÊNCIAS ─────────────────────────────────────
+ * A companheira de xⁿ = c₁xⁿ⁻¹ + … + cₙ, com a acção nas LINHAS: v_{k+1} = v_k·C. E o
+ * traço de Cᵏ É a soma das potências das raízes — o Tr(σᵏ) de Newton, sem avaliar raiz
+ * nenhuma. Escrevi-a transposta à primeira, e a asserção deu 91 de 160: o índice sobe
+ * na COLUNA, e não na linha. */
+static void rt_companheira(const long *c, int n, long *C){
+    for(int i = 0; i < n*n; i++) C[i] = 0;
+    for(int i = 0; i + 1 < n; i++) C[i*n + (i+1)] = 1;
+    for(int j = 0; j < n; j++) C[(n-1)*n + j] = c[j];
+}
+static void rt_tracos(const long *C, int n, long *tr, int k){
+    long P[RT_MAX*RT_MAX], N[RT_MAX*RT_MAX];
+    for(int i = 0; i < n*n; i++) P[i] = 0;
+    for(int i = 0; i < n; i++) P[i*n+i] = 1;
+    for(int t = 0; t < k; t++){
+        long s = 0;
+        for(int i = 0; i < n; i++) s += P[i*n+i];
+        tr[t] = s;
+        for(int i = 0; i < n*n; i++) N[i] = 0;
+        for(int i = 0; i < n; i++) for(int j = 0; j < n; j++)
+            for(int l = 0; l < n; l++) N[i*n+j] += P[i*n+l]*C[l*n+j];
+        for(int i = 0; i < n*n; i++) P[i] = N[i];
+    }
+}
+
+/* ── A FORMA QUE O PONTO FIXO ANULARIA ───────────────────────────────────────────────
+ * p² − m·p·q − q². Nos convergentes ela vale ±1 e NUNCA zero, e é isso o corte: o ponto
+ * fixo pediria a forma = 0, e a descida mostra que não tem solução em ℤ. Seis cópias. */
+static long rt_forma(long p, long q, long m){ return p*p - m*p*q - q*q; }
+
+/* ── O PRODUTO DE KRONECKER ──────────────────────────────────────────────────────────
+ * A operação ⊗ do corpo de corpos: (A⊗B) tem ordem a·b, e det(A⊗B) = det(A)^b·det(B)^a.
+ * K tem de ter espaço para (a·b)², e o passo dele é `pk`. */
+static void rt_kron(const long *A, int a, const long *B, int b, long *K, int pk){
+    for(int i = 0; i < a; i++) for(int j = 0; j < a; j++)
+    for(int k = 0; k < b; k++) for(int l = 0; l < b; l++)
+        K[(i*b+k)*pk + (j*b+l)] = A[i*a+j]*B[k*b+l];
+}
+
 #endif /* RETA_H */

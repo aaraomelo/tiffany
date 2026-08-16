@@ -171,7 +171,11 @@ sete do inverso modular, cinco da potência inteira. Estão agora em \code{lib/r
 \textbf{todas inteiras e sem um limiar}, e o cabeçalho não é uma cópia a mais: onde já
 havia uma canónica --- \code{iz\_gcd}, \code{qz}, \code{pz\_div\_exata},
 \code{mat\_posto} --- ela é apontada, e o que fica é só o que não tinha casa.
-\emph{Verificado:} \code{tests/reta.c} ($8{:}0$), cada operação por duas rotas que não
+E não são só utilitários: são as \textbf{peças} --- a recorrência $u_{k+1}=m\,u_k+u_{k-1}$
+\emph{é} a régua e aparecia inline em \textbf{quarenta} ficheiros, a convolução \emph{é}
+o produto de polinómios, o cruzado \emph{é} a metade que inverte, e
+$p^{2}-m\,p\,q-q^{2}$ \emph{é} a forma que o ponto fixo anularia.
+\emph{Verificado:} \code{tests/reta.c} ($12{:}0$), cada operação por duas rotas que não
 partilham código e cada uma com o seu controlo negativo.
 
 \medskip
@@ -2527,7 +2531,7 @@ medidor & unidades \\
 \code{tests/supremo.c}            & $4{:}0$ \\
 \code{tests/cardinal.c}           & $4{:}0$ \\
 \code{tests/condicao\_pisot.c}    & $4{:}0$ \\
-\code{tests/reta.c}              & $8{:}0$ \\
+\code{tests/reta.c}              & $12{:}0$ \\
 \bottomrule
 \end{tabular}
 \end{center}

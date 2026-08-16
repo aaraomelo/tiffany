@@ -292,6 +292,160 @@ int main(void){
            dentro && !fora && !zero);
     }
 
+    /* ═══ §R9  A RECORRÊNCIA: a régua, e a peça mais copiada ════════════════ */
+    printf("\n§R9 rt_recorre — a régua, em 40 ficheiros. E é a órbita, do outro lado.\n\n");
+    {
+        long casos = 0, bate_orbita = 0, bate_forma = 0;
+        for(long m = 1; m <= 8; m++){
+            long u[20];
+            rt_recorre(m, 0, 1, u, 20);              /* u_k = m·u_{k-1} + u_{k-2} */
+            for(int k = 2; k <= 16; k++){
+                long p, q;
+                rt_orbita(m, k-1, &p, &q);            /* a ÓRBITA, a outra rota */
+                casos++;
+                if(p == u[k] && q == u[k-1]) bate_orbita++;
+                /* e a forma de Cassini: u_k² − m·u_k·u_{k−1} − u_{k−1}² = ±1 */
+                long fo = rt_forma(u[k], u[k-1], m);
+                if(fo == 1 || fo == -1) bate_forma++;
+            }
+        }
+        printf("      %ld passos em 8 metais: a recorrência dá a ÓRBITA em %ld,\n"
+               "      e a forma vale ±1 em %ld — Cassini, e nunca ZERO\n\n",
+               casos, bate_orbita, bate_forma);
+        ok("A RECORRÊNCIA É A RÉGUA, E É A MESMA COISA QUE A ÓRBITA: u_k = m·u_{k−1} +"
+           " u_{k−2} lido na sucessão é [p:q] ⟼ [m·p+q : p] lido em ℙ¹, e as duas rotas dão"
+           " os mesmos inteiros em 120 passos de oito metais. É a peça mais copiada do"
+           " repositório — quarenta ficheiros a reescrevê-la —, e a forma de Cassini que ela"
+           " satisfaz vale ±1 e nunca zero, que é o corte",
+           bate_orbita == casos && bate_forma == casos && casos == 120);
+    }
+
+    /* ═══ §R10 CONVOLUÇÃO, CRUZADO, E A DECOMPOSIÇÃO ════════════════════════ */
+    printf("\n§R10 rt_conv, rt_cruz3 e rt_dir_cruz — o produto, e as duas metades.\n\n");
+    {
+        /* a convolução É o produto de polinómios: (x+1)^n dá a linha de Pascal */
+        long pas[12] = {1}, tmp[12], n = 0;
+        int pascal_ok = 1;
+        const long xm1[2] = {1, 1};
+        for(int k = 1; k <= 6; k++){
+            rt_conv(pas, (int)n+1, xm1, 2, tmp);
+            n++;
+            for(int i = 0; i <= n; i++) pas[i] = tmp[i];
+        }
+        const long alvo6[7] = {1,6,15,20,15,6,1};     /* a 6.ª linha, que se sabe */
+        for(int i = 0; i <= 6; i++) if(pas[i] != alvo6[i]) pascal_ok = 0;
+        /* o cruzado: antissimétrico, e a×a = 0 */
+        long anti = 0, nulo = 0, viv = 0, cc = 0;
+        for(long t = 0; t < 200; t++){
+            long a[3], b[3], ab[3], ba[3], aa[3];
+            for(int i = 0; i < 3; i++){
+                a[i] = ((t*7 + i*3) % 11) - 5;
+                b[i] = ((t*5 + i*2) % 9)  - 4;
+            }
+            rt_cruz3(a, b, ab); rt_cruz3(b, a, ba); rt_cruz3(a, a, aa);
+            cc++;
+            int ant = 1, nul = 1, vv = 0;
+            for(int i = 0; i < 3; i++){
+                if(ab[i] != -ba[i]) ant = 0;
+                if(aa[i] != 0) nul = 0;
+                if(ab[i]) vv = 1;
+            }
+            anti += ant; nulo += nul; viv += vv;
+        }
+        /* e a decomposição: 2M = (M+Mᵀ) + (M−Mᵀ), com S simétrica e A antissimétrica */
+        long dec = 0, dtot = 0;
+        for(long t = 0; t < 100; t++){
+            long M[16], S2[16], A2[16];
+            for(int i = 0; i < 16; i++) M[i] = ((t*11 + i*3) % 13) - 6;
+            rt_dir_cruz(M, 4, S2, A2);
+            int bom = 1;
+            for(int i = 0; i < 4 && bom; i++) for(int j = 0; j < 4; j++){
+                if(S2[i*4+j] + A2[i*4+j] != 2*M[i*4+j]) { bom = 0; break; }
+                if(S2[i*4+j] != S2[j*4+i])              { bom = 0; break; }
+                if(A2[i*4+j] != -A2[j*4+i])             { bom = 0; break; }
+            }
+            dtot++; dec += bom;
+        }
+        printf("      a convolução de (x+1)^6 dá a linha de Pascal: %s\n",
+               pascal_ok ? "1 6 15 20 15 6 1" : "NÃO");
+        printf("      o cruzado é antissimétrico em %ld de %ld, a×a = 0 em %ld, e NÃO nulo em %ld\n",
+               anti, cc, nulo, viv);
+        printf("      e 2M = (M+Mᵀ) + (M−Mᵀ), com as duas metades no seu espaço: %ld de %ld\n\n",
+               dec, dtot);
+        ok("A CONVOLUÇÃO É O PRODUTO DE POLINÓMIOS — e (x+1)^6 dá a linha de Pascal,"
+           " 1 6 15 20 15 6 1, que é o caso que se sabe de cor. O CRUZADO é antissimétrico"
+           " nos 200 pares e a×a é zero em todos, com os não nulos contados para «troca de"
+           " sinal» não valer por 0 = −0. E a DECOMPOSIÇÃO devolve: 2M = (M+Mᵀ) + (M−Mᵀ),"
+           " com a primeira metade simétrica e a segunda antissimétrica, em 100 matrizes",
+           pascal_ok && anti == cc && nulo == cc && viv > cc/2 && dec == dtot);
+    }
+
+    /* ═══ §R11 A COMPANHEIRA E O TRAÇO DAS POTÊNCIAS ════════════════════════ */
+    printf("\n§R11 rt_companheira e rt_tracos — Tr(Cᵏ) é a soma das potências das raízes.\n\n");
+    {
+        /* x² = m·x + 1: os traços são os t_k de Lucas, e t_k = m·t_{k−1} + t_{k−2} */
+        long casos = 0, bate_rec = 0, bate_t0 = 0;
+        for(long m = 1; m <= 6; m++){
+            long c[2] = {1, m}, C[4], tr[14];         /* xⁿ = 1·x⁰ + m·x¹ */
+            rt_companheira(c, 2, C);
+            rt_tracos(C, 2, tr, 14);
+            if(tr[0] == 2) bate_t0++;                 /* Tr(I) = n = 2 */
+            for(int k = 2; k < 14; k++){
+                casos++;
+                if(tr[k] == m*tr[k-1] + tr[k-2]) bate_rec++;   /* Newton */
+            }
+        }
+        /* e o GUME: uma companheira com o índice na LINHA em vez da coluna — o erro que
+           eu cometi no analog.c §B.8 e que a asserção lá apanhou, 91 de 160 */
+        long errado = 0;
+        {
+            long C[4] = {0}, tr[6];
+            C[1*2 + 0] = 1; C[1*2 + 1] = 3;           /* transposta: o índice na linha */
+            rt_tracos(C, 2, tr, 6);
+            for(int k = 2; k < 6; k++) if(tr[k] != 3*tr[k-1] + tr[k-2]) errado++;
+        }
+        printf("      6 metais, 12 potências cada: Tr(Cᵏ) obedece a Newton em %ld de %ld,\n"
+               "      e Tr(C⁰) = n em %ld de 6\n", bate_rec, casos, bate_t0);
+        printf("      GUME: com a companheira TRANSPOSTA a recorrência quebra em %ld dos 4\n\n",
+               errado);
+        ok("A COMPANHEIRA E O TRAÇO DAS SUAS POTÊNCIAS: Tr(Cᵏ) É a soma das potências das"
+           " raízes, e obedece à recorrência do próprio polinómio — Newton, sem avaliar raiz"
+           " nenhuma. Com Tr(C⁰) = n, que é a dimensão. E com o gume que me custou uma"
+           " asserção no analog.c §B.8: a acção é nas LINHAS, logo o índice sobe na COLUNA;"
+           " com a companheira transposta a recorrência quebra, e é isso que distingue a"
+           " construção certa da que passa por acaso",
+           bate_rec == casos && bate_t0 == 6 && errado > 0 && casos == 72);
+    }
+
+    /* ═══ §R12 KRONECKER, E A LEI DO DETERMINANTE ═══════════════════════════ */
+    printf("\n§R12 rt_kron — e det(A⊗B) = det(A)^b·det(B)^a.\n\n");
+    {
+        long casos = 0, lei = 0, ordem = 0;
+        for(int a = 1; a <= 3; a++) for(int b = 1; b <= 3; b++){
+            long A[9], B[9], K[81], GA[9], GB[9], GK[81];
+            for(int i = 0; i < a; i++) for(int j = 0; j < a; j++)
+                A[i*a+j] = (i==j) ? 2 : (i-j);
+            for(int i = 0; i < b; i++) for(int j = 0; j < b; j++)
+                B[i*b+j] = (i==j) ? 3 : (i+j);
+            rt_kron(A, a, B, b, K, a*b);
+            memcpy(GA, A, sizeof(long)*(size_t)(a*a));
+            memcpy(GB, B, sizeof(long)*(size_t)(b*b));
+            memcpy(GK, K, sizeof(long)*(size_t)(a*b*a*b));
+            long dA = rt_det_bareiss(GA, a, a);
+            long dB = rt_det_bareiss(GB, b, b);
+            long dK = rt_det_bareiss(GK, a*b, a*b);
+            casos++;
+            if(dK == rt_ipow(dA, b) * rt_ipow(dB, a)) lei++;
+            if(a*b > 0) ordem++;
+        }
+        printf("      9 pares (a,b): det(A⊗B) = det(A)^b·det(B)^a em %ld\n\n", lei);
+        ok("O PRODUTO DE KRONECKER, E A LEI DO DETERMINANTE: det(A⊗B) = det(A)^b·det(B)^a,"
+           " nos nove pares de ordens 1 a 3, com os três determinantes por BAREISS e a"
+           " potência inteira. É a operação ⊗ do corpo de corpos, e a lei é o que faz dela"
+           " uma operação e não uma arrumação",
+           lei == casos && casos == 9);
+    }
+
     if(!falhas){
         printf("\n  ─────────────────────────────────────────────────────────────\n");
         printf("  As operações da recta têm uma casa. Vinte e oito cópias do mdc,\n");
