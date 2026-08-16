@@ -73,7 +73,47 @@ crescimento dos denominadores dos convergentes ENTRE as expansões com a_k ≥ 1
 **extremalidade da régua**, o pior caso do mecanismo, e não uma propriedade de φ contra os
 outros reais. Ver [[feedback-o-escopo-da-afirmacao]], [[feedback-duas-reguas]].
 
-`tests/geometria_real.c` (18:0) na ordem obrigatória do eval: 8 leis → base ortonormal →
+**A 2.ª RONDA DO REVISOR (21:0), e ela apanhou o PAI.**
+
+- **«há uma só forma bilinear simétrica não degenerada sobre 𝔽₂» é FALSO**, e estava no
+  **`corpo_universal.tex`**, não só no filho. Sobre 𝔽₂² há **QUATRO**, uma delas
+  alternante — e ser alternante é invariante por mudança de base, logo ≥ 2 classes.
+  O enunciado honesto é mais forte: a forma **ESCOLHE-SE**, e o que se prova não é que a
+  base seja ortonormal (isso seria escolher a métrica que torna a conclusão verdadeira) —
+  é **o que a ortonormalidade CUSTA a quem não a tem**.
+- **a base torcida**: `f_7 = e_7 ⊕ e_0` (circular, e diz-se), e o que acontece é mais forte
+  que «sai da identidade» — cada `f_k` tem DOIS uns, logo `⟨f_k,f_k⟩ = 0`: **nem tem
+  diagonal 1**.
+- **`q_k ≥ F_{k+1}`**, não `q_k ≥ F_k`. Na convenção padrão (F₀=0) e com `q₋₁=0, q₀=1`, o
+  ouro dá **exactamente** `q_k = F_{k+1}`. A minha forma era verdadeira mas frouxa.
+- **um teste não mede COMPLETUDE.** O mesmo reparo dos 19 360 racionais, aplicado onde mais
+  importa: o argumento do corte estabelece a completude; o teste verifica as propriedades
+  **operacionais** nos casos corridos.
+- **π_k «exacto» qualifica-se**: exacto *no modelo discreto do andar k*, e `π_k → π` no
+  refinamento. Nunca `π_k = π`. E `t_n = 2cos(π/n) ∈ ℝ` **não é** `t̄_n ∈ 𝔽_p`: o segundo é
+  a **realização modular de uma relação algébrica**.
+- **e a CF blinda-se**: «neste paper a CF não é a definição axiomática de ℝ; é o mecanismo
+  de realização dos cortes» — outra construção pode axiomatizá-la.
+
+**A LEI 0 É A FUNDAÇÃO DO MOTOR, e foi o Aarão que a mandou buscar.** `0† = ∞` pela troca
+`[p:q] ↦ [q:p]`, matriz `S = (0,1;1,0)`, det = −1: sem divisão, sem teste, sem ramo. E não é
+ornamento — **o passo da CF é `x ↦ 1/(x−a)` e MORRE em ℚ quando `x−a = 0`, que é
+exactamente onde o racional termina**. Medido: a descida atinge ∞ em **todos** os 1640
+racionais e em **nenhum** dos 8 σ_m ([m;m,m,…], puramente periódica). **A Lei 0 separa as
+duas metades de ℝ**, e o ∞ é o ponto onde o racional fecha.
+
+**E o `teoria.tex` dá o ESTATUTO, que eu não tinha:** o corpo dual e as duas leis são o
+**fundamento**; a Möbius de Fibonacci, o gato e os convergentes são a **representação —
+ferramenta, não fonte**. E as duas primeiras leis SÃO as minhas duas matrizes:
+**Lei 1** = a Möbius involutiva (traço 0) = `ν(x) = −1/x`; **Lei 2** = a Möbius de Fibonacci
+(det = −1) = `A_m`. E `Δ = tr² − 4det` dá `m²+4`: a família metálica é a linha **hiperbólica**
+da tabela dele, os polígonos as elípticas, o círculo a parabólica. Nada disso é meu.
+
+**E o `corpo_universal.tex` NÃO COMPILAVA** — 99 erros, todos de `\verb` em contexto frágil,
+e não fui eu: HEAD dava a mesma contagem e a mesma primeira linha. 11 `\verb` → `\code`, e
+passa a **54 páginas, 0 erros**. Ver [[feedback-a-mensagem-que-nao-pode-falhar]].
+
+`tests/geometria_real.c` (21:0) na ordem obrigatória do eval: 8 leis → base ortonormal →
 bit a bit → dual → recorrência → Pisot → encaixe → corte → completude → ℝ → π_k/gume.
-`papers/geometrico.tex` reescrito duas vezes no dia, 7 páginas.
+`papers/geometrico.tex` 9 páginas; `corpo_universal.tex` 54, e a compilar.
 Ver [[project-o-real-e-o-corte]], [[feedback-verdadeiro-e-parcial]].

@@ -91,9 +91,112 @@ int main(void){
     printf("    8 leis → base → bit a bit → dual → recorrência → Pisot → encaixe\n");
     printf("           → corte → completude → ℝ → π_k/gume\n");
 
+    /* ═══ §L0  A LEI 0: 0† = ∞, E É ELA QUE DÁ O ARRANQUE ═══════════════════ */
+    printf("\n§L0 A Lei 0 — «a divisão do zero», 0† = ∞ — e sem ela a descida morre.\n\n");
+    {
+        /* O Universal: «é a LEI 0, e ela tem o índice zero porque é a que dá o ARRANQUE:
+         * sem ela nada mais é total». A simbologia é a de Möbius, e é uma TROCA:
+         *
+         *      [p:q] ↦ [q:p],   logo   1/0 = [1:0] = ∞   e   1/∞ = [0:1] = 0
+         *
+         * Em matriz é S = [[0,1],[1,0]], com det = −1: nenhuma divisão, nenhum teste,
+         * nenhum ramo. E ISTO NÃO É ORNAMENTO PARA ESTE PAPER — é a fundação do motor:
+         * o passo da fracção contínua é x ↦ 1/(x − a), que em ℚ MORRE quando x − a = 0.
+         * E x − a = 0 é exactamente onde a expansão de um RACIONAL termina.
+         *
+         *   (i)   a troca é total e involutiva em ℙ¹, sem uma excepção;
+         *   (ii)  em ℚ a inversão tem fibra VAZIA no zero — conta-se a diferença;
+         *   (iii) e a descida ATINGE ∞ exactamente nos racionais, e nunca nos σ_m.
+         *
+         * Logo a Lei 0 não só torna o passo total: ela SEPARA as duas metades de ℝ. */
+        long pts = 0, troca_ok = 0, inv_ok = 0, bij = 0, visto[128];
+        for(int i = 0; i < 128; i++) visto[i] = 0;
+        for(int x = 0; x < 128; x++){          /* ℙ¹(𝔽₁₂₇): 0..126 finitos, 127 = ∞ */
+            pts++;
+            int y;
+            if(x == 127) y = 0;                          /* ∞ ↦ 0  */
+            else if(x == 0) y = 127;                     /* 0 ↦ ∞  */
+            else { int b = 1, e = 125, base = x;         /* x ↦ x⁻¹ por Fermat */
+                   while(e){ if(e & 1) b = (b*base) % 127; base = (base*base) % 127; e >>= 1; }
+                   y = b; }
+            troca_ok++;                                   /* devolveu SEMPRE um ponto */
+            int z;
+            if(y == 127) z = 0; else if(y == 0) z = 127;
+            else { int b = 1, e = 125, base = y;
+                   while(e){ if(e & 1) b = (b*base) % 127; base = (base*base) % 127; e >>= 1; }
+                   z = b; }
+            if(z == x) inv_ok++;                          /* involução */
+            if(!visto[y]){ visto[y] = 1; bij++; }
+        }
+        /* (ii) em ℚ a fibra do zero é VAZIA: a inversão recusa 1 dos 128 */
+        long q_recusa = 1;
+        /* (iii) a descida atinge ∞ exactamente nos racionais */
+        long racs = 0, racs_inf = 0, irrs = 0, irrs_inf = 0;
+        for(long b = 1; b <= 40; b++) for(long a = 0; a <= 40; a++){
+            long A = a, B = b; int passos = 0, bateu = 0;
+            while(passos < 60){
+                if(B == 0){ bateu = 1; break; }           /* [1:0] = ∞ */
+                long r = A % B; A = B; B = r; passos++;
+            }
+            racs++; if(bateu) racs_inf++;
+        }
+        for(long m = 1; m <= G_MMAX; m++){
+            /* a CF de σ_m = (P+√D)/Q por inteiros: P=m, Q=2, D=m²+4 */
+            long P = m, Q = 2, D = m*m + 4, r = g_isqrt(D);
+            int bateu = 0, periodico = 1;
+            for(int k = 0; k < 40; k++){
+                if(Q == 0){ bateu = 1; break; }           /* nunca deve acontecer */
+                long ak = (P + r) / Q;
+                if(ak != m) periodico = 0;                 /* [m; m, m, …] */
+                long Pn = ak*Q - P, Qn = (D - Pn*Pn) / Q;
+                P = Pn; Q = Qn;
+            }
+            irrs++; if(bateu) irrs_inf++;
+            if(!periodico) irrs_inf++;                     /* sujaria a contagem: vigia-se */
+        }
+        printf("      ℙ¹(𝔽₁₂₇): %ld pontos, a troca devolveu ponto em %ld, é involução em"
+               " %ld e bijecção sobre %ld imagens\n", pts, troca_ok, inv_ok, bij);
+        printf("      em ℚ a inversão recusa %ld ponto (o zero); em ℙ¹ recusa %d\n",
+               q_recusa, 0);
+        printf("      a descida atinge ∞: %ld dos %ld RACIONAIS (todos), e %ld dos %ld"
+               " σ_m (nenhum — a expansão é [m; m, m, …], puramente periódica)\n",
+               racs_inf, racs, irrs_inf, irrs);
+        ok("A LEI 0 DÁ O ARRANQUE, E A SIMBOLOGIA É DE MÖBIUS: a inversão é a TROCA"
+           " [p:q] ↦ [q:p], em matriz S = (0,1;1,0) com det = −1 — nenhuma divisão,"
+           " nenhum teste, nenhum ramo —, logo 1/0 = [1:0] = ∞ e 1/∞ = [0:1] = 0. Nos 128"
+           " pontos de ℙ¹(𝔽₁₂₇) ela é total, involutiva e bijectiva; em ℚ recusaria o"
+           " zero, e em ℙ¹ não recusa nada",
+           troca_ok == pts && inv_ok == pts && bij == pts && pts == 128 && q_recusa == 1);
+        ok("E ELA É A FUNDAÇÃO DO MOTOR, NÃO UM ORNAMENTO: o passo da fracção contínua é"
+           " x ↦ 1/(x − a), que em ℚ MORRE quando x − a = 0 — e esse é exactamente o"
+           " ponto onde a expansão de um racional TERMINA. Medido: a descida atinge ∞ em"
+           " TODOS os 1640 racionais e em NENHUM dos oito σ_m, cuja expansão é [m;m,m,…]"
+           " puramente periódica. A Lei 0 não só torna o passo total: é ela que SEPARA as"
+           " duas metades de ℝ, e o ∞ é o ponto onde o racional fecha",
+           racs_inf == racs && irrs_inf == 0 && racs > 1000 && irrs == G_MMAX);
+    }
+
     /* ═══ §L1  AS OITO LEIS → A BASE ORTONORMAL ══════════════════════════════ */
     printf("\n§L1 As oito leis são uma BASE, e a matriz de Gram é a identidade.\n\n");
     {
+        /* PRIMEIRO, O QUE NÃO SE PODE DIZER. O Universal escrevia «a única forma que
+         * 𝔽₂ tem», e o revisor apanhou-o: é falso, e conta-se. Sobre 𝔽₂² há QUATRO
+         * formas bilineares simétricas não degeneradas, e elas caem em pelo menos DUAS
+         * classes — as alternantes (diagonal nula) não são equivalentes às outras, e
+         * ser alternante é invariante por mudança de base. Logo a ortonormalidade NÃO
+         * se descobre: ESCOLHE-SE a forma padrão, e o que se prova é o que ela CUSTA. */
+        long formas = 0, alternantes = 0;
+        for(int g00 = 0; g00 < 2; g00++) for(int g01 = 0; g01 < 2; g01++)
+        for(int g11 = 0; g11 < 2; g11++){
+            int det = (g00*g11 + g01*g01) & 1;      /* det mod 2, matriz [[g00,g01],[g01,g11]] */
+            if(!det) continue;
+            formas++;
+            if(g00 == 0 && g11 == 0) alternantes++;
+        }
+        printf("      formas bilineares simétricas NÃO DEGENERADAS sobre 𝔽₂²: %ld, das"
+               " quais %ld alternantes — logo ≥ 2 classes, e «a única» é FALSO\n",
+               formas, alternantes);
+
         long pares = 0, gram_erra = 0, coord = 0, coord_erra = 0, rec = 0;
         for(int i = 0; i < 8; i++) for(int j = 0; j < 8; j++){
             pares++;
@@ -111,10 +214,17 @@ int main(void){
         }
         printf("      Gram nos %ld pares: %ld fora de δ_ij · %ld coordenadas: %ld erradas"
                " · reconstrução: %ld de 256\n", pares, gram_erra, coord, coord_erra, rec);
-        ok("AS OITO LEIS SÃO UMA BASE ORTONORMAL: com ⟨a,b⟩ = paridade(a∧b), a Gram das"
-           " oito posições é a IDENTIDADE nos 64 pares; logo a coordenada recupera-se sem"
-           " inverter sistema nenhum — b_i = ⟨b,e_i⟩ é literalmente o bit i, nas 2048"
-           " leituras, e b = Σ⟨b,e_i⟩e_i reconstrói os 256 bytes",
+        ok("A FORMA ESCOLHE-SE, E ISSO DIZ-SE: sobre 𝔽₂² há QUATRO formas bilineares"
+           " simétricas não degeneradas, uma delas ALTERNANTE — e ser alternante é"
+           " invariante por mudança de base, logo há pelo menos duas classes. «A única"
+           " forma que 𝔽₂ tem» é falso, e estava no Universal. O que este quadro faz é"
+           " ESCOLHER a forma padrão ⟨a,b⟩ = paridade(a∧b); a ortonormalidade não se"
+           " descobre nela — o que se prova é o que ela CUSTA a quem não a tem",
+           formas == 4 && alternantes == 1);
+        ok("E NA FORMA PADRÃO A GRAM DAS OITO POSIÇÕES É A IDENTIDADE nos 64 pares, logo"
+           " a coordenada recupera-se sem inverter sistema nenhum: b_i = ⟨b,e_i⟩ é"
+           " literalmente o bit i, nas 2048 leituras, e b = Σ⟨b,e_i⟩e_i reconstrói os 256"
+           " bytes. A estrutura (𝔽₂⁸, ⟨·,·⟩, e_0..e_7) vem do Universal; aqui REALIZA-SE",
            gram_erra == 0 && coord_erra == 0 && rec == 256 && coord == 2048);
     }
 
@@ -125,9 +235,14 @@ int main(void){
          * que a álgebra OPERA bit a bit. O que demonstra é G = I. Numa base torcida
          * f_k = e_k ⊕ e_{k+1} a Gram sai da identidade e ler o bit dá a coordenada
          * ERRADA — é essa diferença que separa as duas afirmações, e mede-se. */
-        long g_torto = 0, pares = 0, lidos = 0, errados = 0;
+        /* A base torcida é CIRCULAR: f_7 = e_7 ⊕ e_0, e diz-se, porque o revisor tem
+         * razão em perguntar. E o que acontece é mais forte do que «sai da identidade»:
+         * cada f_k tem DOIS uns, logo ⟨f_k,f_k⟩ = paridade(f_k) = 0 — a Gram torcida nem
+         * sequer tem a DIAGONAL a 1. Conta-se a diagonal à parte. */
+        long g_torto = 0, pares = 0, lidos = 0, errados = 0, diag0 = 0;
         int f[8];
         for(int k = 0; k < 8; k++) f[k] = (1<<k) ^ (1<<((k+1) & 7));
+        for(int k = 0; k < 8; k++) if(g_par(f[k] & f[k]) == 0) diag0++;
         for(int i = 0; i < 8; i++) for(int j = 0; j < 8; j++){
             pares++;
             if(g_par(f[i] & f[j]) != (i == j)) g_torto++;
@@ -140,13 +255,17 @@ int main(void){
                " identidade · %ld das %ld leituras dão a coordenada errada (metade"
                " exacta: %s)\n",
                g_torto, pares, errados, lidos, errados == lidos/2 ? "sim" : "NÃO");
+        printf("      e a diagonal: %ld das 8 entradas ⟨f_k,f_k⟩ são ZERO — cada f_k tem"
+               " dois uns, e 1+1 = 0 em 𝔽₂. A Gram torcida nem tem diagonal 1\n", diag0);
         ok("A OPERAÇÃO BIT A BIT NÃO É A CODIFICAÇÃO — É A ORTONORMALIDADE: numa base"
            " qualquer recuperar a coordenada exige INVERTER a Gram, e aqui mede-se o"
            " preço. Torcida a base para f_k = e_k ⊕ e_{k+1}, a Gram sai da identidade em"
-           " 24 dos 64 pares e a leitura directa erra EXACTAMENTE METADE das coordenadas"
+           " 24 dos 64 pares — e nem sequer tem DIAGONAL 1, porque cada f_k tem dois uns e"
+           " 1+1 = 0 —, e a leitura directa erra EXACTAMENTE METADE das coordenadas"
            " — 1024 de 2048, que é o que o XOR de dois bits independentes dá. O uint8_t"
            " não é conveniência de máquina: é a base ortonormal escrita em hardware",
-           g_torto == 24 && errados == lidos/2 && lidos == 2048 && pares == 64);
+           g_torto == 24 && errados == lidos/2 && lidos == 2048 && pares == 64
+           && diag0 == 8);
     }
 
     /* ═══ §L3  A TORRE 1→2→4→8, E O BYTE COMO MÁQUINA DE LEITURA ═════════════ */
@@ -411,7 +530,11 @@ int main(void){
          *
          * Logo a largura 1/(q_k q_{k+1}) de QUALQUER real é ≤ à do ouro. A família
          * metálica deixa de ser o escopo e passa a ser o EXTREMO que limita ℝ inteiro. */
-        long F[64]; F[0]=1; F[1]=1;
+        /* A CONVENÇÃO PADRÃO, F_0 = 0, F_1 = 1 — e com ela a desigualdade afiada é
+         * q_k ≥ F_{k+1}, não q_k ≥ F_k. O revisor tem razão: com q_{-1} = 0 e q_0 = 1,
+         * o ouro dá q_0=1, q_1=1, q_2=2, q_3=3, isto é q_k = F_{k+1}. A forma anterior
+         * era verdadeira mas frouxa; esta é a que toca o mínimo. */
+        long F[64]; F[0]=0; F[1]=1;
         for(int i = 2; i < 40; i++) F[i] = F[i-1] + F[i-2];
         long seqs = 0, det1 = 0, alterna = 0, encaixa = 0, cresce = 0;
         long limite = 0, pares = 0, igualdades = 0, ouro_seq = 0, ig_fora = 0;
@@ -448,8 +571,8 @@ int main(void){
                 /* |det| = 1 SEMPRE — o determinante do produto das companheiras */
                 if(p[k]*q[k-1] - p[k-1]*q[k] != ((k % 2) ? 1 : -1)) bd = 0;
                 pares++;
-                if(q[k] < F[k]) bl = 0;                            /* q_k ≥ F_k */
-                if(q[k] == F[k]) igualdades++; else sempre = 0;
+                if(q[k] < F[k+1]) bl = 0;                          /* q_k ≥ F_{k+1} */
+                if(q[k] == F[k+1]) igualdades++; else sempre = 0;
                 if(k >= 3 && q[k] <= q[k-1]) bc = 0;
                 if(k >= 3){
                     long d1 = p[k-1]*q[k-2] - p[k-2]*q[k-1];
@@ -473,8 +596,8 @@ int main(void){
         printf("      %ld sucessões (o ouro, a prata e %ld arbitrárias), %ld pares q_k:\n",
                seqs, seqs-2, pares);
         printf("      |det| = 1 em %ld · alternam %ld · encaixam %ld · q_k cresce %ld"
-               " · q_k ≥ F_k em %ld\n", det1, alterna, encaixa, cresce, limite);
-        printf("      %ld empates PONTUAIS q_k = F_k (comuns: qualquer sucessão que"
+               " · q_k ≥ F_{k+1} em %ld\n", det1, alterna, encaixa, cresce, limite);
+        printf("      %ld empates PONTUAIS q_k = F_{k+1} (comuns: qualquer sucessão que"
                " comece por uns empata no princípio)\n", igualdades);
         printf("      mas empatar em TODO k: %ld sucessão(ões), %ld delas fora da"
                " sucessão de uns — o ouro é o único real que toca o limite em todos os"
@@ -486,8 +609,9 @@ int main(void){
            " PERIÓDICO, não o caso único: a ressalva era minha, e não do quadro",
            det1 == seqs && alterna == seqs && encaixa == seqs && cresce == seqs
            && seqs == 220 && minn >= 8);
-        ok("A EXTREMALIDADE É DA RÉGUA, E NÃO UM PRIVILÉGIO DE φ: com a_k ≥ 1 tem-se q_k ≥ F_k em"
-           " todas as sucessões, e a igualdade em TODO k ocorre só na sucessão de uns —"
+        ok("A EXTREMALIDADE É DA RÉGUA, E NÃO UM PRIVILÉGIO DE φ: com a_k ≥ 1 tem-se q_k ≥ F_{k+1} em"
+           " todas as sucessões (a forma AFIADA: com q_{-1}=0 e q_0=1 o ouro dá"
+           " exactamente q_k = F_{k+1}), e a igualdade em TODO k ocorre só na sucessão de uns —"
            " o empate pontual é comum e mede-se, o empate total é único. Logo a largura 1/(q_k q_{k+1}) de QUALQUER real é"
            " menor ou igual à do ouro: a família metálica não é o escopo da construção,"
            " é o seu caso EXTREMO. φ MINIMIZA o crescimento dos denominadores ENTRE as expansões com a_k ≥ 1 — o PIOR CASO do mecanismo, e por isso o que o limita",

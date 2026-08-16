@@ -11,6 +11,7 @@
 # em 03/08 — regeneram-se com `pdflatex <p>.tex`, e o deploy fá-lo sozinho.
 /teoria.pdf
 /geometrico.pdf
+/corpo_universal.pdf
 /tiffany.pdf
 /microprocessador.pdf
 /viveiro.pdf

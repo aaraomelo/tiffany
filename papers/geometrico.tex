@@ -50,7 +50,7 @@ reconstrói o sistema nem decide se ele é permitido: \textbf{realiza
 geometricamente a construção que o Universal já fechou}, na ordem
 \[
 \boxed{\;
-\text{8 leis}\to\text{base ortonormal}\to\text{bit a bit}\to\text{dual}
+\text{Lei 0}\to\text{8 leis}\to\text{base ortonormal}\to\text{bit a bit}\to\text{dual}
 \to\text{recorrência}\to\text{Pisot}\to\text{encaixe}\to\text{corte}
 \to\mathbb{R}\to\pi_k .\;}
 \]
@@ -59,15 +59,22 @@ oito leis tem Gram $=I$, e por isso $b_i=\langle b,e_i\rangle$ \emph{é} o bit
 --- o que autoriza o bit a bit não é a codificação, é a ortonormalidade. O dual
 $\sigma\dg=-\sigma^{-1}$ produz a recorrência inteira; o operador \textbf{produz}
 o inteiro $t_k=\sigma^{k}+(\sigma\dg)^{k}$, e com ele
-$\operatorname{dist}(\sigma^{k},\mathbb{Z})=\abs{\sigma\dg}^{k}$: a aproximação
+\[
+\abs{\sigma^{k}-t_k}=\abs{\sigma\dg}^{k},
+\qquad
+\abs{\sigma\dg}^{k}<\tfrac12\ \Longrightarrow\
+\operatorname{dist}(\sigma^{k},\mathbb{Z})=\abs{\sigma\dg}^{k}
+\]
+--- \emph{são duas afirmações, e a condição faz parte da segunda}. A aproximação
 não é escolhida. Daí o encaixe, e daí o corte.
 
 \smallskip\noindent
 E a construção é de $\mathbb{R}$ \textbf{inteiro}. Corre sobre quocientes
-parciais \emph{arbitrários} --- um real \emph{é} uma dessas sucessões ---, e
-o metálico é o caso \emph{periódico}, não o caso único. Com $a_k\geq1$,
+parciais \emph{arbitrários} --- cada real tem uma representação canónica por
+fracção contínua, infinita se irracional e finita se racional ---, e o metálico é
+o caso \emph{periódico}, não o caso único. Com $a_k\geq1$,
 \[
-\boxed{\;q_k\geq F_k,\quad\text{com igualdade em TODO }k
+\boxed{\;q_k\geq F_{k+1},\quad\text{com igualdade em TODO }k
 \text{ só na sucessão de uns}\;}
 \]
 --- $\varphi$ é o \textbf{irracional de crescimento mínimo dos denominadores
@@ -75,7 +82,7 @@ dos convergentes} entre as expansões com $a_k\geq1$, e por isso uma só taxa
 limita a construção inteira. A família metálica não é o escopo: é o caso
 \textbf{extremo}, o pior caso do mecanismo.
 
-\smallskip\noindent\emph{Medido:} \code{tests/geometria\_real.c} ($18{:}0$).
+\smallskip\noindent\emph{Medido:} \code{tests/geometria\_real.c} ($21{:}0$).
 \end{abstract}
 
 %======================================================================
@@ -107,10 +114,93 @@ e é contagem de bits, e a área do \S\ref{sec:det}, que nomeia um
 sem avisar é pior do que nenhuma.
 
 %======================================================================
+\section{A Lei 0: $0\dg=\infty$, e é ela que dá o arranque}\label{sec:lei0}
+
+Antes da base vem a Lei de índice zero, e o índice não é decorativo: o
+\emph{Corpo Universal} chama-lhe «a que dá o arranque --- sem ela nada mais é
+total».
+
+\begin{definicao}[a simbologia, e ela é de Möbius]\label{def:lei0}
+Na recta projectiva $\mathbb{P}^1$ o ponto é $[p:q]$ com $(p,q)\neq(0,0)$, a menos
+de escala, e a inversão é a \textbf{troca}
+\[
+\boxed{\;[p:q]\ \longmapsto\ [q:p],
+\qquad S=\begin{pmatrix}0&1\\1&0\end{pmatrix},\ \det S=-1 .\;}
+\]
+Não há divisão, não há teste, não há ramo. E daí
+\[
+\frac10=[1:0]=\infty,
+\qquad
+\frac1\infty=[0:1]=0
+\qquad\text{---}\qquad
+\boxed{\;0\dg=\infty:\ \text{zero e infinito são inversos.}\;}
+\]
+\end{definicao}
+
+\begin{teorema}[e a Lei 0 é a fundação do motor, não um ornamento]\label{thm:lei0}
+O passo da fracção contínua é
+\[
+x\ \longmapsto\ \frac{1}{x-a},
+\]
+e \textbf{em $\mathbb{Q}$ ele morre} quando $x-a=0$. Mas $x-a=0$ é
+\emph{exactamente} o ponto onde a expansão de um racional termina. Em
+$\mathbb{P}^1$ não morre: aterra em $[1:0]=\infty$, e o passo é total.
+
+Medido: a inversão é total, involutiva e bijectiva nos $128$ pontos de
+$\mathbb{P}^1(\mathbb{F}_{127})$ --- em $\mathbb{Q}$ recusaria o zero, aqui não
+recusa nada. E a descida atinge $\infty$
+\[
+\text{em \textbf{todos} os } 1640 \text{ racionais varridos,}
+\qquad
+\text{e em \textbf{nenhum} dos oito } \sigma_m ,
+\]
+cuja expansão é $[m;m,m,\ldots]$, puramente periódica. \emph{Portanto a Lei 0 não
+só torna o passo total: é ela que \textbf{separa as duas metades} de
+$\mathbb{R}$}, e o $\infty$ é o ponto onde o racional fecha. $\square$
+\end{teorema}
+\colunas{a Lei 0, $0\dg=\infty$, e a inversão total em $\mathbb{P}^1$
+(\code{cor:zero-infinito})}
+        {o passo da CF tornado total, e o $\infty$ como fecho do racional}
+        {\code{geometria\_real.c} \S L0}
+
+\begin{observacao}[e as duas primeiras leis são as duas matrizes deste paper]
+O \emph{Teoria} classifica-as por traço e determinante, e elas são exactamente as
+que aqui se usam:
+\[
+\begin{array}{llll}
+\text{\textbf{Lei 1}} & 1\dg=-1 & \text{a Möbius \textbf{involutiva}, traço }0
+& \nu(x)=-1/x=\begin{psmallmatrix}0&-1\\1&0\end{psmallmatrix}\\[3pt]
+\text{\textbf{Lei 2}} & T\dg=-T & \text{a Möbius de \textbf{Fibonacci}, }\det=-1
+& A_m=\begin{psmallmatrix}m&1\\1&0\end{psmallmatrix}
+\end{array}
+\]
+E a tricotomia do \S\ref{sec:pi} é a classificação de $\Delta=\operatorname{tr}^2-4\det$
+do mesmo texto: para $A_m$ dá $\Delta=m^{2}+4>0$ --- \textbf{hiperbólica}, «onde
+vive $\sigma$» ---, os polígonos são as elípticas, e o círculo a parabólica.
+\emph{Nada disto é inventado aqui: é a tabela do Teoria, e este paper corre dentro
+dela.}
+\end{observacao}
+
+%======================================================================
 \section{As oito leis são uma base ortonormal}\label{sec:orto}
 
-Sobre $\mathbb{F}_2$ há uma só forma bilinear simétrica não degenerada:
-$\langle a,b\rangle=\operatorname{paridade}(a\wedge b)$.
+\textbf{A estrutura vem do Universal, e diz-se qual é:} o par
+$\bigl(\mathbb{F}_2^{8},\ \langle\cdot,\cdot\rangle,\ e_0,\ldots,e_7\bigr)$
+com a forma bilinear \textbf{padrão}
+\[
+\langle a,b\rangle=\operatorname{paridade}(a\wedge b)
+=\textstyle\sum_i a_ib_i\bmod2 .
+\]
+Este paper \emph{realiza} essa estrutura; não a estabelece.
+
+\medskip
+\noindent\textbf{E a forma ESCOLHE-SE --- não é a única.} Uma versão anterior
+deste paper, e o próprio Universal, diziam «a única forma que $\mathbb{F}_2$ tem»:
+é \emph{falso}. Só sobre $\mathbb{F}_2^{2}$ há \textbf{quatro} formas bilineares
+simétricas não degeneradas, uma delas \emph{alternante} --- e ser alternante é
+invariante por mudança de base, logo há pelo menos duas classes. Dizê-lo importa,
+porque senão pareceria que a ortonormalidade se \emph{prova} escolhendo a métrica
+que a torna verdadeira.
 
 \begin{teorema}\label{thm:orto}
 Com $e_k=2^{k}$ reservado à Lei $k$, a matriz de Gram é a identidade:
@@ -119,7 +209,9 @@ $\langle e_i,e_j\rangle=\delta_{ij}$. Logo
 \boxed{\;b_i=\langle b,e_i\rangle\;}
 \]
 --- um AND e uma paridade, que é \emph{ler o bit} ---, e
-$b=\sum_i\langle b,e_i\rangle e_i$ reconstrói. $\square$
+$b=\sum_i\langle b,e_i\rangle e_i$ reconstrói. \emph{O conteúdo não é «a base é
+ortonormal», que a escolha da forma já dá: é o que a ortonormalidade CUSTA a quem
+não a tem}, e é isso que o \S\ref{sec:bitabit} mede. $\square$
 \end{teorema}
 \colunas{a base é ortonormal (\code{thm:ortonormal})}
         {Gram $=I$ nos $64$ pares; $2048$ leituras}
@@ -142,9 +234,14 @@ custa sistema nenhum. Numa base qualquer seria preciso \textbf{inverter} a
 Gram --- e o preço mede-se.
 
 \begin{teorema}[o gume da base torcida]\label{thm:torcida}
-Com $f_k=e_k\oplus e_{k+1}$, a Gram sai da identidade em $24$ dos $64$ pares, e
-a leitura directa passa a dar a coordenada errada em \textbf{exactamente
-metade} das $2048$ --- $1024$, que é o que o XOR de dois bits independentes dá.
+Com $f_k=e_k\oplus e_{k+1}$ e o índice \textbf{circular} ($f_7=e_7\oplus e_0$), e
+sempre com a \emph{mesma} forma sobre $\mathbb{F}_2$ --- não se troca de métrica a
+meio ---, a Gram sai da identidade em $24$ dos $64$ pares. E o que se passa é mais
+forte: cada $f_k$ tem \textbf{dois} uns, logo
+$\langle f_k,f_k\rangle=\operatorname{paridade}(f_k)=0$ nas oito, e
+\emph{a Gram torcida nem sequer tem diagonal $1$}. A leitura directa passa a dar a
+coordenada errada em \textbf{exactamente metade} das $2048$ --- $1024$, que é o que
+o XOR de dois bits independentes dá.
 \emph{O \code{uint8\_t} não é conveniência de máquina: é a base ortonormal
 escrita em hardware.} $\square$
 \end{teorema}
@@ -346,10 +443,16 @@ excepção. \emph{O metálico é o caso periódico, e não o caso único.} $\squ
 \begin{teorema}[a extremalidade da régua: $\varphi$ minimiza o crescimento]\label{thm:ouro}
 Com $a_k\geq1$,
 \[
-\boxed{\;q_k\geq F_k\ \text{para todo real},\qquad
-\text{com igualdade em TODO }k\ \text{só na sucessão de uns.}\;}
+\boxed{\;q_k\geq F_{k+1}\ \ (k\geq0),\qquad
+\text{com igualdade em TODO }k\ \text{só na sucessão de uns,}\;}
 \]
-Logo a largura $1/(q_kq_{k+1})$ é minorada uniformemente: \textbf{uma só taxa
+na convenção padrão $F_0=0$, $F_1=1$. \textbf{É esta a forma afiada}: com
+$q_{-1}=0$ e $q_0=1$, a sucessão de uns dá exactamente $q_k=F_{k+1}$, e não apenas
+$q_k\geq F_k$. Donde a resolução da régua,
+\[
+\abs{c_{k+1}-c_k}=\frac{1}{q_kq_{k+1}}\ \leq\ \frac{1}{F_{k+1}F_{k+2}},
+\]
+minorada uniformemente: \textbf{uma só taxa
 limita a construção inteira}, e é a do ouro. A família metálica não é o escopo
 --- é o caso \textbf{extremo}. $\square$
 
@@ -380,10 +483,16 @@ O corte não é uma técnica adicional: é a \textbf{leitura ordenada da mesma
 sucessão}.
 
 \begin{teorema}\label{thm:corte}
-Para $a\in\mathbb{Z}$, $b\geq1$ e $\Delta=m^{2}+4$, a pergunta
-$\tfrac ab<\sigma_m$ converte-se na comparação inteira
+Para $a\in\mathbb{Z}$, $b\geq1$ e $\Delta=m^{2}+4$: de
+$\sigma_m=\bigl(m+\sqrt\Delta\bigr)/2$ vem
 \[
-2a-mb<0\quad\text{ou}\quad(2a-mb)^{2}<b^{2}\Delta .
+\frac ab<\sigma_m
+\iff 2a-mb<b\sqrt\Delta ,
+\]
+e como o lado direito é positivo isto parte-se em dois, sem perda:
+\[
+2a-mb<0\quad\text{(e acabou)},\qquad\text{ou}\quad
+2a-mb\geq0\ \text{e}\ (2a-mb)^{2}<b^{2}\Delta .
 \]
 \textbf{E aqui as duas coisas não se confundem}, que é a hierarquia da primeira
 página aplicada a si própria:
@@ -421,9 +530,25 @@ como \textbf{a máquina de leitura de cada bloco de decisões}. $\square$
 
 O intervalo aperta porque uma face é obrigada a encolher para a unidade se
 conservar (Obs.~\ref{obs:area}); o encaixe fecha; o corte fica determinado.
-As hipóteses de corpo ordenado completo estão medidas --- corpo, ordem
-compatível com as operações, arquimediano com o $n$ exibido, completo pelo
-corte --- em \code{tests/ordenado.c} ($7{:}0$).
+
+\medskip
+\noindent\textbf{E aqui as duas coisas separam-se, porque um teste não mede
+completude.} É o mesmo reparo dos $19\,360$ racionais, aplicado onde ele mais
+importa:
+\begin{center}
+\begin{tabular}{@{}p{6.6cm}p{7.6cm}@{}}
+\toprule
+o que o \textbf{argumento} estabelece & o que o \textbf{teste} verifica \\
+\midrule
+a \textbf{completude}, pelo argumento do corte: todo corte é determinado porque a
+largura do encaixe vai a zero
+ & que as \emph{propriedades operacionais} valem nos casos corridos --- fecho,
+tricotomia, compatibilidade com $+$ e $\times$, o $n$ arquimediano exibido \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent Uma varredura finita não podia estabelecer a completude, e não é para
+isso que está aqui. \emph{Verificado:} \code{tests/ordenado.c} ($7{:}0$).
 
 \noindent\textbf{E são duas rotas, que não se substituem:}
 \[
@@ -435,10 +560,17 @@ corte --- em \code{tests/ordenado.c} ($7{:}0$).
 \text{intervalos encaixados}\ \longrightarrow\ \text{corte}
 \end{array}}
 \]
-A primeira é a \emph{identificação}; a segunda é o \emph{mecanismo}.
-\textbf{A fracção contínua não define $\mathbb{R}$: ela é o mecanismo
-geométrico que realiza os cortes} --- e é por isso que este paper a usa, e é
-por isso que a identificação continua a ser citada e não reclamada.
+A primeira é a \emph{identificação}; a segunda é o \emph{mecanismo}. E a
+formulação exacta, que é uma escolha metodológica e não uma tese sobre
+fundamentos --- outra construção pode perfeitamente axiomatizar $\mathbb{R}$ por
+sucessões de fracção contínua:
+\[
+\boxed{\;\text{Neste paper a CF \textbf{não} é a definição axiomática de }
+\mathbb{R};\ \text{é o \textbf{mecanismo de realização} dos cortes.}\;}
+\]
+É também o estatuto que o \emph{Teoria} já lhe dá: o corpo dual e as duas leis são
+o \textbf{fundamento}; a Möbius de Fibonacci, o gato e os convergentes são a
+\textbf{representação} --- ferramenta, não fonte.
 
 \begin{observacao}[a identificação com $\mathbb{R}$]
 Que um corpo ordenado completo seja isomorfo a $\mathbb{R}$, e único a menos de
@@ -460,9 +592,16 @@ t_n=2\cos\frac{\pi}{n},
 e a companheira $C_n=\begin{psmallmatrix}t_n&-1\\1&0\end{psmallmatrix}$ tem
 ordem $2n$. \textbf{Mas $t_n$ não é inteiro} --- $t_4=\sqrt2$, $t_6=\sqrt3$ ---,
 e é aqui que está a passagem que dá o título a esta secção: nos modelos finitos
-usados para a realização, \emph{o traço irracional é substituído por uma raiz
-inteira do polinómio correspondente no corpo finito}. É isso que faz $\pi_k$ ser
-\textbf{realizado} e não aproximado.
+usados para a realização, \emph{o traço irracional é substituído pela raiz da
+classe modular correspondente} --- uma raiz inteira, em $\mathbb{F}_p$, do mesmo
+polinómio mínimo. E não se confundem os dois objectos:
+\[
+t_n=2\cos\frac{\pi}{n}\in\mathbb{R}
+\qquad\text{contra}\qquad
+\bar t_n\in\mathbb{F}_p ,
+\]
+sendo o segundo uma \textbf{realização modular de uma relação algébrica}, e não
+«o mesmo número». É isso que faz $\pi_k$ ser \textbf{realizado} e não aproximado.
 
 \begin{teorema}\label{thm:pi}
 \emph{(i) os elíticos.} Com $t_n=2\cos(\pi/n)$ realizado no primo da ordem,
@@ -495,6 +634,14 @@ Medido nos sete primos. $\square$
 \boxed{\;\pi_k=\text{fecho geométrico do andar }k,
 \qquad \pi_\infty=\text{fronteira parabólica.}\;}
 \]
+
+\noindent\textbf{E «exacto» qualifica-se, senão diz outra coisa:}
+\[
+\boxed{\;\pi_k\ \text{é exacto \textbf{no modelo discreto do andar} }k;
+\qquad \pi_k\to\pi\ \text{quando o refinamento é tomado.}\;}
+\]
+Nunca $\pi_k=\pi$. O que o quadro dispensa é \emph{importar} uma constante: cada
+andar apresenta o seu representante, exacto no seu modelo.
 
 \noindent Nenhuma constante foi importada: \textbf{cada andar apresenta a sua}.
 E ao chegar ao círculo a família muda de natureza, de fechar na escada para
@@ -531,6 +678,7 @@ sua realização geométrica.
 
 \begin{center}
 \fbox{\parbox{0.94\textwidth}{\centering\medskip
+a \textbf{Lei 0} torna a inversão total\quad$\to$\quad
 o \textbf{bit} fornece a unidade\quad$\to$\quad
 as \textbf{oito leis} fornecem a base\quad$\to$\quad
 o \textbf{dual} fornece a recorrência\\[3pt]
@@ -546,7 +694,7 @@ fornece o contínuo.} Não usámos a reta para construir os números: construím
 reta a partir do processo que os produz.
 
 \medskip
-\emph{Medido:} \code{tests/geometria\_real.c} ($18{:}0$), com
+\emph{Medido:} \code{tests/geometria\_real.c} ($21{:}0$), com
 \code{tests/ortonormal.c} ($6{:}0$), \code{tests/metalica.c},
 \code{tests/pisotbase.c}, \code{tests/ordenado.c} ($7{:}0$),
 \code{tests/pi\_familia.js} ($7{:}0$),

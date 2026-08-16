@@ -217,7 +217,7 @@ oito}. O byte é esse ciclo escrito em binário:
 \emph{Declara-se} (Def.~\ref{def:byte-oito}) --- e o que se \emph{mede} é
 o que vem depois: rodar um bit tem período $8$, e a tabela exaustiva dos
 $256$ bytes diz, por operação e por posição, se ela preserva, realiza o
-dual, ou move. \emph{O \verb|uint8_t| deixa de ser conveniência de
+dual, ou move. \emph{O \code{uint8\_t} deixa de ser conveniência de
 máquina e passa a ser a realização mínima do catálogo.}
 
 \subsection*{A operação completa}
@@ -239,7 +239,7 @@ ordena não opera} --- e é o par que é a operação completa, não uma das
 metades.
 
 \subsection*{O ASCII, e o encaixe que não foi procurado}
-$127$ é primo e é o topo do \verb|int8_t|; o ASCII foi desenhado para
+$127$ é primo e é o topo do \code{int8\_t}; o ASCII foi desenhado para
 sete bits; e $|\mathbb{P}^1(\mathbb{F}_{127})|=128$. Logo os $128$
 códigos \emph{são} os $128$ pontos, com o DEL no $\infty$ por ser o
 único que sobra. E então o gato é uma \textbf{cifra} das letras, com
@@ -251,7 +251,7 @@ O sistema desceu de representação em quatro degraus ---
 $\text{double}\to\text{long}\to\text{int}\to\text{uint8}\to\text{bit}$ ---
 e em nenhum se perdeu a matemática. O que se perdeu, de cada vez, não era
 do objecto: o \emph{limiar} do double (os valores já eram inteiros), a
-\emph{ilusão} de tecto infinito do \verb|long|, e o \emph{sinal} --- que
+\emph{ilusão} de tecto infinito do \code{long}, e o \emph{sinal} --- que
 em $\mathrm{GF}(2)$ não existe, porque $-x=x$, e é essa ausência que faz
 os ramos desaparecerem. A única perda real está no terceiro degrau e
 diz-se: a \textbf{característica} muda, e por isso a face finita refuta e
@@ -270,14 +270,14 @@ representação de tudo o resto; \emph{realização}, onde a conta acontece;
 \emph{medição}, onde uma régua minha entra na conta; e
 \emph{apresentação}, que não entra em conta nenhuma. A ordem certa é
 medição primeiro (é defeito), estrutura depois (é alavanca), realização a
-seguir; a apresentação fica, porque reduzir um \verb|printf| é estética.
-\emph{Auditado:} \code{tools/audita\_tipos.sh} --- para o \verb|double|,
+seguir; a apresentação fica, porque reduzir um \code{printf} é estética.
+\emph{Auditado:} \code{tools/audita\_tipos.sh} --- para o \code{double},
 $3616$ ocorrências em $165$ ficheiros: $68$ estrutura, $3157$ realização,
 $350$ \textbf{medição}, $41$ apresentação.
 
 \textbf{E cada limiar tem uma de três causas, só uma honesta.} A triagem
 (\code{tools/triagem\_limiares.sh}) encontra $918$ limiares
-\verb|1e-N| no repositório e separa-os:
+\code{1e-N} no repositório e separa-os:
 \begin{itemize}
 \item \textbf{(A) decoração} --- $583$: não há função transcendente na
 conta. O limiar não é preciso, e a comparação pode ser por
@@ -1430,7 +1430,7 @@ divergências --- e as saturações contadas à parte. $\square$
 
 \begin{teorema}[os ramos da aritmética são o preço de um andar --- e cada um
 tem um absorvedor com nome]\label{thm:sem-ramo}
-Contados na fonte, os dez \verb|if| da aritmética racional deste quadro
+Contados na fonte, os dez \code{if} da aritmética racional deste quadro
 testam exactamente três coisas --- o \textbf{sinal}, o \textbf{zero} e o
 \textbf{tecto} --- e as três são consequências da \textbf{normalização}.
 Normaliza-se porque em $\mathbb{Q}$ os números crescem; e é a
@@ -1447,7 +1447,7 @@ porque a igualdade é o produto cruzado, que é uma \emph{comparação} e não
 um ramo.
 
 \textbf{(1) E a disciplina, sem a qual isto era estética.} Não se elimina
-um \verb|if| por beleza: elimina-se quando a condição é \textbf{absorvida}
+um \code{if} por beleza: elimina-se quando a condição é \textbf{absorvida}
 por uma primitiva, um tipo, um domínio, uma dualidade ou uma
 representação. Senão apenas se desloca a excepção. Por isso o enunciado
 exige o \emph{absorvedor com nome}:
@@ -1483,7 +1483,7 @@ $\infty$ é uma convenção e não um valor do corpo --- sem esse ramo o
 $\infty$ colapsa em $0$ nos seus $126$ representantes. Por isso essa
 função existe para \emph{imprimir} e não para calcular: não se elimina o
 ramo, muda-se para onde ele não é preciso, e diz-se onde ficou. Um
-ficheiro sem \verb|if| que precisasse de normalizar para operar estaria a
+ficheiro sem \code{if} que precisasse de normalizar para operar estaria a
 mentir.
 
 \emph{Medido:} \code{tests/sem\_ramo.c} ($6{:}0$), com a contagem feita
@@ -1564,12 +1564,12 @@ que não é dele.
 
 \begin{teorema}[a base das oito leis é ORTONORMAL --- e é isso que autoriza
 o bit a bit]\label{thm:ortonormal}
-Em $\mathbb{F}_2^{8}$ com a forma bilinear
+Em $\mathbb{F}_2^{8}$ com a forma bilinear \textbf{padrão}
 \[
 \langle a,b\rangle=\operatorname{paridade}(a\wedge b)
+=\textstyle\sum_i a_ib_i \bmod 2 ,
 \]
---- a única que $\mathbb{F}_2$ tem --- a base das oito leis $e_k=2^{k}$
-satisfaz
+a base das oito leis $e_k=2^{k}$ satisfaz
 \[
 \boxed{\;\langle e_i,e_j\rangle=\delta_{ij}\;}
 \]
@@ -1596,6 +1596,21 @@ de implementação.
 base: $a=\sum_k\langle a,e_k\rangle\,e_k$ nos $256$ bytes, sem uma falha
 --- e aqui ela não custa nada.
 
+\textbf{(1b) E a forma ESCOLHE-SE --- não é a única, e a versão anterior deste
+teorema dizia que era.} Estava aqui escrito «a única que $\mathbb{F}_2$ tem», e é
+\textbf{falso}: só sobre $\mathbb{F}_2^{2}$ há \textbf{quatro} formas bilineares
+simétricas não degeneradas, uma delas \emph{alternante} (diagonal nula) --- e ser
+alternante é invariante por mudança de base, logo há pelo menos \textbf{duas
+classes}. Em característica $2$ a classificação é mais delicada, e não é preciso
+nenhuma afirmação classificatória para o que aqui se quer.
+
+O enunciado honesto é mais forte, e não mais fraco: \emph{fixa-se} a forma padrão,
+e o que se prova não é que a base seja ortonormal --- isso seria escolher a métrica
+que torna verdadeira a conclusão --- mas \textbf{o que a ortonormalidade custa a
+quem não a tem}: numa base sem $G=I$ a coordenada exige inverter a Gram, e o
+\S(3) mede o preço. \emph{Medido:} \code{tests/geometria\_real.c} \S L1 conta as
+quatro formas e a alternante.
+
 \textbf{(2) O preço, dito.} A forma é bilinear e simétrica, mas
 \textbf{não} é definida positiva --- em $\mathbb{F}_2$ isso nem faz
 sentido. Há vectores \emph{isótropos}: todo byte de peso \emph{par} é
@@ -1604,10 +1619,12 @@ $G=I$ \emph{na base}, e é essa a propriedade que autoriza o bit a bit ---
 não um comprimento euclidiano, que este corpo não tem. Importar a outra
 noção seria dar ao resultado uma força que ele não pede.
 
-\textbf{(3) O gume.} Torcida a base para $f_k=e_k+e_{k+1}$, a Gram deixa
-de ser a identidade ($24$ dos $64$ pares saem dela) --- e com ela vai-se
-o bit a bit, porque a coordenada passa a exigir um sistema. A
-ortonormalidade não é decoração: é a condição.
+\textbf{(3) O gume.} Torcida a base para $f_k=e_k+e_{k+1}$, com o índice
+\textbf{circular} ($f_7=e_7+e_0$), a Gram deixa de ser a identidade: $24$ dos $64$
+pares saem dela, e ela nem sequer tem \textbf{diagonal $1$} --- cada $f_k$ tem dois
+uns, logo $\langle f_k,f_k\rangle=0$ nas oito. Com ela vai-se o bit a bit, porque a
+coordenada passa a exigir um sistema: a leitura directa erra \emph{metade exacta}
+das $2048$. A ortonormalidade não é decoração: é a condição.
 
 \textbf{(4) E cada andar tem a sua representação --- pelos Lucas
 ímpares.} O \emph{Teoria} já tinha o teorema
@@ -1751,7 +1768,7 @@ bits. Nenhuma coluna fica indefinida.
 
 \textbf{(3) E o ASCII fecha a realização.} Os $128$ códigos são os $128$
 pontos de $\mathbb{P}^1(\mathbb{F}_{127})$ --- o encaixe não foi
-procurado: $127$ é primo, é o topo do \verb|int8_t|, e o ASCII foi
+procurado: $127$ é primo, é o topo do \code{int8\_t}, e o ASCII foi
 desenhado para sete bits. O DEL é o $\infty$ por ser o único código que
 sobra. E então o gato lido em ASCII é uma \textbf{cifra}: uma bijecção
 das $128$ letras sem tabela e sem chave, só a lei --- com
@@ -1879,7 +1896,7 @@ tem $128$ pontos e varre-se inteiro]\label{cor:exaustao}
 A regra que o Corolário~\ref{cor:zero-infinito} impõe --- \emph{não
 representar o infinito como um número grande, mas como o dual projectivo
 de zero} --- tem uma consequência que não foi procurada: $127$ é primo
-\emph{e} é o maior valor de um \verb|int8_t|. Logo $\mathbb{F}_{127}$
+\emph{e} é o maior valor de um \code{int8\_t}. Logo $\mathbb{F}_{127}$
 cabe inteiro no tipo mais pequeno da máquina, e
 \[
 \boxed{\;|\mathbb{P}^1(\mathbb{F}_{127})|=127+1=128\;}
