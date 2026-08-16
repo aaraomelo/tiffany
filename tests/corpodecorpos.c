@@ -28,10 +28,10 @@
 #include <string.h>
 
 #define NMAX 12
+#include "reta.h"      /* as operações da recta */
 #include "unidade.h"
 static long mdc(long a, long b){ while(b){ long t = a % b; a = b; b = t; } return a; }
 static long mmc(long a, long b){ return a / mdc(a,b) * b; }
-static long ipow(long b, int e){ long r = 1; while(e-- > 0) r *= b; return r; }
 
 /* ---- R^n sobre Z_2 pela borda: x^n = m·x^{n−1} + 1 ---- */
 static int N, M;
@@ -53,11 +53,6 @@ static unsigned mult(unsigned a, unsigned b){
         for(int j = 0; j < N; j++)
             if((b >> j) & 1u) r ^= red[i+j];
     }
-    return r;
-}
-static unsigned pot(unsigned a, long e){
-    unsigned r = 1;
-    while(e > 0){ if(e & 1) r = mult(r, a); a = mult(a, a); e >>= 1; }
     return r;
 }
 /* é corpo? todo não-nulo tem inverso */
@@ -214,7 +209,7 @@ printf("     O teorema diz #{x : x^(2^a) = x} = 2^gcd(a,n); se bater, o retícul
                 for(int t = 0; t < a; t++) y = mult(y, y);        /* x^(2^a) */
                 if(y == x) fixos++;
             }
-            long esperado = ipow(2, (int)mdc(a, n));
+            long esperado = rt_ipow(2, (int)mdc(a, n));
             int divide = (n % a == 0);
             int sub = (fixos == esperado) && (divide ? (fixos == (1L<<a)) : 1);
             if(fixos != esperado) mau++;

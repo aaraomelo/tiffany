@@ -37,9 +37,9 @@
  *   cc -O2 -std=c99 -Wall -I../lib entropia_dual.c -o entropia_dual && ./entropia_dual
  */
 #include <stdio.h>
+#include "reta.h"      /* as operações da recta */
 #include "unidade.h"
 
-static long pot(long b, long e){ long r = 1; while(e-- > 0) r *= b; return r; }
 
 int main(void)
 {
@@ -64,8 +64,8 @@ int main(void)
         long val_maus = 0;
         for(long d = 2; d <= 5; d++)
             for(long r = 1; r <= 5; r++){
-                long Sn_n = pot(r, d-1), Sn_d = 1;            /* S do negro */
-                long Sb_n = 1,           Sb_d = pot(r, d-1);  /* S do dual: (1/r)^{d-1} */
+                long Sn_n = rt_ipow(r, d-1), Sn_d = 1;            /* S do negro */
+                long Sb_n = 1,           Sb_d = rt_ipow(r, d-1);  /* S do dual: (1/r)^{d-1} */
                 if(Sn_n * Sb_n != Sn_d * Sb_d) val_maus++;    /* o produto tem de dar 1 */
             }
         printf("       e nao houve segunda hipotese: %ld desvios nos expoentes,"
@@ -81,7 +81,7 @@ int main(void)
         long maus = 0, casos = 0;
         for(long d = 2; d <= 6; d++)
             for(long r = 1; r <= 12; r++){
-                long p_n = pot(r, d-1) * 1, p_d = 1 * pot(r, d-1);
+                long p_n = rt_ipow(r, d-1) * 1, p_d = 1 * rt_ipow(r, d-1);
                 if(p_n != p_d) maus++;              /* S_negro . S_branco = 1 */
                 casos++;
             }
@@ -106,7 +106,7 @@ int main(void)
         long ponte_maus = 0, pares = 0;
         for(long r = 2; r <= 6; r++)
             for(int i = 0; i <= 5; i++) for(int j = 0; j <= 5 - i; j++){
-                if(pot(r, i) * pot(r, j) != pot(r, i + j)) ponte_maus++;   /* produto = soma */
+                if(rt_ipow(r, i) * rt_ipow(r, j) != rt_ipow(r, i + j)) ponte_maus++;   /* produto = soma */
                 pares++;
             }
         printf("  §X3  soma dos expoentes em %ld dimensoes: %ld desvios\n", casos, soma_maus);
@@ -125,9 +125,9 @@ int main(void)
         long neg_cresce = 0, bra_decresce = 0, par_move = 0, passos = 0;
         long d = 3;
         for(long r = 1; r < 20; r++){
-            long Sn1 = pot(r, d-1),   Sn2 = pot(r+1, d-1);        /* o negro, ao crescer r */
+            long Sn1 = rt_ipow(r, d-1),   Sn2 = rt_ipow(r+1, d-1);        /* o negro, ao crescer r */
             /* o branco, no raio dual: comparam-se as fracoes 1/r^{d-1} por produto cruzado */
-            long Sb1_d = pot(r, d-1), Sb2_d = pot(r+1, d-1);
+            long Sb1_d = rt_ipow(r, d-1), Sb2_d = rt_ipow(r+1, d-1);
             if(Sn2 > Sn1) neg_cresce++;                            /* cresce sempre */
             if(1 * Sb1_d > 1 * Sb2_d) { } else bra_decresce++;     /* 1/x decresce sempre */
             /* e o par: o produto continua a valer 1 nos dois instantes */
@@ -150,7 +150,7 @@ int main(void)
         for(long r = 1; r <= 40; r++){
             /* as duas entropias coincidem sse r^{d-1} = 1/r^{d-1}, isto e', r^{2(d-1)} = 1 */
             long d = 3;
-            if(pot(r, 2*(d-1)) == 1){ fixos++; qual = r; }
+            if(rt_ipow(r, 2*(d-1)) == 1){ fixos++; qual = r; }
             testados++;
         }
         long e_neg = 3 - 1, e_bra = -(3 - 1);
@@ -169,12 +169,12 @@ int main(void)
         long d = 3;
         for(long r = 1; r <= 10; r++){
             /* com a AREA (codimensao d-1): o par fecha */
-            if(pot(r, d-1) * 1 != 1 * pot(r, d-1)) maus_area++;
+            if(rt_ipow(r, d-1) * 1 != 1 * rt_ipow(r, d-1)) maus_area++;
             /* com o VOLUME (d): o dual teria de ser r^{-d}, e usando r^{-(d-1)} nao fecha */
-            if(pot(r, d) * 1 == 1 * pot(r, d-1)) ; else maus_volume++;
+            if(rt_ipow(r, d) * 1 == 1 * rt_ipow(r, d-1)) ; else maus_volume++;
             /* e com um dual que nao e' o inverso: r_B = 2/r */
-            long Sb_d = pot(r, d-1), Sb_n = pot(2, d-1);
-            if(pot(r, d-1) * Sb_n == 1 * Sb_d) ; else maus_dual_falso++;
+            long Sb_d = rt_ipow(r, d-1), Sb_n = rt_ipow(2, d-1);
+            if(rt_ipow(r, d-1) * Sb_n == 1 * Sb_d) ; else maus_dual_falso++;
         }
         printf("  §X6  o par fecha com a AREA: %ld falhas;  com o VOLUME: %ld;"
                "  com um dual falso: %ld\n\n", maus_area, maus_volume, maus_dual_falso);

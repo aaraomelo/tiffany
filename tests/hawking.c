@@ -33,9 +33,9 @@
  *   cc -O2 -std=c99 -Wall -I../lib hawking.c -o hawking && ./hawking
  */
 #include <stdio.h>
+#include "reta.h"      /* as operações da recta */
 #include "unidade.h"
 
-static long pot(long b, long e){ long r = 1; while(e-- > 0) r *= b; return r; }
 
 int main(void)
 {
@@ -93,10 +93,10 @@ int main(void)
         long razao_maus = 0;
         for(long d = 2; d <= 6; d++)
             for(long r = 1; r <= 5; r++){
-                long A1 = pot(r, d-1), A2 = pot(2*r, d-1);
+                long A1 = rt_ipow(r, d-1), A2 = rt_ipow(2*r, d-1);
                 /* dobrar o raio tem de multiplicar pela codimensao, e NAO pelo volume */
-                if(A2 != A1 * pot(2, d-1)) razao_maus++;
-                if(d >= 3 && A2 == A1 * pot(2, d)) razao_maus++;   /* e nao pelo do volume */
+                if(A2 != A1 * rt_ipow(2, d-1)) razao_maus++;
+                if(d >= 3 && A2 == A1 * rt_ipow(2, d)) razao_maus++;   /* e nao pelo do volume */
             }
         printf("       e dobrar o raio multiplica a area por 2^{d-1}: %ld desvios\n\n", razao_maus);
         ok("a ENTROPIA e' a AREA, e a area e' o FLUXO TOTAL — o mesmo Omega que saiu por"

@@ -33,6 +33,7 @@
  */
 #include <stdio.h>
 #include "corpos.h"
+#include "reta.h"      /* as operações da recta */
 #include "unidade.h"
 
 static int meq(Mat x, Mat y){ return x.a==y.a && x.b==y.b && x.c==y.c && x.d==y.d; }
@@ -43,11 +44,6 @@ static long ordem(Mat W, long teto){
     Mat P = ID;
     for(long i = 1; i <= teto; i++){ P = me_prod(P, W); if(meq(P, ID)) return i; }
     return 0;
-}
-static long pot_mod(long g, long e, long p){
-    long r = 1; g %= p;
-    while(e > 0){ if(e & 1) r = r*g % p; g = g*g % p; e >>= 1; }
-    return r;
 }
 
 int main(void){
@@ -165,8 +161,8 @@ printf("\n§G5  P (Pontryagin) medida onde é exata: a soma vira PRODUTO.\n\n");
     printf("      p    gerador   χ_k(u+v) = χ_k(u)·χ_k(v)?   casos\n");
     for(long k = 0; k < p-1; k++)
     for(long u = 0; u < p-1; u++) for(long v = 0; v < p-1; v++){
-        long esq = pot_mod(g, (k*((u+v) % (p-1))) % (p-1), p);
-        long dir = pot_mod(g, (k*u) % (p-1), p) * pot_mod(g, (k*v) % (p-1), p) % p;
+        long esq = rt_pot_mod(g, (k*((u+v) % (p-1))) % (p-1), p);
+        long dir = rt_pot_mod(g, (k*u) % (p-1), p) * rt_pot_mod(g, (k*v) % (p-1), p) % p;
         if(esq != dir) mau++;
         casos++;
     }

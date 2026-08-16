@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "corpos.h"
+#include "reta.h"      /* as operações da recta */
 #include "unidade.h"
 
 enum { F_P, F_D, F_NU, F_A, F_W, F_ADJ, F_Q, F_N };
@@ -78,11 +79,6 @@ static const struct { const char *nome; int f; const char *pi; } CORPOS[] = {
 static int par_eq(Par x, Par y){ return x.a==y.a && x.b==y.b; }
 static int mat_eq(Mat x, Mat y){ return x.a==y.a && x.b==y.b && x.c==y.c && x.d==y.d; }
 static const Mat ID = {1,0,0,1};
-static long pot_mod(long g, long e, long p){
-    long r = 1; g %= p;
-    while(e > 0){ if(e & 1) r = r*g % p; g = g*g % p; e >>= 1; }
-    return r;
-}
 
 int main(void){
 printf("\n=== O TOOLKIT FECHADO: OS 28 CORPOS =======================================\n");
@@ -112,7 +108,7 @@ printf("\n§T1  As SETE formas do operador ∏, e o medidor que fecha cada uma.\
     { Par r = ra_classe((Par){6,8}); if(r.a != 3 || r.b != 4) mau++; }   /* Q      */
     { const long p = 11, g = 2;                                /* P: o caractere */
       for(long u = 0; u < 10; u++) for(long v = 0; v < 10; v++)
-        if(pot_mod(g,(u+v)%10,p) != pot_mod(g,u,p)*pot_mod(g,v,p)%p) mau++; }
+        if(rt_pot_mod(g,(u+v)%10,p) != rt_pot_mod(g,u,p)*rt_pot_mod(g,v,p)%p) mau++; }
     ok("as sete formas fecham, cada uma na sua assinatura, medidas aqui", mau == 0);
     printf("\n      A, W e D são as TRÊS CLASSES do discriminante (catalogo.c §G2) — não três\n");
     printf("      escolhas. ν é a seta que as vira, P é a que troca ⊕ por ⊗, δ⊣ε é o par adjunto,\n");

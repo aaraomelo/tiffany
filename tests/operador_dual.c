@@ -37,6 +37,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include "reta.h"      /* as operações da recta */
 #include "unidade.h"
 
 typedef struct { long a, b; } Par;
@@ -50,12 +51,6 @@ static long nu_forca(long F){ return -F; }                                   /* 
 /* e um NÃO-dual, para o controlo: uma operação que parece um dual e não é involução */
 static Par nao_dual(Par x){ Par r = { x.a + 1, -x.b }; return r; }
 
-/* potência modular, para o gerador */
-static long pot(long b, long e, long p){
-    long r = 1; b %= p;
-    while(e > 0){ if(e & 1) r = r*b % p; b = b*b % p; e >>= 1; }
-    return r;
-}
 
 int main(void){
 printf("\n=== O OPERADOR DUAL DE CADA CORPO, E O SINAL QUE O DEFINE =================\n");
@@ -173,14 +168,14 @@ printf("\n§D3  A DECONVOLUÇÃO é a convolução com ν(w) — o sinal no EXPO
     /* F com w^(+jk) */
     for(long k = 0; k < n; k++){
         long s = 0;
-        for(long j = 0; j < n; j++) s = (s + x[j]*pot(w, (j*k)%n, p)) % p;
+        for(long j = 0; j < n; j++) s = (s + x[j]*rt_pot_mod(w, (j*k)%n, p)) % p;
         X[k] = s;
     }
     /* Finv com w^(ν(jk)) = w^(−jk) — o MESMO ν do §D1 */
-    long ninv = pot(n % p, p-2, p);            /* 1/n mod p, para fechar a volta */
+    long ninv = rt_pot_mod(n % p, p-2, p);            /* 1/n mod p, para fechar a volta */
     for(long j = 0; j < n; j++){
         long s = 0;
-        for(long k = 0; k < n; k++) s = (s + X[k]*pot(w, nu_exp(j*k, n), p)) % p;
+        for(long k = 0; k < n; k++) s = (s + X[k]*rt_pot_mod(w, nu_exp(j*k, n), p)) % p;
         y[j] = s*ninv % p;
     }
     long pior = 0;
@@ -205,9 +200,9 @@ printf("\n§D4  O GERADOR: ν(w) = w⁻¹, e é por ν ser involução que a vol
     printf("      w    ν(w) = w^(n−1)   w·ν(w) mod %ld   ν(ν(w))   volta a w?\n", p);
     int mau = 0;
     for(long w = 2; w <= 6; w++){
-        long inv = pot(w, p-2, p);             /* w⁻¹ mod p */
+        long inv = rt_pot_mod(w, p-2, p);             /* w⁻¹ mod p */
         long prod = w*inv % p;
-        long volta = pot(inv, p-2, p);         /* ν(ν(w)) */
+        long volta = rt_pot_mod(inv, p-2, p);         /* ν(ν(w)) */
         if(prod != 1 || volta != w) mau++;
         printf("      %-4ld %-16ld %-16ld %-9ld %s\n", w, inv, prod, volta, volta==w?"sim":"NÃO");
     }

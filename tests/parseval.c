@@ -38,10 +38,10 @@
  *   cc -O2 -std=c99 -Wall -I../lib parseval.c -o parseval && ./parseval
  */
 #include <stdio.h>
+#include "reta.h"      /* as operações da recta */
 #include "unidade.h"
 
 static long res(long a, long b){ long d = a - b; return d < 0 ? -d : d; }
-static long pot(long b, long e){ long r = 1; while(e-- > 0) r *= b; return r; }
 
 int main(void)
 {
@@ -72,8 +72,8 @@ int main(void)
         for(long d = 1; d <= 6; d++)
             for(long a = 1; a <= 6; a++){
                 long T_num = 1, T_den = a;                     /* T = 1/a */
-                long lhs_num = pot(T_num, d+1), lhs_den = pot(T_den, d+1);   /* T^{d+1} */
-                long rhs_num = 1, rhs_den = pot(a, d+1);                     /* a^{-(d+1)} */
+                long lhs_num = rt_ipow(T_num, d+1), lhs_den = rt_ipow(T_den, d+1);   /* T^{d+1} */
+                long rhs_num = 1, rhs_den = rt_ipow(a, d+1);                     /* a^{-(d+1)} */
                 if(lhs_num * rhs_den != rhs_num * lhs_den) comp_maus++;
             }
         printf("       e por composicao directa, sem dividir expoentes: %ld desvios\n\n", comp_maus);
@@ -100,8 +100,8 @@ int main(void)
         for(long a = 1; a <= 6; a++){
             long k = 4;                             /* a radiacao: 3(1+w) = 4 */
             /* r_A = CA / a^k  e  r_B = CB . a^k, guardados como fraccao para nao dividir */
-            long rA_n = CA,        rA_d = pot(a, k);
-            long rB_n = CB * pot(a, k), rB_d = 1;
+            long rA_n = CA,        rA_d = rt_ipow(a, k);
+            long rB_n = CB * rt_ipow(a, k), rB_d = 1;
             long p_n = rA_n * rB_n, p_d = rA_d * rB_d;        /* o produto */
             /* reduz e compara com a referencia, por produto cruzado */
             if(ref < 0) ref = 1;
@@ -171,8 +171,8 @@ int main(void)
             long falha = 0;
             for(long a = 1; a <= 5; a++){
                 long e = 4;
-                long rA_n = CA, rA_d = pot(a, e);
-                long rB_n = CB * pot(k * a, e), rB_d = pot(k, 2*e);   /* com o k a estragar */
+                long rA_n = CA, rA_d = rt_ipow(a, e);
+                long rB_n = CB * rt_ipow(k * a, e), rB_d = rt_ipow(k, 2*e);   /* com o k a estragar */
                 long p_n = rA_n * rB_n, p_d = rA_d * rB_d;
                 if(p_n * 1 != CA * CB * p_d) falha++;
             }

@@ -49,7 +49,7 @@ canvas_front f5106644abd9858b 0
 cardinal 64356635f9d3aa74 0
 cards 43b08164685d307d 0
 carnot 8d04da08cd5af623 0
-catalogo fd8969387f25f550 0
+catalogo 0dbe859ca368ba34 0
 central_continuo 2806a99350c5d4e4 0
 checkup b98a8fcd902c838a 0
 chessb 0768070318a75793 0
@@ -102,7 +102,7 @@ corpo_front 6d9be918caa521db 0
 corpo_peano 3c134a3db72ab710 0
 corpo_unico d21a078aa8bd7aa5 0
 corpo_viveiro 35c96afeadd012b8 0
-corpodecorpos 7833ffa700f335cd 0
+corpodecorpos 8d2cbc90ae332e67 0
 corte_ponto_fixo ebd7191a1453f1d8 0
 cosmico ad551a25ab7b7917 0
 cosmologia ba6dd5df9be09b0a 0
@@ -170,7 +170,7 @@ encaixotamento 0f9c4a6716e901fe 0
 encanamento 545dabf8895fe820 0
 enche a2861fc14a9fd7f9 0
 entre c9d4cbfc7a5a9307 0
-entropia_dual 9e1e8357b68c4eb5 0
+entropia_dual e455b61b6d1075f9 0
 equivalencia_universal 4f70e8b809338078 0
 erg 24fd5a4ae1cb1739 0
 escada 0eba2e6eb28c6529 0
@@ -182,7 +182,7 @@ espelho d56cc3c0b73eee7a 0
 espurio b087b9b6bc7fc263 0
 esquilo 8dc0713ba6d2b3e9 0
 estacao_front 8809fb26de6b6a2e 0
-estado_caos 5639e690f9da8ad9 0
+estado_caos 7e447a3e506b5875 0
 estelar d246b5726a4715a6 0
 estelar_completo 752da72d2ff6a866 0
 estrela c5bed29dd437e004 0
@@ -227,7 +227,7 @@ grau 875760f31c09ce87 0
 grupo 60afba16f136035c 0
 guarda 6e9ee3952f6cb691 0
 gume_calculo dfbe6cf281569b1e 0
-hawking 456bb5aa6bdfaa3c 0
+hawking 09fe7a28606897a6 0
 headjack 26c9a27cb791d804 0
 hilbert_bidual b7e85807ec6864e8 0
 hiper 965c8458576d06ff 0
@@ -246,7 +246,7 @@ isa4 043933598b3025cf 0
 isa_dupla 153fd4762a86077d 0
 isa_wasm 4e171d4c0561ad48 0
 isomorfo 43f497a869f80c7a 0
-isserlis 4b042bb92727c85e 0
+isserlis 43de4dbc517f15d3 0
 kernelb f0c87f33a589ee14 0
 koch 6242b04db20c8e11 0
 lahire_universal 843cfa03c5e214ba 0
@@ -271,7 +271,7 @@ llm_reversivel ad337505752179a9 0
 logico afd540f8d888135d 0
 logico_continuo 0cb6224c6d89cb4e 0
 luz_periodo bbe03b56937b8167 0
-lyapunov_refletido 1e9f698b6ae0aab6 0
+lyapunov_refletido 276dae8d76c22ba5 0
 lyapunov_torre 6d18b7610f966dc9 0
 maestro_memoria d89b11e2c1b7a549 0
 maisum 06d588623bce168e 0
@@ -294,7 +294,7 @@ microfluidica d99ab70d8d53526d 0
 migracao 13607331afbee297 0
 migracao_universal 7bbcce67bc1915a2 0
 milenio 3ae5c1319f2be093 0
-milenio_trial fadcc72d65f812a7 0
+milenio_trial 7faaeb0465d7c296 0
 mmu 3e46735bb1cec005 0
 mobilidade b4ceb2c3dd1a218a 0
 modelo_no_banco 3795f1d2b9ee4e73 0
@@ -323,7 +323,7 @@ numerica 2d1d6e20b7f87362 0
 observador_torre 3d55320445a27093 0
 octeto 3be2809a3655f8e0 0
 operacao 83b71894068bb608 0
-operador_dual db67e7115ba83fae 0
+operador_dual c8fdae8dffa36fd9 0
 orbita_real 76d42a35f89973a2 0
 orbitas d3aa3021fb5ddff0 0
 ordem b41f2548ee3653f9 0
@@ -333,14 +333,14 @@ ordenados28 85286139056d060c 0
 origem 9fe476a81d9ae6cf 0
 ortogonal e5c9ca3c9e58efc7 0
 ortonormal bc1682230eaf9831 0
-os28 b942a5550845f4bd 0
+os28 61909abb112795df 0
 os28_medidos b939f33b10c71062 0
 ouro_base 54a516183f184039 0
 ouro_branco eb5b0bc78ff590a9 0
 palavra 57157f16be7664e5 0
 parabola 986f731493cd1a64 0
 paracomplexo 2691565615f4e600 0
-parseval 72b8ef997da2bd4f 0
+parseval e2d65980b58ef3dd 0
 pascal 52b41d2d25608f60 0
 passagem_global 96703b17e0d7e130 0
 patria_front bd725634b0b6534c 0
@@ -477,7 +477,7 @@ tudo_ouro 60071788220fdcd1 0
 um_mecanismo 8461f148388a7b3a 0
 umbit fbe48c8dbdb31bf2 0
 unico 21693b7745af890e 0
-universal 033f380c72ca2ce8 0
+universal cb1a462a952321ed 0
 valida28 89ad605fe75f1b44 0
 venom a3ae18f1f0e252dc 0
 venom_string 86edcbaa18a94320 0

@@ -43,6 +43,7 @@
  *   cc -O2 -std=c99 -Wall -Wformat universal.c -o universal && ./universal
  */
 #include <stdio.h>
+#include "reta.h"      /* as operações da recta */
 #include "../lib/disco.h"
 
 /* ─────────────────────────────────────────── aritmética inteira, e mais nada ── */
@@ -51,14 +52,6 @@ typedef long long L;
 
 static L pmod(L a, L p){ a %= p; return a < 0 ? a + p : a; }
 
-/* inverso em Z_p pelo Euclides estendido — inteiro, sem Fermat e sem potenciação */
-static L inv_mod(L a, L p){
-    L t = 0, nt = 1, r = p, nr = pmod(a, p);
-    while(nr){ L q = r/nr, tmp;
-        tmp = t - q*nt; t = nt; nt = tmp;
-        tmp = r - q*nr; r = nr; nr = tmp; }
-    return r > 1 ? 0 : pmod(t, p);      /* 0 = não invertível */
-}
 
 /* GF(p)[x]/(x² − m x − 1): o elemento é a + b·σ, com σ² = m σ + 1 */
 typedef struct { L a, b; } E;
@@ -180,7 +173,7 @@ int main(void){
         raizes_em_Zp(m, p, &s1, &s2);
         /* a matriz de avaliacao V = [[1, s1],[1, s2]] : leva (a0,a1) em (a(s1), a(s2)) */
         L det = pmod(s2 - s1, p);
-        L idet = inv_mod(det, p);
+        L idet = rt_inv_mod(det, p);
         printf("     V = [[1, %lld], [1, %lld]]   det V = %lld - %lld = %lld   inverso de det: %lld\n",
                s1, s2, s2, s1, det, idet);
         ok("a matriz de avaliacao e INVERTIVEL: det = sigma' - sigma nao e zero, e tem inverso",
@@ -353,8 +346,8 @@ int main(void){
             L c0 = pmod(a0*b0 + a1*b1, p), c1 = pmod(a0*b1 + a1*b0 + m*a1*b1, p);
             L Fc1 = pmod(c0 + c1*s1, p), Fc2 = pmod(c0 + c1*s2, p);
             /* dividir casa a casa, e voltar */
-            L q1 = pmod(Fc1*inv_mod(Fb1,p), p), q2 = pmod(Fc2*inv_mod(Fb2,p), p);
-            L idet = inv_mod(pmod(s2-s1,p), p);
+            L q1 = pmod(Fc1*rt_inv_mod(Fb1,p), p), q2 = pmod(Fc2*rt_inv_mod(Fb2,p), p);
+            L idet = rt_inv_mod(pmod(s2-s1,p), p);
             L v0 = pmod(idet*(s2*q1 - s1*q2), p), v1 = pmod(idet*(q2 - q1), p);
             if(v0 != a0 || v1 != a1) maus++;
             n++;
@@ -374,7 +367,7 @@ int main(void){
         /* 1. a TRANSFORMADA: a matriz de avaliacao inverte-se, residuo 0 (§U2) */
         L p = 11, m = 1, s1 = 0, s2 = 0;
         raizes_em_Zp(m, p, &s1, &s2);
-        L idet = inv_mod(pmod(s2-s1,p), p);
+        L idet = rt_inv_mod(pmod(s2-s1,p), p);
         int e1 = 0;
         for(L a0 = 0; a0 < p; a0++) for(L a1 = 0; a1 < p; a1++){
             L f1 = pmod(a0 + a1*s1, p), f2 = pmod(a0 + a1*s2, p);
@@ -519,7 +512,7 @@ int main(void){
                                             s = (s*1103515245 + 12345) % q; u[i] = pmod(s,q); }
                 L nu = 0; for(int i = 0; i < N; i++) nu = pmod(nu + u[i]*u[i], q);
                 if(!nu) continue;                       /* u isotropico: nao ha projecao */
-                L inu = inv_mod(nu, q);
+                L inu = rt_inv_mod(nu, q);
                 L c = 0; for(int i = 0; i < N; i++) c = pmod(c + v[i]*u[i], q);
                 L P1[8]; for(int i = 0; i < N; i++) P1[i] = pmod(c*inu % q * u[i], q);
                 /* projetar outra vez */

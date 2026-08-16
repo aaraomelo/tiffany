@@ -27,21 +27,13 @@
  *   cc -O2 -std=c99 -Wall -I../lib lyapunov_refletido.c -o lyapunov_refletido && ./lyapunov_refletido
  */
 #include <stdio.h>
+#include "reta.h"      /* as operações da recta */
 #include "unidade.h"
 
 typedef long long L;
 static const L P = 2147483647; /* 2^31 - 1, primo de Mersenne */
 
-static L inv_mod(L a, L p){
-    L t = 0, nt = 1, r = p, nr = a % p;
-    while(nr != 0){ L q = r / nr; L tmp;
-        tmp = t - q*nt; t = nt; nt = tmp;
-        tmp = r - q*nr; r = nr; nr = tmp; }
-    if(r > 1) return 0;
-    if(t < 0) t += p;
-    return t;
-}
-static L estrela(L x){ if(x % P == 0) return 0; return (P - inv_mod(x, P)) % P; }
+static L estrela(L x){ if(x % P == 0) return 0; return (P - rt_inv_mod(x, P)) % P; }
 
 int main(void){
     printf("=== LYAPUNOV PELA METADE REFLETIDA, E O TEOREMA OPERACIONAL DA MEDICAO =====\n\n");

@@ -30,6 +30,7 @@
 #include <string.h>
 
 typedef long double LD;
+#include "reta.h"      /* as operações da recta */
 #include "unidade.h"
 
 /* ---------------- a covariância de teste (2 dimensões, correlacionada) ---------------- */
@@ -102,7 +103,6 @@ static long long dupfat(long long n){          /* n!! */
     for(long long i = n; i > 1; i -= 2) r *= i;
     return r;
 }
-static long long ipow(long long b, int e){ long long r = 1; while(e-- > 0) r *= b; return r; }
 
 int main(void){
     CHOL[1][1] = sqrtl(1.0L - 0.25L);          /* Cholesky de [[1,.5],[.5,1]] */
@@ -195,9 +195,9 @@ printf("\n§I4  As constantes fechadas contra a tabela — e as duas formas de C
     printf("      k    a_k = 32·6^((k−1)/2)   N_k·a_k/b_k    2k(k−2)!!·6^((k−1)/2)   tabela\n");
     for(int i = 0; i < 4; i++){
         int k = ks[i];
-        long long a = 32 * ipow(6, (k-1)/2);                 /* k é ímpar em toda a tabela */
+        long long a = 32 * rt_ipow(6, (k-1)/2);                 /* k é ímpar em toda a tabela */
         long long c1 = Nk[i] * a / bk;
-        long long c2 = 2LL * k * dupfat(k-2) * ipow(6, (k-1)/2);
+        long long c2 = 2LL * k * dupfat(k-2) * rt_ipow(6, (k-1)/2);
         printf("      %d    %20lld   %11lld    %21lld   %8lld\n", k, a, c1, c2, Ck2[i]);
         if(a != ak[i]) mau_a++;
         if(c1 != Ck2[i]) mau_c1++;
@@ -213,7 +213,7 @@ printf("\n§I4  As constantes fechadas contra a tabela — e as duas formas de C
         int k = ks[i];
         /* k!! = k·(k−2)!!  e  a_k/b_k = 2·6^((k−1)/2)  ⟹  N_k·a_k/b_k = 2k(k−2)!!·6^((k−1)/2) */
         if(dupfat(k) != (long long)k * dupfat(k-2)) mau_id++;
-        if(32*ipow(6,(k-1)/2) != bk * 2 * ipow(6,(k-1)/2)) mau_id++;
+        if(32*rt_ipow(6,(k-1)/2) != bk * 2 * rt_ipow(6,(k-1)/2)) mau_id++;
     }
     ok("as duas formas são UMA identidade (k!! = k·(k−2)!!, a_k/b_k = 2·6^…)", mau_id == 0);
     printf("\n      Ou seja: C_k² = 2·N_k·6^((k−1)/2), com N_k a contagem de Wick. O ‘2’ vem de\n");

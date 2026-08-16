@@ -24,23 +24,14 @@
  *   cc -O2 -std=c99 -Wall -I../lib estado_caos.c -o estado_caos && ./estado_caos
  */
 #include <stdio.h>
+#include "reta.h"      /* as operações da recta */
 #include "unidade.h"
 
 typedef long long L;
 static const L P = 2147483647; /* 2^31 - 1, primo de Mersenne: o corpo dos dados */
 
-/* inverso modular por Euclides estendido (inteiro, exato) */
-static L inv_mod(L a, L p){
-    L t = 0, nt = 1, r = p, nr = a % p;
-    while(nr != 0){ L q = r / nr; L tmp;
-        tmp = t - q*nt; t = nt; nt = tmp;
-        tmp = r - q*nr; r = nr; nr = tmp; }
-    if(r > 1) return 0;            /* não invertível */
-    if(t < 0) t += p;
-    return t;
-}
 /* a estrela: ν(x) = -1/x  (mod P). ν∘ν = id. */
-static L estrela(L x){ if(x % P == 0) return 0; return (P - inv_mod(x, P)) % P; }
+static L estrela(L x){ if(x % P == 0) return 0; return (P - rt_inv_mod(x, P)) % P; }
 
 int main(void){
     printf("=== ACUMULAR ESTADO INTRODUZ VAZAMENTO QUE PROPAGA E VIRA CAOS ============\n\n");
