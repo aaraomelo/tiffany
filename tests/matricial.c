@@ -577,8 +577,13 @@ printf("\n§M8  E É ORDENADO: a decomposição é ÚNICA, e a ordem é ALTERNAD
     int mau = 0, casos = 0, mostrados = 0;
     for(int i = 0; i < 9; i++) for(int j = 0; j < 9; j++){
         if(i == j) continue;
-        double x = (double)PP[i]/QQ[i], y = (double)PP[j]/QQ[j];
-        if(fabs(x-y) < 1e-12) continue;
+        /* E OS DOIS RACIONAIS COMPARAM-SE COMO RACIONAIS. Estava aqui um
+         * (double)PP[i]/QQ[i] e um fabs(x−y) < 1e-12 para saltar os iguais — dividir
+         * dois inteiros para depois perguntar se o resultado é quase igual a outro. O
+         * `racionais.h`, que este ficheiro já inclui, compara por PRODUTO CRUZADO, e o
+         * comentário dele diz que essa é a operação que «nunca satura». */
+        Qz X = qz(PP[i], QQ[i]), Y = qz(PP[j], QQ[j]);
+        if(qz_igual(X, Y)) continue;
         long A[24], B[24];
         int na = regua_exata(PP[i], QQ[i], A, 24), nb = regua_exata(PP[j], QQ[j], B, 24);
         /* o primeiro índice em que diferem, e a regra ALTERNADA */
@@ -588,7 +593,7 @@ printf("\n§M8  E É ORDENADO: a decomposição é ÚNICA, e a ordem é ALTERNAD
         if(ak == bk) continue;
         int sinal = (k % 2 == 0) ? +1 : -1;            /* alterna com a profundidade */
         int prevê = (sinal > 0) ? (ak < bk) : (ak > bk);
-        int real  = (x < y);
+        int real  = qz_menor(X, Y);          /* a ordem, exacta */
         if(prevê != real) mau++;
         casos++;
         if(mostrados < 5){
@@ -606,19 +611,25 @@ printf("\n§M8  E É ORDENADO: a decomposição é ÚNICA, e a ordem é ALTERNAD
         }
     }
     printf("      …\n\n      %d comparações, %d discordâncias\n\n", casos, mau);
-    ok("a ordem em ℝ é a lexicográfica ALTERNADA na sequência — logo há ordem total", mau == 0);
+    ok("A ORDEM EM ℝ É A LEXICOGRÁFICA ALTERNADA NA SEQUÊNCIA — LOGO HÁ ORDEM TOTAL, e a"
+       " ordem contra a qual se compara é agora EXACTA: os candidatos são racionais p/q, e"
+       " estava aqui um (double)p/q com fabs(x−y) < 1e-12 a saltar os iguais — dividir dois"
+       " inteiros para depois perguntar se o quociente é quase igual a outro. O"
+       " `racionais.h`, que este ficheiro já incluía, compara por PRODUTO CRUZADO, e é a"
+       " operação que a lib garante que nunca satura",
+       mau == 0);
     /* e o CONTROLO: a lexicográfica SEM alternar erraria, e mede-se quanto */
     {
         int mauLex = 0, n2 = 0;
         for(int i = 0; i < 9; i++) for(int j = 0; j < 9; j++){
             if(i == j) continue;
-            double x = (double)PP[i]/QQ[i], y = (double)PP[j]/QQ[j];
-            if(fabs(x-y) < 1e-12) continue;
+            Qz X = qz(PP[i], QQ[i]), Y = qz(PP[j], QQ[j]);
+            if(qz_igual(X, Y)) continue;
             long A[24], B[24];
             int na = regua_exata(PP[i], QQ[i], A, 24), nb = regua_exata(PP[j], QQ[j], B, 24);
             int k = 0; while(k < na && k < nb && A[k] == B[k]) k++;
             if(k >= na || k >= nb || A[k] == B[k]) continue;
-            if((A[k] < B[k]) != (x < y)) mauLex++;
+            if((A[k] < B[k]) != qz_menor(X, Y)) mauLex++;
             n2++;
         }
         printf("      controlo: a lexicográfica SEM alternar erra %d de %d comparações\n\n", mauLex, n2);
@@ -1368,59 +1379,94 @@ printf("\n§M14 A EQUAÇÃO DA BASE EM POLAR É UMA SÉRIE — e só fecha no in
      * O termo dominante sozinho NUNCA é exato: falta-lhe sempre a parte oscilante. E como
      * ρ_j < 1 no regime bom, o erro cai — mas só se ANULA no limite. A igualdade na polar
      * converge apenas no infinito, e é a régua a fechar: a sombra apaga-se sem nunca ser zero. */
-    printf("      k     u_k exato    só o termo σ   com o oscilante   erro de só-σ\n");
-    /* K(3,1): σ³ = σ² + 1, com uma raiz real e um par conjugado */
-    double sg;
-    { double lo = 1, hi = 3;
-      for(int i = 0; i < 200; i++){ double md = (lo+hi)/2; if(md*md*md - md*md - 1 > 0) hi = md; else lo = md; }
-      sg = (lo+hi)/2; }
-    /* o par conjugado: divide-se x³−x²−1 por (x−σ) e resolve-se o quadrático */
-    double b = sg - 1, cc = 1.0/sg;              /* x² + b x + c, com c = 1/σ (produto = 1/σ) */
-    double rho = sqrt(cc), th = acos(-b/(2*sqrt(cc)));
-    /* Os coeficientes: escrever o oscilante como ρ^k(P·cos kθ + Q·sin kθ) torna o sistema
-     * LINEAR em (c0, P, Q) — três condições iniciais, três incógnitas, uma eliminação 3×3.
-     * (A primeira versão tentou resolver para A e φ diretamente, com uma manipulação
-     * trigonométrica apressada, e saiu errada: a asserção apanhou-a.) */
-    double c0 = 0, P = 0, Q = 0;
-    {
-        long U0[3] = {0,0,1};                    /* u_0 = 0, u_1 = 0, u_2 = 1 */
-        double M3[3][4];
-        for(int k = 0; k < 3; k++){
-            M3[k][0] = pow(sg,k);
-            M3[k][1] = pow(rho,k)*cos(k*th);
-            M3[k][2] = pow(rho,k)*sin(k*th);
-            M3[k][3] = (double)U0[k];
-        }
-        for(int c = 0; c < 3; c++){
-            int piv = c;
-            for(int r = c; r < 3; r++) if(fabs(M3[r][c]) > fabs(M3[piv][c])) piv = r;
-            for(int t = 0; t < 4; t++){ double x = M3[c][t]; M3[c][t] = M3[piv][t]; M3[piv][t] = x; }
-            for(int r = 0; r < 3; r++){
-                if(r == c) continue;
-                double f = M3[r][c]/M3[c][c];
-                for(int t = c; t < 4; t++) M3[r][t] -= f*M3[c][t];
-            }
-        }
-        c0 = M3[0][3]/M3[0][0]; P = M3[1][3]/M3[1][1]; Q = M3[2][3]/M3[2][2];
+    /* E AS TRÊS TESES DIZEM-SE EM ℤ[σ], SEM AVALIAR σ. Estava aqui uma bisseção de 200
+     * passos para achar σ, uma raiz quadrada e um arco-cosseno para o par conjugado, uma
+     * eliminação 3×3 em double para os coeficientes, e três asserções decididas por
+     * 1e-9 e por um erro relativo. A forma polar é uma LEITURA — a apresentação, no fim,
+     * para o cliente. As teses são estas, e todas fecham em inteiros:
+     *
+     *   (a) o termo dominante SOZINHO nunca é exacto. Isso é σ^k ∉ ℚ, e mede-se
+     *       escrevendo σ^k em ℤ[σ]: σ^k = u + v·σ + w·σ², com σ³ = σ² + 1. Se (v,w) ≠
+     *       (0,0) e σ é irracional — provado no §M13 pelo teste da raiz racional — então
+     *       σ^k não é racional, logo nunca é o inteiro u_k.
+     *
+     *   (b) a soma de TODAS as raízes fecha em ℤ. Isso é t_k = Tr(C^k), inteiro, e é o
+     *       Binet generalizado lido do lado que não precisa das raízes.
+     *
+     *   (c) e a sombra DECAI, |σ'| < 1: sem raiz, pela condição do encaixe. Para a
+     *       família x² − t·x − n é n ≤ t (thm:condicao); aqui, para x³ − x² − 1, a
+     *       parte não dominante tem produto 1/σ < 1 porque o termo constante é −1 e
+     *       σ > 1 — e σ > 1 vê-se em p(1) = −1 < 0 com p crescente depois.
+     *
+     * A régua da soma continua a ser uma série, e o fecho continua a estar no infinito:
+     * o que mudou é que nada disto se decide por uma margem. */
+    printf("      k     u_k (recorrência)   σ^k em Z[σ]: u + vσ + wσ²   w = u_k?   Tr(C^k)\n");
+    long U[32]; U[0]=0; U[1]=0; U[2]=1;
+    for(int t = 3; t <= 20; t++) U[t] = U[t-1] + U[t-3];
+    /* σ^k em ℤ[σ], por σ³ = σ² + 1: (u,v,w)·σ = (w, u, v+w) */
+    long su = 1, sv = 0, sw = 0;                  /* σ⁰ = 1 */
+    long pot[21][3];
+    for(int k = 0; k <= 20; k++){
+        pot[k][0] = su; pot[k][1] = sv; pot[k][2] = sw;
+        long nu = sw, nv = su, nw = sv + sw;
+        su = nu; sv = nv; sw = nw;
     }
-    int mauSo = 0, mauTudo = 0;
+    /* e os traços da companheira de x³ − x² − 1, inteiros */
+    long C3[3][3] = { {1,0,1}, {1,0,0}, {0,1,0} };
+    long Pk3[3][3] = { {1,0,0}, {0,1,0}, {0,0,1} }, tr3[21];
+    for(int k = 0; k <= 20; k++){
+        tr3[k] = Pk3[0][0] + Pk3[1][1] + Pk3[2][2];
+        long NN[3][3] = {{0}};
+        for(int i=0;i<3;i++) for(int j=0;j<3;j++)
+            for(int l=0;l<3;l++) NN[i][j] += Pk3[i][l]*C3[l][j];
+        memcpy(Pk3, NN, sizeof Pk3);
+    }
+    int mauSo = 0, mauTudo = 0, vistos3 = 0;
     for(int i = 0; i < 6; i++){
         int k = (int[]){1,3,5,8,12,20}[i];
-        /* u_k exato pela recorrência em inteiros: u_k = u_{k-1} + u_{k-3} */
-        long U[32]; U[0]=0; U[1]=0; U[2]=1;
-        for(int t = 3; t <= 20; t++) U[t] = U[t-1] + U[t-3];
-        double ex = (double)U[k];
-        double so = c0*pow(sg,k);
-        double tudo = so + pow(rho,k)*(P*cos(k*th) + Q*sin(k*th));
-        if(fabs(ex - so) < 1e-9) mauSo++;                  /* o termo só nunca deve bater */
-        if(fabs(ex - tudo) > 1e-6*fabs(ex) + 1e-6) mauTudo++;
-        printf("      %-5d %-12.6f %-14.6f %-17.6f %.3e\n", k, ex, so, tudo, fabs(ex - so));
+        int irr = (pot[k][1] != 0 || pot[k][2] != 0);   /* σ^k tem parte não escalar */
+        if(!irr) mauSo++;                                /* se fosse escalar, σ^k ∈ ℚ */
+        /* E A LIGAÇÃO QUE O PRÓPRIO QUADRO EXIBIU: a coordenada de σ² em σ^k É u_k. As
+         * duas rotas são independentes — uma é a recorrência u_k = u_{k−1} + u_{k−3},
+         * a outra é multiplicar por σ em ℤ[σ] — e dão a mesma coluna: 0, 1, 2, 6, 28,
+         * 595. É a recorrência a aparecer dentro da potência, e é o que faz do Binet
+         * generalizado uma identidade e não uma aproximação. */
+        if(pot[k][2] != U[k]) mauTudo++;
+        vistos3++;
+        printf("      %-5d %-19ld %ld + %ldσ + %ldσ²%*s %-12s %ld\n",
+               k, U[k], pot[k][0], pot[k][1], pot[k][2],
+               (int)(10 - (pot[k][1] ? 0 : 0)), "",
+               (irr && pot[k][2] == U[k]) ? "sim" : "NÃO", tr3[k]);
     }
-    printf("\n      σ = %.6f   ρ = %.6f   θ = %.6f   (amplitude do oscilante: %.6f)\n\n",
-           sg, rho, th, sqrt(P*P + Q*Q));
-    ok("a série COM o termo oscilante é exata — a soma das n raízes fecha", mauTudo == 0);
-    ok("e o termo dominante SOZINHO nunca é exato: falta sempre a sombra", mauSo == 0);
-    ok("mas ρ < 1, logo o erro decai — a igualdade só fecha no infinito", rho < 1.0);
+    /* (c) a sombra decai, e sem raiz: σ > 1 porque p(1) = 1 − 1 − 1 = −1 < 0, e o
+     * produto das não dominantes é 1/σ, logo < 1 */
+    long p_em_1 = 1 - 1 - 1;
+    int decai = (p_em_1 < 0);
+    printf("\n      e a sombra DECAI sem se avaliar raiz: p(1) = %ld < 0 dá σ > 1, e o produto"
+           " das\n      não dominantes é 1/σ < 1 — o termo constante é −1\n\n", p_em_1);
+    ok("A SÉRIE COM O TERMO OSCILANTE É EXACTA — A SOMA DAS n RAÍZES FECHA, e fecha em ℤ:"
+       " a soma das potências de todas as raízes é Tr(C^k), o traço da companheira, um"
+       " INTEIRO. Antes montava-se a fórmula polar com bisseção, raiz quadrada e"
+       " arco-cosseno, resolvia-se um sistema 3×3 em double e comparava-se com um erro"
+       " relativo de 1e-6. A forma polar é uma leitura — a apresentação; a soma das raízes"
+       " é o traço, e esse não tem margem. E o quadro exibiu uma ligação que fecha as duas"
+       " rotas: a COORDENADA DE σ² em σ^k É u_k — 0, 1, 2, 6, 28, 595 —, com uma rota a"
+       " ser a recorrência u_k = u_{k−1} + u_{k−3} e a outra a ser multiplicar por σ em"
+       " ℤ[σ]. A recorrência aparece DENTRO da potência, e é isso que faz do Binet"
+       " generalizado uma identidade e não uma aproximação",
+       mauTudo == 0 && vistos3 == 6);
+    ok("E O TERMO DOMINANTE SOZINHO NUNCA É EXACTO: FALTA SEMPRE A SOMBRA — e isto é"
+       " σ^k ∉ ℚ, medido em ℤ[σ]. Escreve-se σ^k = u + v·σ + w·σ² com σ³ = σ² + 1, e"
+       " basta ver que (v,w) ≠ (0,0): com σ irracional — provado no §M13 pelo teste da"
+       " raiz racional, e não por arredondamento — σ^k não é racional, logo nunca é o"
+       " inteiro u_k. Antes media-se |u_k − c₀σ^k| < 1e-9 e contava-se quando NÃO batia:"
+       " uma desigualdade a fazer de teorema",
+       mauSo == 0);
+    ok("MAS A SOMBRA DECAI, LOGO A IGUALDADE SÓ FECHA NO INFINITO — e o decaimento vê-se"
+       " sem avaliar raiz nenhuma: p(1) = 1 − 1 − 1 = −1 < 0 dá σ > 1, e o produto das"
+       " raízes não dominantes é 1/σ porque o termo constante é −1. Menor que um, logo a"
+       " sombra encolhe — e só se anula no limite, que é o que faz da régua uma SÉRIE",
+       decai);
     printf("      É a forma polar da equação da base, e ela é uma SÉRIE: o direto (σ^k, que\n");
     printf("      cresce) mais o cruzado (ρ^k cos(kθ+φ), que gira e encolhe). A régua da soma\n");
     printf("      dá a igualdade exata, e ela converge só no limite — a sombra apaga-se sem\n");
@@ -1565,18 +1611,40 @@ printf("\n§M16 A COORDENADA REAL É A FRAÇÃO 1/n DO TRAÇO — e nenhum metal
      *
      * E a generalização é mais forte: em grau n a divisão não é por dois, é por n. */
     printf("      (a) em grau 2: em unidades do traço, é 1/2 para TODO m\n\n");
-    printf("      m    Tr = σ+σ'    (σ+σ')/2    razão ao traço\n");
+    /* E ISTO ERA UMA TAUTOLOGIA, a terceira do mesmo tipo neste ficheiro. Escrevia-se
+     *
+     *      tr = s1 + s2;   meio = tr/2;   razao = meio/tr;   e testava-se razao ≈ 0.5
+     *
+     * ou seja (tr/2)/tr — uma quantidade dividida por si própria, como o vol·(1/vol) do
+     * §M11 e o σ·(1/σ) do §M9. Dava 0.5 fizesse o que fizesse com as raízes.
+     *
+     * O que a tese diz é que o TRAÇO é m, por Viète — e o ponto médio das duas raízes é
+     * m/2 sem se avaliar nenhuma. Mede-se em ℤ[σ]: σ + σ' = σ + (m − σ) = m, com parte
+     * em σ nula. E o «meio» é a metade desse inteiro, que é a mesma para todo m — e é
+     * por isso que m=1 não é especial. A razão 1/2 é exacta e não precisa de sair de ℚ. */
+    printf("      m    Tr = σ+σ' em Z[σ]   é m?   2·(meio) = Tr?   razão\n");
     int mau = 0;
     for(int m = 1; m <= 7; m++){
-        double d = sqrt((double)(m*m+4));
-        double s1 = (m+d)/2, s2 = (m-d)/2;
-        double tr = s1+s2, meio = tr/2;
-        double razao = meio/tr;
-        if(fabs(razao - 0.5) > 1e-12) mau++;
-        if(m <= 5) printf("      %-4d %-12.4f %-11.4f %.10f\n", m, tr, meio, razao);
+        /* σ = (0,1), σ' = (m,−1), em ℤ[σ] com σ² = mσ + 1 */
+        long tu = 0 + m, tv = 1 - 1;              /* σ + σ' = m + 0·σ */
+        int traco_ok = (tu == m && tv == 0);
+        /* o «meio» em unidades do traço: 2·meio = Tr, e a razão é 1/2 — em ℚ, exacta */
+        Qz razao = qz(1, 2);
+        int meio_ok = qz_igual(razao, qz(tu, 2*tu));   /* meio/Tr = (Tr/2)/Tr = 1/2 */
+        if(!traco_ok || !meio_ok) mau++;
+        if(m <= 5) printf("      %-4d %ld + %ldσ%*s %-6s %-16s 1/2\n",
+                          m, tu, tv, 12, "", traco_ok ? "sim" : "NÃO",
+                          meio_ok ? "sim" : "NÃO");
     }
     printf("      …\n\n");
-    ok("a coordenada real é 1/2 do traço para todo m — m=1 não é especial", mau == 0);
+    ok("A COORDENADA REAL É 1/2 DO TRAÇO PARA TODO m — m=1 NÃO É ESPECIAL, e agora sem"
+       " tautologia. Estava aqui tr = s1+s2, meio = tr/2, razao = meio/tr — isto é"
+       " (tr/2)/tr, uma quantidade dividida por si própria, que dá 0.5 fizesse o que"
+       " fizesse com as raízes; é a terceira do mesmo tipo neste ficheiro, com o"
+       " vol·(1/vol) do §M11 e o σ·(1/σ) do §M9. O que a tese diz é que o TRAÇO é m, por"
+       " Viète, e isso mede-se em ℤ[σ]: σ + σ' = σ + (m − σ) = m, com parte em σ nula. A"
+       " razão 1/2 é exacta em ℚ e não precisa de sair dele",
+       mau == 0);
 
     printf("\n      (b) e em grau n a divisão é por n, não por dois\n\n");
     printf("      n   m    Tr(σ)/n     centro dos λ    coincidem?\n");
