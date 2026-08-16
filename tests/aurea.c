@@ -69,12 +69,51 @@ int main(void){
          * borda com m=1 é x² − x − 1 = 0. Os coeficientes são (1,−1,−1) nos dois — nada a
          * arredondar. Medir phi*phi−phi−1 em double media o arredondamento de sqrt(5). */
         {
-            L cf[3] = {1,-1,-1};                  /* de b−1 = 1/b, multiplicado por b */
-            L bd[3] = {1,-1,-1};                  /* da borda x² − mx − 1 com m=1 */
-            printf("      o polinomio de f'=f^-1:  %lldx^2 %+lldx %+lld\n", cf[0],cf[1],cf[2]);
-            printf("      a borda com m=1:         %lldx^2 %+lldx %+lld\n", bd[0],bd[1],bd[2]);
-            ok("os coeficientes COINCIDEM — a mesma equacao, em inteiros",
+            /* E OS DOIS LADOS DERIVAM-SE. Estavam aqui dois arrays escritos a mao com os
+             * MESMOS literais — L cf[3] = {1,-1,-1} e L bd[3] = {1,-1,-1} — e comparados
+             * um com o outro. Nenhum vinha de nada: era uma copia comparada com a outra,
+             * e a asserção não podia falhar. Mudar a borda não mexia num deles.
+             *
+             * Agora:
+             *   cf  sai da equacao dos EXPOENTES, b − 1 = 1/b. Multiplicada por b da
+             *       b(b−1) = 1, e o polinomio e a convolucao de (b) com (b−1) menos 1.
+             *   bd  sai da BORDA x² = m·x + 1, isto e (1, −m, −1), e depende de m.
+             *
+             * Assim a coincidencia passa a ser um RESULTADO — e so vale em m = 1, que e
+             * exactamente a tese. Para outro metal os coeficientes divergem, e e o gume. */
+            L cf[3] = {0,0,0}, bd[3] = {0,0,0};
+            {   /* b·(b−1) − 1: convolucao de {0,1} com {−1,1}, menos 1 no termo constante */
+                const L u[2] = {0, 1}, v[2] = {-1, 1};      /* b  e  b−1, em coeficientes */
+                for (int i = 0; i < 2; i++) for (int j = 0; j < 2; j++) cf[i+j] += u[i]*v[j];
+                cf[0] -= 1;                                  /* ... = 1, passado para a esquerda */
+                L t = cf[0]; cf[0] = cf[2]; cf[2] = t;       /* do grau crescente ao decrescente */
+            }
+            const L m_ouro = 1;
+            bd[0] = 1; bd[1] = -m_ouro; bd[2] = -1;          /* x² − m·x − 1 */
+            printf("      o polinomio de f'=f^-1:  %lldx^2 %+lldx %+lld   (de b−1 = 1/b)\n",
+                   cf[0],cf[1],cf[2]);
+            printf("      a borda com m=%lld:         %lldx^2 %+lldx %+lld   (de x² = mx+1)\n",
+                   m_ouro, bd[0],bd[1],bd[2]);
+            ok("OS COEFICIENTES COINCIDEM — A MESMA EQUACAO, EM INTEIROS, e agora os dois"
+               " lados DERIVAM: o de f'=f^{-1} sai da equacao dos expoentes b−1 = 1/b"
+               " multiplicada por b, e o da borda sai de x² = m·x + 1 com o m. Estavam aqui"
+               " dois arrays escritos a mao com os mesmos literais e comparados um com o"
+               " outro — uma copia contra a outra, e mudar a borda nao mexia em nenhum",
                cf[0]==bd[0] && cf[1]==bd[1] && cf[2]==bd[2]);
+            /* e o GUME: a coincidencia e do OURO. Noutro metal a borda muda e ela cai. */
+            {
+                int divergem = 0;
+                for (L m = 2; m <= 5; m++) {
+                    L b2[3] = {1, -m, -1};
+                    if (!(cf[0]==b2[0] && cf[1]==b2[1] && cf[2]==b2[2])) divergem++;
+                }
+                printf("      GUME: com m = 2..5 a borda muda e deixa de coincidir em %d de 4\n",
+                       divergem);
+                ok("e a coincidencia e do OURO: noutro metal a borda e (1,−m,−1) e ja nao"
+                   " bate com (1,−1,−1) — logo f' = f^{-1} escolhe m = 1, e nao vale para"
+                   " a familia toda",
+                   divergem == 4);
+            }
             /* e a identidade phi−1 = 1/phi É a equação, reescrita: phi(phi−1) = 1 */
             ok("e phi - 1 = 1/phi E a propria equacao: phi(phi-1) = phi^2 - phi = 1",
                cf[1]==-1 && cf[2]==-1);

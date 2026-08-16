@@ -21,7 +21,7 @@ assinatura_banal 807a95526f24eccf 0
 assinatura_colisoes 22f557e6dc462b7b 0
 assinatura_tradutor 71805022a70f092e 0
 ataque 54c457ea130598f8 0
-aurea f73354b6db20cbb5 0
+aurea b8a980adaa07a8b9 0
 autoria_tradutor 0591f5d4efec101f 0
 avalia_macros 6dc8be4f913e264f 0
 aya 9b26183507a36142 0
