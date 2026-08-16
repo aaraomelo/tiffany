@@ -53,7 +53,27 @@ leitura directa erra **metade exacta** das 2048 coordenadas.
 - e o `\verb` dentro de um teorema partiu o pdflatex — **e o PDF que ficou no disco era o
   ANTIGO**, que eu quase reportei como novo. Ver [[feedback-a-mensagem-que-nao-pode-falhar]].
 
-`tests/geometria_real.c` (15:0) na ordem obrigatória do eval: 8 leis → base ortonormal →
+**A RONDA DO REVISOR EXTERNO (18:0).** Quatro erros matemáticos concretos, e o pior era de
+NOME: chamei `F_k` à sucessão metálica em três secções. A conta estava certa (`A_2² =
+(5,2;2,1)`), mas `F` lê-se Fibonacci, que é só `m = 1`. Agora é `U^{(m)}`, e a distinção
+virou MEDIDA: coincide com F em 1 dos 8 metais, divergindo em `k = 2`. Os outros três:
+
+- **os racionais estavam a descoberto** — CF infinita ↔ IRRACIONAIS; os racionais são os
+  casos em que o processo TERMINA, com a ambiguidade `[…,a_n] = […,a_n−1,1]`. Medido em
+  3660: termina em todos, exacto em todos. Sem isto, «ℝ inteiro» era reivindicação.
+- **duas afirmações coladas numa**: `|σ^k − t_k| = |σ†|^k` é IMEDIATA; `dist(σ^k,ℤ) =
+  |σ†|^k` exige além disso `|σ†|^k < 1/2`. Medido em separado, com `round(σ^k)` calculado
+  em inteiros por raiz de Newton.
+- **a varredura é VERIFICAÇÃO, não prova**: «nenhum racional cai em cima» é teorema geral
+  (Δ não é quadrado); os 19 360 casos confirmam a IMPLEMENTAÇÃO. É a hierarquia aplicada
+  a si própria.
+
+E o Aarão: **«não privilegie ninguém, nem o ouro»** — a frase certa é «φ minimiza o
+crescimento dos denominadores dos convergentes ENTRE as expansões com a_k ≥ 1»: é a
+**extremalidade da régua**, o pior caso do mecanismo, e não uma propriedade de φ contra os
+outros reais. Ver [[feedback-o-escopo-da-afirmacao]], [[feedback-duas-reguas]].
+
+`tests/geometria_real.c` (18:0) na ordem obrigatória do eval: 8 leis → base ortonormal →
 bit a bit → dual → recorrência → Pisot → encaixe → corte → completude → ℝ → π_k/gume.
-`papers/geometrico.tex` reescrito duas vezes no dia, 6 páginas.
+`papers/geometrico.tex` reescrito duas vezes no dia, 7 páginas.
 Ver [[project-o-real-e-o-corte]], [[feedback-verdadeiro-e-parcial]].

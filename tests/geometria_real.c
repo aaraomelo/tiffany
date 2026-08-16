@@ -17,7 +17,9 @@
  * ── O QUE MUDOU, E POR ORDEM DO EVAL ─────────────────────────────────────────
  *  (1) «não constrói todos os reais» ERA RESSALVA MINHA, não do quadro — e caiu. §L8
  *      constrói ℝ INTEIRO, com quocientes parciais ARBITRÁRIOS. O metálico deixa de ser
- *      o escopo e passa a ser o EXTREMO: o ouro é o real mais lento que existe.
+ *      o escopo e passa a ser o EXTREMO: φ minimiza o crescimento dos denominadores
+ *      dos convergentes ENTRE AS EXPANSÕES COM a_k ≥ 1 — é o pior caso do mecanismo,
+ *      não um privilégio de φ sobre os outros reais.
  *  (2) a torre 1→2→4→8 e o REUSO dos oito bits em cada andar: §L3.
  *  (3) «oito passos enchem um byte» é CODIFICAÇÃO e não demonstra o bit a bit — §L2
  *      liga-o à base ortonormal e mede o preço numa base torcida.
@@ -37,12 +39,19 @@
 #define G_LIMF 100000000L      /* o tecto: com Δ ≤ 68, Δ·F² e (t+1)² cabem em long */
 #define G_MMAX 8
 
-static int g_fib(long m, long *F, long *t, int max){
+/* ── A SUCESSÃO METÁLICA, e o nome importa ────────────────────────────────────
+ * U^{(m)}: U_0 = 0, U_1 = 1, U_{k+2} = m·U_{k+1} + U_k.   t^{(m)}: t_0 = 2, t_1 = m.
+ *
+ * Chamava-se F, e o revisor apanhou-o: F lê-se FIBONACCI, e Fibonacci é só o andar
+ * m = 1. A conta sempre esteve certa — A_2² = (5,2;2,1), e não (2,1;1,1) —, mas o NOME
+ * fazia a família inteira passar por um dos seus membros. Duas réguas para o mesmo
+ * objecto, e o sintoma é sempre letras coladas. */
+static int g_metal(long m, long *U, long *t, int max){
     int k;
-    F[0] = 0; F[1] = 1; t[0] = 2; t[1] = m;
+    U[0] = 0; U[1] = 1; t[0] = 2; t[1] = m;
     for(k = 2; k < max; k++){
-        if(F[k-1] > G_LIMF/(m+1)) break;
-        F[k] = m*F[k-1] + F[k-2];
+        if(U[k-1] > G_LIMF/(m+1)) break;
+        U[k] = m*U[k-1] + U[k-2];
         t[k] = m*t[k-1] + t[k-2];
     }
     return k;
@@ -53,6 +62,15 @@ static int g_cmp(long a, long b, long m){
     if(s < 0) return -1;
     long e = s*s, d = b*b*D;
     return e < d ? -1 : (e > d ? 1 : 0);
+}
+/* ⌊√n⌋ em inteiros, por Newton — sem uma única raiz de vírgula flutuante */
+static long g_isqrt(long n){
+    if(n < 2) return n;
+    long x = n, y = (x + 1) / 2;
+    while(y < x){ x = y; y = (x + n/x) / 2; }
+    while((x+1)*(x+1) <= n) x++;
+    while(x*x > n) x--;
+    return x;
 }
 static int g_peso(int x){ int p = 0; while(x){ p += x & 1; x >>= 1; } return p; }
 static int g_par(int x){ return g_peso(x) & 1; }        /* ⟨a,b⟩ = paridade(a ∧ b) */
@@ -174,30 +192,54 @@ int main(void){
             ms++;
             int okB = (soma_b == 0 && soma_a == m) && (pb == 0 && pa == -1);
             if(okB && trA == m && detA == -1) batem++;
-            long F[64], t[64];
-            int n = g_fib(m, F, t, 40);
+            long U[64], t[64];
+            int n = g_metal(m, U, t, 40);
             long a11=1, a12=0, a21=0, a22=1;
             int cai = 0;
             for(int k = 1; k < n-1 && k <= 12; k++){         /* (C) a potência */
                 long b11 = a11*m + a12, b12 = a11;
                 long b21 = a21*m + a22, b22 = a21;
                 a11=b11; a12=b12; a21=b21; a22=b22;
-                if(a11 != F[k+1] || a12 != F[k] || a21 != F[k] || a22 != F[k-1]) cai++;
+                if(a11 != U[k+1] || a12 != U[k] || a21 != U[k] || a22 != U[k-1]) cai++;
                 potk++;
             }
             if(!cai) pot++;
             { int a = (n-2 < 12) ? n-2 : 12; if(a < minand) minand = a; }
             if(m*1 - 1*1 != -1) gume++;                      /* mexer uma entrada */
         }
+        /* E O GUME DO NOME: U^{(m)} coincide com Fibonacci SÓ em m = 1. Se o texto
+         * escrever F onde m é geral, está a fazer a família passar por um membro. */
+        long fib[16]; fib[0]=0; fib[1]=1;
+        for(int i=2;i<16;i++) fib[i]=fib[i-1]+fib[i-2];
+        long msU = 0, coincide = 0, primeiro_k = 99;
+        for(long m = 1; m <= 8; m++){
+            long U[64], t[64];
+            int n = g_metal(m, U, t, 16);
+            int igual = 1, pk = 99;
+            for(int k = 0; k < n && k < 12; k++)
+                if(U[k] != fib[k]){ igual = 0; if(k < pk) pk = k; }
+            msU++;
+            if(igual) coincide++;
+            else if(pk < primeiro_k) primeiro_k = pk;
+        }
+        printf("      o NOME: U^(m) coincide com Fibonacci em %ld dos %ld metais, e o"
+               " primeiro k onde diverge é %ld — A_2² = (5,2;2,1), não (2,1;1,1)\n",
+               coincide, msU, primeiro_k);
         printf("      m=1..40: %ld com os três caminhos a concordar, %ld com a potência"
                " certa em %ld andares (o m mais curto ainda dá %d) · gume: %ld de %ld\n",
                batem, pot, potk, minand, gume, ms);
         ok("O DUAL PRODUZ A RECORRÊNCIA: σ† = −σ⁻¹ = m−σ lido DENTRO de ℤ[σ] por"
            " σ² = mσ+1, o traço e o determinante da companheira, e a potência"
-           " A^k = (F_{k+1},F_k;F_k,F_{k−1}) dão os MESMOS σ+σ† = m e σσ† = −1, para"
+           " A^k = (U_{k+1},U_k;U_k,U_{k−1}), com U a METÁLICA e não Fibonacci dão os MESMOS σ+σ† = m e σσ† = −1, para"
            " m = 1..40 e sem avaliar uma raiz. E mexer uma entrada da companheira parte o"
            " determinante nos 40: a identidade tem conteúdo",
            batem == ms && pot == ms && ms == 40 && gume == ms && minand >= 3);
+        ok("E O NOME NÃO É DETALHE: a sucessão é a METÁLICA U^{(m)}, com U_{k+2} ="
+           " m·U_{k+1} + U_k, e ela coincide com Fibonacci em EXACTAMENTE UM dos oito"
+           " metais — o m = 1 — divergindo já no k = 2 nos outros. Escrever F_k onde m é"
+           " geral faz a família inteira passar por um dos seus membros: A_2² = (5,2;2,1)"
+           " e não (2,1;1,1). A conta estava certa; o nome é que era de outro andar",
+           coincide == 1 && msU == 8 && primeiro_k == 2);
     }
 
     /* ═══ §L5  A RECORRÊNCIA → PISOT ═════════════════════════════════════════ */
@@ -206,53 +248,101 @@ int main(void){
         long casos = 0, ident = 0, discorda = 0, vale = 0, quebra = 0;
         int fm = 0, fk = 0, minand = 99;
         for(long m = 1; m <= G_MMAX; m++){
-            long F[64], t[64], D = m*m + 4;
-            int n = g_fib(m, F, t, 40);
+            long U[64], t[64], D = m*m + 4;
+            int n = g_metal(m, U, t, 40);
             if(n-1 < minand) minand = n-1;
             for(int k = 1; k < n; k++){
                 casos++;
-                if(t[k]*t[k] - D*F[k]*F[k] == ((k % 2) ? -4 : 4)) ident++;
-                int c1 = ((t[k]-1)*(t[k]-1) < D*F[k]*F[k])
-                      && (D*F[k]*F[k] < (t[k]+1)*(t[k]+1));
+                if(t[k]*t[k] - D*U[k]*U[k] == ((k % 2) ? -4 : 4)) ident++;
+                int c1 = ((t[k]-1)*(t[k]-1) < D*U[k]*U[k])
+                      && (D*U[k]*U[k] < (t[k]+1)*(t[k]+1));
                 int c2 = (k % 2) ? (t[k] >= 2) : (t[k] >= 3);
                 if(c1 != c2) discorda++;
                 if(c1) vale++; else { quebra++; if(!fm){ fm = (int)m; fk = k; } }
             }
         }
-        printf("      %ld andares: %ld com t_k² − ΔF_k² = 4(−1)^k, %ld discordâncias,"
+        printf("      %ld andares: %ld com t_k² − ΔU_k² = 4(−1)^k, %ld discordâncias,"
                " %ld com |σ†|^k < 1/2 e %ld sem\n", casos, ident, discorda, vale, quebra);
-        printf("      e o que quebra é (m=%d, k=%d): t=1, ΔF²=5 e (t+1)²=4 — o inteiro"
+        printf("      e o que quebra é (m=%d, k=%d): t=1, ΔU²=5 e (t+1)²=4 — o inteiro"
                " mais próximo de φ é 2, não 1\n", fm, fk);
+
+        /* AS DUAS AFIRMAÇÕES SÃO DUAS, e o revisor tem razão em separá-las:
+         *   (a)  |σ^k − t_k| = |σ†|^k          — IMEDIATA, sai de σ^k + (σ†)^k = t_k
+         *   (b)  dist(σ^k, ℤ) = |σ†|^k          — EXIGE que t_k seja o inteiro MAIS
+         *                                         PRÓXIMO, o que pede |σ†|^k < 1/2
+         * Mede-se (b) sozinha: calcula-se round(σ^k) EM INTEIROS — com
+         * σ^k = (t_k + U_k√Δ)/2, comparar 2σ^k com 2n+1 é comparar U_k√Δ com
+         * 2n+1−t_k — e vê-se se dá t_k. Onde a condição falha, tem de dar OUTRO. */
+        long ver = 0, red_bate = 0, red_falha_bate = 0;
+        for(long m = 1; m <= G_MMAX; m++){
+            long U[64], t[64], D = m*m + 4;
+            int n = g_metal(m, U, t, 40);
+            for(int k = 1; k < n && k < 12; k++){
+                /* floor(σ^k) em O(1). A 1.ª versão procurava j a subir de um em um e
+                 * batia no tecto de 1e8 nos metais grandes — 3 casos em 85 saíram
+                 * errados, e a asserção apanhou-o pela soma que não fechava.
+                 * Agora: r = ⌊U_k√Δ⌋ pela raiz inteira, j ≈ (t_k + r)/2, e AJUSTA-SE
+                 * com a comparação exacta, que é a mesma de sempre. */
+                long r = g_isqrt(D*U[k]*U[k]);
+                long j = (t[k] + r) / 2;
+                while(j > 0){                                   /* desce se passou */
+                    long e = 2*j - t[k];
+                    if(e <= 0 || e*e <= D*U[k]*U[k]) break;
+                    j--;
+                }
+                while(1){                                       /* sobe se ficou curto */
+                    long e = 2*(j+1) - t[k];
+                    if(e > 0 && e*e > D*U[k]*U[k]) break;
+                    j++;
+                }
+                /* round: comparar 2σ^k com 2j+1, i.e. U_k√Δ com 2j+1−t_k */
+                long e = 2*j + 1 - t[k];
+                long red = (e < 0 || D*U[k]*U[k] > e*e) ? j+1 : j;
+                int cond = (k % 2) ? (t[k] >= 2) : (t[k] >= 3);
+                ver++;
+                if(cond){ if(red == t[k]) red_bate++; }
+                else    { if(red != t[k]) red_falha_bate++; }
+            }
+        }
+        printf("      round(σ^k) calculado em inteiros: bate com t_k em %ld dos %ld casos"
+               " com |σ†|^k < 1/2; e nos que NÃO cumprem a condição, round ≠ t_k em %ld\n",
+               red_bate, ver, red_falha_bate);
         ok("A APROXIMAÇÃO NÃO É ESCOLHIDA — O OPERADOR PRODUZ O INTEIRO: σ^k + (σ†)^k ="
            " t_k está em ℤ, logo σ^k = t_k − (σ†)^k e dist(σ^k, ℤ) = |σ†|^k. O critério"
-           " decide-se em inteiros por (t_k−1)² < ΔF_k² < (t_k+1)², e concorda com a forma"
-           " reduzida pela identidade t_k² − ΔF_k² = 4(−1)^k nos dois caminhos",
+           " decide-se em inteiros por (t_k−1)² < ΔU_k² < (t_k+1)², e concorda com a forma"
+           " reduzida pela identidade t_k² − ΔU_k² = 4(−1)^k nos dois caminhos",
            ident == casos && discorda == 0 && minand >= 9);
         ok("E A CONDIÇÃO TEM ESCOPO, MEDIDO: |σ†|^k < 1/2 quebra em EXACTAMENTE um andar"
            " de toda a janela — o ouro no primeiro degrau, onde |φ†| = 0,618 > 1/2. É o"
            " andar em que a outra face ainda não entrou na metade certa do intervalo;"
            " entra no segundo degrau, e para m ≥ 2 já no primeiro",
            quebra == 1 && fm == 1 && fk == 1);
+        ok("E SÃO DUAS AFIRMAÇÕES, NÃO UMA: |σ^k − t_k| = |σ†|^k é IMEDIATA e sai de"
+           " σ^k + (σ†)^k = t_k; mas dist(σ^k, ℤ) = |σ†|^k exige além disso que t_k seja"
+           " o inteiro MAIS PRÓXIMO, e isso é |σ†|^k < 1/2. Medido em separado, com"
+           " round(σ^k) calculado em inteiros: onde a condição vale, round dá t_k em"
+           " todos; e no único andar onde ela falha, round dá OUTRO inteiro",
+           red_bate + red_falha_bate == ver && red_falha_bate == 1);
     }
 
     /* ═══ §L6  OS DOIS DETERMINANTES, DISTINGUIDOS ═══════════════════════════ */
     printf("\n§L6 São DOIS objectos — e a igualdade deles é que é o teorema.\n\n");
     {
         /* O eval apanhou uma mistura minha. São dois caminhos distintos:
-         *   (E) das ENTRADAS:  det A^k = F_{k+1}F_{k−1} − F_k²  — em ℤ, sem espectro
+         *   (E) das ENTRADAS:  det A^k = U_{k+1}U_{k−1} − U_k²  — em ℤ, sem espectro
          *   (S) ESPECTRAL:     σ^k(σ†)^k = N(σ^k) = a² + mab − b²  — o produto das faces
          * (E) não sabe que existem valores próprios; (S) não olha para uma entrada da
          * matriz. Coincidem por «det é o produto do espectro», que é o TEOREMA — e é a
          * coincidência que se mede, não a definição. */
         long casos = 0, ent = 0, esp = 0, nor = 0, tres = 0;
         for(long m = 1; m <= G_MMAX; m++){
-            long F[64], t[64];
-            int n = g_fib(m, F, t, 40);
+            long U[64], t[64];
+            int n = g_metal(m, U, t, 40);
             for(int k = 2; k < n-1; k++){
                 casos++;
                 long alvo = (k % 2) ? -1 : 1;
-                long dE = F[k+1]*F[k-1] - F[k]*F[k];              /* (E) entradas   */
-                long a = F[k-1], b = F[k];
+                long dE = U[k+1]*U[k-1] - U[k]*U[k];              /* (E) entradas   */
+                long a = U[k-1], b = U[k];
                 long dS = a*a + m*a*b - b*b;                      /* (S) espectral  */
                 long dN = (k % 2) ? -1 : 1;                       /* N(σ)^k         */
                 if(dE == alvo) ent++;
@@ -264,7 +354,7 @@ int main(void){
         printf("      %ld andares: entradas %ld, espectral %ld, norma %ld · os TRÊS"
                " coincidem em %ld\n", casos, ent, esp, nor, tres);
         ok("OS DOIS DETERMINANTES SÃO OBJECTOS DISTINTOS, E A IGUALDADE É O TEOREMA:"
-           " det A^k = F_{k+1}F_{k−1} − F_k² lê-se nas ENTRADAS, sem espectro nenhum;"
+           " det A^k = U_{k+1}U_{k−1} − U_k² lê-se nas ENTRADAS, sem espectro nenhum;"
            " σ^k(σ†)^k = N(σ^k) = a² + mab − b² lê-se no ESPECTRO, sem olhar uma entrada;"
            " e N(σ)^k = (−1)^k é a multiplicatividade da norma. Os três dão (−1)^k em"
            " todos os andares — e o que se mede é a COINCIDÊNCIA, não a definição",
@@ -276,29 +366,29 @@ int main(void){
     {
         long casos = 0, cass = 0, alterna = 0, encaixa = 0, pod = 0, aperta = 0;
         for(long m = 1; m <= G_MMAX; m++){
-            long F[64], t[64];
-            int n = g_fib(m, F, t, 40);
+            long U[64], t[64];
+            int n = g_metal(m, U, t, 40);
             for(int k = 1; k < n-2; k++){
                 casos++;
-                if(F[k+1]*F[k+1] - F[k+2]*F[k] == ((k % 2) ? -1 : 1)) cass++;
-                int s1 = g_cmp(F[k+1], F[k], m), s2 = g_cmp(F[k+2], F[k+1], m);
+                if(U[k+1]*U[k+1] - U[k+2]*U[k] == ((k % 2) ? -1 : 1)) cass++;
+                int s1 = g_cmp(U[k+1], U[k], m), s2 = g_cmp(U[k+2], U[k+1], m);
                 if(s1 && s2 && s1 != s2) alterna++;
                 if(k >= 2){
                     pod++;
-                    long an=F[k], ad=F[k-1], bn=F[k+1], bd=F[k], cn=F[k+2], cd=F[k+1];
+                    long an=U[k], ad=U[k-1], bn=U[k+1], bd=U[k], cn=U[k+2], cd=U[k+1];
                     long lo_n, lo_d, hi_n, hi_d;
                     if(an*bd < bn*ad){ lo_n=an; lo_d=ad; hi_n=bn; hi_d=bd; }
                     else             { lo_n=bn; lo_d=bd; hi_n=an; hi_d=ad; }
                     if(lo_n*cd <= cn*lo_d && cn*hi_d <= hi_n*cd) encaixa++;
                 }
-                if(F[k+2]*F[k+1] > F[k+1]*F[k]) aperta++;
+                if(U[k+2]*U[k+1] > U[k+1]*U[k]) aperta++;
             }
         }
         printf("      %ld degraus: %ld com Cassini, %ld a alternar, %ld de %ld"
                " encaixados, %ld a apertar\n", casos, cass, alterna, encaixa, pod, aperta);
         ok("O ENCAIXE SAI DA RECORRÊNCIA: os convergentes caem alternadamente nos dois"
            " lados, cada intervalo está DENTRO do anterior, e por Cassini metálico"
-           " F_{k+1}² − F_{k+2}F_k = (−1)^k a largura é exactamente 1/(F_k F_{k+1}) —"
+           " U_{k+1}² − U_{k+2}U_k = (−1)^k a largura é exactamente 1/(U_k U_{k+1}) —"
            " régua inteira, e a divisão nunca se faz",
            cass == casos && alterna == casos && encaixa == pod && aperta == casos);
     }
@@ -396,12 +486,66 @@ int main(void){
            " PERIÓDICO, não o caso único: a ressalva era minha, e não do quadro",
            det1 == seqs && alterna == seqs && encaixa == seqs && cresce == seqs
            && seqs == 220 && minn >= 8);
-        ok("E O OURO É O EXTREMO QUE LIMITA ℝ INTEIRO: com a_k ≥ 1 tem-se q_k ≥ F_k em"
+        ok("A EXTREMALIDADE É DA RÉGUA, E NÃO UM PRIVILÉGIO DE φ: com a_k ≥ 1 tem-se q_k ≥ F_k em"
            " todas as sucessões, e a igualdade em TODO k ocorre só na sucessão de uns —"
            " o empate pontual é comum e mede-se, o empate total é único. Logo a largura 1/(q_k q_{k+1}) de QUALQUER real é"
            " menor ou igual à do ouro: a família metálica não é o escopo da construção,"
-           " é o seu caso EXTREMO, e é por isso que uma taxa serve para todos os reais",
+           " é o seu caso EXTREMO. φ MINIMIZA o crescimento dos denominadores ENTRE as expansões com a_k ≥ 1 — o PIOR CASO do mecanismo, e por isso o que o limita",
            limite == seqs && ig_sempre == 1 && ig_fora == 0 && ouro_seq == 1);
+    }
+
+    /* ═══ §L8b  OS RACIONAIS: O PROCESSO TERMINA ════════════════════════════ */
+    printf("\n§L8b Os racionais fecham o domínio: a expansão TERMINA, e a ambiguidade\n"
+           "     final tem convenção. Sem isto, «ℝ inteiro» ficava a descoberto.\n\n");
+    {
+        /* O revisor: «uma expansão em fracção contínua INFINITA corresponde aos
+         * IRRACIONAIS; os racionais têm expansão FINITA, com a conhecida ambiguidade da
+         * representação final». Tem razão, e não é objecção de escopo — é fechar
+         * correctamente o domínio que o paper reivindicou. Mede-se:
+         *
+         *   (i)  para a/b racional o algoritmo de Euclides TERMINA, e o último resto é 0;
+         *   (ii) o último convergente É a/b exactamente (não uma aproximação);
+         *   (iii) a ambiguidade: [a_0;…,a_n] = [a_0;…,a_n−1, 1] quando a_n ≥ 2, e a
+         *         convenção canónica é a que termina com a_n ≥ 2 (ou o comprimento 1). */
+        long casos = 0, termina = 0, exacto = 0, ambig = 0, ambig_pod = 0;
+        int maxpassos = 0;
+        for(long b = 1; b <= 60; b++) for(long a = 0; a <= 60; a++){
+            long A = a, B = b, q[40];
+            int n = 0;
+            while(B != 0 && n < 40){ q[n++] = A/B; long r = A%B; A = B; B = r; }
+            casos++;
+            if(B == 0) termina++;                       /* o resto chega a ZERO */
+            if(n > maxpassos) maxpassos = n;
+            /* reconstruir a/b a partir dos quocientes, de trás para a frente */
+            long num = q[n-1], den = 1;
+            for(int i = n-2; i >= 0; i--){ long t2 = num; num = q[i]*num + den; den = t2; }
+            /* «É a/b exacto» compara-se por PRODUTO CRUZADO — sem reduzir nada e sem
+             * uma divisão: num/den = a/b ⟺ num·b = a·den. */
+            if(num*b == a*den) exacto++;
+            /* a ambiguidade final, e a convenção */
+            if(n >= 1 && q[n-1] >= 2){
+                ambig_pod++;
+                /* [.., a_n] e [.., a_n−1, 1] dão o MESMO racional */
+                long r2[41]; for(int i = 0; i < n-1; i++) r2[i] = q[i];
+                r2[n-1] = q[n-1]-1; r2[n] = 1;
+                long nu = r2[n], de = 1;
+                for(int i = n-1; i >= 0; i--){ long t2 = nu; nu = r2[i]*nu + de; de = t2; }
+                if(nu*den == num*de) ambig++;
+            }
+        }
+        printf("      %ld racionais a/b (b ≤ 60): %ld com o processo a TERMINAR (resto"
+               " zero), %ld reconstruídos EXACTOS, comprimento máximo %d\n",
+               casos, termina, exacto, maxpassos);
+        printf("      a ambiguidade final: %ld dos %ld com a_n ≥ 2 dão o mesmo racional"
+               " por [a_0;…,a_n] = [a_0;…,a_n−1,1] — e a convenção canónica escolhe um\n",
+               ambig, ambig_pod);
+        ok("E OS RACIONAIS FECHAM O DOMÍNIO: a correspondência infinita é com os"
+           " IRRACIONAIS, e os racionais são os casos em que o processo TERMINA — resto"
+           " zero em todos, com o último convergente a dar a/b EXACTO e não aproximado."
+           " A ambiguidade final [a_0;…,a_n] = [a_0;…,a_n−1,1] verifica-se em todos os"
+           " que têm a_n ≥ 2, e resolve-se por convenção. É isto que faz «ℝ inteiro» ser"
+           " uma afirmação fechada e não uma reivindicação",
+           termina == casos && exacto == casos && ambig == ambig_pod && casos > 3000);
     }
 
     /* ═══ §L9  O CORTE, E O BIT DECIDE ═══════════════════════════════════════ */

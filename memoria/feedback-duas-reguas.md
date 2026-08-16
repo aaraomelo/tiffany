@@ -34,3 +34,14 @@ o `corpo-estelar.tex` §coexistem, «o conflito por espaço não é uma luta: é
 resolução».
 
 Ver [[feedback-a-referencia-escrita-a-mao]] e [[project-checkpoint-2026-08-07]].
+
+**E a pior variante é o NOME DE UM MEMBRO a servir de nome da FAMÍLIA.** Chamei `F_k` à sucessão
+metálica `U^{(m)}_{k+2} = m·U_{k+1} + U_k`, em código e em paper. **A conta estava certa** —
+`A_2² = (5,2;2,1)`, e não `(2,1;1,1)` —, mas `F` lê-se Fibonacci, e Fibonacci é só `m = 1`.
+Um revisor externo leu o paper e apontou-o como erro matemático em três secções; nenhuma
+asserção minha o podia apanhar, porque **as asserções comparavam a conta com ela própria**.
+
+**How to apply:** quando uma letra serve uma família indexada, ela leva o índice
+(`U^{(m)}`) — e a defesa é medir a DIVERGÊNCIA: `U^{(m)}` coincide com `F` em exactamente
+um dos oito metais, e diverge já em `k = 2`. Isso transforma a confusão de nome num
+número que falha se eu voltar a colá-las. Ver [[project-a-reta-construida]].

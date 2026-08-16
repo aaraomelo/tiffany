@@ -70,11 +70,12 @@ o metálico é o caso \emph{periódico}, não o caso único. Com $a_k\geq1$,
 \boxed{\;q_k\geq F_k,\quad\text{com igualdade em TODO }k
 \text{ só na sucessão de uns}\;}
 \]
---- o \textbf{ouro é o real mais lento que existe}, e por isso uma só taxa
-limita todos. A família metálica não é o escopo da construção: é o seu caso
-extremo.
+--- $\varphi$ é o \textbf{irracional de crescimento mínimo dos denominadores
+dos convergentes} entre as expansões com $a_k\geq1$, e por isso uma só taxa
+limita a construção inteira. A família metálica não é o escopo: é o caso
+\textbf{extremo}, o pior caso do mecanismo.
 
-\smallskip\noindent\emph{Medido:} \code{tests/geometria\_real.c} ($15{:}0$).
+\smallskip\noindent\emph{Medido:} \code{tests/geometria\_real.c} ($18{:}0$).
 \end{abstract}
 
 %======================================================================
@@ -172,6 +173,18 @@ coordenadas, sem a base ganhar uma posição. $\square$
 %======================================================================
 \section{O dual produz a recorrência}\label{sec:dual}
 
+\begin{definicao}[a sucessão metálica]\label{def:U}
+\[
+U^{(m)}_0=0,\qquad U^{(m)}_1=1,\qquad
+U^{(m)}_{k+2}=m\,U^{(m)}_{k+1}+U^{(m)}_k;
+\qquad t^{(m)}_0=2,\quad t^{(m)}_1=m .
+\]
+\textbf{Fibonacci é $U^{(1)}$, e só ele.} Escrever $F_k$ onde $m$ é geral faz a
+família inteira passar por um dos seus membros --- e a diferença é imediata:
+$U^{(2)}=0,1,2,5,12,\ldots$ diverge de $F$ já em $k=2$. Medido: $U^{(m)}$
+coincide com $F$ em exactamente um dos oito metais.
+\end{definicao}
+
 \begin{teorema}\label{thm:dual}
 Com $A_m=\begin{psmallmatrix}m&1\\1&0\end{psmallmatrix}$ e $\sigma$ a classe de
 $x$ em $\mathbb{Z}[x]/(x^{2}-mx-1)$:
@@ -183,7 +196,13 @@ $x$ em $\mathbb{Z}[x]/(x^{2}-mx-1)$:
 por \textbf{três caminhos independentes} --- o traço e o determinante da
 companheira; a involução lida \emph{dentro} de $\mathbb{Z}[\sigma]$ usando só
 $\sigma^{2}=m\sigma+1$; e a potência
-$A_m^{k}=\begin{psmallmatrix}F_{k+1}&F_k\\F_k&F_{k-1}\end{psmallmatrix}$.
+\[
+A_m^{k}=\begin{pmatrix}U^{(m)}_{k+1}&U^{(m)}_k\\
+U^{(m)}_k&U^{(m)}_{k-1}\end{pmatrix},
+\qquad \det A_m^{k}=(-1)^{k}
+\]
+--- por exemplo $A_2^{2}=\begin{psmallmatrix}5&2\\2&1\end{psmallmatrix}$, e
+\emph{não} $\begin{psmallmatrix}2&1\\1&1\end{psmallmatrix}$.
 Concordam para $m=1,\ldots,40$, e \emph{nenhuma raiz é avaliada}: a raiz é a
 representação alcançada, a recorrência é a construção. \emph{Gume}: mexida uma
 entrada da companheira, o determinante deixa de valer $-1$ nos $40$. $\square$
@@ -199,13 +218,23 @@ entrada da companheira, o determinante deixa de valer $-1$ nos $40$. $\square$
 $t_k=\sigma^{k}+(\sigma\dg)^{k}\in\mathbb{Z}$, logo
 $\sigma^{k}=t_k-(\sigma\dg)^{k}$ e
 \[
-\boxed{\;\operatorname{dist}(\sigma^{k},\mathbb{Z})=\abs{\sigma\dg}^{k}\;}
+\abs{\sigma^{k}-t_k}=\abs{\sigma\dg}^{k}
 \]
-a partir do momento em que a outra face entrou na metade certa do intervalo.
+--- e \textbf{esta é imediata}. A passagem para a \emph{distância ao inteiro}
+exige um passo a mais, que se diz:
+\[
+\boxed{\;\abs{\sigma\dg}^{k}<\tfrac12
+\ \Longrightarrow\ t_k=\operatorname{round}(\sigma^{k})
+\ \Longrightarrow\ \operatorname{dist}(\sigma^{k},\mathbb{Z})=\abs{\sigma\dg}^{k}.\;}
+\]
 A condição decide-se \textbf{em inteiros}, por
-$(t_k-1)^{2}<\Delta F_k^{2}<(t_k+1)^{2}$ com $\Delta=m^{2}+4$, e concorda com a
-forma reduzida pela identidade $t_k^{2}-\Delta F_k^{2}=4(-1)^{k}$ nos $131$
-andares, sem uma discordância.
+$(t_k-1)^{2}<\Delta\,(U^{(m)}_k)^{2}<(t_k+1)^{2}$ com $\Delta=m^{2}+4$, e
+concorda com a forma reduzida pela identidade
+\[
+t_k^{2}-(m^{2}+4)\bigl(U^{(m)}_k\bigr)^{2}=4(-1)^{k}
+\]
+nos $131$ andares, sem uma discordância. Em $m=1$ ela é
+$L_k^{2}-5F_k^{2}=4(-1)^{k}$, e só aí.
 
 \emph{Não há escolha de aproximação: o inteiro $t_k$ é produzido pelo próprio
 operador.} $\square$
@@ -231,7 +260,7 @@ precisa:
 \begin{teorema}\label{thm:doisdet}
 São \textbf{dois objectos}, calculados por caminhos que não se tocam:
 \[
-\underbrace{\det A_m^{k}=F_{k+1}F_{k-1}-F_k^{2}}_{\text{das ENTRADAS, em }\mathbb{Z}}
+\underbrace{\det A_m^{k}=U^{(m)}_{k+1}U^{(m)}_{k-1}-\bigl(U^{(m)}_k\bigr)^{2}}_{\text{das ENTRADAS, em }\mathbb{Z}}
 \qquad\text{e}\qquad
 \underbrace{\sigma^{k}(\sigma\dg)^{k}=N(\sigma^{k})=a^{2}+mab-b^{2}}_{\text{ESPECTRAL, o produto das duas faces}}
 \]
@@ -250,7 +279,10 @@ Nas duas direcções próprias, uma cresce e a outra encolhe:
 $\abs{\sigma}>1$, $\abs{\sigma\dg}<1$, com
 $\abs{\sigma^{k}(\sigma\dg)^{k}}=1$. \textbf{O intervalo não é postulado
 pequeno; ele fica pequeno porque uma face cresce enquanto a face dual é
-obrigada a encolher para preservar a unidade.} E «área», «comprimento» e
+obrigada a encolher, com o produto das duas faces preservado em módulo por
+$\abs{N(\sigma)}=1$.} A condição é essa, e não é decorativa: é exactamente ela
+que o contraexemplo do \S\ref{sec:contra} viola, com $N=-4$.
+E «área», «comprimento» e
 «largura» nomeiam aqui um determinante, que numa matriz de inteiros é um
 inteiro: nenhum contínuo foi pedido emprestado para dizer isto.
 \end{observacao}
@@ -259,13 +291,18 @@ inteiro: nenhum contínuo foi pedido emprestado para dizer isto.
 \section{O encaixe}\label{sec:encaixe}
 
 \begin{teorema}\label{thm:encaixe}
-Os convergentes caem alternadamente nos dois lados, cada intervalo está
+Para \textbf{cada $m$}, os convergentes $c_k=U^{(m)}_{k+1}/U^{(m)}_k$ caem
+alternadamente nos dois lados de $\sigma_m$, cada intervalo está
 \textbf{dentro} do anterior, e por Cassini metálico
-$F_{k+1}^{2}-F_{k+2}F_k=(-1)^{k}$ a largura é
 \[
-\abs{c_{k+1}-c_k}=\frac{1}{F_kF_{k+1}},
+\bigl(U^{(m)}_{k+1}\bigr)^{2}-U^{(m)}_{k+2}U^{(m)}_k=(-1)^{k}
 \]
-exacta e sem uma divisão. $\square$
+a largura é
+\[
+\boxed{\;\abs{c_{k+1}-c_k}=\frac{1}{U^{(m)}_kU^{(m)}_{k+1}}\;}
+\]
+exacta e sem uma divisão. Em $m=1$ isto é a identidade de Fibonacci; nos outros
+sete metais medidos, não. $\square$
 \end{teorema}
 \colunas{o encaixe alcança $\mathbb{R}$ (\code{thm:encaixe})}
         {os intervalos, com largura inteira}
@@ -277,11 +314,25 @@ exacta e sem uma divisão. $\square$
 Esta é a secção que a versão anterior não tinha, e a sua falta era uma
 ressalva inventada pelo autor.
 
-\begin{definicao}\label{def:real}
-Um real \emph{é} uma sucessão de quocientes parciais $a_k\geq1$, com
-convergentes $p_k/q_k$ dados por $q_{-1}=0$, $q_0=1$,
-$q_k=a_kq_{k-1}+q_{k-2}$. A bijecção entre reais e essas sucessões é clássica e
-cita-se.
+\begin{definicao}[e o domínio fecha-se dos dois lados]\label{def:real}
+Os convergentes são $p_k/q_k$ com
+\[
+q_{-1}=0,\qquad q_0=1,\qquad q_k=a_kq_{k-1}+q_{k-2},
+\]
+e a correspondência é esta, com as duas metades ditas:
+\[
+\boxed{
+\begin{array}{ll}
+\text{cada IRRACIONAL} & \text{uma sucessão INFINITA }(a_k)_{k\geq1},\ a_k\geq1\\[2pt]
+\text{cada RACIONAL}   & \text{o caso em que o processo TERMINA}
+\end{array}}
+\]
+Dizer só a primeira linha deixaria $\mathbb{R}$ a descoberto, e a afirmação
+deste paper é sobre $\mathbb{R}$ inteiro. Para $a/b$ o algoritmo termina com
+resto zero, o último convergente dá $a/b$ \textbf{exacto} --- não aproximado
+---, e a ambiguidade final $[a_0;\ldots,a_n]=[a_0;\ldots,a_n{-}1,1]$ resolve-se
+por convenção canónica. \emph{Medido} em $3660$ racionais: termina em todos,
+exacto em todos, e a ambiguidade verifica-se nos $3540$ com $a_n\geq2$.
 \end{definicao}
 
 \begin{teorema}[a construção corre sobre quocientes arbitrários]\label{thm:todos}
@@ -292,16 +343,23 @@ $220$ sucessões (o ouro, a prata e $218$ arbitrárias), $3651$ pares, sem
 excepção. \emph{O metálico é o caso periódico, e não o caso único.} $\square$
 \end{teorema}
 
-\begin{teorema}[o ouro é o real mais lento que existe]\label{thm:ouro}
+\begin{teorema}[a extremalidade da régua: $\varphi$ minimiza o crescimento]\label{thm:ouro}
 Com $a_k\geq1$,
 \[
 \boxed{\;q_k\geq F_k\ \text{para todo real},\qquad
 \text{com igualdade em TODO }k\ \text{só na sucessão de uns.}\;}
 \]
-Logo a largura $1/(q_kq_{k+1})$ de \emph{qualquer} real é menor ou igual à do
-ouro: \textbf{uma só taxa limita $\mathbb{R}$ inteiro}, e é a do ouro. A família
-metálica não é o escopo da construção --- é o seu caso \textbf{extremo}.
-$\square$
+Logo a largura $1/(q_kq_{k+1})$ é minorada uniformemente: \textbf{uma só taxa
+limita a construção inteira}, e é a do ouro. A família metálica não é o escopo
+--- é o caso \textbf{extremo}. $\square$
+
+\medskip
+\noindent\emph{E o escopo da palavra «lento» diz-se}, para não privilegiar
+ninguém: $\varphi$ é o \textbf{irracional de crescimento mínimo dos
+denominadores dos convergentes, entre as expansões com $a_k\geq1$}. Não é uma
+propriedade de $\varphi$ contra os outros reais em geral --- os racionais nem
+sequer têm expansão infinita ---, é a \textbf{extremalidade da própria régua}:
+o pior caso do mecanismo, e por isso o que o limita.
 \end{teorema}
 \colunas{a torre, o dual, e a família metálica}
         {a construção para TODOS os reais, com o ouro a limitar}
@@ -327,9 +385,19 @@ $\tfrac ab<\sigma_m$ converte-se na comparação inteira
 \[
 2a-mb<0\quad\text{ou}\quad(2a-mb)^{2}<b^{2}\Delta .
 \]
-Nos $19\,360$ racionais varridos: nenhum cai \emph{em cima} --- porque $\Delta$
-não é quadrado, que é dizer $\sigma\notin\mathbb{Q}$ --- e nenhuma das duas
-classes tem extremo, com o seguinte \emph{exibido} em cada caso. $\square$
+\textbf{E aqui as duas coisas não se confundem}, que é a hierarquia da primeira
+página aplicada a si própria:
+\begin{itemize}
+\item \emph{Que} nenhum racional caia em cima é \textbf{teorema geral} ---
+$\Delta=m^{2}+4$ não é quadrado, logo $\sigma_m\notin\mathbb{Q}$ ---, e o mesmo
+para a inexistência de extremo nas duas classes. Isso é o corte, e prova-se no
+Universal.
+\item A varredura dos $19\,360$ racionais \textbf{verifica a implementação}, e
+não demonstra o teorema. Uma varredura finita não podia demonstrá-lo, e não é
+para isso que está aqui.
+\end{itemize}
+Este paper \emph{realiza} o corte; a varredura confirma que a realização não
+diverge do que o Universal prova. $\square$
 \end{teorema}
 
 \noindent Portanto o bit não apenas \emph{representa} o número:
@@ -357,6 +425,21 @@ As hipóteses de corpo ordenado completo estão medidas --- corpo, ordem
 compatível com as operações, arquimediano com o $n$ exibido, completo pelo
 corte --- em \code{tests/ordenado.c} ($7{:}0$).
 
+\noindent\textbf{E são duas rotas, que não se substituem:}
+\[
+\boxed{
+\begin{array}{lcl}
+\text{cortes} &\longrightarrow& \text{corpo ordenado completo}
+\ \longrightarrow\ \text{unicidade}\ \longrightarrow\ \mathbb{R}\\[4pt]
+(a_k) \ \longrightarrow\ (p_k/q_k) &\longrightarrow&
+\text{intervalos encaixados}\ \longrightarrow\ \text{corte}
+\end{array}}
+\]
+A primeira é a \emph{identificação}; a segunda é o \emph{mecanismo}.
+\textbf{A fracção contínua não define $\mathbb{R}$: ela é o mecanismo
+geométrico que realiza os cortes} --- e é por isso que este paper a usa, e é
+por isso que a identificação continua a ser citada e não reclamada.
+
 \begin{observacao}[a identificação com $\mathbb{R}$]
 Que um corpo ordenado completo seja isomorfo a $\mathbb{R}$, e único a menos de
 isomorfismo, é teorema clássico, e cita-se como tal. \textbf{Mas a passagem a
@@ -370,16 +453,42 @@ mesmo eixo, não duas teorias concorrentes.}
 %======================================================================
 \section{E só então $\pi$}\label{sec:pi}
 
+O traço do polígono de $n$ lados é, sobre os reais,
+\[
+t_n=2\cos\frac{\pi}{n},
+\]
+e a companheira $C_n=\begin{psmallmatrix}t_n&-1\\1&0\end{psmallmatrix}$ tem
+ordem $2n$. \textbf{Mas $t_n$ não é inteiro} --- $t_4=\sqrt2$, $t_6=\sqrt3$ ---,
+e é aqui que está a passagem que dá o título a esta secção: nos modelos finitos
+usados para a realização, \emph{o traço irracional é substituído por uma raiz
+inteira do polinómio correspondente no corpo finito}. É isso que faz $\pi_k$ ser
+\textbf{realizado} e não aproximado.
+
 \begin{teorema}\label{thm:pi}
-Pela tricotomia do traço: os polígonos são os membros \textbf{elíticos}, e a
-companheira $C=\begin{psmallmatrix}t&-1\\1&0\end{psmallmatrix}$ tem ordem
-exactamente $2n$ --- $6$ no triângulo, $8$ no quadrado, $12$ no hexágono ---
-com as raízes \emph{realizadas inteiras} nos primos das ordens: $\sqrt2$ é $11$
-e $6$ em $\mathbb{F}_{17}$, $\sqrt3$ é $9$ e $4$ em $\mathbb{F}_{13}$. Os
-metais são os \textbf{hiperbólicos}, que foram o motor
-dos \S\S\ref{sec:dual}--\ref{sec:todos}. E o círculo é o \textbf{parabólico}
-$t=2$, cuja ordem módulo $p$ é exactamente $p$ --- ímpar, logo nunca divisor da
-ordem $2n$ de andar nenhum. $\square$
+\emph{(i) os elíticos.} Com $t_n=2\cos(\pi/n)$ realizado no primo da ordem,
+\[
+\begin{array}{llll}
+n=3: & t_3=1 & \text{já inteiro} & \operatorname{ord}C_3=6\\
+n=4: & t_4=\sqrt2\equiv11\ (\mathrm{mod}\ 17) & 11^{2}=2\ \text{em }\mathbb{F}_{17}
+     & \operatorname{ord}C_4=8\\
+n=6: & t_6=\sqrt3\equiv9\ (\mathrm{mod}\ 13) & 9^{2}=3\ \text{em }\mathbb{F}_{13}
+     & \operatorname{ord}C_6=12
+\end{array}
+\]
+--- ordem exactamente $2n$ em cada caso, e a raiz é a \emph{outra} raiz também
+($6$ em $\mathbb{F}_{17}$, $4$ em $\mathbb{F}_{13}$: os dois sinais).
+
+\emph{(ii) os hiperbólicos} são os metais, o motor dos
+\S\S\ref{sec:dual}--\ref{sec:todos}.
+
+\emph{(iii) o parabólico.} Para $t=2$ o polinómio é $x^{2}-2x+1=(x-1)^{2}$, logo
+$C=I+N$ com $N^{2}=0$; em característica $p$ ímpar $C^{k}=I+kN\neq I$ para
+$1\leq k<p$ e $C^{p}=I$, portanto
+\[
+\boxed{\;\operatorname{ord}C=p\;}
+\]
+--- ímpar, e por isso \textbf{nunca} divisor da ordem $2n$ de andar nenhum.
+Medido nos sete primos. $\square$
 \end{teorema}
 
 \[
@@ -394,7 +503,7 @@ membro-limite. \emph{Assim o círculo não é usado para construir a reta: a ret
 construída explica por que o círculo aparece como o seu gume.}
 \colunas{$\pi$ é o membro-limite da família (\code{thm:pi-familia})}
         {$\pi_k$ exacto por andar, realizado nos primos das ordens}
-        {\code{geometria\_real.c} \S L10; \code{pi\_familia.js}}
+        {\code{geometria\_real.c} \S L10; \code{pi\_familia.js} ($7{:}0$)}
 
 %======================================================================
 \section{O contraexemplo ao mecanismo}\label{sec:contra}
@@ -437,7 +546,7 @@ fornece o contínuo.} Não usámos a reta para construir os números: construím
 reta a partir do processo que os produz.
 
 \medskip
-\emph{Medido:} \code{tests/geometria\_real.c} ($15{:}0$), com
+\emph{Medido:} \code{tests/geometria\_real.c} ($18{:}0$), com
 \code{tests/ortonormal.c} ($6{:}0$), \code{tests/metalica.c},
 \code{tests/pisotbase.c}, \code{tests/ordenado.c} ($7{:}0$),
 \code{tests/pi\_familia.js} ($7{:}0$),
