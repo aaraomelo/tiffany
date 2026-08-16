@@ -33,3 +33,17 @@ mesma linha tem.
    apareceram como **vermelhas noutro andar**, nunca no que eu estava a editar.
 
 Ver [[feedback-duas-reguas]] (letras coladas), [[feedback-o-write-que-diz-updated]].
+
+**E a variante que ACUMULA:** `sed -i 's/(\$21{:}0\$)/(\$24{:}0\$)/g'` para
+actualizar a contagem do MEU medidor — e o paper citava outro com a mesma contagem. O
+`arquimedes_area.js`, que tem **21**, foi arrastado ronda após ronda:
+`21 → 24 → 27 → 36 → 38 → 43 → 45 → 48 → 51 → 57 → 58`. Onze substituições, nenhuma vista.
+
+**Why:** a contagem de um medidor é um número de dois dígitos, e há dezenas de medidores. A
+colisão não é improvável — é provável.
+
+**How to apply:** actualizar contagens é o caso onde o `count=1` não basta, porque a
+ocorrência certa não é a primeira: tem de ser **ancorada no nome do ficheiro**, e nunca no
+número sozinho. E a defesa barata: conferir cada `(N:0)` do paper contra a bateria — foi
+assim que apareceu, e o excesso de margem foi o que me fez olhar. Ver
+[[feedback-o-numero-que-nao-cabe]].

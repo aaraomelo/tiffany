@@ -29,11 +29,15 @@
 \newcommand{\abs}[1]{\lvert #1\rvert}
 \newcommand{\dg}{^{\dagger}}
 % as três colunas, em cada peça: quem prova, quem realiza, quem verifica
+% as tres colunas, em cada peca: quem prova, quem realiza, quem verifica.
+% O separador leva \penalty0 para a linha poder quebrar nele — sem isso o \quad
+% e cola rigida e a caixa passa da margem.
+\newcommand{\sepcol}{\quad\penalty0$\big|$\quad\penalty0}
 \newcommand{\colunas}[3]{%
-\par\smallskip\noindent{\footnotesize
-\textbf{prova} (Universal): #1\quad$\big|$\quad
-\textbf{realiza} (aqui): #2\quad$\big|$\quad
-\textbf{verifica}: #3}\par\smallskip}
+\par\smallskip\noindent{\footnotesize\raggedright
+\textbf{prova} (Universal): #1\sepcol
+\textbf{realiza} (aqui): #2\sepcol
+\textbf{verifica}: #3\par}\smallskip}
 \input{gkcapa}
 \begin{document}
 \gkcapa{A Construção de $\mathbb{R}$}
@@ -46,10 +50,12 @@
 reconstrói o sistema nem decide se ele é permitido: \textbf{realiza
 geometricamente a construção que o Universal já fechou}, na ordem
 \[
-\boxed{\;
-\underbrace{\text{Lei 0}}_{\text{fundação}}\to\text{leis }0,\ldots,7\to\text{base ortonormal}\to\text{bit a bit}\to\text{dual}
-\to\text{recorrência}\to\text{Pisot}\to\text{encaixe}\to\text{corte}
-\to\mathbb{R}\to\pi_k .\;}
+\boxed{\;\begin{gathered}
+\underbrace{\text{Lei 0}}_{\text{fundação}}\ \to\ \text{leis }0,\ldots,7\ \to\
+\text{base ortonormal}\ \to\ \text{bit a bit}\ \to\ \text{dual}\\
+\to\ \text{recorrência}\ \to\ \text{Pisot}\ \to\ \text{encaixe}\ \to\ \text{corte}
+\ \to\ \mathbb{R}\ \to\ \pi_k
+\end{gathered}\;}
 \]
 Cada seta deixa um objecto matemático no papel e uma verificação no
 repositório. A base das
@@ -116,10 +122,11 @@ com sentido fixo --- \textbf{demonstra} (deriva das hipóteses), \textbf{realiza
 
 \medskip
 \noindent E a regra editorial que governa a ordem:
-\[
-\boxed{\;\text{\textbf{nenhuma definição de comprimento, área ou limite geométrico}}\\
-\text{\textbf{contínuo antes da construção do corte.}}\;}
-\]
+\begin{center}
+\fbox{\parbox{0.88\textwidth}{\centering
+\textbf{nenhuma definição de comprimento, área ou limite geométrico contínuo\\
+antes da construção do corte.}}}
+\end{center}
 Assim formulada, ela é cumprível e o texto cumpre-a: antes do corte há
 $\mathbb{P}^1$, Möbius, o alfabeto $(T,X)$, o encaixotador, o cone, a espiral,
 poliedros e Euler --- todos \emph{discretos ou combinatórios} ---, e nenhum
@@ -251,13 +258,12 @@ contínua}, pelo \textbf{período}.
 
 \begin{teorema}[a classificação, e o nível acima]\label{thm:lagrange}
 \[
-\boxed{
-\begin{array}{lll}
+\boxed{\;\begin{array}{lcl}
 \text{CF \textbf{finita}} & \longrightarrow & \text{RACIONAL}\\[2pt]
-\text{CF eventualmente \textbf{periódica} de período } p
- & \longrightarrow & \text{IRRACIONAL \textbf{QUADRÁTICO}}\quad(\text{Lagrange})\\[2pt]
+\text{CF \textbf{periódica} de período } p & \longrightarrow &
+\text{IRRACIONAL \textbf{QUADRÁTICO}\ (Lagrange)}\\[2pt]
 \text{CF \textbf{não periódica}} & \longrightarrow & \text{irracional não quadrático}
-\end{array}}
+\end{array}\;}
 \]
 O caso $p=1$ é a família metálica. E o \textbf{nível acima} --- os convergentes ---
 continua \emph{racional}, obedecendo a uma \textbf{progressão geométrica de ordem
@@ -516,8 +522,10 @@ a identidade discreta, e é a única das três que se \emph{usa} na conta;
 \emph{Lebesgue} entra como interpretação estrutural, e não como ingrediente; e a
 \textbf{completude é herdada} do Universal. Nada aqui constrói o limite clássico:
 \[
-\boxed{\;\text{\emph{nesta realização}, o limite lê-se como o \textbf{ponto fixo}}\\
-\text{da compatibilidade entre as três contagens.}\;}
+\boxed{\;\begin{gathered}
+\text{\emph{nesta realização}, o limite lê-se como o \textbf{ponto fixo}}\\
+\text{da compatibilidade entre as três contagens}
+\end{gathered}\;}
 \]
 
 \begin{corolario}[a tricotomia distribui-se pelas três leituras]\label{cor:distribui}
@@ -1197,13 +1205,12 @@ quatro cláusulas nos oito $\sigma_m$; $28$ pares separados}
 \medskip
 \noindent Assim a divisão fica limpa, e cada peça faz exactamente o seu trabalho:
 \[
-\boxed{
-\begin{array}{ll}
-\text{o \textbf{mecanismo} entrega o corte}
- & \text{---\ e o Universal identifica os cortes com o corpo completo}\\[2pt]
-\text{o \textbf{pombal} dá a unicidade dos APROXIMANTES RACIONAIS}
- & \text{---\ não há dois racionais distintos em }I_K
-\end{array}}
+\boxed{\;\begin{array}{l}
+\text{o \textbf{mecanismo} entrega o corte;}\\
+\quad\text{e o Universal identifica os cortes com o corpo completo}\\[3pt]
+\text{o \textbf{pombal} dá a unicidade dos \textsc{aproximantes racionais}:}\\
+\quad\text{não há dois racionais distintos em }I_K
+\end{array}\;}
 \]
 \[
 \boxed{
@@ -1257,8 +1264,10 @@ formulação exacta, que é uma escolha metodológica e não uma tese sobre
 fundamentos --- outra construção pode perfeitamente axiomatizar $\mathbb{R}$ por
 sucessões de fracção contínua:
 \[
-\boxed{\;\text{Neste paper a CF \textbf{não} é a definição axiomática de }
-\mathbb{R};\ \text{é o \textbf{mecanismo de realização} dos cortes.}\;}
+\boxed{\;\begin{gathered}
+\text{neste paper a CF \textbf{não} é a definição axiomática de }\mathbb{R};\\
+\text{é o \textbf{mecanismo de realização} dos cortes}
+\end{gathered}\;}
 \]
 É também o estatuto que o \emph{Teoria} já lhe dá: o corpo dual e as duas leis são
 o \textbf{fundamento}; a Möbius de Fibonacci, o gato e os convergentes são a
@@ -1346,8 +1355,10 @@ sendo o segundo uma \textbf{realização modular de uma relação algébrica}, e
 $\sqrt{4-t_n^{2}}$ e a passagem da raiz real para uma raiz em $\mathbb{F}_p$ exigiria
 estrutura adicional:
 \[
-\boxed{\;\text{a realização modular fecha a \textbf{relação algébrica do traço};}
-\quad\text{as áreas e }\pi_n\text{ permanecem na realização \textbf{real}.}\;}
+\boxed{\;\begin{gathered}
+\text{a realização modular fecha a \textbf{relação algébrica do traço};}\\
+\text{as áreas e }\pi_n\text{ permanecem na realização \textbf{real}}
+\end{gathered}\;}
 \]
 
 \begin{teorema}\label{thm:pi}
@@ -1462,7 +1473,7 @@ utilizada no passo que preserva o módulo do produto dual. Daqui não se conclui
 caracterização nenhuma --- «tem de ser unidade e Pisot» não está demonstrado neste
 quadro.
 \colunas{---}{o passo nomeado onde a cadeia parte}
-        {\code{geometria\_real.c} \S L11}
+        {\code{geometria\_real.c}}
 
 %======================================================================
 \section{A construção está fechada}\label{sec:fechada}
@@ -1486,8 +1497,10 @@ uma estrutura binária de oito leis --- a base fornece as coordenadas, a dualida
 fornece a recorrência, e o corte fornece o contínuo}, com a distinção que o corpo
 do paper estabelece:
 \[
-\boxed{\;\text{a família metálica fornece o \textbf{mecanismo extremo explícito};}
-\quad\text{as CF \textbf{generalizam} o encaixe a todos os reais.}\;}
+\boxed{\;\begin{gathered}
+\text{a família metálica fornece o \textbf{mecanismo extremo explícito};}\\
+\text{as CF \textbf{generalizam} o encaixe a todos os reais}
+\end{gathered}\;}
 \]
 
 \smallskip
@@ -1497,10 +1510,21 @@ Universal}, e é nessa realização que a recta real aparece como o corpo ordena
 completo.
 
 \medskip
-\emph{Medido:} \code{tests/geometria\_real.c} ($58{:}0$), com
-\code{tests/ortonormal.c} ($6{:}0$), \code{tests/metalica.c},
-\code{tests/pisotbase.c}, \code{tests/ordenado.c} ($7{:}0$),
-\code{tests/pi\_familia.js} ($7{:}0$),
-\code{tests/arquimedes\_area.js} ($58{:}0$) e \code{tests/geometrico.js}.
+\noindent\emph{Verificado por:}
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+medidor & unidades \\
+\midrule
+\code{tests/geometria\_real.c}    & $58{:}0$ \\
+\code{tests/arquimedes\_area.js}  & $21{:}0$ \\
+\code{tests/ordenado.c}           & $7{:}0$ \\
+\code{tests/pi\_familia.js}       & $7{:}0$ \\
+\code{tests/ortonormal.c}         & $6{:}0$ \\
+\code{tests/metalica.c}, \code{tests/pisotbase.c},
+\code{tests/geometrico.js} & \\
+\bottomrule
+\end{tabular}
+\end{center}
 
 \end{document}
