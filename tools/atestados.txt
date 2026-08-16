@@ -413,7 +413,7 @@ saltos 6ee5a6b83928bee0 0
 selberg 3a2bb3ff7f1dbcb8 0
 selo f6d39d6487a0f0aa 0
 sem_chute 56b9981f39111844 0
-sem_ramo 8142003fbfc3bae0 0
+sem_ramo a6e38ca24a7eda51 0
 semantico eb5372d2769edde6 0
 semente 98e9a0194e17f02d 0
 significado ff504aa181796ca5 0

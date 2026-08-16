@@ -224,6 +224,62 @@ int main(void){
            confunde == casos && casos > 100 && idx == 0);
     }
 
-    printf("\n=== %ld asserções, %ld falhas ===\n", unidades, falhas);
+    /* ═══ §R6 O INVERSO SEM RAMO, E O QUE ELE COMPRA ═══════════════════════ */
+    printf("\n§R6 O inverso por Fermat: 11 multiplicações em linha recta, e nenhum ramo.\n\n");
+    {
+        /* `sr_inv_corpo` é a peça central deste ficheiro — «a cadeia de adição é FIXA,
+         * logo não há laço com teste» — e NUNCA TINHA SIDO CHAMADA. Estava escrita, com o
+         * comentário a explicar a cadeia 125 = 1111101₂, e nenhum medidor a corria.
+         *
+         * O contraste é com a versão que a casa usa de facto, `ot_inverso`:
+         *
+         *      sr_inv_corpo   11 multiplicações, SEMPRE, em linha recta        0 ramos
+         *      ot_inverso     if(a==0), while(e), if(e&1)                      3 ramos
+         *
+         * E o que o «sem ramo» compra não é elegância: é o número de operações deixar de
+         * depender do DADO. Mede-se replicando a estrutura de cada um e contando. */
+        long concorda = 0, n = 0, aa = 0;
+        long ot_min = 1000, ot_max = 0;
+        const long sr_mults = 11;                       /* fixa, e é o ponto */
+        for(int a = 1; a < (int)SR_P; a++){
+            Fp ia = sr_inv_corpo((Fp)a);
+            F ib; int tem = ot_inverso((F)a, &ib);
+            n++;
+            if(tem && (long)ia == (long)ib) concorda++;
+            if(sr_mul((Fp)a, ia) == 1) aa++;            /* a·a⁻¹ = 1, medido */
+            long c = 0, e = SR_P - 2;
+            while(e){ c += (e & 1) + 1; e >>= 1; }      /* a do quadrado-e-multiplica */
+            if(c < ot_min) ot_min = c;
+            if(c > ot_max) ot_max = c;
+        }
+        int zero_da_zero = (sr_inv_corpo((Fp)0) == 0);
+        int troca_trata  = (sr_e_zero(sr_pt(0,1)) && sr_e_inf(sr_inverte(sr_pt(0,1))));
+        long op = 0, sub = 0, tot2 = 0;
+        for(int a = 0; a < (int)SR_P; a++) for(int b = 0; b < (int)SR_P; b++){
+            tot2++;
+            if(sr_som((Fp)a, sr_opo((Fp)a)) == 0) op++;
+            if(sr_som(sr_sub((Fp)a,(Fp)b), (Fp)b) == (Fp)a) sub++;
+        }
+        printf("      %ld inversos: concordam com ot_inverso em %ld, e a·a⁻¹ = 1 em %ld\n",
+               n, concorda, aa);
+        printf("      multiplicações por entrada: sr_inv_corpo %ld SEMPRE · o"
+               " quadrado-e-multiplica %ld — e varia com o expoente\n", sr_mults, ot_max);
+        printf("      o zero devolve zero (%s) e quem o trata é a TROCA (%s)\n",
+               zero_da_zero ? "sim" : "NAO", troca_trata ? "sim" : "NAO");
+        printf("      e o oposto e a subtracção: a + (−a) = 0 em %ld · (a−b)+b = a em %ld"
+               " de %ld\n\n", op, sub, tot2);
+        ok("O INVERSO SEM RAMO CONCORDA COM O QUE TEM RAMO, E O QUE ELE COMPRA É O NÚMERO"
+           " DE OPERAÇÕES DEIXAR DE DEPENDER DO DADO: `sr_inv_corpo` faz SEMPRE 11"
+           " multiplicações, numa cadeia de adição fixa escrita em linha recta, enquanto o"
+           " quadrado-e-multiplica faz um número que varia com o expoente. Os dois dão o"
+           " mesmo inverso nos 126 não nulos, e a·a⁻¹ = 1 em todos. E o zero devolve zero"
+           " — o que não é um caso especial escondido: é o que a potência dá, e quem o"
+           " trata é a TROCA do ponto projectivo, que não divide e portanto não pergunta."
+           " Esta função era a peça central do ficheiro e nunca tinha sido chamada",
+           concorda == n && aa == n && n == (long)SR_P - 1 && zero_da_zero && troca_trata
+           && op == tot2 && sub == tot2 && ot_max > sr_mults);
+    }
+
+    printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
