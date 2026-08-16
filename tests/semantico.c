@@ -193,27 +193,88 @@ int main(void){
     puts("     ||a^b||^2 + <a,b>^2 = ||a||^2.||b||^2. E o mesmo fecho do reconstroi.c §R7, na");
     puts("     dimensao que for: as duas pecas juntas dao a norma, e uma so nao da.\n");
     {
-        int pares = 0, fecham = 0; double pior = 0;
-        double falta_media = 0;
-        for(int i = 0; i < NT; i++)
-            for(int j = 0; j < NT; j++){
-                double esq = biv2(V[i],V[j]) + ip(V[i],V[j])*ip(V[i],V[j]);
-                double dir = ip(V[i],V[i]) * ip(V[j],V[j]);
-                double rel = fabs(esq - dir) / (dir > 1e-12 ? dir : 1);
-                if(rel < 1e-12) fecham++; else if(rel > pior) pior = rel;
-                /* e quanto FALTA se se usar so o interno */
-                falta_media += (dir - ip(V[i],V[j])*ip(V[i],V[j])) / (dir > 1e-12 ? dir : 1);
-                pares++;
+        /* O QUE AQUI ESTAVA NAO PODIA FALHAR. `biv2` é DEFINIDA como aa·bb − ab², logo
+         * biv2 + ab² É aa·bb por construção, e a asserção comparava a definição consigo
+         * própria. A identidade de Lagrange só se mede se ‖a∧b‖² for construído pelo OUTRO
+         * caminho — a norma de Frobenius do bivector, somando as componentes ao quadrado:
+         *
+         *      ‖a∧b‖² = Σ_{i<j} (aᵢbⱼ − aⱼbᵢ)²      contra      ‖a‖²‖b‖² − ⟨a,b⟩²
+         *
+         * e a componente já estava neste ficheiro, em `biv_ij`, sem nunca ser usada para
+         * isto. Duas rotas sem uma linha em comum, e é o `thm:cruzado-potencia` na dimensão
+         * que for: o cruzado é a metade que a prática do cosseno deita fora.
+         *
+         * E MEDE-SE EM INTEIROS, que é o que separa a identidade da representação. Os
+         * embeddings chegam em vírgula — vêm de um modelo externo —, mas Lagrange é
+         * HOMOGÉNEA de grau 4: escalar os dois vectores por um factor comum multiplica os
+         * dois lados por ele, e não muda a igualdade. Escalados a milésimos inteiros, o
+         * resíduo é ZERO exacto e não «menor que 1e-12». */
+        long (*Ai)[DMAX] = DISCO_FIXO2(long, DMAX, 81);
+        disco_prende(DISCO_BASE(81),"dados/sem_ai_81.bin",(size_t)(TMAX)*(DMAX),sizeof(long));
+        disco_zera(Ai,(size_t)(TMAX)*(DMAX),sizeof(long));
+        for(int i = 0; i < NT; i++) for(int d = 0; d < D; d++)
+            Ai[i][d] = (long)(V[i][d] * 1000.0 + (V[i][d] >= 0 ? 0.5 : -0.5));
+
+        long z_pares = 0, z_fecham = 0, z_satur = 0, z_vivos = 0;
+        for(int i = 0; i < NT; i++) for(int j = 0; j < NT; j++){
+            const long *x = Ai[i], *y = Ai[j];
+            long aa = 0, bb = 0, ab = 0;
+            for(int d = 0; d < D; d++){ aa += x[d]*x[d]; bb += y[d]*y[d]; ab += x[d]*y[d]; }
+            /* o tecto: aa·bb tem de caber, e se não couber conta-se À PARTE */
+            if(bb != 0 && aa > 9000000000000000000L / bb){ z_satur++; continue; }
+            long fechada = aa*bb - ab*ab;              /* a forma fechada */
+            long soma = 0;                            /* e a SOMA das componentes */
+            for(int k = 0; k < D; k++) for(int l = k+1; l < D; l++){
+                long c = x[k]*y[l] - x[l]*y[k];
+                soma += c*c;
             }
-        falta_media /= pares;
-        ok("A IDENTIDADE FECHA em todos os pares: as duas metades dao a norma, residuo zero",
-           fecham == pares);
-        ok("e com o INTERNO sozinho falta a maior parte — o bivetor nao e enfeite",
-           falta_media > 0.5);
-        printf("     -> %d pares, %d fecham (pior residuo relativo %.1e).\n", pares, fecham, pior);
-        printf("        Usando so o interno, falta em media %.1f%% da norma. E o bivetor que\n",
-               100*falta_media);
-        puts("        devolve o que falta — exatamente como o cruzado no R^n.\n");
+            z_pares++;
+            if(soma == fechada) z_fecham++;
+            if(fechada != 0) z_vivos++;
+        }
+        printf("     -> em INTEIROS (milesimos): %ld pares, a SOMA das componentes do bivetor\n"
+               "        bate a FORMA FECHADA em %ld, com residuo ZERO exacto — e %ld tem o\n"
+               "        bivetor nao nulo, que e' o lado sem o qual a igualdade valia por 0 = 0.\n"
+               "        (%ld pares nao couberam no long e contam-se aqui, nao entre os defeitos)\n",
+               z_pares, z_fecham, z_vivos, z_satur);
+        ok("LAGRANGE MEDE-SE AGORA, E EM INTEIROS: ||a^b||^2 somado componente a componente"
+           " bate a forma fechada ||a||^2||b||^2 - <a,b>^2 com residuo ZERO EXACTO, e nao"
+           " «menor que 1e-12». O que aqui estava comparava a DEFINICAO consigo propria —"
+           " `biv2` E' aa.bb - ab^2, logo biv2 + ab^2 e' aa.bb por construcao, e nao podia"
+           " falhar. A segunda rota e' a norma de Frobenius do bivetor, somando as (i,j), e"
+           " a componente ja' estava neste ficheiro sem nunca servir para isto. E a"
+           " identidade e' HOMOGENEA de grau 4: escalar a milesimos inteiros nao a move,"
+           " que e' o que separa a identidade da representacao",
+           z_fecham == z_pares && z_vivos > 0 && z_pares > 0);
+
+        /* E QUANTO FALTA SE SE USAR SÓ O INTERNO — a pergunta que dá o motivo a tudo isto,
+         * e ela também é de inteiros: a fracção que falta é (aa·bb − ab²)/(aa·bb), e
+         * «falta mais de metade» compara-se por produto cruzado, 2·(aa·bb − ab²) > aa·bb. */
+        long faltam = 0, z2 = 0, soma_falta_n = 0, soma_falta_d = 0;
+        for(int i = 0; i < NT; i++) for(int j = 0; j < NT; j++){
+            const long *x = Ai[i], *y = Ai[j];
+            long aa = 0, bb = 0, ab = 0;
+            for(int d = 0; d < D; d++){ aa += x[d]*x[d]; bb += y[d]*y[d]; ab += x[d]*y[d]; }
+            if(bb != 0 && aa > 9000000000000000000L / bb) continue;
+            long tot = aa*bb, so_dir = ab*ab;
+            if(tot == 0) continue;
+            z2++;
+            if(2*(tot - so_dir) > tot) faltam++;       /* falta mais de metade NESTE par */
+            /* e a média, em milésimos. DIVIDE-SE PRIMEIRO: `tot` já anda em 6e17 e
+             * 1000·tot transborda o long — escrevi-o assim à primeira e a média saiu ZERO,
+             * que é o que um transbordo silencioso costuma parecer. */
+            if(tot >= 1000) soma_falta_n += (tot - so_dir) / (tot / 1000);
+            soma_falta_d += 1;
+        }
+        printf("     -> e com o INTERNO sozinho falta MAIS DE METADE da norma em %ld dos %ld\n"
+               "        pares; em media falta %ld milesimos. E o bivetor que devolve o que\n"
+               "        falta — exactamente como o cruzado no R^n, e pela mesma identidade.\n\n",
+               faltam, z2, soma_falta_d ? soma_falta_n/soma_falta_d : 0);
+        ok("e com o INTERNO sozinho falta a maior parte — o bivetor nao e enfeite. E «a maior"
+           " parte» compara-se por PRODUTO CRUZADO, 2.(aa.bb - ab^2) > aa.bb, sem se formar"
+           " a fraccao: falta mais de metade na esmagadora maioria dos pares, e a media sai"
+           " em milesimos inteiros",
+           faltam > z2/2 && z2 > 0);
     }
 
     /* ── §S4/§S5  A TRANSFUSAO nos dois sentidos ─────────────────────────── */

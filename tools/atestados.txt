@@ -421,7 +421,7 @@ selberg 3a2bb3ff7f1dbcb8 0
 selo 0719769040b53f6d 0
 sem_chute 56b9981f39111844 0
 sem_ramo a6e38ca24a7eda51 0
-semantico eb5372d2769edde6 0
+semantico c84539e0b757b453 0
 semente 98e9a0194e17f02d 0
 significado ff504aa181796ca5 0
 simula ec8b4e5edec62a25 0
