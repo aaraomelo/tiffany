@@ -53,8 +53,9 @@ geometricamente a construção que o Universal já fechou}, na ordem
 \boxed{\;\begin{gathered}
 \underbrace{\text{Lei 0}}_{\text{fundação}}\ \to\ \text{leis }0,\ldots,7\ \to\
 \text{base ortonormal}\ \to\ \text{bit a bit}\ \to\ \text{dual}\\
-\to\ \text{recorrência}\ \to\ \text{Pisot}\ \to\ \text{encaixe}\ \to\ \text{corte}
-\ \to\ \text{supremo}\ \to\ \mathbb{R}\ \to\ \pi_k
+\to\ \text{recorrência}\ \to\ \text{Pisot}\ \to\ \text{encaixe}\\
+\to\ \text{ponto fixo}\ \to\ \text{corte}\ \to\ \text{supremo}
+\ \to\ \mathbb{R}\ \to\ \pi_k
 \end{gathered}\;}
 \]
 Cada seta deixa um objecto matemático no papel e uma verificação no
@@ -509,6 +510,90 @@ em todos}
 transformação de Möbius associada ao cone, $x\mapsto m+1/x$} --- a sucessão de quociente
 constante. É por isso que ele dá o mecanismo \emph{extremo explícito}: não porque
 seja o caso geral, mas porque é o caso que não se move.
+
+%======================================================================
+\section{E o corte É o ponto fixo que falta ao andar}\label{sec:pontofixo}
+
+\noindent O ponto fixo não é uma observação lateral: \textbf{é o corte}. E a ordem
+é esta, com a Lei 0 a dar o arranque.
+
+\medskip
+\noindent\textbf{O andar tem três pontos, e deles sai tudo.} Em $\mathbb{P}^1$ os
+pontos base são $0=[0:1]$, $1=[1:1]$ e $\infty=[1:0]$. A Lei 0 diz $0\dg=\infty$, e
+por isso o $\infty$ \emph{não} é um número grande: é um ponto como os outros, e a
+inversão é a troca. Uma Möbius fica determinada por onde manda estes três.
+
+\begin{proposicao}[a órbita de $\infty$ são os convergentes]\label{prop:orbita}
+A acção de $A_m$ em coordenadas homogéneas é a matriz vezes o vector, \emph{sem uma
+divisão}:
+\[
+\boxed{\;[p:q]\ \longmapsto\ [\,m\,p+q\ :\ p\,],
+\qquad
+g^{k}(\infty)=\frac{p_k}{q_k}\;}
+\]
+--- partindo de $[1:0]$, o que sai é exactamente a recorrência dos convergentes, com
+$\abs{\det}=1$ em todos os passos. \emph{E o ponto de partida só é legítimo por causa
+da Lei 0}: num corpo sem ela, «começar no infinito» não quer dizer nada. $\square$
+\end{proposicao}
+
+\begin{teorema}[o ponto fixo é o vector próprio, e são dois]\label{thm:fixo-dual}
+$x$ é fixo por $g(x)=m+1/x$ exactamente quando $[x:1]$ é vector próprio de $A_m$,
+isto é $x^{2}=mx+1$. As duas raízes são o \textbf{par dual}, e o que as descreve são
+o traço e o determinante --- \emph{inteiros}, e não avaliados:
+\[
+\sigma+\sigma\dg=m=\operatorname{tr}A_m,
+\qquad
+\sigma\,\sigma\dg=-1=\det A_m ,
+\]
+por Cayley--Hamilton entrada a entrada, $A_m^{2}-\operatorname{tr}A_m\cdot A_m+\det
+A_m\cdot I=0$. $\square$
+\end{teorema}
+
+\medskip
+\noindent\textbf{E daqui sai o corte, que é a frase inteira em duas linhas:}
+\[
+\boxed{\;\begin{array}{ll}
+\text{no andar de \textbf{baixo}} & \text{a órbita é uma \emph{soma racional} que não
+termina}\\[3pt]
+\text{no andar de \textbf{cima}} & \text{o ponto fixo é \emph{um} ponto --- e é
+irracional}
+\end{array}\;}
+\]
+
+\begin{teorema}[o corte é a falta do ponto fixo]\label{thm:corte-fixo}
+Em coordenadas homogéneas o ponto fixo pede
+\[
+p^{2}-m\,p\,q-q^{2}=0,\qquad [p:q]\in\mathbb{P}^1(\mathbb{Q}),
+\]
+e isso não tem solução além da trivial. \textbf{A razão é a descida, e não uma
+varredura}: a identidade
+\[
+\boxed{\;q^{2}-m\,q\,(p-mq)-(p-mq)^{2}=-\bigl(p^{2}-m\,p\,q-q^{2}\bigr)\;}
+\]
+\textbf{troca o sinal}, logo $(p,q)\mapsto(q,\,p-mq)$ leva solução em solução; e no
+cone $p>q>0$ tem-se $0<p-mq<q$, ou seja o denominador \textbf{encolhe}. As duas
+juntas dão descida infinita em $\mathbb{N}$, impossível.
+
+\emph{Logo a órbita da Prop.~\ref{prop:orbita} corre toda em $\mathbb{P}^1(\mathbb{Q})$
+e o ponto para onde ela vai não está lá.} $\square$
+\end{teorema}
+
+\begin{corolario}[e o corte não é um defeito de $\mathbb{Q}$]\label{cor:corte-face}
+A \emph{mesma} equação $x^{2}=mx+1$ tem raiz em $\mathbb{F}_p$ exactamente quando
+$D=m^{2}+4$ é resíduo quadrático. Aí o ponto fixo \textbf{está} no andar, a órbita
+cai nele, e não há corte nenhum a fazer. Donde:
+\[
+\boxed{\;\text{o corte é a equação do ponto fixo a \textbf{não fechar} no corpo onde
+a órbita corre}\;}
+\]
+--- e não uma construção acrescentada por fora. $\square$
+\end{corolario}
+\colunas{a Lei 0, o gato como Möbius, e o ponto fixo do metal}
+        {o corte fundado no ponto fixo, e a descida que o proíbe em $\mathbb{Q}$}
+        {\code{tests/corte\_ponto\_fixo.c}: $264$ passos da órbita com $\abs{\det}=1$;
+Cayley--Hamilton nos $12$ metais; a descida em $29\,280$ triplos e o encolhimento nos
+$1342$ do cone; e $62$ dos $126$ metais de $\mathbb{F}_{127}$ com ponto fixo, por duas
+rotas concordantes --- contra ZERO em $\mathbb{Q}$, para todo $m$}
 
 %======================================================================
 \section{O Teorema Central funda o limite}\label{sec:central}
@@ -1176,7 +1261,9 @@ cai pelo menos como $2^{-k}$}, e é este o elo que a unicidade usa.
 perder.} É verdade que \emph{intervalos encaixados de comprimento a tender para
 zero não estabelecem, por si sós, a existência do ponto de intersecção}: em
 $\mathbb{Q}$ há cadeias assim sem habitante. \textbf{Mas o objecto construído não é
-o intervalo --- é o caminho}, e o caminho não espera por ponto nenhum:
+o intervalo --- é o caminho}, e o caminho não espera por ponto nenhum. E o
+\S\ref{sec:pontofixo} já disse \emph{o que} é esse ponto: o \textbf{ponto fixo da
+Möbius}, que a órbita persegue e o andar de baixo não contém.
 \[
 \boxed{\;\begin{array}{ll}
 \text{o \textbf{intervalo}} & \text{é a testemunha, e precisaria de um habitante que
