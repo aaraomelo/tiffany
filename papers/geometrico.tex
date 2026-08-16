@@ -704,6 +704,63 @@ $\sigma^{i}\sigma^{j}=\sigma^{i+j}$ em $64$ pares; a soma de contorno em $19$ va
 de $j$; e a factorização com a volta a reconstruir}
 
 %======================================================================
+\section{A transformada universal por andares: o espectro de cima nos de
+baixo}\label{sec:transf-andar}
+
+\noindent Factorizar o zero não decompõe só o polinómio: \textbf{decompõe o anel}. E
+decompor o anel é decompor o \emph{produto} --- que é a convolução.
+
+\begin{teorema}[a cadeia, e ela é um isomorfismo]\label{thm:crt-andar}
+Se $\mu=f\cdot g$ com $f,g$ coprimos, então
+\[
+\boxed{\;\mathbb{Z}[x]/(f g)\ \simeq\ \mathbb{Z}[x]/(f)\times\mathbb{Z}[x]/(g),
+\qquad z\longmapsto(z\bmod f,\ z\bmod g)\;}
+\]
+e no único caso da família que factoriza (\S\ref{sec:residuo}):
+\[
+\underbrace{\text{andar }5}_{x^{5}-x^{4}-1}\ \simeq\
+\underbrace{\text{andar }2}_{\Phi_6\ \text{(roda)}}\times
+\underbrace{\text{andar }3}_{\text{plástica (cresce)}}
+\]
+--- \emph{o espectro do andar de cima escreve-se nos andares de baixo}, com as
+dimensões a somar $2+3=5$. Não é analogia: é uma bijecção que respeita as duas
+operações, medida elemento a elemento nos $3125$ de $\mathbb{F}_5[x]/(\mu)$, sem uma
+colisão e sem caso de fora. $\square$
+\end{teorema}
+
+\begin{corolario}[e por isso a convolução desce]\label{cor:conv-desce}
+O produto em $\mathbb{Z}[x]/(\mu)$ \textbf{é} a convolução dos coeficientes seguida
+da redução. Como o isomorfismo é de \emph{anéis},
+\[
+\boxed{\;(z\cdot w)\bmod f=(z\bmod f)\cdot(w\bmod f),
+\qquad\text{e o mesmo em } g\;}
+\]
+--- \textbf{convolver no andar 5 é convolver no 2 e no 3 ao mesmo tempo}. A operação
+desce com o espectro. $\square$
+\end{corolario}
+
+\begin{teorema}[e a deconvolução existe onde cada componente é coprima]\label{thm:decon-andar}
+Dividir por $w$ é possível exactamente quando $w$ é invertível, e num produto de
+anéis isso é sê-lo em \emph{cada} componente:
+\[
+\boxed{\;w\ \text{invertível em } \mathbb{F}_p[x]/(D)
+\iff \gcd(w,D)=1\;}
+\]
+\textbf{E não «$w\neq0$»}, que é o caso particular de $D$ irredutível: aqui $\Phi_6$
+é irredutível em $\mathbb{F}_5$ e $x^{3}-x-1$ \emph{não} é --- a plástica tem raiz em
+$\mathbb{F}_5$, e o zero \textbf{desce outra vez}, um nível abaixo. Num anel com
+divisores de zero um elemento não nulo pode não ter inverso. \emph{É a mesma regra
+que esta casa já tinha para a deconvolução --- exacta onde o espectro não tem zeros
+---, agora lida por andares.} $\square$
+\end{teorema}
+\colunas{a transformada universal como avaliação nas folhas}
+        {o espectro do andar decomposto, e a convolução a descer com ele}
+        {\code{tests/transformada\_andar.c} ($4{:}0$): o CRT bijectivo nos $3125$ sem
+colisão; $40\,000$ pares com o produto e a soma a descer; a lei da deconvolução em
+$300$ elementos, com $77$ do caso que decide --- uma componente coprima e a outra
+não; e as raízes a somar, $1=0+1$ em $\mathbb{F}_5$}
+
+%======================================================================
 \section{O Teorema Central funda o limite}\label{sec:central}
 
 \begin{teorema}[Hurwitz conta, Lebesgue mede, Gentil casa]\label{thm:central}

@@ -460,6 +460,7 @@ traduz_pi_dim e3de288015d88fdc 0
 traduz_volta 9302ea3367def892 0
 transforma 482ec2df8e69cd65 0
 transformada 23899586ee0774d4 0
+transformada_andar 3ef45a35ce8a480b 0
 transfusao 103d2692f48b184b 0
 travessia 4d90fe8423093207 0
 tres_pontos 43ad5af8747edc63 0
