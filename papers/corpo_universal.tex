@@ -1251,6 +1251,59 @@ que torna a última um resultado em vez de uma escolha de ficheiro vazio.
 $\square$
 \end{teorema}
 
+\begin{corolario}[o refutador como segunda testemunha permanente ---
+a matemática continua grande, o detector fica pequeno]\label{cor:refutador}
+Pelo Teorema~\ref{thm:reducao} a face finita refuta e não prova. Este
+corolário põe isso a \emph{trabalhar}: as identidades que este quadro
+afirma passam pelo refutador \textbf{antes} de serem afirmadas, e a
+assimetria fica no fluxo:
+\[
+\boxed{\;
+\text{asserção}\ \longrightarrow\ \rho\ \longrightarrow\
+\begin{cases}
+\text{falha} & \Rightarrow\ \text{REFUTADA, e o contra-exemplo exibe-se}\\
+\text{passa} & \Rightarrow\ \text{segue para prova em }\mathbb{Q}
+\end{cases}\;}
+\]
+
+\textbf{(0) Exaustão nas variáveis, comprada baixando o primo.} Uma
+identidade em quatro entradas varre-se \emph{inteira} em $\mathbb{F}_{13}$
+($13^4=28\,561$) e não em $\mathbb{F}_{127}$ ($260$ milhões). Exaustão
+compra-se baixando o primo, não subindo o tempo: $129\,749$ atribuições
+por identidade, sobre cinco primos, e nada cresce porque o resto é o
+tecto.
+
+\textbf{(1) E vários primos, porque um só tem acidentes.} Uma identidade
+\emph{falsa} pode passar num corpo por acidente de característica:
+$(a+b)^2=a^2+b^2$ é falsa e \textbf{passa} em $\mathbb{F}_2$, porque o
+$2ab$ desaparece. Um primo é uma régua; cinco são a mesma pergunta feita
+onde os acidentes são diferentes.
+
+\textbf{(2) E o refutador tem de saber achar.} Cada identidade verdadeira
+vem com a sua \textbf{mutação} --- um sinal trocado, um termo em falta,
+um $+$ no lugar de um $\times$ ---, e todas caem, com o primo e os
+valores ditos. Um refutador que nunca acha nada não distingue «não há
+defeito» de «não sei procurar».
+
+\textbf{(3) E o silêncio dele é silêncio}, com testemunha: $p\cdot a=0$ é
+falso em $\mathbb{Q}$ e verdadeiro em $\mathbb{F}_p$ para todo $a$ ---
+passa nos cinco primos e é falso na face grande. Vazio quer dizer «não
+encontrei contra-exemplo nesta face», nunca «provei».
+
+\medskip
+\noindent Donde a divisão de trabalho que este quadro passa a ter:
+\[
+\boxed{\;\text{o Gato organiza as duas faces; a face exacta PROVA; a face
+finita CAÇA O CONTRA-EXEMPLO.}\;}
+\]
+\emph{A matemática continua grande. O detector de erro fica pequeno.}
+
+\emph{Medido:} \code{tests/refuta.c} ($5{:}0$): as cinco identidades da
+casa --- centro, membrana, Cayley--Hamilton, Lagrange e
+$\det(AB)=\det A\det B$ --- não caem em nenhum dos cinco primos, e as
+cinco mutações caem todas. $\square$
+\end{corolario}
+
 \begin{teorema}[a ponte entre as faces: a face pequena REFUTA, e não
 prova]\label{thm:reducao}
 O Teorema~\ref{thm:gato} diz que a lei é universal e a face é da

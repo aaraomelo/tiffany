@@ -75,7 +75,21 @@ racional** — coincidir na redução não é ser igual. Provar continua a ser t
 desmentir passa a ser de 𝔽₁₂₇, que é onde é barato. E a redução é TOTAL só por causa do ∞:
 quando 127 | q dá o POLO, não um erro.
 
-`tests/reducao.c` (6:0) · `tests/migracao.c` (5:0, equivalência em 213840 casos) · `tests/aritmetica.c` (6:0) · `tests/exaustao.c` (7:0) · `tests/sem_ramo.c` (6:0) ·
+**O REFUTADOR COMO SEGUNDA TESTEMUNHA PERMANENTE.** As identidades da casa — centro,
+membrana, Cayley-Hamilton, Lagrange, det(AB)=detA·detB — passam pelo refutador ANTES de
+serem afirmadas, exaustivamente nas quatro variáveis sobre CINCO primos (129749
+atribuições por identidade). Nenhuma cai; e as cinco MUTAÇÕES (sinal trocado, termo em
+falta, + no lugar de ×) caem todas, com o primo e os valores ditos.
+
+**Vários primos porque um só tem acidentes de característica:** (a+b)² = a²+b² é falsa e
+PASSA em 𝔽₂, porque o 2ab desaparece. E exaustão compra-se BAIXANDO o primo: 13⁴ = 28561
+contra 127⁴ = 260 milhões.
+
+**A divisão de trabalho:** o Gato organiza as duas faces; a face exacta PROVA; a face
+finita CAÇA O CONTRA-EXEMPLO. *A matemática continua grande; o detector de erro fica
+pequeno.*
+
+`tests/refuta.c` (5:0) · `tests/reducao.c` (6:0) · `tests/migracao.c` (5:0, equivalência em 213840 casos) · `tests/aritmetica.c` (6:0) · `tests/exaustao.c` (7:0) · `tests/sem_ramo.c` (6:0) ·
 `tests/projetiva.c` (6:0). No Universal: `thm:fibra-por-andar`, `thm:sem-ramo`,
 `cor:exaustao`, `cor:zero-infinito`. Ver [[project-teorema-do-gato]],
 [[feedback-saturacao-nao-e-resultado]], [[feedback-o-write-diz-updated]].

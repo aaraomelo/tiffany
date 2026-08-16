@@ -65,6 +65,7 @@
 #include "projetiva.h"  /* zero e infinito sao inversos: P1 e Mobius */
 #include "sem_ramo.h"   /* a aritmetica sem um if, em F127 */
 #include "reducao.h"    /* a ponte entre as faces: F127 refuta, nao prova */
+#include "refuta.h"     /* o refutador exaustivo sobre as identidades */
 #include "medida.h"     /* a conservacao metrica por dualidade, e a meta-inducao */
 #include "dforma.h"     /* o d: Lambda^0 -> ... -> Lambda^3, e os tres viram UM */
 #include "eletrico.h"
@@ -1422,6 +1423,7 @@ static const struct { int n; const char *nome; const char *enunciado; } CM10[] =
  {18, "zero e infinito", "são INVERSOS — e não há regra especial para o zero" },
  {19, "sem ramo",       "os `if` vêm da normalização — e em 𝔽₁₂₇ não há normalização" },
  {20, "refuta",         "a face pequena REFUTA e não prova — e é exaustiva" },
+ {21, "duas testemunhas","a face exacta PROVA; a finita CAÇA o contra-exemplo" },
 };
 static void cmetrica_resolve(int n){
     TICK_N = 0;
@@ -1714,6 +1716,58 @@ static void cmetrica_resolve(int n){
                     " estava como regra de cálculo, e o que este andar acrescenta é o"
                     " NOME dela — o Jacobiano não é um factor de correcção, é a medida"); }
         break;
+    case 21: {
+        tique7(0, "sejam as identidades que esta casa afirma");
+        tique7(1, "e o fluxo que elas passam a ter:");
+        printf("      asserção $\\to$ redução $\\to$ falha: REFUTADA;  passa: segue"
+               " para prova em $\\mathbb{Q}$\n");
+        tique7(2, "e a exaustão nas variáveis compra-se BAIXANDO o primo: quatro entradas"
+                  " varrem-se inteiras em 𝔽₁₃ (28561) e não em 𝔽₁₂₇ (260 milhões). E são"
+                  " VÁRIOS primos porque um só tem acidentes de característica — (a+b)² ="
+                  " a² + b² é falsa e PASSA em 𝔽₂, porque o 2ab desaparece");
+        tique7(3, "a lei é a assimetria do Teorema da ponte: refutar é conclusivo, passar"
+                  " não é. O silêncio do refutador é silêncio");
+        { struct { const char *nome; RfId4 f; } vs[] = {
+              { "o CENTRO", id_centro }, { "a MEMBRANA", id_membrana },
+              { "CAYLEY-HAMILTON", id_cayley }, { "LAGRANGE", id_lagrange },
+              { "det(AB) = detA·detB", id_detmult } };
+          struct { const char *nome; RfId4 f; } ms[] = {
+              { "centro com tr = a+a", mut_centro },
+              { "membrana com sinal trocado", mut_membrana },
+              { "Cayley sem o det", mut_cayley },
+              { "Lagrange sem o cruzado", mut_lagrange },
+              { "det(AB) = detA + detB", mut_detmult } };
+          int caiu_v = 0, caiu_m = 0;
+          printf("        as VERDADEIRAS                caiu?\n");
+          for(int i = 0; i < 5; i++){
+              int pr,a2,b2,c2,d2;
+              int r = rf_refuta(vs[i].f,&pr,&a2,&b2,&c2,&d2);
+              if(r) caiu_v++;
+              printf("        %-29s %s\n", vs[i].nome, r ? "CAIU (mau)" : "vazio");
+          }
+          printf("\n        as MUTAÇÕES                   caiu em    (a,b,c,d)\n");
+          for(int i = 0; i < 5; i++){
+              int pr = 0,a2 = 0,b2 = 0,c2 = 0,d2 = 0;
+              int r = rf_refuta(ms[i].f,&pr,&a2,&b2,&c2,&d2);
+              if(r){ caiu_m++;
+                  printf("        %-29s 𝔽%-9d (%d,%d,%d,%d)\n", ms[i].nome, pr,
+                         a2,b2,c2,d2);
+              } else printf("        %-29s NÃO CAIU (mau)\n", ms[i].nome);
+          }
+          printf("\n      e o custo: %ld atribuições por identidade, e nada cresce\n",
+                 rf_custo());
+          tique7(4, "a testemunha são as duas colunas: nenhuma verdadeira cai e todas as"
+                    " mutações caem, com o primo e os valores ditos. É o gume automático"
+                    " desta casa aplicado às suas próprias afirmações");
+          tique7(5, caiu_v == 0 && caiu_m == 5
+                 ? "logo o refutador passa a ser uma SEGUNDA TESTEMUNHA PERMANENTE: a face"
+                   " exacta prova, a face finita caça o contra-exemplo"
+                 : "os dois controlos não separaram — NÃO afirmo");
+          tique7(6, "e a VOLTA é a divisão de trabalho que fica: a matemática continua"
+                    " GRANDE — ela vive em ℚ e não muda —, e o detector de erro fica"
+                    " PEQUENO. Refutar é barato na face finita e caro na exacta; provar é"
+                    " o contrário. Cada face faz aquilo em que é barata"); }
+        break; }
     case 19: case 20: {
         tique7(0, n == 19 ? "seja a aritmética, e os ramos que ela tem"
                           : "sejam as duas faces: ℚ e 𝔽₁₂₇");
@@ -2295,7 +2349,7 @@ static int resolve_cmetrica(const char *f){
         long n = 0;
         while(*p >= '0' && *p <= '9') n = n*10 + (*p++ - '0');
         while(*p == ' ') p++;
-        if(!*p && n >= 1 && n <= 20){ cmetrica_resolve((int)n); return 1; }
+        if(!*p && n >= 1 && n <= 21){ cmetrica_resolve((int)n); return 1; }
         return 0;
     }
     return 0;
@@ -17692,18 +17746,18 @@ static int teste(void){
               fflush(stdout);
               int guarda = dup(1), nulo = open("/dev/null", O_WRONLY);
               if(guarda >= 0 && nulo >= 0) dup2(nulo, 1);
-              for(int k = 1; k <= 20; k++){
+              for(int k = 1; k <= 21; k++){
                   char fala[64];
                   snprintf(fala, sizeof fala, "medida %d", k);
                   if(resolve_cmetrica(fala)) por_n++; else vmal++;
               }
               for(size_t i = 0; i < sizeof CM10/sizeof *CM10; i++)
                   if(resolve_cmetrica(CM10[i].nome)) por_nome++; else vmal++;
-              if(resolve_cmetrica("medida 21")) vmal++;
+              if(resolve_cmetrica("medida 22")) vmal++;
               fflush(stdout);
               if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
               if(nulo >= 0) close(nulo);
-              printf("      os vinte: %d por número, %d por nome\n", por_n, por_nome);
+              printf("      os vinte e um: %d por número, %d por nome\n", por_n, por_nome);
               ok("O TEOREMA ESTÁ PROMOVIDO À ASSISTENTE em dez falas, e as três camadas"
                  " ficam alinhadas: o UNIVERSAL tem a lei — a conservação métrica por"
                  " dualidade —, o PEANO dá det|·| (a face discreta, e a contagem do"
@@ -17712,7 +17766,7 @@ static int teste(void){
                  " A passagem entre elas é σ_k σ_k′ = −1, que é a hipótese ESTRUTURAL já"
                  " estabelecida pela torre — e sem ela não há teorema, há uma definição a"
                  " olhar para si própria",
-                 vmal == 0 && por_n == 20 && por_nome == 20); }
+                 vmal == 0 && por_n == 21 && por_nome == 21); }
         }
 
         /* ═══ §C50 ANÁLISE REAL: as CINCO VIAS, e nenhuma arbitra as outras ══════
