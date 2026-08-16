@@ -205,7 +205,7 @@ fisica 934484ad77a8c2aa 0
 fita 708d74da822a8f82 0
 fonte_banco 53525f1a1b7fe74d 0
 fonte_corpo 6720cdb0b5e2252e 0
-forca 2523c31d50858a8b 0
+forca ce12f0a3e1661833 0
 fractal 6bab7fb3cd133ffb 0
 fronteira_front efe3776eb4b37362 0
 furos 6be7e5769751df24 0

@@ -51,6 +51,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include "reta.h"      /* Dir e Cruz: a operação */
 #include "unidade.h"
 
 /* o produto cruzado do R³, que é onde S = ‖a×b‖² se escreve sem rodeios */
@@ -77,13 +78,15 @@ printf("    é a identidade do círculo — a pressão É o cruzado, e s é o di
     long perp = 0, lagr = 0, pares = 0, nao_nulos = 0;
     for(long ax=-2; ax<=2; ax++) for(long ay=-2; ay<=2; ay++) for(long az=-2; az<=2; az++)
     for(long bx=-2; bx<=2; bx++) for(long by=-2; by<=2; by++) for(long bz=-2; bz<=2; bz++){
-        /* CHAMA-SE A FUNCAO cruz(), e nao se repete a formula aqui: um teste que recalcula
-         * o que devia testar mede a sua propria copia. Com estes inteiros pequenos o double
-         * representa exatamente, logo a comparacao continua a ser exata. */
-        double A[3] = {(double)ax,(double)ay,(double)az};
-        double B[3] = {(double)bx,(double)by,(double)bz};
-        double C[3]; cruz(A, B, C);
-        long c0 = (long)C[0], c1 = (long)C[1], c2 = (long)C[2];
+        /* CHAMA-SE A OPERAÇÃO DA LIB, e não se repete a fórmula aqui: um teste que
+         * recalcula o que devia testar mede a sua própria cópia. E chama-se a INTEIRA:
+         * os vectores são inteiros, o cruzado é inteiro, e o que aqui estava convertia
+         * para double, chamava o cruz() local e convertia de volta — uma viagem de ida e
+         * volta justificada com «o double representa exactamente». Representa; mas a
+         * operação inteira existe, e não precisa de ser representada. */
+        long A[3] = {ax, ay, az}, B[3] = {bx, by, bz}, C[3];
+        rt_cruz3(A, B, C);
+        long c0 = C[0], c1 = C[1], c2 = C[2];
         if(c0*ax + c1*ay + c2*az == 0 && c0*bx + c1*by + c2*bz == 0) perp++;
         long na = ax*ax+ay*ay+az*az, nb = bx*bx+by*by+bz*bz;
         long ip = ax*bx+ay*by+az*bz, nc = c0*c0+c1*c1+c2*c2;
@@ -175,6 +178,46 @@ printf("\n§G3  Π + s² = 1 É a identidade do círculo — a pressão é o CRU
         printf("      %-8.4f %-11.6f %-10.6f %-18.6f %.2e\n", th, s, Pi, cr2, dif);
     }
     printf("\n      pior diferença: %.3e\n\n", pior);
+    /* E A IDENTIDADE É EXACTA, SEM ÂNGULO NENHUM. O quadro acima toma θ, calcula cos e
+     * sin, e compara Π com o cruzado² a menos de 1e-15 — mas «Π + s² = 1» é LAGRANGE
+     * normalizado, e o §F1 deste ficheiro já o mede em ℤ com resíduo ZERO:
+     *
+     *      ‖a×b‖² + ⟨a,b⟩² = ‖a‖²·‖b‖²
+     *
+     * Basta não dividir. Com s = ⟨a,b⟩/(‖a‖‖b‖), a pressão Π = 1 − s² multiplicada pelo
+     * denominador comum ‖a‖²‖b‖² dá exactamente ‖a×b‖²:
+     *
+     *      Π·‖a‖²‖b‖²  =  ‖a‖²‖b‖² − ⟨a,b⟩²  =  ‖a×b‖²
+     *
+     * — a mesma frase, em inteiros e sem uma divisão. O cosseno era o preço de ter
+     * normalizado antes de medir. */
+    {
+        long ok_lag = 0, pares = 0, vivos = 0;
+        for(long t = 0; t < 400; t++){
+            long a[3], b[3], c[3];
+            for(int i = 0; i < 3; i++){
+                a[i] = ((t*7 + i*3) % 11) - 5;
+                b[i] = ((t*5 + i*2) % 9)  - 4;
+            }
+            rt_cruz3(a, b, c);
+            long na = rt_norma(a, 3), nb = rt_norma(b, 3);
+            long dir = rt_dir(a, b, 3), cru = rt_norma(c, 3);
+            pares++;
+            /* Π·‖a‖²‖b‖² = ‖a‖²‖b‖² − ⟨a,b⟩², e isso É ‖a×b‖² */
+            if(na*nb - dir*dir == cru) ok_lag++;
+            if(cru) vivos++;                      /* e o cruzado não é nulo */
+        }
+        printf("      e em INTEIROS, sem ângulo: Π·‖a‖²‖b‖² = ‖a‖²‖b‖² − ⟨a,b⟩² = ‖a×b‖²\n");
+        printf("      em %ld de %ld pares, com o cruzado não nulo em %ld — resíduo ZERO\n\n",
+               ok_lag, pares, vivos);
+        ok("A PRESSÃO ALGÉBRICA É O CRUZADO AO QUADRADO — Π + s² = 1 É cos² + sin² = 1, e"
+           " isto é LAGRANGE, que este ficheiro já media em ℤ no §F1 com resíduo zero. O"
+           " quadro acima toma θ, calcula cos e sin e compara a menos de 1e-15; mas basta"
+           " NÃO DIVIDIR: com s = ⟨a,b⟩/(‖a‖‖b‖), a pressão Π = 1 − s² multiplicada pelo"
+           " denominador comum ‖a‖²‖b‖² dá exactamente ‖a×b‖². A mesma frase, em inteiros e"
+           " sem uma divisão — o cosseno era o preço de ter normalizado antes de medir",
+           ok_lag == pares && vivos > pares/2 && pares == 400);
+    }
     ok("a PRESSÃO algébrica é o cruzado ao quadrado — Π + s² = 1 é cos² + sin² = 1", pior < 1e-15);
     printf("      Logo o imposto do hiper e o fator de potência de hoje são a mesma decomposição:\n");
     printf("      s é o DIRETO (mede), Π é o CRUZADO (ordena), e V = Π·S é o que o cruzado custa.\n");
