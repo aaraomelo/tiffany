@@ -241,7 +241,7 @@ printf("\n§W5  A INVERSÃO: o circuito quer fp = 1, o TECIDO quer fp = 0.\n\n")
                 double c = direto(w, b[k], D);
                 for(int i = 0; i < D; i++) w[i] -= c*b[k][i];
             }
-            if(sqrt(direto(w,w,D)) > 1e-9){ normaliza(w,D); memcpy(b[p], w, sizeof w); p++; }
+            if(direto(w,w,D) > 1e-18){ normaliza(w,D); memcpy(b[p], w, sizeof w); p++; }
         }
         posto[caso] = p;
     }

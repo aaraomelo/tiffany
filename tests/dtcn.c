@@ -228,7 +228,7 @@ printf("\n§H4  Os campos locais C_â: fechados, e R^n é a sua união.\n\n");
             double e = r.v[k] - proj*ah[k];
             perp += e*e;
         }
-        if(sqrt(perp) > 1e-14) malF++;
+        if(perp > 1e-28) malF++;      /* raiz(perp) > 1e-14  equivale a  perp > 1e-28 */
         /* e é a lei de C? */
         double eR = a1*a2 - b1*b2, eI = a1*b2 + b1*a2;
         if(fabs(r.s0 - eR) > 1e-14 || fabs(proj - eI) > 1e-14) malC++;

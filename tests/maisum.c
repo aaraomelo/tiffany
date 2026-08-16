@@ -69,7 +69,11 @@ printf("\n§M1  A BASE OBLÍQUA: a Gram não é I, e a reconstrução simples n�
     printf("\n      soma dos |⟨v_i,v_j⟩| fora da diagonal:  %.4f\n", fora);
     printf("      erro relativo da reconstrução simples:  %.2f%%\n\n", 100*sqrt(e/den));
     ok("a base é oblíqua — a Gram tem termos fora da diagonal", fora > 0.1);
-    ok("e a reconstrução simples NÃO fecha", sqrt(e/den) > 0.05);
+    /* «o erro relativo passa de 5%» é e/den > 0,0025, e isso compara-se sem raiz e sem
+     * dividir: e > 0,0025·den. O sqrt fica só na linha que IMPRIME, que é o sítio dele. */
+    ok("e a reconstrução simples NÃO fecha — e a comparação é sem raiz e sem dividir:"
+       " e > 0,0025.den, que é o mesmo que o erro relativo passar de 5%",
+       e > 0.0025 * den);
     printf("      É o mesmo 3,63%% do pinos.c §P3, agora numa base que se controla. A saída\n");
     printf("      conhecida é inverter a Gram — e o §M3 mostra a outra.\n");
 }

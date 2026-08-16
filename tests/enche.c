@@ -98,10 +98,10 @@ printf("\n§E3  A multiplicação: a Julia de z² é o círculo, e ele é invari
     for(int k = 1; k <= 20; k++){
         double x = k / 21.0, y = 0;                       /* dentro: |z| < 1 */
         for(int n = 0; n < 12; n++){ double nx = x*x - y*y, ny = 2*x*y; x = nx; y = ny; }
-        if(sqrt(x*x + y*y) < 1e-6) cai++;
+        if(x*x + y*y < 1e-12) cai++;          /* o QUADRADO do limiar, e a mesma pergunta */
         double X = 1.0 + k/10.0, Y = 0;                   /* fora: |z| > 1 */
         for(int n = 0; n < 6; n++){ double nx = X*X - Y*Y, ny = 2*X*Y; X = nx; Y = ny; }
-        if(sqrt(X*X + Y*Y) > 10.0) foge++;
+        if(X*X + Y*Y > 100.0) foge++;         /* idem: dez ao quadrado sao cem */
     }
     printf("      no círculo |z|=1:  %ld ficam, %ld saem\n", fica, mau);
     printf("      dentro:            %ld caem para 0\n", cai);

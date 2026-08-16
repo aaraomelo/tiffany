@@ -114,11 +114,25 @@ int main(void){
             aplica(rd,&a1,&b1);
             aplica(r2d,&a2,&b2); aplica(r2d,&a2,&b2);   /* duas batidas do nível de cima            */
             double dif = sqrt((a1-a2)*(a1-a2)+(b1-b2)*(b1-b2));
-            double difz = fabs(sqrt(L/C) - sqrt((L/2)/(C/2)));   /* e Z₀ não muda (o §B.7)          */
+            /* Z₀ FIXO SOB O ZOOM, e agora medido. O que aqui estava era
+             *      difz = |√(L/C) − √((L/2)/(C/2))|
+             * e (L/2)/(C/2) É L/C: as duas expressões são a mesma, logo difz era zero por
+             * construção e a tese do §B.7 nunca foi medida. Mede-se assim:
+             *
+             *   — Z₀² = L/C é uma FRACÇÃO de inteiros (1 mH e 1 nF são 1000 µH e 1000 pF),
+             *     e «os dois Z₀ são iguais» é L·C' = L'·C, por produto cruzado e sem raiz;
+             *   — e o GUME: um zoom que divide só o L NÃO preserva Z₀, e tem de falhar.
+             * Sem a segunda metade, «Z₀ fixo» continuava a valer por nada estar a mudar. */
+            const long Lu = 1000, Cp = 1000;                 /* µH e pF: a malha, em inteiros */
+            long Lz = Lu/2, Cz = Cp/2;                       /* o zoom do §B.7: (L,C) → (L/2,C/2) */
+            long Lg = Lu/2, Cg = Cp;                         /* o gume: divide só o L            */
+            int z_fixo  = (Lu*Cz == Lz*Cp);                  /* Z₀² igual, por cruzado */
+            int g_mexeu = (Lu*Cg != Lg*Cp);                  /* e este TEM de mudar     */
             if(d==N||d==16||d==4)
-                printf("         nível %3d : zoom(1 batida) == 2 batidas do nível %3d ? %.1e ; Z₀ fixo? %.1e\n",
-                       d, 2*d, dif, difz);
-            if(dif>1e-12 || difz>1e-12) erro_torre=1;
+                printf("         nível %3d : zoom(1 batida) == 2 batidas do nível %3d ? %.1e ;"
+                       " Z₀ fixo? %s (e com o zoom torto muda? %s)\n",
+                       d, 2*d, dif, z_fixo ? "sim" : "NAO", g_mexeu ? "sim" : "NAO");
+            if(dif>1e-12 || !z_fixo || !g_mexeu) erro_torre=1;
         }
         printf("     %s\n", VD(!((bom1 && !erro_torre)), "resíduo 0 — a torção é a rotação da borda: fecha em n passos, conserva energia, e a\n"
           "     torre fractal É o zoom do circuito: com o MESMO passo de tempo, dobrar ω₀ (o zoom\n"

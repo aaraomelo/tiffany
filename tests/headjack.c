@@ -237,10 +237,14 @@ int main(void){
         b_dipolo(Qb, rhat, B2);
         double d = 0;
         for(int i = 0; i < 3; i++) d += (B1[i]-B2[i])*(B1[i]-B2[i]);
-        double escala = sqrt(B1[0]*B1[0]+B1[1]*B1[1]+B1[2]*B1[2]);
-        ok("DOIS dipolos DIFERENTES dao o MESMO campo — o operador nao e injetivo, e prova-se",
-           sqrt(d) < escala * 1e-12);
-        printf("     -> Q_a = (1e-8, 0, 0) e Q_b = (1e-8, 0, 7e-9) dao |B1-B2| = %.1e.\n", sqrt(d));
+        /* DUAS raizes numa comparacao so, e nenhuma delas decidia nada:
+         *      raiz(d) < raiz(esc2)*1e-12   equivale a   d < esc2*1e-24
+         * — os dois lados sao nao negativos e x->x^2 e' monotona neles. */
+        double esc2 = B1[0]*B1[0]+B1[1]*B1[1]+B1[2]*B1[2];
+        ok("DOIS dipolos DIFERENTES dao o MESMO campo — o operador nao e injetivo, e prova-se."
+           " E a comparacao e' dos QUADRADOS: d < |B1|^2.1e-24, sem uma raiz de cada lado",
+           d < esc2 * 1e-24);
+        printf("     -> Q_a = (1e-8, 0, 0) e Q_b = (1e-8, 0, 7e-9) dao |B1-B2|^2 = %.1e.\n", d);
         puts("        Sao correntes distintas com o mesmo sinal. Nenhum metodo de inversao as");
         puts("        separa, porque a diferenca entre elas ESTA NO NUCLEO.");
         puts("");

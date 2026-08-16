@@ -176,7 +176,7 @@ printf("\n§Z4  SUBIR restitui a ortogonalidade — e é isso que torna reversí
         double c_cima = dot(rec2,x,N)/dot(x,x,N);
         double e = 0;
         for(int d = 0; d < N; d++){ double t = rec[d]/c_baixo - x[d]; e += t*t; }
-        if(sqrt(e) > 1e-12 || fabs(c_cima - 1.0) > 1e-12) mau++;
+        if(e > 1e-24 || fabs(c_cima - 1.0) > 1e-12) mau++;   /* raiz(e) > 1e-12 = e > 1e-24 */
         printf("      %-4d %-23s %-11.6f %-22s %.6f\n",
                n, "exata (÷ constante)", c_baixo, "exata (identidade)", c_cima);
     }

@@ -206,8 +206,8 @@ int main(void){
                 double dB = 0;
                 for(int i = 0; i < 3; i++) dB += (Ba[i]-Bb[i])*(Ba[i]-Bb[i]);
                 double dP = fabs(p_joule(Qa,vol,comp) - p_joule(Qb,vol,comp));
-                double escala = sqrt(Ba[0]*Ba[0]+Ba[1]*Ba[1]+Ba[2]*Ba[2]);
-                if(sqrt(dB) < escala*1e-12) colidem_B++;
+                double esc2 = Ba[0]*Ba[0]+Ba[1]*Ba[1]+Ba[2]*Ba[2];
+                if(dB < esc2*1e-24) colidem_B++;      /* os quadrados, sem duas raizes */
                 if(dP < p_joule(Qa,vol,comp)*1e-12) colidem_P++;
                 pares++;
             }
@@ -337,7 +337,7 @@ int main(void){
         for(int i = 0; i < 3; i++) dB += (Bp[i]-Bm[i])*(Bp[i]-Bm[i]);
         double dP = fabs(p_joule(Qp,vol,comp) - p_joule(Qm,vol,comp));
         ok("a corrente radial para DENTRO e para FORA da o mesmo B e o mesmo P — o sinal fica",
-           sqrt(dB) < 1e-30 && dP < 1e-30);
+           dB < 1e-60 && dP < 1e-30);            /* raiz(dB) < 1e-30  equivale a  dB < 1e-60 */
         puts("     -> as duas dao B identico e P identico. O par resolve o MODULO e nao o sinal.");
         puts("        E isto e a alfandega outra vez, um andar acima: o que sobrou sem dual");
         puts("        agora e o SINAL, e ele fica na garrafa ate aparecer a terceira medida.");
