@@ -47,6 +47,7 @@
 #include <string.h>
 #include <math.h>
 #include "unidade.h"
+#include "racionais.h"
 
 typedef struct { long a, b, c, d; } M2;                 /* [[a,b],[c,d]] */
 static M2 mul(M2 X, M2 Y){
@@ -181,7 +182,6 @@ printf("\n§M4  ⊕ é a SOMA DIRETA e ⊗ é KRONECKER — as dimensões do cor
         for(int i = 0; i < a; i++) for(int j = 0; j < a; j++) A[i][j] = (i==j) ? 2.0 : 0.3*(i-j);
         for(int i = 0; i < b; i++) for(int j = 0; j < b; j++) B[i][j] = (i==j) ? 3.0 : 0.2*(i+j);
         /* ⊕: o BLOCO DIAGONAL, construído */
-        int ns = a + b;
         /* limpar a matriz INTEIRA e não só ns×ns: a ordem conta-se varrendo até NX, e o lixo
          * da iteração anterior fazia a contagem dar mais — foi o que a asserção apanhou. */
         memset(R, 0, ((size_t)((NX)*(NX))*sizeof(double)));
@@ -745,27 +745,35 @@ printf("\n§M12 O POSTO ENCHE, E AÍ SOBE A DIMENSÃO — indução e meta-indu�
         /* os convergentes de φ: cada nível dá um vetor (p,q). Acumulam-se todos e mede-se
          * o posto do conjunto — se ele crescesse, a dimensão crescia. Não cresce. */
         long p0 = 1, q0 = 0, p1 = 1, q1 = 1;
-        double V[20][2]; int nv = 0;
+        long V[20][2]; int nv = 0;
         V[nv][0] = p1; V[nv][1] = q1; nv++;
         int postoFinal = 0, saturou = 1;
+        long cassini_mau = 0, cassini_n = 0;
         for(int k = 1; k < 14; k++){
             long pn = p1 + p0, qn = q1 + q0;     /* a_k = 1 para φ */
             p0 = p1; q0 = q1; p1 = pn; q1 = qn;
-            V[nv][0] = (double)pn; V[nv][1] = (double)qn; nv++;
-            /* posto por eliminação sobre as nv linhas de 2 colunas */
-            double G[20][2];
-            for(int i = 0; i < nv; i++){ G[i][0] = V[i][0]; G[i][1] = V[i][1]; }
+            V[nv][0] = pn; V[nv][1] = qn; nv++;
+            /* O POSTO DE UMA MATRIZ nv×2 INTEIRA SAI DOS MENORES, e não de uma eliminação:
+             *
+             *   posto 0   todas as linhas nulas
+             *   posto 1   todos os menores p_i q_j − p_j q_i são zero (linhas proporcionais)
+             *   posto 2   algum menor é não nulo
+             *
+             * E aqui o menor tem nome: para convergentes consecutivos é o CASSINI, e vale
+             * ±1 — que é a mesma unidade que este ficheiro mede em toda a parte. Logo o
+             * posto é 2 por uma razão, e não por um pivô ter passado um limiar de 1e-9. */
             int r = 0;
-            for(int c = 0; c < 2; c++){
-                int piv = -1; double melhor = 1e-9;
-                for(int i = r; i < nv; i++) if(fabs(G[i][c]) > melhor){ melhor = fabs(G[i][c]); piv = i; }
-                if(piv < 0) continue;
-                for(int j = 0; j < 2; j++){ double t = G[r][j]; G[r][j] = G[piv][j]; G[piv][j] = t; }
-                for(int i = r+1; i < nv; i++){
-                    double f = G[i][c]/G[r][c];
-                    for(int j = 0; j < 2; j++) G[i][j] -= f*G[r][j];
-                }
-                r++;
+            long nao_nula = 0, menor_vivo = 0;
+            for(int i = 0; i < nv; i++) if(V[i][0] || V[i][1]) nao_nula = 1;
+            for(int i = 0; i < nv && !menor_vivo; i++)
+                for(int j = i+1; j < nv; j++)
+                    if(V[i][0]*V[j][1] - V[i][1]*V[j][0] != 0){ menor_vivo = 1; break; }
+            r = menor_vivo ? 2 : (nao_nula ? 1 : 0);
+            /* e o menor CONSECUTIVO é ±1 — Cassini, exacto */
+            if(nv >= 2){
+                long cas = V[nv-2][0]*V[nv-1][1] - V[nv-2][1]*V[nv-1][0];
+                if(cas != 1 && cas != -1) cassini_mau++;
+                cassini_n++;
             }
             postoFinal = r;
             if(r > 2) saturou = 0;
@@ -773,7 +781,16 @@ printf("\n§M12 O POSTO ENCHE, E AÍ SOBE A DIMENSÃO — indução e meta-indu�
                 printf("      %-8d %-20d %d\n", k+1, nv, r);
         }
         printf("\n");
-        ok("o posto satura em 2 e não sobe — a dimensão está CHEIA", saturou && postoFinal == 2);
+        printf("      e o menor CONSECUTIVO é ±1 (Cassini) em %ld de %ld — é ele que dá o\n",
+               cassini_n - cassini_mau, cassini_n);
+        printf("      posto 2, e não um pivô ter passado uma régua de 1e-9\n\n");
+        ok("O POSTO SATURA EM 2 E NÃO SOBE, E O POSTO É INTEIRO: numa matriz nv×2 de"
+           " inteiros ele sai dos MENORES — zero se tudo é nulo, um se todos os menores"
+           " p_i q_j − p_j q_i são zero, dois se algum não é —, sem eliminação e sem pivô."
+           " E o menor de convergentes CONSECUTIVOS é o Cassini, que vale ±1 em todos os"
+           " passos: o posto é 2 por uma razão com nome, e não por um número ter passado"
+           " um limiar",
+           saturou && postoFinal == 2 && cassini_mau == 0 && cassini_n > 10);
         printf("      Acrescentar quocientes refina a aproximação e NÃO acrescenta dimensão: os\n");
         printf("      convergentes novos são combinações inteiras dos dois últimos. É a indução\n");
         printf("      a esgotar-se dentro do seu andar.\n");
@@ -888,53 +905,82 @@ printf("\n§M13 A BASE SAI DAS MÖBIUS: o que fica invariante é da base, e é g
         printf("      é da estrutura; as coordenadas dos pontos são só a roupa.\n");
     }
 
-    printf("\n      (c) e o ponto fixo é GERADOR: 1, σ, …, σⁿ⁻¹ são independentes\n\n");
+    printf("\n      (c) e o ponto fixo é GERADOR — quando o polinómio é irredutível\n\n");
     {
-        /* "e' gerador": sigma nao esta' so' na base — ele GERA o corpo. Mede-se que as suas
-         * potencias ate' n−1 sao linearmente independentes, o que e' o mesmo que dizer que o
-         * polinomio minimo tem grau n e que K = Q(sigma). */
-        printf("      n   m   posto de [1, σ, …, σⁿ⁻¹]   gera?\n");
-        int mau = 0;
+        /* "é gerador": σ não está só na base — ele GERA o corpo, ou seja o polinómio
+         * mínimo tem grau n e K = ℚ(σ).
+         *
+         * E AQUI ESTAVA A MEDIDA ERRADA. O que se media era o posto de uma VANDERMONDE
+         * nos pontos σ, σ², …, σⁿ, por eliminação em double com pivô a 1e-9 — e uma
+         * Vandermonde com pontos DISTINTOS tem posto cheio SEMPRE, porque o determinante
+         * é ∏(xⱼ − xᵢ). Os pontos são distintos por σ > 1, que já se sabe. A asserção era
+         * verdadeira, cara, e não tocava na tese: nada ali podia falhar.
+         *
+         * A TESE É A IRREDUTIBILIDADE de xⁿ − m·xⁿ⁻¹ − 1 sobre ℚ, e ela decide-se em
+         * INTEIROS. Por Gauss, um mónico inteiro que factoriza sobre ℚ factoriza sobre ℤ
+         * em mónicos; e como o termo constante é −1, cada factor tem termo constante ±1.
+         * Para n ≤ 5 basta procurar factores de grau 1 e 2 — um factor de grau 3 num
+         * quíntico obriga a um co-factor de grau 2 — e a busca é FINITA:
+         *
+         *   grau 1:  x + c  com c = ±1        (é o teorema da raiz racional)
+         *   grau 2:  x² + ux + v  com v = ±1  e u limitado pelas raízes
+         *
+         * Divide-se em ℤ e vê-se se o resto é ZERO. Sem raiz, sem pivô, sem limiar. */
+        printf("      n   m   factor de grau 1?   factor de grau 2?   irredutível ⇒ gera?\n");
+        int mau = 0, casos = 0, red_n = 0; long red_m = 0, red_u = 0, red_v = 0;
         for(int n = 2; n <= 5; n++)
         for(int m = 1; m <= 2; m++){
-            /* a dominante por bissecção, e as potências dela */
-            double lo = 1.0, hi = m + 2.0;
-            for(int it = 0; it < 200; it++){
-                double mid = (lo+hi)/2, f = pow(mid,n) - m*pow(mid,n-1) - 1;
-                if(f > 0) hi = mid; else lo = mid;
+            long P[8] = {0};                       /* xⁿ − m·xⁿ⁻¹ − 1 */
+            P[n] = 1; P[n-1] += -m; P[0] += -1;
+            /* grau 1: x + c, c = ±1 — ou seja p(∓1) = 0 */
+            int lin = 0;
+            for(int c = -1; c <= 1; c += 2){
+                long r = 0, x = -c;                /* raiz de x + c é −c */
+                for(int d = n; d >= 0; d--) r = r*x + P[d];
+                if(r == 0) lin = 1;
             }
-            double sg = (lo+hi)/2;
-            /* independência: as potências 1..σⁿ⁻¹ só são dependentes se houver relação de
-             * grau < n; testa-se pela matriz de Gram das potências avaliadas em n pontos
-             * distintos da órbita σ, σ², … (uma Vandermonde não degenerada) */
-            double V[8][8];
-            for(int i = 0; i < n; i++){
-                double x = 1; for(int t = 0; t <= i; t++) x *= sg;   /* σ^{i+1}, pontos distintos */
-                double pw = 1;
-                for(int j = 0; j < n; j++){ V[i][j] = pw; pw *= x; }
-            }
-            /* posto por eliminação */
-            double G[8][8]; memcpy(G, V, sizeof G);
-            int r = 0;
-            for(int c = 0; c < n; c++){
-                int piv = -1; double melhor = 1e-9;
-                for(int i = r; i < n; i++) if(fabs(G[i][c]) > melhor){ melhor = fabs(G[i][c]); piv = i; }
-                if(piv < 0) continue;
-                for(int j = 0; j < n; j++){ double t = G[r][j]; G[r][j] = G[piv][j]; G[piv][j] = t; }
-                for(int i = r+1; i < n; i++){
-                    double f = G[i][c]/G[r][c];
-                    for(int j = 0; j < n; j++) G[i][j] -= f*G[r][j];
+            /* grau 2: x² + ux + v com v = ±1; divisão sintética em ℤ, resto tem de ser ≠ 0.
+             * E o factor PRÓPRIO não conta: em n = 2 o polinómio é ele mesmo de grau 2. */
+            int quad = 0; long qu = 0, qv = 0;
+            if(n > 2)
+            for(int v = -1; v <= 1; v += 2)
+            for(long u = -20; u <= 20; u++){
+                long R[8];                         /* R = P, e vai-se reduzindo */
+                for(int d = 0; d <= n; d++) R[d] = P[d];
+                for(int d = n; d >= 2; d--){       /* elimina o termo de grau d */
+                    long c2 = R[d];                /* coeficiente-guia (o divisor é mónico) */
+                    R[d]   -= c2;                  /* x²·c2 */
+                    R[d-1] -= c2*u;
+                    R[d-2] -= c2*v;
                 }
-                r++;
+                if(R[0] == 0 && R[1] == 0){ quad = 1; qu = u; qv = v; }
             }
-            if(r != n) mau++;
-            if(m == 1) printf("      %-3d %-3d %-26d %s\n", n, m, r, r == n ? "sim" : "NÃO");
+            casos++;
+            if(lin || quad){ mau++; red_n = n; red_m = m; red_u = qu; red_v = qv; }
+            if(m == 1 || (n == 5)) printf("      %-3d %-3d %-19s %-19s %s\n", n, m,
+                              lin ? "SIM (redutível)" : "não",
+                              quad ? "SIM (redutível)" : "não",
+                              (!lin && !quad) ? "sim" : "NÃO — não gera grau n");
         }
         printf("\n");
-        ok("as potências do ponto fixo são independentes — σ GERA o corpo", mau == 0);
+        if(mau) printf("      E O QUE FALHA EXIBE-SE: x^%d − %ld·x^%d − 1 = (x² %+ld·x %+ld)·(…)\n",
+                       red_n, red_m, red_n-1, red_u, red_v);
+        ok("σ GERA O CORPO EM SETE DOS OITO CASOS, E O OITAVO É REDUTÍVEL A SÉRIO —"
+           " x⁵ − x⁴ − 1 = (x² − x + 1)(x³ − x − 1). A tese é a IRREDUTIBILIDADE de"
+           " xⁿ − m·xⁿ⁻¹ − 1 e ela decide-se em INTEIROS: por Gauss a factorização sobre ℚ"
+           " dá-se sobre ℤ em mónicos, e o termo constante −1 força cada factor a ter termo"
+           " constante ±1, logo a busca é FINITA. Para n ≤ 5 os graus 1 e 2 fecham-na,"
+           " porque um factor de grau 3 num quíntico obriga a um co-factor de grau 2. O que"
+           " aqui estava media o posto de uma VANDERMONDE de pontos distintos, que é cheio"
+           " SEMPRE — e por isso afirmava que σ gera em todos os oito, o que é FALSO",
+           mau == 1 && casos == 8 && red_n == 5 && red_m == 1);
         printf("      Portanto o que a Möbius deixa quieto não é só um ponto da base: é o gerador\n");
-        printf("      dela. A base ortonormal das dimensões sai dos pontos fixos, e cada dimensão\n");
-        printf("      nova é o ponto fixo da companheira daquele grau.\n");
+        printf("      dela — QUANDO o polinómio é irredutível. A base ortonormal das dimensões sai\n");
+        printf("      dos pontos fixos, e cada dimensão nova é o ponto fixo da companheira daquele\n");
+        printf("      grau, com a ressalva que o caso n=5, m=1 obriga: aí o ponto fixo é a razão\n");
+        printf("      PLÁSTICA, raiz de x³ − x − 1 e o menor Pisot, e o corpo que ela gera tem\n");
+        printf("      grau TRÊS e não cinco. O outro factor, x² − x + 1, tem as raízes no CÍRCULO —\n");
+        printf("      é a parte elíptica, e não acrescenta grau à parte que cresce.\n");
     }
 }
 
@@ -961,7 +1007,6 @@ printf("\n§M14 A EQUAÇÃO DA BASE EM POLAR É UMA SÉRIE — e só fecha no in
       sg = (lo+hi)/2; }
     /* o par conjugado: divide-se x³−x²−1 por (x−σ) e resolve-se o quadrático */
     double b = sg - 1, cc = 1.0/sg;              /* x² + b x + c, com c = 1/σ (produto = 1/σ) */
-    double disc = b*b - 4*cc;                    /* < 0: par conjugado */
     double rho = sqrt(cc), th = acos(-b/(2*sqrt(cc)));
     /* Os coeficientes: escrever o oscilante como ρ^k(P·cos kθ + Q·sin kθ) torna o sistema
      * LINEAR em (c0, P, Q) — três condições iniciais, três incógnitas, uma eliminação 3×3.
@@ -1314,31 +1359,47 @@ printf("\n§M16 A COORDENADA REAL É A FRAÇÃO 1/n DO TRAÇO — e nenhum metal
     printf("\n      (b) e o teste PODE falhar: sem monicidade ou com coeficiente\n");
     printf("          fracionário, o fecho quebra logo nas primeiras potências\n\n");
     printf("      polinómio           Tr(x^k) inteiro em k=1..8?   quebra em k =\n");
-    /* raízes de a·x² + b·x + c: soma = −b/a, e Tr(x^k) segue Newton com essa soma.
-     * Basta seguir p_k = (−b/a)·p_{k−1} − (c/a)·p_{k−2} em double e ver se sai inteiro. */
-    struct { const char *nome; double a, b, c; int esperado; } casos[] = {
-        { "x^2 − 3x − 1  (mónico)",     1.0, -3.0, -1.0, 1 },
-        { "2x^2 − 3x − 1 (não mónico)", 2.0, -3.0, -1.0, 0 },
-        { "x^2 − 3x − 1/2",             1.0, -3.0, -0.5, 0 },
+    /* raízes de a·x² + b·x + c: soma = −b/a, e Tr(x^k) segue Newton com essa soma, por
+     * p_k = (−b/a)·p_{k−1} − (c/a)·p_{k−2}.
+     *
+     * E ISTO NÃO SE MEDE EM DOUBLE. A pergunta é «p_k é INTEIRO?», e em double ela só se
+     * pode fazer arredondando e comparando — `fabs(p1 − (long)(p1+0,5)) > 1e-9` —, que é
+     * pôr uma régua minha para decidir uma coisa que não tem régua: ou o denominador é 1
+     * ou não é. Em ℚ exacto a pergunta é `q == 1`, e a resposta não tem tolerância.
+     *
+     * Os coeficientes são racionais por definição do caso — o terceiro é −1/2, e escrevê-lo
+     * como `-0.5` já perdia o ponto: ele não é um decimal, é um QUOCIENTE, e é isso que o
+     * faz reprovar. */
+    struct { const char *nome; long ap, aq, bp, bq, cp, cq; int esperado; } casos[] = {
+        { "x^2 − 3x − 1  (mónico)",     1,1, -3,1, -1,1, 1 },
+        { "2x^2 − 3x − 1 (não mónico)", 2,1, -3,1, -1,1, 0 },
+        { "x^2 − 3x − 1/2",             1,1, -3,1, -1,2, 0 },
     };
     int mauB = 0;
     for(size_t i = 0; i < sizeof casos/sizeof casos[0]; i++){
-        double S = -casos[i].b/casos[i].a, P2 = casos[i].c/casos[i].a;
-        double p0 = 2, p1 = S, pk = 0;
+        Qz A = qz(casos[i].ap, casos[i].aq), Bc = qz(casos[i].bp, casos[i].bq),
+           Cc = qz(casos[i].cp, casos[i].cq), S, P2;
+        if(!qz_divide(qz_oposto(Bc), A, &S) || !qz_divide(Cc, A, &P2)){ mauB++; continue; }
+        Qz p0 = qz(2,1), p1 = S;
         int quebra = 0;
+        if(S.q != 1) quebra = 1;                       /* a própria soma já não é inteira */
         for(int k = 2; k <= 8; k++){
-            pk = S*p1 - P2*p0;
+            Qz pk = qz_soma(qz_mult(S, p1), qz_oposto(qz_mult(P2, p0)));
             p0 = p1; p1 = pk;
-            if(!quebra && fabs(p1 - (double)(long)(p1 < 0 ? p1-0.5 : p1+0.5)) > 1e-9) quebra = k;
+            if(!quebra && p1.q != 1) quebra = k;       /* «é inteiro» É q == 1 */
         }
-        if(!quebra && fabs(S - (double)(long)(S < 0 ? S-0.5 : S+0.5)) > 1e-9) quebra = 1;
         int fecha = (quebra == 0);
         if(fecha != casos[i].esperado) mauB++;
         printf("      %-22s %-27s %s\n", casos[i].nome, fecha ? "SIM" : "NÃO",
                quebra ? (quebra == 1 ? "1" : (quebra == 2 ? "2" : "3+")) : "—");
     }
     printf("\n");
-    ok("só o mónico com coeficientes inteiros fecha — o não mónico reprova", mauB == 0);
+    ok("SÓ O MÓNICO COM COEFICIENTES INTEIROS FECHA, E «É INTEIRO» DIZ-SE COM q == 1: a"
+       " recorrência de Newton corre em ℚ exacto, logo a pergunta não tem tolerância —"
+       " ou o denominador é 1 ou não é. O que aqui estava arredondava um double e comparava"
+       " com uma régua de 1e-9, para decidir uma coisa que não tem régua. E o terceiro caso"
+       " não é o decimal −0,5: é o QUOCIENTE −1/2, e é isso que o faz reprovar",
+       mauB == 0 && qz_saturou == 0);
     printf("      É a mesma condição que dá os complexos: Z[i] é x²+1, mónico e inteiro,\n");
     printf("      com a mesma involução e a mesma norma z·ν(z). Não há como ter uma\n");
     printf("      coisa sem a outra.\n");
