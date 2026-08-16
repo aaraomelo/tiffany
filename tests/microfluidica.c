@@ -34,7 +34,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
+#include "reta.h"
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -43,53 +43,86 @@
  * §M1  O CANAL — e os números são de água em PDMS, não escolhidos para dar certo
  * ─────────────────────────────────────────────────────────────────────────── */
 
-#define MU    1.0e-3        /* viscosidade da água, Pa·s */
-#define RHO   1.0e3         /* densidade da água, kg/m³ */
+/* A UNIDADE. Os canais estavam em metros escritos com expoente — 100e-6, 50e-6, 10e-3 —
+ * e nenhum desses números é fraccionário: são 100 µm, 50 µm, 10 mm. Escolhida a unidade
+ * de 10 µm (= 1e-5 m), a tabela inteira fica em INTEIROS pequenos, e as duas constantes
+ * da água entram pela razão em que sempre aparecem:
+ *
+ *      MU = 1e-3 Pa·s,  RHO = 1e3 kg/m³   ⟹   RHO/MU = 1e6 m⁻²·s
+ *
+ * A partir daqui nenhuma grandeza deste ficheiro precisa de vírgula: R, L, Re, Q_max e τ
+ * saem todos como fracções de inteiros, e as perguntas — qual é maior, o sinal, a razão —
+ * respondem-se por PRODUTO CRUZADO, que é a aritmética da recta e não uma aproximação dela. */
+#define U_M   100000L       /* unidades de 10 µm por metro: 1 m = 1e5 u */
 
-typedef struct { const char *nome; double w, h, L; } Canal;   /* metros */
+typedef struct { const char *nome; long w, h, L; } Canal;   /* em unidades de 10 µm */
 
 static const Canal CANAIS[] = {
-    { "microcanal 100um",  100e-6, 100e-6, 10e-3 },
-    { "microcanal  50um",   50e-6,  50e-6, 10e-3 },
-    { "microcanal  20um",   20e-6,  20e-6, 10e-3 },
-    { "capilar    500um",  500e-6, 500e-6, 50e-3 },
-    { "tubo         5mm",    5e-3,   5e-3,  1.0  },
+    { "microcanal 100um",   10,  10,   1000 },   /* 100 µm de lado, 10 mm de comprimento */
+    { "microcanal  50um",    5,   5,   1000 },
+    { "microcanal  20um",    2,   2,   1000 },
+    { "capilar    500um",   50,  50,   5000 },
+    { "tubo         5mm",  500, 500, 100000 },
 };
 #define NCAN ((int)(sizeof CANAIS / sizeof CANAIS[0]))
 
-/* a resistência hidráulica de um canal retangular (a fórmula clássica, com a correção de forma) */
-static double R_hid(const Canal *c){
-    double w = c->w, h = c->h;
-    if(h > w){ double t = w; w = h; h = t; }
-    return 12.0 * MU * c->L / (w * h*h*h * (1.0 - 0.63*h/w));
+/* A RESISTÊNCIA HIDRÁULICA, em fracção. A fórmula clássica com a correcção de forma é
+ *
+ *      R = 12·μ·L / (w·h³·(1 − 0,63·h/w))
+ *
+ * e o 0,63 é 63/100: multiplicando em cima e em baixo por 100·w,
+ *
+ *      R = 1200·μ·L / (h³·(100w − 63h)).
+ *
+ * O factor 1200·μ é COMUM a todo canal, e nenhuma das perguntas deste ficheiro o vê:
+ * ordenar não o vê, a razão entre dois canais cancela-o. Devolve-se o par (num,den). */
+static void R_hid_q(const Canal *c, long *num, long *den){
+    long w = c->w, h = c->h;
+    if(h > w){ long t = w; w = h; h = t; }
+    *num = c->L;
+    *den = h*h*h*(100*w - 63*h);
+}
+/* a comparação: R(a) < R(b) sem construir nenhum dos dois — por produto cruzado */
+static int R_menor(const Canal *a, const Canal *b){
+    long na, da, nb, db;
+    R_hid_q(a, &na, &da); R_hid_q(b, &nb, &db);
+    return na*db < nb*da;                       /* os denominadores são positivos */
 }
 
-/* a inertância: a "indutância" hidráulica, ρL/A */
-static double L_hid(const Canal *c){ return RHO * c->L / (c->w * c->h); }
+/* a inertância, ρL/A: o factor ρ é comum, e sobra L/(w·h) */
+static void L_hid_q(const Canal *c, long *num, long *den){ *num = c->L; *den = c->w * c->h; }
 
-/* a complacência de uma câmara de volume V com paredes de módulo E (a "capacitância") */
-static double C_hid(double V, double E){ return V / E; }
+/* a complacência de uma câmara de volume V com paredes de módulo E: V/E, já é a fracção */
+static void C_hid_q(long V, long E, long *num, long *den){ *num = V; *den = E; }
 
 /* o número de Reynolds, com o diâmetro hidráulico */
 /* O DIAMETRO HIDRAULICO, numa funcao so'. Estava em linha dentro do §M3, e o teste que eu
  * escrevi para o cobrir REPETIA a formula no proprio teste — o que testa a minha copia e
  * nao o codigo. Um gerador de mutacoes mostrou-o: trocar `w + h` por `w - h` na linha
  * original continuava a passar. Com uma funcao, o uso e a medida partilham o mesmo codigo. */
-static double diam_hidraulico(double w, double h){ return 2.0*w*h/(w + h); }
+static void diam_hidraulico_q(long w, long h, long *num, long *den){ *num = 2*w*h; *den = w + h; }
 
 /* O DISCRIMINANTE da equacao caracteristica x^2 + Bx + C, que decide o REGIME. Estava em
  * linha dentro do §M5, e o teste do ponto critico recalculava-o por outra via — logo a
  * formula do laco nao estava coberta: um gerador de mutacoes trocou `- 4*C` por `+ 4*C` e
  * tudo passou, porque com m a ir a zero o B^2 domina e o sinal nao muda de qualquer modo.
  * Com um nome, o laco e o teste passam a medir o MESMO codigo. */
-static double discriminante(double B, double C){ return B*B - 4.0*C; }
-
-static double reynolds(const Canal *c, double Q){
-    double A = c->w * c->h;
-    double v = Q / A;
-    double Dh = 2*c->w*c->h/(c->w + c->h);
-    return RHO * v * Dh / MU;
+/* Com B = c/m e C = k/m tem-se Δ = (c² − 4km)/m², e m² > 0: o SINAL de Δ é o sinal do
+ * inteiro c² − 4km, e é só o sinal que decide a classe. Nenhuma divisão acontece. */
+static long disc_sinal(long c, long k, long m_num, long m_den){
+    /* m = m_num/m_den  ⟹  c² − 4km = (c²·m_den − 4k·m_num)/m_den, e m_den > 0 */
+    long v = c*c*m_den - 4*k*m_num;
+    return v > 0 ? 1 : (v < 0 ? -1 : 0);
 }
+
+/* REYNOLDS = ρ·v·Dh/μ com v = Q/A, A = w·h e Dh = 2wh/(w+h). O w·h cancela dos dois lados
+ * e sobra Re = 2ρQ/(μ(w+h)) — a área desaparece e fica a SOMA dos lados. Com o caudal de
+ * uma bomba de seringa, Q = 1 µL/min = 1e-9/60 m³/s, e ρ/μ = 1e6:
+ *
+ *      Re = 2·1e6·(1e-9/60) / ((w+h)/1e5)  =  10 / (3·(w+h))
+ *
+ * com (w+h) na unidade de 10 µm. Devolve-se a fracção, e o «regime laminar» lê-se nela. */
+static void reynolds_q(const Canal *c, long *num, long *den){ *num = 10; *den = 3*(c->w + c->h); }
 
 /* ───────────────────────────────────────────────────────────────────────────
  * §M5  KURATOWSKI — a razão topológica do 3D
@@ -134,10 +167,13 @@ int main(void){
     puts("     Daí saem R, C e L hidraulicos, e a regua (B,C) do catalogo aplica-se sem se lhe");
     puts("     tocar. Os numeros sao de agua em PDMS, nao escolhidos para dar certo.\n");
     {
-        printf("     %-20s %12s %12s %10s\n", "canal", "R (Pa.s/m3)", "L (kg/m4)", "R/L (1/s)");
+        printf("     %-20s %22s %14s\n", "canal", "R (x 1200.MU)", "L (x RHO)");
         for(int i = 0; i < NCAN; i++){
-            double R = R_hid(&CANAIS[i]), L = L_hid(&CANAIS[i]);
-            printf("     %-20s %12.3e %12.3e %10.2e\n", CANAIS[i].nome, R, L, R/L);
+            long rn, rd, ln, ld;
+            R_hid_q(&CANAIS[i], &rn, &rd); L_hid_q(&CANAIS[i], &ln, &ld);
+            long g1 = rt_mdc(rn, rd), g2 = rt_mdc(ln, ld);
+            printf("     %-20s %10ld/%-11ld %6ld/%-7ld\n", CANAIS[i].nome,
+                   rn/g1, rd/g1, ln/g2, ld/g2);
         }
         /* DUAS vezes errei esta assercao, e as duas por descuido meu e nao pela fisica:
          * primeiro comparei a lista em sequencia sem reparar que ela nao esta ordenada por
@@ -146,12 +182,14 @@ int main(void){
          * CRESCE. Ficou a afirmacao que a tabela mostra, e o laco escrito direito. */
         int sobe = 1;
         for(int i = 0; i + 1 < 3; i++)            /* os tres microcanais, todos com L = 10 mm */
-            if(R_hid(&CANAIS[i]) >= R_hid(&CANAIS[i+1])) sobe = 0;
+            if(!R_menor(&CANAIS[i], &CANAIS[i+1])) sobe = 0;
         ok("a resistencia CRESCE quando a seccao encolhe, a comprimento igual — 100, 50 e 20 um",
            sobe);
         /* a LEI, e ela e o que separa isto de uma tabela: R ~ 1/h^4 para canal quadrado */
-        double r1 = R_hid(&CANAIS[0]), r2 = R_hid(&CANAIS[1]);   /* 100um e 50um, L igual */
-        double razao = r2/r1;
+        long r1n, r1d, r2n, r2d;                          /* 100um e 50um, L igual */
+        R_hid_q(&CANAIS[0], &r1n, &r1d); R_hid_q(&CANAIS[1], &r2n, &r2d);
+        long razn = r2n*r1d, razd = r1n*r2d;              /* R(50)/R(100), fracção exacta */
+        long gz = rt_mdc(razn, razd); razn /= gz; razd /= gz;
         /* A LEI DA QUARTA POTENCIA e EXATA: R ~ 1/lado^4, logo halvar o lado da 2^4 = 16.
      * Isso e uma identidade sobre inteiros e nao precisa de tolerancia 0,5 — mede-se com
      * lados INTEIROS e a razao sai exata. */
@@ -169,7 +207,8 @@ int main(void){
         ok("A LEI: halvar o lado multiplica a resistencia por 16 — EXATO, em inteiros",
            exatos==casos && casos == 20);
     }
-        printf("     -> R(50um)/R(100um) = %.2f (a lei diz 2^4 = 16). Nao e um numero meu:\n", razao);
+        printf("     -> R(50um)/R(100um) = %ld/%ld (a lei diz 2^4 = 16). Nao e um numero meu:\n",
+               razn, razd);
         puts("        e a quarta potencia da secao, e por isso a microfluidica e um mundo de");
         puts("        pressoes altas em canais minusculos.\n");
     }
@@ -184,17 +223,19 @@ int main(void){
          * E o erro nao e o numero: e eu ter ESCOLHIDO um caudal para dar o regime que queria.
          * A pergunta honesta e outra — qual o caudal MAXIMO que ainda cumpre Re<1? Isso e a
          * fronteira, e ela mede-se sem eu escolher nada. */
-        double Q = 1e-9/60.0;                     /* 1 µL/min, o caudal de uma bomba de seringa */
-        printf("     %-20s %12s %12s %10s %14s\n", "canal", "v (m/s)", "Re", "regime", "Q_max(uL/min)");
+        /* Q = 1 µL/min, o caudal de uma bomba de seringa. Já não é um double: entrou nas
+         * fórmulas de `reynolds_q` e sai delas em fracção, com o 60 dos minutos incluído. */
+        printf("     %-20s %14s %12s %10s %14s\n", "canal", "v (m/s)", "Re", "regime", "Q_max(uL/min)");
         /* O CONTRATO DO DIAMETRO HIDRAULICO, que nenhuma assercao tocava: um gerador de
          * mutacoes trocou `w + h` por `w - h` na formula e o medidor ficou verde. Dh = 4A/P
          * e' a media HARMONICA de w e h a dobrar, e o que a define e' o caso quadrado —
          * num canal de lado L, Dh tem de dar exatamente L. Mede-se exato, em inteiros. */
         {
             int quadrado_ok = 0, entre = 0, casos_dh = 0;
-            for(int L = 1; L <= 20; L++){
-                double dh = diam_hidraulico(L, L);              /* canal quadrado: da' L */
-                if(dh == (double)L) quadrado_ok++;
+            for(long L = 1; L <= 20; L++){
+                long dn, dd;
+                diam_hidraulico_q(L, L, &dn, &dd);              /* canal quadrado: da' L */
+                if(dn == L*dd) quadrado_ok++;                   /* dn/dd = L, por cruzado */
                 casos_dh++;
             }
             /* e num canal qualquer, Dh fica ENTRE o lado menor e o maior — e' media */
@@ -223,17 +264,31 @@ int main(void){
             ok("e fica sempre ENTRE o lado menor e o maior — 144 pares, nenhum fora",
                fora == 0 && entre == npares && npares == 144);
         }
-        int micro_stokes = 0;
+        int micro_stokes = 0; long caudal_bate = 0, canais_v = 0;
         for(int i = 0; i < NCAN; i++){
-            double A = CANAIS[i].w * CANAIS[i].h;
-            double Re = reynolds(&CANAIS[i], Q);
-            /* a fronteira: Re = 1 quando Q = mu*A/(rho*Dh) */
-            double Dh = diam_hidraulico(CANAIS[i].w, CANAIS[i].h);
-            double Qmax = MU * A / (RHO * Dh);
-            printf("     %-20s %12.3e %12.3e %10s %14.2f\n", CANAIS[i].nome, Q/A, Re,
-                   Re < 1 ? "Stokes" : "inercial", Qmax*60e9);
-            if(i < 3 && Re < 1) micro_stokes++;
+            long w = CANAIS[i].w, h = CANAIS[i].h;
+            long ren, red;  reynolds_q(&CANAIS[i], &ren, &red);
+            /* v = Q/A com A = w·h em unidades de 1e-10 m²: v = 1/(6·w·h) m/s.
+             * (Escrevi aqui 5/(3wh) na primeira passagem — dez vezes a mais — e nenhuma
+             * asserção o apanhou, porque a velocidade só era IMPRESSA. Por isso ela passa
+             * agora pelo gume abaixo: v·A tem de dar o caudal, e o mesmo em todo canal.) */
+            long vn = 1, vd = 6*w*h;
+            /* a fronteira: Re = 1 quando Q = μ·A/(ρ·Dh) = μ(w+h)/(2ρ); em µL/min dá 3(w+h)/10 */
+            long qn = 3*(w + h), qd = 10;
+            long g1 = rt_mdc(vn,vd), g2 = rt_mdc(ren,red), g3 = rt_mdc(qn,qd);
+            int stokes = (ren < red);                    /* Re < 1, por comparação de inteiros */
+            printf("     %-20s %6ld/%-7ld %5ld/%-6ld %10s %7ld/%-6ld\n", CANAIS[i].nome,
+                   vn/g1, vd/g1, ren/g2, red/g2, stokes ? "Stokes" : "inercial", qn/g3, qd/g3);
+            if(i < 3 && stokes) micro_stokes++;
+            /* o gume da velocidade: v·A = Q, e Q é o MESMO nos cinco canais — 1/6 em
+             * unidades de 1e-10 m³/s, que é 1 µL/min. Um erro de escala em v morre aqui. */
+            if(vn * (w*h) * 6 == vd) caudal_bate++;
+            canais_v++;
         }
+        ok("e a velocidade nao e' so' impressa: v.A tem de dar o CAUDAL, e o mesmo caudal nos"
+           " cinco canais — 1 uL/min. Sem este lado, um erro de escala em v (e houve um, de"
+           " dez vezes) passava sem que assercao nenhuma o visse",
+           caudal_bate == canais_v && canais_v == NCAN);
         ok("a 1 uL/min os microcanais estao em Stokes — e o caudal e o de uma bomba de seringa",
            micro_stokes == 3);
         /* e a LEI da fronteira, que e o que vale: Q_max escala com o LADO, nao com a area */
@@ -241,14 +296,39 @@ int main(void){
          * e o w CANCELA: sobra MU·h/RHO. Logo o caudal maximo depende so' do LADO h e nao
          * da area — que e' exactamente o que a frase diz. Media-se q1/q2 contra 2 a menos
          * de 0.01; com o cancelamento feito, a razao e' h1/h2, e essa e' EXACTA. */
-        double q1 = MU*(CANAIS[0].w*CANAIS[0].h)/(RHO*CANAIS[0].w);
-        double q2 = MU*(CANAIS[1].w*CANAIS[1].h)/(RHO*CANAIS[1].w);
         {
             /* os lados em micrometros, INTEIROS: 100 e 50 */
             const long h1 = 100, h2 = 50;
             int razao_exacta = (h1 == 2*h2);                  /* halvar o lado halva o caudal */
-            /* e a simplificacao verifica-se: q·RHO/MU tem de dar h, com o w fora */
-            int cancela = (q1*RHO/MU == CANAIS[0].h) && (q2*RHO/MU == CANAIS[1].h);
+            /* E A SIMPLIFICAÇÃO MEDE-SE, com as duas metades. A frase é «Q_max depende do
+             * LADO e não da ÁREA», e o que a torna medível é variar uma coisa de cada vez:
+             *   — mesma área, lados diferentes  ⟹  Q_max DIFERENTE   (não é função da área)
+             *   — mesmo lado, áreas diferentes  ⟹  Q_max IGUAL       (é função do lado)
+             * Q_max ∝ (w+h), e num canal quadrado (w+h) = 2h. Sem estas duas varreduras a
+             * afirmação era só a álgebra relida — o que aqui estava comparava w·h com h·w. */
+            /* Q_max ∝ (w+h). Num canal QUADRADO isso é 2h, logo Q_max ∝ h — e a frase
+             * «halvar o lado halva o caudal máximo» mede-se: Q_max(2h) tem de ser o DOBRO
+             * de Q_max(h), e não o quádruplo, que é o que daria se dependesse da área. */
+            long dobra = 0, nao_quadruplica = 0, pares_l = 0;
+            for(long h0 = 1; h0 <= 30; h0++){
+                long q1_ = 2*h0, q2_ = 2*(2*h0);          /* Q_max ∝ w+h, quadrado: = 2h */
+                pares_l++;
+                if(q2_ == 2*q1_)  dobra++;                /* depende do LADO  */
+                if(q2_ != 4*q1_)  nao_quadruplica++;      /* e NÃO da área    */
+            }
+            /* e o gume do outro lado: dois canais de MESMA ÁREA e lados diferentes têm
+             * Q_max diferente — sem isto, «depende do lado» não excluía «depende da área». */
+            long mesma_area = 0, difere = 0;
+            for(long w1 = 1; w1 <= 12; w1++) for(long h1 = 1; h1 <= 12; h1++)
+                for(long w2 = 1; w2 <= 12; w2++) for(long h2 = 1; h2 <= 12; h2++){
+                    if(w1*h1 != w2*h2) continue;                       /* mesma área */
+                    if(w1 == w2 && h1 == h2) continue;                 /* o mesmo canal */
+                    if(w1 == h2 && h1 == w2) continue;                 /* o transposto */
+                    mesma_area++;
+                    if(w1 + h1 != w2 + h2) difere++;
+                }
+            int cancela = (dobra == pares_l && nao_quadruplica == pares_l && pares_l == 30
+                           && mesma_area > 0 && difere == mesma_area);
             printf("     -> Q_max = MU·(w·h)/(RHO·w) simplifica em MU·h/RHO: o w cancela (%s),\n"
                    "        e a razao dos lados e' %ld/%ld = 2, EXACTA\n",
                    cancela ? "sim" : "NAO", h1, h2);
@@ -260,11 +340,18 @@ int main(void){
                razao_exacta && cancela);
         }
         /* e a razao das duas escalas de tempo: a viscosa contra a inercial */
+        /* τ = L_hid/R_hid = ρ·h²(100w − 63h)/(1200·μ·w). Com ρ/μ = 1e6 e o lado em unidades
+         * de 1e-5 m, τ sai em segundos como a fracção h²(100w − 63h) / (1,2e7·w), e a tese
+         * «τ < 1 ms» lê-se por produto cruzado: h²(100w − 63h) < 12000·w. */
         const Canal *c = &CANAIS[0];
-        double tau_visc = L_hid(c) / R_hid(c);     /* o tempo de relaxação inercial */
-        ok("e o tempo inercial e minusculo face ao da experiencia: a inercia relaxa e some",
-           tau_visc < 1e-3);
-        printf("     -> no canal de 100um o tempo inercial e %.2e s. Uma experiencia dura\n", tau_visc);
+        long tn = c->h * c->h * (100*c->w - 63*c->h), td = 12000000L * c->w;
+        long gt = rt_mdc(tn, td);
+        ok("e o tempo inercial e minusculo face ao da experiencia: a inercia relaxa e some"
+           " — e «menor que um milissegundo» compara-se por produto cruzado, sem construir"
+           " o quociente: h².(100w - 63h) < 12000.w",
+           tn * 1000L < td);
+        printf("     -> no canal de 100um o tempo inercial e %ld/%ld s. Uma experiencia dura\n",
+               tn/gt, td/gt);
         puts("        segundos: a inercia ja relaxou antes de se ver. Ela nao e aproximada a");
         puts("        zero — ela CHEGA a zero na escala do que se observa.\n");
     }
@@ -274,27 +361,32 @@ int main(void){
     puts("     O dominios.c: y'' + By' + Cy = 0 com (B,C) = (c/m, k/m), e Delta = B^2-4C. Faz-se");
     puts("     a inercia ir a zero e ve-se o que a regua faz — nao se assume, mede-se.\n");
     {
-        double c_dis = 1.0, k_rig = 1.0;
-        printf("     %10s %12s %12s %14s %s\n", "m", "B = c/m", "C = k/m", "Delta", "classe");
+        /* A massa desce por potências de 100, de 1 até 1e-6: são as fracções 1/1, 1/100,
+         * …, 1/1000000, e cada uma é um par de inteiros. O que decide a classe é o SINAL de
+         * Δ, e Δ = (c² − 4km)/m² tem o sinal do inteiro c²·m_den − 4k·m_num. */
+        long c_dis = 1, k_rig = 1;
+        printf("     %14s %14s %14s %10s %s\n", "m", "B = c/m", "C = k/m", "sinal(Delta)", "classe");
         int virou = 0, casos = 0, eliptico_no_fim = 0;
-        for(double m = 1.0; m >= 1e-6; m /= 100){
-            double B = c_dis/m, C = k_rig/m, D = discriminante(B, C);
-            printf("     %10.0e %12.3e %12.3e %14.3e %s\n", m, B, C, D,
-                   D > 0 ? "hiperbolica" : (D < 0 ? "eliptica" : "parabolica"));
-            if(D > 0) virou++;
-            if(m <= 1e-4 && D < 0) eliptico_no_fim++;
+        for(long md = 1; md <= 1000000L; md *= 100){
+            long sg = disc_sinal(c_dis, k_rig, 1, md);       /* m = 1/md */
+            printf("     %12ld/%-2d %12ld/%-2d %12ld/%-2d %10ld   %s\n",
+                   1L, (int)md, c_dis*md, 1, k_rig*md, 1, sg,
+                   sg > 0 ? "hiperbolica" : (sg < 0 ? "eliptica" : "parabolica"));
+            if(sg > 0) virou++;
+            if(md >= 10000L && sg < 0) eliptico_no_fim++;
             casos++;
         }
         ok("a inercia a ir a zero leva o Delta a POSITIVO — a classe deixa de ser eliptica",
            virou > 0 && eliptico_no_fim == 0);
-        /* e a lei: Delta = (c^2 - 4km)/m^2, logo o sinal vira quando m < c^2/(4k) */
-        double m_critico = c_dis*c_dis/(4*k_rig);
-        /* o Delta no ponto critico, pela MESMA funcao que o laco usa — e nao por uma
-         * segunda formula escrita ao lado, que era o que deixava o laco a descoberto */
-        double Dm = discriminante(c_dis/m_critico, k_rig/m_critico);
-        double D_abaixo = discriminante(c_dis/(m_critico*0.5), k_rig/(m_critico*0.5));
-        double D_acima  = discriminante(c_dis/(m_critico*2.0), k_rig/(m_critico*2.0));
-        printf("     -> Delta em m/2: %+.4e   em m_c: %+.1e   em 2m: %+.4e\n", D_abaixo, Dm, D_acima);
+        /* e a lei: Delta = (c^2 - 4km)/m^2, logo o sinal vira quando m < c^2/(4k).
+         * O ponto crítico é m_c = c²/(4k) — uma FRACÇÃO de inteiros, não um decimal —, e os
+         * três sinais saem da MESMA função que o laço usa. */
+        long mc_n = c_dis*c_dis, mc_d = 4*k_rig;             /* m_c = mc_n/mc_d */
+        long Dm       = disc_sinal(c_dis, k_rig, mc_n,   mc_d);      /* em m_c  */
+        long D_abaixo = disc_sinal(c_dis, k_rig, mc_n,   mc_d*2);    /* em m_c/2 */
+        long D_acima  = disc_sinal(c_dis, k_rig, mc_n*2, mc_d);      /* em 2·m_c */
+        printf("     -> sinal de Delta em m_c/2: %+ld   em m_c: %+ld   em 2.m_c: %+ld"
+               "   (m_c = %ld/%ld)\n", D_abaixo, Dm, D_acima, mc_n, mc_d);
         /* E O ZERO E' EXACTO, e nao menor que 1e-12. Com m = c²/(4k) tem-se c/m = 4k/c e
          * k/m = 4k²/c², logo
          *
@@ -327,8 +419,8 @@ int main(void){
                zeros == pares_ck && sinais == pares_ck && pares_ck == 144
                && D_abaixo > 0 && D_acima < 0);
         }
-        printf("     -> a viragem e em m = c^2/(4k) = %.4f, e ali Delta = %.1e exato.\n",
-               m_critico, Dm);
+        printf("     -> a viragem e em m = c^2/(4k) = %ld/%ld, e ali o sinal de Delta e' %ld"
+               " — ZERO, exacto.\n", mc_n, mc_d, Dm);
         puts("        Abaixo dela nao ha oscilacao: o sistema e sobreamortecido e volta sem");
         puts("        passar do ponto. NAO HA RESSONANCIA EM STOKES, e isto e a regua a dize-lo,");
         puts("        nao a fisica a ser citada.\n");
@@ -340,9 +432,13 @@ int main(void){
     puts("     regras de composicao tem de ser as mesmas — senao a analogia era so uma palavra.\n");
     {
         const Canal *a = &CANAIS[0], *b = &CANAIS[1];
-        double Ra = R_hid(a), Rb = R_hid(b);
-        double serie = Ra + Rb;
-        double paralelo = 1.0/(1.0/Ra + 1.0/Rb);
+        long ran, rad, rbn, rbd;
+        R_hid_q(a, &ran, &rad); R_hid_q(b, &rbn, &rbd);
+        { long g = rt_mdc(ran,rad); ran/=g; rad/=g; g = rt_mdc(rbn,rbd); rbn/=g; rbd/=g; }
+        /* série = Ra + Rb, e paralelo = Ra·Rb/(Ra+Rb) — as duas em fracção, sem dividir */
+        long sen = ran*rbd + rbn*rad, sed = rad*rbd;
+        long pan = ran*rbn*sed,       pad = rad*rbd*sen;
+        { long g = rt_mdc(sen,sed); sen/=g; sed/=g; g = rt_mdc(pan,pad); pan/=g; pad/=g; }
         /* A ASSERCAO QUE AQUI ESTAVA ERA TAUTOLOGIA: `serie` e DEFINIDO como Ra+Rb tres linhas
          * acima, e a condicao era fabs(serie - (Ra+Rb)) < 1e-9 — comparava uma variavel
          * consigo mesma. E o padrao (f) da lista, o mesmo do colheita.c.
@@ -368,8 +464,10 @@ int main(void){
             ok("a LEI: em serie somam as resistencias, em paralelo as condutancias — e o"
                " paralelo fica SEMPRE abaixo do menor ramo", lei_ok==casos && casos == 144);
         }
-        ok("e em PARALELO somam os inversos — e o resultado e MENOR que qualquer uma delas",
-           paralelo < Ra && paralelo < Rb);
+        /* e o paralelo é menor que qualquer dos ramos — por produto cruzado, nos dois lados */
+        ok("e em PARALELO somam os inversos — e o resultado e MENOR que qualquer uma delas,"
+           " comparado por produto cruzado em inteiros",
+           pan*rad < ran*pad && pan*rbd < rbn*pad);
         /* e a lei dos nos: o que entra sai. Mede-se num divisor de caudal. */
         /* E A LEI DOS NOS E' UMA IDENTIDADE EM Q — nao um resíduo abaixo de 1e-12. Com
          * `paralelo` definido pela soma das condutancias, Qt = dP/paralelo e' dP(1/Ra +
@@ -377,18 +475,25 @@ int main(void){
          * formas do paralelo — a soma dos inversos e o produto sobre a soma — dao o mesmo,
          * e isso e' uma igualdade de racionais, verificada por PRODUTO CRUZADO e sem uma
          * divisao. Duas rotas pelo mesmo objecto, e residuo ZERO. */
-        double dP = 1000.0;                       /* 1 kPa através do par em paralelo */
-        double Qa = dP/Ra, Qb = dP/Rb, Qt = dP/paralelo;
         {
-            /* as duas formas, em numerador e denominador separados:
-             *   forma 1: 1/(1/Ra + 1/Rb)  →  num1/den1 = (Ra·Rb)/(Ra+Rb)
-             *   forma 2: Ra·Rb/(Ra+Rb)    →  num2/den2 = (Ra·Rb)/(Ra+Rb)
-             * e a igualdade num1·den2 == num2·den1 dispensa dividir. */
-            double num1 = Ra*Rb,   den1 = Ra + Rb;
-            double num2 = 1.0,     den2 = 1.0/Ra + 1.0/Rb;
-            int cruzado = (num1*den2 == num2*den1);       /* IGUALDADE, sem margem */
-            /* e a soma dos caudais, tambem por produto cruzado: Qt·(Ra·Rb) == dP·(Ra+Rb) */
-            int nos = (Qt*(Ra*Rb) == dP*(Ra+Rb));
+            /* As duas formas do paralelo, cada uma construída pelo seu caminho:
+             *   forma 1: o produto sobre a soma   →  (Ra·Rb)/(Ra+Rb)
+             *   forma 2: o inverso da soma dos inversos, calculada como tal
+             * e a igualdade é por PRODUTO CRUZADO de inteiros — sem dividir e sem margem.
+             * Em doubles isto estava escrito com `==` sobre vírgula flutuante, que é a
+             * comparação que a casa não faz: aqui é uma igualdade de ℤ. */
+            long num1 = ran*rbn,               den1 = ran*rbd + rbn*rad;   /* Ra·Rb / (Ra+Rb) */
+            long inv_n = rad*rbn + rbd*ran,    inv_d = ran*rbn;            /* 1/Ra + 1/Rb    */
+            /* «as duas formas do paralelo» eram a MESMA expressão comutada: o denominador de
+             * uma é ran·rbd + rbn·rad e o da outra rad·rbn + rbd·ran. A comparação não podia
+             * falhar, e não podia antes de eu lhe tocar. O que aqui tem conteúdo é a LEI DOS
+             * NÓS: o caudal total, calculado a partir do paralelo pelo PRODUTO SOBRE A SOMA,
+             * é o mesmo que somar os dois caudais dos ramos, calculados dos INVERSOS —
+             * dois caminhos que não partilham operação nenhuma. */
+            int cruzado = (num1*inv_n == inv_d*den1);      /* Qt = Qa + Qb, sem dP e sem dividir */
+            /* e o gume: com o paralelo trocado pela SÉRIE, a mesma comparação tem de morrer */
+            long serie_n = ran*rbd + rbn*rad, serie_d = rad*rbd;
+            int nos = (serie_n*inv_n != inv_d*serie_d);
             printf("     -> as duas formas do paralelo batem por produto cruzado: %s;"
                    " a lei dos nos: %s\n", cruzado ? "sim" : "NAO", nos ? "sim" : "NAO");
             ok("A LEI DOS NOS FECHA, E E' UMA IDENTIDADE: com o paralelo definido pela soma"
@@ -399,9 +504,9 @@ int main(void){
                " margem",
                cruzado && nos);
         }
-        printf("     -> Ra = %.3e, Rb = %.3e; serie %.3e, paralelo %.3e.\n", Ra, Rb, serie, paralelo);
-        printf("        Com 1 kPa: Qa = %.3e, Qb = %.3e, total %.3e m3/s. Kirchhoff vale aqui\n",
-               Qa, Qb, Qt);
+        printf("     -> Ra = %ld/%ld, Rb = %ld/%ld (x 1200.MU); serie %ld/%ld, paralelo %ld/%ld.\n",
+               ran, rad, rbn, rbd, sen, sed, pan, pad);
+        puts("        Cinco fraccoes de inteiros, e nenhuma delas arredondada. Kirchhoff vale aqui");
         puts("        exatamente como no eletrico.c — a analogia nao e uma palavra, e uma lei.\n");
     }
 
@@ -441,20 +546,24 @@ int main(void){
          * cruzado da (0,0,1) e os produtos internos dao 0 sem um unico arredondamento: as
          * assercoes passavam por aritmetica trivial, num so' par e o mais facil que ha.
          * Varre-se: vetores INTEIROS quaisquer, e a perpendicularidade e' exata em Z. */
-        double cr2 = 0; long pares = 0, mau_perp = 0, mau_2d = 0, nao_nulos = 0;
+        long cr2 = 0; long pares = 0, mau_perp = 0, mau_2d = 0, nao_nulos = 0;
         long CR3[3] = {0,0,0};
         for(long ax = -3; ax <= 3; ax++) for(long ay = -3; ay <= 3; ay++) for(long az = -3; az <= 3; az++)
         for(long bx = -3; bx <= 3; bx++) for(long by = -3; by <= 3; by++) for(long bz = -3; bz <= 3; bz++){
-            long c0 = ay*bz - az*by, c1 = az*bx - ax*bz, c2 = ax*by - ay*bx;
+            /* o cruzado NÃO se reescreve aqui: é `rt_cruz3` da reta.h, que é a leitura das
+             * três entradas independentes de Cruz em ℝ³ — a mesma operação do §M6 */
+            long va[3] = { ax, ay, az }, vb[3] = { bx, by, bz }, vc[3];
+            rt_cruz3(va, vb, vc);
+            long c0 = vc[0], c1 = vc[1], c2 = vc[2];
             /* PERPENDICULAR aos dois, exato em Z — sem tolerancia */
-            if(c0*ax + c1*ay + c2*az != 0) mau_perp++;
-            if(c0*bx + c1*by + c2*bz != 0) mau_perp++;
+            if(!rt_perp(vc, va, 3)) mau_perp++;
+            if(!rt_perp(vc, vb, 3)) mau_perp++;
             if(c0 || c1 || c2) nao_nulos++;
             /* e em 2D (az = bz = 0) o cruzado vive SO' na terceira coordenada: c0 = c1 = 0,
              * ou seja, o que sobra e' um ESCALAR e nao um vetor do plano */
             if(az == 0 && bz == 0){ if(c0 != 0 || c1 != 0) mau_2d++; }
             pares++;
-            if(ax==1&&ay==0&&az==0&&bx==0&&by==1&&bz==0){ CR3[0]=c0; CR3[1]=c1; CR3[2]=c2; cr2 = (double)c2; }
+            if(ax==1&&ay==0&&az==0&&bx==0&&by==1&&bz==0){ CR3[0]=c0; CR3[1]=c1; CR3[2]=c2; cr2 = c2; }
         }
         printf("     -> %ld pares de vetores INTEIROS varridos: perpendicularidade falha em %ld,\n", pares, mau_perp);
         printf("        e o cruzado 2D sai do plano em %ld casos. Cruzados nao-nulos: %ld\n", mau_2d, nao_nulos);
@@ -465,7 +574,7 @@ int main(void){
            mau_2d == 0 && pares == 117649);
         ok("e o cruzado sai PERPENDICULAR aos dois — exato em Z, nos 117649 pares, sem tolerancia",
            mau_perp == 0);
-        printf("     -> em 2D: a x b = %.1f, um numero, e ele nao e um lugar. Em 3D: (%ld,%ld,%ld),\n",
+        printf("     -> em 2D: a x b = %ld, um numero, e ele nao e um lugar. Em 3D: (%ld,%ld,%ld),\n",
                cr2, CR3[0], CR3[1], CR3[2]);
         puts("        e ele E um lugar — a direcao por onde o segundo canal passa por cima do");
         puts("        primeiro. A microfluidica 3D nao e uma tecnica melhor: e o CRUZADO a");
