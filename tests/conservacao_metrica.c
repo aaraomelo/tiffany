@@ -9,7 +9,7 @@
  * §M0  A DESCIDA: indução e descida são o mesmo facto lido nos dois sentidos
  * §M1  A META-INDUÇÃO: o passo não vê n — e é por isso que vale em todo andar
  * §M2  QUATRO CONTAS, UM NÚMERO: eliminação, cunha, espectro e CONTAGEM
- * §M3  σσ′ = −1 É |det| = 1: a hipótese estrutural e a conservação da área
+ * §M3  det = σσ′, e σσ′ = −1 DÁ |det| = 1 — a seta vai só num sentido
  * §M4  O LADO CONTÍNUO: |det DT| ≡ 1 num T que NÃO é linear
  * §M5  O GUME: retirar |det| = 1 e a medida deixa de se conservar
  * §M6  A SEGUNDA REALIZAÇÃO: a primeira satura, a lei não
@@ -186,7 +186,7 @@ int main(void){
            mal_conta == 0 && dentro3 < caixa && ger_mal == 0 && ger_casos == 5);
     }
 
-    /* ═══ §M3 σσ′ = −1 É |det| = 1 ════════════════════════════════════════════ */
+    /* ═══ §M3 det = σσ′, e a seta é numa direcção ═════════════════════════════ */
     printf("\n§M3 A hipótese estrutural e a conservação da área são a MESMA frase.\n\n");
     {
         long mal = 0, casos = 0;
@@ -200,13 +200,19 @@ int main(void){
         }
         printf("      em %ld metais: det(A_m) = σσ′ = −1, e a estaca σ† = m − σ fecha —"
                " %ld divergências\n", casos, mal);
-        ok("σσ′ = −1 É |det A_m| = 1, e não são dois factos: o determinante É o produto"
-           " dos valores próprios, e a casa já tinha escrito a relação nos dois papers sem"
-           " a ligar à medida. Logo a HIPÓTESE ESTRUTURAL que o eval pede — «σ_m σ_m′ = −1"
-           " tomada como relação de passagem» — é exactamente a conservação da área: o gato"
-           " estica por σ numa direcção e encolhe por 1/σ na outra, e o produto é 1. E o"
-           " sinal negativo é a inversão de orientação, que a medida não vê",
-           mal == 0 && casos == 40);
+        /* e o CONTROLO da seta: |det| = 1 SEM ser gato — a identidade */
+        Mat Id = mat_id(2);
+        int recip_falso = qz_igual(mat_det(Id), qz(1,1));   /* det = +1, σσ′ = +1 */
+        printf("      e a seta é numa direcção: a identidade tem |det| = 1 com σσ′ = +1"
+               " (%s), logo NÃO é gato\n", recip_falso ? "medido" : "falhou");
+        ok("det = σσ′ É A IDENTIDADE, e dela σσ′ = −1 DÁ |det A_m| = 1. Escrevi primeiro"
+           " «⟺» e o recíproco é FALSO: a identidade tem |det| = 1 com σσ′ = +1 e não é"
+           " gato nenhum — está aqui medida ao lado, e é ela o controlo. O que a casa já"
+           " tinha escrito nos dois papers, e nunca ligado à medida, é a hipótese"
+           " ESTRUTURAL σ_m σ_m′ = −1; dela sai a conservação da área — o gato estica por σ"
+           " numa direcção e encolhe por 1/σ na outra. E o sinal negativo é a inversão de"
+           " orientação, que a medida não vê",
+           mal == 0 && casos == 40 && recip_falso);
     }
 
     /* ═══ §M4 O LADO CONTÍNUO: |det DT| ≡ 1 sem T ser linear ══════════════════ */
@@ -305,6 +311,81 @@ int main(void){
            " (espectro) e a razão de pontos do reticulado (contagem). Nenhuma delas é a"
            " definição da outra, e é por isso que elas coincidirem é um facto",
            tautologia);
+    }
+
+    /* ═══ §M8 OS DOIS MOVIMENTOS: só um composto fecha, e a medida não vê ═══ */
+    printf("\n§M8 Sobe em espiral, desce discreto — e a medida sobrevive ao que o"
+           " laço não fecha.\n\n");
+    {
+        long a[MD_CF], b[MD_CF], p2, q2;
+        long ida_mal = 0, casos = 0, duas = 0, det_mal = 0, dif = 0;
+        for(long p = 1; p <= 60; p++) for(long q = 1; q <= 60; q++){
+            int n = md_cone(p, q, a, MD_CF);
+            if(n == 0) continue;
+            casos++;
+            /* Σ∘Π = Id: descer e voltar a subir devolve o racional */
+            if(!md_espiral(a, n, &p2, &q2)){ continue; }
+            Qz orig = qz(p,q), volta = qz(p2,q2);
+            if(!qz_igual(orig, volta)) ida_mal++;
+            /* Π∘Σ ≠ Id: a OUTRA expansão dá o mesmo racional e sequência diferente */
+            int m = md_outra_expansao(a, n, b, MD_CF);
+            if(m > 0){
+                long p3, q3;
+                if(md_espiral(b, m, &p3, &q3) && qz_igual(qz(p3,q3), orig)){
+                    duas++;
+                    if(m != n) dif++;                       /* e a sequência É outra */
+                    /* e a MEDIDA não distingue: os dois percursos têm |det| = 1 */
+                    if(md_det_percurso(a,n) * md_det_percurso(a,n) != 1
+                       || md_det_percurso(b,m) * md_det_percurso(b,m) != 1) det_mal++;
+                }
+            }
+        }
+        printf("      Σ∘Π = Id em %ld racionais: %ld divergências\n", casos, ida_mal);
+        printf("      Π∘Σ ≠ Id: %ld deles têm DUAS expansões, e em %ld a sequência é"
+               " mesmo outra\n", duas, dif);
+        printf("      e |det| do percurso nas duas expansões: %ld divergências de 1\n",
+               det_mal);
+        ok("SÓ UM DOS COMPOSTOS FECHA, E A MEDIDA NÃO VÊ A DIFERENÇA. Descer pelo cone e"
+           " voltar a subir pela espiral devolve o real — Σ∘Π = Id, exacto em inteiros"
+           " porque é Euclides. Subir e voltar a descer NÃO devolve a sequência: todo"
+           " racional tem exactamente DUAS expansões, [a₀…aₙ] e [a₀…aₙ−1,1], e o cone só"
+           " produz uma. O par é uma RETRAÇÃO e não uma involução. E a metade métrica é"
+           " esta: cada passo do cone é [[a,1],[1,0]] com det = −1, logo |det| = 1 nos DOIS"
+           " percursos — a conservação da medida é estritamente MAIS FRACA que o fecho do"
+           " laço. O gato desce ao mesmo tronco e não às mesmas marcas de unha: o que volta"
+           " é a medida, a representação não",
+           ida_mal == 0 && duas > 0 && dif == duas && det_mal == 0 && casos > 1000);
+    }
+
+    /* ═══ §M9 A BIDUALIDADE: o gato é o ponto fixo, o passarinho volta ═════════ */
+    printf("\n§M9 O dual inverte a medida; o bidual restitui-a — e o gato é onde os"
+           " dois coincidem.\n\n");
+    {
+        long bi_mal = 0, casos = 0, fixos = 0, fixos_esp = 0, sem_dual = 0;
+        for(long p = -30; p <= 30; p++) for(long q = 1; q <= 12; q++){
+            Qz d = qz(p,q), u, vv;
+            casos++;
+            if(!md_dual_medida(d, &u)){ sem_dual++; continue; }
+            if(!md_bidual(d, &vv) || !qz_igual(d, vv)) bi_mal++;   /* †∘† = id */
+            if(md_ponto_fixo(d)) fixos++;
+            if((d.p == 1 || d.p == -1) && d.q == 1) fixos_esp++;   /* d = ±1 */
+        }
+        printf("      o bidual devolve o mesmo em %ld casos: %ld divergências\n",
+               casos - sem_dual, bi_mal);
+        printf("      pontos fixos da PRIMEIRA dualidade: %ld — e os d = ±1 são %ld\n",
+               fixos, fixos_esp);
+        printf("      e sem dual (d = 0, a fibra vazia): %ld\n", sem_dual);
+        ok("O GATO É O PONTO FIXO DA PRIMEIRA DUALIDADE, E O PASSARINHO VOLTA PELA SEGUNDA."
+           " O dual métrico inverte o factor de medida — det(T*) = 1/det(T) —, logo a"
+           " primeira dualidade é d ↦ 1/d e NÃO é a identidade; a segunda é, e é a Lei 1"
+           " desta casa, †∘† = id, medida aqui sem uma divergência. E os pontos fixos da"
+           " primeira são exactamente d = 1/d, ou seja d² = 1, ou seja |det| = 1 — que é a"
+           " conservação da medida. Donde: CONSERVAR A MEDIDA É SER O SEU PRÓPRIO DUAL"
+           " MÉTRICO. Um corpo qualquer — o passarinho, uma instância como o Corpo de"
+           " Peano, que se declara instância no seu próprio texto — precisa das DUAS"
+           " aplicações para voltar; o gato volta à primeira. E o zero não tem dual, que é"
+           " a mesma fibra vazia de 0⁻¹ que a escada aritmética encontrou em todo andar",
+           bi_mal == 0 && fixos == fixos_esp && fixos_esp > 0 && sem_dual > 0);
     }
 
     printf("\n=== %ld asserções, %ld falhas, %ld estouros, %ld saturações"

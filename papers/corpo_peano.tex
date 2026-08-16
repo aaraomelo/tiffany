@@ -2118,12 +2118,26 @@ esta tabela. O teorema não os junta --- separa-os pelo $a$.
 $\square$
 \end{teorema}
 
-\begin{teorema}[a face discreta da conservação métrica --- o determinante
-é a área, e o gato já a conservava]\label{thm:det-volume}
-A realização discreta da conservação métrica (\emph{Corpo Universal},
-Teor.~da conservação métrica por dualidade) é o \textbf{determinante}, e
+\begin{teorema}[a face discreta do \textsc{Teorema do Gato} --- o
+determinante é a área, e o gato já a conservava sem o
+saber]\label{thm:det-volume}
+A realização discreta do \textsc{Teorema do Gato} (\emph{Corpo
+Universal}, Teor.~da conservação métrica por dualidade) é o
+\textbf{determinante}, e
 esta tabela já a tinha escrita sem lhe dar o nome: a relação
-$\sigma\sigma'=-1$ do relógio ($\S$~a estaca) \emph{é} $|\det A_{m}|=1$.
+$\sigma\sigma'=-1$ do relógio ($\S$~a estaca) \textbf{dá}
+$|\det A_{m}|=1$ --- e «dá» é a palavra certa, porque a identidade é
+$\det=\sigma\sigma'$ e a seta de volta não existe ($|\det|=1$ também se
+cumpre com $\sigma\sigma'=+1$, que é a identidade).
+
+E há uma coisa que esta tabela tinha escrita em dois sítios sem as
+juntar: a Definição da régua metálica diz \emph{norma} $N(\sigma)=-1$, e
+o gato tem $\det A_{m}=-1$. É o \textbf{mesmo número}:
+\[
+\boxed{\;N(\sigma)=\det A_{m}=\sigma\sigma^{\dagger}=-1\;}
+\]
+--- a norma algébrica \emph{é} o determinante do operador de
+multiplicação. Estava nas duas páginas e nunca na mesma frase.
 
 \textbf{(0) O determinante é o factor de volume.} Para
 $A:\mathbb{R}^{n}\to\mathbb{R}^{n}$, a ação sobre o elemento de volume
@@ -2167,6 +2181,39 @@ caixa simétrica de raio $12$ os múltiplos de $3$ são $9$, não $25/3$);
 substituiu-se pela segunda contagem, que não é referência minha.
 $\square$
 \end{teorema}
+
+\begin{corolario}[este corpo é o passarinho, e por isso precisa das duas
+dualidades]\label{cor:passarinho-peano}
+O \emph{Corpo Universal} tem a lei; esta tabela declara-se
+\textbf{instância} na sua própria abertura ($\S$~o programa: «este corpo é
+instância»). Na leitura do \textsc{Teorema do Gato} isso tem um nome e
+uma consequência medível.
+
+\textbf{O nome.} A instância é o \textbf{passarinho} --- o corpo na sua
+realização particular ---, e o \textbf{gato} é o operador de passagem que
+sobe pela extensão dual e desce pela projecção métrica. O
+\emph{Corpo estelar} já tinha o resto: no teorema do \textbf{viveiro},
+fundir $N$ corpos dá \emph{um} corpo, o menor que os contém, «e voa».
+
+\textbf{A consequência.} Pelo Corolário da bidualidade
+(\emph{Corpo Universal}), a dualidade age na medida como $d\mapsto1/d$, e
+o gato é o seu \textbf{ponto fixo} --- volta à primeira aplicação, porque
+$|\det|=1$. Uma instância qualquer não é ponto fixo: volta só à
+\textbf{segunda}, pelo bidual $\dagger\circ\dagger=\mathrm{id}$, que é a
+Lei~1 desta casa e que esta tabela já media em
+\code{tests/hilbert\_bidual.c}. É essa a diferença entre o gato e o
+passarinho, e ela é aritmética e não retórica: \emph{quantas dualidades
+cada um precisa para voltar a si}.
+
+E o gato desta tabela --- $A_{m}$, com $N(\sigma)=\det A_{m}=-1$ --- é um
+ponto fixo com o sinal trocado: volta à primeira na \emph{medida} e
+inverte a \emph{orientação}. A medida não vê o sinal; a orientação é a
+parte que a primeira dualidade leva e a segunda traz de volta.
+
+\emph{Medido:} \code{tests/conservacao\_metrica.c} ($\S$M9), com os
+pontos fixos a serem exactamente $d=\pm1$ --- $24$ de $24$, sem sobra nem
+falta. $\square$
+\end{corolario}
 
 \begin{teorema}[a face discreta da ponte --- o potencial é a fibra, e ela
 esvazia-se no ciclo]\label{thm:ponte-discreta}

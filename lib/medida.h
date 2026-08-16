@@ -279,4 +279,91 @@ static int md_det_potencia_exacto(long m, long k, Qz *det){
     *det = mat_det(R);
     return 1;
 }
+/* ═══ PARTE V — OS DOIS MOVIMENTOS: SOBE EM ESPIRAL, DESCE DISCRETO ═══════════
+ * O gato sobe pela extensão dual (contínuo na representação) e desce pela projecção
+ * métrica (discreto na leitura). A casa já tinha o par medido em `tests/cone_espiral.c`:
+ *
+ *      Π : ℝ → ℕ^ℕ     o CONE, extracção discreta       (a descida)
+ *      Σ : ℕ^ℕ → ℝ     a ESPIRAL, reconstrução contínua (a subida)
+ *      Σ∘Π = Id_ℝ,  mas  Π∘Σ ≠ Id  — é uma RETRAÇÃO, não uma involução
+ *
+ * Lá o Π corre em vírgula flutuante e o próprio ficheiro conta o que isso lhe custou.
+ * Aqui corre em INTEIROS, porque é Euclides e sai exacto — e o que se mede é a metade
+ * MÉTRICA, que é nova: cada passo do cone é a matriz [[a,1],[1,0]], com det = −1. Logo
+ *
+ *      |det| = 1 nos DOIS compostos, e só UM deles é a identidade.
+ *
+ * A conservação da medida é estritamente mais fraca que o fecho do laço, e a diferença
+ * conta-se: as duas expansões de um racional dão matrizes DIFERENTES com o MESMO |det|.
+ * O gato desce ao mesmo tronco e não às mesmas marcas de unha. */
+#define MD_CF 40
+
+/* Π — o cone, em inteiros: Euclides, e escreve os quocientes */
+static int md_cone(long p, long q, long *a, int max){
+    int k = 0;
+    if(q == 0) return 0;
+    while(q != 0 && k < max){
+        long d = p / q, r = p % q;
+        if(r < 0){ d--; r += (q > 0 ? q : -q); }     /* o quociente para BAIXO */
+        a[k++] = d; p = q; q = r;
+    }
+    return k;
+}
+/* Σ — a espiral, em inteiros: recompõe de trás para a frente, exacto */
+static int md_espiral(const long *a, int n, long *p, long *q){
+    if(n <= 0) return 0;
+    long P = a[n-1], Q = 1;
+    for(int i = n - 2; i >= 0; i--){
+        long nP = a[i] * P + Q, nQ = P;
+        if(P > 1000000000L || Q > 1000000000L){ md_saturou++; return 0; }
+        P = nP; Q = nQ;
+    }
+    *p = P; *q = Q;
+    return 1;
+}
+/* a MATRIZ do percurso: o produto dos [[a,1],[1,0]] — e o det dela é (−1)^n */
+static long md_det_percurso(const long *a, int n){
+    long d = 1;
+    for(int i = 0; i < n; i++) d = -d;             /* cada passo tem det = −1 */
+    return d;
+}
+/* a OUTRA expansão: [a₀,…,aₙ] ↔ [a₀,…,aₙ−1,1]. São exactamente duas, e só duas. */
+static int md_outra_expansao(const long *a, int n, long *b, int max){
+    if(n <= 0 || n + 1 > max) return 0;
+    for(int i = 0; i < n; i++) b[i] = a[i];
+    if(b[n-1] <= 1) return 0;                      /* já é a que termina em 1 */
+    b[n-1] -= 1; b[n] = 1;
+    return n + 1;
+}
+/* ═══ PARTE VI — A BIDUALIDADE: o gato é o PONTO FIXO, o passarinho volta ═════
+ * O dual métrico inverte o factor de medida: det(T*) = 1/det(T). Logo
+ *
+ *      PRIMEIRA dualidade   d ↦ 1/d        e ela NÃO é a identidade
+ *      SEGUNDA  (bidual)    d ↦ 1/d ↦ d    e ela É — a Lei 1, †∘† = id
+ *
+ * E daí sai o que faz do gato um gato: ele é o PONTO FIXO da primeira,
+ *
+ *      d = 1/d  ⟺  d² = 1  ⟺  |det| = 1,
+ *
+ * que é exactamente a conservação da medida. Ou seja, conservar a medida É ser o seu
+ * próprio dual métrico. O passarinho — um corpo qualquer, uma instância — não é ponto
+ * fixo: precisa das DUAS aplicações para voltar. O gato volta à primeira.
+ *
+ * Esta é a lei desta casa em dois níveis: toda representação tem dual, e exigir que o
+ * PASSO seja o dual dá a forma. Aqui o passo é a medida, e a forma é |det| = 1. */
+static int md_dual_medida(Qz d, Qz *dual){
+    if(d.p == 0) return 0;                       /* sem dual: a fibra é vazia */
+    return qz_divide(qz(1,1), d, dual);
+}
+static int md_bidual(Qz d, Qz *volta){
+    Qz u;
+    if(!md_dual_medida(d, &u)) return 0;
+    return md_dual_medida(u, volta);
+}
+/* é ponto fixo da PRIMEIRA dualidade? — e isto é |det| = 1, dito de outra maneira */
+static int md_ponto_fixo(Qz d){
+    Qz u;
+    if(!md_dual_medida(d, &u)) return 0;
+    return qz_igual(d, u);
+}
 #endif

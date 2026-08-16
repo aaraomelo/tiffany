@@ -46,6 +46,7 @@
 - **[A definição do extractor](feedback-a-definicao-do-extractor.md)** — publiquei «15 de 22 citam medidor»: era a definição da MINHA consulta, não um facto sobre o paper. Os 22 estavam medidos. E foi a 2.ª vez no dia — passou porque o número deixou de ser absurdo. Ler os que caem do lado NEGATIVO.
 - **[O tecto do array](feedback-o-tecto-do-array.md)** — subi `TR_MAX` para 64 e chamei-lhe «não tem tecto». Se a conclusão menciona um número do meu código, medi a MÁQUINA. Tese com «todo/sempre/sem limite» não se varre: prova-se o PASSO.
 - **[O double que só transportava](feedback-o-double-que-so-transportava.md)** — 20 doubles sobre dados que SEMPRE foram inteiros: não carregavam vírgula, traziam um limiar `1e-9` de borla. «É zero» é mais forte que «é menor que a régua que eu escolhi».
+- **[Saturação não é resultado](feedback-saturacao-nao-e-resultado.md)** — «falha travestida de teorema». Ia publicar «5 de 8» e as três em falta eram o `long`. A tese é do PASSO: virou 1040/1040.
 - **[Revisores em paralelo](feedback-revisores-externos.md)** — compensam MUITO e é preciso REPICAR. Os graves são todos do mesmo tipo: A ASSERÇÃO ERA O DEFEITO.
 
 ## A teoria
@@ -59,6 +60,7 @@
 - [A escada do diabo](project-escada-do-diabo.md) — 1/2 é o patamar mais largo; e um revisor apanhou DUAS frases falsas publicadas, incluindo «os convergentes do áureo encolhem mais depressa», que é o contrário.
 - [O fator de potência é a régua](project-fator-de-potencia.md) — |det|=1, fator unitário e inversa inteira são TRÊS NOMES da mesma condição. O motor quer fp=1, o tecido quer fp=0.
 - [O corpo quântico e o cósmico](project-quantico-cosmico.md) — [σi,σj]=2i·ε·σk É o produto cruzado. E: CHAMEI LEI À CONSEQUÊNCIA DE UMA ESCOLHA MINHA (Carnot). Gatilho: que parâmetros do teorema fui eu que escolhi?
+- **[O TEOREMA DO GATO](project-teorema-do-gato.md)** — det É a medida; sobe em espiral, desce discreto; e o dual do gato é o PASSARINHO — conservar a medida é ser o seu próprio dual métrico.
 - **[A derivada exterior](project-a-derivada-exterior.md)** — o `d` é UMA operação (grad/rot/div são nomes dela) e Green/Stokes/Gauss são UM teorema: a prova é o PROGRAMA ser um só. Sete objectos de cinco andares, uma gramática — a graduação.
 - **[Cálculo II e III](project-calculo-2-3.md)** — a série é o OBJECTO e o valor é que precisa do limite; local→global; e Green/Stokes/Gauss são UMA frase: ∫_∂R ω = ∫_R Dω, com os dois lados sem código em comum.
 - **[Cálculo I exacto](project-calculo-exacto.md)** — `(f(a+h)−f(a))/h` **É** um polinómio em h, logo a derivada é uma AVALIAÇÃO e não um limite; e a casa já derivava exacto pela parte ε do dual. O ponto do Valor Médio pode ser IRRACIONAL, e isso não é falha.

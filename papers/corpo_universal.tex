@@ -857,8 +857,9 @@ onde falhar --- com $\det T=0$ o operador não tem dual, e o passo
 recusa. $\square$
 \end{teorema}
 
-\begin{teorema}[conservação métrica por dualidade: o determinante É o
-factor de medida, em todo andar]\label{thm:conservacao-metrica}
+\begin{teorema}[\textsc{Teorema do Gato} --- a conservação métrica por
+dualidade: o determinante É o factor de medida, em todo
+andar]\label{thm:gato}
 Seja $\mathcal{T}=\{T_{k}\}_{k\ge0}$ a torre construída por extensão
 dual, e $\sigma_{k}$ o operador métrico do $k$-ésimo andar, com a
 relação de passagem que esta casa já tinha escrito
@@ -869,11 +870,93 @@ relação de passagem que esta casa já tinha escrito
 Então a conservação métrica admite formulação \textbf{independente da
 dimensão}: a medida é conservada pela ação dual, e
 \[
-\boxed{\;|\det|\;\text{é o factor de escala da medida, e}\;
-\sigma_{k}\sigma_{k'}=-1\;\Longleftrightarrow\;|\det|=1.\;}
+\boxed{\;\det=\sigma_{k}\sigma_{k'}\;\text{ é o factor de escala da
+medida};\quad
+\sigma_{k}\sigma_{k'}=-1\;\Longrightarrow\;|\det|=1.\;}
 \]
+\emph{E a seta é só numa direcção.} Escrevi primeiro
+$\sigma\sigma'=-1\Leftrightarrow|\det|=1$ e o recíproco é \textbf{falso}:
+$|\det|=1$ dá $\sigma\sigma'=\pm1$, e a identidade tem $\sigma\sigma'=+1$
+sem ser nenhum gato. O que é uma identidade é $\det=\sigma\sigma'$ --- o
+determinante \emph{é} o produto dos valores próprios; o $-1$ é a escolha
+que a torre faz, e é ela que traz a inversão de orientação junto com a
+conservação da área.
 
-\textbf{(0) O que este teorema NÃO afirma.} Se $\sigma_{n}(A)$ se
+\textbf{(0) O nome, e a geometria que ele carrega.} Chama-se
+\textbf{Teorema do Gato} porque o objecto que o realiza é o \emph{gato}
+desta casa, $A_{m}=\begin{pmatrix} m & 1\\ 1 & 0\end{pmatrix}$: é nele
+que $\det=\sigma\sigma'$ se lê como conservação da área, e é ele que
+\emph{estica por $\sigma$ numa direcção e encolhe por $1/\sigma$ na
+outra}. O nome é do objecto e não de uma pessoa, que é a regra desta
+casa: o sujeito da frase é o resultado. (A intuição nasceu no quintal, a
+ver um gato subir um coqueiro em espiral e descer agarrado ao tronco,
+aos saltos --- e o nome ficou porque a imagem estava certa, não porque
+fosse bonita.)
+
+\textbf{(1) Os dois movimentos, e são duais.} O gato tem
+\[
+\boxed{\;\uparrow\;\text{em espiral}
+\qquad\qquad
+\downarrow\;\text{discretamente}\;}
+\]
+--- \textbf{sobe} pela extensão dual, ganhando andar e refinando a
+representação de modo \emph{contínuo}; \textbf{desce} pela projecção
+métrica, por níveis \emph{discretos}, e o que ele não larga na descida é
+o factor de medida. Não são duas dinâmicas: são as duas faces da mesma
+passagem dual, e são exactamente o par do
+Teorema~\ref{thm:meta-inducao} --- a indução que projecta e a descida que
+lê.
+
+\textbf{(2) E a casa já tinha os dois medidos, com um senão que corrige
+a fórmula.} O par não é novo aqui: \code{tests/cone\_espiral.c} mede-o há
+muito, com estes nomes,
+\[
+\Pi:\mathbb{R}\to\mathbb{N}^{\mathbb{N}}\ \ (\text{o \textbf{cone}:
+extracção discreta}),
+\qquad
+\Sigma:\mathbb{N}^{\mathbb{N}}\to\mathbb{R}\ \ (\text{a \textbf{espiral}:
+reconstrução contínua}),
+\]
+e o que ele apurou foi que \textbf{só um dos compostos fecha}:
+\[
+\Sigma\circ\Pi=\operatorname{Id}_{\mathbb{R}},
+\qquad\text{mas}\qquad
+\Pi\circ\Sigma\neq\operatorname{Id}.
+\]
+O par é uma \textbf{retracção}, não uma involução --- e a falha conta-se
+exactamente: todo racional tem \emph{duas} expansões,
+$[a_{0};\ldots,a_{n}]$ e $[a_{0};\ldots,a_{n}-1,1]$, logo $\Sigma$ não é
+injectiva. Descer e voltar a subir devolve o real; subir e voltar a
+descer \emph{não} devolve a sequência.
+
+Escrever $D\circ U\sim\sigma_{k}\sigma_{k'}=-1$ aponta, na notação do
+cone, para $\Pi\circ\Sigma$ --- o lado que \textbf{não} é a identidade. E
+é aí que a afirmação métrica ganha o seu conteúdo em vez de o perder:
+\[
+\boxed{\;|D\circ U|=1\;\text{ vale nos \emph{dois} compostos, e só um
+deles é a identidade.}\;}
+\]
+Ou seja, \textbf{a conservação da medida é estritamente mais fraca do que
+o fecho do laço}, e a casa tem a diferença medida e contada. O gato sobe
+o coqueiro e desce ao mesmo tronco --- mas não às mesmas marcas de unha.
+O que volta é a \emph{medida}; a representação não.
+
+\textbf{(3) As três vidas do gato.} A lei desce em três papéis, e são
+papéis \emph{diferentes} --- não três enunciados do mesmo:
+\[
+\boxed{\;
+\underbrace{\text{dualidade}}_{\text{Universal: a lei}}
+\;\longrightarrow\;
+\underbrace{\text{volume}}_{\text{Peano: realização algébrica}}
+\;\longrightarrow\;
+\underbrace{\text{medida}}_{\text{Estelar: realização analítica}}\;}
+\]
+O determinante é a leitura de Peano, o Jacobiano é a leitura Estelar, e a
+conservação métrica é a lei que fica acima dos dois. O Universal tem a
+lei e \emph{não a calcula}; é essa separação que impede a lei de ser
+confundida com a conta que a realiza.
+
+\textbf{(4) O que este teorema NÃO afirma.} Se $\sigma_{n}(A)$ se
 \emph{define} como $|\det A|$, então «$\det|\cdot|=\sigma_{n}$» é verdade
 por definição, e uma proposição que não pode falhar não é um teorema. O
 conteúdo está noutro sítio, e é ele que se mede: esse \textbf{mesmo}
@@ -891,17 +974,18 @@ e sai dos coeficientes, sem avaliar raiz nenhuma;
 Quatro contas sem código em comum e um só número. \emph{Isso} é o
 teorema; a igualdade com $\sigma_{n}$ é a notação.
 
-\textbf{(1) A hipótese estrutural É a conservação da área.} O
-determinante é o produto dos valores próprios; logo
-$\sigma\sigma'=-1$ e $|\det A_{m}|=1$ são a \emph{mesma} frase, e não
-duas. A casa tinha a relação escrita no \emph{Corpo de Peano} e no
+\textbf{(5) A hipótese estrutural DÁ a conservação da área.} O
+determinante é o produto dos valores próprios --- $\det=\sigma\sigma'$, e
+\emph{esta} é a identidade. Da hipótese $\sigma\sigma'=-1$ sai
+$|\det A_{m}|=1$, e portanto a conservação; o caminho de volta não
+existe, porque $|\det|=1$ também se cumpre com $\sigma\sigma'=+1$. A casa tinha a relação escrita no \emph{Corpo de Peano} e no
 Universal (Def.~\ref{def:energia} lista $|\det|=1$ entre os três nomes
 da conservação da norma) e nunca a tinha ligado à \textbf{medida}: o
 gato estica por $\sigma$ numa direcção e encolhe por $1/\sigma$ na
 outra, e o produto é $1$. O sinal negativo é a inversão de orientação,
 que a medida não vê.
 
-\textbf{(2) Sem tecto, e pela forma.} Base: $\det(I)=1$. Passo: para a
+\textbf{(6) Sem tecto, e pela forma.} Base: $\det(I)=1$. Passo: para a
 extensão dual $T_{n+1}=T_{n}\oplus T_{n}^{\ast}$ com $T^{\ast}$ o dual
 métrico,
 \[
@@ -912,8 +996,22 @@ e a conta \textbf{não menciona a dimensão}. Pelo
 Teorema~\ref{thm:meta-inducao}, $\forall n$. A conservação não é
 reintroduzida em cada andar: é \textbf{transportada pela dualidade}.
 
+\textbf{(7) E duas maneiras de falsificar a própria prova, mortas.} A
+descida não é um procedimento de confirmação: ela procura \emph{onde a
+estrutura poderia quebrar}. Duas portas fecharam-se ao construí-la ---
+(i) uma \emph{saturação} do tipo deixou de poder virar teorema, porque a
+lei se verifica numa segunda realização e a saturação conta-se à parte;
+(ii) a meta-indução deixou de aceitar objectos \emph{fora do seu
+domínio}, que foi como a primeira descida que se escreveu deu sessenta
+falsos sobreviventes. E a regra metodológica que daqui sai é a mais
+larga de todas:
+\[
+\boxed{\;\text{tese com «sempre» não se varre; prova-se o passo.}\;}
+\]
+
 \emph{Prova (operacional, medida).} \code{tests/conservacao\_metrica.c}
-$\S$M2--$\S$M7, $11{:}0$. As quatro contas coincidem: eliminação contra
+$\S$M2--$\S$M7, $11{:}0$; e a retracção do (2) em
+\code{tests/cone\_espiral.c} ($\S$E1--$\S$E4). As quatro contas coincidem: eliminação contra
 cunha em $2401$ matrizes $2\times2$ e $625$ $3\times3$ ($0$
 divergências); $\sigma\sigma'=\det=-1$ em $40$ metais; e a contagem do
 reticulado feita pelos \emph{dois} lados --- descendo pela
@@ -924,6 +1022,91 @@ o $\S$M6 mede a regra do Teorema~\ref{thm:meta-inducao}: a primeira
 realização satura em $k=19$, e a segunda --- em resíduos --- responde
 até $k=400$ em três primos, com $\det(A^{k})=(-1)^{k}$. $\square$
 \end{teorema}
+
+\begin{corolario}[a bidualidade: o gato é o PONTO FIXO, o passarinho volta
+pela segunda]\label{cor:bidualidade}
+O dual métrico inverte o factor de medida, $\det(T^{\ast})=1/\det(T)$.
+Logo a dualidade age sobre a medida como $d\mapsto 1/d$, e daí saem as
+duas leis desta casa, com os seus papéis separados:
+\[
+\boxed{\;
+\underbrace{d\mapsto 1/d}_{\text{1.\textsuperscript{a}: NÃO é a
+identidade}}
+\qquad
+\underbrace{d\mapsto 1/d\mapsto d}_{\text{2.\textsuperscript{a}: o
+bidual, }\dagger\circ\dagger=\mathrm{id}\ (\text{Lei~1})}\;}
+\]
+e o \textbf{gato é exactamente o ponto fixo da primeira}:
+\[
+d=\frac1d
+\iff d^{2}=1
+\iff |\det|=1 .
+\]
+
+\textbf{Donde a leitura que fecha o nome.} \emph{Conservar a medida é ser
+o seu próprio dual métrico.} O gato volta à \emph{primeira} aplicação; um
+corpo qualquer --- o passarinho, uma instância --- precisa das
+\emph{duas}. É por isso que o dual do gato é o passarinho e não outro
+gato: o que distingue os dois não é a natureza, é quantas dualidades cada
+um precisa para voltar a si.
+
+E o \emph{Corpo de Peano} é um passarinho pela sua própria letra: «este
+corpo é instância» ($\S$~o programa). É a realização particular sobre a
+qual o gato opera --- e a bidualidade já estava lá medida, em
+\code{tests/hilbert\_bidual.c}, pelas mesmas duas leis.
+
+\emph{Medido:} \code{tests/conservacao\_metrica.c} ($\S$M9): o bidual
+devolve o mesmo em $720$ casos sem uma divergência; os pontos fixos da
+primeira dualidade são \textbf{exactamente} os $d=\pm1$ ($24$ de $24$,
+sem sobra nem falta); e o zero não tem dual --- a mesma fibra vazia de
+$0^{-1}$ que a escada aritmética encontrou em todo andar. $\square$
+\end{corolario}
+
+\begin{observacao}[a leitura do quintal, e ela compõe com o que já estava
+escrito]\label{obs:passarinho}
+A cena que deu o nome tinha três papéis, e os três já existem nesta
+teoria --- a leitura não acrescenta matemática, arruma a que há.
+
+\medskip
+\noindent\textbf{O passarinho} é o \emph{corpo na sua realização
+particular}: uma instância, com a sua face. O \emph{Corpo estelar} já
+tinha escrito o resto disto no teorema do \textbf{viveiro} --- fundir $N$
+corpos é o \emph{fold} da junção,
+$\mathbb{R}^{a_1}\vee\cdots\vee\mathbb{R}^{a_N}
+=\mathbb{R}^{\operatorname{lcm}(a_1,\ldots,a_N)}$, e o resultado «é
+\emph{um} corpo, o menor que contém todos, e voa». O pássaro estava lá
+antes do gato.
+
+\medskip
+\noindent\textbf{O gato} é o \textbf{operador de passagem}: sobe pela
+extensão dual $T_0\to T_1\to T_2\to\cdots$ --- espiral, contínua na
+representação --- e desce pela projecção métrica --- cone, discreta na
+leitura. É o par $\uparrow/\downarrow$ do ponto (1), e é o par
+indução/descida do Teorema~\ref{thm:meta-inducao}.
+
+\medskip
+\noindent\textbf{A supervisão} é a \textbf{condição de fronteira}, e a
+fronteira é a lei: o gato muda de andar e muda de orientação, e
+\emph{não muda a medida}. A espiral pode aumentar a dimensão sem tecto
+(ponto~(6)); o que ela não pode é deixar a métrica escapar.
+
+\medskip
+E é aqui que se lê por que o Universal tem de ser \emph{universal}:
+\textbf{ele é um corpo sobre outro corpo}. Os seus elementos são as
+instâncias --- os passarinhos ---, e a lei que ele guarda é uma lei
+\emph{sobre} leis. É a mesma forma da meta-indução um andar acima: como a
+meta-indução é a indução aplicada ao passo em vez de aos andares, o
+Universal é o corpo aplicado aos corpos em vez de aos elementos. Daí a
+frase que abre este documento --- \emph{a lei não precisa de nome; o
+Universal é dono da lei, cada instância é dona da sua face} --- e daí
+também o Universal ter a lei e \textbf{não a calcular}: quem calcula é a
+face.
+
+\medskip
+\noindent Para o histórico informal, que é onde isto pertence:
+\emph{o gato sobe em espiral e desce discretamente; o matemático fica de
+olho nos passarinhos.}
+\end{observacao}
 
 \begin{definicao}[energia]\label{def:energia}
 A \textbf{energia} de um corpo $x$ de componentes endereçadas é o

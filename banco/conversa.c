@@ -1402,11 +1402,12 @@ static const struct { int n; const char *nome; const char *enunciado; } CM10[] =
  { 3, "sem teto",       "a ausência de tecto é da FORMA, não de uma varredura" },
  { 4, "determinante",   "det é o factor de volume: A(v₁)∧…∧A(vₙ) = det(A)·v₁∧…∧vₙ" },
  { 5, "quatro contas",  "álgebra, geometria, espectro e CONTAGEM — um só número" },
- { 6, "sigma dual",     "σσ′ = −1 É |det| = 1: a hipótese estrutural é a área" },
+ { 6, "gato",           "det = σσ′, e σσ′ = −1 DÁ |det| = 1 — a seta é numa direcção" },
  { 7, "jacobiano",      "a lei é LOCAL, e o cisalhamento não linear prova-o" },
  { 8, "gume da area",   "retirar |det| = 1, e a medida escala pelo determinante" },
  { 9, "representacao",  "falha de representação ≠ contra-exemplo matemático" },
- {10, "as tres camadas","Universal (lei) → Peano (det) → Estelar (medida)" },
+ {10, "passarinho",     "o corpo, o gato e a fronteira — e o Universal é corpo SOBRE corpos" },
+ {11, "bidualidade",    "o gato é o PONTO FIXO da 1.ª; o passarinho volta pela 2.ª" },
 };
 static void cmetrica_resolve(int n){
     TICK_N = 0;
@@ -1506,14 +1507,17 @@ static void cmetrica_resolve(int n){
     case 4: case 5: case 6:
         tique7(0, "seja A uma transformação linear de ℝⁿ com entradas racionais");
         tique7(1, n == 4 ? "o determinante é o factor de volume:"
-             : n == 5 ? "as quatro contas:" : "a hipótese estrutural:");
+             : n == 5 ? "as quatro contas:" : "a hipótese estrutural, e a seta:");
         printf(n == 4 ? "      $A(v_1) \\wedge \\cdots \\wedge A(v_n) = \\det(A)\\,"
                         " v_1 \\wedge \\cdots \\wedge v_n$\n"
              : n == 5 ? "      eliminação $\\cdot$ cunha $\\cdot$ espectro $\\cdot$"
                         " contagem\n"
                       : "      $\\sigma\\sigma' = -1$\\qquad e\\qquad $|\\det A_m| = 1$\n");
         tique7(2, n == 6
-               ? "e não são dois factos: o determinante É o produto dos valores próprios."
+               ? "e a seta vai só num sentido, o que eu tinha escrito mal: det = σσ′ É uma"
+                 " identidade — o determinante É o produto dos valores próprios —, e dela"
+                 " σσ′ = −1 DÁ |det| = 1. O recíproco é falso: |det| = 1 admite σσ′ = +1,"
+                 " que é a identidade."
                  " A casa tinha σσ′ = −1 escrito no Corpo de Peano e no Universal e nunca a"
                  " tinha ligado à MEDIDA — o gato estica por σ numa direcção e encolhe por"
                  " 1/σ na outra, e o produto é 1. É a conservação da área"
@@ -1612,8 +1616,9 @@ static void cmetrica_resolve(int n){
                         " passo, e a varredura só confirma");
               tique7(5, mal == 0
                      ? "logo a hipótese estrutural que o eval pede — σσ′ = −1 como relação"
-                       " de passagem — É a conservação da área, e o sinal negativo é a"
-                       " inversão de orientação, que a medida não vê"
+                       " de passagem — DÁ a conservação da área, e o sinal negativo é a"
+                       " inversão de orientação, que a medida não vê. Dá, e não «é»: a"
+                       " identidade é det = σσ′, e o −1 é a escolha da torre"
                      : "algum metal falhou — NÃO afirmo");
           }
           tique7(6, "e a VOLTA é a torre: |det| = 1, factor de potência unitário, inversa"
@@ -1695,21 +1700,71 @@ static void cmetrica_resolve(int n){
                     " estava como regra de cálculo, e o que este andar acrescenta é o"
                     " NOME dela — o Jacobiano não é um factor de correcção, é a medida"); }
         break;
+    case 11: {
+        tique7(0, "seja d o factor de medida de um operador, e † o dual métrico");
+        tique7(1, "as duas dualidades, com os papéis separados:");
+        printf("      $d \\mapsto 1/d$\\qquad (1.ª: NÃO é a identidade)\\qquad"
+               " $d \\mapsto 1/d \\mapsto d$\\qquad (2.ª: o bidual)\n");
+        tique7(2, "e a primeira sai do dual métrico: det(T*) = 1/det(T). Logo a dualidade"
+                  " age na medida como d ↦ 1/d, que NÃO é a identidade — e a segunda é, e"
+                  " é a Lei 1 desta casa, †∘† = id. Duas leis com papéis diferentes, e é"
+                  " preciso não as juntar");
+        tique7(3, "a lei é que toda representação tem dual e o PASSO tem de ser o dual —"
+                  " aqui o passo é a medida, e a forma que daí sai é |det| = 1");
+        { long bi = 0, cas = 0, fx = 0, esp = 0, sem = 0;
+          printf("        d        dual 1/d     bidual     é ponto fixo?\n");
+          for(long p = -3; p <= 3; p++){
+              if(p == 0) continue;
+              Qz d = qz(p,1), u, v;
+              if(!md_dual_medida(d,&u)) continue;
+              md_bidual(d,&v);
+              printf("        "); esc_qzl(d, 9); esc_qzl(u, 13); esc_qzl(v, 11);
+              printf("%s\n", md_ponto_fixo(d) ? "SIM" : "não");
+          }
+          for(long p = -30; p <= 30; p++) for(long q = 1; q <= 12; q++){
+              Qz d = qz(p,q), u, v;
+              cas++;
+              if(!md_dual_medida(d,&u)){ sem++; continue; }
+              if(!md_bidual(d,&v) || !qz_igual(d,v)) bi++;
+              if(md_ponto_fixo(d)) fx++;
+              if((d.p == 1 || d.p == -1) && d.q == 1) esp++;
+          }
+          printf("      em %ld factores: bidual devolve o mesmo (%ld divergências);"
+                 " pontos fixos %ld, e os d = ±1 são %ld\n", cas - sem, bi, fx, esp);
+          printf("      e sem dual — d = 0, a fibra vazia: %ld\n", sem);
+          tique7(4, "a testemunha é a coluna «é ponto fixo»: ela diz SIM exactamente em"
+                    " ±1 e NÃO no resto, e os dois lados contam-se. Se dissesse sim em"
+                    " tudo, a primeira dualidade seria a identidade e não haveria segunda"
+                    " lei nenhuma; se dissesse não em tudo, não haveria gato");
+          tique7(5, bi == 0 && fx == esp && esp > 0 && sem > 0
+                 ? "logo CONSERVAR A MEDIDA É SER O SEU PRÓPRIO DUAL MÉTRICO: d = 1/d dá"
+                   " d² = 1, que é |det| = 1. O gato volta à PRIMEIRA aplicação; um corpo"
+                   " qualquer volta só à segunda"
+                 : "as duas dualidades não se separaram — NÃO afirmo");
+          tique7(6, "e a VOLTA é o que isto diz do nome: o dual do gato é o PASSARINHO, e"
+                    " não outro gato. O que os distingue não é a natureza — é QUANTAS"
+                    " DUALIDADES cada um precisa para voltar a si. O Corpo de Peano é um"
+                    " passarinho pela sua própria letra, «este corpo é instância», e a"
+                    " bidualidade já lá estava medida em tests/hilbert_bidual.c pelas"
+                    " mesmas duas leis"); }
+        break; }
     case 9: case 10:
         tique7(0, n == 9 ? "seja uma realização finita da lei"
                          : "sejam as três camadas");
         tique7(1, n == 9 ? "a regra que o eval impõe:" : "a mesma lei em três níveis:");
         printf(n == 9 ? "      falha de representação $\\neq$ contra-exemplo matemático\n"
                       : "      Universal $\\to$ Peano $\\to$ Estelar\n");
-        tique7(2, n == 9
-               ? "e esta regra nasceu de um erro meu de hoje: iterei Newton oito vezes,"
+        tique7(2, n == 10
+               ? "e a cena que deu o nome tinha três papéis, e os três já existiam nesta"
+                 " casa: o PASSARINHO é o corpo na sua realização particular — e o teorema"
+                 " do viveiro já dizia que fundir N corpos dá UM, o menor que os contém,"
+                 " «e voa»; o GATO é o operador de passagem, que sobe pela extensão dual e"
+                 " desce pela projecção; e a SUPERVISÃO é a fronteira, que é a lei — ele"
+                 " muda de andar e de orientação, e não muda a medida"
+               : "e esta regra nasceu de um erro meu de hoje: iterei Newton oito vezes,"
                  " cinco sobreviveram, e eu ia escrever «5 de 8» como se fosse um"
                  " resultado. Não era — Newton DUPLICA os dígitos a cada passo, e ao sexto"
-                 " o numerador não cabia num `long`. Saturação não é teorema"
-               : "e as três não são leis independentes: são realizações distintas da mesma."
-                 " O Universal tem a LEI e não a calcula; o Peano dá o determinante; o"
-                 " Estelar dá a medida. Cada corpo é dono da sua face, e a lei não precisa"
-                 " de nome");
+                 " o numerador não cabia num `long`. Saturação não é teorema");
         tique7(3, "a lei é que o teorema tem de sobreviver à troca de representação — e"
                   " quando a primeira satura, a verificação passa a uma SEGUNDA");
         { long onde = 0; Qz d;
@@ -1742,6 +1797,13 @@ static void cmetrica_resolve(int n){
               int vazia = !mi_procura_minimo(mi_passo, 400, &nb);
               long mc = 0;
               for(long m = 1; m <= 6; m++) if(md_conta_imagem(md_gato(m), 8) != 17L*17L) mc++;
+              printf("      papel        o que é                          onde já estava\n");
+              printf("      PASSARINHO   o corpo na sua realização        o VIVEIRO: fundir N\n");
+              printf("                   particular — uma instância       corpos dá UM, «e voa»\n");
+              printf("      GATO         o operador de passagem: sobe     a torre e a descida\n");
+              printf("                   em espiral, desce no cone        (meta-indução)\n");
+              printf("      A FRONTEIRA  |det| = 1 — muda de andar e      o Teorema do Gato\n");
+              printf("                   de orientação, não de medida\n\n");
               printf("      camada      o que ela tem                    e como se mede\n");
               printf("      UNIVERSAL   a conservação métrica por        a descida volta"
                      " VAZIA\n                  dualidade — a LEI\n");
@@ -1759,7 +1821,13 @@ static void cmetrica_resolve(int n){
                         " mesma conta escrita três vezes, coincidirem não diria nada");
               tique7(5, vazia && mc == 0
                      ? "logo determinante, medida e dualidade não são três leis: são três"
-                       " realizações de uma"
+                       " realizações de uma. E lê-se por que o Universal tem de ser"
+                       " universal: ele é um CORPO SOBRE OUTRO CORPO — os seus elementos"
+                       " são as instâncias, e a lei que guarda é uma lei sobre leis. É a"
+                       " mesma forma da meta-indução um andar acima: como a meta-indução"
+                       " se aplica ao PASSO em vez de aos andares, o Universal aplica-se"
+                       " aos CORPOS em vez de aos elementos — e é por isso que ele tem a"
+                       " lei e não a calcula: quem calcula é a face"
                      : "as camadas não fecharam — NÃO afirmo");
           }
           tique7(6, n == 10
@@ -1787,7 +1855,7 @@ static int resolve_cmetrica(const char *f){
     else if(!strncmp(p, "métrica", 8)) p += 8;
     while(*p == ' ') p++;
     if(!*p){
-        printf("   A conservação métrica por dualidade — «medida N» ou «medida <nome>»\n");
+        printf("   O Teorema do Gato: a conservação métrica por dualidade — «medida N» ou o nome\n");
         printf("   e a ordem é a do eval: primeiro a descida, depois o que ela prova\n\n");
         for(size_t i = 0; i < sizeof CM10/sizeof *CM10; i++){
             printf("     %2d  ", CM10[i].n);
@@ -1800,7 +1868,7 @@ static int resolve_cmetrica(const char *f){
         long n = 0;
         while(*p >= '0' && *p <= '9') n = n*10 + (*p++ - '0');
         while(*p == ' ') p++;
-        if(!*p && n >= 1 && n <= 10){ cmetrica_resolve((int)n); return 1; }
+        if(!*p && n >= 1 && n <= 11){ cmetrica_resolve((int)n); return 1; }
         return 0;
     }
     return 0;
@@ -5357,7 +5425,11 @@ static void calculo3_resolve(int n){
                     " reescrita que a carrega");
           tique7(6, "e a VOLTA é a TRADUÇÃO: isto é Λⁿ T = det T outra vez, e é o mesmo"
                     " objecto das cartas EQUIAREAIS do corpo_universal §370 — «cada carta"
-                    " preserva área, e sem a inversa-escala o det é 2 ≠ 1»"); }
+                    " preserva área, e sem a inversa-escala o det é 2 ≠ 1». E agora tem"
+                    " nome: é o TEOREMA DO GATO, e esta fala é a terceira vida dele — a"
+                    " MEDIDA. A casa calculava-o desde este andar sem saber que estava a"
+                    " realizar uma lei; o andar da conservação métrica trouxe o nome, não"
+                    " o motor"); }
         break; }
     case 13: case 14: case 15: case 16: case 17: {
         tique7(0, "seja F = (F₁,F₂,F₃) um campo polinomial em ℝ³");
@@ -5930,7 +6002,10 @@ static void calculo2_resolve(int n){
           tique7(6, "e a VOLTA é a TRADUÇÃO: o determinante da jacobiana é Λⁿ T = det T do"
                     " andar exterior — «a acção do operador no VOLUME». E det(AB) ="
                     " det A · det B é o que faz a cadeia funcionar nas medidas. LOCAL →"
-                    " GLOBAL: a matriz é local, o volume que ela move é global"); }
+                    " GLOBAL: a matriz é local, o volume que ela move é global. E o nome"
+                    " disto é TEOREMA DO GATO: a segunda vida, o VOLUME — a realização"
+                    " algébrica, entre a dualidade que é a lei e a medida que é a leitura"
+                    " analítica"); }
         break; }
     case 17: case 18: {
         tique7(0, n == 17 ? "seja a um ponto crítico de f, com ∇f(a) = 0"
@@ -7812,7 +7887,11 @@ static void torre_resolve(int n){
                  : "a base e o passo não fecham — NÃO afirmo");
           tique7(6, "e a VOLTA é o teorema central: Hurwitz é o lado DISCRETO e tem o limite"
                     " de grau; Gentil é o CONTÍNUO e não o tem; e a bijeção entre os dois é"
-                    " a estrela. A fala 16 fecha-o"); }
+                    " a estrela. A fala 16 fecha-o. E o argumento desta fala — base e passo,"
+                    " em vez de varrer andares — passou a ser lei com nome: é a"
+                    " META-INDUÇÃO do TEOREMA DO GATO, «tese com sempre não se varre,"
+                    " prova-se o passo». Aqui ela nasceu de um erro meu, que foi varrer até"
+                    " 64 e chamar-lhe «sem limite» quando o 64 era o meu array"); }
         break; }
     case 14: case 15: {
         tique7(0, "sejam x₁ … x_N inteiros com 0 ≤ xₙ ≤ q — uma escada dentro do rectângulo N×q");
@@ -17145,10 +17224,13 @@ static int teste(void){
               printf("      |det DT| = 1 em %ld pontos com a derivada a variar em %ld;"
                      " gume: %ld/%ld achadas, %ld falsos\n", cas - mal, varia, achou,
                      casos2, falso);
-              ok("σσ′ = −1 É |det| = 1, E A LEI É LOCAL. A casa tinha a relação escrita no"
-                 " Corpo de Peano e no Universal e nunca a tinha ligado à MEDIDA: o"
-                 " determinante É o produto dos valores próprios, logo o gato estica por σ"
-                 " e encolhe por 1/σ, e conserva a área. E o cisalhamento mostra que a lei"
+              ok("det = σσ′, E DAÍ σσ′ = −1 DÁ |det| = 1 — a seta é numa direcção só. Eu"
+                 " tinha escrito ⟺, e o recíproco é FALSO: |det| = 1 admite σσ′ = +1, que é"
+                 " a identidade e não é gato nenhum. A identidade é det = σσ′; o −1 é a"
+                 " ESCOLHA da torre, e é ela que traz a inversão de orientação junto com a"
+                 " conservação da área. A casa tinha a relação escrita no Corpo de Peano e"
+                 " no Universal e nunca a tinha ligado à MEDIDA: o gato estica por σ e"
+                 " encolhe por 1/σ. E o cisalhamento mostra que a lei"
                  " não é de matrizes: T(x,y) = (x + y² + 3y + 5, y) não é linear — a"
                  " derivada muda em quase todos os pontos — e |det DT| = 1 em todos. O gume"
                  " tem os dois controlos: acha nas dilatações e volta vazio nos metais",
@@ -17183,18 +17265,18 @@ static int teste(void){
               fflush(stdout);
               int guarda = dup(1), nulo = open("/dev/null", O_WRONLY);
               if(guarda >= 0 && nulo >= 0) dup2(nulo, 1);
-              for(int k = 1; k <= 10; k++){
+              for(int k = 1; k <= 11; k++){
                   char fala[64];
                   snprintf(fala, sizeof fala, "medida %d", k);
                   if(resolve_cmetrica(fala)) por_n++; else vmal++;
               }
               for(size_t i = 0; i < sizeof CM10/sizeof *CM10; i++)
                   if(resolve_cmetrica(CM10[i].nome)) por_nome++; else vmal++;
-              if(resolve_cmetrica("medida 11")) vmal++;
+              if(resolve_cmetrica("medida 12")) vmal++;
               fflush(stdout);
               if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
               if(nulo >= 0) close(nulo);
-              printf("      os dez: %d por número, %d por nome\n", por_n, por_nome);
+              printf("      os onze: %d por número, %d por nome\n", por_n, por_nome);
               ok("O TEOREMA ESTÁ PROMOVIDO À ASSISTENTE em dez falas, e as três camadas"
                  " ficam alinhadas: o UNIVERSAL tem a lei — a conservação métrica por"
                  " dualidade —, o PEANO dá det|·| (a face discreta, e a contagem do"
@@ -17203,7 +17285,7 @@ static int teste(void){
                  " A passagem entre elas é σ_k σ_k′ = −1, que é a hipótese ESTRUTURAL já"
                  " estabelecida pela torre — e sem ela não há teorema, há uma definição a"
                  " olhar para si própria",
-                 vmal == 0 && por_n == 10 && por_nome == 10); }
+                 vmal == 0 && por_n == 11 && por_nome == 11); }
         }
 
         /* ═══ §C50 ANÁLISE REAL: as CINCO VIAS, e nenhuma arbitra as outras ══════
@@ -17482,7 +17564,7 @@ static int teste(void){
               fflush(stdout);
               if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
               if(nulo >= 0) close(nulo);
-              printf("      os dez: %d por número, %d por nome\n", por_n, por_nome);
+              printf("      os onze: %d por número, %d por nome\n", por_n, por_nome);
               ok("O TEOREMA ESTÁ PROMOVIDO À ASSISTENTE em dez falas, e as três camadas"
                  " ficam alinhadas com as duas frases lado a lado: CICLO − BORDA = CLASSE"
                  " no discreto (Peano, ker ∂/im ∂) e FECHADA − EXACTA = COHOMOLOGIA no"
@@ -17615,7 +17697,12 @@ static int teste(void){
                  " de eu não ver o buraco é a REPRESENTAÇÃO, não a matemática». Aqui está"
                  " ele, noutra representação: o círculo combinatório, e o buraco é o posto"
                  " 1. O que não cabia em ℚ[x,y,z] cabe num grafo de oito vértices",
-                 vmal == 0 && por_n == 14 && por_nome == 14 && ht_estouros == 0); }
+                 vmal == 0 && por_n == 14 && por_nome == 14);
+              ok("E O TECTO DIZ-SE À PARTE, que é o que o teorema da conservação métrica"
+                 " obriga: uma saturação da minha representação não é um contra-exemplo"
+                 " matemático, e se ficasse na mesma asserção do conteúdo, o `long` a"
+                 " transbordar apareceria como a matemática a falhar",
+                 ht_estouros == 0); }
         }
 
         /* ═══ §C47 TOPOLOGIA: A RÉGUA REMOVIDA ═══════════════════════════════════
@@ -17756,7 +17843,11 @@ static int teste(void){
                  " compacidade, conexidade e a reta — refazem-se sem uma distância. E a"
                  " torre que ele desenha fica visível: ℝ → métrico → topológico →"
                  " compacto/conexo → invariantes, com cada passo a LARGAR estrutura",
-                 vmal == 0 && por_n == 20 && por_nome == 20 && tp_estouros == 0); }
+                 vmal == 0 && por_n == 20 && por_nome == 20);
+              ok("E O TECTO DIZ-SE À PARTE — a régua do teorema da conservação métrica:"
+                 " falha de representação não é contra-exemplo, e as duas coisas não se"
+                 " somam na mesma asserção",
+                 tp_estouros == 0); }
         }
 
         /* ═══ §C46 A HIERARQUIA, E A RÉGUA ANTES DA ÁLGEBRA ══════════════════════
@@ -18126,7 +18217,14 @@ static int teste(void){
                  " NÃO É POLINOMIAL, logo não vive no meu anel. A razão de eu não ver o"
                  " buraco é a REPRESENTAÇÃO, não a matemática, e dizê-lo é o que impede"
                  " esta secção de insinuar que fechou algo que não fechou",
-                 fech && ach && conf && df_estouros == 0); }
+                 fech && ach && conf);
+              ok("E ESTA SECÇÃO É A ORIGEM DE UMA REGRA: o «não vejo porque a representação"
+                 " não chega» que aqui se disse à mão virou lei no teorema da conservação"
+                 " métrica — falha de representação não é contra-exemplo matemático, e a"
+                 " verificação passa a uma SEGUNDA realização. Foi o que o andar da"
+                 " homotopia fez: o buraco que não cabia em ℚ[x,y,z] cabe num grafo. O"
+                 " tecto conta-se aqui, sozinho",
+                 df_estouros == 0); }
 
             /* E OS VINTE E UM CORREM */
             { int vmal = 0, por_n = 0, por_nome = 0;
@@ -24146,6 +24244,10 @@ static int teste(void){
     }
     for(int i = 0; i < NB; i++){ char c[512]; snprintf(c, sizeof c, "%s.%d", b, i);
                                  close(fdv[i]); unlink(c); }
+#ifdef QZ_MEDE
+    printf("\n#QZ maior|p| ou |q| = %ld ; maior produto cruzado = %ld\n",
+           qz_max_pq, qz_max_prod);
+#endif
     return falhas ? 1 : 0;
 }
 
