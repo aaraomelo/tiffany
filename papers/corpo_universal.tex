@@ -99,9 +99,126 @@ nome; o Universal é dono da lei, cada instância é dona da sua face}.
 \text{intérprete (Quantizador/projector espectral)}.
 }
 \]
-Nada aqui funda as oito leis: o catálogo é o do \emph{Corpo estelar}, e
-este paper organiza o que os medidores fecharam por cima dele. As
-camadas e os seus donos estão na tabela de \S\ref{sec:fundacao}.
+O catálogo das oito leis é o do \emph{Corpo estelar}, e este paper
+organiza o que os medidores fecharam por cima dele. As camadas e os seus
+donos estão na tabela de \S\ref{sec:fundacao}. \emph{Mas quem chega
+agora não precisa de sair daqui para perceber a arquitectura}: a secção
+seguinte reconstrói-a a partir de um bit, e diz em cada passo se ele se
+deriva, se se declara ou se se mede.
+
+\section{A arquitectura, a partir de um bit}\label{sec:do-bit}
+
+Esta secção é a \textbf{porta de entrada}. Quem a ler sabe o que o
+sistema é, sem ter de percorrer o resto --- e sabe, sobretudo,
+\emph{com que estatuto} cada peça entrou.
+
+\medskip
+\noindent\textbf{A planta baixa.}
+\[
+\boxed{
+\begin{array}{c}
+\text{bit}\\[2pt]
+\downarrow\ \text{(o dual: a única involução não trivial)}\\[2pt]
+\text{as OITO LEIS}\\[2pt]
+\downarrow\ \text{(ciclo gerador de período oito)}\\[2pt]
+\text{as OITO POSIÇÕES}\\[2pt]
+\downarrow\ \text{(a dobra: }1\to2\to4\to8)\\[2pt]
+\text{o BYTE}\\[4pt]
+\hline\\[-6pt]
+\text{ASCII}\quad\big|\quad\mathbb{P}^1(\mathbb{F}_{127})
+\quad\big|\quad\text{o neurónio}\quad\big|\quad\text{Gato}/\text{Esquilo}
+\end{array}}
+\]
+\begin{center}\small
+\emph{As setas acima da linha são a estrutura universal.
+As de baixo são \textbf{realizações}.}
+\end{center}
+
+\noindent E é essa linha que impede este documento de se tornar um paper
+sobre ASCII, sobre C ou sobre $\mathbb{F}_{127}$: esses são
+\textbf{instrumentos} --- de realização e de refutação --- da mesma
+estrutura, e a estrutura não depende de nenhum deles. \emph{O Universal
+continua universal.}
+
+\medskip
+\noindent As três colunas não se misturam:
+\[
+\boxed{\;
+\underbrace{\text{DERIVA-SE}}_{\text{sai da estrutura}}
+\quad\Big|\quad
+\underbrace{\text{DECLARA-SE}}_{\text{é convenção}}
+\quad\Big|\quad
+\underbrace{\text{MEDE-SE}}_{\text{tem medidor}}
+\;}
+\]
+
+\subsection*{Um bit}
+O objecto mínimo é um bit: $\mathbb{F}_2=\{0,1\}$, o corpo mais pequeno
+que existe. Nele:
+\begin{itemize}
+\item a \textbf{soma} é o XOR e o \textbf{produto} é o AND;
+\item o \textbf{oposto} de $x$ é o próprio $x$ --- \emph{o sinal não
+existe} ---, e portanto a diferença e a soma são a mesma operação. As
+cinco primitivas (Teor.~\ref{thm:derivacao-primitivas}) não ficam mais
+pobres aqui: ficam \textbf{nuas}, e vê-se o que cada uma fazia.
+\end{itemize}
+\emph{Deriva-se.} \emph{Medido:} \code{tests/umbit.c}.
+
+\subsection*{O zero e o infinito, e por que a Lei 0 tem o índice zero}
+Em $\mathbb{F}_2$ a inversão não está definida no zero --- é a fibra
+vazia de sempre. Acrescentando o ponto no infinito, $\mathbb{P}^1$ passa
+a ter \textbf{três} pontos ($0$, $1$, $\infty$) e a inversão torna-se a
+\emph{troca} $[p:q]\mapsto[q:p]$, total e sem um ramo
+(Cor.~\ref{cor:zero-infinito}). É a \textbf{Lei 0} --- «a divisão do
+zero», $0^{\dagger}=\infty$ --- e ela tem o índice zero porque é a que
+dá o arranque: sem ela nada mais é total. \emph{Deriva-se e mede-se.}
+
+\subsection*{As oito, e por que são oito}
+A involução do complemento e o seu regresso dão as Leis $1$ e $2$; os
+três pontos dão a Lei $3$; a dobra $T\oplus T^{*}$ dobra a dimensão e
+dá a Lei $4$; a exigência $x^{2}=-1$ pede período quatro e dá a Lei
+$5$; o lugar onde soma e produto coincidem dá a Lei $6$; e os dois
+lados que operam sem se fundirem dão a Lei $7$
+(Teor.~\ref{thm:esquilo}). \emph{Isto é uma reconstrução, e diz-se: ela
+mostra que o catálogo é coerente com o bit, não que ele foi forçado por
+ele.}
+
+\subsection*{O byte, e por que tem oito posições}
+A dobra aplicada três vezes leva $1\to2\to4\to8$; e as oito leis são,
+pela letra do \emph{Corpo estelar}, \emph{um ciclo gerador de período
+oito}. O byte é esse ciclo escrito em binário:
+\[
+\boxed{\;B=\sum_{k=0}^{7}b_k\,2^{k},
+\qquad \text{a posição }k\text{ RESERVADA à Lei }k.\;}
+\]
+\emph{Declara-se} (Def.~\ref{def:byte-oito}) --- e o que se \emph{mede} é
+o que vem depois: rodar um bit tem período $8$, e a tabela exaustiva dos
+$256$ bytes diz, por operação e por posição, se ela preserva, realiza o
+dual, ou move. \emph{O \verb|uint8_t| deixa de ser conveniência de
+máquina e passa a ser a realização mínima do catálogo.}
+
+\subsection*{O ASCII, e o encaixe que não foi procurado}
+$127$ é primo e é o topo do \verb|int8_t|; o ASCII foi desenhado para
+sete bits; e $|\mathbb{P}^1(\mathbb{F}_{127})|=128$. Logo os $128$
+códigos \emph{são} os $128$ pontos, com o DEL no $\infty$ por ser o
+único que sobra. E então o gato é uma \textbf{cifra} das letras, com
+$\mathrm{NUL}\mapsto\mathrm{DEL}$ --- que é $0\mapsto\infty$ escrito em
+caracteres. \emph{Mede-se} (Cor.~\ref{cor:exaustao}).
+
+\subsection*{E as duas faces, que é como o sistema trabalha}
+$\mathbb{Q}$ é a face exacta e \emph{prova}; $\mathbb{F}_p$ é a face
+finita, exaustível e sem ramos, e \emph{caça o contra-exemplo}
+(Teor.~\ref{thm:reducao}). A ponte entre elas é um homomorfismo, logo
+refutar é conclusivo e passar não é. \emph{A matemática continua grande;
+o detector de erro fica pequeno.}
+
+\medskip
+\noindent Quem leu até aqui tem a arquitectura: \textbf{um bit}, a
+\textbf{extensão projectiva} que torna a inversão total, a \textbf{dobra}
+que constrói a torre, as \textbf{oito leis} no byte, o \textbf{ASCII}
+como realização, e as \textbf{duas faces} --- uma que prova e outra que
+refuta. O resto do documento é o detalhe, e cada peça dele traz o
+medidor que a fechou.
 
 %======================================================================
 \section{A fundação vetorial --- $K$, $V$, $V^{*}$, e o corpo é
@@ -1250,6 +1367,75 @@ mentir.
 que torna a última um resultado em vez de uma escolha de ficheiro vazio.
 $\square$
 \end{teorema}
+
+\begin{definicao}[realização binária das oito leis --- a arquitectura DECLARA,
+o neurónio MEDE]\label{def:byte-oito}
+A posição $k$ de um byte fica \textbf{reservada} à realização da Lei $k$,
+para $0\le k\le 7$:
+\[
+B=\sum_{k=0}^{7}b_k\,2^{k},
+\qquad
+b_k \longleftrightarrow \text{Lei }k .
+\]
+
+\textbf{(0) Isto é uma declaração e não um teorema}, e a diferença
+importa: não se escreve «cada bit \emph{é} uma lei». Escreve-se a
+reserva de posição --- uma convenção da arquitectura, que se cumpre ou
+não se cumpre. O que se \emph{prova} é o que vem depois: se as operações
+realizam mesmo as leis que a posição lhes reserva. Dar a uma escolha o
+estatuto de um facto seria a insinuação que este quadro persegue.
+
+\textbf{(1) E o byte não é arbitrário.} Ele tem oito posições não por
+conveniência de máquina, mas porque o catálogo tem oito leis --- e as
+oito são, pela própria letra do \emph{Corpo estelar}, «um ciclo gerador
+de período oito». O gerador realiza-se: rodar \emph{um} bit tem período
+$8$, e o período de cada byte divide $8$ ($254$ bytes, sem excepção).
+
+\textbf{(2) O que a medição encontrou, nos $256$ bytes:}
+\begin{center}\small
+\begin{tabular}{@{}lcccccccc@{}}
+\toprule
+a operação & $b_7$ & $b_6$ & $b_5$ & $b_4$ & $b_3$ & $b_2$ & $b_1$ & $b_0$\\
+\midrule
+Lei 1 --- o dual $\sim\!x$ & d & d & d & d & d & d & d & d\\
+Lei 2 --- o bidual & p & p & p & p & p & p & p & p\\
+Lei 4 --- a dobra (nibbles) & m & m & m & m & m & m & m & m\\
+Lei 5 --- o rotor & m & m & m & m & m & m & m & m\\
+Lei 7 --- o octonião dual & p & p & p & p & d & d & d & d\\
+o gerador (um bit) & m & m & m & m & m & m & m & m\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent\emph{p} preserva a posição, \emph{d} realiza o \textbf{dual}
+nela, \emph{m} move-a. E as linhas dizem-se: o dual inverte
+\emph{todas} as oito; o bidual preserva \emph{todas} --- que é a Lei 2 a
+ser a Lei 1 duas vezes, \emph{medida} e não citada; e o octonião dual
+inverte \textbf{só metade}, que é «ligar sem fundir» a acontecer nos
+bits. Nenhuma coluna fica indefinida.
+
+\textbf{(3) E o ASCII fecha a realização.} Os $128$ códigos são os $128$
+pontos de $\mathbb{P}^1(\mathbb{F}_{127})$ --- o encaixe não foi
+procurado: $127$ é primo, é o topo do \verb|int8_t|, e o ASCII foi
+desenhado para sete bits. O DEL é o $\infty$ por ser o único código que
+sobra. E então o gato lido em ASCII é uma \textbf{cifra}: uma bijecção
+das $128$ letras sem tabela e sem chave, só a lei --- com
+$\mathrm{NUL}\mapsto\mathrm{DEL}$, que é $0\mapsto\infty$ escrito em
+caracteres.
+
+\textbf{(4) Mas são DUAS álgebras, e não são compatíveis.} O mesmo
+suporte carrega $\mathbb{P}^1(\mathbb{F}_{127})$ (o byte é um ponto, o
+gato permuta) e $\mathbb{F}_2^{7}$ (o byte é um vector, a soma é o XOR).
+O gato \emph{não} respeita o XOR --- medido: $0$ de $228$ pares. Não é um
+defeito: é o conteúdo. Cada operação só faz sentido numa das duas, e
+confundi-las é o erro que esta tabela torna impossível.
+
+\emph{Medido:} \code{tests/umbit.c} ($8{:}0$), e o operador bit a bit já
+estava escrito em \code{tests/neuronio.c} --- ele soma os bits por
+posição, que é projectar em cada coordenada de $\mathbb{F}_2^{8}$, e o
+gato dele em $\mathbb{F}_2$ é $(c_0,c_1)\mapsto(c_0\oplus c_1,c_0)$, com
+período $3$ --- que é $|\mathbb{P}^1(\mathbb{F}_2)|$. A órbita fecha no
+que existe.
+\end{definicao}
 
 \begin{corolario}[o refutador como segunda testemunha permanente ---
 a matemática continua grande, o detector fica pequeno]\label{cor:refutador}

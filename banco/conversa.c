@@ -66,6 +66,8 @@
 #include "sem_ramo.h"   /* a aritmetica sem um if, em F127 */
 #include "reducao.h"    /* a ponte entre as faces: F127 refuta, nao prova */
 #include "refuta.h"     /* o refutador exaustivo sobre as identidades */
+#include "umbit.h"      /* um bit: F2, e as oito leis no byte */
+#include "ascii.h"      /* os 128 codigos SAO os 128 pontos */
 #include "medida.h"     /* a conservacao metrica por dualidade, e a meta-inducao */
 #include "dforma.h"     /* o d: Lambda^0 -> ... -> Lambda^3, e os tres viram UM */
 #include "eletrico.h"
@@ -1424,6 +1426,9 @@ static const struct { int n; const char *nome; const char *enunciado; } CM10[] =
  {19, "sem ramo",       "os `if` vêm da normalização — e em 𝔽₁₂₇ não há normalização" },
  {20, "refuta",         "a face pequena REFUTA e não prova — e é exaustiva" },
  {21, "duas testemunhas","a face exacta PROVA; a finita CAÇA o contra-exemplo" },
+ {22, "um bit",         "em 𝔽₂ o dual é a IDENTIDADE, e 0 ↔ ∞ sobrevive" },
+ {23, "as oito no byte","a posição k reservada à Lei k — a arquitectura declara" },
+ {24, "ascii",          "os 128 códigos SÃO os 128 pontos, e o gato é uma CIFRA" },
 };
 static void cmetrica_resolve(int n){
     TICK_N = 0;
@@ -1716,6 +1721,133 @@ static void cmetrica_resolve(int n){
                     " estava como regra de cálculo, e o que este andar acrescenta é o"
                     " NOME dela — o Jacobiano não é um factor de correcção, é a medida"); }
         break;
+    case 22: case 23: case 24: {
+        tique7(0, n == 22 ? "seja o corpo com dois elementos"
+             : n == 23 ? "sejam as oito leis do catálogo, e o byte"
+                       : "seja a tabela ASCII");
+        tique7(1, n == 22 ? "as cinco primitivas colapsam em portas:"
+             : n == 23 ? "a DECLARAÇÃO — e não é um teorema:"
+                       : "os 128 códigos e os 128 pontos:");
+        printf(n == 22
+               ? "      $x \\oplus y$ (soma) $\\cdot$ $x \\wedge y$ (produto)"
+                 " $\\cdot$ $-x = x$ (o dual é a IDENTIDADE)\n"
+             : n == 23
+               ? "      $B = \\sum_{k=0}^{7} b_k 2^{k}$,\\qquad $b_k \\leftrightarrow$"
+                 " Lei $k$\n"
+               : "      $c \\in \\{0, \\ldots, 126\\} \\mapsto [c : 1]$;\\qquad"
+                 " $127$ (DEL) $\\mapsto [1 : 0] = \\infty$\n");
+        tique7(2, n == 22
+               ? "e em 𝔽₂ a álgebra não fica mais pobre — fica NUA. O oposto de x é o"
+                 " PRÓPRIO x, logo a diferença e a soma são a mesma operação: o par «soma"
+                 " + dual = diferença» continua verdadeiro e DEGENERA"
+             : n == 23
+               ? "e isto é uma DECLARAÇÃO, não um teorema. Não se escreve «cada bit É uma"
+                 " lei» — escreve-se a reserva de posição, que é convenção e cumpre-se ou"
+                 " não. A arquitectura DECLARA; o neurónio MEDE"
+               : "e o encaixe não foi procurado: 127 é primo, é o topo do int8_t, e o"
+                 " ASCII foi desenhado para sete bits. O DEL é o ∞ por ser o único código"
+                 " que sobra depois de os 127 finitos estarem atribuídos");
+        tique7(3, n == 23
+               ? "a lei é o catálogo: as oito são «um ciclo gerador de período oito», e o"
+                 " byte tem oito posições por causa disso — não por conveniência"
+               : "a lei é o Corolário 0 ↔ ∞: a inversão é a TROCA, e ela não usa o sinal");
+        { if(n == 22){
+              P1 pt[4]; int np = 0;
+              for(B p2 = 0; p2 <= 1; p2++) for(B q2 = 0; q2 <= 1; q2++){
+                  P1 x = p1(p2,q2);
+                  if(!p1_e_ponto(x)) continue;
+                  int novo = 1;
+                  for(int i = 0; i < np; i++) if(p1_igual(pt[i],x)) novo = 0;
+                  if(novo) pt[np++] = x;
+              }
+              printf("        x y | x⊕y  x∧y  −x\n");
+              for(B x = 0; x <= 1; x++) for(B y = 0; y <= 1; y++)
+                  printf("        %d %d |  %d    %d    %d\n", x,y,
+                         b_som(x,y), b_mul(x,y), b_opo(x));
+              printf("      e ℙ¹(𝔽₂) tem %d pontos: 0, 1 e ∞;  1/0 = ∞ (%s)\n", np,
+                     p1_igual(p1_inverte(p1_zero()), p1_inf()) ? "sim" : "NÃO");
+              tique7(4, "a testemunha é a coluna do meio: −x = x. Em 𝔽₂ não há sinal para"
+                        " trocar, e mesmo assim a troca 0 ↔ ∞ sobrevive — porque ela nunca"
+                        " foi sobre o sinal, foi sobre a REPRESENTAÇÃO");
+              tique7(5, np == 3
+                     ? "logo o corpo mais pobre que existe ainda realiza a lei, e é aí que"
+                       " se vê o que cada peça fazia"
+                     : "os pontos não fecharam — NÃO afirmo");
+          } else if(n == 23){
+              struct { const char *nm; V8 (*f)(V8); } op[] = {
+                  { "Lei 1  o dual ~x",    lei1_dual  },
+                  { "Lei 2  o bidual",     lei2_bidual},
+                  { "Lei 4  a dobra",      lei4_dobra },
+                  { "Lei 5  o rotor",      lei5_rotor },
+                  { "Lei 7  o par",        lei7_par   },
+                  { "o gerador (1 bit)",   lei_gera   } };
+              printf("        operação              b7 b6 b5 b4 b3 b2 b1 b0\n");
+              long dub = 0;
+              for(int i = 0; i < 6; i++){
+                  printf("        %-21s", op[i].nm);
+                  for(int k = 7; k >= 0; k--){
+                      char c2 = lei_faz(op[i].f, k);
+                      printf(" %c ", c2);
+                      if(c2 == '?') dub++;
+                  }
+                  printf("\n");
+              }
+              printf("        p = preserva · d = realiza o DUAL · m = move;  indefinidas:"
+                     " %ld\n", dub);
+              int pg = lei_periodo(lei_gera, 0x5A, 32);
+              printf("      e o gerador tem período %d — o ciclo das oito\n", pg);
+              tique7(4, "a testemunha é a tabela nos 256 bytes: o dual inverte TODAS as"
+                        " posições, o bidual preserva TODAS — que é a Lei 2 a ser a Lei 1"
+                        " duas vezes, medida e não citada —, e o octonião dual inverte SÓ"
+                        " METADE, que é «ligar sem fundir» a acontecer nos bits");
+              tique7(5, dub == 0 && pg == 8
+                     ? "logo a declaração cumpre-se: cada operação faz uma das três coisas"
+                       " em toda a parte, e o gerador fecha em oito"
+                     : "alguma coluna ficou indefinida — NÃO afirmo");
+          } else {
+              int visto[AS_N];
+              for(int i = 0; i < AS_N; i++) visto[i] = 0;
+              long mal = 0, col = 0;
+              for(int c2 = 0; c2 < AS_N; c2++){
+                  int v = as_codigo(as_ponto(c2));
+                  if(v < 0 || v >= AS_N || visto[v]) mal++; else visto[v] = 1;
+              }
+              int img[AS_N];
+              for(int i = 0; i < AS_N; i++) img[i] = 0;
+              for(int c2 = 0; c2 < AS_N; c2++){ int y = as_gato(2,c2); if(y>=0&&y<AS_N) img[y]++; }
+              for(int i = 0; i < AS_N; i++) if(img[i] != 1) col++;
+              char b1[4], b2[4], b3[4];
+              printf("        a cifra do gato A₂:  'A' → %s    'a' → %s    NUL → %s\n",
+                     as_nome(as_gato(2,65),b1), as_nome(as_gato(2,97),b2),
+                     as_nome(as_gato(2,0),b3));
+              printf("        a tabela é bijectiva (%ld falhas) e o gato é PERMUTAÇÃO das"
+                     " 128 (%ld colisões)\n", mal, col);
+              long resp = 0, cs = 0;
+              for(int a2 = 0; a2 < AS_N; a2 += 7) for(int b2i = 0; b2i < AS_N; b2i += 11){
+                  cs++;
+                  if(as_gato(2, as_xor(a2,b2i)) == as_xor(as_gato(2,a2), as_gato(2,b2i))) resp++;
+              }
+              printf("        e o gato respeita o XOR em %ld de %ld — as DUAS álgebras não"
+                     " são compatíveis\n", resp, cs);
+              tique7(4, "a testemunha é NUL ↦ DEL: o zero vai para o infinito, escrito em"
+                        " caracteres. E a segunda é o gato não respeitar o XOR em nenhum"
+                        " par — se respeitasse, as duas álgebras eram a mesma e não havia"
+                        " nada a distinguir");
+              tique7(5, mal == 0 && col == 0 && resp < cs/2
+                     ? "logo o ASCII carrega DUAS álgebras no mesmo suporte: como ℙ¹ o byte"
+                       " é um PONTO e o gato é uma cifra; como 𝔽₂⁷ é um VECTOR e a soma é o"
+                       " XOR. Cada operação só faz sentido numa"
+                     : "a tabela não fechou — NÃO afirmo");
+          }
+          tique7(6, n == 24
+                 ? "e a VOLTA é que a cifra não tem chave nem tabela: é a lei. O gato"
+                   " permuta as 128 letras e o esquilo desfá-lo, porque é a acção à"
+                   " direita — e isso já estava medido no teorema do esquilo"
+                 : "e a VOLTA é o `neuronio.c`, que já fazia isto sem lhe chamar assim: ele"
+                   " soma os bits POR POSIÇÃO, que é projectar em cada coordenada de 𝔽₂⁸, e"
+                   " o gato dele em 𝔽₂ tem período 3 — que é |ℙ¹(𝔽₂)|. A órbita fecha no"
+                   " que existe"); }
+        break; }
     case 21: {
         tique7(0, "sejam as identidades que esta casa afirma");
         tique7(1, "e o fluxo que elas passam a ter:");
@@ -2349,7 +2481,7 @@ static int resolve_cmetrica(const char *f){
         long n = 0;
         while(*p >= '0' && *p <= '9') n = n*10 + (*p++ - '0');
         while(*p == ' ') p++;
-        if(!*p && n >= 1 && n <= 21){ cmetrica_resolve((int)n); return 1; }
+        if(!*p && n >= 1 && n <= 24){ cmetrica_resolve((int)n); return 1; }
         return 0;
     }
     return 0;
@@ -17746,18 +17878,18 @@ static int teste(void){
               fflush(stdout);
               int guarda = dup(1), nulo = open("/dev/null", O_WRONLY);
               if(guarda >= 0 && nulo >= 0) dup2(nulo, 1);
-              for(int k = 1; k <= 21; k++){
+              for(int k = 1; k <= 24; k++){
                   char fala[64];
                   snprintf(fala, sizeof fala, "medida %d", k);
                   if(resolve_cmetrica(fala)) por_n++; else vmal++;
               }
               for(size_t i = 0; i < sizeof CM10/sizeof *CM10; i++)
                   if(resolve_cmetrica(CM10[i].nome)) por_nome++; else vmal++;
-              if(resolve_cmetrica("medida 22")) vmal++;
+              if(resolve_cmetrica("medida 25")) vmal++;
               fflush(stdout);
               if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
               if(nulo >= 0) close(nulo);
-              printf("      os vinte e um: %d por número, %d por nome\n", por_n, por_nome);
+              printf("      os vinte e quatro: %d por número, %d por nome\n", por_n, por_nome);
               ok("O TEOREMA ESTÁ PROMOVIDO À ASSISTENTE em dez falas, e as três camadas"
                  " ficam alinhadas: o UNIVERSAL tem a lei — a conservação métrica por"
                  " dualidade —, o PEANO dá det|·| (a face discreta, e a contagem do"
@@ -17766,7 +17898,7 @@ static int teste(void){
                  " A passagem entre elas é σ_k σ_k′ = −1, que é a hipótese ESTRUTURAL já"
                  " estabelecida pela torre — e sem ela não há teorema, há uma definição a"
                  " olhar para si própria",
-                 vmal == 0 && por_n == 21 && por_nome == 21); }
+                 vmal == 0 && por_n == 24 && por_nome == 24); }
         }
 
         /* ═══ §C50 ANÁLISE REAL: as CINCO VIAS, e nenhuma arbitra as outras ══════

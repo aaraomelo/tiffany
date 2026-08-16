@@ -89,7 +89,30 @@ contra 127⁴ = 260 milhões.
 finita CAÇA O CONTRA-EXEMPLO. *A matemática continua grande; o detector de erro fica
 pequeno.*
 
-`tests/refuta.c` (5:0) · `tests/reducao.c` (6:0) · `tests/migracao.c` (5:0, equivalência em 213840 casos) · `tests/aritmetica.c` (6:0) · `tests/exaustao.c` (7:0) · `tests/sem_ramo.c` (6:0) ·
+**A PLANTA BAIXA — o Universal como PORTA DE ENTRADA** (`sec:do-bit` em
+corpo_universal.tex). Quem chega lê a arquitectura toda numa secção, e ela separa em três
+colunas o que se DERIVA, o que se DECLARA e o que se MEDE:
+
+    bit → (o dual) → as OITO LEIS → (ciclo de período 8) → as OITO POSIÇÕES →
+    (a dobra 1→2→4→8) → o BYTE → | ASCII | ℙ¹(𝔽₁₂₇) | o neurónio | Gato/Esquilo |
+
+E a legenda que mantém o Universal universal: **as setas de cima são a estrutura; as de
+baixo são REALIZAÇÕES.** Sem ela o documento viraria um paper sobre ASCII ou sobre C.
+
+**UM BIT:** em 𝔽₂ a álgebra fica NUA — soma é XOR, produto é AND, e o oposto de x é o
+PRÓPRIO x (o sinal não existe), logo diferença e soma são a mesma operação. E a troca
+0 ↔ ∞ SOBREVIVE lá, o que prova que ela nunca foi sobre o sinal: é sobre a representação.
+
+**O BYTE:** a posição k RESERVADA à Lei k — declaração, não teorema («a arquitectura
+declara; o neurónio mede»). Medido nos 256 bytes: o dual inverte TODAS as posições, o
+bidual preserva TODAS, e o octonião dual inverte SÓ METADE — «ligar sem fundir» nos bits.
+O gerador (rodar 1 bit) tem período 8.
+
+**O ASCII:** 128 códigos = 128 pontos de ℙ¹(𝔽₁₂₇); o DEL é o ∞ por ser o único que sobra.
+O gato é uma CIFRA das 128 letras — NUL ↦ DEL, que é 0 ↦ ∞ em caracteres. E são DUAS
+álgebras no mesmo suporte: o gato NÃO respeita o XOR (0 de 228 pares).
+
+`lib/umbit.h` + `lib/ascii.h` + `tests/umbit.c` (8:0) · `tests/refuta.c` (5:0) · `tests/reducao.c` (6:0) · `tests/migracao.c` (5:0, equivalência em 213840 casos) · `tests/aritmetica.c` (6:0) · `tests/exaustao.c` (7:0) · `tests/sem_ramo.c` (6:0) ·
 `tests/projetiva.c` (6:0). No Universal: `thm:fibra-por-andar`, `thm:sem-ramo`,
 `cor:exaustao`, `cor:zero-infinito`. Ver [[project-teorema-do-gato]],
 [[feedback-saturacao-nao-e-resultado]], [[feedback-o-write-diz-updated]].
