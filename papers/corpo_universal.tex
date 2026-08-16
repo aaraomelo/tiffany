@@ -1135,6 +1135,72 @@ e não cópia ($\S$2); $A(xB)=(Ax)B$ sem uma violação nos $p^{4}$ estados
 $\sigma+\sigma'=m$ e $\sigma\sigma'=-1$ ($\S$4). $\square$
 \end{teorema}
 
+\begin{teorema}[os ramos da aritmética são o preço de um andar --- e cada um
+tem um absorvedor com nome]\label{thm:sem-ramo}
+Contados na fonte, os dez \verb|if| da aritmética racional deste quadro
+testam exactamente três coisas --- o \textbf{sinal}, o \textbf{zero} e o
+\textbf{tecto} --- e as três são consequências da \textbf{normalização}.
+Normaliza-se porque em $\mathbb{Q}$ os números crescem; e é a
+normalização que obriga a perguntar pelo sinal e pelo zero.
+
+\textbf{(0) Donde a eliminação dos ramos não é uma técnica: é uma
+consequência.} Em $\mathbb{F}_{127}$ nada cresce --- o resto \emph{é} a
+operação ---, logo não é preciso normalizar. E sem normalizar: o sinal
+desaparece (não há sinal em $\mathbb{N}$), o zero desaparece (a inversão
+é a \emph{troca} $[p:q]\mapsto[q:p]$, que não divide e portanto não
+pergunta) e o tecto desaparece (não há para onde crescer). O par fica
+\emph{não reduzido de propósito}: $[2{:}4]$ e $[1{:}2]$ não se confundem
+porque a igualdade é o produto cruzado, que é uma \emph{comparação} e não
+um ramo.
+
+\textbf{(1) E a disciplina, sem a qual isto era estética.} Não se elimina
+um \verb|if| por beleza: elimina-se quando a condição é \textbf{absorvida}
+por uma primitiva, um tipo, um domínio, uma dualidade ou uma
+representação. Senão apenas se desloca a excepção. Por isso o enunciado
+exige o \emph{absorvedor com nome}:
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+o ramo que havia & quem o absorveu & como \\
+\midrule
+$q<0$ (o sinal) & o \textbf{tipo} & $\mathbb{N}$ não tem sinal \\
+$p=0$ (a fibra vazia) & a \textbf{representação} & $[q{:}p]$ é uma troca \\
+$a^{-1}$ no zero & a \textbf{dualidade} & $0\leftrightarrow\infty$, mesma operação \\
+$v>$ tecto & o \textbf{tipo} & em $\mathbb{F}_p$ nada cresce \\
+normalizar & o \textbf{domínio} & não se normaliza \\
+$[0{:}0]$ & o \textbf{domínio} & não é ponto, e diz-se \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{(2) E que nada foi deslocado prova-se de uma maneira só:}
+comparando exaustivamente com a versão que \emph{tem} os ramos. As duas
+camadas dão o mesmo nos $128$ pontos e nos $126$ metais --- $16\,128$
+comparações, sem uma divergência. Se um ramo tivesse sido escondido em
+vez de absorvido, a diferença aparecia aqui.
+
+\textbf{(3) O $[0{:}0]$ é o domínio e não um ramo}, e a diferença
+mede-se: em $57\,830$ matrizes com $\det\neq0$ e $10\,351\,570$
+aplicações, ele \emph{nunca} é produzido a partir de um ponto legítimo.
+A exclusão vive no enunciado, não num teste.
+
+\textbf{(4) E o gume é o ramo que NÃO se tira.} Passar do par ao
+\emph{índice} precisa mesmo de saber se $q=0$, porque o índice do
+$\infty$ é uma convenção e não um valor do corpo --- sem esse ramo o
+$\infty$ colapsa em $0$ nos seus $126$ representantes. Por isso essa
+função existe para \emph{imprimir} e não para calcular: não se elimina o
+ramo, muda-se para onde ele não é preciso, e diz-se onde ficou. Um
+ficheiro sem \verb|if| que precisasse de normalizar para operar estaria a
+mentir.
+
+\emph{Medido:} \code{tests/sem\_ramo.c} ($6{:}0$), com a contagem feita
+\textbf{no ficheiro}: $10$ em \code{racionais.h}, $8$ em
+\code{projetiva.h}, $14$ em \code{oito.h} e \textbf{zero} em
+\code{sem\_ramo.h}. As camadas intermédias não descem a zero, e é isso
+que torna a última um resultado em vez de uma escolha de ficheiro vazio.
+$\square$
+\end{teorema}
+
 \begin{corolario}[a exaustão em oito bits: $\mathbb{P}^1(\mathbb{F}_{127})$
 tem $128$ pontos e varre-se inteiro]\label{cor:exaustao}
 A regra que o Corolário~\ref{cor:zero-infinito} impõe --- \emph{não
@@ -1200,7 +1266,8 @@ lei da escada inteira:
 \end{array}}
 \]
 
-\textbf{(0) A lei, e ela não é uma lista.} \emph{Cada andar torna uma
+\textbf{(0) A lei, e ela não é uma lista.} \emph{Não eliminamos as
+excepções; descobrimos em que andar elas são o preço.} \emph{Cada andar torna uma
 fibra total e paga noutra}, e não há andar onde tudo seja total. Isso
 muda o estatuto de todas as excepções que este quadro escreveu: deixam de
 ser defeitos e passam a ser o \textbf{preço} --- que é uma quantidade, e
