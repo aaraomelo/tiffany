@@ -1012,6 +1012,73 @@ existem.
 lexicograficamente satisfaz tricotomia e transitividade em toda a amostra verificada, com resíduo
 zero em ambas. Nenhum corte de Dedekind, nenhuma sucessão de Cauchy: só o par.}
 
+\paragraph{E o corte, quando aparece, \emph{é} o par --- não uma construção ao lado
+dele.} A frase acima diz que a ordem não precisa de corte. Falta dizer o que o corte
+\emph{é}, quando o quisermos: ele é o \textbf{ponto fixo} da Möbius que o par gera, visto
+do andar que não o contém.
+
+\noindent A estaca é a Möbius $g(x)=m+1/x$, de matriz
+$A_m=\begin{psmallmatrix}m&1\\1&0\end{psmallmatrix}$. Pela Lei~$0$ o infinito é um ponto
+como os outros ($0^{\dagger}=\infty$), e por isso a órbita pode \textbf{começar nele}:
+\[
+[p:q]\ \longmapsto\ [\,m\,p+q\ :\ p\,],
+\qquad
+g^{k}(\infty)=\frac{p_k}{q_k},
+\]
+a matriz vezes o vector, sem uma divisão --- e o que sai são os convergentes. O ponto fixo
+é o vector próprio, $x^{2}=mx+1$, e são \emph{dois}: exactamente o par
+$(\sigma,\sigma^{\dagger})$, com soma $\operatorname{tr}A_m$ e produto $\det A_m$.
+
+\noindent E daqui sai o corte em duas linhas. Em coordenadas homogéneas o ponto fixo pede
+$p^{2}-mpq-q^{2}=0$, o que completando o quadrado é
+$(2p-mq)^{2}=D\,q^{2}$ com $D=m^{2}+4$; logo ele vive nos racionais \emph{exactamente
+quando $D$ é quadrado perfeito}. E $m^{2}<D<(m+2)^{2}$ para todo $m\geq1$, com o único
+candidato do meio, $(m+1)^{2}$, a pedir $2m=3$. Não há.
+
+\[
+\boxed{\;\begin{array}{ll}
+\text{no andar de \textbf{baixo}} & \text{a órbita é uma \emph{soma racional} que não
+termina}\\[3pt]
+\text{no andar de \textbf{cima}} & \text{o ponto fixo é \emph{um} ponto --- e é irracional}
+\end{array}\;}
+\]
+
+\noindent \textbf{O corte é essa falta}, e nada mais: a órbita corre toda no andar de
+baixo, e o ponto para onde ela vai não está lá. Não é um defeito dos racionais --- é a
+equação do ponto fixo a não fechar no corpo onde a órbita corre, e a face finita di-lo
+pelo contrário: em $\mathbb{F}_p$ a \emph{mesma} equação tem raiz quando $D$ é resíduo
+quadrático, e aí a órbita cai no ponto fixo e não há corte a fazer.
+
+\paragraph{E há volta --- é a metade dual, e sem ela isto seria meia lei.} A ida é a
+órbita; a volta existe porque $\det A_m=-1$, e é o \emph{fator de potência unitário} que a
+torna exacta:
+\[
+A_m^{-1}=\begin{pmatrix}0&1\\1&-m\end{pmatrix}\ \text{---\ \textbf{inteira}},
+\qquad
+[p:q]\ \longmapsto\ [\,q\ :\ p-mq\,].
+\]
+E essa acção é, \emph{letra por letra}, a descida que acabou de provar que o ponto fixo não
+está nos racionais. \textbf{A descida não era um truque: é a órbita para trás} --- a ida
+cresce como $\sigma^{k}$, a volta desce pelo mesmo caminho, e chega ao $\infty$ exacto. E o
+par $0\leftrightarrow\infty$ é o caso mais simples: a troca $S$ tem $S^{2}=I$, logo é a sua
+\emph{própria} inversa --- ida e volta pela mesma matriz, que é o que a Lei $0$ diz.
+\[
+\boxed{
+\begin{array}{ll}
+\text{a \textbf{ida}} & \text{a órbita de }\infty\text{: os convergentes, a crescer}\\[3pt]
+\text{a \textbf{volta}} & A_m^{-1}\text{ inteira: a descida, a encolher}\\[3pt]
+\text{e o que a \textbf{fecha}} & \lvert\det A_m\rvert=1
+\end{array}}
+\]
+
+\medido{$264$ passos da órbita de $\infty$ com $\lvert\det\rvert=1$ em todos; Cayley--Hamilton
+nos metais; a forma canónica $4(p^{2}-mpq-q^{2})=(2p-mq)^{2}-Dq^{2}$ em $31\,212$ triplos;
+o passo $m^{2}<D<(m+2)^{2}$ nos seus dois membros; e $62$ dos $126$ metais de
+$\mathbb{F}_{127}$ com ponto fixo, por duas rotas concordantes, contra \emph{zero} nos
+racionais para todo $m$; e a volta: $A_mA_m^{-1}=I$, a órbita a regressar ao $\infty$
+exacto, $S^{2}=I$, e $16\,128$ pares (metal, ponto) a fechar na face finita.
+\emph{Verificado:} \texttt{tests/corte\_ponto\_fixo.c} ($6{:}0$).}
+
 \paragraph{E daí que uma quantidade ordenada seja uma \emph{n}-upla.} Uma ordem sobre $n$ partes
 precisa de $n$ componentes: um escalar colapsa-a --- as $120$ ordens de cinco partes dão uma só soma,
 e o número perde $119$. \textbf{O que é ordenado no bidual tem tantas componentes quantas as partes

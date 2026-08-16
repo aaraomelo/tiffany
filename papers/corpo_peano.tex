@@ -372,6 +372,24 @@ integrar (Gentil) são duais pela soma reversível
 \]
 O salto $\mathbb{Q}\to\mathbb{R}$ é este cruzamento. Ordem e contínuo
 recuperam-se aqui; não se postulam.
+
+\noindent \textbf{E o mecanismo do salto tem nome: é o ponto fixo.} A Möbius
+$g(x)=m+1/x$, de matriz $(m,1;1,0)$, tem órbita a
+partir de $\infty$ --- que é um ponto legítimo pela Lei $0$, $0^{\dagger}=\infty$ --- e essa
+órbita é a sucessão dos convergentes, em $\mathbb{Q}$. O ponto fixo dela é o vector
+próprio, $x^{2}=mx+1$, e em coordenadas homogéneas pede $p^{2}-mpq-q^{2}=0$, isto é
+$(2p-mq)^{2}=(m^{2}+4)q^{2}$: vive em $\mathbb{Q}$ \emph{exactamente quando} $m^{2}+4$ é
+quadrado perfeito, e não é --- $m^{2}<m^{2}+4<(m+2)^{2}$, e o candidato do meio pediria
+$2m=3$. \emph{O salto é essa falta}: a órbita corre toda em $\mathbb{Q}$ e o ponto para
+onde ela vai não está lá.
+
+\noindent \textbf{E o salto tem volta} --- que é a metade dual, e sem ela seria meia lei.
+De $\det A_m=-1$ vem $A_m^{-1}=(0,1;1,-m)$ \emph{inteira}, e a sua acção é
+$[p:q]\mapsto[q:p-mq]$: exactamente a descida que prova a falta. A descida é a órbita para
+\textbf{trás}, e chega ao $\infty$ exacto; e o par $0\leftrightarrow\infty$ é a troca, que
+tem $S^{2}=I$ e portanto é a sua própria inversa. \emph{Medido:}
+\code{tests/corte\_ponto\_fixo.c} ($6{:}0$), com $16\,128$ pares a fechar a volta na face
+finita.
 \[
 \boxed{
 \text{Hurwitz (contar, discreto)}

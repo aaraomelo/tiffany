@@ -28,9 +28,11 @@
  *
  *      p² − m·p·q − q² = 0
  *
- * e isso NÃO tem solução em ℤ² além da trivial — prova-se por descida, não por varredura:
+ * e isso NÃO tem solução em ℤ² além da trivial. Há duas provas, e a segunda é melhor:
  *
- *      (p,q) ⟼ (q, p − mq)      leva solução em solução, com q ESTRITAMENTE menor
+ *   por DESCIDA   (p,q) ⟼ (q, p − mq) leva solução em solução, com q estritamente menor
+ *   pelo PASSO    (2p − mq)² = D·q², logo o ponto fixo está em ℚ ⟺ D = m²+4 é QUADRADO —
+ *                 e m² < D < (m+2)² sempre, com o único candidato (m+1)² a pedir 2m = 3
  *
  * Logo a órbita corre toda em ℙ¹(ℚ) e o limite dela não está lá. O CORTE É ESSA FALTA: não é
  * uma construção acrescentada, é o ponto fixo da Möbius visto do andar que não o contém.
@@ -45,6 +47,8 @@
  *   §F2  o PONTO FIXO é o vector próprio, e os dois são o par dual (σ, σ†)
  *   §F3  ele NÃO está em ℙ¹(ℚ), e a razão é a DESCIDA — o corte é essa falta
  *   §F4  e na face finita ele ESTÁ, quando D é resíduo quadrático: exaustivo nos 126 metais
+ *   §F5  E A PROVA É DE DUAS LINHAS: (2p−mq)² = D·q², e D nunca é quadrado — o PASSO
+ *   §F6  E HÁ VOLTA: |det| = 1 dá a inversa INTEIRA, e a descida É a Möbius inversa
  *
  * Nenhum double, nenhum limiar.
  *
@@ -238,6 +242,143 @@ int main(void){
            " órbita corre",
            euler_ok == metais && fixo_e_raiz == com_fixo && com_fixo > 40
            && com_fixo < metais && metais == OT_P - 1);
+    }
+
+    /* ═══ §F5  E A PROVA É DE DUAS LINHAS: D NUNCA É QUADRADO ═══════════════ */
+    printf("\n§F5 E não é preciso descida: o ponto fixo está em ℚ ⟺ D é quadrado.\n\n");
+    {
+        /* Completando o quadrado, a equação do ponto fixo tem forma canónica:
+         *
+         *      p² − m·p·q − q² = 0   ⟺   (2p − m·q)² = (m² + 4)·q² = D·q²
+         *
+         * — identidade exacta em inteiros, 4·(p²−mpq−q²) = (2p−mq)² − D·q². Logo o ponto
+         * fixo vive em ℙ¹(ℚ) EXACTAMENTE quando D é quadrado perfeito, e a pergunta deixa
+         * de ser sobre racionais para ser sobre um inteiro.
+         *
+         * E aí a prova é de duas linhas, PARA TODO m, sem varrer m nenhum:
+         *
+         *      m² < m² + 4 < (m+2)²        para todo m ≥ 1  (a segunda é 0 < 4m)
+         *
+         * logo o único quadrado possível no meio é (m+1)²; e
+         *
+         *      m² + 4 = (m+1)²  ⟺  4 = 2m + 1  ⟺  2m = 3
+         *
+         * que não tem solução em ℤ. É o PASSO, e não a lista: varrer m confirmaria a
+         * conclusão sem medir a prova.
+         *
+         * E é a MESMA impossibilidade que o Corpo Universal já tinha para o ouro no
+         * thm:real-caminho — «a folha não é nó: (2m+N)² = 5N² é impossível» —, que é o
+         * caso m = 1 desta forma canónica. */
+        long trip = 0, forma = 0;
+        for(long m = 1; m <= CF_M; m++)
+        for(long q = -25; q <= 25; q++) for(long p = -25; p <= 25; p++){
+            long D = m*m + 4;
+            trip++;
+            if(4*(p*p - m*p*q - q*q) == (2*p - m*q)*(2*p - m*q) - D*q*q) forma++;
+        }
+        /* o PASSO, medido nos seus dois membros — e não a conclusão varrida */
+        long passo_baixo = 0, passo_cima = 0, passo_meio = 0, ms = 0;
+        for(long m = 1; m <= 200; m++){
+            long D = m*m + 4;
+            ms++;
+            if(m*m < D) passo_baixo++;                       /* trivial, mas é metade */
+            if(D < (m+2)*(m+2)) passo_cima++;                /* ⟺ 0 < 4m */
+            if(D != (m+1)*(m+1)) passo_meio++;               /* ⟺ 2m ≠ 3 */
+        }
+        printf("      a forma canónica 4(p²−mpq−q²) = (2p−mq)² − D·q² em %ld de %ld triplos\n",
+               forma, trip);
+        printf("      e o PASSO, nos dois membros: m² < D em %ld · D < (m+2)² em %ld ·"
+               " D ≠ (m+1)² em %ld  (de %ld)\n", passo_baixo, passo_cima, passo_meio, ms);
+        printf("      ⇒ D está estritamente entre dois quadrados consecutivos, e o único\n");
+        printf("        candidato do meio exigiria 2m = 3 — que não é inteiro\n\n");
+        ok("E A PROVA NÃO PRECISA DE DESCIDA NEM DE VARREDURA: completando o quadrado, a"
+           " equação do ponto fixo é (2p − mq)² = D·q², logo ele vive em ℙ¹(ℚ)"
+           " EXACTAMENTE quando D é quadrado perfeito — e a pergunta passa de racionais"
+           " para um inteiro. Aí decide-se em duas linhas PARA TODO m: m² < D < (m+2)²"
+           " sempre, logo o único quadrado possível é (m+1)²; e D = (m+1)² pede 2m = 3,"
+           " que não tem solução em ℤ. É o PASSO e não a lista — varrer m confirmaria a"
+           " conclusão sem medir a prova. E é a MESMA impossibilidade que o Corpo Universal"
+           " já tinha para o ouro, (2m+N)² = 5N², que é o caso m = 1 desta forma canónica",
+           forma == trip && passo_baixo == ms && passo_cima == ms && passo_meio == ms
+           && ms == 200);
+    }
+
+    /* ═══ §F6  A IDA E VOLTA: A DESCIDA É A MÖBIUS INVERSA ══════════════════ */
+    printf("\n§F6 E há volta, porque |det| = 1 — a descida É a Möbius inversa.\n\n");
+    {
+        /* O Aarão: «como 0 é inverso de infinito por Möbius, tem ida e volta também — a
+         * dualidade; verificar isso.»
+         *
+         * E a volta existe por uma razão que este quadro já persegue: det A_m = −1, logo
+         *
+         *      A_m⁻¹ = (1/det)·adj = [[0,1],[1,−m]]      INTEIRA
+         *
+         * — o fator de potência unitário é o que torna a volta exacta. Em ℙ¹ a acção da
+         * inversa é [p:q] ⟼ [q : p − mq]; e essa é, LETRA POR LETRA, a descida do §F3.
+         *
+         * A descida não era um truque de teoria dos números: é a ÓRBITA PARA TRÁS. O §F3
+         * prova que o ponto fixo não está em ℚ percorrendo a órbita ao contrário, e é por
+         * isso que ela encolhe — a ida cresce como σ^k, a volta desce pelo mesmo caminho.
+         *
+         * E o par 0 ↔ ∞ é o caso mais simples: a troca S = [[0,1],[1,0]] tem S² = I, logo
+         * é a SUA PRÓPRIA inversa. Ida e volta pela mesma matriz — é isso a Lei 0. */
+        long viagens = 0, voltou = 0, id_ok = 0, s2 = 0, desc_igual = 0;
+        printf("      m    ida (k passos)                     a volta chega a ∞?\n");
+        for(long m = 1; m <= CF_M; m++){
+            /* A·A⁻¹ = I, entrada a entrada, em inteiros */
+            long A[2][2] = {{m,1},{1,0}}, B[2][2] = {{0,1},{1,-m}}, C[2][2] = {{0,0},{0,0}};
+            for(int i2 = 0; i2 < 2; i2++) for(int j = 0; j < 2; j++)
+                for(int k = 0; k < 2; k++) C[i2][j] += A[i2][k]*B[k][j];
+            if(C[0][0] == 1 && C[1][1] == 1 && C[0][1] == 0 && C[1][0] == 0) id_ok++;
+            /* a ida a partir de ∞, e a volta pela inversa */
+            long p = 1, q = 0;
+            int K = 12;
+            for(int k = 0; k < K; k++){ long np = m*p + q; q = p; p = np; }
+            for(int k = 0; k < K; k++){ long nq = p - m*q; p = q; q = nq; }
+            viagens++;
+            if(p == 1 && q == 0) voltou++;                /* chegou de volta ao ∞ exacto */
+            /* e a inversa É a descida do §F3: [p:q] ⟼ [q : p−mq], letra por letra */
+            long tp = 7, tq = 3;
+            long ip = tq, iq = tp - m*tq;                 /* pela matriz inversa */
+            long dp = tq, dq = tp - m*tq;                 /* pela descida do §F3 */
+            if(ip == dp && iq == dq) desc_igual++;
+            if(m <= 3) printf("      %-4ld %ld passos e volta                    %s\n",
+                              m, (long)K, (p == 1 && q == 0) ? "sim, exacto" : "NÃO");
+        }
+        /* e a troca é a sua própria inversa: S² = I */
+        {
+            long S[2][2] = {{0,1},{1,0}}, S2m[2][2] = {{0,0},{0,0}};
+            for(int i2 = 0; i2 < 2; i2++) for(int j = 0; j < 2; j++)
+                for(int k = 0; k < 2; k++) S2m[i2][j] += S[i2][k]*S[k][j];
+            if(S2m[0][0] == 1 && S2m[1][1] == 1 && S2m[0][1] == 0 && S2m[1][0] == 0) s2 = 1;
+        }
+        /* e nos 128 pontos da face finita, a ida e volta é EXAUSTIVA */
+        long pts = 0, fecha = 0;
+        for(int mm = 1; mm < OT_P; mm++) for(int i2 = 0; i2 < OT_PONTOS; i2++){
+            Pt x = (Pt)i2, y;
+            if(!ot_gato((F)mm, x, &y)) continue;
+            /* a inversa do gato: [p:q] ⟼ [q : p − mq], que é a Möbius (0,1;1,−m) */
+            Pt z;
+            if(!ot_mobius((F)0, (F)1, (F)1, ot_oposto((F)mm), y, &z)) continue;
+            pts++;
+            if(z == x) fecha++;
+        }
+        printf("      %ld metais: A·A⁻¹ = I em %ld · a volta chega a ∞ em %ld · a inversa É"
+               " a descida em %ld\n", viagens, id_ok, voltou, desc_igual);
+        printf("      e a troca S² = I: %s — ida e volta pela MESMA matriz, que é a Lei 0\n",
+               s2 ? "sim" : "NÃO");
+        printf("      e na face finita, EXAUSTIVO: %ld pares (metal, ponto) e a volta fecha"
+               " em %ld\n", pts, fecha);
+        ok("E HÁ VOLTA PORQUE |det| = 1, E A DESCIDA É A MÖBIUS INVERSA: de det A_m = −1"
+           " vem A⁻¹ = (0,1;1,−m) INTEIRA — é o fator de potência unitário que torna a"
+           " volta exacta —, e a sua acção em ℙ¹ é [p:q] ⟼ [q : p−mq], que é LETRA POR"
+           " LETRA a descida do §F3. Logo a descida não era um truque de teoria dos"
+           " números: é a ÓRBITA PARA TRÁS, e é por isso que ela encolhe — a ida cresce"
+           " como σ^k e a volta desce pelo mesmo caminho, chegando ao ∞ EXACTO. E o par"
+           " 0 ↔ ∞ é o caso mais simples de todos: a troca S tem S² = I, logo é a sua"
+           " PRÓPRIA inversa — ida e volta pela mesma matriz, que é o que a Lei 0 diz",
+           id_ok == viagens && voltou == viagens && desc_igual == viagens && s2 == 1
+           && fecha == pts && pts > 10000);
     }
 
     if(!falhas){

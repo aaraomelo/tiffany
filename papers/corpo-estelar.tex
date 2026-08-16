@@ -142,6 +142,45 @@ zero} --- é o inverso, $x\dg=-1/x$, e o seu $-1$ é a semente da \textbf{Lei 2}
 leis são as duas partes da divisão do zero}, e é por isso que são duas e não uma nem três. É a Lei $0$
 porque está \emph{debaixo} das outras: enuncia-se depois, mas vem antes.
 
+\subsection*{E é ela que deixa o corte nascer}
+
+\noindent A segunda parte da lei, $0\dg=\infty$, não é só uma notação que evita um caso
+especial: \textbf{é ela que dá ao corte um ponto de partida}. Em $\mathbb{P}^1$ o infinito
+é um ponto como os outros, e por isso a órbita da Möbius $g(x)=m+1/x$ pode \emph{começar
+nele}:
+\[
+[p:q]\ \longmapsto\ [\,m\,p+q\ :\ p\,],
+\qquad
+g^{k}(\infty)=\frac{p_k}{q_k}
+\]
+--- a matriz vezes o vector, sem uma divisão. Num sistema sem esta lei, «começar no
+infinito» não quer dizer nada, e a órbita não teria de onde partir.
+
+\noindent E o ponto fixo dessa Möbius é o vector próprio, $x^{2}=mx+1$: são \emph{dois},
+com soma $m$ e produto $-1$ --- o par que a Lei 1 e a Lei 2 já anunciam. Em coordenadas
+homogéneas ele pede $p^{2}-mpq-q^{2}=0$, que completando o quadrado é
+$(2p-mq)^{2}=(m^{2}+4)\,q^{2}$; logo \textbf{ele vive nos racionais exactamente quando
+$m^{2}+4$ é quadrado perfeito}, e não é, porque $m^{2}<m^{2}+4<(m+2)^{2}$ e o único
+candidato do meio pediria $2m=3$.
+
+\noindent \textbf{Donde o corte, em uma frase}: a órbita corre toda no andar de baixo e o
+ponto fixo para onde ela vai não está lá --- \emph{no andar de baixo é uma soma racional
+que não termina; no andar de cima é um ponto, e é irracional}. O corte não é uma
+construção acrescentada por fora: é o ponto fixo visto do andar que não o contém, e a Lei
+$0$ é a que deixa a órbita começar.
+
+\noindent \textbf{E há volta, que é a metade dual.} $\det A_m=-1$, logo
+$A_m^{-1}=\left(\begin{smallmatrix}0&1\\1&-m\end{smallmatrix}\right)$ é \emph{inteira} ---
+o fator de potência unitário é o que torna a volta exacta ---, e a sua acção é
+$[p:q]\mapsto[q:p-mq]$, que é \emph{letra por letra} a descida acima. A descida é a órbita
+\textbf{para trás}: a ida cresce, a volta desce pelo mesmo caminho, e chega ao $\infty$
+exacto. E o par $0\leftrightarrow\infty$ é o caso mais simples de todos --- a troca tem
+$S^{2}=I$, logo é a sua \emph{própria} inversa, ida e volta pela mesma matriz. \emph{É isso
+a Lei $0$, e é isso a dualidade.}
+
+\emph{Medido:} \code{tests/corte\_ponto\_fixo.c} ($6{:}0$), com $16\,128$ pares
+(metal, ponto) a fechar a volta na face finita.
+
 \subsection*{Dividir o zero, e dividir por ele}
 
 \textbf{Dividir \emph{o} zero é parti-lo em duas assinaturas duais.} O $0$ não é a ausência: é o par

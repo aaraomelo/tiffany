@@ -515,7 +515,8 @@ seja o caso geral, mas porque é o caso que não se move.
 \section{E o corte É o ponto fixo que falta ao andar}\label{sec:pontofixo}
 
 \noindent O ponto fixo não é uma observação lateral: \textbf{é o corte}. E a ordem
-é esta, com a Lei 0 a dar o arranque.
+é esta, com a Lei 0 a dar o arranque. \emph{O enunciado geral é do Corpo Universal}
+(\code{thm:corte-ponto-fixo}); o que segue é a realização.
 
 \medskip
 \noindent\textbf{O andar tem três pontos, e deles sai tudo.} Em $\mathbb{P}^1$ os
@@ -588,12 +589,37 @@ a órbita corre}\;}
 \]
 --- e não uma construção acrescentada por fora. $\square$
 \end{corolario}
+\begin{teorema}[e há volta --- é a metade dual]\label{thm:volta}
+$\det A_m=-1$, logo a inversa é \textbf{inteira}, e é o fator de potência unitário que a
+torna exacta:
+\[
+\boxed{\;A_m^{-1}=\begin{psmallmatrix}0&1\\1&-m\end{psmallmatrix},
+\qquad
+[p:q]\ \longmapsto\ [\,q\ :\ p-mq\,]\;}
+\]
+--- e essa acção é, \emph{letra por letra}, a descida do Teor.~\ref{thm:corte-fixo}.
+\textbf{A descida não era um truque de teoria dos números: é a órbita para trás.} A ida
+cresce como $\sigma^{k}$, a volta desce pelo mesmo caminho, e chega ao $\infty$ exacto.
+
+E o par $0\leftrightarrow\infty$ é o caso mais simples: a troca
+$S=\begin{psmallmatrix}0&1\\1&0\end{psmallmatrix}$ tem $S^{2}=I$, logo é a \emph{sua
+própria} inversa --- ida e volta pela mesma matriz, que é o que a Lei 0 diz. $\square$
+\end{teorema}
+\[
+\boxed{
+\begin{array}{ll}
+\text{a \textbf{ida}} & \text{a órbita de }\infty\text{: os convergentes, a crescer}\\[3pt]
+\text{a \textbf{volta}} & A_m^{-1}\text{ inteira: a descida, a encolher}\\[3pt]
+\text{e o que a \textbf{fecha}} & \abs{\det A_m}=1
+\end{array}}
+\]
 \colunas{a Lei 0, o gato como Möbius, e o ponto fixo do metal}
         {o corte fundado no ponto fixo, e a descida que o proíbe em $\mathbb{Q}$}
         {\code{tests/corte\_ponto\_fixo.c}: $264$ passos da órbita com $\abs{\det}=1$;
 Cayley--Hamilton nos $12$ metais; a descida em $29\,280$ triplos e o encolhimento nos
-$1342$ do cone; e $62$ dos $126$ metais de $\mathbb{F}_{127}$ com ponto fixo, por duas
-rotas concordantes --- contra ZERO em $\mathbb{Q}$, para todo $m$}
+$1342$ do cone; $62$ dos $126$ metais de $\mathbb{F}_{127}$ com ponto fixo, por duas
+rotas concordantes --- contra ZERO em $\mathbb{Q}$, para todo $m$; e a volta, com
+$16\,128$ pares a fechar na face finita}
 
 %======================================================================
 \section{O Teorema Central funda o limite}\label{sec:central}
