@@ -120,7 +120,7 @@ construtivamente (o n é EXIBIDO), COMPLETO pelo corte com as cinco vias indepen
 unicidade CITA-SE: um corpo ordenado completo é isomorfo a ℝ, e isso é literatura.
 
 **E O CORTE FECHA PORQUE OS METÁLICOS SÃO DE PISOT** — o elo, e a casa já o tinha
-(): |σ|>1, |σ†|<1, logo ‖σᵏ‖ → 0 com VAZAMENTO ZERO. A parte fraccionária de σᵏ
+(`thm:pisot`): |σ|>1, |σ†|<1, logo ‖σᵏ‖ → 0 com VAZAMENTO ZERO. A parte fraccionária de σᵏ
 é exactamente −σ'ᵏ porque a SOMA é o traço, que é INTEIRO — mede-se em ℤ[σ] sem avaliar
 raiz. **A completude não é postulado acrescentado: é consequência de a família ser Pisot.**
 
@@ -130,7 +130,7 @@ isto é LER O BIT. Numa base qualquer seria preciso INVERTER a Gram. **O uint8_t
 escolha de armazenamento: é a base ortonormal escrita em hardware.** O preço diz-se: há 127
 vectores ISÓTROPOS (peso par), e «ortonormal» aqui é Gram = I na base, não comprimento
 euclidiano. E cada andar traz o seu representante pelos LUCAS ÍMPARES: σ_{L_k} = φ^k, com
-σ₄ = φ³ (o  do teoria.tex, provado em ℤ[φ] por Cassini).
+σ₄ = φ³ (o `thm:sigma4` do teoria.tex, provado em ℤ[φ] por Cassini).
 
 `tests/ordenado.c` (7:0) · `tests/ortonormal.c` (6:0) · `tests/reducao.c` (6:0) · `tests/migracao.c` (5:0, equivalência em 213840 casos) · `tests/aritmetica.c` (6:0) · `tests/exaustao.c` (7:0) · `tests/sem_ramo.c` (6:0) ·
 `tests/projetiva.c` (6:0). No Universal: `thm:fibra-por-andar`, `thm:sem-ramo`,
