@@ -270,7 +270,30 @@ representação de tudo o resto; \emph{realização}, onde a conta acontece;
 \emph{apresentação}, que não entra em conta nenhuma. A ordem certa é
 medição primeiro (é defeito), estrutura depois (é alavanca), realização a
 seguir; a apresentação fica, porque reduzir um \verb|printf| é estética.
-\emph{Auditado:} \code{tools/audita\_tipos.sh}.
+\emph{Auditado:} \code{tools/audita\_tipos.sh} --- para o \verb|double|,
+$3616$ ocorrências em $165$ ficheiros: $68$ estrutura, $3157$ realização,
+$350$ \textbf{medição}, $41$ apresentação.
+
+\textbf{E cada limiar tem uma de três causas, só uma honesta.} A triagem
+(\code{tools/triagem\_limiares.sh}) encontra $918$ limiares
+\verb|1e-N| no repositório e separa-os:
+\begin{itemize}
+\item \textbf{(A) decoração} --- $583$: não há função transcendente na
+conta. O limiar não é preciso, e a comparação pode ser por
+\emph{igualdade}: o resíduo é zero. O pior caso desta classe é o limiar
+a dar cara de medição a uma \textbf{tautologia} --- uma matriz
+construída simétrica, comparada com $10^{-14}$.
+\item \textbf{(B) sabor} --- há transcendentes, mas a identidade é
+\emph{algébrica} e vale para quaisquer entradas: eles não entram na prova
+e só forçam o limiar. Com entradas inteiras fica exacta.
+\item \textbf{(C) honesto} --- a quantidade \emph{é} transcendente. Aí o
+\verb|double| é a representação certa, mas o que se \textbf{afirma} muda:
+em vez de «$\pi=3{,}14159\pm10^{-9}$», afirma-se o encaixe
+$223/71<\pi<22/7$, que é uma desigualdade exacta entre racionais.
+\end{itemize}
+\emph{Medido:} \code{tests/limiares.c} ($5{:}0$), com os três casos
+tomados de código real deste repositório. \emph{A regra que fica: um
+limiar novo tem de dizer a que classe pertence.}
 
 \subsection*{E as duas faces, que é como o sistema trabalha}
 $\mathbb{Q}$ é a face exacta e \emph{prova}; $\mathbb{F}_p$ é a face

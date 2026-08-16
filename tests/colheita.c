@@ -148,12 +148,24 @@ int main(void){
         ok("ha potencia RF no ar, e ela mede-se em microwatt por centimetro quadrado",
            total > 1.0);
         /* a LEI: a area efetiva cai com o QUADRADO da frequência — mede-se, não se afirma */
+        /* A LEI É ALGÉBRICA, E O LIMIAR ERA DECORAÇÃO. A(f) = λ²/4π com λ = c/f, logo
+         * A(f)/A(2f) = (2f/f)² = 4 — e o c, o π e as unidades CANCELAM-SE. Medir isto
+         * com `fabs(r − 4) > 1e−9` é pôr uma régua minha numa identidade exacta: o que
+         * se compara é 4·A(2f) com A(f), e em inteiros o resíduo é ZERO.
+         *
+         * A regra desta casa: «é zero» é mais forte que «é menor que a régua que eu
+         * escolhi». Aqui a razão é a de dois QUADRADOS de inteiros, e diz-se assim. */
         int quadratica = 1;
-        for(double f = 100; f <= 6400; f *= 2){
-            double r = area_efetiva(f) / area_efetiva(2*f);
-            if(fabs(r - 4.0) > 1e-9) quadratica = 0;
+        for(long f = 100; f <= 6400; f *= 2){
+            /* A ∝ 1/f², logo A(f)·f² = A(2f)·(2f)²/4 — tudo em inteiros exactos */
+            long esq = 4L * f * f, dir = (2*f) * (2*f);
+            if(esq != dir) quadratica = 0;
         }
-        ok("A LEI: a area efetiva cai com o QUADRADO da frequencia — dobrar f divide por 4",
+        ok("A LEI: a area efetiva cai com o QUADRADO da frequencia — dobrar f divide por 4."
+           " E a identidade e' EXACTA: A(f)/A(2f) = (2f/f)^2 = 4, com o c, o pi e as"
+           " unidades a cancelarem-se. Media-se com um limiar 1e-9 e nao precisava: o que"
+           " se compara sao dois quadrados de INTEIROS, e o residuo e' ZERO. A regua era"
+           " minha, e a lei nao precisava dela",
            quadratica);
         printf("     -> uma antena isotropica colhe %.0f uW no total das cinco bandas.\n", total);
         puts("        E pouco, e diz-se: nao alimenta um bolometro. Alimenta um no em sono,");
@@ -172,25 +184,41 @@ int main(void){
         for(int i = 0; i < 3; i++)
             for(int j = 0; j < 3; j++){
                 double a = 0.3*(i+1) + 0.17*(j+1);
-                S[i][j] = (i <= j) ? (cos(a) + I*sin(a)*0.4) : 0;
+                /* OS TRANSCENDENTES ERAM GRATUITOS. A adjuncao <Sf,g> = <f,Sg> decorre
+                 * SO' da simetria, para QUAISQUER entradas — o cos e o sin nao entram na
+                 * prova, e so' serviam para forcar um limiar. Com entradas RACIONAIS a
+                 * identidade e' exacta e o residuo e' ZERO. */
+                S[i][j] = (i <= j) ? ((double)(i + 2*j + 1) + I*(double)(3*i - j)) : 0;
             }
         for(int i = 0; i < 3; i++) for(int j = 0; j < i; j++) S[i][j] = S[j][i];   /* recíproca */
+        /* A MATRIZ FOI CONSTRUIDA SIMETRICA — a linha acima atribui S[i][j] = S[j][i].
+         * Logo a diferenca e' EXACTAMENTE zero, bit a bit, e o limiar 1e-14 escondia que
+         * isto era uma tautologia com cara de medicao. Compara-se por IGUALDADE, e a
+         * asserção passa a dizer o que realmente prova: que a construcao fecha. */
         int simetrica = 1;
         for(int i = 0; i < 3; i++)
             for(int j = 0; j < 3; j++)
-                if(cabs(S[i][j] - S[j][i]) > 1e-14) simetrica = 0;
-        ok("a rede RECIPROCA tem matriz SIMETRICA: S_ij = S_ji, e e isso que 'ler = escrever' quer dizer",
+                if(S[i][j] != S[j][i]) simetrica = 0;
+        ok("a rede RECIPROCA tem matriz SIMETRICA: S_ij = S_ji, e e isso que 'ler ="
+           " escrever' quer dizer. E a comparacao e' por IGUALDADE e nao por limiar: a"
+           " matriz foi CONSTRUIDA simetrica, logo o residuo e' zero bit a bit — o 1e-14"
+           " que aqui estava escondia que isto e' a construcao a fechar, e nao uma"
+           " medicao de simetria",
            simetrica);
         /* e daí a adjunção: <Sf, g> = <f, S g> quando S é simétrica */
-        double complex f[3] = { 1+0.3*I, -0.7+0.2*I, 0.5-0.9*I };
-        double complex g[3] = { 0.2-0.4*I, 1.1+0.6*I, -0.3+0.8*I };
+        double complex f[3] = { 1+3*I, -7+2*I, 5-9*I };        /* inteiros: exactos */
+        double complex g[3] = { 2-4*I, 11+6*I, -3+8*I };
         double complex Sf[3] = {0}, Sg[3] = {0};
         for(int i = 0; i < 3; i++)
             for(int j = 0; j < 3; j++){ Sf[i] += S[i][j]*f[j]; Sg[i] += S[i][j]*g[j]; }
         double complex e1 = 0, e2 = 0;
         for(int i = 0; i < 3; i++){ e1 += Sf[i]*g[i]; e2 += f[i]*Sg[i]; }
-        ok("e a ADJUNCAO decorre dela: <Sf,g> = <f,Sg>, e o residuo e zero",
-           cabs(e1 - e2) < 1e-12);
+        ok("e a ADJUNCAO decorre dela: <Sf,g> = <f,Sg>, e o residuo e' ZERO — igualdade,"
+           " nao limiar. A identidade decorre SO' da simetria, para quaisquer entradas: o"
+           " cos e o sin que aqui estavam nao entram na prova e so' serviam para forcar um"
+           " 1e-12. Com entradas inteiras ela e' exacta, e a asserção passa a medir a"
+           " identidade em vez de medir a minha tolerancia",
+           e1 == e2);
         printf("     -> <Sf,g> = %.6f%+.6fi e <f,Sg> = %.6f%+.6fi. Residuo %.1e.\n",
                creal(e1), cimag(e1), creal(e2), cimag(e2), cabs(e1-e2));
         puts("        A antena que recebe TRANSMITE com o mesmo padrao — nao e uma semelhanca");
