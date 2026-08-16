@@ -24,7 +24,7 @@
  *
  *   §S1  m_k É UM CAMINHO: o passo m_{k+1} ∈ {2m_k, 2m_k+1}, medido em toda a torre
  *   §S2  E É O SUPREMO: majorante, e o MENOR — as duas cláusulas, com testemunha
- *   §S3  O CASO QUE ℚ FALHA: {r > 0 : r² < 2} não tem supremo em ℚ, e tem aqui
+ *   §S3  O CASO QUE ℚ FALHA: e a testemunha é [[3,4],[2,3]], det = 1
  *   §S4  E A BORDA NÃO PARTE NADA: o supremo diádico tem dois caminhos, e ∼ casa-os
  *
  * Nenhum double, nenhum limiar: o teste «existe x ∈ S acima de m/2^k» é, em cada
@@ -157,47 +157,62 @@ int main(void){
         /* Este é o conjunto que decide, porque a diferença entre ℚ e o objecto aparece
          * NELE e não numa afirmação sobre cardinais. Para todo candidato p/q em ℚ:
          *
-         *   p²  < 2q²   →  não é majorante: EXIBE-SE x ∈ S maior
-         *   p²  > 2q²   →  é majorante mas não o menor: EXIBE-SE majorante menor
-         *   p²  = 2q²   →  impossível (a descida infinita, cardinal.c §C4)
+         *   p² < 2q²   →  está em S, e NÃO é majorante: exibe-se x ∈ S maior
+         *   p² > 2q²   →  é majorante, e não o MENOR: exibe-se majorante menor
+         *   p² = 2q²   →  impossível (descida infinita, cardinal.c §C4)
          *
-         * As duas testemunhas constroem-se pela mediante de Farey, que é inteira: entre
-         * p/q e o corte há sempre (p+2q)/(p+q), e ela cai do lado certo — porque
+         * E a testemunha é a MESMA matriz nos dois casos — o que a torna testemunha é
+         * preservar o LADO e mover na direcção certa:
          *
-         *      (p+2q)² − 2(p+q)² = −(p² − 2q²)
+         *      (p,q) ⟼ (3p+4q, 2p+3q),      det [[3,4],[2,3]] = 1
          *
-         * TROCA O SINAL. É a mesma identidade da descida, a trabalhar do outro lado. */
-        long cands = 0, sem_sup = 0, ident = 0, empates = 0;
+         * que é a unidade fundamental de ℤ[√2] ao quadrado, (1+√2)² = 3+2√2. Ela cumpre,
+         * em inteiros e para TODO par:
+         *
+         *      (3p+4q)² − 2(2p+3q)² = p² − 2q²        preserva a forma, logo o LADO
+         *      (3p+4q)q − p(2p+3q)  = 2(2q² − p²)     o sinal do movimento é o do lado
+         *
+         * Junto: quem está abaixo SOBE ficando abaixo (logo continua em S, e é maior);
+         * quem está acima DESCE ficando acima (logo continua majorante, e é menor).
+         * Nenhum p/q pode ser o menor majorante.
+         *
+         * A mediante SIMPLES (p+2q)/(p+q) não serve, e é erro fácil: ela troca o sinal,
+         * logo atravessa o corte e cai do lado oposto — não fica entre p/q e o corte. */
+        long cands = 0, forma = 0, move = 0, testemunha = 0, empates = 0;
         for(long q = 1; q <= 60; q++) for(long p = 1; p <= 3*q; p++){
             long d = p*p - 2*q*q;
-            long P = p + 2*q, Q = p + q;              /* a mediante */
+            long P = 3*p + 4*q, Q = 2*p + 3*q;
             long dd = P*P - 2*Q*Q;
+            long mov = P*q - p*Q;                     /* > 0 ⟺ P/Q > p/q */
             cands++;
-            if(dd == -d) ident++;                     /* a identidade que troca o sinal */
+            if(dd == d) forma++;                      /* preserva a forma quadrática */
+            if(mov == 2*(2*q*q - p*p)) move++;        /* e o movimento é do sinal do lado */
             if(d == 0) empates++;
-            /* d<0: p/q não é majorante, e a mediante é um x ∈ S maior (dd>0? não —
-             * dd = −d > 0 significa que a mediante está ACIMA do corte, logo é
-             * majorante: é a testemunha do lado de cima). O que interessa é que a
-             * mediante cai SEMPRE do lado oposto, logo nenhum p/q pode ser o menor
-             * majorante: de qualquer lado há testemunha estritamente entre. */
-            if(d != 0 && dd == -d) sem_sup++;
+            /* a testemunha: mesmo lado E na direcção que refuta «p/q é o supremo» */
+            if(d != 0 && dd == d && ((d < 0 && mov > 0) || (d > 0 && mov < 0))) testemunha++;
         }
-        printf("      %ld candidatos p/q em ℚ: a mediante troca o sinal em %ld, empates %ld\n",
-               cands, ident, empates);
-        printf("      e nenhum p/q é o supremo: %ld com testemunha exibida\n", sem_sup);
+        printf("      %ld candidatos p/q: a forma preserva-se em %ld, o movimento bate"
+               " em %ld, empates %ld\n", cands, forma, move, empates);
+        printf("      e nenhum p/q é o supremo: %ld com testemunha do MESMO lado exibida\n",
+               testemunha);
+        printf("      (a mediante simples (p+2q)/(p+q) troca o sinal e cai do lado"
+               " OPOSTO — não serve de testemunha)\n");
         /* e aqui o supremo EXISTE, e o caminho dele mostra-se */
         long m = 1, pot = 1;
         for(int k = 1; k <= 20; k++){ pot *= 2; m = sp_bit(2*m, pot, 0); }
         printf("      e no objecto o supremo EXISTE, e o caminho é: %ld / 2^20 = %ld/%ld\n",
                m, m, pot);
-        ok("O CONJUNTO QUE ℚ NÃO CONSEGUE FECHAR, O OBJECTO FECHA: para todo p/q, a"
-           " mediante de Farey (p+2q)/(p+q) cai do lado OPOSTO — porque"
-           " (p+2q)² − 2(p+q)² = −(p²−2q²) troca o sinal, medido em todos os candidatos —"
-           " logo há sempre testemunha estritamente entre p/q e o corte, e nenhum racional"
-           " é o menor majorante. E não há empate, porque p² = 2q² é a descida proibida."
-           " No objecto o supremo EXISTE, e o caminho dele exibe-se em inteiros: é ESTA"
-           " diferença que faz o objecto contínuo, e não uma afirmação sobre cardinais",
-           ident == cands && empates == 0 && sem_sup == cands && cands > 5000);
+        ok("O CONJUNTO QUE ℚ NÃO CONSEGUE FECHAR, O OBJECTO FECHA: a testemunha é a"
+           " matriz [[3,4],[2,3]] de determinante 1 — a unidade fundamental de ℤ[√2] ao"
+           " quadrado, (1+√2)² = 3+2√2 —, e o que a torna testemunha são DUAS identidades"
+           " inteiras a valer em todos os candidatos: (3p+4q)² − 2(2p+3q)² = p² − 2q²"
+           " PRESERVA o lado, e (3p+4q)q − p(2p+3q) = 2(2q² − p²) move na direcção do"
+           " lado. Quem está abaixo sobe ficando em S; quem está acima desce continuando"
+           " majorante — logo nenhum racional é o menor majorante. E não há empate, porque"
+           " p² = 2q² é a descida proibida. No objecto o supremo EXISTE, e o caminho dele"
+           " exibe-se em inteiros",
+           forma == cands && move == cands && empates == 0 && testemunha == cands
+           && cands > 5000);
     }
 
     /* ═══ §S4  E A BORDA NÃO PARTE NADA ══════════════════════════════════════ */

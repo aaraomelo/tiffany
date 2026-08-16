@@ -54,7 +54,7 @@ geometricamente a construção que o Universal já fechou}, na ordem
 \underbrace{\text{Lei 0}}_{\text{fundação}}\ \to\ \text{leis }0,\ldots,7\ \to\
 \text{base ortonormal}\ \to\ \text{bit a bit}\ \to\ \text{dual}\\
 \to\ \text{recorrência}\ \to\ \text{Pisot}\ \to\ \text{encaixe}\ \to\ \text{corte}
-\ \to\ \mathbb{R}\ \to\ \pi_k
+\ \to\ \text{supremo}\ \to\ \mathbb{R}\ \to\ \pi_k
 \end{gathered}\;}
 \]
 Cada seta deixa um objecto matemático no papel e uma verificação no
@@ -73,7 +73,7 @@ o inteiro $t_k=\sigma^{k}+(\sigma\dg)^{k}$, e com ele
 não é escolhida. Daí o encaixe, e daí o corte.
 
 \smallskip\noindent
-E a construção é de $\mathbb{R}$ \textbf{inteiro}. Corre sobre quocientes
+E a construção é de \textbf{todo} $\mathbb{R}$. Corre sobre quocientes
 parciais \emph{arbitrários} --- cada real tem uma representação canónica por
 fracção contínua, infinita se irracional e finita se racional ---, e o metálico é
 o caso de \emph{quociente parcial constante}, e portanto periódico --- há
@@ -85,9 +85,21 @@ infinitas CF periódicas que não são metálicas. Com $a_k\geq1$,
 --- $\varphi$ é o \textbf{irracional de crescimento mínimo dos denominadores
 dos convergentes} entre as expansões com $a_k\geq1$, e por isso uma só taxa
 limita a construção inteira. A família metálica não é o escopo: é o caso
-\textbf{extremo}, o pior caso do mecanismo.
+\textbf{extremo}, o pior caso do mecanismo, e a condição que a generaliza é
+$n\leq t$ --- \emph{o termo constante não excede o traço} ---, necessária e
+suficiente para $x^{2}-tx-n$.
 
-\smallskip\noindent\emph{Medido:} \code{tests/geometria\_real.c} ($58{:}0$).
+\smallskip\noindent
+E a \textbf{continuidade constrói-se}, nas duas direcções. Dado $S\neq\emptyset$
+limitado, o caminho de $\sup S$ desce a árvore binária bit a bit,
+$m_{k+1}\in\{2m_k,2m_k+1\}$, em inteiros; e o objecto não é $\mathbb{Q}$, porque
+$\mathbb{Q}$ enumera-se com o índice exibido e os caminhos não. \emph{O habitante
+\textbf{é} o caminho} --- não há valor por trás à espera de ser aproximado, e é por
+isso que a ida e a volta são exactas.
+
+\smallskip\noindent{\raggedright\emph{Medido:} \code{tests/geometria\_real.c}
+($58{:}0$), \code{tests/supremo.c} ($4{:}0$), \code{tests/cardinal.c} ($4{:}0$),
+\code{tests/condicao\_pisot.c} ($4{:}0$).\par}
 \end{abstract}
 
 %======================================================================
@@ -107,10 +119,12 @@ as oito leis, a base ortonormal, o Gato, Pisot, o corpo ordenado completo
 \end{tabular}
 \end{center}
 
-\noindent\textbf{A trava.} A identificação dos cortes com o corpo ordenado
-completo é \emph{herdada}; a contribuição deste paper é a \textbf{realização
-geométrica do mecanismo que os produz}. Não é uma prova independente da existência
-de $\mathbb{R}$.
+\noindent\textbf{A trava, e ela tem duas metades.} A identificação do corpo
+ordenado completo com $\mathbb{R}$ --- unicidade a menos de isomorfismo --- é
+teorema clássico, e cita-se como tal. \textbf{Mas a \emph{continuidade} não se
+herda aqui: constrói-se} (\S\ref{sec:supremo}), e constrói-se em inteiros: dado
+$S$ limitado, o caminho de $\sup S$ desce a árvore bit a bit. O que este paper
+\emph{não} faz é reconstruir o \emph{Corpo Universal}, de que é filho.
 
 \medskip
 \noindent\textbf{Regra metodológica.} Cada afirmação é apresentada segundo o seu
@@ -198,7 +212,10 @@ objectos geométricos --- em $\det=1$:
 \text{hiperbólica: }\abs{\operatorname{tr}}>2 .
 \]
 Donde: as \emph{rotações associadas aos polígonos} caem no regime elíptico; $t=2$
-no parabólico; e a companheira $A_m$, com $\Delta=m^{2}+4>0$, no hiperbólico.
+no parabólico; e a companheira $A_m$, com $D=m^{2}+4>0$, no hiperbólico ---
+onde $D=\operatorname{tr}^{2}-4\det$ é o \textbf{discriminante}, escrito $D$ em todo
+o paper, ficando $\Delta$ reservado à \emph{diferença finita} do
+\S\ref{sec:torre-graus}.
 Estas transformações são, portanto, casos particulares da classificação por traço
 e determinante utilizada pelo \emph{Corpo Universal}.
 \end{observacao}
@@ -519,8 +536,10 @@ resíduo zero em cada andar. $\square$
 
 \noindent\textbf{E onde cada um entra, para que não fique dúvida:} \emph{Gentil} é
 a identidade discreta, e é a única das três que se \emph{usa} na conta;
-\emph{Lebesgue} entra como interpretação estrutural, e não como ingrediente; e a
-\textbf{completude é herdada} do Universal. Nada aqui constrói o limite clássico:
+\emph{Lebesgue} entra como interpretação estrutural, e não como ingrediente. E o
+que esta secção faz é \emph{fundar} o limite como ponto fixo --- a
+\textbf{continuidade} propriamente dita, a existência do supremo, constrói-se no
+\S\ref{sec:supremo} e não aqui:
 \[
 \boxed{\;\begin{gathered}
 \text{\emph{nesta realização}, o limite lê-se como o \textbf{ponto fixo}}\\
@@ -648,9 +667,11 @@ $P_k$ desse caso. \emph{Elas dão o mecanismo extremo explícito; o objecto cont
 a ser o polinómio.}}}
 \end{center}
 
-\noindent E o contraexemplo do \S\ref{sec:contra} lê-se agora sem esforço:
-$x^{2}-2x-4$ tem termo constante $4$, logo \textbf{a raiz não é unidade} --- e é
-exactamente aí que o mecanismo quebra.
+\noindent E a condição do \S\ref{sec:contra} lê-se agora sem esforço, nos dois
+coeficientes do polinómio: para $x^{2}-tx-n$ o encaixe fecha exactamente quando
+$n\leq t$ --- o \textbf{termo constante não excede o traço}. O caso
+$x^{2}-2x-4$ tem $n=4>t=2$ e quebra; $x^{2}-3x-3$ tem $n=t=3$ e fecha, com termo
+constante $3$ e portanto \emph{sem} ser unidade.
 
 %======================================================================
 \section{E um polinómio é amplitude e fase: o espectro}\label{sec:espectro}
@@ -735,8 +756,7 @@ das diferenças, e é por isso que a soma reconstrói. $\square$
 \section{E no infinito tudo vira recta}\label{sec:reta}
 
 \begin{teorema}[o colapso do discriminante]\label{thm:colapso}
-Nos andares elípticos exactos o discriminante $D=\operatorname{tr}^{2}-4\det$ ---
-escrito $D$, e não $\Delta$, que fica reservado à diferença finita --- é
+Nos andares elípticos exactos o discriminante $D=\operatorname{tr}^{2}-4\det$ é
 \textbf{inteiro} e desce em módulo:
 \[
 n=3:\ D=-3,\qquad n=4:\ D=-2,\qquad n=6:\ D=-1,\qquad \ldots\ \to 0 .
@@ -825,8 +845,8 @@ requer adicionalmente a condição $\abs{\sigma\dg}^{k}<\tfrac12$:
 \ \Longrightarrow\ \operatorname{dist}(\sigma^{k},\mathbb{Z})=\abs{\sigma\dg}^{k}.\;}
 \]
 A condição escreve-se sem raízes --- para $k\geq1$, onde
-$\sqrt\Delta\,U^{(m)}_k>0$, de $2(\sigma\dg)^{k}=t_k-\sqrt\Delta\,U^{(m)}_k$ ---, por
-$(t_k-1)^{2}<\Delta\,(U^{(m)}_k)^{2}<(t_k+1)^{2}$ com $\Delta=m^{2}+4$, forma
+$\sqrt{D}\,U^{(m)}_k>0$, de $2(\sigma\dg)^{k}=t_k-\sqrt{D}\,U^{(m)}_k$ ---, por
+$(t_k-1)^{2}<D\,(U^{(m)}_k)^{2}<(t_k+1)^{2}$ com $D=m^{2}+4$, forma
 equivalente à que se obtém da identidade
 \[
 t_k^{2}-(m^{2}+4)\bigl(U^{(m)}_k\bigr)^{2}=4(-1)^{k}
@@ -880,8 +900,10 @@ $\abs{\sigma}>1$, $\abs{\sigma\dg}<1$, com
 $\abs{\sigma^{k}(\sigma\dg)^{k}}=1$. \textbf{O intervalo não é postulado
 pequeno; ele fica pequeno porque uma face cresce enquanto a face dual é
 obrigada a encolher, com o produto das duas faces preservado em módulo por
-$\abs{N(\sigma)}=1$.} A condição é essa, e não é decorativa: é exactamente ela
-que o contraexemplo do \S\ref{sec:contra} viola, com $N=-4$.
+$\abs{N(\sigma)}$.} \textbf{A unidade $\abs{N(\sigma)}=1$ é o caso em que as duas
+faces se compensam exactamente} --- e é suficiente, mas não é a condição: o que se
+exige é $\abs{\sigma\dg}<1$, e o \S\ref{sec:contra} dá-lhe a forma inteira
+$n\leq t$.
 E «área», «comprimento» e
 «largura» nomeiam aqui um determinante, que numa matriz de inteiros é um
 inteiro: nenhum contínuo foi pedido emprestado para dizer isto.
@@ -910,7 +932,7 @@ $m=1$ isto é a identidade de Fibonacci, e só aí. $\square$
         {\code{geometria\_real.c} \S L7}
 
 %======================================================================
-\section{$\mathbb{R}$ inteiro --- e o ouro é o extremo}\label{sec:todos}
+\section{Todo $\mathbb{R}$ --- e o ouro é o extremo}\label{sec:todos}
 
 A realização não se restringe à família metálica.
 
@@ -930,7 +952,7 @@ e a correspondência é esta, com as duas metades ditas:
 \end{array}}
 \]
 Dizer só a primeira linha deixaria $\mathbb{R}$ a descoberto, e a afirmação
-deste paper é sobre $\mathbb{R}$ inteiro. Para $a/b$ o algoritmo termina com
+deste paper é sobre \textbf{todo} $\mathbb{R}$. Para $a/b$ o algoritmo termina com
 resto zero, o último convergente dá $a/b$ \textbf{exacto} --- não aproximado
 ---, e a ambiguidade final $[a_0;\ldots,a_n]=[a_0;\ldots,a_n{-}1,1]$ resolve-se
 por convenção canónica.
@@ -1068,22 +1090,22 @@ O corte não é uma técnica adicional: é a \textbf{leitura ordenada da mesma
 sucessão}.
 
 \begin{teorema}\label{thm:corte}
-Para $a\in\mathbb{Z}$, $b\geq1$ e $\Delta=m^{2}+4$: de
-$\sigma_m=\bigl(m+\sqrt\Delta\bigr)/2$ vem
+Para $a\in\mathbb{Z}$, $b\geq1$ e $D=m^{2}+4$: de
+$\sigma_m=\bigl(m+\sqrt{D}\bigr)/2$ vem
 \[
 \frac ab<\sigma_m
-\iff 2a-mb<b\sqrt\Delta ,
+\iff 2a-mb<b\sqrt{D} ,
 \]
 e como o lado direito é positivo isto parte-se em dois, sem perda:
 \[
 2a-mb<0\quad\text{(e acabou)},\qquad\text{ou}\quad
-2a-mb\geq0\ \text{e}\ (2a-mb)^{2}<b^{2}\Delta .
+2a-mb\geq0\ \text{e}\ (2a-mb)^{2}<b^{2}D .
 \]
 \textbf{E aqui as duas coisas não se confundem}, que é a hierarquia da primeira
 página aplicada a si própria:
 \begin{itemize}
 \item \emph{Que} nenhum racional caia em cima é \textbf{teorema geral} ---
-$\Delta=m^{2}+4$ não é quadrado, logo $\sigma_m\notin\mathbb{Q}$ ---, e o mesmo
+$D=m^{2}+4$ não é quadrado, logo $\sigma_m\notin\mathbb{Q}$ ---, e o mesmo
 para a inexistência de extremo nas duas classes. Isso é o corte, e prova-se no
 Universal.
 \item A varredura dos $19\,360$ racionais \textbf{verifica a implementação}, e
@@ -1415,21 +1437,40 @@ deles é majorante. $\square$
 
 \begin{proposicao}[e é aqui que $\mathbb{Q}$ falha, com testemunha]\label{prop:q-falha}
 Para $S=\{r\in\mathbb{Q},\,r>0:\ r^{2}<2\}$ nenhum $p/q$ é o supremo, e a
-testemunha é a \textbf{mediante de Farey} $(p+2q)/(p+q)$, que cai sempre do lado
-oposto porque
+testemunha é a \emph{mesma} nos dois casos:
 \[
-\boxed{\;(p+2q)^{2}-2(p+q)^{2}=-\,(p^{2}-2q^{2})\;}
+\boxed{\;(p,q)\longmapsto(3p+4q,\ 2p+3q),
+\qquad \det\begin{psmallmatrix}3&4\\2&3\end{psmallmatrix}=1\;}
 \]
-\textbf{troca o sinal} --- a mesma identidade da descida
-(Cor.~\ref{cor:habitante}), a trabalhar do outro lado. E não há empate, pois
-$p^{2}=2q^{2}$ é a descida proibida. Logo há sempre racional estritamente entre
-$p/q$ e o corte, dos dois lados. $\square$
+--- a \textbf{unidade fundamental de $\mathbb{Z}[\sqrt2]$ ao quadrado},
+$(1+\sqrt2)^{2}=3+2\sqrt2$. O que faz dela testemunha são duas identidades
+inteiras, e são precisas as duas:
+\[
+\begin{array}{ll}
+(3p+4q)^{2}-2(2p+3q)^{2}=p^{2}-2q^{2}
+ & \textbf{preserva} \text{ a forma, logo o \textbf{lado}}\\[3pt]
+(3p+4q)q-p(2p+3q)=2\,(2q^{2}-p^{2})
+ & \text{e \textbf{move} na direcção desse lado}
+\end{array}
+\]
+Juntas: quem está \emph{abaixo} sobe continuando abaixo --- fica em $S$, e é maior,
+logo $p/q$ não era majorante; quem está \emph{acima} desce continuando acima ---
+continua majorante, e é menor, logo $p/q$ não era o menor. E não há empate, pois
+$p^{2}=2q^{2}$ é a descida proibida (Cor.~\ref{cor:habitante}). $\square$
 \end{proposicao}
+
+\begin{observacao}[e a mediante simples não serve]\label{obs:mediante}
+A mediante de Farey $(p+2q)/(p+q)$ satisfaz
+$(p+2q)^{2}-2(p+q)^{2}=-(p^{2}-2q^{2})$ e portanto \textbf{troca} o sinal: ela
+\emph{atravessa} o corte e cai do lado oposto, em vez de ficar entre $p/q$ e ele.
+A identidade é verdadeira e a testemunha seria falsa --- é preciso a matriz de
+$\det=1$ acima, que é a mediante \emph{aplicada duas vezes}.
+\end{observacao}
 \colunas{a continuidade como propriedade do menor majorante}
         {o caminho do supremo, construído bit a bit em inteiros}
         {\code{tests/supremo.c}: $104$ passos por duas rotas concordantes;
-$64$ níveis nas duas cláusulas; $5490$ candidatos com a mediante a trocar o sinal,
-zero empates; e o supremo de $\{r^2<2\}$ dá $1\,482\,910/2^{20}$}
+$64$ níveis nas duas cláusulas; $5490$ candidatos com as duas identidades da
+testemunha e zero empates; e o supremo de $\{r^2<2\}$ dá $1\,482\,910/2^{20}$}
 
 \medskip
 \noindent\textbf{E é por isto que o sistema atravessa os andares com erro zero.} O
@@ -1494,9 +1535,8 @@ t_n=2\cos\frac{\pi}{n},
 que é uma identificação e não a definição --- sem isso, $\pi$ entraria na
 definição de $t_n$ e a cadeia
 $\text{ordem}\to t_n\to A_n^{\rm in},A_n^{\rm circ}\to\pi_n\to\pi$
-seria circular.
-e a companheira $C_n=\begin{psmallmatrix}t_n&-1\\1&0\end{psmallmatrix}$ tem
-ordem $2n$. \textbf{Mas $t_n$ não é inteiro} --- $t_4=\sqrt2$, $t_6=\sqrt3$ ---,
+seria circular. E a companheira
+$C_n=\begin{psmallmatrix}t_n&-1\\1&0\end{psmallmatrix}$ tem ordem $2n$. \textbf{Mas $t_n$ não é inteiro} --- $t_4=\sqrt2$, $t_6=\sqrt3$ ---,
 e é aqui que está a passagem que dá o título a esta secção: nos modelos finitos
 usados para a realização, \emph{o traço irracional é substituído pela raiz da
 classe modular correspondente} --- uma raiz inteira, em $\mathbb{F}_p$, do mesmo
@@ -1540,11 +1580,8 @@ representante do ramo escolhido.
 $C=I+N$ com $N^{2}=0$; em característica $p$ ímpar $C^{k}=I+kN\neq I$ para
 $1\leq k<p$ e $C^{p}=I$, portanto
 \[
-\boxed{\;\operatorname{ord}C=p\;}
-\]
-\[
 \boxed{\;\operatorname{ord}C=p:\ \text{o fecho parabólico é governado pela
-\textbf{característica},}\;}
+\textbf{característica}}\;}
 \]
 e \emph{não} coincide genericamente com a ordem elíptica $2n$. Note-se que $p$
 \textbf{pode} dividir $2n$ --- $n=3$ com $p=3$ dá $3\mid6$, e $n=5$ com $p=5$ dá
@@ -1561,8 +1598,9 @@ A_n^{\rm in}=\frac{n\,t_n}{4}\sqrt{4-t_n^{2}}
 \qquad\text{e}\qquad
 A_n^{\rm circ}=\frac{n\sqrt{4-t_n^{2}}}{t_n}\;}
 \]
---- a do polígono inscrito e a do circunscrito, no círculo unitário. --- notação distinta da companheira $C_n$ do
-Teor.~\ref{thm:pi}, que é outra coisa. Elas satisfazem, \emph{sem que $\pi$ entre}:
+--- a do polígono inscrito e a do circunscrito, no círculo unitário, com notação
+distinta da companheira $C_n$ do Teor.~\ref{thm:pi}, que é outra coisa. Elas
+satisfazem, \emph{sem que $\pi$ entre}:
 \[
 A_n^{\rm in}<A_n^{\rm circ},\qquad
 A_n^{\rm in}\uparrow,\qquad A_n^{\rm circ}\downarrow,\qquad
@@ -1611,43 +1649,93 @@ reaparece como gume geométrico} --- e a palavra é \emph{reaparece}, não
         {\code{geometria\_real.c} \S L10; \code{pi\_familia.js} ($7{:}0$)}
 
 %======================================================================
-\section{A hipótese da unidade é necessária}\label{sec:contra}
+\section{A condição do encaixe: $n\leq t$, necessária e suficiente}\label{sec:contra}
 
-Falta responder a uma pergunta que o mecanismo deixa em aberto: a condição
-$\abs{N(\sigma)}=1$ é \emph{usada}, ou está lá a enfeitar? A resposta é um
-teorema, e prova-se removendo-a.
+O mecanismo deixa em aberto uma pergunta, e ela tem resposta \textbf{exacta}: que
+condição sobre o polinómio faz o encaixe fechar? A resposta não é a unidade --- a
+unidade é apenas o caso extremo mínimo --- e sai da álgebra em três linhas, e sai
+\emph{inteira}.
 
-\begin{teorema}[a unidade é necessária ao encaixe]\label{thm:necessaria}
-Seja $B=\begin{psmallmatrix}2&4\\1&0\end{psmallmatrix}$, a companheira de
-$x^{2}-2x-4$, com $\det B=-4$ --- e portanto \emph{não} a $A_m$ deste paper, cujo
-determinante é $-1$. Então:
+\begin{teorema}[a condição é $n\leq t$]\label{thm:condicao}
+Para $x^{2}-tx-n$ com $t,n\geq1$, e $\sigma,\sigma\dg$ as suas raízes:
+\[
+\sigma\dg=\frac{t-\sqrt{t^{2}+4n}}{2},\qquad
+\abs{\sigma\dg}=\frac{\sqrt{t^{2}+4n}-t}{2},
+\]
+donde, sem avaliar raiz nenhuma,
+\[
+\abs{\sigma\dg}<1
+\iff \sqrt{t^{2}+4n}<t+2
+\iff t^{2}+4n<(t+2)^{2}
+\iff 4n<4t+4
+\]
+\[
+\boxed{\;\abs{\sigma\dg}<1\iff n\leq t\;}
+\]
+--- \textbf{o termo constante não excede o traço}. $\square$
+\end{teorema}
+
+\noindent E daqui saem as três consequências que arrumam a questão:
+
+\begin{corolario}[a unidade é suficiente, não necessária]\label{cor:unidade}
+$n=1\leq t$ para todo $t\geq1$: \textbf{a unidade satisfaz sempre}, e é por isso
+que a família metálica é toda de Pisot --- ela é o \emph{extremo}, e não a regra.
+Mas não é necessária, e um exemplo basta:
+\[
+\boxed{
+\begin{array}{lll}
+x^{2}-3x-3 & \abs{\det}=3\neq1 & \textbf{e encaixa}\quad(n=t=3),\ \abs{\sigma\dg}=0{,}7913\\[3pt]
+x^{2}-2x-4 & \abs{\det}=4\neq1 & \textbf{e não encaixa}\quad(n=4>t=2),\ \abs{\sigma\dg}=1{,}2361
+\end{array}}
+\]
+\textbf{Os dois falham a unidade e caem de lados opostos:} o determinante sozinho
+não classifica, e a condição tem de nomear os \emph{dois} coeficientes. $\square$
+\end{corolario}
+
+\begin{corolario}[a fronteira é onde o irracional acaba]\label{cor:fronteira}
+Em $n=t+1$ tem-se $\abs{\sigma\dg}=1$ \emph{exactamente}, porque
+$t^{2}+4(t+1)=(t+2)^{2}$ é quadrado perfeito. E aí o polinómio \textbf{factoriza}:
+\[
+\boxed{\;x^{2}-tx-(t+1)=(x-(t+1))(x+1)\;}
+\]
+--- a raiz de módulo $1$ é $-1$, o polinómio é \textbf{redutível}, e não há
+irracional nenhum para encaixar. \emph{A condição não corta o contínuo ao meio:
+corta exactamente onde ele deixa de existir.} $\square$
+\end{corolario}
+
+\begin{proposicao}[e o vazamento mede-se sem raiz]\label{prop:vazamento}
+$\sigma^{k}$ e $(\sigma\dg)^{k}$ são as raízes de $y^{2}-t_ky+(-n)^{k}$, com
+$t_k=\sigma^{k}+(\sigma\dg)^{k}$ o traço inteiro de Newton
+($t_0=2$, $t_1=t$, $t_k=t\,t_{k-1}+n\,t_{k-2}$). Como $\sigma^{k}>1$,
+\[
+\boxed{\;\abs{(\sigma\dg)^{k}}<1
+\iff \underbrace{1-t_k+(-n)^{k}<0}_{f(1)}
+\ \text{ e }\ \underbrace{1+t_k+(-n)^{k}>0}_{f(-1)}\;}
+\]
+--- um \textbf{teste de sinal sobre inteiros}, onde um limiar teria escolhido um
+número. $\square$
+\end{proposicao}
+\colunas{---}{a condição $n\leq t$, a fronteira redutível, e o vazamento por sinal}
+        {\code{tests/condicao\_pisot.c}: $8400$ pares $(t,n)$ com as duas rotas a
+coincidir e a fronteira atingida em $60$; $12$ determinantes com os dois lados;
+factorização verificada em $60$ traços; $97$ andares de vazamento}
+
+\medskip
+\noindent\textbf{E o estatuto, dito sem folga.} O que se afirmava antes --- «a
+unidade é necessária ao encaixe» --- era conclusão a mais tirada de um
+contraexemplo correcto: $x^{2}-2x-4$ mostra que \emph{alguma} hipótese sobre os
+coeficientes é indispensável, e não que seja a unidade. A condição
+$\abs{N(\sigma)}=1$ continua a ser a que este paper \emph{usa}, porque é ela que
+dá $\abs{\det M_k}=1$ e portanto o comprimento $1/(q_kq_{k+1})$ do
+\S\ref{sec:completude}; mas o \textbf{encaixe} --- a face dual a encolher --- fecha
+sob a condição mais larga $n\leq t$. \emph{São duas exigências, e não uma:}
 \[
 \boxed{
 \begin{array}{ll}
-\text{as hipóteses \textbf{anteriores} valem} &
-\text{recorrência inteira, traço inteiro, nos }12\text{ andares}\\[2pt]
-\text{a hipótese da \textbf{unidade} falha} & \abs{\det B}=4\neq1\\[2pt]
-\text{e o \textbf{mecanismo} falha com ela} &
-\det B^{k}=(-4)^{k}\ \textbf{cresce}
+\abs{\sigma\dg}<1\iff n\leq t & \text{a face dual encolhe: o \textbf{vazamento} é zero}\\[3pt]
+\abs{N(\sigma)}=1\ \ (n=1) & \text{o \textbf{comprimento} do intervalo é } 1/(q_kq_{k+1})
 \end{array}}
 \]
-A face que devia encolher não encolhe, e o encaixe não fecha em nenhum andar.
-$\square$
-\end{teorema}
-
-\noindent\textbf{E daqui conclui-se, com precisão, o seguinte:}
-\[
-\boxed{\;\abs{N(\sigma)}=1\ \text{\textbf{não é decoração}: é usada, e o passo que
-a usa é o da contração dual.}\;}
-\]
-Isto é \emph{necessidade da hipótese dentro do mecanismo} --- que é o que um
-contraexemplo prova, e é o que fecha a pergunta. Ele não prova a
-\emph{recíproca}: «unidade e Pisot $\Rightarrow$ o mecanismo», que exigiria a
-implicação no outro sentido e não é o que aqui se afirma. \emph{Uma coisa é dizer
-que a hipótese é necessária --- e está demonstrado; outra é dizer que é suficiente
---- e essa não se afirma.}
-\colunas{---}{a necessidade da hipótese, pelo passo que a usa}
-        {\code{geometria\_real.c} \S L11}
 
 %======================================================================
 \section{A construção está fechada}\label{sec:fechada}
@@ -1662,14 +1750,15 @@ o \textbf{bit} fornece a unidade\quad$\to$\quad
 as \textbf{oito leis} fornecem a base\quad$\to$\quad
 o \textbf{dual} fornece a recorrência\\[3pt]
 $\to$\quad \textbf{Pisot} fornece o encolhimento\quad$\to$\quad
-o \textbf{corte} fornece a ordem\quad$\to$\quad$\mathbb{R}$.\medskip}}
+o \textbf{corte} fornece a ordem\quad$\to$\quad
+o \textbf{supremo} fornece a continuidade\quad$\to$\quad$\mathbb{R}$.\medskip}}
 \end{center}
 
 \medskip
 \noindent E a tese, numa frase: \emph{a geometria real é a realização alcançada de
 uma estrutura binária de oito leis --- a base fornece as coordenadas, a dualidade
-fornece a recorrência, e o corte fornece o contínuo}, com a distinção que o corpo
-do paper estabelece:
+fornece a recorrência, o corte fornece a ordem e o \textbf{supremo constrói-se}},
+com a distinção que o corpo do paper estabelece:
 \[
 \boxed{\;\begin{gathered}
 \text{a família metálica fornece o \textbf{mecanismo extremo explícito};}\\
@@ -1691,12 +1780,17 @@ completo.
 medidor & unidades \\
 \midrule
 \code{tests/geometria\_real.c}    & $58{:}0$ \\
+\code{tests/metalica.c}           & $24{:}0$ \\
 \code{tests/arquimedes\_area.js}  & $21{:}0$ \\
+\code{tests/pisotbase.c}          & $9{:}0$ \\
 \code{tests/ordenado.c}           & $7{:}0$ \\
 \code{tests/pi\_familia.js}       & $7{:}0$ \\
 \code{tests/ortonormal.c}         & $6{:}0$ \\
-\code{tests/metalica.c}, \code{tests/pisotbase.c},
-\code{tests/geometrico.js} & \\
+\code{tests/geometrico.js}        & $5{:}0$ \\
+\midrule
+\code{tests/supremo.c}            & $4{:}0$ \\
+\code{tests/cardinal.c}           & $4{:}0$ \\
+\code{tests/condicao\_pisot.c}    & $4{:}0$ \\
 \bottomrule
 \end{tabular}
 \end{center}

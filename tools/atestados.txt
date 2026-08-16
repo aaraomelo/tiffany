@@ -70,6 +70,7 @@ colheita 6ddbef65644fac29 0
 colisor_corpos 3be2fa7041eb0275 0
 completo b7ccb59fe44332bc 0
 complexo 1ffd14ad04af24c5 0
+condicao_pisot a1a923004cc64aea 0
 cone_espiral 63b392f5bb541bab 0
 cone_nulo 504b52404fbfd424 0
 config_corpo 058335e53d3b487e 0
@@ -428,7 +429,7 @@ sql dd9f1021d22ed500 0
 sshb 867d3328b082b67a 0
 str2dbl_dual 74601c0ca36de56f 0
 superficie_tate 42631bd983dc985c 0
-supremo 02181b6d1bbe856b 0
+supremo 12f41bbd499986fa 0
 sustento 159daa95a6bc46b6 0
 tecido a71972ce13c4429d 0
 teletransporte 8b13cc6bf9acf1a0 0
