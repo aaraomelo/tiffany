@@ -235,7 +235,7 @@ hipercubo32 ea42d6c98082dcd2 0
 hipociclo 514fec9334344cf9 0
 histerese_navier ed3e0f5791f828fd 0
 hodge_viviani 9e53debee8151fb9 0
-hopfield d2eff341b1a41c84 0
+hopfield 01fa02d8eb07d0dc 0
 hurwitz 31b672a93aa6e4a6 0
 icc a1b66e7969752be4 0
 inducao 08eb20f9b21c6338 0

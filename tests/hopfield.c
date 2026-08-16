@@ -69,7 +69,12 @@
 #define N     128                      /* neurônios */
 #define PMAX   64                      /* padrões que cabem no ensaio */
 
-typedef struct { signed char x[PMAX][N]; int p; double w[N][N]; } Rede;
+/* E A MATRIZ GUARDA-SE EM N-VEZES. A regra de Hebb dá w[i][j] = (Σ_p x_p[i]·x_p[j])/N,
+ * um racional de denominador N — e o numerador é uma soma de produtos de ±1, INTEIRO.
+ * Guardar W = N·w em vez de w tira a única divisão da estrutura: quem precisa da escala
+ * divide onde precisa, e as identidades exactas ficam todas em ℤ. É a mesma regra do
+ * «trabalhar em dobro» que o operacao.c usa para não dividir por dois. */
+typedef struct { signed char x[PMAX][N]; int p; long W[N][N]; } Rede;   /* W = N·w */
 
 /* o gerador determinístico — nada de Math.random: a corrida tem de repetir-se */
 static unsigned long SEM = 88172645463325252UL;
@@ -80,10 +85,10 @@ static int bit(void){ return (xs() >> 33) & 1 ? 1 : -1; }
 static void grava(Rede *r){
     for(int i = 0; i < N; i++)
         for(int j = 0; j < N; j++){
-            if(i == j){ r->w[i][j] = 0; continue; }
-            double s = 0;
-            for(int p = 0; p < r->p; p++) s += r->x[p][i] * r->x[p][j];
-            r->w[i][j] = s / N;
+            if(i == j){ r->W[i][j] = 0; continue; }
+            long s = 0;
+            for(int p = 0; p < r->p; p++) s += (long)r->x[p][i] * r->x[p][j];
+            r->W[i][j] = s;                       /* W = N·w, sem dividir */
         }
 }
 
@@ -91,14 +96,14 @@ static void grava(Rede *r){
 static double energia(const Rede *r, const signed char *s){
     double E = 0;
     for(int i = 0; i < N; i++)
-        for(int j = 0; j < N; j++) E += r->w[i][j] * s[i] * s[j];
+        for(int j = 0; j < N; j++) E += (double)r->W[i][j]/N * s[i] * s[j];
     return -0.5 * E;
 }
 
 /* um passo assíncrono: escolhe i e alinha s_i com o campo local. É a DESCIDA. */
 static int passo(const Rede *r, signed char *s, int i){
     double h = 0;
-    for(int j = 0; j < N; j++) h += r->w[i][j] * s[j];
+    for(int j = 0; j < N; j++) h += (double)r->W[i][j]/N * s[j];
     signed char novo = (h >= 0) ? 1 : -1;
     if(novo == s[i]) return 0;
     s[i] = novo;
@@ -527,7 +532,7 @@ int main(void){
         double pior_as = 0;
         for(int i = 0; i < N; i++)
             for(int j = 0; j < N; j++){
-                double d = fabs(R.w[i][j] - R.w[j][i]);
+                double d = (double)(R.W[i][j] - R.W[j][i]);   /* em N-vezes: o zero é o mesmo */
                 if(d > pior_as) pior_as = d;
             }
         ok("Hebb da uma matriz SIMETRICA: w_ij = w_ji em todas as 16384 entradas",
@@ -664,10 +669,14 @@ int main(void){
         int fixo_puro = 0, ciclo_misto = 0, ensaios = 12;
         for(int e = 0; e < ensaios; e++){
             for(int i = 0; i < N; i++)
-                for(int j = 0; j < N; j++) MIST[i][j] = R.w[i][j] + 0.60 * A[i][j];
+                for(int j = 0; j < N; j++) MIST[i][j] = (double)R.W[i][j]/N + 0.60 * A[i][j];
             signed char ini[N];
             for(int i = 0; i < N; i++) ini[i] = (signed char)bit();
-            int p1 = periodo((const double(*)[N])R.w, ini, 200);
+            /* a matriz em N-vezes, escalada para o `periodo`, que trabalha na versão w */
+            static double wd[N][N];
+            for(int i2 = 0; i2 < N; i2++) for(int j2 = 0; j2 < N; j2++)
+                wd[i2][j2] = (double)R.W[i2][j2]/N;
+            int p1 = periodo((const double(*)[N])wd, ini, 200);
             int p2 = periodo((const double(*)[N])MIST, ini, 200);
             if(p1 == 1) fixo_puro++;
             if(p2 > 1) ciclo_misto++;
@@ -872,23 +881,40 @@ int main(void){
          * aplicar a um vetor ORTOGONAL a todos CONTRAI-o a zero. E o gato e o esquilo:
          * sigma estica (|sigma|>1, o sorvedouro), sigma' contrai (|sigma'|<1, a fonte). */
         grava(&R);
-        double norma_dentro = 0, norma_fora = 0;
+        /* E AS DUAS RAIZES SAEM. Comparar NORMAS pede sqrt; comparar os QUADRADOS das
+         * normas nao pede nada — e a tese e a mesma, porque a norma e nao negativa e
+         * x ↦ x² e monotona nela. Os padroes de Hopfield sao ±1 e a matriz w sai de
+         * somas deles: tudo isto ja era inteiro, e o double so' transportava.
+         *
+         * A forma fechada, em quadrados e sem dividir:
+         *
+         *      |w·xi|²·N = (N − P)²·N/N²  →  |w·xi|²·N² = (N−P)²·N   ... e o mesmo p/ P
+         *
+         * o que se escreve, ja simplificado, como: N·|v|² = (N−P)²·N e N·|v|² = P²·N,
+         * isto e' |v|² = (N−P)²  e  |v|² = P², sobre o N que a norma divide. */
+        long q_dentro = 0, q_fora = 0;
         {
-            /* dentro: um padrao guardado */
-            double v[N] = {0};
-            for(int i = 0; i < N; i++)
-                for(int j = 0; j < N; j++) v[i] += R.w[i][j] * R.x[0][j];
-            for(int i = 0; i < N; i++) norma_dentro += v[i]*v[i];
-            norma_dentro = sqrt(norma_dentro / N);
+            long v[N];
+            for(int i = 0; i < N; i++){
+                v[i] = 0;
+                for(int j = 0; j < N; j++) v[i] += R.W[i][j] * (long)R.x[0][j];
+            }
+            for(int i = 0; i < N; i++) q_dentro += v[i]*v[i];      /* |v|², inteiro */
         }
         {
-            /* fora: uma linha da base que NAO foi guardada — ortogonal a todas as guardadas */
-            double v[N] = {0};
-            for(int i = 0; i < N; i++)
-                for(int j = 0; j < N; j++) v[i] += R.w[i][j] * H[P + 3][j];
-            for(int i = 0; i < N; i++) norma_fora += v[i]*v[i];
-            norma_fora = sqrt(norma_fora / N);
+            long v[N];
+            for(int i = 0; i < N; i++){
+                v[i] = 0;
+                for(int j = 0; j < N; j++) v[i] += R.W[i][j] * (long)H[P + 3][j];
+            }
+            for(int i = 0; i < N; i++) q_fora += v[i]*v[i];
         }
+        /* e a forma fechada, tambem em inteiros e sem uma divisao:
+         *      |v_dentro|² = N·(N−P)²   e   |v_fora|² = N·P²
+         * donde as normas sao (N−P)/√N·... — mas nada disso e' preciso: a RAZAO dos
+         * quadrados e' ((N−P)/P)², e a das normas e' (N−P)/P, exacta. */
+        /* com V = N·v, tem-se |V|² = N²·|v|², e |v|² = (N−P)²/N e P²/N — logo: */
+        long pq_dentro = (long)N*(N-P)*(N-P), pq_fora = (long)N*P*P;
         /* Eu tinha exigido "norma_dentro > 1,0" e deu 0,938 — outro limiar de cabeca. Mas
          * estes dois numeros TEM forma fechada, e medir contra ela vale mil vezes mais que
          * contra um limiar meu. Com xi ortonormais de norma sqrt(N), o projetor devolve xi
@@ -897,13 +923,19 @@ int main(void){
          *      dentro = 1 - P/N        fora = P/N        e a razao = N/P - 1
          *
          * Com P=8 e N=128: 0,9375 e 0,0625, razao 15. Nao ha limiar nenhum nisto. */
-        double prev_dentro = 1.0 - (double)P/N, prev_fora = (double)P/N;
-        ok("ESTICA o guardado e CONTRAI o ortogonal — e os dois batem a FORMA FECHADA, nao um limiar",
-           norma_dentro == prev_dentro && norma_fora == prev_fora);
-        printf("     -> |w.xi| = %.4f (previsto 1-P/N = %.4f); |w.u| = %.4f (previsto P/N = %.4f).\n",
-               norma_dentro, prev_dentro, norma_fora, prev_fora);
-        printf("        A razao e %.0f para 1, e ela e N/P-1 = %.0f — exata. O esticar aqui e\n",
-               norma_dentro/norma_fora, (double)N/P - 1);
+        /* a RAZAO, por produto cruzado e sem dividir: |v_d|²·P² == |v_f|²·(N−P)² */
+        int razao_ok = (q_dentro*(long)P*P == q_fora*(long)(N-P)*(N-P));
+        ok("ESTICA O GUARDADO E CONTRAI O ORTOGONAL — E OS DOIS BATEM A FORMA FECHADA, NAO"
+           " UM LIMIAR, e agora sem uma raiz: comparar NORMAS pedia sqrt, comparar os"
+           " QUADRADOS nao pede nada, e a tese e a mesma porque a norma e nao negativa. Os"
+           " padroes sao ±1 e a matriz w sai de somas deles — ja era tudo inteiro, e o"
+           " double so' transportava. |v_dentro|² = N(N−P)² e |v_fora|² = N·P², por"
+           " igualdade; e a razao das normas e (N−P)/P, verificada por PRODUTO CRUZADO",
+           q_dentro == pq_dentro && q_fora == pq_fora && razao_ok);
+        printf("     -> |w.xi|² = %ld (previsto N(N-P)² = %ld); |w.u|² = %ld (previsto N·P² = %ld).\n",
+               q_dentro, pq_dentro, q_fora, pq_fora);
+        printf("        A razao das normas e (N-P)/P = %d para %d — exata. O esticar aqui e\n",
+               N-P, P);
         puts("        RELATIVO, e eu ia chamar-lhe absoluto: nada passa de 1, e o que separa as");
         puts("        duas direcoes e a razao entre elas. E o par do neuronio.c — sigma sorve");
         puts("        (|sigma|>1, a convolucao) e sigma' emana (|sigma'|<1, a deconvolucao).");
