@@ -32,6 +32,7 @@
  */
 #include <stdio.h>
 #include <string.h>
+#include "reta.h"      /* Dir e Cruz: a operação */
 #include "unidade.h"
 
 #define D 8
@@ -154,7 +155,7 @@ printf("\n§B4  O CRUZADO na forma recursiva — e a antissimétrica É o a×b.\
     printf("      em H:  x*y = (%ld,%ld,%ld,%ld)\n", p[0],p[1],p[2],p[3]);
     printf("             y*x = (%ld,%ld,%ld,%ld)\n", q[0],q[1],q[2],q[3]);
     long a[3] = {x[1],x[2],x[3]}, b[3] = {y[1],y[2],y[3]};
-    long c[3] = { a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0] };
+    long c[3]; rt_cruz3(a, b, c);
     /* E TRABALHA-SE EM DOBRO, para nao dividir: a parte antissimetrica e ½(xy-yx), e
      * em vez de dividir por dois compara-se (xy-yx) com 2·(a×b). O residuo e ZERO. */
     long dif[D];

@@ -40,6 +40,7 @@
  *   cc -O2 -std=c99 reconstroi.c -lm -o reconstroi && ./reconstroi
  */
 #include <stdio.h>
+#include "reta.h"      /* Dir e Cruz: a operação */
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -421,8 +422,8 @@ int main(void){
             dir_v_ba[k] = b0*a[k] + a0*b[k];
         }
         /* CRUZADO: a peca que troca de sinal */
-        long cr_ab[3] = { a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0] };
-        long cr_ba[3] = { b[1]*a[2]-b[2]*a[1], b[2]*a[0]-b[0]*a[2], b[0]*a[1]-b[1]*a[0] };
+        long cr_ab[3]; rt_cruz3(a, b, cr_ab);
+        long cr_ba[3]; rt_cruz3(b, a, cr_ba);
 
         int direto_sim = (dir_re_ab == dir_re_ba);
         for(int k = 0; k < 3; k++) if(dir_v_ab[k] != dir_v_ba[k]) direto_sim = 0;

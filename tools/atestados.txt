@@ -32,7 +32,7 @@ banco 647afcff53576d24 0
 banco_relogio 59b8d9b3c28fd22a 0
 banda d2f4c8e26b179307 0
 barramento 8d975d371666a0c7 0
-base ad91dd32b7f4e282 0
+base 6124f9464900c2b3 0
 base_local a24cac35e9d0a65f 0
 batuta_continuo 7671972b9f96081b 0
 biblioteca c1f10655bb60418b 0
@@ -97,7 +97,7 @@ corpo_autossimilar cfed1db62ac9d8ef 0
 corpo_disco d558d055b5ff6e4e 0
 corpo_do_numero 235bf71b3ace5cac 0
 corpo_dual 829b5470e1022d51 0
-corpo_fisico 2a6b8f6180ed1f24 0
+corpo_fisico f77d3652581acf8c 0
 corpo_front 6d9be918caa521db 0
 corpo_peano 3c134a3db72ab710 0
 corpo_unico d21a078aa8bd7aa5 0
@@ -146,7 +146,7 @@ dourada_banco da40aa247da4be4c 0
 dourada_bidual a007b48f456bf1d4 0
 dourada_escala 690b7dc3b9608a7a 0
 dourada_lei2 f46d69dbe7d4e582 0
-dtc_viveiro 36453a570fa98d62 0
+dtc_viveiro ccbe31142837ba46 0
 dtcn cf607d0c0a75e3d5 0
 duais 0df04b5273fb6a25 0
 dual 869340d98961353e 0
@@ -222,7 +222,7 @@ gerador_primos dccf9257d62b61f2 0
 geral bfe72e7dd638c0ba 0
 gguf e0586cfef6b9f200 0
 gitb c558deae4b86e995 0
-graduacao_realiza 56c51e03f27a2292 0
+graduacao_realiza d148bf0f42a0c44c 0
 grau 875760f31c09ce87 0
 grupo 60afba16f136035c 0
 guarda 6e9ee3952f6cb691 0
@@ -236,7 +236,7 @@ hipociclo 514fec9334344cf9 0
 histerese_navier ed3e0f5791f828fd 0
 hodge_viviani 9e53debee8151fb9 0
 hopfield 01fa02d8eb07d0dc 0
-hurwitz 31b672a93aa6e4a6 0
+hurwitz 40161d10726c09e0 0
 icc a1b66e7969752be4 0
 inducao 08eb20f9b21c6338 0
 instrumento 7e6416b6f2a92ecd 0
@@ -384,7 +384,7 @@ rastro 26e475d85d748049 0
 reais 621a5430042c6845 0
 real_caminho 8e59cbaaf2b0ed87 0
 recaman e67ba263ef7dfb38 0
-reconstroi e93e15d0ecf48a83 0
+reconstroi f44d37687ea61b9e 0
 recursao 7b5ddd4dbc13c83b 0
 rede_dual 982122481c4d95f5 0
 reducao 28c5896c5ab674d0 0

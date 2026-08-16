@@ -54,6 +54,7 @@
 #include <stdio.h>
 #include "racionais.h"
 #include "linear.h"
+#include "reta.h"      /* Dir e Cruz: a operação */
 #include "unidade.h"
 
 static long estouros = 0;
@@ -187,7 +188,8 @@ printf("\n§G4  O DIRECTO E O CRUZADO do estelar, realizados por ∧ e ⋆.\n\n"
     for(long f = -3; f <= 3; f++){
         long u[3] = {a,b,c}, v[3] = {d1,e1,f};
         long dir = u[0]*v[0] + u[1]*v[1] + u[2]*v[2];
-        long w0 = u[1]*v[2] - u[2]*v[1], w1 = u[2]*v[0] - u[0]*v[2], w2 = u[0]*v[1] - u[1]*v[0];
+        long w_[3]; rt_cruz3(u, v, w_);          /* o CRUZADO, da lib: é a mesma peça */
+        long w0 = w_[0], w1 = w_[1], w2 = w_[2];
         long cru = w0*w0 + w1*w1 + w2*w2;
         long Nu = u[0]*u[0] + u[1]*u[1] + u[2]*u[2];
         long Nv = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];

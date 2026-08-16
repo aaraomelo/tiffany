@@ -46,6 +46,7 @@
  */
 #include <stdio.h>
 #include <string.h>
+#include "reta.h"      /* Dir e Cruz: a operação */
 #include "unidade.h"
 
 #define DMAX 64
@@ -352,7 +353,8 @@ printf("\n§H6  O FECHO DO DUAL: directo² + cruzado² = N(u)N(v).\n\n");
     for(long d=-3;d<=3;d++) for(long e=-3;e<=3;e++) for(long f=-3;f<=3;f++){
         long u[3]={a,b,c}, v[3]={d,e,f};
         long dir = u[0]*v[0]+u[1]*v[1]+u[2]*v[2];
-        long w0 = u[1]*v[2]-u[2]*v[1], w1 = u[2]*v[0]-u[0]*v[2], w2 = u[0]*v[1]-u[1]*v[0];
+        long w_[3]; rt_cruz3(u, v, w_);   /* o CRUZADO, da lib */
+        long w0 = w_[0], w1 = w_[1], w2 = w_[2];
         long cru = w0*w0 + w1*w1 + w2*w2;
         long Nu = u[0]*u[0]+u[1]*u[1]+u[2]*u[2], Nv = v[0]*v[0]+v[1]*v[1]+v[2]*v[2];
         pares++;
@@ -368,7 +370,8 @@ printf("\n§H6  O FECHO DO DUAL: directo² + cruzado² = N(u)N(v).\n\n");
     for(long d=-3;d<=3;d++) for(long e=-3;e<=3;e++) for(long f=-3;f<=3;f++){
         long u[3]={a,b,c}, v[3]={d,e,f};
         long dir = u[0]*v[0]+u[1]*v[1]+u[2]*v[2];
-        long w0 = u[1]*v[2]-u[2]*v[1], w1 = u[2]*v[0]-u[0]*v[2], w2 = u[0]*v[1]-u[1]*v[0];
+        long w_[3]; rt_cruz3(u, v, w_);   /* o CRUZADO, da lib */
+        long w0 = w_[0], w1 = w_[1], w2 = w_[2];
         long cru = w0*w0 + w1*w1 + w2*w2;
         long Nu = u[0]*u[0]+u[1]*u[1]+u[2]*u[2], Nv = v[0]*v[0]+v[1]*v[1]+v[2]*v[2];
         long folga = Nu*Nv - dir*dir;
@@ -388,7 +391,8 @@ printf("\n§H6  O FECHO DO DUAL: directo² + cruzado² = N(u)N(v).\n\n");
     for(long d=-3;d<=3;d++) for(long e=-3;e<=3;e++) for(long f=-3;f<=3;f++){
         long u[3]={a,b,c}, v[3]={d,e,f};
         long esc = -(u[0]*v[0]+u[1]*v[1]+u[2]*v[2]);            /* a parte REAL do produto */
-        long w0 = u[1]*v[2]-u[2]*v[1], w1 = u[2]*v[0]-u[0]*v[2], w2 = u[0]*v[1]-u[1]*v[0];
+        long w_[3]; rt_cruz3(u, v, w_);   /* o CRUZADO, da lib */
+        long w0 = w_[0], w1 = w_[1], w2 = w_[2];
         long Np = esc*esc + w0*w0 + w1*w1 + w2*w2;              /* a norma em dimensão 4 */
         long Nu = u[0]*u[0]+u[1]*u[1]+u[2]*u[2], Nv = v[0]*v[0]+v[1]*v[1]+v[2]*v[2];
         if(Np != Nu*Nv) mal4++;

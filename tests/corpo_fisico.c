@@ -46,6 +46,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include "reta.h"      /* Dir e Cruz: a operação */
 #include "unidade.h"
 #include "racionais.h"
 #include "calculo.h"
@@ -92,7 +93,7 @@ printf("    hamiltoniano, trabalho, potência e impulso saem dele por derivada.\
  * como inteiros sobre 10, e o produto vectorial de inteiros é inteiro. Escrevê-los como
  * 1.0, 0.4, −0.2 dava a S um arredondamento antes de a mecânica começar. */
 long A[3] = {10, 4, -2}, B[3] = {3, -6, 8};              /* = a·10 e b·10 */
-long C[3] = { A[1]*B[2]-A[2]*B[1], A[2]*B[0]-A[0]*B[2], A[0]*B[1]-A[1]*B[0] };
+long C[3]; rt_cruz3(A, B, C);
 long n2 = C[0]*C[0] + C[1]*C[1] + C[2]*C[2];             /* ‖A×B‖², inteiro */
 S_ex = qz(n2, 10000);                                     /* S = ‖a×b‖² = ‖A×B‖²/10⁴ */
 V_ex = fn0(); V_ex.n = 2; V_ex.c[0] = S_ex; V_ex.c[2] = qz_oposto(S_ex);

@@ -20,17 +20,19 @@
  *   cc -O2 -std=c99 -Wall -I../lib dtc_viveiro.c -o dtc_viveiro && ./dtc_viveiro
  */
 #include <stdio.h>
+#include "reta.h"      /* Dir e Cruz: a operação */
 #include "unidade.h"
 
 typedef long long L;
 enum { N = 4 };                                    /* a torre: 4 andares */
 
 /* o torque É o produto cruzado; a massa reactiva é ‖a×b‖² (inteiro) */
+/* a MASSA é a norma do CRUZADO — isto é, Dir(Cruz(a,b), Cruz(a,b)). Não são duas
+ * operações: é a composição das duas leituras da mesma, e a lib dá-as. */
 static L massa_cruz(const L a[3], const L b[3]){
-    L cx = a[1]*b[2] - a[2]*b[1];
-    L cy = a[2]*b[0] - a[0]*b[2];
-    L cz = a[0]*b[1] - a[1]*b[0];
-    return cx*cx + cy*cy + cz*cz;
+    long c[3];
+    rt_cruz3((const long*)a, (const long*)b, c);
+    return (L)rt_norma(c, 3);
 }
 /* o imposto algébrico: a potência reactiva que a álgebra cobra fora do eixo. Inteiro. */
 static L imposto(L s, L massa){ return (1 - s*s) * massa; }
