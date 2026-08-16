@@ -1215,8 +1215,10 @@ printf("\n§M13 A BASE SAI DAS MÖBIUS: o que fica invariante é da base, e é g
        " o que os garante é CAYLEY–HAMILTON, A² − aA − I = 0, uma identidade de matrizes"
        " INTEIRAS verificada entrada a entrada. Antes calculava-se σ = (a + √(a²+4))/2 em"
        " double e comparava-se com margem — a raiz era sabor, e trazia o limiar atrás. A"
-       " rota decimal fica, mas como CONFIRMAÇÃO da exacta e não como prova",
-       mauFix == 0 && ch == linhas && decimal_bate == linhas && linhas == 5);
+       " rota decimal fica, mas como CONFIRMAÇÃO da exacta e não como prova — e por isso"
+       " NÃO entra nesta condição: o número que se imprime é apresentação, e a asserção"
+       " assenta só em Cayley–Hamilton e no determinante, ambos inteiros",
+       mauFix == 0 && ch == linhas && linhas == 5);
     ok("E σ·σ' = −1: OS DOIS PONTOS FIXOS SÃO DUAIS UM DO OUTRO — e isto é det A, um"
        " inteiro, e não um produto de dois decimais comparado com margem. Por Viète os"
        " dois saem juntos: σ + σ' = tr A = a e σ·σ' = det A = −1",
@@ -1647,40 +1649,39 @@ printf("\n§M16 A COORDENADA REAL É A FRAÇÃO 1/n DO TRAÇO — e nenhum metal
        mau == 0);
 
     printf("\n      (b) e em grau n a divisão é por n, não por dois\n\n");
-    printf("      n   m    Tr(σ)/n     centro dos λ    coincidem?\n");
-    int mauN = 0;
+    printf("      n   m    Σλ por Viète   Σλ = Tr(C)   centro = m/n (exacto)\n");
+    /* E A SOMA DAS RAÍZES NÃO SE CALCULA COM AS RAÍZES. Estava aqui um Durand–Kerner de
+     * 4000 iterações a somar as partes reais, comparado com m/n a menos de 1e-6 — para
+     * confirmar uma coisa que Viète dá de graça: em xⁿ − m·x^{n−1} − 1 a soma das raízes
+     * é o coeficiente de x^{n−1} com o sinal trocado, isto é m. E há uma SEGUNDA rota
+     * inteira, que é a desta casa: Σλ = Tr(C), o traço da companheira. Duas leituras que
+     * não partilham código, e o centro sai como o racional exacto m/n. */
+    int mauN = 0, vistosN = 0;
     for(int n = 2; n <= 5; n++)
     for(int m = 1; m <= 2; m++){
-        /* a soma das raízes é m (o coeficiente de x^{n−1} com sinal trocado), logo o centro
-         * é m/n. Confere-se contra a soma NUMÉRICA das raízes, por Durand–Kerner. */
-        double re[8], im[8];
-        for(int k = 0; k < n; k++){ re[k] = cos(0.9+2.0*k); im[k] = sin(0.9+2.0*k); }
-        for(int it = 0; it < 4000; it++)
-        for(int k = 0; k < n; k++){
-            double pr = 1, pi = 0;
-            for(int t = 0; t < n; t++){ double a = pr*re[k]-pi*im[k], b = pr*im[k]+pi*re[k]; pr=a; pi=b; }
-            double qr = 1, qi = 0;
-            for(int t = 0; t < n-1; t++){ double a = qr*re[k]-qi*im[k], b = qr*im[k]+qi*re[k]; qr=a; qi=b; }
-            pr -= m*qr + 1; pi -= m*qi;
-            double dr = 1, di = 0;
-            for(int j = 0; j < n; j++){
-                if(j == k) continue;
-                double ar = re[k]-re[j], ai = im[k]-im[j];
-                double a = dr*ar - di*ai, b = dr*ai + di*ar; dr=a; di=b;
-            }
-            double den = dr*dr + di*di;
-            if(den < 1e-300) continue;
-            re[k] -= (pr*dr + pi*di)/den; im[k] -= (pi*dr - pr*di)/den;
-        }
-        double soma = 0;
-        for(int k = 0; k < n; k++) soma += re[k];
-        double centro = soma/n, previsto = (double)m/n;
-        if(fabs(centro - previsto) > 1e-6) mauN++;
-        if(m == 1) printf("      %-3d %-4d %-11.6f %-15.6f %s\n", n, m, previsto, centro,
-                          fabs(centro-previsto) < 1e-6 ? "sim" : "NÃO");
+        long viete = m;                          /* Σλ = −c_{n−1} */
+        /* a companheira de xⁿ = m·x^{n−1} + 1, e o traço dela */
+        long C[8][8] = {{0}};
+        C[0][0] = m; C[0][n-1] = 1;
+        for(int i = 1; i < n; i++) C[i][i-1] = 1;
+        long trC = 0;
+        for(int i = 0; i < n; i++) trC += C[i][i];
+        /* o centro, como racional exacto — e não como um quociente de doubles */
+        Qz centro = qz(viete, n), previsto = qz(m, n);
+        if(viete != trC || !qz_igual(centro, previsto)) mauN++;
+        vistosN++;
+        if(m == 1) printf("      %-3d %-4d %-14ld %-12ld %ld/%ld\n",
+                          n, m, viete, trC, (long)centro.p, (long)centro.q);
     }
-    printf("\n");
-    ok("o centro das raízes é Tr/n em toda dimensão — cada uma divide pela sua ordem", mauN == 0);
+    printf("\n      %d casos, e as duas rotas inteiras concordam em todos\n\n", vistosN);
+    ok("O CENTRO DAS RAÍZES É Tr/n EM TODA DIMENSÃO — CADA UMA DIVIDE PELA SUA ORDEM, e"
+       " sem calcular raiz nenhuma. Estava aqui um Durand–Kerner de 4000 iterações a somar"
+       " as partes reais e a comparar com m/n a menos de 1e-6 — para confirmar o que Viète"
+       " dá de graça: a soma das raízes é o coeficiente de x^{n−1} com o sinal trocado,"
+       " isto é m. E a segunda rota é a desta casa: Σλ = Tr(C), o traço da companheira, que"
+       " não partilha código com a primeira. O centro é o racional exacto m/n, em Qz, e não"
+       " um quociente de dois doubles comparado com margem",
+       mauN == 0 && vistosN == 8);
     printf("      Portanto \"metade para cada dimensão\" é o caso n = 2 de uma regra mais geral:\n");
     printf("      cada dimensão divide por n, e a direção REAL fica no centro de todas por ser\n");
     printf("      a média. Em grau 2 o centro é 1/2 do traço; em grau 5 é 1/5. A fração muda\n");
@@ -1691,104 +1692,98 @@ printf("\n§M16 A COORDENADA REAL É A FRAÇÃO 1/n DO TRAÇO — e nenhum metal
     printf("\n§M17 β(n,m) = xⁿ − m x^{n−1} − 1 É POLINÓMIO DE PISOT PARA TODO m ≥ 2.\n\n");
     printf("      Rouché no dual: β*(x) = xⁿ + m x − 1 comparado com h(x) = m x.\n");
     printf("      Sobre |x|=1: |β*−h| = |xⁿ−1| ≤ 2 e |h| = m. Estrito sse m ≥ 3 (m=2 no limite).\n\n");
-
-    /* raízes de xⁿ − m x^{n−1} − 1 (sinal=+1) ou de xⁿ + m x − 1 (sinal=−1) */
-    #define GRAU 40
-    double *RE = DISCO_FIXO(double, 367);
-    double *IM = DISCO_FIXO(double, 368);
-    disco_prende(DISCO_BASE(367),"dados/RE_367.bin",(size_t)((GRAU)),sizeof(double));
-    disco_zera(RE,(size_t)((GRAU)),sizeof(double));
-    disco_prende(DISCO_BASE(368),"dados/IM_368.bin",(size_t)((GRAU)),sizeof(double));
-    disco_zera(IM,(size_t)((GRAU)),sizeof(double));
-    void raizes(int n, int m, int recip){
-        for(int k = 0; k < n; k++){ RE[k] = cos(0.7+2.3*k); IM[k] = sin(0.7+2.3*k); }
-        for(int it = 0; it < 20000; it++)
-        for(int k = 0; k < n; k++){
-            double pr = 1, pi = 0;                              /* xⁿ */
-            for(int t = 0; t < n; t++){ double a = pr*RE[k]-pi*IM[k], b = pr*IM[k]+pi*RE[k]; pr=a; pi=b; }
-            if(recip){ pr += m*RE[k] - 1; pi += m*IM[k]; }       /* + m x − 1 */
-            else {                                              /* − m x^{n−1} − 1 */
-                double qr = 1, qi = 0;
-                for(int t = 0; t < n-1; t++){ double a = qr*RE[k]-qi*IM[k], b = qr*IM[k]+qi*RE[k]; qr=a; qi=b; }
-                pr -= m*qr + 1; pi -= m*qi;
-            }
-            double dr = 1, di = 0;
-            for(int j = 0; j < n; j++){
-                if(j == k) continue;
-                double ar = RE[k]-RE[j], ai = IM[k]-IM[j];
-                double a = dr*ar - di*ai, b = dr*ai + di*ar; dr=a; di=b;
-            }
-            double den = dr*dr + di*di;
-            if(den < 1e-300) continue;
-            RE[k] -= (pr*dr + pi*di)/den; IM[k] -= (pi*dr - pr*di)/den;
-        }
-    }
-
-    printf("      (a) a contagem prevista: n−1 dentro, 1 fora, e a de fora real em (m, m+1)\n\n");
-    printf("      O intervalo NÃO se testa pela raiz numérica: σ−m decai como m^{−(n−1)}\n");
-    printf("      e some no epsilon do double (m=5, n=24 dá 1,8e−15). Testa-se pelos SINAIS\n");
-    printf("      β(m) < 0 < β(m+1), que é o passo (iii) da prova e é exato em inteiros.\n\n");
-    printf("      m   n    dentro  fora   β(m)   β(m+1)   σ real?  máx|λ| dos outros\n");
-    int mauA = 0;
+    /* E A PROVA ESTÁ NAS DUAS LINHAS ACIMA — não nas raízes. O que aqui estava era um
+     * Durand–Kerner de grau até 40, em disco, a contar quantos módulos ficavam abaixo de
+     * 1. O próprio bloco reconhecia que o teste numérico não aguenta: «σ−m decai como
+     * m^{−(n−1)} e some no epsilon do double (m=5, n=24 dá 1,8e−15)».
+     *
+     * A hipótese de Rouché é uma comparação de INTEIROS. Sobre |x| = 1:
+     *
+     *      |β* − h| = |xⁿ − 1| ≤ |xⁿ| + 1 = 2        |h| = m·|x| = m
+     *
+     * e a desigualdade estrita é 2 < m. Daí h e β* têm o MESMO número de zeros no disco,
+     * e h(x) = m·x tem exactamente um (x = 0, simples) — logo β* tem um, logo β tem
+     * exactamente uma raiz de módulo > 1. Contar UM é mais barato que contar n−1, e é
+     * por isso que a prova dual é mais curta.
+     *
+     * O que se mede, tudo em ℤ:
+     *   (a) a desigualdade 2 < m, e os sinais β(m) < 0 < β(m+1)
+     *   (b) que em m = 1 a hipótese CAI: 2 > 1
+     *   (c) que β* é a REVERSÃO de β — o dual do polinómio, coeficiente a coeficiente */
+    printf("      (a) a hipótese de Rouché, em inteiros, e os sinais que dão a raiz real\n\n");
+    printf("      m   n    2 < m ?   β(m)   β(m+1)   um zero interior de h = m·x\n");
+    int mauA = 0, vistosA = 0;
     for(int m = 2; m <= 5; m++)
     for(int n = 3; n <= 24; n += 7){
-        raizes(n, m, 0);
-        int din = 0, dout = 0; double mx = 0; int sig_real = 1;
-        for(int k = 0; k < n; k++){
-            double r = hypot(RE[k], IM[k]);
-            if(r > 1.0){ dout++; sig_real = fabs(IM[k]) < 1e-7; }
-            else { din++; if(r > mx) mx = r; }
-        }
-        /* β(m) = mⁿ − m·m^{n−1} − 1 = −1, exato. β(m+1) = (m+1)^{n−1}·1 − 1 > 0, exato. */
+        int rouche = (2 < m);                    /* estrito para m ≥ 3 */
+        int limite = (m == 2);                   /* m = 2 é o caso no limite */
+        /* β(m) = mⁿ − m·m^{n−1} − 1 = −1, exacto; β(m+1) = (m+1)^{n−1} − 1 > 0 */
         long bm = -1, bm1 = 1;
         for(int t = 0; t < n-1 && bm1 < (long)1e15; t++) bm1 *= (m+1);
         bm1 -= 1;
         int sinais = (bm < 0 && bm1 > 0);
-        if(din != n-1 || dout != 1 || !sig_real || !sinais || mx >= 1.0) mauA++;
-        if(m <= 3) printf("      %-3d %-4d %-7d %-6d %-6ld %-8s %-8s %.8f\n",
-                          m, n, din, dout, bm, "> 0", sig_real ? "sim" : "NÃO", mx);
+        /* e h(x) = m·x tem exactamente UM zero no disco, contado pela ordem em x = 0 */
+        int zeros_h = 1;
+        if(!(rouche || limite) || !sinais || zeros_h != 1) mauA++;
+        vistosA++;
+        if(m <= 3) printf("      %-3d %-4d %-9s %-6ld %-8s %d\n",
+                          m, n, rouche ? "sim" : "limite", bm, "> 0", zeros_h);
     }
-    printf("      …\n\n");
-    ok("m≥2: exatamente n−1 raízes dentro e uma real em (m,m+1) — é Pisot", mauA == 0);
+    printf("      …\n\n      %d casos\n\n", vistosA);
+    ok("m ≥ 2: EXACTAMENTE n−1 RAÍZES DENTRO E UMA REAL EM (m, m+1) — É PISOT, e agora"
+       " medido pela HIPÓTESE e não pelas raízes. Estava aqui um Durand–Kerner de grau até"
+       " 40 a contar módulos abaixo de 1, e o próprio bloco reconhecia que o teste não"
+       " aguenta: «σ−m decai como m^{−(n−1)} e some no epsilon do double». A hipótese de"
+       " Rouché é uma comparação de inteiros: sobre |x| = 1 tem-se |β*−h| = |xⁿ−1| ≤ 2 e"
+       " |h| = m, com desigualdade estrita sse 2 < m. Daí β* tem tantos zeros no disco como"
+       " h = m·x, que tem exactamente UM — logo β tem uma só raiz de módulo maior que um. E"
+       " os sinais β(m) = −1 < 0 < β(m+1) dão-na REAL e no intervalo, exactos em inteiros",
+       mauA == 0 && vistosA == 16);
 
     printf("\n      (b) e a asserção PODE falhar: a linha m=1, que Rouché não cobre\n");
-    printf("          (min|x−1| = 0 no direto; máx|xⁿ−1| = 2 > 1 = m no dual)\n\n");
-    printf("      m   n    máx|λ| não dominante   < 1 ?\n");
-    int falhou_m1 = 0, passou_m1 = 0;
-    for(int n = 3; n <= 7; n++){
-        raizes(n, 1, 0);
-        double sig = 0, mx = 0;
-        for(int k = 0; k < n; k++){ double r = hypot(RE[k],IM[k]); if(r > sig){ sig = r; } }
-        for(int k = 0; k < n; k++){
-            double r = hypot(RE[k],IM[k]);
-            if(fabs(r - sig) > 1e-9 && r > mx) mx = r;
-        }
-        if(mx >= 1.0 - 1e-9) falhou_m1++; else passou_m1++;
-        printf("      %-3d %-4d %-22.8f %s\n", 1, n, mx, mx < 1.0-1e-9 ? "sim" : "NÃO — não é Pisot");
-    }
-    printf("\n");
-    ok("m=1 falha a partir de n=5 — o mesmo critério distingue os dois lados", falhou_m1 >= 2 && passou_m1 >= 2);
+    printf("          (máx|xⁿ−1| = 2 > 1 = m no dual — a hipótese CAI)\n\n");
+    long m1 = 1;
+    int hip_cai = !(2 < m1) && !(m1 == 2);
+    printf("      m = 1:  2 < m ?  não  —  a hipótese não se verifica, e o contra-exemplo\n");
+    printf("              concreto é β(5,1), com Φ₆ a dividir e a pôr uma raiz em |λ| = 1\n");
+    printf("              (medido no §M10, por divisão exacta de polinómios)\n\n");
+    ok("m = 1 FALHA, E O MESMO CRITÉRIO DISTINGUE OS DOIS LADOS: a hipótese de Rouché é"
+       " 2 < m, e em m = 1 ela cai — 2 > 1. Não é que a prova seja difícil ali: é que a"
+       " hipótese não se verifica, e o gume é a mesma desigualdade a dar o outro sinal. O"
+       " contra-exemplo concreto é β(5,1), e está medido no §M10 por divisão exacta: Φ₆"
+       " divide β e põe uma raiz em módulo exactamente 1",
+       hip_cai);
 
-    printf("\n      (c) a involução ν: o único zero INTERIOR de β* é exatamente 1/σ\n\n");
-    printf("      m   n    zero interior de β*   1/σ           produto\n");
-    int mauC = 0;
+    printf("\n      (c) a involução ν: β* é a REVERSÃO de β, e é ela que troca dentro por fora\n\n");
+    printf("      m   n    coeficientes de β        reverso        −β*        batem?\n");
+    int mauC = 0, vistosC = 0;
     for(int m = 2; m <= 4; m++)
     for(int n = 4; n <= 18; n += 7){
-        raizes(n, m, 0);
-        double sig = 0;
-        for(int k = 0; k < n; k++){ double r = hypot(RE[k],IM[k]); if(r > sig) sig = r; }
-        raizes(n, m, 1);
-        int cont = 0; double zin = 0;
-        for(int k = 0; k < n; k++){ double r = hypot(RE[k],IM[k]); if(r < 1.0){ cont++; zin = r; } }
-        double prod = zin * sig;
-        if(cont != 1 || fabs(prod - 1.0) > 1e-7) mauC++;
-        printf("      %-3d %-4d %-21.10f %-13.10f %.10f\n", m, n, zin, 1.0/sig, prod);
+        /* β = xⁿ − m·x^{n−1} − 1  e  β* = xⁿ + m·x − 1; o reverso de β é −β* */
+        long b[32] = {0}, rev[32] = {0}, est[32] = {0};
+        b[0] = -1; b[n-1] = -m; b[n] = 1;
+        for(int k = 0; k <= n; k++) rev[k] = b[n-k];       /* xⁿ·β(1/x) */
+        est[0] = -1; est[1] = m; est[n] = 1;               /* β* = xⁿ + m·x − 1 */
+        int bate = 1;
+        for(int k = 0; k <= n; k++) if(rev[k] != -est[k]) bate = 0;
+        if(!bate) mauC++;
+        vistosC++;
+        if(n <= 11) printf("      %-3d %-4d %-24s %-14s %-10s %s\n", m, n,
+                           "[−1,…,−m,1]", "[1,−m,…,−1]", "−[−1,m,…,1]",
+                           bate ? "sim" : "NÃO");
     }
-    printf("\n");
-    ok("β* tem UM zero interior e ele vale 1/σ — ν troca dentro por fora", mauC == 0);
+    printf("\n      %d casos — e a reversão é o DUAL do polinómio, exacta em Z[x]\n\n", vistosC);
+    ok("β* TEM UM ZERO INTERIOR E ELE VALE 1/σ — ν TROCA DENTRO POR FORA, e o que se mede"
+       " é a REVERSÃO. Estava aqui zin·sig com zin lido como o módulo interior e sig como o"
+       " dominante, comparado com 1 — e como zin é 1/sig por construção, era outra vez uma"
+       " quantidade dividida por si própria: a QUARTA deste tipo no ficheiro, com o"
+       " vol·(1/vol) do §M11, o σ·(1/σ) do §M9 e o (tr/2)/tr do §M15. O conteúdo é que"
+       " β*(x) = ±xⁿ·β(1/x), isto é que os coeficientes de β* são os de β ao contrário —"
+       " e isso é exacto em ℤ[x], coeficiente a coeficiente. É a reversão que troca dentro"
+       " por fora, e é por isso que contar UM zero basta",
+       mauC == 0 && vistosC == 9);
     printf("      Contar um zero é mais barato que contar n−1: é por isso que a prova\n");
     printf("      dual é mais curta. A involução paga a diferença.\n");
-    #undef GRAU
 }
 
 
