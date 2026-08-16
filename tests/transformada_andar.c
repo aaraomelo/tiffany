@@ -38,6 +38,7 @@
  *   §T2  e é MORFISMO: respeita + e ×, logo a CONVOLUÇÃO decompõe-se
  *   §T3  a DECONVOLUÇÃO existe ⟺ nenhuma componente do espectro zera
  *   §T4  e o espectro do andar É a união dos espectros de baixo: 2 + 3 = 5
+ *   §T5  os DIVISORES DE ZERO são a factorização do zero — e a dualidade é soma/produto
  *
  * Nenhum double, nenhum limiar.
  *
@@ -281,6 +282,97 @@ int main(void){
            " dimensões somam, 5 = 2 + 3: o andar de cima escreve-se nos de baixo, e é a"
            " mesma soma de graus que diz que o zero DESCE em vez de desaparecer",
            rmu == rf + rg && NM == NF + NG);
+    }
+
+    /* ═══ §T5  OS DIVISORES DE ZERO SÃO A FACTORIZAÇÃO DO ZERO ══════════════ */
+    printf("\n§T5 Os divisores de zero SÃO a factorização do zero — e Hurwitz e Gentil\n");
+    printf("    são a soma e o produto do mesmo par.\n\n");
+    {
+        /* O Aarão: «os dois são duais; os divisores de zero são justamente a factorização
+         * do zero nos andares abaixo; vê essa relação como soma e produto.»
+         *
+         * E a frase é LITERAL. Um divisor de zero é x·y = 0 com x, y ≠ 0 — ou seja, uma
+         * FACTORIZAÇÃO DO ZERO. Não é uma metáfora do teorema do gerador: é o mesmo
+         * enunciado visto no anel em vez de no polinómio.
+         *
+         *      μ IRREDUTÍVEL   →  o quociente é CORPO  →  ZERO divisores de zero
+         *      μ FACTORIZA     →  o zero parte-se      →  há divisores de zero, e eles
+         *                                                 são os que morrem num factor
+         *
+         * E a contagem prova-o sem varrer o significado: os INVERTÍVEIS de um produto de
+         * anéis são o PRODUTO dos invertíveis de cada andar. Em 𝔽₅ a cadeia desce até ao
+         * fim — Φ₆ é irredutível, mas x³−x−1 = (x−2)(x²+2x+3) —, logo
+         *
+         *      𝔽₅[x]/(μ)  ≅  𝔽₂₅ × 𝔽₅ × 𝔽₂₅        e  24 · 4 · 24 = 2304 invertíveis
+         *
+         * ── E A DUALIDADE É SOMA E PRODUTO ─────────────────────────────────────
+         *      HURWITZ   norma = SOMA de quadrados    Σxᵢ²    → tecto em 8
+         *      GENTIL    norma = PRODUTO das coords   ∏xᵢ     → sem tecto
+         *
+         * A soma é a norma do DIRECTO; o produto é a do CRUZADO — o determinante, que é a
+         * área. E o divisor de zero é exactamente onde o PRODUTO zera sem que nenhum
+         * factor zere: a assinatura de que o zero se partiu. */
+        long nao_nulos = 0, inv = 0, dz = 0;
+        for(long code = 1; code < TOT; code++){
+            int w[NM];
+            decode(code, w, NM);
+            nao_nulos++;
+            if(gcd_grau(w, NM-1, MU, NM) == 0) inv++; else dz++;
+        }
+        /* e a contagem por andares: 𝔽₂₅ × 𝔽₅ × 𝔽₂₅ */
+        long por_andar = 24L * 4L * 24L;
+        /* e um divisor de zero EXIBE a factorização do zero: x·y = 0 com x,y ≠ 0 */
+        long exibidos = 0; int ex_x[NM], ex_y[NM];
+        for(long a = 1; a < TOT && exibidos < 1; a++){
+            int x[NM];
+            decode(a, x, NM);
+            if(gcd_grau(x, NM-1, MU, NM) == 0) continue;      /* invertível: não serve */
+            for(long b = 1; b < TOT; b++){
+                int y[NM], z[NM];
+                decode(b, y, NM);
+                mulmod(x, y, MU, NM, z);
+                if(nulo(z, NM)){
+                    for(int t = 0; t < NM; t++){ ex_x[t] = x[t]; ex_y[t] = y[t]; }
+                    exibidos++;
+                    break;
+                }
+            }
+        }
+        /* e o CONTROLO: num irredutível não há nenhum. x² + 2 é irredutível em 𝔽₅ */
+        long dz_irred = 0;
+        {
+            const int IR[3] = { 2, 0, 1 };
+            for(long code = 1; code < TP*TP; code++){
+                int w[2];
+                w[0] = (int)(code % TP); w[1] = (int)(code / TP);
+                if(gcd_grau(w, 1, IR, 2) != 0) dz_irred++;
+            }
+        }
+        printf("      %ld não nulos: %ld invertíveis, %ld DIVISORES DE ZERO\n",
+               nao_nulos, inv, dz);
+        printf("      e a contagem decompõe-se por andar: 𝔽₂₅ × 𝔽₅ × 𝔽₂₅ dá"
+               " 24 · 4 · 24 = %ld\n", por_andar);
+        printf("      e um deles EXIBE a factorização do zero:\n");
+        printf("        x = (%d,%d,%d,%d,%d) · y = (%d,%d,%d,%d,%d) = 0, com x ≠ 0 e y ≠ 0\n",
+               ex_x[0],ex_x[1],ex_x[2],ex_x[3],ex_x[4],
+               ex_y[0],ex_y[1],ex_y[2],ex_y[3],ex_y[4]);
+        printf("      e o CONTROLO — num módulo IRREDUTÍVEL (x²+2): %ld divisores de zero\n\n",
+               dz_irred);
+        ok("OS DIVISORES DE ZERO SÃO A FACTORIZAÇÃO DO ZERO, E A FRASE É LITERAL: x·y = 0"
+           " com x, y ≠ 0 É uma factorização do zero — o mesmo enunciado do teorema do"
+           " gerador, visto no ANEL em vez de no polinómio. Se μ é irredutível o quociente"
+           " é CORPO e não há nenhum, medido no controlo x²+2; se μ factoriza, eles"
+           " aparecem, e são exactamente os que morrem num dos factores. E a contagem"
+           " prova-o sem varrer significado nenhum: os invertíveis de um produto de anéis"
+           " são o PRODUTO dos invertíveis por andar — em 𝔽₅ a cadeia desce até ao fim,"
+           " porque x³−x−1 = (x−2)(x²+2x+3), e 24·4·24 = 2304 bate com a varredura."
+           " E A DUALIDADE É SOMA E PRODUTO: Hurwitz mede pela SOMA de quadrados, que é a"
+           " norma do DIRECTO e tem tecto em 8; Gentil mede pelo PRODUTO das coordenadas,"
+           " que é a do CRUZADO — o determinante, a área — e não tem tecto. O divisor de"
+           " zero é onde o PRODUTO zera sem que nenhum factor zere: a assinatura de que o"
+           " zero se partiu",
+           inv == por_andar && dz == nao_nulos - inv && dz > 0 && exibidos == 1
+           && dz_irred == 0 && nao_nulos == TOT - 1);
     }
 
     if(!falhas){

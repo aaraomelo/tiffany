@@ -753,12 +753,52 @@ divisores de zero um elemento não nulo pode não ter inverso. \emph{É a mesma 
 que esta casa já tinha para a deconvolução --- exacta onde o espectro não tem zeros
 ---, agora lida por andares.} $\square$
 \end{teorema}
+\begin{teorema}[os divisores de zero SÃO a factorização do zero]\label{thm:divzero}
+A frase é literal, e não uma leitura: $x\cdot y=0$ com $x,y\neq0$ \textbf{é} uma
+factorização do zero --- o mesmo enunciado do \S\ref{sec:pontofixo} e do teorema do
+gerador, visto no \emph{anel} em vez de no polinómio.
+\[
+\boxed{
+\begin{array}{lll}
+\mu\ \text{\textbf{irredutível}} & \text{o quociente é CORPO} & \text{ZERO divisores de zero}\\[3pt]
+\mu\ \text{\textbf{factoriza}} & \text{o zero parte-se} & \text{e eles são os que morrem
+num factor}
+\end{array}}
+\]
+E a contagem prova-o sem varrer significado nenhum: os \textbf{invertíveis} de um
+produto de anéis são o \emph{produto} dos invertíveis por andar. Em $\mathbb{F}_5$ a
+cadeia desce até ao fim, porque $x^{3}-x-1=(x-2)(x^{2}+2x+3)$:
+\[
+\mathbb{F}_5[x]/(\mu)\ \simeq\ \mathbb{F}_{25}\times\mathbb{F}_{5}\times\mathbb{F}_{25},
+\qquad 24\cdot4\cdot24=2304\ \text{invertíveis, e } 820\ \text{divisores de zero.}
+\]
+$\square$
+\end{teorema}
+
+\begin{corolario}[e a dualidade é soma e produto]\label{cor:soma-produto}
+\[
+\boxed{
+\begin{array}{llll}
+\textbf{Hurwitz} & \text{norma} = \textstyle\sum x_i^{2} & \text{a \textbf{soma}: a norma
+do \emph{directo}} & \to\ \text{tecto em }8\\[3pt]
+\textbf{Gentil} & \text{norma} = \textstyle\prod x_i & \text{o \textbf{produto}: a do
+\emph{cruzado}} & \to\ \textbf{sem tecto}
+\end{array}}
+\]
+--- e o produto das coordenadas é o \emph{determinante}, que é a área. \textbf{O divisor
+de zero é exactamente onde o produto zera sem que nenhum factor zere}: a assinatura de
+que o zero se partiu. É por isso que o par (Hurwitz, Gentil) é o par (soma, produto), e
+que o tecto vive num lado e não no outro. $\square$
+\end{corolario}
+
 \colunas{a transformada universal como avaliação nas folhas}
-        {o espectro do andar decomposto, e a convolução a descer com ele}
+        {o espectro do andar decomposto, a convolução a descer, e o zero a partir-se}
         {\code{tests/transformada\_andar.c} ($4{:}0$): o CRT bijectivo nos $3125$ sem
 colisão; $40\,000$ pares com o produto e a soma a descer; a lei da deconvolução em
 $300$ elementos, com $77$ do caso que decide --- uma componente coprima e a outra
-não; e as raízes a somar, $1=0+1$ em $\mathbb{F}_5$}
+não; as raízes a somar, $1=0+1$ em $\mathbb{F}_5$; e $2304=24\cdot4\cdot24$ invertíveis
+contra $820$ divisores de zero, com a factorização do zero \emph{exibida} e o controlo
+irredutível em zero}
 
 %======================================================================
 \section{O Teorema Central funda o limite}\label{sec:central}
