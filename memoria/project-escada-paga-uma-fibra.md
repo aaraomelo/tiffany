@@ -45,7 +45,26 @@ prova por crescimento**, que era a classe de defeito do dia inteiro.
 deixa de ser busca na órbita: `qₙ·qₙ₊₁·a > b`, uma comparação de naturais. Formar a
 diferença custa o QUADRADO — é a conta que se escolhe que decide o tamanho dos números.
 
-`tests/aritmetica.c` (6:0) · `tests/exaustao.c` (7:0) · `tests/sem_ramo.c` (6:0) ·
+**A MIGRAÇÃO DO SISTEMA (Qz: 64 → 32 bits), e o que mudou foi sempre O MESMO:** comparar
+em vez de FORMAR. Em quatro sítios a pergunta era uma comparação e a resposta vinha de uma
+construção — |a−b|<ε construía a diferença (multiplica os denominadores), sinal(x²−2)
+construía x² (o dobro dos dígitos), o módulo de Cauchy iterava a órbita, Σ1/n^p acumulava
+a soma. O par decide as quatro exactas. **A definição não mudou; mudou a conta escolhida.**
+
+**E o guarda mudou de sítio:** antes ADIVINHAVA o tecto (comparava com um número meu) e só
+depois construía. Com o tipo menor o guarda largo dizia «cabe», o racional grampeava, e
+restava o CADÁVER da conta a passar por resultado. Agora PERGUNTA À OPERAÇÃO — o `qz`
+conta o que não coube (`qz_saturou`), e a detecção está dentro da conta.
+
+**E nunca se compara contra um valor saturado:** a partir do índice em que o termo não
+cabe, o que se lê é o grampo. O varrimento pára no último índice HONESTO
+(`cy_teto_honesto`), e esse índice diz-se. Medido: a órbita de Möbius é honesta até n=23.
+
+**O preço, dito:** 32 bits saturam ao DOBRO da profundidade de 64 — não ao infinito, que
+era a ilusão do tipo largo. A migração tornou o tecto VISÍVEL e metade; o defeito nunca foi
+o tecto, foi o tecto silencioso.
+
+`tests/migracao.c` (5:0, equivalência em 213840 casos) · `tests/aritmetica.c` (6:0) · `tests/exaustao.c` (7:0) · `tests/sem_ramo.c` (6:0) ·
 `tests/projetiva.c` (6:0). No Universal: `thm:fibra-por-andar`, `thm:sem-ramo`,
 `cor:exaustao`, `cor:zero-infinito`. Ver [[project-teorema-do-gato]],
 [[feedback-saturacao-nao-e-resultado]], [[feedback-o-write-diz-updated]].

@@ -22750,25 +22750,31 @@ static int teste(void){
             { int tmal = 0;
               Qz lo = qz_de_inteiro(1), hi = qz_de_inteiro(2);
               /* f(1) = −1 < 0 < 2 = f(2) — a hipótese, medida e não assumida */
-              Qz f_lo = qz_soma(qz_mult(lo,lo), qz_de_inteiro(-2));
-              Qz f_hi = qz_soma(qz_mult(hi,hi), qz_de_inteiro(-2));
-              if(!(f_lo.p < 0 && f_hi.p > 0)) tmal++;
+              /* COMPARAR SEM FORMAR: f(x) = x² − 2 não se constrói. x² tem o DOBRO
+               * dos dígitos de x, e formá-lo fazia a bisseção morrer a meio; o sinal de
+               * x² − 2 é a comparação de x² com 2, que o par decide exacta. A função não
+               * mudou — mudou a conta que se escolhe para lhe ler o sinal. */
+              int bl, bh;
+              if(!(qz_cmp_quad(lo,2,&bl) < 0 && qz_cmp_quad(hi,2,&bh) > 0)) tmal++;
+              if(!bl || !bh) tmal++;
+              int passos = 0;
               for(int k = 0; k < 18; k++){
                   Qz m = qz_medio(lo, hi);
-                  Qz fm = qz_soma(qz_mult(m,m), qz_de_inteiro(-2));
-                  if(fm.p == 0) break;                      /* seria a raiz racional */
-                  if(fm.p < 0) lo = m; else hi = m;
-                  Qz fl = qz_soma(qz_mult(lo,lo), qz_de_inteiro(-2));
-                  Qz fh = qz_soma(qz_mult(hi,hi), qz_de_inteiro(-2));
-                  if(!(fl.p < 0 && fh.p > 0)) tmal++;       /* O INVARIANTE, a cada tick */
+                  int bm, sm = qz_cmp_quad(m, 2, &bm);
+                  if(!bm) break;                            /* nem o par chega: pára */
+                  if(sm == 0) break;                        /* seria a raiz racional */
+                  if(sm < 0) lo = m; else hi = m;
+                  passos++;
+                  if(!(qz_cmp_quad(lo,2,&bl) < 0 && qz_cmp_quad(hi,2,&bh) > 0)) tmal++;
+                  if(!bl || !bh) tmal++;                    /* O INVARIANTE, a cada tick */
               }
               /* e o c é o corte: as pontas apertam-no dos dois lados */
               int b1, b2;
               if(rz_cmp(lo, 2, 2, &b1) >= 0 || !b1) tmal++;
               if(rz_cmp(hi, 2, 2, &b2) <= 0 || !b2) tmal++;
-              printf("      f(x) = x²−2 em [1,2]: f(1) = %s", frac2(f_lo.p,f_lo.q));
-              printf(" e f(2) = %s", frac2(f_hi.p,f_hi.q));
-              printf(", e 18 cortes dão c ∈ (%s", frac2(lo.p,lo.q));
+              printf("      f(x) = x²−2 em [1,2]: sinal(f(1)) = %d", qz_cmp_quad(qz_de_inteiro(1),2,&bl));
+              printf(" e sinal(f(2)) = %d", qz_cmp_quad(qz_de_inteiro(2),2,&bh));
+              printf(", e %d cortes dão c ∈ (%s", passos, frac2(lo.p,lo.q));
               printf(", %s)\n", frac2(hi.p,hi.q));
               ok("o VALOR INTERMÉDIO com o exemplo dele: f(1) = −1 < 0 < 2 = f(2), e a"
                  " bisseção É o encaixotamento — o INVARIANTE (o sinal troca entre as"

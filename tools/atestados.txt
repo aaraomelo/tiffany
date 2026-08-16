@@ -84,7 +84,7 @@ continuo b98335aed4401267 0
 contorno_riemann 6cf7ea38b2e3b6b7 0
 contrato 5fffd2633c0858b1 0
 controlo_front e94ce67fbef877c1 0
-conversa 462516f1a727cf31 0
+conversa e106092a722aad4d 0
 converte fe99f74438556e46 0
 convolucao_universal 14db429c007982da 0
 coroa bf5f52e1e6e43aea 0
@@ -283,6 +283,7 @@ metronomo_autossimilar daf675c96c99ac84 0
 metronomo_fourier b70d83baa019ad03 0
 metronomo_pi 09b2eb77df540fd5 0
 microfluidica 7d10ccec731925cd 0
+migracao 13607331afbee297 0
 migracao_universal 7bbcce67bc1915a2 0
 milenio 3ae5c1319f2be093 0
 milenio_trial fadcc72d65f812a7 0

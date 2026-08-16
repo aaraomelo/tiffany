@@ -1135,6 +1135,56 @@ e não cópia ($\S$2); $A(xB)=(Ax)B$ sem uma violação nos $p^{4}$ estados
 $\sigma+\sigma'=m$ e $\sigma\sigma'=-1$ ($\S$4). $\square$
 \end{teorema}
 
+\begin{corolario}[a migração do sistema: comparar em vez de
+formar]\label{cor:migracao}
+O racional deste quadro passou de $64$ para $32$ bits, com o par
+(Cor.~\ref{cor:dual32}) a segurar os intermédios e o que não cabe
+\emph{contado} em vez de enrolado. O critério é o do
+Teorema~\ref{thm:sem-ramo}: migração $+$ equivalência exaustiva $+$ zero
+ramos onde a lei os absorve, sem aceitar que algum ramo volte escondido
+numa camada inferior.
+
+\textbf{(0) O que mudou foi sempre a mesma coisa.} Em quatro sítios
+diferentes a pergunta era uma \textbf{comparação} e a resposta estava a
+ser dada por uma \textbf{construção}:
+\[
+\boxed{
+\begin{array}{ll}
+|a-b|<\varepsilon & \text{construía a diferença; multiplica os denominadores}\\
+\operatorname{sinal}(x^{2}-2) & \text{construía } x^{2}\text{; tem o DOBRO dos dígitos}\\
+\text{o módulo de Cauchy} & \text{iterava a órbita; os termos crescem}\\
+\Sigma\,1/n^{p} & \text{acumulava a soma exacta; o denominador é o lcm}
+\end{array}}
+\]
+Em todos, o par decide a comparação exacta e nada precisa de crescer.
+\emph{A definição não mudou; mudou a conta que se escolhe para lhe ler a
+resposta.}
+
+\textbf{(1) E o guarda mudou de sítio.} Antes ele \emph{adivinhava} o
+tecto --- comparava com um número escolhido à mão --- e só depois
+construía. Isso deixou de funcionar quando o tipo encolheu: o guarda
+largo continuou a dizer «cabe», o racional grampeou, e o que restava era
+o \textbf{cadáver da conta} a passar por resultado. Agora o guarda
+\textbf{pergunta à operação}: o racional conta o que não lhe coube, e a
+detecção está \emph{dentro} da conta.
+
+\textbf{(2) E nunca se compara contra um valor saturado.} A partir do
+índice em que um termo deixa de caber, o que se lê não é o termo: é o
+grampo. O varrimento pára no último índice \textbf{honesto}, e esse
+índice diz-se --- medido, a órbita de Möbius é honesta até $n=23$.
+
+\textbf{(3) O preço, dito.} Em $32$ bits uma progressão geométrica satura
+ao \emph{dobro} da profundidade a que saturava em $64$ --- não a uma
+profundidade infinita, que era a ilusão que o tipo largo dava. A migração
+não tornou nada infinito: tornou o tecto \textbf{visível} e metade. E é
+essa visibilidade que vale, porque o defeito nunca foi o tecto: foi o
+tecto silencioso.
+
+\emph{Medido:} \code{tests/migracao.c} ($5{:}0$), com a equivalência
+contra a régua larga em $213\,840$ casos --- soma, produto e ordem, zero
+divergências --- e as saturações contadas à parte. $\square$
+\end{corolario}
+
 \begin{teorema}[os ramos da aritmética são o preço de um andar --- e cada um
 tem um absorvedor com nome]\label{thm:sem-ramo}
 Contados na fonte, os dez \verb|if| da aritmética racional deste quadro

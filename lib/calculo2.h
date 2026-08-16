@@ -133,25 +133,33 @@ static Sr sr_cos(int termos){
  * Nenhuma das duas contas passa de fracções minúsculas. É a regra da casa outra vez: a
  * forma fechada custa nada e dá o exacto; a soma bruta custa e dá lixo. */
 
-/* o guarda que faltava: uma soma de racionais que DETECTA o estouro, por __int128 */
+/* o guarda, e ele mudou de sítio: ANTES adivinhava o tecto (comparava com 4·10¹⁸ em
+ * __int128) e depois construía o racional. Isso deixou de funcionar quando o racional
+ * passou a 32 bits: o guarda largo dizia «cabe», o `qz` grampeava, e o que restava era o
+ * CADÁVER da conta a passar por resultado — que é exactamente o defeito que esta casa
+ * andou a apanhar.
+ *
+ * Agora não se adivinha tecto nenhum: PERGUNTA-SE À OPERAÇÃO. O `qz` conta o que não lhe
+ * coube, e o guarda lê esse contador. A detecção está dentro da conta, e não numa
+ * releitura do valor depois de ele já ter enrolado. */
 static int c2_soma_segura(Qz a, Qz b, Qz *r){
-    __int128 p = (__int128)a.p * b.q + (__int128)b.p * a.q;
-    __int128 q = (__int128)a.q * b.q;
-    if(p > 4000000000000000000LL || p < -4000000000000000000LL
-       || q > 4000000000000000000LL || q < -4000000000000000000LL){ c2_estouros++; return 0; }
-    *r = qz((long)p, (long)q);
+    long antes = qz_saturou;
+    Qz s = qz_soma(a, b);
+    if(qz_saturou != antes){ c2_estouros++; return 0; }
+    *r = s;
     return 1;
 }
 /* a soma parcial exacta — mas com o estouro DETECTADO e devolvido, em vez de escondido */
 static int sr_p_parcial(long p, long N, Qz *saida){
     Qz s = qz(0,1);
     for(long n = 1; n <= N; n++){
-        __int128 d = 1;
-        for(long k = 0; k < p; k++){
-            d *= n;
-            if(d > 4000000000000000000LL){ c2_estouros++; return 0; }
-        }
-        if(!c2_soma_segura(s, qz(1, (long)d), &s)) return 0;
+        /* nº: o denominador é n^p, e ele também tem de caber — a mesma pergunta,
+         * feita ao mesmo contador em vez de a um número que eu escolhesse */
+        long antes = qz_saturou;
+        Qz t = qz(1,1);
+        for(long k = 0; k < p; k++) t = qz_mult(t, qz(1, n));
+        if(qz_saturou != antes){ c2_estouros++; return 0; }
+        if(!c2_soma_segura(s, t, &s)) return 0;
     }
     *saida = s;
     return 1;

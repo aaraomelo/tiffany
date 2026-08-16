@@ -83,13 +83,37 @@ static Qz cy_dist(Qz a, Qz b){                    /* |a − b| */
 /* O MÓDULO DE CONVERGÊNCIA: o menor N tal que |aₘ − aₙ| < ε para todo m,n na janela
  * acima de N. A JANELA DIZ-SE — não se varre o infinito, e fingir que sim era pior que
  * não medir. Devolve 1 e escreve o N; 0 se não achou até ao teto. */
+/* ── O TECTO HONESTO: até onde os termos ainda SÃO os termos ───────────────────
+ * Uma sucessão cujos termos crescem — a órbita de Möbius, os convergentes — satura na
+ * representação a partir de certo índice, e a partir daí o que se lê não é o termo: é o
+ * valor grampeado. Comparar contra ele é comparar contra lixo, e a regra do Gato diz o
+ * que fazer: uma saturação não é um resultado, e não pode entrar numa asserção como se
+ * fosse. Logo o varrimento pára no último índice HONESTO, e esse índice diz-se.
+ *
+ * Mede-se pelo contador `qz_saturou`, que é o mesmo que o racional usa — a detecção está
+ * dentro da operação, e não numa releitura do valor depois de ele já ter enrolado. */
+static long cy_teto_honesto(Suc s, long ate){
+    for(long n = 0; n <= ate; n++){
+        long antes = qz_saturou;
+        (void)cy_termo(s, n);
+        if(qz_saturou != antes) return n > 0 ? n - 1 : 0;
+    }
+    return ate;
+}
 static int cy_modulo(Suc s, Qz eps, long teto, long janela, long *N){
+    long h = cy_teto_honesto(s, teto + janela);
+    if(h < janela) return 0;
+    if(teto > h - janela) teto = h - janela;
     for(long k = 0; k <= teto; k++){
         int bom = 1;
         for(long m = k; m <= k + janela && bom; m++)
             for(long n2 = k; n2 <= k + janela; n2++){
-                Qz d = cy_dist(cy_termo(s, m), cy_termo(s, n2));
-                if(!qz_menor(d, eps)){ bom = 0; break; }
+                /* COMPARAR SEM FORMAR: `cy_dist` construía a diferença, e formá-la
+                 * multiplica os denominadores — o produto é o QUADRADO do que os
+                 * números precisam, e era isso que fazia este módulo saturar. Agora
+                 * decide-se |xₘ − xₙ| < ε pelo par de 32 bits, sem construir racional
+                 * nenhum. A definição não mudou; a conta escolhida mudou. */
+                if(!qz_dist_menor(cy_termo(s, m), cy_termo(s, n2), eps)){ bom = 0; break; }
             }
         if(bom){ if(N) *N = k; return 1; }
     }
@@ -103,11 +127,14 @@ static int cy_modulo(Suc s, Qz eps, long teto, long janela, long *N){
  * dava N = 0 por COINCIDÊNCIA no arranque, e a asserção passava sem medir convergência
  * nenhuma. «→ 0» quer dizer que a partir do N NUNCA MAIS se afastam. */
 static int cy_equiv(Suc x, Suc y, Qz eps, long teto, long *N){
+    long hx = cy_teto_honesto(x, teto), hy = cy_teto_honesto(y, teto);
+    long h = hx < hy ? hx : hy;
+    if(h < 1) return 0;
+    if(teto > h) teto = h;                 /* só os índices honestos entram */
     for(long k = 0; k <= teto; k++){
         int fica = 1;
         for(long m = k; m <= teto; m++){
-            Qz d = cy_dist(cy_termo(x, m), cy_termo(y, m));
-            if(!qz_menor(d, eps)){ fica = 0; break; }
+            if(!qz_dist_menor(cy_termo(x, m), cy_termo(y, m), eps)){ fica = 0; break; }
         }
         if(fica){ if(N) *N = k; return 1; }
     }
