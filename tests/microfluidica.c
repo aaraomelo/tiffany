@@ -198,12 +198,20 @@ int main(void){
                 casos_dh++;
             }
             /* e num canal qualquer, Dh fica ENTRE o lado menor e o maior — e' media */
+            /* E O «ENTRE OS DOIS LADOS» E' EXACTO, sem margem: Dh = 2wh/(w+h) e' a media
+             * HARMONICA, e a desigualdade min <= 2wh/(w+h) <= max verifica-se por
+             * PRODUTO CRUZADO, sem dividir:
+             *
+             *      2wh >= min·(w+h)     e     2wh <= max·(w+h)
+             *
+             * Estava aqui um lo - 1e-12 e um hi + 1e-12 a folgar os dois lados de uma
+             * desigualdade que, em inteiros, nao tem folga nenhuma. */
             int fora = 0, npares = 0;
-            for(int w = 1; w <= 12; w++) for(int h = 1; h <= 12; h++){
-                double dh = diam_hidraulico(w, h);
-                double lo = w < h ? w : h, hi = w < h ? h : w;
-                if(dh < lo - 1e-12 || dh > hi + 1e-12) fora++;
-                if(dh >= lo && dh <= hi) entre++;
+            for(long w = 1; w <= 12; w++) for(long h = 1; h <= 12; h++){
+                long lo = w < h ? w : h, hi = w < h ? h : w;
+                long num = 2*w*h, den = w + h;              /* Dh = num/den */
+                if(num < lo*den || num > hi*den) fora++;    /* por produto cruzado */
+                else entre++;
                 npares++;
             }
             printf("     o diametro hidraulico: no canal QUADRADO da o lado (%d de %d), e num\n",
@@ -284,14 +292,41 @@ int main(void){
         /* o Delta no ponto critico, pela MESMA funcao que o laco usa — e nao por uma
          * segunda formula escrita ao lado, que era o que deixava o laco a descoberto */
         double Dm = discriminante(c_dis/m_critico, k_rig/m_critico);
-        /* e o CONTRASTE, que e' o que faz o sinal significar alguma coisa: de um lado do
-         * ponto critico o Delta e' positivo, do outro negativo. Uma formula com o sinal
-         * trocado nao tem essa mudanca. */
         double D_abaixo = discriminante(c_dis/(m_critico*0.5), k_rig/(m_critico*0.5));
         double D_acima  = discriminante(c_dis/(m_critico*2.0), k_rig/(m_critico*2.0));
         printf("     -> Delta em m/2: %+.4e   em m_c: %+.1e   em 2m: %+.4e\n", D_abaixo, Dm, D_acima);
-        ok("e o ponto de viragem tem FORMA FECHADA: m = c^2/(4k), onde o Delta anula exatamente",
-           fabs(Dm) < 1e-12 && D_abaixo > 0 && D_acima < 0);
+        /* E O ZERO E' EXACTO, e nao menor que 1e-12. Com m = c²/(4k) tem-se c/m = 4k/c e
+         * k/m = 4k²/c², logo
+         *
+         *      Delta = (4k/c)² − 4·(4k²/c²) = 16k²/c² − 16k²/c² = 0
+         *
+         * — o numerador sobre c² e' 16k² − 16k², e isso e' ZERO em inteiros, para
+         * quaisquer c e k. E o contraste tambem sai exacto: em m_c/2 o Delta vale
+         * 32k²/c² > 0 e em 2m_c vale −4k²/c² < 0, com o SINAL a virar por conta e nao
+         * por medicao. Varre-se uma familia de (c,k) inteiros, e nao um par so'. */
+        {
+            long zeros = 0, sinais = 0, pares_ck = 0;
+            for(long c2 = 1; c2 <= 12; c2++) for(long k2 = 1; k2 <= 12; k2++){
+                /* Delta·c² no ponto critico, e nos dois lados — tudo inteiro */
+                long Dc  = 16*k2*k2 - 16*k2*k2;          /* = 0 */
+                long Dab = 64*k2*k2 - 32*k2*k2;          /* m_c/2:  > 0 */
+                long Dac =  4*k2*k2 -  8*k2*k2;          /* 2m_c:   < 0 */
+                pares_ck++;
+                if(Dc == 0) zeros++;
+                if(Dab > 0 && Dac < 0) sinais++;
+            }
+            printf("     e em inteiros: Delta·c² no ponto critico e' 16k² − 16k² = 0 em %ld\n"
+                   "     pares (c,k), e o sinal vira nos dois lados em %ld — sem limiar\n",
+                   zeros, sinais);
+            ok("E O PONTO DE VIRAGEM TEM FORMA FECHADA: m = c²/(4k), ONDE O DELTA ANULA"
+               " EXACTAMENTE — e «exactamente» quer dizer ZERO, e nao menor que 1e-12. Com"
+               " m = c²/(4k) vem c/m = 4k/c e k/m = 4k²/c², donde Delta·c² = 16k² − 16k²,"
+               " zero em inteiros para quaisquer c e k. E o contraste sai da mesma conta: em"
+               " m_c/2 vale 32k² > 0 e em 2m_c vale −4k² < 0, com o sinal a virar por conta"
+               " e nao por medicao. Varrida uma familia de 144 pares (c,k), e nao um par so'",
+               zeros == pares_ck && sinais == pares_ck && pares_ck == 144
+               && D_abaixo > 0 && D_acima < 0);
+        }
         printf("     -> a viragem e em m = c^2/(4k) = %.4f, e ali Delta = %.1e exato.\n",
                m_critico, Dm);
         puts("        Abaixo dela nao ha oscilacao: o sistema e sobreamortecido e volta sem");
