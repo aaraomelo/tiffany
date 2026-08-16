@@ -84,7 +84,7 @@ continuo b98335aed4401267 0
 contorno_riemann 6cf7ea38b2e3b6b7 0
 contrato 5fffd2633c0858b1 0
 controlo_front e94ce67fbef877c1 0
-conversa e106092a722aad4d 0
+conversa 071fe84723040187 0
 converte fe99f74438556e46 0
 convolucao_universal 14db429c007982da 0
 coroa bf5f52e1e6e43aea 0
@@ -376,6 +376,7 @@ recaman e67ba263ef7dfb38 0
 reconstroi ebee793f4c68d7b0 0
 recursao 7b5ddd4dbc13c83b 0
 rede_dual 982122481c4d95f5 0
+reducao 28c5896c5ab674d0 0
 refracao ce9fa14f889657fc 0
 refs ffc0c3cb4670180e 0
 regua b48a197936fde76f 0

@@ -1251,6 +1251,54 @@ que torna a última um resultado em vez de uma escolha de ficheiro vazio.
 $\square$
 \end{teorema}
 
+\begin{teorema}[a ponte entre as faces: a face pequena REFUTA, e não
+prova]\label{thm:reducao}
+O Teorema~\ref{thm:gato} diz que a lei é universal e a face é da
+instância. Este quadro tem agora duas faces --- $\mathbb{Q}$, onde a
+matemática vive, e $\mathbb{F}_{127}$, onde tudo é exaustível e não há um
+ramo --- e a ponte entre elas é a redução
+\[
+[p:q]\longmapsto[p\bmod 127:q\bmod 127].
+\]
+
+\textbf{(0) Ela é total, e isso só é possível por causa do $\infty$.}
+Quando $127\mid q$ o denominador anula-se, e em $\mathbb{Q}$ isso seria
+«não se pode reduzir». Aqui dá $[x:0]=\infty$, que é o ponto \emph{certo}
+--- é o \textbf{polo}. É o Cor.~\ref{cor:zero-infinito} a trabalhar num
+sítio novo; sem ele a ponte teria um caso especial logo à entrada.
+Medido: $360$ polos, todos a dar $\infty$, e zero recusas em $48\,400$
+racionais.
+
+\textbf{(1) Ela é um homomorfismo, e é isso que lhe dá direito de falar.}
+Reduzir e somar dá o mesmo que somar e reduzir, e o mesmo para o produto
+($122\,976$ pares, zero divergências); e comuta com a inversão e com o
+gato. Logo \emph{uma identidade que vale em $\mathbb{Q}$ tem de valer na
+redução}.
+
+\textbf{(2) Donde:}
+\[
+\boxed{\;\mathbb{F}_{127}\ \text{não prova nada sobre }\mathbb{Q}
+\text{ --- mas REFUTA.}\;}
+\]
+Se uma identidade falha na face pequena, era falsa na grande --- e falha
+lá sobre \emph{todos} os casos, em milissegundos, sem um ramo e sem nada
+crescer. É o refutador exaustivo que este quadro não tinha. Medido com os
+dois controlos que a casa exige: $(a+b)^2=a^2+2ab+b^2$ nunca é refutada
+($0$ de $1681$) e $(a+b)^2=a^2+b^2$ cai em $1600$ de $1681$.
+
+\textbf{(3) E o limite, com testemunha.} Coincidir na redução \emph{não}
+é ser igual em $\mathbb{Q}$: $1$ e $128$ são o mesmo ponto em
+$\mathbb{F}_{127}$ e não são o mesmo racional. A face pequena pode dizer
+«isto é falso», nunca «isto é verdadeiro». Uma ponte usada para provar
+seria a insinuação arquitectónica que este quadro persegue.
+\emph{Provar continua a ser trabalho de $\mathbb{Q}$; desmentir passa a
+ser trabalho de $\mathbb{F}_{127}$, que é onde é barato.}
+
+\emph{Medido:} \code{tests/reducao.c} ($6{:}0$), com a face pequena
+varrida inteira ($16\,128$ pares) sem uma saturação e sem um ramo.
+$\square$
+\end{teorema}
+
 \begin{corolario}[a exaustão em oito bits: $\mathbb{P}^1(\mathbb{F}_{127})$
 tem $128$ pontos e varre-se inteiro]\label{cor:exaustao}
 A regra que o Corolário~\ref{cor:zero-infinito} impõe --- \emph{não

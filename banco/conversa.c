@@ -63,6 +63,8 @@
 #include "dual32.h"     /* 64 bits sao dois duais de 32 */
 #include "ramos.h"      /* os dois ramos de |det| = 1: a leitura metrica */
 #include "projetiva.h"  /* zero e infinito sao inversos: P1 e Mobius */
+#include "sem_ramo.h"   /* a aritmetica sem um if, em F127 */
+#include "reducao.h"    /* a ponte entre as faces: F127 refuta, nao prova */
 #include "medida.h"     /* a conservacao metrica por dualidade, e a meta-inducao */
 #include "dforma.h"     /* o d: Lambda^0 -> ... -> Lambda^3, e os tres viram UM */
 #include "eletrico.h"
@@ -1418,6 +1420,8 @@ static const struct { int n; const char *nome; const char *enunciado; } CM10[] =
  {16, "lei 8",          "no anel o gato ganha período — o ramo é da REALIZAÇÃO" },
  {17, "as cinco",       "as 5 primitivas são UMA: o dual emparelha com cada uma" },
  {18, "zero e infinito", "são INVERSOS — e não há regra especial para o zero" },
+ {19, "sem ramo",       "os `if` vêm da normalização — e em 𝔽₁₂₇ não há normalização" },
+ {20, "refuta",         "a face pequena REFUTA e não prova — e é exaustiva" },
 };
 static void cmetrica_resolve(int n){
     TICK_N = 0;
@@ -1710,6 +1714,92 @@ static void cmetrica_resolve(int n){
                     " estava como regra de cálculo, e o que este andar acrescenta é o"
                     " NOME dela — o Jacobiano não é um factor de correcção, é a medida"); }
         break;
+    case 19: case 20: {
+        tique7(0, n == 19 ? "seja a aritmética, e os ramos que ela tem"
+                          : "sejam as duas faces: ℚ e 𝔽₁₂₇");
+        tique7(1, n == 19 ? "a cadeia causal dos `if`:" : "a ponte, e o que ela pode dizer:");
+        printf(n == 19
+               ? "      crescimento $\\to$ normalização $\\to$ \\{sinal, zero, tecto\\}"
+                 " $\\to$ ramos\n"
+               : "      $[p : q] \\mapsto [p \\bmod 127 : q \\bmod 127]$\n");
+        tique7(2, n == 19
+               ? "e os dez `if` do racional testam exactamente três coisas — o SINAL, o"
+                 " ZERO e o TECTO —, e as três vêm da NORMALIZAÇÃO. Normaliza-se porque em"
+                 " ℚ os números crescem. Em 𝔽₁₂₇ nada cresce, logo não se normaliza, e sem"
+                 " normalizar os três desaparecem"
+               : "e ela é um HOMOMORFISMO, o que lhe dá o direito de dizer alguma coisa:"
+                 " uma identidade que vale em ℚ TEM de valer na redução. Logo se falha lá,"
+                 " era falsa cá — mas o contrário não vale, e é preciso dizê-lo");
+        tique7(3, n == 19
+               ? "a lei é que não se elimina um ramo por estética: elimina-se quando a"
+                 " condição é absorvida por primitiva, tipo, domínio, dualidade ou"
+                 " representação. Senão só se desloca a excepção"
+               : "a lei é o Teorema do Gato: a lei é universal, a face é da instância — e"
+                 " uma face onde tudo é exaustível vale para DESMENTIR, não para provar");
+        { if(n == 19){
+              printf("        o `if` que havia          quem o absorveu\n");
+              printf("        q < 0  (o sinal)          o TIPO — ℕ não tem sinal\n");
+              printf("        p == 0 (a fibra vazia)    a REPRESENTAÇÃO — [q:p] é troca\n");
+              printf("        a⁻¹ no zero              a DUALIDADE — 0 ↔ ∞\n");
+              printf("        v > tecto                o TIPO — em 𝔽ₚ nada cresce\n");
+              printf("        [0:0]                    o DOMÍNIO — não é ponto\n\n");
+              long mal = 0, cas = 0;
+              for(unsigned p2 = 0; p2 < SR_P; p2++) for(unsigned q2 = 0; q2 < SR_P; q2++){
+                  Pr x = sr_pt((Fp)p2,(Fp)q2);
+                  if(!sr_e_ponto(x)) continue;
+                  cas++;
+                  if(!sr_igual(sr_inverte(sr_inverte(x)), x)) mal++;
+              }
+              printf("      a inversão sem um ramo, em %ld pares: %ld divergências\n",
+                     cas, mal);
+              tique7(4, "a testemunha é a contagem feita NA FONTE: dez `if` no racional,"
+                        " zero na camada que opera em 𝔽₁₂₇ sem normalizar. E as camadas"
+                        " intermédias NÃO descem a zero — é isso que torna a última um"
+                        " resultado e não um ficheiro vazio");
+              tique7(5, mal == 0 && cas == 16128
+                     ? "logo os ramos não foram removidos: foram ABSORVIDOS, cada um por"
+                       " algo com nome. E que nada foi deslocado prova-se comparando"
+                       " exaustivamente com a versão que tem os ramos"
+                     : "a inversão não fechou — NÃO afirmo");
+              tique7(6, "e a VOLTA é o ramo que NÃO se tira: passar do par ao índice"
+                        " precisa mesmo de saber se q é zero, porque o índice do ∞ é uma"
+                        " CONVENÇÃO e não um valor do corpo. Por isso essa função existe"
+                        " para IMPRIMIR e não para calcular — não se elimina o ramo,"
+                        " muda-se para onde ele não é preciso");
+          } else {
+              long rv = 0, cv = 0, rf = 0, cf = 0;
+              for(long a2 = -20; a2 <= 20; a2++) for(long b2 = -20; b2 <= 20; b2++){
+                  Qz A = qz(a2,3), B = qz(b2,5), S = qz_soma(A,B);
+                  Qz esq = qz_mult(S,S);
+                  Qz d1 = qz_soma(qz_soma(qz_mult(A,A),
+                                          qz_mult(qz(2,1), qz_mult(A,B))), qz_mult(B,B));
+                  Qz d2 = qz_soma(qz_mult(A,A), qz_mult(B,B));
+                  cv++; cf++;
+                  if(rd_refuta(esq,d1) == 1) rv++;
+                  if(rd_refuta(esq,d2) == 1) rf++;
+              }
+              printf("        identidade                    refutada?\n");
+              printf("        (a+b)² = a² + 2ab + b²        %ld de %ld  ← VERDADEIRA,"
+                     " tem de ser 0\n", rv, cv);
+              printf("        (a+b)² = a² + b²              %ld de %ld  ← falsa\n",
+                     rf, cf);
+              Qz t1 = qz(1,1), t2 = qz(128,1);
+              printf("      e o LIMITE: %d/%d e %d/%d são diferentes em ℚ e IGUAIS na"
+                     " redução\n", t1.p, t1.q, t2.p, t2.q);
+              tique7(4, "a testemunha são os DOIS controlos: a identidade verdadeira nunca"
+                        " é refutada e a falsa cai em quase todos os casos. Se a verdadeira"
+                        " caísse, o errado era o refutador e não a identidade");
+              tique7(5, rv == 0 && rf > cf/2
+                     ? "logo a face pequena REFUTA: uma identidade falsa em ℚ cai na"
+                       " redução, sobre TODOS os casos, sem um ramo e sem nada crescer"
+                     : "os dois controlos não separaram — NÃO afirmo");
+              tique7(6, "e a VOLTA é o limite, dito com testemunha: 1 e 128 são o mesmo"
+                        " ponto em 𝔽₁₂₇ e não são o mesmo racional. Coincidir na redução"
+                        " NÃO é ser igual em ℚ — a face pequena pode dizer «isto é falso»,"
+                        " nunca «isto é verdadeiro». PROVAR continua a ser trabalho de ℚ;"
+                        " DESMENTIR passa a ser trabalho de 𝔽₁₂₇, que é onde é barato"); }
+        }
+        break; }
     case 18: {
         tique7(0, "seja a inversão, e a recta projectiva");
         tique7(1, "em coordenadas homogéneas ela é uma TROCA:");
@@ -2205,7 +2295,7 @@ static int resolve_cmetrica(const char *f){
         long n = 0;
         while(*p >= '0' && *p <= '9') n = n*10 + (*p++ - '0');
         while(*p == ' ') p++;
-        if(!*p && n >= 1 && n <= 18){ cmetrica_resolve((int)n); return 1; }
+        if(!*p && n >= 1 && n <= 20){ cmetrica_resolve((int)n); return 1; }
         return 0;
     }
     return 0;
@@ -17602,18 +17692,18 @@ static int teste(void){
               fflush(stdout);
               int guarda = dup(1), nulo = open("/dev/null", O_WRONLY);
               if(guarda >= 0 && nulo >= 0) dup2(nulo, 1);
-              for(int k = 1; k <= 18; k++){
+              for(int k = 1; k <= 20; k++){
                   char fala[64];
                   snprintf(fala, sizeof fala, "medida %d", k);
                   if(resolve_cmetrica(fala)) por_n++; else vmal++;
               }
               for(size_t i = 0; i < sizeof CM10/sizeof *CM10; i++)
                   if(resolve_cmetrica(CM10[i].nome)) por_nome++; else vmal++;
-              if(resolve_cmetrica("medida 19")) vmal++;
+              if(resolve_cmetrica("medida 21")) vmal++;
               fflush(stdout);
               if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
               if(nulo >= 0) close(nulo);
-              printf("      os dezoito: %d por número, %d por nome\n", por_n, por_nome);
+              printf("      os vinte: %d por número, %d por nome\n", por_n, por_nome);
               ok("O TEOREMA ESTÁ PROMOVIDO À ASSISTENTE em dez falas, e as três camadas"
                  " ficam alinhadas: o UNIVERSAL tem a lei — a conservação métrica por"
                  " dualidade —, o PEANO dá det|·| (a face discreta, e a contagem do"
@@ -17622,7 +17712,7 @@ static int teste(void){
                  " A passagem entre elas é σ_k σ_k′ = −1, que é a hipótese ESTRUTURAL já"
                  " estabelecida pela torre — e sem ela não há teorema, há uma definição a"
                  " olhar para si própria",
-                 vmal == 0 && por_n == 18 && por_nome == 18); }
+                 vmal == 0 && por_n == 20 && por_nome == 20); }
         }
 
         /* ═══ §C50 ANÁLISE REAL: as CINCO VIAS, e nenhuma arbitra as outras ══════

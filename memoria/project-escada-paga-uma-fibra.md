@@ -64,7 +64,18 @@ cabe, o que se lê é o grampo. O varrimento pára no último índice HONESTO
 era a ilusão do tipo largo. A migração tornou o tecto VISÍVEL e metade; o defeito nunca foi
 o tecto, foi o tecto silencioso.
 
-`tests/migracao.c` (5:0, equivalência em 213840 casos) · `tests/aritmetica.c` (6:0) · `tests/exaustao.c` (7:0) · `tests/sem_ramo.c` (6:0) ·
+**A PONTE ENTRE AS FACES, E O QUE ELA GANHOU:** a redução ℚ → ℙ¹(𝔽₁₂₇) é um
+HOMOMORFISMO, logo uma identidade que vale em ℚ tem de valer nela. Donde **𝔽₁₂₇ NÃO PROVA
+nada sobre ℚ — mas REFUTA**, sobre TODOS os casos, em milissegundos, sem um ramo e sem
+nada crescer. É o refutador exaustivo que a casa não tinha. Controlos: a identidade
+verdadeira nunca é refutada (0/1681), a falsa cai em 1600/1681.
+
+E o LIMITE, com testemunha: **1 e 128 são o mesmo ponto em 𝔽₁₂₇ e não são o mesmo
+racional** — coincidir na redução não é ser igual. Provar continua a ser trabalho de ℚ;
+desmentir passa a ser de 𝔽₁₂₇, que é onde é barato. E a redução é TOTAL só por causa do ∞:
+quando 127 | q dá o POLO, não um erro.
+
+`tests/reducao.c` (6:0) · `tests/migracao.c` (5:0, equivalência em 213840 casos) · `tests/aritmetica.c` (6:0) · `tests/exaustao.c` (7:0) · `tests/sem_ramo.c` (6:0) ·
 `tests/projetiva.c` (6:0). No Universal: `thm:fibra-por-andar`, `thm:sem-ramo`,
 `cor:exaustao`, `cor:zero-infinito`. Ver [[project-teorema-do-gato]],
 [[feedback-saturacao-nao-e-resultado]], [[feedback-o-write-diz-updated]].
