@@ -424,7 +424,7 @@ significado ff504aa181796ca5 0
 simula ec8b4e5edec62a25 0
 sistema b93be799ff62ae01 0
 smartcontract 2686bef07a252cfb 0
-solar 37470dc0e4812701 0
+solar 629611050846cded 0
 solucoes_primitivas a317586c48866d16 0
 sombra_cone 2b75f89f2187feac 0
 sombras bb1e5441b87d7cb5 0

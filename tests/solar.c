@@ -242,6 +242,51 @@ printf("\n§S5  A eficiência é ÁUREA e AUTODUAL: FP² = 1/φ = THD².\n\n");
            FP*FP, THD2);
     ok("FP = φ^{-1/2}, e FP² = 1/φ = THD² — a eficiência é AUTODUAL",
        fabs(FP - pow(PHI,-0.5)) < 1e-14 && fabs(FP*FP - THD2) < 1e-14);
+
+    /* E A IGUALDADE FP² = THD² É UMA EQUAÇÃO, e ela é INTEIRA. Acima mede-se em vírgula
+     * com 1e-14, mas o que a sustenta não tem decimal nenhum:
+     *
+     *      FP² = 1/(1 + x)   com x = THD²,   e a tese FP² = x dá
+     *      1/(1+x) = x   ⟺   x² + x − 1 = 0
+     *
+     * E esse polinómio é a REVERSÃO do da borda do ouro: φ² − φ − 1 tem coeficientes
+     * (1,−1,−1), e ao contrário dá (−1,−1,1), que é −(1,1,−1) — exactamente x² + x − 1.
+     * É a mesma reversão que troca dentro por fora no §M17 do analog, e é ela que faz do
+     * RECÍPROCO do ouro a raiz do polinómio revertido.
+     *
+     * Donde «autodual» deixa de ser uma leitura e passa a ter conta: o que se perde e o
+     * que passa são raízes de um polinómio e do seu reverso. */
+    {
+        const long ouro[3] = {1, -1, -1};          /* φ² − φ − 1, do maior grau ao menor */
+        long rev[3];
+        for (int k = 0; k < 3; k++) rev[k] = ouro[2-k];      /* a reversão */
+        /* a equação de FP: 1/(1+x) = x  ⟹  x² + x − 1 = 0 */
+        const long eqfp[3] = {1, 1, -1};
+        int bate = 1;
+        for (int k = 0; k < 3; k++) if (rev[k] != -eqfp[k]) bate = 0;
+        /* e o GUME: noutro metal a reversão já não dá a equação do fator de potência */
+        int divergem = 0;
+        for (long m = 2; m <= 5; m++) {
+            long b[3] = {1, -m, -1}, r[3];
+            for (int k = 0; k < 3; k++) r[k] = b[2-k];
+            int igual = 1;
+            for (int k = 0; k < 3; k++) if (r[k] != -eqfp[k]) igual = 0;
+            if (!igual) divergem++;
+        }
+        printf("      e em inteiros: a borda do ouro é (%ld,%ld,%ld); revertida dá"
+               " (%ld,%ld,%ld) = −(1,1,−1)\n", ouro[0],ouro[1],ouro[2], rev[0],rev[1],rev[2]);
+        printf("      e a equação de FP, 1/(1+x) = x, é x² + x − 1 — a MESMA\n");
+        printf("      GUME: com m = 2..5 a reversão da borda já não dá essa equação: %d de 4\n\n",
+               divergem);
+        ok("E A AUTODUALIDADE TEM CONTA, E É INTEIRA: FP² = THD² equivale a"
+           " 1/(1+x) = x, isto é x² + x − 1 = 0 — e esse polinómio é a REVERSÃO do da borda"
+           " do ouro, (1,−1,−1) ao contrário. É a mesma reversão que troca dentro por fora"
+           " no §M17, e é ela que faz do RECÍPROCO do ouro a raiz do polinómio revertido."
+           " Acima isto media-se a menos de 1e-14; aqui os coeficientes batem por igualdade."
+           " E com o gume: noutro metal a reversão já não dá a equação do fator de potência,"
+           " logo a coincidência é do OURO e não da família",
+           bate && divergem == 4);
+    }
     printf("      Autodual quer dizer o que sempre quis neste projeto: o objeto é o seu próprio\n");
     printf("      dual. Aqui a distorção (o que se perde) e o fator de potência (o que passa)\n");
     printf("      são o MESMO número áureo — um é o quadrado do outro, e o outro é o quadrado\n");
