@@ -1767,12 +1767,33 @@ int main(void){
             mults++;
             if(r0 == c0 && r1 == c1) poli_ok++;
         }
-        for(long a1 = -20; a1 <= 20; a1++) for(long a2 = -20; a2 <= 20; a2++){
-            /* GRAU UM: ℤ[x]/(x − a) ≅ ℤ — a classe tem um só coeficiente */
-            if(a1*a2 == a1*a2) esc_ok++;
+        /* GRAU UM: ℤ[x]/(x − a) ≅ ℤ, e a redução É A AVALIAÇÃO — o teorema do resto.
+         *
+         * AQUI ESTAVA `if(a1*a2 == a1*a2) esc_ok++;` — um número comparado CONSIGO
+         * PRÓPRIO, 1681 vezes, a alimentar a asserção. Nada podia falhar, e o comentário
+         * prometia uma coisa que o código não tocava. Foi o compilador que o disse
+         * (`self-comparison always evaluates to true`), e não uma medida minha.
+         *
+         * O que o grau um afirma é isto: reduzir p módulo (x − a) dá p(a), um ESCALAR; e
+         * a redução respeita o produto, (p·q)(a) = p(a)·q(a). Mede-se com a divisão
+         * sintética em ℤ — o resto de p por (x − a) — contra a avaliação por Horner: duas
+         * rotas, e têm de concordar. */
+        for(long a = -20; a <= 20; a++) for(long k = -20; k <= 20; k++){
+            long P[4] = { k, 3, -2, 1 };           /* p(x) = x³ − 2x² + 3x + k */
+            long Q[3] = { 1-k, 2, 1 };             /* q(x) = x² + 2x + (1−k)   */
+            /* o resto de P por (x − a), por divisão sintética inteira */
+            long rP = 0; for(int d = 3; d >= 0; d--) rP = rP*a + P[d];
+            long rQ = 0; for(int d = 2; d >= 0; d--) rQ = rQ*a + Q[d];
+            /* e o produto dos polinómios, reduzido pela MESMA divisão */
+            long PQ[6] = {0};
+            for(int i = 0; i <= 3; i++) for(int j = 0; j <= 2; j++) PQ[i+j] += P[i]*Q[j];
+            long rPQ = 0; for(int d = 5; d >= 0; d--) rPQ = rPQ*a + PQ[d];
+            /* o teorema do resto: a redução É a avaliação, e respeita o produto */
+            if(rPQ == rP*rQ) esc_ok++;
         }
         printf("      um número é um POLINÓMIO: %ld produtos em ℤ[σ] batem com o produto"
-               " de polinómios reduzido por p · e o ESCALAR é o grau um (%ld casos)\n",
+               " de polinómios reduzido por p · e o GRAU UM é a AVALIAÇÃO: o resto de p"
+               " por (x−a) é p(a), e (pq)(a) = p(a)q(a) em %ld casos\n",
                poli_ok, esc_ok);
         ok("UM NÚMERO AQUI É UM POLINÓMIO, E NÃO SIMPLESMENTE UM ESCALAR: um elemento é a"
            " classe de um polinómio em ℤ[x]/(p(x)) com grau menor que n, e as operações"
@@ -2431,20 +2452,33 @@ int main(void){
             if(A_naovazio && B_naovazio && fechado && sem_max) quatro++;
         }
         /* (c) sucessões distintas → cortes distintos, com o separador EXIBIDO */
+        /* E «EXIBIDO» TEM DE EXIBIR. Este bloco dizia «com o racional separador EXIBIDO»
+         * em três sítios — comentário, printf e asserção — e não imprimia racional
+         * nenhum: contava `separa` e seguia. A palavra prometia o que o código não fazia,
+         * e nenhuma asserção o podia apanhar, porque o número estava certo. */
         long pares_m = 0, separa = 0;
+        long sep_a[4], sep_b[4], sep_m1[4], sep_m2[4]; int nsep = 0;
         for(long m1 = 1; m1 <= G_MMAX; m1++) for(long m2 = m1+1; m2 <= G_MMAX; m2++){
             pares_m++;
             int achou = 0;
+            long ga = 0, gb = 0;
             for(long b = 1; b <= 30 && !achou; b++) for(long a = 0; a <= 300; a++)
-                if(g_cmp(a,b,m1) > 0 && g_cmp(a,b,m2) < 0){ achou = 1; break; }
-            if(achou) separa++;
+                if(g_cmp(a,b,m1) > 0 && g_cmp(a,b,m2) < 0){ achou = 1; ga = a; gb = b; break; }
+            if(achou){
+                separa++;
+                if(nsep < 4){ sep_a[nsep] = ga; sep_b[nsep] = gb;
+                              sep_m1[nsep] = m1; sep_m2[nsep] = m2; nsep++; }
+            }
         }
         printf("      (a) o POMBAL: %ld pares de fracções — |r₁s₂ − r₂s₁| < 1 coincide"
                " com a igualdade em %ld, viola em %ld\n", pares, pombal, viola);
         printf("      (b) as QUATRO cláusulas do corte: %ld de %ld σ_m (A e B não"
                " vazios, A fechado para baixo, A sem máximo)\n", quatro, ms);
         printf("      (c) sucessões distintas dão cortes distintos: %ld de %ld pares,"
-               " com o racional separador EXIBIDO\n", separa, pares_m);
+               " com o racional separador EXIBIDO:\n", separa, pares_m);
+        for(int i = 0; i < nsep; i++)
+            printf("          σ_%ld < %ld/%ld < σ_%ld\n",
+                   sep_m1[i], sep_a[i], sep_b[i], sep_m2[i]);
         ok("A COMPLETUDE MOSTRA-SE ASSIM, E NÃO POR VARREDURA: (a) a UNICIDADE é o"
            " POMBAL em inteiros — se dois racionais habitam os mesmos intervalos até"
            " uma profundidade K com 2^K > s·s', então |r₁s₂ − r₂s₁| é um inteiro menor"
@@ -2458,7 +2492,8 @@ int main(void){
            " para baixo, e A sem máximo. O ponto não vive em ℚ — e é por isso que o"
            " CORTE é o objecto, e não um ponto que se procura dentro de ℚ. (c) E o"
            " corte é determinado: sucessões distintas dão cortes distintos, com o"
-           " racional separador exibido em todos os pares",
+           " racional separador exibido em todos os pares — e exibido a sério, que é o"
+           " que a palavra promete: quatro deles saem impressos com os dois σ_m em volta",
            quatro == ms && ms == G_MMAX && separa == pares_m && pares_m == 28);
     }
 
