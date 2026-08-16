@@ -219,7 +219,7 @@ gerador d0c790752b0fac3a 0
 gerador_analog 6a7abcf53c950b0b 0
 gerador_andar 5314d20fa27c125f 0
 gerador_primos dccf9257d62b61f2 0
-geral 351ddbfdcb7e9c51 0
+geral bfe72e7dd638c0ba 0
 gguf e0586cfef6b9f200 0
 gitb c558deae4b86e995 0
 graduacao_realiza 56c51e03f27a2292 0

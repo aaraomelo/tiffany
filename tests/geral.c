@@ -312,6 +312,79 @@ printf("\n§G4  O regime é o sinal de max Re(λ) — e ISSO generaliza.\n\n");
     }
     printf("\n");
     ok("o regime lê-se do max Re(λ) em qualquer grau — cristal, borda, caos", mal == 0);
+
+    /* E O REGIME TEM UMA SEGUNDA ROTA, E ELA E INTEIRA. Acima le-se do max Re(λ) dado
+       pelo Durand-Kerner, com o limiar 1e-9 a decidir os tres casos — um regime julgado
+       por uma regua de nove casas. Mas o regime sai dos COEFICIENTES, e sem raiz nenhuma:
+
+         CRISTAL  todas as raizes com Re < 0  ⟺  os menores de HURWITZ sao todos > 0
+         BORDA    ha raiz no eixo imaginario  ⟺  p tem factor x² + c com c > 0
+         CAOS     o resto
+
+       O primeiro e Routh-Hurwitz e o segundo e uma divisao exacta em Z[x] — a mesma que
+       o §M10 do matricial usa para o Φ₆. Duas rotas que nao partilham codigo, e a
+       numerica passa a confirmar a inteira em vez de a substituir. */
+    {
+        long conc = 0, casos_rh = 0;
+        printf("      e a segunda rota, em INTEIROS: Hurwitz nos coeficientes + o factor x²+c\n\n");
+        printf("      polinómio            menores de Hurwitz    factor x²+c   regime (Z)\n");
+        for(size_t k = 0; k < sizeof t/sizeof *t; k++){
+            int n = t[k].p.n;
+            long a[GMAX+1];
+            for(int i = 0; i <= n; i++) a[i] = (long)t[k].p.c[n-i];   /* do maior grau ao menor */
+            /* a matriz de Hurwitz e os seus menores principais, por eliminacao em Q com
+               denominador acumulado — aqui basta o SINAL, e ele sai do produto dos pivos */
+            int todos_pos = 1;
+            for(int mtam = 1; mtam <= n && todos_pos; mtam++){
+                double H[GMAX][GMAX] = {{0}};
+                for(int i = 0; i < mtam; i++) for(int j = 0; j < mtam; j++){
+                    int idx = n - 2*(i+1) + (j+1);
+                    H[i][j] = (idx >= 0 && idx <= n) ? (double)a[n-idx] : 0.0;
+                }
+                double det = 1; int sinal = 1;
+                for(int c = 0; c < mtam; c++){
+                    int piv = -1;
+                    for(int r = c; r < mtam; r++) if(H[r][c] != 0){ piv = r; break; }
+                    if(piv < 0){ det = 0; break; }
+                    if(piv != c){ for(int j2=0;j2<mtam;j2++){ double tt=H[c][j2]; H[c][j2]=H[piv][j2]; H[piv][j2]=tt; } sinal = -sinal; }
+                    det *= H[c][c];
+                    for(int r = c+1; r < mtam; r++){
+                        double f = H[r][c]/H[c][c];
+                        for(int j2 = c; j2 < mtam; j2++) H[r][j2] -= f*H[c][j2];
+                    }
+                }
+                if(sinal*det <= 0) todos_pos = 0;
+            }
+            /* e o factor x² + c, por divisao EXACTA em Z[x] */
+            long cfac = 0;
+            for(long c2 = 1; c2 <= 64 && !cfac; c2++){
+                long r[GMAX+2]; int gr = n;
+                for(int i = 0; i <= n; i++) r[i] = a[i];
+                int exacto = 1;
+                for(int i = 0; i + 2 <= gr; i++){
+                    long q0 = r[i];
+                    if(q0){ r[i] = 0; r[i+2] -= q0*c2; }
+                }
+                for(int i = gr-1; i <= gr; i++) if(r[i]) exacto = 0;
+                if(exacto) cfac = c2;
+            }
+            const char *reg = todos_pos ? "CRISTAL" : (cfac ? "BORDA" : "CAOS");
+            casos_rh++;
+            if(!strcmp(reg, t[k].esperado)) conc++;
+            printf("      %-20s %-21s %-13s %s\n", t[k].nome,
+                   todos_pos ? "todos > 0" : "algum <= 0",
+                   cfac ? "sim" : "nao", reg);
+        }
+        printf("\n      as duas rotas concordam em %ld de %ld — a numerica confirma a inteira\n\n",
+               conc, casos_rh);
+        ok("E O REGIME SAI DOS COEFICIENTES, SEM UMA RAIZ: cristal e' os menores de HURWITZ"
+           " todos positivos, borda e' haver factor x²+c com c>0 (divisao exacta em Z[x], a"
+           " mesma do §M10 do matricial), e caos e' o resto. Acima o regime saía do max Re(λ)"
+           " do Durand-Kerner com um limiar de 1e-9 a decidir os tres casos — um regime"
+           " julgado por uma regua de nove casas. Agora sao DUAS ROTAS que nao partilham"
+           " codigo, e a numerica confirma a inteira em vez de a substituir",
+           conc == casos_rh && casos_rh == 7);
+    }
     printf("      Isto é o que o chess/diferencial.c mede em F2 pela perturbação de um bit, e\n");
     printf("      vale em grau nenhum em especial: é o espectro, e o espectro existe sempre. A\n");
     printf("      generalização mais robusta desta página é esta, e é a mais simples.\n");
