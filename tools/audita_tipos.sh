@@ -35,9 +35,43 @@ echo
 printf '%-26s %6s %6s %6s %6s %6s\n' "FICHEIRO" "total" "estrt" "reali" "medic" "apres"
 printf '%s\n' "-------------------------------------------------------------------------"
 
+# E CONTA-SE O CÓDIGO, E NÃO O TEXTO — o mesmo defeito que a `triagem_limiares.sh`
+# tinha. Depois de fechar o `matricial.c` em ZERO doubles, esta auditoria continuava a
+# contar-lhe 26: eram os comentários que EXPLICAM os que saíram. Uma métrica que conta a
+# palavra em vez do tipo mede o texto, e quem escreve mais sobre a migração parece migrar
+# menos. O filtro é o mesmo scanner de um percurso: apaga comentários e literais de
+# texto, preservando as quebras de linha, para que os números de linha não se movam.
+DESPIR=$(mktemp -d)
+trap 'rm -rf "$DESPIR"' EXIT INT TERM
+despe() {
+  python3 -c '
+import sys
+s = open(sys.argv[1], encoding="utf-8", errors="replace").read()
+out, i, n = [], 0, len(s)
+while i < n:
+    c = s[i]
+    if c == "/" and i+1 < n and s[i+1] == "*":
+        j = s.find("*/", i+2); j = n if j < 0 else j+2
+    elif c == "/" and i+1 < n and s[i+1] == "/":
+        j = s.find(chr(10), i); j = n if j < 0 else j
+    elif c in "\"\x27":
+        j, q = i+1, c
+        while j < n and s[j] != q:
+            j += 2 if s[j] == "\\" else 1
+        j = min(j+1, n)
+    else:
+        out.append(c); i += 1; continue
+    out.append("".join(ch if ch == chr(10) else " " for ch in s[i:j]))
+    i = j
+sys.stdout.write("".join(out))
+' "$1"
+}
+
 tot=0; est=0; rea=0; med=0; apr=0; nf=0
-for f in lib/*.h tests/*.c tools/*.c banco/*.c; do
-  [ -f "$f" ] || continue
+for f0 in lib/*.h tests/*.c tools/*.c banco/*.c; do
+  [ -f "$f0" ] || continue
+  f="$DESPIR/$(echo "$f0" | tr '/' '_')"
+  despe "$f0" > "$f" 2>/dev/null || continue
   n=$(grep -c "\b$T\b" "$f" 2>/dev/null)
   [ "$n" -gt 0 ] || continue
   # ESTRUTURA: aparece em typedef, struct ou declaração de campo
@@ -53,7 +87,7 @@ for f in lib/*.h tests/*.c tools/*.c banco/*.c; do
   m=$(grep "\b$T\b" "$f" | grep -cE "1e-|fabs|\bEPS\b|\beps\b|\btol|TOLER")
   # REALIZAÇÃO: o resto
   r=$((n - e - a - m)); [ "$r" -lt 0 ] && r=0
-  printf '%-26s %6d %6d %6d %6d %6d\n' "$f" "$n" "$e" "$r" "$m" "$a"
+  printf '%-26s %6d %6d %6d %6d %6d\n' "$f0" "$n" "$e" "$r" "$m" "$a"
   tot=$((tot+n)); est=$((est+e)); rea=$((rea+r)); med=$((med+m)); apr=$((apr+a)); nf=$((nf+1))
 done
 
