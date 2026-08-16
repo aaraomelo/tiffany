@@ -41,20 +41,30 @@
 #endif
 #include "unidade.h"
 
-typedef struct { double a, b; } Alg;      /* z = a + b·σ */
+/* A FORMA ALGÉBRICA É ℤ[σ], E OS DADOS SEMPRE FORAM INTEIROS. Os corpos são (B,C) com
+ * B, C ∈ ℤ — (1,−1), (2,−1), (0,1), (−1,1), (2,1), (0,−2) —, os pontos varridos são
+ * a, b ∈ ℤ, e o produto pela borda σ² = Bσ − C leva inteiros em inteiros. Escrever isto
+ * em `double` não carregava vírgula nenhuma: transportava ℤ[σ] num tipo que o arredonda,
+ * e trazia de borla os limiares que se seguiam — `fabs(norma(...)) < 1e-9` para dizer que
+ * uma norma INTEIRA é zero.
+ *
+ * A polar é que é real, e por isso tem tipo próprio: ρ e θ passam por raiz e por atan. */
+typedef struct { long a, b; } Alg;        /* z = a + b·σ, em ℤ[σ] — exacto */
+typedef struct { double a, b; } AlgR;     /* a reconstrução pela polar — essa é real */
 /* E A POLAR CARREGA UM SINAL, que o elíptico não precisa. No círculo o atan2 cobre a volta
  * inteira; na hipérbole não há atan2 — cosh θ é sempre positivo, logo θ sozinho nunca alcança
  * u < 0. O ramo é genuinamente separado, e o sinal é a informação a mais: DOIS BITS, um por
  * eixo. Sem ele a volta erra por 12 e a asserção cai — foi o que aconteceu. */
 typedef struct { double rho, th; int reg; int sig; } Pol;   /* reg: −1 elíptico, +1 hiperbólico, 0 parabólico */
 
-static double DELTA(double B, double C){ return B*B - 4*C; }
+static long DELTA(long B, long C){ return B*B - 4*C; }
 
-/* a norma, na forma algébrica: N(a,b) = a² + B·a·b + C·b² */
-static double norma(double B, double C, Alg z){ return z.a*z.a + B*z.a*z.b + C*z.b*z.b; }
+/* a norma, na forma algébrica: N(a,b) = a² + B·a·b + C·b² — INTEIRA, logo «é zero» diz-se
+ * com `== 0` e não com uma régua. */
+static long norma(long B, long C, Alg z){ return z.a*z.a + B*z.a*z.b + C*z.b*z.b; }
 
-/* o produto, pela borda σ² = B·σ − C */
-static Alg prod(double B, double C, Alg x, Alg y){
+/* o produto, pela borda σ² = B·σ − C — inteiro leva inteiro, sem resto */
+static Alg prod(long B, long C, Alg x, Alg y){
     Alg z = { x.a*y.a - C*x.b*y.b, x.a*y.b + x.b*y.a + B*x.b*y.b };
     return z;
 }
@@ -63,10 +73,10 @@ static Alg prod(double B, double C, Alg x, Alg y){
  * Centrando: u = a + (B/2)·b,  v = b,  e τ² = Δ/4. Então N = u² − (Δ/4)·v², e a polar sai
  * do regime. O |τ| = √|Δ|/2 é o que põe u e v na mesma escala — sem ele os ângulos ficam
  * torcidos, e a lei do produto deixa de fechar. */
-static Pol para_polar(double B, double C, Alg z){
-    double D = DELTA(B, C);
-    double u = z.a + 0.5*B*z.b, v = z.b;
-    double t = sqrt(fabs(D)) / 2.0;          /* |τ| */
+static Pol para_polar(long B, long C, Alg z){
+    long D = DELTA(B, C);
+    double u = (double)z.a + 0.5*B*z.b, v = (double)z.b;
+    double t = sqrt((double)labs(D)) / 2.0;  /* |τ| — só aqui a raiz entra */
     Pol p;
     p.sig = 1;
     if(D < 0){                                /* elíptico: o círculo */
@@ -89,14 +99,14 @@ static Pol para_polar(double B, double C, Alg z){
 }
 
 /* ---- POLAR → ALGÉBRICA ---- a volta, e é ela que prova que a ida não perdeu nada */
-static Alg para_alg(double B, double C, Pol p){
-    double D = DELTA(B, C);
-    double t = sqrt(fabs(D)) / 2.0;
+static AlgR para_alg(long B, long C, Pol p){
+    long D = DELTA(B, C);
+    double t = sqrt((double)labs(D)) / 2.0;
     double u, v;
     if(p.reg < 0){ u = p.rho*cos(p.th);  v = p.rho*sin(p.th)  / t; }
     else if(p.reg > 0){ u = p.sig*p.rho*cosh(p.th); v = p.sig*p.rho*sinh(p.th) / t; }
     else { u = p.sig*p.rho; v = p.sig*p.rho*p.th; }
-    Alg z = { u - 0.5*B*v, v };
+    AlgR z = { u - 0.5*B*v, v };
     return z;
 }
 
@@ -104,26 +114,45 @@ static Alg para_alg(double B, double C, Pol p){
 static void secao_Y1(void){
     printf("\n§Y1  A CENTRAGEM: τ = σ − B/2 dá τ² = Δ/4 — e o regime é o SINAL do Δ\n\n");
 
-    printf("        corpo      (B,C)     Δ      τ² = Δ/4    regime\n");
-    struct { const char *n; double B, C; } cs[] = {
+    printf("        corpo      (B,C)     Δ      (2τ)² em ℤ[σ]        regime\n");
+    struct { const char *n; long B, C; } cs[] = {
         { "ouro",   1, -1 }, { "prata",  2, -1 }, { "i",      0,  1 },
         { "ω",     -1,  1 }, { "PA",     2,  1 }, { "√2",     0, -2 },
     };
-    int erros = 0;
+    /* E AQUI ESTAVA UMA ASSERÇÃO QUE COMPARAVA UM NÚMERO CONSIGO PRÓPRIO. O ramo Δ < 0
+     * fazia `tau2 = D/4.0` e a seguir testava `fabs(tau2 - D/4.0) > 1e-12` — metade dos
+     * seis corpos passava por construção, e o outro ramo só reconstruía √Δ para o voltar
+     * a elevar ao quadrado.
+     *
+     * A identidade É INTEIRA, e não precisa de raiz nenhuma. τ = σ − B/2 não vive em
+     * ℤ[σ] — tem o meio —, mas 2τ = 2σ − B vive, e
+     *
+     *      (2σ − B)² = 4σ² − 4Bσ + B² = 4(Bσ − C) − 4Bσ + B² = B² − 4C = Δ
+     *
+     * logo mede-se o quadrado de (−B, 2) pelo produto do próprio corpo, e o resultado tem
+     * de ser o escalar Δ: parte em σ EXACTAMENTE zero, parte escalar EXACTAMENTE Δ.
+     * Zero doubles, zero raízes, e falha se o produto ou o Δ estiverem errados. */
+    int erros = 0, esc_ok = 0, sig_ok = 0, mult_ok = 0;
     for(int i = 0; i < 6; i++){
-        double D = DELTA(cs[i].B, cs[i].C);
-        /* τ² tem de dar Δ/4, e verifica-se pela definição: τ = σ − B/2 e σ² = Bσ − C.
-         * τ² = σ² − Bσ + B²/4 = −C + B²/4 = (B² − 4C)/4 = Δ/4. Medimos numericamente. */
-        double sig = (D >= 0) ? (cs[i].B + sqrt(D))/2 : cs[i].B/2;   /* a raiz real, se houver */
-        double tau2;
-        if(D >= 0){ double tau = sig - cs[i].B/2; tau2 = tau*tau; }
-        else tau2 = D/4.0;                    /* a raiz é complexa: τ² = Δ/4 por construção */
-        if(fabs(tau2 - D/4.0) > 1e-12) erros++;
-        printf("        %-8s  (%2.0f,%2.0f)  %5.1f   %8.3f    %s\n",
-               cs[i].n, cs[i].B, cs[i].C, D, tau2,
+        long B = cs[i].B, C = cs[i].C, D = DELTA(B, C);
+        Alg dois_tau = { -B, 2 };                       /* 2τ = 2σ − B */
+        Alg q = prod(B, C, dois_tau, dois_tau);         /* (2τ)², pela borda do corpo */
+        if(q.a == D) esc_ok++; else erros++;            /* a parte escalar É o Δ */
+        if(q.b == 0)  sig_ok++; else erros++;           /* e a parte em σ é ZERO */
+        /* e a norma é multiplicativa, o que amarra o produto a não ser qualquer coisa */
+        Alg x = { 3, 2 }, y = { 5, 1 };
+        if(norma(B,C,prod(B,C,x,y)) == norma(B,C,x)*norma(B,C,y)) mult_ok++; else erros++;
+        printf("        %-8s  (%2ld,%2ld)  %5ld   (2τ)² = %ld %+ld·σ    %s\n",
+               cs[i].n, B, C, D, q.a, q.b,
                D < 0 ? "elíptico  — gira" : D > 0 ? "hiperbólico — estica" : "parabólico — o limite");
     }
-    ok("τ² = Δ/4 nos seis corpos — a centragem tira o B e deixa só o Δ", erros == 0);
+    ok("τ² = Δ/4 NOS SEIS CORPOS, E A IDENTIDADE É INTEIRA: escreve-se sem o meio como"
+       " (2σ − B)² = Δ, e mede-se pelo produto do próprio corpo — a parte escalar dá"
+       " EXACTAMENTE Δ e a parte em σ dá EXACTAMENTE zero, sem uma raiz e sem um limiar."
+       " O que aqui estava comparava D/4 com D/4 em metade dos casos. E a norma"
+       " multiplicativa N(xy) = N(x)N(y) amarra o produto nos seis, para que a identidade"
+       " não valha por o produto ser qualquer coisa",
+       erros == 0 && esc_ok == 6 && sig_ok == 6 && mult_ok == 6);
 
     conclui("o regime não é uma escolha de coordenadas: é o sinal de um número que já estava lá.");
 }
@@ -134,7 +163,7 @@ static void secao_Y1(void){
 static void secao_Y2(void){
     printf("\n§Y2  A LEI: ρ(zw) = ρ(z)ρ(w) e θ(zw) = θ(z)+θ(w) — nos três regimes\n\n");
 
-    struct { const char *n; double B, C; } cs[] = {
+    struct { const char *n; long B, C; } cs[] = {
         { "i        Δ<0", 0,  1 },
         { "ouro     Δ>0", 1, -1 },
         { "PA       Δ=0", 2,  1 },
@@ -142,15 +171,15 @@ static void secao_Y2(void){
     printf("        corpo         pior erro em ρ      pior erro em θ      pares\n");
     int falhou = 0;
     for(int i = 0; i < 3; i++){
-        double B = cs[i].B, C = cs[i].C;
+        long B = cs[i].B, C = cs[i].C;
         double pior_r = 0, pior_t = 0; int n = 0;
-        for(double a = 1; a <= 3; a += 1) for(double b = 0; b <= 2; b += 1)
-        for(double c = 1; c <= 3; c += 1) for(double d = 0; d <= 2; d += 1){
+        for(long a = 1; a <= 3; a++) for(long b = 0; b <= 2; b++)
+        for(long c = 1; c <= 3; c++) for(long d = 0; d <= 2; d++){
             Alg x = { a, b }, y = { c, d };
-            if(fabs(norma(B,C,x)) < 1e-9 || fabs(norma(B,C,y)) < 1e-9) continue;
+            if(norma(B,C,x) == 0 || norma(B,C,y) == 0) continue;   /* inteira: «é zero» é == 0 */
             Pol px = para_polar(B,C,x), py = para_polar(B,C,y);
             Alg xy = prod(B,C,x,y);
-            if(fabs(norma(B,C,xy)) < 1e-9) continue;
+            if(norma(B,C,xy) == 0) continue;
             Pol pxy = para_polar(B,C,xy);
             double er = fabs(pxy.rho - px.rho*py.rho) / (px.rho*py.rho);
             /* no elíptico o ângulo é módulo 2π: compara-se a diferença dobrada ao círculo */
@@ -167,7 +196,7 @@ static void secao_Y2(void){
 
     /* e tem de saber falhar: com o |τ| ERRADO (sem a escala √|Δ|/2) o ângulo torce e a lei cai */
     double B = 1, C = -1, pior = 0;
-    for(double a = 1; a <= 3; a += 1) for(double b = 1; b <= 2; b += 1){
+    for(long a = 1; a <= 3; a++) for(long b = 1; b <= 2; b++){
         Alg x = { a, b }, y = { b, a };
         double u1 = x.a + 0.5*B*x.b, v1 = x.b, u2 = y.a + 0.5*B*y.b, v2 = y.b;
         double t1 = atanh(v1/u1), t2 = atanh(v2/u2);       /* SEM a escala |τ| */
@@ -187,7 +216,7 @@ static void secao_Y2(void){
 static void secao_Y3(void){
     printf("\n§Y3  A VOLTA: algébrica → polar → algébrica, com resíduo 0\n\n");
 
-    struct { const char *n; double B, C; } cs[] = {
+    struct { const char *n; long B, C; } cs[] = {
         { "i     Δ<0", 0, 1 }, { "ouro  Δ>0", 1, -1 }, { "PA    Δ=0", 2, 1 },
     };
     /* E A POLAR TEM RAMO, A ALGÉBRICA NÃO — e isto apareceu por a asserção ter falhado.
@@ -198,17 +227,17 @@ static void secao_Y3(void){
     printf("        corpo        no ramo   fora do ramo   pior resíduo da volta\n");
     int falhou = 0, fora_total = 0;
     for(int i = 0; i < 3; i++){
-        double B = cs[i].B, C = cs[i].C, D = DELTA(B,C), pior = 0; int n = 0, fora = 0;
+        long B = cs[i].B, C = cs[i].C, D = DELTA(B,C); double pior = 0; int n = 0, fora = 0;
         double t = sqrt(fabs(D))/2.0;
-        for(double a = -3; a <= 3; a += 1) for(double b = -3; b <= 3; b += 1){
+        for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++){
             Alg z = { a, b };
-            if(fabs(norma(B,C,z)) < 1e-9){ fora++; continue; }
+            if(norma(B,C,z) == 0){ fora++; continue; }
             double u = z.a + 0.5*B*z.b, v = z.b;
             if(D > 0 && fabs(t*v) >= fabs(u)){ fora++; continue; }   /* fora do cone */
             if(D == 0 && fabs(u) < 1e-12){ fora++; continue; }        /* sem ângulo */
             Pol p = para_polar(B,C,z);
             if(!isfinite(p.rho) || !isfinite(p.th)){ fora++; continue; }
-            Alg w = para_alg(B,C,p);
+            AlgR w = para_alg(B,C,p);
             double e = fabs(w.a - z.a) + fabs(w.b - z.b);
             if(e > pior) pior = e;
             n++;
@@ -229,7 +258,7 @@ static void secao_Y3(void){
 static void secao_Y4(void){
     printf("\n§Y4  A POTÊNCIA É A LEI OUTRA VEZ: ρⁿ e n·θ — De Moivre nos três\n\n");
 
-    struct { const char *n; double B, C; double a, b; } cs[] = {
+    struct { const char *n; long B, C; long a, b; } cs[] = {
         { "i     Δ<0", 0,  1, 1, 1 },
         { "ouro  Δ>0", 1, -1, 2, 1 },
         { "PA    Δ=0", 2,  1, 1, 1 },
@@ -237,7 +266,7 @@ static void secao_Y4(void){
     printf("        corpo        n     ρⁿ previsto     ρ medido       resíduo\n");
     int falhou = 0;
     for(int i = 0; i < 3; i++){
-        double B = cs[i].B, C = cs[i].C;
+        long B = cs[i].B, C = cs[i].C;
         Alg z = { cs[i].a, cs[i].b };
         Pol p0 = para_polar(B,C,z);
         Alg w = { 1, 0 };
@@ -273,8 +302,9 @@ static void secao_Y5(void){
     Alg p_alg = prod(B,C,x,y);
     Pol px = para_polar(B,C,x), py = para_polar(B,C,y);
     Pol p_pol = { px.rho*py.rho, px.th + py.th, px.reg, px.sig*py.sig };
-    Alg volta = para_alg(B,C,p_pol);
-    printf("        (3,2) ⊗ (5,1) pela algébrica:  (%.0f, %.0f)\n", p_alg.a, p_alg.b);
+    AlgR volta = para_alg(B,C,p_pol);
+    printf("        (3,2) ⊗ (5,1) pela algébrica:  (%ld, %ld)  — exacto, em ℤ[σ]\n",
+           p_alg.a, p_alg.b);
     printf("                      pela polar:      (%.4f, %.4f)\n", volta.a, volta.b);
     double e = fabs(volta.a - p_alg.a) + fabs(volta.b - p_alg.b);
     printf("        resíduo entre os dois caminhos: %.2e\n", e);
@@ -306,16 +336,17 @@ static void secao_Y5(void){
 static void secao_Y6(void){
     printf("\n§Y6  A DUALIDADE FECHADA: algébrica = DIRETO, polar = CRUZADO\n\n");
 
-    struct { const char *n; double B, C; } cs[] = {
+    struct { const char *n; long B, C; } cs[] = {
         { "i     Δ<0", 0, 1 }, { "ouro  Δ>0", 1, -1 }, { "PA    Δ=0", 2, 1 },
     };
     printf("        corpo        ⟨x,y⟩ = ρρ·cos_Δ(Δθ)   x∧y = ρρ·sin_Δ(Δθ)/|τ|   pares\n");
     int falhou = 0;
     for(int i = 0; i < 3; i++){
-        double B = cs[i].B, C = cs[i].C, D = DELTA(B,C), t = sqrt(fabs(D))/2.0;
+        long B = cs[i].B, C = cs[i].C, D = DELTA(B,C);
+        double t = sqrt((double)labs(D))/2.0;
         double pior_d = 0, pior_c = 0; int n = 0;
-        for(double a = 1; a <= 3; a += 1) for(double b = 0; b <= 2; b += 1)
-        for(double c = 1; c <= 3; c += 1) for(double d = 0; d <= 2; d += 1){
+        for(long a = 1; a <= 3; a++) for(long b = 0; b <= 2; b++)
+        for(long c = 1; c <= 3; c++) for(long d = 0; d <= 2; d++){
             Alg x = { a, b }, y = { c, d };
             double ux = x.a + 0.5*B*x.b, uy = y.a + 0.5*B*y.b;
             if(D > 0 && (fabs(t*x.b) >= fabs(ux) || fabs(t*y.b) >= fabs(uy))) continue;
@@ -345,23 +376,43 @@ static void secao_Y6(void){
     /* O FECHO: sob ν, o direto fica e o cruzado troca. Os dois lados da torre. */
     printf("\n     sob o espelho ν(a,b) = (a + B·b, −b):\n");
     printf("        x        y        ⟨x,y⟩   ⟨νx,νy⟩   x∧y    νx∧νy\n");
-    double B = 1, C = -1, D = DELTA(B,C);
-    int d_mudou = 0, c_manteve = 0, n = 0;
-    for(double a = 1; a <= 3; a += 1) for(double c = 1; c <= 3; c += 1){
+    /* E ESTE FECHO É INTEIRO. O meio só aparece porque u = a + (B/2)·b e o Δ/4 trazem um
+     * quarto; escalando, ele desaparece e a dualidade fica exacta:
+     *
+     *      4·⟨x,y⟩ = (2u_x)(2u_y) − Δ·v_x·v_y        com 2u = 2a + B·b, INTEIRO
+     *      2·(x∧y) = (2u_x)·v_y − v_x·(2u_y)
+     *
+     * Escalar não muda nem «fica igual» nem «troca de sinal» — as duas teses são sobre
+     * IGUALDADES, e uma igualdade sobrevive a multiplicar os dois lados. O que muda é que
+     * passam a dizer-se com `==` em vez de com `fabs(...) < 1e-9`. */
+    long B = 1, C = -1, D = DELTA(B,C);
+    int d_mudou = 0, c_manteve = 0, c_vivo = 0, n = 0;
+    for(long a = 1; a <= 3; a++) for(long c = 1; c <= 3; c++){
         Alg x = { a, a+1 }, y = { c, c+2 };
         Alg nx = { x.a + B*x.b, -x.b }, ny = { y.a + B*y.b, -y.b };
-        double ux = x.a + 0.5*B*x.b, uy = y.a + 0.5*B*y.b;
-        double unx = nx.a + 0.5*B*nx.b, uny = ny.a + 0.5*B*ny.b;
-        double d1 = ux*uy - (D/4.0)*x.b*y.b, d2 = unx*uny - (D/4.0)*nx.b*ny.b;
-        double c1 = ux*y.b - x.b*uy,          c2 = unx*ny.b - nx.b*uny;
-        if(fabs(d1 - d2) > 1e-9) d_mudou++;
-        if(fabs(c1 + c2) > 1e-9) c_manteve++;      /* devia trocar de SINAL */
-        if(n < 4) printf("        (%.0f,%.0f)    (%.0f,%.0f)    %6.1f   %6.1f   %6.1f  %6.1f\n",
+        long ux2 = 2*x.a + B*x.b,  uy2 = 2*y.a + B*y.b;        /* 2u, inteiro */
+        long unx2 = 2*nx.a + B*nx.b, uny2 = 2*ny.a + B*ny.b;
+        long d1 = ux2*uy2 - D*x.b*y.b, d2 = unx2*uny2 - D*nx.b*ny.b;   /* 4·⟨·,·⟩ */
+        long c1 = ux2*y.b - x.b*uy2,   c2 = unx2*ny.b - nx.b*uny2;     /* 2·(·∧·) */
+        if(d1 != d2) d_mudou++;
+        if(c1 != -c2) c_manteve++;                 /* devia trocar de SINAL, exactamente */
+        if(c1 != 0) c_vivo++;                      /* e nem todos podem ser zero: 0 == −0 */
+        if(n < 4) printf("        (%ld,%ld)    (%ld,%ld)    %6ld   %6ld   %6ld  %6ld\n",
                          x.a, x.b, y.a, y.b, d1, d2, c1, c2);
         n++;
     }
-    ok("sob ν o DIRETO fica igual — a peça que MEDE é a mesma dos dois lados", d_mudou == 0);
-    ok("e o CRUZADO troca de sinal — a peça que ORDENA é a que se inverte", c_manteve == 0);
+    printf("        (as colunas ⟨·,·⟩ estão escaladas por 4 e as ∧ por 2 — inteiras)\n");
+    printf("        e %d dos %d cruzados são NÃO NULOS — sem isso «troca de sinal» valia\n", c_vivo, n);
+    printf("        por 0 == −0, que é verdade e não é a tese\n");
+    ok("SOB ν O DIRETO FICA IGUAL, E É IGUALDADE INTEIRA: escalando por 4 o meio da"
+       " centragem desaparece — 4⟨x,y⟩ = (2u_x)(2u_y) − Δ v_x v_y —, e a peça que MEDE"
+       " é bit a bit a mesma dos dois lados do espelho, sem um limiar",
+       d_mudou == 0 && n == 9);
+    ok("E O CRUZADO TROCA DE SINAL, TAMBÉM EXACTAMENTE: 2(x∧y) = (2u_x)v_y − v_x(2u_y) é"
+       " inteiro, e o que se mede é c1 == −c2 e não «a soma é pequena» — a peça que ORDENA"
+       " é a que se inverte, e escalar não mexe numa igualdade. E os cruzados NÃO são"
+       " todos nulos — seriam 0 == −0, que é verdade e não é a tese: contam-se os vivos",
+       c_manteve == 0 && n == 9 && c_vivo >= 6);
 
     conclui("um direto e um cruzado para cada lado da torre, e o espelho troca só o que ordena.");
 }
@@ -373,15 +424,15 @@ static int modo_piloto(int argc, char **argv){
         printf("       ./polar 1 -1 3 2      o ouro, no ponto 3 + 2σ\n");
         return 2;
     }
-    double B = atof(argv[1]), C = atof(argv[2]);
-    Alg z = { atof(argv[3]), atof(argv[4]) };
-    double D = DELTA(B, C);
+    long B = atol(argv[1]), C = atol(argv[2]);
+    Alg z = { atol(argv[3]), atol(argv[4]) };
+    long D = DELTA(B, C);
     Pol p = para_polar(B, C, z);
-    Alg v = para_alg(B, C, p);
-    printf("  a régua      q(a,b) = a² %+.0f·ab %+.0f·b²        Δ = %.0f  (%s)\n", B, C, D,
+    AlgR v = para_alg(B, C, p);
+    printf("  a régua      q(a,b) = a² %+ld·ab %+ld·b²        Δ = %ld  (%s)\n", B, C, D,
            D < 0 ? "elíptico — gira" : D > 0 ? "hiperbólico — estica" : "parabólico — o limite");
-    printf("\n  CARTESIANA   z = %.4f %+.4f·σ\n", z.a, z.b);
-    printf("               N(z) = %.4f\n", norma(B, C, z));
+    printf("\n  CARTESIANA   z = %ld %+ld·σ   (em ℤ[σ])\n", z.a, z.b);
+    printf("               N(z) = %ld   — inteira\n", norma(B, C, z));
     printf("\n  POLAR        ρ = %.6f   θ = %.6f   ramo %+d\n", p.rho, p.th, p.sig);
     printf("               z = ρ·(%s)\n",
            p.reg < 0 ? "cos θ + τ̂ sin θ" : p.reg > 0 ? "cosh θ + τ̂ sinh θ" : "1 + τ̂ θ");
