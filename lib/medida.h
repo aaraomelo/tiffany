@@ -366,4 +366,28 @@ static int md_ponto_fixo(Qz d){
     if(!md_dual_medida(d, &u)) return 0;
     return qz_igual(d, u);
 }
+/* ═══ PARTE VII — A PATA QUE SOME NA MARCA: a fibra da projeção ══════════════
+ * O gato anda no plano e uma pata pisa a marca da outra. A marca NÃO É O ESTADO: a
+ * projecção identifica trajectórias que no espaço de estados são distintas.
+ *
+ * Isto não é uma imagem nova nesta casa — é o que três construções já formalizadas
+ * fazem, e por isso fecha como corolário e não como intuição:
+ *
+ *   · a DOBRA TEMPORAL (thm:dobra-temporal): x ↦ x², «dois meios-passos são um tick»,
+ *     e os representantes ±√σ colapsam num só. |fibra| = 2, exactamente.
+ *   · o CONE (Σ∘Π = Id, Π∘Σ ≠ Id): duas expansões, um real. |fibra| = 2, exactamente.
+ *   · a SOMBRA do simplex: uma base ortonormal de ℝ^{n+1} projectada identifica.
+ *
+ * E o par que o corolário obriga a nomear: conserva-se a MEDIDA (|det| = 1) e perde-se a
+ * FIBRA. Não é «perde-se informação» em geral — é esta informação, e conta-se. */
+static int md_fibra_quadrado(long y, long *r1, long *r2){
+    if(y < 0) return 0;                              /* fora da imagem: fibra VAZIA */
+    long r = 0;
+    while(r * r < y && r < 100000L) r++;
+    if(r * r != y) return 0;                         /* não é quadrado: fibra vazia */
+    *r1 = r; *r2 = -r;
+    return r == 0 ? 1 : 2;                           /* o 0 é o único com fibra 1 */
+}
+/* e o CONTROLO: um mapa INJECTIVO, onde a fibra tem de ser 1 e a pata não esconde nada */
+static int md_fibra_desloca(long y, long *r1){ *r1 = y - 1; return 1; }
 #endif

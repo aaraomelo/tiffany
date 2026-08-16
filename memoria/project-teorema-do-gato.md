@@ -45,7 +45,29 @@ vale nos DOIS compostos e só um é a identidade: **a conservação da medida é
 mais fraca que o fecho do laço.** O gato desce ao mesmo tronco e não às mesmas marcas de
 unha.
 
-`tests/conservacao_metrica.c` (13:0) · `thm:gato`, `thm:meta-inducao`, `cor:bidualidade`,
+**A PATA QUE SOME NA MARCA** (corolário). A projecção conserva a MEDIDA e perde a FIBRA.
+Fecha como corolário e não como intuição porque corresponde a três construções já
+formalizadas: a **dobra temporal** (`x ↦ x²`, «dois meios-passos são um tick», e ±√σ
+colapsam — fibra 2, e o zero é o único com fibra 1), o **cone** (duas expansões, um real)
+e a **sombra** do simplex. Controlo: num mapa injectivo a fibra é 1 em 401/401 — logo
+«fibra > 1» não é automático.
+
+**O LIVRO-RAZÃO**, e cada linha tem número: sobe conserva a medida e não esquece nada ·
+espirala conserva sem tecto · desce conserva o real e esquece qual expansão · o cone
+conserva a medida nos dois ramos e esquece a fibra (=2) · pisa a marca e esquece a pata ·
+observa o traço e esquece o estado. Lidas juntas: **a medida atravessa a cadeia inteira;
+o percurso não.**
+
+**64 BITS SÃO DOIS DUAIS DE 32** (`lib/dual32.h`, `tests/dual32.c` 6:0). Multiplicar dois
+de 32 dá um de 64: a operação SAI do tipo e guardar só 32 perde exactamente metade — «a
+dualidade é a memória da divisão», literal. O par (alto, baixo) guarda-a, sem tipo largo
+nenhum: as parcelas de 16×16 cabem num 32 porque (2¹⁶−1)² < 2³². E o **alto é a parte que
+ORDENA**: comparar só pelo baixo erra em 12158 de 40000. Substituiu o `__int128` em
+`an_cmp_quad` e `mt_pell`. Defeito meu que o medidor apanhou: emparelhei o determinante
+como `a·b − c·d` em vez de `a·d − b·c` — 6560 divergências em 6561, e uma varredura só
+com matrizes simétricas não o teria visto.
+
+`tests/conservacao_metrica.c` (14:0) · `thm:gato`, `thm:meta-inducao`, `cor:bidualidade`,
 `obs:passarinho` no Universal · `thm:det-volume`, `cor:passarinho-peano` no Peano ·
 `thm:medida-jacobiano` no Estelar. Ver [[feedback-saturacao-nao-e-resultado]],
 [[project-a-lei-em-dois-niveis]], [[feedback-justificar-o-que-so-e-coerente]].

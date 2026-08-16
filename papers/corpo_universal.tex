@@ -1062,6 +1062,155 @@ sem sobra nem falta); e o zero não tem dual --- a mesma fibra vazia de
 $0^{-1}$ que a escada aritmética encontrou em todo andar. $\square$
 \end{corolario}
 
+\begin{corolario}[a pata que some na marca: a projecção conserva a medida e
+perde a fibra]\label{cor:pata}
+O gato desce ao plano e anda; uma pata pisa a marca da outra. A marca
+observada não diz quantas patas a produziram:
+\[
+\boxed{\;\text{estado}\ \neq\ \text{traço observado};
+\qquad
+\text{estrutura}\ \xrightarrow{\ \text{projecção}\ }\ \text{marca}.\;}
+\]
+
+\textbf{(0) E isto fecha como corolário, e não como intuição.} A imagem
+só vale se corresponder a construção já formalizada --- e corresponde a
+\emph{três}, todas com o mesmo número:
+\begin{enumerate}
+\item A \textbf{dobra temporal} (Teorema~\ref{thm:dobra-temporal}) é ela,
+literalmente: a substituição $x\mapsto x^{2}$, «dois meios-passos são um
+tick», e os representantes espectrais $\pm\sqrt{\sigma}$ colapsam num só.
+A fibra tem \textbf{exactamente dois} elementos --- as duas patas ---, e
+um único ponto tem fibra $1$: o zero, onde as duas coincidem.
+\item O \textbf{cone} (ponto~(2) do Teorema~\ref{thm:gato}): duas
+expansões contínuas, um só real. Fibra $2$, e por outro caminho.
+\item A \textbf{sombra} do simplex: uma base ortonormal de
+$\mathbb{R}^{n+1}$, projectada, dá vectores com relações que em cima não
+existiam --- \code{tests/sombra\_cone.c}.
+\end{enumerate}
+
+\textbf{(1) O par, e ele tem de ser nomeado dos dois lados.} O que se
+\textbf{conserva} é a \emph{medida}: $|\det|=1$, e a
+Parte~\ref{cor:bidualidade} diz por quê. O que se \textbf{perde} é a
+\emph{fibra}. E não é «perde informação» em geral --- é esta informação,
+e conta-se: é $2$ nas duas primeiras realizações. Donde a leitura que
+importa para o corpus:
+\[
+\boxed{\;\text{conservar a medida}\ \not\Rightarrow\ \text{conservar o
+percurso}.\;}
+\]
+É a mesma frase que a retracção do Teorema~\ref{thm:gato} já dizia --- o
+gato desce ao mesmo tronco e não às mesmas marcas de unha ---, agora com
+a fibra medida em vez de apenas observada.
+
+\emph{Medido:} \code{tests/conservacao\_metrica.c} ($\S$M10). A fibra de
+$x\mapsto x^{2}$ é $2$ em toda a imagem excepto no zero, que é $1$; a do
+cone é $2$ em $1560$ de $1600$ racionais. E o \textbf{controlo} é o que
+torna isto uma medição e não uma observação: num mapa \emph{injectivo} a
+fibra é $1$ em $401$ de $401$ --- logo «a fibra é maior que um» não é
+automático; é uma propriedade da projecção, e é ela que se perde
+enquanto a medida sobrevive. $\square$
+\end{corolario}
+
+\begin{corolario}[o tipo largo não é primitivo: $64$ bits são dois duais de
+$32$]\label{cor:dual32}
+O Corolário~\ref{cor:bidualidade} diz que a dualidade guarda o que uma
+operação perderia. Aplicado à \emph{aritmética da máquina}, isso deixa de
+ser uma leitura e passa a ser uma construção.
+
+\textbf{(0) O problema é o produto, e ele é exactamente meio.}
+Multiplicar dois números de $32$ bits dá um de $64$: a operação
+\textbf{sai do tipo}, e guardar só $32$ perde \emph{exactamente metade}.
+É o caso mais nu da frase desta casa --- «a dualidade é a memória da
+divisão»: dividir perde, e o dual guarda a segunda metade.
+
+\textbf{(1) A construção.} O produto de dois de $32$ escreve-se como o
+\textbf{par}
+\[
+\boxed{\;(\text{alto},\ \text{baixo}),
+\qquad a\cdot b=\text{alto}\cdot 2^{32}+\text{baixo},\;}
+\]
+e nenhum tipo mais largo entra na conta: parte-se cada factor em dois de
+$16$, e cada parcela cabe num $32$ porque $(2^{16}-1)^{2}<2^{32}$. O que
+\emph{não} cabe é a soma das duas parcelas do meio --- e é aí que o
+transporte aparece, e guardá-lo é guardar a metade perdida.
+
+\textbf{(2) E o alto é a parte que ORDENA.} Não é um resto pequeno.
+Comparar só pelo baixo --- que é o que fazer a conta num tipo estreito
+faria --- erra em $12\,158$ de $40\,000$ comparações medidas: quase um
+terço. A metade que a multiplicação perde é a que decide a ordem, e a
+ordem por produto cruzado é a \emph{única} coisa que o corpo dos
+racionais precisa de um tipo largo.
+
+\textbf{(3) O que isto muda no estatuto.} Onde o código escrevia `long`
+ou um inteiro de $128$ para «caber», passa a escrever o par --- e o que
+era um \textbf{tecto da máquina} passa a ser uma \textbf{estrutura da
+matemática}. O $64$ não é primitivo: é o dual de dois $32$. E o sinal
+trata-se à parte da magnitude, que é a mesma decomposição de sempre --- a
+parte que \emph{ordena} e a parte que \emph{orienta} ---, e é ela que faz
+o caso difícil ($-2^{31}$, que não tem simétrico dentro do tipo)
+desaparecer em vez de precisar de uma excepção.
+
+\emph{Medido:} \code{tests/dual32.c} ($6{:}0$), e a regra é a desta casa
+--- \emph{dois caminhos que têm de concordar}: o par calcula-se em $32$
+bits e o mesmo produto num inteiro de $128$, e os dois coincidem em
+$490\,225$ produtos, incluindo os extremos. O controlo do lado que
+importa: o `int` sozinho erra em $7\,311$ de $14\,641$ comparações e o
+par não erra em nenhuma --- se o produto coubesse sempre, a varredura
+passaria por acaso e não estaria a medir nada. E um defeito que o medidor
+apanhou à primeira: eu tinha emparelhado o determinante como
+$a\cdot b-c\cdot d$ em vez de $a\cdot d-b\cdot c$; deu $6\,560$
+divergências em $6\,561$, e uma varredura só com matrizes simétricas não
+o teria visto. $\square$
+\end{corolario}
+
+\begin{observacao}[o livro-razão: o que cada etapa conserva e o que
+esquece]\label{obs:razao}
+A cadeia completa é
+\[
+\text{gato}\ \xrightarrow{\ \text{espiral}\ }\ \text{torre}
+\ \xrightarrow{\ \text{descida}\ }\ \text{cone}
+\ \xrightarrow{\ \text{projecção}\ }\ \text{marca},
+\]
+e o que a torna um mecanismo e não uma imagem é que \textbf{a cada etapa
+alguma coisa é preservada e alguma coisa é esquecida} --- e as duas
+colunas estão medidas.
+
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+etapa & conserva & esquece & onde se mede \\
+\midrule
+sobe (extensão dual) & a medida, $|\det|=1$ & nada: a indução
+acrescenta & $\S$M1, o passo \\
+espirala (atravessa andares) & a medida, \emph{sem tecto} & --- &
+$\S$M0, a descida vazia \\
+desce (retracção) & o real, $\Sigma\circ\Pi=\mathrm{Id}$ & qual das duas
+expansões & $\S$M8, $3540$ de $3600$ \\
+cone (projecção discreta) & a medida nos dois ramos & a \textbf{fibra},
+e ela vale $2$ & $\S$M8 e $\S$M10 \\
+pisa a própria marca & a marca & qual pata & $\S$M10, fibra de
+$x\mapsto x^{2}$ \\
+observa (medição) & o traço & o estado & Cor.~\ref{cor:pata} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Lidas as duas colunas juntas, elas são \emph{uma} frase:
+\[
+\boxed{\;\text{a medida atravessa a cadeia inteira; o percurso não.}\;}
+\]
+E é isso que faz do gato o mecanismo e não a decoração --- o que sobrevive
+a todas as etapas é exactamente aquilo que o Teorema~\ref{thm:gato} diz
+ser conservado, nem mais nem menos.
+
+\medskip
+\noindent E o \textbf{passarinho} é o que faz o gato mover-se: sem
+instância, o operador não tem sobre o que agir. O par
+$\text{gato}\leftrightarrow\text{passarinho}$ é o par lei/face desta
+teoria, com o coqueiro no papel da torre --- e por isso o dual do gato
+não é outro gato (Cor.~\ref{cor:bidualidade}).
+\end{observacao}
+
 \begin{observacao}[a leitura do quintal, e ela compõe com o que já estava
 escrito]\label{obs:passarinho}
 A cena que deu o nome tinha três papéis, e os três já existem nesta

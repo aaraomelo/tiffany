@@ -60,6 +60,7 @@
 #include "topologia.h"  /* a regua REMOVIDA: topologias finitas, exaustivas */
 #include "homotopia.h"  /* o buraco que nenhum ponto ve: pi1 combinatorio */
 #include "analise.h"    /* Analise Real: as CINCO VIAS da completude, sem arbitro */
+#include "dual32.h"     /* 64 bits sao dois duais de 32 */
 #include "medida.h"     /* a conservacao metrica por dualidade, e a meta-inducao */
 #include "dforma.h"     /* o d: Lambda^0 -> ... -> Lambda^3, e os tres viram UM */
 #include "eletrico.h"
@@ -1408,6 +1409,9 @@ static const struct { int n; const char *nome; const char *enunciado; } CM10[] =
  { 9, "representacao",  "falha de representação ≠ contra-exemplo matemático" },
  {10, "passarinho",     "o corpo, o gato e a fronteira — e o Universal é corpo SOBRE corpos" },
  {11, "bidualidade",    "o gato é o PONTO FIXO da 1.ª; o passarinho volta pela 2.ª" },
+ {12, "a pata",         "a marca NÃO é o estado: conserva a medida, perde a FIBRA" },
+ {13, "dois duais de 32","64 bits são dois de 32 — o alto é a metade que ORDENA" },
+ {14, "livro razao",    "o que cada etapa conserva e o que esquece — as duas colunas" },
 };
 static void cmetrica_resolve(int n){
     TICK_N = 0;
@@ -1700,6 +1704,145 @@ static void cmetrica_resolve(int n){
                     " estava como regra de cálculo, e o que este andar acrescenta é o"
                     " NOME dela — o Jacobiano não é um factor de correcção, é a medida"); }
         break;
+    case 14: {
+        tique7(0, "seja a cadeia inteira, do coqueiro à marca no chão");
+        tique7(1, "e o que cada etapa faz às duas colunas:");
+        printf("      gato $\\to$ espiral $\\to$ torre $\\to$ descida $\\to$ cone"
+               " $\\to$ projecção $\\to$ marca\n");
+        tique7(2, "e o que torna isto um mecanismo e não uma imagem é que a cada etapa"
+                  " alguma coisa é PRESERVADA e alguma coisa é ESQUECIDA — e as duas"
+                  " colunas estão medidas, não descritas");
+        tique7(3, "a lei é a do Gato: a medida atravessa a cadeia inteira; o percurso"
+                  " não");
+        { printf("      etapa                    conserva              esquece\n");
+          printf("      ─────────────────────────────────────────────────────────────\n");
+          printf("      sobe (extensão dual)     a medida |det| = 1    nada: a indução"
+                 " acrescenta\n");
+          printf("      espirala (os andares)    a medida, SEM TECTO   —\n");
+          printf("      desce (retracção)        o real, Σ∘Π = Id      qual das duas"
+                 " expansões\n");
+          printf("      cone (projecção)         a medida nos 2 ramos  a FIBRA, e ela"
+                 " vale 2\n");
+          printf("      pisa a própria marca     a marca               qual pata\n");
+          printf("      observa (medição)        o traço               o estado\n\n");
+          int nb = -1;
+          int vazia = !mi_procura_minimo(mi_passo, 400, &nb);
+          long a2[MD_CF], b2[MD_CF], duas = 0, cas = 0;
+          for(long p2 = 1; p2 <= 40; p2++) for(long q2 = 1; q2 <= 40; q2++){
+              int nn = md_cone(p2,q2,a2,MD_CF);
+              if(!nn) continue;
+              cas++;
+              int m = md_outra_expansao(a2,nn,b2,MD_CF);
+              long p3,q3;
+              if(m > 0 && md_espiral(b2,m,&p3,&q3) && qz_igual(qz(p3,q3), qz(p2,q2))) duas++;
+          }
+          long r1, r2;
+          int fib = md_fibra_quadrado(16, &r1, &r2);
+          printf("      e as linhas, medidas agora: descida %s · retracção %ld/%ld ·"
+                 " fibra de x↦x² em 16: %d\n",
+                 vazia ? "vazia" : "ACHOU", duas, cas, fib);
+          tique7(4, "a testemunha é o livro-razão ter as DUAS colunas cheias. Uma tabela só"
+                    " com o que se conserva seria uma lista de vitórias; é a coluna do que"
+                    " se esquece que a torna uma medição — e cada linha dela tem um número"
+                    " atrás");
+          tique7(5, vazia && duas > 0 && fib == 2
+                 ? "logo A MEDIDA ATRAVESSA A CADEIA INTEIRA E O PERCURSO NÃO, e é isso que"
+                   " faz do gato o mecanismo e não a decoração: o que sobrevive a todas as"
+                   " etapas é exactamente o que o teorema diz ser conservado, nem mais nem"
+                   " menos"
+                 : "alguma linha não fechou — NÃO afirmo");
+          tique7(6, "e a VOLTA é o passarinho: é ele que faz o gato mover-se, porque sem"
+                    " instância o operador não tem sobre o que agir. O par gato/passarinho"
+                    " é o par lei/face desta teoria, com o coqueiro no papel da torre — e é"
+                    " por isso que o dual do gato não é outro gato"); }
+        break; }
+    case 12: {
+        tique7(0, "seja uma projecção, e o traço que ela deixa");
+        tique7(1, "a marca não é o estado:");
+        printf("      estado $\\neq$ traço observado;\\qquad estrutura"
+               " $\\to$ marca\n");
+        tique7(2, "e isto fecha como COROLÁRIO e não como intuição porque corresponde a"
+                  " construções que esta casa já tinha: o gato anda no plano e uma pata"
+                  " pisa a marca da outra — e a DOBRA TEMPORAL é isso, literalmente. A"
+                  " substituição x ↦ x², «dois meios-passos são um tick», faz os"
+                  " representantes ±√σ colapsarem num só");
+        tique7(3, "a lei é que a projecção conserva a MEDIDA e não conserva a FIBRA — e o"
+                  " par tem de ser nomeado dos dois lados, senão é meia frase");
+        { long duas = 0, uma = 0, vaz = 0;
+          printf("        y      a fibra de x ↦ x²        quantas patas\n");
+          for(long y = 0; y <= 16; y += 4){
+              long r1, r2;
+              int n = md_fibra_quadrado(y, &r1, &r2);
+              printf("        %-6ld ", y);
+              char cel[48];
+              if(n == 2) snprintf(cel, sizeof cel, "%+ld e %+ld", r1, r2);
+              else if(n == 1) snprintf(cel, sizeof cel, "%ld", r1);
+              else snprintf(cel, sizeof cel, "vazia");
+              esc_col(cel, 24);
+              printf("%s\n", n == 2 ? "duas" : (n == 1 ? "UMA — e é o único" : "nenhuma"));
+          }
+          for(long y = 0; y <= 400; y++){
+              long r1, r2; int n = md_fibra_quadrado(y, &r1, &r2);
+              if(n == 2) duas++; else if(n == 1) uma++; else vaz++;
+          }
+          long ctrl = 0;
+          for(long y = 0; y <= 400; y++){ long r; if(md_fibra_desloca(y,&r) == 1) ctrl++; }
+          printf("      em 401 pontos: fibra 2 em %ld, fibra 1 em %ld (só o zero), vazia"
+                 " em %ld\n", duas, uma, vaz);
+          printf("      e o CONTROLO, um mapa injectivo: fibra 1 em %ld de 401 — aqui a"
+                 " pata não esconde nada\n", ctrl);
+          tique7(4, "a testemunha é o CONTROLO: num mapa injectivo a fibra é 1 sempre, logo"
+                    " «a fibra é maior que um» não é automático — é uma propriedade da"
+                    " projecção. Sem essa segunda linha eu estaria a observar, não a medir");
+          tique7(5, uma == 1 && duas > 0 && ctrl == 401
+                 ? "logo CONSERVAR A MEDIDA NÃO IMPLICA CONSERVAR O PERCURSO, e a perda"
+                   " conta-se: é 2, e o zero é o único ponto onde as duas patas coincidem"
+                 : "a fibra não separou — NÃO afirmo");
+          tique7(6, "e a VOLTA é a retracção que já estava medida: Σ∘Π = Id mas Π∘Σ ≠ Id."
+                    " O gato desce ao mesmo tronco e não às mesmas marcas de unha — e"
+                    " agora a fibra está contada em vez de apenas observada"); }
+        break; }
+    case 13: {
+        tique7(0, "sejam dois números de 32 bits, e o produto deles");
+        tique7(1, "64 bits são dois duais de 32:");
+        printf("      $(\\text{alto}, \\text{baixo})$,\\qquad $a \\cdot b ="
+               " \\text{alto} \\cdot 2^{32} + \\text{baixo}$\n");
+        tique7(2, "e o problema é EXACTAMENTE meio: multiplicar dois de 32 dá um de 64, a"
+                  " operação sai do tipo, e guardar só 32 perde metade. É o caso mais nu da"
+                  " frase desta casa — a dualidade é a MEMÓRIA DA DIVISÃO");
+        tique7(3, "a lei é que cada parcela de 16×16 cabe num 32, porque (2¹⁶−1)² < 2³² — e"
+                  " o que NÃO cabe é a soma das duas do meio, que é onde o transporte"
+                  " aparece e se guarda em vez de se perder");
+        { long errou = 0, cas = 0;
+          for(int i = 1; i <= 200; i++) for(int j = 1; j <= 200; j++){
+              unsigned a = (unsigned)i*70001u, b = (unsigned)j*70003u;
+              unsigned c = (unsigned)j*70009u, d = (unsigned)i*69997u;
+              D64 p = d64_mult(a,b), q = d64_mult(c,d);
+              cas++;
+              int so_baixo = (p.baixo < q.baixo) ? -1 : (p.baixo > q.baixo ? 1 : 0);
+              if(d64_cmp(p,q) != so_baixo) errou++;
+          }
+          D64 m = d64_mult(2147483647u, 2147483647u);
+          printf("      2147483647² = alto %u, baixo %u   — e nenhum tipo de 64 entrou na"
+                 " conta\n", m.alto, m.baixo);
+          int det;
+          long gm = 0;
+          for(int k = 1; k <= 200; k++) if(!d32_det2(k,1,1,0,&det) || det != -1) gm++;
+          printf("      o gato em 200 metais, pelo par: %ld divergências de det = −1\n",
+                 gm);
+          printf("      e o GUME — comparar só pelo baixo: %ld erros em %ld\n", errou, cas);
+          tique7(4, "a testemunha é o gume: comparar só pelo «baixo», que é o que fazer a"
+                    " conta num int faria, erra em quase um terço dos casos. A metade que a"
+                    " multiplicação perde não é um resto pequeno — é a parte que ORDENA");
+          tique7(5, errou > 100 && gm == 0
+                 ? "logo o 64 NÃO é primitivo: é o dual de dois 32, e o que era tecto da"
+                   " máquina passa a ser estrutura da matemática"
+                 : "o par não separou — NÃO afirmo");
+          tique7(6, "e a VOLTA é o sinal: ele trata-se à parte da magnitude, que é a mesma"
+                    " decomposição de sempre — a parte que ORDENA e a parte que ORIENTA."
+                    " E é ela que faz o caso difícil, o −2³¹ que não tem simétrico dentro"
+                    " do tipo, desaparecer em vez de precisar de uma excepção"); }
+        break; }
     case 11: {
         tique7(0, "seja d o factor de medida de um operador, e † o dual métrico");
         tique7(1, "as duas dualidades, com os papéis separados:");
@@ -1868,7 +2011,7 @@ static int resolve_cmetrica(const char *f){
         long n = 0;
         while(*p >= '0' && *p <= '9') n = n*10 + (*p++ - '0');
         while(*p == ' ') p++;
-        if(!*p && n >= 1 && n <= 11){ cmetrica_resolve((int)n); return 1; }
+        if(!*p && n >= 1 && n <= 14){ cmetrica_resolve((int)n); return 1; }
         return 0;
     }
     return 0;
@@ -17265,18 +17408,18 @@ static int teste(void){
               fflush(stdout);
               int guarda = dup(1), nulo = open("/dev/null", O_WRONLY);
               if(guarda >= 0 && nulo >= 0) dup2(nulo, 1);
-              for(int k = 1; k <= 11; k++){
+              for(int k = 1; k <= 14; k++){
                   char fala[64];
                   snprintf(fala, sizeof fala, "medida %d", k);
                   if(resolve_cmetrica(fala)) por_n++; else vmal++;
               }
               for(size_t i = 0; i < sizeof CM10/sizeof *CM10; i++)
                   if(resolve_cmetrica(CM10[i].nome)) por_nome++; else vmal++;
-              if(resolve_cmetrica("medida 12")) vmal++;
+              if(resolve_cmetrica("medida 15")) vmal++;
               fflush(stdout);
               if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
               if(nulo >= 0) close(nulo);
-              printf("      os onze: %d por número, %d por nome\n", por_n, por_nome);
+              printf("      os catorze: %d por número, %d por nome\n", por_n, por_nome);
               ok("O TEOREMA ESTÁ PROMOVIDO À ASSISTENTE em dez falas, e as três camadas"
                  " ficam alinhadas: o UNIVERSAL tem a lei — a conservação métrica por"
                  " dualidade —, o PEANO dá det|·| (a face discreta, e a contagem do"
@@ -17285,7 +17428,7 @@ static int teste(void){
                  " A passagem entre elas é σ_k σ_k′ = −1, que é a hipótese ESTRUTURAL já"
                  " estabelecida pela torre — e sem ela não há teorema, há uma definição a"
                  " olhar para si própria",
-                 vmal == 0 && por_n == 11 && por_nome == 11); }
+                 vmal == 0 && por_n == 14 && por_nome == 14); }
         }
 
         /* ═══ §C50 ANÁLISE REAL: as CINCO VIAS, e nenhuma arbitra as outras ══════
@@ -17564,7 +17707,7 @@ static int teste(void){
               fflush(stdout);
               if(guarda >= 0){ dup2(guarda, 1); close(guarda); }
               if(nulo >= 0) close(nulo);
-              printf("      os onze: %d por número, %d por nome\n", por_n, por_nome);
+              printf("      os catorze: %d por número, %d por nome\n", por_n, por_nome);
               ok("O TEOREMA ESTÁ PROMOVIDO À ASSISTENTE em dez falas, e as três camadas"
                  " ficam alinhadas com as duas frases lado a lado: CICLO − BORDA = CLASSE"
                  " no discreto (Peano, ker ∂/im ∂) e FECHADA − EXACTA = COHOMOLOGIA no"

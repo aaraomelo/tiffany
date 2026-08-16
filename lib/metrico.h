@@ -36,6 +36,8 @@
 #ifndef METRICO_H
 #define METRICO_H
 
+#include "dual32.h"   /* o par: |p² − a·q²| sem tipo de 64 bits */
+
 static long mt_estouros = 0;
 
 static Qz mt_abs(Qz x){ return x.p < 0 ? qz_oposto(x) : x; }
@@ -123,10 +125,13 @@ static int mt_equivalentes(Qz x1, Qz y1, Qz x2, Qz y2){
  * esses. Uma sucessão de Möbius aproxima √2 igualmente bem e NÃO o satisfaz: o
  * certificado distingue duas famílias, não separa o certo do errado. */
 static long mt_pell(long p, long q, long a){
-    __int128 v = (__int128)p*p - (__int128)a*q*q;
-    if(v > 4000000000000000000LL || v < -4000000000000000000LL){ mt_estouros++; return -1; }
-    long r = (long)v;
-    return r < 0 ? -r : r;
+    /* |p² − a·q²|, pelo PAR DUAL de 32 bits — sem tipo largo nenhum */
+    D64 e = d64_mult(d32_abs((int)p), d32_abs((int)p));
+    D64 q2 = d64_mult(d32_abs((int)q), d32_abs((int)q)), d;
+    if(!d64_esc(q2, (unsigned)(a < 0 ? -a : a), &d)){ mt_estouros++; return -1; }
+    D64 r = (d64_cmp(e,d) >= 0) ? d64_menos(e,d) : d64_menos(d,e);
+    if(r.alto != 0){ mt_estouros++; return -1; }
+    return (long)r.baixo;
 }
 /* ── O FECHO: x ∈ Ā ⟺ toda bola em torno de x toca A ──────────────────────────
  * Para A = (0,1) ∩ ℚ em ℚ, testa-se se x está no fecho procurando um racional de A

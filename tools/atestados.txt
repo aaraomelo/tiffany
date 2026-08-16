@@ -73,7 +73,7 @@ cone_nulo 504b52404fbfd424 0
 config_corpo 058335e53d3b487e 0
 conico db6e0cef9c0d6c26 0
 conjunto ee3b0d585a79668e 0
-conservacao_metrica 8f29d6e59a2b5b8f 0
+conservacao_metrica afadb92daf50a069 0
 constantes 0a154572e05cc610 0
 constroi 2c60273bdc7acb47 0
 conta b61d39344f09ecf3 0
@@ -83,7 +83,7 @@ continuo b98335aed4401267 0
 contorno_riemann 6cf7ea38b2e3b6b7 0
 contrato 5fffd2633c0858b1 0
 controlo_front e94ce67fbef877c1 0
-conversa 5c68c94c954ae96f 0
+conversa 030cc845a276cc78 0
 converte fe99f74438556e46 0
 convolucao_universal 14db429c007982da 0
 coroa bf5f52e1e6e43aea 0
@@ -145,6 +145,7 @@ dtc_viveiro 36453a570fa98d62 0
 dtcn cf607d0c0a75e3d5 0
 duais 28dc625dbb3da8b3 0
 dual 869340d98961353e 0
+dual32 c489f54924157885 0
 dual_cadeia c7280a378e486134 0
 dual_spline_ttf 3e8e11fb1a25018f 0
 dualidade 18065d141793793e 0

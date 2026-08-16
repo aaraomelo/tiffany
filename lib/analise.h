@@ -30,6 +30,8 @@
 #ifndef ANALISE_H
 #define ANALISE_H
 
+#include "dual32.h"   /* 64 bits são dois duais de 32 — e é o par que compara */
+
 static long an_estouros = 0;
 
 static Qz an_abs(Qz x){ return x.p < 0 ? qz_oposto(x) : x; }
@@ -43,11 +45,16 @@ static int an_menor_ig(Qz a, Qz b){ return a.p * b.q <= b.p * a.q; }
  * silêncio: a via parava e eu leria «5 de 8» como se a matemática tivesse falhado.
  *
  * A pergunta é a mais barata que há e está no catálogo desta casa: CABE NO TIPO? Não
- * cabia. Compara-se p² contra c·q² em __int128, que é exacto para quaisquer `long`, e a
- * via de Newton passa a ir tão longe quanto a de Möbius. Devolve −1, 0 ou +1. */
+ * cabia. E a comparação faz-se pelo PAR DUAL de 32 bits (`dual32.h`): p² e c·q² são cada
+ * um um par (alto, baixo), e comparam-se pelo alto primeiro — que é justamente a metade
+ * que um tipo estreito perderia. Nenhum tipo de 64 bits entra aqui.
+ * Devolve −1, 0 ou +1, e 0 quando os números saem do par (que se conta). */
 static int an_cmp_quad(Qz x, long c){
-    __int128 e = (__int128)x.p * x.p, d = (__int128)c * x.q * x.q;
-    return e < d ? -1 : (e > d ? 1 : 0);
+    unsigned p = d32_abs((int)x.p), q = d32_abs((int)x.q);
+    D64 e = d64_mult(p, p), q2 = d64_mult(q, q), d;
+    if(c < 0) return 1;
+    if(!d64_esc(q2, (unsigned)c, &d)){ an_estouros++; return 0; }
+    return d64_cmp(e, d);
 }
 /* ── SUPREMO E ÍNFIMO: a existência separada do ATINGIMENTO ─────────────────────
  * Sobre uma lista finita de racionais o supremo existe e é atingido — e é aí que a
@@ -137,9 +144,11 @@ static int an_dedekind_sem_maximo(Qz a, Qz *maior){
 /* (2) CAUCHY: o módulo, sem mencionar limite — está em cy_modulo, e cita-se.
  * Aqui fica só a testemunha da falha: nenhum racional tem quadrado 2. */
 static int an_sem_raiz_racional(long p, long q, long a){
-    __int128 v = (__int128)p*p - (__int128)a*q*q;
-    if(v > 4000000000000000000LL || v < -4000000000000000000LL){ an_estouros++; return 1; }
-    return v != 0;
+    /* p² = a·q²? — pelo par, e sem tipo largo: comparam-se os dois pares */
+    D64 e = d64_mult(d32_abs((int)p), d32_abs((int)p));
+    D64 q2 = d64_mult(d32_abs((int)q), d32_abs((int)q)), d;
+    if(!d64_esc(q2, (unsigned)(a < 0 ? -a : a), &d)){ an_estouros++; return 1; }
+    return d64_cmp(e, d) != 0;
 }
 /* (3) SUPREMO: A = {q > 0 : q² < 2} é limitado e NÃO tem supremo racional.
  * Prova-se construtivamente: dado um majorante b (b² > 2), acha-se um MENOR. */

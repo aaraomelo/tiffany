@@ -388,6 +388,55 @@ int main(void){
            bi_mal == 0 && fixos == fixos_esp && fixos_esp > 0 && sem_dual > 0);
     }
 
+    /* ═══ §M10 A PATA QUE SOME NA MARCA: conserva a medida, perde a fibra ═════ */
+    printf("\n§M10 A marca não é o estado — a projecção conserva a medida e perde a"
+           " fibra.\n\n");
+    {
+        long duas = 0, uma = 0, vazias = 0, casos = 0;
+        for(long y = 0; y <= 400; y++){
+            long r1, r2;
+            int n = md_fibra_quadrado(y, &r1, &r2);
+            casos++;
+            if(n == 2) duas++; else if(n == 1) uma++; else vazias++;
+        }
+        /* o CONTROLO: um mapa injectivo — a fibra tem de ser SEMPRE 1 */
+        long ctrl_uma = 0, ctrl = 0;
+        for(long y = 0; y <= 400; y++){
+            long r;
+            ctrl++;
+            if(md_fibra_desloca(y, &r) == 1) ctrl_uma++;
+        }
+        /* e o cone: as DUAS expansões do mesmo racional, já em inteiros */
+        long a2[MD_CF], b2[MD_CF], cone_duas = 0, cone_cas = 0;
+        for(long p = 1; p <= 40; p++) for(long q = 1; q <= 40; q++){
+            int n = md_cone(p, q, a2, MD_CF);
+            if(n == 0) continue;
+            cone_cas++;
+            int m = md_outra_expansao(a2, n, b2, MD_CF);
+            if(m > 0){
+                long p3, q3;
+                if(md_espiral(b2, m, &p3, &q3) && qz_igual(qz(p3,q3), qz(p,q))) cone_duas++;
+            }
+        }
+        printf("      x ↦ x² (a DOBRA TEMPORAL): fibra 2 em %ld, fibra 1 em %ld (só o"
+               " zero), vazia em %ld\n", duas, uma, vazias);
+        printf("      o cone: %ld de %ld racionais com DUAS expansões\n",
+               cone_duas, cone_cas);
+        printf("      e o CONTROLO, um mapa injectivo: fibra 1 em %ld de %ld — aqui a pata"
+               " não esconde nada\n", ctrl_uma, ctrl);
+        ok("A PATA QUE SOME NA MARCA: A PROJECÇÃO CONSERVA A MEDIDA E PERDE A FIBRA. Duas"
+           " patas produzem uma marca porque a projecção identifica estados distintos — e"
+           " isto fecha como COROLÁRIO e não como intuição porque corresponde a construções"
+           " que esta casa já tinha formalizado. A DOBRA TEMPORAL é ela: x ↦ x², «dois"
+           " meios-passos são um tick», e os representantes ±√σ colapsam num só — fibra 2"
+           " em toda a imagem excepto no zero, que é o único ponto onde as duas patas"
+           " coincidem. O CONE dá o mesmo número por outro caminho: duas expansões, um"
+           " real. E o controlo é o que torna isto medição: num mapa INJECTIVO a fibra é 1"
+           " sempre, logo «a fibra é maior que um» não é automático — é uma propriedade da"
+           " projecção, e é a que se perde enquanto a medida sobrevive",
+           duas > 0 && uma == 1 && ctrl_uma == ctrl && cone_duas > 0 && casos == 401);
+    }
+
     printf("\n=== %ld asserções, %ld falhas, %ld estouros, %ld saturações"
            " (que não são falhas) ===\n", unidades, falhas, md_estouros, md_saturou);
     return falhas ? 1 : 0;
