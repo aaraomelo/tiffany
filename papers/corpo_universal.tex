@@ -1135,6 +1135,113 @@ e não cópia ($\S$2); $A(xB)=(Ax)B$ sem uma violação nos $p^{4}$ estados
 $\sigma+\sigma'=m$ e $\sigma\sigma'=-1$ ($\S$4). $\square$
 \end{teorema}
 
+\begin{corolario}[a exaustão em oito bits: $\mathbb{P}^1(\mathbb{F}_{127})$
+tem $128$ pontos e varre-se inteiro]\label{cor:exaustao}
+A regra que o Corolário~\ref{cor:zero-infinito} impõe --- \emph{não
+representar o infinito como um número grande, mas como o dual projectivo
+de zero} --- tem uma consequência que não foi procurada: $127$ é primo
+\emph{e} é o maior valor de um \verb|int8_t|. Logo $\mathbb{F}_{127}$
+cabe inteiro no tipo mais pequeno da máquina, e
+\[
+\boxed{\;|\mathbb{P}^1(\mathbb{F}_{127})|=127+1=128\;}
+\]
+--- exactamente os valores não negativos do tipo, com o $\infty=[1:0]$ a
+ocupar um lugar como os outros.
+
+\textbf{(0) E então o tipo deixa de ser uma aposta.} Num corpo finito
+nada cresce: o resto \emph{é} a operação. E o espaço é pequeno o bastante
+para se varrer inteiro --- $128$ pontos, $126$ metais, todos. Deixa de
+haver amostra, tecto ou profundidade escolhida: é a única varredura deste
+quadro que não pode estar a deixar de fora o caso interessante, porque
+não há caso de fora.
+
+\textbf{(1) O que se exauriu.} A inversão é total, involutiva e bijectiva
+nos $128$ ($0\leftrightarrow\infty$ inclusive); o gato é bijecção dos
+$128$ para \emph{todo} metal, e em todos eles a órbita a partir do zero
+atravessa o infinito e cai em $m$; e a órbita \textbf{fecha sempre}, com
+períodos entre $6$ e $128$. Este último é o Teorema~\ref{thm:esquilo}
+medido: sobre $\mathbb{Z}$ o gato cresce como $\sigma^{k}$ e satura em
+toda representação finita; em $\mathbb{F}_{127}$ ele roda. \emph{O ramo é
+propriedade da realização; a lei não.}
+
+\textbf{(2) O que NÃO se exauriu, dito.} Nas \emph{matrizes} a varredura
+é amostrada --- $127^{4}$ são $260$ milhões, e varrê-las seria trocar uma
+exaustão honesta por uma espera. O que se exaure é o objecto sobre o qual
+a lei fala: os pontos.
+
+\textbf{(3) E o que a exaustão não prova.} $\mathbb{F}_{127}$ tem
+característica $127$ --- somar um elemento consigo próprio $127$ vezes dá
+zero, em todos eles ---, e em $\mathbb{Q}$ isso nunca acontece. Logo o
+que aqui se varre por inteiro é uma \textbf{face}, e o
+Teorema~\ref{thm:gato} já diz o que isso vale. O que $\mathbb{F}_{127}$
+dá é uma face onde não há nada por varrer, e por isso onde nenhuma
+afirmação pode estar a esconder o caso que faltava.
+
+\emph{Medido:} \code{tests/exaustao.c} ($7{:}0$), com zero valores fora
+do tipo. O gume: as $2751$ matrizes degeneradas são todas recusadas, e se
+as deixássemos correr a imagem colapsaria a um ponto em vez dos $128$.
+$\square$
+\end{corolario}
+
+\begin{teorema}[a escada paga uma fibra por andar --- e nenhuma excepção
+sobrevive a ela]\label{thm:fibra-por-andar}
+O Corolário~\ref{cor:zero-infinito} mostra que «$0^{-1}$ não existe» era
+uma propriedade da carta. Levada ao andar de baixo, a mesma pergunta dá a
+lei da escada inteira:
+\[
+\boxed{
+\begin{array}{lll}
+\text{andar} & \text{a fibra que fica TOTAL} & \text{a fibra que se PAGA}\\
+\midrule
+\mathbb{N} & \text{a soma} & \text{a subtracção: } a+x=b \text{ só se } b\ge a\\
+\mathbb{Z} & \text{a subtracção} & \text{o sinal, e a boa ordem}\\
+\mathbb{Q} & \text{a divisão} & \text{o zero } (0^{-1})\\
+\widehat{\mathbb{Q}} & \text{a inversão} & \text{a soma } (\infty+\infty)
+\end{array}}
+\]
+
+\textbf{(0) A lei, e ela não é uma lista.} \emph{Cada andar torna uma
+fibra total e paga noutra}, e não há andar onde tudo seja total. Isso
+muda o estatuto de todas as excepções que este quadro escreveu: deixam de
+ser defeitos e passam a ser o \textbf{preço} --- que é uma quantidade, e
+conta-se. E explica por que o $0^{-1}$ parecia sobreviver à escada toda:
+ele não sobrevivia; era o preço de \emph{um} andar, e no seguinte já está
+pago.
+
+\textbf{(1) E em $\mathbb{N}$ a subtracção tem exactamente a forma do
+$0^{-1}$.} $a+x=b$ tem fibra só quando $b\ge a$ --- medido, $1891$ dos
+$3721$ pares têm e $1830$ não têm ---, e a soma nunca falha. É o mesmo
+enunciado, com as operações trocadas.
+
+\textbf{(2) A consequência operacional, e é ela que desbloqueia a
+migração.} Em $\mathbb{N}$ um racional positivo \emph{é} uma sequência de
+naturais --- a fracção contínua ---, e os convergentes consecutivos
+satisfazem $|p_nq_{n+1}-p_{n+1}q_n|=1$, donde a \textbf{forma fechada}
+\[
+\Bigl|\frac{p_n}{q_n}-\frac{p_{n+1}}{q_{n+1}}\Bigr|
+=\frac{1}{q_n\,q_{n+1}} .
+\]
+O módulo de Cauchy deixa de ser uma busca na órbita: achar $N$ para
+$\varepsilon=a/b$ é achar o primeiro $n$ com $q_n q_{n+1}\,a>b$, uma
+comparação de naturais. \emph{Nenhuma diferença de racionais é formada} —
+e era ela que fazia os denominadores crescerem.
+
+\textbf{(3) E o ganho mede-se, em vez de se afirmar.} Formar a diferença
+obriga a multiplicar dois denominadores: o produto é o \emph{quadrado} do
+que os naturais sozinhos precisam. Medido na expansão de $\sqrt2$: pelo
+passo, o $\varepsilon$ aperta oito ordens de grandeza (de $10^{-1}$ a
+$10^{-8}$) com o maior natural em $1{,}31\cdot10^{9}$; formando a
+diferença, o denominador chega a $2{,}70\cdot10^{9}$ e pára ao passo
+$13$. A matemática é a mesma; \emph{a conta que se escolhe fazer decide o
+tamanho dos números}, que é o Teorema~\ref{thm:meta-inducao} aplicado ao
+último sítio onde ainda faltava.
+
+\emph{Medido:} \code{tests/aritmetica.c} ($6{:}0$), com as saturações
+contadas à parte. A volta fracção-contínua $\to$ convergentes fecha em
+$14\,400$ racionais; a identidade $\pm1$ vale em $74\,651$ pares
+consecutivos. $\square$
+\end{teorema}
+
 \begin{corolario}[zero e infinito são inversos --- e não há regra especial
 para o zero]\label{cor:zero-infinito}
 Seja $\iota$ a inversão induzida pela acção de Möbius na recta

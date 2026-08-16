@@ -12,6 +12,7 @@ analiticas e839e3fbf00311e4 0
 analog 04ade86bdec3cc0c 0
 antissimetrico 5c13e7c1c00d85b1 0
 app_arranca abb24b0fe22e3ae2 0
+aritmetica 67f71240db27105e 0
 arquimedes_area 3fb4925bc7f62b48 0
 arraytermico e4a2d53b3a3ef1da 0
 artefato d7a764740ef476b0 0
@@ -186,6 +187,7 @@ estrela_pontofixo 28214a4f49ddadcb 0
 estrela_unifica 5e2f9d7b477e452a 0
 estrutura_corpo 2f62a80aac5c3a03 0
 evolutivo 0d23ff55520f5c59 0
+exaustao e585271daf22f8dd 0
 expressao 92d06c014898a2ea 0
 fala 710144c0e4bd433c 0
 familia_real 63bd209ecb10c32e 0

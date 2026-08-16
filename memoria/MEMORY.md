@@ -46,6 +46,7 @@
 - **[A definição do extractor](feedback-a-definicao-do-extractor.md)** — publiquei «15 de 22 citam medidor»: era a definição da MINHA consulta, não um facto sobre o paper. Os 22 estavam medidos. E foi a 2.ª vez no dia — passou porque o número deixou de ser absurdo. Ler os que caem do lado NEGATIVO.
 - **[O tecto do array](feedback-o-tecto-do-array.md)** — subi `TR_MAX` para 64 e chamei-lhe «não tem tecto». Se a conclusão menciona um número do meu código, medi a MÁQUINA. Tese com «todo/sempre/sem limite» não se varre: prova-se o PASSO.
 - **[O double que só transportava](feedback-o-double-que-so-transportava.md)** — 20 doubles sobre dados que SEMPRE foram inteiros: não carregavam vírgula, traziam um limiar `1e-9` de borla. «É zero» é mais forte que «é menor que a régua que eu escolhi».
+- **[O Write diz «updated»](feedback-o-write-diz-updated.md)** — escrevi por cima de DOIS medidores no mesmo dia. A palavra que o Write devolve é o alarme; `git ls-files` antes.
 - **[O replace sem limite](feedback-o-replace-sem-limite.md)** — TRÊS vezes num dia: mudou laços e asserções noutros andares. O código idiomático é o que torna o replace global uma arma.
 - **[Saturação não é resultado](feedback-saturacao-nao-e-resultado.md)** — «falha travestida de teorema». Ia publicar «5 de 8» e as três em falta eram o `long`. A tese é do PASSO: virou 1040/1040.
 - **[Revisores em paralelo](feedback-revisores-externos.md)** — compensam MUITO e é preciso REPICAR. Os graves são todos do mesmo tipo: A ASSERÇÃO ERA O DEFEITO.
