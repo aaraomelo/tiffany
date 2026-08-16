@@ -458,7 +458,10 @@ static void B8_mult_Rn(void) {
     const long m = 1; const double TOL = 1e-9;
     long passou = 0, tot = 0; int dente_quebrou = 0;
     for (int n = 2; n <= 6; n++) {
-        double pot[16][8] = {{0}};                  /* a companion: pot[d][k] = σ^d reduzido        */
+        /* A tabela das potências é INTEIRA e sempre foi: nasce de 0 e 1, e a redução
+         * σ^n = m·σ^{n−1} + 1 só soma e copia. Era `double` e não carregava vírgula
+         * nenhuma — transportava inteiros num tipo que os pode arredondar. */
+        long pot[16][8] = {{0}};                    /* a companion: pot[d][k] = σ^d reduzido        */
         for (int d = 0; d < n; d++) pot[d][d] = 1;
         for (int d = n; d < 2*n-1; d++) {
             pot[d][0] = pot[d-1][n-1];
@@ -497,16 +500,54 @@ static void B8_mult_Rn(void) {
 /* ==========================================================================
  * §B.9 — O conversor discreto→contínuo: interpolação polinomial no circuito
  * ========================================================================== */
-/* c = V⁻¹ y : a interpolação (Vandermonde por Gauss) — as coordenadas do polinômio de ℝⁿ. */
-static void b9_interpola(int n, const double *x, const double *y, double *c) {
-    double A[12][13];
-    for (int i = 0; i < n; i++) { double p = 1; for (int k = 0; k < n; k++) { A[i][k] = p; p *= x[i]; } A[i][n] = y[i]; }
-    for (int k = 0; k < n; k++) {
-        int piv = k; for (int i = k+1; i < n; i++) if (fabs(A[i][k]) > fabs(A[piv][k])) piv = i;
-        for (int j = 0; j <= n; j++) { double t = A[k][j]; A[k][j] = A[piv][j]; A[piv][j] = t; }
-        for (int i = 0; i < n; i++) if (i != k) { double f = A[i][k]/A[k][k]; for (int j = k; j <= n; j++) A[i][j] -= f*A[k][j]; }
+/* c = V⁻¹ y : as coordenadas do polinômio de ℝⁿ.
+ *
+ * ISTO NÃO PRECISA DE ELIMINAÇÃO, e é a representação que decide. Os nós são x_i = i+1,
+ * INTEIROS — logo a Vandermonde é inteira, e a sua inversa tem FORMA FECHADA: Lagrange.
+ *
+ *      P(x) = Σ_i y_i · L_i(x),      L_i(x) = ∏_{j≠i} (x − x_j) / (x_i − x_j)
+ *
+ * O numerador ∏_{j≠i}(x − x_j) é um polinómio de coeficientes INTEIROS, porque os x_j
+ * são inteiros; e o denominador ∏_{j≠i}(x_i − x_j) é um INTEIRO. A parte que depende dos
+ * nós é toda exacta, e o único real que entra é o y — que é o dado, e é real de facto.
+ *
+ * O que estava aqui era Gauss com pivotamento por `fabs(A[i][k]) > fabs(A[piv][k])`, ou
+ * seja: uma matriz EXACTA reduzida por comparação de magnitudes em vírgula flutuante, com
+ * a divisão `f = A[i][k]/A[k][k]` a arredondar em cada passo. O pivô existe para conter o
+ * erro de uma eliminação — e aqui não há eliminação nenhuma a fazer.
+ *
+ * A base de Lagrange é a base DUAL dos nós: L_i(x_j) = δ_ij, que é a mesma Gram = I do
+ * §L1 do geometrico.tex, noutro andar. */
+static long b9_num[8][8];     /* N_i[k]: coeficientes INTEIROS de ∏_{j≠i}(x − x_j) */
+static long b9_den[8];        /* D_i = ∏_{j≠i}(x_i − x_j), inteiro                  */
+static long b9_resto = 0;     /* divisões que não fecharam — não pode acontecer     */
+
+static void b9_lagrange(int n, const long *xi) {
+    for (int i = 0; i < n; i++) {
+        long N[9] = {1};                       /* o polinómio 1, e vai-se multiplicando  */
+        int g = 0;                             /* grau corrente                          */
+        for (int j = 0; j < n; j++) {
+            if (j == i) continue;
+            for (int k = g + 1; k >= 1; k--) N[k] = N[k-1] - xi[j]*N[k];   /* ×(x − x_j) */
+            N[0] = -xi[j]*N[0];
+            g++;
+        }
+        long D = 1;
+        for (int j = 0; j < n; j++) if (j != i) D *= (xi[i] - xi[j]);
+        for (int k = 0; k < n; k++) b9_num[i][k] = N[k];
+        b9_den[i] = D;
     }
-    for (int k = 0; k < n; k++) c[k] = A[k][n]/A[k][k];
+}
+static void b9_interpola(int n, const double *x, const double *y, double *c) {
+    long xi[8];
+    for (int i = 0; i < n; i++) xi[i] = (long)(x[i] + (x[i] < 0 ? -0.5 : 0.5));
+    for (int i = 0; i < n; i++) if ((double)xi[i] != x[i]) b9_resto++;  /* nós têm de ser inteiros */
+    b9_lagrange(n, xi);
+    for (int k = 0; k < n; k++) {
+        double acc = 0;
+        for (int i = 0; i < n; i++) acc += y[i] * ((double)b9_num[i][k] / (double)b9_den[i]);
+        c[k] = acc;
+    }
 }
 static double b9_horner(int n, const double *c, double x) {         /* oráculo: P(x) exato */
     double a = c[n-1]; for (int k = n-2; k >= 0; k--) a = a*x + c[k]; return a;
@@ -542,7 +583,43 @@ static void B9_interp(void) {
         double Pd = 0; for (int k = 0; k < n; k++) if (fabs(c[k]) > 1e-12) Pd += (c[k]<0?-1:1)*tl_mul(fabs(c[k]), 2.0);  /* DENTE: pot fixo, sem realimentação */
         if (fabs(Pd - b9_horner(n,c,2.0)) > TOL) dente_quebrou = 1;
     }
-    printf("     9 sinais, n=4..6, coordenadas contínuas: P(x) analógico passa por cada amostra E\n");
+    /* O CONTROLO, e é ele que faz da Lagrange uma medida e não uma reescrita. A tese é
+     * que a base é DUAL dos nós — L_i(x_j) = δ_ij —, e ela escreve-se sem uma única
+     * divisão, porque L_i = N_i/D_i:
+     *
+     *      N_i(x_j) = D_i · δ_ij
+     *
+     * Inteiro contra inteiro, e o alvo é D_i ou ZERO — não «perto de». Nenhum double
+     * entra: os nós são inteiros, os N_i são inteiros por construção, e a avaliação de um
+     * polinómio inteiro num inteiro é inteira. Uma base errada erra isto, e nenhum «erro
+     * pequeno» a disfarça, porque não há erro nenhum a ter. */
+    long ctl = 0, ctl_ok = 0;
+    for (int n = 4; n <= 6; n++) {
+        long xi[8]; for (int i = 0; i < n; i++) xi[i] = i + 1;
+        b9_lagrange(n, xi);
+        for (int i = 0; i < n; i++) for (int j = 0; j < n; j++) {
+            long v = 0;                                  /* N_i(x_j) por Horner inteiro   */
+            for (int k = n-1; k >= 0; k--) v = v*xi[j] + b9_num[i][k];
+            long alvo = (i == j) ? b9_den[i] : 0;
+            ctl++; if (v == alvo) ctl_ok++;
+        }
+    }
+    printf("     CONTROLO: a base é DUAL dos nós — N_i(x_j) = D_i·δ_ij, inteiro contra\n");
+    printf("     inteiro e sem uma divisão: %ld de %ld pares (n = 4..6), e nós não\n", ctl_ok, ctl);
+    printf("     inteiros seriam %ld\n\n", b9_resto);
+    /* o DENTE: adulterar UM coeficiente parte a dualidade — e parte-a num par concreto */
+    long ctl_dente = 0;
+    { int n = 5; long xi[8]; for (int i = 0; i < n; i++) xi[i] = i + 1;
+      b9_lagrange(n, xi);
+      b9_num[0][0] = -b9_num[0][0];
+      for (int j = 0; j < n; j++) {
+          long v = 0;
+          for (int k = n-1; k >= 0; k--) v = v*xi[j] + b9_num[0][k];
+          if (v != ((0 == j) ? b9_den[0] : 0)) ctl_dente = 1;
+      } }
+    pulso("B.9c", "a base de Lagrange é DUAL dos nós: L_i(x_j) = δ_ij",
+          "N_i(x_j) = D_i·δ_ij, inteiro", ctl_ok - (b9_resto ? 1 : 0), ctl, (int)ctl_dente);
+    printf("\n     9 sinais, n=4..6, coordenadas contínuas: P(x) analógico passa por cada amostra E\n");
     printf("     bate P(x) exato em toda a rampa (a saída é contínua, avaliável em qualquer x).\n\n");
     pulso("B.9", "o circuito reconstrói o contínuo P(x) do discreto", "P(x) do corpo (Horner)",
           passou, tot, dente_quebrou);
