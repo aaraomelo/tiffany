@@ -30,26 +30,25 @@
  *   cc -O2 -std=c99 rn.c -lm -o rn && ./rn
  */
 #include <stdio.h>
-#include <math.h>
 #include "unidade.h"
 
-static double interno(const double *a, const double *b, int n){
-    double s = 0;
+static long interno(const long *a, const long *b, int n){
+    long s = 0;
     for(int k = 0; k < n; k++) s += a[k]*b[k];
     return s;
 }
-static void cruz3(const double *a, const double *b, double *c){
+static void cruz3(const long *a, const long *b, long *c){
     c[0] = a[1]*b[2] - a[2]*b[1];
     c[1] = a[2]*b[0] - a[0]*b[2];
     c[2] = a[0]*b[1] - a[1]*b[0];
 }
 /* o produto de R^(1+m): escalar + vetor de dimensão m. cruz = 0 quando não há cruzado. */
-static void prod(const double *A, const double *B, int m, void (*cruz)(const double*,const double*,double*),
-                 double *R){
-    double a0 = A[0], b0 = B[0];
-    const double *a = A+1, *b = B+1;
+static void prod(const long *A, const long *B, int m, void (*cruz)(const long*,const long*,long*),
+                 long *R){
+    long a0 = A[0], b0 = B[0];
+    const long *a = A+1, *b = B+1;
     R[0] = a0*b0 - interno(a, b, m);
-    double c[8] = {0};
+    long c[8] = {0};
     if(cruz) cruz(a, b, c);
     for(int k = 0; k < m; k++) R[1+k] = a0*b[k] + b0*a[k] + c[k];
 }
@@ -65,54 +64,83 @@ printf("\n§R1  A decomposição bate C e H, sem tabela de multiplicação nenhu
     int mal = 0;
     /* C: escalar + vetor de dim 1, sem cruzado */
     printf("      em C (vetor de dim 1, cruzado inexistente):\n");
-    struct { double A[2], B[2], R[2]; } tc[] = {
+    struct { long A[2], B[2], R[2]; } tc[] = {
         { {1,2}, {3,4}, {-5,10} },
         { {0,1}, {0,1}, {-1,0} },
         { {2,0}, {0,3}, {0,6} },
     };
     for(size_t k = 0; k < sizeof tc/sizeof *tc; k++){
-        double R[2];
+        long R[2];
         prod(tc[k].A, tc[k].B, 1, 0, R);
-        printf("        (%g,%g)·(%g,%g) = (%g,%g)   e o produto complexo dá (%g,%g)\n",
+        printf("        (%ld,%ld)·(%ld,%ld) = (%ld,%ld)   e o produto complexo dá (%ld,%ld)\n",
                tc[k].A[0],tc[k].A[1], tc[k].B[0],tc[k].B[1], R[0],R[1], tc[k].R[0],tc[k].R[1]);
-        if(fabs(R[0]-tc[k].R[0]) > 1e-12 || fabs(R[1]-tc[k].R[1]) > 1e-12) mal++;
+        if(R[0] != tc[k].R[0] || R[1] != tc[k].R[1]) mal++;
     }
     /* H: escalar + vetor de dim 3, com cruzado */
     printf("\n      em H (vetor de dim 3, com cruzado):\n");
-    double A[4] = {1,2,3,4}, B[4] = {5,6,7,8}, R[4];
+    long A[4] = {1,2,3,4}, B[4] = {5,6,7,8}, R[4];
     prod(A, B, 3, cruz3, R);
-    printf("        (1,2,3,4)·(5,6,7,8) = (%g,%g,%g,%g)\n", R[0],R[1],R[2],R[3]);
-    /* conferido contra a tabela de Hamilton: i²=j²=k²=ijk=-1 */
-    double esperado[4] = {-60, 12, 30, 24};
-    for(int k = 0; k < 4; k++) if(fabs(R[k]-esperado[k]) > 1e-12) mal++;
-    printf("        e a tabela de Hamilton dá   (-60,12,30,24)\n\n");
-    ok("a fórmula das quatro peças dá C e H, sem tabela de multiplicação", mal == 0);
+    printf("        (1,2,3,4)·(5,6,7,8) = (%ld,%ld,%ld,%ld)\n", R[0],R[1],R[2],R[3]);
+    /* E A TABELA DE HAMILTON CALCULA-SE, em vez de o resultado ser escrito. Estava aqui
+     *
+     *     long esperado[4] = {-60, 12, 30, 24};   // "conferido contra a tabela"
+     *
+     * — o resultado a fazer de oraculo, escrito por mim. A tabela nunca era usada, e se
+     * eu a tivesse lido mal o erro entrava dos dois lados.
+     *
+     * Agora ela DERIVA das regras: 1 e' neutro, i² = j² = k² = -1, e ij = k com o ciclo
+     * (i,j,k) — donde ji = -k por antissimetria. Dai sai o produto termo a termo, que e'
+     * uma rota independente da formula das quatro pecas (escalar + interno + cruzado). */
+    long tsin[4][4], tidx[4][4];
+    {
+        for(int i = 0; i < 4; i++){ tsin[0][i] = tsin[i][0] = 1; tidx[0][i] = tidx[i][0] = i; }
+        for(int i = 1; i < 4; i++){ tsin[i][i] = -1; tidx[i][i] = 0; }   /* i² = -1 */
+        for(int i = 1; i < 4; i++){                                       /* o ciclo ij = k */
+            int j = i % 3 + 1, k2 = j % 3 + 1;
+            tsin[i][j] = 1;  tidx[i][j] = k2;
+            tsin[j][i] = -1; tidx[j][i] = k2;                             /* ji = -k */
+        }
+    }
+    long H[4] = {0};
+    for(int i = 0; i < 4; i++) for(int j = 0; j < 4; j++)
+        H[tidx[i][j]] += tsin[i][j] * A[i] * B[j];
+    for(int k = 0; k < 4; k++) if(R[k] != H[k]) mal++;
+    printf("        e a tabela de Hamilton, DERIVADA das regras, da  (%ld,%ld,%ld,%ld)\n\n",
+           H[0],H[1],H[2],H[3]);
+    ok("A FORMULA DAS QUATRO PECAS DA C E H, SEM TABELA DE MULTIPLICACAO — e agora a"
+       " tabela de Hamilton CALCULA-SE em vez de o resultado ser escrito. Estava aqui um"
+       " `esperado[4] = {-60,12,30,24}` posto a mao, com o comentario a dizer «conferido"
+       " contra a tabela»: a tabela nunca era usada, e se eu a tivesse lido mal o erro"
+       " entrava dos dois lados. Agora ela deriva das REGRAS — 1 neutro, i²=j²=k²=-1, e"
+       " ij=k com o ciclo, donde ji=-k — e o produto termo a termo e uma rota independente"
+       " da formula das quatro pecas",
+       mal == 0);
     printf("      Não há tabela em lado nenhum: há a fórmula, e a única coisa que muda de C\n");
     printf("      para H é a DIMENSÃO do vetor e a existência do cruzado.\n");
 }
 
 printf("\n§R2  O cruzado é o ÚNICO termo antissimétrico — e a não-comutatividade É ele.\n\n");
 {
-    double a[3] = {1,2,3}, b[3] = {4,5,6}, ab[3], ba[3];
+    long a[3] = {1,2,3}, b[3] = {4,5,6}, ab[3], ba[3];
     cruz3(a,b,ab); cruz3(b,a,ba);
-    printf("      <a,b> = %g   <b,a> = %g          simétrico\n", interno(a,b,3), interno(b,a,3));
-    printf("      a×b = (%g,%g,%g)   b×a = (%g,%g,%g)   ANTIssimétrico\n\n",
+    printf("      <a,b> = %ld   <b,a> = %ld          simétrico\n", interno(a,b,3), interno(b,a,3));
+    printf("      a×b = (%ld,%ld,%ld)   b×a = (%ld,%ld,%ld)   ANTIssimétrico\n\n",
            ab[0],ab[1],ab[2], ba[0],ba[1],ba[2]);
-    int sim = fabs(interno(a,b,3) - interno(b,a,3)) < 1e-12;
+    int sim = (interno(a,b,3) == interno(b,a,3));
     int anti = 1;
-    for(int k = 0; k < 3; k++) if(fabs(ab[k] + ba[k]) > 1e-12) anti = 0;
+    for(int k = 0; k < 3; k++) if(ab[k] != -ba[k]) anti = 0;
     ok("o interno é simétrico e o cruzado é antissimétrico", sim && anti);
 
     /* e daí: a diferenca ab - ba e EXATAMENTE 2(a×b) */
-    double A[4] = {1,2,3,4}, B[4] = {5,6,7,8}, P[4], Q[4];
+    long A[4] = {1,2,3,4}, B[4] = {5,6,7,8}, P[4], Q[4];
     prod(A,B,3,cruz3,P); prod(B,A,3,cruz3,Q);
-    double vc[3]; cruz3(A+1, B+1, vc);
-    printf("      a·b = (%g,%g,%g,%g)\n", P[0],P[1],P[2],P[3]);
-    printf("      b·a = (%g,%g,%g,%g)\n", Q[0],Q[1],Q[2],Q[3]);
-    printf("      a·b - b·a = (%g,%g,%g,%g)\n", P[0]-Q[0],P[1]-Q[1],P[2]-Q[2],P[3]-Q[3]);
-    printf("      e 2(a×b)  = (0,%g,%g,%g)\n\n", 2*vc[0], 2*vc[1], 2*vc[2]);
-    int bate = fabs(P[0]-Q[0]) < 1e-12;
-    for(int k = 0; k < 3; k++) if(fabs((P[1+k]-Q[1+k]) - 2*vc[k]) > 1e-12) bate = 0;
+    long vc[3]; cruz3(A+1, B+1, vc);
+    printf("      a·b = (%ld,%ld,%ld,%ld)\n", P[0],P[1],P[2],P[3]);
+    printf("      b·a = (%ld,%ld,%ld,%ld)\n", Q[0],Q[1],Q[2],Q[3]);
+    printf("      a·b - b·a = (%ld,%ld,%ld,%ld)\n", P[0]-Q[0],P[1]-Q[1],P[2]-Q[2],P[3]-Q[3]);
+    printf("      e 2(a×b)  = (0,%ld,%ld,%ld)\n\n", 2*vc[0], 2*vc[1], 2*vc[2]);
+    int bate = (P[0] == Q[0]);
+    for(int k = 0; k < 3; k++) if(P[1+k]-Q[1+k] != 2*vc[k]) bate = 0;
     ok("a·b - b·a é EXATAMENTE 2(a×b) — a não-comutatividade é o cruzado", bate);
     printf("      Das quatro peças, três são simétricas em a e b: a0b0, <a,b> e a0b + b0a\n");
     printf("      não mudam se se trocarem os dois. Só o cruzado muda, e muda de SINAL. Logo\n");
@@ -128,7 +156,7 @@ printf("\n§R3  Em C o cruzado é zero, e é por isso que C comuta.\n\n");
     /* o vetor de C tem dimensao 1, e o cruzado de dois vetores de dim 1 e 0 — nao ha
      * antissimetrico nao nulo em dimensao 1. */
     /* O produto de C e POLINOMIAL — (a+bi)(c+di) = (ac-bd) + (ad+bc)i — e a comutatividade
-     * e uma identidade sobre inteiros. A versao anterior media UM par em double com
+     * e uma identidade sobre inteiros. A versao anterior media UM par em long com
      * tolerancia 1e-12; aqui varre-se uma familia e compara-se com IGUALDADE. */
     {
         long long tot=0, comuta=0;
@@ -162,7 +190,7 @@ printf("\n§R4  E o cruzado só existe em dim 1, 3 e 7 — é isso que limita a 
     printf("      15 (R^16)           NÃO HÁ     S       não      não, e há divisores de zero\n\n");
     /* A identidade de Lagrange é POLINOMIAL e os vetores são de inteiros — logo mede-se em
      * long long, com igualdade EXATA e sem tolerância nenhuma. A versão anterior media UM
-     * par em double com `fabs(lhs-rhs) < 1e-9`: media a aritmética de vírgula flutuante
+     * par em long com `(lhs-rhs) == 0`: media a aritmética de vírgula flutuante
      * sobre um objeto que é inteiro do princípio ao fim. E varre-se uma família. */
     {
         long long tot = 0, iguais = 0;
@@ -203,23 +231,19 @@ printf("\n§R5  E OS DOIS SÃO AS DUAS METADES DE QUALQUER PRODUTO BILINEAR.\n\n
     printf("                   SIMÉTRICA               ANTISSIMÉTRICA\n");
     printf("                   o DIRETO                o CRUZADO\n\n");
     /* mede-se num bilinear qualquer, em dim 3 */
-    double M[3][3] = { {1,2,3}, {4,5,6}, {7,8,10} };     /* B(a,b) = aᵀMb, sem simetria nenhuma */
     int mal = 0;
-    double pior_s = 0, pior_a = 0, pior_soma = 0;
-    for(int t = 0; t < 6; t++){
-        double a2[3] = { 1.0+t, 2.0-t, 0.5*t }, b2[3] = { 3.0-t, 1.0+0.5*t, 2.0 };
-        double Bab = 0, Bba = 0;
-        for(int i = 0; i < 3; i++) for(int j = 0; j < 3; j++){
-            Bab += a2[i]*M[i][j]*b2[j];
-            Bba += b2[i]*M[i][j]*a2[j];
-        }
-        double S = (Bab + Bba)/2, A2 = (Bab - Bba)/2;
-        /* a simétrica é mesmo simétrica, a antissimétrica é mesmo antissimétrica, e somam */
-        double S2 = (Bba + Bab)/2, A3 = (Bba - Bab)/2;
-        if(fabs(S - S2) > pior_s) pior_s = fabs(S - S2);
-        if(fabs(A2 + A3) > pior_a) pior_a = fabs(A2 + A3);
-        if(fabs((S + A2) - Bab) > pior_soma) pior_soma = fabs((S + A2) - Bab);
-    }
+    /* AQUI ESTAVA O MESMO DEFEITO DO matricial.c, e ja corrigido no bloco seguinte:
+     *
+     *     S  = (Bab + Bba)/2 ;   S2 = (Bba + Bab)/2 ;   comparava-se S com S2
+     *     A2 = (Bab - Bba)/2 ;   A3 = (Bba - Bab)/2 ;   e A2 com -A3
+     *
+     * — a MESMA expressao com as parcelas trocadas, e o zero vinha da soma comutar. Alem
+     * disso as entradas eram { 1.0+t, 2.0-t, 0.5*t } que, em inteiros, truncam o terceiro
+     * a ZERO na maioria dos casos: dados degenerados por cima de uma assercao vazia.
+     *
+     * O bloco que se segue mede a mesma tese como deve ser — avaliando a FORMA nos
+     * argumentos trocados, em DOBRO para nao dividir, sobre 300 bilineares de coeficientes
+     * inteiros —, e por isso este sai em vez de ser remendado. */
     /* A DECOMPOSICAO B = S + A e uma IDENTIDADE: S(a,b) = (B(a,b)+B(b,a))/2 e
      * A(a,b) = (B(a,b)-B(b,a))/2, logo S+A = B por construcao, S e simetrico e A
      * antissimetrico. Mede-se DOBRADO (2B = 2S + 2A) para ficar em inteiros, e sobre
@@ -274,7 +298,7 @@ printf("\n§R5  E OS DOIS SÃO AS DUAS METADES DE QUALQUER PRODUTO BILINEAR.\n\n
     printf("        nos grupos: G ⋉ H         (g₁,h₁)(g₂,h₂) = (g₁g₂, g₁·h₂ + h₁), um AGE\n\n");
     {
         /* ⟨a×b,a⟩ = 0 e a×a = 0 sao IDENTIDADES POLINOMIAIS: medem-se em inteiros, com
-         * igualdade, e sobre uma familia — nao num par em double com tolerancia. */
+         * igualdade, e sobre uma familia — nao num par em long com tolerancia. */
         long long tot=0, perp_ok=0, aa_ok=0;
         for(long long ax=-3;ax<=3;ax++) for(long long ay=-3;ay<=3;ay++)
         for(long long az=-3;az<=3;az++) for(long long bx=-3;bx<=3;bx++)
