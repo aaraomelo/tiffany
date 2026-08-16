@@ -457,6 +457,97 @@ printf("    duas induções encontram-se — o encontro é o que a fecha, e não
 printf("    E o par dual FECHA: directo² + cruzado² = N(u)N(v). A conservação da norma\n");
 printf("    e a decomposição simétrica ⊕ antissimétrica são a mesma frase, e o degrau 4\n");
 printf("    é onde o escalar arranja lugar. Zero doubles, zero tolerâncias.\n\n");
+/* ══════════════════════════════════════════════════════════════════════════════
+ * O OUTRO LADO DO PAR: GENTIL PRESERVA NORMA, E A NORMA DELE NÃO TEM TECTO
+ * ══════════════════════════════════════════════════════════════════════════════
+ * O Aarão: «os andares são em pares, os ímpares projectam os pares; vê a dualidade
+ * Hurwitz/Gentil/Lebesgue para entender melhor — Gentil preserva norma.»
+ *
+ * O §anterior mediu que o tecto é DO LADO DA NORMA e não do objecto. Falta a metade
+ * dual, que é o que o fecha: existe uma norma que NÃO tem tecto, e é a de Gentil.
+ *
+ * A álgebra dual do Gentil (medida no nne.c §N6) é o produto COMPONENTE A COMPONENTE
+ *
+ *      (a,b) ∗ (c,d) = (a·c, −b·d)
+ *
+ * e a norma que ela preserva não é a euclidiana: é o PRODUTO das coordenadas — o
+ * determinante de diag(a,b). E essa é multiplicativa em TODA a dimensão, porque o
+ * produto é componente a componente e o determinante é multiplicativo:
+ *
+ *      N(x ∗ y) = ∏ |x_i y_i| = ∏|x_i| · ∏|y_i| = N(x)·N(y)      sem tecto
+ *
+ * O PREÇO diz-se, e é ele que devolve Hurwitz: essa álgebra tem DIVISORES DE ZERO —
+ * basta uma coordenada nula —, logo não é álgebra de divisão. E a hipótese de Hurwitz é
+ * exactamente a divisão. Os dois lados do par:
+ *
+ *      HURWITZ   norma euclidiana + divisão      →  tecto em 8
+ *      GENTIL    norma-produto, sem divisão      →  SEM tecto
+ *
+ * O tecto de 8 não é do objecto nem do número: é do PAR (norma, divisão). Trocar a
+ * norma tira o tecto e paga a divisão. */
+{
+    printf("\n§H8  GENTIL PRESERVA NORMA — e a norma dele não tem tecto.\n\n");
+    long dims = 0, mult_ok = 0, div_zero = 0, euclid_falha = 0;
+    printf("      (a coluna da euclidiana é para o MESMO produto, o de Gentil — não é o\n");
+    printf("       teorema de Hurwitz, que já está medido acima com o produto certo)\n\n");
+    printf("      dim    N(x∗y) = N(x)N(y) com a norma-PRODUTO?   e com a euclidiana?\n");
+    for(int n = 2; n <= 32; n *= 2){
+        long mau = 0, mauE = 0, casos = 0;
+        for(int t = 0; t < 400; t++){
+            long x[32], y[32], z[32];
+            for(int i = 0; i < n; i++){
+                x[i] = ((t*7 + i*11) % 9) - 4;
+                y[i] = ((t*13 + i*5) % 9) - 4;
+                if(!x[i]) x[i] = 1;                     /* fora do divisor de zero */
+                if(!y[i]) y[i] = 2;
+                z[i] = ((i & 1) ? -1 : 1) * x[i] * y[i];  /* o produto de Gentil */
+            }
+            /* a norma-PRODUTO: ∏|coordenada| */
+            long Nx = 1, Ny = 1, Nz = 1;
+            for(int i = 0; i < n; i++){
+                Nx *= (x[i] < 0 ? -x[i] : x[i]);
+                Ny *= (y[i] < 0 ? -y[i] : y[i]);
+                Nz *= (z[i] < 0 ? -z[i] : z[i]);
+            }
+            /* a EUCLIDIANA, para contraste */
+            long Ex = 0, Ey = 0, Ez = 0;
+            for(int i = 0; i < n; i++){ Ex += x[i]*x[i]; Ey += y[i]*y[i]; Ez += z[i]*z[i]; }
+            casos++;
+            if(Nz != Nx*Ny) mau++;
+            if(Ez != Ex*Ey) mauE++;
+        }
+        dims++;
+        if(!mau) mult_ok++;
+        if(mauE) euclid_falha++;
+        printf("      %-6d %-42s %s\n", n, mau ? "NÃO" : "sim, exacta",
+               mauE ? "falha" : "sim");
+    }
+    /* e o PREÇO: uma coordenada nula mata o produto — divisores de zero */
+    {
+        long x[4] = {3, 0, 2, 5}, y[4] = {0, 7, 1, 1}, z[4];
+        for(int i = 0; i < 4; i++) z[i] = ((i & 1) ? -1 : 1) * x[i] * y[i];
+        long Nz = 1; for(int i = 0; i < 4; i++) Nz *= (z[i] < 0 ? -z[i] : z[i]);
+        int nao_nulos = (x[0] || x[1] || x[2] || x[3]) && (y[0] || y[1] || y[2] || y[3]);
+        if(nao_nulos && Nz == 0) div_zero = 1;      /* x ≠ 0, y ≠ 0, e N(x∗y) = 0 */
+    }
+    printf("\n      e o PREÇO: x = (3,0,2,5) e y = (0,7,1,1) são NÃO NULOS e o produto tem"
+           " norma ZERO (%s)\n", div_zero ? "sim" : "NÃO");
+    printf("      — divisores de zero, logo NÃO é álgebra de divisão; e a divisão é a"
+           " hipótese de Hurwitz\n\n");
+    ok("GENTIL PRESERVA NORMA, E A NORMA DELE NÃO TEM TECTO — que é a metade dual do"
+       " teorema de Hurwitz. O produto de Gentil é componente a componente, e a norma que"
+       " ele preserva não é a euclidiana: é o PRODUTO das coordenadas, o determinante de"
+       " diag(x). Essa é multiplicativa em TODA a dimensão — 2, 4, 8, 16, 32 —, enquanto a"
+       " euclidiana não a preserva em dimensão nenhuma PARA ESTE produto — o que não é o"
+       " teorema de Hurwitz, que precisa do produto quaterniónico e está medido acima. E o"
+       " PREÇO diz-se, porque é ele que"
+       " devolve Hurwitz: com uma coordenada nula o produto tem norma zero sem que nenhum"
+       " factor seja nulo, logo há DIVISORES DE ZERO e não é álgebra de divisão. O tecto de"
+       " 8 não é do objecto nem do número: é do PAR (norma euclidiana, divisão). Trocar a"
+       " norma tira o tecto e paga a divisão",
+       mult_ok == dims && dims == 5 && euclid_falha > 0 && div_zero);
+}
+
 printf("    %ld estouros do teto (%ld) — se não for 0, os inteiros não chegaram.\n", estouros, (long)TETO);
 ok("nenhuma conta passou o teto declarado — o limite não é documentação, é medido",
    estouros == 0);

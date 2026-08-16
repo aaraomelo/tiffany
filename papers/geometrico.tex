@@ -812,6 +812,33 @@ $22$ racionais, quota de $22/64$ a $22/4096$}
 \noindent\emph{E o par cone/espiral tem a mesma forma da soma reversível}: duas
 leituras do mesmo objecto, que têm de fechar uma na outra.
 
+\medskip
+\noindent\textbf{E o que Gentil preserva é uma norma, mas não a mesma.} É a metade que
+fecha a tríade, e sem ela «Gentil casa» fica sem conteúdo operacional. O produto dele é
+\emph{componente a componente}, $(a,b)\ast(c,d)=(ac,\,-bd)$, e a norma que ele preserva
+é o \textbf{produto das coordenadas} --- o determinante de $\operatorname{diag}(x)$, e
+não a euclidiana:
+\[
+\boxed{\;N(x\ast y)=\prod_i\abs{x_iy_i}=\prod_i\abs{x_i}\cdot\prod_i\abs{y_i}
+=N(x)\,N(y)\qquad\text{em \textbf{toda} a dimensão}\;}
+\]
+Donde o par, e ele explica o tecto:
+\[
+\boxed{
+\begin{array}{lll}
+\textbf{Hurwitz} & \text{norma euclidiana}\ +\ \text{divisão} & \to\ \text{tecto em }8\\[3pt]
+\textbf{Gentil} & \text{norma-produto, \emph{sem} divisão} & \to\ \textbf{sem tecto}
+\end{array}}
+\]
+\textbf{O tecto de $8$ não é do objecto nem do número: é do par (norma, divisão).} Trocar
+a norma tira o tecto e paga a divisão --- e o preço exibe-se: com uma coordenada nula o
+produto tem norma zero sem que nenhum factor seja nulo, logo há \emph{divisores de zero},
+que é exactamente o que a hipótese de Hurwitz proíbe.
+\colunas{a tríade, e o tecto como propriedade da norma}
+        {a norma que Gentil preserva, e o preço que ela cobra}
+        {\code{tests/hurwitz.c} \S H8: a norma-produto multiplicativa em $2,4,8,16,32$,
+e o divisor de zero exibido}
+
 %======================================================================
 \section{Um número é um polinómio}\label{sec:polinomio}
 
