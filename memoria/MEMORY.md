@@ -66,7 +66,7 @@
 - [O fator de potência é a régua](project-fator-de-potencia.md) — |det|=1, fator unitário e inversa inteira são TRÊS NOMES da mesma condição. O motor quer fp=1, o tecido quer fp=0.
 - [O corpo quântico e o cósmico](project-quantico-cosmico.md) — [σi,σj]=2i·ε·σk É o produto cruzado. E: CHAMEI LEI À CONSEQUÊNCIA DE UMA ESCOLHA MINHA (Carnot). Gatilho: que parâmetros do teorema fui eu que escolhi?
 - **[A escada paga uma fibra por andar](project-escada-paga-uma-fibra.md)** — «não eliminamos as excepções; descobrimos em que andar elas são o preço». Os `if` vêm da normalização: 10 → 0.
-- **[A RETA CONSTRUÍDA](project-a-reta-construida.md)** — bit → 8 leis → dual → Pisot → corte → ℝ, e a completude é CONSEQUÊNCIA da conservação da área: comprimento × largura = 1.
+- **[A RETA CONSTRUÍDA](project-a-reta-construida.md)** — ℝ INTEIRO nas oito leis: o ouro é o real mais lento e limita todos. E a lição: não virar JUIZ da teoria, executar a construção.
 - **[O TEOREMA DO GATO](project-teorema-do-gato.md)** — det É a medida; sobe em espiral, desce discreto; e o dual do gato é o PASSARINHO — conservar a medida é ser o seu próprio dual métrico.
 - **[A derivada exterior](project-a-derivada-exterior.md)** — o `d` é UMA operação (grad/rot/div são nomes dela) e Green/Stokes/Gauss são UM teorema: a prova é o PROGRAMA ser um só. Sete objectos de cinco andares, uma gramática — a graduação.
 - **[Cálculo II e III](project-calculo-2-3.md)** — a série é o OBJECTO e o valor é que precisa do limite; local→global; e Green/Stokes/Gauss são UMA frase: ∫_∂R ω = ∫_R Dω, com os dois lados sem código em comum.

@@ -10,6 +10,7 @@
 # PDFs gerados dos papers (pdflatex regenera dos .tex). Os quatro da raiz foram apagados
 # em 03/08 — regeneram-se com `pdflatex <p>.tex`, e o deploy fá-lo sozinho.
 /teoria.pdf
+/geometrico.pdf
 /tiffany.pdf
 /microprocessador.pdf
 /viveiro.pdf

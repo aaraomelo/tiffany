@@ -1,21 +1,24 @@
 % !TeX program = pdflatex
-% papers/geometrico.tex — A RETA CONSTRUÍDA.
+% papers/geometrico.tex — A CONSTRUÇÃO DE ℝ, realizada geometricamente.
 %
-% Reescrito por inteiro (16/08). O paper antigo partia da dimensão 3, do círculo
-% e do polígono, e construía uma «reta real geométrica» com a régua já na mão.
-% O eval do coordenador inverteu a ordem:
+% Reescrito por inteiro (16/08), segunda vez no dia. A primeira reescrita ainda
+% «estava com medo da própria construção»: tinha um §13 «O que este paper não
+% faz» a funcionar como freio, e uma ressalva — «não constrói todos os reais» —
+% que era invenção do autor e não do quadro.
 %
-%   «não usamos a reta para construir os números; construímos a reta a partir
-%    do processo que produz os números»
-%
-% e fixou a espinha: bit → 8 leis → F_2^8 → dual → metálico/Pisot → corte → R,
-% com a regra editorial de que NENHUMA definição geométrica precede o corte.
+% O eval fixou a hierarquia:
+%     o Universal PROVA | o geométrico REALIZA | os medidores VERIFICAM
+% e a ordem, que é obrigatória:
+%     8 leis → base ortonormal → operação bit a bit → dual → recorrência
+%            → Pisot → encaixe → corte → completude → ℝ → π_k/gume
+% Este paper é FILHO do corpo_universal.tex, não um paper independente.
 % Auto-contido: pdflatex geometrico.tex
 \documentclass[11pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[portuguese]{babel}
 \usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
 \usepackage[margin=2.5cm]{geometry}
 \usepackage{booktabs}
 \usepackage{xcolor}
@@ -28,521 +31,416 @@
 \newcommand{\code}[1]{\texttt{\small #1}}
 \newcommand{\abs}[1]{\lvert #1\rvert}
 \newcommand{\dg}{^{\dagger}}
+% as três colunas, em cada peça: quem prova, quem realiza, quem verifica
+\newcommand{\colunas}[3]{%
+\par\smallskip\noindent{\footnotesize
+\textbf{prova} (Universal): #1\quad$\big|$\quad
+\textbf{realiza} (aqui): #2\quad$\big|$\quad
+\textbf{verifica}: #3}\par\smallskip}
 \input{gkcapa}
 \begin{document}
-\gkcapa{A Reta Construída}
-       {do bit às oito leis, do dual à família metálica, de Pisot ao corte}
-       {a completude não é axioma: é a área que se conserva}
+\gkcapa{A Construção de $\mathbb{R}$}
+       {realização geométrica da cadeia fechada no Corpo Universal}
+       {oito leis, uma base, um dual, e o corte que a área obriga a fechar}
 \maketitle
 
 \begin{abstract}
-\noindent Este paper não usa a reta para construir os números. Constrói a reta
-a partir do processo que os produz, e a ordem é
+\noindent Este paper é \textbf{filho} do \emph{Corpo Universal}. Não
+reconstrói o sistema nem decide se ele é permitido: \textbf{realiza
+geometricamente a construção que o Universal já fechou}, na ordem
 \[
 \boxed{\;
-\text{bit}\;\to\;8\ \text{leis}\;\to\;\mathbb{F}_2^{8}\;\to\;\text{dual}
-\;\to\;\text{metálico/Pisot}\;\to\;\text{corte}\;\to\;\mathbb{R}.\;}
+\text{8 leis}\to\text{base ortonormal}\to\text{bit a bit}\to\text{dual}
+\to\text{recorrência}\to\text{Pisot}\to\text{encaixe}\to\text{corte}
+\to\mathbb{R}\to\pi_k .\;}
 \]
-A base das oito leis é ortonormal, e por isso \emph{ler uma coordenada é medir
-um bit}: a geometria discreta existe antes de qualquer real. O dual
-$\nu(x)=-1/x$ produz a recorrência inteira $u_{n+2}=m\,u_{n+1}+u_n$, e com ela a
-família metálica --- \emph{sem avaliar uma raiz}. Como
-$\abs{\sigma_m}>1$ e $\abs{\sigma_m\dg}<1$, e como
-$\sigma_m^{k}+(\sigma_m\dg)^{k}$ é \textbf{inteiro},
-\[
-\boxed{\;\operatorname{dist}(\sigma_m^{k},\mathbb{Z})=\abs{\sigma_m\dg}^{k}
-\;:\;\text{a aproximação não é escolhida --- é produzida pela dualidade.}\;}
-\]
-Daí saem os intervalos encaixados e o corte. E o corte fecha por uma razão que
-já é desta casa: $\abs{\det}=\abs{\sigma\sigma\dg}=1$, a área conserva-se; como
-o comprimento diverge, a largura \emph{tem} de ir a zero. Só depois disso
-entram comprimento, distância, reta e círculo --- e $\pi$ fica no lugar certo:
-$\pi_k$ é a representação fechada do andar~$k$, e $\pi_\infty$ é o limite
-parabólico, que não fecha na escada. \emph{O círculo não é o ponto de partida
-da geometria: é o gume da construção.}
+Cada seta deixa um objecto no papel e um medidor no repositório. A base das
+oito leis tem Gram $=I$, e por isso $b_i=\langle b,e_i\rangle$ \emph{é} o bit
+--- o que autoriza o bit a bit não é a codificação, é a ortonormalidade. O dual
+$\sigma\dg=-\sigma^{-1}$ produz a recorrência inteira; o operador \textbf{produz}
+o inteiro $t_k=\sigma^{k}+(\sigma\dg)^{k}$, e com ele
+$\operatorname{dist}(\sigma^{k},\mathbb{Z})=\abs{\sigma\dg}^{k}$: a aproximação
+não é escolhida. Daí o encaixe, e daí o corte.
 
-\smallskip
-\noindent\emph{Medido:} \code{tests/geometria\_real.c} ($9{:}0$), com
-\code{tests/metalica.c}, \code{tests/ortonormal.c}, \code{tests/pisotbase.c},
-\code{tests/ordenado.c}, \code{tests/pi\_familia.js},
-\code{tests/arquimedes\_area.js} e \code{tests/geometrico.js}.
+\smallskip\noindent
+E a construção é de $\mathbb{R}$ \textbf{inteiro}. Corre sobre quocientes
+parciais \emph{arbitrários} --- um real \emph{é} uma dessas sucessões ---, e
+o metálico é o caso \emph{periódico}, não o caso único. Com $a_k\geq1$,
+\[
+\boxed{\;q_k\geq F_k,\quad\text{com igualdade em TODO }k
+\text{ só na sucessão de uns}\;}
+\]
+--- o \textbf{ouro é o real mais lento que existe}, e por isso uma só taxa
+limita todos. A família metálica não é o escopo da construção: é o seu caso
+extremo.
+
+\smallskip\noindent\emph{Medido:} \code{tests/geometria\_real.c} ($15{:}0$).
 \end{abstract}
 
 %======================================================================
-\section{A regra editorial, e o que ela proíbe}
+\section{A hierarquia}\label{sec:hier}
 
-Um paper que constrói $\mathbb{R}$ e usa a palavra \emph{comprimento} na
-página um já pediu emprestado o que ia construir. Por isso a regra, e ela
-governa a ordem das secções:
-
+Três colunas, e não se misturam:
 \begin{center}
-\fbox{\parbox{0.9\textwidth}{\centering
-\textbf{Nenhuma definição geométrica antes da construção do corte}
---- salvo as mínimas para enunciar o que será construído.}}
+\begin{tabular}{@{}p{4.4cm}p{4.4cm}p{5.4cm}@{}}
+\toprule
+o \emph{Corpo Universal} & este paper & os medidores \\
+\midrule
+\textbf{PROVA} e organiza & \textbf{REALIZA} geometricamente & \textbf{VERIFICAM} \\
+as oito leis, a base ortonormal, o Gato, Pisot, o corpo ordenado completo
+ & a mesma cadeia, com um objecto geométrico por seta
+ & cada afirmação, com contagem e gume \\
+\bottomrule
+\end{tabular}
 \end{center}
 
-Concretamente: até ao \S\ref{sec:corte} não há reta, não há círculo, não há
-polígono. Há bits, há uma forma bilinear sobre $\mathbb{F}_2$, há uma
-recorrência de inteiros e há comparações de inteiros. As
-secções~\ref{sec:geo} em diante é que trazem a geometria --- e trazem-na
-\emph{como consequência}, não como cenário.
+\noindent Cada peça deste paper leva, no fim, a linha das três colunas. Se uma
+afirmação não tiver as três, não está pronta.
 
 \medskip
-\noindent\textbf{E a regra admite exactamente duas excepções, que se nomeiam
-aqui para que não passem caladas.} Uma regra que o próprio texto viola sem
-avisar é pior do que nenhuma.
-\begin{itemize}
-\item \textbf{A distância no cubo} (\S\ref{sec:orto}) --- e ela não é um
-empréstimo, porque toma valores em $\{0,\ldots,8\}$: é uma contagem de bits.
-Que exista \emph{geometria discreta} antes de qualquer real é o primeiro
-resultado do paper, não uma antecipação do último.
-\item \textbf{A área, o comprimento e a largura} do \S\ref{sec:area} --- e aí
-as três palavras nomeiam \emph{um determinante}, que numa matriz de inteiros é
-um inteiro. É a leitura geométrica de $\det$, e é o Teorema do Gato: nenhum
-contínuo entra para a dizer. A distinção está enunciada em
-Obs.~\ref{obs:area-inteira}, e é ela que impede a demonstração de ser
-circular.
-\end{itemize}
-
-\medskip
-\noindent Isto também arruma a divisão de trabalho com o resto do quadro:
-\[
-\boxed{\;
-\underbrace{\text{\emph{Corpo Universal}}}_{\text{prova e organiza}}
-\qquad\Big|\qquad
-\underbrace{\text{este paper}}_{\text{realiza geometricamente a MESMA construção}}
-\;}
-\]
-Nada aqui é um segundo sistema. O que aqui se acrescenta é a leitura
-geométrica de uma cadeia que já está provada, e um mecanismo --- a conservação
-da área --- que explica \emph{por que} o último elo fecha.
+\noindent E a regra editorial que governa a ordem: \textbf{nenhuma definição
+geométrica antes da construção do corte}, com duas excepções nomeadas ---
+a distância no cubo (\S\ref{sec:orto}), que toma valores em $\{0,\ldots,8\}$
+e é contagem de bits, e a área do \S\ref{sec:det}, que nomeia um
+\emph{determinante} e portanto um inteiro. Uma regra que o próprio texto viola
+sem avisar é pior do que nenhuma.
 
 %======================================================================
-\section{A primitiva: um bit}\label{sec:bit}
+\section{As oito leis são uma base ortonormal}\label{sec:orto}
 
-\begin{definicao}[o objecto mínimo]\label{def:bit}
-$\mathbb{F}_2=\{0,1\}$, com a soma XOR e o produto AND. O oposto de $x$ é o
-próprio $x$: \emph{o sinal não existe}.
-\end{definicao}
+Sobre $\mathbb{F}_2$ há uma só forma bilinear simétrica não degenerada:
+$\langle a,b\rangle=\operatorname{paridade}(a\wedge b)$.
 
-\begin{definicao}[as oito posições]\label{def:posicoes}
-$b=(b_0,\ldots,b_7)\in\mathbb{F}_2^{8}$, e a posição $i$ está
-\textbf{reservada à Lei}~$i$. Escrito em binário, $b=\sum_i b_i 2^{i}$: um byte.
-\end{definicao}
-
-Que as leis sejam oito e que o byte tenha oito posições não é coincidência de
-máquina: a dobra leva $1\to2\to4\to8$ e o catálogo das leis é um ciclo gerador
-de período oito. Isso está estabelecido no \emph{Corpo Universal} e aqui
-\emph{usa-se}, não se repete.
-
-%======================================================================
-\section{A base é ortonormal --- e por isso já há geometria}\label{sec:orto}
-
-Sobre $\mathbb{F}_2$ há uma só forma bilinear simétrica não degenerada
-disponível, e é esta:
-\[
-\langle a,b\rangle \;=\; \operatorname{paridade}(a\wedge b).
-\]
-
-\begin{teorema}[a base das oito leis é ortonormal]\label{thm:orto}
-$\langle e_i,e_j\rangle=\delta_{ij}$, isto é, a matriz de Gram é a identidade.
-Logo a coordenada recupera-se sem inverter sistema nenhum:
+\begin{teorema}\label{thm:orto}
+Com $e_k=2^{k}$ reservado à Lei $k$, a matriz de Gram é a identidade:
+$\langle e_i,e_j\rangle=\delta_{ij}$. Logo
 \[
 \boxed{\;b_i=\langle b,e_i\rangle\;}
 \]
---- \emph{um AND e uma paridade, que é ler o bit}. \emph{Medido:}
-\code{tests/ortonormal.c} ($6{:}0$). $\square$
+--- um AND e uma paridade, que é \emph{ler o bit} ---, e
+$b=\sum_i\langle b,e_i\rangle e_i$ reconstrói. $\square$
 \end{teorema}
+\colunas{a base é ortonormal (\code{thm:ortonormal})}
+        {Gram $=I$ nos $64$ pares; $2048$ leituras}
+        {\code{geometria\_real.c} \S L1}
 
-\noindent E é aqui que a primeira frase geométrica aparece, ainda sem um único
-real dentro:
-
-\begin{proposicao}[a distância é a soma das coordenadas]\label{prop:dist}
-Em $\mathbb{F}_2^{8}$,
-\[
-d(a,b)\;=\;\sum_{i=0}^{7}\bigl\lvert\langle a,e_i\rangle-\langle b,e_i\rangle\bigr\rvert
-\;=\;\operatorname{peso}(a\oplus b),
-\]
-e $d$ toma valores em $\{0,\ldots,8\}$, anula-se só na diagonal, é simétrica e
-fecha a desigualdade do triângulo. O \textbf{diâmetro é $8$}, porque as leis são
-oito. \emph{Medido} nos $65\,536$ pares e nos $262\,144$ trios, pelos dois
-caminhos --- a soma das coordenadas e o peso ---, sem divergência:
-\code{tests/geometria\_real.c} \S G0. $\square$
-\end{proposicao}
-
-\begin{observacao}[o que já se ganhou, e o que ainda falta]
-Existe distância, existe diâmetro, existe triângulo. Ou seja: \emph{há
-geometria}, e ela é inteira, finita e exacta. O que ainda \textbf{não} há é
-\emph{contínuo} --- e é exactamente isso que as secções seguintes constroem.
-Esta face, aliás, não admite ordem de corpo, porque $1+1=0$; dizer o contrário
-seria trocar o escopo, e o escopo faz parte do enunciado.
+\begin{observacao}[oito leis não são uma metáfora para oito bits]
+A base ortonormal das oito leis \emph{realiza} $\mathbb{F}_2^{8}$. Cada
+operação da face binária de uma unidade é, portanto, uma operação
+\textbf{coordenada} em oito posições --- e o byte deixa de ser analogia com o
+ASCII: é a \textbf{realização finita da base universal}.
 \end{observacao}
 
 %======================================================================
-\section{O dual: uma unidade, duas faces}\label{sec:dual}
+\section{E é a ortonormalidade que autoriza o bit a bit}\label{sec:bitabit}
 
-A dualidade organiza as oito posições sem acrescentar graus de liberdade. É o
-princípio que no quadro aparece como Gato e Esquilo:
-\[
-\boxed{\;\text{uma unidade}\;=\;\text{duas faces duais.}\;}
-\]
-Não é «bit \emph{versus} real»: é a mesma estrutura vista dos dois lados. E o
-que interessa aqui é que o dual não é decorativo --- ele \textbf{produz} o
-objecto seguinte.
+Dizer que «oito passos enchem um byte» é uma afirmação sobre
+\emph{codificação}, e ela não demonstra que a álgebra \emph{opere} bit a bit.
+O que o demonstra é $G=I$: com Gram identidade a extracção da coordenada não
+custa sistema nenhum. Numa base qualquer seria preciso \textbf{inverter} a
+Gram --- e o preço mede-se.
 
-\begin{definicao}[a involução]\label{def:nu}
-$\nu(x)=-1/x$. Ela é total na recta projectiva, onde a inversão é a troca
-$[p:q]\mapsto[q:p]$ e $0\dg=\infty$.
-\end{definicao}
-
-\begin{teorema}[o dual produz a recorrência]\label{thm:dual-produz}
-Seja $A_m=\begin{pmatrix}m&1\\1&0\end{pmatrix}$ e $\sigma$ a classe de $x$ em
-$\mathbb{Z}[x]/(x^{2}-mx-1)$. Então $\sigma\dg=-\sigma^{-1}=m-\sigma$, e
-\[
-\sigma+\sigma\dg=m,\qquad \sigma\,\sigma\dg=-1,
-\]
-lidos por \textbf{três caminhos independentes} que têm de concordar:
-\emph{(A)} o traço e o determinante de $A_m$;
-\emph{(B)} a involução $\nu$ dentro de $\mathbb{Z}[\sigma]$, usando apenas
-$\sigma^{2}=m\sigma+1$;
-\emph{(C)} a potência
-$A_m^{k}=\begin{pmatrix}F_{k+1}&F_k\\F_k&F_{k-1}\end{pmatrix}$.
-Concordam para $m=1,\ldots,40$; e o \textbf{gume}: alterada uma entrada da
-companheira, o determinante deixa de valer $-1$ nos $40$ casos.
-\emph{Medido:} \code{tests/geometria\_real.c} \S G1. $\square$
+\begin{teorema}[o gume da base torcida]\label{thm:torcida}
+Com $f_k=e_k\oplus e_{k+1}$, a Gram sai da identidade em $24$ dos $64$ pares, e
+a leitura directa passa a dar a coordenada errada em \textbf{exactamente
+metade} das $2048$ --- $1024$, que é o que o XOR de dois bits independentes dá.
+\emph{O \code{uint8\_t} não é conveniência de máquina: é a base ortonormal
+escrita em hardware.} $\square$
 \end{teorema}
-
-\emph{Nenhuma raiz foi avaliada.} As duas identidades acima são a soma e o
-produto de duas faces, e saem da redução --- não de um valor decimal.
+\colunas{a operação completa é coordenada (\S\,«a operação completa»)}
+        {o custo da coordenada numa base não ortonormal}
+        {\code{geometria\_real.c} \S L2}
 
 %======================================================================
-\section{A escada metálica: a recorrência é a construção}\label{sec:metal}
+\section{A torre $1\to2\to4\to8$, e o reuso}\label{sec:torre}
 
-\begin{definicao}[a escada]\label{def:escada}
-Para $m\geq1$ inteiro,
-\[
-u_{n+2}=m\,u_{n+1}+u_n,
-\]
-e escrevem-se $F_k$ (com $F_0=0$, $F_1=1$) e $t_k$ (com $t_0=2$, $t_1=m$) as
-duas soluções que a casa usa: o \emph{Fibonacci} e o \emph{Lucas} metálicos.
-\end{definicao}
+\begin{teorema}\label{thm:torre}
+A dobra $T\oplus T^{*}$ duplica a dimensão e chega a oito em
+\textbf{exactamente três} passos. E a passagem ao andar seguinte não cria
+aritmética nova: \emph{duplica a estrutura pela dualidade}, pelo que a torre
+$2,4,8,16,\ldots$ é a própria expansão da base operacional.
 
-A representação alcançada é $\sigma_m=\bigl(m+\sqrt{m^{2}+4}\bigr)/2$, e ela
-\textbf{não} é o ponto de partida: escreve-se aqui uma vez, para dizer de que se
-fala, e não volta a ser usada como número. \emph{A raiz é a representação
-alcançada; a recorrência é a construção.} Tudo o que segue lê-se em
-$\mathbb{Z}[\sigma]$.
-
-\begin{proposicao}[o que já estava medido]\label{prop:ja}
-$\sigma^{k}=F_{k-1}+F_k\sigma$; o traço $t_k=\sigma^{k}+(\sigma\dg)^{k}$ fica em
-$\mathbb{Z}$ e obedece a $t_{k+1}=m\,t_k+t_{k-1}$; $N(\sigma^{k})=(-1)^{k}$; e
-\emph{unidade} e \emph{Pisot} são critérios distintos, com a família metálica na
-intersecção. \emph{Medido:} \code{tests/metalica.c}. $\square$
-\end{proposicao}
+O que cresce é o \textbf{objecto}, não a máquina: um real precisa de infinitos
+bits, e a base que os lê tem oito posições, \textbf{reutilizadas bloco a
+bloco}. Medido num fluxo de $400$ decisões lido em $50$ blocos pelas mesmas oito
+coordenadas, sem a base ganhar uma posição. $\square$
+\end{teorema}
+\colunas{a dobra $1\to2\to4\to8$ e o ciclo de período oito}
+        {os oito bits reusados em cada andar}
+        {\code{geometria\_real.c} \S L3}
 
 %======================================================================
-\section{Pisot é o mecanismo geométrico}\label{sec:pisot}
+\section{O dual produz a recorrência}\label{sec:dual}
 
-Este é o coração do paper.
-
-\begin{teorema}[a aproximação é produzida, não escolhida]\label{thm:pisot-geo}
-Como $\abs{\sigma_m}>1$ e $\abs{\sigma_m\dg}<1$, tem-se
-$(\sigma_m\dg)^{k}\to0$; e como $\sigma_m^{k}+(\sigma_m\dg)^{k}=t_k$ é
-\textbf{inteiro},
+\begin{teorema}\label{thm:dual}
+Com $A_m=\begin{psmallmatrix}m&1\\1&0\end{psmallmatrix}$ e $\sigma$ a classe de
+$x$ em $\mathbb{Z}[x]/(x^{2}-mx-1)$:
 \[
-\boxed{\;\operatorname{dist}\bigl(\sigma_m^{k},\mathbb{Z}\bigr)
-=\bigl\lvert(\sigma_m\dg)^{k}\bigr\rvert\;}
+\sigma\dg=-\sigma^{-1}=m-\sigma,
+\qquad \sigma+\sigma\dg=m,
+\qquad \sigma\sigma\dg=-1,
 \]
-sempre que $\abs{\sigma_m\dg}^{k}<\tfrac12$ --- condição que se decide em
-inteiros puros, por
-\[
-(t_k-1)^{2}\;<\;\Delta F_k^{2}\;<\;(t_k+1)^{2},\qquad \Delta=m^{2}+4,
-\]
-e que, substituída a identidade $t_k^{2}-\Delta F_k^{2}=4(-1)^{k}$, se reduz a
-$t_k\geq2$ ($k$ ímpar) e $t_k\geq3$ ($k$ par). \emph{Os dois caminhos concordam
-em todos os $131$ andares medidos, sem uma discordância.}
-\emph{Medido:} \code{tests/geometria\_real.c} \S G2; e
-\code{tests/pisotbase.c} \S B4 pelo lado da numeração. $\square$
+por \textbf{três caminhos independentes} --- o traço e o determinante da
+companheira; a involução lida \emph{dentro} de $\mathbb{Z}[\sigma]$ usando só
+$\sigma^{2}=m\sigma+1$; e a potência
+$A_m^{k}=\begin{psmallmatrix}F_{k+1}&F_k\\F_k&F_{k-1}\end{psmallmatrix}$.
+Concordam para $m=1,\ldots,40$, e \emph{nenhuma raiz é avaliada}: a raiz é a
+representação alcançada, a recorrência é a construção. \emph{Gume}: mexida uma
+entrada da companheira, o determinante deixa de valer $-1$ nos $40$. $\square$
 \end{teorema}
+\colunas{o dual, e o Gato como Möbius}
+        {a recorrência inteira $u_{n+2}=m\,u_{n+1}+u_n$}
+        {\code{geometria\_real.c} \S L4; \code{metalica.c}}
 
-\begin{observacao}[a hipótese não é vazia --- e o escopo diz-se]\label{obs:gume-ouro}
-Há \textbf{exactamente um} andar, em toda a janela medida, onde
-$\abs{\sigma\dg}^{k}<\tfrac12$ falha: o \emph{ouro no primeiro degrau}. Lá,
-$t_1=1$, $\Delta F_1^{2}=5$ e $(t_1+1)^{2}=4$ --- e de facto o inteiro mais
-próximo de $\varphi$ é $2$, não $1$. Portanto a lei vale do segundo degrau em
-diante para $m=1$, e desde o primeiro para $m\geq2$. Uma afirmação sem este
-escopo estaria meio certa, que é a pior maneira de estar certo.
+%======================================================================
+\section{Pisot: o operador produz o inteiro}\label{sec:pisot}
+
+\begin{teorema}\label{thm:pisot}
+$t_k=\sigma^{k}+(\sigma\dg)^{k}\in\mathbb{Z}$, logo
+$\sigma^{k}=t_k-(\sigma\dg)^{k}$ e
+\[
+\boxed{\;\operatorname{dist}(\sigma^{k},\mathbb{Z})=\abs{\sigma\dg}^{k}\;}
+\]
+a partir do momento em que a outra face entrou na metade certa do intervalo.
+A condição decide-se \textbf{em inteiros}, por
+$(t_k-1)^{2}<\Delta F_k^{2}<(t_k+1)^{2}$ com $\Delta=m^{2}+4$, e concorda com a
+forma reduzida pela identidade $t_k^{2}-\Delta F_k^{2}=4(-1)^{k}$ nos $131$
+andares, sem uma discordância.
+
+\emph{Não há escolha de aproximação: o inteiro $t_k$ é produzido pelo próprio
+operador.} $\square$
+\end{teorema}
+\colunas{$\abs{\sigma}>1$, $\abs{\sigma\dg}<1$, vazamento zero (\code{thm:pisot})}
+        {a distância ao inteiro como quantidade PRODUZIDA}
+        {\code{geometria\_real.c} \S L5; \code{pisotbase.c} \S B4}
+
+\begin{observacao}[o escopo, medido]\label{obs:escopo}
+A condição $\abs{\sigma\dg}^{k}<\tfrac12$ quebra em \textbf{exactamente um}
+andar de toda a janela: o ouro no primeiro degrau, onde
+$\abs{\varphi\dg}=0{,}618>\tfrac12$ e o inteiro mais próximo de $\varphi$ é $2$,
+não $1$. É o andar em que a outra face ainda não entrou na metade certa. Entra
+no segundo degrau, e para $m\geq2$ já no primeiro.
 \end{observacao}
 
-\medskip
-\noindent A frase que este teorema autoriza é a do coordenador, e ela é a tese
-do paper:
+%======================================================================
+\section{Os dois determinantes --- e a igualdade é o teorema}\label{sec:det}
+
+Aqui há uma distinção que a primeira versão deste paper misturou, e que é
+precisa:
+
+\begin{teorema}\label{thm:doisdet}
+São \textbf{dois objectos}, calculados por caminhos que não se tocam:
 \[
-\boxed{\;\text{a aproximação não é escolhida; ela é PRODUZIDA pela dualidade.}\;}
+\underbrace{\det A_m^{k}=F_{k+1}F_{k-1}-F_k^{2}}_{\text{das ENTRADAS, em }\mathbb{Z}}
+\qquad\text{e}\qquad
+\underbrace{\sigma^{k}(\sigma\dg)^{k}=N(\sigma^{k})=a^{2}+mab-b^{2}}_{\text{ESPECTRAL, o produto das duas faces}}
 \]
-Nenhuma sucessão foi exibida à mão, nenhum $\varepsilon$ foi escolhido. O erro
-que aparece é $\abs{\sigma\dg}^{k}$, e $\sigma\dg$ é a \emph{outra face} de
-$\sigma$ --- a que o \S\ref{sec:dual} produziu.
+O primeiro não sabe que existem valores próprios; o segundo não olha para uma
+entrada da matriz. Coincidem --- ambos $(-1)^{k}$, nos $115$ andares, e junto
+com a multiplicatividade $N(\sigma)^{k}=(-1)^{k}$ --- por «$\det$ é o produto do
+espectro», \emph{que é o teorema}. É a coincidência que se mede, não a
+definição. $\square$
+\end{teorema}
+\colunas{$\det$ É a medida (Teorema do Gato)}
+        {as duas leituras da mesma unidade, separadas}
+        {\code{geometria\_real.c} \S L6}
+
+\begin{observacao}[e é daí que vem a geometria]\label{obs:area}
+Nas duas direcções próprias, uma cresce e a outra encolhe:
+$\abs{\sigma}>1$, $\abs{\sigma\dg}<1$, com
+$\abs{\sigma^{k}(\sigma\dg)^{k}}=1$. \textbf{O intervalo não é postulado
+pequeno; ele fica pequeno porque uma face cresce enquanto a face dual é
+obrigada a encolher para preservar a unidade.} E «área», «comprimento» e
+«largura» nomeiam aqui um determinante, que numa matriz de inteiros é um
+inteiro: nenhum contínuo foi pedido emprestado para dizer isto.
+\end{observacao}
 
 %======================================================================
 \section{O encaixe}\label{sec:encaixe}
 
-\begin{teorema}[os convergentes encaixam, e a largura é inteira]\label{thm:encaixe-geo}
-Seja $c_k=F_{k+1}/F_k$. Então:
-\emph{(i)} $c_k$ e $c_{k+1}$ caem em lados \textbf{opostos} de $\sigma$;
-\emph{(ii)} cada intervalo está \textbf{dentro} do anterior;
-\emph{(iii)} pela identidade de Cassini metálica
-$F_{k+1}^{2}-F_{k+2}F_k=(-1)^{k}$, a largura é
+\begin{teorema}\label{thm:encaixe}
+Os convergentes caem alternadamente nos dois lados, cada intervalo está
+\textbf{dentro} do anterior, e por Cassini metálico
+$F_{k+1}^{2}-F_{k+2}F_k=(-1)^{k}$ a largura é
 \[
-\abs{c_{k+1}-c_k}=\frac{1}{F_kF_{k+1}}
+\abs{c_{k+1}-c_k}=\frac{1}{F_kF_{k+1}},
 \]
---- exacta, e obtida sem fazer uma única divisão. \emph{Medido} nos $115$
-degraus de $m=1,\ldots,8$, sem excepção: \code{tests/geometria\_real.c} \S G3.
-$\square$
+exacta e sem uma divisão. $\square$
 \end{teorema}
-
-\begin{observacao}
-A primeira versão deste enunciado tinha o sinal de Cassini trocado, e a medição
-deu $0$ de $115$. Um sinal errado num expoente $(-1)^{k}$ é invisível na
-leitura e total na medição --- é para isso que o medidor serve.
-\end{observacao}
+\colunas{o encaixe alcança $\mathbb{R}$ (\code{thm:encaixe})}
+        {os intervalos, com largura inteira}
+        {\code{geometria\_real.c} \S L7}
 
 %======================================================================
-\section{A área é a razão: por que o encaixe fecha}\label{sec:area}
+\section{$\mathbb{R}$ inteiro --- e o ouro é o extremo}\label{sec:todos}
 
-Aqui entra o Teorema do Gato, e é ele que substitui o axioma.
+Esta é a secção que a versão anterior não tinha, e a sua falta era uma
+ressalva inventada pelo autor.
 
-\begin{teorema}[a completude é consequência da conservação da área]\label{thm:area-fecha}
-$\det A_m=-1$, logo $\det A_m^{k}=(-1)^{k}$ e
-\[
-\boxed{\;\abs{\det}=\abs{\sigma\sigma\dg}=1\quad\text{em todos os andares.}\;}
-\]
-Lido geometricamente: o quadrado unitário vai, sob $A_m^{k}$, num paralelogramo
-de \textbf{comprimento} $\sigma^{k}$ na direcção que estica e \textbf{largura}
-$\abs{\sigma\dg}^{k}$ na que encolhe, e
-\[
-\text{comprimento}\times\text{largura}=1 .
-\]
-Como o comprimento diverge, a largura \textbf{tem} de ir a zero. \emph{Não é um
-axioma acrescentado à construção: é a área que não pode aumentar nem diminuir.}
-Medido: $\abs{\det}=1$ nos $115$ andares, e o traço a crescer nos $115$.
-\emph{Medido:} \code{tests/geometria\_real.c} \S G4. $\square$
-\end{teorema}
-
-\begin{observacao}[a «área» aqui é um inteiro --- e é por isso que o argumento
-não é circular]\label{obs:area-inteira}
-Um paper que constrói $\mathbb{R}$ e usa \emph{área} para o fazer devia estar a
-pedir emprestado o que vai construir. Não está, e a razão é aritmética: a
-quantidade conservada é
-\[
-\det A_m^{k}=F_{k+1}F_{k-1}-F_k^{2}=(-1)^{k},
-\]
-uma \textbf{diferença de produtos de inteiros}. «Área» é o \emph{nome
-geométrico} desse inteiro --- o Teorema do Gato: $\det$ \textbf{é} a medida ---,
-e a igualdade
-$\text{comprimento}\times\text{largura}=1$ é a factorização de $\pm1$ nas duas
-faces $\sigma$ e $\sigma\dg$. Nenhum contínuo foi usado para a enunciar nem para
-a medir: o medidor compara inteiros. O contínuo aparece \emph{depois}, e
-aparece como \textbf{conclusão} --- a largura vai a zero --- e não como
-hipótese.
-\end{observacao}
-
-\begin{observacao}[o único degrau plano]
-$F$ cresce estritamente em $114$ dos $115$: a excepção é $F_1=F_2=1$, o ouro,
-que demora um andar a arrancar. É o \emph{mesmo} $m$ do
-Obs.~\ref{obs:gume-ouro} --- o primeiro degrau do ouro é o sítio onde a família
-ainda não separou as duas faces o suficiente.
-\end{observacao}
-
-\begin{teorema}[o controlo: sem Pisot não há reta]\label{thm:controlo}
-Tome-se $x^{2}-2x-4$, cuja raiz dominante é $1+\sqrt5$ e cuja conjugada é
-$1-\sqrt5$, com $\abs{\sigma\dg}=\sqrt5>1$ e norma $-4$. A recorrência é
-inteira, o traço é inteiro, e ainda assim:
-o critério do Teor.~\ref{thm:pisot-geo} falha em \textbf{todos} os $12$ andares
-medidos, e $\abs{\det}=1$ em \textbf{nenhum} --- $\det A^{k}=(-4)^{k}$. O que
-devia encolher \emph{cresce}, e o encaixe não fecha.
-\emph{Uma recorrência inteira qualquer não dá a reta: tem de ser unidade e tem
-de ser Pisot.} \emph{Medido:} \code{tests/geometria\_real.c} \S G4. $\square$
-\end{teorema}
-
-\noindent Sem este controlo, o Teor.~\ref{thm:pisot-geo} poderia estar a medir
-uma propriedade de \emph{qualquer} recorrência inteira. Está a medir Pisot.
-
-%======================================================================
-\section{O corte}\label{sec:corte}
-
-\begin{teorema}[o corte decide-se em inteiros]\label{thm:corte}
-Para $a\in\mathbb{Z}$, $b\geq1$ e $\Delta=m^{2}+4$:
-\[
-\frac{a}{b}<\sigma_m
-\quad\Longleftrightarrow\quad
-2a-mb<0 \ \ \text{ou}\ \ (2a-mb)^{2}<b^{2}\Delta .
-\]
-Nos $19\,360$ racionais varridos ($m\leq8$, $b\leq20$, $\abs{a}\leq60$):
-\emph{(i)} cada um cai de um lado e \textbf{nenhum} cai em cima --- porque
-$\Delta$ não é quadrado, que é dizer $\sigma\notin\mathbb{Q}$;
-\emph{(ii)} nenhuma das duas classes tem extremo: para cada $a/b$ do lado de
-baixo \emph{exibe-se} $a'/b'$ com $a/b<a'/b'<\sigma$, e simetricamente do outro.
-A raiz nunca é avaliada: elevar ao quadrado é tudo o que é preciso.
-\emph{Medido:} \code{tests/geometria\_real.c} \S G5. $\square$
-\end{teorema}
-
-\begin{teorema}[e o bit lê o corte]\label{thm:bit-le}
-Bissectar $[m,m+1]$ e perguntar de que lado está $\sigma_m$ é \emph{uma}
-pergunta --- a do Teor.~\ref{thm:corte}, decidida em inteiros --- e devolve
-exactamente \textbf{um bit}. Oito passos enchem um byte; o intervalo fica com
-largura $1/256$ e $\sigma_m$ continua dentro nos oito passos, para os oito
-metais. E o bit lê-se pela coordenada $\langle b,e_i\rangle$ da base ortonormal
-do \S\ref{sec:orto}. \emph{Medido:} \code{tests/geometria\_real.c} \S G6.
-$\square$
-\end{teorema}
-
-\medskip
-\noindent A cadeia fecha:
-\[
-\boxed{\;
-\text{Pisot}\Longrightarrow\text{vazamento}\to0
-\Longrightarrow\text{encaixe}\Longrightarrow\text{corte}\Longrightarrow\mathbb{R}.\;}
-\]
-
-\begin{observacao}[a identificação final é literatura, e diz-se]\label{obs:citada}
-Que um corpo ordenado completo seja isomorfo a $\mathbb{R}$, e único a menos de
-isomorfismo, é \textbf{teorema clássico} --- não deste quadro. O que aqui se
-constrói e se mede são as \emph{hipóteses}: corpo, ordem compatível com as
-operações, arquimediano com o $n$ exibido, e completo pelo corte. A conclusão
-cita-se. Misturar as duas coisas seria dar ao trabalho um crédito que não é
-dele. \emph{Medido:} \code{tests/ordenado.c} ($7{:}0$).
-\end{observacao}
-
-%======================================================================
-\section{E só agora: a geometria}\label{sec:geo}
-
-Com o corte construído, as definições geométricas podem entrar --- e entram
-\emph{como consequências}, cada uma apoiada numa peça já medida.
-
-\begin{definicao}[comprimento, intervalo, distância, reta]\label{def:geo}
-O \textbf{comprimento} do intervalo $[c_k,c_{k+1}]$ é $1/(F_kF_{k+1})$
-(Teor.~\ref{thm:encaixe-geo}); a \textbf{distância} entre dois cortes é o
-comprimento do intervalo que os separa; e a \textbf{reta} é o conjunto dos
-cortes, com a ordem induzida pela comparação inteira do Teor.~\ref{thm:corte}.
+\begin{definicao}\label{def:real}
+Um real \emph{é} uma sucessão de quocientes parciais $a_k\geq1$, com
+convergentes $p_k/q_k$ dados por $q_{-1}=0$, $q_0=1$,
+$q_k=a_kq_{k-1}+q_{k-2}$. A bijecção entre reais e essas sucessões é clássica e
+cita-se.
 \end{definicao}
 
-\noindent Repare-se no que foi invertido. No paper anterior, a reta era o
-cenário e os números eram pontos marcados nela. Aqui a reta é o
-\emph{arquivo do processo}: cada ponto é o corte que um encaixe produziu, e o
-comprimento é a largura que a conservação da área obrigou a ir a zero.
-
-%======================================================================
-\section{O círculo é o gume}\label{sec:circulo}
-
-Só agora o círculo, e ele entra pelo lado que interessa: como o \emph{membro que
-não fecha}.
-
-\begin{teorema}[$\pi_k$ fecha por andar; $\pi_\infty$ não fecha na escada]\label{thm:pi}
-Pela tricotomia do traço, a família é uma só: os \textbf{polígonos} são os
-membros \emph{elípticos} ($t_n<2$), e fecham em ordem $2n$ exacta no primo da
-ordem --- $\sqrt2$ é $11$ em $\mathbb{F}_{17}$, $\sqrt3$ é $9$ em
-$\mathbb{F}_{13}$; os \textbf{metais} são os \emph{hiperbólicos}
-($\Delta=m^{2}+4>0$), que são os que este paper usou para construir o corte; e o
-\textbf{círculo} é o limite \emph{parabólico} $t=2$, unipotente, cuja ordem
-módulo $p$ é exactamente $p$ --- logo \textbf{nunca} um divisor da ordem da
-escada. \emph{Medido:} \code{tests/pi\_familia.js} ($7{:}0$). $\square$
+\begin{teorema}[a construção corre sobre quocientes arbitrários]\label{thm:todos}
+Para uma sucessão \textbf{qualquer} --- não só a periódica ---:
+$p_kq_{k-1}-p_{k-1}q_k=(-1)^{k-1}$, logo $\abs{\det}=1$ em todos os passos; os
+convergentes alternam de lado; os intervalos aninham; e $q_k$ cresce. Medido em
+$220$ sucessões (o ouro, a prata e $218$ arbitrárias), $3651$ pares, sem
+excepção. \emph{O metálico é o caso periódico, e não o caso único.} $\square$
 \end{teorema}
 
-\begin{corolario}[o lugar de $\pi$]\label{cor:pi}
-$\pi_k$ é a representação geométrica \textbf{fechada} do andar~$k$, e
-$\pi_\infty$ é o limite parabólico, que não fecha em ordem da escada. Portanto
-não há aqui nada a aproximar: quem escrever um limiar para $\pi$ está a importar
-uma constante que o quadro já tem exacta por andar, ou está a pedir o limite. E
-esta é a mesma fronteira do eixo de Pontryagin, agora dita como propriedade do
-membro-limite: \emph{a álgebra opera e não alcança o contínuo; o encaixe alcança
-e não opera}. $\square$
+\begin{teorema}[o ouro é o real mais lento que existe]\label{thm:ouro}
+Com $a_k\geq1$,
+\[
+\boxed{\;q_k\geq F_k\ \text{para todo real},\qquad
+\text{com igualdade em TODO }k\ \text{só na sucessão de uns.}\;}
+\]
+Logo a largura $1/(q_kq_{k+1})$ de \emph{qualquer} real é menor ou igual à do
+ouro: \textbf{uma só taxa limita $\mathbb{R}$ inteiro}, e é a do ouro. A família
+metálica não é o escopo da construção --- é o seu caso \textbf{extremo}.
+$\square$
+\end{teorema}
+\colunas{a torre, o dual, e a família metálica}
+        {a construção para TODOS os reais, com o ouro a limitar}
+        {\code{geometria\_real.c} \S L8}
+
+\begin{observacao}[o empate pontual é comum; o total é único]
+A primeira redacção afirmou de mais. O empate $q_k=F_k$ num $k$ isolado é
+frequente --- qualquer sucessão que comece por uns empata no princípio, e a
+medição contou $69$. O que \emph{só} o ouro faz é empatar em \textbf{todos} os
+andares: uma sucessão em $220$, e nenhuma fora da sucessão de uns. A afirmação
+certa é essa, e a medição é que a fixou.
+\end{observacao}
+
+%======================================================================
+\section{O corte, e o bit que decide}\label{sec:corte}
+
+O corte não é uma técnica adicional: é a \textbf{leitura ordenada da mesma
+sucessão}.
+
+\begin{teorema}\label{thm:corte}
+Para $a\in\mathbb{Z}$, $b\geq1$ e $\Delta=m^{2}+4$, a pergunta
+$\tfrac ab<\sigma_m$ converte-se na comparação inteira
+\[
+2a-mb<0\quad\text{ou}\quad(2a-mb)^{2}<b^{2}\Delta .
+\]
+Nos $19\,360$ racionais varridos: nenhum cai \emph{em cima} --- porque $\Delta$
+não é quadrado, que é dizer $\sigma\notin\mathbb{Q}$ --- e nenhuma das duas
+classes tem extremo, com o seguinte \emph{exibido} em cada caso. $\square$
+\end{teorema}
+
+\noindent Portanto o bit não apenas \emph{representa} o número:
+
+\begin{corolario}\label{cor:bitdecide}
+\[
+\boxed{\;\text{bit}\to\text{decisão}\to\text{intervalo}\to\text{encaixe}
+\to\text{corte}\to\text{número real}.\;}
+\]
+Cada bisseção é \emph{uma} pergunta do Teor.~\ref{thm:corte} e devolve
+\textbf{um bit}; oito enchem um byte, que é o bloco que a base ortonormal do
+\S\ref{sec:orto} lê pelas suas oito coordenadas. A base das oito leis reaparece
+como \textbf{a máquina de leitura de cada bloco de decisões}. $\square$
 \end{corolario}
+\colunas{$\mathbb{P}^1$, a inversão total, e o corte}
+        {o bit como DECISÃO de lado, e o byte como leitor do bloco}
+        {\code{geometria\_real.c} \S L9}
 
-\begin{observacao}[o círculo como gume, e não como origem]
-O paper anterior começava no triângulo --- «o primeiro polígono regular que
-fecha» --- e subia. A ordem estava invertida: o polígono e o círculo são o
-\emph{fim} da construção, não o princípio, porque ambos precisam de área, e a
-área precisa de comprimento, e o comprimento precisa do corte. Aqui eles são o
-gume: o sítio onde se vê que a escada tem uma fronteira, e que a fronteira é
-teorema.
+%======================================================================
+\section{A completude}\label{sec:completude}
+
+O intervalo aperta porque uma face é obrigada a encolher para a unidade se
+conservar (Obs.~\ref{obs:area}); o encaixe fecha; o corte fica determinado.
+As hipóteses de corpo ordenado completo estão medidas --- corpo, ordem
+compatível com as operações, arquimediano com o $n$ exibido, completo pelo
+corte --- em \code{tests/ordenado.c} ($7{:}0$).
+
+\begin{observacao}[a identificação com $\mathbb{R}$]
+Que um corpo ordenado completo seja isomorfo a $\mathbb{R}$, e único a menos de
+isomorfismo, é teorema clássico, e cita-se como tal. \textbf{Mas a passagem a
+$\mathbb{R}$ não é a identificação posterior de um subconjunto conveniente}: é
+a realização da \emph{face alcançada} da própria construção. A face binária
+permanece finita e não ordenável como corpo; a face alcançada é aquela em que
+os cortes se tornam estrutura ordenada e completa. \emph{São duas faces do
+mesmo eixo, não duas teorias concorrentes.}
 \end{observacao}
 
 %======================================================================
-\section{As áreas dos andares, e a torre normalizada}\label{sec:areas}
+\section{E só então $\pi$}\label{sec:pi}
 
-O que o paper anterior tinha de próprio sobrevive --- \emph{a jusante} do corte,
-que é onde sempre pertenceu. Fica registado por inteiro, com os seus medidores.
+\begin{teorema}\label{thm:pi}
+Pela tricotomia do traço: os polígonos são os membros \textbf{elíticos}, e a
+companheira $C=\begin{psmallmatrix}t&-1\\1&0\end{psmallmatrix}$ tem ordem
+exactamente $2n$ --- $6$ no triângulo, $8$ no quadrado, $12$ no hexágono ---
+com as raízes \emph{realizadas inteiras} nos primos das ordens: $\sqrt2$ é $11$
+e $6$ em $\mathbb{F}_{17}$, $\sqrt3$ é $9$ e $4$ em $\mathbb{F}_{13}$. Os
+metais são os \textbf{hiperbólicos}, que foram o motor
+dos \S\S\ref{sec:dual}--\ref{sec:todos}. E o círculo é o \textbf{parabólico}
+$t=2$, cuja ordem módulo $p$ é exactamente $p$ --- ímpar, logo nunca divisor da
+ordem $2n$ de andar nenhum. $\square$
+\end{teorema}
 
-\begin{proposicao}[Arquimedes das áreas]\label{prop:arquimedes}
-Cada andar elíptico $n\in\{3,4,6,8\}$ traz um círculo renormalizado com a área
-do polígono circunscrito $C_n$, ficando o inscrito $I_n$ por baixo; e a
-duplicação $n\to2n$ desce pelas médias \emph{geométrica} e \emph{harmónica}:
 \[
-I_{2n}^{2}=I_nC_n,\qquad C_{2n}(I_{2n}+C_n)=2I_{2n}C_n .
+\boxed{\;\pi_k=\text{fecho geométrico do andar }k,
+\qquad \pi_\infty=\text{fronteira parabólica.}\;}
 \]
-Os círculos dos andares \textbf{não são o mesmo círculo}: $C_3,C_4,C_6,C_8$ são
-distintos dois a dois, por desigualdades quadráticas inteiras. E
-$I_8<333/106<\pi<22/7<C_8$ em $\mathbb{Z}$: $\pi$ no buraco. \emph{O gume}: a
-média \emph{aritmética} não duplica. \emph{Medido:}
-\code{tests/arquimedes\_area.js} ($21{:}0$). $\square$
-\end{proposicao}
 
-\begin{proposicao}[a torre normalizada pesa $1$]\label{prop:torre}
-Com $\abs{C_n}=\abs{P_n}=1/2^{\,n-1}$ para $n\geq3$, a soma parcial é
-\[
-\sum_{n=3}^{N}\frac{1}{2^{\,n-1}}=\frac12-\frac{1}{2^{\,N-1}},
-\]
-logo cada metade da torre pesa $\tfrac12$ e a torre pesa $1$; e a leitura em
-andares consecutivos dá $\tfrac1{2^{n}}+\tfrac1{2^{n-1}}=\tfrac3{2^{n}}$ dos
-dois lados. \emph{O gume}: repetido o peso do triângulo, três andares somam
-$\tfrac34\neq\tfrac12$ --- a série só fecha porque os níveis \emph{descem} em
-potência de $2$. \emph{Medido:} \code{tests/geometrico.js}. $\square$
-\end{proposicao}
-
-\begin{observacao}[o estatuto que estas duas mudaram]
-Na versão anterior, a igualdade $\abs{C_n}=\abs{P_n}$ era o \emph{axioma
-fundamental} e a normalização era a construção da reta. Nenhuma das duas coisas
-se sustenta na ordem nova: a igualdade é uma \textbf{identificação de andar} e a
-normalização é uma \textbf{escolha de pesos}, e ambas pressupõem a área, que
-pressupõe o corte. Passam a proposições, e o que era o axioma passa a ser a
-hipótese que as define. \emph{Nada foi apagado; foi mudado de andar} --- que é o
-mesmo que se fez, no quadro, com a excepção do zero.
-\end{observacao}
+\noindent Nenhuma constante foi importada: \textbf{cada andar apresenta a sua}.
+E ao chegar ao círculo a família muda de natureza, de fechar na escada para
+fechar só no primo --- é a mesma fronteira do eixo, agora como propriedade do
+membro-limite. \emph{Assim o círculo não é usado para construir a reta: a reta
+construída explica por que o círculo aparece como o seu gume.}
+\colunas{$\pi$ é o membro-limite da família (\code{thm:pi-familia})}
+        {$\pi_k$ exacto por andar, realizado nos primos das ordens}
+        {\code{geometria\_real.c} \S L10; \code{pi\_familia.js}}
 
 %======================================================================
-\section{O que este paper não faz}\label{sec:escopo}
+\section{O contraexemplo ao mecanismo}\label{sec:contra}
 
-\begin{itemize}
-\item \textbf{Não prova a unicidade de $\mathbb{R}$.} Cita-a
-(Obs.~\ref{obs:citada}). O que mede são as hipóteses.
-\item \textbf{Não constrói todos os reais}, e sim os de $\mathbb{Z}[\sigma_m]$:
-a construção é dada na família metálica, que é onde o mecanismo --- Pisot --- é
-exacto e inteiro. A extensão a um corte arbitrário é o Teor.~\ref{thm:corte},
-que já decide qualquer racional, mas o \emph{gerador} aqui é metálico.
-\item \textbf{Não afirma que a face finita é ordenada.} Não é
-($1+1=0$), e isso é teorema. A face que alcança é que é o corpo ordenado
-completo. O escopo é parte de cada enunciado.
-\item \textbf{Não calcula $\pi$}, e não porque falte instrumento: porque
-$\pi_k$ já é exacto por andar e $\pi_\infty$ é o limite, por
-Teor.~\ref{thm:pi}.
-\end{itemize}
+\begin{proposicao}\label{prop:contra}
+Em $x^{2}-2x-4$ a recorrência é inteira e o traço é inteiro nos $12$ andares
+--- \emph{as primeiras setas passam} --- e mesmo assim o critério do
+\S\ref{sec:pisot} falha nos $12$ e $\abs{\det}=1$ em nenhum, porque
+$\det A^{k}=(-4)^{k}$ \textbf{cresce} em módulo a cada andar. A face que devia
+encolher não encolhe. $\square$
+\end{proposicao}
 
-\medskip
+\noindent Daqui não se conclui caracterização nenhuma --- «tem de ser unidade e
+Pisot» não está demonstrado neste quadro. Conclui-se o que se vê: \textbf{em que
+seta este exemplo pára}. É um contraexemplo ao \emph{mecanismo}, e serve para
+mostrar que o mecanismo tem conteúdo.
+\colunas{---}{o passo nomeado onde a cadeia parte}
+        {\code{geometria\_real.c} \S L11}
+
+%======================================================================
+\section{A construção está fechada}\label{sec:fechada}
+
+O \emph{Corpo Universal} fornece a estrutura operacional; este paper fornece a
+sua realização geométrica.
+
 \begin{center}
-\fbox{\parbox{0.92\textwidth}{\centering
-\textbf{A tese.} A geometria real é a realização alcançada de uma estrutura
-binária de oito leis: \textbf{a base fornece as coordenadas}, \textbf{a
-dualidade fornece a recorrência}, \textbf{a família de Pisot fornece o encaixe}
-e \textbf{o corte fornece o contínuo}.\\[4pt]
-E o encaixe fecha porque a área se conserva: $\abs{\det}=\abs{\sigma\sigma\dg}=1$.}}
+\fbox{\parbox{0.94\textwidth}{\centering\medskip
+o \textbf{bit} fornece a unidade\quad$\to$\quad
+as \textbf{oito leis} fornecem a base\quad$\to$\quad
+o \textbf{dual} fornece a recorrência\\[3pt]
+$\to$\quad \textbf{Pisot} fornece o encolhimento\quad$\to$\quad
+o \textbf{corte} fornece a ordem\quad$\to$\quad$\mathbb{R}$.\medskip}}
 \end{center}
 
 \medskip
-\emph{Medido:} \code{tests/geometria\_real.c} ($9{:}0$),
+\noindent E a tese, numa frase: \emph{a geometria real é a realização alcançada
+de uma estrutura binária de oito leis --- a base fornece as coordenadas, a
+dualidade fornece a recorrência, a família de Pisot fornece o encaixe, e o corte
+fornece o contínuo.} Não usámos a reta para construir os números: construímos a
+reta a partir do processo que os produz.
+
+\medskip
+\emph{Medido:} \code{tests/geometria\_real.c} ($15{:}0$), com
 \code{tests/ortonormal.c} ($6{:}0$), \code{tests/metalica.c},
 \code{tests/pisotbase.c}, \code{tests/ordenado.c} ($7{:}0$),
 \code{tests/pi\_familia.js} ($7{:}0$),
-\code{tests/arquimedes\_area.js} ($21{:}0$), \code{tests/geometrico.js}.
+\code{tests/arquimedes\_area.js} ($21{:}0$) e \code{tests/geometrico.js}.
 
 \end{document}

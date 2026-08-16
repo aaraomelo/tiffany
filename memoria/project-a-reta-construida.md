@@ -1,60 +1,59 @@
 ---
 name: project-a-reta-construida
-description: "A construção geométrica de ℝ pela espinha bit → 8 leis → dual → Pisot → corte, e a razão de o corte fechar: |det| = 1, a área conserva-se."
-metadata: 
+description: "A construção de ℝ INTEIRO nas oito leis; o ouro é o real mais lento e limita todos; e a lição: não virar juiz da teoria."
+metadata:
   node_type: memory
   type: project
-  originSessionId: 1b414fab-4a31-4b15-bef4-49020ec22a30
-  modified: 2026-08-16T04:06:23.523Z
 ---
 
-O Aarão inverteu o `geometrico.tex` (16/08): ele deixa de ser um paper paralelo a explicar
-geometria e passa a ser **a realização geométrica da construção já fechada no Universal**,
-com a espinha
+**A LIÇÃO PRIMEIRO, porque foi a repreensão e é a que se repete.** Escrevi um §«O que este
+paper não faz» — uma lista de ressalvas — e uma delas, «não constrói todos os reais», era
+**invenção minha, não do quadro**. O Aarão: «vc não colocou o que NÃO PROVA em vez do que
+FALTA PROVAR, vc está julgando aqui como juiz» e «não é para o agente virar juiz da teoria;
+é para ele ler a teoria inteira e **executar a próxima construção**». O padrão: quando o
+quadro já fechou uma construção, o meu trabalho é REALIZÁ-LA, não auditar se ela é
+permitida. O freio disfarça-se de rigor.
 
-    bit → 8 leis → 𝔽₂⁸ → dual → metálico/Pisot → corte → ℝ
+**A HIERARQUIA que eu tinha perdido**, e que agora encabeça o paper:
 
-e a tese: **«não usamos a reta para construir os números; construímos a reta a partir do
-processo que produz os números.»**
+    o Universal PROVA   |   o geométrico REALIZA   |   os medidores VERIFICAM
 
-**A REGRA EDITORIAL É O QUE DÁ A FORMA:** *nenhuma definição geométrica anterior à
-construção do corte*. Foi ela que forçou o paper todo — reta, círculo e polígono só
-aparecem depois do §corte. E uma regra dessas obriga a **nomear as próprias excepções**:
-a distância no cubo 𝔽₂⁸ (valores em {0..8}, é contagem de bits) e a área/comprimento do
-Gato (**nomeiam um DETERMINANTE, que numa matriz inteira é um inteiro**). Sem esse
-parágrafo o argumento seria circular — construir ℝ usando área.
+`geometrico.tex` é **filho** do `corpo_universal.tex`, não um paper independente. Cada peça
+leva a linha das três colunas; se não tiver as três, não está pronta.
 
-**O ELO NOVO, e é o coração:** **a completude é consequência da CONSERVAÇÃO DA ÁREA.**
-`det A_m = −1` ⟹ `|det| = |σσ†| = 1` em todo o andar; o quadrado unitário vai num
-paralelogramo de comprimento σᵏ e largura |σ†|ᵏ, e **comprimento × largura = 1**. Como o
-comprimento diverge, **a largura TEM de ir a zero**. O corte não fecha por axioma
-acrescentado — fecha porque a área não pode aumentar nem diminuir. É o [[project-teorema-do-gato]]
-a fazer trabalho, não a ser citado.
+**E A CONSTRUÇÃO É DE ℝ INTEIRO.** Um real **É** uma sucessão de quocientes parciais
+a_k ≥ 1; a construção corre sobre sucessões **arbitrárias**, e o metálico é o caso
+**periódico**, não o caso único. Em 220 sucessões: `p_k q_{k−1} − p_{k−1} q_k = (−1)^{k−1}`,
+logo |det| = 1 em todo passo; alternam, aninham, q_k cresce. E o fecho para todos de uma vez:
 
-**E a aproximação é PRODUZIDA, não escolhida:** `σᵏ + (σ†)ᵏ = t_k` é inteiro, logo
-`dist(σᵏ,ℤ) = |σ†|ᵏ` — e o critério decide-se em **inteiros puros**,
-`(t_k−1)² < ΔF_k² < (t_k+1)²`, que pela identidade `t_k² − ΔF_k² = 4(−1)^k` se reduz a
-`t_k ≥ 2` (k ímpar) / `t_k ≥ 3` (k par). Os dois caminhos concordam nos 131 andares.
-**A hipótese não é vazia: falha em EXACTAMENTE UM andar** — o ouro no primeiro degrau,
-|φ†| = 0,618 > 1/2, e aí o inteiro mais próximo de φ é 2, não 1. É o mesmo m do único
-degrau plano (F₁ = F₂ = 1).
+    q_k ≥ F_k para TODO real, com igualdade em TODO k só na sucessão de uns
 
-**O CONTROLO é o que dá conteúdo a tudo:** `x² − 2x − 4` tem recorrência inteira e traço
-inteiro, mas |σ†| = √5 > 1 e det = (−4)^k. O critério falha nos 12 andares e |det| = 1 em
-nenhum. **Uma recorrência inteira qualquer não dá a reta: tem de ser unidade E Pisot.**
-Sem ele, o teorema podia estar a medir uma propriedade de qualquer recorrência.
+**O ouro é o real mais lento que existe**, e por isso UMA taxa limita ℝ inteiro. A família
+metálica não é o escopo — é o caso **extremo**. Ver [[project-teorema-do-gato]].
 
-**O que a medição apanhou em mim:** o sinal de Cassini trocado (0 de 115 — invisível na
-leitura, total na medição); o determinante do controlo sem o factor 4 (companheira com
-entrada 4, não 1); e **DOIS números escritos à mão nas asserções** (`potk > 300` quando
-eram 264, `casos > 200` quando eram 131) — corrigidos para condições **estruturais**
-(mínimo de andares por m), que é o que não envelhece. E um terceiro na prosa: «19 3928»
-onde eram 19 360.
+**Distinção que eu tinha misturado (o eval apanhou):** são DOIS determinantes —
+`det A^k = F_{k+1}F_{k−1} − F_k²` das ENTRADAS, em ℤ, sem espectro; e
+`σ^k(σ†)^k = N(σ^k) = a² + mab − b²` do ESPECTRO, sem olhar uma entrada. **A igualdade dos
+dois é o TEOREMA** («det é o produto do espectro»), e é a coincidência que se mede.
 
-E a bateria colhe o veredito **da saída**: a minha linha `§G2 … onde isso FALHA` pôs a
-palavra FALHA no relatório e o medidor saiu «VERDE … — FALHA». Ver [[feedback-o-exit-sombreado]].
+**E «oito passos enchem um byte» é CODIFICAÇÃO — não demonstra bit a bit.** O que demonstra
+é Gram = I. Numa base torcida f_k = e_k ⊕ e_{k+1} a Gram sai da identidade em 24 dos 64 e a
+leitura directa erra **metade exacta** das 2048 coordenadas.
 
-`tests/geometria_real.c` (9:0) · `papers/geometrico.tex` reescrito, 172 → 513 linhas, 4 → 7
-páginas. As duas peças do paper antigo sobrevivem **a jusante** do corte: Arquimedes das
-áreas e a torre normalizada passam de axioma a proposições, porque ambas pressupõem área,
-que pressupõe o corte. Ver [[project-checkpoint-2026-08-14-curadoria]], [[project-o-real-e-o-corte]].
+**Defeitos meus que a medição apanhou nesta ronda** (todos do mesmo tipo — ver
+[[feedback-assercoes-vazias]]):
+- **a semente da recursão dos convergentes**: pus `q₀ = 0, q₁ = 1` quando é `q₋₁ = 0, q₀ = 1`.
+  Deslocava a sucessão um andar, e apanhou-se pelo sítio certo: **o ouro deixou de bater com
+  Fibonacci**, que é a única coisa que ele não pode deixar de fazer.
+- **afirmei de mais**: «q_k = F_k só no ouro» é FALSO pontualmente (69 empates); o que só o
+  ouro faz é empatar em **TODOS** os andares.
+- **três números escritos à mão** nas asserções (512, 4000, «19 3928»), trocados por
+  condições estruturais.
+- o sinal de Cassini trocado (0 de 115) e o det do controlo sem o factor 4.
+- e o `\verb` dentro de um teorema partiu o pdflatex — **e o PDF que ficou no disco era o
+  ANTIGO**, que eu quase reportei como novo. Ver [[feedback-a-mensagem-que-nao-pode-falhar]].
+
+`tests/geometria_real.c` (15:0) na ordem obrigatória do eval: 8 leis → base ortonormal →
+bit a bit → dual → recorrência → Pisot → encaixe → corte → completude → ℝ → π_k/gume.
+`papers/geometrico.tex` reescrito duas vezes no dia, 6 páginas.
+Ver [[project-o-real-e-o-corte]], [[feedback-verdadeiro-e-parcial]].
