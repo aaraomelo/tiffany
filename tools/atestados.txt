@@ -9,7 +9,7 @@ agm_gerador 958387d0ec02fc04 0
 algebra e4923ae8b9efc021 0
 amplifica 18a45c8f08ff73f8 0
 analiticas 9ef41198052b919a 0
-analog 7bf2eb092ebe66ee 0
+analog 31434c442270db4b 0
 antissimetrico 5c13e7c1c00d85b1 0
 app_arranca abb24b0fe22e3ae2 0
 aritmetica d327b96d450212d6 0

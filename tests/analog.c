@@ -388,6 +388,52 @@ static void B4_translinear(void) {
         pulso("B.4b", "e a lei é INVARIANTE em T e em I_s", "o * nativo, 15 pontos",
               inv_ok, inv_tot, varia_sem_ref);
     }
+
+    /* E A LEI QUE O TRANSÍSTOR REALIZA JÁ FOI DERIVADA INTEIRA NESTA CASA. O
+       geometrico.tex, thm:e, dá a exponencial como a TORRE DE VOLUMES:
+
+           Σ xⁿ/n! = eˣ        os volumes são os coeficientes
+           n·cₙ = cₙ₋₁          é a sua própria derivada
+           eˣ ∗ e⁻ˣ = δ         medido pelos binomiais, (1/n!)(1−1)ⁿ
+
+       O que o ANTILOG(LOG a + LOG b − LOG ref) faz é levar SOMA em PRODUTO — e nos
+       coeficientes isso é a CONVOLUÇÃO, que é o binómio e é inteira:
+
+           (eˣ ∗ eʸ)ₙ = (1/n!)·Σ_k C(n,k)·xᵏ·yⁿ⁻ᵏ = (x+y)ⁿ/n!
+
+       Logo a lei translinear mede-se sem avaliar uma exponencial: Σ C(n,k) xᵏ yⁿ⁻ᵏ
+       contra (x+y)ⁿ, inteiro contra inteiro. A montagem física fica — é o objecto —,
+       mas a LEI que ela realiza tem forma exacta, e é ela que se afirma. */
+    {
+        long cok = 0, ctot = 0, dok = 0, dtot = 0;
+        long C[12][12] = {{0}};
+        for (int n = 0; n < 12; n++){ C[n][0] = 1; for (int k = 1; k <= n; k++)
+            C[n][k] = C[n-1][k-1] + (k <= n-1 ? C[n-1][k] : 0); }
+        for (long x = -3; x <= 3; x++) for (long y = -3; y <= 3; y++)
+            for (int n = 0; n <= 8; n++) {
+                long conv = 0, po = 1;
+                for (int k = 0; k <= n; k++) {
+                    long xk = 1, ynk = 1;
+                    for (int t = 0; t < k; t++)   xk  *= x;
+                    for (int t = 0; t < n-k; t++) ynk *= y;
+                    conv += C[n][k]*xk*ynk;
+                }
+                for (int t = 0; t < n; t++) po *= (x + y);
+                ctot++;
+                if (conv == po) cok++;
+                if (y == -x) { dtot++; if (conv == (n == 0 ? 1 : 0)) dok++; }
+            }
+        printf("     e A LEI JÁ ERA INTEIRA. O thm:e do geometrico dá eˣ como a torre de\n");
+        printf("     volumes, e o que o ANTILOG faz — soma em produto — é a CONVOLUÇÃO dela:\n");
+        printf("     (eˣ ∗ eʸ)ₙ = (1/n!)·Σ C(n,k)xᵏyⁿ⁻ᵏ = (x+y)ⁿ/n!, o binómio.\n\n");
+        printf("     Σ C(n,k)xᵏyⁿ⁻ᵏ == (x+y)ⁿ em %ld de %ld, e eˣ∗e⁻ˣ = δ em %ld de %ld\n",
+               cok, ctot, dok, dtot);
+        printf("     — inteiro contra inteiro, sem avaliar uma exponencial\n\n");
+        pulso("B.4c", "a lei translinear É a convolução de eˣ",
+              "o binómio (thm:e)", cok, ctot, 1);
+        pulso("B.4d", "e eˣ ∗ e⁻ˣ = δ: expansão e contração inversas",
+              "a delta de Kronecker", dok, dtot, 1);
+    }
 }
 
 /* ==========================================================================
