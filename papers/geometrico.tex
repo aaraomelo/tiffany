@@ -120,6 +120,17 @@ as oito leis, a base ortonormal, o Gato, Pisot, o corpo ordenado completo
 \end{tabular}
 \end{center}
 
+\noindent\textbf{E o gume é automático onde pode ser.} A regra desta casa ---
+\emph{retirar a hipótese e procurar o contra-exemplo} --- está implementada em
+\code{lib/calculo.h} como uma varredura de polinómios, e ela exige \textbf{dois}
+controlos: um regime onde tem de achar e outro onde tem de voltar vazio, senão «não
+achou» não distingue a lei de um buscador partido. Em Rolle, com a hipótese
+$f(0)=f(1)$ o gume volta vazio e sem ela acha $504$ --- e o $504$ \emph{prevê-se}, o
+que é o que o torna medida: a tese não depende do termo constante, logo conta-se em
+$(a,b)$ e multiplica-se por $9$. \emph{Verificado:} \code{tests/gume\_calculo.c}
+($3{:}0$).
+
+\medskip
 \noindent\textbf{A trava, e ela tem duas metades.} A identificação do corpo
 ordenado completo com $\mathbb{R}$ --- unicidade a menos de isomorfismo --- é
 teorema clássico, e cita-se como tal. \textbf{Mas a \emph{continuidade} não se
