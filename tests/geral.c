@@ -33,6 +33,7 @@
 #include <complex.h>
 #include "unidade.h"
 
+static long resto_bareiss = 0, caminhos = 0, concordam = 0;   /* Bareiss: a divisao tem de ser exacta */
 #define GMAX 12                 /* a caixa desta máquina — da caixa, e não da matemática */
 
 /* p(x) = c[0] + c[1]x + … + c[n]x^n, com c[n] = 1 (mónico) */
@@ -122,30 +123,99 @@ printf("\n§G1  A companion de grau n devolve o característico — em qualquer 
     };
     const char *nomes[5] = { "x² - x - 1   (ouro)", "x³ - 1", "x³ - x - 1   (plástico)",
                              "x⁴ + 2x² + 1", "x⁵ - x⁴ - 1  (o furo)" };
+    /* OS COEFICIENTES SÃO INTEIROS, e a companion também: o traço é a soma da
+     * diagonal, e o determinante sai por BAREISS — a eliminação sem fracções, em que
+     * a divisão intermédia é EXACTA por teorema, e por isso não há resto a tolerar.
+     * A eliminação com f = M[r][c]/M[c][c] que aqui estava introduzia a vírgula onde
+     * o objecto não tinha nenhuma, e depois pedia um limiar para a esconder. */
     for(int k = 0; k < 5; k++){
-        double A[GMAX][GMAX];
-        companion(ps[k], A);
         int n = ps[k].n;
-        double tr = 0;
+        long A[GMAX][GMAX];
+        for(int i = 0; i < n; i++) for(int j = 0; j < n; j++) A[i][j] = 0;
+        for(int i = 1; i < n; i++) A[i][i-1] = 1;
+        for(int i = 0; i < n; i++) A[i][n-1] = -(long)ps[k].c[i];
+        long tr = 0;
         for(int i = 0; i < n; i++) tr += A[i][i];
-        /* determinante por eliminação */
-        double M[GMAX][GMAX], det = 1;
+
+        /* BAREISS, e o resto da divisão vigia-se: se não for zero, é defeito. */
+        long M[GMAX][GMAX];
         for(int i = 0; i < n; i++) for(int j = 0; j < n; j++) M[i][j] = A[i][j];
-        for(int c = 0; c < n; c++){
-            int p2 = -1;
-            for(int r = c; r < n; r++) if(fabs(M[r][c]) > 1e-12){ p2 = r; break; }
-            if(p2 < 0){ det = 0; break; }
-            if(p2 != c){ for(int j = 0; j < n; j++){ double t2=M[c][j]; M[c][j]=M[p2][j]; M[p2][j]=t2; } det = -det; }
-            det *= M[c][c];
-            for(int r = c+1; r < n; r++){ double f = M[r][c]/M[c][c];
-                for(int j = c; j < n; j++) M[r][j] -= f*M[c][j]; }
+        long det = 1, prev = 1;
+        int sinal = 1, singular = 0;
+        for(int c = 0; c < n-1 && !singular; c++){
+            if(M[c][c] == 0){
+                int p2 = -1;
+                for(int r = c+1; r < n; r++) if(M[r][c] != 0){ p2 = r; break; }
+                if(p2 < 0){ singular = 1; break; }
+                for(int j = 0; j < n; j++){ long t2=M[c][j]; M[c][j]=M[p2][j]; M[p2][j]=t2; }
+                sinal = -sinal;
+            }
+            for(int i = c+1; i < n; i++)
+                for(int j = c+1; j < n; j++){
+                    long num = M[i][j]*M[c][c] - M[i][c]*M[c][j];
+                    if(num % prev != 0) resto_bareiss++;      /* não pode acontecer */
+                    M[i][j] = num / prev;
+                }
+            prev = M[c][c];
         }
-        double esp_tr = -ps[k].c[n-1], esp_det = ((n%2)?-1:1)*ps[k].c[0];
-        printf("      %-5d %-32s %+6g  %+7g  %+6g  %+g\n", n, nomes[k], tr, esp_tr, det, esp_det);
-        if(fabs(tr - esp_tr) > 1e-9 || fabs(det - esp_det) > 1e-9) mal++;
+        det = singular ? 0 : sinal * M[n-1][n-1];
+
+        long esp_tr = -(long)ps[k].c[n-1], esp_det = ((n%2)?-1:1)*(long)ps[k].c[0];
+
+        /* E AQUI ESTAVA UMA TAUTOLOGIA, que a sabotagem apanhou: tr = -c_{n-1} vale POR
+         * CONSTRUÇÃO da companion — só a última entrada da diagonal é não nula —, logo o
+         * teste comparava o coeficiente consigo próprio e não podia falhar. O conteúdo
+         * verdadeiro é que a companion tem o característico CERTO, e isso mede-se por
+         * DOIS CAMINHOS que não se tocam:
+         *
+         *   (M) tr(A^k)   — multiplicando MATRIZES, sem olhar para os coeficientes
+         *   (N) P_k       — a recorrência de NEWTON sobre os COEFICIENTES, sem matriz
+         *
+         * Se a companion não realizasse p, os dois separavam-se. */
+        long Pw[GMAX][GMAX], T[GMAX][GMAX];
+        for(int i = 0; i < n; i++) for(int j = 0; j < n; j++) Pw[i][j] = (i==j);
+        long PN[16]; PN[0] = n;
+        for(int q = 1; q <= 6; q++){
+            long v = 0;
+            if(q <= n){
+                for(int j = 1; j < q; j++) v += (-(long)ps[k].c[n-j]) * PN[q-j];
+                v += (long)q * (-(long)ps[k].c[n-q]);
+            } else {
+                for(int j = 1; j <= n; j++) v += (-(long)ps[k].c[n-j]) * PN[q-j];
+            }
+            PN[q] = v;
+        }
+        for(int q = 1; q <= 6; q++){
+            for(int i = 0; i < n; i++) for(int j = 0; j < n; j++){
+                long acc = 0;
+                for(int t2 = 0; t2 < n; t2++) acc += Pw[i][t2]*A[t2][j];
+                T[i][j] = acc;
+            }
+            for(int i = 0; i < n; i++) for(int j = 0; j < n; j++) Pw[i][j] = T[i][j];
+            long trk = 0;
+            for(int i = 0; i < n; i++) trk += Pw[i][i];
+            caminhos++;
+            if(trk == PN[q]) concordam++;
+        }
+
+        printf("      %-5d %-32s %+6ld  %+7ld  %+6ld  %+ld\n", n, nomes[k], tr, esp_tr, det, esp_det);
+        if(tr != esp_tr || det != esp_det) mal++;
     }
     printf("\n");
-    ok("o traço é -c(n-1) e o determinante é (-1)^n·c0, em todos os graus", mal == 0);
+    printf("\n      e os DOIS CAMINHOS para o caracteristico: tr(A^k) pelas MATRIZES contra"
+           " P_k por NEWTON\n      sobre os coeficientes — %ld de %ld a concordar\n\n",
+           concordam, caminhos);
+    ok("a companion REALIZA o caracteristico, e mede-se por DOIS CAMINHOS que nao se"
+       " tocam: tr(A^k) multiplicando MATRIZES, contra P_k pela recorrencia de NEWTON"
+       " sobre os COEFICIENTES — e concordam em todos. O teste anterior comparava"
+       " tr com -c(n-1), que vale POR CONSTRUCAO da companion: era tautologia, e a"
+       " sabotagem de um coeficiente nao a fazia cair",
+       concordam == caminhos && caminhos == 30);
+    ok("e o determinante sai por BAREISS, em INTEIROS e por IGUALDADE: a eliminacao sem"
+       " fraccoes, cuja divisao intermedia e exacta por teorema — o resto vigia-se e e"
+       " zero. A eliminacao com f = M[r][c]/M[c][c] punha a virgula onde o objecto nao"
+       " tinha nenhuma, e depois pedia um limiar para a esconder",
+       mal == 0 && resto_bareiss == 0);
     printf("      Traço e determinante são a SOMA e o PRODUTO das raízes, sempre — em grau 2 eles\n");
     printf("      são os dois coeficientes e nada mais falta; em grau n são dois dos n, e os\n");
     printf("      outros n-2 também dizem alguma coisa. É a primeira coisa que muda ao subir.\n");

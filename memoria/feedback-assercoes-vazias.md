@@ -247,3 +247,18 @@ Cuidado com **mutações equivalentes**: `d = p/q` → `p/q+1` sobreviveu porque
 ideia — pela frase. Em 03/08 a mesma frase falsa vivia em dois sítios e eu corrigi um; a segunda
 estava no *mesmo ficheiro*, cem linhas abaixo. Uma frase que vale a pena escrever costuma ter sido
 escrita mais de uma vez.
+
+**E a variante da CONSTRUÇÃO:** `tr(companion) == −c_{n−1}` parecia uma medição
+e era tautologia: na companion **só a última entrada da diagonal é não nula**, e vale
+`−c_{n−1}` por construção. O teste comparava o coeficiente consigo próprio. Estava assim
+desde que o ficheiro nasceu, e nenhuma ronda o apanhou.
+
+**O que o apanhou foi a SABOTAGEM** — e à segunda tentativa, porque a primeira também estava
+errada: sabotar o COEFICIENTE não parte nada, porque dá só **outro polinómio**, onde o
+teorema continua verdadeiro. O que parte é sabotar a **CONSTRUÇÃO** (a companion), que é o
+que a tese afirma. Regra: *o gume tem de atacar o que a tese AFIRMA, e não a instância em
+que ela é testada.*
+
+**O conserto** é o de sempre — dois caminhos que não se tocam: `tr(A^k)` multiplicando
+MATRIZES contra `P_k` pela recorrência de NEWTON sobre os COEFICIENTES. Com a companion
+partida, os dois separam-se e caem duas asserções.
