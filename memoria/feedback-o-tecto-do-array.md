@@ -49,3 +49,26 @@ para dentro dos inteiros é «o preço da régua que se trouxe».
 
 Ver [[project-o-fecho-do-dual-lagrange]], [[feedback-o-teto-nao-verificado]],
 [[feedback-varrer-onde-nada-pode-falhar]].
+
+**E a razão, na formulação do Aarão:** eu tinha começado a escrever um medidor
+para «medir a indecidibilidade», e ele parou-me com uma pergunta:
+
+> «então tu querias validar todo o infinito, é isso? Se isso fosse possível, para que então
+>  a matemática? Vamos demitir a matemática e contratar o Claude no lugar.»
+
+**A matemática existe PORQUE o infinito não se enumera.** Se varrer bastasse, não haveria
+teorema a provar — bastava esperar. Portanto:
+
+    UM MEDIDOR NUNCA PROVA UM ∀.
+    Ele REFUTA (um caso basta, e é conclusivo), ou serve de CONTROLO a uma prova
+    que existe noutro sítio.
+
+É a regra que a casa já tinha em `thm:quantificador` — «a indução é conservação: uma
+verificação do passo substitui infinitas; a varredura completa é só o controlo» —, e o que
+eu fazia era o oposto: varrer e depois escrever o universal. Cada vez que faço isso estou a
+fazer exactamente a coisa que tornaria a matemática dispensável.
+
+**E o corolário sobre contraexemplos**, que eu também tinha ao contrário: como refutar é
+finito e conclusivo, **UM contraexemplo é uma conclusão completa** — prova a NECESSIDADE da
+hipótese. Escrever «daqui não se conclui nada» a seguir a um contraexemplo é atirar fora o
+único lado do quantificador que uma máquina pode fechar.

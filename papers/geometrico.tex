@@ -1455,25 +1455,43 @@ reaparece como gume geométrico} --- e a palavra é \emph{reaparece}, não
         {\code{geometria\_real.c} \S L10; \code{pi\_familia.js} ($7{:}0$)}
 
 %======================================================================
-\section{O contraexemplo ao mecanismo}\label{sec:contra}
+\section{A hipótese da unidade é necessária}\label{sec:contra}
 
-\begin{proposicao}\label{prop:contra}
+Falta responder a uma pergunta que o mecanismo deixa em aberto: a condição
+$\abs{N(\sigma)}=1$ é \emph{usada}, ou está lá a enfeitar? A resposta é um
+teorema, e prova-se removendo-a.
+
+\begin{teorema}[a unidade é necessária ao encaixe]\label{thm:necessaria}
 Seja $B=\begin{psmallmatrix}2&4\\1&0\end{psmallmatrix}$, a companheira de
-$x^{2}-2x-4$, com $\det B=-4$ --- e note-se que \emph{não} é a $A_m$ usada até
-aqui, cujo determinante é $-1$. A recorrência é inteira e o traço é inteiro
---- \emph{as primeiras setas passam} --- e mesmo assim o critério do
-\S\ref{sec:pisot} falha nos $12$ andares testados e $\abs{\det}=1$ em nenhum, porque
-$\det B^{k}=(-4)^{k}$ \textbf{cresce} em módulo a cada andar. A face que devia
-encolher não encolhe. $\square$
-\end{proposicao}
+$x^{2}-2x-4$, com $\det B=-4$ --- e portanto \emph{não} a $A_m$ deste paper, cujo
+determinante é $-1$. Então:
+\[
+\boxed{
+\begin{array}{ll}
+\text{as hipóteses \textbf{anteriores} valem} &
+\text{recorrência inteira, traço inteiro, nos }12\text{ andares}\\[2pt]
+\text{a hipótese da \textbf{unidade} falha} & \abs{\det B}=4\neq1\\[2pt]
+\text{e o \textbf{mecanismo} falha com ela} &
+\det B^{k}=(-4)^{k}\ \textbf{cresce}
+\end{array}}
+\]
+A face que devia encolher não encolhe, e o encaixe não fecha em nenhum andar.
+$\square$
+\end{teorema}
 
-\noindent O exemplo mostra que \textbf{a recorrência inteira, isoladamente, não
-garante o mecanismo de encaixe}: a propriedade de unidade do determinante é
-utilizada no passo que preserva o módulo do produto dual. Daqui não se conclui
-caracterização nenhuma --- «tem de ser unidade e Pisot» não está demonstrado neste
-quadro.
-\colunas{---}{o passo nomeado onde a cadeia parte}
-        {\code{geometria\_real.c}}
+\noindent\textbf{E daqui conclui-se, com precisão, o seguinte:}
+\[
+\boxed{\;\abs{N(\sigma)}=1\ \text{\textbf{não é decoração}: é usada, e o passo que
+a usa é o da contração dual.}\;}
+\]
+Isto é \emph{necessidade da hipótese dentro do mecanismo} --- que é o que um
+contraexemplo prova, e é o que fecha a pergunta. Ele não prova a
+\emph{recíproca}: «unidade e Pisot $\Rightarrow$ o mecanismo», que exigiria a
+implicação no outro sentido e não é o que aqui se afirma. \emph{Uma coisa é dizer
+que a hipótese é necessária --- e está demonstrado; outra é dizer que é suficiente
+--- e essa não se afirma.}
+\colunas{---}{a necessidade da hipótese, pelo passo que a usa}
+        {\code{geometria\_real.c} \S L11}
 
 %======================================================================
 \section{A construção está fechada}\label{sec:fechada}
