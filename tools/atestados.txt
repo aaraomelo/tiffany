@@ -90,6 +90,7 @@ convolucao_universal 14db429c007982da 0
 coroa bf5f52e1e6e43aea 0
 coroacao 69ae2836d0ea4d17 0
 corpo bb3c75a6171597ad 0
+corpo256 d8b397a145399dfe 0
 corpo_autossimilar cfed1db62ac9d8ef 0
 corpo_disco d558d055b5ff6e4e 0
 corpo_do_numero 235bf71b3ace5cac 0

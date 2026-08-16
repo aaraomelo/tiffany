@@ -123,7 +123,9 @@ sistema é, sem ter de percorrer o resto --- e sabe, sobretudo,
 \downarrow\ \text{(ciclo gerador de período oito)}\\[2pt]
 \text{as OITO POSIÇÕES}\\[2pt]
 \downarrow\ \text{(a dobra: }1\to2\to4\to8)\\[2pt]
-\text{o BYTE}\\[4pt]
+\text{o BYTE}\\[2pt]
+\downarrow\ \text{(a base }e_k=x^{k}\text{, e o produto mod }p(x))\\[2pt]
+\text{o CORPO de }256\ \text{(a face que OPERA)}\\[4pt]
 \hline\\[-6pt]
 \text{ASCII}\quad\big|\quad\mathbb{P}^1(\mathbb{F}_{127})
 \quad\big|\quad\text{o neurónio}\quad\big|\quad\text{Gato}/\text{Esquilo}
@@ -133,6 +135,24 @@ sistema é, sem ter de percorrer o resto --- e sabe, sobretudo,
 \emph{As setas acima da linha são a estrutura universal.
 As de baixo são \textbf{realizações}.}
 \end{center}
+
+\medskip
+\noindent\textbf{E o eixo, que é o de Pontryagin.} A coluna acima é
+\emph{uma} das duas metades. A outra é o \textbf{encaixe}, e o eixo entre
+elas está medido neste documento há muito
+(Teor.~\ref{thm:encaixe}, Teor.~\ref{thm:torcao}):
+\[
+\boxed{\;
+\underbrace{\text{a álgebra OPERA}}_{\text{finita, }2\text{-ádica}}
+\ \ \text{e não alcança }\mathbb{R}
+\qquad\Big|\qquad
+\underbrace{\text{o encaixe ALCANÇA }\mathbb{R}}_{\text{ordenado, completo}}
+\ \ \text{e não opera.}\;}
+\]
+\emph{A fronteira é teorema, não lacuna}, e mede-se dos dois lados. Logo
+$\mathbb{R}$ \textbf{é} alcançado por este quadro, e é ordenado --- a
+ordem tem aqui até o seu observador (Def.~\ref{def:iso-dual}). Quem ler
+só a coluna de cima leva metade.
 
 \noindent E é essa linha que impede este documento de se tornar um paper
 sobre ASCII, sobre C ou sobre $\mathbb{F}_{127}$: esses são
@@ -196,6 +216,24 @@ o que vem depois: rodar um bit tem período $8$, e a tabela exaustiva dos
 $256$ bytes diz, por operação e por posição, se ela preserva, realiza o
 dual, ou move. \emph{O \verb|uint8_t| deixa de ser conveniência de
 máquina e passa a ser a realização mínima do catálogo.}
+
+\subsection*{A operação completa}
+Com a posição $k$ reservada à Lei $k$, as oito leis são a \textbf{base} de
+um espaço; a soma é o XOR (e o dual dela é ela própria); o produto é o
+dos polinómios módulo um irredutível de grau oito --- e o grau é oito
+porque as leis são oito; o operador é $\times x$, que roda e realimenta.
+O espaço é \textbf{completo} no sentido algébrico (todo não nulo tem
+inversa) e \emph{esta face} não admite ordem de corpo, porque $1+1=0$.
+
+\textbf{E aqui é preciso não confundir escopo}, que foi o erro que esta
+secção teve de corrigir: «não ordenado» é uma propriedade
+\emph{daquela face} --- de $\mathbb{F}_{2^8}$, cuja característica é
+$2$ ---, e \textbf{não} um veredicto sobre a arquitectura. Do outro lado
+do eixo de Pontryagin, o encaixe alcança $\mathbb{R}$, que é ordenado e
+completo (Teor.~\ref{thm:encaixe}); e a ordem tem observador próprio
+(Def.~\ref{def:iso-dual}). \emph{A face que opera não ordena; a que
+ordena não opera} --- e é o par que é a operação completa, não uma das
+metades.
 
 \subsection*{O ASCII, e o encaixe que não foi procurado}
 $127$ é primo e é o topo do \verb|int8_t|; o ASCII foi desenhado para
@@ -1366,6 +1404,79 @@ mentir.
 \code{sem\_ramo.h}. As camadas intermédias não descem a zero, e é isso
 que torna a última um resultado em vez de uma escolha de ficheiro vazio.
 $\square$
+\end{teorema}
+
+\begin{teorema}[as oito leis são a BASE de um corpo de $256$ elementos ---
+a face que OPERA]\label{thm:espaco-oito}
+A declaração da Def.~\ref{def:byte-oito} reserva a posição $k$ do byte à
+Lei $k$. Isso faz das oito leis uma \textbf{base}, e sobre ela o espaço
+fecha:
+\[
+\boxed{\;
+V=\mathbb{F}_2^{8},\quad
+\text{base } e_k=x^{k}\ (0\le k\le 7),\quad
+p(x)=x^{8}+x^{4}+x^{3}+x+1 .\;}
+\]
+
+\textbf{(0) A soma e o seu dual.} $a\oplus b$ é o XOR, e o dual da soma
+é \emph{ela própria}: $-a=a$. Cada elemento é a sua própria volta --- a
+Lei 1 lida no espaço inteiro --- e o grupo aditivo é $(\mathbb{Z}/2)^8$.
+Medido nos $65\,536$ pares: associa, comuta, tem neutro, sem uma falha.
+
+\textbf{(1) O produto e o seu dual.} O produto é o dos polinómios
+módulo $p(x)$, e \emph{o grau oito não é escolha}: é o número de
+posições, logo o número de leis. O dual do produto é a inversa, que
+existe para todo $a\neq0$ por Fermat, $a^{-1}=a^{254}$ --- numa cadeia
+\emph{fixa} de multiplicações, sem laço com teste e sem ramo. Comuta,
+associa e distribui, medido exaustivamente.
+
+\textbf{(2) O operador.} É a multiplicação por $x$: rodar uma posição e
+\textbf{realimentar} com $p(x)$ quando o bit de topo sai. As potências
+$x^0,\ldots,x^7$ percorrem exactamente a base, e ao oitavo passo a
+realimentação entra --- é ela que fecha o ciclo \emph{dentro} do espaço
+em vez de o deixar sair. Sem realimentação, o gerador roda com período
+$8$ e não multiplica nada; com ela, multiplica e é bijectivo.
+
+\textbf{(3) COMPLETO}, no sentido algébrico: todo $a\neq0$ tem inversa
+($255$ de $255$) e nenhuma operação sai dos $256$.
+
+\textbf{(4) ESTA FACE não admite ordem de corpo --- e o escopo é toda a
+afirmação.} Num corpo ordenado $1>0$ força $1+1>0$, e por indução nenhuma
+soma de uns pode dar zero. Em $\mathbb{F}_{2^8}$,
+\[
+1+1=0,
+\]
+e toda soma de um número \emph{par} de uns dá zero. Logo
+\[
+\boxed{\;\text{em }\mathbb{F}_{2^8}\text{ não existe ordem compatível com
+as operações.}\;}
+\]
+
+\textbf{E isto NÃO é um veredicto sobre a arquitectura}, que foi o erro
+que esta secção corrigiu. Escrevi primeiro «completo e não ordenado» sem
+escopo, e no lugar mais visível --- a porta de entrada ---, como se a
+questão da ordem ficasse fechada. Não fica: do outro lado do eixo de
+Pontryagin, \emph{o encaixe alcança $\mathbb{R}$}
+(Teor.~\ref{thm:encaixe}), que é ordenado e completo, e a ordem tem
+observador próprio neste quadro (Def.~\ref{def:iso-dual}). O que o eixo
+diz é a troca: \emph{a álgebra opera e não alcança; a topologia alcança e
+não opera}. Uma face não ordena; a outra não opera. Chamar «a operação
+completa» a uma delas seria tomar metade pelo todo.
+
+\textbf{(5) A ordem que EXISTE, nomeada à parte.} O grupo multiplicativo
+é \textbf{cíclico} de ordem $255$ --- há $128$ geradores, o primeiro é
+$0\mathtt{x}03$ --- logo todo $a\neq0$ é $g^{k}$ para um $k$ único: o
+\emph{logaritmo discreto}. Isso dá uma enumeração canónica dos $255$,
+que é ordem no sentido de \textbf{percurso} e não de «compatível com a
+soma». São coisas diferentes, e juntá-las seria dizer o que o ponto (4)
+acabou de negar.
+
+\emph{Medido:} \code{tests/corpo256.c} ($8{:}0$), com as leis do anel
+verificadas nos $65\,536$ pares, a base a gerar os $256$ elementos
+distintos, e o $\S$C7 a medir \emph{os dois lados do eixo na mesma
+asserção}: os convergentes do áureo encaixam com a unidade $\pm1$ e o
+sinal a alternar --- é a \textbf{ordem} que decide o encaixe --- enquanto
+nesta face $1+1=0$. Dual exige duas partes na mesma frase. $\square$
 \end{teorema}
 
 \begin{definicao}[realização binária das oito leis --- a arquitectura DECLARA,
