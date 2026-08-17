@@ -368,7 +368,18 @@ int main(void){
          * §CP15. O oito entra como o MÓDULO do ciclo, que é uma coisa que o código usa, e
          * não como uma contagem que o código não faz. */
         const int MOD_CAT = 8;               /* o módulo do catálogo, da teoria */
-        int nona = (MOD_CAT % MOD_CAT != 0); /* haveria Lei 8 primitiva se 8 não voltasse ao 0 */
+        /* AQUI ESTAVA `int nona = (MOD_CAT % MOD_CAT != 0);`, e ela era a constante FALSE:
+         * `x % x` é zero para qualquer x, logo `nona` não dizia nada sobre o oito — dizia
+         * que um número dividido por si próprio não deixa resto. O `&& !nona` na condição
+         * era um termo que nunca podia falhar.
+         *
+         * Era um resto da limpeza anterior deste mesmo bloco, que já tinha tirado três
+         * tautologias e escrito porquê. Esta escapou porque parecia uma conta.
+         *
+         * E não se põe outra no lugar: como o comentário acima já diz, o «oito» é a
+         * cardinalidade do conjunto de leis da TEORIA, e este bloco não tem a lista delas.
+         * O que ele mede — o período do índice, a torre a NÃO o herdar, a unicidade de
+         * (d,ι,C) — está nas outras condições, e essas medem. */
         int lei0_nao_dim0 = (0 != dim_torre(0));   /* índice 0 ≠ d_0=2 */
         int torre_nao_periodica = 1;
         for(int k = 0; k < 8; k++)
@@ -393,8 +404,8 @@ int main(void){
             if(N / nu != d) bidual = 0;
         }
 
-        printf("§CP13 catálogo ℓ_{m+8}=ℓ_m; d_k cresce (não período 8); Lei 0 ≠ d_0=%d; nona? %s\n\n",
-               dim_torre(0), nona ? "sim" : "nao");
+        printf("§CP13 catálogo ℓ_{m+8}=ℓ_m; d_k cresce (não período 8); Lei 0 ≠ d_0=%d\n\n",
+               dim_torre(0));
         ok("§CP13 período 8 do catálogo, não da torre; índice 0 ≠ dim 0; unicidade (d,ι,C)."
            " E as tres pecas que aqui estavam escritas passam a ser CONTADAS: o ciclo era"
            " `cat[i] = i` comparado com `cat[(i+8)%8]`, que e' cat[i] != cat[i] e nunca podia"
@@ -406,7 +417,7 @@ int main(void){
            " TORRE nao ter esse periodo: dim_torre(k+8) nunca iguala dim_torre(k), porque ela"
            " DOBRA — e e' essa a tese da seccao",
            dobra_ok && ciclo && ciclo_pares == MOD_CAT && torre_repete == 0
-           && !nona && lei0_nao_dim0 &&
+           && lei0_nao_dim0 &&
            torre_nao_periodica && unico && d_cresce && bidual);
     }
 
