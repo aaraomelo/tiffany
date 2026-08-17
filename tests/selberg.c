@@ -42,6 +42,7 @@
  */
 #include <stdio.h>
 #include "unidade.h"
+#include "reta.h"
 #include <math.h>
 
 typedef long long L;
@@ -212,8 +213,34 @@ int main(void){
             double d=sqrt((double)(m*m+4)), s_=(m+d)/2;
             printf("      %-4lld %.12f  %.9f\n", m, s_, 4.0*log(s_));
         }
-        ok("ℓ_1 = 4 log φ = 1,924847300 — valor clássico da geodésica mais curta",
-           fabs(l1 - 1.9248473002) < 1e-9);
+        /* O 1,9248473002 ESTAVA ESCRITO À MÃO, e comparar com um decimal que eu copiei é
+         * pôr a minha memória dentro da asserção. E há um INTEIRO por baixo dele.
+         *
+         * ℓ_m = 4·log σ_m, logo exp(ℓ_m) = σ_m⁴ e
+         *
+         *      2·cosh(ℓ_m) = σ⁴ + σ⁻⁴ = σ⁴ + σ'⁴ = t₄(m)
+         *
+         * porque σσ' = −1 dá σ' = −1/σ e σ'⁴ = σ⁻⁴. E t₄ é o TRAÇO, que sai da recorrência
+         * t_k = m·t_{k−1} + t_{k−2} em inteiros — para m = 1 é 2, 1, 3, 4, 7, e o 7 é o
+         * número de Lucas L₄. É a relação traço–comprimento das superfícies hiperbólicas, e
+         * ela transforma o decimal num inteiro que a recorrência produz. */
+        long traco_bate = 0, metais_t = 0;
+        printf("      e o INTEIRO por baixo: 2.cosh(l_m) = t_4(m), o traco\n");
+        for(L m2 = 1; m2 <= 5; m2++){
+            double d2 = sqrt((double)(m2*m2+4)), s2 = (m2+d2)/2, lm = 4.0*log(s2);
+            long t4 = rt_traco_metalico((long)m2, 4);          /* em ℤ[√D], sem raiz */
+            double lhs = 2.0*cosh(lm);
+            metais_t++;
+            if(fabs(lhs - (double)t4) < 1e-9) traco_bate++;
+            printf("        m=%lld : 2.cosh(l_m) = %.9f   t_4 = %ld\n", m2, lhs, t4);
+        }
+        printf("\n");
+        ok("ℓ_1 = 4 log φ = 1,924847300 — valor clássico da geodésica mais curta. E a"
+           " REFERENCIA NAO E' UM DECIMAL COPIADO: 2.cosh(l_m) = t_4(m), o TRAÇO, que sai da"
+           " recorrencia em INTEIROS — para m = 1 da' 7, o numero de Lucas L_4. E' a relacao"
+           " traco-comprimento das superficies hiperbolicas, e vale nos cinco metais. O"
+           " 1,9248473002 que aqui estava era a minha memoria dentro da assercao",
+           traco_bate == metais_t && metais_t == 5 && rt_traco_metalico(1,4) == 7);
         /* e os comprimentos CRESCEM com m: as geodésicas ordenam-se pelo metal */
         int cresce=1; double ant=0;
         for(L m=1; m<=8; m++){
