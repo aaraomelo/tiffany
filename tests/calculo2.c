@@ -31,6 +31,7 @@
 #include "racionais.h"
 #include "linear.h"
 #include "calculo2.h"
+#include "reta.h"      /* RtCf: a palavra, uma sequencia de longs */
 #include "unidade.h"
 
 static long c2_sat_tecto = 0;
@@ -195,6 +196,49 @@ printf("\n§C5  O TECTO: as divisões que não couberam, contadas à parte.\n\n"
        " calada. Uma quadratura exacta que estoire em silêncio é pior que uma aproximada"
        " que o diga",
        c2_estouros == 0 && qz_saturou == c2_sat_tecto && c2_sat_tecto > 0);
+}
+
+/* ═══ §C6 — E O TECTO NÃO É DO OBJECTO: É DA REPRESENTAÇÃO ═════════════════ */
+printf("\n§C6  O TECTO ERA DO PAR (p,q). Na PALAVRA não há tecto: é uma sequência.\n\n");
+{
+    /* O Aarão: «1e-12 = 10^-12, e você coloca tudo em frações contínuas — não tem porquê
+     * não caber, é uma sequência num acumulador long int».
+     *
+     * E é isso. O §C1 mediu que a integral de e^x com 12 termos não cabe, porque o
+     * denominador que sai é 13! = 6 227 020 800 e o `Qz` é um PAR de `int` de 32 bits. Mas
+     * o tecto é DA REPRESENTAÇÃO, não do número: a mesma fracção como PALAVRA é
+     *
+     *      1/13!  =  [0; 6227020800]
+     *
+     * dois termos, cada um a caber num `long`, e a volta é exacta. A palavra não satura
+     * porque não guarda o produto: guarda a DESCIDA, e cada degrau cabe sozinho.
+     *
+     * E O MESMO VALE PARA OS LIMIARES. `1e-12` não é uma vírgula — é 10^-12, o racional
+     * 1/1000000000000, e a sua palavra é [0; 1000000000000]. Um limiar escrito assim
+     * deixa de ser uma régua e passa a ser um número do corpo, comparável por produto
+     * cruzado como qualquer outro. */
+    long f13 = 1; for(int k = 2; k <= 13; k++) f13 *= k;
+    RtCf w13; rt_cf_de(1, 1, f13, &w13);
+    long p13, q13; int volta13 = rt_cf_para(&w13, &p13, &q13);
+    long e12 = 1; for(int k = 0; k < 12; k++) e12 *= 10;
+    RtCf w12; rt_cf_de(1, 1, e12, &w12);
+    long pe, qe; int volta12 = rt_cf_para(&w12, &pe, &qe);
+    printf("      13! = %ld — cabe em int32? %s ; em long? sim\n",
+           f13, f13 <= 2147483647L ? "sim" : "NAO");
+    printf("      1/13! como PALAVRA: [%ld;%ld]  (%d termos, saturou %d) e a volta dá %ld/%ld\n",
+           w13.a[0], w13.a[1], w13.n, w13.saturou, p13, q13);
+    printf("      1e-12 = 10^-12 = 1/%ld ; palavra [%ld;%ld] e a volta dá %ld/%ld\n\n",
+           e12, w12.a[0], w12.a[1], pe, qe);
+    ok("O TECTO ERA DA REPRESENTAÇÃO, NÃO DO OBJECTO. O §C1 mede que a integral de e^x com"
+       " doze termos não cabe — 13! = 6227020800 não entra num `int` de 32 bits —, e isso é"
+       " verdade do PAR (p,q). A mesma fracção como PALAVRA é [0;6227020800]: dois termos,"
+       " cada um a caber num `long`, e a volta é exacta. A palavra não satura porque não"
+       " guarda o produto, guarda a DESCIDA, e cada degrau cabe sozinho. E o mesmo vale"
+       " para os limiares: 1e-12 é 10^-12, o racional 1/10^12, palavra [0;1000000000000] —"
+       " um número do corpo, e não uma régua",
+       volta13 && p13 == 1 && q13 == f13 && w13.saturou == 0 && w13.n == 2
+       && volta12 && pe == 1 && qe == e12 && w12.saturou == 0
+       && f13 > 2147483647L);
 }
 
 printf("\n=== FECHO ==================================================================\n");
