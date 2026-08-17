@@ -124,7 +124,7 @@ São a razão pela qual os doubles saem. Cada um dá uma forma exacta de medir.
 3. O PROCEDIMENTO — como tirar um double
 ----------------------------------------
 
-Estado: 98 limiares ainda DECIDEM uma asserção (eram 134, depois 118). Lista com:
+Estado: 85 limiares ainda DECIDEM uma asserção (eram 134, depois 118, depois 98). Lista com:
 
     python3 - <<'PY'
     import re,glob

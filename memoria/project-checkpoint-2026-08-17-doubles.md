@@ -1,6 +1,6 @@
 ---
 name: project-checkpoint-2026-08-17-doubles
-description: "17/08 — continuar a tirar doubles: traço, ℤ[√D], definição relida; 118→98 limiares, 505:505"
+description: "17/08 — tirar doubles: 118→85 limiares, 505:505; F_p, cruzado nulo, tese já exacta"
 metadata:
   node_type: memory
   type: project
@@ -13,9 +13,10 @@ asserções, não converter à cega.
 ## ESTADO
 
 - **Bateria 505:505** (era 505:505 no cursor; mantém-se verde)
-- **Limiares em `ok(...)`**: **118 → 98** (−20 nesta sessão)
+- **Limiares em `ok(...)`**: **118 → 85** (−33 nesta sessão: 20 + 13)
 - **Ficheiros tocados**: `fecha.c`, `plugs.c`, `spline.c`, `solar.c`, `cosmico.c`,
-  `forca.c`, `nne.c`, `sombra_cone.c`, `eletrico.c`, `moe.c`
+  `forca.c`, `nne.c`, `sombra_cone.c`, `eletrico.c`, `moe.c`, `travessia.c`,
+  `dif.c`, `quantico.c`, `headjack.c`, `radiacao.c`, `corpo_fisico.c`
 
 ## O QUE SAIU (por lei, não por limiar)
 
@@ -30,6 +31,14 @@ asserções, não converter à cega.
 | `nne.c` §N1 | 7 limiares double | exacto em Q(√5); 2.ª ok redundante fundida |
 | `eletrico.c` §E2 | `fabs(soma)`, `fabs(geo²−L/C)` | `+1−1=0` e `Ln·Cd = 1000·Cn·Ld` |
 | `moe.c` §M4 | `pior < 1e-14` sin/cos | `GD·y_MoE = GD·y_densa` em inteiros |
+| `travessia.c` §T5 | `res/escala < 1e-13`, `|nE/N−nc|` | só F_p (`volta_ok`, `pars_ok`) |
+| `dif.c` §F2 | `e1,e2 < 1e-12` | F⁴ e F² em ℤ₁₇ (`z1==0`, `z2==0`) |
+| `dif.c` §F10 | Parseval `pior < 1e-12` | `N·Σx² = Σ X_k X_{−k}` em ℤ₁₇ |
+| `dif.c` §F9 | `e2 < 1e-12` linearidade DFT | F(x+y)=F(x)+F(y) em ℤ₁₇ |
+| `quantico.c` §Q5 | `>= lado² − 1e-12` | `dx²·dy² >= lado²` (satura exacto em \|0⟩) |
+| `headjack.c` | `nt2 > 1e-18`, `d < esc²·1e-24` | `nt2 > 0`, `d == 0` (cruzado de paralelos) |
+| `radiacao.c` | `nBr2 < nBt2·1e-24`, `|Pr−Pt|/Pt` | `nBr2 == 0`; só as duas metades em ℤ |
+| `corpo_fisico.c` | `1e-9` no comentário dentro do `ok()` | comentário saiu; `p31 != p30` |
 
 ## LIÇÕES DESTA RONDA
 
@@ -44,8 +53,9 @@ asserções, não converter à cega.
 
 ## PRÓXIMO
 
-- **98 limiares** restantes — prioridade: `dif.c` (10), `travessia.c` (9), `quantico.c` (8),
-  `corpo_fisico.c` (7), `encaixa.c` (4)
+- **85 limiares** restantes — prioridade: `quantico.c` (série mexp, Robertson saturado
+  com θ), `travessia.c` (logs de Hodge/ν∘rev, circuito), `dif.c` (símbolo da diferença,
+  volta DFT, eixos polares), `encaixa.c`, `corpo_fisico.c` (integrador)
 - `tools/alvos_doubles.txt`: 177 candidatos já verificados — continuar um a um com gume
 - Citações: 37 a bater (cursor.txt)
 
