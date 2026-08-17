@@ -116,9 +116,22 @@ printf("\n§C2  JÁ SÃO QUASE ORTOGONAIS? — e é isto que autoriza o \"só no
      * ortogonais. Em alta dimensao isso e' esperado por concentracao de medida: dois vetores
      * ao acaso em R^768 tem cosseno ~ 1/sqrt(768) = 0,036. Mede-se o cosseno REAL entre pares
      * e compara-se com esse valor — que nao e' regua minha, e' o que a dimensao impoe. */
+    /* O COSSENO NÃO PRECISA DA RAIZ para responder a esta pergunta. O que se quer saber é
+     * se |cos| excede o do acaso, 1/√nd — e isso é uma comparação, logo vive nos QUADRADOS:
+     *
+     *      |c| > 3/√nd   ⟺   c² > 9/nd   ⟺   ⟨u,v⟩²·nd > 9·‖u‖²‖v‖²
+     *
+     * sem uma raiz e sem uma divisão. É o `rt_cos2` da reta.h — cos²(a,b) como par
+     * (numerador, denominador) — e a pergunta decide-se por produto cruzado. */
     double pior = 0, soma = 0; int n = 0;
+    long acima = 0, pares_c = 0;
     for(int i = 0; i < nf; i++) for(int j = i+1; j < nf; j++){
-        double c = dot(v[i],v[j],nd) / sqrt(dot(v[i],v[i],nd)*dot(v[j],v[j],nd));
+        double nii = dot(v[i],v[i],nd), njj = dot(v[j],v[j],nd), dij = dot(v[i],v[j],nd);
+        /* a decisão, nos quadrados: c²·nd > 9  ⟺  dij²·nd > 9·nii·njj */
+        pares_c++;
+        if(dij*dij*(double)nd > 9.0*nii*njj) acima++;
+        /* e o valor, só para a tabela — a raiz fica no sítio dela, que é a apresentação */
+        double c = dij / sqrt(nii*njj);
         if(fabs(c) > pior) pior = fabs(c);
         soma += fabs(c); n++;
     }
@@ -126,8 +139,14 @@ printf("\n§C2  JÁ SÃO QUASE ORTOGONAIS? — e é isto que autoriza o \"só no
     printf("      cosseno médio entre pares        %.4f\n", media);
     printf("      pior caso                        %.4f\n", pior);
     printf("      o acaso em %d dimensões daria    %.4f\n\n", nd, esperado);
-    ok("os vetores NÃO são ortogonais — o cosseno médio excede muito o do acaso",
-       media > 3*esperado);
+    printf("      e a DECISAO, sem raiz: %ld dos %ld pares tem cos^2.nd > 9, que e' |cos| acima\n"
+           "      do triplo do acaso — comparado por produto cruzado, dij^2.nd > 9.nii.njj\n\n",
+           acima, pares_c);
+    ok("os vetores NÃO são ortogonais — o cosseno médio excede muito o do acaso. E a"
+       " decisao nao precisa da raiz: |c| > 3/raiz(nd) e' c^2 > 9/nd, que e'"
+       " dij^2.nd > 9.nii.njj, sem uma raiz e sem uma divisao. A raiz fica so' na linha"
+       " que IMPRIME, que e' o sitio dela",
+       media > 3*esperado && acima > pares_c/2);
     printf("      E aqui a medida diz o contrário do que \"só normalizar\" sugere: estes vetores\n");
     printf("      têm cosseno médio %.2f, muito acima dos %.3f do acaso. Não é defeito — é o\n", media, esperado);
     printf("      SIGNIFICADO: 'rei' e 'rainha' não são ortogonais porque não são independentes.\n");
@@ -204,19 +223,27 @@ printf("\n§C5  E ELA PRESERVA A VIZINHANÇA — o que o telómero não fazia.\n
      * ORTONORMAL preserva distancias — e' Parseval, e mede-se: a distancia entre dois vetores
      * tem de ser IGUAL a distancia entre os seus coeficientes. Se isto falhasse, a cifra
      * servia para identificar e nao para procurar. */
-    double pior = 0;
+    double pior = 0; long vivos = 0;
     for(int i = 0; i < nf; i++) for(int j = i+1; j < nf; j++){
         double ci[NF], cj[NF];
         for(int k = 0; k < nf; k++){ ci[k] = dot(v[i],base[k],nd); cj[k] = dot(v[j],base[k],nd); }
         double dv = 0, dc = 0;
         for(int d = 0; d < nd; d++){ double t = v[i][d]-v[j][d]; dv += t*t; }
         for(int k = 0; k < nf; k++){ double t = ci[k]-cj[k]; dc += t*t; }
-        double e = fabs(sqrt(dv) - sqrt(dc)) / sqrt(dv);
+        /* TRÊS raízes para dizer que dv = dc. A tese de Parseval é a igualdade das
+         * distâncias, e a igualdade dos quadrados É a igualdade delas — x ↦ x² é monótona
+         * nos não negativos. Compara-se relativamente, sem formar raiz nenhuma. */
+        double e = (dv > 0) ? fabs(dv - dc) / dv : fabs(dv - dc);
         if(e > pior) pior = e;
+        if(dv > 0) vivos++;
     }
-    printf("      pior desvio entre a distância no espaço e a distância na cifra: %.3e\n\n", pior);
-    ok("a cifra preserva as distâncias — Parseval, e é o que a torna boa para procurar",
-       pior < 1e-12);
+    printf("      pior desvio RELATIVO entre a distância² no espaço e na cifra: %.3e\n"
+           "      (e sao %ld pares com distancia nao nula — sem isso «preserva» valia por\n"
+           "       ser tudo zero)\n\n", pior, vivos);
+    ok("a cifra preserva as distâncias — Parseval, e é o que a torna boa para procurar."
+       " E mede-se nos QUADRADOS: |dv - dc|/dv, sem as tres raizes que aqui estavam para"
+       " dizer que dv = dc. E os pares com distancia nao nula contam-se",
+       pior < 2e-12 && vivos > 0);
     printf("      É aqui que esta cifra e o telómero se separam, e cada uma serve para o que a\n");
     printf("      outra não serve: o telómero ESPALHA (por isso identifica sem colidir) e esta\n");
     printf("      PRESERVA (por isso procura). Não são duas versões da mesma coisa — são o par\n");

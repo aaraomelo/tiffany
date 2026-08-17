@@ -38,11 +38,21 @@
 #include <string.h>
 #include <complex.h>
 #include "unidade.h"
+#include "reta.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
 #define N 16                                   /* a caixa: N pontos. Finito, e dito. */
+
+/* O FACTOR DA DFT UNITÁRIA É √N — e aqui ele é INTEIRO, porque N = 16 é quadrado
+ * perfeito. Estava escrito `sqrt((double)N)`, o que é pedir a uma função de vírgula um
+ * número que vale exactamente 4. A `rt_raiz_exacta` da reta.h decide-o por busca binária
+ * em inteiros, e o medidor abaixo (§F0) verifica que decidiu — porque um factor assumido
+ * é o defeito que esta casa já conhece: «um fator que não se elimina, tratado como
+ * resultado». Se N não fosse quadrado, isto dizia-o em vez de arredondar calado. */
+static long RAIZ_N = 0;
+static int  RAIZ_N_EXACTA = 0;
 
 static void dft(const double complex *x, double complex *X, int inv){
     for(int k = 0; k < N; k++){
@@ -51,7 +61,7 @@ static void dft(const double complex *x, double complex *X, int inv){
             double a = (inv ? 2 : -2) * M_PI * j * k / N;
             s += x[j] * (cos(a) + I*sin(a));
         }
-        X[k] = s / sqrt((double)N);            /* unitária dos dois lados: é assim que F⁴ = id */
+        X[k] = s / (double)RAIZ_N;             /* unitária dos dois lados: é assim que F⁴ = id */
     }
 }
 
@@ -65,10 +75,33 @@ static Fr fr_div_i(Fr x, long k){ return fr(x.n, x.d*k); }
 static int fr_eq(Fr x, Fr y){ return x.n==y.n && x.d==y.d; }
 
 int main(void){
+RAIZ_N_EXACTA = rt_raiz_exacta(N, &RAIZ_N);
 printf("\n=== O CORPO DIFERENCIAL — cifra e deformação, como os outros ==============\n");
 printf("    A cifra é a RETA: o operador D, e as funções e^(λt) com λ real, que\n");
 printf("    crescem ou decaem e não voltam. A DEFORMAÇÃO leva-a ao CÍRCULO, e o\n");
 printf("    caminho é o POLINÓMIO. Fourier na soma, Mellin no produto.\n");
+
+/* ── §F0  o factor da unitária, e ele é EXACTO ──────────────────────────────── */
+printf("\n§F0  O factor da DFT unitaria e' raiz(N), e aqui ele e' INTEIRO.\n\n");
+{
+    /* O gume tem de estar nos dois lados: a raiz existe para N = 16 e NÃO existe para os
+     * N vizinhos, que não são quadrados. Sem a segunda metade, «é exacta» valia por a
+     * função dizer sim a tudo. */
+    long r;
+    long acha = 0, recusa = 0;
+    for(long n2 = N-3; n2 <= N+3; n2++){
+        if(rt_raiz_exacta(n2, &r)) acha++; else recusa++;
+    }
+    printf("      N = %d, raiz(N) = %ld, exacta? %s\n", N, RAIZ_N, RAIZ_N_EXACTA ? "sim" : "NAO");
+    printf("      e nos sete vizinhos de N: %ld tem raiz inteira e %ld nao tem\n\n", acha, recusa);
+    ok("O FACTOR raiz(N) DA DFT UNITARIA E' UM INTEIRO, e nao uma chamada a uma funcao de"
+       " virgula: N = 16 e' quadrado perfeito e a raiz vale 4 EXACTAMENTE, decidida por"
+       " busca binaria em inteiros. E o gume esta' nos dois lados — dos sete vizinhos de N"
+       " (13 a 19) so' o proprio 16 tem raiz inteira, e os outros SEIS sao recusados. Um factor"
+       " assumido e' o defeito que esta casa ja' conhece: um fator que nao se elimina,"
+       " tratado como resultado",
+       RAIZ_N_EXACTA && RAIZ_N == 4 && RAIZ_N*RAIZ_N == N && acha == 1 && recusa == 6);
+}
 
 printf("\n§F1  Fourier leva a derivada em multiplicação — o operador vira POLINÓMIO.\n\n");
 {
