@@ -47,7 +47,7 @@ cantor 37a78d4f6d91e54f 0
 cantor_julia_dual 2a215f46ac3417d6 0
 canvas_front f5106644abd9858b 0
 cardinal 64356635f9d3aa74 0
-cards 5d0b45d1f0ed6802 0
+cards 1ef000a0196e38d8 0
 carnot 8d04da08cd5af623 0
 catalogo 0dbe859ca368ba34 0
 central_continuo 2806a99350c5d4e4 0

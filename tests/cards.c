@@ -276,7 +276,14 @@ int main(void)
         /* e a segunda metade: dos sete, quantos SAO operacao da triade? o raymarch nao e' —
          * e' o metodo de fora. Deixar isso por dizer era ter no sistema uma peca que nao
          * pertence e nao a nomear. */
+        /* ESTES DOIS SÃO O RESULTADO DE UMA VERIFICAÇÃO PASSADA, escritos à mão — e
+         * `da_triade == 6 && fora_da_triade == 0` comparava-os com o que a linha lhes deu.
+         * Mas há aqui uma relação que FECHA e que nunca era medida: a partição tem de somar
+         * o número de kernels POSTOS no banco, que esse é contado. Se um kernel entrasse sem
+         * ser classificado, a soma denunciava-o — foi assim que o §B12 mostrou que os
+         * fósseis não fechavam por um. */
         long da_triade = 6, fora_da_triade = 0;      /* o raymarch saiu: ja' nao ha' nenhum */
+        long parte_fecha = (da_triade + fora_da_triade == postos);
         printf("  §B5  kernels no banco: %ld postos, %ld lidos de volta, %ld residuo\n",
                postos, lidos, resid);
         printf("       e dos seis: %ld sao operacao da triade, %ld nao — o raymarch SAIU\n",
@@ -292,9 +299,13 @@ int main(void)
            " os fotogramas. Medido nos dois lados — o fluxo de J fecha em instantes igualmente"
            " espacados, e uma translacao, que corre na mesma, NAO fecha e por isso nao tem"
            " relogio nenhum. E os kernels entraram no banco como tudo o resto: nada fica fora"
-           " da estrela. E sao SEIS, todos operacao da triade: o raymarch SAIU, porque nao era nenhuma"
-           " — era o metodo de fora, e o que nao pertence nao fica so' porque ja' la' estava",
-           postos == 6 && lidos == 6 && resid == 0 && da_triade == 6 && fora_da_triade == 0
+           " da estrela. E sao SEIS, todos operacao da triade: o raymarch SAIU, porque nao era"
+           " nenhuma — era o metodo de fora, e o que nao pertence nao fica so' porque ja' la'"
+           " estava. E a classificacao FECHA contra os postos: da_triade + fora_da_triade e' o"
+           " numero de kernels que entraram no banco, que esse e' CONTADO — se um entrasse sem"
+           " ser classificado, a soma denunciava-o. Antes comparavam-se os dois com o que a"
+           " linha lhes tinha atribuido",
+           postos == 6 && lidos == 6 && resid == 0 && parte_fecha
            && nf >= 2 && espacamento_maus == 0 && sem_relogio == 1);
     }
 
