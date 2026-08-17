@@ -1832,7 +1832,21 @@ representações, e não uma: de \code{3.14159} saem $22/7$ e $355/113$ sem
 ninguém os pedir, porque os convergentes são o que a recorrência do
 $q_k$ produz.
 
-\emph{Verificado:} \code{tests/entrega.c} ($9{:}0$). A ida e volta pela
+\textbf{E o pipe fecha do outro lado com o MMC.} À entrada, cada texto lido isolado dá o
+seu $p/q$ e um conjunto fica com denominadores diferentes --- o que obriga a cruzar
+fracções a cada operação. O \textbf{mínimo múltiplo comum dos denominadores} é a
+\emph{unidade} do conjunto, e leva-o todo a $\mathbb{Z}$ de uma vez:
+\[
+\text{textos}\ \longrightarrow\ \underbrace{\operatorname{mmc}(q_i)}_{\text{a unidade}}\
+\longrightarrow\ \text{inteiros}\ \longrightarrow\ \text{operar}\ \longrightarrow\
+[a_0;\ldots,a_n]\ \longrightarrow\ \text{o cliente}
+\]
+\emph{e entre a unidade e a palavra não há vírgula em sítio nenhum}. Normalizar, aqui, não
+é dividir por coisa nenhuma --- é \textbf{escolher a régua}, e o que a autoriza é as
+perguntas serem homogéneas: escalar por $\lambda$ multiplica os dois lados de uma
+comparação, e Lagrange é homogénea de grau~4.
+
+\emph{Verificado:} \code{tests/entrega.c} ($11{:}0$). A ida e volta pela
 palavra é exacta nos $10\,000$ decimais de três casas e a comparação é por
 produto cruzado --- a \emph{mesma} fracção, não uma que difere abaixo de uma
 régua; pelo \code{double}, com os mesmos números, $175$ deles não voltam, e

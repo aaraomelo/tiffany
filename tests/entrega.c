@@ -20,6 +20,7 @@
  *   §E3  a palavra é EUCLIDES: os mesmos quocientes do mdc, noutra coluna
  *   §E4  o cliente reconstrói o que quiser — e a divisão longa não arredonda por acaso
  *   §E5  a saturação conta-se em lugar SEPARADO, e há onde ela acontece
+ *   §E6  O PIPE FECHADO: o MMC à entrada, e daí em diante não há vírgula
  *
  * A outra metade da entrega está no `tools/libc.c`: o parser que lê o texto e devolve
  * p/q exacto (`atofr`). A palavra tira-se dele aqui, e não lá — porque lá não haveria
@@ -282,6 +283,81 @@ printf("\n§E5  A saturação conta-se em lugar SEPARADO — e há onde ela acon
        " a contar em nt_saturou. A saturacao esta' nesta assercao e em nenhuma outra: as"
        " sete de cima nao a veem",
        saturou_palavra > 0 && coube_palavra > 0 && conv_parou && nt_saturou > 0);
+}
+
+/* ── §E6 ─────────────────────────────────────────────────────────────────────── */
+printf("\n§E6  O PIPE FECHADO: o MMC à entrada, e daí em diante não há vírgula.\n\n");
+{
+    /* A ENTREGA resolvia a SAÍDA. A entrada estava a meio: cada texto virava p/q sozinho,
+     * e um conjunto de dados ficava com denominadores diferentes — o que obriga a cruzar
+     * fracções a cada operação. O MMC dos denominadores resolve-o de uma vez:
+     *
+     *      textos ──► UNIDADE (mmc dos q) ──► inteiros ──► operar ──► palavra ──► cliente
+     *
+     * e no meio, entre a unidade e a palavra, NÃO HÁ VÍRGULA em sítio nenhum. */
+    const char *dados[] = { "0.6", "0.45", "1.25", "2.5", "3", "0.125" };
+    const int N = 6;
+    long u = rt_unidade_comum(dados, N);
+    long z[8];
+    int conv = rt_para_unidade(dados, N, u, z);
+
+    printf("      entrada:   ");
+    for(int i = 0; i < N; i++) printf("%s ", dados[i]);
+    printf("\n      unidade:   %ld  (o MMC dos denominadores)\n      inteiros:  ", u);
+    for(int i = 0; i < conv; i++) printf("%ld ", z[i]);
+    printf("\n");
+
+    /* AGORA OPERA-SE, e tudo é inteiro. Três operações que a casa usa: a soma (que em
+     * unidade comum é a soma dos inteiros), o produto directo, e o cruzado. */
+    long soma = 0;
+    for(int i = 0; i < conv; i++) soma += z[i];
+    long a3[3] = { z[0], z[1], z[2] }, b3[3] = { z[3], z[4], z[5] };
+    long dir = rt_dir(a3, b3, 3), cr[3];
+    rt_cruz3(a3, b3, cr);
+    long lag = rt_lagrange(a3, b3, 3);
+    printf("      soma = %ld/%ld ; Dir = %ld/%ld² ; Cruz = (%ld,%ld,%ld)/%ld² ; Lagrange fecha: %s\n",
+           soma, u, dir, u, cr[0], cr[1], cr[2], u, lag ? "sim" : "NAO");
+
+    /* E A SAÍDA: cada resultado sai como PALAVRA, com o denominador que a unidade dá. */
+    RtCf cs;  rt_cf_de(soma < 0 ? -1 : 1, soma, u, &cs);
+    long ps, qs;  rt_cf_para(&cs, &ps, &qs);
+    char dec[32];  rt_escreve_decimal(ps < 0 ? -1 : 1, ps, qs, 4, dec, sizeof dec);
+    printf("      a soma entregue: palavra [");
+    for(int i = 0; i < cs.n; i++) printf("%ld%s", cs.a[i], i+1 < cs.n ? ";" : "");
+    printf("] = %ld/%ld = %s\n", ps, qs, dec);
+
+    /* O CONTROLO DO PIPE: a soma dos racionais, calculada pelo caminho ANTIGO — cruzando
+     * fracções uma a uma, sem unidade comum — tem de dar o MESMO. São dois caminhos, e o
+     * segundo não passa pelo MMC. */
+    long an = 0, ad = 1;
+    for(int i = 0; i < N; i++){
+        int sg; long p2, q2;
+        rt_le_decimal(dados[i], &sg, &p2, &q2);
+        long nn = an*q2 + sg*p2*ad, nd = ad*q2;
+        long g = rt_mdc(nn, nd); if(g > 1){ nn /= g; nd /= g; }
+        an = nn; ad = nd;
+    }
+    int pipe_bate = (soma * ad == an * u);        /* soma/u == an/ad, por produto cruzado */
+    printf("      e o CONTROLO, somando fracção a fracção sem unidade comum: %ld/%ld — bate: %s\n\n",
+           an, ad, pipe_bate ? "sim" : "NAO");
+
+    /* e o que o pipe RECUSA: um decimal com casas a mais faz o MMC não caber, e diz-se */
+    const char *fundo[] = { "0.1", "0.123456789012345678901" };
+    long u_fundo = rt_unidade_comum(fundo, 2);
+
+    ok("O PIPE FECHA DOS DOIS LADOS: o MMC dos denominadores entra a' ENTRADA e leva o"
+       " conjunto todo a INTEIROS de uma vez — «0.6 0.45 1.25 2.5 3 0.125» tem unidade 1000"
+       " —, opera-se la' dentro (soma, Dir, Cruz, Lagrange) sem uma virgula, e a saida e' a"
+       " PALAVRA com o denominador que a unidade da'. Entre a unidade e a palavra nao ha'"
+       " virgula em sitio nenhum",
+       u == 1000 && conv == N && lag && u_fundo == 0);
+
+    ok("E O CONTROLO NAO PASSA PELO MMC: a mesma soma calculada a' antiga, cruzando fraccoes"
+       " uma a uma e reduzindo pelo mdc a cada passo, da' o MESMO racional — comparado por"
+       " produto cruzado. Sao dois caminhos pelo mesmo objecto, e o segundo nao sabe que a"
+       " unidade comum existe. E o pipe RECUSA quando a unidade nao cabe no long, em vez de"
+       " truncar calado",
+       pipe_bate && u_fundo == 0);
 }
 
 printf("\n  ─────────────────────────────────────────────────────────────\n");
