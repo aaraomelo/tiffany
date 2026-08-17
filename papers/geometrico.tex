@@ -1585,11 +1585,69 @@ números grandes.} $\square$
 \colunas{a unificação: quatro peças, quatro ordens, um fecho}
         {Cantor/Julia em $2$, o trial em $3$, Viviani em $4$, a Lei 8 em $8$; o hexal é o
 $\operatorname{lcm}$ dos dois primeiros e o quadro fecha em $24=8\cdot3$}
-        {\code{tests/lei8\_trial.c} ($5{:}0$): as quatro ordens medidas por iteração até à
+        {\code{tests/lei8\_trial.c} ($6{:}0$): as quatro ordens medidas por iteração até à
 identidade e MÍNIMAS; o hexal a sair como o menor $k$ onde dual e trial voltam juntos
 ($6$); o $\operatorname{lcm}$ de todas a dar $24$ e a bater com $8\times3$; $i^{2}$ a ser o
 espelho e $\operatorname{ord}(i)=2\operatorname{ord}(\nu)$; e o gume das $12$ trocas de
 ordem, com $6$ a quebrar o $24$}
+
+\begin{teorema}[O TORO é o invariante geométrico da tríade --- e o GATO fica de
+fora]\label{thm:toro}
+Um automorfismo do toro $T^{2}=\mathbb{R}^{2}/\mathbb{Z}^{2}$ é uma matriz $2\times2$
+\emph{inteira} com $\abs{\det}=1$. As ordens \textbf{finitas} que ele pode ter são cinco,
+e só cinco:
+\[
+\boxed{\;\operatorname{ord}\in\{1,2,3,4,6\}\;}
+\]
+--- a restrição cristalográfica. E as ordens da tríade (Teor.~\ref{thm:unificacao}) são
+\emph{exactamente} essas, tirando a identidade:
+\[
+\underbrace{2}_{\text{Cantor/Julia}}\quad
+\underbrace{3}_{\text{o trial}}\quad
+\underbrace{4}_{\text{VIVIANI}}\quad
+\underbrace{6}_{\text{o hexal}}
+\]
+\textbf{O toro é o sítio onde as quatro vivem juntas.} E o que fica de FORA é o que torna
+isto uma medida:
+
+\textbf{(1) A Lei 8 não é uma ordem do toro.} $8\notin\{1,2,3,4,6\}$ --- ela é o
+\emph{índice} do catálogo, e vive noutro sítio. O Teor.~\ref{thm:unificacao} já o dizia
+sem saber: o fecho é $24=8\cdot3$, e o $8$ entra pelo produto, não pela lista.
+
+\textbf{(2) E o GATO também fica de fora --- que é o CORTE, dito pela topologia.} O gato
+desta casa é $A_m=\begin{psmallmatrix}m&1\\1&0\end{psmallmatrix}$ (\code{thm:gato} do
+\emph{Corpo Universal}), com $\det=\sigma\sigma\dg=-1$ e discriminante
+\[
+D=m^{2}+4>0\quad\text{para todo }m,
+\]
+logo é \textbf{hiperbólico} e tem ordem \emph{infinita}: ele estica por $\sigma$ e
+encolhe por $1/\sigma$, e nunca volta. \emph{Ele não fecha no toro} --- e é isso, em
+linguagem topológica, o Teor.~\ref{thm:corte-fixo}. O que na aritmética é «a órbita corre
+em $\mathbb{P}^1(\mathbb{Q})$ e o ponto fixo não está lá» é aqui «o automorfismo não tem
+ordem finita».
+
+\textbf{(3) E quem decide é o TRAÇO}, outra vez. Com $\det=+1$:
+\[
+\abs{\operatorname{tr}}\le1\ \Rightarrow\ \text{fecha}\qquad
+\abs{\operatorname{tr}}\ge2\ \Rightarrow\ \text{não fecha}
+\]
+--- $\operatorname{tr}=-1$ dá ordem $3$, $0$ dá $4$, $1$ dá $6$. É a divisão do
+Teor.~\ref{thm:viviani} vista de cima: $d=+1$ pode fechar, $d=-1$ nunca fecha porque
+$m^{2}+4$ é sempre positivo.
+
+\textbf{(4) E $\abs{\det}=1$ é NECESSÁRIO}, não uma escolha de apresentação: as matrizes
+inteiras de determinante diferente \emph{nunca} têm ordem finita. \emph{A conservação da
+medida é a condição de haver volta} --- Teor.~\ref{thm:conservacao}(3) outra vez, agora
+como topologia. $\square$
+\end{teorema}
+\colunas{o toro, e o gato que não fecha nele}
+        {as ordens finitas de $T^{2}$ são $1,2,3,4,6$ e são as da tríade; a Lei 8 e o GATO
+ficam de fora, e o gato fora é o CORTE}
+        {\code{tests/lei8\_trial.c} \S L6: $88$ automorfismos de ordem finita e $272$ de
+ordem infinita, com as ordens finitas a darem exactamente $\{1,2,3,4,6\}$ e nenhuma outra;
+a Lei 8 ($8$) ausente da lista; o gato $[m\,1;1\,0]$ com ordem infinita em $12$ de $12$; e
+$\abs{\det}=1$ necessário --- $6201$ de $6201$ matrizes de determinante diferente com
+ordem infinita}
 
 \medskip
 \noindent\textbf{E OS SETE TEOREMAS SÃO UMA FRASE SÓ --- as duas metades de
@@ -1621,6 +1679,7 @@ para andar}\\[3pt]
 \ref{thm:cantor-julia} Cantor/Julia & o shift cicla & $\mathrm{cantor}\cdot\mathrm{julia}=-1$\\
 \ref{thm:viviani} Viviani & $t_2=m^{2}-2d$ & $\det=+1$: a volta é própria\\
 \ref{thm:unificacao} a unificação & a ORDEM identifica & $\operatorname{lcm}=24=8\cdot3$\\
+\ref{thm:toro} o toro & $\abs{\operatorname{tr}}\le1$ fecha & $\abs{\det}=1$ é necessário\\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -3306,7 +3365,7 @@ medidor & unidades \\
 \code{tests/reta.c}              & $42{:}0$ \\
 \code{tests/racionais\_fixos.c}   & $8{:}0$ \\
 \code{tests/descida\_mobius.c}    & $15{:}0$ \\
-\code{tests/lei8\_trial.c}       & $5{:}0$ \\
+\code{tests/lei8\_trial.c}       & $6{:}0$ \\
 \bottomrule
 \end{tabular}
 \end{center}

@@ -1,6 +1,6 @@
 CURSOR.TXT — ELIMINAR OS DOUBLES
 ================================
-Para quem entra. Estado em 17/08/2026, bateria 505:505, 37 citações a bater.
+Para quem entra. Estado em 17/08/2026, bateria 505:505, 37 citações a bater. geometrico.tex: 43 páginas, 54 teoremas.
 
 
 1. A ARQUITECTURA
@@ -78,6 +78,16 @@ São a razão pela qual os doubles saem. Cada um dá uma forma exacta de medir.
     thm:unificacao       as peças são LEIS, e a ORDEM identifica cada uma:
                              Cantor/Julia 2 | trial 3 | Viviani 4 | Lei 8 -> 8
                          lcm(2,3) = 6 é o hexal; lcm de todas = 24 = 8·3.
+
+    thm:toro             O TORO é o invariante geométrico da tríade. As ordens FINITAS de
+                         um automorfismo de T² = R²/Z² são só {1,2,3,4,6} (a restrição
+                         cristalográfica), e são exactamente as da tríade.
+                         A LEI 8 fica de fora (8 não é ordem do toro).
+                         O GATO A_m = [m 1; 1 0] também: det = −1 e disc m²+4 > 0 sempre,
+                         logo hiperbólico e de ordem INFINITA — ele NÃO FECHA NO TORO, e é
+                         isso o CORTE dito pela topologia.
+                         Quem decide é o TRAÇO: com det=+1, |tr| <= 1 fecha, |tr| >= 2 não.
+                         E |det| = 1 é NECESSÁRIO, não uma escolha.
 
     E A SÍNTESE, que é a frase que atravessa os sete:
         o TRAÇO mede (separa, coordena, muda de andar)
