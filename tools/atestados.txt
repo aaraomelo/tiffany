@@ -205,7 +205,7 @@ fator 696100e63cb6aa0a 0
 fecha 50bf15cf5ec4f5ea 0
 fecho_convexo c990307f513c1d36 0
 fermat 33e7038658da1129 0
-fisica f07c358e2c160507 0
+fisica fd051ca419ba202e 0
 fita bfd35f11caa044aa 0
 fonte_banco fb9e4adc448fa16d 0
 fonte_corpo b71085ec1b3db094 0

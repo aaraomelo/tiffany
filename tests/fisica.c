@@ -167,14 +167,21 @@ printf("\n§P3  O bra-ket — o palpite do Aarão, e ele está certo (com uma co
     M2 dif = P; for(int i=0;i<2;i++) for(int j=0;j<2;j++){ dif.re[i][j]-=PP.re[i][j]; dif.im[i][j]-=PP.im[i][j]; }
     printf("      |0><0| é o PROJETOR:  P² - P = %g  ->  P² = P, idempotente, NÃO nilpotente\n",
            mnorma(dif));
-    ok("o projetor |a><a| dá P² = P — não é este o ε", mnorma(dif) < 1e-12);
+    /* ZERO EXACTO, e não «menor que uma régua minha». As entradas são 0 e 1, e os produtos
+     * de 0 e 1 são exactos em IEEE — não há arredondamento nenhum a acomodar. O 1e-12 que
+     * aqui estava dava a esta linha cara de medida aproximada quando ela é uma identidade
+     * algébrica. Medido: com `== 0.0` passa. */
+    ok("o projetor |a><a| dá P² = P — não é este o ε, e a diferença é ZERO EXACTO",
+       mnorma(dif) == 0.0);
 
     /* Agora o caso que DA: bra e ket ORTOGONAIS. */
     double d[2] = {0,1};
     M2 S = ketbra(u, z, d, z);                  /* |0><1| — o operador de subida */
     M2 SS = mm(S,S);
     printf("\n      |0><1| com <1|0> = 0:  S² = %g  ->  S² = 0, NILPOTENTE. É o ε.\n\n", mnorma(SS));
-    ok("o bra-ket com bra e ket ORTOGONAIS dá exatamente ε² = 0", mnorma(SS) < 1e-12);
+    /* o texto já dizia «EXATAMENTE», e o limiar ficava a desdizê-lo — é o defeito que a
+     * casa apanhou catorze vezes. Agora a condição diz o mesmo que a frase. */
+    ok("o bra-ket com bra e ket ORTOGONAIS dá exatamente ε² = 0", mnorma(SS) == 0.0);
 
     /* E a lei geral: (|a><b|)² = <b|a> · |a><b|. Logo anula SSE <b|a> = 0. */
     printf("      E a lei geral, que explica o SE:\n\n");
@@ -225,8 +232,9 @@ printf("\n§P4  Os férmions: a² = 0 é o princípio de exclusão.\n\n");
     printf("      a·a   = %g      (aniquilar duas vezes)\n", mnorma(aa));
     printf("      a†·a† = %g      (CRIAR duas vezes o mesmo estado)\n", mnorma(adad));
     printf("      {a, a†} - I = %g      (a relação de anticomutação)\n\n", mnorma(dif));
-    ok("a² = (a†)² = 0 e {a,a†} = I — a álgebra fermiónica", mnorma(aa) < 1e-12
-       && mnorma(adad) < 1e-12 && mnorma(dif) < 1e-12);
+    ok("a² = (a†)² = 0 e {a,a†} = I — a álgebra fermiónica, com os três resíduos a ZERO"
+       " EXACTO: as entradas são 0 e 1 e os produtos são exactos em IEEE",
+       mnorma(aa) == 0.0 && mnorma(adad) == 0.0 && mnorma(dif) == 0.0);
     printf("      E (a†)² = 0 É o princípio de exclusão de Pauli, escrito em álgebra: criar duas\n");
     printf("      vezes o mesmo férmion no mesmo estado dá ZERO — não \"é improvável\", é zero. A\n");
     printf("      exclusão não é uma regra imposta por fora; é a nilpotência do gerador.\n");
@@ -281,6 +289,41 @@ printf("\n§P6  A soma de velocidades de Einstein É a lei polar do dual.\n\n");
         printf("      %.3f   %.3f   %.9f              %.9f\n", v1, v2, porRapidez, porEinstein);
         if(fabs(porRapidez - porEinstein) > 1e-12) mal++;
     }
+
+    /* E A TESE MEDE-SE EXACTA, sem tanh nenhuma. «Somar rapidezes» quer dizer que a
+     * composição de velocidades é uma SOMA — isto é, que ⊕ é associativa, tem neutro 0 e
+     * cada elemento tem simétrico. Isso é uma identidade ALGÉBRICA e não pede vírgula:
+     *
+     *     v1 ⊕ v2 = (v1+v2)/(1+v1v2),  e com v = p/q:  (p1q2+p2q1)/(q1q2+p1p2)
+     *
+     * Em racionais é exacta, e compara-se por produto cruzado. A rota em tanh fica ao lado
+     * a confirmar — e o resíduo dela é o do arredondamento, não zero: o texto desta
+     * asserção dizia «resíduo 0» e media 1e-16, o que é sobreafirmar. */
+    long assoc = 0, neutro = 0, cone = 0, tot_q = 0;
+    const long P[] = {1, 1, 2, 3, -1, -2}, Q[] = {2, 3, 5, 7, 4, 9};
+    for(int i = 0; i < 6; i++) for(int j = 0; j < 6; j++) for(int k = 0; k < 6; k++){
+        /* (v_i ⊕ v_j) ⊕ v_k */
+        long a1 = P[i]*Q[j] + P[j]*Q[i], b1 = Q[i]*Q[j] + P[i]*P[j];
+        long e1 = a1*Q[k] + P[k]*b1,     f1 = b1*Q[k] + a1*P[k];
+        /* v_i ⊕ (v_j ⊕ v_k) */
+        long a2 = P[j]*Q[k] + P[k]*Q[j], b2 = Q[j]*Q[k] + P[j]*P[k];
+        long e2 = P[i]*b2 + a2*Q[i],     f2 = Q[i]*b2 + P[i]*a2;
+        tot_q++;
+        if(e1*f2 == e2*f1) assoc++;                        /* igualdade em ℚ, sem dividir */
+        /* e o CONE preserva-se: |v| < 1 em cada, logo |e| < |f| no resultado */
+        long ae = e1 < 0 ? -e1 : e1, af = f1 < 0 ? -f1 : f1;
+        if(ae < af) cone++;
+    }
+    for(int i = 0; i < 6; i++){
+        /* v ⊕ 0 = v: (p·1 + 0·q)/(q·1 + p·0) = p/q */
+        long a1 = P[i]*1 + 0*Q[i], b1 = Q[i]*1 + P[i]*0;
+        if(a1*Q[i] == P[i]*b1) neutro++;
+    }
+    printf("\n      e a TESE, exacta em ℚ e sem tanh:\n");
+    printf("      ⊕ é associativa em %ld de %ld ternos   (é isso que a faz uma SOMA)\n",
+           assoc, tot_q);
+    printf("      o neutro é 0 em %ld de 6, e o CONE |v|<1 preserva-se em %ld de %ld\n\n",
+           neutro, cone, tot_q);
     /* e em massa, incluindo o caso da luz */
     int malL = 0;
     for(int k = 0; k < 300; k++){
@@ -291,7 +334,11 @@ printf("\n§P6  A soma de velocidades de Einstein É a lei polar do dual.\n\n");
         if(fabs(r) >= 1) malL++;                /* nunca ultrapassa c */
     }
     printf("\n      (mais 300 pares medidos; e em nenhum a composta atingiu ou passou c)\n\n");
-    ok("somar rapidezes DÁ a fórmula de Einstein — resíduo 0", mal == 0);
+    ok("somar rapidezes DÁ a fórmula de Einstein, e a TESE mede-se exacta em ℚ: ⊕ é"
+       " associativa, tem neutro 0 e preserva o cone |v| < 1 — é isso que faz dela uma SOMA."
+       " A rota por tanh confirma ao lado, e o resíduo dela é o do ARREDONDAMENTO: este"
+       " rótulo dizia «resíduo 0» e media 1e-16",
+       mal == 0 && assoc == tot_q && neutro == 6 && cone == tot_q && tot_q > 0);
     ok("e a velocidade composta nunca chega a c: o cone é inatingível por dentro", malL == 0);
     printf("      Então a fórmula de adição relativística não é um postulado à parte: é a lei\n");
     printf("      \"raios multiplicam, ângulos somam\" do §U4, escrita na variável v = tanh θ. O\n");
@@ -339,7 +386,9 @@ printf("\n§P8  O quadro das três — e o que é exato e o que é analogia.\n\n
     printf("      E a honestidade sobre cada linha, porque nem todas valem o mesmo:\n\n");
     printf("      EXATO (mesma estrutura, outros nomes):\n");
     printf("        · o cone de N = a² - b² É o cone de luz de t² - x². Mesma forma quadrática.\n");
-    printf("        · somar rapidezes DÁ a fórmula de Einstein. Medido, resíduo 0.\n");
+    printf("        · somar rapidezes DÁ a fórmula de Einstein: ⊕ associativa e com neutro,\n");
+    printf("          exacto em ℚ (216 de 216 ternos). A rota por tanh confirma, com o\n");
+    printf("          resíduo do ARREDONDAMENTO — que não é zero, e não se escreve zero.\n");
     printf("        · (|a><b|)² = 0 sse <b|a> = 0. Medido, 200 pares, 0 discordâncias.\n");
     printf("        · a² = (a†)² = 0 com {a,a†} = I é a álgebra fermiónica. Medido.\n");
     printf("        · a parte ε de f(a+ε) É f'(a), exata. Medido.\n\n");
