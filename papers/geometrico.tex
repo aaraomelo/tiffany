@@ -1060,7 +1060,7 @@ e o ponto para onde ela vai não está lá.} $\square$
 
 \begin{teorema}[TEOREMA DO OPERADOR: a indução, a meta-indução e o acumulador são um
 só]\label{thm:operador}
-A Def.~\ref{def:inducao} do \emph{Corpo Universal} nomeia o par --- a indução projecta
+A \code{def:inducao} do \emph{Corpo Universal} nomeia o par --- a indução projecta
 ($\lambda^{+}$), a meta-indução lê ($\lambda^{-}$). Aqui ele \textbf{deriva-se do
 operador}, e o que sai é que as três peças da dinâmica da recta --- o passo, a sua leitura
 e o sítio onde o resultado se acumula --- \textbf{não são três coisas}: são o operador
@@ -1071,7 +1071,7 @@ $A_m$:
 \[
 [p:q]\;\longmapsto\;[\,q\;:\;p+mq\,],
 \]
-a mesma matriz em todo $k$. Pela Def.~\ref{def:inducao} isso dá $\forall k$ pela
+a mesma matriz em todo $k$. Pela \code{def:inducao} isso dá $\forall k$ pela
 \textbf{forma} e não por uma tabela: \emph{a órbita não tem tecto porque o passo não tem
 índice}.
 
@@ -1096,7 +1096,7 @@ transbordar --- é uma \textbf{sequência}, e cada termo cabe sozinho num inteir
 Daí que $1/13!$, que não cabe num par de $32$ bits, seja $[0;6\,227\,020\,800]$ --- dois
 termos, cada um a caber. \emph{Um limiar como $10^{-12}$ é, pela mesma via, o racional
 $1/10^{12}$ de palavra $[0;10^{12}]$: um número do corpo, e não uma régua.} E isto é a
-Teor.~\ref{thm:meta-inducao}(2) aplicada a si própria --- \emph{falha de representação
+\code{thm:meta-inducao}(2) do \emph{Corpo Universal} aplicada a si própria --- \emph{falha de representação
 $\neq$ contra-exemplo}: quando o par satura, a segunda realização é a palavra.
 
 \textbf{(4) E AS DUAS FACES DO EIXO DE PONTRYAGIN SÃO $\operatorname{Dir}$ E
@@ -1349,6 +1349,63 @@ termo a termo em $3600$ racionais; $A_m=T_m\circ S$ e $A_m^{-1}=S\circ T_{-m}$ e
 $40$; $S^2=I$ com a translação involutiva só em $m=0$ ($1$ de $41$); $A_aA_0A_b=A_{a+b}$
 em $961$ de $961$ e $[\ldots a,0,b\ldots]=[\ldots a+b\ldots]$ em $180$ de $180$; e as
 potências de $T_{-1}\circ S$ a dar Fibonacci em $12$ de $12$; e $A_m^{-2}(\infty)=-1/m=\text{norma}/\text{traço}$ em $40$ de $40$, com $\det B=+1$ e $\operatorname{disc}B=m^{2}D$ no quadrado}
+
+\begin{teorema}[A CONSERVAÇÃO: a paragem é o orçamento do nível a esgotar-se]\label{thm:conservacao}
+Faltava dizer \emph{por que} é que a descida pára, e a resposta não é «porque os inteiros
+acabam»: é uma \textbf{lei de conservação}. E a ponte já estava escrita em dois sítios que
+não se conheciam --- o \emph{Corpo Universal} (\code{def:inducao}) diz que \emph{o que
+a meta-indução VALIDA é a conservação de energia}, e o Teor.~\ref{thm:operador} diz que a
+meta-indução \textbf{é a dobra}. Donde:
+\[
+\boxed{\;\text{A DOBRA É A LEI DE CONSERVAÇÃO}\;}
+\]
+
+\textbf{(1) Duas quantidades, e fazem coisas opostas.} Em cada passo da descida
+$[p{:}q]\mapsto[q:p-aq]$, com $a=\lfloor p/q\rfloor$:
+\[
+\boxed{
+\begin{array}{lll}
+\text{CONSERVA-SE} & \gcd(p,q) & \text{a \textbf{energia}: }\gcd(p,q)=\gcd(q,p-aq)\text{,
+exacto}\\[3pt]
+\text{GASTA-SE} & q & \text{o \textbf{orçamento} do nível, e decresce em }\mathbb{N}
+\end{array}}
+\]
+
+\textbf{(2) A paragem é o orçamento a acabar --- e devolve a energia inteira.} A descida
+termina em $q=0$, e nesse instante o que sobra em $p$ é \emph{exactamente} o
+$\gcd$ inicial. \emph{O nível comporta uma energia finita, o passo gasta-a, e quando ela
+acaba a descida devolve-a.} Não é convenção nem tecto de máquina.
+
+\textbf{(3) E nada se perde pelo caminho, porque $\abs{\det}=1$.} Cada passo é
+\textbf{reversível} (Teor.~\ref{thm:volta}), e é isso que autoriza a palavra
+«conservação»: \emph{conservar e poder voltar são a mesma frase}. É por aqui que a
+meta-indução «valida o que a indução conservou» --- ela mede o passo, e o que mede é que
+ele não gastou o que não podia.
+
+\textbf{(4) E a descida infinita é impossível pelo PAR, não por uma das metades.} O
+$\gcd$ não pode desaparecer e $q$ não pode decrescer para sempre em $\mathbb{N}$: é a
+colisão das duas que fecha o Teor.~\ref{thm:corte-fixo}. Uma quantidade conservada e uma
+monótona --- \emph{o invariante e o que se gasta}.
+
+\textbf{(5) Donde o Teor.~\ref{thm:descida} lido pela energia}, e é a frase inteira:
+\[
+\boxed{
+\begin{array}{ll}
+\text{\textbf{racional}} & \text{energia FINITA --- há }\gcd\text{, a descida pára, a
+palavra fecha}\\[3pt]
+\text{\textbf{real}} & \text{energia que não se esgota --- e é o \emph{corte}}
+\end{array}}
+\]
+No ponto fixo $F$ vale $\pm1$ e nunca $0$, e o $\gcd$ dos convergentes vale sempre $1$:
+\emph{a energia está lá, e não há passo que a consuma}. $\square$
+\end{teorema}
+\colunas{a conservação, e a condição de paragem}
+        {o $\gcd$ é a energia e o denominador é o orçamento; a paragem devolve a energia
+inteira; e no ponto fixo ela não se esgota}
+        {\code{tests/descida\_mobius.c} \S M10: em $6400$ descidas o $\gcd$ conserva-se em
+todo o passo, o denominador decresce em todas, $\abs{\det}=1$ em todas, e a paragem devolve
+$p=\gcd$ em $6400$ de $6400$ --- $24\,364$ passos ao todo, e a mais longa com $9$; e nos
+$12$ metais a energia vale $1$ e não se esgota em nenhum}
 
 \begin{teorema}[e há volta --- é a metade dual]\label{thm:volta}
 $\det A_m=-1$, logo a inversa é \textbf{inteira}, e é o fator de potência unitário que a
@@ -3015,7 +3072,7 @@ medidor & unidades \\
 \code{tests/condicao\_pisot.c}    & $4{:}0$ \\
 \code{tests/reta.c}              & $39{:}0$ \\
 \code{tests/racionais\_fixos.c}   & $8{:}0$ \\
-\code{tests/descida\_mobius.c}    & $10{:}0$ \\
+\code{tests/descida\_mobius.c}    & $12{:}0$ \\
 \bottomrule
 \end{tabular}
 \end{center}

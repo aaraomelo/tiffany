@@ -36,6 +36,8 @@
  *   §M8  e ∞ + 1 = −1: a Möbius que o faz tem o ÁUREO por ponto fixo
  *   §M9  e fecha NOS ÍNDICES: ∞ é o 0, dois abaixo está −1/m = norma/traço — e no
  *        operador AO QUADRADO fica um passo só, com det +1 e o anel a virar ℤ[m√D]
+ *   §M10 A CONSERVAÇÃO: o mdc é a energia, o denominador é o orçamento, e a paragem é
+ *        o orçamento a esgotar-se — no ponto fixo ele não se esgota, e é o corte
  *
  * Nenhum double, nenhum limiar: compila sem -lm.
  *
@@ -437,6 +439,101 @@ int main(void){
        " −1/m, que é norma/traço, os dois invariantes do par dual. O caso do Aarão é"
        " m = 1, o ouro", met9 > 0 && ind_soma9 == met9 && inf_zero9 == met9 &&
        um_abaixo9 == met9 && dois_abaixo9 == met9 && nt9 == met9 && ouro_da_menos_um9 == 1);
+
+    /* ─── §M10 ── A CONSERVAÇÃO: a paragem é o esgotamento da energia do nível ──────
+     *
+     * O Aarão: «falta algo ainda, a conservação (energia), porque a condição de paragem é
+     * a energia que o nível comporta».
+     *
+     * E a ponte já estava escrita, em dois sítios que não se conheciam. O `corpo_universal`
+     * (def:inducao) diz que «o que a meta-indução VALIDA é a CONSERVAÇÃO DE ENERGIA»; o
+     * thm:operador diz que a meta-indução É A DOBRA. Logo:
+     *
+     *              A DOBRA É A LEI DE CONSERVAÇÃO.
+     *
+     * E na descida vê-se em duas quantidades que fazem coisas OPOSTAS, e é o par delas que
+     * força a paragem:
+     *
+     *     CONSERVA-SE   o mdc(p,q)      — a energia. mdc(p,q) = mdc(q, p−aq), EXACTO.
+     *     GASTA-SE      o denominador q — o orçamento do nível, e decresce em ℕ.
+     *
+     * A paragem não é convenção nem tecto de máquina: é q = 0, e nesse instante o que
+     * SOBRA é exactamente a energia — p vale o mdc inicial. O nível comporta uma energia
+     * finita, o passo gasta-a, e quando acaba a descida devolve-a inteira.
+     *
+     * E o que garante que nada se perde pelo caminho é |det| = 1 (§M6): cada passo é
+     * REVERSÍVEL. Conservação e reversibilidade são a mesma frase — é por isso que a
+     * meta-indução «valida o que a indução conservou».
+     *
+     * Daqui sai a leitura do thm:descida pelo lado da energia:
+     *
+     *     RACIONAL   energia FINITA (há mdc)      →  a descida PÁRA, a palavra fecha
+     *     REAL       energia que não se esgota    →  não pára, e é o corte
+     */
+    long descidas = 0, mdc_const = 0, q_desce = 0, para_no_mdc = 0, det_um10 = 0;
+    long passos_tot10 = 0, mais_longa = 0;
+    for(long p0 = 1; p0 <= 80; p0++) for(long q0 = 1; q0 <= 80; q0++){
+        long g = rt_mdc(p0, q0);
+        long P = p0, Q = q0;
+        int mdc_ok = 1, desce_ok = 1, det_ok = 1, n = 0;
+        while(Q != 0 && n < 200){
+            long a = P / Q;
+            long nP = Q, nQ = P - a*Q;
+            /* a ENERGIA conserva-se: o mdc do par novo é o do par velho */
+            if(rt_mdc(nP < 0 ? -nP : nP, nQ < 0 ? -nQ : nQ) != g) mdc_ok = 0;
+            /* o ORÇAMENTO gasta-se: o denominador decresce estritamente */
+            if(!(nQ >= 0 && nQ < Q)) desce_ok = 0;
+            /* e o passo é REVERSÍVEL: a matriz [0 1; 1 −a] tem det = −1 */
+            long M[4] = {0, 1, 1, -a};
+            if(mdet(M) != -1) det_ok = 0;
+            P = nP; Q = nQ; n++;
+        }
+        descidas++;
+        passos_tot10 += n;
+        if(n > mais_longa) mais_longa = n;
+        if(mdc_ok) mdc_const++;
+        if(desce_ok) q_desce++;
+        if(det_ok) det_um10++;
+        /* e a paragem DEVOLVE a energia: o que sobra em P é o mdc */
+        if(Q == 0 && P == g) para_no_mdc++;
+    }
+    printf("\n  §M10 a conservação: o mdc é a energia, e o denominador é o orçamento\n");
+    printf("      descidas ......................... %ld\n", descidas);
+    printf("      com o mdc CONSERVADO em todo o passo %ld\n", mdc_const);
+    printf("      com o denominador a DECRESCER .... %ld\n", q_desce);
+    printf("      com |det| = 1 (passo reversível) . %ld\n", det_um10);
+    printf("      e a paragem a DEVOLVER a energia . %ld   (q = 0, e p = mdc)\n", para_no_mdc);
+    printf("      passos ao todo %ld, e a descida mais longa tem %ld\n",
+           passos_tot10, mais_longa);
+    ok("a descida CONSERVA o mdc e GASTA o denominador, e a paragem é o orçamento a"
+       " esgotar-se: quando q = 0 o que sobra é exactamente a energia inicial. E cada passo"
+       " tem |det| = 1, logo é reversível — conservar e poder voltar são a mesma frase",
+       descidas > 0 && mdc_const == descidas && q_desce == descidas &&
+       det_um10 == descidas && para_no_mdc == descidas && mais_longa > 0);
+
+    /* e no PONTO FIXO a energia não se esgota — é o corte, pelo lado da conservação */
+    long inf_met = 0, inf_nao_para = 0;
+    for(long m = 1; m <= 12; m++){
+        /* a órbita de σ_m: parte de um convergente e desce; F vale ±1 e NUNCA zero, logo o
+         * par nunca chega a (g, 0) — a energia é 1 e nunca se gasta */
+        RtCf w; w.n = 0; w.saturou = 0;
+        for(int k = 0; k < 12; k++) if(!rt_op_escreve(&w, m)) break;
+        long p, q;
+        inf_met++;
+        int nunca_esgota = 1;
+        for(int k = 1; k < w.n; k++){
+            if(!rt_op_le(&w, k, &p, &q)) continue;
+            if(rt_forma(p, q, m) == 0) nunca_esgota = 0;   /* se F zerasse, teria parado */
+            if(rt_mdc(p, q) != 1) nunca_esgota = 0;        /* e a energia vale sempre 1 */
+        }
+        if(nunca_esgota) inf_nao_para++;
+    }
+    printf("      e no ponto fixo a energia vale 1 e NUNCA se esgota: %ld de %ld metais\n\n",
+           inf_nao_para, inf_met);
+    ok("no ponto fixo a energia não se esgota — F nunca é zero e o mdc vale sempre 1, logo a"
+       " descida não tem onde parar. É o thm:corte-fixo dito pela conservação: o racional"
+       " tem energia FINITA e pára, o real não",
+       inf_met > 0 && inf_nao_para == inf_met);
 
     printf("\n  ══ a torre é uma só: de cima parte de ∞ e cresce, de baixo parte de p/q e\n");
     printf("     desce até ∞, e S troca os dois extremos porque 0 = 1/∞. E as duas usam\n");
