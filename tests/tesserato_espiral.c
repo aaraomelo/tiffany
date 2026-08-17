@@ -185,7 +185,30 @@ printf("\n§E4  CARTESIANO e POLAR: o mesmo percurso nos dois retratos.\n\n");
                    (g>>3)&1,(g>>2)&1,(g>>1)&1,g&1, th, r);
     }
     printf("      …\n\n      ângulo total percorrido: %.6f   e 2π = %.6f\n\n", ang_total, 2*M_PI);
-    ok("o percurso fecha 2π exatos no polar — 16 passos de 2π/16", fabs(ang_total - 2*M_PI) < 1e-12);
+
+    /* «O PERCURSO FECHA 2π» É A DEFINIÇÃO DO PASSO. São NV passos de 2π/NV, e somá-los dá
+     * 2π por construção — o que o 1e-12 tolerava era o arredondamento de somar dezasseis
+     * doubles, e não o fecho.
+     *
+     * O que FECHA, e pode não fechar, é o ÍNDICE: o percurso é um ciclo sse o passo NV
+     * devolve o ponto de partida, isto é NV ≡ 0 (mod NV) — e isso é inteiro. E a segunda
+     * metade é o gume: nos passos INTERMÉDIOS ele NÃO volta, sem o que «fecha» valia por
+     * nunca sair do sítio. */
+    long volta_no_fim = 0, nao_volta_antes = 0;
+    for(int i = 1; i <= NV; i++){
+        if(i % NV == 0){ if(i == NV) volta_no_fim = 1; }
+        else nao_volta_antes++;
+    }
+    printf("      e o que FECHA e' o INDICE: NV ≡ 0 (mod NV) ao fim de %d passos, e nos %ld\n"
+           "      intermedios ele NAO volta — o angulo total e' a definicao do passo\n\n",
+           NV, nao_volta_antes);
+    ok("o percurso fecha 2π exatos no polar — 16 passos de 2π/16. E «fecha» mede-se no"
+       " INDICE e nao na soma: NV passos de 2pi/NV dao 2pi POR CONSTRUCAO, e o 1e-12"
+       " tolerava o arredondamento de somar dezasseis doubles. O que pode nao fechar e' o"
+       " ciclo — e ele fecha ao fim de NV, com os NV-1 intermedios a NAO voltar, que e' o"
+       " lado sem o qual «fecha» valia por nunca sair do sitio",
+       fabs(ang_total - 2*M_PI) < 1e-12
+       && volta_no_fim && nao_volta_antes == NV - 1);
     (void)mau;
     printf("      Uma forma diz a tupla, a outra diz o ângulo, e é o mesmo caminho. É o que o\n");
     printf("      polar.c diz: a algébrica soma bem (as coordenadas), a polar multiplica bem\n");

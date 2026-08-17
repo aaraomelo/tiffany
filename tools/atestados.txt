@@ -210,7 +210,7 @@ fonte_corpo 6720cdb0b5e2252e 0
 forca ce12f0a3e1661833 0
 fractal 6bab7fb3cd133ffb 0
 fronteira_front efe3776eb4b37362 0
-furos 6be7e5769751df24 0
+furos de39d906c3d1aa0f 0
 fusao 13c9bc056928be95 0
 fusao_conceitos 3c406248b1261cc4 0
 gauss 77024247661e4422 0
@@ -356,7 +356,7 @@ pidual 34b8faa62b3bf489 0
 pimonte 317fdba0a5c75103 0
 pinos ee11b099ae858c6e 0
 pisotbase 5dae6293f2753416 0
-plugs 6ef5653859ff25ac 0
+plugs 08633f3d7d8cecac 0
 po_corpo bd31fce254616bbc 0
 polar 26b7d896d0e8809e 0
 poligonos 4a132f94a847e701 0
@@ -447,7 +447,7 @@ teorema_universal df27b1753b369ed2 0
 teoria_vetorial 4720f0890da571d2 0
 termica 517ad21a05866f7e 0
 tesseracto ebf76569a555a633 0
-tesserato_espiral 55f89989bf04aa64 0
+tesserato_espiral 111a68cd4a4c59af 0
 tex 548ca752cb7fd27c 0
 tex_wasm 1bc71686aca7c02b 0
 texto 9faa357fc47031c3 0

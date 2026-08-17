@@ -38,6 +38,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include "reta.h"
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -275,8 +276,19 @@ int main(void){
         double s1 = sigma(1), sl1 = sigma_linha(1);
         ok("o par tem POLARIDADE (sinais opostos), GANHO (|sigma|>1) e PERDA (|sigma\'|<1)",
            s1 > 0 && sl1 < 0 && fabs(s1) > 1 && fabs(sl1) < 1);
-        ok("e o produto -1 e a CONSERVACAO: o que um estica, o outro contrai, exatamente",
-           fabs(s1*sl1 + 1.0) < 1e-14);
+        /* σ·σ' = −1 É VIETA, e é exacto em ℤ[√D] — o mesmo conserto do dispositivo.c §?.
+         * Com 2σ = m + √D e 2σ' = m − √D, D = m²+4:
+         *      (2σ)(2σ') = m² − D = −4        logo   σσ' = −1
+         * e a conta faz-se com `rt_zd_mul`, sem formar raiz nenhuma. O 1e-14 dava folga a
+         * uma identidade que sai do termo constante do polinómio. */
+        long pza, pzb;
+        rt_zd_mul(1, 1, 1, -1, 1*1+4, &pza, &pzb);      /* m = 1: (2σ)(2σ') */
+        printf("      e em ℤ[√5]: (2σ)(2σ') = %ld + %ld√5 — logo σσ' = -1, EXACTO\n", pza, pzb);
+        ok("e o produto -1 e a CONSERVACAO: o que um estica, o outro contrai, exatamente."
+           " E e' VIETA, exacto em ℤ[√D]: com 2σ = m + raiz(D) e D = m²+4, (2σ)(2σ') = m² - D"
+           " = -4, donde σσ' = -1 — sem formar raiz e sem limiar. O 1e-14 dava folga a uma"
+           " identidade que sai do termo constante do polinomio",
+           fabs(s1*sl1 + 1.0) < 1e-14 && pza == -4 && pzb == 0);
         printf("     -> em todos: + e -, um estica e o outro contrai, e o produto e -1.\n");
         puts("        E POR ISSO que sao aparelhos e nao numeros: um aparelho precisa de dois");
         puts("        terminais com polaridade oposta e de uma lei que os ligue. Aqui a lei e");

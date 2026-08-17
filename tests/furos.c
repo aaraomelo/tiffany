@@ -46,6 +46,7 @@
 #define M_PI 3.14159265358979323846
 #endif
 #include "unidade.h"
+#include "reta.h"
 
 /* quantas caixas de lado 3^-k tocam o Cantor? conta-se, não se assume */
 static long caixas_cantor(int k){
@@ -97,8 +98,34 @@ printf("\n§F1  O FURO TEM NÚMERO: a dimensão do Cantor, contada e não assumi
     printf("\n      e log2/log3 = %.9f\n\n", log(2.0)/log(3.0));
     ok("as duas contagens de caixas concordam — a dimensão é contada, não assumida",
        mau == 0);
-    ok("e ela NÃO é inteira: 0,6309… vive entre a dimensão 0 e a 1",
-       fabs(ultima - log(2.0)/log(3.0)) < 1e-9
+    /* «ENTRE 0 E 1» NÃO PRECISA DE LOGARITMOS. D = log2/log3 é definido por 3^D = 2, logo
+     *      D > 0  ⟺  2 > 1        e        D < 1  ⟺  2 < 3
+     * — em INTEIROS. E a irracionalidade sai da factorização única: D = p/q daria 3^p = 2^q,
+     * e 2 e 3 são primos distintos. É o mesmo conserto do koch.c, onde 1 < D < 2 era
+     * 3 < 4 < 9. */
+    long pq_c = 0, resolve_c = 0;
+    for(long q2 = 1; q2 <= 36; q2++){
+        long e2 = 1; int cabe = 1;
+        for(long t = 0; t < q2; t++){ if(e2 > 4000000000000000000L/2){ cabe = 0; break; } e2 *= 2; }
+        if(!cabe) continue;
+        for(long p2 = 1; p2 <= 36; p2++){
+            long e3 = 1; cabe = 1;
+            for(long t = 0; t < p2; t++){ if(e3 > 4000000000000000000L/3){ cabe = 0; break; } e3 *= 3; }
+            if(!cabe) continue;
+            pq_c++;
+            if(e2 == e3) resolve_c++;
+        }
+    }
+    printf("      e SEM logaritmos: D > 0 e' 2 > 1, e D < 1 e' 2 < 3 — «entre a dimensao 0 e a\n");
+    printf("      1» E' «entre 1 e 3». E 2^q = 3^p nao tem solucao em %ld pares, logo D e'\n"
+           "      IRRACIONAL: 2 e 3 sao primos distintos.\n", pq_c);
+    ok("e ela NÃO é inteira: 0,6309… vive entre a dimensão 0 e a 1. E mede-se SEM"
+       " logaritmos: D = log2/log3 e' definido por 3^D = 2, logo D > 0 e' 2 > 1 e D < 1 e'"
+       " 2 < 3 — «entre a dimensao 0 e a 1» E' «entre 1 e 3», em inteiros. E a"
+       " IRRACIONALIDADE sai da factorizacao unica, porque 2^q = 3^p nao tem solucao com"
+       " p,q >= 1. Mesmo conserto do koch.c, onde 1 < D < 2 era 3 < 4 < 9",
+       2 > 1 && 2 < 3 && resolve_c == 0 && pq_c > 100
+       && fabs(ultima - log(2.0)/log(3.0)) < 1e-9
        && fabs(ultima - floor(ultima+0.5)) > 0.1);
     printf("      É isto o furo, e ele tem número. A dimensão inteira é ancoragem; o Cantor\n");
     printf("      não encosta em nenhuma — fica entre elas, que é onde a teoria diz que o\n");
