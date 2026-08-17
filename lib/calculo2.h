@@ -93,6 +93,32 @@ static Sr sr_exp(int termos){                    /* eˣ = Σ xⁿ/n! */
     }
     return s;
 }
+/* log(1+x) = Σ (−1)^{n+1} xⁿ/n — a INVERSA da exponencial, do lado da série, e com os
+ * coeficientes em ℚ como todos os outros. É o terceiro lado do trio de reta.h: ali a
+ * inversa é pelo expoente INTEIRO, aqui é pela série formal, e as duas dizem o mesmo par.
+ * O termo 0 é zero, porque log(1) = 0 — e é isso que a torna componível com exp. */
+static Sr sr_log1p(int termos){
+    Sr s = sr0();
+    for(int n = 1; n <= termos && n <= C2_MAX; n++){
+        Qz t;
+        if(!qz_divide(qz_de_inteiro((n % 2) ? 1 : -1), qz_de_inteiro(n), &t)) c2_estouros++;
+        s.a[n] = t;
+    }
+    return s;
+}
+/* e a COMPOSIÇÃO de séries, que é o que permite medir exp∘log = id: substitui g em f,
+ * termo a termo, até à ordem N. Exige g[0] = 0 — senão a composição não é formal. */
+static Sr sr_compoe(Sr f, Sr g, int N){
+    Sr r = sr0(), pot = sr0();
+    pot.a[0] = qz(1,1);                              /* g^0 = 1 */
+    for(int k = 0; k <= N && k <= C2_MAX; k++){
+        for(int i = 0; i <= N && i <= C2_MAX; i++)
+            r.a[i] = qz_soma(r.a[i], qz_mult(f.a[k], pot.a[i]));
+        pot = sr_mult(pot, g);
+    }
+    return r;
+}
+
 static Sr sr_sin(int termos){
     Sr s = sr0();
     long f = 1;

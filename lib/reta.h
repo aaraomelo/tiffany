@@ -828,6 +828,41 @@ static void rt_cf_de(int sinal, long p, long q, RtCf *c){
 
 /* e a VOLTA: da palavra ao racional, pela recorrência dos convergentes lida de trás para a
  * frente. Devolve 1, ou 0 se um produto não coubesse. */
+/* ── O TEOREMA DO OPERADOR COMO LEITOR/ESCRITOR ──────────────────────────────────────
+ *
+ * `thm:operador`: a indução, a meta-indução e o acumulador são um só. E sobre o acumulador
+ * as duas metades têm um nome operacional — uma ESCREVE, a outra LÊ:
+ *
+ *      rt_op_escreve   a INDUÇÃO   (λ⁺)   acrescenta um quociente à palavra
+ *      rt_op_le        a META-INDUÇÃO (λ⁻) lê o convergente que a palavra já tem
+ *
+ * e o par fecha: escrever k termos e ler dá exactamente o k-ésimo convergente, que é o
+ * mesmo que a órbita de ∞ produz em k passos (rt_orbita). São as duas metades do MESMO
+ * operador — não duas funções que por acaso concordam.
+ *
+ * O escritor recusa quando a palavra está cheia, e diz-se: RT_CF_MAX é o tecto do array,
+ * e um tecto que não se verifica é documentação e não limite. */
+static int rt_op_escreve(RtCf *w, long a){
+    if(w->n >= RT_CF_MAX){ w->saturou = 1; return 0; }
+    w->a[w->n++] = a;
+    return 1;
+}
+
+/* O LEITOR: o convergente de ordem k, pela recorrência p_k = a_k·p_{k−1} + p_{k−2}. Lê
+ * apenas os primeiros k+1 termos — é a leitura PARCIAL, que é o que faz dela a meta-
+ * indução: ela mede o passo sem precisar do fim da palavra. */
+static int rt_op_le(const RtCf *w, int k, long *p, long *q){
+    if(k < 0 || k >= w->n) return 0;
+    long p0 = 1, q0 = 0, p1 = w->a[0], q1 = 1;
+    for(int i = 1; i <= k; i++){
+        long np = w->a[i]*p1 + p0, nq = w->a[i]*q1 + q0;
+        p0 = p1; q0 = q1; p1 = np; q1 = nq;
+    }
+    if(p) *p = p1;
+    if(q) *q = q1;
+    return 1;
+}
+
 static int rt_cf_para(const RtCf *c, long *p, long *q){
     if(c->n == 0){ *p = 0; *q = 1; return 1; }
     long P = 1, Q = 0;                                      /* ∞ = [1:0], como em rt_orbita */
@@ -1022,6 +1057,26 @@ static int rt_raiz_k(long x, int k, long *r){
     return 1;
 }
 
+/* ── O TRIO DE b^k = n, E ELE ESTÁ FECHADO ──────────────────────────────────────────
+ *
+ * O Aarão: «a exponencial está na lib e a inversa também, daí tem logaritmo».
+ *
+ * E está: uma equação com três letras tem TRÊS perguntas, e a lib tem as três — cada uma
+ * a inversa da potência por um lado diferente, e nenhuma a precisar de vírgula:
+ *
+ *      dado b, k  →  n     rt_ipow        a POTÊNCIA          (a ida)
+ *      dado n, k  →  b     rt_raiz_k      a inversa pela BASE
+ *      dado n, b  →  k     rt_log_int     a inversa pelo EXPOENTE — o LOGARITMO
+ *
+ * As duas inversas são PARCIAIS, e é isso que as torna medidas: devolvem 0 quando a
+ * resposta não existe em ℤ, e esse 0 é metade do valor delas. `log(n)/log(b)` nunca
+ * devolve 0 — devolve sempre um número, e é preciso uma régua para decidir se ele é
+ * inteiro. Aqui a pergunta responde-se sozinha.
+ *
+ * E é por isso que `log(4^N)/log(3^N)` sai de cena: os N cancelam-se, a razão é a mesma
+ * para todo N, e o que a pergunta queria — «4^N é potência de 3?» — é rt_log_int a
+ * devolver 0. Ver o koch.c e o furos.c, onde as duas versões conviveram. */
+
 /* O LOGARITMO INTEIRO: existe k com bᵏ = n? É a inversa da potência do lado do EXPOENTE,
  * e é o que substitui `log(n)/log(b)` quando a pergunta é sobre inteiros — sem dois
  * logaritmos, sem uma divisão, e sem a régua que a divisão de logaritmos obriga a
@@ -1174,6 +1229,28 @@ static long rt_caminho_sup(int (*serve)(long m, long pot, void *ctx), int k,
  * e como o lado direito é positivo, parte-se em dois SEM PERDA e sem formar a raiz:
  * ou 2a − mb é negativo (e acabou), ou é não negativo e (2a−mb)² < b²D. Devolve 1 se
  * a/b < σ. Exige b ≥ 1. */
+/* A COMPARAÇÃO GERAL: p/q  <  (A + B·√D)/E ?   Sem formar a raiz, e é a mesma partição
+ * do thm:corte um passo mais geral. Escreve-se
+ *
+ *      p·E − q·A  <  q·B·√D
+ *
+ * e decide-se pelo SINAL dos dois lados antes de elevar ao quadrado, porque elevar troca
+ * a ordem nos negativos — é aí que uma comparação «óbvia» se estraga:
+ *
+ *      esq < 0 e dir ≥ 0   →  sim, e acabou
+ *      esq ≥ 0 e dir < 0   →  não
+ *      ambos ≥ 0           →  esq² < dir²·D
+ *      ambos < 0           →  esq² > dir²·D      (a ordem inverte-se)
+ *
+ * Exige q > 0 e E > 0. Devolve 1 se p/q é menor. */
+static int rt_menor_que_zd(long p, long q, long A, long B, long E, long D){
+    long esq = p*E - q*A, dir = q*B;
+    if(esq < 0 && dir >= 0) return 1;
+    if(esq >= 0 && dir < 0) return 0;
+    if(esq >= 0) return esq*esq < dir*dir*D;
+    return esq*esq > dir*dir*D;
+}
+
 static int rt_menor_que_sigma(long a, long b, long m, long D){
     long e = 2*a - m*b;
     if(e < 0) return 1;

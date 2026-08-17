@@ -556,6 +556,42 @@ int main(void){
            && casos > 0 && no_cone > 0);
     }
 
+    /* ═══ §R12c O OPERADOR COMO LEITOR/ESCRITOR — e o par fecha ════════════ */
+    printf("\n§R12c a INDUÇÃO escreve, a META-INDUÇÃO lê, e o acumulador é a PALAVRA.\n\n");
+    {
+        /* thm:operador, realizado: sobre o acumulador as duas metades têm nome
+         * operacional — uma ESCREVE um quociente, a outra LÊ o convergente. E o par fecha
+         * contra uma TERCEIRA rota que não sabe da palavra: a órbita de ∞ (rt_orbita), que
+         * é a mesma recorrência escrita do lado da matriz.
+         *
+         * Três caminhos pelo mesmo objecto — a palavra, o leitor e a órbita — e nenhum
+         * partilha código com os outros. Se um estivesse errado, dois discordavam. */
+        long mau = 0, passos = 0;
+        RtCf w = { 1, {0}, 0, 0 };
+        printf("      k    palavra   leitor p/q     órbita de ∞     batem?\n");
+        for(int k = 0; k < 12; k++){
+            if(!rt_op_escreve(&w, 1)) break;             /* o ouro: [1;1,1,…] */
+            long p = 0, q = 0, P = 0, Q = 0;
+            if(!rt_op_le(&w, k, &p, &q)) break;
+            rt_orbita(1, k+1, &P, &Q);
+            passos++;
+            if(p != P || q != Q) mau++;
+            if(k < 4 || k == 11)
+                printf("      %-4d %-9d %ld/%-12ld %ld/%-13ld %s\n",
+                       k, w.n, p, q, P, Q, (p==P && q==Q) ? "sim" : "NAO");
+        }
+        printf("      …\n\n      %ld passos, %ld divergências, a palavra saturou %d vez(es)\n\n",
+               passos, mau, w.saturou);
+        ok("O OPERADOR É UM LEITOR E UM ESCRITOR sobre o mesmo acumulador: a INDUÇÃO escreve"
+           " um quociente na palavra, a META-INDUÇÃO lê o convergente que ela já tem, e o"
+           " par fecha contra uma TERCEIRA rota que não sabe da palavra — a órbita de ∞,"
+           " que é a mesma recorrência do lado da matriz. Doze passos do ouro, e os"
+           " convergentes saem 1/1, 2/1, 3/2, 5/3, 8/5 … 233/144 pelos três caminhos, sem"
+           " uma divergência e sem a palavra saturar. É o thm:operador realizado: um"
+           " operador, um espelho, e o rasto que eles deixam",
+           mau == 0 && passos == 12 && w.saturou == 0);
+    }
+
     /* ═══ §R13 O PONTO FIXO: NÃO CABE EM ℚ, E CABE EM 𝔽ₚ ═══════════════════ */
     printf("\n§R13 o ponto fixo — o corte é a falta dele, e a Lei 8 diz o contrário.\n\n");
     {

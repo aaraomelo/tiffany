@@ -198,6 +198,47 @@ printf("\n§C5  O TECTO: as divisões que não couberam, contadas à parte.\n\n"
        c2_estouros == 0 && qz_saturou == c2_sat_tecto && c2_sat_tecto > 0);
 }
 
+/* ═══ §C7 — exp e log são o PAR, e a composição prova-o em ℚ ═══════════════ */
+printf("\n§C7  exp∘log = id, coeficiente a coeficiente — o par sem uma vírgula.\n\n");
+{
+    /* O Aarão: «a exponencial está na lib e a inversa também, daí tem logaritmo».
+     *
+     * E o par fecha-se em ℚ, sem avaliar nada: com log(1+x) = Σ (−1)^{n+1}xⁿ/n e
+     * eˣ = Σ xⁿ/n!, a composição exp(log(1+x)) tem de dar 1 + x — isto é, o coeficiente
+     * 0 vale 1, o coeficiente 1 vale 1, e TODOS os outros valem ZERO. Não é «próximo de
+     * zero»: é zero, e mede-se com qz_igual.
+     *
+     * É a mesma inversão que a reta.h tem do lado inteiro — rt_ipow, rt_raiz_k e
+     * rt_log_int são as três perguntas de b^k = n. Ali a inversa é pelo expoente; aqui é
+     * pela série. As duas dizem o mesmo par. */
+    int N = 8;
+    Sr L = sr_log1p(N), E = sr_exp(N);
+    Sr comp = sr_compoe(E, L, N);
+    long zeros = 0, olhados = 0;
+    int c0 = qz_igual(comp.a[0], qz(1,1));
+    int c1 = qz_igual(comp.a[1], qz(1,1));
+    printf("      exp(log(1+x)) coeficiente a coeficiente:\n");
+    printf("        grau 0: %d/%d   grau 1: %d/%d   (têm de ser 1 e 1)\n",
+           comp.a[0].p, comp.a[0].q, comp.a[1].p, comp.a[1].q);
+    for(int i = 2; i <= N; i++){ olhados++; if(qz_igual(comp.a[i], qz(0,1))) zeros++; }
+    printf("        graus 2..%d: %ld de %ld são ZERO exacto\n\n", N, zeros, olhados);
+    /* e o GUME: uma série que NÃO é a inversa não compõe na identidade */
+    Sr S1 = sr_sin(N);
+    Sr errada = sr_compoe(E, S1, N);
+    long zeros_err = 0;
+    for(int i = 2; i <= N; i++) if(qz_igual(errada.a[i], qz(0,1))) zeros_err++;
+    printf("      e o GUME: com sin no lugar do log, só %ld dos %ld graus dão zero —\n",
+           zeros_err, olhados);
+    printf("      a composição só colapsa na identidade com a INVERSA certa\n\n");
+    ok("exp E log SÃO O PAR, e prova-se em ℚ sem avaliar nada: exp(log(1+x)) dá 1 + x"
+       " coeficiente a coeficiente — o grau 0 vale 1, o grau 1 vale 1, e todos os outros"
+       " são ZERO EXACTO, medido com qz_igual e não com uma régua. É a mesma inversão que"
+       " a reta.h tem do lado inteiro (rt_ipow, rt_raiz_k, rt_log_int são as três perguntas"
+       " de b^k = n); ali é pelo expoente, aqui é pela série. E o gume: pondo sin no lugar"
+       " do log a composição NÃO colapsa",
+       c0 && c1 && zeros == olhados && olhados > 0 && zeros_err < olhados);
+}
+
 /* ═══ §C6 — E O TECTO NÃO É DO OBJECTO: É DA REPRESENTAÇÃO ═════════════════ */
 printf("\n§C6  O TECTO ERA DO PAR (p,q). Na PALAVRA não há tecto: é uma sequência.\n\n");
 {

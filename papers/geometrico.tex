@@ -199,7 +199,7 @@ que é a \textbf{Lei 8} a dizer o contrário: $62$ dos $126$ metais de $\mathbb{
 o mesmo número que o \emph{Corpo Universal} publica, obtido por uma implementação que não
 o conhecia. E a \textbf{volta} está lá inteira, $[p:q]\mapsto[q:p-mq]$, a desfazer a ida
 e a chegar ao $\infty=[1:0]$ exacto.
-\emph{Verificado:} \code{tests/reta.c} ($38{:}0$), cada operação por duas rotas que não
+\emph{Verificado:} \code{tests/reta.c} ($39{:}0$), cada operação por duas rotas que não
 partilham código e cada uma com o seu controlo negativo.
 
 \medskip
@@ -1149,6 +1149,74 @@ a órbita corre}\;}
 \]
 --- e não uma construção acrescentada por fora. $\square$
 \end{corolario}
+
+\begin{teorema}[TEOREMA DA DESCIDA: $\mathbb{Q}$ são as classes de equivalência dos pontos
+fixos]\label{thm:descida}
+O Teor.~\ref{thm:corte-fixo} sobe: a órbita corre em $\mathbb{P}^1(\mathbb{Q})$ e o ponto
+fixo \emph{não está lá}. Falta a outra metade do par --- a \textbf{descida}, e ela não pede
+construção nova: pede ler o que o Teor.~\ref{thm:fixo-dual} já diz, que o par dual é
+descrito por \textbf{traço e determinante, ambos inteiros}.
+
+\textbf{(1) Cada ponto fixo vive no seu próprio corpo, e só um deles é comum a todos.}
+$\sigma_m$ é raiz de $x^{2}=mx+1$, logo vive em $\mathbb{Q}(\sqrt{m^{2}+4})$ --- um corpo
+\emph{diferente} por cada $m$: $\sigma_1=\varphi$ está em $\mathbb{Q}(\sqrt5)$,
+$\sigma_2=1+\sqrt2$ em $\mathbb{Q}(\sqrt8)$. Não há sítio onde caibam todos. \emph{Excepto
+o que a simetrização deixa para trás:}
+\[
+\boxed{\;\sigma_m+\sigma_m\dg=m\in\mathbb{Z}
+\qquad\text{e}\qquad
+\sigma_m\,\sigma_m\dg=-1\;}
+\]
+
+\textbf{(2) O traço projecta, a norma não --- e é aqui que a escolha se paga.} As duas são
+as metades da mesma Cayley--Hamilton, e só uma delas é \textbf{coordenada}: o traço é
+sobrejectivo sobre $\mathbb{Z}$, e a norma \emph{vale $-1$ em todo $m$}. Se a coordenada
+escolhida fosse ela, a fibra seria a família inteira e a tabela toda daria $-1$. \emph{A
+norma conserva; quem separa é o traço.}
+
+\textbf{(3) A classe de equivalência é a fibra do traço, e é o par dual.} Sobre cada $m$ a
+fibra de $\operatorname{tr}$ é exactamente $\{\sigma_m,\sigma_m\dg\}$ --- os dois pontos
+fixos de $g_m$, que é o par dual e mais nada. Logo
+\[
+\boxed{\;\mathbb{Z}\;\cong\;\{\text{pontos fixos}\}\big/\!\sim,
+\qquad \sigma\sim\tau\iff\operatorname{tr}\sigma=\operatorname{tr}\tau\;}
+\]
+e $\mathbb{Q}$ é a \textbf{razão}: $\dfrac ab=\dfrac{\operatorname{tr}\sigma_a}
+{\operatorname{tr}\sigma_b}$, com $(a,b)\sim(c,d)$ exactamente quando os traços cruzados
+coincidem --- que é $ad=bc$, a definição de $\mathbb{Q}$, \emph{recuperada e não posta}.
+
+\textbf{(4) E o racional é o que a DOBRA fixa.} Dentro de um corpo, a dobra $x\mapsto
+x\dg$ tem espectro $\{+1,-1\}$ (Teor.~\ref{thm:operador}(2)), e
+\[
+\boxed{\;x\in\mathbb{Q}\iff x=x\dg\;}
+\]
+--- o auto-espaço $+1$ \emph{é} $\mathbb{Q}$, o $-1$ é $\sqrt D\,\mathbb{Q}$. São
+$\operatorname{Dir}$ e $\operatorname{Cruz}$ outra vez, agora literais: \emph{o racional é
+a face que não se move.}
+
+\textbf{(5) A descida reais $\to$ racionais é o TRUNCAR da palavra.} Os dois lados do
+racional $p_k/q_k$ obedecem à \emph{mesma} recorrência $x_{k+1}=m\,x_k+x_{k-1}$, cujo
+característico é $x^{2}-mx-1$ --- a equação do ponto fixo. Diferem só nas condições
+iniciais, inteiras. Logo \textbf{todo racional é a razão de duas soluções da equação do
+ponto fixo}, e o irracional cancela-se porque cada uma é simétrica nos dois. Daí a
+diferença que separa os dois andares, e é só esta:
+\[
+\boxed{\;\text{racional}=\text{a palavra que \textbf{fecha}};\qquad
+\text{real}=\text{a que não fecha}\;}
+\]
+$\square$
+\end{teorema}
+\colunas{a descida: $\mathbb{Q}$ como classes de equivalência de pontos fixos}
+        {o traço projecta a família toda em $\mathbb{Z}$, a fibra é o par dual, a razão dá
+$\mathbb{Q}$, e a norma --- que é a outra metade --- não separa nada}
+        {\code{tests/racionais\_fixos.c}: $\operatorname{tr}\sigma_m=m$ por duas rotas em
+$60$ de $60$, e a norma a valer $-1$ em todos ($1$ valor distinto contra $60$);
+$m^{2}+4$ sem raiz inteira em $60$ de $60$, com o controlo $m=0$ a dar $\sqrt4=2$; a
+equivalência dos pares a bater com $ad=bc$ em $20\,736$ quádruplos (a norma, na mesma
+varredura, acerta $432$); $\mathbb{Q}$ como auto-espaço $+1$ da dobra em $845$ elementos de
+$5$ corpos; e $F\neq0$ nas $112$ truncaturas, com o \emph{único} empate de denominador a
+ser o do ouro}
+
 \begin{teorema}[e há volta --- é a metade dual]\label{thm:volta}
 $\det A_m=-1$, logo a inversa é \textbf{inteira}, e é o fator de potência unitário que a
 torna exacta:
@@ -2812,7 +2880,8 @@ medidor & unidades \\
 \code{tests/supremo.c}            & $6{:}0$ \\
 \code{tests/cardinal.c}           & $4{:}0$ \\
 \code{tests/condicao\_pisot.c}    & $4{:}0$ \\
-\code{tests/reta.c}              & $38{:}0$ \\
+\code{tests/reta.c}              & $39{:}0$ \\
+\code{tests/racionais\_fixos.c}   & $7{:}0$ \\
 \bottomrule
 \end{tabular}
 \end{center}
