@@ -1,6 +1,6 @@
 ---
 name: feedback-assercoes-vazias
-description: "A asserção que passa sem poder falhar — NOVE formas dela, e como reconhecer cada uma antes de commitar"
+description: "A asserção que passa sem poder falhar — ONZE formas dela, e as três ferramentas que as caçam por máquina"
 metadata: 
   node_type: memory
   type: feedback
@@ -58,6 +58,39 @@ no mesmo dia**, em ficheiros diferentes, e ela é a mais fácil de escrever sem 
   tautologia*.
 - `xx.c §X1`: `L a=1, b=1;` calculados por **dois laços idênticos**, e depois `a==b`. E na mesma
   secção, sem disfarce nenhum: **`if(1==1 && 1==1) raiz_1++;`**
+
+**10. A DEFINIÇÃO RELIDA — e é a mais produtiva de todas.** Uma variável é definida por uma
+expressão, e uma asserção mais abaixo verifica essa MESMA expressão. Em 17/08 apanhei-a **cinco
+vezes em cinco ficheiros**:
+
+```
+forca.c        V = Pi*S            depois  razao = V/(Pi*S)          → 1
+cosmico.c      Qf = Q - W          depois  W + Qf == Q               → W+Q−W
+tikz.c         #define TFIM (N*H)  depois  fabs(N*H - TFIM) < 1e-12  → x−x
+spline.c       w = av*s/upem       depois  w12/w10 == 1.2            → 12/10
+ttf_corpo.c    buraco = a - b      depois  b < a && buraco > 0       → a mesma condição
+```
+
+**Nem o `gume.py` nem o `residuo_zero.py` a apanham**: mutar o operador derruba a asserção na
+mesma, e nem todas imprimem resíduo. Por isso nasceu `tools/definicao_relida.py`, que procura a
+FORMA — para cada asserção, se a definição de um identificador da condição menciona outro que
+também lá está. (A 1.ª versão deu 250 candidatos, quase todos ruído de declarações múltiplas
+`int a = 0, b = 0;`; com as vírgulas de topo separadas ficaram 70.)
+
+**O antídoto é sempre o mesmo: a segunda parcela tem de vir de OUTRA VIA.** No `cosmico.c`, calcular
+`Q_frio` pela razão das temperaturas em vez de por `Q − W`; no `forca.c`, medir a consequência
+(sem cruzado não há imposto) em vez da factorização; no `ttf_corpo.c`, medir a CAUSA (há um contorno
+de área negativa) e o contraste (um glifo de sentido único não tem nenhum).
+
+**11. A CONSTANTE QUE PARECE UMA CONTA.** `int nona = (MOD_CAT % MOD_CAT != 0);` — `x % x` é zero
+para qualquer x, logo é a constante `false`, e o `&& !nona` na condição nunca podia falhar. Estava
+num bloco de onde eu **já tinha tirado três tautologias e escrito porquê**: escapou porque tinha um
+operador e um `!=`. *Uma expressão não é uma medida só por ter símbolos.*
+
+**E o gume que RELAXA não é gume.** Duas vezes apontei mutações que afrouxavam a condição (aceitar
+zero, verificar menos coordenadas) e concluí «não mordeu». Um gume tem de mutar **o que a asserção
+mede**, não a asserção. E quando ele não morde, a causa pode ser a ENTRADA: no `nne.c` o gume ao
+`esc` sobreviveu porque `u = {1,0,0}` tinha a terceira coordenada zero — o defeito não vivia ali.
 
 **E o modo mais traiçoeiro dela: SIMPLIFICAR À MÃO NO PONTO.** Em 17/08, a corrigir uma destas no
 `dominios.c`, escrevi a «derivada analítica em t=0» já simplificada:
