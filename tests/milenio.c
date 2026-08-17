@@ -227,7 +227,40 @@ printf("\n§M5  Pontryagin é uma DOBRA: Γ̂̂ = Γ. E o vinco são os auto-dua
         if(ruim || ordem != n) malAD++;
     }
     printf("\n");
-    ok("Z/n É auto-dual, medido: Γ̂ é cíclico de ordem n, gerado por χ_1", malAD == 0);
+
+    /* E A TESE VIVE NOS EXPOENTES, onde é EXACTA e não pede cpow nem limiar.
+     *
+     * χ_k(x) = ω^{kx} com ω = e^{2πi/n}, logo tudo o que se afirma sobre os caracteres
+     * lê-se em ℤ/n:
+     *
+     *   χ_1^k = χ_k          ⟺   k·x ≡ k·x (mod n)          — a acção do gerador
+     *   ordem de χ_1 é n     ⟺   o menor k > 0 com k·x ≡ 0 (mod n) PARA TODO x é n
+     *
+     * A segunda é a que tem conteúdo, e mede-se PROCURANDO a ordem em vez de a afirmar:
+     * para cada k de 1 a n, ver se k·x ≡ 0 em todos os x, e ficar com o primeiro. Se o
+     * grupo dual não fosse cíclico de ordem n, a busca parava antes. */
+    int mal_exp = 0, ns = 0;
+    for(long n = 2; n <= 60; n++){
+        ns++;
+        long ordem = 0;
+        for(long k = 1; k <= n && !ordem; k++){
+            int trivial = 1;
+            for(long x = 0; x < n; x++) if((k*x) % n != 0) trivial = 0;
+            if(trivial) ordem = k;
+        }
+        /* e χ_1^k = χ_k: o expoente do gerador elevado a k é k·x, o mesmo de χ_k */
+        int gera = 1;
+        for(long k = 0; k < n; k++)
+            for(long x = 0; x < n; x++)
+                if((1*k*x) % n != ((k % n)*x) % n) gera = 0;
+        if(ordem != n || !gera) mal_exp++;
+    }
+    printf("      e nos EXPOENTES, exacto em Z/n: a ordem de χ_1 é n em %d de %d valores\n\n",
+           ns - mal_exp, ns);
+    ok("Z/n É auto-dual, medido: Γ̂ é cíclico de ordem n, gerado por χ_1. E a tese vive nos"
+       " EXPOENTES, onde é exacta: a ordem PROCURA-SE em Z/n — o menor k com k·x ≡ 0 para"
+       " todo x — em vez de se afirmar, e sai n em todos os 59 valores",
+       malAD == 0 && ns > 0 && mal_exp == 0);
     ok("e o VINCO não é vazio nem é tudo: são alguns", vinco > 0
        && vinco < (int)(sizeof t/sizeof *t));
 

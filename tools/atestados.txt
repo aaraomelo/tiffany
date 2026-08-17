@@ -297,7 +297,7 @@ metronomo_pi 09b2eb77df540fd5 0
 microfluidica e111ec4d2bbccc7e 0
 migracao a473dc3633c9cb85 0
 migracao_universal 7bbcce67bc1915a2 0
-milenio 4f8285673d064149 0
+milenio 98ce1f97ffce1cf9 0
 milenio_trial 139dac2c1296565e 0
 mmu 645716da5f0ca2a0 0
 mobilidade b66181572b2a5e24 0
@@ -427,7 +427,7 @@ sem_ramo 81a20f7c9df8d1e2 0
 semantico 5787c32405ada5b5 0
 semente bdf47d333634825f 0
 significado 4cde300a66dfe985 0
-simula 71b1c4570dfb270a 0
+simula 8f43695442bd7d89 0
 sistema f56a7c35b80f8e03 0
 smartcontract c584e6c96ecec290 0
 solar ca574d4f57ea30ae 0

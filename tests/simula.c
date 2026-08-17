@@ -165,8 +165,35 @@ int main(void){
                 double alvo = (i==j) ? 4.0/3.0 : 0.0;
                 if(fabs(NtN[i][j] - alvo) > 1e-14) isotropico = 0;
             }
-        ok("N^T.N e ISOTROPICO e vale (4/3).I — o tetraedro nao privilegia direcao nenhuma",
-           isotropico);
+
+        /* E A TESE NAO PRECISA DA RAIZ NENHUMA. Os quatro eixos do tetraedro sao vectores
+         * INTEIROS — (1,1,1), (1,-1,-1), (-1,1,-1), (-1,-1,1) — e a normalizacao por raiz(3)
+         * e' um factor COMUM que sai para fora:
+         *
+         *     sum_k n_k n_k^T = (1/3) sum_k v_k v_k^T = (1/3) . 4I = (4/3) I
+         *
+         * logo a isotropia le-se em `sum v v^T = 4I`, que e' uma identidade de INTEIROS. E a
+         * diagonal e a fora-diagonal dizem coisas diferentes: a diagonal da 4 porque cada
+         * componente e' +-1 e ha quatro; a fora-diagonal ANULA-SE porque os sinais cancelam
+         * aos pares. Contam-se as duas em separado, senao «isotropico» ficava a valer por
+         * uma delas so'. */
+        long S[3][3] = {{0}};
+        static const long vi[4][3] = { {1,1,1}, {1,-1,-1}, {-1,1,-1}, {-1,-1,1} };
+        for(int k = 0; k < 4; k++)
+            for(int i = 0; i < 3; i++)
+                for(int j = 0; j < 3; j++) S[i][j] += vi[k][i]*vi[k][j];
+        int diag_ok = 0, fora_ok = 0, fora_tot = 0;
+        for(int i = 0; i < 3; i++)
+            for(int j = 0; j < 3; j++){
+                if(i == j){ if(S[i][j] == 4) diag_ok++; }
+                else { fora_tot++; if(S[i][j] == 0) fora_ok++; }
+            }
+        printf("     e em INTEIROS, sem raiz: sum v.v^T tem diagonal 4 em %d de 3 e"
+               " fora-diagonal 0 em %d de %d\n", diag_ok, fora_ok, fora_tot);
+        ok("N^T.N e ISOTROPICO e vale (4/3).I — o tetraedro nao privilegia direcao nenhuma."
+           " E mede-se EXACTO em inteiros: a normalizacao por raiz(3) e' factor comum, logo a"
+           " tese e' sum v.v^T = 4I, com a diagonal e a fora-diagonal contadas em separado",
+           isotropico && diag_ok == 3 && fora_ok == fora_tot && fora_tot == 6);
 
         double Brec[3] = {0,0,0};
         for(int i = 0; i < 3; i++){
