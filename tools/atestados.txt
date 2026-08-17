@@ -167,7 +167,7 @@ einstein 769166e44317809f 0
 eletrico 8af6bb149cfa9f9c 0
 elipses 686fc2b4ec8ad0e4 0
 eliptica_viviani 6202e1b445210d57 0
-encaixa a1bf5e740401b366 0
+encaixa 91195406760ef0f7 0
 encaixe_continuo fb85476766754fcb 0
 encaixotamento 0f9c4a6716e901fe 0
 encanamento 672eb25bf7dc3010 0

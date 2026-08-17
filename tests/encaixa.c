@@ -161,6 +161,7 @@ printf("\n§C3  A BASE por Gram-Schmidt: e mede-se que ela É ortonormal.\n\n");
     /* Gram-Schmidt: tira-se de cada vetor o que ele tem dos anteriores, e normaliza-se. O que
      * se mede nao e' que o algoritmo correu — e' que o RESULTADO tem as duas propriedades:
      * norma 1 em cada, e produto interno 0 entre quaisquer dois. */
+    int degenerados = 0;
     for(int i = 0; i < nf; i++){
         memcpy(base[i], v[i], (size_t)nd*sizeof(double));
         for(int j = 0; j < i; j++){
@@ -168,7 +169,11 @@ printf("\n§C3  A BASE por Gram-Schmidt: e mede-se que ela É ortonormal.\n\n");
             for(int d = 0; d < nd; d++) base[i][d] -= c*base[j][d];
         }
         double nn = sqrt(dot(base[i], base[i], nd));
-        if(nn > 1e-12) for(int d = 0; d < nd; d++) base[i][d] /= nn;
+        /* O VECTOR QUE NAO SE NORMALIZA CONTA-SE. Se nn cair abaixo do limiar, o vector e'
+         * dependente dos anteriores e a base fica com menos elementos do que nf — e isso
+         * mudava a tese sem se ver, porque o ramo passava calado. */
+        if(nn > 1e-12){ for(int d = 0; d < nd; d++) base[i][d] /= nn; }
+        else degenerados++;
     }
     double pior_norma = 0, pior_orto = 0;
     for(int i = 0; i < nf; i++){
@@ -179,9 +184,43 @@ printf("\n§C3  A BASE por Gram-Schmidt: e mede-se que ela É ortonormal.\n\n");
             if(c > pior_orto) pior_orto = c;
         }
     }
-    printf("      pior desvio da norma 1           %.3e\n", pior_norma);
-    printf("      pior produto interno entre pares %.3e\n\n", pior_orto);
-    ok("cada vetor da base tem norma 1", pior_norma < 1e-12);
+
+    /* A TESE REAL, e a que aqui faltava. «Cada vector da base tem norma 1» era medido DEPOIS
+     * de eu ter dividido cada um pela sua norma: a divisao POE la' o 1, e o que o 1e-12
+     * mediria era o arredondamento do IEEE, nao o Gram-Schmidt. E' o «normalizar nao e'
+     * medir» na forma mais pura — uma tabela de 1 que eu proprio escrevi.
+     *
+     * O que o Gram-Schmidt tem de garantir, e pode falhar, e' que a base GERA O MESMO
+     * ESPACO: cada vector original tem de se reconstruir a partir das suas projeccoes. Isso
+     * mede-se pelo residuo da reconstrucao, e um erro no algoritmo derruba-o. */
+    double pior_rec = 0;
+    for(int i = 0; i < nf; i++){
+        double rec[512];
+        for(int d = 0; d < nd && d < 512; d++) rec[d] = 0;
+        for(int j = 0; j < nf; j++){
+            double c = dot(v[i], base[j], nd);
+            for(int d = 0; d < nd && d < 512; d++) rec[d] += c*base[j][d];
+        }
+        double num = 0, den = 0;
+        for(int d = 0; d < nd && d < 512; d++){
+            double dd = rec[d] - v[i][d];
+            num += dd*dd; den += v[i][d]*v[i][d];
+        }
+        double rel = den > 0 ? sqrt(num)/sqrt(den) : sqrt(num);
+        if(rel > pior_rec) pior_rec = rel;
+    }
+
+    printf("      pior desvio da norma 1           %.3e   (e' o ARREDONDAMENTO: a norma\n",
+           pior_norma);
+    printf("                                              foi POSTA a 1 pela divisao)\n");
+    printf("      pior produto interno entre pares %.3e\n", pior_orto);
+    printf("      pior residuo de RECONSTRUCAO     %.3e   (esta e' a tese: a base gera)\n",
+           pior_rec);
+    printf("      vectores degenerados (nao normalizados) %d\n\n", degenerados);
+    ok("a base GERA o espaço: cada vetor original reconstrói-se das suas projeções. A"
+       " asserção que aqui estava media que a norma era 1 DEPOIS de eu dividir por ela —"
+       " uma tabela de 1 que eu próprio escrevi, com o limiar a medir o arredondamento",
+       pior_rec < 1e-9 && degenerados == 0);
     ok("e são ortogonais dois a dois — a base É ortonormal", pior_orto < 1e-12);
     printf("      A base sai dos DADOS, não de fora. O semantico.c §S4 usa Hadamard, que fecha\n");
     printf("      igualmente bem e vem de fora; esta vem de dentro, e é isso que a torna a\n");
