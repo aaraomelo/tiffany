@@ -1649,6 +1649,50 @@ a Lei 8 ($8$) ausente da lista; o gato $[m\,1;1\,0]$ com ordem infinita em $12$ 
 $\abs{\det}=1$ necessário --- $6201$ de $6201$ matrizes de determinante diferente com
 ordem infinita}
 
+\begin{teorema}[A CONTINUAÇÃO TEM IDA E VOLTA, e as duas são exactas]\label{thm:continuacao}
+A continuação analítica costuma dizer-se numa direcção: a série vive num disco, a forma
+fechada vive no plano, e o que sai do disco não se perde --- \emph{muda-se de fórmula, não
+de objecto}. Mas isso é meia lei. A outra metade é a \textbf{volta}, e é ela que faz da
+continuação uma \emph{bijecção} e não uma projecção:
+\[
+\boxed{
+\begin{array}{ll}
+\textbf{IDA} & m\ \longrightarrow\ t_k=\sigma^{k}+(\sigma\dg)^{k}\ \longrightarrow\
+L(x)=\sum t_k x^{k}/k\ \longrightarrow\ -\log(1-mx-x^{2})\\[3pt]
+\textbf{VOLTA} & L\ \longrightarrow\ c_k\ \longrightarrow\ t_k=k\,c_k\ \longrightarrow\
+\text{o OPERADOR}
+\end{array}}
+\]
+
+\textbf{(1) A volta faz-se sem sair de $\mathbb{Q}$.} Multiplicam-se os coeficientes da
+forma fechada por $k$, e o que sai \emph{tem} de ser a sequência de traços: \textbf{inteira},
+a satisfazer a recorrência do operador, e com $t_1=m$. \emph{O operador lê-se de volta na
+série} --- a ida não perde nada.
+
+\textbf{(2) E ela é ÚNICA, que é o que lhe dá conteúdo.} Dois operadores diferentes dão
+séries diferentes; se não dessem, «recuperar $m$ da série» não queria dizer nada, porque
+dois objectos com a mesma imagem tornariam a inversa uma \emph{escolha}. Mede-se par a
+par, em $\mathbb{Q}$ e sem régua.
+
+\textbf{(3) E a volta É o Teor.~\ref{thm:residuo-fixo}.} Extrair o coeficiente é somar
+sobre os polos, e os polos \emph{são} os pontos fixos: $t_k=\sigma^{k}+(\sigma\dg)^{k}$ é a
+soma dos resíduos. \emph{A continuação de volta não devolve um número: devolve o par
+dual.} É por isso que os metais aparecem na continuação --- dentro do disco eles não se
+veem, e nos polos são tudo o que há (Teor.~\ref{thm:corte-fixo}).
+
+\textbf{(4) E há uma segunda volta, que é a do DOMÍNIO.} A continuação analítica prolonga
+o \emph{valor}; a projectiva prolonga o \emph{lugar}: em $\mathbb{P}^1$ o polo em $0$ é
+ponto ordinário, e $S$ troca $0\leftrightarrow\infty$ com $S^{2}=I$
+(Teor.~\ref{thm:aditiva}). \emph{Uma acrescenta plano à função, a outra acrescenta ponto
+ao espaço} --- e as duas dizem «o buraco era da fórmula, não do objecto». $\square$
+\end{teorema}
+\colunas{a continuação, nas duas direcções}
+        {a ida dá a forma fechada, a volta devolve o operador ($t_k=k\,c_k$), e ela é única}
+        {\code{tests/continua.c} \S C8: a volta a devolver os traços em $6$ de $6$ metais,
+inteiros, com a recorrência a valer nos RECUPERADOS e $t_1=m$ em todos; e a unicidade em
+$30$ de $30$ pares de operadores distintos --- tudo em $\mathbb{Q}$, sem uma régua. E \S C2:
+a ida coeficiente a coeficiente, $32$ de $32$}
+
 \medskip
 \noindent\textbf{E OS SETE TEOREMAS SÃO UMA FRASE SÓ --- as duas metades de
 Cayley--Hamilton.} O Teor.~\ref{thm:fixo-dual} diz que o par dual se descreve por
@@ -1680,6 +1724,7 @@ para andar}\\[3pt]
 \ref{thm:viviani} Viviani & $t_2=m^{2}-2d$ & $\det=+1$: a volta é própria\\
 \ref{thm:unificacao} a unificação & a ORDEM identifica & $\operatorname{lcm}=24=8\cdot3$\\
 \ref{thm:toro} o toro & $\abs{\operatorname{tr}}\le1$ fecha & $\abs{\det}=1$ é necessário\\
+\ref{thm:continuacao} a continuação & a volta dá o operador & e é ÚNICA\\
 \bottomrule
 \end{tabular}
 \end{center}

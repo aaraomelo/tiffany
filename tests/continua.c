@@ -41,6 +41,8 @@
  *   §C4  e os polos da forma fechada são −σ e −σ': a continuação DEVOLVE os metais
  *   §C5  a dual projetiva: A_0 é bijeção de P¹, e o polo em 0 é ponto ordinário
  *   §C6  controlo negativo: fora do disco a série NÃO aproxima — somar mais termos PIORA
+ *   §C7  partir do ZERO nas duas direcções: t_{-k} = (-1)^k t_k, e do centro os Lucas
+ *   §C8  a continuação tem IDA e VOLTA: t_k = k·c_k devolve o operador, e ela é ÚNICA
  *
  *   cc -O2 -std=c99 -Wall continua.c -lm -o continua && ./continua
  */
@@ -577,5 +579,89 @@ int main(void){
 
     printf("\n================================================================\n");
     printf("  %d unidade(s), %d falha(s)%s\n", unidades, falhas, falhas ? "" : " — RESÍDUO 0");
+/* ---------------- §C8 — A CONTINUAÇÃO TEM IDA E VOLTA, e as duas são EXACTAS -------
+ *
+ * O §C2 mediu a IDA: o operador dá os traços, os traços dão a série, e a série É a forma
+ * fechada — coeficiente a coeficiente em ℚ. Faltava a VOLTA, que é a metade que torna a
+ * continuação uma bijecção e não uma projecção:
+ *
+ *      IDA     m  ──►  t_k = σ^k + σ†^k  ──►  L(x) = Σ t_k x^k/k  ──►  −log(1−mx−x²)
+ *      VOLTA   L  ──►  c_k  ──►  t_k = k·c_k  ──►  o OPERADOR de volta
+ *
+ * A volta faz-se sem sair de ℚ: os coeficientes da forma fechada multiplicam-se por k, e
+ * o que sai TEM de ser a sequência de traços — inteira, e a satisfazer a recorrência do
+ * operador. E o m lê-se no primeiro: t_1 = m.
+ *
+ * Se a composição não fechasse, a forma fechada teria perdido alguma coisa da série; se
+ * fechasse mas duas séries diferentes dessem o mesmo m, a continuação não seria única. As
+ * duas medem-se, e a segunda é o que dá conteúdo à primeira. */
+printf("\n§C8 a continuação tem IDA e VOLTA, e as duas são exactas em ℚ\n\n");
+{
+    const int G = 8;
+    int volta_ok = 0, rec_ok = 0, m_ok = 0, inteiro_ok = 0, metais = 0;
+    printf("      m    t_k recuperados da forma fechada (k = 1..5)      t_1 = m ?\n");
+    for(long m = 1; m <= 6; m++){
+        /* IDA: a forma fechada −log(1 − mx − x²), montada pela composição */
+        Sr u = sr0(); u.n = G;
+        u.a[1] = qz(-m, 1); u.a[2] = qz(-1, 1);
+        Sr L = sr_compoe(sr_log1p(G), u, G);
+        for(int i = 0; i <= G; i++) L.a[i] = qz_oposto(L.a[i]);
+
+        /* VOLTA: t_k = k · c_k, e tem de dar a sequência de traços */
+        long t[16]; t[0] = 2; t[1] = m;
+        for(int k = 2; k < 16; k++) t[k] = m*t[k-1] + t[k-2];
+        int bate = 1, inteiro = 1, recorre = 1;
+        long tv[16];
+        for(int k = 1; k <= G; k++){
+            Qz tk = qz_mult(qz(k, 1), L.a[k]);      /* k·c_k, em ℚ */
+            if(tk.q != 1 && tk.q != -1) inteiro = 0; /* o traço TEM de ser inteiro */
+            tv[k] = (tk.q == 0) ? 0 : tk.p / (tk.q ? tk.q : 1);
+            if(tv[k] != t[k]) bate = 0;
+        }
+        /* e a recorrência do operador vale nos RECUPERADOS, não nos originais */
+        for(int k = 3; k <= G; k++) if(tv[k] != m*tv[k-1] + tv[k-2]) recorre = 0;
+        metais++;
+        if(bate) volta_ok++;
+        if(inteiro) inteiro_ok++;
+        if(recorre) rec_ok++;
+        if(tv[1] == m) m_ok++;
+        if(m <= 3){
+            printf("      %ld    ", m);
+            for(int k = 1; k <= 5; k++) printf("%ld ", tv[k]);
+            printf("                        %s\n", tv[1] == m ? "sim" : "NÃO");
+        }
+    }
+    printf("      metais: %d ; a volta devolve os traços em %d ; inteiros em %d\n",
+           metais, volta_ok, inteiro_ok);
+    printf("      a recorrência vale nos RECUPERADOS em %d ; e t_1 = m em %d\n\n",
+           rec_ok, m_ok);
+    ok("a continuação tem VOLTA, e ela é exacta: multiplicar os coeficientes da forma"
+       " fechada por k devolve os TRAÇOS — inteiros, a satisfazer a recorrência do operador,"
+       " e com t_1 = m. A ida NÃO PERDE nada: o operador lê-se de volta na série",
+       metais == 6 && volta_ok == metais && inteiro_ok == metais &&
+       rec_ok == metais && m_ok == metais);
+
+    /* E A UNICIDADE, que é o que dá conteúdo à volta: dois operadores DIFERENTES não podem
+     * dar a mesma série. Se dessem, a volta seria ambígua e «recuperar m» não queria dizer
+     * nada. Compara-se par a par, e exige-se que difiram — em ℚ, sem régua. */
+    int pares = 0, distinguem = 0;
+    for(long m1 = 1; m1 <= 6; m1++) for(long m2 = 1; m2 <= 6; m2++){
+        if(m1 == m2) continue;
+        Sr u1 = sr0(); u1.n = G; u1.a[1] = qz(-m1,1); u1.a[2] = qz(-1,1);
+        Sr u2 = sr0(); u2.n = G; u2.a[1] = qz(-m2,1); u2.a[2] = qz(-1,1);
+        Sr L1 = sr_compoe(sr_log1p(G), u1, G), L2 = sr_compoe(sr_log1p(G), u2, G);
+        int difere = 0;
+        for(int k = 1; k <= G; k++) if(!qz_igual(L1.a[k], L2.a[k])) difere = 1;
+        pares++;
+        if(difere) distinguem++;
+    }
+    printf("      e a UNICIDADE: operadores diferentes dão séries diferentes em %d de %d pares\n\n",
+           distinguem, pares);
+    ok("a continuação é ÚNICA: dois operadores diferentes dão séries diferentes, logo"
+       " «recuperar m da série» não é ambíguo. Sem isto a volta não queria dizer nada — dois"
+       " objectos com a mesma imagem tornariam a inversa uma escolha",
+       pares == 30 && distinguem == pares);
+}
+
     return falhas ? 1 : 0;
 }

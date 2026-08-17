@@ -82,7 +82,7 @@ constantes 849d11c9ca414268 0
 constroi c85b8230866a958f 0
 conta 536fec2fdcf62b34 0
 contagem_cifra 2eff3b0b87eb444e 0
-continua 529ac6292cacefbe 0
+continua ed75284e86459572 0
 continuo 8dcd56f6d3e9754e 0
 contorno_riemann 6cf7ea38b2e3b6b7 0
 contrato d627953f37de504d 0

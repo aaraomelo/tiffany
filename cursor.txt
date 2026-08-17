@@ -1,12 +1,12 @@
 CURSOR.TXT — ELIMINAR OS DOUBLES
 ================================
-Para quem entra. Estado em 17/08/2026, bateria 505:505, 37 citações a bater. geometrico.tex: 43 páginas, 54 teoremas.
+Para quem entra. Estado em 17/08/2026, bateria 505:505, 37 citações a bater. geometrico.tex: 43 páginas, 55 teoremas.
 
 
 1. A ARQUITECTURA
 -----------------
 
-    papers/*.tex      a teoria. O central é papers/geometrico.tex (43 páginas, 54 teoremas)
+    papers/*.tex      a teoria. O central é papers/geometrico.tex (43 páginas, 55 teoremas)
     lib/*.h           as operações. Tudo inteiro. reta.h é a principal
     tests/*.c         os medidores. Um por assunto, cada um com asserções `ok(texto, cond)`
     tools/            a bateria, as citações e os detectores
@@ -88,6 +88,17 @@ São a razão pela qual os doubles saem. Cada um dá uma forma exacta de medir.
                          isso o CORTE dito pela topologia.
                          Quem decide é o TRAÇO: com det=+1, |tr| <= 1 fecha, |tr| >= 2 não.
                          E |det| = 1 é NECESSÁRIO, não uma escolha.
+
+    thm:continuacao      A CONTINUAÇÃO TEM IDA E VOLTA, e as duas são exactas em Q.
+                             IDA    m -> t_k -> L(x) = Σ t_k x^k/k -> −log(1−mx−x²)
+                             VOLTA  L -> c_k -> t_k = k·c_k -> o OPERADOR
+                         A volta devolve os traços INTEIROS, a satisfazer a recorrência, e
+                         t_1 = m. E é ÚNICA: operadores diferentes dão séries diferentes —
+                         sem isso «recuperar m» seria uma escolha.
+                         A volta É o thm:residuo-fixo: extrair coeficiente é somar sobre os
+                         polos, e os polos são os pontos fixos. A continuação de volta não
+                         devolve um número, devolve o PAR DUAL.
+                         E há a segunda volta, a do DOMÍNIO: a projectiva, S: 0 <-> ∞.
 
     E A SÍNTESE, que é a frase que atravessa os sete:
         o TRAÇO mede (separa, coordena, muda de andar)
