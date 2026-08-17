@@ -41,6 +41,7 @@
  */
 #include <stdio.h>
 #include "unidade.h"
+#include "reta.h"
 #include <math.h>
 
 typedef long long L;
@@ -125,12 +126,30 @@ int main(void){
          * phi^2 = phi+1, o expoente e phi - phi - 1 = -1. Logo a^phi = phi^{-1} = 1/phi
          * POR ALGEBRA, e o expoente e um INTEIRO: -1. Nada a arredondar. */
         {
-            /* o expoente (1-phi)*phi, reduzido pela borda: phi - phi^2 = phi - (phi+1) = -1 */
-            L expoente = -1;                      /* o valor exato, pela reducao */
-            printf("      o expoente (1-phi)phi reduz-se por phi^2 = phi+1 a %lld — INTEIRO\n",
-                   expoente);
-            ok("a^phi = phi^{(1-phi)phi} = phi^{-1}: o expoente e -1, exato pela borda",
-               expoente == -1);
+            /* A CONTA ESTAVA NO COMENTÁRIO E O RESULTADO ESTAVA ESCRITO. «φ − φ² = φ − (φ+1)
+             * = −1» é a redução pela borda, e ela devia ser FEITA — `L expoente = -1;`
+             * seguido de `ok(expoente == -1)` compara a atribuição consigo própria.
+             *
+             * Faz-se em ℤ[√5], onde φ vive: 2φ = (1,1) e 2(1−φ) = 2 − (1+√5) = (1,−1), logo
+             *
+             *      4·(1−φ)·φ = (1 − √5)(1 + √5) = 1 − 5 = −4      ⟹   (1−φ)·φ = −1
+             *
+             * e isso é a NORMA de 2φ, que a `rt_zd_norma` dá directamente. A redução
+             * acontece, e o −1 sai dela em vez de a preceder. */
+            long ea, eb;
+            rt_zd_mul(1, -1, 1, 1, 5, &ea, &eb);      /* 2(1−φ) · 2φ = (1−√5)(1+√5) */
+            long norma2phi = rt_zd_norma(1, 1, 5);    /* = 1 − 5 = −4, a mesma coisa */
+            L expoente = ea / 4;                      /* 4·(1−φ)φ = −4 ⟹ o expoente é −1 */
+            printf("      o expoente (1-phi)phi reduz-se por phi^2 = phi+1 a %lld — INTEIRO,\n"
+                   "      e a reducao ACONTECE: 2(1-phi).2phi = %ld + %ld raiz5, e a norma de\n"
+                   "      2phi da' %ld — o mesmo -4, donde o expoente e' -4/4\n",
+                   expoente, ea, eb, norma2phi);
+            ok("a^phi = phi^{(1-phi)phi} = phi^{-1}: o expoente e -1, exato pela borda. E a"
+               " REDUCAO acontece em ℤ[√5] em vez de estar so' no comentario: 2(1-phi) e'"
+               " (1,-1) e 2phi e' (1,1), logo o produto e' 1 - 5 = -4 com a parte irracional"
+               " a CANCELAR, donde (1-phi)phi = -1. O que aqui estava era `expoente = -1`"
+               " seguido de `expoente == -1` — a atribuicao comparada consigo propria",
+               expoente == -1 && ea == -4 && eb == 0 && norma2phi == -4);
         }
         conclui("procurar a função cuja derivada é a sua inversa dá a BORDA deste projeto.");
         conclui("não é analogia: é a mesma equação, com m = 1.");
