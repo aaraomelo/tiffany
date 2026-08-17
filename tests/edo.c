@@ -154,9 +154,9 @@ printf("\n§E4  E dois casos fecham o círculo com o resto do sistema.\n\n");
        " raiz(5).raiz(5) e' 5 — a raiz cancela-se contra si propria. (2φ)² − 2(2φ) − 4 e'"
        " ZERO nas duas coordenadas, (2φ)+(2φ') e' (2,0) com a parte irracional a CANCELAR"
        " (que e' a conjugacao), e (2φ)(2φ') e' (-4,0). O 1e-12 dava folga a igualdades que"
-       " nao tem folga nenhuma",
-       ea == 0 && eb == 0 && sa == 2 && sb == 0 && pa == -4 && pb == 0
-       && fabs(phi*phi - phi - 1) < 1e-12);
+       " nao tem folga nenhuma — e ele ESTEVE nesta condicao ate' agora, na linha a seguir"
+       " aos seis inteiros, que e' onde um detector que corta a saida nao o mostra",
+       ea == 0 && eb == 0 && sa == 2 && sb == 0 && pa == -4 && pb == 0);
     printf("      A solução de y'' = y' + y é A·φ^t + B·(-1/φ)^t. O REI É A SOLUÇÃO DE UMA\n");
     printf("      EQUAÇÃO DIFERENCIAL, e o par de raízes é o chicote — soma 1 (o traço), produto\n");
     printf("      -1 (o determinante). E a mesma recorrência, em passos inteiros, é Fibonacci:\n");

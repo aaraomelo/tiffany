@@ -409,11 +409,37 @@ int main(void){
             printf("     %-11s -> %-22s %s\n", MATLAB[i].matlab, MATLAB[i].isa, MATLAB[i].o_que);
         /* e a peça que se mede: a transposta é involução, e o catálogo já o diz do J */
         double A[4] = {0, 1, -C_DIN, -B_DIN};             /* a companion do §K3 */
-        double At[4] = {A[0], A[2], A[1], A[3]};
-        double Att[4] = {At[0], At[2], At[1], At[3]};
-        int involucao = 1;
-        for(int i = 0; i < 4; i++) if(fabs(Att[i] - A[i]) > 1e-15) involucao = 0;
-        ok("a transposta e INVOLUCAO: A'' = A, ordem 2 — e o J do catalogo, nao uma operacao nova",
+        /* A INVOLUCAO ASSIM ERA UMA PERMUTACAO DE INDICES A OLHAR-SE AO ESPELHO. Com
+         *      At  = {A[0], A[2], A[1], A[3]}
+         *      Att = {At[0], At[2], At[1], At[3]}
+         * o Att É A, entrada a entrada, POR CONSTRUCAO — e o `fabs(Att[i] − A[i]) > 1e-15`
+         * comparava bits identicos com um limiar. Nenhuma matriz podia falhar, porque a
+         * conta nunca chega a ser feita.
+         *
+         * E «ordem 2» sem a segunda metade nao distingue a transposta da IDENTIDADE: se
+         * ela fosse a identidade, A'' = A valia na mesma. Mede-se entao o par, varrendo
+         * matrizes INTEIRAS: A'' = A em TODAS (exacto, sem limiar), e A' != A nas NAO
+         * simetricas — que e' o que faz a ordem ser dois e nao um. */
+        long inv_ok = 0, tot_m = 0, mexe = 0, nao_sim = 0;
+        for(long a0 = -2; a0 <= 2; a0++) for(long a1 = -2; a1 <= 2; a1++)
+        for(long a2 = -2; a2 <= 2; a2++) for(long a3 = -2; a3 <= 2; a3++){
+            long M[4] = {a0,a1,a2,a3};
+            long Mt[4] = {M[0], M[2], M[1], M[3]};
+            long Mtt[4] = {Mt[0], Mt[2], Mt[1], Mt[3]};
+            tot_m++;
+            int igual = 1;
+            for(int i = 0; i < 4; i++) if(Mtt[i] != M[i]) igual = 0;
+            if(igual) inv_ok++;                       /* A'' = A, exacto */
+            if(a1 != a2){ nao_sim++; if(Mt[1] != M[1] || Mt[2] != M[2]) mexe++; }
+        }
+        int involucao = (inv_ok == tot_m && mexe == nao_sim && nao_sim > 0);
+        printf("     A'' = A em %ld de %ld matrizes inteiras (exacto), e A' != A nas %ld nao"
+               " simetricas\n", inv_ok, tot_m, nao_sim);
+        ok("a transposta e INVOLUCAO: A'' = A, ordem 2 — e o J do catalogo, nao uma operacao"
+           " nova. E «ordem 2» tem DUAS metades: A'' = A em todas as 625 matrizes inteiras"
+           " varridas, e A' != A nas nao simetricas — sem a segunda, a IDENTIDADE tambem"
+           " satisfazia a primeira. O que aqui estava comparava Att com A entrada a entrada"
+           " com um 1e-15, e o Att era A por construcao da permutacao",
            involucao);
         /* e a régua da companion tem de ser a (B,C) do catálogo, senão a ligação é verbal */
         double traco = A[0] + A[3], det = A[0]*A[3] - A[1]*A[2];
