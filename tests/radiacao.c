@@ -67,6 +67,10 @@ static const Termico TERMICOS[] = {
 /* ───────────────────────────────────────────────────────── o programa */
 
 static int falhas = 0, feitas = 0;
+/* a CONCLUSAO nao e unidade: resume o que as assercoes acima mediram, e contá-la como
+ * medida inflacionava a bateria. O `unidade.h` tem a dele; este ficheiro traz o seu
+ * proprio `ok`, logo traz tambem o seu `conclui`, com a MESMA marca [~] da casa. */
+static void conclui(const char *q){ printf("  [~] %s\n", q); }
 static void ok(const char *q, int cond){
     feitas++; if(!cond) falhas++;
     printf("#UNIT %s %s\n", cond ? "ok" : "falha", q);
@@ -95,8 +99,20 @@ int main(void){
             nT++;
             if(fabs(r - 16.0) > 1e-9) quarta = 0;
         }
-        ok("STEFAN-BOLTZMANN e a QUARTA potencia: dobrar T multiplica por 16, em todos os T",
-           quarta && nT == 4);
+        /* ESTAS DUAS NAO SAO MEDIDA, E O GUME AUTOMATICO DISSE-O. Sobreviveram a todas as
+         * mutacoes porque `sb_potencia` E' sigma.T^4 e `wien_pico` E' B/T: dividir
+         * sb_potencia(2T) por sb_potencia(T) da 16 POR CONSTRUCAO, e multiplicar B/T por T
+         * devolve B POR CONSTRUCAO. Sao a definicao lida de volta — «normalizar nao e
+         * medir», com a lei no papel de quantidade dividida por si propria.
+         *
+         * Ficam como CONCLUSAO, que e o que sao. A medida esta' na RECUPERACAO A PARTIR DE
+         * PLANCK: o integral de Planck tem de dar Stefan-Boltzmann (ja' medido abaixo), e o
+         * PICO de Planck tem de cair onde Wien o poe. Essa segunda faltava, e escreve-se
+         * aqui — procurando o maximo numa grelha inteira de nanometros e comparando com
+         * `wien_pico`, que e' uma comparacao entre DUAS ROTAS e nao entre uma e ela mesma. */
+        conclui("STEFAN-BOLTZMANN e a QUARTA potencia por DEFINICAO de sb_potencia — a medida");
+        conclui("e a recuperacao a partir do integral de Planck, abaixo");
+        (void)quarta; (void)nT;
         /* a LEI de Wien: o pico e inversamente proporcional a T */
         int inversa = 1, nW = 0;
         for(int k = 0; k <= 4; k++){
@@ -104,8 +120,35 @@ int main(void){
             nW++;
             if(fabs(wien_pico(T)*T - WIEN_B) > 1e-15) inversa = 0;
         }
-        ok("WIEN e inverso: lambda.T e CONSTANTE, e ela e a de tabela",
-           inversa && nW == 5);
+        conclui("WIEN e inverso por DEFINICAO de wien_pico — o que se mede e' o PICO de Planck");
+        (void)inversa; (void)nW;
+
+        /* A LEI DE WIEN RECUPERADA: onde esta' o maximo de Planck? Procura-se numa grelha
+         * INTEIRA de nanometros, sem derivada e sem chute, e compara-se com wien_pico(T).
+         * Duas rotas: uma e' a tabela (B/T), a outra e' o proprio Planck. */
+        int wien_bate = 0, wien_tot = 0;
+        for(long T = 300; T <= 3000; T += 300){
+            long melhor_nm = 0; double melhor = -1;
+            for(long nm = 100; nm <= 60000; nm += 10){
+                double v = planck(nm*1e-9, (double)T);
+                if(v > melhor){ melhor = v; melhor_nm = nm; }
+            }
+            double previsto_nm = wien_pico((double)T) * 1e9;
+            wien_tot++;
+            /* a grelha tem passo 10 nm, logo o argmax so' pode ser localizado a 10 nm —
+             * a tolerancia e' a do PASSO, e nao uma regua escolhida a olho */
+            if(melhor_nm - previsto_nm < 10.0 && previsto_nm - melhor_nm < 10.0) wien_bate++;
+            if(T <= 900)
+                printf("          T = %4ld K: pico de Planck em %5ld nm, Wien em %8.1f nm\n",
+                       T, melhor_nm, previsto_nm);
+        }
+        printf("        o pico de PLANCK cai onde WIEN o poe em %d de %d temperaturas\n\n",
+               wien_bate, wien_tot);
+        ok("WIEN RECUPERA-SE de Planck: o maximo do espectro, procurado numa grelha inteira"
+           " de nanometros, cai onde lambda = B/T o poe — e a tolerancia e' o PASSO DA"
+           " GRELHA (10 nm), nao uma regua escolhida. A assercao anterior multiplicava B/T"
+           " por T e achava B: a definicao lida de volta",
+           wien_tot > 0 && wien_bate == wien_tot);
         /* e Planck tem de RECUPERAR os dois — senao as tres nao sao a mesma teoria.
          * O integral de Planck sobre lambda da a de Stefan-Boltzmann (a menos de pi, por
          * radiancia vs emitancia).
