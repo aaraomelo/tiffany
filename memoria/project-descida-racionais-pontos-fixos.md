@@ -153,3 +153,26 @@ trial uma lei de ordem 6. E o gume está dentro — trocar a ordem de uma peça 
 
 Medidor: `tests/lei8_trial.c` (5:0, zero sobreviventes em 80 mutações do gume).
 
+## O CICLO UNIVERSAL (thm:universal) — e o toro é a CONDIÇÃO
+
+    DESCODIFICA   (p,q) := o texto, racional EXACTO ; u := mmc dos denominadores
+    OPERA         exige |det T| = 1 ;  [p:q] -> T·[p:q], sem dividir
+    INVERTE       T⁻¹ = adj(T)/det T, INTEIRA porque det = ±1
+    CODIFICA      w := palavra (FC) ou dígitos (Cantor)
+    E FECHA       descodifica(w) == (p,q)
+
+**O toro não é mais um operador na lista: é a CONDIÇÃO.** Sem |det| = 1 a inversa não é
+inteira e `rt_inverte` RECUSA (2169/2169). É o thm:conservacao dito como algoritmo.
+
+**Viviani tem DUAS ordens, e foi a asserção que mo mostrou**: medi só em ℙ¹ e deu 2 em vez
+de 4 — em ℙ¹ os vectores v e −v são o MESMO PONTO, logo i² = −1 já é a identidade
+projectiva. A ordem 4 vive no VECTOR. *É isso o recobrimento duplo.* E o gato não fecha em
+nenhuma das duas.
+
+**A codificação é LIVRE** (palavra, base 2, base 10 dão o mesmo racional): a escrita é uma
+escolha, não é do objecto. É isso que «universal» quer dizer.
+
+Promovido à lib: `RtOp`, `rt_opera`, `rt_inverte`, `rt_ordem_ponto/vector`, `rt_ciclo` —
+e **a TESE fica de FORA da peça** (a comparação com o original é de quem chama, senão ela
+media a própria definição). Ver [[project-a-reta-construida]].
+

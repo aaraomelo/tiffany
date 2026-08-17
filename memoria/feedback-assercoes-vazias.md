@@ -1,6 +1,6 @@
 ---
 name: feedback-assercoes-vazias
-description: "A asserção que passa sem poder falhar — ONZE formas dela, e as três ferramentas que as caçam por máquina"
+description: "A asserção que passa sem poder falhar — DOZE formas dela, e as três ferramentas que as caçam por máquina"
 metadata: 
   node_type: memory
   type: feedback
@@ -81,6 +81,11 @@ também lá está. (A 1.ª versão deu 250 candidatos, quase todos ruído de dec
 `Q_frio` pela razão das temperaturas em vez de por `Q − W`; no `forca.c`, medir a consequência
 (sem cruzado não há imposto) em vez da factorização; no `ttf_corpo.c`, medir a CAUSA (há um contorno
 de área negativa) e o contraste (um glifo de sentido único não tem nenhum).
+
+**12. A SOMA DAS PARTES É O TODO.** `ok(..., fecha + fora == ciclos)` — cada ciclo cai num dos dois
+contadores, logo a soma é sempre o total. Escrevi-a no `universal.c` e **um gume não mordeu**: foi
+ele que a denunciou. O que tem conteúdo é exigir o fecho TOTAL onde nada satura, e contar a
+saturação à parte. *Um invariante contabilístico não é uma medida.*
 
 **11. A CONSTANTE QUE PARECE UMA CONTA.** `int nona = (MOD_CAT % MOD_CAT != 0);` — `x % x` é zero
 para qualquer x, logo é a constante `false`, e o `&& !nona` na condição nunca podia falhar. Estava
