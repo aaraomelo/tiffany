@@ -85,31 +85,60 @@ printf("\n§M2  O FFN ganha UMA dimensão: de (a,b) para (a,b,E).\n\n");
     printf("      roteador é quem diz onde se está dentro dela.\n");
 }
 
-printf("\n§M3  O GATE MULTIPLICA, e a densa é o caso E = 1.\n\n");
+printf("\n§M3  O GATE MULTIPLICA, e a densa é o MoE com os gates a somarem 1.\n\n");
 {
     /* A densa: y = W·x, uma soma sobre b. O MoE: y = sum_e g_e · (W_e·x), uma soma sobre os
-     * experts com o gate a MULTIPLICAR cada um. Se a densa fosse um caso do MoE, entao com um
-     * expert so' e gate 1 os dois teriam de dar o mesmo — e e' isso que se mede. */
-    double W[A][Bb], x[A], Wm[E][A][Bb], g[E];
+     * experts com o gate a MULTIPLICAR cada um.
+     *
+     * A ASSERCAO QUE AQUI ESTAVA NAO PODIA FALHAR. Punha E = 1, copiava Wm[0] = W entrada a
+     * entrada, punha g[0] = 1.0, e comparava `sum W[i][j]*x[i]` com `sum 1.0*Wm[0][i][j]*x[i]`
+     * — A MESMA EXPRESSAO, com os mesmos valores e na mesma ordem, logo igual BIT A BIT. O
+     * 1e-15 nao media nada: nao havia dois caminhos, havia um escrito duas vezes.
+     *
+     * A tese com conteudo e' a PARTICAO DA UNIDADE: com E experts todos iguais a' densa e
+     * gates que somam 1, o MoE reproduz a densa — e reproduz para gates QUAISQUER, desde que
+     * somem 1. Isso pode falhar (basta os gates nao somarem 1), e mede-se EXACTO, porque com
+     * W, x e g racionais a igualdade e' de racionais e nao pede tolerancia nenhuma.
+     *
+     * Os gates: 1/2, 1/4, 1/8, 1/8 — somam 8/8, e o denominador comum e' 8. */
+    const long GN[E] = {4, 2, 1, 1}, GD = 8;                  /* g_e = GN[e]/GD, soma = 1 */
+    long Wi[A][Bb], xi[A];
     for(int i = 0; i < A; i++){
-        x[i] = sin(0.7*i);
-        for(int j = 0; j < Bb; j++) W[i][j] = cos(0.3*i + 0.11*j);
+        xi[i] = (i % 7) - 3;                                   /* inteiros, com sinal */
+        for(int j = 0; j < Bb; j++) Wi[i][j] = ((i*3 + j*5) % 11) - 5;
     }
-    /* o MoE com E=1: o único expert É a densa, e o gate é 1 */
-    for(int i = 0; i < A; i++) for(int j = 0; j < Bb; j++) Wm[0][i][j] = W[i][j];
-    g[0] = 1.0;
-    double yd[Bb] = {0}, ym[Bb] = {0};
+    /* densa, em inteiros: yd_j = sum_i W_ij x_i */
+    long ydi[Bb];
     for(int j = 0; j < Bb; j++){
-        for(int i = 0; i < A; i++) yd[j] += W[i][j]*x[i];          /* densa: uma soma */
-        for(int e = 0; e < 1; e++)                                  /* MoE com um expert */
-            for(int i = 0; i < A; i++) ym[j] += g[e]*Wm[e][i][j]*x[i];
+        ydi[j] = 0;
+        for(int i = 0; i < A; i++) ydi[j] += Wi[i][j]*xi[i];
     }
-    double pior = 0;
-    for(int j = 0; j < Bb; j++){ double d = fabs(yd[j]-ym[j]); if(d > pior) pior = d; }
+    /* MoE: ym_j = sum_e (GN[e]/GD) * sum_i W_ij x_i. Multiplica-se por GD para ficar inteiro:
+     * GD*ym_j = sum_e GN[e] * yd_j, e como sum_e GN[e] = GD, isso e' GD*yd_j. */
+    long ymi[Bb], soma_g = 0;
+    for(int e = 0; e < E; e++) soma_g += GN[e];
+    for(int j = 0; j < Bb; j++){
+        ymi[j] = 0;
+        for(int e = 0; e < E; e++){
+            long parcial = 0;
+            for(int i = 0; i < A; i++) parcial += Wi[i][j]*xi[i];   /* o expert e, igual a' densa */
+            ymi[j] += GN[e]*parcial;                                /* ainda por dividir por GD */
+        }
+    }
+    int iguais = 0, naozero = 0;
+    for(int j = 0; j < Bb; j++){
+        if(ymi[j] == GD*ydi[j]) iguais++;      /* GD*ym == GD*yd, sem dividir */
+        if(ydi[j] != 0) naozero++;             /* e o caso degenerado nao serve de prova */
+    }
     printf("      densa      y_j = Σ_i W_ij x_i\n");
-    printf("      MoE        y_j = Σ_e g_e Σ_i W^e_ij x_i\n\n");
-    printf("      com E = 1 e g = 1, a maior diferença entre os dois: %.3e\n\n", pior);
-    ok("a densa É o MoE com um expert — a fórmula é a mesma, e o gate é 1", pior < 1e-15);
+    printf("      MoE        y_j = Σ_e g_e Σ_i W^e_ij x_i,  com g = 4/8, 2/8, 1/8, 1/8\n\n");
+    printf("      Σ_e g_e = %ld/%ld (a partição da unidade)\n", soma_g, GD);
+    printf("      colunas em que GD·y_MoE = GD·y_densa, EXACTO: %d de %d\n", iguais, Bb);
+    printf("      e com y_densa ≠ 0 (o degenerado não prova nada): %d de %d\n\n", naozero, Bb);
+    ok("a densa É o MoE com gates que somam 1 — e a tese é a PARTIÇÃO DA UNIDADE, não o caso"
+       " E = 1. Medida em inteiros, sem uma tolerância: o que aqui estava comparava a mesma"
+       " expressão consigo própria, com 1e-15 por cima",
+       soma_g == GD && iguais == Bb && naozero > 0);
     printf("      Logo não são duas topologias: é uma, e a densa é o caso degenerado. O que o\n");
     printf("      MoE acrescenta é a soma sobre os experts, e o que a percorre é um PRODUTO\n");
     printf("      pelo gate — a densa soma, o MoE multiplica antes de somar.\n");
