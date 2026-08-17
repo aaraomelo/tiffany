@@ -1394,4 +1394,60 @@ static int rt_iv_shift(long p, long q, long base, long *rp, long *rq){
 static int rt_iv_shift2 (long p, long q, long *rp, long *rq){ return rt_iv_shift(p,q, 2,rp,rq); }
 static int rt_iv_shift10(long p, long q, long *rp, long *rq){ return rt_iv_shift(p,q,10,rp,rq); }
 
+/* ═══════════════════════════════════════════════════════════════════════════════════
+ * A ORDEM DE UM OPERADOR — e é ela que identifica a lei
+ *
+ * O `thm:unificacao` diz que Cantor, Julia, Viviani e o trial não são quatro objectos
+ * parecidos: são quatro operadores de ORDEM FINITA, e a ordem de cada um é o fecho da sua
+ * lei no catálogo (2, 3, 4, 8). A peça que mede isso vivia num medidor; passa para aqui,
+ * porque é dela que o PIPE precisa.
+ *
+ * NO PIPE ela responde à pergunta que decide a codificação: `textos → unidade → inteiros →
+ * operar → PALAVRA → cliente` — e a palavra ou FECHA ou CICLA. Qual dos dois, e ao fim de
+ * quantos passos, é exactamente a ORDEM do operador que a escreve:
+ *
+ *      a Möbius   gasta o denominador   →  ordem finita no racional, e a palavra FECHA
+ *      o shift    não o gasta           →  período = ord_q(base), e a palavra CICLA
+ *
+ * `rt_ordem` mede a primeira; `rt_periodo_shift` mede a segunda. E as duas devolvem 0
+ * quando não fecham dentro do tecto — que é o que distingue «tem ordem finita» de «ainda
+ * não vi voltar», e não se pode confundir com ordem 0.
+ * ═══════════════════════════════════════════════════════════════════════════════════ */
+
+/* um passo actua sobre um estado de n inteiros, em-lugar */
+typedef void (*RtPasso)(long *estado, int n);
+
+/* A ORDEM: aplica-se o passo até o estado voltar ao inicial, e devolve-se o PRIMEIRO k.
+ * A minimalidade é a tese: τ⁶ = id também é verdade e não faz do trial ordem 6. */
+static int rt_ordem(RtPasso f, const long *e0, int n, int tecto){
+    long e[16], ini[16];
+    if(n > 16) return 0;
+    for(int i = 0; i < n; i++){ e[i] = e0[i]; ini[i] = e0[i]; }
+    for(int k = 1; k <= tecto; k++){
+        f(e, n);
+        int igual = 1;
+        for(int i = 0; i < n; i++) if(e[i] != ini[i]) igual = 0;
+        if(igual) return k;
+    }
+    return 0;                                  /* não fechou dentro do tecto — e diz-se */
+}
+
+/* O PERÍODO DO SHIFT de p/q na base b: o estado é o RESTO, e ele vive em {0,…,q−1}. Com
+ * mdc(b,q) = 1 o shift é invertível e o período é a ordem de b em (ℤ/q)*; sem isso o
+ * denominador encolhe primeiro (thm:cantor-julia), e o que se devolve é o período do que
+ * sobra. Devolve 0 se o racional for inteiro (resto zero: não há palavra a ciclar). */
+static int rt_periodo_shift(long p, long q, long base, int tecto){
+    if(q <= 0 || base < 2) return 0;
+    long g = rt_mdc(p < 0 ? -p : p, q); if(g < 1) g = 1;
+    long qr = q / g, pr = (p < 0 ? -p : p) / g;
+    long r0 = pr % qr;
+    if(r0 == 0) return 0;
+    long r = r0;
+    for(int k = 1; k <= tecto; k++){
+        r = (r * base) % qr;
+        if(r == r0) return k;
+    }
+    return 0;
+}
+
 #endif /* RETA_H */

@@ -42,21 +42,8 @@
 
 static long mmc(long a, long b){ long g = rt_mdc(a, b); return g ? a/g*b : 0; }
 
-/* A ORDEM DE UM OPERADOR, MEDIDA: aplica-se ao estado inicial até voltar a ele, e o k é o
- * primeiro. Devolve 0 se não voltar dentro do tecto — que é o que distingue «tem ordem
- * finita» de «ainda não vi voltar». */
-typedef void (*RtPasso)(long *e, int n);
-static int rt_ordem(RtPasso f, long *e0, int n, int tecto){
-    long e[8], ini[8];
-    for(int i = 0; i < n; i++){ e[i] = e0[i]; ini[i] = e0[i]; }
-    for(int k = 1; k <= tecto; k++){
-        f(e, n);
-        int igual = 1;
-        for(int i = 0; i < n; i++) if(e[i] != ini[i]) igual = 0;
-        if(igual) return k;
-    }
-    return 0;
-}
+/* `rt_ordem` e `RtPasso` estão na `reta.h`: a peça que mede a ordem é da LIB, porque é
+ * dela que o pipe precisa — e uma cópia que ninguém confronta diverge. */
 
 /* os quatro operadores, cada um a agir no seu estado — e nenhum sabe dos outros */
 static void p_espelho(long *e, int n){ (void)n; e[0] = -e[0]; }              /* ν: x ↦ −x   */

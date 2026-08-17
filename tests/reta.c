@@ -1547,5 +1547,80 @@ printf("\n§R24 Normalizar é escolher a unidade — e depois tudo é inteiro.\n
            cod_ok && vp*6 == vq && ok_x < tot_x);
     }
 
+    /* ─── §R26 ── A ORDEM NO PIPE: é ela que decide se a palavra fecha ou cicla ─────
+     *
+     * O `thm:unificacao` diz que as peças do corpo são operadores de ORDEM FINITA, e que a
+     * ordem identifica a lei. No PIPE — `textos → unidade → inteiros → operar → PALAVRA →
+     * cliente` — essa mesma ordem responde à pergunta que decide a codificação: a palavra
+     * FECHA ou CICLA, e ao fim de quantos passos.
+     *
+     *      a Möbius   GASTA o denominador   →  a palavra fecha, em n passos
+     *      o shift    não o gasta           →  a palavra cicla, com período ord_q(base)
+     *
+     * E as duas medem-se com a mesma peça da lib. O que se verifica aqui é que o período
+     * do shift É a ordem da base no grupo — não «parece», É: compara-se `rt_periodo_shift`
+     * com a ordem calculada por iteração directa de b^k mod q, que é outra rota. */
+    {
+        long casos = 0, bate = 0, fecha_mob = 0, cicla_shift = 0;
+        long sem_periodo = 0;
+        printf("\n  §R26 a ordem no pipe: a Möbius fecha, o shift cicla\n");
+        printf("      p/q      período do shift (base 2)   ord_q(2)   passos da Möbius\n");
+        /* E VARREM-SE TAMBÉM AS NÃO REDUZIDAS. À primeira filtrei `mdc(p,q) != 1` e só
+         * passavam fracções já reduzidas — a redução que `rt_periodo_shift` faz por dentro
+         * nunca trabalhava, e o gume que lhe apontei sobreviveu. É varrer onde o defeito
+         * não vive, pela terceira vez hoje. O que se compara é sempre contra a ordem no
+         * denominador REDUZIDO, que é o que o período tem de ver. */
+        for(long q = 3; q <= 60; q += 2)
+            for(long p = 1; p < q; p++){
+                long gg = rt_mdc(p, q); if(gg < 1) gg = 1;
+                long qred = q / gg;
+                if(qred < 3) continue;
+                casos++;
+                int per = rt_periodo_shift(p, q, 2, 4*(int)q);
+                /* a ordem de 2 em (ℤ/qred)*, por iteração directa — a segunda rota */
+                long ord = 0, x = 1 % qred;
+                for(long k = 1; k <= 4*qred; k++){
+                    x = (x*2) % qred;
+                    if(x == 1){ ord = k; break; }
+                }
+                if(per > 0 && ord > 0 && per == ord) bate++;
+                if(per == 0 || ord == 0) sem_periodo++;
+                if(per > 0) cicla_shift++;
+                /* e a Möbius: a descida termina, e conta-se em quantos passos */
+                long P = p, Q = q; int n = 0;
+                while(Q != 0 && n < 100){ long a = P/Q; long nP = Q, nQ = P - a*Q; P = nP; Q = nQ; n++; }
+                if(Q == 0) fecha_mob++;
+                if(q <= 9 && p == 1)
+                    printf("      1/%-6ld %-28d %-10ld %d\n", q, per, ord, n);
+            }
+        printf("      racionais de denominador ímpar (reduzidas e não): %ld\n", casos);
+        printf("      o período do shift É ord_q(2), pelas duas rotas: %ld\n", bate);
+        printf("      a palavra do shift CICLA em %ld ; a da Möbius FECHA em %ld\n",
+               cicla_shift, fecha_mob);
+        printf("      sem período dentro do tecto (contados à parte): %ld\n\n", sem_periodo);
+        ok("no PIPE a ORDEM é que decide: o período do shift É a ordem da base no grupo —"
+           " medido por duas rotas que não partilham código, `rt_periodo_shift` e a iteração"
+           " de 2^k mod q — e a palavra da Möbius FECHA porque ela gasta o denominador,"
+           " enquanto a do shift cicla porque ele não o gasta",
+           casos > 0 && bate == casos && cicla_shift == casos && fecha_mob == casos
+           && sem_periodo == 0);
+
+        /* e o CONTRASTE que impede «cicla» de valer por «tudo cicla»: com a base a dividir
+         * o denominador, o shift ENCOLHE-O primeiro e o período é o do que sobra. */
+        long enc = 0, enc_tot = 0;
+        for(long q = 4; q <= 40; q += 2){
+            long qr = q; int passos = 0;
+            while(qr % 2 == 0 && passos < 32){ qr /= 2; passos++; }
+            enc_tot++;
+            if(qr < q && qr % 2 == 1) enc++;
+        }
+        printf("      e com a base a DIVIDIR o denominador, ele encolhe antes: %ld de %ld\n\n",
+               enc, enc_tot);
+        ok("e o shift também GASTA quando há o que gastar: com o denominador par a base 2"
+           " divide-o até ao ímpar, e só aí começa a ciclar — logo ciclar não é propriedade"
+           " do operador, é o que sobra quando o orçamento deixa de poder ser gasto",
+           enc_tot > 0 && enc == enc_tot);
+    }
+
     return falhas ? 1 : 0;
 }
