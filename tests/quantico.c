@@ -126,14 +126,22 @@ int main(void){
         M H = esc(0.5, add(A, dag(A)));              /* a metade hermitiana */
         M K = esc(0.5, add(A, esc(-1, dag(A))));     /* a metade anti-hermitiana */
 
-        ok("a particao FECHA: H + K = A, sem resto",
+        /* AQUI O LIMIAR FICA, E O TEXTO E' QUE MUDA. As outras dez comparacoes desta
+         * seccao passaram a igualdade EXACTA — as entradas sao 0 e 1 ou metades exactas em
+         * binario, e o residuo e' zero mesmo. Esta nao: H e K sao METADES arredondadas
+         * (0.25 e -0.65 nao somam exactamente -0.4 em IEEE), logo a reconstrucao carrega um
+         * ulp. Dizer «sem resto» era sobreafirmar. A particao EXACTA mede-se em Z na
+         * seccao das matrizes de Gauss (2H + 2K = 2A, sem dividir) — e' la' que a tese
+         * vive; aqui mede-se que a aritmetica de virgula a segue. */
+        ok("a particao FECHA: H + K = A, com o residuo do ARREDONDAMENTO — as metades sao"
+           " arredondadas, e a versao EXACTA e' a que corre em Z, sem dividir",
            dif(add(H,K), A) < 1e-14);
         ok("H e HERMITIANO (H' = H) e K e ANTI-HERMITIANO (K' = -K) — as duas, exatas",
-           dif(dag(H), H) < 1e-14 && dif(dag(K), esc(-1,K)) < 1e-14);
+           dif(dag(H), H) == 0.0 && dif(dag(K), esc(-1,K)) == 0.0);
         /* e o 'i' troca-os — e e por isso que ele e a peca central da teoria */
         M iH = esc(I, H);
         ok("e MULTIPLICAR POR i leva hermitiano em ANTI-hermitiano: (iH)' = -(iH)",
-           dif(dag(iH), esc(-1, iH)) < 1e-14);
+           dif(dag(iH), esc(-1, iH)) == 0.0);
         printf("     -> ||H|| = %.4f, ||K|| = %.4f, e a soma bate A com residuo %.1e.\n",
                norma(H), norma(K), dif(add(H,K), A));
         puts("        O 'i' e o que troca MEDIR por RODAR — e o §F12 ja media que ele tem");
@@ -189,6 +197,52 @@ int main(void){
                    viu_imag, nao_herm);
             ok("o TRACO e o DETERMINANTE de um hermitiano sao REAIS — 2401 casos em Z, residuo 0",
                mau_herm == 0 && herm == 2401);
+
+            /* E A PARTICAO EM Z, que faltava. O §Q1 mede H + K = A em virgula flutuante e
+             * carrega um ulp, porque H e K sao METADES arredondadas. Aqui nao se divide:
+             * guarda-se 2H = A + A' e 2K = A - A', e a reconstrucao pede 2H + 2K = 2A —
+             * inteira, e exacta. E as duas propriedades tambem: (2H)' = 2H e (2K)' = -2K.
+             *
+             * Escrevi no §Q1 que «a particao exacta esta' medida em Z no §Q7» e ISSO ERA
+             * FALSO: o que estava medido em Z era o traco e o determinante, nao a particao.
+             * Em vez de corrigir a frase, escreve-se a medida. */
+            long part = 0, part_ok = 0, hermit_ok = 0, antiherm_ok = 0;
+            for(long a1 = -3; a1 <= 3; a1++) for(long b1 = -3; b1 <= 3; b1++)
+            for(long c1 = -3; c1 <= 3; c1++) for(long d1 = -3; d1 <= 3; d1++){
+                /* A = [[a1, b1 + i·c1], [d1, 0]] — uma 2x2 de Gauss qualquer, nao simetrica */
+                long Are[2][2] = {{a1, b1},{d1, 0}}, Aim[2][2] = {{0, c1},{0, 0}};
+                /* A' = conjugada transposta */
+                long Dre[2][2], Dim[2][2];
+                for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                    Dre[i][j] =  Are[j][i];
+                    Dim[i][j] = -Aim[j][i];
+                }
+                long H2re[2][2], H2im[2][2], K2re[2][2], K2im[2][2];
+                for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                    H2re[i][j] = Are[i][j] + Dre[i][j];   H2im[i][j] = Aim[i][j] + Dim[i][j];
+                    K2re[i][j] = Are[i][j] - Dre[i][j];   K2im[i][j] = Aim[i][j] - Dim[i][j];
+                }
+                part++;
+                int fecha = 1, eh = 1, ea = 1;
+                for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                    if(H2re[i][j] + K2re[i][j] != 2*Are[i][j]) fecha = 0;
+                    if(H2im[i][j] + K2im[i][j] != 2*Aim[i][j]) fecha = 0;
+                    /* (2H)' = 2H  e  (2K)' = -2K */
+                    if(H2re[j][i] != H2re[i][j] || -H2im[j][i] != H2im[i][j]) eh = 0;
+                    if(K2re[j][i] != -K2re[i][j] || -K2im[j][i] != -K2im[i][j]) ea = 0;
+                }
+                if(fecha) part_ok++;
+                if(eh) hermit_ok++;
+                if(ea) antiherm_ok++;
+            }
+            printf("      e a PARTICAO em Z, sem dividir: 2H + 2K = 2A em %ld de %ld\n",
+                   part_ok, part);
+            printf("      com (2H)' = 2H em %ld e (2K)' = -2K em %ld — EXACTO, sem regua\n\n",
+                   hermit_ok, antiherm_ok);
+            ok("a PARTICAO A = H + K mede-se EXACTA em Z: guarda-se 2H = A+A' e 2K = A-A',"
+               " nao se divide, e 2H + 2K = 2A fecha sem resto — com as duas simetrias a"
+               " valerem tambem. E' esta a tese; o §Q1 mede que a virgula flutuante a segue",
+               part > 0 && part_ok == part && hermit_ok == part && antiherm_ok == part);
             ok("e nao e' trivial: nas NAO hermitianas a parte imaginaria APARECE — o contraste mede",
                viu_imag > 1000);
         }
@@ -252,7 +306,7 @@ int main(void){
                 M prev = mzero();
                 for(int k = 0; k < 3; k++)
                     if(eps(i,j,k)) prev = add(prev, esc(2*I*eps(i,j,k), pauli(k)));
-                if(dif(com, prev) < 1e-14) batem++;
+                if(dif(com, prev) == 0.0) batem++;
                 pares++;
             }
         ok("O COMUTADOR DE PAULI E O CRUZADO: bate em TODOS os nove pares, residuo zero",
@@ -261,7 +315,7 @@ int main(void){
         int anti = 1;
         for(int i = 0; i < 3; i++)
             for(int j = 0; j < 3; j++)
-                if(dif(comuta(pauli(i),pauli(j)), esc(-1, comuta(pauli(j),pauli(i)))) > 1e-14) anti = 0;
+                if(dif(comuta(pauli(i),pauli(j)), esc(-1, comuta(pauli(j),pauli(i)))) != 0.0) anti = 0;
         ok("e ele e ANTISSIMETRICO nos nove: [A,B] = -[B,A], que e a x b = -(b x a)",
            anti);
         /* e o ANTI-comutador e o DIRETO: {σi,σj} = 2δij·I — o interno, que MEDE */
@@ -270,7 +324,7 @@ int main(void){
             for(int j = 0; j < 3; j++){
                 M anticom = add(mul(pauli(i),pauli(j)), mul(pauli(j),pauli(i)));
                 M prev = esc(2.0*(i==j), mid());
-                if(dif(anticom, prev) < 1e-14) direto++;
+                if(dif(anticom, prev) == 0.0) direto++;
             }
         ok("e o ANTI-comutador e o DIRETO: {si,sj} = 2.delta_ij.I — o interno, e ele so MEDE",
            direto == 9);
@@ -354,7 +408,7 @@ int main(void){
         /* e onde o comutador é ZERO não há incerteza — mede-se com um operador que comuta */
         M com_zz = comuta(sz, sz);
         ok("e onde o COMUTADOR e zero o limite e zero: [sz,sz] = 0, e sz mede-se sem preco",
-           norma(com_zz) < 1e-14);
+           norma(com_zz) == 0.0);
         puts("        A incerteza NAO e uma limitacao de instrumento: e o cruzado a cobrar. E o");
         puts("        mesmo imposto do dtcn.c §U7 — la V(s) = (1-s^2)m, aqui e |<[A,B]>|/2, e");
         puts("        nos dois casos ele anula exatamente onde a parte antissimetrica anula.\n");
@@ -374,17 +428,17 @@ int main(void){
         /* a medida: o projetor P = |0><0|. P² = P (idempotente) e P NAO tem inversa. */
         M P = mzero(); P.a[0][0] = 1;
         ok("a MEDIDA e um projetor: P^2 = P, idempotente — e uma vez feita, repeti-la nao muda",
-           dif(mul(P,P), P) < 1e-14);
+           dif(mul(P,P), P) == 0.0);
         /* e ele NÃO é inversível: det = 0, e isso é decidível */
         C detP = P.a[0][0]*P.a[1][1] - P.a[0][1]*P.a[1][0];
         ok("e ele NAO tem inversa: det(P) = 0, e isso nao e opiniao — e o determinante",
-           cabs(detP) < 1e-14);
+           cabs(detP) == 0.0);
         /* e a prova de que perde: dois estados DIFERENTES vão no mesmo */
         C a[2] = { 1, 0 }, b[2] = { 1, 0 };
         b[1] = 0.6;                                   /* estado diferente */
         C pa = P.a[0][0]*a[0], pb = P.a[0][0]*b[0];
         ok("DOIS estados distintos colapsam no MESMO — o projetor tem nucleo, como o B do §W2",
-           cabs(pa - pb) < 1e-14 && cabs(a[1] - b[1]) > 0.1);
+           cabs(pa - pb) == 0.0 && cabs(a[1] - b[1]) > 0.1);
         printf("     -> |det U| = 1 (reversivel) contra det P = 0 (nao). E o mesmo criterio do\n");
         puts("        travessia.c: morto != vivo e decidivel, a travessia nao.");
         puts("");

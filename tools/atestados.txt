@@ -241,7 +241,7 @@ histerese_navier ed3e0f5791f828fd 0
 hodge_viviani 9e53debee8151fb9 0
 hopfield 6c9ef97ebb6681df 0
 hurwitz 1a1b71fee1d0adea 0
-icc 06795485be90ea6d 0
+icc f3a150a2f0f87c6f 0
 inducao c00c87a7c08f1ca5 0
 instrumento c6862c1c59553ecc 0
 interface_padrao d5102ce78f3704d3 0
@@ -375,7 +375,7 @@ produto_dual ddd1edbd32b0678a 0
 progressoes 36f2db34b595d74a 0
 projetiva e77edff49e9833b8 0
 promove 91c74b926f1ba345 0
-quantico 18bf557aaf66a2ff 0
+quantico 30359e51360b28ac 0
 quantificador_histerese afd27f900a63173a 0
 quantizador_universal 5432c65b6546dfe0 0
 quasi 4260bc780519ca6d 0

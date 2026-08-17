@@ -276,8 +276,14 @@ int main(void){
         for(int i = 0; i < NC; i++)   e1 += Af[i] * c[i];
         for(int i = 0; i < NPTS; i++) e2 += f[i] * ATc[i];
         double rel = fabs(e1 - e2) / (fabs(e1) > 1e-12 ? fabs(e1) : 1);
-        ok("a AFERENTE e a EFERENTE sao adjuntas: <A f, c> = <f, A^T c>, e isso nao e aproximado",
-           rel < 1e-9);
+        /* O TEXTO JA' DIZIA «nao e aproximado» e a condicao trazia um 1e-9 a desdize-lo.
+         * Medido: o residuo relativo e' ZERO EXACTO, e nao por sorte — a matriz de
+         * amostragem tem uma entrada 1 por ponto e zero no resto, logo as duas somas
+         * percorrem AS MESMAS parcelas, e somar os mesmos termos em ordens diferentes com
+         * um so' termo por indice nao arredonda. A condicao passa a dizer o que a frase diz. */
+        ok("a AFERENTE e a EFERENTE sao adjuntas: <A f, c> = <f, A^T c>, e isso nao e"
+           " aproximado — o residuo e' ZERO EXACTO, e nao «menor que uma regua»",
+           rel == 0.0);
         printf("     -> <Af,c> = %.6f e <f,A'c> = %.6f (residuo relativo %.1e).\n", e1, e2, rel);
         puts("        E o mesmo par do robo.c (J e J^T) e do §B12: uma torre le, a outra escreve,");
         puts("        e a adjuncao e o que garante que o que se escreve e o que se leu.\n");
