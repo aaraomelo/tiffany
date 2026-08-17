@@ -279,18 +279,36 @@ int main(void){
          * infinito de aplicações — e aí o resultado deixa de ser um natural.
          * Mede-se o que acontece de facto: o valor CRESCE sem limite com k, e o tipo do
          * objeto (um natural) não sobrevive ao limite. */
-        printf("      k    π aplicado k vezes a (1,1,1,…)      cabe em long long?\n");
-        int estourou_em = 0;
+        /* O `ok_cab = (n > ant && n > 0)` MISTURAVA DUAS COISAS — crescer e não estourar —
+         * e o `estourou_em` marcava as duas com a mesma palavra. Daí que a asserção
+         * `estourou_em > 0 || n > 1e9` passasse por MOTIVOS OPOSTOS: substituindo
+         * `n = dir_par(n,1)` por `n = ant`, o valor fica parado em 1, o `n > ant` é falso,
+         * `estourou_em` vira 1, e a asserção que afirma «cresce sem limite» PASSA — a
+         * imprimir «NÃO — estourou» num valor que não se mexeu. Medido, não suposto.
+         *
+         * Separam-se: CRESCER é n > ant com ambos positivos; ESTOURAR é n dar a volta
+         * (n < ant ou n <= 0) DEPOIS de ter crescido, que é o sinal do overflow em
+         * s(s+1)/2. A tese é que ele cresce em TODOS os passos até ao tecto da máquina —
+         * e o tecto é da máquina, não do objecto, o que já vai dito na conclusão. */
+        printf("      k    π aplicado k vezes a (1,1,1,…)      cresceu?   cabe em long long?\n");
+        int estourou_em = 0, cresceu = 0;
         L n = 1;
         for(int k=1;k<=12;k++){
             L ant = n;
             n = dir_par(n, 1);
-            int ok_cab = (n > ant && n > 0);
-            printf("      %2d   %22lld           %s\n", k, n, ok_cab ? "sim" : "NÃO — estourou");
-            if(!ok_cab && !estourou_em) estourou_em = k;
+            int subiu  = (n > ant && ant > 0 && n > 0);
+            int deu_volta = (n < ant || n <= 0);
+            if(subiu && !estourou_em) cresceu++;
+            if(deu_volta && !estourou_em) estourou_em = k;
+            printf("      %2d   %22lld           %-10s %s\n", k, n,
+                   subiu ? "sim" : "nao", deu_volta ? "NAO — estourou" : "sim");
         }
-        ok("o valor cresce sem limite: cada dimensão nova custa, e o custo compõe-se",
-           estourou_em > 0 || n > 1000000000LL);
+        printf("\n      cresceu em %d passos seguidos, e estourou no %d\n\n", cresceu, estourou_em);
+        ok("o valor cresce sem limite: cada dimensão nova custa, e o custo compõe-se — cresce"
+           " ESTRITAMENTE em todos os passos até dar a volta no tipo, e o passo do estouro é"
+           " o seguinte ao último que cresceu. A condição anterior media `estourou_em > 0`,"
+           " que uma função PARADA também satisfazia",
+           cresceu >= 6 && estourou_em == cresceu + 1);
         conclui("Cantor dá N^k para todo k FINITO, e mais nada. N^N — a potência infinita —");
         conclui("não é o limite disto: é outro objeto, e quem o dá é a Möbius do palavra.c,");
         conclui("porque ali a palavra NÃO tem de terminar. Os dois geradores repartem o");

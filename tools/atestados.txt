@@ -43,7 +43,7 @@ buracos 66161db65811b122 0
 cadeia c0f6b61ee48784a9 0
 caminho 7934d7eb5949397d 0
 canal f23ae0f630ffc2a4 0
-cantor 37a78d4f6d91e54f 0
+cantor bea89ed7b9c85629 0
 cantor_julia_dual 2a215f46ac3417d6 0
 canvas_front f5106644abd9858b 0
 cardinal 5317ef08a6c4b8e8 0
