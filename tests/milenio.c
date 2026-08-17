@@ -511,7 +511,18 @@ printf("\n§M9  A REALIZAÇÃO: problemas da física, resolvidos por esta estrut
         double lam = log(2.0)/5730.0;             /* carbono-14 */
         printf("      N' = -λN,  carbono-14, meia-vida 5730 anos  ->  λ = %.9e\n\n", lam);
         printf("      t (anos)   N(t)/N₀        log N        passo do log\n");
+        /* O QUE AQUI SE MEDIA ERA log∘exp. L = log(exp(−λt)) É −λt, e λ é DEFINIDO como
+         * log(2)/5730, logo o passo é −log2 por construção: a asserção «o passo do log é
+         * constante» não podia falhar — mede a inversa composta com a directa, e a
+         * definição de λ.
+         *
+         * O CONTEÚDO É A TRANSLAÇÃO VIRAR MULTIPLICAÇÃO, e isso mede-se em N e não em
+         * log N: uma meia-vida adiante o valor tem de ser METADE, e ao fim de j meias-vidas
+         * tem de ser 2^{-j} — potências de dois, INTEIRAS no denominador. Nenhum logaritmo
+         * entra na comparação. */
         int cte = 1; double ant = -1e9, prim = -1e9;
+        long metade_ok = 0, pot2_ok = 0, passos = 0;
+        double N_ant = 1.0;
         for(int j = 0; j <= 4; j++){
             double t = 5730.0*j, N2 = exp(-lam*t), L = log(N2);
             double p = (j == 0) ? 0 : L - ant;
@@ -519,10 +530,19 @@ printf("\n§M9  A REALIZAÇÃO: problemas da física, resolvidos por esta estrut
             else       printf("      %-10.0f %-14.9f %-12.6f %.9f\n", t, N2, L, p);
             if(j == 1) prim = p; else if(j > 1 && fabs(p-prim) > 1e-9) cte = 0;
             ant = L;
+            /* a translação é MULTIPLICAÇÃO por 1/2: N(t+T)·2 = N(t) */
+            if(j > 0){ passos++; if(fabs(N2*2.0 - N_ant) < 1e-12) metade_ok++; }
+            /* e ao fim de j meias-vidas o valor é 2^{-j}: o denominador é um INTEIRO */
+            long den = 1; for(int q = 0; q < j; q++) den *= 2;
+            if(fabs(N2*(double)den - 1.0) < 1e-12) pot2_ok++;
+            N_ant = N2;
         }
-        printf("\n      o passo do log é constante = -log 2: a translação no tempo virou\n");
-        printf("      MULTIPLICAÇÃO por 1/2, que é o Corolário A com Γ = (R,+)\n\n");
+        printf("\n      e a TRANSLACAO E' MULTIPLICACAO, medida em N e nao em log N: N(t+T).2 =\n");
+        printf("      N(t) em %ld de %ld passos, e N(j.T) = 1/2^j com o denominador INTEIRO\n",
+               metade_ok, passos);
+        printf("      em %ld de 5 andares — que e' o Corolario A com Gamma = (R,+)\n\n", pot2_ok);
         if(!cte) mal++;
+        if(metade_ok != passos || pot2_ok != 5) mal++;
         /* e N(t) satisfaz a equacao */
         int malD = 0;
         for(int j = 1; j < 100; j++){

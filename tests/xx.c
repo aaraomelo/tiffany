@@ -307,10 +307,38 @@ int main(void){
         /* e o ponto critico e' onde a derivada de x^x anula: ln x + 1 = 0. Mede-se pela
          * MUDANCA DE SINAL de (ln x + 1) em torno de xc, nao por comparacao com um literal. */
         {
-            double esq = log(xc*0.99) + 1.0, dir = log(xc*1.01) + 1.0;
+            /* E A CORRECÇÃO ANTERIOR CAIU NA MESMA ARMADILHA que o comentário de cima
+             * descreve. Com xc = 1/e, log(xc·0,99) + 1 É log(0,99), e log(xc·1,01) + 1 É
+             * log(1,01): o teste dizia «troca de sinal em xc» e media log(0,99) < 0 < log(1,01),
+             * que é a MONOTONIA DO LOG — verdade para qualquer xc, e portanto sobre nenhum.
+             *
+             * O ponto crítico mede-se pelo que ele É: um MÍNIMO de x^x. E isso compara
+             * VALORES da função, sem derivada e sem logaritmo — se xc é o mínimo, a função
+             * é maior dos dois lados, e é maior em toda a grelha. */
+            double esq = log(xc*0.99) + 1.0, dir = log(xc*1.01) + 1.0;   /* só para imprimir */
+            double f_xc = pow(xc, xc);
+            double f_e  = pow(xc*0.99, xc*0.99), f_d = pow(xc*1.01, xc*1.01);
+            /* e o argmin numa grelha larga, que é o gume: se o mínimo caísse noutro sítio,
+             * a grelha di-lo-ia — e ela não sabe que xc existe */
+            double melhor = 1e9, arg_melhor = 0;
+            long pontos = 0;
+            for(double x = 0.05; x <= 1.5; x += 0.0005){
+                double v = pow(x, x);
+                pontos++;
+                if(v < melhor){ melhor = v; arg_melhor = x; }
+            }
             printf("      ln x + 1 a 1%% a esquerda de 1/e: %+.6f    a 1%% a direita: %+.6f\n", esq, dir);
-            ok("x = 1/e e o ponto critico: ln x + 1 TROCA DE SINAL ali — nenhum literal no teste",
-               esq < 0.0 && dir > 0.0);
+            printf("      e x^x em 1/e vale %.9f, contra %.9f a 1%% a esquerda e %.9f a\n"
+                   "      direita: e' um MINIMO. E numa grelha de %ld pontos em [0,05 ; 1,5]\n"
+                   "      o argmin cai em %.4f, a %.1e de 1/e = %.4f\n",
+                   f_xc, f_e, f_d, pontos, arg_melhor, fabs(arg_melhor - xc), xc);
+            ok("x = 1/e e o ponto critico, e mede-se pelo que ele E': um MINIMO de x^x. A"
+               " funcao e' MAIOR nos dois lados, e o argmin de uma grelha de 2901 pontos —"
+               " que nao sabe que 1/e existe — cai la'. A versao anterior calculava"
+               " log(xc.0,99) + 1, e com xc = 1/e isso E' log(0,99): media a monotonia do"
+               " logaritmo, verdadeira para qualquer xc e portanto sobre nenhum. E' o mesmo"
+               " defeito que o comentario acima ja' tinha descrito uma vez",
+               f_xc < f_e && f_xc < f_d && fabs(arg_melhor - xc) < 0.001 && pontos > 900);
         }
         conclui("é a MESMA lei do continua.c §C1: o raio é a distância à singularidade mais");
         conclui("próxima. Ali era o polo −σ'; aqui é o ponto onde a função deixa de inverter.");
