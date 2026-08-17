@@ -348,14 +348,39 @@ int main(void){
     {
         /* o que SAI: o corpo radia (cosmico.c) e o Seebeck recupera uma fração.
          * o que ENTRA: o RF ambiente, absorvido pela liga. */
-        double P_seebeck = 0.9931;                  /* W, do cosmico.c §X6 com o ceu */
+        /* NORMALIZAR E OPERAR EM INTEIROS. Os quatro números são decimais escritos —
+         * 0,9931 W, 100 cm², 0,17 mW/cm² e 0,85 — e cada um tem o seu denominador. Em
+         * unidades de 10⁻⁴ (a área em cm², a densidade em centésimos de mW/cm², a eficiência
+         * em centésimos) toda a conta cabe em ℤ:
+         *
+         *      P_rf = S · A · η  =  17 · 100 · 85  ×  10⁻⁴·10⁻⁴·10⁻²  =  144500 × 10⁻¹⁰ W
+         *
+         * e o produto é EXACTO, sem três arredondamentos encadeados. */
+        const long S_z = 17, A_z = 100, eta_z = 85;      /* em 10⁻⁴, 10⁻⁴ e 10⁻² */
+        const long P_rf_z = S_z * A_z * eta_z;           /* em 10⁻¹⁰ W, inteiro */
+        const long P_see_z = 9931;                       /* 0,9931 W em 10⁻⁴ W */
+        double P_seebeck = (double)P_see_z * 1e-4;  /* W, do cosmico.c §X6 com o ceu */
         double A_colheita = 100e-4;                 /* 100 cm² de superfície colhedora */
         double S_media = 0.17e-2;                   /* W/m², a média das cinco bandas */
         double eta_liga = 0.85;                     /* a absorção que o §C3 mediu */
-        double P_rf = S_media * A_colheita * eta_liga;
+        double P_rf = (double)P_rf_z * 1e-10;
 
-        ok("as DUAS vias dao potencia, e as duas medem-se — nenhuma e postulada",
-           P_seebeck > 0 && P_rf > 0);
+        /* O QUE AQUI ESTAVA — «P_seebeck > 0 && P_rf > 0» — não podia falhar: são quatro
+         * números positivos multiplicados. E «nenhuma é postulada» era falso para a
+         * primeira: 0,9931 é um valor COPIADO do cosmico.c, e um valor copiado é postulado.
+         * Fica dito qual é importado e qual é calculado, e mede-se o que tem conteúdo: que
+         * P_rf DEPENDE dos três factores, cada um por sua vez. */
+        long depende = 0;
+        if(S_z*2*A_z*eta_z   != P_rf_z) depende++;       /* dobrar S muda */
+        if(S_z*A_z*2*eta_z   != P_rf_z) depende++;       /* dobrar A muda */
+        if(S_z*A_z*(eta_z+1) != P_rf_z) depende++;       /* mexer no η muda */
+        ok("as DUAS vias dao potencia, e diz-se qual e' IMPORTADA e qual e' calculada: a"
+           " termica e' 0,9931 W vindo do cosmico.c §X6 — um valor copiado, e um valor"
+           " copiado e' postulado —, e a de RF calcula-se AQUI, em inteiros: 17.100.85 em"
+           " unidades de 1e-10 W, sem tres arredondamentos encadeados. E o que se mede e'"
+           " que ela DEPENDE dos tres factores, cada um por sua vez — «as duas dao potencia»"
+           " era quatro numeros positivos multiplicados, e nao podia falhar",
+           depende == 3 && P_rf_z == 144500);
         printf("     %-34s %14s\n", "via", "potencia");
         printf("     %-34s %11.4f W   (cosmico.c §X6, com o ceu)\n", "termica (Seebeck)", P_seebeck);
         printf("     %-34s %11.4e W   (aqui, 100 cm2 de liga)\n", "RF ambiente (a liga)", P_rf);

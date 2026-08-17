@@ -66,7 +66,7 @@ clifford_dual 12ecc8250a26cd5a 0
 clifford_pleno 8861e58d2970553f 0
 cobertura 575ec441d3142f8b 0
 cohomologia_ponte 1edbf545ad8f2cd3 0
-colheita 6ddbef65644fac29 0
+colheita e1e08bccde514d5f 0
 colisor_corpos 3be2fa7041eb0275 0
 completo b7ccb59fe44332bc 0
 complexo 1ffd14ad04af24c5 0
