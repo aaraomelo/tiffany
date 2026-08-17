@@ -129,3 +129,27 @@ contraste prova que não é do operador**: com q PAR o shift ENCOLHE o denominad
 e só deixa de encolher ao chegar ao ímpar. *Ciclar não é uma propriedade do operador: é o
 que sobra quando o orçamento deixa de poder ser gasto.*
 
+## A UNIFICAÇÃO (thm:unificacao): a ORDEM identifica a lei
+
+«Formaliza a unificação com a lei 8 e trial, Cantor, Julia, Viviani; se fechar, faz teorema.»
+Fechou — e a estrutura **já estava na tabela das oito leis do `corpo_peano`**, com o FECHO de cada
+uma escrito ao lado. O que faltava era ver que as peças SÃO essas leis:
+
+    Cantor / Julia   o espelho da dobra          2    L_1/L_2   ν² = id
+    o trial          τ em {−1, 0, +1}            3    L_3       τ³ = id
+    VIVIANI          i, o meio-ângulo            4    L_5       i⁴ = id
+    a Lei 8          Ind, o índice do catálogo   8    L_7       Ind⁸ = id
+
+**E o quadro fecha em 24 = 8 × 3** — a Lei 8 (que é 2³, três dobras) vezes o trial. *O 24 não é um
+número que aparece: é o produto das duas coisas que o catálogo tem, oito índices e três símbolos.*
+E o HEXAL sai das ordens medidas: o menor k onde dual e trial voltam juntos, 6 = lcm(2,3).
+
+**Viviani é a de ordem 4 porque i² É o espelho** — uma volta no ângulo devolve o ponto com o sinal
+trocado, e ord(i) = 2·ord(ν). O meio-ângulo é a raiz quadrada da rotação, e a ordem di-lo.
+
+**As ordens MEDEM-SE e a minimalidade é parte da tese**: τ⁶ = id também é verdade e não faz do
+trial uma lei de ordem 6. E o gume está dentro — trocar a ordem de uma peça pela de outra quebra o
+24 em 6 das 12 trocas.
+
+Medidor: `tests/lei8_trial.c` (5:0, zero sobreviventes em 80 mutações do gume).
+
