@@ -5,7 +5,7 @@ metadata:
   node_type: memory
   type: feedback
   originSessionId: c1a01a83-ee3b-4229-965f-a0acb8476ee5
-  modified: 2026-08-02T23:24:35.869Z
+  modified: 2026-08-16T19:05:11.634Z
 ---
 
 02/08/2026. O Aarão disse: *"a razão é sempre 1 mas normalizada pelo metal da reta"*. Corri uma
@@ -48,3 +48,29 @@ minha, medir a correção **com um teste que possa falhar** antes de a aceitar: 
 não é humildade, é saltar o passo.
 
 Apanhado por um revisor externo, não por mim. Ver [[feedback-revisores-externos]].
+
+## 16/08/2026 — QUATRO no mesmo ficheiro, e o padrão tem forma fixa
+
+Ao migrar o `matricial.c` encontrei **quatro**, e cada uma tinha uma frase com conteúdo por cima:
+
+```
+vold = 1.0/vol   →  fabs(vol*vold − 1.0) < 1e-9   «o reticulado e o dual têm volumes recíprocos»
+sgl  = −1.0/sg   →  fabs(sg)*fabs(sgl) ≈ 1        «σ·σ' = −1, os dois pontos fixos são duais»
+meio = tr/2      →  razao = meio/tr  ≈ 0.5        «a coordenada real é 1/2 do traço»
+zin  = 1/sig     →  prod = zin*sig   ≈ 1          «ν troca dentro por fora»
+```
+
+**Quatro não são quatro acidentes: são um hábito meu.** E a forma é sempre a mesma —
+uma variável DEFINIDA a partir de outra, e depois as duas combinadas numa expressão
+comparada com uma constante. O limiar dá cara de medição à aritmética, e a tese fica
+por medir sem que nada acuse.
+
+**O conserto nunca é apertar o limiar**: é construir o segundo objecto por um caminho
+que não passe pelo primeiro. No §M11 o dual passou a ser a ADJUNTA, com
+`G·adj(G) = disc·I` verificada entrada a entrada — e a mutação que a mata (multiplicar
+adj por 2) não tinha efeito nenhum na versão antiga, porque o dual não existia.
+
+Virou detector: `tools/tectos.py`, padrão P3, com os dois controlos — acha `vold vem de
+vol` na versão de `eaddab7` e dá zero na corrigida. 40 candidatos no repo, e é lista de
+revisão e não veredicto: verifiquei quatro e os quatro eram legítimos (em `agm_analog.c`
+os dois `invar()` são em pontos DIFERENTES da órbita). Ver [[feedback-assercoes-vazias]].

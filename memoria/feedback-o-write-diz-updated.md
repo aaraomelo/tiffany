@@ -1,8 +1,11 @@
 ---
 name: feedback-o-write-diz-updated
 description: O Write diz «updated» quando o ficheiro existe e «created» quando não — e eu escrevi por cima de DOIS medidores no mesmo dia sem ler a palavra.
-metadata:
+metadata: 
+  node_type: memory
   type: feedback
+  originSessionId: 1b414fab-4a31-4b15-bef4-49020ec22a30
+  modified: 2026-08-16T23:35:12.925Z
 ---
 
 Duas vezes na mesma sessão criei um medidor «de raiz» e escrevi por cima de um que já
@@ -31,3 +34,22 @@ São palavras diferentes e eu tratei-as como a mesma. Nas duas vezes só o
 
 Ver [[feedback-destruir-antes-do-inventario]], [[feedback-o-write-que-diz-updated]],
 [[feedback-a-base-ja-existe]].
+
+## 16/08/2026 — a TERCEIRA, e desta vez foi o TOTAL que a apanhou
+
+`tests/potencia.c` media a potência como **terceira operação** — clone (o corpo e o
+elemento ficam), reprodução (o corpo cresce, ℝ^lcm), potência (o ELEMENTO cresce, x⊗x) —
+com a órbita a fechar em período de **Pisano**. 153 linhas. Escrevi por cima com o
+cruzado invariante a potências. **Palavra igual, assunto diferente — outra vez.**
+
+Li a palavra «updated» e não parei. E o `git ls-files` da regra 1 também não fiz.
+
+**O que a apanhou foi a bateria não subir.** Acrescentei um medidor citado no paper e o
+total ficou em **500**, quando tinha de ir a 501. Não foi uma asserção: nenhuma podia
+ver isto — foi o TOTAL, que é a única coisa que conta medidores em vez de os correr.
+
+**How to apply, o que se acrescenta:**
+4. **O total da bateria é o detector deste defeito.** Sempre que um medidor novo entra
+   citado num paper, o total sobe em um. Se não subiu, ou não entrou na lista ou
+   substituiu alguém. Ver [[feedback-o-exit-sombreado]] — a mesma família: ler o número
+   que conta, e não só os que passam.

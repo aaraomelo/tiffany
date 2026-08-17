@@ -262,3 +262,36 @@ que ela é testada.*
 **O conserto** é o de sempre — dois caminhos que não se tocam: `tr(A^k)` multiplicando
 MATRIZES contra `P_k` pela recorrência de NEWTON sobre os COEFICIENTES. Com a companion
 partida, os dois separam-se e caem duas asserções.
+
+## 16/08/2026 — A NONA forma: a DEFINIÇÃO a fazer de medida
+
+Numa só volta pela bateria, três ficheiros com a mesma forma — e nenhum tinha limiar
+frouxo nem tipo errado. O defeito era a asserção **confirmar a própria escrita**:
+
+```c
+// arraytermico.c §A6 — a parcela definida como o RESTO
+volta = P*e;  radia = P - volta;  soma = volta + radia;   ok(soma == P)   // P-volta+volta
+
+// analog.c §B.2 — o produto reescrito
+long malha = u1 * u2;   if (malha == u1*u2) passou++;                     // x == x
+
+// aurea.c §A1 — a cópia comparada com a cópia
+L cf[3] = {1,-1,-1};  L bd[3] = {1,-1,-1};  ok(cf[k] == bd[k])            // duas escritas
+```
+
+**O teste é sempre o mesmo: mudar o dado a montante e ver se o número se move.** Se `radia`
+é o resto, mexer na eficiência não move nada. Se `bd` é escrito à mão, mudar `m` não o
+move. Se a malha é o produto, não há o que mover.
+
+E o conserto nunca é apertar a comparação — é **fazer o segundo lado derivar**:
+`radia` de uma via própria (ou dizer que é identidade, e medir que a partição é uma
+partição); `malha` do ANTILOG da soma dos expoentes; `bd` do `m` da borda.
+
+**E o conserto costuma trazer a tese que faltava.** No `aurea.c`, com `bd` a derivar de
+`m`, apareceu o gume que a versão anterior não podia ter: com `m = 2..5` a coincidência
+CAI — logo `f' = f⁻¹` **escolhe** o ouro, e não vale para a família metálica toda. Isso
+nunca estivera medido, porque os coeficientes não dependiam de nada.
+
+O detector é o `tools/tectos.py` P3 — e a segunda forma (`v` comparado com a expressão que
+o definiu) só entrou depois de o `malha == u1*u2` lhe escapar. Ver
+[[feedback-a-referencia-escrita-a-mao]] e [[feedback-normalizar-nao-e-medir]].

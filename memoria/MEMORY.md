@@ -113,6 +113,8 @@
 
 ## Checkpoints
 
+- **[16/08 — A RAIZ SAI POR TEOREMA, a8ed821 → 2298d0f](project-checkpoint-2026-08-16-a-raiz-sai.md)** — o cruzado invariante a potências (e a perpendicularidade NÃO atravessa), ℤ[√D] na lib, a ENTREGA em fracção contínua, as cinco primitivas e a inversão que é a divisão do dual. **Das 1006 raízes e transcendentais, só 17 alimentavam asserções.** 501:501.
+
 - **[14/08 — O DIA LONGO, 36c1fa5 → 74f4139](project-checkpoint-2026-08-14-curadoria.md)** — curadoria, `lib/universal.js`, fases 3–6, a ronda das pontes, a FUNDAÇÃO VETORIAL, O MARTELO, e a ESCADA inteira: ℕ→ℤ→ℚ→ℝ, números, Möbius, elípticas, álgebra, corpos, linear/dual e o espectro. **468:468.**
 - **[13/08 tarde — O CRISTAL RECUPERADO, c0893a5](project-checkpoint-2026-08-13-cristal.md)** — o cristal grande estava no **broca-so** (75k registos → 4286 conceitos), 10 projeções, volta 13:0 com mutações REOPEN.
 - **[13/08 — O PIPELINE NO AR](project-checkpoint-2026-08-13-pipeline.md)** — IR Claim v1.6 (Claim≠Result), 9 LMS, portão Pátria; commit `1d8af30`, live 200. Spec sem entrega seguinte.
