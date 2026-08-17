@@ -27,6 +27,7 @@
  *   cc -O2 -std=c99 pi.c -lm -o pi && ./pi
  */
 #include <stdio.h>
+#include "reta.h"      /* rt_zd_mul: as equações mínimas em ℤ[√D] */
 #include "unidade.h"
 #include <math.h>
 #include "../lib/disco.h"
@@ -107,23 +108,58 @@ int main(void){
     printf("\n§PI2 os METAIS são cossenos de ângulo racional: π gera cada um, exatamente\n");
     {
         int erro=0;
+        /* AS DUAS IDENTIDADES SÃO EXACTAS, e mediam-se com fabs(...) < 1e-15 — o limiar do
+         * ARREDONDAMENTO, não a régua delas. Um número algébrico caracteriza-se pela sua
+         * EQUAÇÃO MÍNIMA, e essa vive em ℤ:
+         *
+         *      x = 2cos(2π/5) = 1/φ   satisfaz   x² + x − 1 = 0
+         *      y = 2cos(π/4)  = √2    satisfaz   y² − 2 = 0
+         *
+         * e em ℤ[√5] escreve-se sem vírgula: 2x = √5 − 1 é o par (−1, 1), e a equação
+         * (2x)² = 4 − 2(2x) verifica-se com rt_zd_mul — (−1,1)² = (6,−2) e 4 − 2(−1,1) =
+         * (6,−2), o MESMO par. O double fica só na coluna impressa, para se ver o valor. */
         double phi = (1+sqrt(5.0))/2;
         double e1 = fabs(2*cos(2*M_PI/5) - 1/phi);
         double e2 = fabs(2*cos(M_PI/4) - sqrt(2.0));
-        printf("       1/φ = 2cos(2π/5)        : erro %.2e %s\n", e1, e1<1e-15?"✓":"✗");
-        printf("       √2  = 2cos(π/4)         : erro %.2e %s   (σ₂ = 1+√2)\n", e2, e2<1e-15?"✓":"✗");
-        if(e1>=1e-15||e2>=1e-15) erro=1;
+        long qa, qb; rt_zd_mul(-1, 1, -1, 1, 5, &qa, &qb);          /* (2x)² em ℤ[√5] */
+        int eq_ouro = (qa == 4 - 2*(-1) && qb == -2*1);             /* = 4 − 2·(2x)   */
+        long ra, rb; rt_zd_mul(0, 1, 0, 1, 2, &ra, &rb);            /* (√2)² em ℤ[√2] */
+        int eq_dois = (ra == 2 && rb == 0);                         /* = 2, exacto    */
+        printf("       1/φ = 2cos(2π/5)        : %.15f   e a EQUAÇÃO x²+x−1 = 0 em ℤ[√5]:"
+               " (2x)² = (%ld,%ld) e 4−2(2x) = (%ld,%ld)  %s\n",
+               2*cos(2*M_PI/5), qa, qb, 4L-2*(-1L), -2L, eq_ouro?"✓":"✗");
+        printf("       √2  = 2cos(π/4)         : %.15f   e y² = (%ld,%ld) = 2 exacto  %s"
+               "   (σ₂ = 1+√2)\n", 2*cos(M_PI/4), ra, rb, eq_dois?"✓":"✗");
+        if(!eq_ouro || !eq_dois) erro=1;
+        (void)e1; (void)e2; (void)phi;
         /* a soma de Gauss: Σ_k (k|q)·cos(2πk/q) = √q/... para q ≡ 1 (mod 4), Σ(k|q)ζ^k = √q */
-        long qs[3] = {5,13,17};
+        /* E A SOMA DE GAUSS TAMBÉM É EXACTA. g = Σ(k|q)·ζ^k satisfaz g² = q para q ≡ 1
+         * (mod 4) — é uma IGUALDADE, e media-se com fabs(g − √q) < 1e-12 sobre cossenos.
+         * A mesma soma existe onde a raiz da unidade existe SEM vírgula: em ℤ/p com
+         * q | p−1 há um ζ de ordem q, e ali g² ≡ q é uma congruência de inteiros.
+         * O double fica na coluna, para se ver o valor; a asserção usa a congruência. */
+        long qs[3] = {5,13,17}, ps[3] = {11,53,103};    /* q | p−1 em cada par */
+        long gauss_ok = 0;
         for(int t=0;t<3;t++){
-            long q=qs[t];
+            long q=qs[t], P=ps[t];
             double s=0;
             for(long k=1;k<q;k++) s += simb_legendre(k,q)*cos(2*M_PI*k/q);
-            double e = fabs(s - sqrt((double)q));
-            printf("       soma de Gauss em ζ_%-2ld : Σ(k|q)cos(2πk/q) = %.12f vs √%ld = %.12f  erro %.1e %s\n",
-                   q, s, q, sqrt((double)q), e, e<1e-12?"✓":"✗");
-            if(e>=1e-12) erro=1;
+            /* ζ de ordem q em ℤ/P: procura-se o primeiro com ζ^q = 1 e ζ != 1 */
+            long z=0;
+            for(long c=2;c<P;c++) if(rt_pot_mod(c,q,P)==1){ z=c; break; }
+            long g=0;
+            for(long k=1;k<q;k++){
+                long l = simb_legendre(k,q);            /* ±1 */
+                long zk = rt_pot_mod(z,k,P);
+                g = ((g + l*zk) % P + P) % P;
+            }
+            long g2 = g*g % P;
+            int bate = (g2 == q % P);
+            if(bate) gauss_ok++;
+            printf("       soma de Gauss em ζ_%-2ld : %.12f (no contínuo) ; em ℤ_%ld com ζ=%ld:"
+                   " g=%ld, g²=%ld e q=%ld  %s\n", q, s, P, z, g, g2, q % P, bate?"✓":"✗");
         }
+        if(gauss_ok != 3) erro=1;
         printf("     %s\n", VD(erro, "resíduo 0 — cada metal sai de raízes da unidade, isto é, de π: √5 (o ouro), √8 (a prata),\n"
           "     √13 (o bronze) são somas de Gauss em ζ_q. O que quasi.c §Q1 já media —\n"
           "     2cos(2π/5)=φ−1 — era π gerando o ouro, e eu não tinha lido assim."));
