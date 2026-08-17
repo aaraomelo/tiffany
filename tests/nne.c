@@ -310,7 +310,45 @@ printf("\n§N6  A ÁLGEBRA DUAL DO GENTIL — e esta É distributiva. Corrijo-me
     }
     printf("      norma euclidiana:  max erro %.2e   (não preserva)\n", pe);
     printf("      norma |ab|:        max erro %.2e   (PRESERVA)\n\n", pd);
-    ok("ela preserva |ab| — que é o DETERMINANTE, e não a norma euclidiana", pd < 1e-9);
+    /* E A IDENTIDADE E' POLINOMIAL, logo mede-se EXACTA em Z e nao pede o 1e-9. Com
+     * p = (x0.y0, -x1.y1), o produto das componentes e'
+     *
+     *     p0.p1 = x0.y0 . (-x1.y1) = -(x0.x1).(y0.y1)     ⟹  |p0.p1| = |x0.x1|.|y0.y1|
+     *
+     * — nao ha nada a arredondar. E o CONTRASTE mede-se do mesmo modo: a euclidiana falha,
+     * e conta-se em quantos casos, para que «nao preserva» seja um numero e nao uma
+     * afirmacao. */
+    long det_ok = 0, eucl_ok = 0, tot_i = 0, sinal_ok = 0;
+    for(long x0 = -4; x0 <= 4; x0++) for(long x1 = -4; x1 <= 4; x1++)
+    for(long y0 = -4; y0 <= 4; y0++) for(long y1 = -4; y1 <= 4; y1++){
+        long p0 = x0*y0, p1 = -x1*y1;
+        long lhs = p0*p1;              if(lhs < 0) lhs = -lhs;
+        long rx = x0*x1;               if(rx < 0)  rx = -rx;
+        long ry = y0*y1;               if(ry < 0)  ry = -ry;
+        tot_i++;
+        if(lhs == rx*ry) det_ok++;                       /* o DETERMINANTE: exacto */
+        /* E COM SINAL, que e' mais forte. Mutei `p1 = -x1.y1` para `+x1.y1` e a asserção
+         * do modulo SOBREVIVEU — o valor absoluto nao ve o sinal, logo aquela medida nao
+         * distinguia a multiplicacao hiperbolica de outra. A identidade com sinal
+         *
+         *     p0.p1 = -(x0.x1).(y0.y1)
+         *
+         * ve-o, e e' ela que fixa qual e' o produto. Uma mutacao que sobrevive e' um gap
+         * meu, e o remedio nao e' afrouxar o gume: e' medir a frase inteira. */
+        if(p0*p1 == -(x0*x1)*(y0*y1)) sinal_ok++;
+        /* a euclidiana: |p|² =? |x|².|y|², nos quadrados para nao formar raiz */
+        if((p0*p0 + p1*p1) == (x0*x0 + x1*x1)*(y0*y0 + y1*y1)) eucl_ok++;
+    }
+    printf("      e em INTEIROS, sem regua: |p0.p1| = |x0.x1|.|y0.y1| em %ld de %ld\n",
+           det_ok, tot_i);
+    printf("      e a EUCLIDIANA so' fecha em %ld de %ld — e' o contraste que mede\n",
+           eucl_ok, tot_i);
+    printf("      e COM SINAL, p0.p1 = -(x0.x1)(y0.y1), em %ld de %ld — o modulo nao o via\n\n",
+           sinal_ok, tot_i);
+    ok("ela preserva |ab| — que é o DETERMINANTE, e não a norma euclidiana. E a identidade"
+       " é POLINOMIAL, logo mede-se EXACTA em ℤ: vale em todos os casos, enquanto a"
+       " euclidiana falha na maioria — o contraste é um número",
+       pd < 1e-9 && tot_i > 0 && det_ok == tot_i && eucl_ok < tot_i && sinal_ok == tot_i);
     printf("      E isso arruma o par: |ab| = 1 é a HIPÉRBOLE (Δ>0, o gato); a²+b² = 1 é a\n");
     printf("      ESFERA (Δ<0, o esquilo). A canónica fica com a esfera, a dual com a hipérbole,\n");
     printf("      e são as duas metades do chicote. Não são construções rivais: são o par.\n");

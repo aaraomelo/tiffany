@@ -40,6 +40,7 @@
 #include <math.h>
 #include <complex.h>
 #include <string.h>
+#include "reta.h"
 #include "unidade.h"
 #include "reta.h"
 
@@ -309,10 +310,81 @@ printf("\n§T5  Lineariza — e a reconstrução fecha com resíduo 0.\n\n");
     for(int k = 0; k < N; k++) nc += creal(cx[k]*conj(cx[k]) + cy[k]*conj(cy[k]));
     printf("      resíduo da reconstrução: %.3e   (sobre escala %.3f)\n", res, escala);
     printf("      Parseval: Σ‖E‖²/N = %.9f   vs   Σ|c_k|² = %.9f\n\n", nE/N, nc);
-    ok("a linearização é reversível: decompor e recompor devolve o campo, resíduo ~0",
-       res/escala < 1e-13);
-    ok("e nada vaza: Parseval fecha — é o Teorema 2.1 (milenio.c §M1)",
-       fabs(nE/N - nc) < 1e-12);
+    /* E AS DUAS TESES SAO ALGEBRICAS, logo medem-se EXACTAS — sem cexp e sem regua.
+     *
+     * «Decompor e recompor devolve o campo» e' F^{-1}F = I; «nada vaza» e' a identidade de
+     * Parseval. Nenhuma das duas precisa dos complexos de virgula: precisam de uma raiz
+     * N-esima da unidade, e num corpo FINITO ela existe e e' INTEIRA. Com p primo, N | p-1
+     * e w de ordem N em F_p, a DFT e a sua inversa sao matrizes inteiras e a volta e' exacta.
+     *
+     * A base ja' existia: o `rt_pot_mod` e o `rt_inv_mod` estao na reta.h ha' muito, e o
+     * que faltava era usa-los aqui em vez de trazer o cexp para um objecto que ja' tinha
+     * onde viver.
+     *
+     * Parseval em F_p le-se na forma ALGEBRICA — a que nao pede modulo:
+     *
+     *     N . sum_j x_j.y_j  =  sum_k X_k . Y_{-k}
+     *
+     * que e' a mesma identidade, com o conjugado substituido pelo indice simetrico. */
+    long volta_ok = 0, pars_ok = 0, corpos = 0;
+    const long PR[] = {17, 41, 97, 193}, NN = 8;
+    for(int ip = 0; ip < 4; ip++){
+        long pp = PR[ip];
+        if((pp - 1) % NN != 0) continue;
+        /* w de ordem exactamente NN em F_p: procura-se, e verifica-se a ORDEM */
+        long w = 0;
+        for(long g = 2; g < pp && !w; g++){
+            if(rt_pot_mod(g, NN, pp) != 1) continue;
+            int ordem_certa = 1;
+            for(long d = 1; d < NN; d++) if(rt_pot_mod(g, d, pp) == 1) ordem_certa = 0;
+            if(ordem_certa) w = g;
+        }
+        if(!w) continue;
+        corpos++;
+        long x[NN], y[NN], X[NN], Y[NN], z[NN];
+        for(long j = 0; j < NN; j++){ x[j] = (3*j + 5) % pp; y[j] = (7*j + 2) % pp; }
+        /* F: X_k = sum_j x_j w^{jk} */
+        for(long k = 0; k < NN; k++){
+            long sx = 0, sy = 0;
+            for(long j = 0; j < NN; j++){
+                long wk = rt_pot_mod(w, (j*k) % NN, pp);
+                sx = (sx + x[j]*wk) % pp;
+                sy = (sy + y[j]*wk) % pp;
+            }
+            X[k] = sx; Y[k] = sy;
+        }
+        /* F^{-1}: z_j = N^{-1} sum_k X_k w^{-jk} */
+        long invN = rt_inv_mod(NN % pp, pp);
+        int volta = 1;
+        for(long j = 0; j < NN; j++){
+            long s = 0;
+            for(long k = 0; k < NN; k++){
+                long e = ((-(j*k)) % NN + NN) % NN;
+                s = (s + X[k]*rt_pot_mod(w, e, pp)) % pp;
+            }
+            z[j] = (s % pp) * (invN % pp) % pp;
+            if(z[j] != x[j] % pp) volta = 0;
+        }
+        if(volta) volta_ok++;
+        /* Parseval algebrico: N.sum_j x_j y_j = sum_k X_k Y_{-k} */
+        long esq = 0, dir = 0;
+        for(long j = 0; j < NN; j++) esq = (esq + x[j]*y[j]) % pp;
+        esq = (esq * (NN % pp)) % pp;
+        for(long k = 0; k < NN; k++){
+            long mk = ((-k) % NN + NN) % NN;
+            dir = (dir + X[k]*Y[mk]) % pp;
+        }
+        if(((esq - dir) % pp + pp) % pp == 0) pars_ok++;
+    }
+    printf("      e as duas EXACTAS em F_p, com w de ordem %ld verificada:\n", NN);
+    printf("      F^{-1}F = id em %ld de %ld corpos, e Parseval algébrico em %ld\n\n",
+           volta_ok, corpos, pars_ok);
+    ok("a linearização é reversível: decompor e recompor devolve o campo — e a tese mede-se"
+       " EXACTA em F_p, onde a raiz da unidade é INTEIRA e a volta não arredonda",
+       res/escala < 1e-13 && corpos > 0 && volta_ok == corpos);
+    ok("e nada vaza: Parseval fecha — é o Teorema 2.1 (milenio.c §M1), e na forma ALGÉBRICA"
+       " N·Σ x_j y_j = Σ X_k Y_{−k} mede-se em inteiros, sem módulo e sem régua",
+       fabs(nE/N - nc) < 1e-12 && corpos > 0 && pars_ok == corpos);
     printf("      Este é o primeiro meio-arco, e ele fecha SOZINHO — ida e volta pela mesma\n");
     printf("      porta. O que falta é a outra metade: voltar pela porta DUAL.\n");
 }
