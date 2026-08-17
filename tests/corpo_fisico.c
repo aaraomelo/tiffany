@@ -306,9 +306,26 @@ printf("\n§H5  O IMPULSO é Δp, e o momento CONSERVA-SE quando a força se anu
         double s2 = 0.0, v2 = 0.0, p20 = S_glob*v2;
         for(long i = 0; i < 100000; i++){ double F = -dVds(s2); v2 += (F/S_glob)*h; s2 += v2*h; }
         double p21 = S_glob*v2;
-        ok("em s = 0 a força é nula e o momento NÃO se mexe — o controlo", fabs(p21-p20) < 1e-9);
-        printf("      (controlo positivo: sem este caso, a asserção acima passaria por\n");
-        printf("       construção do integrador, e não por a mecânica estar certa.)\n");
+        /* E ESTE CONTROLO NÃO CONTROLAVA. dVds(s) = −2sS, logo dVds(0) = 0: com s₂ = 0 e
+         * v₂ = 0 a força é zero, nada se move, e p21 = p20 = 0 exactamente. A asserção
+         * `|0 − 0| < 1e-9` passa por aritmética trivial — o comentário chamava-lhe «controlo
+         * positivo» e ele tinha a mesma cor de um controlo sem o ser.
+         *
+         * Um controlo precisa das DUAS metades: em s = 0 não mexe, e em s ≠ 0 MEXE. É a
+         * segunda que dá conteúdo à primeira, porque sem ela o integrador podia estar
+         * parado por defeito e passar na mesma. */
+        double s3 = 0.5, v3 = 0.0, p30 = S_glob*v3;
+        for(long i = 0; i < 100000; i++){ double F = -dVds(s3); v3 += (F/S_glob)*h; s3 += v3*h; }
+        double p31 = S_glob*v3;
+        printf("      e com s = 0,5 o momento MEXE: de %+.6f para %+.6f\n", p30, p31);
+        ok("em s = 0 a força é nula e o momento NÃO se mexe — o controlo. E ele precisa das"
+           " DUAS metades: com s = 0 tudo fica em zero por dVds(0) = 0, e essa comparacao"
+           " passa por aritmetica trivial; o que lhe da' conteudo e' o outro lado, com"
+           " s = 0,5, onde o momento MEXE. Sem ele, o integrador podia estar parado por"
+           " defeito e a assercao passava na mesma",
+           fabs(p21-p20) < 1e-9 && fabs(p31-p30) > 1e-3);
+        printf("      (controlo positivo, e agora com as duas metades: sem a segunda, a\n");
+        printf("       primeira passaria por o integrador não mexer em nada.)\n");
     }
 }
 
