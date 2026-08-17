@@ -167,7 +167,7 @@ einstein 769166e44317809f 0
 eletrico 8af6bb149cfa9f9c 0
 elipses 686fc2b4ec8ad0e4 0
 eliptica_viviani 6202e1b445210d57 0
-encaixa 91195406760ef0f7 0
+encaixa b1788062911646e2 0
 encaixe_continuo fb85476766754fcb 0
 encaixotamento 0f9c4a6716e901fe 0
 encanamento 672eb25bf7dc3010 0
@@ -383,7 +383,7 @@ quatro cbb4af51d8c7cea0 0
 quebra b7dd95becedbb9ba 0
 racionais_fixos e18080be0098219b 0
 racional_pg ddf59373d881a71a 0
-radiacao 5527b8847b13bb89 0
+radiacao 35e70d5ceff5a927 0
 ramos df8a0c5ccaa39f37 0
 rastro 2b799b5c517d010d 0
 reais caba0c9221d343e8 0

@@ -364,11 +364,25 @@ int main(void){
         double Qp[3] = { 1e-8, 0,  3e-9 }, Qm[3] = { 1e-8, 0, -3e-9 };
         double Bp[3], Bm[3];
         b_dipolo(Qp, rhat, Bp); b_dipolo(Qm, rhat, Bm);
-        long dB = 0;
+        /* `long dB` A RECEBER UM DOUBLE: a soma dos quadrados vale ~1e-36 e TRUNCAVA PARA
+         * ZERO na atribuicao, logo `dB < 1e-60` era verdade em qualquer entrada — a
+         * assercao nao podia falhar, e o defeito estava escondido numa conversao de tipo.
+         *
+         * E o zero e' real, e exacto: B = Q x r^ com r^ = z^, e o cruzado devolve
+         * (Qy, -Qx, 0) — a componente z de Q NAO ENTRA. Qp e Qm diferem so' em z, logo dao
+         * o mesmo B bit a bit. E p_joule usa |Q|², onde o quadrado mata o sinal. As duas
+         * igualdades sao exactas, e escrevem-se assim. */
+        double dB = 0;
         for(int i = 0; i < 3; i++) dB += (Bp[i]-Bm[i])*(Bp[i]-Bm[i]);
         double dP = fabs(p_joule(Qp,vol,comp) - p_joule(Qm,vol,comp));
-        ok("a corrente radial para DENTRO e para FORA da o mesmo B e o mesmo P — o sinal fica",
-           dB < 1e-60 && dP < 1e-30);            /* raiz(dB) < 1e-30  equivale a  dB < 1e-60 */
+        /* e o CONTROLO: os dois Q sao mesmo diferentes, senao a igualdade nao dizia nada */
+        double dQ = 0;
+        for(int i = 0; i < 3; i++) dQ += (Qp[i]-Qm[i])*(Qp[i]-Qm[i]);
+        ok("a corrente radial para DENTRO e para FORA da o mesmo B e o mesmo P — o sinal fica."
+           " E o mesmo e' EXACTO: o cruzado com r^ nao ve a componente radial, e |Q|² nao ve"
+           " o sinal. O que aqui estava punha a soma dos quadrados num `long`, que a truncava"
+           " para zero — e ai a comparacao nao podia falhar",
+           dB == 0.0 && dP == 0.0 && dQ > 0.0);
         puts("     -> as duas dao B identico e P identico. O par resolve o MODULO e nao o sinal.");
         puts("        E isto e a alfandega outra vez, um andar acima: o que sobrou sem dual");
         puts("        agora e o SINAL, e ele fica na garrafa ate aparecer a terceira medida.");

@@ -206,21 +206,24 @@ printf("\n§C3  A BASE por Gram-Schmidt: e mede-se que ela É ortonormal.\n\n");
             double dd = rec[d] - v[i][d];
             num += dd*dd; den += v[i][d]*v[i][d];
         }
-        double rel = den > 0 ? sqrt(num)/sqrt(den) : sqrt(num);
-        if(rel > pior_rec) pior_rec = rel;
+        /* a comparacao vive nos QUADRADOS: rel < t ⟺ num < t².den. Duas raizes a menos,
+         * e o que se guarda e' num/den, que e' o quadrado do residuo relativo. */
+        double rel2 = den > 0 ? num/den : num;
+        if(rel2 > pior_rec) pior_rec = rel2;
     }
 
     printf("      pior desvio da norma 1           %.3e   (e' o ARREDONDAMENTO: a norma\n",
            pior_norma);
     printf("                                              foi POSTA a 1 pela divisao)\n");
     printf("      pior produto interno entre pares %.3e\n", pior_orto);
-    printf("      pior residuo de RECONSTRUCAO     %.3e   (esta e' a tese: a base gera)\n",
+    printf("      pior residuo de RECONSTRUCAO²    %.3e   (esta e' a tese: a base gera,\n",
            pior_rec);
+    printf("                                              e a comparacao vive nos QUADRADOS)\n");
     printf("      vectores degenerados (nao normalizados) %d\n\n", degenerados);
     ok("a base GERA o espaço: cada vetor original reconstrói-se das suas projeções. A"
        " asserção que aqui estava media que a norma era 1 DEPOIS de eu dividir por ela —"
        " uma tabela de 1 que eu próprio escrevi, com o limiar a medir o arredondamento",
-       pior_rec < 1e-9 && degenerados == 0);
+       pior_rec < 1e-18 && degenerados == 0);   /* (1e-9)² — a mesma regua, sem raiz */
     ok("e são ortogonais dois a dois — a base É ortonormal", pior_orto < 1e-12);
     printf("      A base sai dos DADOS, não de fora. O semantico.c §S4 usa Hadamard, que fecha\n");
     printf("      igualmente bem e vem de fora; esta vem de dentro, e é isso que a torna a\n");
