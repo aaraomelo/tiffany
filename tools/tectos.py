@@ -383,6 +383,33 @@ def especie(bloco, cond, nus):
 REGUA_DEC = re.compile(r'[<>]=?\s*([0-9]*\.[0-9]+(?:[eE][-+]?\d+)?|[0-9]+[eE][-+]?\d+)')
 
 
+def especie_dec(cond, decs):
+    """e as reguas decimais tambem sao duas especies, e a diferenca decide o conserto.
+
+    LIMIAR DE ZERO   `fabs(a - b) < 1e-9`. Quer dizer «a e b sao IGUAIS», e o numero nao
+                     tem significado nenhum — e' a folga que se deu a' igualdade. Se a
+                     conta for exacta em Z, isto e' `== 0`, e o limiar era a esconder que
+                     ela e' exacta. Foi este que hoje deu Lagrange no semantico, o Delta
+                     no gerador_analog e o critico no eletrico.
+    CONDICAO         `> 0.5`, `< 0.01`. O numero TEM significado — e' meia, e' um por
+                     cento — e a pergunta e' se ele veio de uma formula ou do gosto.
+    """
+    perto_de_zero = any(_minusculo(d) for d in decs)
+    tem_fabs = bool(re.search(r'\bfabsl?\s*\(', cond))
+    if perto_de_zero and tem_fabs:
+        return 'LIMIAR DE ZERO'
+    if perto_de_zero:
+        return 'limiar pequeno'
+    return 'condicao'
+
+
+def _minusculo(d):
+    try:
+        return abs(float(d)) <= 1e-4
+    except ValueError:
+        return False
+
+
 def main():
     fich = sorted(glob.glob('tests/*.c') + glob.glob('tests/*.js') +
                   glob.glob('tools/*.c'))
@@ -415,7 +442,7 @@ def main():
                 decs = REGUA_DEC.findall(cond)
                 if decs:
                     linha = codigo[:ini + v.start()].count('\n') + 1
-                    p2.append((f, linha, sorted(set(decs)), 'REGUA decimal'))
+                    p2.append((f, linha, sorted(set(decs)), especie_dec(cond, decs)))
                 if nus:
                     linha = codigo[:ini + v.start()].count('\n') + 1
                     p2.append((f, linha, sorted(set(nus), key=int), especie(bl, cond, nus)))
@@ -430,7 +457,7 @@ def main():
     print(f"\n  P2 — literal NU na condição do veredicto: {len(p2)}"
           f" em {fich_p2} ficheiros")
     print("      por espécie: " + ", ".join(f"{k} {v}" for k, v in por_esp.most_common()))
-    for esp in ('COPIADA', 'REGUA decimal', 'REGUA'):
+    for esp in ('COPIADA', 'LIMIAR DE ZERO', 'limiar pequeno', 'condicao', 'REGUA'):
         do_esp = [x for x in p2 if x[3] == esp]
         if not do_esp:
             continue

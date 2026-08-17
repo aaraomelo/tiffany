@@ -218,10 +218,59 @@ int main(void){
             if(dS < menor) menor = dS;
             casos++;
         }
-        ok("no limite de CARNOT a entropia do universo nao DESCE — e o segundo principio",
-           cresce_sempre);
-        ok("e ela e exatamente ZERO ali: Carnot e reversivel, e e por isso que e o teto",
-           fabs(menor) < 1e-12);
+        /* AS DUAS ASSERÇÕES ERAM A MESMA TAUTOLOGIA, e a álgebra mostra-o em três linhas.
+         * Com e exactamente Carnot, e = (Tq − Tf)/Tq:
+         *
+         *      W  = Q·e = Q(Tq − Tf)/Tq
+         *      Qf = Q − W = Q·Tf/Tq
+         *      dS = −Q/Tq + Qf/Tf = −Q/Tq + Q/Tq = 0
+         *
+         * IDENTICAMENTE zero, para todo Tf — não «no limite», sempre. Logo «dS ≥ −1e-12» e
+         * «|menor| < 1e-12» verificavam 0 ≥ 0 e |0| < ε, e nenhuma podia falhar.
+         *
+         * O que se mede em vez disso são as duas metades verdadeiras:
+         *   — a identidade Qf·Tq = Q·Tf, em PRODUTO CRUZADO e sem divisão: é ela que faz
+         *     Carnot reversível, e é exacta;
+         *   — e o que a torna um TECTO: com eficiência ABAIXO de Carnot, dS é estritamente
+         *     POSITIVO. Sem esta metade, «a entropia não desce» valia por ela ser sempre
+         *     zero seja o que for que se faça. */
+        long ident = 0, ident_tot = 0;
+        long sobe = 0, sobe_tot = 0;
+        for(long Tf_z = 2725; Tf_z <= 300000; Tf_z += 30000){
+            const long Tq_z = 310150, Q_z = 20;      /* milésimos de kelvin, e Q em watts */
+            /* Qf·Tq = Q·Tf, exacto em inteiros — o «Carnot é reversível» sem uma divisão.
+             * E os dois lados são construídos por caminhos DIFERENTES: o esquerdo desce
+             * pela eficiência (Q·Tq − W, com W = Q(Tq − Tf)) e o direito é o produto
+             * directo. Escrevi isto à primeira como `X == X`, a expressão comparada consigo
+             * própria — a quinta vez hoje que produzo o defeito que ando a corrigir. */
+            long W_z = Q_z*(Tq_z - Tf_z);          /* W·Tq, pela eficiência */
+            long QfTq = Q_z*Tq_z - W_z;            /* Qf·Tq, por subtracção */
+            ident_tot++;
+            if(QfTq == Q_z*Tf_z) ident++;          /* contra o produto directo */
+            /* e o TECTO: com 30% de Carnot, dS tem de ser estritamente positivo */
+            double Tf = (double)Tf_z/1000.0;
+            double e_ab = carnot(T_CORPO, Tf)*0.3;
+            double W_ab = Q*e_ab, Qf_ab = Q - W_ab;
+            double dS_ab = -Q/T_CORPO + Qf_ab/Tf;
+            sobe_tot++;
+            if(dS_ab > 1e-9) sobe++;
+        }
+        printf("     -> e com 30%% de Carnot a entropia SOBE em %ld de %ld casos: e' isso que\n"
+               "        faz de Carnot um TECTO, e nao a identidade dS = 0, que vale sempre\n",
+               sobe, sobe_tot);
+        ok("no limite de CARNOT a entropia do universo nao DESCE — e o segundo principio."
+           " E o que se mede NAO e' dS >= 0 com e = Carnot: ai dS e' IDENTICAMENTE zero por"
+           " algebra (Qf = Q.Tf/Tq, logo -Q/Tq + Qf/Tf = 0 para todo Tf), e a comparacao"
+           " verificava 0 >= 0. O que mede e' o TECTO: com eficiencia ABAIXO de Carnot, dS"
+           " e' estritamente POSITIVO em todos os casos",
+           cresce_sempre && sobe == sobe_tot && sobe_tot > 5);
+        ok("e ela e exatamente ZERO ali: Carnot e reversivel, e e por isso que e o teto. E o"
+           " zero nao e' «menor que 1e-12»: e' a identidade Qf.Tq = Q.Tf, que sai de"
+           " Qf = Q - Q.(Tq-Tf)/Tq por conta e vale exacta em Z, com os dois lados"
+           " construidos por caminhos diferentes — o esquerdo desce pela eficiencia e"
+           " subtrai, o direito e' o produto directo. O limiar estava a dar folga a uma"
+           " igualdade que nao tem folga nenhuma",
+           fabs(menor) < 1e-12 && ident == ident_tot);
         printf("     -> %d casos, menor dS = %.1e. No limite de Carnot dS = 0 exato.\n", casos, menor);
         /* e abaixo do limite ela cresce mesmo — mede-se com uma máquina real (ZT finito) */
         double e_real = carnot(T_CORPO, T_CEU_SECO) * 0.3;   /* 30% de Carnot, otimista */

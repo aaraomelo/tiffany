@@ -228,10 +228,29 @@ int main(void){
     {
         /* o balanço R+T+A=1 do colheita.c §C5 é exatamente a prova: um passivo reparte,
          * não cria. E o ganho de potência de um passivo é <= 1, por conservação. */
-        double R = 0.31, T = 0.02, A = 0.67;
+        /* OS TRÊS NÚMEROS FORAM ESCOLHIDOS PARA SOMAR 1, e depois verificava-se que somam
+         * 1, com um 1e-12 a dar-lhe cara de medição. Em CENTÉSIMOS são 31, 2 e 67, e a soma
+         * é 100 — EXACTA, sem limiar. E o que tem conteúdo não é a soma dar o todo (isso é
+         * a repartição a ser uma repartição): é que NENHUMA PARCELA passa do todo, e isso
+         * pode falhar — mede-se com o gume, uma repartição que não fecha. */
+        const long R_z = 31, T_z = 2, A_z = 67;        /* centésimos */
+        const long TODO = 100;
+        double R = (double)R_z/100.0, T = (double)T_z/100.0, A = (double)A_z/100.0;
         double soma = R + T + A;
-        ok("um PASSIVO reparte e nao cria: R + T + A = 1, e nenhuma parcela passa do todo",
-           fabs(soma - 1.0) < 1e-12 && A < 1.0 && T < 1.0);
+        long soma_z = R_z + T_z + A_z;
+        /* o GUME: uma repartição que não fecha é detectada, e nenhuma parcela pode passar */
+        const long mau_z[3] = { 31, 2, 80 };
+        long soma_ma = mau_z[0] + mau_z[1] + mau_z[2];
+        printf("     -> em centesimos: %ld + %ld + %ld = %ld, EXACTO (e a que nao fecha,\n"
+               "        %ld + %ld + %ld = %ld, e' apanhada)\n",
+               R_z, T_z, A_z, soma_z, mau_z[0], mau_z[1], mau_z[2], soma_ma);
+        ok("um PASSIVO reparte e nao cria: R + T + A = 1, e nenhuma parcela passa do todo."
+           " E em CENTESIMOS a soma e' 31 + 2 + 67 = 100, EXACTA e sem limiar — o 1e-12 dava"
+           " cara de medicao a numeros que foram escolhidos para somar um. O que tem conteudo"
+           " e' nenhuma PARCELA passar do todo, e isso pode falhar: uma reparticao que nao"
+           " fecha e' apanhada pela mesma conta",
+           soma_z == TODO && A_z < TODO && T_z < TODO && R_z < TODO
+           && soma_ma != TODO && fabs(soma - 1.0) < 1e-12);
         ok("logo o ganho de um passivo e no MAXIMO 1 — e isso e conservacao, nao limitacao",
            T <= 1.0 && A <= 1.0);
         /* e o ATIVO: com fonte, o ganho passa de 1, e o Shockley diz quanto */

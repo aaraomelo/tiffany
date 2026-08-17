@@ -104,7 +104,7 @@ corpo_unico d21a078aa8bd7aa5 0
 corpo_viveiro 35c96afeadd012b8 0
 corpodecorpos 8d2cbc90ae332e67 0
 corte_ponto_fixo ebd7191a1453f1d8 0
-cosmico 470af59167a71edc 0
+cosmico 5db6572aca954967 0
 cosmologia ba6dd5df9be09b0a 0
 costura_mecanica 3300d90fae0bb568 0
 cristal_adversarial a5b592f03e349608 0
@@ -168,7 +168,7 @@ eliptica_viviani 6202e1b445210d57 0
 encaixa d030c3c2f3c4e01c 0
 encaixe_continuo fb85476766754fcb 0
 encaixotamento 0f9c4a6716e901fe 0
-encanamento ed5cc0baeacd947e 0
+encanamento 4930bbd54cb47bc5 0
 enche 28e010af816d4c4d 0
 entre c9d4cbfc7a5a9307 0
 entrega 081367290859c44e 0
