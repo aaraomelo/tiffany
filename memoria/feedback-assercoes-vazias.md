@@ -59,6 +59,19 @@ no mesmo dia**, em ficheiros diferentes, e ela é a mais fácil de escrever sem 
 - `xx.c §X1`: `L a=1, b=1;` calculados por **dois laços idênticos**, e depois `a==b`. E na mesma
   secção, sem disfarce nenhum: **`if(1==1 && 1==1) raiz_1++;`**
 
+**E o modo mais traiçoeiro dela: SIMPLIFICAR À MÃO NO PONTO.** Em 17/08, a corrigir uma destas no
+`dominios.c`, escrevi a «derivada analítica em t=0» já simplificada:
+
+```c
+double v0_exacta = -aa*(1.0) + (0.0 + aa*1.0);   /* y'(0) */
+```
+
+que é `-a + a`. Zero por ser `x − x`. **Cometi o defeito dentro da correcção do defeito**, e foi a
+quarta vez no mesmo dia. A causa: eu fiz a álgebra de cabeça até ao ponto onde ela colapsa, e
+escrevi o colapso. O remédio é **escrever a função GERAL e só depois avaliar no ponto** — assim ela
+pode estar errada, e uma segunda rota (aqui a diferença finita, corrida FORA do zero) apanha-o. É
+[[feedback-a-referencia-escrita-a-mao]] outra vez: se não muda com os dados, é cópia.
+
 **O gatilho:** sempre que uma asserção compara duas quantidades, perguntar *de onde vem cada uma*.
 Se as duas descem do mesmo cálculo — mesmo laço, mesma fórmula reescrita, mesma variável negada
 duas vezes — não há duas rotas, há uma. É o [[feedback-dois-caminhos]] pelo avesso.
