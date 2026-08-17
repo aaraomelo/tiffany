@@ -165,8 +165,22 @@ int main(void){
         if(bezier_num(2, S2, b, b) != S2[2] * p2) liga = 0;
         if(bezier_num(3, S3, 0, b) != S3[0] * p3) liga = 0;
         if(S2[2] != S3[0]) liga = 0;
-        n6 = 3;
-        ok("os segmentos ligam pelo PONTO PARTILHADO: B(1) de um e' B(0) do seguinte", liga && n6 == 3);
+        /* `n6 = 3` seguido de `n6 == 3` não acrescentava nada ao `liga` — era um 3
+         * comparado com um 3. O que se pode contar são as VERIFICAÇÕES que o `liga` faz:
+         * seis, e todas têm de correr. Se uma fosse esquecida, a contagem denunciava-a. */
+        n6 = 6;                                   /* as seis verificações acima */
+        long feitas = 0;
+        feitas += (bezier_num(2, S1, b, b) == S1[2] * p1);
+        feitas += (bezier_num(2, S2, 0, b) == S2[0] * p2);
+        feitas += (S1[2] == S2[0]);
+        feitas += (bezier_num(2, S2, b, b) == S2[2] * p2);
+        feitas += (bezier_num(3, S3, 0, b) == S3[0] * p3);
+        feitas += (S2[2] == S3[0]);
+        ok("os segmentos ligam pelo PONTO PARTILHADO: B(1) de um e' B(0) do seguinte — e sao"
+           " SEIS verificacoes, contadas: as duas pontas de cada juncao e o ponto ser O MESMO"
+           " e nao dois iguais. O `n6 = 3` que aqui estava era um tres comparado com um tres,"
+           " e nao acrescentava nada ao `liga`",
+           liga && feitas == n6 && n6 == 6);
 
         /* e a ORBITA FECHA: o ultimo ponto do ultimo segmento e' o primeiro do primeiro */
         long ini = S1[0], fim = S3[3];

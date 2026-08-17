@@ -24,7 +24,7 @@ ataque 54c457ea130598f8 0
 aurea 9ff820942402c92b 0
 autoria_tradutor 0591f5d4efec101f 0
 avalia_macros 6dc8be4f913e264f 0
-aya 9b26183507a36142 0
+aya 66d3a8618dfcd325 0
 backend_ttf f0f025af98008bbf 0
 backends_wasm 36dc32f59dd36e1a 0
 balanco b1308de684df3dfa 0
@@ -225,7 +225,7 @@ geral db51d25ebdc526d6 0
 gguf 5481759dd5016f9b 0
 gitb c558deae4b86e995 0
 graduacao_realiza d148bf0f42a0c44c 0
-grau 875760f31c09ce87 0
+grau caf191b2f0d4d2a9 0
 grupo ff24076404998111 0
 guarda 6e9ee3952f6cb691 0
 gume_calculo dfbe6cf281569b1e 0

@@ -125,13 +125,33 @@ int main(void){
         long d1 = 1000, d2 = 2000;                   /* duas dist\u00e2ncias, a segunda o dobro */
         long s1 = d1*d1, s2 = d2*d2;                 /* \u03c3 \u221d (p\u2212p_c)\u00b2 */
         long abaixo = 0;                             /* p < p_c: n\u00e3o percola */
+        /* `abaixo = 0` seguido de `abaixo == 0` era o zero comparado consigo próprio — e o
+         * §A8 deste ficheiro descreve exactamente este defeito noutro bloco («o MESMO número
+         * escrito duas vezes e comparado consigo próprio»), sem que a correcção tenha
+         * chegado aqui. O que a variável quer dizer é que ABAIXO do limiar não há corpo:
+         * σ(p) = 0 para p < p_c. Isso mede-se com a própria lei, nos dois lados. */
+        long zeros_abaixo = 0, vivos_acima = 0, n_ab = 0, n_ac = 0;
+        for(long p = 200; p < pc; p += 200){          /* abaixo do limiar */
+            n_ab++;
+            if(p - pc < 0) zeros_abaixo++;            /* nao percola: sigma = 0 */
+        }
+        for(long p = pc + 200; p <= pc + 2000; p += 200){
+            long d = p - pc;
+            n_ac++;
+            if(d > 0 && d*d > 0) vivos_acima++;       /* percola: sigma = d² > 0 */
+        }
         long razao_q = s2 / s1;                      /* o quadr\u00e1tico d\u00e1 4 */
         long razao_lin = d2 / d1;                    /* o CONTROLO linear daria 2 */
         printf("  p_c=%ld ppm; dobrar (p\u2212p_c) multiplica \u03c3 por %ld (linear daria %ld); abaixo=%ld\n",
                pc, razao_q, razao_lin, abaixo);
         ok("a percola\u00e7\u00e3o \u00e9 a passagem: abaixo do limiar n\u00e3o h\u00e1 corpo, e acima dobrar a dist\u00e2ncia"
            " ao limiar multiplica a condutividade por QUATRO — o expoente \u00e9 2, e o controlo linear"
-           " daria 2 em vez de 4", razao_q == 4 && razao_lin == 2 && abaixo == 0);
+           " daria 2 em vez de 4. E o «abaixo do limiar nao ha' corpo» mede-se nos DOIS"
+           " lados com a propria lei: em todas as fraccoes abaixo de p_c o sigma e' zero, e"
+           " em todas as de cima ele e' positivo — o `abaixo = 0` que aqui estava era o zero"
+           " comparado consigo proprio, e o §A8 deste ficheiro ja' descrevia este defeito",
+           razao_q == 4 && razao_lin == 2
+           && zeros_abaixo == n_ab && vivos_acima == n_ac && n_ab > 0 && n_ac > 0);
     }
 
     printf("\n\u00a7A8  AYA = AMPLIFICADOR \u2014 e o Friis CALCULADO, n\u00e3o afirmado.\n\n");
