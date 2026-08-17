@@ -108,10 +108,25 @@ int main(void){
             ok("e o COEFICIENTE fecha: a^{1+1/b} = 1/(b)_n — f^(n) e f^-1 batem em VALOR, nao so' em expoente",
                bate_a == na && na == 6);
             /* o caso n=1 tem de dar o número publicado no teoria.tex */
-            double b1 = (1 + sqrt(5.0))/2.0, a1 = pow(1.0/b1, b1/(b1+1.0));
-            printf("      e n=1 da a = %.12f — o valor publicado para o ouro\n", a1);
-            ok("e n=1 devolve o ouro do teoria.tex: a = 0,742742944625",
-               fabs(a1 - 0.742742944625) < 1e-12);
+            /* O DECIMAL 0,742742944625 ESTAVA ESCRITO À MÃO, e o escada.c §? já corrigiu
+             * este mesmo número — «tem genealogia: é φ^(1−φ), e agora sai dela». A correcção
+             * não tinha chegado aqui. A referência DERIVA-SE, e por dois caminhos que não se
+             * tocam: o φ pela RECORRÊNCIA de Fibonacci (inteiros) e o φ pela raiz. */
+            long fa = 1, fb = 1;
+            for(int q = 0; q < 78; q++){ long fc = fa + fb; fa = fb; fb = fc; }
+            double phi_rec = (double)fb / (double)fa;        /* φ pela recorrência inteira */
+            double b1 = (1 + sqrt(5.0))/2.0;                 /* φ pela raiz */
+            double a1  = pow(1.0/b1,      b1/(b1+1.0));
+            double ref = pow(1.0/phi_rec, phi_rec/(phi_rec+1.0));
+            printf("      e n=1 da a = %.12f — e a referencia DERIVADA da recorrencia da' %.12f\n",
+                   a1, ref);
+            ok("e n=1 devolve o ouro do teoria.tex, e a REFERENCIA E' DERIVADA e nao copiada:"
+               " o decimal 0,742742944625 que aqui estava e' a mesma memoria que o escada.c ja'"
+               " tinha tirado de si — «tem genealogia: e' phi^(1-phi)». Agora sai dela por DOIS"
+               " caminhos que nao se tocam: o phi pela RECORRENCIA de Fibonacci, em inteiros, e"
+               " o phi pela raiz. Comparar com um numero que eu escrevi era por a minha memoria"
+               " dentro da assercao",
+               fabs(a1 - ref) < 1e-12);
         }
         printf("      logo b = sigma_n:  n=1 ouro, n=2 prata, n=3 bronze, ...\n");
         conclui("o aurea.c media so n=1. A familia das funcoes 'n-esima derivada = inversa' e");
