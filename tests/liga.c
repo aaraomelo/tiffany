@@ -304,10 +304,15 @@ int main(void){
     /* ── §L6  O CONFLITO ─────────────────────────────────────────────────── */
     puts("§L6  O CONFLITO: os quatro requisitos NAO se satisfazem todos, e mostra-se onde\n");
     {
+        /* Os três últimos são decimais com denominador 100 — 0,02, 0,20 e 0,10 — e em
+         * CENTÉSIMOS são 2, 20 e 10, inteiros. O primeiro não: vem da percolação, com um
+         * expoente não inteiro, e fica em vírgula porque é aí que ele vive. A ordenação
+         * entre os três faz-se em ℤ, e a comparação com o primeiro por multiplicação. */
+        const long pm_z = 2, pt_z = 20, pc_z = 10;                 /* centésimos */
         double p_eletrico = PC + pow(3.46/S_GRAFENO, 1.0/EXPO);   /* para casar 377 Ω */
-        double p_mecanico = 0.02;                                  /* pouco, para manter ductilidade */
-        double p_termico  = 0.20;                                  /* muito, para conduzir calor */
-        double p_condutor = 0.10;                                  /* para ser antena */
+        double p_mecanico = (double)pm_z/100.0;                    /* pouco, para manter ductilidade */
+        double p_termico  = (double)pt_z/100.0;                    /* muito, para conduzir calor */
+        double p_condutor = (double)pc_z/100.0;                    /* para ser antena */
 
         printf("     %-34s %14s %12s\n", "requisito", "fracao pedida", "conflito");
         printf("     %-34s %14.6f %12s\n", "casar 377 ohm (absorver)", p_eletrico, "");
@@ -316,11 +321,16 @@ int main(void){
         printf("     %-34s %14.6f %12s\n", "conduzir calor (dissipar)", p_termico, "SIM");
         printf("     %-34s %14.6f %12s\n", "conduzir E (antena)", p_condutor, "SIM");
 
-        ok("as fracoes pedidas DIFEREM por ordens de grandeza — nao ha uma que sirva as quatro",
-           p_termico/p_eletrico > 100);
+        /* «diferem por ordens de grandeza» é p_termico > 100·p_eletrico — sem a divisão,
+         * que era a única coisa que a razão fazia ali. */
+        ok("as fracoes pedidas DIFEREM por ordens de grandeza — nao ha uma que sirva as quatro."
+           " E a comparacao e' sem dividir: p_termico > 100.p_eletrico",
+           p_termico > 100.0*p_eletrico);
         /* e o que se pode fazer: camadas, e isso também se mede */
-        ok("e a saida nao e uma liga so: sao CAMADAS, cada uma na sua fracao",
-           p_eletrico < p_mecanico && p_mecanico < p_condutor && p_condutor < p_termico);
+        ok("e a saida nao e uma liga so: sao CAMADAS, cada uma na sua fracao. E a ordem entre"
+           " as tres ultimas e' de INTEIROS — 2 < 10 < 20 em centesimos —, com so' a primeira"
+           " a ficar em virgula, porque ela vem da percolacao e tem expoente nao inteiro",
+           p_eletrico < p_mecanico && pm_z < pc_z && pc_z < pt_z);
         printf("     -> a fracao para absorver e %.0e vezes menor que a para dissipar. Uma liga\n",
                p_termico/p_eletrico);
         puts("        unica nao faz as duas coisas, e insistir nisso seria querer que o material");
