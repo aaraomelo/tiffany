@@ -33,6 +33,7 @@
 #include <string.h>
 #include "eletrico.h"
 #include "unidade.h"
+#include "reta.h"
 
 /* ── A GENEALOGIA DE φ, EM VEZ DO DECIMAL ─────────────────────────────────────
  * Estava aqui `#define PHI 1.6180339887498948482` — vinte dígitos escritos à mão. E φ
@@ -87,6 +88,10 @@ static double preve(const double *d, int m, int h){
     }
     return s;
 }
+
+/* a identidade φ² = φ+1, medida em ℤ[√5] no §S4 e usada outra vez no §S5 — as duas
+ * secções reduzem-se a ela, e por isso ela vive fora das duas */
+static int phi_fecha = 0;
 
 int main(void){
 printf("\n=== O CORPO SOLAR ========================================================\n");
@@ -247,8 +252,27 @@ printf("\n§S4  A garrafa de KOCH: harmónicos de Fibonacci, e THD² = 1/φ.\n\n
     printf("      1/φ                 = %.12f\n", 1.0/PHI);
     printf("      φ − 1               = %.12f    (e 1/φ = φ−1, porque φ² = φ+1)\n\n",
            PHI - 1);
-    ok("a distorção da fonte é EXATAMENTE 1/φ — sai fechada, não se ajusta",
-       fabs(THD2 - 1.0/PHI) < 1e-12 && fabs(1.0/PHI - (PHI-1)) < 1e-15);
+    /* A SÉRIE TEM FORMA FECHADA, e a identidade que a fecha é EXACTA em ℤ[√5].
+     * Σ_{k≥1} φ^{-2k} é geométrica de razão φ^{-2}, e vale φ^{-2}/(1 − φ^{-2}) = 1/(φ² − 1).
+     * E φ² − 1 = φ, porque φ² = φ + 1 — logo a soma é 1/φ, sem somar dois mil termos.
+     *
+     * Essa identidade não precisa de limiar: com 2φ = 1 + √5 como o par (1,1) em ℤ[√5],
+     *
+     *      (2φ)² = 6 + 2√5        e        2·(2φ) + 4 = 2 + 2√5 + 4 = 6 + 2√5
+     *
+     * são o MESMO par, nas duas coordenadas. O 1e-15 dava folga a isto. */
+    long g2a, g2b;
+    rt_zd_mul(1, 1, 1, 1, 5, &g2a, &g2b);          /* (2φ)² = 6 + 2√5 */
+    long la = 2*1 + 4, lb = 2*1;                   /* 2(2φ) + 4 = 6 + 2√5 */
+    phi_fecha = (g2a == la && g2b == lb);
+    printf("      e em ℤ[√5]: (2φ)² = %ld + %ld√5   e   2(2φ) + 4 = %ld + %ld√5   — o MESMO par\n\n",
+           g2a, g2b, la, lb);
+    ok("a distorção da fonte é EXATAMENTE 1/φ — sai fechada, não se ajusta. E a identidade"
+       " que a fecha nao precisa de limiar: a serie e' geometrica de razao phi^-2 e vale"
+       " 1/(phi²-1), e phi²-1 E' phi porque phi² = phi+1. Em ℤ[√5] com 2phi = (1,1) isso e'"
+       " (2phi)² = 6+2raiz5 contra 2(2phi)+4 = 6+2raiz5 — o MESMO par nas duas coordenadas,"
+       " e o 1e-15 dava folga a uma igualdade que nao tem",
+       fabs(THD2 - 1.0/PHI) < 1e-12 && g2a == la && g2b == lb);
     /* e a identidade que a sustenta */
     int malI = 0;
     if(fabs(PHI*PHI - (PHI+1)) > 1e-14) malI++;
@@ -273,8 +297,16 @@ printf("\n§S5  A eficiência é ÁUREA e AUTODUAL: FP² = 1/φ = THD².\n\n");
     printf("      FP_dist    = %.12f    e φ^{-1/2} = %.12f\n", FP, pow(PHI,-0.5));
     printf("      FP_dist²   = %.12f    e THD² = 1/φ = %.12f   <- O MESMO\n\n",
            FP*FP, THD2);
-    ok("FP = φ^{-1/2}, e FP² = 1/φ = THD² — a eficiência é AUTODUAL",
-       fabs(FP - pow(PHI,-0.5)) < 1e-14 && fabs(FP*FP - THD2) < 1e-14);
+    /* E A AUTODUALIDADE É A MESMA IDENTIDADE OUTRA VEZ. FP² = 1/(1 + THD²) = 1/(1 + 1/φ),
+     * e 1 + 1/φ = (φ+1)/φ = φ²/φ = φ — logo FP² = 1/φ = THD². As duas asserções desta
+     * secção reduzem-se a φ² = φ + 1, que é a que se mede em ℤ[√5] acima. O que aqui fica é
+     * a CADEIA: cada passo dela é uma igualdade, e o passo que a sustenta é exacto. */
+    ok("FP = φ^{-1/2}, e FP² = 1/φ = THD² — a eficiência é AUTODUAL. E a autodualidade E' a"
+       " identidade phi² = phi+1 outra vez: FP² = 1/(1 + 1/phi) e 1 + 1/phi = (phi+1)/phi ="
+       " phi²/phi = phi, donde FP² = 1/phi = THD². As duas assercoes desta seccao reduzem-se"
+       " ao mesmo passo, e esse passo mede-se EXACTO em ℤ[√5] — nao com 1e-14",
+       fabs(FP - pow(PHI,-0.5)) < 1e-14 && fabs(FP*FP - THD2) < 1e-14
+       && phi_fecha);
 
     /* E A IGUALDADE FP² = THD² É UMA EQUAÇÃO, e ela é INTEIRA. Acima mede-se em vírgula
      * com 1e-14, mas o que a sustenta não tem decimal nenhum:
