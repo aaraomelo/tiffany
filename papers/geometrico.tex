@@ -1271,6 +1271,56 @@ $18$ casos fora do \code{long} \emph{contados à parte}; \code{tests/continua.c}
 identidade $-\log(1-mx-x^{2})=\sum t_k x^k/k$ coeficiente a coeficiente em $\mathbb{Q}$,
 $32$ de $32$, sem avaliar num único ponto}
 
+\begin{teorema}[A ARITMÉTICA ADITIVA: é a Möbius com um $S$ no meio]\label{thm:aditiva}
+A Möbius dá a estrutura \textbf{multiplicativa} --- compõem-se matrizes, e $\abs{\det}=1$
+conserva. Faltava a \textbf{aditiva}, e ela não é uma segunda estrutura ao lado: é a
+mesma, conjugada pelo eixo $0\leftrightarrow\infty$. A conta cabe numa linha:
+\[
+\boxed{\;A_a\cdot A_0=\begin{psmallmatrix}a&1\\1&0\end{psmallmatrix}
+\begin{psmallmatrix}0&1\\1&0\end{psmallmatrix}
+=\begin{psmallmatrix}1&a\\0&1\end{psmallmatrix}=T_a\;}
+\]
+--- \emph{o passo da fracção contínua composto com a INVERSÃO dá a TRANSLAÇÃO}. E como
+$T_aT_b=T_{a+b}$, sai
+\[
+\boxed{\;A_a\cdot A_0\cdot A_b=A_{a+b}\;}
+\]
+\textbf{A soma de inteiros realiza-se dentro do grupo multiplicativo, com $S=A_0$ no
+meio.} É o $S$ a fazer de logaritmo: conjugar por ele troca composição por adição.
+
+\textbf{E na palavra lê-se directamente.} A mesma identidade, dita no acumulador:
+\[
+\boxed{\;[\,\ldots,a,\;\mathbf{0},\;b,\ldots\,]=[\,\ldots,a+b,\ldots\,]\;}
+\]
+--- \emph{um quociente ZERO soma os seus vizinhos}. O que na matriz é «meter um $S$ no
+meio» é na palavra «escrever um zero», e são a mesma frase: $A_0=S$.
+
+\medskip
+\noindent\textbf{E $\infty+1=-1$.} A Möbius que leva $\infty$ a $-1$ com determinante
+unitário é $M=T_{-1}\circ S$, isto é $M(x)=1/x-1$, e o seu ponto fixo pede
+\[
+x=\frac1x-1\ \Longrightarrow\ x^{2}+x-1=0,
+\qquad\text{e no recíproco } y=1/x:\quad y^{2}=y+1
+\]
+--- \textbf{o ouro}. As potências de $M$ são os Fibonacci com o sinal a alternar, que é
+a dobra a agir passo a passo. \emph{A operação que põe $\infty$ dentro da aritmética
+aditiva é a mesma que gera o primeiro metal.}
+
+A \emph{mediante} $[p{:}q]\oplus[r{:}s]=[p+r{:}q+s]$ --- a outra leitura aditiva, a soma
+dos vectores no cone $\mathbb{Z}^2$ --- responde outra coisa: $\infty\oplus(-1)=0$, e
+$0=1/\infty$. \textbf{São duas leituras e dizem coisas diferentes}, e por isso medem-se
+as duas em vez de se escolher a que agrada. $\square$
+\end{teorema}
+\colunas{a aritmética aditiva, e a descida via Möbius}
+        {a soma dentro do grupo multiplicativo ($A_aA_0A_b=A_{a+b}$), o quociente zero a
+somar os vizinhos na palavra, e o algoritmo da fracção contínua como iteração de
+$g^{-1}$}
+        {\code{tests/descida\_mobius.c}: Euclides e a Möbius inversa a dar a MESMA palavra
+termo a termo em $3600$ racionais; $A_m=T_m\circ S$ e $A_m^{-1}=S\circ T_{-m}$ em $40$ de
+$40$; $S^2=I$ com a translação involutiva só em $m=0$ ($1$ de $41$); $A_aA_0A_b=A_{a+b}$
+em $961$ de $961$ e $[\ldots a,0,b\ldots]=[\ldots a+b\ldots]$ em $180$ de $180$; e as
+potências de $T_{-1}\circ S$ a dar Fibonacci em $12$ de $12$}
+
 \begin{teorema}[e há volta --- é a metade dual]\label{thm:volta}
 $\det A_m=-1$, logo a inversa é \textbf{inteira}, e é o fator de potência unitário que a
 torna exacta:
@@ -2936,6 +2986,7 @@ medidor & unidades \\
 \code{tests/condicao\_pisot.c}    & $4{:}0$ \\
 \code{tests/reta.c}              & $39{:}0$ \\
 \code{tests/racionais\_fixos.c}   & $8{:}0$ \\
+\code{tests/descida\_mobius.c}    & $8{:}0$ \\
 \bottomrule
 \end{tabular}
 \end{center}
