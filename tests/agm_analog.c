@@ -160,8 +160,34 @@ int main(void){
                    pares[t][0], pares[t][1], pior, pior<1e-13?"✓":"← REVER");
             if(pior>=1e-13) erro=1;
         }
+        /* E O AGM TEM UMA IDENTIDADE EXACTA que o limiar de 1e-13 esconde. Do passo
+         *      A' = (a+b)/2,   B' = √(ab)
+         * sai, sem aproximação nenhuma,
+         *      A'² − B'² = (a+b)²/4 − ab = ((a−b)/2)²
+         * — a diferença dos quadrados no passo seguinte É o quadrado de metade da
+         * diferença, e isso é ARITMÉTICA. Mede-se em pares inteiros onde a+b é par e ab é
+         * quadrado perfeito (a = k·m², b = k·n² dá √(ab) = k·m·n), e ali o resíduo é ZERO.
+         * O invariante elíptico do laço acima é do MEIO CONTÍNUO; esta é da operação. */
+        long exactos = 0, tent = 0;
+        printf("\n       e a identidade EXACTA do passo, em inteiros:\n");
+        printf("       (a,b)        A'=(a+b)/2  B'=raiz(ab)  A'²−B'²   ((a−b)/2)²\n");
+        for(long k = 1; k <= 3; k++) for(long mm = 1; mm <= 4; mm++) for(long nn = mm+1; nn <= 5; nn++){
+            long A2 = k*mm*mm, B2 = k*nn*nn;
+            if((A2 + B2) % 2) continue;                  /* A' tem de ser inteiro */
+            long Al = (A2 + B2)/2, Bl = k*mm*nn;         /* √(ab) = k·m·n, exacto */
+            long esq = Al*Al - Bl*Bl, dir = ((A2 - B2)/2)*((A2 - B2)/2);
+            tent++;
+            if(esq == dir) exactos++;
+            if(tent <= 3)
+                printf("       (%2ld,%2ld)      %-11ld %-12ld %-9ld %ld\n", A2, B2, Al, Bl, esq, dir);
+        }
+        printf("       …\n       A'² − B'² = ((a−b)/2)² em %ld de %ld pares — resíduo ZERO\n\n",
+               exactos, tent);
+        if(exactos != tent || tent == 0) erro = 1;
         printf("     %s\n", VD(erro, "resíduo 0 — o invariante do AGM é conservado pelo circuito. É a mão que segura\n"
-          "     (§B), agora medida: σσ'=−1 e Parseval do lado da forma, I(a,b) do lado do laço."));
+          "     (§B), agora medida: σσ'=−1 e Parseval do lado da forma, I(a,b) do lado do laço.\n"
+          "     E a identidade do PASSO é exacta e não precisa do meio: A'² − B'² = ((a−b)/2)²,\n"
+          "     aritmética pura, medida em inteiros onde √(ab) é inteiro."));
         if(erro) passou=0;
     }
 

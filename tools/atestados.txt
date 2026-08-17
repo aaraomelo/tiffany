@@ -3,7 +3,7 @@ acoplamento d2e623a39178ee8f 0
 agentes 72bcfbae4cd7755c 0
 agm cd5705430a48f29f 0
 agm_analitico 71272f7669b34069 0
-agm_analog 667653412b2a00af 0
+agm_analog 703513029c15c1fc 0
 agm_deforma 79301901342b1efe 0
 agm_gerador 0265a56ac89f908d 0
 algebra bb3203bc98eb434e 0
@@ -313,7 +313,7 @@ navega 6fe4800c26ec96d4 0
 navegante 4d7f4477cfbcd6b7 0
 navier_corpo 59af373b2600e81c 0
 neuronio 31a8788908d75dfa 0
-neuronio_analog 5b4ede1723e44384 0
+neuronio_analog 7da3b3dd4b32156e 0
 nginxb 7f13a47adb0059b1 0
 nne c2c615a79d4a93a0 0
 nomeia aa1ae7ffb4b5125e 0

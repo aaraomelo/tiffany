@@ -12,6 +12,7 @@
  * Uso: ./neuronio_analog CAMINHO [m] [K] [N]     cc -O2 neuronio_analog.c -lm -o neuronio_analog
  */
 #include <stdio.h>
+#include "reta.h"      /* rt_zd_mul: σσ\' = −1 exacto */
 #include "unidade.h"
 #include <stdlib.h>
 #include <math.h>
@@ -79,8 +80,33 @@ int main(int argc, char **argv)
         printf("] →σ'→ volta: %s  (gato==digital: %s)\n", volta?"sim (id)":"NÃO", gok?"sim":"NÃO");
     }
 
+    /* AS DUAS TESES DO RÓTULO MEDEM-SE EXACTAS, e nenhuma delas precisa do meio.
+     * O 1e-6 acima é a régua entre o translinear e o digital — legítimo, compara MEIOS.
+     * Mas «σσ' = −1» e «o esquilo desfaz o gato» são da OPERAÇÃO, e essa é inteira:
+     *
+     *   σσ' = −1   com 2σ = m + √D e D = m²+4, (2σ)(2σ') = m² − D = −4      (rt_zd_mul)
+     *   ∘ = id     gato_int e esquilo_int são inversos EXACTOS em ℤ, bit a bit
+     *
+     * Sem isto, o que estava medido era só que o analógico imita o digital — e não que o
+     * digital está certo. */
+    long za, zb; rt_zd_mul(mi, 1, mi, -1, mi*mi + 4, &za, &zb);
+    int sigma_dual = (za == -4 && zb == 0);              /* (2σ)(2σ') = −4, logo σσ' = −1 */
+    long inv_falha = 0, inv_casos = 0;
+    for (int n = 2; n <= N; n++)
+        for (long v0 = -3; v0 <= 3; v0++) for (long v1 = -3; v1 <= 3; v1++) {
+            long d[8], o[8];
+            for (int i = 0; i < n; i++){ d[i] = (i ? v1 + i : v0); o[i] = d[i]; }
+            gato_int(d, n, mi); esquilo_int(d, n, mi);   /* ida e volta, em ℤ */
+            inv_casos++;
+            for (int i = 0; i < n; i++) if (d[i] != o[i]) { inv_falha++; break; }
+        }
+    printf("\n  e as duas teses do rótulo, EXACTAS e sem o meio:\n");
+    printf("    (2σ)(2σ') = %ld %+ld√D  — logo σσ' = -1                    %s\n",
+           za, zb, sigma_dual ? "sim" : "NAO");
+    printf("    esquilo∘gato = id em ℤ, bit a bit: %ld falhas em %ld casos\n\n",
+           inv_falha, inv_casos);
     printf("\n----------------------------------------------------------------\n");
-    int ok = (viol == 0 && volta_falha == 0);
+    int ok = (viol == 0 && volta_falha == 0 && sigma_dual && inv_falha == 0 && inv_casos > 0);
     printf("metal m=%ld  gato==digital: viol=%ld ; esquilo desfaz o gato (gato∘esquilo=id): viol=%ld\n",
            mi, viol, volta_falha);
     printf("resíduo total = %d   %s\n", ok ? 0 : 1, VD(!(ok), "A DUALIDADE FECHA — gato ×σ (negro) e esquilo ×σ' (branco), a MESMA peça, σσ'=−1"));
