@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "eletrico.h"
+#include "reta.h"      /* rt_cruz3, rt_dir: Lagrange em ℤ */
 #include "unidade.h"
 
 /* R^4 = escalar + vetor de R³ — onde o cruzado existe (n ∈ {1,3,7}) */
@@ -158,18 +159,53 @@ printf("\n§H2  A LEI DE CONSERVAÇÃO, e o imposto V(s) = (1−s²)·m.\n\n");
         if(fabs(lhs-rhs) > 1e-11*(fabs(rhs)+1)) mal++;
     }
     printf("\n      (mais %d casos com z, w e s quaisquer)\n\n", casos);
-    ok("a lei de conservação fecha para TODO s — a norma que falta É o imposto", mal == 0);
-    /* e a identidade de Lagrange, que é de onde a lei sai */
-    int malL = 0;
-    for(int k = 0; k < 300; k++){
-        double a[3] = { sin(3.0*k), cos(5.0*k+1), sin(7.0*k+2) };
-        double b[3] = { cos(11.0*k), sin(13.0*k), cos(17.0*k+1) };
-        double c[3]; cruz(a,b,c);
-        double lag = ip3(a,a)*ip3(b,b) - ip3(a,b)*ip3(a,b);
-        if(fabs(ip3(c,c) - lag) > 1e-12) malL++;
+    /* E A LEI TAMBÉM É EXACTA. ‖z⋆w‖² + (1−s²)‖a×b‖² = ‖z‖²‖w‖² é aritmética: com z, w
+     * INTEIROS e s inteiro, as quatro peças do star são somas e produtos, e os dois lados
+     * são o MESMO inteiro. O 1e-12 e o 1e-11 relativo acima medem os sin/cos que geram os
+     * vectores, não a lei. Aqui não há o que tolerar. */
+    long leiZ = 0, leiT = 0;
+    for(long s = -3; s <= 3; s++)
+    for(long z0 = -2; z0 <= 2; z0++) for(long z1 = -2; z1 <= 2; z1++)
+    for(long w0 = -2; w0 <= 2; w0++) for(long w1 = -2; w1 <= 2; w1++){
+        long zv[3] = {z0, z1, 1}, wv[3] = {w0, w1, -1}, c[3];
+        long zs = z0 + 1, ws = w1 - 1;                    /* as escalares */
+        rt_cruz3(zv, wv, c);
+        long rs = zs*ws - rt_dir(zv, wv, 3);              /* a parte escalar de z⋆w */
+        long rv[3];
+        for(int k = 0; k < 3; k++) rv[k] = zs*wv[k] + ws*zv[k] + s*c[k];
+        long nr = rs*rs + rt_dir(rv, rv, 3);              /* ‖z⋆w‖² */
+        long imp = (1 - s*s) * rt_dir(c, c, 3);           /* o imposto */
+        long nz = zs*zs + rt_dir(zv, zv, 3), nw = ws*ws + rt_dir(wv, wv, 3);
+        leiT++;
+        if(nr + imp == nz*nw) leiZ++;
     }
+    printf("      e a MESMA lei em ℤ, com z, w e s inteiros: %ld de %ld com resíduo ZERO\n\n",
+           leiZ, leiT);
+    ok("a lei de conservação fecha para TODO s — a norma que falta É o imposto. E ela é"
+       " ARITMÉTICA: com z, w e s inteiros os dois lados são o mesmo inteiro, sem um"
+       " limiar — o 1e-12 media os sin/cos que geram os vectores, não a lei",
+       mal == 0 && leiZ == leiT && leiT > 0);
+    /* e a identidade de Lagrange, que é de onde a lei sai.
+     *
+     * ELA É EXACTA EM ℤ, e media-se com vectores gerados por sin/cos contra um 1e-12 —
+     * o limiar do arredondamento, não a régua da identidade. ‖a×b‖² = ‖a‖²‖b‖² − ⟨a,b⟩²
+     * é aritmética: em ℤ³ os dois lados são inteiros e a diferença é ZERO, não pequena.
+     * A peça é rt_lagrange, de lib/reta.h, que já faz esta conta com rt_cruz3 e rt_dir. */
+    int malL = 0;
+    long lagZ = 0, lagT = 0;
+    for(long a0 = -3; a0 <= 3; a0++) for(long a1 = -3; a1 <= 3; a1++) for(long a2 = -3; a2 <= 3; a2++)
+    for(long b0 = -3; b0 <= 3; b0++) for(long b1 = -3; b1 <= 3; b1++) for(long b2 = -3; b2 <= 3; b2++){
+        long A[3] = {a0,a1,a2}, B[3] = {b0,b1,b2}, C[3];
+        rt_cruz3(A, B, C);
+        long esq = rt_dir(C, C, 3);
+        long dir = rt_dir(A,A,3)*rt_dir(B,B,3) - rt_dir(A,B,3)*rt_dir(A,B,3);
+        lagT++;
+        if(esq == dir) lagZ++;                     /* resíduo ZERO, não «< 1e-12» */
+    }
+    if(lagZ != lagT) malL++;
     printf("      e a identidade de Lagrange, de onde a lei sai: ‖a×b‖² = ‖a‖²‖b‖² − ⟨a,b⟩²\n");
-    printf("      em 300 casos: %d falhas\n\n", malL);
+    printf("      em ℤ³, varridos %ld pares de vectores inteiros: %ld com resíduo ZERO"
+           " (nem um limiar)\n\n", lagT, lagZ);
     ok("Lagrange fecha — e é ela que separa o que a norma guarda do que ela paga", malL == 0);
     printf("      A leitura é esta: a norma do produto NÃO é o produto das normas, em geral. O\n");
     printf("      que falta é exatamente V(s), e V é uma MEDIDA — dá para lê-la e agir sobre\n");
