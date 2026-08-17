@@ -1407,6 +1407,51 @@ todo o passo, o denominador decresce em todas, $\abs{\det}=1$ em todas, e a para
 $p=\gcd$ em $6400$ de $6400$ --- $24\,364$ passos ao todo, e a mais longa com $9$; e nos
 $12$ metais a energia vale $1$ e não se esgota em nenhum}
 
+\medskip
+\noindent\textbf{E OS SETE TEOREMAS SÃO UMA FRASE SÓ --- as duas metades de
+Cayley--Hamilton.} O Teor.~\ref{thm:fixo-dual} diz que o par dual se descreve por
+\emph{traço} e \emph{determinante}, ambos inteiros. Todos os que vieram a seguir são essa
+divisão, lida em sítios diferentes:
+\[
+\boxed{
+\begin{array}{lll}
+\operatorname{tr} & \textbf{MEDE} & \text{separa, coordena, constrói --- e muda de andar
+para andar}\\[3pt]
+\det & \textbf{CONSERVA} & \text{é invariante, e é por isso que há volta}
+\end{array}}
+\]
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{teorema} & \textbf{o que MEDE (traço)} & \textbf{o que CONSERVA (det)}\\
+\midrule
+\ref{thm:fixo-dual} o par dual & $\sigma+\sigma\dg=m$ & $\sigma\sigma\dg=-1$\\
+\ref{thm:corte-fixo} o corte & $q$ encolhe & $F$ troca de sinal, $\abs{F}$ fica\\
+\ref{thm:operador} o operador & a palavra acumula & $\abs{\det A_m}=1$\\
+\ref{thm:descida} $\mathbb{Q}$ & o traço separa os $60$ & a norma vale $-1$ em todos\\
+\ref{thm:residuo-fixo} os resíduos & a soma \emph{é} o traço & a norma é o invariante\\
+\ref{thm:aditiva} a soma & os índices somam & $\det(A_aA_0A_b)=\det A_{a+b}$\\
+\ref{thm:conservacao} a paragem & $q$ é o orçamento & $\gcd$ é a energia\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent E a leitura fecha em três passos, que são os três andares do mesmo gesto:
+\begin{enumerate}
+\item \textbf{a indução sobe} e o acumulador guarda o rasto (Teor.~\ref{thm:operador}(1),(3));
+\item \textbf{a meta-indução desce}, e o que ela \emph{valida} é a energia --- o
+$\gcd$ que não se altera e o $\abs{\det}=1$ que a torna reversível
+(Teor.~\ref{thm:conservacao}(1),(3));
+\item \textbf{a paragem} é o orçamento do nível a esgotar-se, e é ela que separa os dois
+andares: no racional acaba e a palavra fecha; no ponto fixo não acaba, e isso \emph{é} o
+corte (Teor.~\ref{thm:descida}, Teor.~\ref{thm:corte-fixo}).
+\end{enumerate}
+
+\noindent\emph{Não são sete resultados sobre o mesmo assunto: é um operador, o seu
+espelho, e a contabilidade de o aplicar.} O que se conserva autoriza a volta; o que se
+gasta obriga à paragem; e o que se mede é o que fica escrito na palavra.
+
 \begin{teorema}[e há volta --- é a metade dual]\label{thm:volta}
 $\det A_m=-1$, logo a inversa é \textbf{inteira}, e é o fator de potência unitário que a
 torna exacta:

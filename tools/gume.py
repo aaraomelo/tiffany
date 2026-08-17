@@ -25,7 +25,7 @@
 #
 #   uso:  python3 tools/gume.py tests/x.c [--max N] [--ver]
 
-import re, subprocess, sys, os, tempfile, shutil
+import re, subprocess, sys, os, tempfile, shutil, resource, glob
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TMP  = os.environ.get('GUME_TMP') or tempfile.mkdtemp(prefix='gume_')
@@ -117,13 +117,28 @@ def corre(caminho_c, tag):
                         capture_output=True, timeout=180)
     if cc.returncode != 0 or not os.path.exists(bina):
         return None                                   # não compilou: não informa nada
+    # O TECTO DE ESCRITA, e ele não é zelo: uma mutação pode pôr o medidor num ciclo, e o
+    # rodapé do `unidade.h` escreve para /tmp sem limite. Enquanto isto corria a varredura
+    # da bateria, dois ficheiros `uni_*.txt` chegaram a 8,2 GB e 3,5 GB e encheram o /tmp —
+    # o `timeout` mata o processo, mas o que ele escreveu fica. Agora cada mutante corre com
+    # RLIMIT_FSIZE e RLIMIT_AS, e o que ele deixou é apagado a seguir.
+    def limites():
+        resource.setrlimit(resource.RLIMIT_FSIZE, (64*1024*1024, 64*1024*1024))
+        resource.setrlimit(resource.RLIMIT_AS, (2*1024*1024*1024, 2*1024*1024*1024))
     try:
         r = subprocess.run([bina], capture_output=True, timeout=90,
-                           cwd=os.path.join(RAIZ, 'tests'))
+                           cwd=os.path.join(RAIZ, 'tests'), preexec_fn=limites)
     except subprocess.TimeoutExpired:
+        return None
+    except OSError:
         return None
     finally:
         if os.path.exists(bina): os.unlink(bina)
+        for lixo in glob.glob('/tmp/uni_*.txt'):
+            try:
+                if os.path.getsize(lixo) > 8*1024*1024: os.unlink(lixo)
+            except OSError:
+                pass
     return unidades(r.stdout.decode('utf-8', 'replace'))
 
 def main():
