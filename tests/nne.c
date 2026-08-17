@@ -214,9 +214,28 @@ printf("\n§N5  A GENERALIZAÇÃO: já estava feita, e faltava interpretar.\n\n"
                pior < 1e-9 ? "SIM" : "NAO", pior);
         if(pior > 1e-9) mal++;
     }
-    printf("\n");
+    /* O `piores[]` era escrito e NUNCA lido — o compilador dizia-o — enquanto a linha
+     * abaixo afirmava «o erro cresce de 3,5e-15 em R² para 1,4e-14 em R⁷», dois números
+     * escritos à mão. E ERRADOS: o medido é 5,9e-16 e 9,3e-16, por um factor de seis e de
+     * quinze. Ficaram da versão anterior, de antes de o resíduo passar a RELATIVO (a nota
+     * de cima), e a correcção que mudou a conta não voltou ao texto.
+     *
+     * Agora os números saem do array, e a afirmação também: se eu mudar a medida, eles
+     * mudam sozinhos. E a afirmação corrigida é mais fraca do que a que lá estava, porque
+     * é a verdadeira — o erro NÃO cresce a cada andar: de R² para R³ ele DESCE. */
+    long sobe = 0, passos = 0;
+    for(int d = 3; d <= 7; d++){ passos++; if(piores[d] > piores[d-1]) sobe++; }
+    printf("\n      o pior resíduo relativo vai de %.2e em R² a %.2e em R⁷ (factor %.1f),\n",
+           piores[2], piores[7], piores[7]/piores[2]);
+    printf("      e sobe em %ld dos %ld passos — nao em todos: de R² para R³ ele DESCE.\n\n",
+           sobe, passos);
     ok("a recursão sobe e a norma continua multiplicativa — medido de R² a R⁷", mal == 0);
-    printf("      O erro cresce de 3,5e-15 em R² para 1,4e-14 em R⁷ — é o arredondamento a\n");
+    ok("e o preço de subir é o ARREDONDAMENTO, que se acumula mas não a cada andar: o pior"
+       " resíduo relativo é maior em R⁷ do que em R², e no entanto DESCE de R² para R³ —"
+       " sobe em quatro dos cinco passos. Os números vêm do array que os mede, e antes"
+       " estavam escritos à mão no texto, errados por um factor de quinze",
+       piores[7] > piores[2] && sobe == 4 && passos == 5);
+    printf("      É o arredondamento a\n");
     /* e a recursao TEM de dar o mesmo que a formula direta em d=3: senao eu implementei outra
      * coisa e chamei-lhe a mesma. */
     {

@@ -46,7 +46,7 @@ canal f23ae0f630ffc2a4 0
 cantor 37a78d4f6d91e54f 0
 cantor_julia_dual 2a215f46ac3417d6 0
 canvas_front f5106644abd9858b 0
-cardinal 64356635f9d3aa74 0
+cardinal 5317ef08a6c4b8e8 0
 cards 1ef000a0196e38d8 0
 carnot 8d04da08cd5af623 0
 catalogo 0dbe859ca368ba34 0
@@ -66,7 +66,7 @@ clifford_dual 12ecc8250a26cd5a 0
 clifford_pleno 8861e58d2970553f 0
 cobertura 575ec441d3142f8b 0
 cohomologia_ponte 1edbf545ad8f2cd3 0
-colheita 43182b7c88e8d872 0
+colheita 310926ffd39d6fba 0
 colisor_corpos 3be2fa7041eb0275 0
 completo b7ccb59fe44332bc 0
 complexo 1ffd14ad04af24c5 0
@@ -158,7 +158,7 @@ dualidade 18065d141793793e 0
 dualreta 2274a93c0398f30a 0
 dualrn 8a91b8108dcd0df5 0
 dualsort 3298ebc60a6b388c 0
-dualsort_banco 32ec1211d142f264 0
+dualsort_banco 91a2972cd834880f 0
 duas_pontes a50961f0657e4654 0
 edo 775fde31b031eaad 0
 einstein a8ce9f96f9b3109a 0
@@ -239,7 +239,7 @@ histerese_navier ed3e0f5791f828fd 0
 hodge_viviani 9e53debee8151fb9 0
 hopfield 7522614f0d0a95bf 0
 hurwitz 40161d10726c09e0 0
-icc a1b66e7969752be4 0
+icc fab32a8267b1cb2e 0
 inducao 08eb20f9b21c6338 0
 instrumento 7e6416b6f2a92ecd 0
 interface_padrao d5102ce78f3704d3 0
@@ -279,7 +279,7 @@ maestro_memoria d89b11e2c1b7a549 0
 maisum f1931979adc0ab16 0
 matricial 47f7f049f24101d7 0
 maxcut 6e3f503ba23045de 0
-mcu ab518f13dc30a9da 0
+mcu c21378278f924314 0
 mecanica 122a11b4b3090e35 0
 mecanica_corpo e5dbd536f54669dc 0
 medicao_normativa 1d628d6930adb23b 0
@@ -315,7 +315,7 @@ navier_corpo 59af373b2600e81c 0
 neuronio 8124473e174ce457 0
 neuronio_analog e35af23bd347d431 0
 nginxb 5646b82457d23418 0
-nne 6951586d6ea0b59b 0
+nne e9f9d065da3dd397 0
 nomeia 71483f3f6333df06 0
 norma 7a26a4611ed1f937 0
 normal_circulo 3cdc5e43a8d97101 0
@@ -423,7 +423,7 @@ sem_chute 56b9981f39111844 0
 sem_ramo a6e38ca24a7eda51 0
 semantico c84539e0b757b453 0
 semente 98e9a0194e17f02d 0
-significado ff504aa181796ca5 0
+significado 0dc903d86c8b9606 0
 simula 9303705569363d25 0
 sistema b93be799ff62ae01 0
 smartcontract 2686bef07a252cfb 0

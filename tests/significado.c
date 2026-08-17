@@ -165,8 +165,9 @@ int main(void){
         int erro=0;
         for(int t=0;t<6;t++){
             long lei = cod(0,1);
-            long L = 1;
-            for(long r=1;r<js[t];r++) L=1;              /* (a lei é σ^j)                             */
+            /* aqui estava `long L = 1; for(r=1;r<js[t];r++) L=1;` — um laco que atribui
+             * 1 repetidamente e cujo resultado ninguem le. A lei sigma^j calcula-se nas
+             * duas linhas seguintes, que fazem o trabalho. */
             lei = cod(0,1);
             for(long r=1;r<js[t];r++) lei = mulg(lei, cod(0,1));
             long o = ordem(lei);

@@ -295,7 +295,6 @@ int main(void){
         printf("     campo com %d meias-ondas: periodo %.0f um, limite de Nyquist %.0f um\n\n",
                k, periodo, periodo/2);
         printf("     %8s %10s %12s %10s\n", "canais", "passo(um)", "residuo", "Nyquist");
-        int fecha_quando_cumpre = 1;
         double melhor = 1;
         for(int lado_n = 2; lado_n <= 32; lado_n *= 2){
             double passo = lado / lado_n;
@@ -306,7 +305,6 @@ int main(void){
             int ny = nyquist(passo, periodo);
             printf("     %8d %10.0f %12.4f %10s\n", lado_n*lado_n, passo, res, ny?"cumpre":"viola");
             if(res < melhor) melhor = res;
-            if(ny && res > 0.5) fecha_quando_cumpre = 0;
         }
         ok("com canais bastantes o residuo cai para a casa do zero — a volta fecha",
            melhor < 0.05);

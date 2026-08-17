@@ -137,11 +137,11 @@ int main(void){
     }
 
     /* ═══ §K1/§K2 — ordena, e e' permutacao ═══════════════════════════════════════ */
-    long fora = 0, soma_sai = 0, ant = -1;
+    long fora = 0, soma_sai = 0;
     {
         emitidos = 0; desceu = subiu = 0; primeiro = 1; soma_saida = 0;
         anda(RAIZ, 0, NIV-1, 1);
-        fora = desceu; soma_sai = soma_saida; ant = 0;
+        fora = desceu; soma_sai = soma_saida;
         { int m=0,reg=0; for(long t=RAIZ;;){ reg++;
              for(int k=1;k<=LARG;k++){ Slot p=le(t+k); if(p.a) m++; }
              Slot c=le(t+NOSL-1); if(c.b){t=c.b;continue;} break; }

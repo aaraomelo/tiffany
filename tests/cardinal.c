@@ -168,7 +168,7 @@ int main(void){
          * — o mesmo passo que o `supremo.c` mede, e que é o que faz dos m_k um CAMINHO e
          * não uma lista solta. E este pode falhar: basta o bit escolher outra coisa. */
         long prof = 0, decide = 0, aperta = 0, empate = 0;
-        long m = 0, pot = 1, ant_den = 1, ant_m = 0;
+        long m = 0, pot = 1, ant_m = 0;
         printf("      k     m/2^k          (m+2^k)² < 2·2^{2k} ?   empate?\n");
         for(int k = 1; k <= 28; k++){
             m *= 2; pot *= 2;
@@ -181,7 +181,9 @@ int main(void){
             if(b*b != 2*pot*pot) decide++; else empate++;
             /* e o ENCAIXE: o filho é 2m ou 2m+1, logo o intervalo novo cabe no antigo */
             if(m == 2*ant_m || m == 2*ant_m + 1) aperta++;
-            ant_den = pot; ant_m = m;
+            ant_m = m;      /* o `ant_den` que aqui era escrito ficou sem leitor quando a
+                             * asserção da linha 199 deixou de o usar — a nota diz porquê:
+                             * `pot > ant_den` com o pot acabado de dobrar é 2x > x. */
             if(k <= 4 || k == 28)
                 printf("      %-5d %-14s %-23s %s\n", k, "…",
                        (b*b < 2*pot*pot) ? "sim" : "não", (b*b == 2*pot*pot) ? "SIM" : "nunca");

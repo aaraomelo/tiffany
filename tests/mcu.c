@@ -141,13 +141,13 @@ printf("\n§U2  O BARRAMENTO casado: Γ = 0, e o ganho MÁXIMO é o casamento.\n
     double Z0 = 50.0, V = 5.0;
     printf("      Z₀ = %.0f Ω (o metal do barramento)\n\n", Z0);
     printf("      Z_L (Ω)   Γ = (Z-Z₀)/(Z+Z₀)   |Γ|²  (eco)    P entregue (mW)\n");
-    double Pmax = 0, ZPmax = 0;
+    double Pmax = 0;
     int malG = 0;
     for(int k = 0; k < 7; k++){
         double ZL = 10.0*(k+1) + (k==4 ? 0 : 0);
         double G = (ZL-Z0)/(ZL+Z0), P = V*V*ZL/((Z0+ZL)*(Z0+ZL));
         printf("      %-9.0f %+-20.6f %-14.6f %.6f\n", ZL, G, G*G, P*1e3);
-        if(P > Pmax){ Pmax = P; ZPmax = ZL; }
+        if(P > Pmax) Pmax = P;
         if(fabs(ZL-Z0) < 1e-9 && fabs(G) > 1e-12) malG++;
     }
     /* varrer fino para achar o maximo de verdade */

@@ -232,7 +232,7 @@ int main(void){
     {
         double f = 2.4e9;
         printf("     %-24s %12s %12s %10s %10s\n", "material", "|Z| (ohm)", "reflete", "transmite", "absorve");
-        int metal_reflete = 0, isolante_transmite = 0, liga_absorve = 0;
+        int metal_reflete = 0, isolante_transmite = 0;
         for(int i = 0; i < NMATS; i++){
             double complex Z = impedancia(MATS[i].sigma, MATS[i].eps_r, f);
             double R = reflexao(MATS[i].sigma, MATS[i].eps_r, f);
@@ -243,7 +243,9 @@ int main(void){
                    100*R, 100*T, 100*A);
             if(i == 0 && R > 0.99) metal_reflete = 1;
             if(i == 3 && T > 0.9)  isolante_transmite = 1;
-            if(i == 4 && A > 0.10) liga_absorve = 1;   /* ver a nota do §C4 sobre limiares */
+            /* o `liga_absorve` que aqui estava foi substituido pela medida de DOMINANCIA
+             * logo abaixo (A_liga contra A_metal e A_isol) e ficou a ser calculado sem
+             * ninguem o ler — residuo da correccao, apontado pelo compilador. */
         }
         ok("o METAL reflete quase tudo — a impedancia dele e quase zero, e a onda volta",
            metal_reflete);
