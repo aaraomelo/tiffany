@@ -141,6 +141,11 @@ Estado: 134 limiares ainda DECIDEM uma asserção (eram 151). Lista com:
         if n: print(f"{n:3d}  {f}")
     PY
 
+OS ALVOS JÁ ESTÃO IDENTIFICADOS: tools/alvos_doubles.txt tem 177 limiares que, trocados
+por igualdade exacta, deixam o medidor VERDE — o compilar-e-correr está feito. NÃO é uma
+autorização para converter cegamente: por cada um, perguntar se o zero é ESTRUTURAL ou
+SORTE dos dados (a lição do recaman.c está escrita no cabeçalho do ficheiro).
+
 PASSO 1 — perguntar de onde vem cada lado da comparação.
     Se os dois lados descem do mesmo cálculo, não há duas rotas: há uma escrita duas vezes.
     Foi o caso da maioria dos que saíram hoje.
