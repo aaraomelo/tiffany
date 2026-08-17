@@ -186,9 +186,19 @@ int main(void){
         ok("por o pre-amp PRIMEIRO reduz o ruido total — e a mesma cadeia, so trocada de ordem",
            F_bom < F_ma);
         /* e o quanto: mede-se, não se adjetiva */
-        double ganho_dB = 10*log10(F_ma) - 10*log10(F_bom);
-        ok("e a diferenca e de DECIBEIS, nao de decimos: a ordem vale mais que os componentes",
-           ganho_dB > 1.0);
+        /* O DECIBEL É UM LOGARITMO DE UMA RAZÃO, e comparar decibéis é comparar a razão:
+         *
+         *      10·log10(a) − 10·log10(b) > 1   ⟺   log10(a/b) > 1/10   ⟺   (a/b)¹⁰ > 10
+         *
+         * — e a última forma não tem logaritmo nenhum. É a mesma monotonia de sempre: log10
+         * é crescente, logo a desigualdade atravessa-o nos dois sentidos. */
+        double ganho_dB = 10*log10(F_ma) - 10*log10(F_bom);   /* só para a linha que imprime */
+        double razao10 = 1.0;
+        for(int t = 0; t < 10; t++) razao10 *= F_ma / F_bom;
+        ok("e a diferenca e de DECIBEIS, nao de decimos: a ordem vale mais que os componentes."
+           " E «mais de 1 dB» compara-se SEM logaritmo: 10.log10(a) - 10.log10(b) > 1 e'"
+           " (a/b)^10 > 10, porque log10 e' crescente e a desigualdade atravessa-o",
+           razao10 > 10.0);
         printf("     -> %.2f dB de diferenca so por trocar a ordem. E por isso que o amplificador\n",
                ganho_dB);
         puts("        tem de estar COLADO ao sensor, e nao na outra ponta do cabo.");

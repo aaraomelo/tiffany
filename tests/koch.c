@@ -138,8 +138,44 @@ printf("\n§K2  A dimensão fractal: log 4 / log 3, entre a linha e o plano.\n\n
         if(fabs(d - D) > 1e-12) mal++;
     }
     printf("\n      D = %.9f — entre a linha (1) e o plano (2)\n\n", D);
-    ok("a dimensão é log4/log3 ≈ 1,2619 — não é curva nem é superfície", mal == 0
-       && D > 1 && D < 2);
+
+    /* E O QUE ESSE LAÇO MEDE É x = x. d = log(4^N)/log(3^N) = N·log4/(N·log3), e os N
+     * CANCELAM: d é D para todo N, por construção, e a comparação |d − D| < 1e-12 não
+     * podia falhar. O que ela parecia dizer — «a dimensão não depende do nível» — é
+     * verdade, mas é a álgebra da linha de cima e não uma medição.
+     *
+     * O CONTEÚDO DISPENSA LOGARITMOS. D = log4/log3 é definido por 4 = 3^D, e daí:
+     *
+     *     D > 1  ⟺  log4 > log3    ⟺  4 > 3
+     *     D < 2  ⟺  log4 < 2·log3  ⟺  4 < 9
+     *
+     * — «entre a linha e o plano» É «entre 3 e 9», em INTEIROS. E a irracionalidade sai
+     * da factorização única: D = p/q racional daria 4^q = 3^p, e 4 = 2² não tem factor 3.
+     * Varre-se p e q para o ver, com a fronteira: o único par que resolve é (0,0). */
+    long pq = 0, resolve = 0, so_trivial = 0;
+    for(long q = 1; q <= 40; q++){
+        long e4 = 1, e3 = 1; int cabe = 1;
+        for(long t = 0; t < q; t++){ if(e4 > 4000000000000000000L/4){ cabe = 0; break; } e4 *= 4; }
+        if(!cabe) continue;
+        for(long pp = 1; pp <= 40; pp++){
+            e3 = 1; cabe = 1;
+            for(long t = 0; t < pp; t++){ if(e3 > 4000000000000000000L/3){ cabe = 0; break; } e3 *= 3; }
+            if(!cabe) continue;
+            pq++;
+            if(e4 == e3) resolve++;             /* 4^q = 3^p — não pode acontecer */
+        }
+    }
+    so_trivial = (resolve == 0);
+    printf("      e SEM logaritmos: D > 1 e' 4 > 3, e D < 2 e' 4 < 9 — «entre a linha e o\n");
+    printf("      plano» E' «entre 3 e 9». E 4^q = 3^p nao tem solucao em %ld pares (q,p)\n"
+           "      com q,p >= 1, logo D e' IRRACIONAL: 4 = 2^2 nao tem factor 3.\n\n", pq);
+    ok("a dimensão é log4/log3 ≈ 1,2619 — não é curva nem é superfície. E mede-se SEM"
+       " logaritmos: D > 1 e' 4 > 3 e D < 2 e' 4 < 9, logo «entre a linha e o plano» E'"
+       " «entre 3 e 9», em inteiros. E a IRRACIONALIDADE sai da factorizacao unica —"
+       " D = p/q daria 4^q = 3^p, e isso nao tem solucao com p,q >= 1 porque 4 = 2^2 nao"
+       " tem factor 3. O laco que aqui estava comparava log(4^N)/log(3^N) com log4/log3, e"
+       " os N CANCELAM: media x = x, com dois logaritmos a torna-lo ilegivel",
+       4 > 3 && 4 < 9 && so_trivial && pq > 100 && mal == 0);
     printf("      E é por isso que ela consegue o que consegue: tem mais que comprimento e menos\n");
     printf("      que área. A dimensão fracionária não é uma curiosidade — é a conta que explica\n");
     printf("      por que a borda cresce sem a área explodir.\n");

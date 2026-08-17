@@ -168,7 +168,7 @@ eliptica_viviani 6202e1b445210d57 0
 encaixa d030c3c2f3c4e01c 0
 encaixe_continuo fb85476766754fcb 0
 encaixotamento 0f9c4a6716e901fe 0
-encanamento 545dabf8895fe820 0
+encanamento ed5cc0baeacd947e 0
 enche 28e010af816d4c4d 0
 entre c9d4cbfc7a5a9307 0
 entrega 298b77e1be12683e 0
@@ -250,7 +250,7 @@ isa_wasm 4e171d4c0561ad48 0
 isomorfo 43f497a869f80c7a 0
 isserlis 43de4dbc517f15d3 0
 kernelb f0c87f33a589ee14 0
-koch 6242b04db20c8e11 0
+koch 67daea17e89aeefe 0
 lahire_universal 843cfa03c5e214ba 0
 lambert c7ac2d933f35cb14 0
 latex_corpo dc511e8c18bbea1d 0
