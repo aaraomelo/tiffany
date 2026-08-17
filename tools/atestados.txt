@@ -268,7 +268,7 @@ limiares 4dec8ea3c1266e52 0
 limite_escada 582f8604e39f093d 0
 linear 59ceee580cbe6d72 0
 liquida 6f6a73a8318e27bf 0
-llm 58b4e72deceaa297 0
+llm c16a9f377a3025b2 0
 llm_reversivel ad337505752179a9 0
 logico afd540f8d888135d 0
 logico_continuo 0cb6224c6d89cb4e 0
@@ -356,7 +356,7 @@ pidual 34b8faa62b3bf489 0
 pimonte 317fdba0a5c75103 0
 pinos ee11b099ae858c6e 0
 pisotbase 5dae6293f2753416 0
-plugs 08633f3d7d8cecac 0
+plugs 64290a2cde425eba 0
 po_corpo bd31fce254616bbc 0
 polar 26b7d896d0e8809e 0
 poligonos 4a132f94a847e701 0

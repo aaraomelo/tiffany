@@ -156,7 +156,32 @@ printf("\n§L1  SOFTMAX: soma 1, e é INVARIANTE a deslocamento — é isso que 
     printf("      soma dos 8 pesos:            %.10f   (tem de ser 1)\n", soma);
     printf("      maior diferença após +137:   %.3e\n", maxdif);
     printf("      régua (8 termos, escala 1):  %.3e\n\n", regua(8, 1.0));
-    ok("o softmax soma 1", fabs(soma - 1.0) < regua(8, 1.0));
+    /* «O SOFTMAX SOMA 1» É A NORMALIZAÇÃO A DIVIDIR POR SI PRÓPRIA: a última linha da
+     * função faz `x[i] /= s` com s = Σx, logo Σ(x_i/s) = 1 por construção, e o que a régua
+     * tolera é só o arredondamento das oito divisões.
+     *
+     * O que TEM conteúdo é a segunda asserção — a invariância ao deslocamento — e uma
+     * terceira que faltava: os pesos são todos POSITIVOS e a soma é 1, logo é uma
+     * distribuição; e o maior peso está no maior x, que é o que faz dela um softMAX e não
+     * uma normalização qualquer. Essa pode falhar. */
+    int todos_pos = 1, arg_bate = 1;
+    { int im = 0, ia = 0;
+      float xm = -1e30f, am = -1e30f;
+      for(int i = 0; i < 8; i++){
+          if(a[i] <= 0) todos_pos = 0;
+          if(a[i] > am){ am = a[i]; ia = i; }
+          float orig = pseudo(i)*10.0f;
+          if(orig > xm){ xm = orig; im = i; }
+      }
+      arg_bate = (ia == im); }
+    printf("      e o maior peso cai no maior x: %s ; todos positivos: %s\n",
+           arg_bate ? "sim" : "NAO", todos_pos ? "sim" : "NAO");
+    ok("o softmax soma 1 — e isso e' a normalizacao a dividir por si propria: a funcao faz"
+       " x[i] /= s com s = Sx, logo a soma da' 1 por construcao e a regua so' tolera o"
+       " arredondamento das oito divisoes. O que se acrescenta e' o que PODE falhar: os oito"
+       " pesos sao POSITIVOS (logo e' uma distribuicao) e o MAIOR cai no maior x — que e' o"
+       " que faz dela um softMAX e nao uma normalizacao qualquer",
+       fabs(soma - 1.0) < regua(8, 1.0) && todos_pos && arg_bate);
     ok("e é invariante a deslocamento — softmax(x+c) = softmax(x)", maxdif < regua(8, 1.0));
     /* o caso degenerado, que também tem resposta conhecida de cor */
     float u[5]; for(int i = 0; i < 5; i++) u[i] = 3.0f;

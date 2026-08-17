@@ -153,8 +153,30 @@ int main(void){
         }
         ok("o NEGRO tem modulo > 1 (expande) e o BRANCO < 1 (contrai) — nos cinco metais",
            negro_expande == n && branco_contrai == n);
-        ok("e o PRODUTO deles e exatamente -1 — e a soma e m, que sao det e traco da regua",
-           prod_menos1 == n && soma_m == n);
+        /* E VIETA É EXACTO NOS CINCO, em ℤ[√D] — a mesma correcção que o §? deste ficheiro
+         * levou, e que não tinha chegado aqui. Com 2σ = m + √D e 2σ' = m − √D, D = m²+4:
+         *      (2σ)(2σ') = m² − D = −4      ⟹  σσ' = −1
+         *      (2σ) + (2σ') = 2m + 0√D      ⟹  σ + σ' = m,  com o √D a CANCELAR
+         * e nenhuma das duas precisa dos 1e-12. */
+        long vieta_prod = 0, vieta_soma = 0, metais_z = 0;
+        for(long m2 = 1; m2 <= 5; m2++){
+            long D2 = m2*m2 + 4, pa2, pb2;
+            rt_zd_mul(m2, 1, m2, -1, D2, &pa2, &pb2);
+            long sa2 = m2 + m2, sb2 = 1 + (-1);
+            metais_z++;
+            if(pa2 == -4 && pb2 == 0) vieta_prod++;
+            if(sa2 == 2*m2 && sb2 == 0) vieta_soma++;
+        }
+        printf("     -> e em ℤ[√D], sem limiar: (2σ)(2σ') = -4 em %ld dos %ld metais, e a soma\n"
+               "        da' (2m, 0) — a parte irracional CANCELA — em %ld\n",
+               vieta_prod, metais_z, vieta_soma);
+        ok("e o PRODUTO deles e exatamente -1 — e a soma e m, que sao det e traco da regua."
+           " E «exatamente» mede-se em ℤ[√D] e nao com 1e-12: (2σ)(2σ') = m² - D = -4 nos"
+           " cinco metais, e (2σ)+(2σ') = (2m, 0) com o raiz(D) a CANCELAR, que e' a"
+           " conjugacao. E' a mesma correccao que a outra seccao deste ficheiro levou hoje, e"
+           " que nao tinha chegado a esta linha",
+           prod_menos1 == n && soma_m == n
+           && vieta_prod == metais_z && vieta_soma == metais_z && metais_z == 5);
         printf("     -> %d metais: produto -1 e soma m em todos. Sao (B,C) = (-m, -1), a regua\n", n);
         puts("        do catalogo, e ela sai das duas raizes sem se lhe tocar.\n");
     }
