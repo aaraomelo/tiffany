@@ -1457,4 +1457,82 @@ static int rt_periodo_shift(long p, long q, long base, int tecto){
     return 0;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════════════
+ * O CICLO UNIVERSAL, PROMOVIDO — descodifica, opera, inverte, codifica
+ *
+ * O `thm:universal` diz que tudo cabe num ciclo, e que o que o faz FECHAR é |det| = 1.
+ * Estava escrito num medidor; passa para aqui, porque é a arquitectura do pipe e não uma
+ * medida sobre ele. Quem converte um medidor deixa de o reescrever: chama a peça.
+ *
+ *      DESCODIFICA   o texto é um racional exacto        rt_le_decimal / rt_unidade_comum
+ *      OPERA         [p:q] ↦ T·[p:q], sem dividir        rt_opera
+ *      INVERTE       T⁻¹ = adj(T)/det T, INTEIRA         rt_inverte   ← exige |det| = 1
+ *      CODIFICA      a palavra ou os dígitos             rt_cf_de / rt_cod_shift
+ *
+ * O TORO é a condição, não um passo: sem |det T| = 1 a inversa não é inteira e o ciclo
+ * não fecha — `rt_inverte` RECUSA, e recusar é dizer, não truncar.
+ * ═══════════════════════════════════════════════════════════════════════════════════ */
+
+typedef struct { long T[4]; } RtOp;          /* [T00 T01; T10 T11], em ordem de leitura */
+
+static long rt_op_det(const RtOp *o){ return o->T[0]*o->T[3] - o->T[1]*o->T[2]; }
+
+/* o operador serve ao ciclo exactamente quando |det| = 1 — é a condição do toro */
+static int rt_op_valido(const RtOp *o){ long d = rt_op_det(o); return d == 1 || d == -1; }
+
+/* OPERA: em ℙ¹, sem dividir */
+static void rt_opera(const RtOp *o, long p, long q, long *rp, long *rq){
+    long a = o->T[0]*p + o->T[1]*q, b = o->T[2]*p + o->T[3]*q;
+    *rp = a; *rq = b;
+}
+
+/* INVERTE: a metade dual. adj(T) = [d −b; −c a], e dividir por ±1 é multiplicar por ±1 —
+ * é isso que a torna INTEIRA. Devolve 0 quando o operador não serve. */
+static int rt_inverte(const RtOp *o, long p, long q, long *rp, long *rq){
+    long d = rt_op_det(o);
+    if(d != 1 && d != -1) return 0;
+    RtOp inv = {{ o->T[3]/d, -o->T[1]/d, -o->T[2]/d, o->T[0]/d }};
+    rt_opera(&inv, p, q, rp, rq);
+    return 1;
+}
+
+/* a ORDEM do operador, e são DUAS: no PONTO (ℙ¹, onde v e −v são o mesmo) e no VECTOR
+ * (ℤ²). Viviani tem 2 e 4 — e é essa razão que é o recobrimento duplo. Devolvem 0 quando
+ * não fecham dentro do tecto, que é o caso do gato. */
+static int rt_ordem_ponto(const RtOp *o, long p, long q, int tecto){
+    long P = p, Q = q;
+    for(int k = 1; k <= tecto; k++){
+        long np, nq; rt_opera(o, P, Q, &np, &nq); P = np; Q = nq;
+        if(Q != 0 && p*Q == P*q) return k;
+        if(P == 0 && Q == 0) return 0;
+    }
+    return 0;
+}
+static int rt_ordem_vector(const RtOp *o, long p, long q, int tecto){
+    long P = p, Q = q;
+    for(int k = 1; k <= tecto; k++){
+        long np, nq; rt_opera(o, P, Q, &np, &nq); P = np; Q = nq;
+        if(P == p && Q == q) return k;
+    }
+    return 0;
+}
+
+/* O CICLO INTEIRO: opera, inverte, e passa pela codificação escolhida. Devolve 1 e o par
+ * de volta; 0 se o operador não serve ou se a codificação não representa. A comparação
+ * com o original faz-se em ℙ¹ por produto cruzado — quem chama é que a faz, porque é ela
+ * a tese e não o ciclo. */
+static int rt_ciclo(const RtOp *o, RtIdaVolta cod, long p, long q, long *rp, long *rq){
+    long a, b, c, d;
+    if(!rt_op_valido(o)) return 0;
+    rt_opera(o, p, q, &a, &b);
+    if(!rt_inverte(o, a, b, &c, &d)) return 0;
+    if(d == 0) return 0;                          /* a órbita passou por ∞ */
+    long g = rt_mdc(c < 0 ? -c : c, d < 0 ? -d : d); if(g < 1) g = 1;
+    long ri = c/g, rj = d/g;
+    if(rj < 0){ ri = -ri; rj = -rj; }
+    if(ri < 0) return 0;                          /* as codificações são de p/q >= 0 */
+    if(!cod) { *rp = ri; *rq = rj; return 1; }
+    return cod(ri, rj, rp, rq);
+}
+
 #endif /* RETA_H */

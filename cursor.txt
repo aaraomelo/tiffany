@@ -209,6 +209,18 @@ SEMPRE, no fim: o GUME. Mutar o que a asserção MEDE (não a asserção) e ver 
     rt_cod_shift / rt_desc_shift                   racional <-> dígitos numa base (Cantor)
     rt_volta_fecha(f, qmax, &tot, &fora)           A VERIFICAÇÃO: a volta tem de fechar
     rt_ordem(passo, e0, n, tecto)                  a ordem de um operador, MEDIDA
+
+    ── O CICLO UNIVERSAL, promovido (thm:universal) ────────────────────────────────
+    RtOp {long T[4]}                               o operador, em ordem de leitura
+    rt_op_det / rt_op_valido                       |det| = 1 ? (a condição do TORO)
+    rt_opera(&T, p,q, &rp,&rq)                     [p:q] -> T·[p:q], sem dividir
+    rt_inverte(&T, p,q, &rp,&rq)                   adj/det, INTEIRA; RECUSA sem |det|=1
+    rt_ordem_ponto  / rt_ordem_vector              as DUAS ordens (P¹ e Z²)
+    rt_ciclo(&T, cod, p,q, &rp,&rq)                opera+inverte+codifica, o pipe inteiro
+
+    CONVERTER UM MEDIDOR É CHAMAR A PEÇA. Não reimplementar o ciclo: `rt_ciclo` faz-o, e
+    a TESE fica de fora dela — a comparação com o original é de quem chama, porque é ela
+    a tese e não o ciclo.
     rt_periodo_shift(p,q,base,tecto)               = ord_q(base)
     rt_pot_mod, rt_inv_mod                         F_p
     rt_menor_que_sigma, rt_menor_que_zd            comparar com um irracional SEM raiz

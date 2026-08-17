@@ -59,20 +59,16 @@
  * par, porque o §E1 da entrega.c mede a leitura do texto.) */
 static void descodifica(long p, long q, long *rp, long *rq){ *rp = p; *rq = q; }
 
-/* OPERA: T age em ℙ¹ sem dividir — [p:q] ↦ [T00·p + T01·q : T10·p + T11·q] */
+/* OPERA e INVERTE estão na `reta.h` — `rt_opera`, `rt_inverte`, `rt_ciclo`. O ciclo é a
+ * ARQUITECTURA do pipe e não uma medida sobre ele, logo vive na lib; aqui mede-se. Estes
+ * dois embrulhos existem só para o laço abaixo ler como o pseudo-código. */
 static void opera(const long *T, long p, long q, long *rp, long *rq){
-    *rp = T[0]*p + T[1]*q;
-    *rq = T[2]*p + T[3]*q;
+    RtOp o; for(int i = 0; i < 4; i++) o.T[i] = T[i];
+    rt_opera(&o, p, q, rp, rq);
 }
-
-/* INVERTE: a metade dual. adj(T) = [d −b; −c a], e dividir por det = ±1 é multiplicar
- * por ±1 — é ISSO que torna a inversa INTEIRA, e é a condição do toro. */
 static int inverte(const long *T, long p, long q, long *rp, long *rq){
-    long det = T[0]*T[3] - T[1]*T[2];
-    if(det != 1 && det != -1) return 0;          /* sem |det| = 1 não há volta inteira */
-    long inv[4] = { T[3]/det, -T[1]/det, -T[2]/det, T[0]/det };
-    opera(inv, p, q, rp, rq);
-    return 1;
+    RtOp o; for(int i = 0; i < 4; i++) o.T[i] = T[i];
+    return rt_inverte(&o, p, q, rp, rq);
 }
 
 /* CODIFICA / DESCODIFICA a palavra: as três da casa, com a mesma assinatura */

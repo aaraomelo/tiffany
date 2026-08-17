@@ -1622,5 +1622,59 @@ printf("\n§R24 Normalizar é escolher a unidade — e depois tudo é inteiro.\n
            enc_tot > 0 && enc == enc_tot);
     }
 
+    /* ─── §R27 ── O CICLO UNIVERSAL, na arquitectura ────────────────────────────────
+     *
+     * `rt_ciclo` faz o pipe inteiro — opera, inverte, codifica — e devolve o par. O que se
+     * mede aqui é a peça da LIB, com a tese a ficar de fora dela: a comparação com o
+     * original é de quem chama, porque é ela a tese e não o ciclo.
+     *
+     * E mede-se o que a peça RECUSA, que é metade do seu valor: sem |det| = 1 não há
+     * inversa inteira, e ela devolve 0 em vez de truncar. */
+    {
+        RtOp OPS[4] = {
+            {{-1, 0, 0, 1}},        /* o espelho    — ordem 2 no ponto e no vector */
+            {{ 0,-1, 1, 0}},        /* o i          — 2 no ponto, 4 no vector      */
+            {{ 1, 1, 1, 0}},        /* o gato A_1   — não fecha                    */
+            {{ 0, 1, 1, 0}},        /* a inversão S — 0 <-> ∞                      */
+        };
+        long ciclos = 0, fecha = 0, recusa = 0, recusa_tot = 0;
+        for(int o = 0; o < 4; o++)
+            for(long q = 1; q <= 30; q++)
+                for(long p = 0; p <= q; p++){
+                    if(rt_mdc(p, q) != 1 && !(p == 0 && q == 1)) continue;
+                    long rp, rq;
+                    if(!rt_ciclo(&OPS[o], rt_iv_palavra, p, q, &rp, &rq)) continue;
+                    ciclos++;
+                    if(rq != 0 && p*rq == rp*q) fecha++;      /* a TESE, fora da peça */
+                }
+        /* o que a peça RECUSA: operadores sem |det| = 1 */
+        for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++)
+        for(long c = -3; c <= 3; c++) for(long d = -3; d <= 3; d++){
+            RtOp o = {{a,b,c,d}};
+            if(rt_op_valido(&o)) continue;
+            long rp, rq;
+            recusa_tot++;
+            if(!rt_ciclo(&o, rt_iv_palavra, 3, 2, &rp, &rq)) recusa++;
+        }
+        /* e as DUAS ordens, pela peça */
+        int op_pt = rt_ordem_ponto (&OPS[1], 3, 2, 24);
+        int op_vc = rt_ordem_vector(&OPS[1], 3, 2, 24);
+        int gt_pt = rt_ordem_ponto (&OPS[2], 3, 2, 24);
+        int gt_vc = rt_ordem_vector(&OPS[2], 3, 2, 24);
+        printf("\n  §R27 o ciclo universal, na arquitectura\n");
+        printf("      ciclos que a peça correu ......... %ld   e fecharam %ld\n", ciclos, fecha);
+        printf("      operadores sem |det| = 1: RECUSA . %ld de %ld\n", recusa, recusa_tot);
+        printf("      as duas ordens do i: ponto %d, vector %d  (o recobrimento duplo)\n",
+               op_pt, op_vc);
+        printf("      e o gato: ponto %s, vector %s\n\n",
+               gt_pt ? "fecha" : "INFINITA", gt_vc ? "fecha" : "INFINITA");
+        ok("o CICLO UNIVERSAL é peça da lib: `rt_ciclo` opera, inverte e codifica, e a tese"
+           " fica de FORA dela — a comparação com o original é de quem chama. E ela RECUSA"
+           " sem |det| = 1, que é a condição do toro. As duas ordens saem da mesma peça: o"
+           " i tem 2 no ponto e 4 no vector, e o gato não fecha em nenhuma",
+           ciclos > 0 && fecha == ciclos && recusa_tot > 0 && recusa == recusa_tot &&
+           op_pt == 2 && op_vc == 4 && gt_pt == 0 && gt_vc == 0);
+    }
+
     return falhas ? 1 : 0;
 }
