@@ -76,7 +76,7 @@ def main():
     for f in FICHEIROS:
         src = open(f, encoding='utf-8', errors='replace').read()
         linhas = src.split('\n')
-        fam = 'MUNDO FISICO' if len(FIS.findall(src)) >= 6 else 'matematica pura'
+        fam = 'todos'          # DADOS SAO DADOS — nao ha coluna a separar
         txt = condicoes(src)
         nomes = declaracoes(src)
         alim = [nm for nm in nomes if re.search(r'\b' + re.escape(nm) + r'\b', txt)]
@@ -100,33 +100,30 @@ def main():
 
     print("LEVANTAMENTO DOS DOUBLES — pelo que ALIMENTAM   (régua: nomes distintos)\n")
     print(f"{'família':<18} {'declarados':>11} {'alimentam':>10} {'%':>5}")
-    for fam in ('MUNDO FISICO', 'matematica pura'):
+    for fam in ('todos',):
         n, a = res[fam]
         print(f"{fam:<18} {n:>11} {a:>10} {100*a//n if n else 0:>4}%")
     tn = sum(v[0] for v in res.values()); ta = sum(v[1] for v in res.values())
     print(f"{'TOTAL':<18} {tn:>11} {ta:>10} {100*ta//tn:>4}%\n")
-    print("A REGRA QUE AQUI ESTAVA ERA FALSA, e a correcção é do Aarão: «qual a diferença")
-    print("do meio físico pro matemático? a física não obedece à matemática?»")
+    print("DADOS SAO DADOS. Aqui nao ha coluna a separar, e a razao e do Aarao — eu ja")
+    print("inventei DUAS taxonomias neste sitio e as duas eram minhas:")
     print()
-    print("Obedece. As LEIS da física SÃO matemática, e são exactas: R_serie = R1+R2+R3 é")
-    print("uma soma; Carnot é 1 - Tf/Tq; a 3.a lei conserva o momento; Shockley espelhado")
-    print("da o mesmo modulo. Eu escrevia «no MUNDO FISICO a virgula e do mundo» e usava")
-    print("isso para deixar limiares em paz. Em 17/08 abri NOVE ficheiros desta coluna e em")
-    print("TODOS a lei era exacta — o bra-ket, a particao hermitiana, a conservacao de")
-    print("Carnot, o campo do dipolo radial, a 3.a lei, o Shockley, a serie/paralelo.")
+    print("   1.a  «no MUNDO FISICO a virgula e do mundo» — usei-a para deixar limiares em")
+    print("        paz, e em nove ficheiros dessa coluna a lei era exacta em todos;")
+    print("   2.a  «a LEI e exacta, o DADO traz incerteza, o MEIO tem ruido» — troquei uma")
+    print("        taxonomia por outra na propria correccao.")
     print()
-    print("A divisao certa nao e FISICO vs MATEMATICO. E esta, e vale nas duas colunas:")
+    print("O ruido FAZ PARTE dos dados. Um valor escrito «6,3e7 S/m» e o racional 63000000/1,")
+    print("e uma medida com barra de erro sao DOIS numeros, ambos exactos. Tudo entra pelo")
+    print("PIPE do mesmo modo: unidade comum (MMC), inteiros, opera, palavra. Nao ha nada a")
+    print("classificar antes.")
     print()
-    print("   a LEI      e matematica, logo EXACTA — mede-se em Z ou Q, sem regua")
-    print("   o DADO     e medido, e traz incerteza — mas a incerteza e um NUMERO DO")
-    print("              PROBLEMA (a barra de erro do instrumento), nao um limiar meu")
-    print("   o MEIO     quando se SIMULA um analogico, ele tem ruido proprio — e ai o")
-    print("              limiar mede o MEIO, com a tese medida no lado exacto ao lado")
+    print("E A REGUA E AS OITO LEIS, que ja estao escritas e nao sao segredo. Um limiar")
+    print("justifica-se se sair de uma delas; nao saindo, sai ele. O que a representacao nao")
+    print("aguenta CONTA-SE a parte (o `saturou`), em vez de se esconder numa regua.")
     print()
-    print("Esta coluna fica porque a proporcao de DADOS medidos e maior aqui. Mas ela nao")
-    print("autoriza nada: um limiar nesta coluna precisa da mesma razao que na outra.\n")
     if verbose:
-        for fam in ('matematica pura', 'MUNDO FISICO'):
+        for fam in ('todos',):
             print(f"{fam}:")
             for a, n, f in sorted(det[fam], reverse=True)[:15]:
                 print(f"   {a:4d} / {n:<4d}  {f}")

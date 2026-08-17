@@ -246,9 +246,33 @@ int main(void){
             ok("e nao e' trivial: nas NAO hermitianas a parte imaginaria APARECE — o contraste mede",
                viu_imag > 1000);
         }
+        /* O DISCRIMINANTE DE UMA HERMITIANA E' UMA SOMA DE QUADRADOS, e por isso o «nao
+         * negativo» nao precisa de folga nenhuma. Com H = [a, b; b*, d] hermitiana (a e d
+         * reais),
+         *
+         *      D = (a+d)² − 4(ad − |b|²) = (a−d)² + 4|b|²
+         *
+         * — dois quadrados somados. Nao ha' entrada que o ponha negativo, e o −1e-14 dava
+         * folga a uma desigualdade que e' estrutural. Mede-se assim, em Z, sobre as mesmas
+         * matrizes de Gauss inteiras da seccao acima: D = (a−d)² + 4(b²+c²) >= 0, e conta-se
+         * quantas dao ZERO (as que tem os dois proprios iguais) para que «>= 0» nao valha
+         * por «> 0 sempre». */
+        long disc_ok = 0, disc_zero = 0, disc_tot = 0;
+        for(long a1 = -6; a1 <= 6; a1++) for(long d1 = -6; d1 <= 6; d1++)
+        for(long b1 = -4; b1 <= 4; b1++) for(long c1 = -4; c1 <= 4; c1++){
+            long Dz = (a1 - d1)*(a1 - d1) + 4*(b1*b1 + c1*c1);
+            disc_tot++;
+            if(Dz >= 0) disc_ok++;
+            if(Dz == 0) disc_zero++;
+        }
         double D = creal(tr)*creal(tr) - 4*creal(det);
-        ok("e o DISCRIMINANTE e NAO NEGATIVO — logo os proprios sao reais, sem excecao",
-           D >= -1e-14);
+        printf("     -> e em Z, o discriminante (a−d)² + 4(b²+c²) é NAO NEGATIVO em %ld de"
+               " %ld, com %ld a dar ZERO\n", disc_ok, disc_tot, disc_zero);
+        ok("e o DISCRIMINANTE e NAO NEGATIVO — logo os proprios sao reais, sem excecao. E e'"
+           " uma SOMA DE QUADRADOS: (a−d)² + 4|b|², logo nao precisa de folga nenhuma. Medido"
+           " em Z sobre as matrizes de Gauss inteiras, com os casos de discriminante ZERO"
+           " contados a' parte — senao «>= 0» valia por «> 0 sempre»",
+           D >= 0.0 && disc_tot > 0 && disc_ok == disc_tot && disc_zero > 0);
         double l1 = (creal(tr) + sqrt(D))/2, l2 = (creal(tr) - sqrt(D))/2;
         /* e verificam-se: det(H − λI) = 0 */
         M H1 = add(H, esc(-l1, mid())), H2 = add(H, esc(-l2, mid()));

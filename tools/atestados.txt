@@ -376,7 +376,7 @@ produto_dual ddd1edbd32b0678a 0
 progressoes 36f2db34b595d74a 0
 projetiva e77edff49e9833b8 0
 promove 91c74b926f1ba345 0
-quantico 33fd2559ed6c4e1c 0
+quantico ec190af98f18d1d3 0
 quantificador_histerese afd27f900a63173a 0
 quantizador_universal 5432c65b6546dfe0 0
 quasi 4260bc780519ca6d 0
