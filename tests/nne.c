@@ -297,20 +297,16 @@ printf("\n§N6  A ÁLGEBRA DUAL DO GENTIL — e esta É distributiva. Corrijo-me
     printf("      (λx)∗y  contra λ(x∗y),    em 300 pares:   %d falhas\n\n", mal_h);
     ok("a álgebra DUAL do Gentil é distributiva E bilinear", mal_d == 0 && mal_h == 0);
 
-    /* e a norma que ela preserva NAO e a euclidiana: e |ab|, o determinante de diag(a,b) */
-    double pe = 0, pd = 0;
-    for(int k = 0; k < 200; k++){
-        double x[2] = { sin(3.0*k+1)*3, cos(3.0*k+2)*3 };
-        double y[2] = { sin(5.0*k+3)*3, cos(5.0*k+4)*3 };
-        double p[2] = { x[0]*y[0], -x[1]*y[1] };
-        double e1 = fabs(hypot(p[0],p[1]) - hypot(x[0],x[1])*hypot(y[0],y[1]));
-        double e2 = fabs(fabs(p[0]*p[1]) - fabs(x[0]*x[1])*fabs(y[0]*y[1]));
-        if(e1 > pe) pe = e1;
-        if(e2 > pd) pd = e2;
-    }
-    printf("      norma euclidiana:  max erro %.2e   (não preserva)\n", pe);
-    printf("      norma |ab|:        max erro %.2e   (PRESERVA)\n\n", pd);
-    /* E A IDENTIDADE E' POLINOMIAL, logo mede-se EXACTA em Z e nao pede o 1e-9. Com
+    /* e a norma que ela preserva NAO e a euclidiana: e |ab|, o determinante de diag(a,b).
+     *
+     * A ROTA EM VIRGULA SAIU. Ela varria 200 pontos de sin/cos, guardava o pior erro de
+     * cada uma das duas normas, e decidia com `pd < 1e-9`. Depois de a identidade passar a
+     * ser medida EXACTA em Z, essa rota deixou de decidir seja o que for — ficava a
+     * consumir sete doubles, duas chamadas a hypot por ponto e um limiar, para confirmar o
+     * que a conta inteira ja' diz sem margem. Em matematica pura o par digital/analogico
+     * nao se aplica: nao ha' meio a medir, ha' uma identidade.
+     *
+     * E A IDENTIDADE E' POLINOMIAL, logo mede-se EXACTA em Z e nao pede o 1e-9. Com
      * p = (x0.y0, -x1.y1), o produto das componentes e'
      *
      *     p0.p1 = x0.y0 . (-x1.y1) = -(x0.x1).(y0.y1)     ⟹  |p0.p1| = |x0.x1|.|y0.y1|
@@ -347,8 +343,9 @@ printf("\n§N6  A ÁLGEBRA DUAL DO GENTIL — e esta É distributiva. Corrijo-me
            sinal_ok, tot_i);
     ok("ela preserva |ab| — que é o DETERMINANTE, e não a norma euclidiana. E a identidade"
        " é POLINOMIAL, logo mede-se EXACTA em ℤ: vale em todos os casos, enquanto a"
-       " euclidiana falha na maioria — o contraste é um número",
-       pd < 1e-9 && tot_i > 0 && det_ok == tot_i && eucl_ok < tot_i && sinal_ok == tot_i);
+       " euclidiana falha na maioria — o contraste é um número. A rota em vírgula que aqui"
+       " estava, com 200 pontos de sin/cos e um 1e-9, saiu: deixou de decidir",
+       tot_i > 0 && det_ok == tot_i && eucl_ok < tot_i && sinal_ok == tot_i);
     printf("      E isso arruma o par: |ab| = 1 é a HIPÉRBOLE (Δ>0, o gato); a²+b² = 1 é a\n");
     printf("      ESFERA (Δ<0, o esquilo). A canónica fica com a esfera, a dual com a hipérbole,\n");
     printf("      e são as duas metades do chicote. Não são construções rivais: são o par.\n");

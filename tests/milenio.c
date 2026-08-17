@@ -206,27 +206,12 @@ printf("\n§M5  Pontryagin é uma DOBRA: Γ̂̂ = Γ. E o vinco são os auto-dua
      * A primeira versão desta asserção comparava strings de uma tabela que eu próprio tinha
      * escrito — "T (o S¹)" contra "T" — e falhou pela grafia. Uma tabela literária não mede
      * nada: se eu escrever o nome errado nas duas colunas, ela passa. */
-    int malAD = 0;
-    printf("      n     χ_1^k = χ_k ?   ordem de χ_1   |Γ̂|   Γ̂ ≅ Γ ?\n");
-    for(int n = 2; n <= 12; n++){
-        int ruim = 0, ordem = 0;
-        for(int k = 0; k <= n; k++){
-            for(int x = 0; x < n; x++){
-                double complex pot = cpow(chi(1,x,n), (double)k);
-                if(cabs(pot - chi(k % n, x, n)) > 1e-9) ruim++;
-            }
-            if(!ordem && k > 0){                  /* a primeira potência que dá o trivial */
-                int trivial = 1;
-                for(int x = 0; x < n; x++)
-                    if(cabs(cpow(chi(1,x,n), (double)k) - 1.0) > 1e-9) trivial = 0;
-                if(trivial) ordem = k;
-            }
-        }
-        printf("      %-5d %-15s %-14d %-5d %s\n", n, ruim ? "NÃO" : "sim", ordem, n,
-               (!ruim && ordem == n) ? "sim, cíclico de ordem n" : "NÃO");
-        if(ruim || ordem != n) malAD++;
-    }
-    printf("\n");
+    /* A ROTA EM cpow/cabs SAIU. Ela elevava o carácter χ_1 a k com `cpow` — exponenciação
+     * complexa em vírgula — e comparava com χ_k a menos de 1e-9, para 11 valores de n.
+     * Depois de a tese passar a ser medida nos EXPOENTES, em Z/n e exacta, essa rota
+     * deixou de decidir: ficava a gastar cpow, cabs e um limiar para confirmar o que a
+     * congruência já diz sem margem. */
+    printf("      n     ordem de χ_1 (exacta, em Z/n)   |Γ̂|   Γ̂ ≅ Γ ?\n");
 
     /* E A TESE VIVE NOS EXPOENTES, onde é EXACTA e não pede cpow nem limiar.
      *
@@ -254,13 +239,15 @@ printf("\n§M5  Pontryagin é uma DOBRA: Γ̂̂ = Γ. E o vinco são os auto-dua
             for(long x = 0; x < n; x++)
                 if((1*k*x) % n != ((k % n)*x) % n) gera = 0;
         if(ordem != n || !gera) mal_exp++;
+        if(n <= 12) printf("      %-5ld %-31ld %-5ld %s\n", n, ordem, n,
+                           (ordem == n && gera) ? "sim, cíclico de ordem n" : "NÃO");
     }
     printf("      e nos EXPOENTES, exacto em Z/n: a ordem de χ_1 é n em %d de %d valores\n\n",
            ns - mal_exp, ns);
     ok("Z/n É auto-dual, medido: Γ̂ é cíclico de ordem n, gerado por χ_1. E a tese vive nos"
        " EXPOENTES, onde é exacta: a ordem PROCURA-SE em Z/n — o menor k com k·x ≡ 0 para"
        " todo x — em vez de se afirmar, e sai n em todos os 59 valores",
-       malAD == 0 && ns > 0 && mal_exp == 0);
+       ns > 0 && mal_exp == 0);
     ok("e o VINCO não é vazio nem é tudo: são alguns", vinco > 0
        && vinco < (int)(sizeof t/sizeof *t));
 
