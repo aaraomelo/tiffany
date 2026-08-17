@@ -211,7 +211,7 @@ int main(void){
                     if(!y || rest % y) continue;
                     criterio = 1; }
                 else {                                /* DEGENERADO: so' resta rest·b = 0 */
-                    if(rest*b) continue;
+                    if(rest != 0 && b != 0) continue;   /* rest.b != 0, escrito sem formar o produto */
                     for(L y=-40;y<=40 && !criterio;y++)
                         if(y && rest % y == 0) criterio = 1; } }
             if(busca != criterio) discord++;

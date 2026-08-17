@@ -88,7 +88,10 @@ printf("\n§Y3  Em ℚ todo Δ é alcançado, e o transporte existe SEMPRE.\n\n"
         /* a secção: B = 0, C = −Δ/4 — existe para TODO racional Δ */
         RegQ r = { q(0,1), ra_prod(D, q(-1,4)) };
         if(!q_eq(delta_q(r), D)) mau++;
-        if(n == 13 || (n == 6 && d == 1) || (n == 13 && d == 2)) ;
+        /* aqui estava `if(n == 13 || (n == 6 && d == 1) || (n == 13 && d == 2)) ;` —
+         * condicao com corpo VAZIO, e ainda por cima `n == 13` nunca acontece porque
+         * o laco vai de -12 a 12. Codigo morto duas vezes. Os casos 6 e 13/2 estao
+         * medidos logo abaixo, um a um e com saida. */
         casos++;
     }
     { RegQ a = { q(0,1), q(-6,4) }; printf("      6           (0, -3/2)                   %s\n",

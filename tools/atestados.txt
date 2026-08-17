@@ -77,7 +77,7 @@ config_corpo 058335e53d3b487e 0
 conico db6e0cef9c0d6c26 0
 conjunto ee3b0d585a79668e 0
 conservacao_metrica afadb92daf50a069 0
-constantes 898cabc656208054 0
+constantes 3bd76036ab5e6551 0
 constroi 2c60273bdc7acb47 0
 conta b61d39344f09ecf3 0
 contagem_cifra 950b2e07602b7dad 0
@@ -361,7 +361,7 @@ po_corpo bd31fce254616bbc 0
 polar e11cecf9bafea897 0
 poligonos 4a132f94a847e701 0
 ponte_universal_metalica 6bdedb0d4a48d0b8 0
-pontofixo 0f106b073e9273c8 0
+pontofixo f7dffdf6abc5ec17 0
 pontryagin 9842a653f36021f9 0
 posto_viviani d6eeac3d7d845b41 0
 potencia cc93709e0a87f0db 0
@@ -394,7 +394,7 @@ refracao ce9fa14f889657fc 0
 refs ffc0c3cb4670180e 0
 refuta da9a03fc633a36bf 0
 regua b48a197936fde76f 0
-regua_continua e8798b21f4181fbd 0
+regua_continua 37596f83678d8753 0
 rei 0d014724794dad5a 0
 rei_em_todos c528cb57fb2a9e6c 0
 relay d8b1fff146f41471 0

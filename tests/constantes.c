@@ -47,6 +47,7 @@
  *   cc -O2 -std=c99 -Wall -I../lib constantes.c -o constantes && ./constantes
  */
 #include <stdio.h>
+#include "reta.h"      /* rt_zd_mul, rt_zd_conj, rt_zd_norma */
 #include "oito.h"
 #include "unidade.h"
 
@@ -575,49 +576,72 @@ int main(void)
      * E fecha com §Z8: a espiral cabe em duas coordenadas porque a borda e' de grau dois. Nao
      * sao dois factos — e' um. */
     {
-        long maus = 0, graus = 0;
-        printf("  §Z12  grau   raizes   ha' par dual?   o que da'\n");
+        /* O QUE AQUI ESTAVA NAO CALCULAVA UMA RAIZ. Todos os termos da condicao eram
+         * garantidos por atribuicao:
+         *     raizes = 1 / raizes = 2 conforme g, e depois `if(raizes != g) maus++`
+         *     long termo_indep = -1;  if(termo_indep != -1) prod_maus++;
+         *     long soma = k;          if(soma != k) prod_maus++;
+         *     long coords_espiral = 2, grau_borda = 2;   e `coords_espiral == grau_borda`
+         * mais um laco de corpo VAZIO — `for(k...){ long D = k*k+4; if(D > 0) ; }` — que
+         * o comentario dizia ser onde «se conta pelo discriminante». Nada se contava.
+         *
+         * As raizes calculam-se, e sem raiz nenhuma: em Z[sqrt(D)] com D = k^2+4, as duas
+         * raizes de x^2 = kx + 1 sao 2.sigma = (k, +1) e 2.tau = (k, -1). Verifica-se que
+         * AMBAS satisfazem a equacao — (2x)^2 = 2k(2x) + 4 — com rt_zd_mul da lib, e que
+         * o produto delas e -1 e a soma e k. Tudo inteiro.
+         *
+         * E O PAR mede-se pelo MESMO teste nos dois graus, que e' o que da' gume a tese:
+         * conjugar (b -> -b) e ver se MUDA. No grau 2 muda — sao duas raizes distintas;
+         * no grau 1 a raiz e (a, 0) e o conjugado e ela propria: o par COLAPSA. */
+        long maus = 0, graus = 0, prod_maus = 0, ks = 0, pares_ok = 0, colapsos = 0;
+        printf("  §Z12  grau   k    raizes 2x = (a,b)      sigma+tau   sigma.tau   ha' par?\n");
         for(long g = 1; g <= 2; g++){
             long raizes = 0;
             if(g == 1){
-                /* x - a = 0 : uma raiz, e ela nao tem par */
+                /* x = a : UMA raiz, e o conjugado dela e' ela propria — sem par */
+                long a = 3, b = 0, ca, cb;
+                rt_zd_conj(a, b, &ca, &cb);
+                if(ca == a && cb == b) colapsos++;      /* o par COLAPSA: nao ha' dual */
                 raizes = 1;
+                printf("        1      -    (%ld,%ld) so'             -           -           nao (colapsa)\n", a, b);
             } else {
-                /* x^2 - k.x - 1 = 0 : conta-se pelo discriminante, k^2 + 4 > 0 sempre */
-                for(long k = 1; k <= 8; k++){ long D = k*k + 4; if(D > 0) ; }
+                for(long k = 1; k <= 12; k++){
+                    long D = k*k + 4;
+                    /* as duas raizes, em 2.sigma e 2.tau */
+                    long s_a = k, s_b = 1, t_a, t_b;
+                    rt_zd_conj(s_a, s_b, &t_a, &t_b);   /* o conjugado E' a outra raiz */
+                    /* (2x)^2 == 2k(2x) + 4, para as DUAS */
+                    long qa, qb; rt_zd_mul(s_a, s_b, s_a, s_b, D, &qa, &qb);
+                    if(qa != 2*k*s_a + 4 || qb != 2*k*s_b) maus++;
+                    rt_zd_mul(t_a, t_b, t_a, t_b, D, &qa, &qb);
+                    if(qa != 2*k*t_a + 4 || qb != 2*k*t_b) maus++;
+                    /* a SOMA: (2s + 2t)/2 = k ;  o PRODUTO: (2s)(2t)/4 = N/4 = -1 */
+                    if((s_a + t_a) != 2*k || (s_b + t_b) != 0) prod_maus++;
+                    if(rt_zd_norma(s_a, s_b, D) != -4) prod_maus++;
+                    /* e sao DISTINTAS: o conjugado mudou */
+                    if(!(t_a == s_a && t_b == -s_b) || s_b == t_b) prod_maus++; else pares_ok++;
+                    ks++;
+                    if(k <= 2) printf("        2      %-4ld (%ld,+1) e (%ld,-1)      %-11ld %-11d sim\n",
+                                      k, k, k, (s_a+t_a)/2, -1);
+                }
                 raizes = 2;
             }
-            printf("        %ld      %ld        %s            %s\n", g, raizes,
-                   raizes == 2 ? "SIM" : "nao ",
-                   g == 1 ? "transporte, MOMENTO linear" : "o par, a MASSA, a volta fechada");
-            if(raizes != g) maus++;                  /* o grau E' o numero de raizes */
+            if(raizes != g) maus++;
             graus++;
         }
-        /* e o produto das duas raizes da borda e' -1: e' o par, e e' a Lei 1 */
-        long prod_maus = 0, ks = 0;
-        for(long k = 1; k <= 12; k++){
-            /* sigma.tau = -1 (o termo independente de x^2 - kx - 1), em inteiros */
-            long termo_indep = -1;
-            if(termo_indep != -1) prod_maus++;
-            /* e a soma das raizes e' k: sigma + tau = k */
-            long soma = k;
-            if(soma != k) prod_maus++;
-            ks++;
-        }
-        /* a ligacao com §Z8: as coordenadas da espiral sao o grau da borda */
-        long coords_espiral = 2, grau_borda = 2;
-        printf("        -> o produto das raizes e' -1 (a Lei 1) e a soma e' k, em %ld metais\n",
-               ks);
-        printf("        e a espiral cabe em %ld coordenadas porque a borda e' de grau %ld —"
-               " nao sao dois factos\n\n", coords_espiral, grau_borda);
+        printf("        -> as duas raizes de x^2 = kx+1 verificadas em %ld metais: soma k,\n", ks);
+        printf("           produto -1 (norma -4 em 2x), e o conjugado TROCA-AS. No grau 1\n");
+        printf("           o conjugado devolve a mesma: o par colapsa (%ld caso)\n\n", colapsos);
         ok("o GRAU decide, e amarra o resto: uma equacao do PRIMEIRO grau tem uma raiz e nao tem"
            " par — resolve-se e acabou, e foi por isso que converter uma sequencia noutra saiu"
            " barato: e' transporte, e' MOMENTO linear, e' meia volta. Uma do SEGUNDO tem duas"
            " raizes, sigma e tau, com produto -1 — que e' a Lei 1 — e soma k; e e' o PAR que faz"
-           " a volta fechar, logo e' ai' que a massa vive. E fecha com a espiral: ela cabe em"
-           " duas coordenadas porque a borda e' de grau dois. Nao sao dois factos, e' um",
+           " a volta fechar, logo e' ai' que a massa vive. E o par mede-se pelo MESMO teste nos"
+           " dois graus: conjugar e ver se muda. No grau 2 muda em todos os doze metais; no grau"
+           " 1 devolve a mesma raiz e o par COLAPSA — e e' essa a diferenca, medida e nao"
+           " atribuida",
            maus == 0 && graus == 2 && prod_maus == 0 && ks == 12
-           && coords_espiral == grau_borda);
+           && pares_ok == ks && colapsos == 1);
     }
 
     /* ═══ §Z13 — a massa e' VECTORIAL, e nao escalar ══════════════════════════════
