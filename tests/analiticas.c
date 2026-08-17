@@ -159,8 +159,21 @@ int main(void)
             printf("       %ld :  %2ld    1/%-2ld         %ld/%ld\n", m, D, D, L_n, L_d);
             casos++;
         }
+        /* `L0_n == 3 && L0_d == 4` era o 3 da linha de cima comparado com um 3 e o 4 da
+         * definição comparado com um 4 — dois literais a olhar-se ao espelho, e nenhuma
+         * entrada os fazia falhar. O que a frase afirma é OUTRA coisa: que m = 0 é onde o
+         * vácuo mora, e isso quer dizer que ali D é MÍNIMO — logo Λ = 3/D é MÁXIMO na
+         * família toda. Compara-se por produto cruzado, sem dividir: Λ(0) > Λ(m) é
+         * 3·D(m) > 3·D(0). E é uma desigualdade ESTRITA para todo m ≠ 0, o que só é
+         * verdade porque m² > 0 fora da origem. */
         long D0 = 0*0 + 4, L0_n = 3, L0_d = D0;
-        int no_ponto_fixo = (L0_n == 3 && L0_d == 4);
+        long fora = 0, estritas = 0;
+        for(long m = 1; m <= 5; m++){
+            long D = m*m + 4;
+            fora++;
+            if(L0_n * D > 3 * L0_d) estritas++;      /* Λ(0) > Λ(m), por cruzado */
+        }
+        int no_ponto_fixo = (estritas == fora && fora == 5);
         printf("       -> no PONTO FIXO m = 0:  Lambda = %ld/%ld\n\n", L0_n, L0_d);
         ok("LAMBDA nao fica livre — DERIVA-SE, e de duas coisas que ja' estavam postas: o vacuo"
            " puro tem H^2 = Lambda/3, e a taxa do corpo e' H^2 = 1/D. Igualando, Lambda = 3/D,"

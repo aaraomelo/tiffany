@@ -498,8 +498,49 @@ int main(void){
         puts("          isola E       DIAMANTE          PMMA (o plastico)");
         puts("");
         /* e o que cada canto SERVE — nao e uma tabela bonita, e uma escolha de material */
-        ok("os quatro cantos existem e sao ocupados por materiais REAIS — nao ha canto vazio",
-           nq == 5);
+        /* `nq == 5` era o TAMANHO DO ARRAY comparado com o literal da linha 466: a frase
+         * fala de CANTOS e a asserção media quantos materiais eu tinha escrito. Um sexto
+         * material no mesmo canto fazia-a falhar, e um canto vazio deixava-a passar.
+         *
+         * O que a frase diz mede-se CLASSIFICANDO. E o corte não é meu: sai dos dados.
+         * Ordenam-se os cinco por cada eixo e procura-se o MAIOR salto entre consecutivos
+         * — se ele for de muitas ordens de grandeza, qualquer limiar dentro dele dá a
+         * mesma classificação, e a divisão dos materiais em condutores/isolantes deixa de
+         * depender de mim. Isso mede-se primeiro, e só depois se contam os cantos. */
+        double sg[5], kp[5];
+        for(int i = 0; i < nq; i++){ sg[i] = QUATRO[i].sigma; kp[i] = QUATRO[i].kappa; }
+        for(int i = 0; i < nq; i++) for(int j = i+1; j < nq; j++){
+            if(sg[j] < sg[i]){ double t2 = sg[i]; sg[i] = sg[j]; sg[j] = t2; }
+            if(kp[j] < kp[i]){ double t2 = kp[i]; kp[i] = kp[j]; kp[j] = t2; }
+        }
+        double corte_s = 0, salto_s = 1, corte_k = 0, salto_k = 1;
+        for(int i = 0; i + 1 < nq; i++){
+            if(sg[i] > 0 && sg[i+1]/sg[i] > salto_s){ salto_s = sg[i+1]/sg[i]; corte_s = sqrt(sg[i]*sg[i+1]); }
+            if(kp[i] > 0 && kp[i+1]/kp[i] > salto_k){ salto_k = kp[i+1]/kp[i]; corte_k = sqrt(kp[i]*kp[i+1]); }
+        }
+        printf("\n     o corte SAI DOS DADOS — o maior salto entre valores consecutivos:\n");
+        printf("       sigma:  salto de %.0e vezes,  corte em %.1e S/m\n", salto_s, corte_s);
+        printf("       kappa:  salto de %.0f vezes,  corte em %.1f W/mK\n\n", salto_k, corte_k);
+        ok("e o corte não é escolha minha: há um salto de mais de dez ordens em sigma, e"
+           " qualquer limiar dentro dele classifica os cinco da MESMA maneira",
+           salto_s > 1e10 && salto_k > 3);
+        /* agora sim: os quatro cantos, contados */
+        int ocupado[4] = {0,0,0,0};
+        printf("     %-20s %-12s %-12s canto\n", "material", "conduz E", "conduz calor");
+        for(int i = 0; i < nq; i++){
+            int cE = QUATRO[i].sigma > corte_s, cK = QUATRO[i].kappa > corte_k;
+            int c = cE*2 + cK;
+            ocupado[c]++;
+            printf("     %-20s %-12s %-12s %d\n", QUATRO[i].nome,
+                   cE ? "sim" : "nao", cK ? "sim" : "nao", c);
+        }
+        int cantos_cheios = 0;
+        for(int c = 0; c < 4; c++) if(ocupado[c]) cantos_cheios++;
+        printf("\n     cantos ocupados: %d de 4   (%d, %d, %d, %d materiais em cada)\n\n",
+               cantos_cheios, ocupado[0], ocupado[1], ocupado[2], ocupado[3]);
+        ok("os quatro cantos existem e sao ocupados por materiais REAIS — nao ha canto vazio,"
+           " e quem o diz e a CLASSIFICACAO pelos dois eixos, nao o tamanho da tabela",
+           cantos_cheios == 4);
         puts("        prata:    conduz os dois — o CONDUTOR, e Wiedemann-Franz explica porque");
         puts("                  (sao os MESMOS eletroes a levar carga e calor)");
         puts("        diamante: isola E e conduz calor melhor que qualquer metal — porque ali o");

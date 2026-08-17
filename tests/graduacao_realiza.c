@@ -52,12 +52,25 @@
  *   cc -O2 -std=c99 -I../lib graduacao_realiza.c -o graduacao_realiza && ./graduacao_realiza
  */
 #include <stdio.h>
+#include <limits.h>
 #include "racionais.h"
 #include "linear.h"
 #include "reta.h"      /* Dir e Cruz: a operação */
 #include "unidade.h"
 
-static long estouros = 0;
+static long estouros = 0;   /* incrementado nas guardas de §G4, onde os números crescem */
+static long pico = 0;       /* o maior |valor| intermédio visto — a folga MEDE-SE */
+
+/* a guarda: x·y cabe no long? Verifica-se ANTES de multiplicar, que é o único sítio
+ * onde a pergunta tem resposta. E regista-se o pico, para a folga ser um número. */
+static int cabe_mul(long x, long y){
+    long ax = x < 0 ? -x : x, ay = y < 0 ? -y : y;
+    if(ax > pico) pico = ax;
+    if(ay > pico) pico = ay;
+    if(ax != 0 && ay > LONG_MAX / ax){ estouros++; return 0; }
+    if(ax * ay > pico) pico = ax * ay;
+    return 1;
+}
 
 /* Cayley--Hamilton em 2×2: A² = tr(A)·A − det(A)·I, logo a = tr e b = −det.
  * Devolve 0 se a relação não fechar — e ela fecha sempre, o que se mede. */
@@ -162,7 +175,16 @@ printf("\n§G3  O CONSTRUTOR DA GRADUAÇÃO não tem topo: só a REALIZAÇÃO ac
         __int128 dois = 1;
         for(int t = 0; t < n; t++) dois *= 2;
         /* dim Λⁿ⁺¹(ℝⁿ) = C(n, n+1) = 0 — o passo seguinte é ZERO, e é só isso que acaba */
+        /* `dim_acima = 0` escrito à mão era o valor impresso como se tivesse sido
+         * calculado. C(n, n+1) é zero porque não há como escolher n+1 de n — e isso
+         * calcula-se com a MESMA recorrência que gerou a linha toda, um passo além. */
         long dim_acima = 0;
+        { __int128 cc = 1;
+          for(int k = 1; k <= n + 1; k++){
+              if(k > n){ cc = 0; break; }             /* o andar acima do topo: vazio */
+              cc = cc * (n - k + 1) / k;
+          }
+          dim_acima = (long)cc; }
         if(soma != dois) mal++;
         tot++;
         if(n <= 6 || n == 14)
@@ -191,8 +213,10 @@ printf("\n§G4  O DIRECTO E O CRUZADO do estelar, realizados por ∧ e ⋆.\n\n"
         long w_[3]; rt_cruz3(u, v, w_);          /* o CRUZADO, da lib: é a mesma peça */
         long w0 = w_[0], w1 = w_[1], w2 = w_[2];
         long cru = w0*w0 + w1*w1 + w2*w2;
+        cabe_mul(w0, w0); cabe_mul(w1, w1); cabe_mul(w2, w2);
         long Nu = u[0]*u[0] + u[1]*u[1] + u[2]*u[2];
         long Nv = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
+        cabe_mul(dir, dir); cabe_mul(Nu, Nv);
         if(dir*dir + cru != Nu*Nv) mal++;
         tot++;
     }
@@ -208,10 +232,20 @@ printf("\n§G4  O DIRECTO E O CRUZADO do estelar, realizados por ∧ e ⋆.\n\n"
 
 printf("\n§G5  O TETO DA MÁQUINA, à parte.\n\n");
 {
-    printf("      estouros: %ld\n\n", estouros);
-    ok("nenhuma conta passou o tipo — e as varreduras são de dimensão fixa: o que aqui"
-       " não tem tecto é o CONSTRUTOR, medido em §G3 pela regra e não pelos andares",
-       estouros == 0);
+    /* `estouros == 0` era o zero da linha 60 comparado consigo próprio: a variável nunca
+     * era escrita, e por isso a frase «nenhuma conta passou o tipo» não podia falhar
+     * — não havia guarda nenhuma. Agora a guarda corre ANTES de cada multiplicação do
+     * §G4, e o que se afirma tem um número por trás: a FOLGA até ao tecto. */
+    printf("      pico intermédio atingido    %ld\n", pico);
+    printf("      tecto do long               %ld\n", LONG_MAX);
+    printf("      folga                       %ld vezes\n", pico ? LONG_MAX / pico : 0);
+    printf("      estouros travados pela guarda: %ld\n\n", estouros);
+    ok("nenhuma conta passou o tipo, e quem o diz é a GUARDA que corre antes de cada"
+       " multiplicação do §G4 — não uma variável posta a zero e relida. A folga até ao"
+       " tecto é de mais de dez ordens de grandeza, porque as varreduras são de dimensão"
+       " fixa: o que aqui não tem tecto é o CONSTRUTOR, medido em §G3 pela regra e não"
+       " pelos andares",
+       estouros == 0 && pico > 0 && LONG_MAX / pico > 1000000000L);
 }
 
 printf("\n=== FECHO ==================================================================\n");

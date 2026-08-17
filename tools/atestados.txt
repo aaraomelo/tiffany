@@ -8,7 +8,7 @@ agm_deforma 99c411ca3dffac43 0
 agm_gerador 958387d0ec02fc04 0
 algebra e4923ae8b9efc021 0
 amplifica 0c8270523a2851f2 0
-analiticas 9ef41198052b919a 0
+analiticas 60d32ba7f9ded84e 0
 analog d66dd4fb3d8bf3ff 0
 antissimetrico 5c13e7c1c00d85b1 0
 app_arranca abb24b0fe22e3ae2 0
@@ -66,7 +66,7 @@ clifford_dual 12ecc8250a26cd5a 0
 clifford_pleno 8861e58d2970553f 0
 cobertura 575ec441d3142f8b 0
 cohomologia_ponte 1edbf545ad8f2cd3 0
-colheita e1e08bccde514d5f 0
+colheita 43182b7c88e8d872 0
 colisor_corpos 3be2fa7041eb0275 0
 completo b7ccb59fe44332bc 0
 complexo 1ffd14ad04af24c5 0
@@ -224,7 +224,7 @@ gerador_primos dccf9257d62b61f2 0
 geral db51d25ebdc526d6 0
 gguf 5481759dd5016f9b 0
 gitb c558deae4b86e995 0
-graduacao_realiza d148bf0f42a0c44c 0
+graduacao_realiza fdf218f981b103a1 0
 grau caf191b2f0d4d2a9 0
 grupo ff24076404998111 0
 guarda 6e9ee3952f6cb691 0
