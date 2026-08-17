@@ -61,6 +61,7 @@
 # pode dar P1, e a versão anterior tinha de dar.
 #
 #   python3 tools/tectos.py
+import collections
 import re, glob, sys
 
 # «todo», «todos», «nenhum», «sempre», «qualquer», «sem excepção» — o que promete a gama
@@ -332,6 +333,56 @@ def resto_relido(bloco):
     return achados
 
 
+# ── A ESPÉCIE DO LITERAL: contagem ou régua? ─────────────────────────────────────────
+#
+# Os 723 literais nus do P2 não são todos o mesmo defeito, e tratá-los como se fossem faz
+# a lista inútil. Há duas espécies, e distinguem-se pelo que o literal ENFRENTA:
+#
+#   CONTAGEM   o literal está numa IGUALDADE com um contador incrementado num laço do
+#              mesmo bloco — `casos == 6561`, `pares == 144`. É o total da varredura, e
+#              é legítimo: diz quantos casos entraram, o que impede a asserção de passar
+#              por a varredura estar vazia. MAS devia ser uma EXPRESSÃO e não o produto já
+#              feito: escrevi 38416 onde eram 15⁴ = 50625, e 59535 onde eram 11·9⁴ = 72171
+#              — duas vezes no mesmo dia. A conta que não erra é a que o compilador faz.
+#
+#   RÉGUA      o literal está numa DESIGUALDADE contra um valor calculado — `< 1e-9`,
+#              `> 0.5`. Esse é o que a casa persegue: ou vem de uma fórmula sobre o
+#              objecto, ou foi escolhido até passar.
+#
+# E há uma terceira, pior que as duas: o literal DECIMAL numa igualdade, que é a
+# referência copiada — o `1.9248473002` do selberg.c, que era o traço 7 visto por um log.
+INCR = re.compile(r'\b([A-Za-z_]\w*)\s*(?:\+\+|\+=\s*1\b)')
+
+
+def especie(bloco, cond, nus):
+    """contagem, EXPRESSAO, regua ou copiada — e a expressao e' a forma boa."""
+    contadores = set(INCR.findall(bloco))
+    tem_decimal = any('.' in n or 'e' in n.lower() for n in nus)
+    for n in nus:
+        # dentro de um PRODUTO ou SOMA? Entao e' uma expressao de contagem, e e' a forma
+        # que se quer: `11L*9*9*9*9` em vez de `72171`, porque a conta que nao erra e' a
+        # que o compilador faz. Nao e' defeito — e' o CONSERTO do defeito.
+        if re.search(r'[*+]\s*' + re.escape(n) + r'\b', cond) or \
+           re.search(r'\b' + re.escape(n) + r'[Ll]?\s*[*+]', cond):
+            return 'expressao'
+        for c in contadores:
+            if re.search(r'\b' + re.escape(c) + r'\s*==\s*' + re.escape(n) + r'\b', cond) or \
+               re.search(r'\b' + re.escape(n) + r'\s*==\s*' + re.escape(c) + r'\b', cond):
+                return 'contagem'
+    if re.search(r'==', cond) and tem_decimal:
+        return 'COPIADA'
+    if re.search(r'[<>]', cond):
+        return 'REGUA'
+    return 'outra'
+
+
+# ── E AS REGUAS DECIMAIS, que o NU nao via ───────────────────────────────────────────
+# O `NU` so' apanha inteiros a seguir a `==` ou `!=`. As reguas mais perigosas nao sao
+# essas: sao os decimais numa DESIGUALDADE — `< 1e-9`, `> 0.5` —, porque um limiar decimal
+# nunca vem de uma contagem. Procuram-se a' parte, e sao a lista que interessa ler.
+REGUA_DEC = re.compile(r'[<>]=?\s*([0-9]*\.[0-9]+(?:[eE][-+]?\d+)?|[0-9]+[eE][-+]?\d+)')
+
+
 def main():
     fich = sorted(glob.glob('tests/*.c') + glob.glob('tests/*.js') +
                   glob.glob('tools/*.c'))
@@ -361,25 +412,40 @@ def main():
                 fim = txt.rfind('"')
                 cond = txt[fim+1:] if fim >= 0 else txt
                 nus = [n for n in NU.findall(cond) if int(n) >= 3]
+                decs = REGUA_DEC.findall(cond)
+                if decs:
+                    linha = codigo[:ini + v.start()].count('\n') + 1
+                    p2.append((f, linha, sorted(set(decs)), 'REGUA decimal'))
                 if nus:
                     linha = codigo[:ini + v.start()].count('\n') + 1
-                    p2.append((f, linha, sorted(set(nus), key=int)))
+                    p2.append((f, linha, sorted(set(nus), key=int), especie(bl, cond, nus)))
     print(f"  {len(fich)} ficheiros, {vistos} blocos\n")
     print(f"  P1 — JANELA DESLIZANTE (o defeito exacto): {len(p1)}")
     for f, l, t in p1:
         print(f"      {f}:{l}   {t}")
     if not p1:
         print("      nenhuma — nenhum laço começa a contar para trás a partir do fim")
-    fich_p2 = len({f for f, _, _ in p2})
+    fich_p2 = len({f for f, *_ in p2})
+    por_esp = collections.Counter(e for *_, e in p2)
     print(f"\n  P2 — literal NU na condição do veredicto: {len(p2)}"
           f" em {fich_p2} ficheiros")
-    for f, l, t in p2[:30]:
-        print(f"      {f}:{l}   {', '.join(t)}")
-    if len(p2) > 30:
-        print(f"      ... e mais {len(p2)-30}")
-    print("\n  Para cada um a pergunta é a mesma: esse número vem de uma FÓRMULA sobre o"
-          "\n  objecto, ou foi calculado à mão e escrito? Se o objecto mudar, ele muda"
-          " sozinho?")
+    print("      por espécie: " + ", ".join(f"{k} {v}" for k, v in por_esp.most_common()))
+    for esp in ('COPIADA', 'REGUA decimal', 'REGUA'):
+        do_esp = [x for x in p2 if x[3] == esp]
+        if not do_esp:
+            continue
+        print(f"\n      ── {esp} ({len(do_esp)}) " + "─"*40)
+        for f, l, t, _ in do_esp[:22]:
+            print(f"      {f}:{l}   {', '.join(t)}")
+        if len(do_esp) > 22:
+            print(f"      ... e mais {len(do_esp)-22}")
+    print("\n  CONTAGEM é o total da varredura e é legítimo — diz quantos casos entraram, e"
+          "\n  sem ele a asserção passaria por a varredura estar vazia. Mas devia ser uma"
+          "\n  EXPRESSÃO e não o produto já feito: 15⁴ e não 50625, porque a conta que não"
+          "\n  erra é a que o compilador faz."
+          "\n  RÉGUA é o que esta casa persegue: vem de uma fórmula sobre o objecto, ou foi"
+          "\n  escolhida até passar?"
+          "\n  COPIADA é a pior: um decimal numa igualdade é uma referência escrita à mão.")
     fich_p3 = len({f for f, *_ in p3})
     print(f"\n  P3 — a quantidade dividida por si própria: {len(p3)}"
           f" em {fich_p3} ficheiros")
