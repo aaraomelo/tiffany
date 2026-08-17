@@ -1435,7 +1435,14 @@ static int rt_ordem(RtPasso f, const long *e0, int n, int tecto){
 /* O PERÍODO DO SHIFT de p/q na base b: o estado é o RESTO, e ele vive em {0,…,q−1}. Com
  * mdc(b,q) = 1 o shift é invertível e o período é a ordem de b em (ℤ/q)*; sem isso o
  * denominador encolhe primeiro (thm:cantor-julia), e o que se devolve é o período do que
- * sobra. Devolve 0 se o racional for inteiro (resto zero: não há palavra a ciclar). */
+ * sobra. Devolve 0 se o racional for inteiro (resto zero: não há palavra a ciclar).
+ *
+ * E A REDUÇÃO PELO MDC É UMA GUARDA REDUNDANTE — dito, porque foi medido. Apontei-lhe um
+ * gume (tirar a redução) e ele NÃO mordeu, nem depois de a varredura passar a incluir
+ * fracções não reduzidas. A razão é estrutural: o shift sobre os múltiplos de g em ℤ/q é
+ * isomorfo ao shift em ℤ/(q/g), logo o período é o mesmo com ou sem reduzir. Fica porque
+ * torna o estado canónico — não porque mude a resposta. Uma mutação que sobrevive é ou um
+ * gap meu ou uma guarda que está certa, e esta é do segundo tipo. */
 static int rt_periodo_shift(long p, long q, long base, int tecto){
     if(q <= 0 || base < 2) return 0;
     long g = rt_mdc(p < 0 ? -p : p, q); if(g < 1) g = 1;
