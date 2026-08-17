@@ -63,8 +63,40 @@ static double complex el_rlc(double R, double L, double C, double w){
 static double el_ressonancia(double L, double C){ return 1.0/sqrt(L*C); }
 static double el_fp(double complex Z){ return creal(Z)/cabs(Z); }   /* cos(arg Z) */
 static double el_Z0(double L, double C){ return sqrt(L/C); }        /* o metal, La Hire */
+
+/* ── AS MESMAS TRÊS, AO QUADRADO — e é aí que as perguntas vivem ─────────────────────
+ *
+ * As três de cima formam uma raiz, e nenhuma pergunta desta casa precisa dela:
+ *
+ *      fp² = Re(Z)²/|Z|²        e |Z|² = Re² + Im², sem cabs
+ *      Z₀² = L/C                uma FRACÇÃO, e comparar Z₀ é comparar L/C
+ *      ω₀² = 1/(LC)             idem
+ *
+ * «Comparar quadrados dispensa sqrt», e a razão é um teorema e não uma economia: x ↦ x²
+ * é monótona nos não negativos, logo a ORDEM das raízes é a ordem dos quadrados. E o
+ * factor de potência unitário é um dos TRÊS NOMES de |det| = 1 — a mesma condição que
+ * faz o cruzado atravessar a órbita no `thm:cruzado-potencia` —, logo fp = 1 é fp² = 1,
+ * uma igualdade que não passa por raiz nenhuma.
+ *
+ * As de cima ficam para a linha que IMPRIME, que é o sítio delas. */
+static double el_fp2(double complex Z){
+    double re = creal(Z), im = cimag(Z);
+    double n2 = re*re + im*im;
+    return n2 == 0 ? 0 : (re*re)/n2;
+}
+static double el_Z0q(double L, double C){ return L/C; }             /* Z₀², a fracção */
+static double el_w0q(double L, double C){ return 1.0/(L*C); }       /* ω₀² */
 /* a régua do RLC — a MESMA (B,C) do resto do projeto: L·s² + R·s + 1/C = 0 */
 static double el_delta(double R, double L, double C){ return R*R - 4.0*L/C; }
+
+/* E O SINAL DO DISCRIMINANTE NÃO PRECISA DA DIVISÃO. Δ = R² − 4L/C, e com C > 0 o sinal
+ * é o de R²·C − 4L — uma expressão sem quociente, e INTEIRA se R, L e C o forem na
+ * unidade escolhida. É o mesmo gesto do §M3 do microfluidica e do §D? do dominios: a
+ * classe lê-se no sinal, e o sinal não precisa de formar o número. */
+static int el_delta_sinal(double R, double L, double C){
+    double v = R*R*C - 4.0*L;
+    return C <= 0 ? 0 : (v > 0 ? 1 : (v < 0 ? -1 : 0));
+}
 
 /* ---- Wheatstone: a medida por ANULAÇÃO ------------------------------------------------- */
 /* A convenção dos braços, e ela tem de ser a MESMA nas duas funções:

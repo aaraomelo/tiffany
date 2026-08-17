@@ -21,6 +21,7 @@
 #include <string.h>
 #include "eletrico.h"
 #include "unidade.h"
+#include "reta.h"
 
 int main(void){
 printf("\n=== O CORPO TRANSISTOR: RESOLVER, SIMULAR, VALIDAR =======================\n");
@@ -115,7 +116,7 @@ printf("\n§E2  As multiplicidades +1, 0, -1 — e L ⋈ C é a dualidade.\n\n")
     printf("              média geométrica √(|Z_L|·|Z_C|) = %.6f\n", geo);
     printf("              e √(L/C) = Z₀ = %.6f      (o metal, La Hire)\n\n", el_Z0(L,C));
     ok("o par L ⋈ C soma 0 e a sua média geométrica É Z₀ = √(L/C), o metal",
-       fabs(soma) < 1e-15 && fabs(geo - el_Z0(L,C)) < 1e-9);
+       fabs(soma) < 1e-15 && fabs(geo*geo - el_Z0q(L,C)) < 1e-9*el_Z0q(L,C));
     printf("      A tríade fecha: indutor (+1) — diodo (log, o operador) — capacitor (-1). O\n");
     printf("      +1 deriva, o -1 integra, e o log é quem atravessa entre os dois.\n");
 }
@@ -134,7 +135,8 @@ printf("\n§E3  O RLC: a ressonância é o CASAMENTO, e Δ dá as três classes.
         double complex Z = el_rlc(R,L,C,w0);
         printf("      %-7.0f %+.6f %+.6fj    %+.1e  %.9f\n", R, creal(Z), cimag(Z),
                cimag(Z), el_fp(Z));
-        if(fabs(cimag(Z)) > 1e-9 || fabs(el_fp(Z) - 1.0) > 1e-12) mal++;
+        /* fp = 1 é fp² = 1, e fp² não forma raiz nenhuma: é Re²/(Re²+Im²) */
+        if(fabs(cimag(Z)) > 1e-9 || fabs(el_fp2(Z) - 1.0) > 1e-12) mal++;
     }
     printf("\n");
     ok("na ressonância Im Z = 0 e FP = 1 — o +1 cancela o -1, e nada volta", mal == 0);
@@ -148,15 +150,57 @@ printf("\n§E3  O RLC: a ressonância é o CASAMENTO, e Δ dá as três classes.
         { Rc,      0, "CRÍTICO",         " 0 (fronteira)"  },
         { Rc*2.0, +1, "sobreamortecido", "+1 (hipérbole)"  },
     };
+    int malS = 0;
     for(int j = 0; j < 3; j++){
         double D = el_delta(q[j].R, L, C);
         int med = (D < -1e-6) ? -1 : (D > 1e-6) ? +1 : 0;
+        /* a SEGUNDA ROTA: o sinal de R²C − 4L, sem a divisão por C e sem o limiar de 1e-6
+         * — duas versões que ninguém confronta divergem, e é por isso que a comparação
+         * está aqui e não na confiança. */
+        int sg = el_delta_sinal(q[j].R, L, C);
         printf("      %-9.2f %+-17.4f %-17s %s\n", q[j].R, D, q[j].cl, q[j].e2);
         if(med != q[j].esp) malC++;
+        if(j != 1 && sg != q[j].esp) malS++;      /* o crítico conta-se à parte, abaixo */
     }
-    printf("\n      R crítico = 2√(L/C) = %.4f Ω\n\n", Rc);
-    ok("as três classes do Δ estão na bancada, e o crítico É ε² = 0 (raiz dupla)",
-       malC == 0);
+    printf("\n      R crítico = 2√(L/C) = %.4f Ω\n", Rc);
+
+    /* E O CRÍTICO NÃO É ATINGÍVEL AQUI, e o limiar de 1e-6 escondia-o. Rc = 2√(L/C) com
+     * L/C = 1000, e √1000 é IRRACIONAL — logo Rc não é um número desta máquina, e
+     * Rc²·C − 4L não dá zero exacto. A fronteira só é exacta quando L/C é QUADRADO
+     * PERFEITO, e isso decide-se com a `rt_raiz_exacta`, em inteiros:
+     *
+     *      L/C = 1000  não é quadrado  →  o crítico é irracional, e não se atinge
+     *      L/C = 10000 = 100²          →  Rc = 200 EXACTO, e Δ é ZERO exacto
+     *
+     * É o mesmo teorema do ponto fixo (`thm:fixo-dual`): a fronteira cai no racional sse o
+     * discriminante é quadrado perfeito. O limiar de 1e-6 não estava a medir a fronteira —
+     * estava a esconder que ela não é atingível com estes valores. */
+    long razao = (long)(L/C + 0.5), r;
+    int e_quadrado = rt_raiz_exacta(razao, &r);
+    int sg_crit = el_delta_sinal(Rc, L, C);
+    /* e a mesma bancada com L/C quadrado: aí o crítico é exacto e o sinal dá ZERO */
+    double L2 = 1e-3, C2 = 1e-7;                  /* L/C = 10000 = 100² */
+    long razao2 = (long)(L2/C2 + 0.5), r2;
+    int e_quadrado2 = rt_raiz_exacta(razao2, &r2);
+    double Rc2 = 2.0*(double)r2;                  /* = 200, sem formar raiz nenhuma */
+    int sg_crit2 = el_delta_sinal(Rc2, L2, C2);
+    printf("      e a FRONTEIRA so' e' exacta se L/C for QUADRADO PERFEITO: aqui L/C = %ld,\n"
+           "      que %s quadrado — logo Rc e' irracional e o sinal sem limiar da' %+d, nao 0.\n"
+           "      Com L/C = %ld = %ld², Rc = %.0f EXACTO e o sinal da' %+d.\n\n",
+           razao, e_quadrado ? "E'" : "NAO e'", sg_crit, razao2, r2, Rc2, sg_crit2);
+
+    ok("as três classes do Δ estão na bancada, e o crítico É ε² = 0 (raiz dupla). E a classe"
+       " sai por DUAS rotas nos dois casos NAO criticos: o Δ = R² − 4L/C, e o SINAL de"
+       " R².C − 4L sem a divisao e sem limiar — com C > 0 os dois tem o mesmo sinal",
+       malC == 0 && malS == 0);
+
+    ok("MAS O CRITICO NAO E' ATINGIVEL AQUI, e o limiar de 1e-6 escondia-o: Rc = 2.raiz(L/C)"
+       " com L/C = 1000, e raiz(1000) e' IRRACIONAL — logo Rc nao e' um numero desta"
+       " maquina, e Rc².C - 4L nao da' zero exacto. A fronteira so' e' exacta quando L/C e'"
+       " QUADRADO PERFEITO, decidido pela `rt_raiz_exacta` em inteiros: com L/C = 10000 = 100²"
+       " o Rc vale 200 sem se formar raiz nenhuma, e o sinal da' ZERO. E' o mesmo teorema do"
+       " ponto fixo — a fronteira cai no racional sse o discriminante e' quadrado perfeito",
+       !e_quadrado && sg_crit != 0 && e_quadrado2 && r2 == 100 && sg_crit2 == 0);
     printf("      A ressonância é a raiz dupla do dual.c, e o casamento FP = 1 é o cone nulo\n");
     printf("      do fisica.c §P5 — σ = 1, nada reflete, toda a potência passa. Três nomes,\n");
     printf("      um lugar.\n");

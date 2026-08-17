@@ -162,7 +162,7 @@ dualsort_banco 32ec1211d142f264 0
 duas_pontes a50961f0657e4654 0
 edo 05c7da22e0a16ca2 0
 einstein a8ce9f96f9b3109a 0
-eletrico 3367df7bc35a0e03 0
+eletrico 3210e88711ee862d 0
 elipses f2e2baa850da0069 0
 eliptica_viviani 6202e1b445210d57 0
 encaixa d030c3c2f3c4e01c 0
