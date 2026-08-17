@@ -117,11 +117,29 @@ esac }
 # nenhuma outra ocupa o lugar dela: um medidor com direito a falhar não é medido.
 negativo_esperado() { return 1; }
 
-# a assinatura de um medidor: o conteúdo do fonte e os argumentos com que corre.
-# Nada de mtime — a régua é a obra, não o relógio.
+# a assinatura de um medidor: o conteúdo do fonte, OS HEADERS DE QUE ELE DEPENDE, e os
+# argumentos com que corre. Nada de mtime — a régua é a obra, não o relógio.
 # O .js entra pela MESMA porta que o .c e o .py: uma linguagem é uma realização, e o que a
 # bateria conta é o predicado — resíduo 0 —, não o substrato em que corre.
-assinatura() { { cat "$1" 2>/dev/null || cat "${1%.c}.py" 2>/dev/null || cat "${1%.c}.js"; printf '%s' "$2"; } | sha256sum | cut -c1-16; }
+#
+# OS HEADERS ENTRARAM DEPOIS, E O BURACO ERA GRANDE. A assinatura era só o fonte, portanto
+# mudar lib/unidade.h ou lib/reta.h NÃO reabria semente nenhuma: a bateria dava verde sobre
+# resultados derivados de uma lib que já não existia. Provado por experiência — acrescentei
+# uma linha a lib/unidade.h e a bateria respondeu «0 sementes abertas agora».
+#
+# É o mesmo defeito que a atestação existe para impedir, um andar acima: ela guardava o
+# resultado sem guardar de que CÓDIGO ele saiu. As dependências vêm do compilador (cc -MM),
+# que é quem sabe: nada de listas à mão, que envelhecem caladas.
+assinatura() {
+  { cat "$1" 2>/dev/null || cat "${1%.c}.py" 2>/dev/null || cat "${1%.c}.js"
+    case "$1" in *.c)
+      cc -MM -I "$RAIZ/lib" -I "$RAIZ/tests" -I "$RAIZ/tools" "$1" 2>/dev/null \
+        | tr ' \\' '\n\n' | grep '\.h$' | sort -u \
+        | while read -r h; do [ -f "$h" ] && cat "$h"; done ;;
+    esac
+    printf '%s' "$2"
+  } | sha256sum | cut -c1-16
+}
 
 # --- o selo: ‖Fx‖² = n‖x‖² por Parseval, sobre a membrana das assinaturas ---------------
 # Soma de QUADRADOS, não XOR: quadrado não cancela, e é isso que impede duas mudanças de se
@@ -143,7 +161,7 @@ if [ "$SO_SELO" -eq 1 ]; then
   rm -f "$LISTA"; exit 0
 fi
 
-verde=0; negativo=0; falha=0; total=0; rodados=0; reusados=0; uni_ok=0; uni_ma=0; uni_neg=0; grosso=0
+verde=0; negativo=0; falha=0; total=0; rodados=0; reusados=0; uni_ok=0; uni_ma=0; uni_neg=0; uni_sal=0; grosso=0
 printf '%-26s %-9s %s\n' "MEDIDOR" "SAÍDA" "VEREDITO"
 printf '%s\n' "-------------------------------------------------------------------------"
 
@@ -182,11 +200,14 @@ for f in $(cat "$LISTA"); do
     # calada: nenhuma asserção o apanhava, porque o número que descia não era o de ninguém.
     u_ok=$(grep -ac '^#UNIT ok' "$out" 2>/dev/null); u_ok=${u_ok:-0}
     u_ma=$(grep -ac '^#UNIT falha' "$out" 2>/dev/null); u_ma=${u_ma:-0}
-    if [ "$u_ok" -eq 0 ] && [ "$u_ma" -eq 0 ]; then
+    u_sa=$(grep -ac '^#UNIT salta' "$out" 2>/dev/null); u_sa=${u_sa:-0}
+    # e a unidade GROSSA nao se aplica a quem SALTOU: um medidor que emitiu 16 saltadas
+    # disse exactamente o que fez, e conta-lo como uma unidade grossa era apaga-lo.
+    if [ "$u_ok" -eq 0 ] && [ "$u_ma" -eq 0 ] && [ "${u_sa:-0}" -eq 0 ]; then
       if [ "$r" -eq 0 ]; then u_ok=1; else u_ma=1; fi
       grosso=$((grosso + 1))
     fi
-    uni_ok=$((uni_ok + u_ok)); uni_ma=$((uni_ma + u_ma))
+    uni_ok=$((uni_ok + u_ok)); uni_ma=$((uni_ma + u_ma)); uni_sal=$((uni_sal + ${u_sa:-0}))
     [ "$u_ok$u_ma" != "00" ] && cert="$u_ok unidade(s), $u_ma falha(s) — ${cert:-ok}"
     # EXIT E UNIDADES TÊM DE CONCORDAR. O cards saiu 0 com duas #UNIT falha — um
     # `long falhas` local no main sombreava o contador do unidade.h e o verde era
@@ -227,11 +248,14 @@ for f in $(cat "$LISTA"); do
     # calada: nenhuma asserção o apanhava, porque o número que descia não era o de ninguém.
     u_ok=$(grep -ac '^#UNIT ok' "$out" 2>/dev/null); u_ok=${u_ok:-0}
     u_ma=$(grep -ac '^#UNIT falha' "$out" 2>/dev/null); u_ma=${u_ma:-0}
-    if [ "$u_ok" -eq 0 ] && [ "$u_ma" -eq 0 ]; then
+    u_sa=$(grep -ac '^#UNIT salta' "$out" 2>/dev/null); u_sa=${u_sa:-0}
+    # e a unidade GROSSA nao se aplica a quem SALTOU: um medidor que emitiu 16 saltadas
+    # disse exactamente o que fez, e conta-lo como uma unidade grossa era apaga-lo.
+    if [ "$u_ok" -eq 0 ] && [ "$u_ma" -eq 0 ] && [ "${u_sa:-0}" -eq 0 ]; then
       if [ "$r" -eq 0 ]; then u_ok=1; else u_ma=1; fi
       grosso=$((grosso + 1))
     fi
-    uni_ok=$((uni_ok + u_ok)); uni_ma=$((uni_ma + u_ma))
+    uni_ok=$((uni_ok + u_ok)); uni_ma=$((uni_ma + u_ma)); uni_sal=$((uni_sal + ${u_sa:-0}))
     [ "$u_ok$u_ma" != "00" ] && cert="$u_ok unidade(s), $u_ma falha(s) — ${cert:-ok}"
     # EXIT E UNIDADES TÊM DE CONCORDAR. O cards saiu 0 com duas #UNIT falha — um
     # `long falhas` local no main sombreava o contador do unidade.h e o verde era
@@ -274,11 +298,14 @@ for f in $(cat "$LISTA"); do
   # dois medidores de oitenta e três. Nada de || aqui.
   u_ok=$(grep -ac '^#UNIT ok' "$out" 2>/dev/null); u_ok=${u_ok:-0}
   u_ma=$(grep -ac '^#UNIT falha' "$out" 2>/dev/null); u_ma=${u_ma:-0}
+  u_sa=$(grep -ac '^#UNIT salta' "$out" 2>/dev/null); u_sa=${u_sa:-0}
   # O MÍNIMO HONESTO. Um punhado de medidores usa idioma próprio e não emite unidade fina.
   # Em vez de os deixar contando ZERO — o que faria a soma de unidades mentir por omissão —
   # cada um conta UMA: o próprio veredito de saída. É grosso, e é dito que é grosso; o que
   # não se pode é somar 0 e parecer que não havia nada a contar.
-  if [ "$u_ok" -eq 0 ] && [ "$u_ma" -eq 0 ]; then
+  # e nao se aplica a quem SALTOU: um medidor que emitiu 16 saltadas disse exactamente o
+  # que fez, e conta-lo como uma unidade grossa era apaga-lo.
+  if [ "$u_ok" -eq 0 ] && [ "$u_ma" -eq 0 ] && [ "${u_sa:-0}" -eq 0 ]; then
     if [ "$r" -eq 0 ] || { [ "$r" -eq 1 ] && negativo_esperado "$base"; }; then u_ok=1; else u_ma=1; fi
     grosso=$((grosso + 1))
   fi
@@ -287,6 +314,7 @@ for f in $(cat "$LISTA"); do
   # mesma saída, o que é incoerência e não informação. Vai para o seu próprio balde.
   if negativo_esperado "$base"; then uni_ok=$((uni_ok + u_ok)); uni_neg=$((uni_neg + u_ma))
   else uni_ok=$((uni_ok + u_ok)); uni_ma=$((uni_ma + u_ma)); fi
+  uni_sal=$((uni_sal + ${u_sa:-0}))
   # ${ver:-ok} e nao ${ver}: o ramo .py/.js ja' escrevia ${cert:-ok}, e este nao. Um medidor
   # que nao imprima nenhum dos tokens do veredicto ("RESIDUO 0", "FALHOU", ...) saia' com um
   # travessao pendurado — "VERDE  11 unidade(s), 0 falha(s) —". As duas metades do mesmo if,
@@ -392,6 +420,10 @@ if [ "$total" -ne "$esperados" ]; then
 fi
 printf 'selo %s : %d sementes abertas agora, %d já atestadas (nada a re-derivar)\n' "$(selo)" "$rodados" "$reusados"
 printf 'unidades: %d passaram, %d falharam, %d negativas por projeto (nas abertas agora)\n' "$uni_ok" "$uni_ma" "$uni_neg"
+# as SALTADAS vao a parte e com motivo: sao as que dependem de um recurso de FORA (a fonte
+# instalada, o modelo no disco). Sem esta linha o total mudava com a maquina, e o total e o
+# detector de um medidor escrito por cima — ver lib/unidade.h, funcao saltou().
+[ "${uni_sal:-0}" -gt 0 ] && printf 'unidades SALTADAS por falta de recurso externo: %d (contam para o total, e dizem porque)\n' "$uni_sal"
 [ "$grosso" -gt 0 ] && printf '  (%d desses medidores contam 1 unidade GROSSA — o exit — por ainda\n   usarem idioma próprio. Não é fineza; é o mínimo para a soma não mentir.)\n' "$grosso"
 printf 'saída de cada medidor em %s/ — para ver outra fatia LEIA O ARQUIVO, não rode de novo.\n' "$SAIDA"
 rm -f "$LISTA"

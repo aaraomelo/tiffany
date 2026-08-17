@@ -5953,12 +5953,25 @@ static long extrai(const char *pdf, long n, char *out, long lim){
 
 /* ───────────────────────────────────────────────────────────── o programa */
 
-static int falhas = 0, feitas = 0;
+static int falhas = 0, feitas = 0, saltadas = 0;
 static void ok(const char *q, int cond){
     feitas++; if(!cond) falhas++;
     /* o idioma da bateria: sem isto ela conta UMA unidade grossa (o exit) em vez das que ha */
     printf("#UNIT %s %s\n", cond ? "ok" : "falha", q);
     printf("  [%s] %s\n", cond ? "ok" : "FALHA", q);
+}
+/* A TERCEIRA PALAVRA — a mesma de lib/unidade.h, e por isso repetida aqui: este ficheiro
+ * tem a SUA propria implementacao de ok(), porque a da lib despeja por atexit e aqui a
+ * ordem da saida importa. As duas falam a mesma lingua com a bateria, e agora tambem esta.
+ *
+ * Ela serve o caso em que a medida nao se faz por falta de um recurso de FORA — a fonte
+ * que nao esta instalada. Antes isso era um puts, e um puts nao entra em conta nenhuma:
+ * numa maquina sem a Liberation o medidor emitia nove unidades a menos e o total da
+ * bateria descia sem se saber porque. */
+static void saltou(const char *q, const char *porque){
+    saltadas++;
+    printf("#UNIT salta %s  [%s]\n", q, porque);
+    printf("  [salta] %s — NAO MEDIDO: %s\n", q, porque);
 }
 
 

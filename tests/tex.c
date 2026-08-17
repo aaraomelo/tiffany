@@ -1493,8 +1493,14 @@ int main(int argc, char **argv){
     {
         carta_abre();
         if(!CARTA){
+            /* «dito em vez de passar em silencio» era um puts, e um puts nao entra em conta
+             * nenhuma: numa maquina sem a Liberation este medidor emitia NOVE unidades a
+             * menos e o total da bateria descia sem que se soubesse porque. Agora as nove
+             * ficam CONTADAS como saltadas, com o motivo — ver lib/unidade.h. */
             puts("  [aviso] a Liberation Sans nao esta neste sistema: a largura vem da TABELA.");
-            puts("          Nao ha medida a fazer aqui, e e dito em vez de passar em silencio.\n");
+            for(int i = 0; i < 9; i++)
+                saltou("§X7 a largura medida na fonte real",
+                       "a Liberation Sans nao esta instalada");
         } else {
             /* 1. os dois caminhos, agora no USO real e nao no medidor do lado */
             /* Eu tinha escrito aqui "iguais == 95 && difs == 0" — igualdade EXATA — e falhou.

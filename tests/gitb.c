@@ -129,21 +129,54 @@ static void secao_G2(void){
         char alvo[700]; snprintf(alvo, sizeof alvo, "%s/%s", GITDIR, buf + 5);
         char sha[128];
         int m = le_pedaco(alvo, sha, (int)sizeof sha);
+        /* OS DOIS RAMOS MEDIAM COISAS DIFERENTES, E EM NÚMERO DIFERENTE: com a ref solta
+         * saíam DUAS asserções e com ela empacotada UMA. Medido num clone: `git pack-refs`
+         * levava este medidor de 10 para 9, e a bateria de 501 para 500.
+         *
+         * Isso não é uma imprecisão: o TOTAL da bateria é o detector de eu ter escrito por
+         * cima de um medidor — foi ele que salvou o tests/potencia.c. Um total que muda
+         * sozinho quando o git compacta (e o `git gc` compacta-as por sua conta) cega esse
+         * detector: eu veria 500 e procuraria um medidor destruído que não existia.
+         *
+         * O arranjo é de ARRUMAÇÃO e a tese é a mesma nos dois: o HEAD é uma indirecção de
+         * dois níveis e o segundo nível é o ENDEREÇO em 40 hex. Então lê-se o sha onde ele
+         * estiver — solto no ficheiro, ou na linha do packed-refs que nomeia esta ref — e
+         * aplicam-se os MESMOS dois testes. Duas asserções nos dois casos. */
         if(m <= 0){
-            /* pode estar empacotado em packed-refs — e isso também é o banco a compactar */
             char pr[600]; snprintf(pr, sizeof pr, "%s/packed-refs", GITDIR);
             char pbuf[4096];
             int k = le_pedaco(pr, pbuf, (int)sizeof pbuf);
-            printf("     a ref está empacotada (packed-refs, %d bytes lidos)\n", k > 0 ? k : 0);
-            ok("a ref existe — solta ou empacotada, é o mesmo slot", k > 0);
+            sha[0] = 0;
+            if(k > 0){
+                pbuf[k < (int)sizeof pbuf ? k : (int)sizeof pbuf - 1] = 0;
+                /* a linha do packed-refs é «<40 hex> <caminho da ref>» */
+                for(char *l = pbuf; l && *l; ){
+                    char *fim = strchr(l, '\n');
+                    if(fim) *fim = 0;
+                    if(*l != '#' && *l != '^'){
+                        char *esp = strchr(l, ' ');
+                        if(esp && !strcmp(esp + 1, buf + 5)){
+                            *esp = 0;
+                            snprintf(sha, sizeof sha, "%s", l);
+                            break;
+                        }
+                    }
+                    l = fim ? fim + 1 : 0;
+                }
+            }
+            printf("     a ref está EMPACOTADA (packed-refs, %d bytes)  →  %s\n",
+                   k > 0 ? k : 0, sha[0] ? sha : "(nao achada)");
         } else {
             for(char *p = sha; *p; p++) if(*p == '\n') *p = 0;
-            printf("     %s  →  %s   (%d hex)\n", buf + 5, sha, (int)strlen(sha));
-            ok("o segundo nível guarda 40 hex — é o endereço, e é aí que a indireção para",
-               strlen(sha) == 40 && e_hex(sha, 40));
-            ok("e são exatamente DOIS níveis: ref → endereço, e o endereço não é outra ref",
-               !e_hex(sha, 5) || sha[0] != 'r');
+            printf("     %s  →  %s   (%d hex)  — ref SOLTA\n", buf + 5, sha, (int)strlen(sha));
         }
+        /* e daqui para baixo é o MESMO teste, venha o endereço de onde vier */
+        ok("o segundo nível guarda 40 hex — é o endereço, e é aí que a indireção para."
+           " Solta ou empacotada, é o mesmo slot: o que muda é a ARRUMAÇÃO, e o medidor"
+           " não pode mudar de tamanho com ela",
+           strlen(sha) == 40 && e_hex(sha, 40));
+        ok("e são exatamente DOIS níveis: ref → endereço, e o endereço não é outra ref",
+           !e_hex(sha, 5) || sha[0] != 'r');
     }
 
     printf("\n     na nossa ISA isto é literal:\n");

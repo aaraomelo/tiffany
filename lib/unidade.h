@@ -76,6 +76,35 @@ static void uni_poe(const char *rot, int passou){
     uni_n++;
 }
 
+/* SALTOU — a terceira palavra, e ela faltava.
+ *
+ * Havia duas: `ok` e `falha`. Mas um medidor tem um terceiro estado — NAO MEDIU, e por uma
+ * razao de FORA: a fonte nao esta instalada, o modelo .gguf nao esta no disco, o multicast
+ * nao respondeu. Esses ramos imprimiam um aviso e nao emitiam unidade nenhuma, e o total
+ * da bateria MUDAVA com a maquina.
+ *
+ * Isso nao e uma imprecisao: o total e o detector de eu ter escrito por cima de um medidor
+ * — foi ele que salvou o tests/potencia.c. Um total que muda sozinho cega-o. Medido no
+ * gitb.c: `git pack-refs` levava-o de 10 para 9 unidades, e a bateria de 501 para 500.
+ *
+ * Com `saltou`, a unidade EXISTE e diz-se do que precisava. O total passa a ser
+ * ok + falha + saltado, que e o mesmo em qualquer maquina, e o que varia fica CONTADO e
+ * com motivo — que e a licao do medidor que nunca mediu: a atestacao guarda o resultado, e
+ * o motivo tem de ir junto. */
+static long saltadas = 0;
+static void saltou(const char *r, const char *porque){
+    printf("      %-58s — NAO MEDIDO: %s\n", r, porque);
+    saltadas++;
+    if(!uni_registado){
+        snprintf(uni_cam, sizeof uni_cam, "/tmp/uni_%d.txt", (int)getpid());
+        uni_f = fopen(uni_cam, "w+");
+        atexit(uni_rodape);
+        uni_registado = 1;
+    }
+    if(uni_f) fprintf(uni_f, "#UNIT salta  %s  [%s]\n", r, porque);
+    uni_n++;
+}
+
 /* o idioma dos 29: a afirmação em português É o endereço */
 static void ok(const char *r, int c){
     printf("      %-58s %s\n", r, c ? "sim ✓" : "NÃO ✗");

@@ -201,7 +201,21 @@ printf("    tensor quando é preciso — por pread, e larga-se a seguir.\n");
 printf("\n    ficheiro: %s\n", caminho);
 
 fd_g = open(caminho, O_RDONLY);
-if(fd_g < 0){ perror("\ngguf: não consigo abrir"); return 1; }
+if(fd_g < 0){
+    /* O MODELO NAO ESTA NO REPO: sao 941 MB de blob do Ollama, e sem ele este medidor
+     * emitia ZERO unidades e saia com exit 1 — que a bateria conta como FALHA. E nao
+     * falhou nada: faltou um recurso de FORA. Medido: com o modelo, 16 unidades; sem
+     * ele, 0 e um vermelho, e a bateria descia de 501 para 485 sem dizer porque.
+     *
+     * As 16 ficam agora CONTADAS como saltadas, com o motivo, e a saida e limpa. Ver
+     * lib/unidade.h, funcao saltou(): a terceira palavra existe para isto. */
+    printf("\n    o modelo GGUF nao esta neste sistema — %s\n", caminho);
+    printf("    Nao ha nada a medir sem ele, e isso vai CONTADO em vez de calado:\n\n");
+    for(int i = 0; i < 16; i++)
+        saltou("as medidas do carregador GGUF (cabecalho, indice, dequantizacao)",
+               "o modelo .gguf nao esta no disco — 941 MB, fora do repositorio");
+    return 0;
+}
 struct stat st;
 if(fstat(fd_g, &st)){ perror("gguf: fstat"); return 1; }
 long long tam_ficheiro = (long long)st.st_size;
