@@ -70,3 +70,44 @@ uma divisão em vírgula. Ver [[project-a-reta-construida]] e [[feedback-a-base-
 **Medidores:** `tests/racionais_fixos.c` (8:0), `tests/descida_mobius.c` (10:0), e o
 `tests/continua.c` §C2 com a identidade `−log(1−mx−x²) = Σ t_k x^k/k` provada **coeficiente a
 coeficiente em ℚ** em vez de avaliada em 15 pontos com duas réguas.
+
+## A CONSERVAÇÃO (thm:conservacao) — e é a dobra
+
+«Falta algo ainda, a conservação (energia), porque a condição de paragem é a energia que o nível
+comporta.» Faltava, e a ponte já estava escrita em dois sítios que não se conheciam: o
+`corpo_universal` (def:inducao) diz que **o que a meta-indução VALIDA é a conservação de energia**,
+e o thm:operador diz que a meta-indução **é a dobra**. Logo **A DOBRA É A LEI DE CONSERVAÇÃO**.
+
+Na descida vê-se em duas quantidades que fazem coisas opostas:
+
+    CONSERVA-SE   mdc(p,q)   a ENERGIA      mdc(p,q) = mdc(q, p−aq), exacto
+    GASTA-SE      q          o ORÇAMENTO    decresce em ℕ
+
+A paragem é `q = 0`, e nesse instante **o que sobra em p é o mdc inicial**: o nível comporta uma
+energia finita, o passo gasta-a, e quando acaba a descida devolve-a. E nada se perde porque
+|det| = 1 — **conservar e poder voltar são a mesma frase**. A descida infinita é impossível pelo
+PAR: o mdc não desaparece e q não decresce para sempre. 6400 descidas, tudo verde.
+
+## O que FUNDAMENTA: o teorema central Gentil–Hurwitz–Lebesgue
+
+Já estava no repo (`corpo_universal` thm:parseval-multi, `cor:verifica-energia`):
+
+- **HURWITZ CONTA** — `Σ_k ω^{(i−j)k} = N·δ_ij`, os cruzados cancelam-se EXACTAMENTE. É o corte
+  discreto, e é daqui que Parseval sai. Medido exacto em 𝔽ₚ (32/32 e 224/224), **com o controlo
+  que o paper exige: raiz de ordem ERRADA quebra**.
+- **GENTIL INTEGRA** — `∫|f|² = ∫|F|²` com Lebesgue.
+- **LEBESGUE CASA-OS**, e o que preserva é a ORDEM (σ-aditividade). *Reversível* é a mesma palavra
+  do thm:conservacao.
+
+**E o tecto de 8 é da NORMA, não do objecto**: Hurwitz limita a {1,2,4,8} com norma EUCLIDIANA
+**e** bilinearidade. A recta não paga porque a energia que conserva é o **determinante**,
+multiplicativo em todo n — e o `nne.c` mede o contraste: determinante 6561/6561, euclidiana 289.
+Ver [[project-torre-hurwitz-gentil]].
+
+## E os sete teoremas são uma frase: o traço MEDE, o determinante CONSERVA
+
+    tr    separa, coordena, constrói — muda de andar para andar
+    det   invariante, e é por isso que há volta
+
+É a divisão do thm:fixo-dual (traço e determinante, ambos inteiros) lida em cada um dos sete.
+

@@ -34,6 +34,7 @@
 - **[A régua não transporta](feedback-a-regua-nao-transporta.md)** — medir contra o pdflatex é INTRANSPORTÁVEL, não difícil. A volta transporta, a régua não.
 - **[O exit sombreado](feedback-o-exit-sombreado.md)** — 17 medidores verdes com unidades vermelhas (contador local a sombrear o do header). Ler SEMPRE as duas linhas do total.
 - **[Medir só metade do par](feedback-medir-so-metade-do-par.md)** — o bench da membrana varria a ENTRADA e nunca a SAÍDA; e apanhou o `\pmod` OUTRA VEZ, muito depois de ter nascido por causa dele.
+- **[O medidor que enche o disco](feedback-o-medidor-que-enche-o-disco.md)** — o rodapé do `unidade.h` escreve para /tmp SEM TECTO: uma mutação em ciclo fez 8,2 GB e o `timeout` não desfaz. Código mutado corre com RLIMIT_FSIZE e RLIMIT_AS.
 - **[O teto não verificado](feedback-o-teto-nao-verificado.md)** — `an_zn(&R,40)` escreveu 1600 inteiros num array de 24×24 e a máquina deixou de terminar. Um `#define` que ninguém testa é documentação, não limite.
 - **[O ramo que nunca corre](feedback-o-ramo-que-nunca-corre.md)** — mutação que sobrevive tem DUAS doenças: ramo inalcançável (gap meu) ou guarda redundante (está certo). Programa mínimo, não adivinhar.
 - **[Medir os extremos](feedback-medir-os-extremos.md)** — varri 625 matrizes para `ker T* = (im T)°` quando a prova são CINCO definições em ⟺. Varrer os extremos confirma a conclusão e não mede a prova. Se a prova cabe em definições, a varredura é o substituto de a ter escrito.
