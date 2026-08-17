@@ -6,7 +6,7 @@ Para quem entra. Estado em 17/08/2026, bateria 505:505, 37 citações a bater. g
 1. A ARQUITECTURA
 -----------------
 
-    papers/*.tex      a teoria. O central é papers/geometrico.tex (42 páginas, 53 teoremas)
+    papers/*.tex      a teoria. O central é papers/geometrico.tex (43 páginas, 54 teoremas)
     lib/*.h           as operações. Tudo inteiro. reta.h é a principal
     tests/*.c         os medidores. Um por assunto, cada um com asserções `ok(texto, cond)`
     tools/            a bateria, as citações e os detectores
