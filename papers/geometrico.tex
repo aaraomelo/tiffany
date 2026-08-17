@@ -1217,6 +1217,60 @@ varredura, acerta $432$); $\mathbb{Q}$ como auto-espaço $+1$ da dobra em $845$ 
 $5$ corpos; e $F\neq0$ nas $112$ truncaturas, com o \emph{único} empate de denominador a
 ser o do ouro}
 
+\begin{teorema}[O TEOREMA DOS RESÍDUOS JÁ DÁ OS PONTOS FIXOS]\label{thm:residuo-fixo}
+Não é preciso ir buscá-los: \textbf{os polos da zeta dinâmica \emph{são} os pontos
+fixos}, e a coincidência não é feliz --- é a definição de um a ser a definição do outro.
+
+\textbf{(1) O denominador FACTORIZA nos pontos fixos, e os coeficientes são o par
+inteiro.} Porque $\sigma+\sigma\dg=m$ e $\sigma\sigma\dg=-1$ (Teor.~\ref{thm:fixo-dual}),
+\[
+\boxed{\;1-mx-x^{2}=(1-\sigma x)(1-\sigma\dg x)\;}
+\]
+--- a factorização \emph{é} a lista dos pontos fixos, e sai do traço e do determinante
+sem que a raiz se forme. Logo os polos de $\zeta=1/(1-mx-x^{2})$ são $1/\sigma$ e
+$1/\sigma\dg$: \emph{o polinómio do ponto fixo é o denominador.}
+
+\textbf{(2) A decomposição dá uma parcela POR PONTO FIXO, e o coeficiente é a soma.}
+\[
+L(x)=-\log(1-mx-x^{2})=\underbrace{-\log(1-\sigma x)}_{\text{o polo }1/\sigma}
+\;\underbrace{-\log(1-\sigma\dg x)}_{\text{o polo }1/\sigma\dg}
+\quad\Longrightarrow\quad
+[x^{k}]\,L=\frac{\sigma^{k}+(\sigma\dg)^{k}}{k}=\frac{t_k}{k}
+\]
+--- que é o teorema dos resíduos dito onde ele é \emph{algébrico}: extrair o coeficiente
+é somar sobre os polos, e somar sobre os polos é somar sobre os pontos fixos. \emph{A
+soma dos resíduos É o traço.}
+
+\textbf{(3) E o traço é a construção de $\mathbb{Q}$.} É a mesma soma do
+Teor.~\ref{thm:descida}: a que projecta a família toda em $\mathbb{Z}$, cuja fibra é o
+par dual, e cuja razão é $\mathbb{Q}$. Donde a frase inteira, e ela fecha o círculo:
+\[
+\boxed{\;\text{extrair coeficiente}\;=\;\text{somar sobre os pontos fixos}\;=\;
+\text{o traço}\;=\;\mathbb{Q}\;}
+\]
+
+\textbf{(4) E UM RESÍDUO SOZINHO NÃO É RACIONAL.} É aqui que o teorema tem gume, e é a
+regra do dual a aparecer como conta: $\sigma^{k}$ tem parte $\sqrt D$ \emph{não nula} em
+todo $k\ge1$, e é a soma dos \textbf{dois} que cai em $\mathbb{Z}$. Um contorno que
+apanhasse um polo só devolveria um irracional. \emph{O resíduo precisa dos dois membros
+pela mesma razão por que o corte precisa dos dois lados.}
+
+\medskip
+Isto é o \S\ref{sec:residuo} dito do lado de cá: lá, $\omega$ é o ponto fixo da
+\emph{monodromia} e $\sigma$ o da \emph{Möbius}, separados pelo regime ($D<0$ roda,
+$D>0$ cresce). Aqui vê-se que no regime que cresce o teorema dos resíduos não é uma
+analogia com o ponto fixo --- \textbf{é a soma sobre ele}. $\square$
+\end{teorema}
+\colunas{o teorema dos resíduos devolve os pontos fixos}
+        {os polos são os pontos fixos, extrair coeficiente é somar sobre eles, e a soma é
+o traço que constrói $\mathbb{Q}$ --- com um resíduo sozinho a dar irracional}
+        {\code{tests/racionais\_fixos.c} \S Q8: a factorização com coeficientes inteiros em
+$60$ de $60$; um resíduo sozinho com parte $\sqrt D\neq0$ em $582$ de $582$; o conjugado
+como espelho exacto ($A\dg=A$, $B\dg=-B$) e a soma a dar o traço em $582$ de $582$, com
+$18$ casos fora do \code{long} \emph{contados à parte}; \code{tests/continua.c} \S C2: a
+identidade $-\log(1-mx-x^{2})=\sum t_k x^k/k$ coeficiente a coeficiente em $\mathbb{Q}$,
+$32$ de $32$, sem avaliar num único ponto}
+
 \begin{teorema}[e há volta --- é a metade dual]\label{thm:volta}
 $\det A_m=-1$, logo a inversa é \textbf{inteira}, e é o fator de potência unitário que a
 torna exacta:
@@ -2881,7 +2935,7 @@ medidor & unidades \\
 \code{tests/cardinal.c}           & $4{:}0$ \\
 \code{tests/condicao\_pisot.c}    & $4{:}0$ \\
 \code{tests/reta.c}              & $39{:}0$ \\
-\code{tests/racionais\_fixos.c}   & $7{:}0$ \\
+\code{tests/racionais\_fixos.c}   & $8{:}0$ \\
 \bottomrule
 \end{tabular}
 \end{center}

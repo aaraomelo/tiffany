@@ -82,7 +82,7 @@ constantes ee2a6b3175c2b4b0 0
 constroi c85b8230866a958f 0
 conta 536fec2fdcf62b34 0
 contagem_cifra 2eff3b0b87eb444e 0
-continua 516118deaf050284 0
+continua fb6ca2e867fac1e8 0
 continuo 8dcd56f6d3e9754e 0
 contorno_riemann 6cf7ea38b2e3b6b7 0
 contrato d627953f37de504d 0
@@ -380,7 +380,7 @@ quantizador_universal 5432c65b6546dfe0 0
 quasi 4260bc780519ca6d 0
 quatro cbb4af51d8c7cea0 0
 quebra b7dd95becedbb9ba 0
-racionais_fixos b29abdc931257ab8 0
+racionais_fixos e18080be0098219b 0
 racional_pg ddf59373d881a71a 0
 radiacao 5527b8847b13bb89 0
 ramos df8a0c5ccaa39f37 0

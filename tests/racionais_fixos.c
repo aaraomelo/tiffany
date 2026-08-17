@@ -275,6 +275,69 @@ int main(void){
        trunc > 0 && nunca_zero == trunc && alterna == trunc - 8 &&
        cresce == trunc - 8 - empate && empate == 1 && m_empate == 1);
 
+    /* ─── §Q8 ── O TEOREMA DOS RESÍDUOS JÁ DÁ OS PONTOS FIXOS ──────────────────────
+     * O denominador da zeta dinâmica FACTORIZA nos pontos fixos, e isso não é um passo
+     * de cálculo — é a definição de polo a coincidir com a definição de ponto fixo:
+     *
+     *     1 − mx − x²  =  (1 − σx)(1 − σ†x)        porque σ+σ† = m e σσ† = −1
+     *
+     * Logo os polos de ζ são 1/σ e 1/σ†, e a decomposição em fracções parciais parte a
+     * função numa parcela POR PONTO FIXO. Extrair o coeficiente de xᵏ é somar essas
+     * parcelas — e o que sai é σᵏ + σ†ᵏ, o TRAÇO. O mesmo traço que o §Q1 mediu e que o
+     * §Q4 usou para construir ℚ.
+     *
+     *     extrair coeficiente  =  somar sobre os pontos fixos  =  o traço  =  ℚ
+     *
+     * E o GUME está aqui dentro, e é a regra do dual: UM RESÍDUO SOZINHO NÃO É RACIONAL.
+     * σᵏ tem parte irracional não nula em todo k ≥ 1; é a soma dos DOIS que cai em ℤ.
+     * Mede-se a parte √D de cada um separadamente, e da soma. */
+    long fact_ok = 0, um_so_irrac = 0, soma_racional = 0, casos = 0, soma_bate = 0;
+    long saturou = 0;
+    for(long m = 1; m <= M_MAX; m++){
+        long D = m*m + 4;
+        /* (1−σx)(1−σ†x): o coeficiente de x é −(σ+σ†) e o de x² é σσ†. Em 2σ = m+√D o
+         * produto (2σ)(2σ†) = −4 e a soma 2m, logo σσ† = −1 e σ+σ† = m: os dois
+         * coeficientes saem inteiros, e é essa a factorização. */
+        long pa, pb; rt_zd_mul(m, 1, m, -1, D, &pa, &pb);      /* (2σ)(2σ†) */
+        if(pa == -4 && pb == 0 && (m + m) == 2*m) fact_ok++;
+
+        /* o traço pela recorrência, que é a rota independente — e serve de DETECTOR de
+         * saturação: t_k cresce estritamente, logo se ele deixar de crescer o `long`
+         * enrolou. Não é uma régua sobre o tamanho, é a própria lei a denunciar-se. */
+        long t[12]; t[0] = 2; t[1] = m;
+        for(int k = 2; k <= 11; k++) t[k] = m*t[k-1] + t[k-2];
+        for(int k = 1; k <= 10; k++){
+            long A, B;  rt_zd_pot(m,  1, D, k, &A, &B);        /* (2σ)ᵏ  = A + B√D */
+            long A2, B2; rt_zd_pot(m, -1, D, k, &A2, &B2);     /* (2σ†)ᵏ = A2 + B2√D */
+            long den = 1; for(int t2 = 1; t2 < k; t2++) den *= 2;   /* 2^{k−1} */
+            /* CABE NO TIPO? É a primeira pergunta, e é barata: (2σ)ᵏ vale t_k·2^{k−1}, e
+             * para m = 40, k = 10 isso é 5,4·10¹⁸ — dentro do long, mas o DOBRO já não.
+             * Somava A+A2 sem reparar que A2 = A (o conjugado só troca o sinal de √D), e
+             * a soma estourava calada: vinte e uma entradas davam traço NEGATIVO. O que
+             * não cabe é contado, não escondido. */
+            if(t[k] > 9223372036854775807L / den){ saturou++; continue; }
+            casos++;
+            if(B != 0) um_so_irrac++;                          /* um polo só: irracional */
+            /* e o conjugado é EXACTAMENTE o espelho: mesma parte inteira, √D trocado */
+            if(A2 == A && B2 == -B) soma_racional++;           /* logo A+A2 = 2A, sem raiz */
+            if(A % den == 0 && A / den == t[k]) soma_bate++;
+        }
+    }
+    printf("\n  §Q8  o teorema dos resíduos devolve os pontos fixos, e a soma é o traço\n");
+    printf("      1−mx−x² = (1−σx)(1−σ†x), coeficientes inteiros  %ld de %d\n", fact_ok, M_MAX);
+    printf("      UM resíduo sozinho tem parte √D ≠ 0 (irracional) %ld de %ld\n",
+           um_so_irrac, casos);
+    printf("      o conjugado é o espelho (A†=A, B†=−B) ........... %ld de %ld\n",
+           soma_racional, casos);
+    printf("      e a soma É o traço do §Q1 ...................... %ld de %ld\n",
+           soma_bate, casos);
+    printf("      o que não coube no long, CONTADO à parte ....... %ld\n", saturou);
+    ok("os polos da zeta SÃO os pontos fixos, e extrair o coeficiente é somar sobre eles:"
+       " um resíduo sozinho é irracional, e são os DOIS que dão o inteiro — o dual a exigir"
+       " os dois membros, medido",
+       fact_ok == M_MAX && um_so_irrac == casos && soma_racional == casos &&
+       soma_bate == casos && casos > 0);
+
     printf("\n  ══ a descida fecha: o traço projecta a família toda em ℤ, a fibra é o\n");
     printf("     par dual {σ_m, σ_m†}, e ℚ é a razão. A norma, que é a outra metade da\n");
     printf("     Cayley–Hamilton, CONSERVA e não separa — e é por isso que não é ela. ══\n\n");

@@ -47,6 +47,10 @@
 #include <stdio.h>
 #include "unidade.h"
 #include "reta.h"
+#include "dual32.h"
+#include "racionais.h"
+#include "linear.h"
+#include "calculo2.h"
 #include <math.h>
 
 typedef long long L;
@@ -59,11 +63,10 @@ int main(void){
     /* ---------------- §C1 — os traços crescem como σ^k ---------------- */
     printf("\n§C1 os traços t_k são INTEIROS, e crescem como σ^k — daí o raio ser 1/σ\n");
     {
-        int metais=0, inteiros=0, razao_ok=0, zd_ok=0;
-        printf("      m    σ         t_1..t_5                t_12/t_11    σ\n");
+        int metais=0, inteiros=0, encaixa=0, zd_ok=0, newton_ok=0, alterna=0;
+        printf("      m    t_1..t_5                 t_11/t_10 < σ < t_12/t_11 ?\n");
         for(L m=1; m<=8; m++){
-            double d = sqrt((double)(m*m+4));
-            double s = (m + d)/2.0, sl = (m - d)/2.0;
+            L D = m*m + 4;
             L t[16]; t[0]=2; t[1]=m;
             for(int k=2;k<16;k++) t[k] = m*t[k-1] + t[k-2];   /* até 12: cabe folgado */
             metais++;
@@ -74,62 +77,120 @@ int main(void){
              * aqui estava comparava a recorrência inteira com pow(s,k) + pow(sl,k), que é a
              * APROXIMAÇÃO NUMÉRICA de uma quantidade que já era inteira, com um limiar
              * relativo por cima para a segurar. */
-            int bate = 1, bate_zd = 1;
+            /* A TERCEIRA ROTA ERA UM DOUBLE, E AGORA É NEWTON. O que aqui estava comparava
+             * a recorrência inteira com pow(s,k)+pow(sl,k) — a aproximação numérica de uma
+             * quantidade que JÁ ERA INTEIRA — e segurava-a com um limiar relativo. Mas o
+             * traço de Cᵏ para a companheira de x² = mx+1 É a soma das potências das
+             * raízes, e sai em inteiros: é a rota de Newton, e não partilha uma linha com
+             * a recorrência nem com o ℤ[√D]. Três rotas, zero vírgulas. */
+            /* c = {1, m} e não {m, m}: a `rt_companheira` lê os coeficientes com o índice
+             * a subir na COLUNA, logo a última linha fica (1, m) e a matriz é [[0,1],[1,m]]
+             * — traço m, determinante −1, que é o par do thm:fixo-dual. Escrevi {m, 1} à
+             * primeira e a asserção deu 1 de 8: o único que passava era m = 1, onde as duas
+             * ordens coincidem. O caso simétrico é onde o erro se esconde. */
+            long c[2] = {1, m}, C[4], trN[16];
+            rt_companheira(c, 2, C);
+            rt_tracos(C, 2, trN, 13);
+
+            int bate_zd = 1, bate_nw = 1;
             for(int k=1;k<=10;k++){
                 if(rt_traco_metalico(m, k) != t[k]) bate_zd = 0;      /* EXACTO, em ℤ[√D] */
-                double v = pow(s,k) + pow(sl,k);                      /* e a numérica, a confirmar */
-                if(fabs(v - (double)t[k]) > 1e-9 * fabs(v) + 1e-9) bate = 0;
+                if(trN[k] != t[k])                  bate_nw = 0;      /* EXACTO, por Newton */
             }
-            if(bate && bate_zd) inteiros++;
+            if(bate_zd && bate_nw) inteiros++;
             if(bate_zd) zd_ok++;
-            double r = (double)t[12]/(double)t[11];
-            /* t_k/t_{k−1} → σ com erro O(|σ'/σ|^k); a tolerância acompanha o erro real */
-            double tol = 3.0 * pow(fabs(sl/s), 11) * s + 1e-12;
-            if(fabs(r - s) < tol) razao_ok++;
-            if(m<=3) printf("      %lld  %8.5f  %lld %lld %lld %lld %lld%*s%10.7f  %10.7f\n",
-                            m, s, t[1],t[2],t[3],t[4],t[5], 12, "", r, s);
+            if(bate_nw) newton_ok++;
+
+            /* E A RAZÃO NÃO PRECISA DE TOLERÂNCIA: precisa do CORTE. «t_12/t_11 → σ» media-se
+             * com |r−σ| < 3·|σ'/σ|^11·σ + 1e-12, que é uma régua a perseguir o erro de uma
+             * conta que não tinha de existir. O que a razão FAZ é encaixar σ: as razões
+             * consecutivas caem em lados opostos, e σ fica entre elas. Isso decide-se sem
+             * formar a raiz, pelo thm:corte — a/b < σ ⟺ 2a−mb < b√D, partido nos dois
+             * casos. É a mesma frase, dita onde ela é exacta. */
+            int baixo11 = rt_menor_que_sigma(t[11], t[10], m, D);
+            int baixo12 = rt_menor_que_sigma(t[12], t[11], m, D);
+            if(baixo11 != baixo12) alterna++;              /* lados opostos: o encaixe fecha */
+            if((baixo11 && !baixo12) || (!baixo11 && baixo12)) encaixa++;
+            if(m<=3) printf("      %lld    %lld %lld %lld %lld %lld%*s%s\n",
+                            m, t[1],t[2],t[3],t[4],t[5], 14, "",
+                            baixo11 != baixo12 ? "sim — σ está ENTRE elas" : "NÃO");
         }
         printf("      metais testados: %d\n", metais);
-        printf("      e por ℤ[√D], sem formar a raiz: %d dos %d metais batem EXACTO\n", zd_ok, metais);
+        printf("      por ℤ[√D], sem formar a raiz ...... %d de %d EXACTO\n", zd_ok, metais);
+        printf("      por NEWTON, tr(Cᵏ) da companheira . %d de %d EXACTO\n", newton_ok, metais);
+        printf("      e as razões consecutivas encaixam σ %d de %d, sem raiz e sem régua\n",
+               alterna, metais);
         ok("t_k = σ^k + σ'^k é INTEIRO — o traço cai no anel. E mede-se por TRÊS rotas: a"
            " recorrência t_k = m.t_{k-1} + t_{k-2}, a álgebra em ℤ[√D] (onde √D.√D é D e a"
            " raiz se cancela contra si própria, e o traço sai como A_k/2^{k-1} com divisão"
-           " exacta), e a numérica pow(s,k) + pow(sl,k), que passa a CONFIRMAR as duas"
-           " primeiras em vez de ser a única. Para m = 1 os t_k são 2, 1, 3, 4, 7, 11 — os"
+           " exacta), e NEWTON — o traço de Cᵏ da companheira, que é a soma das potências"
+           " das raízes sem avaliar raiz nenhuma. TRÊS rotas exactas: a que aqui estava,"
+           " pow(s,k) + pow(sl,k) com limiar relativo, aproximava numericamente uma"
+           " quantidade que já era inteira. Para m = 1 os t_k são 2, 1, 3, 4, 7, 11 — os"
            " números de LUCAS, os mesmos que o §G2 do geral.c tira por Newton",
-           inteiros==metais && zd_ok==metais);
-        ok("t_k/t_{k−1} → σ dentro do erro O(|σ'/σ|^k): o raio é 1/σ", razao_ok==metais);
+           inteiros==metais && zd_ok==metais && newton_ok==metais);
+        ok("t_11/t_10 e t_12/t_11 caem em lados OPOSTOS de σ: a razão não se aproxima dele"
+           " dentro de uma régua, ENCAIXA-o — e o encaixe decide-se pelo corte, sem formar"
+           " a raiz e sem tolerância nenhuma", encaixa==metais && alterna==metais);
         conclui("a série tem raio finito porque o coeficiente cresce. Não é defeito: é o polo a");
         conclui("anunciar-se de dentro do disco.");
     }
 
-    /* ---------------- §C2 — dentro do disco: a série DÁ a forma fechada ---------------- */
-    printf("\n§C2 dentro do disco: a série converge PARA a forma fechada\n");
+    /* ---------------- §C2 — a série É a forma fechada, e isso é FORMAL --------------
+     *
+     * O QUE AQUI ESTAVA AVALIAVA. Escolhia pontos x dentro do disco, somava dois mil
+     * termos em double até o termo cair abaixo de 1e-18, chamava log() à forma fechada, e
+     * comparava os dois valores com uma régua relativa de 1e-10. Sete doubles e dois
+     * limiares para medir uma identidade que não precisa de nenhum ponto: a analiticidade
+     * é do OBJECTO, e não da representação.
+     *
+     *     −log(1 − mx − x²)  =  Σ_{k≥1} t_k x^k / k
+     *
+     * é uma igualdade de SÉRIES FORMAIS, e prova-se coeficiente a coeficiente em ℚ, exacto.
+     * Duas rotas que não partilham código: a esquerda monta-se compondo o log1p da lib com
+     * u = −mx−x²; a direita monta-se dos TRAÇOS INTEIROS, que o §C1 acabou de medir por
+     * três vias. Não há ponto, não há truncatura a olho, não há limiar — e a afirmação
+     * fica mais forte, porque vale em todo o disco de uma vez em vez de em quinze pontos.
+     *
+     * O que a avaliação media de VERDADE — que a série converge dentro do raio e explode
+     * fora — não se perde: é o §C1 (o raio, pelo encaixe de σ) e o §C3 (a explosão). */
+    printf("\n§C2 a série É a forma fechada — coeficiente a coeficiente, em ℚ\n");
     {
-        int casos=0, bons=0;
-        printf("      m    x        série            −log(1−mx−x²)   |dif|\n");
-        for(L m=1; m<=6; m++){
-            double s = (m + sqrt((double)(m*m+4)))/2.0, R = 1.0/s;
-            for(double f=0.2; f<=0.85; f+=0.3){
-                double x = f*R;
-                /* traços em double, pela MESMA recorrência: sem estouro de inteiro */
-                double ta=2, tb=m, soma = tb*x, xp = x*x;
-                for(int k=2;k<=2000;k++){
-                    double tk = m*tb + ta; ta=tb; tb=tk;
-                    double termo = tk*xp/k;
-                    soma += termo; xp *= x;
-                    if(fabs(termo) < 1e-18) break;
-                }
-                double fech = -log(1.0 - m*x - x*x);
-                casos++;
-                double dif = fabs(soma-fech);
-                if(dif < 1e-10*(1+fabs(fech))) bons++;
-                if(m<=2 && f<0.6)
-                    printf("      %lld  %7.5f  %14.10f  %14.10f  %.2e\n", m, x, soma, fech, dif);
+        int metais=0, iguais=0, graus=0, bate=0;
+        const int G = 8;                          /* grau até onde os t_k cabem no Qz */
+        long sat0 = qz_saturou;
+        printf("      m    coeficientes de −log(1−mx−x²)   ==   t_k/k ?\n");
+        for(long m=1; m<=4; m++){
+            /* ESQUERDA: log(1+u) com u = −mx − x², e o sinal trocado */
+            Sr u = {{{0,1}}, 0}; u.n = 2;
+            for(int i=0;i<=G;i++){ u.a[i].p = 0; u.a[i].q = 1; }
+            u.a[1].p = -m; u.a[2].p = -1; u.n = G;
+            Sr Lf = sr_compoe(sr_log1p(G), u, G);
+            for(int i=0;i<=G;i++) Lf.a[i] = qz_oposto(Lf.a[i]);
+
+            /* DIREITA: Σ t_k x^k / k, com os t_k inteiros da recorrência */
+            long t[16]; t[0]=2; t[1]=m;
+            for(int k=2;k<16;k++) t[k] = m*t[k-1] + t[k-2];
+            Sr Ld; Ld.n = G;
+            for(int i=0;i<=G;i++){ Ld.a[i].p = 0; Ld.a[i].q = 1; }
+            for(int k=1;k<=G;k++){ Ld.a[k].p = t[k]; Ld.a[k].q = k; }
+
+            metais++;
+            int todos = 1;
+            for(int k=1;k<=G;k++){
+                graus++;
+                if(qz_igual(Lf.a[k], Ld.a[k])) bate++; else todos = 0;
             }
+            if(todos) iguais++;
+            if(m<=2) printf("      %ld    grau 1..%d: %s\n", m, G,
+                            todos ? "IGUAIS, todos" : "divergem");
         }
-        printf("      pontos dentro do disco: %d   série = forma fechada: %d\n", casos, bons);
-        ok("dentro do disco as duas fórmulas dão O MESMO — é a mesma função", bons==casos);
+        printf("      metais: %d   coeficientes comparados: %d   iguais: %d\n",
+               metais, graus, bate);
+        printf("      e o que não coube no Qz, contado à parte: %ld\n", qz_saturou - sat0);
+        ok("−log(1−mx−x²) e Σ t_k x^k/k são a MESMA série formal, coeficiente a"
+           " coeficiente em ℚ e sem avaliar num único ponto — a analiticidade é do objecto",
+           iguais==metais && bate==graus && graus>0);
     }
 
     /* ---------------- §C3 — fora do disco, SEM atravessar o polo ---------------- */
@@ -164,25 +225,61 @@ int main(void){
     /* ---------------- §C4 — os polos são os metais ---------------- */
     printf("\n§C4 os polos da forma fechada são −σ e −σ': a continuação DEVOLVE os metais\n");
     {
-        int metais=0, bate=0, raio_ok=0;
-        printf("      m    polos de 1−mx−x²        −σ'         −σ          raio  1/σ\n");
-        for(L m=1; m<=8; m++){
-            double d = sqrt((double)(m*m+4));
-            double s  = (m + d)/2.0, sl = (m - d)/2.0;
-            /* 1 − m x − x² = 0  ⟺  x² + m x − 1 = 0  ⟹  x = (−m ± d)/2 = −σ', −σ */
-            double r1 = (-m + d)/2.0, r2 = (-m - d)/2.0;
+        /* A ASSERÇÃO QUE ESTAVA AQUI NÃO PODIA FALHAR, E O LIMIAR ESCONDIA-O.
+         *
+         * Media `fabs(r1 − (−sl)) < 1e-12` com r1 = (−m+d)/2 e sl = (m−d)/2 — logo −sl =
+         * (d−m)/2, que é A MESMA EXPRESSÃO, letra por letra. Comparava x consigo próprio,
+         * e o 1e-12 por cima dava-lhe cara de medida. O mesmo para r2 e −σ. Oito metais,
+         * oito «sim», e nenhuma entrada podia dar outra coisa.
+         *
+         * O que há para medir é que −σ e −σ' são RAÍZES: substituídas em 1−mx−x², dão
+         * ZERO. E isso faz-se sem formar a raiz uma única vez, porque ela se cancela
+         * contra si própria — guarda-se 2x = −(m ± √D) e multiplica-se a forma por 4:
+         *
+         *     4 − 4mx − 4x²  com  2x = −(m+√D)
+         *     4x²  = (m+√D)² = m² + D + 2m√D
+         *     4mx  = −2m(m+√D) = −2m² − 2m√D
+         *     ⟹  4 + 2m² + 2m√D − m² − D − 2m√D  =  4 + m² − D  =  0,  pois D = m²+4
+         *
+         * O √D sai por subtracção, não por arredondamento. Zero exacto, e não «< 1e-12». */
+        int metais=0, bate=0, raio_ok=0, ordem_ok=0;
+        printf("      m    4(1−mx−x²) em x = −σ e x = −σ'    σ·|σ'| = 1 ?\n");
+        for(long m=1; m<=8; m++){
+            long D = m*m + 4;
             metais++;
-            if(fabs(r1 - (-sl)) < 1e-12 && fabs(r2 - (-s)) < 1e-12) bate++;
-            /* e o raio de convergência é o polo MAIS PRÓXIMO: |−σ'| = 1/σ */
-            double raio = fabs(r1) < fabs(r2) ? fabs(r1) : fabs(r2);
-            if(fabs(raio - 1.0/s) < 1e-12) raio_ok++;
-            if(m<=3) printf("      %lld  %9.6f %9.6f  %9.6f  %9.6f  %8.6f  %8.6f\n",
-                            m, r1, r2, -sl, -s, raio, 1.0/s);
+            /* 2x = −(m+√D) para x = −σ, e 2x = −(m−√D) para x = −σ'. Guarda-se o par
+             * (a,b) com o valor a+b√D, e a forma calcula-se inteira no anel. */
+            int zeros = 0;
+            for(int lado = 0; lado < 2; lado++){
+                long ax = -m, bx = (lado == 0) ? -1 : 1;      /* 2x = ax + bx√D */
+                /* 4·(1 − m x − x²) = 4 − 2m(2x) − (2x)² */
+                long qa, qb; rt_zd_mul(ax, bx, ax, bx, D, &qa, &qb);   /* (2x)² */
+                long fa = 4 - 2*m*ax - qa, fb = -2*m*bx - qb;
+                if(fa == 0 && fb == 0) zeros++;               /* ZERO EXACTO, sem régua */
+            }
+            if(zeros == 2) bate++;
+
+            /* o raio é o polo mais próximo, e «σ·|σ'| = 1» é a NORMA: (2σ)(2σ') = m²−D
+             * = −4, logo σσ' = −1 e |σ'| = 1/σ. Inteiro, sem divisão. */
+            if(rt_zd_norma(m, 1, D) == -4) raio_ok++;
+            /* e que o mais próximo é mesmo σ': |σ'| < 1 < σ, o que em inteiros é
+             * (√D − m) < 2 < (√D + m), isto é (2−m)² < D quando 2−m > 0, e D > 0 se não */
+            long e1 = 2 - m;
+            int menor = (e1 < 0) ? 1 : (e1*e1 < D);
+            if(menor) ordem_ok++;
+            if(m<=3) printf("      %ld    %s                              %s\n", m,
+                            zeros == 2 ? "0 e 0, EXACTO" : "NÃO ZERA",
+                            rt_zd_norma(m,1,D) == -4 ? "sim, exacto" : "não");
         }
-        printf("      metais: %d   com polos = (−σ', −σ): %d   com raio = 1/σ: %d\n",
-               metais, bate, raio_ok);
-        ok("os polos são EXATAMENTE −σ' e −σ — a zeta guarda os metais", bate==metais);
-        ok("e o raio da série é |−σ'| = 1/σ, o polo mais próximo", raio_ok==metais);
+        printf("      metais: %d   com −σ e −σ' a ZERAR a forma: %d\n", metais, bate);
+        printf("      com σσ' = −1 (a norma, inteira): %d   e |σ'| < 1 < σ: %d\n",
+               raio_ok, ordem_ok);
+        ok("−σ e −σ' ANULAM 1−mx−x²: o zero é exacto, e a raiz cancela-se contra si própria"
+           " em vez de ser arredondada. O que aqui estava comparava a mesma expressão"
+           " consigo própria, com 1e-12 por cima", bate==metais);
+        ok("e o raio da série é |−σ'| = 1/σ, o polo mais próximo — que é a NORMA σσ' = −1,"
+           " medida em inteiros, com a ordem |σ'| < 1 < σ a dizer qual dos dois é",
+           raio_ok==metais && ordem_ok==metais);
         conclui("continuar a série não é truque de cálculo: é o que faz aparecer o que ela não");
         conclui("mostrava. Dentro do disco os σ não se veem; nos polos, são tudo o que há.");
     }
