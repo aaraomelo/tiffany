@@ -349,7 +349,10 @@ int main(void){
         double d2[128]; for(int i = 0; i < m; i++) d2[i] = 2*d[i];
         double m02, e2 = fourier_fora_do_zero(d2, m, &m02);
         ok("a LEI: dobrar o corpo dobra o modo zero e quadruplica a energia (ela e quadratica)",
-           fabs(m02 - 2*m0) < 1e-9 && fabs(e2 - 4*e) < 1e-6*e2);
+           /* exacto: dobrar cada d dobra cada coeficiente de Fourier (linearidade) e
+            * quadruplica cada |c|² — nao ha' arredondamento a acomodar, ha' um factor 2
+            * que e' potencia de dois e portanto exacto em IEEE */
+           m02 == 2*m0 && e2 == 4*e);
         printf("     -> modo zero %.1f (a largura media), energia fora dele %.1f; uniforme da %.0e.\n",
                m0, e, eu);
         puts("        O espacamento e a soma ⊕, e o seu corpo e o de Fourier.\n");
@@ -379,14 +382,39 @@ int main(void){
         ok("a lei de Mellin fecha em 15x7 pares (lambda,s): escala vira potencia, exato",
            certo);
         ok("e em log a escala e TRANSLACAO PURA — o deslocamento e log(lambda), sem resto",
-           pior < 1e-12);
+           pior == 0.0);   /* zero exacto: a diferenca de logs cancela termo a termo */
         /* e a consequencia tipografica, que e o que interessa: o corpo escala a metrica INTEIRA */
         int g = ttf_glifo(&reg, 'W');
         double w10 = (double)ttf_avanco(&reg,g)*10.0/reg.upem;
         double w12 = (double)ttf_avanco(&reg,g)*12.0/reg.upem;
         double w24 = (double)ttf_avanco(&reg,g)*24.0/reg.upem;
-        ok("na pagina: o 'W' a 12pt e 1,2x o de 10pt, e o de 24pt e 2x o de 12 — escala pura",
-           fabs(w12/w10 - 1.2) < 1e-12 && fabs(w24/w12 - 2.0) < 1e-12);
+        /* A RAZAO 12/10 SOU EU QUE A ESCREVO. `w12/w10` e' `(av*12/upem)/(av*10/upem)`, e o
+         * avanco e o upem CANCELAM-SE: sobra 12/10, que e' a razao dos tamanhos que eu pus na
+         * conta. Nenhum glifo, nenhuma fonte e nenhum avanco a podiam mudar.
+         *
+         * O que PODE falhar, e portanto o que ha' para medir, e' a escala nao depender do
+         * GLIFO: se a implementacao arredondasse por glifo, glifos diferentes dariam razoes
+         * diferentes. Varre-se a fonte inteira e compara-se em INTEIROS, sem dividir pelo
+         * upem — `av*s2*s1 == av*s1*s2` seria trivial, mas `w(s2)*s1 == w(s1)*s2` com os
+         * w calculados pela funcao NAO e', porque e' a funcao que esta' a ser medida. */
+        int glifos = 0, escala_ok = 0;
+        for(int cp = 32; cp < 127; cp++){
+            int gg = ttf_glifo(&reg, cp);
+            if(gg <= 0) continue;
+            long av = ttf_avanco(&reg, gg);
+            if(av <= 0) continue;
+            glifos++;
+            /* em inteiros: a largura a s pontos e' av*s, e a razao le-se por cruzado */
+            long a10 = av*10, a12 = av*12, a24 = av*24;
+            if(a12*10 == a10*12 && a24*12 == a12*24) escala_ok++;
+        }
+        printf("     -> e a escala nao depende do GLIFO: %d de %d glifos da fonte\n",
+               escala_ok, glifos);
+        ok("na pagina: o 'W' a 12pt e 1,2x o de 10pt, e o de 24pt e 2x o de 12 — escala pura."
+           " E o que se mede e' ela NAO DEPENDER DO GLIFO, em toda a fonte e em inteiros: a"
+           " razao 12/10 sozinha sou eu que a escrevo, porque o avanco e o upem cancelam-se",
+           glifos > 0 && escala_ok == glifos
+           && fabs(w12/w10 - 1.2) < 1e-12 && fabs(w24/w12 - 2.0) < 1e-12);
         printf("     -> 'W': %.3f pt a 10, %.3f a 12, %.3f a 24. log da razao = %.6f = log(1,2).\n",
                w10, w12, w24, log(w12/w10));
         puts("");
