@@ -1,12 +1,12 @@
 CURSOR.TXT — ELIMINAR OS DOUBLES
 ================================
-Para quem entra. Estado em 17/08/2026, bateria 505:505, 37 citações a bater. geometrico.tex: 43 páginas, 55 teoremas.
+Para quem entra. Estado em 17/08/2026, bateria 505:505, 37 citações a bater. geometrico.tex: 44 páginas, 56 teoremas.
 
 
 1. A ARQUITECTURA
 -----------------
 
-    papers/*.tex      a teoria. O central é papers/geometrico.tex (43 páginas, 55 teoremas)
+    papers/*.tex      a teoria. O central é papers/geometrico.tex (44 páginas, 56 teoremas)
     lib/*.h           as operações. Tudo inteiro. reta.h é a principal
     tests/*.c         os medidores. Um por assunto, cada um com asserções `ok(texto, cond)`
     tools/            a bateria, as citações e os detectores
@@ -99,6 +99,22 @@ São a razão pela qual os doubles saem. Cada um dá uma forma exacta de medir.
                          polos, e os polos são os pontos fixos. A continuação de volta não
                          devolve um número, devolve o PAR DUAL.
                          E há a segunda volta, a do DOMÍNIO: a projectiva, S: 0 <-> ∞.
+
+    thm:universal        O CICLO UNIVERSAL, e é UM só:
+
+                             DESCODIFICA   (p,q) := o texto, racional EXACTO
+                                           u := mmc dos denominadores
+                             OPERA         exige |det T| = 1
+                                           [p:q] -> [T00·p+T01·q : T10·p+T11·q]
+                             INVERTE       T⁻¹ = adj(T)/det T, INTEIRA porque det = ±1
+                             CODIFICA      w := palavra (FC) ou dígitos (Cantor)
+                             E FECHA       descodifica(w) == (p,q)
+
+                         O TORO não é mais um operador: é a CONDIÇÃO. Sem |det| = 1 a
+                         inversa não é inteira e o ciclo não fecha — a inversão RECUSA.
+                         O que muda é o OPERADOR (e a sua ORDEM) e a ESCRITA (a codificação).
+                         Viviani tem DUAS ordens: 2 no ponto (P¹) e 4 no vector (Z²) — em
+                         P¹ os vectores v e −v são o mesmo ponto. É o recobrimento duplo.
 
     E A SÍNTESE, que é a frase que atravessa os sete:
         o TRAÇO mede (separa, coordena, muda de andar)

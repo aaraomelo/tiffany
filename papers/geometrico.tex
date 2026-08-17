@@ -1693,6 +1693,56 @@ inteiros, com a recorrência a valer nos RECUPERADOS e $t_1=m$ em todos; e a uni
 $30$ de $30$ pares de operadores distintos --- tudo em $\mathbb{Q}$, sem uma régua. E \S C2:
 a ida coeficiente a coeficiente, $32$ de $32$}
 
+\begin{teorema}[O CICLO UNIVERSAL: descodifica, opera, inverte, codifica --- e o que o
+faz fechar é $\abs{\det}=1$]\label{thm:universal}
+Tudo o que este paper faz cabe num ciclo, e ele é \emph{um} para todos os operadores e
+todas as escritas:
+\[
+\boxed{
+\begin{array}{ll}
+\textbf{DESCODIFICA} & (p,q):=\text{o texto, que é um racional EXACTO}\\
+& u:=\operatorname{mmc}\text{ dos denominadores}\quad\text{(a unidade)}\\[3pt]
+\textbf{OPERA} & \text{exige }\abs{\det T}=1;\quad [p:q]\mapsto[T_{00}p+T_{01}q:
+T_{10}p+T_{11}q]\\[3pt]
+\textbf{INVERTE} & T^{-1}=\operatorname{adj}(T)/\det T\quad\text{--- INTEIRA, porque
+}\det T=\pm1\\[3pt]
+\textbf{CODIFICA} & w:=\text{palavra (FC) ou dígitos (Cantor)}\\[3pt]
+\hline
+\textbf{E FECHA} & \text{descodifica}(w)=(p,q)
+\end{array}}
+\]
+
+\textbf{(1) O TORO não é mais um operador na lista: é a CONDIÇÃO.} O passo
+\textbf{INVERTE} só existe porque $\operatorname{adj}(T)/\det T$ é \emph{inteira}, e ela
+só o é com $\abs{\det T}=1$ --- dividir por $\pm1$ é multiplicar por $\pm1$. É o
+Teor.~\ref{thm:toro} a ser a peça que fecha o ciclo, e o
+Teor.~\ref{thm:conservacao}(3) dito como algoritmo: \emph{conservar e poder voltar são a
+mesma frase}. Com $\abs{\det}\neq1$ a inversão \textbf{recusa} --- e recusar é dizer, não
+truncar.
+
+\textbf{(2) O que muda é o OPERADOR, e a sua ORDEM.} Cantor/Julia (o espelho) e a
+inversão fecham em $2$; \textbf{Viviani} tem \emph{duas} ordens --- $2$ no ponto e $4$ no
+vector ---, que é o recobrimento duplo do Teor.~\ref{thm:viviani}: em $\mathbb{P}^1$ os
+vectores $v$ e $-v$ são o \emph{mesmo ponto}, logo $i^{2}=-1$ já é a identidade
+projectiva, e a ordem $4$ vive no vector. \emph{Uma volta devolve o ponto com o sinal
+trocado; duas devolvem o vector.} E o \textbf{gato} não fecha em nenhuma das duas: é o
+corte, e no ciclo aparece como \emph{«este operador não tem ordem»}.
+
+\textbf{(3) E a CODIFICAÇÃO é livre.} Palavra, base $2$ e base $10$ devolvem o
+\emph{mesmo} racional: a escrita é uma escolha, não é do objecto. \emph{É isso que
+«universal» quer dizer} --- o ciclo não depende de como se escreve o resultado, e o que
+uma representação não aguenta conta-se à parte (a base $10$ satura; a palavra e a base $2$
+não). $\square$
+\end{teorema}
+\colunas{o ciclo universal, e a condição que o fecha}
+        {descodifica $\to$ opera $\to$ inverte $\to$ codifica; o toro é a CONDIÇÃO
+($\abs{\det}=1$), a ordem é do operador, e a escrita é livre}
+        {\code{tests/universal.c}: $2172$ ciclos em $3$ codificações $\times$ $4$
+operadores, com fecho TOTAL ($1448$ de $1448$) nas duas que não saturam e $88$ contados à
+parte na base $10$; a inversão a aceitar em $232$ de $232$ com $\abs{\det}=1$ e a RECUSAR
+em $2169$ de $2169$ sem ela; as duas ordens de Viviani ($2$ no ponto, $4$ no vector) e o
+gato sem ordem em nenhuma; e as três codificações a concordarem em $181$ de $181$}
+
 \medskip
 \noindent\textbf{E OS SETE TEOREMAS SÃO UMA FRASE SÓ --- as duas metades de
 Cayley--Hamilton.} O Teor.~\ref{thm:fixo-dual} diz que o par dual se descreve por
@@ -1725,6 +1775,7 @@ para andar}\\[3pt]
 \ref{thm:unificacao} a unificação & a ORDEM identifica & $\operatorname{lcm}=24=8\cdot3$\\
 \ref{thm:toro} o toro & $\abs{\operatorname{tr}}\le1$ fecha & $\abs{\det}=1$ é necessário\\
 \ref{thm:continuacao} a continuação & a volta dá o operador & e é ÚNICA\\
+\ref{thm:universal} o ciclo & a ORDEM e a escrita & $\abs{\det}=1$ dá a INVERSÃO\\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -3411,6 +3462,7 @@ medidor & unidades \\
 \code{tests/racionais\_fixos.c}   & $8{:}0$ \\
 \code{tests/descida\_mobius.c}    & $15{:}0$ \\
 \code{tests/lei8\_trial.c}       & $6{:}0$ \\
+\code{tests/universal.c}          & $4{:}0$ \\
 \bottomrule
 \end{tabular}
 \end{center}
