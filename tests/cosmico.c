@@ -90,10 +90,42 @@ int main(void){
         printf("     %-28s %10.2f %13.2f%%\n", "ar ambiente", T_AR, 100*e_ar);
         printf("     %-28s %10.2f %13.2f%%\n", "ceu noturno (janela)", T_CEU_SECO, 100*e_ceu);
         printf("     %-28s %10.3f %13.2f%%\n", "fundo cosmico", T_CMB, 100*e_cmb);
-        ok("o teto de Carnot SOBE quando o frio desce — nao e uma constante, e uma funcao",
-           e_meu < e_ar && e_ar < e_ceu && e_ceu < e_cmb);
-        ok("e a minha escolha era a PIOR de todas: o escalpe e o reservatorio mais quente",
-           e_meu < e_ar && e_meu < e_ceu && e_meu < e_cmb);
+        /* NORMALIZAR E OPERAR EM INTEIROS. As quatro temperaturas são decimais escritos —
+         * 310,15 K, 305,15, 295,15, 230,0 e 2,725 — com denominadores 100 e 1000: em
+         * MILÉSIMOS DE KELVIN toda a tabela cabe em ℤ. E a ordem das eficiências não precisa
+         * de as formar: com o quente FIXO,
+         *
+         *      carnot(Tq,Tf) = (Tq − Tf)/Tq = 1 − Tf/Tq
+         *
+         * é DECRESCENTE em Tf, logo ordenar os tectos de Carnot é ordenar as temperaturas
+         * frias ao contrário — uma comparação de inteiros, sem uma divisão. O quociente
+         * cancela porque o Tq é o mesmo nos quatro. */
+        const long Tq_z = 310150, Tesc_z = 305150, Tar_z = 295150,
+                   Tceu_z = 230000, Tcmb_z = 2725;          /* milésimos de kelvin */
+        int ordem_z = (Tesc_z > Tar_z && Tar_z > Tceu_z && Tceu_z > Tcmb_z);
+        /* e a verificação de que a ordem inteira É a ordem dos tectos, por produto cruzado:
+         * carnot(Tq,Ta) < carnot(Tq,Tb)  ⟺  Ta > Tb, com Tq comum e positivo */
+        const long Tf_z[4] = { Tesc_z, Tar_z, Tceu_z, Tcmb_z };
+        const double ee[4] = { e_meu, e_ar, e_ceu, e_cmb };
+        int concorda = 1;
+        for(int i = 0; i < 4; i++) for(int j = 0; j < 4; j++)
+            if((Tf_z[i] > Tf_z[j]) != (ee[i] < ee[j] - 1e-15)
+               && Tf_z[i] != Tf_z[j]) concorda = 0;
+        printf("     -> e em MILESIMOS DE KELVIN, sem uma divisao: %ld > %ld > %ld > %ld,\n"
+               "        e ordenar os tectos E' ordenar os frios ao contrario (Tq comum)\n",
+               Tesc_z, Tar_z, Tceu_z, Tcmb_z);
+        ok("o teto de Carnot SOBE quando o frio desce — nao e uma constante, e uma funcao. E"
+           " a ordem mede-se em INTEIROS: as quatro temperaturas sao decimais com"
+           " denominador 100 e 1000, e em milesimos de kelvin cabem em Z; com o quente FIXO,"
+           " (Tq - Tf)/Tq e' decrescente em Tf, logo ordenar os tectos E' ordenar os frios ao"
+           " contrario — o Tq cancela, e nao ha' divisao nenhuma. As duas ordens concordam"
+           " nos doze pares",
+           e_meu < e_ar && e_ar < e_ceu && e_ceu < e_cmb && ordem_z && concorda);
+        ok("e a minha escolha era a PIOR de todas: o escalpe e o reservatorio mais quente."
+           " E «mais quente» e' uma comparacao de INTEIROS: 305150 milesimos contra 295150,"
+           " 230000 e 2725 — sem se formar nenhum dos quatro tectos",
+           Tesc_z > Tar_z && Tesc_z > Tceu_z && Tesc_z > Tcmb_z
+           && e_meu < e_ar && e_meu < e_ceu && e_meu < e_cmb);
         printf("     -> do escalpe ao ceu o teto multiplica por %.0f; ao cosmico, por %.0f.\n",
                e_ceu/e_meu, e_cmb/e_meu);
         puts("        Carnot nunca disse que a energia se perde: disse qual e o maximo DADO um");
