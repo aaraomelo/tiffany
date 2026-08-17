@@ -294,13 +294,26 @@ printf("\n§F4  LEIBNIZ — é o que faz do corpo um corpo DIFERENCIAL.\n\n");
             for(int k = 0; k < 3; k++) if(tDa[k] != k * A[k]) maus_euler++;
             pares++;
         }
-        /* e o EULER dito como o §F3 o afirma: tD tem os t^s por próprios, com valor s */
+        /* e o EULER dito como o §F3 o afirma: tD tem os t^s por próprios, com valor s.
+         *
+         * A PRIMEIRA VERSÃO DESTE BLOCO TAMBÉM ERA VAZIA, e passou o gume por eu o ter
+         * apontado à outra linha. Ela fazia `tD[k] = k*ts[k]` e comparava com `sgrau*ts[k]`:
+         * como ts só é 1 em k = sgrau e 0 no resto, os dois lados são a MESMA expressão
+         * para todo k, e `euler_ok` valia 7 fizesse o que fizesse. Segunda tautologia minha
+         * no mesmo bloco, e a lição é que o gume se aponta a CADA lei, não ao bloco.
+         *
+         * Agora tD é construído pelas duas OPERAÇÕES que o definem — derivar, depois
+         * multiplicar por t (que é deslocar de um) — e só então se compara com o valor
+         * próprio s·t^s. São duas rotas que não partilham a expressão. */
         long euler_ok = 0;
         for(int sgrau = 0; sgrau <= 6; sgrau++){
-            long ts[7] = {0,0,0,0,0,0,0}; ts[sgrau] = 1;      /* o monómio t^s */
-            long tD[7]; for(int k = 0; k < 7; k++) tD[k] = k * ts[k];
+            long ts[8] = {0,0,0,0,0,0,0,0}; ts[sgrau] = 1;      /* o monómio t^s */
+            long d[8] = {0,0,0,0,0,0,0,0};                      /* D: reindexa    */
+            for(int k = 1; k < 8; k++) d[k-1] = k * ts[k];
+            long tD[8] = {0,0,0,0,0,0,0,0};                     /* ·t: desloca    */
+            for(int k = 0; k < 7; k++) tD[k+1] = d[k];
             int bate = 1;
-            for(int k = 0; k < 7; k++) if(tD[k] != sgrau * ts[k]) bate = 0;
+            for(int k = 0; k < 8; k++) if(tD[k] != sgrau * ts[k]) bate = 0;
             if(bate) euler_ok++;
         }
         printf("      e sem diferenças finitas, em %ld pares de polinómios inteiros:\n", pares);
