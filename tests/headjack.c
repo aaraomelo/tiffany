@@ -214,9 +214,15 @@ int main(void){
         double nr2 = Br[0]*Br[0]+Br[1]*Br[1]+Br[2]*Br[2];
         double nt2 = Bt[0]*Bt[0]+Bt[1]*Bt[1]+Bt[2]*Bt[2];
         double nr = sqrt(nr2), nt = sqrt(nt2);       /* só para a linha que imprime */
-        ok("o dipolo RADIAL da campo zero face ao tangencial — nao pequeno: nulo, por simetria."
-           " E a comparacao e' dos quadrados: nr^2 < nt^2.1e-24, sem uma raiz de cada lado",
-           nr2 < nt2 * 1e-24);
+        /* O TEXTO JA' DIZIA «nulo, por simetria», e a condicao trazia um 1e-24 a
+         * desdize-lo. E o nulo e' MESMO nulo: o cruzado de dois vectores paralelos tem cada
+         * componente da forma a.b - a.b, com os DOIS termos identicos bit a bit, logo a
+         * subtraccao da zero exacto em IEEE — nao ha arredondamento a acomodar. A condicao
+         * passa a dizer o que a frase diz, e leva ao lado o controlo que a impede de ser
+         * vazia: o tangencial tem de dar campo NAO nulo. */
+        ok("o dipolo RADIAL da campo zero face ao tangencial — nao pequeno: NULO, e o zero e'"
+           " EXACTO, porque o cruzado de paralelos subtrai termos identicos bit a bit",
+           nr2 == 0.0 && nt2 > 0.0);
         ok("e o TANGENCIAL da campo — logo o zero acima nao e um artefacto do calculo",
            nt2 > 1e-18);
         printf("     -> |B| do radial: %.1e T. Do tangencial: %.1e T.\n", nr, nt);

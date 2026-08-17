@@ -232,7 +232,7 @@ grupo d223484f823f262b 0
 guarda fa13a12b95d6b2f9 0
 gume_calculo 8af5f8fd0d0ddcf7 0
 hawking d6f694f6d6970754 0
-headjack 91bb6d378e64db19 0
+headjack d414f06a68b0b959 0
 hilbert_bidual f8c8159a1e1e3878 0
 hiper 2a2e7132db161e4c 0
 hipercubo32 6f71340587320316 0
@@ -375,7 +375,7 @@ produto_dual ddd1edbd32b0678a 0
 progressoes 36f2db34b595d74a 0
 projetiva e77edff49e9833b8 0
 promove 91c74b926f1ba345 0
-quantico 30359e51360b28ac 0
+quantico 33fd2559ed6c4e1c 0
 quantificador_histerese afd27f900a63173a 0
 quantizador_universal 5432c65b6546dfe0 0
 quasi 4260bc780519ca6d 0

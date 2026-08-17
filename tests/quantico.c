@@ -425,6 +425,56 @@ int main(void){
         ok("a EVOLUCAO e reversivel: U tem inversa e ela e U' — a volta da a identidade",
            dif(volta, mid()) < 1e-12);
 
+        /* E A TESE MEDE-SE EXACTA, sem a exponencial de matriz. «U'U = I» e' uma identidade
+         * ALGEBRICA, e o que a torna aproximada aqui e' o mexp(), nao ela. Basta escolher um
+         * angulo cujo cos e sin sejam RACIONAIS — um terno pitagorico — e a conta cai em
+         * Z[i]:
+         *
+         *     U = [[c, -is], [-is, c]]  com c = 3/5, s = 4/5
+         *     5U = [[3, -4i], [-4i, 3]]   e   (5U)'(5U) = 25.I,  exacto
+         *
+         * Varrem-se os ternos (a,b,h) com a²+b² = h², e exige-se (hU)'(hU) = h².I entrada a
+         * entrada. Sem raiz, sem exponencial, sem regua. */
+        long ternos = 0, unit_ok = 0, det_ok = 0;
+        for(long a1 = 1; a1 <= 20; a1++) for(long b1 = 1; b1 <= 20; b1++){
+            long h2 = a1*a1 + b1*b1, h = 0;
+            while(h*h < h2) h++;
+            if(h*h != h2) continue;                    /* so' os ternos pitagoricos */
+            ternos++;
+            /* hU = [[a1, -b1.i], [-b1.i, a1]]; guarda-se (re,im) de cada entrada */
+            long Ure[2][2] = {{a1,0},{0,a1}}, Uim[2][2] = {{0,-b1},{-b1,0}};
+            /* (hU)' = conjugada transposta */
+            long Dre[2][2], Dim[2][2];
+            for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                Dre[i][j] =  Ure[j][i];
+                Dim[i][j] = -Uim[j][i];
+            }
+            /* P = (hU)'(hU), em Z[i] */
+            long Pre[2][2] = {{0,0},{0,0}}, Pim[2][2] = {{0,0},{0,0}};
+            for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                for(int k = 0; k < 2; k++){
+                    Pre[i][j] += Dre[i][k]*Ure[k][j] - Dim[i][k]*Uim[k][j];
+                    Pim[i][j] += Dre[i][k]*Uim[k][j] + Dim[i][k]*Ure[k][j];
+                }
+            int bate = 1;
+            for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                long esperado = (i == j) ? h2 : 0;
+                if(Pre[i][j] != esperado || Pim[i][j] != 0) bate = 0;
+            }
+            if(bate) unit_ok++;
+            /* e o determinante de hU vale h²: a² + b² — o mesmo h², e e' isso a unitariedade */
+            long dre = Ure[0][0]*Ure[1][1] - Uim[0][0]*Uim[1][1]
+                     - (Ure[0][1]*Ure[1][0] - Uim[0][1]*Uim[1][0]);
+            if(dre == h2) det_ok++;
+        }
+        printf("      e a UNITARIEDADE em Z[i], por ternos pitagoricos, sem exponencial:\n");
+        printf("      (hU)'(hU) = h².I em %ld de %ld ternos, e det(hU) = h² em %ld\n\n",
+               unit_ok, ternos, det_ok);
+        ok("U'U = I mede-se EXACTA em Z[i]: com cos e sin racionais (um terno pitagorico) a"
+           " unitariedade e' uma identidade inteira, e o que o mexp() traz de aproximado e' a"
+           " exponencial e nao a tese",
+           ternos > 0 && unit_ok == ternos && det_ok == ternos);
+
         /* a medida: o projetor P = |0><0|. P² = P (idempotente) e P NAO tem inversa. */
         M P = mzero(); P.a[0][0] = 1;
         ok("a MEDIDA e um projetor: P^2 = P, idempotente — e uma vez feita, repeti-la nao muda",
