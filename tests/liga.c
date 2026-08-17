@@ -137,8 +137,32 @@ int main(void){
         /* a fração que dá o alvo: p = pc + (alvo/S_grafeno)^(1/t) */
         double p_alvo = PC + pow(alvo/S_GRAFENO, 1.0/EXPO);
         double s_check = sigma_comp(p_alvo);
-        ok("ha uma fracao que da EXATAMENTE o sigma do casamento — e ela calcula-se, nao se tenta",
-           fabs(s_check - alvo)/alvo < 1e-6);
+        /* ISTO É f(f⁻¹(alvo)) = alvo. `p_alvo` foi obtido invertendo a `sigma_comp` — e
+         * aplicá-la de volta devolve o alvo por construção, não por a fórmula estar certa.
+         * O que tem conteúdo é a INVERSÃO ser correcta noutro sítio que não o alvo: dá-se
+         * uma fracção p qualquer, calcula-se σ, inverte-se, e tem de voltar ao p. Aí a ida
+         * e a volta partem de pontos diferentes, e a composição já pode falhar. */
+        /* o laço conta em INTEIROS: `for(double p = ...; p <= ...; p += 0.01)` deu 29
+         * passos e não 30, porque o incremento em vírgula acumula e o último ultrapassa.
+         * Um contador de iterações não se escreve em vírgula flutuante. */
+        long volta_ok = 0, volta_tot = 0;
+        for(int i = 1; i <= 30; i++){
+            double p = PC + 0.01*i;
+            double s = sigma_comp(p);                       /* a ida */
+            double p_de_volta = PC + pow(s/S_GRAFENO, 1.0/EXPO);   /* a volta */
+            volta_tot++;
+            if(fabs(p_de_volta - p) < 1e-9) volta_ok++;
+        }
+        printf("      e a INVERSAO volta ao p de partida em %ld de %ld fraccoes varridas\n",
+               volta_ok, volta_tot);
+        ok("ha uma fracao que da EXATAMENTE o sigma do casamento — e ela calcula-se, nao se"
+           " tenta. E o que se mede e' a INVERSAO, partindo de p e nao do alvo: `sigma_comp`"
+           " aplicada a uma fraccao qualquer e depois invertida volta ao mesmo p, em 30"
+           " fraccoes contadas por um indice INTEIRO — com o passo em virgula o laco dava 29,"
+           " porque o incremento acumula e o ultimo ultrapassa. Comparar sigma_comp(p_alvo)"
+           " com o alvo era f(f^-1(x)) = x: a definicao do par relida, e nao a formula a"
+           " estar certa",
+           volta_ok == volta_tot && volta_tot == 30 && fabs(s_check - alvo)/alvo < 1e-6);
         /* e a JANELA: que variação de p mantém σ dentro de um fator 2 do alvo? */
         double p_lo = PC + pow(alvo/2/S_GRAFENO, 1.0/EXPO);
         double p_hi = PC + pow(alvo*2/S_GRAFENO, 1.0/EXPO);

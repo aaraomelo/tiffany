@@ -256,7 +256,7 @@ def main():
     fich_p3 = len({f for f, *_ in p3})
     print(f"\n  P3 — a quantidade dividida por si própria: {len(p3)}"
           f" em {fich_p3} ficheiros")
-    for f, l, v, w, ln in p3[:25]:
+    for f, l, v, w, ln in p3[:200]:
         print(f"      {f}:{l}   {v} vem de {w}   →   {ln}")
     if len(p3) > 25:
         print(f"      ... e mais {len(p3)-25}")

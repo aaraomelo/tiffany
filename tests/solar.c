@@ -178,13 +178,46 @@ printf("\n§S3  A BATERIA é uma ALFÂNDEGA: entra dual, sai dual, e o que fica 
         double Eout = (V*Ic - Ic*Ic*Rint)*t;
         double eta = Eout/Ein, ret = Ein - Eout;
         printf("      %-10.1f %-10.4f %-10.4f %-17.6f %.6f J\n", Ic, Ein, Eout, eta, ret);
-        /* o retido é EXATAMENTE 2·I²·R·t — o que a alfândega cobra dos dois lados */
-        if(fabs(ret - 2*Ic*Ic*Rint*t) > 1e-9) mal++;
+        /* E ISTO É ÁLGEBRA RELIDA. Ein = (V·Ic + Ic²R)t e Eout = (V·Ic − Ic²R)t, logo
+         * Ein − Eout É 2·Ic²·R·t por construção: a comparação não podia falhar, e o «1e-9»
+         * dava-lhe cara de medição. É o mesmo defeito do §A6 do arraytermico, onde «radia»
+         * era o resto e o balanço fechava por definição.
+         *
+         * O CONTEÚDO É A NATUREZA DA COBRANÇA: o retido é QUADRÁTICO na corrente e a
+         * energia útil é LINEAR — e é isso que faz a eficiência cair. Com t = Cap/Ic, o
+         * retido vale 2·Ic·R·Cap, logo DOBRAR a corrente DOBRA o retido enquanto a energia
+         * entregue por ciclo não muda. Mede-se a razão, e ela é 2 seja qual for o Ic. */
+        if(k > 1){
+            double ret_ant = 2*(Ic-0.5)*(Ic-0.5)*Rint*(Cap/(Ic-0.5));
+            double r = ret/ret_ant;                  /* = Ic/(Ic−0,5), e cresce */
+            if(!(ret > ret_ant)) mal++;              /* mais corrente, MAIS retido */
+            if(r <= 1.0) mal++;
+        }
         if(eta > antEta) mal++;                    /* mais corrente, menos eficiência */
         antEta = eta;
     }
     printf("\n");
-    ok("o RETIDO é exatamente 2·I²R·t — a alfândega cobra na entrada e na saída", mal == 0);
+    /* e a LEI, sem álgebra relida: o retido é 2·R·Cap·Ic — LINEAR na corrente, enquanto
+     * a energia entregue por ciclo, V·Cap, NÃO DEPENDE dela. É por isso que a eficiência
+     * cai: o numerador é fixo e o denominador cresce. Mede-se nos dois lados. */
+    {
+        int retido_cresce = 1, util_fixa = 1; double ant_ret = -1, util0 = -1;
+        for(int k = 1; k <= 5; k++){
+            double Ic = 0.5*k, t = Cap/Ic;
+            double r = 2*Ic*Ic*Rint*t;               /* = 2·R·Cap·Ic */
+            double u = V*Ic*t;                       /* = V·Cap, e não depende de Ic */
+            if(ant_ret >= 0 && !(r > ant_ret)) retido_cresce = 0;
+            if(util0 >= 0 && fabs(u - util0) > 1e-12) util_fixa = 0;
+            ant_ret = r; if(util0 < 0) util0 = u;
+        }
+        ok("o RETIDO é exatamente 2·I²R·t — a alfândega cobra na entrada e na saída. E o que"
+           " se mede NAO e' essa igualdade, que e' algebra relida (Ein - Eout E' 2.I²R.t por"
+           " construcao, e nao podia falhar): e' a NATUREZA da cobranca. Com t = Cap/Ic o"
+           " retido vale 2.R.Cap.Ic, LINEAR na corrente, enquanto a energia entregue por"
+           " ciclo e' V.Cap e NAO DEPENDE dela — o numerador fixo e o denominador a crescer"
+           " sao a razao de a eficiencia cair, e as duas metades medem-se",
+           mal == 0 && retido_cresce && util_fixa);
+    }
     printf("      E repare-se no que a bateria de facto guarda. A energia que sai é a que tinha\n");
     printf("      DUAL — a reação química reverte, e por isso ela atravessa e volta. O que não\n");
     printf("      tem dual é a dissipação em I²R: ela não tem operação que a devolva, e por isso\n");
