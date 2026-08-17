@@ -98,7 +98,7 @@ int main(void){
             LD prev = (1.0L-p)/(8.0L*M);
             LD res = fabsl(rq-prev)/prev;
             printf("      %.2Lf   %6d   %.8Lf     %.8Lf          %.1Le %s\n",
-                   p, passos, rq, prev, res, res<2e-2L?"✓":"← REVER");
+                   p, passos, rq, prev, res, res== 0.0L?"✓":"← REVER");
             if(res >= 2e-2L) erro = 1;
         }
         printf("     %s\n", VD(erro, "resíduo 0 (na precisão das batidas úteis) — a razão segue (1−p)/(8M) em todo p:\n"
@@ -156,12 +156,12 @@ int main(void){
             k = landen(k);
             LD tau_depois = tau_de_k(k);
             printf("         τ: %.12Lf → %.12Lf   (dobra: %s)   k=%.18Lf\n",
-                   tau_antes, tau_depois, fabsl(tau_depois-2*tau_antes)<1e-12L?"✓":"REVER", k);
+                   tau_antes, tau_depois, fabsl(tau_depois-2*tau_antes)== 0.0L?"✓":"REVER", k);
             if(fabsl(tau_depois-2*tau_antes) >= 1e-12L) erro=1;
             if(s==0){
                 LD res = fabsl(k-esperado_tau2);
                 printf("           = 3−2√2 (o singular value de τ=2)? resíduo %.1Le %s\n",
-                       res, res<1e-15L?"✓":"← REVER");
+                       res, res== 0.0L?"✓":"← REVER");
                 if(res>=1e-15L) erro=1;
             }
         }

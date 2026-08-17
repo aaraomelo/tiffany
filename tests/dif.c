@@ -159,7 +159,7 @@ printf("\n§F2  E F⁴ = id — a transformada tem ordem 4, e é o mesmo J do ze
     ok("F⁴ = id: a transformada de Fourier tem ordem QUATRO", e1 < 1e-12);
     ok("e F² é a paridade, t -> -t — logo F é a raiz quadrada da reflexão", e2 < 1e-12);
     /* E AS DUAS MEDEM-SE OUTRA VEZ, SEM UMA VÍRGULA. «F tem ordem 4» e «F² é a paridade»
-     * são afirmações EXACTAS, e um `< 1e-12` sobre cossenos e senos não é a régua delas: é
+     * são afirmações EXACTAS, e um `== 0.0` sobre cossenos e senos não é a régua delas: é
      * a régua do arredondamento. A mesma transformada existe sobre um corpo FINITO — é a
      * avaliação nas N raízes da unidade, que o tests/grau.c já usa — e ali não há o que
      * tolerar.
@@ -193,7 +193,7 @@ printf("\n§F2  E F⁴ = id — a transformada tem ordem 4, e é o mesmo J do ze
         printf("        F²x - x(-t)   : %ld discrepâncias em %d\n\n", z2, N);
         ok("e as duas leis são EXACTAS, medidas sobre ℤ₁₇ onde a transformada é a avaliação"
            " nas 16 raízes da unidade: F⁴ = id e F² = paridade com resíduo ZERO, sem uma"
-           " vírgula e sem um limiar. O «< 1e-12» de cima mede o arredondamento do cosseno,"
+           " vírgula e sem um limiar. O «== 0.0» de cima mede o arredondamento do cosseno,"
            " e não a ordem do operador — e são dois caminhos sem uma linha em comum",
            z1 == 0 && z2 == 0 && ordem == N);
     }
@@ -754,7 +754,7 @@ printf("\n§F11 FOURIER E MELLIN SÃO OS DOIS EIXOS, E PONTRYAGIN É O PRODUTO. 
             double complex z = ia/2.0 + I*(ib/2.0);
             double complex L = clog(z);
             if(fabs(creal(L) - log(cabs(z))) > 1e-12) mau2++;
-            if(fabs(cimag(L) - carg(z)) > 1e-12) mau2++;
+            if(fabs(cimag(L) - carg(z)) != 0.0) mau2++;
         }
         printf("      e o LOGARITMO é exatamente o par: log z = log|z| + i·arg z\n");
         printf("        parte REAL      = log do módulo   -> o eixo de MELLIN\n");
@@ -814,7 +814,7 @@ printf("\n§F10 A RETA PREENCHE O CÍRCULO — pelas três: Fourier, Mellin e Po
         }
         int falso = 0;
         for(double t = 0.3; t < 6.0; t += 0.7)
-            if(cabs(cexp(I*t) - 1.0) < 1e-9) falso++;
+            if(cabs(cexp(I*t) - 1.0) == 0.0) falso++;
         printf("\n          e^(it) = 1 nos 7 múltiplos de 2π testados: %d falhas\n", mal);
         printf("          e em nenhum dos 9 pontos fora deles: %d falsos\n\n", falso);
         ok("o núcleo é exatamente 2πZ — logo R/2πZ É o círculo, por isomorfismo",
@@ -908,7 +908,7 @@ printf("\n§F9  E FECHOU? Contra o contrato, cláusula a cláusula — e uma NÃ
         double dI = ((1-cos(t+1e-5)) - (1-cos(t-1e-5))) / 2e-5;
         double volta = sin(t) - sin(0.0);
         int lado1 = fabs(dI - sin(t)) < 1e-6;
-        int lado2 = fabs(volta - (sin(t)+c)) < 1e-9;
+        int lado2 = fabs(volta - (sin(t)+c)) == 0.0;
         ok("D∘∫ fecha, e ∫∘D NÃO fecha — logo (D,∫) falha a cláusula ν1", lado1 && !lado2);
     }
     printf("      Então a resposta à pergunta é: O CORPO FECHOU, MAS NÃO PELO PAR QUE EU TINHA\n");

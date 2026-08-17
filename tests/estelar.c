@@ -75,8 +75,8 @@ int main(void){
         printf("       q = e^{−2π}              = %.20Lf\n", q);
         printf("       R(q) pela fração contínua = %.20Lf\n", r);
         printf("       √(φ√5) − φ (Ramanujan)    = %.20Lf   erro %.2Le %s\n",
-               fechada, e, e<5e-17L?"✓ (o limite do long double)":"✗");
-        printf("       x⁴+2x³−6x²−2x+1 em R(q)   = %.2Le  %s\n", pol, fabsl(pol)<1e-16L?"✓ é raiz":"✗");
+               fechada, e, e== 0.0L?"✓ (o limite do long double)":"✗");
+        printf("       x⁴+2x³−6x²−2x+1 em R(q)   = %.2Le  %s\n", pol, fabsl(pol)== 0.0L?"✓ é raiz":"✗");
         if(e>=5e-17L || fabsl(pol)>=1e-15L) passou=0;
         printf("     %s\n", VD(!((e<5e-17L)), "resíduo 0 — na base q = e^{−2π} o ouro é um valor ALGÉBRICO de grau 4, e π o produz. O\n"
           "     mecanismo é multiplicação complexa (singular moduli): π transcendente gera algébrico.\n"
@@ -93,11 +93,11 @@ int main(void){
         LD sig2 = 1.0L + sqrtl(2.0L);                 /* a prata                                    */
         LD v2 = sqrtl(sig2*sig2+1.0L) - sig2;         /* a forma fechada v_m                        */
         printf("       v(e^{−π}) pela fração     = %.20Lf   (o paper diz 0,1989123…)\n", v);
-        printf("       x⁴+4x³−6x²−4x+1 em v      = %.2Le  %s\n", pol, fabsl(pol)<1e-15L?"✓ é raiz":"✗");
+        printf("       x⁴+4x³−6x²−4x+1 em v      = %.2Le  %s\n", pol, fabsl(pol)== 0.0L?"✓ é raiz":"✗");
         printf("       v₂ = √(σ₂²+1) − σ₂        = %.20Lf   erro vs v(e^{−π}) %.2Le\n",
                v2, fabsl(v2-v));
         if(fabsl(pol)>=1e-15L) passou=0;
-        printf("     %s\n", fabsl(pol)<1e-15L ?
+        printf("     %s\n", fabsl(pol)== 0.0L ?
           "resíduo 0 — não é um só R avaliado em vários pontos: é uma FAMÍLIA, uma fração modular\n"
           "     por nível, e cada uma gera o seu metal."
           : "FALHA");
@@ -138,10 +138,10 @@ int main(void){
         /* e a razão: φ²+1 = φ+2 = φ√5 */
         LD id = fabsl((phi*phi+1.0L) - phi*sqrtl(5.0L));
         printf("       v₁ = √(φ²+1) − φ  = %.20Lf\n", v1);
-        printf("       √(φ√5) − φ        = %.20Lf   erro %.2Le %s\n", ram, e, e<1e-17L?"✓":"✗");
+        printf("       √(φ√5) − φ        = %.20Lf   erro %.2Le %s\n", ram, e, e== 0.0L?"✓":"✗");
         printf("       e a razão: φ²+1 = φ+2 = φ√5   (erro %.2Le)\n", id);
         if(e>=1e-17L || id>=1e-17L) passou=0;
-        printf("     %s\n", VD(!((e<1e-17L)), "resíduo 0 — a fórmula de Ramanujan é o caso m=1 de uma lei que vale para todo metal."));
+        printf("     %s\n", VD(!((e== 0.0L)), "resíduo 0 — a fórmula de Ramanujan é o caso m=1 de uma lei que vale para todo metal."));
     }
 
     /* ---------- E5: o DUPOLINÔMIO é uma COLISÃO (e eu havia trocado a definição) ---------- */
@@ -155,7 +155,7 @@ int main(void){
             LD pg=sig*sig, pa=(LD)m*sig+1.0L;
             LD e=fabsl(pg-pa);
             printf("       %d    %.15Lf   %.15Lf    %.15Lf    %.1Le %s\n", m, sig, pg, pa, e,
-                   e<1e-17L?"✓":"✗");
+                   e== 0.0L?"✓":"✗");
             if(e>=1e-17L) erro=1;
         }
         printf("     %s\n", VD(erro, "resíduo 0 — o metal É o ponto onde a PG encontra a PA. Não é \"o par (PA,PG)\" como eu\n"
@@ -171,7 +171,7 @@ int main(void){
         LD phi=(1.0L+sqrtl(5.0L))/2.0L;
         /* na base inteira: φ = [1;1,1,…], o PIOR aproximável (Hurwitz, constante √5) */
         LD x=phi; int reg_ok=1;
-        for(int i=0;i<12;i++){ LD a=floorl(x); if(fabsl(a-1.0L)>1e-15L) reg_ok=0; x=1.0L/(x-a); }
+        for(int i=0;i<12;i++){ LD a=floorl(x); if(fabsl(a-1.0L)!= 0.0L) reg_ok=0; x=1.0L/(x-a); }
         printf("       base INTEIRA (fc regular) : φ = [1;1,1,1,…]  %s → o PIOR aproximável\n",
                reg_ok?"✓":"✗");
         printf("                                   (Hurwitz: constante √5 = %.6Lf, a melhor possível)\n",

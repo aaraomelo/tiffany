@@ -118,9 +118,9 @@ printf("\n§H1  A família ⋆_s: as quatro peças, e só a quarta vê o s.\n\n"
         printf("      %+-8.1f %+-17.9f (%+.6f, %+.6f, %+.6f)\n", s, r.s0,
                r.v[0], r.v[1], r.v[2]);
         if(primeiro){ esc0 = r.s0; primeiro = 0; }
-        else if(fabs(r.s0 - esc0) > 1e-15) mal++;      /* a escalar NÃO se move */
+        else if(fabs(r.s0 - esc0) != 0.0) mal++;      /* a escalar NÃO se move */
         for(int j = 0; j < 3; j++)                     /* e a vetorial move-se exatamente s·c */
-            if(fabs(r.v[j] - (base.v[j] + s*c[j])) > 1e-15) mal++;
+            if(fabs(r.v[j] - (base.v[j] + s*c[j])) != 0.0) mal++;
     }
     printf("\n      a×b = (%+.6f, %+.6f, %+.6f)\n\n", c[0], c[1], c[2]);
     ok("variar s move APENAS o termo do cruzado — as outras três peças não o veem",
@@ -200,7 +200,7 @@ printf("\n§H2  A LEI DE CONSERVAÇÃO, e o imposto V(s) = (1−s²)·m.\n\n");
         long esq = rt_dir(C, C, 3);
         long dir = rt_dir(A,A,3)*rt_dir(B,B,3) - rt_dir(A,B,3)*rt_dir(A,B,3);
         lagT++;
-        if(esq == dir) lagZ++;                     /* resíduo ZERO, não «< 1e-12» */
+        if(esq == dir) lagZ++;                     /* resíduo ZERO, não «== 0.0» */
     }
     if(lagZ != lagT) malL++;
     printf("      e a identidade de Lagrange, de onde a lei sai: ‖a×b‖² = ‖a‖²‖b‖² − ⟨a,b⟩²\n");
@@ -224,9 +224,9 @@ printf("\n§H3  s = ±1 é onde o imposto ANULA — e é o Hurwitz outra vez.\n\
         Q r = star(z, w, s);
         double V = imposto(z,w,s), dif = fabs(nq(r) - nzw);
         printf("      %+-8.3f %+-10.6f %-13.9f %s\n", s, 1-s*s, V,
-               dif < 1e-12 ? "SIM — multiplicativa" : "não");
-        int devia = fabs(fabs(s) - 1.0) < 1e-12;
-        if((dif < 1e-12) != devia) mal++;
+               dif == 0.0 ? "SIM — multiplicativa" : "não");
+        int devia = fabs(fabs(s) - 1.0) == 0.0;
+        if((dif == 0.0) != devia) mal++;
     }
     printf("\n");
     ok("a norma é multiplicativa EXATAMENTE em s = ±1 — onde o imposto anula", mal == 0);
@@ -272,7 +272,7 @@ printf("\n§H4  Os campos locais C_â: fechados, e R^n é a sua união.\n\n");
         if(c < 3)
             printf("      (%+.3f,%+.3f,%+.3f)   %+.6f %+.6f    %s\n",
                    ah[0], ah[1], ah[2], r.s0, proj,
-                   (fabs(r.s0-eR) < 1e-14 && fabs(proj-eI) < 1e-14) ? "sim" : "NÃO");
+                   (fabs(r.s0-eR) == 0.0 && fabs(proj-eI) == 0.0) ? "sim" : "NÃO");
     }
     printf("\n      fecho (a parte vetorial fica paralela a â): %d falhas\n", malF);
     printf("      e a lei é a de C, exatamente                : %d falhas\n", malC);
@@ -311,9 +311,9 @@ printf("\n§H5  O TORQUE VETORIAL: T⃗_e(s), e em n=4 tem TRÊS componentes.\n\
         printf("      a mesma, forma compacta     (%+.4f, %+.4f, %+.4f)   [Im(conj(ψ)⋆i)]\n",
                Tc[0],Tc[1],Tc[2]);
         printf("      e o DTC clássico dá         %+.6f\n", classico);
-        if(fabs(T2[2] - classico) > 1e-12) mal++;
-        if(fabs(T2[0]) > 1e-14 || fabs(T2[1]) > 1e-14) mal++;
-        if(fabs(Tc[2] + classico) > 1e-12) malC++;   /* a compacta dá o SIMÉTRICO */
+        if(fabs(T2[2] - classico) != 0.0) mal++;
+        if(fabs(T2[0]) != 0.0 || fabs(T2[1]) != 0.0) mal++;
+        if(fabs(Tc[2] + classico) != 0.0) malC++;   /* a compacta dá o SIMÉTRICO */
     }
     printf("\n");
     ok("a forma COMPACTA do paper dá o simétrico da expandida — as duas diferem no sinal do cruzado",
@@ -328,7 +328,7 @@ printf("\n§H5  O TORQUE VETORIAL: T⃗_e(s), e em n=4 tem TRÊS componentes.\n\
         torque(p3, i3, 1.0, P, T3);
         printf("      e fora do plano:            (%+.4f, %+.4f, %+.4f)   %.6f\n",
                T3[0],T3[1],T3[2], n3(T3));
-        for(int k = 0; k < 3; k++) if(fabs(T3[k]) > 1e-6) vivas++;
+        for(int k = 0; k < 3; k++) if(fabs(T3[k]) != 0.0) vivas++;
     }
     printf("\n");
     ok("fora do plano as TRÊS componentes vivem — uma por eixo de SO(3), o motor esférico",
@@ -358,7 +358,7 @@ printf("\n§H6  A histerese ESFÉRICA, e a redução ao clássico em n = 2.\n\n"
         printf("      (%+.3f,%+.3f,%+.3f)   %-9.6f (%+.3f,%+.3f,%+.3f)      %s\n",
                T[0],T[1],T[2], ne, sg[0],sg[1],sg[2], ne <= d ? "sim" : "não");
         if(ne > d && fabs(n3(sg) - 1.0) > 1e-12) mal++;       /* σ é versor */
-        if(ne <= d && n3(sg) > 1e-15) mal++;                  /* dentro, σ = 0 */
+        if(ne <= d && n3(sg) != 0.0) mal++;                  /* dentro, σ = 0 */
     }
     printf("\n");
     ok("a banda esférica dá σ = 0 dentro e um VERSOR fora — a direção da correção", mal == 0);
@@ -372,7 +372,7 @@ printf("\n§H6  A histerese ESFÉRICA, e a redução ao clássico em n = 2.\n\n"
         double sg = (ne > d) ? e/ne : 0;
         int cl = (T < ref - d) ? +1 : (T > ref + d) ? -1 : 0;
         printf("      %-13.3f %+-9.3f %+-17.0f %+d\n", T, e, sg, cl);
-        if(fabs(sg - cl) > 1e-12) malR++;
+        if(fabs(sg - cl) != 0.0) malR++;
     }
     printf("\n");
     ok("em uma componente a banda esférica É o comparador de sinal de Takahashi", malR == 0);
@@ -404,7 +404,7 @@ printf("\n§H7  As BANDAS derivadas do imposto — e a economia, medida.\n\n");
         double d2 = lam*lam*V/(nq(z)*nq(z)*nq(w)*nq(w));
         double d = sqrt(d2);
         /* quantos passos até sair da banda, com uma deriva fixa */
-        int passos = (d2 > 1e-24) ? (int)(d/0.002) : 999999;
+        int passos = (d2 != 0.0) ? (int)(d/0.002) : 999999;
         if(nc < 7) nc++;
         printf("      %-16.0f %-13.6f %-12.6f %-12.6f %d passos\n",
                ang*180/M_PI, m, V, d, passos);
@@ -486,8 +486,8 @@ printf("\n§H8  VALIDAR: o DTC hipercomplexo roda, e em n=2 dá o de Takahashi.\
         double T[3];
         torque(p2, i2, 1.0, P, T);
         double classico = 1.5*P*(p2.v[0]*i2.v[1] - p2.v[1]*i2.v[0]);
-        if(fabs(T[2] - classico) > 1e-12) mal2++;
-        if(fabs(T[0]) > 1e-14 || fabs(T[1]) > 1e-14) mal2++;
+        if(fabs(T[2] - classico) != 0.0) mal2++;
+        if(fabs(T[0]) != 0.0 || fabs(T[1]) != 0.0) mal2++;
     }
     printf("      e restrito ao plano, contra o DTC clássico, em 300 pontos: %d falhas\n\n", mal2);
     ok("restrito ao plano, o hipercomplexo É o de Takahashi — resíduo 0 em 300 pontos",

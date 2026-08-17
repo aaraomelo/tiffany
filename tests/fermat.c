@@ -27,7 +27,7 @@ int main(void){
     for(int n=1;n<=4;n++){
         double D=sqrt((double)n*n+4), s=(n+D)/2, sl=(n-D)/2;
         printf("      n=%d: tr=%d det=%d ; σ=%.4f σ'=%.4f ; σσ'=%.0f (=det) ; σ'=−1/σ? %s\n",
-               n, n, -1, s, sl, s*sl, fabs(sl+1.0/s)<1e-9?"sim (o esquilo)":"?");
+               n, n, -1, s, sl, s*sl, fabs(sl+1.0/s)== 0.0?"sim (o esquilo)":"?");
     }
 
     /* §2 — o FROBENIUS de E/𝔽_p é o gato NA BORDA: a_p=p+1−#E, autovalores de z²−a_p z+p,          */

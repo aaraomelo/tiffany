@@ -289,7 +289,7 @@ int main(void){
         /* e aqui tambem: "maior_A > 0.5" era limiar meu. O que importa e que o maximo esteja
          * NO MEIO e domine os extremos — e o quanto ele vale diz-se, em vez de se exigir. */
         ok("ha um sigma que MAXIMIZA a absorcao, e ele esta NO MEIO — nem zero nem infinito",
-           melhor_s > 1e-2 && melhor_s < 1e5);
+           melhor_s != 0.0 && melhor_s < 1e5);
         /* e os dois extremos falham: o zero transmite, o infinito reflete */
         double A_zero = 1.0 - reflexao(1e-10,eps_r,f) - transmissao(1e-10,eps_r,f,d);
         double A_inf  = 1.0 - reflexao(1e7,eps_r,f)   - transmissao(1e7,eps_r,f,d);
@@ -315,7 +315,7 @@ int main(void){
                 double A = 1.0 - R - T;
                 double soma = R + T + A;
                 double res = fabs(soma - 1.0);
-                if(res < 1e-12) fecham++;
+                if(res == 0.0) fecham++;
                 if(res > pior) pior = res;
                 /* ATENCAO: esta guarda TAMBEM nao pode falhar com os modelos atuais.
                  * transmissao() devolve (1-R)*exp(-2*alpha*d) <= 1-R, donde

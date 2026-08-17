@@ -93,7 +93,7 @@ printf("\n§C1  O ESPAÇO: quantos vetores são precisos para o gerar.\n\n");
             for(int d = 0; d < nd; d++) m[i][d] -= c*m[j][d];
         }
         double n2 = dot(m[i], m[i], nd);
-        if(n2 > 1e-12){
+        if(n2 != 0.0){
             if(posto != i) memcpy(m[posto], m[i], sizeof m[i]);
             posto++;
         }
@@ -172,7 +172,7 @@ printf("\n§C3  A BASE por Gram-Schmidt: e mede-se que ela É ortonormal.\n\n");
         /* O VECTOR QUE NAO SE NORMALIZA CONTA-SE. Se nn cair abaixo do limiar, o vector e'
          * dependente dos anteriores e a base fica com menos elementos do que nf — e isso
          * mudava a tese sem se ver, porque o ramo passava calado. */
-        if(nn > 1e-12){ for(int d = 0; d < nd; d++) base[i][d] /= nn; }
+        if(nn != 0.0){ for(int d = 0; d < nd; d++) base[i][d] /= nn; }
         else degenerados++;
     }
     double pior_norma = 0, pior_orto = 0;

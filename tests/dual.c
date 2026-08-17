@@ -65,7 +65,7 @@ printf("\n§U1  A tabela do dual é a do direto com o sinal trocado.\n\n");
     for(int k = 0; k < 200; k++){
         Z x = { sin(3.0*k+1), cos(5.0*k+2) }, y = { sin(7.0*k+3), cos(11.0*k+4) };
         Z pd = mul(x,y,-1), pu = mul(x,y,+1);
-        if(fabs(pd.b - pu.b) > 1e-14) mal++;              /* a 2a componente e IDENTICA */
+        if(fabs(pd.b - pu.b) != 0.0) mal++;              /* a 2a componente e IDENTICA */
         if(fabs((pd.a + pu.a)/2 - x.a*y.a) > 1e-14) mal++;  /* e a media das 1as e ac */
     }
     printf("      a 2ª componente é a MESMA nas duas, e a média das 1ªs é ac: %d falhas\n\n", mal);
@@ -86,7 +86,7 @@ printf("\n§U2  E daí a reversão: ε tem ordem 2, i tem ordem 4.\n\n");
         for(int k = 1; k <= 8; k++){
             p = mul(p, e, -1);
             if(k <= 4) printf(" %+g%+g·i ", p.a, p.b);
-            if(!ordem && fabs(p.a-1) < 1e-14 && fabs(p.b) < 1e-14) ordem = k;
+            if(!ordem && fabs(p.a-1) == 0.0 && fabs(p.b) == 0.0) ordem = k;
         }
         printf("   %d\n", ordem);
         if(ordem != 4) malD++;
@@ -98,7 +98,7 @@ printf("\n§U2  E daí a reversão: ε tem ordem 2, i tem ordem 4.\n\n");
         for(int k = 1; k <= 8; k++){
             p = mul(p, e, +1);
             if(k <= 4) printf(" %+g%+g·ε ", p.a, p.b);
-            if(!ordem && fabs(p.a-1) < 1e-14 && fabs(p.b) < 1e-14) ordem = k;
+            if(!ordem && fabs(p.a-1) == 0.0 && fabs(p.b) == 0.0) ordem = k;
         }
         printf("   %d\n\n", ordem);
         if(ordem != 2) malU++;
@@ -185,7 +185,7 @@ printf("\n§U5  As duas numa só: a assinatura, e a terceira classe no meio.\n\n
         int D = -4*s;
         printf("      %+2d       %-16s %s      %+4d      %s\n", s, t[i].nome, t[i].curva, D,
                D < 0 ? "elíptica" : D == 0 ? "parabólica" : "hiperbólica");
-        if(fabs(q.a - s) > 1e-15 || fabs(q.b) > 1e-15) mal++;
+        if(fabs(q.a - s) != 0.0 || fabs(q.b) != 0.0) mal++;
     }
     printf("\n");
     ok("as três classes são um parâmetro só — e Δ = -4s liga-as à régua do projeto", mal == 0);
@@ -206,8 +206,8 @@ printf("\n§U6  O que o dual NÃO tem: o cone, onde a reversão falha.\n\n");
         if(i == 0 && j == 0) continue;
         Z z = { (double)i, (double)j };
         total++;
-        if(fabs(norma(z,-1)) < 1e-12) semInvD++;
-        if(fabs(norma(z,+1)) < 1e-12) semInvU++;
+        if(fabs(norma(z,-1)) == 0.0) semInvD++;
+        if(fabs(norma(z,+1)) == 0.0) semInvU++;
     }
     printf("      sobre %d pontos != 0 do reticulado:\n", total);
     printf("      sem inverso no direto: %d\n", semInvD);
@@ -220,7 +220,7 @@ printf("\n§U6  O que o dual NÃO tem: o cone, onde a reversão falha.\n\n");
         for(int k = 0; k < 300; k++){
             Z z = { sin(13.0*k+1), 0.4*cos(17.0*k+2) };
             double N = norma(z,s);
-            if(fabs(N) < 1e-6) continue;
+            if(fabs(N) == 0.0) continue;
             Z c = conjuga(z), inv = { c.a/N, c.b/N }, p = mul(z, inv, s);
             medidos++;
             if(fabs(p.a-1) > 1e-9 || fabs(p.b) > 1e-9) mal++;
@@ -261,14 +261,14 @@ printf("\n§U7  A notação no R^n, e o produto escrito nas duas.\n\n");
              * E NAO E, para sigma = -1: e este o achado da seccao, medido logo abaixo. */
             double na = a0*a0, nb = b0*b0, nc = c0*c0;
             for(int i = 0; i < 3; i++){ na += sigma*a[i]*a[i]; nb += sigma*b[i]*b[i]; nc += sigma*c[i]*c[i]; }
-            if(fabs(nc - na*nb) > 1e-9*(fabs(na*nb)+1)) malN++;
+            if(fabs(nc - na*nb) != 0.0*(fabs(na*nb)+1)) malN++;
             /* e a antissimetrica continua a ser SO o cruzado, nas duas */
             double d0 = b0*a0 - sigma*ip, d[3];
             for(int i = 0; i < 3; i++) d[i] = b0*a[i] + a0*b[i];
             d[0] += b[1]*a[2]-b[2]*a[1];
             d[1] += b[2]*a[0]-b[0]*a[2];
             d[2] += b[0]*a[1]-b[1]*a[0];
-            if(fabs(c0 - d0) > 1e-12) mal++;                 /* a escalar nao ve a ordem */
+            if(fabs(c0 - d0) != 0.0) mal++;                 /* a escalar nao ve a ordem */
             for(int i = 0; i < 3; i++){                      /* e a vetorial e 2(a×b) */
                 double cr[3] = { a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0] };
                 if(fabs((c[i]-d[i]) - 2*cr[i]) > 1e-12) mal++;

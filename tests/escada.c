@@ -164,7 +164,7 @@ int main(void){
            " agora sai dela. O phi vem da RECORRENCIA inteira e o outro caminho da raiz;"
            " os dois concordam. Comparar com um numero que eu escrevi era pôr a minha"
            " memoria dentro da asserção",
-           fabs(a1 - ref) < 1e-12);
+           fabs(a1 - ref) == 0.0);
         conclui("o que faz o coeficiente existir nao e' um calculo feliz: e' sigma_n > n, que e'");
         conclui("uma desigualdade de inteiros. Por ela, todos os fatores do produto descendente");
         conclui("sao positivos e o expoente tambem — e a solucao real positiva nunca falha.");
@@ -453,7 +453,7 @@ int main(void){
         long inteiros = 0, total = 0, def = 0;
         for(unsigned i=0;i<sizeof B/sizeof*B;i++){
             double b = B[i].b, n = b - 1.0/b;
-            int eint = fabs(n - (double)(long)(n < 0 ? n-0.5 : n+0.5)) < 1e-12;
+            int eint = fabs(n - (double)(long)(n < 0 ? n-0.5 : n+0.5)) == 0.0;
             if(b != 0.0) def++;                        /* o grau esta' DEFINIDO */
             inteiros += eint; total++;
             printf("      %18.12f %18.12f   %8s   %s\n", b, n, eint?"SIM":"nao", B[i].nome); }
@@ -466,7 +466,7 @@ int main(void){
         printf("      b = -1 (f = a/x, a Mobius de traco nulo):  n = %.1f\n", n_inv);
         printf("      b = +1 (f = a·x com a^2 = 1):              n = %.1f\n\n", n_id);
         /* OS DOIS SÃO ZERO POR ARITMÉTICA TRIVIAL: −1 − 1/(−1) = −1 + 1 e 1 − 1/1 = 0. A
-         * asserção verificava |0| < 1e-15 duas vezes. O CONTEÚDO é que n = b − 1/b se anula
+         * asserção verificava |0| == 0.0 duas vezes. O CONTEÚDO é que n = b − 1/b se anula
          * EXACTAMENTE nos b com b² = 1, e em mais nenhum — e isso varre-se em inteiros:
          * b² − 1 = 0 sse b = ±1, e nos outros o n NÃO é zero. Sem essa segunda metade, «n = 0
          * é o passo que já é o seu dual» valia por n ser zero em toda a parte. */
@@ -481,11 +481,11 @@ int main(void){
                "      e NAO se anula nos outros %ld — o zero tem onde deixar de o ser\n\n",
                anula, bs, nao_anula);
         ok("n = 0 e' o passo que JA' E' o seu dual — e e' o MESMO traco nulo da Mobius. E o"
-           " que se mede nao e' |0| < 1e-15 duas vezes (que era o que estava, porque"
+           " que se mede nao e' |0| == 0.0 duas vezes (que era o que estava, porque"
            " -1 - 1/(-1) e 1 - 1/1 sao zero por aritmetica trivial): e' que n = b - 1/b se"
            " anula EXACTAMENTE nos b com b² = 1 e em mais nenhum, varrido em inteiros e sem"
            " dividir. O b = 0 fica de fora porque 1/b nao existe — e' a fibra sem volta."
-           " E os DOIS |0| < 1e-15 estiveram nesta condicao ate' agora, ao lado da frase que"
+           " E os DOIS |0| == 0.0 estiveram nesta condicao ate' agora, ao lado da frase que"
            " diz que nao sao eles que medem",
            anula == 2 && nao_anula == bs - 2 && bs == 12);
         conclui("nada disto e' exigido ao passo. O dual dele existe pela Primeira Lei, e o traco");

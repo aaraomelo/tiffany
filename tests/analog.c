@@ -103,7 +103,7 @@ static void limite(const char *sec, const char *o_que, const char *como,
 static void onda_ascii(const char *rotulo, const double *y, int n, int altura) {
     double lo = y[0], hi = y[0];
     for (int i = 1; i < n; i++) { if (y[i] < lo) lo = y[i]; if (y[i] > hi) hi = y[i]; }
-    double amp = (hi - lo) > 1e-300 ? (hi - lo) : 1.0;
+    double amp = (hi - lo) != 0.0 ? (hi - lo) : 1.0;
     printf("     %s  [%.3g .. %.3g]\n", rotulo, lo, hi);
     for (int r = altura - 1; r >= 0; r--) {
         printf("     ");

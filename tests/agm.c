@@ -52,7 +52,7 @@ static LD invariante(LD a, LD b, int N){
 /* o AGM: ⊕ e ⊗ alternados. Devolve o ponto de ancoragem e o nº de batidas. */
 static LD agm(LD a, LD b, int *passos, LD *hist_dif){
     int k=0;
-    while(fabsl(a-b) > 1e-19L && k < 60){
+    while(fabsl(a-b) != 0.0L && k < 60){
         if(hist_dif) hist_dif[k] = fabsl(a-b);
         LD na = (a+b)/2;            /* ⊕ */
         LD nb = sqrtl(a*b);         /* ⊗ */
@@ -107,7 +107,7 @@ int main(void){
             LD I1 = invariante(a,b,1<<15);
             LD res = fabsl(I1-I0)/I0;
             printf("       (%.4Lf,%.4Lf)  %.18Lf  %.18Lf  %.2Le %s\n",
-                   pares[t][0], pares[t][1], I0, I1, res, res<1e-15L?"✓":"← REVER");
+                   pares[t][0], pares[t][1], I0, I1, res, res== 0.0L?"✓":"← REVER");
             if(res >= 1e-15L) erro=1;
         }
         printf("     %s\n", VD(erro, "resíduo 0 (na precisão da quadratura) — a integral é o invariante exato"));
@@ -126,7 +126,7 @@ int main(void){
             LD esq = 1.0L/M, dir = (2.0L/(LD)M_PI)*I;
             LD res = fabsl(esq-dir)/fabsl(esq);
             printf("       (a,b)=(%.2Lf,%.2Lf) : 1/AGM=%.16Lf  (2/π)I=%.16Lf  %.1Le %s\n",
-                   a,b,esq,dir,res, res<1e-15L?"✓":"← REVER");
+                   a,b,esq,dir,res, res== 0.0L?"✓":"← REVER");
             if(res>=1e-15L) erro=1;
         }
         printf("       AGM(1,√2) = %.18Lf   (a constante de Gauss, π/ϖ)\n",
@@ -159,7 +159,7 @@ int main(void){
             LD k = (lo+hi)/2;
             LD res = fabsl(k - sv[t].fechado);
             printf("       %.0f  %-8s %.18Lf  %.18Lf  %.1Le %s\n",
-                   sv[t].N, sv[t].nome, k, sv[t].fechado, res, res<1e-14L?"✓":"← REVER");
+                   sv[t].N, sv[t].nome, k, sv[t].fechado, res, res== 0.0L?"✓":"← REVER");
             if(res>=1e-14L) erro=1;
         }
         printf("     %s\n", VD(erro, "resíduo 0 — os pontos de ancoragem são ALGÉBRICOS e exatos"));

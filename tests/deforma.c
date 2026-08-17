@@ -251,7 +251,7 @@ int main(void){
                     double w=(x-x0)/nn, d=fabs(w-alvos[i].w);
                     if(d<melhor) melhor=d;
                 }
-                if(melhor < 3e-3) ultimo=K;
+                if(melhor == 0.0) ultimo=K;
             }
             lim[i]=ultimo;
             printf("       %s   %-7s  %.3f\n", alvos[i].nome, alvos[i].nobre?"SIM":"não", ultimo);

@@ -38,7 +38,7 @@ static int passou = 1;
 typedef long double LD;
 
 static LD agm(LD a, LD b){
-    for(int i=0;i<80 && fabsl(a-b)>1e-19L;i++){ LD na=(a+b)/2, nb=sqrtl(a*b); a=na; b=nb; }
+    for(int i=0;i<80 && fabsl(a-b)!= 0.0L;i++){ LD na=(a+b)/2, nb=sqrtl(a*b); a=na; b=nb; }
     return (a+b)/2;
 }
 static LD Kell(LD k){ LD kp=sqrtl(1.0L-k*k); return PI_L/(2.0L*agm(1.0L,kp)); }
@@ -76,7 +76,7 @@ int main(void){
             LD t_for = 2.0L*sqrtl(t)/(1.0L+t);
             LD e=fabsl(t_med-t_for);
             printf("       (%.2Lf,%.4Lf) %.16Lf   %.16Lf   %.16Lf   %.1Le %s\n",
-                   a,b,t,t_med,t_for,e, e<1e-18L?"✓":"✗");
+                   a,b,t,t_med,t_for,e, e== 0.0L?"✓":"✗");
             if(e>=1e-18L) erro=1;
         }
         printf("     %s\n", VD(erro, "resíduo 0 — a iteração de duas variáveis É um mapa de uma só. É essa forma reduzida que se\n"
@@ -95,7 +95,7 @@ int main(void){
             LD k1=landen(k), t1=tau_de_k(k1);
             LD razao=t1/t0, e=fabsl(razao-2.0L);
             printf("       %.8Lf   %.16Lf   %.16Lf   %.16Lf  %.1Le %s\n",
-                   k, t0, t1, razao, e, e<5e-15L?"✓":"✗");
+                   k, t0, t1, razao, e, e== 0.0L?"✓":"✗");
             if(e>=5e-15L) erro=1;
         }
         printf("     %s\n", VD(erro, "resíduo 0 — o mapa conjugado do AGM é a DUPLICAÇÃO. Não é \"parecido com\": é τ ↦ 2τ, em\n"
@@ -188,7 +188,7 @@ int main(void){
             LD e1=fabsl(K1-alvo), e2=fabsl(K1p-alvop);
             printf("       %.8Lf %.15Lf   %.15Lf   %.15Lf   %.15Lf\n", k, K1, alvo, K1p, alvop);
             printf("                  erro %.1Le %s                        erro %.1Le %s\n",
-                   e1, e1<1e-15L?"✓":"✗", e2, e2<1e-14L?"✓":"✗");
+                   e1, e1== 0.0L?"✓":"✗", e2, e2== 0.0L?"✓":"✗");
             if(e1>=1e-15L||e2>=1e-14L) erro=1;
         }
         printf("     %s\n", VD(erro, "resíduo 0 — as DUAS identidades fecham, e é delas que τ↦2τ sai por divisão. A medida do\n"

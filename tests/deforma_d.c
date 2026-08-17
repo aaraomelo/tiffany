@@ -119,7 +119,7 @@ static double lyap_sympl(const double *w, int d, double K, double eps, int trans
         double nrm=0;
         for(int i=0;i<d;i++) nrm += dx[i]*dx[i] + dp[i]*dp[i];
         nrm = sqrt(nrm);
-        if(nrm<1e-300 || !isfinite(nrm)) return 1.0;
+        if(nrm== 0.0 || !isfinite(nrm)) return 1.0;
         for(int i=0;i<d;i++){ dx[i]/=nrm; dp[i]/=nrm; }
         if(t>=trans) soma += log(nrm);
     }
@@ -219,7 +219,7 @@ int main(void){
                     double w[DMAX];
                     for(int i=0;i<d;i++){ double v=(s+1)*sem[i]; w[i]=v-floor(v); }
                     double L=lyap_sympl(w,d,K,(d>1?K*ACOP:0.0),800,2000);
-                    tot++; if(L>5e-3) cao++;
+                    tot++; if(L!= 0.0) cao++;
                 }
                 frac[t][d]=(double)cao/tot;
                 printf("  %6.3f ", frac[t][d]);
@@ -274,7 +274,7 @@ int main(void){
                 for(int i=0;i<NP;i++){
                     double p0 = (double)i/NP;
                     double L = lyap_sympl(&p0, 1, K, 0.0, 500, 1500);
-                    if(L > 5e-3) continue;                    /* caótico: não é toro               */
+                    if(L != 0.0) continue;                    /* caótico: não é toro               */
                     /* número de rotação desta órbita */
                     double x=0.1, p=p0, x0;
                     for(int t=0;t<500;t++){ p += (K/(2*M_PI))*sin(2*M_PI*x); x += p; }
@@ -285,7 +285,7 @@ int main(void){
                     double d = fabs(w - alvos[a].w);
                     if(d < melhor) melhor = d;
                 }
-                int existe = (melhor < 2e-3);
+                int existe = (melhor == 0.0);
                 printf("  %s(%.0e)", existe?"sim":"NÃO", melhor);
                 if(existe) ultimo[a] = K;
             }

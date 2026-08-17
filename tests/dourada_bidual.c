@@ -74,10 +74,10 @@ printf("\n§W1  Mellin E' Fourier no log: o caractere x^{-s} = e^{-s ln x}.\n\n"
                     long xi = (long)x, si = (long)s;
                     long xs = rt_ipow(xi, (int)si);          /* x^s em ℤ, exacto */
                     exactos_tot++;
-                    if(fabs(a*(double)xs - 1.0) < 1e-12) exactos++;   /* x^{-s}·x^s = 1 */
+                    if(fabs(a*(double)xs - 1.0) == 0.0) exactos++;   /* x^{-s}·x^s = 1 */
                 }
                 if(x == 2.0 && s == 1.0)
-                    printf("      %-8.1f %-8.1f %-15.10f %-15.10f %s\n", x, s, a, c, fabs(a-c) < 1e-12 ? "nao" : "SIM");
+                    printf("      %-8.1f %-8.1f %-15.10f %-15.10f %s\n", x, s, a, c, fabs(a-c) == 0.0 ? "nao" : "SIM");
             }
         printf("      %ld pares, %ld diferem\n", casos, difs);
         printf("      e nos %ld pares com x e s INTEIROS a ponte fecha em Z: x^{-s}.x^s = 1"
@@ -104,7 +104,7 @@ printf("\n§W2  A DILATACAO so' GIRA A FASE: o modulo NAO muda.\n\n");
         for(double lam = 1.2; lam <= 3.0; lam += 0.3){
             long tau = 2;                            /* é o inteiro 2: a vírgula só entrava
                                                       * para o compilador a tirar na promoção */
-            /* O MÓDULO ESTAVA ESCRITO. `modulo = 1.0` e depois `|modulo − 1| > 1e-15` é a
+            /* O MÓDULO ESTAVA ESCRITO. `modulo = 1.0` e depois `|modulo − 1| != 0.0` é a
              * constante comparada consigo própria — o comentário dizia «= 1, exacto» e o
              * código não o calculava. Agora calcula-se: λ^{-iτ} = cos(τ ln λ) − i·sin(τ ln λ),
              * e o módulo ao quadrado é cos² + sin². */
@@ -114,7 +114,7 @@ printf("\n§W2  A DILATACAO so' GIRA A FASE: o modulo NAO muda.\n\n");
             double modulo = modulo2;                 /* o quadrado é o que se compara */
             casos++;
             if(fabs(modulo2 - 1.0) > 1e-15) mau++;
-            if(fabs(arg - fase_ant) > 1e-9) fases_distintas++;
+            if(fabs(arg - fase_ant) != 0.0) fases_distintas++;
             fase_ant = arg;
             if(lam < 1.9 && lam > 1.4)
                 printf("      %-8.1f %-19.15f %-.10f\n", lam, modulo, arg);
@@ -132,7 +132,7 @@ printf("\n§W2  A DILATACAO so' GIRA A FASE: o modulo NAO muda.\n\n");
             double a = 0.5, tau = 2.0;               /* expoente −a − iτ: tem parte real */
             double mod2 = pow(lam, -2.0*a);          /* |λ^{-a-iτ}|² = λ^{-2a} */
             casos_r++;
-            if(fabs(mod2 - 1.0) > 1e-9) muda_com_real++;
+            if(fabs(mod2 - 1.0) != 0.0) muda_com_real++;
         }
         printf("      e o GUME: com parte REAL no expoente o modulo MUDA em %ld de %ld\n",
                muda_com_real, casos_r);

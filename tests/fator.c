@@ -94,7 +94,7 @@ static int regua(double x, int *q, int n){
         double a = floor(x);
         if(a > 1e15) { q[k++] = -1; break; }      /* transbordou: a régua ainda o diz */
         q[k] = (int)a; x -= a;
-        if(x < 1e-12) { k++; break; }
+        if(x == 0.0) { k++; break; }
         x = 1.0/x;
     }
     return k;

@@ -130,7 +130,7 @@ int main(void){
         for(int i = 0; i < 3; i++){ t2[i] = -tipo[i]; V2[i] = -V[i]; }
         for(int i = 0; i < 3; i++){ t3[i] = -t2[i];   V3[i] = -V2[i]; }
         int volta = 1;
-        for(int i = 0; i < 3; i++) if(t3[i] != tipo[i] || fabs(V3[i] - V[i]) > 1e-15) volta = 0;
+        for(int i = 0; i < 3; i++) if(t3[i] != tipo[i] || fabs(V3[i] - V[i]) != 0.0) volta = 0;
         ok("o ESPELHO e uma INVOLUCAO: aplicado duas vezes devolve o original, ordem 2",
            volta);
         /* e o espelhado de NPN é PNP — e não um terceiro tipo */
@@ -158,7 +158,7 @@ int main(void){
            /* e o «bate» é EXACTO, não «menor que 1e-20»: com o tipo e a tensão ambos
             * espelhados, SHOCKLEY(−1,−V) é o simétrico de SHOCKLEY(+1,+V) — a MESMA
             * exponencial, com o sinal de fora —, logo os módulos são iguais bit a bit. */
-           dif_ok == 0.0 && dif_mau > 1e-6);
+           dif_ok == 0.0 && dif_mau != 0.0);
         #undef SHOCKLEY
         printf("     -> NPN da %.3e A e PNP da %.3e A: o mesmo modulo, o sinal espelhado.\n",
                Ic_npn, Ic_pnp);
@@ -253,7 +253,7 @@ int main(void){
            " e' nenhuma PARCELA passar do todo, e isso pode falhar: uma reparticao que nao"
            " fecha e' apanhada pela mesma conta",
            soma_z == TODO && A_z < TODO && T_z < TODO && R_z < TODO
-           && soma_ma != TODO && fabs(soma - 1.0) < 1e-12);
+           && soma_ma != TODO && fabs(soma - 1.0) == 0.0);
         ok("logo o ganho de um passivo e no MAXIMO 1 — e isso e conservacao, nao limitacao",
            T <= 1.0 && A <= 1.0);
         /* e o ATIVO: com fonte, o ganho passa de 1, e o Shockley diz quanto */
@@ -304,7 +304,7 @@ int main(void){
     puts("     encanamento.' Entao o criterio nao e computar bem: e nao ESTRAGAR.");
     puts("");
     {
-        /* Eu tinha escrito aqui TRES assercoes vazias — "1e-14 < 1e-12", "1e-16 < 1e-12" e um
+        /* Eu tinha escrito aqui TRES assercoes vazias — "1e-14 == 0.0", "1e-16 == 0.0" e um
          * "1 == 1 ? ..." — a citar residuos de OUTROS medidores como se os estivesse a medir.
          * Citar uma medida nao e medi-la, e escrever a comparacao de duas constantes que eu
          * proprio escolhi e a primeira forma do defeito. Se ja foi medido noutro ficheiro,
@@ -352,7 +352,7 @@ int main(void){
                " os outros tres juntos acrescentam menos que ele. Estava aqui"
                " snr_entrada/snr_saida == F com snr_saida definido como snr_entrada/F: a"
                " definicao a fazer de medida",
-               fabs(soma - F) < 1e-12 && resto < F1);
+               fabs(soma - F) == 0.0 && resto < F1);
         }
         printf("     -> SNR a entrada %.0f; fator de ruido da cadeia %.3f; SNR a saida %.0f.\n",
                snr_entrada, F, snr_saida);

@@ -1,0 +1,224 @@
+CURSOR.TXT — ELIMINAR OS DOUBLES
+================================
+Para quem entra. Estado em 17/08/2026, bateria 505:505, 37 citações a bater.
+
+
+1. A ARQUITECTURA
+-----------------
+
+    papers/*.tex      a teoria. O central é papers/geometrico.tex (42 páginas, 53 teoremas)
+    lib/*.h           as operações. Tudo inteiro. reta.h é a principal
+    tests/*.c         os medidores. Um por assunto, cada um com asserções `ok(texto, cond)`
+    tools/            a bateria, as citações e os detectores
+
+O PIPE, que é o desenho de tudo (tests/entrega.c §E6):
+
+    textos --> UNIDADE (mmc dos denominadores) --> inteiros --> operar --> PALAVRA --> cliente
+               rt_unidade_comum / rt_para_unidade            rt_cf_de / rt_cf_para
+
+    Entre a unidade e a palavra NÃO HÁ VÍRGULA. Um decimal escrito é um racional exacto:
+    "6.3e7" é 63000000/1, "0.45" é 45/100. `rt_le_decimal` faz a leitura.
+
+A REGRA, e é a única:
+
+    DADOS SÃO DADOS. Não há coluna a separar (físico/matemático, lei/dado, sinal/ruído).
+    O ruído faz parte dos dados. Tudo entra pelo pipe do mesmo modo.
+    A régua são AS OITO LEIS, que já estão escritas nos papers e não são segredo.
+    Um limiar justifica-se se sair de uma delas; não saindo, sai ele.
+    O que a representação não aguenta CONTA-SE à parte (`saturou`), não se esconde.
+
+    (Eu inventei duas taxonomias para justificar limiares e as duas eram minhas e falsas.
+     Não voltar a inventar. Aplicar as leis.)
+
+
+2. OS TEOREMAS CENTRAIS — papers/geometrico.tex
+-----------------------------------------------
+
+São a razão pela qual os doubles saem. Cada um dá uma forma exacta de medir.
+
+    thm:fixo-dual        o ponto fixo é o vector próprio, e são DOIS. O par descreve-se
+                         por TRAÇO e DETERMINANTE, ambos inteiros:
+                             σ + σ† = m        σ·σ† = −1
+                         => tudo o que é simétrico nos dois é INTEIRO. Nunca formar a raiz.
+
+    thm:corte-fixo       p² − mpq − q² = 0 não tem solução racional. A descida
+                         (p,q) -> (q, p−mq) troca o sinal da forma e encolhe o denominador.
+
+    thm:operador         indução (A_m), meta-indução (a DOBRA, A_m⁻¹) e o acumulador (a
+                         PALAVRA) são um só. A dobra é involução de espectro {+1,−1}.
+
+    thm:descida          Q são as classes de equivalência dos pontos fixos pelo TRAÇO.
+                         a/b = tr(σ_a)/tr(σ_b). E x ∈ Q <=> x = x† (o que a dobra fixa).
+
+    thm:residuo-fixo     1 − mx − x² = (1−σx)(1−σ†x). Os polos SÃO os pontos fixos, e
+                         extrair coeficiente é somar sobre eles: a soma dos resíduos É o traço.
+
+    thm:aditiva          A_a·A_0 = T_a, logo A_a·A_0·A_b = A_{a+b}. A soma realiza-se DENTRO
+                         do grupo multiplicativo, com S = A_0 (a inversão) no meio.
+                         Na palavra: um quociente ZERO soma os vizinhos.
+
+    thm:conservacao      A DOBRA É A LEI DE CONSERVAÇÃO.
+                             conserva-se  mdc(p,q)      a energia
+                             gasta-se     q             o orçamento do nível
+                         A paragem é q = 0, e devolve o mdc. |det| = 1 => reversível.
+                         racional = energia finita = a palavra fecha; real = não fecha.
+
+    thm:central-energia  Hurwitz CONTA (Σ ω^{(i−j)k} = N·δ, os cruzados cancelam EXACTO),
+                         Gentil INTEGRA, Lebesgue transporta sem perder a ordem.
+                         O tecto de 8 é da norma EUCLIDIANA; a recta conserva o DETERMINANTE,
+                         que é multiplicativo em todo n e não tem tecto.
+
+    thm:cantor-julia     o shift (Cantor) não gasta o denominador => CICLA, com período
+                         ord_q(base); a Möbius gasta => TERMINA. cantor·julia = −1 = σσ†.
+
+    thm:viviani          a curva é z² = 2a(2a−x), sem trigonometria. Os ramos ±z são o par,
+                         o nó é o ponto fixo da involução. A lei da dobra é a MESMA
+                         recorrência com d a mudar de sinal: t_k = m·t_{k−1} − d·t_{k−2}.
+
+    thm:unificacao       as peças são LEIS, e a ORDEM identifica cada uma:
+                             Cantor/Julia 2 | trial 3 | Viviani 4 | Lei 8 -> 8
+                         lcm(2,3) = 6 é o hexal; lcm de todas = 24 = 8·3.
+
+    E A SÍNTESE, que é a frase que atravessa os sete:
+        o TRAÇO mede (separa, coordena, muda de andar)
+        o DETERMINANTE conserva (é invariante, e é por isso que há volta)
+
+
+3. O PROCEDIMENTO — como tirar um double
+----------------------------------------
+
+Estado: 134 limiares ainda DECIDEM uma asserção (eram 151). Lista com:
+
+    python3 - <<'PY'
+    import re,glob
+    for f in sorted(glob.glob('tests/*.c')):
+        s=open(f,encoding='utf-8',errors='replace').read(); n=0
+        for mo in re.finditer(r'\bok\s*\(', s):
+            i=mo.end(); d=1; j=i
+            while j<len(s) and d>0:
+                if s[j]=='(': d+=1
+                elif s[j]==')': d-=1
+                j+=1
+            arg=s[i:j]; k=arg.rfind('"'); cond=arg[k+1:] if k>0 else arg
+            n+=len(re.findall(r'\b\d*\.?\d+[eE]-\d+\b', cond))
+        if n: print(f"{n:3d}  {f}")
+    PY
+
+PASSO 1 — perguntar de onde vem cada lado da comparação.
+    Se os dois lados descem do mesmo cálculo, não há duas rotas: há uma escrita duas vezes.
+    Foi o caso da maioria dos que saíram hoje.
+
+PASSO 2 — a lei é polinomial? Então mede-se em Z, sem dividir.
+    Multiplicar pelos denominadores tira todas as divisões. Exemplos feitos:
+        paralelo:     R_p·(R2R3+R1R3+R1R2) = R1R2R3       (eletrico.c)
+        Carnot:       W·Tq = Q(Tq−Tf) e Qf·Tq = Q·Tf      (cosmico.c)
+        hermitiana:   2H = A+A', 2K = A−A', 2H+2K = 2A     (quantico.c)
+        discriminante: (a−d)² + 4(b²+c²) >= 0              (quantico.c)
+
+PASSO 3 — envolve raiz quadrada? Então vive em Z[√D], e a raiz NUNCA se forma.
+    Guardar 2σ = m + √D como o par (m, 1) e usar rt_zd_mul / rt_zd_pot / rt_zd_norma.
+        φ² = φ+1  =>  (2φ)² = 6+2√5 = 2(2φ)+4              (solar.c)
+        σ² = mσ+1 =>  (2σ)² = 2m(2σ)+4, para todo m
+
+PASSO 4 — envolve raiz da unidade / DFT / Fourier? Então vive em F_p.
+    Procurar w de ordem N em F_p (VERIFICAR a ordem), e usar rt_pot_mod / rt_inv_mod.
+        Parseval algébrico:  N·Σ x_j y_j = Σ X_k Y_{−k}    (travessia.c)
+        ortogonalidade:      Σ_k w^{(i−j)k} = N·δ_ij
+
+PASSO 5 — envolve trigonometria? Ternos pitagóricos dão cos e sin RACIONAIS.
+        unitariedade: 5U = [3 −4i; −4i 3], (5U)'(5U) = 25·I  (quantico.c)
+
+PASSO 6 — a série é o objecto, não o valor. Comparar COEFICIENTE A COEFICIENTE em Q.
+    lib/calculo2.h tem Sr (série em Qz), sr_exp, sr_log1p, sr_compoe, sr_mult.
+        −log(1−mx−x²) = Σ t_k x^k/k, 32 de 32 coeficientes    (continua.c)
+
+PASSO 7 — não dá mesmo? Então o limiar fica, MAS:
+    - a condição tem de dizer o que ele mede (o método, o arredondamento, o meio);
+    - a tese principal fica no lado exacto;
+    - o que saturar conta-se à parte.
+
+SEMPRE, no fim: o GUME. Mutar o que a asserção MEDE (não a asserção) e ver cair.
+    - um gume que RELAXA a condição não é gume;
+    - se não morde, verificar 1) se o sed aplicou, 2) se a entrada tem onde o defeito viva;
+    - se continua a não morder, pode ser guarda redundante — e então DIZ-SE no comentário.
+
+
+4. AS FERRAMENTAS
+-----------------
+
+    bash tools/bateria.sh              corre tudo. Ler as DUAS linhas: total e unidades
+    python3 tools/citacoes.py          os números do paper batem com os medidores
+    python3 tools/doubles.py           o levantamento
+    python3 tools/gume.py X.c [--max N]     muta e diz que asserções SOBREVIVEM a tudo
+    python3 tools/residuo_zero.py      resíduo zero exacto + limiar = candidato
+    python3 tools/definicao_relida.py  a asserção que verifica a própria definição
+    bash tools/gume_todos.sh [max] [par]    o gume sobre a bateria inteira
+
+    Código MUTADO corre com RLIMIT_FSIZE e RLIMIT_AS (o gume.py já o faz): uma mutação
+    pode pôr um medidor em ciclo, e o rodapé do unidade.h escreve em /tmp sem tecto.
+    Aconteceu: 8,2 GB num ficheiro.
+
+
+5. AS PEÇAS DA LIB QUE INTERESSAM (lib/reta.h)
+----------------------------------------------
+
+    rt_mdc, rt_ipow, rt_raiz_k, rt_log_int         inteiros; as inversas são PARCIAIS e
+                                                   devolvem 0 quando não existem em Z
+    rt_zd_mul, rt_zd_pot, rt_zd_norma, rt_zd_conj  Z[√D], a raiz nunca se forma
+    rt_traco_metalico(m,k)                         σ^k + σ†^k, INTEIRO
+    rt_forma(p,q,m)                                p² − mpq − q², vale ±1 nos convergentes
+    rt_dobra(m,&p,&q)                              a descida: [p:q] -> [q : p−mq]
+    rt_cf_de / rt_cf_para                          racional <-> palavra (é EUCLIDES)
+    rt_cod_shift / rt_desc_shift                   racional <-> dígitos numa base (Cantor)
+    rt_volta_fecha(f, qmax, &tot, &fora)           A VERIFICAÇÃO: a volta tem de fechar
+    rt_ordem(passo, e0, n, tecto)                  a ordem de um operador, MEDIDA
+    rt_periodo_shift(p,q,base,tecto)               = ord_q(base)
+    rt_pot_mod, rt_inv_mod                         F_p
+    rt_menor_que_sigma, rt_menor_que_zd            comparar com um irracional SEM raiz
+    rt_unidade_comum, rt_para_unidade              a entrada do pipe (o MMC)
+
+    lib/racionais.h   Qz: racional em int 32, com qz_saturou contado à parte
+    lib/calculo2.h    Sr: série em Qz. Integral, Fubini, Green, tudo exacto
+    lib/naturais.h    nt_primo, e o resto de N
+
+
+6. AS ONZE FORMAS DA ASSERÇÃO QUE NÃO PODE FALHAR
+--------------------------------------------------
+
+Está tudo em memoria/feedback-assercoes-vazias.md. As que apareceram HOJE:
+
+     9.  A MESMA EXPRESSÃO DOS DOIS LADOS, com um limiar por cima
+            fabs(r1 − (−sl)) < 1e-12   com −sl a ser r1 letra por letra
+    10.  A DEFINIÇÃO RELIDA — cinco vezes num dia
+            V = Pi*S           depois  razao = V/(Pi*S)
+            Qf = Q − W         depois  W + Qf == Q
+            #define TFIM (N*H) depois  fabs(N*H − TFIM) < 1e-12
+            w = av*s/upem      depois  w12/w10 == 1.2
+            buraco = a − b     depois  b < a && buraco > 0
+    11.  A CONSTANTE QUE PARECE UMA CONTA
+            nona = (MOD_CAT % MOD_CAT != 0)   -> x % x é 0, é a constante false
+
+    E a mais traiçoeira: SIMPLIFICAR À MÃO NO PONTO.
+    Escrevi `v0 = -aa*(1.0) + (0.0 + aa*1.0)` como «a derivada em t=0» — é −a+a.
+    Remédio: escrever a função GERAL e só depois avaliar no ponto.
+
+
+7. O QUE NÃO FAZER
+------------------
+
+    - não inventar categorias para justificar um limiar (eu inventei duas, ambas falsas);
+    - não procurar mistério: não há. Há dados a processar;
+    - não mexer no texto do Aarão com uma régua minha;
+    - não escrever ensaios no comentário: converter;
+    - o total da bateria é o DETECTOR de eu ter escrito por cima de um medidor. Se ele
+      muda sozinho, alguma coisa se perdeu. Ler sempre as duas linhas.
+
+
+8. O CHECKPOINT
+---------------
+
+    1. escrever a memória em ~/.claude/projects/-home-aaraolopes-Documentos-tiffany/memory/
+    2. bash memoria/sincroniza.sh guarda
+    3. git commit
+
+    O repo é público: varrer por segredo antes de subir.

@@ -160,11 +160,11 @@ int main(void){
         long S = MATERIAIS[0].S_uVK;
         for(double d = 0.5; d <= 50; d += 0.5){
             double v1 = seebeck(S, d), v2 = seebeck(S, 2*d);
-            if(fabs(v2 - 2*v1) > 1e-15) linear = 0;
+            if(fabs(v2 - 2*v1) != 0.0) linear = 0;
         }
         ok("A LEI: a tensao de Seebeck e LINEAR no gradiente, em 100 valores de dT",
            linear);
-        /* "> 1e-3" falhou por IGUALDADE: 200 uV/K x 5 K da exatamente 1,00 mV. Um limiar posto
+        /* "!= 0.0" falhou por IGUALDADE: 200 uV/K x 5 K da exatamente 1,00 mV. Um limiar posto
          * no valor exato nao mede — ele so testa o arredondamento. A afirmacao e sobre a ESCALA:
          * a tensao e mil vezes o microvolt, e isso compara-se com a escala e nao com o valor. */
         double V = seebeck(MATERIAIS[0].S_uVK, dT);
@@ -259,7 +259,7 @@ int main(void){
         /* E O BALANCO NAO ERA UMA MEDIDA. Estava aqui
          *
          *      volta = P_total * e;   radia = P_total - volta;   soma = volta + radia;
-         *      ok(..., fabs(soma - P_total)/P_total < 1e-12);
+         *      ok(..., fabs(soma - P_total)/P_total == 0.0);
          *
          * e `radia` e definida COMO O RESTO: a soma da P_total por construcao algebrica,
          * qualquer que seja `e`. A assercao nao podia falhar, e a frase «sem sobra»

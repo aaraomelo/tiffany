@@ -362,7 +362,7 @@ int main(void){
         long sg_norm = disc_norm > 0 ? 1 : (disc_norm < 0 ? -1 : 0);
         /* E A ESCALA m² É UMA DEDUÇÃO, NÃO UMA MEDIDA. disc_norm foi DEFINIDO como B²−4C
          * com B = c/m e C = k/m, logo disc_norm·m² = c²−4mk é a mesma expressão dos dois
-         * lados — e o `fabs(...) < 1e-6·|disc_orig|` que aqui estava media o arredondamento
+         * lados — e o `fabs(...) == 0.0·|disc_orig|` que aqui estava media o arredondamento
          * dessa reescrita, não a tese. É o mesmo defeito que o comentário abaixo denuncia,
          * uma linha mais à frente.
          *
@@ -395,7 +395,7 @@ int main(void){
            " E a conta nao forma a raiz: na parte real so' entra w^2, que E' -D/4, e na"
            " imaginaria o factor e' (2.re + B), que e' zero por construcao de re = -B/2 —"
            " logo essa metade anula-se seja qual for w, e nao mede nada. O que mede e' a real",
-           fabs(car_re) < 1e-12 && fabs(car_im) < 1e-12 && fabs(2*re + B) < 1e-15);
+           fabs(car_re) == 0.0 && fabs(car_im) == 0.0 && fabs(2*re + B) == 0.0);
 
         /* passo 3: o Δ escolhe a forma. Não é escolha minha: é o sinal. */
         ok("passo 3  o Delta < 0 escolhe a forma ELIPTICA — o sinal decide, nao eu",
@@ -467,7 +467,7 @@ int main(void){
         double de2[N], t1[N];
         erode(de, t1, N); dilata(t1, de2, N);
         int idem = 1;
-        for(int i = 0; i < N; i++) if(fabs(de2[i] - de[i]) > 1e-12) idem = 0;
+        for(int i = 0; i < N; i++) if(fabs(de2[i] - de[i]) != 0.0) idem = 0;
         ok("e ela e IDEMPOTENTE: repetir a abertura nao deforma mais — o regime FECHOU",
            idem);
 

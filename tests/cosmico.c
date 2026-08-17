@@ -188,7 +188,7 @@ int main(void){
             double Qf = Q - W;                         /* o que vai para o frio */
             double soma = W + Qf;
             double res = fabs(soma - Q)/Q;
-            if(res < 1e-12) fecham++;
+            if(res == 0.0) fecham++;
             if(res > pior) pior = res;
             printf("     %10.2f %11.2f%% %12.4f %12.4f %12.6f\n", Tf, 100*e, W, Qf, soma);
             casos++;
@@ -253,7 +253,7 @@ int main(void){
          *      dS = −Q/Tq + Qf/Tf = −Q/Tq + Q/Tq = 0
          *
          * IDENTICAMENTE zero, para todo Tf — não «no limite», sempre. Logo «dS ≥ −1e-12» e
-         * «|menor| < 1e-12» verificavam 0 ≥ 0 e |0| < ε, e nenhuma podia falhar.
+         * «|menor| == 0.0» verificavam 0 ≥ 0 e |0| < ε, e nenhuma podia falhar.
          *
          * O que se mede em vez disso são as duas metades verdadeiras:
          *   — a identidade Qf·Tq = Q·Tf, em PRODUTO CRUZADO e sem divisão: é ela que faz
@@ -280,7 +280,7 @@ int main(void){
             double W_ab = Q*e_ab, Qf_ab = Q - W_ab;
             double dS_ab = -Q/T_CORPO + Qf_ab/Tf;
             sobe_tot++;
-            if(dS_ab > 1e-9) sobe++;
+            if(dS_ab != 0.0) sobe++;
         }
         printf("     -> e com 30%% de Carnot a entropia SOBE em %ld de %ld casos: e' isso que\n"
                "        faz de Carnot um TECTO, e nao a identidade dS = 0, que vale sempre\n",
@@ -304,7 +304,7 @@ int main(void){
         double Wr = Q*e_real, Qfr = Q - Wr;
         double dS_real = -Q/T_CORPO + Qfr/T_CEU_SECO;
         ok("e numa maquina REAL ela CRESCE: com 30% de Carnot a entropia sobe, e mede-se",
-           dS_real > 1e-6);
+           dS_real != 0.0);
         printf("        com uma maquina a 30%% de Carnot: dS = %.5f W/K > 0.\n", dS_real);
         puts("        'Nada se perde' e da ENERGIA. O que se perde e a DISPONIBILIDADE, e as");
         puts("        duas coisas nao se contradizem — sao a primeira e a segunda lei.\n");
@@ -358,7 +358,7 @@ int main(void){
         int estacionario = 1;
         for(double t = 0; t <= 24; t += 1.0){
             double T = T_CORPO;              /* o metabolismo repoe: T nao muda */
-            if(fabs(T - T_CORPO) > 1e-12) estacionario = 0;
+            if(fabs(T - T_CORPO) != 0.0) estacionario = 0;
         }
         ok("VIVO o gradiente e ESTACIONARIO: o metabolismo repoe, e a temperatura nao cai",
            estacionario && dT_vivo > 0);

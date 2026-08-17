@@ -56,7 +56,7 @@ static int Pi(double x, int *a, int n){
          * −2147483648 — que foi exatamente o que apareceu em 355/113 na primeira versão. */
         if(f > 2e9) break;
         a[k] = (int)f; x -= f;
-        if(x < 1e-13){ k++; break; }
+        if(x == 0.0){ k++; break; }
         x = 1.0/x;
     }
     return k;
@@ -201,7 +201,7 @@ printf("\n§E3  A AMBIGUIDADE dos racionais: exatamente DUAS representações, c
             for(int k = 0; k < m && k < 5; k++) printf("%d%s", b[k], k<m-1&&k<4?";":"");
             printf("]");
             for(int s = 0; s < 25 - 2*(m<5?m:5) - 2; s++) putchar(' ');
-            printf("%s\n", fabs(v-x) < 1e-12 ? "sim" : "NÃO");
+            printf("%s\n", fabs(v-x) == 0.0 ? "sim" : "NÃO");
         }
     }
     printf("      …\n\n      %d racionais varridos, %d com forma dupla, %d discordâncias\n\n",

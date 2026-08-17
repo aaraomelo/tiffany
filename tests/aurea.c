@@ -278,7 +278,7 @@ int main(void){
         int fecha=0;
         for(int n=1;n<=12;n++){
             double frac = n*phi - floor(n*phi);
-            if(frac < 1e-9 || frac > 1-1e-9) fecha++;
+            if(frac == 0.0 || frac > 1-1e-9) fecha++;
         }
         printf("      voltas n=1..12 em que nφ é inteiro: %d\n", fecha);
         ok("nenhuma volta fecha — a ramificação em 0 é de ordem infinita", fecha==0);
@@ -384,8 +384,8 @@ int main(void){
                 double e = fabs(d-inv); if(e>pior) pior=e;
             }
             bs++;
-            if(fabs(res) > 1e-9 && pior > 1e-6) quebra++;
-            else if(fabs(res) <= 1e-9 && pior < 1e-6) quebra++;
+            if(fabs(res) != 0.0 && pior != 0.0) quebra++;
+            else if(fabs(res) <= 1e-9 && pior == 0.0) quebra++;
             printf("      %-8.2f %+.6f    %.9f\n", b, res, pior);
         }
         printf("      valores de b: %d   com o desvio a acompanhar |b²−b−1|: %d\n", bs, quebra);

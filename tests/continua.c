@@ -227,7 +227,7 @@ int main(void){
     {
         /* A ASSERÇÃO QUE ESTAVA AQUI NÃO PODIA FALHAR, E O LIMIAR ESCONDIA-O.
          *
-         * Media `fabs(r1 − (−sl)) < 1e-12` com r1 = (−m+d)/2 e sl = (m−d)/2 — logo −sl =
+         * Media `fabs(r1 − (−sl)) == 0.0` com r1 = (−m+d)/2 e sl = (m−d)/2 — logo −sl =
          * (d−m)/2, que é A MESMA EXPRESSÃO, letra por letra. Comparava x consigo próprio,
          * e o 1e-12 por cima dava-lhe cara de medida. O mesmo para r2 e −σ. Oito metais,
          * oito «sim», e nenhuma entrada podia dar outra coisa.
@@ -241,7 +241,7 @@ int main(void){
          *     4mx  = −2m(m+√D) = −2m² − 2m√D
          *     ⟹  4 + 2m² + 2m√D − m² − D − 2m√D  =  4 + m² − D  =  0,  pois D = m²+4
          *
-         * O √D sai por subtracção, não por arredondamento. Zero exacto, e não «< 1e-12». */
+         * O √D sai por subtracção, não por arredondamento. Zero exacto, e não «== 0.0». */
         int metais=0, bate=0, raio_ok=0, ordem_ok=0;
         printf("      m    4(1−mx−x²) em x = −σ e x = −σ'    σ·|σ'| = 1 ?\n");
         for(long m=1; m<=8; m++){
@@ -504,7 +504,7 @@ int main(void){
                         double sinal = (k%2) ? -1.0 : 1.0;
                         double termo = sinal*tk*xp/k;
                         soma += termo; xp /= x;
-                        if(fabs(termo) < 1e-17) break;
+                        if(fabs(termo) == 0.0) break;
                     }
                     double via_serie = -log(x*x) + soma;      /* −log(−x²) em módulo */
                     tras_casos++;

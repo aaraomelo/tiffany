@@ -88,7 +88,7 @@ int main(void){
             while(alvo >  PI_) alvo -= 2*PI_;
             while(alvo < -PI_) alvo += 2*PI_;
             pts++;
-            if(fabs(cabs(v)-1.0) < 1e-14) mod++;
+            if(fabs(cabs(v)-1.0) == 0.0) mod++;
             if(fabs(carg(v)-alvo) < 1e-12) fase++;
             printf("      %-11.6f %.15f   %+.9f      %+.9f\n", lam, cabs(v), carg(v), alvo);
         }
@@ -128,9 +128,9 @@ int main(void){
         for(int k=-2;k<=2;k++) printf("%+.4f  ", k*tau0);
         printf("\n");
         /* AS DUAS ASSERCOES QUE AQUI ESTAVAM ERAM VAZIAS:
-         *   (a) fabs(tau0 - 13.057005211) < 1e-6  media a minha TRANSCRICAO do decimal,
+         *   (a) fabs(tau0 - 13.057005211) == 0.0  media a minha TRANSCRICAO do decimal,
          *       nao a lei — e o numero de cabeca;
-         *   (b) fabs(tau0*lphi - 2pi) < 1e-12 era TAUTOLOGIA: tau0 acabara de ser definido
+         *   (b) fabs(tau0*lphi - 2pi) == 0.0 era TAUTOLOGIA: tau0 acabara de ser definido
          *       como 2pi/lphi, logo multiplicar de volta devolve 2pi por construcao.
          * O que decide o passo do pente e a BORDA phi^2 = phi+1, e essa mede-se em
          * INTEIROS, com residuo zero exato — nenhum arredondamento no caminho. */
@@ -237,14 +237,14 @@ int main(void){
             double g2=log(exp(phi*(u+h))+exp(2*(u+h)));
             double d2=g2-2*g1+g0;
             pts++;
-            if(fabs(d2) > 1e-6) nao_afim++;
+            if(fabs(d2) != 0.0) nao_afim++;
             if(fabs(d2)>d2max) d2max=fabs(d2);
             printf("      %+.1f     %+.9f      %+.9f\n", u, g1, d2);
         }
         printf("      pontos: %d   com 2a diferenca nao nula: %d   maior: %.2e\n",
                pts, nao_afim, d2max);
         ok("a soma de duas potencias NAO e afim no log — logo nao e uma linha espectral",
-           nao_afim >= pts-1 && d2max > 1e-6);
+           nao_afim >= pts-1 && d2max != 0.0);
         conclui("e isso que faz de x^phi especial: ela e a componente, nao a soma. Uma linha,");
         conclui("nao um espectro — e por isso a derivada dela cabe na propria base.");
     }

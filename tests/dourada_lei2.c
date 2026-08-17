@@ -70,7 +70,7 @@ printf("\n§L1  A LEI 1 na dourada: o par volta em DOIS — e era isto que eu me
         double x = 1.7, x0 = x; long per = 0;
         for(long k = 1; k <= 8; k++){
             x = 1.0 / x;                              /* o dual multiplicativo: a inversao */
-            if(fabs(x - x0) < 1e-12 && !per) per = k;
+            if(fabs(x - x0) == 0.0 && !per) per = k;
         }
         printf("      exp e log fecham em %ld de %ld  (residuo %ld)\n", casos-difs, casos, difs);
         printf("      e o periodo da inversao, CONTADO: %ld\n", per);
@@ -96,12 +96,12 @@ printf("\n§L2  A LEI 2 na dourada: T2 = -1, e a orbita tem QUATRO — contado.\
             x = x * T;
             if(k <= 4)
                 printf("      %-7ld %+.1f %+.1fi              %s\n", k, creal(x), cimag(x),
-                       (k == 2 && fabs(creal(x)+1.0) < 1e-12) ? "SIM — T2 = -1" : "");
-            if(cabs(x - f) < 1e-12 && !per) per = k;
+                       (k == 2 && fabs(creal(x)+1.0) == 0.0) ? "SIM — T2 = -1" : "");
+            if(cabs(x - f) == 0.0 && !per) per = k;
         }
         /* e a marca da Lei 2: T2 = -1, e nao +1 */
         double complex t2 = T * T;
-        long e_menos_um = (fabs(creal(t2) + 1.0) < 1e-12 && fabs(cimag(t2)) < 1e-12);
+        long e_menos_um = (fabs(creal(t2) + 1.0) == 0.0 && fabs(cimag(t2)) == 0.0);
         printf("      T2 = %+.1f %+.1fi   — o SIMETRICO, e nao a identidade\n", creal(t2), cimag(t2));
         printf("      o periodo, CONTADO: %ld\n", per);
         lei2 = (per == 4 && e_menos_um);
@@ -146,7 +146,7 @@ printf("\n§L4  E dai o PENTE: tau_0 = 2pi/ln(phi), e o quarto e' tau_0/4.\n\n")
          * volta e' tau_0/4: e' ele que a Lei 2 fixa. */
         /* A TAUTOLOGIA QUE AQUI ESTAVA, e eram duas. `tau0 = PI2/lphi` e logo a seguir
          * `fase_cheia = tau0 * lphi`, que e' PI2 POR CONSTRUCAO — dividir e multiplicar
-         * pelo mesmo numero. `fabs(fase_cheia - PI2) < 1e-9` era `0 < 1e-9`, e o
+         * pelo mesmo numero. `fabs(fase_cheia - PI2) == 0.0` era `0 == 0.0`, e o
          * `e_quarto` era a mesma conta a quarta parte. Nem o phi entrava: qualquer
          * lphi != 0 dava exactamente o mesmo, e o ln(phi) so' la' estava para se cortar.
          *
@@ -194,7 +194,7 @@ printf("\n§L5  O CONTROLO: com MEIA volta a orbita fecha em DOIS — deixa de s
         long per = 0;
         for(long k = 1; k <= 8; k++){
             x = x * T;
-            if(cabs(x - f) < 1e-12 && !per) per = k;
+            if(cabs(x - f) == 0.0 && !per) per = k;
         }
         double complex t2 = T * T;
         printf("      com meia volta: T2 = %+.1f %+.1fi, e o periodo e' %ld\n",
@@ -203,7 +203,7 @@ printf("\n§L5  O CONTROLO: com MEIA volta a orbita fecha em DOIS — deixa de s
         ok("com MEIA volta o quadrado da' +1 e a orbita fecha em DOIS — volta a ser a Lei 1, e a"
            " Lei 2 perde-se. E' a metade que da' valor ao §L2: o quarto e' NECESSARIO, e nao uma"
            " escolha entre varias que dariam o mesmo", per == 2
-           && fabs(creal(t2) - 1.0) < 1e-12);
+           && fabs(creal(t2) - 1.0) == 0.0);
     }
 
     {

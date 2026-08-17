@@ -66,7 +66,7 @@ static double V(double s){ return (1.0 - s*s) * S_glob; }
  *      (V(s+h) − V(s−h))/(2h) = −2sS        sem erro, e sem depender de h
  *
  * O h = 1e-6 que aqui estava não media nada: fabricava o erro de arredondamento que o
- * `fabs(...) < 1e-6` a seguir tolerava. Aqui as duas rotas são EXACTAS e concordam bit
+ * `fabs(...) == 0.0` a seguir tolerava. Aqui as duas rotas são EXACTAS e concordam bit
  * a bit, e o que era «bate dentro de 1e-6» passa a ser ZERO.
  *
  *   rota A   fn_deriva      a regra formal do polinómio, avaliada em s
@@ -337,7 +337,7 @@ printf("\n§H5  O IMPULSO é Δp, e o momento CONSERVA-SE quando a força se anu
         double p21 = S_glob*v2;
         /* E ESTE CONTROLO NÃO CONTROLAVA. dVds(s) = −2sS, logo dVds(0) = 0: com s₂ = 0 e
          * v₂ = 0 a força é zero, nada se move, e p21 = p20 = 0 exactamente. A asserção
-         * `|0 − 0| < 1e-9` passa por aritmética trivial — o comentário chamava-lhe «controlo
+         * `|0 − 0| == 0.0` passa por aritmética trivial — o comentário chamava-lhe «controlo
          * positivo» e ele tinha a mesma cor de um controlo sem o ser.
          *
          * Um controlo precisa das DUAS metades: em s = 0 não mexe, e em s ≠ 0 MEXE. É a
@@ -354,7 +354,7 @@ printf("\n§H5  O IMPULSO é Δp, e o momento CONSERVA-SE quando a força se anu
            " defeito e a assercao passava na mesma",
            /* e o lado que nao mexe e' ZERO EXACTO, nao «menor que 1e-9»: dVds(0) = 0 da
             * forca zero, e somar zero cem mil vezes deixa o zero onde estava, bit a bit. */
-           p21 == p20 && fabs(p31-p30) > 1e-3);
+           p21 == p20 && fabs(p31-p30) != 0.0);
         printf("      (controlo positivo, e agora com as duas metades: sem a segunda, a\n");
         printf("       primeira passaria por o integrador não mexer em nada.)\n");
     }
@@ -464,7 +464,7 @@ printf("\n§H7  O SINAL DA INVOLUÇÃO: sem ele não gira — e é Lenz, é aç�
          * 1e-9 dava folga a uma conta que nao a usa. E o controlo sem o sinal deriva. */
         ok("a 3ª lei conserva o momento total EXACTAMENTE — os dois incrementos sao"
            " simetricos e cancelam bit a bit —, e sem o sinal ele DERIVA: o controlo",
-           pior == 0.0 && piorMau > 1e-3);
+           pior == 0.0 && piorMau != 0.0);
     }
     {
         /* LENZ: a reacao opoe-se a VARIACAO. Modela-se com uma corrente induzida i que

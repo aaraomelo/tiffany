@@ -124,7 +124,7 @@ int main(void){
             double colhido = (A+B)/2;
             /* o AGM exato, em double puro */
             double x=pares[t][0], y=pares[t][1];
-            for(int it=0; it<80 && fabs(x-y) > 1e-16; it++){ double nx=(x+y)/2, ny=sqrt(x*y); x=nx; y=ny; }
+            for(int it=0; it<80 && fabs(x-y) != 0.0; it++){ double nx=(x+y)/2, ny=sqrt(x*y); x=nx; y=ny; }
             double exato=(x+y)/2;
             double e = fabs(colhido-exato)/exato;
             printf("       (%.3f,%.3f)  %.15f  %.15f  %.1e  %d\n",
@@ -134,7 +134,7 @@ int main(void){
             if(t==0 && k>=4){
                 double rq = dif[k-2]/(dif[k-3]*dif[k-3]), prev = 1.0/(8.0*exato);
                 printf("         razão d_{n+1}/d_n² = %.8f   1/(8·AGM) = %.8f  %s\n",
-                       rq, prev, fabs(rq-prev)/prev < 1e-2 ? "✓ dobra" : "← REVER");
+                       rq, prev, fabs(rq-prev)/prev == 0.0 ? "✓ dobra" : "← REVER");
                 if(fabs(rq-prev)/prev >= 1e-2) erro=1;
             }
         }
@@ -157,7 +157,7 @@ int main(void){
                 if(e>pior) pior=e;
             }
             printf("       (%.2f,%.2f) : I preservado nas 5 batidas, erro rel. máx %.2e %s\n",
-                   pares[t][0], pares[t][1], pior, pior<1e-13?"✓":"← REVER");
+                   pares[t][0], pares[t][1], pior, pior== 0.0?"✓":"← REVER");
             if(pior>=1e-13) erro=1;
         }
         /* E O AGM TEM UMA IDENTIDADE EXACTA que o limiar de 1e-13 esconde. Do passo
@@ -195,17 +195,17 @@ int main(void){
     printf("\n§A4  o DENTE — somador CHEIO (o produto, s=+1) em vez do ganho ½:\n");
     {
         double A=1, B=2; int k=0; int estourou=0;
-        while(fabs(A-B) > 1e-15 && k<40){
+        while(fabs(A-B) != 0.0 && k<40){
             double nA = ari_colhida(A,B);
             double nB = dente_produto(A,B,T_AMB,I_S);        /* a·b, não √(ab)                    */
             A=nA; B=nB; k++;
             if(!isfinite(A)||!isfinite(B)||A>1e6||B>1e6){ estourou=1; break; }
         }
         double x=1,y=2;
-        for(int it=0; it<80 && fabs(x-y)>1e-16; it++){ double nx=(x+y)/2, ny=sqrt(x*y); x=nx; y=ny; }
+        for(int it=0; it<80 && fabs(x-y)!= 0.0; it++){ double nx=(x+y)/2, ny=sqrt(x*y); x=nx; y=ny; }
         double exato=(x+y)/2;
         double colhido=(A+B)/2;
-        int quebrou = estourou || fabs(colhido-exato)/exato > 1e-3;
+        int quebrou = estourou || fabs(colhido-exato)/exato != 0.0;
         printf("       (1,2) com o produto : %s após %d batidas  (AGM exato = %.6f)\n",
                estourou?"ESTOUROU":"convergiu para outro valor", k, exato);
         if(!estourou) printf("         colhido = %.6f, erro rel. %.2e\n", colhido, fabs(colhido-exato)/exato);

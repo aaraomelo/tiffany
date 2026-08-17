@@ -102,9 +102,9 @@ printf("\n§D1  A definição: só o CRUZADO muda de sinal.\n\n");
         Z x = aleat(k), y = aleat(k+37);
         Z p = mul(x,y,+1), m = mul(x,y,-1);
         double c[3]; cruz(x.v,y.v,c);
-        if(fabs(p.r - m.r) > 1e-15) mal++;
+        if(fabs(p.r - m.r) != 0.0) mal++;
         for(int q=0;q<3;q++) if(fabs((p.v[q]-m.v[q]) - 2*c[q]) > 1e-12) mal++;
-        if(dif(mul(x,y,-1), mul(y,x,+1)) > 1e-12) malOp++;
+        if(dif(mul(x,y,-1), mul(y,x,+1)) != 0.0) malOp++;
     }
     printf("      a parte ESCALAR é idêntica nos dois, e a vetorial difere por 2(a×b)\n");
     printf("      %d falhas em 400 pares\n\n", mal);
@@ -128,7 +128,7 @@ printf("\n§D2  Os dois conservam a norma, e os dois são álgebras de divisão.
             if(dif(mul(mul(x,y,s),z,s), mul(x,mul(y,z,s),s)) > 1e-9) malA++;
             if(dif(mul(x,som(y,z),s), som(mul(x,y,s),mul(x,z,s))) > 1e-9) malD++;
             double n = N(x,s);
-            if(n > 1e-9){
+            if(n != 0.0){
                 Z c = conjuga(x), inv = { c.r/n, {c.v[0]/n,c.v[1]/n,c.v[2]/n} };
                 Z um = { 1, {0,0,0} };
                 if(dif(mul(x,inv,s), um) > 1e-8) malI++;
@@ -167,10 +167,10 @@ printf("\n§D3  A DUALIDADE DE HURWITZ: são as mesmas, no espelho.\n\n");
     int naoComuta = 0, comutaEsc = 0, iso = 0;
     for(int k = 0; k < 300; k++){
         Z x=aleat(k), y=aleat(k+53);
-        if(dif(mul(x,y,+1), mul(y,x,+1)) > 1e-9) naoComuta++;
-        if(fabs(mul(x,y,+1).r - mul(y,x,+1).r) < 1e-15) comutaEsc++;
+        if(dif(mul(x,y,+1), mul(y,x,+1)) != 0.0) naoComuta++;
+        if(fabs(mul(x,y,+1).r - mul(y,x,+1).r) == 0.0) comutaEsc++;
         /* e o ESPELHO é a conjugação: conj(x ⋆₊ y) = conj(y) ⋆₊ conj(x) = conj(x) ⋆₋ conj(y) */
-        if(dif(conjuga(mul(x,y,+1)), mul(conjuga(x), conjuga(y), -1)) < 1e-12) iso++;
+        if(dif(conjuga(mul(x,y,+1)), mul(conjuga(x), conjuga(y), -1)) == 0.0) iso++;
     }
     printf("      x⋆y != y⋆x em %d de 300 — os dois não são a mesma álgebra pela identidade\n",
            naoComuta);
@@ -243,7 +243,7 @@ printf("\n§D5  A COMPLETUDE: Cauchy converge, e o corte não deixa buraco.\n\n"
         double prev = 0, p0b=1,q0b=0,p1b=m,q1b=1;
         for(int j=2;j<=19;j++){ double a=m*p1b+p0b,b=m*q1b+q0b; p0b=p1b;q0b=q1b;p1b=a;q1b=b; }
         prev = fabs(p1b/q1b - sig);
-        if(err > 1e-30 && prev > 1e-30 && fabs(log(prev/err)/log(sig*sig) - 1) > 0.25) mal++;
+        if(err != 0.0 && prev != 0.0 && fabs(log(prev/err)/log(sig*sig) - 1) > 0.25) mal++;
         /* e é de CAUCHY: |x_{k+1} − x_k| -> 0 */
         long a0=1,b0=0,a1=m,b1=1, ant=1e9, mono=1;
         for(int k=2;k<=25;k++){

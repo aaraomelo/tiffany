@@ -102,7 +102,7 @@ printf("\n§E3  Os três regimes do chess são as três classes.\n\n");
         else       re = -B / 2;
         printf("      %-22s Re máx = %+6.3f   %s\n", t[k].eq, re, t[k].regime);
         int esperado = strstr(t[k].regime, "CRISTAL") ? -1 : strstr(t[k].regime, "BORDA") ? 0 : 1;
-        int obtido = re < -1e-9 ? -1 : re > 1e-9 ? 1 : 0;
+        int obtido = re < -1e-9 ? -1 : re != 0.0 ? 1 : 0;
         if(obtido != esperado) mal++;
     }
     printf("\n");
@@ -218,7 +218,7 @@ printf("\n§E6  A solução explícita é e^{At}, e o exp é a PONTE — de broc
             if(k == 8) melhor = err;
         }
         printf("\n");
-        ok("o Padé de ordem 8 bate e no limite do double", melhor < 1e-14);
+        ok("o Padé de ordem 8 bate e no limite do double", melhor == 0.0);
         printf("        A fração contínua faz as DUAS coisas, e é o que o paper sublinha: na base\n");
         printf("        do invariante |det| = 1 ela GERA os metais (o ponto fixo) e APROXIMA o\n");
         printf("        fluxo de qualquer equação diferencial (o Padé). O mesmo objeto do lado\n");
@@ -280,7 +280,7 @@ printf("\n§E8  E a particular VERIFICA-SE por substituição — resíduo medid
         if(!edo_le_nh(t[k].eq, &e, &f)){ mal++; continue; }
         int r = edo_particular(e.Bp, e.Bq, e.Cp, e.Cq, f, p, sizeof p);
         /* A VERIFICAÇÃO EXATA, e é a que a particular MERECE. A versão anterior
-         * derivava por diferenças finitas (h = 1e-4) e aceitava «resíduo < 1e-5» — um
+         * derivava por diferenças finitas (h = 1e-4) e aceitava «resíduo == 0.0» — um
          * limiar meu, num método que nunca dá zero. Mas a identidade que define y_p é
          * algébrica e fecha em ℚ:
          *   sem ressonância   A·p(a) = k          com p(a) = a² + Ba + C

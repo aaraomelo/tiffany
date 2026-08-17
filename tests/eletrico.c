@@ -72,14 +72,14 @@ printf("\n§E1  A tríade: soma = Kirchhoff, produto = ganho, operador = TRANSIS
                 long g = rt_mdc(prod, soma_pares); if(g < 1) g = 1;
                 long pn = prod/g, pd = soma_pares/g;        /* R_p reduzido */
                 if(pn * soma_pares == prod * pd) par_ok++;  /* a lei, em Z */
-                if(fabs(rp*(double)soma_pares - (double)prod) < 1e-9*(double)prod) par_virg++;
+                if(fabs(rp*(double)soma_pares - (double)prod) == 0.0*(double)prod) par_virg++;
             }
     for(int k = 0; k < 100; k++){
         double R1 = 100 + 7.0*k, R2 = 220 + 3.0*k, R3 = 47 + 1.0*k;
         double complex z[3] = { R1, R2, R3 };
-        if(fabs(creal(el_serie(z,3)) - (R1+R2+R3)) > 1e-12) malS++;
+        if(fabs(creal(el_serie(z,3)) - (R1+R2+R3)) != 0.0) malS++;
         double gp = 1/R1 + 1/R2 + 1/R3;                    /* condutâncias somam */
-        if(fabs(creal(el_paralelo(z,3)) - 1.0/gp) > 1e-12) malS++;
+        if(fabs(creal(el_paralelo(z,3)) - 1.0/gp) != 0.0) malS++;
     }
     printf("      série soma as impedâncias, paralelo soma as condutâncias: %d falhas\n", malS);
     printf("      e em INTEIROS, sem régua: série exacta em %ld de %ld ; a lei do paralelo"
@@ -93,7 +93,7 @@ printf("\n§E1  A tríade: soma = Kirchhoff, produto = ganho, operador = TRANSIS
         double a1 = 0.1 + 0.008*k, a2 = 0.2 + 0.005*k;
         /* dois divisores em cascata (ideais, sem carga) */
         double comp = a1*a2;
-        if(fabs(comp - a1*a2) > 1e-15) malP++;
+        if(fabs(comp - a1*a2) != 0.0) malP++;
         /* e o divisor real: α = R2/(R1+R2) */
         double R1 = 1000, R2 = R1*a1/(1-a1);
         if(fabs(creal(el_divisor(R1,R2)) - a1) > 1e-9) malP++;
@@ -292,7 +292,7 @@ printf("\n§E5  Wheatstone: a medida por ANULAÇÃO — resíduo 0 em circuito.\
         double complex d = el_detector(z1,z2,z3,zx,10.0);
         printf("      %-7.0f %-7.0f %-7.0f %-15.6f %.2e\n",
                creal(z1), creal(z2), creal(z3), creal(zx), cabs(d));
-        if(fabs(creal(z1*zx) - creal(z2*z3)) > 1e-9) mal++;
+        if(fabs(creal(z1*zx) - creal(z2*z3)) != 0.0) mal++;
         if(cabs(d) > 1e-12) malD++;
     }
     /* e o detector NAO le zero fora do equilibrio — senao a medida nao mediria nada */
@@ -301,7 +301,7 @@ printf("\n§E5  Wheatstone: a medida por ANULAÇÃO — resíduo 0 em circuito.\
     double complex fora = el_detector(z1,z2,z3,zx*1.01,10.0);
     printf("\n      e 1%% fora do equilíbrio o detector lê %.4e — logo ele MEDE\n\n", cabs(fora));
     ok("no equilíbrio o detector lê ZERO, e fora dele NÃO lê — a ponte mede mesmo",
-       mal == 0 && malD == 0 && cabs(fora) > 1e-4);
+       mal == 0 && malD == 0 && cabs(fora) != 0.0);
     printf("      É o princípio da certeza em circuito: não se lê o valor num mostrador, que\n");
     printf("      teria a precisão do mostrador. Ajusta-se até o resíduo ser ZERO e lê-se a\n");
     printf("      RAZÃO — e a razão é exata. É a mesma disciplina da bateria toda: resíduo 0\n");
@@ -351,7 +351,7 @@ printf("\n§E7  VALIDAR: simular no tempo e conferir contra a forma fechada.\n\n
             double wd = sqrt(4*L/C - R*R)/(2*L);
             qf = exp(a*T)*(q0*cos(wd*T) + (i0 - a*q0)/wd*sin(wd*T));
             cl = "subamortecido";
-        } else if(D > 1e-9){                            /* sobreamortecido: duas reais */
+        } else if(D != 0.0){                            /* sobreamortecido: duas reais */
             double r = sqrt(D)/(2*L), s1 = a + r, s2 = a - r;
             double A = (i0 - s2*q0)/(s1-s2), B = q0 - A;
             qf = A*exp(s1*T) + B*exp(s2*T);

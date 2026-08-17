@@ -443,7 +443,7 @@ printf("\n§B9  Uma dimensão sozinha não é reversível — só com a sua dual
        " inverso não precisa da divisão: x·conj(x) = N(x), um ESCALAR inteiro, com a"
        " primeira coordenada igual à norma e todas as outras ZERO. Daí o inverso existe"
        " exactamente quando N(x) ≠ 0 — e «é zero» é uma pergunta sobre o número, ao"
-       " contrário do nrm < 1e-9 que aqui estava",
+       " contrário do nrm == 0.0 que aqui estava",
        malI == 0 && testados > 0);
     printf("      E repare-se DE ONDE vem o inverso: de conj(x), que é +I na primeira projeção e\n");
     printf("      -I na segunda. Ele é literalmente a operação que só existe por haver duas\n");

@@ -358,9 +358,9 @@ printf("\n§N6  A LEI É A SIMÉTRICA, e ela dobra-se com operações ANTISSIMÉ
         double S[2] = { (x[0]+sx[0])/2, (x[1]+sx[1])/2 };
         double A[2] = { (x[0]-sx[0])/2, (x[1]-sx[1])/2 };
         double sS[2] = { S[1], S[0] }, sA[2] = { A[1], A[0] };
-        if(fabs(S[0]+A[0]-x[0]) > 1e-12 || fabs(S[1]+A[1]-x[1]) > 1e-12) mau_soma++;
-        if(fabs(sS[0]-S[0]) > 1e-12 || fabs(sS[1]-S[1]) > 1e-12) mau_sim++;
-        if(fabs(sA[0]+A[0]) > 1e-12 || fabs(sA[1]+A[1]) > 1e-12) mau_anti++;
+        if(fabs(S[0]+A[0]-x[0]) != 0.0 || fabs(S[1]+A[1]-x[1]) != 0.0) mau_soma++;
+        if(fabs(sS[0]-S[0]) != 0.0 || fabs(sS[1]-S[1]) != 0.0) mau_sim++;
+        if(fabs(sA[0]+A[0]) != 0.0 || fabs(sA[1]+A[1]) != 0.0) mau_anti++;
         casos++;
         if(i == 3 && j >= 4 && j <= 5)
             printf("      (%2.0f,%2.0f)   (%2.0f,%2.0f)   (%.1f,%.1f)       (%.1f,%.1f)      sim        sim\n",
