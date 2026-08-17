@@ -61,7 +61,11 @@ int main(void){
                 casos++;
                 if(orbita(p % q, q) != q) mau++;
             }
-        printf("      %ld fases p/q com gcd(p,q)=1, q ate' 200: %ld discordancias\n", casos, mau);
+        /* q vai de 1: a fase trivial 1/1 conta aqui, e e' por isso que este numero e'
+         * UM a mais que o do §F3, onde q comeca em 2. Os dois rotulos diziam quase o
+         * mesmo — «fases p/q com gcd=1» e «fases primitivas» — sobre conjuntos que
+         * diferem no caso q=1, e isso induz em erro quem cita. Dizem-se agora as gamas. */
+        printf("      %ld fases p/q com gcd(p,q)=1, q de 1 a 200: %ld discordancias\n", casos, mau);
         ok("a fase p/q da' EXACTAMENTE q pontos quando p e q sao primos entre si — a orbita"
            " e' um relogio de q marcas, e a fase escolheu quantas", mau == 0 && casos > 0);
     }
@@ -86,7 +90,9 @@ int main(void){
                 casos++;
                 if(menor != 1) mau++;
             }
-        printf("      %ld fases primitivas: passo minimo != 1 em %ld\n", casos, mau);
+        printf("      %ld fases primitivas com q de 2 a 200 (a trivial 1/1 nao entra, e e'\n"
+               "      por isso que sao uma a menos que no §F2): passo minimo != 1 em %ld\n",
+               casos, mau);
         ok("e o PASSO da orbita e' uma marca em q: a fase nao muda so' o caminho, fixa a"
            " REGUA — [sigma] = q caminhos por passo, e duas fases sao dois corpos",
            mau == 0 && casos > 0);
