@@ -1108,4 +1108,45 @@ static long rt_desce(int (*P)(long, void*), long ate, void *ctx){
     return -1;
 }
 
+
+/* ── O REAL COMO CAMINHO: a peça que tira a vírgula de vez ────────────────────────────
+ *
+ * O geometrico.tex, §sec:supremo: «o habitante É o caminho — não há valor por trás à
+ * espera de ser aproximado, logo não há erro a acumular». Um real não se representa: as
+ * suas DECISÕES é que se guardam, e cada uma é um bit.
+ *
+ *      m_k := max{ m ∈ ℤ : m/2^k < x para algum x ∈ S },   m_{k+1} ∈ {2m_k, 2m_k+1}
+ *
+ * A construção vivia inline no tests/supremo.c e é geral: qualquer real definido por um
+ * predicado INTEIRO — «existe x em S acima de m/2^k?» — constrói-se assim, e o resultado
+ * é um par (m, 2^k) sem uma vírgula. O supremo de {r² < 2} sai 1482910/2^20.
+ *
+ * E é este o caminho para os andares seguintes: a sequência de bits das decisões é, em
+ * blocos de oito, exactamente um byte — o corpo256.h lê-o pelas suas oito coordenadas
+ * (cor:bitdecide). */
+static long rt_caminho_sup(int (*serve)(long m, long pot, void *ctx), int k,
+                           void *ctx, long *pot_out){
+    long m = 0, pot = 1;
+    while(serve(m + 1, 1, ctx)) m++;                  /* m_0, subindo do zero */
+    for(int i = 1; i <= k; i++){
+        m = 2*m; pot *= 2;                            /* desce um nível da árvore */
+        if(serve(m + 1, pot, ctx)) m++;               /* o filho direito ainda serve? */
+    }
+    if(pot_out) *pot_out = pot;
+    return m;
+}
+
+/* O CORTE SEM RAIZ — thm:corte do geometrico.tex. Para D = m²+4 e σ = (m+√D)/2:
+ *
+ *      a/b < σ  ⟺  2a − mb < b√D
+ *
+ * e como o lado direito é positivo, parte-se em dois SEM PERDA e sem formar a raiz:
+ * ou 2a − mb é negativo (e acabou), ou é não negativo e (2a−mb)² < b²D. Devolve 1 se
+ * a/b < σ. Exige b ≥ 1. */
+static int rt_menor_que_sigma(long a, long b, long m, long D){
+    long e = 2*a - m*b;
+    if(e < 0) return 1;
+    return e*e < b*b*D;
+}
+
 #endif /* RETA_H */

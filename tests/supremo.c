@@ -37,6 +37,7 @@
 #include "inteiros.h"
 #include "cifra.h"
 #include "dual32.h"
+#include "reta.h"      /* rt_caminho_sup: o caminho, agora na lib */
 #include "racionais.h"
 #include "reais.h"
 #include "cauchy.h"
@@ -79,6 +80,11 @@ static int sp_existe(long m, long pot, int caso){
 static long sp_bit(long m, long pot, int caso){
     return m + (sp_existe(m + 1, pot, caso) ? 1 : 0);   /* m já vem dobrado */
 }
+
+/* e a CONSTRUÇÃO INTEIRA está agora em lib/reta.h — rt_caminho_sup —, porque ela é
+ * geral: qualquer real definido por um predicado inteiro constrói-se assim. O que era
+ * uma peça deste ficheiro passou a ser a peça de quem precisar. A ponte é esta: */
+static int sp_serve(long m, long pot, void *ctx){ return sp_existe(m, pot, *(int*)ctx); }
 
 int main(void){
     printf("\n=== A CONTINUIDADE: dado S limitado, o supremo CONSTRÓI-SE no objecto ===\n");
@@ -243,11 +249,21 @@ int main(void){
                testemunha);
         printf("      (a mediante simples (p+2q)/(p+q) troca o sinal e cai do lado"
                " OPOSTO — não serve de testemunha)\n");
-        /* e aqui o supremo EXISTE, e o caminho dele mostra-se */
+        /* e aqui o supremo EXISTE, e o caminho dele mostra-se — DUAS ROTAS: a descida
+         * deste ficheiro e a peça rt_caminho_sup da lib, que não partilham uma linha. */
         long m = 1, pot = 1;
         for(int k = 1; k <= 20; k++){ pot *= 2; m = sp_bit(2*m, pot, 0); }
+        int caso0 = 0; long pot_lib = 0;
+        long m_lib = rt_caminho_sup(sp_serve, 20, &caso0, &pot_lib);
         printf("      e no objecto o supremo EXISTE, e o caminho é: %ld / 2^20 = %ld/%ld\n",
                m, m, pot);
+        printf("      e a peça da lib (rt_caminho_sup) desce o MESMO caminho: %ld/%ld — %s\n",
+               m_lib, pot_lib, (m_lib == m && pot_lib == pot) ? "batem" : "DIVERGEM");
+        ok("e a peça da lib desce o MESMO caminho que a descida local — duas rotas sem uma"
+           " linha em comum, e o supremo de {r²<2} é 1482910/2^20, o par (m, 2^k) que o"
+           " geometrico.tex publica. Um real nao se aproxima: constroi-se, e o que se"
+           " guarda sao as DECISOES",
+           m_lib == m && pot_lib == pot && m == 1482910 && pot == 1048576);
         ok("O CONJUNTO QUE ℚ NÃO CONSEGUE FECHAR, O OBJECTO FECHA: a testemunha é a"
            " matriz [[3,4],[2,3]] de determinante 1 — a unidade fundamental de ℤ[√2] ao"
            " quadrado, (1+√2)² = 3+2√2 —, e o que a torna testemunha são DUAS identidades"
