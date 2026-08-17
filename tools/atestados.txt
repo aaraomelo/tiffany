@@ -424,7 +424,7 @@ sem_ramo a6e38ca24a7eda51 0
 semantico c84539e0b757b453 0
 semente 98e9a0194e17f02d 0
 significado ff504aa181796ca5 0
-simula 28ebda619bd44e1e 0
+simula 9303705569363d25 0
 sistema b93be799ff62ae01 0
 smartcontract 2686bef07a252cfb 0
 solar b17d49f0c7b3948a 0

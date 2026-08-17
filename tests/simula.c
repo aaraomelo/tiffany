@@ -34,6 +34,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include "reta.h"
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -111,8 +112,27 @@ int main(void){
         /* e elas somam ZERO — é o que faz delas um tetraedro e não quatro direções soltas */
         double soma[3] = {0,0,0};
         for(int k = 0; k < 4; k++) for(int i = 0; i < 3; i++) soma[i] += n[k][i];
-        ok("e as quatro SOMAM ZERO — e isso que as faz um tetraedro, e nao quatro soltas",
-           nrm(soma) < 1e-15);
+        /* E A SOMA É ZERO EXACTO NOS VÉRTICES, que são INTEIROS. Os versores são os
+         * vértices do tetraedro no cubo divididos por √3 — e todos têm a mesma norma, logo
+         * a soma dos versores é a soma dos vértices sobre √3. Essa soma faz-se em ℤ e é
+         * (0,0,0) sem folga; o «< 1e-15» era do arredondamento das quatro divisões por √3,
+         * e não do facto. É a mesma geometria do octeto.c §O2, agora exacta nos dois. */
+        long Vt[4][3] = { {1,1,1}, {1,-1,-1}, {-1,1,-1}, {-1,-1,1} };
+        long sz[3] = {0,0,0};
+        for(int k = 0; k < 4; k++) for(int i = 0; i < 3; i++) sz[i] += Vt[k][i];
+        long normas_iguais = 0;
+        for(int k = 0; k < 4; k++) if(rt_dir(Vt[k], Vt[k], 3) == 3) normas_iguais++;
+        printf("     -> e nos VERTICES, em inteiros: a soma e' (%ld,%ld,%ld) — ZERO exacto —\n"
+               "        e as quatro tem a mesma norma ao quadrado (3) em %ld de 4\n",
+               sz[0], sz[1], sz[2], normas_iguais);
+        ok("e as quatro SOMAM ZERO — e isso que as faz um tetraedro, e nao quatro soltas. E o"
+           " zero e' EXACTO nos vertices, que sao INTEIROS: (1,1,1) + (1,-1,-1) + (-1,1,-1) +"
+           " (-1,-1,1) = (0,0,0), sem folga. Os versores sao esses vertices sobre raiz(3), e"
+           " como as quatro normas sao iguais a soma deles e' a soma dos vertices sobre a"
+           " mesma raiz — o «< 1e-15» era do arredondamento das quatro divisoes, e nao do"
+           " facto. Mesma geometria do octeto.c §O2, e agora exacta nos dois",
+           nrm(soma) < 1e-15 && sz[0] == 0 && sz[1] == 0 && sz[2] == 0
+           && normas_iguais == 4);
         printf("     -> 6 pares, todos a %.4f graus; a soma dos quatro versores tem norma %.1e.\n",
                alvo, nrm(soma));
         puts("        E o mesmo numero do octeto.c §O2, e nao foi copiado: foi recalculado aqui");
@@ -267,16 +287,42 @@ int main(void){
         /* em malha fechada o sensor fica sempre no ponto de trabalho: o controlador injeta um
          * campo de compensação e mede-se ESSE. A janela deixa de ser a da linearidade da curva
          * e passa a ser a do atuador. */
+        /* AS DUAS ASSERÇÕES QUE AQUI ESTAVAM ERAM TAUTOLOGIAS.
+         *   `janela_fechada = janela_aberta·ganho` e depois `janela_fechada > 100·janela_aberta`
+         *   é `ganho > 100`, isto é `1000 > 100` — a comparação não vê a janela.
+         *   E `banda_aberta·1 == banda_fechada·ganho` com banda_fechada = gbw/ganho é
+         *   `gbw == gbw`: álgebra pura, com um 1e-9 por cima.
+         *
+         * A LEI é que o PRODUTO ganho×banda não depende do ganho — e isso mede-se VARIANDO
+         * o ganho, em inteiros: com gbw inteiro e o ganho a percorrer os divisores dele, o
+         * produto é o mesmo em todos, e a banda MUDA em todos. Sem a segunda metade, «o
+         * produto não muda» valia por nada estar a mudar. */
+        const long GBW_z = 1000000;                /* produto ganho-banda, Hz, inteiro */
+        long prod_igual = 0, banda_muda = 0, ganhos = 0, banda_ant = -1;
+        for(long G = 1; G <= 100000; G *= 10){
+            long banda = GBW_z / G;                /* exacta: G divide GBW */
+            ganhos++;
+            if(G * banda == GBW_z) prod_igual++;   /* o produto NÃO depende do ganho */
+            if(banda_ant >= 0 && banda != banda_ant) banda_muda++;
+            banda_ant = banda;
+        }
         double janela_aberta = 1e-9;               /* ±1 nT, medido no §S4 */
         double ganho_malha = 1000.0;
         double janela_fechada = janela_aberta * ganho_malha;
-        ok("a MALHA FECHADA alarga a janela pelo ganho de malha — e isso e a lei do realimentado",
-           janela_fechada > 100*janela_aberta);
-        /* e o preço: a banda. O produto ganho-banda é constante, e isso mede-se. */
-        double gbw = 1e6;                           /* produto ganho-banda, Hz */
+        double gbw = (double)GBW_z;
         double banda_aberta = gbw/1.0, banda_fechada = gbw/ganho_malha;
-        ok("e o PRECO e a banda: o produto ganho-banda e constante, e fecha exato",
-           fabs(banda_aberta*1.0 - banda_fechada*ganho_malha) < 1e-9);
+        printf("     -> e o produto ganho x banda em INTEIROS: igual em %ld de %ld ganhos, com\n"
+               "        a banda a MUDAR em %ld deles — a troca e' real e o produto nao a ve\n",
+               prod_igual, ganhos, banda_muda);
+        ok("a MALHA FECHADA alarga a janela pelo ganho de malha — e isso e a lei do realimentado."
+           " (O que aqui se media era `janela_aberta.ganho > 100.janela_aberta`, isto e'"
+           " `ganho > 100`: a comparacao nao via a janela.)",
+           ganho_malha > 100.0 && janela_fechada > janela_aberta);
+        ok("e o PRECO e a banda: o produto ganho-banda e constante, e fecha exato. E a LEI"
+           " mede-se VARIANDO o ganho, em INTEIROS: G.banda = GBW em todos os cinco ganhos, e"
+           " a banda MUDA em todos — sem essa segunda metade, «o produto nao muda» valia por"
+           " nada estar a mudar. O que aqui estava comparava gbw com gbw, por algebra",
+           prod_igual == ganhos && banda_muda == ganhos - 1 && ganhos == 6);
         printf("     -> a janela passa de %.1e T para %.1e T, e a banda cai de %.0f Hz para %.0f Hz.\n",
                janela_aberta, janela_fechada, banda_aberta, banda_fechada);
         puts("        'Temos o controle' e literalmente isto: a realimentacao troca GANHO por");
