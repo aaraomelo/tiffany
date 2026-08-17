@@ -27,6 +27,7 @@
  */
 #include <stdio.h>
 #include "../lib/disco.h"
+#include "reta.h"      /* rt_pot_mod: a torre em Z_p, exacta */
 #include "unidade.h"
 #include <math.h>
 #ifndef M_PI
@@ -201,7 +202,21 @@ int main(void){
                 printf("         nível %3d : zoom(1 batida) == 2 batidas do nível %3d ? %.1e ;"
                        " Z₀ fixo? %s (e com o zoom torto muda? %s)\n",
                        d, 2*d, dif, z_fixo ? "sim" : "NAO", g_mexeu ? "sim" : "NAO");
-            if(dif>1e-12 || !z_fixo || !g_mexeu) erro_torre=1;
+            /* E A TESE DA TORRE MEDE-SE EXACTA, sem o 1e-12. «Uma batida do nível zoom é
+             * igual a duas do nível de cima» é, no meio digital, w_d = (w_{2d})² — e isso
+             * é ARITMÉTICA MODULAR: w_d = w^(n/d), logo (w_{2d})² = w^(2·n/(2d)) = w^(n/d).
+             * A mesma tese, no outro meio, com resíduo ZERO. O `dif` em double fica para a
+             * coluna impressa, que é onde a comparação entre os dois meios se vê. */
+            /* e o DOMÍNIO diz-se: o nível de cima só existe enquanto 2d cabe em n. Para
+             * d = n não há 2d, e a divisão inteira 256/512 daria zero — a tese não se
+             * aplica ali, e fingir que se aplica seria medir um caso degenerado. */
+            int torre_exacta = 1;
+            if(2*d <= N){
+                long wd  = rt_pot_mod(W_GLOBAL, (long)(N/d),      P_GLOBAL);
+                long w2d = rt_pot_mod(W_GLOBAL, (long)(N/(2*d)),  P_GLOBAL);
+                torre_exacta = (w2d * w2d % P_GLOBAL == wd);
+            }
+            if(!torre_exacta || dif>1e-12 || !z_fixo || !g_mexeu) erro_torre=1;
         }
         printf("     %s\n", VD(!((bom1 && !erro_torre)), "resíduo 0 — a torção é a rotação da borda: fecha em n passos, conserva energia, e a\n"
           "     torre fractal É o zoom do circuito: com o MESMO passo de tempo, dobrar ω₀ (o zoom\n"
