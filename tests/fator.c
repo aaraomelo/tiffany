@@ -374,17 +374,22 @@ printf("\n§W7  A RESOLUÇÃO modula até fp = 1 — e o 1 É a condição de pa
         if(real < 0) semResposta++;
         else if(real != previsto) discorda++;
         /* e o fp ao longo da descida, com o n que a MAQUINA gastou */
-        double fpAnt = 1.0/n0;
+        /* O FACTOR DE POTENCIA E 1/n, e comparar 1/a com 1/b nao pede virgula: para a e b
+         * positivos, 1/a > 1/b  <=>  b > a. Guarda-se o DENOMINADOR e inverte-se a
+         * comparacao — os dois doubles saem, e a conta fica exacta em vez de exacta por
+         * sorte (1/3 nao tem representacao em base dois). */
+        long den_ant = n0;
         for(int k = 1; k <= (real > 0 ? real : previsto); k++){
-            double fp = 1.0/(double)(n0 - k);
-            if(fp <= fpAnt) subiuSempre = 0;
-            fpAnt = fp;
+            long den = n0 - k;                       /* fp = 1/den */
+            if(den <= 0 || den >= den_ant) subiuSempre = 0;   /* fp <= fpAnt */
+            den_ant = den;
         }
-        if(fabs(fpAnt - 1.0) > 1e-12) parouEmUm = 0;
-        printf("      %-29s %-5d %-10d %-14s %.3f → %.3f\n",
+        /* «parou em um» e o denominador chegar a UM: fp = 1/1. Sem virgula e sem limiar. */
+        if(den_ant != 1) parouEmUm = 0;
+        printf("      %-29s %-5d %-10d %-14s 1/%d → 1/%ld\n",
                casos[c].conta, n0, previsto,
                real < 0 ? "(sem resposta)" : (real == previsto ? "bate" : "DIFERE"),
-               1.0/n0, fpAnt);
+               n0, den_ant);
     }
     printf("\n");
     ok("a assistente gasta exatamente n−1 dobras, com n = folhas + parênteses",

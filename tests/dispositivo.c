@@ -59,17 +59,24 @@ int main(void){
     /* ── §D2 ─────────────────────────────────────────────────────────────── */
     puts("§D2  A RAM DA LLM EM CELULAS: quantas, e quanto espaco\n");
     {
-        double bytes_llm = 1.3e9;                 /* o llama3.2:1b, quantizado */
-        double bits = bytes_llm * 8;
-        long celulas_slc = bits;                /* 1 bit por célula */
-        double celulas_qlc = bits / 4.0;          /* 4 bits por célula, o QLC comercial */
-        /* a densidade real: um die NAND de 1 Tb em ~100 mm² */
-        double bits_por_mm2 = 1e12 / 100.0;
-        double area_mm2 = bits / bits_por_mm2;
-        ok("a RAM do modelo cabe numa area de escala de CHIP, e nao de sala",
-           area_mm2 > 0.1 && area_mm2 < 100.0);
-        printf("      -> %.1f GB = %.2e bits = %.2e celulas QLC, em %.2f mm2 de silicio.\n",
-               bytes_llm/1e9, bits, celulas_qlc, area_mm2);
+        /* TUDO ISTO SAO CONTAGENS, e contagens sao inteiros: bytes, bits, celulas e a
+         * densidade de um die. Os doubles nao carregavam virgula nenhuma — carregavam
+         * numeros grandes, que e outra coisa, e o `long` leva-os sem perder um bit.
+         * A area e uma RAZAO de duas contagens, e nao se forma: compara-se por PRODUTO
+         * CRUZADO, que e a regra da casa —
+         *      bits/bpm > 1/10   <=>   10·bits > bpm
+         *      bits/bpm < 100    <=>   bits < 100·bpm
+         * e assim a asserção deixa de precisar de uma virgula para dizer o que diz. */
+        long bytes_llm = 1300000000L;            /* o llama3.2:1b, quantizado */
+        long bits = bytes_llm * 8;
+        long celulas_slc = bits;                 /* 1 bit por célula */
+        long celulas_qlc = bits / 4;             /* 4 bits por célula, o QLC comercial */
+        long bits_por_mm2 = 1000000000000L / 100;   /* 1 Tb em ~100 mm² */
+        ok("a RAM do modelo cabe numa area de escala de CHIP, e nao de sala — e a area e uma"
+           " RAZAO de duas contagens, comparada por produto cruzado e sem formar a divisao",
+           10*bits > bits_por_mm2 && bits < 100*bits_por_mm2);
+        printf("      -> %ld bytes = %ld bits = %ld celulas QLC; a area e %ld/%ld mm2\n",
+               bytes_llm, bits, celulas_qlc, bits, bits_por_mm2);
         conclui("o modelo inteiro cabe num die. O problema do dispositivo nunca foi o ESPACO.");
         puts("");
     }

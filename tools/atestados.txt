@@ -135,7 +135,7 @@ dinamica_inversor 3857d5d566297c2e 0
 dirac_transicao 97341d46b5343b0d 0
 disco 8fc97c29cd393f92 0
 disco_wasm b36d2463b26941fb 0
-dispositivo fe9bbc3df383fc72 0
+dispositivo 91c46df795fb3353 0
 dissipa 04ad16367025408c 0
 dissipa_pagina 9f641716f4773db8 0
 distancia 508543c170ad9fd9 0
@@ -199,7 +199,7 @@ fala 16ba53ad545da551 0
 familia_real 0833f102c1037af8 0
 fase_regua 679ad4c12ac12cb9 0
 fatia 9c955f7c15fa1be7 0
-fator ef488dcfcf630786 0
+fator 696100e63cb6aa0a 0
 fecha 50bf15cf5ec4f5ea 0
 fecho_convexo c990307f513c1d36 0
 fermat 33e7038658da1129 0
@@ -250,7 +250,7 @@ isa_wasm 4e171d4c0561ad48 0
 isomorfo 34e59d734ca34d32 0
 isserlis 1ed5c1ac27f01ece 0
 kernelb 0b9ee67bae8ceebd 0
-koch 70558e955a78c5a0 0
+koch e6b1bceec01c64f4 0
 lahire_universal 843cfa03c5e214ba 0
 lambert cc1ad44da75715be 0
 latex_corpo f48d359835cf528c 0

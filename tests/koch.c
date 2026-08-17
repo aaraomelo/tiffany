@@ -257,19 +257,33 @@ printf("\n§K6  A mesma escada em Koch: o nível N.\n\n");
 {
     /* E a terceira: cada nivel de Koch acrescenta detalhe, e a area aproxima-se do limite.
      * Mede-se a fracao da area ja' recuperada. */
-    double A0 = sqrt(3)/4.0, limite = A0*8.0/5.0;
-    printf("      nível N   área/limite     o que falta\n");
-    int mal = 0; double ant = -1;
+    /* O A0 = sqrt(3)/4 CANCELA-SE, e com ele sai a única raiz desta secção:
+     *
+     *    f = área/limite = A0·(1 + (3/5)(1 − (4/9)^N)) / (A0·8/5)
+     *                    = (8·9^N − 3·4^N) / (8·9^N)
+     *
+     * um RACIONAL exacto em N, sem raiz e sem pow. A fracção 0,6 é 3/5 e (4/9)^N é
+     * 4^N/9^N — nenhuma delas precisava de vírgula. A monotonia compara-se por produto
+     * cruzado: f_N < f_{N+1}  <=>  n_N·d_{N+1} < n_{N+1}·d_N. */
+    printf("      nível N   área/limite (exacto)      o que falta\n");
+    int mal = 0; long n_ant = -1, d_ant = 1;
     for(int N = 0; N <= 8; N++){
-        double area = A0*(1 + 0.6*(1 - pow(4.0/9.0, N)));
-        double f = area/limite;
-        if(N <= 4 || N == 8) printf("      %-9d %-15.9f %.6f%%\n", N, f, (1-f)*100);
-        if(ant >= 0 && f < ant) mal++;
-        ant = f;
+        long p9 = 1, p4 = 1;
+        for(int k = 0; k < N; k++){ p9 *= 9; p4 *= 4; }
+        long num = 8*p9 - 3*p4, den = 8*p9;         /* f = num/den, irredutível ou não */
+        if(N <= 4 || N == 8)
+            printf("      %-9d %ld/%ld%*s falta %ld/%ld\n", N, num, den,
+                   (int)(14 - (N > 4 ? 18 : 6)), "", den - num, den);
+        if(n_ant >= 0 && num*d_ant < n_ant*den) mal++;   /* f cresce, por cruzado */
+        n_ant = num; d_ant = den;
     }
     printf("\n");
-    ok("cada nível de Koch recupera mais da área, monotonicamente — a mesma escada",
-       mal == 0 && ant > 0.99);
+    /* e no fim a fracção está a menos de 1% do total: (den − num)/den < 1/100, por
+     * produto cruzado — 100·(den − num) < den. O sqrt(3) que aqui estava cancelava-se. */
+    ok("cada nível de Koch recupera mais da área, monotonicamente — a mesma escada, e a"
+       " fracção é EXACTA: (8·9^N − 3·4^N)/(8·9^N), sem raiz e sem pow, porque o A0 do"
+       " numerador e do denominador é o MESMO e cancela-se",
+       mal == 0 && 100*(d_ant - n_ant) < d_ant);
 }
 
 printf("\n§K7  A lei comum: completar é recuperar o inverso.\n\n");
