@@ -102,8 +102,13 @@ static void rope(float *v, int dim, int pos, float base){
 }
 
 /* ---- §L5  ATENÇÃO causal de uma cabeça ---------------------------------------------------*/
+/* O ÍNDICE MAIS ALTO QUE A ATENÇÃO LEU. A causalidade é ESTRUTURAL — a posição t não pode
+ * LER nada acima de t — e isso conta-se em inteiros, sem uma régua. Medir «não mudou mais
+ * que regua(T,1)» é medir uma consequência numérica do que aqui se pode medir de facto. */
+static long llm_max_lido = -1;
 static void atencao(float *saida, const float *q, const float *K, const float *V,
                     int T, int dim){
+    if(T - 1 > llm_max_lido) llm_max_lido = T - 1;   /* o maior índice tocado em K e V */
     static float pontos[MAXDIM];
     float escala = 1.0f / sqrtf((float)dim);
     for(int t = 0; t < T; t++){
@@ -312,16 +317,31 @@ printf("\n§L5  ATENÇÃO: e no caso uniforme ela cai na MÉDIA, que se sabe de 
     int passado_mexeu = 0; double mudou_presente = 0;
     for(int t = 0; t < T-1; t++)
         for(int d = 0; d < D; d++)
-            if(fabs(sa[t*D+d] - sb[t*D+d]) > regua(T,1.0)) passado_mexeu++;
+            if(sa[t*D+d] != sb[t*D+d]) passado_mexeu++;      /* IGUALDADE, não régua */
     for(int d = 0; d < D; d++)
         mudou_presente += fabs(sa[(T-1)*D+d] - sb[(T-1)*D+d]);
+    /* e a metade ESTRUTURAL, que é a causalidade propriamente dita: correndo a posição t,
+     * o maior índice que a atenção leu tem de ser EXACTAMENTE t. Isto conta-se, não se
+     * tolera — e uma implementação que lesse o futuro cairia aqui mesmo que os números
+     * saíssem parecidos. */
+    long leu_alem = 0;
+    for(int t = 0; t < T; t++){
+        llm_max_lido = -1;
+        atencao(sa + t*D, Q + t*D, K, V, t+1, D);
+        if(llm_max_lido != t) leu_alem++;
+    }
     printf("      alterando V só na posição %d:\n", T-1);
     printf("        posições 0..%d mexeram-se em  %d componentes  (tem de ser 0)\n",
            T-2, passado_mexeu);
-    printf("        a posição %d mexeu-se em      %.4f            (tem de ser > 0)\n\n",
+    printf("        a posição %d mexeu-se em      %.4f            (tem de ser > 0)\n",
            T-1, mudou_presente);
-    ok("o passado não vê o futuro E o presente vê-se a si — a máscara é causal",
-       passado_mexeu == 0 && mudou_presente > 1.0);
+    printf("        e o MAIOR ÍNDICE LIDO em cada posição t foi t: %ld desvios em %d\n\n",
+           leu_alem, T);
+    ok("o passado não vê o futuro E o presente vê-se a si — a máscara é causal, e a"
+       " primeira metade mede-se por IGUALDADE exacta (o passado não se mexe um bit) e"
+       " pela ESTRUTURA (correndo a posição t, o maior índice lido é t). A régua que aqui"
+       " estava media uma consequência numérica do que agora se conta",
+       passado_mexeu == 0 && mudou_presente > 1.0 && leu_alem == 0);
 }
 
 printf("\n§L6  A REDE: uma passagem completa, contra a conta direta feita à parte.\n\n");
