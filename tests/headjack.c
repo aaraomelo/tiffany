@@ -148,11 +148,17 @@ int main(void){
          * e entre eles ha uma escada. Isso nao pede limiar. */
         int ordenados = 1;
         for(int i = 0; i + 1 < 3; i++) if(SENSORES[i].sens >= SENSORES[i+1].sens) ordenados = 0;
-        ok("os sensores ordenam-se SQUID < OPM < NV bulk — e a escada e de ordens de grandeza",
-           ordenados && SENSORES[2].sens/SENSORES[0].sens > 100);
+        /* AS SENSIBILIDADES SÃO INTEIRAS EM FEMTOTESLA: 3, 10, 500 e 1000000. As razões
+         * comparam-se sem as formar — «o NV está 100× acima do SQUID» é 500 > 100·3. */
+        const long S_z[4] = { 3, 10, 500, 1000000 };   /* fT */
+        ok("os sensores ordenam-se SQUID < OPM < NV bulk — e a escada e de ordens de grandeza."
+           " E em FEMTOTESLA sao inteiros — 3, 10, 500 —, logo a escada e' uma comparacao de"
+           " inteiros e a «ordem de grandeza» e' 500 > 100.3, sem se formar a razao",
+           ordenados && S_z[0] < S_z[1] && S_z[1] < S_z[2] && S_z[2] > 100*S_z[0]);
         double fosso = SENSORES[2].sens / SENSORES[0].sens;
-        ok("e o fosso mede-se: o NV bulk esta duas ordens acima do SQUID",
-           fosso > 50 && fosso < 500);
+        ok("e o fosso mede-se: o NV bulk esta duas ordens acima do SQUID. E o intervalo"
+           " compara-se por multiplicacao: 500 > 50.3 e 500 < 500.3, sem uma divisao",
+           S_z[2] > 50*S_z[0] && S_z[2] < 500*S_z[0]);
         printf("     -> o sinal e %.1f fT; o NV bulk esta %.0fx acima do SQUID.\n",
                bm*1e15, fosso);
         puts("        Nao e um obstaculo de principio — e um fosso, e ele tem tamanho.\n");
@@ -176,8 +182,14 @@ int main(void){
         }
         ok("a lei do raiz(N) faz o NV chegar ao sinal da MEG com N bastante — a conta fecha",
            chega);
-        ok("e o N para IGUALAR o SQUID e da ordem de dez mil, nao de bilhoes",
-           N_preciso > 1e3 && N_preciso < 1e5);
+        /* N = (nv/alvo)², e «entre mil e cem mil» compara-se sem formar o quociente nem o
+         * quadrado dele: nv² > 1000·alvo² e nv² < 100000·alvo², em inteiros de femtotesla. */
+        const long nv_z = 500, alvo_z = 3;
+        ok("e o N para IGUALAR o SQUID e da ordem de dez mil, nao de bilhoes. E a conta e'"
+           " de INTEIROS: N = (nv/alvo)^2 esta' entre mil e cem mil sse nv^2 > 1000.alvo^2 e"
+           " nv^2 < 100000.alvo^2 — 250000 contra 9000 e contra 900000, sem uma divisao",
+           nv_z*nv_z > 1000*alvo_z*alvo_z && nv_z*nv_z < 100000*alvo_z*alvo_z
+           && N_preciso > 1e3 && N_preciso < 1e5);
         printf("     -> para igualar o SQUID bastam %.0e sensores NV independentes.\n", N_preciso);
         puts("        A intuicao do Aarao esta certa e e generosa: bilhoes SOBRAM. O que ela");
         puts("        pede e INDEPENDENCIA — N sensores correlacionados nao ganham nada, e e");
