@@ -429,8 +429,25 @@ printf("\n§F13 PONTRYAGIN É O PRODUTO CRUZADO — e não o cartesiano. Corrijo
            dpq[0], dpq[1], dqp[0], dqp[1]);
     printf("      CRUZADO  p·q = (%.1f, %.1f)   q·p = (%.1f, %.1f)   NÃO comuta\n\n",
            cpq[0], cpq[1], cqp[0], cqp[1]);
-    ok("o produto cruzado não comuta, e o direto comuta — a diferença é a AÇÃO",
-       fabs(dpq[1] - dqp[1]) < 1e-12 && fabs(cpq[1] - cqp[1]) > 1e-9);
+    /* E O GRUPO AFIM É INTEIRO. (a,b) com a adimensional e b em DÉCIMOS: p = (2, 5) e
+     * q = (3, 11) são os mesmos 2,0 / 0,5 / 3,0 / 1,1 na unidade em que cabem em ℤ. O
+     * produto cruzado (a₁a₂, a₁b₂ + b₁) fecha nessa unidade — a₁ é adimensional, logo a₁b₂
+     * continua em décimos — e a não-comutatividade sai como uma diferença de UM:
+     *
+     *      p·q = (6, 2·11 + 5) = (6, 27)        q·p = (6, 3·5 + 11) = (6, 26)
+     *
+     * O directo, esse, dá (6, 16) nos dois. Nada disto precisa de limiar. */
+    const long pa = 2, pb = 5, qa = 3, qb = 11;      /* b em décimos */
+    long d_pq = pb + qb,          d_qp = qb + pb;    /* directo: só soma */
+    long c_pq = pa*qb + pb,       c_qp = qa*pb + qb; /* cruzado: o primeiro AGE no segundo */
+    printf("      e em INTEIROS (b em décimos): directo %ld = %ld ; cruzado %ld != %ld\n\n",
+           d_pq, d_qp, c_pq, c_qp);
+    ok("o produto cruzado não comuta, e o direto comuta — a diferença é a AÇÃO. E em"
+       " INTEIROS nao ha' limiar nenhum: com b em decimos, p = (2,5) e q = (3,11), o directo"
+       " da' 16 nos dois sentidos e o cruzado da' 27 contra 26 — a nao-comutatividade e' uma"
+       " diferenca de UM, e nao «maior que 1e-9»",
+       fabs(dpq[1] - dqp[1]) < 1e-12 && fabs(cpq[1] - cqp[1]) > 1e-9
+       && d_pq == d_qp && c_pq != c_qp && c_pq - c_qp == 1);
 
     /* e a acao e real: aplicar (a,b) a x e ax+b, e a composicao bate o produto */
     {
@@ -441,8 +458,22 @@ printf("\n§F13 PONTRYAGIN É O PRODUTO CRUZADO — e não o cartesiano. Corrijo
         printf("      e a ação é real: (a,b) leva x em ax+b\n");
         printf("        p depois q -> %.1f, e (p·q)(x) -> %.1f\n", via_pq, do_prod);
         printf("        q depois p -> %.1f     — e os dois caminhos DIFEREM\n\n", via_qp);
-        ok("a composição das ações bate o produto cruzado, e a ordem importa",
-           fabs(via_pq - do_prod) < 1e-12 && fabs(via_pq - via_qp) > 1e-9);
+        /* e a ACÇÃO também é inteira: com x = 1 (dez décimos),
+         *      p depois q:  2·(3·10 + 11) + 5 = 87        (p·q)(x) = 6·10 + 27 = 87
+         *      q depois p:  3·(2·10 + 5) + 11 = 86        e os dois DIFEREM por um
+         * A composição bate o produto EXACTAMENTE, e a ordem importa exactamente. */
+        const long xz = 10;                          /* x = 1, em décimos */
+        long v_pq = pa*(qa*xz + qb) + pb;
+        long v_prod = (pa*qa)*xz + c_pq;
+        long v_qp = qa*(pa*xz + pb) + qb;
+        printf("        e em INTEIROS: p∘q(x) = %ld = (p·q)(x) = %ld, e q∘p(x) = %ld\n\n",
+               v_pq, v_prod, v_qp);
+        ok("a composição das ações bate o produto cruzado, e a ordem importa. E em INTEIROS a"
+           " igualdade e' EXACTA e a diferenca tambem: p∘q(x) = 87 = (p·q)(x), e q∘p(x) = 86"
+           " — um a menos. O grupo afim x -> ax+b fecha em Z quando o b esta' na unidade"
+           " certa, e nenhuma das duas comparacoes precisa de regua",
+           fabs(via_pq - do_prod) < 1e-12 && fabs(via_pq - via_qp) > 1e-9
+           && v_pq == v_prod && v_pq - v_qp == 1);
     }
     printf("      É O GRUPO AFIM, x -> ax + b, e ele é R ⋊ R+ — o produto CRUZADO das duas\n");
     printf("      partes que as duas transformadas diagonalizam:\n\n");
