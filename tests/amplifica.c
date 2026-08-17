@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "eletrico.h"
+#include "reta.h"      /* rt_ipow: a potencia de expoente INTEIRO */
 #include "unidade.h"
 
 /* as portas, em bits */
@@ -169,7 +170,9 @@ printf("\n§A3  A realimentação: o ganho passa a ser uma RAZÃO, e a razão é
     printf("      A (malha aberta)   A_f (fechada)     erro vs 1/β = %.0f\n", 1/beta);
     int mal = 0; double ant = 1e30;
     for(int k = 1; k <= 6; k++){
-        double A = pow(10.0, k);
+        double A = (double)rt_ipow(10, k);   /* 10^k e INTEIRO: a potencia inteira da lib,
+                                             * e nao a pow generica sobre um expoente que
+                                             * nunca teve virgula */
         double Af = A/(1 + A*beta);
         double err = fabs(Af - 1/beta)/(1/beta);
         printf("      %-18.0f %-17.6f %.3e\n", A, Af, err);
@@ -186,7 +189,7 @@ printf("\n§A3  A realimentação: o ganho passa a ser uma RAZÃO, e a razão é
     printf("\n      a LEI: a realimentação divide a sensibilidade por (1 + A·β)\n\n");
     printf("      A          var. aberta   var. fechada    razão medida   1 + A'·β (exato)\n");
     for(int k = 3; k <= 6; k++){
-        double A = pow(10.0, k), dA = 0.5*A;        /* o dispositivo varia 50% */
+        double A = (double)rt_ipow(10, k), dA = 0.5*A;   /* o dispositivo varia 50% */
         double Af1 = A/(1+A*beta), Af2 = (A+dA)/(1+(A+dA)*beta);
         double vA = dA/A, vF = fabs(Af2-Af1)/Af1;
         double razao = vA/vF, exato = 1 + (A+dA)*beta;

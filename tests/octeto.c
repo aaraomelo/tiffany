@@ -215,8 +215,12 @@ int main(void){
                " <vi,vj> = -1 e ||v||^2 = 3 nos SEIS pares, logo cos = -1/3 exacto e as quatro"
                " direccoes sao equidistantes — que e' a tese, e antes media-se UM par so'. A"
                " assercao anterior comparava acos(ip/(n0.n1)) com acos(-1/3), e ip/(n0.n1) E'"
-               " -1/3: dois acos a mascarar x = x",
-               cos_um_terco == pares && pares == 6 && norma3 == 4 && fabs(a3 - previsto3) < 1e-9);
+               " -1/3: dois acos a mascarar x = x — E ESSE PEDACO FICOU AQUI DENTRO."
+               " `a3` e' acos(ip/(n0.n1))*180/pi com ip = -1 e n0 = n1 = raiz(3), e"
+               " `previsto3` e' acos(-1/3)*180/pi: a MESMA expressao escrita duas vezes,"
+               " logo `fabs(a3 - previsto3) < 1e-9` era `0 < 1e-9`. Descrevi o defeito no"
+               " comentario, acrescentei a medida inteira ao lado, e deixei-o na condicao",
+               cos_um_terco == pares && pares == 6 && norma3 == 4);
         }
         {
             /* ℤ[√3]: a coordenada é (x, coeficiente de √3), e o produto interno é
@@ -234,9 +238,12 @@ int main(void){
                " (x, coef de raiz(3)): <a,b> = -2 e ||a||^2 = ||b||^2 = 4, logo cos = -1/2"
                " EXACTO, e a soma das tres e' (0,0). Esse zero e' o que o comentario da funcao"
                " ja' prometia — «verifica-se que somam zero» — e nunca verificava; a assercao"
-               " anterior media acos(cos(2pi/3)), que e' a funcao e a sua inversa",
+               " anterior media acos(cos(2pi/3)), que e' a funcao e a sua inversa — e"
+               " tambem esse ficou na condicao, ao lado da frase que o denuncia. Os dois"
+               " angulos em graus continuam a existir, mas so' para a COLUNA da tabela:"
+               " apresentacao, que e' o lugar deles",
                ip2 == -2 && na == 4 && nb == 4 && 2*ip2 == -na
-               && sx == 0 && sy == 0 && fabs(a2 - 120.0) < 1e-9);
+               && sx == 0 && sy == 0);
         }
         printf("     %-22s %6s %6s %14s\n", "hibridizacao", "sigma", "pi", "angulo");
         printf("     %-22s %6d %6d %13.4f\n", HIB[0].nome, HIB[0].sigma, HIB[0].pi, a3);

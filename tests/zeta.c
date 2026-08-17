@@ -26,6 +26,7 @@
 #include <math.h>
 #include <complex.h>
 #include <string.h>
+#include "reta.h"      /* rt_ipow */
 #include "unidade.h"
 #include "../lib/disco.h"
 #define primo DISCO_FIXO(int, 31)
@@ -250,15 +251,17 @@ printf("\n§Z4  O DESENROLAR: a soma vira produto.\n\n");
     /* E DEPOIS o limite, medido como limite: o resíduo tem de DECRESCER com P. */
     printf("      E o caso completo, medido como limite — o resíduo decresce com P:\n\n");
     double somaTot = 0;
-    for(long n = 1; n < 30000000L; n++) somaTot += pow((double)n, -2.0);
+    /* pow(n, -2.0) e 1/n^2 com um expoente que nunca teve virgula — e trinta milhoes de
+     * chamadas a uma funcao generica onde bastava uma multiplicacao. */
+    for(long n = 1; n < 30000000L; n++) somaTot += 1.0/((double)n*(double)n);
     printf("      P        produto p≤P        resíduo vs a soma   cauda prevista Σ_{p>P} p^-2\n");
     int decresce = 1; double ant = 1e9;
     for(int e = 2; e <= 5; e++){
-        int P = (int)pow(10, e);
+        int P = (int)rt_ipow(10, e);         /* 10^e, inteiro, pela lib */
         double prod = 1;
-        for(int p = 2; p <= P; p++) if(primo[p]) prod /= (1.0 - pow(p, -2.0));
+        for(int p = 2; p <= P; p++) if(primo[p]) prod /= (1.0 - 1.0/((double)p*p));
         double cauda = 0;
-        for(int p = P+1; p < 300000; p++) if(primo[p]) cauda += pow(p, -2.0);
+        for(int p = P+1; p < 300000; p++) if(primo[p]) cauda += 1.0/((double)p*p);
         double res = fabs(somaTot - prod);
         printf("      %-8d %.12f      %.2e            %.2e\n", P, prod, res, cauda);
         if(res > ant) decresce = 0;

@@ -7,7 +7,7 @@ agm_analog 9464d727b662316a 0
 agm_deforma 99c411ca3dffac43 0
 agm_gerador 958387d0ec02fc04 0
 algebra e4923ae8b9efc021 0
-amplifica 0c8270523a2851f2 0
+amplifica 685890ca38cd4382 0
 analiticas 60d32ba7f9ded84e 0
 analog d66dd4fb3d8bf3ff 0
 antissimetrico 5c13e7c1c00d85b1 0
@@ -323,7 +323,7 @@ nove_periodico c18299871152ca54 0
 nucleo_unificado ac7c6cf9a9960bc6 0
 numerica 2d1d6e20b7f87362 0
 observador_torre 3d55320445a27093 0
-octeto 8de6781669ac5834 0
+octeto 3bd3fcf1dea8d4a4 0
 operacao 83b71894068bb608 0
 operador_dual c8fdae8dffa36fd9 0
 orbita_real 76d42a35f89973a2 0
@@ -495,7 +495,7 @@ wasm_sobe 8c931b0862f2fa4c 0
 xx 57e4c99aed9f9967 0
 ym_pnp c9dace961b02d965 0
 zero 625eaa454b88f7d2 0
-zeta 4f2cab66eb1645a4 0
+zeta 3de3444b3ea09053 0
 zeta_global bb4d049db28f27f5 0
 zeta_universal c1995884d7e0d044 0
 zetadin 8e12f30277165969 0
