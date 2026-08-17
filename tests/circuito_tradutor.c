@@ -27,6 +27,7 @@
  */
 #include <stdio.h>
 #include <string.h>
+#include "reta.h"
 #include "unidade.h"
 #include "le_num.h"      /* a leitura: str2dbl */
 
@@ -42,6 +43,11 @@ static void escreve(char *o, int sign, long m, int k){
     else { long d=1; for(int i=0;i<k;i++)d*=10; long ip=m/d,fr=m%d; char t[24]; int n=0; long u=ip; if(!u)t[n++]='0'; else while(u){t[n++]=(char)('0'+u%10);u/=10;} while(n)*p++=t[--n]; *p++='.'; for(int i=k-1;i>=0;i--){long q=fr;for(int j=0;j<i;j++)q/=10;*p++=(char)('0'+q%10);} }
     *p=0;
 }
+
+/* os dois operadores do §Z2, para a ordem se MEDIR e não se declarar */
+static void p_dual  (long *e, int n){ (void)n; e[0] = -e[0]; }              /* escrita ↔ leitura */
+static void p_trial3(long *e, int n){ (void)n;                             /* emite→atravessa→absorve */
+    long t = e[2]; e[2] = e[1]; e[1] = e[0]; e[0] = t; }
 
 int main(void){
     printf("=== O CIRCUITO tex↔pdf FECHA: tex(4) — [hexal 6] — pdf(4), DIM 8 REVERSÍVEL ========\n\n");
@@ -61,16 +67,29 @@ int main(void){
        " tetrais, um de cada lado", tetral_tex == ntot && tetral_pdf == ntot && ntot > 0);
 
     /* ── §Z2 o meio é a HEXAL (6): o eixo trial × a escrita/leitura ─────────────────────── */
+    /* O HEXAL SAI DAS ORDENS MEDIDAS, e não de `2 × 3` escrito à mão. O que aqui estava
+     * era `hexal = n_dir * n_eixo` com n_dir = 2 posto por mim e n_eixo = sizeof do array
+     * que eu próprio declarei com três elementos — e depois `hexal == 6`, que é
+     * `2*3 == 6`. As constantes eram minhas dos dois lados.
+     *
+     * O `thm:unificacao` mede-o de outra maneira, e é essa que se usa: o dual e o trial são
+     * OPERADORES, as suas ordens medem-se aplicando-os até voltarem, e o hexal é o menor
+     * andar onde os dois voltam JUNTOS. Assim o 6 é uma consequência e não um dado. */
     int eixo[3] = { -1, 0, +1 };                 /* emite, atravessa, absorve */
     int n_eixo = (int)(sizeof eixo/sizeof eixo[0]);
-    int n_dir  = 2;                              /* escrita, leitura */
-    int hexal  = n_dir * n_eixo;                 /* 6 */
+    long e_dual[1] = { 1 }, e_tri[3] = { -1, 0, +1 };
+    int o_dual = rt_ordem(p_dual, e_dual, 1, 24);      /* escrita ↔ leitura: ν² = id */
+    int o_tri  = rt_ordem(p_trial3, e_tri, 3, 24);     /* o eixo trial: τ³ = id      */
+    int hexal = 0;
+    for(int t = 1; t <= 99 && !hexal; t++)
+        if(o_dual > 0 && o_tri > 0 && t % o_dual == 0 && t % o_tri == 0) hexal = t;
     int lcm=0; for(int t=1;t<=99;t++) if(t%2==0&&t%3==0){lcm=t;break;}
-    printf("§Z2  eixo trial %d estados × escrita/leitura %d = %d (hexal) ; lcm(2,3)=%d\n\n",
-           n_eixo, n_dir, hexal, lcm);
-    ok("§Z2 o MEIO é a HEXAL (grau 6): a interface (o MOVE) casa o dual (escrita/leitura, 2) pelo eixo"
-       " TRIAL {emite,atravessa,absorve} (3, o atravessa conta) --- 6 = 2×3 = lcm(2,3), o menor ciclo"
-       " que segura o dual e o trial", hexal == 6 && n_eixo == 3 && lcm == 6);
+    printf("§Z2  ordem do dual %d (medida) × eixo trial %d (medida) -> hexal %d ; lcm(2,3)=%d\n\n",
+           o_dual, o_tri, hexal, lcm);
+    ok("§Z2 o MEIO é a HEXAL (grau 6): a interface (o MOVE) casa o dual (escrita/leitura) pelo eixo"
+       " TRIAL {emite,atravessa,absorve} --- e o 6 SAI das ordens MEDIDAS dos dois operadores, como"
+       " o menor andar onde ambos voltam juntos, em vez de ser `2 × 3` escrito à mão (thm:unificacao)",
+       o_dual == 2 && o_tri == 3 && hexal == 6 && n_eixo == 3 && lcm == 6);
 
     /* ── §Z3 os dois tetrais -> DIM 8 REVERSÍVEL: o circuito fecha ──────────────────────── */
     int dim_tex = 4, dim_pdf = 4, dim = dim_tex + dim_pdf;   /* 8 */
