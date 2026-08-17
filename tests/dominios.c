@@ -346,9 +346,17 @@ int main(void){
         long sg_orig = disc_orig > 0 ? 1 : (disc_orig < 0 ? -1 : 0);
         double disc_norm = B*B - 4*C;
         long sg_norm = disc_norm > 0 ? 1 : (disc_norm < 0 ? -1 : 0);
-        /* e a escala é exactamente m²: disc_orig = disc_norm · m², por produto cruzado */
-        int escala_m2 = (fabs(disc_norm*(double)d->m*(double)d->m - (double)disc_orig)
-                         < 1e-6*fabs((double)disc_orig));
+        /* E A ESCALA m² É UMA DEDUÇÃO, NÃO UMA MEDIDA. disc_norm foi DEFINIDO como B²−4C
+         * com B = c/m e C = k/m, logo disc_norm·m² = c²−4mk é a mesma expressão dos dois
+         * lados — e o `fabs(...) < 1e-6·|disc_orig|` que aqui estava media o arredondamento
+         * dessa reescrita, não a tese. É o mesmo defeito que o comentário abaixo denuncia,
+         * uma linha mais à frente.
+         *
+         * O que TEM conteúdo é o SINAL, e ele já está medido por DUAS ROTAS que não
+         * partilham código: sg_orig sai de c²−4mk em `long`, e sg_norm sai de B²−4C em
+         * vírgula. Se a normalização mudasse a classe, os dois discordavam — e é essa a
+         * afirmação do passo 1. A escala ser m² > 0 é a RAZÃO de eles concordarem, e as
+         * razões demonstram-se; o que se mede é a concordância. */
         ok("passo 1  dividir por m da y'' + By' + Cy = 0 — e o que se mede e' que a equacao"
            " normalizada tem as MESMAS RAIZES que a original, pelo DISCRIMINANTE: o da"
            " original e' c^2 - 4mk (inteiro) e o da normalizada e' esse dividido por m^2,"
@@ -356,7 +364,7 @@ int main(void){
            " com B, e B VEIO de c/m: a mesma expressao dos dois lados, com um 1e-15 a"
            " disfarca-lo — e foi a migracao a inteiros que o descobriu, porque a divisao"
            " passou a ser inteira e a assercao caiu",
-           sg_orig == sg_norm && escala_m2);
+           sg_orig == sg_norm && d->m > 0);
 
         /* passo 2: a característica. σ² + Bσ + C = 0 — o resíduo é substituir a raiz nela */
         /* A CARACTERÍSTICA NÃO PRECISA DA RAIZ. Com σ = −B/2 + i·w:
