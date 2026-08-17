@@ -462,10 +462,10 @@ def main():
         if not do_esp:
             continue
         print(f"\n      ── {esp} ({len(do_esp)}) " + "─"*40)
-        for f, l, t, _ in do_esp[:22]:
+        for f, l, t, _ in do_esp[:60]:
             print(f"      {f}:{l}   {', '.join(t)}")
-        if len(do_esp) > 22:
-            print(f"      ... e mais {len(do_esp)-22}")
+        if len(do_esp) > 60:
+            print(f"      ... e mais {len(do_esp)-60}")
     print("\n  CONTAGEM é o total da varredura e é legítimo — diz quantos casos entraram, e"
           "\n  sem ele a asserção passaria por a varredura estar vazia. Mas devia ser uma"
           "\n  EXPRESSÃO e não o produto já feito: 15⁴ e não 50625, porque a conta que não"

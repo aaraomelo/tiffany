@@ -128,6 +128,23 @@ static const short W_NEG[95] = {
  * ───────────────────────────────────────────── */
 
 /* a energia do espaçamento nos modos k>0. Uniforme -> 0. */
+/* A ENERGIA FORA DO MODO ZERO, POR PARSEVAL — e é a rota que não soma modo nenhum.
+ *
+ * Parseval diz que a energia total é a soma dos módulos ao quadrado dos coeficientes, e o
+ * modo zero leva N·m0². Logo o que fica fora dele é
+ *
+ *      Σ d_j²/N  −  m0²        com m0 = (Σ d_j)/N
+ *
+ * — a VARIÂNCIA, e ela não precisa de um único cosseno. Com os dados INTEIROS a conta faz-se
+ * em ℤ: N·Σd² − (Σd)² é um inteiro, e vale ZERO exactamente quando todos os d são iguais.
+ * É a segunda rota da `fourier_fora_do_zero`, e é ela que dispensa o limiar de 1e-18. */
+static long parseval_fora_z(const long *d, int n, long *soma){
+    long s = 0, s2 = 0;
+    for(int i = 0; i < n; i++){ s += d[i]; s2 += d[i]*d[i]; }
+    if(soma) *soma = s;
+    return (long)n*s2 - s*s;              /* = N²·(energia fora), inteiro */
+}
+
 static double fourier_fora_do_zero(const double *d, int n, double *modo0){
     double m0 = 0;
     for(int i = 0; i < n; i++) m0 += d[i];
@@ -299,8 +316,24 @@ int main(void){
         /* e agora o mesmo com larguras TODAS IGUAIS: a energia fora do zero tem de ser 0 */
         double u[128]; for(int i = 0; i < m; i++) u[i] = 500;
         double m0u, eu = fourier_fora_do_zero(u, m, &m0u);
-        ok("um espacamento UNIFORME poe toda a energia no modo zero — fora dele, exatamente 0",
-           eu < 1e-18 && fabs(m0u - 500) < 1e-9);
+        /* e a MESMA quantidade por PARSEVAL, em inteiros e sem um cosseno: N·Σd² − (Σd)²,
+         * que é ZERO exactamente quando todos os d são iguais. O «< 1e-18» dava folga a um
+         * zero que não tem folga — e o gume está do outro lado: com um só valor diferente,
+         * a conta inteira já não dá zero. */
+        long uz[128]; for(int i = 0; i < m; i++) uz[i] = 500;
+        long su; long fora_z = parseval_fora_z(uz, m, &su);
+        long uz2[128]; for(int i = 0; i < m; i++) uz2[i] = (i == 3) ? 501 : 500;
+        long fora_z2 = parseval_fora_z(uz2, m, NULL);
+        printf("     -> e por PARSEVAL, em inteiros: N.Sd² − (Sd)² = %ld (zero EXACTO), e com\n"
+               "        uma so' largura diferente da' %ld — o zero tem onde deixar de o ser\n",
+               fora_z, fora_z2);
+        ok("um espacamento UNIFORME poe toda a energia no modo zero — fora dele, exatamente 0."
+           " E «exatamente» quer dizer isso: por PARSEVAL a energia fora do zero e' a"
+           " VARIANCIA, N.Sd² − (Sd)², um INTEIRO que vale ZERO quando todos os d sao"
+           " iguais — sem um cosseno e sem o 1e-18, que dava folga a um zero que nao tem"
+           " folga. E o gume: com uma so' largura diferente a conta ja' nao da' zero",
+           eu < 1e-18 && fabs(m0u - 500) < 1e-9
+           && fora_z == 0 && fora_z2 != 0 && su == 500L*m);
         ok("e o texto REAL nao e uniforme: ha energia fora do modo zero, e ela e mensuravel",
            e > 1.0);
         /* a lei: dobrar o corpo dobra o modo zero e QUADRUPLICA a energia (que e quadratica) */
