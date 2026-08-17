@@ -99,7 +99,7 @@ corpo_do_numero 235bf71b3ace5cac 0
 corpo_dual 829b5470e1022d51 0
 corpo_fisico b85f259118ecd507 0
 corpo_front 6d9be918caa521db 0
-corpo_peano 3c134a3db72ab710 0
+corpo_peano 2647e48bcb360032 0
 corpo_unico d21a078aa8bd7aa5 0
 corpo_viveiro 35c96afeadd012b8 0
 corpodecorpos 8d2cbc90ae332e67 0

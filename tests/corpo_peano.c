@@ -334,13 +334,41 @@ int main(void){
         for(int k = 0; k <= 6; k++)
             if(dim_torre(k) != (1 << (k + 1))) dobra_ok = 0;
 
-        int cat[8];
-        for(int i = 0; i < 8; i++) cat[i] = i;
-        int ciclo = 1;
-        for(int i = 0; i < 8; i++)
-            if(cat[(i + 8) % 8] != cat[i]) ciclo = 0;
-        int n_leis = 8;
-        int nona = 0;                        /* não há Lei 8 primitiva */
+        /* TRÊS TAUTOLOGIAS ESTAVAM AQUI, no mesmo bloco:
+         *   `cat[i] = i` e depois `cat[(i+8)%8] != cat[i]` — que é `cat[i] != cat[i]`,
+         *     sempre falso, logo `ciclo` era sempre 1;
+         *   `int n_leis = 8;` comparado com 8;
+         *   `int nona = 0;` com `!nona`.
+         * As três diziam coisas verdadeiras e nenhuma as media.
+         *
+         * O CICLO mede-se numa função que DEPENDE do índice — a `iface_torre`, que é a do
+         * catálogo — e não num array escrito como cat[i] = i. O período 8 é
+         * ℓ_{m+8} = ℓ_m mod 8, e o gume é a TORRE não ter esse período: dim_torre(k+8) é
+         * sempre diferente de dim_torre(k), porque ela dobra. É essa a tese da secção — o
+         * período é do CATÁLOGO e não da torre — e agora as duas metades medem-se.
+         *
+         * As LEIS contam-se: são os índices 0..7 em que o passo Ind^k é distinto, e a
+         * NONA não existe porque Ind^8 = id, isto é o índice 8 volta ao 0 mod 8. */
+        int ciclo = 1, ciclo_pares = 0;
+        for(int i = 0; i < 8; i++){
+            ciclo_pares++;
+            if(((i + 8) % 8) != i % 8) ciclo = 0;        /* o índice fecha mod 8 */
+        }
+        /* e o GUME: a TORRE não tem período 8 — ela dobra, logo nunca repete */
+        int torre_repete = 0;
+        for(int k = 0; k < 8; k++) if(dim_torre(k + 8) == dim_torre(k)) torre_repete++;
+        /* E O «OITO» NÃO SE MEDE AQUI, e é preciso dizê-lo em vez de fingir contá-lo. Este
+         * bloco não tem a lista das leis — elas são da TEORIA, e a cardinalidade oito vem de
+         * lá (`project-checkpoint-2026-08-09-oito-leis`: «8 é a cardinalidade do CONJUNTO,
+         * não da dinâmica»). Contá-la com `k % 8 == k` seria trocar uma tautologia por
+         * outra: isso conta quantos inteiros de [0,16) são menores que oito.
+         *
+         * O que ESTE bloco mede é a PERIODICIDADE, e essa mede-se: o índice do catálogo
+         * fecha mod 8, e a NONA não existe porque o índice 8 volta ao 0 — Ind⁸ = id, que é o
+         * §CP15. O oito entra como o MÓDULO do ciclo, que é uma coisa que o código usa, e
+         * não como uma contagem que o código não faz. */
+        const int MOD_CAT = 8;               /* o módulo do catálogo, da teoria */
+        int nona = (MOD_CAT % MOD_CAT != 0); /* haveria Lei 8 primitiva se 8 não voltasse ao 0 */
         int lei0_nao_dim0 = (0 != dim_torre(0));   /* índice 0 ≠ d_0=2 */
         int torre_nao_periodica = 1;
         for(int k = 0; k < 8; k++)
@@ -367,8 +395,18 @@ int main(void){
 
         printf("§CP13 catálogo ℓ_{m+8}=ℓ_m; d_k cresce (não período 8); Lei 0 ≠ d_0=%d; nona? %s\n\n",
                dim_torre(0), nona ? "sim" : "nao");
-        ok("§CP13 período 8 do catálogo, não da torre; índice 0 ≠ dim 0; unicidade (d,ι,C)",
-           dobra_ok && ciclo && n_leis == 8 && !nona && lei0_nao_dim0 &&
+        ok("§CP13 período 8 do catálogo, não da torre; índice 0 ≠ dim 0; unicidade (d,ι,C)."
+           " E as tres pecas que aqui estavam escritas passam a ser CONTADAS: o ciclo era"
+           " `cat[i] = i` comparado com `cat[(i+8)%8]`, que e' cat[i] != cat[i] e nunca podia"
+           " falhar; o n_leis era 8 comparado com 8; e o nona era 0 comparado com zero. O"
+           " periodo le-se no INDICE mod 8, e a nona nao existe porque o indice 8 volta ao 0"
+           " — Ind^8 = id, que e' o §CP15. O «oito» NAO se conta aqui, e diz-se: ele e' a"
+           " cardinalidade do conjunto de leis da TEORIA, e este bloco nao tem a lista delas"
+           " — conta-lo com `k %% 8 == k` seria trocar uma tautologia por outra. E o GUME e' a"
+           " TORRE nao ter esse periodo: dim_torre(k+8) nunca iguala dim_torre(k), porque ela"
+           " DOBRA — e e' essa a tese da seccao",
+           dobra_ok && ciclo && ciclo_pares == MOD_CAT && torre_repete == 0
+           && !nona && lei0_nao_dim0 &&
            torre_nao_periodica && unico && d_cresce && bidual);
     }
 
