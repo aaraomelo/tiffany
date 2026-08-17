@@ -98,7 +98,7 @@ corpo_autossimilar cfed1db62ac9d8ef 0
 corpo_disco d558d055b5ff6e4e 0
 corpo_do_numero 80ed8329ab5a0153 0
 corpo_dual 829b5470e1022d51 0
-corpo_fisico 8432a8bc975d2d08 0
+corpo_fisico a3ba07b197a8d703 0
 corpo_front 6d9be918caa521db 0
 corpo_peano b95c783e2f4f08ee 0
 corpo_unico 492f2b999ad97a0a 0

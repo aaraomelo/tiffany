@@ -352,7 +352,9 @@ printf("\n§H5  O IMPULSO é Δp, e o momento CONSERVA-SE quando a força se anu
            " passa por aritmetica trivial; o que lhe da' conteudo e' o outro lado, com"
            " s = 0,5, onde o momento MEXE. Sem ele, o integrador podia estar parado por"
            " defeito e a assercao passava na mesma",
-           fabs(p21-p20) < 1e-9 && fabs(p31-p30) > 1e-3);
+           /* e o lado que nao mexe e' ZERO EXACTO, nao «menor que 1e-9»: dVds(0) = 0 da
+            * forca zero, e somar zero cem mil vezes deixa o zero onde estava, bit a bit. */
+           p21 == p20 && fabs(p31-p30) > 1e-3);
         printf("      (controlo positivo, e agora com as duas metades: sem a segunda, a\n");
         printf("       primeira passaria por o integrador não mexer em nada.)\n");
     }
@@ -456,8 +458,13 @@ printf("\n§H7  O SINAL DA INVOLUÇÃO: sem ele não gira — e é Lenz, é aç�
         }
         printf("      NEWTON     com F₁₂ = −F₂₁:  deriva do momento total = %.2e\n", pior);
         printf("                 SEM o sinal:      deriva do momento total = %.2e\n\n", piorMau);
-        ok("a 3ª lei conserva o momento total, e sem o sinal ele DERIVA — o controlo",
-           pior < 1e-9 && piorMau > 1e-3);
+        /* e a conservacao e' EXACTA, nao aproximada: com F12 = -F21 os dois incrementos
+         * de velocidade sao simetricos — v3 += -F/m*h e v4 += +F/m*h — logo a soma v3+v4
+         * recebe x e -x no mesmo passo e CANCELA bit a bit. Nao ha' deriva a tolerar; o
+         * 1e-9 dava folga a uma conta que nao a usa. E o controlo sem o sinal deriva. */
+        ok("a 3ª lei conserva o momento total EXACTAMENTE — os dois incrementos sao"
+           " simetricos e cancelam bit a bit —, e sem o sinal ele DERIVA: o controlo",
+           pior == 0.0 && piorMau > 1e-3);
     }
     {
         /* LENZ: a reacao opoe-se a VARIACAO. Modela-se com uma corrente induzida i que
