@@ -1255,8 +1255,17 @@ int main(void){
         for(int i = 0; i < 5; i++){
             pol++;
             if(PV[i] - PA[i] + PF[i] == 2) chi2++;
-            if(PF[i] - PA[i] + PV[i] == 2) dual_ok++;     /* o dual: troca V e F */
-            if(PA[i] == PA[i]) guarda_A++;                 /* e guarda A */
+            /* O DUAL MEDIA-SE A SI PRÓPRIO. `PF-PA+PV` é a MESMA SOMA que `PV-PA+PF` — a
+             * adição é comutativa —, e `PA[i] == PA[i]` é x == x. Os dois termos não
+             * podiam falhar, e a frase que eles suportam diz algo verificável: que o dual
+             * de cada platónico ESTÁ NA LISTA, com V e F trocados e A igual. É isso que se
+             * procura agora, e é uma afirmação sobre os DADOS: o tetraedro é autodual, o
+             * cubo casa com o octaedro e o dodecaedro com o icosaedro. */
+            int achou = 0;
+            for(int j = 0; j < 5; j++)
+                if(PV[j] == PF[i] && PF[j] == PV[i] && PA[j] == PA[i]){ achou = 1; break; }
+            if(achou) dual_ok++;
+            if(achou && PA[i] > 0) guarda_A++;             /* e o dual guarda A */
             /* O CONE PELO CENTRO, e a operação diz-se célula a célula: acrescenta-se
              * o ápice c e liga-se a tudo —
              *      V → V+1,  A → A+V,  F → F+A,  e F células novas (as pirâmides)
@@ -1265,14 +1274,47 @@ int main(void){
             long V2 = PV[i]+1, A2 = PA[i]+PV[i], F2 = PF[i]+PA[i], C2 = PF[i];
             if(V2 - A2 + F2 - C2 == 1) piram++;
         }
+        /* E ESTAS TRÊS ERAM AS PIORES. `n - n + 1 == 1` é 1 == 1 para todo n; `n - n + 0
+         * == 0` idem; e `(n+1) - (n+n) + n` expande para 1, sempre. As três contavam o
+         * laço, e a asserção que elas sustentam afirma que «χ não depende de n» — que é
+         * precisamente o que uma expressão constante NÃO pode mostrar.
+         *
+         * O que a mostra é CONSTRUIR o complexo e CONTAR as células. As arestas do n-gono
+         * geram-se uma a uma (i → i+1 mod n), os vértices marcam-se num crivo, e V e A saem
+         * da contagem — não de um n escrito. Aí V − A + F é uma conta sobre números
+         * medidos, e se a construção estivesse errada o χ mudava. */
         long ngonos = 0, disco1 = 0, borda0 = 0, cone1 = 0;
         for(long n = 3; n <= 60; n++){
             ngonos++;
-            if(n - n + 1 == 1) disco1++;                   /* χ do preenchido */
-            if(n - n + 0 == 0) borda0++;                   /* χ da borda      */
-            /* e o CONE um andar abaixo: da borda (χ=0) ao disco (χ=1), pela MESMA
-             * operação — ápice no centro, V→V+1, A→A+n, e n triângulos novos */
-            if((n+1) - (n+n) + n == 1) cone1++;
+            /* e as ARESTAS contam-se DISTINTAS e sem laços — o `A++` incondicional da
+             * primeira versão não mordia: trocar (i+1)%n por i fazia cada aresta ligar um
+             * vértice a si próprio e o χ não mudava, porque o contador subia na mesma.
+             * Apanhado por apontar o gume a ESTA lei em vez de ao bloco. */
+            char visto[64] = {0}, arestas[64][64] = {{0}};
+            long V = 0, A = 0, grau[64] = {0}, ciclo = 1;
+            for(long i = 0; i < n; i++){                   /* a aresta i → (i+1) mod n */
+                long u = i, v = (i+1) % n;
+                if(u == v) continue;                       /* um laço não é aresta */
+                if(!visto[u]){ visto[u] = 1; V++; }
+                if(!visto[v]){ visto[v] = 1; V++; }
+                long a1 = u < v ? u : v, a2 = u < v ? v : u;
+                if(!arestas[a1][a2]){ arestas[a1][a2] = 1; A++; grau[u]++; grau[v]++; }
+            }
+            /* e A CONSTRUÇÃO VERIFICA-SE: um n-gono é um CICLO, logo todo vértice tem grau
+             * DOIS e há n deles. Sem isto o χ não morde — foram precisas TRÊS tentativas
+             * para o ver: com as arestas a ligar cada vértice a si próprio o complexo fica
+             * VAZIO, e o χ do vazio com uma face também é 0 − 0 + 1 = 1. A coincidência
+             * numérica passava por medida. É a estrutura que distingue, não o total. */
+            for(long i = 0; i < n; i++) if(grau[i] != 2) ciclo = 0;
+            if(V != n || A != n) ciclo = 0;
+            if(ciclo && V - A + 1 == 1) disco1++;          /* χ do preenchido: 1 face  */
+            if(ciclo && V - A + 0 == 0) borda0++;          /* χ da borda: sem face     */
+            /* e o CONE um andar abaixo: ápice no centro, ligado a TODOS os vértices, e
+             * um triângulo por aresta da borda. As três contagens saem da operação. */
+            long Vc = V + 1, Ac = A, Fc = 0;
+            for(long i = 0; i < V; i++) Ac++;              /* o ápice liga a cada vértice */
+            for(long i = 0; i < A; i++) Fc++;              /* um triângulo por aresta     */
+            if(ciclo && Vc - Ac + Fc == 1) cone1++;
         }
         printf("      os cinco platónicos: χ = 2 em %ld, e o dual (F,A,V) dá o MESMO em"
                " %ld, guardando A em %ld · a pirâmide leva χ de 2 a 1 em %ld\n",

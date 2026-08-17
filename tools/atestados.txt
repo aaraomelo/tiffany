@@ -215,7 +215,7 @@ fusao f838ce19274e2bee 0
 fusao_conceitos 3c406248b1261cc4 0
 gauss fc9f8634269216bc 0
 geometria_corpo 99c0472d0316ad9f 0
-geometria_real 9d5758ee4af1ae71 0
+geometria_real 23ceff0113ef0190 0
 geometrico e4a6fce5bd91e395 0
 gerador 749f14e467de00f5 0
 gerador_analog 676348b363f37ace 0
