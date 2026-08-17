@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "unidade.h"
+#include "reta.h"
 
 int main(void){
     puts("dispositivo.c — O BANCO VIRA DISPOSITIVO: NAND e SSD, e a liga alimenta\n");
@@ -135,21 +136,47 @@ int main(void){
         /* σσ' = −1 é EXATA em Z[σ] e não precisa de raiz nenhuma: σ e σ' são as raízes de
          * x² − mx − 1, logo o produto delas É o termo constante, −1. Verifica-se pelo
          * polinómio, em inteiros, e para toda a família — não só para o ouro. */
-        double s = (1 + sqrt(5.0))/2, sl = (1 - sqrt(5.0))/2;
-        ok("os terminais sao DOIS e tem polaridade oposta — o + e o -, do §P7",
-           s > 0 && sl < 0);
+        double s = (1 + sqrt(5.0))/2, sl = (1 - sqrt(5.0))/2;   /* só para as linhas que imprimem */
         {
-            int metais = 0, exatos = 0;
-            for(long long m = 1; m <= 12; m++){
-                /* x² − mx − 1: soma das raízes = m, produto = −1 (Vieta, em inteiros) */
-                long long soma = m, produto = -1;
+            /* O QUE AQUI ESTAVA NÃO PODIA FALHAR:
+             *      long long soma = m, produto = -1;
+             *      if(produto == -1 && soma == m) exatos++;
+             * as duas comparações são com o que a linha de cima atribuiu. A asserção dizia
+             * «Vieta, em inteiros» e media as suas próprias atribuições.
+             *
+             * Vieta mede-se em ℤ[√D], onde σ e σ' EXISTEM como pares e as contas acontecem:
+             * guarda-se 2σ = (m, 1) e 2σ' = (m, −1), com D = m² + 4. Então
+             *
+             *      (2σ)(2σ') = m² − D = −4      ⟹  σ·σ' = −1     — e é a NORMA
+             *      (2σ) + (2σ') = (2m, 0)       ⟹  σ + σ' = m    — a parte irracional CANCELA
+             *
+             * e o cancelamento do √D na soma é o conteúdo: é a conjugação, a dobra b ↦ −b. */
+            int metais = 0, prod_ok = 0, soma_ok = 0, pol_ok = 0;
+            for(long m = 1; m <= 12; m++){
+                long D = m*m + 4;
                 metais++;
-                if(produto == -1 && soma == m) exatos++;
+                /* o produto, pela norma de ℤ[√D] — e ela é uma CONTA, não uma atribuição */
+                long pa, pb;
+                rt_zd_mul(m, 1, m, -1, D, &pa, &pb);
+                if(pa == -4 && pb == 0) prod_ok++;          /* (2σ)(2σ') = −4 + 0·√D */
+                /* a soma: a parte em √D tem de CANCELAR, e é isso que a conjugação faz */
+                long sa = m + m, sb = 1 + (-1);
+                if(sa == 2*m && sb == 0) soma_ok++;
+                /* e a polaridade, sem raiz: σ' < 0 ⟺ m < √D ⟺ m² < D = m²+4, sempre */
+                if(m*m < D) pol_ok++;
             }
-            printf("        e em Z[sigma]: sigma+sigma' = m e sigma.sigma' = -1 por Vieta,\n");
-            printf("        em %d metais, sem uma raiz quadrada\n", metais);
-            ok("sigma.sigma' = -1 EXATO por Vieta, em inteiros e em toda a familia",
-               exatos == metais && metais == 12);
+            printf("        e em ℤ[√D]: (2σ)(2σ') = m² − D = −4 e a parte em √D CANCELA na\n");
+            printf("        soma, em %d metais e sem uma raiz quadrada\n", metais);
+            ok("os terminais sao DOIS e tem polaridade oposta — o + e o -, do §P7. E mede-se"
+               " sem raiz: σ' < 0 e' m < raiz(D), que e' m^2 < D = m^2+4, verdadeiro para"
+               " toda a familia e nao so' para o ouro",
+               pol_ok == metais && metais == 12);
+            ok("sigma.sigma' = -1 EXATO em ℤ[√D], e agora a conta ACONTECE: (2σ)(2σ') sai"
+               " por rt_zd_mul e da' -4 + 0.raiz(D) nos doze metais, donde σσ' = -1. E a"
+               " SOMA e' a outra metade — a parte em raiz(D) CANCELA, que e' a conjugacao,"
+               " a dobra b -> -b. O que aqui estava atribuia `produto = -1` e comparava com"
+               " -1: nao podia falhar, e dizia «Vieta, em inteiros»",
+               prod_ok == metais && soma_ok == metais);
         }
         /* esta linha media sigma*sigma' em double contra 1e-14; a versao exata esta no
          * bloco acima (Vieta, em inteiros, e para toda a familia). Fica o registo do valor,

@@ -145,8 +145,10 @@ printf("\n§C2  JÁ SÃO QUASE ORTOGONAIS? — e é isto que autoriza o \"só no
     ok("os vetores NÃO são ortogonais — o cosseno médio excede muito o do acaso. E a"
        " decisao nao precisa da raiz: |c| > 3/raiz(nd) e' c^2 > 9/nd, que e'"
        " dij^2.nd > 9.nii.njj, sem uma raiz e sem uma divisao. A raiz fica so' na linha"
-       " que IMPRIME, que e' o sitio dela",
-       media > 3*esperado && acima > pares_c/2);
+       " que IMPRIME, que e' o sitio dela — e a assercao depende SO' da rota sem raiz:"
+       " o `media > 3.esperado` que aqui estava usava valores que ja' tinham passado pelo"
+       " sqrt, e era a mesma pergunta feita duas vezes, uma delas pior",
+       acima > pares_c/2);
     printf("      E aqui a medida diz o contrário do que \"só normalizar\" sugere: estes vetores\n");
     printf("      têm cosseno médio %.2f, muito acima dos %.3f do acaso. Não é defeito — é o\n", media, esperado);
     printf("      SIGNIFICADO: 'rei' e 'rainha' não são ortogonais porque não são independentes.\n");

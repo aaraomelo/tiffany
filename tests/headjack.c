@@ -197,12 +197,16 @@ int main(void){
         double Br[3], Bt[3];
         b_dipolo(Q_rad, rhat, Br);
         b_dipolo(Q_tan, rhat, Bt);
-        double nr = sqrt(Br[0]*Br[0]+Br[1]*Br[1]+Br[2]*Br[2]);
-        double nt = sqrt(Bt[0]*Bt[0]+Bt[1]*Bt[1]+Bt[2]*Bt[2]);
-        ok("o dipolo RADIAL da campo zero face ao tangencial — nao pequeno: nulo, por simetria",
-           nr < nt * 1e-12);
+        /* as duas normas comparam-se uma com a outra, e isso vive nos QUADRADOS:
+         *      nr < nt·1e-12   ⟺   nr² < nt²·1e-24 */
+        double nr2 = Br[0]*Br[0]+Br[1]*Br[1]+Br[2]*Br[2];
+        double nt2 = Bt[0]*Bt[0]+Bt[1]*Bt[1]+Bt[2]*Bt[2];
+        double nr = sqrt(nr2), nt = sqrt(nt2);       /* só para a linha que imprime */
+        ok("o dipolo RADIAL da campo zero face ao tangencial — nao pequeno: nulo, por simetria."
+           " E a comparacao e' dos quadrados: nr^2 < nt^2.1e-24, sem uma raiz de cada lado",
+           nr2 < nt2 * 1e-24);
         ok("e o TANGENCIAL da campo — logo o zero acima nao e um artefacto do calculo",
-           nt > 1e-9);
+           nt2 > 1e-18);
         printf("     -> |B| do radial: %.1e T. Do tangencial: %.1e T.\n", nr, nt);
         /* e mede-se em muitas direcoes, nao numa: TODA componente paralela a r̂ e invisivel */
         int invisiveis = 0, testados = 0;

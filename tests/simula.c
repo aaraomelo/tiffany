@@ -154,9 +154,13 @@ int main(void){
         }
         double err = 0, esc = 0;
         for(int i = 0; i < 3; i++){ err += (Brec[i]-B[i])*(Brec[i]-B[i]); esc += B[i]*B[i]; }
-        double rel = sqrt(err/esc);
-        ok("A INVERSAO FECHA: as quatro projecoes devolvem o vetor exato, residuo na casa do zero",
-           rel < 1e-12);
+        /* «o resíduo relativo é menor que 1e-12» é err/esc < 1e-24, e isso é
+         * err < 1e-24·esc — sem a raiz e sem a divisão. */
+        double rel = sqrt(err/esc);                 /* só para a linha que imprime */
+        ok("A INVERSAO FECHA: as quatro projecoes devolvem o vetor exato, residuo na casa do"
+           " zero. E a comparacao e' err < 1e-24.esc, sem raiz e sem dividir — o quadrado do"
+           " limiar, que e' onde a pergunta sempre viveu",
+           err < 1e-24 * esc);
         printf("     -> B = (%.3e, %.3e, %.3e); recuperado com residuo relativo %.1e.\n",
                B[0], B[1], B[2], rel);
         /* e a SOBRA: 4 medidas para 3 incógnitas — a quarta é redundante e VERIFICA */

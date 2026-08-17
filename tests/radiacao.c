@@ -175,12 +175,14 @@ int main(void){
         double Br[3], Bt[3];
         b_dipolo(Q_rad, rhat, Br);
         b_dipolo(Q_tan, rhat, Bt);
-        double nBr = sqrt(Br[0]*Br[0]+Br[1]*Br[1]+Br[2]*Br[2]);
-        double nBt = sqrt(Bt[0]*Bt[0]+Bt[1]*Bt[1]+Bt[2]*Bt[2]);
+        /* os quadrados, que é onde a comparação entre as duas normas vive */
+        double nBr2 = Br[0]*Br[0]+Br[1]*Br[1]+Br[2]*Br[2];
+        double nBt2 = Bt[0]*Bt[0]+Bt[1]*Bt[1]+Bt[2]*Bt[2];
+        double nBr = sqrt(nBr2), nBt = sqrt(nBt2);   /* só para as linhas que imprimem */
         double Pr = p_joule(Q_rad, vol, comp), Pt = p_joule(Q_tan, vol, comp);
 
         ok("o radial da campo NULO e o tangencial nao — e o que o headjack.c ja media",
-           nBr < nBt*1e-12 && nBt > 0);
+           nBr2 < nBt2*1e-24 && nBt2 > 0);
         ok("MAS OS DOIS DISSIPAM IGUAL: a potencia nao ve a direcao, porque e ESCALAR",
            fabs(Pr - Pt)/Pt < 1e-12);
         printf("     -> |B| radial %.1e / tangencial %.1e   (razao zero)\n", nBr, nBt);

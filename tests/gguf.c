@@ -347,7 +347,11 @@ printf("\n§G5  DEQUANTIZAR Q4_K: e o bloco desempacotado tem de ser são.\n\n")
                 }
             }
             long n = (long)n_blocos * QK_K;
-            double media = soma/n, dp = sqrt(soma2/n - media*media);
+            /* a VARIÂNCIA é o que se mede; o desvio padrão é a leitura dela. A janela
+              * «1e-4 a 1» no desvio é «1e-8 a 1» na variância, e a raiz fica só na linha
+              * que imprime — que é onde ela pertence. */
+            double media = soma/n, var = soma2/n - media*media;
+            double dp = sqrt(var > 0 ? var : 0);
             printf("      %ld pesos desempacotados de %d blocos:\n\n", n, n_blocos);
             printf("        média            %+.6f\n", media);
             printf("        desvio padrão     %.6f\n", dp);
@@ -360,7 +364,9 @@ printf("\n§G5  DEQUANTIZAR Q4_K: e o bloco desempacotado tem de ser são.\n\n")
              * errado nao erra por pouco — devolve lixo com desvio de ordens de grandeza a
              * mais, ou colapsa tudo a zero. E' isso que esta janela larga apanha. */
             ok("os pesos estão centrados perto de zero", fabs(media) < 0.05);
-            ok("e o desvio padrão é de escala plausível (1e-4 a 1)", dp > 1e-4 && dp < 1.0);
+            ok("e o desvio padrão é de escala plausível (1e-4 a 1) — e a comparacao e' na"
+               " VARIANCIA, 1e-8 a 1, sem se formar a raiz para decidir",
+               var > 1e-8 && var < 1.0);
             printf("      Isto não prova que a dequantização está certa — prova que não está\n");
             printf("      grosseiramente errada. A prova a sério é o §G6 do llm.c, quando a\n");
             printf("      saída da rede for comparada com a do ollama para o mesmo prompt.\n");
