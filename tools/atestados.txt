@@ -144,7 +144,7 @@ dois_streams 624d9e1997aa4657 0
 dominios ad07694e3a1a261e 0
 dourada 0d4544be18ec836a 0
 dourada_banco da40aa247da4be4c 0
-dourada_bidual fc22b9caa636e799 0
+dourada_bidual 31e05ee9df292475 0
 dourada_escala 690b7dc3b9608a7a 0
 dourada_lei2 f46d69dbe7d4e582 0
 dtc_viveiro ccbe31142837ba46 0
@@ -252,7 +252,7 @@ isserlis 43de4dbc517f15d3 0
 kernelb f0c87f33a589ee14 0
 koch 67daea17e89aeefe 0
 lahire_universal 843cfa03c5e214ba 0
-lambert b28d54a12c7096c5 0
+lambert 6b2524b2128063b2 0
 latex_corpo dc511e8c18bbea1d 0
 lean_controlo aaf49206e4a67e72 0
 lean_convencao c6f7c086994efcfc 0
@@ -358,7 +358,7 @@ pinos ee11b099ae858c6e 0
 pisotbase 5dae6293f2753416 0
 plugs 64290a2cde425eba 0
 po_corpo bd31fce254616bbc 0
-polar 26b7d896d0e8809e 0
+polar e11cecf9bafea897 0
 poligonos 4a132f94a847e701 0
 ponte_universal_metalica 6bdedb0d4a48d0b8 0
 pontofixo 0f106b073e9273c8 0

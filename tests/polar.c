@@ -195,7 +195,12 @@ static void secao_Y2(void){
     ok("a lei vale nos três regimes, sem caso especial — é ∏ = exp∘Σ∘log", falhou == 0);
 
     /* e tem de saber falhar: com o |τ| ERRADO (sem a escala √|Δ|/2) o ângulo torce e a lei cai */
-    double B = 1, C = -1, pior = 0;
+    /* B e C são os coeficientes de x² = Bx + C, e prod/para_polar/para_alg recebem-nos
+     * como `long` (linhas 67, 76, 102). Declará-los `double` fazia o compilador
+     * convertê-los de volta na chamada — uma ida e volta que nunca carregou vírgula
+     * nenhuma. E o §Y3 deste mesmo ficheiro já os escreve `long` na linha 230: era o
+     * mesmo objecto com duas réguas, no mesmo ficheiro. */
+    long B = 1, C = -1; double pior = 0;
     for(long a = 1; a <= 3; a++) for(long b = 1; b <= 2; b++){
         Alg x = { a, b }, y = { b, a };
         double u1 = x.a + 0.5*B*x.b, v1 = x.b, u2 = y.a + 0.5*B*y.b, v2 = y.b;
@@ -297,7 +302,7 @@ static void secao_Y5(void){
     printf("        POLAR          difícil    1 mult      1 pow       multiplicar, girar, escalar\n\n");
 
     /* e a conta que justifica o painel ter as duas: contar as operações de facto */
-    double B = 1, C = -1;
+    long B = 1, C = -1;              /* long, como em §Y3 e como prod() os recebe */
     Alg x = { 3, 2 }, y = { 5, 1 };
     Alg p_alg = prod(B,C,x,y);
     Pol px = para_polar(B,C,x), py = para_polar(B,C,y);

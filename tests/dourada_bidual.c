@@ -102,7 +102,8 @@ printf("\n§W2  A DILATACAO so' GIRA A FASE: o modulo NAO muda.\n\n");
         double fase_ant = -99;
         printf("      lambda   |lambda^{-i tau}|   arg = -tau ln(lambda)\n");
         for(double lam = 1.2; lam <= 3.0; lam += 0.3){
-            double tau = 2.0;
+            long tau = 2;                            /* é o inteiro 2: a vírgula só entrava
+                                                      * para o compilador a tirar na promoção */
             /* O MÓDULO ESTAVA ESCRITO. `modulo = 1.0` e depois `|modulo − 1| > 1e-15` é a
              * constante comparada consigo própria — o comentário dizia «= 1, exacto» e o
              * código não o calculava. Agora calcula-se: λ^{-iτ} = cos(τ ln λ) − i·sin(τ ln λ),

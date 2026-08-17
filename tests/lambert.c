@@ -185,8 +185,11 @@ int main(void){
         /* medir: a razão C_k/C_{k−1} → 4 = 1/(1/4), e a de Cayley → e = 1/(1/e) */
         double razao_cat = 0, razao_cay = 0;
         {
-            double a=1, b=1;
-            for(L k=1;k<=18;k++){ double prev=b; b = b*2*(2*k-1)/(k+1); if(k==18) razao_cat=b/prev; a=prev; }
+            /* `a` era escrita (`a=prev`) e nunca lida: variável morta. E este bloco é só a
+             * APRESENTAÇÃO da linha do printf — a medição verdadeira está logo abaixo, em
+             * inteiros e com a forma fechada, que é onde ela deve estar. */
+            double b=1;
+            for(L k=1;k<=18;k++){ double prev=b; b = b*2*(2*k-1)/(k+1); if(k==18) razao_cat=b/prev; }
         }
         {
             /* |coef de W| = k^{k−1}/k!, razão → e */
