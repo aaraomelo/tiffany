@@ -209,10 +209,80 @@ def blocos(src):
     return saida
 
 
+# ── P4: A FUNÇÃO E A SUA INVERSA, DENTRO DA MESMA COMPARAÇÃO ─────────────────────────
+#
+# O defeito que 16/08 deu sete vezes, sempre disfarçado por conversões que o tornavam
+# ilegível. Medir f(f⁻¹(x)) = x não mede nada — é a definição do par relida:
+#
+#     octeto.c   |acos(ip/(n0·n1))·180/π − acos(−1/3)·180/π| < 1e-9
+#                e ip/(n0·n1) É −1/3: dois acos e duas conversões a mascarar x = x
+#     octeto.c   |acos(cos(2π/3))·180/π − 120| < 1e-9        acos∘cos
+#     xx.c       log(xc·0,99) + 1 < 0   com xc = 1/e          É log(0,99)
+#     milenio.c  L = log(exp(−λt)), e o passo é constante     log∘exp
+#     koch.c     |log(4^N)/log(3^N) − log4/log3| < 1e-12      os N cancelam
+#     liga.c     |sigma_comp(p_alvo) − alvo|/alvo < 1e-6      p_alvo veio de invertê-la
+#     gerador    |√(L/C) − √((L/2)/(C/2))|                    (L/2)/(C/2) É L/C
+#
+# A regra: quando os DOIS lados de uma comparação passam pela mesma função, ela
+# cancela-se e o que fica é a igualdade de dentro — que costuma ser INTEIRA. Ou se mede
+# essa, ou não se mede nada.
+#
+# O padrão procurado é conservador: os PARES conhecidos (log/exp, acos/cos, asin/sin,
+# atan/tan, sqrt/pow-2) a aparecerem compostos, ou a MESMA função transcendental a
+# aparecer nos dois lados de uma subtracção dentro de um fabs.
+PARES = [('log', 'exp'), ('exp', 'log'), ('acos', 'cos'), ('cos', 'acos'),
+         ('asin', 'sin'), ('sin', 'asin'), ('atan', 'tan'), ('tan', 'atan'),
+         ('log10', 'pow'), ('log2', 'pow')]
+# a composição tem de ser DIRECTA: f(g(x)) e não f(g(x) + h(y)). O parêntesis do g tem
+# de fechar imediatamente o do f — senão `log(exp(a) + exp(b))` entrava, e essa não é
+# uma composição: é um logaritmo de uma soma, e nada se cancela.
+COMPOSTA = [(a, b, re.compile(r'\b' + a + r'\s*\(\s*' + b + r'\s*\(')) for a, b in PARES]
+
+
+def composta_directa(t, m, nome_g):
+    """o parêntesis aberto por g fecha exactamente onde o de f fecha?"""
+    i = m.end() - 1                      # o '(' do g
+    d, j = 0, i
+    while j < len(t):
+        if t[j] == '(':
+            d += 1
+        elif t[j] == ')':
+            d -= 1
+            if d == 0:
+                break
+        j += 1
+    if j >= len(t):
+        return False
+    resto = t[j+1:].lstrip()
+    return resto.startswith(')')          # o do f fecha logo a seguir
+# f(...) − f(...) dentro de um fabs: a mesma função nos dois lados de uma diferença
+MESMA_FN = re.compile(
+    r'fabsl?\s*\(\s*(sqrtf?|logf?|log10|log2|expf?|acos|asin|atan|cosf?|sinf?|tanf?)'
+    r'\s*\([^()]*(?:\([^()]*\)[^()]*)*\)\s*[-+]\s*\1\s*\(')
+
+
+def inversas(bloco):
+    """devolve as ocorrências de f∘f⁻¹ ou f(x) − f(y) dentro de um fabs, no bloco."""
+    achados = []
+    for ln in bloco.split('\n'):
+        t = ln.strip()
+        if not t:
+            continue
+        for fa, fb, rx in COMPOSTA:
+            m = rx.search(t)
+            if m and composta_directa(t, m, fb):
+                achados.append(('composta', fa + '∘' + fb, t[:78]))
+                break
+        m = MESMA_FN.search(t)
+        if m:
+            achados.append(('mesma nos dois lados', m.group(1), t[:78]))
+    return achados
+
+
 def main():
     fich = sorted(glob.glob('tests/*.c') + glob.glob('tests/*.js') +
                   glob.glob('tools/*.c'))
-    p1, p2, p3, vistos = [], [], [], 0
+    p1, p2, p3, p4, vistos = [], [], [], [], 0
     for f in fich:
         try:
             src = open(f, encoding='utf-8').read()
@@ -228,6 +298,8 @@ def main():
             vistos += 1
             for v, w, ln in recíprocas(bl):
                 p3.append((f, codigo[:ini].count('\n') + 1, v, w, ln))
+            for tipo, fn, ln in inversas(bl):
+                p4.append((f, codigo[:ini].count('\n') + 1, tipo, fn, ln))
             for v in VERED.finditer(bl):
                 txt = texto_do_veredicto(bl, v.start())
                 # só a CONDIÇÃO: o que vem depois da última string do veredicto
@@ -263,6 +335,18 @@ def main():
     print("\n  Em cada um: o segundo objecto foi CONSTRUÍDO por um caminho que não passa"
           "\n  pelo primeiro, ou foi escrito a partir dele? Se foi escrito, a asserção mede"
           "\n  aritmética e a tese fica por medir.")
+    fich_p4 = len({f for f, *_ in p4})
+    print(f"\n  P4 — a função e a sua INVERSA na mesma comparação: {len(p4)}"
+          f" em {fich_p4} ficheiros")
+    for f, l, tipo, fn, ln in p4[:40]:
+        print(f"      {f}:{l}   [{tipo}] {fn}   →   {ln}")
+    if len(p4) > 40:
+        print(f"      ... e mais {len(p4)-40}")
+    if not p4:
+        print("      nenhuma — nenhuma composição f∘f⁻¹ dentro de uma comparação")
+    print("\n  Medir f(f⁻¹(x)) = x não mede nada: é a definição do par relida. Quando os"
+          "\n  DOIS lados passam pela mesma função, ela cancela-se e o que fica é a"
+          "\n  igualdade de dentro — que costuma ser INTEIRA. Ou se mede essa, ou nada.")
     return 1 if p1 else 0
 
 

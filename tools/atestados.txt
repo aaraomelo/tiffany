@@ -315,7 +315,7 @@ navier_corpo 59af373b2600e81c 0
 neuronio 8124473e174ce457 0
 neuronio_analog e35af23bd347d431 0
 nginxb 5646b82457d23418 0
-nne 03e32801956a0a35 0
+nne 6951586d6ea0b59b 0
 nomeia 71483f3f6333df06 0
 norma 7a26a4611ed1f937 0
 normal_circulo 3cdc5e43a8d97101 0
@@ -467,7 +467,7 @@ transforma 25258f5c9679fa5e 0
 transformada 23899586ee0774d4 0
 transformada_andar a05f9db457978c4c 0
 transfusao 645d63bf8859beed 0
-travessia 4d90fe8423093207 0
+travessia 3a725e6f9e44b60d 0
 tres_pontos 43ad5af8747edc63 0
 tres_reconstroi 1f48f7d032a33b62 0
 tres_regimes 6103cb6d6d8222ee 0

@@ -533,6 +533,19 @@ static void rt_mul_mat(const long *A, const long *B, int n, long *C){
 static void rt_identidade(long *Id, int n){
     for(int i = 0; i < n; i++) for(int j = 0; j < n; j++) Id[i*n + j] = (i == j);
 }
+/* A POTÊNCIA DE UMA MATRIZ, por multiplicação repetida — e o corpo do passo não menciona
+ * k, que é o que dá o ∀k pela `thm:meta-inducao`. É o gerador do semigrupo na realização
+ * EXACTA: A^{a+b} = A^a·A^b é o morfismo (ℕ,+) → (matrizes,×), medido em ℤ e sem uma
+ * exponencial. O chamador garante n ≤ RT_MAX. */
+static void rt_pot_mat(const long *A, int n, int k, long *R){
+    rt_identidade(R, n);
+    long T[RT_MAX*RT_MAX];
+    for(int t = 0; t < k; t++){
+        rt_mul_mat(R, A, n, T);
+        for(int i = 0; i < n*n; i++) R[i] = T[i];
+    }
+}
+
 static long rt_traco(const long *M, int n){
     long s = 0;
     for(int i = 0; i < n; i++) s += M[i*n + i];

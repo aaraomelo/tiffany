@@ -41,6 +41,7 @@
 #include <complex.h>
 #include <string.h>
 #include "unidade.h"
+#include "reta.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -130,8 +131,49 @@ printf("\n§T1  Morto != vivo, e a diferença é o GERADOR.\n\n");
         if(fabs(exp(L*(t+s)) - exp(L*t)*exp(L*s)) > 1e-12) mal++;
     }
     printf("      o vivo: U_{t+s} = U_t·U_s em 200 pares: %d falhas\n", mal);
+
+    /* A LEI DE SEMIGRUPO É SOBRE A ESTRUTURA, E NÃO SOBRE A `exp`. O que se media era
+     * |e^{L(t+s)} − e^{Lt}·e^{Ls}| < 1e-12: a mesma função nos dois lados de uma
+     * subtracção, e o que ela testa é a implementação da exponencial da libm — não a lei.
+     *
+     * A lei é o MORFISMO (ℝ,+) → (ℝ*,×): somar no tempo é multiplicar no operador. E ela
+     * tem realização EXACTA — o gerador não tem de ser um número. Com o gerador a ser a
+     * MATRIZ companheira do metal m, U_k = A^k, e a lei é
+     *
+     *      A^{a+b} = A^a · A^b
+     *
+     * em INTEIROS, sem uma vírgula. É a mesma lei, na realização em que ela se prova em
+     * vez de se aproximar — e a distinção vivo/morto continua a ser a mesma: o morto não
+     * tem onde pôr o expoente. */
+    long semig = 0, semig_tot = 0, satur = 0;
+    for(long m = 1; m <= 4; m++){
+        long c[2] = { 1, m }, A[4];
+        rt_companheira(c, 2, A);
+        for(int a2 = 0; a2 <= 8; a2++) for(int b2 = 0; b2 <= 8; b2++){
+            long Pa[4], Pb[4], Pab[4], Pr[4];
+            rt_pot_mat(A, 2, a2, Pa);
+            rt_pot_mat(A, 2, b2, Pb);
+            rt_pot_mat(A, 2, a2 + b2, Pab);
+            rt_mul_mat(Pa, Pb, 2, Pr);
+            if(rt_modulo(Pab[0]) > 1000000000L){ satur++; continue; }
+            semig_tot++;
+            int igual = 1;
+            for(int i = 0; i < 4; i++) if(Pr[i] != Pab[i]) igual = 0;
+            if(igual) semig++;
+        }
+    }
+    printf("      e a MESMA lei em INTEIROS, com o gerador a ser a companheira: A^{a+b} =\n"
+           "      A^a.A^b em %ld de %ld pares (a,b), sem uma virgula (%ld nao couberam)\n",
+           semig, semig_tot, satur);
     printf("      o morto: \"G = A\" — não há t onde pôr a pergunta, e a lei nem se enuncia\n\n");
-    ok("a lei de semigrupo distingue o vivo do morto, e é uma MEDIDA", mal == 0);
+    ok("a lei de semigrupo distingue o vivo do morto, e é uma MEDIDA. E ela e' sobre a"
+       " ESTRUTURA e nao sobre a `exp`: o que se media era |e^{L(t+s)} - e^{Lt}.e^{Ls}| com"
+       " a MESMA funcao nos dois lados de uma subtraccao — isso testa a implementacao da"
+       " exponencial, nao a lei. A lei e' o morfismo (R,+) -> (R*,x), somar no tempo e'"
+       " multiplicar no operador, e tem realizacao EXACTA: com o gerador a ser a matriz"
+       " companheira, A^{a+b} = A^a.A^b em INTEIROS. As duas rotas correm, e a distincao"
+       " vivo/morto e' a mesma — o morto nao tem onde por o expoente",
+       mal == 0 && semig == semig_tot && semig_tot > 0);
     printf("      O que isto tem de bom: a morte aqui não é opinião nem retórica — é decidível,\n");
     printf("      e decide-se olhando a descrição. Tem gerador, ou não tem. O enredo chama\n");
     printf("      CRISTALIZAÇÃO à operação que mata: trocar o gerador por uma igualdade entre\n");

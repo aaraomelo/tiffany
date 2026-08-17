@@ -201,7 +201,12 @@ printf("\n§N5  A GENERALIZAÇÃO: já estava feita, e faltava interpretar.\n\n"
             nne_rec(x, y, d, p);
             double nx = 0, ny = 0, np = 0;
             for(int i = 0; i < d; i++){ nx += x[i]*x[i]; ny += y[i]*y[i]; np += p[i]*p[i]; }
-            double e = fabs(sqrt(np) - sqrt(nx)*sqrt(ny));
+            /* ‖xy‖ = ‖x‖·‖y‖ ELEVA-SE AO QUADRADO e fica np = nx·ny — três raízes fora,
+             * e a tese é a mesma porque as normas são não negativas e x ↦ x² é monótona
+             * nelas. O que estava aqui tinha a MESMA função nos dois lados de uma
+             * subtracção, e o resíduo media o arredondamento das três raízes tanto como a
+             * multiplicatividade. Compara-se relativamente, que é o que a escala pede. */
+            double e = fabs(np - nx*ny) / (nx*ny > 0 ? nx*ny : 1.0);
             if(e > pior) pior = e;
         }
         piores[d] = pior;
