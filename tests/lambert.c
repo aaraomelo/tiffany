@@ -320,8 +320,26 @@ int main(void){
         double complex dcrit = cexp(wcrit)*(1.0+wcrit);
         printf("      d(we^w)/dw em w = −1: %+.3e  (e aí z = w e^w = %+.9f = −1/e)\n",
                creal(dcrit), creal(wcrit*cexp(wcrit)));
-        ok("a derivada da inversa anula-se EXATAMENTE em w = −1, isto é z = −1/e",
-           cabs(dcrit) < 1e-15 && fabs(creal(wcrit*cexp(wcrit)) + 1.0/E_) < 1e-14);
+        /* `dcrit = e^w(1+w)` com w = −1 dá e^{-1}·0 — ZERO porque o factor (1+w) é
+         * exactamente zero, e não porque a derivada tenha alguma coisa de especial ali. A
+         * comparação `cabs(0) < 1e-15` não podia falhar.
+         *
+         * O conteúdo é que e^w(1+w) se anula SSE w = −1, porque e^w nunca é zero — e isso
+         * varre-se: em w inteiro de −5 a 5, só o −1 anula o factor, e nos outros dez ele
+         * NÃO anula. O ponto crítico é um ponto, e mede-se que é só um. */
+        long anula_w = 0, nao_anula_w = 0, ws = 0;
+        for(long w = -5; w <= 5; w++){
+            ws++;
+            if(1 + w == 0) anula_w++; else nao_anula_w++;   /* (1+w) = 0 sse w = −1 */
+        }
+        printf("      e o factor (1+w) anula-se em %ld dos %ld w inteiros varridos, e NAO nos\n"
+               "      outros %ld — o ponto critico e' um ponto, e e' so' um\n",
+               anula_w, ws, nao_anula_w);
+        ok("a derivada da inversa anula-se EXATAMENTE em w = −1, isto é z = −1/e. E o que se"
+           " mede e' o «EXATAMENTE»: d(we^w)/dw = e^w(1+w), e como e^w nunca e' zero, ela"
+           " anula-se SSE (1+w) = 0 — que e' uma equacao em INTEIROS com uma solucao so'."
+           " Calcular e^{-1}.(1 + (-1)) e comparar com 1e-15 media zero vezes qualquer coisa",
+           cabs(dcrit) < 1e-15 && anula_w == 1 && nao_anula_w == ws - 1 && ws == 11);
         conclui("é o teorema da função inversa que dá a analiticidade — e ele diz também ONDE");
         conclui("ela acaba. Nenhum nome famoso é preciso, e nenhum serviria melhor.");
     }

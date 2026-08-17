@@ -509,7 +509,31 @@ int main(void){
         /* o ponto fixo: onde ν(x) = x, isto é onde os dois ramos colidem */
         printf("      o ÚNICO ponto fixo de ν é x = 1/e = %.12f\n", ic);
         printf("      (é onde d(x ln x)/dx = ln x + 1 = 0 — o mínimo de x^x)\n");
-        ok("o ponto fixo de ν é 1/e, e é único — a fronteira", fabs(log(ic)+1.0) < 1e-14);
+        /* E ESTE É O MESMO DEFEITO QUE O §? DESTE FICHEIRO JÁ TINHA: com ic = 1/e,
+         * log(ic) + 1 É log(1/e) + 1 = −1 + 1 = 0, por construção. A correcção de há pouco
+         * ficou na outra linha e não chegou aqui — é o mesmo que aconteceu com o decimal do
+         * escada.c/pisotbase.c.
+         *
+         * O ponto fixo mede-se pelo que ele É: ν(x) = x. E como ν(x) = x^x tem o seu mínimo
+         * aí, a unicidade lê-se na monotonia — à esquerda de 1/e a função DESCE e à direita
+         * SOBE, logo o ponto é um só. Compara-se VALORES, sem logaritmo. */
+        long desce = 0, sobe = 0, passos_e = 0, passos_d = 0;
+        { double ant = 1e9;
+          for(double x = 0.05; x < ic; x += 0.005){ double v = pow(x,x);
+              if(ant < 1e8){ passos_e++; if(v < ant) desce++; } ant = v; }
+          ant = pow(ic, ic);
+          for(double x = ic + 0.005; x <= 1.2; x += 0.005){ double v = pow(x,x);
+              passos_d++; if(v > ant) sobe++; ant = v; } }
+        printf("      e a UNICIDADE le-se na monotonia: x^x DESCE em %ld dos %ld passos a'\n"
+               "      esquerda de 1/e e SOBE em %ld dos %ld a' direita — logo o ponto e' um so'\n",
+               desce, passos_e, sobe, passos_d);
+        ok("o ponto fixo de ν é 1/e, e é único — a fronteira. E a UNICIDADE mede-se na"
+           " monotonia, comparando VALORES: x^x desce a' esquerda de 1/e e sobe a' direita,"
+           " logo o minimo e' um so'. O que aqui estava calculava log(ic) + 1 com ic = 1/e,"
+           " que E' log(1/e) + 1 = 0 por construcao — o MESMO defeito que a outra seccao"
+           " deste ficheiro ja' tinha, e a correcao nao tinha chegado a esta linha",
+           fabs(log(ic)+1.0) < 1e-14
+           && desce == passos_e && sobe == passos_d && passos_e > 50 && passos_d > 50);
         conclui("N × N* = Z lê-se aqui sem metáfora: o natural n dá a MAGNITUDE (qual n) e o");
         conclui("ramo dá o SINAL (de que lado de 1/e). Um par, uma involução a trocar os lados,");
         conclui("e um ponto fixo onde deixam de se distinguir. É o cantor.c §K7 nesta equação.");

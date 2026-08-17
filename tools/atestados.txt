@@ -252,7 +252,7 @@ isserlis 43de4dbc517f15d3 0
 kernelb f0c87f33a589ee14 0
 koch 67daea17e89aeefe 0
 lahire_universal 843cfa03c5e214ba 0
-lambert c7ac2d933f35cb14 0
+lambert b28d54a12c7096c5 0
 latex_corpo dc511e8c18bbea1d 0
 lean_controlo aaf49206e4a67e72 0
 lean_convencao c6f7c086994efcfc 0
@@ -492,7 +492,7 @@ viviani_universal 3891b0e053a8d515 0
 vizinha bb01d10bf8c614f6 0
 volta_estrela 59d9d31fd90137e4 0
 wasm_sobe 8c931b0862f2fa4c 0
-xx d3d6e2bf031db10a 0
+xx 57e4c99aed9f9967 0
 ym_pnp c9dace961b02d965 0
 zero 625eaa454b88f7d2 0
 zeta 4f2cab66eb1645a4 0
