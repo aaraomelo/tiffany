@@ -225,7 +225,7 @@ geral db51d25ebdc526d6 0
 gguf 5481759dd5016f9b 0
 gitb c558deae4b86e995 0
 graduacao_realiza fdf218f981b103a1 0
-grau caf191b2f0d4d2a9 0
+grau 62677b60d5ece863 0
 grupo ff24076404998111 0
 guarda 6e9ee3952f6cb691 0
 gume_calculo dfbe6cf281569b1e 0
@@ -258,7 +258,7 @@ lean_controlo aaf49206e4a67e72 0
 lean_convencao c6f7c086994efcfc 0
 lean_cruz 0707dd551947897b 0
 lebesgue_toro 65132337ebb27456 0
-lei2 aafa184130e2d70f 0
+lei2 b0d2388afe26a9c0 0
 leis_no_tradutor b021c11d75457674 0
 lemniscata 72425a6ff1117151 0
 letra_assinatura ac69847f7bec6136 0
@@ -298,7 +298,7 @@ migracao_universal 7bbcce67bc1915a2 0
 milenio 8728353dc95e588c 0
 milenio_trial 7faaeb0465d7c296 0
 mmu 3e46735bb1cec005 0
-mobilidade d6dad8e3185fb9d4 0
+mobilidade 339fd829f9c3e93a 0
 modelo_no_banco 3795f1d2b9ee4e73 0
 moe 9807b0dd3762d993 0
 monoide 0340fc40391e17db 0

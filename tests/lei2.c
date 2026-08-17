@@ -55,17 +55,44 @@ int main(void){
 
     /* ═══ §L2 — o periodo e' quatro, e os sinais alternam ══════════════════════════ */
     {
+        /* O TITULO DESTA SECCAO PROMETE DUAS COISAS — «o periodo e' quatro, E OS SINAIS
+         * ALTERNAM» — e media-se uma. O array `sinais[4]` estava aqui para a outra e era
+         * escrito sem ninguem o ler, o que o compilador dizia. E a formula que ele usava,
+         * `(p.a > 0 || p.b > 0) ? +1 : -1`, daria +,-,-,+ nas quatro potencias: isso nao
+         * e' alternar, e a palavra estava errada.
+         *
+         * O que ALTERNA e' outra coisa, e e' a Lei 2: i^2 = -1 e i^4 = +1 — o quadrado da'
+         * o SIMETRICO e a quarta devolve. Mede-se a orbita inteira, potencia a potencia,
+         * e mede-se que o periodo e' EXACTAMENTE quatro: i^k != 1 para k = 1, 2 e 3.
+         * Sem isso, «o periodo e' 4» nao distinguia 4 de 1 nem de 2. */
         C i = {0,1}, p = {1,0};
-        long mau = 0; int sinais[4];
+        C esperado[4] = { {0,1}, {-1,0}, {0,-1}, {1,0} };
+        long mau = 0, na_orbita = 0, antes_do_fim = 0;
+        int sinais[4];
+        printf("      k    i^k        esperado     e' 1?\n");
         for(int k = 0; k < 4; k++){
             p = cmul(p, i);
-            sinais[k] = (p.a > 0 || p.b > 0) ? +1 : -1;
+            sinais[k] = (p.a != 0) ? (p.a > 0 ? +1 : -1) : (p.b > 0 ? +1 : -1);
+            if(p.a == esperado[k].a && p.b == esperado[k].b) na_orbita++;
+            if(k < 3 && p.a == 1 && p.b == 0) antes_do_fim++;   /* fecharia CEDO */
+            printf("      %-4d (%+ld,%+ld)   (%+ld,%+ld)      %s\n", k+1, p.a, p.b,
+                   esperado[k].a, esperado[k].b,
+                   (p.a==1 && p.b==0) ? "SIM" : "nao");
         }
         if(p.a != 1 || p.b != 0) mau++;             /* i^4 = 1 */
-        printf("      i^1..i^4 e' (0,1) (-1,0) (0,-1) (1,0): periodo %s\n",
-               (p.a==1 && p.b==0) ? "QUATRO" : "NAO e' 4");
-        ok("o PERIODO e' quatro: i^4 = 1 exacto, e a orbita sao os quatro quadrantes — a"
-           " operacao unica, aplicada quatro vezes, devolve", mau == 0);
+        /* a LEI 2, dita nos sinais: o quadrado da' o simetrico da unidade */
+        long lei2 = (esperado[1].a == -1 && esperado[1].b == 0
+                     && sinais[1] == -1 && sinais[3] == +1);
+        printf("\n      periodo EXACTAMENTE quatro: fecha em 4 e nao antes (%ld fechos cedo)\n",
+               antes_do_fim);
+        printf("      e o sinal do quadrado e' %+d e o da quarta %+d — a Lei 2\n\n",
+               sinais[1], sinais[3]);
+        ok("o PERIODO e' EXACTAMENTE quatro: i^4 = 1 e i^k != 1 para k = 1, 2 e 3 — sem esta"
+           " segunda metade, «o periodo e' 4» nao distinguia 4 de 1 nem de 2. A orbita e' a"
+           " prevista nos quatro quadrantes, e o que os sinais dizem nao e' que alternam"
+           " (dao +,-,-,+): e' que o QUADRADO da' o simetrico e a QUARTA devolve, que e' a"
+           " Lei 2 escrita",
+           mau == 0 && na_orbita == 4 && antes_do_fim == 0 && lei2);
     }
 
     /* ═══ §L3 — a mesma lei na familia metalica ════════════════════════════════════

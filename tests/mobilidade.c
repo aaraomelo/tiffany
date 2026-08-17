@@ -233,8 +233,27 @@ int main(void){
      * muitas corridas NEM CHEGAM a bloquear. Recusar capturar NAO fecha o tabuleiro. */
     ok("a previsao de 32 lances NAO se confirma: o bloqueio, quando acontece, e' uma ordem"
        " de grandeza mais tarde", media > 100);
-    ok("e em parte das corridas nem chega a bloquear dentro do travao de 400 lances",
-       maxi >= 400);
+    /* «EM PARTE DAS CORRIDAS» media-se com `maxi >= 400`, que e' compativel com UMA SO'.
+     * O array `zerou[]` guardava o numero de lances de cada corrida e era escrito sem
+     * ninguem o ler — o compilador dizia-o. Ele responde exactamente a esta pergunta:
+     * QUANTAS. E de caminho da' a MEDIANA, que numa distribuicao truncada pelo travao
+     * diz mais que a media. */
+    long no_travao = 0;
+    for(int i = 0; i < nz && i < 256; i++) if(zerou[i] >= 400) no_travao++;
+    { int ord[256], n2 = nz < 256 ? nz : 256;
+      for(int i = 0; i < n2; i++) ord[i] = zerou[i];
+      for(int i = 0; i < n2; i++) for(int j = i+1; j < n2; j++)
+          if(ord[j] < ord[i]){ int t2 = ord[i]; ord[i] = ord[j]; ord[j] = t2; }
+      printf("      corridas que bateram no travao de 400: %ld de %d   (mediana %d lances)\n",
+             no_travao, nz, n2 ? ord[n2/2] : 0); }
+    /* e o limiar tem de ser o da FRASE, nao um meu: «em parte» quer dizer NEM NENHUMA NEM
+     * TODAS, e e' isso que se escreve. A primeira versao desta linha exigia mais de um
+     * terco — 21 contra 20, a UM do limite, e um terco era numero meu. */
+    ok("e em parte das corridas nem chega a bloquear dentro do travao de 400 lances — e"
+       " «em parte» tem numero: contadas uma a uma no array que guarda cada corrida, sao"
+       " 21 das 60, com mediana de 281 lances. O `maxi >= 400` que aqui estava era"
+       " compativel com UMA SO', e o que se afirma e' que nao sao nem nenhuma nem todas",
+       maxi >= 400 && no_travao > 0 && no_travao < CORRIDAS);
 
     /* ═══ §X4 — nada se perdeu ═══════════════════════════════════════════════════════ */
     printf("      pecas de pe' no instante do bloqueio: %d em media (das 32)\n",

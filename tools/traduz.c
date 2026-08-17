@@ -2983,11 +2983,13 @@ static void reverte_cauda(FILE *o){
 static int desce_modulo(const unsigned char *b, long n, FILE *o){
     M = b; MN = n;
     if(n < 8 || memcmp(b, "\0asm", 4) || b[4] != 1) return 0;
-    long off[16] = {0}, tam[16] = {0};
+    long off[16] = {0};   /* o `tam[16]` era preenchido e nunca lido; o tamanho serve
+                           * antes para GUARDAR contra um modulo truncado, abaixo */
     MP = 8;
     while(MP < MN){
         int id = M[MP++]; long t = (long)d_u();
-        if(id >= 0 && id < 16){ off[id] = MP; tam[id] = t; }
+        if(t < 0 || MP + t > MN) return 0;        /* a seccao tem de caber no modulo */
+        if(id >= 0 && id < 16) off[id] = MP;
         MP += t;
     }
     if(!off[1] || !off[3] || !off[10]) return 0;

@@ -222,7 +222,7 @@ int main(void){
            ordem == N);
 
         /* o contorno: N pontos, e a transformada e' avalia-lo nas N raizes */
-        long z[12] = { 3, 5, 9, 11, 12, 10, 6, 4, 1, 2, 7, 8 }, Z[12], v[12];
+        long z[12] = { 3, 5, 9, 11, 12, 10, 6, 4, 1, 2, 7, 8 }, Z[12];
         for(long k = 0; k < N; k++){
             /* Z_k = sum_n z_n w^(nk) — o expoente e' o PRODUTO n*k, e nao n. Escrevi `w^n`
              * e a volta deu desvio 12, que e' -1 mod 13: um expoente errado nao da' lixo,
@@ -231,9 +231,8 @@ int main(void){
             for(long i = 0; i < k; i++) wk1 = wk1 * w % p;     /* w^k */
             for(long n = 0; n < N; n++){ s2 = (s2 + z[n] * wnk) % p; wnk = wnk * wk1 % p; }
             Z[k] = s2;
-            /* prepara-se w^k para a volta */
-            long t2 = 1; for(long i = 0; i < k; i++) t2 = t2 * w % p;
-            v[k] = t2;
+            /* aqui recalculava-se w^k para um array `v` que ninguem lia — e o w^k ja'
+             * estava em `wk1`, calculado tres linhas acima. Trabalho a dobrar sem leitor. */
         }
         /* A VOLTA: soma dos harmonicos sobre o inverso da raiz, dividida por N — e a
          * divisao por N e' um INVERSO em Z_p, exacto, sem resto nenhum. */
