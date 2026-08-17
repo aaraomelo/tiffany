@@ -172,8 +172,10 @@ printf("\n§T1  Morto != vivo, e a diferença é o GERADOR.\n\n");
        " exponencial, nao a lei. A lei e' o morfismo (R,+) -> (R*,x), somar no tempo e'"
        " multiplicar no operador, e tem realizacao EXACTA: com o gerador a ser a matriz"
        " companheira, A^{a+b} = A^a.A^b em INTEIROS. As duas rotas correm, e a distincao"
-       " vivo/morto e' a mesma — o morto nao tem onde por o expoente",
-       mal == 0 && semig == semig_tot && semig_tot > 0);
+       " vivo/morto e' a mesma — o morto nao tem onde por o expoente. E o `mal` da rota em"
+       " virgula esteve NESTA CONDICAO ate' agora, ao lado da frase que o dispensa: ele"
+       " fica a imprimir, que e' o lugar de uma segunda rota, e quem decide e' a exacta",
+       semig == semig_tot && semig_tot > 0);
     printf("      O que isto tem de bom: a morte aqui não é opinião nem retórica — é decidível,\n");
     printf("      e decide-se olhando a descrição. Tem gerador, ou não tem. O enredo chama\n");
     printf("      CRISTALIZAÇÃO à operação que mata: trocar o gerador por uma igualdade entre\n");
