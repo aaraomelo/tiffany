@@ -146,7 +146,7 @@ dourada 0d4544be18ec836a 0
 dourada_banco da40aa247da4be4c 0
 dourada_bidual 31e05ee9df292475 0
 dourada_escala 690b7dc3b9608a7a 0
-dourada_lei2 f46d69dbe7d4e582 0
+dourada_lei2 95424bf3ea0309bd 0
 dtc_viveiro ccbe31142837ba46 0
 dtcn b5caccf581116271 0
 duais 0df04b5273fb6a25 0

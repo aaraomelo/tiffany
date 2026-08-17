@@ -38,6 +38,7 @@
 #include <string.h>
 #include <math.h>
 #include <complex.h>
+#include "reta.h"      /* rt_pot_mat, rt_identidade: o periodo em inteiros */
 #include "banco.h"
 #include "unidade.h"
 
@@ -143,22 +144,44 @@ printf("\n§L4  E dai o PENTE: tau_0 = 2pi/ln(phi), e o quarto e' tau_0/4.\n\n")
         /* se a orbita fecha em quatro passos, a frequencia que nao da' pela translacao e'
          * aquela em que tau·ln(phi) e' multiplo de 2pi — o tau_0 do catalogo. E o quarto de
          * volta e' tau_0/4: e' ele que a Lei 2 fixa. */
-        double tau0 = PI2 / lphi;
-        double quarto = tau0 / 4.0;
-        /* a marca: em tau_0 a translacao por ln(phi) NAO se nota — a fase deu a volta inteira */
-        double fase_cheia = tau0 * lphi;              /* tem de dar 2pi */
-        double fase_quarto = quarto * lphi;           /* e um quarto disso */
-        printf("      tau_0 = 2pi/ln(phi) = %.9f\n", tau0);
-        printf("      tau_0 · ln(phi)     = %.12f   (2pi = %.12f)\n", fase_cheia, PI2);
-        printf("      o quarto: tau_0/4   = %.9f, e a sua fase e' %.9f = 2pi/4\n",
-               quarto, fase_quarto);
-        long fecha = fabs(fase_cheia - PI2) < 1e-9;
-        long e_quarto = fabs(fase_quarto - PI2/4.0) < 1e-9;
-        pente = fecha && e_quarto;
-        ok("o PENTE sai da Lei 2: tau_0 = 2pi/ln(phi) e' a frequencia em que a translacao por"
-           " ln(phi) NAO SE NOTA — a fase deu a volta inteira —, e o QUARTO dela e' o passo do"
-           " rotor. E' a mesma conta do catalogo, agora com a razao dita: o quarto nao e' uma"
-           " escolha de escala, e' o periodo 4 da Lei 2 lido no eixo da frequencia", pente);
+        /* A TAUTOLOGIA QUE AQUI ESTAVA, e eram duas. `tau0 = PI2/lphi` e logo a seguir
+         * `fase_cheia = tau0 * lphi`, que e' PI2 POR CONSTRUCAO — dividir e multiplicar
+         * pelo mesmo numero. `fabs(fase_cheia - PI2) < 1e-9` era `0 < 1e-9`, e o
+         * `e_quarto` era a mesma conta a quarta parte. Nem o phi entrava: qualquer
+         * lphi != 0 dava exactamente o mesmo, e o ln(phi) so' la' estava para se cortar.
+         *
+         * tau_0 E' DEFINIDO por tau_0 · ln(phi) = 2pi. Uma definicao nao se mede: diz-se,
+         * e fica no printf. O que tem conteudo e' o DENOMINADOR do quarto — porque o 4
+         * nao e' uma escolha de escala, e' o PERIODO da Lei 2, e um periodo CONTA-SE.
+         *
+         * Conta-se em inteiros, na matriz do rotor J = [[0,-1],[1,0]], com rt_pot_mat da
+         * lib: J^4 = I, e J^k != I para k = 1, 2 e 3. O periodo e' EXACTAMENTE quatro,
+         * nem menos — e J² = -I, que e' a Lei 2 escrita. Sem raiz, sem fase, sem limiar. */
+        double tau0 = PI2 / lphi, quarto = tau0 / 4.0;
+        printf("      tau_0 = 2pi/ln(phi) = %.9f          (DEFINICAO: tau_0 · ln(phi) = 2pi)\n", tau0);
+        printf("      o quarto: tau_0/4   = %.9f\n\n", quarto);
+        long J[4] = {0,-1,1,0}, Id[4], P[4];
+        rt_identidade(Id, 2);
+        long periodo = 0;
+        printf("      k    J^k                periodo?\n");
+        for(int k = 1; k <= 8; k++){
+            rt_pot_mat(J, 2, k, P);
+            int igual = (P[0]==Id[0] && P[1]==Id[1] && P[2]==Id[2] && P[3]==Id[3]);
+            if(igual && !periodo) periodo = k;
+            if(k <= 4) printf("      %-4d [%+ld %+ld ; %+ld %+ld]      %s\n",
+                              k, P[0],P[1],P[2],P[3], igual ? "SIM" : "nao");
+        }
+        rt_pot_mat(J, 2, 2, P);
+        long quadrado_menos_I = (P[0]==-1 && P[1]==0 && P[2]==0 && P[3]==-1);
+        printf("\n      periodo contado: %ld        J² = -I (a Lei 2): %s\n",
+               periodo, quadrado_menos_I ? "sim" : "NAO");
+        pente = (periodo == 4 && quadrado_menos_I);
+        ok("o QUARTO nao e uma escolha de escala: o 4 do denominador e o PERIODO, e ele"
+           " conta-se. Na matriz do rotor J = [[0,-1],[1,0]] tem-se J^4 = I e J^k != I para"
+           " k = 1, 2 e 3 — exactamente quatro, nem menos — e J² = -I, que e a Lei 2"
+           " escrita. Que tau_0 · ln(phi) seja 2pi nao se mede: e a DEFINICAO de tau_0, e"
+           " medi-la era dividir e multiplicar pelo mesmo numero. O que o pente herda da"
+           " Lei 2 e o denominador, e e esse que aqui tem testemunha", pente);
     }
 
 printf("\n§L5  O CONTROLO: com MEIA volta a orbita fecha em DOIS — deixa de ser Lei 2.\n\n");
