@@ -192,15 +192,37 @@ int main(void){
         printf("     %12s %14s %14s %12s\n", "f (GHz)", "|Z| (ohm)", "reflexao", "vs Z0");
         int melhora = 0, casos = 0;
         double melhor_f = 0, menor_R = 1e9;
+        double zmin = 1e30, zmax = 0, zmin_c = 1e30, zmax_c = 0;
         for(double f = 0.5e9; f <= 20e9; f *= 2){
             double R = reflexao(s, 4.0, f);
             double complex Z = impedancia(s, 4.0, f);
-            printf("     %12.2f %14.2f %13.2f%% %11.2f\n", f/1e9, cabs(Z), 100*R, cabs(Z)/Z0);
+            double az = cabs(Z);
+            if(az < zmin) zmin = az;
+            if(az > zmax) zmax = az;
+            /* O CONTROLO, no mesmo laco: um dieletrico SEM PERDAS (sigma = 0). Ali
+             * Z = sqrt(i.w.mu0 / (i.w.eps0.eps_r)) e os w CANCELAM-SE — a impedancia
+             * nao ve a frequencia. E' o caso em que a tese tem de ser FALSA. */
+            double azc = cabs(impedancia(0.0, 4.0, f));
+            if(azc < zmin_c) zmin_c = azc;
+            if(azc > zmax_c) zmax_c = azc;
+            printf("     %12.2f %14.2f %13.2f%% %11.2f\n", f/1e9, az, 100*R, az/Z0);
             if(R < menor_R){ menor_R = R; melhor_f = f; }
             casos++;
         }
-        ok("a impedancia DEPENDE da frequencia — a liga nao casa em toda a banda, e diz-se",
-           casos == 6);
+        /* `casos == 6` sozinho media que o LACO CORREU, e nada mais: se |Z| fosse
+         * constante em toda a banda a asserção passava na mesma, e a frase fala de
+         * DEPENDENCIA. Mede-se a dependencia, e mede-se contra o caso que a nao tem. */
+        double varia = zmax/zmin, varia_c = zmax_c/zmin_c;
+        printf("\n     |Z| varia de %.2f a %.2f ohm  ->  factor %.2f  (o grafeno)\n",
+               zmin, zmax, varia);
+        printf("     e no CONTROLO (sigma = 0, sem perdas): %.2f a %.2f  ->  factor %.6f\n\n",
+               zmin_c, zmax_c, varia_c);
+        ok("a impedancia DEPENDE da frequencia — |Z| varia por um factor de mais de tres na"
+           " banda medida, e a liga nao casa em toda ela. E quem diz que a medida sabe ver"
+           " a diferenca e o CONTROLO: num dieletrico sem perdas os omega cancelam-se dentro"
+           " da raiz e |Z| e' o MESMO nas seis frequencias. Antes media-se `casos == 6`, que"
+           " so' dizia que o laco tinha corrido",
+           casos == 6 && varia > 3.0 && varia_c < 1.000001);
         ok("e ha uma frequencia onde ela casa melhor: o casamento e de BANDA, nao universal",
            melhor_f > 0 && menor_R < 0.5);
         /* eu tinha partido este printf em dois e DEIXADO OS ARGUMENTOS DE FORA — os "159,5%%

@@ -648,7 +648,35 @@ printf("\n§X13 E AGORA A MÁQUINA VERIFICA O CORPUS.\n\n");
     resolve("/tmp/.expr_t", "(5 x 5) mod 11", &c1, 0);
     printf("      o corpus diz: \"em Z/3, 3 vezes 3 é 3 mais 3\"\n");
     printf("        (3 x 3) mod 3 = %ld    (3 + 3) mod 3 = %ld\n\n", a1, a2);
-    ok("e a máquina conta, e confirma: os dois dão 0 em Z/3", a1 == 0 && a2 == 0 && a1 == a2);
+    /* `a1 == 0 && a2 == 0 && a1 == a2` tinha um terceiro termo que SEGUE dos dois
+     * primeiros — se ambos são 0, são iguais. Mas o defeito maior é outro: o 3 É O ZERO
+     * de Z/3, portanto «3 vezes 3 é 3 mais 3» é 0·0 = 0+0. O CASO DEGENERADO. A frase
+     * parecia dizer algo sobre a multiplicação e a soma coincidirem, e media o zero.
+     *
+     * Varre-se então Z/3 inteiro, pelo MESMO parser, e a resposta é mais interessante do
+     * que a afirmação: x·x = x+x vale em DOIS dos três elementos e falha no terceiro —
+     * é x² − 2x = x(x−2) = 0, e Z/3 é corpo, logo x = 0 ou x = 2. O 3 do corpus é o
+     * primeiro deles, e o 2 é o que a afirmação não mencionava. */
+    long batem = 0, falham = 0, vistos = 0;
+    printf("      e a MAQUINA VARRE Z/3 inteiro, pelo mesmo parser:\n\n");
+    printf("        x     (x X x) mod 3     (x + x) mod 3    bate?\n");
+    for(long x = 0; x <= 2; x++){
+        char em[64], es[64]; long vm = -9, vs = -9;
+        snprintf(em, sizeof em, "(%ld x %ld) mod 3", x, x);
+        snprintf(es, sizeof es, "(%ld + %ld) mod 3", x, x);
+        resolve("/tmp/.expr_t", em, &vm, 0);
+        resolve("/tmp/.expr_t", es, &vs, 0);
+        vistos++;
+        if(vm == vs) batem++; else falham++;
+        printf("        %-5ld %-17ld %-16ld %s\n", x, vm, vs, vm == vs ? "sim" : "NAO");
+    }
+    printf("\n      batem em %ld de %ld, e falham em %ld\n\n", batem, vistos, falham);
+    ok("e a máquina conta — e conta MAIS do que o corpus dizia. «3 vezes 3 é 3 mais 3» em"
+       " Z/3 é 0·0 = 0+0, porque o 3 É o zero: era o caso degenerado. Varrido o corpo"
+       " inteiro pelo mesmo parser, x·x = x+x vale em DOIS dos três elementos e falha num"
+       " — que é o que x(x−2) = 0 obriga num corpo. O outro é o 2, e a afirmação não o"
+       " mencionava",
+       a1 == 0 && a2 == 0 && batem == 2 && falham == 1 && vistos == 3);
 
     printf("\n      o corpus diz: \"a raiz de 2 existe em Z/7, e vale 3\"\n");
     printf("        (3 x 3) mod 7 = %ld\n\n", b1);

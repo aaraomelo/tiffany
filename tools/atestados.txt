@@ -252,7 +252,7 @@ isserlis 43de4dbc517f15d3 0
 kernelb f0c87f33a589ee14 0
 koch 67daea17e89aeefe 0
 lahire_universal 843cfa03c5e214ba 0
-lambert 6b2524b2128063b2 0
+lambert 9900f09bf787579e 0
 latex_corpo dc511e8c18bbea1d 0
 lean_controlo aaf49206e4a67e72 0
 lean_convencao c6f7c086994efcfc 0
@@ -263,7 +263,7 @@ leis_no_tradutor b021c11d75457674 0
 lemniscata 72425a6ff1117151 0
 letra_assinatura ac69847f7bec6136 0
 libc_wasm fc834bc8eeefe10a 0
-liga ad81797be4c56787 0
+liga 7a5b674edd74e2cf 0
 limiares 4dec8ea3c1266e52 0
 limite_escada 582f8604e39f093d 0
 linear 59ceee580cbe6d72 0
@@ -321,7 +321,7 @@ norma 7a26a4611ed1f937 0
 normal_circulo 3cdc5e43a8d97101 0
 nove_periodico c18299871152ca54 0
 nucleo_unificado ac7c6cf9a9960bc6 0
-numerica 2d1d6e20b7f87362 0
+numerica 50e6a794c8fbea53 0
 observador_torre 3d55320445a27093 0
 octeto 3bd3fcf1dea8d4a4 0
 operacao 83b71894068bb608 0

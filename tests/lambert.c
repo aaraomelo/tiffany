@@ -122,14 +122,19 @@ int main(void){
     {
         /* inversa: z = w e^w — uma multiplicação e uma exponencial.
          * direta:  w = W(z) — sem forma elementar, precisa de série ou iteração. */
-        int casos=0, volta=0; int iters_max=0;
+        int casos=0, volta=0; int iters_max=0, iters_min=999, resid_ok=0;
         printf("      w                  z = w·e^w (INVERSA)   W(z) (DIRETA)      |erro|\n");
         double complex ws[5] = {0.3, 1.0, -0.5+0.2*I, 2.0-0.7*I, 0.1+1.2*I};
         for(int i=0;i<5;i++){
             double complex w = ws[i];
             double complex z = w*cexp(w);           /* a inversa: UMA linha */
             /* a direta: contar iterações até estabilizar */
-            double complex v = 0.3; int it=0;
+            /* O CHUTE ERA 0.3 E O PRIMEIRO PONTO DA LISTA E' 0.3: o chute JA' ERA a
+             * resposta, e aquele ponto resolvia-se em ZERO iteracoes. Nao por a directa
+             * ser facil — por o alvo estar posto na partida. Foi a assercao nova que o
+             * apanhou, ao exigir iters_min > 0, e ela falhou como devia. O chute passa a
+             * 0.5, que nao e' nenhum dos cinco w. */
+            double complex v = 0.5; int it=0;
             for(; it<400; it++){
                 double complex e=cexp(v), f=v*e-z;
                 double complex nv = v - f/(e*(v+1) - (v+2)*f/(2*v+2));
@@ -137,14 +142,29 @@ int main(void){
                 v = nv;
             }
             if(it > iters_max) iters_max = it;
+            if(it < iters_min) iters_min = it;
+            /* e a INVERSA aplicada ao que a directa devolveu tem de reproduzir z, numa
+             * linha e sem iterar: e' o custo dos dois lados, lado a lado. */
+            if(cabs(v*cexp(v) - z) < 1e-12) resid_ok++;
             casos++;
             if(cabs(v-w) < 1e-10) volta++;
             printf("      %+.3f%+.3fi     %+.9f%+.9fi   %+.9f%+.9fi  %.1e\n",
                    creal(w), cimag(w), creal(z), cimag(z), creal(v), cimag(v), cabs(v-w));
         }
-        printf("      pontos: %d   com a direta a devolver w: %d   iterações máx: %d\n",
-               casos, volta, iters_max);
-        ok("a inversa z = w·e^w é EXATA e elementar — uma linha", casos==5);
+        printf("      pontos: %d   com a direta a devolver w: %d   iterações: %d a %d\n",
+               casos, volta, iters_min, iters_max);
+        /* `casos == 5` media que o LACO CORREU, e a frase fala do custo da inversa. A
+         * assimetria mede-se nos dois lados: a inversa e' fechada e o seu residuo e' zero
+         * em todos os pontos, sem iterar; a directa precisou de pelo menos UMA iteracao em
+         * TODOS eles — nenhum se resolveu de graca. Se o chute inicial acertasse nalgum,
+         * iters_min seria 0 e a assercao caia, que e' o que a torna uma medida. */
+        ok("a inversa z = w·e^w é EXATA e elementar — uma linha, e o seu resíduo é zero nos"
+           " cinco pontos sem uma única iteração. A directa, na mesma banca, precisou de"
+           " pelo menos uma em TODOS eles: nenhum ponto se resolveu de graça, e é essa"
+           " diferença de custo que a palavra «elementar» significa. E o chute da"
+           " directa é 0,5 e não 0,3: com 0,3 o primeiro ponto da lista ERA o chute e"
+           " resolvia-se em zero iterações — o alvo estava posto na partida",
+           casos==5 && resid_ok==casos && iters_min>0);
         ok("a direta devolve w, mas por ITERAÇÃO — não há fórmula", volta==casos && iters_max>0);
         conclui("é a assimetria de sempre: a volta é fácil e a ida é que custa. No palavra.c a");
         conclui("volta é Euclides e a ida é a Möbius; aqui a volta é w e^w e a ida é W.");
