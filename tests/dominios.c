@@ -90,6 +90,20 @@ static double exata(double B, double C, double t){
     double w = sqrt(4*C - B*B)/2.0;
     return exp(-B*t/2.0) * (cos(w*t) + (B/(2*w))*sin(w*t));
 }
+/* A DERIVADA, e ela escreve-se GERAL e nao ja' simplificada no ponto.
+ *
+ * Escrevi-a primeiro so' para t = 0, e o que me saiu foi `-a*1 + (0 + a*1)` — isto e',
+ * `-a + a`, que e' zero por ser x - x e nao mede coisa nenhuma. E' o defeito que este
+ * mesmo ficheiro me ajudou a cacar noutros, cometido dentro da correccao.
+ *
+ * Assim, com t livre, ela pode estar ERRADA — e a comparacao com a diferenca finita em
+ * varios t apanha-o. So' depois disso e' que avaliar em t = 0 diz alguma coisa. */
+static double dexata(double B, double C, double t){
+    double a = B/2.0, w = sqrt(4*C - B*B)/2.0, k = B/(2*w);
+    double u  = cos(w*t) + k*sin(w*t);
+    double du = -w*sin(w*t) + k*w*cos(w*t);
+    return exp(-a*t) * (du - a*u);
+}
 
 /* ───────────────────────────────────────────────────────────────────────────
  * §D4  RESOLVER PASSO A PASSO — e cada passo VERIFICADO
@@ -387,12 +401,40 @@ int main(void){
         ok("passo 3  o Delta < 0 escolhe a forma ELIPTICA — o sinal decide, nao eu",
            D < 0);
 
-        /* passo 4: as condições iniciais. y(0)=1 e y'(0)=0, verificadas na forma fechada. */
+        /* passo 4: as condições iniciais. E as duas medem-se por rotas diferentes.
+         *
+         * y(0) = 1 é EXACTO e não «menor que 1e-12»: em t = 0 a forma fechada é
+         * exp(0)·(cos 0 + k·sin 0), e os três valem 1, 1 e 0 exactos em IEEE. Escreve-se
+         * com igualdade.
+         *
+         * y'(0) = 0 estava medido por diferença finita de cinco pontos com h = 1e-4, e o
+         * 1e-7 era o erro do MÉTODO — uma régua sobre a minha escolha de h, e não sobre a
+         * solução. Agora há a derivada GERAL (`dexata`), e ela decide; a diferença finita
+         * fica ao lado, e serve para CONFERIR a derivada geral em oito pontos FORA do zero
+         * — que é onde ela poderia estar errada sem que t = 0 desse por isso. */
         double y0 = exata(B,C,0);
+        double v0_exacta = dexata(B,C,0);                     /* y'(0) pela derivada GERAL */
         double h = 1e-4;
         double v0 = (exata(B,C,-2*h) - 8*exata(B,C,-h) + 8*exata(B,C,h) - exata(B,C,2*h))/(12*h);
-        ok("passo 4  as condicoes iniciais y(0)=1 e y'(0)=0 sao satisfeitas pela forma fechada",
-           fabs(y0 - 1) < 1e-12 && fabs(v0) < 1e-7);
+        /* e a derivada geral CONFERE-SE fora do zero, que e' onde ela pode estar errada */
+        int dbate = 0, dtot = 0; double pior_d = 0;
+        for(int q = 1; q <= 8; q++){
+            double t = 0.25*q;
+            double num = (exata(B,C,t-2*h) - 8*exata(B,C,t-h)
+                        + 8*exata(B,C,t+h) - exata(B,C,t+2*h))/(12*h);
+            double e = fabs(num - dexata(B,C,t));
+            if(e > pior_d) pior_d = e;
+            dtot++;
+            if(e < 1e-6) dbate++;
+        }
+        printf("      y(0) = %.17g (exacto)   y'(0) pela derivada geral = %.17g\n", y0, v0_exacta);
+        printf("      e a derivada geral bate com a diferenca finita em %d de %d pontos"
+               " fora do zero (pior %.2e)\n", dbate, dtot, pior_d);
+        ok("passo 4  as condicoes iniciais y(0)=1 e y'(0)=0 sao satisfeitas pela forma"
+           " fechada — e as duas EXACTAS: y(0) porque exp(0), cos(0) e sin(0) sao exactos,"
+           " e y'(0) porque a analitica subtrai termos identicos. A diferenca finita fica ao"
+           " lado a confirmar, com o erro do METODO",
+           y0 == 1.0 && v0_exacta == 0.0 && fabs(v0) < 1e-7 && dtot > 0 && dbate == dtot);
 
         /* passo 5: a substituição na equação original — o teste final */
         double r5 = fabs(substitui(B,C,2.0)) / C;
