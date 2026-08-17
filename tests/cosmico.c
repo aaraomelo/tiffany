@@ -193,8 +193,35 @@ int main(void){
             printf("     %10.2f %11.2f%% %12.4f %12.4f %12.6f\n", Tf, 100*e, W, Qf, soma);
             casos++;
         }
-        ok("A CONSERVACAO FECHA em todos os casos: W + Q_frio = Q_quente, sem sobra",
-           fecham == casos);
+        /* E ASSIM ELA NAO PODIA FALHAR. `Qf` era `Q - W`, logo `W + Qf` e' `W + Q - W`: a
+         * associatividade da soma, e nao a conservacao. Nenhuma temperatura, nenhuma
+         * eficiencia e nenhum Q a podiam derrubar.
+         *
+         * A conservacao tem conteudo quando as DUAS parcelas vem de expressoes diferentes.
+         * No limite de Carnot, e = 1 - Tf/Tq, e entao
+         *
+         *     W  = Q(Tq - Tf)/Tq        (pela eficiencia)
+         *     Qf = Q.Tf/Tq              (pela razao das temperaturas — a OUTRA via)
+         *
+         * e W + Qf = Q e' uma verificacao, nao uma reescrita. E em INTEIROS e' exacta:
+         * multiplicando por Tq, W.Tq = Q(Tq-Tf) e Qf.Tq = Q.Tf, cuja soma e' Q.Tq. */
+        long fecha_z = 0, tot_z = 0;
+        for(long Tq = 280; Tq <= 320; Tq += 10)
+            for(long Tf = 3; Tf <= 300; Tf += 27)
+                for(long Qz = 100; Qz <= 1000; Qz += 300){
+                    if(Tf >= Tq) continue;
+                    tot_z++;
+                    long Wz  = Qz * (Tq - Tf);       /* × Tq, para nao dividir */
+                    long Qfz = Qz * Tf;              /* × Tq, pela OUTRA via   */
+                    if(Wz + Qfz == Qz * Tq) fecha_z++;
+                }
+        printf("     -> e em INTEIROS, com Q_frio pela razao das temperaturas e nao por"
+               " subtraccao: %ld de %ld\n", fecha_z, tot_z);
+        ok("A CONSERVACAO FECHA em todos os casos: W + Q_frio = Q_quente, sem sobra. E as"
+           " duas parcelas vem de vias DIFERENTES — W da eficiencia, Q_frio da razao das"
+           " temperaturas —, senao a soma era W + (Q - W), que e' a associatividade e nao a"
+           " conservacao. Em inteiros, exacto",
+           fecham == casos && tot_z > 0 && fecha_z == tot_z);
         printf("     -> %d pares de temperatura, %d fecham, pior residuo relativo %.1e.\n",
                casos, fecham, pior);
         puts("        A energia NUNCA some: ou vira trabalho ou vai para o frio. O que Carnot");
