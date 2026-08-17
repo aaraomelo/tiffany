@@ -155,7 +155,10 @@ int main(void){
         printf("     -> a MESMA equacao nos dois tipos, com a tensao espelhada: |dif| = %.3e\n", dif_ok);
         printf("        e sem espelhar a tensao ela NAO bate: |dif| = %.3e  (o teste distingue)\n", dif_mau);
         ok("e a EQUACAO e a mesma — a MESMA Shockley nos dois tipos, e so' com a tensao espelhada e que bate",
-           dif_ok < 1e-20 && dif_mau > 1e-6);
+           /* e o «bate» é EXACTO, não «menor que 1e-20»: com o tipo e a tensão ambos
+            * espelhados, SHOCKLEY(−1,−V) é o simétrico de SHOCKLEY(+1,+V) — a MESMA
+            * exponencial, com o sinal de fora —, logo os módulos são iguais bit a bit. */
+           dif_ok == 0.0 && dif_mau > 1e-6);
         #undef SHOCKLEY
         printf("     -> NPN da %.3e A e PNP da %.3e A: o mesmo modulo, o sinal espelhado.\n",
                Ic_npn, Ic_pnp);

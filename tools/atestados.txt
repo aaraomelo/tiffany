@@ -170,7 +170,7 @@ eliptica_viviani 6202e1b445210d57 0
 encaixa b1788062911646e2 0
 encaixe_continuo fb85476766754fcb 0
 encaixotamento 0f9c4a6716e901fe 0
-encanamento 672eb25bf7dc3010 0
+encanamento d25eebc345b7cfe5 0
 enche f527b62442211841 0
 entre d48aa7887a3dbe2f 0
 entrega 914c8c65066c6f39 0
