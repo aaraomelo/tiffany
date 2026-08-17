@@ -258,6 +258,64 @@ printf("\n§F4  LEIBNIZ — é o que faz do corpo um corpo DIFERENCIAL.\n\n");
     printf("\n");
     ok("D é linear: D(a+b) = D(a) + D(b)", mal_lin == 0);
     ok("e cumpre LEIBNIZ: D(ab) = D(a)b + aD(b), nos 16 pares", mal_leib == 0);
+    /* E AS DUAS OUTRA VEZ, SEM DIFERENÇAS FINITAS. Linearidade e Leibniz são IDENTIDADES
+     * ALGÉBRICAS: valem coeficiente a coeficiente, e não «a menos de 1e-6». O h = 1e-5 e o
+     * limiar acima medem o erro de truncamento da diferença central, que é uma propriedade
+     * do MÉTODO e não da derivação.
+     *
+     * Num polinómio a derivada não é um limite: é uma reindexação — D(p)[k] = (k+1)·p[k+1] —
+     * e o produto é a convolução, que a lib já tem em rt_conv. Varrem-se todos os pares de
+     * polinómios de grau ≤ 2 com coeficientes em {-2..2}: 125 × 125 pares, e as duas leis
+     * têm de valer em TODOS, com resíduo zero. O operador de Euler entra pelo mesmo caminho,
+     * porque (tD)(p)[k] = k·p[k] é a mesma reindexação sem o deslocamento. */
+    {
+        long maus_lin = 0, maus_leib = 0, maus_euler = 0, pares = 0;
+        for(int ca = 0; ca < 125; ca++) for(int cb = 0; cb < 125; cb++){
+            long A[3] = { ca%5 - 2, (ca/5)%5 - 2, (ca/25)%5 - 2 };
+            long B[3] = { cb%5 - 2, (cb/5)%5 - 2, (cb/25)%5 - 2 };
+            long dA[3] = { A[1], 2*A[2], 0 }, dB[3] = { B[1], 2*B[2], 0 };
+            long AB[5]; rt_conv(A, 3, B, 3, AB);
+            long dAB[5] = { AB[1], 2*AB[2], 3*AB[3], 4*AB[4], 0 };
+            /* D(a)·b + a·D(b) */
+            long t1[5], t2[5]; rt_conv(dA, 3, B, 3, t1); rt_conv(A, 3, dB, 3, t2);
+            for(int k = 0; k < 5; k++) if(dAB[k] != t1[k] + t2[k]) maus_leib++;
+            /* linearidade: D(a+b) = D(a) + D(b) */
+            for(int k = 0; k < 3; k++){
+                long soma[3] = { A[0]+B[0], A[1]+B[1], A[2]+B[2] };
+                long dsoma[3] = { soma[1], 2*soma[2], 0 };
+                if(dsoma[k] != dA[k] + dB[k]) maus_lin++;
+            }
+            /* EULER num polinómio QUALQUER: (tD)(p) tem de dar Σ k·c_k·t^k, e o teste é
+             * contra a definição por CONVOLUÇÃO — tD é D seguido de multiplicar por t, e
+             * multiplicar por t é deslocar. Duas rotas, não uma expressão contra si.
+             * (A primeira versão desta linha comparava k*A[k] consigo próprio: x != x, que
+             *  nunca incrementa. Escrita dentro da correcção de tautologias.) */
+            long tDa[4] = { 0, dA[0], dA[1], dA[2] };      /* t·D(a): desloca de um */
+            for(int k = 0; k < 3; k++) if(tDa[k] != k * A[k]) maus_euler++;
+            pares++;
+        }
+        /* e o EULER dito como o §F3 o afirma: tD tem os t^s por próprios, com valor s */
+        long euler_ok = 0;
+        for(int sgrau = 0; sgrau <= 6; sgrau++){
+            long ts[7] = {0,0,0,0,0,0,0}; ts[sgrau] = 1;      /* o monómio t^s */
+            long tD[7]; for(int k = 0; k < 7; k++) tD[k] = k * ts[k];
+            int bate = 1;
+            for(int k = 0; k < 7; k++) if(tD[k] != sgrau * ts[k]) bate = 0;
+            if(bate) euler_ok++;
+        }
+        printf("      e sem diferenças finitas, em %ld pares de polinómios inteiros:\n", pares);
+        printf("        Leibniz  D(ab) = D(a)b + aD(b) : %ld falhas   (resíduo ZERO)\n", maus_leib);
+        printf("        linear   D(a+b) = D(a) + D(b)  : %ld falhas\n", maus_lin);
+        printf("        Euler    (tD)(t^s) = s·t^s     : bate em %ld de 7 graus\n\n", euler_ok);
+        ok("e as duas leis são IDENTIDADES, não aproximações: em 15625 pares de polinómios"
+           " inteiros de grau 2, D(ab) = D(a)b + aD(b) e D(a+b) = D(a) + D(b) valem"
+           " COEFICIENTE A COEFICIENTE, com resíduo zero e sem um h. O produto é a"
+           " convolução (rt_conv da lib) e a derivada é uma reindexação — num polinómio ela"
+           " não é limite nenhum. E o Euler do §F3 entra pelo mesmo caminho: (tD)(t^s) ="
+           " s·t^s nos sete graus, exacto",
+           maus_leib == 0 && maus_lin == 0 && maus_euler == 0
+           && pares == 15625 && euler_ok == 7);
+    }
     printf("      Leibniz é a cláusula que liga D às DUAS operações do contrato ao mesmo tempo:\n");
     printf("      ele é morfismo para a soma e QUASE morfismo para o produto — quase, porque o\n");
     printf("      resultado tem dois termos em vez de um. É essa falta de simetria que carrega a\n");
