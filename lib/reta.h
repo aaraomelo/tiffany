@@ -824,6 +824,140 @@ static int rt_escreve_decimal(int sinal, long p, long q, int casas, char *d, int
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════════
+ * AS INVERSAS — e a armadilha que elas trazem consigo.
+ *
+ * Toda operação com fibra tem volta (`project-corpos-a-escada-fecha`), e esta casa está
+ * cheia de pares: a raiz e a potência, o log e a exponencial, o acos e o cosseno, a
+ * fracção contínua e os convergentes, a conjugação consigo própria. Reuni-los aqui é
+ * útil por uma razão que não é a comodidade:
+ *
+ *      MEDIR f(f⁻¹(x)) = x NÃO MEDE NADA.
+ *
+ * É a definição do par relida. E não é um erro teórico — foi encontrado três vezes num
+ * dia, sempre disfarçado por conversões que o tornavam ilegível:
+ *
+ *      octeto.c   ok(|acos(ip/(n0·n1))·180/π − acos(−1/3)·180/π| < 1e-9)
+ *                 e ip/(n0·n1) É −1/3: dois acos e duas conversões a mascarar x = x
+ *      octeto.c   ok(|acos(cos(2π/3))·180/π − 120| < 1e-9)
+ *                 que é acos∘cos, a função e a sua inversa
+ *      gerador    difz = |√(L/C) − √((L/2)/(C/2))|
+ *                 e (L/2)/(C/2) É L/C
+ *
+ * A regra que daí sai: quando os dois lados de uma comparação passam pela MESMA inversa,
+ * ela cancela-se e o que fica é a igualdade de dentro. Ou se mede a igualdade de dentro
+ * — que costuma ser INTEIRA —, ou não se mede nada.
+ *
+ * ── E AS INVERSAS EXACTAS SÃO INTEIRAS ──────────────────────────────────────────────
+ * Onde a fibra existe em ℤ, a inversa não precisa de vírgula: a raiz k-ésima acha-se por
+ * busca binária, o logaritmo discreto por multiplicação repetida, e as duas RECUSAM
+ * quando não há fibra — que é a metade que as torna medições e não adivinhas.
+ *
+ *   PAR                       DIRECTA              INVERSA            onde
+ *   potência ↔ raiz           rt_ipow              rt_raiz_k          aqui
+ *   quadrado ↔ raiz           x*x                  rt_raiz_exacta     aqui
+ *   base ↔ expoente           rt_ipow              rt_log_int         aqui
+ *   p/q ↔ palavra             rt_cf_para           rt_cf_de           aqui
+ *   a+b√D ↔ a−b√D             rt_zd_conj           rt_zd_conj         (involução)
+ *   ×a mod p ↔ ×a⁻¹ mod p     rt_pot_mod           rt_inv_mod         aqui
+ *   M ↔ M⁻¹ com |det|=1       rt_mul_mat           rt_inversa2        (= rt_adjunta2/det)
+ *   [p:q] ↔ [q:p] em ℙ¹        a TROCA              a propria          (involucao, Lei 0)
+ *   coeficientes ↔ reversão   rt_reverte           rt_reverte         (involução)
+ *   M ↔ Mᵀ                    rt_transpoe          rt_transpoe        (involução)
+ *
+ * As três involuções da coluna da direita são o mesmo objecto que a Lei 1: espectro
+ * {+1,−1}, e f∘f = id. Medir f∘f = id NELAS também não mede — o que mede é f ≠ id.
+ * ═══════════════════════════════════════════════════════════════════════════════════ */
+
+/* A CONJUGAÇÃO EM ℤ[√D]: a dobra b ↦ −b, e é a sua própria inversa. */
+static void rt_zd_conj(long a, long b, long *ca, long *cb){ *ca = a; *cb = -b; }
+
+/* A RAIZ k-ÉSIMA EXACTA: existe r inteiro com rᵏ = x? Busca binária, sem vírgula.
+ * Devolve 1 e escreve r, ou 0 se não existe — e o 0 é metade do valor desta função. */
+static int rt_raiz_k(long x, int k, long *r){
+    if(k <= 0) return 0;
+    if(k == 1){ if(r) *r = x; return 1; }
+    if(x < 0){                                  /* ímpar tem raiz negativa; par não tem */
+        if(k % 2 == 0) return 0;
+        long rr;
+        if(!rt_raiz_k(-x, k, &rr)) return 0;
+        if(r) *r = -rr;
+        return 1;
+    }
+    if(x < 2){ if(r) *r = x; return 1; }
+    long lo = 1, hi = x;
+    while(lo < hi){
+        long mid = lo + (hi - lo + 1)/2;
+        /* mid^k > x ? — com corte, para não transbordar ao elevar */
+        long v = 1; int passou = 0;
+        for(int t = 0; t < k; t++){
+            if(mid != 0 && v > x / mid){ passou = 1; break; }
+            v *= mid;
+        }
+        if(passou || v > x) hi = mid - 1; else lo = mid;
+    }
+    long v = 1;
+    for(int t = 0; t < k; t++) v *= lo;
+    if(v != x) return 0;
+    if(r) *r = lo;
+    return 1;
+}
+
+/* O LOGARITMO INTEIRO: existe k com bᵏ = n? É a inversa da potência do lado do EXPOENTE,
+ * e é o que substitui `log(n)/log(b)` quando a pergunta é sobre inteiros — sem dois
+ * logaritmos, sem uma divisão, e sem a régua que a divisão de logaritmos obriga a
+ * escolher. Devolve 1 e escreve k, ou 0 se n não é potência de b. */
+static int rt_log_int(long n, long b, int *k){
+    if(b < 2 || n < 1) return 0;
+    long v = 1; int e = 0;
+    while(v < n){
+        if(v > n / b) return 0;                 /* o próximo passo já excede: não é potência */
+        v *= b; e++;
+    }
+    if(v != n) return 0;
+    if(k) *k = e;
+    return 1;
+}
+
+/* ── O DUAL, E A INVERSÃO QUE SAI DELE ───────────────────────────────────────
+ *
+ * `thm:derivacao-primitivas` do Corpo Universal: as cinco operações — Soma, Multiplicação,
+ * Divisão, Dual, Inversão — NÃO são independentes. O dual emparelha com cada uma:
+ *
+ *      M + M†  = tr M · I        o CENTRO
+ *      M · M†  = det M · I       a MEMBRANA
+ *      M⁻¹     = M† / det M      a INVERSÃO É A DIVISÃO DO DUAL
+ *
+ * «Cada operação, emparelhada com o dual, dá a sua parceira, e a parceira não entra na
+ * lista.» Pela mesma conta a subtracção é a soma do dual — a − b = a ⊕ b† — e é por isso
+ * que são CINCO e não sete.
+ *
+ * Por isso a inversa NÃO se escreve aqui: escreve-se o DUAL, e a inversa sai dele. Eu
+ * tinha escrito `Inv[0] = M[3]/d` à mão, que é a adjunta sem lhe chamar o nome — e uma
+ * operação escrita à mão onde havia uma derivação é a lista a crescer sem razão.
+ *
+ * E NA RECTA PROJECTIVA A INVERSÃO NEM DIVISÃO É (`def:lei0` do geométrico): é a TROCA
+ * [p:q] ↦ [q:p], sem teste e sem ramo, e daí 0† = ∞. As duas leituras concordam — a troca
+ * S = [[0,1],[1,0]] tem det = −1 e é a sua própria adjunta, logo S⁻¹ = −S, que em ℙ¹ é o
+ * mesmo ponto a menos de escala. */
+
+/* O DUAL de uma 2×2: a adjunta. É ele a primitiva; tudo o resto sai daqui. */
+static void rt_adjunta2(const long *M, long *A){
+    A[0] =  M[3]; A[1] = -M[1];
+    A[2] = -M[2]; A[3] =  M[0];
+}
+
+/* A INVERSA, DERIVADA: M⁻¹ = M†/det M. Com |det| = 1 ela é INTEIRA — a condição da
+ * unidade do `thm:cruzado-potencia`, e é por isso que a órbita metálica volta sem sair
+ * de ℤ. Devolve 1, ou 0 quando |det| ≠ 1: aí a inversa existe, mas não neste corpo. */
+static int rt_inversa2(const long *M, long *Inv){
+    long d = M[0]*M[3] - M[1]*M[2];
+    if(d != 1 && d != -1) return 0;
+    rt_adjunta2(M, Inv);                        /* o DUAL */
+    for(int i = 0; i < 4; i++) Inv[i] /= d;     /* dividido pelo determinante */
+    return 1;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════════
  * A INDUÇÃO E A META-INDUÇÃO — a recursão formalizada, e sem casos especiais.
  *
  * `def:inducao` e `thm:meta-inducao` do Corpo Universal. O par é o de sempre:

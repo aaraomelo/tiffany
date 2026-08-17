@@ -406,7 +406,7 @@ renormaliza ca31a22ea5e1ff3f 0
 residuo_gerador 300a6b6e998ef497 0
 residuo_universal 0f3aadabb52d8da3 0
 residuos_totais 52cf778fe4c28b37 0
-reta 5aaab1bccd29f623 0
+reta 371a6fe7e4c91bc4 0
 reversao 6ce3ed15e79f47b7 0
 ribossomo 5d80dbc0f2781041 0
 rn 6a6a258280263c85 0

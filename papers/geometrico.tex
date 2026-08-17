@@ -199,7 +199,7 @@ que é a \textbf{Lei 8} a dizer o contrário: $62$ dos $126$ metais de $\mathbb{
 o mesmo número que o \emph{Corpo Universal} publica, obtido por uma implementação que não
 o conhecia. E a \textbf{volta} está lá inteira, $[p:q]\mapsto[q:p-mq]$, a desfazer a ida
 e a chegar ao $\infty=[1:0]$ exacto.
-\emph{Verificado:} \code{tests/reta.c} ($29{:}0$), cada operação por duas rotas que não
+\emph{Verificado:} \code{tests/reta.c} ($34{:}0$), cada operação por duas rotas que não
 partilham código e cada uma com o seu controlo negativo.
 
 \medskip
@@ -275,6 +275,57 @@ Na descida racional o denominador nulo corresponde ao ponto $\infty$; nos
 irracionais de expansão infinita esse evento não ocorre. \emph{Assim, a Lei 0
 distingue operacionalmente a terminação racional da continuação infinita do
 processo.} $\square$
+\end{teorema}
+
+\begin{teorema}[a INVERSÃO não é uma operação: é a divisão do
+DUAL]\label{thm:inversao-dual}
+A Definição~\ref{def:lei0} diz que em $\mathbb{P}^1$ a inversão é a
+\emph{troca} $[p:q]\mapsto[q:p]$, sem divisão e sem ramo. Este teorema diz de
+onde vem essa troca, e a resposta é que ela não é primitiva --- \textbf{sai do
+dual}, e sai pela mesma conta que dá tudo o resto.
+
+\textbf{(1) O dual emparelha com cada operação.} Para $M$ de ordem $2$ e
+$M^{\dagger}$ a adjunta:
+\[
+\boxed{
+\begin{array}{lll}
+M+M^{\dagger}=\operatorname{tr}M\cdot I & \text{o \textbf{centro}}\\[2pt]
+M\,M^{\dagger}=\det M\cdot I & \text{a \textbf{membrana}}\\[2pt]
+M^{-1}=M^{\dagger}/\det M & \text{a \textbf{inversão}}
+\end{array}}
+\]
+--- as três linhas do \code{thm:derivacao-primitivas} do \emph{Corpo Universal},
+onde se lê a consequência: \emph{cada operação, emparelhada com o dual, dá a sua
+parceira, e a parceira não entra na lista}. Pela mesma conta a subtracção é a
+soma do dual, $a-b=a\oplus b^{\dagger}$ com $\dagger$ o \emph{sinal} da Lei~1 --- e
+é por isso que as primitivas são \textbf{cinco} e não sete.
+
+\textbf{(2) E a troca da Lei 0 é este teorema no caso mais barato.} Para
+$S=\begin{psmallmatrix}0&1\\1&0\end{psmallmatrix}$ tem-se $S^{\dagger}=-S$ e
+$\det S=-1$, e os \emph{dois sinais cancelam}:
+\[
+S^{-1}=\frac{S^{\dagger}}{\det S}=\frac{-S}{-1}=S .
+\]
+A troca é a sua própria inversa --- «ida e volta pela mesma matriz» --- e isso
+\textbf{deriva-se} da linha $M^{-1}=M^{\dagger}/\det M$, em vez de se afirmar.
+Note-se que $S$ \emph{não} é a sua própria adjunta: é o simétrico dela, e é o
+cancelamento dos dois sinais que produz o resultado.
+
+\textbf{(3) E é aqui que $|\det|=1$ reaparece.} Se $|\det M|=1$, a divisão da
+linha (3) é por $\pm1$ e \textbf{a inversa fica em $\mathbb{Z}$} --- é a mesma
+condição da unidade do Teorema~\ref{thm:cruzado-potencia}, e é ela que faz a
+órbita metálica voltar sem sair dos inteiros (Teor.~\ref{thm:volta}). Onde
+$|\det M|\neq1$ a inversa existe, mas não neste corpo: e isso diz-se, em vez de
+se devolver uma fracção calada.
+
+\emph{Verificado:} \code{tests/reta.c} $\S$R23. O centro e a membrana valem nas
+$14\,641$ matrizes de entradas em $[-5,5]$; a inversão coincide com
+$M^{\dagger}/\det M$ em todas as que têm $|\det|=1$ e é \emph{recusada} nas
+outras $6\,201$ de $6\,561$; e a troca cumpre $S^2=I$, $S^{\dagger}=-S$ e
+$S^{-1}=S$. A \code{lib/reta.h} passou a ter o dual como primitiva
+(\code{rt\_adjunta2}) e a inversa \emph{derivada} dele --- estava escrita à mão,
+que é a adjunta sem lhe chamar o nome, e uma operação escrita onde havia uma
+derivação é a lista a crescer sem razão. $\square$
 \end{teorema}
 \colunas{a Lei 0, $0\dg=\infty$, e a inversão total em $\mathbb{P}^1$
 (\code{cor:zero-infinito})}

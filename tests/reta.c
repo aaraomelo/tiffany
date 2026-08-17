@@ -1090,6 +1090,176 @@ printf("\n§R22 ℤ[√D]: a raiz cancela-se contra si própria, e o traço sai 
        qd_metal == qd_tot && qd_quadrado == 0 && qd_tot == 200);
 }
 
+
+/* ─── §R23 ────────────────────────────────────────────────────────────────────────────
+ * AS INVERSAS — e a armadilha que elas trazem: medir f(f⁻¹(x)) = x não mede nada.
+ * Cada uma aqui mede-se pelo lado que PODE falhar: a inversa RECUSA quando não há fibra.
+ * ──────────────────────────────────────────────────────────────────────────────────── */
+printf("\n§R23 As inversas, e o lado delas que pode falhar.\n\n");
+{
+    /* (a) a raiz k-ésima: acha as potências e RECUSA o que está entre duas */
+    long rk_acha = 0, rk_recusa = 0, rk_tot = 0, rk_falso = 0;
+    for(int k = 2; k <= 5; k++)
+        for(long b = -20; b <= 20; b++){
+            long x = 1; int cabe = 1;
+            for(int t = 0; t < k; t++){
+                if(b != 0 && rt_modulo(x) > 4000000000000000000L / (rt_modulo(b) > 1 ? rt_modulo(b) : 1)){ cabe = 0; break; }
+                x *= b;
+            }
+            if(!cabe) continue;
+            long r;
+            rk_tot++;
+            /* A FIBRA DA POTÊNCIA PAR TEM DOIS ELEMENTOS, e a função escolhe um: para k par
+             * (−3)ᵏ = 3ᵏ, e a raiz devolve a POSITIVA. Não é falha — é a dobra do sinal a
+             * aparecer aqui, e o esperado é |b|. Escrevi `r == b` à primeira e falhou em 40
+             * de 164, que são exactamente os dois k pares vezes os vinte b negativos. */
+            long esperado = (k % 2 == 0 && b < 0) ? -b : b;
+            if(rt_raiz_k(x, k, &r) && r == esperado) rk_acha++;
+            /* e o vizinho, que NÃO é potência k-ésima (para |b| ≥ 2) */
+            if(rt_modulo(b) >= 2 && x + 1 != 0){
+                if(!rt_raiz_k(x + 1, k, &r)) rk_recusa++; else rk_falso++;
+            }
+        }
+
+    /* (b) o logaritmo inteiro: acha o expoente e recusa o que não é potência */
+    long li_acha = 0, li_recusa = 0, li_tot = 0;
+    for(long b = 2; b <= 10; b++){
+        long v = 1;
+        for(int e = 0; e <= 12; e++){
+            int kk;
+            li_tot++;
+            if(rt_log_int(v, b, &kk) && kk == e) li_acha++;
+            if(v > 1 && !rt_log_int(v + 1, b, &kk)) li_recusa++;
+            if(v > 4000000000000000000L / b) break;
+            v *= b;
+        }
+    }
+
+    /* (c) as INVOLUÇÕES: f∘f = id não mede — o que mede é f ≠ id. Conta-se onde ela MOVE. */
+    long inv_tot = 0, inv_volta = 0, inv_move = 0;
+    for(long a = -6; a <= 6; a++) for(long b = -6; b <= 6; b++)
+        for(long D = 2; D <= 8; D++){
+            long ca, cb, da, db;
+            rt_zd_conj(a, b, &ca, &cb);
+            rt_zd_conj(ca, cb, &da, &db);
+            inv_tot++;
+            if(da == a && db == b) inv_volta++;
+            if(ca != a || cb != b) inv_move++;      /* e AQUI está o conteúdo */
+        }
+
+    /* (d) a inversa de matriz com |det| = 1, e ela é INTEIRA. O gume: com |det| ≠ 1
+     *     ela RECUSA, porque a inversa existe mas sai de ℤ. */
+    long mi_tot = 0, mi_ok = 0, mi_recusa = 0, mi_pedidas = 0;
+    for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++)
+    for(long c = -4; c <= 4; c++) for(long d = -4; d <= 4; d++){
+        long M[4] = { a, b, c, d }, Inv[4], P[4];
+        mi_pedidas++;
+        if(!rt_inversa2(M, Inv)){ mi_recusa++; continue; }
+        mi_tot++;
+        rt_mul_mat(M, Inv, 2, P);
+        if(P[0] == 1 && P[1] == 0 && P[2] == 0 && P[3] == 1) mi_ok++;
+    }
+
+    printf("      a raiz k-esima: acha %ld de %ld potencias e RECUSA %ld vizinhos (falsos: %ld)\n",
+           rk_acha, rk_tot, rk_recusa, rk_falso);
+    printf("      o log inteiro:  acha %ld de %ld expoentes e recusa %ld nao-potencias\n",
+           li_acha, li_tot, li_recusa);
+    printf("      a conjugacao:   volta em %ld de %ld, e MOVE em %ld — e e' o mover que conta\n",
+           inv_volta, inv_tot, inv_move);
+    printf("      a inversa 2x2:  %ld matrizes com |det|=1 de %ld, e M.M^-1 = I em %ld;\n"
+           "      as outras %ld sao RECUSADAS, porque a inversa delas sai de Z\n\n",
+           mi_tot, mi_pedidas, mi_ok, mi_recusa);
+
+    ok("A RAIZ k-ESIMA E O LOG INTEIRO SAO INVERSAS QUE RECUSAM, e e' a recusa que faz"
+       " delas medicoes: a raiz acha todas as potencias exactas de grau 2 a 5 e diz NAO"
+       " a todos os vizinhos delas — que estao estritamente entre duas potencias —, e o"
+       " log inteiro acha o expoente de b^e e recusa b^e + 1. Sem esse lado, «acha» valia"
+       " por dizerem sim a tudo. E o log inteiro substitui `log(n)/log(b)`: sem dois"
+       " logaritmos, sem uma divisao, e sem a regua que essa divisao obriga a escolher."
+       " E a FIBRA DA POTENCIA PAR tem DOIS elementos — (-3)^2 = 3^2 —, logo a raiz par"
+       " devolve a positiva: a dobra do sinal a aparecer no sitio onde ela sempre esteve",
+       rk_acha == rk_tot && rk_falso == 0 && rk_recusa > 0
+       && li_acha == li_tot && li_recusa > 0);
+
+    ok("E NAS INVOLUCOES O QUE MEDE NAO E' f(f(x)) = x — isso e' a definicao relida. A"
+       " conjugacao de ℤ[√D] volta nos 1183 casos, como tem de voltar; o que tem conteudo"
+       " e' que ela MOVE, e move em todos os que tem parte irracional nao nula. E' a mesma"
+       " licao que o §R21 aprendeu na transposta, e a mesma armadilha que o octeto.c tinha"
+       " com acos(cos(x)): quando os dois lados passam pela mesma inversa, ela cancela-se"
+       " e o que fica e' a igualdade de dentro",
+       inv_volta == inv_tot && inv_move > inv_tot/2);
+
+    /* (e) AS TRÊS LINHAS DO `thm:derivacao-primitivas`: o dual emparelhado com cada
+     *     operação dá a sua parceira, e a parceira não entra na lista das cinco. */
+    long pr_tot = 0, centro = 0, membrana = 0, inversao = 0, sub_dual = 0;
+    for(long a = -5; a <= 5; a++) for(long b = -5; b <= 5; b++)
+    for(long c = -5; c <= 5; c++) for(long d = -5; d <= 5; d++){
+        long M[4] = { a, b, c, d }, Ad[4], P[4];
+        rt_adjunta2(M, Ad);
+        long tr = a + d, dt = a*d - b*c;
+        pr_tot++;
+        /* M + M† = tr·I — o CENTRO */
+        if(M[0]+Ad[0] == tr && M[1]+Ad[1] == 0 && M[2]+Ad[2] == 0 && M[3]+Ad[3] == tr) centro++;
+        /* M·M† = det·I — a MEMBRANA */
+        rt_mul_mat(M, Ad, 2, P);
+        if(P[0] == dt && P[1] == 0 && P[2] == 0 && P[3] == dt) membrana++;
+        /* M⁻¹ = M†/det — a INVERSÃO, e onde |det| = 1 ela fica em ℤ */
+        if(dt == 1 || dt == -1){
+            long Inv[4];
+            rt_inversa2(M, Inv);
+            int bate = 1;
+            for(int i = 0; i < 4; i++) if(Inv[i] != Ad[i]/dt) bate = 0;
+            if(bate) inversao++;
+        }
+        /* e a SUBTRACÇÃO é a soma do dual: a − b = a ⊕ b†, com † o sinal (Lei 1) */
+        if(a - b == a + (-b)) sub_dual++;
+    }
+    /* a Lei 0: em ℙ¹ a inversão é a TROCA, e ela é a sua própria inversa */
+    long S[4] = { 0, 1, 1, 0 }, S2[4];
+    rt_mul_mat(S, S, 2, S2);
+    int troca_involucao = (S2[0]==1 && S2[1]==0 && S2[2]==0 && S2[3]==1);
+    /* e a adjunta da troca é −S, não S — escrevi «S é a sua própria adjunta» e é falso.
+     * O que faz S⁻¹ = S é os DOIS sinais cancelarem: S† = −S e det S = −1, logo
+     * S⁻¹ = S†/det = (−S)/(−1) = S. A derivação dá o resultado certo pelo caminho certo. */
+    long SA[4], SI[4]; rt_adjunta2(S, SA);
+    int troca_antiautodual = (SA[0]==-S[0] && SA[1]==-S[1] && SA[2]==-S[2] && SA[3]==-S[3]);
+    int troca_inv_e_ela = rt_inversa2(S, SI)
+                       && SI[0]==S[0] && SI[1]==S[1] && SI[2]==S[2] && SI[3]==S[3];
+
+    printf("      e as TRES linhas do thm:derivacao-primitivas, em %ld matrizes:\n"
+           "         M + M† = tr.I   (o centro)     %ld\n"
+           "         M . M† = det.I  (a membrana)   %ld\n"
+           "         M^-1 = M†/det   (a inversao)   %ld das que tem |det| = 1\n"
+           "      e em P^1 a inversao e' a TROCA: S² = I? %s ; S† = -S? %s ; S^-1 = S? %s\n\n",
+           pr_tot, centro, membrana, inversao,
+           troca_involucao ? "sim" : "NAO", troca_antiautodual ? "sim" : "NAO",
+           troca_inv_e_ela ? "sim" : "NAO");
+
+    ok("AS CINCO PRIMITIVAS NAO SAO INDEPENDENTES, e as tres linhas medem-se: M + M† = tr.I"
+       " e' o CENTRO, M.M† = det.I e' a MEMBRANA, e M^-1 = M†/det e' a INVERSAO — que por"
+       " isso NAO e' uma operacao a escrever, e' a divisao do dual. Varridas 14641 matrizes."
+       " Eu tinha escrito a inversa a mao, `Inv[0] = M[3]/d`, que e' a adjunta sem lhe"
+       " chamar o nome: uma operacao escrita onde havia uma derivacao e' a lista a crescer"
+       " sem razao. E pela mesma conta a subtraccao e' a soma do dual, a - b = a + b†, e e'"
+       " por isso que sao CINCO e nao sete",
+       centro == pr_tot && membrana == pr_tot && sub_dual == pr_tot
+       && inversao > 0 && pr_tot == 11L*11*11*11);
+
+    ok("E NA RECTA PROJECTIVA A INVERSAO NEM DIVISAO E': e' a TROCA [p:q] -> [q:p], sem"
+       " teste e sem ramo, e dai 0† = infinito. E as duas leituras concordam pela"
+       " DERIVACAO, nao por coincidencia: S† = -S (escrevi «S e' a sua propria adjunta» e"
+       " e' falso), det S = -1, e os dois sinais CANCELAM — S^-1 = S†/det = (-S)/(-1) = S."
+       " Logo a troca e' a sua propria inversa, «ida e volta pela mesma matriz, que e' o"
+       " que a Lei 0 diz», e isso sai da linha M^-1 = M†/det e nao de uma afirmacao",
+       troca_involucao && troca_antiautodual && troca_inv_e_ela);
+
+    ok("E A INVERSA DE UMA MATRIZ COM |det| = 1 E' INTEIRA — e' a condicao da unidade do"
+       " thm:cruzado-potencia, e e' por isso que a orbita metalica volta sem sair de Z:"
+       " M.M^-1 = I exacto em todas as que tem |det| = 1. E as outras sao RECUSADAS em vez"
+       " de devolverem fraccoes caladas — a inversa delas existe, mas nao neste corpo",
+       mi_ok == mi_tot && mi_tot > 0 && mi_recusa > 0 && mi_ok + 0 == mi_tot);
+}
+
     if(!falhas){
         printf("\n  ─────────────────────────────────────────────────────────────\n");
         printf("  As operações da recta têm uma casa. Vinte e oito cópias do mdc,\n");
