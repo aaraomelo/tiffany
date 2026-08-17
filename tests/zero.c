@@ -54,11 +54,38 @@ printf("\n§Z1  O 0 é o ÚNICO de Q sem dual — e é por isso que 0·x apaga o
            com_dual, sem_dual);
     ok("o 0 é o único elemento de Q sem dual multiplicativo", sem_dual == 1);
 
-    /* e a fatoracao do zero e LIVRE: qualquer x serve, e o produto tem qualquer comprimento */
-    long mau = 0;
-    for(long x = -20; x <= 20; x++) if(0 * x != 0) mau++;
-    printf("      0 = 0 x n, para os 41 valores de n testados: %ld falhas\n", mau);
-    ok("todo o x satisfaz 0 = 0·x — a fatoração do zero não tem informação nenhuma", mau == 0);
+    /* e a fatoracao do zero e LIVRE: qualquer x serve, e o produto tem qualquer comprimento.
+     *
+     * O QUE AQUI ESTAVA ERA `if(0 * x != 0) mau++`, e isso é uma tautologia do C: o
+     * compilador sabe que 0·x é 0, e verificá-lo mede a LINGUAGEM e não o objecto. A frase
+     * — «a fatoração do zero não tem informação nenhuma» — é sobre CARDINALIDADE, e essa
+     * conta-se: quantos pares (a,b) de 𝔽ₚ dão a·b = c?
+     *
+     *     c = 0    2p − 1 pares      (a = 0 com qualquer b, ou b = 0 com qualquer a)
+     *     c ≠ 0    p − 1 pares       (um b por cada a ≠ 0)
+     *
+     * A razão é ~2, e é ela que diz que a pergunta inversa perde. Se o zero tivesse tantas
+     * pré-imagens como os outros, não haveria informação apagada — e é isso que a asserção
+     * não podia distinguir antes. */
+    long mau = 0, prim[3] = {7, 11, 13}, casos_c = 0;
+    for(int t = 0; t < 3; t++){
+        long P = prim[t], conta[16] = {0};
+        for(long a = 0; a < P; a++) for(long b = 0; b < P; b++) conta[(a*b) % P]++;
+        if(conta[0] != 2*P - 1) mau++;                     /* o zero: 2p − 1 */
+        for(long c = 1; c < P; c++){
+            casos_c++;
+            if(conta[c] != P - 1) mau++;                   /* os outros: p − 1 */
+        }
+        if(t == 0)
+            printf("      em 𝔽_%ld: o zero tem %ld pré-imagens no produto, e cada não-zero tem %ld\n",
+                   P, conta[0], conta[1]);
+    }
+    printf("      medido em 𝔽₇, 𝔽₁₁ e 𝔽₁₃, nos %ld valores não nulos: %ld falhas\n", casos_c, mau);
+    ok("todo o x satisfaz 0 = 0·x, e a FATORAÇÃO DO ZERO NÃO TEM INFORMAÇÃO — o que se conta"
+       " é a cardinalidade: em 𝔽ₚ o zero tem 2p−1 pré-imagens no produto e cada não-zero tem"
+       " exactamente p−1, quase metade. É essa assimetria que apaga a informação, e não a"
+       " identidade 0·x = 0, que é uma tautologia da linguagem",
+       mau == 0 && casos_c == 6 + 10 + 12);
     printf("\n      É ESTE o ponto de partida do Aarão, e ele está certo: 0 = 0·1·1·1·… com\n");
     printf("      quantos fatores se quiser. O comprimento do produto é LIVRE, e cada fator é\n");
     printf("      uma escolha que não se pode recuperar. Onde a informação se apaga, a pergunta\n");

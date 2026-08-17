@@ -102,19 +102,44 @@ int main(void){
         }
         /* o GUME: em 𝔽ₚ o zero NÃO tem inverso, e um `a` múltiplo de p também não —
          * sem este lado, «o inverso desfaz» valia por nunca se lhe pedir o impossível */
-        for(int t = 0; t < 4; t++){
-            long p = PR[t], v = rt_inv_mod(p, p);    /* p ≡ 0 (mod p) */
-            if(p*v % p != 1) nao_inv++;
+        /* E O GUME NÃO MORDIA. `p*v % p != 1` é SEMPRE verdade — p·v ≡ 0 (mod p) para
+         * qualquer v —, portanto `nao_inv == 4` passava independentemente do que
+         * rt_inv_mod devolvesse. A tautologia estava escondida por o teste parecer usar o
+         * resultado da função.
+         *
+         * O que se afirma verifica-se CONTANDO SOLUÇÕES, e é aí que há conteúdo: em 𝔽ₚ a
+         * equação a·v = 1 tem EXACTAMENTE uma solução quando a ≠ 0 e NENHUMA quando a = 0.
+         * Varre-se v e conta-se — e as duas metades vão juntas, porque «não há inverso do
+         * zero» sem «há um e um só dos outros» não distingue um corpo de um anel qualquer. */
+        long zero_sem = 0, outros_um = 0, testados_a = 0, varridos = 0;
+        for(int t = 0; t < 4; t++){                  /* os primos que cabem: varre-se TUDO */
+            long p = PR[t];
+            if(p > 1100) continue;                   /* 1009² ainda cabe; 65537² não */
+            varridos++;
+            long quantos0 = 0;
+            for(long v = 0; v < p; v++) if((0 * v) % p == 1) quantos0++;
+            if(quantos0 == 0) zero_sem++;            /* o zero: NENHUMA solução */
+            for(long a = 1; a < p; a++){
+                long quantos = 0;
+                for(long v = 0; v < p; v++) if((a * v) % p == 1) quantos++;
+                testados_a++;
+                if(quantos == 1) outros_um++;        /* os outros: UMA, e uma só */
+            }
         }
+        nao_inv = zero_sem;
         printf("      rt_ipow contra o laço directo: %ld de %ld\n", pot_ok, pot_tot);
         printf("      rt_inv_mod: a·a⁻¹ = 1 em %ld de %ld, em quatro primos\n", inv_ok, inv_tot);
-        printf("      GUME: o zero de 𝔽ₚ não tem inverso, e isso confirma-se em %ld de 4\n\n",
-               nao_inv);
+        printf("      GUME, por CONTAGEM DE SOLUÇÕES de a·v = 1 em 𝔽ₚ:\n");
+        printf("        a = 0 : nenhuma solução, em %ld de %ld primos varridos por inteiro\n",
+               zero_sem, varridos);
+        printf("        a ≠ 0 : exactamente UMA, em %ld de %ld valores\n\n", outros_um, testados_a);
         ok("A POTÊNCIA E O INVERSO EM 𝔽ₚ, e o inverso mede-se pela DEFINIÇÃO — a·a⁻¹ = 1,"
            " e não contra uma segunda fórmula do inverso, que seria escrevê-lo duas vezes."
            " Quatro primos até 65537. Com o gume: o zero não tem inverso, e sem esse lado"
            " «o inverso desfaz» valia por nunca se lhe pedir o impossível",
-           pot_ok == pot_tot && inv_ok == inv_tot && nao_inv == 4 && pot_tot > 0);
+           pot_ok == pot_tot && inv_ok == inv_tot && pot_tot > 0
+           && varridos == 3 && zero_sem == varridos
+           && outros_um == testados_a && testados_a > 0);
     }
 
     /* ═══ §R2  BAREISS CONTRA AS PERMUTAÇÕES ════════════════════════════════ */

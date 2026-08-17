@@ -406,7 +406,7 @@ renormaliza 3a529afaea4b0343 0
 residuo_gerador efe736904ca2d0b0 0
 residuo_universal 0f3aadabb52d8da3 0
 residuos_totais 52cf778fe4c28b37 0
-reta eb5c9c4404de7aec 0
+reta deac7810d44406e3 0
 reversao 2e091bbdd10e2a80 0
 ribossomo bcba711c1222cddd 0
 rn 5ec655126a7b9ceb 0
@@ -494,7 +494,7 @@ volta_estrela 59d9d31fd90137e4 0
 wasm_sobe fc3f02b1e4561ff0 0
 xx 21095a6be4d46638 0
 ym_pnp c9dace961b02d965 0
-zero 8f1c8e3d30c99da5 0
+zero 22f5d1c77e521c6c 0
 zeta 74a1adada4217bd2 0
 zeta_global bb4d049db28f27f5 0
 zeta_universal c1995884d7e0d044 0
