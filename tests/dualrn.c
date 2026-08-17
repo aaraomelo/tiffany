@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include "reta.h"      /* rt_caminho_sup: o corte em inteiros */
 #include "unidade.h"
 
 /* z = a₀ + a, com a em R³ (onde o cruzado existe). O sinal s dá R^n (s=+1) ou R^n* (s=-1). */
@@ -78,6 +79,12 @@ static double dif(Z a, Z b){
 static Z aleat(int k){
     Z z = { sin(3.0*k+1), { cos(5.0*k+2), sin(7.0*k+3), cos(11.0*k+5) } };
     return z;
+}
+
+/* «existe x com x² < 2 acima de m/pot?» — em inteiros, m² < 2·pot². O m negativo serve
+ * sempre, que é o arranque da descida. */
+static int dr_serve_raiz2(long m, long pot, void *ctx){
+    (void)ctx; return m < 0 || m*m < 2*pot*pot;
 }
 
 int main(void){
@@ -252,11 +259,33 @@ printf("\n§D5  A COMPLETUDE: Cauchy converge, e o corte não deixa buraco.\n\n"
     /* (b) o corte de Dedekind: o conjunto dos racionais com x² < 2 não tem supremo em Q,
      *     e tem em R. Mede-se pela bissecção, que É a construção do corte. */
     printf("      (b) o CORTE de Dedekind: {x ∈ Q : x² < 2} não tem supremo em Q — e tem em R\n\n");
-    double lo=1, hi=2;
-    for(int k=0;k<80;k++){ double mid=(lo+hi)/2; if(mid*mid<2) lo=mid; else hi=mid; }
-    printf("      a fronteira do corte: %.15f    e √2 = %.15f\n", lo, sqrt(2.0));
-    printf("      resíduo: %.3e\n\n", fabs(lo-sqrt(2.0)));
-    ok("o corte tem fronteira, e ela é √2 — completude por cortes", fabs(lo-sqrt(2.0)) < 1e-14);
+    /* A BISSECÇÃO ERA EM DOUBLE E COMPARAVA-SE COM sqrt(2.0) — a construção contra a
+     * APROXIMAÇÃO DA LIBC, com um limiar de 1e-14 a segurar as duas. Mas o texto acima
+     * já diz o que é isto: «a bissecção, que É a construção do corte» — e o corte
+     * constrói-se em INTEIROS, que é o §sec:supremo do geometrico.tex:
+     *
+     *      m_k := max{ m : m/2^k < x para algum x ∈ S },   m_{k+1} ∈ {2m_k, 2m_k+1}
+     *
+     * O predicado «existe x com x² < 2 acima de m/2^k» é, em inteiros, m² < 2·(2^k)².
+     * E a fronteira caracteriza-se sem NUNCA formar √2: m é o MAIOR que serve, isto é
+     *
+     *      m² < 2·pot²   e   (m+1)² ≥ 2·pot²
+     *
+     * duas desigualdades inteiras, exactas, e que só √2 satisfaz naquele nível. A peça
+     * é rt_caminho_sup, de lib/reta.h. */
+    long pot20 = 0;
+    long m20 = rt_caminho_sup(dr_serve_raiz2, 20, 0, &pot20);
+    int abaixo = (m20*m20 < 2*pot20*pot20);
+    int e_o_maior = ((m20+1)*(m20+1) >= 2*pot20*pot20);
+    printf("      a fronteira do corte, construída em inteiros: %ld/%ld\n", m20, pot20);
+    printf("        m² < 2·pot²      %ld < %ld    %s\n", m20*m20, 2*pot20*pot20, abaixo?"sim":"NAO");
+    printf("        (m+1)² ≥ 2·pot²  %ld ≥ %ld    %s\n\n",
+           (m20+1)*(m20+1), 2*pot20*pot20, e_o_maior?"sim":"NAO");
+    ok("o corte tem fronteira, e ela é √2 — completude por cortes, e a fronteira"
+       " CONSTRÓI-SE em inteiros em vez de se comparar com a aproximação da libc: o"
+       " caminho é m/2^20 com m² < 2·pot² e (m+1)² ≥ 2·pot², duas desigualdades exactas"
+       " que só a fronteira satisfaz. Nem sqrt, nem fabs, nem limiar",
+       abaixo && e_o_maior && pot20 == 1048576L);
     printf("      As duas caracterizações são equivalentes e clássicas, e a nossa construção\n");
     printf("      satisfaz as duas. O que a cifra acrescenta é o CAMINHO: ela não postula o\n");
     printf("      limite, gera-o — cada convergente é um passo do gato, e a completude é o\n");

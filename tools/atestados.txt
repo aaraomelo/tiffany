@@ -156,7 +156,7 @@ dual_cadeia e5d34cc8b15fc348 0
 dual_spline_ttf 5af8277297aa852c 0
 dualidade f0c09bee87f518ac 0
 dualreta be4efd85d73a375e 0
-dualrn fb41e0308031d446 0
+dualrn b1b43ab4c1248a17 0
 dualsort 6ed810bbaae464a0 0
 dualsort_banco e829df2405ea94f6 0
 duas_pontes a50961f0657e4654 0
