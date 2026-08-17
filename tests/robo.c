@@ -321,11 +321,16 @@ printf("\n§R6  CONTROLAR: a ponta segue o alvo, e valida-se pelos dois caminhos
         for(int j = 0; j < NJ; j++) q[j] += passo*qd[j];
     }
     direta(q, &x, &y);
-    double errF = hypot(ax-x, ay-y);
+    /* «o erro final e' menor que 1e-6» e' (ax-x)^2 + (ay-y)^2 < 1e-12, sem hypot */
+    double errF2 = (ax-x)*(ax-x) + (ay-y)*(ay-y);
+    double errF = hypot(ax-x, ay-y);           /* so' para a linha que IMPRIME */
     printf("\n      erro inicial: %.6f    erro final: %.3e    chegou: %s\n",
            erro0, errF, chegou ? "sim" : "não");
     printf("      discordâncias de potência ao longo do percurso: %d\n\n", malP);
-    ok("a ponta chega ao alvo distribuindo o erro pelas juntas", chegou && errF < 1e-6);
+    ok("a ponta chega ao alvo distribuindo o erro pelas juntas — e o «menor que 1e-6»"
+       " compara-se no QUADRADO, (ax-x)^2 + (ay-y)^2 < 1e-12, sem hypot: a raiz ficou so'"
+       " na linha que imprime",
+       chegou && errF2 < 1e-12);
     ok("e a potência fecha em TODO o percurso — a adjunção não se quebra a mexer", malP == 0);
     printf("      E é a rede inteira: o erro é medido UMA vez na ponta, o corpo diferencial\n");
     printf("      reparte-o pelas juntas por Jᵀ, e cada junta é um motor com o seu DTC a\n");

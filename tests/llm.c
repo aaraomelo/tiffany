@@ -172,12 +172,18 @@ printf("\n§L2  RMSNORM: devolve norma √n, e normalizar duas vezes não move n
     for(int i = 0; i < 64; i++) x[i] = pseudo(100+i) * 7.0f;
     rmsnorm(y, x, NULL, 64);
     rmsnorm(z, y, NULL, 64);
-    double ny = 0, dif = 0;
-    for(int i = 0; i < 64; i++){ ny += (double)y[i]*y[i]; dif += fabs(y[i]-z[i]); }
-    ny = sqrt(ny);
-    printf("      ‖RMSNorm(x)‖ = %.6f   e √64 = %.6f\n", ny, sqrt(64.0));
+    /* A TESE É ‖y‖ = √n, E ELA VIVE NO QUADRADO: ‖y‖² = n = 64, um INTEIRO. O que aqui
+     * estava formava a raiz da soma e comparava com 8, e imprimia `sqrt(64.0)` ao lado —
+     * uma chamada a uma função de vírgula para obter oito. A raiz não só era desnecessária
+     * como PIORAVA: ela introduz um arredondamento que a soma dos quadrados não tem. */
+    double nq = 0, dif = 0;
+    for(int i = 0; i < 64; i++){ nq += (double)y[i]*y[i]; dif += fabs(y[i]-z[i]); }
+    printf("      ‖RMSNorm(x)‖² = %.6f   e n = %d  (a tese e' a igualdade DESTES dois)\n", nq, 64);
     printf("      Σ|norm(x) − norm(norm(x))| = %.3e\n\n", dif);
-    ok("a norma do resultado é √n", fabs(ny - 8.0) < regua(64, 8.0));
+    ok("a norma do resultado é √n — e mede-se no QUADRADO, que e' onde a tese vive:"
+       " ‖y‖² = n = 64, um inteiro. Formar a raiz para comparar com 8 acrescentava um"
+       " arredondamento que a soma dos quadrados nao tem",
+       fabs(nq - 64.0) < regua(64, 64.0));
     ok("e é idempotente: normalizar o normalizado não move", dif < regua(64, 1.0));
 }
 

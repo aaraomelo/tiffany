@@ -268,7 +268,7 @@ limiares 4dec8ea3c1266e52 0
 limite_escada 582f8604e39f093d 0
 linear 59ceee580cbe6d72 0
 liquida 6f6a73a8318e27bf 0
-llm 3ca3e3ba0ee143d5 0
+llm 58b4e72deceaa297 0
 llm_reversivel ad337505752179a9 0
 logico afd540f8d888135d 0
 logico_continuo 0cb6224c6d89cb4e 0
@@ -373,7 +373,7 @@ produto_dual ddd1edbd32b0678a 0
 progressoes 68a256306197805b 0
 projetiva 0575c1d6da355faf 0
 promove a305cad77d13697a 0
-quantico 5cf79db190356ce4 0
+quantico 18bf557aaf66a2ff 0
 quantificador_histerese afd27f900a63173a 0
 quantizador_universal 5432c65b6546dfe0 0
 quasi 96f357dfd131aff4 0
@@ -410,7 +410,7 @@ reta 5aaab1bccd29f623 0
 reversao 6ce3ed15e79f47b7 0
 ribossomo 5d80dbc0f2781041 0
 rn 6a6a258280263c85 0
-robo 584b5a523259b6e8 0
+robo 48d046f12dd5ee6b 0
 rotacao 1dd03ecf0025d4d2 0
 rotaciona d5e304bfd7d6ea7b 0
 rotulos da58cb7659dcef98 0

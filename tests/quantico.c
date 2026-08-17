@@ -297,11 +297,18 @@ int main(void){
         double ex = VAL(sx), ey = VAL(sy), ez = VAL(sz);
         M sx2 = mul(sx,sx), sy2 = mul(sy,sy);
         double ex2 = VAL(sx2), ey2 = VAL(sy2);
-        double dx = sqrt(ex2 - ex*ex), dy = sqrt(ey2 - ey*ey);
-        /* o lado direito: |<[σx,σy]>|/2 = |<2i σz>|/2 = |<σz>| */
+        /* AS VARIANCIAS SAO OS QUADRADOS, e Robertson vive neles: dx.dy >= |<sz>| e'
+         * dx^2.dy^2 >= <sz>^2, porque os dois lados sao nao negativos e x -> x^2 e'
+         * monotona neles. As duas raizes saem, e com elas sai um risco: `ex2 - ex*ex`
+         * pode dar negativo por arredondamento, e ai a raiz devolvia NaN — o quadrado
+         * nao tem esse problema. */
+        double dx2 = ex2 - ex*ex, dy2 = ey2 - ey*ey;
         double lado = fabs(ez);
-        ok("ROBERTSON vale: dA.dB >= |<[A,B]>|/2, no estado |0> com sigma_x e sigma_y",
-           dx*dy >= lado - 1e-12);
+        ok("ROBERTSON vale: dA.dB >= |<[A,B]>|/2, no estado |0> com sigma_x e sigma_y."
+           " E mede-se nos QUADRADOS — dx^2.dy^2 >= <sz>^2 —, que e' onde as variancias ja'"
+           " vivem: formar as duas raizes para as multiplicar e comparar acrescentava dois"
+           " arredondamentos e um NaN possivel, porque ex2 - ex.ex pode sair negativo",
+           dx2*dy2 >= lado*lado - 1e-12);
         /* A ASSERCAO QUE AQUI ESTAVA media a saturacao NUM estado so' — o |0>, onde
          * <sx> = <sy> = 0 e tudo da 0 ou 1. Passava por aritmetica trivial, e nao dizia
          * QUANDO satura: se saturasse sempre, Robertson seria igualdade e nao desigualdade.
@@ -342,8 +349,8 @@ int main(void){
             ok("e ela SATURA sse <sx> ou <sy> se anula — a identidade dx².dy² - |<sz>|² = <sx>².<sy>², medida",
                mau_lei == 0 && pior < 1e-12 && satura > 0 && folga > 0);
         }
-        printf("     -> dx = %.4f, dy = %.4f, produto %.4f; |<sz>| = %.4f. Igualdade.\n",
-               dx, dy, dx*dy, lado);
+        printf("     -> dx² = %.4f, dy² = %.4f, produto %.4f; <sz>² = %.4f. Igualdade.\n",
+               dx2, dy2, dx2*dy2, lado*lado);
         /* e onde o comutador é ZERO não há incerteza — mede-se com um operador que comuta */
         M com_zz = comuta(sz, sz);
         ok("e onde o COMUTADOR e zero o limite e zero: [sz,sz] = 0, e sz mede-se sem preco",
