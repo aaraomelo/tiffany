@@ -205,6 +205,29 @@ printf("\n§V2  E a FOLHA e' o mesmo par: a tinta e' a soma com sinal, o resto e
             com_sinal += a;
             sem_sinal += (a < 0 ? -a : a);
         }
+        /* quantos contornos têm área NEGATIVA — é essa a causa do buraco */
+        long neg_aqui = 0;
+        for(long c = 0; c < G.nc; c++) if(area_com_sinal(&G, c) < 0) neg_aqui++;
+        /* e o CONTRASTE, que é o que impede «tem buraco» de valer por «tudo tem»: procura-se
+         * um glifo em que TODOS os contornos correm no mesmo sentido — esse não tem buraco,
+         * e a sua soma com sinal é igual à soma sem sinal. Se não houver nenhum na fonte,
+         * diz-se, em vez de a asserção passar por omissão. */
+        long neg_sem = -1, pos_sem = 0;
+        {
+            struct glifo GS;
+            for(long i = 0; i < 3 && neg_sem < 0; i++)
+                for(long g = 1; g < 400; g++){
+                    if(!ttf_le(CAND[i], g, &GS) || GS.n == 0 || GS.nc < 1) continue;
+                    long p2 = 0, n2 = 0;
+                    for(long c = 0; c < GS.nc; c++){
+                        long a2 = area_com_sinal(&GS, c);
+                        if(a2 > 0) p2++; else if(a2 < 0) n2++;
+                    }
+                    if(p2 > 0 && n2 == 0){ neg_sem = 0; pos_sem = p2; break; }
+                    if(n2 > 0 && p2 == 0){ neg_sem = 0; pos_sem = n2; break; }
+                }
+            if(neg_sem < 0) neg_sem = 0;      /* não achou: não inventa contraste */
+        }
         long total = com_sinal < 0 ? -com_sinal : com_sinal;
         long so_positivas = sem_sinal;
         long buraco = so_positivas - total;
@@ -212,11 +235,20 @@ printf("\n§V2  E a FOLHA e' o mesmo par: a tinta e' a soma com sinal, o resto e
         printf("      soma SEM sinal (a letra cheia):       %ld\n", so_positivas);
         printf("      a diferenca (o buraco):               %ld\n", buraco);
         printf("      e a tinta e' MENOR que a letra cheia:  %s\n", total < so_positivas ? "sim" : "NAO");
+        printf("      contornos de area NEGATIVA neste glifo: %ld\n", neg_aqui);
+        printf("      e num glifo de sentido UNICO (sem buraco): %ld negativos, %ld do mesmo sinal\n",
+               neg_sem, pos_sem);
         ok("a TINTA e' a soma COM SINAL, e ela e' menor que a soma SEM sinal — porque o"
            " buraco SUBTRAI. Ignorar o sinal e somar tudo da' a letra CHEIA, sem o buraco: e'"
            " exactamente o que se perde ao ler so' um lado do par. E a folha do PDF e' o mesmo"
            " no grande — a parte escrita e a parte vazia sao UMA coisa com dois sinais",
-           total < so_positivas && total > 0 && buraco > 0);
+           /* `buraco > 0` É `total < so_positivas` reescrito — duas condições que dizem o
+            * mesmo, e uma delas não acrescenta nada. O que falta, e é o que pode falhar, é
+            * a CAUSA: tem de haver pelo menos um contorno de área NEGATIVA, que é o buraco.
+            * E o contraste, para que «tem buraco» não valha por «tudo tem»: um glifo sem
+            * buraco não tem contorno negativo nenhum. */
+           total < so_positivas && total > 0 && neg_aqui > 0
+           && neg_sem == 0 && pos_sem > 0);
     }
 
 printf("\n§V3  A VOLTA, que faltava: ler -> emitir -> ler devolve o contorno.\n\n");
