@@ -376,6 +376,69 @@ printf("\n§T5  Lineariza — e a reconstrução fecha com resíduo 0.\n\n");
         }
         if(((esq - dir) % pp + pp) % pp == 0) pars_ok++;
     }
+    /* E O PASSO QUE ESTA' POR BAIXO DAS DUAS: a ORTOGONALIDADE, que e' o lado HURWITZ do
+     * teorema central Gentil-Hurwitz (corpo_universal, thm:parseval-multi).
+     *
+     *     sum_k w^{(i-j)k} = N . delta_ij
+     *
+     * — a orbita completa da raiz CONTA N na diagonal e ZERO fora dela. E' o corte discreto,
+     * e e' dele que Parseval sai: a soma dos cruzados cancela-se EXACTAMENTE, e o que
+     * sobra e' a diagonal. Do outro lado da ponte, Gentil INTEGRA a mesma linha com a
+     * medida de Lebesgue, e a sigma-aditividade transporta a contagem para o integral sem
+     * perder a ordem.
+     *
+     * Aqui mede-se o lado que e' exacto — o de contar —, e mede-se com o CONTROLO que o
+     * corpo_universal exige: com uma raiz de ORDEM ERRADA a identidade quebra. Sem isso,
+     * «os cruzados cancelam» valia por nao haver cruzados. */
+    long ort_diag = 0, ort_fora = 0, ort_tot_d = 0, ort_tot_f = 0, ort_corpos = 0;
+    long mau_diag = 0, mau_fora = 0, mau_tot = 0;
+    for(int ip = 0; ip < 4; ip++){
+        long pp = PR[ip];
+        if((pp - 1) % NN != 0) continue;
+        long w = 0;
+        for(long g = 2; g < pp && !w; g++){
+            if(rt_pot_mod(g, NN, pp) != 1) continue;
+            int oc = 1;
+            for(long d = 1; d < NN; d++) if(rt_pot_mod(g, d, pp) == 1) oc = 0;
+            if(oc) w = g;
+        }
+        if(!w) continue;
+        ort_corpos++;
+        for(long i = 0; i < NN; i++) for(long j = 0; j < NN; j++){
+            long soma = 0;
+            for(long k = 0; k < NN; k++){
+                long e = (((i - j) * k) % NN + NN) % NN;
+                soma = (soma + rt_pot_mod(w, e, pp)) % pp;
+            }
+            if(i == j){ ort_tot_d++; if(soma % pp == NN % pp) ort_diag++; }
+            else      { ort_tot_f++; if(soma % pp == 0)        ort_fora++; }
+        }
+        /* O CONTROLO: uma raiz de ordem ERRADA nao produz a delta. Toma-se w² — que tem
+         * ordem NN/2 — e conta-se quantas entradas passam a estar mal. */
+        long w2 = (w*w) % pp;
+        for(long i = 0; i < NN; i++) for(long j = 0; j < NN; j++){
+            long soma = 0;
+            for(long k = 0; k < NN; k++){
+                long e = (((i - j) * k) % NN + NN) % NN;
+                soma = (soma + rt_pot_mod(w2, e, pp)) % pp;
+            }
+            mau_tot++;
+            long alvo = (i == j) ? (NN % pp) : 0;
+            if(soma % pp != alvo){ if(i == j) mau_diag++; else mau_fora++; }
+        }
+    }
+    printf("      e o passo por baixo — a ORTOGONALIDADE, o lado HURWITZ (contar):\n");
+    printf("      sum_k w^{(i-j)k} = N na diagonal em %ld de %ld, e ZERO fora em %ld de %ld\n",
+           ort_diag, ort_tot_d, ort_fora, ort_tot_f);
+    printf("      e com a raiz de ORDEM ERRADA (w², ordem N/2) quebram %ld entradas de %ld\n",
+           mau_diag + mau_fora, mau_tot);
+    ok("a ORTOGONALIDADE é o lado HURWITZ do teorema central: a órbita completa da raiz"
+       " CONTA N na diagonal e ZERO fora, exacto em F_p — e é dela que Parseval sai. Do"
+       " outro lado da ponte Gentil INTEGRA a mesma linha, e Lebesgue transporta a contagem"
+       " sem perder a ordem. O controlo: com uma raiz de ordem ERRADA a identidade quebra",
+       ort_corpos > 0 && ort_diag == ort_tot_d && ort_fora == ort_tot_f &&
+       mau_diag + mau_fora > 0);
+
     printf("      e as duas EXACTAS em F_p, com w de ordem %ld verificada:\n", NN);
     printf("      F^{-1}F = id em %ld de %ld corpos, e Parseval algébrico em %ld\n\n",
            volta_ok, corpos, pars_ok);

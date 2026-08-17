@@ -1407,6 +1407,46 @@ todo o passo, o denominador decresce em todas, $\abs{\det}=1$ em todas, e a para
 $p=\gcd$ em $6400$ de $6400$ --- $24\,364$ passos ao todo, e a mais longa com $9$; e nos
 $12$ metais a energia vale $1$ e não se esgota em nenhum}
 
+\begin{teorema}[E O QUE O FUNDAMENTA É O TEOREMA CENTRAL: Hurwitz conta, Gentil integra,
+Lebesgue casa-os]\label{thm:central-energia}
+O Teor.~\ref{thm:conservacao} diz \emph{que} a energia se conserva. Falta dizer
+\textbf{por que é que ela pode ser conservada} --- e a resposta é o \textbf{teorema
+central Gentil--Hurwitz} do \emph{Corpo estelar}, que o \emph{Corpo Universal} usa em
+\code{thm:parseval-multi} para derivar o Parseval multidimensão, e cujo corolário
+(\code{cor:verifica-energia}) já dizia a frase toda: \emph{a indução legítima CONSERVA
+$E$; a que viola o invariante muda $E$, e a meta-indução acusa}.
+
+\textbf{(1) HURWITZ CONTA --- e é o lado exacto.} A órbita completa da raiz fecha:
+\[
+\boxed{\;\sum_{k=0}^{N-1}\omega^{(i-j)k}=N\cdot\delta_{ij}\;}
+\]
+--- $N$ na diagonal, \textbf{zero} fora. Os cruzados não são pequenos: cancelam-se
+\emph{exactamente}, e é daqui que Parseval sai. \emph{É o corte discreto.}
+
+\textbf{(2) GENTIL INTEGRA --- e é o lado que não tem grau.} A mesma linha, integrada,
+é $\int\abs{f}^{2}=\int\abs{F}^{2}$ com a medida de Lebesgue.
+
+\textbf{(3) LEBESGUE CASA-OS, e o que ele preserva é a ORDEM.} A $\sigma$-aditividade
+transporta a contagem para o integral \emph{sem perder a ordem} --- é o degrau
+$\mathbb{Q}\to\mathbb{R}$. \emph{A soma reversível é o que autoriza a ponte}, e
+reversível é a mesma palavra do Teor.~\ref{thm:conservacao}(3): conservar e poder voltar.
+
+\textbf{(4) E O TECTO DE OITO É DA NORMA, NÃO DO OBJECTO.} Hurwitz limita a
+$n\in\{1,2,4,8\}$ quando se exige norma \emph{euclidiana} multiplicativa \textbf{e}
+operação bilinear. A recta não paga esse tecto porque a energia que ela conserva
+\textbf{não é a euclidiana}: é o \textbf{determinante}, que é multiplicativo em todo $n$.
+\emph{Foi por isso que $\abs{\det}=1$ pôde ser a lei de conservação em todos os andares.}
+Gentil escapa pelo mesmo sítio, e paga com a bilinearidade --- \emph{o que ele cede não é
+a norma, é a bilinearidade}. $\square$
+\end{teorema}
+\colunas{o teorema central fundamenta a conservação}
+        {Hurwitz conta (a ortogonalidade exacta), Gentil integra, Lebesgue transporta sem
+perder a ordem --- e o tecto de $8$ é da norma euclidiana, não da recta}
+        {\code{tests/travessia.c}: $\sum_k\omega^{(i-j)k}=N$ na diagonal em $32$ de $32$ e
+ZERO fora em $224$ de $224$, exacto em $\mathbb{F}_p$, com a raiz de ordem ERRADA a quebrar
+$32$ entradas de $256$; \code{tests/nne.c}: a norma-determinante preserva-se em $6561$ de
+$6561$ e a euclidiana só em $289$ --- é o contraste que diz qual delas não tem tecto}
+
 \medskip
 \noindent\textbf{E OS SETE TEOREMAS SÃO UMA FRASE SÓ --- as duas metades de
 Cayley--Hamilton.} O Teor.~\ref{thm:fixo-dual} diz que o par dual se descreve por
@@ -1433,6 +1473,7 @@ para andar}\\[3pt]
 \ref{thm:residuo-fixo} os resíduos & a soma \emph{é} o traço & a norma é o invariante\\
 \ref{thm:aditiva} a soma & os índices somam & $\det(A_aA_0A_b)=\det A_{a+b}$\\
 \ref{thm:conservacao} a paragem & $q$ é o orçamento & $\gcd$ é a energia\\
+\ref{thm:central-energia} o central & Hurwitz conta & Gentil integra, Lebesgue transporta\\
 \bottomrule
 \end{tabular}
 \end{center}
