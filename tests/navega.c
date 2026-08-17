@@ -16,6 +16,7 @@
  *   ./navega [p] [m]
  */
 #include <stdio.h>
+#include "naturais.h"      /* nt_primo: o p tem de ser primo */
 #include "unidade.h"
 #include <stdlib.h>
 #include "gp2.h"                                   /* a peça: o gato em GF(p²) (mul, gato, pw, ordem, σ) */
@@ -23,6 +24,17 @@
 int main(int argc, char **argv){
     p = argc>1? atoi(argv[1]) : 7;
     m = argc>2? atoi(argv[2]) : 1;
+    /* O `p` E O PRIMO DO CORPO, e vinha de argv sem uma unica verificacao: com
+     * `p = 0` toda a aritmetica %% p rebentava em SIGFPE, e com p composto (4, 6)
+     * GF(p) nao e corpo nenhum e os resultados sairiam falsos EM SILENCIO, que e
+     * pior. A primalidade tem teste na casa — nt_primo, em lib/naturais.h — e nao
+     * se escreve aqui uma setima copia. */
+    if(!nt_primo((unsigned long)p)){
+        printf("  p = %d nao e primo: GF(p) so e corpo com p primo, e sem isso\n", p);
+        printf("  nem a divisao existe. uso: %s <p primo> [m]\n", argv[0]);
+        return 2;
+    }
+
     long N = (long)p*p - 1;                         /* |GF(p²)*| = p²−1                              */
 
     /* x²−mx−1 tem de ser irredutível mod p (σ irracional): sem raiz em ℤ_p.                        */

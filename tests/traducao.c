@@ -14,6 +14,7 @@
  *   cc -O2 -std=c99 traducao.c -o traducao   (usa gp2.h: GF(p²)=ℤ_p[σ], σ²=mσ+1)
  */
 #include <stdio.h>
+#include "naturais.h"      /* nt_primo: o p tem de ser primo */
 #include "unidade.h"
 #include <stdlib.h>
 #include "gp2.h"
@@ -34,6 +35,17 @@ static E mult(E z, E w, E s, E sl){
 int main(int argc, char **argv){
     p = argc>1 ? atoi(argv[1]) : 97;
     m = argc>2 ? atoi(argv[2]) : 1;
+    /* O `p` E O PRIMO DO CORPO, e vinha de argv sem uma unica verificacao: com
+     * `p = 0` toda a aritmetica %% p rebentava em SIGFPE, e com p composto (4, 6)
+     * GF(p) nao e corpo nenhum e os resultados sairiam falsos EM SILENCIO, que e
+     * pior. A primalidade tem teste na casa — nt_primo, em lib/naturais.h — e nao
+     * se escreve aqui uma setima copia. */
+    if(!nt_primo((unsigned long)p)){
+        printf("  p = %d nao e primo: GF(p) so e corpo com p primo, e sem isso\n", p);
+        printf("  nem a divisao existe. uso: %s <p primo> [m]\n", argv[0]);
+        return 2;
+    }
+
     if(!irred_gp2()){ printf("x²−%dx−1 cinde mod %d — escolha p,m com σ irracional\n", m, p); return 2; }
     E s = SIG, sl = frob(SIG);                          /* σ,σ' — os irracionais (o significado) */
     int res = 0;

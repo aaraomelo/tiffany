@@ -69,7 +69,7 @@ cohomologia_ponte 1edbf545ad8f2cd3 0
 colheita 310926ffd39d6fba 0
 colisor_corpos 3be2fa7041eb0275 0
 completo b7ccb59fe44332bc 0
-complexo 1ffd14ad04af24c5 0
+complexo 9aa2ec1d1bff4532 0
 condicao_pisot a1a923004cc64aea 0
 cone_espiral 63b392f5bb541bab 0
 cone_nulo 504b52404fbfd424 0
@@ -182,7 +182,7 @@ escala_espaco 849fe8fea9a4b7d9 0
 escuros 1387b814af7e9a7f 0
 espelho d56cc3c0b73eee7a 0
 espurio b087b9b6bc7fc263 0
-esquilo 8dc0713ba6d2b3e9 0
+esquilo dfe4ac5be43c0b64 0
 estacao_front 8809fb26de6b6a2e 0
 estado_caos 7e447a3e506b5875 0
 estelar d246b5726a4715a6 0
@@ -309,7 +309,7 @@ morfologia_universal cf0164d1ea38683b 0
 motor 05955a030c0081c0 0
 move b72f34e5b0b6563d 0
 natural 093f17537fda7936 0
-navega 2bdea3d83c63ec36 0
+navega cd6764ee38b850f2 0
 navegante b5bcbbf0f2856e6e 0
 navier_corpo 59af373b2600e81c 0
 neuronio 8124473e174ce457 0
@@ -411,12 +411,12 @@ reversao 6ce3ed15e79f47b7 0
 ribossomo 5d80dbc0f2781041 0
 rn 6a6a258280263c85 0
 robo 48d046f12dd5ee6b 0
-rotacao 1dd03ecf0025d4d2 0
+rotacao c2e463c2cca5c0a2 0
 rotaciona d5e304bfd7d6ea7b 0
 rotulos da58cb7659dcef98 0
 roupa 21ee9ca0cda0f4bd 0
 sair_pu e7e789497f7128e7 0
-saltos 6ee5a6b83928bee0 0
+saltos 38101775bd2830a5 0
 selberg 9bc35f7fb50df419 0
 selo 0719769040b53f6d 0
 sem_chute 56b9981f39111844 0
@@ -459,7 +459,7 @@ toro_histerese 1f70fcec201cda1d 0
 torre_corpo fdfeef8f1b2b5d32 0
 torre_induc 0e26df90f9fdcaca 0
 torres acf1a40374e156e3 0
-traducao 9a4d69e8627dc0f4 0
+traducao 2affc11a44caf240 0
 traduz bbb8a5206e36217f 0
 traduz_pi_dim e3de288015d88fdc 0
 traduz_volta 9302ea3367def892 0

@@ -13,6 +13,7 @@
  *   ./esquilo [p] [m]
  */
 #include <stdio.h>
+#include "naturais.h"      /* nt_primo: o p tem de ser primo */
 #include "unidade.h"
 #include "quat.h"
 
@@ -22,6 +23,17 @@ static M minv(M X){ return mscal(pw(mdet(X),p-2), madj(X)); }       /* X⁻¹ = 
 int main(int argc,char**argv){
     p = argc>1? atoi(argv[1]) : 13;
     m = argc>2? atoi(argv[2]) : 1;
+    /* O `p` E O PRIMO DO CORPO, e vinha de argv sem uma unica verificacao: com
+     * `p = 0` toda a aritmetica %% p rebentava em SIGFPE, e com p composto (4, 6)
+     * GF(p) nao e corpo nenhum e os resultados sairiam falsos EM SILENCIO, que e
+     * pior. A primalidade tem teste na casa — nt_primo, em lib/naturais.h — e nao
+     * se escreve aqui uma setima copia. */
+    if(!nt_primo((unsigned long)p)){
+        printf("  p = %d nao e primo: GF(p) so e corpo com p primo, e sem isso\n", p);
+        printf("  nem a divisao existe. uso: %s <p primo> [m]\n", argv[0]);
+        return 2;
+    }
+
     int res=0;
 
     int irred=1; for(int t=0;t<p;t++) if((((long)t*t-(long)m*t-1)%p+p)%p==0){ irred=0; break; }
