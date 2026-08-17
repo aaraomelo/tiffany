@@ -1260,6 +1260,105 @@ printf("\n§R23 As inversas, e o lado delas que pode falhar.\n\n");
        mi_ok == mi_tot && mi_tot > 0 && mi_recusa > 0 && mi_ok + 0 == mi_tot);
 }
 
+
+/* ─── §R24 ────────────────────────────────────────────────────────────────────────────
+ * NORMALIZAR É ESCOLHER A UNIDADE, e o que a autoriza é a HOMOGENEIDADE das perguntas.
+ * ──────────────────────────────────────────────────────────────────────────────────── */
+printf("\n§R24 Normalizar é escolher a unidade — e depois tudo é inteiro.\n\n");
+{
+    /* (a) o denominador comum de um conjunto de decimais, e a conversão a ℤ */
+    const char *ds[] = { "0.6", "0.45", "1.25", "-2.5", "3" };
+    long u = rt_unidade_comum(ds, 5);
+    long vi[8];
+    int quantos = rt_para_unidade(ds, 5, u, vi);
+    printf("      «0.6 0.45 1.25 -2.5 3»  ->  unidade %ld  ->  ", u);
+    for(int i = 0; i < quantos; i++) printf("%ld ", vi[i]);
+    printf("\n");
+
+    /* e a volta: cada inteiro dividido pela unidade tem de dar o decimal de partida —
+     * comparado por produto cruzado contra o p/q que a leitura deu, sem formar quociente */
+    long volta = 0;
+    for(int i = 0; i < 5; i++){
+        int sg; long p, q;
+        rt_le_decimal(ds[i], &sg, &p, &q);
+        if(vi[i]*q == sg*p*u) volta++;
+    }
+
+    /* (b) A HOMOGENEIDADE, que é o que autoriza tudo isto. Escalar por λ multiplica os
+     *     dois lados de uma comparação, de uma razão e de Lagrange — e não muda nenhuma. */
+    long cmp_ok = 0, cmp_tot = 0, lag_ok = 0, lag_tot = 0, cruz_ok = 0;
+    for(long lam = 1; lam <= 6; lam++)
+    for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++)
+    for(long c = -4; c <= 4; c++) for(long d = -4; d <= 4; d++){
+        long u1[2] = { a, b }, v1[2] = { c, d };
+        long u2[2] = { a*lam, b*lam }, v2[2] = { c*lam, d*lam };
+        /* a COMPARAÇÃO não vê a escala */
+        cmp_tot++;
+        if(rt_ordem_norma(u1, v1, 2) == rt_ordem_norma(u2, v2, 2)) cmp_ok++;
+        /* LAGRANGE é homogénea de grau 4: os dois lados multiplicam por λ⁴ */
+        if(rt_lagrange(u1, v1, 2) && rt_lagrange(u2, v2, 2)) lag_ok++;
+        lag_tot++;
+        /* e o CRUZADO escala por λ², que é o det da homotetia — e a RAZÃO não muda */
+        long c1 = rt_cruz2(u1, v1), c2 = rt_cruz2(u2, v2);
+        if(c2 == lam*lam*c1) cruz_ok++;
+    }
+
+    /* (c) a redução à forma mínima: o mesmo ponto com o menor par, que é a `def:lei0` */
+    long red_tot = 0, red_ok = 0, red_mexeu = 0;
+    for(long a = -12; a <= 12; a++) for(long b = -12; b <= 12; b++)
+    for(long c = -12; c <= 12; c++){
+        if(!a && !b && !c) continue;
+        long v[3] = { a, b, c }, w[3] = { a, b, c };
+        long g = rt_reduz_vector(v, 3);
+        red_tot++;
+        /* a direcção é a mesma: v·g == w, entrada a entrada */
+        int mesma = 1;
+        for(int i = 0; i < 3; i++) if(v[i]*g != w[i]) mesma = 0;
+        if(mesma) red_ok++;
+        if(g > 1) red_mexeu++;
+        /* e o resultado é mínimo: o mdc das coordenadas reduzidas é 1 */
+        long g2 = 0;
+        for(int i = 0; i < 3; i++) g2 = rt_mdc(g2, v[i]);
+        if(g2 != 1) red_ok--;
+    }
+
+    /* (d) e o lado que RECUSA: um texto que não é decimal, e uma unidade que não serve */
+    const char *maus[] = { "0.5", "abc" };
+    long u_mau = rt_unidade_comum(maus, 2);
+    const char *fino[] = { "0.001" };
+    long vfino[1];
+    int nao_serve = rt_para_unidade(fino, 1, 10, vfino);    /* 10 não é múltiplo de 1000 */
+
+    printf("      a volta pelo produto cruzado bate em %ld de 5\n", volta);
+    printf("      a ESCALA nao muda: a comparacao em %ld de %ld, Lagrange em %ld, e o cruzado\n"
+           "      multiplica por lambda^2 em %ld — a razao fica\n", cmp_ok, cmp_tot, lag_ok, cruz_ok);
+    printf("      a reducao a forma minima: %ld vectores, %ld correctos, e ela MEXEU em %ld\n",
+           red_tot, red_ok, red_mexeu);
+    printf("      e recusa: texto nao decimal -> unidade %ld ; unidade que nao serve -> %d\n\n",
+           u_mau, nao_serve);
+
+    ok("NORMALIZAR E' ESCOLHER A UNIDADE, e a unidade e' o DENOMINADOR COMUM: «0.6 0.45"
+       " 1.25 -2.5 3» tem MMC 100, e vira 60 45 125 -250 300 em INTEIROS. Nao e' aproximar"
+       " — e' mudar de regua, e a regua nova e' exacta: a volta confere por produto cruzado"
+       " nos cinco. E RECUSA nos dois lados — um texto que nao e' decimal nao da' unidade, e"
+       " uma unidade que nao serve devolve o indice em vez de truncar calado",
+       u == 100 && quantos == 5 && volta == 5 && u_mau == 0 && nao_serve == 0);
+
+    ok("E O QUE AUTORIZA ISTO E' A HOMOGENEIDADE DAS PERGUNTAS, que se mede: escalar por"
+       " lambda multiplica os dois lados de uma COMPARACAO e ela nao muda; LAGRANGE e'"
+       " homogenea de grau 4 e fecha nas duas escalas; e o CRUZADO multiplica por lambda^2,"
+       " que e' o determinante da homotetia — logo a RAZAO entre cruzados nao muda. O que"
+       " muda e' so' o valor absoluto, que e' a representacao e sai no fim",
+       cmp_ok == cmp_tot && lag_ok == lag_tot && cruz_ok == cmp_tot
+       && cmp_tot == 6L*9*9*9*9);
+
+    ok("E A FORMA MINIMA E' A `def:lei0` em n coordenadas: dividir pelo mdc da' o MESMO"
+       " ponto com o menor par possivel, e verifica-se que e' o mesmo — v.g == w entrada a"
+       " entrada — e que e' MINIMO, com o mdc das reduzidas a valer um. E ela MEXE numa"
+       " parte dos vectores, sem o que «reduz» valia por nunca reduzir nada",
+       red_ok == red_tot && red_mexeu > 0 && red_tot == 25L*25*25 - 1);
+}
+
     if(!falhas){
         printf("\n  ─────────────────────────────────────────────────────────────\n");
         printf("  As operações da recta têm uma casa. Vinte e oito cópias do mdc,\n");

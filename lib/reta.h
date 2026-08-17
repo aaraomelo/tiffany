@@ -824,6 +824,82 @@ static int rt_escreve_decimal(int sinal, long p, long q, int casas, char *d, int
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════════
+ * NORMALIZAR É ESCOLHER A UNIDADE — e depois tudo é inteiro.
+ *
+ * O Aarão: «normalizar e operar em inteiros». As duas metades são uma só operação, e a
+ * ordem importa: primeiro escolhe-se a unidade em que os dados são inteiros, e só depois
+ * se opera. Feito assim, nenhuma conta precisa de vírgula.
+ *
+ * A UNIDADE É O DENOMINADOR COMUM. Um dado escrito «0,6» é 6/10; «1,25» é 125/100. O
+ * denominador comum de um conjunto é o MMC dos denominadores, e multiplicar por ele leva
+ * todos a ℤ de uma vez. Não é aproximar — é MUDAR DE RÉGUA, e a régua nova é exacta.
+ *
+ * ── E POR QUE É QUE ISTO NÃO ESTRAGA A MEDIDA ───────────────────────────────────────
+ *
+ * Porque as perguntas que esta casa faz são HOMOGÉNEAS. Escalar todos os dados por um
+ * factor comum λ multiplica os dois lados de:
+ *
+ *      uma COMPARAÇÃO           a < b          por λ            — não muda
+ *      uma RAZÃO                a/b            por λ/λ = 1      — não muda
+ *      LAGRANGE                 Dir² + Cruz² = N(u)N(v)   por λ⁴ — não muda
+ *      o CRUZADO na órbita      Cruz(Au,Av) = det(A)Cruz(u,v)   — não muda
+ *
+ * e o que MUDA é só o valor absoluto, que é a representação e sai no fim (`cor:entrega`).
+ * Onde a pergunta NÃO é homogénea — uma constante física com dimensão, um limiar
+ * absoluto — a escala tem de entrar na conta, e isso diz-se em vez de se escalar calado.
+ *
+ * ── OS QUATRO CASOS QUE ISTO RECOLHE ────────────────────────────────────────────────
+ *
+ *      microfluidica   metros escritos como 100e-6   →  unidade de 10 µm, tudo inteiro
+ *      hopfield        W/N em cada uso                →  N-vezes: «W = N·w, sem dividir»
+ *      semantico       embeddings de um modelo        →  milésimos, e Lagrange é grau 4
+ *      gerador_analog  1 mH e 1 nF                    →  1000 µH e 1000 pF
+ *
+ * Em todos, o double era a régua errada — não o objecto.
+ * ═══════════════════════════════════════════════════════════════════════════════════ */
+
+/* O DENOMINADOR COMUM de n textos decimais: lê cada um como p/q exacto e devolve o MMC
+ * dos q. Devolve 0 se algum texto não é decimal ou se o MMC não cabe — e o zero é a
+ * metade que faz disto uma medição: quando a unidade não existe em ℤ, diz-se. */
+static long rt_unidade_comum(const char **textos, int n){
+    long u = 1;
+    for(int i = 0; i < n; i++){
+        int sg; long p, q;
+        if(!rt_le_decimal(textos[i], &sg, &p, &q)) return 0;
+        long g = rt_mdc(u, q);
+        if(g == 0) return 0;
+        if(u > 4000000000000000000L / (q/g)) return 0;      /* o MMC não cabe */
+        u = (u / g) * q;
+    }
+    return u;
+}
+
+/* e a CONVERSÃO: com a unidade escolhida, cada texto vira um INTEIRO. Devolve quantos
+ * converteu; se algum não couber, pára e devolve o índice — não trunca calado. */
+static int rt_para_unidade(const char **textos, int n, long unidade, long *saida){
+    for(int i = 0; i < n; i++){
+        int sg; long p, q;
+        if(!rt_le_decimal(textos[i], &sg, &p, &q)) return i;
+        if(q == 0 || unidade % q != 0) return i;             /* a unidade tem de servir */
+        long f = unidade / q;
+        if(p != 0 && rt_modulo(p) > 4000000000000000000L / f) return i;
+        saida[i] = sg * p * f;
+    }
+    return n;
+}
+
+/* E A ESCALA DE UM VECTOR JÁ EM ℤ: divide todas as coordenadas pelo mdc delas, que é a
+ * forma mínima — o mesmo ponto da recta projectiva com o menor par possível. Devolve o
+ * factor retirado. É `[p:q]` a menos de escala, da `def:lei0`, aplicado a n coordenadas. */
+static long rt_reduz_vector(long *v, int n){
+    long g = 0;
+    for(int i = 0; i < n; i++) g = rt_mdc(g, v[i]);
+    if(g <= 1) return g ? g : 1;
+    for(int i = 0; i < n; i++) v[i] /= g;
+    return g;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════════
  * AS INVERSAS — e a armadilha que elas trazem consigo.
  *
  * Toda operação com fibra tem volta (`project-corpos-a-escada-fecha`), e esta casa está

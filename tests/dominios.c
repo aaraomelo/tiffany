@@ -36,6 +36,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include "reta.h"
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -49,23 +50,40 @@
 
 typedef struct {
     const char *nome, *equacao, *inercia, *perda, *rigidez;
-    double m, c, k;            /* inércia, dissipação, restituição — a tríade de qualquer domínio */
+    long m, c, k;              /* inércia, dissipação, restituição — a tríade, em CENTÉSIMOS */
     const char *unidade;
-} Dom;
+} Dom;   /* m, c, k em CENTÉSIMOS, inteiros */
 
 static const Dom DOM[] = {
     /* nome        equação                  inércia     perda      rigidez     m      c      k     */
-    { "eletrico",  "L q'' + R q' + q/C = 0", "L (H)",    "R (ohm)", "1/C (1/F)", 0.50, 1.20, 800.0, "carga" },
-    { "mecanico",  "m x'' + c x' + k x = 0", "m (kg)",   "c (Ns/m)","k (N/m)",   2.00, 3.00, 500.0, "metro" },
-    { "pneumatico","I p'' + Rp p' + p/Cp=0", "I (inert)","Rp",      "1/Cp",      0.80, 4.00, 300.0, "pascal"},
-    { "optico",    "a'' + a'/tau + w0^2 a=0","1",        "1/tau",   "w0^2",      1.00, 0.05, 1e2,   "campo" },
-    { "elastico",  "rho u'' + eta u' + E u=0","rho",     "eta",     "E (mod)",   1.50, 0.90, 600.0, "desloc"},
+    /* OS DADOS EM CENTÉSIMOS, INTEIROS. Os decimais escritos — 0,50, 1,20, 0,05 — têm
+     * denominadores 2, 5 e 20, e o MMC deles é 20: em centésimos toda a tabela cabe em ℤ.
+     * Não é aproximar, é escolher a unidade, e o que se ganha é o Δ exacto (ver `regua_z`). */
+    { "eletrico",  "L q'' + R q' + q/C = 0", "L (H)",    "R (ohm)", "1/C (1/F)",  50,  120,  80000, "carga" },
+    { "mecanico",  "m x'' + c x' + k x = 0", "m (kg)",   "c (Ns/m)","k (N/m)",   200,  300,  50000, "metro" },
+    { "pneumatico","I p'' + Rp p' + p/Cp=0", "I (inert)","Rp",      "1/Cp",       80,  400,  30000, "pascal"},
+    { "optico",    "a'' + a'/tau + w0^2 a=0","1",        "1/tau",   "w0^2",      100,    5,  10000, "campo" },
+    { "elastico",  "rho u'' + eta u' + E u=0","rho",     "eta",     "E (mod)",   150,   90,  60000, "desloc"},
 };
 #define NDOM ((int)(sizeof DOM / sizeof DOM[0]))
 
 /* a régua do catálogo: (B,C) = (−traço, det) da companion. Aqui sai dos parâmetros físicos. */
-static void regua(const Dom *d, double *B, double *C){ *B = d->c / d->m; *C = d->k / d->m; }
+/* A RÉGUA (B,C) = (c/m, k/m). Os três dados estão em centésimos, logo as duas razões são
+ * FRACÇÕES de inteiros e a unidade cancela nelas — c/m não tem dimensão de centésimo. */
+static void regua(const Dom *d, double *B, double *C){
+    *B = (double)d->c / (double)d->m;
+    *C = (double)d->k / (double)d->m;
+}
 static double delta(double B, double C){ return B*B - 4*C; }
+
+/* E O SINAL DO Δ NÃO PRECISA DE VÍRGULA. Δ = B² − 4C = (c² − 4·k·m)/m², e m² > 0: o sinal
+ * é o do INTEIRO c² − 4km, com os três em centésimos — e a expressão é homogénea de grau
+ * dois nos dados, logo a unidade multiplica os dois termos e não muda o sinal. É a mesma
+ * conta do §M3 do microfluidica, e é ela que classifica sem uma divisão. */
+static long delta_sinal_z(const Dom *d){
+    long v = d->c*d->c - 4*d->k*d->m;
+    return v > 0 ? 1 : (v < 0 ? -1 : 0);
+}
 
 /* a forma fechada do caso Δ<0 (edo.c §E4), com y(0)=1, y'(0)=0 — o ORÁCULO dos dois métodos */
 static double exata(double B, double C, double t){
@@ -232,26 +250,41 @@ int main(void){
     puts("     conversao e uma medida e nao uma tabela minha.\n");
     {
         printf("     %-11s %-26s %8s %9s %10s  classe\n", "dominio", "equacao", "B", "C", "Delta");
-        int elipticos = 0, distintos = 0;
+        int elipticos = 0, distintos = 0, mistura = 0;
         double Bs[NDOM], Cs[NDOM];
         for(int i = 0; i < NDOM; i++){
             regua(&DOM[i], &Bs[i], &Cs[i]);
             double D = delta(Bs[i], Cs[i]);
+            /* a classe sai do SINAL do inteiro c² − 4km, e não do Δ em vírgula */
+            long sg = delta_sinal_z(&DOM[i]);
             printf("     %-11s %-26s %8.4f %9.2f %10.2f  %s\n",
                    DOM[i].nome, DOM[i].equacao, Bs[i], Cs[i], D,
-                   D < 0 ? "eliptica" : (D > 0 ? "hiperbolica" : "parabolica"));
-            if(D < 0) elipticos++;
+                   sg < 0 ? "eliptica" : (sg > 0 ? "hiperbolica" : "parabolica"));
+            if(sg < 0) elipticos++;
+            if((D < 0) != (sg < 0)) mistura++;      /* as duas rotas TÊM de concordar */
         }
+        /* «as réguas são distintas» compara-se por PRODUTO CRUZADO em inteiros: B_i = c_i/m_i
+         * e B_j = c_j/m_j são iguais sse c_i·m_j == c_j·m_i, sem se formar nenhum quociente
+         * e sem o limiar de 1e-12 que aqui estava a decidir uma igualdade de racionais. */
         for(int i = 0; i < NDOM; i++){
             int ja = 0;
-            for(int j = 0; j < i; j++)
-                if(fabs(Bs[j]-Bs[i]) < 1e-12 && fabs(Cs[j]-Cs[i]) < 1e-12) ja = 1;
+            for(int j = 0; j < i; j++){
+                int mesmoB = (DOM[j].c*DOM[i].m == DOM[i].c*DOM[j].m);
+                int mesmoC = (DOM[j].k*DOM[i].m == DOM[i].k*DOM[j].m);
+                if(mesmoB && mesmoC) ja = 1;
+            }
             if(!ja) distintos++;
         }
-        ok("os cinco dominios dao reguas (B,C) DISTINTAS — nao sao o mesmo sistema disfarcado",
+        ok("os cinco dominios dao reguas (B,C) DISTINTAS — nao sao o mesmo sistema disfarcado."
+           " E «distintas» compara-se por PRODUTO CRUZADO: c_i.m_j == c_j.m_i, sem formar os"
+           " quocientes e sem o limiar de 1e-12 que aqui decidia uma igualdade de racionais",
            distintos == NDOM);
-        ok("e o Delta classifica-os pela regua do catalogo: com pouca perda, todos elipticos",
-           elipticos == NDOM);
+        ok("e o Delta classifica-os pela regua do catalogo: com pouca perda, todos elipticos."
+           " E a classe sai do SINAL do inteiro c^2 - 4km, com os tres dados em CENTESIMOS:"
+           " Delta = (c^2 - 4km)/m^2 e m^2 > 0, e a expressao e' homogenea de grau dois, logo"
+           " a unidade multiplica os dois termos e nao muda o sinal. As duas rotas — a"
+           " inteira e a de virgula — concordam nos cinco",
+           elipticos == NDOM && mistura == 0);
         puts("     -> cinco reguas distintas, uma classificacao. O Delta e o MESMO do catalogo,");
         puts("        e a classe eliptica e a do §E4 do edo.c: 'o oscilador e o i'.\n");
     }
@@ -289,12 +322,41 @@ int main(void){
         const Dom *d = &DOM[1];                       /* o mecânico, para ter nomes concretos */
         double B, C; regua(d, &B, &C);
         double D = delta(B, C), w = sqrt(-D)/2.0;
-        printf("     tomo o %s: m=%.2f kg, c=%.2f Ns/m, k=%.2f N/m\n", d->nome, d->m, d->c, d->k);
+        /* os três estão em CENTÉSIMOS e são `long`: o `%.2f` de antes passava um inteiro a
+         * uma conversão de vírgula, e imprimia 0,00 — comportamento indefinido, e foi o diff
+         * da saída que o apanhou. A leitura decimal faz-se pela `rt_escreve_decimal`, que
+         * divide por 100 em inteiros. */
+        { char sm[24], sc[24], sk[24];
+          rt_escreve_decimal(1, d->m, 100, 2, sm, sizeof sm);
+          rt_escreve_decimal(1, d->c, 100, 2, sc, sizeof sc);
+          rt_escreve_decimal(1, d->k, 100, 2, sk, sizeof sk);
+          printf("     tomo o %s: m=%s kg, c=%s Ns/m, k=%s N/m\n", d->nome, sm, sc, sk); }
 
         /* passo 1: dividir por m dá a forma normal — e o resíduo é a diferença dos coeficientes */
-        double r1 = fabs((d->c/d->m) - B) + fabs((d->k/d->m) - C);
-        ok("passo 1  dividir por m da y'' + By' + Cy = 0        (residuo: os coeficientes batem)",
-           r1 < 1e-15);
+        /* O QUE AQUI ESTAVA ERA x = x. `B` veio da `regua`, que faz c/m, e a linha comparava
+         * c/m com B: a mesma expressão dos dois lados, com um 1e-15 a dar-lhe cara de
+         * medição. E a migração a inteiros descobriu-o de graça — com m e c em `long` a
+         * divisão passou a ser INTEIRA, 300/200 deu 1, e a asserção caiu.
+         *
+         * O CONTEÚDO DE «DIVIDIR POR m» é que a equação normalizada tem as MESMAS RAÍZES
+         * que a original. Isso mede-se pelo discriminante: o da original é c² − 4mk e o da
+         * normalizada é B² − 4C = (c² − 4mk)/m². A escala é m² > 0, logo o SINAL é o mesmo —
+         * e é o sinal que decide a classe. Em inteiros, e sem uma divisão. */
+        long disc_orig = d->c*d->c - 4*d->m*d->k;
+        long sg_orig = disc_orig > 0 ? 1 : (disc_orig < 0 ? -1 : 0);
+        double disc_norm = B*B - 4*C;
+        long sg_norm = disc_norm > 0 ? 1 : (disc_norm < 0 ? -1 : 0);
+        /* e a escala é exactamente m²: disc_orig = disc_norm · m², por produto cruzado */
+        int escala_m2 = (fabs(disc_norm*(double)d->m*(double)d->m - (double)disc_orig)
+                         < 1e-6*fabs((double)disc_orig));
+        ok("passo 1  dividir por m da y'' + By' + Cy = 0 — e o que se mede e' que a equacao"
+           " normalizada tem as MESMAS RAIZES que a original, pelo DISCRIMINANTE: o da"
+           " original e' c^2 - 4mk (inteiro) e o da normalizada e' esse dividido por m^2,"
+           " logo o SINAL e' o mesmo e a classe nao muda. O que aqui estava comparava c/m"
+           " com B, e B VEIO de c/m: a mesma expressao dos dois lados, com um 1e-15 a"
+           " disfarca-lo — e foi a migracao a inteiros que o descobriu, porque a divisao"
+           " passou a ser inteira e a assercao caiu",
+           sg_orig == sg_norm && escala_m2);
 
         /* passo 2: a característica. σ² + Bσ + C = 0 — o resíduo é substituir a raiz nela */
         /* A CARACTERÍSTICA NÃO PRECISA DA RAIZ. Com σ = −B/2 + i·w:

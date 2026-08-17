@@ -141,7 +141,7 @@ dissipa_pagina 092dbc2e096cf561 0
 distancia b942370c17c50cda 0
 dna d913ac3541f9d307 0
 dois_streams 624d9e1997aa4657 0
-dominios 5374f6d67d4277d5 0
+dominios ad07694e3a1a261e 0
 dourada 0d4544be18ec836a 0
 dourada_banco da40aa247da4be4c 0
 dourada_bidual a007b48f456bf1d4 0
@@ -406,7 +406,7 @@ renormaliza ca31a22ea5e1ff3f 0
 residuo_gerador 300a6b6e998ef497 0
 residuo_universal 0f3aadabb52d8da3 0
 residuos_totais 52cf778fe4c28b37 0
-reta 371a6fe7e4c91bc4 0
+reta 11ccd3dde33b472d 0
 reversao 6ce3ed15e79f47b7 0
 ribossomo 5d80dbc0f2781041 0
 rn 6a6a258280263c85 0
