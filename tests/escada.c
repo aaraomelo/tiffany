@@ -465,8 +465,28 @@ int main(void){
         double n_inv = -1.0 - 1.0/(-1.0), n_id = 1.0 - 1.0/1.0;
         printf("      b = -1 (f = a/x, a Mobius de traco nulo):  n = %.1f\n", n_inv);
         printf("      b = +1 (f = a·x com a^2 = 1):              n = %.1f\n\n", n_id);
-        ok("n = 0 e' o passo que JA' E' o seu dual — e e' o MESMO traco nulo da Mobius",
-           fabs(n_inv) < 1e-15 && fabs(n_id) < 1e-15);
+        /* OS DOIS SÃO ZERO POR ARITMÉTICA TRIVIAL: −1 − 1/(−1) = −1 + 1 e 1 − 1/1 = 0. A
+         * asserção verificava |0| < 1e-15 duas vezes. O CONTEÚDO é que n = b − 1/b se anula
+         * EXACTAMENTE nos b com b² = 1, e em mais nenhum — e isso varre-se em inteiros:
+         * b² − 1 = 0 sse b = ±1, e nos outros o n NÃO é zero. Sem essa segunda metade, «n = 0
+         * é o passo que já é o seu dual» valia por n ser zero em toda a parte. */
+        long anula = 0, nao_anula = 0, bs = 0;
+        for(long b = -6; b <= 6; b++){
+            if(b == 0) continue;                   /* 1/b não existe: é a fibra sem volta */
+            bs++;
+            /* n = b − 1/b, e n = 0 ⟺ b² = 1 — comparado sem dividir */
+            if(b*b == 1) anula++; else nao_anula++;
+        }
+        printf("      e em INTEIROS: b - 1/b anula-se sse b² = 1, em %ld dos %ld b varridos,\n"
+               "      e NAO se anula nos outros %ld — o zero tem onde deixar de o ser\n\n",
+               anula, bs, nao_anula);
+        ok("n = 0 e' o passo que JA' E' o seu dual — e e' o MESMO traco nulo da Mobius. E o"
+           " que se mede nao e' |0| < 1e-15 duas vezes (que era o que estava, porque"
+           " -1 - 1/(-1) e 1 - 1/1 sao zero por aritmetica trivial): e' que n = b - 1/b se"
+           " anula EXACTAMENTE nos b com b² = 1 e em mais nenhum, varrido em inteiros e sem"
+           " dividir. O b = 0 fica de fora porque 1/b nao existe — e' a fibra sem volta",
+           fabs(n_inv) < 1e-15 && fabs(n_id) < 1e-15
+           && anula == 2 && nao_anula == bs - 2 && bs == 12);
         conclui("nada disto e' exigido ao passo. O dual dele existe pela Primeira Lei, e o traco");
         conclui("MEDE a que distancia — em derivacoes — ele esta' de si proprio do outro lado.");
         conclui("E fecha uma coincidencia aparente: a Mobius involutiva tem traco nulo, e o nivel");

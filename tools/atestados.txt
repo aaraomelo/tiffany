@@ -175,7 +175,7 @@ entrega 081367290859c44e 0
 entropia_dual e455b61b6d1075f9 0
 equivalencia_universal 4f70e8b809338078 0
 erg 24fd5a4ae1cb1739 0
-escada 0eba2e6eb28c6529 0
+escada 03664be09444ed0d 0
 escala d6e3ee5a8e38e0cc 0
 escala_dourada 7ae60b0712a0b7cf 0
 escala_espaco 849fe8fea9a4b7d9 0
@@ -380,7 +380,7 @@ quasi 96f357dfd131aff4 0
 quatro 7ab68ac6a57ef1f7 0
 quebra 789cef502f39fd13 0
 racional_pg 62d5f52b3aa7c179 0
-radiacao 7917fc34f4cf15f7 0
+radiacao 013149044260fce5 0
 ramos 2c80ff07ed03e9e8 0
 rastro 26e475d85d748049 0
 reais 621a5430042c6845 0

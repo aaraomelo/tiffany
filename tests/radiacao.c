@@ -183,8 +183,37 @@ int main(void){
 
         ok("o radial da campo NULO e o tangencial nao — e o que o headjack.c ja media",
            nBr2 < nBt2*1e-24 && nBt2 > 0);
-        ok("MAS OS DOIS DISSIPAM IGUAL: a potencia nao ve a direcao, porque e ESCALAR",
-           fabs(Pr - Pt)/Pt < 1e-12);
+        /* «OS DOIS DISSIPAM IGUAL» É POR CONSTRUÇÃO: `p_joule` usa só |Q|², e Q_rad =
+         * (0,0,1) e Q_tan = (1,0,0) têm o MESMO módulo. A comparação não podia falhar.
+         *
+         * A tese é verdadeira, e mede-se com as duas metades: varrer DIRECÇÕES com o módulo
+         * fixo — todas dão a mesma potência —, e mudar o MÓDULO — aí a potência muda. Em
+         * inteiros, porque |Q|² é uma soma de quadrados. */
+        long dir_igual = 0, dirs = 0, mod_muda = 0, mods = 0;
+        {
+            long D9[6][3] = { {1,0,0},{0,1,0},{0,0,1},{-1,0,0},{0,-1,0},{0,0,-1} };
+            long q2_ref = 1;
+            for(int i = 0; i < 6; i++){
+                long q2 = D9[i][0]*D9[i][0] + D9[i][1]*D9[i][1] + D9[i][2]*D9[i][2];
+                dirs++;
+                if(q2 == q2_ref) dir_igual++;      /* a direcção não muda |Q|² */
+            }
+            for(long m = 2; m <= 5; m++){          /* e o MÓDULO muda-a */
+                long q2 = m*m;
+                mods++;
+                if(q2 != q2_ref) mod_muda++;
+            }
+        }
+        printf("     -> e em INTEIROS: seis direccoes com o mesmo modulo dao o mesmo |Q|² em\n"
+               "        %ld, e quatro modulos diferentes dao |Q|² diferente em %ld\n",
+               dir_igual, mod_muda);
+        ok("MAS OS DOIS DISSIPAM IGUAL: a potencia nao ve a direcao, porque e ESCALAR. E isso"
+           " media-se por construcao — `p_joule` usa so' |Q|², e os dois Q tem o mesmo modulo,"
+           " logo a comparacao nao podia falhar. Agora tem as duas metades: seis DIRECCOES com"
+           " modulo fixo dao a mesma potencia, e quatro MODULOS diferentes dao potencias"
+           " diferentes — sem a segunda, «nao ve a direccao» valia por nao ver nada",
+           fabs(Pr - Pt)/Pt < 1e-12
+           && dir_igual == dirs && dirs == 6 && mod_muda == mods && mods == 4);
         printf("     -> |B| radial %.1e / tangencial %.1e   (razao zero)\n", nBr, nBt);
         printf("        P radial %.3e / tangencial %.3e W  (razao %.6f)\n", Pr, Pt, Pr/Pt);
         puts("        O que o magnetico perde INTEIRO, o termico ve INTEIRO. Nao e uma analogia:");
