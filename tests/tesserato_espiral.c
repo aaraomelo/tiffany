@@ -32,6 +32,7 @@
  */
 #include <stdio.h>
 #include "../lib/disco.h"
+#include "reta.h"      /* rt_norma: a soma de quadrados, inteira */
 #include <string.h>
 #include <math.h>
 #ifndef M_PI
@@ -229,24 +230,78 @@ printf("\n§E5  A ESPIRAL É A SOMBRA DA HÉLICE NO CONE — e eu perguntei mal.
      * NO cone x²+y² = z² — e projeta-se em z=0: sai (t·cos t, t·sin t), a espiral de Arquimedes,
      * EXATA. E' a mesma estrutura do sombra_cone.c §Z1: o objeto de baixo e' a sombra do de
      * cima, e as relacoes de baixo sao o que resta la' em cima. */
-    printf("      t        hélice no cone (x,y,z)          está no cone?   sombra (x,y)      r = t?\n");
-    int fora_cone = 0, mau_sombra = 0;
+    /* AS DUAS ASSERCOES QUE AQUI ESTAVAM ERAM A MESMA IDENTIDADE, DUAS VEZES.
+     * Com (x,y,z) = (t·cos t, t·sin t, t):
+     *     x² + y² − z² = t²(cos² + sin²) − t² = 0        Pitagoras, para todo t
+     *     r = sqrt(x²+y²) = |t| = t                       a mesma identidade outra vez
+     * A parametrizacao FOI ESCOLHIDA para viver no cone; dizer que vive e' repetir a
+     * escolha, e nenhum t podia derrubar nem uma nem outra. E' cos²+sin²=1 disfarcado
+     * — o que o geometrico.tex thm:cruzado-potencia (4) diz que se mede pelo QUADRADO,
+     * sem formar nem o cosseno nem o seno.
+     *
+     * O que ha para medir sao duas coisas, e cada uma tem controlo:
+     *
+     *   (a) ESTAR NO CONE e' uma equacao que pode falhar. Mede-se em INTEIROS, nos
+     *       triplos pitagoricos — e o controlo sao os NAO-triplos, que tem de ficar
+     *       todos fora. Sem isso, «esta no cone» nao distingue ponto nenhum.
+     *
+     *   (b) A SOMBRA SER ESPIRAL e' uma afirmacao sobre o CONE, e nao sobre a curva:
+     *       o que a faz espiral e' o raio CRESCER com a altura. O controlo e a helice
+     *       CILINDRICA — mesma subida, raio constante — cuja sombra e' o CIRCULO. As
+     *       duas superficies lado a lado, e e a comparacao que mede.
+     *
+     * O raio² sai de rt_norma da lib, que e' a soma de quadrados em inteiros. */
+    printf("      (a) O CONE EM INTEIROS: x² + y² = z², nos triplos e nos que nao sao\n\n");
+    static const long TRI[][3] = {
+        {3,4,5}, {5,12,13}, {8,15,17}, {7,24,25}, {20,21,29}, {9,40,41}, {12,35,37}
+    };
+    static const long NAO[][3] = {                    /* o CONTROLO: tem de ficar TUDO fora */
+        {3,4,6}, {5,12,14}, {2,3,4}, {1,1,2}, {6,7,9}, {10,10,14}, {8,15,18}
+    };
+    int nt = (int)(sizeof TRI / sizeof TRI[0]), nn = (int)(sizeof NAO / sizeof NAO[0]);
+    int dentro = 0, fora_controlo = 0;
+    printf("      triplo        x²+y²    z²      no cone      controlo      x²+y²   z²   no cone\n");
+    for(int i = 0; i < nt; i++){
+        long v[2] = { TRI[i][0], TRI[i][1] }, z = TRI[i][2];
+        long r2 = rt_norma(v, 2), z2 = z*z;            /* o raio² da sombra, sem raiz */
+        if(r2 == z2) dentro++;
+        long w[2] = { NAO[i][0], NAO[i][1] }, zc = NAO[i][2];
+        long rc2 = rt_norma(w, 2), zc2 = zc*zc;
+        if(rc2 != zc2) fora_controlo++;
+        if(i < 4) printf("      (%2ld,%2ld,%2ld)    %-8ld %-7ld %-12s (%2ld,%2ld,%2ld)    %-7ld %-4ld %s\n",
+                         TRI[i][0],TRI[i][1],z, r2, z2, r2==z2?"sim":"NAO",
+                         NAO[i][0],NAO[i][1],zc, rc2, zc2, rc2==zc2?"sim":"nao");
+    }
+    printf("      …\n\n      no cone: %d de %d       fora, no controlo: %d de %d\n\n",
+           dentro, nt, fora_controlo, nn);
+    ok("o cone x² + y² = z² e uma equacao que SEPARA: os sete triplos pitagoricos caem"
+       " nele e os sete de controlo ficam todos fora. E o raio da sombra e a altura, o"
+       " que se le sem tirar raiz nenhuma — e o quadrado que se conserva",
+       dentro == nt && fora_controlo == nn && nt == 7);
+    printf("      (b) E A SOMBRA: o CONE da espiral, o CILINDRO da circulo\n\n");
+    int cresce = 1, constante = 1, passos = 0;
+    long r2_ant_cone = -1, r2_ant_cil = -1;
+    printf("      t        raio² da sombra do CONE   raio² da sombra do CILINDRO\n");
     for(int i = 1; i <= 40; i++){
         double t = 0.4*i;
-        double x = t*cos(t), y = t*sin(t), z = t;
-        double no_cone = fabs(x*x + y*y - z*z);          /* x²+y² = z² define o cone */
-        if(no_cone > 1e-12) fora_cone++;
-        double r = sqrt(x*x + y*y);                      /* o raio da sombra */
-        if(fabs(r - t) > 1e-12) mau_sombra++;
-        if(i <= 4)
-            printf("      %-8.2f (%+.4f, %+.4f, %+.4f)   %-15s (%+.4f,%+.4f)  %s\n",
-                   t, x, y, z, no_cone < 1e-12 ? "sim" : "NÃO", x, y,
-                   fabs(r-t) < 1e-12 ? "sim" : "NÃO");
+        double xc = t*cos(t), yc = t*sin(t);           /* helice CONICA:    raio cresce */
+        double xl =   cos(t), yl =   sin(t);           /* helice CILINDRICA: raio fixo  */
+        long r2c = (long)((xc*xc + yc*yc)*1000000.0 + 0.5);
+        long r2l = (long)((xl*xl + yl*yl)*1000000.0 + 0.5);
+        if(r2_ant_cone >= 0 && r2c <= r2_ant_cone) cresce = 0;
+        if(r2_ant_cil  >= 0 && r2l != r2_ant_cil)  constante = 0;
+        r2_ant_cone = r2c; r2_ant_cil = r2l; passos++;
+        if(i <= 4) printf("      %-8.2f %-25ld %ld\n", t, r2c, r2l);
     }
-    printf("      …\n\n      pontos fora do cone x²+y²=z²:      %d de 40\n", fora_cone);
-    printf("      sombras cujo raio não é t (Arquimedes): %d de 40\n\n", mau_sombra);
-    ok("a hélice vive exatamente no cone x²+y² = z²", fora_cone == 0);
-    ok("e a sua sombra é a espiral de Arquimedes, r = t — exata", mau_sombra == 0);
+    printf("      …\n\n      cone: raio² estritamente crescente nos %d passos: %s\n", passos,
+           cresce ? "sim" : "NAO");
+    printf("      cilindro: raio² constante:                       %s\n\n",
+           constante ? "sim" : "NAO");
+    ok("e a sombra e ESPIRAL porque o cone abre: o raio² cresce a cada passo. O controlo"
+       " e a helice CILINDRICA, que sobe do mesmo modo e cuja sombra e o CIRCULO — raio²"
+       " constante. A espiral nao vem da curva, vem da SUPERFICIE, e sao as duas juntas"
+       " que o dizem",
+       cresce && constante && passos == 40);
     printf("      A espiral não é uma forma que o percurso tenha ou não tenha: é o que o cone\n");
     printf("      projeta. Cone em cima, espiral em baixo — e a dualidade é a mesma do\n");
     printf("      sombra_cone.c: perde-se uma dimensão e o que resta são as relações.\n");

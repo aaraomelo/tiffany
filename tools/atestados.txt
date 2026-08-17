@@ -155,7 +155,7 @@ dual32 c489f54924157885 0
 dual_cadeia c7280a378e486134 0
 dual_spline_ttf 3e8e11fb1a25018f 0
 dualidade 18065d141793793e 0
-dualreta d9a0e2809774fac6 0
+dualreta 2274a93c0398f30a 0
 dualrn 8a91b8108dcd0df5 0
 dualsort 3298ebc60a6b388c 0
 dualsort_banco 32ec1211d142f264 0
@@ -447,7 +447,7 @@ teorema_universal df27b1753b369ed2 0
 teoria_vetorial 4720f0890da571d2 0
 termica 517ad21a05866f7e 0
 tesseracto ebf76569a555a633 0
-tesserato_espiral 111a68cd4a4c59af 0
+tesserato_espiral 551d490ab65b97a2 0
 tex 548ca752cb7fd27c 0
 tex_wasm 1bc71686aca7c02b 0
 texto 9faa357fc47031c3 0

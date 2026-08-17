@@ -40,6 +40,7 @@
  *   cc -O2 -std=c99 -Wall dualreta.c -lm -o dualreta && ./dualreta
  */
 #include <stdio.h>
+#include "reta.h"      /* rt_zd_norma: a norma em Z[sqrt(D)], inteira */
 #include "unidade.h"
 #include <math.h>
 #include <string.h>
@@ -74,17 +75,42 @@ int main(void){
 
     printf("\n§D1 em p.u. so existe a DOURADA: a taxa e 1 em todos os metais\n");
     {
-        int metais=0, um=0;
-        printf("      m    sigma          log sigma      taxa em p.u.\n");
-        for(L m=1;m<=8;m++){
-            double s=(m+sqrt((double)(m*m+4)))/2.0;
-            double taxa = log(s)/log(s);          /* a normalizacao: cada um pela sua escala */
+        /* `taxa = log(s)/log(s)` E' UM, para todo s: a mesma quantidade dividida por si
+         * propria, com um limiar 1e-15 por cima a dar-lhe cara de medicao. O m nem
+         * entrava na conta, e o sqrt tambem nao. Oito vezes 1 == 1.
+         *
+         * E a frase deste ficheiro tem DUAS metades, ditas no cabecalho: em p.u. sao a
+         * MESMA COISA, e em ABSOLUTO SEPARAM-SE pelo Delta e pelo sigma. So se media
+         * (mal) a primeira. As duas medem-se juntas, e em inteiros:
+         *
+         *   a LEI UNICA:   2*sigma = m + sqrt(D) com D = m*m+4, e a norma de 2*sigma e'
+         *                  m*m - D = -4 para TODO m. Uma lei, a mesma em todos.
+         *   a SEPARACAO:   D = m*m+4 e' DIFERENTE em cada m — oito valores distintos.
+         *
+         * Nao ha raiz nem logaritmo: a norma e' rt_zd_norma da lib, e o que se conserva
+         * ao longo da familia e' o INTEIRO -4. */
+        int metais=0, mesma_lei=0, distintos=0;
+        long Ds[9];
+        printf("      m    Delta = m^2+4   N(2.sigma) = m^2 - Delta   fraccao continua\n");
+        for(long m=1;m<=8;m++){
+            long D = m*m + 4;
+            long N = rt_zd_norma(m, 1, D);        /* a norma de 2.sigma = m + sqrt(D) */
+            Ds[metais] = D;
             metais++;
-            if(fabs(taxa-1.0) < 1e-15) um++;
-            if(m<=4) printf("      %-4lld %.9f    %.9f    %.1f\n", m, s, log(s), taxa);
+            if(N == -4) mesma_lei++;              /* a LEI: a mesma em todos */
+            if(m<=4) printf("      %-4ld %-15ld %-25ld [%ld;%ld,%ld,%ld,...]\n", m, D, N, m,m,m,m);
         }
-        printf("      metais: %d   com taxa 1: %d\n", metais, um);
-        ok("em p.u. a taxa e 1 em TODOS os metais — uma lei so", um==metais);
+        for(int i=0;i<metais;i++){                /* a SEPARACAO: todos os Delta diferentes */
+            int repetido = 0;
+            for(int j=0;j<i;j++) if(Ds[j]==Ds[i]) repetido = 1;
+            if(!repetido) distintos++;
+        }
+        printf("      metais: %d   com a MESMA norma -4: %d   com Delta DISTINTO: %d\n",
+               metais, mesma_lei, distintos);
+        ok("em p.u. a lei e UMA SO — a norma de 2.sigma e -4 em todos os oito metais — e em"
+           " ABSOLUTO eles separam-se, porque o Delta = m^2+4 e distinto em cada um. As duas"
+           " metades na mesma medida, e tudo inteiro: nem raiz nem logaritmo",
+           mesma_lei==metais && distintos==metais && metais==8);
         conclui("e o representante e o OURO. Em absoluto eles separam-se pelo Delta e pelo");
         conclui("sigma; em p.u. sao a mesma coisa, e por isso tudo opera em dourada.");
     }
