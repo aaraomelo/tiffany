@@ -352,9 +352,7 @@ printf("\n§H5  O IMPULSO é Δp, e o momento CONSERVA-SE quando a força se anu
            " passa por aritmetica trivial; o que lhe da' conteudo e' o outro lado, com"
            " s = 0,5, onde o momento MEXE. Sem ele, o integrador podia estar parado por"
            " defeito e a assercao passava na mesma",
-           /* e o lado que nao mexe e' ZERO EXACTO, nao «menor que 1e-9»: dVds(0) = 0 da
-            * forca zero, e somar zero cem mil vezes deixa o zero onde estava, bit a bit. */
-           p21 == p20 && fabs(p31-p30) != 0.0);
+           p21 == p20 && p31 != p30);
         printf("      (controlo positivo, e agora com as duas metades: sem a segunda, a\n");
         printf("       primeira passaria por o integrador não mexer em nada.)\n");
     }

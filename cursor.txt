@@ -124,7 +124,7 @@ São a razão pela qual os doubles saem. Cada um dá uma forma exacta de medir.
 3. O PROCEDIMENTO — como tirar um double
 ----------------------------------------
 
-Estado: 134 limiares ainda DECIDEM uma asserção (eram 151). Lista com:
+Estado: 98 limiares ainda DECIDEM uma asserção (eram 134, depois 118). Lista com:
 
     python3 - <<'PY'
     import re,glob
@@ -195,6 +195,16 @@ SEMPRE, no fim: o GUME. Mutar o que a asserção MEDE (não a asserção) e ver 
     python3 tools/residuo_zero.py      resíduo zero exacto + limiar = candidato
     python3 tools/definicao_relida.py  a asserção que verifica a própria definição
     bash tools/gume_todos.sh [max] [par]    o gume sobre a bateria inteira
+
+    tools/gume_relatorio.txt   JÁ CORRIDO (17/08, tecto 18): 377 de 397 medidores .c,
+                               3199 unidades, 1050 sobreviventes em 198 medidores.
+                               É PARCIAL nos dois sentidos, e o topo do ficheiro diz
+                               porquê: o tecto baixo INFLA a lista, e 20 medidores não
+                               entraram porque precisam de ARGUMENTOS que o gume.py não
+                               tem (a bateria.sh tem-nos na sua tabela args()).
+                               Para confirmar uma linha: gume.py nesse medidor com --max 200.
+
+    tools/alvos_doubles.txt    177 limiares que aguentam igualdade exacta, já verificados
 
     Código MUTADO corre com RLIMIT_FSIZE e RLIMIT_AS (o gume.py já o faz): uma mutação
     pode pôr um medidor em ciclo, e o rodapé do unidade.h escreve em /tmp sem tecto.

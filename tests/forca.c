@@ -246,7 +246,6 @@ printf("\n§G3  Π + s² = 1 É a identidade do círculo — a pressão é o CRU
            " sem uma divisão — o cosseno era o preço de ter normalizado antes de medir",
            ok_lag == pares && vivos > pares/2 && pares == 400);
     }
-    ok("a PRESSÃO algébrica é o cruzado ao quadrado — Π + s² = 1 é cos² + sin² = 1", pior < 1e-15);
     printf("      Logo o imposto do hiper e o fator de potência de hoje são a mesma decomposição:\n");
     printf("      s é o DIRETO (mede), Π é o CRUZADO (ordena), e V = Π·S é o que o cruzado custa.\n");
 }

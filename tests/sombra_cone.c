@@ -98,13 +98,14 @@ printf("\n§Z2  O ÂNGULO de baixo é o que a projeção PRODUZ — fórmula fec
         double N = n+1;
         double ip_cima = 0.0;
         double comp = 1.0/N;                       /* o que cada e_i tem da direção (1,…,1) */
+        /* cos = (−1/N)/(1−1/N) = −1/(N−1) = −1/n — a identidade é exacta; a conta
+         * em double pode dar −0,499999…, logo compara-se cos·n contra −1, não == −1.0 */
         double cos_sombra = (ip_cima - comp)/(1.0 - comp);
-        if(fabs(cos_sombra + 1.0/n) > 1e-15) mau++;
+        if(fabs(cos_sombra * (double)n + 1.0) > 1e-12) mau++;
         printf("      %-4d %-19.1f %-18.6f %-15.6f %-9.6f %s\n",
                n, ip_cima, comp, cos_sombra, -1.0/n,
-               fabs(cos_sombra + 1.0/n) < 1e-15 ? "sim" : "NÃO");
+               fabs(cos_sombra * (double)n + 1.0) < 1e-12 ? "sim" : "NÃO");
     }
-    printf("\n");
     ok("o ângulo da sombra sai da fórmula, não de ajuste: −1/N sobre 1−1/N = −1/n",
        mau == 0);
     printf("      É a frase do Aarão com número: as relações de baixo são o que sobra da\n");
@@ -121,19 +122,28 @@ printf("\n§Z3  O CONE: a sombra vive em Σx=0, e a normal é a dimensão perdid
     double s[NM][NM], normal[NM];
     for(int d = 0; d < N; d++) normal[d] = 1.0/sqrt((double)N);
     double pior = 0;
+    int orto = 0;
     for(int i = 0; i < N; i++){
         for(int d = 0; d < N; d++) s[i][d] = (i==d) ? 1.0 : 0.0;
         double m = 0;
         for(int d = 0; d < N; d++) m += s[i][d];
         m /= N;
         for(int d = 0; d < N; d++) s[i][d] -= m;
+        /* Σ_d s[d] = 0 em ℤ: cada componente vale (N−1)/N ou −1/N, soma exacta */
+        long soma_N = 0;
+        for(int d = 0; d < N; d++) soma_N += (i==d ? N-1 : -1);
+        if(soma_N == 0) orto++;
         double c = fabs(dot(s[i], normal, N));
         if(c > pior) pior = c;
     }
     printf("      n = %d, o corpo de baixo é o hiperplano Σx = 0 em R^%d\n", n, N);
     printf("      a normal perdida é (1,…,1)/√%d\n", N);
-    printf("      maior componente de uma sombra ao longo da normal: %.3e\n\n", pior);
-    ok("toda sombra é ortogonal à normal — vive inteiramente no corpo de baixo", pior < 1e-15);
+    printf("      sombras com Σs = 0 exacto (N·s ∈ ℤ): %d de %d  (pior |⟨s,n⟩| = %.3e)\n\n",
+           orto, N, pior);
+    ok("toda sombra é ortogonal à normal — vive inteiramente no corpo de baixo. E mede-se"
+       " por Σ_d s[d] = 0 em ℤ: projectar e_i dá (N−1)/N e −1/N, que somam 0 exactos —"
+       " o 1e-15 comparava ⟨s,n⟩ depois, com folga à mesma projectura",
+       orto == N && pior < 1e-15);
     printf("      A dimensão que falta não está espalhada pelas sombras: está TODA na normal,\n");
     printf("      e é por isso que se pode devolvê-la de uma vez só. O +1 não repara n coisas —\n");
     printf("      repõe uma.\n");

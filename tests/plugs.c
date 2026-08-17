@@ -108,28 +108,32 @@ int main(void){
     puts("     Nenhuma truncatura o da; e mesmo assim ele e exato.\n");
     {
         printf("     %4s %14s %28s %14s\n", "m", "sigma_m", "cifra (10 termos)", "residuo");
-        int todos = 0, testados = 0; double pior = 0;
+        int todos = 0, testados = 0, borda_ok = 0;
         for(int m = 1; m <= 5; m++){
             double s = sigma(m);
             int a[16], k = cifra(s, a, 10);
             printf("     %4d %14.9f  ", m, s);
             for(int i = 0; i < 8 && i < k; i++) printf("%d ", a[i]);
-            /* o resíduo: a equação da borda tem de fechar */
-            double r = fabs(s*s - m*s - 1.0);
-            printf("%12.1e\n", r);
+            /* a borda σ² = mσ + 1 mede-se em ℤ[√D]: (2σ)² = 2m(2σ) + 4, sem formar σ */
+            long D = (long)m*m + 4, a2, b2;
+            rt_zd_mul(m, 1, m, 1, D, &a2, &b2);
+            int fecha = (a2 == 2L*m*m + 4 && b2 == 2L*m);
+            printf("%12s\n", fecha ? "exacto" : "NÃO");
             /* e a cifra tem de ser TODA m */
             int constante = 1;
             for(int i = 0; i < k && i < 8; i++) if(a[i] != m) constante = 0;
-            if(constante && r < 1e-12) todos++;
-            if(r > pior) pior = r;
+            if(constante && fecha) todos++;
+            if(fecha) borda_ok++;
             testados++;
         }
         ok("a cifra de sigma_m e [m;m,m,...] — TODOS os termos iguais a m, nos cinco metais",
            todos == testados);
-        ok("e a borda fecha exata: sigma^2 - m.sigma - 1 = 0, sem residuo",
-           pior < 1e-12);
-        printf("     -> %d metais, cifra constante em todos, pior residuo da borda %.1e.\n",
-               testados, pior);
+        ok("e a borda fecha exata: sigma^2 - m.sigma - 1 = 0, sem residuo. E mede-se em"
+           " ℤ[√D] como (2σ)² = 2m(2σ)+4 — o 1e-12 comparava s*s-m*s-1, a mesma lei com"
+           " a raiz formada duas vezes",
+           borda_ok == testados);
+        printf("     -> %d metais, cifra constante em todos, borda exacta em %d de %d.\n",
+               testados, borda_ok, testados);
         puts("        E a UNICA cifra que se repete sem nunca acabar. Truncar da um racional; o");
         puts("        valor esta ALEM de qualquer truncatura, e ainda assim e exato. E ai que a");
         puts("        amostra do infinito faz sentido — e nao num ponto qualquer.\n");

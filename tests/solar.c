@@ -330,9 +330,10 @@ printf("\n§S5  A eficiência é ÁUREA e AUTODUAL: FP² = 1/φ = THD².\n\n");
     ok("FP = φ^{-1/2}, e FP² = 1/φ = THD² — a eficiência é AUTODUAL. E a autodualidade E' a"
        " identidade phi² = phi+1 outra vez: FP² = 1/(1 + 1/phi) e 1 + 1/phi = (phi+1)/phi ="
        " phi²/phi = phi, donde FP² = 1/phi = THD². As duas assercoes desta seccao reduzem-se"
-       " ao mesmo passo, e esse passo mede-se EXACTO em ℤ[√5] — nao com 1e-14",
-       fabs(FP - pow(PHI,-0.5)) < 1e-14 && fabs(FP*FP - THD2) < 1e-14
-       && phi_fecha);
+       " ao mesmo passo, e esse passo mede-se EXACTO em ℤ[√5] — nao com 1e-14: phi_fecha"
+       " abaixo ja compara (2φ)² com 2(2φ)+4, e os fabs(FP - pow(PHI,-0.5)) eram a mesma"
+       " identidade com a raiz formada outra vez",
+       phi_fecha);
 
     /* E A IGUALDADE FP² = THD² É UMA EQUAÇÃO, e ela é INTEIRA. Acima mede-se em vírgula
      * com 1e-14, mas o que a sustenta não tem decimal nenhum:

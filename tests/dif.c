@@ -154,10 +154,8 @@ printf("\n§F2  E F⁴ = id — a transformada tem ordem 4, e é o mesmo J do ze
         if(cabs(d[j] - x[j]) > e1) e1 = cabs(d[j] - x[j]);      /* F⁴ = id      */
         if(cabs(b[j] - x[(N-j)%N]) > e2) e2 = cabs(b[j] - x[(N-j)%N]);  /* F² = paridade */
     }
-    printf("      max |F⁴x - x|        = %.2e\n", e1);
+    printf("      max |F⁴x - x|        = %.2e   (vírgula: arredondamento do cosseno)\n", e1);
     printf("      max |F²x - x(-t)|    = %.2e\n\n", e2);
-    ok("F⁴ = id: a transformada de Fourier tem ordem QUATRO", e1 < 1e-12);
-    ok("e F² é a paridade, t -> -t — logo F é a raiz quadrada da reflexão", e2 < 1e-12);
     /* E AS DUAS MEDEM-SE OUTRA VEZ, SEM UMA VÍRGULA. «F tem ordem 4» e «F² é a paridade»
      * são afirmações EXACTAS, e um `== 0.0` sobre cossenos e senos não é a régua delas: é
      * a régua do arredondamento. A mesma transformada existe sobre um corpo FINITO — é a
@@ -191,6 +189,12 @@ printf("\n§F2  E F⁴ = id — a transformada tem ordem 4, e é o mesmo J do ze
         printf("      e em ℤ_%ld, com w = %ld de ordem %ld e √N = 4 (inverso %ld):\n", P, W, ordem, INV_RN);
         printf("        F⁴x - x       : %ld discrepâncias em %d  — resíduo ZERO, sem limiar\n", z1, N);
         printf("        F²x - x(-t)   : %ld discrepâncias em %d\n\n", z2, N);
+        ok("F⁴ = id: a transformada de Fourier tem ordem QUATRO — EXACTA em ℤ₁₇, sem o"
+           " 1e-12 do cosseno",
+           z1 == 0 && ordem == N);
+        ok("e F² é a paridade, t -> -t — logo F é a raiz quadrada da reflexão. A mesma"
+           " medida, resíduo ZERO, sem limiar",
+           z2 == 0 && ordem == N);
         ok("e as duas leis são EXACTAS, medidas sobre ℤ₁₇ onde a transformada é a avaliação"
            " nas 16 raízes da unidade: F⁴ = id e F² = paridade com resíduo ZERO, sem uma"
            " vírgula e sem um limiar. O «== 0.0» de cima mede o arredondamento do cosseno,"
@@ -859,9 +863,30 @@ printf("\n§F10 A RETA PREENCHE O CÍRCULO — pelas três: Fourier, Mellin e Po
             for(int j = 0; j < N; j++){ n1 += creal(x[j]*conj(x[j])); n2 += creal(X[j]*conj(X[j])); }
             if(fabs(n1 - n2) > pior) pior = fabs(n1 - n2);
         }
-        printf("          max | ||x||² - ||Fx||² |  em 4 sinais  =  %.2e\n\n", pior);
-        ok("PARSEVAL: a norma conserva-se — os caracteres são COMPLETOS, não há buraco",
-           pior < 1e-12);
+        printf("          max | ||x||² - ||Fx||² |  em 4 sinais  =  %.2e  (vírgula)\n\n", pior);
+        /* PARSEVAL É ALGEBRICO: N·Σ x_j² = Σ X_k X_{−k} em F_p, sem módulo complexo. */
+        {
+            const long P = 17, W = 3, NN = 16;
+            long x[NN], X[NN];
+            for(int j = 0; j < NN; j++) x[j] = (3*j + 5) % P;
+            for(int k = 0; k < NN; k++){
+                long s = 0;
+                for(int j = 0; j < NN; j++)
+                    s = (s + x[j] * rt_pot_mod(W, (long)((j*(long)k)%NN), P)) % P;
+                X[k] = s;
+            }
+            long esq = 0, dir = 0;
+            for(int j = 0; j < NN; j++) esq = (esq + x[j]*x[j]) % P;
+            esq = (esq * NN) % P;
+            for(int k = 0; k < NN; k++){
+                int km = (int)((NN - k) % NN);
+                dir = (dir + X[k]*X[km]) % P;
+            }
+            printf("          e em ℤ_17: N·Σ x² = %ld,  Σ X_k X_{-k} = %ld — o mesmo\n\n", esq, dir);
+            ok("PARSEVAL: a norma conserva-se — os caracteres são COMPLETOS, não há buraco."
+               " A identidade N·Σ x_j² = Σ X_k X_{−k} fecha em ℤ₁₇, sem o 1e-12 do cexp",
+               esq == dir);
+        }
         printf("          É esta a forma dual de \"preenche a área\". Do lado da reta, preencher\n");
         printf("          é a órbita não deixar setor vazio; do lado DUAL é os caracteres não\n");
         printf("          deixarem função por ver. Se faltasse um deles, haveria energia a\n");
@@ -890,13 +915,35 @@ printf("\n§F9  E FECHOU? Contra o contrato, cláusula a cláusula — e uma NÃ
     printf("      ν1      a dualidade é INVOLUÇÃO     F² = paridade, e (F²)² = id SIM (§F2)\n");
     printf("      ν2      e respeita a estrutura      F(a+b) = F(a) + F(b)        SIM\n\n");
 
-    /* ν1 com F: (F²)² = F⁴ = id, ja medido no §F2. Aqui mede-se ν2: F e linear. */
-    double complex x[N], y[N], sx[N], Fx[N], Fy[N], Fs[N];
-    for(int j = 0; j < N; j++){ x[j] = (j==2) ? 1 : 0; y[j] = (j==5) ? 0.5 : 0; sx[j] = x[j]+y[j]; }
-    dft(x, Fx, 0); dft(y, Fy, 0); dft(sx, Fs, 0);
-    double e2 = 0;
-    for(int j = 0; j < N; j++) if(cabs(Fs[j] - Fx[j] - Fy[j]) > e2) e2 = cabs(Fs[j] - Fx[j] - Fy[j]);
-    ok("ν2: a transformada respeita a soma — F(a+b) = F(a) + F(b)", e2 < 1e-12);
+    /* ν1 com F: (F²)² = F⁴ = id, ja medido no §F2. Aqui mede-se ν2: F e linear.
+     * A LINEARIDADE É ALGEBRAICA, e o 1e-12 media o cexp. Em ℤ₁₇, F(x+y) = F(x)+F(y)
+     * entrada a entrada, resíduo ZERO. */
+    {
+        const long P = 17, W = 3;
+        long x[N], y[N], s[N], Fx[N], Fy[N], Fs[N];
+        for(int j = 0; j < N; j++){
+            x[j] = (j==2) ? 1 : 0;
+            y[j] = (j==5) ? 1 : 0;
+            s[j] = (x[j] + y[j]) % P;
+        }
+        for(int k = 0; k < N; k++){
+            long sx = 0, sy = 0, ss = 0;
+            for(int j = 0; j < N; j++){
+                long w = rt_pot_mod(W, (long)((N - (long)j*k % N) % N), P);
+                sx = (sx + x[j]*w) % P;
+                sy = (sy + y[j]*w) % P;
+                ss = (ss + s[j]*w) % P;
+            }
+            Fx[k] = sx; Fy[k] = sy; Fs[k] = ss;
+        }
+        long mal = 0;
+        for(int k = 0; k < N; k++) if(Fs[k] != (Fx[k] + Fy[k]) % P) mal++;
+        printf("      e em ℤ_17: F(x+y) = F(x)+F(y) em %d de %d modos — resíduo ZERO\n",
+               N - (int)mal, N);
+        ok("ν2: a transformada respeita a soma — F(a+b) = F(a) + F(b). EXACTA em ℤ₁₇,"
+           " sem o 1e-12 do cexp: a linearidade e' da soma, nao do arredondamento",
+           mal == 0);
+    }
 
     printf("\n      MAS HÁ UMA QUE NÃO FECHA, e é a que o Aarão mandou olhar:\n\n");
     printf("      o par (D, ∫) NÃO é uma dualidade no sentido do contrato.\n");

@@ -386,7 +386,7 @@ int main(void){
            " E mede-se nos QUADRADOS — dx^2.dy^2 >= <sz>^2 —, que e' onde as variancias ja'"
            " vivem: formar as duas raizes para as multiplicar e comparar acrescentava dois"
            " arredondamentos e um NaN possivel, porque ex2 - ex.ex pode sair negativo",
-           dx2*dy2 >= lado*lado - 1e-12);
+           dx2*dy2 >= lado*lado);
         /* A ASSERCAO QUE AQUI ESTAVA media a saturacao NUM estado so' — o |0>, onde
          * <sx> = <sy> = 0 e tudo da 0 ou 1. Passava por aritmetica trivial, e nao dizia
          * QUANDO satura: se saturasse sempre, Robertson seria igualdade e nao desigualdade.
@@ -446,7 +446,9 @@ int main(void){
         M H = pauli(0);
         M U = mexp(esc(-I*0.7, H));
         M volta = mul(dag(U), U);
-        ok("a EVOLUCAO e reversivel: U tem inversa e ela e U' — a volta da a identidade",
+        ok("a EVOLUCAO e reversivel: U tem inversa e ela e U' — a volta da a identidade."
+           " O limiar e' do METODO (a serie mexp), nao da tese: a unitariedade EXACTA"
+           " mede-se abaixo em Z[i] por ternos pitagoricos, sem exponencial",
            dif(volta, mid()) < 1e-12);
 
         /* E A TESE MEDE-SE EXACTA, sem a exponencial de matriz. «U'U = I» e' uma identidade

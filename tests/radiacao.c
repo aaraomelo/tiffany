@@ -225,7 +225,7 @@ int main(void){
         double Pr = p_joule(Q_rad, vol, comp), Pt = p_joule(Q_tan, vol, comp);
 
         ok("o radial da campo NULO e o tangencial nao — e o que o headjack.c ja media",
-           nBr2 < nBt2*1e-24 && nBt2 > 0);
+           nBr2 == 0.0 && nBt2 > 0);
         /* «OS DOIS DISSIPAM IGUAL» É POR CONSTRUÇÃO: `p_joule` usa só |Q|², e Q_rad =
          * (0,0,1) e Q_tan = (1,0,0) têm o MESMO módulo. A comparação não podia falhar.
          *
@@ -255,8 +255,7 @@ int main(void){
            " logo a comparacao nao podia falhar. Agora tem as duas metades: seis DIRECCOES com"
            " modulo fixo dao a mesma potencia, e quatro MODULOS diferentes dao potencias"
            " diferentes — sem a segunda, «nao ve a direccao» valia por nao ver nada",
-           fabs(Pr - Pt)/Pt < 1e-12
-           && dir_igual == dirs && dirs == 6 && mod_muda == mods && mods == 4);
+           dir_igual == dirs && dirs == 6 && mod_muda == mods && mods == 4);
         printf("     -> |B| radial %.1e / tangencial %.1e   (razao zero)\n", nBr, nBt);
         printf("        P radial %.3e / tangencial %.3e W  (razao %.6f)\n", Pr, Pt, Pr/Pt);
         puts("        O que o magnetico perde INTEIRO, o termico ve INTEIRO. Nao e uma analogia:");

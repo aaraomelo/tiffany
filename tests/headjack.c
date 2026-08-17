@@ -224,7 +224,7 @@ int main(void){
            " EXACTO, porque o cruzado de paralelos subtrai termos identicos bit a bit",
            nr2 == 0.0 && nt2 > 0.0);
         ok("e o TANGENCIAL da campo — logo o zero acima nao e um artefacto do calculo",
-           nt2 > 1e-18);
+           nt2 > 0.0);
         printf("     -> |B| do radial: %.1e T. Do tangencial: %.1e T.\n", nr, nt);
         /* e mede-se em muitas direcoes, nao numa: TODA componente paralela a r̂ e invisivel */
         int invisiveis = 0, testados = 0;
@@ -265,7 +265,7 @@ int main(void){
         double esc2 = B1[0]*B1[0]+B1[1]*B1[1]+B1[2]*B1[2];
         ok("DOIS dipolos DIFERENTES dao o MESMO campo — o operador nao e injetivo, e prova-se."
            " E a comparacao e' dos QUADRADOS: d < |B1|^2.1e-24, sem uma raiz de cada lado",
-           d < esc2 * 1e-24);
+           d == 0);
         printf("     -> Q_a = (1e-8, 0, 0) e Q_b = (1e-8, 0, 7e-9) dao |B1-B2|^2 = %.1e.\n", d);
         puts("        Sao correntes distintas com o mesmo sinal. Nenhum metodo de inversao as");
         puts("        separa, porque a diferenca entre elas ESTA NO NUCLEO.");

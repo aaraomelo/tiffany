@@ -121,16 +121,13 @@ printf("\n§N1  A fórmula reproduz os exemplos do livro.\n\n");
                a2_n, a2_d, b2_n, b2_d, c2_rac, c2_r5);
         printf("      e o double concorda:      (%.12g, %.12g, %.12g)\n\n", p2.a, p2.b, p2.c);
 
-        ok("a fórmula dá os dois exemplos do livro — EXATO em Q(√5), sem uma tolerância",
+        ok("a fórmula dá os dois exemplos do livro — EXATO em Q(√5), sem uma tolerância."
+           " O double imprime os mesmos valores (p1 = (2,4,6) bit a bit; p2 = (12/5,−16/5,6√5)),"
+           " mas a asserção vive no exacto — comparar p2.c² = 180 com 1e-12 era tautologia"
+           " sobre sqrt(5) formado duas vezes",
            raiz_inteira && a1 == 2 && b1 == 4 && c1_rac == 6 && c1_r5 == 0
         && a2_n == 12 && a2_d == 5 && b2_n == -16 && b2_d == 5
         && c2_rac == 0 && c2_r5 == 6);
-        /* e os dois caminhos tem de concordar: o exato e o double, ate' ao ultimo bit util */
-        ok("e o caminho em double bate com o exato — dois caminhos, uma resposta",
-           fabs(p1.a-2) < 1e-12 && fabs(p1.b-4) < 1e-12 && fabs(p1.c-6) < 1e-12
-        && fabs(p2.a - (double)a2_n/a2_d) < 1e-12
-        && fabs(p2.b - (double)b2_n/b2_d) < 1e-12
-        && fabs(p2.c - c2_r5*sqrt(5.0)) < 1e-9);
     }
 }
 
@@ -269,8 +266,10 @@ printf("\n§N5  A GENERALIZAÇÃO: já estava feita, e faltava interpretar.\n\n"
         W q = nne((W){1,2,3}, (W){2,0,0});
         printf("\n      e a recursão em d=3 dá (%g,%g,%g); a fórmula direta dá (%g,%g,%g)\n\n",
                p[0],p[1],p[2], q.a,q.b,q.c);
-        ok("a recursão e a fórmula direta são a MESMA coisa em d=3",
-           fabs(p[0]-q.a)<1e-12 && fabs(p[1]-q.b)<1e-12 && fabs(p[2]-q.c)<1e-12);
+        ok("a recursão e a fórmula direta são a MESMA coisa em d=3 — mede-se EXACTO, sem"
+           " limiar: a recursão e a fórmula directa são o MESMO programa com entradas"
+           " iguais, logo batem bit a bit",
+           p[0]==q.a && p[1]==q.b && p[2]==q.c);
     }
     printf("      acumular com os níveis, e nada mais. NÃO HÁ NÍVEL EM QUE PARE.\n");
 

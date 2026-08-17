@@ -412,9 +412,10 @@ int main(void){
                escala_ok, glifos);
         ok("na pagina: o 'W' a 12pt e 1,2x o de 10pt, e o de 24pt e 2x o de 12 — escala pura."
            " E o que se mede e' ela NAO DEPENDER DO GLIFO, em toda a fonte e em inteiros: a"
-           " razao 12/10 sozinha sou eu que a escrevo, porque o avanco e o upem cancelam-se",
-           glifos > 0 && escala_ok == glifos
-           && fabs(w12/w10 - 1.2) < 1e-12 && fabs(w24/w12 - 2.0) < 1e-12);
+           " razao 12/10 sozinha sou eu que a escrevo, porque o avanco e o upem cancelam-se."
+           " Os fabs(w12/w10 - 1.2) eram a 12.ª forma: w12/w10 E' 12/10 porque av e upem"
+           " cancelam — o limiar nao media nada alem da definicao relida",
+           glifos > 0 && escala_ok == glifos);
         printf("     -> 'W': %.3f pt a 10, %.3f a 12, %.3f a 24. log da razao = %.6f = log(1,2).\n",
                w10, w12, w24, log(w12/w10));
         puts("");

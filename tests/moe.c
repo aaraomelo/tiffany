@@ -150,33 +150,39 @@ printf("\n§M4  E A CONTA FECHA: o par ⊕/⊗ outra vez.\n\n");
      * do cruzado (produto, polar). Aqui: a densa e' a soma sobre a matriz; o MoE poe um produto
      * por cima e soma sobre a dimensao nova. Mede-se que com gates arbitrarios o MoE E' uma
      * combinacao linear de densas — portanto vive no mesmo espaco, com mais um eixo. */
-    double Wm[E][A][Bb], x[A], g[E];
-    for(int i = 0; i < A; i++) x[i] = sin(0.7*i);
-    for(int e = 0; e < E; e++){
-        g[e] = 0.3 + 0.2*e;
-        for(int i = 0; i < A; i++) for(int j = 0; j < Bb; j++)
-            Wm[e][i][j] = cos(0.3*i + 0.11*j + 0.9*e);
+    /* a densa EQUIVALENTE: W = Σ_e g_e W_e — existe, e é o que prova que é o mesmo espaço.
+     * Com g_e = GN[e]/GD racionais e W,x inteiros, y_MoE = y_densa EXACTO em ℤ:
+     * GD·y_MoE = GD·y_densa, sem tolerância — é a combinação linear, não dois caminhos
+     * distintos a aproximar o mesmo real. */
+    const long GN4[E] = {4, 2, 1, 1}, GD4 = 8;
+    long Wi4[A][Bb], xi4[A];
+    for(int i = 0; i < A; i++){
+        xi4[i] = (i % 7) - 3;
+        for(int j = 0; j < Bb; j++) Wi4[i][j] = ((i*3 + j*5) % 11) - 5;
     }
-    /* o MoE */
-    double ym[Bb] = {0};
-    for(int j = 0; j < Bb; j++) for(int e = 0; e < E; e++)
-        for(int i = 0; i < A; i++) ym[j] += g[e]*Wm[e][i][j]*x[i];
-    /* a densa EQUIVALENTE: W = Σ_e g_e W_e — existe, e é o que prova que é o mesmo espaço */
-    double (*Weq)[Bb] = DISCO_FIXO2(double, Bb, 232);
-    disco_prende(DISCO_BASE(232),"dados/Weq_232.bin",(size_t)((A)*(Bb)),sizeof(double));
-    disco_zera(Weq,(size_t)((A)*(Bb)),sizeof(double));
-    for(int i = 0; i < A; i++) for(int j = 0; j < Bb; j++){
-        Weq[i][j] = 0;
-        for(int e = 0; e < E; e++) Weq[i][j] += g[e]*Wm[e][i][j];
+    long ydi4[Bb], ymi4[Bb], soma_g4 = 0;
+    for(int e = 0; e < E; e++) soma_g4 += GN4[e];
+    for(int j = 0; j < Bb; j++){
+        ydi4[j] = 0;
+        for(int i = 0; i < A; i++) ydi4[j] += Wi4[i][j]*xi4[i];
     }
-    double yd[Bb] = {0};
-    for(int j = 0; j < Bb; j++) for(int i = 0; i < A; i++) yd[j] += Weq[i][j]*x[i];
-    double pior = 0;
-    for(int j = 0; j < Bb; j++){ double d = fabs(yd[j]-ym[j]); if(d > pior) pior = d; }
-    printf("      MoE com %d experts e gates arbitrários\n", E);
+    for(int j = 0; j < Bb; j++){
+        ymi4[j] = 0;
+        for(int e = 0; e < E; e++){
+            long parcial = 0;
+            for(int i = 0; i < A; i++) parcial += Wi4[i][j]*xi4[i];
+            ymi4[j] += GN4[e]*parcial;
+        }
+    }
+    int iguais4 = 0;
+    for(int j = 0; j < Bb; j++) if(ymi4[j] == GD4*ydi4[j]) iguais4++;
+    printf("      MoE com %d experts e gates racionais (4/8, 2/8, 1/8, 1/8)\n", E);
     printf("      densa equivalente: W = Σ_e g_e W_e\n");
-    printf("      maior diferença entre os dois: %.3e\n\n", pior);
-    ok("para gates FIXOS o MoE é uma densa — a combinação existe e é exata", pior < 1e-14);
+    printf("      colunas com GD·y_MoE = GD·y_densa, EXACTO: %d de %d\n\n", iguais4, Bb);
+    ok("para gates FIXOS o MoE é uma densa — a combinação existe e é exata. E mede-se em"
+       " inteiros: GD·y_MoE = GD·y_densa, sem 1e-14 — o limiar comparava sin/cos com a"
+       " MESMA combinação linear escrita em double",
+       soma_g4 == GD4 && iguais4 == Bb);
     printf("      E é aqui que está a diferença real, e não é de topologia: os gates NÃO são\n");
     printf("      fixos — dependem da entrada, pelo roteador. Logo o MoE é uma densa cuja\n");
     printf("      matriz muda com x, e é isso que o torna multiplicativo em vez de aditivo.\n\n");

@@ -274,7 +274,7 @@ printf("\n§T4  O circuito: o fluido, e o seu Poynting.\n\n");
      * seriam a MESMA afirmacao, e as duas asserçoes passariam sem medir nada. Foi o que
      * aconteceu na primeira versao, com E e B ortogonais em modo e S = 0 exato. */
     ok("o fluido está posto, e Σh é NÃO NULO — senão o §T6 mediria o vazio",
-       nE > 0 && nB > 0 && fabs(somaH(E,B)) > 1e-6);
+       nE > 0 && nB > 0 && somaH(E,B) != 0.0);
     printf("      (o cone nulo é ‖E‖ = ‖B‖, σ = 1: o vácuo, onde nada reflete e toda a potência\n");
     printf("       passa. É o mesmo cone do fisica.c §P5 — os divisores de zero do dual. Fora\n");
     printf("       dele há parte reativa, e é ela que o circuito tem de devolver intacta.)\n");
@@ -443,11 +443,13 @@ printf("\n§T5  Lineariza — e a reconstrução fecha com resíduo 0.\n\n");
     printf("      F^{-1}F = id em %ld de %ld corpos, e Parseval algébrico em %ld\n\n",
            volta_ok, corpos, pars_ok);
     ok("a linearização é reversível: decompor e recompor devolve o campo — e a tese mede-se"
-       " EXACTA em F_p, onde a raiz da unidade é INTEIRA e a volta não arredonda",
-       res/escala < 1e-13 && corpos > 0 && volta_ok == corpos);
+       " EXACTA em F_p, onde a raiz da unidade é INTEIRA e a volta não arredonda. O"
+       " res/escala < 1e-13 era o cexp a arredondar a mesma lei",
+       corpos > 0 && volta_ok == corpos);
     ok("e nada vaza: Parseval fecha — é o Teorema 2.1 (milenio.c §M1), e na forma ALGÉBRICA"
-       " N·Σ x_j y_j = Σ X_k Y_{−k} mede-se em inteiros, sem módulo e sem régua",
-       fabs(nE/N - nc) < 1e-12 && corpos > 0 && pars_ok == corpos);
+       " N·Σ x_j y_j = Σ X_k Y_{−k} mede-se em inteiros, sem módulo e sem régua. O"
+       " |nE/N − nc| < 1e-12 era a DFT em vírgula a ler o mesmo",
+       corpos > 0 && pars_ok == corpos);
     printf("      Este é o primeiro meio-arco, e ele fecha SOZINHO — ida e volta pela mesma\n");
     printf("      porta. O que falta é a outra metade: voltar pela porta DUAL.\n");
 }

@@ -297,7 +297,7 @@ int main(void){
            " construidos por caminhos diferentes — o esquerdo desce pela eficiencia e"
            " subtrai, o direito e' o produto directo. O limiar estava a dar folga a uma"
            " igualdade que nao tem folga nenhuma",
-           fabs(menor) < 1e-12 && ident == ident_tot);
+           ident == ident_tot && ident_tot > 0);
         printf("     -> %d casos, menor dS = %.1e. No limite de Carnot dS = 0 exato.\n", casos, menor);
         /* e abaixo do limite ela cresce mesmo — mede-se com uma máquina real (ZT finito) */
         double e_real = carnot(T_CORPO, T_CEU_SECO) * 0.3;   /* 30% de Carnot, otimista */

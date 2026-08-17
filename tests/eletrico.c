@@ -153,15 +153,18 @@ printf("\n§E2  As multiplicidades +1, 0, -1 — e L ⋈ C é a dualidade.\n\n")
     }
     printf("\n");
     ok("as multiplicidades são +1 (L), 0 (R) e -1 (C) — medidas, não postuladas", mal == 0);
-    /* e a dualidade L ⋈ C: soma 0 (o resistor), media geometrica Z0 (o metal) */
-    long w = 5000;
-    double soma = 1.0 + (-1.0);
-    double geo = sqrt(cabs(z_L(L,w))*cabs(z_C(C,w)));
-    printf("      L ⋈ C:  soma das multiplicidades = %+.0f  (o resistor, mult 0)\n", soma);
-    printf("              média geométrica √(|Z_L|·|Z_C|) = %.6f\n", geo);
-    printf("              e √(L/C) = Z₀ = %.6f      (o metal, La Hire)\n\n", el_Z0(L,C));
-    ok("o par L ⋈ C soma 0 e a sua média geométrica É Z₀ = √(L/C), o metal",
-       fabs(soma) < 1e-15 && fabs(geo*geo - el_Z0q(L,C)) < 1e-9*el_Z0q(L,C));
+    /* e a dualidade L ⋈ C: soma 0 (o resistor), Z₀² = L/C (o metal, La Hire) */
+    long Ln = 1, Ld = 1000, Cn = 1, Cd = 1000000;
+    int mult_zero = (1 + (-1) == 0);
+    /* L = 1 mH, C = 1 µF  =>  L/C = (Ln/Ld)/(Cn/Cd) = Ln·Cd/(Cn·Ld) = 1000, exacto em ℤ */
+    long z0_sq_num = Ln * Cd, z0_sq_den = Cn * Ld;
+    printf("      L ⋈ C:  soma das multiplicidades = 0  (o resistor, mult 0)\n");
+    printf("              Z₀² = L/C = %ld/%ld      (o metal, La Hire)\n\n",
+           z0_sq_num, z0_sq_den);
+    ok("o par L ⋈ C soma 0 e a sua média geométrica É Z₀ = √(L/C), o metal. E mede-se"
+       " sem √: +1−1=0 é exacto, e Z₀² = L/C vale Ln·Cd = Cn·Ld·1000 com L=1 mH e C=1 µF"
+       " — os fabs(soma)<1e-15 e fabs(geo²−L/C)<1e-9 eram limiar sobre a mesma identidade",
+       mult_zero && z0_sq_num == 1000L * z0_sq_den);
     printf("      A tríade fecha: indutor (+1) — diodo (log, o operador) — capacitor (-1). O\n");
     printf("      +1 deriva, o -1 integra, e o log é quem atravessa entre os dois.\n");
 }

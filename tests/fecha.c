@@ -40,6 +40,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include "reta.h"
 #include "unidade.h"
 
 typedef struct { long a, b; } Par;
@@ -260,19 +261,23 @@ static void secao_F3(void){
 static void secao_F4(void){
     printf("\n§F4  A DUALIDADE DA CIFRA: o inverso é a mesma cifra, deslocada por uma casa\n\n");
 
-    printf("        m   σ_m = [m; m, m, …]        1/σ_m           σ_m − 1/σ_m   resíduo\n");
-    double pior = 0;
+    printf("        m   σ_m = [m; m, m, …]        1/σ_m           σ_m − 1/σ_m   traço\n");
+    int traco_ok = 0;
     for(int m = 1; m <= 5; m++){
-        double s = (m + sqrt((double)m*m + 4)) / 2.0;    /* σ² = mσ + 1 */
+        double s = (m + sqrt((double)m*m + 4)) / 2.0;    /* σ² = mσ + 1 — só imprime */
         double inv = 1.0 / s;
         /* a cifra de 1/σ_m é [0; m, m, m, …] — a MESMA lista, com um zero à frame.
-         * Consequência exata: σ − 1/σ = m, e é isso que se mede. */
-        double res = fabs(s - inv - (double)m);
-        if(res > pior) pior = res;
-        printf("        %d   %14.10f        %10.8f      %12.10f   %.1e\n", m, s, inv, s - inv, res);
+         * Consequência exata: σ + σ† = m, logo σ − 1/σ = m — e mede-se pelo TRAÇO,
+         * nunca formando a raiz: rt_traco_metalico(m,1) = m em ℤ. */
+        long tr = rt_traco_metalico(m, 1);
+        if(tr == m) traco_ok++;
+        printf("        %d   %14.10f        %10.8f      %12.10f   %ld\n", m, s, inv, s - inv, tr);
     }
-    printf("     o pior resíduo em m = 1..5: %.2e\n", pior);
-    ok("σ_m − 1/σ_m = m exatamente — a cifra do inverso é a mesma deslocada", pior < 1e-12);
+    printf("     traço = m em m = 1..5: %d de 5\n", traco_ok);
+    ok("σ_m − 1/σ_m = m exatamente — a cifra do inverso é a mesma deslocada. E mede-se"
+       " pelo TRAÇO em ℤ: rt_traco_metalico(m,1) = m, sem formar σ nem 1/σ — o 1e-12"
+       " dava folga a s − inv − m, que era a mesma expressão escrita duas vezes",
+       traco_ok == 5);
 
     /* e no inteiro: ν(σ) tem norma ±1, logo σ É unidade, logo o inverso é INTEIRO do corpo.
      * É isso que faz a reversão fechar sem sair para os racionais. */
