@@ -126,7 +126,7 @@ deforma_d 08bfec56355f0f58 0
 demonstracoes 1db3704fa2a95055 0
 densidade c8594d52fd644c0b 0
 derivacao_primitivas 3d04c680af7012a7 0
-descida_mobius f6454b86a38e853a 0
+descida_mobius 448884ab66b96244 0
 desenha 5918033b43ea7382 0
 design f782a62b62cb35d7 0
 design_no_pdf c808ea80e27f1cb8 0

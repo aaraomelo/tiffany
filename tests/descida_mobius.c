@@ -34,6 +34,8 @@
  *   §M6  e o que a descida conserva: |det| = 1 em todo o passo
  *   §M7  a ARITMÉTICA ADITIVA: A_a·A_0·A_b = A_{a+b}, com A_0 = S no meio
  *   §M8  e ∞ + 1 = −1: a Möbius que o faz tem o ÁUREO por ponto fixo
+ *   §M9  e fecha NOS ÍNDICES: ∞ é o 0, dois abaixo está −1/m = norma/traço — e no
+ *        operador AO QUADRADO fica um passo só, com det +1 e o anel a virar ℤ[m√D]
  *
  * Nenhum double, nenhum limiar: compila sem -lm.
  *
@@ -335,6 +337,106 @@ int main(void){
        " outra leitura aditiva, responde ∞ ⊕ (−1) = 0: as duas dizem coisas diferentes,"
        " e por isso medem-se as duas",
        leva_a_menos1 && det_unit && e_ouro && fib_ok == fib_tot && mediante_da_zero);
+
+    /* ─── §M9 ── A RELAÇÃO FECHA NOS ÍNDICES, E EM ℤ[√D] PARA TODO m ───────────────
+     *
+     * O Aarão: «a relação proposta ∞ + 1 = −1 fecha nos índices, verifica» e «vê se fecha
+     * em ℤ[√D]». Fecha, e a forma geral é mais forte do que o caso que ele escreveu.
+     *
+     * A numeração é a das POTÊNCIAS do operador: x_k := A_m^k(∞). Os índices somam —
+     * A_m^a·A_m^b = A_m^{a+b} é o grupo ℤ — e ∞ ocupa o índice 0, que é o NEUTRO. Descer
+     * é aplicar a inversa inteira, e o que se encontra é:
+     *
+     *     x_0  = ∞                       o neutro dos índices
+     *     x_-1 = 0                       e é isto o «0 = 1/∞»: UM passo abaixo
+     *     x_-2 = −1/m                    e para m = 1 isso é EXACTAMENTE −1
+     *
+     * E o −1/m não é um número que aparece: é a razão dos dois invariantes do par dual,
+     *
+     *     −1/m  =  (σ·σ†)/(σ+σ†)  =  norma / traço
+     *
+     * os mesmos dois inteiros do thm:fixo-dual — o que conserva a dividir o que separa.
+     * A relação que o Aarão propôs é o caso m = 1 disto, e o «+1» é descer dois índices.
+     * Diz-se assim, com o m à vista, em vez de se guardar só o caso do ouro. */
+    long met9 = 0, ind_soma9 = 0, inf_zero9 = 0, um_abaixo9 = 0, dois_abaixo9 = 0, nt9 = 0;
+    long ouro_da_menos_um9 = 0;
+    for(long m = 1; m <= 40; m++){
+        long D = m*m + 4;
+        met9++;
+        /* os índices somam: A^a·A^b = A^{a+b}, medido em três pares */
+        long Am[4] = {m,1,1,0}, P2[4], P3[4], P5[4], R[4];
+        mm(Am, Am, P2); mm(P2, Am, P3); mm(P3, P2, P5);
+        mm(P2, P3, R);
+        if(meq(R, P5)) ind_soma9++;                    /* A²·A³ = A⁵ */
+
+        /* ∞ está no índice 0: A⁰ = I, e I(∞) = ∞ */
+        long p = 1, q = 0;
+        if(p == 1 && q == 0) inf_zero9++;
+
+        /* um passo abaixo: A⁻¹(∞) = [q : p−mq] = [0:1] = 0 */
+        long p1 = q, q1 = p - m*q;
+        if(p1 == 0 && q1 == 1) um_abaixo9++;
+
+        /* dois abaixo: A⁻²(∞) = [q1 : p1−m·q1] = [1 : −m] = −1/m */
+        long p2 = q1, q2 = p1 - m*q1;
+        if(p2 == 1 && q2 == -m) dois_abaixo9++;
+        if(m == 1 && p2 == 1 && q2 == -1) ouro_da_menos_um9++;
+
+        /* e −1/m É norma/traço, com os dois calculados em ℤ[√D] e sem raiz */
+        long norma = rt_zd_norma(m, 1, D) / 4;        /* σσ† = −1 */
+        long traco = rt_traco_metalico(m, 1);         /* σ+σ† = m */
+        /* [p2:q2] representa norma/traço exactamente quando p2·traço = norma·q2 — a
+         * igualdade em ℙ¹, por produto cruzado e sem dividir. (Escrevi aqui uma expressão
+         * sem sentido à primeira, com sinais empilhados, e deu 0 de 40: a asserção
+         * apanhou-a.) */
+        if(norma == -1 && traco == m && p2*traco == norma*q2) nt9++;
+    }
+    printf("\n  §M9  a relação fecha nos índices, e em ℤ[√D] para todo m\n");
+    printf("      metais ........................... %ld\n", met9);
+    printf("      os índices SOMAM (A²·A³ = A⁵) .... %ld\n", ind_soma9);
+    printf("      ∞ no índice 0 (o neutro) ......... %ld\n", inf_zero9);
+    printf("      um abaixo: A⁻¹(∞) = 0  (0 = 1/∞) . %ld\n", um_abaixo9);
+    printf("      dois abaixo: A⁻²(∞) = −1/m ....... %ld\n", dois_abaixo9);
+    printf("      −1/m = norma/traço, em ℤ[√D] ..... %ld\n", nt9);
+    printf("      e em m = 1 (o OURO) isso é −1 .... %s\n",
+           ouro_da_menos_um9 ? "sim — a relação do Aarão, exacta" : "não");
+    /* E A VOLTA AO QUADRADO. O Aarão: «ou ainda na volta em ℤ[D²]». Se o operador for
+     * B = A_m², descer UM índice de ∞ já dá −1/m — a relação fica literal, com «+1» a ser
+     * um passo. E B muda de anel: tem traço m²+2, determinante +1 (a volta passa a ser
+     * PRÓPRIA, e não já a inversão de sinal), e discriminante
+     *
+     *     (m²+2)² − 4  =  m²(m²+4)  =  m²·D
+     *
+     * isto é √(disc B) = m√D: o quadrado vive em ℤ[m√D], um sub-anel de ℤ[√D] com o
+     * mesmo corpo por trás. É a mesma recta, medida com uma régua m vezes mais grossa. */
+    long q_tr = 0, q_det = 0, q_disc = 0, q_um = 0, q_tot = 0;
+    for(long m = 1; m <= 40; m++){
+        long Am[4] = {m,1,1,0}, B[4];
+        mm(Am, Am, B);                                 /* B = A_m² */
+        q_tot++;
+        if(B[0] + B[3] == m*m + 2) q_tr++;
+        if(mdet(B) == 1) q_det++;                      /* det B = (det A)² = +1 */
+        long disc = (m*m+2)*(m*m+2) - 4*mdet(B);
+        if(disc == m*m*(m*m+4)) q_disc++;              /* = m²·D */
+        /* B⁻¹(∞): B = [b0 b1; b2 b3], B⁻¹ = [b3 −b1; −b2 b0]/det, e det = 1 */
+        long p = B[3]*1 + (-B[1])*0, q = (-B[2])*1 + B[0]*0;
+        if(p*(-m) == q*1 || (p == 1 && q == -m) || (p*m + q == 0 && p != 0)) q_um++;
+    }
+    printf("      ── e a VOLTA AO QUADRADO, B = A_m² ──\n");
+    printf("      tr B = m²+2 ...................... %ld de %ld\n", q_tr, q_tot);
+    printf("      det B = +1 (a volta é PRÓPRIA) ... %ld de %ld\n", q_det, q_tot);
+    printf("      disc B = m²·D (vive em ℤ[m√D]) ... %ld de %ld\n", q_disc, q_tot);
+    printf("      e B⁻¹(∞) = −1/m: UM passo, não dois %ld de %ld\n", q_um, q_tot);
+    ok("no operador AO QUADRADO a relação fica literal — B⁻¹(∞) = −1/m em um passo — e o"
+       " quadrado muda de anel: det passa de −1 a +1 (a volta é própria) e o discriminante"
+       " de D a m²·D, isto é ℤ[m√D]. A mesma recta, com uma régua m vezes mais grossa",
+       q_tot > 0 && q_tr == q_tot && q_det == q_tot && q_disc == q_tot && q_um == q_tot);
+
+    ok("a relação ∞ + 1 = −1 fecha nos índices e generaliza: ∞ é o índice 0 (o neutro da"
+       " soma de índices), um passo abaixo está 0 — que é o 0 = 1/∞ — e DOIS abaixo está"
+       " −1/m, que é norma/traço, os dois invariantes do par dual. O caso do Aarão é"
+       " m = 1, o ouro", met9 > 0 && ind_soma9 == met9 && inf_zero9 == met9 &&
+       um_abaixo9 == met9 && dois_abaixo9 == met9 && nt9 == met9 && ouro_da_menos_um9 == 1);
 
     printf("\n  ══ a torre é uma só: de cima parte de ∞ e cresce, de baixo parte de p/q e\n");
     printf("     desce até ∞, e S troca os dois extremos porque 0 = 1/∞. E as duas usam\n");

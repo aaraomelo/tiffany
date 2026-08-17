@@ -1309,7 +1309,36 @@ aditiva é a mesma que gera o primeiro metal.}
 A \emph{mediante} $[p{:}q]\oplus[r{:}s]=[p+r{:}q+s]$ --- a outra leitura aditiva, a soma
 dos vectores no cone $\mathbb{Z}^2$ --- responde outra coisa: $\infty\oplus(-1)=0$, e
 $0=1/\infty$. \textbf{São duas leituras e dizem coisas diferentes}, e por isso medem-se
-as duas em vez de se escolher a que agrada. $\square$
+as duas em vez de se escolher a que agrada.
+
+\medskip
+\noindent\textbf{E ela FECHA NOS ÍNDICES, para todo $m$.} A numeração certa é a das
+potências do operador, $x_k:=A_m^{k}(\infty)$. Os índices somam --- $A_m^{a}A_m^{b}
+=A_m^{a+b}$ é o grupo $\mathbb{Z}$ --- e o que se encontra ao descer é:
+\[
+\boxed{
+\begin{array}{lll}
+x_{0}=\infty & \text{o \textbf{neutro}} & \text{o índice }0\text{ da soma}\\[3pt]
+x_{-1}=0 & \text{um passo abaixo} & \text{e é isto o }0=1/\infty\\[3pt]
+x_{-2}=-\dfrac1m &
+\text{dois abaixo} & \text{e }\;-\dfrac1m=\dfrac{\sigma\sigma\dg}{\sigma+\sigma\dg}
+=\dfrac{\text{norma}}{\text{traço}}
+\end{array}}
+\]
+--- \emph{o elemento que fecha a relação é a razão dos dois invariantes do par dual}
+(Teor.~\ref{thm:fixo-dual}): o que conserva a dividir o que separa. Em $m=1$, o ouro,
+isso vale exactamente $-1$: \textbf{a relação proposta é o caso $m=1$ desta}, e o «$+1$»
+é descer dois índices.
+
+\noindent\textbf{E na volta ao quadrado fica um passo só.} Com $B=A_m^{2}$ tem-se
+$B^{-1}(\infty)=-1/m$ \emph{em um passo}, e o quadrado muda de anel:
+\[
+\operatorname{tr}B=m^{2}+2,\qquad \det B=+1,\qquad
+\operatorname{disc}B=(m^{2}+2)^{2}-4=m^{2}D
+\]
+--- a volta passa a ser \textbf{própria} ($\det$ de $-1$ para $+1$) e o discriminante de
+$D$ para $m^{2}D$, isto é $\mathbb{Z}[m\sqrt D]$: \emph{a mesma recta, com uma régua $m$
+vezes mais grossa}. $\square$
 \end{teorema}
 \colunas{a aritmética aditiva, e a descida via Möbius}
         {a soma dentro do grupo multiplicativo ($A_aA_0A_b=A_{a+b}$), o quociente zero a
@@ -1319,7 +1348,7 @@ $g^{-1}$}
 termo a termo em $3600$ racionais; $A_m=T_m\circ S$ e $A_m^{-1}=S\circ T_{-m}$ em $40$ de
 $40$; $S^2=I$ com a translação involutiva só em $m=0$ ($1$ de $41$); $A_aA_0A_b=A_{a+b}$
 em $961$ de $961$ e $[\ldots a,0,b\ldots]=[\ldots a+b\ldots]$ em $180$ de $180$; e as
-potências de $T_{-1}\circ S$ a dar Fibonacci em $12$ de $12$}
+potências de $T_{-1}\circ S$ a dar Fibonacci em $12$ de $12$; e $A_m^{-2}(\infty)=-1/m=\text{norma}/\text{traço}$ em $40$ de $40$, com $\det B=+1$ e $\operatorname{disc}B=m^{2}D$ no quadrado}
 
 \begin{teorema}[e há volta --- é a metade dual]\label{thm:volta}
 $\det A_m=-1$, logo a inversa é \textbf{inteira}, e é o fator de potência unitário que a
@@ -2986,7 +3015,7 @@ medidor & unidades \\
 \code{tests/condicao\_pisot.c}    & $4{:}0$ \\
 \code{tests/reta.c}              & $39{:}0$ \\
 \code{tests/racionais\_fixos.c}   & $8{:}0$ \\
-\code{tests/descida\_mobius.c}    & $8{:}0$ \\
+\code{tests/descida\_mobius.c}    & $10{:}0$ \\
 \bottomrule
 \end{tabular}
 \end{center}
