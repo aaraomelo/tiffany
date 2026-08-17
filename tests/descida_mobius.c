@@ -38,6 +38,8 @@
  *        operador AO QUADRADO fica um passo só, com det +1 e o anel a virar ℤ[m√D]
  *   §M10 A CONSERVAÇÃO: o mdc é a energia, o denominador é o orçamento, e a paragem é
  *        o orçamento a esgotar-se — no ponto fixo ele não se esgota, e é o corte
+ *   §M11 CANTOR/JULIA: o shift CONSERVA o denominador e cicla; a Möbius GASTA-o e termina
+ *        — e o par cantor·julia = −1 É σσ† = −1, o mesmo par noutra carta
  *
  * Nenhum double, nenhum limiar: compila sem -lm.
  *
@@ -534,6 +536,116 @@ int main(void){
        " descida não tem onde parar. É o thm:corte-fixo dito pela conservação: o racional"
        " tem energia FINITA e pára, o real não",
        inf_met > 0 && inf_nao_para == inf_met);
+
+    /* ─── §M11 ── CANTOR/JULIA E A PALAVRA: o que separa é quem GASTA o orçamento ────
+     *
+     * O Aarão: «vê a codificação com Cantor e Julia no corpo de Peano e traz pro
+     * geométrico».
+     *
+     * O `corpo_peano` (def:cantor) põe o par: CANTOR é o lado discreto/aditivo — o shift
+     * θ ↦ 2θ — e JULIA é o multiplicativo — z ↦ z² —, conjugados por z = e^{2πiθ}. E os
+     * dois «golden» são
+     *
+     *     cantor = φ,   julia = ψ,   φψ = −1
+     *
+     * que é EXACTAMENTE o par dual deste paper: σσ† = −1 do thm:fixo-dual, com m = 1.
+     * Não é analogia — é o mesmo par, noutra carta.
+     *
+     * E o thm:aditiva de hoje diz a mesma frase com outro conjugador: lá, a exponencial
+     * leva a soma no produto; aqui, a INVERSÃO S leva a composição na soma. As duas são a
+     * dualidade aditivo↔multiplicativo, com conjugadores diferentes.
+     *
+     * MAS O QUE INTERESSA É ONDE ELAS SE SEPARAM, e mede-se em inteiros:
+     *
+     *     CANTOR   o shift r ↦ b·r mod q      CONSERVA q  →  a palavra CICLA
+     *     MÖBIUS   a descida (p,q) ↦ (q,p−aq) GASTA   q   →  a palavra TERMINA
+     *
+     * As duas codificam o mesmo racional. O que as separa não é a base nem o operador: é
+     * se o passo GASTA o orçamento do nível (thm:conservacao). O shift não gasta — o
+     * denominador é invariante —, logo não tem onde parar e fecha em ciclo; a Möbius gasta,
+     * logo termina. É a mesma lei de conservação a dizer as duas coisas. */
+    /* E O DENOMINADOR MEDE-SE REDUZIDO, senao nao ha' o que medir. Escrevi isto a primeira
+     * com `int q_fixo = 1;` que nunca mudava — o modulo e' literalmente o mesmo q, logo
+     * «conserva» era verdade por eu o ter escrito. A quinta assercao vazia minha hoje.
+     *
+     * O que se conserva de facto e' o denominador REDUZIDO de r/q, e ele PODE mudar: com q
+     * IMPAR o 2 e' inversivel mod q, logo mdc(2r,q) = mdc(r,q) e o denominador fica; com q
+     * PAR o shift divide-o por 2 a cada passo ate' o tornar impar. E' o contraste que da'
+     * conteudo — o shift tambem GASTA, quando ha' o que gastar, e para de gastar quando
+     * chega ao impar. Dai ciclar. */
+    long cj = 0, shift_conserva = 0, shift_cicla = 0, mob_termina = 0;
+    long par_tot = 0, par_gasta = 0, per_max = 0, passos_max = 0;
+    printf("\n  §M11 Cantor cicla porque deixa de GASTAR o denominador; a Möbius gasta-o até zero\n");
+    printf("      p/q      shift base 2: período   denominador reduzido   Möbius: passos\n");
+    for(long q = 3; q <= 60; q++) for(long p = 1; p < q; p++){
+        long g0 = rt_mdc(p, q); if(g0 < 1) g0 = 1;
+        long qred0 = q / g0, pred0 = p / g0;    /* REDUZ-SE O PAR, e não só o denominador:
+                                                 * escrevi `qred0` sem `pred0` e vinte casos
+                                                 * de 1150 apareceram a «gastar» quando o que
+                                                 * gastava era o numerador por reduzir. A
+                                                 * asserção apanhou-o. */
+        if(qred0 < 3) continue;
+        if(qred0 % 2 == 1){
+            cj++;
+            /* CANTOR com q ímpar: r ↦ 2r mod qred, e o denominador reduzido NÃO muda */
+            long r = pred0 % qred0, r0 = r, per = 0;
+            int fica = 1;
+            do {
+                r = (2*r) % qred0;
+                long g = rt_mdc(r, qred0); if(g < 1) g = 1;
+                if(r != 0 && qred0/g != qred0) fica = 0;    /* reduziu? então gastou */
+                per++;
+                if(per > 4*qred0) break;
+            } while(r != r0);
+            if(fica) shift_conserva++;
+            if(r == r0 && per > 0) shift_cicla++;
+            if(per > per_max) per_max = per;
+            /* MÖBIUS: a mesma fracção, e o denominador desce a ZERO */
+            long P = p, Q = q; int n = 0;
+            while(Q != 0 && n < 100){ long a = P/Q; long nP = Q, nQ = P - a*Q; P = nP; Q = nQ; n++; }
+            if(Q == 0) mob_termina++;
+            if(n > passos_max) passos_max = n;
+            if(p == 1 && q <= 9)
+                printf("      1/%-6ld %-22ld %-22s %d\n", q, per, "não muda", n);
+        } else {
+            /* q PAR: o shift DIVIDE o denominador por 2 — também gasta, até chegar ao ímpar */
+            par_tot++;
+            long qq = qred0, rr = pred0 % qred0, passos_par = 0;
+            while(qq % 2 == 0 && passos_par < 64){
+                rr = (2*rr) % qq;
+                long g = rt_mdc(rr, qq); if(g < 1) g = 1;
+                if(qq/g < qq) qq = qq/g;                    /* o denominador ENCOLHEU */
+                passos_par++;
+                if(qq % 2 == 1) break;
+            }
+            if(qq % 2 == 1 && qq < qred0) par_gasta++;
+        }
+    }
+    printf("      racionais de denominador ÍMPAR: %ld   a ciclar: %ld (período máx %ld)\n",
+           cj, shift_cicla, per_max);
+    printf("      com o denominador reduzido a NÃO mudar: %ld\n", shift_conserva);
+    printf("      Möbius a terminar: %ld (passos máx %ld)\n", mob_termina, passos_max);
+    printf("      e o CONTRASTE — com denominador PAR o shift ENCOLHE-o: %ld de %ld\n\n",
+           par_gasta, par_tot);
+    ok("Cantor e a Möbius codificam o MESMO racional, e o que as separa é a CONSERVAÇÃO: com"
+       " denominador ímpar o shift não tem o que gastar — o 2 é inversível mod q — logo não"
+       " tem onde parar e CICLA; a descida de Möbius gasta-o até zero e TERMINA. E o"
+       " contraste prova que não é da natureza do shift: com denominador PAR ele ENCOLHE-o,"
+       " e só deixa de encolher ao chegar ao ímpar",
+       cj > 0 && shift_cicla == cj && shift_conserva == cj && mob_termina == cj &&
+       par_tot > 0 && par_gasta == par_tot);
+
+    /* e o PAR DUAL é o mesmo nas duas cartas: cantor·julia = φψ = −1 = σσ†, com m = 1 */
+    long D1 = 1*1 + 4;                              /* D = m²+4 = 5, o do ouro */
+    long norma_cj = rt_zd_norma(1, 1, D1) / 4;      /* (2φ)(2ψ)/4 = φψ */
+    long traco_cj = rt_traco_metalico(1, 1);        /* φ + ψ = 1 */
+    printf("      e o par dual é o MESMO nas duas cartas: cantor·julia = %ld e a soma = %ld\n",
+           norma_cj, traco_cj);
+    printf("      — que é σσ† = −1 e σ+σ† = m com m = 1, o ouro (thm:fixo-dual)\n\n");
+    ok("cantor·julia = −1 É σσ† = −1: o par metálico m = 1. O «golden» do corpo de Peano e"
+       " o ponto fixo deste paper são o MESMO par dual, escrito em cartas diferentes — a de"
+       " Cantor/Julia conjuga pela exponencial, a da recta conjuga pela inversão",
+       norma_cj == -1 && traco_cj == 1);
 
     printf("\n  ══ a torre é uma só: de cima parte de ∞ e cresce, de baixo parte de p/q e\n");
     printf("     desce até ∞, e S troca os dois extremos porque 0 = 1/∞. E as duas usam\n");

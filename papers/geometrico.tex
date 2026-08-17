@@ -1447,6 +1447,55 @@ ZERO fora em $224$ de $224$, exacto em $\mathbb{F}_p$, com a raiz de ordem ERRAD
 $32$ entradas de $256$; \code{tests/nne.c}: a norma-determinante preserva-se em $6561$ de
 $6561$ e a euclidiana só em $289$ --- é o contraste que diz qual delas não tem tecto}
 
+\begin{teorema}[CANTOR E JULIA: a mesma codificação, e o que as separa é quem gasta o
+orçamento]\label{thm:cantor-julia}
+O \emph{Corpo de Peano} (\code{def:cantor}) põe o par: \textbf{Cantor} é o lado
+discreto/aditivo --- o \emph{shift} $\theta\mapsto2\theta$ --- e \textbf{Julia} é o
+multiplicativo --- $z\mapsto z^{2}$ ---, conjugados por $z=e^{2\pi i\theta}$. E os dois
+\emph{golden} de lá são
+\[
+\boxed{\;\mathrm{cantor}=\varphi,\qquad \mathrm{julia}=\psi,\qquad \varphi\psi=-1\;}
+\]
+--- que é \emph{exactamente} o par dual deste paper: $\sigma\sigma\dg=-1$ do
+Teor.~\ref{thm:fixo-dual} com $m=1$. \textbf{Não é analogia: é o mesmo par, noutra carta.}
+
+\textbf{(1) E é o Teor.~\ref{thm:aditiva} com outro conjugador.} Lá, a exponencial leva a
+\emph{soma} no \emph{produto} ($\theta\mapsto2\theta$ vira $z\mapsto z^{2}$); aqui, a
+\textbf{inversão $S$} leva a composição de Möbius na \emph{soma} de índices
+($A_aA_0A_b=A_{a+b}$). São a mesma dualidade aditivo$\leftrightarrow$multiplicativo, com
+conjugadores diferentes --- a exponencial e a inversão.
+
+\textbf{(2) E onde elas se separam é a CONSERVAÇÃO.} As duas codificam o \emph{mesmo}
+racional. O que as distingue não é a base nem o operador:
+\[
+\boxed{
+\begin{array}{lll}
+\textbf{Cantor} & r\mapsto b\,r \bmod q & \text{não gasta }q\text{ --- a palavra
+\textbf{CICLA}}\\[3pt]
+\textbf{Möbius} & (p,q)\mapsto(q,\,p-aq) & \text{gasta }q\text{ --- a palavra
+\textbf{TERMINA}}
+\end{array}}
+\]
+Com $q$ ímpar o $2$ é invertível $\bmod\,q$, logo o shift não tem o que gastar e fecha em
+ciclo; a descida gasta o orçamento até $0$ e pára. \emph{É o Teor.~\ref{thm:conservacao} a
+dizer as duas coisas com a mesma lei.}
+
+\textbf{(3) E o contraste prova que não é da natureza do shift.} Com $q$ \emph{par} o
+shift \textbf{encolhe} o denominador --- divide-o por $2$ a cada passo ---, e só deixa de o
+encolher quando chega ao ímpar. \emph{Ele também gasta, quando há o que gastar.} Donde a
+frase inteira: \textbf{ciclar não é uma propriedade do operador, é o que sobra quando o
+orçamento deixa de poder ser gasto.} $\square$
+\end{teorema}
+\colunas{Cantor/Julia e a palavra: a mesma codificação, separadas pela conservação}
+        {$\mathrm{cantor}\cdot\mathrm{julia}=-1$ é $\sigma\sigma\dg=-1$; o shift cicla
+porque não gasta, a Möbius termina porque gasta, e com $q$ par o shift também gasta}
+        {\code{tests/descida\_mobius.c} \S M11: $1150$ racionais de denominador ímpar, todos
+a ciclar e todos com o denominador reduzido a não mudar (período máximo $58$), contra os
+mesmos $1150$ a terminar pela Möbius em no máximo $9$ passos; e o contraste com denominador
+PAR, onde o shift encolhe o denominador em $590$ de $590$; \code{tests/cantor\_julia\_dual.c}:
+a conjugação $\theta\mapsto2\theta\ \leftrightarrow\ z\mapsto z^{2}$ exacta em
+$\mathbb{Z}[i]$}
+
 \medskip
 \noindent\textbf{E OS SETE TEOREMAS SÃO UMA FRASE SÓ --- as duas metades de
 Cayley--Hamilton.} O Teor.~\ref{thm:fixo-dual} diz que o par dual se descreve por
@@ -1474,6 +1523,7 @@ para andar}\\[3pt]
 \ref{thm:aditiva} a soma & os índices somam & $\det(A_aA_0A_b)=\det A_{a+b}$\\
 \ref{thm:conservacao} a paragem & $q$ é o orçamento & $\gcd$ é a energia\\
 \ref{thm:central-energia} o central & Hurwitz conta & Gentil integra, Lebesgue transporta\\
+\ref{thm:cantor-julia} Cantor/Julia & o shift cicla & $\mathrm{cantor}\cdot\mathrm{julia}=-1$\\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -3158,7 +3208,7 @@ medidor & unidades \\
 \code{tests/condicao\_pisot.c}    & $4{:}0$ \\
 \code{tests/reta.c}              & $39{:}0$ \\
 \code{tests/racionais\_fixos.c}   & $8{:}0$ \\
-\code{tests/descida\_mobius.c}    & $12{:}0$ \\
+\code{tests/descida\_mobius.c}    & $14{:}0$ \\
 \bottomrule
 \end{tabular}
 \end{center}
