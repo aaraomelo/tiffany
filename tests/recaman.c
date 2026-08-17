@@ -106,7 +106,32 @@ int main(void)
         }
         printf("      trecho [2,7,13,20], diferenças 5,6,7 → razões e^{0,5}, e^{0,6}, e^{0,7}\n");
         printf("      pior resíduo: %.2e\n", pior);
-        ok("exp leva a PA de razão d na PG de razão e^d", pior < 1e-12);
+
+        /* O RESÍDUO DEU ZERO EXACTO, E ISSO É SORTE DESTES TRÊS VALORES, não estrutura:
+         * exp(x)/exp(y) e exp(x−y) são rotas diferentes e noutro trecho dariam 1e-16.
+         * Trocar o limiar por `== 0` seria construir a asserção à medida dos dados.
+         *
+         * A TESE é o HOMOMORFISMO — b^{a+d} = b^a · b^d, «a soma vai no produto» — e essa
+         * não precisa da exponencial real nenhuma: mede-se em INTEIROS, com uma base
+         * inteira, e aí é exacta. A rota em double fica ao lado a dizer que a exp real a
+         * segue, com o resíduo que tiver. */
+        long homo = 0, tot_h = 0;
+        for(long b = 2; b <= 7; b++)
+            for(long a = 0; a <= 8; a++)
+                for(long d = 0; a + d <= 8; d++){
+                    long pa = 1, pd = 1, pad = 1;
+                    for(long k = 0; k < a; k++)     pa  *= b;
+                    for(long k = 0; k < d; k++)     pd  *= b;
+                    for(long k = 0; k < a + d; k++) pad *= b;
+                    tot_h++;
+                    if(pad == pa * pd) homo++;      /* b^{a+d} = b^a · b^d, EXACTO */
+                }
+        printf("      e a LEI em inteiros: b^{a+d} = b^a·b^d em %ld de %ld (bases 2..7)\n",
+               homo, tot_h);
+        ok("exp leva a PA de razão d na PG de razão e^d — e a tese é o HOMOMORFISMO"
+           " b^{a+d} = b^a·b^d, medido EXACTO em inteiros. O resíduo zero da rota em"
+           " vírgula é destes três valores, e não se toma por lei",
+           pior < 1e-12 && tot_h > 0 && homo == tot_h);
     }
 
     /* ---------------- §R3 — a colisão é o reset de fase ---------------- */
