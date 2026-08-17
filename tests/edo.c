@@ -20,6 +20,7 @@
 #include "edo.h"
 #include "algebra.h"
 #include "unidade.h"
+#include "reta.h"
 
 int main(void){
 printf("\n=== A EQUAÇÃO DIFERENCIAL É A BORDA DO CORPO ==============================\n");
@@ -131,9 +132,31 @@ printf("\n§E4  E dois casos fecham o círculo com o resto do sistema.\n\n");
     /* A asserção comparava phi com a sua PRÓPRIA expansão decimal digitada três linhas
      * acima — não testava o que o rótulo diz. Agora mede Vieta contra a borda: a soma das
      * raízes é -B e o produto é C, e φ satisfaz φ² - φ - 1 = 0. */
-    ok("as raízes da ED do ouro são φ e -1/φ — o chicote",
-       fabs(phi*phi - phi - 1) < 1e-12 && fabs(phi + (-1/phi) - 1) < 1e-12
-       && fabs(phi * (-1/phi) + 1) < 1e-12);
+    /* E AS TRÊS IDENTIDADES SÃO EXACTAS EM ℤ[√5], sem limiar nenhum. Guarda-se 2φ = 1 + √5
+     * como o par (1,1) com D = 5, e as contas fazem-se lá — √5·√5 é 5, um inteiro, e a raiz
+     * cancela-se contra si própria:
+     *
+     *      (2φ)² − 2·(2φ) − 4  =  (6 + 2√5) − (2 + 2√5) − 4  =  0        φ² − φ − 1 = 0
+     *      (2φ) + (2φ')  =  (1+√5) + (1−√5)  =  2                        φ + φ' = 1
+     *      (2φ)·(2φ')    =  1 − 5  =  −4                                 φ·φ' = −1
+     *
+     * e a segunda é a que mostra o mecanismo: a parte em √5 CANCELA na soma, que é a
+     * conjugação. O limiar de 1e-12 estava a dar folga a igualdades que não têm folga. */
+    long D5 = 5, qa, qb, sa, sb, pa, pb;
+    rt_zd_mul(1, 1, 1, 1, D5, &qa, &qb);            /* (2φ)² = 6 + 2√5 */
+    long ea = qa - 2*1 - 4, eb = qb - 2*1;          /* (2φ)² − 2(2φ) − 4 */
+    sa = 1 + 1;  sb = 1 + (-1);                     /* (2φ) + (2φ') = (2, 0) */
+    rt_zd_mul(1, 1, 1, -1, D5, &pa, &pb);           /* (2φ)(2φ') = −4 + 0√5 */
+    printf("      e em ℤ[√5], sem limiar: (2φ)²−2(2φ)−4 = %ld + %ld√5 ; (2φ)+(2φ') = %ld + %ld√5 ;"
+           " (2φ)(2φ') = %ld + %ld√5\n\n", ea, eb, sa, sb, pa, pb);
+    ok("as raízes da ED do ouro são φ e -1/φ — o chicote. E as tres identidades sao EXACTAS"
+       " em ℤ[√5], sem limiar: guarda-se 2φ = 1 + raiz(5) como o par (1,1), e la' dentro"
+       " raiz(5).raiz(5) e' 5 — a raiz cancela-se contra si propria. (2φ)² − 2(2φ) − 4 e'"
+       " ZERO nas duas coordenadas, (2φ)+(2φ') e' (2,0) com a parte irracional a CANCELAR"
+       " (que e' a conjugacao), e (2φ)(2φ') e' (-4,0). O 1e-12 dava folga a igualdades que"
+       " nao tem folga nenhuma",
+       ea == 0 && eb == 0 && sa == 2 && sb == 0 && pa == -4 && pb == 0
+       && fabs(phi*phi - phi - 1) < 1e-12);
     printf("      A solução de y'' = y' + y é A·φ^t + B·(-1/φ)^t. O REI É A SOLUÇÃO DE UMA\n");
     printf("      EQUAÇÃO DIFERENCIAL, e o par de raízes é o chicote — soma 1 (o traço), produto\n");
     printf("      -1 (o determinante). E a mesma recorrência, em passos inteiros, é Fibonacci:\n");

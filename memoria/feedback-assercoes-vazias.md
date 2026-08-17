@@ -295,3 +295,33 @@ nunca estivera medido, porque os coeficientes não dependiam de nada.
 O detector é o `tools/tectos.py` P3 — e a segunda forma (`v` comparado com a expressão que
 o definiu) só entrou depois de o `malha == u1*u2` lhe escapar. Ver
 [[feedback-a-referencia-escrita-a-mao]] e [[feedback-normalizar-nao-e-medir]].
+
+## 16/08/2026 — o sítio onde eu baixo a guarda: o CONTROLO, e não a tese
+
+Num dia inteiro a corrigir asserções vazias, escrevi CINCO. E não foram distribuídas ao
+acaso — foram todas no mesmo sítio:
+
+| o que eu estava a escrever | o que saiu |
+|---|---|
+| o gume de «Q_max depende do lado» | `if(w*h != h*w)` — a comutatividade consigo própria |
+| o controlo da taxa do bairro | «o q medido não excede o DOBRO de 1/σ²» — passava por 0,142 ser pequeno |
+| o controlo da identidade de Carnot | `if(X == X)` — a expressão comparada consigo própria |
+| a contagem de um gume | 38416 onde eram 15⁴ = 50625 |
+| a contagem de outro | 59535 onde eram 11·9⁴ = 72171 |
+
+**Why:** a tese leva atenção porque é o que se quer provar. O CONTROLO — o gume, a segunda
+rota, a contagem que impede a varredura vazia — é escrito depois, a correr, como
+formalidade. E é exactamente ali que a asserção vazia nasce, porque um controlo que não
+pode falhar tem a mesma cor de um que pode.
+
+**How to apply:**
+1. **Depois de escrever um gume, aplicar-lhe o gume**: que entrada faria ESTE controlo
+   falhar? Se não houver, ele não é um controlo — é decoração.
+2. **Nunca escrever um total à mão.** `11L*9*9*9*9` e não `72171`: a conta que não erra é
+   a do compilador. Errei-a duas vezes num dia, e as duas eram gumes.
+3. E o sinal operacional: se o controlo passou **à primeira** e sem me obrigar a pensar,
+   é candidato a vazio. Os controlos verdadeiros costumam falhar uma vez antes de passar
+   — foi o que aconteceu com «mais de metade não-nulas» no hopfield (errado por 4×) e com
+   a perpendicularidade no cruzado_potencia (que NÃO é invariante).
+
+Ver [[feedback-o-controlo-a-tres-linhas]], [[feedback-varrer-onde-nada-pode-falhar]].

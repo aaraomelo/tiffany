@@ -160,7 +160,7 @@ dualrn 8a91b8108dcd0df5 0
 dualsort 3298ebc60a6b388c 0
 dualsort_banco 32ec1211d142f264 0
 duas_pontes a50961f0657e4654 0
-edo 05c7da22e0a16ca2 0
+edo 775fde31b031eaad 0
 einstein a8ce9f96f9b3109a 0
 eletrico 3210e88711ee862d 0
 elipses f2e2baa850da0069 0
