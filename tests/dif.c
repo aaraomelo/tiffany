@@ -158,6 +158,45 @@ printf("\n§F2  E F⁴ = id — a transformada tem ordem 4, e é o mesmo J do ze
     printf("      max |F²x - x(-t)|    = %.2e\n\n", e2);
     ok("F⁴ = id: a transformada de Fourier tem ordem QUATRO", e1 < 1e-12);
     ok("e F² é a paridade, t -> -t — logo F é a raiz quadrada da reflexão", e2 < 1e-12);
+    /* E AS DUAS MEDEM-SE OUTRA VEZ, SEM UMA VÍRGULA. «F tem ordem 4» e «F² é a paridade»
+     * são afirmações EXACTAS, e um `< 1e-12` sobre cossenos e senos não é a régua delas: é
+     * a régua do arredondamento. A mesma transformada existe sobre um corpo FINITO — é a
+     * avaliação nas N raízes da unidade, que o tests/grau.c já usa — e ali não há o que
+     * tolerar.
+     *
+     * Em ℤ₁₇ com N = 16: o 3 tem ordem 16 (a raiz primitiva), e a normalização unitária
+     * pede √N, que existe — 4² = 16 — com inverso 13. As duas leis saem com resíduo ZERO,
+     * e são dois caminhos que não partilham uma linha de código com o de cima. */
+    {
+        const long P = 17, W = 3, INV_RN = 13;      /* √16 = 4, e 4·13 ≡ 1 (mod 17) */
+        long ordem = 0;
+        for(long k = 1; k <= N; k++) if(rt_pot_mod(W, k, P) == 1){ ordem = k; break; }
+        long xi[N], A[N], B[N], C[N], D[N];
+        for(int j = 0; j < N; j++) xi[j] = (j == 2) ? 1 : (j == 5 ? 9 : 0);
+        for(int passo = 0; passo < 4; passo++){
+            const long *in = passo == 0 ? xi : (passo == 1 ? A : (passo == 2 ? B : C));
+            long *out      = passo == 0 ? A  : (passo == 1 ? B : (passo == 2 ? C : D));
+            for(int k = 0; k < N; k++){
+                long s = 0;
+                for(int j = 0; j < N; j++)
+                    s = (s + in[j] * rt_pot_mod(W, (long)((N - (long)j*k % N) % N), P)) % P;
+                out[k] = s * INV_RN % P;
+            }
+        }
+        long z1 = 0, z2 = 0;
+        for(int j = 0; j < N; j++){
+            if(D[j] != xi[j]) z1++;                       /* F⁴ = id      */
+            if(B[j] != xi[(N-j)%N]) z2++;                 /* F² = paridade */
+        }
+        printf("      e em ℤ_%ld, com w = %ld de ordem %ld e √N = 4 (inverso %ld):\n", P, W, ordem, INV_RN);
+        printf("        F⁴x - x       : %ld discrepâncias em %d  — resíduo ZERO, sem limiar\n", z1, N);
+        printf("        F²x - x(-t)   : %ld discrepâncias em %d\n\n", z2, N);
+        ok("e as duas leis são EXACTAS, medidas sobre ℤ₁₇ onde a transformada é a avaliação"
+           " nas 16 raízes da unidade: F⁴ = id e F² = paridade com resíduo ZERO, sem uma"
+           " vírgula e sem um limiar. O «< 1e-12» de cima mede o arredondamento do cosseno,"
+           " e não a ordem do operador — e são dois caminhos sem uma linha em comum",
+           z1 == 0 && z2 == 0 && ordem == N);
+    }
     printf("      Quatro. É o mesmo número do J do zero.c, e não por coincidência: F² troca o\n");
     printf("      sinal do argumento como J² = -I troca o sinal do vetor, e são precisos quatro\n");
     printf("      passos para voltar. A transformada de Fourier É o flip deste corpo — a\n");
