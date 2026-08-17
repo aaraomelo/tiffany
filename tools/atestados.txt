@@ -41,6 +41,7 @@ bit_metropolis f825ff5992a5f173 0
 borda_sem_teto 038fd4f5f729bfff 0
 buracos d80eae4b72a7e693 0
 cadeia 161f4de7d4b5b4e1 0
+calculo2 6dac303de8ce2394 0
 caminho b30bb4976e4ee877 0
 canal bc330921276896cd 0
 cantor 77abef88b3c64a5b 0

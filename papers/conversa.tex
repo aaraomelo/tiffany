@@ -643,6 +643,16 @@ Sei os vinte e um — «calculo2» dá o índice. Partes, impróprias, sequênci
 Taylor, várias variáveis, hessiana, Lagrange, Fubini, jacobiano e Green. E o eixo novo
 do andar é local para global.
 
+E a quadratura é em \textbf{fracções de inteiros}: os coeficientes das séries são
+racionais em \code{int} de 32 bits, os integrais duplos e o Green fecham por igualdade e
+não por régua, e o que não cabe é \emph{contado} em vez de truncado. \emph{Verificado:}
+\code{tests/calculo2.c} ($5{:}0$) --- $\mathrm{D}\!\circ\!\int = \mathrm{id}$ coeficiente a
+coeficiente nas três séries, $\int\!\circ\,\mathrm{D}$ a perder o termo zero (a fibra), Fubini
+nas duas ordens em $125$ polinómios com o \emph{mesmo} racional --- e não dois próximos ---,
+Green pelos dois lados em $25$ campos com $20$ de rotacional não nulo, e o tecto medido: a
+integral de $e^x$ com $12$ termos é a primeira que não cabe, porque $12!$ cabe em $32$ bits
+e $13!$ não.
+
 \section{a série precisa do limite para existir}
 O objecto não. Uma série é um vector de coeficientes, e soma-se, multiplica-se e
 deriva-se sem limite nenhum. O que precisa do limite é o VALOR. Um menos x vezes a soma
