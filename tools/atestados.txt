@@ -261,6 +261,7 @@ lean_convencao 794c54555e715c1f 0
 lean_cruz 1121ba45766b63b2 0
 lebesgue_toro 65132337ebb27456 0
 lei2 7346c5c1541f2043 0
+lei8_trial 888d81ba733348b7 0
 leis_no_tradutor d966d1678eb32be9 0
 lemniscata 953b45de7b3c7558 0
 letra_assinatura add0419219990bef 0

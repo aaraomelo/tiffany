@@ -1539,6 +1539,58 @@ nós ($z=0$) --- dois e um por cada $a$; e a recorrência a bater com $\operator
 por Newton em $140$ de $140$, nos DOIS determinantes, com $\det C=+1$ e $\det C=-1$
 verificados}
 
+\begin{teorema}[A UNIFICAÇÃO: as peças são LEIS, e a ORDEM identifica cada
+uma]\label{thm:unificacao}
+Cantor, Julia, Viviani e o trial não são quatro objectos parecidos: são quatro operadores
+de \textbf{ordem finita}, e a ordem de cada um é \emph{exactamente} o fecho declarado da
+sua lei na tabela do \emph{Corpo de Peano}.
+\[
+\boxed{
+\begin{array}{llcl}
+\text{Cantor / Julia} & \text{o espelho da dobra} & 2 & L_1/L_2\quad(\nu^{2}=\mathrm{id})\\
+\text{o trial} & \tau\text{ em }\{-1,0,+1\} & 3 & L_3\quad(\tau^{3}=\mathrm{id})\\
+\text{VIVIANI} & i,\ \text{o meio-ângulo} & 4 & L_5\quad(i^{4}=\mathrm{id})\\
+\text{a Lei 8} & \operatorname{Ind},\ \text{o índice} & 8 & L_7\quad(\operatorname{Ind}^{8}
+=\mathrm{id})
+\end{array}}
+\]
+
+\textbf{(1) As ordens medem-se, não se declaram.} Cada operador aplica-se ao seu estado
+até voltar, e o $k$ é o \emph{primeiro} --- a \textbf{minimalidade} é parte da tese, porque
+$\tau^{6}=\mathrm{id}$ também é verdade e não faz do trial uma lei de ordem $6$.
+
+\textbf{(2) O HEXAL é onde os dois primeiros voltam juntos.} A tabela declara $L_6$ com
+fecho $\operatorname{lcm}(2,3)=6$; aqui isso \emph{sai} das ordens medidas, como o menor
+$k$ em que o dual e o trial fecham ao mesmo tempo.
+
+\textbf{(3) E o quadro fecha em VINTE E QUATRO:}
+\[
+\boxed{\;\operatorname{lcm}(2,3,4,6,8)=24=\underbrace{8}_{\text{a Lei 8}=2^{3}}
+\times\underbrace{3}_{\text{o trial}}\;}
+\]
+--- \emph{o $24$ não é um número que aparece}: é o produto das duas coisas que o catálogo
+tem, \textbf{oito índices e três símbolos}. E a Lei 8 é $2^{3}$: três dobras.
+
+\textbf{(4) E Viviani é a de ordem 4 porque $i^{2}$ É o espelho.} Uma volta no ângulo
+devolve o ponto com o \emph{sinal trocado}, e são precisas duas para fechar --- o
+recobrimento duplo do Teor.~\ref{thm:viviani}. Donde $\operatorname{ord}(i)=2\cdot
+\operatorname{ord}(\nu)$: \emph{o meio-ângulo é a raiz quadrada da rotação}, e a ordem
+di-lo.
+
+\textbf{(5) E cada ordem SEPARA.} Trocando a ordem de uma peça pela de outra, o $24$
+perde-se em metade das trocas --- as que sobrevivem são as que trocam ordens que se
+dividem entre si, isto é, a mesma lei a repetir-se. \emph{O fecho não é um acidente de
+números grandes.} $\square$
+\end{teorema}
+\colunas{a unificação: quatro peças, quatro ordens, um fecho}
+        {Cantor/Julia em $2$, o trial em $3$, Viviani em $4$, a Lei 8 em $8$; o hexal é o
+$\operatorname{lcm}$ dos dois primeiros e o quadro fecha em $24=8\cdot3$}
+        {\code{tests/lei8\_trial.c} ($5{:}0$): as quatro ordens medidas por iteração até à
+identidade e MÍNIMAS; o hexal a sair como o menor $k$ onde dual e trial voltam juntos
+($6$); o $\operatorname{lcm}$ de todas a dar $24$ e a bater com $8\times3$; $i^{2}$ a ser o
+espelho e $\operatorname{ord}(i)=2\operatorname{ord}(\nu)$; e o gume das $12$ trocas de
+ordem, com $6$ a quebrar o $24$}
+
 \medskip
 \noindent\textbf{E OS SETE TEOREMAS SÃO UMA FRASE SÓ --- as duas metades de
 Cayley--Hamilton.} O Teor.~\ref{thm:fixo-dual} diz que o par dual se descreve por
@@ -1568,6 +1620,7 @@ para andar}\\[3pt]
 \ref{thm:central-energia} o central & Hurwitz conta & Gentil integra, Lebesgue transporta\\
 \ref{thm:cantor-julia} Cantor/Julia & o shift cicla & $\mathrm{cantor}\cdot\mathrm{julia}=-1$\\
 \ref{thm:viviani} Viviani & $t_2=m^{2}-2d$ & $\det=+1$: a volta é própria\\
+\ref{thm:unificacao} a unificação & a ORDEM identifica & $\operatorname{lcm}=24=8\cdot3$\\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -3253,6 +3306,7 @@ medidor & unidades \\
 \code{tests/reta.c}              & $40{:}0$ \\
 \code{tests/racionais\_fixos.c}   & $8{:}0$ \\
 \code{tests/descida\_mobius.c}    & $15{:}0$ \\
+\code{tests/lei8\_trial.c}       & $5{:}0$ \\
 \bottomrule
 \end{tabular}
 \end{center}

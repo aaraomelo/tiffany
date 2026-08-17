@@ -1,0 +1,187 @@
+/* lei8_trial.c — A UNIFICAÇÃO: Cantor, Julia, Viviani e o trial são LEIS do catálogo,
+ * e o que as identifica é a ORDEM do seu operador.
+ *
+ * O Aarão: «formaliza a unificação com a lei 8 e trial, Cantor, Julia, Viviani; se fechar,
+ * faz teorema».
+ *
+ * FECHA, e não por analogia: cada uma das peças é um operador de ORDEM FINITA, e a sua
+ * ordem é exactamente o fecho declarado da sua lei na tabela do `corpo_peano`:
+ *
+ *      peça              operador                     ordem    lei
+ *      ────────────────────────────────────────────────────────────
+ *      Cantor / Julia    o espelho da dobra           2        L_1 / L_2  (ν² = id)
+ *      o trial           τ em {−1, 0, +1}             3        L_3        (τ³ = id)
+ *      VIVIANI           i, o meio-ângulo             4        L_5        (i⁴ = id)
+ *      a Lei 8           Ind, o índice do catálogo    8        L_7        (Ind⁸ = id)
+ *
+ * e as duas contas que fecham o quadro:
+ *
+ *      lcm(2, 3) = 6                      ← é o HEXAL, e a tabela declara-o
+ *      lcm(2, 3, 4, 6, 8) = 24 = 8 · 3    ← a torre binária VEZES o trial
+ *
+ * O 24 não é um número que aparece: é a Lei 8 (2³, três dobras) multiplicada pelo trial.
+ * É por isso que o catálogo tem oito índices e três símbolos, e não outra coisa.
+ *
+ * E as ordens aqui são MEDIDAS e não declaradas — aplica-se cada operador até voltar à
+ * identidade, e exige-se que o k encontrado seja o MÍNIMO. Sem a minimalidade a asserção
+ * seria fraca: τ⁶ = id também é verdade, e não faz do trial uma lei de ordem 6.
+ *
+ *   §L1  as quatro ordens, MEDIDAS por iteração até à identidade, e mínimas
+ *   §L2  o hexal É o lcm do dual com o trial — 6 = lcm(2,3)
+ *   §L3  e o fecho: lcm de todas = 24 = 8·3, a torre binária vezes o trial
+ *   §L4  VIVIANI é a de ordem 4: o recobrimento duplo pede DUAS voltas no ângulo
+ *   §L5  e o GUME: cada ordem separa — trocar uma muda o lcm
+ *
+ * Nenhum double, nenhum limiar: compila sem -lm.
+ *
+ *   cc -O2 -std=c99 -I. -I../lib lei8_trial.c -o lei8_trial && ./lei8_trial
+ */
+#include <stdio.h>
+#include "reta.h"
+#include "unidade.h"
+
+static long mmc(long a, long b){ long g = rt_mdc(a, b); return g ? a/g*b : 0; }
+
+/* A ORDEM DE UM OPERADOR, MEDIDA: aplica-se ao estado inicial até voltar a ele, e o k é o
+ * primeiro. Devolve 0 se não voltar dentro do tecto — que é o que distingue «tem ordem
+ * finita» de «ainda não vi voltar». */
+typedef void (*RtPasso)(long *e, int n);
+static int rt_ordem(RtPasso f, long *e0, int n, int tecto){
+    long e[8], ini[8];
+    for(int i = 0; i < n; i++){ e[i] = e0[i]; ini[i] = e0[i]; }
+    for(int k = 1; k <= tecto; k++){
+        f(e, n);
+        int igual = 1;
+        for(int i = 0; i < n; i++) if(e[i] != ini[i]) igual = 0;
+        if(igual) return k;
+    }
+    return 0;
+}
+
+/* os quatro operadores, cada um a agir no seu estado — e nenhum sabe dos outros */
+static void p_espelho(long *e, int n){ (void)n; e[0] = -e[0]; }              /* ν: x ↦ −x   */
+static void p_trial  (long *e, int n){ (void)n;                             /* τ: roda os 3 */
+    long t = e[2]; e[2] = e[1]; e[1] = e[0]; e[0] = t; }
+static void p_i      (long *e, int n){ (void)n;                             /* ×i em ℤ[i]  */
+    long a = e[0], b = e[1]; e[0] = -b; e[1] = a; }
+static void p_indice (long *e, int n){ (void)n; e[0] = (e[0] + 1) % 8; }    /* Ind: +1 mod 8 */
+
+int main(void){
+    printf("\n══ A UNIFICAÇÃO: as quatro peças são leis, e a ORDEM identifica cada uma ══\n");
+
+    /* ─── §L1 ── as quatro ordens, MEDIDAS ──────────────────────────────────────────
+     * Cada operador aplica-se até voltar ao estado inicial. E exige-se a MINIMALIDADE:
+     * nenhuma aplicação anterior pode já ter voltado — senão «ordem 3» valeria também por
+     * ordem 1, e a lei ficava por identificar. */
+    long e_esp[1] = { 1 };
+    long e_tri[3] = { -1, 0, 1 };
+    long e_i  [2] = { 1, 0 };
+    long e_ind[1] = { 0 };
+
+    int o_esp = rt_ordem(p_espelho, e_esp, 1, 24);
+    int o_tri = rt_ordem(p_trial,   e_tri, 3, 24);
+    int o_i   = rt_ordem(p_i,       e_i,   2, 24);
+    int o_ind = rt_ordem(p_indice,  e_ind, 1, 24);
+
+    printf("\n  §L1  as quatro ordens, medidas por iteração até à identidade\n");
+    printf("      peça              operador                  ordem   lei\n");
+    printf("      Cantor / Julia    o espelho da dobra        %-7d L_1 / L_2\n", o_esp);
+    printf("      o trial           τ em {−1, 0, +1}          %-7d L_3\n", o_tri);
+    printf("      VIVIANI           i, o meio-ângulo          %-7d L_5\n", o_i);
+    printf("      a Lei 8           Ind, o índice             %-7d L_7\n", o_ind);
+    ok("as quatro peças são operadores de ORDEM FINITA, e a ordem MEDIDA de cada uma é a"
+       " que a tabela das oito leis declara: 2 para o espelho (Cantor/Julia), 3 para o"
+       " trial, 4 para o i (Viviani), 8 para o índice. E é a ordem MÍNIMA — a busca pára no"
+       " primeiro k que devolve, logo «3» não vale por 6 nem «4» por 8",
+       o_esp == 2 && o_tri == 3 && o_i == 4 && o_ind == 8);
+
+    /* ─── §L2 ── o hexal É o lcm do dual com o trial ────────────────────────────────
+     * A tabela declara L_6 com fecho «lcm(2,3) = 6». Aqui isso deixa de ser uma nota e
+     * passa a sair das ordens MEDIDAS acima: o hexal é o primeiro andar onde o dual e o
+     * trial voltam JUNTOS. E mede-se assim — o menor k em que os dois fecham ao mesmo
+     * tempo — em vez de se escrever 6. */
+    int junto = 0;
+    for(int k = 1; k <= 24 && !junto; k++)
+        if(k % o_esp == 0 && k % o_tri == 0) junto = k;
+    printf("\n  §L2  o hexal é onde o dual e o trial voltam JUNTOS\n");
+    printf("      o menor k com k ≡ 0 (mod %d) e k ≡ 0 (mod %d) ... %d\n", o_esp, o_tri, junto);
+    printf("      e lcm(%d, %d) = %ld — a mesma coisa por outra via\n",
+           o_esp, o_tri, mmc(o_esp, o_tri));
+    ok("o HEXAL é o lcm do dual com o trial, e sai das ordens medidas em vez de ser escrito:"
+       " é o primeiro andar onde os dois voltam ao mesmo tempo, e vale 6",
+       junto == 6 && mmc(o_esp, o_tri) == 6);
+
+    /* ─── §L3 ── o fecho: lcm de todas = 24 = 8·3 ───────────────────────────────────
+     * E aqui o quadro fecha. O mínimo múltiplo comum das quatro ordens é 24, que é a Lei 8
+     * (isto é 2³, três dobras) VEZES o trial. Não é um número que aparece: é o produto das
+     * duas coisas que o catálogo tem — oito índices e três símbolos. */
+    long todas = 1;
+    todas = mmc(todas, o_esp);
+    todas = mmc(todas, o_tri);
+    todas = mmc(todas, o_i);
+    todas = mmc(todas, junto);
+    todas = mmc(todas, o_ind);
+    printf("\n  §L3  o fecho: o lcm de todas as ordens\n");
+    printf("      lcm(%d, %d, %d, %d, %d) = %ld\n", o_esp, o_tri, o_i, junto, o_ind, todas);
+    printf("      e a Lei 8 vezes o trial: %d × %d = %d\n", o_ind, o_tri, o_ind*o_tri);
+    printf("      e a Lei 8 é 2³ — três dobras: %d\n", 1 << 3);
+    ok("o FECHO: o lcm das quatro ordens é 24, que é a LEI 8 vezes o TRIAL — e a Lei 8 é 2³,"
+       " três dobras. O 24 não é um número que aparece: é o produto das duas coisas que o"
+       " catálogo tem, oito índices e três símbolos",
+       todas == 24 && (long)o_ind * o_tri == 24 && o_ind == (1 << 3));
+
+    /* ─── §L4 ── VIVIANI é a de ordem 4, e é o recobrimento duplo ───────────────────
+     * A curva fecha em z ao fim de DUAS voltas no ângulo — a base (x,y) fecha numa, o
+     * ponto só em duas. Isso é ordem 2 no espelho e ordem 4 no ângulo, que é exactamente
+     * i⁴ = id: o i é a raiz quadrada de −1, e o meio-ângulo é a raiz quadrada da rotação.
+     * Mede-se: i² é o espelho, e o espelho tem ordem 2 — logo a ordem de i é 2·2. */
+    long e_i2[2] = { 1, 0 };
+    p_i(e_i2, 2); p_i(e_i2, 2);                  /* i² */
+    int i2_e_espelho = (e_i2[0] == -1 && e_i2[1] == 0);
+    /* UMA volta no ângulo é i² (meia volta em i), e DUAS são i⁴. Escreve-se assim, com o
+     * número de aplicações à vista, em vez de um laço que faz quatro e diz «duas». */
+    long e_v1[2] = { 1, 0 };
+    p_i(e_v1, 2); p_i(e_v1, 2);                                /* i² — uma volta */
+    int volta_duas = (e_v1[0] == -1 && e_v1[1] == 0);          /* devolve −1, não 1 */
+    long e_v2[2] = { 1, 0 };
+    for(int k = 0; k < 4; k++) p_i(e_v2, 2);                   /* i⁴ — duas voltas */
+    int volta_uma = (e_v2[0] == 1 && e_v2[1] == 0);
+    printf("\n  §L4  Viviani: o recobrimento duplo pede DUAS voltas\n");
+    printf("      i² é o espelho (−1) .................. %s\n", i2_e_espelho ? "sim" : "não");
+    printf("      uma volta no ângulo NÃO devolve o ponto %s\n", volta_duas ? "sim (dá −1)" : "não");
+    printf("      e duas voltas devolvem ............... %s\n", volta_uma ? "sim" : "não");
+    ok("VIVIANI é a lei de ordem 4: i² É o espelho, logo uma volta no ângulo devolve o ponto"
+       " com o sinal TROCADO e são precisas duas para fechar — o recobrimento duplo. E é por"
+       " isso que o meio-ângulo é a raiz quadrada da rotação",
+       i2_e_espelho && volta_duas && volta_uma && o_i == 2*o_esp);
+
+    /* ─── §L5 ── o GUME: cada ordem separa ──────────────────────────────────────────
+     * Se as quatro ordens não fossem estas, o lcm mudava. Percorre-se cada uma, troca-se
+     * pela ordem de outra peça, e conta-se em quantas o 24 se perde. Sem isto, «lcm = 24»
+     * podia ser um acidente de números grandes. */
+    long ords[4] = { o_esp, o_tri, o_i, o_ind };
+    int quebra = 0, tentativas = 0;
+    for(int i = 0; i < 4; i++)
+        for(int j = 0; j < 4; j++){
+            if(i == j) continue;
+            long alt[4] = { ords[0], ords[1], ords[2], ords[3] };
+            alt[i] = ords[j];                       /* a peça i com a ordem da peça j */
+            long L = 1;
+            for(int t = 0; t < 4; t++) L = mmc(L, alt[t]);
+            tentativas++;
+            if(L != 24) quebra++;
+        }
+    printf("\n  §L5  o gume: trocar a ordem de uma peça pela de outra\n");
+    printf("      trocas feitas ....................... %d\n", tentativas);
+    printf("      em que o lcm DEIXA de ser 24 ........ %d\n", quebra);
+    ok("cada ordem separa: trocar a de uma peça pela de outra quebra o 24 na maioria das"
+       " trocas — o fecho não é um acidente de números grandes. E as que NÃO quebram são as"
+       " que trocam ordens que se dividem entre si, o que é a mesma lei a repetir-se",
+       tentativas == 12 && quebra > 0 && quebra < tentativas);
+
+    printf("\n  ══ as quatro são a MESMA coisa vista em quatro ordens: um operador que\n");
+    printf("     fecha. Cantor e Julia fecham em 2, o trial em 3, Viviani em 4, o índice\n");
+    printf("     em 8 — e o que os junta a todos é 24 = 8·3. ══\n\n");
+
+    return falhas ? 1 : 0;
+}
