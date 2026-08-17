@@ -38,6 +38,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include "reta.h"
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -174,10 +175,69 @@ int main(void){
     {
         double a3 = angulo_sp3(), a2 = angulo_sp2();
         double previsto3 = acos(-1.0/3.0)*180/M_PI;
-        ok("o angulo sp3 e arccos(-1/3) = 109,47 graus — derivado do tetraedro, nao citado",
-           fabs(a3 - previsto3) < 1e-9);
-        ok("e o sp2 e 360/3 = 120 exatos — a simetria do plano da-o sem margem",
-           fabs(a2 - 120.0) < 1e-9);
+
+        /* AS DUAS ASSERÇÕES QUE AQUI ESTAVAM NÃO PODIAM FALHAR.
+         *
+         * A do sp3 comparava `acos(ip/(n0·n1))` com `acos(−1/3)` — e ip/(n0·n1) É −1/3,
+         * porque os vértices são (1,1,1) e (1,−1,−1) e a conta dá −1 sobre √3·√3. Dois
+         * `acos` e duas conversões para graus a mascarar x = x.
+         * A do sp2 comparava `acos(cos(2π/3))·180/π` com 120: mede acos∘cos, e não a
+         * geometria do plano.
+         *
+         * O QUE HÁ PARA MEDIR É O COSSENO, e ele é RACIONAL — não é preciso ângulo nenhum:
+         *
+         *   sp3: os vértices são INTEIROS, ⟨v_i,v_j⟩ = −1 e ‖v‖² = 3, logo cos = −1/3
+         *        exacto, e mede-se em TODOS os seis pares (a equidistância é a tese, e
+         *        antes media-se um par só).
+         *   sp2: em ℤ[√3] as três direcções são (2,0), (−1,1) e (−1,−1) na coordenada
+         *        (x, coeficiente de √3). ⟨a,b⟩ = −2 e ‖a‖² = ‖b‖² = 4, logo cos = −1/2
+         *        exacto; e a SOMA das três é (0,0), que é o que o comentário da função já
+         *        prometia — «verifica-se que somam zero» — e nunca verificava. */
+        {
+            long V[4][3] = { {1,1,1}, {1,-1,-1}, {-1,1,-1}, {-1,-1,1} };
+            long pares = 0, cos_um_terco = 0, norma3 = 0;
+            for(int i = 0; i < 4; i++){
+                if(rt_dir(V[i], V[i], 3) == 3) norma3++;
+                for(int j = i+1; j < 4; j++){
+                    pares++;
+                    /* cos = ⟨vi,vj⟩ / (‖vi‖·‖vj‖) = −1/3, por produto cruzado e sem raiz:
+                     * 3·⟨vi,vj⟩ = −‖vi‖² e ‖vi‖² = ‖vj‖² */
+                    long d = rt_dir(V[i], V[j], 3);
+                    long ni = rt_dir(V[i], V[i], 3), nj = rt_dir(V[j], V[j], 3);
+                    if(d == -1 && ni == 3 && nj == 3 && 3*d == -ni) cos_um_terco++;
+                }
+            }
+            printf("     -> sp3 em INTEIROS: %ld pares de vertices, todos com <vi,vj> = -1 e\n"
+                   "        ||v||^2 = 3, logo cos = -1/3 EXACTO (e as normas batem em %ld de 4)\n",
+                   cos_um_terco, norma3);
+            ok("o angulo sp3 e arccos(-1/3) = 109,47 graus — derivado do tetraedro, nao citado."
+               " E o que se mede e' o COSSENO, que e' RACIONAL: os vertices sao INTEIROS,"
+               " <vi,vj> = -1 e ||v||^2 = 3 nos SEIS pares, logo cos = -1/3 exacto e as quatro"
+               " direccoes sao equidistantes — que e' a tese, e antes media-se UM par so'. A"
+               " assercao anterior comparava acos(ip/(n0.n1)) com acos(-1/3), e ip/(n0.n1) E'"
+               " -1/3: dois acos a mascarar x = x",
+               cos_um_terco == pares && pares == 6 && norma3 == 4 && fabs(a3 - previsto3) < 1e-9);
+        }
+        {
+            /* ℤ[√3]: a coordenada é (x, coeficiente de √3), e o produto interno é
+             * x1·x2 + 3·y1·y2 porque √3·√3 = 3. Tudo inteiro. */
+            long A[2][2] = { {2,0}, {-1,1} }, Cv[2] = { -1, -1 };
+            long ip2 = A[0][0]*A[1][0] + 3*A[0][1]*A[1][1];
+            long na = A[0][0]*A[0][0] + 3*A[0][1]*A[0][1];
+            long nb = A[1][0]*A[1][0] + 3*A[1][1]*A[1][1];
+            long sx = A[0][0] + A[1][0] + Cv[0], sy = A[0][1] + A[1][1] + Cv[1];
+            printf("        sp2 em ℤ[√3]: <a,b> = %ld, ||a||^2 = %ld, ||b||^2 = %ld — cos = -1/2\n"
+                   "        exacto; e as TRES direccoes somam (%ld, %ld), que e' o zero\n\n",
+                   ip2, na, nb, sx, sy);
+            ok("e o sp2 e 360/3 = 120 exatos — a simetria do plano da-o sem margem. E mede-se"
+               " em ℤ[√3], onde as tres direccoes sao (2,0), (-1,1) e (-1,-1) na coordenada"
+               " (x, coef de raiz(3)): <a,b> = -2 e ||a||^2 = ||b||^2 = 4, logo cos = -1/2"
+               " EXACTO, e a soma das tres e' (0,0). Esse zero e' o que o comentario da funcao"
+               " ja' prometia — «verifica-se que somam zero» — e nunca verificava; a assercao"
+               " anterior media acos(cos(2pi/3)), que e' a funcao e a sua inversa",
+               ip2 == -2 && na == 4 && nb == 4 && 2*ip2 == -na
+               && sx == 0 && sy == 0 && fabs(a2 - 120.0) < 1e-9);
+        }
         printf("     %-22s %6s %6s %14s\n", "hibridizacao", "sigma", "pi", "angulo");
         printf("     %-22s %6d %6d %13.4f\n", HIB[0].nome, HIB[0].sigma, HIB[0].pi, a3);
         printf("     %-22s %6d %6d %13.4f\n", HIB[1].nome, HIB[1].sigma, HIB[1].pi, a2);
