@@ -1273,7 +1273,7 @@ larga de todas:
 \]
 
 \emph{Prova (operacional, medida).} \code{tests/conservacao\_metrica.c}
-$\S$M2--$\S$M7, $11{:}0$; e a retracção do (2) em
+$\S$M2--$\S$M7, $14{:}0$; e a retracção do (2) em
 \code{tests/cone\_espiral.c} ($\S$E1--$\S$E4). As quatro contas coincidem: eliminação contra
 cunha em $2401$ matrizes $2\times2$ e $625$ $3\times3$ ($0$
 divergências); $\sigma\sigma'=\det=-1$ em $40$ metais; e a contagem do
@@ -1506,7 +1506,7 @@ ramo, muda-se para onde ele não é preciso, e diz-se onde ficou. Um
 ficheiro sem \code{if} que precisasse de normalizar para operar estaria a
 mentir.
 
-\emph{Medido:} \code{tests/sem\_ramo.c} ($6{:}0$), com a contagem feita
+\emph{Medido:} \code{tests/sem\_ramo.c} ($7{:}0$), com a contagem feita
 \textbf{no ficheiro}: $10$ em \code{racionais.h}, $8$ em
 \code{projetiva.h}, $14$ em \code{oito.h} e \textbf{zero} em
 \code{sem\_ramo.h}. As camadas intermédias não descem a zero, e é isso
@@ -1966,7 +1966,7 @@ Teorema~\ref{thm:gato} já diz o que isso vale. O que $\mathbb{F}_{127}$
 dá é uma face onde não há nada por varrer, e por isso onde nenhuma
 afirmação pode estar a esconder o caso que faltava.
 
-\emph{Medido:} \code{tests/exaustao.c} ($7{:}0$), com zero valores fora
+\emph{Medido:} \code{tests/exaustao.c} ($8{:}0$), com zero valores fora
 do tipo. O gume: as $2751$ matrizes degeneradas são todas recusadas, e se
 as deixássemos correr a imagem colapsaria a um ponto em vez dos $128$.
 $\square$
@@ -2026,7 +2026,7 @@ $13$. A matemática é a mesma; \emph{a conta que se escolhe fazer decide o
 tamanho dos números}, que é o Teorema~\ref{thm:meta-inducao} aplicado ao
 último sítio onde ainda faltava.
 
-\emph{Medido:} \code{tests/aritmetica.c} ($6{:}0$), com as saturações
+\emph{Medido:} \code{tests/aritmetica.c} ($7{:}0$), com as saturações
 contadas à parte. A volta fracção-contínua $\to$ convergentes fecha em
 $14\,400$ racionais; a identidade $\pm1$ vale em $74\,651$ pares
 consecutivos. $\square$

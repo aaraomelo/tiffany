@@ -222,7 +222,7 @@ gerador_analog 676348b363f37ace 0
 gerador_andar 3bb26b73aa6e4b05 0
 gerador_primos dccf9257d62b61f2 0
 geral f65a9a4ba20710fa 0
-gguf 117a5f5c6b0cf7b4 0
+gguf 3eb8877e3cf38a66 0
 gitb 8ec1b8901aa320cc 0
 graduacao_realiza b60285fba66f1f46 0
 grau 4a07ac0eb16bfd8a 0
