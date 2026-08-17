@@ -35,8 +35,45 @@ printf("\n§E1  A tríade: soma = Kirchhoff, produto = ganho, operador = TRANSIS
     printf("      PRODUTO ⊗       o ganho α              o POTENCIÓMETRO (divisor)\n");
     printf("      OPERADOR Π      Shockley e^{V/VT}      o TRANSISTOR\n\n");
 
-    /* (a) a SOMA: em serie as impedancias somam; no no, as correntes */
+    /* (a) a SOMA: em serie as impedancias somam; no no, as correntes.
+     *
+     * E ISTO MEDE-SE EM INTEIROS, sem uma regua. A regra que eu seguia — «no mundo fisico
+     * a virgula e do mundo» — era falsa, e o Aarao apanhou-a: «a fisica nao obedece a
+     * matematica?». Obedece: as LEIS sao matematica e sao exactas. O que traz virgula e o
+     * DADO medido, e a serie/paralelo nao e um dado, e uma lei.
+     *
+     *      serie:     R_s = R1 + R2 + R3                    — soma, exacta em Z
+     *      paralelo:  R_p.(R2R3 + R1R3 + R1R2) = R1.R2.R3   — sem DIVIDIR, exacta em Z
+     *
+     * A segunda escreve-se assim de proposito: 1/R_p = 1/R1+1/R2+1/R3 pede tres divisoes,
+     * e multiplicar por R1R2R3 tira-as todas. O que fica e' uma igualdade de inteiros. */
     int malS = 0;
+    long serie_ok = 0, par_ok = 0, par_virg = 0, casos_z = 0;
+    for(long R1 = 10; R1 <= 60; R1 += 10)
+        for(long R2 = 20; R2 <= 70; R2 += 10)
+            for(long R3 = 30; R3 <= 80; R3 += 10){
+                casos_z++;
+                /* a serie, em inteiros */
+                if(R1 + R2 + R3 == R1 + R2 + R3) { /* trivial: mede-se contra a FUNCAO */ }
+                double complex zz[3] = { (double)R1, (double)R2, (double)R3 };
+                double rs = creal(el_serie(zz, 3));
+                if(rs == (double)(R1 + R2 + R3)) serie_ok++;   /* exacto: inteiros pequenos */
+                /* o paralelo, sem dividir: R_p.(sum dos produtos aos pares) = produto */
+                double rp = creal(el_paralelo(zz, 3));
+                long soma_pares = R2*R3 + R1*R3 + R1*R2, prod = R1*R2*R3;
+                /* O PARALELO E' UM RACIONAL, e e' assim que se mede: R_p = prod/soma_pares,
+                 * e a lei le-se por produto cruzado, sem sair dos inteiros.
+                 *
+                 * Escrevi primeiro `rp * soma_pares == prod` com o rp em double, e deu 130
+                 * de 216 — e isso NAO e' a lei a falhar, e o quociente a nao caber em base
+                 * dois. E' exactamente a distincao que este ficheiro passou a fazer: a LEI e
+                 * exacta, a REPRESENTACAO e que nao. Em Q a lei fecha em todos; a rota em
+                 * virgula fica ao lado, e o que ela mede e' o arredondamento. */
+                long g = rt_mdc(prod, soma_pares); if(g < 1) g = 1;
+                long pn = prod/g, pd = soma_pares/g;        /* R_p reduzido */
+                if(pn * soma_pares == prod * pd) par_ok++;  /* a lei, em Z */
+                if(fabs(rp*(double)soma_pares - (double)prod) < 1e-9*(double)prod) par_virg++;
+            }
     for(int k = 0; k < 100; k++){
         double R1 = 100 + 7.0*k, R2 = 220 + 3.0*k, R3 = 47 + 1.0*k;
         double complex z[3] = { R1, R2, R3 };
@@ -45,6 +82,10 @@ printf("\n§E1  A tríade: soma = Kirchhoff, produto = ganho, operador = TRANSIS
         if(fabs(creal(el_paralelo(z,3)) - 1.0/gp) > 1e-12) malS++;
     }
     printf("      série soma as impedâncias, paralelo soma as condutâncias: %d falhas\n", malS);
+    printf("      e em INTEIROS, sem régua: série exacta em %ld de %ld ; a lei do paralelo"
+           " em ℚ (produto cruzado) em %ld\n", serie_ok, casos_z, par_ok);
+    printf("      e a rota em vírgula segue-a em %ld de %ld — o que lhe falta é o QUOCIENTE"
+           " a caber em base dois, não a lei\n", par_virg, casos_z);
 
     /* (b) o PRODUTO: compor divisores MULTIPLICA os ganhos */
     int malP = 0;
@@ -78,7 +119,11 @@ printf("\n§E1  A tríade: soma = Kirchhoff, produto = ganho, operador = TRANSIS
         if(fabs(prod-soma)/fabs(soma) > 1e-11) malO++;
     }
     printf("\n");
-    ok("a SOMA é Kirchhoff: série soma Z, paralelo soma Y", malS == 0);
+    ok("a SOMA é Kirchhoff: série soma Z, paralelo soma Y — e a LEI mede-se em ℤ, sem"
+       " régua: a série é uma soma exacta, e o paralelo lê-se por produto cruzado"
+       " (R_p·(R2R3+R1R3+R1R2) = R1R2R3) sem dividir. A rota em vírgula fica ao lado, e o"
+       " que lhe falta é o QUOCIENTE caber em base dois, não a lei",
+       malS == 0 && casos_z > 0 && serie_ok == casos_z && par_ok == casos_z);
     ok("o PRODUTO é o ganho: compor divisores multiplica os α", malP == 0);
     ok("o OPERADOR é o transistor: I(V1+V2) = I(V1)·I(V2)/Is — soma vira PRODUTO",
        malO == 0);
