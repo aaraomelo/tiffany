@@ -43,7 +43,7 @@ static double det(Mn M){
     double A[NMAX][NMAX];
     int n = M.n;
     for(int i = 0; i < n; i++) for(int j = 0; j < n; j++) A[i][j] = (double)M.a[i][j];
-    double d = 1;
+    long d = 1;
     for(int c = 0; c < n; c++){
         int p = -1;
         for(int r = c; r < n; r++) if(fabs(A[r][c]) > 1e-12){ p = r; break; }

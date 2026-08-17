@@ -109,7 +109,7 @@ printf("\n§E2  As multiplicidades +1, 0, -1 — e L ⋈ C é a dualidade.\n\n")
     printf("\n");
     ok("as multiplicidades são +1 (L), 0 (R) e -1 (C) — medidas, não postuladas", mal == 0);
     /* e a dualidade L ⋈ C: soma 0 (o resistor), media geometrica Z0 (o metal) */
-    double w = 5000;
+    long w = 5000;
     double soma = 1.0 + (-1.0);
     double geo = sqrt(cabs(z_L(L,w))*cabs(z_C(C,w)));
     printf("      L ⋈ C:  soma das multiplicidades = %+.0f  (o resistor, mult 0)\n", soma);
@@ -251,7 +251,7 @@ printf("\n§E5  Wheatstone: a medida por ANULAÇÃO — resíduo 0 em circuito.\
         if(cabs(d) > 1e-12) malD++;
     }
     /* e o detector NAO le zero fora do equilibrio — senao a medida nao mediria nada */
-    double complex z1 = 100, z2 = 220, z3 = 470;
+    long complex z1 = 100, z2 = 220, z3 = 470;
     double complex zx = el_wheatstone(z1,z2,z3);
     double complex fora = el_detector(z1,z2,z3,zx*1.01,10.0);
     printf("\n      e 1%% fora do equilíbrio o detector lê %.4e — logo ele MEDE\n\n", cabs(fora));

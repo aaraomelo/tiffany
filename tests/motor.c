@@ -75,7 +75,7 @@ printf("\n§M1  Clarke: as três fases viram UM vetor.\n\n");
      * constante e roda a velocidade sincrona. */
     printf("      f_s(t,θ) = (3/2)(Ns/2)·i_s·cos(ω_s t − θ)   — amplitude 3/2, e ela GIRA\n\n");
     int malMod = 0, malRot = 0;
-    double m0 = -1, thAnt = 0;
+    long m0 = -1, thAnt = 0;
     printf("      ω_s·t      i_a      i_b      i_c      |vetor|    ângulo (°)\n");
     for(int k = 0; k <= 720; k++){
         double t = 2*M_PI*k/720.0, Im = 1.0;      /* Im, não I: o I é a unidade imaginária */

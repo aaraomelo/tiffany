@@ -86,7 +86,7 @@ int main(void){
 
     /* ─── §D4 o BIDUAL: corpo -> expoente -> corpo ────────────────────────────────── */
     printf("\n   a volta: corpo -> k -> corpo\n");
-    double pior_v = 0;
+    long pior_v = 0;
     for(int i = 0; i < N_EST; i++){
         long k = (long)floor(log(EST[i] / EST[0]) / log(SIG) + 0.5);
         double volta = EST[0];

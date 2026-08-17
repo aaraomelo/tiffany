@@ -61,7 +61,7 @@ int main(void){
     {
         double bytes_llm = 1.3e9;                 /* o llama3.2:1b, quantizado */
         double bits = bytes_llm * 8;
-        double celulas_slc = bits;                /* 1 bit por célula */
+        long celulas_slc = bits;                /* 1 bit por célula */
         double celulas_qlc = bits / 4.0;          /* 4 bits por célula, o QLC comercial */
         /* a densidade real: um die NAND de 1 Tb em ~100 mm² */
         double bits_por_mm2 = 1e12 / 100.0;

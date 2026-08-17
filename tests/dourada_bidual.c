@@ -99,7 +99,7 @@ printf("\n§W2  A DILATACAO so' GIRA A FASE: o modulo NAO muda.\n\n");
          * modulo — move a FASE, e so' isso. Aplicado: mudar a escala de uma coisa nao move as
          * outras. */
         long mau = 0, casos = 0, fases_distintas = 0;
-        double fase_ant = -99;
+        long fase_ant = -99;
         printf("      lambda   |lambda^{-i tau}|   arg = -tau ln(lambda)\n");
         for(double lam = 1.2; lam <= 3.0; lam += 0.3){
             long tau = 2;                            /* é o inteiro 2: a vírgula só entrava

@@ -96,7 +96,7 @@ int main(void){
                 double poch = 1.0;                       /* (b)_n = b(b-1)...(b-n+1) */
                 for(int k = 0; k < nn; k++) poch *= (b - k);
                 double a = pow(1.0/poch, b/(b + 1.0));
-                double x = 2.0;
+                long x = 2.0;
                 double fn   = a*poch*pow(x, b - nn);     /* a n-ésima derivada de a·x^b */
                 double finv = pow(x/a, 1.0/b);           /* a inversa                    */
                 double d = fabs(fn - finv);

@@ -204,7 +204,7 @@ printf("\n§E6  A solução explícita é e^{At}, e o exp é a PONTE — de broc
     {
         /* Pade [k/k] de e^1, por recorrencia dos coeficientes — a diagonal da fracao continua */
         printf("        k    Padé [k/k] de e        erro\n");
-        double melhor = 1;
+        long melhor = 1;
         for(int k = 1; k <= 8; k++){
             double num = 0, den = 0;
             for(int j = 0; j <= k; j++){

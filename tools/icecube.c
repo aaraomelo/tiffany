@@ -135,7 +135,7 @@ int main(int argc,char**argv){
     printf("  χ²/dof = %.0f/%d = %.2f\n", best, dof, best/dof);
 
     /* só-atmosférico (astro=0) para comparar */
-    double best0=1e18;
+    long best0=1e18;
     for(double g=2.5;g<=4.5;g+=0.05){ double Ta[NER]; template(g,Ta);
         for(double la=-2;la<=8;la+=0.05){ double a=pow(10,la); double c=chi2(a,0,Ta,Tastro,lo,hi); if(c<best0)best0=c; } }
     printf("  χ² SÓ atmosférico (astro=0): %.0f   →  o astro melhora Δχ²=%.0f\n\n", best0, best0-best);

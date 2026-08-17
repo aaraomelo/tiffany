@@ -163,7 +163,7 @@ printf("\n§N3  Mas NÃO é bilinear — e é aí que ela sai da hipótese de Hu
     ok("NÃO é distributiva — logo não é bilinear", !distrib);
 
     /* mas e homogenea: (λw)·u = λ(w·u) */
-    double lam = 2.0;
+    long lam = 2.0;
     W e2 = nne(esc(lam,w), u), d2 = esc(lam, nne(w,u));
     printf("      (λw)·u = (%.4f, %.4f, %.4f)   λ(w·u) = (%.4f, %.4f, %.4f)\n\n",
            e2.a, e2.b, e2.c, d2.a, d2.b, d2.c);

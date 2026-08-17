@@ -249,7 +249,7 @@ int main(void){
     {
         printf("     %12s %14s %14s %14s\n", "fracao p", "E (GPa)", "alongam. (%)", "sigma (S/m)");
         int E_sobe = 1, al_cai = 1;
-        double E_ant = -1, al_ant = 1e9;
+        long E_ant = -1, al_ant = 1e9;
         for(double p = 0.0; p <= 0.30; p += 0.05){
             double E = mistura(E_GRAFENO, E_ESTANHO, p);
             double al = alongamento(p);

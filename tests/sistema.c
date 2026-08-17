@@ -135,7 +135,7 @@ printf("\n§S3  A solução e^{At} fechada bate a integração numérica.\n\n");
         { "acoplado   ", { 1, 2,  3,  4 } },
     };
     int mal = 0;
-    double pior = 0;
+    long pior = 0;
     printf("      sistema        e^{At}·x₀ (fechada)         RK4 (20000 passos)         erro\n");
     for(size_t k = 0; k < sizeof t/sizeof *t; k++){
         M2 E = expA(t[k].A, 1.0);

@@ -187,7 +187,7 @@ printf("\n§W4  A RÉGUA INFINITA representa o que diverge, e sai INTEIRA.\n\n")
     /* "ele sai inteiro, usa a regua infinita". Um float perto de pi/2 perde precisao; a
      * fracao continua devolve INTEIROS exatos, e reconstroi de volta. Mede-se a volta. */
     printf("      θ         tan θ            a régua (quocientes)          volta        resíduo\n");
-    double pior = 0;
+    long pior = 0;
     double th[] = {0.5, 1.0, 1.4, 1.5, 1.55};
     for(int i = 0; i < 5; i++){
         double t = tan(th[i]);

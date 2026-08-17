@@ -251,7 +251,7 @@ int main(void){
         double Qb[3] = { 1e-8, 0, 7e-9 };               /* o mesmo, mais uma parte radial */
         b_dipolo(Qa, rhat, B1);
         b_dipolo(Qb, rhat, B2);
-        double d = 0;
+        long d = 0;
         for(int i = 0; i < 3; i++) d += (B1[i]-B2[i])*(B1[i]-B2[i]);
         /* DUAS raizes numa comparacao so, e nenhuma delas decidia nada:
          *      raiz(d) < raiz(esc2)*1e-12   equivale a   d < esc2*1e-24

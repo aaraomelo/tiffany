@@ -238,7 +238,7 @@ printf("\n§D5  A COMPLETUDE: Cauchy converge, e o corte não deixa buraco.\n\n"
         prev = fabs(p1b/q1b - sig);
         if(err > 1e-30 && prev > 1e-30 && fabs(log(prev/err)/log(sig*sig) - 1) > 0.25) mal++;
         /* e é de CAUCHY: |x_{k+1} − x_k| -> 0 */
-        double a0=1,b0=0,a1=m,b1=1, ant=1e9, mono=1;
+        long a0=1,b0=0,a1=m,b1=1, ant=1e9, mono=1;
         for(int k=2;k<=25;k++){
             double a2=m*a1+a0,b2=m*b1+b0; a0=a1;b0=b1;a1=a2;b1=b2;
             double d = (k>2)? fabs(a1/b1 - a0/b0) : 1e9;

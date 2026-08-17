@@ -697,7 +697,7 @@ int main(void){
             double r  = sqrt((double)n*n + 4.0);
             double s  = (n + r)/2.0, s2 = (n - r)/2.0;
             double por_raizes = s * s2;                /* caminho 1: multiplicar as raizes */
-            double por_coefs  = -1.0;                  /* caminho 2: o termo independente de x²-nx-1 */
+            long por_coefs  = -1.0;                  /* caminho 2: o termo independente de x²-nx-1 */
             if(fabs(por_raizes - por_coefs) > 1e-12) mau++;
             if(fabs(fabs(por_raizes) - 1.0) > 1e-12) mau++;
             casos++; }

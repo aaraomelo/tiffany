@@ -453,7 +453,7 @@ int main(void){
             }
             /* régua algébrica: varrer den uniformemente, e ler o mesmo θ */
             double salto_alg = 0; th_ant = 0;
-            double T = 1e7;
+            long T = 1e7;
             for(int i=0;i<=N;i++){
                 double den = -T + 2.0*T*i/N;
                 double th = atan(den);

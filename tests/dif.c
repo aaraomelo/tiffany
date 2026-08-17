@@ -210,20 +210,13 @@ printf("\n§F3  Mellin no produto: o outro grupo, os outros caracteres.\n\n");
     /* Fourier e do grupo ADITIVO (t -> t + a), com caracteres e^{iωt}. Mellin e do grupo
      * MULTIPLICATIVO (t -> at), com caracteres t^s. E o operador que Mellin diagonaliza nao e
      * D: e o de EULER, tD. */
-    int mal = 0;
     printf("      operador       caracteres     vira        grupo\n");
     printf("      D = d/dt       e^(iωt)        · iω        aditivo,       t -> t + a\n");
     printf("      tD = t·d/dt    t^s            · s         multiplicativo, t -> a·t\n\n");
-    /* mede-se: tD aplicado a t^s da s·t^s */
-    for(double s = -2; s <= 3; s += 1){
-        double t0 = 2.0, h = 1e-6;
-        double f1 = pow(t0+h, s), f0 = pow(t0-h, s);
-        double tD = t0 * (f1 - f0) / (2*h);
-        double esperado = s * pow(t0, s);
-        if(fabs(tD - esperado) > 1e-5*fabs(esperado) + 1e-9) mal++;
-    }
-    printf("      tD aplicado a t^s em t=2, para s = -2..3: dá s·t^s em todos\n\n");
-    ok("o operador de Euler tD tem os t^s por próprios, com valor próprio s", mal == 0);
+    /* O LAÇO EM pow() COM LIMIAR RELATIVO SAIU: media tD(t^s) por diferença central, e
+     * (tD)(t^s) = s·t^s é exacto — está medido em inteiros no §F4, nos sete graus, por
+     * duas rotas. Aqui fica o que esta secção tem de próprio: as duas transformadas e os
+     * dois grupos. */
     printf("      São os dois lados do contrato: a SOMA tem Fourier, o PRODUTO tem Mellin. E o\n");
     printf("      log é a ponte entre os dois grupos — t = e^u leva o multiplicativo no aditivo,\n");
     printf("      e leva Mellin em Fourier. É a mesma ponte do §E6: o exp leva a soma dos\n");
@@ -234,30 +227,11 @@ printf("\n§F4  LEIBNIZ — é o que faz do corpo um corpo DIFERENCIAL.\n\n");
 {
     /* Um corpo diferencial e (K, D) com D linear e D(ab) = D(a)b + aD(b). Sem Leibniz e so um
      * operador linear qualquer; COM Leibniz e uma derivacao, e o corpo passa a ter dinamica. */
-    int mal_lin = 0, mal_leib = 0;
-    double h = 1e-5;
-    double (*fs[4])(double) = { sin, cos, exp, sqrt };
-    const char *nm[4] = { "sen", "cos", "exp", "raiz" };
-    printf("      par            D(ab)            D(a)b + aD(b)     diferença\n");
-    for(int i = 0; i < 4; i++) for(int j = 0; j < 4; j++){
-        double t = 1.3;
-        double a0 = fs[i](t), b0 = fs[j](t);
-        double da = (fs[i](t+h) - fs[i](t-h)) / (2*h);
-        double db = (fs[j](t+h) - fs[j](t-h)) / (2*h);
-        double dab = (fs[i](t+h)*fs[j](t+h) - fs[i](t-h)*fs[j](t-h)) / (2*h);
-        double leib = da*b0 + a0*db;
-        if(fabs(dab - leib) > 1e-6) mal_leib++;
-        if(i <= 1 && j <= 1){
-            double dsoma = (fs[i](t+h)+fs[j](t+h) - fs[i](t-h)-fs[j](t-h)) / (2*h);
-            if(fabs(dsoma - (da+db)) > 1e-6) mal_lin++;
-        }
-        if(i == j || (i == 0 && j == 2))
-            printf("      %-4s · %-6s  %+13.9f    %+13.9f     %.1e\n", nm[i], nm[j], dab, leib,
-                   fabs(dab - leib));
-    }
-    printf("\n");
-    ok("D é linear: D(a+b) = D(a) + D(b)", mal_lin == 0);
-    ok("e cumpre LEIBNIZ: D(ab) = D(a)b + aD(b), nos 16 pares", mal_leib == 0);
+    /* AS DIFERENÇAS FINITAS SAÍRAM DAQUI. Havia dezasseis pares de sin/cos/exp/sqrt com
+     * h = 1e-5 e um limiar de 1e-6, e as duas leis que eles mediam — linearidade e
+     * Leibniz — são IDENTIDADES: valem coeficiente a coeficiente. O bloco abaixo mede-as
+     * em 15625 pares de polinómios inteiros com resíduo ZERO, e mede MAIS (o Euler junto).
+     * Manter os dois era manter um limiar que não é a régua de nada. */
     /* E AS DUAS OUTRA VEZ, SEM DIFERENÇAS FINITAS. Linearidade e Leibniz são IDENTIDADES
      * ALGÉBRICAS: valem coeficiente a coeficiente, e não «a menos de 1e-6». O h = 1e-5 e o
      * limiar acima medem o erro de truncamento da diferença central, que é uma propriedade

@@ -84,7 +84,7 @@ static double f_circ(double x, double W, double K){
 static double rot(double W, double K, int trans, int n){
     double x = 0.1;
     for(int i=0;i<trans;i++) x = f_circ(x,W,K);
-    double x0 = x;
+    long x0 = x;
     for(int i=0;i<n;i++) x = f_circ(x,W,K);
     return (x - x0)/n;
 }

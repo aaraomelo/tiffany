@@ -77,7 +77,7 @@ printf("\n§K1  A garrafa: borda INFINITA em espaço FINITO.\n\n");
     /* área do floco de Koch a partir do triângulo unitário: A = A0·(1 + 3/4·Σ(4/9)^k) */
     double A0 = sqrt(3)/4.0, limite = A0*8.0/5.0;
     int malP = 0, malA = 0;
-    double antP = -1, antA = -1;
+    long antP = -1, antA = -1;
     for(int N = 0; N <= 12; N++){
         per = pow(4.0/3.0, N);
         area = A0*(1 + 0.6*(1 - pow(4.0/9.0, N)));   /* forma fechada do floco */

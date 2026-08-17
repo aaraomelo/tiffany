@@ -234,7 +234,7 @@ int main(void){
                 double Qa[3] = { 1e-8, 0, a*1e-9 }, Qb[3] = { 1e-8, 0, b*1e-9 };
                 double Ba[3], Bb[3];
                 b_dipolo(Qa, rhat, Ba); b_dipolo(Qb, rhat, Bb);
-                double dB = 0;
+                long dB = 0;
                 for(int i = 0; i < 3; i++) dB += (Ba[i]-Bb[i])*(Ba[i]-Bb[i]);
                 double dP = fabs(p_joule(Qa,vol,comp) - p_joule(Qb,vol,comp));
                 double esc2 = Ba[0]*Ba[0]+Ba[1]*Ba[1]+Ba[2]*Ba[2];
@@ -364,7 +364,7 @@ int main(void){
         double Qp[3] = { 1e-8, 0,  3e-9 }, Qm[3] = { 1e-8, 0, -3e-9 };
         double Bp[3], Bm[3];
         b_dipolo(Qp, rhat, Bp); b_dipolo(Qm, rhat, Bm);
-        double dB = 0;
+        long dB = 0;
         for(int i = 0; i < 3; i++) dB += (Bp[i]-Bm[i])*(Bp[i]-Bm[i]);
         double dP = fabs(p_joule(Qp,vol,comp) - p_joule(Qm,vol,comp));
         ok("a corrente radial para DENTRO e para FORA da o mesmo B e o mesmo P — o sinal fica",

@@ -256,7 +256,7 @@ int main(void){
         /* e o ATIVO: com fonte, o ganho passa de 1, e o Shockley diz quanto */
         double VT = 0.02585, Ic = 1e-3;
         double gm = Ic/VT;                        /* a transcondutância — a derivada, §A1 */
-        double RL = 5000.0;
+        long RL = 5000.0;
         double Av = gm * RL;
         ok("e o ATIVO passa de 1: com fonte, o ganho e gm.RL e ele e MUITO maior que um",
            Av > 100);

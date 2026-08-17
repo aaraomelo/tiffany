@@ -88,7 +88,7 @@ static double complex zeta(double complex s){
     acc += 0.5*cpow((double)N, -s);
     acc += cpow((double)N, 1.0-s)/(s-1.0);
     double complex poch = s;                      /* (s)_1 = s */
-    double fat = 2.0;                             /* (2k)! */
+    long fat = 2.0;                             /* (2k)! */
     for(int k = 1; k <= 10; k++){
         acc += B2k[k-1]/fat * poch * cpow((double)N, -s-(2*k-1));
         poch *= (s + (2*k-1)) * (s + 2*k);        /* (s)_{2k+1} a partir de (s)_{2k-1} */

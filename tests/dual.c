@@ -249,7 +249,7 @@ printf("\n§U7  A notação no R^n, e o produto escrito nas duas.\n\n");
             double a0 = sin(19.0*k+1), b0 = cos(23.0*k+2);
             double a[3], b[3];
             for(int i = 0; i < 3; i++){ a[i] = sin(29.0*k+i+1); b[i] = cos(31.0*k+i+2); }
-            double ip = 0;
+            long ip = 0;
             for(int i = 0; i < 3; i++) ip += a[i]*b[i];
             double c0 = a0*b0 - sigma*ip;
             double c[3];

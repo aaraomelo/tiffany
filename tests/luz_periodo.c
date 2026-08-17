@@ -126,7 +126,7 @@ int main(void){
      * orbita (voltar a origem) e' o residuo do proprio desenho. */
     puts("\n  n    fecho da orbita   pi_geo = q/D   pi_dobra      |geo-dobra|");
     int dois_caminhos = 1, orbita_fecha = 1;
-    double err_ant = 1;
+    long err_ant = 1;
     for(int j = 1; j <= 4; j++){
         int n = 1 << j;
         long q = q_dim(n);

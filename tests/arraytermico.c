@@ -150,14 +150,14 @@ int main(void){
     puts("§A3  SEEBECK: o calor vira tensao, e a lei mede-se em varios gradientes");
     puts("     V = S.dT. O gradiente disponivel numa cabeca e o do cortex ao escalpe: ~5 K.\n");
     {
-        double dT = T_QUENTE - T_FRIO;
+        long dT = T_QUENTE - T_FRIO;
         printf("     %-22s %10s %8s %14s\n", "material", "S(uV/K)", "ZT", "V a 5 K");
         for(int i = 0; i < NMAT; i++)
             printf("     %-22s %10.0f %8.2f %12.2f mV\n", MATERIAIS[i].nome, MATERIAIS[i].S_uVK,
                    MATERIAIS[i].ZT, seebeck(MATERIAIS[i].S_uVK, dT)*1e3);
         /* a LEI: V e LINEAR em dT — mede-se em muitos dT, nao num */
         int linear = 1;
-        double S = MATERIAIS[0].S_uVK;
+        long S = MATERIAIS[0].S_uVK;
         for(double d = 0.5; d <= 50; d += 0.5){
             double v1 = seebeck(S, d), v2 = seebeck(S, 2*d);
             if(fabs(v2 - 2*v1) > 1e-15) linear = 0;
@@ -185,7 +185,7 @@ int main(void){
                T_QUENTE, T_FRIO, 100*ec);
         printf("     %-22s %8s %14s %14s\n", "material", "ZT", "eficiencia", "% de Carnot");
         int nenhum_passa = 1, cresce = 1;
-        double ant = -1;
+        long ant = -1;
         for(int i = 0; i < NMAT; i++){
             double e = eficiencia(T_QUENTE, T_FRIO, MATERIAIS[i].ZT);
             printf("     %-22s %8.2f %12.5f%% %12.1f%%\n", MATERIAIS[i].nome, MATERIAIS[i].ZT,

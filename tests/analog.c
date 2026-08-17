@@ -483,7 +483,7 @@ static void B5_soma(void) {
     long passou = 0, tot = 0; int arvore_torta_bateu = 0;
     for (int seed = 0; seed < 200; seed++) {
         double v[8]; int nb = 2 + seed % 7;                 /* de 2 a 8 fontes */
-        double linear = 0;                                  /* fontes > 0: o ramo */
+        long linear = 0;                                  /* fontes > 0: o ramo */
         for (int j = 0; j < nb; j++) { v[j] = 1 + (seed*7 + j*13) % 20; linear += v[j]; }
         if (soma_arvore(v, nb) == linear) passou++;             /* árvore == linear */
         /* o dente: o topo subtrai os ramos. Com fontes > 0 o ramo direito é > 0,

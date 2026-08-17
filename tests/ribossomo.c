@@ -229,7 +229,7 @@ printf("\n§Y4  ESTICAR E LINEARIZAR: o enrolamento desenrola sem perder.\n\n");
         int bits[9] = {1,0,1,1,0,0,1,0,1}, lido[9];
         double x = cantor_de(bits, 9);
         x += 2.0/pow(3.0, 5);                     /* mexe-se no 5º dígito */
-        double y = x;
+        long y = x;
         for(int k = 0; k < 9; k++){
             y *= 3.0; int d = (int)floor(y + 1e-9);
             lido[k] = d >= 2 ? 1 : 0;

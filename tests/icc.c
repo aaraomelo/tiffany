@@ -136,7 +136,7 @@ int main(void){
     puts("     Nao e criterio de engenharia — e o teorema da amostragem, e ele falha de forma");
     puts("     verificavel. Mede-se nos dois lados: acima do limite reconstroi, abaixo nao.\n");
     {
-        double lado = 4000.0;                       /* 4 mm de campo, como o Utah */
+        long lado = 4000.0;                       /* 4 mm de campo, como o Utah */
         double f[NPTS], canais[4096];
         int acima = 0, abaixo = 0, casos = 0;
         printf("     %10s %12s %10s %12s\n", "passo(um)", "periodo(um)", "Nyquist", "residuo");
@@ -288,7 +288,7 @@ int main(void){
     puts("     A pergunta do reconstroi.c noutra coordenada. La foram n+2 termos; aqui e uma");
     puts("     condicao de amostragem, e tem forma fechada.\n");
     {
-        double lado = 4000.0;
+        long lado = 4000.0;
         double f[NPTS], canais[4096];
         int k = 4;                                   /* o campo tem 4 meias-ondas no lado */
         double periodo = 2.0*lado/k;

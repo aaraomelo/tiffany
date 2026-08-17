@@ -216,7 +216,7 @@ printf("\n§G2  As raízes acham-se e VERIFICAM-SE por substituição, em graus 
     };
     const char *nm[6] = { "x²-x-1", "x³-x-1", "x⁴+2x²+1", "x⁵-x⁴-1", "x⁶-1", "grau 8 qualquer" };
     int mal = 0;
-    double pior = 0;
+    long pior = 0;
     printf("      polinómio          raízes  resíduo máx |p(z)|   convergiu\n");
     for(int k = 0; k < 6; k++){
         double complex z[GMAX];

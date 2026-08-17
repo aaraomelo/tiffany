@@ -211,7 +211,7 @@ int main(void){
         double complex Sf[3] = {0}, Sg[3] = {0};
         for(int i = 0; i < 3; i++)
             for(int j = 0; j < 3; j++){ Sf[i] += S[i][j]*f[j]; Sg[i] += S[i][j]*g[j]; }
-        double complex e1 = 0, e2 = 0;
+        long complex e1 = 0, e2 = 0;
         for(int i = 0; i < 3; i++){ e1 += Sf[i]*g[i]; e2 += f[i]*Sg[i]; }
         ok("e a ADJUNCAO decorre dela: <Sf,g> = <f,Sg>, e o residuo e' ZERO — igualdade,"
            " nao limiar. A identidade decorre SO' da simetria, para quaisquer entradas: o"

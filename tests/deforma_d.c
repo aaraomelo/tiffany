@@ -126,7 +126,7 @@ static double lyap_sympl(const double *w, int d, double K, double eps, int trans
     return soma/n;
 }
 static double metal(int n){
-    double lo=1.0, hi=2.0;
+    long lo=1.0, hi=2.0;
     for(int it=0;it<200;it++){
         double mid=(lo+hi)/2, f=pow(mid,n)-pow(mid,n-1)-1;
         if(f>0) hi=mid; else lo=mid;
@@ -165,7 +165,7 @@ int main(void){
         int cresce_ok=1;
         for(double gama=0.01; gama<=0.161; gama*=2){
             printf("      %.3f  ", gama);
-            double ant=-1;
+            long ant=-1;
             for(int d=1;d<=3;d++){
                 long tot=0,res=0;
                 int M = (d==1)?20000:((d==2)?300:60);

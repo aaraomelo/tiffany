@@ -200,7 +200,7 @@ int main(void){
     puts("     O contraste e uma Lorentziana em torno de f0, e f0 desloca-se com o campo. Ler no");
     puts("     PICO nao serve: ali a derivada e zero. Le-se na encosta, e mede-se onde ela e maxima.\n");
     {
-        double f0 = D_ZFS;
+        long f0 = D_ZFS;
         /* a derivada é zero no pico — e isso é o que torna o pico inútil para medir */
         ok("no PICO a derivada e ZERO: ali o sensor nao responde a variacao nenhuma",
            fabs(dlorentz(f0, f0)) < 1e-20);
@@ -258,7 +258,7 @@ int main(void){
         double df = GAMMA * B;                     /* o deslocamento em frequência */
         double S = fabs(dlorentz(D_ZFS + LARG/sqrt(3.0), D_ZFS));
         double dC = S * df;                        /* a variação de contraste */
-        double fotons = 1e6;                       /* fotões por medida */
+        long fotons = 1e6;                       /* fotões por medida */
         double ruido_shot = 1.0/sqrt(fotons);      /* o ruído de contagem, relativo */
         double snr = dC / ruido_shot;
 
@@ -307,7 +307,7 @@ int main(void){
             banda_ant = banda;
         }
         double janela_aberta = 1e-9;               /* ±1 nT, medido no §S4 */
-        double ganho_malha = 1000.0;
+        long ganho_malha = 1000.0;
         double janela_fechada = janela_aberta * ganho_malha;
         double gbw = (double)GBW_z;
         double banda_aberta = gbw/1.0, banda_fechada = gbw/ganho_malha;
