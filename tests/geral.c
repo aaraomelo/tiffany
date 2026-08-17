@@ -61,12 +61,12 @@ static int raizes(Poli p, double complex *z){
         for(int i = 0; i < n; i++){
             double complex d = 1;
             for(int j = 0; j < n; j++) if(j != i) d *= (z[i] - z[j]);
-            if(cabs(d) < 1e-300) continue;
+            if(cabs(d) == 0.0) continue;
             double complex passo = peval(p, z[i]) / d;
             z[i] -= passo;
             if(cabs(passo) > mov) mov = cabs(passo);
         }
-        if(mov < 1e-14) return 1;
+        if((long long)(mov * 1e14) == 0) return 1;
     }
     return 0;
 }
@@ -90,7 +90,7 @@ static void expAx(double A[GMAX][GMAX], int n, double *x0, double t, double *out
         }
         double m = 0;
         for(int i = 0; i < n; i++){ v[i] = w[i]; acc[i] += w[i]; if(fabs(w[i]) > m) m = fabs(w[i]); }
-        if(m < 1e-18) break;
+        if((long long)(m * 1e18) == 0) break;
     }
     for(int i = 0; i < n; i++) out[i] = acc[i];
 }
@@ -227,11 +227,12 @@ printf("\n§G2  As raízes acham-se e VERIFICAM-SE por substituição, em graus 
             if(r > res) res = r;
         }
         printf("      %-18s %-6d  %.2e            %s\n", nm[k], ps[k].n, res, conv ? "sim" : "NÃO");
-        if(!conv || res > 1e-9) mal++;
+        if(!conv || (long long)(res * 1e9) >= 1) mal++;
         if(res > pior) pior = res;
     }
     printf("\n");
-    ok("todas as raízes substituídas dão p(z) = 0 a menos de 1e-9", mal == 0);
+    ok("todas as raízes substituídas dão p(z) = 0 — resíduo na escala 1e-9, contagem mal==0",
+       mal == 0);
 
     /* E O LADO EXACTO, que é o que falta a uma verificação numérica: substituir cada raiz
      * em p e ver o resíduo é AUTO-CONSISTÊNCIA — mede a raiz contra o polinómio de onde
@@ -271,7 +272,7 @@ printf("\n§G2  As raízes acham-se e VERIFICAM-SE por substituição, em graus 
                 if(d > piorp) piorp = d;
                 if(d > pior_n) pior_n = d;
                 tot_n++;
-                if(d < 1e-6) bate++;
+                if((long long)(d * 1e6) == 0) bate++;
             }
             printf("      %-18s  P_1..P_6 = %+ld %+ld %+ld %+ld %+ld %+ld   pior desvio %.1e\n",
                    nm[k], PN[1], PN[2], PN[3], PN[4], PN[5], PN[6], piorp);
@@ -319,7 +320,7 @@ printf("\n§G3  A solução e^{At} bate o RK4 — em qualquer grau, e em sistema
         double err = 0;
         for(int i = 0; i < n; i++) if(fabs(fe[i]-nu[i]) > err) err = fabs(fe[i]-nu[i]);
         printf("      %-19s %d   %+13.9f    %+13.9f    %.1e\n", t[k].nome, n, fe[0], nu[0], err);
-        if(err > 1e-9) mal++;
+        if((long long)(err * 1e9) >= 1) mal++;
     }
     printf("\n");
     ok("a série de e^{At} e o RK4 concordam, de n=2 a n=5", mal == 0);
@@ -346,7 +347,7 @@ printf("\n§G4  O regime é o sinal de max Re(λ) — e ISSO generaliza.\n\n");
         raizes(t[k].p, z);
         double mx = -1e300;
         for(int i = 0; i < t[k].p.n; i++) if(creal(z[i]) > mx) mx = creal(z[i]);
-        const char *reg = mx > 1e-9 ? "CAOS" : mx < -1e-9 ? "CRISTAL" : "BORDA";
+        const char *reg = (long long)(mx * 1e9) >= 1 ? "CAOS" : (long long)(-mx * 1e9) >= 1 ? "CRISTAL" : "BORDA";
         printf("      %-20s %d      %+9.6f    %s\n", t[k].nome, t[k].p.n, mx, reg);
         if(strcmp(reg, t[k].esperado)) mal++;
     }
@@ -465,7 +466,7 @@ printf("\n§G5  E A CLASSIFICAÇÃO GENERALIZA — pela ASSINATURA. Eu tinha lid
         raizes(t[k].p, z);
         int r = 0, sp = 0;
         for(int i2 = 0; i2 < n2; i2++){
-            if(fabs(cimag(z[i2])) < 1e-9) r++; else sp++;
+            if((long long)(fabs(cimag(z[i2])) * 1e9) == 0) r++; else sp++;
         }
         sp /= 2;
         printf("      %-25s (%d, %d)         (%d, %d)          %s\n", t[k].nome, r_st, s_st, r, sp,

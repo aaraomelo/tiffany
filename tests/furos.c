@@ -69,7 +69,7 @@ static long caixas_por_varredura(int k){
     for(long v = 0; v < total; v++){
         double x = 0, p = 1.0/3.0;
         for(int i = 0; i < k; i++){ x += 2.0*((v >> (k-1-i)) & 1)*p; p /= 3.0; }
-        long c = (long)(x*lado + 1e-9);
+        long c = (long)floor(x*lado + 0.5);
         if(c >= 0 && c < lado && !marca[c]){ marca[c] = 1; ocupadas++; }
     }
     return ocupadas;
@@ -158,8 +158,8 @@ printf("\n§F2  CANTOR é o produto DIRETO: as dimensões SOMAM, e a soma varre 
         long nk = 1;
         for(int i = 0; i < k; i++) nk *= n1;     /* o direto MULTIPLICA as contagens... */
         double d = log((double)nk) / (3*log(3.0));  /* ...e por isso as dimensões somam */
-        if(fabs(d - k*d1) > 1e-9) mau++;
-        int e_inteira = fabs(d - floor(d+0.5)) < 1e-9;
+        if((long long)(fabs(d - k*d1) * 1e9) >= 1) mau++;
+        int e_inteira = (long long)(fabs(d - floor(d+0.5)) * 1e9) == 0;
         printf("      %-10d %-22ld %-15.9f %-13.9f %s\n", k, nk, d, k*d1,
                e_inteira ? "SIM" : "não");
     }
@@ -183,11 +183,11 @@ printf("\n§F3  JULIA é o CRUZADO na POLAR: módulos multiplicam, ângulos soma
         double zr = a*c - b*d, zi = a*d + b*c;                  /* z·w */
         double rz = sqrt(a*a+b*b), rw = sqrt(c*c+d*d), rzw = sqrt(zr*zr+zi*zi);
         double tz = atan2(b,a), tw = atan2(d,c), tzw = atan2(zi,zr);
-        if(fabs(rzw - rz*rw) > 1e-9*(1+rz*rw)) mau_rho++;
+        if((long long)(fabs(rzw - rz*rw)/(1+rz*rw) * 1e9) >= 1) mau_rho++;
         double soma = tz + tw;
         while(soma >  M_PI) soma -= 2*M_PI;
         while(soma < -M_PI) soma += 2*M_PI;
-        if(fabs(tzw - soma) > 1e-9) mau_ang++;
+        if((long long)(fabs(tzw - soma) * 1e9) >= 1) mau_ang++;
         casos++;
         if(i == 1 && j <= 2)
             printf("      %.2f+%.2fi   %.2f+%.2fi   %.9f          %.9f\n",
@@ -219,11 +219,11 @@ printf("\n§F4  AS DUAS TORRES: o dual troca o SINAL da multiplicação, e σ·�
         double s  = (m + sqrt((double)m*m + 4.0))/2.0;
         double sl = -1.0/s;                          /* o dual: o sinal da multiplicação */
         double prod = s*sl;
-        if(fabs(prod + 1.0) > 1e-12) mau_prod++;
+        if((long long)(fabs(prod + 1.0) * 1e12) >= 1) mau_prod++;
         double volta = -1.0/sl;                      /* trocar outra vez */
-        if(fabs(volta - s) > 1e-12) mau_inv++;
+        if((long long)(fabs(volta - s) * 1e12) >= 1) mau_inv++;
         printf("      %-4d %-14.9f %-20.9f %-9.6f %s\n", m, s, sl, prod,
-               fabs(volta - s) < 1e-12 ? "sim" : "NÃO");
+               (long long)(fabs(volta - s) * 1e12) == 0 ? "sim" : "NÃO");
     }
     printf("\n");
     ok("σ·σ' = −1 em todo metal — o dual é o sinal da multiplicação trocado", mau_prod == 0);
@@ -231,7 +231,7 @@ printf("\n§F4  AS DUAS TORRES: o dual troca o SINAL da multiplicação, e σ·�
 
     /* E O CONTROLO: uma operação que não é involução não serve de dual. */
     double s = (1 + sqrt(5.0))/2.0, nao_inv = 1.0/s, volta_ma = 1.0/nao_inv;
-    int ctl = fabs(volta_ma - s) < 1e-12;            /* 1/x TAMBÉM é involução... */
+    int ctl = (long long)(fabs(volta_ma - s) * 1e12) == 0;            /* 1/x TAMBÉM é involução... */
     double roda = s + 1.0, volta_roda = roda + 1.0;  /* ...mas somar 1 não é */
     int ctl2 = fabs(volta_roda - s) > 0.5;
     printf("      controlo: somar 1 e somar 1 outra vez dá %.6f, não %.6f — %s\n\n",

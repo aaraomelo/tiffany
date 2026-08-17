@@ -69,7 +69,7 @@ printf("\n§M1  O Teorema: ortogonalidade, e completude POR CONTAGEM.\n\n");
             double complex v = ip(f,g,n);
             double esp = (m==k) ? 1.0 : 0.0;
             testados++;
-            if(cabs(v - esp) > 1e-12) ruim++;
+            if((long long)(cabs(v - esp) * 1e12) >= 1) ruim++;
         }
         printf("      %-5d %-24s %-20d %d\n", n, ruim ? "NÃO" : "sim, δ exato", n, n);
         if(ruim) mal++;
@@ -97,7 +97,7 @@ printf("\n§M1  O Teorema: ortogonalidade, e completude POR CONTAGEM.\n\n");
             for(int j = 0; j < n; j++) nx += creal(x[j]*conj(x[j]));
             nx /= n;
             for(int k = 0; k < n; k++) nc += creal(c[k]*conj(c[k]));
-            if(fabs(nx-nc) > 1e-12) malP++;
+            if((long long)(fabs(nx-nc) * 1e12) >= 1) malP++;
         }
     printf("\n      Parseval: ‖x‖² = Σ|c_χ|², em 200 casos: %d falhas\n\n", malP);
     ok("nenhuma medida vaza na decomposição — o que sobra ao cortar é a cauda", malP == 0);
@@ -119,7 +119,7 @@ printf("\n§M2  Corolário A — toda translação é DIAGONAL.\n\n");
                     for(int j = 0; j < n; j++) e[j] = chi(k,j,n);
                     double complex a = ip(tx,e,n), b = conj(chi(k,g,n))*ip(x,e,n);
                     testados++;
-                    if(cabs(a-b) > 1e-12) mal++;
+                    if((long long)(cabs(a-b) * 1e12) >= 1) mal++;
                 }
             }
     printf("      %d coeficientes medidos: %d falhas\n\n", testados, mal);
@@ -139,7 +139,7 @@ printf("\n§M3  Corolário B — todo produto é SOMA no índice.\n\n");
             for(int x = 0; x < n; x++){
                 double complex p = chi(a,x,n)*chi(b,x,n), q = chi((a+b)%n,x,n);
                 testados++;
-                if(cabs(p-q) > 1e-12) mal++;
+                if((long long)(cabs(p-q) * 1e12) >= 1) mal++;
             }
     printf("      %d produtos medidos: %d falhas\n\n", testados, mal);
     ok("o produto dos caracteres é o caractere da soma — grau alto vira grau um", mal == 0);
@@ -276,7 +276,7 @@ printf("\n§M5  Pontryagin é uma DOBRA: Γ̂̂ = Γ. E o vinco são os auto-dua
         }
         for(int a = 0; a < n; a++) for(int b = 0; b < n; b++){
             double esp = (a == b) ? (double)n*n : 0.0;
-            if(cabs(F4[a][b] - esp) > 1e-9*n*n) malD++;
+            if(n > 0 && (long long)(cabs(F4[a][b] - esp) / (n*n) * 1e9) >= 1) malD++;
         }
     }
     printf("      E concretamente: a matriz de Fourier tem F⁴ = n²·id em n = 2..12: %d falhas\n\n",
@@ -298,7 +298,7 @@ printf("\n§M6  O corpo diferencial é a instância MÁXIMA — e é corpo de co
     int mal = 0;
     for(int k = 0; k < 300; k++){
         double x = 0.05 + 0.03*k, y = 0.07 + 0.02*k;
-        if(fabs(log(x*y) - (log(x)+log(y))) > 1e-12) mal++;
+        if((long long)(fabs(log(x*y) - (log(x)+log(y))) * 1e12) >= 1) mal++;
     }
     printf("      log(xy) = log x + log y, 300 pares: %d falhas   [o eixo × vira o eixo +]\n", mal);
     /* e o caractere de Mellin t^s e' o de Fourier em log t */
@@ -307,7 +307,7 @@ printf("\n§M6  O corpo diferencial é a instância MÁXIMA — e é corpo de co
         double t = 0.1 + 0.05*k, w = 0.3 + 0.01*k;
         double complex mel = cpow(t, I*w);            /* caractere de (R_{>0},×) */
         double complex fou = cexp(I*w*log(t));        /* caractere de (R,+) em log t */
-        if(cabs(mel-fou) > 1e-12) malM++;
+        if((long long)(cabs(mel-fou) * 1e12) >= 1) malM++;
     }
     printf("      t^{iω} = e^{iω·log t}, 300 pontos: %d falhas   [Mellin É Fourier no log]\n\n",
            malM);
@@ -319,7 +319,7 @@ printf("\n§M6  O corpo diferencial é a instância MÁXIMA — e é corpo de co
         for(int k = 0; k < n; k++) for(int x = 0; x < n; x++){
             double complex doQuociente = chi(k,x,n);
             double complex daReta = cexp(2.0*M_PI*I*k*x/(double)n);   /* o de R, em x/n */
-            if(cabs(doQuociente - daReta) > 1e-12) malQ++;
+            if((long long)(cabs(doQuociente - daReta) * 1e12) >= 1) malQ++;
         }
     printf("      os caracteres de Z/n são os de R avaliados no reticulado: %d falhas\n\n", malQ);
     /* CORREÇÃO: "quociente" é FALSO. R é divisível, e todo quociente de divisível é
@@ -412,8 +412,8 @@ printf("\n§M8  As seis leituras, cada uma com o seu Γ.\n\n");
             if(antM >= 0){
                 if(primeiroM < 0){ primeiroM = pm; primeiroA = pa; }
                 else {
-                    if(fabs(pm - primeiroM) > 1e-6) variavel = 1;      /* × : varia */
-                    if(fabs(pa - primeiroA) > 1e-12) constante = 0;    /* + : não varia */
+                    if((long long)(fabs(pm - primeiroM) * 1e6) >= 1) variavel = 1;
+                    if((long long)(fabs(pa - primeiroA) * 1e12) >= 1) constante = 0;
                 }
             }
             antM = sm; antA = sa;
@@ -453,7 +453,7 @@ printf("\n§M9  A REALIZAÇÃO: problemas da física, resolvidos por esta estrut
         for(int n = 0; n <= 5; n++){
             double E = (n + 0.5)*w, p = ant < 0 ? 0 : E - ant;
             printf("      %-4d %-24.6f %.9f\n", n, E, p);
-            if(ant >= 0){ if(prim < 0) prim = p; else if(fabs(p-prim) > 1e-12) cte = 0; }
+            if(ant >= 0){ if(prim < 0) prim = p; else if((long long)(fabs(p-prim) * 1e12) >= 1) cte = 0; }
             ant = E;
         }
         printf("\n      o passo é ω = %.6f, constante — e é o GAP\n\n", w);
@@ -463,7 +463,7 @@ printf("\n§M9  A REALIZAÇÃO: problemas da física, resolvidos por esta estrut
         for(int j = 0; j < 100; j++){
             double t = 0.01*j, h = 1e-5;
             double x  = cos(w*t), xpp = (cos(w*(t+h)) - 2*cos(w*t) + cos(w*(t-h)))/(h*h);
-            if(fabs(m*xpp + k*x) > 1e-3) malS++;
+            if((long long)(fabs(m*xpp + k*x) * 1e3) >= 1) malS++;
         }
         printf("      e x(t) = cos(ωt) satisfaz a equação em 100 pontos: %d falhas\n\n", malS);
         if(malS) mal++;
@@ -487,7 +487,7 @@ printf("\n§M9  A REALIZAÇÃO: problemas da física, resolvidos por esta estrut
             printf("      %-7.1f %+-9.1f %-14s %-19s %s\n", t[j].R, D, t[j].cl, t[j].e2, t[j].ve);
             /* a classe tem de bater com o sinal de Δ */
             int esperado = (j == 0) ? -1 : (j == 1) ? 0 : +1;
-            int medido = (D < -1e-12) ? -1 : (D > 1e-12) ? +1 : 0;
+            int medido = (D < 0) ? -1 : (D > 0) ? +1 : 0;
             if(medido != esperado) malC++;
         }
         printf("\n      as três classes do dual.c §U5, na bancada: %d discordâncias\n\n", malC);
@@ -513,7 +513,7 @@ printf("\n§M9  A REALIZAÇÃO: problemas da física, resolvidos por esta estrut
             s = 2.0*s/N;
             double esp = (m2 == n2) ? 1.0 : 0.0;
             if(m2 <= 2 && n2 <= 3) printf("      %d  %d   %+.9f      %.0f\n", m2, n2, s, esp);
-            if(fabs(s - esp) > 1e-6) malO++;
+            if((long long)(fabs(s - esp) * 1e6) >= 1) malO++;
         }
         printf("\n      16 pares medidos: %d falhas\n\n", malO);
         if(malO) mal++;
@@ -548,13 +548,13 @@ printf("\n§M9  A REALIZAÇÃO: problemas da física, resolvidos por esta estrut
             double p = (j == 0) ? 0 : L - ant;
             if(j == 0) printf("      %-10.0f %-14.9f %-12.6f %s\n", t, N2, L, "—");
             else       printf("      %-10.0f %-14.9f %-12.6f %.9f\n", t, N2, L, p);
-            if(j == 1) prim = p; else if(j > 1 && fabs(p-prim) > 1e-9) cte = 0;
+            if(j == 1) prim = p; else if(j > 1 && (long long)(fabs(p-prim) * 1e9) >= 1) cte = 0;
             ant = L;
             /* a translação é MULTIPLICAÇÃO por 1/2: N(t+T)·2 = N(t) */
-            if(j > 0){ passos++; if(fabs(N2*2.0 - N_ant) < 1e-12) metade_ok++; }
+            if(j > 0){ passos++; if((long long)(fabs(N2*2.0 - N_ant) * 1e12) == 0) metade_ok++; }
             /* e ao fim de j meias-vidas o valor é 2^{-j}: o denominador é um INTEIRO */
             long den = 1; for(int q = 0; q < j; q++) den *= 2;
-            if(fabs(N2*(double)den - 1.0) < 1e-12) pot2_ok++;
+            if((long long)(fabs(N2*(double)den - 1.0) * 1e12) == 0) pot2_ok++;
             N_ant = N2;
         }
         printf("\n      e a TRANSLACAO E' MULTIPLICACAO, medida em N e nao em log N: N(t+T).2 =\n");
@@ -568,7 +568,7 @@ printf("\n§M9  A REALIZAÇÃO: problemas da física, resolvidos por esta estrut
         for(int j = 1; j < 100; j++){
             double t = 100.0*j, h = 1e-3;
             double d = (exp(-lam*(t+h)) - exp(-lam*(t-h)))/(2*h);
-            if(fabs(d + lam*exp(-lam*t)) > 1e-12) malD++;
+            if((long long)(fabs(d + lam*exp(-lam*t)) * 1e12) >= 1) malD++;
         }
         printf("      e e^{-λt} satisfaz N' = -λN em 99 pontos: %d falhas\n\n", malD);
         if(malD) mal++;

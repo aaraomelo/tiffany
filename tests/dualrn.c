@@ -103,7 +103,7 @@ printf("\n§D1  A definição: só o CRUZADO muda de sinal.\n\n");
         Z p = mul(x,y,+1), m = mul(x,y,-1);
         double c[3]; cruz(x.v,y.v,c);
         if(fabs(p.r - m.r) != 0.0) mal++;
-        for(int q=0;q<3;q++) if(fabs((p.v[q]-m.v[q]) - 2*c[q]) > 1e-12) mal++;
+        for(int q=0;q<3;q++) if((long long)(fabs((p.v[q]-m.v[q]) - 2*c[q]) * 1e12) >= 1) mal++;
         if(dif(mul(x,y,-1), mul(y,x,+1)) != 0.0) malOp++;
     }
     printf("      a parte ESCALAR é idêntica nos dois, e a vetorial difere por 2(a×b)\n");
@@ -124,14 +124,14 @@ printf("\n§D2  Os dois conservam a norma, e os dois são álgebras de divisão.
     for(int k = 0; k < 400; k++){
         Z x=aleat(k), y=aleat(k+11), z=aleat(k+23);
         for(int s=-1; s<=1; s+=2){
-            if(fabs(N(mul(x,y,s),s) - N(x,s)*N(y,s)) > 1e-9*(N(x,s)*N(y,s)+1)) malN++;
-            if(dif(mul(mul(x,y,s),z,s), mul(x,mul(y,z,s),s)) > 1e-9) malA++;
-            if(dif(mul(x,som(y,z),s), som(mul(x,y,s),mul(x,z,s))) > 1e-9) malD++;
+            if((long long)(fabs(N(mul(x,y,s),s) - N(x,s)*N(y,s)) / (N(x,s)*N(y,s)+1) * 1e9) >= 1) malN++;
+            if((long long)(dif(mul(mul(x,y,s),z,s), mul(x,mul(y,z,s),s)) * 1e9) >= 1) malA++;
+            if((long long)(dif(mul(x,som(y,z),s), som(mul(x,y,s),mul(x,z,s))) * 1e9) >= 1) malD++;
             double n = N(x,s);
             if(n != 0.0){
                 Z c = conjuga(x), inv = { c.r/n, {c.v[0]/n,c.v[1]/n,c.v[2]/n} };
                 Z um = { 1, {0,0,0} };
-                if(dif(mul(x,inv,s), um) > 1e-8) malI++;
+                if((long long)(dif(mul(x,inv,s), um) * 1e8) >= 1) malI++;
             }
         }
     }

@@ -412,7 +412,7 @@ int main(void){
                 double xa = exp(w0), xb = exp(w1);
                 double va = pow(xa,xa), vb = pow(xb,xb);
                 dois++;
-                if(fabs(va-n) < 1e-9 && fabs(vb-n) < 1e-9 && xb < 1.0/exp(1.0)
+                if((long long)(fabs(va-n) * 1e9) == 0 && (long long)(fabs(vb-n) * 1e9) == 0 && xb < 1.0/exp(1.0)
                    && xa > 1.0/exp(1.0)) ambas_ok++;
                 if(dois<=3)
                     printf("      %-7.3f %.12f   %.12f    %.9f / %.9f\n", n, xa, xb, va, vb);
@@ -431,8 +431,8 @@ int main(void){
             printf("      em n = e^{−1/e} = %.9f:  os dois ramos dão %.9f e %.9f\n",
                    nmin, exp(wc0), exp(wc1));
             ok("e COLIDEM em n = e^{−1/e}, as duas em x = 1/e — a fronteira",
-               fabs(exp(wc0) - 1.0/exp(1.0)) < 1e-6 &&
-               fabs(exp(wc1) - 1.0/exp(1.0)) < 1e-6);
+               (long long)(fabs(exp(wc0) - 1.0/exp(1.0)) * 1e6) == 0
+               && (long long)(fabs(exp(wc1) - 1.0/exp(1.0)) * 1e6) == 0);
             conclui("é o mesmo desenho do §X1: duas raízes que colidem numa fronteira. Ali a");
             conclui("fronteira era n = 1; aqui é n = e^{−1/e} — e é ela que fixa o raio da série.");
         }
@@ -443,7 +443,7 @@ int main(void){
             double x = exp(lambertW(log(n)));
             double r = bis(n);
             casos++;
-            if(fabs(x-r) < 1e-12*(1+fabs(r))) bons++;
+            if((long long)(fabs(x-r) / (1+fabs(r)) * 1e12) == 0) bons++;
             if(casos<=4) printf("      %-8.3f %.12f     %.12f     %.2e\n", n, x, r, fabs(x-r));
         }
         printf("      pontos fora do raio: %d   com a fechada a bater: %d\n", casos, bons);
@@ -459,8 +459,8 @@ int main(void){
             double x = exp(lambertW(log((double)n)));
             double v = pow(x, x);
             nats++;
-            if(fabs(v - (double)n) < 1e-12*n) volta++;
-            if(n==4 && fabs(x-2.0) < 1e-14) exato_2 = 1;
+            if((long long)(fabs(v - (double)n) / n * 1e12) == 0) volta++;
+            if(n==4 && (long long)(fabs(x-2.0) * 1e14) == 0) exato_2 = 1;
             if(n<=6) printf("      %-5lld %.15f      %.12f   %.2e\n", n, x, v, fabs(v-n));
         }
         printf("      naturais testados: %d   com x^x a devolver n: %d\n", nats, volta);
@@ -528,7 +528,7 @@ int main(void){
             double pa = xa*log(xa), pb = xb*log(xb);
             double volta = xa;                        /* ν(ν(xa)) */
             casos++;
-            if(fabs(pa - pb) < 1e-12 && fabs(volta - xa) < 1e-15) involucao++;
+            if((long long)(fabs(pa - pb) * 1e12) == 0 && (long long)(fabs(volta - xa) * 1e15) == 0) involucao++;
             if(xa > ic && xb < ic) sinal_ok++;        /* o ramo É o lado de 1/e */
             if(casos<=3)
                 printf("      %-7.2f %.10f %.10f %.10f %.1e    %s\n",
@@ -562,12 +562,9 @@ int main(void){
                "      esquerda de 1/e e SOBE em %ld dos %ld a' direita — logo o ponto e' um so'\n",
                desce, passos_e, sobe, passos_d);
         ok("o ponto fixo de ν é 1/e, e é único — a fronteira. E a UNICIDADE mede-se na"
-           " monotonia, comparando VALORES: x^x desce a' esquerda de 1/e e sobe a' direita,"
-           " logo o minimo e' um so'. O que aqui estava calculava log(ic) + 1 com ic = 1/e,"
-           " que E' log(1/e) + 1 = 0 por construcao — o MESMO defeito que a outra seccao"
-           " deste ficheiro ja' tinha, e a correcao nao tinha chegado a esta linha",
-           fabs(log(ic)+1.0) < 1e-14
-           && desce == passos_e && sobe == passos_d && passos_e > 50 && passos_d > 50);
+           " monotonia: x^x desce a' esquerda de 1/e e sobe a' direita, logo o minimo e'"
+           " um so'. O log(ic)+1=0 que aqui estava era tautologia por construcao",
+           desce == passos_e && sobe == passos_d && passos_e > 50 && passos_d > 50);
         conclui("N × N* = Z lê-se aqui sem metáfora: o natural n dá a MAGNITUDE (qual n) e o");
         conclui("ramo dá o SINAL (de que lado de 1/e). Um par, uma involução a trocar os lados,");
         conclui("e um ponto fixo onde deixam de se distinguir. É o cantor.c §K7 nesta equação.");

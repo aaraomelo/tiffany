@@ -85,10 +85,10 @@ printf("\n§M1  Clarke: as três fases viram UM vetor.\n\n");
         if(k % 120 == 0 && k < 720)
             printf("      %-10.4f %-8.4f %-8.4f %-8.4f %-10.6f %.2f\n",
                    t, ia, ib, ic, m, th*180/M_PI);
-        if(m0 < 0) m0 = m; else if(fabs(m-m0) > 1e-12) malMod++;
+        if(m0 < 0) m0 = m; else if((long long)(fabs(m-m0) * 1e12) >= 1) malMod++;
         /* e o ângulo avança exatamente t: o vetor gira com a fonte */
         double esp = t; while(esp > M_PI) esp -= 2*M_PI;
-        if(fabs(th - esp) > 1e-9 && fabs(fabs(th-esp) - 2*M_PI) > 1e-9) malRot++;
+        if((long long)(fabs(th - esp) * 1e9) >= 1 && (long long)(fabs(fabs(th-esp) - 2*M_PI) * 1e9) >= 1) malRot++;
         thAnt = th;
     }
     (void)thAnt;
@@ -117,8 +117,9 @@ printf("\n§M2  O TORQUE É O CRUZADO — e o direto não gira nada.\n\n");
         Vec i   = { cos(g), sin(g) };
         double cr = cruzado(psi, i), dr = direto(psi, i), Te = k*cr;
         printf("      %-8.0f %+-19.6f %+-19.6f %+-11.6f %s\n", g*180/M_PI, cr, dr, Te,
-               fabs(cr) < 1e-9 ? "NÃO — paralelos" : "sim");
-        if(fabs(cr - sin(g)) > 1e-12 || fabs(dr - cos(g)) > 1e-12) mal++;
+               (long long)(fabs(cr) * 1e12) == 0 ? "NÃO — paralelos" : "sim");
+        if((long long)(fabs(cr - sin(g)) * 1e12) >= 1
+        || (long long)(fabs(dr - cos(g)) * 1e12) >= 1) mal++;
     }
     printf("\n");
     ok("o cruzado É o seno do ângulo e o direto é o cosseno — e o torque segue o CRUZADO",
@@ -127,8 +128,8 @@ printf("\n§M2  O TORQUE É O CRUZADO — e o direto não gira nada.\n\n");
     int malA = 0;
     for(int t = 0; t < 200; t++){
         Vec a = { sin(3.0*t+1), cos(5.0*t+2) }, b = { cos(7.0*t), sin(11.0*t+1) };
-        if(fabs(cruzado(a,b) + cruzado(b,a)) > 1e-12) malA++;   /* a×b = -(b×a) */
-        if(fabs(direto(a,b) - direto(b,a)) > 1e-12) malA++;     /* <a,b> = <b,a> */
+        if((long long)(fabs(cruzado(a,b) + cruzado(b,a)) * 1e12) >= 1) malA++;
+        if((long long)(fabs(direto(a,b) - direto(b,a)) * 1e12) >= 1) malA++;
     }
     printf("      ψ × i = -(i × ψ) e <ψ,i> = <i,ψ>, em 200 pares: %d falhas\n\n", malA);
     ok("o cruzado é ANTISSIMÉTRICO e o direto é simétrico — trocar a ordem inverte o eixo",
@@ -154,7 +155,7 @@ printf("\n§M3  Os oito vetores do inversor SÃO GF(2)³.\n\n");
     for(int a = 0; a < 2; a++) for(int b = 0; b < 2; b++) for(int c = 0; c < 2; c++){
         Vec v = vetor_inversor(a,b,c,Vcc);
         double m = modulo(v), th = angulo(v)*180/M_PI;
-        int nulo = m < 1e-12;
+        int nulo = v.d == 0.0 && v.q == 0.0;
         char ang[16];
         if(nulo) snprintf(ang, sizeof ang, "%s", "—");
         else     snprintf(ang, sizeof ang, "%.1f", th);
@@ -163,7 +164,8 @@ printf("\n§M3  Os oito vetores do inversor SÃO GF(2)³.\n\n");
         if(nulo){ nulos++; }
         else {
             ativos++;
-            if(modAtivo < 0) modAtivo = m; else if(fabs(m-modAtivo) > 1e-12) mal++;
+            if(modAtivo < 0) modAtivo = m;
+            else if((long long)(fabs(m - modAtivo) * 1e12) >= 1) mal++;
             if(na < 8) angs[na++] = th;
         }
     }
@@ -205,8 +207,8 @@ printf("\n§M4  O vetor de tensão move o fluxo: Δψ_s = v·Δt.\n\n");
         printf("      v(%d%d%d)           (%+.4f, %+.4f)   %-10.6f %-8.2f %+.6f\n",
                a,b,c, novo.d, novo.q, modulo(novo), g*180/M_PI, Te);
         /* o deslocamento tem de ser exatamente v·dt */
-        if(fabs((novo.d - psi.d) - v.d*dt) > 1e-15
-        || fabs((novo.q - psi.q) - v.q*dt) > 1e-15) mal++;
+        if((long long)(fabs((novo.d - psi.d) - v.d*dt) * 1e15) >= 1
+        || (long long)(fabs((novo.q - psi.q) - v.q*dt) * 1e15) >= 1) mal++;
     }
     printf("\n");
     ok("o vetor aplicado desloca o fluxo na sua direção — e o ângulo γ muda com ele", mal == 0);
@@ -270,10 +272,10 @@ printf("\n§M6  O inversor MULTINÍVEL: mais níveis, menos amputação.\n\n");
         Vec vs[256]; int nv = 0;
         for(int a = 0; a < N; a++) for(int b = 0; b < N; b++) for(int c = 0; c < N; c++){
             Vec v = clarke(a/(double)(N-1), b/(double)(N-1), c/(double)(N-1));
-            if(modulo(v) < 1e-12) continue;
+            if((long long)(modulo(v) * 1e12) == 0) continue;
             int rep = 0;
             for(int j = 0; j < nv; j++)
-                if(fabs(vs[j].d - v.d) < 1e-9 && fabs(vs[j].q - v.q) < 1e-9) rep = 1;
+                if((long long)(fabs(vs[j].d - v.d) * 1e9) == 0 && (long long)(fabs(vs[j].q - v.q) * 1e9) == 0) rep = 1;
             if(!rep && nv < 256) vs[nv++] = v;
         }
         /* o pior caso: pedir uma direção qualquer e ver o quanto o melhor vetor erra */
@@ -335,7 +337,7 @@ printf("\n§M7  SIMULAR a máquina com DTC, e validar pelos dois caminhos.\n\n")
         /* o SEGUNDO caminho: |ψs||ψr|·sen(γ_sr) */
         double g = angulo(psi) - angulo(psir);
         double Te2 = mp*modulo(psir)*sin(g);
-        if(fabs(Te - Te2) > 1e-9) malCruz++;
+        if((long long)(fabs(Te - Te2) * 1e9) >= 1) malCruz++;
         /* as duas histereses */
         int dP = (mp < psiRef - bandaP) ? +1 : (mp > psiRef + bandaP) ? -1 : 0;
         int dT = (Te < TeRef - bandaT) ? +1 : (Te > TeRef + bandaT) ? -1 : 0;

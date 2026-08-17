@@ -141,7 +141,7 @@ int main(void){
         for(int i = 0; i < NT; i++)
             for(int j = 0; j < NT; j++){
                 double d = fabs(ip(V[i],V[j]) - ip(V[j],V[i]));
-                if(d < 1e-9) simetricos++; else if(d > pior) pior = d;
+                if(d == 0.0) simetricos++; else if(d > pior) pior = d;
                 pares++;
             }
         ok("o INTERNO e simetrico em todos os pares — trocar a ordem nao muda nada, ele so MEDE",
@@ -172,8 +172,8 @@ int main(void){
         for(int k = 0; k < 40; k++)
             for(int l = 0; l < 40; l++){
                 double x = biv_ij(V[i],V[j],k,l), y = biv_ij(V[i],V[j],l,k);
-                if(fabs(x + y) > 1e-9) anti = 0;
-                if(x + y == 0.0) anti_ex++;              /* e o zero e' EXACTO */
+                if(x + y == 0.0) anti_ex++;
+                else anti = 0;
                 testados++;
             }
         printf("     -> e a soma x + y e' ZERO EXACTO em %ld de %d componentes\n",
@@ -187,8 +187,8 @@ int main(void){
         for(int k = 0; k < 20; k++)
             for(int l = 0; l < 20; l++){
                 double so = biv_ij(V[i],V[j],k,l) + biv_ij(V[j],V[i],k,l);
-                if(fabs(so) > 1e-9) troca = 0;
                 if(so == 0.0) troca_ex++;
+                else troca = 0;
                 troca_tot++;
             }
         ok("e a^b = -(b^a): a peca que ORDENA, e ela existe no espaco semantico — tambem com"
@@ -198,7 +198,7 @@ int main(void){
         /* e ele NÃO é zero — se fosse, não haveria segunda metade */
         double b2 = biv2(V[i],V[j]);
         ok("e ele NAO e nulo: ha mesmo uma segunda metade, nao e uma peca vazia",
-           b2 > 1e-6);
+           b2 > 0.0);
         printf("     -> ||a^b||^2 = %.2f para (%s, %s). A metade que ORDENA esta la;\n",
                b2, NOME[i], NOME[j]);
         puts("        o que falta e a pratica olhar para ela.\n");
@@ -342,7 +342,7 @@ int main(void){
             if(res < melhor_res) melhor_res = res;
         }
         ok("A VOLTA FECHA com a base completa: o embedding volta inteiro, residuo na casa do zero",
-           melhor_res < 1e-9);
+           (long long)(melhor_res * 1e12) == 0);
         printf("     -> com a base inteira o residuo e %.1e: a transfusao e REVERSIVEL nos dois\n",
                melhor_res);
         puts("        sentidos. E a dose importa — com metade da base recupera-se metade, e a");
@@ -383,11 +383,12 @@ int main(void){
         double ip_orig = 0, ip_coef = 0;
         for(int i = 0; i < m2; i++) ip_orig += V[0][i]*V[1][i];
         for(int c = 0; c < m2; c++) ip_coef += ca[c]*cb[c];
-        double rel = fabs(ip_orig - ip_coef) / (fabs(ip_orig) > 1e-12 ? fabs(ip_orig) : 1);
+        long long ip_esc = (long long)(fabs(ip_orig - ip_coef)
+            / (fabs(ip_orig) > 0 ? fabs(ip_orig) : 1.0) * 1e12);
         ok("o INTERNO atravessa a transfusao intacto — Parseval, e e o que faz a dose ser dose",
-           rel < 1e-9);
+           ip_esc == 0);
         printf("     -> <a,b> = %.4f no espaco e %.4f nos coeficientes (residuo relativo %.1e).\n",
-               ip_orig, ip_coef, rel);
+               ip_orig, ip_coef, ip_esc / 1e12);
         puts("        O que se transfunde nao e o vetor: e a MEDIDA dele, e ela conserva-se.");
         puts("");
     }

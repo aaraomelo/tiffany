@@ -54,7 +54,7 @@ static LD media_p(LD a, LD b, LD p){
 }
 static LD agm_p(LD a, LD b, LD p, int *passos, LD *dif){
     int k=0;
-    while(fabsl(a-b) > 1e-18L && k < 200){
+    while((long long)(fabsl(a-b) * 1e18L) >= 1 && k < 200){
         if(dif) dif[k]=fabsl(a-b);
         LD na=(a+b)/2, nb=media_p(a,b,p);
         a=na; b=nb; k++;
@@ -157,12 +157,12 @@ int main(void){
             LD tau_depois = tau_de_k(k);
             printf("         τ: %.12Lf → %.12Lf   (dobra: %s)   k=%.18Lf\n",
                    tau_antes, tau_depois, fabsl(tau_depois-2*tau_antes)== 0.0L?"✓":"REVER", k);
-            if(fabsl(tau_depois-2*tau_antes) >= 1e-12L) erro=1;
+            if((long long)(fabsl(tau_depois-2*tau_antes) * 1e12L) >= 1) erro=1;
             if(s==0){
                 LD res = fabsl(k-esperado_tau2);
                 printf("           = 3−2√2 (o singular value de τ=2)? resíduo %.1Le %s\n",
                        res, res== 0.0L?"✓":"← REVER");
-                if(res>=1e-15L) erro=1;
+                if((long long)(res * 1e15L) >= 1) erro=1;
             }
         }
         printf("     %s\n", VD(erro, "resíduo 0 — a batida DOBRA τ (é a 2-isogenia) e ainda assim preserva I, e leva o\n"
@@ -175,7 +175,7 @@ int main(void){
         for(int s=0;s<6;s++){
             LD na=(a+b)/2, nb=sqrtl(a*b); a=na; b=nb;
             LD I=invariante(a,b,1<<15);
-            if(fabsl(I-I0)/I0 > 1e-15L) bom=0;
+            if((long long)(fabsl(I-I0)/I0 * 1e15L) >= 1) bom=0;
         }
         printf("       I preservado nas 6 batidas da torre: %s\n", VD(!(bom), "resíduo 0 ✓"));
         if(!bom) passou=0;

@@ -77,8 +77,8 @@ int main(void){
         printf("       √(φ√5) − φ (Ramanujan)    = %.20Lf   erro %.2Le %s\n",
                fechada, e, e== 0.0L?"✓ (o limite do long double)":"✗");
         printf("       x⁴+2x³−6x²−2x+1 em R(q)   = %.2Le  %s\n", pol, fabsl(pol)== 0.0L?"✓ é raiz":"✗");
-        if(e>=5e-17L || fabsl(pol)>=1e-15L) passou=0;
-        printf("     %s\n", VD(!((e<5e-17L)), "resíduo 0 — na base q = e^{−2π} o ouro é um valor ALGÉBRICO de grau 4, e π o produz. O\n"
+        if((long long)(e * 1e17L) >= 5 || (long long)(fabsl(pol) * 1e15L) >= 1) passou=0;
+        printf("     %s\n", VD((long long)(e * 1e17L) >= 5, "resíduo 0 — na base q = e^{−2π} o ouro é um valor ALGÉBRICO de grau 4, e π o produz. O\n"
           "     mecanismo é multiplicação complexa (singular moduli): π transcendente gera algébrico.\n"
           "     (o resíduo de 1,4e-17 é o arredondamento da fração contínua em long double — a\n"
           "     identidade fechada φ²+1 = φ√5 do §E4 fecha em erro EXATAMENTE zero.)"));
@@ -96,7 +96,7 @@ int main(void){
         printf("       x⁴+4x³−6x²−4x+1 em v      = %.2Le  %s\n", pol, fabsl(pol)== 0.0L?"✓ é raiz":"✗");
         printf("       v₂ = √(σ₂²+1) − σ₂        = %.20Lf   erro vs v(e^{−π}) %.2Le\n",
                v2, fabsl(v2-v));
-        if(fabsl(pol)>=1e-15L) passou=0;
+        if((long long)(fabsl(pol) * 1e15L) >= 1) passou=0;
         printf("     %s\n", fabsl(pol)== 0.0L ?
           "resíduo 0 — não é um só R avaliado em vários pontos: é uma FAMÍLIA, uma fração modular\n"
           "     por nível, e cada uma gera o seu metal."
@@ -119,7 +119,7 @@ int main(void){
             LD sig = ((LD)m + sqrtl((LD)m*m+4.0L))/2.0L;
             LD vm = sqrtl(sig*sig+1.0L) - sig;
             LD pol = poly4(vm, (LD)(2*m), -6.0L, (LD)(-2*m));
-            if(fabsl(pol) > 1e-15L) erro=1;
+            if((long long)(fabsl(pol) * 1e15L) >= 1) erro=1;
         }
         printf("       e v_m = √(σ_m²+1) − σ_m é raiz de Q_m em m=1..8 : %s\n", erro?"✗":"✓");
         printf("     %s\n", VD(erro, "resíduo 0 — a identidade é exata em m: os termos cruzados dão 2(σ+σ')=2m e σσ'=−1, donde\n"
@@ -140,7 +140,7 @@ int main(void){
         printf("       v₁ = √(φ²+1) − φ  = %.20Lf\n", v1);
         printf("       √(φ√5) − φ        = %.20Lf   erro %.2Le %s\n", ram, e, e== 0.0L?"✓":"✗");
         printf("       e a razão: φ²+1 = φ+2 = φ√5   (erro %.2Le)\n", id);
-        if(e>=1e-17L || id>=1e-17L) passou=0;
+        if((long long)(e * 1e17L) >= 1 || (long long)(id * 1e17L) >= 1) passou=0;
         printf("     %s\n", VD(!((e== 0.0L)), "resíduo 0 — a fórmula de Ramanujan é o caso m=1 de uma lei que vale para todo metal."));
     }
 
@@ -156,7 +156,7 @@ int main(void){
             LD e=fabsl(pg-pa);
             printf("       %d    %.15Lf   %.15Lf    %.15Lf    %.1Le %s\n", m, sig, pg, pa, e,
                    e== 0.0L?"✓":"✗");
-            if(e>=1e-17L) erro=1;
+            if((long long)(e * 1e17L) >= 1) erro=1;
         }
         printf("     %s\n", VD(erro, "resíduo 0 — o metal É o ponto onde a PG encontra a PA. Não é \"o par (PA,PG)\" como eu\n"
           "     escrevi em teoria.tex §2: é a COLISÃO das duas, e é dela que σ_m nasce. A recorrência\n"

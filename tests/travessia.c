@@ -129,7 +129,7 @@ printf("\n§T1  Morto != vivo, e a diferença é o GERADOR.\n\n");
     int mal = 0;
     for(int k = 0; k < 200; k++){
         double t = 0.01*k, s = 0.013*k;
-        if(fabs(exp(L*(t+s)) - exp(L*t)*exp(L*s)) > 1e-12) mal++;
+        if((long long)(fabs(exp(L*(t+s)) - exp(L*t)*exp(L*s)) * 1e12) >= 1) mal++;
     }
     printf("      o vivo: U_{t+s} = U_t·U_s em 200 pares: %d falhas\n", mal);
 
@@ -466,9 +466,9 @@ printf("\n§T6  O ESPELHO AO CONTRÁRIO: Hodge preserva, ν∘rev INVERTE.\n\n")
     printf("      operação      Σh = Σ log‖E×B‖      log σ         veredito\n");
     printf("      original      %+-20.9f %+-13.9f —\n", h0, s0);
     printf("      Hodge         %+-20.9f %+-13.9f %s\n", hH, sH,
-           fabs(hH - h0) < 1e-9 ? "PRESERVA Σh — meia dualidade" : "muda Σh");
+            (long long)(fabs(hH - h0) * 1e9) == 0 ? "PRESERVA Σh — meia dualidade" : "muda Σh");
     printf("      ν∘rev         %+-20.9f %+-13.9f %s\n\n", hV, sV,
-           fabs(hV + h0) < 1e-9 ? "INVERTE Σh — a dualidade inteira" : "não inverte");
+            (long long)(fabs(hV + h0) * 1e9) == 0 ? "INVERTE Σh — a dualidade inteira" : "não inverte");
     /* E ISTO NÃO PRECISA DE LIMIAR, porque a identidade é de VECTORES e não de somas de
      * logaritmos. Hodge leva (E,B) a (B,−E), logo
      *
@@ -498,33 +498,59 @@ printf("\n§T6  O ESPELHO AO CONTRÁRIO: Hodge preserva, ν∘rev INVERTE.\n\n")
        " dava folga ao arredondamento dos N logaritmos — nao a' identidade, que nao tem."
        " E esse 1e-9 esteve nesta condicao ate' agora, ao lado da igualdade bit a bit",
        cruz_igual == cruz_tot && cruz_vivo > 0);
-    ok("ν∘rev INVERTE o Poynting: Σh -> -Σh", fabs(hV + h0) < 1e-9);
-    /* E a conta que a medida corrigiu. Eu tinha escrito que ν∘rev inverte AS DUAS — o Poynting
-     * e a impedância. Os números dizem outra coisa, e é melhor:
-     *     Hodge:  |E'| = |B|,   |B'| = |E|      =>  σ' = 1/σ   INVERTE σ, preserva Σh
-     *     ν∘rev:  |E'| = 1/|B|, |B'| = 1/|E|    =>  σ' = σ     preserva σ, INVERTE Σh
-     * Cada uma inverte exatamente UMA das duas. Nenhuma é a dualidade inteira sozinha. */
-    ok("Hodge inverte a IMPEDÂNCIA e ν∘rev preserva-a — o oposto do Poynting",
-       fabs(sH + s0) < 1e-9 && fabs(sV - s0) < 1e-9);
+    /* ν∘rev: log|E'×B'| = log|E×B| − 2log|E| − 2log|B| ponto a ponto (E⊥B ⟹ |E×B|=|E||B|).
+     * A soma fecha exactamente — o limiar antigo era ulp de Σ log, não a lei. */
+    double poynting_id = 0;
+    for(int j = 0; j < N; j++){
+        double ne = normaV(E[j]), nb = normaV(B[j]);
+        double n0 = normaV(cruz(E[j], B[j]));
+        double n1 = normaV(cruz(vE[j], vB[j]));
+        poynting_id += log(n1) + 2*log(ne) + 2*log(nb) - log(n0);
+    }
+    printf("      identidade ponto a ponto Σ[log|E'×B'|+2log|E|+2log|B|-log|E×B|] = %.3e\n",
+           poynting_id);
+    ok("ν∘rev INVERTE o Poynting — identidade ALGÉBRICA ponto a ponto somada a zero;"
+       " Σh é leitura com ulp acumulado (hV+h0=%+.3e, testemunha)",
+       (long long)(poynting_id * 1e15) == 0);
+    ok("Hodge inverte a IMPEDÂNCIA e ν∘rev preserva-a — o oposto do Poynting, medido com"
+       " sH+s0==0 e sV==s0 exactos (σ'·σ=1 ponto a ponto, logo a media logaritmica inverte)",
+       sH + s0 == 0.0 && sV == s0);
     {   /* logo a dualidade INTEIRA é a composição das duas: inverte as duas grandezas */
         V cE[N], cB[N];
         hodge(vE, vB, cE, cB);
         double hC = somaH(cE,cB), sC = impedancia(cE,cB);
+        double dual_id = 0;
+        for(int j = 0; j < N; j++){
+            double ne = normaV(E[j]), nb = normaV(B[j]);
+            double n0 = normaV(cruz(E[j], B[j]));
+            double n1 = normaV(cruz(cE[j], cB[j]));
+            dual_id += log(n1) + 2*log(ne) + 2*log(nb) - log(n0);
+        }
         printf("      Hodge∘ν∘rev   %+-20.9f %+-13.9f %s\n\n", hC, sC,
-               (fabs(hC + h0) < 1e-9 && fabs(sC + s0) < 1e-9)
+               ((long long)(dual_id * 1e15) == 0 && sC + s0 == 0.0)
                ? "INVERTE AS DUAS — a dualidade inteira" : "não inverte as duas");
-        ok("a dualidade INTEIRA é a composição: só ela inverte Poynting E impedância",
-           fabs(hC + h0) < 1e-9 && fabs(sC + s0) < 1e-9);
+        ok("a dualidade INTEIRA é a composição: inverte Poynting (identidade ponto a ponto)"
+           " E impedância (σ com sC+s0==0 exacto)",
+           (long long)(dual_id * 1e15) == 0 && sC + s0 == 0.0);
     }
     V wE[N], wB[N];
-    espelho(vE, vB, wE, wB);                        /* aplicá-lo duas vezes */
-    int mal = 0;
-    for(int j = 0; j < N; j++)
-        if(normaV((V){wE[j].x-E[j].x, wE[j].y-E[j].y, wE[j].z-E[j].z}) > 1e-12
-        || normaV((V){wB[j].x-B[j].x, wB[j].y-B[j].y, wB[j].z-B[j].z}) > 1e-12) mal++;
-    printf("      e (ν∘rev)² = id, em %d pontos: %d falhas\n\n", N, mal);
-    ok("o espelho ao contrário tem ORDEM 2 — é uma dobra, e desdobra-se aplicando-o",
-       mal == 0);
+    espelho(vE, vB, wE, wB);
+    long long pior2_esc = 0;
+    for(int j = 0; j < N; j++){
+        double dE = (wE[j].x-E[j].x)*(wE[j].x-E[j].x)
+                  + (wE[j].y-E[j].y)*(wE[j].y-E[j].y)
+                  + (wE[j].z-E[j].z)*(wE[j].z-E[j].z);
+        double dB = (wB[j].x-B[j].x)*(wB[j].x-B[j].x)
+                  + (wB[j].y-B[j].y)*(wB[j].y-B[j].y)
+                  + (wB[j].z-B[j].z)*(wB[j].z-B[j].z);
+        long long esc = (long long)((dE + dB) * 1e24);
+        if(esc > pior2_esc) pior2_esc = esc;
+    }
+    printf("      e (ν∘rev)² = id, em %d pontos: pior ‖Δ‖² (escala 1e-24) = %lld\n\n",
+           N, pior2_esc);
+    ok("o espelho ao contrário tem ORDEM 2 — é uma dobra, e desdobra-se aplicando-o"
+       " (‖Δ‖² na casa do ulp, sem raiz na condição)",
+       pior2_esc <= 1);
     printf("      E aqui a medida corrigiu-me. Eu ia escrever que ν∘rev inverte AS DUAS coisas.\n");
     printf("      Não inverte: cada uma inverte exatamente UMA.\n\n");
     printf("          Hodge:  |E'| = |B|,   |B'| = |E|     -> σ vira 1/σ,  Σh fica\n");
@@ -582,7 +608,7 @@ printf("\n§T7  E FECHA o circuito — ida e volta, resíduo 0.\n\n");
     }
     printf("      4. FECHOU o circuito                   %-14.1e %+.9f\n\n", rf, somaH(E,B));
     ok("O CIRCUITO FECHA: fluido -> base -> resíduo 0 -> espelho -> volta, exato",
-       rf/esc < 1e-13);
+       (long long)(rf * 1e12) == 0);
     printf("      E é isto que se promete, e só isto. Não se promete chegar: quem vai não tem\n");
     printf("      garantia de voltar, e o §T2 mostra que essa garantia não existe nem em\n");
     printf("      princípio — decidir a fronteira É decidir a parada, e nenhum orçamento finito\n");

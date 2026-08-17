@@ -65,7 +65,7 @@ int main(void){
             double complex a = cpow(x, -I*tau);
             double complex b = cexp(-I*tau*log(x));
             pts++;
-            if(cabs(a-b) < 1e-14) bate++;
+            if((long long)(cabs(a-b) * 1e14) == 0) bate++;
             if(i<4) printf("      %-8.1f %+.9f%+.9fi   %+.9f%+.9fi   %.1e\n",
                            x, creal(a), cimag(a), creal(b), cimag(b), cabs(a-b));
         }
@@ -89,7 +89,7 @@ int main(void){
             while(alvo < -PI_) alvo += 2*PI_;
             pts++;
             if(fabs(cabs(v)-1.0) == 0.0) mod++;
-            if(fabs(carg(v)-alvo) < 1e-12) fase++;
+            if((long long)(fabs(carg(v)-alvo) * 1e12) == 0) fase++;
             printf("      %-11.6f %.15f   %+.9f      %+.9f\n", lam, cabs(v), carg(v), alvo);
         }
         printf("      pontos: %d   com modulo 1: %d   com a fase certa: %d\n", pts, mod, fase);
@@ -108,7 +108,7 @@ int main(void){
             double x=exp(u);
             double lhs=log(A*pow(x,phi)), rhs=phi*u+log(A);
             pts++;
-            if(fabs(lhs-rhs) < 1e-13) afim++;
+            if((long long)(fabs(lhs-rhs) * 1e13) == 0) afim++;
             printf("      %+.1f     %+.12f      %+.12f       %.1e\n", u, lhs, rhs, fabs(lhs-rhs));
         }
         printf("      pontos: %d   com ln f(e^u) afim em u: %d\n", pts, afim);

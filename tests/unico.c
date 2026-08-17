@@ -51,7 +51,7 @@ printf("\n§U1  MUITOS corpos são ordenados — ℚ(√d), e são distintos ent
         for(long x = -12; x <= 12; x++) for(long y = -12; y <= 12; y++){
             int s = sinal_raiz(x,y,d);
             double v = (double)x + (double)y*sq;
-            int sd = (v > 1e-9) - (v < -1e-9);
+            int sd = ((long long)(v * 1e9) >= 1) - ((long long)(-v * 1e9) >= 1);
             if(s != sd) mau++;
             casos++;
         }

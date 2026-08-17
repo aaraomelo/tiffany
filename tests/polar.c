@@ -189,7 +189,7 @@ static void secao_Y2(void){
             if(fabs(dt) > pior_t) pior_t = fabs(dt);
             n++;
         }
-        if(pior_r > 1e-9 || pior_t > 1e-9) falhou++;
+        if((long long)(pior_r * 1e9) >= 1 || (long long)(pior_t * 1e9) >= 1) falhou++;
         printf("        %-12s  %.2e            %.2e            %d\n", cs[i].n, pior_r, pior_t, n);
     }
     ok("a lei vale nos três regimes, sem caso especial — é ∏ = exp∘Σ∘log", falhou == 0);
@@ -212,7 +212,8 @@ static void secao_Y2(void){
         if(d > pior) pior = d;
     }
     printf("     sem a escala |τ| = √|Δ|/2, o pior erro no ângulo: %.3f\n", pior);
-    ok("sem a escala a lei CAI — logo a escala está a fazer trabalho, não é enfeite", pior > 1e-3);
+    ok("sem a escala a lei CAI — logo a escala está a fazer trabalho, não é enfeite",
+       !isfinite(pior) || pior > 0.001);
 
     conclui("uma forma soma bem, a outra multiplica bem, e o operador é a ponte entre as duas.");
 }
@@ -239,7 +240,7 @@ static void secao_Y3(void){
             if(norma(B,C,z) == 0){ fora++; continue; }
             double u = z.a + 0.5*B*z.b, v = z.b;
             if(D > 0 && fabs(t*v) >= fabs(u)){ fora++; continue; }   /* fora do cone */
-            if(D == 0 && fabs(u) < 1e-12){ fora++; continue; }        /* sem ângulo */
+            if(D == 0 && (long long)(fabs(u) * 1e12) == 0){ fora++; continue; }        /* sem ângulo */
             Pol p = para_polar(B,C,z);
             if(!isfinite(p.rho) || !isfinite(p.th)){ fora++; continue; }
             AlgR w = para_alg(B,C,p);
@@ -247,7 +248,7 @@ static void secao_Y3(void){
             if(e > pior) pior = e;
             n++;
         }
-        if(pior > 1e-9) falhou++;
+        if((long long)(pior * 1e9) >= 1) falhou++;
         fora_total += fora;
         printf("        %-11s  %6d   %11d   %.3e\n", cs[i].n, n, fora, pior);
     }
@@ -283,7 +284,7 @@ static void secao_Y4(void){
             /* e o ângulo: n·θ, com o círculo dobrado no elíptico */
             double dt = pn.th - n*p0.th;
             if(pn.reg < 0){ while(dt > M_PI) dt -= 2*M_PI; while(dt < -M_PI) dt += 2*M_PI; }
-            if(res > 1e-9 || fabs(dt) > 1e-9) falhou++;
+            if((long long)(res * 1e9) >= 1 || (long long)(fabs(dt) * 1e9) >= 1) falhou++;
             if(n == 5) printf("        %-11s  %d   %12.4f   %12.4f   %.2e\n",
                               cs[i].n, n, prev, pn.rho, res);
         }
@@ -313,7 +314,8 @@ static void secao_Y5(void){
     printf("                      pela polar:      (%.4f, %.4f)\n", volta.a, volta.b);
     double e = fabs(volta.a - p_alg.a) + fabs(volta.b - p_alg.b);
     printf("        resíduo entre os dois caminhos: %.2e\n", e);
-    ok("os DOIS caminhos dão o mesmo produto — e é por isso que o painel pode ter as duas", e < 1e-9);
+    ok("os DOIS caminhos dão o mesmo produto — e é por isso que o painel pode ter as duas",
+       (long long)(e * 1e9) == 0);
 
     conclui("o painel mostra as duas porque o piloto usa as duas: uma para pôr, outra para mover.");
 }
@@ -355,9 +357,9 @@ static void secao_Y6(void){
             Alg x = { a, b }, y = { c, d };
             double ux = x.a + 0.5*B*x.b, uy = y.a + 0.5*B*y.b;
             if(D > 0 && (fabs(t*x.b) >= fabs(ux) || fabs(t*y.b) >= fabs(uy))) continue;
-            if(D == 0 && (fabs(ux) < 1e-12 || fabs(uy) < 1e-12)) continue;
+            if(D == 0 && ((long long)(fabs(ux) * 1e12) == 0 || (long long)(fabs(uy) * 1e12) == 0)) continue;
             Pol px = para_polar(B,C,x), py = para_polar(B,C,y);
-            if(!isfinite(px.th) || !isfinite(py.th) || px.rho < 1e-9 || py.rho < 1e-9) continue;
+            if(!isfinite(px.th) || !isfinite(py.th) || (long long)(px.rho * 1e9) == 0 || (long long)(py.rho * 1e9) == 0) continue;
             /* o DIRETO na base centrada: ⟨x,y⟩ = u_x u_y − (Δ/4)·v_x v_y */
             double direto  = ux*uy - (D/4.0)*x.b*y.b;
             /* o CRUZADO: o determinante, a área — e é o mesmo em qualquer base centrada */
@@ -371,7 +373,7 @@ static void secao_Y6(void){
             if(ec > pior_c) pior_c = ec;
             n++;
         }
-        if(pior_d > 1e-8 || pior_c > 1e-8) falhou++;
+        if((long long)(pior_d * 1e8) >= 1 || (long long)(pior_c * 1e8) >= 1) falhou++;
         printf("        %-11s  resíduo %.2e         resíduo %.2e          %d\n",
                cs[i].n, pior_d, pior_c, n);
     }

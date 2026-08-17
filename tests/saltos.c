@@ -79,7 +79,7 @@ int main(int argc,char**argv){
     printf("      itero o gato; razão branca/negra = (σ'/σ)^k → 0 (esfria para o negro):\n      ");
     int mono=1; double prev=1e18;
     for(int k=0;k<24;k++){ double r=fabs(ub/un); if(k<6) printf("%.4f ", r); if(r>=prev) mono=0; prev=r; un*=sig; ub*=sil; }
-    int esfria = fabs(ub/un) < 1e-6 && mono;            /* monótona decrescente → 0                  */
+    int esfria = (long long)(fabs(ub/un) * 1e6) == 0 && mono;            /* monótona decrescente → 0 */
     res += !esfria;
     printf("… → %.1e  %s\n", fabs(ub/un), VD(!(esfria), "(monótona → 0: converge ao NEGRO; o BRANCO diverge — a cor é a temperatura)"));
 

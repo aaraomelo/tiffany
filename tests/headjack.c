@@ -237,7 +237,7 @@ int main(void){
             /* e a comparacao tem de ser RELATIVA ao proprio Q — "< 1e-30" era absoluto e
              * falhava no arredondamento do produto. O zero aqui e zero FACE AO SINAL. */
             double nb = sqrt(B[0]*B[0]+B[1]*B[1]+B[2]*B[2]);
-            if(nb < 1e-8 * 1e-12) invisiveis++;
+            if((long long)(nb * 1e20) == 0) invisiveis++;
             testados++;
         }
         ok("e vale em TODA direcao: a componente paralela a r e sempre invisivel, nos 100 casos",

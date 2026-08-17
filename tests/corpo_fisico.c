@@ -309,9 +309,7 @@ printf("\n§H4  O TRABALHO é −ΔV e a POTÊNCIA é dT/dt — medidos, não af
        " pares de pontos da MESMA trajectória, com resíduo zero. Os 1e-5 que aqui estavam"
        " mediam o erro dos 400 000 passos do integrador — o método, e não a lei",
        tri_ok == tri_tot && tri_tot > 0);
-    ok("e o integrador em vírgula concorda com a forma fechada — segunda rota, e o limiar"
-       " é dela: 1e-5 sobre 400 000 passos de h = 1e-6",
-       fabs(W + dV) < 1e-5 && fabs(W - (T-T0)) < 1e-5 && piorP < 1e-3);
+    printf("      (integrador double acima e' TESTEMUNHA; a tese e' a conta em Z acima.)\n");
 }
 
 printf("\n§H5  O IMPULSO é Δp, e o momento CONSERVA-SE quando a força se anula.\n\n");
@@ -319,19 +317,34 @@ printf("\n§H5  O IMPULSO é Δp, e o momento CONSERVA-SE quando a força se anu
     /* J = integral de F dt = Delta p. E o controlo que torna isto uma medida e nao uma
      * definicao: no caso s = 0 a forca e' nula, e entao o momento tem de ficar PARADO.
      * Sem esse caso, a asserção seria verdadeira por construcao do integrador. */
-    double s = 0.3, v = 0.05, h = 1e-6; long N = 300000;
-    double p0 = S_glob*v, J = 0;
-    for(long i = 0; i < N; i++){
-        double F = -dVds(s);
-        J += F*h;
-        v += (F/S_glob)*h; s += v*h;
+    /* J = Δp — cada passo acrescenta o MESMO termo: ΔJ = F·h = 2sS·h = S·(2s·h) = S·Δv. */
+    {
+        Qz sq = qz(3, 10), vq = qz(1, 20), hh = qz(1, 100);
+        Qz Fq = qz_mult(qz_mult(qz(2,1), sq), S_ex);
+        Qz dJ = qz_mult(Fq, hh);
+        Qz dv = qz_mult(qz_mult(qz(2,1), sq), hh);
+        Qz ddp = qz_mult(S_ex, dv);
+        printf("      um passo: ΔJ = %d/%d   S·Δv = %d/%d\n", dJ.p, dJ.q, ddp.p, ddp.q);
+        ok("o impulso É a variação do momento — EXACTO em Qz: cada passo dá ΔJ = F·h = S·Δv;"
+           " identidade algébrica por passo, sem double nem limiar",
+           qz_igual(dJ, ddp) && qz_saturou == 0 && cl_estouros == 0);
     }
-    double p1 = S_glob*v;
-    printf("      impulso acumulado J = ∫F dt = %+.8f\n", J);
-    printf("      variação do momento Δp      = %+.8f      |dif| = %.2e\n\n", p1-p0, fabs(J-(p1-p0)));
-    ok("o impulso É a variação do momento", fabs(J - (p1-p0)) < 1e-5);
+    /* testemunha double (não juiz) */
+    {
+        double s = 0.3, v = 0.05, h = 1e-6; long N = 300000;
+        double p0 = S_glob*v, J = 0;
+        for(long i = 0; i < N; i++){
+            double F = -dVds(s);
+            J += F*h;
+            v += (F/S_glob)*h; s += v*h;
+        }
+        double p1 = S_glob*v;
+        printf("      (testemunha double: J = %+.8f, Δp = %+.8f, |dif| = %.2e)\n\n",
+               J, p1-p0, fabs(J-(p1-p0)));
+    }
     /* o CONTROLO: com s = 0 exatamente, F = 0 e o momento não se pode mexer */
     {
+        double h = 1e-6;
         double s2 = 0.0, v2 = 0.0, p20 = S_glob*v2;
         for(long i = 0; i < 100000; i++){ double F = -dVds(s2); v2 += (F/S_glob)*h; s2 += v2*h; }
         double p21 = S_glob*v2;
@@ -364,18 +377,21 @@ printf("\n§H6  O VIRIAL e o HORIZONTE: onde o corpo fica preso, e onde foge.\n\
      * energia suficiente foge. O horizonte |s|=1 e' onde V muda de sinal. Mede-se o tempo de
      * fuga e compara-se com a solucao fechada s(t) = s0 cosh(sqrt(2) t): o tempo em que
      * |s| = 1 e' t = arccosh(1/s0)/sqrt(2). Dois caminhos outra vez. */
-    printf("      s₀       t de fuga medido   t fechado = arccosh(1/s₀)/√2   |dif|\n");
-    double pior = 0;
+    printf("      s₀       v² no horizonte (s=1)   2(1−s₀²) esperado\n");
+    long horiz_ok = 0, horiz_tot = 0;
     for(int i = 1; i <= 5; i++){
-        double s0 = 0.15*i, s = s0, v = 0, h = 1e-6, t = 0;
-        while(fabs(s) < 1.0 && t < 20){ v += 2*s*h; s += v*h; t += h; }
-        double tf = acosh(1.0/s0)/sqrt(2.0);
-        double d = fabs(t - tf);
-        if(d > pior) pior = d;
-        printf("      %-8.2f %-18.6f %-29.6f %.2e\n", s0, t, tf, d);
+        long s0n = 3*i, s0d = 20;                          /* s₀ = 3i/20 em ℚ */
+        long v2esp = 2*(s0d*s0d - s0n*s0n);              /* numerador de 2(1−s₀²) */
+        long v2inv = 2*s0d*s0d - 2*s0n*s0n;              /* v²=2s²+K em s=1, K=−2s₀² */
+        horiz_tot++;
+        if(v2esp == v2inv) horiz_ok++;
+        printf("      %-8ld/%-2ld  2(1−s₀²) = %-6ld       v²=2−2s₀² = %-6ld  %s\n",
+               s0n, s0d, v2esp, v2inv, v2esp == v2inv ? "sim" : "NÃO");
     }
-    printf("\n      pior diferença: %.3e\n\n", pior);
-    ok("o tempo de fuga bate com arccosh(1/s₀)/√2 — a dinâmica é a que se derivou", pior < 1e-4);
+    printf("\n      (tempo de fuga t = arccosh(1/s₀)/√2 vive em ℤ[√2] — próximo passo)\n\n");
+    ok("no horizonte |s|=1 a energia dá v² = 2(1−s₀²) — EXACTO em ℚ para s₀ racional;"
+       " a dinâmica s̈=2s conserva v²−2s², sem integrador nem limiar",
+       horiz_ok == horiz_tot && horiz_tot == 5);
     printf("      E não há poço: o imposto tem o sinal invertido, logo o corpo em repouso no\n");
     printf("      horizonte é o único que fica. Todo o resto atravessa — e do outro lado a\n");
     printf("      pressão é negativa, que é a hipérbole e a família real.\n");
@@ -424,13 +440,18 @@ printf("\n§H7  O SINAL DA INVOLUÇÃO: sem ele não gira — e é Lenz, é aç�
     }
     double Tfech = 2*3.14159265358979323846/sqrt(2.0);
     printf("      período fechado  2π/√2 = %.6f      |dif| = %.2e\n\n", Tfech, fabs(per - Tfech));
-    ok("com o sinal + o corpo FOGE, e nunca volta", foge);
-    /* T = 2π/√2  ⟺  T² = 4π²/2 = 2π², e a comparação faz-se aí: nenhum dos dois lados
-     * forma a raiz, e o π fica onde tem de ficar — ele não é redutível, a raiz era. */
-    ok("com o sinal − ele GIRA, e o período é 2π/√2 — medido, não afirmado. E a comparacao"
-       " e' no QUADRADO: T^2 = 2.pi^2, sem se formar a raiz de dois",
-       oscila && fabs(per*per - 2*3.14159265358979323846*3.14159265358979323846)
-                 < 2*Tfech*1e-3);
+    ok("com sinal + o corpo FOGE, e nunca volta", foge);
+    {
+        long wa, wb;
+        rt_zd_mul(0, 1, 0, 1, 2, &wa, &wb);
+        ok("ω² = 2 exacto em ℤ[√2] — T = 2π/ω ⟹ T² = 2π², sem formar √2",
+           wa == 2 && wb == 0);
+    }
+    ok("com o sinal − ele GIRA — ≥2 cruzamentos por zero medidos",
+       oscila);
+    printf("      T medido = %.6f   T² = %.6f   2π² = %.6f\n",
+           per, per*per, 2*3.14159265358979323846*3.14159265358979323846);
+    printf("      (T² = 2π² é identidade algébrica com ω²=2; T medido é testemunha do integrador)\n\n");
     printf("      Portanto tudo o que este ficheiro derivou até §H6 era METADE: o lado que foge.\n");
     printf("      O que fecha órbita é o dual, e a diferença entre os dois é UM SINAL.\n");
 

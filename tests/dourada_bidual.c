@@ -65,7 +65,7 @@ printf("\n§W1  Mellin E' Fourier no log: o caractere x^{-s} = e^{-s ln x}.\n\n"
             for(double s = 0.5; s <= 2.0; s += 0.5){
                 double a = pow(x, -s), c = exp(-s * log(x));
                 casos++;
-                if(fabs(a - c) > 1e-12) difs++;
+                if((long long)(fabs(a - c) * 1e12) >= 1) difs++;
                 /* E A PONTE TEM UM CASO EXACTO, que é o que a torna medição e não uma
                  * comparação entre duas rotinas da libm: com s INTEIRO e x racional,
                  * x^{-s} é 1/x^s e calcula-se em ℤ. Aqui x anda em meios e s em meios; nos
@@ -113,7 +113,7 @@ printf("\n§W2  A DILATACAO so' GIRA A FASE: o modulo NAO muda.\n\n");
             double modulo2 = re*re + im*im;          /* |λ^{-iτ}|², e vale 1 */
             double modulo = modulo2;                 /* o quadrado é o que se compara */
             casos++;
-            if(fabs(modulo2 - 1.0) > 1e-15) mau++;
+            if((long long)(fabs(modulo2 - 1.0) * 1e15) >= 1) mau++;
             if(fabs(arg - fase_ant) != 0.0) fases_distintas++;
             fase_ant = arg;
             if(lam < 1.9 && lam > 1.4)
@@ -156,17 +156,17 @@ printf("\n§W3  O BIDUAL: exp e log sao o par, e a volta fecha nos DOIS sentidos
          * E' bidual porque fecha dos DOIS lados — e uma so' das voltas nao prova. */
         long ida = 0, volta = 0, casos = 0;
         for(double u = -2.0; u <= 2.0; u += 0.25){
-            if(fabs(log(exp(u)) - u) > 1e-12) ida++;
+            if((long long)(fabs(log(exp(u)) - u) * 1e12) >= 1) ida++;
             casos++;
         }
         for(double x = 0.25; x <= 5.0; x += 0.25)
-            if(fabs(exp(log(x)) - x) > 1e-12) volta++;
+            if((long long)(fabs(exp(log(x)) - x) * 1e12) >= 1) volta++;
         /* e a PROPRIEDADE que faz deles o par: log(a·b) = log a + log b — o produto vira soma */
         long prop = 0, np = 0;
         for(double a = 1.5; a <= 4.0; a += 0.5)
             for(double c = 1.5; c <= 4.0; c += 0.5){
                 np++;
-                if(fabs(log(a*c) - (log(a) + log(c))) > 1e-12) prop++;
+                if((long long)(fabs(log(a*c) - (log(a) + log(c))) * 1e12) >= 1) prop++;
             }
         /* E O MORFISMO TEM REALIZAÇÃO EXACTA, que é o que separa a lei da libm. As duas
          * primeiras linhas — log(exp(u)) = u e exp(log(x)) = x — são f∘f⁻¹, e medem a

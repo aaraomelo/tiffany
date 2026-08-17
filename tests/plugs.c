@@ -52,11 +52,11 @@ static double sigma_linha(double m){ return (m - sqrt(m*m + 4.0))/2.0; }
 /* a cifra: a fração contínua de x, truncada a `n` termos */
 static int cifra(double x, int *a, int n){
     int k = 0;
-    for(int i = 0; i < n && x > 1e-12; i++){
+    for(int i = 0; i < n && (long long)(x * 1e12) >= 1; i++){
         double f = floor(x);
         a[k++] = (int)f;
         double r = x - f;
-        if(r < 1e-12) break;
+        if((long long)(r * 1e12) == 0) break;
         x = 1.0/r;
     }
     return k;
@@ -91,7 +91,7 @@ int main(void){
                 double mag = sqrt(re*re + im*im);
                 if(j == jl){ if(mag < menor_dentro) menor_dentro = mag; }
                 else       { if(mag > pior_fora)   pior_fora  = mag; }
-                if((j == jl && fabs(mag - n) < 1e-9) || (j != jl && mag < 1e-9)) colapsa++;
+                if((j == jl && (long long)(fabs(mag - n) * 1e9) == 0) || (j != jl && (long long)(mag * 1e9) == 0)) colapsa++;
                 pares++;
             }
         ok("a soma da orbita da n na diagonal e ZERO fora — e isso E o Dirac, nao uma aproximacao",
@@ -151,8 +151,8 @@ int main(void){
             printf("     %4d %14.9f %14.9f %14.9f %12.4f\n", m, s, sl, s*sl, s+sl);
             if(fabs(s) > 1.0) negro_expande++;
             if(fabs(sl) < 1.0) branco_contrai++;
-            if(fabs(s*sl + 1.0) < 1e-12) prod_menos1++;
-            if(fabs((s+sl) - m) < 1e-12) soma_m++;
+            if((long long)(fabs(s*sl + 1.0) * 1e12) == 0) prod_menos1++;
+            if((long long)(fabs((s+sl) - m) * 1e12) == 0) soma_m++;
             n++;
         }
         ok("o NEGRO tem modulo > 1 (expande) e o BRANCO < 1 (contrai) — nos cinco metais",
@@ -196,7 +196,7 @@ int main(void){
             double s = sigma(m), sm = sigma(-(double)m), iv = 1.0/s;
             printf("     %4d %16.10f %16.10f %16.10f\n", m, s, sm, iv);
             double d = fabs(sm - iv);
-            if(d < 1e-12) inversos++;
+            if((long long)(d * 1e12) == 0) inversos++;
             if(d > pior) pior = d;
             n++;
         }

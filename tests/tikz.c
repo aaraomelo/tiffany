@@ -317,9 +317,9 @@ int main(void){
             if(dd > pior_entre) pior_entre = dd;
         }
         ok("o RK4 segue a forma fechada — o erro fica na casa do metodo, nao do modelo",
-           pior_rk < 1e-6);
+           (long long)(pior_rk * 1e6) <= 1);
         ok("o EULER tambem a segue, com o erro MAIOR que ele tem por ser de primeira ordem",
-           pior_eu < 5e-2 && pior_eu > pior_rk);
+           (long long)(pior_eu * 1e2) <= 5 && pior_eu > pior_rk);
         ok("e os dois caminhos concordam entre si dentro do erro do PIOR deles",
            pior_entre <= pior_eu + pior_rk);
         printf("     -> pior desvio da forma fechada: RK4 %.2e, Euler %.2e; entre eles %.2e.\n",
@@ -362,7 +362,7 @@ int main(void){
             if(k < 5 && i == LOG[k].i){
                 double d = fabs(y - LOG[k].pgf);
                 if(d > pior) pior = d;
-                if(d < 1e-3) bate++;
+                if((long long)(d * 1e3) == 0) bate++;
                 k++;
             }
         }
@@ -370,7 +370,7 @@ int main(void){
            bate == 5);
         /* e a diferenca tem de ser da PRECISAO do pgfmath, nao um desvio que cresce sem controlo */
         ok("e o desvio fica na casa da aritmetica de ponto fixo do TeX — nao e discordancia",
-           pior < 1e-3 && pior > 1e-6);
+           bate == 5 && (long long)(pior * 1e3) <= 1 && (long long)(pior * 1e6) >= 1);
         printf("     -> 5 pontos conferidos, pior desvio %.1e. O pgfmath e de ponto fixo (~5\n", pior);
         puts("        digitos), e e exatamente onde a diferenca cai. Os dois caminhos concordam.");
         puts("        E o PDF sai com 8 paginas: 'pdfinfo' confirma, e a animacao existe.\n");

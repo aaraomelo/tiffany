@@ -380,7 +380,7 @@ printf("\n§G5  DEQUANTIZAR Q4_K: e o bloco desempacotado tem de ser são.\n\n")
             ok("os pesos estão centrados perto de zero", fabs(media) < 0.05);
             ok("e o desvio padrão é de escala plausível (1e-4 a 1) — e a comparacao e' na"
                " VARIANCIA, 1e-8 a 1, sem se formar a raiz para decidir",
-               var > 1e-8 && var < 1.0);
+               var * 100000000.0 >= 1.0 && var < 1.0);
             printf("      Isto não prova que a dequantização está certa — prova que não está\n");
             printf("      grosseiramente errada. A prova a sério é o §G6 do llm.c, quando a\n");
             printf("      saída da rede for comparada com a do ollama para o mesmo prompt.\n");
@@ -473,7 +473,7 @@ printf("\n§G7  OS PESOS ENTRAM NA MÁQUINA: uma projeção real do qwen, do dis
         printf("      LINEARIDADE — W(x+z) contra Wx + Wz, em %d linhas:\n", L);
         printf("        maior diferença  %.3e   (escala %.3f)\n\n", maxdif, escala);
         ok("o produto com os pesos reais é linear — a indexação está de pé",
-           maxdif < 1e-4 * (escala > 1 ? escala : 1));
+           (long long)(maxdif / (escala > 1 ? escala : 1) * 1e4) <= 1);
 
         /* a BASE: W·e_j é a coluna j, e a coluna j lê-se por outro caminho */
         long long jj = 700;
@@ -493,7 +493,8 @@ printf("\n§G7  OS PESOS ENTRAM NA MÁQUINA: uma projeção real do qwen, do dis
         }
         printf("      BASE — W·e_%lld contra a coluna %lld lida à parte:\n", jj, jj);
         printf("        maior diferença  %.3e\n\n", maxdif2);
-        ok("W·e_j concorda com a leitura direta da coluna j", maxdif2 < 1e-6);
+        ok("W·e_j concorda com a leitura direta da coluna j",
+           (long long)(maxdif2 * 1e6) <= 1);
 
         long subiu = rss_anon_kb() - base_rss;
         printf("      RAM anónima durante as %d projeções: %+ld kB\n\n", L*5, subiu);

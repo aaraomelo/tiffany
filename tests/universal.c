@@ -26,6 +26,9 @@
  *   │       w := codifica(p'', q'')              FC (Möbius) ou dígitos (Cantor)   │
  *   │                                                                              │
  *   │    E A VOLTA FECHA:  descodifica(w) == (p, q)                                │
+ *   │                                                                              │
+ *   │    ── VERIFICA RÁPIDA ───────  em Q(m√D), thm:serie-quadratica                │
+ *   │       qmd_verifica_rapida(m,D,α)   norma, 1/(α−1), S₁ = α⁻¹                 │
  *   └──────────────────────────────────────────────────────────────────────────────┘
  *
  * As quatro peças entram cada uma no seu lugar, e nenhuma é decorativa:
@@ -44,6 +47,7 @@
  *   §U3  há DUAS ordens: no PONTO (ℙ¹) e no VECTOR (ℤ²) — e Viviani tem 2 e 4, que é
  *        o recobrimento duplo. O gato não fecha em nenhuma
  *   §U4  e a codificação é livre: as três dão o MESMO racional de volta
+ *   §U5  VERIFICA RÁPIDA: série geométrica em Q(m√D) — thm:serie-quadratica
  *
  * Nenhum double, nenhum limiar: compila sem -lm.
  *
@@ -52,6 +56,7 @@
 #include <stdio.h>
 #include "reta.h"
 #include "unidade.h"
+#include "qmd.h"
 
 /* ── as peças do ciclo, cada uma numa função ─────────────────────────────────────── */
 
@@ -235,6 +240,19 @@ int main(void){
        " devolvem o MESMO racional. É isso que «universal» quer dizer — o ciclo não depende"
        " de como se escreve o resultado",
        conc_tot > 0 && conc == conc_tot);
+
+    /* ─── §U5 ── VERIFICA RÁPIDA: série geométrica em Q(m√D) ─────────────────────
+     * Uma passagem por instância: norma de α−1, inversa fechada, S₁=α⁻¹.
+     * É o passo do algoritmo universal após CODIFICA — exacto, sem double. */
+    printf("  §U5  VERIFICA RÁPIDA — thm:serie-quadratica em Q(m√D)\n");
+    int rap_ok = qmd_verifica_rapida(1, 5, qmd_make(1, 1, 2))
+              && qmd_verifica_rapida(1, 2, qmd_make(1, 1, 1))
+              && qmd_verifica_rapida(1, 3, qmd_make(2, 1, 1));
+    printf("      φ, 1+√2 e 2+√3: norma + 1/(α−1) + S₁=α⁻¹ — %s\n\n",
+           rap_ok ? "exacto" : "FALHOU");
+    ok("VERIFICA RÁPIDA no ciclo universal: norma de α−1, inversa fechada e S₁=α⁻¹"
+       " em Q(m√D) — thm:serie-quadratica, sem double nem limiar",
+       rap_ok);
 
     printf("  ══ o ciclo é um só: o que muda é o operador (e a sua ORDEM) e a escrita\n");
     printf("     (e a codificação). O que NÃO muda é |det| = 1 — sem ela não há volta. ══\n\n");

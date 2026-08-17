@@ -100,7 +100,7 @@ int main(void){
                 double fn   = a*poch*pow(x, b - nn);     /* a n-ésima derivada de a·x^b */
                 double finv = pow(x/a, 1.0/b);           /* a inversa                    */
                 double d = fabs(fn - finv);
-                if(d < 1e-12) bate_a++;
+                if((long long)(d * 1e12) == 0) bate_a++;
                 na++;
                 if(nn <= 3) printf("      %-3d %.12f    %13.6f    %.12f    %.1e\n", nn, b, poch, a, d);
             }
@@ -126,7 +126,7 @@ int main(void){
                " caminhos que nao se tocam: o phi pela RECORRENCIA de Fibonacci, em inteiros, e"
                " o phi pela raiz. Comparar com um numero que eu escrevi era por a minha memoria"
                " dentro da assercao",
-               fabs(a1 - ref) < 1e-12);
+               (long long)(fabs(a1 - ref) * 1e12) == 0);
         }
         printf("      logo b = sigma_n:  n=1 ouro, n=2 prata, n=3 bronze, ...\n");
         conclui("o aurea.c media so n=1. A familia das funcoes 'n-esima derivada = inversa' e");

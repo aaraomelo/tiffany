@@ -131,7 +131,7 @@ int main(void)
         ok("exp leva a PA de razão d na PG de razão e^d — e a tese é o HOMOMORFISMO"
            " b^{a+d} = b^a·b^d, medido EXACTO em inteiros. O resíduo zero da rota em"
            " vírgula é destes três valores, e não se toma por lei",
-           pior < 1e-12 && tot_h > 0 && homo == tot_h);
+           (long long)(pior * 1e12) == 0 && tot_h > 0 && homo == tot_h);
     }
 
     /* ---------------- §R3 — a colisão é o reset de fase ---------------- */

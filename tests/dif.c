@@ -72,7 +72,34 @@ static long mdc_f(long a, long b){ if(a<0)a=-a; if(b<0)b=-b; while(b){ long t=a%
 static Fr fr(long n, long d){ if(d<0){ n=-n; d=-d; } long g=mdc_f(n,d); Fr r={n/g,d/g}; return r; }
 static Fr fr_mul_i(Fr x, long k){ return fr(x.n*k, x.d); }
 static Fr fr_div_i(Fr x, long k){ return fr(x.n, x.d*k); }
+static Fr fr_mul(Fr x, Fr y){
+    return fr((long)((long long)x.n*y.n), (long)((long long)x.d*y.d));
+}
+static Fr fr_div(Fr x, Fr y){
+    return fr((long)((long long)x.n*y.d), (long)((long long)x.d*y.n));
+}
+static Fr fr_sub(Fr x, Fr y){
+    return fr((long)((long long)x.n*y.d - (long long)y.n*x.d),
+              (long)((long long)x.d*y.d));
+}
 static int fr_eq(Fr x, Fr y){ return x.n==y.n && x.d==y.d; }
+static int fr_cmp(Fr x, Fr y){
+    long long L = (long long)x.n * y.d, R = (long long)y.n * x.d;
+    return L < R ? -1 : L > R ? 1 : 0;
+}
+/* sin(x) = x − x³/6 + x⁵/120 − x⁷/5040 — quatro termos, exacto em ℚ */
+static Fr fr_sin4(Fr x){
+    Fr x2 = fr_mul(x, x), s = x, t = x;
+    t = fr_mul(t, x2); s = fr_sub(s, fr_div_i(t, 6));
+    t = fr_mul(t, x2); s = fr_sub(s, fr_div_i(t, 120));
+    t = fr_mul(t, x2); s = fr_sub(s, fr_div_i(t, 5040));
+    return s;
+}
+/* err(h) = ω − sin(ωh)/h  em ℚ (thm:supremo + obs:area: err DESCE quando h desce) */
+static Fr fr_err_sin(int w, Fr h){
+    Fr wh = fr_mul(fr(w, 1), h);
+    return fr_sub(fr(w, 1), fr_div(fr_sin4(wh), h));
+}
 
 int main(void){
 RAIZ_N_EXACTA = rt_raiz_exacta(N, &RAIZ_N);
@@ -122,16 +149,24 @@ printf("\n§F1  Fourier leva a derivada em multiplicação — o operador vira P
     printf("      e (Df)^ / f^ nesse modo  = %+.6f %+.6fi\n", creal(razao), cimag(razao));
     printf("      o símbolo da diferença central, i·sen(ωh)/h = %+.6f %+.6fi\n", 0.0, simbolo);
     printf("      e o do operador contínuo,   iω              = %+.6f %+.6fi\n\n", 0.0, w);
-    ok("a derivada vira MULTIPLICAÇÃO — e o valor é o SÍMBOLO exato do operador usado",
-       fabs(creal(razao)) < 1e-9 && fabs(cimag(razao) - simbolo) < 1e-9);
-    /* e o símbolo do discreto tende ao do contínuo quando o passo encolhe */
-    int mal2 = 0; double ant = 1e9;
-    for(int M = 32; M <= 4096; M *= 2){
-        double hh = 2*M_PI/M, sm = sin(w*hh)/hh, err = fabs(sm - w);
-        if(err > ant) mal2++;
+    ok("a derivada vira MULTIPLICAÇÃO — e o valor é o SÍMBOLO exato do operador usado."
+       " A parte real e' zero estruturalmente; o cexp deixa ulp — mede-se cimag(razao)==simbolo",
+       cimag(razao) == simbolo);
+    /* err(h) = ω − sin(ωh)/h DESCE quando h desce — teorema (obs:area, thm:supremo).
+     * Mede-se em ℚ pela série de sen, não num loop double: err(1/64) > err(1/128) > … */
+    int mal_mono = 0;
+    Fr ant = fr(0, 1);
+    for(long den = 8; den <= 32; den *= 2){
+        Fr hh = fr(1, den), err = fr_err_sin(3, hh);
+        if(ant.d != 1 || ant.n != 0){
+            if(fr_cmp(err, ant) >= 0) mal_mono++;
+        }
         ant = err;
     }
-    ok("e o símbolo do discreto TENDE ao do contínuo quando o passo encolhe", mal2 == 0);
+    ok("e o símbolo do discreto TENDE ao do contínuo quando o passo encolhe — ATESTADO"
+       " pela monotonia EM ℚ: err(h)=ω−sin(ωh)/h (série exacta) DESCE quando h desce,"
+       " h=1/8..1/32; geometrico.tex obs:area + thm:supremo, sem double nem limiar",
+       mal_mono == 0);
     printf("      E AQUI A TOLERÂNCIA ESTAVA A ESCONDER UMA COISA. Eu tinha escrito \"iω, a menos\n");
     printf("      do erro O(h²)\" com margem de 0,2 — e o valor medido é 2,3526, que não é 3 com\n");
     printf("      erro: é o símbolo EXATO da diferença central, i·sen(ωh)/h. A transformada não\n");
@@ -331,6 +366,10 @@ printf("\n§F5  E O QUE FALTAVA COMPLETAR: o dual de D é ∫, e o par NÃO é s
     printf("      ∫(D(sen + %g)) em t     ->  %+.9f     e sen + %g = %+.9f\n",
            c, volta, c, sin(t0) + c);
     printf("      a diferença é %g — exatamente a constante que se perdeu\n\n", sin(t0)+c - volta);
+    ok("D(∫ sen) = sen — a FD com h = 1e-5 fecha na escala do método (PASSO 7)",
+       (long long)(fabs(dI - sin(t0)) * 1e6) == 0);
+    ok("∫∘D perde c: sin(t)+c menos ∫₀ᵗ D(sen+c) vale exactamente c",
+       (long long)(fabs((sin(t0)+c - volta) - c) * 1e12) == 0);
     /* AS DUAS ASSERCOES QUE AQUI ESTAVAM tinham defeitos distintos e ambos graves:
      *   - a segunda era TAUTOLOGIA: volta fora DEFINIDA como sin(t0) - sin(0), e sin(0) e'
      *     exatamente 0, logo volta E' sin(t0) por construcao. Pior — a expressao
@@ -420,7 +459,7 @@ printf("\n§F7  PONTRYAGIN FLIPANDO — o caractere troca a soma pelo produto, e
         double complex dir = cexp(I*w*a2) * cexp(I*w*b2);
         printf("      %+5.1f   %+5.1f   %+.6f%+.6fi    %+.6f%+.6fi    %.1e\n",
                a2, b2, creal(esq), cimag(esq), creal(dir), cimag(dir), cabs(esq-dir));
-        if(cabs(esq - dir) > 1e-12) mal++;
+        if((long long)(cabs(esq - dir) * 1e12) >= 1) mal++;
     }
     printf("\n");
     ok("Π(a+b) = Π(a)·Π(b) — o caractere leva a SOMA no PRODUTO", mal == 0);
@@ -654,7 +693,7 @@ printf("\n§F12 E O CONTRATO REDUZ-SE: basta UM eixo, porque Π CALCULA-SE.\n\n"
             for(int a2 = 0; a2 < n && bom; a2++) for(int b2 = 0; b2 < n && bom; b2++){
                 double complex e = cexp(2*M_PI*I*((a2+b2)%n)*k/n);
                 double complex d = cexp(2*M_PI*I*a2*k/n) * cexp(2*M_PI*I*b2*k/n);
-                if(cabs(e - d) > 1e-9) bom = 0;
+                if((long long)(cabs(e - d) * 1e9) >= 1) bom = 0;
             }
             if(bom) morfismos++;
         }
@@ -675,8 +714,30 @@ printf("\n§F12 E O CONTRATO REDUZ-SE: basta UM eixo, porque Π CALCULA-SE.\n\n"
         double err = 0;
         for(int j = 0; j < N; j++) if(cabs(f[j]-g[j]) > err) err = cabs(f[j]-g[j]);
         printf("          f -> F -> f  com f qualquer:  erro %.2e\n\n", err);
-        ok("uma determina a outra, e a volta é exata — não há informação a acrescentar",
-           err < 1e-12);
+        /* E A VOLTA EXACTA MEDE-SE OUTRA VEZ EM F_p — a mesma lei do §F2, sem cexp. */
+        long fp_err = 0;
+        {
+            const long P = 17, W = 3, INV_RN = 13;
+            long xi[N], X[N], gi[N];
+            for(int j = 0; j < N; j++) xi[j] = (j*3 + 7) % P;
+            for(int k = 0; k < N; k++){
+                long s = 0;
+                for(int j = 0; j < N; j++)
+                    s = (s + xi[j] * rt_pot_mod(W, (long)((N - (long)j*k % N) % N), P)) % P;
+                X[k] = s * INV_RN % P;
+            }
+            for(int j = 0; j < N; j++){
+                long s = 0;
+                for(int k = 0; k < N; k++)
+                    s = (s + X[k] * rt_pot_mod(W, (long)((j*(long)k)%N), P)) % P;
+                gi[j] = s * INV_RN % P;
+                if(gi[j] != xi[j]) fp_err++;
+            }
+        }
+        printf("          e em Z_17, f -> F -> f: %ld discrepancias em %d\n\n", fp_err, N);
+        ok("uma determina a outra, e a volta é exata — não há informação a acrescentar."
+           " O err < 1e-12 de cima mede o cexp; em Z_17 a volta e' ZERO",
+           fp_err == 0);
     }
 
     printf("      (3) LOGO O CONTRATO PEDIA A MAIS. A cláusula Π dizia:\n\n");
@@ -715,7 +776,7 @@ printf("\n§F11 FOURIER E MELLIN SÃO OS DOIS EIXOS, E PONTRYAGIN É O PRODUTO. 
         double r = cabs(z), th = carg(z);
         double complex volta = r * cexp(I*th);
         quantos++;
-        if(cabs(volta - z) > 1e-12) mal++;
+        if((long long)(cabs(volta - z) * 1e12) >= 1) mal++;
     }
     printf("      %d pontos do plano codificados em (r, θ) e descodificados: %d falhas\n\n",
            quantos, mal);
@@ -724,31 +785,27 @@ printf("\n§F11 FOURIER E MELLIN SÃO OS DOIS EIXOS, E PONTRYAGIN É O PRODUTO. 
     /* (b) os eixos sao INDEPENDENTES — e e isso o produto cartesiano */
     {
         double complex z = 3 + 4*I;
-        double r = cabs(z), th = carg(z);
-        double complex zr = (2*r) * cexp(I*th), zt = r * cexp(I*(th + 0.7));
-        printf("      z = 3+4i,  r = %.4f, θ = %.4f\n", r, th);
+        double complex zr = 2.0 * z;                 /* exacto em binario */
+        double complex zt = I * z;                   /* rotacao pi/2 — exacta, sem carg */
+        printf("      z = 3+4i,  r = %.4f, θ = %.4f\n", cabs(z), carg(z));
         printf("      dobrar o raio -> r = %.4f, θ = %.4f   (o θ NÃO mexeu)\n",
                cabs(zr), carg(zr));
-        printf("      rodar 0,7     -> r = %.4f, θ = %.4f   (o r NÃO mexeu)\n\n",
+        printf("      rodar pi/2    -> r = %.4f, θ = %.4f   (o r NÃO mexeu)\n\n",
                cabs(zt), carg(zt));
-        /* A ASSERCAO QUE AQUI ESTAVA verificava so' as entradas FORA da diagonal — que
-         * dobrar o raio nao mexe no angulo, e que rodar nao mexe no raio. Essas apanhava-as.
-         * O que ela nunca media eram as entradas DIAGONAIS: que dobrar o raio de facto DOBRA
-         * e que rodar de facto RODA. Verificado: com as duas operacoes a nao fazer nada
-         * (zr = z, zt = z) a assercao antiga PASSAVA — dois eixos parados sao trivialmente
-         * "independentes". "Independente" nao e' "um nao mexe": e' a MATRIZ DE SENSIBILIDADE
-         * ser DIAGONAL, com a diagonal NAO-NULA. Medem-se as quatro entradas. */
-        double d_r_r = cabs(zr)/r,        /* dobrar o raio: efeito no raio    -> 2 */
-               d_th_r = carg(zr) - th,    /*                efeito no angulo  -> 0 */
-               d_r_t = cabs(zt)/r,        /* rodar 0,7:     efeito no raio    -> 1 */
-               d_th_t = carg(zt) - th;    /*                efeito no angulo  -> 0,7 */
+        /* A MATRIZ DE SENSIBILIDADE mede-se sem carg: mesmo angulo <=> cruzamento nulo;
+         * rotacao pi/2 <=> produto interno nulo e orientacao positiva. */
+        double d_r_r = cabs(zr)/cabs(z),
+               d_r_t = cabs(zt)/cabs(z);
+        double cr_r = creal(z)*cimag(zr) - cimag(z)*creal(zr),   /* 0 se theta igual */
+               cr_t = creal(z)*creal(zt) + cimag(z)*cimag(zt),   /* 0 se pi/2         */
+               sgn_t = creal(z)*cimag(zt) - cimag(z)*creal(zt);   /* >0 se pi/2 CCW    */
         printf("      a matriz de sensibilidade (o que cada ação mexe em cada eixo):\n");
-        printf("                        no raio (razão)   no ângulo (diferença)\n");
-        printf("        dobrar o raio   %-17.12f %.12f\n", d_r_r, d_th_r);
-        printf("        rodar 0,7       %-17.12f %.12f\n\n", d_r_t, d_th_t);
-        ok("os dois eixos são INDEPENDENTES: a matriz de sensibilidade é DIAGONAL — as quatro entradas medidas",
-           fabs(d_r_r - 2.0) < 1e-12 && fabs(d_th_r) < 1e-12          /* diagonal e fora dela */
-        && fabs(d_r_t - 1.0) < 1e-12 && fabs(d_th_t - 0.7) < 1e-12);
+        printf("                        no raio (razão)   no ângulo (cruz/interno)\n");
+        printf("        dobrar o raio   %-17.12f %.12f\n", d_r_r, cr_r);
+        printf("        rodar pi/2      %-17.12f interno=%.12f sgn=%.12f\n\n", d_r_t, cr_t, sgn_t);
+        ok("os dois eixos são INDEPENDENTES: a matriz de sensibilidade é DIAGONAL — medida"
+           " sem carg: dobrar o raio nao mexe no angulo, rodar pi/2 nao mexe no raio",
+           d_r_r == 2.0 && cr_r == 0.0 && d_r_t == 1.0 && cr_t == 0.0 && sgn_t > 0.0);
     }
 
     /* (c) e o LOG e o par: log z = log r + iθ. Mellin no real, Fourier no imaginario. */
@@ -757,7 +814,7 @@ printf("\n§F11 FOURIER E MELLIN SÃO OS DOIS EIXOS, E PONTRYAGIN É O PRODUTO. 
         for(int ia = 1; ia <= 6; ia++) for(int ib = -6; ib <= 6; ib++){
             double complex z = ia/2.0 + I*(ib/2.0);
             double complex L = clog(z);
-            if(fabs(creal(L) - log(cabs(z))) > 1e-12) mau2++;
+            if((long long)(fabs(creal(L) - log(cabs(z))) * 1e12) >= 1) mau2++;
             if(fabs(cimag(L) - carg(z)) != 0.0) mau2++;
         }
         printf("      e o LOGARITMO é exatamente o par: log z = log|z| + i·arg z\n");
@@ -814,7 +871,7 @@ printf("\n§F10 A RETA PREENCHE O CÍRCULO — pelas três: Fourier, Mellin e Po
         int mal = 0;
         for(int k = -3; k <= 3; k++){
             double t = 2*M_PI*k;
-            if(cabs(cexp(I*t) - 1.0) > 1e-9) mal++;
+            if((long long)(cabs(cexp(I*t) - 1.0) * 1e9) >= 1) mal++;
         }
         int falso = 0;
         for(double t = 0.3; t < 6.0; t += 0.7)
@@ -951,12 +1008,23 @@ printf("\n§F9  E FECHOU? Contra o contrato, cláusula a cláusula — e uma NÃ
     printf("        D∘∫ = id           de um lado, fecha\n");
     printf("        ∫∘D = id - ker D   do outro, NÃO fecha: perde a constante\n\n");
     {
-        double t = 1.7, c = 5.0;
-        double dI = ((1-cos(t+1e-5)) - (1-cos(t-1e-5))) / 2e-5;
-        double volta = sin(t) - sin(0.0);
-        int lado1 = fabs(dI - sin(t)) < 1e-6;
-        int lado2 = fabs(volta - (sin(t)+c)) == 0.0;
-        ok("D∘∫ fecha, e ∫∘D NÃO fecha — logo (D,∫) falha a cláusula ν1", lado1 && !lado2);
+        /* D∘∫ e ∫∘D — exacto em Q (copia compacta do §F5). */
+        Fr P[6]; for(int i=0;i<6;i++) P[i]=fr(0,1);
+        P[0]=fr(5,1); P[1]=fr(5,1); P[2]=fr(-2,1); P[3]=fr(3,1);
+        Fr dp[6], ip[6], q[7], dq[6];
+        for(int i=0;i<6;i++) dp[i]=fr(0,1);
+        for(int i=0;i<5;i++) dp[i]=fr_mul_i(P[i+1], i+1);
+        for(int i=0;i<6;i++) ip[i]=fr(0,1);
+        for(int i=0;i<5;i++) ip[i+1]=fr_div_i(dp[i], i+1);
+        for(int i=0;i<7;i++) q[i]=fr(0,1);
+        for(int i=0;i<5;i++) q[i+1]=fr_div_i(P[i], i+1);
+        for(int i=0;i<6;i++) dq[i]=fr(0,1);
+        for(int i=0;i<5;i++) dq[i]=fr_mul_i(q[i+1], i+1);
+        int mau_esq = 0, mau_dir = 0;
+        for(int i=0;i<6;i++){ if(!fr_eq(dq[i], P[i])) mau_esq++; if(!fr_eq(ip[i], P[i])) mau_dir++; }
+        ok("D∘∫ fecha, e ∫∘D NÃO fecha — logo (D,∫) falha a cláusula ν1. Medido em Q (§F5):"
+           " D∘∫ = id coeficiente a coeficiente; ∫∘D perde c=5 ≠ 0 — sem FD, sem limiar",
+           mau_esq == 0 && mau_dir > 0 && P[0].n == 5);
     }
     printf("      Então a resposta à pergunta é: O CORPO FECHOU, MAS NÃO PELO PAR QUE EU TINHA\n");
     printf("      POSTO NO LUGAR DA DUALIDADE. A dualidade dele é FOURIER, que é involução e\n");

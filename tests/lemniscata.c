@@ -37,7 +37,7 @@ typedef long double LD;
 
 /* o AGM: ⊕ e ⊗ alternados (agm.c) */
 static LD agm(LD a, LD b){
-    for(int i=0;i<80 && fabsl(a-b)>1e-19L;i++){ LD na=(a+b)/2, nb=sqrtl(a*b); a=na; b=nb; }
+    for(int i=0;i<80 && (long long)(fabsl(a-b) * 1e19L) >= 1;i++){ LD na=(a+b)/2, nb=sqrtl(a*b); a=na; b=nb; }
     return (a+b)/2;
 }
 /* K(k) = ∫₀^{π/2} dθ/√(1−k²sin²θ), por trapézio (integrando suave para k<1) */
@@ -80,8 +80,8 @@ int main(void){
         printf("       G = 1/M      = %.20Lf   (a constante de Gauss)\n", G);
         printf("       π·G          = %.20Lf   erro vs ϖ %.2Le %s\n", via_agm, e1, e1<1e-17L?"✓":"✗");
         printf("       2∫₀¹dt/√(1−t⁴) = %.20Lf   erro vs ϖ %.2Le %s\n", via_int, e2, e2<1e-16L?"✓":"✗");
-        if(e1>=1e-17L || e2>=1e-16L) passou=0;
-        printf("     %s\n", VD(!((e1<1e-17L&&e2<1e-16L)), "resíduo 0 — as duas vias dão o mesmo ϖ: a geométrica (a integral da lemniscata) e a do\n"
+        if((long long)(e1 * 1e17L) >= 1 || (long long)(e2 * 1e16L) >= 1) passou=0;
+        printf("     %s\n", VD(!(((long long)(e1 * 1e17L) == 0 && (long long)(e2 * 1e16L) == 0)), "resíduo 0 — as duas vias dão o mesmo ϖ: a geométrica (a integral da lemniscata) e a do\n"
           "     AGM (π vezes a constante de Gauss). π não \"parece\" gerar ϖ: gera por um FATOR, e o\n"
           "     fator é o AGM."));
     }
@@ -101,7 +101,7 @@ int main(void){
                              : (t==3)?"  ← a LEMNISCATA (k=1/√2): a âncora τ=1"
                              : "";
             printf("       %.8Lf %.18Lf  %.18Lf  %.1Le%s\n", k, Kq, Ka, e, nota);
-            if(e>1e-15L) erro=1;
+            if((long long)(e * 1e15L) >= 1) erro=1;
         }
         printf("     %s\n", VD(erro, "resíduo 0 — o AGM não costura só a lemniscata: costura π a QUALQUER curva da família. É\n"
           "     esse o sentido de planificar — um fator único aplaina toda a escada de deformação em π."));
@@ -117,7 +117,7 @@ int main(void){
         printf("       k = 1/√2 = %.18Lf : k' = %.18Lf  (iguais: k=k')\n", k, kp);
         printf("       K = %.18Lf ; K' = %.18Lf ; τ = K'/K = %.18Lf\n", K, Kl, tau);
         printf("       e ϖ/K : %.18Lf   (ϖ = √2·K, pois a lemniscata é o caso k=k')\n", VARPI/K);
-        int bom = fabsl(tau-1.0L)<1e-17L;
+        int bom = (long long)(fabsl(tau-1.0L) * 1e17L) == 0;
         printf("     %s\n", VD(!(bom), "resíduo 0 — τ=1 exato: a lemniscata é o singular value que agm.c §A4 já achava por\n"
           "     bisseção (k=1/√2, resíduo 0). A escada das CURVAS deformadas e a escada dos SINGULAR\n"
           "     VALUES são a mesma escada — e a lemniscata é o primeiro degrau depois do círculo."));
@@ -133,9 +133,9 @@ int main(void){
         printf("       2π  = %.18Lf   (o círculo: k=0, sem deformação)\n", 2*PI);
         printf("       2ϖ  = %.18Lf   (a lemniscata: k=1/√2, dobrado)\n", 2*VARPI);
         printf("       ϖ/π = %.18Lf = G  ;  π/ϖ = %.18Lf = M(1,√2)  erro %.1Le %s\n",
-               razao, inv, e, e<1e-17L?"✓":"✗");
-        if(e>=1e-17L) passou=0;
-        printf("     %s\n", VD(!((e<1e-17L)), "resíduo 0 — a razão entre a medida da lemniscata e a do círculo É o AGM. Dobrar o círculo\n"
+               razao, inv, e, (long long)(e * 1e17L) == 0 ? "✓" : "✗");
+        if((long long)(e * 1e17L) >= 1) passou=0;
+        printf("     %s\n", VD(!((long long)(e * 1e17L) == 0), "resíduo 0 — a razão entre a medida da lemniscata e a do círculo É o AGM. Dobrar o círculo\n"
           "     custa exatamente um M(1,√2), e desdobrar custa o seu inverso: a costura tem preço, e\n"
           "     o preço é a média que alterna ⊕ e ⊗."));
     }

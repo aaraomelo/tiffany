@@ -140,7 +140,7 @@ printf("     conta emparelhamentos. Se batem, a maquinaria está validada de for
          * quadratura é da ordem de 1e-15/1e-14, e não vem de desacordo com Isserlis. Exigir
          * 1e-15 seria exigir dígito que a TABELA não tem. A concordância medida (13-14 casas
          * entre dois métodos independentes) é decisiva; o resto é a régua, não o objeto. */
-        if(res > 1e-12L) mau++;
+        if((long long)(res * 1e12L) >= 1) mau++;
     }
     ok("Isserlis = quadratura exata, em todos os momentos", mau == 0);
     printf("\n      Note E[x0² x1²] = 1 + 2ρ² = 1,5 com ρ=0,5 — os três emparelhamentos, um\n");

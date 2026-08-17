@@ -82,7 +82,7 @@ printf("\n§E1  OS VÉRTICES: {0,1}^4 é o produto direto, e são pontos de Cant
     /* e distintos: 16 vértices, 16 pontos */
     int col = 0;
     for(int a = 0; a < NV; a++) for(int b = a+1; b < NV; b++)
-        if(fabs(pontos[a]-pontos[b]) < 1e-12) col++;
+        if((long long)(fabs(pontos[a]-pontos[b]) * 1e12) == 0) col++;
     printf("      …\n\n      colisões entre os 16 pontos: %d\n\n", col);
     ok("cada vértice do tesseracto é um ponto de Cantor, e a volta fecha", mau == 0);
     ok("e os 16 pontos são distintos — o produto direto não colapsa", col == 0);

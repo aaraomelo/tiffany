@@ -100,7 +100,7 @@ int main(void){
         printf("§A1  a média GEOMÉTRICA colhida (sem I_ref):\n");
         printf("       √(ab) em 16 pares          : erro rel. máx %.2e\n", pior);
         printf("       I_S ×10⁴ e T de 250 a 400K : erro rel. máx %.2e  (I_S e V_T cancelam)\n", pior_var);
-        int bom = (pior < 1e-13 && pior_var < 1e-13);
+        int bom = ((long long)(pior * 1e13) == 0 && (long long)(pior_var * 1e13) == 0);
         printf("     %s\n", VD(!(bom), "resíduo 0 — e sem corrente de referência: o expoente ½ divide a\n"
                "     dimensão junto com o valor. A geométrica é mais nativa que o produto."));
         if(!bom) passou=0;
@@ -115,7 +115,7 @@ int main(void){
         for(int t=0;t<6;t++){
             double a=pares[t][0], b=pares[t][1];
             double A=a, B=b, dif[40]; int k=0;
-            while(fabs(A-B) > 1e-14 && k<40){
+            while((long long)(fabs(A-B) * 1e14) >= 1 && k<40){
                 dif[k]=fabs(A-B);
                 double nA = ari_colhida(A,B);                 /* ⊕ Kirchhoff + espelho             */
                 double nB = geo_colhida(A,B,T_AMB,I_S);       /* ⊗ translinear em ganho ½          */
@@ -129,13 +129,13 @@ int main(void){
             double e = fabs(colhido-exato)/exato;
             printf("       (%.3f,%.3f)  %.15f  %.15f  %.1e  %d\n",
                    pares[t][0], pares[t][1], colhido, exato, e, k);
-            if(e > 1e-14) erro=1;
+            if((long long)(e * 1e14) >= 1) erro=1;
             /* dobra os dígitos? a razão d_{n+1}/d_n² → 1/(8M) */
             if(t==0 && k>=4){
                 double rq = dif[k-2]/(dif[k-3]*dif[k-3]), prev = 1.0/(8.0*exato);
                 printf("         razão d_{n+1}/d_n² = %.8f   1/(8·AGM) = %.8f  %s\n",
                        rq, prev, fabs(rq-prev)/prev == 0.0 ? "✓ dobra" : "← REVER");
-                if(fabs(rq-prev)/prev >= 1e-2) erro=1;
+                if((long long)(fabs(rq-prev)/prev * 1e2) >= 1) erro=1;
             }
         }
         printf("     %s\n", VD(erro, "resíduo 0 — o laço de correntes é o AGM, e dobra os dígitos"));
@@ -158,7 +158,7 @@ int main(void){
             }
             printf("       (%.2f,%.2f) : I preservado nas 5 batidas, erro rel. máx %.2e %s\n",
                    pares[t][0], pares[t][1], pior, pior== 0.0?"✓":"← REVER");
-            if(pior>=1e-13) erro=1;
+            if((long long)(pior * 1e13) >= 1) erro=1;
         }
         /* E O AGM TEM UMA IDENTIDADE EXACTA que o limiar de 1e-13 esconde. Do passo
          *      A' = (a+b)/2,   B' = √(ab)

@@ -129,7 +129,7 @@ printf("\n§R2  O JACOBIANO É o corpo diferencial: J é a derivada da cinemáti
             if(e > pior) pior = e;
         }
         printf("      (%+.2f, %+.2f, %+.2f)      %.3e\n", q[0], q[1], q[2], pior);
-        if(pior > 1e-8) mal++;
+        if((long long)(pior * 1e8) >= 1) mal++;
     }
     printf("\n");
     ok("a forma fechada e a diferença finita dão o MESMO J — é mesmo a derivada", mal == 0);
@@ -166,7 +166,7 @@ printf("\n§R3  J e Jᵀ são ADJUNTOS — e a adjunção É a conservação de 
         for(int j = 0; j < NJ; j++) Pjunta += tau[j]*qd[j];
         double res = fabs(Pponta - Pjunta);
         if(c < 4) printf("      %-6d %+-19.9f %+-21.9f %.1e\n", c, Pponta, Pjunta, res);
-        if(res > 1e-12) mal++;
+        if((long long)(res * 1e12) >= 1) mal++;
     }
     printf("\n      (200 casos medidos)\n\n");
     ok("⟨F, J·q̇⟩ = ⟨Jᵀ·F, q̇⟩ — a potência é a MESMA dos dois lados, resíduo 0", mal == 0);
@@ -199,11 +199,11 @@ printf("\n§R4  A SINGULARIDADE é a degenerescência: det J = 0, e ali é ε² 
          * saía rotulada "regular": a tabela a mentir, com a asserção a passar porque eu só
          * verificava o caso esticado. w é da ordem de L² ≈ 1, logo o limiar é relativo. */
         double escala = (L[0]+L[1]+L[2])*(L[0]+L[1]+L[2]);
-        int sing = w < 1e-6*escala;
-        int esperado = (fabs(q[1]) < 1e-9) || (fabs(fabs(q[1]) - M_PI) < 1e-9);
+        int sing = (long long)(w / escala * 1e6) == 0;
+        int esperado = ((long long)(fabs(q[1]) * 1e9) == 0) || ((long long)(fabs(fabs(q[1]) - M_PI) * 1e9) == 0);
         printf("      %-10.4f %-10.4f %-15.9f %-16s %s\n", q[1], q[2], w,
                sing ? "1 (perdeu uma)" : "2",
-               sing ? (fabs(q[1]) < 1e-9 ? "SINGULAR — o braço esticado"
+               sing ? ((long long)(fabs(q[1]) * 1e9) == 0 ? "SINGULAR — o braço esticado"
                                          : "SINGULAR — o braço dobrado")
                     : "regular");
         if(sing != esperado) mal++;              /* as DUAS singularidades, não só uma */
@@ -218,7 +218,7 @@ printf("\n§R4  A SINGULARIDADE é a degenerescência: det J = 0, e ali é ε² 
         jacobiano(q, J);
         double w = manip(J);
         double esc = (L[0]+L[1]+L[2])*(L[0]+L[1]+L[2]);
-        if(antw >= 0 && ((antw > 1e-6*esc) != (w > 1e-6*esc))) nsing++;
+        if(antw >= 0 && (((long long)(antw / esc * 1e6) >= 1) != ((long long)(w / esc * 1e6) >= 1))) nsing++;
         antw = w;
     }
     printf("      varrendo q₂ de -π a π: %d travessias da singularidade\n\n", nsing);
@@ -251,10 +251,10 @@ printf("\n§R5  A rede como corpo de corpos: o que ela gera é maior que a soma.
             /* posto: quantas colunas (das n ativas) são independentes em R² */
             int posto = 0;
             for(int a = 0; a < n; a++){
-                if(fabs(J[0][a]) + fabs(J[1][a]) < 1e-12) continue;
+                if((long long)((fabs(J[0][a]) + fabs(J[1][a])) * 1e12) == 0) continue;
                 if(posto == 0){ posto = 1; continue; }
                 for(int b = 0; b < a; b++)
-                    if(fabs(det2(J,b,a)) > 1e-9){ posto = 2; break; }
+                    if((long long)(fabs(det2(J,b,a)) * 1e9) >= 1){ posto = 2; break; }
                 if(posto == 2) break;
             }
             if(posto > postoMax) postoMax = posto;
@@ -301,7 +301,7 @@ printf("\n§R6  CONTROLAR: a ponta segue o alvo, e valida-se pelos dois caminhos
         double A = 0, B = 0, C = 0;
         for(int j = 0; j < NJ; j++){ A += J[0][j]*J[0][j]; B += J[0][j]*J[1][j]; C += J[1][j]*J[1][j]; }
         double det = A*C - B*B;
-        if(fabs(det) < 1e-9) break;                /* na singularidade, pára — e é honesto */
+        if((long long)(fabs(det) * 1e9) == 0) break;                /* na singularidade, pára — e é honesto */
         double iv[2][2] = { { C/det, -B/det }, { -B/det, A/det } };
         double w[2] = { iv[0][0]*ex + iv[0][1]*ey, iv[1][0]*ex + iv[1][1]*ey };
         double qd[NJ] = {0};
@@ -313,10 +313,10 @@ printf("\n§R6  CONTROLAR: a ponta segue o alvo, e valida-se pelos dois caminhos
         for(int j = 0; j < NJ; j++) tau[j] = J[0][j]*ex + J[1][j]*ey;
         double Pp = ex*xd[0] + ey*xd[1], Pj = 0;
         for(int j = 0; j < NJ; j++) Pj += tau[j]*qd[j];
-        if(fabs(Pp-Pj) > 1e-10) malP++;
+        if((long long)(fabs(Pp-Pj) * 1e10) >= 1) malP++;
         if(k % 80 == 0)
             printf("      %-8d (%+.5f, %+.5f)   %-10.6f %+.6f × %+.6f\n", k, x, y, err, Pp, Pj);
-        if(err < 1e-6){ chegou = 1; break; }
+        if((long long)(err * 1e6) == 0){ chegou = 1; break; }
         double passo = 0.06;
         for(int j = 0; j < NJ; j++) q[j] += passo*qd[j];
     }
@@ -330,7 +330,7 @@ printf("\n§R6  CONTROLAR: a ponta segue o alvo, e valida-se pelos dois caminhos
     ok("a ponta chega ao alvo distribuindo o erro pelas juntas — e o «menor que 1e-6»"
        " compara-se no QUADRADO, (ax-x)^2 + (ay-y)^2 < 1e-12, sem hypot: a raiz ficou so'"
        " na linha que imprime",
-       chegou && errF2 < 1e-12);
+       chegou && (long long)(errF2 * 1e12) == 0);
     ok("e a potência fecha em TODO o percurso — a adjunção não se quebra a mexer", malP == 0);
     printf("      E é a rede inteira: o erro é medido UMA vez na ponta, o corpo diferencial\n");
     printf("      reparte-o pelas juntas por Jᵀ, e cada junta é um motor com o seu DTC a\n");

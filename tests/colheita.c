@@ -294,7 +294,7 @@ int main(void){
         double A_zero = 1.0 - reflexao(1e-10,eps_r,f) - transmissao(1e-10,eps_r,f,d);
         double A_inf  = 1.0 - reflexao(1e7,eps_r,f)   - transmissao(1e7,eps_r,f,d);
         ok("e os dois EXTREMOS absorvem quase nada — o zero deixa passar, o infinito devolve",
-           A_zero < 0.01 && A_inf < 0.01 && maior_A > 10*(A_zero + A_inf + 1e-9));
+           A_zero < 0.01 && A_inf < 0.01 && maior_A > 10*(A_zero + A_inf));
         printf("     -> o maximo e em sigma = %.2f S/m (|Z| = %.1f ohm), com %.1f%% absorvidos.\n",
                melhor_s, cabs(Zbest), 100*maior_A);
         printf("        Nos extremos: sigma->0 absorve %.1f%%, sigma->inf absorve %.1f%%.\n",
@@ -321,7 +321,7 @@ int main(void){
                  * transmissao() devolve (1-R)*exp(-2*alpha*d) <= 1-R, donde
                  * A = (1-R)(1-exp(-2*alpha*d)) >= 0 SEMPRE. Fica como rede de seguranca
                  * para quando os modelos mudarem — mas nao se conte como medicao. */
-                if(A < -1e-12 || R < -1e-12 || T < -1e-12) fecham--;
+                if((long long)(A * 1e12) < 0 || (long long)(R * 1e12) < 0 || (long long)(T * 1e12) < 0) fecham--;
                 casos++;
             }
         /* ATENCAO ao que esta asserção mede, e ao que NAO mede.

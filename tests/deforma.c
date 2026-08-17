@@ -89,7 +89,7 @@ static double rot(double W, double K, int trans, int n){
     return (x - x0)/n;
 }
 /* travado? existe q ≤ qmax e p com f^q(x) ≈ x + p (órbita periódica) */
-static int travado(double W, double K, int qmax, double tol){
+static int travado(double W, double K, int qmax){
     double x = 0.1;
     for(int i=0;i<3000;i++) x = f_circ(x,W,K);            /* transiente                            */
     double x0 = x;
@@ -97,7 +97,7 @@ static int travado(double W, double K, int qmax, double tol){
         x = f_circ(x,W,K);
         double d = x - x0;
         double r = d - floor(d + 0.5);                     /* distância ao inteiro mais próximo     */
-        if(fabs(r) < tol) return q;
+        if((long long)(fabs(r) * 1e10) == 0) return q;
     }
     return 0;
 }
@@ -167,7 +167,7 @@ int main(void){
                 /* a malha tem de ser IRRACIONAL: Ω=i/NW seria racional de denominador pequeno e
                  * travaria por artefato. (i+1/φ)/NW é irracional para todo i.                   */
                 double W = ((double)i + PHI_INV)/NW;
-                if(travado(W,K,40,1e-10)) trav++;
+                if(travado(W,K,40)) trav++;
             }
             double frac = (double)trav/NW;
             printf("       K=%.2f : fração travada = %.4f   %s\n", K, frac,
@@ -199,7 +199,7 @@ int main(void){
             for(int i=-25000;i<=25000;i++){
                 double W = alvo + i*passo;
                 if(W<0||W>1) continue;
-                int q = travado(W,K,40,1e-10);
+                int q = travado(W,K,40);
                 if(q == (int)alvos[t].q){ if(W<lo) lo=W; if(W>hi) hi=W; }
             }
             double larg = (hi>lo) ? hi-lo : 0;
@@ -208,7 +208,7 @@ int main(void){
             else
                 printf("       %2ld/%-2ld    < %.0e  (abaixo da resolução — não é zero medido)\n",
                        alvos[t].pp, alvos[t].q, passo);
-            if(larg > 0 && larg > larg_ant + 1e-12) decresce = 0;
+            if(larg > 0 && (long long)((larg - larg_ant) * 1e12) >= 1) decresce = 0;
             if(larg > 0) larg_ant = larg;
         }
         printf("     as línguas ENCOLHEM ao longo dos convergentes de 1/φ: %s\n",
@@ -243,7 +243,7 @@ int main(void){
                 int NP=700;
                 for(int j=0;j<NP;j++){
                     double p0=(double)j/NP;
-                    if(travado(p0,K,40,1e-10)) continue;      /* ilha: não é curva                 */
+                    if(travado(p0,K,40)) continue;      /* ilha: não é curva                 */
                     double x=0.1, pp=p0;
                     for(int t=0;t<400;t++){ pp += (K/(2*M_PI))*sin(2*M_PI*x); x += pp; }
                     double x0=x; int nn=3000;

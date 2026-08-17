@@ -93,12 +93,12 @@ printf("\n§E3  A multiplicação: a Julia de z² é o círculo, e ele é invari
         double x = cos(t), y = sin(t);
         double nx = x*x - y*y, ny = 2*x*y;
         double r = sqrt(nx*nx + ny*ny);
-        if(fabs(r - 1.0) < 1e-12) fica++; else mau++;
+        if((long long)(fabs(r - 1.0) * 1e12) == 0) fica++; else mau++;
     }
     for(int k = 1; k <= 20; k++){
         double x = k / 21.0, y = 0;                       /* dentro: |z| < 1 */
         for(int n = 0; n < 12; n++){ double nx = x*x - y*y, ny = 2*x*y; x = nx; y = ny; }
-        if(x*x + y*y < 1e-12) cai++;          /* o QUADRADO do limiar, e a mesma pergunta */
+        if((long long)(x*x + y*y) == 0) cai++;
         double X = 1.0 + k/10.0, Y = 0;                   /* fora: |z| > 1 */
         for(int n = 0; n < 6; n++){ double nx = X*X - Y*Y, ny = 2*X*Y; X = nx; Y = ny; }
         if(X*X + Y*Y > 100.0) foge++;         /* idem: dez ao quadrado sao cem */

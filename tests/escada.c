@@ -135,7 +135,7 @@ int main(void){
         }
         printf("      ...\n\n");
         ok("a equacao do coeficiente fecha em n = 1..10, e (b)_n e o expoente sao SEMPRE positivos",
-           pior < 1e-12 && fora == 0);
+           (long long)(pior * 1e12) == 0 && fora == 0);
 
         /* e n = 1 tem de devolver o valor ja' publicado para o ouro — a generalizacao CONTEM.
          *
@@ -239,7 +239,7 @@ int main(void){
             Zs d = desc(n);
             double b = (n + sqrt((double)n*n + 4.0)) / 2.0, pn = 1.0;
             for(int k=0;k<n;k++) pn *= (b - k);
-            if(fabs((d.p + d.q*b) - pn) > 1e-6 * (pn > 1 ? pn : 1)) mau_fecho++;
+            if((long long)(fabs((d.p + d.q*b) - pn) / (pn > 1 ? pn : 1) * 1e6) >= 1) mau_fecho++;
             if((d.p == 0) != (n % 2 == 1)) mau_dic++;
             if(n % 2) impares++; else pares++;
             if(n <= 8 || n == 14)
@@ -437,8 +437,8 @@ int main(void){
             double s  = (n + sqrt((double)n*n + 4.0)) / 2.0;
             double s2 = (n - sqrt((double)n*n + 4.0)) / 2.0;
             /* as tres formas do mesmo numero: n, sigma+sigma', sigma-1/sigma */
-            if(fabs((s + s2) - (double)n) > 1e-12) mau++;
-            if(fabs((s - 1.0/s) - (double)n) > 1e-12) mau++;
+            if((long long)(fabs((s + s2) - (double)n) * 1e12) >= 1) mau++;
+            if((long long)(fabs((s - 1.0/s) - (double)n) * 1e12) >= 1) mau++;
             casos++; }
         printf("      n = sigma + sigma' = sigma - 1/sigma, para n = -8..8: %ld casos, %ld falhas\n\n",
                casos, mau);

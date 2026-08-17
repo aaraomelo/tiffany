@@ -97,7 +97,7 @@ int main(void){
             double T = 100.0 * (1L << k);
             double r = sb_potencia(2*T) / sb_potencia(T);
             nT++;
-            if(fabs(r - 16.0) > 1e-9) quarta = 0;
+            if(r != 16.0) quarta = 0;
         }
         /* ESTAS DUAS NAO SAO MEDIDA, E O GUME AUTOMATICO DISSE-O. Sobreviveram a todas as
          * mutacoes porque `sb_potencia` E' sigma.T^4 e `wien_pico` E' B/T: dividir
@@ -118,7 +118,7 @@ int main(void){
         for(int k = 0; k <= 4; k++){
             double T = 100.0 * (1L << k);
             nW++;
-            if(fabs(wien_pico(T)*T - WIEN_B) > 1e-15) inversa = 0;
+            if(wien_pico(T)*T != WIEN_B) inversa = 0;
         }
         conclui("WIEN e inverso por DEFINICAO de wien_pico — o que se mede e' o PICO de Planck");
         (void)inversa; (void)nW;
@@ -280,7 +280,7 @@ int main(void){
                 for(int i = 0; i < 3; i++) dB += (Ba[i]-Bb[i])*(Ba[i]-Bb[i]);
                 double dP = fabs(p_joule(Qa,vol,comp) - p_joule(Qb,vol,comp));
                 double esc2 = Ba[0]*Ba[0]+Ba[1]*Ba[1]+Ba[2]*Ba[2];
-                if(dB < esc2*1e-24) colidem_B++;      /* os quadrados, sem duas raizes */
+                if(esc2 > 0 && (long long)(dB / esc2 * 1e24) == 0) colidem_B++;
                 if(dP < p_joule(Qa,vol,comp)*1e-12) colidem_P++;
                 pares++;
             }
@@ -384,7 +384,7 @@ int main(void){
             double qr2 = q2_rec - qt_rec*qt_rec;
             double qr_rec = qr2 > 0 ? sqrt(qr2) : 0;
             double err = fabs(qr_rec - qr) / qr;
-            if(err < 1e-9) recuperados++;
+            if((long long)(err * 1e9) == 0) recuperados++;
             if(err > pior) pior = err;
             tentados++;
         }

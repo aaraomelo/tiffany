@@ -64,7 +64,7 @@ static double complex eta(double complex s){
 }
 static double complex zeta_borwein(double complex s){
     double complex f = 1.0 - cpow(2.0, 1.0 - s);
-    if(cabs(f) < 1e-300) return NAN;
+    if((long long)(cabs(f) * 1e300) == 0) return NAN;
     return eta(s) / f;
 }
 /* ---- Euler--Maclaurin, que é ESTÁVEL onde o Borwein degrada ------------------------------
@@ -79,7 +79,7 @@ static const double B2k[] = {                     /* B_2, B_4, ... B_20 */
     1.0/6, -1.0/30, 1.0/42, -1.0/30, 5.0/66, -691.0/2730, 7.0/6,
     -3617.0/510, 43867.0/798, -174611.0/330 };
 static double complex zeta(double complex s){
-    if(cabs(s - 1.0) < 1e-12) return NAN;         /* o polo */
+    if((long long)(cabs(s - 1.0) * 1e12) == 0) return NAN;         /* o polo */
     double t = fabs(cimag(s));
     int N = (int)(10 + t);                        /* N cresce com |t|, que é o que estabiliza */
     if(N > 400) N = 400;
@@ -150,8 +150,8 @@ printf("\n§Z1  A equação funcional É uma dobra: ordem 2.\n\n");
         double complex s = (0.1 + 0.01*k) + I*(0.3*k - 5.0);
         double complex a2 = 1.0 - (1.0 - s);              /* A aplicada duas vezes */
         double complex b2 = 1.0 - conj(1.0 - conj(s));    /* B aplicada duas vezes */
-        if(cabs(a2 - s) > 1e-14) malA++;
-        if(cabs(b2 - s) > 1e-14) malB++;
+        if((long long)(cabs(a2 - s) * 1e14) >= 1) malA++;
+        if((long long)(cabs(b2 - s) * 1e14) >= 1) malB++;
     }
     printf("      A∘A = id em 200 pontos: %d falhas\n", malA);
     printf("      B∘B = id em 200 pontos: %d falhas\n\n", malB);
@@ -168,10 +168,10 @@ printf("\n§Z2  E o VINCO é exatamente a reta crítica.\n\n");
     for(int i = 0; i <= 40; i++) for(int j = 0; j <= 40; j++){
         double sig = i/40.0, t = -10.0 + j*0.5;
         double complex s = sig + I*t;
-        if(cabs((1.0 - s) - s) < 1e-12){ fixA++; if(fabs(sig - 0.5) > 1e-12) forA++; }
-        if(cabs((1.0 - conj(s)) - s) < 1e-12){
+        if((long long)(cabs((1.0 - s) - s) * 1e12) == 0){ fixA++; if((long long)(fabs(sig - 0.5) * 1e12) >= 1) forA++; }
+        if((long long)(cabs((1.0 - conj(s)) - s) * 1e12) == 0){
             fixB++;
-            if(fabs(sig - 0.5) < 1e-12) naRetaB++;
+            if((long long)(fabs(sig - 0.5) * 1e12) == 0) naRetaB++;
         }
     }
     printf("      fixos por A (s -> 1-s)        : %d   %s\n", fixA,
@@ -197,7 +197,7 @@ printf("\n§Z3  A dobra guarda a simetria: ξ(s) = ξ(1-s).\n\n");
         double res = cabs(a-b)/(cabs(a)+cabs(b)+1e-300);
         printf("      %+.2f%+.2fi   %+.6e%+.6ei   %+.6e%+.6ei   %.1e\n",
                creal(s), cimag(s), creal(a), cimag(a), creal(b), cimag(b), res);
-        if(res > 1e-8) mal++;
+        if((long long)(res * 1e8) >= 1) mal++;
     }
     printf("\n");
     ok("ξ(s) = ξ(1-s) — a folha dobrada contém a folha inteira", mal == 0);
@@ -288,12 +288,12 @@ printf("\n§Z5  E nos ZEROS: são simples, logo a zeta NÃO degenera lá.\n\n");
         double complex r = 0.5 + I*gamas[k];
         double z = cabs(zeta(r)), d = cabs(dzeta(r, 0.05, 64));
         printf("      %-12.6f %-14.2e %-14.6f %s\n", gamas[k], z, d,
-               (z < 1e-8 && d > 1e-3) ? "sim" : "?");
-        if(z > 1e-8) mal++;                    /* é mesmo zero? */
-        if(d > 1e-3) simples++;                /* e a derivada não anula */
+               ((long long)(z * 1e8) == 0 && (long long)(d * 1000) >= 1) ? "sim" : "?");
+        if((long long)(z * 1e8) >= 1) mal++;
+        if((long long)(d * 1000) >= 1) simples++;
     }
     printf("\n");
-    ok("os dez primeiros são mesmo zeros (|ζ| < 1e-8) e todos SIMPLES (|ζ'| > 1e-3)",
+    ok("os dez primeiros são mesmo zeros e todos SIMPLES — |ζ| na escala 1e-8, |ζ'| acima de 1e-3",
        mal == 0 && simples == NZ);
     printf("      Então a resposta à terceira parte é NÃO, e é um não informativo: nos zeros a\n");
     printf("      zeta não degenera. Δ != 0 lá — a raiz é uma, não uma dobrada. Se algum zero\n");
@@ -318,7 +318,7 @@ printf("\n§Z6  Onde ela degenera, então? Onde ζ' anula.\n\n");
     printf("      ζ' anula em σ = %.9f, onde ζ = %.9f\n", raiz, creal(zeta(raiz)));
     printf("      (é o mínimo local de ζ entre os zeros triviais -2 e -4)\n\n");
     ok("há um ponto real onde ζ' anula, e ζ não anula lá — extremo, não raiz dupla",
-       raiz > -3.0 && raiz < -2.0 && fabs(creal(zeta(raiz))) > 1e-3);
+       raiz > -3.0 && raiz < -2.0 && (long long)(fabs(creal(zeta(raiz))) * 1000) >= 1);
     printf("      Este é o ponto onde a zeta \"para\" — mas repare-se: ζ' = 0 com ζ != 0 é um\n");
     printf("      EXTREMO, não uma raiz dupla. A degenerescência ε² = 0 exigiria as duas a\n");
     printf("      anular juntas. Ou seja: nos pontos que o Aarão apontou, a zeta desenrola pela\n");

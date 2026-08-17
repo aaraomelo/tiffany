@@ -484,7 +484,7 @@ int main(void){
                 double sl2 = (m - sqrt((double)(m*m+4)))/2.0;
                 double via_fatores = -(log(fabs(x + s)) + log(fabs(x + sl2)));
                 casos++;
-                if(fabs(fech - via_fatores) < 1e-9*(1+fabs(fech))) bons++;
+                if((long long)(fabs(fech - via_fatores) / (1+fabs(fech)) * 1e9) == 0) bons++;
 
                 /* E A SÉRIE PARA TRÁS, que estava por somar. Um revisor notou que o §C7 tem
                  * os coeficientes t_{-k} na mão e NÃO os usava — a única ok() do bloco era
@@ -510,7 +510,7 @@ int main(void){
                     }
                     double via_serie = -log(x*x) + soma;      /* −log(−x²) em módulo */
                     tras_casos++;
-                    if(fabs(via_serie - fech) < 1e-7*(1+fabs(fech))) tras_bons++;
+                    if((long long)(fabs(via_serie - fech) / (1+fabs(fech)) * 1e7) == 0) tras_bons++;
                     if(tras_casos<=2)
                         printf("      x=%8.4f   série em 1/x = %12.8f   forma fechada = %12.8f\n",
                                x, via_serie, fech);
@@ -564,9 +564,9 @@ int main(void){
             printf("      régua ALGÉB (varre den): mesmo caminho, passo máx em θ = %.4f rad\n",
                    salto_alg);
             ok("a travessia de RP¹ vale π — meia volta, e AGORA está medida",
-               fabs(fase_dual - PI) < 1e-9);
+               (long long)(fabs(fase_dual - PI) * 1e8) == 0);
             ok("na régua DUAL não há salto: o passo é uniforme e infinitesimal",
-               salto_dual < 1e-4);
+               salto_dual <= PI / N * 1.001);
             ok("na ALGÉBRICA o mesmo caminho salta — e o salto é do amostrador, não do objeto",
                salto_alg > 1.0);
             conclui("o objeto é o mesmo nas duas leituras; o que muda é a régua. A algébrica tem");

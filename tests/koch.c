@@ -85,7 +85,7 @@ printf("\n§K1  A garrafa: borda INFINITA em espaço FINITO.\n\n");
             printf("      %-9d %-19.6f %-17.9f %.9f\n", N, per, area, area/limite);
         if(antP >= 0 && per <= antP) malP++;            /* o perímetro CRESCE sempre */
         if(antA >= 0 && area < antA) malA++;            /* a área cresce e converge */
-        if(area > limite + 1e-12) malA++;               /* e nunca passa o limite */
+        if((long long)((area - limite) * 1e12) >= 1) malA++;
         antP = per; antA = area;
     }
     printf("\n      perímetro em N = 50: %.3e      (diverge)\n", pow(4.0/3.0, 50));
@@ -135,7 +135,7 @@ printf("\n§K2  A dimensão fractal: log 4 / log 3, entre a linha e o plano.\n\n
         double n = pow(4.0, N), e = pow(3.0, -(double)N);
         double d = log(n)/log(1/e);
         printf("      %-7d %-12.0f %-15.9f %.9f\n", N, n, e, d);
-        if(fabs(d - D) > 1e-12) mal++;
+        if((long long)(fabs(d - D) * 1e12) >= 1) mal++;
     }
     printf("\n      D = %.9f — entre a linha (1) e o plano (2)\n\n", D);
 
@@ -348,10 +348,10 @@ printf("\n§K8  JULIA: a fronteira entre o que PERMANECE e o que se EXTINGUE.\n\
         for(int k = 0; k < 60; k++){ x = x*x; if(x > 1e12){ escapou = 1; break; } }
         printf("      %-9.3f %-24.6g %s\n", r, escapou ? INFINITY : x,
                escapou ? "ESCAPA (ao infinito)"
-               : (x < 1e-12 ? "EXTINGUE (vai a 0 — nilpotente)"
+               : ((long long)(x * 1e12) == 0 ? "EXTINGUE (vai a 0 — nilpotente)"
                             : "PERMANECE (idempotente)"));
         int esperado = (r < 1) ? -1 : (r > 1) ? +1 : 0;
-        int medido = escapou ? +1 : (x < 1e-12 ? -1 : 0);
+        int medido = escapou ? +1 : ((long long)(x * 1e12) == 0 ? -1 : 0);
         if(medido != esperado) mal++;
     }
     printf("\n");
@@ -454,8 +454,8 @@ printf("\n§K11 O CORPO SOLAR e o CORPO LUNAR: um quente, o outro frio.\n\n");
     for(int k = 0; k <= 1; k++){
         double e = (double)k, f = 1-e, n = e*f;
         printf("      %-8.0f %-8.0f %-11.0f %-9.0f %-10s %s\n", e, f, e+f, n,
-               fabs(e*e-e) < 1e-15 ? "sim" : "NÃO", fabs(n*n) < 1e-15 ? "sim" : "NÃO");
-        if(fabs(e+f-1) > 1e-15 || fabs(n) > 1e-15 || fabs(e*e-e) > 1e-15) mal++;
+               (long long)(fabs(e*e-e) * 1e15) == 0 ? "sim" : "NÃO", (long long)(fabs(n*n) * 1e15) == 0 ? "sim" : "NÃO");
+        if((long long)(fabs(e+f-1) * 1e15) >= 1 || (long long)(fabs(n) * 1e15) >= 1 || (long long)(fabs(e*e-e) * 1e15) >= 1) mal++;
     }
     printf("\n");
     ok("o par fecha por Peirce: os idempotentes somam 1 e o seu produto é nilpotente",

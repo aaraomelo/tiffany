@@ -154,10 +154,10 @@ int main(void){
         double dif_mau = fabs(fabs(Ic_erra) - fabs(Ic_npn));
         printf("     -> a MESMA equacao nos dois tipos, com a tensao espelhada: |dif| = %.3e\n", dif_ok);
         printf("        e sem espelhar a tensao ela NAO bate: |dif| = %.3e  (o teste distingue)\n", dif_mau);
+        /* e o «bate» é EXACTO, não «menor que 1e-20»: com o tipo e a tensão ambos
+         * espelhados, SHOCKLEY(−1,−V) é o simétrico de SHOCKLEY(+1,+V) — a MESMA
+         * exponencial, com o sinal de fora —, logo os módulos são iguais bit a bit. */
         ok("e a EQUACAO e a mesma — a MESMA Shockley nos dois tipos, e so' com a tensao espelhada e que bate",
-           /* e o «bate» é EXACTO, não «menor que 1e-20»: com o tipo e a tensão ambos
-            * espelhados, SHOCKLEY(−1,−V) é o simétrico de SHOCKLEY(+1,+V) — a MESMA
-            * exponencial, com o sinal de fora —, logo os módulos são iguais bit a bit. */
            dif_ok == 0.0 && dif_mau != 0.0);
         #undef SHOCKLEY
         printf("     -> NPN da %.3e A e PNP da %.3e A: o mesmo modulo, o sinal espelhado.\n",
@@ -217,7 +217,7 @@ int main(void){
         double F_lim = 0;
         { Andar c[4]; memcpy(c, cadeia, sizeof c); c[0].G = 1e12; F_lim = friis(c, 4); }
         ok("A LEI: subir o ganho do primeiro andar faz o ruido total TENDER ao ruido dele so",
-           suprime && fabs(F_lim - cadeia[0].F) < 1e-6);
+           suprime && (long long)(fabs(F_lim - cadeia[0].F) * 1e6) == 0);
         printf("        Com G1 -> infinito, F_total -> %.3f, que e o F do primeiro andar sozinho.\n",
                F_lim);
         puts("        O encanamento inteiro fica refem do primeiro elo — e isso decide o DESENHO,");

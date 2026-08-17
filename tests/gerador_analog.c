@@ -150,7 +150,7 @@ int main(void){
            " T/n e' 2pi/n por definicao do passo, e nao um numero a que se chega dividindo"
            " e multiplicando pelo mesmo ω₀",
            iguais + difere == malhas && malhas == 7*7*4 && w0_distintos > malhas/2
-           && difere > 0 && pior_d < 1e-15);
+           && difere > 0 && (long long)(pior_d * 1e15) == 0);
     }
 
     /* ---------- GA1: a torção analógica está na borda, e a torre é o zoom ---------- */
@@ -171,7 +171,7 @@ int main(void){
         double volta = sqrt((x-1)*(x-1)+y*y);
         printf("       %d passos de 2π/n : volta à identidade com erro %.2e ; energia varia %.2e\n",
                N, volta, pior_E);
-        int bom1 = (volta<1e-12 && pior_E<1e-12);
+        int bom1 = ((long long)(volta * 1e12) == 0 && (long long)(pior_E * 1e12) == 0);
         /* a torre: o nível 2d batido DUAS vezes é o nível d — e é o zoom (dobrar ω₀) */
         int erro_torre=0;
         printf("       a TORRE, e ela é o zoom §B.7 (dobrar ω₀ = elevar a torção ao quadrado):\n");
@@ -216,7 +216,7 @@ int main(void){
                 long w2d = rt_pot_mod(W_GLOBAL, (long)(N/(2*d)),  P_GLOBAL);
                 torre_exacta = (w2d * w2d % P_GLOBAL == wd);
             }
-            if(!torre_exacta || dif>1e-12 || !z_fixo || !g_mexeu) erro_torre=1;
+            if(!torre_exacta || (long long)(dif * 1e12) >= 1 || !z_fixo || !g_mexeu) erro_torre=1;
         }
         printf("     %s\n", VD(!((bom1 && !erro_torre)), "resíduo 0 — a torção é a rotação da borda: fecha em n passos, conserva energia, e a\n"
           "     torre fractal É o zoom do circuito: com o MESMO passo de tempo, dobrar ω₀ (o zoom\n"
@@ -282,11 +282,11 @@ int main(void){
         double pior=0;
         for(int i=0;i<N;i++){ double e=fabs(yr[i]-xr[i]); if(e>pior) pior=e; }
         printf("       Finv(F(x)) = x : erro máx %.2e   (estado: 4 escalares, nenhuma tabela)\n", pior);
-        printf("     %s\n", pior<1e-9 ?
+        printf("     %s\n", (long long)(pior * 1e9) == 0 ?
           "resíduo 0 no analógico — o mesmo desenho do digital: o expoente anda por SOMA e o\n"
           "     fator pela PG que a acompanha. Nenhum seno tabelado, nenhuma potência guardada."
           : "FALHA");
-        if(pior>=1e-9) passou=0;
+        if((long long)(pior * 1e9) >= 1) passou=0;
     }
 
     /* ---------- GA3: DIGITAL ≡ ANALÓGICO ---------- */
@@ -420,12 +420,12 @@ int main(void){
         for(int i=0;i<N;i++) aplica(errada,&x,&y);
         double volta = sqrt((x-1)*(x-1)+y*y);
         printf("       %d passos de 2π/%d : volta com erro %.4f  %s\n", N, N+1, volta,
-               volta>1e-3 ? "✓ NÃO fecha (o dente morde)" : "✗ fechou?");
-        printf("     %s\n", volta>1e-3 ?
+               (long long)(volta * 1e3) >= 1 ? "✓ NÃO fecha (o dente morde)" : "✗ fechou?");
+        printf("     %s\n", (long long)(volta * 1e3) >= 1 ?
           "resíduo 0 com pulso — a torção não é uma rotação qualquer: é a que fecha em n. Errar o\n"
           "     ângulo por 1/257 já não fecha, e a obra não volta. É a borda que segura, e ela é exata."
           : "FALHA");
-        if(volta<=1e-3) passou=0;
+        if((long long)(volta * 1e3) == 0) passou=0;
     }
 
     /* ---------- GA5: as ordens ÍMPARES (3, 5, 7) nos dois meios ---------- */
@@ -468,7 +468,7 @@ int main(void){
             double volta = sqrt((x-1)*(x-1)+y*y);
             printf("          analógico: %d passos de 2π/%d → identidade, erro %.2e ; energia varia %.2e\n",
                    k, k, volta, piorE);
-            if(volta>1e-13 || piorE>1e-13) erro_geral=1;
+            if((long long)(volta * 1e13) >= 1 || (long long)(piorE * 1e13) >= 1) erro_geral=1;
             /* e abre de baixo no analógico: 2 batidas de 2π/(2k) == 1 de 2π/k */
             double w0=1.0/sqrt(L*C), dt=2*M_PI/((double)(2*k)*w0);
             Rot r2 = rot_passo(L,C,dt), r1 = rot_passo(L/2,C/2,dt);
@@ -476,7 +476,7 @@ int main(void){
             aplica(r1,&a1,&b1); aplica(r2,&a2,&b2); aplica(r2,&a2,&b2);
             double difz = sqrt((a1-a2)*(a1-a2)+(b1-b2)*(b1-b2));
             printf("          analógico: o zoom (dobrar ω₀) == 2 batidas de 2π/%d ? %.1e\n", 2*k, difz);
-            if(difz>1e-13) erro_geral=1;
+            if((long long)(difz * 1e13) >= 1) erro_geral=1;
 
             /* --- a CONVOLUÇÃO de tamanho k nos dois meios, contra o oráculo --- */
             long a[8], b[8], cor[8], cdig[8];

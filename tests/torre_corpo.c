@@ -127,7 +127,7 @@ int main(void){
             W x = { sin(2.0*t+1), cos(2.0*t+2), 0.3+0.1*t };
             W y = { sin(3.0*t+3), cos(3.0*t+4), 0.7-0.05*t };
             W s1 = wsoma(x,y), s2 = wsoma(y,x);
-            if(fabs(s1.a-s2.a) < 1e-12 && fabs(s1.b-s2.b) < 1e-12 && fabs(s1.c-s2.c) < 1e-12) g_ok++;
+            if((long long)(fabs(s1.a-s2.a) * 1e12) == 0 && (long long)(fabs(s1.b-s2.b) * 1e12) == 0 && (long long)(fabs(s1.c-s2.c) * 1e12) == 0) g_ok++;
         }
         printf("      Gentil 3D: a soma é a de R³, componente a componente — comutativa em"
                " %ld de 200\n\n", g_ok);
@@ -220,7 +220,7 @@ int main(void){
             W e = gen(x, wsoma(y,z));
             W d = wsoma(gen(x,y), gen(x,z));
             g_casos++;
-            if(fabs(e.a-d.a) > 1e-9 || fabs(e.b-d.b) > 1e-9 || fabs(e.c-d.c) > 1e-9) g_falhas++;
+            if((long long)(fabs(e.a-d.a) * 1e9) >= 1 || (long long)(fabs(e.b-d.b) * 1e9) >= 1 || (long long)(fabs(e.c-d.c) * 1e9) >= 1) g_falhas++;
         }
         printf("      Gentil (ímpar)      3     NÃO — falha em %ld de %ld\n\n",
                g_falhas, g_casos);
@@ -318,7 +318,7 @@ int main(void){
                 W y = { sin(3.0*t+3)*3, cos(3.0*t+4)*3, 0.6+0.1*cos(t) };
                 W z = { sin(5.0*t+5)*3, cos(5.0*t+6)*3, 0.4+0.3*sin(2.0*t) };
                 W e = gen(x, wsoma(y,z)), d = wsoma(gen(x,y), gen(x,z));
-                if(fabs(e.a-d.a) > 1e-9 || fabs(e.b-d.b) > 1e-9 || fabs(e.c-d.c) > 1e-9) g_falha++;
+                if((long long)(fabs(e.a-d.a) * 1e9) >= 1 || (long long)(fabs(e.b-d.b) * 1e9) >= 1 || (long long)(fabs(e.c-d.c) * 1e9) >= 1) g_falha++;
             }
             if(!g_falha) coerente = 0;              /* se distribuísse, o nome mudava */
         }

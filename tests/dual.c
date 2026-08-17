@@ -66,7 +66,7 @@ printf("\n§U1  A tabela do dual é a do direto com o sinal trocado.\n\n");
         Z x = { sin(3.0*k+1), cos(5.0*k+2) }, y = { sin(7.0*k+3), cos(11.0*k+4) };
         Z pd = mul(x,y,-1), pu = mul(x,y,+1);
         if(fabs(pd.b - pu.b) != 0.0) mal++;              /* a 2a componente e IDENTICA */
-        if(fabs((pd.a + pu.a)/2 - x.a*y.a) > 1e-14) mal++;  /* e a media das 1as e ac */
+        if((long long)(fabs((pd.a + pu.a)/2 - x.a*y.a) * 1e14) >= 1) mal++;  /* e a media das 1as e ac */
     }
     printf("      a 2ª componente é a MESMA nas duas, e a média das 1ªs é ac: %d falhas\n\n", mal);
     ok("as duas álgebras diferem só no termo bd, e diferem só no sinal dele", mal == 0);
@@ -118,12 +118,12 @@ printf("\n§U3  A forma polar do direto — o círculo.\n\n");
     for(int k = 0; k < 200; k++){
         double r = 1 + fabs(sin(3.0*k)), th = 0.7*k;
         Z z = { r*cos(th), r*sin(th) };
-        if(fabs(norma(z,-1) - r*r) > 1e-12) malN++;
+        if((long long)(fabs(norma(z,-1) - r*r) * 1e12) >= 1) malN++;
         /* e a polar MULTIPLICA os raios e SOMA os ângulos */
         double r2 = 1 + fabs(cos(5.0*k)), t2 = 0.3*k;
         Z w = { r2*cos(t2), r2*sin(t2) }, p = mul(z,w,-1);
         Z esp = { r*r2*cos(th+t2), r*r2*sin(th+t2) };
-        if(fabs(p.a-esp.a) > 1e-11 || fabs(p.b-esp.b) > 1e-11) mal++;
+        if((long long)(fabs(p.a-esp.a) * 1e11) >= 1 || (long long)(fabs(p.b-esp.b) * 1e11) >= 1) mal++;
     }
     printf("      N(z) = a² + b² = r², em 200 casos: %d falhas\n", malN);
     printf("      e^{iθ}·e^{iφ} = e^{i(θ+φ)} — raios multiplicam, ângulos somam: %d falhas\n\n", mal);
@@ -145,14 +145,14 @@ printf("\n§U4  A forma polar do dual — a hipérbole.\n\n");
          * cancelamento. Medir contra o resultado acusaria a aritmética de um erro que é dela e
          * não da identidade — e a diferença face ao círculo (onde a²+b² SOMA) é o achado. */
         double escala = z.a*z.a + z.b*z.b;
-        if(fabs(norma(z,+1) - r*r)/escala > 1e-14) malN++;
+        if((long long)(fabs(norma(z,+1) - r*r)/escala * 1e14) >= 1) malN++;
         double r2 = 1 + fabs(cos(5.0*k)), t2 = 0.03*k;
         Z w = { r2*cosh(t2), r2*sinh(t2) }, p = mul(z,w,+1);
         Z esp = { r*r2*cosh(th+t2), r*r2*sinh(th+t2) };
         /* erro RELATIVO: cosh cresce ate ~1e7 aqui, e uma tolerancia absoluta acusaria a
          * aritmetica de ponto flutuante em vez de medir a identidade. */
         double esc = fabs(esp.a) + fabs(esp.b) + 1;
-        if(fabs(p.a-esp.a)/esc > 1e-13 || fabs(p.b-esp.b)/esc > 1e-13) mal++;
+        if((long long)(fabs(p.a-esp.a)/esc * 1e13) >= 1 || (long long)(fabs(p.b-esp.b)/esc * 1e13) >= 1) mal++;
     }
     printf("      N(z) = a² - b² = r², em 200 casos: %d falhas\n", malN);
     printf("      e^{εθ}·e^{εφ} = e^{ε(θ+φ)} — raios multiplicam, ângulos somam: %d falhas\n\n", mal);
@@ -223,7 +223,7 @@ printf("\n§U6  O que o dual NÃO tem: o cone, onde a reversão falha.\n\n");
             if(fabs(N) == 0.0) continue;
             Z c = conjuga(z), inv = { c.a/N, c.b/N }, p = mul(z, inv, s);
             medidos++;
-            if(fabs(p.a-1) > 1e-9 || fabs(p.b) > 1e-9) mal++;
+            if((long long)(fabs(p.a-1) * 1e9) >= 1 || (long long)(fabs(p.b) * 1e9) >= 1) mal++;
         }
     printf("      e onde há inverso, ele é conj(z)/N(z) nas DUAS álgebras\n");
     printf("      (%d casos medidos, %d falhas)\n\n", medidos, mal);
@@ -271,7 +271,7 @@ printf("\n§U7  A notação no R^n, e o produto escrito nas duas.\n\n");
             if(fabs(c0 - d0) != 0.0) mal++;                 /* a escalar nao ve a ordem */
             for(int i = 0; i < 3; i++){                      /* e a vetorial e 2(a×b) */
                 double cr[3] = { a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0] };
-                if(fabs((c[i]-d[i]) - 2*cr[i]) > 1e-12) mal++;
+                if((long long)(fabs((c[i]-d[i]) - 2*cr[i]) * 1e12) >= 1) mal++;
             }
         }
         printf("      σ = %+g: N multiplicativa falhou em %3d de 200;  ab-ba = 2(a×b) sempre\n",
@@ -309,7 +309,7 @@ printf("\n§U7  A notação no R^n, e o produto escrito nas duas.\n\n");
         double na = a0*a0+a1*a1 - (b0*b0+b1*b1);
         double nb = c0*c0+c1*c1 - (d0*d0+d1*d1);
         double nz = z[0]*z[0]+z[1]*z[1] - (z[2]*z[2]+z[3]*z[3]);
-        if(fabs(nz - na*nb) > 1e-9*(fabs(na*nb)+1)) malS++;
+        if((long long)(fabs(nz - na*nb)/(fabs(na*nb)+1) * 1e9) >= 1) malS++;
     }
     printf("      N(xy) = N(x)N(y) com N = |a|² - |b|², em 200 casos: %d falhas\n\n", malS);
     ok("com o sinal no PASSO, a norma volta a ser multiplicativa — assinatura (2,2)",

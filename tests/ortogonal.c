@@ -182,12 +182,12 @@ int main(void){
                     re += cos(th); im += sin(th);
                 }
                 double mod = sqrt(re*re+im*im);
-                if(k==l){ if(fabs(mod - n) > 1e-9) diag_bom = 0; }
+                if(k==l){ if((long long)(fabs(mod - n) * 1e9) >= 1) diag_bom = 0; }
                 else if(mod > pior_fora) pior_fora = mod;
             }
             ns++;
             if(diag_bom) diag_ok++;
-            if(pior_fora < 1e-9) fora_ok++;
+            if((long long)(pior_fora * 1e9) == 0) fora_ok++;
             printf("      %-4d %-16d %.2e\n", n, n, pior_fora);
         }
         printf("      n testados: %d   diagonal = n: %d   fora da diagonal = 0: %d\n",
@@ -213,7 +213,7 @@ int main(void){
             double g11=1.0, g12=cos(th), g22=1.0;
             double det = g11*g22 - g12*g12;
             ts++;
-            if(fabs(det - sin(th)*sin(th)) < 1e-12) lei_ok++;
+            if((long long)(fabs(det - sin(th)*sin(th)) * 1e12) == 0) lei_ok++;
             printf("      %.5f  (1,0)         (%.5f, %.5f)      %.12e\n",
                    th, cos(th), sin(th), det);
         }

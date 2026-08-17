@@ -164,7 +164,7 @@ int main(void){
             double d = A*phi*pow(x, phi-1.0);
             double inv = pow(x/A, 1.0/phi);
             pts++;
-            if(fabs(d-inv) < 1e-14*(1+fabs(d))) iguais++;
+            if((long long)(fabs(d-inv) / (1+fabs(d)) * 1e14) == 0) iguais++;
             printf("      %-8.2f %.15f  %.15f  %.2e\n", x, d, inv, fabs(d-inv));
         }
         printf("      pontos: %d   com f' = f^{-1}: %d\n\n", pts, iguais);
@@ -199,7 +199,7 @@ int main(void){
         for(double x=0.5; x<=5.01; x+=0.9){
             double y = A*pow(x,phi);
             double v = pow(y/A, 1.0/phi);
-            n++; if(fabs(v-x) < 1e-13*(1+x)) inv_ok++;
+            n++; if((long long)(fabs(v-x) / (1+x) * 1e13) == 0) inv_ok++;
         }
         ok("e f^{-1} é mesmo a inversa: f^{-1}(f(x)) = x", inv_ok==n);
     }
@@ -278,7 +278,7 @@ int main(void){
         int fecha=0;
         for(int n=1;n<=12;n++){
             double frac = n*phi - floor(n*phi);
-            if(frac == 0.0 || frac > 1-1e-9) fecha++;
+            if(frac == 0.0 || (long long)((1.0 - frac) * 1e9) == 0) fecha++;
         }
         printf("      voltas n=1..12 em que nφ é inteiro: %d\n", fecha);
         ok("nenhuma volta fecha — a ramificação em 0 é de ordem infinita", fecha==0);
@@ -360,7 +360,7 @@ int main(void){
         int fixo=0, m2=0; double h=1e-6;
         for(double y=0.5; y<=3.01; y+=0.5){
             double d = (exp(y+h)-exp(y-h))/(2*h);
-            m2++; if(fabs(d-exp(y)) < 1e-7*exp(y)) fixo++;
+            m2++; if((long long)(fabs(d-exp(y)) / exp(y) * 1e7) == 0) fixo++;
         }
         printf("      pontos: %d   com d/dx e^x = e^x: %d\n", m2, fixo);
         ok("e a exponencial é o PONTO FIXO da derivada", fixo==m2);
@@ -385,7 +385,7 @@ int main(void){
             }
             bs++;
             if(fabs(res) != 0.0 && pior != 0.0) quebra++;
-            else if(fabs(res) <= 1e-9 && pior == 0.0) quebra++;
+            else if((long long)(fabs(res) * 1e9) == 0 && pior == 0.0) quebra++;
             printf("      %-8.2f %+.6f    %.9f\n", b, res, pior);
         }
         printf("      valores de b: %d   com o desvio a acompanhar |b²−b−1|: %d\n", bs, quebra);

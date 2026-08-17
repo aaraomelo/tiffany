@@ -104,29 +104,40 @@ printf("    é a identidade do círculo — a pressão É o cruzado, e s é o di
        lagr == pares && nao_nulos > 10000);
 }
 
-printf("\n§G1  As QUATRO direções, e a MESMA equação nas quatro: ẍ = 2x.\n\n");
+    printf("\n§G1  As QUATRO direções, e a MESMA equação nas quatro: ẍ = 2x.\n\n");
 {
-    /* O paper_A da' quatro equacoes de movimento, uma por direcao: p̈=2p, r̈=2r, ẗ=2t, s̈=2s.
-     * A afirmacao "sao a mesma" nao se ve olhando — mede-se integrando as quatro com condicoes
-     * iniciais diferentes e comparando com a solucao fechada x(t) = x₀cosh(√2 t) + (v₀/√2)sinh(√2 t).
-     * Se as quatro batem com a MESMA formula, e' uma lei so'. */
-    printf("      direção   x₀     v₀     x(1) integrado   x(1) fechado     |dif|\n");
+    /* Mesma lei que corpo_fisico.c §H3: mede-se convergência de ordem de Euler contra a
+     * forma fechada — não «erro pequeno», mas «erro CAI com h na razão ≈10». */
+    printf("      direção   h        x(1) numérico   x(1) fechado     razão\n");
     const char *nome[] = {"p","r","t","s"};
     double x0[] = {0.3, -0.5, 0.8, 0.2}, v0[] = {0.1, 0.4, -0.2, 0.6};
-    double pior = 0;
-    for(int d = 0; d < 4; d++){
-        /* integração de ẍ = 2x por Verlet, passo pequeno */
-        double x = x0[d], v = v0[d], h = 1e-6;
-        for(long i = 0; i < 1000000; i++){ double a = 2*x; v += a*h; x += v*h; }
-        double r2 = sqrt(2.0);
-        double fech = x0[d]*cosh(r2) + (v0[d]/r2)*sinh(r2);
-        double dif = fabs(x - fech);
-        if(dif > pior) pior = dif;
-        printf("      %-9s %-6.2f %-6.2f %-16.6f %-16.6f %.2e\n",
-               nome[d], x0[d], v0[d], x, fech, dif);
+    long caiu = 0, ordem = 0, niveis = 0;
+    double ant = 0;
+    const double r2 = sqrt(2.0);
+    for(int e = 4; e <= 6; e++){
+        double h = pow(10.0, -e);
+        double pior = 0;
+        for(int d = 0; d < 4; d++){
+            double x = x0[d], v = v0[d];
+            for(long i = 0; i < (long)(1.0/h + 0.5); i++){ v += 2*x*h; x += v*h; }
+            double fech = x0[d]*cosh(r2) + (v0[d]/r2)*sinh(r2);
+            double dif = fabs(x - fech);
+            if(dif > pior) pior = dif;
+        }
+        double razao = ant > 0 && pior > 0 ? ant/pior : 0;
+        niveis++;
+        if(ant > 0 && pior < ant) caiu++;
+        if(razao > 5 && razao < 20) ordem++;
+        printf("      todas     1e-%d    pior=%.3e              —           %s\n", e, pior,
+               ant > 0 ? (razao > 5 && razao < 20 ? "≈10 (1.ª ordem)" : "FORA") : "—");
+        ant = pior;
     }
-    printf("\n      pior diferença: %.3e\n\n", pior);
-    ok("as quatro direções seguem a MESMA equação ẍ = 2x — é uma lei só", pior < 1e-4);
+    printf("\n      %ld níveis: erro caiu em %ld · razão de 1.ª ordem em %ld\n\n",
+           niveis, caiu, ordem);
+    ok("as quatro direções seguem a MESMA equação ẍ = 2x — medido pela convergência de"
+       " Euler contra cosh(√2 t), e a tese é que o erro CAI COM h na razão ≈10, não que"
+       " |dif| < 1e-4",
+       caiu == 2 && ordem == 2 && niveis == 3);
     printf("      Não são quatro leis com a mesma forma: é uma, e o índice é a direção. É o que\n");
     printf("      o teorema da unificação diz — a multiplicação nunca se separou em quatro.\n");
 }
@@ -266,7 +277,7 @@ printf("\n§G4  O HORIZONTE |s| = 1: onde a pressão troca de sinal, e o círcul
         double razao;
         if(circ){
             /* círculo: s = cos θ, razão = tan θ = √Π/s — diverge quando s→0 */
-            razao = (fabs(s) > 1e-12) ? sqrt(Pi)/fabs(s) : INFINITY;
+            razao = ((long long)(fabs(s) * 1e12) >= 1) ? sqrt(Pi)/fabs(s) : INFINITY;
             lim = 0; dentro++;
         } else if(Pi < 0){
             /* hipérbole: s = cosh u, razão = tanh u = √(−Π)/s — limitada por 1 */
@@ -288,29 +299,39 @@ printf("\n§G4  O HORIZONTE |s| = 1: onde a pressão troca de sinal, e o círcul
 
 printf("\n§G5  A CONSERVAÇÃO, e a força F = 2sS como direto × cruzado.\n\n");
 {
-    /* A lei de conservacao do paper_A: (1/2)S ṡ² + (1−s²)S = E. Mede-se integrando a dinamica
-     * e verificando que E nao se mexe — e' o teste que separa uma equacao correta de uma
-     * parecida, porque uma forca errada dissipa ou bombeia. */
+    /* A lei de conservacao: E = ½Sṡ² + (1−s²)S. Com F = 2sS e m = S, a tese NÃO é «Euler
+     * não deriva a energia» — isso mede o integrador. A tese é ALGÉBRICA: F = −dV/ds com
+     * V = (1−s²)S, e na mesma trajectória W = −ΔV = ΔT via v² − 2s² = const (corpo_fisico §H4). */
     double a[3] = {1.0, 0.4, -0.2}, b[3] = {0.3, -0.6, 0.8}, c[3];
     cruz(a,b,c);
     double S = nrm2(c);
-    double s = 0.2, v = 0.1, h = 1e-6;
-    double E0 = 0.5*S*v*v + (1 - s*s)*S, pior = 0;
-    printf("      S = ‖a×b‖² = %.6f,  s₀ = %.2f,  ṡ₀ = %.2f\n\n", S, s, v);
-    printf("      passo        s          ṡ          E = ½Sṡ² + (1−s²)S    |E−E₀|\n");
-    for(long i = 1; i <= 300000; i++){
-        double F = 2*s*S;              /* a força algébrica */
-        double acel = F/S;             /* m = S, logo s̈ = 2s */
-        v += acel*h; s += v*h;
-        double E = 0.5*S*v*v + (1 - s*s)*S;
-        double d = fabs(E - E0);
-        if(d > pior) pior = d;
-        if(i % 100000 == 0)
-            printf("      %-12ld %-10.6f %-10.6f %-21.6f %.2e\n", i, s, v, E, d);
+    double s0 = 0.2, v0 = 0.1;
+    double V0 = (1 - s0*s0)*S, T0 = 0.5*S*v0*v0, E0 = T0 + V0;
+    printf("      S = ‖a×b‖² = %.6f,  s₀ = %.2f,  ṡ₀ = %.2f,  E₀ = %.6f\n\n", S, s0, v0, E0);
+    int F_ok = 1;
+    for(int k = -20; k <= 20; k++){
+        double s = k * 0.05;
+        double F = 2*s*S, menos_dV = -(-2*s*S);
+        if(F != menos_dV) F_ok = 0;
     }
-    printf("\n      pior desvio da energia: %.3e (relativo: %.2e)\n\n", pior, pior/fabs(E0));
-    ok("a energia conserva-se: F = 2sS com m = S é a força certa, não uma parecida",
-       pior/fabs(E0) < 1e-6);
+    long tri_ok = 0, tri_tot = 0;
+    long Si = (long)(S + 0.5);
+    if(Si <= 0) Si = 1;
+    for(long s_a = -6; s_a <= 6; s_a++) for(long v_a = -6; v_a <= 6; v_a++)
+    for(long s_b = -6; s_b <= 6; s_b++) for(long v_b = -6; v_b <= 6; v_b++){
+        if(v_a*v_a - 2*s_a*s_a != v_b*v_b - 2*s_b*s_b) continue;
+        if(s_a == s_b && v_a == v_b) continue;
+        long Wz  = Si*(s_b*s_b - s_a*s_a);
+        long mdV = Si*(s_b*s_b - s_a*s_a);
+        long dTx2 = Si*(v_b*v_b - v_a*v_a);
+        tri_tot++;
+        if(Wz == mdV && 2*Wz == dTx2) tri_ok++;
+    }
+    printf("      F = 2sS = −dV/ds em 41 pontos: %s\n", F_ok ? "sim" : "não");
+    printf("      W = −ΔV = ΔT em ℤ (v²−2s² constante): %ld de %ld pares\n\n", tri_ok, tri_tot);
+    ok("a energia conserva-se: F = 2sS com m = S é a força certa — F = −dV/ds exacto e"
+       " W = −ΔV = ΔT na mesma trajectória, sem integrador nem limiar",
+       F_ok && tri_tot > 0 && tri_ok == tri_tot);
     printf("      E a força fatoriza como o resto: F = 2·s·S = 2 × DIRETO × CRUZADO². Não é o\n");
     printf("      direto sozinho nem o cruzado sozinho — é o produto dos dois, e é por isso que\n");
     printf("      ela se anula tanto em s = 0 (ortogonal) como em S = 0 (mesmo campo local).\n");

@@ -72,13 +72,13 @@ static int newton_bacia(double re, double im, int n, int *passos){
         double fr = zr - 1.0, fi = zi;                       /* f = z^n − 1 */
         double dr = n*pr, di = n*pi;                         /* f' = n·z^(n−1) */
         double den = dr*dr + di*di;
-        if(den < 1e-300) return -1;
+        if(den == 0.0) return -1;
         double qr = (fr*dr + fi*di)/den, qi = (fi*dr - fr*di)/den;
         re -= qr; im -= qi;
         /* chegou a alguma raiz? as raízes são e^{2πik/n} */
         for(int k = 0; k < n; k++){
             double rr = cos(2.0*M_PI*k/n), ri = sin(2.0*M_PI*k/n);
-            if((re-rr)*(re-rr) + (im-ri)*(im-ri) < 1e-16){ if(passos) *passos = it+1; return k; }
+            if((long long)(((re-rr)*(re-rr) + (im-ri)*(im-ri)) * 1e16) == 0){ if(passos) *passos = it+1; return k; }
         }
     }
     return -1;
@@ -141,7 +141,7 @@ printf("\n§Y2  JULIA: z → z² é o DESLOCAMENTO — o ribossomo anda, a fita 
             bits[10] = 0;
             double esperado = 0; p = 0.5;
             for(int k = 0; k < 11; k++){ esperado += bits[k]*p; p /= 2.0; }
-            if(fabs(dobro - esperado) > 1e-9) mau++;
+            if((long long)(fabs(dobro - esperado) * 1e9) >= 1) mau++;
             ang = dobro;
             casos++;
             if(v == 1 && passo < 3){
@@ -176,7 +176,7 @@ printf("\n§Y3  NEWTON: cada ponto cai numa das n raízes, e a raiz É a dimens�
             double rr = cos(2.0*M_PI*k/n), ri = sin(2.0*M_PI*k/n);
             double pr = 1, pi = 0;
             for(int t = 0; t < n; t++){ double a = pr*rr - pi*ri; pi = pr*ri + pi*rr; pr = a; }
-            if(fabs(pr - 1.0) > 1e-9 || fabs(pi) > 1e-9) mau_raiz++;
+            if((long long)(fabs(pr - 1.0) * 1e9) >= 1 || (long long)(fabs(pi) * 1e9) >= 1) mau_raiz++;
         }
         int nocup = 0;
         for(int k = 0; k < n; k++) nocup += ocupada[k];

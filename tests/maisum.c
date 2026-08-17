@@ -97,7 +97,7 @@ printf("\n§M2  O SIMPLEX de n+1: soma zero, e todos os ângulos IGUAIS.\n\n");
         for(int i = 0; i <= n; i++){
             for(int d = 0; d < n; d++) s[i][d] -= med[d];
             double nn = sqrt(dot(s[i],s[i],n));
-            if(nn > 1e-12) for(int d = 0; d < n; d++) s[i][d] /= nn;
+            if((long long)(nn * 1e12) >= 1) for(int d = 0; d < n; d++) s[i][d] /= nn;
         }
         double soma[NMAX] = {0};
         for(int i = 0; i <= n; i++) for(int d = 0; d < n; d++) soma[d] += s[i][d];
@@ -107,9 +107,9 @@ printf("\n§M2  O SIMPLEX de n+1: soma zero, e todos os ângulos IGUAIS.\n\n");
             double g = dot(s[i],s[j],n);
             if(fabs(g - (-1.0/n)) > pior) pior = fabs(g - (-1.0/n));
         }
-        if(ns > 1e-9 || pior > 1e-9) mau++;
+        if((long long)(ns * 1e9) >= 1 || (long long)(pior * 1e9) >= 1) mau++;
         printf("      %-4d %-9d %-13.2e %-17.6f %-9.6f %s\n",
-               n, n+1, ns, ip, -1.0/n, (ns<1e-9 && pior<1e-9) ? "sim" : "NÃO");
+               n, n+1, ns, ip, -1.0/n, ((long long)(ns * 1e9) == 0 && (long long)(pior * 1e9) == 0) ? "sim" : "NÃO");
     }
     printf("\n");
     ok("os n+1 vetores do simplex somam ZERO e têm todos o mesmo ângulo, −1/n", mau == 0);
@@ -136,7 +136,7 @@ printf("\n§M3  O TIGHT FRAME: Σ⟨x,v⟩v = c·x, EXATO e sem ortogonalizar.\n
         for(int i = 0; i <= n; i++){
             for(int d = 0; d < n; d++) s[i][d] -= med[d];
             double nn = sqrt(dot(s[i],s[i],n));
-            if(nn > 1e-12) for(int d = 0; d < n; d++) s[i][d] /= nn;
+            if((long long)(nn * 1e12) >= 1) for(int d = 0; d < n; d++) s[i][d] /= nn;
         }
         double pior = 0, c_med = 0; int nc = 0;
         for(int k = 0; k < 20; k++){
@@ -154,7 +154,7 @@ printf("\n§M3  O TIGHT FRAME: Σ⟨x,v⟩v = c·x, EXATO e sem ortogonalizar.\n
             if(rel > pior) pior = rel;
         }
         c_med /= nc;
-        if(pior > 1e-12) mau++;
+        if((long long)(pior * 1e12) >= 1) mau++;
         printf("      %-4d %-10.6f %-13.6f %.3e\n", n, c_med, (n+1.0)/n, pior);
     }
     printf("\n");
@@ -199,8 +199,9 @@ printf("\n§M4  E É O +1 QUE COMPRA: com n falha, com n+1 fecha.\n\n");
                quantos == n ? "sem o +1" : "COM o +1", rel);
     }
     printf("\n");
-    ok("sem o +1 a reconstrução falha", pior_sem > 1e-6);
-    ok("e com o +1 fecha — é o vetor a mais que conserta, não uma correção", pior_com < 1e-12);
+    ok("sem o +1 a reconstrução falha", (long long)(pior_sem * 1e6) > 1);
+    ok("e com o +1 fecha — é o vetor a mais que conserta, não uma correção",
+       (long long)(pior_com * 1e12) == 0);
     printf("      Um vetor de diferença, e a fórmula passa de errada a exata. Não é a base que\n");
     printf("      muda — os n primeiros são os mesmos — é o espaço que fica completo.\n");
 }

@@ -37,7 +37,7 @@ static double dis(M2 M){ return tr(M)*tr(M) - 4*de(M); }
  * saem do espectro. Não é aproximação — é a fórmula, e o §S3 mede-a contra a integração. */
 static M2 expA(M2 A, double t){
     double T = tr(A), D = dis(A), c1, c2;
-    if(fabs(D) < 1e-12){                        /* raiz dupla */
+    if((long long)(fabs(D) * 1e12) == 0){                        /* raiz dupla */
         double l = T/2, e = exp(l*t);
         c1 = e*(1 - l*t); c2 = e*t;
     } else if(D > 0){
@@ -116,7 +116,7 @@ printf("\n§S2  E a régua do sistema É a régua do catálogo.\n\n");
         M2 A = { 0, 1, -C, -B };
         double T = tr(A), D = de(A), Dl = dis(A), De = B*B - 4*C;
         printf("      %-23s %+5g  %+5g  %+5g   %+8g     %+g\n", t[k].eq, T, D, -T, Dl, De);
-        if(fabs(-T - B) > 1e-12 || fabs(D - C) > 1e-12 || fabs(Dl - De) > 1e-12) mal++;
+        if((long long)(fabs(-T - B) * 1e12) >= 1 || (long long)(fabs(D - C) * 1e12) >= 1 || (long long)(fabs(Dl - De) * 1e12) >= 1) mal++;
     }
     printf("\n");
     ok("B = -traço e C = determinante, e os dois Δ são o MESMO número", mal == 0);
@@ -145,7 +145,7 @@ printf("\n§S3  A solução e^{At} fechada bate a integração numérica.\n\n");
         double err = fmax(fabs(fe[0]-nu[0]), fabs(fe[1]-nu[1]));
         printf("      %s  (%+10.6f,%+10.6f)  (%+10.6f,%+10.6f)  %.1e\n",
                t[k].nome, fe[0], fe[1], nu[0], nu[1], err);
-        if(err > 1e-9) mal++;
+        if((long long)(err * 1e9) >= 1) mal++;
         if(err > pior) pior = err;
     }
     printf("\n");
@@ -187,7 +187,8 @@ printf("\n§S4  O produto de sistemas: exp(A ⊕ B) = exp A ⊗ exp B.\n\n");
     }
     printf("      A = oscilador,  B = decaimento (-1, -2)\n");
     printf("      max |exp(A ⊕ B)  -  exp A ⊗ exp B|  =  %.2e\n\n", pior);
-    ok("o exp leva a SOMA de Kronecker ao PRODUTO tensorial — resíduo de máquina", pior < 1e-12);
+    ok("o exp leva a SOMA de Kronecker ao PRODUTO tensorial — resíduo de máquina",
+       (long long)(pior * 1e12) == 0);
     printf("      É a assimetria que o paper chama o coração: O GERADOR SOMA, A SOLUÇÃO\n");
     printf("      MULTIPLICA. As taxas somam — o espectro de A ⊕ B são as somas duas a duas dos\n");
     printf("      espectros — e os fluxos multiplicam. O exp é a ponte, o log desfá-la, e é a\n");
@@ -215,7 +216,7 @@ printf("     nomes do catálogo.\n\n");
         double re = D >= 0 ? (T + sqrt(D))/2 : T/2;
         printf("      %s %+6g %+6g %+7.2f  %-12s  %s\n", t[k].nome, tr(A), de(A), D,
                D > 0 ? "hiperbólico" : D < 0 ? "elíptico" : "parabólico",
-               re < -1e-9 ? "CRISTAL, colapsa" : re > 1e-9 ? "CAOS, diverge" : "BORDA, orbita");
+               (long long)(re * 1e9) <= -1 ? "CRISTAL, colapsa" : (long long)(re * 1e9) >= 1 ? "CAOS, diverge" : "BORDA, orbita");
         if(k == 0 && D >= 0) mal++;
         if(k == 3 && D <= 0) mal++;
     }

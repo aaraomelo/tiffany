@@ -96,7 +96,7 @@ printf("\n§E1  A tríade: soma = Kirchhoff, produto = ganho, operador = TRANSIS
         if(fabs(comp - a1*a2) != 0.0) malP++;
         /* e o divisor real: α = R2/(R1+R2) */
         double R1 = 1000, R2 = R1*a1/(1-a1);
-        if(fabs(creal(el_divisor(R1,R2)) - a1) > 1e-9) malP++;
+        if((long long)(fabs(creal(el_divisor(R1,R2)) - a1) * 1e9) >= 1) malP++;
     }
     printf("      o divisor dá α = R2/(R1+R2), e compor divisores MULTIPLICA: %d falhas\n", malP);
 
@@ -110,13 +110,13 @@ printf("\n§E1  A tríade: soma = Kirchhoff, produto = ganho, operador = TRANSIS
         double prod = i1*i2/Is, soma = Is*exp((V1+V2)/VT);
         double res = fabs(prod-soma)/fabs(soma);
         printf("      %.3f    %.3f    %.6e      %.6e     %.1e\n", V1, V2, prod, soma, res);
-        if(res > 1e-12) malO++;
+        if((long long)(res * 1e12) >= 1) malO++;
     }
     printf("\n      (mais 200 pares medidos)\n");
     for(int k = 0; k < 200; k++){
         double V1 = 0.1 + 0.002*k, V2 = 0.15 + 0.0015*k;
         double prod = Is*exp(V1/VT)*exp(V2/VT), soma = Is*exp((V1+V2)/VT);
-        if(fabs(prod-soma)/fabs(soma) > 1e-11) malO++;
+        if((long long)(fabs(prod-soma)/fabs(soma) * 1e11) >= 1) malO++;
     }
     printf("\n");
     ok("a SOMA é Kirchhoff: série soma Z, paralelo soma Y — e a LEI mede-se em ℤ, sem"
@@ -149,7 +149,7 @@ printf("\n§E2  As multiplicidades +1, 0, -1 — e L ⋈ C é a dualidade.\n\n")
         double incl = (log(m2)-log(m1))/(log(w2)-log(w1));
         printf("      %-12s %-13s %-27.9f %+d\n", t[j].nome,
                j==0 ? "sL" : j==1 ? "R" : "1/(sC)", incl, t[j].esp);
-        if(fabs(incl - t[j].esp) > 1e-9) mal++;
+        if((long long)(fabs(incl - t[j].esp) * 1e9) >= 1) mal++;
     }
     printf("\n");
     ok("as multiplicidades são +1 (L), 0 (R) e -1 (C) — medidas, não postuladas", mal == 0);
@@ -184,7 +184,7 @@ printf("\n§E3  O RLC: a ressonância é o CASAMENTO, e Δ dá as três classes.
         printf("      %-7.0f %+.6f %+.6fj    %+.1e  %.9f\n", R, creal(Z), cimag(Z),
                cimag(Z), el_fp(Z));
         /* fp = 1 é fp² = 1, e fp² não forma raiz nenhuma: é Re²/(Re²+Im²) */
-        if(fabs(cimag(Z)) > 1e-9 || fabs(el_fp2(Z) - 1.0) > 1e-12) mal++;
+        if((long long)(fabs(cimag(Z)) * 1e9) >= 1 || (long long)(fabs(el_fp2(Z) - 1.0) * 1e12) >= 1) mal++;
     }
     printf("\n");
     ok("na ressonância Im Z = 0 e FP = 1 — o +1 cancela o -1, e nada volta", mal == 0);
@@ -201,7 +201,7 @@ printf("\n§E3  O RLC: a ressonância é o CASAMENTO, e Δ dá as três classes.
     int malS = 0;
     for(int j = 0; j < 3; j++){
         double D = el_delta(q[j].R, L, C);
-        int med = (D < -1e-6) ? -1 : (D > 1e-6) ? +1 : 0;
+        int med = ((long long)(D * 1e6) <= -1) ? -1 : ((long long)(D * 1e6) >= 1) ? +1 : 0;
         /* a SEGUNDA ROTA: o sinal de R²C − 4L, sem a divisão por C e sem o limiar de 1e-6
          * — duas versões que ninguém confronta divergem, e é por isso que a comparação
          * está aqui e não na confiança. */
@@ -267,12 +267,12 @@ printf("\n§E4  A Gilbert cell: multiplicar É somar os logs.\n\n");
         double direto = I1*I2/Iref, gil = el_gilbert(I1,I2,Iref);
         double res = fabs(direto-gil)/fabs(direto);
         printf("      %-9.3f %-9.3f %.9e   %.9e    %.1e\n", I1*1e6, I2*1e6, direto, gil, res);
-        if(res > 1e-12) mal++;
+        if((long long)(res * 1e12) >= 1) mal++;
     }
     for(int k = 0; k < 300; k++){
         double I1 = (0.5 + 0.01*k)*1e-6, I2 = (3.0 - 0.008*k)*1e-6;
         if(I2 <= 0) continue;
-        if(fabs(I1*I2/Iref - el_gilbert(I1,I2,Iref))/(I1*I2/Iref) > 1e-12) mal++;
+        if((long long)(fabs(I1*I2/Iref - el_gilbert(I1,I2,Iref))/(I1*I2/Iref) * 1e12) >= 1) mal++;
     }
     printf("\n      (mais 300 pares medidos)\n\n");
     ok("a Gilbert cell multiplica somando os logs — Π = exp∘Σ∘log em silício", mal == 0);
@@ -296,7 +296,7 @@ printf("\n§E5  Wheatstone: a medida por ANULAÇÃO — resíduo 0 em circuito.\
         printf("      %-7.0f %-7.0f %-7.0f %-15.6f %.2e\n",
                creal(z1), creal(z2), creal(z3), creal(zx), cabs(d));
         if(fabs(creal(z1*zx) - creal(z2*z3)) != 0.0) mal++;
-        if(cabs(d) > 1e-12) malD++;
+        if((long long)(cabs(d) * 1e12) >= 1) malD++;
     }
     /* e o detector NAO le zero fora do equilibrio — senao a medida nao mediria nada */
     long complex z1 = 100, z2 = 220, z3 = 470;
@@ -327,7 +327,8 @@ printf("\n§E6  A ponte retificadora: o operador |·|, e o DC nasce do AC.\n\n")
     printf("      saída:    média de |sen(t)|    = %+.9f\n", mediaDC);
     printf("      previsto: 2/π                  = %+.9f\n\n", 2.0/M_PI);
     ok("a ponte dá |·|, e a média salta de 0 para 2/π — o DC nasce do AC",
-       fabs(mediaAC) < 1e-9 && fabs(mediaDC - 2.0/M_PI) < 1e-5);
+       (long long)(fabs(mediaAC) * 1e9) <= 1
+       && (long long)(fabs(mediaDC - 2.0/M_PI) * 1e5) <= 1);
     printf("      E note-se o que a ponte é, na tríade: um OPERADOR. Ela não soma nem escala —\n");
     printf("      dobra o sinal sobre si próprio. É uma dobra, e não é reversível: de |v| não\n");
     printf("      se recupera o sinal de v. Perde-se exatamente um bit, e é esse bit que vira\n");
@@ -350,7 +351,7 @@ printf("\n§E7  VALIDAR: simular no tempo e conferir contra a forma fechada.\n\n
         double R = Rs[j], D = el_delta(R,L,C), T = 2e-5;
         double a = -R/(2*L), qf;
         const char *cl;
-        if(D < -1e-9){                                  /* subamortecido: par conjugado */
+        if(D < 0.0 && (long long)(D * 1e9) != 0){                                  /* subamortecido: par conjugado */
             double wd = sqrt(4*L/C - R*R)/(2*L);
             qf = exp(a*T)*(q0*cos(wd*T) + (i0 - a*q0)/wd*sin(wd*T));
             cl = "subamortecido";
@@ -367,7 +368,7 @@ printf("\n§E7  VALIDAR: simular no tempo e conferir contra a forma fechada.\n\n
         el_simula(R,L,C,q0,i0,h,4000000,&qs,&is);
         double res = fabs(qf-qs)/(fabs(qf)+1e-30);
         printf("      %-8.2f %-17s %+.9e   %+.9e   %.1e\n", R, cl, qf, qs, res);
-        if(res > 1e-4) mal++;
+        if((long long)(res * 1e4) >= 1) mal++;
     }
     printf("\n");
     ok("os DOIS caminhos concordam nas três classes — incluindo a raiz dupla",

@@ -77,7 +77,7 @@ printf("\n§A1  Um dispositivo, dois regimes — e a fronteira entre eles.\n\n")
     printf("      largura = %.1f mV — e VT·ln(99) = %.1f mV\n\n", (v99-v1)*1e3,
            VT*log(99.0)*1e3);
     ok("a janela ativa é estreita e vale exatamente VT·ln(99) — a exponencial é íngreme",
-       fabs((v99-v1) - VT*log(99.0)) < 1e-3);
+       (long long)(fabs((v99-v1) - VT*log(99.0)) * 1e3) == 0);
     printf("      É esta estreiteza que dá os dois regimes de graça. Ficar DENTRO da janela\n");
     printf("      exige cuidado (é o ponto de operação, e é o que o amplificador faz); ficar\n");
     printf("      FORA dela é fácil, e é o que a porta lógica faz — de propósito.\n");
@@ -100,12 +100,12 @@ printf("\n§A2  O AMPLIFICADOR: gm = Ic/VT é a DERIVADA, e amplificar É linear
         double gm_for = Ic/VT;
         printf("      %.3f     %-11.5f %-18.4f %-15.4f %.2f\n",
                V, Ic*1e3, gm_num*1e3, gm_for*1e3, -gm_for*Rc);
-        if(fabs(gm_num-gm_for)/gm_for > 1e-6) mal++;
+        if((long long)(fabs(gm_num-gm_for)/gm_for * 1e6) >= 1) mal++;
     }
     for(int k = 0; k < 200; k++){
         double V = 0.45 + 0.001*k, h = 1e-7;
         double g1 = (Is*exp((V+h)/VT) - Is*exp((V-h)/VT))/(2*h), g2 = Is*exp(V/VT)/VT;
-        if(fabs(g1-g2)/g2 > 1e-6) mal++;
+        if((long long)(fabs(g1-g2)/g2 * 1e6) >= 1) mal++;
     }
     printf("\n      (mais 200 pontos medidos)\n\n");
     ok("gm É a derivada de Shockley, e vale Ic/VT — medida contra a fórmula", mal == 0);
@@ -202,7 +202,7 @@ printf("\n§A3  A realimentação: o ganho passa a ser uma RAZÃO, e a razão é
          * diferença perde dígitos proporcionalmente a (1+A'β) — de 8,9e-16 em A=1e3 até
          * 1,0e-12 em A=1e6. É o mesmo fenómeno do cosh²-senh² do dual.c §U4. Por isso a
          * margem é relativa ao fator de cancelamento, e não um número fixo. */
-        if(fabs(razao - exato)/exato > 1e-15*exato) malS++;
+        if((long long)(fabs(razao - exato) / (exato*exato) * 1e15) >= 1) malS++;
     }
     printf("\n");
     ok("a realimentação divide a sensibilidade por (1+A'·β), EXATO — a lei, não um número meu",

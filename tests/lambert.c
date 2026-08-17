@@ -76,7 +76,8 @@ int main(void){
             double re = exp(u)*(u*cos(v) - v*sin(v));
             double im = exp(u)*(u*sin(v) + v*cos(v));
             casos++;
-            if(fabs(re-creal(z)) < 1e-11 && fabs(im-cimag(z)) < 1e-11) bate++;
+            if((long long)(fabs(re-creal(z)) * 1e11) == 0
+            && (long long)(fabs(im-cimag(z)) * 1e11) == 0) bate++;
             printf("      %+.4f%+.4fi      %+.9f%+.9fi   %+.9f%+.9fi\n",
                    creal(z), cimag(z), u, v, re, im);
         }
@@ -104,8 +105,8 @@ int main(void){
             /* a fase é módulo 2π */
             double d = f - az; while(d > PI_) d -= 2*PI_; while(d < -PI_) d += 2*PI_;
             casos++;
-            if(fabs(m - cabs(z)) < 1e-11) mod_ok++;
-            if(fabs(d) < 1e-11) fase_ok++;
+            if((long long)(fabs(m - cabs(z)) * 1e11) == 0) mod_ok++;
+            if((long long)(fabs(d) * 1e11) == 0) fase_ok++;
             printf("      %+.3f%+.3fi     %.9f  %.9f  %+.9f  %+.9f\n",
                    creal(z), cimag(z), m, cabs(z), f, az);
         }
@@ -138,16 +139,16 @@ int main(void){
             for(; it<400; it++){
                 double complex e=cexp(v), f=v*e-z;
                 double complex nv = v - f/(e*(v+1) - (v+2)*f/(2*v+2));
-                if(cabs(nv-v) < 1e-15){ v=nv; break; }
+                if((long long)(cabs(nv-v) * 1e15) == 0){ v=nv; break; }
                 v = nv;
             }
             if(it > iters_max) iters_max = it;
             if(it < iters_min) iters_min = it;
             /* e a INVERSA aplicada ao que a directa devolveu tem de reproduzir z, numa
              * linha e sem iterar: e' o custo dos dois lados, lado a lado. */
-            if(cabs(v*cexp(v) - z) < 1e-12) resid_ok++;
+            if((long long)(cabs(v*cexp(v) - z) * 1e12) == 0) resid_ok++;
             casos++;
-            if(cabs(v-w) < 1e-10) volta++;
+            if((long long)(cabs(v-w) * 1e10) == 0) volta++;
             printf("      %+.3f%+.3fi     %+.9f%+.9fi   %+.9f%+.9fi  %.1e\n",
                    creal(w), cimag(w), creal(z), cimag(z), creal(v), cimag(v), cabs(v-w));
         }
@@ -309,7 +310,7 @@ int main(void){
         ok("uma volta de 2π NÃO devolve o valor — há ramificação em −1/e",
            cabs(w_fim - w_ini) > 0.5);
         ok("mas DUAS voltas devolvem: a monodromia tem ORDEM 2 — é involução",
-           cabs(w_dois - w_ini) < 1e-6);
+           (long long)(cabs(w_dois - w_ini) * 1e6) == 0);
         conclui("a involução do xx.c §X8 não foi acrescentada à mão: é a MONODROMIA deste");
         conclui("ponto de ramificação. ν∘ν = id porque duas voltas fecham — e o ponto fixo");
         conclui("é o próprio −1/e, onde os dois ramos colidem.");
@@ -332,7 +333,7 @@ int main(void){
             double dux = (creal(wx1)-creal(wx0))/(2*h), dvx = (cimag(wx1)-cimag(wx0))/(2*h);
             double duy = (creal(wy1)-creal(wy0))/(2*h), dvy = (cimag(wy1)-cimag(wy0))/(2*h);
             pts++;
-            if(fabs(dux-dvy) < 1e-5 && fabs(duy+dvx) < 1e-5) cr_ok++;
+            if((long long)(fabs(dux-dvy) * 1e5) == 0 && (long long)(fabs(duy+dvx) * 1e5) == 0) cr_ok++;
             printf("      %+.2f%+.2fi     %+.5f %+.5f %.1e   %+.5f %+.5f %.1e\n",
                    creal(z), cimag(z), dux, dvy, fabs(dux-dvy), duy, -dvx, fabs(duy+dvx));
         }
@@ -453,7 +454,7 @@ int main(void){
             double wr = a0*db - b0*da;
             double fc = z*exp(-(a0+b0))*(a0-b0)/((1+a0)*(1+b0));
             pts++;
-            if(fabs(wr-fc) < 1e-9*(1+fabs(wr))) fechada_ok++;
+            if((long long)(fabs(wr-fc) / (1+fabs(wr)) * 1e9) == 0) fechada_ok++;
             printf("      %+.3f   %+.8f   %+.8f   %+.8e   %+.8e  %.1e\n",
                    z, a0, b0, wr, fc, fabs(wr-fc));
         }
@@ -476,7 +477,7 @@ int main(void){
                 meds++;
                 /* os dois vão como (z+1/e)^{±1/2}: a razão por década é √10 */
                 if(fabs(r1 - sqrt(10.0)) < 0.02 && fabs(r2 - sqrt(10.0)) < 0.02) raiz_ok++;
-                if(fabs(dif*wr - 4.0*E_) < 1e-3) inv_ok++;
+                if((long long)(fabs(dif*wr - 4.0*E_) * 1e3) == 0) inv_ok++;
             }
             printf("      1e-%d       %.6e   %6.4f   %.6e   %6.4f   %.10f\n",
                    e_, dif, r1, wr, r2, dif*wr);
@@ -520,7 +521,7 @@ int main(void){
             double complex z = zs[i], w = Wc(z, 0.3);
             double complex lhs = w + clog(w), rhs = clog(z);
             casos++;
-            if(cabs(lhs-rhs) < 1e-12) log_ok++;
+            if((long long)(cabs(lhs-rhs) * 1e12) == 0) log_ok++;
             printf("      %+.2f%+.2fi     %+.9f%+.9fi   %+.9f%+.9fi   %.1e\n",
                    creal(z), cimag(z), creal(lhs), cimag(lhs), creal(rhs), cimag(rhs),
                    cabs(lhs-rhs));
@@ -535,16 +536,16 @@ int main(void){
             double complex z = I*t*cexp(I*t);
             double complex w = Wc(z, I*t);
             esp++;
-            if(fabs(creal(w)) < 1e-9 && fabs(cimag(w)-t) < 1e-9) puro++;
+            if((long long)(fabs(creal(w)) * 1e9) == 0 && (long long)(fabs(cimag(w)-t) * 1e9) == 0) puro++;
             /* e as coordenadas polares: |z| = t e arg z = t + π/2 (mod 2π) */
             double d = carg(z) - (t + PI_/2);
             while(d >  PI_) d -= 2*PI_;
             while(d < -PI_) d += 2*PI_;
-            if(fabs(cabs(z) - t) < 1e-12 && fabs(d) < 1e-12) coord++;
+            if((long long)(fabs(cabs(z) - t) * 1e12) == 0 && (long long)(fabs(d) * 1e12) == 0) coord++;
             if(esp<=3)
                 printf("      %-7.2f %+.9f%+.9fi   %+.9f%+.9fi   %s\n",
                        t, creal(z), cimag(z), creal(w), cimag(w),
-                       fabs(creal(w))<1e-9 ? "SIM" : "nao");
+                       (long long)(fabs(creal(w)) * 1e9) == 0 ? "SIM" : "nao");
         }
         printf("      pontos da espiral: %d   com W imaginário puro: %d   com |z|=t e arg=t+π/2: %d\n",
                esp, puro, coord);

@@ -115,7 +115,7 @@ printf("\n§S1  O eixo PREDITIVO: PA de ordem m, e o triângulo de diferenças.\
         int cte = 1;
         for(int n = 0; n + m < 12; n++){
             difs(a, n, m, d);
-            if(fabs(d[m] - r) > 1e-9) cte = 0;
+            if((long long)(fabs(d[m] - r) * 1e9) >= 1) cte = 0;
         }
         printf("  %s\n", cte ? "sim, = r = 2" : "NÃO");
         if(!cte) mal++;
@@ -144,11 +144,11 @@ printf("\n§S2  O Teorema da Unificação: as diferenças caracterizam — e PRE
             double f = preve(d, m, h), it = a[3+h];
             if(m <= 2 || h == 3)
                 printf("      %d   %-4d %-15.6f %-15.6f %.1e\n", m, h, f, it, fabs(f-it));
-            if(fabs(f-it) > 1e-9) mal++;
+            if((long long)(fabs(f-it) * 1e9) >= 1) mal++;
         }
         /* e longe: h = 20 */
         double f = preve(d, m, 20), it = a[23];
-        if(fabs(f-it) > 1e-6) mal++;
+        if((long long)(fabs(f-it) * 1e6) >= 1) mal++;
     }
     printf("\n      (e a h = 20 passos, também: a fórmula não degrada com a distância)\n\n");
     ok("a fórmula fechada PREDIZ exatamente — os dois caminhos concordam", mal == 0);
@@ -212,7 +212,7 @@ printf("\n§S3  A BATERIA é uma ALFÂNDEGA: entra dual, sai dual, e o que fica 
             double r = 2*Ic*Ic*Rint*t;               /* = 2·R·Cap·Ic */
             double u = V*Ic*t;                       /* = V·Cap, e não depende de Ic */
             if(ant_ret >= 0 && !(r > ant_ret)) retido_cresce = 0;
-            if(util0 >= 0 && fabs(u - util0) > 1e-12) util_fixa = 0;
+            if(util0 >= 0 && (long long)(fabs(u - util0) * 1e12) >= 1) util_fixa = 0;
             ant_ret = r; if(util0 < 0) util0 = u;
         }
         ok("o RETIDO é exatamente 2·I²R·t — a alfândega cobra na entrada e na saída. E o que"
@@ -436,7 +436,7 @@ printf("\n§S7  As ESTRELAS IRRACIONAIS: o ónus é o que nunca fecha.\n\n");
         for(int n = 1; n <= 10000; n++){
             double f = fmod(n*t[j].v, 1.0);
             double d = fmin(f, 1-f);              /* distância ao ponto de partida */
-            if(d < melhor){ melhor = d; if(d < 1e-12) quando = n; }
+            if(d < melhor){ melhor = d; if((long long)(d * 1e12) == 0) quando = n; }
             if(quando > 0) break;
         }
         char rot[32];

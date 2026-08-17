@@ -33,14 +33,15 @@ static double RES[128]; static int NRES;      /* a sequencia de residuos: a LEI 
 static int contrai(int nt, int nk[NT], double a[NT][KC], double c[NT][KC][NT][KC],
                    double s[NT][KC], int raio, double *dfim){
     NRES = 0;
-    const double m = 1.0, eps = 1e-13;
+    const double m = 1.0;
+    const int escala = 10000000000000LL;   /* 1e13 — paragem quando dmax·1e13 < 1 */
     double w[NT][KC];
     for(int t = 0; t < nt; t++){                       /* iteração 0: a MARGINAL, e mais nada */
         double z = 0; for(int j = 0; j < nk[t]; j++) z += a[t][j];
         for(int j = 0; j < nk[t]; j++) s[t][j] = z > 0 ? a[t][j]/z : 0;
     }
     int it = 0; double dmax = 1;
-    for(; it < 60 && dmax > eps; it++){
+    for(; it < 60 && (long long)(dmax * escala) >= 1; it++){
         memcpy(w, s, sizeof w);
         dmax = 0;
         for(int t = 0; t < nt; t++){

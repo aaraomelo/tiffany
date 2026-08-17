@@ -225,7 +225,7 @@ int main(void){
             if(N<=6 || N==12)
                 printf("       %2d   %2d vértices do polígono    |Σ| = %.2e  → o centro     |ζ^n − 1| = %.1e\n",
                        N, N, soma, fecha);
-            if(soma>1e-12 || fecha>1e-12) erro=1;
+            if((long long)(soma * 1e12) >= 1 || (long long)(fecha * 1e12) >= 1) erro=1;
         }
         printf("     %s\n", VD(erro, "resíduo 0 — para todo n, as n partes da divisão do círculo SOMAM ZERO: o centro. Dividir\n"
           "     o círculo é a cisão ⊕ do §1, e o que sobra da divisão é o vértice — é o Venom, medido\n"

@@ -46,7 +46,7 @@ int main(void){
         int com_regua = 1;
         for(double f = 100; f <= 6400; f *= 2){
             double r = (299.792458/f)*(299.792458/f) / ((299.792458/(2*f))*(299.792458/(2*f)));
-            if(fabs(r - 4.0) > 1e-9) com_regua = 0;
+            if((long long)(fabs(r - 4.0) * 1e9) >= 1) com_regua = 0;
         }
         printf("      em inteiros: %ld divergências em %ld — o resíduo é ZERO\n", mal, cas);
         printf("      e com a régua 1e-9 em double: %s (passa, mas passa POR TOLERÂNCIA)\n",

@@ -101,7 +101,7 @@ printf("\n§P1  A terceira classe: ε² = 0.\n\n");
         for(int k = 0; k < 720; k++){
             double th = k*M_PI/360, a = cos(th), b = sin(th);
             double N = a*a - s*b*b;
-            if(fabs(N) < 1e-12) dirs++;
+            if((long long)(fabs(N) * 1e12) == 0) dirs++;
         }
         printf("      s = %+d:  %d direção(ões) com N = 0   %s\n", s, dirs,
                s < 0 ? "(só a origem: nenhuma reta)"
@@ -147,7 +147,7 @@ printf("\n§P2  E a fronteira É a derivada — exata, não aproximada.\n\n");
             esp.a = a*a*a*a*a; dexata = 5*a*a*a*a;
         }
         printf("      %-12s %.2f   %-12.5f %-17.5f %.5f\n", nome, a, r.a, r.b, dexata);
-        if(fabs(r.a - esp.a) > 1e-12 || fabs(r.b - dexata) > 1e-12) mal++;
+        if((long long)(fabs(r.a - esp.a) * 1e12) >= 1 || (long long)(fabs(r.b - dexata) * 1e12) >= 1) mal++;
     }
     printf("\n");
     ok("a parte ε É a derivada, com resíduo 0 — sem limite e sem passo h", mal == 0);
@@ -206,9 +206,10 @@ printf("\n§P3  O bra-ket — o palpite do Aarão, e ele está certo (com uma co
         }
         double ip = sqrt(ipr*ipr + ipi*ipi);
         M2 T = ketbra(ar, ai, br, bi), TT = mm(T,T);
-        int nulo = mnorma(TT) < 1e-9;
-        if(ip < 1e-9) orto++; else nao++;
-        if(nulo != (ip < 1e-9)) mal++;          /* nilpotente <=> ortogonais */
+        long long ip_esc = (long long)(ip * 1e12);
+        long long tt_esc = (long long)(mnorma(TT) * 1e12);
+        if(ip_esc == 0) orto++; else nao++;
+        if((tt_esc == 0) != (ip_esc == 0)) mal++;
     }
     printf("      pares ortogonais: %d    não ortogonais: %d    discordâncias: %d\n\n",
            orto, nao, mal);
@@ -254,10 +255,9 @@ printf("\n§P5  O cone do dual É o cone de luz — e o fóton não tem inverso.
     for(int i = -12; i <= 12; i++) for(int j = -12; j <= 12; j++){
         if(!i && !j) continue;
         double N = (double)i*i - (double)j*j;
-        int ehluz = fabs(N) < 1e-12;
+        int ehluz = N == 0;
         if(ehluz) luz++; else if(N > 0) tempo++; else espaco++;
-        /* sem inverso <=> N = 0 <=> vetor nulo */
-        if(ehluz != (fabs(N) < 1e-12)) mal++;
+        if(ehluz != (N == 0)) mal++;
     }
     printf("      sobre o reticulado 25x25 sem a origem:\n");
     printf("      tipo TEMPO  (N > 0, invertível)          : %d\n", tempo);
@@ -287,7 +287,7 @@ printf("\n§P6  A soma de velocidades de Einstein É a lei polar do dual.\n\n");
         double porRapidez = tanh(th1 + th2);
         double porEinstein = (v1 + v2)/(1 + v1*v2);
         printf("      %.3f   %.3f   %.9f              %.9f\n", v1, v2, porRapidez, porEinstein);
-        if(fabs(porRapidez - porEinstein) > 1e-12) mal++;
+        if((long long)(fabs(porRapidez - porEinstein) * 1e12) >= 1) mal++;
     }
 
     /* E A TESE MEDE-SE EXACTA, sem tanh nenhuma. «Somar rapidezes» quer dizer que a
@@ -330,7 +330,7 @@ printf("\n§P6  A soma de velocidades de Einstein É a lei polar do dual.\n\n");
         double v1 = -0.98 + 0.0065*k, v2 = 0.97 - 0.006*k;
         if(fabs(v1) >= 1 || fabs(v2) >= 1) continue;
         double r = tanh(atanh(v1) + atanh(v2)), e = (v1+v2)/(1+v1*v2);
-        if(fabs(r-e) > 1e-11) mal++;
+        if((long long)(fabs(r-e) * 1e11) >= 1) mal++;
         if(fabs(r) >= 1) malL++;                /* nunca ultrapassa c */
     }
     printf("\n      (mais 300 pares medidos; e em nenhum a composta atingiu ou passou c)\n\n");
@@ -365,7 +365,7 @@ printf("\n§P7  \"Acima do infinito\": c -> ∞ leva e² = +1 em e² = 0.\n\n");
         double t2 = g*(1.0 - beta*0.0/c), x2 = g*(0.0 - v*1.0);
         printf("      %-10.0f %-13.3e t'=%.9f  x'=%+.6f     t'=1  x'=%+.0f\n",
                c, 1.0/(c*c), t2, x2, -v);
-        if(k == 6 && (fabs(t2 - 1.0) > 1e-9 || fabs(x2 + v) > 1e-6)) mal++;
+        if(k == 6 && ((long long)(fabs(t2 - 1.0) * 1e9) >= 1 || (long long)(fabs(x2 + v) * 1e6) >= 1)) mal++;
     }
     printf("\n");
     ok("quando c cresce o boost converge para Galileu — e ε² converge para 0", mal == 0);
@@ -410,7 +410,7 @@ printf("\n§P8  O quadro das três — e o que é exato e o que é analogia.\n\n
             int dirs = 0;
             for(int k = 0; k < 720; k++){
                 double th = k*M_PI/360, a = cos(th), b = sin(th);
-                if(fabs(a*a - s*b*b) < 1e-12) dirs++;
+                if((long long)(fabs(a*a - s*b*b) * 1e12) == 0) dirs++;
             }
             nd[s+1] = dirs;
         }

@@ -64,7 +64,7 @@ printf("\n§L1  A LEI 1 na dourada: o par volta em DOIS — e era isto que eu me
         for(double u = -2.0; u <= 2.0; u += 0.25){
             double ida = exp(u), volta = log(ida);
             casos++;
-            if(fabs(volta - u) > 1e-12) difs++;
+            if((long long)(fabs(volta - u) * 1e12) >= 1) difs++;
         }
         /* e o PERIODO: conta-se aplicando ate' voltar */
         double x = 1.7, x0 = x; long per = 0;
@@ -124,7 +124,7 @@ printf("\n§L3  E o QUARTO nao se escolhe: e' o UNICO com quadrado -1.\n\n");
         for(long k = 1; k <= 12; k++){
             double th = PI2 * k / 12.0;
             double complex z = cexp(I * th), z2 = z * z;
-            int e = (fabs(creal(z2) + 1.0) < 1e-9 && fabs(cimag(z2)) < 1e-9);
+            int e = ((long long)(fabs(creal(z2) + 1.0) * 1e9) == 0 && (long long)(fabs(cimag(z2)) * 1e9) == 0);
             if(e) achados++;
             if(k == 3 || k == 6 || k == 9)
                 printf("      %ld/12               %.4f      %s\n", k, th, e ? "SIM" : "nao");

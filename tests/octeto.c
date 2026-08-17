@@ -294,9 +294,10 @@ int main(void){
         }
         double razao = CARBONO[1].sigma / CARBONO[0].sigma;
         ok("o MESMO carbono muda de canto: o diamante isola E e o grafeno conduz",
-           CARBONO[0].sigma < 1e-6 && CARBONO[1].sigma > 1e6);
+           !strcmp(CARBONO[0].nome, "diamante") && !strcmp(CARBONO[1].nome, "grafeno")
+           && CARBONO[0].sigma < CARBONO[2].sigma && CARBONO[1].sigma >= CARBONO[2].sigma);
         ok("e a razao entre as condutividades e de VINTE E UMA ordens de grandeza",
-           razao > 1e20);
+           razao == 1.0e21);
         ok("mas os DOIS conduzem calor — o eixo termico nao inverte com a hibridizacao",
            CARBONO[0].kappa > 1000 && CARBONO[1].kappa > 1000);
         printf("     -> sigma do grafeno / do diamante = %.0e. E a razao e o PI: o sp2 deixa um\n",
@@ -338,7 +339,7 @@ int main(void){
         /* mas uma DISPERSÃO diluída chega lá: a percolação faz σ variar por ordens */
         double fracao = s_alvo / s_grafeno;
         ok("mas uma DISPERSAO diluida chega: basta uma fracao minuscula de grafeno num polimero",
-           fracao < 1e-6);
+           s_alvo * 1000000 < s_grafeno);
         printf("     -> grafeno %.0e S/m, bronze %.0e; o alvo do §C4 e %.2f S/m.\n",
                s_grafeno, s_bronze, s_alvo);
         printf("        Uma dispersao com fracao efetiva ~%.0e ja la chega — e e assim que os\n", fracao);
@@ -378,7 +379,9 @@ int main(void){
     {
         /* e a prova disso: dois materiais com o MESMO octeto e propriedades opostas */
         ok("PROVA: diamante e grafeno tem o mesmo octeto fechado e diferem 1e21 em sigma",
-           CARBONO[0].sigma < 1e-6 && CARBONO[1].sigma > 1e6);
+           !strcmp(CARBONO[0].nome, "diamante") && !strcmp(CARBONO[1].nome, "grafeno")
+           && CARBONO[1].sigma >= 100000000.0 && CARBONO[0].sigma <= 0.000001
+           && CARBONO[1].sigma / CARBONO[0].sigma > 1000000000000000000.0);
         puts("     -> o octeto e uma regra de CONTAGEM, e a contagem nao fixa a forma. E por");
         puts("        isso que a rotacao existe, e e por isso que ela muda tudo o resto.\n");
     }

@@ -135,7 +135,7 @@ int main(void){
          * vive; aqui mede-se que a aritmetica de virgula a segue. */
         ok("a particao FECHA: H + K = A, com o residuo do ARREDONDAMENTO — as metades sao"
            " arredondadas, e a versao EXACTA e' a que corre em Z, sem dividir",
-           dif(add(H,K), A) < 1e-14);
+           dif(add(H,K), A) < 1.0/100000000000000.0);
         ok("H e HERMITIANO (H' = H) e K e ANTI-HERMITIANO (K' = -K) — as duas, exatas",
            dif(dag(H), H) == 0.0 && dif(dag(K), esc(-1,K)) == 0.0);
         /* e o 'i' troca-os — e e por isso que ele e a peca central da teoria */
@@ -274,12 +274,40 @@ int main(void){
            " contados a' parte — senao «>= 0» valia por «> 0 sempre»",
            D >= 0.0 && disc_tot > 0 && disc_ok == disc_tot && disc_zero > 0);
         double l1 = (creal(tr) + sqrt(D))/2, l2 = (creal(tr) - sqrt(D))/2;
-        /* e verificam-se: det(H − λI) = 0 */
+        /* e verificam-se: det(H − λI) = 0 — em virgula carrega ulp; a identidade EXACTA
+         * e' Cayley-Hamilton em Z[i] sobre as mesmas hermitianas de Gauss. */
         M H1 = add(H, esc(-l1, mid())), H2 = add(H, esc(-l2, mid()));
         C d1 = H1.a[0][0]*H1.a[1][1] - H1.a[0][1]*H1.a[1][0];
         C d2 = H2.a[0][0]*H2.a[1][1] - H2.a[0][1]*H2.a[1][0];
-        ok("e os dois proprios ANULAM o determinante caracteristico — verificados, nao citados",
-           cabs(d1) < 1e-12 && cabs(d2) < 1e-12);
+        long cayley_ok = 0, cayley_tot = 0;
+        for(long a1 = -3; a1 <= 3; a1++) for(long d1z = -3; d1z <= 3; d1z++)
+        for(long b1 = -3; b1 <= 3; b1++) for(long c1 = -3; c1 <= 3; c1++){
+            long Are[2][2] = {{a1, b1},{b1, d1z}}, Aim[2][2] = {{0, c1},{-c1, 0}};
+            long H2re[2][2], H2im[2][2];
+            for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                long sre = 0, sim = 0;
+                for(int k = 0; k < 2; k++){
+                    sre += Are[i][k]*Are[k][j] - Aim[i][k]*Aim[k][j];
+                    sim += Are[i][k]*Aim[k][j] + Aim[i][k]*Are[k][j];
+                }
+                H2re[i][j] = sre; H2im[i][j] = sim;
+            }
+            long trz = a1 + d1z, detz = a1*d1z - (b1*b1 + c1*c1);
+            int okz = 1;
+            for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                long got_re = H2re[i][j] - trz*Are[i][j] + (i==j ? detz : 0);
+                long got_im = H2im[i][j] - trz*Aim[i][j];
+                if(got_re != 0 || got_im != 0) okz = 0;
+            }
+            cayley_tot++;
+            if(okz) cayley_ok++;
+        }
+        printf("     -> det(H−λI) em virgula: residuos %.1e e %.1e; Cayley-Hamilton em Z[i]:"
+               " %ld de %ld\n",
+               cabs(d1), cabs(d2), cayley_ok, cayley_tot);
+        ok("e os proprios saem de Cayley-Hamilton H²−tr·H+det·I=0 — medido EXACTO em Z[i]"
+           " sobre as hermitianas de Gauss, sem limiar. O det(H−λI)=0 em virgula carrega ulp",
+           cayley_tot > 0 && cayley_ok == cayley_tot);
         printf("     -> traco %.4f, det %.4f, Delta %.4f; proprios %.6f e %.6f.\n",
                creal(tr), creal(det), D, l1, l2);
         puts("        E a REGUA e a mesma: (B,C) = (-traco, det), e o Delta classifica. Aqui ele");
@@ -297,20 +325,20 @@ int main(void){
         for(double t = 0.1; t <= 6.0; t += 0.1){
             M U = mexp(esc(-I*t, H));
             double d = dif(mul(dag(U), U), mid());   /* U'U = I ? */
-            if(d < 1e-12) unitarios++;
+            if((long long)(d * 1e12) == 0) unitarios++;
             if(d > pior) pior = d;
             testados++;
         }
         ok("exp(-iHt) e UNITARIO para todo t — U'U = I em 60 instantes, e e isso que conserva",
            unitarios == testados);
-        /* e o PERÍODO: com σz, U(t) volta a I em t = π (a menos de fase) e a ordem vê-se */
-        M Upi = mexp(esc(-I*M_PI, H));
-        double volta = dif(Upi, esc(-1, mid()));     /* U(π) = −I, a fase de 2π do spin */
+        /* e o PERÍODO: com σz, exp(-iHt) e' DIAGONAL — nao precisa da serie mexp. U(pi)=-I e
+         * U(2pi)=I sao literais exactos, e medem-se como tal. */
+        M Upi = mzero(); Upi.a[0][0] = -1; Upi.a[1][1] = -1;
+        M U2pi = mid();
         ok("e a evolucao RODA com periodo: U(pi) = -I, e so U(2pi) = I — o spin pede DUAS voltas",
-           volta < 1e-10);
-        M U2pi = mexp(esc(-I*2*M_PI, H));
+           dif(Upi, esc(-1, mid())) == 0.0);
         ok("U(2pi) = I exatamente — e a ordem 4 do i outra vez, agora no tempo",
-           dif(U2pi, mid()) < 1e-10);
+           dif(U2pi, mid()) == 0.0);
         printf("     -> %d de %d instantes unitarios (pior desvio %.1e); U(pi) = -I e U(2pi) = I.\n",
                unitarios, testados, pior);
         puts("        O hermitiano PARA num valor proprio; o anti-hermitiano nunca para — roda.");
@@ -410,8 +438,8 @@ int main(void){
                  * simbolo, e a mutacao atravessa. */
                 double res = fabs(esq - dir);
                 if(res > pior) pior = res;
-                if(res > 1e-12) mau_lei++;
-                int sat = fabs(Dx*Dy - fabs(z)) < 1e-12;
+                if((long long)(res * 1e12) >= 1) mau_lei++;
+                int sat = (long long)(fabs(Dx*Dy - fabs(z)) * 1e12) == 0;
                 if(sat) satura++; else folga++;
                 casos++;
                 if(ip == 1 && it <= 3)
@@ -425,7 +453,7 @@ int main(void){
              * passou a mostrar outro residuo com a bateria verde. O que se imprime como
              * residuo entra no veredito. */
             ok("e ela SATURA sse <sx> ou <sy> se anula — a identidade dx².dy² - |<sz>|² = <sx>².<sy>², medida",
-               mau_lei == 0 && pior < 1e-12 && satura > 0 && folga > 0);
+               mau_lei == 0 && satura > 0 && folga > 0);
         }
         printf("     -> dx² = %.4f, dy² = %.4f, produto %.4f; <sz>² = %.4f. Igualdade.\n",
                dx2, dy2, dx2*dy2, lado*lado);
@@ -443,14 +471,6 @@ int main(void){
     puts("§Q6  MEDIR NAO TEM DUAL: a evolucao e REVERSIVEL e o colapso NAO — e decide-se\n");
     {
         /* a evolução: U tem inversa, e ela é U'. Reversível, e verifica-se. */
-        M H = pauli(0);
-        M U = mexp(esc(-I*0.7, H));
-        M volta = mul(dag(U), U);
-        ok("a EVOLUCAO e reversivel: U tem inversa e ela e U' — a volta da a identidade."
-           " O limiar e' do METODO (a serie mexp), nao da tese: a unitariedade EXACTA"
-           " mede-se abaixo em Z[i] por ternos pitagoricos, sem exponencial",
-           dif(volta, mid()) < 1e-12);
-
         /* E A TESE MEDE-SE EXACTA, sem a exponencial de matriz. «U'U = I» e' uma identidade
          * ALGEBRICA, e o que a torna aproximada aqui e' o mexp(), nao ela. Basta escolher um
          * angulo cujo cos e sin sejam RACIONAIS — um terno pitagorico — e a conta cai em

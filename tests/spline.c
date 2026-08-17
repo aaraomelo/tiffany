@@ -372,7 +372,7 @@ int main(void){
                 double M  = 1.0/s;
                 double Ml = pow(lam, -s)/s;
                 double d  = fabs(Ml - pow(lam, -s)*M);
-                if(d > 1e-12) certo = 0;
+                if((long long)(d * 1e12) >= 1) certo = 0;
                 /* e em LOG: a escala e uma translacao pura */
                 double t1 = log(1.0), t2 = log(lam);
                 double desl = fabs((t2 - t1) - log(lam));

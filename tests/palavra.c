@@ -675,12 +675,12 @@ int main(void){
                 double r20 = (t[20]/pow(sg,20)) / (t[19]/pow(sg,19));
                 double r30 = (t[30]/pow(sg,30)) / (t[29]/pow(sg,29));
                 double e20 = fabs(r20-1), e30 = fabs(r30-1);
-                if(e30 < 1e-4) converge++;
-                if(e30 < e20 || e20 < 1e-12) encolhe++;
+                if((long long)(e30 * 1e4) == 0) converge++;
+                if(e30 < e20 || (long long)(e20 * 1e12) == 0) encolhe++;
                 if(e20 > pior){ pior=e20; pior_n=n; pior_m=m; }
                 if((n<=3 && m<=2) || (n>=4 && m==1))
                     printf("      %d  %lld   %8.6f  %14.9f  %.9f   %s\n",
-                           n, m, sg, r20, r30, e30<1e-4?"sim":"NÃO");
+                           n, m, sg, r20, r30, (long long)(e30 * 1e4) == 0 ? "sim" : "NÃO");
             }
             printf("      corpos K_{n,m} testados (n=2..5, m=1..4): %d\n", corpos);
             printf("      o mais lento: n=%d, m=%lld — e é sempre m=1, onde σ está mais perto\n",
@@ -712,7 +712,7 @@ int main(void){
             }
             for(int i=0;i<nc;i++){
                 int novo = 1;
-                for(int j=0;j<i;j++) if(fabs(c[i]-c[j]) < 1e-6) novo = 0;
+                for(int j=0;j<i;j++) if((long long)(fabs(c[i]-c[j]) * 1e6) == 0) novo = 0;
                 if(novo) distintas++;
             }
             printf("      e as CONSTANTES t_k/σ^k: %d corpos, %d valores DISTINTOS\n",

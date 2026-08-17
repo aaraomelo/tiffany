@@ -96,7 +96,7 @@ static double reconstroi(const Matriz *m, const double *canais, const double *or
             num += d*d;
             den += orig[i*LADO+j]*orig[i*LADO+j];
         }
-    return sqrt(num / (den > 1e-12 ? den : 1));
+    return sqrt(num / ((long long)(den * 1e12) >= 1 ? den : 1));
 }
 
 /* ───────────────────────────────────────────────────────────────────────────
@@ -208,7 +208,7 @@ int main(void){
             printf("      o pior vale %.2e  —  separavel = posto 1 = todo menor anula, e a soma NAO\n\n",
                    pior_menor);
             ok("o campo e SEPARAVEL, f(x,y) = g(x).h(y): todo menor 2x2 anula — posto 1",
-               pior_menor < 1e-12 && menores == previsto);
+               (long long)(pior_menor * 1e12) == 0 && menores == previsto);
             free(fs);
         }
 
@@ -275,7 +275,7 @@ int main(void){
         double e1 = 0, e2 = 0;
         for(int i = 0; i < NC; i++)   e1 += Af[i] * c[i];
         for(int i = 0; i < NPTS; i++) e2 += f[i] * ATc[i];
-        double rel = fabs(e1 - e2) / (fabs(e1) > 1e-12 ? fabs(e1) : 1);
+        double rel = fabs(e1 - e2) / ((long long)(fabs(e1) * 1e12) >= 1 ? fabs(e1) : 1);
         /* O TEXTO JA' DIZIA «nao e aproximado» e a condicao trazia um 1e-9 a desdize-lo.
          * Medido: o residuo relativo e' ZERO EXACTO, e nao por sorte — a matriz de
          * amostragem tem uma entrada 1 por ponto e zero no resto, logo as duas somas
@@ -327,7 +327,7 @@ int main(void){
             Matriz mm = { lado_n, lado_n, passo };
             campo(f, k, 0, lado);
             le(&mm, f, canais, lado);
-            if(reconstroi(&mm, canais, f, lado) < 1e-9){ fator = f2; break; }
+            if((long long)(reconstroi(&mm, canais, f, lado) * 1e9) == 0){ fator = f2; break; }
         }
         /* e a NECESSIDADE mede-se a serio: violar tem de falhar SEMPRE */
         int violou_e_falhou = 0, violou = 0;

@@ -169,7 +169,7 @@ int main(void){
          * a tensao e mil vezes o microvolt, e isso compara-se com a escala e nao com o valor. */
         double V = seebeck(MATERIAIS[0].S_uVK, dT);
         ok("e com o gradiente real da cabeca (5 K) o Bi2Te3 da mil vezes o microvolt",
-           V >= 1000e-6);
+           V >= 0.001);
         printf("     -> a 5 K o Bi2Te3 da %.2f mV por juncao (%.0f uV). Empilhando N juncoes em\n",
                V*1e3, V*1e6);
         puts("        serie a tensao soma — e e assim que um modulo Peltier chega a volts.\n");

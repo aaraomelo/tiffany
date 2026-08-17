@@ -118,7 +118,8 @@ printf("\n§E1  Σ∘Π = Id: a espiral recompõe o real, e o resíduo é epsilo
         printf("%-15.10f %.2e\n", v, r);
     }
     printf("\n      pior resíduo relativo: %.3e\n\n", pior);
-    ok("Σ∘Π = Id — a espiral recompõe o real que o cone extraiu", pior < 1e-9);
+    ok("Σ∘Π = Id — a espiral recompõe o real que o cone extraiu",
+       (long long)(pior * 1e9) == 0);
     printf("      Uma projeção sozinha PERDE (fica só um inteiro); a composição de todas não\n");
     printf("      perde nada. É o que o eval.txt diz, e é o que faz da régua uma coordenada.\n\n");
     printf("      E repare-se QUEM tem o pior resíduo: φ e 1/φ, com 1e-10 contra o zero exato\n");
@@ -234,7 +235,7 @@ printf("\n§E4  Logo o par é uma RETRAÇÃO, e não uma involução — os dois
         int a[20], n = Pi(x, a, 20);
         double volta = Sigma(a, n);
         int b[20]; int m = Pi(volta, b, 20);
-        int ida = (fabs(volta - x) < 1e-9);
+        int ida = ((long long)(fabs(volta - x) * 1e9) == 0);
         /* e a outra ordem, com uma sequência não-canónica, não fecha (§E2) */
         int c[4] = {1,7,0,2};
         double v2 = Sigma(c, 4); int d[20], k2 = Pi(v2, d, 20);

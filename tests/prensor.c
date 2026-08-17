@@ -75,7 +75,7 @@ printf("\n§P2  O cone é Q=0: as duas direções nulas SÃO os dois atratores.\
         LD q1 = -2*s*s + 2*m*s + 2;
         LD q2 = -2*sl*sl + 2*m*sl + 2;
         printf("      %lld   %10.7Lf   %+.3Le   %10.7Lf   %+.3Le\n", m, s, (double)q1?q1:q1, sl, q2);
-        if(fabsl(q1) > 1e-15L || fabsl(q2) > 1e-15L) mau++;
+        if((long long)(fabsl(q1) * 1e15L) >= 1 || (long long)(fabsl(q2) * 1e15L) >= 1) mau++;
     }
     ok("as direções nulas do cone são exatamente σ e σ'", mau == 0);
     printf("\n      Logo o cone não é figura: é o par de atratores do §1 visto como LUGAR.\n");
@@ -106,12 +106,12 @@ printf("\n§P3  As marcas: quem começa fora do cone nunca o toca — e espirala
         for(int k = 0; k < 40; k++){
             LD na = m*a + b, nb = a; a = na; b = nb;
             LD c1 = (a - sl*b)/den, c2 = (s*b - a)/den;
-            if(fabsl(c1) < 1e-300L) break;
+            if((long long)(fabsl(c1) * 1e300L) == 0) break;
             LD r = fabsl(c2/c1);
             /* só se mede onde ainda há dígito: |c2/c1| decai geometricamente e afunda no
              * subfluxo do long double. Antes eu fazia média INCLUINDO o ruído do subfluxo, e
              * m=4 devolvia 0,64 em vez de 0,056 — a média estava medindo o fim da precisão. */
-            if(k >= 2 && ant > 1e-16L && r > 1e-16L){ razao += r/ant; n++; }
+            if(k >= 2 && (long long)(ant * 1e16L) >= 1 && (long long)(r * 1e16L) >= 1){ razao += r/ant; n++; }
             ant = r;
             if(fabsl(a) > 1e300L) break;
         }
@@ -122,7 +122,7 @@ printf("\n§P3  As marcas: quem começa fora do cone nunca o toca — e espirala
          * quase iguais depois que o vetor se alinha à direção nula — cancelamento catastrófico.
          * O long double entrega ~7-8 dígitos aqui, e é o que se exige. Pedir 1e-15 seria pedir
          * dígito que a aritmética não tem; e a concordância medida (7 dígitos) não é marginal. */
-        if(n < 3 || fabsl(med - alvo)/alvo > 1e-5L) mau_raz++;
+        if(n < 3 || (long long)(fabsl(med - alvo)/alvo * 1e5L) >= 1) mau_raz++;
     }
     ok("|Q| constante: a órbita nunca alcança o cone", mau_toca == 0);
     ok("a componente branca/negra cai por 1/σ² a CADA batida", mau_raz == 0);
@@ -147,7 +147,7 @@ printf("\n§P4  A espiral, medida como espiral: passo constante, e a áurea no c
         }
         LD med = n ? soma/n : 0, res = fabsl(med - logl(s));
         printf("      %lld    %18.14Lf   %.14Lf   %.2Le\n", m, med, logl(s), res);
-        if(res > 1e-12L) mau++;
+        if((long long)(res * 1e12L) >= 1) mau++;
     }
     ok("Δ(log r) = log σ por batida — espiral logarítmica", mau == 0);
     printf("\n      E com o esquilo dando o giro (G = [[0,-1],[1,0]], det=+1, um quarto de volta),\n");
@@ -161,7 +161,7 @@ printf("\n§P4  A espiral, medida como espiral: passo constante, e a áurea no c
         LD r_esp = powl(phi, 2.0L*th/(LD)3.14159265358979323846264338327950288L);
         LD res = fabsl(r_med - r_esp);
         printf("      %d    %9.6Lf   %13.9Lf   %13.9Lf   %.2Le\n", k, th, r_med, r_esp, res);
-        if(res > 1e-15L) mau_au++;
+        if((long long)(res * 1e15L) >= 1) mau_au++;
     }
     ok("a marca do par gato+esquilo é a espiral áurea, exata", mau_au == 0);
 }

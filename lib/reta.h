@@ -605,6 +605,9 @@ static long rt_traco(const long *M, int n){
  *      σᵏ + σ'ᵏ = ((2σ)ᵏ + (2σ')ᵏ) / 2ᵏ = 2A_k / 2ᵏ = A_k / 2^{k−1}
  *
  * e essa divisão é EXACTA — o que se verifica, e não se assume.
+ *
+ * Para coeficientes racionais e escala m genérica em ℚ(m√D), ver lib/qmd.h
+ * (thm:serie-quadratica: conj, norma, inversão, qmd_verifica_rapida).
  * ═══════════════════════════════════════════════════════════════════════════════════ */
 
 /* o produto em ℤ[√D]: (a₁+b₁√D)(a₂+b₂√D) */

@@ -108,7 +108,7 @@ int main(void){
             Zs i2 = zs_mul(inv,inv,m), i4 = zs_mul(i2,i2,m);
             double v = zs_val(i4, s);
             metais++;
-            if(fabs(v - alvo) < 1e-12) bate++;
+            if((long long)(fabs(v - alvo) * 1e12) == 0) bate++;
             printf("      %-4lld %.15f    %+lld%+lldσ         %.15f  %.1e\n",
                    m, alvo, i4.a, i4.b, v, fabs(v-alvo));
         }
@@ -191,10 +191,10 @@ int main(void){
                 casos++;
                 /* estabiliza: a diferença entre 16 e 24 termos é muito menor que entre 8 e 16 */
                 double d1=fabs(p[1]-p[0]), d2=fabs(p[2]-p[1]);
-                if(d2 < d1*0.1 || d2 < 1e-14) converge++;
+                if((long long)(d2 * 10) < (long long)(d1) || (long long)(d2 * 1e14) == 0) converge++;
                 if(casos<=4)
                     printf("      %-2lld %-3lld %.14f %.14f %.14f  %s\n",
-                           m, sv, p[0], p[1], p[2], (d2<d1*0.1||d2<1e-14)?"sim":"NÃO");
+                           m, sv, p[0], p[1], p[2], ((long long)(d2 * 10) < (long long)(d1) || (long long)(d2 * 1e14) == 0) ? "sim" : "NÃO");
             }
         }
         printf("      casos: %d   a estabilizar: %d\n", casos, converge);
@@ -231,7 +231,7 @@ int main(void){
             long t4 = rt_traco_metalico((long)m2, 4);          /* em ℤ[√D], sem raiz */
             double lhs = 2.0*cosh(lm);
             metais_t++;
-            if(fabs(lhs - (double)t4) < 1e-9) traco_bate++;
+            if((long long)(fabs(lhs - (double)t4) * 1e9) == 0) traco_bate++;
             printf("        m=%lld : 2.cosh(l_m) = %.9f   t_4 = %ld\n", m2, lhs, t4);
         }
         printf("\n");

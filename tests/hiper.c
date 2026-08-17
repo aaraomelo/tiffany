@@ -46,7 +46,7 @@ static double det(Mn M){
     long d = 1;
     for(int c = 0; c < n; c++){
         int p = -1;
-        for(int r = c; r < n; r++) if(fabs(A[r][c]) > 1e-12){ p = r; break; }
+        for(int r = c; r < n; r++) if((long long)(fabs(A[r][c]) * 1e12) >= 1){ p = r; break; }
         if(p < 0) return 0;
         if(p != c){ for(int k = 0; k < n; k++){ double t = A[c][k]; A[c][k] = A[p][k]; A[p][k] = t; }
                     d = -d; }
@@ -86,7 +86,7 @@ printf("\n§H1  O determinante da companion é ±1 em TODA dimensão e todo meta
         for(long m = 1; m <= 4; m++){
             double d = det(companion(n, m));
             quantos++;
-            if(fabs(fabs(d) - 1.0) > 1e-9) mau++;
+            if((long long)(fabs(fabs(d) - 1.0) * 1e9) >= 1) mau++;
             printf("%+5.0f  ", d);
         }
         printf("\n");
@@ -116,7 +116,7 @@ printf("\n§H2  Em n=2 o polinómio da teoria É o da cifra [m;m,m,…].\n\n");
         }
         double s = (m + sqrt((double)m*m + 4)) / 2, c = (double)h1 / k1;
         printf("      %ld   x² - %ldx - 1     %.9f     %.9f     %.1e\n", m, m, s, c, fabs(c - s));
-        if(fabs(c - s) > 1e-6) mau++;
+        if((long long)(fabs(c - s) * 1e6) >= 1) mau++;
     }
     printf("\n");
     ok("os convergentes das MESMAS sementes convergem para a raiz de p_2", mau == 0);
@@ -134,7 +134,7 @@ printf("\n§H3  As sementes em R^n são as n colunas de I_n — o 0/0 é o caso 
         Mn I = {{{0}}, n};
         for(int i = 0; i < n; i++) I.a[i][i] = 1;
         double d = det(I);
-        if(fabs(d - 1.0) > 1e-9) mau++;
+        if((long long)(fabs(d - 1.0) * 1e9) >= 1) mau++;
         printf("      %-4d I_%-18d %+.0f    os %d eixos da base %s\n", n, n, d, n,
                n == 2 ? "<- e aqui são o ZERO e o INFINITO" : "");
     }

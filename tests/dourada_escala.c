@@ -155,7 +155,7 @@ int main(void){
     }
     printf("   bidual exp/log, e somar-la' == multiplicar-ca': pior desvio %.2e\n", pior_b);
     ok("o par fecha dos DOIS lados: somar no aditivo E' multiplicar no multiplicativo",
-       pior_b < 1e-10);
+       (long long)(pior_b * 1e10) == 0);
 
     /* ─── §D7 E ASSIM NAO SE MEDE: PROMOVE-SE ─────────────────────────────────────── */
     /* O Aarao: «o residuo deve ser 0 INTEIRO, ausencia da sua interferencia; vc ainda esta

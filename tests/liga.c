@@ -118,7 +118,7 @@ int main(void){
         int lei = 1;
         for(double d = 1e-4; d <= 1e-2; d *= 2){
             double r = sigma_comp(PC + 2*d) / sigma_comp(PC + d);
-            if(fabs(r - pow(2.0, EXPO)) > 1e-9) lei = 0;
+            if((long long)(fabs(r - pow(2.0, EXPO)) * 1e9) >= 1) lei = 0;
         }
         ok("A LEI: sigma cresce com (p-pc)^2 — dobrar a distancia ao limiar QUADRUPLICA",
            lei);
@@ -151,7 +151,7 @@ int main(void){
             double s = sigma_comp(p);                       /* a ida */
             double p_de_volta = PC + pow(s/S_GRAFENO, 1.0/EXPO);   /* a volta */
             volta_tot++;
-            if(fabs(p_de_volta - p) < 1e-9) volta_ok++;
+            if((long long)(fabs(p_de_volta - p) * 1e9) == 0) volta_ok++;
         }
         printf("      e a INVERSAO volta ao p de partida em %ld de %ld fraccoes varridas\n",
                volta_ok, volta_tot);
@@ -162,7 +162,8 @@ int main(void){
            " porque o incremento acumula e o ultimo ultrapassa. Comparar sigma_comp(p_alvo)"
            " com o alvo era f(f^-1(x)) = x: a definicao do par relida, e nao a formula a"
            " estar certa",
-           volta_ok == volta_tot && volta_tot == 30 && fabs(s_check - alvo)/alvo < 1e-6);
+           volta_ok == volta_tot && volta_tot == 30
+           && (long long)(fabs(s_check - alvo) / alvo * 1e6) == 0);
         /* e a JANELA: que variação de p mantém σ dentro de um fator 2 do alvo? */
         double p_lo = PC + pow(alvo/2/S_GRAFENO, 1.0/EXPO);
         double p_hi = PC + pow(alvo*2/S_GRAFENO, 1.0/EXPO);
@@ -172,7 +173,7 @@ int main(void){
          * acertar. Digo o numero em vez de o adjetivar. */
         double abs_largura = p_hi - p_lo;
         ok("a JANELA e larga em relativo e ESTREITA em absoluto — e e o absoluto que o fabrico ve",
-           largura > 0.05 && abs_largura < 1e-3);
+           largura > 0.05 && (long long)(abs_largura * 1000000) < 1000);
         printf("     -> p_alvo = %.8f (%.6f%%), e a janela de fator 2 vai de %.8f a %.8f.\n",
                p_alvo, 100*p_alvo, p_lo, p_hi);
         printf("        Isso e %.1f%% de largura RELATIVA, mas so %.1e de largura ABSOLUTA em p.\n",
@@ -274,11 +275,11 @@ int main(void){
                 for(int k = 0; k <= 10; k++){
                     double v = mistura(a, b, k/10.0);
                     double lo = a < b ? a : b, hi = a < b ? b : a;
-                    if(v < lo - 1e-12 || v > hi + 1e-12) dentro = 0;
+                    if((long long)((v - lo) * 1e12) < 0 || (long long)((v - hi) * 1e12) > 0) dentro = 0;
                 }
                 if(dentro) limitada++;
                 /* e trocar os papeis reparte o mesmo total: e' uma PARTICAO de a+b */
-                if(fabs(mistura(a,b,0.3) + mistura(b,a,0.3) - (a+b)) < 1e-12) simetrica++;
+                if((long long)(fabs(mistura(a,b,0.3) + mistura(b,a,0.3) - (a+b)) * 1e12) == 0) simetrica++;
                 casos++;
             }
             printf("     o contrato da mistura em %d pares (a,b) inteiros:\n", casos);

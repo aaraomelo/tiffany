@@ -341,7 +341,7 @@ int main(void){
             }
             I2 *= h2/3.0;
             double alvo = X*y1 - 1.0*y0;
-            if(fabs(I1 + I2 - alvo) < 1e-8) fecha++;
+            if((long long)(fabs(I1 + I2 - alvo) * 1e8) == 0) fecha++;
             ns++;
             printf("      %-3d %.9f    %12.8f   %12.8f   %10.6f  %10.6f\n", n, b, I1, I2, I1+I2, alvo);
         }
@@ -358,7 +358,7 @@ int main(void){
             I2 *= h2/3.0;
             printf("      e com f = f^-1 (f(x)=1/x): as duas integrais dao %.9f e %.9f\n\n", I1, I2);
             ok("e quando f E' a sua propria inversa os dois lados valem o MESMO — metade cada",
-               fabs(I1 - I2) < 1e-8);
+               (long long)(fabs(I1 - I2) * 1e8) == 0);
         }
         conclui("a conservacao nao se postula: ela e' o que sobra quando se proibe a perda. E' a");
         conclui("mesma lei que Parseval diz na transformada — a energia nao se move ao ir ao dual.");

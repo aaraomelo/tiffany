@@ -151,11 +151,11 @@ int main(void){
         double pin = (double)q * sq;               /* wait: pin = q*sen(pi/q) — a dobra */
         double dif = fabs(pi_geo - pin) / pin;
         printf("  %2d   %.3e        %.9f  %.9f  %.3e\n", n, fecho, pi_geo, pin, dif);
-        if(fecho > 1e-6 * q) orbita_fecha = 0;
+        if((long long)(fecho / q * 1e6) >= 1) orbita_fecha = 0;
         /* a regua da concordancia e' o residuo do PROPRIO desenho: o arredondamento
          * acumula com os q passos do rotor — exige-se dif ABAIXO de 1e-9, que e' tres
          * ordens acima do pior medido e seis abaixo de qualquer fisica da orbita */
-        if(dif > 1e-9) dois_caminhos = 0;
+        if((long long)(dif * 1e9) >= 1) dois_caminhos = 0;
         err_ant = dif; (void)err_ant;
     }
     ok("§L6a a ORBITA FECHA: q passos unitarios com uma marca de rotacao por passo "

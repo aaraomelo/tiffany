@@ -108,7 +108,7 @@ int main(void){
             LD res = fabsl(I1-I0)/I0;
             printf("       (%.4Lf,%.4Lf)  %.18Lf  %.18Lf  %.2Le %s\n",
                    pares[t][0], pares[t][1], I0, I1, res, res== 0.0L?"✓":"← REVER");
-            if(res >= 1e-15L) erro=1;
+            if((long long)(res * 1e15L) >= 1) erro=1;
         }
         printf("     %s\n", VD(erro, "resíduo 0 (na precisão da quadratura) — a integral é o invariante exato"));
         if(erro) passou=0;
@@ -127,7 +127,7 @@ int main(void){
             LD res = fabsl(esq-dir)/fabsl(esq);
             printf("       (a,b)=(%.2Lf,%.2Lf) : 1/AGM=%.16Lf  (2/π)I=%.16Lf  %.1Le %s\n",
                    a,b,esq,dir,res, res== 0.0L?"✓":"← REVER");
-            if(res>=1e-15L) erro=1;
+            if((long long)(res * 1e15L) >= 1) erro=1;
         }
         printf("       AGM(1,√2) = %.18Lf   (a constante de Gauss, π/ϖ)\n",
                agm(1.0L, sqrtl(2.0L), NULL, NULL));
@@ -160,7 +160,7 @@ int main(void){
             LD res = fabsl(k - sv[t].fechado);
             printf("       %.0f  %-8s %.18Lf  %.18Lf  %.1Le %s\n",
                    sv[t].N, sv[t].nome, k, sv[t].fechado, res, res== 0.0L?"✓":"← REVER");
-            if(res>=1e-14L) erro=1;
+            if((long long)(res * 1e14L) >= 1) erro=1;
         }
         printf("     %s\n", VD(erro, "resíduo 0 — os pontos de ancoragem são ALGÉBRICOS e exatos"));
         if(erro) passou=0;

@@ -241,7 +241,7 @@ int main(void){
             double W = Q*e, Qf = Q - W;
             /* a variação de entropia do universo: −Q/Tq + Qf/Tf. No limite de Carnot é ZERO. */
             double dS = -Q/T_CORPO + Qf/Tf;
-            if(dS < -1e-12) cresce_sempre = 0;
+            if((long long)(dS * 1e12) < 0) cresce_sempre = 0;
             if(dS < menor) menor = dS;
             casos++;
         }

@@ -77,7 +77,7 @@ int main(void){
             LD e=fabsl(t_med-t_for);
             printf("       (%.2Lf,%.4Lf) %.16Lf   %.16Lf   %.16Lf   %.1Le %s\n",
                    a,b,t,t_med,t_for,e, e== 0.0L?"✓":"✗");
-            if(e>=1e-18L) erro=1;
+            if((long long)(e * 1e18L) >= 1) erro=1;
         }
         printf("     %s\n", VD(erro, "resíduo 0 — a iteração de duas variáveis É um mapa de uma só. É essa forma reduzida que se\n"
           "     vai conjugar."));
@@ -189,7 +189,7 @@ int main(void){
             printf("       %.8Lf %.15Lf   %.15Lf   %.15Lf   %.15Lf\n", k, K1, alvo, K1p, alvop);
             printf("                  erro %.1Le %s                        erro %.1Le %s\n",
                    e1, e1== 0.0L?"✓":"✗", e2, e2== 0.0L?"✓":"✗");
-            if(e1>=1e-15L||e2>=1e-14L) erro=1;
+            if((long long)(e1 * 1e15L) >= 1 || (long long)(e2 * 1e14L) >= 1) erro=1;
         }
         printf("     %s\n", VD(erro, "resíduo 0 — as DUAS identidades fecham, e é delas que τ↦2τ sai por divisão. A medida do\n"
           "     §U2 não era o teorema: era o corolário. O teorema são estas duas linhas."));

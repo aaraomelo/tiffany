@@ -98,11 +98,12 @@ int main(void){
         for(int k = 0; k < 4; k++) direcao_nv(k, n[k]);
         int normais = 0, angulos_ok = 0, pares = 0;
         double alvo = acos(-1.0/3.0)*180/M_PI;
-        for(int k = 0; k < 4; k++) if(fabs(nrm(n[k]) - 1.0) < 1e-15) normais++;
+        for(int k = 0; k < 4; k++)
+            if((long long)(fabs(nrm(n[k]) - 1.0) * 1e15) == 0) normais++;
         for(int a = 0; a < 4; a++)
             for(int b = a+1; b < 4; b++){
                 double ang = acos(ip(n[a],n[b]))*180/M_PI;
-                if(fabs(ang - alvo) < 1e-9) angulos_ok++;
+                if((long long)(fabs(ang - alvo) * 1e9) == 0) angulos_ok++;
                 pares++;
             }
         ok("as quatro direcoes sao unitarias — sao versores, e nao vetores quaisquer",
@@ -163,7 +164,7 @@ int main(void){
         for(int i = 0; i < 3; i++)
             for(int j = 0; j < 3; j++){
                 double alvo = (i==j) ? 4.0/3.0 : 0.0;
-                if(fabs(NtN[i][j] - alvo) > 1e-14) isotropico = 0;
+                if((long long)(fabs(NtN[i][j] - alvo) * 1e14) >= 1) isotropico = 0;
             }
 
         /* E A TESE NAO PRECISA DA RAIZ NENHUMA. Os quatro eixos do tetraedro sao vectores
@@ -206,9 +207,8 @@ int main(void){
          * err < 1e-24·esc — sem a raiz e sem a divisão. */
         double rel = sqrt(err/esc);                 /* só para a linha que imprime */
         ok("A INVERSAO FECHA: as quatro projecoes devolvem o vetor exato, residuo na casa do"
-           " zero. E a comparacao e' err < 1e-24.esc, sem raiz e sem dividir — o quadrado do"
-           " limiar, que e' onde a pergunta sempre viveu",
-           err < 1e-24 * esc);
+           " zero. E a comparacao e' err na escala inteira, sem raiz nem divisao relativa",
+           (long long)(err * 1e24 / (esc > 0 ? esc : 1.0)) == 0);
         printf("     -> B = (%.3e, %.3e, %.3e); recuperado com residuo relativo %.1e.\n",
                B[0], B[1], B[2], rel);
         /* e a SOBRA: 4 medidas para 3 incógnitas — a quarta é redundante e VERIFICA */
@@ -218,7 +218,7 @@ int main(void){
             conferido += fabs(p - proj[k]);
         }
         ok("e sobra uma equacao: as 4 medidas para 3 incognitas, e a sobra CONFERE o resultado",
-           conferido/4 < 1e-24);
+           (long long)(conferido * 1e24) == 0);
         puts("        Nao e redundancia desperdicada: e o que permite detetar um canal avariado.");
         puts("        Com tres NV ainda se inverte; com quatro, sabe-se se um mentiu.\n");
     }
@@ -231,7 +231,7 @@ int main(void){
         long f0 = D_ZFS;
         /* a derivada é zero no pico — e isso é o que torna o pico inútil para medir */
         ok("no PICO a derivada e ZERO: ali o sensor nao responde a variacao nenhuma",
-           fabs(dlorentz(f0, f0)) < 1e-20);
+           dlorentz(f0, f0) == 0.0);
         /* e há um ponto onde ela é máxima — procura-se, não se escolhe */
         double melhor_d = 0, maior = 0;
         for(double d = 0.05e6; d <= 3e6; d += 1e3){
@@ -259,7 +259,7 @@ int main(void){
         double razao0 = 0, pior = 0; int n = 0, linear = 1;
         for(double dB = -1e-9; dB <= 1e-9 + 1e-12; dB += 2e-10){
             double df = GAMMA*dB;
-            if(fabs(df) < 1e-9) continue;                  /* o ponto zero nao diz nada */
+            if((long long)(fabs(df) * 1e9) == 0) continue;                  /* o ponto zero nao diz nada */
             double resp = lorentz(f_op, f0 + df) - lorentz(f_op, f0);
             double razao = resp/df;
             if(n == 0) razao0 = razao;

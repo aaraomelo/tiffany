@@ -93,7 +93,7 @@ printf("\n§X1  O TELÓMERO É RECIPIENTE INFINITO: período finito, conteúdo s
         double v = (double)a[n-1];
         for(int k = 0; k < 40; k++) v = (double)m + 1.0/v;
         double res = fabs(v - s);
-        if(res > 1e-12 || n == 0) mau++;
+        if((long long)(res * 1e12) >= 1 || n == 0) mau++;
         printf("      %-7d %-16.12f %-9zu %-32.12f %.2e\n", m, s, n, v, res);
     }
     printf("\n");

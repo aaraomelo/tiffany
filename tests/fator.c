@@ -120,7 +120,7 @@ printf("\n§W1  A razão cruzado/direto É tan θ — por dois caminhos independ
     double pior = 0; int n = 0;
     for(int a = 0; a < M; a++) for(int b = a+1; b < M; b++){
         double dd = direto(v[a],v[b],D), cc = cruzado(v[a],v[b],D);
-        if(fabs(dd) < 1e-9) continue;
+        if((long long)(fabs(dd) * 1e9) == 0) continue;
         double razao = cc/dd;
         double tang  = tan(acos(dd > 1 ? 1 : dd < -1 ? -1 : dd));
         double dif = fabs(razao - tang);
@@ -130,7 +130,8 @@ printf("\n§W1  A razão cruzado/direto É tan θ — por dois caminhos independ
         n++;
     }
     printf("      …\n\n      %d pares medidos, pior diferença: %.3e\n\n", n, pior);
-    ok("a razão cruzado/direto É a tangente — as duas contas dão o mesmo", pior < 1e-9);
+    ok("a razão cruzado/direto É a tangente — as duas contas dão o mesmo",
+       (long long)(pior * 1e9) == 0);
     printf("      Logo o fator de potência é o DIRETO (cos φ) e a razão é tan φ. E não é\n");
     printf("      analogia: o motor.c já tinha T_e = ψ_s × i_s — o torque É o cruzado.\n");
 }
@@ -202,7 +203,8 @@ printf("\n§W4  A RÉGUA INFINITA representa o que diverge, e sai INTEIRA.\n\n")
         printf("…]   %-12.6f %.2e\n", volta, res);
     }
     printf("\n");
-    ok("a régua reconstrói o valor a partir dos INTEIROS, com resíduo de epsilon", pior < 1e-9);
+    ok("a régua reconstrói o valor a partir dos INTEIROS, com resíduo de epsilon",
+       (long long)(pior * 1e9) == 0);
     printf("      É o telomero.c outra vez: cada divisão deixa resto estritamente menor, logo\n");
     printf("      termina, e o que fica identifica. A régua é infinita porque tan é ilimitada —\n");
     printf("      não por generosidade, por necessidade.\n");
@@ -241,7 +243,7 @@ printf("\n§W5  A INVERSÃO: o circuito quer fp = 1, o TECIDO quer fp = 0.\n\n")
                 double c = direto(w, b[k], D);
                 for(int i = 0; i < D; i++) w[i] -= c*b[k][i];
             }
-            if(direto(w,w,D) > 1e-18){ normaliza(w,D); memcpy(b[p], w, sizeof w); p++; }
+            if((long long)(direto(w,w,D) * 1e18) >= 1){ normaliza(w,D); memcpy(b[p], w, sizeof w); p++; }
         }
         posto[caso] = p;
     }

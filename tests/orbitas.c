@@ -91,8 +91,8 @@ static int secao1(void) {
     printf("\n§O.1  O GATO ESMAGA — uma dilatação hiperbólica (estica ×σ, esmaga ×1/σ)\n");
     int res = 0;
     double s = sigma(), si = 1.0/s;
-    if (fabs(s*s - (double)m*s - 1.0) > 1e-9) res++;   /* dente: σ resolve σ²=mσ+1        */
-    if (fabs(s*si - 1.0) > 1e-12) res++;               /* dente: σ·(1/σ)=1               */
+    if ((long long)(fabs(s*s - (double)m*s - 1.0) * 1e9) >= 1) res++;   /* dente: σ resolve σ²=mσ+1        */
+    if ((long long)(fabs(s*si - 1.0) * 1e12) >= 1) res++;               /* dente: σ·(1/σ)=1               */
     printf("     A_m=[[%ld,1],[1,0]]: tr=%ld, det=%ld  → autovalores σ=%.6f e −1/σ=%.6f\n",
            m, tr(gato()), det(gato()), s, -si);
     printf("     a entrada é esticada ×σ num eixo e esmagada ×1/σ no outro — espatifada\n");
@@ -107,7 +107,7 @@ static int secao2(void) {
     printf("\n§O.2  O EXPOENTE — λ=ln σ, a taxa do esmagamento (a impressão digital)\n");
     int res = 0;
     double lam = log(sigma());
-    if (fabs(log(pow(sigma(),5.0))/5.0 - lam) > 1e-9) res++;   /* dente: σ^k = e^{kλ}   */
+    if ((long long)(fabs(log(pow(sigma(),5.0))/5.0 - lam) * 1e9) >= 1) res++;   /* dente: σ^k = e^{kλ}   */
     printf("     λ = ln σ = %.6f : uma perturbação cresce σ^k = e^{kλ}\n", lam);
     printf("     = a taxa de crescimento do número de estados (a entropia); σ=[%ld;%ld,%ld,…]\n", m, m, m);
     printf("     é a assinatura (o metal, a fração contínua) — a impressão digital do corpo\n");

@@ -125,7 +125,7 @@ printf("\n§U1  O CLOCK: o astável, e o seu período é ln2·(R₁C₁ + R₂C�
         double T1_for = R1*C1*log(2.0);
         printf("      %-8.0f %-8.0f %-8.0f %-9.0f %-11.4f %.4f\n",
                R1/1e3, C1*1e9, R2/1e3, C2*1e9, T*1e6, 1.0/T/1e3);
-        if(fabs(T1 - T1_for)/T1_for > 1e-4) mal++;   /* a meia-fase, pelos dois caminhos */
+        if((long long)(fabs(T1 - T1_for)/T1_for * 1e4) >= 1) mal++;   /* a meia-fase, pelos dois caminhos */
     }
     printf("\n      (e a meia-fase medida por integração bate com RC·ln2: %d falhas)\n\n", mal);
     ok("o clock é o astável, e o período sai da EXPONENCIAL do RC — dois caminhos",
@@ -148,7 +148,7 @@ printf("\n§U2  O BARRAMENTO casado: Γ = 0, e o ganho MÁXIMO é o casamento.\n
         double G = (ZL-Z0)/(ZL+Z0), P = V*V*ZL/((Z0+ZL)*(Z0+ZL));
         printf("      %-9.0f %+-20.6f %-14.6f %.6f\n", ZL, G, G*G, P*1e3);
         if(P > Pmax) Pmax = P;
-        if(fabs(ZL-Z0) < 1e-9 && fabs(G) > 1e-12) malG++;
+        if((long long)(fabs(ZL-Z0) * 1e9) == 0 && (long long)(fabs(G) * 1e12) >= 1) malG++;
     }
     /* varrer fino para achar o maximo de verdade */
     double melhor = 0, zbest = 0;

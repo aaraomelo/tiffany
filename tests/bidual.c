@@ -698,8 +698,8 @@ int main(void){
             double s  = (n + r)/2.0, s2 = (n - r)/2.0;
             double por_raizes = s * s2;                /* caminho 1: multiplicar as raizes */
             long por_coefs  = -1.0;                  /* caminho 2: o termo independente de x²-nx-1 */
-            if(fabs(por_raizes - por_coefs) > 1e-12) mau++;
-            if(fabs(fabs(por_raizes) - 1.0) > 1e-12) mau++;
+            if((long long)(fabs(por_raizes - por_coefs) * 1e12) >= 1) mau++;
+            if((long long)(fabs(fabs(por_raizes) - 1.0) * 1e12) >= 1) mau++;
             casos++; }
         printf("      sigma·sigma' pelas RAIZES contra o termo independente, n = -9..9: %ld falhas\n",
                mau);

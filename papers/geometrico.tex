@@ -1707,6 +1707,8 @@ T_{10}p+T_{11}q]\\[3pt]
 \textbf{INVERTE} & T^{-1}=\operatorname{adj}(T)/\det T\quad\text{--- INTEIRA, porque
 }\det T=\pm1\\[3pt]
 \textbf{CODIFICA} & w:=\text{palavra (FC) ou dígitos (Cantor)}\\[3pt]
+\textbf{VERIFICA RÁPIDA} & \text{em }\mathbb{Q}(m\sqrt D)\text{: norma de }\alpha-1\text{,}
+\ 1/(\alpha-1)\text{, e }S_1=\alpha^{-1}\ \text{(Teor.~\ref{thm:serie-quadratica})}\\[3pt]
 \hline
 \textbf{E FECHA} & \text{descodifica}(w)=(p,q)
 \end{array}}
@@ -1741,7 +1743,8 @@ não). $\square$
 operadores, com fecho TOTAL ($1448$ de $1448$) nas duas que não saturam e $88$ contados à
 parte na base $10$; a inversão a aceitar em $232$ de $232$ com $\abs{\det}=1$ e a RECUSAR
 em $2169$ de $2169$ sem ela; as duas ordens de Viviani ($2$ no ponto, $4$ no vector) e o
-gato sem ordem em nenhuma; e as três codificações a concordarem em $181$ de $181$}
+gato sem ordem em nenhuma; e as três codificações a concordarem em $181$ de $181$; \S U5:
+verificação rápida da série geométrica em $\mathbb{Q}(m\sqrt D)$}
 
 \medskip
 \noindent\textbf{E OS SETE TEOREMAS SÃO UMA FRASE SÓ --- as duas metades de
@@ -2636,6 +2639,113 @@ excepções; \S L8b: $3660$ racionais, terminação e exactidão em todos}
 A igualdade num índice isolado não caracteriza a sucessão de uns: a caracterização
 é pela igualdade \emph{simultânea em todos} os índices.
 \end{observacao}
+
+\begin{teorema}[Série geométrica em $\mathbb{Q}(m\sqrt D)$]\label{thm:serie-quadratica}
+Sejam $D,m,a,b\in\mathbb{Q}$, com $D$ livre de quadrados,
+$m\neq0$, e seja
+\[
+    \alpha=a+b\,m\sqrt D
+    \in\mathbb{Q}(m\sqrt D).
+\]
+Suponha
+\[
+    \alpha\neq1,
+    \qquad
+    |\alpha|>1
+\]
+na imersão real considerada. Então
+\[
+    \sum_{n=1}^{\infty}\alpha^{-n}
+    =
+    \frac{1}{\alpha-1},
+\]
+e, sempre que $(a-1)^2-b^2m^2D\neq0$,
+\[
+    \boxed{
+    \sum_{n=1}^{\infty}\alpha^{-n}
+    =
+    \frac{a-1-bm\sqrt D}
+         {(a-1)^2-b^2m^2D}
+    }.
+\]
+Toda a operação algébrica ocorre exactamente em
+$\mathbb{Q}(m\sqrt D)$, sem ponto flutuante.
+\emph{Em particular}, com $D=5$, $m=1$ e $\alpha=\varphi=(1+\sqrt5)/2$ satisfazendo
+$\varphi^2=\varphi+1$, obtém-se $\varphi(\varphi-1)=1$, logo $1/(\varphi-1)=\varphi$ e
+$\sum_{n\geq1}\varphi^{-n}=\varphi$ --- o caso dourado é \emph{instância} deste teorema,
+não fundamento separado.
+\end{teorema}
+\begin{proof}
+Escreva
+\[
+    \alpha=a+b\,m\sqrt D.
+\]
+O conjugado quadrático é
+\[
+    \alpha^\ast=a-b\,m\sqrt D.
+\]
+Logo
+\[
+    (\alpha-1)(\alpha^\ast-1)
+    =
+    (a-1)^2-b^2m^2D.
+\]
+Se esse produto é não nulo, a inversa existe e é
+\[
+    \frac1{\alpha-1}
+    =
+    \frac{\alpha^\ast-1}
+         {(\alpha-1)(\alpha^\ast-1)}
+    =
+    \frac{a-1-bm\sqrt D}
+         {(a-1)^2-b^2m^2D}.
+\]
+
+Para $N\geq1$, a soma parcial é a progressão geométrica
+\[
+    S_N
+    =
+    \sum_{n=1}^{N}\alpha^{-n}
+    =
+    \frac{\alpha^{-1}(1-\alpha^{-N})}
+         {1-\alpha^{-1}}.
+\]
+Como
+\[
+    \frac{\alpha^{-1}}
+         {1-\alpha^{-1}}
+    =
+    \frac1{\alpha-1},
+\]
+obtemos
+\[
+    S_N
+    =
+    \frac{1-\alpha^{-N}}
+         {\alpha-1}.
+\]
+
+A hipótese $|\alpha|>1$ implica
+\[
+    \lim_{N\to\infty}\alpha^{-N}=0.
+\]
+Portanto
+\[
+    \boxed{
+    \sum_{n=1}^{\infty}\alpha^{-n}
+    =
+    \frac1{\alpha-1}
+    }.
+\]
+
+\medskip\noindent\emph{Caso $\varphi$.}
+Com $D=5$, $m=1$ e $\alpha=\varphi=(1+\sqrt5)/2$, a relação $\varphi^2=\varphi+1$ dá
+$\varphi=1+1/\varphi$, logo $1/\varphi=\varphi-1$ e $\varphi(\varphi-1)=1$, donde
+$1/(\varphi-1)=\varphi$. A convergência usa só $0<\varphi^{-1}<1$.
+\end{proof}
+\colunas{a série geométrica em $\mathbb{Q}(m\sqrt D)$}
+        {$\sum_{n\geq1}\alpha^{-n}=1/(\alpha-1)$; $\varphi$ incluído no teorema}
+        {\code{tests/serie\_phi.c}; verificação rápida em \code{tests/universal.c} \S U5}
 
 %======================================================================
 \section{$e$: a razão dos volumes de andar para andar}\label{sec:e}

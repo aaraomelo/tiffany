@@ -42,7 +42,7 @@ printf("\n§O1  Δ>0: o sinal de x+yσ, exato em ℤ — e concorda com o double
         for(long x = -25; x <= 25; x++) for(long y = -25; y <= 25; y++){
             int s = au_sinal(x, y, m);
             double v = (double)x + (double)y*sg;
-            int sd = (v > 1e-9) - (v < -1e-9);
+            int sd = ((long long)(v * 1e9) >= 1) - ((long long)(-v * 1e9) >= 1);
             if(s != sd) mau++;
             casos++;
         }

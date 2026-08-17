@@ -71,7 +71,7 @@ printf("\n§Z1  O SIMPLEX É A SOMBRA: projeta-se e_i e sai exatamente o simplex
             double g = dot(s[i],s[j],N);
             if(fabs(g + 1.0/n) > pior) pior = fabs(g + 1.0/n);
         }
-        if(ns > 1e-12 || pior > 1e-12) mau++;
+        if((long long)(ns * 1e12) >= 1 || (long long)(pior * 1e12) >= 1) mau++;
         printf("      %-4d %-16d %-16s %-13.2e %-11.6f %.6f\n",
                n, n+1, "Σx=0", ns, ip, -1.0/n);
     }
@@ -101,10 +101,10 @@ printf("\n§Z2  O ÂNGULO de baixo é o que a projeção PRODUZ — fórmula fec
         /* cos = (−1/N)/(1−1/N) = −1/(N−1) = −1/n — a identidade é exacta; a conta
          * em double pode dar −0,499999…, logo compara-se cos·n contra −1, não == −1.0 */
         double cos_sombra = (ip_cima - comp)/(1.0 - comp);
-        if(fabs(cos_sombra * (double)n + 1.0) > 1e-12) mau++;
+        if((long long)(fabs(cos_sombra * (double)n + 1.0) * 1e12) >= 1) mau++;
         printf("      %-4d %-19.1f %-18.6f %-15.6f %-9.6f %s\n",
                n, ip_cima, comp, cos_sombra, -1.0/n,
-               fabs(cos_sombra * (double)n + 1.0) < 1e-12 ? "sim" : "NÃO");
+               (long long)(fabs(cos_sombra * (double)n + 1.0) * 1e12) == 0 ? "sim" : "NÃO");
     }
     ok("o ângulo da sombra sai da fórmula, não de ajuste: −1/N sobre 1−1/N = −1/n",
        mau == 0);
@@ -143,7 +143,7 @@ printf("\n§Z3  O CONE: a sombra vive em Σx=0, e a normal é a dimensão perdid
     ok("toda sombra é ortogonal à normal — vive inteiramente no corpo de baixo. E mede-se"
        " por Σ_d s[d] = 0 em ℤ: projectar e_i dá (N−1)/N e −1/N, que somam 0 exactos —"
        " o 1e-15 comparava ⟨s,n⟩ depois, com folga à mesma projectura",
-       orto == N && pior < 1e-15);
+       orto == N && (long long)(pior * 1e15) == 0);
     printf("      A dimensão que falta não está espalhada pelas sombras: está TODA na normal,\n");
     printf("      e é por isso que se pode devolvê-la de uma vez só. O +1 não repara n coisas —\n");
     printf("      repõe uma.\n");
@@ -186,7 +186,7 @@ printf("\n§Z4  SUBIR restitui a ortogonalidade — e é isso que torna reversí
         double c_cima = dot(rec2,x,N)/dot(x,x,N);
         long e = 0;
         for(int d = 0; d < N; d++){ double t = rec[d]/c_baixo - x[d]; e += t*t; }
-        if(e > 1e-24 || fabs(c_cima - 1.0) > 1e-12) mau++;   /* raiz(e) > 1e-12 = e > 1e-24 */
+        if((long long)(e * 1e24) >= 1 || (long long)(fabs(c_cima - 1.0) * 1e12) >= 1) mau++;
         printf("      %-4d %-23s %-11.6f %-22s %.6f\n",
                n, "exata (÷ constante)", c_baixo, "exata (identidade)", c_cima);
     }
@@ -208,7 +208,7 @@ printf("\n§Z5  E A PROJEÇÃO ÁUREA: onde φ aparece, e onde eu NÃO a encontr
     int achou = 0;
     for(int n = 2; n <= 8; n++){
         double r = sqrt((double)n/(n+1.0));
-        int e_phi = fabs(r - phi) < 1e-6 || fabs(r - 1/phi) < 1e-6;
+        int e_phi = (long long)(fabs(r - phi) * 1e6) == 0 || (long long)(fabs(r - 1/phi) * 1e6) == 0;
         if(e_phi) achou++;
         printf("      %-4d %-30.10f %s\n", n, r, e_phi ? "SIM" : "não");
     }

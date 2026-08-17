@@ -142,7 +142,7 @@ printf("\n§N2  E a NORMA é multiplicativa em R³.\n\n");
     }
     printf("      max | ‖w1·w2‖ - ‖w1‖·‖w2‖ |  em 500 pares  =  %.2e\n\n", pior);
     ok("a norma É multiplicativa — em R³, que é onde eu disse que não podia ser",
-       pior < 1e-9);
+       (long long)(pior * 1e9) == 0);
     printf("      É o que a identidade de Lagrange exige, e a dimensão do vetor aqui é 2, não\n");
     printf("      1 nem 3 nem 7. Se a conclusão que eu tirei fosse universal, isto não podia\n");
     printf("      existir — e existe, e está medido.\n");
@@ -233,8 +233,8 @@ printf("\n§N5  A GENERALIZAÇÃO: já estava feita, e faltava interpretar.\n\n"
         }
         piores[d] = pior;
         printf("        R^%d     %-22s %.2e\n", d,
-               pior < 1e-9 ? "SIM" : "NAO", pior);
-        if(pior > 1e-9) mal++;
+               (long long)(pior * 1e9) == 0 ? "SIM" : "NAO", pior);
+        if((long long)(pior * 1e9) >= 1) mal++;
     }
     /* O `piores[]` era escrito e NUNCA lido — o compilador dizia-o — enquanto a linha
      * abaixo afirmava «o erro cresce de 3,5e-15 em R² para 1,4e-14 em R⁷», dois números
@@ -311,11 +311,11 @@ printf("\n§N6  A ÁLGEBRA DUAL DO GENTIL — e esta É distributiva. Corrijo-me
         double yz[2] = { y[0]+z[0], y[1]+z[1] };
         double e[2] = { x[0]*yz[0], -x[1]*yz[1] };
         double d[2] = { x[0]*y[0] + x[0]*z[0], -x[1]*y[1] - x[1]*z[1] };
-        if(fabs(e[0]-d[0]) > 1e-12 || fabs(e[1]-d[1]) > 1e-12) mal_d++;
+        if((long long)(fabs(e[0]-d[0]) * 1e12) >= 1 || (long long)(fabs(e[1]-d[1]) * 1e12) >= 1) mal_d++;
         double l = 1.7;
         double e2[2] = { l*x[0]*y[0], -l*x[1]*y[1] };
         double d2[2] = { l*(x[0]*y[0]), l*(-x[1]*y[1]) };
-        if(fabs(e2[0]-d2[0]) > 1e-12 || fabs(e2[1]-d2[1]) > 1e-12) mal_h++;
+        if((long long)(fabs(e2[0]-d2[0]) * 1e12) >= 1 || (long long)(fabs(e2[1]-d2[1]) * 1e12) >= 1) mal_h++;
     }
     printf("      x∗(y+z) contra x∗y + x∗z, em 300 triplos: %d falhas\n", mal_d);
     printf("      (λx)∗y  contra λ(x∗y),    em 300 pares:   %d falhas\n\n", mal_h);
@@ -450,7 +450,8 @@ printf("\n§N8  O LADO DA TORRE QUE É DE GENTIL — par e ímpar, e continua du
             W u = { a1, b1, 0.0 }, v = { a2, b2, 0.0 }, p = nne(u, v);
             double cr = a1*a2 - b1*b2, ci = a1*b2 + a2*b1;
             casos++;
-            if(fabs(p.a - cr) < 1e-9 && fabs(p.b - ci) < 1e-9 && fabs(p.c) < 1e-12) complexo++;
+            if((long long)(fabs(p.a - cr) * 1e9) == 0 && (long long)(fabs(p.b - ci) * 1e9) == 0
+            && (long long)(fabs(p.c) * 1e12) == 0) complexo++;
         }
         /* (ii) com ela NÃO nula, as duas partes fazem coisas diferentes */
         {
@@ -459,13 +460,12 @@ printf("\n§N8  O LADO DA TORRE QUE É DE GENTIL — par e ímpar, e continua du
             double r1 = hypot(a1,b1), r2 = hypot(a2,b2);
             double g = 1.0 - c1*c2/(r1*r2);
             /* a par MULTIPLICA (o complexo vezes γ) */
-            if(fabs(p.a - (a1*a2-b1*b2)*g) < 1e-9 && fabs(p.b - (a1*b2+a2*b1)*g) < 1e-9) par_mult++;
-            /* a ímpar SOMA (os c pesados pelas normas) */
-            if(fabs(p.c - (c1*r2 + c2*r1)) < 1e-9) impar_soma++;
-            /* e a norma continua multiplicativa */
+            if((long long)(fabs(p.a - (a1*a2-b1*b2)*g) * 1e9) == 0
+            && (long long)(fabs(p.b - (a1*b2+a2*b1)*g) * 1e9) == 0) par_mult++;
+            if((long long)(fabs(p.c - (c1*r2 + c2*r1)) * 1e9) == 0) impar_soma++;
             double nu = sqrt(a1*a1+b1*b1+c1*c1), nv = sqrt(a2*a2+b2*b2+c2*c2);
             double np = sqrt(p.a*p.a+p.b*p.b+p.c*p.c);
-            if(fabs(np - nu*nv) < 1e-9) norma_ok++;
+            if((long long)(fabs(np - nu*nv) * 1e9) == 0) norma_ok++;
         }
     }
     printf("      c = 0 (sem parte ímpar)    o produto de ℂ         ausente\n");

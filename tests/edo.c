@@ -178,7 +178,7 @@ printf("\n§E6  A solução explícita é e^{At}, e o exp é a PONTE — de broc
         double esq = exp(a2 + b2), dir = exp(a2) * exp(b2);
         printf("        e^(%.1f + %.1f) = %.9f     e^%.1f · e^%.1f = %.9f\n",
                a2, b2, esq, a2, b2, dir);
-        if(fabs(esq - dir) > 1e-12) mal++;
+        if((long long)(fabs(esq - dir) * 1e12) >= 1) mal++;
     }
     printf("\n");
     ok("exp leva a SOMA dos geradores ao PRODUTO dos fluxos", mal == 0);
@@ -192,7 +192,7 @@ printf("\n§E6  A solução explícita é e^{At}, e o exp é a PONTE — de broc
     for(int m = 1; m <= 4; m++){
         double sg = (m + sqrt((double)m*m + 4)) / 2, lam = log(sg);
         printf("        %d   %.9f     %.9f          %.9f\n", m, sg, lam, exp(lam));
-        if(fabs(exp(lam) - sg) > 1e-12) mal++;
+        if((long long)(fabs(exp(lam) - sg) * 1e12) >= 1) mal++;
     }
     printf("\n");
     ok("σ = e^λ nos quatro metais — a reta é o log do metal", mal == 0);

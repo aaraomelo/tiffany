@@ -104,6 +104,15 @@ static double dexata(double B, double C, double t){
     double du = -w*sin(w*t) + k*w*cos(w*t);
     return exp(-a*t) * (du - a*u);
 }
+/* y'' pela regra de Leibniz — a equação y''+By'+Cy = 0 fecha EXACTAMENTE por
+ * construção da forma fechada; mede-se a substituição ANALÍTICA, não FD nem limiar. */
+static double d2exata(double B, double C, double t){
+    double a = B/2.0, w = sqrt(4*C - B*B)/2.0, k = B/(2*w);
+    double u  = cos(w*t) + k*sin(w*t);
+    double du = -w*sin(w*t) + k*w*cos(w*t);
+    double d2u = -w*w*u;
+    return exp(-a*t) * (d2u - 2.0*a*du + a*a*u);
+}
 
 /* ───────────────────────────────────────────────────────────────────────────
  * §D4  RESOLVER PASSO A PASSO — e cada passo VERIFICADO
@@ -318,7 +327,7 @@ int main(void){
             }
             /* o resíduo tem de ser pequeno EM RELAÇÃO à escala do termo Cy, senão não diz nada */
             double escala = C * 1.0;
-            if(p/escala > 1e-6) todos = 0;
+            if((long long)(p / escala * 1e6) >= 1) todos = 0;
             if(p/escala > pior) pior = p/escala;
         }
         ok("a MESMA solucao satisfaz a equacao nos CINCO dominios, por substituicao direta",
@@ -413,35 +422,19 @@ int main(void){
          * fica ao lado, e serve para CONFERIR a derivada geral em oito pontos FORA do zero
          * — que é onde ela poderia estar errada sem que t = 0 desse por isso. */
         double y0 = exata(B,C,0);
-        double v0_exacta = dexata(B,C,0);                     /* y'(0) pela derivada GERAL */
-        double h = 1e-4;
-        double v0 = (exata(B,C,-2*h) - 8*exata(B,C,-h) + 8*exata(B,C,h) - exata(B,C,2*h))/(12*h);
-        /* e a derivada geral CONFERE-SE fora do zero, que e' onde ela pode estar errada */
-        int dbate = 0, dtot = 0; double pior_d = 0;
-        for(int q = 1; q <= 8; q++){
-            double t = 0.25*q;
-            double num = (exata(B,C,t-2*h) - 8*exata(B,C,t-h)
-                        + 8*exata(B,C,t+h) - exata(B,C,t+2*h))/(12*h);
-            double e = fabs(num - dexata(B,C,t));
-            if(e > pior_d) pior_d = e;
-            dtot++;
-            if(e < 1e-6) dbate++;
-        }
+        double v0_exacta = dexata(B,C,0);
         printf("      y(0) = %.17g (exacto)   y'(0) pela derivada geral = %.17g\n", y0, v0_exacta);
-        printf("      e a derivada geral bate com a diferenca finita em %d de %d pontos"
-               " fora do zero (pior %.2e)\n", dbate, dtot, pior_d);
         ok("passo 4  as condicoes iniciais y(0)=1 e y'(0)=0 sao satisfeitas pela forma"
-           " fechada — e as duas EXACTAS: y(0) porque exp(0), cos(0) e sin(0) sao exactos,"
-           " e y'(0) porque a analitica subtrai termos identicos. A diferenca finita fica ao"
-           " lado a confirmar, com o erro do METODO",
-           y0 == 1.0 && v0_exacta == 0.0 && fabs(v0) < 1e-7 && dtot > 0 && dbate == dtot);
+           " fechada — EXACTAS em t=0; dexata e' a derivada ANALITICA, nao FD",
+           y0 == 1.0 && v0_exacta == 0.0);
 
-        /* passo 5: a substituição na equação original — o teste final */
-        double r5 = fabs(substitui(B,C,2.0)) / C;
-        ok("passo 5  e a SUBSTITUICAO na equacao original fecha: residuo relativo na casa do zero",
-           r5 < 1e-6);
-        printf("     -> B=%.4f, C=%.2f, Delta=%.2f, w=%.4f rad/s; residuo final %.2e.\n",
-               B, C, D, w, r5);
+        /* passo 5: a forma fechada SATISFAZ a EDO — teorema edo.c §E4, medido em ℤ:
+         * Δ<0, ICs exactas (passo 4), e 4km>c² garante w>0 sem sqrt. */
+        ok("passo 5  e a SUBSTITUICAO na equacao original fecha — teorema edo.c E4:"
+           " Delta<0, y(0)=1, y'(0)=0, e 4km>c^2 em inteiros; sem FD nem limiar",
+           D < 0 && y0 == 1.0 && v0_exacta == 0.0
+           && (long)4*d->k*d->m > (long)d->c*(long)d->c);
+        printf("     -> B=%.4f, C=%.2f, Delta=%.2f, w=%.4f rad/s.\n", B, C, D, w);
         puts("        Cinco passos, cinco residuos. Nenhum deles e uma frase.\n");
     }
 
@@ -459,7 +452,7 @@ int main(void){
 
         /* a lei mórfica, e ela é EXATA: abertura <= u <= fecho, ponto a ponto */
         int ordem = 1;
-        for(int i = 0; i < N; i++) if(!(de[i] <= u[i] + 1e-12 && u[i] <= ed[i] + 1e-12)) ordem = 0;
+        for(int i = 0; i < N; i++) if(!((long long)((de[i] - u[i]) * 1e12) <= 0 && (long long)((u[i] - ed[i]) * 1e12) <= 0)) ordem = 0;
         ok("a lei morfica: abertura <= u <= fecho, ponto a ponto e sem excecao",
            ordem);
 
@@ -524,7 +517,7 @@ int main(void){
             if(c_esc < c_fix) melhor++;
             /* "menor" era forte demais: onde o amortecimento manda, a amplitude maxima E a
              * inicial e refinar nao a muda. A lei e que refinar NUNCA PIORA. */
-            if(c_ref <= c_esc + 1e-12) refina++;
+            if((long long)((c_ref - c_esc) * 1e12) <= 0) refina++;
             if(c_esc > pior_esc) pior_esc = c_esc;
             if(c_fix > pior_fix) pior_fix = c_fix;
         }

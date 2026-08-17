@@ -146,7 +146,7 @@ printf("\n§H2  A LEI DE CONSERVAÇÃO, e o imposto V(s) = (1−s²)·m.\n\n");
         double rhs = nq(z)*nq(z) * nq(w)*nq(w);
         printf("      %+-8.1f %-13.9f %-13.9f %-13.9f %-13.9f %.1e\n",
                s, nq(r)*nq(r), imposto(z,w,s), lhs, rhs, fabs(lhs-rhs));
-        if(fabs(lhs-rhs) > 1e-12) mal++;
+        if((long long)(fabs(lhs-rhs) * 1e12) >= 1) mal++;
     }
     /* e em massa, com z e w quaisquer */
     for(int k = 0; k < 500; k++){
@@ -156,7 +156,7 @@ printf("\n§H2  A LEI DE CONSERVAÇÃO, e o imposto V(s) = (1−s²)·m.\n\n");
         Q r = star(z, w, s);
         double lhs = nq(r)*nq(r) + imposto(z,w,s), rhs = nq(z)*nq(z)*nq(w)*nq(w);
         casos++;
-        if(fabs(lhs-rhs) > 1e-11*(fabs(rhs)+1)) mal++;
+        if((long long)(fabs(lhs-rhs) / (fabs(rhs)+1) * 1e11) >= 1) mal++;
     }
     printf("\n      (mais %d casos com z, w e s quaisquer)\n\n", casos);
     /* E A LEI TAMBÉM É EXACTA. ‖z⋆w‖² + (1−s²)‖a×b‖² = ‖z‖²‖w‖² é aritmética: com z, w
@@ -264,11 +264,11 @@ printf("\n§H4  Os campos locais C_â: fechados, e R^n é a sua união.\n\n");
             double e = r.v[k] - proj*ah[k];
             perp += e*e;
         }
-        if(perp > 1e-28) malF++;      /* raiz(perp) > 1e-14  equivale a  perp > 1e-28 */
+        if((long long)(perp * 1e28) >= 1) malF++;
         /* e é a lei de C? */
         double eR = a1*a2 - b1*b2, eI = a1*b2 + b1*a2;
-        if(fabs(r.s0 - eR) > 1e-14 || fabs(proj - eI) > 1e-14) malC++;
-        if(fabs(imposto(z,w,s)) > 1e-28) malV++;       /* e o imposto é ZERO lá */
+        if((long long)(fabs(r.s0 - eR) * 1e14) >= 1 || (long long)(fabs(proj - eI) * 1e14) >= 1) malC++;
+        if((long long)(fabs(imposto(z,w,s)) * 1e28) >= 1) malV++;       /* e o imposto é ZERO lá */
         if(c < 3)
             printf("      (%+.3f,%+.3f,%+.3f)   %+.6f %+.6f    %s\n",
                    ah[0], ah[1], ah[2], r.s0, proj,
@@ -357,7 +357,7 @@ printf("\n§H6  A histerese ESFÉRICA, e a redução ao clássico em n = 2.\n\n"
         if(ne > d) for(int k = 0; k < 3; k++) sg[k] = e[k]/ne;
         printf("      (%+.3f,%+.3f,%+.3f)   %-9.6f (%+.3f,%+.3f,%+.3f)      %s\n",
                T[0],T[1],T[2], ne, sg[0],sg[1],sg[2], ne <= d ? "sim" : "não");
-        if(ne > d && fabs(n3(sg) - 1.0) > 1e-12) mal++;       /* σ é versor */
+        if(ne > d && (long long)(fabs(n3(sg) - 1.0) * 1e12) >= 1) mal++;       /* σ é versor */
         if(ne <= d && n3(sg) != 0.0) mal++;                  /* dentro, σ = 0 */
     }
     printf("\n");

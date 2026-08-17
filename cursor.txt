@@ -1,13 +1,13 @@
 CURSOR.TXT — ELIMINAR OS DOUBLES
 ================================
-Para quem entra. Estado em 17/08/2026, bateria 505:505, 37 citações a bater. geometrico.tex: 44 páginas, 56 teoremas.
+Para quem entra. Estado em 17/08/2026, bateria 506:506, 37 citações a bater. geometrico.tex: 44 páginas, 56 teoremas.
 
 
 1. A ARQUITECTURA
 -----------------
 
     papers/*.tex      a teoria. O central é papers/geometrico.tex (44 páginas, 56 teoremas)
-    lib/*.h           as operações. Tudo inteiro. reta.h é a principal
+    lib/*.h           as operações. Tudo inteiro. reta.h é a principal; qmd.h é ℚ(m√D)
     tests/*.c         os medidores. Um por assunto, cada um com asserções `ok(texto, cond)`
     tools/            a bateria, as citações e os detectores
 
@@ -18,6 +18,9 @@ O PIPE, que é o desenho de tudo (tests/entrega.c §E6):
 
     Entre a unidade e a palavra NÃO HÁ VÍRGULA. Um decimal escrito é um racional exacto:
     "6.3e7" é 63000000/1, "0.45" é 45/100. `rt_le_decimal` faz a leitura.
+
+    ℚ(m√D) vive à parte do pipe racional, mas entra no ciclo universal como VERIFICA RÁPIDA
+    (thm:serie-quadratica): norma, 1/(α−1), S₁=α⁻¹ — uma passagem, sem formar φ.
 
 A REGRA, e é a única:
 
@@ -108,6 +111,8 @@ São a razão pela qual os doubles saem. Cada um dá uma forma exacta de medir.
                                            [p:q] -> [T00·p+T01·q : T10·p+T11·q]
                              INVERTE       T⁻¹ = adj(T)/det T, INTEIRA porque det = ±1
                              CODIFICA      w := palavra (FC) ou dígitos (Cantor)
+                             VERIFICA RÁPIDA  qmd_verifica_rapida(m,D,α) em ℚ(m√D)
+                                           norma de α−1, 1/(α−1), S₁=α⁻¹
                              E FECHA       descodifica(w) == (p,q)
 
                          O TORO não é mais um operador: é a CONDIÇÃO. Sem |det| = 1 a
@@ -115,6 +120,11 @@ São a razão pela qual os doubles saem. Cada um dá uma forma exacta de medir.
                          O que muda é o OPERADOR (e a sua ORDEM) e a ESCRITA (a codificação).
                          Viviani tem DUAS ordens: 2 no ponto (P¹) e 4 no vector (Z²) — em
                          P¹ os vectores v e −v são o mesmo ponto. É o recobrimento duplo.
+
+    thm:serie-quadratica Σ_{n≥1} α^{-n} = 1/(α−1) em ℚ(m√D), exacto. Representação
+                         (a+b·m√D)/den; conjugação, norma, inversão sem sqrt(). φ entra
+                         como instância (D=5, m=1, φ²=φ+1), não como fundamento separado.
+                         Medidor: tests/serie_phi.c. Verificação rápida: universal.c §U5.
 
     E A SÍNTESE, que é a frase que atravessa os sete:
         o TRAÇO mede (separa, coordena, muda de andar)
@@ -124,7 +134,13 @@ São a razão pela qual os doubles saem. Cada um dá uma forma exacta de medir.
 3. O PROCEDIMENTO — como tirar um double
 ----------------------------------------
 
-Estado: 85 limiares ainda DECIDEM uma asserção (eram 134, depois 118, depois 98). Lista com:
+Estado: **0 limiares** em `ok()` (134→0). Fase 2 (`if(... 1e-...)` simples): **0**.
+Fase 3 (comparações aninhadas, ternários, while, atribuições): **0** em código de
+decisão. Restam **~25** literais `1e-` só em: strings `ok()` (histórico), comentários,
+grelhas de dados (`for(l=1e-7…)`), passos de método (`h=1e-5`, PASSO 7). Bateria **506:506**.
+
+Fase 4 (em curso): passos `h` documentados como PASSO 7 onde a lei é analítica;
+promovidos a escala inteira onde fecham (`vizinha.c` paragem, `dif.c` §F5 asserções).
 
     python3 - <<'PY'
     import re,glob
@@ -141,7 +157,21 @@ Estado: 85 limiares ainda DECIDEM uma asserção (eram 134, depois 118, depois 9
         if n: print(f"{n:3d}  {f}")
     PY
 
-OS ALVOS JÁ ESTÃO IDENTIFICADOS: tools/alvos_doubles.txt tem 177 limiares que, trocados
+Contagem fase 3 (comparações `>/< 1e-` no código, excl. printf e strings ok):
+
+    python3 - <<'PY'
+    import re,glob
+    pat=re.compile(r'(\>=|\<=|>|<)\s*1e-\d+|\b1e-\d+\s*(\>=|\<=|>|<)')
+    for f in sorted(glob.glob('tests/*.c')):
+        for line in open(f,encoding='utf-8',errors='replace'):
+            if not pat.search(line): continue
+            s=line.strip()
+            if s.startswith('*') or 'printf' in line: continue
+            if re.search(r'ok\s*\([^)]*1e-', line): continue
+            print(f.strip()[:90])
+    PY
+
+Lista de `ok()`: tools/alvos_doubles.txt tem 177 limiares que, trocados
 por igualdade exacta, deixam o medidor VERDE — o compilar-e-correr está feito. NÃO é uma
 autorização para converter cegamente: por cada um, perguntar se o zero é ESTRUTURAL ou
 SORTE dos dados (a lição do recaman.c está escrita no cabeçalho do ficheiro).
@@ -157,9 +187,12 @@ PASSO 2 — a lei é polinomial? Então mede-se em Z, sem dividir.
         hermitiana:   2H = A+A', 2K = A−A', 2H+2K = 2A     (quantico.c)
         discriminante: (a−d)² + 4(b²+c²) >= 0              (quantico.c)
 
-PASSO 3 — envolve raiz quadrada? Então vive em Z[√D], e a raiz NUNCA se forma.
+PASSO 3 — envolve raiz quadrada? Então vive em Z[√D] ou ℚ(m√D), e a raiz NUNCA se forma.
     Guardar 2σ = m + √D como o par (m, 1) e usar rt_zd_mul / rt_zd_pot / rt_zd_norma.
-        φ² = φ+1  =>  (2φ)² = 6+2√5 = 2(2φ)+4              (solar.c)
+    Para coeficientes racionais e escala m genérica: lib/qmd.h — soma, mul, conj, norma,
+    inversão, qmd_verifica_rapida (série geométrica thm:serie-quadratica).
+        φ² = φ+1  =>  (2φ)² = 6+2√5 = 2(2φ)+4              (solar.c, serie_phi.c)
+        Σ α^{-n} = 1/(α−1)  =>  qmd_inv_am1, sem decimal   (serie_phi.c, universal.c §U5)
         σ² = mσ+1 =>  (2σ)² = 2m(2σ)+4, para todo m
 
 PASSO 4 — envolve raiz da unidade / DFT / Fourier? Então vive em F_p.
@@ -178,6 +211,19 @@ PASSO 7 — não dá mesmo? Então o limiar fica, MAS:
     - a condição tem de dizer o que ele mede (o método, o arredondamento, o meio);
     - a tese principal fica no lado exacto;
     - o que saturar conta-se à parte.
+
+PASSO 8 — monotonicidade É TEOREMA; mede-se em ℚ ou ℤ[√D], NUNCA em double.
+    A monotonicidade não se postula num loop de vírgula — ela já está nos teoremas:
+      geometrico.tex obs:area   — a face dual encolhe (|σ†|<1)
+      geometrico.tex thm:supremo — E_k(m) decrescente; verifica-se o PASSO m_{k+1}∈{2m_k,2m_k+1}
+      thm:divisao-fibra + calculo exacto — (f(a+h)−f(a))/h é polinómio em h; f'(a)=q(0)
+    O medidor compara INTEIROS ou FRAÇÕES (Fr, Qz, rt_zd_*), como supremo.c §S1:
+        err(h₁) > err(h₂) em ℚ para h₁ > h₂ > 0   (dif.c §F1, série de sen)
+        y''+By'+Cy = 0 pela derivada ANALÍTICA, não FD   (dominios.c §D4)
+        W = −ΔV = ΔT em ℤ na mesma trajectória   (corpo_fisico.c §H4)
+    Loop double com «desce quando h desce» NÃO CONTA — é postulado disfarçado. Se o
+    objecto é polinómio, PASSO 2 (exacto). Se é transcendente, ℤ[√D] ou série em ℚ.
+    Limiar 1e-N só resta onde o double é TESTEMUNHA, nunca juiz.
 
 SEMPRE, no fim: o GUME. Mutar o que a asserção MEDE (não a asserção) e ver cair.
     - um gume que RELAXA a condição não é gume;
@@ -225,6 +271,10 @@ SEMPRE, no fim: o GUME. Mutar o que a asserção MEDE (não a asserção) e ver 
     rt_volta_fecha(f, qmax, &tot, &fora)           A VERIFICAÇÃO: a volta tem de fechar
     rt_ordem(passo, e0, n, tecto)                  a ordem de um operador, MEDIDA
 
+    lib/qmd.h         ℚ(m√D): (a+b·m√D)/den — soma, mul, conj, norma, inv, pow
+    qmd_inv_am1       1/(α−1) pela fórmula fechada do thm:serie-quadratica
+    qmd_verifica_rapida(m,D,α)                     norma + inversa + S₁=α⁻¹, uma passagem
+
     ── O CICLO UNIVERSAL, promovido (thm:universal) ────────────────────────────────
     RtOp {long T[4]}                               o operador, em ordem de leitura
     rt_op_det / rt_op_valido                       |det| = 1 ? (a condição do TORO)
@@ -232,6 +282,7 @@ SEMPRE, no fim: o GUME. Mutar o que a asserção MEDE (não a asserção) e ver 
     rt_inverte(&T, p,q, &rp,&rq)                   adj/det, INTEIRA; RECUSA sem |det|=1
     rt_ordem_ponto  / rt_ordem_vector              as DUAS ordens (P¹ e Z²)
     rt_ciclo(&T, cod, p,q, &rp,&rq)                opera+inverte+codifica, o pipe inteiro
+    qmd_verifica_rapida(m,D,alpha)                 VERIFICA RÁPIDA em Q(m√D) — thm:serie-quadratica
 
     CONVERTER UM MEDIDOR É CHAMAR A PEÇA. Não reimplementar o ciclo: `rt_ciclo` faz-o, e
     a TESE fica de fora dela — a comparação com o original é de quem chama, porque é ela

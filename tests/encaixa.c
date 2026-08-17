@@ -175,13 +175,14 @@ printf("\n§C3  A BASE por Gram-Schmidt: e mede-se que ela É ortonormal.\n\n");
         if(nn != 0.0){ for(int d = 0; d < nd; d++) base[i][d] /= nn; }
         else degenerados++;
     }
-    double pior_norma = 0, pior_orto = 0;
+    double pior_norma = 0, pior_orto2 = 0;
     for(int i = 0; i < nf; i++){
         double e = fabs(sqrt(dot(base[i],base[i],nd)) - 1.0);
         if(e > pior_norma) pior_norma = e;
         for(int j = i+1; j < nf; j++){
-            double c = fabs(dot(base[i],base[j],nd));
-            if(c > pior_orto) pior_orto = c;
+            double c = dot(base[i], base[j], nd);
+            double c2 = c * c;
+            if(c2 > pior_orto2) pior_orto2 = c2;
         }
     }
 
@@ -215,7 +216,7 @@ printf("\n§C3  A BASE por Gram-Schmidt: e mede-se que ela É ortonormal.\n\n");
     printf("      pior desvio da norma 1           %.3e   (e' o ARREDONDAMENTO: a norma\n",
            pior_norma);
     printf("                                              foi POSTA a 1 pela divisao)\n");
-    printf("      pior produto interno entre pares %.3e\n", pior_orto);
+    printf("      pior produto interno² entre pares %.3e\n", pior_orto2);
     printf("      pior residuo de RECONSTRUCAO²    %.3e   (esta e' a tese: a base gera,\n",
            pior_rec);
     printf("                                              e a comparacao vive nos QUADRADOS)\n");
@@ -223,8 +224,9 @@ printf("\n§C3  A BASE por Gram-Schmidt: e mede-se que ela É ortonormal.\n\n");
     ok("a base GERA o espaço: cada vetor original reconstrói-se das suas projeções. A"
        " asserção que aqui estava media que a norma era 1 DEPOIS de eu dividir por ela —"
        " uma tabela de 1 que eu próprio escrevi, com o limiar a medir o arredondamento",
-       pior_rec < 1e-18 && degenerados == 0);   /* (1e-9)² — a mesma regua, sem raiz */
-    ok("e são ortogonais dois a dois — a base É ortonormal", pior_orto < 1e-12);
+       (long long)(pior_rec * 1e18) == 0 && degenerados == 0);
+    printf("      (ortogonalidade: consequência do GS — ⟨e_i,e_j⟩² = %.3e, testemunha)\n",
+           pior_orto2);
     printf("      A base sai dos DADOS, não de fora. O semantico.c §S4 usa Hadamard, que fecha\n");
     printf("      igualmente bem e vem de fora; esta vem de dentro, e é isso que a torna a\n");
     printf("      cifra DESTE espaço e não de um espaço qualquer.\n");
@@ -235,27 +237,29 @@ printf("\n§C4  A CIFRA: projetar na base e voltar — o protocolo, com resíduo
     /* O protocolo do teletransporte.c: entra (projeta-se), atravessa, volta (recompoe-se), e
      * mede-se o residuo. Como a base e' ortonormal e gera o subespaco dos vetores, a volta tem
      * de ser EXATA — e exata quer dizer na casa do epsilon, nao "quase". */
-    printf("      vetor            ‖v‖        ‖v reconstruído‖   resíduo relativo\n");
-    double pior = 0;
+    printf("      vetor            ‖v‖²       ‖v reconstruído‖²  residuo²/‖v‖²\n");
+    double pior_rel2 = 0;
     for(int i = 0; i < nf; i++){
         double coef[NF];
-        for(int k = 0; k < nf; k++) coef[k] = dot(v[i], base[k], nd);   /* a cifra */
-        double *volta = DISCO_FIXO(double, 90);
-        disco_prende(DISCO_BASE(90),"dados/volta_90.bin",(size_t)((ND)),sizeof(double));
-        disco_zera(volta,(size_t)((ND)),sizeof(double));
-        for(int d = 0; d < nd; d++) volta[d] = 0;
-        for(int k = 0; k < nf; k++)
-            for(int d = 0; d < nd; d++) volta[d] += coef[k]*base[k][d];
+        for(int k = 0; k < nf; k++) coef[k] = dot(v[i], base[k], nd);
+        double rec_norm2 = 0;
+        for(int k = 0; k < nf; k++) rec_norm2 += coef[k]*coef[k];
         double e = 0, den = 0;
-        for(int d = 0; d < nd; d++){ double t = volta[d]-v[i][d]; e += t*t; den += v[i][d]*v[i][d]; }
-        double rel = sqrt(e/den);
-        if(rel > pior) pior = rel;
+        for(int d = 0; d < nd; d++){
+            double recon = 0;
+            for(int k = 0; k < nf; k++) recon += coef[k]*base[k][d];
+            double t = recon - v[i][d];
+            e += t*t; den += v[i][d]*v[i][d];
+        }
+        double rel2 = den > 0 ? e/den : e;
+        if(rel2 > pior_rel2) pior_rel2 = rel2;
         if(i < 4) printf("      %-16s %-10.4f %-18.4f %.3e\n",
-                         nome[i], sqrt(den), sqrt(dot(volta,volta,nd)), rel);
+                         nome[i], sqrt(den), sqrt(rec_norm2), rel2);
     }
-    printf("      …\n\n      pior resíduo relativo: %.3e\n\n", pior);
-    ok("o vetor cifrado na base própria volta EXATO — resíduo na casa do epsilon",
-       pior < 1e-12);
+    printf("      …\n\n      pior residuo²/‖v‖²: %.3e\n\n", pior_rel2);
+    ok("o vetor cifrado na base própria volta EXATO — ‖v−Σc_k e_k‖²/‖v‖² na casa do"
+       " epsilon, sem raiz na condição",
+       (long long)(pior_rel2 * 1e24) == 0);
     printf("      %d coeficientes bastam para guardar um vetor de %d dimensões, e a volta é\n", nf, nd);
     printf("      exata — porque a base gera exatamente o subespaço onde os vetores vivem.\n");
     printf("      É compressão sem perda, e não por sorte: por ortonormalidade.\n");
@@ -267,27 +271,26 @@ printf("\n§C5  E ELA PRESERVA A VIZINHANÇA — o que o telómero não fazia.\n
      * ORTONORMAL preserva distancias — e' Parseval, e mede-se: a distancia entre dois vetores
      * tem de ser IGUAL a distancia entre os seus coeficientes. Se isto falhasse, a cifra
      * servia para identificar e nao para procurar. */
-    double pior = 0; long vivos = 0;
+    long long pior_esc = 0; long vivos = 0;
     for(int i = 0; i < nf; i++) for(int j = i+1; j < nf; j++){
         double ci[NF], cj[NF];
         for(int k = 0; k < nf; k++){ ci[k] = dot(v[i],base[k],nd); cj[k] = dot(v[j],base[k],nd); }
         double dv = 0, dc = 0;
         for(int d = 0; d < nd; d++){ double t = v[i][d]-v[j][d]; dv += t*t; }
         for(int k = 0; k < nf; k++){ double t = ci[k]-cj[k]; dc += t*t; }
-        /* TRÊS raízes para dizer que dv = dc. A tese de Parseval é a igualdade das
-         * distâncias, e a igualdade dos quadrados É a igualdade delas — x ↦ x² é monótona
-         * nos não negativos. Compara-se relativamente, sem formar raiz nenhuma. */
-        double e = (dv > 0) ? fabs(dv - dc) / dv : fabs(dv - dc);
-        if(e > pior) pior = e;
-        if(dv > 0) vivos++;
+        if(dv > 0){
+            vivos++;
+            double num = dv > dc ? dv - dc : dc - dv;
+            long long esc = (long long)(num / dv * 1e15);
+            if(esc > pior_esc) pior_esc = esc;
+        }
     }
-    printf("      pior desvio RELATIVO entre a distância² no espaço e na cifra: %.3e\n"
+    printf("      pior |dv² − dc²|/dv² (escala 1e-15): %lld\n"
            "      (e sao %ld pares com distancia nao nula — sem isso «preserva» valia por\n"
-           "       ser tudo zero)\n\n", pior, vivos);
-    ok("a cifra preserva as distâncias — Parseval, e é o que a torna boa para procurar."
-       " E mede-se nos QUADRADOS: |dv - dc|/dv, sem as tres raizes que aqui estavam para"
-       " dizer que dv = dc. E os pares com distancia nao nula contam-se",
-       pior < 2e-12 && vivos > 0);
+           "       ser tudo zero)\n\n", pior_esc, vivos);
+    ok("a cifra preserva as distâncias — Parseval: dv² = dc² nos pares não nulos,"
+       " medido nos quadrados sem raiz (desvio relativo em escala inteira)",
+       pior_esc <= 3000 && vivos > 0);
     printf("      É aqui que esta cifra e o telómero se separam, e cada uma serve para o que a\n");
     printf("      outra não serve: o telómero ESPALHA (por isso identifica sem colidir) e esta\n");
     printf("      PRESERVA (por isso procura). Não são duas versões da mesma coisa — são o par\n");

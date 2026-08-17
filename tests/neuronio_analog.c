@@ -72,9 +72,9 @@ int main(int argc, char **argv)
         }
         gato_analog(cc, n, m);  gato_int(di, n, mi);          /* ⊗ sobe (analógico e oráculo) */
         for (int i = 0; i < n; i++) up[i] = cc[i];
-        int gok = 1; for (int i = 0; i < n; i++) if (fabs(cc[i]-(double)di[i]) > 1e-6) { viol++; gok=0; }
+        int gok = 1; for (int i = 0; i < n; i++) if ((long long)(fabs(cc[i]-(double)di[i]) * 1e6) >= 1) { viol++; gok=0; }
         esquilo_analog(cc, n, m);                              /* ⊘ desce */
-        int volta = 1; for (int i = 0; i < n; i++) if (fabs(cc[i]-(double)orig[i]) > 1e-6) { volta=0; volta_falha++; }
+        int volta = 1; for (int i = 0; i < n; i++) if ((long long)(fabs(cc[i]-(double)orig[i]) * 1e6) >= 1) { volta=0; volta_falha++; }
         printf("  R%-2d →σ→ [", n);
         for (int i = 0; i < n; i++) printf("%.1f%s", up[i], i<n-1?",":"");
         printf("] →σ'→ volta: %s  (gato==digital: %s)\n", volta?"sim (id)":"NÃO", gok?"sim":"NÃO");
