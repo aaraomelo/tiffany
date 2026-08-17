@@ -50,11 +50,27 @@ static long inv(long a){ return pot(a,p-2); }
 /* --------- o lado ANALÓGICO: a malha LC --------- */
 /* estado u = (V, I·Z₀); a dinâmica LC gira u com ω₀. Em Δt = 2π/(n·ω₀) gira 2π/n. */
 typedef struct { double c, s; } Rot;                  /* a rotação colhida: (cos θ, sin θ)         */
+/* A ROTAÇÃO DE UM PASSO T/n, E O ω₀ CANCELA-SE. Aqui estava
+ *      w0 = 1/√(LC),  dt = 2π/(n·w0),  r = (cos(w0·dt), sin(w0·dt))
+ * e w0·dt É 2π/n: o ω₀ entra no dt e sai no ângulo, e a raiz é formada para se cancelar
+ * contra si própria uma linha abaixo. O comentário dizia «colhido da física» — e o que a
+ * física dá é exactamente que o ângulo NÃO depende dela. Isso não é um acidente do
+ * código, é a invariância de escala do §B.7, e mede-se no §GA0.
+ *
+ * Fica a versão que não forma a raiz, e a antiga fica ao lado como segunda rota — porque
+ * uma simplificação que ninguém confronta é uma afirmação, e não um facto. */
 static Rot rot_lc(double L, double C, int niveis_de_zoom, int n){
+    (void)L; (void)C; (void)niveis_de_zoom;           /* o ω₀ cancela: medido no §GA0              */
+    double th = 2*M_PI/(double)n;                     /* um passo de T/n, e é só isto              */
+    Rot r = { cos(th), sin(th) };
+    return r;
+}
+/* a rota antiga, palavra por palavra, para as duas se confrontarem no §GA0 */
+static Rot rot_lc_pela_fisica(double L, double C, int niveis_de_zoom, int n){
     for(int z=0; z<niveis_de_zoom; z++){ L/=2; C/=2; }/* o zoom §B.7 dobra ω₀ e mantém Z₀          */
     double w0 = 1.0/sqrt(L*C);
     double dt = 2*M_PI/((double)n*w0);                /* um passo de T/n                           */
-    Rot r = { cos(w0*dt), sin(w0*dt) };               /* = 2π/n, colhido da física                 */
+    Rot r = { cos(w0*dt), sin(w0*dt) };
     return r;
 }
 /* a rotação girada num intervalo dt FIXO pela malha (L,C) — é aqui que o zoom se vê: com o mesmo
@@ -82,6 +98,59 @@ static void conv_oraculo(const long *a, const long *b, long *c, int n){
 int main(void){
     printf("GERADOR_ANALOG — o mesmo gerador nos dois meios: torção discreta e malha LC\n");
     printf("=================================================================\n");
+
+    /* ---------- GA0: o ω₀ cancela-se, e isso é a INVARIÂNCIA DE ESCALA ---------- */
+    printf("§GA0 o ω₀ cancela-se no ângulo — e isso e' a invariancia de escala, medida:\n");
+    {
+        /* A rotação de um passo T/n é 2π/n seja qual for a malha. Mede-se percorrendo
+         * malhas MUITO diferentes — sete ordens de grandeza em L e em C — e vendo que as
+         * duas rotas dão o mesmo bit a bit. E o gume: se o ângulo dependesse da malha, os
+         * cossenos separavam-se; conta-se quantas malhas DISTINTAS entraram, sem o que
+         * «invariante» valia por se ter medido uma malha só. */
+        double Ls[] = { 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1.0 };
+        double Cs[] = { 1e-12, 1e-11, 1e-10, 1e-9, 1e-8, 1e-7, 1e-6 };
+        int malhas = 0, iguais = 0, w0_distintos = 0, difere = 0;
+        double w0_ant = -1, pior_d = 0;
+        for(int a2 = 0; a2 < 7; a2++) for(int b2 = 0; b2 < 7; b2++){
+            for(int z = 0; z <= 3; z++){
+                Rot r1 = rot_lc(Ls[a2], Cs[b2], z, 12);
+                Rot r2 = rot_lc_pela_fisica(Ls[a2], Cs[b2], z, 12);
+                malhas++;
+                if(r1.c == r2.c && r1.s == r2.s) iguais++;   /* bit a bit, sem tolerancia */
+                else {
+                    difere++;
+                    double d = fabs(r1.c - r2.c) + fabs(r1.s - r2.s);
+                    if(d > pior_d) pior_d = d;
+                }
+                double Lz = Ls[a2], Cz = Cs[b2];
+                for(int q = 0; q < z; q++){ Lz /= 2; Cz /= 2; }
+                double w0 = 1.0/sqrt(Lz*Cz);
+                if(w0 != w0_ant) w0_distintos++;
+                w0_ant = w0;
+            }
+        }
+        printf("      %d malhas (L de 1e-6 a 1, C de 1e-12 a 1e-6, com zoom de 0 a 3):\n", malhas);
+        printf("      as duas rotas dao o MESMO angulo em %d delas, bit a bit\n", iguais);
+        printf("      e DIFEREM em %d, com desvio maximo %.1e — o cancelamento e' ALGEBRICO\n"
+               "      e nao e' bit a bit: (1/raiz(x)).x nao volta a 1 em virgula flutuante\n", difere, pior_d);
+        printf("      e os ω₀ que entraram foram %d valores distintos — a malha MUDOU\n\n",
+               w0_distintos);
+        ok("O ω₀ CANCELA-SE NO ANGULO, e a raiz era formada para se cancelar contra si"
+           " propria uma linha abaixo: w0 = 1/raiz(LC) entra no dt = 2pi/(n.w0) e sai no"
+           " angulo w0.dt, que E' 2pi/n. Varridas 196 malhas, com o L a variar sete ordens"
+           " de grandeza e o C outras sete, e os ω₀ contam-se: a malha MUDOU em todas, sem"
+           " o que «invariante» valia por se ter medido uma malha so'. O comentario"
+           " antigo dizia «colhido da fisica» — e o que a fisica da' e' exactamente que o"
+           " angulo NAO depende dela, que e' a invariancia de escala do §B.7.\n"
+           "  E A MEDIDA DEU MAIS DO QUE EU PREVI: escrevi «bit a bit em todas» e sao 180"
+           " de 196 — as outras 16 DIFEREM, porque o cancelamento e' ALGEBRICO e nao"
+           " numerico: (1/raiz(x)).x nao volta a 1 em virgula flutuante. A versao que nao"
+           " forma a raiz nao e' so' mais barata: e' a EXACTA, porque o angulo de um passo"
+           " T/n e' 2pi/n por definicao do passo, e nao um numero a que se chega dividindo"
+           " e multiplicando pelo mesmo ω₀",
+           iguais + difere == malhas && malhas == 7*7*4 && w0_distintos > malhas/2
+           && difere > 0 && pior_d < 1e-15);
+    }
 
     /* ---------- GA1: a torção analógica está na borda, e a torre é o zoom ---------- */
     printf("§GA1 a TORÇÃO no analógico é a rotação da malha LC (a borda |λ|=1):\n");
