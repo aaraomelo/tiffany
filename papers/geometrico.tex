@@ -1496,6 +1496,49 @@ PAR, onde o shift encolhe o denominador em $590$ de $590$; \code{tests/cantor\_j
 a conjugação $\theta\mapsto2\theta\ \leftrightarrow\ z\mapsto z^{2}$ exacta em
 $\mathbb{Z}[i]$}
 
+\begin{teorema}[VIVIANI: o mesmo par dual com o determinante $+1$]\label{thm:viviani}
+A curva de Viviani já está realizada \emph{inteira} no anel (\emph{Corpo Universal}, o
+relógio da meia-volta). O que falta é dizer o que ela é \textbf{daqui}: \emph{o par dual
+deste paper, com o determinante trocado}.
+
+\textbf{(1) A curva é polinomial, e sai por subtracção.} Da esfera $x^{2}+y^{2}+z^{2}
+=4a^{2}$ e do cilindro $(x-a)^{2}+y^{2}=a^{2}$, subtraindo:
+\[
+\boxed{\;z^{2}=2a\,(2a-x)\;}
+\]
+--- \emph{sem uma trigonometria}. Os dois ramos $\pm z$ são o \textbf{par dual}: soma
+$0$, produto $-z^{2}$. E o ponto $(2a,0,0)$, onde $z=0$, é o \textbf{nó} --- o ponto fixo
+da involução $z\mapsto-z$, que é a dobra do Teor.~\ref{thm:operador}(2).
+
+\textbf{(2) E a lei da dobra é a MESMA recorrência, com $d$ a mudar de sinal:}
+\[
+\boxed{\;t_k=m\,t_{k-1}-d\,t_{k-2},\qquad t_2=m^{2}-2d\;}
+\]
+\[
+\begin{array}{lll}
+d=-1 & \text{a RECTA (hiperbólica)} & t_2=m^{2}+2\quad\text{--- cresce, e é o corte}\\[3pt]
+d=+1 & \text{VIVIANI (rotação)} & t_2=m^{2}-2\quad\text{--- que é }2\cos2u=(2\cos u)^{2}-2
+\end{array}
+\]
+O $2\cos2u=(2\cos u)^{2}-2$ do \emph{Corpo Universal} \textbf{não é outra fórmula}: é esta,
+no ramo $d=+1$.
+
+\textbf{(3) E o meio-ângulo é o operador AO QUADRADO.} Lá, $h$ de ordem $2N$ dá o
+meio-ângulo $u$ e $h^{2}$ dá o ângulo cheio; aqui, o Teor.~\ref{thm:aditiva} já mediu que
+no quadrado $B=A_m^{2}$ o determinante passa de $-1$ a $+1$ e \emph{a volta fica própria}.
+São o mesmo gesto: \emph{a curva de Viviani é o desenho, no espaço, da raiz quadrada da
+rotação} --- e o recobrimento duplo (a base fecha em $N$, o ponto só em $2N$) é a
+involução $z\mapsto-z$ a exigir duas voltas. $\square$
+\end{teorema}
+\colunas{Viviani daqui: o par dual com $\det=+1$}
+        {a curva é polinomial ($z^{2}=2a(2a-x)$), os ramos $\pm z$ são o par, o nó é o ponto
+fixo da involução, e a lei da dobra é a recorrência do traço com $d=+1$}
+        {\code{tests/descida\_mobius.c} \S M12: $36$ pontos inteiros da curva para
+$a=1..12$, todos a satisfazer $z^{2}=2a(2a-x)$, com $24$ nos dois ramos ($z\neq0$) e $12$
+nós ($z=0$) --- dois e um por cada $a$; e a recorrência a bater com $\operatorname{tr}(C^k)$
+por Newton em $140$ de $140$, nos DOIS determinantes, com $\det C=+1$ e $\det C=-1$
+verificados}
+
 \medskip
 \noindent\textbf{E OS SETE TEOREMAS SÃO UMA FRASE SÓ --- as duas metades de
 Cayley--Hamilton.} O Teor.~\ref{thm:fixo-dual} diz que o par dual se descreve por
@@ -1524,6 +1567,7 @@ para andar}\\[3pt]
 \ref{thm:conservacao} a paragem & $q$ é o orçamento & $\gcd$ é a energia\\
 \ref{thm:central-energia} o central & Hurwitz conta & Gentil integra, Lebesgue transporta\\
 \ref{thm:cantor-julia} Cantor/Julia & o shift cicla & $\mathrm{cantor}\cdot\mathrm{julia}=-1$\\
+\ref{thm:viviani} Viviani & $t_2=m^{2}-2d$ & $\det=+1$: a volta é própria\\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -3206,9 +3250,9 @@ medidor & unidades \\
 \code{tests/supremo.c}            & $6{:}0$ \\
 \code{tests/cardinal.c}           & $4{:}0$ \\
 \code{tests/condicao\_pisot.c}    & $4{:}0$ \\
-\code{tests/reta.c}              & $39{:}0$ \\
+\code{tests/reta.c}              & $40{:}0$ \\
 \code{tests/racionais\_fixos.c}   & $8{:}0$ \\
-\code{tests/descida\_mobius.c}    & $14{:}0$ \\
+\code{tests/descida\_mobius.c}    & $15{:}0$ \\
 \bottomrule
 \end{tabular}
 \end{center}

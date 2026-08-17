@@ -78,6 +78,15 @@ static int passo_cassini(long n, void *v){
 static int nao_falha_ate(long n, void *v){ return passo_cassini(n, v); }
 
 
+/* a codificação PARTIDA — existe só para o gume: deita fora o último dígito, e a volta
+ * deixa de fechar. É o controlo da própria verificação. */
+static int iv_partida(long p, long q, long *rp, long *rq){
+    RtCod c;
+    if(!rt_cod_shift(p, q, 2, &c)) return 0;
+    if(c.n > 0){ c.n--; if(c.per > 0) c.per--; else if(c.pre > 0) c.pre--; }
+    return rt_desc_shift(&c, rp, rq);
+}
+
 int main(void){
     printf("\n=== A RECTA GEOMÉTRICA: as operações, todas inteiras ===\n");
 
@@ -1482,5 +1491,61 @@ printf("\n§R24 Normalizar é escolher a unidade — e depois tudo é inteiro.\n
         printf("  dela tem duas rotas e um gume.\n");
     }
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
+    /* ─── §R25 ── A CODIFICAÇÃO PROMOVIDA, E A VOLTA VERIFICADA POR MÁQUINA ─────────
+     *
+     * O pipe da entrega é `textos → unidade (MMC) → inteiros → operar → PALAVRA →
+     * cliente`, e a palavra é a fracção contínua. Mas ela não é a única codificação exacta
+     * do racional: o SHIFT de Cantor — os dígitos numa base, com pré-período e período —
+     * codifica o mesmo objecto (thm:cantor-julia).
+     *
+     * As duas passaram para a `reta.h` com a MESMA assinatura, e por cima delas está a
+     * condição que faz de uma codificação uma codificação:
+     *
+     *          A VOLTA TEM DE FECHAR.
+     *
+     * `rt_volta_fecha` varre os racionais REDUZIDOS até um denominador, manda cada um pela
+     * ida e volta, e compara em ℙ¹ por produto cruzado. Não é um teste escrito à mão para
+     * uma delas: é a condição aplicada por máquina, e acrescentar uma codificação nova é
+     * escrever a função e passá-la aqui.
+     *
+     * E o que NÃO COUBE conta-se à parte, porque não caber não é falhar: na base 10 o
+     * denominador da volta é (10^per − 1)·10^pre, que estoura o `long` para períodos
+     * longos. Na base 2 e na palavra não estoura nenhum. */
+    {
+        long tot_p = 0, fora_p = 0, tot_2 = 0, fora_2 = 0, tot_10 = 0, fora_10 = 0;
+        long ok_p  = rt_volta_fecha(rt_iv_palavra,  40, &tot_p,  &fora_p);
+        long ok_2  = rt_volta_fecha(rt_iv_shift2,   40, &tot_2,  &fora_2);
+        long ok_10 = rt_volta_fecha(rt_iv_shift10,  40, &tot_10, &fora_10);
+        printf("\n  §R25 a codificação promovida, e a volta verificada por máquina\n");
+        printf("      codificação      fecham   de     não couberam\n");
+        printf("      palavra (FC)     %-8ld %-6ld %ld\n", ok_p,  tot_p,  fora_p);
+        printf("      shift base 2     %-8ld %-6ld %ld\n", ok_2,  tot_2,  fora_2);
+        printf("      shift base 10    %-8ld %-6ld %ld\n", ok_10, tot_10, fora_10);
+
+        /* e um caso à mão, para se ver o que a codificação É: 1/6 na base 10 tem
+         * pré-período 1 e período 1 — o «0,1666…» — e a volta devolve 15/90 = 1/6. */
+        RtCod c; long vp = 0, vq = 0;
+        int cod_ok = rt_cod_shift(1, 6, 10, &c) && rt_desc_shift(&c, &vp, &vq);
+        printf("      1/6 na base 10: pré-período %d, período %d, dígitos", c.pre, c.per);
+        for(int i = 0; i < c.n; i++) printf(" %ld", c.d[i]);
+        printf("   e a volta dá %ld/%ld\n", vp, vq);
+
+        /* O GUME da própria verificação: uma codificação PARTIDA tem de ser apanhada por
+         * ela. `rt_iv_partida` deita fora o último dígito, e a volta deixa de fechar —
+         * se `rt_volta_fecha` não a apanhasse, ela não estaria a verificar nada. */
+        long tot_x = 0, fora_x = 0;
+        long ok_x = rt_volta_fecha(iv_partida, 40, &tot_x, &fora_x);
+        printf("      e a codificação PARTIDA (um dígito a menos): %ld de %ld fecham\n\n",
+               ok_x, tot_x);
+
+        ok("a codificação é peça da lib e a volta verifica-se POR MÁQUINA: a palavra e o"
+           " shift base 2 fecham em todos os racionais reduzidos até 40, e o que não coube"
+           " na base 10 conta-se à parte — o denominador da volta é (10^per−1)·10^pre e"
+           " estoura. E o gume é a própria verificação: com um dígito a menos ela apanha",
+           ok_p == tot_p && fora_p == 0 && ok_2 == tot_2 && fora_2 == 0 &&
+           ok_10 + fora_10 == tot_10 && fora_10 > 0 &&
+           cod_ok && vp*6 == vq && ok_x < tot_x);
+    }
+
     return falhas ? 1 : 0;
 }

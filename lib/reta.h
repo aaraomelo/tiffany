@@ -1257,4 +1257,141 @@ static int rt_menor_que_sigma(long a, long b, long m, long D){
     return e*e < b*b*D;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════════════
+ * A CODIFICAÇÃO, PROMOVIDA — e a verificação da volta, AUTOMÁTICA
+ *
+ * O pipe da entrega é `textos → unidade (MMC) → inteiros → operar → PALAVRA → cliente`, e
+ * a palavra é a fracção contínua. Mas ela não é a única codificação exacta do racional: o
+ * SHIFT de Cantor — os dígitos numa base, com pré-período e período — codifica o mesmo
+ * objecto, e o `thm:cantor-julia` diz o que as separa (uma gasta o denominador e termina,
+ * a outra não gasta e cicla).
+ *
+ * As duas ficam aqui, com a MESMA assinatura, e por cima delas fica o que interessa:
+ *
+ *      UMA CODIFICAÇÃO SÓ É UMA CODIFICAÇÃO SE A VOLTA FECHAR.
+ *
+ * `rt_volta_fecha` varre os racionais reduzidos de um domínio, manda cada um pela ida e
+ * volta, e conta. Não é um teste escrito à mão para uma codificação: é a condição que
+ * QUALQUER codificação tem de cumprir, aplicada por máquina. Acrescentar uma codificação
+ * nova é escrever uma função com esta assinatura e passá-la aqui.
+ * ═══════════════════════════════════════════════════════════════════════════════════ */
+
+#define RT_COD_MAX 64
+
+/* O SHIFT DE CANTOR: os dígitos de p/q na base b. O estado é o RESTO, e ele vive em
+ * {0,…,q−1} — finito, logo a sequência de restos REPETE, e é isso que dá o período. */
+typedef struct {
+    long base;
+    long d[RT_COD_MAX];      /* os dígitos, pré-período seguido do período */
+    int  n;                  /* quantos ao todo                            */
+    int  pre;                /* d[0 .. pre−1] não repetem                  */
+    int  per;                /* d[pre .. pre+per−1] repetem para sempre    */
+    long inteiro;            /* a parte antes da vírgula                   */
+    int  saturou;            /* o que não coube, e conta-se                */
+} RtCod;
+
+static int rt_cod_shift(long p, long q, long base, RtCod *c){
+    if(q <= 0 || base < 2) return 0;
+    c->base = base; c->n = 0; c->pre = 0; c->per = 0; c->saturou = 0;
+    c->inteiro = p / q;
+    long r = p % q;
+    if(r < 0){ r += q; c->inteiro -= 1; }
+    long visto_r[RT_COD_MAX]; int nv = 0;
+    while(r != 0){
+        /* já vimos este resto? então o ciclo fecha aqui */
+        for(int i = 0; i < nv; i++) if(visto_r[i] == r){
+            c->pre = i; c->per = nv - i; c->n = nv; return 1;
+        }
+        if(nv >= RT_COD_MAX){ c->saturou = 1; c->n = nv; c->pre = nv; c->per = 0; return 0; }
+        visto_r[nv] = r;
+        if(r > 4611686018427387903L / base){ c->saturou = 1; return 0; }
+        long t = r * base;
+        c->d[nv] = t / q;
+        r = t % q;
+        nv++;
+    }
+    c->n = nv; c->pre = nv; c->per = 0;      /* terminou: dígitos finitos, sem período */
+    return 1;
+}
+
+/* A VOLTA: dos dígitos ao racional, exacta e inteira. A parte não periódica vale
+ * D_pre/base^pre; a periódica vale D_per/((base^per − 1)·base^pre). Devolve 0 se algum
+ * produto não couber — e é isso, e não um limiar, o que decide se a volta se pode fazer. */
+static int rt_desc_shift(const RtCod *c, long *p, long *q){
+    if(c->saturou) return 0;
+    long base = c->base;
+    long bp = 1;                                    /* base^pre  */
+    for(int i = 0; i < c->pre; i++){
+        if(bp > 4611686018427387903L / base) return 0;
+        bp *= base;
+    }
+    long dpre = 0;                                  /* o número formado pelos pré-dígitos */
+    for(int i = 0; i < c->pre; i++){
+        if(dpre > 4611686018427387903L / base) return 0;
+        dpre = dpre*base + c->d[i];
+    }
+    if(c->per == 0){                                /* finito: p/q = inteiro + dpre/bp */
+        long num = c->inteiro * bp + dpre;
+        *p = num; *q = bp;
+        return 1;
+    }
+    long bq = 1;                                    /* base^per */
+    for(int i = 0; i < c->per; i++){
+        if(bq > 4611686018427387903L / base) return 0;
+        bq *= base;
+    }
+    long dper = 0;
+    for(int i = 0; i < c->per; i++){
+        if(dper > 4611686018427387903L / base) return 0;
+        dper = dper*base + c->d[c->pre + i];
+    }
+    /* p/q = inteiro + dpre/bp + dper/((bq−1)·bp) */
+    long den1 = bq - 1;
+    if(bp != 0 && den1 > 4611686018427387903L / bp) return 0;
+    long den = bp * den1;
+    long num = c->inteiro;
+    if(num != 0 && (num > 4611686018427387903L / den || num < -4611686018427387903L / den))
+        return 0;
+    num = num * den + dpre * den1 + dper;
+    *p = num; *q = den;
+    return 1;
+}
+
+/* ── A VERIFICAÇÃO AUTOMÁTICA ────────────────────────────────────────────────────────
+ * Uma ida-e-volta devolve 1 e o par reconstruído, ou 0 se não coube. `rt_volta_fecha`
+ * varre os racionais REDUZIDOS com denominador até qmax, chama-a, e compara em ℙ¹ (por
+ * produto cruzado, sem dividir). Devolve quantos fecharam; escreve em `*total` quantos
+ * foram tentados e em `*fora` quantos não couberam — que se contam à parte, porque não
+ * caber não é falhar. */
+typedef int (*RtIdaVolta)(long p, long q, long *rp, long *rq);
+
+static long rt_volta_fecha(RtIdaVolta f, long qmax, long *total, long *fora){
+    long ok = 0, tot = 0, nc = 0;
+    for(long q = 1; q <= qmax; q++)
+        for(long p = 0; p <= q; p++){
+            if(rt_mdc(p, q) != 1 && !(p == 0 && q == 1)) continue;
+            tot++;
+            long rp = 0, rq = 0;
+            if(!f(p, q, &rp, &rq)){ nc++; continue; }
+            if(rq != 0 && p*rq == rp*q) ok++;        /* igualdade em ℙ¹, sem dividir */
+        }
+    if(total) *total = tot;
+    if(fora)  *fora  = nc;
+    return ok;
+}
+
+/* as três codificações da casa, com a MESMA assinatura — é isso que as torna comparáveis */
+static int rt_iv_palavra(long p, long q, long *rp, long *rq){
+    RtCf w; rt_cf_de(1, p, q, &w);
+    if(w.saturou) return 0;
+    return rt_cf_para(&w, rp, rq);
+}
+static int rt_iv_shift(long p, long q, long base, long *rp, long *rq){
+    RtCod c;
+    if(!rt_cod_shift(p, q, base, &c)) return 0;
+    return rt_desc_shift(&c, rp, rq);
+}
+static int rt_iv_shift2 (long p, long q, long *rp, long *rq){ return rt_iv_shift(p,q, 2,rp,rq); }
+static int rt_iv_shift10(long p, long q, long *rp, long *rq){ return rt_iv_shift(p,q,10,rp,rq); }
+
 #endif /* RETA_H */

@@ -40,6 +40,8 @@
  *        o orçamento a esgotar-se — no ponto fixo ele não se esgota, e é o corte
  *   §M11 CANTOR/JULIA: o shift CONSERVA o denominador e cicla; a Möbius GASTA-o e termina
  *        — e o par cantor·julia = −1 É σσ† = −1, o mesmo par noutra carta
+ *   §M12 VIVIANI: o mesmo par dual com o determinante +1 — z² = 2a(2a−x) sem
+ *        trigonometria, os dois ramos ±z, e o nó como ponto fixo da involução
  *
  * Nenhum double, nenhum limiar: compila sem -lm.
  *
@@ -646,6 +648,94 @@ int main(void){
        " o ponto fixo deste paper são o MESMO par dual, escrito em cartas diferentes — a de"
        " Cantor/Julia conjuga pela exponencial, a da recta conjuga pela inversão",
        norma_cj == -1 && traco_cj == 1);
+
+    /* ─── §M12 ── VIVIANI: a mesma dinâmica com o determinante +1 ───────────────────
+     *
+     * O Aarão: «vê a curva de Viviani, se der a dinâmica leva pro geométrico». Dá, e ela
+     * já estava medida no `corpo_universal` — realizada INTEIRA no anel, com o relógio da
+     * meia-volta. O que falta é dizer o que ela é DAQUI:
+     *
+     *   VIVIANI É O PAR DUAL DESTE PAPER COM O DETERMINANTE TROCADO.
+     *
+     * A curva é a intersecção da esfera x²+y²+z² = 4a² com o cilindro (x−a)²+y² = a², e
+     * subtrair as duas dá uma relação POLINOMIAL, sem uma trigonometria:
+     *
+     *          z² = 2a(2a − x)
+     *
+     * Os dois ramos ±z são o par dual: soma ZERO e produto −z². E o ponto (2a,0,0), onde
+     * z = 0, é o NÓ — o ponto fixo da involução z ↦ −z, que é a dobra do thm:operador.
+     *
+     * E a lei da dobra é a MESMA recorrência do traço, com o determinante a mudar de sinal:
+     *
+     *     t_k = m·t_{k−1} − d·t_{k−2},      t_2 = m² − 2d
+     *
+     *     d = −1   a RECTA (hiperbólico)   t_2 = m²+2   — cresce, e é o corte
+     *     d = +1   VIVIANI  (rotação)      t_2 = m²−2   — que é 2cos(2u) = (2cos u)²−2
+     *
+     * O «2cos(2u) = (2cos u)²−2» do corpo_universal não é outra fórmula: é ESTA, no ramo
+     * d = +1. E o meio-ângulo — h de ordem 2N a dar u, h² a dar t — é o operador AO
+     * QUADRADO do §M9, onde o determinante passa de −1 a +1 e a volta fica própria. */
+    long v_tot = 0, v_rel = 0, v_ramos = 0, v_nos = 0, v_a = 0;
+    for(long a = 1; a <= 12; a++){
+        v_a++;
+        long nos_a = 0, ramos_a = 0;
+        for(long x = -4*a; x <= 4*a; x++)
+        for(long y = -4*a; y <= 4*a; y++)
+        for(long z = -4*a; z <= 4*a; z++){
+            if(x*x + y*y + z*z != 4*a*a) continue;      /* a esfera   */
+            if((x-a)*(x-a) + y*y != a*a) continue;      /* o cilindro */
+            v_tot++;
+            if(z*z == 2*a*(2*a - x)) v_rel++;           /* a relação DERIVADA das duas */
+            if(z != 0) ramos_a++; else nos_a++;
+        }
+        v_ramos += ramos_a; v_nos += nos_a;
+    }
+    /* a lei da dobra nos dois determinantes, e é a MESMA recorrência */
+    /* E A SEGUNDA ROTA É O TRAÇO DA MATRIZ, senão isto não mede nada. Escrevi primeiro
+     * `if(k > 2) { dobra_p++; dobra_m++; }` — a incrementar sem verificar seja o que for,
+     * porque a recorrência É a definição de tp. Sexta assercao vazia minha hoje.
+     *
+     * A rota independente: a companheira com traço m e determinante d,
+     *
+     *     d = +1  →  C = [m −1; 1 0]      d = −1  →  C = [m 1; 1 0]
+     *
+     * e tr(C^k) É a soma das potências das raízes — o mesmo t_k, por Newton, sem partilhar
+     * uma linha com a recorrência. */
+    long dobra_p = 0, dobra_m = 0, dobra_tot = 0, base_p = 0, base_m = 0;
+    for(long m = 1; m <= 20; m++){
+        long tp0 = 2, tp1 = m, tm0 = 2, tm1 = m;
+        long Cp[4] = { m, -1, 1, 0 }, Cm[4] = { m, 1, 1, 0 };   /* det +1 e det −1 */
+        long Pp[4] = { 1, 0, 0, 1 }, Pm[4] = { 1, 0, 0, 1 };
+        mm(Pp, Cp, Pp); mm(Pm, Cm, Pm);                          /* C^1 */
+        if(mdet(Cp) == 1)  base_p++;                             /* o determinante é o que separa */
+        if(mdet(Cm) == -1) base_m++;
+        for(int k = 2; k <= 8; k++){
+            long tp = m*tp1 - tp0, tm = m*tm1 + tm0;
+            mm(Pp, Cp, Pp); mm(Pm, Cm, Pm);                      /* C^k */
+            dobra_tot++;
+            if(tp == Pp[0] + Pp[3]) dobra_p++;                   /* t_k = tr(C^k), rota B */
+            if(tm == Pm[0] + Pm[3]) dobra_m++;
+            if(k == 2 && (tp != m*m - 2 || tm != m*m + 2)){ dobra_p--; dobra_m--; }
+            tp0 = tp1; tp1 = tp; tm0 = tm1; tm1 = tm;
+        }
+    }
+    printf("\n  §M12 Viviani é o mesmo par dual, com o determinante +1\n");
+    printf("      pontos INTEIROS da curva (a = 1..12) ..... %ld\n", v_tot);
+    printf("      com z² = 2a(2a−x), a relação derivada .... %ld\n", v_rel);
+    printf("      com z ≠ 0 — os DOIS ramos, o par dual .... %ld  (dois por cada a)\n", v_ramos);
+    printf("      com z = 0 — o NÓ, ponto fixo de z ↦ −z ... %ld  (um por cada a)\n", v_nos);
+    printf("      e a lei t_k = m·t_{k−1} − d·t_{k−2} bate com tr(C^k), por Newton:\n");
+    printf("      d=+1 (Viviani, det C = +1) %ld de %ld ; d=−1 (a recta, det C = −1) %ld\n\n",
+           dobra_p, dobra_tot, dobra_m);
+    ok("Viviani é o par dual deste paper com o DETERMINANTE trocado: a intersecção da"
+       " esfera com o cilindro dá z² = 2a(2a−x) sem uma trigonometria, os dois ramos ±z são"
+       " o par (soma zero, produto −z²), e o nó é o ponto fixo da involução. E o"
+       " «2cos(2u) = (2cos u)²−2» do corpo_universal é a recorrência do traço no ramo"
+       " d = +1, a mesma que na recta corre com d = −1",
+       v_a == 12 && v_tot > 0 && v_rel == v_tot &&
+       v_ramos == 2*v_a && v_nos == v_a &&
+       dobra_tot > 0 && dobra_p == dobra_tot && dobra_m == dobra_tot &&
+       base_p == 20 && base_m == 20);
 
     printf("\n  ══ a torre é uma só: de cima parte de ∞ e cresce, de baixo parte de p/q e\n");
     printf("     desce até ∞, e S troca os dois extremos porque 0 = 1/∞. E as duas usam\n");
