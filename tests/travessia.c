@@ -330,8 +330,34 @@ printf("\n§T6  O ESPELHO AO CONTRÁRIO: Hodge preserva, ν∘rev INVERTE.\n\n")
            fabs(hH - h0) < 1e-9 ? "PRESERVA Σh — meia dualidade" : "muda Σh");
     printf("      ν∘rev         %+-20.9f %+-13.9f %s\n\n", hV, sV,
            fabs(hV + h0) < 1e-9 ? "INVERTE Σh — a dualidade inteira" : "não inverte");
-    ok("Hodge PRESERVA o Poynting — é só a permutação, e falta-lhe o sinal",
-       fabs(hH - h0) < 1e-9);
+    /* E ISTO NÃO PRECISA DE LIMIAR, porque a identidade é de VECTORES e não de somas de
+     * logaritmos. Hodge leva (E,B) a (B,−E), logo
+     *
+     *      E'×B' = B×(−E) = −(B×E) = E×B
+     *
+     * entrada a entrada — e em vírgula flutuante isso vale BIT A BIT, porque os produtos
+     * são os mesmos e a multiplicação comuta. O `Σlog‖·‖` é uma leitura dessa igualdade, e
+     * o 1e-9 estava a dar folga ao arredondamento dos N logaritmos, não à identidade. */
+    long cruz_igual = 0, cruz_tot = 0, cruz_vivo = 0;
+    {
+        V eH[N], bH[N];
+        hodge(E, B, eH, bH);
+        for(int j = 0; j < N; j++){
+            V c0 = cruz(E[j], B[j]), c1 = cruz(eH[j], bH[j]);
+            cruz_tot++;
+            if(c1.x == c0.x && c1.y == c0.y && c1.z == c0.z) cruz_igual++;
+            if(c0.x != 0 || c0.y != 0 || c0.z != 0) cruz_vivo++;
+        }
+    }
+    printf("      e o cruzado E'xB' = ExB entrada a entrada, BIT A BIT, em %ld de %ld\n"
+           "      (nao nulo em %ld — sem isso a igualdade valia por ser 0 = 0)\n",
+           cruz_igual, cruz_tot, cruz_vivo);
+    ok("Hodge PRESERVA o Poynting — é só a permutação, e falta-lhe o sinal. E a identidade e'"
+       " de VECTORES: Hodge leva (E,B) a (B,-E), logo E'xB' = B x (-E) = ExB entrada a"
+       " entrada, e em virgula isso vale BIT A BIT porque os produtos sao os mesmos e a"
+       " multiplicacao comuta. O «Sigma log||.||» e' uma LEITURA dessa igualdade, e o 1e-9"
+       " dava folga ao arredondamento dos N logaritmos — nao a' identidade, que nao tem",
+       fabs(hH - h0) < 1e-9 && cruz_igual == cruz_tot && cruz_vivo > 0);
     ok("ν∘rev INVERTE o Poynting: Σh -> -Σh", fabs(hV + h0) < 1e-9);
     /* E a conta que a medida corrigiu. Eu tinha escrito que ν∘rev inverte AS DUAS — o Poynting
      * e a impedância. Os números dizem outra coisa, e é melhor:

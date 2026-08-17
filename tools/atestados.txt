@@ -467,7 +467,7 @@ transforma 25258f5c9679fa5e 0
 transformada 23899586ee0774d4 0
 transformada_andar a05f9db457978c4c 0
 transfusao 645d63bf8859beed 0
-travessia 3a725e6f9e44b60d 0
+travessia 8f36a344eb4664d1 0
 tres_pontos 43ad5af8747edc63 0
 tres_reconstroi 1f48f7d032a33b62 0
 tres_regimes 6103cb6d6d8222ee 0
