@@ -111,3 +111,21 @@ Ver [[project-torre-hurwitz-gentil]].
 
 É a divisão do thm:fixo-dual (traço e determinante, ambos inteiros) lida em cada um dos sete.
 
+## Cantor/Julia: o mesmo par dual, noutra carta (thm:cantor-julia)
+
+O `corpo_peano` (def:cantor) já tinha **cantor = φ, julia = ψ, φψ = −1** — que é
+`σσ† = −1` do thm:fixo-dual com m=1. **Não é analogia: é o mesmo par.** E o shift θ↦2θ
+(aditivo, Cantor) conjugado a z↦z² (multiplicativo, Julia) pela exponencial é o
+[[project-descida-racionais-pontos-fixos]] thm:aditiva com **outro conjugador** — lá a
+exponencial, aqui a inversão S.
+
+**E o que as separa é a conservação, que é o resultado do dia:**
+
+    Cantor   r ↦ b·r mod q      NÃO gasta q  →  CICLA
+    Möbius   (p,q) ↦ (q,p−aq)   gasta q      →  TERMINA
+
+Com q ímpar o 2 é invertível, o shift não tem o que gastar, e fecha em ciclo. **E o
+contraste prova que não é do operador**: com q PAR o shift ENCOLHE o denominador (590/590),
+e só deixa de encolher ao chegar ao ímpar. *Ciclar não é uma propriedade do operador: é o
+que sobra quando o orçamento deixa de poder ser gasto.*
+
