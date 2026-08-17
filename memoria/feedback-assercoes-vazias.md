@@ -325,3 +325,34 @@ pode falhar tem a mesma cor de um que pode.
    a perpendicularidade no cruzado_potencia (que NÃO é invariante).
 
 Ver [[feedback-o-controlo-a-tres-linhas]], [[feedback-varrer-onde-nada-pode-falhar]].
+
+## E a NONA forma: o valor EMPRESTADO que se finge medir
+
+16/08, no `corpo_peano.c §CP13`. Havia `int n_leis = 8;` comparado com `8`, e eu fui
+corrigi-lo contando: `for(k = 0; k < 16; k++) if(k % 8 == k) n_leis++;` — que conta
+quantos inteiros de [0,16) são menores que oito, e dá oito **por aritmética modular**.
+
+**Trocar uma tautologia por outra não é corrigir.** O ficheiro não tinha a lista das leis:
+o oito vem da TEORIA, e nenhuma linha daquele bloco o pode contar.
+
+**How to apply:** quando uma parcela da frase não se pode medir com o que o bloco tem:
+
+1. **Tira-se da asserção.** Uma condição que não pode falhar não a fortalece — dá-lhe cor
+   de medição.
+2. **Diz-se de onde vem** — «da teoria», «do medidor X», «da literatura». Um valor
+   emprestado é legítimo; um valor emprestado *disfarçado de medido* não é.
+3. E se ele for usado pelo código, entra como o que é: no §CP13 o oito ficou como o
+   **módulo do ciclo**, que é o que as contas de facto usam.
+
+O mesmo vale para o `P_seebeck = 0,9931` do `colheita.c`, copiado do `cosmico.c`: um valor
+copiado é POSTULADO, e a asserção que dizia «nenhuma é postulada» era falsa para ele.
+
+## E onde isto me acontece: A CONSTRUIR O CONSERTO
+
+Sete vezes em 16/08, e o padrão é o mesmo da secção anterior mas um passo à frente: não é
+só no CONTROLO — é no acto de **corrigir**. A atenção vai toda para o defeito que se está
+a tirar, e a peça nova entra sem passar pelo mesmo crivo.
+
+**O sinal:** acabei de escrever um conserto e ele passou à primeira. Aplicar-lhe o gume
+antes de commitar — foi assim que o `tikz.c` me apanhou (Cayley–Hamilton vale para TODA
+matriz 2×2, logo verificá-lo com o traço dela não testava a companheira).
