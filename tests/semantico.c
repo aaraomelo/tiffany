@@ -162,23 +162,39 @@ int main(void){
     puts("     Em 768 dim nao ha produto vetorial — ele so existe em 3 e 7, por Hurwitz. Mas o");
     puts("     bivetor a b^T - b a^T existe em toda a dimensao, e e ANTISSIMETRICO.\n");
     {
+        /* A ANTISSIMETRIA E' POLINOMIAL, logo o zero e' EXACTO e nao «menor que 1e-9»:
+         * biv_ij(a,b,k,l) = a_k.b_l - a_l.b_k, e biv_ij(a,b,l,k) = a_l.b_k - a_k.b_l sao o
+         * simetrico UM DO OUTRO termo a termo — a soma subtrai valores identicos bit a bit.
+         * A lei nao pede regua; o que pediria seria um DADO medido, e aqui nao ha nenhum. */
         int i = 0, j = 1;
         int anti = 1, testados = 0;
+        long anti_ex = 0;
         for(int k = 0; k < 40; k++)
             for(int l = 0; l < 40; l++){
                 double x = biv_ij(V[i],V[j],k,l), y = biv_ij(V[i],V[j],l,k);
                 if(fabs(x + y) > 1e-9) anti = 0;
+                if(x + y == 0.0) anti_ex++;              /* e o zero e' EXACTO */
                 testados++;
             }
-        ok("o BIVETOR e antissimetrico: (a^b)_ij = -(a^b)_ji, em 1600 componentes",
-           anti);
+        printf("     -> e a soma x + y e' ZERO EXACTO em %ld de %d componentes\n",
+               anti_ex, testados);
+        ok("o BIVETOR e antissimetrico: (a^b)_ij = -(a^b)_ji, em 1600 componentes — e o zero"
+           " e' EXACTO, porque a lei e' polinomial e os dois lados subtraem os MESMOS dois"
+           " produtos com o sinal trocado",
+           anti && anti_ex == testados && testados == 1600);
         /* e trocar os argumentos troca o sinal — a ordem 2 na troca, como o cruzado do R^n */
-        int troca = 1;
+        int troca = 1; long troca_ex = 0, troca_tot = 0;
         for(int k = 0; k < 20; k++)
-            for(int l = 0; l < 20; l++)
-                if(fabs(biv_ij(V[i],V[j],k,l) + biv_ij(V[j],V[i],k,l)) > 1e-9) troca = 0;
-        ok("e a^b = -(b^a): a peca que ORDENA, e ela existe no espaco semantico",
-           troca);
+            for(int l = 0; l < 20; l++){
+                double so = biv_ij(V[i],V[j],k,l) + biv_ij(V[j],V[i],k,l);
+                if(fabs(so) > 1e-9) troca = 0;
+                if(so == 0.0) troca_ex++;
+                troca_tot++;
+            }
+        ok("e a^b = -(b^a): a peca que ORDENA, e ela existe no espaco semantico — tambem com"
+           " zero EXACTO, pela mesma razao: trocar os argumentos troca os dois produtos de"
+           " lugar e a soma cancela-os",
+           troca && troca_tot > 0 && troca_ex == troca_tot);
         /* e ele NÃO é zero — se fosse, não haveria segunda metade */
         double b2 = biv2(V[i],V[j]);
         ok("e ele NAO e nulo: ha mesmo uma segunda metade, nao e uma peca vazia",
