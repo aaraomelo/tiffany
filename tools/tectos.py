@@ -279,10 +279,63 @@ def inversas(bloco):
     return achados
 
 
+# ── P5: A QUANTIDADE DEFINIDA COMO O RESTO ───────────────────────────────────────────
+#
+# Uma variável é definida por subtracção — o que sobra depois de tirar as outras — e depois
+# a asserção verifica que a SOMA de todas dá o total. Isso é a definição relida: o resto
+# foi construído para fechar, e fecha. Quatro casos em 16/08:
+#
+#     colheita.c    A = 1.0 − R − T          →  «R + T + A = 1, a conservação da onda»
+#     arraytermico  radia = P − volta        →  «volta + radia = P, o balanço fecha»
+#     arraytermico  perdido = P − P_rec      →  «perdido/P > 0,99»   (o P cancela)
+#     solar.c       ret = Ein − Eout         →  «ret = 2·I²·R·t»     (é a álgebra de cima)
+#
+# O que costuma ter conteúdo é a DESIGUALDADE que sobra — que o resto não é negativo, ou
+# seja que as partes não excedem o total —, e essa não é tautologia: é a passividade do
+# modelo, e pode falhar. O colheita.c chegou lá sozinho e escreve-o no texto.
+#
+# Procura-se: uma atribuição `v = A − B` (com ou sem mais termos) e, no mesmo bloco, uma
+# condição que mencione `v` e pelo menos DOIS dos termos que o definem.
+RESTO = re.compile(
+    r'^\s*(?:const\s+)?(?:double|float|long|int|long\s+long)?\s*'
+    r'([A-Za-z_]\w*)\s*=\s*([^;=]*?-[^;=]+);', re.M)
+
+
+def resto_relido(bloco):
+    """variáveis definidas por subtracção que reaparecem numa condição com os seus termos."""
+    achados = []
+    for m in RESTO.finditer(bloco):
+        v, expr = m.group(1), m.group(2)
+        termos = [t for t in re.findall(r'[A-Za-z_]\w*', expr)
+                  if t not in ('fabs', 'fabsl', 'sqrt', 'exp', 'log', 'pow', 'double',
+                               'float', 'long', 'int', 'creal', 'cimag', 'cabs')]
+        if len(termos) < 2:
+            continue
+        # a condição de um veredicto no mesmo bloco menciona v e >= 2 dos termos?
+        for cm in re.finditer(r'\bok\s*\((?:[^()]|\([^()]*\))*\)', bloco, re.S):
+            cond = cm.group(0)
+            fim = cond.rfind('"')
+            cond = cond[fim+1:] if fim >= 0 else cond
+            if not re.search(r'\b' + re.escape(v) + r'\b', cond):
+                continue
+            juntos = sum(1 for t in set(termos) if re.search(r'\b' + re.escape(t) + r'\b', cond))
+            if juntos >= 2:
+                # a distinção que importa: numa IGUALDADE o resto fecha por construção;
+                # numa DESIGUALDADE o que sobra é a passividade, e essa PODE falhar.
+                tem_ig = bool(re.search(r'==|fabs\s*\(', cond))
+                tem_des = bool(re.search(r'[<>]', cond))
+                tipo = 'IGUALDADE' if (tem_ig and not tem_des) else (
+                       'desigualdade' if tem_des and not tem_ig else 'mista')
+                achados.append((v, tipo + ': ' + ' '.join(sorted(set(termos))[:3]),
+                                m.group(0).strip()[:64]))
+                break
+    return achados
+
+
 def main():
     fich = sorted(glob.glob('tests/*.c') + glob.glob('tests/*.js') +
                   glob.glob('tools/*.c'))
-    p1, p2, p3, p4, vistos = [], [], [], [], 0
+    p1, p2, p3, p4, p5, vistos = [], [], [], [], [], 0
     for f in fich:
         try:
             src = open(f, encoding='utf-8').read()
@@ -300,6 +353,8 @@ def main():
                 p3.append((f, codigo[:ini].count('\n') + 1, v, w, ln))
             for tipo, fn, ln in inversas(bl):
                 p4.append((f, codigo[:ini].count('\n') + 1, tipo, fn, ln))
+            for v, termos, ln in resto_relido(bl):
+                p5.append((f, codigo[:ini].count('\n') + 1, v, termos, ln))
             for v in VERED.finditer(bl):
                 txt = texto_do_veredicto(bl, v.start())
                 # só a CONDIÇÃO: o que vem depois da última string do veredicto
@@ -347,6 +402,19 @@ def main():
     print("\n  Medir f(f⁻¹(x)) = x não mede nada: é a definição do par relida. Quando os"
           "\n  DOIS lados passam pela mesma função, ela cancela-se e o que fica é a"
           "\n  igualdade de dentro — que costuma ser INTEIRA. Ou se mede essa, ou nada.")
+    fich_p5 = len({f for f, *_ in p5})
+    print(f"\n  P5 — a quantidade definida como O RESTO: {len(p5)}"
+          f" em {fich_p5} ficheiros")
+    for f, l, v, termos, ln in p5[:40]:
+        print(f"      {f}:{l}   {v} = resto de ({termos})   →   {ln}")
+    if len(p5) > 40:
+        print(f"      ... e mais {len(p5)-40}")
+    if not p5:
+        print("      nenhuma — nenhum resto reaparece na condição que o define")
+    print("\n  O resto foi CONSTRUÍDO para fechar, e fecha: numa IGUALDADE a soma dele com"
+          "\n  as partes dá o total por definição, e essa não pode falhar. Numa DESIGUALDADE"
+          "\n  o que sobra é a passividade — as partes não excedem o total —, e essa mede."
+          "\n  Ler a etiqueta antes de mexer.")
     return 1 if p1 else 0
 
 

@@ -59,16 +59,52 @@ int main(void){
     {
         /* o equilibrio hidrostatico e' dP/dr = -(peso). Em p.u. cada factor de escala vale
          * 1, e o que sobra e' a RAZAO entre o que empurra e o que puxa. */
+        /* O QUE AQUI ESTAVA ERA x/x MAIS O RESTO, na mesma linha:
+         *      empurra = U;  puxa = U;  razao = empurra*U/puxa;  a = razao − U;
+         *      ok(..., razao == U && a == 0 && regime(a) == 0);
+         * `empurra` e `puxa` são POSTOS iguais, logo a razão vale U por construção e o
+         * desvio é zero — e as três condições são consequências das atribuições. A tese
+         * («o equilíbrio é ela valer 1») é uma CONDIÇÃO sobre o par, e não uma identidade.
+         *
+         * Mede-se variando os dois lados: a razão só vale 1 quando eles são IGUAIS, e o
+         * regime muda de nome quando não são. É o gume que faltava — sem os outros dois
+         * regimes, «é a borda» valia por a borda ser o único sítio onde se olhou. */
         long empurra = U, puxa = U;                    /* ambos em p.u. */
         long razao = empurra * U / puxa;               /* em milesimos */
         long a = razao - U;                            /* o desvio ao equilibrio */
         printf("      empurra %ld/1000, puxa %ld/1000  ->  razao %ld/1000, desvio %ld\n",
                empurra, puxa, razao, a);
         printf("      regime: %s\n\n", nome(regime(a)));
+
+        long eq = 0, br = 0, ne = 0, tot = 0;
+        printf("      e VARIANDO os dois lados (o equilibrio e' uma CONDICAO, nao uma conta):\n");
+        for(long e2 = 800; e2 <= 1200; e2 += 100){
+            for(long p2 = 800; p2 <= 1200; p2 += 100){
+                long r2 = e2 * U / p2, a2 = r2 - U;
+                int rg = regime(a2);
+                tot++;
+                if(e2 == p2){ if(rg == 0) eq++; }        /* iguais ⟹ borda */
+                else if(rg > 0) br++;                    /* empurra mais ⟹ estica */
+                else if(rg < 0) ne++;                    /* puxa mais ⟹ contrai */
+            }
+            printf("        empurra %ld: ", e2);
+            for(long p2 = 800; p2 <= 1200; p2 += 100){
+                long a2 = e2 * U / p2 - U;
+                printf("%s ", regime(a2) > 0 ? "+" : (regime(a2) < 0 ? "-" : "0"));
+            }
+            printf("\n");
+        }
+        printf("      %ld pares: %ld na borda (os iguais), %ld a esticar, %ld a contrair\n\n",
+               tot, eq, br, ne);
         ok("em p.u. NAO ha' constante nenhuma a pedir: G, c e as outras sao factores de"
            " escala e valem 1 por construcao. O que sobra e' a RAZAO entre o que empurra e o"
-           " que puxa, e o equilibrio e' ela valer 1 — nao um numero com unidades",
-           razao == U && a == 0 && regime(a) == 0);
+           " que puxa, e o equilibrio e' ela valer 1 — nao um numero com unidades. E isso e'"
+           " uma CONDICAO sobre o par, medida a variar os dois lados: a razao so' da' 1 nos"
+           " pares IGUAIS, e nos outros o regime muda de nome — estica quando empurra mais,"
+           " contrai quando puxa mais. O que aqui estava punha empurra = puxa e depois"
+           " verificava que a razao dava 1: x/x, mais o resto, na mesma linha",
+           razao == U && a == 0 && regime(a) == 0
+           && eq == 5 && br > 0 && ne > 0 && br + ne + eq == tot);
     }
 
     /* ═══ §E2 — a estrela E' a borda ═══════════════════════════════════════════════ */

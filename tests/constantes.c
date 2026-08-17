@@ -759,7 +759,10 @@ int main(void)
            " cada particula, senao ninguem crescia nem se curava — crescer e curar sao"
            " reconstrucao ORDENADA, e cada parte tem de saber onde vai. Se a massa fosse um"
            " numero, essa informacao nao estava em lado nenhum",
-           perdidas > 0 && distintas_tensor > distintas_traco && com_direccao > isotropicas
+           /* `perdidas` E' distintas_tensor - distintas_traco, logo «perdidas > 0» e
+            * «distintas_tensor > distintas_traco» sao a MESMA pergunta feita duas vezes
+            * na mesma conjuncao. Fica a que nomeia os dois lados. */
+           distintas_tensor > distintas_traco && com_direccao > isotropicas
            && casos == 168 && esc_com_dual == 2 && vec_com_dual == tot - 2
            && tot == OT_PONTOS
            && contadas == 120 && somas_distintas == 1);
