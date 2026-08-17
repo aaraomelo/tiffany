@@ -201,8 +201,19 @@ int main(void){
             ant = e;
         }
         double e_inf = eficiencia(T_QUENTE, T_FRIO, 1e12);
-        ok("e a eficiencia CRESCE com ZT e TENDE a Carnot no limite — medido ate ZT = 1e12",
-           cresce && fabs(e_inf - ec)/ec < 0.01);
+        /* O CARNOT CANCELA-SE NOS DOIS LADOS, e é preciso dizê-lo. A `eficiencia` é
+         * carnot·(m−1)/(m + Tf/Tq), logo |e_inf − ec|/ec É |f(ZT) − 1| com f a fracção de
+         * Carnot: a comparação não depende das temperaturas, e mediria o mesmo com quaisquer
+         * duas. Isso não a torna vazia — torna-a uma afirmação sobre f e não sobre o par.
+         * O que faltava era o outro lado: para ZT pequeno f está LONGE de 1, sem o que
+         * «tende a Carnot» valia por f ser sempre 1. */
+        double f_inf = e_inf/ec, f_baixo = eficiencia(T_QUENTE, T_FRIO, 0.1)/ec;
+        ok("e a eficiencia CRESCE com ZT e TENDE a Carnot no limite — medido ate ZT = 1e12."
+           " E o Carnot CANCELA nos dois lados: |e_inf - ec|/ec e' |f(ZT) - 1|, a fraccao de"
+           " Carnot, e nao depende das temperaturas. O que a torna medicao e' o outro lado:"
+           " com ZT = 0,1 a fraccao esta' LONGE de um, e sem isso «tende» valia por f ser"
+           " sempre um",
+           cresce && fabs(f_inf - 1.0) < 0.01 && f_baixo < 0.5);
         printf("     -> com ZT -> infinito a eficiencia da %.4f%% contra o Carnot de %.4f%%.\n",
                100*e_inf, 100*ec);
         puts("        O ZT nao e uma constante de material qualquer: e a fracao de Carnot que");
@@ -226,9 +237,15 @@ int main(void){
         puts("        Mas alimenta a ELETRONICA de um no: um microcontrolador em sono profundo");
         puts("        vive com dezenas de microwatt, e ha aqui milesimos de watt.");
         /* e o que NÃO volta: mede-se, e é a maior parte */
+        /* E AQUI O P_cerebro CANCELA. perdido = P_cerebro − P_rec e P_rec = P_cerebro·e,
+         * logo perdido/P_cerebro É 1 − e: a asserção não depende dos 20 W, e o que ela diz é
+         * que a EFICIÊNCIA é menor que 1%. Fica dito assim, que é o que se mede, e o valor
+         * em watts continua na linha que imprime. */
         double perdido = P_cerebro - P_rec;
-        ok("e o que NAO volta e a esmagadora maioria — e Carnot que o exige, nao a engenharia",
-           perdido/P_cerebro > 0.99);
+        ok("e o que NAO volta e a esmagadora maioria — e Carnot que o exige, nao a engenharia."
+           " E o P_cerebro CANCELA: perdido/P_cerebro E' 1 - e, logo o que se mede e' que a"
+           " EFICIENCIA fica abaixo de 1%, e a assercao nao depende dos 20 W do cerebro",
+           e < 0.01);
         printf("     -> %.3f W dos %.0f nao voltam (%.2f%%). E nao e desperdicio evitavel: e o\n",
                perdido, P_cerebro, 100*perdido/P_cerebro);
         puts("        segundo principio. Com dT de 5 K em 310 K, Carnot ja limita a 1,6%.\n");
