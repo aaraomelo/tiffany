@@ -391,9 +391,27 @@ int main(void){
         }
         ok("a amostragem dos quadros e MONOTONA e o ultimo cobre a orbita inteira",
            monotona && cobre);
-        /* e o tempo do último quadro tem de ser o tempo final — senão a animação mente */
-        ok("e o instante do ultimo quadro E o tempo final do sistema, sem sobra nem falta",
-           fabs(NPASSOS*H - TFIM) < 1e-12);
+        /* ESTA ASSERCAO COMPARAVA UMA EXPRESSAO CONSIGO PROPRIA. `TFIM` e' `#define TFIM
+         * (NPASSOS*H)` — a linha 149 —, logo `fabs(NPASSOS*H - TFIM)` e' `x - x`, zero por
+         * construcao, e o 1e-12 dava-lhe cara de medida. Nenhuma entrada a podia derrubar.
+         *
+         * O que tem conteudo e' a COBERTURA: os quadros amostram a orbita e o ultimo tem de
+         * chegar ao passo NPASSOS — nem antes (falta orbita) nem depois (nao existe). Isso
+         * ja' era medido pelo `cobre` acima; o que faltava era medir que a soma dos passos
+         * amostrados NAO SALTA nenhum, e que o primeiro quadro comeca no zero. */
+        int comeca_zero = (quadros > 0), sem_salto = 1, prev_q = 0, ultimo_q = 0;
+        for(int q = 0; q < quadros; q++){
+            int ate = (int)((long)NPASSOS * (q+1) / quadros);
+            if(q == 0 && ate <= 0) comeca_zero = 0;
+            if(ate < prev_q) sem_salto = 0;
+            prev_q = ate; ultimo_q = ate;
+        }
+        printf("     -> os %d quadros cobrem 1..%d sem saltar, e o ultimo chega a %d\n",
+               quadros, NPASSOS, ultimo_q);
+        ok("os quadros COBREM a orbita: o ultimo chega ao passo NPASSOS e nenhum recua. A"
+           " assercao que aqui estava comparava NPASSOS*H com TFIM, e TFIM E' definido como"
+           " NPASSOS*H — era x menos x, com um 1e-12 por cima",
+           comeca_zero && sem_salto && ultimo_q == NPASSOS);
         printf("     -> 8 quadros, %d passos, ate t=%.1f. O PDF de 8 paginas E a animacao.\n",
                NPASSOS, TFIM);
         printf("        E a amplitude cai de 1,000 para %.3f — o amortecimento VE-SE nos quadros.\n\n",
@@ -463,7 +481,7 @@ int main(void){
         double CH[4] = { -B_DIN*A[0] - C_DIN, -B_DIN*A[1],
                          -B_DIN*A[2],         -B_DIN*A[3] - C_DIN };
         int ch_ok = 1;
-        for(int i = 0; i < 4; i++) if(fabs(A2[i] - CH[i]) > 1e-15) ch_ok = 0;
+        for(int i = 0; i < 4; i++) if(A2[i] != CH[i]) ch_ok = 0;   /* EXACTO: so ha somas e produtos */
         /* o GUME: a mesma conta com o −C virado do avesso, contra o MESMO polinómio */
         double Am[4] = {0, 1, C_DIN, -B_DIN};
         double Am2[4] = { Am[0]*Am[0]+Am[1]*Am[2], Am[0]*Am[1]+Am[1]*Am[3],
@@ -471,7 +489,7 @@ int main(void){
         double CHm[4] = { -B_DIN*Am[0] - C_DIN, -B_DIN*Am[1],
                           -B_DIN*Am[2],         -B_DIN*Am[3] - C_DIN };
         int gume_cai = 0;
-        for(int i = 0; i < 4; i++) if(fabs(Am2[i] - CHm[i]) > 1e-15) gume_cai = 1;
+        for(int i = 0; i < 4; i++) if(Am2[i] != CHm[i]) gume_cai = 1;
         printf("      e CAYLEY-HAMILTON fecha na companion (A² = tr.A − det.I): %s ;"
                " com o sinal trocado: %s\n", ch_ok ? "sim" : "NAO", gume_cai ? "CAI" : "nao cai");
         ok("e a REGUA da companion e a (B,C) do catalogo: -traco = B e det = C. Mas ISSO e' a"
@@ -483,7 +501,10 @@ int main(void){
            " determinante calculados dela testa o teorema e nao a companion. Escrevi-o assim"
            " a' primeira e o gume nao caiu. Com o B e o C do catalogo, uma companion com um"
            " sinal trocado ja' NAO realiza aquele polinomio, e cai",
-           fabs(-traco - B_DIN) < 1e-15 && fabs(det - C_DIN) < 1e-15
+           /* e o traco e o determinante saem EXACTOS: a companion foi escrita com o
+            * proprio B e C, logo -traco e' B bit a bit — e' a construcao relida, e diz-se
+            * com igualdade em vez de com uma regua que sugeriria aproximacao */
+           -traco == B_DIN && det == C_DIN
            && ch_ok && gume_cai);
         double D = B_DIN*B_DIN - 4*C_DIN;
         ok("e o Delta classifica-a: negativo, logo ELIPTICA — a mesma classe do oscilador",
