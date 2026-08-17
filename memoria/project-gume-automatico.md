@@ -43,3 +43,33 @@ muda um resultado. Se o teorema é verdadeiro, `hip ⟹ tese`, logo nenhum objet
 hipótese verdadeira falha a tese, e a linha seguinte já os exclui. Ele **declara** que se
 procura fora da hipótese, e passaria a ser operacional no dia em que o «teorema» fosse
 falso — que é justamente quando queremos saber. Ver [[feedback-o-ramo-que-nunca-corre]].
+
+---
+
+## 17/08 — E o SEGUNDO gume automático, que é o das ASSERÇÕES
+
+O `gume_matriz` acima procura **o objecto** onde a tese cai sem a hipótese. Faltava o outro lado:
+saber se **a asserção** que escrevi tem gume nenhum. Isso eu fazia com um `sed` por asserção — lento,
+e com o defeito de **eu escolher a mutação**, logo apontá-la onde já sei que morde. Foi exactamente
+assim que duas tautologias minhas passaram no `dif.c` ([[feedback-o-gume-por-lei]]).
+
+**`tools/gume.py <medidor.c> [--max N]`** tira-me a escolha das mãos: muta o ficheiro
+MECANICAMENTE, uma alteração de cada vez (`==`→`!=`, `<`→`<=`, `&&`→`||`, `++`→`--`, `k`→`k+1`),
+corre o medidor, e lista **as unidades que sobreviveram a todas**. E
+**`tools/gume_todos.sh [max] [par]`** corre-o sobre a bateria inteira.
+
+Três decisões que são o que o torna útil, e não ruído:
+
+- **não muta comentários nem strings** — mudar o TEXTO de uma asserção não a testa;
+- **não conta mutações que não compilam** — contá-las como «matou» era
+  [[feedback-a-mensagem-que-nao-pode-falhar]] outra vez;
+- **não julga**: uma sobrevivente pode estar certíssima, se nenhuma mutação lhe tocar. O que a lista
+  dá é **onde olhar**, e a pergunta é a de sempre — que entrada faria isto falhar?
+
+E o tecto de mutações é **dito**: com amostragem a lista fica MAIOR que a verdade, porque a mutação
+que mataria a asserção pode não ter sido corrida. Tecto calado leria-se como cobertura
+([[feedback-saturacao-nao-e-resultado]]).
+
+Primeira colheita (1 em cada 6): `continua` 7 sobreviventes, `ordenado` 2, e
+`reta`/`calculo2`/`supremo`/`racionais_fixos`/`descida_mobius` **zero**.
+

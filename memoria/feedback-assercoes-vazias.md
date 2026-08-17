@@ -1,6 +1,6 @@
 ---
 name: feedback-assercoes-vazias
-description: "A asserção que passa sem poder falhar — OITO formas dela, e como reconhecer cada uma antes de commitar"
+description: "A asserção que passa sem poder falhar — NOVE formas dela, e como reconhecer cada uma antes de commitar"
 metadata: 
   node_type: memory
   type: feedback
@@ -47,6 +47,29 @@ limiar. **Uma lei medida em vários pontos não tem onde eu enfiar um palpite; u
 E há uma variante do antídoto que vale guardar, do `tikz.c`: quando a afirmação é *"X não afeta a
 contagem"*, **medir a mesma entrada COM e SEM X e exigir igualdade** — aí não há número nenhum na
 asserção, e ela mede exatamente o que diz.
+
+**9. A MESMA EXPRESSÃO DOS DOIS LADOS, com um limiar por cima.** Em 17/08 apanhei-a **duas vezes
+no mesmo dia**, em ficheiros diferentes, e ela é a mais fácil de escrever sem dar por isso:
+
+- `continua.c §C4`: `fabs(r1 − (−sl)) < 1e-12` com `r1 = (−m+d)/2` e `sl = (m−d)/2`. Então
+  `−sl = (d−m)/2`, que é **r1 letra por letra**. Oito metais, oito «sim», e nenhuma entrada podia
+  dar outra coisa. O `1e-12` era o que lhe dava cara de medida — é o
+  [[feedback-o-limiar-tem-tres-causas]] na sua pior forma: *o limiar a dar cara de medição a uma
+  tautologia*.
+- `xx.c §X1`: `L a=1, b=1;` calculados por **dois laços idênticos**, e depois `a==b`. E na mesma
+  secção, sem disfarce nenhum: **`if(1==1 && 1==1) raiz_1++;`**
+
+**O gatilho:** sempre que uma asserção compara duas quantidades, perguntar *de onde vem cada uma*.
+Se as duas descem do mesmo cálculo — mesmo laço, mesma fórmula reescrita, mesma variável negada
+duas vezes — não há duas rotas, há uma. É o [[feedback-dois-caminhos]] pelo avesso.
+
+**O antídoto não é escolher outra comparação: é medir a EQUAÇÃO.** No `§C4` passou a ser «−σ e −σ†
+ANULAM 1−mx−x²» (zero exacto em ℤ[√D], sem régua). No `§X1` passou a ser «quantos x satisfazem
+x^x = x^n?» — varrer, avaliar os dois lados e **contar**: são dois, e um só em n=1. A contagem tem
+gume; a identidade repetida não tem.
+
+**E o detector automático apanha-a:** a `tools/gume.py` muta `==` para `!=` e a asserção não cai,
+porque `x != x` continua a decidir o mesmo. Ver [[project-gume-automatico]].
 
 **4. O caso degenerado que iguala os dois lados.** A pior, porque parece um teste a sério. Escolhi
 `E` em senos e `B` em cossenos para medir o Poynting; são ortogonais, logo `S = 0` **exato**. E com

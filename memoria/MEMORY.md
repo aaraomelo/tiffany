@@ -4,6 +4,8 @@
 - **[Inteiro primeiro, sempre](feedback-inteiro-primeiro.md)** — inteiro/racional desde o PRIMEIRO rascunho. Os medidores que fiz à minha maneira têm 67, 59, 45 doubles; os de depois têm ZERO.
 - **[A ausência é DELIBERADA](feedback-a-ausencia-e-deliberada.md)** — «escolhi não usar nenhuma DELIBERADAMENTE». O que falta é decisão, não lacuna. E nem para as derrubar.
 - **[A base já existe](feedback-a-base-ja-existe.md)** — TRÊS vezes trouxe Gram-Schmidt/DFT para um objeto que já tinha base. Sintoma: um fator que não se elimina (√N, Δ) tratado como resultado.
+- **[O limiar que o texto despediu](feedback-o-limiar-que-o-texto-despediu.md)** — DOZE asserções dizem «o 1e-15 dava folga» e mantêm-no na condição. A correcção acrescenta e não TIRA.
+- **[O gume aponta-se a CADA lei](feedback-o-gume-por-lei.md)** — `A && B && C` precisa de TRÊS mutações. Mutei uma, vi cair, commitei — e havia OUTRA tautologia minha no mesmo bloco.
 - **[A asserção que passa sem poder falhar](feedback-assercoes-vazias.md)** — OITO formas (constante disfarçada, número de cabeça, caso degenerado…). Que entrada faria isto falhar?
 - **[A referência escrita à mão](feedback-a-referencia-escrita-a-mao.md)** — calculo a referência de cabeça e ESCREVO-a, reintroduzindo o defeito dentro da correção. Mudar o dado; se ela não muda sozinha, é cópia.
 - **[Dual exige DUAS partes](feedback-dual-exige-dois.md)** — escrever «dual» obriga a nomear os dois membros na mesma frase.
@@ -85,6 +87,7 @@
 - **[ℕ→ℤ→ℚ→ℝ](project-escada-aritmetica-n-z-q.md)** — cada andar acrescenta UMA reversibilidade; e dividir por zero é uma operação SEM FIBRA.
 - **[O real é o CORTE](project-o-real-e-o-corte.md)** — nunca um decimal: aqui o exato é a MATÉRIA. Quatro portas que induzem o MESMO corte, medido nos seis pares, com a indecisão contada à parte.
 - **[Teoria dos números](project-teoria-dos-numeros.md)** — Euclides = MDC = Bézout = FC é a MESMA descida em colunas diferentes; e o convergente de ordem 0 NÃO é a melhor aproximação.
+- **[A DESCIDA: ℚ são classes de pontos fixos](project-descida-racionais-pontos-fixos.md)** — o TRAÇO projecta a família toda em ℤ (a norma é constante e não separa); o teorema dos resíduos dá os pontos fixos DIRECTO; e a soma é a Möbius com um S no meio.
 - **[Möbius e as elípticas](project-mobius-e-elipticas.md)** — μ = 1⁻¹ na convolução (a inversão É a deconvolução); e na curva a FIBRA escolhe a operação. Dirichlet mede-se FORMAL.
 - **[Álgebra moderna](project-algebra-moderna-sete-ticks.md)** — a espinha de sete ticks que ele exigiu (hipóteses→…→LEI→TESTEMUNHA→…→volta), com a definição em LaTeX. «Não medir só a conclusão».
 - **[A casa já corria Cayley–Hamilton](project-a-casa-ja-corria-cayley.md)** — a `estaca` (A·(mI−A)=−I) É ele, e as duas cartas são as duas formas quadráticas: o andar trouxe o NOME, não o motor. E a raiz nunca se tira; e a assinatura CAÇA-SE.
