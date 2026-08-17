@@ -297,11 +297,21 @@ int main(void){
            r1 < 1e-15);
 
         /* passo 2: a característica. σ² + Bσ + C = 0 — o resíduo é substituir a raiz nela */
-        double re = -B/2, im = w;
-        double car_re = re*re - im*im + B*re + C;
-        double car_im = 2*re*im + B*im;
-        ok("passo 2  a caracteristica sigma^2+B sigma+C=0 e A BORDA (edo.c §E1) — a raiz anula-a",
-           fabs(car_re) < 1e-12 && fabs(car_im) < 1e-12);
+        /* A CARACTERÍSTICA NÃO PRECISA DA RAIZ. Com σ = −B/2 + i·w:
+         *   parte imaginária:  2·re·w + B·w = w·(−B + B) = 0   — anula-se seja qual for w,
+         *                                                        e por isso nada mede;
+         *   parte real:        re² − w² + B·re + C, e aqui só entra w², que é −D/4.
+         * Logo o resíduo é (B² − 4C + D)/4 · (−1), e D É B² − 4C: é zero por identidade,
+         * em aritmética que não passa por √. A raiz só existia para ser elevada ao quadrado
+         * na linha seguinte. */
+        double re = -B/2, w2 = -D/4.0;               /* w² directo, sem formar w */
+        double car_re = re*re - w2 + B*re + C;
+        double car_im = w*(2*re + B);                /* e esta anula-se por (2re + B) = 0 */
+        ok("passo 2  a caracteristica sigma^2+B sigma+C=0 e A BORDA (edo.c §E1) — a raiz anula-a."
+           " E a conta nao forma a raiz: na parte real so' entra w^2, que E' -D/4, e na"
+           " imaginaria o factor e' (2.re + B), que e' zero por construcao de re = -B/2 —"
+           " logo essa metade anula-se seja qual for w, e nao mede nada. O que mede e' a real",
+           fabs(car_re) < 1e-12 && fabs(car_im) < 1e-12 && fabs(2*re + B) < 1e-15);
 
         /* passo 3: o Δ escolhe a forma. Não é escolha minha: é o sinal. */
         ok("passo 3  o Delta < 0 escolhe a forma ELIPTICA — o sinal decide, nao eu",

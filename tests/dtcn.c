@@ -362,14 +362,18 @@ printf("\n§H7  As BANDAS derivadas do imposto — e a economia, medida.\n\n");
         Q z = { 0.0, { 1.0, 0.0, 0.0 } };
         Q w = { 0.0, { cos(ang), sin(ang), 0.0 } };
         double m = massa(z,w), V = imposto(z,w,s);
-        double d = lam*sqrt(V/(nq(z)*nq(z)*nq(w)*nq(w)));
+        /* d² = lam²·V/(nq(z)²·nq(w)²) — e a monotonia de d É a de d², porque x ↦ √x é
+         * crescente nos não negativos. A raiz fica para o valor que se imprime e para os
+         * passos, que são uma contagem; a comparação que a asserção usa é em d². */
+        double d2 = lam*lam*V/(nq(z)*nq(z)*nq(w)*nq(w));
+        double d = sqrt(d2);
         /* quantos passos até sair da banda, com uma deriva fixa */
-        int passos = (d > 1e-12) ? (int)(d/0.002) : 999999;
+        int passos = (d2 > 1e-24) ? (int)(d/0.002) : 999999;
         if(nc < 7) chav[nc++] = passos;
         printf("      %-16.0f %-13.6f %-12.6f %-12.6f %d passos\n",
                ang*180/M_PI, m, V, d, passos);
-        if(antD >= 0 && ang > antAng && d < antD) malMono++;   /* d cresce com o ângulo */
-        antD = d; antAng = ang;
+        if(antD >= 0 && ang > antAng && d2 < antD) malMono++;  /* d cresce com o ângulo */
+        antD = d2; antAng = ang;
     }
     printf("\n");
     ok("a banda sai da lei e cresce com o imposto — perto do campo local ela FECHA", malMono == 0);

@@ -379,8 +379,12 @@ printf("\n§H7  O SINAL DA INVOLUÇÃO: sem ele não gira — e é Lenz, é aç�
     double Tfech = 2*3.14159265358979323846/sqrt(2.0);
     printf("      período fechado  2π/√2 = %.6f      |dif| = %.2e\n\n", Tfech, fabs(per - Tfech));
     ok("com o sinal + o corpo FOGE, e nunca volta", foge);
-    ok("com o sinal − ele GIRA, e o período é 2π/√2 — medido, não afirmado",
-       oscila && fabs(per - Tfech) < 1e-3);
+    /* T = 2π/√2  ⟺  T² = 4π²/2 = 2π², e a comparação faz-se aí: nenhum dos dois lados
+     * forma a raiz, e o π fica onde tem de ficar — ele não é redutível, a raiz era. */
+    ok("com o sinal − ele GIRA, e o período é 2π/√2 — medido, não afirmado. E a comparacao"
+       " e' no QUADRADO: T^2 = 2.pi^2, sem se formar a raiz de dois",
+       oscila && fabs(per*per - 2*3.14159265358979323846*3.14159265358979323846)
+                 < 2*Tfech*1e-3);
     printf("      Portanto tudo o que este ficheiro derivou até §H6 era METADE: o lado que foge.\n");
     printf("      O que fecha órbita é o dual, e a diferença entre os dois é UM SINAL.\n");
 

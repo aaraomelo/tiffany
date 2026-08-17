@@ -97,7 +97,7 @@ corpo_autossimilar cfed1db62ac9d8ef 0
 corpo_disco d558d055b5ff6e4e 0
 corpo_do_numero 235bf71b3ace5cac 0
 corpo_dual 829b5470e1022d51 0
-corpo_fisico f77d3652581acf8c 0
+corpo_fisico 85cca7f0195d54c9 0
 corpo_front 6d9be918caa521db 0
 corpo_peano 3c134a3db72ab710 0
 corpo_unico d21a078aa8bd7aa5 0
@@ -141,14 +141,14 @@ dissipa_pagina 092dbc2e096cf561 0
 distancia b942370c17c50cda 0
 dna d913ac3541f9d307 0
 dois_streams 624d9e1997aa4657 0
-dominios a4d6c3573f6d8047 0
+dominios 5374f6d67d4277d5 0
 dourada 0d4544be18ec836a 0
 dourada_banco da40aa247da4be4c 0
 dourada_bidual a007b48f456bf1d4 0
 dourada_escala 690b7dc3b9608a7a 0
 dourada_lei2 f46d69dbe7d4e582 0
 dtc_viveiro ccbe31142837ba46 0
-dtcn 9b6c1f5dfeb8af85 0
+dtcn b5caccf581116271 0
 duais 0df04b5273fb6a25 0
 dual 869340d98961353e 0
 dual32 c489f54924157885 0
@@ -424,7 +424,7 @@ sem_ramo a6e38ca24a7eda51 0
 semantico c84539e0b757b453 0
 semente 98e9a0194e17f02d 0
 significado ff504aa181796ca5 0
-simula b3324a25927d1f22 0
+simula 28ebda619bd44e1e 0
 sistema b93be799ff62ae01 0
 smartcontract 2686bef07a252cfb 0
 solar de38736acf2fc6ff 0
@@ -441,7 +441,7 @@ supremo 08f61704a4139001 0
 sustento 159daa95a6bc46b6 0
 tecido a71972ce13c4429d 0
 teletransporte 8b13cc6bf9acf1a0 0
-telomero c1812a6efcda83af 0
+telomero 284c5fda71047b02 0
 tensor 22059d38a7653ff7 0
 teorema_universal df27b1753b369ed2 0
 teoria_vetorial 4720f0890da571d2 0

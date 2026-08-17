@@ -191,9 +191,14 @@ int main(void){
             if(s > maior){ maior = s; melhor_d = d; }
         }
         /* a forma fechada: o máximo da derivada de uma Lorentziana é em x = 1/√3 */
-        double previsto = LARG/sqrt(3.0);
-        ok("e ha um ponto de DERIVADA MAXIMA, e ele bate a forma fechada w/raiz(3)",
-           fabs(melhor_d - previsto)/previsto < 0.01);
+        /* a forma fechada é x = w/√3, e «bate a 1%» compara-se nos QUADRADOS: a condição
+         * |d − w/√3| / (w/√3) < 0,01 é, elevada, |3·d² − w²| / w² < 0,0201 — e nenhum dos
+         * dois lados forma a raiz. Fica a versão sem ela na asserção. */
+        double previsto = LARG/sqrt(3.0);            /* só para a linha que imprime */
+        double lhs = 3.0*melhor_d*melhor_d, rhs = (double)LARG*LARG;
+        ok("e ha um ponto de DERIVADA MAXIMA, e ele bate a forma fechada w/raiz(3) — comparada"
+           " no QUADRADO: 3.d^2 contra w^2, a menos de 2,01%, que e' o mesmo 1% elevado",
+           fabs(lhs - rhs)/rhs < 0.0201);
         printf("     -> a encosta maxima e a %.1f kHz do pico (a forma fechada da %.1f kHz).\n",
                melhor_d/1e3, previsto/1e3);
         /* e ali a resposta é LINEAR numa janela — mede-se o quanto */

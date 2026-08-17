@@ -126,12 +126,34 @@ printf("\n§T1  O TELÓMERO ENCURTA E TERMINA — e o que fica é o período.\n\
     printf("      telómeros que não terminaram em %d:     %d\n\n", MAXT, nao_terminou);
     ok("o telómero encurta a cada divisão — estritamente, sem exceção", nao_decresceu == 0);
     ok("e por isso termina sempre — nenhum passou do teto", nao_terminou == 0);
-    /* e o teto teorico: Lame diz que o pior caso sao numeros de Fibonacci consecutivos, e o
-     * comprimento e' O(log_phi(n)). Nao e' regua minha — e' um teorema de 1844. */
-    double lame = log(400.0*sqrt(5.0)) / log((1.0+sqrt(5.0))/2.0);
-    printf("      E o teto não é meu: Lamé (1844) dá %.1f termos para n ≤ 400, e o pior\n", lame);
-    printf("      caso medido foi %ld.\n\n", maior);
-    ok("o comprimento respeita o limite de Lamé", (double)maior <= lame);
+    /* E O TEOREMA DE LAMÉ É INTEIRO. O que aqui estava era a sua forma assintótica —
+     * log(400·√5)/log(φ) —, e essa traz um logaritmo e uma raiz para exprimir um facto que
+     * o próprio Lamé enunciou em Fibonacci: se o algoritmo de Euclides leva k passos, então
+     * o menor argumento é pelo menos F_{k+2}. Logo
+     *
+     *      k passos sobre n  ⟹  F_{k+2} ≤ n
+     *
+     * e isso mede-se em inteiros. É de 1844, e a forma de 1844 é a exacta: a versão com
+     * log_φ é a que se obtém depois de aproximar F_k por φᵏ/√5. */
+    long F[64]; F[0] = 0; F[1] = 1;
+    for(int i = 2; i < 64; i++) F[i] = F[i-1] + F[i-2];
+    long lame_fib = F[maior + 2];
+    /* e a FRONTEIRA, que é o que torna o limite apertado e não uma folga qualquer: com um
+     * passo a mais o Fibonacci já ultrapassa o n, logo o limite não podia ser maior. */
+    long lame_prox = F[maior + 3];
+    double lame = log(400.0*sqrt(5.0)) / log((1.0+sqrt(5.0))/2.0);  /* só para a linha impressa */
+    printf("      E o teto não é meu: Lamé (1844) na forma INTEIRA — %ld passos exigem\n", maior);
+    printf("      F(%ld) = %ld <= 400, e F(%ld) = %ld ja' passa. (A forma assintotica\n",
+           maior+2, lame_fib, maior+3, lame_prox);
+    printf("      log(400.raiz5)/log(phi) da' %.1f, e e' a mesma coisa aproximada.)\n\n", lame);
+    ok("o comprimento respeita o limite de Lamé — e na forma INTEIRA de 1844, que e' a"
+       " exacta: k passos sobre n exigem F(k+2) <= n, e aqui F(k+2) cabe em 400 enquanto"
+       " F(k+3) ja' o ultrapassa. A versao com log_phi e raiz(5) que aqui estava e' a"
+       " forma ASSINTOTICA, obtida depois de aproximar F_k por phi^k/raiz(5) — trazia um"
+       " logaritmo e uma raiz para exprimir um facto sobre inteiros. E a fronteira mede-se:"
+       " com um passo a mais o Fibonacci ja' nao cabe, logo o limite e' APERTADO e nao uma"
+       " folga qualquer",
+       lame_fib <= 400 && lame_prox > 400);
 }
 
 printf("\n§T2  BASE e FRAÇÃO CONTÍNUA são o MESMO algoritmo: muda o divisor.\n\n");
