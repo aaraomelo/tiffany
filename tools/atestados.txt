@@ -150,13 +150,13 @@ dourada_lei2 95424bf3ea0309bd 0
 dtc_viveiro ccbe31142837ba46 0
 dtcn 8fad620f7798082d 0
 duais 0df04b5273fb6a25 0
-dual 869340d98961353e 0
+dual 2aa9328257f2d644 0
 dual32 c489f54924157885 0
 dual_cadeia c7280a378e486134 0
 dual_spline_ttf 3e8e11fb1a25018f 0
 dualidade 18065d141793793e 0
 dualreta 2274a93c0398f30a 0
-dualrn 8a91b8108dcd0df5 0
+dualrn 03d88f12bb713052 0
 dualsort 3298ebc60a6b388c 0
 dualsort_banco 91a2972cd834880f 0
 duas_pontes a50961f0657e4654 0
@@ -448,7 +448,7 @@ teoria_vetorial 4720f0890da571d2 0
 termica 517ad21a05866f7e 0
 tesseracto ebf76569a555a633 0
 tesserato_espiral 551d490ab65b97a2 0
-tex 548ca752cb7fd27c 0
+tex 663b317bb51ec405 0
 tex_wasm 1bc71686aca7c02b 0
 texto 9faa357fc47031c3 0
 tikz fea621b3b5dd1a75 0

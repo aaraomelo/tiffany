@@ -295,7 +295,8 @@ static void recolhe_macros(const char *s, long n){
         /* o número de argumentos, opcional: `[n]` */
         int nargs = 0;
         if(q < n && s[q] == '['){ long b = q+1; nargs = atoi(s+b);
-            while(q < n && s[q] != ']') q++; q++; }
+            while(q < n && s[q] != ']') q++;
+            if(q < n) q++; }   /* sem `]` ate ao fim, nao se salta nada */
         /* um SEGUNDO `[...]` é o valor por omissão do 1.º argumento — não o tratamos, e
          * saltar a macro é mais honesto que a expandir com um argumento a menos */
         if(q < n && s[q] == '['){ continue; }
@@ -1062,7 +1063,11 @@ int compila_ficheiro(const char *ent, const char *sai){
 
 static char *SH_FONTE = NULL;  static long SH_N = 0;
 static char *SH_PDF   = NULL;  static long SH_PN = 0;
-static const char  SH_NOME[512] = "";
+/* SH_NOME era `static const char[512] = ""` e o snprintf da linha do ABRE escrevia
+ * nele: o objdump mostrava-o em .rodata, e o comando crashava SEMPRE com SIGSEGV.
+ * Nunca apareceu porque o shell e interactivo e a bateria nao o corre — foi o aviso
+ * -Wdiscarded-qualifiers do compilador que o denunciou. O buffer e para ESCREVER. */
+static char SH_NOME[512] = "";
 
 static int conta(const char *agulha, const char *palheiro, long n){
     long m = (long)strlen(agulha); int c = 0;
@@ -1404,16 +1409,32 @@ int main(int argc, char **argv){
                 char *q = x + 6;
                 int primeiro, quantos;
                 if(sscanf(q, "%d %d", &primeiro, &quantos) == 2 && primeiro == 0){
-                    while(*q && *q != '\n') q++; q++;
-                    q += 20;                                   /* a entrada livre do objeto 0 */
-                    xref_certo = 1;
-                    for(int k = 1; k < quantos && xref_certo; k++){
-                        long off = strtol(q, NULL, 10);
-                        if(off <= 0 || off >= n){ xref_certo = 0; break; }
-                        int num = -1;
-                        if(sscanf(pdf + off, "%d 0 obj", &num) != 1 || num != k) xref_certo = 0;
-                        conferidos++;
-                        q += 20;
+                    /* O `q++` SEM GUARDA passava o terminador quando o xref vinha sem
+                     * newline, e as duas linhas seguintes (q += 20, strtol) liam ja' fora
+                     * do buffer. O tex_core.c:6121 e o ttf_corpo.c:240 fazem o MESMO
+                     * idioma com `if(*q) q++;` — a guarda existia na casa e nao tinha
+                     * chegado aqui.
+                     *
+                     * E A MINHA PRIMEIRA CORRECCAO ESTAVA ERRADA: pus `xref_certo = -1`
+                     * para marcar «truncado», e -1 e' VERDADEIRO em C, logo o laco corria
+                     * na mesma e ainda com o cursor fora. Ficava pior do que estava. O
+                     * certo e' nao entrar: se a linha nao fechou, nao ha' xref para ler.
+                     * E dentro do laco o cursor tem de estar DENTRO do buffer, verificado
+                     * antes de cada leitura e nao depois. */
+                    while(*q && *q != '\n') q++;
+                    if(*q){
+                        q++;
+                        q += 20;                               /* a entrada livre do objeto 0 */
+                        xref_certo = 1;
+                        for(int k = 1; k < quantos && xref_certo; k++){
+                            if(q < pdf || q >= pdf + n){ xref_certo = 0; break; }
+                            long off = strtol(q, NULL, 10);
+                            if(off <= 0 || off >= n){ xref_certo = 0; break; }
+                            int num = -1;
+                            if(sscanf(pdf + off, "%d 0 obj", &num) != 1 || num != k) xref_certo = 0;
+                            conferidos++;
+                            q += 20;
+                        }
                     }
                 }
             }

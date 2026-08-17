@@ -37,7 +37,11 @@ static Z mul(Z x, Z y, int s){
     r.b = x.a*y.b + x.b*y.a;
     return r;
 }
-static Z conj(Z x){ Z r = { x.a, -x.b }; return r; }
+/* Renomeada de `conj`, que e o nome da conjugacao complexa de <complex.h>: mesmo
+ * sendo static e sobre outro tipo, o compilador avisava do conflito. E a mesma
+ * colisao do parametro `I` que ja apareceu na lib. A palavra `conj` continua no
+ * TEXTO, onde e a notacao matematica; o que mudou foi o identificador. */
+static Z conjuga(Z x){ Z r = { x.a, -x.b }; return r; }
 static double norma(Z x, int s){ return x.a*x.a - s*x.b*x.b; }
 
 int main(void){
@@ -217,7 +221,7 @@ printf("\n§U6  O que o dual NÃO tem: o cone, onde a reversão falha.\n\n");
             Z z = { sin(13.0*k+1), 0.4*cos(17.0*k+2) };
             double N = norma(z,s);
             if(fabs(N) < 1e-6) continue;
-            Z c = conj(z), inv = { c.a/N, c.b/N }, p = mul(z, inv, s);
+            Z c = conjuga(z), inv = { c.a/N, c.b/N }, p = mul(z, inv, s);
             medidos++;
             if(fabs(p.a-1) > 1e-9 || fabs(p.b) > 1e-9) mal++;
         }

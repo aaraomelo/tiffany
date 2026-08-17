@@ -64,7 +64,11 @@ static Z som(Z x, Z y){
     for(int k=0;k<3;k++) o.v[k]=x.v[k]+y.v[k];
     return o;
 }
-static Z conj(Z x){ Z o = { x.r, {-x.v[0],-x.v[1],-x.v[2]} }; return o; }
+/* Renomeada de `conj`, que e o nome da conjugacao complexa de <complex.h>: mesmo
+ * sendo static e sobre outro tipo, o compilador avisava do conflito. E a mesma
+ * colisao do parametro `I` que ja apareceu na lib. A palavra `conj` continua no
+ * TEXTO, onde e a notacao matematica; o que mudou foi o identificador. */
+static Z conjuga(Z x){ Z o = { x.r, {-x.v[0],-x.v[1],-x.v[2]} }; return o; }
 static double N(Z x, int s){ (void)s; return x.r*x.r + ip(x.v,x.v); }  /* a MESMA nos dois */
 static double dif(Z a, Z b){
     double d = fabs(a.r-b.r);
@@ -118,7 +122,7 @@ printf("\n§D2  Os dois conservam a norma, e os dois são álgebras de divisão.
             if(dif(mul(x,som(y,z),s), som(mul(x,y,s),mul(x,z,s))) > 1e-9) malD++;
             double n = N(x,s);
             if(n > 1e-9){
-                Z c = conj(x), inv = { c.r/n, {c.v[0]/n,c.v[1]/n,c.v[2]/n} };
+                Z c = conjuga(x), inv = { c.r/n, {c.v[0]/n,c.v[1]/n,c.v[2]/n} };
                 Z um = { 1, {0,0,0} };
                 if(dif(mul(x,inv,s), um) > 1e-8) malI++;
             }
@@ -159,7 +163,7 @@ printf("\n§D3  A DUALIDADE DE HURWITZ: são as mesmas, no espelho.\n\n");
         if(dif(mul(x,y,+1), mul(y,x,+1)) > 1e-9) naoComuta++;
         if(fabs(mul(x,y,+1).r - mul(y,x,+1).r) < 1e-15) comutaEsc++;
         /* e o ESPELHO é a conjugação: conj(x ⋆₊ y) = conj(y) ⋆₊ conj(x) = conj(x) ⋆₋ conj(y) */
-        if(dif(conj(mul(x,y,+1)), mul(conj(x), conj(y), -1)) < 1e-12) iso++;
+        if(dif(conjuga(mul(x,y,+1)), mul(conjuga(x), conjuga(y), -1)) < 1e-12) iso++;
     }
     printf("      x⋆y != y⋆x em %d de 300 — os dois não são a mesma álgebra pela identidade\n",
            naoComuta);
