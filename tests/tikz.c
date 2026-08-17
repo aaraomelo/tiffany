@@ -417,8 +417,48 @@ int main(void){
            involucao);
         /* e a régua da companion tem de ser a (B,C) do catálogo, senão a ligação é verbal */
         double traco = A[0] + A[3], det = A[0]*A[3] - A[1]*A[2];
-        ok("e a REGUA da companion e a (B,C) do catalogo: -traco = B e det = C",
-           fabs(-traco - B_DIN) < 1e-15 && fabs(det - C_DIN) < 1e-15);
+        /* «−traço = B e det = C» É A CONSTRUÇÃO DA MATRIZ RELIDA. A companheira foi escrita
+         * duas linhas acima como {0, 1, −C, −B}: o traço é 0 + (−B) e o determinante é
+         * 0 − 1·(−C). Não pode falhar, e é a mesma tautologia que o geral.c §G1 já tinha —
+         * «tr = −c_{n−1} vale POR CONSTRUÇÃO da companion».
+         *
+         * O que TEM conteúdo é a companheira REALIZAR o polinómio, e isso lê-se em
+         * CAYLEY–HAMILTON: A² = tr·A − det·I. Essa é uma consequência, não uma leitura — se
+         * a matriz estivesse escrita com um sinal trocado, ela caía. */
+        double A2[4] = { A[0]*A[0] + A[1]*A[2], A[0]*A[1] + A[1]*A[3],
+                         A[2]*A[0] + A[3]*A[2], A[2]*A[1] + A[3]*A[3] };
+        /* E O POLINÓMIO É O DO CATÁLOGO, e não o da própria matriz. Cayley–Hamilton vale
+         * para TODA matriz 2×2 — é teorema —, logo verificá-lo com o traço e o determinante
+         * calculados DELA não testa a companheira: testa o teorema. Escrevi-o assim à
+         * primeira e o gume não caiu, que é o sinal.
+         *
+         * O que testa é A² = −B·A − C·I com o B e o C do CATÁLOGO: aí a matriz tem de
+         * realizar AQUELE polinómio, e uma companheira com um sinal trocado já não realiza. */
+        double CH[4] = { -B_DIN*A[0] - C_DIN, -B_DIN*A[1],
+                         -B_DIN*A[2],         -B_DIN*A[3] - C_DIN };
+        int ch_ok = 1;
+        for(int i = 0; i < 4; i++) if(fabs(A2[i] - CH[i]) > 1e-15) ch_ok = 0;
+        /* o GUME: a mesma conta com o −C virado do avesso, contra o MESMO polinómio */
+        double Am[4] = {0, 1, C_DIN, -B_DIN};
+        double Am2[4] = { Am[0]*Am[0]+Am[1]*Am[2], Am[0]*Am[1]+Am[1]*Am[3],
+                          Am[2]*Am[0]+Am[3]*Am[2], Am[2]*Am[1]+Am[3]*Am[3] };
+        double CHm[4] = { -B_DIN*Am[0] - C_DIN, -B_DIN*Am[1],
+                          -B_DIN*Am[2],         -B_DIN*Am[3] - C_DIN };
+        int gume_cai = 0;
+        for(int i = 0; i < 4; i++) if(fabs(Am2[i] - CHm[i]) > 1e-15) gume_cai = 1;
+        printf("      e CAYLEY-HAMILTON fecha na companion (A² = tr.A − det.I): %s ;"
+               " com o sinal trocado: %s\n", ch_ok ? "sim" : "NAO", gume_cai ? "CAI" : "nao cai");
+        ok("e a REGUA da companion e a (B,C) do catalogo: -traco = B e det = C. Mas ISSO e' a"
+           " construcao relida — a matriz foi escrita como {0,1,-C,-B} duas linhas acima, e o"
+           " traco e' 0 + (-B) por definicao. O que tem conteudo e' ela REALIZAR o polinomio,"
+           " e isso le-se em CAYLEY-HAMILTON: A² = tr.A - det.I, uma consequencia e nao uma"
+           " leitura — e o polinomio e' o do CATALOGO e nao o da propria matriz, porque"
+           " Cayley-Hamilton vale para TODA matriz 2x2: verifica-lo com o traco e o"
+           " determinante calculados dela testa o teorema e nao a companion. Escrevi-o assim"
+           " a' primeira e o gume nao caiu. Com o B e o C do catalogo, uma companion com um"
+           " sinal trocado ja' NAO realiza aquele polinomio, e cai",
+           fabs(-traco - B_DIN) < 1e-15 && fabs(det - C_DIN) < 1e-15
+           && ch_ok && gume_cai);
         double D = B_DIN*B_DIN - 4*C_DIN;
         ok("e o Delta classifica-a: negativo, logo ELIPTICA — a mesma classe do oscilador",
            D < 0);

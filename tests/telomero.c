@@ -36,6 +36,7 @@
 #include <string.h>
 #include <math.h>
 #include "unidade.h"
+#include "reta.h"
 #include "cifra.h"        /* o codificador EXATO, em inteiros — não se escreve um segundo */
 
 #define MAXT 64
@@ -181,9 +182,23 @@ printf("\n§T2  BASE e FRAÇÃO CONTÍNUA são o MESMO algoritmo: muda o divisor
     /* e a volta da fracao continua: convergentes de tras para a frente */
     double v = saida[n2-1];
     for(size_t i = n2-1; i > 0; i--) v = saida[i-1] + 1.0/v;
-    printf("      e a volta dá %.6f (era %.6f)\n\n", v, 137.0/4.0);
-    ok("com divisor variável, devolve a fração contínua — e a volta também é exata",
-       fabs(v - 137.0/4.0) < 1e-9);
+    /* E A VOLTA É EXACTA EM ℚ, não «a menos de 1e-9». Os quocientes são a PALAVRA de 137/4,
+     * e a `rt_cf_para` da reta.h reconstrói o racional pela recorrência dos convergentes —
+     * lida de trás para a frente, tal como o laço acima, mas em INTEIROS. A comparação
+     * faz-se por produto cruzado: p·4 == 137·q, sem se formar quociente nenhum. */
+    RtCf pal;
+    pal.sinal = 1; pal.n = (int)n2; pal.saturou = 0;
+    for(size_t i = 0; i < n2 && i < (size_t)RT_CF_MAX; i++) pal.a[i] = saida[i];
+    long pz = 0, qz2 = 0;
+    int voltou = rt_cf_para(&pal, &pz, &qz2);
+    printf("      e a volta dá %.6f (era %.6f) — e em INTEIROS dá %ld/%ld\n\n",
+           v, 137.0/4.0, pz, qz2);
+    ok("com divisor variável, devolve a fração contínua — e a volta também é exata. E"
+       " «exacta» quer dizer isso: os quocientes sao a PALAVRA de 137/4, e a `rt_cf_para` da"
+       " reta.h reconstroi o racional pela recorrencia dos convergentes, em INTEIROS. A"
+       " comparacao e' por produto cruzado, p.4 == 137.q — sem formar quociente e sem o"
+       " 1e-9, que dava folga a uma igualdade de racionais",
+       fabs(v - 137.0/4.0) < 1e-9 && voltou && pz*4 == 137*qz2 && qz2 != 0);
     conclui("uma função só, e a linha que muda é qual o divisor do passo seguinte");
 }
 
