@@ -177,9 +177,14 @@ printf("\n§N3  Mas NÃO é bilinear — e é aí que ela sai da hipótese de Hu
     /* e a homogeneidade é EXACTA: λ = 2 é potência de dois, e escalar por ela em IEEE só
      * mexe no expoente. Diz-se com igualdade, e varre-se mais do que um λ — com um só, a
      * asserção não distinguia «homogénea» de «funciona no 2». */
+    /* E O SEGUNDO OPERANDO TEM DE TER A TERCEIRA COORDENADA NÃO NULA. Com `u = {1,0,0}` o
+     * termo c2·r1 do produto desaparece e c1·r2 não escala — logo um `esc` que esquecesse a
+     * terceira coordenada passava despercebido, e o gume que lhe apontei não mordeu. É
+     * varrer onde o defeito não vive. Com u3 = {1,0,2} ele morde. */
+    W u3 = {1, 0, 2};
     int hom_ok = 0, hom_tot = 0;
     for(long L2 = 1; L2 <= 16; L2 *= 2){
-        W eh = nne(esc(L2, w), u), dh = esc(L2, nne(w, u));
+        W eh = nne(esc(L2, w), u3), dh = esc(L2, nne(w, u3));
         hom_tot++;
         if(eh.a == dh.a && eh.b == dh.b && eh.c == dh.c) hom_ok++;
     }
