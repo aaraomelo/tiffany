@@ -94,35 +94,69 @@ int main(void){
     /* ---------------- §X1 — as duas raízes ---------------- */
     printf("\n§X1 x^x = x^n tem DUAS raízes: x = n e x = 1 — e colidem em n = 1\n");
     {
-        int casos=0, raiz_n=0, raiz_1=0;
-        printf("      n     n^n            n^n (a 2.ª forma)   1^1   1^n\n");
+        /* AQUI ESTAVAM TRÊS ASSERÇÕES QUE NÃO PODIAM FALHAR, e a pior era literal:
+         *
+         *     if(1==1 && 1==1) raiz_1++;
+         *
+         * — a constante disfarçada sem sequer o disfarce. As outras duas: `a` e `b` eram
+         * calculados pelo MESMO laço, letra por letra, e depois comparava-se `a==b`; e a
+         * «separação» fazia `d = n−1` e verificava `d==0` quando `n==1`. Nenhuma das três
+         * podia dar outra coisa, em nenhuma entrada.
+         *
+         * O que há para medir é a EQUAÇÃO, e não a definição repetida: quantos x
+         * satisfazem x^x = x^n? Varre-se x, avaliam-se os dois lados por potenciação
+         * inteira, e CONTA-SE. A tese é que são exactamente dois — x = 1 e x = n — e um
+         * só quando n = 1, porque aí colidem. É essa contagem que tem gume: se houvesse
+         * uma terceira raiz, ou se x = n falhasse, o número mudava. */
+        int casos=0, dois=0, um=0, tem_1=0, tem_n=0, saltou_teto=0;
+        L maior_decidido = 0;
+        printf("      n    raízes de x^x = x^n em 1..%d      quais\n", 40);
         for(L n=1; n<=12; n++){
-            /* x = n:  n^n = n^n  — identidade, em INTEIROS quando cabe */
-            L a = 1, b = 1;
-            int cabe = 1;
-            for(L i=0;i<n;i++){ if(a > 9223372036854775807LL/n){ cabe=0; break; } a *= n; }
-            for(L i=0;i<n;i++){ if(b > 9223372036854775807LL/n){ cabe=0; break; } b *= n; }
             casos++;
-            if(cabe && a==b) raiz_n++;
-            /* x = 1:  1^1 = 1 = 1^n, para TODO n */
-            if(1==1 && 1==1) raiz_1++;
-            if(n<=5) printf("      %-5lld %-14lld %-18lld %-5d %d\n", n, a, b, 1, 1);
+            int quantas = 0, viu1 = 0, viun = 0, coube = 1;
+            L ate_x = 0;
+            for(L x=1; x<=40; x++){
+                /* os dois lados, por potenciação inteira — e o TECTO verifica-se, porque
+                 * x^x cresce como nada: 21^21 já não cabe no long. O que não cabe não
+                 * entra na contagem, e diz-se quantos foram. */
+                int cabe = 1;
+                L e1 = 1, e2 = 1;
+                for(L i=0;i<x;i++){ if(e1 > 9223372036854775807LL/x){ cabe=0; break; } e1 *= x; }
+                if(cabe) for(L i=0;i<n;i++){ if(e2 > 9223372036854775807LL/x){ cabe=0; break; } e2 *= x; }
+                if(!cabe){ coube = 0; continue; }
+                ate_x = x;                         /* o maior x que a varredura DECIDIU */
+                if(e1 == e2){                      /* x^x == x^n, os dois lados avaliados */
+                    quantas++;
+                    if(x == 1) viu1 = 1;
+                    if(x == n) viun = 1;
+                }
+            }
+            if(!coube) saltou_teto++;
+            if(ate_x > maior_decidido) maior_decidido = ate_x;
+            if(n == 1){ if(quantas == 1) um++; }
+            else       { if(quantas == 2) dois++; }
+            if(viu1) tem_1++;
+            if(viun) tem_n++;
+            if(n<=5) printf("      %-4lld %-33d %s%s\n", n, quantas,
+                            viu1 ? "x=1 " : "", viun ? "x=n" : "");
         }
-        printf("      n testados: %d   com x=n a ser raiz: %d   com x=1 a ser raiz: %d\n",
-               casos, raiz_n, raiz_1);
-        ok("x = n é raiz — a que SEGUE o parâmetro", raiz_n>=10);
-        ok("x = 1 é raiz para TODO n — a que NÃO depende do parâmetro", raiz_1==casos);
-
-        /* e a fronteira: em n=1 as duas coincidem. Mede-se a SEPARAÇÃO |n−1|. */
-        printf("      a separação entre as duas raízes é |n − 1|:\n");
-        int separa=0, colide=0;
-        for(L n=1; n<=8; n++){
-            L d = n - 1;
-            if(n==1){ if(d==0) colide++; } else if(d>0) separa++;
-        }
-        printf("      n=1: separação 0 (raiz DUPLA)     n>1: separação n−1 > 0, em %d casos\n",
-               separa);
-        ok("em n=1 as duas raízes COLIDEM — é a fronteira, e é única", colide==1 && separa==7);
+        printf("      n testados: %d   com x=1 raiz: %d   com x=n raiz: %d\n",
+               casos, tem_1, tem_n);
+        printf("      com EXACTAMENTE duas raízes (n>1): %d de %d\n", dois, casos-1);
+        printf("      e com UMA só, em n=1 (colidem): %d\n", um);
+        printf("      n em que algum x^x não coube no long: %d  (contado, não escondido)\n",
+               saltou_teto);
+        printf("      e o maior x que a varredura DECIDIU: %lld — acima disso x^x não cabe,\n",
+               maior_decidido);
+        printf("      logo a tese «não há outras» é sobre 1..%lld, e é assim que se diz\n",
+               maior_decidido);
+        ok("x = 1 e x = n são raízes de x^x = x^n, e NÃO HÁ OUTRAS: a varredura conta"
+           " exactamente duas para n > 1 — o que aqui estava escrevia `if(1==1 && 1==1)`"
+           " e comparava dois laços idênticos entre si",
+           tem_1==casos && tem_n==casos && dois==casos-1);
+        ok("em n=1 as duas raízes COLIDEM — a contagem cai a UMA, e é o único n onde isso"
+           " acontece: a fronteira mede-se pelo número de soluções, não por n−1 ser zero",
+           um==1 && dois==casos-1);
         conclui("uma raiz mede (segue n) e a outra ordena (fica em 1, e é a mesma sempre).");
         conclui("é o par do §1, e a fronteira é onde as duas coincidem — aqui, n = 1.");
     }

@@ -33,9 +33,12 @@ echo "  a correr o gume em $n medidores, até $MAX mutações cada, $PAR em para
 i=0
 for b in $lista; do
   (
-    GUME_TMP="$(mktemp -d)" timeout 900 python3 tools/gume.py "tests/$b.c" --max "$MAX" \
+    # o gume.py limpa o seu proprio directorio no `finally`; o `rm` que aqui estava lia
+    # uma variavel que so existia no ambiente do comando, e com `set -u` matava o ramo
+    d="$(mktemp -d)"
+    GUME_TMP="$d" timeout 900 python3 tools/gume.py "tests/$b.c" --max "$MAX" \
       > "$TMPD/$b.txt" 2>&1
-    rm -rf "$GUME_TMP" 2>/dev/null
+    rm -rf "$d" 2>/dev/null
   ) &
   i=$((i+1))
   if [ $((i % PAR)) -eq 0 ]; then wait; printf '.'; fi
