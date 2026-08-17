@@ -431,7 +431,7 @@ significado 4cde300a66dfe985 0
 simula 955a3e4d10cc867b 0
 sistema f56a7c35b80f8e03 0
 smartcontract c584e6c96ecec290 0
-solar 0767dc295d2b5077 0
+solar f78906c13f9ab294 0
 solucoes_primitivas a317586c48866d16 0
 sombra_cone 803debae54064148 0
 sombras 4cdee1845f8c56fd 0

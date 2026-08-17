@@ -274,13 +274,38 @@ printf("\n§S4  A garrafa de KOCH: harmónicos de Fibonacci, e THD² = 1/φ.\n\n
        " e o 1e-15 dava folga a uma igualdade que nao tem — e ele esteve nesta condicao"
        " ate' agora (como 1e-12), ao lado do par que o dispensa",
        g2a == la && g2b == lb);
-    /* e a identidade que a sustenta */
-    int malI = 0;
-    if(fabs(PHI*PHI - (PHI+1)) > 1e-14) malI++;
-    if(fabs(1 - pow(PHI,-2.0) - 1.0/PHI) > 1e-14) malI++;
-    printf("      φ² = φ + 1: resíduo %.1e     1 − φ^{-2} = 1/φ: resíduo %.1e\n\n",
-           fabs(PHI*PHI-(PHI+1)), fabs(1-pow(PHI,-2.0)-1.0/PHI));
-    ok("e as duas identidades áureas que a sustentam fecham", malI == 0);
+    /* E AS DUAS «IDENTIDADES ÁUREAS» SÃO UMA SÓ. Multiplicando 1 − φ^{-2} = 1/φ por φ²
+     * vem φ² − 1 = φ, que é φ² = φ + 1 — a de cima, reescrita. Contá-las como duas era
+     * contar a mesma coisa duas vezes.
+     *
+     * E medem-se EXACTAS em ℤ[√5], como a asserção anterior já faz: guarda-se 2φ = 1+√5
+     * como o par (1,1) e nunca se forma a raiz.
+     *
+     *      (2φ)² = 6 + 2√5        e   2(2φ) + 4 = 6 + 2√5       ← φ² = φ+1
+     *      (2φ)² − 4 = 2 + 2√5    e   2(2φ)     = 2 + 2√5       ← φ² − 1 = φ
+     *
+     * E generaliza-se aos metais sem custo nenhum: σ_m² = m·σ_m + 1 para todo m, com
+     * 2σ = m + √D e D = m²+4. É a equação do ponto fixo, e vale exacta em todos. */
+    long q2a, q2b;  rt_zd_mul(1, 1, 1, 1, 5, &q2a, &q2b);        /* (2φ)² = 6 + 2√5 */
+    int id_soma = (q2a == 2*1 + 4 && q2b == 2*1);                /* = 2(2φ) + 4     */
+    int id_menos = (q2a - 4 == 2*1 && q2b == 2*1);               /* (2φ)²−4 = 2(2φ) */
+    /* e a mesma lei em todos os metais: (2σ)² = 2m(2σ) + 4 */
+    long met_ok = 0, met_tot = 0;
+    for(long m = 1; m <= 40; m++){
+        long D = m*m + 4, a2, b2;
+        rt_zd_mul(m, 1, m, 1, D, &a2, &b2);                      /* (2σ)² = a2 + b2√D */
+        met_tot++;
+        if(a2 == 2*m*m + 4 && b2 == 2*m) met_ok++;               /* = 2m(2σ) + 4      */
+    }
+    printf("      φ² = φ+1 em ℤ[√5]: (2φ)² = %ld + %ld√5, e 2(2φ)+4 = %d + %d√5\n",
+           q2a, q2b, 2*1+4, 2*1);
+    printf("      e a MESMA identidade nos metais, σ² = mσ+1: %ld de %ld, exacta\n\n",
+           met_ok, met_tot);
+    ok("a identidade áurea que sustenta o resultado mede-se EXACTA em ℤ[√5], e as duas que"
+       " aqui estavam eram UMA: multiplicar 1 − φ^{-2} = 1/φ por φ² dá φ² = φ+1. E ela"
+       " generaliza aos metais sem custo — σ_m² = m·σ_m + 1 em todos, que é a equação do"
+       " ponto fixo",
+       id_soma && id_menos && met_tot > 0 && met_ok == met_tot);
     printf("      A fonte não é lisa — é ÁUREA. E é por isso que se chama garrafa de Koch: ela\n");
     printf("      tem borda infinita em espaço finito, a série de harmónicos não termina, mas a\n");
     printf("      sua soma é um número só. Cabe.\n");
