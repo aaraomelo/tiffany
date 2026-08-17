@@ -145,15 +145,43 @@ printf("\n§G2  O imposto FATORIZA: Π só depende da posição, S só dos opera
             double a[3] = {1.0, 0.3*k, -0.2}, b[3] = {0.5, -0.4, 0.7*k}, c[3];
             cruz(a, b, c);
             double S = nrm2(c), Pi = 1 - s*s, V = Pi*S;
-            double razao = (Pi*S != 0) ? V/(Pi*S) : 1.0;
-            if(fabs(razao - 1.0) > pior) pior = fabs(razao - 1.0);
+            /* `razao` era V/(Pi·S) com V DEFINIDO como Pi·S duas expressões antes: dividia
+             * uma quantidade por si própria e dava 1, e o `pior < 1e-15` mediria só o
+             * arredondamento dessa divisão. «Fatoriza exactamente» não é uma medida — é a
+             * linha de cima relida. O que tem conteúdo está no parágrafo seguinte, e é a
+             * CONSEQUÊNCIA: sem cruzado não há imposto. Mede-se abaixo. */
+            double razao = 1.0;
+            (void)razao;
             if(n < 5) printf("      %-6.2f (%.2f,%.2f,%.2f)  %-11.4f %-12.4f %-11.4f %.6f\n",
                              s, c[0], c[1], c[2], Pi, S, V, razao);
             n++;
         }
     }
-    printf("      …\n\n      %d pontos, pior desvio de 1: %.3e\n\n", n, pior);
-    ok("o imposto fatoriza exatamente em pressão × secção", pior < 1e-15);
+    /* A TESE COM CONTEÚDO: se a×b = 0 — campos paralelos — então S = 0 e o imposto
+     * DESAPARECE; e se a×b ≠ 0, ele existe. As duas metades, porque «desaparece» sozinho
+     * valeria por nunca haver imposto nenhum. E o zero é EXACTO: o cruzado de paralelos
+     * subtrai termos idênticos bit a bit. */
+    int par_zero = 0, par_tot = 0, nao_par_v = 0, nao_par_tot = 0;
+    for(int k = 1; k <= 6; k++){
+        double a[3] = {1.0, 0.3*k, -0.2};
+        double bp[3] = {2.0, 0.6*k, -0.4};              /* PARALELO a `a` (o dobro) */
+        double bn[3] = {0.5, -0.4, 0.7*k};              /* não paralelo */
+        double c1[3], c2[3];
+        cruz(a, bp, c1);  cruz(a, bn, c2);
+        double S1 = nrm2(c1), S2 = nrm2(c2), Pi = 1 - 0.4*0.4;
+        par_tot++;      if(Pi*S1 == 0.0) par_zero++;
+        nao_par_tot++;  if(Pi*S2 != 0.0) nao_par_v++;
+    }
+    printf("      …\n\n      %d pontos varridos\n", n);
+    printf("      com a×b = 0 (paralelos) o imposto ZERA, exacto: %d de %d\n", par_zero, par_tot);
+    printf("      e com a×b ≠ 0 ele EXISTE: %d de %d — o contraste é que mede\n\n",
+           nao_par_v, nao_par_tot);
+    ok("SEM CRUZADO NÃO HÁ IMPOSTO: com os campos paralelos a×b anula-se e V = Π·S zera"
+       " EXACTAMENTE — o cruzado de paralelos subtrai termos idênticos bit a bit —, e com"
+       " eles não paralelos o imposto existe. A asserção que aqui estava media V/(Π·S) com V"
+       " definido como Π·S: dividia uma quantidade por si própria",
+       par_tot > 0 && par_zero == par_tot && nao_par_v == nao_par_tot);
+    (void)pior;
     printf("      E a consequência está no paper: se a×b = 0 — mesmo campo local — então S = 0 e\n");
     printf("      o imposto DESAPARECE. Sem cruzado não há imposto: é o cruzado que se paga.\n");
 }

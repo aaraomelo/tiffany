@@ -159,16 +159,36 @@ printf("\n§N3  Mas NÃO é bilinear — e é aí que ela sai da hipótese de Hu
     printf("      w·(u+v)    = (%.6f, %.6f, %.6f)\n", esq.a, esq.b, esq.c);
     printf("      w·u + w·v  = (%.6f, %.6f, %.6f)\n", dir.a, dir.b, dir.c);
     printf("      diferem na terceira coordenada: %.6f contra %.6f\n\n", esq.c, dir.c);
-    int distrib = fabs(esq.a-dir.a) < 1e-9 && fabs(esq.b-dir.b) < 1e-9 && fabs(esq.c-dir.c) < 1e-9;
-    ok("NÃO é distributiva — logo não é bilinear", !distrib);
+    /* «NÃO é distributiva» com um limiar de 1e-9 diz pouco: a diferença podia ser 1e-8 e a
+     * asserção passava na mesma. O que interessa é ONDE e QUANTO — e aqui é grande, e numa
+     * coordenada só. Mede-se as três em separado, e diz-se o desvio. */
+    double da = fabs(esq.a-dir.a), db = fabs(esq.b-dir.b), dc = fabs(esq.c-dir.c);
+    printf("      desvios por coordenada: a %.3e   b %.3e   c %.3e\n", da, db, dc);
+    ok("NÃO é distributiva — logo não é bilinear. E falha numa coordenada SÓ, a terceira,"
+       " e por uma margem que não é de arredondamento: as duas primeiras batem exacto e a"
+       " terceira difere de mais de um décimo",
+       da == 0.0 && db == 0.0 && dc > 0.1);
 
     /* mas e homogenea: (λw)·u = λ(w·u) */
     long lam = 2.0;
     W e2 = nne(esc(lam,w), u), d2 = esc(lam, nne(w,u));
     printf("      (λw)·u = (%.4f, %.4f, %.4f)   λ(w·u) = (%.4f, %.4f, %.4f)\n\n",
            e2.a, e2.b, e2.c, d2.a, d2.b, d2.c);
-    ok("e É homogénea — o que a torna quase-bilinear, e não bilinear",
-       fabs(e2.a-d2.a) < 1e-9 && fabs(e2.b-d2.b) < 1e-9 && fabs(e2.c-d2.c) < 1e-9);
+    /* e a homogeneidade é EXACTA: λ = 2 é potência de dois, e escalar por ela em IEEE só
+     * mexe no expoente. Diz-se com igualdade, e varre-se mais do que um λ — com um só, a
+     * asserção não distinguia «homogénea» de «funciona no 2». */
+    int hom_ok = 0, hom_tot = 0;
+    for(long L2 = 1; L2 <= 16; L2 *= 2){
+        W eh = nne(esc(L2, w), u), dh = esc(L2, nne(w, u));
+        hom_tot++;
+        if(eh.a == dh.a && eh.b == dh.b && eh.c == dh.c) hom_ok++;
+    }
+    printf("      e a homogeneidade em λ = 1,2,4,8,16: %d de %d, EXACTA\n", hom_ok, hom_tot);
+    ok("e É homogénea — o que a torna quase-bilinear, e não bilinear. Medido EXACTO em"
+       " cinco potências de dois, onde escalar só mexe no expoente: com um λ só, a asserção"
+       " não distinguia «homogénea» de «funciona no 2»",
+       hom_tot == 5 && hom_ok == hom_tot &&
+       e2.a == d2.a && e2.b == d2.b && e2.c == d2.c);
     printf("      A raiz quadrada no r e o γ que divide por r1r2 são o que quebra a soma: a\n");
     printf("      multiplicação USA A NORMA dos operandos, e a norma não é aditiva. Escalar não\n");
     printf("      lhe faz mal (a raiz é homogénea), somar faz.\n");
