@@ -670,22 +670,48 @@ int main(void)
      * refere; depois, DESSES, os que o CODIGO tambem nao menciona. Dois estavam vivos so' no
      * codigo — e apaga-los teria partido o app sem nenhum medidor acusar. */
     {
-        long no_manifesto = 12;      /* nao referidos pelo manifesto */
+        /* OS QUATRO NÚMEROS SÃO UM RELATÓRIO IMPORTADO, e não uma medição deste bloco: vêm
+         * da operação de limpeza que já aconteceu. Escritos à mão e comparados com o que foi
+         * escrito, não podiam falhar — e é assim que passou despercebido que ELES NÃO FECHAM.
+         *
+         * A prosa acima descreve uma PARTIÇÃO: «primeiro os que o manifesto não refere;
+         * depois, DESSES, os que o código também não menciona». Se é partição, então
+         *
+         *      no_manifesto = vivos_no_codigo + mortos      12 = 2 + 9 = 11        ← falta UM
+         *
+         * O que falta não se inventa aqui: fica CONTADO e dito. Ou há uma terceira categoria
+         * que a prosa não nomeia, ou um dos três números do relatório está errado. A
+         * asserção passa a dizer o que se sabe — que os valores são importados — e a
+         * DISCREPÂNCIA passa a ser visível em vez de invisível. */
+        long no_manifesto = 12;      /* nao referidos pelo manifesto  (relatorio da operacao) */
         long vivos_no_codigo = 2;    /* mas mencionados no codigo — SALVOS pela segunda metade */
         long mortos = 9;             /* zero referencias no repositorio inteiro */
         long removidos = 9;
+        long por_classificar = no_manifesto - vivos_no_codigo - mortos;
         printf("  §B12  fosseis: %ld nao referidos pelo manifesto, %ld salvos por estarem no"
                " codigo, %ld mortos\n", no_manifesto, vivos_no_codigo, mortos);
-        printf("        removidos: %ld  (o git guarda-os — a rede existe antes de destruir)\n\n",
+        printf("        removidos: %ld  (o git guarda-os — a rede existe antes de destruir)\n",
                removidos);
+        printf("        E OS NUMEROS NAO FECHAM: %ld = %ld + %ld daria %ld, e ficam %ld por\n"
+               "        classificar — o relatorio e' importado, e a soma nunca foi medida\n\n",
+               no_manifesto, vivos_no_codigo, mortos, vivos_no_codigo + mortos, por_classificar);
         ok("os FOSSEIS sao dissipacao e nao peso morto inocente: ocupam, entram nas contagens, e"
            " fazem quem le' nao distinguir o que E' o caminho do que FOI. A busca fez-se PELAS"
            " DUAS METADES e a segunda salvou dois — primeiro os que o manifesto nao refere,"
            " depois os que o CODIGO tambem nao menciona. Dois estavam vivos so' no codigo, e"
            " apaga-los teria partido o app sem nenhum medidor acusar. Restaram nove com zero"
            " referencias no repositorio inteiro, e so' esses sairam — com o git como rede,"
-           " verificada ANTES de destruir",
-           no_manifesto == 12 && vivos_no_codigo == 2 && mortos == 9 && removidos == mortos);
+           " verificada ANTES de destruir."
+           " E OS NUMEROS SAO UM RELATORIO IMPORTADO da operacao, nao uma medicao deste"
+           " bloco — e por serem escritos a' mao e comparados consigo proprios, passou"
+           " despercebido que NAO FECHAM: a prosa descreve uma particao (dos nao referidos"
+           " pelo manifesto, uns estao vivos no codigo e os outros sao mortos), e"
+           " 2 + 9 = 11 contra 12 declarados. Fica UM por classificar, contado e dito — ou"
+           " ha' uma terceira categoria que a prosa nao nomeia, ou um dos tres esta' errado."
+           " O que se afirma aqui e' so' o que se sabe: que os removidos sao exactamente os"
+           " mortos, e que a discrepancia existe e tem tamanho um",
+           removidos == mortos && por_classificar == 1
+           && vivos_no_codigo + mortos + por_classificar == no_manifesto);
     }
 
     /* ═══ §B13 — os GIFs SAEM: eram ruido, e 90 dos 92 ja' nao precisavam deles ═════
