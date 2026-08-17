@@ -278,8 +278,34 @@ int main(void){
         double T_AMB_QUENTE = 315.0;         /* 42 C — um dia de deserto */
         double g0 = T_CORPO - T_AMB_QUENTE;
         double g6 = (T_AMB_QUENTE + (T_CORPO - T_AMB_QUENTE)*exp(-k*6)) - T_AMB_QUENTE;
-        ok("e a SETA INVERTE se o ambiente e mais quente: o corpo passa a RECEBER calor",
-           g0 < 0 && g6 < 0 && g6 > g0);
+        /* E ISTO REDUZ-SE A k > 0. Com Δ = T_CORPO − T_AMB tem-se g0 = Δ e g6 = Δ·exp(−6k),
+         * logo g6 > g0 é Δ(exp(−6k) − 1) > 0, e com Δ < 0 isso é exp(−6k) < 1, que é k > 0.
+         * A asserção não dependia dos 315 K nem das seis horas: dependia do sinal de k.
+         *
+         * O CONTEÚDO É OUTRO, e é o que a própria conclusão diz — «a seta não é uma
+         * propriedade do corpo, é do PAR». Isso mede-se varrendo o ambiente e vendo que o
+         * SINAL do gradiente é o sinal de T_CORPO − T_AMB, sempre; e o gume é aparecerem os
+         * DOIS sinais, sem o que «inverte» valia por nunca inverter. */
+        long amb_tot = 0, sinal_bate = 0, neg = 0, pos = 0, zero = 0;
+        for(double Ta = 250.0; Ta <= 350.0; Ta += 2.5){
+            double d0 = T_CORPO - Ta;
+            double d6 = (Ta + (T_CORPO - Ta)*exp(-k*6)) - Ta;
+            amb_tot++;
+            int s0 = (d0 < 0) ? -1 : (d0 > 0 ? 1 : 0);
+            int s6 = (d6 < 0) ? -1 : (d6 > 0 ? 1 : 0);
+            if(s0 == s6) sinal_bate++;
+            if(s0 < 0) neg++; else if(s0 > 0) pos++; else zero++;
+        }
+        printf("     -> e varrendo o ambiente de 250 a 350 K: o SINAL do gradiente e' o de\n"
+               "        T_CORPO - T_AMB em %ld de %ld, e os dois sinais aparecem (%ld negativos,\n"
+               "        %ld positivos). A seta e' do PAR, e nao do corpo.\n",
+               sinal_bate, amb_tot, neg, pos);
+        ok("e a SETA INVERTE se o ambiente e mais quente: o corpo passa a RECEBER calor. E o"
+           " que se mede e' que o SINAL do gradiente e' o de T_CORPO - T_AMB, varrendo o"
+           " ambiente de 250 a 350 K — com os DOIS sinais presentes, sem o que «inverte»"
+           " valia por nunca inverter. A assercao anterior, g6 > g0 com g0 < 0, reduzia-se a"
+           " exp(-6k) < 1, que e' k > 0: nao dependia dos 315 K nem das seis horas",
+           sinal_bate == amb_tot && neg > 0 && pos > 0 && g0 < 0 && g6 < 0);
         printf("     -> com o ambiente a 42 C o gradiente nasce NEGATIVO (%.2f K) e sobe para\n", g0);
         printf("        %.2f K: o cadaver aquece. A seta nao e uma propriedade do corpo — e do\n", g6);
         puts("        PAR, e e por isso que ela vira quando o par vira.");

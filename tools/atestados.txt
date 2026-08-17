@@ -104,7 +104,7 @@ corpo_unico d21a078aa8bd7aa5 0
 corpo_viveiro 35c96afeadd012b8 0
 corpodecorpos 8d2cbc90ae332e67 0
 corte_ponto_fixo ebd7191a1453f1d8 0
-cosmico 69c665c4c6c9ad3b 0
+cosmico 6c8d0bba63c6d175 0
 cosmologia ba6dd5df9be09b0a 0
 costura_mecanica 3300d90fae0bb568 0
 cristal_adversarial a5b592f03e349608 0
@@ -203,7 +203,7 @@ fator fe6d6f91443c9ede 0
 fecha 78a93ae5af23426b 0
 fecho_convexo 1cc9544415551039 0
 fermat 0657621efa6e4bbc 0
-fisica 934484ad77a8c2aa 0
+fisica 9460b77fe023d9c2 0
 fita 708d74da822a8f82 0
 fonte_banco 53525f1a1b7fe74d 0
 fonte_corpo 6720cdb0b5e2252e 0

@@ -27,6 +27,7 @@
 #include <math.h>
 #include <string.h>
 #include "unidade.h"
+#include "reta.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -310,7 +311,9 @@ printf("\n§P7  \"Acima do infinito\": c -> ∞ leva e² = +1 em e² = 0.\n\n");
     int mal = 0;
     printf("      c          ε_c²          boost(v=1) sobre (t,x)=(1,0)     Galileu daria\n");
     for(int k = 1; k <= 6; k++){          /* de c = 10; em c = 1 seria v = c e o boost não existe */
-        double c = pow(10.0, k), v = 1.0;
+        /* 10^k com k inteiro é `rt_ipow`, não `pow`: uma potência inteira não precisa da
+         * função transcendental, e o resultado é exacto até 10^18. */
+        double c = (double)rt_ipow(10, k), v = 1.0;
         double beta = v/c, g = 1.0/sqrt(1 - beta*beta);
         double t2 = g*(1.0 - beta*0.0/c), x2 = g*(0.0 - v*1.0);
         printf("      %-10.0f %-13.3e t'=%.9f  x'=%+.6f     t'=1  x'=%+.0f\n",
