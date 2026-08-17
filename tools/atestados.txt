@@ -5,7 +5,7 @@ agm 2c9e8cedfee7ccac 0
 agm_analitico 71272f7669b34069 0
 agm_analog 9464d727b662316a 0
 agm_deforma 99c411ca3dffac43 0
-agm_gerador 958387d0ec02fc04 0
+agm_gerador 21b6aeffd42a08f0 0
 algebra e4923ae8b9efc021 0
 amplifica 685890ca38cd4382 0
 analiticas 60d32ba7f9ded84e 0
@@ -32,7 +32,7 @@ banco 647afcff53576d24 0
 banco_relogio 59b8d9b3c28fd22a 0
 banda d2f4c8e26b179307 0
 barramento 8d975d371666a0c7 0
-base 33bebabcde1316ca 0
+base aacbd7936e210831 0
 base_local a24cac35e9d0a65f 0
 batuta_continuo 7671972b9f96081b 0
 biblioteca c1f10655bb60418b 0
@@ -40,7 +40,7 @@ bidual 503ba21286d79154 0
 bit_metropolis cd99cd38b06fd1a8 0
 borda_sem_teto 15010a3ef5e4a863 0
 buracos 66161db65811b122 0
-cadeia 4a46e51a37c7d07d 0
+cadeia c0f6b61ee48784a9 0
 caminho 7934d7eb5949397d 0
 canal f23ae0f630ffc2a4 0
 cantor 37a78d4f6d91e54f 0
@@ -144,11 +144,11 @@ dois_streams 624d9e1997aa4657 0
 dominios ad07694e3a1a261e 0
 dourada 0d4544be18ec836a 0
 dourada_banco da40aa247da4be4c 0
-dourada_bidual 31e05ee9df292475 0
+dourada_bidual eebfed5f9cdf523c 0
 dourada_escala 690b7dc3b9608a7a 0
 dourada_lei2 95424bf3ea0309bd 0
 dtc_viveiro ccbe31142837ba46 0
-dtcn b5caccf581116271 0
+dtcn 8fad620f7798082d 0
 duais 0df04b5273fb6a25 0
 dual 869340d98961353e 0
 dual32 c489f54924157885 0

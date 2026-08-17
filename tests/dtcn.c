@@ -356,7 +356,7 @@ printf("\n§H7  As BANDAS derivadas do imposto — e a economia, medida.\n\n");
     double lam = 1.0, s = 0.6;
     printf("      ângulo ψ∠i (°)   m = ‖ψ×i‖²   imposto V    banda d      chaveia a cada\n");
     int malMono = 0; double antD = -1, antAng = -1;
-    int chav[7]; int nc = 0;
+    int nc = 0;
     for(int c = 0; c <= 6; c++){
         double ang = c*M_PI/12;                        /* de 0° (paralelos) a 90° */
         Q z = { 0.0, { 1.0, 0.0, 0.0 } };
@@ -369,7 +369,7 @@ printf("\n§H7  As BANDAS derivadas do imposto — e a economia, medida.\n\n");
         double d = sqrt(d2);
         /* quantos passos até sair da banda, com uma deriva fixa */
         int passos = (d2 > 1e-24) ? (int)(d/0.002) : 999999;
-        if(nc < 7) chav[nc++] = passos;
+        if(nc < 7) nc++;
         printf("      %-16.0f %-13.6f %-12.6f %-12.6f %d passos\n",
                ang*180/M_PI, m, V, d, passos);
         if(antD >= 0 && ang > antAng && d2 < antD) malMono++;  /* d cresce com o ângulo */

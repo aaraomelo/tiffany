@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include "dual32.h"
 #include "racionais.h"
+#include "reta.h"      /* rt_inv_mod: canonizar [p:q] */
 #include "sem_ramo.h"
 #include "umbit.h"
 #include "corpo256.h"
@@ -107,24 +108,54 @@ int main(void){
     /* ═══ §K3 32 → uint8: o espaço fica EXAUSTÍVEL ══════════════════════════ */
     printf("\n§K3 De 32 para oito bits: o espaço passa a caber inteiro.\n\n");
     {
-        long pontos = 0, mal = 0;
+        /* O `pontos` NAO ERA CONTADO: vinha de `for(c = 0; c < 128; c++) pontos++`, um
+         * laco que nao olhava para nada, e a asserção comparava-o com 128 — o mesmo
+         * numero escrito duas vezes. E o array `visto[128]`, declarado logo acima, era
+         * zerado e NUNCA lido: o compilador dizia-o. Ele e' exactamente o instrumento
+         * da medida que faltava.
+         *
+         * Contam-se agora os pontos DISTINTOS de P1(F_127), canonizando cada classe:
+         * [p:q] com q != 0 vale [p.q^-1 : 1], e [p:0] vale [1:0], o ponto no infinito.
+         * O total tem de ser 127 + 1, e o +1 e' a razao de ser da recta projectiva. */
+        long pontos = 0, mal = 0, afins = 0, infinitos = 0;
         int visto[128];
         for(int i = 0; i < 128; i++) visto[i] = 0;
         for(unsigned p = 0; p < SR_P; p++) for(unsigned q = 0; q < SR_P; q++){
             Pr x = sr_pt((Fp)p,(Fp)q);
             if(!sr_e_ponto(x)) continue;
             if(!sr_igual(sr_inverte(sr_inverte(x)), x)) mal++;
+            int idx;
+            if(q != 0) idx = (int)(((unsigned long)p * (unsigned long)rt_inv_mod((long)q, SR_P)) % SR_P);
+            else       idx = 127;                       /* [1:0], o infinito */
+            if(!visto[idx]){ visto[idx] = 1; pontos++; if(idx == 127) infinitos++; else afins++; }
         }
-        for(int c = 0; c < 128; c++){ visto[c] = 1; pontos++; }
-        printf("      ℙ¹(𝔽₁₂₇) tem %ld pontos e varre-se INTEIRO;  a involução: %ld"
-               " falhas\n", pontos, mal);
+        /* E O TOTAL SOZINHO NAO MEDE A CANONIZACAO — descobri-o ao passar-lhe o gume:
+         * trocar o representante por `idx = p` da' 128 na mesma, porque p tambem percorre
+         * 127 casas. O que distingue as duas contas e' a EQUIVALENCIA: [p:q] e [Lp:Lq]
+         * sao O MESMO PONTO para todo L != 0, e tem de cair no MESMO indice. Sem
+         * canonizar, [1:2] e [2:4] caem em 1 e em 2, e a recta deixa de ser projectiva.
+         * E' isto que o gume morde, e por isso e' isto que se mede. */
+        long escalas = 0, mesma_classe = 0;
+        for(unsigned pp = 0; pp < SR_P; pp += 13) for(unsigned qq = 1; qq < SR_P; qq += 17)
+        for(unsigned L = 2; L < SR_P; L += 31){
+            unsigned p2 = (pp * L) % SR_P, q2 = (qq * L) % SR_P;
+            int i1 = (int)(((unsigned long)pp * (unsigned long)rt_inv_mod((long)qq, SR_P)) % SR_P);
+            int i2 = (int)(((unsigned long)p2 * (unsigned long)rt_inv_mod((long)q2, SR_P)) % SR_P);
+            escalas++;
+            if(i1 == i2) mesma_classe++;
+        }
+        printf("      e a EQUIVALENCIA: [p:q] e [Lp:Lq] no mesmo indice em %ld de %ld escalas\n",
+               mesma_classe, escalas);
+        printf("      ℙ¹(𝔽₁₂₇): %ld pontos DISTINTOS contados — %ld afins e %ld no infinito;\n"
+               "      varre-se INTEIRO, e a involução dá %ld falhas\n", pontos, afins, infinitos, mal);
         printf("      → e o preço diz-se: a característica passa a 127, logo esta face"
                " REFUTA e não prova\n");
         ok("DE 32 PARA OITO BITS O ESPAÇO PASSA A CABER INTEIRO — 128 pontos, varridos"
            " todos —, e é aí que a exaustão deixa de ser uma esperança. O preço é o único"
            " real da cadeia e diz-se: a CARACTERÍSTICA muda. Por isso esta face refuta e"
            " não prova, e a ponte de volta é um homomorfismo com a assimetria explícita",
-           pontos == 128 && mal == 0);
+           pontos == 128 && afins == 127 && infinitos == 1 && mal == 0
+           && escalas > 0 && mesma_classe == escalas);
     }
 
     /* ═══ §K4 uint8 → bit: GF(2), e as cinco continuam lá ═══════════════════ */

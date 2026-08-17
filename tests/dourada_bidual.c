@@ -264,7 +264,7 @@ printf("\n§W5  O CONTROLO: medir a dilatacao com a regua da translacao ACUMULA.
          * fila; pelo meu, cada uma subia UMA entrelinha da posicao onde a anterior acabou. Com
          * uma celula de varias linhas, as posicoes DIVERGEM — e e' isso que se ve' na pagina. */
         long conteudo[4] = { 400, 1500, 400, 900 };
-        long larg = 500, topo = 100, certo = 0, meu = 0, divergem = 0;
+        long larg = 500, topo = 100, certo = 0, divergem = 0;
         long pos_certa = topo, pos_minha = topo;
         printf("      celula   linhas   pelo eixo certo   pelo meu (soma)\n");
         for(int k = 0; k < 4; k++){
@@ -276,7 +276,6 @@ printf("\n§W5  O CONTROLO: medir a dilatacao com a regua da translacao ACUMULA.
             /* o meu: descia l e subia 1 — logo acumulava (l-1) */
             pos_minha -= (l - 1);
         }
-        meu = pos_minha;
         long desvio = pos_certa - pos_minha;
         printf("      as posicoes divergem em %ld de 4 celulas\n", divergem);
         printf("      o desvio e' %ld linha(s) — e ACUMULA a cada fila\n", desvio < 0 ? -desvio : desvio);

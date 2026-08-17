@@ -212,8 +212,6 @@ int main(void){
             /* a imagem de μ_{2d} sob x↦x² é μ_d ? conta os quadrados distintos */
             long img=0, nuc=0;
             long c=1;
-            static char visto[300];
-            for(int i=0;i<300;i++) visto[i]=0;
             for(long j=0;j<2*d;j++){                      /* percorre μ_{2d}                        */
                 long x=pot(w2d,j), q=mul(x,x);
                 /* q está em μ_d ? (q^d == 1) */

@@ -701,11 +701,11 @@ printf("\n§B13 A recursão salta entre as torres — e no fim a dual está vazi
     for(int i = 0; i + 1 < m; i++){ S[i+1][i] = 1; Dn[i][i+1] = 1; }
 
     /* (a) um e um: SD e DS, e o comutador so vive nas PONTAS */
-    long SD[8][8] = {{0}}, DS[8][8] = {{0}}, K[8][8];
+    long K[8][8];   /* SD e DS eram guardados inteiros e nunca lidos: so a diferenca conta */
     for(int i = 0; i < m; i++) for(int j = 0; j < m; j++){
         long a = 0, b = 0;
         for(int r = 0; r < m; r++){ a += S[i][r]*Dn[r][j]; b += Dn[i][r]*S[r][j]; }
-        SD[i][j] = a; DS[i][j] = b; K[i][j] = a - b;
+        K[i][j] = a - b;
     }
     printf("      [S,D] = SD - DS, a recursão de um e um. Onde é que ela não cancela?\n\n");
     int fora = 0; long traco = 0;
