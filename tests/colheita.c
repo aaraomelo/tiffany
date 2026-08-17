@@ -362,7 +362,7 @@ int main(void){
         const long P_rf_z = S_z * A_z * eta_z;           /* em 10⁻¹⁰ W, inteiro */
         const long P_see_z = 9931;                       /* 0,9931 W em 10⁻⁴ W */
         double P_seebeck = (double)P_see_z * 1e-4;  /* W, do cosmico.c §X6 com o ceu */
-        double A_colheita = 100e-4;                 /* 100 cm² de superfície colhedora */
+        double A_colheita = 100e-4;  /* DOUBLE DELIBERADO: 100e-4 = 0,01 e em long e ZERO */                 /* 100 cm² de superfície colhedora */
         double S_media = 0.17e-2;                   /* W/m², a média das cinco bandas */
         double eta_liga = 0.85;                     /* a absorção que o §C3 mediu */
         double P_rf = (double)P_rf_z * 1e-10;

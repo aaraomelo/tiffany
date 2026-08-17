@@ -372,7 +372,7 @@ printf("\n§L7  A RAM NÃO CRESCE COM O MODELO — e há controlo positivo.\n\n"
     static float x[MAXDIM], y[MAXDIM];
     for(int i = 0; i < 256; i++) x[i] = pseudo(8000+i);
     int fd = open(ficheiro, O_RDWR|O_CREAT|O_TRUNC, 0644);
-    static float linha[256];
+    static long linha[256];
     for(long L = 256; L <= 8192; L *= 4){
         for(long i = 0; i < L; i++){
             for(int j = 0; j < 256; j++) linha[j] = pseudo(i*256+j);

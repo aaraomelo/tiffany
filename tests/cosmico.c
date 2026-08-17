@@ -179,7 +179,7 @@ int main(void){
     puts("     'Nada se perde' nao e consolo: e verificavel. A energia que nao converte vai");
     puts("     para o frio, e contabiliza-se. Mede-se em muitos pares de temperaturas.\n");
     {
-        double Q = 20.0;                              /* os 20 W do cérebro */
+        long Q = 20.0;                              /* os 20 W do cérebro */
         int fecham = 0, casos = 0; double pior = 0;
         printf("     %10s %12s %12s %12s %12s\n", "Tf (K)", "Carnot", "W (util)", "Q_frio", "soma");
         for(double Tf = 2.725; Tf <= 305.15; Tf = (Tf < 10 ? Tf*4 : Tf + 60)){
@@ -206,7 +206,7 @@ int main(void){
     puts("     A energia conserva-se sempre; a ENTROPIA nao. E e a diferenca entre as duas que");
     puts("     diz porque 'nada se perde' e verdade sem tornar o segundo principio falso.\n");
     {
-        double Q = 20.0;
+        long Q = 20.0;
         int cresce_sempre = 1, casos = 0;
         double menor = 1e9;
         for(double Tf = 2.725; Tf <= 300.0; Tf += 30.0){
@@ -286,7 +286,7 @@ int main(void){
     /* ── §X6  o balanço refeito ──────────────────────────────────────────── */
     puts("§X6  O BALANCO DO HEADJACK, REFEITO COM O CEU — e o numero muda de verdade\n");
     {
-        double Q = 20.0, ZT = 1.0;
+        long Q = 20.0, ZT = 1.0;
         struct { const char *nome; double Tf; } CASOS[] = {
             { "escalpe (o que eu fiz)", T_ESCALPE },
             { "ar ambiente",            T_AR      },
@@ -324,7 +324,7 @@ int main(void){
     puts("     perde — e por isso a seta nao vira enquanto ha quem a segure.\n");
     {
         double k = 0.08;                     /* constante de arrefecimento, /hora (Newton) */
-        double P_met = 20.0;                 /* os 20 W do cerebro */
+        long P_met = 20.0;                 /* os 20 W do cerebro */
 
         /* VIVO: estado estacionario. O gradiente e CONSTANTE, e a derivada e zero. */
         double dT_vivo = T_CORPO - T_AR;
@@ -339,7 +339,7 @@ int main(void){
         /* MORTO: Newton. T(t) = T_amb + (T0 - T_amb)e^{-kt}, e ele CONVERGE. */
         printf("     %8s %12s %12s %14s\n", "t (h)", "T (K)", "T - T_amb", "Carnot");
         int converge = 1, seta_positiva = 0, casos = 0;
-        double ant = 1e9;
+        long ant = 1e9;
         for(double t = 0; t <= 24; t += 4.0){
             double T = T_AR + (T_CORPO - T_AR)*exp(-k*t);
             double grad = T - T_AR;
@@ -356,7 +356,7 @@ int main(void){
            fabs(T24 - T_AR) < (T_CORPO - T_AR)*0.2);
 
         /* A INVERSAO: se o ambiente esta MAIS QUENTE, a seta troca de sinal. */
-        double T_AMB_QUENTE = 315.0;         /* 42 C — um dia de deserto */
+        long T_AMB_QUENTE = 315.0;         /* 42 C — um dia de deserto */
         double g0 = T_CORPO - T_AMB_QUENTE;
         double g6 = (T_AMB_QUENTE + (T_CORPO - T_AMB_QUENTE)*exp(-k*6)) - T_AMB_QUENTE;
         /* E ISTO REDUZ-SE A k > 0. Com Δ = T_CORPO − T_AMB tem-se g0 = Δ e g6 = Δ·exp(−6k),

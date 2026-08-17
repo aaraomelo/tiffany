@@ -754,7 +754,8 @@ static void B9_interp(void) {
      * inteiro contra inteiro. A via CONTINUA — o circuito translinear na rampa — fica,
      * porque essa e o objecto deste ficheiro; o que sai e a regua na INTERPOLACAO, que
      * nunca precisou dela. */
-    const double TOL = 1e-9;
+    const double TOL = 1e-9;   /* DOUBLE DELIBERADO: 1e-9 em long e ZERO, e a varredura
+                            * automatica ja o trocou duas vezes por a saida nao mudar. */
     long passou = 0, tot = 0, exactos = 0; int dente_quebrou = 0;
     for (int caso = 0; caso < 9; caso++) {
         int n = 4 + caso % 3;                                       /* n=4,5,6 (várias dimensões)  */

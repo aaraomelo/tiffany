@@ -769,7 +769,7 @@ printf("\n§F10 A RETA PREENCHE O CÍRCULO — pelas três: Fourier, Mellin e Po
     printf("\n      (2) MELLIN: t -> t^(is) leva R+ (multiplicativo) no mesmo círculo.\n\n");
     {
         int M = 720, atingido[720] = {0};
-        double s2 = 1.0;
+        long s2 = 1.0;
         for(int k = 1; k <= 100000; k++){
             double t = exp(-8.0 + 16.0*k/100000.0);        /* t em R+, escala larga */
             double ang = s2*log(t);

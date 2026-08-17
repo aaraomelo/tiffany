@@ -28,7 +28,7 @@ static int er_bin(double e){ int i=(int)floor((e-ER0)/ERW); return (i>=0&&i<NER)
 static int ev_bin(double elo){ int i=(int)floor((elo-2.0)/0.5+0.5); return (i>=0&&i<NEV)?i:-1; }
 
 /* ── aceitação: soma A_eff * dΩ sobre os sub-bins (E_nu de 0.2, Dec finos) por (ev,band) ── */
-static double accept[NEV][NBAND];   /* cm^2 * sr, integrado no bin de E_nu de 0.5           */
+static long accept[NEV][NBAND];   /* cm^2 * sr, integrado no bin de E_nu de 0.5           */
 static void le_aeff(const char*f){
     FILE*fp=fopen(f,"r"); if(!fp){ fprintf(stderr,"sem %s\n",f); exit(1);}
     char ln[512];
@@ -45,7 +45,7 @@ static void le_aeff(const char*f){
 }
 
 /* ── smearing: P(E_reco|E_nu,band), marginal em PSF/AngErr, rebin a 0.5 ─────────────────── */
-static double P[NEV][NBAND][NER];
+static long P[NEV][NBAND][NER];
 static void le_smear(const char*f){
     FILE*fp=fopen(f,"r"); if(!fp){ fprintf(stderr,"sem %s\n",f); exit(1);}
     char ln[512];

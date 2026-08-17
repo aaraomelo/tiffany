@@ -9,7 +9,7 @@ agm_gerador 0265a56ac89f908d 0
 algebra bb3203bc98eb434e 0
 amplifica 6513d952bc2adea4 0
 analiticas 970ca1566c452f3a 0
-analog 0b28ec76050c335c 0
+analog d9fe4148395d11f9 0
 antissimetrico 0c1a1152b54ee86d 0
 app_arranca abb24b0fe22e3ae2 0
 aritmetica c3d8fd5157ee4e9d 0
@@ -66,7 +66,7 @@ clifford_dual 12ecc8250a26cd5a 0
 clifford_pleno 8861e58d2970553f 0
 cobertura 7823f5eabdbef688 0
 cohomologia_ponte 295e56e948cc5f9c 0
-colheita 79bc815b449e9b96 0
+colheita f170b1f5ba3c9592 0
 colisor_corpos ab5d526892f6dda6 0
 completo 5a46309aad49e534 0
 complexo 9858f54d3dfd5f9b 0
@@ -104,7 +104,7 @@ corpo_unico 492f2b999ad97a0a 0
 corpo_viveiro f61705d6ae49eafb 0
 corpodecorpos f0eefca27465e5d7 0
 corte_ponto_fixo 17db665765097cd5 0
-cosmico eecb1833be80bba1 0
+cosmico 80755db1ec03a76b 0
 cosmologia ce3f24a7bbd55349 0
 costura_mecanica 3300d90fae0bb568 0
 cristal_adversarial a5b592f03e349608 0
@@ -128,7 +128,7 @@ derivacao_primitivas 3d04c680af7012a7 0
 desenha 5918033b43ea7382 0
 design f782a62b62cb35d7 0
 design_no_pdf c808ea80e27f1cb8 0
-dif 234efe220efc4ed0 0
+dif 459c644610cc0ce8 0
 diferentes e79bff3e124cf01f 0
 dimensoes 5f6df5d3e407c5ad 0
 dinamica_inversor 3857d5d566297c2e 0
@@ -232,7 +232,7 @@ gume_calculo 8af5f8fd0d0ddcf7 0
 hawking 626cab5e03abe576 0
 headjack 91bb6d378e64db19 0
 hilbert_bidual f8c8159a1e1e3878 0
-hiper 16774bd8fb5b9eeb 0
+hiper 2a2e7132db161e4c 0
 hipercubo32 6f71340587320316 0
 hipociclo 0f614988c674fdcc 0
 histerese_navier ed3e0f5791f828fd 0
@@ -268,7 +268,7 @@ limiares 81d57a64e8b3dc88 0
 limite_escada 582f8604e39f093d 0
 linear e85c1b8d812c0329 0
 liquida 1ae9ae2eabbc9fcc 0
-llm 30574f99143f4738 0
+llm 542f99a0d0651512 0
 llm_reversivel 10f5de58148e7595 0
 logico d897e3ef812b1fb8 0
 logico_continuo c98cc36631cf3e34 0
@@ -427,7 +427,7 @@ significado 4cde300a66dfe985 0
 simula 6f396d7e811b0712 0
 sistema f56a7c35b80f8e03 0
 smartcontract c584e6c96ecec290 0
-solar 33dcad9bcd79440c 0
+solar a915285afa0cb35c 0
 solucoes_primitivas a317586c48866d16 0
 sombra_cone 803debae54064148 0
 sombras 4cdee1845f8c56fd 0

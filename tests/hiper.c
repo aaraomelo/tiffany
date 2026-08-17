@@ -40,7 +40,7 @@ static Mn companion(int n, long m){
 /* determinante por eliminação em racionais de numerador/denominador inteiros pequenos:
  * aqui basta trabalhar em double e arredondar, porque as entradas são 0, 1 e m. */
 static double det(Mn M){
-    double A[NMAX][NMAX];
+    long A[NMAX][NMAX];
     int n = M.n;
     for(int i = 0; i < n; i++) for(int j = 0; j < n; j++) A[i][j] = (double)M.a[i][j];
     long d = 1;

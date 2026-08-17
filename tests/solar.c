@@ -72,7 +72,7 @@ static void pam_gera(double r, const double *sem, int m, double *out, int N){
 }
 /* o vetor de diferenças finitas no ponto n — é ele que o Teorema da Unificação diz caracterizar */
 static void difs(const double *a, int n, int m, double *d){
-    double tmp[64];
+    long tmp[64];
     for(int k = 0; k <= m; k++) tmp[k] = a[n+k];
     for(int ordem = 0; ordem <= m; ordem++){
         d[ordem] = tmp[0];
