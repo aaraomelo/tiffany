@@ -31,6 +31,7 @@
  *   cc -O2 -std=c99 -Wall -I../lib cosmologia.c -o cosmologia && ./cosmologia
  */
 #include <stdio.h>
+#include "reta.h"      /* rt_traco, rt_det2: o discriminante lido do operador */
 #include "unidade.h"
 
 #define U 1000                       /* a unidade em p.u. */
@@ -181,18 +182,48 @@ int main(void){
     {
         /* D = m^2 + 4 e' o discriminante da familia. H^2 = 1/D diz que a taxa ao quadrado
          * E' o inverso dele — a expansao nao e' um parametro livre: e' a regua do corpo. */
-        long mau = 0;
-        printf("      m     D = m^2+4     H^2 = 1/D  (em milionesimos)\n");
+        /* O QUE AQUI ESTAVA ERA A DIVISAO INTEIRA A CONFIRMAR-SE A SI PROPRIA.
+         *     long H2 = 1000000 / D;
+         *     if(H2 * D > 1000000 || (H2+1)*D <= 1000000) mau++;
+         * Isso e' a DEFINICAO de quociente inteiro — H2 = floor(1e6/D) satisfaz aquilo
+         * para todo D > 0, por construcao da linguagem. Nenhum m podia derrubar, e a
+         * frase prometia «H^2 . D = 1 exacto», que e' outra coisa. Os milionesimos
+         * tambem nao serviam para nada: H^2 e' a FRACCAO 1/D, e uma fraccao escreve-se.
+         *
+         * O que a frase afirma tem duas metades, e as duas se medem:
+         *
+         *   (a) D E' O DISCRIMINANTE, e sai do OPERADOR — nao de uma escolha minha. Da
+         *       matriz da familia M = [[m,1],[1,0]] leem-se o traco e o determinante com
+         *       rt_traco e rt_det2 da lib, e D = tr^2 - 4.det. Se a matriz fosse outra,
+         *       D mudava: e isto que faz dele a regua DO CORPO.
+         *   (b) E A TAXA E' O SEU INVERSO, logo DECRESCE quando o grau sobe. Compara-se
+         *       por produto cruzado, sem dividir: 1/D(m) > 1/D(m+1) e' D(m+1) > D(m). */
+        long mau = 0, sai_do_operador = 0, decresce = 0, graus = 0;
+        Rac H2ant = { 0, 0 };
+        printf("      m     M = [[m,1],[1,0]]   tr   det   D = tr^2-4det   m^2+4   H^2 = 1/D\n");
         for(long m = 0; m <= 4; m++){
-            long D = m*m + 4;
-            long H2 = 1000000 / D;                     /* em milionesimos */
-            if(H2 * D > 1000000 || (H2+1)*D <= 1000000) mau++;   /* H^2 . D == 1 */
-            printf("      %ld     %5ld        %8ld\n", m, D, H2);
+            long M[4] = { m, 1, 1, 0 };
+            long tr = rt_traco(M, 2);                  /* = m,  lido da matriz */
+            long dt = rt_det2(M[0], M[1], M[2], M[3]); /* = -1, lido da matriz */
+            long D  = tr*tr - 4*dt;                    /* o DISCRIMINANTE, do operador */
+            if(D == m*m + 4) sai_do_operador++;        /* e bate com a forma fechada */
+            Rac H2 = { 1, D };                         /* a taxa: a fraccao, exacta */
+            if(graus > 0){                             /* a ORDEM, por produto cruzado */
+                if(H2ant.n * H2.d > H2.n * H2ant.d) decresce++;
+                else mau++;
+            }
+            H2ant = H2; graus++;
+            printf("      %ld     [[%ld,1],[1,0]]        %-4ld %-5ld %-15ld %-7ld %ld/%ld\n",
+                   m, m, tr, dt, D, m*m+4, H2.n, H2.d);
         }
-        printf("\n");
-        ok("a TAXA E' A REGUA: H^2 = 1/D com D o discriminante, logo H^2 . D = 1 exacto — a"
-           " expansao nao e' parametro livre nenhum, e' o inverso da regua do corpo. Medido"
-           " em cinco graus sem residuo", mau == 0);
+        printf("\n      D lido do operador e igual a m^2+4 em %ld de %ld graus\n", sai_do_operador, graus);
+        printf("      e a taxa DECRESCE estritamente em %ld dos %ld passos\n\n", decresce, graus-1);
+        ok("a TAXA E' A REGUA, e a regua sai do OPERADOR: o discriminante D le-se da matriz"
+           " da familia como tr^2 - 4.det, e nao de um m^2+4 que eu escrevesse — sao os"
+           " cinco graus a bater. E a taxa e o seu INVERSO, o que se ve na ordem: H^2"
+           " decresce estritamente quando o grau sobe, medido por produto cruzado e sem"
+           " dividir. A expansao nao e parametro livre nenhum",
+           mau == 0 && sai_do_operador == graus && decresce == graus-1 && graus == 5);
     }
 
     /* ═══ §C4 — o DESTINO le-se no mesmo sinal ═══════════════════════════════════ */
