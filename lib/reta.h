@@ -201,6 +201,37 @@ static void rt_orbita(long m, int k, long *p, long *q){
     *p = P; *q = Q;
 }
 
+/* ── O TEOREMA DO OPERADOR, realizado: a DOBRA e o ACUMULADOR ────────────────────────
+ *
+ * `thm:operador` do geometrico.tex: a indução, a meta-indução e o acumulador não são três
+ * peças — são o operador, o seu espelho, e o rasto que eles deixam.
+ *
+ *   INDUÇÃO       [p:q] ⟼ [q : p+mq]     é a rt_orbita acima      (λ⁺, sobe)
+ *   META-INDUÇÃO  [p:q] ⟼ [q : p−mq]     é a DOBRA, aqui          (λ⁻, lê)
+ *   ACUMULADOR    a PALAVRA                é a RtCf                (o rasto)
+ *
+ * A dobra troca o SINAL da forma F(p,q) = p² − mpq − q², e aplicada duas vezes devolve-o:
+ * é a involução de espectro {+1,−1} do espelho, a mesma que reparte a operação em Dir e
+ * Cruz. Devolve o novo par em (*p, *q). */
+static void rt_dobra(long m, long *p, long *q){
+    long np = *q, nq = *p - m * (*q);
+    *p = np; *q = nq;
+}
+
+/* e o que a dobra faz à forma, dito como predicado: F(dobra(p,q)) = −F(p,q).
+ * Devolve 1 se a identidade vale — e ela vale sempre, em ℤ, por álgebra. */
+static long rt_forma(long p, long q, long m);            /* declarada abaixo */
+static int rt_dobra_inverte(long m, long p, long q){
+    long F = rt_forma(p, q, m), P = p, Q = q;
+    rt_dobra(m, &P, &Q);
+    return rt_forma(P, Q, m) == -F;
+}
+
+/* O CONE onde a dobra ENCOLHE o denominador: 0 < p − m·q < q, isto é m·q < p < (m+1)·q.
+ * É o cone dos DOIS lados — sem o tecto, o encolhimento não é promessa nenhuma, e foi
+ * assim que a asserção do §R12b caiu à primeira. */
+static int rt_no_cone(long m, long p, long q){ return q > 0 && p > m*q && p < (m+1)*q; }
+
 /* ── A REVERSÃO DOS COEFICIENTES: O DUAL DO POLINÓMIO ────────────────────────────────
  * p*(x) = xⁿ·p(1/x) — os coeficientes ao contrário. É ela que troca DENTRO por FORA no
  * disco, e é por isso que contar UM zero basta em vez de contar n−1 (Rouché no dual,

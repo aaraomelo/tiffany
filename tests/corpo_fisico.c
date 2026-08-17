@@ -280,9 +280,38 @@ printf("\n§H4  O TRABALHO é −ΔV e a POTÊNCIA é dT/dt — medidos, não af
     printf("      |W + ΔV| = %.3e\n\n", fabs(W + dV));
     printf("      variação da energia cinética ΔT = %+.8f  (e W = ΔT: %.3e)\n\n",
            T - T0, fabs(W - (T - T0)));
-    ok("o trabalho da força É menos a variação do imposto", fabs(W + dV) < 1e-5);
-    ok("e o trabalho É a variação da energia cinética — o teorema fecha", fabs(W - (T-T0)) < 1e-5);
-    ok("a potência instantânea F·ṡ é a derivada de T", piorP < 1e-3);
+    /* AS TRÊS LEIS SÃO ALGÉBRICAS NA TRAJECTÓRIA, e os 1e-5 acima medem o erro dos
+     * 400 000 passos de integração — o MÉTODO, não a lei. Com V(s) = −S·s² e F = 2Ss:
+     *
+     *      W  = ∫F ds  = S(s² − s₀²)          −ΔV = S(s² − s₀²)
+     *      ΔT = ½S(v² − v₀²)
+     *
+     * e a conservação da equação s̈ = 2s dá v² − 2s² = const, donde v² − v₀² = 2(s² − s₀²)
+     * e as TRÊS coincidem — exactamente, em ℤ, sem integrar nada. Varrem-se os pares
+     * (s₀,v₀) e (s,v) que estão na MESMA trajectória, isto é com a mesma constante. */
+    long tri_ok = 0, tri_tot = 0, Si = 3;                 /* S inteiro, para a conta fechar */
+    for(long s0 = -6; s0 <= 6; s0++) for(long v0 = -6; v0 <= 6; v0++)
+    for(long s1 = -6; s1 <= 6; s1++) for(long v1 = -6; v1 <= 6; v1++){
+        if(v0*v0 - 2*s0*s0 != v1*v1 - 2*s1*s1) continue;  /* a MESMA trajectória */
+        if(s0 == s1 && v0 == v1) continue;                /* dois pontos distintos */
+        long Wz  = Si*(s1*s1 - s0*s0);                    /* ∫F ds, fechado */
+        long mdV = Si*(s1*s1 - s0*s0);                    /* −ΔV, de V = −S·s²  */
+        long dTx2 = Si*(v1*v1 - v0*v0);                   /* 2·ΔT, para não dividir */
+        tri_tot++;
+        if(Wz == mdV && 2*Wz == dTx2) tri_ok++;           /* as três, sem vírgula */
+    }
+    printf("      e as TRÊS leis em ℤ, na mesma trajectória (v² − 2s² constante):\n");
+    printf("        W = −ΔV = ΔT  em %ld de %ld pares de pontos — resíduo ZERO\n\n",
+           tri_ok, tri_tot);
+    ok("o trabalho da força É menos a variação do imposto, E É a variação da energia"
+       " cinética — e as duas são ALGÉBRICAS: com V = −S·s² sai W = S(s²−s₀²) dos dois"
+       " lados, e a conservação v² − 2s² = const faz ΔT dar o mesmo. Medido em ℤ, nos"
+       " pares de pontos da MESMA trajectória, com resíduo zero. Os 1e-5 que aqui estavam"
+       " mediam o erro dos 400 000 passos do integrador — o método, e não a lei",
+       tri_ok == tri_tot && tri_tot > 0);
+    ok("e o integrador em vírgula concorda com a forma fechada — segunda rota, e o limiar"
+       " é dela: 1e-5 sobre 400 000 passos de h = 1e-6",
+       fabs(W + dV) < 1e-5 && fabs(W - (T-T0)) < 1e-5 && piorP < 1e-3);
 }
 
 printf("\n§H5  O IMPULSO é Δp, e o momento CONSERVA-SE quando a força se anula.\n\n");

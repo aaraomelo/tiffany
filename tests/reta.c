@@ -503,6 +503,59 @@ int main(void){
            lei == casos && casos == 9);
     }
 
+    /* ═══ §R12b A DOBRA NO PONTO FIXO — e é ela que PROVA o corte ═══════════ */
+    printf("\n§R12b a DOBRA: a descida troca o SINAL da forma, e encolhe o denominador.\n\n");
+    {
+        /* O Aarão: «o corpo geométrico é ordenado e completo, dobras nos pontos fixos».
+         *
+         * O thm:corte-fixo do geometrico.tex prova que o ponto fixo não cabe em ℙ¹(ℚ), e a
+         * prova NÃO é uma varredura: é uma DOBRA. Com F(p,q) = p² − m·p·q − q², a descida
+         * (p,q) ⟼ (q, p − m·q) satisfaz
+         *
+         *      F(q, p − m·q)  =  −F(p, q)
+         *
+         * — troca o sinal, exactamente, e isso é a involução com espectro {+1,−1} que a
+         * casa chama dobra. E no cone p > q > 0 o denominador ENCOLHE: 0 < p − m·q < q.
+         *
+         * As duas juntas dão descida infinita em ℕ, que é impossível — e é por isso que a
+         * forma nunca se anula, isto é, que o ponto fixo não está no andar. O ponto fixo é
+         * o ZERO da forma; a dobra é o que o torna inalcançável.
+         *
+         * E é uma DOBRA a sério: aplicada DUAS vezes, o sinal volta. */
+        long troca = 0, encolhe = 0, casos = 0, dobra2 = 0, no_cone = 0;
+        for(long m = 1; m <= 6; m++)
+        for(long p = 1; p <= 60; p++) for(long q = 1; q < p; q++){
+            /* a DOBRA é agora a peça da lib — rt_dobra —, e o predicado que diz o que ela
+             * faz à forma é rt_dobra_inverte. O que aqui estava era a mesma conta escrita
+             * à mão, e escrever a peça duas vezes é a maneira de as duas divergirem. */
+            long F  = rt_forma(p, q, m);
+            long p1 = p, q1 = q; rt_dobra(m, &p1, &q1);       /* a descida, da lib */
+            casos++;
+            if(rt_dobra_inverte(m, p, q)) troca++;            /* F(dobra) = −F */
+            long p2 = p1, q2 = q1; rt_dobra(m, &p2, &q2);     /* e outra vez */
+            if(rt_forma(p2, q2, m) == F) dobra2++;            /* a involução fecha */
+            /* o encolhimento, só onde o cone o promete */
+            /* O CONE É DOS DOIS LADOS, e a primeira versão desta linha só tinha o de
+             * baixo: 0 < p − m·q < q pede m·q < p < (m+1)·q, e sem o tecto o encolhimento
+             * dava 1447 de 4230. A asserção caiu e estava certa em cair — o cone é onde a
+             * descida encolhe, e fora dele ela não promete nada. */
+            if(rt_no_cone(m, p, q)){ no_cone++; if(q1 > 0 && q1 < q) encolhe++; }
+        }
+        printf("      F(q, p−mq) = −F(p,q) em %ld de %ld pares — a dobra TROCA o sinal\n",
+               troca, casos);
+        printf("      e duas descidas devolvem-no: %ld de %ld — a involução fecha\n", dobra2, casos);
+        printf("      e no cone p > m·q o denominador ENCOLHE: %ld de %ld\n\n", encolhe, no_cone);
+        ok("A DOBRA NO PONTO FIXO, e é ela que prova o corte sem varrer nada: com"
+           " F(p,q) = p² − m·p·q − q², a descida (p,q) ⟼ (q, p−m·q) TROCA O SINAL da forma"
+           " — F(q,p−mq) = −F(p,q), exacto em ℤ —, e aplicada duas vezes devolve-o: é uma"
+           " involução com o espectro {+1,−1} de sempre. E no cone o denominador ENCOLHE,"
+           " 0 < p−m·q < q. As duas juntas dão descida infinita em ℕ, impossível — logo a"
+           " forma nunca se anula, e o ponto fixo (que é o ZERO dela) não está no andar. A"
+           " dobra é o que o torna inalcançável",
+           troca == casos && dobra2 == casos && encolhe == no_cone
+           && casos > 0 && no_cone > 0);
+    }
+
     /* ═══ §R13 O PONTO FIXO: NÃO CABE EM ℚ, E CABE EM 𝔽ₚ ═══════════════════ */
     printf("\n§R13 o ponto fixo — o corte é a falta dele, e a Lei 8 diz o contrário.\n\n");
     {

@@ -199,7 +199,7 @@ que é a \textbf{Lei 8} a dizer o contrário: $62$ dos $126$ metais de $\mathbb{
 o mesmo número que o \emph{Corpo Universal} publica, obtido por uma implementação que não
 o conhecia. E a \textbf{volta} está lá inteira, $[p:q]\mapsto[q:p-mq]$, a desfazer a ida
 e a chegar ao $\infty=[1:0]$ exacto.
-\emph{Verificado:} \code{tests/reta.c} ($37{:}0$), cada operação por duas rotas que não
+\emph{Verificado:} \code{tests/reta.c} ($38{:}0$), cada operação por duas rotas que não
 partilham código e cada uma com o seu controlo negativo.
 
 \medskip
@@ -1057,6 +1057,87 @@ juntas dão descida infinita em $\mathbb{N}$, impossível.
 \emph{Logo a órbita da Prop.~\ref{prop:orbita} corre toda em $\mathbb{P}^1(\mathbb{Q})$
 e o ponto para onde ela vai não está lá.} $\square$
 \end{teorema}
+
+\begin{teorema}[TEOREMA DO OPERADOR: a indução, a meta-indução e o acumulador são um
+só]\label{thm:operador}
+A Def.~\ref{def:inducao} do \emph{Corpo Universal} nomeia o par --- a indução projecta
+($\lambda^{+}$), a meta-indução lê ($\lambda^{-}$). Aqui ele \textbf{deriva-se do
+operador}, e o que sai é que as três peças da dinâmica da recta --- o passo, a sua leitura
+e o sítio onde o resultado se acumula --- \textbf{não são três coisas}: são o operador
+$a\star b$ do \S\ref{sec:operacao}, o seu espelho, e a palavra.
+
+\textbf{(1) A INDUÇÃO é o passo, e o corpo do passo não menciona o andar.} Subir é aplicar
+$A_m$:
+\[
+[p:q]\;\longmapsto\;[\,q\;:\;p+mq\,],
+\]
+a mesma matriz em todo $k$. Pela Def.~\ref{def:inducao} isso dá $\forall k$ pela
+\textbf{forma} e não por uma tabela: \emph{a órbita não tem tecto porque o passo não tem
+índice}.
+
+\textbf{(2) A META-INDUÇÃO é o espelho, e é a DOBRA.} A descida $(p,q)\mapsto(q,\,p-mq)$ é
+a inversa inteira (Teor.~\ref{thm:volta}), e o que ela faz à forma
+$F(p,q)=p^{2}-mpq-q^{2}$ é \emph{trocar-lhe o sinal}:
+\[
+\boxed{\;F(q,\,p-mq)=-F(p,q)\;}
+\]
+--- e aplicada duas vezes devolve-o. É uma \textbf{involução de espectro $\{+1,-1\}$},
+exactamente a do espelho do \S\ref{sec:operacao}. \emph{A meta-indução não é uma segunda
+operação: é a metade que inverte.}
+
+\textbf{(3) O ACUMULADOR é a PALAVRA, e é por isso que não satura.} Cada passo da indução
+acrescenta \textbf{um quociente parcial} à fracção contínua, e a órbita de $\infty$ são os
+convergentes (Prop.~\ref{prop:orbita}). O estado não é um par $(p,q)$ que cresce até
+transbordar --- é uma \textbf{sequência}, e cada termo cabe sozinho num inteiro da máquina:
+\[
+\boxed{\;\text{o par }(p,q)\text{ guarda o \emph{produto}};\quad
+        \text{a palavra }[a_0;a_1,\ldots]\text{ guarda a \emph{descida}}\;}
+\]
+Daí que $1/13!$, que não cabe num par de $32$ bits, seja $[0;6\,227\,020\,800]$ --- dois
+termos, cada um a caber. \emph{Um limiar como $10^{-12}$ é, pela mesma via, o racional
+$1/10^{12}$ de palavra $[0;10^{12}]$: um número do corpo, e não uma régua.} E isto é a
+Teor.~\ref{thm:meta-inducao}(2) aplicada a si própria --- \emph{falha de representação
+$\neq$ contra-exemplo}: quando o par satura, a segunda realização é a palavra.
+
+\textbf{(4) E AS DUAS FACES DO EIXO DE PONTRYAGIN SÃO $\operatorname{Dir}$ E
+$\operatorname{Cruz}$.} O \emph{Corpo Universal} separa a face que \textbf{opera} (finita,
+sem ordem) da que \textbf{alcança} (ordenada e completa). São as duas leituras do mesmo
+$a\star b$:
+\[
+\boxed{
+\begin{array}{lll}
+\operatorname{Dir} & \text{fixo sob o espelho} & \text{a face que ALCANÇA: a diagonal, a
+que \textbf{mede} e ordena}\\[3pt]
+\operatorname{Cruz} & \text{troca de sinal} & \text{a face que OPERA: a área, a que
+\textbf{move}}
+\end{array}}
+\]
+--- e é o Teor.~\ref{thm:operacao}(iv) dito do outro lado: \emph{a diagonal mede; fora dela
+há área}. A ordem vive no directo, porque é ele que não se move; a dinâmica vive no
+cruzado, porque é ele que inverte.
+
+\textbf{(5) A unificação.} As quatro alíneas são \emph{uma} frase:
+\[
+\boxed{\;
+\underbrace{A_m}_{\text{indução},\;\lambda^{+}}
+\quad\text{e}\quad
+\underbrace{A_m^{-1}}_{\text{meta-indução},\;\lambda^{-}}
+\;\text{são as duas metades de }a\star b,
+\;\text{e o que elas escrevem é a \textbf{palavra}.}\;}
+\]
+O que a meta-indução \emph{valida} é o que a indução conservou, e na recta isso lê-se num
+número: $\lvert F\rvert=1$ em todo o passo e $F=0$ em passo nenhum. O zero de $F$ \emph{é}
+o ponto fixo, e a dobra é o que o torna inalcançável --- não por varredura, mas porque
+trocar o sinal e encolher o denominador não podem coexistir em $\mathbb{N}$
+(Teor.~\ref{thm:corte-fixo}). \textbf{Não são dois eixos nem três peças: é um operador, um
+espelho, e o rasto que eles deixam.} $\square$
+\end{teorema}
+\colunas{indução/meta-indução e o eixo de Pontryagin}
+        {a órbita como indução, a dobra como meta-indução, a palavra como acumulador, e
+Dir/Cruz como as duas faces}
+        {\code{tests/reta.c} \S R12b: $F(q,p-mq)=-F(p,q)$ em $10\,620$ pares e a involução a
+fechar nas duas aplicações, com o encolhimento em $1447$ de $1447$ dentro do cone
+$mq<p<(m+1)q$; \code{tests/calculo2.c} \S C6: $1/13!=[0;6227020800]$ sem saturar}
 
 \begin{corolario}[e o corte não é um defeito de $\mathbb{Q}$]\label{cor:corte-face}
 A \emph{mesma} equação $x^{2}=mx+1$ tem raiz em $\mathbb{F}_p$ exactamente quando
@@ -2731,7 +2812,7 @@ medidor & unidades \\
 \code{tests/supremo.c}            & $6{:}0$ \\
 \code{tests/cardinal.c}           & $4{:}0$ \\
 \code{tests/condicao\_pisot.c}    & $4{:}0$ \\
-\code{tests/reta.c}              & $37{:}0$ \\
+\code{tests/reta.c}              & $38{:}0$ \\
 \bottomrule
 \end{tabular}
 \end{center}
