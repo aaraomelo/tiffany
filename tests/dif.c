@@ -459,7 +459,11 @@ printf("\n§F8  E PREENCHE A ÁREA DO CÍRCULO? Só com o irracional — e o our
         double maior = p[0] + (1 - p[n-1]);
         for(int i = 1; i < n; i++){
             double g = p[i] - p[i-1];
-            if(g > 1e-12) dist++;
+            /* DISTINTOS é `g > 0`, e não «g maior que uma régua minha». Os pontos vêm de
+             * uma conta exacta e dois valores iguais dão diferença ZERO bit a bit — o
+             * 1e-12 fingia proteger de um arredondamento que não existe, e ao mesmo tempo
+             * declarava iguais dois pontos genuinamente separados por menos do que ele. */
+            if(g > 0.0) dist++;
             if(g > maior) maior = g;
         }
         int enche = maior < 0.02;
@@ -468,7 +472,56 @@ printf("\n§F8  E PREENCHE A ÁREA DO CÍRCULO? Só com o irracional — e o our
         if((k < 3) == enche) mal++;            /* os racionais NÃO enchem, os outros enchem */
     }
     printf("\n");
+
+    /* E AQUI A VIRGULA FLUTUANTE INVENTA PONTOS. A orbita de 1/3 tem TRES pontos — 0, 1/3
+     * e 2/3 — e a tabela acima conta DOZE. Nao e' a matematica: e' que 1/3 nao e' exacto
+     * em binario, e `w*j - floor(w*j)` acumula um erro que separa pontos que sao o MESMO.
+     * (1/2 e 3/8 dao 2 e 8 certos, porque os denominadores sao potencias de dois.)
+     *
+     * Em inteiros nao ha' onde inventar: para w = a/b, os pontos sao (a.j mod b)/b, e o
+     * numero de distintos e' EXACTAMENTE b/mdc(a,b) — a ordem de a no grupo Z/b. Mede-se
+     * assim, e o contraste com a tabela de cima fica escrito. */
+    /* E A LISTA TEM DE INCLUIR FRACCOES NAO REDUZIDAS, senao o mdc nao faz trabalho
+     * nenhum. Escrevi-a primeiro so' com coprimos — 1/2, 1/3, 3/8, 5/12, 7/9 — e os DOIS
+     * gumes que lhe apontei sobreviveram: trocar `b/mdc(a,b)` por `b` nao mudava nada
+     * (mdc = 1 em todos), e trocar o produto `a.j` pela soma `a+j` tambem nao, porque com
+     * a coprimo de b as duas percorrem os mesmos b residuos. Era uma varredura num regime
+     * onde o defeito nao vive. Com 2/6, 4/8 e 6/9 o mdc actua, e os dois gumes mordem. */
+    struct { const char *nome; long a, b; } tr[] = {
+        { "1/2", 1, 2 }, { "1/3", 1, 3 }, { "3/8", 3, 8 }, { "5/12", 5, 12 }, { "7/9", 7, 9 },
+        { "2/6", 2, 6 }, { "4/8", 4, 8 }, { "6/9", 6, 9 },      /* mdc > 1: o que morde */
+    };
+    int mal_exacto = 0, casos_ex = 0;
+    printf("      e em INTEIROS, onde nao ha' onde inventar ponto:\n");
+    printf("        w      distintos (exacto)   b/mdc(a,b)   o double via\n");
+    for(size_t k = 0; k < sizeof tr/sizeof *tr; k++){
+        long a = tr[k].a, b = tr[k].b;
+        /* a orbita: (a.j mod b) para j = 0..399, e contam-se os residuos distintos */
+        int visto[64] = {0}, quantos_ex = 0;
+        for(long j = 0; j < 400; j++){
+            long r = (a*j) % b;
+            if(r < 64 && !visto[r]){ visto[r] = 1; quantos_ex++; }
+        }
+        long esperado = b / rt_mdc(a, b);
+        /* e o que o double ve, pela MESMA conta em virgula */
+        double pf[400];
+        for(int j = 0; j < 400; j++){ double v = ((double)a/(double)b) * j; pf[j] = v - floor(v); }
+        for(int i = 1; i < 400; i++){ double v = pf[i]; int j2 = i-1;
+            while(j2 >= 0 && pf[j2] > v){ pf[j2+1] = pf[j2]; j2--; } pf[j2+1] = v; }
+        int dv = 1;
+        for(int i = 1; i < 400; i++) if(pf[i] - pf[i-1] > 0.0) dv++;
+        casos_ex++;
+        if(quantos_ex != esperado) mal_exacto++;
+        printf("        %-6s %-20d %-12ld %d%s\n", tr[k].nome, quantos_ex, esperado, dv,
+               dv == quantos_ex ? "" : "   <- a virgula INVENTOU pontos");
+    }
+    printf("\n");
     ok("o racional fecha em ciclo e deixa buraco; o irracional preenche", mal == 0);
+    ok("e a orbita de um racional tem EXACTAMENTE b/mdc(a,b) pontos — a ordem de a em Z/b —"
+       " medida em inteiros. Em virgula flutuante 1/3 aparece com DOZE pontos em vez de tres,"
+       " porque 1/3 nao e' exacto em binario e o erro acumulado separa pontos que sao o"
+       " mesmo: a vírgula INVENTA orbita onde nao ha'",
+       casos_ex > 0 && mal_exacto == 0);
     printf("      É a mesma pergunta do prismático — \"deformá-lo de modo a preencher a área\" —\n");
     printf("      e a resposta aqui é a mesma do resto do sistema: quem preenche é o IRRACIONAL.\n");
     printf("      Com ω racional a órbita fecha ao fim de q passos e não visita mais nada: são\n");
@@ -530,7 +583,10 @@ printf("\n§F13 PONTRYAGIN É O PRODUTO CRUZADO — e não o cartesiano. Corrijo
        " INTEIROS nao ha' limiar nenhum: com b em decimos, p = (2,5) e q = (3,11), o directo"
        " da' 16 nos dois sentidos e o cruzado da' 27 contra 26 — a nao-comutatividade e' uma"
        " diferenca de UM, e nao «maior que 1e-9»",
-       fabs(dpq[1] - dqp[1]) < 1e-12 && fabs(cpq[1] - cqp[1]) > 1e-9
+       /* e a rota em vírgula aperta também: o directo é a MESMA soma nos dois sentidos,
+        * logo dá o mesmo bit a bit, e o cruzado difere de facto. Zero exacto e diferença
+        * exacta, sem régua de nenhum dos lados. */
+       dpq[1] == dqp[1] && cpq[1] != cqp[1]
        && d_pq == d_qp && c_pq != c_qp && c_pq - c_qp == 1);
 
     /* e a acao e real: aplicar (a,b) a x e ax+b, e a composicao bate o produto */
@@ -648,7 +704,10 @@ printf("\n§F11 FOURIER E MELLIN SÃO OS DOIS EIXOS, E PONTRYAGIN É O PRODUTO. 
     int mal = 0, quantos = 0;
     for(int ia = -12; ia <= 12; ia++) for(int ib = -12; ib <= 12; ib++){
         double complex z = ia/4.0 + I*(ib/4.0);
-        if(cabs(z) < 1e-12) continue;
+        /* o zero é EXACTO: ia/4.0 é exacto em binário (4 é potência de dois), logo z anula
+         * exactamente quando os dois índices são zero. A guarda diz isso, em vez de
+         * perguntar a `cabs` se o módulo é pequeno. */
+        if(ia == 0 && ib == 0) continue;
         double r = cabs(z), th = carg(z);
         double complex volta = r * cexp(I*th);
         quantos++;
