@@ -207,9 +207,9 @@ printf("\n§E4  CARTESIANO e POLAR: o mesmo percurso nos dois retratos.\n\n");
        " INDICE e nao na soma: NV passos de 2pi/NV dao 2pi POR CONSTRUCAO, e o 1e-12"
        " tolerava o arredondamento de somar dezasseis doubles. O que pode nao fechar e' o"
        " ciclo — e ele fecha ao fim de NV, com os NV-1 intermedios a NAO voltar, que e' o"
-       " lado sem o qual «fecha» valia por nunca sair do sitio",
-       fabs(ang_total - 2*M_PI) < 1e-12
-       && volta_no_fim && nao_volta_antes == NV - 1);
+       " lado sem o qual «fecha» valia por nunca sair do sitio. E o 1e-12 esteve nesta"
+       " condicao ate' agora, ao lado da frase que diz que ele tolera o arredondamento",
+       volta_no_fim && nao_volta_antes == NV - 1);
     (void)mau;
     printf("      Uma forma diz a tupla, a outra diz o ângulo, e é o mesmo caminho. É o que o\n");
     printf("      polar.c diz: a algébrica soma bem (as coordenadas), a polar multiplica bem\n");

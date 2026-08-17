@@ -130,8 +130,9 @@ int main(void){
            " (-1,-1,1) = (0,0,0), sem folga. Os versores sao esses vertices sobre raiz(3), e"
            " como as quatro normas sao iguais a soma deles e' a soma dos vertices sobre a"
            " mesma raiz — o «< 1e-15» era do arredondamento das quatro divisoes, e nao do"
-           " facto. Mesma geometria do octeto.c §O2, e agora exacta nos dois",
-           nrm(soma) < 1e-15 && sz[0] == 0 && sz[1] == 0 && sz[2] == 0
+           " facto. Mesma geometria do octeto.c §O2, e agora exacta nos dois — e o proprio"
+           " «< 1e-15» esteve nesta condicao ate' agora, ao lado da frase que o dispensa",
+           sz[0] == 0 && sz[1] == 0 && sz[2] == 0
            && normas_iguais == 4);
         printf("     -> 6 pares, todos a %.4f graus; a soma dos quatro versores tem norma %.1e.\n",
                alvo, nrm(soma));

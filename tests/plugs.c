@@ -309,8 +309,12 @@ int main(void){
         ok("e o produto -1 e a CONSERVACAO: o que um estica, o outro contrai, exatamente."
            " E e' VIETA, exacto em ℤ[√D]: com 2σ = m + raiz(D) e D = m²+4, (2σ)(2σ') = m² - D"
            " = -4, donde σσ' = -1 — sem formar raiz e sem limiar. O 1e-14 dava folga a uma"
-           " identidade que sai do termo constante do polinomio",
-           fabs(s1*sl1 + 1.0) < 1e-14 && pza == -4 && pzb == 0);
+           " identidade que sai do termo constante do polinomio — e ESSE 1e-14 ficou aqui"
+           " dentro ate' agora, ao lado da frase que o denuncia: a condicao tinha"
+           " `fabs(s1*sl1 + 1.0) < 1e-14` a somar-se aos dois inteiros. E' a terceira vez"
+           " que apanho o mesmo — a correccao acrescenta a medida exacta e nao tira a que"
+           " ela substitui",
+           pza == -4 && pzb == 0);
         printf("     -> em todos: + e -, um estica e o outro contrai, e o produto e -1.\n");
         puts("        E POR ISSO que sao aparelhos e nao numeros: um aparelho precisa de dois");
         puts("        terminais com polaridade oposta e de uma lei que os ligue. Aqui a lei e");

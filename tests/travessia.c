@@ -356,8 +356,9 @@ printf("\n§T6  O ESPELHO AO CONTRÁRIO: Hodge preserva, ν∘rev INVERTE.\n\n")
        " de VECTORES: Hodge leva (E,B) a (B,-E), logo E'xB' = B x (-E) = ExB entrada a"
        " entrada, e em virgula isso vale BIT A BIT porque os produtos sao os mesmos e a"
        " multiplicacao comuta. O «Sigma log||.||» e' uma LEITURA dessa igualdade, e o 1e-9"
-       " dava folga ao arredondamento dos N logaritmos — nao a' identidade, que nao tem",
-       fabs(hH - h0) < 1e-9 && cruz_igual == cruz_tot && cruz_vivo > 0);
+       " dava folga ao arredondamento dos N logaritmos — nao a' identidade, que nao tem."
+       " E esse 1e-9 esteve nesta condicao ate' agora, ao lado da igualdade bit a bit",
+       cruz_igual == cruz_tot && cruz_vivo > 0);
     ok("ν∘rev INVERTE o Poynting: Σh -> -Σh", fabs(hV + h0) < 1e-9);
     /* E a conta que a medida corrigiu. Eu tinha escrito que ν∘rev inverte AS DUAS — o Poynting
      * e a impedância. Os números dizem outra coisa, e é melhor:

@@ -555,9 +555,9 @@ printf("\n§F13 PONTRYAGIN É O PRODUTO CRUZADO — e não o cartesiano. Corrijo
         ok("a composição das ações bate o produto cruzado, e a ordem importa. E em INTEIROS a"
            " igualdade e' EXACTA e a diferenca tambem: p∘q(x) = 87 = (p·q)(x), e q∘p(x) = 86"
            " — um a menos. O grupo afim x -> ax+b fecha em Z quando o b esta' na unidade"
-           " certa, e nenhuma das duas comparacoes precisa de regua",
-           fabs(via_pq - do_prod) < 1e-12 && fabs(via_pq - via_qp) > 1e-9
-           && v_pq == v_prod && v_pq - v_qp == 1);
+           " certa, e nenhuma das duas comparacoes precisa de regua — nem a de igualdade"
+           " nem a de diferenca, e as duas estiveram nesta condicao ate' agora",
+           v_pq == v_prod && v_pq - v_qp == 1);
     }
     printf("      É O GRUPO AFIM, x -> ax + b, e ele é R ⋊ R+ — o produto CRUZADO das duas\n");
     printf("      partes que as duas transformadas diagonalizam:\n\n");

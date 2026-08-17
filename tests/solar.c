@@ -271,8 +271,9 @@ printf("\n§S4  A garrafa de KOCH: harmónicos de Fibonacci, e THD² = 1/φ.\n\n
        " que a fecha nao precisa de limiar: a serie e' geometrica de razao phi^-2 e vale"
        " 1/(phi²-1), e phi²-1 E' phi porque phi² = phi+1. Em ℤ[√5] com 2phi = (1,1) isso e'"
        " (2phi)² = 6+2raiz5 contra 2(2phi)+4 = 6+2raiz5 — o MESMO par nas duas coordenadas,"
-       " e o 1e-15 dava folga a uma igualdade que nao tem",
-       fabs(THD2 - 1.0/PHI) < 1e-12 && g2a == la && g2b == lb);
+       " e o 1e-15 dava folga a uma igualdade que nao tem — e ele esteve nesta condicao"
+       " ate' agora (como 1e-12), ao lado do par que o dispensa",
+       g2a == la && g2b == lb);
     /* e a identidade que a sustenta */
     int malI = 0;
     if(fabs(PHI*PHI - (PHI+1)) > 1e-14) malI++;

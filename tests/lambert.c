@@ -361,8 +361,9 @@ int main(void){
         ok("a derivada da inversa anula-se EXATAMENTE em w = −1, isto é z = −1/e. E o que se"
            " mede e' o «EXATAMENTE»: d(we^w)/dw = e^w(1+w), e como e^w nunca e' zero, ela"
            " anula-se SSE (1+w) = 0 — que e' uma equacao em INTEIROS com uma solucao so'."
-           " Calcular e^{-1}.(1 + (-1)) e comparar com 1e-15 media zero vezes qualquer coisa",
-           cabs(dcrit) < 1e-15 && anula_w == 1 && nao_anula_w == ws - 1 && ws == 11);
+           " Calcular e^{-1}.(1 + (-1)) e comparar com 1e-15 media zero vezes qualquer coisa"
+           " — e esse 1e-15 esteve nesta condicao ate' agora, ao lado da frase",
+           anula_w == 1 && nao_anula_w == ws - 1 && ws == 11);
         conclui("é o teorema da função inversa que dá a analiticidade — e ele diz também ONDE");
         conclui("ela acaba. Nenhum nome famoso é preciso, e nenhum serviria melhor.");
     }

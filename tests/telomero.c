@@ -197,8 +197,9 @@ printf("\n§T2  BASE e FRAÇÃO CONTÍNUA são o MESMO algoritmo: muda o divisor
        " «exacta» quer dizer isso: os quocientes sao a PALAVRA de 137/4, e a `rt_cf_para` da"
        " reta.h reconstroi o racional pela recorrencia dos convergentes, em INTEIROS. A"
        " comparacao e' por produto cruzado, p.4 == 137.q — sem formar quociente e sem o"
-       " 1e-9, que dava folga a uma igualdade de racionais",
-       fabs(v - 137.0/4.0) < 1e-9 && voltou && pz*4 == 137*qz2 && qz2 != 0);
+       " 1e-9, que dava folga a uma igualdade de racionais — e ele ESTEVE aqui dentro"
+       " ate' agora, ao lado do produto cruzado que o substitui",
+       voltou && pz*4 == 137*qz2 && qz2 != 0);
     conclui("uma função só, e a linha que muda é qual o divisor do passo seguinte");
 }
 

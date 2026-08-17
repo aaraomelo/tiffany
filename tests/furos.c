@@ -96,6 +96,21 @@ printf("\n§F1  O FURO TEM NÚMERO: a dimensão do Cantor, contada e não assumi
         printf("      %-9d %-24ld %-15ld %.9f\n", k, a, b, d);
     }
     printf("\n      e log2/log3 = %.9f\n\n", log(2.0)/log(3.0));
+    /* E «0 < D < 1» MEDE-SE NO OBJECTO, sem logaritmo. D é definido por 3^D = N, logo
+     *      D > 0  <=>  N > 3^0 = 1        D < 1  <=>  N < 3^1·(por nível) = 3^k
+     * e o que decide é o NÚMERO DE CAIXAS, não um par de literais. A condição anterior
+     * escrevia «2 > 1 && 2 < 3», que é verdade sem olhar para nada — e ao lado tinha
+     * `fabs(ultima − log(2.0)/log(3.0)) < 1e-9`, que é x == x: `ultima` É log(2^k)/(k·log3)
+     * e os k CANCELAM-SE, tal como no koch.c. Quatro dos seis termos não podiam falhar. */
+    long entre = 0, niveis = 0;
+    for(int k = 1; k <= 9; k++){
+        long N = caixas_cantor(k), p3 = 1;
+        for(int i = 0; i < k; i++) p3 *= 3;
+        niveis++;
+        if(N > 1 && N < p3) entre++;          /* 1 < N < 3^k  é  0 < D < 1 */
+    }
+    printf("      e «0 < D < 1» em inteiros: 1 < N < 3^k em %ld de %ld níveis\n\n",
+           entre, niveis);
     ok("as duas contagens de caixas concordam — a dimensão é contada, não assumida",
        mau == 0);
     /* «ENTRE 0 E 1» NÃO PRECISA DE LOGARITMOS. D = log2/log3 é definido por 3^D = 2, logo
@@ -124,9 +139,7 @@ printf("\n§F1  O FURO TEM NÚMERO: a dimensão do Cantor, contada e não assumi
        " 2 < 3 — «entre a dimensao 0 e a 1» E' «entre 1 e 3», em inteiros. E a"
        " IRRACIONALIDADE sai da factorizacao unica, porque 2^q = 3^p nao tem solucao com"
        " p,q >= 1. Mesmo conserto do koch.c, onde 1 < D < 2 era 3 < 4 < 9",
-       2 > 1 && 2 < 3 && resolve_c == 0 && pq_c > 100
-       && fabs(ultima - log(2.0)/log(3.0)) < 1e-9
-       && fabs(ultima - floor(ultima+0.5)) > 0.1);
+       entre == niveis && niveis == 9 && resolve_c == 0 && pq_c > 100);
     printf("      É isto o furo, e ele tem número. A dimensão inteira é ancoragem; o Cantor\n");
     printf("      não encosta em nenhuma — fica entre elas, que é onde a teoria diz que o\n");
     printf("      contínuo existe em quantidade.\n");

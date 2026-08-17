@@ -340,9 +340,9 @@ int main(void){
            " E «exatamente» quer dizer isso: por PARSEVAL a energia fora do zero e' a"
            " VARIANCIA, N.Sd² − (Sd)², um INTEIRO que vale ZERO quando todos os d sao"
            " iguais — sem um cosseno e sem o 1e-18, que dava folga a um zero que nao tem"
-           " folga. E o gume: com uma so' largura diferente a conta ja' nao da' zero",
-           eu < 1e-18 && fabs(m0u - 500) < 1e-9
-           && fora_z == 0 && fora_z2 != 0 && su == 500L*m);
+           " folga. E o gume: com uma so' largura diferente a conta ja' nao da' zero."
+           " Os dois limiares estiveram nesta condicao ate' agora, ao lado dos inteiros",
+           fora_z == 0 && fora_z2 != 0 && su == 500L*m);
         ok("e o texto REAL nao e uniforme: ha energia fora do modo zero, e ela e mensuravel",
            e > 1.0);
         /* a lei: dobrar o corpo dobra o modo zero e QUADRUPLICA a energia (que e quadratica) */

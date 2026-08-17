@@ -484,9 +484,10 @@ int main(void){
            " que se mede nao e' |0| < 1e-15 duas vezes (que era o que estava, porque"
            " -1 - 1/(-1) e 1 - 1/1 sao zero por aritmetica trivial): e' que n = b - 1/b se"
            " anula EXACTAMENTE nos b com b² = 1 e em mais nenhum, varrido em inteiros e sem"
-           " dividir. O b = 0 fica de fora porque 1/b nao existe — e' a fibra sem volta",
-           fabs(n_inv) < 1e-15 && fabs(n_id) < 1e-15
-           && anula == 2 && nao_anula == bs - 2 && bs == 12);
+           " dividir. O b = 0 fica de fora porque 1/b nao existe — e' a fibra sem volta."
+           " E os DOIS |0| < 1e-15 estiveram nesta condicao ate' agora, ao lado da frase que"
+           " diz que nao sao eles que medem",
+           anula == 2 && nao_anula == bs - 2 && bs == 12);
         conclui("nada disto e' exigido ao passo. O dual dele existe pela Primeira Lei, e o traco");
         conclui("MEDE a que distancia — em derivacoes — ele esta' de si proprio do outro lado.");
         conclui("E fecha uma coincidencia aparente: a Mobius involutiva tem traco nulo, e o nivel");
