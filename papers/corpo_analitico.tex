@@ -103,8 +103,60 @@ da torre e traz a leitura junto, porque quem escreve o par já leu. \textbf{Uma 
 irradia}, e é por isso que ordena sem apagar um bit.
 \end{abstract}
 
-\section{A exigência}
+\section{O que este documento RECEBE, e o que ele ACRESCENTA}\label{sec:recebe}
 
+Antes da primeira linha de conteúdo, a tabela que faz deste documento uma
+\textbf{realização} e não um corpo à parte. Ele é o lado $\tau=+1$: recebe o fundamento
+inteiro do centro e não o refunda --- e o que ele introduz é uma coisa só, o
+\textbf{alcance}.
+
+\[
+\boxed{
+\begin{array}{lll}
+\textbf{RECEBE do centro} & \textbf{onde está lá} & \textbf{o que se faz com ela aqui}\\[3pt]
+\text{a Lei } 1\dg=-1 & \code{universal thm:fixo-dual} & \text{a leitura: o que separa}\\[2pt]
+\text{a Lei } T\dg=-T,\ J & \code{universal thm:espectro-tau} & \text{o passo: o que roda}\\[2pt]
+\text{a operação }\star & \code{universal thm:operacao} & \text{a soma e o produto do corpo}\\[2pt]
+\text{a Lei 0},\ 0\dg=\infty & \code{universal def:lei0} & \text{a divisão do zero}\\[2pt]
+\text{os três sinais }\tau & \code{universal thm:cuspide} & \text{os três regimes da estrela}\\[2pt]
+\text{a torre } \dim A_n=2^n & \code{universal thm:torre} & \text{os andares do corpo}\\[2pt]
+\text{a conservação }\abs{\det}=1 & \code{universal thm:conservacao} & \text{a exigência, escrita}\\[2pt]
+\text{o espaço } \mathbb{Q}(m\sqrt D) & \code{universal def:espaco} & \text{a base de tudo}\\[6pt]
+\textbf{ACRESCENTA} & \multicolumn{2}{l}{\text{---e é só isto---}}\\[3pt]
+\text{a GRADUAÇÃO sem topo} & \code{thm:graduacao-gentil} & \text{o que não tem último andar}\\[2pt]
+\text{a CONTINUAÇÃO} & \code{thm:atravessa} & \text{atravessar onde a álgebra pára}\\[2pt]
+\text{o LIMITE} & \S\ref{sec:corpo} & \text{o objecto de \emph{todos} os passos}
+\end{array}}
+\]
+
+\noindent\textbf{E a regra de leitura que daqui sai:} \emph{quando uma secção deste
+documento enuncia uma lei, ela não a está a fundar --- está a realizá-la.} As secções
+\S\ref{sec:exigencia}, \S\ref{sec:lei}, \S\ref{sec:zero}, \S\ref{sec:duas},
+\S\ref{sec:sinais} e \S\ref{sec:torre} escrevem cada peça na língua da análise, e cada uma
+diz, na sua primeira linha, de onde vem. A prova está no centro; aqui está a forma que ela
+toma quando o objecto deixa de fechar.
+
+\medskip
+\noindent\textbf{Porque é que isto não é burocracia.} Se o fundamento fosse refundado aqui,
+haveria \emph{duas} versões de cada lei --- e duas versões separam-se com o tempo, sem que
+nada acuse. Foi o que aconteceu com este texto enquanto se chamava \emph{corpo estelar}:
+ele abria com «há uma só exigência, e tudo o resto sai dela», como se o centro não
+existisse. A exigência é a mesma; o que muda é que agora ela \textbf{tem endereço}.
+
+\colunas{este documento é a realização $\tau=+1$, não um corpo à parte}
+        {recebe oito peças canónicas do centro e acrescenta TRÊS --- graduação, continuação
+e limite}
+        {\code{tools/refcruz.py} confere que cada uma das oito aponta para um label que
+existe no \code{universal.tex}; \code{tests/cuspide.c} \S C12 mede que $\tau=+1$ é o
+regime que NÃO fecha, e é essa a razão de o alcance viver deste lado}
+
+\section{A exigência}\label{sec:exigencia}
+
+\noindent\emph{Vem do centro:} é a conservação $\abs{\det}=1$
+(\code{universal thm:conservacao}), escrita na língua desta camada. \emph{Não se funda
+aqui} --- aqui lê-se o que ela obriga quando o objecto não fecha.
+
+\medskip
 Há uma só, e tudo o resto sai dela:
 
 \begin{quote}
@@ -120,7 +172,13 @@ linguagem e ler o que ela obriga.
 de escala; em p.u.\ cada um vale $1$ por construção, e o que resta são razões. Nada aqui precisa de
 medir o universo para correr, e nenhum número deste documento tem unidade.
 
-\section{A Lei}
+\section{A Lei}\label{sec:lei}
+
+\noindent\emph{Vêm do centro:} a primeira é o ponto fixo do par dual
+(\code{universal thm:fixo-dual}); a segunda é o espectro da involução
+(\code{universal thm:espectro-tau}), de onde sai o $J$ de período quatro. \emph{As provas
+estão lá}; o que se faz aqui é lê-las como \textbf{leitura} e \textbf{passo}, que é a forma
+que elas tomam quando há um contínuo por baixo.
 
 \begin{lei}[a unidade é dual]
 $1\dg=-1$.
@@ -166,6 +224,12 @@ operador e um medidor que a certifica a fechar (resíduo $0$; \emph{Catálogo}, 
 seis \emph{estendem} estas duas, não as substituem.
 
 \section{A base: a divisão do zero}\label{sec:zero}
+
+\noindent\emph{Vem do centro:} é a Lei~0, $0\dg=\infty$, a inversão de $\mathbb{P}^1$
+(\code{universal def:lei0}, \code{universal thm:lei0}), com a factorização do zero em
+\code{universal thm:divzero}. \emph{Aqui} ela deixa de ser uma troca de coordenadas e passa
+a ser a porta do limite --- o único sítio da tríade onde o infinito é um objecto e não um
+símbolo.
 
 As duas leis já estão ditas; falta dizer \emph{de onde} saem. Saem de $0$ --- e de duas maneiras de o
 dividir, que são as duas leis. \textbf{A base deste sistema não é um axioma: é $0/0$}, e tudo o resto é
@@ -421,7 +485,11 @@ ciclo ao seguinte \textbf{não falta}: é a própria estrela --- a composição,
 Lei~$8$}: há a Lei~$0$ outra vez, um nível acima. As oito são um \textbf{ciclo gerador} de período oito
 --- o octonião fecha a volta da norma e a estrela recomeça-a: fechado, e é a fechar que recomeça.
 
-\section{As duas operações}
+\section{As duas operações}\label{sec:duas}
+
+\noindent\emph{Vem do centro:} há \textbf{uma} operação $\star$ e as duas leis são as suas
+duas metades (\code{universal thm:operacao}). \emph{Aqui} elas aparecem como soma e produto
+do corpo, que é a face que a análise usa.
 
 \begin{definicao}[a estaca]
 $x\mapsto x\dg$. Move, e é involutiva: $x\dg{}\dg=x$.
@@ -453,7 +521,12 @@ invariante em $11$ pontos e o produto é máximo exactamente no ponto fixo; $J$ 
 quadrantes, todos distintos, e volta ao quarto, com $J^2=-1$ e $J^4=\mathrm{id}$ em $169$ pares
 (\code{tests/dualsort.c}).}
 
-\section{Os três sinais}
+\section{Os três sinais}\label{sec:sinais}
+
+\noindent\emph{Vêm do centro:} são o $\tau=\operatorname{sign}(\operatorname{disc})$ da
+cúspide (\code{universal thm:cuspide}) --- o mesmo trial que divide a tríade. \emph{Aqui}
+eles nomeiam os três regimes da estrela, e este documento vive no $\tau=+1$: o que
+\textbf{não fecha}, e é por isso que é ele quem alcança $\mathbb{R}$.
 
 O sinal de uma quantidade toma três valores, e não mais. É o \textbf{trial} $\{-1,0,+1\}$, e é a
 classificação de todo regime deste sistema:
@@ -475,7 +548,12 @@ sinais. \textbf{E a estrela não é um caso intermédio entre os outros dois} --
 involução que os troca, e o \emph{único} que tem os dois sentidos. É a \textbf{trindade}: buraco
 branco, estrela, buraco negro.
 
-\section{A torre}
+\section{A torre}\label{sec:torre}
+
+\noindent\emph{Vem do centro:} $\dim A_n=2^n\dim A_0$ (\code{universal thm:torre}).
+\emph{Aqui} ela ganha o que não tem lá --- a graduação \textbf{sem topo}
+(\code{thm:graduacao-gentil}) ---, e essa é a primeira das três coisas que esta camada
+acrescenta.
 
 As dimensões não são um pano de fundo: contam-se, e subir de andar é a operação.
 
