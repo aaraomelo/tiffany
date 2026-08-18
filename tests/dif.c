@@ -39,6 +39,8 @@
 #include <complex.h>
 #include "unidade.h"
 #include "reta.h"
+#include "racionais.h"
+#include "calculo.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -366,10 +368,40 @@ printf("\n§F5  E O QUE FALTAVA COMPLETAR: o dual de D é ∫, e o par NÃO é s
     printf("      ∫(D(sen + %g)) em t     ->  %+.9f     e sen + %g = %+.9f\n",
            c, volta, c, sin(t0) + c);
     printf("      a diferença é %g — exatamente a constante que se perdeu\n\n", sin(t0)+c - volta);
-    ok("D(∫ sen) = sen — a FD com h = 1e-5 fecha na escala do método (PASSO 7)",
-       (long long)(fabs(dI - sin(t0)) * 1e6) == 0);
-    ok("∫∘D perde c: sin(t)+c menos ∫₀ᵗ D(sen+c) vale exactamente c",
-       (long long)(fabs((sin(t0)+c - volta) - c) * 1e12) == 0);
+    /* E O h E O LIMIAR SAEM. `D∘∫ = id` e `∫∘D = id − av0` não são leis sobre o seno:
+     * valem para qualquer função, e o seno só as trazia com um passo `h = 1e-5` e uma régua
+     * `1e-6` que era minha. Num POLINÓMIO as duas medem-se EXACTAS em ℚ, com a máquina que
+     * o `lib/calculo.h` já tem — a analiticidade é do objecto, não da representação, e a
+     * casa já derivava sem limite (a derivada é uma AVALIAÇÃO, `fn_deriva_def`).
+     *
+     * Varre-se uma família inteira em vez de um ponto, e cada metade do par pode falhar:
+     *   D(∫p) = p          exacto, coeficiente a coeficiente
+     *   ∫₀ᵗ(Dp) = p − p(0) exacto, e o que se perde É p(0) — a constante, e nada mais. */
+    long fam = 0, ida = 0, volta_perde = 0;
+    for(int a2 = -3; a2 <= 3; a2++) for(int a1 = -3; a1 <= 3; a1++) for(int a0 = -3; a0 <= 3; a0++){
+        Cf p = fn0(); p.n = 2;
+        p.c[0] = qz_de_inteiro(a0); p.c[1] = qz_de_inteiro(a1); p.c[2] = qz_de_inteiro(a2);
+        fn_ajusta(&p);
+        Cf P; if(!fn_primitiva(p, &P)) continue;
+        fam++;
+        if(fn_igual(fn_deriva(P), p)) ida++;                    /* D∘∫ = id */
+        /* ∫₀ᵗ D p = Q(t) − Q(0) com Q primitiva de Dp; e p − isso tem de ser a CONSTANTE p(0) */
+        Cf Q; if(!fn_primitiva(fn_deriva(p), &Q)) continue;
+        Cf perdido = fn_soma(p, fn_esc(qz_de_inteiro(-1), Q));  /* p − Q, e Q(0) = 0 */
+        if(fn_igual(perdido, fn_const(fn_av(p, qz(0,1))))) volta_perde++;
+    }
+    printf("      e em ℚ EXACTO, sobre %ld polinómios de grau ≤ 2: D∘∫ = id em %ld,\n"
+             "      e ∫∘D perde exactamente p(0) em %ld — sem h e sem limiar\n",
+           fam, ida, volta_perde);
+    ok("D(∫ f) = f — e sem h e sem limiar: a lei nao e' sobre o seno, vale para qualquer"
+       " funcao, e num POLINOMIO mede-se EXACTA em Q com a maquina que o lib/calculo.h ja"
+       " tem. Varridos 343 polinomios de grau ate' 2, coeficiente a coeficiente. O `h = 1e-5`"
+       " com regua `1e-6` era o preco de a medir numa representacao onde ela nao fecha",
+       fam == 343 && ida == fam);
+    ok("∫∘D perde c — e o que se perde e' EXACTAMENTE p(0), nem mais nem menos: nos mesmos"
+       " 343 polinomios, p menos a primitiva de Dp da' a constante p(0) em Q exacto. A outra"
+       " metade do par, e ela pode falhar sozinha",
+       fam == 343 && volta_perde == fam);
     /* AS DUAS ASSERCOES QUE AQUI ESTAVAM tinham defeitos distintos e ambos graves:
      *   - a segunda era TAUTOLOGIA: volta fora DEFINIDA como sin(t0) - sin(0), e sin(0) e'
      *     exatamente 0, logo volta E' sin(t0) por construcao. Pior — a expressao
