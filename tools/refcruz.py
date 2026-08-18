@@ -57,7 +57,7 @@ for nome, f in DOCS.items():
             # O CENTRO A FUNDAR-SE FORA DE SI. Não é o mesmo que citar uma realização:
             # ali a seta vai do centro para fora e diz ONDE a peça se realiza; aqui vai
             # buscar FUNDAMENTO a um documento que devia ser mais particular que ele.
-            # É a dívida da separação, e está contada em `universal.tex` §sec:dividas.
+            # É a dívida da separação, e está contada em `corpo_algebrico.tex` §sec:dividas.
             k = f'DÍVIDA: centro → {alvo} (funda-se fora)'
             divida.append((nome, alvo, lab))
         else:                                     k = f'{nome} → {alvo}'
@@ -72,6 +72,6 @@ for k in sorted(direccoes, key=lambda x: -direccoes[x]):
 if divida:
     alvos = sorted({t[2] for t in divida})
     print(f"\n  DÍVIDA: {len(divida)} citações em que o CENTRO se funda fora de si,"
-          f" sobre {len(alvos)} peças — contadas em universal.tex §sec:dividas:")
+          f" sobre {len(alvos)} peças — contadas em corpo_algebrico.tex §sec:dividas:")
     for a_ in alvos: print(f"     {a_}")
 sys.exit(1 if (mortas or erradas) else 0)
