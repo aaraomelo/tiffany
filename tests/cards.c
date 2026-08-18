@@ -283,11 +283,16 @@ int main(void)
          * ser classificado, a soma denunciava-o — foi assim que o §B12 mostrou que os
          * fósseis não fechavam por um. */
         long da_triade = 6, fora_da_triade = 0;      /* o raymarch saiu: ja' nao ha' nenhum */
+        /* e `parte_fecha` só acrescenta a `postos == 6` se os dois somandos NÃO forem escritos
+         * à mão — e são. Com `da_triade = 6` e `fora = 0` fixos, `parte_fecha` é `postos == 6`
+         * outra vez. Fica como testemunha impressa; quem mede é o `postos`, que vem do banco. */
         long parte_fecha = (da_triade + fora_da_triade == postos);
         printf("  §B5  kernels no banco: %ld postos, %ld lidos de volta, %ld residuo\n",
                postos, lidos, resid);
-        printf("       e dos seis: %ld sao operacao da triade, %ld nao — o raymarch SAIU\n",
-               da_triade, fora_da_triade);
+        printf("       e dos seis: %ld sao operacao da triade, %ld nao — o raymarch SAIU"
+               " (a soma fecha nos postos: %s, e e' testemunha e nao medida — os dois somandos"
+               " estao escritos a' mao)\n",
+               da_triade, fora_da_triade, parte_fecha ? "sim" : "NAO");
         printf("       o fluxo fecha em k = ");
         for(long i = 0; i < nf; i++) printf("%ld ", fecha_em[i]);
         printf(" — espacamento constante: %s\n", espacamento_maus ? "NAO" : "sim");
@@ -305,7 +310,7 @@ int main(void)
            " numero de kernels que entraram no banco, que esse e' CONTADO — se um entrasse sem"
            " ser classificado, a soma denunciava-o. Antes comparavam-se os dois com o que a"
            " linha lhes tinha atribuido",
-           postos == 6 && lidos == 6 && resid == 0 && parte_fecha
+           postos == 6 && lidos == 6 && resid == 0
            && nf >= 2 && espacamento_maus == 0 && sem_relogio == 1);
     }
 
@@ -721,8 +726,15 @@ int main(void)
            " ha' uma terceira categoria que a prosa nao nomeia, ou um dos tres esta' errado."
            " O que se afirma aqui e' so' o que se sabe: que os removidos sao exactamente os"
            " mortos, e que a discrepancia existe e tem tamanho um",
+           /* e a terceira metade SAI, porque era `no_manifesto == no_manifesto`:
+            * `por_classificar` foi DEFINIDO como `no_manifesto − vivos − mortos`, logo
+            * somar-lhe de volta o `vivos + mortos` devolve o `no_manifesto`, sempre, para
+            * quaisquer três números. A própria frase acima diz «por serem escritos à mão e
+            * comparados consigo próprios» — e a condição continuava a fazê-lo.
+            * O que resta é o que se pode afirmar sobre números DECLARADOS: que a partição
+            * que a prosa descreve NÃO fecha, e que a falta é de exactamente um. */
            removidos == mortos && por_classificar == 1
-           && vivos_no_codigo + mortos + por_classificar == no_manifesto);
+           && vivos_no_codigo + mortos != no_manifesto);
     }
 
     /* ═══ §B13 — os GIFs SAEM: eram ruido, e 90 dos 92 ja' nao precisavam deles ═════
