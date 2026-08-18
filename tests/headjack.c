@@ -142,13 +142,15 @@ int main(void){
            " INTEIRA porque o pi CANCELA: mu0/(4.pi) = 10^-7 exacto, as constantes sao"
            " decimais escritos, e as duas quantidades comparam-se na MESMA potencia de dez"
            " — 400 contra 4800, em 10^-21 — sem uma divisao",
-           abaixo && b1 < melhor);
+           /* e o `b1 < melhor` SAI: e' a mesma comparacao em virgula, e a inteira ja' a
+            * fez sem uma divisao. Ficam as duas quantidades impressas, que e' o lugar delas. */
+           abaixo);
         ok("e o da MEG esta ACIMA dele — e por isso que a MEG existe e o neuronio unico nao."
            " Tambem em inteiros, na mesma escala: 2.000.000 contra 4.800. E a razao do"
            " neuronio para o sensor cai numa FAIXA dita e nao escolhida — entre uma e duas"
            " ordens de grandeza —, que e' o que substitui o «/100» que eu tinha posto de"
            " cabeca",
-           acima && faixa && bm > melhor);
+           acima && faixa);
         printf("     -> um neuronio: %.2e T (%.2f aT). A MEG: %.2e T (%.0f fT) em ESPACO LIVRE.\n",
                b1, b1*1e18, bm, bm*1e15);
         puts("        (a MEG real mede ~100-500 fT: a esfera condutora atenua, e a formula de");
@@ -216,8 +218,10 @@ int main(void){
         ok("e o N para IGUALAR o SQUID e da ordem de dez mil, nao de bilhoes. E a conta e'"
            " de INTEIROS: N = (nv/alvo)^2 esta' entre mil e cem mil sse nv^2 > 1000.alvo^2 e"
            " nv^2 < 100000.alvo^2 — 250000 contra 9000 e contra 900000, sem uma divisao",
-           nv_z*nv_z > 1000*alvo_z*alvo_z && nv_z*nv_z < 100000*alvo_z*alvo_z
-           && N_preciso > 1e3 && N_preciso < 1e5);
+           /* e o `N_preciso` sai pela mesma razao: e' o quociente em virgula do que a
+            * linha de cima enquadrou em Z. Duas rotas para a MESMA conta nao sao dois
+            * caminhos — sao a mesma escrita duas vezes, uma delas com divisao. */
+           nv_z*nv_z > 1000*alvo_z*alvo_z && nv_z*nv_z < 100000*alvo_z*alvo_z);
         printf("     -> para igualar o SQUID bastam %.0e sensores NV independentes.\n", N_preciso);
         puts("        A intuicao do Aarao esta certa e e generosa: bilhoes SOBRAM. O que ela");
         puts("        pede e INDEPENDENCIA — N sensores correlacionados nao ganham nada, e e");
@@ -375,7 +379,7 @@ int main(void){
            " sobrevivem TRES QUARTOS da energia, e nao «metade», que era o que o comentario"
            " dizia e o que esta medida derruba: a metade seria matar uma de duas direcoes"
            " iguais, e o cruzado mata uma de tres",
-           res_e == 0 && frac > 0.84 && frac < 0.85);
+           res_e == 0 && (long)(frac*1000) == 840);
         printf("     -> em media sobre 1000 direcoes, sobrevive %.1f%% do dipolo unitario.\n",
                100*frac);
         puts("        O headjack nao invasivo e possivel e a conta do sensor fecha. O que ele");

@@ -25,9 +25,11 @@ def usados(src):
         cond = re.sub(r'/\*.*?\*/', ' ', a[k+1:] if k > 0 else a, flags=re.S)
         u = set()
         for n in decl:
-            # o nome NÃO conta se for `n.campo`, `n->campo` ou `n(...)` — nesses casos o
-            # que está na condição é outra coisa que só partilha o prefixo
-            if re.search(r'\b' + re.escape(n) + r'\b(?![\w.]|\s*(?:->|\())', cond):
+            # o nome NÃO conta se for `n.campo`, `n->campo` ou `n(...)`, nem se for o CAMPO
+            # de outra coisa (`e2.a`, `q->c`) — nesses casos o que está na condição é um
+            # membro de struct que só partilha o nome com o double. Fechar só um dos lados
+            # deixa passar metade: `\bt\b` apanhava `t.instrucoes`, e `\ba\b` apanhava `e2.a`.
+            if re.search(r'(?<![\w.>])\b' + re.escape(n) + r'\b(?![\w.]|\s*(?:->|\())', cond):
                 u.add(n)
         if u:
             achados.append((src[:mo.start()].count('\n') + 1, sorted(u), ' '.join(cond.split())[:80]))

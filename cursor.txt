@@ -54,9 +54,20 @@ CORPO EXACTO PRIMEIRO: fecha em Q, e só depois vê o que sobra.
 
     python3 tools/doubles_cond.py   o que ALIMENTA uma condição — e só isso conta
 
-    (A conta ingénua inflaciona: `\bt\b` casa com o `t` de `t.instrucoes`, que é
-     campo LONG de uma struct. Eram 135; com o nome a não valer quando seguido de
-     `.`, `->` ou `(`, são 122. Treze eram fantasmas meus.)
+    A conta ingénua INFLACIONA, e o nome tem de fechar dos DOIS lados: `\bt\b` casa
+    com o `t` de `t.instrucoes` (campo long de struct) e `\ba\b` casa com o `a` de
+    `e2.a`. Fechar só um lado deixa passar metade.
+
+    E os quatro números, medidos — o de partida que este ficheiro citava («197») não
+    correspondia a medição nenhuma:
+
+                      início (8e4da41)   hoje
+        régua ingénua       257           135
+        régua fechada       237           110      ← esta é a boa
+
+    Ou seja o trabalho desta sessão é 237 → 110, menos 127. Quando a ferramenta muda,
+    remedir o PONTO DE PARTIDA com a régua nova — senão o progresso é a diferença
+    entre duas réguas, e não entre dois estados.
 
 O que conta é o que ALIMENTA uma condição `ok(...)`. Estado dos que já foram tocados:
 
@@ -72,8 +83,8 @@ QUATRO estão fechados a zero. Os que ficam com poucos são os que MEDEM vírgul
 `nne.c` os doubles restantes são o erro de arredondamento (é o objecto), no `dif.c` e
 no `encanamento.c` são igualdades exactas `== 0.0`, que é o contrário de dar folga.
 
-POR FAZER: ~57 ficheiros, 122 doubles. Os maiores por tocar:
-    xx 6 · nne 5 · headjack 5 · continua 5 · tikz 4 · spline 4 · relogio_curva 4 · encanamento 4 · cosmico 4 · corpo_fisico 4
+POR FAZER: ~53 ficheiros, 110 doubles. Os maiores por tocar:
+    xx 6 · continua 5 · tikz 4 · spline 4 · relogio_curva 4 · encanamento 4 · cosmico 4 · corpo_fisico 4 · travessia 3 · quantico 3
 
 ### E a ferramenta que apanha o que a leitura não apanha
 
