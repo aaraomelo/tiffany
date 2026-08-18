@@ -276,7 +276,7 @@ terminais)
   linha "RF ambiente, isotrópica" "21 µW       (colheita.c)"
   linha "e a conta que decide" "guardar é quase grátis; calcular não é"
   echo
-  echo "  medido em  tools/plugs.c §P7  ·  tools/dispositivo.c  ·  tools/colheita.c"
+  echo "  medido em  tests/plugs.c §P7  ·  tests/dispositivo.c  ·  tests/colheita.c"
   echo "  para correr:  ./painel.sh tudo   (inclui os três)"
   ;;
 

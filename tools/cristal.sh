@@ -24,7 +24,7 @@ aprende "o que e cristalvolta" "conecthus/claims/cristal.claim — step project_
 aprende "a inducao do cristal" "Apagar conceito, trocar resposta, alterar categoria, corromper projeção: R diferente de 0, REOPEN. Reordenar sobrevive por desenho (ordem canónica é derivada do id)."
 aprende "a energia do cristal" "E = soma dos quadrados — a massa da cruz; E(fonte)=E(reconstrução)=38771546660 exato (a âncora pré-curadoria era 38731623179; a diferença é a soma dos contornos das 52 fusões); Parseval dourado 1D/2D/4D fator 256. tests/cristal_energia.js"
 aprende "o que e meta-inducao" "O passo sobre os passos: a leitura dual que mede a indução e valida a conservação de energia. corpo_topologico.tex def:inducao"
-aprende "o estresse do cristal" "e = R - k, lido pelo endereço: zero exato com o endereço vivo; o par faltante+excedente quando morre. tools/lyapunov_measure.js; Teorema da Absorção, papers/corpo_topologico.tex"
+aprende "o estresse do cristal" "e = R - k, lido pelo endereço: zero exato com o endereço vivo; o par faltante+excedente quando morre. tests/lyapunov_torre.js; Teorema da Absorção, papers/corpo_topologico.tex"
 aprende "a historia do cristal" "cristal/historia.tsv: id, versões no jornal. A normalização não amassa a linha do tempo — a versão canónica sabe que tem passado."
 aprende "de onde vem cada conceito" "Cada registo carrega origem, meta.fonte, meta.dominio, epistemico, confianca e as arestas do grafo. A proveniência viaja no %CRISTAL de cada secção."
 aprende "quais sao os grupos do cristal" "ciencias 899, matematica 679, manual 516, computacao 515, engenharia 441, papers 427, fisica 332, floxina 187, xadrez 150, diversos 88."

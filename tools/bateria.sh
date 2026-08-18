@@ -415,6 +415,12 @@ fi
 if [ -f tools/refcruz.py ]; then
   python3 tools/refcruz.py 2>/dev/null | sed 's/^/  /'
 fi
+# --- e os CAMINHOS da infraestrutura: workflows, scripts, configs ---------------
+# A terceira familia, e a que ninguem compila: um `test -s dist/corpo/papers/x.tex` num
+# workflow so' falha em producao. Foi assim que o deploy ficou quebrado de 15/08 a 18/08.
+if [ -f tools/caminhos.py ]; then
+  python3 tools/caminhos.py 2>/dev/null | sed 's/^/  /'
+fi
 
 printf '%s\n' "-------------------------------------------------------------------------"
 # ── ATESTACOES ORFAS: linhas de medidores que ja' nao existem ────────────────────

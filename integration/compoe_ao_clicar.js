@@ -20,7 +20,7 @@
  *   §Z3  e não há cópia guardada: o dist não tem os PDFs
  *   §Z4  o controlo: com o tradutor fora, falha RUIDOSAMENTE — não serve o antigo
  *
- *   node tests/compoe_ao_clicar.js          (precisa do servidor local em 8099)
+ *   node integration/compoe_ao_clicar.js    (precisa do servidor local em 8099)
  */
 'use strict'
 const fs = require('fs')
