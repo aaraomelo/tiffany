@@ -63,3 +63,37 @@ delas. O alarme foi o TOTAL: **57 → 52**.
 Antes de recortar por índices, listar o que o intervalo contém — `grep -o "§L[0-9]*[a-z]*"` —
 e depois do write conferir o TOTAL. E a recuperação é barata quando o commit anterior existe:
 `git show HEAD:ficheiro` dá o bloco de volta letra por letra. Ver [[feedback-o-write-diz-updated]].
+
+
+---
+
+## 18/08/2026 — o `git checkout --` apaga trabalho NÃO COMMITADO, e eu usei-o para limpar um gume
+
+A montar um gume, mutei um ficheiro, corri o detector, e limpei assim:
+
+```bash
+cp /tmp/ct.bak papers/corpo_topologico.tex     # o restauro certo
+git checkout -- papers/corpo_topologico.tex    # ...e depois isto, "por segurança"
+```
+
+O `cp` já tinha restaurado. O `git checkout` levou o ficheiro ao **HEAD** — e com ele
+apagou uma alteração legítima que eu tinha feito nessa sessão e ainda não commitara.
+
+**Só dei por isso porque o `git status` a seguir não listava o ficheiro** que eu sabia ter
+editado. Recuperei do `/tmp/ct.bak`, e confirmei com `diff` que a única diferença face ao
+backup era a melhoria seguinte — mas se o backup não existisse, estava perdido.
+
+### A regra
+
+Ao montar um gume, o restauro é o **backup que eu próprio fiz**, e mais nada. `git checkout
+--`, `git restore` e `git stash` operam contra o HEAD e **não distinguem a mutação do
+trabalho** — para eles é tudo «alterações locais».
+
+E o teste de que o restauro foi limpo não é o ficheiro compilar: é
+
+```bash
+diff /tmp/backup.tex ficheiro.tex     # tem de sair vazio, ou só com o que eu quis mudar
+```
+
+Vale a mesma frase do resto desta memória: **inventário ANTES**. Aqui o inventário é o
+backup, e ele tem de existir antes da mutação, não depois de se dar pela falta.
