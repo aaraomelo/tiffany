@@ -6,7 +6,7 @@
 - **[A base já existe](feedback-a-base-ja-existe.md)** — TRÊS vezes trouxe Gram-Schmidt/DFT para um objeto que já tinha base. Sintoma: um fator que não se elimina (√N, Δ) tratado como resultado.
 - **[O limiar que o texto despediu](feedback-o-limiar-que-o-texto-despediu.md)** — DOZE asserções dizem «o 1e-15 dava folga» e mantêm-no na condição. A correcção acrescenta e não TIRA.
 - **[O gume aponta-se a CADA lei](feedback-o-gume-por-lei.md)** — `A && B && C` precisa de TRÊS mutações. Mutei uma, vi cair, commitei — e havia OUTRA tautologia minha no mesmo bloco.
-- **[A asserção que passa sem poder falhar](feedback-assercoes-vazias.md)** — OITO formas (constante disfarçada, número de cabeça, caso degenerado…). Que entrada faria isto falhar?
+- **[A asserção que passa sem poder falhar](feedback-assercoes-vazias.md)** — NOVE formas, e a nona é a pior: a tautologia escrita DENTRO da correcção, os dois lados copiados. As duas expressões partem de sítios diferentes?
 - **[A referência escrita à mão](feedback-a-referencia-escrita-a-mao.md)** — calculo a referência de cabeça e ESCREVO-a, reintroduzindo o defeito dentro da correção. Mudar o dado; se ela não muda sozinha, é cópia.
 - **[Dual exige DUAS partes](feedback-dual-exige-dois.md)** — escrever «dual» obriga a nomear os dois membros na mesma frase.
 - **[O sujeito da frase é o resultado](feedback-o-sujeito-da-frase.md)** — o nome clássico entra como cláusula, se entrar. Se o nome do morto aparece mais que o objeto, a secção é sobre ele.

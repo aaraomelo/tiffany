@@ -430,3 +430,45 @@ a tirar, e a peça nova entra sem passar pelo mesmo crivo.
 **O sinal:** acabei de escrever um conserto e ele passou à primeira. Aplicar-lhe o gume
 antes de commitar — foi assim que o `tikz.c` me apanhou (Cayley–Hamilton vale para TODA
 matriz 2×2, logo verificá-lo com o traço dela não testava a companheira).
+
+
+---
+
+## 18/08/2026 — a nona forma: a tautologia escrita DENTRO da correcção
+
+Três num dia, e a terceira foi a que ensina. Em `travessia.c` eu estava a substituir uma soma
+de logaritmos por uma identidade em ℤ, e escrevi:
+
+```c
+long por_nurev = -(Ex*By - Ey*Bx);          /* ν∘rev */
+long por_comp  = -(Ex*By - Ey*Bx);          /* Hodge∘ν∘rev */
+if(por_nurev == por_comp) mesmo_poynting++;
+```
+
+**A mesma expressão, copiada, com dois nomes.** E no comentário por cima estava escrito que o
+ponto era medir por DOIS CAMINHOS. Antes disso, no mesmo ficheiro: `if(cz*cz == cz*cz)`.
+
+### Por que é que escapa
+
+Porque a tautologia entra pela **cópia**, não pelo raciocínio. Eu sei qual é o valor certo,
+escrevo-o de um lado, e do outro lado escrevo *o mesmo*, porque é o que tenho na cabeça. O
+comentário fica correcto — descreve o que eu QUERIA fazer — e é o comentário que eu releio.
+
+### O teste, e é de olhar e não de correr
+
+Depois de escrever `A == B`, tapar o comentário e perguntar: **as duas expressões partem de
+sítios diferentes?** Se `B` se obtém de `A` por copiar-e-colar, não há duas rotas — há uma
+escrita duas vezes. Cada lado tem de sair da **sua própria definição**:
+
+```c
+long por_nurev = Bx*Ey - By*Ex;   /* vE=B/|B|², vB=E/|E|²  →  (B×E)_z */
+long por_comp  = Ey*Bx - Ex*By;   /* cE=vB,     cB=−vE     →  (E×(−B))_z */
+```
+
+Iguais em valor, **diferentes em origem** — e só agora o `==` mede alguma coisa. Os três gumes
+(tirar o sinal do Hodge, não trocar E e B, mudar o `hodge`) passaram a morder.
+
+E o corolário: **o momento de maior risco é o da correcção**, não o do primeiro rascunho. Ao
+substituir uma medida fraca por uma forte eu já sei a resposta, e é exactamente aí que a
+escrevo dos dois lados. Vale para [[feedback-a-referencia-escrita-a-mao]] (duas vezes hoje
+também) — é o mesmo defeito, com a cópia a entrar pelo lado do valor em vez do lado do dado.
