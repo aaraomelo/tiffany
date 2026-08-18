@@ -438,7 +438,7 @@ solucoes_primitivas a317586c48866d16 0
 sombra_cone 765938756f8c9b85 0
 sombras 4cdee1845f8c56fd 0
 spinor32 52cc87063065a82e 0
-spline 1be21995859e3348 0
+spline 0aa0f74901ee2337 0
 sql 820e30fdda7248b4 0
 sshb 87867429592fc40b 0
 str2dbl_dual 812b6a544d8ae0f1 0
@@ -457,7 +457,7 @@ tesserato_espiral bd599042b464952c 0
 tex 55f6ef36b59e894f 0
 tex_wasm 35e84e8b69861d91 0
 texto 5bbce62a899f0c00 0
-tikz 82241a531a32ec26 0
+tikz 8a4d248ee5907d53 0
 toolkit d1e1c23cd0380eac 0
 toolkit_llm 506bd345232193ba 0
 topologia 5fbb31a1e0865a9d 0

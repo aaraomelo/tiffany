@@ -320,8 +320,25 @@ int main(void){
            (long long)(pior_rk * 1e6) <= 1);
         ok("o EULER tambem a segue, com o erro MAIOR que ele tem por ser de primeira ordem",
            (long long)(pior_eu * 1e2) <= 5 && pior_eu > pior_rk);
-        ok("e os dois caminhos concordam entre si dentro do erro do PIOR deles",
-           pior_entre <= pior_eu + pior_rk);
+        /* E ISTO ERA A DESIGUALDADE TRIANGULAR, verdade por teorema e independente do que se
+         * mediu: para cada ponto |yr − ye| ≤ |yr − ex| + |ex − ye|, logo o máximo da esquerda
+         * nunca passa a soma dos máximos. A asserção não podia falhar com métodos nenhuns.
+         *
+         * O que TEM conteúdo é mais forte e é o que a saída mostra: o RK4 erra 3,3e-09 e o
+         * Euler 2,55e-02 — SETE ordens de grandeza de diferença —, e por isso a discordância
+         * entre os dois caminhos NÃO é «menor que a soma»: ela É o erro do Euler, a menos do
+         * erro do RK4. É isso que faz do RK4 uma referência utilizável, e mede-se assim. */
+        long rk_mil_vezes_melhor = (pior_rk > 0 && pior_rk * 1000000.0 < pior_eu);
+        long discordancia_e_o_euler = (fabs(pior_entre - pior_eu) < pior_rk);
+        printf("     -> e a discordância entre os dois É o erro do Euler: |%.3e − %.3e| = %.1e,"
+               " abaixo do erro do RK4 (%.1e)\n",
+               pior_entre, pior_eu, fabs(pior_entre - pior_eu), pior_rk);
+        ok("e os dois caminhos concordam entre si — e nao «dentro da soma dos erros», que era"
+           " a desigualdade TRIANGULAR, verdade por teorema e que nao podia falhar com metodos"
+           " nenhuns. O que se mede e' mais forte: o RK4 erra mais de um MILHAO de vezes menos"
+           " que o Euler, e por isso a discordancia entre os dois caminhos E' o erro do Euler,"
+           " a menos do erro do RK4 — e e' isso que faz do RK4 uma referencia utilizavel",
+           rk_mil_vezes_melhor && discordancia_e_o_euler);
         printf("     -> pior desvio da forma fechada: RK4 %.2e, Euler %.2e; entre eles %.2e.\n",
                pior_rk, pior_eu, pior_entre);
         /* e a LEI do Euler: halvar o passo tem de halvar o erro (primeira ordem) */
@@ -338,8 +355,15 @@ int main(void){
             erros[k] = pior;
         }
         double r1 = erros[0]/erros[1], r2 = erros[1]/erros[2];
-        ok("A LEI: o Euler e de PRIMEIRA ordem — halvar o passo halva o erro, medido em 3 pontos",
-           r1 > 1.7 && r1 < 2.3 && r2 > 1.7 && r2 < 2.3);
+        /* e o enquadramento aperta-se ao que a medida da': 2,03 e 2,02, e nao «entre 1,7 e
+         * 2,3», que era ±15% a fingir de lei. A primeira ordem diz 2 e o desvio para cima e'
+         * o termo seguinte da serie — que existe e tem sinal, e por isso as duas razoes ficam
+         * ACIMA de 2 e nao em torno dele. */
+        ok("A LEI: o Euler e' de PRIMEIRA ordem — halvar o passo halva o erro, medido em 3"
+           " pontos. E as razoes ficam entre 2,00 e 2,05, nao «entre 1,7 e 2,3» que era ±15% a"
+           " fingir de lei; e ficam ACIMA de 2 e nao em torno dele, porque o desvio e' o termo"
+           " seguinte da serie, que tem sinal",
+           r1 >= 2.0 && r1 < 2.05 && r2 >= 2.0 && r2 < 2.05);
         printf("     -> h, h/2, h/4: erros %.2e, %.2e, %.2e; razoes %.2f e %.2f (a lei diz 2).\n\n",
                erros[0], erros[1], erros[2], r1, r2);
     }
@@ -506,11 +530,18 @@ int main(void){
             * com igualdade em vez de com uma regua que sugeriria aproximacao */
            -traco == B_DIN && det == C_DIN
            && ch_ok && gume_cai);
-        double D = B_DIN*B_DIN - 4*C_DIN;
-        ok("e o Delta classifica-a: negativo, logo ELIPTICA — a mesma classe do oscilador",
-           D < 0);
-        printf("     -> a companion: traco %.2f, det %.2f, Delta %.4f < 0. A regua e a do catalogo,\n",
-               traco, det, D);
+        /* e o Delta e' INTEIRO: B e C sao os do catalogo, escritos como decimais exactos, e
+         * B² − 4C faz-se em Z sem vírgula nenhuma. Declará-lo `double` só lhe dava uma casa
+         * decimal que ele não tem. */
+        const long Bz = (long)(B_DIN*100 + 0.5), Cz = (long)(C_DIN*100 + 0.5);   /* centésimos */
+        long Dz = Bz*Bz - 400L*Cz;                    /* B² − 4C, em 10⁻⁴ */
+        printf("      e o discriminante em inteiros (escala 1e-4): B² − 4C = %ld\n", Dz);
+        ok("e o Delta classifica-a: negativo, logo ELIPTICA — a mesma classe do oscilador."
+           " E ele e' INTEIRO: B e C sao decimais exactos do catalogo, logo B² − 4C faz-se em"
+           " Z sem virgula, e o `double` so' lhe dava uma casa que ele nao tem",
+           Dz < 0 && Bz*Bz < 400L*Cz);
+        printf("     -> a companion: traco %.2f, det %.2f, Delta %ld/1e4 < 0. A regua e a do"
+               " catalogo,\n", traco, det, Dz);
         puts("        e a classe e a do §E4. O MATLAB nao trouxe corpo novo: trouxe notacao.\n");
     }
 

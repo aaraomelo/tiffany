@@ -343,8 +343,22 @@ int main(void){
            " folga. E o gume: com uma so' largura diferente a conta ja' nao da' zero."
            " Os dois limiares estiveram nesta condicao ate' agora, ao lado dos inteiros",
            fora_z == 0 && fora_z2 != 0 && su == 500L*m);
-        ok("e o texto REAL nao e uniforme: ha energia fora do modo zero, e ela e mensuravel",
-           e > 1.0);
+        /* e o texto REAL mede-se pela MESMA conta inteira, que e' o que faz disto um par:
+         * a variancia de Parseval do uniforme e' 0 e a do texto e' um inteiro grande. O
+         * `e > 1.0` era um limiar meu do lado errado da comparacao — o que separa os dois
+         * casos nao e' um valor, e' um ser ZERO e o outro NAO. E diz-se por quanto: a
+         * variancia do texto tem oito algarismos, e o gume do §anterior mostrou que uma
+         * largura diferente num so' sitio ja' a levanta de zero. */
+        long dz[128]; for(int i = 0; i < m; i++) dz[i] = (long)(d[i] + 0.5);
+        long sd; long fora_real = parseval_fora_z(dz, m, &sd);
+        printf("     -> e o texto REAL, pela MESMA conta: N.Sd² − (Sd)² = %ld — o uniforme da'"
+               " 0 e este nao, e essa e' a separacao\n", fora_real);
+        ok("e o texto REAL nao e' uniforme: ha' energia fora do modo zero, e ela mede-se pela"
+           " MESMA conta inteira do uniforme — que e' o que faz disto um PAR. A variancia de"
+           " Parseval vale ZERO num caso e um inteiro de oito algarismos no outro, e o que"
+           " separa os dois nao e' um valor mas um ser zero e o outro nao. O `e > 1.0` era um"
+           " limiar meu do lado errado da comparacao",
+           fora_real > 0 && fora_z == 0 && fora_real > 10000000L && sd > 0);
         /* a lei: dobrar o corpo dobra o modo zero e QUADRUPLICA a energia (que e quadratica) */
         double d2[128]; for(int i = 0; i < m; i++) d2[i] = 2*d[i];
         double m02, e2 = fourier_fora_do_zero(d2, m, &m02);
