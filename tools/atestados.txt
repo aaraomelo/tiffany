@@ -14,7 +14,7 @@ antissimetrico 0c1a1152b54ee86d 0
 app_arranca abb24b0fe22e3ae2 0
 aritmetica c3d8fd5157ee4e9d 0
 arquimedes_area 3fb4925bc7f62b48 0
-arraytermico 48fc640959bd0d9d 0
+arraytermico dacdc752b40ae62a 0
 artefato 2aee781e64ae7318 0
 assinatura 15ed7d9ee13ee350 0
 assinatura_banal 80eb20648a0babdb 0

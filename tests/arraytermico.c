@@ -120,10 +120,38 @@ int main(void){
         double a1 = (ARRAY[1].nx*ARRAY[1].passo_mm)*(ARRAY[1].ny*ARRAY[1].passo_mm);
         double razao_area = a0 > a1 ? a0/a1 : a1/a0;
         double razao_passo = ARRAY[0].passo_mm / ARRAY[1].passo_mm;
-        ok("as duas grelhas cobrem area COMPARAVEL — a razao entre elas fica dentro de 2x",
-           razao_area < 2.0);
-        ok("mas os passos diferem por uma ORDEM DE GRANDEZA — e e de proposito, nao descuido",
-           razao_passo > 10.0);
+        /* E OS DOIS LIMIARES SAEM, porque as duas contas sao EXACTAS em Z. Com o passo em
+         * decimos de milimetro — 80 para a grelha NV e 4 para o bolometro:
+         *
+         *      NV:        32.80 = 2560  por  32.80 = 2560
+         *      bolometro: 640.4 = 2560  por  480.4 = 1920
+         *
+         * As duas tem a MESMA LARGURA, 2560 decimos, e por isso a razao das areas e' a razao
+         * das alturas: 2560/1920 = 4/3 exacto — que e' a razao de aspecto do proprio
+         * bolometro, 640 por 480. Nao «dentro de 2x»: e' 4/3, e diz-se.
+         * E os passos estao na razao 80/4 = 20, exacta tambem. */
+        /* e os passos e as contagens SAEM do proprio ARRAY[] — nao se escrevem. Escritos a
+         * mao, mudar o passo do bolometro no dado nao mudava a conta, e o gume nao mordia:
+         * a referencia tem de se mover quando o dado se move, senao e' copia. */
+        const long px_nv = (long)(ARRAY[0].passo_mm*10 + 0.5);   /* passos em decimos de mm */
+        const long px_bo = (long)(ARRAY[1].passo_mm*10 + 0.5);
+        long lx_nv = ARRAY[0].nx*px_nv, ly_nv = ARRAY[0].ny*px_nv;
+        long lx_bo = ARRAY[1].nx*px_bo, ly_bo = ARRAY[1].ny*px_bo;
+        int mesma_largura = (lx_nv == lx_bo);
+        int area_4_3 = (3L*lx_nv*ly_nv == 4L*lx_bo*ly_bo);
+        int passo_20  = (px_nv == 20*px_bo);
+        int aspecto   = (3L*ARRAY[1].nx == 4L*ARRAY[1].ny);  /* a razao vem do 4:3 do sensor */
+        printf("     -> em decimos de mm: NV %ldx%ld e bolometro %ldx%ld — MESMA largura,\n"
+               "        e a razao das areas e' 4/3 EXACTO, que e' o 4:3 do proprio sensor\n",
+               lx_nv, ly_nv, lx_bo, ly_bo);
+        ok("as duas grelhas cobrem area COMPARAVEL — e nao «dentro de 2x», que era um limiar"
+           " meu: em decimos de milimetro as duas tem a MESMA largura, 2560, e por isso a"
+           " razao das areas e' a razao das alturas, 2560/1920 = 4/3 EXACTO. E esse 4/3 nao"
+           " e' coincidencia: e' a razao de aspecto do proprio bolometro, 640 por 480",
+           mesma_largura && area_4_3 && aspecto);
+        ok("mas os passos diferem por uma ORDEM DE GRANDEZA — e e' de proposito, nao descuido."
+           " E o numero e' exacto: 80 decimos contra 4, ou seja VINTE vezes, nao «mais de dez»",
+           passo_20);
         printf("     -> %ld canais ao todo; areas %.0f e %.0f mm2 (razao %.2f).\n",
                total, a0, a1, a0/a1);
         puts("");
@@ -168,8 +196,21 @@ int main(void){
          * no valor exato nao mede — ele so testa o arredondamento. A afirmacao e sobre a ESCALA:
          * a tensao e mil vezes o microvolt, e isso compara-se com a escala e nao com o valor. */
         double V = seebeck(MATERIAIS[0].S_uVK, dT);
-        ok("e com o gradiente real da cabeca (5 K) o Bi2Te3 da mil vezes o microvolt",
-           V >= 0.001);
+        /* e a nota de cima ja' o dizia sem tirar a consequencia: se 200 uV/K x 5 K da'
+         * EXACTAMENTE 1000 uV, entao a afirmacao e' uma IGUALDADE e nao uma desigualdade —
+         * `V >= 0,001` deixava passar qualquer material melhor, e o que se afirma e' este.
+         * Em microvolt inteiros: S.dT = 200.5 = 1000, e os dois factores saem do dado. */
+        const long S_uV = (long)MATERIAIS[0].S_uVK;
+        long V_uV_lei = S_uV * dT;                       /* pela lei, em Z */
+        long V_uV_med = (long)(V*1000000 + 0.5);         /* pela funcao do ficheiro */
+        printf("     -> em microvolt inteiros: %ld uV/K x %ld K = %ld uV, e a funcao da' %ld\n",
+               S_uV, dT, V_uV_lei, V_uV_med);
+        ok("e com o gradiente real da cabeca (5 K) o Bi2Te3 da' mil vezes o microvolt — e isso"
+           " e' uma IGUALDADE e nao uma desigualdade: 200 uV/K vezes 5 K sao EXACTAMENTE 1000"
+           " uV. O `V >= 0,001` deixava passar qualquer material melhor, e o que se afirma e'"
+           " este. Medido por DOIS CAMINHOS, a lei em Z e a `seebeck` do ficheiro, e os dois"
+           " factores saem do dado",
+           V_uV_lei == 1000 && V_uV_med == V_uV_lei && S_uV*dT == V_uV_lei);
         printf("     -> a 5 K o Bi2Te3 da %.2f mV por juncao (%.0f uV). Empilhando N juncoes em\n",
                V*1e3, V*1e6);
         puts("        serie a tensao soma — e e assim que um modulo Peltier chega a volts.\n");
@@ -208,12 +249,21 @@ int main(void){
          * O que faltava era o outro lado: para ZT pequeno f está LONGE de 1, sem o que
          * «tende a Carnot» valia por f ser sempre 1. */
         double f_inf = e_inf/ec, f_baixo = eficiencia(T_QUENTE, T_FRIO, 0.1)/ec;
+        /* e os dois lados dizem-se em partes por milhao de Carnot, enquadrados: com ZT = 0,1
+         * a fraccao vale 24011 ppm e no limite 999998 — logo o limite esta' entre 41 e 42
+         * vezes o pe. «< 0,5» tinha vinte vezes de folga e nao dizia nada sobre o par. */
+        long fz_inf = (long)(f_inf*1000000), fz_baixo = (long)(f_baixo*1000000);
+        printf("     -> a fraccao de Carnot em ppm: com ZT = 0,1 vale %ld, e no limite %ld"
+               " — o limite e' 41 vezes o pe\n", fz_baixo, fz_inf);
         ok("e a eficiencia CRESCE com ZT e TENDE a Carnot no limite — medido ate ZT = 1e12."
            " E o Carnot CANCELA nos dois lados: |e_inf - ec|/ec e' |f(ZT) - 1|, a fraccao de"
            " Carnot, e nao depende das temperaturas. O que a torna medicao e' o outro lado:"
            " com ZT = 0,1 a fraccao esta' LONGE de um, e sem isso «tende» valia por f ser"
-           " sempre um",
-           cresce && fabs(f_inf - 1.0) < 0.01 && f_baixo < 0.5);
+           " sempre um. E os dois lados dizem-se em partes por milhao de Carnot em vez de se"
+           " arbitrarem: 24011 ppm no pe e 999998 no limite, logo o limite e' entre 41 e 42"
+           " vezes o pe. O «< 0,5» tinha vinte vezes de folga",
+           cresce && fz_inf > 999990 && fz_inf <= 1000000 && fz_baixo > 24000 && fz_baixo < 24100
+           && 41*fz_baixo < fz_inf && fz_inf < 42*fz_baixo);
         printf("     -> com ZT -> infinito a eficiencia da %.4f%% contra o Carnot de %.4f%%.\n",
                100*e_inf, 100*ec);
         puts("        O ZT nao e uma constante de material qualquer: e a fracao de Carnot que");
@@ -228,8 +278,17 @@ int main(void){
         double P_cerebro = 20.0;
         double e = eficiencia(T_QUENTE, T_FRIO, MATERIAIS[0].ZT);
         double P_rec = P_cerebro * e;
-        ok("o que se recupera e uma FRACAO minuscula — e diz-se o numero, nao se arredonda",
-           P_rec > 0 && P_rec < 0.1);
+        /* e o numero diz-se mesmo, em microwatt inteiros: 55691 uW dos 20 W, ou seja 2784
+         * partes por milhao de eficiencia. «< 0,1 W» era o meu arredondamento a fingir de
+         * numero — e a frase ja prometia dizer o numero. */
+        long P_uW = (long)(P_rec*1000000), e_ppm = (long)(e*1000000);
+        printf("     -> em microwatt inteiros: %ld uW dos 20 W, e a eficiencia %ld ppm\n",
+               P_uW, e_ppm);
+        ok("o que se recupera e' uma FRACAO minuscula — e diz-se o numero, nao se arredonda:"
+           " 55691 microwatt dos 20 W, que sao 2784 partes por milhao de eficiencia,"
+           " enquadrados dos dois lados. O `< 0,1 W` era o arredondamento a fingir de numero,"
+           " e a propria frase ja prometia dizer o numero",
+           P_uW > 55000 && P_uW < 56000 && e_ppm > 2784 - 1 && e_ppm < 2784 + 1);
         printf("     -> o cerebro dissipa ~%.0f W; com Bi2Te3 e dT de 5 K recupera-se %.1f mW\n",
                P_cerebro, P_rec*1e3);
         printf("        (%.4f%%). Nao alimenta o array — o bolometro de 640x480 consome watts.\n",
@@ -244,8 +303,10 @@ int main(void){
         double perdido = P_cerebro - P_rec;
         ok("e o que NAO volta e a esmagadora maioria — e Carnot que o exige, nao a engenharia."
            " E o P_cerebro CANCELA: perdido/P_cerebro E' 1 - e, logo o que se mede e' que a"
-           " EFICIENCIA fica abaixo de 1%, e a assercao nao depende dos 20 W do cerebro",
-           e < 0.01);
+           " EFICIENCIA fica abaixo de 1%, e a assercao nao depende dos 20 W do cerebro. E o"
+           " quanto abaixo diz-se: 2784 ppm contra os 16121 de Carnot, ou seja a maquina real"
+           " fica abaixo de um QUINTO do tecto — e isso e' o ZT, nao a engenharia",
+           e_ppm < 10000 && 5*e_ppm < 16121 && 3*e_ppm > 8000);
         printf("     -> %.3f W dos %.0f nao voltam (%.2f%%). E nao e desperdicio evitavel: e o\n",
                perdido, P_cerebro, 100*perdido/P_cerebro);
         puts("        segundo principio. Com dT de 5 K em 310 K, Carnot ja limita a 1,6%.\n");
