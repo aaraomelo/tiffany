@@ -166,8 +166,22 @@ int main(void){
            " 10^6 a cancelarem dos dois lados",
            dentro_z && lado_min < b_wien && b_wien < lado_max);
         double f = fracao_janela(T_CORPO);
-        ok("e uma fracao GRANDE da radiacao do corpo sai por ela — nao e uma fresta",
-           f > 0.25 && f < 0.6);
+        /* «0,25 < f < 0,6» tinha o dobro de folga do lado de cima e nao dizia nada sobre a
+         * janela SER do corpo: qualquer fresta larga passava. O que a torna janela e' estar
+         * SINTONIZADA — a mesma [8,13] um deixa sair 33% do corpo a 310 K, 10% de uma chama
+         * a 1000 K e um milesimo do Sol a 5778 K. Diz-se o numero, em milesimos, e diz-se
+         * contra os dois controlos: a razao ao Sol passa de trezentas vezes. */
+        double f_chama = fracao_janela(1000.0), f_sol = fracao_janela(5778.0);
+        long fz = (long)(f*1000), fcz = (long)(f_chama*1000), fsz = (long)(f_sol*100000);
+        printf("     -> a janela e' do CORPO: %ld milesimos a 310 K, %ld a 1000 K, e %ld"
+               " cem-milesimos a 5778 K\n", fz, fcz, fsz);
+        ok("e uma fracao GRANDE da radiacao do corpo sai por ela — nao e uma fresta. E o que"
+           " a torna JANELA e' estar SINTONIZADA, nao ser larga: a mesma [8,13] um deixa sair"
+           " 330 milesimos do corpo a 310 K, 98 de uma chama a 1000 K e cerca de um milesimo"
+           " do Sol. A razao ao Sol passa de TREZENTAS vezes, e a fraccao do corpo enquadra-se"
+           " entre 330 e 331 milesimos. «0,25 < f < 0,6» tinha o dobro de folga de um lado e"
+           " qualquer fresta larga passava",
+           fz == 330 && fcz > 90 && fcz < 100 && f > 300*f_sol && f > 3*f_chama);
         printf("     -> pico em %.2f um, dentro de [%.0f, %.0f]. Fracao na janela: %.1f%%.\n",
                pico*1e6, JANELA_MIN*1e6, JANELA_MAX*1e6, 100*f);
         puts("        Isto NAO foi arranjado: o pico saiu de Wien e a janela e da atmosfera, e");
@@ -371,8 +385,16 @@ int main(void){
             if(i == 0) primeiro = P;
             if(i == 2) ultimo = P;
         }
-        ok("usar o CEU em vez do escalpe multiplica o recuperado — e por mais de dez vezes",
-           ultimo > 10*primeiro);
+        /* «mais de dez vezes» era o meu adjectivo e a razao real e' 17,8. Diz-se o numero,
+         * enquadrado dos dois lados em miliwatt inteiros: 17.557 < 993 < 18.557. */
+        /* e a regua e' o MICROWATT e nao o miliwatt: truncada a miliwatt, 55,7 vira 55 e a
+         * razao salta de 17,83 para 18,05 — a truncagem move o resultado para fora da faixa
+         * que ela propria deveria confirmar. Uma regua grossa de mais nao arredonda: mente. */
+        long p_mW = (long)(primeiro*1000000), u_mW = (long)(ultimo*1000000);
+        ok("usar o CEU em vez do escalpe multiplica o recuperado — e diz-se por QUANTO em vez"
+           " de «mais de dez vezes», que era o meu adjectivo: em miliwatt inteiros a razao"
+           " esta' entre 17 e 18, enquadrada dos dois lados por multiplicacao e sem dividir",
+           p_mW > 0 && 17*p_mW < u_mW && u_mW < 18*p_mW);
         printf("     -> de %.1f mW para %.0f mW: %.0f vezes mais, so por trocar o reservatorio\n",
                primeiro*1e3, ultimo*1e3, ultimo/primeiro);
         puts("        frio. E o ceu esta la de graca, pela janela dos 8-13 um.");
@@ -394,15 +416,49 @@ int main(void){
         double k = 0.08;                     /* constante de arrefecimento, /hora (Newton) */
         long P_met = 20.0;                 /* os 20 W do cerebro */
 
-        /* VIVO: estado estacionario. O gradiente e CONSTANTE, e a derivada e zero. */
+        /* VIVO: estado estacionario. E ISTO ERA UMA TAUTOLOGIA — o laco escrevia
+         *      double T = T_CORPO;  if(fabs(T - T_CORPO) != 0.0) estacionario = 0;
+         * ou seja comparava T_CORPO consigo proprio, vinte e cinco vezes. `estacionario`
+         * nao podia sair de 1, e a assercao passava sem poder falhar.
+         *
+         * O estacionario nao e' uma constante repetida: e' uma EQUACAO. Newton com fonte da'
+         *      dT/dt = -k(T - T_amb) + P/C
+         * e T_CORPO e' ponto fixo exactamente quando P/C = k.(T_CORPO - T_amb). Isso mede-se
+         * como PAR, e cada metade pode falhar:
+         *   · com a fonte, partindo de T_CORPO a temperatura NAO se move — ponto fixo;
+         *   · com a fonte, partindo de OUTRA temperatura ela converge PARA T_CORPO;
+         *   · sem a fonte, o ponto fixo passa a ser T_AR — e e' a fonte que o desloca.
+         * Em centesimos de kelvin, com o gradiente 1500 = 31015 - 29515. */
         double dT_vivo = T_CORPO - T_AR;
-        int estacionario = 1;
-        for(double t = 0; t <= 24; t += 1.0){
-            double T = T_CORPO;              /* o metabolismo repoe: T nao muda */
-            if(fabs(T - T_CORPO) != 0.0) estacionario = 0;
+        const long TC_z = 31015, TA_z = 29515, grad_z = TC_z - TA_z;
+        double fonte = 0.08 * (T_CORPO - T_AR);        /* P/C que sustenta o gradiente */
+        int fixo_com_fonte = 1, converge_para_corpo = 1, fixo_sem_fonte = 1;
+        {   /* parte no proprio ponto fixo: nao se move */
+            double T = T_CORPO;
+            for(int h = 0; h < 24; h++) T += -0.08*(T - T_AR) + fonte;
+            if((long)(T*100 + 0.5) != TC_z) fixo_com_fonte = 0;
         }
-        ok("VIVO o gradiente e ESTACIONARIO: o metabolismo repoe, e a temperatura nao cai",
-           estacionario && dT_vivo > 0);
+        {   /* parte de outro sitio: converge PARA o corpo, e nao para o ar */
+            double T = T_AR;
+            for(int h = 0; h < 400; h++) T += -0.08*(T - T_AR) + fonte;
+            if((long)(T*100 + 0.5) != TC_z) converge_para_corpo = 0;
+        }
+        {   /* sem fonte o ponto fixo desce ao ambiente: e' a FONTE que o desloca */
+            double T = T_CORPO;
+            for(int h = 0; h < 400; h++) T += -0.08*(T - T_AR);
+            if((long)(T*100 + 0.5) != TA_z) fixo_sem_fonte = 0;
+        }
+        int estacionario = fixo_com_fonte && converge_para_corpo && fixo_sem_fonte;
+        printf("     -> o ponto fixo COM fonte e' %ld centesimos de K e SEM fonte e' %ld:"
+               " a fonte desloca-o de %ld\n", TC_z, TA_z, grad_z);
+        ok("VIVO o gradiente e' ESTACIONARIO: o metabolismo repoe, e a temperatura nao cai."
+           " E isto era uma TAUTOLOGIA — o laco comparava T_CORPO consigo proprio vinte e"
+           " cinco vezes, e `estacionario` nao podia sair de 1. O estacionario e' uma EQUACAO:"
+           " T_CORPO e' ponto fixo de Newton com fonte exactamente quando P/C = k.(T_CORPO -"
+           " T_amb), e mede-se como PAR com as tres metades a poderem falhar — partindo do"
+           " ponto fixo nao se move, partindo do ambiente CONVERGE para o corpo, e sem a fonte"
+           " o ponto fixo desce ao ambiente. E' a FONTE que o desloca, de 1500 centesimos de K",
+           estacionario && dT_vivo > 0 && grad_z == 1500);
 
         /* MORTO: Newton. T(t) = T_amb + (T0 - T_amb)e^{-kt}, e ele CONVERGE. */
         printf("     %8s %12s %12s %14s\n", "t (h)", "T (K)", "T - T_amb", "Carnot");
@@ -420,8 +476,33 @@ int main(void){
         ok("MORTO o gradiente RELAXA: cai monotonamente e converge para o ambiente",
            converge);
         double T24 = T_AR + (T_CORPO - T_AR)*exp(-k*24);
-        ok("e no limite ele VIRA ambiente: a diferenca tende a zero, e nao a outra coisa",
-           fabs(T24 - T_AR) < (T_CORPO - T_AR)*0.2);
+        /* «menor que 20% do gradiente inicial» era um numero meu, e diz menos do que Newton
+         * da'. A lei e' GEOMETRICA: em intervalos iguais o gradiente cai pelo MESMO factor,
+         * porque exp(-k(t+D))/exp(-kt) = exp(-kD) nao depende de t. Isso mede-se sem log e
+         * sem conhecer o factor — por produtos CRUZADOS:
+         *
+         *      g(t+D) . g(t')  ==  g(t'+D) . g(t)      para todos os pares t, t'
+         *
+         * que e' dizer que os quocientes sao iguais sem os dividir. Vinte e cinco pares, e
+         * o que resta e' o arredondamento da representacao. E o quanto CAI diz-se em
+         * milesimos: o gradiente as 24 h e' 146 milesimos do inicial, enquadrado. */
+        double g_[7]; for(int i = 0; i < 7; i++) g_[i] = (T_CORPO - T_AR)*exp(-k*4.0*i);
+        long pares_g = 0, cruzados = 0;
+        for(int i = 0; i < 6; i++) for(int j = 0; j < 6; j++){
+            pares_g++;
+            long e = (long)(g_[i+1]*g_[j]*1e9 + 0.5), d = (long)(g_[j+1]*g_[i]*1e9 + 0.5);
+            if(e == d) cruzados++;
+        }
+        long queda_z = (long)((T24 - T_AR)/(T_CORPO - T_AR)*1000);
+        printf("     -> a queda e' GEOMETRICA: %ld de %ld produtos cruzados batem, e as 24 h"
+               " o gradiente vale %ld milesimos do inicial\n", cruzados, pares_g, queda_z);
+        ok("e no limite ele VIRA ambiente: a diferenca tende a zero, e nao a outra coisa."
+           " E a lei e' GEOMETRICA, nao «menor que 20%», que era um numero meu: em intervalos"
+           " iguais o gradiente cai pelo MESMO factor, porque exp(-k(t+D))/exp(-kt) nao depende"
+           " de t, e isso mede-se sem log e sem conhecer o factor — por produtos CRUZADOS,"
+           " g(t+D).g(t') == g(t'+D).g(t), que e' dizer que os quocientes sao iguais sem os"
+           " dividir. E o quanto cai diz-se: 146 milesimos as 24 horas",
+           pares_g == 36 && cruzados == pares_g && queda_z == 146);
 
         /* A INVERSAO: se o ambiente esta MAIS QUENTE, a seta troca de sinal. */
         long T_AMB_QUENTE = 315.0;         /* 42 C — um dia de deserto */
@@ -449,12 +530,19 @@ int main(void){
                "        T_CORPO - T_AMB em %ld de %ld, e os dois sinais aparecem (%ld negativos,\n"
                "        %ld positivos). A seta e' do PAR, e nao do corpo.\n",
                sinal_bate, amb_tot, neg, pos);
+        /* e os dois gradientes tambem se dizem em centesimos de kelvin, que e' a regua em
+         * que as temperaturas estao escritas: 310,15 contra 315,00 da' -485 centesimos, e as
+         * seis horas -300 — os dois NEGATIVOS e o segundo MENOS negativo, ou seja o cadaver
+         * aquece e a distancia ao ambiente encolhe */
+        long g0_z = (long)(g0*100 - 0.5), g6_z = (long)(g6*100 - 0.5);
+        printf("     -> em centesimos de K: g0 = %ld e g6 = %ld, os dois negativos e o"
+               " segundo mais perto de zero\n", g0_z, g6_z);
         ok("e a SETA INVERTE se o ambiente e mais quente: o corpo passa a RECEBER calor. E o"
            " que se mede e' que o SINAL do gradiente e' o de T_CORPO - T_AMB, varrendo o"
            " ambiente de 250 a 350 K — com os DOIS sinais presentes, sem o que «inverte»"
            " valia por nunca inverter. A assercao anterior, g6 > g0 com g0 < 0, reduzia-se a"
            " exp(-6k) < 1, que e' k > 0: nao dependia dos 315 K nem das seis horas",
-           sinal_bate == amb_tot && neg > 0 && pos > 0 && g0 < 0 && g6 < 0);
+           sinal_bate == amb_tot && neg > 0 && pos > 0 && g0_z == -485 && g6_z < 0 && g6_z > g0_z);
         printf("     -> com o ambiente a 42 C o gradiente nasce NEGATIVO (%.2f K) e sobe para\n", g0);
         printf("        %.2f K: o cadaver aquece. A seta nao e uma propriedade do corpo — e do\n", g6);
         puts("        PAR, e e por isso que ela vira quando o par vira.");
@@ -463,8 +551,15 @@ int main(void){
          * de um corpo VIVO, e isso nao e uma limitacao tecnica: e a definicao. */
         double ec_vivo = carnot(T_CORPO, T_AR);
         double ec_24h  = carnot(T24, T_AR);
-        ok("E O HEADJACK PARA: a eficiencia cai com o gradiente, e num corpo frio ela e zero",
-           ec_24h < ec_vivo/3.0);
+        /* `< ec_vivo/3` tinha o dobro da folga: a razao real e' 6,5. Diz-se, em partes por
+         * milhao de eficiencia e enquadrada dos dois lados por multiplicacao. */
+        long ecv = (long)(ec_vivo*1000000), ec24 = (long)(ec_24h*1000000);
+        printf("     -> Carnot em ppm: vivo %ld, as 24 h %ld\n", ecv, ec24);
+        ok("E O HEADJACK PARA: a eficiencia cai com o gradiente, e num corpo frio ela e' zero."
+           " E o quanto diz-se em vez de se arbitrar: em partes por milhao de eficiencia a"
+           " razao esta' entre 6 e 7, enquadrada dos dois lados por multiplicacao e sem"
+           " dividir. O `< ec_vivo/3` tinha o dobro da folga",
+           ec24 > 0 && 6*ec24 < ecv && ecv < 7*ec24);
         printf("     -> Carnot vivo %.2f%%, as 24 h %.2f%%. A maquina nao para por avaria: para\n",
                100*ec_vivo, 100*ec_24h);
         puts("        porque o corpo parou de a alimentar.");
