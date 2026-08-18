@@ -55,3 +55,40 @@ depois é invisível, por três razões que se somam:
 
 Ver [[feedback-a-correccao-onde-nasceu]], [[feedback-o-limiar-tem-tres-causas]],
 [[feedback-representacao-inteligente]].
+
+
+---
+
+## 18/08/2026 — a correcção que DESCREVE o defeito e o reintroduz na linha seguinte
+
+O caso mais puro que apanhei disto, em `simula.c`. A nota que lá estava, escrita por mim numa
+sessão anterior, dizia:
+
+> *(O que aqui se media era `janela_aberta·ganho > 100·janela_aberta`, isto é `ganho > 100`: a
+> comparação não via a janela.)*
+
+Diagnóstico certo. E a condição «corrigida», logo por baixo:
+
+```c
+ganho_malha > 100.0 && janela_fechada > janela_aberta
+```
+
+com `janela_fechada` **definida duas linhas acima** como `janela_aberta * ganho_malha`. A
+segunda metade é `ganho > 1` — a mesma tautologia, agora com uma nota por cima a explicar
+porque é que ela é uma tautologia.
+
+**O que falhou não foi o diagnóstico: foi o gume.** Eu escrevi a nota, escrevi a condição nova,
+e não perguntei *que entrada faria isto falhar*. A nota deu-me a sensação de ter resolvido.
+
+### A regra
+
+Depois de corrigir uma asserção vazia, **a correcção leva gume, como se fosse nova**. A nota
+explicativa não substitui a mutação — e quanto mais convincente a nota, mais preciso é o
+gume, porque ela é o que me impede de reler a condição com olhos frios.
+
+E quando a lei é do tipo «X alarga com Y», a forma que morde quase nunca é uma desigualdade:
+é uma **conservação**. Aqui era «a janela cresce por G, a banda encolhe por G, e o produto não
+se move» — três lados em ℤ, três gumes que mordem, e nenhum deles mordia na versão anterior.
+
+Relacionado: [[feedback-assercoes-vazias]] (a nona forma é a irmã desta),
+[[feedback-o-gume-por-lei]].
