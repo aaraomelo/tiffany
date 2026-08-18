@@ -3571,6 +3571,211 @@ $\leftrightarrow$ folhas, fechar $\leftrightarrow$ não fechar.
 
 \section{As realizações do polo MULTIPLICATIVO}\label{sec:realiz-mult}
 
+\begin{teorema}[A CONTINUAÇÃO TEM IDA E VOLTA, e as duas são exactas]\label{thm:continuacao}
+\emph{Os polos de que aqui se fala são as folhas da \code{algebrico def:espaco}}, e a ida e a
+volta deste teorema são as duas metades que lá estão: sair de $\mathbb{Q}$ e regressar.
+A continuação analítica costuma dizer-se numa direcção: a série vive num disco, a forma
+fechada vive no plano, e o que sai do disco não se perde --- \emph{muda-se de fórmula, não
+de objecto}. Mas isso é meia lei. A outra metade é a \textbf{volta}, e é ela que faz da
+continuação uma \emph{bijecção} e não uma projecção:
+\[
+\boxed{
+\begin{array}{ll}
+\textbf{IDA} & m\ \longrightarrow\ t_k=\sigma^{k}+(\sigma\dg)^{k}\ \longrightarrow\
+L(x)=\sum t_k x^{k}/k\ \longrightarrow\ -\log(1-mx-x^{2})\\[3pt]
+\textbf{VOLTA} & L\ \longrightarrow\ c_k\ \longrightarrow\ t_k=k\,c_k\ \longrightarrow\
+\text{o OPERADOR}
+\end{array}}
+\]
+
+\textbf{(1) A volta faz-se sem sair de $\mathbb{Q}$.} Multiplicam-se os coeficientes da
+forma fechada por $k$, e o que sai \emph{tem} de ser a sequência de traços: \textbf{inteira},
+a satisfazer a recorrência do operador, e com $t_1=m$. \emph{O operador lê-se de volta na
+série} --- a ida não perde nada.
+
+\textbf{(2) E ela é ÚNICA, que é o que lhe dá conteúdo.} Dois operadores diferentes dão
+séries diferentes; se não dessem, «recuperar $m$ da série» não queria dizer nada, porque
+dois objectos com a mesma imagem tornariam a inversa uma \emph{escolha}. Mede-se par a
+par, em $\mathbb{Q}$ e sem régua.
+
+\textbf{(3) E a volta É o \code{algebrico thm:residuo-fixo}.} Extrair o coeficiente é somar
+sobre os polos, e os polos \emph{são} os pontos fixos: $t_k=\sigma^{k}+(\sigma\dg)^{k}$ é a
+soma dos resíduos. \emph{A continuação de volta não devolve um número: devolve o par
+dual.} É por isso que os metais aparecem na continuação --- dentro do disco eles não se
+veem, e nos polos são tudo o que há (\code{algebrico thm:corte-fixo}).
+
+\textbf{(4) E há uma segunda volta, que é a do DOMÍNIO.} A continuação analítica prolonga
+o \emph{valor}; a projectiva prolonga o \emph{lugar}: em $\mathbb{P}^1$ o polo em $0$ é
+ponto ordinário, e $S$ troca $0\leftrightarrow\infty$ com $S^{2}=I$
+(\code{algebrico thm:aditiva}). \emph{Uma acrescenta plano à função, a outra acrescenta ponto
+ao espaço} --- e as duas dizem «o buraco era da fórmula, não do objecto». $\square$
+\end{teorema}\begin{corolario}[a cúspide na CONTINUAÇÃO: o polo duplo, e o $k$ que
+aparece]\label{cor:cuspide-continuacao}
+O Teor.~\ref{thm:continuacao} põe a ida e a volta, e os \textbf{polos} de
+$L(x)=-\log(1-mx-x^{2})$ são as folhas. A cúspide é onde eles \textbf{colidem}, e a
+consequência lê-se nas duas direcções.
+
+\textbf{A recorrência dos traços é a mesma nos três regimes} ---
+$t_{k+1}=\operatorname{tr}t_k-\det t_{k-1}$, com $t_0=2$, $t_1=\operatorname{tr}$, tudo
+inteiro ---, \emph{mas a base das suas soluções muda ao passar por $\tau=0$}:
+\[
+\begin{array}{lll}
+\tau=+1 & \{\sigma^{k},\,(\sigma\dg)^{k}\} & \text{polos separados: os traços CRESCEM}\\
+\tau=\ \ 0 & \{\lambda^{k},\,k\,\lambda^{k}\} & \textbf{polo DUPLO: aparece o }k\\
+\tau=-1 & \text{folhas conjugadas} & \text{polos no círculo: OSCILA, e fecha}
+\end{array}
+\]
+Na cúspide $t_k=2\lambda^{k}$ exactamente, e a segunda solução da recorrência é
+$k\,\lambda^{k}$ --- ela \emph{só existe} porque o polo é duplo.
+
+\textbf{E o $k$ que aparece é o mesmo $k$ da volta.} O Teor.~\ref{thm:continuacao}(1)
+recupera o operador por $t_k=k\,c_k$; aqui o $k$ entra na própria base das soluções. Não são
+dois $k$: é a \textbf{ordem do polo} a mostrar-se no coeficiente --- na ida como o
+factor que a segunda solução carrega, na volta como o factor que a extracção repõe.
+\emph{A cúspide é o único sítio onde as duas direcções da torre se veem uma à outra.}
+
+\textbf{E as três peças da tríade dizem isto cada uma na sua coluna.} A continuação tem ida
+e volta (Teor.~\ref{thm:continuacao}); o que muda de peça para peça é \emph{onde} a
+reflexão se realiza:
+\[
+\begin{array}{lll}
+\textbf{CANTOR} & \text{a escrita} & \text{dígitos }\{-1,0,+1\}:\ \text{reverter troca os}
+\ \pm1\ \text{e deixa o }0\\[2pt]
+\textbf{JULIA} & \text{o operador} & \nu^{2}=\mathrm{id}:\ \text{a reflexão em pessoa,
+ordem }2\\[2pt]
+\textbf{VIVIANI} & \text{o meio-ângulo} & i^{2}=-1:\ \text{a reflexão é a METADE dele,}
+\ \operatorname{ord}(i)=2\operatorname{ord}(\nu)
+\end{array}
+\]
+Cantor reflecte \emph{onde se escreve}, Julia reflecte \emph{o que se aplica}, e Viviani é
+a sua raiz quadrada --- por isso a ordem $4$. \emph{As três reflectem o mesmo
+$\{-1,0,+1\}$}, e as três fixam o zero: a cúspide é o que nenhuma delas move, e é por isso
+que o teste $\operatorname{rev}(\tau)=\tau$ vale nas três colunas sem mudar de forma.
+$\square$
+\end{corolario}\begin{teorema}[o corte É o ponto fixo --- com ida e volta, que é a
+dualidade]\label{thm:corte-ponto-fixo}
+O \code{algebrico thm:real-caminho} diz que \emph{a folha não é nó}, e fecha-o com uma
+impossibilidade concreta: $(2m+N)^{2}=5N^{2}$. Essa impossibilidade tem nome, e
+generaliza-se a toda a família --- \textbf{ela é a equação do ponto fixo}.
+
+\emph{(i) O andar tem três pontos, e a Lei 0 é que os fecha.} Em $\mathbb{P}^1$ são
+$0=[0:1]$, $1=[1:1]$ e $\infty=[1:0]$; e por $0^{\dagger}=\infty$
+(\code{teoria cor:zero-infinito}) o infinito \textbf{não é um número grande}: é um ponto
+como os outros. A acção de $A_m$ é então a matriz vezes o vector, \emph{sem uma
+divisão},
+\[
+[p:q]\ \longmapsto\ [\,m\,p+q\ :\ p\,],
+\]
+e a órbita de $\infty$ é a sucessão dos convergentes. \textbf{O ponto de partida só
+existe por causa da Lei 0}: num corpo sem ela, «começar no infinito» não quer dizer
+nada.
+
+\emph{(ii) O ponto fixo é o vector próprio, e são dois.} $x$ é fixo por $g(x)=m+1/x$
+exactamente quando $[x:1]$ é vector próprio de $A_m$, isto é $x^{2}=mx+1$; as duas
+raízes têm soma $\operatorname{tr}A_m=m$ e produto $\det A_m=-1$ --- \emph{inteiros},
+e é o par dual $(\sigma,\sigma^{\dagger})$ do \code{algebrico thm:gato}.
+
+\emph{(iii) E o corte é a falta dele.} Em coordenadas homogéneas o ponto fixo pede
+$p^{2}-mpq-q^{2}=0$, e \textbf{completando o quadrado} isso é
+\[
+\boxed{\;4\bigl(p^{2}-m\,p\,q-q^{2}\bigr)=(2p-mq)^{2}-D\,q^{2},
+\qquad D=m^{2}+4\;}
+\]
+--- identidade em $\mathbb{Z}$. Logo
+\[
+\boxed{\;\text{o ponto fixo vive em }\mathbb{P}^1(\mathbb{Q})
+\iff D\ \text{é quadrado perfeito}\;}
+\]
+e a questão deixa de ser sobre racionais para ser sobre um inteiro. \textbf{E aí
+decide-se em duas linhas, para todo $m\geq1$}: $m^{2}<D<(m+2)^{2}$ --- a segunda
+desigualdade é $0<4m$ ---, logo o único quadrado possível no meio é $(m+1)^{2}$; e
+$D=(m+1)^{2}$ pede $2m=3$, que não tem solução em $\mathbb{Z}$. \emph{É o passo, e
+não a lista.}
+
+Portanto: a órbita corre toda em $\mathbb{P}^1(\mathbb{Q})$ e o ponto para onde ela
+vai não está lá. \textbf{O corte não é uma construção acrescentada por fora: é o
+ponto fixo da Möbius visto do andar que não o contém}, e o
+$(2m+N)^{2}=5N^{2}$ do \code{algebrico thm:real-caminho} é o caso $m=1$.
+
+\emph{(iv) E a face finita di-lo pelo contrário.} A \emph{mesma} equação
+$x^{2}=mx+1$ tem raiz em $\mathbb{F}_p$ exactamente quando $D$ é resíduo quadrático
+--- e aí o ponto fixo \textbf{está} no andar, a órbita cai nele, e não há corte
+nenhum a fazer. Donde o enunciado na forma que o torna estrutural:
+\[
+\boxed{\;\text{o corte é a equação do ponto fixo a \textbf{não fechar} no corpo onde
+a órbita corre}\;}
+\]
+--- e não um defeito de $\mathbb{Q}$.
+
+\emph{(v) E há VOLTA --- é a metade dual, e sem ela isto seria meia lei.} A ida é a
+órbita; a volta existe porque $\det A_m=-1$, e é o \textbf{fator de potência unitário}
+que a torna exacta:
+\[
+\boxed{\;A_m^{-1}=\frac{1}{\det}\operatorname{adj}A_m
+=\begin{pmatrix}0&1\\1&-m\end{pmatrix}\ \text{---\ \textbf{inteira}},
+\qquad
+[p:q]\ \longmapsto\ [\,q\ :\ p-mq\,]\;}
+\]
+E essa acção é, \emph{letra por letra}, a descida do ponto (iii). \textbf{A descida não
+era um truque de teoria dos números: é a órbita para trás} --- e é por isso que ela
+encolhe, porque a ida cresce como $\sigma^{k}$ e a volta desce pelo mesmo caminho, a
+chegar ao $\infty$ exacto.
+
+\noindent E o par $0\leftrightarrow\infty$ é o caso mais simples de todos: a troca
+$S=\begin{pmatrix}0&1\\1&0\end{pmatrix}$ tem $S^{2}=I$, logo é a \emph{sua
+própria} inversa --- \textbf{ida e volta pela mesma matriz}, que é o que a Lei 0 diz.
+Donde a forma dual do enunciado:
+\[
+\boxed{
+\begin{array}{ll}
+\text{a \textbf{ida}} & \text{a órbita de }\infty\text{: os convergentes, a crescer}\\[3pt]
+\text{a \textbf{volta}} & A_m^{-1}\text{ inteira: a descida, a encolher}\\[3pt]
+\text{e o que a \textbf{fecha}} & \lvert\det A_m\rvert=1
+\end{array}}
+\]
+
+\emph{Medido:} \code{tests/corte\_ponto\_fixo.c} ($6{:}0$) --- $264$ passos da órbita
+com $\lvert\det\rvert=1$; Cayley--Hamilton nos metais; a forma canónica em $31\,212$
+triplos; o passo nos seus dois membros; $62$ dos $126$ metais de
+$\mathbb{F}_{127}$ com ponto fixo, por duas rotas concordantes, contra \emph{zero}
+em $\mathbb{Q}$ para todo $m$; e a volta: $A_mA_m^{-1}=I$, a órbita a regressar ao
+$\infty$ exacto, $S^{2}=I$, e $16\,128$ pares (metal, ponto) a fechar na face finita.
+$\square$
+\end{teorema}\begin{teorema}[E O QUE O FUNDAMENTA É O TEOREMA CENTRAL: Hurwitz conta, Gentil integra,
+Lebesgue casa-os]\label{thm:central-energia}
+O \code{algebrico thm:conservacao} diz \emph{que} a energia se conserva. Falta dizer
+\textbf{por que é que ela pode ser conservada} --- e a resposta é o \textbf{teorema
+central Gentil--Hurwitz}, que vive hoje no \emph{Corpo Analítico}
+(\code{analitico sec:central}) por não estar na cadeia principal, e que se usa em
+\code{teoria thm:parseval-multi} --- \emph{o Parseval multidimensão, no anel escolhido} ---
+para derivar a energia; e cujo corolário
+(\code{algebrico cor:verifica-energia}) já dizia a frase toda: \emph{a indução legítima CONSERVA
+$E$; a que viola o invariante muda $E$, e a meta-indução acusa}.
+
+\textbf{(1) HURWITZ CONTA --- e é o lado exacto.} A órbita completa da raiz fecha:
+\[
+\boxed{\;\sum_{k=0}^{N-1}\omega^{(i-j)k}=N\cdot\delta_{ij}\;}
+\]
+--- $N$ na diagonal, \textbf{zero} fora. Os cruzados não são pequenos: cancelam-se
+\emph{exactamente}, e é daqui que Parseval sai. \emph{É o corte discreto.}
+
+\textbf{(2) GENTIL INTEGRA --- e é o lado que não tem grau.} A mesma linha, integrada,
+é $\int\abs{f}^{2}=\int\abs{F}^{2}$ com a medida de Lebesgue.
+
+\textbf{(3) LEBESGUE CASA-OS, e o que ele preserva é a ORDEM.} A $\sigma$-aditividade
+transporta a contagem para o integral \emph{sem perder a ordem} --- é o degrau
+$\mathbb{Q}\to\mathbb{R}$. \emph{A soma reversível é o que autoriza a ponte}, e
+reversível é a mesma palavra do \code{algebrico thm:conservacao}(3): conservar e poder voltar.
+
+\textbf{(4) E O TECTO DE OITO É DA NORMA, NÃO DO OBJECTO.} Hurwitz limita a
+$n\in\{1,2,4,8\}$ quando se exige norma \emph{euclidiana} multiplicativa \textbf{e}
+operação bilinear. A recta não paga esse tecto porque a energia que ela conserva
+\textbf{não é a euclidiana}: é o \textbf{determinante}, que é multiplicativo em todo $n$.
+\emph{Foi por isso que $\abs{\det}=1$ pôde ser a lei de conservação em todos os andares.}
+Gentil escapa pelo mesmo sítio, e paga com a bilinearidade --- \emph{o que ele cede não é
+a norma, é a bilinearidade}. $\square$
+\end{teorema}
+
 \noindent\emph{Veio do centro, e veio para este polo} (\code{analitico sec:mellin}): o
 Teorema Central do \textbf{contínuo}, que é realização específica do lado que não fecha.
 A régua vem com ele.

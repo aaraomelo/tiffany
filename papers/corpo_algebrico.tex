@@ -444,7 +444,7 @@ não faz é chegar a $\mathbb{R}$}: $\mathbb{Q}$ não é completo, e a testemunh
 (\code{analitico prop:q-falha}).
 
 \textbf{(2) A TOPOLOGIA é o palco, e é cega para duas coisas.} Aqui vivem $\chi=V-A+F$ e o
-cone pelo centro (\S\ref{sec:euler}), o toro (Teor.~\ref{thm:toro}) e a métrica canónica
+cone pelo centro (\S\ref{sec:euler}), o toro (\code{topologico thm:toro}) e a métrica canónica
 (Teor.~\ref{thm:metrica}). E o que ela \emph{não} vê mede-se: \textbf{não vê o andar} ---
 quem o vê é o traço --- e \textbf{não vê a medida}, porque há isometrias da própria métrica
 canónica que mudam a área. Donde: \emph{a topologia é onde as coisas acontecem, não é quem
@@ -454,7 +454,7 @@ sai do \emph{determinante}. \textbf{As duas são condições da estrutura inteir
 
 \textbf{(3) A ANÁLISE é o alcance, e o preço é o limite.} Aqui vivem o corte
 (Teor.~\ref{thm:corte}, \code{analitico thm:folhas-corte}), a continuação nas duas direcções
-(Teor.~\ref{thm:continuacao}), o supremo e o ínfimo (\code{analitico thm:supremo},
+(\code{analitico thm:continuacao}), o supremo e o ínfimo (\code{analitico thm:supremo},
 \code{analitico cor:infimo}), a completude (\code{analitico thm:completude}), a série
 (\code{analitico thm:serie-quadratica}), o $e$ e o $\pi$. \emph{É esta camada que chega a
 $\mathbb{R}$}, e chega porque aceita o que as outras recusam: um objecto definido por
@@ -2020,40 +2020,7 @@ todo o passo, o denominador decresce em todas, $\abs{\det}=1$ em todas, e a para
 $p=\gcd$ em $6400$ de $6400$ --- $24\,364$ passos ao todo, e a mais longa com $9$; e nos
 $12$ metais a energia vale $1$ e não se esgota em nenhum}
 
-\begin{teorema}[E O QUE O FUNDAMENTA É O TEOREMA CENTRAL: Hurwitz conta, Gentil integra,
-Lebesgue casa-os]\label{thm:central-energia}
-O Teor.~\ref{thm:conservacao} diz \emph{que} a energia se conserva. Falta dizer
-\textbf{por que é que ela pode ser conservada} --- e a resposta é o \textbf{teorema
-central Gentil--Hurwitz}, que vive hoje no \emph{Corpo Analítico}
-(\code{analitico sec:central}) por não estar na cadeia principal, e que se usa em
-\code{teoria thm:parseval-multi} --- \emph{o Parseval multidimensão, no anel escolhido} ---
-para derivar a energia; e cujo corolário
-(\ref{cor:verifica-energia}) já dizia a frase toda: \emph{a indução legítima CONSERVA
-$E$; a que viola o invariante muda $E$, e a meta-indução acusa}.
 
-\textbf{(1) HURWITZ CONTA --- e é o lado exacto.} A órbita completa da raiz fecha:
-\[
-\boxed{\;\sum_{k=0}^{N-1}\omega^{(i-j)k}=N\cdot\delta_{ij}\;}
-\]
---- $N$ na diagonal, \textbf{zero} fora. Os cruzados não são pequenos: cancelam-se
-\emph{exactamente}, e é daqui que Parseval sai. \emph{É o corte discreto.}
-
-\textbf{(2) GENTIL INTEGRA --- e é o lado que não tem grau.} A mesma linha, integrada,
-é $\int\abs{f}^{2}=\int\abs{F}^{2}$ com a medida de Lebesgue.
-
-\textbf{(3) LEBESGUE CASA-OS, e o que ele preserva é a ORDEM.} A $\sigma$-aditividade
-transporta a contagem para o integral \emph{sem perder a ordem} --- é o degrau
-$\mathbb{Q}\to\mathbb{R}$. \emph{A soma reversível é o que autoriza a ponte}, e
-reversível é a mesma palavra do Teor.~\ref{thm:conservacao}(3): conservar e poder voltar.
-
-\textbf{(4) E O TECTO DE OITO É DA NORMA, NÃO DO OBJECTO.} Hurwitz limita a
-$n\in\{1,2,4,8\}$ quando se exige norma \emph{euclidiana} multiplicativa \textbf{e}
-operação bilinear. A recta não paga esse tecto porque a energia que ela conserva
-\textbf{não é a euclidiana}: é o \textbf{determinante}, que é multiplicativo em todo $n$.
-\emph{Foi por isso que $\abs{\det}=1$ pôde ser a lei de conservação em todos os andares.}
-Gentil escapa pelo mesmo sítio, e paga com a bilinearidade --- \emph{o que ele cede não é
-a norma, é a bilinearidade}. $\square$
-\end{teorema}
 \colunas{o teorema central fundamenta a conservação}
         {Hurwitz conta (a ortogonalidade exacta), Gentil integra, Lebesgue transporta sem
 perder a ordem --- e o tecto de $8$ é da norma euclidiana, não da recta}
@@ -2064,7 +2031,7 @@ $6561$ e a euclidiana só em $289$ --- é o contraste que diz qual delas não te
 
 \begin{teorema}[A MÉTRICA CANÓNICA É A DE LEBESGUE --- e conservar a MEDIDA não é
 conservar a DISTÂNCIA]\label{thm:metrica}
-O Teor.~\ref{thm:central-energia} atribui a Lebesgue o \emph{transporte da ordem}, e o
+O \code{analitico thm:central-energia} atribui a Lebesgue o \emph{transporte da ordem}, e o
 Teor.~\ref{thm:conservacao} dá $\abs{\det}=1$ como a conservação. Falta a \textbf{métrica},
 e ela não é escolha: é a da \textbf{diferença simétrica},
 \[
@@ -2158,7 +2125,7 @@ passa de um ao outro é a derivada.
 \textbf{(4) E o que atravessa é a ORDEM.} $\mu$ é \textbf{monótona} --- $A\subseteq B
 \Rightarrow\mu(A)\leq\mu(B)$ --- e \textbf{aditiva} ---
 $\mu(A\cup B)+\mu(A\cap B)=\mu(A)+\mu(B)$, exacto. É a $\sigma$-aditividade no andar
-finito, e é ela que o Teor.~\ref{thm:central-energia} usa para transportar a contagem para
+finito, e é ela que o \code{analitico thm:central-energia} usa para transportar a contagem para
 o integral \emph{sem perder a ordem}. \emph{A ponte não leva valores: leva ordem} ---
 e a métrica é o que a torna quantitativa. $\square$
 \end{teorema}
@@ -2321,62 +2288,7 @@ identidade e MÍNIMAS; o hexal a sair como o menor $k$ onde dual e trial voltam 
 espelho e $\operatorname{ord}(i)=2\operatorname{ord}(\nu)$; e o gume das $12$ trocas de
 ordem, com $6$ a quebrar o $24$}
 
-\begin{teorema}[O TORO é o invariante geométrico da tríade --- e o GATO fica de
-fora]\label{thm:toro}
-Um automorfismo do toro $T^{2}=\mathbb{R}^{2}/\mathbb{Z}^{2}$ é uma matriz $2\times2$
-\emph{inteira} com $\abs{\det}=1$. As ordens \textbf{finitas} que ele pode ter são cinco,
-e só cinco:
-\[
-\boxed{\;\operatorname{ord}\in\{1,2,3,4,6\}\;}
-\]
---- a restrição cristalográfica. E as ordens da tríade (Teor.~\ref{thm:unificacao}) são
-\emph{exactamente} essas, tirando a identidade:
-\[
-\underbrace{2}_{\text{Cantor/Julia}}\quad
-\underbrace{3}_{\text{o trial}}\quad
-\underbrace{4}_{\text{VIVIANI}}\quad
-\underbrace{6}_{\text{o hexal}}
-\]
-\textbf{O toro é o sítio onde as quatro vivem juntas.} E o que fica de FORA é o que torna
-isto uma medida:
 
-\textbf{(1) A Lei 8 não é uma ordem do toro.} $8\notin\{1,2,3,4,6\}$ --- ela é o
-\emph{índice} do catálogo, e vive noutro sítio. O Teor.~\ref{thm:unificacao} já o dizia
-sem saber: o fecho é $24=8\cdot3$, e o $8$ entra pelo produto, não pela lista.
-
-\textbf{(2) E o GATO também fica de fora --- que é o CORTE, dito pela topologia.} O gato
-desta casa é $A_m=\begin{psmallmatrix}m&1\\1&0\end{psmallmatrix}$ (\ref{thm:gato}, canónico e ainda fora do centro, \S\ref{sec:dividas}; do
-\emph{Corpo Algébrico}), com $\det=\sigma\sigma\dg=-1$ e discriminante
-\[
-D=m^{2}+4>0\quad\text{para todo }m,
-\]
-logo é \textbf{hiperbólico} e tem ordem \emph{infinita}: ele estica por $\sigma$ e
-encolhe por $1/\sigma$, e nunca volta. \emph{Ele não fecha no toro} --- e é isso o
-Teor.~\ref{thm:corte-fixo}, dito do lado do operador.
-
-\emph{E convém a precisão, que o Teor.~\ref{thm:metrica} obriga}: o que decide não é a
-topologia do toro --- essa é a mesma para todos eles ---, é o \textbf{reticulado}. A
-restrição às ordens $\{1,2,3,4,6\}$ vem de o traço ter de ser \emph{inteiro}, e a
-conservação da área vem do \emph{determinante}: as duas são condições da estrutura
-inteira, e nenhuma se lê no espaço contínuo. \textbf{A topologia é o palco; quem decide é
-a aritmética que nele vive.} O que na aritmética é «a órbita corre
-em $\mathbb{P}^1(\mathbb{Q})$ e o ponto fixo não está lá» é aqui «o automorfismo não tem
-ordem finita».
-
-\textbf{(3) E quem decide é o TRAÇO}, outra vez. Com $\det=+1$:
-\[
-\abs{\operatorname{tr}}\le1\ \Rightarrow\ \text{fecha}\qquad
-\abs{\operatorname{tr}}\ge2\ \Rightarrow\ \text{não fecha}
-\]
---- $\operatorname{tr}=-1$ dá ordem $3$, $0$ dá $4$, $1$ dá $6$. É a divisão do
-Teor.~\ref{thm:viviani} vista de cima: $d=+1$ pode fechar, $d=-1$ nunca fecha porque
-$m^{2}+4$ é sempre positivo.
-
-\textbf{(4) E $\abs{\det}=1$ é NECESSÁRIO}, não uma escolha de apresentação: as matrizes
-inteiras de determinante diferente \emph{nunca} têm ordem finita. \emph{A conservação da
-medida é a condição de haver volta} --- Teor.~\ref{thm:conservacao}(3) outra vez, agora
-como topologia. $\square$
-\end{teorema}
 \colunas{o toro, e o gato que não fecha nele}
         {as ordens finitas de $T^{2}$ são $1,2,3,4,6$ e são as da tríade; a Lei 8 e o GATO
 ficam de fora, e o gato fora é o CORTE --- decidido pelo RETICULADO (traço inteiro,
@@ -2450,7 +2362,7 @@ que é uma mutação que não derruba}: não é fraca, ficou do \textbf{mesmo la
 onde o defeito não podia viver. Mais: com passo unitário \textbf{não há como saltar por
 cima} --- não se vai de $\tau=-1$ a $\tau=+1$ sem passar pelo zero.
 
-\textbf{(6) E o quadro do Teor.~\ref{thm:toro} reparte-se, com uma correcção de sítio:}
+\textbf{(6) E o quadro do \code{topologico thm:toro} reparte-se, com uma correcção de sítio:}
 \[
 \begin{array}{lll}
 \tau=-1 & \text{ordens }3,\ 4,\ 6 & \text{o trial, VIVIANI, o hexal --- e mais nenhuma}\\
@@ -2512,50 +2424,7 @@ $13\,244$ zeros TODOS fixos; \S C10: o grupo de ordem $6$; \S C11: a leitura
 $\operatorname{rev}(\tau)=\tau\iff\tau=0$ a separar em $6\,480$ de $6\,480$, e $+0=-0$ dos
 dois lados em $20$ de $20$ famílias que atravessam}
 
-\begin{corolario}[a cúspide na CONTINUAÇÃO: o polo duplo, e o $k$ que
-aparece]\label{cor:cuspide-continuacao}
-O Teor.~\ref{thm:continuacao} põe a ida e a volta, e os \textbf{polos} de
-$L(x)=-\log(1-mx-x^{2})$ são as folhas. A cúspide é onde eles \textbf{colidem}, e a
-consequência lê-se nas duas direcções.
 
-\textbf{A recorrência dos traços é a mesma nos três regimes} ---
-$t_{k+1}=\operatorname{tr}t_k-\det t_{k-1}$, com $t_0=2$, $t_1=\operatorname{tr}$, tudo
-inteiro ---, \emph{mas a base das suas soluções muda ao passar por $\tau=0$}:
-\[
-\begin{array}{lll}
-\tau=+1 & \{\sigma^{k},\,(\sigma\dg)^{k}\} & \text{polos separados: os traços CRESCEM}\\
-\tau=\ \ 0 & \{\lambda^{k},\,k\,\lambda^{k}\} & \textbf{polo DUPLO: aparece o }k\\
-\tau=-1 & \text{folhas conjugadas} & \text{polos no círculo: OSCILA, e fecha}
-\end{array}
-\]
-Na cúspide $t_k=2\lambda^{k}$ exactamente, e a segunda solução da recorrência é
-$k\,\lambda^{k}$ --- ela \emph{só existe} porque o polo é duplo.
-
-\textbf{E o $k$ que aparece é o mesmo $k$ da volta.} O Teor.~\ref{thm:continuacao}(1)
-recupera o operador por $t_k=k\,c_k$; aqui o $k$ entra na própria base das soluções. Não são
-dois $k$: é a \textbf{ordem do polo} a mostrar-se no coeficiente --- na ida como o
-factor que a segunda solução carrega, na volta como o factor que a extracção repõe.
-\emph{A cúspide é o único sítio onde as duas direcções da torre se veem uma à outra.}
-
-\textbf{E as três peças da tríade dizem isto cada uma na sua coluna.} A continuação tem ida
-e volta (Teor.~\ref{thm:continuacao}); o que muda de peça para peça é \emph{onde} a
-reflexão se realiza:
-\[
-\begin{array}{lll}
-\textbf{CANTOR} & \text{a escrita} & \text{dígitos }\{-1,0,+1\}:\ \text{reverter troca os}
-\ \pm1\ \text{e deixa o }0\\[2pt]
-\textbf{JULIA} & \text{o operador} & \nu^{2}=\mathrm{id}:\ \text{a reflexão em pessoa,
-ordem }2\\[2pt]
-\textbf{VIVIANI} & \text{o meio-ângulo} & i^{2}=-1:\ \text{a reflexão é a METADE dele,}
-\ \operatorname{ord}(i)=2\operatorname{ord}(\nu)
-\end{array}
-\]
-Cantor reflecte \emph{onde se escreve}, Julia reflecte \emph{o que se aplica}, e Viviani é
-a sua raiz quadrada --- por isso a ordem $4$. \emph{As três reflectem o mesmo
-$\{-1,0,+1\}$}, e as três fixam o zero: a cúspide é o que nenhuma delas move, e é por isso
-que o teste $\operatorname{rev}(\tau)=\tau$ vale nas três colunas sem mudar de forma.
-$\square$
-\end{corolario}
 \colunas{a cúspide na continuação}
         {os polos de $-\log(1-mx-x^{2})$ são as folhas; em $\tau=0$ colidem num polo duplo
 e a base ganha o factor $k$ --- o mesmo $k$ da volta $t_k=k\,c_k$}
@@ -2564,45 +2433,7 @@ exacto em $6$ e $k\lambda^{k}$ a satisfazer a recorrência em $6$; os $3$ de $\t
 traços LIMITADOS e os $20$ de $\tau=+1$ a crescerem --- os três regimes separados por
 $\tau$, tudo em inteiros}
 
-\begin{teorema}[A CONTINUAÇÃO TEM IDA E VOLTA, e as duas são exactas]\label{thm:continuacao}
-\emph{Os polos de que aqui se fala são as folhas da Def.~\ref{def:espaco}}, e a ida e a
-volta deste teorema são as duas metades que lá estão: sair de $\mathbb{Q}$ e regressar.
-A continuação analítica costuma dizer-se numa direcção: a série vive num disco, a forma
-fechada vive no plano, e o que sai do disco não se perde --- \emph{muda-se de fórmula, não
-de objecto}. Mas isso é meia lei. A outra metade é a \textbf{volta}, e é ela que faz da
-continuação uma \emph{bijecção} e não uma projecção:
-\[
-\boxed{
-\begin{array}{ll}
-\textbf{IDA} & m\ \longrightarrow\ t_k=\sigma^{k}+(\sigma\dg)^{k}\ \longrightarrow\
-L(x)=\sum t_k x^{k}/k\ \longrightarrow\ -\log(1-mx-x^{2})\\[3pt]
-\textbf{VOLTA} & L\ \longrightarrow\ c_k\ \longrightarrow\ t_k=k\,c_k\ \longrightarrow\
-\text{o OPERADOR}
-\end{array}}
-\]
 
-\textbf{(1) A volta faz-se sem sair de $\mathbb{Q}$.} Multiplicam-se os coeficientes da
-forma fechada por $k$, e o que sai \emph{tem} de ser a sequência de traços: \textbf{inteira},
-a satisfazer a recorrência do operador, e com $t_1=m$. \emph{O operador lê-se de volta na
-série} --- a ida não perde nada.
-
-\textbf{(2) E ela é ÚNICA, que é o que lhe dá conteúdo.} Dois operadores diferentes dão
-séries diferentes; se não dessem, «recuperar $m$ da série» não queria dizer nada, porque
-dois objectos com a mesma imagem tornariam a inversa uma \emph{escolha}. Mede-se par a
-par, em $\mathbb{Q}$ e sem régua.
-
-\textbf{(3) E a volta É o Teor.~\ref{thm:residuo-fixo}.} Extrair o coeficiente é somar
-sobre os polos, e os polos \emph{são} os pontos fixos: $t_k=\sigma^{k}+(\sigma\dg)^{k}$ é a
-soma dos resíduos. \emph{A continuação de volta não devolve um número: devolve o par
-dual.} É por isso que os metais aparecem na continuação --- dentro do disco eles não se
-veem, e nos polos são tudo o que há (Teor.~\ref{thm:corte-fixo}).
-
-\textbf{(4) E há uma segunda volta, que é a do DOMÍNIO.} A continuação analítica prolonga
-o \emph{valor}; a projectiva prolonga o \emph{lugar}: em $\mathbb{P}^1$ o polo em $0$ é
-ponto ordinário, e $S$ troca $0\leftrightarrow\infty$ com $S^{2}=I$
-(Teor.~\ref{thm:aditiva}). \emph{Uma acrescenta plano à função, a outra acrescenta ponto
-ao espaço} --- e as duas dizem «o buraco era da fórmula, não do objecto». $\square$
-\end{teorema}
 \colunas{a continuação, nas duas direcções}
         {a ida dá a forma fechada, a volta devolve o operador ($t_k=k\,c_k$), e ela é única}
         {\code{tests/continua.c} \S C8: a volta a devolver os traços em $6$ de $6$ metais,
@@ -2668,7 +2499,7 @@ acrescenta objecto nenhum.
 \textbf{(1) O TORO não é mais um operador na lista: é a CONDIÇÃO.} O passo
 \textbf{INVERTE} só existe porque $\operatorname{adj}(T)/\det T$ é \emph{inteira}, e ela
 só o é com $\abs{\det T}=1$ --- dividir por $\pm1$ é multiplicar por $\pm1$. É o
-Teor.~\ref{thm:toro} a ser a peça que fecha o ciclo, e o
+\code{topologico thm:toro} a ser a peça que fecha o ciclo, e o
 Teor.~\ref{thm:conservacao}(3) dito como algoritmo: \emph{conservar e poder voltar são a
 mesma frase}. Com $\abs{\det}\neq1$ a inversão \textbf{recusa} --- e recusar é dizer, não
 truncar.
@@ -2739,12 +2570,12 @@ para andar}\\[3pt]
 \ref{thm:residuo-fixo} os resíduos & a soma \emph{é} o traço & a norma é o invariante\\
 \ref{thm:aditiva} a soma & os índices somam & $\det(A_aA_0A_b)=\det A_{a+b}$\\
 \ref{thm:conservacao} a paragem & $q$ é o orçamento & $\gcd$ é a energia\\
-\ref{thm:central-energia} o central & Hurwitz conta & Gentil integra, Lebesgue transporta\\
+\code{analitico thm:central-energia} o central & Hurwitz conta & Gentil integra, Lebesgue transporta\\
 \ref{thm:cantor-julia} Cantor/Julia & o shift cicla & $\mathrm{cantor}\cdot\mathrm{julia}=-1$\\
 \ref{thm:viviani} Viviani & $t_2=m^{2}-2d$ & $\det=+1$: a volta é própria\\
 \ref{thm:unificacao} a unificação & a ORDEM identifica & $\operatorname{lcm}=24=8\cdot3$\\
-\ref{thm:toro} o toro & $\abs{\operatorname{tr}}\le1$ fecha & $\abs{\det}=1$ é necessário\\
-\ref{thm:continuacao} a continuação & a volta dá o operador & e é ÚNICA\\
+\code{topologico thm:toro} o toro & $\abs{\operatorname{tr}}\le1$ fecha & $\abs{\det}=1$ é necessário\\
+\code{analitico thm:continuacao} a continuação & a volta dá o operador & e é ÚNICA\\
 \ref{thm:universal} o ciclo & a ORDEM e a escrita & $\abs{\det}=1$ dá a INVERSÃO\\
 \bottomrule
 \end{tabular}
@@ -4501,138 +4332,11 @@ $\mathcal{M}$).
 $\square$
 \end{teorema}
 
-\begin{teorema}[o corte É o ponto fixo --- com ida e volta, que é a
-dualidade]\label{thm:corte-ponto-fixo}
-O Teor.~\ref{thm:real-caminho} diz que \emph{a folha não é nó}, e fecha-o com uma
-impossibilidade concreta: $(2m+N)^{2}=5N^{2}$. Essa impossibilidade tem nome, e
-generaliza-se a toda a família --- \textbf{ela é a equação do ponto fixo}.
-
-\emph{(i) O andar tem três pontos, e a Lei 0 é que os fecha.} Em $\mathbb{P}^1$ são
-$0=[0:1]$, $1=[1:1]$ e $\infty=[1:0]$; e por $0^{\dagger}=\infty$
-(Cor.~\ref{cor:zero-infinito}) o infinito \textbf{não é um número grande}: é um ponto
-como os outros. A acção de $A_m$ é então a matriz vezes o vector, \emph{sem uma
-divisão},
-\[
-[p:q]\ \longmapsto\ [\,m\,p+q\ :\ p\,],
-\]
-e a órbita de $\infty$ é a sucessão dos convergentes. \textbf{O ponto de partida só
-existe por causa da Lei 0}: num corpo sem ela, «começar no infinito» não quer dizer
-nada.
-
-\emph{(ii) O ponto fixo é o vector próprio, e são dois.} $x$ é fixo por $g(x)=m+1/x$
-exactamente quando $[x:1]$ é vector próprio de $A_m$, isto é $x^{2}=mx+1$; as duas
-raízes têm soma $\operatorname{tr}A_m=m$ e produto $\det A_m=-1$ --- \emph{inteiros},
-e é o par dual $(\sigma,\sigma^{\dagger})$ do Teor.~\ref{thm:gato}.
-
-\emph{(iii) E o corte é a falta dele.} Em coordenadas homogéneas o ponto fixo pede
-$p^{2}-mpq-q^{2}=0$, e \textbf{completando o quadrado} isso é
-\[
-\boxed{\;4\bigl(p^{2}-m\,p\,q-q^{2}\bigr)=(2p-mq)^{2}-D\,q^{2},
-\qquad D=m^{2}+4\;}
-\]
---- identidade em $\mathbb{Z}$. Logo
-\[
-\boxed{\;\text{o ponto fixo vive em }\mathbb{P}^1(\mathbb{Q})
-\iff D\ \text{é quadrado perfeito}\;}
-\]
-e a questão deixa de ser sobre racionais para ser sobre um inteiro. \textbf{E aí
-decide-se em duas linhas, para todo $m\geq1$}: $m^{2}<D<(m+2)^{2}$ --- a segunda
-desigualdade é $0<4m$ ---, logo o único quadrado possível no meio é $(m+1)^{2}$; e
-$D=(m+1)^{2}$ pede $2m=3$, que não tem solução em $\mathbb{Z}$. \emph{É o passo, e
-não a lista.}
-
-Portanto: a órbita corre toda em $\mathbb{P}^1(\mathbb{Q})$ e o ponto para onde ela
-vai não está lá. \textbf{O corte não é uma construção acrescentada por fora: é o
-ponto fixo da Möbius visto do andar que não o contém}, e o
-$(2m+N)^{2}=5N^{2}$ do Teor.~\ref{thm:real-caminho} é o caso $m=1$.
-
-\emph{(iv) E a face finita di-lo pelo contrário.} A \emph{mesma} equação
-$x^{2}=mx+1$ tem raiz em $\mathbb{F}_p$ exactamente quando $D$ é resíduo quadrático
---- e aí o ponto fixo \textbf{está} no andar, a órbita cai nele, e não há corte
-nenhum a fazer. Donde o enunciado na forma que o torna estrutural:
-\[
-\boxed{\;\text{o corte é a equação do ponto fixo a \textbf{não fechar} no corpo onde
-a órbita corre}\;}
-\]
---- e não um defeito de $\mathbb{Q}$.
-
-\emph{(v) E há VOLTA --- é a metade dual, e sem ela isto seria meia lei.} A ida é a
-órbita; a volta existe porque $\det A_m=-1$, e é o \textbf{fator de potência unitário}
-que a torna exacta:
-\[
-\boxed{\;A_m^{-1}=\frac{1}{\det}\operatorname{adj}A_m
-=\begin{pmatrix}0&1\\1&-m\end{pmatrix}\ \text{---\ \textbf{inteira}},
-\qquad
-[p:q]\ \longmapsto\ [\,q\ :\ p-mq\,]\;}
-\]
-E essa acção é, \emph{letra por letra}, a descida do ponto (iii). \textbf{A descida não
-era um truque de teoria dos números: é a órbita para trás} --- e é por isso que ela
-encolhe, porque a ida cresce como $\sigma^{k}$ e a volta desce pelo mesmo caminho, a
-chegar ao $\infty$ exacto.
-
-\noindent E o par $0\leftrightarrow\infty$ é o caso mais simples de todos: a troca
-$S=\begin{pmatrix}0&1\\1&0\end{pmatrix}$ tem $S^{2}=I$, logo é a \emph{sua
-própria} inversa --- \textbf{ida e volta pela mesma matriz}, que é o que a Lei 0 diz.
-Donde a forma dual do enunciado:
-\[
-\boxed{
-\begin{array}{ll}
-\text{a \textbf{ida}} & \text{a órbita de }\infty\text{: os convergentes, a crescer}\\[3pt]
-\text{a \textbf{volta}} & A_m^{-1}\text{ inteira: a descida, a encolher}\\[3pt]
-\text{e o que a \textbf{fecha}} & \lvert\det A_m\rvert=1
-\end{array}}
-\]
-
-\emph{Medido:} \code{tests/corte\_ponto\_fixo.c} ($6{:}0$) --- $264$ passos da órbita
-com $\lvert\det\rvert=1$; Cayley--Hamilton nos metais; a forma canónica em $31\,212$
-triplos; o passo nos seus dois membros; $62$ dos $126$ metais de
-$\mathbb{F}_{127}$ com ponto fixo, por duas rotas concordantes, contra \emph{zero}
-em $\mathbb{Q}$ para todo $m$; e a volta: $A_mA_m^{-1}=I$, a órbita a regressar ao
-$\infty$ exacto, $S^{2}=I$, e $16\,128$ pares (metal, ponto) a fechar na face finita.
-$\square$
-\end{teorema}
 
 
 
-\begin{teorema}[a mecânica trazida --- o fluxo como ação
-conservativa]\label{thm:mecanica}
-A mecânica não se importa: \emph{deriva-se} dos fluxos das duas
-membranas, e a pergunta da mesa («o fluxo é uma ação que conserva o
-produto dual?») responde-se SIM, com a estrutura fina à vista:
-\begin{enumerate}
-\item \textbf{a conservação}: no relógio, $c^{2}+s^{2}=1$ ao longo de
-toda a trajetória; no Pell, $\sigma$ conserva $|4N|$ \emph{alternando
-a membrana} $(-1)^{k}$ --- o sinal do encaixe --- e $\sigma^{2}$ (a
-unidade de Pell) conserva \emph{exato}, BigInt.
-\item \textbf{a energia decompõe-se nas parcelas da carta}: $c^{2}$ e
-$s^{2}$ no círculo, $u^{2}$ e $(m^{2}{+}4)v^{2}$ na hipérbole. Os dois
-regimes distinguem-se pelo comportamento das parcelas com o invariante
-fixo: no círculo elas \emph{oscilam} ($c^{2}$ periódico) e o rotor $J$
-\emph{troca-as} ($c^{2}\leftrightarrow s^{2}$, pela ação real da
-matriz) --- a troca cinética$\leftrightarrow$potencial é o rotor; no
-Pell elas \emph{escapam} ($u_{k}$ estritamente crescente) mantendo a
-diferença. Oscilação compacta e escape não-compacto: as duas mecânicas
-das duas membranas.
-\item \textbf{a $T$-simetria já estava no grupo}:
-$S\,R_{k}=R_{-k}\,S$ em todos os ticks --- a relação diedral
-$SJS=J^{-1}$ \emph{é} a reversão do tempo, com $T^{2}=\mathrm{id}$; e
-na hipérbole a estaca inverte o fluxo a menos do sinal da membrana
-($\overline{\sigma v}=-\sigma^{-1}\overline{v}$, exato).
-\item \textbf{$D_{4}$ age no fluxo}: $g\,R\,g^{-1}=R^{\det g}$ para
-os $8$ elementos --- as rotações comutam com o tempo, as reflexões
-invertem-no: \emph{o $\det$ é a seta do tempo}.
-\item \textbf{o gume}: rodar \emph{e} transladar perde a conservação
-em todos os passos --- a translação (a mesma da fronteira aditiva,
-\S L5) não é isometria do produto dual.
-\end{enumerate}
-O corpo já não é uma coleção de números: é \emph{o que sustenta
-movimentos conservativos sob as suas operações}. Se Lagrange ou
-Hamilton aparecerem, será como representação disto --- não como
-importação.
-\emph{Medido:} \code{tests/mecanica\_corpo.js} ($8{:}0$; assinado por
-$\mathcal{M}$).
-$\square$
-\end{teorema}
+
+
 
 \begin{teorema}[a costura --- termodinâmica e memória neural contra o
 mesmo observável]\label{thm:costura}

@@ -2851,6 +2851,101 @@ sozinha é metade, com a outra metade no polo oposto.
 
 \section{As realizações do polo ADITIVO}\label{sec:realiz-aditivo}
 
+\begin{teorema}[O TORO é o invariante geométrico da tríade --- e o GATO fica de
+fora]\label{thm:toro}
+Um automorfismo do toro $T^{2}=\mathbb{R}^{2}/\mathbb{Z}^{2}$ é uma matriz $2\times2$
+\emph{inteira} com $\abs{\det}=1$. As ordens \textbf{finitas} que ele pode ter são cinco,
+e só cinco:
+\[
+\boxed{\;\operatorname{ord}\in\{1,2,3,4,6\}\;}
+\]
+--- a restrição cristalográfica. E as ordens da tríade (\code{algebrico thm:unificacao}) são
+\emph{exactamente} essas, tirando a identidade:
+\[
+\underbrace{2}_{\text{Cantor/Julia}}\quad
+\underbrace{3}_{\text{o trial}}\quad
+\underbrace{4}_{\text{VIVIANI}}\quad
+\underbrace{6}_{\text{o hexal}}
+\]
+\textbf{O toro é o sítio onde as quatro vivem juntas.} E o que fica de FORA é o que torna
+isto uma medida:
+
+\textbf{(1) A Lei 8 não é uma ordem do toro.} $8\notin\{1,2,3,4,6\}$ --- ela é o
+\emph{índice} do catálogo, e vive noutro sítio. O \code{algebrico thm:unificacao} já o dizia
+sem saber: o fecho é $24=8\cdot3$, e o $8$ entra pelo produto, não pela lista.
+
+\textbf{(2) E o GATO também fica de fora --- que é o CORTE, dito pela topologia.} O gato
+desta casa é $A_m=\begin{psmallmatrix}m&1\\1&0\end{psmallmatrix}$ (\code{algebrico thm:gato}, canónico e ainda fora do centro, \code{algebrico sec:dividas}; do
+\emph{Corpo Algébrico}), com $\det=\sigma\sigma\dg=-1$ e discriminante
+\[
+D=m^{2}+4>0\quad\text{para todo }m,
+\]
+logo é \textbf{hiperbólico} e tem ordem \emph{infinita}: ele estica por $\sigma$ e
+encolhe por $1/\sigma$, e nunca volta. \emph{Ele não fecha no toro} --- e é isso o
+\code{algebrico thm:corte-fixo}, dito do lado do operador.
+
+\emph{E convém a precisão, que o \code{algebrico thm:metrica} obriga}: o que decide não é a
+topologia do toro --- essa é a mesma para todos eles ---, é o \textbf{reticulado}. A
+restrição às ordens $\{1,2,3,4,6\}$ vem de o traço ter de ser \emph{inteiro}, e a
+conservação da área vem do \emph{determinante}: as duas são condições da estrutura
+inteira, e nenhuma se lê no espaço contínuo. \textbf{A topologia é o palco; quem decide é
+a aritmética que nele vive.} O que na aritmética é «a órbita corre
+em $\mathbb{P}^1(\mathbb{Q})$ e o ponto fixo não está lá» é aqui «o automorfismo não tem
+ordem finita».
+
+\textbf{(3) E quem decide é o TRAÇO}, outra vez. Com $\det=+1$:
+\[
+\abs{\operatorname{tr}}\le1\ \Rightarrow\ \text{fecha}\qquad
+\abs{\operatorname{tr}}\ge2\ \Rightarrow\ \text{não fecha}
+\]
+--- $\operatorname{tr}=-1$ dá ordem $3$, $0$ dá $4$, $1$ dá $6$. É a divisão do
+\code{algebrico thm:viviani} vista de cima: $d=+1$ pode fechar, $d=-1$ nunca fecha porque
+$m^{2}+4$ é sempre positivo.
+
+\textbf{(4) E $\abs{\det}=1$ é NECESSÁRIO}, não uma escolha de apresentação: as matrizes
+inteiras de determinante diferente \emph{nunca} têm ordem finita. \emph{A conservação da
+medida é a condição de haver volta} --- \code{algebrico thm:conservacao}(3) outra vez, agora
+como topologia. $\square$
+\end{teorema}\begin{teorema}[a mecânica trazida --- o fluxo como ação
+conservativa]\label{thm:mecanica}
+A mecânica não se importa: \emph{deriva-se} dos fluxos das duas
+membranas, e a pergunta da mesa («o fluxo é uma ação que conserva o
+produto dual?») responde-se SIM, com a estrutura fina à vista:
+\begin{enumerate}
+\item \textbf{a conservação}: no relógio, $c^{2}+s^{2}=1$ ao longo de
+toda a trajetória; no Pell, $\sigma$ conserva $|4N|$ \emph{alternando
+a membrana} $(-1)^{k}$ --- o sinal do encaixe --- e $\sigma^{2}$ (a
+unidade de Pell) conserva \emph{exato}, BigInt.
+\item \textbf{a energia decompõe-se nas parcelas da carta}: $c^{2}$ e
+$s^{2}$ no círculo, $u^{2}$ e $(m^{2}{+}4)v^{2}$ na hipérbole. Os dois
+regimes distinguem-se pelo comportamento das parcelas com o invariante
+fixo: no círculo elas \emph{oscilam} ($c^{2}$ periódico) e o rotor $J$
+\emph{troca-as} ($c^{2}\leftrightarrow s^{2}$, pela ação real da
+matriz) --- a troca cinética$\leftrightarrow$potencial é o rotor; no
+Pell elas \emph{escapam} ($u_{k}$ estritamente crescente) mantendo a
+diferença. Oscilação compacta e escape não-compacto: as duas mecânicas
+das duas membranas.
+\item \textbf{a $T$-simetria já estava no grupo}:
+$S\,R_{k}=R_{-k}\,S$ em todos os ticks --- a relação diedral
+$SJS=J^{-1}$ \emph{é} a reversão do tempo, com $T^{2}=\mathrm{id}$; e
+na hipérbole a estaca inverte o fluxo a menos do sinal da membrana
+($\overline{\sigma v}=-\sigma^{-1}\overline{v}$, exato).
+\item \textbf{$D_{4}$ age no fluxo}: $g\,R\,g^{-1}=R^{\det g}$ para
+os $8$ elementos --- as rotações comutam com o tempo, as reflexões
+invertem-no: \emph{o $\det$ é a seta do tempo}.
+\item \textbf{o gume}: rodar \emph{e} transladar perde a conservação
+em todos os passos --- a translação (a mesma da fronteira aditiva,
+\S L5) não é isometria do produto dual.
+\end{enumerate}
+O corpo já não é uma coleção de números: é \emph{o que sustenta
+movimentos conservativos sob as suas operações}. Se Lagrange ou
+Hamilton aparecerem, será como representação disto --- não como
+importação.
+\emph{Medido:} \code{tests/mecanica\_corpo.js} ($8{:}0$; assinado por
+$\mathcal{M}$).
+$\square$
+\end{teorema}
+
 \noindent\emph{Vieram do centro, e vieram para este polo} (\code{topologico sec:fourier}):
 são realizações \textbf{específicas} do lado que fecha --- os círculos dos andares, a
 geometria de Klein, e a curva elíptica que sai de Viviani. As três vivem no aditivo porque
