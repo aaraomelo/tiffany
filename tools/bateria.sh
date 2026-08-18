@@ -374,6 +374,37 @@ if [ "$naocitados" -gt 0 ]; then
   sed 's/^/    /' /tmp/bat_nc.txt
 fi
 
+# --- e a MESMA conferencia para os DOCUMENTOS, que faltava ----------------------
+# A de cima apanha o medidor .c citado que nao existe. Faltava o gemeo: o .tex citado
+# que nao existe — e ele nao acusa em lado nenhum, porque `\code{papers/corpo-estelar.tex}`
+# nao e' uma referencia LaTeX, e' TEXTO: o pdflatex compila sem uma queixa e quem descobre
+# e' o leitor. Em 18/08 a reorganizacao deixou CATORZE assim (corpo-estelar renomeado,
+# conversa_* e torre_fundacao movidos para corpus/), e nada falhou por causa delas.
+#
+# As linhas de COMENTARIO (%) saem, porque la' o nome antigo e' registo historico e nao
+# citacao; e os caminhos de OUTRO repositorio (broca-so/) tambem, porque nao vivem aqui.
+# e o `grep -oh` CORTA o prefixo: `broca-so/papers/x.tex` saia como `papers/x.tex` e
+# aparecia como quebrado sendo de outro repositorio. O filtro tem de ser na LINHA, antes
+# de extrair — foi assim que dois falsos positivos entraram na primeira versao disto.
+{ grep -vE '^\s*%' teoria.tex catalogo.tex enredo.tex papers/*.tex conecthus/*.tex 2>/dev/null \
+    | grep -v 'broca-so/' \
+    | grep -ohE '(^|[^/a-z-])(papers|corpus/docs|corpus/fala|cristal)/[a-z_0-9-]+\.tex' \
+    | grep -oE '(papers|corpus/docs|corpus/fala|cristal)/[a-z_0-9-]+\.tex'
+  grep -vE '^\s*%' teoria.tex catalogo.tex enredo.tex papers/*.tex conecthus/*.tex 2>/dev/null \
+    | grep -v 'broca-so/' \
+    | grep -ohE '(papers|corpus/docs|corpus/fala|cristal)/[a-z0-9]+(\\_[a-z0-9]+)+\.tex' | sed 's/\\_/_/g'
+} 2>/dev/null | sort -u > /tmp/bat_tex_citados.txt
+tex_quebradas=0
+: > /tmp/bat_tex_faltam.txt
+while read -r _t; do
+  [ -n "$_t" ] || continue
+  [ -e "$RAIZ/$_t" ] || { echo "$_t" >> /tmp/bat_tex_faltam.txt; tex_quebradas=$((tex_quebradas+1)); }
+done < /tmp/bat_tex_citados.txt
+if [ "$tex_quebradas" -gt 0 ]; then
+  printf 'DOCUMENTO QUEBRADO: %d .tex citado(s) que nao existem no disco:\n' "$tex_quebradas"
+  sed 's/^/    /' /tmp/bat_tex_faltam.txt
+fi
+
 printf '%s\n' "-------------------------------------------------------------------------"
 # ── ATESTACOES ORFAS: linhas de medidores que ja' nao existem ────────────────────
 # Uma atestacao orfa nao mascara nada por si — nao ha' ficheiro para correr. Mas foi a
