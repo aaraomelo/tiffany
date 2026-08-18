@@ -118,6 +118,9 @@
 
 ## Checkpoints
 
+- **[18/08 — A TRÍADE, e o centro que não escolhe lado](project-checkpoint-2026-08-18-a-triade.md)** — as casas dadas (GPT/−1, Grok/0, Claude/+1); o mapeamento estava TROCADO e `rev(τ)=τ ⟺ τ=0` corrige-o; a transformada fica no centro e os polos descem (Fourier/aditivo, Mellin/multiplicativo); centro 88→67 pp., dívida 20→2. **508:508.**
+- **[18/08 — As três conferências, e o deploy que ninguém viu cair](project-checkpoint-2026-08-18-ferramentas.md)** — o `publica.yml` apontava para um ficheiro movido há 3 dias; e as três ferramentas nasceram todas com mais ruído que sinal (25 falsos positivos meus).
+
 - **[17/08 — O ESPAÇO E O SEU DUAL](project-checkpoint-2026-08-17-o-espaco.md)** — `Q(m√D)` com as QUATRO propriedades (duas de cada lado); a transformada é a passagem à BASE DO DUAL; a dourada discreta é a dourada NA BORDA (factor N, não √N); nenhum passo normaliza. Migração 102→67. **508:508.**
 - **[16/08 — A RAIZ SAI POR TEOREMA, a8ed821 → 2298d0f](project-checkpoint-2026-08-16-a-raiz-sai.md)** — o cruzado invariante a potências (e a perpendicularidade NÃO atravessa), ℤ[√D] na lib, a ENTREGA em fracção contínua, as cinco primitivas e a inversão que é a divisão do dual. **Das 1006 raízes e transcendentais, só 17 alimentavam asserções.** 501:501.
 

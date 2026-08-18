@@ -10,7 +10,17 @@ A TRÍADE, e quem mora em cada casa
     τ=−1  papers/corpo_topologico.tex     o que FECHA          41 pp.   [GPT]
     τ= 0  papers/corpo_algebrico.tex      o CENTRO, canónico   67 pp.   [Grok]
     τ=+1  papers/corpo_analitico.tex      o que NÃO fecha      56 pp.   [Claude]
-          papers/corpo_computacional.tex  a descida EXECUTADA  11 pp.
+          papers/corpo_computacional.tex  realização DENTRO do τ=−1   11 pp.
+
+    E NÃO HÁ QUARTA CASA. «O centro não escolhe lado: ele é o sítio onde a dualidade
+    ainda não se partiu» — ele não é o terceiro lado do par, é o lugar ANTERIOR à
+    separação. Se algo é computacional, é realização dentro de uma das três, e a
+    posição LÊ-SE pelo que consome (o computacional consome do centro e do τ=−1, e
+    nada do τ=+1, porque ordenar TERMINA).
+
+    A REGRA DAS RÉGUAS:  centro --distribui--> {polo −1, polo +1} --medidores--> centro
+    Cada bloco que desce leva o seu medidor, e a contagem de citados não muda. É por
+    isso que dividir não dilui.
 
     raiz  teoria.tex     segundo escalão: realizações específicas      98 pp.
           catalogo.tex   mais específico ainda                        488 pp.

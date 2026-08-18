@@ -25,9 +25,11 @@ DOCS = {'algebrico':'papers/corpo_algebrico.tex', 'topologico':'papers/corpo_top
         'analitico':'papers/corpo_analitico.tex', 'computacional':'papers/corpo_computacional.tex',
         'teoria':'teoria.tex', 'catalogo':'catalogo.tex', 'enredo':'enredo.tex'}
 CENTRO = 'algebrico'
-# os QUATRO canónicos: o centro e as três realizações fundamentais. `computacional` não é um
-# quarto valor de τ — é a EXECUÇÃO da mesma estrutura, e conta como canónico na arrumação.
-LADOS  = {'topologico', 'analitico', 'computacional'}
+# A TRÍADE É DE TRÊS. `computacional` NÃO é um lado: é uma realização que vive DENTRO do
+# τ=−1 (lê-se pelo que consome — do centro e do endereçamento, e nada do τ=+1). Contá-lo
+# como lado era criar a quarta casa que a arquitectura recusa.
+LADOS  = {'topologico', 'analitico'}
+REALIZ = {'computacional': 'topologico'}   # realização : polo onde vive
 PARTICULARES = {'teoria', 'catalogo', 'enredo'}   # segundo escalão: mais específicos
 
 raiz = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -67,7 +69,9 @@ for nome, f in DOCS.items():
             direccoes['inventário (a §sec:dividas a nomear-se)'] = \
                 direccoes.get('inventário (a §sec:dividas a nomear-se)', 0) + 1
             continue
-        if nome == CENTRO and alvo in LADOS:      k = 'centro → lado (realização)'
+        if nome in REALIZ:                       k = f'realização ({nome}, dentro do {REALIZ[nome]}) → {alvo}'
+        elif nome == CENTRO and alvo in LADOS:   k = 'centro → lado (realização)'
+        elif alvo in REALIZ:                     k = f'{nome} → realização {alvo}'
         elif nome in LADOS and alvo == CENTRO:    k = 'lado → centro (origem)'
         elif nome in LADOS and alvo in LADOS:     k = 'lado → lado (o PAR)'
         elif nome == CENTRO and alvo in PARTICULARES:
