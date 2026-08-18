@@ -188,7 +188,7 @@ x^{\dagger})=(\text{soma},\,\text{produto})$. Os seus dois lados são os \textbf
 $\text{cantor}=\varphi$ e $\text{julia}=\psi$, as raízes de $x^{2}=x+1$ ---, ligados pelo
 \textbf{inversor} $x^{\dagger}=-1/x$ ($\text{cantor}\cdot\text{julia}=-1$, a estaca), e simétricos (a
 cruz é invariante pela troca). Três dobras da composição dão o \textbf{octonião dual} (grau $8$: dois
-tecidos, reversível, \code{corpo-estelar def:octoniao-dual}), e a \textbf{interface} é a \textbf{hexal}
+tecidos, reversível, \code{corpo\_analitico def:octoniao-dual}), e a \textbf{interface} é a \textbf{hexal}
 ($6$, a plena, onde $\text{soma}=\text{produto}$: o seis perfeito). \emph{É o corpo que atravessa toda a
 construção} --- e por isso é usado por toda a parte.
 \end{definicao}
@@ -207,7 +207,7 @@ poeira de \textbf{Cantor} ($c$ fora). E são os \emph{dois} golden --- \textbf{c
 duas raízes de $x^{2}=x+1$ ($\varphi$ e $\psi$: os dois tecidos, um de cada lado) --- ligados pelo
 \textbf{inversor} $x^{\dagger}=-1/x$ (cantor$\cdot$julia$=-1$, a estaca), \emph{não} por
 $\text{julia}^{2}+1$: três dobras da composição dão o \textbf{octonião dual} (grau $8$,
-\code{corpo-estelar def:octoniao-dual}), e a interface é a \textbf{hexal}
+\code{corpo\_analitico def:octoniao-dual}), e a interface é a \textbf{hexal}
 ($6=\mathrm{lcm}(2,3)$, o dual $\times$ o trial). E o $6$ é a plena porque é o \emph{perfeito} ---
 $6=1+2+3=1\cdot2\cdot3$, \textbf{soma$=$produto} dos divisores (\emph{Teoria}, o seis): a forma áurea
 é isso, $\varphi\cdot\varphi=\varphi+1$, o \emph{produto que é a soma}. A equação $x^{2}=x+1$ resolve-se
@@ -1589,7 +1589,7 @@ E o que o universal faz ali dentro são duas coisas. A \textbf{transformada} lev
 
 E as inversas não são três sortes separadas. São \textbf{uma} razão, dita três vezes: \textbf{o dual do dual devolve o grupo.} A transformada volta porque ir ao dual e voltar é a identidade; a convolução desfaz-se porque do outro lado ela é um produto, e produto se divide; o inverso de uma matriz é o seu dual sobre a norma, e é ele que decide se aquilo é corpo. Ir e voltar, sempre a mesma frase --- e é dela que sai a proibição de vazar, porque o que não tem volta não é apenas inconveniente: \textbf{não pertence.}
 
-E há razão operacional, medida --- no \emph{Corpo de Peano}, o \textbf{Teorema do Metrónomo}:
+E há razão operacional, medida --- no \emph{Corpo Topológico}, o \textbf{Teorema do Metrónomo}:
 o maestro projecta; o metrónomo lê; o Lyapunov dualizado atesta.
 A volta é a \textbf{metade refletida} --- a inversa temporal ---, e é ela que dá o expoente de Lyapunov, porque num sistema reversível o espectro é simétrico, $\lambda^++\lambda^-=0$. Uma medida só é fiável se a metade refletida volta com resíduo $0$ (a própria medida com $\lambda=0$, sem amplificar erro); e o erro, quando desbalança, \textbf{quantifica-se em atrasos unitários}: $d$ atrasos ($z^{-1}$) de um lado dão erro $(e^{\lambda d}-1)$ vezes a escala, cada atraso a multiplicar por $e^\lambda$. É essa a justificativa das proibições --- o \code{double} que arredonda, o \code{malloc} e o estado que se sobrescreve, o \emph{buffer} que atrasa: todos \textbf{perdem a metade refletida}, e o que perde a volta deriva. Medido em \code{tests/lyapunov\_refletido.c} e \code{tests/corpo\_topologico.c}~§CP40: a estrela $\nu\circ\nu=\mathrm{id}$ volta com resíduo $0$, a medida com um bit descartado não volta, e cada atraso unitário dobra o erro.
 
@@ -11095,7 +11095,7 @@ $1\ldots54$ e depois $1\ldots94$. Com ela, a sequência é \textbf{idêntica}: 1
 que número nenhum}, e foi a comparação --- não uma asserção --- que o disse.
 
 \item \code{tests/volta\_estrela.js} --- \textbf{$\nu\circ\nu=\mathrm{id}$ no documento real,
-por resíduo e não por comparação.} O \code{papers/corpo-estelar.tex} fecha a especificação
+por resíduo e não por comparação.} O \code{papers/corpo\_analitico.tex} fecha a especificação
 assim: \emph{medir --- resíduo $0$, \textbf{não comparação}}, e sem margem: «uma asserção que
 compara contra um valor escrito passa no objecto certo \emph{e no trocado} --- ela verifica a
 aritmética de quem a escreveu, não o objecto. \textbf{A reversão separa-os}.» O
@@ -11149,11 +11149,11 @@ $21$ de $21$ (\code{tests/corpo\_unico.c}, $9$ unidades).}
 \textbf{E a unificação não mudou uma letra}: refeito o tradutor sobre a operação única, a
 involução $\nu\circ\nu$ sobre o documento inteiro dá \textbf{resíduo $\mathbf{0}$} contra o
 PDF de antes. Uma operação, e o corpo é \emph{campo} --- como o \code{MOVE} do
-\code{corpo-estelar}, onde «a mesma instrução serve $500$ corpos diferentes sem uma instrução
+\code{corpo\_analitico}, onde «a mesma instrução serve $500$ corpos diferentes sem uma instrução
 nova, porque o corpo é campo e não \emph{opcode}».
 
 \item \code{tests/dissipa\_pagina.c} --- \textbf{onde a página dissipa, e quanto.} O
-\code{corpo-estelar} diz o que dissipa: «apagar é a única operação que não se desfaz» e «o
+\code{corpo\_analitico} diz o que dissipa: «apagar é a única operação que não se desfaz» e «o
 que não se desfaz custa». Numa página há três operações, e são o par deste projecto --- a
 \textbf{translação} soma ($x+w$), a \textbf{escala} multiplica ($w\cdot\sigma^{k}$), o
 \textbf{espaçamento} soma nos dois eixos. A pergunta não é se estão certas: é se
@@ -11180,7 +11180,7 @@ apaga não reverte --- $12345$ truncado nos centésimos perde $45$, e o que se p
 degrau é um expoente inteiro.} Andei a resolver um tamanho de cada vez --- o do capítulo, o
 da secção, o da parte ---, cada um com o seu caso e cada caso a falhar de maneira própria. A
 escala não é uma lista de sete números: é \emph{uma razão elevada a um expoente}, e o
-a secção «A renormalização» do \code{corpo-estelar} di-lo --- «renormalizar é mudar a régua sem mudar o
+a secção «A renormalização» do \code{corpo\_analitico} di-lo --- «renormalizar é mudar a régua sem mudar o
 objecto», «a escala sobe por \textbf{degraus}, e os degraus são os metais».
 
 \medido{as razões entre degraus consecutivos do \code{estilo.tex} são $1{,}17323 \cdot
@@ -11203,7 +11203,7 @@ multiplicar no multiplicativo, pior desvio $7{,}11\times10^{-15}$. \emph{Uma met
 não é a lei: é meia lei com o nome dela}.}
 
 \textbf{E assim não se mede: promove-se.} Comparar o expoente com o inteiro mais próximo e
-ler o desvio é comparação --- e o limiar é de quem a escreve. O \code{papers/corpo-estelar.tex},
+ler o desvio é comparação --- e o limiar é de quem a escreve. O \code{papers/corpo\_analitico.tex},
 em \emph{Como se mede aqui: o medidor é $0$}, dá a operação que não compara: $S=\frac{x+x^{\dagger}}{2}$,
 $A=\frac{x-x^{\dagger}}{2}$, $S+A=x$. «A divisão por dois é \emph{exacta}, e não por sorte
 \ldots \textbf{num objecto que não reverte ela falha} --- e é assim que a ferramenta acusa em
@@ -11225,7 +11225,7 @@ próprio dual, o $4$ é o ponto fixo, e os pares são $(1,7)$, $(2,6)$, $(3,5)$.
 dual do $2$, que já lá estava --- e por isso ele existe \emph{por lei}, não por escolha.
 $S+A$ reconstrói os oito com \textbf{resíduo $\mathbf{0}$ INTEIRO} e nenhuma soma é ímpar. E
 o \textbf{controlo}: a meia volta só existe em $q$ \emph{par} --- em $q=7$ nenhuma marca lá
-chega, que é o a secção «A renormalização» do \code{corpo-estelar} palavra por palavra
+chega, que é o a secção «A renormalização» do \code{corpo\_analitico} palavra por palavra
 (\code{tests/dourada\_escala.c}, \code{lib/promove.h}).}
 
 \textbf{E o relógio não pára em oito.} Pôr $q=8$ era contar as marcas \emph{usadas} e
@@ -11269,7 +11269,7 @@ cúbica fica de referência, e a assinatura inteira vive na transformada univers
 $8$ ($\mathbb{Z}_{65537}$, $N=2^8$), volta exacta e selo global. E o \textbf{teste decisivo} (§L6): o $R$ vem de OUTRO instrumento ---
 a órbita desenhada, diâmetro medido das coordenadas --- e o $\pi$ geométrico concorda com o da
 dobra a $6\times10^{-12}$: a relação $c=\pi R$ não é identidade por construção, é concordância de
-dois instrumentos. E o fundo disto é o isomorfismo do \emph{Corpo estelar} («As oito leis,
+dois instrumentos. E o fundo disto é o isomorfismo do \emph{Corpo Analítico} («As oito leis,
 e não há nona»): os graus $2,4,6,8$ são isomórficos à torre inteira --- o ciclo das oito
 leis reaplica-se ao corpo que constrói, a torre cresce finita nas dimensões mas a
 estrutura das leis mantém-se de andar para andar --- e é por isso que o mesmo medidor
@@ -11420,7 +11420,7 @@ funções com recursão e recursão mútua, e o controlo todo --- \code{if/else}
 \code{for}, \code{do/while}, \code{break}, \code{continue}.
 
 \textbf{E a medida não compara: reverte.} Medi-lo contra o \code{cc} do sistema \emph{é} comparar,
-e comparar é ler metade (\code{papers/corpo-estelar.tex}, \emph{Como se mede
+e comparar é ler metade (\code{papers/corpo\_analitico.tex}, \emph{Como se mede
 aqui}). A reversão existe porque o tradutor tem os
 \textbf{dois sentidos}, como o \code{MOVE}: $-1$ emite (o C sobe), $+1$ absorve (o módulo desce).
 Então a régua é o próprio objecto:
@@ -16994,7 +16994,7 @@ trial. Os dois buracos são o par dual --- \textbf{o branco só emite e estica, 
 contrai} --- e \textbf{a estrela é a interface}, o ponto fixo da involução que os troca e o único
 dos três que faz as duas coisas. \emph{Um
 corpo estelar é, exatamente, um corpo que se mantém na borda} --- e a especificação completa do
-sistema por esse eixo, da Lei à ordenação, está em \code{papers/corpo-estelar.tex}. Em p.u.\ não há
+sistema por esse eixo, da Lei à ordenação, está em \code{papers/corpo\_analitico.tex}. Em p.u.\ não há
 constante a pedir --- $G$, $c$ e as outras são factores de escala e valem $1$ por construção ---, e
 o que sobra é a razão entre o que empurra e o que puxa:
 \[
@@ -17013,7 +17013,7 @@ passo de desvio $a$ seguido do seu dual devolve $R(U^2-a^2)/U^2$, que regressa \
 quando $a=0$. \emph{É por aqui que a máquina é uma estrela e não uma metáfora}: \code{MOVE(slot,$+1$)}
 lê, que é \textbf{absorver} --- o lado negro ---, e \code{MOVE(slot,$-1$)} escreve, que é
 \textbf{emitir} --- o lado branco. Uma instrução, dois sentidos, e a interface entre os dois
-buracos. A especificação completa por esse eixo está em \code{papers/corpo-estelar.tex}.
+buracos. A especificação completa por esse eixo está em \code{papers/corpo\_analitico.tex}.
 
 \smallskip
 \noindent \textbf{E a pressão de radiação deriva-se contando eixos.} A radiação reparte-se pelos
@@ -26303,7 +26303,7 @@ arrumam, uma vez que a análise (o teorema central) e a geometria (o fecho conve
 realizações. E as duas leis \emph{estendem-se} numa progressão de seis (Obs.~\ref{obs:seis-leis}), que é a
 arrumação fina e a fundação operacional do sistema --- e essa progressão fecha em \textbf{oito}, com
 a divisão do zero em baixo (Lei 0, a base) e o octonião dual em cima (Lei 7, o topo);
-v.\ \code{corpo-estelar sub:oitoleis}.
+v.\ \code{corpo\_analitico sub:oitoleis}.
 
 \begin{obs}[os problemas do milénio, pelas duas leis]\label{obs:clay}
 Reavaliados agora pela \emph{geometria}, os problemas do milénio arrumam-se pelas \textbf{duas leis}. A
@@ -26423,7 +26423,7 @@ dimensão, fundamentam a teoria.}
 ligar sem fundir (dim $8$, o \emph{topo} --- a norma pára em oito, Hurwitz, \code{tests/circuito\_tradutor.c}).
 Renumeradas de $0$ a $7$, as seis do meio são a \textbf{Lei 1} (dual, dim $2$) à \textbf{Lei 6} (hexal, dim
 $6$), e a \textbf{Lei 2} (bidual) é a projeção que as liga; \emph{não há nona} --- nem degrau acima do
-octonião nem abaixo do zero. A fonte canónica desta tabela é \code{corpo-estelar sub:oitoleis} (\S\,\emph{As
+octonião nem abaixo do zero. A fonte canónica desta tabela é \code{corpo\_analitico sub:oitoleis} (\S\,\emph{As
 oito leis, e não há nona}).
 \end{obs}
 
