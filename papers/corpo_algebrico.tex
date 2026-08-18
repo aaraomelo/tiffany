@@ -4,7 +4,7 @@
 % Realização geométrica da construção fechada no teoria.tex.
 %
 % A hierarquia:
-%     o Universal PROVA | o geométrico REALIZA | os medidores VERIFICAM
+%     o Algébrico PROVA | o geométrico REALIZA | os medidores VERIFICAM
 % e a ordem, que é obrigatória:
 %     8 leis → base ortonormal → operação bit a bit → dual → recorrência
 %            → Pisot → encaixe → corte → completude → ℝ → π_k/gume
@@ -75,7 +75,7 @@ indivisibilidade lida dos dois lados da ponte.
 
 \smallskip\noindent Este paper é \textbf{filho} do \emph{Corpo Algébrico}. Não
 reconstrói o sistema nem decide se ele é permitido: \textbf{realiza
-geometricamente a construção que o Universal já fechou}, na ordem
+geometricamente a construção que o Algébrico já fechou}, na ordem
 \[
 \boxed{\;\begin{gathered}
 \underbrace{\text{Lei 0}}_{\text{fundação}}\ \to\ \text{leis }0,\ldots,7\ \to\
@@ -621,7 +621,7 @@ inventa aqui: \textbf{já está escrita nos títulos dos teoremas} que cada um p
 \]
 
 \noindent\emph{E as setas apontam para FORA, do centro para os lados}, que é o contrário
-do que uma leitura em fila sugeriria. O Universal não é o primeiro de três: é o
+do que uma leitura em fila sugeriria. O Algébrico não é o primeiro de três: é o
 \textbf{ponto fixo}, e os outros dois são as duas realizações que partem dele --- uma
 fechando ($\tau=-1$, ordem finita) e outra cortando ($\tau=+1$, o que não fecha). Trocar as
 duas pontas é a reflexão de Cantor/Julia, e ela deixa o centro onde está.
@@ -666,7 +666,7 @@ Teor.~\ref{thm:fixo-dual}, \ref{thm:operador}, \ref{thm:descida}, \ref{thm:aditi
 posição, composição e \textbf{volume discreto} (\code{topologico thm:det-volume}), com o \emph{Maestro}
 a realizar a dinâmica e o \emph{Metrónomo} a métrica. \emph{Não mede:} a medida no sentido
 de Lebesgue --- o Teor.~\ref{thm:metrica} mostra que há isometrias que a mudam --- nem o
-que só o limite alcança. \emph{Ponte:} para o Universal pelo determinante; para o Analítico
+que só o limite alcança. \emph{Ponte:} para o Algébrico pelo determinante; para o Analítico
 pela graduação. \emph{Aritmética:} é onde ela \textbf{endereça} --- os índices são
 inteiros, e é por isso que a torre tem andares e não um contínuo.
 
@@ -699,7 +699,7 @@ a si. É por isso que o palco aguenta composição sem limite nenhum.
 (\code{analitico cor:noves}, \code{analitico cor:noves-dual}), a completude, o corte, $\mathbb{R}$.
 \emph{Não mede:} o que é da forma exacta finita --- ali a álgebra já respondeu, e repetir
 seria trocar uma identidade por um limite. \emph{Ponte:} para o Topológico pelo Jacobiano
-(\code{analitico thm:medida-jacobiano}); para o Universal pelo corte
+(\code{analitico thm:medida-jacobiano}); para o Algébrico pelo corte
 (\code{analitico thm:folhas-corte}). \emph{Aritmética:} é onde ela \textbf{fecha} --- o corte
 decide-se por $\operatorname{tr}$ e $\mathrm{N}$, ambas inteiras, e o limite entra só
 depois.
@@ -729,7 +729,7 @@ muda é fechar ou não:
 
 \subsection*{E a aritmética atravessa as três}
 
-Não é um desdobramento posterior: \emph{já está no Universal e não sai de lá}. O que muda é
+Não é um desdobramento posterior: \emph{já está no Algébrico e não sai de lá}. O que muda é
 o ofício --- no centro ($\tau=0$) ela \textbf{opera}, no Topológico ($\tau=-1$)
 \textbf{endereça}, no Analítico ($\tau=+1$) \textbf{fecha}. E é por ser a mesma em todas
 que as pontes existem: se a aritmética de cada camada fosse outra, não haveria por onde
@@ -1063,7 +1063,7 @@ sucessão de quocientes.
 %======================================================================
 \section{As oito leis, realizadas por uma base ortonormal}\label{sec:orto}
 
-\textbf{A estrutura vem do Universal, e diz-se qual é:} o par
+\textbf{A estrutura vem do Algébrico, e diz-se qual é:} o par
 $\bigl(\mathbb{F}_2^{8},\ \langle\cdot,\cdot\rangle,\ e_0,\ldots,e_7\bigr)$
 com a forma bilinear \textbf{padrão}
 \[
@@ -2551,7 +2551,7 @@ corte, e no ciclo aparece como \emph{«este operador não tem ordem»}.
 uma representação não aguenta conta-se à parte (a base $10$ satura; a palavra e a base $2$
 não). $\square$
 \end{teorema}
-\colunas{o ciclo universal, e a condição que o fecha}
+\colunas{o ciclo algébrico, e a condição que o fecha}
         {descodifica $\to$ opera $\to$ inverte $\to$ codifica; o toro é a CONDIÇÃO
 ($\abs{\det}=1$), a ordem é do operador, e a escrita é livre}
         {\code{tests/universal.c}: $2172$ ciclos em $3$ codificações $\times$ $4$
@@ -3041,7 +3041,7 @@ x_j=N^{-1}\sum_k \mathcal{G}(x)_k\,\sigma^{-jk}\;}
 \sigma^{-1}=-\sigma\dg ,
 \]
 logo \emph{o passo de volta não precisa de inverter nada}: usa a outra folha. É a mesma
-frase do ciclo universal --- conservar e poder voltar são uma só.
+frase do ciclo algébrico --- conservar e poder voltar são uma só.
 
 \textbf{(4) E o DIRAC dá o factor, que é $N$ e não $\sqrt N$.} A órbita fecha:
 \[
@@ -3397,7 +3397,7 @@ não demonstra o teorema. Uma varredura finita não podia demonstrá-lo, e não 
 para isso que está aqui.
 \end{itemize}
 Este paper \emph{realiza} o corte; a varredura confirma que a realização não
-diverge do que o Universal prova. $\square$
+diverge do que o Algébrico prova. $\square$
 \end{teorema}
 
 \noindent\textbf{E o mesmo alfabeto binário é reutilizado em dois níveis}: primeiro
@@ -3733,7 +3733,7 @@ só a coluna de cima leva metade.
 \noindent E é essa linha que impede este documento de se tornar um paper
 sobre ASCII, sobre C ou sobre $\mathbb{F}_{127}$: esses são
 \textbf{instrumentos} --- de realização e de refutação --- da mesma
-estrutura, e a estrutura não depende de nenhum deles. \emph{O Universal
+estrutura, e a estrutura não depende de nenhum deles. \emph{O Algébrico
 continua universal.}
 
 \medskip
@@ -4002,7 +4002,7 @@ $\mathcal{M}$).
 $\square$
 \end{teorema}
 
-\begin{teorema}[o corpo do Universal é dual --- e a troca de corpo é
+\begin{teorema}[o corpo do Algébrico é dual --- e a troca de corpo é
 a dinâmica]\label{thm:corpo-dual}
 A investigação pedida («o que é $K^{*}$?») fechou com resíduo zero, e
 a definição \emph{vem do resultado}:
@@ -4084,7 +4084,7 @@ $\mathcal{M}$).
 $\square$
 \end{teorema}
 
-\begin{teorema}[o gerador do corpo universal em primos --- recuperado
+\begin{teorema}[o gerador do corpo algébrico em primos --- recuperado
 dos documentos]\label{thm:gerador-primos}
 A máquina de conversão estava escrita há meses
 (\code{tests/gerador.c} \S G9--G10) e recupera-se aqui, re-medida em
@@ -4174,8 +4174,8 @@ $\square$
 \subsection*{As camadas --- quem é dono de quê}\label{sec:camadas-operacoes}
 
 \[
-\boxed{\textbf{o Topológico não é o corpo universal; é uma realização
-do corpo universal.}}
+\boxed{\textbf{o Topológico não é o corpo algébrico; é uma realização
+do corpo algébrico.}}
 \]
 \[
 \boxed{\textbf{O nome de uma realização não é a língua; é o
@@ -4213,7 +4213,7 @@ ocupa uma camada só.
 %======================================================================
 \section{As cinco operações --- cada uma com a sua conservação}\label{sec:cinco}
 
-\begin{definicao}[as cinco operações do corpo universal]\label{def:cinco}
+\begin{definicao}[as cinco operações do corpo algébrico]\label{def:cinco}
 \begin{center}\small
 \begin{tabular}{@{}lll@{}}
 \toprule
@@ -4296,7 +4296,7 @@ dobra &
 \end{center}
 
 \begin{teorema}[de Estrutura do Corpo Algébrico]\label{thm:estrutura}
-As operações medidas fazem do Universal, em cada andar, um
+As operações medidas fazem do Algébrico, em cada andar, um
 \textbf{corpo operacional} (corpo de verdade quando o discriminante
 não separa; o par de folhas, com os divisores exibidos, quando
 separa); a escada induz uma \textbf{ordem de refinamento} --- a única
@@ -5086,7 +5086,7 @@ das duas línguas --- nem os nomes do Topológico nem «quantizador»
 aparecem nela ($0$ ocorrências; a asserção \emph{falhava} antes: a
 Lei~3 dizia «o operador do passo», instância dentro da língua universal,
 removida). A lei não precisa de nome; os nomes vivem nos papers ---
-o Universal é dono da lei, cada instância é dona da sua face.
+o Algébrico é dono da lei, cada instância é dona da sua face.
 \emph{Medido:} \code{tests/quantizador\_universal.js} ($7{:}0$;
 $\mathcal{M}$).
 $\square$
@@ -5259,7 +5259,7 @@ papéis \emph{diferentes} --- não três enunciados do mesmo:
 \underbrace{\text{medida}}_{\text{$\tau=+1$: realização contínua}}\;}
 \]
 O determinante é a leitura do Topológico, o Jacobiano é a leitura do Analítico, e a
-conservação métrica é a lei que fica acima dos dois. O Universal tem a
+conservação métrica é a lei que fica acima dos dois. O Algébrico tem a
 lei e \emph{não a calcula}; é essa separação que impede a lei de ser
 confundida com a conta que a realiza.
 
