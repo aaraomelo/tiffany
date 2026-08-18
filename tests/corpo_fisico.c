@@ -489,9 +489,10 @@ printf("\n§H7  O SINAL DA INVOLUÇÃO: sem ele não gira — e é Lenz, é aç�
         /* LENZ: a reacao opoe-se a VARIACAO. Modela-se com uma corrente induzida i que
          * responde a -dPhi/dt; com o sinal certo o sistema amortece (a energia cai), com o
          * sinal trocado ele BOMBEIA (a energia cresce sem limite). Mede-se a diferenca. */
-        double amort = 0, bomba = 0;
+        double amort = 0, bomba = 0, E0 = 0;
         for(int caso = 0; caso < 2; caso++){
             double x = 1.0, v = 0.0, h = 1e-5, E = 0;
+            E0 = 0.5*v*v + x*x;                    /* a energia INICIAL, e é ela a régua */
             for(long i = 0; i < 300000; i++){
                 double dPhi = v;                          /* dΦ/dt ∝ velocidade */
                 double iind = (caso == 0 ? -1.0 : +1.0) * dPhi;   /* Lenz: sinal MENOS */
@@ -503,8 +504,21 @@ printf("\n§H7  O SINAL DA INVOLUÇÃO: sem ele não gira — e é Lenz, é aç�
         }
         printf("      LENZ       com o sinal −:  energia final = %.6f  (amortece)\n", amort);
         printf("                 com o sinal +:  energia final = %.3e  (bombeia)\n\n", bomba);
-        ok("a lei de Lenz é o sinal −: com ele o sistema amortece, sem ele diverge",
-           amort < 1.5 && bomba > 10*amort);
+        /* e o `1.5` era um número meu escolhido ENTRE os dois resultados — 0,27 e 3,99 —,
+         * o que é o mesmo que desenhar a régua depois de ver onde caíram. A lei não precisa
+         * dele: «amortece» é a energia DESCER da inicial, e «bombeia» é SUBIR dela. A energia
+         * inicial calcula-se da condição de partida (x = 1, v = 0, logo E₀ = 1) e é ela a
+         * régua — vem do problema e não de mim. E o quanto diz-se: a razão entre os dois
+         * fica entre 14 e 15. */
+        long razao_lenz = (long)(bomba/amort);
+        printf("      e a energia INICIAL é %.1f: com Lenz DESCE dela, sem Lenz SOBE — e a"
+               " razão entre os dois é %ld\n", E0, razao_lenz);
+        ok("a lei de Lenz e' o sinal −: com ele o sistema amortece, sem ele diverge. E a regua"
+           " e' a ENERGIA INICIAL, que vem da condicao de partida (x=1, v=0, logo E0 = 1) e"
+           " nao de mim: «amortece» e' descer dela e «bombeia» e' subir dela. O `1.5` que aqui"
+           " estava era um numero escolhido ENTRE os dois resultados, 0,27 e 3,99 — desenhar a"
+           " regua depois de ver onde caiu. E a razao entre os dois diz-se: entre 14 e 15",
+           E0 == 1.0 && amort < E0 && bomba > E0 && razao_lenz >= 14 && razao_lenz < 15);
     }
     {
         /* INVOLUCAO: nu troca o sinal, e nu∘nu = id EXATAMENTE. E' a definicao, mas mede-se

@@ -301,7 +301,8 @@ int main(void){
         printf("     campo com %d meias-ondas: periodo %.0f um, limite de Nyquist %.0f um\n\n",
                k, periodo, periodo/2);
         printf("     %8s %10s %12s %10s\n", "canais", "passo(um)", "residuo", "Nyquist");
-        double melhor = 1;
+        double melhor = 1, ant_res = -1;
+        long casos_n = 0, desce = 0, zeros = 0, nao_sobe = 0;
         for(int lado_n = 2; lado_n <= 32; lado_n *= 2){
             double passo = lado / lado_n;
             Matriz m = { lado_n, lado_n, passo };
@@ -311,9 +312,30 @@ int main(void){
             int ny = nyquist(passo, periodo);
             printf("     %8d %10.0f %12.4f %10s\n", lado_n*lado_n, passo, res, ny?"cumpre":"viola");
             if(res < melhor) melhor = res;
+            /* e a LEI conta-se: o resíduo CAI a cada duplicação, e a partir de certo ponto
+             * ele não é «pequeno» — é ZERO na casa do 1e-12. `melhor < 0.05` era um número
+             * meu escolhido entre o 0,54 do penúltimo e o zero dos dois últimos. */
+            casos_n++;
+            /* e a lei é «não SOBE», não «desce sempre»: eu tinha escrito `desce == casos−1`
+             * e o medidor falhou, porque do penúltimo para o último o resíduo vai de ZERO
+             * para ZERO — não desce, FICA. A monotonia certa é não-crescente, e a descida
+             * estrita só vale enquanto ainda há resíduo para descer. */
+            if(ant_res >= 0 && res <= ant_res) nao_sobe++;
+            if(ant_res > 0 && (long long)(ant_res*1e12) != 0 && res < ant_res) desce++;
+            if((long long)(res * 1e12) == 0) zeros++;
+            ant_res = res;
         }
-        ok("com canais bastantes o residuo cai para a casa do zero — a volta fecha",
-           melhor < 0.05);
+        printf("     -> em %ld larguras: o residuo nao SOBE em nenhum dos %ld passos, DESCE"
+               " estritamente nos %ld em que ainda ha residuo, e nos %ld maiores ele e' ZERO"
+               " na casa do 1e-12 — nao «pequeno»\n", casos_n, nao_sobe, desce, zeros);
+        ok("com canais bastantes o residuo cai para a casa do zero — a volta fecha. E os dois"
+           " lados dizem-se: o residuo nunca SOBE, desce estritamente enquanto ha residuo para"
+           " descer — do penultimo para o ultimo ele vai de zero a zero, e «desce sempre» era"
+           " falso, o medidor apanhou-o —, e nos dois"
+           " maiores ele e' ZERO na casa do 1e-12, nao «pequeno». O `< 0,05` era um numero meu"
+           " escolhido entre o 0,54 do penultimo e o zero dos ultimos — a regua desenhada"
+           " depois de ver onde os pontos caem",
+           casos_n == 5 && nao_sobe == casos_n - 1 && desce == 3 && zeros == 2);
         /* Eu tinha escrito "sempre que Nyquist e cumprido o residuo fica pequeno: a condicao e
          * SUFICIENTE" — e a tabela derruba: com passo 500 (que CUMPRE, o limite e 1000) o
          * residuo ainda e 0,54. Nyquist garante que a INFORMACAO esta la; nao garante que a
