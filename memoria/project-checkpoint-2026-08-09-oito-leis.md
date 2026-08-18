@@ -8,7 +8,7 @@ metadata:
   modified: 2026-08-10T02:10:20.333Z
 ---
 
-**AS 8 LEIS FECHAM (0–7), E NÃO HÁ NONA.** A fonte canónica é `corpo_analitico §sub:oitoleis`. Lei 0 (a divisão do zero: `0=(+1)⊕(-1)`, `0†=∞`, a base `0/0`) + as seis (dual, bidual, trial, tetral, pental, hexal = Lei 1–6, o `obs:seis-leis` renumerado) + Lei 7 (o octonião dual, `ℍ×ℍ*`, ligar sem fundir, dim 8). A descida 7→0; os dois nulos são Lei 0 (dim 0) e Lei 7 (dim 8).
+**AS 8 LEIS FECHAM (0–7), E NÃO HÁ NONA.** A fonte canónica é `corpo-estelar §sub:oitoleis`. Lei 0 (a divisão do zero: `0=(+1)⊕(-1)`, `0†=∞`, a base `0/0`) + as seis (dual, bidual, trial, tetral, pental, hexal = Lei 1–6, o `obs:seis-leis` renumerado) + Lei 7 (o octonião dual, `ℍ×ℍ*`, ligar sem fundir, dim 8). A descida 7→0; os dois nulos são Lei 0 (dim 0) e Lei 7 (dim 8).
 
 **A DIVISÃO DO ZERO É A BASE.** Dividir *o* zero (a soma, ±1) dá a Lei 1 (dual) e a semente da Lei 2 (`f²=-1`); dividir *por* zero (`x†=-1/x`, 0↔∞, `ν²=id` **fecha** — sem o dual não fechava) dá o ∞. O corpo fecha `0/0` num finito (`x²=nx+1`), a régua diverge (`∞^∞`) — **«finito é o corpo, não a régua»**. Corolários: `0,999…=1` (à vista) e o seu dual (no discreto separam-se; **o contínuo não mede o discreto**; só os **pontos fixos** são invariantes). O **limite** = o ponto fixo onde contar=integrar; o teorema central (`thm:central`) fundamenta o **Gentil–Lebesgue–Hurwitz** (Hurwitz conta o domínio, Lebesgue mede a imagem, Gentil a soma reversível). Ver [[project-dualidade-memoria-da-divisao]], [[project-a-lei-em-dois-niveis]].
 

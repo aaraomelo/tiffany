@@ -16,7 +16,7 @@ partida e a involução intacta, e escrevi «do lado do dual não tem tecto». O
 aparecia na minha tabela era o do **meu array** (`TR_MAX`), não o do objeto, e apresentar
 um como se fosse o outro é trazer a minha régua como se fosse do mundo.
 
-E o `corpo_analitico.tex` §328 já dizia como se faz: «o passo dos tecidos T_{k+1} = T_k+T_k*
+E o `corpo-estelar.tex` §328 já dizia como se faz: «o passo dos tecidos T_{k+1} = T_k+T_k*
 é a estrela usada como **CONSTRUTOR**, e a torre que ele gera não tem topo por dentro:
 a indução não pára — a régua é infinita —, e ν∘ν = id fecha cada andar com resíduo 0».
 

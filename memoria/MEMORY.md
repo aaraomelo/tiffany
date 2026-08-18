@@ -27,7 +27,7 @@
 - **[O número que não cabe](feedback-o-numero-que-nao-cabe.md)** — o teste mais barato contra um número à mão: **cabe no tipo?** A «máquina de 80 bits» era um `uint64_t`.
 - **[A base incompleta](feedback-a-base-incompleta.md)** — um ponto fora do campo NÃO pede régua nova: faltava **metade do corpo** (`x† = −1/x`). Procurar a régua que inclui o outlier É procurar o número que faz passar.
 - **[O medidor que nunca mediu](feedback-o-medidor-que-nunca-mediu.md)** — QUATRO diziam «NÃO MEDIU» e a bateria contava-os VERDES: a atestação guarda o *resultado*, não o *motivo*.
-- **[O \medido sem medidor](feedback-o-medido-sem-medidor.md)** — 28 blocos afirmam número e resíduo sem nomear programa: a bateria só conta o CITADO.
+- **[O \medido sem medidor, e o seu DUAL](feedback-o-medido-sem-medidor.md)** — 28 blocos afirmam número sem nomear programa; e o `banco/fala.c` era citado só num .tex FORA da varredura. Nenhum dos dois faz o total descer.
 - **[O controlo a três linhas](feedback-o-controlo-a-tres-linhas.md)** — quando um número melhora muito, gerar o mesmo objecto AO ACASO com a mesma magnitude. Achei 21× melhor e o acaso empatava.
 - **[A estrutura lida como ruído](feedback-estrutura-lida-como-ruido.md)** — um resíduo que não fecha pode ser MEIA ÓRBITA, não erro. Perguntar o PERÍODO do operador antes de medir dispersão.
 - **[Duas réguas para o mesmo objecto](feedback-duas-reguas.md)** — SEIS vezes num dia, e o sintoma é sempre letras coladas. O sítio esquecido foi sempre um `if` escrito quando só havia duas fontes.

@@ -1,6 +1,6 @@
 ---
 name: feedback-o-medido-sem-medidor
-description: "28 blocos \\medido afirmam número e resíduo sem nomear programa nenhum — a bateria não os vê porque só conta o que é citado, e o cruzamento por números não os recupera"
+description: "o par dual da invisibilidade na bateria: o \\medido que não nomeia programa (28 blocos), e o medidor que existe mas é citado só num .tex que a varredura não lê (banco/fala.c)"
 metadata: 
   node_type: memory
   type: feedback
@@ -13,7 +13,7 @@ metadata:
 percorre: não é uma referência quebrada (não há referência), não é um medidor que falha (não há
 medidor). É invisível por construção.
 
-São **28**: 18 em `teoria.tex`, 10 em `catalogo.tex`. Os dois papers (`corpo_analitico`, `dualsort`)
+São **28**: 18 em `teoria.tex`, 10 em `catalogo.tex`. Os dois papers (`corpo-estelar`, `dualsort`)
 estão limpos — zero.
 
 ## Como se acham
@@ -55,3 +55,37 @@ afirmação. Não há quarto caminho — e deixá-los como estão é o que os fa
 
 Relacionado: [[feedback-o-medidor-que-nunca-mediu]] (a atestação guardava o resultado e não o motivo),
 [[feedback-assercoes-vazias]], [[feedback-dois-caminhos]].
+
+
+---
+
+## O DUAL, 18/08/2026: o medidor que a varredura não lê
+
+O de cima é *afirmação sem medidor*. **O outro lado é medidor sem varredura** — e apanhei-o hoje.
+
+A bateria dava **507**, e o repo tinha **508**. Não falhou nada: `banco/fala.c` existe no disco, está
+citado, e a bateria nunca o viu — porque a única citação está em `corpus/docs/dualsort.tex:666`, e a
+varredura lia só cinco alvos (`teoria`, `catalogo`, `enredo`, `papers/`, `conecthus/`).
+
+**E o comentário da própria bateria já dizia que isto ia acontecer**: *«corpus/docs/medida.tex foi o
+primeiro»*. A correcção da altura acrescentou `papers/` e `conecthus/` — e não acrescentou o
+`corpus/docs/` que o próprio comentário nomeava. Terceira vez.
+
+### Como se acha (barato, e devia correr sempre)
+
+```bash
+# a lista larga (todo .tex do repo) contra a lista que a bateria varre
+comm -13 <(lista_da_bateria) <(git grep -ohE '(tests|banco)/[a-z_0-9]+\.(c|py|js)' HEAD -- '*.tex' | sort -u)
+```
+Um nome nesse `comm` é um medidor que morre calado. Cuidado com o diagnóstico largo: procurei pelo
+*basename* `fala` e o `git grep -l` devolveu 34 ficheiros, nenhum deles a citação real. **O grep de
+diagnóstico tem de ser tão literal quanto o da bateria.**
+
+### A frase que vale para os dois lados
+
+Um medidor pode morrer de dois modos, e **nenhum dos dois faz o total descer**: ou a afirmação não
+nomeia programa, ou o programa não é lido por quem conta. Por isso a regra é ler **as duas listas**,
+nunca só o total — que é a mesma lição de [[feedback-o-exit-sombreado]] e
+[[feedback-dois-caminhos]], e o teste obrigatório de [[project-tres-documentos]].
+
+Relacionado: [[feedback-o-medidor-que-nunca-mediu]], [[feedback-procurar-na-bateria-antes]].

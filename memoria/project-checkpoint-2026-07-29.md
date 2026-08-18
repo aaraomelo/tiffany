@@ -14,7 +14,7 @@ repos limpos do meu lado (`tiffany` em `0059afb`, `broca-so` em `f77c3a8`, `ches
 
 **Estado:** 3 papers (`teoria` 14 pág, `tiffany` 6, `microprocessador` 6), 0 pendências de referência.
 Bateria em **49 medidores — 47 verdes, 2 negativos por projeto, 0 falhas** (`./tools/bateria.sh`, que
-extrai a lista dos próprios papers). `corpo_analitico.tex` do `broca-so` em 32 pág (Partes XV e XVI).
+extrai a lista dos próprios papers). `corpo_estelar.tex` do `broca-so` em 32 pág (Partes XV e XVI).
 
 **A última linha de raciocínio da sessão** (três medidores encadeados, todos resíduo 0):
 `significado.c` → a janela `1 < classes < pontos` com lei que **conserva** (a borda) ·

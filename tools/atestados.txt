@@ -267,7 +267,7 @@ leis_no_tradutor a55e60b96ff95e05 0
 lemniscata 9a6fad9d2b944fb7 0
 letra_assinatura d08fa2f63c002ec2 0
 libc_wasm fc834bc8eeefe10a 0
-liga 3ff46918cdc2a0a7 0
+liga 3900e13796bf04b7 0
 limiares d4d10b25506e73fc 0
 limite_escada 582f8604e39f093d 0
 linear e85c1b8d812c0329 0

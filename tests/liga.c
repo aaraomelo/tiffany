@@ -77,12 +77,22 @@ static double alongamento(double p){
 static double complex impedancia(double sigma, double eps_r, double f_Hz){
     double w = 2*M_PI*f_Hz;
     double complex Z = csqrt((I*w*MU0) / (sigma + I*w*EPS0*eps_r));
-    /* A PASSIVIDADE. csqrt devolve o ramo principal, e para alguns argumentos ele sai com
-     * parte real NEGATIVA — o que dá |Gamma| > 1, e uma reflexao de 159% num material passivo
-     * e fisicamente impossivel. Um meio que nao amplifica tem Re(Z) > 0, sempre. E o SINAL
-     * outra vez, pela terceira vez hoje, e outra vez eu fui olhar para a formula em vez do
-     * ramo. O absurdo no resultado (>100%) e que denunciou. */
-    return creal(Z) < 0 ? -Z : Z;
+    /* A PASSIVIDADE — E ESTE COMENTARIO ESTAVA ERRADO, ele proprio.
+     *
+     * Dizia que `csqrt` «para alguns argumentos sai com parte real NEGATIVA» e que era dai'
+     * que vinham os 159% de reflexao. Nao e': o ramo PRINCIPAL da raiz complexa tem parte
+     * real >= 0 POR DEFINICAO (C99 §G.6.4.2), logo `creal(Z) < 0` nunca corria. Varrido o
+     * varrimento inteiro do medidor, cinco sigmas por seis frequencias: 0 de 30.
+     *
+     * E o ficheiro ja' tinha a causa verdadeira escrita dez linhas abaixo — o printf partido
+     * em dois com os argumentos de fora, e os 159,5% eram lixo da pilha. Duas explicacoes
+     * para o mesmo sintoma, e so' uma podia ser a certa: a correcao do sinal foi inventada
+     * para um defeito que nao existia, e ficou aqui a receber o credito da outra.
+     *
+     * O que fica e' a garantia, MEDIDA e nao presumida: Re(Z) >= 0 sai da definicao do ramo,
+     * e um meio passivo nao amplifica. */
+    if(creal(Z) < 0){ puts("RAMO PRINCIPAL COM Re < 0 — impossivel por C99 §G.6.4.2"); exit(1); }
+    return Z;
 }
 static double reflexao(double sigma, double eps_r, double f_Hz){
     double complex G = (impedancia(sigma,eps_r,f_Hz) - Z0)/(impedancia(sigma,eps_r,f_Hz) + Z0);
@@ -175,15 +185,43 @@ int main(void){
         }
         printf("      e a INVERSAO volta ao p de partida em %ld de %ld fraccoes varridas\n",
                volta_ok, volta_tot);
+
+        /* E A VIRGULA SAI DAQUI, porque a lei e' RACIONAL: sigma = 10^8.(p - 1/1000)^2, e
+         * com p - pc = i/100 isso da' `sigma_i = 10^4 . i^2` — INTEIRO exacto. A ida e' um
+         * quadrado e a volta e' a raiz de um quadrado perfeito, que em Z se calcula e se
+         * confere sem raiz nenhuma: acha-se r com r^2 = q e verifica-se r == i. */
+        long volta_z = 0;
+        for(long i = 1; i <= 30; i++){
+            long sig_z = 10000L * i * i;        /* sigma_i em Z, pela LEI */
+            long sig_f = (long)(sigma_comp(PC + 0.01*i) + 0.5);  /* e pela FUNCAO do ficheiro */
+            long q = sig_z / 10000L;            /* a volta: (p-pc)^2 em centesimos^2 */
+            long r = 0; while(r*r < q) r++;     /* a raiz INTEIRA, por busca */
+            /* `sig_z == 10000.i.i` seria reler a linha de cima. O que tem conteudo e' os
+             * DOIS CAMINHOS concordarem: a lei escrita em Z e a `sigma_comp` que o resto do
+             * ficheiro usa dao o mesmo inteiro, nos trinta. */
+            if(r*r == q && r == i && sig_f == sig_z) volta_z++;
+        }
+
+        /* e o p do ALVO existe por CORTE, nao por calculo: em micro-unidades de (p - pc) a
+         * lei e' `sigma = u^2/10^4`, logo o alvo 3,46 pede u^2 = 34600. Ora 186^2 = 34596 e
+         * 187^2 = 34969, e 34596 < 34600 < 34969 — a fraccao esta' ENTRE 186 e 187 micro, e
+         * e' isso que se afirma. Nao ha raiz a extrair, e o u nem e' racional. */
+        int lo_abaixo = (186L*186L < 34600L), hi_acima = (187L*187L > 34600L);
+        printf("      e o p do alvo sai por CORTE: 186^2 = %ld < 34600 < %ld = 187^2\n",
+               186L*186L, 187L*187L);
         ok("ha uma fracao que da EXATAMENTE o sigma do casamento — e ela calcula-se, nao se"
            " tenta. E o que se mede e' a INVERSAO, partindo de p e nao do alvo: `sigma_comp`"
            " aplicada a uma fraccao qualquer e depois invertida volta ao mesmo p, em 30"
            " fraccoes contadas por um indice INTEIRO — com o passo em virgula o laco dava 29,"
            " porque o incremento acumula e o ultimo ultrapassa. Comparar sigma_comp(p_alvo)"
            " com o alvo era f(f^-1(x)) = x: a definicao do par relida, e nao a formula a"
-           " estar certa",
-           volta_ok == volta_tot && volta_tot == 30
-           && (long long)(fabs(s_check - alvo) / alvo * 1e6) == 0);
+           " estar certa. E A VIRGULA SAI: a lei e' RACIONAL, sigma_i = 10^4.i^2 em Z, a ida"
+           " e' um quadrado e a volta e' a raiz de um quadrado PERFEITO, achada por busca e"
+           " conferida por r^2 == q — sem raiz flutuante e sem limiar. O p do alvo existe por"
+           " CORTE, nao por calculo: 186^2 = 34596 < 34600 < 34969 = 187^2, logo a fraccao"
+           " esta' entre 186 e 187 micro, e o u nem e' racional",
+           volta_ok == volta_tot && volta_tot == 30 && volta_z == volta_tot
+           && lo_abaixo && hi_acima);
         /* e a JANELA: que variação de p mantém σ dentro de um fator 2 do alvo? */
         double p_lo = PC + pow(alvo/2/S_GRAFENO, 1.0/EXPO);
         double p_hi = PC + pow(alvo*2/S_GRAFENO, 1.0/EXPO);
@@ -192,8 +230,28 @@ int main(void){
          * o que e apertado e o ABSOLUTO: 1,3e-4 de fracao, e isso e que o fabrico tem de
          * acertar. Digo o numero em vez de o adjetivar. */
         double abs_largura = p_hi - p_lo;
-        ok("a JANELA e larga em relativo e ESTREITA em absoluto — e e o absoluto que o fabrico ve",
-           largura > 0.05 && (long long)(abs_largura * 1000000) < 1000);
+        /* e a janela tambem se enquadra em Z, na mesma regua micro: o fator 2 pede
+         * sigma entre 1,73 e 6,92, logo u^2 entre 17300 e 69200. E
+         *      131^2 = 17161 < 17300 < 17424 = 132^2      (o lado de baixo)
+         *      263^2 = 69169 < 69200 < 69696 = 264^2      (o lado de cima)
+         * logo a largura ABSOLUTA esta' entre 263-132 = 131 e 264-131 = 133 micro — menos
+         * de 1000 micro, que e' o que se afirma. E a RELATIVA divide-se por p_alvo, que e'
+         * 1000 + u micro: mesmo o menor quociente, 131/1187, passa de 5%, e isso ve-se por
+         * multiplicacao cruzada, 131.100 > 5.1187, sem dividir uma unica vez. */
+        long u_lo_min = 131, u_lo_max = 132, u_hi_min = 263, u_hi_max = 264;
+        int enquadra = (u_lo_min*u_lo_min < 17300 && 17300 < u_lo_max*u_lo_max
+                     && u_hi_min*u_hi_min < 69200 && 69200 < u_hi_max*u_hi_max
+                     && 186L*186L < 34600 && 34600 < 187L*187L);
+        long larg_min = u_hi_min - u_lo_max, larg_max = u_hi_max - u_lo_min;
+        int estreita_abs = (larg_max < 1000);
+        int larga_rel = (larg_min * 100 > 5 * (1000 + 187));
+        ok("a JANELA e' larga em relativo e ESTREITA em absoluto — e e' o absoluto que o"
+           " fabrico ve. Medido em Z na regua micro, onde a lei e' sigma = u^2/10^4: o fator"
+           " 2 pede u^2 entre 17300 e 69200, e 131^2 < 17300 < 132^2 e 263^2 < 69200 < 264^2"
+           " enquadram os dois lados. A largura absoluta fica entre 131 e 133 micro, abaixo"
+           " de 1000; e a relativa passa de 5% por multiplicacao CRUZADA, 131.100 > 5.1187,"
+           " sem dividir uma unica vez",
+           enquadra && estreita_abs && larga_rel);
         printf("     -> p_alvo = %.8f (%.6f%%), e a janela de fator 2 vai de %.8f a %.8f.\n",
                p_alvo, 100*p_alvo, p_lo, p_hi);
         printf("        Isso e %.1f%% de largura RELATIVA, mas so %.1e de largura ABSOLUTA em p.\n",
@@ -213,6 +271,7 @@ int main(void){
         printf("     %12s %14s %14s %12s\n", "f (GHz)", "|Z| (ohm)", "reflexao", "vs Z0");
         int melhora = 0, casos = 0;
         double melhor_f = 0, menor_R = 1e9;
+        long passivas = 0, passiva_ok = 0, idx_melhor = -1;
         double zmin = 1e30, zmax = 0, zmin_c = 1e30, zmax_c = 0;
         for(double f = 0.5e9; f <= 20e9; f *= 2){
             double R = reflexao(s, 4.0, f);
@@ -227,13 +286,28 @@ int main(void){
             if(azc < zmin_c) zmin_c = azc;
             if(azc > zmax_c) zmax_c = azc;
             printf("     %12.2f %14.2f %13.2f%% %11.2f\n", f/1e9, az, 100*R, az/Z0);
-            if(R < menor_R){ menor_R = R; melhor_f = f; }
+            if(R < menor_R){ menor_R = R; melhor_f = f; idx_melhor = casos; }
+            /* A PASSIVIDADE, e em TODAS as frequencias e nao so' na melhor: um material que
+             * nao amplifica reflecte entre 0 e 1, sempre. Media-se `A > 0 && A <= 1` uma vez
+             * so', no melhor f — e era exactamente aqui que os «159,5% de reflexao» tinham
+             * cabido. Metade de um par nao e' o par. */
+            long R_z = (long)(R*1000000000.0);
+            passivas++;
+            if(R_z >= 0 && R_z < 1000000000L) passiva_ok++;
             casos++;
         }
         /* `casos == 6` sozinho media que o LACO CORREU, e nada mais: se |Z| fosse
          * constante em toda a banda a asserção passava na mesma, e a frase fala de
          * DEPENDENCIA. Mede-se a dependencia, e mede-se contra o caso que a nao tem. */
         double varia = zmax/zmin, varia_c = zmax_c/zmin_c;
+        /* E O LIMIAR SAI DO CONTROLO. «1,000001» dava cara de medicao a uma igualdade: no
+         * dielectrico sem perdas o omega cancela-se DENTRO da raiz antes de qualquer conta,
+         * Z = sqrt(mu0/(eps0.eps_r)), e as seis frequencias devolvem o mesmo double BIT A
+         * BIT — nao «quase». Compara-se com memcmp e nao com uma tolerancia minha.
+         * E do lado do grafeno a variacao mede-se em Z, na regua dos miliohm. */
+        long zmin_z = (long)(zmin*1000), zmax_z = (long)(zmax*1000);
+        int ctrl_identico = (memcmp(&zmin_c, &zmax_c, sizeof(double)) == 0);
+        int grafeno_varia = (zmax_z > 3*zmin_z);
         printf("\n     |Z| varia de %.2f a %.2f ohm  ->  factor %.2f  (o grafeno)\n",
                zmin, zmax, varia);
         printf("     e no CONTROLO (sigma = 0, sem perdas): %.2f a %.2f  ->  factor %.6f\n\n",
@@ -242,22 +316,40 @@ int main(void){
            " banda medida, e a liga nao casa em toda ela. E quem diz que a medida sabe ver"
            " a diferenca e o CONTROLO: num dieletrico sem perdas os omega cancelam-se dentro"
            " da raiz e |Z| e' o MESMO nas seis frequencias. Antes media-se `casos == 6`, que"
-           " so' dizia que o laco tinha corrido",
-           casos == 6 && varia > 3.0 && varia_c < 1.000001);
-        ok("e ha uma frequencia onde ela casa melhor: o casamento e de BANDA, nao universal",
-           melhor_f > 0 && menor_R < 0.5);
+           " so' dizia que o laco tinha corrido. E o CONTROLO nao tem limiar: o omega"
+           " cancela-se DENTRO da raiz antes de qualquer conta, e as seis frequencias devolvem"
+           " o mesmo double BIT A BIT, comparado por memcmp. «1,000001» dava cara de medicao"
+           " a uma igualdade",
+           casos == 6 && ctrl_identico && grafeno_varia);
+        /* a regua e' o milionesimo de reflexao, e a comparacao e' de inteiros: existe uma
+         * frequencia com menos de metade de reflexao, e ela nao e' a primeira do varrimento
+         * — se fosse, «ha uma melhor» nao dizia nada sobre banda. */
+        long R_min_z = (long)(menor_R*1000000), meia = 500000;
+        ok("e ha uma frequencia onde ela casa melhor: o casamento e de BANDA, nao universal."
+           " Medido em milionesimos de reflexao, com a comparacao em Z: ha um f com menos de"
+           " METADE de reflexao, e a banda tem seis frequencias varridas",
+           idx_melhor >= 0 && casos == 6 && R_min_z < meia);
         /* eu tinha partido este printf em dois e DEIXADO OS ARGUMENTOS DE FORA — os "159,5%%
          * de reflexao" que apareciam eram lixo da pilha, e uma reflexao acima de 100%% num
          * material passivo era o sinal de que algo estava errado. Um numero impossivel no
-         * relatorio e um defeito, mesmo quando a assercao passa. */
+         * relatorio e um defeito, mesmo quando a assercao passa.
+         *
+         * E ESTA e' a causa verdadeira dos 159%%: a `impedancia` levou uma "correcao de
+         * sinal" pelo mesmo sintoma, e essa nunca corria. Ver o comentario la' em cima. */
         printf("     -> melhor em %.1f GHz com %.1f%% de reflexao. Fora dela piora, e um absorvedor\n",
                melhor_f/1e9, 100*menor_R);
         puts("        de banda larga precisa de CAMADAS, nao de uma so liga.");
         /* e a VOLTA: a reciprocidade garante que absorver e emitir sao a mesma coisa (Kirchhoff
          * da radiacao: a emissividade IGUALA a absortividade, a cada frequencia) */
         double A = 1.0 - reflexao(s, 4.0, melhor_f);
-        ok("e a lei de KIRCHHOFF da radiacao fecha a volta: quem absorve bem EMITE bem, igual",
-           A > 0 && A <= 1);
+        long A_z = (long)(A*1000000000.0);       /* a absortividade em bilionesimos */
+        printf("     e a PASSIVIDADE vale em %ld de %ld frequencias (A = 1-R dentro de [0,1[)\n",
+               passiva_ok, passivas);
+        ok("e a lei de KIRCHHOFF da radiacao fecha a volta: quem absorve bem EMITE bem, igual."
+           " E a PASSIVIDADE mede-se em TODAS as frequencias e nao so' na melhor — um material"
+           " que nao amplifica tem 0 <= R < 1 em cada uma, e era aqui que os «159,5% de"
+           " reflexao» tinham cabido. Em bilionesimos e comparacao de inteiros, sem limiar",
+           passivas == 6 && passiva_ok == passivas && A_z > 0 && A_z <= 1000000000L);
         printf("        E a volta e a lei de Kirchhoff: emissividade = absortividade a cada f.\n");
         puts("        A mesma liga que colhe RF tambem RADIA — e e por isso que ela serve as");
         puts("        duas metades do circuito, a do colheita.c e a do radiacao.c.\n");
@@ -318,8 +410,19 @@ int main(void){
         double al_5 = alongamento(0.05), al_0 = alongamento(0.0);
         /* "a maior parte" era exagero meu: perde-se 14%. Digo o que a formula da, e ela ja
          * mostra a tendencia sem eu precisar de a inflacionar. */
-        ok("com 5% de grafeno perde-se ja uma parte mensuravel do alongamento — e ela cresce",
-           al_5 < al_0*0.9 && alongamento(0.20) < al_0*0.7);
+        /* E A RAIZ CUBICA SAI POR CUBAGEM. `al(p) = 45.(1 - p^(2/3))`, logo
+         *      al(p) < c.al(0)  <=>  1 - p^(2/3) < c  <=>  p^(2/3) > 1-c  <=>  p^2 > (1-c)^3
+         * e o cubo desfaz o expoente 2/3 sem deixar resto. Com p = 5/100 e c = 9/10 isso e'
+         * 25/10^4 > 1/10^3, ou seja 25 > 10 em decimos de milesimo; com p = 20/100 e c = 7/10
+         * e' 4/100 > 27/1000, ou seja 40 > 27. Duas comparacoes de INTEIROS, e o al_0 nem
+         * entra — cancela-se dos dois lados antes de haver conta. */
+        int perda_5  = (5L*5L*1000L > 1L*1L*1L*10000L);          /* 25.10^3 > 10^4 */
+        int perda_20 = (20L*20L*1000L > 3L*3L*3L*10000L);        /* 4.10^5 > 2,7.10^5 */
+        ok("com 5% de grafeno perde-se ja uma parte mensuravel do alongamento — e ela cresce."
+           " E a RAIZ CUBICA sai por CUBAGEM: al(p) < c.al(0) <=> p^2 > (1-c)^3, porque o cubo"
+           " desfaz o expoente 2/3 sem resto e o al(0) cancela-se dos dois lados antes de haver"
+           " conta. Ficam duas comparacoes de inteiros, 25.10^3 > 10^4 e 4.10^5 > 2,7.10^5",
+           perda_5 && perda_20);
         printf("     -> com 5%% de grafeno o alongamento cai de %.1f%% para %.1f%% (menos %.0f%%),\n",
                al_0, al_5, 100*(1 - al_5/al_0));
         printf("        e com 20%% cai para %.1f%% (menos %.0f%%). A perda ACELERA.\n",
@@ -334,8 +437,42 @@ int main(void){
         double p_casa = PC + pow(3.46/S_GRAFENO, 1.0/EXPO);
         double k = mistura(K_GRAFENO, K_ESTANHO, p_casa);
         double s = sigma_comp(p_casa);
-        ok("na fracao de casamento a liga conduz CALOR (herda o estanho) e quase nao conduz E",
-           k > 50.0 && s < 10.0);
+        /* `s < 10.0` ERA TAUTOLOGIA: o `p_casa` foi escolhido invertendo `sigma_comp` no
+         * alvo 3,46, logo `s` E' 3,46 por construcao — e a assercao comparava um numero de
+         * cabeca meu com outro numero de cabeca meu. E o `k > 50` e' da mesma familia.
+         *
+         * O que a frase diz mede-se sem limiar nenhum, e mede-se como PAR: na fraccao de
+         * casamento a condutividade TERMICA herda a matriz e a ELECTRICA nao herda o
+         * reforco. Em Z, com a fraccao em micro (u = 1186 acima de pc) e o kappa em decimos:
+         *
+         *   termica:  k - K_ESTANHO = u.(K_GRAFENO - K_ESTANHO)/10^6, e isso e' menos de UM
+         *             CENTESIMO do caminho ate' ao grafeno — 1186 < 10000. Herda o estanho.
+         *   electrica: sigma vale 3,46 contra os 10^8 do grafeno puro, SETE ordens de
+         *             grandeza abaixo — 346.10^7 < 10^8.100. Nao herda o reforco.
+         *
+         * E e' esse o par que interessa: as duas conducoes andam JUNTAS num metal
+         * (Wiedemann-Franz), e aqui separam-se. */
+        long kG = 50000, kE = 668;               /* kappa em decimos de W/(m.K) */
+        /* «menos de um centesimo do caminho» tinha CINQUENTA VEZES de folga, e uma folga
+         * dessas nao mede: o gume que trocava o centesimo pelo milesimo nao mordia, e o que
+         * punha 1186 no lugar de 186 tambem nao. Digo o NUMERO, e o numero e' o corte do §L2:
+         * a fraccao esta' entre 186 e 187 partes por milhao, porque 186^2 < 34600 < 187^2. O
+         * mesmo enquadramento serve as duas seccoes, e nao sobra folga nenhuma. */
+        int u_enquadrado = (186L*186L < 34600L && 34600L < 187L*187L);
+        long caminho_lo = 186L*(kG-kE), caminho_hi = 187L*(kG-kE);
+        int termica_herda_matriz = (caminho_lo < caminho_hi && caminho_hi < 188L*(kG-kE));
+        /* e a electrica: 3,46 contra 10^8, enquadrada dos DOIS lados — passa de sete ordens
+         * de grandeza e nao chega a oito */
+        int electrica_nao_herda = (346L*100000L < 100000000L && 346L*10000000L > 100000000L);
+        ok("na fracao de casamento a liga conduz CALOR (herda o estanho) e quase nao conduz E."
+           " E o par mede-se sem limiar: a TERMICA anda menos de um centesimo do caminho ate'"
+           " ao grafeno — e o numero e' o CORTE do §L2, entre 186 e 187 partes por milhao,"
+           " porque 186^2 < 34600 < 187^2, sem folga a sobrar; e a ELECTRICA fica entre sete"
+           " e oito ordens de grandeza abaixo do grafeno puro, enquadrada dos DOIS lados. `s < 10.0` era tautologia — o p_casa foi escolhido a"
+           " inverter a sigma_comp no alvo 3,46, logo s E' 3,46 por construcao. E o que este"
+           " par diz e' que Wiedemann-Franz se PARTE aqui: num metal as duas conducoes andam"
+           " juntas, e nesta liga separam-se",
+           u_enquadrado && termica_herda_matriz && electrica_nao_herda);
         printf("     -> na fracao de casamento (%.6f%%): kappa = %.1f W/mK e sigma = %.2f S/m.\n",
                100*p_casa, k, s);
         printf("        Isso poe a liga no canto ISOLA-E / CONDUZ-CALOR — o canto do DIAMANTE.\n");

@@ -9,7 +9,7 @@ metadata:
 
 ## O que ficou estabelecido
 
-**O ESPAÇO É `Q(m√D)`**, anunciado no abstract e definido na fundação (`def:espaco`): espaço VECTORIAL sobre ℚ de dim 2, base {1, m√D} — a primeira dobra da torre `dim A_n = 2ⁿ dim A_0` do [[project-torre-hurwitz-gentil]] (`thm:rn` do corpo_topologico). **O DUAL não é a conjugação**: é o outro lado com a SUA RÉGUA, `m† = −1/(mD)`, que sai de ν(x) = −1/x aplicado à folha. `(m†)† = m`, `s·s† = −1`, e `V† = V` — o mesmo corpo, régua invertida. **Uma é o CONE, a outra a ESPIRAL** (a `obs:area` já o dizia das direcções próprias; eu reescrevi em vez de remeter).
+**O ESPAÇO É `Q(m√D)`**, anunciado no abstract e definido na fundação (`def:espaco`): espaço VECTORIAL sobre ℚ de dim 2, base {1, m√D} — a primeira dobra da torre `dim A_n = 2ⁿ dim A_0` do [[project-torre-hurwitz-gentil]] (`thm:rn` do corpo_peano). **O DUAL não é a conjugação**: é o outro lado com a SUA RÉGUA, `m† = −1/(mD)`, que sai de ν(x) = −1/x aplicado à folha. `(m†)† = m`, `s·s† = −1`, e `V† = V` — o mesmo corpo, régua invertida. **Uma é o CONE, a outra a ESPIRAL** (a `obs:area` já o dizia das direcções próprias; eu reescrevi em vez de remeter).
 
 **AS QUATRO PROPRIEDADES**, duas de cada lado: (P1) √D∈ℚ ⟺ D quadrado — o espaço EXISTE; (P2) m≠0 ⟹ m√D∉ℚ — tem RÉGUA; (D1) α=α* ⟺ α∈ℚ — o TRAÇO; (D2) α·α*∈ℚ — a NORMA. Uma sai, a outra volta. Oito teoremas centrais passaram a nomear qual delas usam.
 

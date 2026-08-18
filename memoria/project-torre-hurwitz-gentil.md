@@ -12,7 +12,7 @@ O `eval.txt` trouxe ℂ, ℍ, 𝕆, Cayley–Dickson, a tabela das perdas e dez 
 Aarão: **«aquilo é metade viu, e a outra metade da torre é gentil, e lebesgue
 discreto-contínuo»**.
 
-## O teorema central (`corpo_analitico.tex` thm:central)
+## O teorema central (`corpo-estelar.tex` thm:central)
 
 - **HURWITZ** — o lado DISCRETO: a norma N(x) = Σxᵢ² lida pela cruz, multiplicativa para
   o produto **bilinear** exactamente nos graus 1, 2, 4, 8. **Conta o domínio.**
@@ -35,7 +35,7 @@ E isso mede-se **onde a norma já morreu**. O `tests/hurwitz.c` §H5 **parava em
 a involução só onde a norma também valia, que é onde a pergunta não tem gume. Agora: em
 16 a multiplicatividade está partida e ν∘ν = id continua com resíduo ZERO, na mesma linha.
 
-## A torre da casa já era escrita com o dual (`corpo_topologico.tex` thm:rn)
+## A torre da casa já era escrita com o dual (`corpo_peano.tex` thm:rn)
 
     A_{n+1} = A_n + A_n*,     dim A_n = 2ⁿ
 

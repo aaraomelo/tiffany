@@ -59,7 +59,7 @@ TER DUAL"** — logo a garrafa **não é um cemitério, é uma sala de espera**.
 ## Onde as fontes estão
 
 - `chess/sandbox/circuito_solar.tex` — a bateria de Koch, o painel casado, a eficiência áurea
-- `chess/sandbox/corpo_analitico.tex` — as estrelas irracionais, o ónus
+- `chess/sandbox/corpo_estelar.tex` — as estrelas irracionais, o ónus
 - `kernel/corpo_tropical.tex` (§ tabela, linha ~66) e `kernel/corpo_glacial.tex` — o par
   quente/frio, ponto a ponto, e o fecho por Peirce
 - `reino_dourado_enredo.tex` `\part{A Alfândega Dimensional}` (~8059)
