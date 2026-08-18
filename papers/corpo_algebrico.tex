@@ -177,7 +177,7 @@ $(a,b)$ e multiplica-se por $9$. \emph{Verificado:} \code{tests/gume\_calculo.c}
 \noindent\textbf{A trava, e ela tem duas metades.} A identificação do corpo
 ordenado completo com $\mathbb{R}$ --- unicidade a menos de isomorfismo --- é
 teorema clássico, e cita-se como tal. \textbf{Mas a \emph{continuidade} não se
-herda aqui: constrói-se} (\S\ref{sec:supremo}), e constrói-se em inteiros: dado
+herda aqui: constrói-se} (\code{analitico sec:supremo}), e constrói-se em inteiros: dado
 $S$ limitado, o caminho de $\sup S$ desce a árvore bit a bit. O que este paper
 \emph{não} faz é reconstruir o \emph{Corpo Algébrico}, de que é filho.
 
@@ -244,7 +244,7 @@ sítio só; o que nunca é escolha é a \textbf{previsão}.
 \noindent E há um caso desta regra que é mais grave que os outros, porque não parece um
 número: \textbf{um laço cujo alcance é menor do que a frase que ele serve}. A cláusula
 que faz do caminho um \emph{supremo} --- «todo $m'$ abaixo ainda serve»
-(\S\ref{sec:supremo}) --- esteve verificada numa janela dos últimos quarenta valores,
+(\code{analitico sec:supremo}) --- esteve verificada numa janela dos últimos quarenta valores,
 com $m_k$ a chegar aos $92\,681$, e a asserção dizia «todos». \emph{A correcção não foi
 alargar a janela}: foi ver que a cláusula sai da \textbf{monotonia} por indução, e medir
 o \textbf{passo}. Quando a tese é do passo, o alcance do laço deixa de ser uma promessa
@@ -435,7 +435,7 @@ f'(a)=q(0),
 que é \emph{avaliar}, não passar ao limite. Faz-se em $\mathbb{Q}$ sem uma vírgula
 (\code{lib/calculo.h}, \code{fn\_deriva\_def}; medido em \code{tests/corpo\_fisico.c}). \textbf{O que a álgebra
 não faz é chegar a $\mathbb{R}$}: $\mathbb{Q}$ não é completo, e a testemunha exibe-se
-(Prop.~\ref{prop:q-falha}).
+(\code{analitico prop:q-falha}).
 
 \textbf{(2) A TOPOLOGIA é o palco, e é cega para duas coisas.} Aqui vivem $\chi=V-A+F$ e o
 cone pelo centro (\S\ref{sec:euler}), o toro (Teor.~\ref{thm:toro}) e a métrica canónica
@@ -448,8 +448,8 @@ sai do \emph{determinante}. \textbf{As duas são condições da estrutura inteir
 
 \textbf{(3) A ANÁLISE é o alcance, e o preço é o limite.} Aqui vivem o corte
 (Teor.~\ref{thm:corte}, \ref{thm:folhas-corte}), a continuação nas duas direcções
-(Teor.~\ref{thm:continuacao}), o supremo e o ínfimo (Teor.~\ref{thm:supremo},
-Cor.~\ref{cor:infimo}), a completude (Teor.~\ref{thm:completude}), a série
+(Teor.~\ref{thm:continuacao}), o supremo e o ínfimo (\code{analitico thm:supremo},
+\code{analitico cor:infimo}), a completude (\code{analitico thm:completude}), a série
 (Teor.~\ref{thm:serie-quadratica}), o $e$ e o $\pi$. \emph{É esta camada que chega a
 $\mathbb{R}$}, e chega porque aceita o que as outras recusam: um objecto definido por
 \textbf{todos} os passos, e não por um.
@@ -631,7 +631,7 @@ arbitrária.
 seus dois projectores, a dualidade, os neutros, a indução e a meta-indução, o operador e a
 sua conservação. \emph{Mede:} o que é exacto --- traço, norma, determinante, ordem.
 \emph{Não mede:} o que exige todos os passos; $\mathbb{Q}$ não é completo
-(Prop.~\ref{prop:q-falha}). \emph{Ponte:} entrega aos outros dois o \textbf{operador} e a
+(\code{analitico prop:q-falha}). \emph{Ponte:} entrega aos outros dois o \textbf{operador} e a
 condição $\abs{\det}=1$. \emph{Fica aqui, por ser fundamento comum:}
 Teor.~\ref{thm:fixo-dual}, \ref{thm:operador}, \ref{thm:descida}, \ref{thm:aditiva},
 \ref{thm:conservacao}, \ref{thm:transformada-universal}, \ref{thm:dourada-discreta},
@@ -860,7 +860,7 @@ realização, não uma igualdade entre a lei e a matriz:
 & A_m=\begin{psmallmatrix}m&1\\1&0\end{psmallmatrix}
 \end{array}
 \]
-E a tricotomia do \S\ref{sec:pi} classifica as \textbf{transformações}, e não os
+E a tricotomia do \code{analitico sec:pi} classifica as \textbf{transformações}, e não os
 objectos geométricos --- em $\det=1$:
 \[
 \text{elíptica: }\abs{\operatorname{tr}}<2,\qquad
@@ -2977,7 +2977,7 @@ essa é a do \S\ref{sec:operacao}, $L_0,\ldots,L_7\to\star\to\tau\to E_{+}\oplus
 \]
 O que segue é \textbf{comparação com o objecto já construído}: três nomes clássicos
 postos ao lado dele para dizer o que coincide e o que não, depois de a construção estar
-feita e medida. \emph{Nenhuma peça do \S\ref{sec:supremo} ou do \S\ref{sec:completude}
+feita e medida. \emph{Nenhuma peça do \code{analitico sec:supremo} ou do \code{analitico sec:completude}
 depende do que se diz aqui.}
 
 \begin{teorema}[contar pelo domínio e medir por níveis somam ao rectângulo]\label{thm:central}
@@ -3006,7 +3006,7 @@ a identidade discreta, e é a única das três que se \emph{usa} na conta;
 \emph{Lebesgue} entra como interpretação estrutural, e não como ingrediente. E o
 que esta secção faz é \emph{fundar} o limite como ponto fixo --- a
 \textbf{continuidade} propriamente dita, a existência do supremo, constrói-se no
-\S\ref{sec:supremo} e não aqui:
+\code{analitico sec:supremo} e não aqui:
 \[
 \boxed{\;\begin{gathered}
 \text{\emph{nesta realização}, o limite lê-se como o \textbf{ponto fixo}}\\
@@ -4237,192 +4237,6 @@ como \textbf{a máquina de leitura de cada bloco de decisões}. $\square$
         {\code{geometria\_real.c} \S L9}
 
 %======================================================================
-\section{A completude}\label{sec:completude}
-
-\noindent\textbf{Primeiro, as duas caixas, que são duas.} O \S\ref{sec:corte}
-decidiu $a/b<\sigma_m$: é o corte de um metálico \emph{específico}. O mecanismo
-geral é outro, e enuncia-se agora:
-\[
-\boxed{
-\begin{array}{ll}
-\text{mecanismo \textbf{extremo explícito}} &
-\text{a família metálica: } \sigma_m,\ t_k,\ \abs{\sigma\dg}^{k}\\[3pt]
-\text{mecanismo \textbf{geral}} &
-\text{CF arbitrária: } (a_k)\to(p_k/q_k)\to\abs{\det M_k}=1\to I_k
-\end{array}}
-\]
-
-\begin{definicao}[os intervalos do mecanismo geral]\label{def:Ik}
-Dada $(a_0;a_1,a_2,\ldots)$ com $a_k\geq1$, e $p_k/q_k$ os convergentes
-(Def.~\ref{def:real}), põe-se para $k\geq0$
-\[
-I_k=\Bigl[\min\Bigl(\tfrac{p_k}{q_k},\tfrac{p_{k+1}}{q_{k+1}}\Bigr),\
-\max\Bigl(\tfrac{p_k}{q_k},\tfrac{p_{k+1}}{q_{k+1}}\Bigr)\Bigr].
-\]
-Então, de $\abs{p_kq_{k-1}-p_{k-1}q_k}=1$:
-\[
-\boxed{\;I_{k+1}\subset I_k,\qquad \abs{I_k}=\frac{1}{q_kq_{k+1}}\;}
-\]
---- uma cadeia \textbf{encaixada} cujo comprimento é dado em inteiros. E, por
-$q_k\geq F_{k+1}$ (Teor.~\ref{thm:ouro}),
-$\abs{I_k}\leq 1/(F_{k+1}F_{k+2})\leq2^{-k}$ para $k\geq1$: \emph{o comprimento
-cai pelo menos como $2^{-k}$}, e é este o elo que a unicidade usa.
-\end{definicao}
-
-\medskip
-\noindent\textbf{E aqui a distinção que decide tudo, porque é ela que se costuma
-perder.} É verdade que \emph{intervalos encaixados de comprimento a tender para
-zero não estabelecem, por si sós, a existência do ponto de intersecção}: em
-$\mathbb{Q}$ há cadeias assim sem habitante. \textbf{Mas o objecto construído não é
-o intervalo --- é o caminho}, e o caminho não espera por ponto nenhum. E o
-\S\ref{sec:pontofixo} já disse \emph{o que} é esse ponto: o \textbf{ponto fixo da
-Möbius}, que a órbita persegue e o andar de baixo não contém.
-\[
-\boxed{\;\begin{array}{ll}
-\text{o \textbf{intervalo}} & \text{é a testemunha, e precisaria de um habitante que
-o ocupasse}\\[3pt]
-\text{o \textbf{caminho}} & \textbf{é} \text{ o habitante --- a sucessão } (a_k)
-\text{ \emph{é} o real}
-\end{array}\;}
-\]
-O \emph{Corpo Algébrico} (Teor.~\code{thm:central-continuo}) constrói
-$\mathbb{R}\simeq\{\text{caminhos}\}/\!\sim$, e a completude é lá \textbf{interna}: a
-sucessão de Cauchy dos truncados estabiliza \emph{bit a bit} dentro do próprio
-objecto, sem sair dele. E o mecanismo deste paper diz \emph{porquê} ela aperta em
-vez de vaguear --- o vazamento é zero porque a família é de Pisot,
-$\abs{\sigma\dg}<1$ (\S\ref{sec:pisot}). \textbf{A completude não é aqui um
-postulado acrescentado: é consequência do vazamento zero.} A identificação final
-com $\mathbb{R}$, essa sim, é o teorema clássico de unicidade a menos de
-isomorfismo, e cita-se como tal.
-
-\medskip
-\noindent\textbf{Mas o que a realização entrega diz-se com precisão, e são duas
-coisas.}
-
-\begin{teorema}[o mecanismo produz um corte, e um só]\label{thm:completude}
-Seja $(a_k)_{k\geq1}$ uma sucessão \textbf{infinita} de quocientes parciais --- o
-caso finito é o racional, e a sua representação termina (Def.~\ref{def:real}). A
-classe define-se \textbf{directamente pelos convergentes}, sem passar pelo
-\S\ref{sec:corte}, que é o caso metálico:
-\[
-\boxed{\;A_{(a_k)}=\bigl\{r\in\mathbb{Q}:\ r<c_{2j}\ \text{para algum convergente
-de índice par}\bigr\}\;}
-\]
---- os pares crescem e ficam todos abaixo, os ímpares descem e ficam todos acima
-(Teor.~\ref{thm:encaixe}). A cadeia é
-$(a_k)\to(p_k/q_k)\to I_k\to\text{corte}$, e o metálico fica como caso explícito. Então:
-
-\emph{(i) $A$ é um corte de Dedekind.} $A$ e o seu complementar são não vazios, e
-$A$ é fechado para baixo. E \textbf{$A$ não tem máximo}, com a testemunha dada pela
-\emph{própria construção} --- não pelo \S metálico: os convergentes de índice
-\textbf{par} crescem estritamente e ficam todos abaixo dos de índice ímpar, logo
-todos em $A$; dado $r\in A$, \textbf{algum} convergente par \emph{posterior}
-excede-o --- não necessariamente o seguinte, pois $r$ pode estar muito perto do
-limite. O ponto não vive
-em $\mathbb{Q}$: é por isso que \emph{o corte é o objecto}.
-
-\emph{(ii) O habitante é único, pelo princípio do pombal, e a conta é inteira.}
-Por Def.~\ref{def:Ik} tem-se $\abs{I_K}\leq2^{-K}$; logo, se $r_1/s_1$ e
-$r_2/s_2$ habitam $I_K$ com $2^{K}>s_1s_2$, então
-$\abs{I_K}\leq2^{-K}<1/(s_1s_2)$ e portanto
-\[
-\Bigl|\frac{r_1}{s_1}-\frac{r_2}{s_2}\Bigr|<\frac{1}{s_1s_2}
-\quad\Longrightarrow\quad
-\abs{r_1s_2-r_2s_1}<1 ,
-\]
-e $\abs{r_1s_2-r_2s_1}$ é um \textbf{inteiro} --- logo é zero, logo
-$r_1/s_1=r_2/s_2$. \textbf{Não há dois racionais distintos em $I_K$.}
-
-\emph{(iii) E o corte é determinado pela sucessão}: sucessões distintas dão cortes
-distintos, com o racional separador exibido. $\square$
-\end{teorema}
-\colunas{a identificação dos cortes com o corpo ordenado completo}
-        {o mecanismo que produz o corte, e a unicidade pelo pombal}
-        {\code{geometria\_real.c} \S L12: $2\,624\,400$ pares sem violação;
-quatro cláusulas nos oito $\sigma_m$; $28$ pares separados}
-
-\medskip
-\noindent Assim a divisão fica limpa, e cada peça faz exactamente o seu trabalho:
-\[
-\boxed{\;\begin{array}{l}
-\text{o \textbf{mecanismo} entrega o corte;}\\
-\quad\text{e o Universal identifica os cortes com o corpo completo}\\[3pt]
-\text{o \textbf{pombal} dá a unicidade dos \textsc{aproximantes racionais}:}\\
-\quad\text{não há dois racionais distintos em }I_K
-\end{array}\;}
-\]
-\[
-\boxed{
-\begin{array}{l}
-\text{pombal}\ \Longrightarrow\ \text{unicidade dos \textbf{aproximantes racionais}}\\[2pt]
-\text{completude herdada}\ \Longrightarrow\ \text{existência do \textbf{habitante real}}
-\end{array}}
-\]
-O pombal não estabelece, por si, a unicidade do \emph{real}: essa vem da estrutura
-de corpo ordenado e da densidade de $\mathbb{Q}$, ambas herdadas. Nenhuma das
-peças se obtém por varredura.
-
-\medskip
-\noindent\textbf{Correspondência estrutural herdada} (não é ingrediente da prova
-de completude, que não depende dela). Como consequência adicional da estrutura
-espectral já estabelecida no \emph{Corpo Algébrico} --- a convolução emerge da
-transformada universal, $\delta$ é a sua identidade, e a deconvolução é a divisão
-espectral, exacta onde o espectro não tem zeros ---, os elementos desta base
-\emph{são} os Diracs transladados,
-\[
-\boxed{\;e_t=\delta_t,
-\qquad \langle b,e_t\rangle=b_t\ \text{é a peneira},
-\qquad (b\ast\delta_{t})\ast\delta_{-t}=b\;}
-\]
---- e portanto, \emph{nessa leitura}, ler uma coordenada e localizar um ponto são
-a mesma operação. O espectro de um $\delta$ não tem zeros, e é por isso que a
-volta é exacta; onde o espectro zera --- o vector todo-uns, por exemplo --- a
-informação perde-se e a deconvolução deixa de existir. \emph{A completude do
-\S anterior não usa nada disto}; a correspondência regista-se por ser da mesma
-estrutura.
-
-\medskip
-\noindent\textbf{E o teste verifica as operações realizadas; não mede a
-completude:}
-fecho, tricotomia, compatibilidade da ordem com $+$ e $\times$, e o $n$
-arquimediano exibido. \emph{Verificado:} \code{tests/ordenado.c} ($7{:}0$),
-\code{tests/convolucao\_universal.js}.
-
-\noindent\textbf{E são duas rotas, que não se substituem:}
-\[
-\boxed{
-\begin{array}{lcl}
-\text{cortes} &\longrightarrow& \text{corpo ordenado completo}
-\ \longrightarrow\ \text{unicidade}\ \longrightarrow\ \mathbb{R}\\[4pt]
-(a_k) \ \longrightarrow\ (p_k/q_k) &\longrightarrow&
-\text{intervalos encaixados}\ \longrightarrow\ \text{corte}
-\end{array}}
-\]
-A primeira é a \emph{identificação}; a segunda é o \emph{mecanismo}. E a
-formulação exacta, que é uma escolha metodológica e não uma tese sobre
-fundamentos --- outra construção pode perfeitamente axiomatizar $\mathbb{R}$ por
-sucessões de fracção contínua:
-\[
-\boxed{\;\begin{gathered}
-\text{neste paper a CF \textbf{não} é a definição axiomática de }\mathbb{R};\\
-\text{é o \textbf{mecanismo de realização} dos cortes}
-\end{gathered}\;}
-\]
-É também o estatuto que o \emph{Teoria} já lhe dá: o corpo dual e as duas leis são
-o \textbf{fundamento}; a Möbius de Fibonacci, o gato e os convergentes são a
-\textbf{representação} --- ferramenta, não fonte.
-
-\begin{observacao}[a identificação com $\mathbb{R}$]
-Que um corpo ordenado completo seja isomorfo a $\mathbb{R}$, e único a menos de
-isomorfismo, é teorema clássico, e cita-se como tal. \textbf{Mas a passagem a
-$\mathbb{R}$ não é a identificação posterior de um subconjunto conveniente}: é
-a realização da \emph{face alcançada} da própria construção. A face binária
-permanece finita e não ordenável como corpo; a face alcançada é aquela em que
-os cortes se tornam estrutura ordenada e completa. \emph{São duas faces do
-mesmo eixo, não duas teorias concorrentes.}
-\end{observacao}
-
-%======================================================================
 \section{E o que se construiu é o contínuo, e não $\mathbb{Q}$}\label{sec:continuo}
 
 \noindent Tudo o que este paper mede corre em inteiros, e daí a pergunta legítima
@@ -4494,304 +4308,6 @@ $28$ profundidades sem empate; a identidade da descida em $21\,900$ pares}
 \noindent Fecha-se assim a pergunta com que a secção abriu, e fecha-se dos dois
 lados: a aritmética é toda do \textbf{caminho} --- inteira, exacta, sem uma
 vírgula --- e o habitante \textbf{é} o caminho. É o contínuo, e não $\mathbb{Q}$.
-
-%======================================================================
-\section{A continuidade: dado $S$ limitado, o supremo constrói-se}\label{sec:supremo}
-
-\noindent Até aqui a direcção foi sempre a mesma --- \emph{dado o habitante $x$, a
-classe racional dele tem $x$ por supremo} (\S\ref{sec:completude},
-Teor.~\ref{thm:completude}). Isso constrói o \textbf{corte a partir do habitante}.
-A continuidade é a \textbf{volta}, e é ela que separa $\mathbb{R}$ de $\mathbb{Q}$
-como estrutura ordenada:
-\[
-\boxed{\;S\neq\emptyset\ \text{limitado superiormente}
-\ \Longrightarrow\ \exists\,\sup S\ \textbf{dentro do objecto}\;}
-\]
-E aqui não é axioma acrescentado: o caminho do supremo \textbf{constrói-se}, bit a
-bit, em inteiros.
-
-\begin{definicao}[o caminho do supremo]\label{def:supremo}
-Para $S\neq\emptyset$ limitado superiormente,
-\[
-m_k:=\max\bigl\{m\in\mathbb{Z}:\ \tfrac{m}{2^{k}}<x\ \text{para algum }x\in S\bigr\}
-\]
---- bem definido, porque $S$ não é vazio (há $m$ pequeno que serve) e é limitado
-(há $m$ grande que não serve).
-\end{definicao}
-
-\begin{teorema}[$m_k$ é um caminho, e é o supremo]\label{thm:supremo}
-\emph{(i) É um caminho}, e é o \textbf{passo} que o diz:
-\[
-\boxed{\;m_{k+1}\in\{2m_k,\ 2m_k+1\}\;}
-\]
---- os $m_k$ descem a árvore binária \emph{sem saltar}, logo são um habitante do
-objecto e não uma lista solta de inteiros.
-
-\emph{(ii) É majorante:} $m_k+1$ já não serve, logo nenhum $x\in S$ ultrapassa o
-caminho.
-
-\emph{(iii) E é o \textbf{menor}} --- é esta a cláusula que trabalha, porque (ii)
-sozinha daria um majorante qualquer. \textbf{E ela não se varre: prova-se}, e a prova é
-a \emph{monotonia}. Ponha-se
-\[
-E_k(m):\quad \exists\,x\in S:\ \tfrac{m}{2^{k}}<x .
-\]
-Então $E_k$ é \textbf{decrescente} em $m$ --- se $m'\leq m$ e $E_k(m)$, o mesmo $x$
-serve --- e daí, numa linha,
-\[
-\boxed{\;m'<m_k\ \Longrightarrow\ \tfrac{m'}{2^{k}}<\tfrac{m_k}{2^{k}}<x
-\ \Longrightarrow\ E_k(m')\;}
-\]
-para \emph{todo} $m'$ abaixo, sem excepção e sem varredura: nenhum deles é majorante.
-\emph{O que se verifica computacionalmente é o \textbf{passo}} $E_k(m+1)\Rightarrow
-E_k(m)$, de onde a indução dá a cláusula inteira --- e não uma amostra dos $m'$, que
-seria substituir a prova por uma janela. $\square$
-\end{teorema}
-
-\begin{corolario}[e o ÍNFIMO é a outra metade --- quem os troca é o
-SWAP]\label{cor:infimo}
-O Teor.~\ref{thm:supremo} constrói o supremo, e sozinho é meia lei: \emph{o par é
-$(\sup,\inf)$}. A outra metade não pede construção nova --- deriva-se, e o que a produz é
-uma peça que já está na fundação.
-
-\textbf{E não é a involução.} Em $x>0$, $\nu(x)=-1/x$ tem derivada $1/x^{2}>0$, logo é
-\emph{crescente}: leva supremo em \textbf{supremo}, e não em ínfimo. Quem inverte a ordem é
-o \textbf{swap} da Def.~\ref{def:lei0},
-\[
-S=\begin{psmallmatrix}0&1\\1&0\end{psmallmatrix},\qquad [p:q]\mapsto[q:p],\qquad
-\det S=-1,
-\]
-que em $x>0$ é $x\mapsto1/x$, \emph{decrescente}. Donde, para $A\subset\mathbb{Q}^{+}$
-limitado e afastado de zero,
-\[
-\boxed{\;\inf A=\frac{1}{\sup\,S(A)},\qquad \sup A=\frac{1}{\inf\,S(A)}\;}
-\]
---- e é o $\det=-1$ que diz que ele \textbf{troca}, o mesmo $-1$ do gato. \emph{O supremo e
-o ínfimo não são duas construções: são uma, vista dos dois lados do swap.} $\square$
-\end{corolario}
-\colunas{o ínfimo, e quem troca o par}
-        {$(\sup,\inf)$ é o par; quem o troca é o swap ($\det=-1$), e a involução $\nu$ NÃO
---- ela preserva o supremo}
-        {\code{tests/transformada\_universal.c} \S T17: em $84$ conjuntos de racionais, «o
-supremo do transformado é o ínfimo do original» em $84$, o mesmo nos dois sentidos, e
-$\nu(x)=-1/x$ a PRESERVAR o supremo em $84$ --- que é o contraste que impede trocar de
-operador; tudo por produto cruzado de inteiros}
-
-\begin{proposicao}[e é aqui que $\mathbb{Q}$ falha, com testemunha]\label{prop:q-falha}
-Para $S=\{r\in\mathbb{Q},\,r>0:\ r^{2}<2\}$ nenhum $p/q$ é o supremo, e a
-testemunha é a \emph{mesma} nos dois casos:
-\[
-\boxed{\;(p,q)\longmapsto(3p+4q,\ 2p+3q),
-\qquad \det\begin{psmallmatrix}3&4\\2&3\end{psmallmatrix}=1\;}
-\]
---- a \textbf{unidade fundamental de $\mathbb{Z}[\sqrt2]$ ao quadrado},
-$(1+\sqrt2)^{2}=3+2\sqrt2$. O que faz dela testemunha são duas identidades
-inteiras, e são precisas as duas:
-\[
-\begin{array}{ll}
-(3p+4q)^{2}-2(2p+3q)^{2}=p^{2}-2q^{2}
- & \textbf{preserva} \text{ a forma, logo o \textbf{lado}}\\[3pt]
-(3p+4q)q-p(2p+3q)=2\,(2q^{2}-p^{2})
- & \text{e \textbf{move} na direcção desse lado}
-\end{array}
-\]
-Juntas: quem está \emph{abaixo} sobe continuando abaixo --- fica em $S$, e é maior,
-logo $p/q$ não era majorante; quem está \emph{acima} desce continuando acima ---
-continua majorante, e é menor, logo $p/q$ não era o menor. E não há empate, pois
-$p^{2}=2q^{2}$ é a descida proibida (Cor.~\ref{cor:habitante}). $\square$
-\end{proposicao}
-
-\begin{observacao}[e a mediante simples não serve]\label{obs:mediante}
-A mediante de Farey $(p+2q)/(p+q)$ satisfaz
-$(p+2q)^{2}-2(p+q)^{2}=-(p^{2}-2q^{2})$ e portanto \textbf{troca} o sinal: ela
-\emph{atravessa} o corte e cai do lado oposto, em vez de ficar entre $p/q$ e ele.
-A identidade é verdadeira e a testemunha seria falsa --- é preciso a matriz de
-$\det=1$ acima, que é a mediante \emph{aplicada duas vezes}.
-\end{observacao}
-\colunas{a continuidade como propriedade do menor majorante}
-        {o caminho do supremo, construído bit a bit em inteiros}
-        {\code{tests/supremo.c} ($6{:}0$): $104$ passos por duas rotas concordantes;
-$64$ níveis com a cláusula (a) e com o \textbf{passo} da monotonia sem uma violação em
-$761\,859$ verificações --- e não numa janela dos últimos $40$, que era o que aqui
-estava com a asserção a dizer «todos»; o gume com uma condição não monótona a violar o
-passo as $429$ vezes previstas; $5490$ candidatos com as duas identidades da
-testemunha e zero empates; e o supremo de $\{r^2<2\}$ dá $1\,482\,910/2^{20}$}
-
-\medskip
-\noindent\textbf{E é por isto que o sistema atravessa os andares com erro zero.} O
-habitante \textbf{é} o caminho --- não há valor por trás à espera de ser
-aproximado, logo não há erro a acumular: a ida e a volta são a involução, exacta
-por construção (\S\ref{sec:dual}). A continuidade clássica precisa do limite
-porque lá o ponto tem de \emph{aparecer} de fora; aqui o ponto \emph{é} a
-sucessão dos passos, e o supremo é apenas mais um caminho que se desce.
-
-%======================================================================
-\section{E só então $\pi$}\label{sec:pi}
-
-\begin{definicao}[dois predicados, e não um]\label{def:primo-ordem}
-Seja $\mu_n\in\mathbb{Z}[x]$ o polinómio mínimo de $t_n=2\cos(\pi/n)$ sobre
-$\mathbb{Q}$. Separam-se:
-\[
-\boxed{\;
-\begin{array}{ll}
-p\ \text{é \textbf{primo de realização} de } n
- & \iff\ \mu_n\ \text{tem raiz } \bar t_n\in\mathbb{F}_p\\[3pt]
-(p,\bar t_n)\ \text{\textbf{realiza a ordem} } n
- & \iff\ \mu_n(\bar t_n)=0\ \text{e}\ \operatorname{ord}\bigl(C_n(\bar t_n)\bigr)=2n
-\end{array}\;}
-\]
-O primeiro é condição sobre a \emph{existência} da realização modular do traço; o
-segundo é propriedade do \textbf{par} $(p,\bar t_n)$ --- porque a companheira depende
-da raiz escolhida --- e não decorre do primeiro. Os exemplos usados aqui cumprem ambos, e isso verifica-se:
-\[
-\begin{array}{lll}
-n=4: & \mu_4=x^{2}-2,\ p=17 & \bar t_4\in\{11,6\}\\
-n=6: & \mu_6=x^{2}-3,\ p=13 & \bar t_6\in\{9,4\}\\
-n=3: & \mu_3=x-1 & \bar t_3=1\ \text{em toda a característica}
-\end{array}
-\]
-Para $n=3$, $\mu_3=x-1$ e portanto \emph{toda} característica admite a raiz; mas
-para a afirmação de ordem $6$ restringe-se às características em que $-I\neq I$,
-em particular $p\neq2$ --- em característica $2$ a ordem colapsa. \textbf{Em geral},
-nos casos usados $p$ é escolhido \emph{fora das características que degeneram a
-relação algébrica relevante} --- em particular fora das que anulam o discriminante,
-onde as folhas colapsam (Cor.~\ref{cor:dourada-completa}).
-\end{definicao}
-
-\begin{definicao}[$t_n$, pela ordem --- sem $\pi$]\label{def:tn}
-$t_n$ é o traço da companheira
-$C=\begin{psmallmatrix}t&-1\\1&0\end{psmallmatrix}$, de determinante $1$, tal que
-\[
-\boxed{\;C^{n}=-I\quad\text{e}\quad C^{k}\neq\pm I\ \text{ para } 0<k<n\;}
-\]
---- pura condição de \textbf{ordem}, sem nenhuma constante. \textbf{Mas a ordem
-não escolhe o ramo}: há mais de uma companheira de ordem $2n$, com traços
-distintos. Fixa-se então o representante:
-\[
-\boxed{\;t_n:=\text{o \textbf{maior} traço real entre as companheiras de ordem }2n\;}
-\]
---- e assim $t_n$ fica determinado sem que nenhuma constante entre.
-\end{definicao}
-
-\noindent E \emph{só então}, como \textbf{identificação posterior}, escreve-se
-\[
-t_n=2\cos\frac{\pi}{n},
-\]
-que é uma identificação e não a definição --- sem isso, $\pi$ entraria na
-definição de $t_n$ e a cadeia
-$\text{ordem}\to t_n\to A_n^{\rm in},A_n^{\rm circ}\to\pi_n\to\pi$
-seria circular. E a companheira
-$C_n=\begin{psmallmatrix}t_n&-1\\1&0\end{psmallmatrix}$ tem ordem $2n$. \textbf{Mas $t_n$ não é inteiro} --- $t_4=\sqrt2$, $t_6=\sqrt3$ ---,
-e é aqui que está a passagem que dá o título a esta secção: nos modelos finitos
-usados para a realização, \emph{o traço irracional é substituído pela raiz da
-classe modular correspondente} --- uma raiz inteira, em $\mathbb{F}_p$, do mesmo
-polinómio mínimo. E não se confundem os dois objectos:
-\[
-t_n=2\cos\frac{\pi}{n}\in\mathbb{R}
-\qquad\text{contra}\qquad
-\bar t_n\in\mathbb{F}_p ,
-\]
-sendo o segundo uma \textbf{realização modular de uma relação algébrica}, e não
-«o mesmo número». E o alcance disso limita-se, porque as áreas usam
-$\sqrt{4-t_n^{2}}$ e a passagem da raiz real para uma raiz em $\mathbb{F}_p$ exigiria
-estrutura adicional:
-\[
-\boxed{\;\begin{gathered}
-\text{a realização modular fecha a \textbf{relação algébrica do traço};}\\
-\text{as áreas e }\pi_n\text{ permanecem na realização \textbf{real}}
-\end{gathered}\;}
-\]
-
-\begin{teorema}\label{thm:pi}
-\emph{(i) os elíticos.} Com $t_n=2\cos(\pi/n)$ realizado no primo da ordem,
-\[
-\begin{array}{llll}
-n=3: & \mu_3=x-1 & \bar t_3=1\in\mathbb{F}_p & \operatorname{ord}C_3=6\\
-n=4: & \mu_4=x^{2}-2 & \bar t_4=11\in\mathbb{F}_{17},\ \mu_4(11)\equiv0
-     & \operatorname{ord}C_4=8\\
-n=6: & \mu_6=x^{2}-3 & \bar t_6=9\in\mathbb{F}_{13},\ \mu_6(9)\equiv0
-     & \operatorname{ord}C_6=12
-\end{array}
-\]
---- ordem exactamente $2n$ em cada caso. As duas raízes conjugadas realizam a
-\emph{mesma relação algébrica} e, nestes exemplos, ambas produzem ordem $2n$ ($6$
-em $\mathbb{F}_{17}$, $4$ em $\mathbb{F}_{13}$); a construção fixa uma delas como
-representante do ramo escolhido.
-
-\emph{(ii) os hiperbólicos} são os metais, o motor dos
-\S\S\ref{sec:dual}--\ref{sec:todos}.
-
-\emph{(iii) o parabólico.} Para $t=2$ o polinómio é $x^{2}-2x+1=(x-1)^{2}$, logo
-$C=I+N$ com $N^{2}=0$; em característica $p$ ímpar $C^{k}=I+kN\neq I$ para
-$1\leq k<p$ e $C^{p}=I$, portanto
-\[
-\boxed{\;\operatorname{ord}C=p:\ \text{o fecho parabólico é governado pela
-\textbf{característica}}\;}
-\]
-e \emph{não} coincide genericamente com a ordem elíptica $2n$. Note-se que $p$
-\textbf{pode} dividir $2n$ --- $n=3$ com $p=3$ dá $3\mid6$, e $n=5$ com $p=5$ dá
-$5\mid10$ ---, pelo que a separação dos dois regimes é pela \emph{natureza do
-fecho}, e não por uma divisibilidade universal. $\square$
-\end{teorema}
-
-\begin{definicao}[$\pi_n$ --- e ele é um intervalo]\label{def:pin}
-Do traço $t_n=2\cos(\pi/n)$ do andar saem as duas áreas, ambas \textbf{algébricas
-em $t_n$}:
-\[
-\boxed{\;
-A_n^{\rm in}=\frac{n\,t_n}{4}\sqrt{4-t_n^{2}}
-\qquad\text{e}\qquad
-A_n^{\rm circ}=\frac{n\sqrt{4-t_n^{2}}}{t_n}\;}
-\]
---- a do polígono inscrito e a do circunscrito, no círculo unitário, com notação
-distinta da companheira $C_n$ do Teor.~\ref{thm:pi}, que é outra coisa. Elas
-satisfazem, \emph{sem que $\pi$ entre}:
-\[
-A_n^{\rm in}<A_n^{\rm circ},\qquad
-A_n^{\rm in}\uparrow,\qquad A_n^{\rm circ}\downarrow,\qquad
-\abs{\pi_n}\to0 .
-\]
-Nos andares $3,4,6$ os quadrados são racionais --- $(A_3^{\rm in})^{2}=27/16$ e
-$(A_3^{\rm circ})^{2}=27$; $A_4^{\rm in}=2$ e $A_4^{\rm circ}=4$;
-$(A_6^{\rm in})^{2}=27/4$ e $(A_6^{\rm circ})^{2}=12$ --- e a duplicação de
-Arquimedes $(A_{2n}^{\rm in})^{2}=A_n^{\rm in}A_n^{\rm circ}$ fecha exacta, dando
-$(A_8^{\rm in})^{2}=8$. O encaixe $A_8^{\rm in}<333/106<22/7<A_8^{\rm circ}$
-decide-se por comparação de inteiros.
-\end{definicao}
-
-\medskip
-\noindent E daqui sai a definição que faltava, e ela usa o mecanismo do próprio
-paper:
-\[
-\boxed{\;\pi_n:=\bigl[A_n^{\rm in},\,A_n^{\rm circ}\bigr],
-\qquad
-\pi_{2n}\subset\pi_n,
-\qquad
-\abs{\pi_n}\longrightarrow0\;}
-\]
---- \textbf{$\pi_n$ é o intervalo do andar}, com as duas bordas exactas nele. O
-encaixe está demonstrado ao longo da \emph{duplicação} $n\mapsto2n$
-(Def.~\ref{def:pin}), pelo que a família encaixada é a cadeia
-$\pi_{n_0}\supset\pi_{2n_0}\supset\pi_{4n_0}\supset\cdots$. Donde
-\[
-\boxed{\;\pi:=\bigcap_{j\geq0}\pi_{2^{j}n_0}\ \text{---\ o \textbf{único habitante}
-do corte que a cadeia de duplicações determina.}\;}
-\]
-Não é constante importada nem aproximação numérica: é um corte, produzido pelo
-mesmo mecanismo de \S\ref{sec:completude}, com bordas algébricas em cada andar.
-\emph{O que é exacto por andar são as bordas}; $\pi$ continua a ser o corte. O que o quadro
-dispensa é \emph{importar} uma constante: cada andar apresenta o seu.
-
-\noindent Nenhuma constante foi importada: \textbf{cada andar apresenta a sua}.
-E na realização modular adoptada, a ordem do operador elíptico fecha em
-características adequadas, ao passo que a do parabólico é $p$ --- a mesma
-fronteira do eixo, agora como propriedade da representação escolhida do
-membro-limite, e não como propriedade universal da geometria circular. \emph{Assim o círculo não é usado para construir a reta: nesta realização, ele
-reaparece como gume geométrico} --- e a palavra é \emph{reaparece}, não
-\emph{portanto}: não há aqui um teorema causal entre a completude e o círculo.
-\colunas{$\pi$ é o membro-limite da família (\code{thm:pi-familia})}
-        {$\pi_k$ exacto por andar, realizado nos primos das ordens}
-        {\code{geometria\_real.c} \S L10; \code{pi\_familia.js} ($7{:}0$)}
 
 %======================================================================
 \section{A condição do encaixe: $n\leq t$, necessária e suficiente}\label{sec:contra}
@@ -4872,7 +4388,7 @@ contraexemplo correcto: $x^{2}-2x-4$ mostra que \emph{alguma} hipótese sobre os
 coeficientes é indispensável, e não que seja a unidade. A condição
 $\abs{N(\sigma)}=1$ continua a ser a que este paper \emph{usa}, porque é ela que
 dá $\abs{\det M_k}=1$ e portanto o comprimento $1/(q_kq_{k+1})$ do
-\S\ref{sec:completude}; mas o \textbf{encaixe} --- a face dual a encolher --- fecha
+\code{analitico sec:completude}; mas o \textbf{encaixe} --- a face dual a encolher --- fecha
 sob a condição mais larga $n\leq t$. \emph{São duas exigências, e não uma:}
 \[
 \boxed{
