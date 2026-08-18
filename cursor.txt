@@ -52,7 +52,11 @@ CORPO EXACTO PRIMEIRO: fecha em Q, e só depois vê o que sobra.
 1. A TAREFA EM CURSO — eliminar os doubles
 ------------------------------------------
 
-    python3 tools/doubles.py        2825 declarados, ~699 alimentam asserções
+    python3 tools/doubles_cond.py   o que ALIMENTA uma condição — e só isso conta
+
+    (A conta ingénua inflaciona: `\bt\b` casa com o `t` de `t.instrucoes`, que é
+     campo LONG de uma struct. Eram 135; com o nome a não valer quando seguido de
+     `.`, `->` ou `(`, são 122. Treze eram fantasmas meus.)
 
 O que conta é o que ALIMENTA uma condição `ok(...)`. Estado dos que já foram tocados:
 
@@ -68,8 +72,8 @@ QUATRO estão fechados a zero. Os que ficam com poucos são os que MEDEM vírgul
 `nne.c` os doubles restantes são o erro de arredondamento (é o objecto), no `dif.c` e
 no `encanamento.c` são igualdades exactas `== 0.0`, que é o contrário de dar folga.
 
-POR FAZER: ~58 ficheiros, 135 doubles. Os maiores por tocar:
-    nne 7 · xx 6 · spline 6 · tikz 5 · quantico 5 · headjack 5 · continua 5 · travessia 4 · relogio_curva 4 · llm 4
+POR FAZER: ~57 ficheiros, 122 doubles. Os maiores por tocar:
+    xx 6 · nne 5 · headjack 5 · continua 5 · tikz 4 · spline 4 · relogio_curva 4 · encanamento 4 · cosmico 4 · corpo_fisico 4
 
 ### E a ferramenta que apanha o que a leitura não apanha
 
