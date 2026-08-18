@@ -28,48 +28,48 @@
 \input{gkcapa}
 
 \begin{document}
-\gkcapa{A realização COMPUTACIONAL}
+\gkcapa{O Corpo Computacional}
        {o dual sort: ordenar é descer pela estaca}
-       {uma realização da tríade --- não um quarto corpo}
+       {a descida EXECUTADA --- onde a propriedade vira processo}
 \maketitle
 
-\section*{Onde este documento vive: DENTRO da tríade, não ao lado dela}
+\section*{Onde este documento vive: o quarto CANÓNICO}
 
-\noindent\textbf{A TRÍADE É DE TRÊS, e este documento não é um deles.}
+\noindent\textbf{Tudo neste corpus é realização do Universal}, e o que separa umas das
+outras é o escalão. Este é um dos \textbf{quatro canónicos} --- as realizações
+\emph{fundamentais} (\code{universal sec:camadas}):
 \[
-\boxed{\;\underset{\tau=-1}{\text{TOPOLÓGICO}}\ \longleftarrow\
-\underset{\tau=0}{\textbf{ALGÉBRICO (o Universal)}}\ \longrightarrow\
-\underset{\tau=+1}{\text{ANALÍTICO}}\;}
-\]
-\emph{Não há quarto lugar.} O centro é o ponto fixo do trial, os dois lados são as duas
-realizações que a reflexão troca, e está fechado --- $S_3$ é o grupo de simetrias de
-\textbf{três} objectos, e são três (\code{universal sec:camadas}).
-
-Este texto é uma \textbf{realização particular}, e realizações não entram na tríade: saem
-dela. Ele não introduz lei, nem operação, nem dualidade --- \emph{recebe tudo}, e o que
-faz é uma coisa só: mostrar que \textbf{ordenar} é a descida da estaca sobre uma régua
-concreta.
-
-\[
-\begin{array}{lll}
-\textbf{RECEBE} & \textbf{de onde} & \textbf{o que realiza aqui}\\[3pt]
-\text{a estaca }\nu,\ 1\dg=-1 & \text{o CENTRO} & \text{a permutação é o dual}\\[2pt]
-\text{os três sinais }\tau & \text{o CENTRO} & \text{o trial da comparação}\\[2pt]
-\text{a bidualidade} & \text{o CENTRO} & \text{a volta fecha, apagamento }0\\[2pt]
-\text{os naturais em degraus} & \text{o TOPOLÓGICO }(\tau{=}-1) & \text{a referência: ela FECHA}\\[2pt]
-\text{o ponto fixo da régua} & \text{o TOPOLÓGICO} & \text{a forma canónica}
+\begin{array}{ll}
+\code{corpo\_universal} & \tau=0\ \text{--- o centro, o ponto fixo}\\[2pt]
+\code{corpo\_topologico} & \tau=-1\ \text{--- o que FECHA}\\[2pt]
+\code{corpo\_analitico} & \tau=+1\ \text{--- o que NÃO fecha}\\[2pt]
+\textbf{este} & \text{a descida EXECUTADA: ordenar}
 \end{array}
 \]
 
-\noindent\textbf{E repare-se de que lado ele se serve:} tudo o que ele usa vem do centro ou
-do $\tau=-1$ --- do lado que \emph{fecha}. Ordenar é um processo que TERMINA, e por isso
-não tem nada a pedir ao $\tau=+1$, onde nada fecha. \emph{A posição de uma realização
-lê-se pelo que ela consome}, e esta lê-se assim.
+\noindent\textbf{E não é um quarto valor de $\tau$.} O trial continua a ter três, porque
+$\operatorname{sign}$ tem três. O que este corpo acrescenta é outra coisa: nos outros a
+descida é uma \emph{propriedade} --- o operador desce, a fracção contínua desce, o corte
+desce ---, e aqui ela é um \textbf{processo que corre e termina}. É a diferença entre dizer
+que uma régua tem ponto fixo e ir lá buscá-lo.
 
-\medskip
-\noindent\emph{(Chamei-lhe «O Corpo Computacional» ao renomear o ficheiro, e isso estava
-errado: pôr um quarto «Corpo» ao lado dos três desfaz o que os três são. O ficheiro guarda
-o nome; o documento não é um corpo.)}
+\[
+\begin{array}{lll}
+\textbf{RECEBE} & \textbf{de onde} & \textbf{o que EXECUTA aqui}\\[3pt]
+\text{a estaca }\nu,\ 1\dg=-1 & \code{universal thm:fixo-dual} & \text{a permutação é o dual}\\[2pt]
+\text{os três sinais }\tau & \code{universal thm:cuspide} & \text{o trial da comparação}\\[2pt]
+\text{a bidualidade} & \code{universal thm:operacao} & \text{a volta fecha, apagamento }0\\[2pt]
+\text{a torre } \dim A_n=2^n & \code{universal thm:torre} & \text{os naturais em degraus}\\[2pt]
+\text{o que FECHA} & \code{topologico def:peano} & \text{a referência, endereçada}\\[6pt]
+\textbf{ACRESCENTA} & \multicolumn{2}{l}{\text{--- e é só isto ---}}\\[3pt]
+\textbf{a EXECUÇÃO} & \S\ref{sec:pecas} & \text{a descida que corre e PARA}
+\end{array}
+\]
+
+\noindent\emph{Repare-se de que lado ele se serve:} tudo vem do centro e do $\tau=-1$ --- o
+lado que fecha. Ordenar é um processo que \textbf{termina}, e por isso este corpo não tem
+nada a pedir ao $\tau=+1$, onde nada fecha. \emph{A posição de uma realização lê-se pelo que
+ela consome}, e esta lê-se assim.
 
 \begin{abstract}
 \noindent \textbf{Ler e escrever são uma operação; ordenar não é essa} --- ela precisa de uma
@@ -154,7 +154,7 @@ de $4096$ e faz $0$ perguntas de ordem; $\nu\circ\nu=\mathrm{id}$ nos $8193$ nat
 \textbf{controlo}: em $\Z$ nenhum quadrado é negativo, e com $i$ há um --- a ordem não sobe
 (\code{tests/ordena\_n.c}).}
 
-\section{As peças}
+\section{As peças}\label{sec:pecas}
 
 Todas as peças estão demonstradas na \emph{Teoria} e nenhuma é importada.
 

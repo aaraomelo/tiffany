@@ -130,7 +130,7 @@ derivacao_primitivas 3d04c680af7012a7 0
 descida_mobius 7a1f5821136fdfa6 0
 desenha 5918033b43ea7382 0
 design f782a62b62cb35d7 0
-design_no_pdf 9a8a8aa1af74cad9 2
+design_no_pdf 9a8a8aa1af74cad9 0
 dif 30e6394f76a66b4f 0
 diferentes e79bff3e124cf01f 0
 dimensoes 5f6df5d3e407c5ad 0
@@ -179,7 +179,7 @@ entropia_dual 0020800d5379fccb 0
 equivalencia_universal 6a6fc94b595de1ff 0
 erg cbe6fa6888b88608 0
 escada 9cc50be41553f6c4 0
-escala 6b61a62823913951 2
+escala 6b61a62823913951 0
 escala_dourada da54f23e82725e22 0
 escala_espaco 26ed3534a655fc9d 0
 escuros 6bc3e85125c6c969 0
@@ -424,7 +424,7 @@ sair_pu a64d5e2b256b4dc8 0
 saltos 8d41227d65c00cca 0
 selberg ee901239b2065270 0
 selo 972c01052066e6ff 0
-sem_chute d5a648827ec7e719 2
+sem_chute d5a648827ec7e719 0
 sem_ramo 81a20f7c9df8d1e2 0
 semantico 4501b7bcfb9d51c7 0
 semente bdf47d333634825f 0

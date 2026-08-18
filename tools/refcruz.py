@@ -22,11 +22,13 @@ Confere três coisas, e a terceira é a que a separação exige:
 import re, sys, os
 
 DOCS = {'universal':'papers/corpo_universal.tex', 'topologico':'papers/corpo_topologico.tex',
-        'analitico':'papers/corpo_analitico.tex', 'teoria':'teoria.tex',
-        'catalogo':'catalogo.tex', 'enredo':'enredo.tex'}
+        'analitico':'papers/corpo_analitico.tex', 'computacional':'papers/corpo_computacional.tex',
+        'teoria':'teoria.tex', 'catalogo':'catalogo.tex', 'enredo':'enredo.tex'}
 CENTRO = 'universal'
-LADOS  = {'topologico', 'analitico'}
-PARTICULARES = {'teoria', 'catalogo', 'enredo'}   # mais particulares que o centro
+# os QUATRO canónicos: o centro e as três realizações fundamentais. `computacional` não é um
+# quarto valor de τ — é a EXECUÇÃO da mesma estrutura, e conta como canónico na arrumação.
+LADOS  = {'topologico', 'analitico', 'computacional'}
+PARTICULARES = {'teoria', 'catalogo', 'enredo'}   # segundo escalão: mais específicos
 
 raiz = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(raiz)

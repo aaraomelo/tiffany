@@ -4093,234 +4093,14 @@ atestação $\lambda^{+}+\lambda^{-}=0$).
 
 \section{Energia --- a conservação pelo Parseval dourado}\label{sec:energia}
 
-\begin{definicao}[indução e meta-indução]\label{def:inducao}
-O passo que transforma um corpo chama-se \textbf{indução} --- o mesmo
-gesto da Lei~4: toda transformação é um passo de indução na torre. O
-passo \emph{sobre} os passos --- a leitura dual que mede a indução e
-valida o que ela conservou --- é a \textbf{meta-indução}: o Quantizador a
-ler a indução. A dualidade é a de sempre: a indução projecta
-($\lambda^{+}$), a meta-indução lê ($\lambda^{-}$), e o que a
-meta-indução \textbf{valida é a conservação de energia}.
-\end{definicao}
+\noindent\emph{(Esta peça é CANÓNICA e passou para o centro: \code{universal def:inducao}. O que fica aqui são as realizações específicas que a usam.)}
 
-\begin{teorema}[a descida é o dual da indução, e a meta-indução mede o
-PASSO]\label{thm:meta-inducao}
-A Definição~\ref{def:inducao} nomeia o par --- a indução projecta
-($\lambda^{+}$), a meta-indução lê ($\lambda^{-}$). Este teorema diz o
-que cada metade \emph{faz}, e como se mede.
 
-\textbf{(0) As duas metades.} Seja $P(n)$ uma proposição sobre andares
-da torre. A \textbf{indução} sobe: base em $0$, e
-$P(n)\Rightarrow P(n+1)$. A \textbf{descida} desce: nega-se a tese --- «há
-um \emph{primeiro} andar $N$ onde $P$ falha» --- e mostra-se que esse $N$
-não existe, porque o passo aplicado em $N-1$ tê-lo-ia produzido. As duas
-usam \emph{o mesmo} facto, e nada mais: $\mathbb{N}$ é bem ordenado. São
-duais no sentido desta casa --- a involução é inverter a ordem, e
-$\nu\circ\nu=\operatorname{id}$: a indução diz o que \textbf{há} no andar
-seguinte, a descida diz o que \textbf{não há} em andar nenhum, e é a
-mesma frase.
+\noindent\emph{(Esta peça é CANÓNICA e passou para o centro: \code{universal thm:meta-inducao}. O que fica aqui são as realizações específicas que a usam.)}
 
-\textbf{(1) A meta-indução: o que se mede é o passo.} Se o passo
-$\mathcal{C}(n)\to\mathcal{C}(n+1)$ é uma construção cujo corpo
-\emph{não menciona} $n$, então $\forall n\,\mathcal{C}(n)$ segue da
-\textbf{forma} do passo. O resultado não é
-$\mathcal{C}(0),\ldots,\mathcal{C}(N)$ --- é
-\[
-\boxed{\;\forall n\ge0,\;\mathcal{C}(n),\;}
-\]
-e a ausência de tecto dimensional é consequência da forma da construção,
-$T_{n+1}=T_{n}\oplus T_{n}^{\ast}$, e \textbf{não} de uma varredura
-finita. Uma tabela de andares prova os andares da tabela.
 
-\textbf{(2) E é por isso que uma saturação não é um resultado.} Se uma
-realização finita --- inteiros, racionais, matrizes --- transborda ao
-$k$-ésimo passo, o que se mediu foi o tamanho da representação e não a
-lei:
-\[
-\boxed{\;\text{falha de representação}\;\neq\;\text{contra-exemplo
-matemático}.\;}
-\]
-A regra que daí sai é operacional e é obrigatória: sempre que a primeira
-realização atinge o seu limite, a conservação verifica-se numa
-\textbf{segunda realização independente}, e a saturação conta-se em
-lugar \emph{separado} dos defeitos.
+\noindent\emph{(Esta peça é CANÓNICA e passou para o centro: \code{universal thm:gato}. O que fica aqui são as realizações específicas que a usam.)}
 
-\emph{Prova (operacional, medida).} \code{tests/conservacao\_metrica.c}
-$\S$M0--$\S$M1. A descida procura o primeiro andar onde a conservação
-falha e volta \textbf{vazia} em $400$ andares; e a procura vale porque o
-segundo controlo mostra que ela sabe achar --- com um passo
-\emph{sabotado}, que duplica a cada andar, ela acha em $N=1$. O passo
-verdadeiro verifica-se em $640$ entradas independentes (não em $640$
-andares: em $640$ \emph{entradas} do passo, que é outra coisa), e tem
-onde falhar --- com $\det T=0$ o operador não tem dual, e o passo
-recusa. $\square$
-\end{teorema}
-
-\begin{teorema}[\textsc{Teorema do Gato} --- a conservação métrica por
-dualidade: o determinante É o factor de medida, em todo
-andar]\label{thm:gato}
-Seja $\mathcal{T}=\{T_{k}\}_{k\ge0}$ a torre construída por extensão
-dual, e $\sigma_{k}$ o operador métrico do $k$-ésimo andar, com a
-relação de passagem que esta casa já tinha escrito
-(\emph{Corpo Topológico}, \emph{$\S$~o relógio}):
-\[
-\sigma_{k}\,\sigma_{k'}=-1 .
-\]
-Então a conservação métrica admite formulação \textbf{independente da
-dimensão}: a medida é conservada pela ação dual, e
-\[
-\boxed{\;\det=\sigma_{k}\sigma_{k'}\;\text{ é o factor de escala da
-medida};\quad
-\sigma_{k}\sigma_{k'}=-1\;\Longrightarrow\;|\det|=1.\;}
-\]
-\emph{E a seta é só numa direcção.} Escrevi primeiro
-$\sigma\sigma'=-1\Leftrightarrow|\det|=1$ e o recíproco é \textbf{falso}:
-$|\det|=1$ dá $\sigma\sigma'=\pm1$, e a identidade tem $\sigma\sigma'=+1$
-sem ser nenhum gato. O que é uma identidade é $\det=\sigma\sigma'$ --- o
-determinante \emph{é} o produto dos valores próprios; o $-1$ é a escolha
-que a torre faz, e é ela que traz a inversão de orientação junto com a
-conservação da área.
-
-\textbf{(0) O nome, e a geometria que ele carrega.} Chama-se
-\textbf{Teorema do Gato} porque o objecto que o realiza é o \emph{gato}
-desta casa, $A_{m}=\begin{pmatrix} m & 1\\ 1 & 0\end{pmatrix}$: é nele
-que $\det=\sigma\sigma'$ se lê como conservação da área, e é ele que
-\emph{estica por $\sigma$ numa direcção e encolhe por $1/\sigma$ na
-outra}. O nome é do objecto e não de uma pessoa, que é a regra desta
-casa: o sujeito da frase é o resultado. (A intuição nasceu no quintal, a
-ver um gato subir um coqueiro em espiral e descer agarrado ao tronco,
-aos saltos --- e o nome ficou porque a imagem estava certa, não porque
-fosse bonita.)
-
-\textbf{(1) Os dois movimentos, e são duais.} O gato tem
-\[
-\boxed{\;\uparrow\;\text{em espiral}
-\qquad\qquad
-\downarrow\;\text{discretamente}\;}
-\]
---- \textbf{sobe} pela extensão dual, ganhando andar e refinando a
-representação de modo \emph{contínuo}; \textbf{desce} pela projecção
-métrica, por níveis \emph{discretos}, e o que ele não larga na descida é
-o factor de medida. Não são duas dinâmicas: são as duas faces da mesma
-passagem dual, e são exactamente o par do
-Teorema~\ref{thm:meta-inducao} --- a indução que projecta e a descida que
-lê.
-
-\textbf{(2) E a casa já tinha os dois medidos, com um senão que corrige
-a fórmula.} O par não é novo aqui: \code{tests/cone\_espiral.c} mede-o há
-muito, com estes nomes,
-\[
-\Pi:\mathbb{R}\to\mathbb{N}^{\mathbb{N}}\ \ (\text{o \textbf{cone}:
-extracção discreta}),
-\qquad
-\Sigma:\mathbb{N}^{\mathbb{N}}\to\mathbb{R}\ \ (\text{a \textbf{espiral}:
-reconstrução contínua}),
-\]
-e o que ele apurou foi que \textbf{só um dos compostos fecha}:
-\[
-\Sigma\circ\Pi=\operatorname{Id}_{\mathbb{R}},
-\qquad\text{mas}\qquad
-\Pi\circ\Sigma\neq\operatorname{Id}.
-\]
-O par é uma \textbf{retracção}, não uma involução --- e a falha conta-se
-exactamente: todo racional tem \emph{duas} expansões,
-$[a_{0};\ldots,a_{n}]$ e $[a_{0};\ldots,a_{n}-1,1]$, logo $\Sigma$ não é
-injectiva. Descer e voltar a subir devolve o real; subir e voltar a
-descer \emph{não} devolve a sequência.
-
-Escrever $D\circ U\sim\sigma_{k}\sigma_{k'}=-1$ aponta, na notação do
-cone, para $\Pi\circ\Sigma$ --- o lado que \textbf{não} é a identidade. E
-é aí que a afirmação métrica ganha o seu conteúdo em vez de o perder:
-\[
-\boxed{\;|D\circ U|=1\;\text{ vale nos \emph{dois} compostos, e só um
-deles é a identidade.}\;}
-\]
-Ou seja, \textbf{a conservação da medida é estritamente mais fraca do que
-o fecho do laço}, e a casa tem a diferença medida e contada. O gato sobe
-o coqueiro e desce ao mesmo tronco --- mas não às mesmas marcas de unha.
-O que volta é a \emph{medida}; a representação não.
-
-\textbf{(3) As três vidas do gato.} A lei desce em três papéis, e são
-papéis \emph{diferentes} --- não três enunciados do mesmo:
-\[
-\boxed{\;
-\underbrace{\text{dualidade}}_{\text{Universal: a lei}}
-\;\longrightarrow\;
-\underbrace{\text{volume}}_{\text{$\tau=-1$: realização discreta}}
-\;\longrightarrow\;
-\underbrace{\text{medida}}_{\text{$\tau=+1$: realização contínua}}\;}
-\]
-O determinante é a leitura do Topológico, o Jacobiano é a leitura do Analítico, e a
-conservação métrica é a lei que fica acima dos dois. O Universal tem a
-lei e \emph{não a calcula}; é essa separação que impede a lei de ser
-confundida com a conta que a realiza.
-
-\textbf{(4) O que este teorema NÃO afirma.} Se $\sigma_{n}(A)$ se
-\emph{define} como $|\det A|$, então «$\det|\cdot|=\sigma_{n}$» é verdade
-por definição, e uma proposição que não pode falhar não é um teorema. O
-conteúdo está noutro sítio, e é ele que se mede: esse \textbf{mesmo}
-número é, ao mesmo tempo,
-\begin{enumerate}
-\item o determinante, por eliminação --- \emph{álgebra};
-\item o factor da ação em $\Lambda^{n}$, pela cunha das colunas ---
-\emph{geometria}: $A(v_{1})\wedge\cdots\wedge A(v_{n})=\det(A)\,
-v_{1}\wedge\cdots\wedge v_{n}$;
-\item o produto dos valores próprios $\sigma\sigma'$ --- \emph{espectro},
-e sai dos coeficientes, sem avaliar raiz nenhuma;
-\item a razão entre pontos do reticulado na imagem e na fonte ---
-\emph{contagem}, e esta não toca em determinante nenhum.
-\end{enumerate}
-Quatro contas sem código em comum e um só número. \emph{Isso} é o
-teorema; a igualdade com $\sigma_{n}$ é a notação.
-
-\textbf{(5) A hipótese estrutural DÁ a conservação da área.} O
-determinante é o produto dos valores próprios --- $\det=\sigma\sigma'$, e
-\emph{esta} é a identidade. Da hipótese $\sigma\sigma'=-1$ sai
-$|\det A_{m}|=1$, e portanto a conservação; o caminho de volta não
-existe, porque $|\det|=1$ também se cumpre com $\sigma\sigma'=+1$. A casa tinha a relação escrita no \emph{Corpo Topológico} e no
-Universal (Def.~\ref{def:energia} lista $|\det|=1$ entre os três nomes
-da conservação da norma) e nunca a tinha ligado à \textbf{medida}: o
-gato estica por $\sigma$ numa direcção e encolhe por $1/\sigma$ na
-outra, e o produto é $1$. O sinal negativo é a inversão de orientação,
-que a medida não vê.
-
-\textbf{(6) Sem tecto, e pela forma.} Base: $\det(I)=1$. Passo: para a
-extensão dual $T_{n+1}=T_{n}\oplus T_{n}^{\ast}$ com $T^{\ast}$ o dual
-métrico,
-\[
-\det(T\oplus T^{\ast})=\det(T)\cdot\det(T^{\ast})
-=\det(T)\cdot\frac{1}{\det(T)}=1,
-\]
-e a conta \textbf{não menciona a dimensão}. Pelo
-Teorema~\ref{thm:meta-inducao}, $\forall n$. A conservação não é
-reintroduzida em cada andar: é \textbf{transportada pela dualidade}.
-
-\textbf{(7) E duas maneiras de falsificar a própria prova, mortas.} A
-descida não é um procedimento de confirmação: ela procura \emph{onde a
-estrutura poderia quebrar}. Duas portas fecharam-se ao construí-la ---
-(i) uma \emph{saturação} do tipo deixou de poder virar teorema, porque a
-lei se verifica numa segunda realização e a saturação conta-se à parte;
-(ii) a meta-indução deixou de aceitar objectos \emph{fora do seu
-domínio}, que foi como a primeira descida que se escreveu deu sessenta
-falsos sobreviventes. E a regra metodológica que daqui sai é a mais
-larga de todas:
-\[
-\boxed{\;\text{tese com «sempre» não se varre; prova-se o passo.}\;}
-\]
-
-\emph{Prova (operacional, medida).} \code{tests/conservacao\_metrica.c}
-$\S$M2--$\S$M7, $14{:}0$; e a retracção do (2) em
-\code{tests/cone\_espiral.c} ($\S$E1--$\S$E4). As quatro contas coincidem: eliminação contra
-cunha em $2401$ matrizes $2\times2$ e $625$ $3\times3$ ($0$
-divergências); $\sigma\sigma'=\det=-1$ em $40$ metais; e a contagem do
-reticulado feita pelos \emph{dois} lados --- descendo pela
-divisibilidade e subindo por geração --- a concordar exactamente. O gume:
-retirada a hipótese, a dilatação por $k$ multiplica a área por $k$ e o
-buscador acha em $7$ de $7$, e nos metais volta vazio em $20$ de $20$. E
-o $\S$M6 mede a regra do Teorema~\ref{thm:meta-inducao}: a primeira
-realização satura em $k=19$, e a segunda --- em resíduos --- responde
-até $k=400$ em três primos, com $\det(A^{k})=(-1)^{k}$. $\square$
-\end{teorema}
 
 \begin{corolario}[a bidualidade: o gato é o PONTO FIXO, o passarinho volta
 pela segunda]\label{cor:bidualidade}
@@ -4395,7 +4175,7 @@ $\mathbb{Z}_p[G]\cong\mathbb{C}$ e comutam --- logo o esquilo
 $\sigma'=\bar\sigma$ não duplica nada: é a direcção contrária dentro do
 \emph{mesmo} corpo, com
 $\sigma+\sigma'=\operatorname{tr}=m$ e $\sigma\sigma'=\det=-1$. É a
-mesma relação de passagem do Teorema~\ref{thm:gato}, agora lida como
+mesma relação de passagem do Teorema~\code{universal thm:gato}, agora lida como
 \emph{lado} e não como valor próprio.
 
 \textbf{(3) A Lei 8, e é ela que dá o chão.} Tudo isto se mede no anel
@@ -4407,7 +4187,7 @@ $x^{2}-mx-1$ tem de ser irredutível mod $p$, senão o corpo cinde e o par
 deixa de estar definido.
 
 \textbf{(4) A leitura métrica, e ela é complementar.} No
-Teorema~\ref{thm:gato} corrigi a seta: $|\det|=1$ também se cumpre com
+Teorema~\code{universal thm:gato} corrigi a seta: $|\det|=1$ também se cumpre com
 $\sigma\sigma'=+1$, e escrevi «e essa é a identidade, que não é gato
 nenhum». Era certo e \emph{parcial}: o $+1$ é a família elíptica ---
 próprios $\pm i$, órbita \emph{periódica} e limitada ---, contra a
@@ -4914,7 +4694,7 @@ cinco mutações caem todas. $\square$
 
 \begin{teorema}[a ponte entre as faces: a face pequena REFUTA, e não
 prova]\label{thm:reducao}
-O Teorema~\ref{thm:gato} diz que a lei é universal e a face é da
+O Teorema~\code{universal thm:gato} diz que a lei é universal e a face é da
 instância. Este quadro tem agora duas faces --- $\mathbb{Q}$, onde a
 matemática vive, e $\mathbb{F}_{127}$, onde tudo é exaustível e não há um
 ramo --- e a ponte entre elas é a redução
@@ -4998,7 +4778,7 @@ a lei fala: os pontos.
 característica $127$ --- somar um elemento consigo próprio $127$ vezes dá
 zero, em todos eles ---, e em $\mathbb{Q}$ isso nunca acontece. Logo o
 que aqui se varre por inteiro é uma \textbf{face}, e o
-Teorema~\ref{thm:gato} já diz o que isso vale. O que $\mathbb{F}_{127}$
+Teorema~\code{universal thm:gato} já diz o que isso vale. O que $\mathbb{F}_{127}$
 dá é uma face onde não há nada por varrer, e por isso onde nenhuma
 afirmação pode estar a esconder o caso que faltava.
 
@@ -5059,7 +4839,7 @@ passo, o $\varepsilon$ aperta oito ordens de grandeza (de $10^{-1}$ a
 $10^{-8}$) com o maior natural em $1{,}31\cdot10^{9}$; formando a
 diferença, o denominador chega a $2{,}70\cdot10^{9}$ e pára ao passo
 $13$. A matemática é a mesma; \emph{a conta que se escolhe fazer decide o
-tamanho dos números}, que é o Teorema~\ref{thm:meta-inducao} aplicado ao
+tamanho dos números}, que é o Teorema~\code{universal thm:meta-inducao} aplicado ao
 último sítio onde ainda faltava.
 
 \emph{Medido:} \code{tests/aritmetica.c} ($7{:}0$), com as saturações
@@ -5121,7 +4901,7 @@ involução da casa $\nu(z)=-1/z$ é $[p:q]\mapsto[-q:p]$: no \emph{par}
 tem período \textbf{quatro} (o quarto de volta, «o bit é $i$»); em
 $\widehat{\mathbb{K}}$ tem período \textbf{dois}, porque $[-p:-q]$ é o
 mesmo ponto. A projectivização mata o sinal --- que é a frase do
-Teorema~\ref{thm:gato} dita noutro sítio: \emph{a medida não vê o sinal}.
+Teorema~\code{universal thm:gato} dita noutro sítio: \emph{a medida não vê o sinal}.
 
 \emph{Medido:} \code{tests/projetiva.c} ($6{:}0$): a inversão é
 involutiva em $6560$ pontos e nenhum fica sem inversa; onde
@@ -5153,7 +4933,7 @@ literalmente: a substituição $x\mapsto x^{2}$, «dois meios-passos são um
 tick», e os representantes espectrais $\pm\sqrt{\sigma}$ colapsam num só.
 A fibra tem \textbf{exactamente dois} elementos --- as duas patas ---, e
 um único ponto tem fibra $1$: o zero, onde as duas coincidem.
-\item O \textbf{cone} (ponto~(2) do Teorema~\ref{thm:gato}): duas
+\item O \textbf{cone} (ponto~(2) do Teorema~\code{universal thm:gato}): duas
 expansões contínuas, um só real. Fibra $2$, e por outro caminho.
 \item A \textbf{sombra} do simplex: uma base ortonormal de
 $\mathbb{R}^{n+1}$, projectada, dá vectores com relações que em cima não
@@ -5170,7 +4950,7 @@ importa para o corpus:
 \boxed{\;\text{conservar a medida}\ \not\Rightarrow\ \text{conservar o
 percurso}.\;}
 \]
-É a mesma frase que a retracção do Teorema~\ref{thm:gato} já dizia --- o
+É a mesma frase que a retracção do Teorema~\code{universal thm:gato} já dizia --- o
 gato desce ao mesmo tronco e não às mesmas marcas de unha ---, agora com
 a fibra medida em vez de apenas observada.
 
@@ -5272,7 +5052,7 @@ observa (medição) & o traço & o estado & Cor.~\ref{cor:pata} \\
 \boxed{\;\text{a medida atravessa a cadeia inteira; o percurso não.}\;}
 \]
 E é isso que faz do gato o mecanismo e não a decoração --- o que sobrevive
-a todas as etapas é exactamente aquilo que o Teorema~\ref{thm:gato} diz
+a todas as etapas é exactamente aquilo que o Teorema~\code{universal thm:gato} diz
 ser conservado, nem mais nem menos.
 
 \medskip
@@ -5303,7 +5083,7 @@ antes do gato.
 extensão dual $T_0\to T_1\to T_2\to\cdots$ --- espiral, contínua na
 representação --- e desce pela projecção métrica --- cone, discreta na
 leitura. É o par $\uparrow/\downarrow$ do ponto (1), e é o par
-indução/descida do Teorema~\ref{thm:meta-inducao}.
+indução/descida do Teorema~\code{universal thm:meta-inducao}.
 
 \medskip
 \noindent\textbf{A supervisão} é a \textbf{condição de fronteira}, e a
@@ -5385,27 +5165,8 @@ raiz de ordem errada ($3^{128}$, ordem $512$) \textbf{quebra} a
 identidade --- a asserção pode falhar. $\square$
 \end{teorema}
 
-\begin{corolario}[a verificação dá-se por energia]\label{cor:verifica-energia}
-A volta de um corpo atesta-se \textbf{por energia}, sem comparação
-analítica termo a termo:
-\[
-\boxed{
-E(\text{fonte})=E(\text{reconstrução})
-\quad\text{(inteiro exato)},
-}
-\qquad
-\boxed{
-\text{caminho espectral valida a conta (dois caminhos)}.
-}
-\]
-A indução legítima \textbf{conserva} $E$; a que viola o invariante muda
-$E$ e a meta-indução acusa. Medido
-(\code{tests/cristal\_energia.js} \S E0, \S E5):
-$E=38\,731\,623\,179$ exato dos dois lados; permutação conserva
-($\Delta E=0$); e \textbf{remoção e duplicação do mesmo endereço dão}
-$\Delta E=\mp7\,433\,979$ --- o par $(+1)\oplus(-1)$ da Lei~0, com soma
-zero, agora lido na energia.
-\end{corolario}
+\noindent\emph{(Esta peça é CANÓNICA e passou para o centro: \code{universal cor:verifica-energia}. O que fica aqui são as realizações específicas que a usam.)}
+
 
 \begin{observacao}[estatuto]
 A cadeia é derivação \emph{na classe}: o teorema central dá a ponte
@@ -6059,47 +5820,8 @@ duas leis.
 $\square$
 \end{teorema}
 
-\begin{teorema}[os res\'iduos --- o modo que a volta n\~ao v\^e]\label{thm:residuo}
-No contorno da casa (o rel\'ogio $\mu_{M}=\{\omega^{k}\}$ do anel,
-com a volta $z\mapsto\omega z$ e o ``$2\pi i$'' igual a $M$ --- a
-volta completa conta o rel\'ogio inteiro), o teorema dos res\'iduos
-deriva-se por aritm\'etica exata:
-\begin{enumerate}
-\item \textbf{a volta s\'o v\^e um modo}:
-$\sum_{z\in\mu_{M}}z^{j}=M\cdot[M\mid j]$; para o integrando
-$f(z)\,z$ isso seleciona $c_{-1}$ --- a soma de contorno l\^e
-\emph{uma} coordenada, $\sum f(z)\,z=M\,c_{-1}$, e o gume confirma:
-mexer em qualquer outro $c_{k}$ n\~ao move a soma; mexer em $c_{-1}$
-move exatamente $M$.
-\item \textbf{o res\'iduo \'e o ponto fixo da monodromia}: a volta
-age no espectro (a \code{dft} da lib) por
-$\hat{c}_{k}\mapsto\omega^{k}\hat{c}_{k}$, tick a tick, e o
-\'unico modo invariante \'e o que carrega o res\'iduo:
-$\hat{c}_{0}=M\,c_{-1}$. \emph{Local} (o coeficiente no polo) e
-\emph{global} (o invariante da volta) s\~ao o mesmo n\'umero --- o
-enquadramento do gerente, medido.
-\item \textbf{o polo simples fecha por dois caminhos}: o resultante
-do contorno \'e $\prod_{z\in\mu_{M}}(a-z)=a^{M}-1$ e a derivada
-logar\'itmica d\'a $\sum_{z}1/(z-a)=-M\,a^{M-1}/(a^{M}-1)$; a soma
-direta dos inversos no corpo confirma, e um polo \emph{em cima} do
-contorno n\~ao se esconde: o denominador zera no tick em que o
-rel\'ogio o toca.
-\item \textbf{a conserva\c{c}\~ao \'e global}: os res\'iduos de
-$1/((z-a)(z-b))$ somam \emph{zero} --- o que um polo emite o outro
-absorve --- e a soma de contorno fecha pela decomposi\c{c}\~ao em
-fra\c{c}\~oes parciais, identidade verificada no contorno e fora
-dele.
-\item \textbf{o res\'iduo logar\'itmico conta}: para
-$g=(z-r)^{2}(z-s)$, $g'/g=2/(z-r)+1/(z-s)$ como identidade
-polinomial no corpo --- os res\'iduos S\~AO as multiplicidades e a
-soma \'e o grau ($2+1=3$): o princ\'ipio do argumento como
-aritm\'etica. \'E a mesma contagem da zeta din\^amica (derivada do
-log $\leftrightarrow$ censo, Sec.~\ref{sec:zeta-dinamica}); a ponte
-fica apontada, n\~ao reafirmada.
-\end{enumerate}
-\emph{Medido:} \code{tests/residuo\_universal.js} ($12{:}0$).
-$\square$
-\end{teorema}
+\noindent\emph{(Esta peça é CANÓNICA e passou para o centro: \code{universal thm:residuo}. O que fica aqui são as realizações específicas que a usam.)}
+
 
 \begin{teorema}[Clifford pleno --- o andar acima, com o espelho por
 deck]\label{thm:clifford-pleno}
