@@ -316,6 +316,74 @@ E há uma testemunha do lugar do centro que não se escolheu: o espelho é $\nu^
 a única involução de $\det=1$ é $-I$, e $-I$ tem $\mathrm{disc}=0$. \emph{O espelho mora
 em $\tau=0$} --- isto é, na álgebra, que é exactamente o ponto que a reflexão fixa.
 
+\subsection*{E a razão é $0\dg=0$ --- provada, e em $\mathbb{Z}$ inteiro}
+
+Tudo o que se disse acima assenta numa linha, e ela não se varre: \textbf{prova-se}. A
+reflexão de Cantor/Julia é $\tau\dg=-\tau$, logo
+
+\begin{proposicao}[$0\dg=0$, e é o único]\label{prop:zero-dual-zero}
+Para $\tau\in\mathbb{Z}$,
+\[
+\boxed{\;\tau\dg=\tau\iff-\tau=\tau\iff2\tau=0\iff\tau=0\;}
+\]
+e portanto $0\dg=0$, e o zero é o \textbf{único} ponto fixo da reflexão.
+\end{proposicao}
+
+\begin{proof}
+$\tau\dg=\tau$ dá $-\tau=\tau$, isto é $2\tau=0$. Em $\mathbb{Z}$, que é domínio de
+integridade e onde $2\neq0$, isso força $\tau=0$. Reciprocamente $-0=0$. \qed
+\end{proof}
+
+\noindent\textbf{E repare-se no alcance:} a conta não usa que $\tau$ ande em
+$\{-1,0,+1\}$ --- vale em $\mathbb{Z}$ inteiro. É por isso que $0\dg=0$ é uma
+\emph{razão} para o centro ser canónico, e não uma observação sobre três casos. Se
+dependesse dos três valores, seria uma coincidência da lista; como não depende, é
+estrutura.
+
+\subsection*{Os DOIS $\dg$, e eles dizem o contrário sobre o zero --- sem contradição}
+
+Este paper tem duas involuções escritas com o mesmo símbolo, e é preciso separá-las porque
+sobre o zero elas dizem coisas opostas. A Lei~0 (\S\ref{sec:lei0}) é a \textbf{inversão}
+na recta projectiva, a troca $[p:q]\mapsto[q:p]$, e ali
+\[
+0\dg=\infty
+\qquad\text{---}\qquad
+\emph{o zero NÃO é fixo: é metade de um par.}
+\]
+Não há contradição, há \textbf{dois objectos}: um $\dg$ age sobre \emph{pontos de
+$\mathbb{P}^1$}, o outro sobre o \emph{valor do trial}. E a relação entre os dois é exacta,
+e é ela que fecha o argumento:
+\[
+\boxed{
+\begin{array}{lll}
+\text{em }\mathbb{P}^1 & \text{FIXOS }\{+1,-1\} & \text{e o PAR }\{0,\infty\}\\[2pt]
+\text{no trial} & \text{FIXO }\{0\} & \text{e o PAR }\{-1,+1\}
+\end{array}}
+\]
+\emph{Os dois trocam exactamente os papéis de $\{0\}$ e de $\{\pm1\}$}: o que num é ponto
+fixo, no outro é o par que se troca. Dito ponto a ponto, para $v\in\{-1,0,+1\}$:
+\[
+[v:1]\ \text{é fixo pela inversão}
+\iff
+v\ \text{NÃO é fixo pela reflexão}.
+\]
+
+\noindent E é daqui que sai a resposta à pergunta que a divisão levanta --- \emph{porque é
+que o centro do trial é o zero e não o um}: porque o um já é o fixo do \emph{outro} $\dg$.
+Se o trial fixasse $\pm1$, as duas involuções fixariam a mesma coisa e não haveria par
+nenhum a guardar; é a troca de papéis que faz das duas uma \textbf{dualidade} e não uma
+repetição. É a mesma frase de \S\ref{sec:camadas} vista do outro lado: a peça que troca as
+duas pontas é a que mora no meio.
+
+\colunas{$0\dg=0$, e os dois $\dg$ trocam os papéis}
+        {a proposição PROVA-SE em $\mathbb{Z}$ e não se varre: $\tau\dg=\tau\iff2\tau=0
+\iff\tau=0$. O que se varre é a outra metade --- que o outro $\dg$, a inversão de
+$\mathbb{P}^1$, fixa $\{\pm1\}$ e emparelha $\{0,\infty\}$, exactamente ao contrário}
+        {\code{tests/cuspide.c} \S C13: $101$ valores de $\tau$ em $[-50,50]$ com «fixo
+$\iff$ zero» nos $101$ (e não só nos três); $168$ pontos $[p:q]$ com «fixo $\iff\pm1$»
+nos $168$; e a troca medida ponto a ponto, com as duas involuções aplicadas por função.
+Quatro gumes mordem}
+
 \textbf{(1) A ÁLGEBRA é o fundamento, e nela nada é aproximado.} Aqui vivem a Lei~0, a
 operação $\star$ e os seus dois projectores, o par dual traço\,/\,norma
 (Teor.~\ref{thm:fixo-dual}), o operador e a descida (Teor.~\ref{thm:operador},
@@ -648,6 +716,14 @@ $\pm I$ fecha, $216$ hiperbólicas e nenhuma fecha; e $-I$ (o espelho) vive em $
 Antes da base vem a Lei de índice zero, e o índice não é decorativo: o
 \emph{Corpo Universal} chama-lhe «a que dá o arranque --- sem ela nada mais é
 total».
+
+\noindent\emph{Aviso de leitura, e ele importa:} o $\dg$ desta secção é a
+\textbf{inversão} de $\mathbb{P}^1$, e aqui o zero \textbf{não} é fixo --- $0\dg=\infty$.
+O outro $\dg$ do paper, a \emph{reflexão} do trial, fixa-o: $0\dg=0$
+(Prop.~\ref{prop:zero-dual-zero}). Não são a mesma involução e não dizem a mesma coisa: uma
+age sobre \emph{pontos}, a outra sobre o \emph{valor} de $\tau$, e elas trocam exactamente
+os papéis de $\{0\}$ e de $\{\pm1\}$ --- o que é fixo numa é o par na outra
+(\S\ref{sec:camadas}).
 
 \begin{definicao}[a simbologia, e ela é de Möbius]\label{def:lei0}
 Na recta projectiva $\mathbb{P}^1$ o ponto é $[p:q]$ com $(p,q)\neq(0,0)$, a menos

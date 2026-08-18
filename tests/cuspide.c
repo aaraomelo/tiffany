@@ -766,6 +766,110 @@ int main(void){
            && cj_na_algebra);
     }
 
+    /* ─── §C13 ── 0† = 0, E É ELE QUE PROVA QUE O CENTRO É CANÓNICO ────────────────
+     * O Aarão: «0† = 0, prova isso no universal».
+     *
+     * E prova-se em duas linhas, sem varrer nada — o que se varre é a OUTRA metade.
+     * A reflexão de Cantor/Julia é τ† = −τ, logo
+     *
+     *      τ† = τ  ⟺  −τ = τ  ⟺  2τ = 0  ⟺  τ = 0        (Z é domínio, 2 ≠ 0)
+     *
+     * e portanto 0† = 0, e é o ÚNICO. Não é preciso que τ ande em {−1,0,+1}: a conta vale
+     * em Z inteiro, e é por isso que ela é a razão de o centro ser canónico, e não uma
+     * observação sobre três casos.
+     *
+     * MAS ATENÇÃO AO OUTRO †, porque o paper tem os dois e eles dizem coisas OPOSTAS sobre
+     * o zero. Na recta projectiva, a Lei 0 é a INVERSÃO — a troca [p:q] ↦ [q:p] —, e ali
+     *
+     *      0† = ∞          (e ∞† = 0)
+     *
+     * o zero NÃO é fixo: é metade de um par. Não há contradição, há dois objectos: um † age
+     * sobre PONTOS de P¹, o outro sobre o VALOR do trial. E a relação entre eles é exacta,
+     * e é a coisa que vale a pena medir:
+     *
+     *      em P¹:    FIXOS {+1, −1}      e o PAR {0, ∞}
+     *      no trial: FIXO  {0}           e o PAR {−1, +1}
+     *
+     * — os dois trocam EXACTAMENTE os papéis de {0} e de {±1}. O que num é ponto fixo, no
+     * outro é o par que se troca. É essa a razão de o corpo e o trial serem duais, e é
+     * também a razão de o centro do trial ser o ZERO e não o um. */
+    {
+        /* (1) a INVERSÃO em P¹: [p:q] ↦ [q:p], e o fixo é p·p − q·q = 0, isto é p = ±q */
+        long pts = 0, fix_pm1 = 0, par_0_inf = 0, fix_fora = 0;
+        for(long p = -6; p <= 6; p++) for(long q = -6; q <= 6; q++){
+            if(p == 0 && q == 0) continue;            /* [0:0] não é ponto */
+            pts++;
+            long ip = q, iq = p;                      /* a troca */
+            int fixo = (p*iq - q*ip) == 0;            /* [p:q] = [ip:iq] em P¹ */
+            /* e o `p != 0 && q != 0` que aqui estava era uma GUARDA REDUNDANTE, apanhada
+             * por um gume que NÃO mordeu: com [0:0] já saltado, `p == q` e `p == -q` são
+             * ambos falsos assim que um dos dois é zero, logo a guarda não excluía nada.
+             * Mutação que sobrevive tem duas doenças — ou o ramo é inalcançável (falha
+             * minha) ou a guarda é redundante (está certa). Esta era a segunda. */
+            int eh_pm1 = (p == q || p == -q);
+            if(fixo == eh_pm1) fix_pm1++;             /* fixo ⟺ é ±1 */
+            if(!fixo && !eh_pm1) fix_fora++;          /* e todos os outros movem-se */
+            /* e o zero e o infinito são um PAR: 0 = [0:1] vai a [1:0] = ∞, e volta */
+            if((p == 0 && q != 0) && (ip != 0 && iq == 0)) par_0_inf++;
+        }
+        /* (2) a REFLEXÃO no trial: τ† = −τ. O fixo resolve-se em Z, e não se varre:
+         *     τ† = τ ⟺ 2τ = 0 ⟺ τ = 0. Varre-se um intervalo LARGO só para mostrar que a
+         *     conclusão não depende de τ andar em {−1,0,+1}. */
+        long taus = 0, fixos_refl = 0, so_o_zero = 0;
+        for(long t = -50; t <= 50; t++){
+            taus++;
+            if(-t == t) fixos_refl++;
+            if((-t == t) == (t == 0)) so_o_zero++;    /* fixo ⟺ é zero, em TODO o intervalo */
+        }
+        /* (3) e a TROCA DE PAPÉIS, dita como igualdade de conjuntos: o par de um é o fixo
+         *     do outro. Em P¹ o par é {0, ∞}; no trial o fixo é {0}. Em P¹ os fixos são
+         *     {+1, −1}; no trial o par é {−1, +1}. */
+        /* e a troca de papéis mede-se PONTO A PONTO nos mesmos três valores, com as duas
+         * involuções aplicadas por função e não escritas à mão — `(-0L == 0L)` era um
+         * literal a fazer de medida, e não podia falhar. Para cada v em {−1,0,+1}, toma-se
+         * o ponto [v:1] de P¹ e o valor v do trial, e afirma-se a EQUIVALÊNCIA:
+         *
+         *      [v:1] é fixo pela inversão   ⟺   v NÃO é fixo pela reflexão
+         *
+         * — é isto que quer dizer «trocam os papéis», e cada um dos três pode desmenti-la. */
+        long tres = 0, trocam = 0;
+        for(long v = -1; v <= 1; v++){
+            long p = v, q = 1;                        /* o ponto [v:1] de P¹ */
+            long ip = q, iq = p;                      /* a inversão: a troca */
+            int fixo_P1    = (p*iq - q*ip) == 0;
+            int fixo_trial = (-v == v);
+            tres++;
+            if(fixo_P1 == !fixo_trial) trocam++;
+        }
+        int trocam_papeis = (tres == 3 && trocam == tres);
+
+        printf("  §C13 0† = 0 — e é ele que faz do centro o canónico\n");
+        printf("      a prova: τ† = τ ⟺ −τ = τ ⟺ 2τ = 0 ⟺ τ = 0  (em Z, e não só em {−1,0,+1})\n");
+        printf("      varridos %ld valores de τ em [−50,50]: fixos da reflexão %ld, e\n"
+               "        «fixo ⟺ zero» vale em %ld deles\n", taus, fixos_refl, so_o_zero);
+        printf("      e o OUTRO † (a Lei 0, a inversão em P¹): %ld pontos, «fixo ⟺ ±1» em %ld,\n"
+               "        e o zero vai a infinito e volta (%ld)\n", pts, fix_pm1, par_0_inf);
+        printf("      TROCAM OS PAPÉIS:  P¹ fixa {±1} e emparelha {0,∞};"
+               "  o trial fixa {0} e emparelha {±1}: %s\n\n",
+               trocam_papeis ? "sim" : "NAO");
+        ok("0† = 0, E E' ELE QUE PROVA QUE O CENTRO E' CANONICO — e a prova nao varre nada:"
+           " a reflexao e' τ† = −τ, logo τ† = τ ⟺ 2τ = 0 ⟺ τ = 0, porque Z e' dominio e 2 nao"
+           " e' zero. Vale em Z INTEIRO e nao so' em {−1,0,+1}, e e' por isso que e' uma razao"
+           " e nao uma observacao sobre tres casos — varrido [−50,50], «fixo da reflexao ⟺ ser"
+           " zero» vale nos 101",
+           taus == 101 && fixos_refl == 1 && so_o_zero == taus);
+        ok("e o OUTRO † diz o CONTRARIO sobre o zero, sem contradicao: na recta projectiva a"
+           " Lei 0 e' a INVERSAO [p:q] ↦ [q:p], e ali 0† = ∞ — o zero NAO e' fixo, e' metade"
+           " de um par. Sao dois objectos: um † age sobre PONTOS de P¹, o outro sobre o VALOR"
+           " do trial. E a relacao entre eles e' exacta: em P¹ os fixos sao {+1,−1} e o par e'"
+           " {0,∞}; no trial o fixo e' {0} e o par e' {−1,+1} — os dois TROCAM os papeis de"
+           " {0} e {±1} — medido PONTO A PONTO nos tres valores, com as duas involucoes"
+           " aplicadas por funcao: [v:1] e' fixo pela inversao se e so' se v NAO e' fixo pela"
+           " reflexao. O que num e' ponto fixo, no outro e' o par que se troca, e e' essa a"
+           " razao de o centro do trial ser o ZERO e nao o um",
+           pts == 168 && fix_pm1 == pts && par_0_inf > 0 && trocam_papeis && trocam == 3);
+    }
+
     printf("  ══ a CÚSPIDE é disc = 0: onde as folhas colidem, a volta se perde e a lei\n");
     printf("     muda de regime. Cada racional ancora uma, todas são a mesma órbita, e o\n");
     printf("     que a valida é rev(τ) = τ. ══\n\n");
