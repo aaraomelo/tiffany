@@ -1,40 +1,67 @@
 CURSOR.TXT — ONDE ESTÁ O TRABALHO, E COMO SE SEGUE
 ==================================================
 Não é histórico. É o que precisas para pegar e continuar.
-Estado: 17/08/2026 (noite). Bateria 508:508, 0 falhas. universal.tex 55 páginas.
+Estado: 18/08/2026 (madrugada). Bateria 508:508, 0 falhas.
 Verificar sempre com:  bash tools/bateria.sh   (lê AS DUAS linhas: total e unidades)
 
-OS DOCUMENTOS, depois da reorganização de 18/08:
+A TRÍADE, e quem mora em cada casa
+----------------------------------
 
-    papers/     universal.tex          O CORPO UNIVERSAL — tudo CANÓNICO (81 pp.)
-                corpo_topologico.tex   o PALCO — endereçamento, projecção, métrica (37)
-                corpo_analitico.tex    o ALCANCE — graduação, continuação, completude (37)
-                estilo.tex, gkcapa.tex preâmbulo partilhado
+    τ=−1  papers/corpo_topologico.tex     o que FECHA          41 pp.   [GPT]
+    τ= 0  papers/corpo_algebrico.tex      o CENTRO, canónico   67 pp.   [Grok]
+    τ=+1  papers/corpo_analitico.tex      o que NÃO fecha      56 pp.   [Claude]
+          papers/corpo_computacional.tex  a descida EXECUTADA  11 pp.
 
-    raiz        teoria.tex             as realizações particulares (102)
-                catalogo.tex           o mais particular ainda (488)
-                enredo.tex             a história (365)
-                livro.tex              os três num volume (959)
+    raiz  teoria.tex     segundo escalão: realizações específicas      98 pp.
+          catalogo.tex   mais específico ainda                        488 pp.
+          enredo.tex     a história                                   365 pp.
 
-    corpus/fala/   23 conversa_*.tex — o corpus de fala que os medidores lêem
-    corpus/docs/    9 documentos de sistema (arquitectura, partitura, medida…)
-    cristal/       10 cristal_*.tex + cristal.jsonl — gerados por tools/cristal_tex.py
+O EIXO É O τ, e ele tem TRÊS valores porque sign() tem três. O centro é canónico
+por SE FIXAR: rev(τ) = τ ⟺ τ = 0, provado em ℤ (algebrico prop:zero-dual-zero).
+A reflexão troca os polos e deixa o meio — é a dualidade discreto ↔ contínuo com o
+fundamento quieto. O computacional NÃO é um quarto valor de τ: é a execução.
 
-A TRÍADE é Universal → Topológico → Analítico: mesma estrutura, três realizações.
-O Gato tem três faces — aqui det É a medida, no topológico é o volume discreto
-(thm:det-volume), no analítico é o Jacobiano (thm:medida-jacobiano).
+    A TRANSFORMADA é UMA e fica no centro; os POLOS são dois e descem:
+        FOURIER   grupo ADITIVO, o círculo, |t|≤2, elíptico   → topologico sec:fourier
+        MELLIN    grupo MULTIPLICATIVO, folhas recíprocas     → analitico sec:mellin
+    e o isomorfismo x = eᵘ entre eles É a reflexão τ ↦ −τ.
+
+O CRITÉRIO DE ARRUMAÇÃO, que decide tudo
+-----------------------------------------
+Uma peça é CANÓNICA se algum dos quatro a usa para FUNDAR; é de SEGUNDO ESCALÃO se
+só ilustra, ou se muda de enunciado quando se troca o sítio onde é lida (um anel
+concreto, uma fonte, um material).
+
+    o canónico fica no centro, sem excepção
+    a realização vai para o lado a que pertence E NOMEIA a peça de que parte
+    o mais específico que os canónicos vive no teoria.tex
+    o mais específico que o teoria vive no catalogo.tex
+
+AS TRÊS CONFERÊNCIAS (correm na bateria, e nasceram todas de defeitos reais)
+----------------------------------------------------------------------------
+
+    tools/refcruz.py    as referências CRUZADAS entre documentos. `\code{topologico
+                        thm:x}` não é um \ref — o pdflatex não a vê. Confere que o
+                        documento existe, que o label existe LÁ, e conta as
+                        DIRECÇÕES. Hoje: centro→lado 59, lado→centro 59 (iguais, e
+                        é isso que «obedecer à dualidade» quer dizer aqui).
+
+    tools/caminhos.py   os caminhos citados em WORKFLOWS, SCRIPTS e CONFIGS. Um
+                        `test -s dist/corpo/papers/x.tex` num workflow só falha em
+                        produção. Foi assim que o deploy ficou quebrado de 15/08 a
+                        18/08 sem ninguém dar por isso.
+
+    tools/tautologia.py a asserção que não pode falhar por RELEITURA: uma variável
+                        da condição definida, linhas acima, em função de outra da
+                        mesma condição. Apanhou quatro num dia.
+
+    tools/doubles_cond.py  quais doubles ALIMENTAM uma condição — e só isso conta.
 
 INVARIANTE DE QUALQUER REORGANIZAÇÃO: contar os medidores CITADOS antes e depois.
-    python3 -c "import re,glob;
-      med=lambda s:{x.replace(chr(92)+'_','_') for x in re.findall(r'\\code\{((?:tests|tools)/[a-z0-9_\\-]+\.(?:c|js|py))\}',s)}
-      t=set()
-      [t.update(med(open(p,encoding='utf-8').read())) for p in glob.glob('papers/*.tex')+['teoria.tex','catalogo.tex','enredo.tex']]
-      print(len(t))"
-    São 499. Um medidor que nenhum documento cita DEIXA DE SER TESTADO, e a
-    contagem parece completa sem estar. Contar não chega: há referências que um
-    grep por texto não vê — path.join('papers','x.tex'), readdirSync com padrão,
-    e ficheiros GERADOS (cristal_*.tex, app/dist/) que não se editam à mão.
-
+São 508. Um medidor que nenhum documento cita DEIXA DE SER TESTADO, e a contagem
+parece completa sem estar. Contar não chega: há referências que um grep por texto
+não vê — path.join('papers','x.tex') partido em pedaços, e ficheiros GERADOS
+(cristal_*.tex, app/dist/) que não se editam à mão: corrige-se a FONTE e regenera.
 
 0. AS DUAS REGRAS
 -----------------
