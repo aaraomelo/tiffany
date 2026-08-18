@@ -1,5 +1,5 @@
 % !TeX program = pdflatex
-% papers/corpo_universal.tex — A CONSTRUÇÃO DE ℝ, realizada geometricamente.
+% papers/corpo_algebrico.tex — A CONSTRUÇÃO DE ℝ, realizada geometricamente.
 %
 % Realização geométrica da construção fechada no teoria.tex.
 %
@@ -41,7 +41,7 @@
 \textbf{verifica}: #3\par}\smallskip}
 \input{gkcapa}
 \begin{document}
-\gkcapa{Corpo Universal}
+\gkcapa{Corpo Algébrico}
        {a construção geométrica e dinâmica de $\mathbb{R}$}
        {oito leis, uma base, um dual, e o corte que a área obriga a fechar}
 \maketitle
@@ -73,7 +73,7 @@ _{+},\operatorname{eval}_{-}\}$, e não uma construção acrescentada; e a passa
 PRIMO~$\to$~IRRACIONAL, que é a passagem DISCRETO~$\to$~CONTÍNUO, é a mesma
 indivisibilidade lida dos dois lados da ponte.
 
-\smallskip\noindent Este paper é \textbf{filho} do \emph{Corpo Universal}. Não
+\smallskip\noindent Este paper é \textbf{filho} do \emph{Corpo Algébrico}. Não
 reconstrói o sistema nem decide se ele é permitido: \textbf{realiza
 geometricamente a construção que o Universal já fechou}, na ordem
 \[
@@ -153,7 +153,7 @@ Três colunas, e não se misturam:
 \begin{center}
 \begin{tabular}{@{}p{4.4cm}p{4.4cm}p{5.4cm}@{}}
 \toprule
-o \emph{Corpo Universal} & este paper & os medidores \\
+o \emph{Corpo Algébrico} & este paper & os medidores \\
 \midrule
 \textbf{PROVA} e organiza & \textbf{REALIZA} geometricamente & \textbf{VERIFICAM} \\
 as oito leis, a base ortonormal, o Gato, Pisot, o corpo ordenado completo
@@ -179,7 +179,7 @@ ordenado completo com $\mathbb{R}$ --- unicidade a menos de isomorfismo --- é
 teorema clássico, e cita-se como tal. \textbf{Mas a \emph{continuidade} não se
 herda aqui: constrói-se} (\S\ref{sec:supremo}), e constrói-se em inteiros: dado
 $S$ limitado, o caminho de $\sup S$ desce a árvore bit a bit. O que este paper
-\emph{não} faz é reconstruir o \emph{Corpo Universal}, de que é filho.
+\emph{não} faz é reconstruir o \emph{Corpo Algébrico}, de que é filho.
 
 \medskip
 \noindent\textbf{Regra metodológica.} Cada afirmação é apresentada segundo o seu
@@ -223,7 +223,7 @@ E o \textbf{Teorema do ponto fixo} fecha-se lá, nos dois lados: em $\mathbb{Q}$
 cabe --- para nenhum dos $400$ metais, e pelo \emph{intervalo} $m^{2}<D<(m+2)^{2}$ e não
 por varredura ---, e em $\mathbb{F}_p$ cabe exactamente quando $D$ é resíduo quadrático,
 que é a \textbf{Lei 8} a dizer o contrário: $62$ dos $126$ metais de $\mathbb{F}_{127}$,
-o mesmo número que o \emph{Corpo Universal} publica, obtido por uma implementação que não
+o mesmo número que o \emph{Corpo Algébrico} publica, obtido por uma implementação que não
 o conhecia. E a \textbf{volta} está lá inteira, $[p:q]\mapsto[q:p-mq]$, a desfazer a ida
 e a chegar ao $\infty=[1:0]$ exacto.
 \emph{Verificado:} \code{tests/reta.c} ($43{:}0$), cada operação por duas rotas que não
@@ -269,7 +269,7 @@ comprimento, nenhuma área contínua e nenhum limite. A distância do
 
 Antes de começar, a separação --- porque quase todo o erro de leitura deste corpus vem de
 pedir a uma camada o que é da outra. As três são \textbf{duais entre si}, e o eixo é o do
-\emph{Corpo Universal}: \emph{a álgebra opera e não alcança a completude; a topologia
+\emph{Corpo Algébrico}: \emph{a álgebra opera e não alcança a completude; a topologia
 alcança e não opera}.
 
 \[
@@ -291,7 +291,7 @@ resto é específico.
 \boxed{
 \begin{array}{ll}
 \textbf{CANÓNICOS} & \text{realizações FUNDAMENTAIS do Universal}\\[3pt]
-\code{papers/corpo\_universal.tex} & \tau=0\ \text{--- o centro, o ponto fixo}\\[2pt]
+\code{papers/corpo\_algebrico.tex} & \tau=0\ \text{--- o centro, o ponto fixo}\\[2pt]
 \code{papers/corpo\_topologico.tex} & \tau=-1\ \text{--- o que FECHA}\\[2pt]
 \code{papers/corpo\_analitico.tex} & \tau=+1\ \text{--- o que NÃO fecha}\\[2pt]
 \code{papers/corpo\_computacional.tex} & \text{a descida EXECUTADA: ordenar}\\[6pt]
@@ -749,7 +749,7 @@ $\pm I$ fecha, $216$ hiperbólicas e nenhuma fecha; e $-I$ (o espelho) vive em $
 \section{A Lei 0: $0\dg=\infty$, e é ela que dá o arranque}\label{sec:lei0}
 
 Antes da base vem a Lei de índice zero, e o índice não é decorativo: o
-\emph{Corpo Universal} chama-lhe «a que dá o arranque --- sem ela nada mais é
+\emph{Corpo Algébrico} chama-lhe «a que dá o arranque --- sem ela nada mais é
 total».
 
 \noindent\emph{Aviso de leitura, e ele importa:} o $\dg$ desta secção é a
@@ -810,7 +810,7 @@ M\,M^{\dagger}=\det M\cdot I & \text{a \textbf{membrana}}\\[2pt]
 M^{-1}=M^{\dagger}/\det M & \text{a \textbf{inversão}}
 \end{array}}
 \]
---- as três linhas do \code{thm:derivacao-primitivas} do \emph{Corpo Universal},
+--- as três linhas do \code{thm:derivacao-primitivas} do \emph{Corpo Algébrico},
 onde se lê a consequência: \emph{cada operação, emparelhada com o dual, dá a sua
 parceira, e a parceira não entra na lista}. Pela mesma conta a subtracção é a
 soma do dual, $a-b=a\oplus b^{\dagger}$ com $\dagger$ o \emph{sinal} da Lei~1 --- e
@@ -873,7 +873,7 @@ onde $D=\operatorname{tr}^{2}-4\det$ é o \textbf{discriminante}, escrito $D$ em
 o paper, ficando $\Delta$ reservado à \emph{diferença finita} do
 \S\ref{sec:torre-graus}.
 Estas transformações são, portanto, casos particulares da classificação por traço
-e determinante utilizada pelo \emph{Corpo Universal}.
+e determinante utilizada pelo \emph{Corpo Algébrico}.
 \end{observacao}
 
 %======================================================================
@@ -1031,7 +1031,7 @@ sucessão de quocientes, e é ela que Lagrange liga ao grau dois.} $\square$
 
 \begin{observacao}[e o critério é o da quinta primitiva]
 Fechar é \emph{ter volta}. O par morfológico $\delta\dashv\varepsilon$ dá o
-critério do \emph{Corpo Universal} --- \emph{admissível $\iff$ tem volta e conserva
+critério do \emph{Corpo Algébrico} --- \emph{admissível $\iff$ tem volta e conserva
 a escada} ---, com $\delta$ a criar, $\varepsilon$ a remover, e a volta a existir
 onde a abertura devolve o objecto. A classificação por período é essa volta lida na
 sucessão de quocientes.
@@ -1701,7 +1701,7 @@ $1/10^{12}$ de palavra $[0;10^{12}]$: um número do corpo, e não uma régua.} E
 $\neq$ contra-exemplo}: quando o par satura, a segunda realização é a palavra.
 
 \textbf{(4) E AS DUAS FACES DO EIXO DE PONTRYAGIN SÃO $\operatorname{Dir}$ E
-$\operatorname{Cruz}$.} O \emph{Corpo Universal} separa a face que \textbf{opera} (finita,
+$\operatorname{Cruz}$.} O \emph{Corpo Algébrico} separa a face que \textbf{opera} (finita,
 sem ordem) da que \textbf{alcança} (ordenada e completa). São as duas leituras do mesmo
 $a\star b$:
 \[
@@ -1960,7 +1960,7 @@ norma, o produto do elemento pelo seu dual, que cai sempre em $\mathbb{Q}$. Cons
 $\abs{\mathrm{N}}=1$.
 Faltava dizer \emph{por que} é que a descida pára, e a resposta não é «porque os inteiros
 acabam»: é uma \textbf{lei de conservação}. E a ponte já estava escrita em dois sítios que
-não se conheciam --- o \emph{Corpo Universal} (\ref{def:inducao}) diz que \emph{o que
+não se conheciam --- o \emph{Corpo Algébrico} (\ref{def:inducao}) diz que \emph{o que
 a meta-indução VALIDA é a conservação de energia}, e o Teor.~\ref{thm:operador} diz que a
 meta-indução \textbf{é a dobra}. Donde:
 \[
@@ -2018,7 +2018,7 @@ $12$ metais a energia vale $1$ e não se esgota em nenhum}
 Lebesgue casa-os]\label{thm:central-energia}
 O Teor.~\ref{thm:conservacao} diz \emph{que} a energia se conserva. Falta dizer
 \textbf{por que é que ela pode ser conservada} --- e a resposta é o \textbf{teorema
-central Gentil--Hurwitz} do \emph{Corpo estelar}, que o \emph{Corpo Universal} usa em
+central Gentil--Hurwitz} do \emph{Corpo estelar}, que o \emph{Corpo Algébrico} usa em
 \code{teoria thm:parseval-multi} para derivar o Parseval multidimensão, e cujo corolário
 (\ref{cor:verifica-energia}) já dizia a frase toda: \emph{a indução legítima CONSERVA
 $E$; a que viola o invariante muda $E$, e a meta-indução acusa}.
@@ -2219,7 +2219,7 @@ a conjugação $\theta\mapsto2\theta\ \leftrightarrow\ z\mapsto z^{2}$ exacta em
 $\mathbb{Z}[i]$}
 
 \begin{teorema}[VIVIANI: o mesmo par dual com o determinante $+1$]\label{thm:viviani}
-A curva de Viviani já está realizada \emph{inteira} no anel (\emph{Corpo Universal}, o
+A curva de Viviani já está realizada \emph{inteira} no anel (\emph{Corpo Algébrico}, o
 relógio da meia-volta). O que falta é dizer o que ela é \textbf{daqui}: \emph{o par dual
 deste paper, com o determinante trocado}.
 
@@ -2242,7 +2242,7 @@ d=-1 & \text{a RECTA (hiperbólica)} & t_2=m^{2}+2\quad\text{--- cresce, e é o 
 d=+1 & \text{VIVIANI (rotação)} & t_2=m^{2}-2\quad\text{--- que é }2\cos2u=(2\cos u)^{2}-2
 \end{array}
 \]
-O $2\cos2u=(2\cos u)^{2}-2$ do \emph{Corpo Universal} \textbf{não é outra fórmula}: é esta,
+O $2\cos2u=(2\cos u)^{2}-2$ do \emph{Corpo Algébrico} \textbf{não é outra fórmula}: é esta,
 no ramo $d=+1$.
 
 \textbf{(3) E o meio-ângulo é o operador AO QUADRADO.} Lá, $h$ de ordem $2N$ dá o
@@ -2338,7 +2338,7 @@ sem saber: o fecho é $24=8\cdot3$, e o $8$ entra pelo produto, não pela lista.
 
 \textbf{(2) E o GATO também fica de fora --- que é o CORTE, dito pela topologia.} O gato
 desta casa é $A_m=\begin{psmallmatrix}m&1\\1&0\end{psmallmatrix}$ (\ref{thm:gato}, canónico e ainda fora do centro, \S\ref{sec:dividas}; do
-\emph{Corpo Universal}), com $\det=\sigma\sigma\dg=-1$ e discriminante
+\emph{Corpo Algébrico}), com $\det=\sigma\sigma\dg=-1$ e discriminante
 \[
 D=m^{2}+4>0\quad\text{para todo }m,
 \]
@@ -3564,7 +3564,7 @@ $m=1$ isto é a identidade de Fibonacci, e só aí. $\square$
 A realização não se restringe à família metálica.
 
 \begin{definicao}[e o domínio fecha-se dos dois lados]\label{def:real}
-No corpo ordenado completo identificado pelo \emph{Corpo Universal}, cada
+No corpo ordenado completo identificado pelo \emph{Corpo Algébrico}, cada
 elemento admite a expansão canónica por fracção contínua. Os convergentes são
 $p_k/q_k$ com
 \[
@@ -4285,7 +4285,7 @@ o ocupasse}\\[3pt]
 \text{ \emph{é} o real}
 \end{array}\;}
 \]
-O \emph{Corpo Universal} (Teor.~\code{thm:central-continuo}) constrói
+O \emph{Corpo Algébrico} (Teor.~\code{thm:central-continuo}) constrói
 $\mathbb{R}\simeq\{\text{caminhos}\}/\!\sim$, e a completude é lá \textbf{interna}: a
 sucessão de Cauchy dos truncados estabiliza \emph{bit a bit} dentro do próprio
 objecto, sem sair dele. E o mecanismo deste paper diz \emph{porquê} ela aperta em
@@ -4365,7 +4365,7 @@ peças se obtém por varredura.
 \medskip
 \noindent\textbf{Correspondência estrutural herdada} (não é ingrediente da prova
 de completude, que não depende dela). Como consequência adicional da estrutura
-espectral já estabelecida no \emph{Corpo Universal} --- a convolução emerge da
+espectral já estabelecida no \emph{Corpo Algébrico} --- a convolução emerge da
 transformada universal, $\delta$ é a sua identidade, e a deconvolução é a divisão
 espectral, exacta onde o espectro não tem zeros ---, os elementos desta base
 \emph{são} os Diracs transladados,
@@ -4885,7 +4885,7 @@ sob a condição mais larga $n\leq t$. \emph{São duas exigências, e não uma:}
 %======================================================================
 \section{A construção está fechada}\label{sec:fechada}
 
-O \emph{Corpo Universal} fornece a estrutura operacional; este paper fornece a
+O \emph{Corpo Algébrico} fornece a estrutura operacional; este paper fornece a
 sua realização geométrica.
 
 \begin{center}

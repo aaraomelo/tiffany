@@ -21,10 +21,10 @@ Confere três coisas, e a terceira é a que a separação exige:
 """
 import re, sys, os
 
-DOCS = {'universal':'papers/corpo_universal.tex', 'topologico':'papers/corpo_topologico.tex',
+DOCS = {'algebrico':'papers/corpo_algebrico.tex', 'topologico':'papers/corpo_topologico.tex',
         'analitico':'papers/corpo_analitico.tex', 'computacional':'papers/corpo_computacional.tex',
         'teoria':'teoria.tex', 'catalogo':'catalogo.tex', 'enredo':'enredo.tex'}
-CENTRO = 'universal'
+CENTRO = 'algebrico'
 # os QUATRO canónicos: o centro e as três realizações fundamentais. `computacional` não é um
 # quarto valor de τ — é a EXECUÇÃO da mesma estrutura, e conta como canónico na arrumação.
 LADOS  = {'topologico', 'analitico', 'computacional'}
