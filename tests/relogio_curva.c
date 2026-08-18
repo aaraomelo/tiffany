@@ -159,7 +159,15 @@ static double orbita(int g, const double *co, double t){
  * em `co[80]`, fora dele. Com a régua do papel a curva fecha muito antes e o ramo NUNCA
  * corria; apertando a régua cem vezes, o medidor deixa de passar e passa a dar FALHA DE
  * SEGMENTAÇÃO. Um `40` que ninguém liga ao `80` é documentação, não limite.
- * Agora o array deriva do grau, e o grau verifica-se onde é usado. */
+ * Agora o array deriva do grau, e o grau verifica-se onde é usado. E a correcção foi
+ * MEDIDA nos três estados, porque a primeira vez que a dei por verificada tinha-me
+ * esquecido de apertar a régua — sem isso o grau nunca chega ao tecto e nada acontece:
+ *
+ *   régua apertada, NCOEF ligado a GMAX, com guarda   ->  exit 1   (falha limpa)
+ *   régua apertada, NCOEF a 80 fixo, GMAX 45, SEM guarda  ->  SIGSEGV  (o defeito volta)
+ *   régua apertada, NCOEF a 80 fixo, GMAX 45, COM guarda  ->  exit 1, a guarda trava
+ *
+ * O caso do meio é o que prova que a guarda serve; sem ele, «pus uma guarda» não é medida. */
 #define GMAX   39                        /* o maior g que cabe: 2·39 + 1 = 79 < 80 */
 #define NCOEF  (2*GMAX + 2)              /* e o array deriva DELE, não o contrário */
 
