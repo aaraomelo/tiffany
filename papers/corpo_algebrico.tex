@@ -4321,82 +4321,7 @@ propriedade do membro-limite.
 $\square$
 \end{teorema}
 
-\begin{teorema}[os $0$ dos andares são círculos de áreas distintas ---
-Arquimedes das áreas, parente do AGM]\label{thm:area-andares}
-A nota do coordenador sobre o Teor.~\ref{thm:pi-familia}: os $0$ que
-$\pi_{\infty}$ projecta \emph{não são o mesmo círculo}. Cada andar
-elítico $n\in\{3,4,6,8\}$ traz o círculo renormalizado com a
-\textbf{área do polígono dual} (circunscrito $C_{n}$); o próprio
-(inscrito $I_{n}$) fica por baixo. Isso é Arquimedes das áreas, e a
-duplicação $n\to 2n$ desce pelas médias \emph{geométrica} e
-\emph{harmónica} --- o GHM, parente do AGM (Teor.~\ref{thm:agm-analitico}),
-não o AGM:
-\[
-I_{2n}^{2}=I_{n}\,C_{n},\qquad
-C_{2n}\,(I_{2n}+C_{n})=2\,I_{2n}\,C_{n}.
-\]
-\textbf{(i) o par}: $I_{n}<C_{n}$ exacto em $\mathbb{Q}(\sqrt2)$ e
-$\mathbb{Q}(\sqrt3)$.
-\textbf{(ii) a joia}: as duas identidades, exactas em $4\to8$ e
-$3\to6$.
-\textbf{(iii) os $0$ não são iguais}: $C_{3},C_{4},C_{6},C_{8}$
-pairwise distintos por desigualdades quadráticas inteiras --- cada $0$
-tem área $C_{n}$, logo raio próprio; o unitário único só aparece no
-limite.
-\textbf{(iv) o dual é o de cima}: $I_{8}<333/106<\pi<22/7<C_{8}$ em
-$\mathbb{Z}$ --- $\pi$ no buraco, o mesmo encaixe do
-Teor.~\ref{thm:metronomo-pi}, agora em área.
-\textbf{(v) o gume}: a média aritmética \emph{não} duplica
-($(I_{4}+C_{4})/2=3$, $I_{8}^{2}=8\neq9$) --- essa é a régua do
-período, não desta descida.
-\textbf{(vi) a soma do círculo, ignorando a base metálica}: as folhas
-hiperbólicas $(\sigma,\sigma^{\dagger})$ \emph{não} estão no relógio
-do andar ($\mathrm{ord}=8192\nmid 16$). Normalizar é dividir pelo
-$\sqrt{d}$ do andar --- não o p.u.\ vazio:
-$I_{8}/\sqrt2=I_{4}$ e $I_{6}/\sqrt3=2\cdot(I_{3}/\sqrt3)$, exactos.
-O círculo discreto é então a soma dos polígonos \emph{elíticos} da
-torre divisora (os andares abaixo do parabólico):
-$\sum_{d\mid n}\varphi(d)=n$.
-Somar o metal ao relógio dá $16+2\neq16$; somar áreas cruas sem
-normalizar dá $I_{3}+I_{6}\neq C_{6}$ ($9\neq8$).
-\textbf{(vii) o dual --- polígono $=$ círculos abaixo}: o mesmo corte
-(ignora o metal, normaliza). Um passo:
-$I_{8}\sqrt2=C_{4}$ e $I_{6}\cdot 2=C_{3}$ --- i.e.\ $I_{2n}=C_{n}/2$
-após o $\sqrt{d}$; o único elítico abaixo, a base $1,2$ fora.
-Somar a \emph{torre} toda falha:
-$I_{16}^{2}=32-16\sqrt2\neq36-16\sqrt2=((C_{8}+C_{4})/2)^{2}$
-($36\neq32$); sem normalizar $I_{8}\neq C_{4}$ ($8\neq16$).
-\textbf{(viii) o sistema de coordenadas}: o círculo do andar de cima
-mapeia-se pelos polígonos de baixo. A \emph{ordem} é o polígono
-($\mathbb{Z}/n\mathbb{Z}$, já resolvida). As \emph{coordenadas} são
-cartas equiareais $P_{n}\to D_{j}$ --- o determinante do sector, após
-a escala do metal, vale o do inscrito ($1/\sqrt2$ no quadrado,
-$1/2$ no triângulo): cada carta preserva área e leva o polígono no
-círculo da mesma área. O atlas tem $\varphi(2n)$ cartas, e a soma das
-áreas é o próximo andar: $4\cdot I_{4}=8$ (o círculo discreto $n=8$)
-e $2\cdot I_{3}=I_{6}$. Sem a escala a projecção no dual \emph{não}
-é equiareal ($2\neq1$, $4\neq1$).
-\textbf{(ix) o dual das coordenadas}: um polígono descreve-se nas
-cartas dos círculos de baixo, da mesma forma. A \emph{ordem} é o
-círculo ($n$ sectores). Cada carta é a inversa equiareal
-$D_{n}\to P_{2n}$ --- $GF=FG=I$ exacto no anel ($G_{4}$ com
-$\det=1$; no triângulo $2\cdot\tfrac12=1$). O atlas tem $n$
-sectores, e a soma é o polígono de cima:
-$C_{4}=I_{8}\sqrt2$ (4 sectores) e $C_{3}=I_{6}\cdot 2$ (3 sectores).
-Sem a inversa-escala o $\det$ é $2\neq1$.
-\textbf{(x) andares consecutivos $(n,n{+}1)$}: $2,3$; $3,4$; $4,5$;
-$5,6$; $\ldots$
-Em cada andar círculo e polígono têm a \emph{mesma área} ($C_{n}$).
-A soma dos círculos é a soma desses polígonos. Em ordem:
-$2{+}3=5$, $3{+}4=7$, $4{+}5=9$, $5{+}6=11$.
-O andar $2$: $I_{2}=0$ e $C_{2}=2\tan(\pi/2)$ não está no anel
-(catálogo).
-A frase mais forte do eval («todo o infinito determinado só por essa
-projeção») \emph{não} é este residual --- fica o medidor que o
-coordenador pediu.
-\emph{Medido:} \code{tests/arquimedes\_area.js} ($21{:}0$; $\mathcal{M}$).
-$\square$
-\end{teorema}
+
 
 \subsection*{As camadas --- quem é dono de quê}\label{sec:camadas-operacoes}
 
@@ -4667,41 +4592,7 @@ $\infty$ exacto, $S^{2}=I$, e $16\,128$ pares (metal, ponto) a fechar na face fi
 $\square$
 \end{teorema}
 
-\begin{teorema}[a geometria trazida --- o Klein da casa]\label{thm:geometria}
-A pergunta da mesa («que estrutura as operações determinam?») tem
-resposta geométrica: \emph{a geometria é o par (forma, grupo)}, e as
-operações do núcleo determinam-no com precisão:
-\begin{enumerate}
-\item \textbf{o grupo do núcleo é $D_{4}$}: $\{\pm I,\pm J,\pm S,
-\pm X\}$ fecha por produto ($64/64$), $J^{4}=S^{2}=I$,
-$SJS=J^{-1}$ --- graduado pelo $\det$ ($4$ rotações, $4$ reflexões),
-com cada inverso dentro do conjunto.
-\item \textbf{e é a interseção das duas geometrias}: os $8$
-preservam o círculo $x^{2}{+}y^{2}$ \emph{exatamente} e a hipérbole
-diagonal $x^{2}{-}y^{2}$ \emph{a menos de sinal} --- e o sinal é um
-segundo caráter: os dois caracteres $(\det,\text{sinal-}D)$ separam
-$D_{4}$ em $4$ classes de $2$, a abelianização
-$\mathbb{Z}/2\times\mathbb{Z}/2$, medida elemento a elemento.
-\item \textbf{a carta $W$ diagonaliza a forma metálica}:
-$4N(a,b)=(2a{+}mb)^{2}-(m^{2}{+}4)b^{2}$ --- a forma de traço do
-produto dual (Teor.~\ref{thm:produto-dual}) lida como mudança de
-carta; e \emph{nela a estaca é o espelho}: a conjugação
-$(a,b)\mapsto(a{+}mb,-b)$ vira $(u,v)\mapsto(u,-v)$. Álgebra e
-geometria: a mesma involução, em cartas diferentes.
-\item \textbf{cada membrana estende o núcleo com o seu fluxo}: o
-relógio (compacto, transitivo, preserva o círculo --- $2N$ rotações)
-e o Pell ($\sigma^{k}$, com $N$ a alternar $(-1)^{k}$ --- o sinal do
-encaixe). O gume: $\sigma$ quebra o círculo e a rotação genérica
-quebra a hipérbole --- \emph{os fluxos não se trocam}.
-\end{enumerate}
-A estrutura que as operações determinam é o \textbf{par de geometrias}
---- o círculo compacto e a hipérbole de Pell --- \emph{com um só
-núcleo por interseção}: $D_{4}$, o grupo das operações. As membranas
-$d=\pm1$ são as duas formas; o núcleo é o que elas partilham.
-\emph{Medido:} \code{tests/geometria\_corpo.js} ($9{:}0$; assinado
-por $\mathcal{M}$).
-$\square$
-\end{teorema}
+
 
 \begin{teorema}[a mecânica trazida --- o fluxo como ação
 conservativa]\label{thm:mecanica}
@@ -4806,42 +4697,7 @@ $\mathcal{M}$).
 $\square$
 \end{teorema}
 
-\begin{teorema}[a curva elíptica sai de Viviani --- pela desafinação
-do nó]\label{thm:eliptica}
-O achado, preservado como a mesa pediu: \emph{Viviani não é elíptica
---- e é por isso que a elíptica sai dela.}
-\begin{enumerate}
-\item \textbf{a família}: eliminar $x$ de
-$\{x^{2}{+}y^{2}{+}z^{2}{=}R^{2},\,(x{-}c)^{2}{+}y^{2}{=}r^{2}\}$ dá
-$Y^{2}=-z^{4}+2Kz^{2}+C$ com $K=R^{2}{-}c^{2}{-}r^{2}$,
-$C=4c^{2}r^{2}{-}K^{2}$ --- identidade polinomial exata.
-\item \textbf{Viviani é a fibra nodal}: $(R,c,r)=(2a,a,a)$ dá
-$C=0$ \emph{para todo} $a$ --- o nó em $z=0$ é a auto-interseção do
-Teor.~\ref{thm:viviani}; o género cai, a curva é racional. A fibra
-nodal \emph{falha} o teste elíptico (raiz dupla, $\Delta=0$) --- o
-gume, exatamente como deve ser.
-\item \textbf{a desafinação}: $(5,2,2)$ dá
-$q(z)=(z^{2}{-}9)(25{-}z^{2})$, suave (género $1$); a transformação
-$z=3+1/t$, $Y=s/(z{-}3)^{2}$ é \emph{reversível byte a byte}
-($R_{\text{curva}}=0$, $60$ pontos de $\mathbb{F}_{257}$) e leva à
-cúbica $s^{2}=96t^{3}{-}20t^{2}{-}12t{-}1$, e daí a
-\textbf{Weierstrass} $y^{2}=x^{3}{-}20x^{2}{-}1152x{-}9216$
-($\Delta=235\,929\,600\neq0$).
-\item \textbf{o deck vira a involução}: $Y\mapsto-Y$ (a troca de
-folha de Viviani) corresponde a $(x,y)\mapsto(x,-y)$ --- a geometria
-passa à aritmética sem resto.
-\item \textbf{o primeiro coeficiente da $L$ nasce medido}:
-$\#E(\mathbb{F}_{17})=16$ e $\#E(\mathbb{F}_{257})=240$, exaustivos
-por dois caminhos (tabela de resíduos vs Euler), $a_{p}=2$ e $18$,
-com \textbf{Hasse} $a_{p}^{2}\le4p$ inteiro nos dois andares.
-\end{enumerate}
-A barreira fica explícita: $a_{p}$ \emph{medido} $\neq$ $L(E,s)$
-\emph{construída} $\neq$ BSD \emph{demonstrado} --- os elos seguintes
-são independentes e esperam no mapa.
-\emph{Medido:} \code{tests/eliptica\_viviani.js} ($10{:}0$; assinado
-por $\mathcal{M}$).
-$\square$
-\end{teorema}
+
 
 \begin{teorema}[o encontro local --- Hodge conta, Riemann fecha, na
 curva de Viviani]\label{thm:encontro-local}
@@ -5021,38 +4877,7 @@ $\mathcal{M}$).
 $\square$
 \end{teorema}
 
-\begin{teorema}[o Teorema Central do contínuo --- a classe racional
-encaixota o irracional por baixo]\label{thm:central-continuo}
-Os quatro pontos do gerente, cada um com medida inteira exata:
-\begin{enumerate}
-\item \textbf{existência e unicidade do limite}: dois habitantes de
-todos os intervalos até a profundidade $K$ coincidem ---
-$|rs'-r's|$ é inteiro $<ss'/2^{K}<1$, logo \emph{zero} (o pombal);
-distintos são separados na profundidade $\log_{2}(ss')$.
-\item \textbf{sobrejetividade, na classe comparável}: todo $x$ com
-teste de chão exato tem caminho --- racionais, quadráticos ($1/\varphi$,
-$\sqrt2-1$) e $\pi-3$ até à profundidade do certificado ($23$ bits) ---
-e a \emph{volta} põe $x$ em todos os intervalos.
-\item \textbf{unicidade módulo a borda}: os diádicos --- e só eles ---
-têm \emph{dois} caminhos ($1000\ldots=0111\ldots$, com a soma
-geométrica exata a fechar no nó); o não-diádico tem um.
-$\mathbb{R}\cong\{\text{caminhos}\}/\!\sim$, e $\sim$ identifica
-exatamente \emph{os nós da árvore}: a borda é a ramificação.
-\item \textbf{completude e o encaixotamento}: a classe racional
-$\{m_{k}/2^{k}\}$ \emph{cresce}, fica \emph{toda abaixo} de $x$, e
-\emph{ultrapassa todo racional} $<x$ --- $x$ é o \textbf{supremo
-exato} da sua classe (o corte de Dedekind em três cláusulas
-verificadas); e a sequência de Cauchy dos truncados estabiliza bit a
-bit \emph{dentro} do objeto.
-\end{enumerate}
-O Teorema Central lê o conjunto: Hurwitz \emph{conta} a borda (os
-nós, magros: $0{,}246\to0{,}015\to0{,}001$), Gentil \emph{casa} o
-endereço, Lebesgue \emph{mede} o que sobra. \emph{A reta não é onde
-algo está sentado --- é o limite dos caminhos da torre.}
-\emph{Medido:} \code{tests/central\_continuo.js} ($7{:}0$; assinado
-por $\mathcal{M}$).
-$\square$
-\end{teorema}
+
 
 \begin{teorema}[as duas pontes --- a pergunta $\mathcal{F}$ e a $L$
 parcial]\label{thm:duas-pontes}
@@ -5103,7 +4928,7 @@ fugia, espelhado, encaixota.
 preserva a ordem, $E<1$ sempre, e $E(\infty)=1$ exato no projetivo
 --- e \textbf{a unidade é o «irracional» da dimensão de baixo}: a
 classe $\{n/(n{+}1)\}$ cumpre as três cláusulas do supremo
-(Teor.~\ref{thm:central-continuo}): cresce, fica abaixo, ultrapassa
+(\code{analitico thm:central-continuo}): cresce, fica abaixo, ultrapassa
 --- encaixotada por baixo exatamente como o irracional era.
 \item \textbf{o infinito desce a escada}: $L^{n}=[1,0;n,1]$ e
 $E^{n}(\infty)=1/n$ --- \emph{a harmónica é a sombra do infinito
@@ -5157,7 +4982,7 @@ nos dois sentidos via Teorema Central é a média
 aritmético-geométrica} --- a classe aritmética desce por cima, a
 geométrica sobe por baixo, $g\le M\le a$ sempre (as duas classes,
 uma de cada lado, com o limite único pelo pombal do
-Teor.~\ref{thm:central-continuo} e colapso quadrático certificado).
+\code{analitico thm:central-continuo} e colapso quadrático certificado).
 E o AGM \textbf{calcula o analítico}: com o $\pi$ da torre
 (Teor.~\ref{thm:metronomo-pi}) e $\mathrm{AGM}(8,\sqrt{60})$
 certificado em intervalos racionais, o período real da curva
