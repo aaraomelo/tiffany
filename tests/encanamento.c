@@ -275,17 +275,41 @@ int main(void){
         puts("        tem de estar COLADO ao sensor, e nao na outra ponta do cabo.");
         /* e a LEI: aumentar o ganho do primeiro andar suprime tudo o resto */
         int suprime = 1; double ant = 1e9;
+        /* E A LEI NAO E' «TENDE A»: tem FORMA FECHADA, e a forma fechada mede-se exacta.
+         * Somando os tres termos de Friis com G1 posto de fora,
+         *
+         *   F_total - F1 = [ (F2-1) + (F3-1)/G2 + (F4-1)/(G2.G3) ] / G1 = (21239/3950) / G1
+         *
+         * ou seja o produto (F_total - F1).G1 e' CONSTANTE — nao tende a nada, e' o mesmo
+         * numero em todos os ganhos. Logo, tirando denominadores,
+         *
+         *   F_total . 395000 . G1  =  497700.G1 + 2123900        (identidade em Z)
+         *
+         * e isso confere-se contra o `friis()` do ficheiro em cada passo do varrimento, sem
+         * limiar nenhum. «Tender ao ruido do primeiro andar» era a leitura certa de uma lei
+         * mais forte do que a que eu media: o RESTO cai como 1/G1, com constante conhecida. */
+        long passos = 0, forma_fechada = 0;
         for(double G1 = 1; G1 <= 1e5; G1 *= 10){
             Andar c[4]; memcpy(c, cadeia, sizeof c);
             c[0].G = G1;
             double F = friis(c, 4);
             if(F >= ant) suprime = 0;
             ant = F;
+            long g = (long)(G1 + 0.5);
+            passos++;
+            if((long)(F * 395000.0 * g + 0.5) == 497700L*g + 2123900L) forma_fechada++;
         }
         double F_lim = 0;
         { Andar c[4]; memcpy(c, cadeia, sizeof c); c[0].G = 1e12; F_lim = friis(c, 4); }
-        ok("A LEI: subir o ganho do primeiro andar faz o ruido total TENDER ao ruido dele so",
-           suprime && (long long)(fabs(F_lim - cadeia[0].F) * 1e6) == 0);
+        ok("A LEI: subir o ganho do primeiro andar faz o ruido total TENDER ao ruido dele so"
+           " — e ela nao e' «tende a», tem FORMA FECHADA. Somando os tres termos de Friis com"
+           " G1 posto de fora, F_total - F1 = (21239/3950)/G1, ou seja o produto (F_total-F1).G1"
+           " e' CONSTANTE: nao tende a nada, e' o MESMO numero em todos os ganhos. Tirando"
+           " denominadores fica a identidade em Z, F_total.395000.G1 = 497700.G1 + 2123900, e"
+           " ela confere-se contra o `friis()` do ficheiro em cada um dos seis passos, sem"
+           " limiar nenhum. O «tende» era a leitura fraca de uma lei mais forte: o resto cai"
+           " como 1/G1, com constante conhecida",
+           suprime && passos == 6 && forma_fechada == passos);
         printf("        Com G1 -> infinito, F_total -> %.3f, que e o F do primeiro andar sozinho.\n",
                F_lim);
         puts("        O encanamento inteiro fica refem do primeiro elo — e isso decide o DESENHO,");
@@ -329,8 +353,23 @@ int main(void){
         double gm = Ic/VT;                        /* a transcondutância — a derivada, §A1 */
         long RL = 5000.0;
         double Av = gm * RL;
-        ok("e o ATIVO passa de 1: com fonte, o ganho e gm.RL e ele e MUITO maior que um",
-           Av > 100);
+        /* `Av > 100` era um limiar meu, e a conta e' RACIONAL: Av = Ic.RL/VT, com Ic = 1 mA,
+         * RL = 5 kohm e VT = 25850 microvolt, logo Av = 5.10^6/25850 = 100000/517. Isso
+         * enquadra-se entre 193 e 194 por multiplicacao cruzada, sem dividir:
+         *      193.517 = 99781 < 100000 < 100298 = 194.517
+         * E o que a frase diz e' o PAR: o passivo nao passa de 1 (a assercao de cima) e o
+         * activo passa — nao «passa de 100», que era um numero meu no meio dos dois. */
+        long VT_uV = 25850, Ic_nA = 1000000, RL_ohm = 5000;
+        long num = Ic_nA/1000 * RL_ohm;          /* Ic.RL em microvolt: 5.10^6 */
+        int Av_enquadrado = (193*VT_uV < num && num < 194*VT_uV);
+        long Av_z = (long)Av;
+        ok("e o ATIVO passa de 1: com fonte, o ganho e' gm.RL e ele e' MUITO maior que um —"
+           " e o quanto diz-se em vez de se arbitrar. Av = Ic.RL/VT e' racional: 5.10^6"
+           " microvolt sobre 25850, ou seja 100000/517, e isso enquadra-se entre 193 e 194 por"
+           " multiplicacao cruzada, 99781 < 100000 < 100298, sem dividir. O par e' este: o"
+           " passivo nao passa de 1 e o activo passa, e `Av > 100` era um numero meu no meio"
+           " dos dois",
+           Av_enquadrado && Av_z == 193);
         printf("     -> passivo: R+T+A = %.4f, e o maximo que sai e %.2f.\n", soma, A);
         printf("        ativo:   gm = %.4f S com Ic = 1 mA, e Av = gm.RL = %.0f com RL = 5k.\n",
                gm, Av);
@@ -392,8 +431,40 @@ int main(void){
         };
         double F = friis(cadeia, 4);
         double snr_saida = snr_entrada / F;
-        ok("a CADEIA INTEIRA preserva o sinal: a relacao sinal-ruido sobrevive ao encanamento",
-           snr_saida > 100);
+        /* E A CADEIA TAMBEM E' RACIONAL, toda ela. Com os F em centesimos e os G exactos, o
+         * denominador comum de Friis e' 1580000 = 100 . 15800, e a soma faz-se em Z:
+         *
+         *   F1        = 1,26            -> 1990800
+         *   (F2-1)/G1 = 1/100           ->   15800
+         *   (F3-1)/G1G2 = 2,16/50       ->   68256
+         *   (F4-1)/G1G2G3 = 9/15800     ->     900
+         *                                 ---------
+         *                                  2075756 / 1580000
+         *
+         * e o snr de entrada e' 1,25 pW sobre 3 fW, ou seja 1250/3 exacto. Logo
+         *   snr_saida = (1250/3) . (1580000/2075756) = 1975000000/6227268
+         * e isso enquadra-se entre 317 e 318 por multiplicacao cruzada. O `> 100` nao dizia
+         * nada que a cadeia pudesse desmentir. */
+        const long D = 1580000;
+        long Fz = 0;
+        Fz += 126L * (D/100);                    /* F1 = 1,26 */
+        Fz += (200L-100L) * (D/100) / 100L;      /* (F2-1)/G1, G1 = 100 */
+        Fz += (316L-100L) * (D/100) / 50L;       /* (F3-1)/(G1.G2), G1.G2 = 50 */
+        Fz += (1000L-100L) * (D/100) / 15800L;   /* (F4-1)/(G1.G2.G3) */
+        /* dois caminhos: o Friis em Z e o `friis()` que o ficheiro usa, em virgula */
+        int friis_concorda = ((long)(F * D + 0.5) == Fz);
+        long snr_num = 1250L * D, snr_den = 3L * Fz;
+        int snr_enquadrado = (317L*snr_den < snr_num && snr_num < 318L*snr_den);
+        printf("     -> Friis em Z: %ld/%ld = %.6f, e o snr de saida %ld/%ld\n",
+               Fz, D, (double)Fz/D, snr_num, snr_den);
+        ok("a CADEIA INTEIRA preserva o sinal: a relacao sinal-ruido sobrevive ao encanamento."
+           " E a cadeia e' RACIONAL toda ela: com os F em centesimos e os G exactos o"
+           " denominador comum de Friis e' 1580000, a soma faz-se em Z e da' 2075756/1580000;"
+           " o snr de entrada e' 1250/3 exacto, logo o de saida e' 1975000000/6227268, e isso"
+           " enquadra-se entre 317 e 318 por multiplicacao cruzada. Medido por DOIS CAMINHOS:"
+           " o Friis em Z e o `friis()` que o ficheiro usa concordam. O `> 100` nao dizia nada"
+           " que a cadeia pudesse desmentir",
+           friis_concorda && snr_enquadrado);
         /* E ISTO ERA A DEFINICAO A FAZER DE MEDIDA. Na linha de cima escreve-se
          *   snr_saida = snr_entrada / F;
          * e aqui perguntava-se se snr_entrada/snr_saida da F — isto e', se
@@ -412,6 +483,20 @@ int main(void){
             double F1 = cadeia[0].F, soma = F1, ganho = 1.0;
             for(int i = 1; i < 4; i++){ ganho *= cadeia[i-1].G; soma += (cadeia[i].F - 1.0)/ganho; }
             double resto = soma - F1;                 /* o que os outros tres acrescentam */
+            /* e a TESE mede-se com o numero, nao com uma desigualdade de vinte e tres vezes
+             * de folga. Em Z, sobre o denominador 395000 que a forma fechada ja' fixou:
+             *      F1    = 126/100      = 497700/395000
+             *      resto = 21239/3950/100 = 21239/395000
+             * logo o primeiro andar pesa entre 23 e 24 vezes os outros tres JUNTOS, e isso
+             * enquadra-se por multiplicacao cruzada: 23.21239 = 488497 < 497700 < 509736. */
+            /* e os dois numeros DERIVAM-SE do Fz que o §T6 ja' calculou — nao se escrevem.
+             * Escritos a mao, «21239» e «21240» passavam os dois, porque o enquadramento e'
+             * largo de mais para apanhar um erro de uma unidade: a referencia tem de mudar
+             * sozinha quando o dado muda, senao e' copia. */
+            const long F1_D = 126L * (D/100), resto_D = Fz - F1_D;
+            int peso_enquadrado = (resto_D > 0 && 23*resto_D < F1_D && F1_D < 24*resto_D);
+            /* e a soma por andares confere com o Friis em Z do §T6, que e' a terceira rota */
+            int soma_em_Z = ((long)(soma * D + 0.5) == Fz);
             printf("     -> Friis por andares: F1 = %.3f, e os outros tres acrescentam %.4f\n",
                    F1, resto);
             ok("e o que ela custa e mensuravel, e e FRIIS quem o diz: o F da cadeia sai da"
@@ -419,8 +504,13 @@ int main(void){
                " a tese: O PRIMEIRO ANDAR DECIDE — sozinho ele responde por quase todo o F, e"
                " os outros tres juntos acrescentam menos que ele. Estava aqui"
                " snr_entrada/snr_saida == F com snr_saida definido como snr_entrada/F: a"
-               " definicao a fazer de medida",
-               fabs(soma - F) == 0.0 && resto < F1);
+               " definicao a fazer de medida. E o QUANTO diz-se em vez de se afirmar com folga:"
+               " sobre o denominador 1580000, F1 vale 1990800 e os outros tres juntos 84956, logo"
+               " o primeiro andar pesa entre 23 e 24 vezes eles todos, enquadrado por"
+               " multiplicacao cruzada. E os dois numeros DERIVAM-SE do Fz do §T6 em vez de"
+               " serem escritos: a mao, «21239» e «21240» passavam os dois. `resto < F1`"
+               " tinha vinte e tres vezes de folga",
+               fabs(soma - F) == 0.0 && soma_em_Z && peso_enquadrado);
         }
         printf("     -> SNR a entrada %.0f; fator de ruido da cadeia %.3f; SNR a saida %.0f.\n",
                snr_entrada, F, snr_saida);
