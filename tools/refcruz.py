@@ -40,16 +40,33 @@ for nome, f in DOCS.items():
         labels.setdefault(m.group(1), set()).add(nome)
 
 CIT = re.compile(r'\\code\{([a-z_]+)[ ~]+((?:thm|def|sec|cor|prop|lem|sub|eq|fig|tab):[a-zA-Z0-9_\\-]+)\}')
+
+def faixa_dividas(src):
+    """onde começa e acaba a §sec:dividas — as citações lá dentro são inventário."""
+    i = src.find(r'\label{sec:dividas}')
+    if i < 0: return (-1, -1)
+    j = src.find(r'\section', i + 20)
+    return (i, j if j > 0 else len(src))
 mortas, erradas, direccoes, divida = [], [], {}, []
 for nome, f in DOCS.items():
     if not os.path.exists(f): continue
-    for m in CIT.finditer(open(f, encoding='utf-8').read()):
+    _src = open(f, encoding='utf-8').read()
+    _di, _df = faixa_dividas(_src)
+    dentro_das_dividas = lambda pos: _di >= 0 and _di <= pos <= _df
+    for m in CIT.finditer(_src):
         alvo, lab = m.group(1), m.group(2).replace('\\_', '_')
         if alvo not in DOCS:
             mortas.append((nome, alvo, lab, 'documento não existe')); continue
         if alvo not in labels.get(lab, set()):
             onde = ', '.join(sorted(labels.get(lab, set()))) or 'nenhum'
             erradas.append((nome, alvo, lab, f'o label vive em: {onde}')); continue
+        # A SECÇÃO QUE CONTA A DÍVIDA NÃO É DÍVIDA. Ela nomeia as peças para dizer que elas
+        # estão fora — citar para inventariar não é fundar-se. Sem esta excepção, o próprio
+        # inventário aparecia no relatório como seis das nove dívidas que ele lista.
+        if nome == CENTRO and dentro_das_dividas(m.start()):
+            direccoes['inventário (a §sec:dividas a nomear-se)'] = \
+                direccoes.get('inventário (a §sec:dividas a nomear-se)', 0) + 1
+            continue
         if nome == CENTRO and alvo in LADOS:      k = 'centro → lado (realização)'
         elif nome in LADOS and alvo == CENTRO:    k = 'lado → centro (origem)'
         elif nome in LADOS and alvo in LADOS:     k = 'lado → lado (o PAR)'

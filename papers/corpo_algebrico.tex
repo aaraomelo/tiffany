@@ -2024,8 +2024,10 @@ $12$ metais a energia vale $1$ e não se esgota em nenhum}
 Lebesgue casa-os]\label{thm:central-energia}
 O Teor.~\ref{thm:conservacao} diz \emph{que} a energia se conserva. Falta dizer
 \textbf{por que é que ela pode ser conservada} --- e a resposta é o \textbf{teorema
-central Gentil--Hurwitz} do \emph{Corpo estelar}, que o \emph{Corpo Algébrico} usa em
-\code{teoria thm:parseval-multi} para derivar o Parseval multidimensão, e cujo corolário
+central Gentil--Hurwitz}, que vive hoje no \emph{Corpo Analítico}
+(\code{analitico sec:central}) por não estar na cadeia principal, e que se usa em
+\code{teoria thm:parseval-multi} --- \emph{o Parseval multidimensão, no anel escolhido} ---
+para derivar a energia; e cujo corolário
 (\ref{cor:verifica-energia}) já dizia a frase toda: \emph{a indução legítima CONSERVA
 $E$; a que viola o invariante muda $E$, e a meta-indução acusa}.
 
@@ -3124,7 +3126,8 @@ regime hiperbólico. \emph{As raízes do metal não estão no círculo}, e por i
 avaliação no círculo cobre o elíptico e mais nada.
 
 \textbf{E o que completa é a DOURADA} --- a dualidade Fourier--Mellin do
-\emph{Catálogo} (\code{catalogo sec:dourada}): \emph{Mellin é Fourier no grupo multiplicativo}, com
+\emph{Catálogo} --- e é uma \emph{leitura} dele, não fundamento
+(\code{catalogo sec:dourada}): \emph{Mellin é Fourier no grupo multiplicativo}, com
 $x=e^{u}$ a ser o isomorfismo entre os dois lados. O círculo é o lado \textbf{aditivo}
 (a dilatação vira translação, e é dali que vem o factor $1/\sqrt N$); as folhas recíprocas
 são o lado \textbf{multiplicativo}, onde o que se conserva é o \emph{produto}
@@ -3140,7 +3143,8 @@ O Cor.~\ref{cor:dourada-completa} diz que a dualidade se completa com a dourada;
 dizer o que a torna \emph{discreta}, e a resposta é uma só palavra: \textbf{a borda}.
 
 \textbf{(1) A dourada é Mellin, e os seus caracteres são POTÊNCIAS.} No
-\emph{Catálogo} (\code{catalogo sec:dourada}): \emph{«Mellin é Fourier, no grupo multiplicativo»},
+\emph{Catálogo}, outra vez como leitura (\code{catalogo sec:dourada}):
+\emph{«Mellin é Fourier, no grupo multiplicativo»},
 os caracteres são $x^{-s}$ --- \emph{as exponenciais vestidas de função-potência} --- e
 \emph{dilatar vira transladar}. Enquanto o grupo é $\mathbb{R}^{+}$, o índice $s$ é
 contínuo e não há nada de discreto.
@@ -3924,7 +3928,7 @@ ele.}
 
 \subsection*{O byte, e por que tem oito posições}
 A dobra aplicada três vezes leva $1\to2\to4\to8$; e as oito leis são,
-pela letra do \emph{Corpo estelar}, \emph{um ciclo gerador de período
+pela letra do \emph{Corpo Analítico}, \emph{um ciclo gerador de período
 oito}. O byte é esse ciclo escrito em binário:
 \[
 \boxed{\;B=\sum_{k=0}^{7}b_k\,2^{k},
@@ -5821,19 +5825,11 @@ zero, agora lido na energia.
 
 
 \medskip
-\noindent\textbf{E as que NÃO vieram, pelo mesmo critério.} Uma peça é de segundo escalão
-quando depende de uma \emph{escolha particular}, e essas três dependem:
-\[
-\begin{array}{lll}
-\code{teoria thm:ortonormal} & \mathbb{F}_2^{8} & \text{um anel concreto --- e o centro já tem
-a sua (Prop.~\ref{thm:orto})}\\[2pt]
-\code{teoria thm:parseval-multi} & \mathbb{Z}_{65537} & \text{o anel da Lei 8, escolhido}\\[2pt]
-\code{catalogo sec:dourada} & \text{Mellin} & \text{uma leitura, não uma lei}
-\end{array}
-\]
+\noindent\textbf{E as que NÃO vieram, pelo mesmo critério}, estão listadas uma a uma na
+\S\ref{sec:dividas} --- são três, e dependem todas de uma \emph{escolha particular}.
 \emph{O critério não é o tamanho nem a importância: é se a peça funda ou ilustra.} As cinco
-de cima fundam --- o operador, a torre, a volta, a conservação. As três de baixo mostram o
-que as leis dão \emph{num sítio escolhido}, e trocar o sítio muda o enunciado.
+de cima fundam --- o operador, a torre, a volta, a conservação. As três de lá mostram o que
+as leis dão \emph{num sítio escolhido}, e trocar o sítio muda o enunciado.
 
 %======================================================================
 \section{O que ainda vive fora do centro --- a dívida da separação}\label{sec:dividas}
@@ -5853,6 +5849,15 @@ Teorema do Gato, os resíduos e a verificação por energia ---, e o que fica é
 \end{array}
 \]
 
+\noindent\textbf{E das três, duas continuam a ser citadas --- como LEITURA, não como
+fundamento.} O \code{tools/refcruz.py} conta-as na mesma, porque um detector não distingue
+«citar para fundar» de «citar uma leitura»: ele vê o centro a apontar para fora e conta. As
+três citações que restam são o \code{catalogo sec:dourada} duas vezes (a frase «Mellin é
+Fourier no grupo multiplicativo», que é uma leitura do Catálogo e está dita como tal) e o
+\code{teoria thm:parseval-multi} uma vez (o Parseval \emph{no anel escolhido}). \emph{Três é
+o mínimo defensável}, e o que faria descer a zero seria deixar de citar --- o que é pior.
+
+\medskip
 \noindent\textbf{E estas três não são dívida no mesmo sentido:} elas \emph{dependem de uma
 escolha particular}, e por isso pertencem ao segundo escalão. O que continua a ser dívida é
 o centro citá-las para \emph{fundar} --- e nos casos em que ele tem forma própria, passou a
