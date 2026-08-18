@@ -95,7 +95,7 @@ coroacao fc3edc511ec0d5a0 0
 corpo 3e35814751fcf7f2 0
 corpo256 acf3f231f051ced7 0
 corpo_autossimilar cfed1db62ac9d8ef 0
-corpo_disco 9387ee6de1c9fef9 1
+corpo_disco 9387ee6de1c9fef9 0
 corpo_do_numero d9acc69fc83d6d49 0
 corpo_dual 829b5470e1022d51 0
 corpo_fisico 24124d78ddbe4c16 0
@@ -455,7 +455,7 @@ termica 1ea9da07cac97566 0
 tesseracto d5df0dc21b1a36b7 0
 tesserato_espiral bd599042b464952c 0
 tex 55f6ef36b59e894f 0
-tex_wasm 35e84e8b69861d91 1
+tex_wasm 35e84e8b69861d91 0
 texto 5bbce62a899f0c00 0
 tikz 82241a531a32ec26 0
 toolkit d1e1c23cd0380eac 0

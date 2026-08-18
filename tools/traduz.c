@@ -578,7 +578,11 @@ static int le_tipo(void){
 
 /* ────────────────────────────────────────────────────────────────── as tabelas */
 
-#define MAX_FUN 256
+/* MAX_FUN — quantas funções o módulo acomoda. Subiu de 256 para 512 quando o
+ * tests/tex.c passou as 256 e deixou de traduzir: o limite é do TRADUTOR, não do
+ * programa, e um #define que ninguém testa é documentação e não limite. O
+ * tests/tex_wasm.js é quem o exercita, e a mensagem abaixo diz o número. */
+#define MAX_FUN 512
 #define MAX_LOC 512   /* o tex_core `compila` passa dos 256 locais do wasm */
 
 /* ── O `...` É UMA FITA ────────────────────────────────────────────────────────────────
@@ -2452,7 +2456,12 @@ static void colhe_assinaturas(void){
                 avanca();
                 continue;
             }
-            if(NFUN >= MAX_FUN) erro("funções a mais");
+            if(NFUN >= MAX_FUN){
+                /* dizer QUANTAS: sem o número, quem lê não sabe se falta uma ou cem */
+                char m[96];
+                snprintf(m, sizeof m, "funções a mais: %ld, e o tecto é %d", (long)NFUN + 1, MAX_FUN);
+                erro(m);
+            }
             Fun *f = &FUNS[NFUN];
             memset(f, 0, sizeof *f);
             strcpy(f->nome, nome); f->ret = ret; f->interna = interna;
