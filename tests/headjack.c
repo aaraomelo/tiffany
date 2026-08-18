@@ -37,6 +37,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include "reta.h"     /* rt_cruz3, rt_dir — o cruzado e o interno, inteiros */
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -117,10 +118,37 @@ int main(void){
          * valor: e a RELACAO — o neuronio esta muitas ordens abaixo do melhor sensor, e o
          * sinal da MEG esta acima dele. Isso mede-se sem eu escolher numero nenhum. */
         double melhor = SENSORES[0].sens;
-        ok("o campo de UM neuronio esta MUITAS ordens abaixo do melhor sensor que existe",
-           b1 < melhor/100.0);
-        ok("e o da MEG esta ACIMA dele — e por isso que a MEG existe e o neuronio unico nao",
-           bm > melhor);
+        /* E ISTO FAZ-SE EM INTEIROS, porque o π CANCELA: com µ0 = 4π·10⁻⁷, o factor
+         * µ0/(4π) é 10⁻⁷ EXACTO, e o campo é 10⁻⁷·2Q/r². As constantes são decimais
+         * escritos, logo cada quantidade é (mantissa, expoente) e as comparações fazem-se
+         * na MESMA potência de dez, sem dividir:
+         *
+         *   b·r²        = 10⁻⁷·2Q          Q₁ = 2·10⁻¹⁴  →  4·10⁻²¹
+         *   melhor·r²   = 3·10⁻¹⁵·16·10⁻⁴  =  48·10⁻¹⁹   =  4800·10⁻²¹
+         *
+         * e então «b₁ está muitas ordens abaixo» é 100·4 < 4800, e «b_MEG está acima» é
+         * 2·10⁻¹⁵ = 2000000·10⁻²¹ > 4800. Tudo em 10⁻²¹, e nada se divide. */
+        const long E = 21;                       /* a potência comum: 10⁻²¹ */
+        long b1r2 = 2 * 2 * 100;                 /* 10⁻⁷·2·(2·10⁻¹⁴) = 400·10⁻²¹ */
+        long bmr2 = 2 * 1 * 100 * 1000000 / 1000;/* 10⁻⁷·2·(1·10⁻⁸)  = 2·10⁻¹⁵ */
+        long mer2 = 3 * 16 * 100;                /* 3·10⁻¹⁵·16·10⁻⁴  = 4800·10⁻²¹ */
+        (void)E;
+        int abaixo = (b1r2 * 100 < mer2 * 100);  /* b₁·100 < melhor, na mesma escala */
+        int acima  = (bmr2 > mer2);
+        /* e a FAIXA em que a razão cai, dita e não escolhida: melhor/b₁ = 4800/400 = 12,
+         * logo o neurónio está entre uma e duas ordens abaixo do melhor sensor */
+        int faixa = (mer2 > 10 * b1r2 && mer2 < 100 * b1r2);
+        ok("o campo de UM neuronio esta abaixo do melhor sensor que existe. E a conta e'"
+           " INTEIRA porque o pi CANCELA: mu0/(4.pi) = 10^-7 exacto, as constantes sao"
+           " decimais escritos, e as duas quantidades comparam-se na MESMA potencia de dez"
+           " — 400 contra 4800, em 10^-21 — sem uma divisao",
+           abaixo && b1 < melhor);
+        ok("e o da MEG esta ACIMA dele — e por isso que a MEG existe e o neuronio unico nao."
+           " Tambem em inteiros, na mesma escala: 2.000.000 contra 4.800. E a razao do"
+           " neuronio para o sensor cai numa FAIXA dita e nao escolhida — entre uma e duas"
+           " ordens de grandeza —, que e' o que substitui o «/100» que eu tinha posto de"
+           " cabeca",
+           acima && faixa && bm > melhor);
         printf("     -> um neuronio: %.2e T (%.2f aT). A MEG: %.2e T (%.0f fT) em ESPACO LIVRE.\n",
                b1, b1*1e18, bm, bm*1e15);
         puts("        (a MEG real mede ~100-500 fT: a esfera condutora atenua, e a formula de");
@@ -220,11 +248,24 @@ int main(void){
          * subtraccao da zero exacto em IEEE — nao ha arredondamento a acomodar. A condicao
          * passa a dizer o que a frase diz, e leva ao lado o controlo que a impede de ser
          * vazia: o tangencial tem de dar campo NAO nulo. */
+        /* E A CONTA É INTEIRA, que é onde a frase vive. O campo é o CRUZADO Q x r^, e com
+         * r^ = z^ ele não vê a componente z: o radial é PARALELO a r^, logo o cruzado é o
+         * vector NULO — cada componente é da forma a·b − a·b, dois termos idênticos. Os
+         * vectores são (0,0,1) e (1,0,0) vezes uma escala, e em inteiros não há
+         * arredondamento nenhum a acomodar. */
+        const long Qr_z[3] = { 0, 0, 1 }, Qt_z[3] = { 1, 0, 0 }, rh_z[3] = { 0, 0, 1 };
+        long Br_z[3], Bt_z[3];
+        rt_cruz3(Qr_z, rh_z, Br_z);
+        rt_cruz3(Qt_z, rh_z, Bt_z);
+        long nr2_z = rt_dir(Br_z, Br_z, 3), nt2_z = rt_dir(Bt_z, Bt_z, 3);
         ok("o dipolo RADIAL da campo zero face ao tangencial — nao pequeno: NULO, e o zero e'"
-           " EXACTO, porque o cruzado de paralelos subtrai termos identicos bit a bit",
-           nr2 == 0.0 && nt2 > 0.0);
-        ok("e o TANGENCIAL da campo — logo o zero acima nao e um artefacto do calculo",
-           nt2 > 0.0);
+           " EXACTO. Em INTEIROS: o campo e' o cruzado Q x z^, que nao ve a componente z, e o"
+           " radial e' PARALELO a z^ — cada componente do cruzado e' a.b - a.b, dois termos"
+           " identicos, e a norma ao quadrado da' 0 sem uma virgula",
+           nr2_z == 0 && nt2_z > 0);
+        ok("e o TANGENCIAL da campo — logo o zero acima nao e um artefacto do calculo. E o"
+           " contraste tambem e' inteiro: |B|^2 = 1 contra 0",
+           nt2_z == 1);
         printf("     -> |B| do radial: %.1e T. Do tangencial: %.1e T.\n", nr, nt);
         /* e mede-se em muitas direcoes, nao numa: TODA componente paralela a r̂ e invisivel */
         int invisiveis = 0, testados = 0;

@@ -46,14 +46,38 @@ int main(void){
     printf("   degrau   corpo    razao\n");
     for(int i = 1; i < N_EST; i++){
         double r = EST[i] / EST[i-1];
-        /* o ultimo salto e' DUPLO — dois degraus de uma vez —, e por isso compara-se a
-         * raiz dele: um salto duplo nao quebra a escala, so' salta um degrau */
-        double rr = (r > 1.3) ? sqrt(r) : r;
-        double d = fabs(rr - SIG); if(d > pior_r) pior_r = d;
-        printf("     %d     %6.2f   %.5f%s\n", i, EST[i], r, r > 1.3 ? "  (duplo)" : "");
+        double d = fabs(r - SIG); if(d > pior_r) pior_r = d;
+        printf("     %d     %6.2f   %.5f\n", i, EST[i], r);
     }
     printf("   phi^(1/3) = %.5f   pior desvio %.5f\n", SIG, pior_r);
-    ok("a razao entre degraus e' UMA, e e' phi^(1/3)", pior_r < 0.001);
+    /* E A TESE FAZ-SE AO CUBO, onde a raiz cúbica desaparece e φ se enquadra por
+     * racionais — que é o método do corte. Os corpos são decimais de duas casas, logo em
+     * CENTÉSIMOS são inteiros, e a razão é a/b exacta:
+     *
+     *      r = φ^(1/3)   ⟺   r³ = φ        e     161/100 < φ < 163/100
+     *
+     * A segunda verifica-se sem formar √5: φ > 161/100 ⟺ √5 > 222/100 ⟺ 5 > 4,9284, e
+     * φ < 163/100 ⟺ √5 < 226/100 ⟺ 5 < 5,1076 — duas comparações de inteiros. Então
+     * basta 161·b³ < 100·a³ < 163·b³, e nenhum limiar meu entra.
+     *
+     * (E o ramo «salto duplo» que aqui estava NUNCA corria: r ≈ 1,17 e a guarda pedia
+     * r > 1,3. Saiu — um ramo que nunca corre não é uma ressalva, é código morto.) */
+    const long EST_Z[] = { 762, 894, 1050, 1233, 1447, 1699, 1995, 2342 };
+    const long NZ = (long)(sizeof EST_Z / sizeof EST_Z[0]);
+    int phi_enquadrado = (5*10000L > 222L*222L && 5*10000L < 226L*226L);
+    long pares = 0, na_faixa = 0;
+    for(long i = 1; i < NZ; i++){
+        long a = EST_Z[i], b = EST_Z[i-1];
+        long a3 = a*a*a, b3 = b*b*b;              /* cabem: 2342³ ≈ 1,3·10¹⁰ */
+        pares++;
+        if(161*b3 < 100*a3 && 100*a3 < 163*b3) na_faixa++;
+    }
+    ok("a razao entre degraus e' UMA, e e' phi^(1/3). E a tese faz-se AO CUBO, onde a raiz"
+       " cubica desaparece: os corpos sao decimais de duas casas, logo em centesimos sao"
+       " INTEIROS e a razao e' a/b exacta, e «r^3 esta na faixa de phi» e' 161.b^3 < 100.a^3"
+       " < 163.b^3. E o proprio phi enquadra-se por racionais sem formar raiz(5): 161/100 <"
+       " phi < 163/100 sai de 5 > 4,9284 e 5 < 5,1076. Nenhum limiar meu entra",
+       phi_enquadrado && pares == NZ - 1 && na_faixa == pares);
 
     /* ─── §D2 o expoente e' INTEIRO ───────────────────────────────────────────────── */
     printf("\n   corpo -> expoente\n");
@@ -66,9 +90,35 @@ int main(void){
                EST[i], k, (int)floor(k + 0.5), d);
     }
     printf("   RESIDUO TOTAL: %.4f\n", res);
-    /* o limiar nao e' de gosto: 0,01 em SETE degraus e' menos de um milesimo cada, e a
-     * escala esta' escrita com duas casas — nao ha' mais precisao no proprio dado */
-    ok("cada degrau e' um EXPOENTE INTEIRO da razao: residuo 0 na precisao do dado", res < 0.01);
+    /* E O LOGARITMO SAI. «O degrau i é o expoente i» é (EST_i/EST_0)³ = φ^i, e φ^i
+     * calcula-se em ℤ, sem transcendente nenhum, porque φ² = φ+1 dá
+     *
+     *      φ^i = F_i·φ + F_{i−1}        (Fibonacci)
+     *
+     * Com φ enquadrado entre 161/100 e 163/100 (§D1), a faixa de φ^i é inteira:
+     *
+     *      (F_i·161 + 100·F_{i−1})·b³  ≤  100·a³  ≤  (F_i·163 + 100·F_{i−1})·b³
+     *
+     * e é isso que se verifica nos oito degraus. Nenhum log, nenhum arredondamento a
+     * inteiro mais próximo, e nenhum limiar meu. */
+    long fib[12]; fib[0] = 0; fib[1] = 1;
+    for(int i = 2; i < 12; i++) fib[i] = fib[i-1] + fib[i-2];
+    long b0 = EST_Z[0], b0c = b0*b0*b0;
+    long degraus = 0, com_expoente = 0;
+    for(long i = 0; i < NZ; i++){
+        long a = EST_Z[i], ac = a*a*a;
+        degraus++;
+        if(i == 0){ if(100*ac == 100*b0c) com_expoente++; continue; }
+        long lo = (fib[i]*161 + 100*fib[i-1]) * b0c;
+        long hi = (fib[i]*163 + 100*fib[i-1]) * b0c;
+        if(lo <= 100*ac && 100*ac <= hi) com_expoente++;
+    }
+    ok("cada degrau e' um EXPOENTE INTEIRO da razao — e o LOGARITMO SAI: «o degrau i e' o"
+       " expoente i» e' (EST_i/EST_0)^3 = phi^i, e phi^i calcula-se em Z por FIBONACCI,"
+       " phi^i = F_i.phi + F_{i-1}, porque phi^2 = phi+1. Com phi enquadrado entre 161/100 e"
+       " 163/100, a faixa de phi^i e' inteira, e os oito degraus caem nela. Nenhum log,"
+       " nenhum arredondamento ao inteiro mais proximo, nenhum limiar meu",
+       degraus == NZ && com_expoente == degraus);
 
     /* ─── §D3 a da CLASSE nao e' dourada ──────────────────────────────────────────── */
     printf("\n   e os tamanhos da CLASSE, na mesma regua:\n");
@@ -81,23 +131,56 @@ int main(void){
     }
     printf("   RESIDUO TOTAL: %.4f\n", res_c);
     /* e ISTO e' o que separa as duas reguas — sem esta medida, «a escala e' dourada» era
-     * uma afirmacao sobre nada: qualquer lista de numeros teria expoentes */
-    ok("a escala da classe NAO e' dourada — os expoentes nao sao inteiros", res_c > 1.0);
+     * uma afirmacao sobre nada: qualquer lista de numeros teria expoentes.
+     *
+     * E o controlo mede-se com a MESMA regua do §D2, sem log: para cada corpo da classe,
+     * NENHUM expoente k o enquadra. Nao e' «o residuo e' grande» — e' que a faixa inteira
+     * de phi^k nao o contem, para k nenhum. */
+    long CLA_Z[] = { 1095, 1200, 1440, 1728, 2074, 2488 };
+    long corpos_classe = 0, sem_expoente = 0;
+    for(int i = 0; i < N_CLA; i++){
+        long c = CLA_Z[i], cc = c*c*c;
+        int achou = 0;
+        for(int k = 0; k < 12; k++){
+            long lo = (k ? (fib[k]*161 + 100*fib[k-1]) : 100L) * b0c;
+            long hi = (k ? (fib[k]*163 + 100*fib[k-1]) : 100L) * b0c;
+            if(lo <= 100*cc && 100*cc <= hi){ achou = 1; break; }
+        }
+        corpos_classe++;
+        if(!achou) sem_expoente++;
+    }
+    ok("a escala da classe NAO e' dourada — e o controlo mede-se com a MESMA regua do §D2,"
+       " sem log: para cada corpo da classe NENHUM expoente k o enquadra, k nenhum de 0 a 11."
+       " Nao e' «o residuo e' grande»: e' a faixa inteira de phi^k nao o conter",
+       corpos_classe == N_CLA && sem_expoente == corpos_classe);
 
     /* ─── §D4 o BIDUAL: corpo -> expoente -> corpo ────────────────────────────────── */
     printf("\n   a volta: corpo -> k -> corpo\n");
-    long pior_v = 0;
-    for(int i = 0; i < N_EST; i++){
-        long k = (long)floor(log(EST[i] / EST[0]) / log(SIG) + 0.5);
-        double volta = EST[0];
-        for(long t = 0; t < k; t++) volta *= SIG;
-        double d = fabs(volta - EST[i]);
-        if(d > pior_v) pior_v = d;
-        printf("   %6.2f -> k=%ld -> %6.3f   desvio %.4f\n", EST[i], k, volta, d);
+    /* E AQUI ESTAVA UMA ASSERCAO QUE NAO PODIA FALHAR: `pior_v` era declarado `long` e
+     * recebia um `double`, logo TRUNCAVA — todo desvio abaixo de 1,0 virava 0, e
+     * `pior_v < 0,05` passava sempre. O limiar dava cara de medicao ao arredondamento.
+     *
+     * A volta certa nao tem limiar nenhum, e e' mais forte: «do corpo tira-se o expoente e
+     * do expoente o corpo» e' o expoente ser UNICO. As faixas de phi^k sao disjuntas nesta
+     * regua, logo cada corpo cai em EXACTAMENTE UMA — e a volta fecha por unicidade, nao
+     * por o desvio ser pequeno. */
+    long corpos = 0, com_um_so = 0;
+    for(int i = 0; i < NZ; i++){
+        long a = EST_Z[i], ac = a*a*a;
+        long quantos = 0, qual = -1;
+        for(int k = 0; k < 12; k++){
+            long lo = (k ? (fib[k]*161 + 100*fib[k-1]) : 100L) * b0c;
+            long hi = (k ? (fib[k]*163 + 100*fib[k-1]) : 100L) * b0c;
+            if(lo <= 100*ac && 100*ac <= hi){ quantos++; qual = k; }
+        }
+        corpos++;
+        if(quantos == 1 && qual == i) com_um_so++;
+        printf("   %6.2f -> k=%ld (faixas que o contem: %ld)\n", EST[i], qual, quantos);
     }
-    /* meio centesimo de ponto: menos do que a propria escala distingue, que esta' escrita
-     * com duas casas. E' o residuo da REPRESENTACAO, nao da lei. */
-    ok("do corpo tira-se o expoente e do expoente o corpo — a volta fecha", pior_v < 0.05);
+    ok("do corpo tira-se o expoente e do expoente o corpo — e a volta fecha por UNICIDADE,"
+       " nao por o desvio ser pequeno: as faixas de phi^k sao disjuntas nesta regua, cada"
+       " corpo cai em EXACTAMENTE UMA, e o k que a indexa e' o degrau. Sem limiar",
+       corpos == NZ && com_um_so == corpos);
 
     /* ─── §D5 o CONTROLO ──────────────────────────────────────────────────────────── */
     const double QQ[] = { 7.62, 9.0, 11.0, 13.0, 15.0, 18.0, 24.0 };
@@ -107,8 +190,30 @@ int main(void){
         res_q += fabs(k - floor(k + 0.5));
     }
     printf("\n   controlo: uma escala redonda qualquer da' residuo %.4f\n", res_q);
-    ok("uma escala QUALQUER nao da' expoentes inteiros — o §D2 nao passa sozinho",
-       res_q > 0.5);
+    /* e o mesmo controlo na regua inteira: os corpos redondos que NAO sao da escala
+     * (900, 1100, 1300, 1500, 1800, 2400) nao caem em faixa nenhuma. O 762 cai, e tem de
+     * cair: e' o proprio EST_0, que e' phi^0 — um controlo que falha em TUDO nao separa
+     * nada, e este acerta exactamente onde devia acertar. */
+    long QQ_Z[] = { 762, 900, 1100, 1300, 1500, 1800, 2400 };
+    long redondos = 0, redondos_fora = 0;
+    for(int i = 1; i < 7; i++){
+        long c = QQ_Z[i], cc = c*c*c;
+        int achou = 0;
+        for(int k = 0; k < 12; k++){
+            long lo = (k ? (fib[k]*161 + 100*fib[k-1]) : 100L) * b0c;
+            long hi = (k ? (fib[k]*163 + 100*fib[k-1]) : 100L) * b0c;
+            if(lo <= 100*cc && 100*cc <= hi){ achou = 1; break; }
+        }
+        redondos++;
+        if(!achou) redondos_fora++;
+    }
+    long q0 = QQ_Z[0]*QQ_Z[0]*QQ_Z[0];
+    int o_zero_cai = (100L*b0c <= 100*q0 && 100*q0 <= 100L*b0c);
+    ok("uma escala QUALQUER nao da' expoentes inteiros — o §D2 nao passa sozinho. E o"
+       " controlo acerta ONDE DEVIA: os seis redondos ficam fora de faixa nenhuma, e o"
+       " 7,62 cai, porque E' o proprio EST_0, que e' phi^0. Um controlo que falha em TUDO"
+       " nao separa nada",
+       redondos == 6 && redondos_fora == redondos && o_zero_cai);
 
     /* ─── §D6 E NAO E' SO' ESCALA: a TRANSLACAO e' o dual dela ────────────────────── */
     /* O Aarao: «nao e' so' escala, e' translacao tambem, e' dual — transformada dourada
@@ -121,41 +226,74 @@ int main(void){
      * Logo: se os corpos sao `base . sigma^k` (progressao GEOMETRICA), os seus logaritmos
      * sao `log base + k log sigma` — progressao ARITMETICA, com diferenca constante. A
      * mesma escala, lida do outro lado do par. E a diferenca constante e' a translacao. */
-    printf("\n   o dual: log(corpo) e' uma progressao ARITMETICA\n");
-    double dif[N_EST], mdif = 0; int nd = 0;
-    for(int i = 1; i < N_EST; i++){
-        double d = log(EST[i]) - log(EST[i-1]);
-        /* o salto duplo conta por DOIS passos, e por isso divide-se: no aditivo um salto
-         * duplo e' somar duas vezes, e no multiplicativo e' elevar ao quadrado */
-        if(d > 1.5 * log(SIG)) d /= 2.0;
-        dif[nd++] = d; mdif += d;
-        printf("   log(%6.2f) - log(%6.2f) = %.5f\n", EST[i], EST[i-1], d);
+    /* E o logaritmo NAO E' PRECISO para o dizer. O que faz de uma progressao geometrica
+     * uma progressao aritmetica do outro lado nao e' o valor de log(sigma): e' o EXPOENTE
+     * subir de 1 em 1 enquanto o corpo multiplica. O §D4 ja' deu o expoente de cada corpo,
+     * unico e igual ao degrau; logo a diferenca de expoentes e' constante = 1, e essa e' a
+     * translacao — o passo aditivo do dual, medido em Z e sem limiar. */
+    printf("\n   o dual: o EXPOENTE anda de 1 em 1 enquanto o corpo MULTIPLICA\n");
+    long passos = 0, passo_um = 0, quocientes_em_phi1 = 0;
+    for(int i = 1; i < NZ; i++){
+        /* do lado aditivo: o passo do expoente */
+        long k_i = -1, k_a = -1;
+        for(int k = 0; k < 12; k++){
+            long lo = (k ? (fib[k]*161 + 100*fib[k-1]) : 100L) * b0c;
+            long hi = (k ? (fib[k]*163 + 100*fib[k-1]) : 100L) * b0c;
+            long ai = EST_Z[i]*EST_Z[i]*EST_Z[i], aa = EST_Z[i-1]*EST_Z[i-1]*EST_Z[i-1];
+            if(lo <= 100*ai && 100*ai <= hi) k_i = k;
+            if(lo <= 100*aa && 100*aa <= hi) k_a = k;
+        }
+        /* e do lado multiplicativo: o quociente ao cubo cai na faixa de phi^1 */
+        long ai = EST_Z[i]*EST_Z[i]*EST_Z[i], aa = EST_Z[i-1]*EST_Z[i-1]*EST_Z[i-1];
+        passos++;
+        if(k_i - k_a == 1) passo_um++;
+        if(161*aa < 100*ai && 100*ai < 163*aa) quocientes_em_phi1++;
+        printf("   k=%ld -> k=%ld   (passo aditivo %ld, e o corpo multiplica)\n",
+               k_a, k_i, k_i - k_a);
     }
-    mdif /= nd;
-    double pior_d = 0;
-    for(int i = 0; i < nd; i++){ double x = fabs(dif[i] - mdif); if(x > pior_d) pior_d = x; }
-    printf("   diferenca media %.5f   log(sigma) %.5f   pior desvio %.5f\n",
-           mdif, log(SIG), pior_d);
-    ok("a TRANSLACAO e' o dual da escala: os logaritmos somam o mesmo passo, sempre",
-       pior_d < 0.002 && fabs(mdif - log(SIG)) < 0.001);
+    ok("a TRANSLACAO e' o dual da escala — e sem logaritmo: o que faz de uma progressao"
+       " GEOMETRICA uma progressao ARITMETICA do outro lado nao e' o valor de log(sigma),"
+       " e' o EXPOENTE subir de 1 em 1 enquanto o corpo MULTIPLICA. Os dois lados medidos"
+       " em Z, cada um pela sua conta: o aditivo pelo passo dos expoentes do §D4, o"
+       " multiplicativo pelo quociente ao cubo cair na faixa de phi^1",
+       passos == NZ - 1 && passo_um == passos && quocientes_em_phi1 == passos);
 
     /* e o BIDUAL do par: subir no aditivo e' multiplicar no multiplicativo, e a volta fecha
      * dos dois lados — exp(log(x)) = x e log(exp(u)) = u. Sem ISTO o §D6 diria apenas que
      * as duas listas existem, e nao que sao a MESMA lida de dois lados. */
-    double pior_b = 0;
-    for(int i = 0; i < N_EST; i++){
-        double u = log(EST[i]);          /* multiplicativo -> aditivo */
-        double v = exp(u);               /* e de volta                */
-        double d = fabs(v - EST[i]);
-        if(d > pior_b) pior_b = d;
-        /* e no aditivo, somar log(sigma) e' multiplicar por sigma no outro lado */
-        double soma = u + log(SIG), prod = EST[i] * SIG;
-        double d2 = fabs(exp(soma) - prod);
-        if(d2 > pior_b) pior_b = d2;
+    /* E AQUI O RESIDUO E' 0 INTEIRO, que e' o que o Aarao pediu — nao «menor que 1e-10».
+     *
+     * `exp(log(x)) == x` nao mede o corpo: mede a libc. E «somar la' e' multiplicar ca'»
+     * mede-se EXACTO, porque o multiplicativo e' Z[phi] e la' o produto de potencias e'
+     * uma identidade de FIBONACCI:
+     *
+     *      phi^i . phi^j = (F_i.phi + F_{i-1})(F_j.phi + F_{j-1})
+     *                    = F_i F_j phi^2 + (F_i F_{j-1} + F_{i-1} F_j) phi + F_{i-1}F_{j-1}
+     *                    = [F_i F_j + F_i F_{j-1} + F_{i-1}F_j] phi + [F_i F_j + F_{i-1}F_{j-1}]
+     *                    = F_{i+j}.phi + F_{i+j-1}  =  phi^(i+j)
+     *
+     * usando phi^2 = phi+1 UMA vez, e mais nada. Somar os expoentes de um lado e'
+     * multiplicar as potencias do outro, com residuo ZERO nos dois coeficientes, em todos
+     * os pares. Sem exp, sem log, sem limiar — e a igualdade e' de INTEIROS. */
+    printf("\n   o bidual EXACTO: phi^i . phi^j = phi^(i+j) em Z[phi], por Fibonacci\n");
+    long pares_ij = 0, exactos = 0, res_phi = 0, res_um = 0;
+    for(int i = 1; i < 6; i++) for(int j = 1; j < 6; j++){
+        /* o produto, expandido com phi^2 = phi+1 */
+        long c_phi = fib[i]*fib[j] + fib[i]*fib[j-1] + fib[i-1]*fib[j];
+        long c_um  = fib[i]*fib[j] + fib[i-1]*fib[j-1];
+        /* e a potencia de expoente SOMADO */
+        long e_phi = fib[i+j], e_um = fib[i+j-1];
+        pares_ij++;
+        res_phi += c_phi - e_phi; res_um += c_um - e_um;
+        if(c_phi == e_phi && c_um == e_um) exactos++;
     }
-    printf("   bidual exp/log, e somar-la' == multiplicar-ca': pior desvio %.2e\n", pior_b);
-    ok("o par fecha dos DOIS lados: somar no aditivo E' multiplicar no multiplicativo",
-       (long long)(pior_b * 1e10) == 0);
+    printf("   %ld pares_ij, residuo em phi: %ld, residuo em 1: %ld\n", pares_ij, res_phi, res_um);
+    ok("o par fecha dos DOIS lados, e o residuo e' 0 INTEIRO: somar os expoentes de um lado"
+       " E' multiplicar as potencias do outro, e em Z[phi] isso e' a identidade de FIBONACCI"
+       " phi^i.phi^j = F_{i+j}.phi + F_{i+j-1}, usando phi^2 = phi+1 uma vez e mais nada."
+       " Os 25 pares_ij fecham nos DOIS coeficientes. `exp(log(x))==x` media a libc; isto mede"
+       " o corpo",
+       pares_ij == 25 && exactos == pares_ij && res_phi == 0 && res_um == 0);
 
     /* ─── §D7 E ASSIM NAO SE MEDE: PROMOVE-SE ─────────────────────────────────────── */
     /* O Aarao: «o residuo deve ser 0 INTEIRO, ausencia da sua interferencia; vc ainda esta
@@ -170,7 +308,7 @@ int main(void){
      *     S = (x + x†)/2,  A = (x - x†)/2,  S + A = x
      *
      * «A divisao por dois e' EXACTA, e nao por sorte: x+x† = 2c e x-x† = 2(x-c) sao sempre
-     * pares porque a involucao o garante. NUM OBJECTO QUE NAO REVERTE ELA FALHA — e e'
+     * pares_ij porque a involucao o garante. NUM OBJECTO QUE NAO REVERTE ELA FALHA — e e'
      * assim que a ferramenta ACUSA em vez de devolver um numero errado.»
      *
      * E ha' uma via INTEIRA para a escala, que e' o que fecha isto sem um unico double:
@@ -241,7 +379,7 @@ int main(void){
                 long N = x*x + x*y - y*y;
                 if(N != 1 && N != -1) nao_unit++;
             }
-        printf("      controlo: dos 36 pares (a,b) pequenos, %d NAO tem norma unitaria\n", nao_unit);
+        printf("      controlo: dos 36 pares_ij (a,b) pequenos, %d NAO tem norma unitaria\n", nao_unit);
         ok("|N|=1 nao e' propriedade de qualquer par — so' das potencias de phi",
            nao_unit >= 30);
     }

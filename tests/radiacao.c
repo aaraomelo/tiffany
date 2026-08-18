@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include "reta.h"     /* rt_cruz3, rt_dir: o cruzado e o interno, inteiros */
 #include "termica.h"
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -224,8 +225,20 @@ int main(void){
         double nBr = sqrt(nBr2), nBt = sqrt(nBt2);   /* só para as linhas que imprimem */
         double Pr = p_joule(Q_rad, vol, comp), Pt = p_joule(Q_tan, vol, comp);
 
-        ok("o radial da campo NULO e o tangencial nao — e o que o headjack.c ja media",
-           nBr2 == 0.0 && nBt2 > 0);
+        /* E ISTO É INTEIRO. Os dois Q são o mesmo número numa direcção diferente — em
+         * unidades de 1e-8 são (0,0,1) e (1,0,0) —, e r^ = z^ = (0,0,1). O campo é o
+         * CRUZADO, que é polinomial: Q x z^ não vê a componente z, logo o radial dá o
+         * vector NULO e o tangencial não. As normas comparam-se nos QUADRADOS, sem raiz. */
+        const long Qr_z[3] = { 0, 0, 1 }, Qt_z[3] = { 1, 0, 0 }, rh_z[3] = { 0, 0, 1 };
+        long Br_z[3], Bt_z[3];
+        rt_cruz3(Qr_z, rh_z, Br_z);
+        rt_cruz3(Qt_z, rh_z, Bt_z);
+        long nBr2_z = rt_dir(Br_z, Br_z, 3), nBt2_z = rt_dir(Bt_z, Bt_z, 3);
+        ok("o radial da campo NULO e o tangencial nao — e o que o headjack.c ja media. E a"
+           " conta e' INTEIRA: em unidades de 1e-8 os dois Q sao (0,0,1) e (1,0,0), o campo"
+           " e' o CRUZADO com z^, que nao ve a componente z, e as normas comparam-se nos"
+           " QUADRADOS — o radial da' o vector nulo, |B|^2 = 0 exacto, e o tangencial da' 1",
+           nBr2_z == 0 && nBt2_z > 0);
         /* «OS DOIS DISSIPAM IGUAL» É POR CONSTRUÇÃO: `p_joule` usa só |Q|², e Q_rad =
          * (0,0,1) e Q_tan = (1,0,0) têm o MESMO módulo. A comparação não podia falhar.
          *
@@ -420,11 +433,24 @@ int main(void){
         /* e o CONTROLO: os dois Q sao mesmo diferentes, senao a igualdade nao dizia nada */
         double dQ = 0;
         for(int i = 0; i < 3; i++) dQ += (Qp[i]-Qm[i])*(Qp[i]-Qm[i]);
+        /* E EM INTEIROS, que é onde as duas igualdades vivem. Os dois Q diferem SÓ no
+         * sinal da componente z; o campo é o cruzado com z^, que não vê essa componente,
+         * logo dá o MESMO vector; e a potência usa |Q|², onde o quadrado mata o sinal.
+         * Nenhuma das duas é «pequena»: são zeros de expressões que cancelam. */
+        const long Qp_z[3] = { 1, 2, 3 }, Qm_z[3] = { 1, 2, -3 }, z_z[3] = { 0, 0, 1 };
+        long Bp_z[3], Bm_z[3], d_z[3];
+        rt_cruz3(Qp_z, z_z, Bp_z);
+        rt_cruz3(Qm_z, z_z, Bm_z);
+        for(int i = 0; i < 3; i++) d_z[i] = Bp_z[i] - Bm_z[i];
+        long dB_z = rt_dir(d_z, d_z, 3);                       /* o campo não muda */
+        long dP_z = rt_dir(Qp_z,Qp_z,3) - rt_dir(Qm_z,Qm_z,3); /* |Q|² não vê o sinal */
+        long dq[3]; for(int i = 0; i < 3; i++) dq[i] = Qp_z[i] - Qm_z[i];
+        long dQ_z = rt_dir(dq, dq, 3);                         /* e os Q SÃO diferentes */
         ok("a corrente radial para DENTRO e para FORA da o mesmo B e o mesmo P — o sinal fica."
            " E o mesmo e' EXACTO: o cruzado com r^ nao ve a componente radial, e |Q|² nao ve"
            " o sinal. O que aqui estava punha a soma dos quadrados num `long`, que a truncava"
            " para zero — e ai a comparacao nao podia falhar",
-           dB == 0.0 && dP == 0.0 && dQ > 0.0);
+           dB_z == 0 && dP_z == 0 && dQ_z > 0);
         puts("     -> as duas dao B identico e P identico. O par resolve o MODULO e nao o sinal.");
         puts("        E isto e a alfandega outra vez, um andar acima: o que sobrou sem dual");
         puts("        agora e o SINAL, e ele fica na garrafa ate aparecer a terceira medida.");

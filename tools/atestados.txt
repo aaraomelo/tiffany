@@ -148,7 +148,7 @@ dominios 4fd7af2edb1fcaa6 0
 dourada 7f3388c0cb4d53a3 0
 dourada_banco d8495af90c42bb1b 0
 dourada_bidual 60ececef82d90485 0
-dourada_escala a9c813ce10a3a3bf 0
+dourada_escala 7f79493313c65590 0
 dourada_lei2 3e96aca24dd8878b 0
 dtc_viveiro b33d91e58ae5ea86 0
 dtcn 1d92b2cdf24cae03 0
@@ -233,7 +233,7 @@ grupo d223484f823f262b 0
 guarda fa13a12b95d6b2f9 0
 gume_calculo 8af5f8fd0d0ddcf7 0
 hawking 534879a613246ed0 0
-headjack f8666426b226e3d3 0
+headjack cea98b9f035a7b44 0
 hilbert_bidual f8c8159a1e1e3878 0
 hiper 209bc5f16330047f 0
 hipercubo32 6f71340587320316 0
@@ -385,7 +385,7 @@ quatro cbb4af51d8c7cea0 0
 quebra b7dd95becedbb9ba 0
 racionais_fixos 1967dd5d11c85105 0
 racional_pg ddf59373d881a71a 0
-radiacao 3322b607d3360e8b 0
+radiacao 3c8b1d8734beac71 0
 ramos df8a0c5ccaa39f37 0
 rastro 2b799b5c517d010d 0
 reais caba0c9221d343e8 0

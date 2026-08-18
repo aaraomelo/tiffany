@@ -6,20 +6,34 @@ Verificar sempre com:  bash tools/bateria.sh   (lê AS DUAS linhas: total e unid
 
 OS DOCUMENTOS, depois da reorganização de 18/08:
 
-    papers/universal.tex    O CORPO UNIVERSAL — «a construção geométrica e dinâmica de R».
-                            É o paper central (60 pp.). Era o geometrico.tex.
-    livro.tex               os três documentos num volume, preâmbulo em estilo.tex:
-      teoria.tex            122 pp. — ABSORVEU o antigo papers/corpo_universal.tex, que
-                            foi ELIMINADO por redundância. O que era fundação passou ao
-                            corpo; o que era desenvolvimento (as cinco operações, o
-                            observador, a membrana, o Peano como instância) é teoria.
-      catalogo.tex          487 pp.
-      enredo.tex            365 pp.
+    papers/     universal.tex          O CORPO UNIVERSAL — tudo CANÓNICO (81 pp.)
+                corpo_topologico.tex   o PALCO — endereçamento, projecção, métrica (37)
+                corpo_analitico.tex    o ALCANCE — graduação, continuação, completude (37)
+                estilo.tex, gkcapa.tex preâmbulo partilhado
 
-    INVARIANTE VERIFICADO na mudança: 499 medidores citados antes e depois, e a bateria
-    em 508:508. É o teste obrigatório de qualquer reorganização — um medidor só é testado
-    se um paper o CITAR, e eliminar um documento pode deixar dezenas órfãos (este tinha 76
-    exclusivos). Contar ANTES, contar DEPOIS.
+    raiz        teoria.tex             as realizações particulares (102)
+                catalogo.tex           o mais particular ainda (488)
+                enredo.tex             a história (365)
+                livro.tex              os três num volume (959)
+
+    corpus/fala/   23 conversa_*.tex — o corpus de fala que os medidores lêem
+    corpus/docs/    9 documentos de sistema (arquitectura, partitura, medida…)
+    cristal/       10 cristal_*.tex + cristal.jsonl — gerados por tools/cristal_tex.py
+
+A TRÍADE é Universal → Topológico → Analítico: mesma estrutura, três realizações.
+O Gato tem três faces — aqui det É a medida, no topológico é o volume discreto
+(thm:det-volume), no analítico é o Jacobiano (thm:medida-jacobiano).
+
+INVARIANTE DE QUALQUER REORGANIZAÇÃO: contar os medidores CITADOS antes e depois.
+    python3 -c "import re,glob;
+      med=lambda s:{x.replace(chr(92)+'_','_') for x in re.findall(r'\\code\{((?:tests|tools)/[a-z0-9_\\-]+\.(?:c|js|py))\}',s)}
+      t=set()
+      [t.update(med(open(p,encoding='utf-8').read())) for p in glob.glob('papers/*.tex')+['teoria.tex','catalogo.tex','enredo.tex']]
+      print(len(t))"
+    São 499. Um medidor que nenhum documento cita DEIXA DE SER TESTADO, e a
+    contagem parece completa sem estar. Contar não chega: há referências que um
+    grep por texto não vê — path.join('papers','x.tex'), readdirSync com padrão,
+    e ficheiros GERADOS (cristal_*.tex, app/dist/) que não se editam à mão.
 
 
 0. AS DUAS REGRAS
