@@ -351,12 +351,32 @@ int main(void){
         printf("     %-30s %12.3e\n", "variacao de contraste", dC);
         printf("     %-30s %12.3e\n", "ruido de shot (1e6 fotoes)", ruido_shot);
         printf("     %-30s %12.3e\n", "SNR de UMA medida", snr);
-        ok("uma medida SO nao chega — o SNR de um unico disparo fica abaixo de 1",
-           snr < 1.0);
+        /* «abaixo de 1» tinha um milhao e meio de vezes de folga: o SNR de um disparo e'
+         * 6,8e-07. Diz-se o numero, enquadrado dos dois lados em unidades de 1e-9 — e o que
+         * ele significa nao e' «nao chega», e' que falta SEIS ordens de grandeza. */
+        long snr_z = (long)(snr * 1000000000.0);        /* SNR em bilionesimos */
+        printf("     -> o SNR de um disparo vale %ld bilionesimos: nao e' «abaixo de 1», e'"
+               " SEIS ordens de grandeza abaixo\n", snr_z);
+        ok("uma medida SO' nao chega — e o quanto diz-se: o SNR de um unico disparo vale 681"
+           " bilionesimos — entre 600 e 700, enquadrado —, ou seja falta SEIS ordens de"
+           " grandeza, e nao «fica abaixo de 1»,"
+           " que tinha um milhao e meio de vezes de folga",
+           snr_z > 600 && snr_z < 700);
         /* e a lei do √N outra vez, e ela diz quantas medidas */
         double N = (1.0/snr)*(1.0/snr) * 100;      /* para SNR = 10 */
-        ok("e a lei do raiz(N) diz quantas medias sao precisas — e o numero calcula-se",
-           N > 1);
+        /* e `N > 1` tinha folga astronomica — N vale 2,1e14. A lei do raiz(N) e' uma
+         * IDENTIDADE, N.snr² = 100, e e' isso que se mede; o valor sai dela e diz-se com a
+         * consequencia, que e' a conclusao verdadeira: a 1 MHz de repeticao, 2,1e14 medidas
+         * sao mais de SEIS ANOS por ponto. */
+        double check = N * snr * snr;                   /* tem de dar 100, pela lei */
+        long anos = (long)(N / 1e6 / (365.25*24*3600));
+        printf("     -> e a lei do raiz(N): N.snr² = %.6f (tem de ser 100), N = %.2e, e a"
+               " 1 MHz isso sao %ld ANOS por ponto\n", check, N, anos);
+        ok("e a lei do raiz(N) diz quantas medias sao precisas — e ela e' uma IDENTIDADE,"
+           " N.snr^2 = 100, e nao a desigualdade `N > 1`, que tinha folga astronomica. O valor"
+           " sai da identidade e diz-se com a CONSEQUENCIA: a 1 MHz de repeticao sao SEIS ANOS"
+           " por ponto, e e' isso que fecha a seccao",
+           fabs(check - 100.0) < 1e-6 && anos >= 6 && anos < 8);
         printf("     -> para SNR = 10 sao precisas %.1e medidas. A 1 MHz de repeticao, isso e\n", N);
         printf("        %.2f segundos por ponto.\n", N/1e6);
         puts("        E o mesmo raiz(N) do headjack.c §H3 e do radiacao.c §W4, agora no tempo em");
@@ -397,10 +417,40 @@ int main(void){
         printf("     -> e o produto ganho x banda em INTEIROS: igual em %ld de %ld ganhos, com\n"
                "        a banda a MUDAR em %ld deles — a troca e' real e o produto nao a ve\n",
                prod_igual, ganhos, banda_muda);
-        ok("a MALHA FECHADA alarga a janela pelo ganho de malha — e isso e a lei do realimentado."
-           " (O que aqui se media era `janela_aberta.ganho > 100.janela_aberta`, isto e'"
-           " `ganho > 100`: a comparacao nao via a janela.)",
-           ganho_malha > 100.0 && janela_fechada > janela_aberta);
+        /* E A CORRECCAO ANTERIOR NAO TINHA CORRIGIDO. A nota diz que a versao velha era
+         * `janela_aberta.ganho > 100.janela_aberta`, isto e' `ganho > 100` — e a nova ficou
+         * `ganho_malha > 100 && janela_fechada > janela_aberta`, com `janela_fechada` DEFINIDA
+         * como `janela_aberta * ganho_malha`. A segunda metade e' `ganho > 1`: a mesma
+         * tautologia, com mais uma linha por cima. Acrescentei e nao TIREI.
+         *
+         * O que a lei do realimentado diz de verdade e' uma CONSERVACAO, e ela mede-se
+         * variando o ganho: a janela multiplica-se por G, a banda divide-se por G, e o
+         * PRODUTO janela x banda nao se move. Isso pode falhar — e falha se um dos dois lados
+         * nao acompanhar. */
+        long gs = 0, produto_invariante = 0, janela_cresce = 0, banda_encolhe = 0;
+        long jb_ref = -1, jant = -1, bant = -1;
+        for(long G = 1; G <= 100000; G *= 10){
+            long janela = 1 * G;                   /* janela em nT, aberta = 1 */
+            long banda  = GBW_z / G;               /* exacta: G divide GBW */
+            long jb = janela * banda;              /* o produto, invariante */
+            gs++;
+            if(jb_ref < 0) jb_ref = jb;
+            if(jb == jb_ref) produto_invariante++;
+            if(jant >= 0 && janela > jant) janela_cresce++;
+            if(bant >= 0 && banda  < bant) banda_encolhe++;
+            jant = janela; bant = banda;
+        }
+        printf("     -> e a lei do realimentado e' uma CONSERVACAO: em %ld ganhos a janela"
+               " CRESCE (%ld passos), a banda ENCOLHE (%ld), e o produto janela x banda fica"
+               " o MESMO (%ld)\n", gs, janela_cresce, banda_encolhe, produto_invariante);
+        ok("a MALHA FECHADA alarga a janela pelo ganho de malha — e isso e' uma CONSERVACAO,"
+           " nao uma desigualdade. A versao anterior media `ganho > 100 && janela_fechada >"
+           " janela_aberta`, com a janela_fechada DEFINIDA como janela_aberta.ganho: a segunda"
+           " metade era `ganho > 1`, a mesma tautologia da versao antes dela com mais uma linha"
+           " por cima — acrescentei e nao TIREI. O que se mede agora varia o ganho e ve os TRES"
+           " lados em Z: a janela cresce, a banda encolhe, e o PRODUTO nao se move",
+           gs == 6 && produto_invariante == gs
+           && janela_cresce == gs - 1 && banda_encolhe == gs - 1);
         ok("e o PRECO e a banda: o produto ganho-banda e constante, e fecha exato. E a LEI"
            " mede-se VARIANDO o ganho, em INTEIROS: G.banda = GBW em todos os cinco ganhos, e"
            " a banda MUDA em todos — sem essa segunda metade, «o produto nao muda» valia por"

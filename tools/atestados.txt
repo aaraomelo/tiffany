@@ -430,7 +430,7 @@ semantico 4501b7bcfb9d51c7 0
 semente bdf47d333634825f 0
 serie_phi d7bed644cd232d52 0
 significado 4cde300a66dfe985 0
-simula 3dcbae83c1fbcbf4 0
+simula 6d221db66a3d75d5 0
 sistema eafe46c4a35c6e05 0
 smartcontract c584e6c96ecec290 0
 solar 48ac32b9e813d49e 0
