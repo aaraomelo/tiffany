@@ -543,11 +543,23 @@ int main(void){
 
             /* régua dual: varrer θ */
             double fase_dual = 0, salto_dual = 0, th_ant = 0;
+            /* e os passos INTERIORES são todos o mesmo — π/N —, enquanto os dois das PONTAS
+             * carregam o ±1e-12 que se lhes pôs de propósito para não tocar o polo. O
+             * `1.001` que estava na condição era a folga para esses dois, aplicada aos
+             * 400 000. Contam-se em separado: os interiores são iguais entre si, e é isso
+             * que quer dizer «não há salto». */
+            long passos_int = 0, iguais_int = 0; double passo_ref = -1;
             for(int i=0;i<=N;i++){
                 double th = -PI2 + PI*i/N + (i==0 ? 1e-12 : 0) - (i==N ? 1e-12 : 0);
                 if(i){ double dt = th - th_ant;
                        if(fabs(dt) > salto_dual) salto_dual = fabs(dt);
-                       fase_dual += dt; }
+                       fase_dual += dt;
+                       if(i > 1 && i < N){                       /* só os interiores */
+                           passos_int++;
+                           if(passo_ref < 0) passo_ref = dt;
+                           if(fabs(dt - passo_ref) <= 1e-15) iguais_int++;
+                       }
+                }
                 th_ant = th;
             }
             /* régua algébrica: varrer den uniformemente, e ler o mesmo θ */
@@ -565,10 +577,30 @@ int main(void){
                    salto_alg);
             ok("a travessia de RP¹ vale π — meia volta, e AGORA está medida",
                (long long)(fabs(fase_dual - PI) * 1e8) == 0);
-            ok("na régua DUAL não há salto: o passo é uniforme e infinitesimal",
-               salto_dual <= PI / N * 1.001);
-            ok("na ALGÉBRICA o mesmo caminho salta — e o salto é do amostrador, não do objeto",
-               salto_alg > 1.0);
+            printf("      e os %ld passos INTERIORES são iguais entre si em %ld (o de"
+                   " referência é %.3e, e π/N vale %.3e)\n",
+                   passos_int, iguais_int, passo_ref, PI/N);
+            ok("na regua DUAL nao ha' salto: o passo e' uniforme e infinitesimal — e «uniforme»"
+               " conta-se em vez de se tolerar. Os passos INTERIORES sao todos o mesmo, e sao"
+               " 399.998 deles; os dois das PONTAS carregam o ±1e-12 que se lhes pos de"
+               " proposito para nao tocar o polo, e era so' para esses que o «1,001» dava"
+               " folga — aplicada aos quatrocentos mil",
+               passos_int == N - 2 && iguais_int == passos_int
+               && fabs(passo_ref - PI/N) <= 1e-15);
+            /* e o salto algébrico diz-se COMPARADO com o dual, que é o que faz disto um par:
+             * ele vale quase π — quase a meia-volta inteira num só passo —, e isso é da ordem
+             * de N vezes o passo dual. O `> 1.0` era um número solto no meio. */
+            long razao_saltos = (long)(salto_alg / salto_dual);
+            printf("      e o salto ALGÉBRICO vale %.4f (π/2 = %.4f): é %ld vezes o passo dual,"
+                   " e N é %d\n", salto_alg, PI2, razao_saltos, N);
+            ok("na ALGEBRICA o mesmo caminho salta — e o salto e' do amostrador, nao do objeto."
+               " E diz-se COMPARADO com o dual, que e' o que faz disto um par: ele vale 1,5508,"
+               " isto e' quase PI/2 — METADE da travessia inteira num unico passo —, e isso e'"
+               " cerca de N/2 vezes o passo dual. O `> 1,0` era um numero solto no meio. (E o"
+               " «quase PI» que escrevi primeiro era uma estimativa de cabeca: o medidor deu"
+               " 1,55 e nao 3,06, e quem diz o numero e' ele.)",
+               salto_alg > 1.5 && salto_alg < PI2
+               && razao_saltos > N/4 && razao_saltos < N);
             conclui("o objeto é o mesmo nas duas leituras; o que muda é a régua. A algébrica tem");
             conclui("de espremer um infinito num passo, e por isso rebenta; a dual anda em fase");
             conclui("e não dá por nada. É o par de sempre — uma mede, a outra ordena.");
