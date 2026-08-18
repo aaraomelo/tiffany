@@ -580,10 +580,10 @@ diferentes, e são os próprios títulos que o dizem:
 \[
 \begin{array}{lll}
 \textbf{o GATO} & \text{aqui} & \det\ \text{É a medida, e }\abs{\det}=1\text{ conserva}\\
- & \tau=-1 & \code{thm:det-volume} \text{ --- \emph{a face DISCRETA}: o volume}\\
- & \tau=+1 & \code{thm:medida-jacobiano} \text{ --- \emph{a face GRADUADA}: o Jacobiano}\\[4pt]
-\textbf{a PONTE} & \tau=-1 & \code{thm:ponte-discreta} \text{ --- o potencial é a fibra}\\
- & \tau=+1 & \code{thm:ponte-graduada} \text{ --- onde a obstrução deixa de ser}
+ & \tau=-1 & \code{topologico thm:det-volume} \text{ --- \emph{a face DISCRETA}: o volume}\\
+ & \tau=+1 & \code{analitico thm:medida-jacobiano} \text{ --- \emph{a face GRADUADA}: o Jacobiano}\\[4pt]
+\textbf{a PONTE} & \tau=-1 & \code{topologico thm:ponte-discreta} \text{ --- o potencial é a fibra}\\
+ & \tau=+1 & \code{analitico thm:ponte-graduada} \text{ --- onde a obstrução deixa de ser}
 \end{array}
 \]
 \emph{Três faces, um teorema.} É isto que autoriza chamar-lhes decomposição e não divisão
@@ -604,8 +604,8 @@ Teor.~\ref{thm:fixo-dual}, \ref{thm:operador}, \ref{thm:descida}, \ref{thm:aditi
 
 \noindent\textbf{TOPOLÓGICO --- $\tau=-1$, o que FECHA (o desdobramento espacial).}
 \emph{Recebe:} o operador e a torre. \emph{Introduz:} o \textbf{endereçamento} e a
-\textbf{projecção dimensional} $\pi_k$ --- \code{def:peano}, \code{def:pi-k}. \emph{Mede:}
-posição, composição e \textbf{volume discreto} (\code{thm:det-volume}), com o \emph{Maestro}
+\textbf{projecção dimensional} $\pi_k$ --- \code{topologico def:peano}, \code{topologico def:pi-k}. \emph{Mede:}
+posição, composição e \textbf{volume discreto} (\code{topologico thm:det-volume}), com o \emph{Maestro}
 a realizar a dinâmica e o \emph{Metrónomo} a métrica. \emph{Não mede:} a medida no sentido
 de Lebesgue --- o Teor.~\ref{thm:metrica} mostra que há isometrias que a mudam --- nem o
 que só o limite alcança. \emph{Ponte:} para o Universal pelo determinante; para o Analítico
@@ -618,17 +618,17 @@ canónica do centro, e nenhuma introduz fundamento novo:
 \[
 \begin{array}{lll}
 \textbf{a torre e o endereçamento} & \leftarrow\ \text{o operador} &
-\text{\code{def:peano}, \code{def:pi-k}}\\[2pt]
+\text{\code{topologico def:peano}, \code{topologico def:pi-k}}\\[2pt]
 \textbf{o Maestro e o Metrónomo} & \leftarrow\ \text{a operação }\star &
-\text{\code{sec:maestro-thm}}\\[2pt]
+\text{\code{topologico sec:maestro-thm}}\\[2pt]
 \textbf{a histerese e o seu dual} & \leftarrow\ \text{a dualidade} &
-\text{\code{sec:histerese}, \code{sec:controle-histerese}}\\[2pt]
+\text{\code{topologico sec:histerese}, \code{topologico sec:controle-histerese}}\\[2pt]
 \textbf{o volume discreto} & \leftarrow\ \abs{\det}=1 &
-\text{\code{thm:det-volume}}\\[2pt]
+\text{\code{topologico thm:det-volume}}\\[2pt]
 \textbf{a interface hexal} & \leftarrow\ \text{o grupo }S_3 &
-\text{\code{sec:catalogo}}\\[2pt]
+\text{\code{topologico sec:catalogo}}\\[2pt]
 \textbf{a rede neural dual} & \leftarrow\ \text{o par dual} &
-\text{\code{sec:rede-dual}}
+\text{\code{topologico sec:rede-dual}}
 \end{array}
 \]
 \emph{Todas fecham} --- é o que $\tau=-1$ quer dizer: ordem finita, ciclos, o objecto volta
@@ -636,12 +636,12 @@ a si. É por isso que o palco aguenta composição sem limite nenhum.
 
 \noindent\textbf{ANALÍTICO --- $\tau=+1$, o que NÃO fecha (o desdobramento contínuo).}
 \emph{Recebe:} o operador e a medida. \emph{Introduz:} a \textbf{graduação sem topo}
-(\code{thm:graduacao-gentil}) e a \textbf{continuação analítica} (\code{thm:atravessa}).
+(\code{analitico thm:graduacao-gentil}) e a \textbf{continuação analítica} (\code{analitico thm:atravessa}).
 \emph{Mede:} o que precisa de todos os passos --- $0{,}999\ldots=1$ e o seu dual discreto
-(\code{cor:noves}, \code{cor:noves-dual}), a completude, o corte, $\mathbb{R}$.
+(\code{analitico cor:noves}, \code{analitico cor:noves-dual}), a completude, o corte, $\mathbb{R}$.
 \emph{Não mede:} o que é da forma exacta finita --- ali a álgebra já respondeu, e repetir
 seria trocar uma identidade por um limite. \emph{Ponte:} para o Topológico pelo Jacobiano
-(\code{thm:medida-jacobiano}); para o Universal pelo corte
+(\code{analitico thm:medida-jacobiano}); para o Universal pelo corte
 (Teor.~\ref{thm:folhas-corte}). \emph{Aritmética:} é onde ela \textbf{fecha} --- o corte
 decide-se por $\operatorname{tr}$ e $\mathrm{N}$, ambas inteiras, e o limite entra só
 depois.
@@ -653,17 +653,17 @@ muda é fechar ou não:
 \[
 \begin{array}{lll}
 \textbf{a graduação sem topo} & \leftarrow\ \text{a torre} &
-\text{\code{thm:graduacao-gentil}}\\[2pt]
+\text{\code{analitico thm:graduacao-gentil}}\\[2pt]
 \textbf{a equação de campo} & \leftarrow\ \text{a operação }\star &
-\text{\code{sec:campo2}}\\[2pt]
+\text{\code{analitico sec:campo2}}\\[2pt]
 \textbf{os dois escuros} & \leftarrow\ \text{a dualidade} &
-\text{os dois pontos fixos, \code{sec:dois}}\\[2pt]
+\text{os dois pontos fixos, \code{analitico sec:dois}}\\[2pt]
 \textbf{o Jacobiano e a medida} & \leftarrow\ \abs{\det}=1 &
-\text{\code{thm:medida-jacobiano}}\\[2pt]
+\text{\code{analitico thm:medida-jacobiano}}\\[2pt]
 \textbf{a renormalização} & \leftarrow\ \text{a régua} &
-\text{\code{sec:renorm}}\\[2pt]
+\text{\code{analitico sec:renorm}}\\[2pt]
 \textbf{a estrela e a ordenação} & \leftarrow\ \text{o par dual} &
-\text{\code{sec:estrela}}
+\text{\code{analitico sec:estrela}}
 \end{array}
 \]
 \emph{Nenhuma fecha} --- é o que $\tau=+1$ quer dizer: o objecto não volta, e é preciso
@@ -809,7 +809,7 @@ que é a adjunta sem lhe chamar o nome, e uma operação escrita onde havia uma
 derivação é a lista a crescer sem razão. $\square$
 \end{teorema}
 \colunas{a Lei 0, $0\dg=\infty$, e a inversão total em $\mathbb{P}^1$
-(\code{cor:zero-infinito})}
+(Def.~\ref{def:lei0}, Teor.~\ref{thm:lei0})}
         {o passo da CF tornado total, e o $\infty$ como fecho do racional}
         {\code{geometria\_real.c} \S L0}
 
@@ -1035,7 +1035,7 @@ $b=\sum_i\langle b,e_i\rangle e_i$ reconstrói. $\square$
 
 \noindent Especificada a forma, esta leitura é imediata; o conteúdo do
 \S\ref{sec:bitabit} é o \emph{custo} de a não ter.
-\colunas{a base é ortonormal (\code{thm:ortonormal})}
+\colunas{a base é ortonormal (Prop.~\ref{thm:orto})}
         {Gram $=I$ nos $64$ pares; $2048$ leituras}
         {\code{geometria\_real.c} \S L1}
 
@@ -1398,7 +1398,7 @@ depois, e como \emph{comparação}.
 coordenadas}\;}
 \]
 --- o resto deste paper mede o que ela faz.
-\colunas{as oito leis e a base ortonormal (\code{thm:ortonormal})}
+\colunas{as oito leis e a base ortonormal (Prop.~\ref{thm:orto})}
         {a operação única, o espelho que a reparte, e o bloco que fecha e satura}
         {\code{tests/operacao.c} ($10{:}0$): a volta das duas leituras em $600$ pares; o espectro
 de $\tau$ com $\dim E_+ + \dim E_- = 36+28 = 64$ e os $56$ não nulos separados dos oito
@@ -1626,7 +1626,7 @@ e o ponto para onde ela vai não está lá.} $\square$
 
 \begin{teorema}[TEOREMA DO OPERADOR: a indução, a meta-indução e o acumulador são um
 só]\label{thm:operador}
-A \code{def:inducao} do \emph{Corpo Universal} nomeia o par --- a indução projecta
+A definição canónica de indução e meta-indução ainda vive fora do centro (\code{teoria def:inducao}, \S\ref{sec:dividas}) e nomeia o par --- a indução projecta
 ($\lambda^{+}$), a meta-indução lê ($\lambda^{-}$). Aqui ele \textbf{deriva-se do
 operador}, e o que sai é que as três peças da dinâmica da recta --- o passo, a sua leitura
 e o sítio onde o resultado se acumula --- \textbf{não são três coisas}: são o operador
@@ -1637,7 +1637,7 @@ $A_m$:
 \[
 [p:q]\;\longmapsto\;[\,q\;:\;p+mq\,],
 \]
-a mesma matriz em todo $k$. Pela \code{def:inducao} isso dá $\forall k$ pela
+a mesma matriz em todo $k$. Pela \code{teoria def:inducao} isso dá $\forall k$ pela
 \textbf{forma} e não por uma tabela: \emph{a órbita não tem tecto porque o passo não tem
 índice}.
 
@@ -1662,7 +1662,7 @@ transbordar --- é uma \textbf{sequência}, e cada termo cabe sozinho num inteir
 Daí que $1/13!$, que não cabe num par de $32$ bits, seja $[0;6\,227\,020\,800]$ --- dois
 termos, cada um a caber. \emph{Um limiar como $10^{-12}$ é, pela mesma via, o racional
 $1/10^{12}$ de palavra $[0;10^{12}]$: um número do corpo, e não uma régua.} E isto é a
-\code{thm:meta-inducao}(2) do \emph{Corpo Universal} aplicada a si própria --- \emph{falha de representação
+\code{teoria thm:meta-inducao}(2) --- canónica, e ainda fora do centro (\S\ref{sec:dividas}) --- aplicada a si própria --- \emph{falha de representação
 $\neq$ contra-exemplo}: quando o par satura, a segunda realização é a palavra.
 
 \textbf{(4) E AS DUAS FACES DO EIXO DE PONTRYAGIN SÃO $\operatorname{Dir}$ E
@@ -1925,7 +1925,7 @@ norma, o produto do elemento pelo seu dual, que cai sempre em $\mathbb{Q}$. Cons
 $\abs{\mathrm{N}}=1$.
 Faltava dizer \emph{por que} é que a descida pára, e a resposta não é «porque os inteiros
 acabam»: é uma \textbf{lei de conservação}. E a ponte já estava escrita em dois sítios que
-não se conheciam --- o \emph{Corpo Universal} (\code{def:inducao}) diz que \emph{o que
+não se conheciam --- o \emph{Corpo Universal} (\code{teoria def:inducao}) diz que \emph{o que
 a meta-indução VALIDA é a conservação de energia}, e o Teor.~\ref{thm:operador} diz que a
 meta-indução \textbf{é a dobra}. Donde:
 \[
@@ -1984,8 +1984,8 @@ Lebesgue casa-os]\label{thm:central-energia}
 O Teor.~\ref{thm:conservacao} diz \emph{que} a energia se conserva. Falta dizer
 \textbf{por que é que ela pode ser conservada} --- e a resposta é o \textbf{teorema
 central Gentil--Hurwitz} do \emph{Corpo estelar}, que o \emph{Corpo Universal} usa em
-\code{thm:parseval-multi} para derivar o Parseval multidimensão, e cujo corolário
-(\code{cor:verifica-energia}) já dizia a frase toda: \emph{a indução legítima CONSERVA
+\code{teoria thm:parseval-multi} para derivar o Parseval multidimensão, e cujo corolário
+(\code{teoria cor:verifica-energia}) já dizia a frase toda: \emph{a indução legítima CONSERVA
 $E$; a que viola o invariante muda $E$, e a meta-indução acusa}.
 
 \textbf{(1) HURWITZ CONTA --- e é o lado exacto.} A órbita completa da raiz fecha:
@@ -2136,7 +2136,7 @@ sobrejectivos e os $2\,592$ restantes a perder pontos}
 
 \begin{teorema}[CANTOR E JULIA: a mesma codificação, e o que as separa é quem gasta o
 orçamento]\label{thm:cantor-julia}
-O \emph{Corpo Topológico} (\code{def:cantor}) põe o par: \textbf{Cantor} é o lado
+O \emph{Corpo Topológico} (\code{topologico def:cantor}) põe o par: \textbf{Cantor} é o lado
 discreto/aditivo --- o \emph{shift} $\theta\mapsto2\theta$ --- e \textbf{Julia} é o
 multiplicativo --- $z\mapsto z^{2}$ ---, conjugados por $z=e^{2\pi i\theta}$. E os dois
 \emph{golden} de lá são
@@ -2302,7 +2302,7 @@ isto uma medida:
 sem saber: o fecho é $24=8\cdot3$, e o $8$ entra pelo produto, não pela lista.
 
 \textbf{(2) E o GATO também fica de fora --- que é o CORTE, dito pela topologia.} O gato
-desta casa é $A_m=\begin{psmallmatrix}m&1\\1&0\end{psmallmatrix}$ (\code{thm:gato} do
+desta casa é $A_m=\begin{psmallmatrix}m&1\\1&0\end{psmallmatrix}$ (\code{teoria thm:gato}, canónico e ainda fora do centro, \S\ref{sec:dividas}; do
 \emph{Corpo Universal}), com $\det=\sigma\sigma\dg=-1$ e discriminante
 \[
 D=m^{2}+4>0\quad\text{para todo }m,
@@ -2757,7 +2757,7 @@ $16\,128$ pares a fechar na face finita}
 %======================================================================
 \section{O teorema dos resíduos, e ele é o mesmo ponto fixo}\label{sec:residuo}
 
-\noindent O \emph{Corpo Universal} já diz (\code{thm:residuo}) que \textbf{o resíduo é
+\noindent Este resultado é canónico e a sua forma completa ainda vive fora do centro (\code{teoria thm:residuo} --- ver \S\ref{sec:dividas}): \textbf{o resíduo é
 o ponto fixo da monodromia}: a volta age no espectro por
 $\hat c_k\mapsto\omega^{k}\hat c_k$, e o \emph{único modo invariante} é o que carrega
 o resíduo. E o \S\ref{sec:pontofixo} diz que \textbf{o corte é o ponto fixo da
@@ -2817,7 +2817,7 @@ coordenada: } \sum f(z)\,z=M\,c_{-1}\\[3pt]
 \]
 --- em ambos, \textbf{a volta lê exactamente o que o gerador deixa fixo}. Lá uma
 coordenada do espectro; aqui o $\infty$ de onde a órbita partiu.
-\colunas{\code{thm:residuo} (o resíduo é o ponto fixo da monodromia)}
+\colunas{\code{teoria thm:residuo} (o resíduo é o ponto fixo da monodromia)}
         {os dois regimes separados pela factorização, em $\mathbb{Z}[\omega]$ e
 $\mathbb{Z}[\sigma]$}
         {\code{tests/residuo\_gerador.c} ($4{:}0$): ordem de $\omega$ exactamente $6$;
@@ -3070,7 +3070,7 @@ com a norma de Gentil não há tecto nenhum.
 \noindent E o que aparece em $16$, $x,y\neq0$ com $xy=0$, é \textbf{a mesma factorização
 do zero} do Teor.~\ref{thm:divzero}: lá o polinómio a factorizar, aqui a álgebra a
 passar dos oito, e nos dois casos a norma multiplicativa é a primeira exigência a cair.
-\colunas{a base ortonormal das oito leis (\code{thm:ortonormal})}
+\colunas{a base ortonormal das oito leis (\code{teoria thm:ortonormal})}
         {a polarização, os andares completos, e o tecto como exigência}
         {\code{tests/hurwitz.c} \S H9--H10: a base satura e os produtos caem nela nos
 SETE andares até $64$, com a norma euclidiana a sobreviver em quatro e o divisor de zero
@@ -3231,7 +3231,7 @@ regime hiperbólico. \emph{As raízes do metal não estão no círculo}, e por i
 avaliação no círculo cobre o elíptico e mais nada.
 
 \textbf{E o que completa é a DOURADA} --- a dualidade Fourier--Mellin do
-\emph{Catálogo} (\code{sec:dourada}): \emph{Mellin é Fourier no grupo multiplicativo}, com
+\emph{Catálogo} (\code{catalogo sec:dourada}): \emph{Mellin é Fourier no grupo multiplicativo}, com
 $x=e^{u}$ a ser o isomorfismo entre os dois lados. O círculo é o lado \textbf{aditivo}
 (a dilatação vira translação, e é dali que vem o factor $1/\sqrt N$); as folhas recíprocas
 são o lado \textbf{multiplicativo}, onde o que se conserva é o \emph{produto}
@@ -3247,7 +3247,7 @@ O Cor.~\ref{cor:dourada-completa} diz que a dualidade se completa com a dourada;
 dizer o que a torna \emph{discreta}, e a resposta é uma só palavra: \textbf{a borda}.
 
 \textbf{(1) A dourada é Mellin, e os seus caracteres são POTÊNCIAS.} No
-\emph{Catálogo} (\code{sec:dourada}): \emph{«Mellin é Fourier, no grupo multiplicativo»},
+\emph{Catálogo} (\code{catalogo sec:dourada}): \emph{«Mellin é Fourier, no grupo multiplicativo»},
 os caracteres são $x^{-s}$ --- \emph{as exponenciais vestidas de função-potência} --- e
 \emph{dilatar vira transladar}. Enquanto o grupo é $\mathbb{R}^{+}$, o índice $s$ é
 contínuo e não há nada de discreto.
@@ -6656,6 +6656,53 @@ o Universal é dono da lei, cada instância é dona da sua face.
 $\mathcal{M}$).
 $\square$
 \end{teorema}
+
+%======================================================================
+\section{O que ainda vive fora do centro --- a dívida da separação}\label{sec:dividas}
+
+A separação diz que \textbf{o canónico fica no centro, sem excepção} (\S\ref{sec:triade}).
+Esta secção existe porque isso ainda não é verdade por inteiro, e a diferença entre uma
+regra e um facto mede-se: são \textbf{oito} peças que este documento trata como canónicas
+--- cita-as para \emph{fundar} outras, e não como realização --- e cuja forma completa
+ainda vive fora do centro, sete no \code{teoria.tex} e uma no \code{catalogo.tex}.
+(Escrevi «sete» na primeira versão desta secção, de cabeça; o \code{tools/refcruz.py}
+contou oito, e a oitava é a última da tabela.)
+
+\[
+\begin{array}{lll}
+\code{teoria def:inducao} & \text{indução e meta-indução} & \text{a Lei 4, e o par }\lambda^{\pm}\\[2pt]
+\code{teoria thm:meta-inducao} & \text{o que cada metade faz} & \text{aplicada a si própria}\\[2pt]
+\code{teoria thm:gato} & \text{o Teorema do Gato} & \text{a torre e o operador métrico}\\[2pt]
+\code{teoria thm:residuo} & \text{os resíduos} & \text{o modo que a volta não vê}\\[2pt]
+\code{teoria thm:ortonormal} & \text{a base das oito leis} & \text{em }\mathbb{F}_2^{8}\\[2pt]
+\code{teoria thm:parseval-multi} & \text{Parseval multidimensão} & \text{pelo teorema central}\\[2pt]
+\code{teoria cor:verifica-energia} & \text{a verificação por energia} & \text{a indução conserva}\\[2pt]
+\code{catalogo sec:dourada} & \text{Mellin é Fourier} & \text{no grupo multiplicativo}
+\end{array}
+\]
+
+\noindent\textbf{E não é a mesma coisa que uma realização citada.} Quando este documento
+aponta para \code{topologico thm:det-volume} ou para \code{analitico thm:medida-jacobiano},
+está a dizer \emph{onde a peça canónica se realiza} --- e essa seta vai do centro para
+fora, que é o sentido certo. As sete de cima são o contrário: o centro a buscar
+\textbf{fundamento} fora de si. São vestígio de quando o Universal e o \code{teoria.tex}
+eram um só documento, e a separação de 17/08 dividiu o texto sem mover estas.
+
+\medskip
+\noindent\textbf{Três delas já não são dívida, e é por isso que não estão na tabela:} a base
+ortonormal tem aqui a sua forma canónica (Prop.~\ref{thm:orto}, com a matriz de Gram a ser
+a identidade), a Lei~0 tem a sua (Def.~\ref{def:lei0}, Teor.~\ref{thm:lei0}) e os resíduos
+têm as duas leituras que este documento prova (Teor.~\ref{thm:residuo-fixo},
+\ref{thm:residuo-geo}). Nesses três casos as citações passaram a apontar para dentro ---
+o que a coluna \emph{prova (Universal)} já dizia e a referência desmentia.
+
+\colunas{o canónico fica no centro, e o que falta CONTA-SE}
+        {oito peças ainda fundam a partir de fora --- sete do \code{teoria.tex} e uma do
+\code{catalogo.tex}; três foram trazidas para dentro (base ortonormal, Lei~0, resíduos)
+porque o centro já tinha a sua própria forma}
+        {\code{tools/refcruz.py}: confere que toda referência cruzada nomeia o documento
+de destino e que o label existe LÁ; e conta as direcções, porque
+\emph{centro\,$\to$\,lado} é realização e \emph{centro\,$\to$\,teoria} é dívida}
 
 %======================================================================
 \end{document}

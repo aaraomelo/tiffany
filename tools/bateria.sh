@@ -405,6 +405,16 @@ if [ "$tex_quebradas" -gt 0 ]; then
   sed 's/^/    /' /tmp/bat_tex_faltam.txt
 fi
 
+# --- e as REFERENCIAS CRUZADAS entre documentos, que o pdflatex tambem nao ve ---
+# `\ref{x}` dentro de um documento e' conferido; um resultado de OUTRO documento nao e'
+# um \ref, e' texto — `\code{topologico thm:det-volume}` — e apodrece calado quando o
+# teorema muda de nome ou de casa. E a mesma ferramenta conta as DIRECCOES, porque a
+# separacao tem sentido: centro→lado e' realizacao, centro→teoria e' o centro a fundar-se
+# fora de si, que e' a divida contada em universal.tex §sec:dividas.
+if [ -f tools/refcruz.py ]; then
+  python3 tools/refcruz.py 2>/dev/null | sed 's/^/  /'
+fi
+
 printf '%s\n' "-------------------------------------------------------------------------"
 # ── ATESTACOES ORFAS: linhas de medidores que ja' nao existem ────────────────────
 # Uma atestacao orfa nao mascara nada por si — nao ha' ficheiro para correr. Mas foi a
