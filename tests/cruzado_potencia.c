@@ -4,7 +4,7 @@
  * invariancia deles ... um produto cruzado antissimetrico é invariante a potencias ...
  * raiz é o inverso, tudo sai inteiro quando normalizado."
  *
- * O resultado está agora em `thm:cruzado-potencia` do geometrico.tex, e não era novo: era
+ * O resultado está agora em `thm:cruzado-potencia` do universal.tex, e não era novo: era
  * a linha `det M_k = (−1)^k` da tabela do §sec:euler, dita ali como observação sobre o
  * determinante. O determinante É o cruzado — a área —, e aquela linha já era esta
  * invariância sem a enunciar.

@@ -411,7 +411,7 @@ static void B4_translinear(void) {
     }
 
     /* E A LEI QUE O TRANSÍSTOR REALIZA JÁ FOI DERIVADA INTEIRA NESTA CASA. O
-       geometrico.tex, thm:e, dá a exponencial como a TORRE DE VOLUMES:
+       universal.tex, thm:e, dá a exponencial como a TORRE DE VOLUMES:
 
            Σ xⁿ/n! = eˣ        os volumes são os coeficientes
            n·cₙ = cₙ₋₁          é a sua própria derivada
@@ -712,7 +712,7 @@ static void B8_mult_Rn(void) {
  * erro de uma eliminação — e aqui não há eliminação nenhuma a fazer.
  *
  * A base de Lagrange é a base DUAL dos nós: L_i(x_j) = δ_ij, que é a mesma Gram = I do
- * §L1 do geometrico.tex, noutro andar. */
+ * §L1 do universal.tex, noutro andar. */
 static long b9_num[8][8];     /* N_i[k]: coeficientes INTEIROS de ∏_{j≠i}(x − x_j) */
 static long b9_den[8];        /* D_i = ∏_{j≠i}(x_i − x_j), inteiro                  */
 static long b9_resto = 0;     /* divisões que não fecharam — não pode acontecer     */

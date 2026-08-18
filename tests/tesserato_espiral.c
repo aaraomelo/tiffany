@@ -236,7 +236,7 @@ printf("\n§E5  A ESPIRAL É A SOMBRA DA HÉLICE NO CONE — e eu perguntei mal.
      *     r = sqrt(x²+y²) = |t| = t                       a mesma identidade outra vez
      * A parametrizacao FOI ESCOLHIDA para viver no cone; dizer que vive e' repetir a
      * escolha, e nenhum t podia derrubar nem uma nem outra. E' cos²+sin²=1 disfarcado
-     * — o que o geometrico.tex thm:cruzado-potencia (4) diz que se mede pelo QUADRADO,
+     * — o que o universal.tex thm:cruzado-potencia (4) diz que se mede pelo QUADRADO,
      * sem formar nem o cosseno nem o seno.
      *
      * O que ha para medir sao duas coisas, e cada uma tem controlo:

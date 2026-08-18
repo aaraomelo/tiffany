@@ -1,15 +1,15 @@
 % !TeX program = pdflatex
-% papers/geometrico.tex — A CONSTRUÇÃO DE ℝ, realizada geometricamente.
+% papers/universal.tex — A CONSTRUÇÃO DE ℝ, realizada geometricamente.
 %
-% Realização geométrica da construção fechada no corpo_universal.tex.
+% Realização geométrica da construção fechada no teoria.tex.
 %
 % A hierarquia:
 %     o Universal PROVA | o geométrico REALIZA | os medidores VERIFICAM
 % e a ordem, que é obrigatória:
 %     8 leis → base ortonormal → operação bit a bit → dual → recorrência
 %            → Pisot → encaixe → corte → completude → ℝ → π_k/gume
-% Este paper é FILHO do corpo_universal.tex, não um paper independente.
-% Auto-contido: pdflatex geometrico.tex
+% Este paper é FILHO do teoria.tex, não um paper independente.
+% Auto-contido: pdflatex universal.tex
 \documentclass[11pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -27,6 +27,7 @@
 \newtheorem{observacao}{Observação}
 \newcommand{\code}[1]{\texttt{\small #1}}
 \newcommand{\abs}[1]{\lvert #1\rvert}
+\newcommand{\norm}[1]{\lVert #1\rVert}
 \newcommand{\dg}{^{\dagger}}
 % as três colunas, em cada peça: quem prova, quem realiza, quem verifica
 % as tres colunas, em cada peca: quem prova, quem realiza, quem verifica.
@@ -40,8 +41,8 @@
 \textbf{verifica}: #3\par}\smallskip}
 \input{gkcapa}
 \begin{document}
-\gkcapa{A Construção de $\mathbb{R}$}
-       {realização geométrica da cadeia fechada no Corpo Universal}
+\gkcapa{Corpo Universal}
+       {a construção geométrica e dinâmica de $\mathbb{R}$}
        {oito leis, uma base, um dual, e o corte que a área obriga a fechar}
 \maketitle
 
@@ -262,6 +263,185 @@ poliedros e Euler --- todos \emph{discretos ou combinatórios} ---, e nenhum
 comprimento, nenhuma área contínua e nenhum limite. A distância do
 \S\ref{sec:orto} toma valores em $\{0,\ldots,8\}$, e a «área» do
 \S\ref{sec:det} nomeia um determinante: ambas inteiras.
+
+%======================================================================
+\section{As três camadas, e o que cada uma pode}\label{sec:camadas}
+
+Antes de começar, a separação --- porque quase todo o erro de leitura deste corpus vem de
+pedir a uma camada o que é da outra. As três são \textbf{duais entre si}, e o eixo é o do
+\emph{Corpo Universal}: \emph{a álgebra opera e não alcança a completude; a topologia
+alcança e não opera}.
+
+\[
+\boxed{
+\begin{array}{lll}
+\textbf{ÁLGEBRA / ARITMÉTICA} & \text{o FUNDAMENTO} & \text{opera, e é exacta}\\[2pt]
+\textbf{TOPOLOGIA} & \text{o PALCO} & \text{não opera, e não vê a medida}\\[2pt]
+\textbf{ANÁLISE} & \text{o ALCANCE} & \text{chega a }\mathbb{R}\text{, e paga o limite}
+\end{array}}
+\]
+
+\textbf{(1) A ÁLGEBRA é o fundamento, e nela nada é aproximado.} Aqui vivem a Lei~0, a
+operação $\star$ e os seus dois projectores, o par dual traço\,/\,norma
+(Teor.~\ref{thm:fixo-dual}), o operador e a descida (Teor.~\ref{thm:operador},
+\ref{thm:descida}), a aritmética aditiva (Teor.~\ref{thm:aditiva}), a conservação
+$\abs{\det}=1$ (Teor.~\ref{thm:conservacao}), a transformada universal e a dourada discreta
+(Teor.~\ref{thm:transformada-universal}, \ref{thm:dourada-discreta}). \emph{E a DERIVADA
+pertence a esta camada}, o que costuma surpreender: ela é uma \textbf{avaliação}, não um
+limite. O quociente de diferenças $q(h)=(f(a+h)-f(a))/h$ \emph{é ele próprio} um polinómio
+em $h$ --- o dividendo anula-se em $h=0$, logo é divisível por $h$ \textbf{exactamente},
+e dividir é baixar os índices --- e então
+\[
+f'(a)=q(0),
+\]
+que é \emph{avaliar}, não passar ao limite. Faz-se em $\mathbb{Q}$ sem uma vírgula
+(\code{lib/calculo.h}, \code{fn\_deriva\_def}; medido em \code{tests/corpo\_fisico.c}). \textbf{O que a álgebra
+não faz é chegar a $\mathbb{R}$}: $\mathbb{Q}$ não é completo, e a testemunha exibe-se
+(Prop.~\ref{prop:q-falha}).
+
+\textbf{(2) A TOPOLOGIA é o palco, e é cega para duas coisas.} Aqui vivem $\chi=V-A+F$ e o
+cone pelo centro (\S\ref{sec:euler}), o toro (Teor.~\ref{thm:toro}) e a métrica canónica
+(Teor.~\ref{thm:metrica}). E o que ela \emph{não} vê mede-se: \textbf{não vê o andar} ---
+quem o vê é o traço --- e \textbf{não vê a medida}, porque há isometrias da própria métrica
+canónica que mudam a área. Donde: \emph{a topologia é onde as coisas acontecem, não é quem
+decide}. As ordens finitas do toro saem do traço ser \emph{inteiro}; a conservação da área
+sai do \emph{determinante}. \textbf{As duas são condições da estrutura inteira} --- e é a
+álgebra que as impõe, não o espaço.
+
+\textbf{(3) A ANÁLISE é o alcance, e o preço é o limite.} Aqui vivem o corte
+(Teor.~\ref{thm:corte}, \ref{thm:folhas-corte}), a continuação nas duas direcções
+(Teor.~\ref{thm:continuacao}), o supremo e o ínfimo (Teor.~\ref{thm:supremo},
+Cor.~\ref{cor:infimo}), a completude (Teor.~\ref{thm:completude}), a série
+(Teor.~\ref{thm:serie-quadratica}), o $e$ e o $\pi$. \emph{É esta camada que chega a
+$\mathbb{R}$}, e chega porque aceita o que as outras recusam: um objecto definido por
+\textbf{todos} os passos, e não por um.
+
+\medskip
+\noindent\textbf{E AS PONTES SÃO TRÊS, cada uma num sentido.}
+\[
+\begin{array}{lll}
+\text{álgebra}\to\text{análise} & \textbf{O CORTE} &
+\text{as folhas SEPARAM, e a separação é o corte (Teor.~\ref{thm:folhas-corte})}\\[3pt]
+\text{análise}\to\text{álgebra} & \textbf{O JACOBIANO} &
+\det\text{ transporta a medida, e }\abs{\det}=1\text{ conserva (Teor.~\ref{thm:metrica})}\\[3pt]
+\text{ida}\leftrightarrow\text{volta} & \textbf{O TEOR. FUNDAMENTAL} &
+\int\text{ e }\tfrac{d}{dx}\text{ são inversas --- e o par NÃO é simétrico}
+\end{array}
+\]
+A terceira merece a ressalva, porque é onde se erra: $D\circ\!\int=\mathrm{id}$, mas
+$\int\!\circ D=\mathrm{id}-\text{a constante}$ --- \emph{o termo zero não tem por onde
+voltar}, e essa é a \textbf{fibra} deste andar.
+
+\textbf{E a constante NÃO fica solta: ela é a CARGA do andar $n-1$.} Em $n$ variáveis o que
+$\int\!\circ\partial_n$ perde não é «um número» --- é tudo o que não depende de $x_n$:
+\[
+\boxed{\;\ker\partial_n\ \text{em}\ P(x_1,\ldots,x_n)\ =\ P(x_1,\ldots,x_{n-1})\;}
+\]
+--- \emph{o núcleo da derivada no andar $n$ é o espaço INTEIRO do andar $n-1$}. E a
+dimensão conta-se, que é o que faz dela uma carga: para grau total $\leq d$,
+\[
+\dim P_d(n)=\binom{n+d}{n},
+\qquad
+\dim\ker\partial_n=\dim P_d(n-1)=\binom{n-1+d}{n-1}.
+\]
+\emph{Em $n=1$ isto degenera no corpo} --- $P$ de zero variáveis --- e é por isso que ali a
+constante \emph{parece} solta: é o único andar em que a carga é um escalar. E
+$\partial_n$ da carga dá o \textbf{zero do andar $n$}, o polinómio nulo em $n$ variáveis,
+enquanto fora do núcleo nunca é zero. \emph{A constante de integração é dimensional, e a
+sua dimensão é a do andar de baixo.}
+
+\textbf{E o que FECHA a dualidade é a derivada do ARGUMENTO, que é $1$.} Os dois extremos
+da derivada são exactamente os dois \textbf{elementos neutros}:
+\[
+\boxed{
+\begin{array}{lll}
+\partial_n(\text{carga do andar }n{-}1) = 0 & \text{o neutro ADITIVO} & \text{e não volta}\\[2pt]
+\partial_n(x_n) = 1 & \text{o neutro MULTIPLICATIVO} & \text{e VOLTA}
+\end{array}}
+\]
+--- e são os do Cor.~\ref{cor:soma-produto}. \emph{A assimetria do Teorema Fundamental
+lê-se aí}: o argumento vai e volta ($\partial x=1$, e $\int1=x$); a carga vai e não volta
+($\partial c=0$, e $\int0=0\neq c$). E entre todos os monómios, \textbf{um só} tem derivada
+$1$ --- é o argumento, e mais nenhum.
+
+\emph{É a mesma frase do Teor.~\ref{thm:operador}}, onde a indução projecta e a
+meta-indução lê: \textbf{a derivada do argumento é a unidade do passo} --- sem ela a
+indução não teria com que subir --- e \textbf{a derivada da carga é o zero} --- sem ele a
+meta-indução não teria o que descartar. Indução e meta-indução, $1$ e $0$, produto e soma:
+\emph{é o mesmo par visto no andar do cálculo}.
+
+\medskip
+\noindent\textbf{E OS DOIS TEOREMAS DO CÁLCULO SÃO AS DUAS LEIS.} Lidos nesta camada, eles
+não são dois resultados sobre integrais: são a Lei~1 e a Lei~2, cada uma no seu ofício ---
+\emph{uma MEDE, a outra ANDA}.
+\[
+\boxed{
+\begin{array}{lll}
+\textbf{TFC I} & \dfrac{d}{dx}\displaystyle\int_a^x f = f(x) &
+\textbf{Lei 1} \text{ --- a que MEDE: é LOCAL, devolve o integrando NO PONTO}\\[10pt]
+\textbf{TFC II} & \displaystyle\int_a^b f = F(b)-F(a) &
+\textbf{Lei 2} \text{ --- a que ANDA: é da BORDA, e o interior não conta}
+\end{array}}
+\]
+O segundo é \textbf{Stokes em dimensão um} --- $\int_R d\omega=\int_{\partial R}\omega$ ---
+e é por isso que o percurso não importa: \emph{só as pontas}. \textbf{E a fibra fecha o
+quadro}: a constante \emph{cancela} em $F(b)-F(a)$, logo é invisível às \textbf{duas} leis
+--- a que mede apaga-a ao derivar, a que anda apaga-a ao subtrair. \emph{É por isso que ela
+não tem por onde voltar, e que vive fora, no andar $n-1$.} O Teorema Fundamental é uma
+\textbf{retracção} e não uma involução, exactamente como o par $\Pi/\Sigma$ da
+Def.~\ref{def:cone} --- e é a mesma distinção que o Teor.~\ref{thm:cone} já fazia. Medido
+em $\mathbb{Q}$ e sem uma vírgula (\code{tests/calculo2.c} \S C2); e ali \textbf{Green
+fecha pelos dois lados} na mesma aritmética, com a borda e a área a não partilharem uma
+linha de código --- $25$ campos, e em $20$ deles o rotacional não é zero, sem o que
+«bater» valeria por $0=0$.
+
+\emph{Lida assim, a construção deste paper é uma frase}: a álgebra dá o operador e a sua
+conservação; o corte entrega-o à análise; a análise fecha $\mathbb{R}$; e a topologia é
+onde tudo isto assenta \textbf{sem decidir nada}.
+
+\medskip
+\noindent\textbf{E AS TRÊS SÃO O TRIAL --- o mapeamento não é escolhido, é o $\tau$.} O
+Teor.~\ref{thm:cuspide} mostrou que $\tau=\operatorname{sign}(\operatorname{disc})$ \emph{é}
+a lei $L_3$; e cada um dos seus três valores tem uma propriedade que os outros dois não
+têm:
+\[
+\boxed{
+\begin{array}{llll}
+\tau=-1 & \text{ELÍPTICO} & \text{FECHA: ordem finita} & \textbf{ÁLGEBRA} \ (opera)\\[2pt]
+\tau=\ \ 0 & \text{A CÚSPIDE} & \text{só }\pm I\text{ fecham} & \textbf{TOPOLOGIA}\ (não\ decide)\\[2pt]
+\tau=+1 & \text{HIPERBÓLICO} & \text{NÃO fecha: é o CORTE} & \textbf{ANÁLISE}\ (alcança)
+\end{array}}
+\]
+
+\textbf{E as peças da tríade agem sobre as camadas como agem sobre os três pontos.}
+\textbf{Cantor/Julia} é a \emph{reflexão} $\tau\mapsto-\tau$, de ordem $2$: ela
+\textbf{troca a álgebra com a análise e FIXA a topologia} --- é a dualidade
+\emph{operar}~$\leftrightarrow$~\emph{alcançar}, com o palco quieto. \textbf{O trial} é a
+\emph{rotação} de ordem $3$, que permuta as três sem fixar nenhuma. \textbf{Viviani} é a
+raiz quadrada da reflexão ($i^{2}=-1$ é o espelho), e por isso tem ordem $4$. E as duas
+primeiras geram $S_3$ --- \textbf{o hexal} (Cor.~\ref{cor:hexal-grupo}) ---, que é o grupo
+de simetrias de \emph{três} objectos: \emph{e são três}.
+
+\emph{E o lugar de Cantor/Julia confirma-o}: o espelho é $\nu^{2}=\mathrm{id}$, a única
+involução de determinante $1$ é $-I$, e $-I$ tem $\operatorname{disc}=0$ --- \textbf{ele
+vive em $\tau=0$, isto é NA TOPOLOGIA}, que é exactamente o ponto que a reflexão fixa. A
+peça que troca as duas pontas é a que mora no meio.
+
+\colunas{as três camadas, e as três pontes}
+        {álgebra opera e não alcança; topologia não opera e não vê a medida; análise
+alcança e paga o limite}
+        {as três camadas são o trial ($\tau$), a reflexão troca álgebra\,/\,análise e fixa
+a topologia, e as duas geram $S_3$: \code{tests/cuspide.c} \S C12 --- $50$ operadores em
+$\tau=-1$ todos a fechar, $106$ em $\tau=0$ com só $\pm I$ a fechar, $216$ em $\tau=+1$
+nenhum a fechar. A derivada como AVALIAÇÃO ($f'(a)=q(0)$): \code{lib/calculo.h} e
+\code{tests/corpo\_fisico.c}; a integral formal, $D\circ\!\int\neq\int\!\circ D$ e Green
+pelos dois lados em $\mathbb{Q}$: \code{tests/calculo2.c} \S C2, e a constante como CARGA
+do andar $n-1$ em \S C8 --- $\dim\ker\partial_n=\binom{n-1+d}{n-1}$ em $15$ de $15$ pares
+$(n,d)$, e \S C9: entre $40$ monómios, os $8$ que derivam a zero são TODOS a carga e o
+ÚNICO que deriva a $1$ é o argumento; e \S C10: os dois teoremas como as duas leis, com o
+integral definido a bater por DOIS caminhos em $5$ de $5$ e a constante a cancelar na borda
+em $5$; a cegueira da topologia:
+\code{tests/metrica.c}; o corte: \code{tests/transformada\_universal.c} \S T7}
 
 %======================================================================
 \section{A Lei 0: $0\dg=\infty$, e é ela que dá o arranque}\label{sec:lei0}
@@ -978,7 +1158,8 @@ tem oito posições, \textbf{reutilizadas bloco a bloco}. $\square$
         {\code{geometria\_real.c} \S L3}
 
 %======================================================================
-\section{O invariante topológico não vê o andar}\label{sec:euler}
+\section{O invariante topológico não vê o andar --- e quem vê é a
+métrica}\label{sec:euler}
 
 Antes de decidir cortes, convém saber \emph{o que na construção depende do andar} ---
 porque quase nada depende.
@@ -1029,6 +1210,11 @@ apenas a borda: a região cuja área será medida ainda não foi realizada. $\sq
 \text{métrico} & \det M_k=(-1)^{k} & \text{sinal ALTERNADO, invariante em módulo pelo passo}
 \end{array}}
 \]
+\emph{E o par não pára aqui}: o Teor.~\ref{thm:metrica} mostra que estes dois invariantes
+respondem a perguntas \textbf{diferentes} e que só o segundo vê a medida --- $\chi$ é
+invariante por \emph{homeomorfismo} e $\det$ é o \emph{jacobiano}, e há isometrias da
+métrica canónica que mudam a área sem mexer na topologia. \textbf{O que separa os dois é a
+derivada.}
 
 \begin{corolario}[e daqui saem os metálicos da construção]\label{cor:purga}
 Para o polígono de $n$ lados,
@@ -1041,7 +1227,12 @@ Para o polígono de $n$ lados,
 \textbf{A topologia não vê o andar.} Quem vê o andar é a \emph{métrica} --- o traço
 $t_n$ e as áreas $A_n^{\rm in}$, $A_n^{\rm circ}$. Portanto a família metálica
 \textbf{não é ingrediente da construção}: é uma \textbf{realização específica} na
-camada métrica. $\square$
+camada métrica.
+
+\emph{E esta é a mesma separação que o Teor.~\ref{thm:metrica} mede um andar acima}: lá, a
+topologia não vê a \textbf{medida} --- há isometrias da métrica canónica que a mudam --- e
+quem a vê é o \emph{jacobiano}. \textbf{Aqui $\chi$ não vê o andar e o traço vê; lá $d$ não
+vê a área e $\det$ vê.} É uma frase só, dita em dois graus. $\square$
 \end{corolario}
 \colunas{a dualidade dimensional de Euler ($V\leftrightarrow F$, $A$ guardado)}
         {a separação entre o que é da construção e o que é do andar}
@@ -1553,6 +1744,121 @@ ZERO fora em $224$ de $224$, exacto em $\mathbb{F}_p$, com a raiz de ordem ERRAD
 $32$ entradas de $256$; \code{tests/nne.c}: a norma-determinante preserva-se em $6561$ de
 $6561$ e a euclidiana só em $289$ --- é o contraste que diz qual delas não tem tecto}
 
+\begin{teorema}[A MÉTRICA CANÓNICA É A DE LEBESGUE --- e conservar a MEDIDA não é
+conservar a DISTÂNCIA]\label{thm:metrica}
+O Teor.~\ref{thm:central-energia} atribui a Lebesgue o \emph{transporte da ordem}, e o
+Teor.~\ref{thm:conservacao} dá $\abs{\det}=1$ como a conservação. Falta a \textbf{métrica},
+e ela não é escolha: é a da \textbf{diferença simétrica},
+\[
+\boxed{\;d(A,B)=\mu(A\,\triangle\,B),\qquad A\,\triangle\,B=(A\setminus B)\cup(B\setminus A)\;}
+\]
+--- não negativa e simétrica porque $\triangle$ é comutativa, e triangular porque
+$A\triangle C\subseteq(A\triangle B)\cup(B\triangle C)$. É \emph{pseudo}métrica nos
+conjuntos e \textbf{métrica no quociente} pelos de medida nula: $d=0$ não diz «o mesmo
+conjunto», diz «iguais a menos de medida nula».
+
+\textbf{(1) E ela é INTEIRA no andar discreto.} No toro $\mathbb{Z}_N\times\mathbb{Z}_N$ a
+medida é a \textbf{contagem}, $\mu(A)=\abs{A}$, e os três axiomas verificam-se sem uma
+vírgula. \emph{O quociente que o contínuo tem de fazer, o discreto já fez}: ali o único
+conjunto de medida nula é o vazio, e $d=0\iff A=B$.
+
+\textbf{(2) TODA bijecção é ISOMETRIA nela --- e isso diz o que ela mede.} Para $T$
+bijectiva,
+\[
+T(A\,\triangle\,B)=TA\,\triangle\,TB \qquad\Longrightarrow\qquad d(TA,TB)=d(A,B),
+\]
+\emph{exactamente}. O gato não espalha nesta métrica, e a razão é estrutural: $d$ é feita
+de $\mu$, e a bijecção conserva $\mu$. \textbf{Donde a métrica de Lebesgue mede a MEDIDA e
+não a FORMA} --- contar não vê direcção, e por isso não vê o esticar. E o operador
+\emph{move} o conjunto na mesma, $d(A,TA)>0$: \emph{mover e afastar-se são coisas
+diferentes}.
+
+\textbf{(3) E É AQUI QUE A ÁREA E A DISTÂNCIA SE SEPARAM: na métrica ESPACIAL.} A
+conservação da área não é a conservação das distâncias \emph{entre pontos}. O gato tem
+$\abs{\det}=1$ --- e o determinante do paralelogramo não muda em caso nenhum --- e ainda
+assim
+\[
+\norm{Tv}^{2}\neq\norm{v}^{2}
+\]
+para todo $v\neq0$: \textbf{uns esticam e outros encolhem}, porque ele estica por $\sigma$
+e encolhe por $1/\sigma$ com o produto $1$ (Obs.~\ref{obs:area}). \emph{Conservar a área e
+ser isometria são duas estruturas, e o operador tem a primeira sem a segunda.} Mede-se nos
+quadrados dos comprimentos, sem raiz.
+
+\textbf{(3b) E O HOMEOMORFISMO COM QUALQUER OUTRA MÉTRICA EXISTE --- e é TRIVIAL.} Sobre
+as funções indicadoras, esta métrica \emph{é} a de Hamming e \emph{é} a $L^{1}$; e contra a
+$L^{\infty}$ --- que vale $1$ se $A\neq B$ --- tem-se
+\[
+1\cdot d_{\infty}(A,B)\ \leq\ d(A,B)\ \leq\ \abs{X}\cdot d_{\infty}(A,B),
+\]
+com $\abs{X}$ finito: constantes destas tornam-nas \textbf{equivalentes}, e fazem da
+\emph{identidade} um homeomorfismo nos dois sentidos. \emph{Mas num espaço finito toda
+métrica induz a topologia DISCRETA} --- a bola de raio $\tfrac12$ é o próprio ponto ---,
+logo o homeomorfismo existe sempre e \textbf{não distingue métrica nenhuma}.
+
+\textbf{(3c) E o que ele não leva é a MEDIDA --- nem sequer é preciso mudar de métrica.}
+Fixado $K$, a aplicação
+\[
+\boxed{\;\Phi(A)=A\,\triangle\,K\;}
+\]
+é \textbf{involução} ($\Phi\circ\Phi=\mathrm{id}$, porque $K\triangle K=\emptyset$) e é
+\textbf{isometria} ($d(\Phi A,\Phi B)=\abs{(A\triangle K)\triangle(B\triangle K)}
+=\abs{A\triangle B}$, porque o $K$ cancela) --- \emph{e no entanto}
+$\mu(A\triangle K)\neq\mu(A)$. Donde: \textbf{a métrica não determina a medida}. A própria
+métrica canónica tem isometrias que não conservam a área, e \emph{conservar a medida é
+estritamente mais forte do que preservar a distância} --- por isso $\abs{\det}=1$ não é uma
+condição topológica, e não podia ser.
+
+\textbf{(3d) E O DUAL DO HOMEOMORFISMO É O DIFEOMORFISMO --- é ele que VÊ a medida.} O
+que separa os dois é a \textbf{derivada}:
+\[
+\begin{array}{lll}
+\textbf{HOMEOMORFISMO} & \text{bijecção contínua, inversa contínua} &
+\text{preserva a TOPOLOGIA}\\[2pt]
+\textbf{DIFEOMORFISMO} & \text{bijecção diferenciável, inversa idem} &
+\text{traz o JACOBIANO}
+\end{array}
+\]
+e é o jacobiano que transporta a medida: $\mu(\Phi(A))=\int_A\abs{\det D\Phi}$, que para
+$\Phi$ linear é $\mu(TA)=\abs{\det T}\,\mu(A)$. \emph{Donde $\abs{\det}=1$ tem origem} ---
+e ela não é topológica, é \textbf{diferenciável}: é o determinante do jacobiano.
+
+\textbf{E no reticulado mede-se exacto, sem integral nenhum}: para $T$ inteira não
+singular,
+\[
+\boxed{\;[\,\mathbb{Z}^{2}:T(\mathbb{Z}^{2})\,]=\abs{\det T}\;}
+\]
+--- o \emph{índice} do sub-reticulado É o determinante. E $v\in T(\mathbb{Z}^{2})$
+decide-se por congruência, $\operatorname{adj}(T)\,v\equiv0\pmod{\det T}$, sem formar
+$T^{-1}$. Donde $\abs{\det}=1\iff T$ é sobrejectiva em $\mathbb{Z}^{2}\iff$ conserva a
+medida; e com $\abs{\det}>1$ ela \textbf{perde pontos na razão exacta do determinante}.
+
+\emph{As duas metades da mesma pergunta}: o contínuo não distingue --- há isometrias da
+própria métrica canónica que mudam a medida (3c) ---, o diferenciável distingue, e o que
+passa de um ao outro é a derivada.
+
+\textbf{(4) E o que atravessa é a ORDEM.} $\mu$ é \textbf{monótona} --- $A\subseteq B
+\Rightarrow\mu(A)\leq\mu(B)$ --- e \textbf{aditiva} ---
+$\mu(A\cup B)+\mu(A\cap B)=\mu(A)+\mu(B)$, exacto. É a $\sigma$-aditividade no andar
+finito, e é ela que o Teor.~\ref{thm:central-energia} usa para transportar a contagem para
+o integral \emph{sem perder a ordem}. \emph{A ponte não leva valores: leva ordem} ---
+e a métrica é o que a torna quantitativa. $\square$
+\end{teorema}
+\colunas{a métrica canónica, e a medida que não é ela}
+        {$d(A,B)=\mu(A\triangle B)$, inteira no discreto; toda bijecção é isometria nela,
+logo ela mede a MEDIDA e não a forma; a separação está na métrica ESPACIAL, onde
+$\abs{\det}=1$ conserva a área e não o comprimento; há isometrias da própria métrica que
+mudam a medida, e quem a vê é o DIFEOMORFISMO, pelo jacobiano}
+        {\code{tests/metrica.c}: os três axiomas em $256$ ternos; $d=0\iff A=B$ em $36$;
+$\mu(TA)=\mu(A)$ em $20$; $d(TA,TB)=d(A,B)$ em $48$ de $48$ com o conjunto a MOVER-SE em
+$48$; e a separação em $168$ vectores --- todos mudam de comprimento, $124$ a esticar e
+$44$ a encolher --- com as $400$ áreas conservadas em $400$; monotonia e aditividade em
+$25$ de $25$; \S M7: as cotas $1\cdot d_\infty\leq d\leq\abs{X}d_\infty$ e a topologia
+discreta em $100$ de $100$, e $\Phi(A)=A\triangle K$ involução E isometria em $6$ de $6$,
+todas a MUDAREM a medida; \S M8: o índice $[\mathbb{Z}^{2}:T(\mathbb{Z}^{2})]=\abs{\det T}$
+em $2\,952$ de $2\,952$ operadores inteiros não singulares, com os $360$ unimodulares
+sobrejectivos e os $2\,592$ restantes a perder pontos}
+
 \begin{teorema}[CANTOR E JULIA: a mesma codificação, e o que as separa é quem gasta o
 orçamento]\label{thm:cantor-julia}
 O \emph{Corpo de Peano} (\code{def:cantor}) põe o par: \textbf{Cantor} é o lado
@@ -1727,8 +2033,15 @@ desta casa é $A_m=\begin{psmallmatrix}m&1\\1&0\end{psmallmatrix}$ (\code{thm:ga
 D=m^{2}+4>0\quad\text{para todo }m,
 \]
 logo é \textbf{hiperbólico} e tem ordem \emph{infinita}: ele estica por $\sigma$ e
-encolhe por $1/\sigma$, e nunca volta. \emph{Ele não fecha no toro} --- e é isso, em
-linguagem topológica, o Teor.~\ref{thm:corte-fixo}. O que na aritmética é «a órbita corre
+encolhe por $1/\sigma$, e nunca volta. \emph{Ele não fecha no toro} --- e é isso o
+Teor.~\ref{thm:corte-fixo}, dito do lado do operador.
+
+\emph{E convém a precisão, que o Teor.~\ref{thm:metrica} obriga}: o que decide não é a
+topologia do toro --- essa é a mesma para todos eles ---, é o \textbf{reticulado}. A
+restrição às ordens $\{1,2,3,4,6\}$ vem de o traço ter de ser \emph{inteiro}, e a
+conservação da área vem do \emph{determinante}: as duas são condições da estrutura
+inteira, e nenhuma se lê no espaço contínuo. \textbf{A topologia é o palco; quem decide é
+a aritmética que nele vive.} O que na aritmética é «a órbita corre
 em $\mathbb{P}^1(\mathbb{Q})$ e o ponto fixo não está lá» é aqui «o automorfismo não tem
 ordem finita».
 
@@ -1748,7 +2061,8 @@ como topologia. $\square$
 \end{teorema}
 \colunas{o toro, e o gato que não fecha nele}
         {as ordens finitas de $T^{2}$ são $1,2,3,4,6$ e são as da tríade; a Lei 8 e o GATO
-ficam de fora, e o gato fora é o CORTE}
+ficam de fora, e o gato fora é o CORTE --- decidido pelo RETICULADO (traço inteiro,
+determinante), não pela topologia}
         {\code{tests/lei8\_trial.c} \S L6: $88$ automorfismos de ordem finita e $272$ de
 ordem infinita, com as ordens finitas a darem exactamente $\{1,2,3,4,6\}$ e nenhuma outra;
 a Lei 8 ($8$) ausente da lista; o gato $[m\,1;1\,0]$ com ordem infinita em $12$ de $12$; e
@@ -3487,7 +3801,8 @@ Teor.~\ref{thm:divzero}}
 \section{$e$: a razão dos volumes de andar para andar}\label{sec:e}
 
 O cone pelo centro (Prop.~\ref{prop:passagem}) não é só uma passagem topológica:
-ele mede.
+ele \textbf{mede} --- e a distinção é a do Teor.~\ref{thm:metrica}, onde o contínuo não
+distingue e quem distingue traz a derivada consigo.
 
 \begin{definicao}[o simplexo do andar]\label{def:simplexo}
 $S_n=\{(x_1,\ldots,x_n): 0\leq x_1\leq\cdots\leq x_n\leq1\}$, e $S_0$ é o ponto.

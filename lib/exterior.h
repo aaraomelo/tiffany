@@ -7,7 +7,7 @@
  *    (o torque É o produto cruzado)». Isso é exatamente a decomposição de uma bilinear
  *    em simétrica ⊕ antissimétrica, e **Λ² É O CRUZADO DA CASA**.
  *
- * 2. `corpo_universal.tex` §370: as cartas EQUIAREAIS, «o determinante do sector… cada
+ * 2. `teoria.tex` §370: as cartas EQUIAREAIS, «o determinante do sector… cada
  *    carta PRESERVA ÁREA», e «sem a inversa-escala o det é 2 ≠ 1». Isso é Λⁿ T = det T,
  *    com det = 1 ⟺ preserva volume — já medido em `tests/arquimedes_area.js` (21:0).
  *

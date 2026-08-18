@@ -517,7 +517,7 @@ int main(void){
     {
         /* O Aarão: «o corpo geométrico é ordenado e completo, dobras nos pontos fixos».
          *
-         * O thm:corte-fixo do geometrico.tex prova que o ponto fixo não cabe em ℙ¹(ℚ), e a
+         * O thm:corte-fixo do universal.tex prova que o ponto fixo não cabe em ℙ¹(ℚ), e a
          * prova NÃO é uma varredura: é uma DOBRA. Com F(p,q) = p² − m·p·q − q², a descida
          * (p,q) ⟼ (q, p − m·q) satisfaz
          *

@@ -1,7 +1,7 @@
 /* racionais_fixos.c — A DESCIDA: os racionais são as classes de equivalência dos
  * PONTOS FIXOS, e cada racional é uma RAZÃO de pontos fixos.
  *
- * O `geometrico.tex` sobe: a órbita corre em ℙ¹(ℚ) e o ponto fixo NÃO está lá
+ * O `universal.tex` sobe: a órbita corre em ℙ¹(ℚ) e o ponto fixo NÃO está lá
  * (thm:corte-fixo). Isto mede a DESCIDA, que é a outra metade do mesmo par — e ela não
  * precisa de teoria nova, precisa de ler o que o thm:fixo-dual já diz: o par dual de
  * pontos fixos é descrito por TRAÇO e DETERMINANTE, ambos INTEIROS.

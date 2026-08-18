@@ -11,7 +11,7 @@
  *      A² − mA − I = 0 é p_A(A) = 0 para a companheira A_m = [[m,1],[1,0]].
  *   `mat2.W(m)` = 2A − mI, com W² = (m²+4)I — o discriminante REALIZADO em matriz,
  *      e é outra vez a mesma relação.
- *   `T = C + C⁻¹` com T² = T + I (o traço-dobra do pentágono, `corpo_universal.tex`)
+ *   `T = C + C⁻¹` com T² = T + I (o traço-dobra do pentágono, `teoria.tex`)
  *      — a terceira aparição.
  *
  * E «a quadrática do ponto fixo DERIVA-SE da matriz (cx² + (d−a)x − b)» é o polinómio

@@ -1,5 +1,5 @@
 /* tests/geometrico.js — torre normalizada da reta real geométrica.
- * papers/geometrico.tex: n≥3, |C_n|=|P_n|=1/2^{n-1};
+ * papers/universal.tex: n≥3, |C_n|=|P_n|=1/2^{n-1};
  * Σ |C_n| = Σ |P_n| = 1/2. Inteiro: fracções p/q em BigInt. Sem double.
  *
  * §N0  mesma área: |C_n|=|P_n| nos primeiros níveis

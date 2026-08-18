@@ -203,7 +203,7 @@ static void rt_orbita(long m, int k, long *p, long *q){
 
 /* ── O TEOREMA DO OPERADOR, realizado: a DOBRA e o ACUMULADOR ────────────────────────
  *
- * `thm:operador` do geometrico.tex: a indução, a meta-indução e o acumulador não são três
+ * `thm:operador` do universal.tex: a indução, a meta-indução e o acumulador não são três
  * peças — são o operador, o seu espelho, e o rasto que eles deixam.
  *
  *   INDUÇÃO       [p:q] ⟼ [q : p+mq]     é a rt_orbita acima      (λ⁺, sobe)
@@ -436,7 +436,7 @@ static void rt_volta(long m, long p, long q, long *np, long *nq){
 }
 
 /* ── O SINAL É UMA DOBRA, E O MDC VIVE DO LADO QUE ELA NÃO MOVE ──────────────────────
- * O `geometrico.tex` trata isto, e não como caso particular: `cor:cadeia` diz que
+ * O `universal.tex` trata isto, e não como caso particular: `cor:cadeia` diz que
  *
  *      ℤ  =  ℕ  +  o SINAL
  *
@@ -1200,7 +1200,7 @@ static long rt_desce(int (*P)(long, void*), long ate, void *ctx){
 
 /* ── O REAL COMO CAMINHO: a peça que tira a vírgula de vez ────────────────────────────
  *
- * O geometrico.tex, §sec:supremo: «o habitante É o caminho — não há valor por trás à
+ * O universal.tex, §sec:supremo: «o habitante É o caminho — não há valor por trás à
  * espera de ser aproximado, logo não há erro a acumular». Um real não se representa: as
  * suas DECISÕES é que se guardam, e cada uma é um bit.
  *
@@ -1225,7 +1225,7 @@ static long rt_caminho_sup(int (*serve)(long m, long pot, void *ctx), int k,
     return m;
 }
 
-/* O CORTE SEM RAIZ — thm:corte do geometrico.tex. Para D = m²+4 e σ = (m+√D)/2:
+/* O CORTE SEM RAIZ — thm:corte do universal.tex. Para D = m²+4 e σ = (m+√D)/2:
  *
  *      a/b < σ  ⟺  2a − mb < b√D
  *

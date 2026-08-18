@@ -165,7 +165,7 @@ printf("\n§F1  Fourier leva a derivada em multiplicação — o operador vira P
     }
     ok("e o símbolo do discreto TENDE ao do contínuo quando o passo encolhe — ATESTADO"
        " pela monotonia EM ℚ: err(h)=ω−sin(ωh)/h (série exacta) DESCE quando h desce,"
-       " h=1/8..1/32; geometrico.tex obs:area + thm:supremo, sem double nem limiar",
+       " h=1/8..1/32; universal.tex obs:area + thm:supremo, sem double nem limiar",
        mal_mono == 0);
     printf("      E AQUI A TOLERÂNCIA ESTAVA A ESCONDER UMA COISA. Eu tinha escrito \"iω, a menos\n");
     printf("      do erro O(h²)\" com margem de 0,2 — e o valor medido é 2,3526, que não é 3 com\n");

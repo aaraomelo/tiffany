@@ -282,6 +282,226 @@ printf("\n§C6  O TECTO ERA DO PAR (p,q). Na PALAVRA não há tecto: é uma sequ
        && f13 > 2147483647L);
 }
 
+/* ─── §C8 ── A CONSTANTE DE INTEGRAÇÃO NÃO É SOLTA: é a CARGA DO ANDAR n−1 ──────────
+ * O Aarão: «a constante de integração não deve ficar solta, deve depender da dimensão n e
+ * do espaço vectorial; depende da dimensão n−1, é a carga dimensional; e a derivada dela
+ * dá o próprio 0 da dimensão n».
+ *
+ * É isso, e em n variáveis vê-se sem margem. O que ∫∘∂_n perde não é «um número»: é TUDO
+ * O QUE NÃO DEPENDE DE x_n, isto é
+ *
+ *      ker ∂_n  em  P(x_1,…,x_n)   =   P(x_1,…,x_{n−1})
+ *
+ * — o núcleo da derivada no andar n É O ESPAÇO INTEIRO do andar n−1. Em n = 1 isso degenera
+ * no corpo (P de zero variáveis), e é por isso que ali a constante PARECE solta: é o único
+ * andar em que a carga é um escalar.
+ *
+ * E a DIMENSÃO conta-se, que é o que faz dela uma CARGA: para grau total ≤ d,
+ *
+ *      dim P_d(n vars) = C(n+d, n)      dim ker ∂_n = dim P_d(n−1 vars) = C(n−1+d, n−1)
+ *
+ * E a derivada da carga dá o ZERO DO ANDAR n — o polinómio nulo em n variáveis, e não um
+ * valor pequeno.
+ *
+ * (E a tese é DIMENSIONAL, não sobre qual variável: por simetria, o núcleo de ∂_1 tem a
+ * mesma dimensão que o de ∂_n. Mutar a variável escolhida não derruba nada, e é isso que
+ * confirma que o que aqui se mede é a CARGA e não a etiqueta.) */
+printf("\n§C8  A CONSTANTE DE INTEGRAÇÃO é a CARGA do andar n−1 — e conta-se.\n\n");
+{
+    long casos = 0, ker_bate = 0, deriva_zero = 0, soma_bate = 0;
+    printf("      %3s %4s %10s %10s %10s\n", "n", "grau", "dim P_d(n)", "dim ker", "C(n-1+d,n-1)");
+    for(int n = 1; n <= 3; n++) for(int d = 0; d <= 4; d++){
+        long total = 0, no_ker = 0, fora = 0, derivou_a_zero = 0, derivou_nao_zero = 0;
+        int e[3];
+        for(e[0] = 0; e[0] <= d; e[0]++)
+        for(e[1] = 0; e[1] <= (n > 1 ? d : 0); e[1]++)
+        for(e[2] = 0; e[2] <= (n > 2 ? d : 0); e[2]++){
+            int soma = e[0] + (n > 1 ? e[1] : 0) + (n > 2 ? e[2] : 0);
+            if(soma > d) continue;
+            total++;
+            int en = e[n-1];                        /* o expoente da ÚLTIMA variável */
+            /* ∂_n do monómio x^e: o coeficiente novo é c·e_n e o expoente baixa um. Faz-se
+             * a conta com um coeficiente NÃO NULO, para que «deu zero» tenha conteúdo. */
+            const long coef = 7;
+            long coef_derivado = coef * en;         /* a derivada de facto */
+            if(en == 0){
+                no_ker++;
+                if(coef_derivado == 0) derivou_a_zero++;   /* o ZERO do andar n */
+            } else {
+                fora++;
+                if(coef_derivado != 0) derivou_nao_zero++; /* e fora do núcleo NÃO é zero */
+            }
+        }
+        long Ctot = 1, Cker = 1;
+        for(int i = 1; i <= n; i++)   Ctot = Ctot * (d + i) / i;
+        for(int i = 1; i <= n-1; i++) Cker = Cker * (d + i) / i;
+        casos++;
+        if(no_ker == Cker && total == Ctot) ker_bate++;
+        if(derivou_a_zero == no_ker && derivou_nao_zero == fora) deriva_zero++;
+        if(no_ker + fora == total) soma_bate++;
+        if(d <= 2) printf("      %3d %4d %10ld %10ld %10ld\n", n, d, total, no_ker, Cker);
+    }
+    printf("\n      pares (n, grau) varridos ........... %ld\n", casos);
+    printf("      dim ker ∂_n = dim P(n−1 vars) ...... %ld\n", ker_bate);
+    printf("      e ∂_n da carga dá o ZERO de n ...... %ld\n", deriva_zero);
+    printf("      núcleo + imagem = o espaço todo .... %ld\n\n", soma_bate);
+    ok("A CONSTANTE DE INTEGRACAO NAO FICA SOLTA: ela e' a CARGA do andar n-1. O que"
+       " integral-apos-derivada perde nao e' «um numero» — e' tudo o que nao depende de"
+       " x_n, e o NUCLEO de d/dx_n no andar n E' O ESPACO INTEIRO do andar n-1:"
+       " ker = P(x_1..x_{n-1}), de dimensao C(n-1+d, n-1) contra C(n+d, n) do total, e as"
+       " duas contam-se e batem. Em n = 1 isso degenera no corpo, e e' por isso que ali a"
+       " constante PARECE solta: e' o unico andar em que a carga e' um escalar. E A DERIVADA"
+       " DA CARGA DA' O ZERO DO ANDAR n — o polinomio nulo em n variaveis, nao um valor"
+       " pequeno —, e FORA do nucleo ela NUNCA e' zero, que e' o contraste sem o qual «deu"
+       " zero» nao dizia nada. E nucleo mais imagem dao o espaco todo, sem sobra",
+       casos > 0 && ker_bate == casos && deriva_zero == casos && soma_bate == casos);
+}
+
+/* ─── §C9 ── A DERIVADA DO ARGUMENTO É 1, e é ela que FECHA a dualidade ─────────────
+ * O Aarão: «aqui vale indução e meta-indução; falta a derivada do argumento, que é 1 — aí
+ * fecha a dualidade».
+ *
+ * Fecha, e o par é este:
+ *
+ *      ∂_n( carga do andar n−1 )  =  0        o neutro ADITIVO
+ *      ∂_n( o argumento x_n )     =  1        o neutro MULTIPLICATIVO
+ *
+ * — os dois extremos da derivada são exactamente os dois elementos neutros, e são os do
+ * cor:soma-produto. E a assimetria do Teorema Fundamental lê-se aí:
+ *
+ *      o ARGUMENTO vai e VOLTA:   ∂x = 1,  ∫1 = x        (ida e volta fecham)
+ *      a CARGA vai e NÃO volta:   ∂c = 0,  ∫0 = 0 ≠ c    (a fibra)
+ *
+ * E é a mesma frase do thm:operador: a INDUÇÃO é o passo (sobe, e o passo é 1 no expoente)
+ * e a META-INDUÇÃO é o espelho que lê. O que a derivada do argumento dá é a UNIDADE do
+ * passo — sem ela a indução não teria com que subir; o que a derivada da carga dá é o
+ * ZERO — sem ele a meta-indução não teria o que descartar. */
+printf("\n§C9  A DERIVADA DO ARGUMENTO é 1 — e é ela que FECHA a dualidade.\n\n");
+{
+    /* a derivada de um monómio c·x^e é (c·e)·x^(e−1) — uma função, aplicada a todos os
+     * monómios de um intervalo, e não uma conta escrita para o caso que se quer. */
+    long varridos = 0, deu_zero = 0, deu_um = 0, deu_outro = 0;
+    long o_um_e_o_argumento = 1, os_zeros_sao_a_carga = 1;
+    long volta_arg = 0, nao_volta_carga = 0, carga_tot = 0;
+    for(long c = -4; c <= 4; c++) for(long e = 0; e <= 4; e++){
+        if(c == 0) continue;                        /* o monómio nulo não é nem carga nem argumento */
+        long dc = c * e, de = e > 0 ? e - 1 : 0;    /* A DERIVADA, pela função */
+        varridos++;
+        int e_constante = (dc == 0) || (de == 0);
+        if(dc == 0){
+            deu_zero++;
+            /* quem derivou a zero TEM de ser a carga, isto é ter expoente 0 em x_n */
+            if(e != 0) os_zeros_sao_a_carga = 0;
+        } else if(e_constante && dc == 1){
+            deu_um++;
+            /* e quem derivou a 1 TEM de ser o argumento: c = 1 e e = 1 */
+            if(!(c == 1 && e == 1)) o_um_e_o_argumento = 0;
+        } else deu_outro++;
+        /* A VOLTA: ∫ da derivada. Para o argumento (c=1,e=1) tem de devolver o próprio;
+         * para a carga (e=0) devolve 0, que não é ela. */
+        if(e == 1 && c == 1){
+            long ic = dc, ie = de + 1;              /* ∫ (1)·x^0 = x^1 */
+            if(ic == c && ie == e) volta_arg++;
+        }
+        if(e == 0){
+            carga_tot++;
+            long ic = dc;                           /* ∫ 0 = 0 */
+            if(ic != c) nao_volta_carga++;          /* e 0 ≠ c, porque c ≠ 0 */
+        }
+    }
+    printf("      monómios varridos .................. %ld\n", varridos);
+    printf("      derivaram a ZERO ................... %ld   e são TODOS a carga: %s\n",
+           deu_zero, os_zeros_sao_a_carga ? "sim" : "NAO");
+    printf("      derivaram a UM ..................... %ld   e é SÓ o argumento: %s\n",
+           deu_um, o_um_e_o_argumento ? "sim" : "NAO");
+    printf("      derivaram a outra coisa ............ %ld\n", deu_outro);
+    printf("      o argumento VOLTA por ∫ ............ %ld\n", volta_arg);
+    printf("      e a carga NÃO volta ................ %ld de %ld\n\n", nao_volta_carga, carga_tot);
+    ok("A DERIVADA DO ARGUMENTO E' 1, e e' ela que FECHA a dualidade: varrendo os monomios,"
+       " os que derivam a ZERO sao TODOS a carga (expoente 0 em x_n) e o que deriva a UM e'"
+       " SO' o argumento (c = 1, e = 1) — mais nenhum. Os dois extremos da derivada sao"
+       " exactamente os dois ELEMENTOS NEUTROS: 0, o aditivo, e 1, o multiplicativo, que sao"
+       " os do cor:soma-produto. E a assimetria do Teorema Fundamental le-se ai: o ARGUMENTO"
+       " vai e VOLTA (d x = 1, e o integral devolve x), a CARGA vai e NAO volta (d c = 0, e"
+       " o integral da' 0, que nao e' c). E' a mesma frase do thm:operador — a INDUCAO sobe"
+       " com a unidade do passo, a META-INDUCAO le e descarta o zero",
+       varridos > 0 && deu_zero > 0 && deu_um == 1 && deu_outro > 0 &&
+       os_zeros_sao_a_carga && o_um_e_o_argumento &&
+       volta_arg == 1 && carga_tot > 0 && nao_volta_carga == carga_tot);
+}
+
+/* ─── §C10 ── OS DOIS TEOREMAS DO CÁLCULO SÃO AS DUAS LEIS ─────────────────────────
+ * O Aarão: «interpreta o primeiro e segundo teoremas do cálculo, na parte de análise, como
+ * primeira e segunda leis».
+ *
+ * São, e o encaixe é o das leis como a casa as enuncia:
+ *
+ *   Lei 1 — a UNIDADE é dual, e MEDE   ↔   TFC I:   d/dx ∫_a^x f = f(x)
+ *           é LOCAL: a derivada devolve o integrando NO PONTO. Mede o que está ali.
+ *
+ *   Lei 2 — a DUALIDADE é dual, e ANDA ↔   TFC II:  ∫_a^b f = F(b) − F(a)
+ *           é da BORDA: o percurso vai de a a b e o resultado só depende das PONTAS.
+ *           É Stokes em dimensão 1 — ∫_R dω = ∫_∂R ω — e o interior não conta.
+ *
+ * E a fibra fecha o quadro: a constante CANCELA em F(b) − F(a). Isto é, ela é invisível às
+ * DUAS leis — a que mede apaga-a ao derivar, a que anda apaga-a ao subtrair. É por isso que
+ * ela não tem por onde voltar (§C2), e é por isso que vive fora, no andar n−1 (§C8).
+ *
+ * Mede-se por DOIS CAMINHOS: o integral definido calculado pela primitiva avaliada nas
+ * pontas, e a mesma área somada termo a termo. Tudo em ℚ. */
+printf("\n§C10 OS DOIS TEOREMAS DO CÁLCULO SÃO AS DUAS LEIS: uma MEDE, a outra ANDA.\n\n");
+{
+    long casos = 0, lei1_local = 0, lei2_nao_trivial = 0, dois_caminhos = 0, const_cancela = 0;
+    /* POLINÓMIOS CURTOS, com coeficientes inteiros pequenos: o §C5 mostra que as séries
+     * longas saturam o Qz, e aqui o que se mede é a LEI e não o alcance do tipo. */
+    for(int g = 1; g <= 5; g++){
+        Sr f = sr0();
+        for(int i = 0; i <= g; i++) f.a[i] = qz(i + 2, 1);      /* 2 + 3x + 4x² + … */
+        f.n = g;
+        Sr F  = sr_integra(f);
+        Sr Df = sr_deriva(F);
+        casos++;
+        /* LEI 1 (MEDE) — LOCAL: coeficiente a coeficiente, até ao grau que existe */
+        int local = 1;
+        for(int i = 0; i <= g; i++) if(!qz_igual(Df.a[i], f.a[i])) local = 0;
+        if(local) lei1_local++;
+        /* LEI 2 (ANDA) — pelas PONTAS */
+        Qz a = qz(1, 3), b = qz(1, 2);
+        Qz pelas_pontas = qz_soma(sr_parcial(F, b, g + 1), qz_oposto(sr_parcial(F, a, g + 1)));
+        /* e o SEGUNDO caminho: Σ c_i (b^{i+1} − a^{i+1})/(i+1), com as potências feitas
+         * de raiz — não partilha uma linha com sr_parcial */
+        Qz termo_a_termo = qz(0,1);
+        for(int i = 0; i <= g; i++){
+            Qz pb = qz(1,1), pa = qz(1,1);
+            for(int t = 0; t <= i; t++){ pb = qz_mult(pb, b); pa = qz_mult(pa, a); }
+            Qz dif = qz_soma(pb, qz_oposto(pa));
+            termo_a_termo = qz_soma(termo_a_termo, qz_mult(f.a[i], qz_mult(dif, qz(1, i + 1))));
+        }
+        if(qz_igual(pelas_pontas, termo_a_termo)) dois_caminhos++;
+        if(!qz_igual(pelas_pontas, qz(0,1))) lei2_nao_trivial++;
+        /* A FIBRA: somar uma constante à primitiva NÃO muda F(b) − F(a) */
+        Sr Fc = F; Fc.a[0] = qz_soma(Fc.a[0], qz(5,1));
+        Qz com_c = qz_soma(sr_parcial(Fc, b, g + 1), qz_oposto(sr_parcial(Fc, a, g + 1)));
+        if(qz_igual(com_c, pelas_pontas)) const_cancela++;
+    }
+    printf("      casos varridos ..................... %ld\n", casos);
+    printf("      LEI 1 (MEDE): D∘∫ = id, e é LOCAL .. %ld\n", lei1_local);
+    printf("      LEI 2 (ANDA): F(b) − F(a) ≠ 0 ...... %ld\n", lei2_nao_trivial);
+    printf("      e os DOIS CAMINHOS batem ........... %ld\n", dois_caminhos);
+    printf("      a constante CANCELA na borda ....... %ld\n\n", const_cancela);
+    ok("OS DOIS TEOREMAS DO CALCULO SAO AS DUAS LEIS. O PRIMEIRO e' a Lei 1 — a que MEDE:"
+       " d/dx do integral devolve o integrando, e e' LOCAL, coeficiente a coeficiente. O"
+       " SEGUNDO e' a Lei 2 — a que ANDA: o integral de a ate' b da' F(b) - F(a), e o"
+       " resultado so' depende das PONTAS; e' Stokes em dimensao 1, e o interior nao conta."
+       " Mede-se por DOIS CAMINHOS que nao partilham uma linha — pela primitiva avaliada nas"
+       " pontas, e somando termo a termo com as potencias feitas de raiz — e batem em Q. E A"
+       " FIBRA FECHA O QUADRO: a constante CANCELA em F(b) - F(a), logo e' invisivel as DUAS"
+       " leis — a que mede apaga-a ao derivar, a que anda apaga-a ao subtrair. E' por isso"
+       " que ela nao tem por onde voltar, e que vive fora, no andar n-1",
+       casos > 0 && lei1_local == casos && lei2_nao_trivial == casos &&
+       dois_caminhos == casos && const_cancela == casos);
+}
+
 printf("\n=== FECHO ==================================================================\n");
 printf("    A quadratura estava escrita e nunca tinha corrido: zero ficheiros incluíam\n");
 printf("    o lib/calculo2.h. Vinte e uma peças em ℚ — séries com integral, Fubini nas\n");

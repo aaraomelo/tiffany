@@ -7,7 +7,7 @@ código. Encontradas sete assim, e o padrão é sempre o mesmo — a citação �
 NASCIMENTO do medidor. O `tests/conservacao_metrica.c` nasceu com 11 asserções (commit
 df1316a), foi a 13, depois a 14, e três papers continuavam a dizer 11.
 
-E há um caso que diz tudo: o `tests/reta.c` aparecia DUAS VEZES no mesmo geometrico.tex,
+E há um caso que diz tudo: o `tests/reta.c` aparecia DUAS VEZES no mesmo universal.tex,
 uma com 37 e outra com 19. Quem actualizou, actualizou um sítio.
 
 O PADRÃO É ESTREITO DE PROPÓSITO: só `${N}{:}{M}$`, que é a notação da casa para a

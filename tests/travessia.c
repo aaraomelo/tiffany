@@ -377,7 +377,7 @@ printf("\n§T5  Lineariza — e a reconstrução fecha com resíduo 0.\n\n");
         if(((esq - dir) % pp + pp) % pp == 0) pars_ok++;
     }
     /* E O PASSO QUE ESTA' POR BAIXO DAS DUAS: a ORTOGONALIDADE, que e' o lado HURWITZ do
-     * teorema central Gentil-Hurwitz (corpo_universal, thm:parseval-multi).
+     * teorema central Gentil-Hurwitz (teoria.tex, thm:parseval-multi).
      *
      *     sum_k w^{(i-j)k} = N . delta_ij
      *
@@ -388,7 +388,7 @@ printf("\n§T5  Lineariza — e a reconstrução fecha com resíduo 0.\n\n");
      * perder a ordem.
      *
      * Aqui mede-se o lado que e' exacto — o de contar —, e mede-se com o CONTROLO que o
-     * corpo_universal exige: com uma raiz de ORDEM ERRADA a identidade quebra. Sem isso,
+     * teoria.tex exige: com uma raiz de ORDEM ERRADA a identidade quebra. Sem isso,
      * «os cruzados cancelam» valia por nao haver cruzados. */
     long ort_diag = 0, ort_fora = 0, ort_tot_d = 0, ort_tot_f = 0, ort_corpos = 0;
     long mau_diag = 0, mau_fora = 0, mau_tot = 0;

@@ -449,7 +449,7 @@ int main(void){
      * O Aarão: «falta algo ainda, a conservação (energia), porque a condição de paragem é
      * a energia que o nível comporta».
      *
-     * E a ponte já estava escrita, em dois sítios que não se conheciam. O `corpo_universal`
+     * E a ponte já estava escrita, em dois sítios que não se conheciam. O `teoria.tex`
      * (def:inducao) diz que «o que a meta-indução VALIDA é a CONSERVAÇÃO DE ENERGIA»; o
      * thm:operador diz que a meta-indução É A DOBRA. Logo:
      *
@@ -652,7 +652,7 @@ int main(void){
     /* ─── §M12 ── VIVIANI: a mesma dinâmica com o determinante +1 ───────────────────
      *
      * O Aarão: «vê a curva de Viviani, se der a dinâmica leva pro geométrico». Dá, e ela
-     * já estava medida no `corpo_universal` — realizada INTEIRA no anel, com o relógio da
+     * já estava medida no `teoria.tex` — realizada INTEIRA no anel, com o relógio da
      * meia-volta. O que falta é dizer o que ela é DAQUI:
      *
      *   VIVIANI É O PAR DUAL DESTE PAPER COM O DETERMINANTE TROCADO.
@@ -672,7 +672,7 @@ int main(void){
      *     d = −1   a RECTA (hiperbólico)   t_2 = m²+2   — cresce, e é o corte
      *     d = +1   VIVIANI  (rotação)      t_2 = m²−2   — que é 2cos(2u) = (2cos u)²−2
      *
-     * O «2cos(2u) = (2cos u)²−2» do corpo_universal não é outra fórmula: é ESTA, no ramo
+     * O «2cos(2u) = (2cos u)²−2» do teoria.tex não é outra fórmula: é ESTA, no ramo
      * d = +1. E o meio-ângulo — h de ordem 2N a dar u, h² a dar t — é o operador AO
      * QUADRADO do §M9, onde o determinante passa de −1 a +1 e a volta fica própria. */
     long v_tot = 0, v_rel = 0, v_ramos = 0, v_nos = 0, v_a = 0;
@@ -730,7 +730,7 @@ int main(void){
     ok("Viviani é o par dual deste paper com o DETERMINANTE trocado: a intersecção da"
        " esfera com o cilindro dá z² = 2a(2a−x) sem uma trigonometria, os dois ramos ±z são"
        " o par (soma zero, produto −z²), e o nó é o ponto fixo da involução. E o"
-       " «2cos(2u) = (2cos u)²−2» do corpo_universal é a recorrência do traço no ramo"
+       " «2cos(2u) = (2cos u)²−2» do teoria.tex é a recorrência do traço no ramo"
        " d = +1, a mesma que na recta corre com d = −1",
        v_a == 12 && v_tot > 0 && v_rel == v_tot &&
        v_ramos == 2*v_a && v_nos == v_a &&

@@ -261,7 +261,7 @@ int main(void){
                m_lib, pot_lib, (m_lib == m && pot_lib == pot) ? "batem" : "DIVERGEM");
         ok("e a peça da lib desce o MESMO caminho que a descida local — duas rotas sem uma"
            " linha em comum, e o supremo de {r²<2} é 1482910/2^20, o par (m, 2^k) que o"
-           " geometrico.tex publica. Um real nao se aproxima: constroi-se, e o que se"
+           " universal.tex publica. Um real nao se aproxima: constroi-se, e o que se"
            " guarda sao as DECISOES",
            m_lib == m && pot_lib == pot && m == 1482910 && pot == 1048576);
         ok("O CONJUNTO QUE ℚ NÃO CONSEGUE FECHAR, O OBJECTO FECHA: a testemunha é a"

@@ -1119,7 +1119,7 @@ printf("\n§M13 A BASE SAI DAS MÖBIUS: o que fica invariante é da base, e é g
      *
      * que se verifica entrada a entrada, sem vírgula. Daí saem os dois de uma vez, por
      * Viète: σ + σ' = tr A = a e σ·σ' = det A = −1. É o mesmo thm:fixo-dual do
-     * `geometrico.tex`, e é o que a casa já usa em todo o lado. A rota decimal fica —
+     * `universal.tex`, e é o que a casa já usa em todo o lado. A rota decimal fica —
      * mas como CONFIRMAÇÃO da exacta, e não como a prova. */
     int mauFix = 0, mauDual = 0, ch = 0, decimal_bate = 0, linhas = 0;
     for(long a = 1; a <= 5; a++){

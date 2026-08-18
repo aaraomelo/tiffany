@@ -6037,7 +6037,7 @@ static void calculo3_resolve(int n){
           tique7(5, "logo o Jacobiano é a medida, e a mudança de coordenadas é uma"
                     " reescrita que a carrega");
           tique7(6, "e a VOLTA é a TRADUÇÃO: isto é Λⁿ T = det T outra vez, e é o mesmo"
-                    " objecto das cartas EQUIAREAIS do corpo_universal §370 — «cada carta"
+                    " objecto das cartas EQUIAREAIS do teoria.tex §370 — «cada carta"
                     " preserva área, e sem a inversa-escala o det é 2 ≠ 1». E agora tem"
                     " nome: é o TEOREMA DO GATO, e esta fala é a terceira vida dele — a"
                     " MEDIDA. A casa calculava-o desde este andar sem saber que estava a"
@@ -8810,7 +8810,7 @@ static void exterior_resolve(int n){
                  ? "logo o determinante NÃO é uma receita de cofatores: é o fator pelo"
                    " qual T atua no volume, e a receita é só como se calcula"
                  : "o fator não é constante — NÃO afirmo");
-          tique7(6, "e a VOLTA fecha com a casa: em `corpo_universal.tex` §370 as cartas"
+          tique7(6, "e a VOLTA fecha com a casa: em `teoria.tex` §370 as cartas"
                     " são EQUIAREAIS, «o determinante do sector… cada carta preserva"
                     " área», e «sem a inversa-escala o det é 2 ≠ 1». Isso é det = 1, isto"
                     " é, Λⁿ T = id. A conservação de área que a casa já media É este"
@@ -10318,7 +10318,7 @@ static void forma_resolve(int n){
         tique7(0, "a pergunta não é um teorema: é «onde é que este andar já corria nesta"
                   " casa». Procurei ANTES de escrever, que é a regra");
         tique7(1, "o que se procurou: matriz, forma quadrática, espectro — em"
-                  " `corpo-estelar.tex`, `corpo_universal.tex` e `lib/universal.js`");
+                  " `corpo-estelar.tex`, `teoria.tex` e `lib/universal.js`");
         tique7(2, "E O ANDAR JÁ CÁ ESTAVA, três vezes, sem o nome. A `estaca` da casa é"
                   " mI − A_m, com A·(mI−A) = −I. Isso É Cayley–Hamilton: A² − mA − I = 0"
                   " é exatamente p_A(A) = 0 para a companheira A_m = [[m,1],[1,0]]");
@@ -19594,7 +19594,7 @@ static int teste(void){
               esc_qz("", d, ")\n");
               ok("Λⁿ T é a MULTIPLICAÇÃO por det T — o determinante é a ação do operador no"
                  " volume, e a receita de cofatores é só como se calcula. E fecha com o que"
-                 " a casa já media: as cartas EQUIAREAIS de corpo_universal §370 são det = 1,"
+                 " a casa já media: as cartas EQUIAREAIS de teoria.tex §370 são det = 1,"
                  " isto é, Λⁿ T = id (tests/arquimedes_area.js, 21:0)",
                  mal == 0 && feitos == 15625); }
 
@@ -24746,7 +24746,7 @@ static int teste(void){
 
             /* E A REFERENCIA NAO E MINHA: o paper PUBLICA as folhas da prata no relogio
              * de Peano — «F_65537, m=2, separado: σ=4081, σ†=61458, σσ†=-1»
-             * (corpo_universal.tex, thm:corpo-dual). O mecanismo tem de dar NESSES
+             * (teoria.tex, thm:corpo-dual). O mecanismo tem de dar NESSES
              * numeros, senao a teoria e o codigo sao duas casas. */
             {
                 long r = 0, s1 = 0, s2 = 0, p = 65537;

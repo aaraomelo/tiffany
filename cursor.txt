@@ -1,8 +1,25 @@
 CURSOR.TXT — ONDE ESTÁ O TRABALHO, E COMO SE SEGUE
 ==================================================
 Não é histórico. É o que precisas para pegar e continuar.
-Estado: 17/08/2026 (noite). Bateria 508:508, 0 falhas. geometrico.tex 55 páginas.
+Estado: 17/08/2026 (noite). Bateria 508:508, 0 falhas. universal.tex 55 páginas.
 Verificar sempre com:  bash tools/bateria.sh   (lê AS DUAS linhas: total e unidades)
+
+OS DOCUMENTOS, depois da reorganização de 18/08:
+
+    papers/universal.tex    O CORPO UNIVERSAL — «a construção geométrica e dinâmica de R».
+                            É o paper central (60 pp.). Era o geometrico.tex.
+    livro.tex               os três documentos num volume, preâmbulo em estilo.tex:
+      teoria.tex            122 pp. — ABSORVEU o antigo papers/corpo_universal.tex, que
+                            foi ELIMINADO por redundância. O que era fundação passou ao
+                            corpo; o que era desenvolvimento (as cinco operações, o
+                            observador, a membrana, o Peano como instância) é teoria.
+      catalogo.tex          487 pp.
+      enredo.tex            365 pp.
+
+    INVARIANTE VERIFICADO na mudança: 499 medidores citados antes e depois, e a bateria
+    em 508:508. É o teste obrigatório de qualquer reorganização — um medidor só é testado
+    se um paper o CITAR, e eliminar um documento pode deixar dezenas órfãos (este tinha 76
+    exclusivos). Contar ANTES, contar DEPOIS.
 
 
 0. AS DUAS REGRAS
@@ -127,7 +144,7 @@ E se um gume honesto não morder, há duas doenças e só duas:
     · a guarda é redundante (a lib já garante) → então o gume vai à LIB, não ao medidor.
 
 
-4. O ESPAÇO — e tudo vive aqui (geometrico.tex def:espaco)
+4. O ESPAÇO — e tudo vive aqui (universal.tex def:espaco)
 ----------------------------------------------------------
 
     V = Q(m raiz D) = Q + Q.m raizD     espaço VECTORIAL sobre Q, dim 2, base {1, m raizD}

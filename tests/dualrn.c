@@ -262,7 +262,7 @@ printf("\n§D5  A COMPLETUDE: Cauchy converge, e o corte não deixa buraco.\n\n"
     /* A BISSECÇÃO ERA EM DOUBLE E COMPARAVA-SE COM sqrt(2.0) — a construção contra a
      * APROXIMAÇÃO DA LIBC, com um limiar de 1e-14 a segurar as duas. Mas o texto acima
      * já diz o que é isto: «a bissecção, que É a construção do corte» — e o corte
-     * constrói-se em INTEIROS, que é o §sec:supremo do geometrico.tex:
+     * constrói-se em INTEIROS, que é o §sec:supremo do universal.tex:
      *
      *      m_k := max{ m : m/2^k < x para algum x ∈ S },   m_{k+1} ∈ {2m_k, 2m_k+1}
      *

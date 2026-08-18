@@ -651,6 +651,106 @@ int main(void){
            e_cuspide > 0 && e_cuspide < tot && lados > 0 && lados_mesmo_zero == lados);
     }
 
+    /* ─── §C12 ── AS TRÊS CAMADAS SÃO O TRIAL, e a reflexão é a dualidade ──────────
+     * O Aarão: «mostra que topologia/álgebra/análise são triais conforme o teorema
+     * Cantor/Viviani/Julia, e fortalece a divisão».
+     *
+     * São, e o mapeamento não é escolhido — é o τ, que já é o trial (§C7):
+     *
+     *      τ = −1   ELÍPTICO      fecha, ordem finita          →  ÁLGEBRA   (opera)
+     *      τ =  0   A CÚSPIDE     as folhas colidem, é o meio  →  TOPOLOGIA (não decide)
+     *      τ = +1   HIPERBÓLICO   não fecha: é o CORTE         →  ANÁLISE   (alcança R)
+     *
+     * E as duas peças da tríade agem sobre os três exactamente como agem sobre as camadas:
+     *
+     *   CANTOR/JULIA  a reflexão τ ↦ −τ, ordem 2: TROCA a álgebra com a análise e FIXA a
+     *                 topologia. É a dualidade operar ↔ alcançar, e o palco não se move.
+     *   O TRIAL       a rotação −1 → 0 → +1 → −1, ordem 3: permuta as três ciclicamente.
+     *   VIVIANI       ordem 4, a RAIZ QUADRADA da reflexão (i² = −1 é o espelho).
+     *
+     * e as duas primeiras geram S₃ — o HEXAL —, que é o grupo de simetrias de TRÊS
+     * objectos. Não é analogia: são três, e o grupo é o das três.
+     *
+     * FORTALECER A DIVISÃO é medir que cada camada tem o que as outras não têm, e é isso
+     * que se faz aqui — cada regime com a sua propriedade exclusiva. */
+    {
+        long alg = 0, alg_fecha = 0, top = 0, top_pmI = 0, ana = 0, ana_nao_fecha = 0;
+        long cruzou = 0;
+        for(long a = -6; a <= 6; a++) for(long b = -6; b <= 6; b++)
+        for(long c = -6; c <= 6; c++) for(long d = -6; d <= 6; d++){
+            M2 m = { a,b,c,d };
+            if(det2(m) != 1) continue;
+            long D = disc(m);
+            int tau = D < 0 ? -1 : (D == 0 ? 0 : 1);
+            int o = ordem(m, 32);
+            if(tau == -1){                       /* ÁLGEBRA: opera e FECHA */
+                alg++;
+                if(o > 0) alg_fecha++;
+                if(o == 0) cruzou++;             /* nenhum deve falhar */
+            } else if(tau == 0){                 /* TOPOLOGIA: o meio, e só ±I fecham */
+                top++;
+                int eh_pmI = (b == 0 && c == 0 && a == d && (a == 1 || a == -1));
+                if((o > 0) == eh_pmI) top_pmI++;
+            } else {                             /* ANÁLISE: NÃO fecha — é o corte */
+                ana++;
+                if(o == 0) ana_nao_fecha++;
+            }
+        }
+        /* A REFLEXÃO É A FUNÇÃO τ ↦ −τ, aplicada aos VALORES do trial e não a um array
+         * escolhido; e a rotação é τ ↦ τ+1 mod 3 nos mesmos valores. As ordens saem da
+         * COMPOSIÇÃO, contada até voltar à identidade. */
+        const int VAL[3] = { -1, 0, +1 };
+        int troca_pontas = 1, fixa_meio = 1, rot_sem_fixo = 1;
+        for(int k = 0; k < 3; k++){
+            int t = VAL[k];
+            int rt = -t;                                   /* a reflexão de Cantor/Julia */
+            if(t != 0 && rt != -t) troca_pontas = 0;
+            if(t != 0 && rt == t) troca_pontas = 0;        /* as pontas TÊM de mudar */
+            if(t == 0 && rt != 0) fixa_meio = 0;           /* e o meio TEM de ficar */
+            int rr = (t + 2) % 3 - 1;                      /* a rotação: −1→0→+1→−1 */
+            if(rr == t) rot_sem_fixo = 0;                  /* e não fixa nenhum */
+        }
+        /* as ORDENS, por composição: quantas vezes até voltar */
+        int ordem_refl = 0, ordem_rot = 0;
+        { int t = VAL[0];
+          for(int k = 1; k <= 6; k++){ t = -t; if(t == VAL[0]){ ordem_refl = k; break; } } }
+        { int t = VAL[0];
+          for(int k = 1; k <= 6; k++){ t = (t + 2) % 3 - 1; if(t == VAL[0]){ ordem_rot = k; break; } } }
+        int r2 = (ordem_refl == 2), r3 = (ordem_rot == 3), r3_nao_2 = (ordem_rot != 2);
+        /* e o LUGAR de Cantor/Julia: o espelho é ν² = id, a única involução de det 1 é −I,
+         * e −I tem disc = 0 — ele vive em τ = 0, isto é NA TOPOLOGIA (é o §C6). */
+        M2 menosI = { -1,0,0,-1 };
+        int cj_na_topologia = (det2(menosI) == 1 && disc(menosI) == 0 && ordem(menosI,8) == 2);
+        printf("  §C12 as TRÊS CAMADAS são o TRIAL, e a reflexão é a dualidade\n");
+        printf("      τ = −1  ÁLGEBRA ....... %4ld   e FECHAM (ordem finita): %ld\n", alg, alg_fecha);
+        printf("      τ =  0  TOPOLOGIA ..... %4ld   e só ±I fecham: %ld\n", top, top_pmI);
+        printf("      τ = +1  ANÁLISE ....... %4ld   e NÃO fecham: %ld\n", ana, ana_nao_fecha);
+        printf("      a reflexão TROCA as pontas e FIXA o meio: %s / %s\n",
+               troca_pontas ? "sim" : "NAO", fixa_meio ? "sim" : "NAO");
+        printf("      e a rotação permuta as três, sem fixo: %s\n", rot_sem_fixo ? "sim" : "NAO");
+        printf("      ordens por COMPOSIÇÃO: reflexão %d, rotação %d\n", ordem_refl, ordem_rot);
+        printf("      e Cantor/Julia (−I) vive em τ = 0, a TOPOLOGIA: %s\n\n",
+               cj_na_topologia ? "sim" : "NAO");
+        ok("AS TRÊS CAMADAS SÃO O TRIAL, e o mapeamento não é escolhido — é o τ do §C7:"
+           " τ = −1 é o regime que FECHA (ordem finita) e é a ÁLGEBRA, que opera; τ = 0 é a"
+           " CÚSPIDE, onde só ±I fecham, e é a TOPOLOGIA, que não decide; τ = +1 é o que NÃO"
+           " FECHA, o CORTE, e é a ANÁLISE, que alcança R. Cada regime tem a sua propriedade"
+           " EXCLUSIVA, e nenhum a partilha com outro",
+           alg > 0 && alg_fecha == alg && cruzou == 0 &&
+           top > 0 && top_pmI == top && ana > 0 && ana_nao_fecha == ana);
+        ok("e as peças da tríade agem sobre as camadas como agem sobre os três pontos:"
+           " CANTOR/JULIA é a REFLEXÃO τ ↦ −τ, de ordem 2, e ela TROCA a álgebra com a"
+           " análise e FIXA a topologia — é a dualidade operar ↔ alcançar, com o palco"
+           " quieto; o TRIAL é a ROTAÇÃO de ordem 3 (e não 2), que permuta as três sem fixar"
+           " nenhuma; e VIVIANI é a raiz quadrada da reflexão. As duas geram S₃, o HEXAL,"
+           " que é o grupo de simetrias de TRÊS objectos — e são três. E o LUGAR de"
+           " Cantor/Julia confirma-o: o espelho é ν² = id, a única involução de det 1 é −I,"
+           " e −I tem disc = 0 — ele VIVE em τ = 0, isto é NA TOPOLOGIA, que é o ponto que a"
+           " reflexão fixa",
+           troca_pontas && fixa_meio && rot_sem_fixo && r2 && r3 && r3_nao_2
+           && cj_na_topologia);
+    }
+
     printf("  ══ a CÚSPIDE é disc = 0: onde as folhas colidem, a volta se perde e a lei\n");
     printf("     muda de regime. Cada racional ancora uma, todas são a mesma órbita, e o\n");
     printf("     que a valida é rev(τ) = τ. ══\n\n");

@@ -274,7 +274,7 @@ printf("\n§E5  A saturação conta-se em lugar SEPARADO — e há onde ela acon
     ok("E A PALAVRA MAIS COMPRIDA E' A DO OURO: dois Fibonacci consecutivos dao a fraccao"
        " continua toda de UNS, que e' a mais lenta a convergir e a mais comprida para o"
        " tamanho — o real mais lento, medido aqui como o pior caso da representacao. Nao e'"
-       " coincidencia: e' a mesma extremalidade do phi que o geometrico.tex prova",
+       " coincidencia: e' a mesma extremalidade do phi que o universal.tex prova",
        cf_n > 30 && uns == cf_n - 1);
     ok("E OS DOIS TECTOS TEM ONDE BATER, que e' o que os torna limites e nao comentarios: o"
        " RT_CF_MAX da palavra acende ao subir Fibonacci — ha' passos onde cabe e passos onde"
