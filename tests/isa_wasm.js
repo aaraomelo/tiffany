@@ -1,7 +1,7 @@
 /* isa_wasm.js — A ISA EM WEBASSEMBLY: A PORTA É UMA, E MEDE-SE PELA METADE REFLETIDA.
  *
  * O Aarão: «a única função que deve ter no ISA é o MOVE» · «não tem opcode inventado DISCO:
- * o MOVE corre aonde senão no disco?» · «lê papers/corpo-estelar.tex e aprende a medir
+ * o MOVE corre aonde senão no disco?» · «lê papers/corpo_analitico.tex e aprende a medir
  * nesse sistema pela metade refletida».
  *
  * E o §sec:medir diz como: «A medida não compara: reverte, e lê o resíduo. [...] A medida
@@ -287,7 +287,7 @@ if (!falhas) {
     console.log('  fabrica os valores (CMP dos zeros, dois iguais, SUB), a orbita gera o resto,');
     console.log('  o reflexo desfaz a ida na mesma corrida e o residuo sai pela propria porta.');
     console.log('');
-    console.log('  E cada seccao tem as DUAS metades do corpo-estelar: o residuo onde TEM de');
+    console.log('  E cada seccao tem as DUAS metades do corpo_analitico: o residuo onde TEM de');
     console.log('  ser zero diz que existe; o residuo onde NAO PODE ser zero diz que e unico.');
 } else console.log(`  FALHOU: ${falhas}`);
 console.log(`#TOTAL ${feitas} ${falhas}`);

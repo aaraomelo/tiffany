@@ -66,12 +66,12 @@ function paginas (pdf) {
 
 console.log('\n=== O FUNDO DA CAIXA, PELOS DOIS STREAMS ===================================\n')
 
-const DOC = 'papers/corpo-estelar.tex'
+const DOC = 'papers/corpo_analitico.tex'
 compoe(DOC, '/tmp/s_ce.pdf')
 
 /* auditoria 14/08: o compositor pinta fundo SÓ no tcolorbox literal
  * (tex_core.c: «o gabarito compõe os teoremas SEM fundo» — deliberado), e o
- * corpo-estelar já não tem nenhum. As secções de FUNDO medem uma fixture
+ * corpo_analitico já não tem nenhum. As secções de FUNDO medem uma fixture
  * própria, pequena e determinística, com as caixas do catálogo. */
 const CAIXA = '\\begin{tcolorbox}[colback=ouroclaro!35,colframe=ouro,boxrule=0pt,leftrule=2pt,arc=0pt,left=4mm,right=3mm,top=2mm,bottom=2mm,breakable]'
 const FIXTURE = '/tmp/s_caixa.tex'
@@ -166,7 +166,7 @@ console.log('\n§S4  E o TEXTO sobreviveu: pintar por baixo não apaga.\n')
 
 console.log('\n§S5  O CONTROLO: tirado o tcolorbox do fonte, os fundos somem — e voltam.\n')
 {
-  /* auditoria 14/08: muta-se a FIXTURE — o corpo-estelar já não tem caixas
+  /* auditoria 14/08: muta-se a FIXTURE — o corpo_analitico já não tem caixas
    * (deliberado no compositor), e mutar o que não está lá não é controlo. */
   const conta = (f) => (bruto(f).match(/ l f/g) || []).length
   let antes = 0, depois = 0, voltou = 0

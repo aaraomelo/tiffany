@@ -498,7 +498,7 @@ static void cam_le(char *out, size_t lim);   /* definida adiante, com o resto da
 static int bairro_escolhe(char cand[NCAND][1024], int prof[NCAND], int n, const char *ctx){
     if(n <= 1) return 0;
     /* EM MANTISSA INTEIRA, e não em double. A casa já tinha a régua: «S = 2^30 fixo
-     * (mantissa); C_k é a resolução» (corpo_peano, §régua dinâmica). A contração é a
+     * (mantissa); C_k é a resolução» (corpo_topologico, §régua dinâmica). A contração é a
      * mesma — s(e) = a(e)·(m + Σ w·c) normalizada —, só que cada peso é um inteiro na
      * escala S, a divisão é inteira e a paragem é por DIFERENÇA INTEIRA. Determinista,
      * reprodutível e sem um decimal: o mesmo resultado em qualquer máquina. */
@@ -5680,7 +5680,7 @@ static void dforma_resolve(int n){
         tique7(1, "o que entrou, e de que andar veio:");
         printf("      objecto              grau            veio de\n");
         printf("      ─────────────────────────────────────────────────────────────\n");
-        printf("      o DIRECTO ⟨,⟩        α∧⋆β  (0)       corpo-estelar §640, o fecho\n");
+        printf("      o DIRECTO ⟨,⟩        α∧⋆β  (0)       corpo_analitico §640, o fecho\n");
         printf("      o CRUZADO ×          α∧β   (+1)      o mesmo, e Λ² do exterior\n");
         printf("      o EXTERIOR ∧         soma os graus   o andar de Λ V\n");
         printf("      a ESTRELA ⋆          k ↔ 3−k         o exterior, e o thm:central\n");
@@ -8055,7 +8055,7 @@ static int resolve_universal(const char *f){
  * 16, 32 e 64 a multiplicatividade está partida com a involução intacta. O laço parava em
  * 8 — media a involução só onde a norma também valia, que é onde a pergunta não tem gume.
  *
- * E a torre da casa já era escrita com o dual (`corpo_peano.tex` thm:rn):
+ * E a torre da casa já era escrita com o dual (`corpo_topologico.tex` thm:rn):
  *      A_{n+1} = A_n + A_n*,   dim A_n = 2ⁿ,  «a ordem NÃO é herdada da reta —
  *                                              é PRODUZIDA pela dualidade». */
 static void esc_hip(Hip x);
@@ -8216,7 +8216,7 @@ static void torre_resolve(int n){
                   " parte simétrica, o cruzado a antissimétrica. O quaternião não é uma"
                   " álgebra a mais: é o directo e o cruzado a caberem no mesmo objecto");
         tique7(3, "a lei é a decomposição de uma bilinear em simétrica ⊕ antissimétrica, e"
-                  " a casa já lhe chamava assim (corpo-estelar §640: fp = cos θ,"
+                  " a casa já lhe chamava assim (corpo_analitico §640: fp = cos θ,"
                   " tan φ = cruzado/directo)");
         { int mal = 0; long feitos = 0;
           for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++)
@@ -8643,7 +8643,7 @@ static int resolve_torre(const char *f){
  *        ⟨u,v⟩² + ‖u∧v‖² = N(u)·N(v)        (Lagrange)
  *
  * e ela é, ao mesmo tempo:
- *   · a decomposição simétrica ⊕ antissimétrica  (corpo-estelar §640: fp = cos θ,
+ *   · a decomposição simétrica ⊕ antissimétrica  (corpo_analitico §640: fp = cos θ,
  *     tan φ = cruzado/directo — o directo é a potência ACTIVA, o cruzado a REACTIVA);
  *   · a CONSERVAÇÃO DA NORMA que a torre de Hurwitz mede (tests/hurwitz.c §H2);
  *   · e cos²θ + sin²θ = 1 com a norma por dentro, medida ao QUADRADO — a raiz não se
@@ -8862,7 +8862,7 @@ static void exterior_resolve(int n){
                         " há vetor que o represente. O Pfaffiano prova-o, e é a fala 13");
               tique7(5, "logo o «produto cruzado» é um acidente da dimensão 3, e o objeto"
                         " geral é o BIVETOR");
-              tique7(6, "e a VOLTA é a casa: `corpo-estelar.tex` §637 chama-lhe «o"
+              tique7(6, "e a VOLTA é a casa: `corpo_analitico.tex` §637 chama-lhe «o"
                         " cruzado, ‖a∧b‖ = sin θ, a parte ANTISSIMÉTRICA, a potência"
                         " REACTIVA que roda e volta — o torque É o produto cruzado». A"
                         " casa já lhe chamava cruzado; o que faltava era o nome Λ²"); }
@@ -8893,7 +8893,7 @@ static void exterior_resolve(int n){
                     " não «abaixo de um limiar», porque tudo aqui é inteiro");
           tique7(5, mal == 0 ? "logo ⋆ é uma involução exata em ℚ³"
                              : "a involução falha — NÃO afirmo");
-          tique7(6, "e a VOLTA liga ao teorema central: `corpo-estelar.tex` thm:central diz"
+          tique7(6, "e a VOLTA liga ao teorema central: `corpo_analitico.tex` thm:central diz"
                     " que a bijeção dual entre Gentil e Hurwitz É A ESTRELA, com"
                     " ν∘ν = id e resíduo 0. Aqui aparece outra estrela com a mesma"
                     " propriedade, entre Λᵏ e Λⁿ⁻ᵏ. E AVISO: o «Hodge» das teorias é a"
@@ -9058,7 +9058,7 @@ static void exterior_resolve(int n){
                " \\;=\\; N(u)\\,N(v)$\n");
         tique7(2, "toda bilinear parte-se em SIMÉTRICA e ANTISSIMÉTRICA, e esta casa já"
                   " lhes chamava DIRECTO (a potência activa, cos θ) e CRUZADO (a"
-                  " reactiva, sin θ) em corpo-estelar §640. A identidade de Lagrange diz"
+                  " reactiva, sin θ) em corpo_analitico §640. A identidade de Lagrange diz"
                   " que os quadrados das duas SOMAM a norma conservada — é"
                   " cos²θ + sin²θ = 1 com a norma por dentro");
         tique7(3, "a lei é a identidade de Lagrange, e mede-se AO QUADRADO: a raiz nunca"
@@ -10318,7 +10318,7 @@ static void forma_resolve(int n){
         tique7(0, "a pergunta não é um teorema: é «onde é que este andar já corria nesta"
                   " casa». Procurei ANTES de escrever, que é a regra");
         tique7(1, "o que se procurou: matriz, forma quadrática, espectro — em"
-                  " `corpo-estelar.tex`, `teoria.tex` e `lib/universal.js`");
+                  " `corpo_analitico.tex`, `teoria.tex` e `lib/universal.js`");
         tique7(2, "E O ANDAR JÁ CÁ ESTAVA, três vezes, sem o nome. A `estaca` da casa é"
                   " mI − A_m, com A·(mI−A) = −I. Isso É Cayley–Hamilton: A² − mA − I = 0"
                   " é exatamente p_A(A) = 0 para a companheira A_m = [[m,1],[1,0]]");
@@ -10379,7 +10379,7 @@ static void forma_resolve(int n){
                   " (a² + b², definida; a² + mab − b², indefinida) são as duas formas"
                   " quadráticas do §3, com o gume Q(v) = 0 já resolvido entre elas");
         tique7(6, "e a VOLTA é o que isto muda: o andar novo não trouxe motor, trouxe o"
-                  " NOME. E há uma ponte por fazer — no `corpo-estelar.tex`,"
+                  " NOME. E há uma ponte por fazer — no `corpo_analitico.tex`,"
                   " M_ij = Σ(xᵢ−cᵢ)(xⱼ−cⱼ) é SIMÉTRICA e «a massa escalar é apenas o seu"
                   " TRAÇO, logo a massa tem DIREÇÃO». Essa direção é a decomposição"
                   " espectral desta matriz — o teorema §11 aplicado ao corpo estelar");
@@ -17640,7 +17640,7 @@ static int teste(void){
          * so o "___", o blank de preencher, e a moldura. Duas regressoes MEDIDAS ate
          * aqui: «o que e um corpo» e «mostra a fundacao» caiam no decreto. */
         int cl = corte_escreve("o que e um corpo", 16,
-                               "ver papers/torre_fundacao.tex", out, sizeof out);
+                               "ver corpus/docs/torre_fundacao.tex", out, sizeof out);
         int cl2 = corte_escreve("o que e um corpo", 16,
                                 "ver papers/torre\\_fundacao.tex", out, sizeof out);
         ok("o '_' nu dos caminhos e o \\_ do LaTeX nao sao buraco — so o ___ e",
@@ -18896,7 +18896,7 @@ static int teste(void){
                  " ZERO, e isso varre-se em vez de se citar. E o par div/rot é o"
                  " DIRECTO/CRUZADO desta casa outra vez — div F é o produto interno de ∇"
                  " com F (a parte que ATRAVESSA) e rot F é o produto cruzado (a que RODA)."
-                 " Não é analogia: é a mesma decomposição de corpo-estelar §640, com ∇ no"
+                 " Não é analogia: é a mesma decomposição de corpo_analitico §640, com ∇ no"
                  " lugar de um vector",
                  m1 == 0 && m2 == 0 && tot == 125); }
 
@@ -19707,7 +19707,7 @@ static int teste(void){
                      " %d falhas\n", feitos, mal, folga_mal);
               ok("O PAR FECHA: directo² + cruzado² = N(u)N(v). A conservação da norma que a"
                  " torre de Hurwitz mede e a decomposição simétrica ⊕ antissimétrica que a"
-                 " casa chama directo/cruzado (corpo-estelar §640) são a MESMA frase — e eu"
+                 " casa chama directo/cruzado (corpo_analitico §640) são a MESMA frase — e eu"
                  " tinha as duas metades em ficheiros diferentes sem nunca a escrever",
                  mal == 0 && feitos == 117649);
               ok("e Cauchy–Schwarz deixa de ser desigualdade: é Lagrange com um termo"

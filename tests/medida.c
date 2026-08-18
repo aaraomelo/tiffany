@@ -1,4 +1,4 @@
-/* medida.c — A MEDIDA: contar, saltar, furar. O medidor que papers/medida.tex devia.
+/* medida.c — A MEDIDA: contar, saltar, furar. O medidor que corpus/docs/medida.tex devia.
  *
  * O Aarão: «vc fica aí aproximando irracionais na forma decimal enquanto só precisamos
  * saltar sobre eles. Contar número inteiro é isso. Fura alguns pontos e já era.»
@@ -259,7 +259,7 @@ static void m5(void){
 }
 
 int main(void){
-    printf("=== A MEDIDA: contar, saltar, furar — o medidor de papers/medida.tex =====\n\n");
+    printf("=== A MEDIDA: contar, saltar, furar — o medidor de corpus/docs/medida.tex =====\n\n");
     m1(); m2(); m3(); m4(); m5();
     printf("\n==========================================================================\n");
     if(!falhas){

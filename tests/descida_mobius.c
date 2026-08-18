@@ -544,7 +544,7 @@ int main(void){
      * O Aarão: «vê a codificação com Cantor e Julia no corpo de Peano e traz pro
      * geométrico».
      *
-     * O `corpo_peano` (def:cantor) põe o par: CANTOR é o lado discreto/aditivo — o shift
+     * O `corpo_topologico` (def:cantor) põe o par: CANTOR é o lado discreto/aditivo — o shift
      * θ ↦ 2θ — e JULIA é o multiplicativo — z ↦ z² —, conjugados por z = e^{2πiθ}. E os
      * dois «golden» são
      *

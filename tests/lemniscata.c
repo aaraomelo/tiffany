@@ -1,6 +1,6 @@
 /* lemniscata.c — π SE DOBRA NA LEMNISCATA, E O AGM É O FATOR DE COSTURA.
  *
- * A linha, e ela fecha o que agm.c e estelar.c já tinham em pedaços (fonte: corpo_estelar.tex,
+ * A linha, e ela fecha o que agm.c e estelar.c já tinham em pedaços (fonte: corpo_analitico.tex,
  * prop:agm). O círculo é a forma sem deformação; a LEMNISCATA é o círculo DOBRADO --- e ela tem o seu
  * próprio π:
  *

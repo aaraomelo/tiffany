@@ -1,6 +1,6 @@
 /* chicote.c — O CHICOTE É O TENSOR: compor gatos É contrair índices.
  *
- * Recuperado de broca-so (papers/corpo_estelar.tex Parte IX, linguagem/tensor_mineral.py) e
+ * Recuperado de broca-so (papers/corpo_analitico.tex Parte IX, linguagem/tensor_mineral.py) e
  * medido aqui. O chicote é a dinâmica posicional da régua mineral — a β-numeração na base σ_n,
  * onde andar uma casa é aplicar o gato. E o gato é um tensor de rank 2, logo:
  *

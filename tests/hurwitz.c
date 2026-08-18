@@ -290,7 +290,7 @@ printf("\n§H5  E O TELÓMERO É A TORRE DUAL: o lado que desce, com o sinal tro
      * ── E ESTE LAÇO PARAVA EM 8 ──────────────────────────────────────────────────────
      * Media a involução só até onde a NORMA também vale — isto é, no sítio onde os dois
      * lados concordam, que é o sítio onde a pergunta não tem gume. A frase que interessa
-     * está em `corpo-estelar.tex` def:octoniao-dual: o mesmo espaço lê-se de dois modos,
+     * está em `corpo_analitico.tex` def:octoniao-dual: o mesmo espaço lê-se de dois modos,
      * «pela norma bilinear PERDE a associatividade; pela dualidade NÃO PERDE NADA — a
      * volta fecha». Isso só se pode medir ONDE A NORMA JÁ MORREU, e eu nunca lá tinha
      * corrido. Vai agora a 64: em 16, 32 e 64 a multiplicatividade está partida e a
@@ -340,7 +340,7 @@ printf("\n§H5  E O TELÓMERO É A TORRE DUAL: o lado que desce, com o sinal tro
 printf("\n§H6  O FECHO DO DUAL: directo² + cruzado² = N(u)N(v).\n\n");
 {
     /* O Aarão: «fecha o dual». Ele tinha razão, e o buraco era este: a casa tinha o SPLIT
-     * directo/cruzado (corpo-estelar §640: fp = cos θ, tan φ = cruzado/directo) e tinha a
+     * directo/cruzado (corpo_analitico §640: fp = cos θ, tan φ = cruzado/directo) e tinha a
      * CONSERVAÇÃO da norma (§H2 aqui em cima), e nunca escreveu a equação que diz que a segunda
      * É a primeira. Estava a medir metade de um par dual — outra vez.
      *

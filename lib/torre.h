@@ -6,7 +6,7 @@
  * E o Aarão: **«aquilo é metade»**. A outra metade é Gentil, e Lebesgue discreto-contínuo.
  * Ele tem razão, e a razão está escrita nos papers da casa:
  *
- * ── O TEOREMA CENTRAL (`corpo-estelar.tex` thm:central) ───────────────────────────
+ * ── O TEOREMA CENTRAL (`corpo_analitico.tex` thm:central) ───────────────────────────
  * Hurwitz e Gentil são DUAIS, pela medida:
  *   · HURWITZ, o lado DISCRETO — a norma N(x) = Σxᵢ² lida pela cruz, multiplicativa
  *     para o produto BILINEAR exactamente nos graus 1, 2, 4, 8;
@@ -29,7 +29,7 @@
  * corre agora até 64: em 16, 32 e 64 a multiplicatividade está partida e a involução
  * continua com resíduo ZERO. A torre não acaba em 8 — acaba em 8 do lado da norma.
  *
- * ── E A TORRE DA CASA JÁ ERA ESCRITA COM O DUAL (`corpo_peano.tex` thm:rn) ────────
+ * ── E A TORRE DA CASA JÁ ERA ESCRITA COM O DUAL (`corpo_topologico.tex` thm:rn) ────────
  *        A_{n+1} = A_n + A_n*,      dim A_n = 2ⁿ · dim A_0
  * com «a ordem sobe por indução; NÃO é herdada da reta — é PRODUZIDA pela dualidade».
  * O eval escreve A_n ⊕ A_n e; a casa escreve A_n + A_n*. É a mesma dobra, e a segunda
@@ -163,7 +163,7 @@ static int hip_cristal(Hip x){
  * Eu tinha subido o TR_MAX para 64 e mostrado a norma partida com o dual intacto em 16,
  * 32 e 64. O Aarão: **«a torre nao tem limite dimensional»**. E tem razão duas vezes.
  *
- * Primeiro, porque é o que o `corpo-estelar.tex` §328 diz, com todas as letras: «o passo
+ * Primeiro, porque é o que o `corpo_analitico.tex` §328 diz, com todas as letras: «o passo
  * dos tecidos, T_{k+1} = T_k + T_k*, é a estrela usada como CONSTRUTOR, e a torre que ele
  * gera NÃO TEM TOPO POR DENTRO: a indução não pára — a régua é infinita —, e ν∘ν = id
  * fecha cada andar com resíduo 0. O que a norma limita é EXTERNO.»

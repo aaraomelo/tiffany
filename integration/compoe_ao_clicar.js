@@ -61,7 +61,7 @@ if (!vivo) {
 console.log('\n=== O PDF SAI DO FONTE AO CLICAR ===========================================\n')
 
 console.log('§Z1  Os cinco documentos saem, e saem com páginas.\n')
-const DOCS = ['teoria', 'catalogo', 'enredo', 'corpo-estelar', 'dualsort']
+const DOCS = ['teoria', 'catalogo', 'enredo', 'corpo_analitico', 'dualsort']
 {
   let vazios = 0, sem_pag = 0
   console.log('      documento         bytes        páginas')

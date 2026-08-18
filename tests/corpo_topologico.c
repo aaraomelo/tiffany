@@ -1,4 +1,4 @@
-/* corpo_peano.c — O CORPO DE PEANO: escalada na torre = soma + lcm + Peano.
+/* corpo_topologico.c — O CORPO DE PEANO: escalada na torre = soma + lcm + Peano.
  *
  * A régua não esgota; cada andar tem a sua. O viveiro cruza dimensões pelo lcm;
  * a torre sobe por T+T*; Peano enche (Gentil) e conta (Hurwitz).
@@ -32,7 +32,7 @@
  *   §CP39 maestro=realização do teorema central; retração≠conservação≠realização
  *   §CP40 metrónomo=métrica dual; Lyapunov ±λ; metal/dobra; universal na borda
  *
- *   cc -O2 -std=c99 -Wall -I../lib corpo_peano.c -o corpo_peano && ./corpo_peano
+ *   cc -O2 -std=c99 -Wall -I../lib corpo_topologico.c -o corpo_topologico && ./corpo_topologico
  */
 #include <stdio.h>
 #include "oito.h"

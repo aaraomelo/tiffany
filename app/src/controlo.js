@@ -1,5 +1,5 @@
 // controlo.js — Controlo de Histerese acima da IR (UI).
-// papers/corpo_peano.tex thm:controle-histerese; conecthus/core/control.c
+// papers/corpo_topologico.tex thm:controle-histerese; conecthus/core/control.c
 // Eixos 𝒱: L1, |R|, |n|, mut, caixa, teclado, fonético, forma
 // Dados reais: ABNT2/QWERTY + mapa φ PT (espelha eixos_texto.c)
 

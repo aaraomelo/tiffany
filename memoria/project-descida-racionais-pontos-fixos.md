@@ -113,7 +113,7 @@ Ver [[project-torre-hurwitz-gentil]].
 
 ## Cantor/Julia: o mesmo par dual, noutra carta (thm:cantor-julia)
 
-O `corpo_peano` (def:cantor) já tinha **cantor = φ, julia = ψ, φψ = −1** — que é
+O `corpo_topologico` (def:cantor) já tinha **cantor = φ, julia = ψ, φψ = −1** — que é
 `σσ† = −1` do thm:fixo-dual com m=1. **Não é analogia: é o mesmo par.** E o shift θ↦2θ
 (aditivo, Cantor) conjugado a z↦z² (multiplicativo, Julia) pela exponencial é o
 [[project-descida-racionais-pontos-fixos]] thm:aditiva com **outro conjugador** — lá a
@@ -132,7 +132,7 @@ que sobra quando o orçamento deixa de poder ser gasto.*
 ## A UNIFICAÇÃO (thm:unificacao): a ORDEM identifica a lei
 
 «Formaliza a unificação com a lei 8 e trial, Cantor, Julia, Viviani; se fechar, faz teorema.»
-Fechou — e a estrutura **já estava na tabela das oito leis do `corpo_peano`**, com o FECHO de cada
+Fechou — e a estrutura **já estava na tabela das oito leis do `corpo_topologico`**, com o FECHO de cada
 uma escrito ao lado. O que faltava era ver que as peças SÃO essas leis:
 
     Cantor / Julia   o espelho da dobra          2    L_1/L_2   ν² = id

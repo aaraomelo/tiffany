@@ -14,19 +14,19 @@
 \maketitle
 \begin{abstract}
 Follow-ups curtos sobre a rede neural dual.
-Fonte: \code{papers/corpo\_peano.tex} \S rede-dual;
+Fonte: \code{papers/corpo\_topologico.tex} \S rede-dual;
 medidor \code{tests/rede\_dual.js}.
 \end{abstract}
 
 \section{falemos de rede\_dual}
 Três operadores: percepção $P$, borda $\mathcal{H}$, memória $H$.
 Não são três nomes da mesma coisa.
-\code{papers/corpo\_peano.tex} \S rede-dual.
+\code{papers/corpo\_topologico.tex} \S rede-dual.
 
 \section{o que a estaca fixa nos pesos}
 $W_P=-I$, $b_P=c$ pela Lei~1 --- geometria, não aprendizagem.
 A banda $b_{-}-b_{+}=2\Delta$ é memória de retenção.
-\code{papers/corpo\_peano.tex}.
+\code{papers/corpo\_topologico.tex}.
 
 \section{porque hopfield nao inverte sozinho}
 Hopfield atrai para $\xi$ (memória $Y$); inversão é $F_H=D\circ F_P^{-1}\circ D^{-1}$.
@@ -44,13 +44,13 @@ UI: \code{app/src/rede\_dual.js}.
 \section{o que e X igual a x h}
 Estado híbrido $X=(x,h)$; $\mathcal{F}\colon(x,h)\mapsto(x',h')$.
 Na banda retém; fora escolhe $F_P$ ou $F_H$.
-\code{papers/corpo\_peano.tex}.
+\code{papers/corpo\_topologico.tex}.
 
 \section{onde a assistente usa a rede}
 Ciclo em \code{app/src/assistente.js}: retenção reusa $Y$; volta Hopfield;
 frente projecta; Metrónomo atesta $\lambda\Sigma$.
 
 \section{mostra a arvore rede dual}
-Este paper + \code{papers/conversa\_rede\_dual.tex} + \code{papers/corpo\_peano.tex} \S rede-dual.
+Este paper + \code{papers/conversa\_rede\_dual.tex} + \code{papers/corpo\_topologico.tex} \S rede-dual.
 
 \end{document}

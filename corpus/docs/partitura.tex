@@ -1,10 +1,10 @@
-% papers/partitura.tex
+% corpus/docs/partitura.tex
 % Partitura --- DESENHADA pelo tradutor (tex.wasm).
-% Produto = Π^{Peano} = Assinatura(corpo_peano) no pentagrama.
+% Produto = Π^{Peano} = Assinatura(corpo\_topologico) no pentagrama.
 %
 %   cd partitura && cc -O2 -std=c99 -Wall emite.c -o emite
-%   ./emite -o ../papers/partitura_vozes.tex
-%   tests/tex papers/partitura.tex partitura-wasm.pdf
+%   ./emite -o ../corpus/docs/partitura_vozes.tex
+%   tests/tex corpus/docs/partitura.tex partitura-wasm.pdf
 %   bash tools/sobe_tex_wasm.sh
 \documentclass[11pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
@@ -80,13 +80,13 @@
 \input{gkcapa}
 \begin{document}
 \gkcapa{Partitura do Corpo de Peano}
-       {$\operatorname{Assinatura}(\texttt{corpo\_peano})\longmapsto\Pi^{\mathrm{Peano}}$}
+       {$\operatorname{Assinatura}(\texttt{corpo\_topologico})\longmapsto\Pi^{\mathrm{Peano}}$}
        {desenhada pelo tradutor WASM --- não sonificação}
 \maketitle
 
 \begin{abstract}
 \noindent Produto: a \textbf{partitura desenhada} de
-\code{papers/corpo\_peano.tex}. Cadeia
+\code{papers/corpo\_topologico.tex}. Cadeia
 \[
 \boxed{
 \operatorname{Assinatura}(\mathcal{C}_{\mathrm{Peano}})
@@ -129,7 +129,7 @@ I=\text{sentido};\quad
 r=\text{atestação}
 \quad
 (\text{Prop.\ pi-cadeia / rede-no-canal em }
-\code{papers/corpo\_peano.tex}).
+\code{papers/corpo\_topologico.tex}).
 }
 \]
 

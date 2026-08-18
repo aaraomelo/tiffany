@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# bench_histerese.sh — valida Teorema da Histerese (corpo_peano §histerese)
+# bench_histerese.sh — valida Teorema da Histerese (corpo_topologico §histerese)
 # no corpus da assistente: vizinhança, abreviação, sequência, borda, r_volta.
 #
 #   cd banco && ../tools/bench_histerese.sh .fala/<hex>

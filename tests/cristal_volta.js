@@ -4,10 +4,10 @@
  * A fonte é cristal/cristal.jsonl (4234 + lotes: 4286 recuperados do
  * broca-so menos 52 fusões de curadoria — tools/cristal_cura.py; cada fusão
  * guarda as duas partes byte a byte, medidor tests/cristal_curadoria.js).
- * As projeções papers/cristal_*.tex carregam cada registo em %CRISTAL —
+ * As projeções cristal/cristal_*.tex carregam cada registo em %CRISTAL —
  * o desenho do /Type/FonteTeX: a página é a leitura, a fonte viaja invisível.
  *
- * v2 (Teorema da Absorção, corpo_peano.tex thm:absorcao): o resíduo lê-se
+ * v2 (Teorema da Absorção, corpo_topologico.tex thm:absorcao): o resíduo lê-se
  * pelo ENDEREÇO (o id), não pela posição — R(a) = Back(a) − a. A posição é
  * derivada e não carrega informação; a régua v1 (por posição) fica só como
  * contraste na matriz de indução, para o teorema aparecer na tela.
@@ -38,7 +38,9 @@ function ok (q, cond) {
 
 const RAIZ = path.join(__dirname, '..')
 const FONTE = path.join(RAIZ, 'cristal', 'cristal.jsonl')
-const PAPERS = path.join(RAIZ, 'papers')
+/* os cristal_*.tex vivem em cristal/, junto ao cristal.jsonl de que são a face
+ * embebida — papers/ ficou só com o fundo (universal, topológico, analítico). */
+const PAPERS = path.join(RAIZ, 'cristal')
 
 /* §V0 — a fonte */
 const fonteLinhas = fs.readFileSync(FONTE, 'utf8').split('\n').filter(l => l.length)

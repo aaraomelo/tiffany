@@ -30,7 +30,7 @@ duais de nada».
 ternário escrito quando só havia duas fontes, que sobreviveu à generalização. Antes de dar
 por resolvido: procurar `? &` e `== F_` no ficheiro, e perguntar se cada um ainda vale com N
 variantes. E quando o sintoma for letra colada, **não é posição: é a régua a não separar** —
-o `corpo-estelar.tex` §coexistem, «o conflito por espaço não é uma luta: é falta de
+o `corpo_analitico.tex` §coexistem, «o conflito por espaço não é uma luta: é falta de
 resolução».
 
 Ver [[feedback-a-referencia-escrita-a-mao]] e [[project-checkpoint-2026-08-07]].

@@ -1,5 +1,5 @@
 // rede_dual.js — Realização na UI do Teorema da Rede Neural Dual
-// (papers/corpo_peano.tex §rede-dual; Dual Sort: W=-I, b=c).
+// (papers/corpo_topologico.tex §rede-dual; Dual Sort: W=-I, b=c).
 //
 //   P (estaca/perceptron)  ↔  ℋ (banda)  ↔  H (memória associativa)
 //

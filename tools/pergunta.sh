@@ -7,7 +7,7 @@
 # E ele tem razão porque isto já me custou caro, e sempre da mesma forma: o que já está
 # medido e eu não sei, escrevo pior. A reversão pdf→estrela→latex estava escrita no
 # `tests/estrela_emite.c` §E3 — eu tinha-a escrito — e mesmo assim construí o
-# `tools/compara.js` contra o pdflatex, que é exactamente o que o `corpo-estelar.tex`
+# `tools/compara.js` contra o pdflatex, que é exactamente o que o `corpo_analitico.tex`
 # proíbe na última linha da especificação.
 #
 # A ferramenta responde em quatro lados, e os quatro importam:
@@ -27,7 +27,7 @@ if [ $# -eq 0 ]; then
   echo
   echo "  ═══ A ESPECIFICAÇÃO, NUMA PÁGINA ═══════════════════════════════════════════"
   echo
-  sed -n '/A especificação, numa página/,/bottomrule/p' papers/corpo-estelar.tex \
+  sed -n '/A especificação, numa página/,/bottomrule/p' papers/corpo_analitico.tex \
     | grep ' & ' | sed 's/\\\\$//; s/\\textbf{\([^}]*\)}/\1/g; s/\\code{\([^}]*\)}/\1/g' \
     | sed 's/\\emph{\([^}]*\)}/\1/g; s/[\\$]//g; s/^/    /'
   echo

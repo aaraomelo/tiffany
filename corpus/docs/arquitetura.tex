@@ -1,5 +1,5 @@
 % !TeX program = pdflatex
-% papers/arquitetura.tex — a arquitetura do sistema: estrela (MOVE), torre (π_k), pipeline (IR Claim).
+% corpus/docs/arquitetura.tex — a arquitetura do sistema: estrela (MOVE), torre (π_k), pipeline (IR Claim).
 % Auto-contido: compila sozinho.  pdflatex arquitetura.tex
 \documentclass[11pt,a4paper]{article}
 \usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[portuguese]{babel}
@@ -172,7 +172,7 @@ tradutor: a interface de \emph{uma} porta que casa o seu dual pelo seu trial.
 $3$ estados. A \textbf{tetral} (os tecidos, dim~$4$) e a \textbf{pental} (o bit $i$, $x^2=-1$)
 \emph{não} estão no núcleo --- o corpo que atravessa é plano $(g,x,y)$, e a dobra texto$\to$página dá-se
 uma vez, não sobe a $4\to8$. A ausência é deliberada: essas leis são do \emph{corpo}
-(\emph{corpo-estelar}), não da interface. As quatro que o tradutor usa --- a \textbf{Lei~1} (dual), a
+(\emph{corpo\_analitico}), não da interface. As quatro que o tradutor usa --- a \textbf{Lei~1} (dual), a
 \textbf{Lei~2} (bidual), a \textbf{Lei~3} (trial) e a \textbf{Lei~6} (hexal) --- são leis do meio da
 torre das oito; a \textbf{Lei~0} (a divisão do zero) e a \textbf{Lei~7} (o octonião dual) são os dois
 nulos, e é a Lei~7 que fecha o \emph{circuito} inteiro, adiante (\emph{corpo estelar},
@@ -192,7 +192,7 @@ O estado vive no disco --- a memória linear do módulo, o \emph{mmap} do \code{
 \textbf{cresce pelo que se escreve}, por \code{memory.grow}, contado, sob demanda: um disco que
 nunca se escreve não pesa. \emph{Não se reserva o pior caso} --- um \code{char MONTE[12\,MB]} era o
 infinito reservado --- \emph{nem se aproxima} por dobrar capacidade; conta-se, que é o que a
-\emph{medida} deste sistema manda (\code{papers/medida.tex}).
+\emph{medida} deste sistema manda (\code{corpus/docs/medida.tex}).
 
 \medido{pedidos $2$\,MB, o disco sobe exactamente $32$ páginas --- o que se pede, não mais; e o que
 se escreve lê-se de volta pela porta dos ficheiros, resíduo $0$ (\code{tests/tex\_wasm.js}).}
@@ -233,7 +233,7 @@ sinais --- duas involuções que fecham \emph{ambas} na forma: o \textbf{sinal d
 Lei~1, reflexão em torno de $0$) e o \textbf{sinal da escala} (multiplicativo, mover a vírgula,
 $10^{-k}\!\leftrightarrow\!10^{+k}$). As duas comutam, e a órbita de um número tem \textbf{quatro}
 estados --- a cruz, a \emph{tetral}: é o par aditivo/multiplicativo das duas leis, no corpo do número.
-É a \textbf{lei dos tecidos} (Lei~4 tetral, \code{corpo-estelar thm:tecidos}): o passo $T{+}T^{*}$,
+É a \textbf{lei dos tecidos} (Lei~4 tetral, \code{corpo\_analitico thm:tecidos}): o passo $T{+}T^{*}$,
 com a \emph{escrita} ($T$, contar os dígitos, o discreto) e a \emph{leitura} ($T^{*}$, o valor, o
 contínuo) lidas pela \textbf{cruz} --- e a medida é \emph{contar}$\leftrightarrow$\emph{integrar}
 (o degrau $\mathbb{Q}\to\mathbb{R}$, o teorema central), \textbf{não} a norma de Cayley--Dickson, que
@@ -728,7 +728,7 @@ conecthus/
   fundamento.tex        LMS lido pelas oito leis
   backends/             realizacoes C -> wasm (manifesto.json)
   claims/               *.claim  = fonte de verdade
-papers/arquitetura.tex  este documento (tres eixos)
+corpus/docs/arquitetura.tex  este documento (tres eixos)
 tools/sobe_backends_wasm.sh
 tools/sobe_tex_wasm.sh
 tools/traduz.c          a bijecao C <-> wasm

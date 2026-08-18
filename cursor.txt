@@ -149,7 +149,7 @@ E se um gume honesto não morder, há duas doenças e só duas:
 
     V = Q(m raiz D) = Q + Q.m raizD     espaço VECTORIAL sobre Q, dim 2, base {1, m raizD}
 
-Primeira dobra da torre dim A_n = 2^n dim A_0 do corpo_peano (thm:rn). O DUAL não é a
+Primeira dobra da torre dim A_n = 2^n dim A_0 do corpo_topologico (thm:rn). O DUAL não é a
 conjugação: é o outro lado, com a SUA RÉGUA, que sai da involução v(x) = -1/x:
 
     s = m raizD    s† = -1/s    ==>    m† = -1/(mD)    V† = Q(m† raizD)

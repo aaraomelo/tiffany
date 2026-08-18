@@ -17,7 +17,7 @@ ROOT=$(cd "$D/.." && pwd)
 CV="$ROOT/banco/bin/conversa"
 MODELO="${MODELO:-qwen2.5:1.5b}"
 FORCA="${FORCA:-1}"
-TEX_OUT="$ROOT/papers/conversa_gabarito.tex"
+TEX_OUT="$ROOT/corpus/fala/conversa_gabarito.tex"
 SISTEMA="$ROOT/tools/.gabarito_sistema.txt"
 mkdir -p "$B"
 [ -x "$CV" ] || { echo "falta $CV — compila banco/conversa"; exit 1; }

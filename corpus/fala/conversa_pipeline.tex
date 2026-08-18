@@ -15,7 +15,7 @@
 \begin{abstract}
 Pares curtos da IR do pipeline e do Controlo de Histerese.
 Especificação: \code{conecthus/pipeline.tex}; arquitetura
-\code{papers/arquitetura.tex} \S pipeline; Peano
+\code{corpus/docs/arquitetura.tex} \S pipeline; Peano
 \code{thm:controle-histerese}. UI: \code{app/src/controlo.js}.
 \end{abstract}
 
@@ -35,7 +35,7 @@ inválido. \code{conecthus/pipeline.tex}; \code{tests/claim\_ir.c}.
 \section{o que e o controlo de histerese}
 Runtime \emph{acima} da IR: Gerar $\to$ Medir$(D)$ $\to$ Seleccionar $\to$
 RETAIN / MOVE / RETRACT. Não é palavra-chave do \code{.claim}.
-\code{papers/corpo\_peano.tex} thm:controle-histerese.
+\code{papers/corpo\_topologico.tex} thm:controle-histerese.
 
 \section{o que e retain}
 $R=0$ e $D\preceq\Theta$: estado preservado na borda.
@@ -57,7 +57,7 @@ Oito de realização: L1, $|R|$, $|n|$, mut, caixa, teclado, fonético, forma.
 
 \section{o pipeline e o terceiro eixo?}
 Sim: porta (\code{MOVE}), torre ($\pi_k$/Maestro/Metrónomo), pipeline (Claim).
-\code{papers/arquitetura.tex} \S pipeline.
+\code{corpus/docs/arquitetura.tex} \S pipeline.
 
 \section{mostra o pipeline}
 \code{conecthus/pipeline.tex}; medidores \code{tests/claim\_ir.c},
@@ -65,7 +65,7 @@ Sim: porta (\code{MOVE}), torre ($\pi_k$/Maestro/Metrónomo), pipeline (Claim).
 
 \section{falemos do controlo}
 Histerese $=$ retenção; Controlo $=$ selecção. Dualidade no Peano.
-\code{papers/corpo\_peano.tex} \S controle-histerese.
+\code{papers/corpo\_topologico.tex} \S controle-histerese.
 
 \section{o que e o eixo teclado}
 Geometria $d_K$ das teclas (ABNT2/QWERTY). \texttt{que}$\leftrightarrow$\texttt{qeu}
@@ -147,7 +147,7 @@ O push fica ao dono --- o Claim observa.
 
 \section{llm e o maestro?}
 Não. LLM pode extrair Claims; não projecta $\pi_k$ nem atesta
-$\lambda^{+}+\lambda^{-}=0$. \code{papers/arquitetura.tex} \S pipeline.
+$\lambda^{+}+\lambda^{-}=0$. \code{corpus/docs/arquitetura.tex} \S pipeline.
 
 \section{o que e pipelineclosure}
 Claim meta: \code{emit}$\circ$\code{parse}$=$\code{id}; mutação

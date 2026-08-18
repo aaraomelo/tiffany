@@ -1,7 +1,7 @@
 #define _POSIX_C_SOURCE 199309L
 /* bench_maxcut.c — MAX-CUT: Maestro/relógio, escala isomorfa, tabela comparativa.
  *
- * Visão (corpo_peano thm:proj-maestro + corpo-estelar meia volta):
+ * Visão (corpo_topologico thm:proj-maestro + corpo_analitico meia volta):
  *   para o Maestro nao ha' diferenca entre cortar 4 nos e cortar 4000 —
  *   o procedimento e' o mesmo (tick ∘ batuta ∘ Π). A torre e' infinita:
  *   so' existem dobras; cada andar e' isomorfo ao anterior (d_{k+1}/2 = d_k).

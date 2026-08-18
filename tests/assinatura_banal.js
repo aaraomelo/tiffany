@@ -6,7 +6,7 @@
  *   E(x) = Σ b²      (energia — o módulo; reconhece equivalência de massa)
  *   Φ(x) = Σ i·b     (fase — a posição interna; reconhece identidade ordenada)
  *
- * Fontes orgânicas: papers/conversa.tex (o corpus banal da casa — fala =
+ * Fontes orgânicas: corpus/fala/conversa.tex (o corpus banal da casa — fala =
  * \section, resposta = corpo) e os pares reais dos eixos de texto do
  * Controle (cafe↔café, que↔qeu, casa↔caza — conecthus/core/eixos_texto.c).
  *
@@ -49,7 +49,7 @@ function degrau (a, b) {
 }
 
 /* §B0 — pares orgânicos do corpus banal */
-const tex = fs.readFileSync(path.join(__dirname, '..', 'papers', 'conversa.tex'), 'utf8')
+const tex = fs.readFileSync(path.join(__dirname, '..', 'corpus', 'fala', 'conversa.tex'), 'utf8')
 const pares = []
 const rx = /\\section\{([^}]+)\}\s*\n([^\n\\]+)/g
 let m
@@ -57,7 +57,7 @@ while ((m = rx.exec(tex)) && pares.length < 20) {
   const fala = m[1].trim(), resp = m[2].trim()
   if (fala.length >= 2 && resp.length >= 8) pares.push([fala, resp])
 }
-console.log(`corpus banal: ${pares.length} pares reais de papers/conversa.tex`)
+console.log(`corpus banal: ${pares.length} pares reais de corpus/fala/conversa.tex`)
 ok('§B0 pelo menos 10 pares orgânicos', pares.length >= 10)
 
 /* §B1 — RETAIN: reler é conservar */

@@ -29,7 +29,7 @@
  *   §K6  a CONSTRUCAO: meia volta na sequencia natural DA' o corte — i -> (i + n/2) mod n,
  *        e o lado le-se em quem atravessou. Sem busca e sem comparacao
  *   §K7  MASSA = CORTE, e mais nada: dizer "na borda" e' redundante, porque so' a borda
- *        fecha orbita e so' onde fecha ha' massa. No corpo_peano / partitura: essa massa e'
+ *        fecha orbita e so' onde fecha ha' massa. No corpo_topologico / partitura: essa massa e'
  *        a seleccionada na PERA da batuta — o Maestro emite o corte (thm:maxcut)
  *   §K8  a REGUA daqui e' BITS APAGADOS e nao passos: o sistema nao tem tempo, e a
  *        complexidade e' uma regua de fora. O corte por rotacao apaga ZERO

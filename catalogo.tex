@@ -1591,7 +1591,7 @@ E as inversas não são três sortes separadas. São \textbf{uma} razão, dita t
 
 E há razão operacional, medida --- no \emph{Corpo de Peano}, o \textbf{Teorema do Metrónomo}:
 o maestro projecta; o metrónomo lê; o Lyapunov dualizado atesta.
-A volta é a \textbf{metade refletida} --- a inversa temporal ---, e é ela que dá o expoente de Lyapunov, porque num sistema reversível o espectro é simétrico, $\lambda^++\lambda^-=0$. Uma medida só é fiável se a metade refletida volta com resíduo $0$ (a própria medida com $\lambda=0$, sem amplificar erro); e o erro, quando desbalança, \textbf{quantifica-se em atrasos unitários}: $d$ atrasos ($z^{-1}$) de um lado dão erro $(e^{\lambda d}-1)$ vezes a escala, cada atraso a multiplicar por $e^\lambda$. É essa a justificativa das proibições --- o \code{double} que arredonda, o \code{malloc} e o estado que se sobrescreve, o \emph{buffer} que atrasa: todos \textbf{perdem a metade refletida}, e o que perde a volta deriva. Medido em \code{tests/lyapunov\_refletido.c} e \code{tests/corpo\_peano.c}~§CP40: a estrela $\nu\circ\nu=\mathrm{id}$ volta com resíduo $0$, a medida com um bit descartado não volta, e cada atraso unitário dobra o erro.
+A volta é a \textbf{metade refletida} --- a inversa temporal ---, e é ela que dá o expoente de Lyapunov, porque num sistema reversível o espectro é simétrico, $\lambda^++\lambda^-=0$. Uma medida só é fiável se a metade refletida volta com resíduo $0$ (a própria medida com $\lambda=0$, sem amplificar erro); e o erro, quando desbalança, \textbf{quantifica-se em atrasos unitários}: $d$ atrasos ($z^{-1}$) de um lado dão erro $(e^{\lambda d}-1)$ vezes a escala, cada atraso a multiplicar por $e^\lambda$. É essa a justificativa das proibições --- o \code{double} que arredonda, o \code{malloc} e o estado que se sobrescreve, o \emph{buffer} que atrasa: todos \textbf{perdem a metade refletida}, e o que perde a volta deriva. Medido em \code{tests/lyapunov\_refletido.c} e \code{tests/corpo\_topologico.c}~§CP40: a estrela $\nu\circ\nu=\mathrm{id}$ volta com resíduo $0$, a medida com um bit descartado não volta, e cada atraso unitário dobra o erro.
 
 E uma nota sobre a volta, que o livro já apanhou noutro lugar: \textbf{a inversa não é a troca de lados --- é a troca \emph{com o sinal}.} Uma permutação que apenas troca as duas faces \emph{preserva} o telescópio, e um par que preserva onde devia inverter é meia dualidade. A dualidade inteira é a permutação \textbf{com a reflexão}: ela inverte o telescópio, $\sum h\mapsto-\sum h$, e troca a régua pela sua recíproca --- a impedância invertida, que é o mesmo $\exp\leftrightarrow\log$ de sempre. \textbf{Falta-lhe o sinal, e um par sem sinal trocado é o mesmo erro outra vez.} Meia dualidade não fecha; e é justamente sobre o que fecha que estas páginas são.
 
@@ -11567,7 +11567,7 @@ caso, o infinito --- nem um \code{realloc} que \textbf{dobra} --- aproximar por 
 disco começa no que as declarações somam e \textbf{estende-se por \code{memory.grow}}, contado,
 sob demanda: o \emph{mmap} do \code{disco.h}, o motor pagina o que se toca e larga o resto. Um
 disco que nunca se escreve não pesa. \emph{Foi a teoria da medida a apontá-lo}: não se reserva
-o infinito nem se aproxima --- conta-se (\code{papers/medida.tex}).
+o infinito nem se aproxima --- conta-se (\code{corpus/docs/medida.tex}).
 
 \medskip
 \noindent A subida cobriu a cauda toda, cada peça catalogada com o porquê no código: os
@@ -26505,4 +26505,55 @@ Quart. J. Math. \textbf{45} (1914), 350--372.
 products}, Proc. London Math. Soc. \textbf{25} (1894), 318--343.
 \end{thebibliography}
 
+
+%======================================================================
+\section{Os medidores das realizações particulares}\label{sec:realizacoes-particulares}
+
+A tríade passou a ser \emph{Universal} --- tudo canónico ---, com \emph{Topológico} e
+\emph{Analítico} a darem as realizações de cada camada; a \emph{Teoria} guarda as
+realizações particulares e este \emph{Catálogo} o que é mais particular ainda. Os
+documentos que existiam entre estes foram retirados, e o que eles mediam \textbf{não se
+perde: fica aqui, que é o seu lugar.}
+
+\emph{E o critério não foi editorial}: contaram-se os medidores citados antes e depois da
+mudança, e os vinte que ficariam sem casa estão todos abaixo. \textbf{Um medidor que
+nenhum documento cita deixa de ser testado} --- e a contagem parece completa sem estar,
+que é o modo de falha mais caro deste repositório.
+
+
+\subsection*{a arquitectura e o tradutor}
+\begin{itemize}
+  \item \code{tests/backends\_wasm.js} --- os backends do wasm — Isabelle $x\oplus x=0$ com zero falhas
+  \item \code{tests/canvas\_front.js} --- compor e pintar pelo mesmo caminho: o default é viável
+  \item \code{tests/claim\_control.c} --- o controlo do Claim no pipeline
+  \item \code{tests/claim\_ir.c} --- o IR do Claim — a representação intermédia
+  \item \code{tests/controlo\_front.js} --- o controlo no front
+  \item \code{tests/corpo\_disco.js} --- o corpo no localStorage: mapa GKCORPO, e o motor lê daí
+  \item \code{tests/corpo\_do\_numero.c} --- o corpo do número
+  \item \code{tests/disco\_wasm.c} --- o disco em wasm
+  \item \code{tests/estrela\_unifica.js} --- a estrela unifica os caminhos
+  \item \code{tests/leis\_no\_tradutor.c} --- as oito leis dentro do tradutor
+  \item \code{tests/migracao\_universal.js} --- a migração universal
+  \item \code{tests/str2dbl\_dual.c} --- a leitura de decimal pelo dual
+\end{itemize}
+
+\subsection*{o pipeline e a fronteira}
+\begin{itemize}
+  \item \code{tests/claim\_fronteira.c} --- a fronteira do Claim
+  \item \code{tests/fronteira\_front.js} --- a fronteira no front
+  \item \code{tests/lean\_convencao.c} --- a convenção do Lean
+\end{itemize}
+
+\subsection*{a medida}
+\begin{itemize}
+  \item \code{tests/bit\_metropolis.c} --- o bit e Metropolis: a curva do gato cobre medida zero, o rasto aleatório cobre tudo
+  \item \code{tests/config\_corpo.c} --- a configuração do corpo
+  \item \code{tests/nove\_periodico.c} --- o nove periódico
+\end{itemize}
+
+\subsection*{o dualsort e a torre}
+\begin{itemize}
+  \item \code{tools/bench\_maxcut.c} --- max-cut em onze escalas $n=4\ldots4096$: qualidade $1$, $N_{\mathrm{erase}}=0$, $|A|=|B|$
+  \item \code{tests/torre\_induc.js} --- a torre da indução
+\end{itemize}
 \end{document}

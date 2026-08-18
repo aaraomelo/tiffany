@@ -1,6 +1,6 @@
 /* estelar.c — A BASE CERTA É q = e^{−2π}: π GERA CADA METAL. E o dupolinômio é uma COLISÃO.
  *
- * Correção de rumo, e a fonte é o paper do corpo estelar (broca-so/papers/corpo_estelar.tex,
+ * Correção de rumo, e a fonte é o paper do corpo estelar (broca-so/papers/corpo_analitico.tex,
  * Prop. escada, Teoremas rr e metais). Eu vinha usando a fração contínua REGULAR --- a de base
  * inteira, onde φ = [1;1,1,…] é o PIOR aproximável (Hurwitz) --- e daí tratei o ouro como o supremo
  * da irracionalidade: o último toro a romper em KAM (deforma_d.c §Dd4), o último a travar no mapa do

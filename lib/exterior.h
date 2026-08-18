@@ -2,7 +2,7 @@
  *
  * Reli as três teorias antes de escrever, e o andar já cá estava em três sítios:
  *
- * 1. `corpo-estelar.tex` §637: «o DIRECTO ⟨a,b⟩ = cos θ é a parte SIMÉTRICA — a potência
+ * 1. `corpo_analitico.tex` §637: «o DIRECTO ⟨a,b⟩ = cos θ é a parte SIMÉTRICA — a potência
  *    ACTIVA; o CRUZADO ‖a∧b‖ = sin θ é a ANTISSIMÉTRICA — a REACTIVA, que roda e volta
  *    (o torque É o produto cruzado)». Isso é exatamente a decomposição de uma bilinear
  *    em simétrica ⊕ antissimétrica, e **Λ² É O CRUZADO DA CASA**.
@@ -232,7 +232,7 @@ static void ex_parte(Mat B, Mat *sim, Mat *ant){
  *
  * E é isto que a casa tinha em DUAS metades sem a frase que as junta:
  *
- *  · `corpo-estelar.tex` §640 tem fp = cos θ e tan φ = cruzado/directo — o split.
+ *  · `corpo_analitico.tex` §640 tem fp = cos θ e tan φ = cruzado/directo — o split.
  *  · `tests/hurwitz.c` §H2 tem N(xy) = N(x)N(y) — a conservação.
  *  · e ninguém escreveu que a SEGUNDA É A PRIMEIRA. Lagrange é cos²θ + sin²θ = 1
  *    com a norma por dentro, e sem raiz nenhuma: mede-se ao QUADRADO.

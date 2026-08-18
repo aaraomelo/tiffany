@@ -3,7 +3,7 @@
 """cristal_tex.py — projeção LaTeX do cristal (eval.txt: LaTeX = projeção verificável).
 
 Lê cristal/cristal.jsonl (a fonte, extraída por cristal_extrai.py) e emite
-papers/cristal_<grupo>.tex — um documento por grupo de domínios, no formato da
+cristal/cristal_<grupo>.tex — um documento por grupo de domínios, no formato da
 casa: uma \\section por conceito (título = fala; corpo = resposta, ingere.py).
 
 A REGRA DE OURO (eval 13/08): não converter o corpus antes de conseguir
@@ -23,7 +23,9 @@ import json, os, re, sys, unicodedata
 RAIZ = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
 FONTE = os.path.join(RAIZ, 'cristal', 'cristal.jsonl')
 HIST = os.path.join(RAIZ, 'cristal', 'historia.tsv')
-PAPERS = os.path.join(RAIZ, 'papers')
+# os cristal_*.tex vivem em cristal/, junto ao cristal.jsonl de que são a face
+# embebida — papers/ ficou só com o fundo (universal, topológico, analítico)
+PAPERS = os.path.join(RAIZ, 'cristal')
 
 
 def le_historia():

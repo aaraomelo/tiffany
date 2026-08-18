@@ -8,7 +8,7 @@
  * manifesto passa a ser uma PROJECCAO dele.
  *
  * E isso nao e' uma escolha de gosto: e' a regra da estrela aplicada aos dados. A estrela tem
- * os dois sentidos e por isso reverte (papers/corpo-estelar.tex §sec:estrela):
+ * os dois sentidos e por isso reverte (papers/corpo_analitico.tex §sec:estrela):
  *
  *      MOVE(slot, +1)  le'      — absorve, o lado negro
  *      MOVE(slot, -1)  escreve  — emite, o lado branco

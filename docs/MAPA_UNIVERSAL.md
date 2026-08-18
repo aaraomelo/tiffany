@@ -85,7 +85,7 @@ Compatibilidade operacional medida ≠ equivalência matemática geral.
 - **Peano** — σ_Peano em `lib/peano.js` (ℤ_65537, UTF-8, endereço=id);
   𝒫 = 𝒰[σ_Peano] provado por caso (migracao_universal 15:0;
   equivalencia_universal 7:0). Torre, música, Maestro/Metrónomo concretos,
-  histerese, rede dual: corpo_peano.tex.
+  histerese, rede dual: corpo_topologico.tex.
 - **Cristal** — o corpus curado (4234; curadoria.tsv), a fonte dos dados
   reais de quase todos os medidores acima.
 - **Corpos do Catálogo** (estelar, metálico, banal, mórfico, quântico…) —
@@ -97,7 +97,7 @@ Compatibilidade operacional medida ≠ equivalência matemática geral.
 
 com a ressalva essencial: **a deconvolução só existe na fibra espectral
 admissível** — os zeros do espectro são a obstrução medida (os divisores
-de zero do corpo-estelar, exibidos em convolucao_universal §V5).
+de zero do corpo_analitico, exibidos em convolucao_universal §V5).
 
 ## O mapa de destino, e a lacuna de cada nome
 

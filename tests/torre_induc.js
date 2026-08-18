@@ -10,7 +10,7 @@ const { instanciaTex } = require('./tex_env.js')
 
 const RAIZ = path.resolve(__dirname, '..')
 const WASM = path.join(RAIZ, 'assets', 'figuras', 'wasm', 'tex.wasm')
-const FONTE = 'papers/torre_induc.tex'
+const FONTE = 'corpus/docs/torre_induc.tex'
 const TORRE_NTT_MAX = 4096
 
 let falhas = 0, feitas = 0
@@ -166,7 +166,7 @@ function parseAssinaturaTorre (latin) {
   console.log('=== TORRE INDUÇÃO (tecidos T+T*) ===\n')
   console.log(`   rc=${rc} tam=${tam} alc=${sem && sem.alcance} dim=${dim} if=${sem && sem.iface}` +
     ` L=${sem && sem.lado} ind=${sem && sem.induc} NTT=${torre && torre.n} bate=${bate}`)
-  ok('§I1 compila papers/torre_induc.tex', rc === 0 && tam > 1000 && latin.includes('%%EOF'))
+  ok('§I1 compila corpus/docs/torre_induc.tex', rc === 0 && tam > 1000 && latin.includes('%%EOF'))
   ok('§I2 indução: alcance 6, dim 128, /Induc viaja', sem && sem.alcance === 6 && sem.dim === 128 && sem.induc === 6)
   ok('§I3 Gentil: Lado 1, Norma 1, interface 24 (2.ª estrela)', sem && sem.lado === 1 && sem.norma === 1 && sem.iface === 24)
   ok('§I4 selo complementar N=min(4096,dim·32)=4096', torre && torre.n === 4096 && torre.torreDim === 128)

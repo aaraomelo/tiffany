@@ -396,7 +396,7 @@ static const Par LEXICO[] = {
     {"cdots",0xA2,1},{"vdots",0xA4,1},{"ddots",0xA6,1},{"dotsb",0xA2,1},{"dotsc",0xBC,1},
     {"dotsm",0xA2,1},{"dotsi",0xA2,1},{"dotso",0xBC,1},
     {"Re",0xC2,1},{"Im",0xC1,1},{"wp",0xC3,1},{"neg",0xD8,1},{"wedge",0xD9,1},{"vee",0xDA,1},
-    /* setas longas: o papel usa \longrightarrow (corpo_peano); a Symbol só tem a curta —
+    /* setas longas: o papel usa \longrightarrow (corpo_topologico); a Symbol só tem a curta —
      * a geometria do átomo Rel é a mesma, o glifo é o que há */
     {"longrightarrow",0xAE,1},{"longleftarrow",0xAC,1},
     {"Longrightarrow",0xDE,1},{"Longleftarrow",0xDC,1},
@@ -1467,7 +1467,7 @@ typedef struct { int var; long deg; } Corpo;
 /* (EIXO_* e a declaração de escala_de_degrau vivem junto ao `mede`, que já os usa) */
 static int    largura_de(int g, int fonte, long corpo);
 
-/* A OPERAÇÃO. Uma só, e o corpo é CAMPO — como o `MOVE` do corpo-estelar, onde «a mesma
+/* A OPERAÇÃO. Uma só, e o corpo é CAMPO — como o `MOVE` do corpo_analitico, onde «a mesma
  * instrução serve 500 corpos diferentes sem uma instrução nova, porque o corpo é campo e
  * não opcode». O eixo é o próprio parâmetro: ESCALA e ESPACO são a mesma leitura, campos duais. */
 static long medida(Corpo c, int eixo, long glifo){
@@ -1537,7 +1537,7 @@ static int fpdf_regista(int variante, long corpo){
 #define D_TEXTO 2                                      /* o corpo do texto */
 /* ─── A ESCALA É A DOURADA, E O DEGRAU É UM EXPOENTE ─────────────────────────────────
  *
- * O `corpo-estelar.tex` §renorm: «renormalizar é mudar a régua sem mudar o objecto» e «a
+ * O `corpo_analitico.tex` §renorm: «renormalizar é mudar a régua sem mudar o objecto» e «a
  * escala não sobe continuamente: sobe por DEGRAUS, e os degraus são os metais». O número
  * muda com a régua; a RAZÃO não.
  *
@@ -2279,7 +2279,7 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
           if(eb == -4) sb = -2 * dvl - sem_resp(dvl);
           if(eb == 5)  sb = dvl;                       /* o vinculum sobe uma dobra */
           if(eb == -3){
-              /* underbrace: compõe chaveta+rótulo (corpo_peano 660, 842). O e=-3
+              /* underbrace: compõe chaveta+rótulo (corpo_topologico 660, 842). O e=-3
                * sozinho só descia a dobra do script — a moldura cortava o rótulo. */
               int i14 = kb; while(i14 > 0 && L->g[i14].g != 14) i14--;
               long fundo = -(sem_desc(corpo));
@@ -2487,7 +2487,7 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
                       if(eb == -4) sb = -2 * dvb - sem_resp(dvb);
                       if(eb == -3){
                           /* compõe chaveta+rótulo do underbrace — senão a moldura
-                           * corta o conteúdo (corpo_peano \[boxed\] 660 e 842) */
+                           * corta o conteúdo (corpo_topologico \[boxed\] 660 e 842) */
                           int i14 = kb; while(i14 > ini_cx && L->g[i14].g != 14) i14--;
                           long fundo = -(sem_desc(corpo));
                           for(int t = i14; t < kb; t++){
@@ -3124,7 +3124,7 @@ static void pdf_fecha(Pdf *p){
       if(iters > regua_C) iters = regua_C;            /* régua deste andar, não cap global */
       long piN = 0;
       if(lado){
-          /* Gentil/Lebesgue: meia-corda — cap cresce a cada 3 andares (corpo_peano) */
+          /* Gentil/Lebesgue: meia-corda — cap cresce a cada 3 andares (corpo_topologico) */
           long long sq = S;
           for(int s = 0; s < iters; s++){
               long long sq2 = (sq * sq) / S, inner = S - sq2;
@@ -3489,7 +3489,7 @@ static void quebra_e_desenrola(Est *e, int ultima){
                 /* `\boxed` curto no meio da linha: corta ANTES (átomo). Se a caixa
                  * É a linha (display) e não cabe, parte por dentro — senão o
                  * texto de L945 saía numa só linha a furar a margem e a moldura
-                 * ia com ele (corpo_peano \[boxed\] longo). */
+                 * ia com ele (corpo_topologico \[boxed\] longo). */
                 if(em_caixa && caixa_ini > 0 && !ate)
                     corte = caixa_ini;
                 else if(em_caixa && caixa_ini > 0 && ate && ate < caixa_ini)
@@ -3541,7 +3541,7 @@ static void quebra_e_desenrola(Est *e, int ultima){
             corte = q;
         }
         if(corte <= 0) corte = 1;
-        /* IN-PLACE: a estrela não armazena (corpo-estelar §estrela). No traduz uma
+        /* IN-PLACE: a estrela não armazena (corpo_analitico §estrela). No traduz uma
          * `Linha` local no quadro é buffer a mais — e `Linha out = e->L` nem sequer
          * copia `g[]` (estrutura vale o endereço). Emite-se o prefixo sobre a própria
          * linha: baixa-se `n`, desenrola, repõe. */
@@ -4120,7 +4120,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                             while(q < n && isalpha((unsigned char)s[q]) && k2 < 63) c2[k2++] = s[q++];
                             c2[k2] = 0;
                             /* `\mathcal{C}` `\mathbb{R}` no título: come o argumento —
-                             * senão saía «C_K» literal (corpo_peano §0.7) */
+                             * senão saía «C_K» literal (corpo_topologico §0.7) */
                             if(!strcmp(c2, "mathbb") || !strcmp(c2, "mathcal")
                             || !strcmp(c2, "mathrm") || !strcmp(c2, "mathit")
                             || !strcmp(c2, "mathbf") || !strcmp(c2, "text")
@@ -4381,7 +4381,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
              * separadores empurram-se como glifos de controlo (2 = &, 3 = \\).
              * O `array` É MATRIZ (com preâmbulo): sem isto caía no `tabular` de
              * texto, `fecha_paragrafo` partia o `\boxed` e a moldura saía vazia
-             * (corpo_peano L572). */
+             * (corpo_topologico L572). */
             if((!strcmp(cmd, "begin") || !strcmp(cmd, "end")) && e->mat){
                 long q = ate_abre(s, j, n);
                 if(q < n){
@@ -5552,7 +5552,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
              * «\mathbb{Z}» saía com o comando escrito na página.
              * Sem `{` imediato: UM token (como o TeX). `ate_abre` até ao próximo
              * `{` qualquer saltava ao `{tabular}` do `\end` e a tabela nunca
-             * fechava — corpo_peano `\mathrm{id}_{\mathcal L}` na catálogo. */
+             * fechava — corpo_topologico `\mathrm{id}_{\mathcal L}` na catálogo. */
             if(!strcmp(cmd, "mathbb")){
                 long q2 = j;
                 while(q2 < n && (s[q2] == ' ' || s[q2] == '\t')) q2++;
@@ -5804,7 +5804,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
             }
             const Par *P = lex_acha(cmd);
             if(P){
-                /* COMPOSIÇÃO DAS GEOMETRIAS (corpo_peano / Alonzo): Bin (∘,⊕,⊗,×)
+                /* COMPOSIÇÃO DAS GEOMETRIAS (corpo_topologico / Alonzo): Bin (∘,⊕,⊗,×)
                  * e Rel (→,≤) espacejam pela semente no nível 0. Sem função nova
                  * (MAX_FUN). Antes só setas da lista antiga; circ/oplus saíam colados. */
                 int at = 0;   /* 0 Ord, 1 Bin, 2 Rel */
@@ -6023,7 +6023,7 @@ static long fecha_chave(const char *s, long n, long i){
  * escreve-se em lado nenhum, só se soma), aloca-se EXACTO, e a segunda ESCREVE. Sem dobrar
  * capacidade, sem realloc, sem aproximar por potências — o tamanho é contado, não adivinhado.
  * A lógica corre UMA vez, parametrizada por `o`: contar e escrever são a mesma passagem com o
- * destino trocado, que é o medir-pela-metade do corpo-estelar. */
+ * destino trocado, que é o medir-pela-metade do corpo_analitico. */
 
 /* uma passagem de avaliação: devolve buffer novo, `*n` actualizado, e quantas avaliou */
 
@@ -6033,7 +6033,7 @@ static long fecha_chave(const char *s, long n, long i){
 
 /* ─── A ABSORÇÃO: pdf → estrela, que é o outro sentido do MOVE ──────────────────────
  *
- * O `corpo-estelar.tex` diz como se mede aqui, e diz-o na última linha da especificação:
+ * O `corpo_analitico.tex` diz como se mede aqui, e diz-o na última linha da especificação:
  *
  *     medir | resíduo 0, NÃO COMPARAÇÃO | a prova dos nove: resolver e provar
  *
@@ -6057,7 +6057,7 @@ static long fecha_chave(const char *s, long n, long i){
 
 /* ─── A ABSORÇÃO IRRADIA: sem fila, sem buffer, sem RAM ────────────────────────────
  *
- * O `corpo-estelar.tex` responde à pergunta «porque não fecha a volta?» em dois sítios:
+ * O `corpo_analitico.tex` responde à pergunta «porque não fecha a volta?» em dois sítios:
  *
  *     «não há RAM. O estado vive no disco, endereçado por MOVE»                    (§estrela)
  *     «E UMA ESTRELA NÃO TEM FILA. Não tem buffer, não tem memória, não guarda

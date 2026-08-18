@@ -19,7 +19,7 @@ A equação que os fecha é uma linha, exata em inteiros:
 
 **A casa já tinha as duas metades, em ficheiros diferentes, sem a frase que as junta:**
 
-- `papers/corpo-estelar.tex` §637-640 — «o DIRECTO ⟨a,b⟩ = cos θ é a parte SIMÉTRICA, a
+- `papers/corpo_analitico.tex` §637-640 — «o DIRECTO ⟨a,b⟩ = cos θ é a parte SIMÉTRICA, a
   potência ACTIVA; o CRUZADO ‖a∧b‖ = sin θ é a ANTISSIMÉTRICA, a REACTIVA que roda e volta
   (o torque É o produto cruzado)», com fp = cos θ e tan φ = cruzado/directo.
 - `tests/hurwitz.c` §H2 — N(xy) = N(x)N(y) em 1,2,4,8, e onde se parte.

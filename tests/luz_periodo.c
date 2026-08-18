@@ -5,7 +5,7 @@
  * dimensional como função da velocidade da luz naquela dimensão; lê as 8 leis e encontra
  * a relação entre π e c em qualquer dimensão.»
  *
- * O corpo-estelar dá as peças, e aqui elas CRUZAM-SE, medidas:
+ * O corpo_analitico dá as peças, e aqui elas CRUZAM-SE, medidas:
  *   — o relógio da dimensão n é o hipercubo: q_n = n·2^(n−1) arestas (32 em n=4 = 2^5);
  *   — a velocidade máxima é MEIA VOLTA: c_n = q_n/2, e só se atinge em q par;
  *   — o percurso de TODAS as arestas (a distância máxima à velocidade máxima) existe

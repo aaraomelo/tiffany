@@ -402,7 +402,7 @@ Ver [[feedback-o-controlo-a-tres-linhas]], [[feedback-varrer-onde-nada-pode-falh
 
 ## E a NONA forma: o valor EMPRESTADO que se finge medir
 
-16/08, no `corpo_peano.c §CP13`. Havia `int n_leis = 8;` comparado com `8`, e eu fui
+16/08, no `corpo_topologico.c §CP13`. Havia `int n_leis = 8;` comparado com `8`, e eu fui
 corrigi-lo contando: `for(k = 0; k < 16; k++) if(k % 8 == k) n_leis++;` — que conta
 quantos inteiros de [0,16) são menores que oito, e dá oito **por aritmética modular**.
 

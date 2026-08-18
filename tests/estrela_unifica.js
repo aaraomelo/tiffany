@@ -92,7 +92,7 @@ function ok (q, cond) {
     mem()[pD + bytes.length] = 0
     if (!E.poe_ficheiro(pN, pD, bytes.length)) throw new Error('poe ' + nome)
   }
-  const subset = ['estilo.tex', 'papers/dualsort.tex', 'papers/gkcapa.tex']
+  const subset = ['estilo.tex', 'corpus/docs/dualsort.tex', 'papers/gkcapa.tex']
   for (const f of man.ficheiros) {
     if (!subset.some((s) => f === s || f.endsWith('/' + path.basename(s)))) continue
     const u8 = fs.readFileSync(path.join(RAIZ, f))
@@ -100,13 +100,13 @@ function ok (q, cond) {
   }
   /* poe o manifesto lazy via ficheirosPara se disponível */
   const disco = await import(pathToFileURL(path.join(RAIZ, 'app', 'src', 'corpo_disco.js')).href)
-  for (const f of disco.ficheirosPara('papers/dualsort.tex', man.ficheiros)) {
+  for (const f of disco.ficheirosPara('corpus/docs/dualsort.tex', man.ficheiros)) {
     if (!fs.existsSync(path.join(RAIZ, f))) continue
     poeFich(f, fs.readFileSync(path.join(RAIZ, f)))
   }
   if (typeof E.marca_vfs === 'function') E.marca_vfs()
   E.limpa_saida()
-  const rc = num(E.compila_ficheiro(poeStr('papers/dualsort.tex'), poeStr('saida.pdf')))
+  const rc = num(E.compila_ficheiro(poeStr('corpus/docs/dualsort.tex'), poeStr('saida.pdf')))
   const tam = num(E.tam_saida())
   const end = porta.absorve(E, 14)
   const pdf = Buffer.from(mem().slice(end, end + tam)).toString('latin1')
@@ -125,7 +125,7 @@ function ok (q, cond) {
   ok('§U2d selo parametrizado: /TorreDim /TorreN no AssinaturaOito', torre)
   ok('§U2e Gentil dim≥16: /AssinaturaTorre N=min(512,dim·32) no arquitetura',
     await (async () => {
-      const arq = 'papers/arquitetura.tex'
+      const arq = 'corpus/docs/arquitetura.tex'
       if (!fs.existsSync(path.join(RAIZ, arq))) return false
       const cache = new Map()
       for (const f of man.ficheiros) {
@@ -177,7 +177,7 @@ function ok (q, cond) {
 
   ok('§U2f torre_induc: dim 128, interface 24, AssinaturaTorre N=4096',
     await (async () => {
-      const arq = 'papers/torre_induc.tex'
+      const arq = 'corpus/docs/torre_induc.tex'
       if (!fs.existsSync(path.join(RAIZ, arq))) return false
       const cache = new Map()
       for (const f of man.ficheiros) {

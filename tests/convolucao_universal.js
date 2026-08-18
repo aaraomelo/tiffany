@@ -19,7 +19,7 @@
  * as autocorrelações convolvem); a deconvolução é a divisão espectral
  * — exata fora dos divisores de zero, e os divisores de zero são
  * EXIBIDOS (b⊛x=0 com b,x≠0: o preço do espectro zerado, o tema do
- * corpo-estelar); e a lei é INVARIANTE DE ESCALA na cascata.
+ * corpo_analitico); e a lei é INVARIANTE DE ESCALA na cascata.
  *
  * §V0  o candidato emerge: f(A)·g(A) == (Σ_{i+j=k} a_i b_j)(A) —
  *      matrizes inteiras exatas, m=1..3, coeficientes reais do
@@ -187,7 +187,7 @@ function cicla (a, b) {
     invertivel && rec.every((v, n) => v === aC[n]) && U.retain(R))
 }
 
-/* §V5 — o gume: os divisores de zero (o tema do corpo-estelar) */
+/* §V5 — o gume: os divisores de zero (o tema do corpo_analitico) */
 {
   const uns = new Array(N).fill(1)
   const x = new Array(N).fill(0); x[0] = 1; x[1] = q - 1        /* [1,−1,0,…] */

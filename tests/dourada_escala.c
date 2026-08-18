@@ -8,7 +8,7 @@
  * parte —, cada um com o seu caso, e cada caso a falhar de maneira própria. A escala não é
  * uma lista de sete números: é UMA razão elevada a um expoente.
  *
- * O `corpo-estelar.tex` §renorm di-lo: «renormalizar é mudar a régua sem mudar o objecto» e
+ * O `corpo_analitico.tex` §renorm di-lo: «renormalizar é mudar a régua sem mudar o objecto» e
  * «a escala não sobe continuamente: sobe por DEGRAUS, e os degraus são os metais». O número
  * muda com a régua; a razão não.
  *
@@ -165,7 +165,7 @@ int main(void){
      * `round(k)` e le' o desvio. O desvio e' pequeno, mas o LIMIAR e' meu — e um limiar meu
      * e' interferencia minha no resultado.
      *
-     * O corpo-estelar da' a operacao que nao compara: PROMOVER.
+     * O corpo_analitico da' a operacao que nao compara: PROMOVER.
      *
      *     S = (x + x†)/2,  A = (x - x†)/2,  S + A = x
      *

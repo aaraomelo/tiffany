@@ -17,7 +17,7 @@
  * metade refletida VOLTA com resíduo 0 (λ da própria medição = 0). Se a medição perde um bit — um
  * double que arredonda, um estado sobrescrito, um malloc — não há volta, o resíduo é > 0, e a medida
  * é ela própria caótica. É a proibição da teoria dita à letra: «não pertence, por não haver como
- * voltar» (medida.tex). Ver papers/corpo_peano.tex thm:metronomo; tests/corpo_peano.c §CP40.
+ * voltar» (medida.tex). Ver papers/corpo_topologico.tex thm:metronomo; tests/corpo_topologico.c §CP40.
  *
  *   §L1  λ derivado pela metade refletida: e⁺(n)=+n, e⁻(n)=−n ⇒ (e⁺−e⁻)/2n = 1 = log2 por passo
  *   §L2  a regra da soma (o espectro ±λ): e⁺(n) + e⁻(n) = 0 exacto — o que a dualidade guarda

@@ -6,7 +6,7 @@
  * INVENTÁRIO (o que já existia; aqui articula-se, nada se re-funda):
  *   - histerese de Peano: H=(X,B,I), batuta I∈{−1,0,+1} — expansão
  *     (B→X), retenção, retração (X→B); Metrónomo λ⁺+λ⁻=0
- *     (corpo_peano thm:histerese)
+ *     (corpo_topologico thm:histerese)
  *   - Maestro = tick∘batuta∘Π realiza a retração π_k (thm:proj-maestro)
  *   - a companheira A_m (o tick), det=−1: a unidade da borda |N|=1
  *   - a adjunção δ⊣ε (morfologia; abertura α=δε ≤ id ≤ φ=εδ)

@@ -5,7 +5,7 @@
  * faz teorema».
  *
  * FECHA, e não por analogia: cada uma das peças é um operador de ORDEM FINITA, e a sua
- * ordem é exactamente o fecho declarado da sua lei na tabela do `corpo_peano`:
+ * ordem é exactamente o fecho declarado da sua lei na tabela do `corpo_topologico`:
  *
  *      peça              operador                     ordem    lei
  *      ────────────────────────────────────────────────────────────

@@ -444,6 +444,103 @@ em $5$; a cegueira da topologia:
 \code{tests/metrica.c}; o corte: \code{tests/transformada\_universal.c} \S T7}
 
 %======================================================================
+\section{A TRÍADE: Universal $\to$ Peano $\to$ Estelar}\label{sec:triade}
+
+As três camadas do \S\ref{sec:camadas} não vivem soltas: cada uma tem o seu documento, e
+os três formam uma \textbf{decomposição funcional} --- \emph{a mesma estrutura, três
+realizações}. Não são níveis de tamanho nem teorias independentes, e a divisão não se
+inventa aqui: \textbf{já está escrita nos títulos dos teoremas} que cada um provou.
+
+\[
+\boxed{\;\text{Universal}\ \longrightarrow\ \text{Peano}\ \longrightarrow\ \text{Estelar}\;}
+\]
+
+\noindent\emph{Leitura editorial, e só isso}: infinito \textbf{algébrico}
+$\to$ infinito \textbf{espacial} $\to$ infinito \textbf{analítico}. \emph{O infinito já
+está no fundamento}; o que muda de camada para camada é a sua realização --- e por isso
+esta frase não é uma definição nem tem estatuto de teorema.
+
+\subsection*{A prova de que é a mesma estrutura: as faces}
+
+Um mesmo resultado aparece nos três documentos com a mesma tese e realizações
+diferentes, e são os próprios títulos que o dizem:
+\[
+\begin{array}{lll}
+\textbf{o GATO} & \text{aqui} & \det\ \text{É a medida, e }\abs{\det}=1\text{ conserva}\\
+ & \text{Peano} & \code{thm:det-volume} \text{ --- \emph{a face DISCRETA}: o volume}\\
+ & \text{Estelar} & \code{thm:medida-jacobiano} \text{ --- \emph{a face GRADUADA}: o Jacobiano}\\[4pt]
+\textbf{a PONTE} & \text{Peano} & \code{thm:ponte-discreta} \text{ --- o potencial é a fibra}\\
+ & \text{Estelar} & \code{thm:ponte-graduada} \text{ --- onde a obstrução deixa de ser}
+\end{array}
+\]
+\emph{Três faces, um teorema.} É isto que autoriza chamar-lhes decomposição e não divisão
+arbitrária.
+
+\subsection*{A divisão, ponto por ponto}
+
+\noindent\textbf{UNIVERSAL --- o fundamento ($U_0$, o ponto fixo canónico em $0$).}
+\emph{Recebe:} nada, é a origem. \emph{Introduz:} as oito leis, a operação $\star$ e os
+seus dois projectores, a dualidade, os neutros, a indução e a meta-indução, o operador e a
+sua conservação. \emph{Mede:} o que é exacto --- traço, norma, determinante, ordem.
+\emph{Não mede:} o que exige todos os passos; $\mathbb{Q}$ não é completo
+(Prop.~\ref{prop:q-falha}). \emph{Ponte:} entrega aos outros dois o \textbf{operador} e a
+condição $\abs{\det}=1$. \emph{Fica aqui, por ser fundamento comum:}
+Teor.~\ref{thm:fixo-dual}, \ref{thm:operador}, \ref{thm:descida}, \ref{thm:aditiva},
+\ref{thm:conservacao}, \ref{thm:transformada-universal}, \ref{thm:dourada-discreta},
+\ref{thm:cuspide}, e a Def.~\ref{def:espaco} com as suas quatro propriedades.
+
+\noindent\textbf{PEANO --- o palco (o desdobramento espacial).} \emph{Recebe:} o operador
+e a torre. \emph{Introduz:} o \textbf{endereçamento} e a \textbf{projecção dimensional}
+$\pi_k$ --- \code{def:peano}, \code{def:pi-k}. \emph{Mede:} posição, composição e
+\textbf{volume discreto} (\code{thm:det-volume}), com o \emph{Maestro} a realizar a
+dinâmica e o \emph{Metrónomo} a métrica. \emph{Não mede:} a medida no sentido de Lebesgue
+--- o Teor.~\ref{thm:metrica} mostra que há isometrias que a mudam --- nem o que só o
+limite alcança. \emph{Ponte:} para o Universal pelo determinante; para o Estelar pela
+graduação. \emph{Aritmética:} é onde ela \textbf{endereça} --- os índices são inteiros, e é
+por isso que a torre tem andares e não um contínuo.
+
+\noindent\textbf{ESTELAR --- o alcance (o desdobramento contínuo).} \emph{Recebe:} o
+operador e a medida. \emph{Introduz:} a \textbf{graduação sem topo}
+(\code{thm:graduacao-gentil}) e a \textbf{continuação analítica} (\code{thm:atravessa}).
+\emph{Mede:} o que precisa de todos os passos --- $0{,}999\ldots=1$ e o seu dual discreto
+(\code{cor:noves}, \code{cor:noves-dual}), a completude, o corte, $\mathbb{R}$.
+\emph{Não mede:} o que é da forma exacta finita --- ali a álgebra já respondeu, e repetir
+seria trocar uma identidade por um limite. \emph{Ponte:} para o Peano pelo Jacobiano
+(\code{thm:medida-jacobiano}); para o Universal pelo corte
+(Teor.~\ref{thm:folhas-corte}). \emph{Aritmética:} é onde ela \textbf{fecha} --- o corte
+decide-se por $\operatorname{tr}$ e $\mathrm{N}$, ambas inteiras, e o limite entra só
+depois.
+
+\subsection*{E a aritmética atravessa as três}
+
+Não é um desdobramento posterior: \emph{já está no Universal e não sai de lá}. O que muda é
+o ofício --- no Universal ela \textbf{opera}, no Peano \textbf{endereça}, no Estelar
+\textbf{fecha}. E é por ser a mesma em todas que as pontes existem: se a aritmética de cada
+camada fosse outra, não haveria por onde passar.
+
+\medskip
+\noindent\textbf{As três recusas, que valem tanto como as três atribuições.} Elas não são
+estilo: são resultados medidos deste paper, e é por isso que a divisão aguenta peso.
+\[
+\text{topologia}\neq\text{medida},
+\qquad
+\text{métrica}\neq\text{medida},
+\qquad
+\text{derivada}\neq\text{limite}.
+\]
+A primeira e a segunda são o Teor.~\ref{thm:metrica}: há isometrias da métrica canónica que
+mudam a área, e quem vê a medida é o \emph{jacobiano} --- logo $\abs{\det}=1$ não é
+condição topológica. A terceira é o quociente de diferenças ser um polinómio: $f'(a)=q(0)$
+é uma \textbf{avaliação}, e vive no fundamento; o limite entra depois, no Estelar, e para
+outra coisa --- para o que a estrutura finita não alcança.
+
+\colunas{a tríade como decomposição funcional}
+        {mesma estrutura, três realizações: $U_0$ opera, Peano endereça, Estelar fecha ---
+e o Gato tem três faces (aqui, discreta, graduada)}
+        {as faces existentes: \code{thm:det-volume} (Peano), \code{thm:medida-jacobiano}
+(Estelar); as três recusas medidas em \code{tests/metrica.c} e \code{lib/calculo.h}}
+
+%======================================================================
 \section{A Lei 0: $0\dg=\infty$, e é ela que dá o arranque}\label{sec:lei0}
 
 Antes da base vem a Lei de índice zero, e o índice não é decorativo: o

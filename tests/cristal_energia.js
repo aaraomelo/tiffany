@@ -4,7 +4,7 @@
  * valida a CONSERVAÇÃO DE ENERGIA. A energia vem dos conceitos do repo:
  *
  *   energia  E(x) = Σ x²  — o segundo momento, a MASSA da cruz
- *            (corpo_peano prop:massa; corpo-estelar: E=m pela régua ao
+ *            (corpo_topologico prop:massa; corpo_analitico: E=m pela régua ao
  *            quadrado; «a energia não se perde ao atravessar — muda de
  *            domínio»);
  *   anel     ℤ_65537, N=2^8, raiz 3^256 — a transformada dourada da Lei 8
@@ -46,7 +46,9 @@ function ok (q, cond) {
 
 const RAIZ = path.join(__dirname, '..')
 const FONTE = path.join(RAIZ, 'cristal', 'cristal.jsonl')
-const PAPERS = path.join(RAIZ, 'papers')
+/* os cristal_*.tex vivem em cristal/, junto ao cristal.jsonl de que são a face
+ * embebida — papers/ ficou só com o fundo (universal, topológico, analítico). */
+const PAPERS = path.join(RAIZ, 'cristal')
 const P = 65537
 
 /* ── energia exata (inteiro, sem mod): E = Σ byte² — a da lib ─────────────── */

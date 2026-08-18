@@ -20,7 +20,7 @@ MODELO="${MODELO:-qwen2.5:1.5b}"
 NIVEL="${NIVEL:-2}"
 PROF="${PROF:-2}"
 SUFIXO="${SUFIXO:-}"
-TEX_OUT="$ROOT/papers/conversa_arvore_n${NIVEL}${SUFIXO}.tex"
+TEX_OUT="$ROOT/corpus/fala/conversa_arvore_n${NIVEL}${SUFIXO}.tex"
 SISTEMA="$ROOT/tools/.gabarito_sistema.txt"
 mkdir -p "$B"
 [ -x "$CV" ] || { echo "falta $CV"; exit 1; }

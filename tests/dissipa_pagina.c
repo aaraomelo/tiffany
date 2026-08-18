@@ -4,7 +4,7 @@
  * verticais e horizontais; mede tudo com resíduo 0 da maneira correcta, pelo corpo estelar.
  * Não quero um resíduo, nenhuma dissipação.»
  *
- * O `corpo-estelar.tex` diz o que dissipa e porquê: «apagar é a única operação que não se
+ * O `corpo_analitico.tex` diz o que dissipa e porquê: «apagar é a única operação que não se
  * desfaz» e «o que não se desfaz custa». Um passo reversível não paga nada — nem por ser
  * eficiente, mas por não haver bit apagado a pagar.
  *
@@ -77,7 +77,7 @@ int main(void){
      * de ponto, isto e' CENTESIMOS. Cada `Td` deita fora o que estiver abaixo disso, e o
      * que se deita fora nao volta: e' apagar, e apagar e' o que dissipa.
      *
-     * Conta-se em BITS, que e' a moeda do corpo-estelar: quantos bits distinguem os valores
+     * Conta-se em BITS, que e' a moeda do corpo_analitico: quantos bits distinguem os valores
      * que o arredondamento junta. */
     const double CORPO = 10.95;
     long perdidos = 0, casos = 0;

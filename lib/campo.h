@@ -31,7 +31,7 @@
  *                        fecha com resíduo 0
  *   rot e div          ↔ o par DIRECTO/CRUZADO outra vez: div é a parte simétrica
  *                        (o fluxo que atravessa) e rot é a antissimétrica (o que roda) —
- *                        corpo-estelar §640, «o torque É o produto cruzado»
+ *                        corpo_analitico §640, «o torque É o produto cruzado»
  *   interior ↔ borda   ↔ o par adjunto δ ⊣ ε da morfologia (thm:morf-par) e o
  *                        thm:borda-dirac: o operador de borda tem adjunto
  *

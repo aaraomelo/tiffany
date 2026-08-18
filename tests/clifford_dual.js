@@ -10,7 +10,7 @@
  *   mul2/det2/metalica       — ponte_universal_metalica.js (a multiplicação)
  *   inversa/adjunta          — ponte §P2 (a inversão: adj·M = det·I)
  *   estaca                   — a conjugação da borda: x† = m−σ (Def. metal
- *                              do corpo_peano); em matriz M† = (tr M)I − M,
+ *                              do corpo_topologico); em matriz M† = (tr M)I − M,
  *                              e M·M† = det(M)·I é Cayley–Hamilton
  *   bloco/mul4, D            — dirac_transicao.js (o andar de cima)
  *

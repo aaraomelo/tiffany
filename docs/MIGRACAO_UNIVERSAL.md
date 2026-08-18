@@ -19,7 +19,7 @@ silêncio.**
 - **Camada de realização** — Peano (torre, π_k, Maestro/Metrónomo, música,
   histerese, rede dual) e os corpos do Catálogo (estelar, metálico, banal,
   cristal…): cada um = 𝒰 especializado por uma **assinatura** σ.
-- **Fundação** — as 8 leis ficam no corpo-estelar (`sub:oitoleis`); os dois
+- **Fundação** — as 8 leis ficam no corpo_analitico (`sub:oitoleis`); os dois
   citam, nenhum re-funda.
 
 ## 2. Quem é dono de quê hoje (e o destino proposto)
@@ -30,13 +30,13 @@ silêncio.**
 | membrana de Dirac (4 teoremas) | corpo_universal §dirac | 𝒰 (já lá) | nada |
 | morfologia δ⊣ε + torção | corpo_universal §morfologia | 𝒰 (já lá) | nada |
 | primitivas mecânicas + domínios | corpo_universal | 𝒰 (já lá) | nada |
-| **Teorema da Absorção** (thm:absorcao) | corpo_peano §absorcao | **𝒰** (lei da régua/observador) | mover; Peano cita e instancia |
-| **Energia + Parseval multidim** (def:energia, thm:parseval-multi) | corpo_peano §energia | **𝒰** | mover; Peano cita |
-| **Observador/escada/teto-oito/fusão/fibra** (thm:escada…thm:divisao-fibra) | corpo_peano §observador | **𝒰** (hoje o Universal cita a instância; após o corte, enuncia) | mover; Peano instancia |
-| ponte universal↔metálica (thm:ponte-universal) | corpo_peano §ponte | **decisão da mesa** (é a ponte 𝒰↔realização; pode ficar como instância exemplar) | debater |
-| torre, borda, π_k, Maestro, Metrónomo, Morfológico (W,H) | corpo_peano | Peano (realização) | ficam |
-| música/partitura/naipes/histerese/controle/rede dual | corpo_peano | Peano (realização) | ficam |
-| 8 leis, teorema central, tecidos, viveiro, cosmologia | corpo-estelar | fundação | ficam |
+| **Teorema da Absorção** (thm:absorcao) | corpo_topologico §absorcao | **𝒰** (lei da régua/observador) | mover; Peano cita e instancia |
+| **Energia + Parseval multidim** (def:energia, thm:parseval-multi) | corpo_topologico §energia | **𝒰** | mover; Peano cita |
+| **Observador/escada/teto-oito/fusão/fibra** (thm:escada…thm:divisao-fibra) | corpo_topologico §observador | **𝒰** (hoje o Universal cita a instância; após o corte, enuncia) | mover; Peano instancia |
+| ponte universal↔metálica (thm:ponte-universal) | corpo_topologico §ponte | **decisão da mesa** (é a ponte 𝒰↔realização; pode ficar como instância exemplar) | debater |
+| torre, borda, π_k, Maestro, Metrónomo, Morfológico (W,H) | corpo_topologico | Peano (realização) | ficam |
+| música/partitura/naipes/histerese/controle/rede dual | corpo_topologico | Peano (realização) | ficam |
+| 8 leis, teorema central, tecidos, viveiro, cosmologia | corpo_analitico | fundação | ficam |
 
 **Símbolos partilhados** (labels citados entre papers — reescrever as
 referências no corte): `thm:absorcao`, `thm:parseval-multi`, `thm:escada`,
@@ -143,13 +143,13 @@ Protocolo cumprido passo a passo:
 1. Bateria ANTES: 420 — 418 verdes, 2 falhas nomeadas. ✓
 2. Contagem por documento ANTES: Peano 26 · Universal 20 · união 38. ✓
 3. Movidas as três secções marcadas «mover» (Absorção; Energia/Parseval;
-   Observador/escada/teto-oito/iso-dual/fusão/fibra) do corpo_peano para o
+   Observador/escada/teto-oito/iso-dual/fusão/fibra) do corpo_topologico para o
    corpo_universal; referências cruzadas reescritas (labels de instância →
    citações textuais); o Peano ganhou a nota de instância
    (§sec:instancia-universal); a ponte universal↔metálica FICOU no Peano
    como instância exemplar (a mesa não mandou movê-la); a menção da
    Arquitetura mudou de casa junto. ✓
-4. pdflatex: corpo_peano, corpo_universal e arquitetura — 2 passagens cada,
+4. pdflatex: corpo_topologico, corpo_universal e arquitetura — 2 passagens cada,
    zero referências órfãs (varredura \ref×\label nos dois). ✓
 5. Bateria DEPOIS: 420 — 418 verdes, 2 falhas — **idêntica**. ✓
 6. Contagem DEPOIS: Peano 21 · Universal 20 · **união 38 = 38, diff vazio —
@@ -367,7 +367,7 @@ e o pdftotext lê ZERO. Nasceu o leitor partilhado `tests/pdf_casa_texto.js`
 uma leitura, muitos usos). Consertados com ele:
 - design_no_pdf ✓ (40.611 sequências longas no catálogo)
 - dois_streams ✓ (glifos por Do; fixture própria com tcolorbox — o
-  corpo-estelar perdeu as caixas DE PROPÓSITO: «só o tcolorbox tem caixa»)
+  corpo_analitico perdeu as caixas DE PROPÓSITO: «só o tcolorbox tem caixa»)
 - avalia_macros ✓ (página 1 sem espaços; capítulos 148=148 contra o
   pdflatex com oráculo AUTO-CONSTRUÍDO; degraus pela escala do cm;
   mutação filtrada às palavras EXCLUSIVAS do estilo)

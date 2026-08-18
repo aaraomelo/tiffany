@@ -4,7 +4,7 @@
  * servidor — é o correto, não há motivo para ser diferente». E depois: «não é compilador —
  * o interpretador não tem tempo nem dissipação, não compila, só traduz».
  *
- * E a correcção que reescreveu este medidor, do fim do `corpo-estelar.tex` (\sec:medir):
+ * E a correcção que reescreveu este medidor, do fim do `corpo_analitico.tex` (\sec:medir):
  *
  *     «A medida não compara: reverte, e lê o resíduo. […] uma asserção que compara contra um
  *      valor escrito passa no objecto certo E no trocado — ela verifica a aritmética de quem

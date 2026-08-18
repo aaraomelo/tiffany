@@ -94,7 +94,7 @@ const { resolveNoCorpo, tipoDe } = mod;
         if (!fs.existsSync(tex)) execFileSync('cc', ['-O2','-std=c99','-I../lib','tex.c','-lm','-o','tex'],
                                               { cwd: path.join(RAIZ, 'tests') });
         const visto = new Set();
-        for (const doc of ['teoria.tex', 'enredo.tex', 'papers/corpo-estelar.tex', 'papers/arquitetura.tex']) {
+        for (const doc of ['teoria.tex', 'enredo.tex', 'papers/corpo_analitico.tex', 'corpus/docs/arquitetura.tex']) {
             const r = require('child_process').spawnSync(tex, [path.join(RAIZ, doc), path.join(espia, 's.pdf')],
                 { cwd: path.join(RAIZ, 'tests'), env: { ...process.env, LD_PRELOAD: path.join(espia, 'e.so') } });
             for (const l of String(r.stderr).split('\n')) {

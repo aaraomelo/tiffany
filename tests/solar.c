@@ -9,7 +9,7 @@
  *   · paper_H_dtc_hipercomplexo.tex §E6-E12 — o eixo preditivo, PA_m de Lopes 2000
  *   · chess/sandbox/circuito_solar.tex     — a bateria de Koch, o painel casado, a eficiência
  *   · reino_dourado_enredo.tex \part{A Alfândega Dimensional} — "o que reverte, passa"
- *   · chess/sandbox/corpo_estelar.tex      — as estrelas irracionais, o ónus
+ *   · chess/sandbox/corpo_analitico.tex      — as estrelas irracionais, o ónus
  *
  * E O QUE AS LIGA: a alfândega cobra na única moeda que existe, o INVERSO. O que tem dual
  * atravessa e chega inteiro; o que não tem fica retido — E O QUE FICA RETIDO, ARDE. Daí a luz.
@@ -417,7 +417,7 @@ printf("\n§S6  A escada: casar N níveis da torre, e η -> 100%%.\n\n");
 
 printf("\n§S7  As ESTRELAS IRRACIONAIS: o ónus é o que nunca fecha.\n\n");
 {
-    /* Do corpo_estelar: ν inteiro <=> a estrela FECHA em k = ν+1 cuspides (orbita periodica);
+    /* Do corpo_analitico: ν inteiro <=> a estrela FECHA em k = ν+1 cuspides (orbita periodica);
      * ν irracional <=> roseta DENSA que nunca fecha. Mede-se: quantas voltas ate voltar ao
      * ponto de partida, e para o irracional a resposta e' NUNCA. */
     printf("      ν racional  ->  a estrela FECHA   (órbita periódica, período finito)\n");

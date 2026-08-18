@@ -135,7 +135,7 @@ int main(void){
 
     printf("\n%s\n", "==========================================================================");
     if(!falhas){
-        puts("  Uma operacao, e o corpo e' CAMPO — como o MOVE do corpo-estelar, onde «a");
+        puts("  Uma operacao, e o corpo e' CAMPO — como o MOVE do corpo_analitico, onde «a");
         puts("  mesma instrucao serve 500 corpos diferentes sem uma instrucao nova, porque o");
         puts("  corpo e' campo e nao opcode».");
         puts("");

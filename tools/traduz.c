@@ -11,7 +11,7 @@
  * Está certo, e não é uma questão de palavra. COMPILAR TEM UM TEMPO: uma etapa que corre
  * antes, produz outra coisa, e deita fora a estrutura de partida para dar lugar à de chegada.
  * O que se deita fora não volta, e o que não volta DISSIPA — é o mesmo critério do
- * `corpo-estelar.tex`, «apagar é a única operação que não se desfaz».
+ * `corpo_analitico.tex`, «apagar é a única operação que não se desfaz».
  *
  * Isto não faz nada disso. Não há representação intermédia, não há AST, não há alocador de
  * registadores, não há passagem de optimização: lê e emite ao mesmo tempo, numa volta só.
@@ -613,7 +613,7 @@ typedef struct { char nome[64]; int tipo, idx; int quadro, vector, slot; long de
 /* ── MOVE(endereço, sentido) ───────────────────────────────────────────────────────────
  *
  * «MOVE(slot, +1) do slot para o registo — o velho LOAD; MOVE(slot, −1) do registo para o
- * slot — o velho STORE.»  (tests/move.c, e §sec:estrela do corpo-estelar)
+ * slot — o velho STORE.»  (tests/move.c, e §sec:estrela do corpo_analitico)
  *
  * Não são duas funções com nomes diferentes: é uma, e o sentido é o sinal. Escrevê-las
  * separadas era dar dois nomes ao mesmo — «e dois nomes para o mesmo não são um par, são
@@ -799,7 +799,7 @@ static void MOVE(int tipo, int sentido){
  * E o tamanho sabe-se ANTES de emitir, porque se lê o corpo primeiro: sem isso a constante do
  * prólogo mudava de comprimento ao ser corrigida, e corrigir um LEB128 pelo meio desloca tudo
  * o que vem depois. */
-/* A fita do quadro: involução SP−n / SP+n (corpo-estelar §estrela) — NÃO é armazenamento.
+/* A fita do quadro: involução SP−n / SP+n (corpo_analitico §estrela) — NÃO é armazenamento.
  * A estrela não guarda nada; o que cabe aqui é a régua do frame aberto, e fecha onde
  * abriu. Se o SP esmaga literais, o defeito é cópia de vector no quadro (ex.: `Linha`
  * duplicada), não «faltam megabytes»: corrige-se in-place, sem alargar a fita. */
@@ -2557,7 +2557,7 @@ static void captura_reverso(const char *s){
  *  A DESCIDA  —  +1 absorve
  *
  *  «MOVE(slot, sentido): +1 absorve, −1 emite: é a interface. […] −1 sozinho só emite, +1
- *   sozinho só absorve, cada um meia operação.»  (corpo-estelar.tex)
+ *   sozinho só absorve, cada um meia operação.»  (corpo_analitico.tex)
  *
  *  Até aqui só havia o −1, e por isso a medida só podia COMPARAR — e comparar é ler metade,
  *  e metade dissipa. Com o +1 a medida deixa de comparar: REVERTE, e lê o resíduo.
@@ -3366,7 +3366,7 @@ int main(int argc, char **argv){
     captura_reverso(SRC);   /* guarda os # e comentários do ORIGINAL, antes de a expansão reescrever o SRC */
 
     /* O SENTIDO SAI DO PRÓPRIO OBJECTO, não de uma opção: um módulo diz-se pela marca. É a
-     * mesma interface do corpo-estelar — `MOVE(slot, sentido)`: −1 emite, +1 absorve. */
+     * mesma interface do corpo_analitico — `MOVE(slot, sentido)`: −1 emite, +1 absorve. */
     if(n >= 4 && !memcmp(SRC, "\0asm", 4)){
         if(IMG_INI >= 0 && IMG_FIM > IMG_INI){        /* 11: os dados — um segmento só */
         bu(&SEC, 1);
@@ -3577,7 +3577,7 @@ int main(int argc, char **argv){
         /* O MÍNIMO É O QUE AS DECLARAÇÕES SOMAM; o MÁXIMO é o tecto até onde o disco pode
          * ESTENDER-SE por `__disco_cresce` — contado, não reservado. O motor pagina o que
          * se toca (lazy), então declarar o tecto não custa RAM: um disco que nunca se escreve
-         * não ocupa nada, como o vector grande nunca escrito do corpo-estelar. Reservar o
+         * não ocupa nada, como o vector grande nunca escrito do corpo_analitico. Reservar o
          * tamanho fixo é que era o infinito — um `char MONTE[12M]` forçava a página a existir.
          * Aqui o disco começa no que basta e cresce pelo que se escreve. */
         bput(&SEC, 0x01);

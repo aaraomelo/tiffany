@@ -1,6 +1,6 @@
 ---
 name: project-checkpoint-2026-08-10
-description: "10/08 — a ronda do gabarito (carta das variáveis, pilha de fontes, radicando um só) e o papers/milenio.tex afirmativo; Aarão fora até quinta 13/08"
+description: "10/08 — a ronda do gabarito (carta das variáveis, pilha de fontes, radicando um só) e o corpus/docs/milenio.tex afirmativo; Aarão fora até quinta 13/08"
 metadata: 
   node_type: memory
   type: project
@@ -35,11 +35,11 @@ Aarão sem cota, **volta quinta 13/08**. Quatro commits `[skip ci]` no ar (sem d
 - Sempre verde: bateria 27:27 resíduo 0, volta byte a byte 0, teoria 64pp, traduz wasm limpo,
   `-fsyntax-only` em todos os que incluem spline.h (a lição do header).
 
-**O isomorfismo promovido**: graus 2,4,6,8 ≅ torre inteira (corpo-estelar `sub:oitoleis`, o ciclo
+**O isomorfismo promovido**: graus 2,4,6,8 ≅ torre inteira (corpo_analitico `sub:oitoleis`, o ciclo
 gerador L→L(L)→…) — notas na teoria (junto à propriedade operacional do π), física (mesmas leis em
 n=4 e n=16) e catálogo (o mesmo medidor serve em qualquer dimensão).
 
-**papers/milenio.tex** (novo, auto-contido, 6pp pdflatex limpo) — Aarão: «é lugar de afirmar,
+**corpus/docs/milenio.tex** (novo, auto-contido, 6pp pdflatex limpo) — Aarão: «é lugar de afirmar,
 não economiza nas afirmações». Estrutura: a autópsia (cristalização G=A, sintomas P1/P2/P3
 decidíveis) → as oito leis → o dicionário com A SOLUÇÃO de cada um (Poincaré resolvido PELO método
 = devolver o gerador; YM/P-NP decididos no estatuto — o centro 0, Abel e a quíntica; Riemann/BSD/

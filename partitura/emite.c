@@ -28,7 +28,7 @@ enum {
     V_BAT = 0, V_MAE, V_COR, V_MAD, V_MET, V_PER, V_L8
 };
 
-static Assinatura A_corpo_peano(void){
+static Assinatura A_corpo_topologico(void){
     Assinatura a;
     a.dim = 8;
     a.alcance = 3;
@@ -44,7 +44,7 @@ static void uso(const char *argv0){
         "uso: %s [peano] [--dim N] [--alcance K] [--lado 0|1] [--iface N]\n"
         "         [--bpm N] [--compassos N] [-o papers/partitura_vozes.tex]\n"
         "\n"
-        "Emite vozes TeX de Assinatura(corpo_peano) para o tradutor WASM.\n",
+        "Emite vozes TeX de Assinatura(corpo_topologico) para o tradutor WASM.\n",
         argv0);
 }
 
@@ -251,7 +251,7 @@ static void emite_peano_tex(FILE *o, const Assinatura *a){
 
     fprintf(o,
         "%% gerado por partitura/emite.c --- NAO editar a mao\n"
-        "%% Assinatura(corpo_peano) = Pi^{Peano}\n"
+        "%% Assinatura(corpo_topologico) = Pi^{Peano}\n"
         "%% Dim=%d Alcance=%d Lado=%d Iface=%d bpm=%d compassos=%d\n"
         "%% Pagina = andar do relogio (janela=%d compassos = meia volta); vozes em paralelo.\n"
         "%% Incluir em papers/partitura.tex; desenhar com tests/tex (WASM).\n\n",
@@ -287,7 +287,7 @@ static void emite_peano_tex(FILE *o, const Assinatura *a){
 int main(int argc, char **argv){
     int i = 1;
     FILE *o;
-    Assinatura a = A_corpo_peano();
+    Assinatura a = A_corpo_topologico();
 
     if(i < argc && (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help"))){
         uso(argv[0]); return 0;

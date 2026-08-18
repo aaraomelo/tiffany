@@ -1,7 +1,7 @@
 % !TeX program = pdflatex
-% papers/corpo-estelar.tex — o paper principal: a especificação do sistema.
+% papers/corpo\_analitico.tex — o paper principal: a especificação do sistema.
 % Auto-contido: não depende de teoria.tex nem de catalogo.tex para ser lido.
-% Compila sozinho:  pdflatex corpo-estelar.tex
+% Compila sozinho:  pdflatex corpo\_analitico.tex
 \documentclass[11pt,a4paper]{article}
 \usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[portuguese]{babel}
 \usepackage{amsmath,amssymb,amsthm}
@@ -22,10 +22,35 @@
 \input{gkcapa}
 
 \begin{document}
-\gkcapa{O Corpo Estelar}
-       {a especificação do sistema}
+\gkcapa{O Corpo Analítico}
+       {o ALCANCE --- graduação sem topo, continuação analítica e completude}
        {buraco branco, estrela, buraco negro --- a trindade reversível}
 \maketitle
+
+%======================================================================
+\section*{Onde este documento vive na tríade}
+
+Este é o \textbf{terceiro} dos três, e o seu papel é o \textbf{alcance}:
+\[
+\text{Universal}\ \longrightarrow\ \text{Peano}\ \longrightarrow\ \boxed{\text{ESTELAR}}
+\]
+Do \emph{Corpo Universal} recebe o \textbf{operador} e a \textbf{medida}; o que
+\emph{introduz} é a \textbf{graduação sem topo} (\code{thm:graduacao-gentil}) e a
+\textbf{continuação analítica} (\code{thm:atravessa}).
+
+\emph{O que ele mede}: o que precisa de \emph{todos} os passos --- $0{,}999\ldots=1$ e o
+seu dual discreto (\code{cor:noves}, \code{cor:noves-dual}), a completude, o corte,
+$\mathbb{R}$. E o \code{thm:medida-jacobiano} diz-se a si próprio o que é, \emph{a face
+graduada do Teorema do Gato}: é aqui que o Jacobiano aparece, e é ele que transporta a
+medida. \emph{O que ele não mede}: o que já é exacto na forma finita --- ali a álgebra
+respondeu, e repetir seria trocar uma identidade por um limite.
+
+\textbf{E a aritmética, aqui, FECHA.} O corte decide-se por traço e norma, ambas inteiras,
+e só \emph{depois} entra o limite --- para o que a estrutura finita não alcança, e não para
+substituir o que ela já deu. \emph{A análise não substitui a álgebra: alcança o que ela não
+alcançava.}
+
+
 
 \begin{abstract}
 \noindent Este documento especifica um sistema completo a partir de uma única exigência, e

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # completa_corpus.sh — Re-gera pares truncados (frases cortadas a meio).
 #
-#   cd banco && ../tools/completa_corpus.sh .fala/<hex> papers/conversa_arvore_n2_fundacao.tex
+#   cd banco && ../tools/completa_corpus.sh .fala/<hex> corpus/fala/conversa_arvore_n2_fundacao.tex
 #   ../tools/completa_corpus.sh .fala/<hex>   # todos conversa_arvore_*.tex
 #
 set -euo pipefail
@@ -16,7 +16,7 @@ SISTEMA="$ROOT/tools/.gabarito_fundacao.txt"
 [ -x "$CV" ] || { echo "falta $CV"; exit 1; }
 
 if [ "$#" -eq 0 ]; then
-  set -- "$ROOT"/papers/conversa_arvore_*.tex
+  set -- "$ROOT"/corpus/fala/conversa_arvore_*.tex
 fi
 
 TMP=$(mktemp)

@@ -9,7 +9,7 @@
  * pilha, com a pilha escrita por extenso».
  *
  * O que faltava era o DUAL: o `wasm_desce` lê, e nada escrevia. Meia operação — «só absorve»,
- * o buraco negro do corpo-estelar. Aqui está a outra metade, e com ela a volta fecha:
+ * o buraco negro do corpo_analitico. Aqui está a outra metade, e com ela a volta fecha:
  *
  *     emitir  ──►  módulo  ──►  descer  ──►  as mesmas secções, resíduo 0
  *
@@ -157,7 +157,7 @@ int main(void){
     if(!falhas){
         puts("  O navegador EXECUTA wasm; quem o EMITE nao tem de ser o emscripten — e nao e',");
         puts("  porque ja' estava aqui. O chessb.c §C2 DESCIA sobre o formato e nada SUBIA:");
-        puts("  meia operacao, «so' absorve», o buraco negro do corpo-estelar.");
+        puts("  meia operacao, «so' absorve», o buraco negro do corpo_analitico.");
         puts("");
         puts("  Com as duas metades a volta fecha: emitir, descer, e as mesmas seccoes com os");
         puts("  mesmos tamanhos. E o mesmo LEB128 dos dois lados — «o valor conta-se por");

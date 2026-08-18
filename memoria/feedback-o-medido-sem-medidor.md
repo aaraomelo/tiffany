@@ -13,7 +13,7 @@ metadata:
 percorre: não é uma referência quebrada (não há referência), não é um medidor que falha (não há
 medidor). É invisível por construção.
 
-São **28**: 18 em `teoria.tex`, 10 em `catalogo.tex`. Os dois papers (`corpo-estelar`, `dualsort`)
+São **28**: 18 em `teoria.tex`, 10 em `catalogo.tex`. Os dois papers (`corpo_analitico`, `dualsort`)
 estão limpos — zero.
 
 ## Como se acham

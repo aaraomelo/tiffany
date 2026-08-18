@@ -77,7 +77,7 @@ LISTA=$(mktemp)
 # \_ escapado no LaTeX — parava em .c, e por isso um medidor que fosse ao mesmo tempo composto
 # e não-C ficava invisível: aparecia como "não citado" estando citado. Só se vê a comparar as
 # duas listas, porque o total não desce quando alguém nunca chegou a entrar.
-# E OS PAPERS ENTRAM NA VARREDURA. Um medidor citado só num paper (papers/medida.tex foi o
+# E OS PAPERS ENTRAM NA VARREDURA. Um medidor citado só num paper (corpus/docs/medida.tex foi o
 # primeiro) ficava fora da lista e desaparecia em silêncio — o total não desce quando alguém
 # nunca chegou a entrar, que é o defeito que esta bateria existe para não ter.
 # E conecthus/ é a mesma frase outra vez: o fundamento.tex cita medidores, e um paper que

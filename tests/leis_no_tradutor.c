@@ -13,7 +13,7 @@
  * medidor a fechar (resíduo 0). Aqui MEDE-SE onde cada uma está NO TRADUTOR --- e onde NÃO está,
  * porque forçá-la seria a asserção que passa sem poder falhar. O tradutor é a INTERFACE (hexal) que
  * casa o seu dual (LaTeX<->PDF) pelo seu trial (o eixo do MOVE); a tetral e a pental são do CORPO
- * (corpo-estelar.tex), não da interface --- e a assinatura grau 2 diz isso.
+ * (corpo_analitico.tex), não da interface --- e a assinatura grau 2 diz isso.
  *
  *   §T1  dual   --- LaTeX<->PDF: MOVE(-1) emite, MOVE(+1) absorve; a volta fecha (resíduo 0)
  *   §T2  trial  --- o eixo {emite=-1, atravessa=0, absorve=+1} do MOVE = o trial do inversor
@@ -145,7 +145,7 @@ int main(void){
      * TETRAL (dim 4, os tecidos, dim A_{n+1}=2 dim A_n) nem a PENTAL (o ponto fixo x²=−1, o bit i):
      * o corpo que atravessa é (glifo,x,y) --- PLANO, não uma torre que dobra; a dobra 1D->2D
      * (texto->página) acontece UMA vez (o passo complexo) e não continua a 4->8. Essas leis são do
-     * CORPO (corpo-estelar.tex), e forçá-las aqui seria a asserção sem poder de falha. A AUSÊNCIA é
+     * CORPO (corpo_analitico.tex), e forçá-las aqui seria a asserção sem poder de falha. A AUSÊNCIA é
      * deliberada, e mede-se: o grau é 2, o eixo 3, e nenhum é 4. */
     /* CONTA-SE, não se afirma: o grau é o nº de campos da assinatura (por sizeof), o eixo o nº de
      * sentidos do MOVE (por sizeof do array). Acrescentar um campo ou um sentido muda o número. */
@@ -175,7 +175,7 @@ int main(void){
         puts("  BIDUAL é a projeção que larga o \\emph mas devolve o corpo (e a cauda reversível guarda o #);");
         puts("  a Lei 6 HEXAL é o próprio tradutor, a interface de UMA porta que casa o dual pelo trial. A");
         puts("  TETRAL e a PENTAL não se forçam: a assinatura é grau 2, e a ausência é deliberada --- essas");
-        puts("  são do corpo (corpo-estelar), não da interface. Cada lei um operador, cada uma a fechar em 0.");
+        puts("  são do corpo (corpo_analitico), não da interface. Cada lei um operador, cada uma a fechar em 0.");
     } else printf("  FALHOU: %d\n", falhas);
     return falhas ? 1 : 0;
 }

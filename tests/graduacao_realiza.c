@@ -201,7 +201,7 @@ printf("\n§G3  O CONSTRUTOR DA GRADUAÇÃO não tem topo: só a REALIZAÇÃO ac
 
 printf("\n§G4  O DIRECTO E O CRUZADO do estelar, realizados por ∧ e ⋆.\n\n");
 {
-    /* corpo-estelar §640: «o directo ⟨a,b⟩ = cos θ é a parte simétrica; o cruzado
+    /* corpo_analitico §640: «o directo ⟨a,b⟩ = cos θ é a parte simétrica; o cruzado
      * ‖a∧b‖ = sin θ é a antissimétrica». Na graduação, o cruzado é α∧β (grau 1+1) e o
      * directo é α∧⋆β (grau 1+2) — o MESMO ∧, e Lagrange fecha entre os dois. */
     long mal = 0, tot = 0;
@@ -225,7 +225,7 @@ printf("\n§G4  O DIRECTO E O CRUZADO do estelar, realizados por ∧ e ⋆.\n\n"
     ok("O PAR DIRECTO/CRUZADO DO ESTELAR REALIZA-SE NA GRADUAÇÃO: o cruzado é α∧β (grau"
        " 1+1) e o directo é α∧⋆β (grau 1+2) — o MESMO produto exterior em graus"
        " diferentes, e não dois produtos. E Lagrange fecha entre eles, directo² +"
-       " cruzado² = N(α)N(β), que é a identidade que o corpo-estelar §640 já usava com"
+       " cruzado² = N(α)N(β), que é a identidade que o corpo_analitico §640 já usava com"
        " cos θ e sin θ, agora sem trigonometria e sem raiz",
        mal == 0 && tot == 117649);
 }

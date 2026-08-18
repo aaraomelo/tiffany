@@ -463,7 +463,7 @@ export function initAssistente () {
     mostraBanco(fala)
     mostraPatria(fala)
 
-    // Controlo dual: P / ℋ / H (corpo_peano §rede-dual)
+    // Controlo dual: P / ℋ / H (corpo_topologico §rede-dual)
     const passo = passoRedeDual(rede, fala)
     linha('sys', 'rede', passo.motivo +
       (passo.recall ? ' · recall=' + passo.recall.fonte : ''), false)

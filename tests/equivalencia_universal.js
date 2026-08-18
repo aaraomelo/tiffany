@@ -99,7 +99,7 @@ function transicoesP (s) {
 /* ── as fixtures reais ────────────────────────────────────────────────────── */
 const cristal = fs.readFileSync(path.join(RAIZ, 'cristal', 'cristal.jsonl'), 'utf8')
   .split('\n').filter(l => l.length)
-const tex = fs.readFileSync(path.join(RAIZ, 'papers', 'conversa.tex'), 'utf8')
+const tex = fs.readFileSync(path.join(RAIZ, 'corpus', 'fala', 'conversa.tex'), 'utf8')
 const pares = []
 {
   const rx = /\\section\{([^}]+)\}\s*\n([^\n\\]+)/g

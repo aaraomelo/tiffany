@@ -1,6 +1,6 @@
 #!/bin/sh
 # pipeline.sh — Cresce o corpus com o inventário Claim + fronteira + Controlo.
-# Fontes: conecthus/pipeline.tex, claims/*.claim, papers/conversa_pipeline.tex
+# Fontes: conecthus/pipeline.tex, claims/*.claim, corpus/fala/conversa_pipeline.tex
 #
 #   cd banco && ../tools/pipeline.sh .fala/<hex>
 #
@@ -14,9 +14,9 @@ mkdir -p "$B"
 aprende(){ "$CV" "$B" aprende "$1" "$2" >/dev/null; }
 
 # —— porta ——
-aprende "mostra o pipeline" "conecthus/pipeline.tex — IR Claim; papers/conversa_pipeline.tex"
+aprende "mostra o pipeline" "conecthus/pipeline.tex — IR Claim; corpus/fala/conversa_pipeline.tex"
 aprende "o que e o pipeline" "IR do desenvolvimento: Claim especifica; Result observa. conecthus/pipeline.tex"
-aprende "falemos do pipeline" "terceiro eixo da arquitetura (porta, torre, pipeline). papers/arquitetura.tex"
+aprende "falemos do pipeline" "terceiro eixo da arquitetura (porta, torre, pipeline). corpus/docs/arquitetura.tex"
 
 # —— inventário LMS ——
 aprende "quantas claims lean ha" "Dez no disco: 9 ferramentas LMS + PipelineClosure. conecthus/claims/"

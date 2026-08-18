@@ -17,7 +17,7 @@ busca deu mais do que uma lista: deu que **o andar já corria, sem o nome** (com
 | `mat2.W(m)` = 2A − mI, com **W² = (m²+4)I** | a mesma relação, a realizar o discriminante em matriz |
 | **T = C + C⁻¹ com T² = T + I** (o pentágono) | a terceira aparição |
 | as duas **cartas**: a²+b² e a²+mab−b² | as duas **formas quadráticas** do §3, definida e indefinida |
-| M_ij = Σ(xᵢ−cᵢ)(xⱼ−cⱼ) no `corpo-estelar.tex` | a matriz **simétrica** cuja massa escalar é o **traço** |
+| M_ij = Σ(xᵢ−cᵢ)(xⱼ−cⱼ) no `corpo_analitico.tex` | a matriz **simétrica** cuja massa escalar é o **traço** |
 
 **A lei que o explica, medida**: «a quadrática do ponto fixo deriva-se da matriz»
 (`cx² + (d−a)x − b`) coincide com o **característico** (`λ² − tr·λ + det`) exatamente nas

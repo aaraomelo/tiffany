@@ -164,14 +164,14 @@ const now = () => Number(process.hrtime.bigint()) / 1e6
   }
 
   /* ─── §P0 dualsort ─────────────────────────────────────────────────────────── */
-  const d0 = await compor('papers/dualsort.tex')
+  const d0 = await compor('corpus/docs/dualsort.tex')
   console.log(`   §P0 dualsort tam=${d0.tam} pág=${d0.pages} Forms=${d0.forms} miss=${d0.miss}` +
     ` cache=${d0.cacheN} ${d0.msCompila} ms`)
   ok('§P0 dualsort: %PDF + Semente + Assinatura + miss>0 (corpo do LS)',
     d0.pct && d0.eof && d0.semente && d0.selo && d0.miss > 5 && d0.tam > 1e5 && d0.pages > 5)
 
   /* ─── §P1 2ª dualsort: id, cache quente ────────────────────────────────────── */
-  const d1 = await compor('papers/dualsort.tex')
+  const d1 = await compor('corpus/docs/dualsort.tex')
   console.log(`   §P1 2.ª dualsort tam=${d1.tam} Forms=${d1.forms} miss=${d1.miss} cacheMs=${d1.cacheMs}`)
   ok('§P1 2ª visita: dualsort id (1 bit + Map quente)',
     d1.tam === d0.tam && d1.forms === d0.forms && d1.miss === d0.miss && d1.pages === d0.pages)
@@ -191,7 +191,7 @@ const now = () => Number(process.hrtime.bigint()) / 1e6
     && cA.tam === cB.tam && cA.forms === cB.forms && cA.miss === cB.miss)
 
   /* ─── §P3 dualsort após catálogo (sessão longa) ────────────────────────────── */
-  const d2 = await compor('papers/dualsort.tex')
+  const d2 = await compor('corpus/docs/dualsort.tex')
   console.log(`   §P3 dualsort após catálogo tam=${d2.tam} Forms=${d2.forms}`)
   ok('§P3 sessão longa: dualsort volta ao mesmo após catálogo (estrela sem estado)',
     d2.tam === d0.tam && d2.forms === d0.forms && d2.pages === d0.pages)

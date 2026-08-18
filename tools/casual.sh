@@ -42,17 +42,17 @@ aprende "conta uma piada curta" "porque o livro de matemática estava triste? ti
 aprende "prazer em conhecer-te" "o prazer é meu. vamos conversar com calma."
 
 # Ponte mínima ao catálogo (só se pedirem explicitamente o paper)
-aprende "mostra a partitura" "a partitura canónica está em papers/partitura.tex"
-aprende "mostra o dual sort" "vê papers/dualsort.tex"
-aprende "mostra o corpo de peano" "papers/corpo_peano.tex"
-aprende "mostra a rede dual" "papers/corpo_peano.tex §rede-dual — também papers/conversa_rede_dual.tex"
-aprende "mostra a teoria" "a formalização: teoria.tex — mas a fundação vem antes: papers/torre_fundacao.tex"
-aprende "mostra a fundação" "Corpos→Dinâmica→Topologia→Hilbert/Clifford→Peano: papers/torre_fundacao.tex"
-aprende "torre de fundação" "a escada antes do Corpo de Peano: papers/torre_fundacao.tex"
+aprende "mostra a partitura" "a partitura canónica está em corpus/docs/partitura.tex"
+aprende "mostra o dual sort" "vê corpus/docs/dualsort.tex"
+aprende "mostra o corpo de peano" "papers/corpo_topologico.tex"
+aprende "mostra a rede dual" "papers/corpo_topologico.tex §rede-dual — também corpus/fala/conversa_rede_dual.tex"
+aprende "mostra a teoria" "a formalização: teoria.tex — mas a fundação vem antes: corpus/docs/torre_fundacao.tex"
+aprende "mostra a fundação" "Corpos→Dinâmica→Topologia→Hilbert/Clifford→Peano: corpus/docs/torre_fundacao.tex"
+aprende "torre de fundação" "a escada antes do Corpo de Peano: corpus/docs/torre_fundacao.tex"
 aprende "mostra o catalogo" "o bestiário: catalogo.tex"
 aprende "mostra o catálogo" "o bestiário: catalogo.tex"
 
-python3 "$D/ingere.py" "$ROOT/papers/conversa.tex" | "$CV" "$B" - >/dev/null
+python3 "$D/ingere.py" "$ROOT/corpus/fala/conversa.tex" | "$CV" "$B" - >/dev/null
 
 echo "casual (banal): base=$B"
 "$CV" "$B" responde "bom dia" | head -2

@@ -14,7 +14,7 @@ CV="$ROOT/banco/bin/conversa"
 [ -x "$CV" ] || { echo "falta $CV"; exit 1; }
 
 if [ "$#" -eq 0 ]; then
-  set -- "$ROOT"/papers/conversa_arvore*.tex "$ROOT"/papers/conversa_gabarito.tex
+  set -- "$ROOT"/corpus/fala/conversa_arvore*.tex "$ROOT"/corpus/fala/conversa_gabarito.tex
 fi
 
 python3 - "$CV" "$B" "$@" <<'PY'

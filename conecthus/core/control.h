@@ -1,6 +1,6 @@
 /* conecthus/core/control.h — Controlo de Histerese ACIMA da IR.
  * Não é sintaxe do .claim. Gerar → Medir(D) → Seleccionar → Reter/Fechar.
- * Teorema: papers/corpo_peano.tex thm:controle-histerese.
+ * Teorema: papers/corpo_topologico.tex thm:controle-histerese.
  * Eixos V: L1, |R|, |n|, mut, caixa, teclado, fonético, forma. */
 #ifndef CONECTHUS_CONTROL_H
 #define CONECTHUS_CONTROL_H

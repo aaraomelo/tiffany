@@ -1094,14 +1094,14 @@ int printf(char *f, ...){
  *
  * O Aarão, e é a teoria da medida: «vc ta calculando o infinito de novo». Eu tinha posto
  * um `char MONTE[12M]` — reservar o pior caso, o infinito — e um `realloc` que DOBRAVA,
- * que é aproximar por potências. As duas coisas são o que o papers/medida.tex proíbe:
+ * que é aproximar por potências. As duas coisas são o que o corpus/docs/medida.tex proíbe:
  * não se reserva o infinito nem se aproxima; CONTA-SE.
  *
  * Aqui o espaço é o DISCO do módulo — a memória linear, o mmap do disco.h — e ele começa
  * onde os dados estáticos acabam e ESTENDE-SE pelo que se escreve, uma página de cada vez.
  * `__disco_cresce` é `memory.grow`: o motor pagina o que se toca e larga o resto, logo o
  * tecto declarado não custa RAM. Um disco que nunca se escreve não pesa — é o vector grande
- * nunca escrito do corpo-estelar. O `free` pontual é vazio; a involução da composição é
+ * nunca escrito do corpo_analitico. O `free` pontual é vazio; a involução da composição é
  * `volta_compila`: 1 bit, CURSOR ← MARCO. Sem isso o malloc só emite (buraco branco) e
  * o segundo PDF grande parte — Lyapunov λ>0, estado_caos.
  *

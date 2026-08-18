@@ -1,7 +1,7 @@
-% papers/corpo_peano.tex
+% papers/corpo\_topologico.tex
 % O corpo operacional de Peano --- eixo: Maestro (dinâmica) ⊕ Metrónomo (métrica).
 % Cadeia: borda → ordem → massa → contínuo → torre → π_k → Maestro/Metrónomo → música.
-% Auto-contido: pdflatex corpo_peano.tex; no browser via tex.wasm (mesmo dialecto dos papers).
+% Auto-contido: pdflatex corpo\_topologico.tex; no browser via tex.wasm (mesmo dialecto dos papers).
 \documentclass[11pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -20,10 +20,34 @@
 \newcommand{\code}[1]{\texttt{#1}}
 \input{gkcapa}
 \begin{document}
-\gkcapa{O Corpo de Peano}
-       {construção até à retração --- Maestro e Metrónomo}
+\gkcapa{O Corpo Topológico}
+       {o PALCO --- endereçamento, projecção dimensional e métrica}
        {realização dinâmica e métrica do teorema central; o tradutor \texttt{.tex}$\leftrightarrow$PDF opera nesta torre}
 \maketitle
+
+%======================================================================
+\section*{Onde este documento vive na tríade}
+
+Este é o \textbf{segundo} dos três, e o seu papel é o \textbf{palco}:
+\[
+\text{Universal}\ \longrightarrow\ \boxed{\text{PEANO}}\ \longrightarrow\ \text{Estelar}
+\]
+Do \emph{Corpo Universal} recebe o \textbf{operador} e a condição $\lvert\det\rvert=1$; o que
+\emph{introduz} é o \textbf{endereçamento} (\code{def:peano}) e a \textbf{projecção
+dimensional} $\pi_k$ (\code{def:pi-k}), com o \emph{Maestro} a realizar a dinâmica
+(\code{thm:proj-maestro}) e o \emph{Metrónomo} a métrica (\code{thm:metronomo}).
+
+\emph{O que ele mede}: posição, composição e volume discreto --- e o
+\code{thm:det-volume} diz-se a si próprio o que é, \emph{a face discreta do Teorema do
+Gato}. \emph{O que ele não mede}: a medida no sentido de Lebesgue --- há isometrias da
+métrica canónica que a mudam --- nem o que só o limite alcança; esse é o Estelar.
+
+\textbf{E a aritmética, aqui, ENDEREÇA.} Ela não é introduzida neste andar: vem do
+fundamento e atravessa os três. O que muda é o ofício --- no Universal opera, aqui
+endereça, no Estelar fecha. É por os índices serem \emph{inteiros} que a torre tem andares
+e não um contínuo.
+
+
 
 \begin{abstract}
 Um corpo possui operações e ordem. Não se postula $\mathbb{R}$ com
@@ -86,10 +110,10 @@ dual} (\S\ref{sec:rede-dual}): Teoremas~\ref{thm:retencao-neural},
 \ref{thm:rede-dual}; pesos $W=-I$ pela Lei~1; Hopfield $=$ memória da
 volta, não inversão --- $\lambda^{+}+\lambda^{-}=0$ pela dualidade
 reversível (Teorema~\ref{thm:metronomo}). Verificação:
-\code{tests/corpo\_peano.c} §CP1--§CP40;
+\code{tests/corpo\_topologico.c} §CP1--§CP40;
 \code{tools/bench\_histerese.sh};
 \code{tools/bench\_vizinhanca.sh};
-\code{papers/dualsort.tex}.
+\code{corpus/docs/dualsort.tex}.
 \end{abstract}
 
 \medskip
@@ -1268,7 +1292,7 @@ autocontida). O Peano é o piano; o catálogo é o reportório; cada entrada
 é uma peça; a partitura é a folha.
 A realização gráfica vive no tradutor WASM:
 \code{partitura/emite.c} emite \code{papers/partitura\_vozes.tex};
-\code{papers/partitura.tex} desenha; \code{tests/tex} / \code{tex.wasm}
+\code{corpus/docs/partitura.tex} desenha; \code{tests/tex} / \code{tex.wasm}
 compõem \code{partitura-wasm.pdf}. Cadeia:
 relógio$\to$metrónomo$\to$maestro$\to$batuta$\to\Pi\to\pi_k\to$orquestra.
 A partitura não inventa informação fora da assinatura.
@@ -1422,7 +1446,7 @@ $\mathcal{P}_k=\mathrm{tick}\circ\mathrm{batuta}\circ\Pi$
 $\mathcal{F}$ escolhe o ramo; o Metrónomo lê o resíduo $r$
 relativamente a $\Pi$ (\code{app/src/maestro.js},
 \code{app/src/assistente.js}; Dual Sort
-\code{papers/dualsort.tex}).
+\code{corpus/docs/dualsort.tex}).
 \end{enumerate}
 \[
 \boxed{
@@ -1443,7 +1467,7 @@ r
 \text{a atestação}.
 }
 \]
-A realização gráfica (\code{papers/partitura.tex},
+A realização gráfica (\code{corpus/docs/partitura.tex},
 \code{partitura-wasm.pdf}) desenha $\Pi$; não substitui o Teorema
 Central nem a rede dual.
 \end{proposicao}
@@ -1562,7 +1586,7 @@ $\{\mathrm{Metrónomo},\mathrm{Batuta},\mathrm{Maestro},
 \mathrm{Cordas},\mathrm{Madeiras},\mathrm{Metais},\mathrm{Percussão},
 \mathrm{Lei\,8}\}$
 (Figura~\ref{fig:partitura-sistema}). Realização gráfica no
-tradutor: \code{papers/partitura.tex}
+tradutor: \code{corpus/docs/partitura.tex}
 (\code{./emite}$\to$\code{partitura\_vozes.tex};
 \code{partitura-wasm.pdf}).
 \end{definicao}
@@ -1586,7 +1610,7 @@ Lei 8 & $0$ & $1$ & $2$ & $3$ & $4$ & $5$ & $6$ & $7$ \\
 \end{center}
 \caption{Partitura completa do sistema (tradutor WASM): todas as vozes em
 paralelo, um único relógio. Realização
-$\Pi^{\mathrm{Peano}}$ em \code{papers/partitura.tex}
+$\Pi^{\mathrm{Peano}}$ em \code{corpus/docs/partitura.tex}
 (\code{partitura-wasm.pdf}).}
 \label{fig:partitura-sistema}
 \end{figure}
@@ -3427,7 +3451,7 @@ inversão. Vem \textbf{depois} da leitura complexa: o Metrónomo já
 ponteia cartesiano e polar (\S\ref{sec:metronomo-ponte}); a rede
 realiza o controlo sobre essa mesma atestação. Núcleo: leis já no
 corpo (Teorema~\ref{thm:histerese}, Prop.~\ref{prop:histerese-nucleo});
-estaca do Dual Sort (\code{papers/dualsort.tex}); Metrónomo
+estaca do Dual Sort (\code{corpus/docs/dualsort.tex}); Metrónomo
 (Teorema~\ref{thm:metronomo}, \S\ref{sec:metronomo-ponte}).
 
 \subsection*{Três níveis (não misturar)}
@@ -3732,7 +3756,7 @@ Prop.~\ref{prop:rede-no-canal}: $I$ da batuta alimenta $\mathcal{F}$.
 
 \noindent \textbf{Verificação.} Núcleo Lyapunov:
 \code{tests/lyapunov\_refletido.c}; Dual Sort:
-\code{papers/dualsort.tex}; UI:
+\code{corpus/docs/dualsort.tex}; UI:
 \code{app/src/rede\_dual.js}, \code{app/src/assistente.js};
 medidor \code{tests/rede\_dual.js} /
 \code{tools/bench\_rede\_dual.sh}; corpus
@@ -3767,7 +3791,7 @@ rotor & Lei~2 & $J$, $J^{2}=-I$ \\
 \code{peano\_dual.c}: trial, $\Lambda_K$. Não são a mesma curva.
 
 \bigskip
-\noindent\textbf{Verificação.} \code{tests/corpo\_peano.c} §CP1--§CP40;
+\noindent\textbf{Verificação.} \code{tests/corpo\_topologico.c} §CP1--§CP40;
 \code{tests/autoria\_tradutor.js}: Hurwitz~$8\neq$teto;
 $\mathcal{P}_k=\mathrm{tick}\circ\mathrm{batuta}\circ\Pi$;
 Teorema~\ref{thm:histerese}: \code{tools/bench\_histerese.sh};
@@ -3786,11 +3810,11 @@ Teorema Central na torre: Prop.~\ref{thm:central-peano},
 \ref{prop:central-operacional};
 música / canal: Prop.~\ref{prop:rede-no-canal},
 \ref{prop:pi-cadeia}
-(\S\ref{sec:musica}; \code{papers/partitura.tex});
+(\S\ref{sec:musica}; \code{corpus/docs/partitura.tex});
 rede neural dual \S\ref{sec:rede-dual}:
 Teoremas~\ref{thm:retencao-neural},~\ref{thm:rede-dual},
 Prop.~\ref{prop:fecho-conj-exp}
-(\code{papers/dualsort.tex}; UI \code{app/src/rede\_dual.js},
+(\code{corpus/docs/dualsort.tex}; UI \code{app/src/rede\_dual.js},
 \code{tests/rede\_dual.js};
 corpus \code{papers/conversa\_rede\_dual.tex},
 \code{papers/conversa\_arvore\_n1\_rede\_dual.tex};

@@ -15,7 +15,7 @@
  * duas leis, agora no corpo do número. (Antes eu dissera grau 2, fixado na notação do expoente `e`;
  * mas o dual da escala não é o `e` --- é a POSIÇÃO DA VÍRGULA, e a vírgula-fixa escreve-a.)
  *
- * E O NOME CERTO É A LEI DOS TECIDOS (Lei 4 tetral; corpo-estelar thm:tecidos): o passo é T + T*,
+ * E O NOME CERTO É A LEI DOS TECIDOS (Lei 4 tetral; corpo_analitico thm:tecidos): o passo é T + T*,
  * o par (A, A*) lido pela CRUZ (x⊕x†, x⊗x†), cujas DUAS coordenadas SÃO o aditivo (o sinal do valor)
  * e o multiplicativo (o sinal da escala). escrita = T (o discreto, contar os dígitos, Hurwitz),
  * leitura = T* (o contínuo, o valor, Gentil): o número↔texto é UM passo de tecido, e a medida é a

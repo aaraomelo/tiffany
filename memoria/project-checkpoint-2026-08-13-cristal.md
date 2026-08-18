@@ -73,7 +73,7 @@ gerente/diretor). Frase do gerente adotada: «o sistema distingue mutações
 admissíveis das que violam o invariante do claim».
 
 **RONDA 4 (ordem do coordenador: formalizar e sanear) — commit `9c42020`.**
-**Teorema da Absorção** entrou no corpo_peano.tex (§sec:absorcao, thm:absorcao,
+**Teorema da Absorção** entrou no corpo_topologico.tex (§sec:absorcao, thm:absorcao,
 após o Controle de Histerese): e=R−k=0 exato pelo ENDEREÇO em toda a torre;
 endereço destruído = o PAR faltante⊕excedente (Lei 0), e≡1 σ²=0; por posição
 diverge ~n² — o estresse é da RÉGUA. Prop. involucao-ruido (flip∘flip=id no
@@ -95,7 +95,7 @@ só a citação da matriz. Frase do gerente: «a absorção não é tolerar erro
 ter uma coordenada onde a perturbação se contabiliza e, dualizada, cancela».
 
 **RONDA 6 (ordem do coordenador: indução/meta-indução + energia + Parseval
-multidim do central) — commit `0c64ad8`.** corpo_peano §sec:energia:
+multidim do central) — commit `0c64ad8`.** corpo_topologico §sec:energia:
 def:inducao (indução = o passo, Lei 4; meta-indução = a leitura dual que
 VALIDA A CONSERVAÇÃO DE ENERGIA), def:energia (E=Σx² = a MASSA da cruz;
 Hurwitz N(xy)=N(x)N(y) + |det|=1 + λ⁺+λ⁻=0 são três nomes; Parseval = a
@@ -161,7 +161,7 @@ escapa ao linear, a ENERGIA apanha (ΔE=12870)** — fecha em 8, falha em 9, o
 gesto do relógio de Hurwitz (analogia dita); **fusão ⊗: E(u⊗v)=E(u)·E(v)
 EXATO (N(xy)=N(x)N(y)); divisão = FIBRA: x_i=z_ij/v_j inteira, 8 caminhos
 concordantes, E divide — a clássica EMERGE**; fusão ⊕ soma e retração devolve.
-corpo_peano §sec:observador: escada I₁≺I₂≺I₃ (estrita e orgânica),
+corpo_topologico §sec:observador: escada I₁≺I₂≺I₃ (estrita e orgânica),
 teto-oito, iso-dual (preserva I ∧ ordem; a escada é observador DA ordem),
 fusao-mult, divisao-fibra. Fusão de CONCEITOS: quarentena mantida (sem objeto
 no banco). Bateria do dia toda verde: 10+7+7+16+10.
@@ -177,7 +177,7 @@ PRODUTO N(xy)=N(x)N(y); det(A_m^k)=(−1)^k; inversa inteira nas unidades
 ordem** (escada idêntica); **EMERGEM sem forçar: frações contínuas (A_m^k
 carrega os convergentes), Möbius (compor matrizes=compor fracionárias), Pisot
 inteiro (L²−ΔF²=4(−1)^k)**; NÃO aparecem: Dirac, convolução — registrados.
-Anel: Parseval dos F_k fecha (14050). corpo_peano §sec:ponte
+Anel: Parseval dos F_k fecha (14050). corpo_topologico §sec:ponte
 (thm:ponte-universal + obs:emerge, cadeia corpo→norma→ordem→observador→
 transformação→dual — «hipótese testável por elos, não manifesto»).
 Bateria do dia: 12+10+7+7+16+10 verde.

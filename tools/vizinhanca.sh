@@ -9,7 +9,7 @@ B="${1:?uso: ./vizinhanca.sh <base>}"
 D=$(cd "$(dirname "$0")" && pwd)
 ROOT=$(cd "$D/.." && pwd)
 CV="$ROOT/banco/bin/conversa"
-TEX="$ROOT/papers/conversa_vizinhanca.tex"
+TEX="$ROOT/corpus/fala/conversa_vizinhanca.tex"
 [ -x "$CV" ] || { echo "falta $CV"; exit 1; }
 mkdir -p "$B"
 aprende(){ "$CV" "$B" aprende "$1" "$2" >/dev/null; }

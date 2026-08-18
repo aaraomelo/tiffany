@@ -1,6 +1,6 @@
 /* volta_estrela.js — ν∘ν = id NO DOCUMENTO REAL, E MEDIDO POR RESÍDUO E NÃO POR COMPARAÇÃO.
  *
- * O Aarão mandou-me perguntar ao `papers/corpo-estelar.tex` em vez de a ele. A última linha
+ * O Aarão mandou-me perguntar ao `papers/corpo_analitico.tex` em vez de a ele. A última linha
  * da especificação responde:
  *
  *     medir | resíduo 0, NÃO COMPARAÇÃO | a prova dos nove: resolver e provar

@@ -39,7 +39,7 @@ static long tabela(const Buf *b, const char *tag){
 }
 
 #ifdef TEX_COM_LIBC_WASM
-/* o host já pôs a carta no slot — aponta pelo nome, sem agulha (corpo-estelar §estrela) */
+/* o host já pôs a carta no slot — aponta pelo nome, sem agulha (corpo_analitico §estrela) */
 char *ficheiro_end_nome(char *nome);
 int ficheiro_tam_nome(char *nome);
 static int ttf_abre(Ttf *t, const char *nome){

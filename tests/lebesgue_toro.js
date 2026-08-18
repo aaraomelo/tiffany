@@ -1,7 +1,7 @@
 /* tests/lebesgue_toro.js — como o Teorema Central vê Hurwitz–Gentil–
  * Lebesgue, MEDIDO na órbita do toro (ordem da mesa, eval 14/08).
  *
- * A leitura já estava escrita no corpo-estelar — aqui só se REALIZA:
+ * A leitura já estava escrita no corpo_analitico — aqui só se REALIZA:
  * «os dois cortes, o do domínio (Riemann/Hurwitz) e o da imagem
  * (Lebesgue/Gentil), fecham na soma reversível ∫f+∫f⁻¹ = bf(b)−af(a);
  * Hurwitz conta (o domínio), Lebesgue mede (a imagem), e Gentil é a

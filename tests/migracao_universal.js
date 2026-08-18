@@ -164,7 +164,7 @@ const cartaP = (a, b) => somaP(escalaP(a, IP2), escalaP(b, JP))
 const cristal = fs.readFileSync(path.join(RAIZ, 'cristal', 'cristal.jsonl'), 'utf8')
   .split('\n').filter(l => l.length)
 const fusoes = cristal.filter(l => JSON.parse(l).fusao)
-const tex = fs.readFileSync(path.join(RAIZ, 'papers', 'conversa.tex'), 'utf8')
+const tex = fs.readFileSync(path.join(RAIZ, 'corpus', 'fala', 'conversa.tex'), 'utf8')
 const pares = []
 {
   const rx = /\\section\{([^}]+)\}\s*\n([^\n\\]+)/g

@@ -1,5 +1,5 @@
 /* rede_dual.js — medidor da rede neural dual na UI
- * (app/src/rede_dual.js · papers/corpo_peano.tex §rede-dual).
+ * (app/src/rede_dual.js · papers/corpo_topologico.tex §rede-dual).
  *
  *   §R1  estaca: W=-1, b=c ⇒ u=c−x
  *   §R2  retenção: |u|≤Δ ⇒ h′=h e mesma fala reusa Y
@@ -55,7 +55,7 @@ function ok (q, cond) {
     const fala = 'o que e hurwitz'
     let p = passoRedeDual(e, fala)
     ok('§R2 primeira fala: frente (sem padrões)', p.acao === 'frente')
-    aprendeRedeDual(e, fala, 'Hurwitz R,C,H,O. papers/corpo_peano.tex', {
+    aprendeRedeDual(e, fala, 'Hurwitz R,C,H,O. papers/corpo_topologico.tex', {
       ...p,
       acao: 'frente',
     })
@@ -70,9 +70,9 @@ function ok (q, cond) {
   {
     const e = criarEstadoRede({ delta: 0.05 })
     const f1 = 'mostra a fundação'
-    const y1 = 'papers/torre_fundacao.tex'
+    const y1 = 'corpus/docs/torre_fundacao.tex'
     const f2 = 'o que faz o maestro'
-    const y2 = 'projecta π_k. papers/corpo_peano.tex'
+    const y2 = 'projecta π_k. papers/corpo_topologico.tex'
     let p = passoRedeDual(e, f1)
     aprendeRedeDual(e, f1, y1, { ...p, acao: 'frente' })
     p = passoRedeDual(e, f2)
@@ -106,14 +106,14 @@ function ok (q, cond) {
     ok('§R4 retenção tem recall', p.acao === 'reter' && !!p.recall)
     const f2 = 'mostra a fundação'
     p = passoRedeDual(e, f2)
-    aprendeRedeDual(e, f2, 'papers/torre_fundacao.tex', { ...p, acao: 'frente' })
+    aprendeRedeDual(e, f2, 'corpus/docs/torre_fundacao.tex', { ...p, acao: 'frente' })
     p = passoRedeDual(e, fala)
     ok('§R4 volta Hopfield com λΣ=0',
       p.acao === 'volta' && Math.abs(p.lambdaSoma) < 1e-12)
   }
 
   /* §R5 conjugação reversível F_H = D∘F_P⁻¹∘D⁻¹
-   * (eval.txt / corpo_peano thm:rede-dual): Hopfield = memória; λ⁻ vem da dualidade.
+   * (eval.txt / corpo_topologico thm:rede-dual): Hopfield = memória; λ⁻ vem da dualidade.
    * Experimento: DF_H DF_P = I e λ⁺+λ⁻=0 medidos por diferenças finitas. */
   {
     const c = 0.17

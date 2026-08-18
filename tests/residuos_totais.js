@@ -44,7 +44,7 @@ function ok (q, cond) {
 const P = 65537
 
 /* ── o corpus banal real: fala → resposta ─────────────────────────────────── */
-const tex = fs.readFileSync(path.join(__dirname, '..', 'papers', 'conversa.tex'), 'utf8')
+const tex = fs.readFileSync(path.join(__dirname, '..', 'corpus', 'fala', 'conversa.tex'), 'utf8')
 const pares = []
 const rx = /\\section\{([^}]+)\}\s*\n([^\n\\]+)/g
 let m

@@ -104,7 +104,7 @@ int main(void){
     /* ── §CJ4 a composição sobe a torre: 3 dobras = octonião DUAL (8); a interface é a HEXAL (6) ── */
     /* compor o quadrado (Alonzo) DUPLICA o ângulo a cada vez --- é a DOBRA dos tecidos
      * (dim A_{n+1}=2 dim A_n). Compor n vezes multiplica o ângulo por 2^n. TRÊS dobras dão GRAU 8 =
-     * o OCTONIÃO DUAL (dois tecidos H×H*, reversível --- corpo-estelar def:octoniao-dual). E a
+     * o OCTONIÃO DUAL (dois tecidos H×H*, reversível --- corpo_analitico def:octoniao-dual). E a
      * INTERFACE é a HEXAL: 6 = lcm(2,3) = o dual (cantor↔julia) vezes o trial. Exato, mod 16. */
     L res_torre = 0;
     for(int n = 0; n <= 3; n++){
