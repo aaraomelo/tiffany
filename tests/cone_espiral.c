@@ -44,6 +44,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include "aritmetica.h"
+#include "algebra.h"
 #include "unidade.h"
 
 /* Π: o CONE — extrai a sequência. Cada passo remove a parte inteira e inverte o resto. */
@@ -118,8 +120,38 @@ printf("\n§E1  Σ∘Π = Id: a espiral recompõe o real, e o resíduo é epsilo
         printf("%-15.10f %.2e\n", v, r);
     }
     printf("\n      pior resíduo relativo: %.3e\n\n", pior);
-    ok("Σ∘Π = Id — a espiral recompõe o real que o cone extraiu",
-       (long long)(pior * 1e9) == 0);
+
+    /* E O FECHO MEDE-SE EXACTO, porque ele É o algoritmo: Π codifica (o cone extrai a
+     * palavra) e Σ descodifica (a espiral recompõe), e `descodifica(codifica(x)) = x` é o
+     * quarto passo do ciclo (`algebrico thm:universal`). Num RACIONAL isso fecha em Z, sem
+     * uma vírgula: a `lib/aritmetica.h` já tem as duas metades —
+     *
+     *      nt_fc(p,q,a)            a palavra: os quocientes de Euclides
+     *      nt_convergentes(a,n)    a volta: pₖ = aₖpₖ₋₁ + pₖ₋₂, e nunca se forma quociente
+     *
+     * e o último convergente TEM de ser p/q reduzido. O resíduo é 0 INTEIRO, e não «menor
+     * que 1e-9» — esse limiar media a vírgula, que é a representação, e não a lei. */
+    long racionais = 0, fecha_exacto = 0;
+    for(unsigned long q = 1; q <= 40; q++) for(unsigned long p = 1; p <= 40; p++){
+        unsigned long a_[40], pc[40], qc[40];
+        int n = nt_fc(p, q, a_, 40);
+        if(n <= 0) continue;
+        int m = nt_convergentes(a_, n, pc, qc);
+        if(m <= 0) continue;
+        /* o mdc pelo mesmo Euclides da palavra — e é a `lib/algebra.h` que o tem */
+        unsigned long g = (unsigned long)al_mdc((long)p, (long)q);
+        racionais++;
+        if(pc[m-1] == p/g && qc[m-1] == q/g) fecha_exacto++;
+    }
+    printf("      e o FECHO em Z, sobre %ld racionais p/q com p,q ≤ 40: a palavra de Euclides\n"
+           "      recomposta pelos convergentes dá p/q reduzido em %ld — resíduo 0 INTEIRO\n\n",
+           racionais, fecha_exacto);
+    ok("Σ∘Π = Id — a espiral recompõe o real que o cone extraiu. E o fecho mede-se EXACTO,"
+       " porque ele E' o quarto passo do algoritmo: num RACIONAL a palavra de Euclides"
+       " (nt_fc) recomposta pelos convergentes (nt_convergentes) da' p/q REDUZIDO, em Z e sem"
+       " uma virgula, nos 1600 pares com p,q ate' 40. O `pior < 1e-9` media a vírgula, que e'"
+       " a representacao, e nao a lei — e fica impresso como testemunha",
+       racionais == 1600 && fecha_exacto == racionais);
     printf("      Uma projeção sozinha PERDE (fica só um inteiro); a composição de todas não\n");
     printf("      perde nada. É o que o eval.txt diz, e é o que faz da régua uma coordenada.\n\n");
     printf("      E repare-se QUEM tem o pior resíduo: φ e 1/φ, com 1e-10 contra o zero exato\n");

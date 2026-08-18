@@ -224,10 +224,25 @@ int main(void){
                cres_phi?"sim":"não", cres_phil?"sim":"não");
         ok("com b = φ a função CRESCE em (0,∞)", cres_phi);
         ok("com b = φ' ela DECRESCE — e o expoente negativo põe o polo em 0", cres_phil);
-        /* e não há outra raiz: o discriminante dá exatamente duas */
-        double disc = 1.0 + 4.0;
-        printf("      discriminante de b²−b−1: %.1f > 0  → exatamente DUAS raízes reais\n", disc);
-        ok("são exatamente duas raízes, e só uma serve — φ é ÚNICO", disc > 0);
+        /* e não há outra raiz: o discriminante dá exatamente duas. E ele é INTEIRO —
+         * b² − b − 1 tem coeficientes 1, −1, −1, logo disc = 1 + 4 = 5, e a conta faz-se
+         * em Z. O `disc > 0` que aqui estava comparava 5,0 com zero: verdade, e a dizer
+         * menos do que se sabe. O que o 5 diz é DUAS coisas, e as duas se medem:
+         *   · disc > 0            -> as raízes são REAIS, e são duas
+         *   · 5 não é quadrado    -> elas são IRRACIONAIS, e é por isso que o ouro não
+         *                            é racional. Mede-se sem raiz: nenhum k tem k² = 5. */
+        const long disc_z = 1 + 4;
+        int duas_reais = (disc_z > 0);
+        int nao_quadrado = 1;
+        for(long k = 0; k*k <= disc_z; k++) if(k*k == disc_z) nao_quadrado = 0;
+        printf("      discriminante de b²−b−1 em Z: %ld > 0 → DUAS raízes reais, e %ld não é\n"
+               "      quadrado perfeito → elas são IRRACIONAIS\n", disc_z, disc_z);
+        ok("são exatamente duas raizes, e so' uma serve — phi e' UNICO. E o discriminante e'"
+           " INTEIRO: b^2 − b − 1 tem coeficientes 1, −1, −1, logo disc = 1 + 4 = 5. Ele diz"
+           " DUAS coisas e as duas se medem: positivo, logo as raizes sao REAIS e sao duas; e"
+           " 5 NAO e' quadrado perfeito, logo elas sao IRRACIONAIS — e e' por isso que o ouro"
+           " nao e' racional. Sem raiz nenhuma: varre-se k ate' k^2 > 5",
+           duas_reais && nao_quadrado && disc_z == 5);
         conclui("a unicidade não é hipótese: sai da mesma quadrática. Duas raízes, uma");
         conclui("descartada pelo domínio, e sobra o ouro.");
     }

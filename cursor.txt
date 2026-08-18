@@ -1,7 +1,9 @@
 CURSOR.TXT — ONDE ESTÁ O TRABALHO, E COMO SE SEGUE
 ==================================================
 Não é histórico. É o que precisas para pegar e continuar.
-Estado: 18/08/2026 (madrugada). Bateria 508:508, 0 falhas.
+Estado: 18/08/2026 (manhã). Bateria 508:508, 0 falhas. A arquitectura FIRMADA:
+o algoritmo desceu ao código (tests/reta.c traz a tabela dos quatro passos com o
+τ de cada um), e as migrações de hoje foram escolhidas por realizarem o ciclo.
 Verificar sempre com:  bash tools/bateria.sh   (lê AS DUAS linhas: total e unidades)
 
 A TRÍADE, e quem mora em cada casa
@@ -120,7 +122,7 @@ QUATRO estão fechados a zero. Os que ficam com poucos são os que MEDEM vírgul
 `nne.c` os doubles restantes são o erro de arredondamento (é o objecto), no `dif.c` e
 no `encanamento.c` são igualdades exactas `== 0.0`, que é o contrário de dar folga.
 
-POR FAZER: ~53 ficheiros, 110 doubles. Os maiores por tocar:
+POR FAZER: ~51 ficheiros, 108 doubles. Os maiores por tocar:
     xx 6 · continua 5 · tikz 4 · spline 4 · relogio_curva 4 · encanamento 4 · cosmico 4 · corpo_fisico 4 · travessia 3 · quantico 3
 
 ### E a ferramenta que apanha o que a leitura não apanha
@@ -264,17 +266,27 @@ Leitura de uma linha, sem tecto:  rev(tau) = -tau  e  rev(tau) = tau <=> tau = 0
 Cada RACIONAL ancora uma cúspide, logo Q É o conjunto delas e o CORTE é o complemento.
 
 
-5. O ALGORITMO UNIVERSAL — quatro passos (thm:universal)
---------------------------------------------------------
+5. O ALGORITMO — quatro passos, e cada um tem CASA (algebrico thm:universal)
+---------------------------------------------------------------------------
 
-    DESCODIFICA   (p,q) := o texto, racional EXACTO; u := mmc dos denominadores
-                                                              -> entra em V
-    OPERA         |det T| = 1;  [p:q] -> [T00p+T01q : T10p+T11q]
-                  é a CONVOLUÇÃO — ou, na dourada discreta, produto ponto a ponto
-    INVERTE       T^-1 = adj(T)/det T, INTEIRA
-                  é a DECONVOLUÇÃO — e sigma^-1 = -sigma†: a volta usa a OUTRA FOLHA
-    CODIFICA      w := palavra (FC) ou dígitos (Cantor)          -> sai de V
-    E FECHA       descodifica(w) = (p,q)
+Isto não é arrumação: é o que decide QUE FUNÇÃO se chama.
+
+    DESCODIFICA  (p,q) := texto, racional EXACTO; u := mmc dos denominadores
+                 τ=0   CENTRO — a leitura para Z, e mais nada          -> entra em V
+    OPERA        |det T| = 1;  [p:q] -> [T00p+T01q : T10p+T11q]
+                 τ=−1  o que FECHA — é a CONVOLUÇÃO, e no discreto é produto ponto
+                       a ponto sobre as N potências de sigma (ordem FINITA)
+    INVERTE      T^-1 = adj(T)/det T, INTEIRA;  sigma^-1 = −sigma†
+                 τ=+1  a volta usa a OUTRA FOLHA — deconvolução, e a folha dual é
+                       recíproca: |sigma| > 1 > |sigma†|, e NÃO fecha
+    CODIFICA     w := palavra (FC) ou dígitos (Cantor)
+                 τ=0   CENTRO — a saída de V                            -> sai de V
+    E FECHA      descodifica(w) = (p,q)
+
+OS DOIS POLOS ESTÃO DENTRO DO ALGORITMO. `OPERA` é o aditivo (fecha, ordem finita,
+Fourier) e `INVERTE` é o multiplicativo (não fecha, folhas recíprocas, Mellin). O
+centro guarda a ENTRADA e a SAÍDA — a transformada é UMA, e só ao operar se parte
+em dois. É a mesma frase da arquitectura, lida no código.
 
 SÃO QUATRO E NÃO CINCO. Não há verificação porque não há nada a verificar: com
 |det| = 1 a adjunta é inteira e a volta é exacta POR CONSTRUÇÃO. Não estamos a
@@ -283,18 +295,23 @@ enquadrar o corpo numa estrutura — estamos a LÊ-LO.
 E NENHUM PASSO NORMALIZA:
   · o mmc do primeiro passo é a LEITURA do texto decimal para Z, e mais nada;
   · quem normaliza é a NORMA — o produto das folhas, que é o primeiro passo;
-  · o gcd no meio foi RETIRADO do rt_ciclo (medido: não faz nada, e os 71 medidores
+  · o gcd no meio foi RETIRADO do rt_ciclo (medido: não faz nada, e os medidores
     que usam reta.h passam sem ele);
-  · e NÃO é 1/raiz(N): esse vem do lado ADITIVO da dourada (raízes no círculo, m = 0).
-    As nossas folhas são RECÍPROCAS — lado MULTIPLICATIVO.
+  · e NÃO é 1/raiz(N): esse vem do lado ADITIVO da dourada (raízes no círculo,
+    m = 0). As nossas folhas são RECÍPROCAS — lado MULTIPLICATIVO.
 
-A DOURADA DISCRETA é a dourada NA BORDA (thm:dourada-discreta): a borda sigma² = m.sigma+1
-faz de sigma uma unidade de ordem N finita, os caracteres são as N potências sigma^k, o
-Dirac dá S_k sigma^((j-j')k) = N.delta, e a inversa corre por sigma^-1 = -sigma†. O
-factor é N, não raiz(N).
+A DOURADA DISCRETA é a dourada NA BORDA (algebrico thm:dourada-discreta): a borda
+sigma² = m·sigma+1 faz de sigma uma unidade de ordem N finita, os caracteres são as
+N potências sigma^k, o Dirac dá S_k sigma^((j−j')k) = N·delta, e a inversa corre
+por sigma^-1 = −sigma†. O factor é N, não raiz(N).
 
-PROIBIDO: Fourier/DFT. A dualidade completa-se com a DOURADA (Mellin é Fourier no
-multiplicativo, catalogo.tex sec:dourada). Zero ocorrências de «DFT» no corpus.
+PROIBIDO: Fourier/DFT como FERRAMENTA que eu traga de fora. Fourier é um POLO da
+transformada (τ=−1, `topologico sec:fourier`) e Mellin é o outro (τ=+1,
+`analitico sec:mellin`) — são objectos medidos, não bibliotecas a importar. A
+dualidade completa-se com a DOURADA. Zero ocorrências de «DFT» no corpus.
+
+O código: `lib/reta.h` realiza, `tests/reta.c` mede (o cabeçalho dele traz esta
+mesma tabela), e nenhum dos dois tem um double.
 
 
 6. AS PEÇAS DA LIB — PROCURA AQUI ANTES DE ESCREVER

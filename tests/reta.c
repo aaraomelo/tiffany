@@ -15,6 +15,36 @@
  *
  * Nenhum double, nenhum limiar: compila sem -lm.
  *
+ * ── O ALGORITMO, E ONDE CADA PASSO VIVE NA TRÍADE ────────────────────────────────
+ *
+ * A `reta.h` realiza o algoritmo de quatro passos (`algebrico thm:universal`), e cada
+ * passo tem casa. Isto não é arrumação: é o que decide QUE FUNÇÃO se chama.
+ *
+ *   DESCODIFICA  (p,q) := texto, racional EXACTO; u := mmc dos denominadores
+ *                τ=0   CENTRO — a leitura para Z, e mais nada
+ *   OPERA        |det T| = 1;  [p:q] -> [T00p+T01q : T10p+T11q]
+ *                τ=-1  o que FECHA — é a CONVOLUÇÃO, e no discreto é produto ponto
+ *                      a ponto sobre as N potências de sigma (ordem FINITA)
+ *   INVERTE      T^-1 = adj(T)/det T, INTEIRA;  sigma^-1 = -sigma†
+ *                τ=+1  a volta usa a OUTRA FOLHA — a deconvolução, e a folha dual
+ *                      é a recíproca: |sigma| > 1 > |sigma†|, e NÃO fecha
+ *   CODIFICA     w := palavra (FC) ou dígitos (Cantor)
+ *                τ=0   CENTRO — a saída de V, e o fecho: descodifica(w) = (p,q)
+ *
+ * SÃO QUATRO E NÃO CINCO. Não há verificação porque não há nada a verificar: com
+ * |det| = 1 a adjunta é INTEIRA e a volta é exacta POR CONSTRUÇÃO. Não se enquadra o
+ * corpo numa estrutura — LÊ-SE.
+ *
+ * E NENHUM PASSO NORMALIZA. O mmc do primeiro é leitura do decimal para Z; quem
+ * normaliza é a NORMA (o produto das folhas). O gcd do meio foi RETIRADO do `rt_ciclo`
+ * — medido: não fazia nada, e os medidores que usam esta lib passam sem ele. E não é
+ * 1/raiz(N): esse vem do lado ADITIVO (raízes no círculo, m = 0), e estas folhas são
+ * RECÍPROCAS, do lado MULTIPLICATIVO.
+ *
+ * OS DOIS POLOS ESTÃO NO ALGORITMO: OPERA é o aditivo (fecha, ordem finita, Fourier)
+ * e INVERTE é o multiplicativo (não fecha, as folhas recíprocas, Mellin). O centro
+ * guarda a entrada e a saída — a transformada é UMA, e só ao operar se parte em dois.
+ *
  *   cc -O2 -std=c99 -I. -I../lib reta.c -o reta && ./reta
  */
 #include <stdio.h>
