@@ -28,10 +28,26 @@
 %======================================================================
 \section*{Onde este documento vive na tríade}
 
-Este é o \textbf{segundo} dos três, e o seu papel é o \textbf{palco}:
+Este é o lado $\tau=-1$ da tríade --- \textbf{o que FECHA} --- e o seu papel é o
+\textbf{palco}:
 \[
-\text{Universal}\ \longrightarrow\ \boxed{\text{PEANO}}\ \longrightarrow\ \text{Estelar}
+\boxed{\text{TOPOLÓGICO}}_{\ \tau=-1}\ \longleftarrow\ \text{UNIVERSAL}_{\ \tau=0}\
+\longrightarrow\ \text{Analítico}_{\ \tau=+1}
 \]
+\emph{A seta aponta do centro para cá, e não daqui para a frente.} O Universal não é um
+primeiro capítulo: é o \textbf{ponto fixo} do trial --- o único $\tau$ que a reflexão
+$\tau\mapsto-\tau$ deixa quieto ---, e este documento é uma das \textbf{duas realizações}
+que partem dele. A outra é o Analítico, e a reflexão troca as duas: \emph{o discreto e o
+contínuo são o par, com o fundamento no meio}.
+
+\textbf{E $\tau=-1$ tem um conteúdo preciso, não é uma etiqueta:} é o regime
+\emph{elíptico}, onde os operadores \textbf{fecham} --- ordem finita, tudo volta a si. É
+essa a propriedade que este lado tem e o outro não, e ela é medida:
+\code{tests/cuspide.c} \S C12 varre todos os operadores de $\det=1$ com entradas em
+$[-6,6]$ e os $50$ de $\tau=-1$ fecham \emph{todos}, enquanto nenhum dos $216$ de
+$\tau=+1$ fecha. Tudo o que se segue é realização disso.
+
+\smallskip
 Do \emph{Corpo Universal} recebe o \textbf{operador} e a condição $\lvert\det\rvert=1$; o que
 \emph{introduz} é o \textbf{endereçamento} (\code{def:peano}) e a \textbf{projecção
 dimensional} $\pi_k$ (\code{def:pi-k}), com o \emph{Maestro} a realizar a dinâmica
@@ -40,12 +56,12 @@ dimensional} $\pi_k$ (\code{def:pi-k}), com o \emph{Maestro} a realizar a dinâm
 \emph{O que ele mede}: posição, composição e volume discreto --- e o
 \code{thm:det-volume} diz-se a si próprio o que é, \emph{a face discreta do Teorema do
 Gato}. \emph{O que ele não mede}: a medida no sentido de Lebesgue --- há isometrias da
-métrica canónica que a mudam --- nem o que só o limite alcança; esse é o Estelar.
+métrica canónica que a mudam --- nem o que só o limite alcança; esse é o Analítico.
 
 \textbf{E a aritmética, aqui, ENDEREÇA.} Ela não é introduzida neste andar: vem do
-fundamento e atravessa os três. O que muda é o ofício --- no Universal opera, aqui
-endereça, no Estelar fecha. É por os índices serem \emph{inteiros} que a torre tem andares
-e não um contínuo.
+fundamento e atravessa os três. O que muda é o ofício --- no centro opera, aqui endereça,
+no Analítico fecha. É por os índices serem \emph{inteiros} que a torre tem andares e não um
+contínuo.
 
 
 

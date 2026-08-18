@@ -49,8 +49,8 @@
 \begin{abstract}
 \noindent\textbf{O ESPAÇO BASE É $\mathbb{Q}(m\sqrt D)$}, e tudo o que se segue vive nele.
 É um \textbf{espaço vectorial} sobre $\mathbb{Q}$ de dimensão $2$, com base
-$\{1,\,m\sqrt D\}$ --- a primeira dobra da torre $\dim A_n=2^{n}\dim A_0$ do \emph{Corpo de
-Peano} ---, e assenta em \textbf{duas} propriedades; o seu \textbf{dual} assenta noutras
+$\{1,\,m\sqrt D\}$ --- a primeira dobra da torre $\dim A_n=2^{n}\dim A_0$ do \emph{Corpo
+Topológico} ---, e assenta em \textbf{duas} propriedades; o seu \textbf{dual} assenta noutras
 duas, e é o par que fecha a volta:
 \[
 \boxed{
@@ -281,6 +281,41 @@ alcança e não opera}.
 \end{array}}
 \]
 
+\subsection*{E a separação não é editorial: é o TRIAL, e o centro é o PONTO FIXO}
+
+As três não são uma lista de três assuntos. São os \textbf{três valores de $\tau$}
+(Teor.~\ref{thm:cuspide}), e o que distingue o centro dos lados não é estar entre eles:
+é \textbf{fixar-se}. Pela reflexão $\tau\mapsto-\tau$,
+\[
+\boxed{\;\mathrm{rev}(\tau)=\tau\iff\tau=0\;}
+\]
+e é só isso que faz do $0$ o canónico --- \emph{quem se fixa é a origem, e as outras duas
+são realizações que partem dela}:
+\[
+\begin{array}{clll}
+\tau=-1 & \text{ELÍPTICO} & \textbf{TOPOLOGIA} & \text{FECHA: ordem finita, tudo volta}\\[2pt]
+\tau=\phantom{-}0 & \text{a CÚSPIDE} & \textbf{ÁLGEBRA} & \text{o PONTO FIXO: só }\pm I\text{ fecham}\\[2pt]
+\tau=+1 & \text{HIPERBÓLICO} & \textbf{ANÁLISE} & \text{NÃO fecha: é o CORTE}
+\end{array}
+\]
+Cada regime tem a sua propriedade \textbf{exclusiva}, e nenhum a partilha: medido em
+\code{tests/cuspide.c} \S C12 sobre todas as matrizes de $\det=1$ com entradas em
+$[-6,6]$ --- $50$ elípticas e todas fecham, $106$ na cúspide e nelas \emph{só} $\pm I$
+fecha, $216$ hiperbólicas e nenhuma fecha.
+
+\medskip
+\noindent\textbf{E as simetrias confirmam o lugar de cada uma.} A reflexão de
+Cantor/Julia é $\tau\mapsto-\tau$, de ordem $2$: ela \textbf{troca a topologia com a
+análise} e \textbf{fixa a álgebra}. Isto é a dualidade \emph{discreto\,$\leftrightarrow$\,contínuo}
+--- o que fecha e o que corta --- com o \emph{fundamento quieto}. O trial é a rotação de
+ordem $3$, que permuta as três sem fixar nenhuma; Viviani é a raiz quadrada da reflexão,
+de ordem $4$. As duas primeiras geram $S_3$, o hexal, que é o grupo de simetrias de
+\textbf{três} objectos --- e são três.
+
+E há uma testemunha do lugar do centro que não se escolheu: o espelho é $\nu^2=\mathrm{id}$,
+a única involução de $\det=1$ é $-I$, e $-I$ tem $\mathrm{disc}=0$. \emph{O espelho mora
+em $\tau=0$} --- isto é, na álgebra, que é exactamente o ponto que a reflexão fixa.
+
 \textbf{(1) A ÁLGEBRA é o fundamento, e nela nada é aproximado.} Aqui vivem a Lei~0, a
 operação $\star$ e os seus dois projectores, o par dual traço\,/\,norma
 (Teor.~\ref{thm:fixo-dual}), o operador e a descida (Teor.~\ref{thm:operador},
@@ -396,42 +431,46 @@ linha de código --- $25$ campos, e em $20$ deles o rotacional não é zero, sem
 «bater» valeria por $0=0$.
 
 \emph{Lida assim, a construção deste paper é uma frase}: a álgebra dá o operador e a sua
-conservação; o corte entrega-o à análise; a análise fecha $\mathbb{R}$; e a topologia é
-onde tudo isto assenta \textbf{sem decidir nada}.
+conservação, e é o \textbf{centro}; um lado fecha e outro corta, e nenhum dos dois
+acrescenta fundamento.
 
 \medskip
 \noindent\textbf{E AS TRÊS SÃO O TRIAL --- o mapeamento não é escolhido, é o $\tau$.} O
 Teor.~\ref{thm:cuspide} mostrou que $\tau=\operatorname{sign}(\operatorname{disc})$ \emph{é}
 a lei $L_3$; e cada um dos seus três valores tem uma propriedade que os outros dois não
-têm:
+têm. \emph{O que fixa qual é o centro não é estar no meio da lista: é ser o PONTO FIXO da
+reflexão} --- $\mathrm{rev}(\tau)=\tau$ se e só se $\tau=0$ (\S\ref{sec:camadas}):
 \[
 \boxed{
 \begin{array}{llll}
-\tau=-1 & \text{ELÍPTICO} & \text{FECHA: ordem finita} & \textbf{ÁLGEBRA} \ (opera)\\[2pt]
-\tau=\ \ 0 & \text{A CÚSPIDE} & \text{só }\pm I\text{ fecham} & \textbf{TOPOLOGIA}\ (não\ decide)\\[2pt]
+\tau=-1 & \text{ELÍPTICO} & \text{FECHA: ordem finita} & \textbf{TOPOLOGIA}\ (tudo\ volta)\\[2pt]
+\tau=\ \ 0 & \text{A CÚSPIDE} & \text{só }\pm I\text{ fecham} & \textbf{ÁLGEBRA}\ (o\ ponto\ fixo)\\[2pt]
 \tau=+1 & \text{HIPERBÓLICO} & \text{NÃO fecha: é o CORTE} & \textbf{ANÁLISE}\ (alcança)
 \end{array}}
 \]
 
 \textbf{E as peças da tríade agem sobre as camadas como agem sobre os três pontos.}
 \textbf{Cantor/Julia} é a \emph{reflexão} $\tau\mapsto-\tau$, de ordem $2$: ela
-\textbf{troca a álgebra com a análise e FIXA a topologia} --- é a dualidade
-\emph{operar}~$\leftrightarrow$~\emph{alcançar}, com o palco quieto. \textbf{O trial} é a
-\emph{rotação} de ordem $3$, que permuta as três sem fixar nenhuma. \textbf{Viviani} é a
-raiz quadrada da reflexão ($i^{2}=-1$ é o espelho), e por isso tem ordem $4$. E as duas
-primeiras geram $S_3$ --- \textbf{o hexal} (Cor.~\ref{cor:hexal-grupo}) ---, que é o grupo
-de simetrias de \emph{três} objectos: \emph{e são três}.
+\textbf{troca a topologia com a análise e FIXA a álgebra} --- é a dualidade
+\emph{discreto}~$\leftrightarrow$~\emph{contínuo}, com o \emph{fundamento} quieto.
+\textbf{O trial} é a \emph{rotação} de ordem $3$, que permuta as três sem fixar nenhuma.
+\textbf{Viviani} é a raiz quadrada da reflexão ($i^{2}=-1$ é o espelho), e por isso tem
+ordem $4$. E as duas primeiras geram $S_3$ --- \textbf{o hexal}
+(Cor.~\ref{cor:hexal-grupo}) ---, que é o grupo de simetrias de \emph{três} objectos:
+\emph{e são três}.
 
 \emph{E o lugar de Cantor/Julia confirma-o}: o espelho é $\nu^{2}=\mathrm{id}$, a única
 involução de determinante $1$ é $-I$, e $-I$ tem $\operatorname{disc}=0$ --- \textbf{ele
-vive em $\tau=0$, isto é NA TOPOLOGIA}, que é exactamente o ponto que a reflexão fixa. A
-peça que troca as duas pontas é a que mora no meio.
+vive em $\tau=0$, isto é NA ÁLGEBRA}, que é exactamente o ponto que a reflexão fixa. A
+peça que troca as duas pontas é a que mora no meio, \emph{e é por isso que o meio é o
+canónico}.
 
 \colunas{as três camadas, e as três pontes}
-        {álgebra opera e não alcança; topologia não opera e não vê a medida; análise
-alcança e paga o limite}
-        {as três camadas são o trial ($\tau$), a reflexão troca álgebra\,/\,análise e fixa
-a topologia, e as duas geram $S_3$: \code{tests/cuspide.c} \S C12 --- $50$ operadores em
+        {a álgebra opera e é o CENTRO; a topologia fecha e não vê a medida; a análise não
+fecha e paga o limite}
+        {as três camadas são o trial ($\tau$), com o centro no PONTO FIXO da reflexão; ela
+troca topologia\,/\,análise e fixa a álgebra, e as duas geram $S_3$:
+\code{tests/cuspide.c} \S C12 --- $50$ operadores em
 $\tau=-1$ todos a fechar, $106$ em $\tau=0$ com só $\pm I$ a fechar, $216$ em $\tau=+1$
 nenhum a fechar. A derivada como AVALIAÇÃO ($f'(a)=q(0)$): \code{lib/calculo.h} e
 \code{tests/corpo\_fisico.c}; a integral formal, $D\circ\!\int\neq\int\!\circ D$ e Green
@@ -444,7 +483,7 @@ em $5$; a cegueira da topologia:
 \code{tests/metrica.c}; o corte: \code{tests/transformada\_universal.c} \S T7}
 
 %======================================================================
-\section{A TRÍADE: Universal $\to$ Peano $\to$ Estelar}\label{sec:triade}
+\section{A TRÍADE: o centro $\tau=0$ e as duas realizações}\label{sec:triade}
 
 As três camadas do \S\ref{sec:camadas} não vivem soltas: cada uma tem o seu documento, e
 os três formam uma \textbf{decomposição funcional} --- \emph{a mesma estrutura, três
@@ -452,8 +491,14 @@ realizações}. Não são níveis de tamanho nem teorias independentes, e a divi
 inventa aqui: \textbf{já está escrita nos títulos dos teoremas} que cada um provou.
 
 \[
-\boxed{\;\text{Universal}\ \longrightarrow\ \text{Peano}\ \longrightarrow\ \text{Estelar}\;}
+\boxed{\;\underset{\tau=-1}{\text{Topológico}}\ \longleftarrow\ \underset{\tau=0}{\textbf{UNIVERSAL}}\ \longrightarrow\ \underset{\tau=+1}{\text{Analítico}}\;}
 \]
+
+\noindent\emph{E as setas apontam para FORA, do centro para os lados}, que é o contrário
+do que uma leitura em fila sugeriria. O Universal não é o primeiro de três: é o
+\textbf{ponto fixo}, e os outros dois são as duas realizações que partem dele --- uma
+fechando ($\tau=-1$, ordem finita) e outra cortando ($\tau=+1$, o que não fecha). Trocar as
+duas pontas é a reflexão de Cantor/Julia, e ela deixa o centro onde está.
 
 \noindent\emph{Leitura editorial, e só isso}: infinito \textbf{algébrico}
 $\to$ infinito \textbf{espacial} $\to$ infinito \textbf{analítico}. \emph{O infinito já
@@ -467,10 +512,10 @@ diferentes, e são os próprios títulos que o dizem:
 \[
 \begin{array}{lll}
 \textbf{o GATO} & \text{aqui} & \det\ \text{É a medida, e }\abs{\det}=1\text{ conserva}\\
- & \text{Peano} & \code{thm:det-volume} \text{ --- \emph{a face DISCRETA}: o volume}\\
- & \text{Estelar} & \code{thm:medida-jacobiano} \text{ --- \emph{a face GRADUADA}: o Jacobiano}\\[4pt]
-\textbf{a PONTE} & \text{Peano} & \code{thm:ponte-discreta} \text{ --- o potencial é a fibra}\\
- & \text{Estelar} & \code{thm:ponte-graduada} \text{ --- onde a obstrução deixa de ser}
+ & \tau=-1 & \code{thm:det-volume} \text{ --- \emph{a face DISCRETA}: o volume}\\
+ & \tau=+1 & \code{thm:medida-jacobiano} \text{ --- \emph{a face GRADUADA}: o Jacobiano}\\[4pt]
+\textbf{a PONTE} & \tau=-1 & \code{thm:ponte-discreta} \text{ --- o potencial é a fibra}\\
+ & \tau=+1 & \code{thm:ponte-graduada} \text{ --- onde a obstrução deixa de ser}
 \end{array}
 \]
 \emph{Três faces, um teorema.} É isto que autoriza chamar-lhes decomposição e não divisão
@@ -489,34 +534,90 @@ Teor.~\ref{thm:fixo-dual}, \ref{thm:operador}, \ref{thm:descida}, \ref{thm:aditi
 \ref{thm:conservacao}, \ref{thm:transformada-universal}, \ref{thm:dourada-discreta},
 \ref{thm:cuspide}, e a Def.~\ref{def:espaco} com as suas quatro propriedades.
 
-\noindent\textbf{PEANO --- o palco (o desdobramento espacial).} \emph{Recebe:} o operador
-e a torre. \emph{Introduz:} o \textbf{endereçamento} e a \textbf{projecção dimensional}
-$\pi_k$ --- \code{def:peano}, \code{def:pi-k}. \emph{Mede:} posição, composição e
-\textbf{volume discreto} (\code{thm:det-volume}), com o \emph{Maestro} a realizar a
-dinâmica e o \emph{Metrónomo} a métrica. \emph{Não mede:} a medida no sentido de Lebesgue
---- o Teor.~\ref{thm:metrica} mostra que há isometrias que a mudam --- nem o que só o
-limite alcança. \emph{Ponte:} para o Universal pelo determinante; para o Estelar pela
-graduação. \emph{Aritmética:} é onde ela \textbf{endereça} --- os índices são inteiros, e é
-por isso que a torre tem andares e não um contínuo.
+\noindent\textbf{TOPOLÓGICO --- $\tau=-1$, o que FECHA (o desdobramento espacial).}
+\emph{Recebe:} o operador e a torre. \emph{Introduz:} o \textbf{endereçamento} e a
+\textbf{projecção dimensional} $\pi_k$ --- \code{def:peano}, \code{def:pi-k}. \emph{Mede:}
+posição, composição e \textbf{volume discreto} (\code{thm:det-volume}), com o \emph{Maestro}
+a realizar a dinâmica e o \emph{Metrónomo} a métrica. \emph{Não mede:} a medida no sentido
+de Lebesgue --- o Teor.~\ref{thm:metrica} mostra que há isometrias que a mudam --- nem o
+que só o limite alcança. \emph{Ponte:} para o Universal pelo determinante; para o Analítico
+pela graduação. \emph{Aritmética:} é onde ela \textbf{endereça} --- os índices são
+inteiros, e é por isso que a torre tem andares e não um contínuo.
 
-\noindent\textbf{ESTELAR --- o alcance (o desdobramento contínuo).} \emph{Recebe:} o
-operador e a medida. \emph{Introduz:} a \textbf{graduação sem topo}
+\smallskip
+\noindent\emph{As REALIZAÇÕES PRINCIPAIS deste lado} --- cada uma parte de uma peça
+canónica do centro, e nenhuma introduz fundamento novo:
+\[
+\begin{array}{lll}
+\textbf{a torre e o endereçamento} & \leftarrow\ \text{o operador} &
+\text{\code{def:peano}, \code{def:pi-k}}\\[2pt]
+\textbf{o Maestro e o Metrónomo} & \leftarrow\ \text{a operação }\star &
+\text{\code{sec:maestro-thm}}\\[2pt]
+\textbf{a histerese e o seu dual} & \leftarrow\ \text{a dualidade} &
+\text{\code{sec:histerese}, \code{sec:controle-histerese}}\\[2pt]
+\textbf{o volume discreto} & \leftarrow\ \abs{\det}=1 &
+\text{\code{thm:det-volume}}\\[2pt]
+\textbf{a interface hexal} & \leftarrow\ \text{o grupo }S_3 &
+\text{\code{sec:catalogo}}\\[2pt]
+\textbf{a rede neural dual} & \leftarrow\ \text{o par dual} &
+\text{\code{sec:rede-dual}}
+\end{array}
+\]
+\emph{Todas fecham} --- é o que $\tau=-1$ quer dizer: ordem finita, ciclos, o objecto volta
+a si. É por isso que o palco aguenta composição sem limite nenhum.
+
+\noindent\textbf{ANALÍTICO --- $\tau=+1$, o que NÃO fecha (o desdobramento contínuo).}
+\emph{Recebe:} o operador e a medida. \emph{Introduz:} a \textbf{graduação sem topo}
 (\code{thm:graduacao-gentil}) e a \textbf{continuação analítica} (\code{thm:atravessa}).
 \emph{Mede:} o que precisa de todos os passos --- $0{,}999\ldots=1$ e o seu dual discreto
 (\code{cor:noves}, \code{cor:noves-dual}), a completude, o corte, $\mathbb{R}$.
 \emph{Não mede:} o que é da forma exacta finita --- ali a álgebra já respondeu, e repetir
-seria trocar uma identidade por um limite. \emph{Ponte:} para o Peano pelo Jacobiano
+seria trocar uma identidade por um limite. \emph{Ponte:} para o Topológico pelo Jacobiano
 (\code{thm:medida-jacobiano}); para o Universal pelo corte
 (Teor.~\ref{thm:folhas-corte}). \emph{Aritmética:} é onde ela \textbf{fecha} --- o corte
 decide-se por $\operatorname{tr}$ e $\mathrm{N}$, ambas inteiras, e o limite entra só
 depois.
 
+\smallskip
+\noindent\emph{As REALIZAÇÕES PRINCIPAIS deste lado} --- e a simetria com a lista de cima
+não é enfeite: cada uma parte da MESMA peça canónica que a sua par do outro lado, e o que
+muda é fechar ou não:
+\[
+\begin{array}{lll}
+\textbf{a graduação sem topo} & \leftarrow\ \text{a torre} &
+\text{\code{thm:graduacao-gentil}}\\[2pt]
+\textbf{a equação de campo} & \leftarrow\ \text{a operação }\star &
+\text{\code{sec:campo2}}\\[2pt]
+\textbf{os dois escuros} & \leftarrow\ \text{a dualidade} &
+\text{os dois pontos fixos, \code{sec:dois}}\\[2pt]
+\textbf{o Jacobiano e a medida} & \leftarrow\ \abs{\det}=1 &
+\text{\code{thm:medida-jacobiano}}\\[2pt]
+\textbf{a renormalização} & \leftarrow\ \text{a régua} &
+\text{\code{sec:renorm}}\\[2pt]
+\textbf{a estrela e a ordenação} & \leftarrow\ \text{o par dual} &
+\text{\code{sec:estrela}}
+\end{array}
+\]
+\emph{Nenhuma fecha} --- é o que $\tau=+1$ quer dizer: o objecto não volta, e é preciso
+\textbf{todos} os passos. É por isso que este lado alcança $\mathbb{R}$ e o outro não.
+
 \subsection*{E a aritmética atravessa as três}
 
 Não é um desdobramento posterior: \emph{já está no Universal e não sai de lá}. O que muda é
-o ofício --- no Universal ela \textbf{opera}, no Peano \textbf{endereça}, no Estelar
-\textbf{fecha}. E é por ser a mesma em todas que as pontes existem: se a aritmética de cada
-camada fosse outra, não haveria por onde passar.
+o ofício --- no centro ($\tau=0$) ela \textbf{opera}, no Topológico ($\tau=-1$)
+\textbf{endereça}, no Analítico ($\tau=+1$) \textbf{fecha}. E é por ser a mesma em todas
+que as pontes existem: se a aritmética de cada camada fosse outra, não haveria por onde
+passar.
+
+\medskip
+\noindent\textbf{E a regra de arrumação, que é a consequência prática de tudo isto:} o que
+é \textbf{canónico} fica no centro, sem excepção --- as leis, a operação, a dualidade, o
+operador, o determinante, a transformada, a cúspide, o espaço $\mathbb{Q}(m\sqrt{D})$ e o
+seu dual. O que é \textbf{realização} vai para o lado a que pertence, \emph{e diz de que
+peça canónica parte}. Uma realização que não nomeia a sua origem no centro está no sítio
+errado; uma peça canónica repetida num lado é redundância, não ênfase. É por isso que as
+duas listas acima têm a mesma coluna da esquerda: \emph{a mesma peça, realizada dos dois
+modos que o $\tau$ permite}.
 
 \medskip
 \noindent\textbf{As três recusas, que valem tanto como as três atribuições.} Elas não são
@@ -531,14 +632,15 @@ estilo: são resultados medidos deste paper, e é por isso que a divisão aguent
 A primeira e a segunda são o Teor.~\ref{thm:metrica}: há isometrias da métrica canónica que
 mudam a área, e quem vê a medida é o \emph{jacobiano} --- logo $\abs{\det}=1$ não é
 condição topológica. A terceira é o quociente de diferenças ser um polinómio: $f'(a)=q(0)$
-é uma \textbf{avaliação}, e vive no fundamento; o limite entra depois, no Estelar, e para
+é uma \textbf{avaliação}, e vive no fundamento; o limite entra depois, no Analítico, e para
 outra coisa --- para o que a estrutura finita não alcança.
 
-\colunas{a tríade como decomposição funcional}
-        {mesma estrutura, três realizações: $U_0$ opera, Peano endereça, Estelar fecha ---
-e o Gato tem três faces (aqui, discreta, graduada)}
-        {as faces existentes: \code{thm:det-volume} (Peano), \code{thm:medida-jacobiano}
-(Estelar); as três recusas medidas em \code{tests/metrica.c} e \code{lib/calculo.h}}
+\colunas{a tríade é o TRIAL, e o centro é o ponto fixo}
+        {$\tau=0$ é canónico por SE FIXAR ($\mathrm{rev}(\tau)=\tau\iff\tau=0$), e os dois
+lados são as realizações que partem dele: $\tau=-1$ fecha, $\tau=+1$ corta. A reflexão
+troca os lados e deixa o centro}
+        {\code{tests/cuspide.c} \S C12: $50$ elípticas todas fecham, $106$ na cúspide e só
+$\pm I$ fecha, $216$ hiperbólicas e nenhuma fecha; e $-I$ (o espelho) vive em $\tau=0$}
 
 %======================================================================
 \section{A Lei 0: $0\dg=\infty$, e é ela que dá o arranque}\label{sec:lei0}
@@ -671,7 +773,7 @@ Sejam $D$ inteiro \emph{não quadrado} e $m\in\mathbb{Q}^{\times}$. O espaço é
 \]
 --- \textbf{espaço vectorial sobre $\mathbb{Q}$, de dimensão $2$}, com base
 $\{1,\,m\sqrt D\}$ e coordenadas únicas. É a \emph{primeira dobra} da torre
-$\dim A_n=2^{n}\dim A_0$ do \emph{Corpo de Peano} (\code{thm:rn}), que parte de
+$\dim A_n=2^{n}\dim A_0$ do \emph{Corpo Topológico} (\code{thm:rn}), que parte de
 $\dim A_0=1$; e ali já está dito o essencial --- \emph{a ordem não é herdada da recta, é
 produzida pela dualidade}.
 
@@ -1958,7 +2060,7 @@ sobrejectivos e os $2\,592$ restantes a perder pontos}
 
 \begin{teorema}[CANTOR E JULIA: a mesma codificação, e o que as separa é quem gasta o
 orçamento]\label{thm:cantor-julia}
-O \emph{Corpo de Peano} (\code{def:cantor}) põe o par: \textbf{Cantor} é o lado
+O \emph{Corpo Topológico} (\code{def:cantor}) põe o par: \textbf{Cantor} é o lado
 discreto/aditivo --- o \emph{shift} $\theta\mapsto2\theta$ --- e \textbf{Julia} é o
 multiplicativo --- $z\mapsto z^{2}$ ---, conjugados por $z=e^{2\pi i\theta}$. E os dois
 \emph{golden} de lá são
@@ -2052,7 +2154,7 @@ verificados}
 uma]\label{thm:unificacao}
 Cantor, Julia, Viviani e o trial não são quatro objectos parecidos: são quatro operadores
 de \textbf{ordem finita}, e a ordem de cada um é \emph{exactamente} o fecho declarado da
-sua lei na tabela do \emph{Corpo de Peano}.
+sua lei na tabela do \emph{Corpo Topológico}.
 \[
 \boxed{
 \begin{array}{llcl}
@@ -5334,7 +5436,7 @@ $\square$
 \subsection*{As camadas --- quem é dono de quê}\label{sec:camadas-operacoes}
 
 \[
-\boxed{\textbf{Peano não é o corpo universal; Peano é uma realização
+\boxed{\textbf{o Topológico não é o corpo universal; é uma realização
 do corpo universal.}}
 \]
 \[
@@ -5352,9 +5454,9 @@ camada & o que é & onde vive neste paper \\
   operações, o núcleo $(X,S,H,J)$ &
   \S\ref{sec:cinco}; Teors.~\ref{thm:universal-espelho},
   \ref{thm:produto-dual}, \ref{thm:derivacao-primitivas} \\
-\textbf{realização} & Peano: $K=\mathbb{F}_{65537}$ (folhas à vista),
+\textbf{realização} & Topológico: $K=\mathbb{F}_{65537}$ (folhas à vista),
   $V=$ o relógio; o operador do passo, o ponto-base, o ternário &
-  \S\ref{sec:instancia}; \emph{Corpo de Peano} \\
+  \S\ref{sec:instancia}; \emph{Corpo Topológico} \\
 \textbf{intérprete} & Quantizador (tick$+$invariante $=\forall$);
   projector espectral$\circ$Quantizador $=$ memória &
   Teors.~\ref{thm:quantizador-universal}, \ref{thm:quantificador},
@@ -5382,7 +5484,7 @@ operação & conservação medida & medidor \\
 \textbf{Soma} $\oplus$ (a dobra/clone, Lei~4) & $E(u\oplus u)=2E(u)$; a retração devolve & \code{observador\_torre} \S T5 \\
 \textbf{Multiplicação} $\otimes$ (fusão) & $E(u\otimes v)=E(u)E(v)$ --- $N(xy)=N(x)N(y)$ & \code{observador\_torre} \S T3 \\
 \textbf{Divisão} (a fibra) & $x_i=z_{ij}/v_j$ exata; $E(u)=E(z)/E(v)$ & \code{observador\_torre} \S T4 \\
-\textbf{Dual} $\dagger$ (a involução) & $\sigma\sigma^{\dagger}=-1$; $\lambda^{+}+\lambda^{-}=0$ & \code{lyapunov\_refletido}; \emph{Peano} \\
+\textbf{Dual} $\dagger$ (a involução) & $\sigma\sigma^{\dagger}=-1$; $\lambda^{+}+\lambda^{-}=0$ & \code{lyapunov\_refletido}; \emph{Topológico} \\
 \textbf{Inversão} (a volta) & admissível $\iff$ tem volta $\wedge$ conserva a escada & \code{ponte\_universal\_metalica} \S P3 \\
 \bottomrule
 \end{tabular}
@@ -6284,7 +6386,7 @@ Cayley--Hamilton é a \emph{concordância} dos emparelhamentos algébricos,
 derivada.
 
 \textbf{E a quinta linha não é um corolário.} A parte morfológica estava
-num teorema à parte (\emph{Corpo de Peano}, o Morfológico) como se fosse
+num teorema à parte (\emph{Corpo Topológico}, o Morfológico) como se fosse
 outra coisa, e não é: $\varepsilon=\neg\delta\neg$ é o \emph{mesmo}
 gesto das três primeiras, com o dual a ser o \textbf{complemento} em vez
 da adjunta. A erosão não é uma operação independente da dilatação --- é a
@@ -6441,9 +6543,9 @@ $\square$
 \end{teorema}
 
 \begin{teorema}[a separação das línguas --- o Quantizador, e o
-Metrónomo como realização de Peano]\label{thm:quantizador-universal}
+Metrónomo como realização do Topológico]\label{thm:quantizador-universal}
 Por ordem do coordenador (14/08), a língua universal separa-se da
-realização: \textbf{Metrónomo é o nome de Peano} (a face musical ---
+realização: \textbf{Metrónomo é o nome do Topológico} (a face musical ---
 o tempo em ticks); o papel universal chama-se \textbf{Quantizador}
 --- \emph{o operador que converte o contínuo em contagem conservada}.
 A interpretação, medida em três faces:
@@ -6469,7 +6571,7 @@ varredura fica como controlo) --- o $\forall$ do
 Teor.~\ref{thm:quantificador} é o Quantizador da verdade, e o seu
 dual é o limite (a histerese).
 \textbf{E a separação desceu ao código}: a lib fica \emph{abaixo}
-das duas línguas --- nem os nomes de Peano nem «quantizador»
+das duas línguas --- nem os nomes do Topológico nem «quantizador»
 aparecem nela ($0$ ocorrências; a asserção \emph{falhava} antes: a
 Lei~3 dizia «o operador do passo», instância dentro da língua universal,
 removida). A lei não precisa de nome; os nomes vivem nos papers ---

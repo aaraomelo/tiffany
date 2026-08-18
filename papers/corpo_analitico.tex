@@ -30,10 +30,26 @@
 %======================================================================
 \section*{Onde este documento vive na tríade}
 
-Este é o \textbf{terceiro} dos três, e o seu papel é o \textbf{alcance}:
+Este é o lado $\tau=+1$ da tríade --- \textbf{o que NÃO fecha} --- e o seu papel é o
+\textbf{alcance}:
 \[
-\text{Universal}\ \longrightarrow\ \text{Peano}\ \longrightarrow\ \boxed{\text{ESTELAR}}
+\text{Topológico}_{\ \tau=-1}\ \longleftarrow\ \text{UNIVERSAL}_{\ \tau=0}\
+\longrightarrow\ \boxed{\text{ANALÍTICO}}_{\ \tau=+1}
 \]
+\emph{A seta aponta do centro para cá.} O Universal é o \textbf{ponto fixo} do trial --- o
+único $\tau$ que a reflexão $\tau\mapsto-\tau$ deixa quieto ---, e este documento é uma das
+\textbf{duas realizações} que partem dele. A outra é o Topológico, e a reflexão troca as
+duas: \emph{o contínuo e o discreto são o par, com o fundamento no meio}.
+
+\textbf{E $\tau=+1$ tem um conteúdo preciso, não é uma etiqueta:} é o regime
+\emph{hiperbólico}, onde os operadores \textbf{não fecham} --- não há ordem finita, o
+objecto não volta, e é por isso que aqui é preciso \emph{todos} os passos. É essa a
+propriedade que este lado tem e o outro não, e ela é medida: \code{tests/cuspide.c} \S C12
+varre todos os operadores de $\det=1$ com entradas em $[-6,6]$ e nenhum dos $216$ de
+$\tau=+1$ fecha, enquanto os $50$ de $\tau=-1$ fecham todos. \emph{Não fechar é o que
+permite cortar} --- e é o corte que dá $\mathbb{R}$.
+
+\smallskip
 Do \emph{Corpo Universal} recebe o \textbf{operador} e a \textbf{medida}; o que
 \emph{introduz} é a \textbf{graduação sem topo} (\code{thm:graduacao-gentil}) e a
 \textbf{continuação analítica} (\code{thm:atravessa}).
@@ -374,7 +390,7 @@ catálogo, não da torre). As representações $\rho_n$ (estaca $\nu$, trial $\t
 bit $i$, tecido $T{+}T^{*}$, relógio, $\mathbb{H}{\times}\mathbb{H}^{*}$)
 fecham $\nu^{2}=\tau^{3}=i^{4}=\mathrm{id}$, e os seus períodos $2,3,4,8$
 geram a interface $6,12,24$ por $\operatorname{lcm}$
-(\emph{corpo de Peano}).
+(\emph{Corpo Topológico}).
 \[
 \boxed{\text{índice da lei}\neq\text{dimensão da torre}.}
 \]
@@ -1699,7 +1715,7 @@ e, no caso conservativo,
 \]
 
 \textbf{(0) O que a graduação acrescenta ao lado discreto.} No
-Teor.~da face discreta (\emph{Corpo de Peano}) o factor é \emph{um}
+Teor.~da face discreta (\emph{Corpo Topológico}) o factor é \emph{um}
 número, porque a transformação é linear. Aqui ele é uma \textbf{função
 do ponto}, e a conservação passa a ser uma condição \emph{pontual} ---
 que é exactamente o que a graduação faz em toda esta tabela: transforma
@@ -1787,7 +1803,7 @@ A passagem de uma à outra é apagar a \emph{ordem}.
 
 \textbf{Estatuto.} A lei é do \emph{Corpo Universal} (localmente
 contráctil $\not\Rightarrow$ globalmente contráctil); a face discreta é
-do \emph{Corpo de Peano} ($\ker\partial/\operatorname{im}\partial$,
+do \emph{Corpo Topológico} ($\ker\partial/\operatorname{im}\partial$,
 com o potencial como fibra e a contagem $E-V+C$); esta é a face
 graduada, $\ker d/\operatorname{im}d$ --- o lugar onde a obstrução se define
 e onde se diz \emph{porque} ela some nos polinómios. Nenhuma das três

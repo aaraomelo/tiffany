@@ -121,7 +121,7 @@ cruzado_potencia 7c5e84a7259193a1 0
 cruzamento 18f7bd7250175d1f 0
 cruzamento_geral e0b19e69803046f0 0
 curvatura 4c1fa246b76375aa 0
-cuspide 598b403f7d6fc344 0
+cuspide ba2892d835e7e109 0
 deforma b71f1684493e6e73 0
 deforma_d 5d862325c561a0db 0
 demonstracoes 1db3704fa2a95055 0
