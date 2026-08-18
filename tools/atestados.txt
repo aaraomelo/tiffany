@@ -203,7 +203,7 @@ familia_real 0833f102c1037af8 0
 fase_regua 679ad4c12ac12cb9 0
 fatia 9c955f7c15fa1be7 0
 fator df7e737ec9f34d8c 0
-fecha 83691050c993215b 0
+fecha 343b24fe0cee5eef 0
 fecho_convexo c990307f513c1d36 0
 fermat d626834393ab1867 0
 fisica a71f9aece8be32cd 0
@@ -282,7 +282,7 @@ lyapunov_torre 6d18b7610f966dc9 0
 maestro_memoria d89b11e2c1b7a549 0
 maisum 295c365d23f434a0 0
 matricial 2b8676a11f009b02 0
-maxcut 2ad16e9084d34ab6 0
+maxcut a97ab54db3b13db4 0
 mcu 50a885ea978e57ed 0
 mecanica c51857a7bd6e7f94 0
 mecanica_corpo e5dbd536f54669dc 0

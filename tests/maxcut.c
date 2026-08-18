@@ -137,7 +137,12 @@ int main(void)
            " ordem distingue n elementos, logo sao precisos log(n) cortes para igualar a ordem —"
            " e esse numero E' a profundidade da arvore. Duais nao quer dizer iguais: quer dizer"
            " que cada um se obtem do outro, e aqui um deles precisa de ser repetido",
-           cortes_precisos == NIV && classes_1corte == 2 && elementos == n);
+           /* e `elementos == n` e `classes_1corte == 2` SAEM: foram atribuídos assim mesmo
+            * na linha de cima, `elementos = n` e `classes_1corte = 2`, logo a condição relia
+            * as duas. Quem mede é o `cortes_precisos`, que sai do laço `while(alcance <
+            * elementos) alcance *= 2` — e é ele que pode dar outra coisa se a profundidade
+            * ou o número de elementos mudarem. */
+           cortes_precisos == NIV && alcance >= elementos && alcance/2 < elementos);
     }
 
     /* ═══ §K6 — a CONSTRUCAO: meia volta na sequencia natural DA' o corte ═══════════

@@ -545,7 +545,12 @@ static void secao_F8(void){
     long Ds = rs.B*rs.B - 4*rs.C;
     printf("     juros SIMPLES  100 110 120 130 …   (B,C)=(%ld,%ld)  Δ=%ld  %s\n",
            rs.B, rs.C, Ds, Ds == 0 ? "PARABÓLICO — o limite" : "?");
-    ok("juros simples dão (B,C) = (2,1) e Δ = 0 — a PA é o caso parabólico",
+    /* (`Ds == 0` SEGUE de B = 2 e C = 1: 4 − 4 = 0, e não é medição independente. Fica
+     * porque é a CONCLUSÃO que se quer ler — a PA é o caso parabólico —, mas quem pode
+     * falhar são o `rs.fechou` e o par (B,C), que saem do `regua_de` sobre a progressão.) */
+    ok("juros simples dão (B,C) = (2,1) e Δ = 0 — a PA é o caso parabólico. E o Δ SEGUE do"
+       " par: com B = 2 e C = 1 é 4 − 4, e não é uma segunda medição; quem pode falhar é o"
+       " `regua_de` sobre a progressão",
        rs.fechou && rs.B == 2 && rs.C == 1 && Ds == 0);
 
     /* (2) JUROS COMPOSTOS — a PG. Capital 1, fator 3 (inteiro, para não sair dos inteiros). */

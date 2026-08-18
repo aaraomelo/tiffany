@@ -72,6 +72,25 @@ POR FAZER: ~55 ficheiros, 148 doubles. Os maiores por tocar:
     nne.c 7 · llm.c 6 · spline.c 6 · tikz.c 6 · travessia.c 6 · xx.c 5 · quantico.c 5
     simula.c 5 · corpo_fisico.c 4 · icc.c 4
 
+### E a ferramenta que apanha o que a leitura não apanha
+
+    python3 tools/tautologia.py [ficheiro.c ...]
+
+Procura uma variável da condição DEFINIDA, poucas linhas acima, **em função de outra
+variável da mesma condição** — e essa é a forma que passa despercebida, porque a condição
+sozinha parece boa. Apanhou quatro num dia:
+
+    long ops_dobra = 2L*k;                ok(..., ops_dobra == 2L*k && k > 0)      plugs.c
+    long a = razao - U;                   ok(..., razao == U && a == 0 && …)       estrela.c
+    janela_fechada = janela_aberta*G;     ok(..., janela_fechada > janela_aberta)  simula.c
+    por_classificar = M - v - m;          ok(..., v + m + por_classificar == M)    cards.c
+
+Em TRÊS dos quatro, a nota por cima da condição já **descrevia** o defeito — e a condição
+mantinha-o. Corrigir a asserção e não voltar a apontar-lhe o gume é o modo de isto sobreviver:
+a nota dá a sensação de estar resolvido. **A correcção leva gume, como se fosse nova.**
+
+Cada achado é um CANDIDATO. O veredito é sempre mutar e ver se cai.
+
 Para levantar os de um ficheiro (troca X pelo nome):
 
     python3 - <<'PY'
