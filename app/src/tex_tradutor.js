@@ -346,7 +346,7 @@ export async function comporTexto (nomeVirtual, tex) {
   if (typeof E.volta_compila === 'function') E.volta_compila()
   motor.poe.clear()
   motor.miss = { n: 0, bytes: 0 }
-  await encheCache('corpus/docs/computacional.tex')     /* o subset com as fontes da casa */
+  await encheCache('papers/corpo_computacional.tex')     /* o subset com as fontes da casa */
   motor.cache.set(nomeVirtual, new TextEncoder().encode(tex))
   if (typeof E.marca_vfs === 'function') E.marca_vfs()
   E.limpa_saida()

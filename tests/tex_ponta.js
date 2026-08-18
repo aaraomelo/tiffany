@@ -164,14 +164,14 @@ const now = () => Number(process.hrtime.bigint()) / 1e6
   }
 
   /* ─── §P0 computacional ─────────────────────────────────────────────────────────── */
-  const d0 = await compor('corpus/docs/computacional.tex')
+  const d0 = await compor('papers/corpo_computacional.tex')
   console.log(`   §P0 computacional tam=${d0.tam} pág=${d0.pages} Forms=${d0.forms} miss=${d0.miss}` +
     ` cache=${d0.cacheN} ${d0.msCompila} ms`)
   ok('§P0 computacional: %PDF + Semente + Assinatura + miss>0 (corpo do LS)',
     d0.pct && d0.eof && d0.semente && d0.selo && d0.miss > 5 && d0.tam > 1e5 && d0.pages > 5)
 
   /* ─── §P1 2ª computacional: id, cache quente ────────────────────────────────────── */
-  const d1 = await compor('corpus/docs/computacional.tex')
+  const d1 = await compor('papers/corpo_computacional.tex')
   console.log(`   §P1 2.ª computacional tam=${d1.tam} Forms=${d1.forms} miss=${d1.miss} cacheMs=${d1.cacheMs}`)
   ok('§P1 2ª visita: computacional id (1 bit + Map quente)',
     d1.tam === d0.tam && d1.forms === d0.forms && d1.miss === d0.miss && d1.pages === d0.pages)
@@ -191,7 +191,7 @@ const now = () => Number(process.hrtime.bigint()) / 1e6
     && cA.tam === cB.tam && cA.forms === cB.forms && cA.miss === cB.miss)
 
   /* ─── §P3 computacional após catálogo (sessão longa) ────────────────────────────── */
-  const d2 = await compor('corpus/docs/computacional.tex')
+  const d2 = await compor('papers/corpo_computacional.tex')
   console.log(`   §P3 computacional após catálogo tam=${d2.tam} Forms=${d2.forms}`)
   ok('§P3 sessão longa: computacional volta ao mesmo após catálogo (estrela sem estado)',
     d2.tam === d0.tam && d2.forms === d0.forms && d2.pages === d0.pages)

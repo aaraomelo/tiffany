@@ -41,7 +41,7 @@ function ok (q, cond) {
   }
 
   const estilo = await get('/corpo/estilo.tex')
-  const dual = await get('/corpo/corpus/docs/computacional.tex')
+  const dual = await get('/corpo/papers/corpo_computacional.tex')
   ok('§F2 corpo estilo+computacional 200', estilo.status === 200 && dual.status === 200 && estilo.n > 100 && dual.n > 1000)
 
   const painel = await get('/wasm/painel_motor.wasm')

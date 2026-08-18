@@ -94,7 +94,7 @@ int main(void)
         { "catalogo",      "../catalogo.tex" },
         { "enredo",        "../enredo.tex" },
         { "corpo_analitico", "../papers/corpo_analitico.tex" },
-        { "computacional", "../corpus/docs/computacional.tex" },
+        { "computacional", "../papers/corpo_computacional.tex" },
     };
     const int ND = (int)(sizeof docs / sizeof docs[0]);
 
@@ -152,12 +152,12 @@ printf("\n§F3  O CONTROLO: um byte trocado no banco ACUSA — senao a volta fec
             unsigned char guardado = v[7];
             v[7] = (unsigned char)(guardado ^ 0xFF);        /* um byte, um so' */
             gravar(&b, chave, v, n);
-            long difs = descer_e_comparar(&b, alvo, "../corpus/docs/computacional.tex", NULL);
+            long difs = descer_e_comparar(&b, alvo, "../papers/corpo_computacional.tex", NULL);
             apanhou = (difs > 0);
             printf("      um byte trocado no bloco 0: a comparacao acusa %ld diferenca(s)\n", difs);
             v[7] = guardado;                                 /* devolve-se SEMPRE */
             gravar(&b, chave, v, n);
-            devolvido = (descer_e_comparar(&b, alvo, "../corpus/docs/computacional.tex", NULL) == 0);
+            devolvido = (descer_e_comparar(&b, alvo, "../papers/corpo_computacional.tex", NULL) == 0);
         }
         ok("um unico byte trocado ACUSA, e o ficheiro volta ao original depois — e' a segunda"
            " metade da medida: a primeira diz que o que esta' certo passa, esta diz que o que"

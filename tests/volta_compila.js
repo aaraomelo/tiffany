@@ -99,7 +99,7 @@ E.marca_vfs()
 console.log(`   marca_vfs (sem poe): DISCO ${(E.DISCO.buffer.byteLength / 1048576).toFixed(2)} MiB`)
 
 const seq = []
-for (const d of ['catalogo.tex', 'corpus/docs/computacional.tex', 'enredo.tex']) {
+for (const d of ['catalogo.tex', 'papers/corpo_computacional.tex', 'enredo.tex']) {
   E.volta_compila()
   missN = 0; poeSet.clear()
   console.log(`   a compor ${d} via miss`)
@@ -135,11 +135,11 @@ ok('§V4 catálogo depois do enredo: gato∘esquilo=id — mesmo tam/Forms',
 
 E.volta_compila()
 missN = 0; poeSet.clear()
-const d1 = compoe('corpus/docs/computacional.tex')
+const d1 = compoe('papers/corpo_computacional.tex')
 const m1 = d1.miss
 E.volta_compila()
 missN = 0; poeSet.clear()
-const d2 = compoe('corpus/docs/computacional.tex')
+const d2 = compoe('papers/corpo_computacional.tex')
 console.log(`   §V5 computacional×2 miss=${m1}/${d2.miss} tam=${d1.tam}/${d2.tam}`)
 ok('§V5 computacional×2 via miss: id após volta (FICH zera, Map fica)',
   d1.rc === 0 && d2.rc === 0 && d1.tam === d2.tam && d1.forms === d2.forms

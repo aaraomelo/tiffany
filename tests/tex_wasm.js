@@ -367,10 +367,10 @@ catch (e) {
         };
         if (typeof E7.volta_compila === 'function') E7.volta_compila();
         poeSet7.clear();
-        d1 = comp7('corpus/docs/computacional.tex');
+        d1 = comp7('papers/corpo_computacional.tex');
         if (typeof E7.volta_compila === 'function') E7.volta_compila();
         poeSet7.clear();
-        d2 = comp7('corpus/docs/computacional.tex');
+        d2 = comp7('papers/corpo_computacional.tex');
     } catch (e) { trap = String(e && e.message || e).slice(0, 200); }
     const f1 = d1.pdf ? (d1.pdf.toString('latin1').match(/\/Subtype\/Form/g) || []).length : 0;
     const f2 = d2.pdf ? (d2.pdf.toString('latin1').match(/\/Subtype\/Form/g) || []).length : 0;

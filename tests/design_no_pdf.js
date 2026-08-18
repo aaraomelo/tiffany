@@ -31,7 +31,7 @@ const DOCS = [
   ['teoria',        'teoria.tex'],
   ['catalogo',      'catalogo.tex'],
   ['corpo_analitico', 'papers/corpo_analitico.tex'],
-  ['computacional',  'corpus/docs/computacional.tex'],
+  ['computacional',  'papers/corpo_computacional.tex'],
 ]
 
 function compoe (fonte, saida) {
@@ -112,19 +112,19 @@ console.log('\n§G4  O CONTROLO: apagadas as réguas do fonte, o PDF perde-as �
 {
   /* sem isto, «há réguas no PDF» passava com réguas que viessem de qualquer lado. Tira-se a
    * CAUSA no fonte e a consequência tem de desaparecer. O fonte é devolvido sempre. */
-  const alvo = path.join(RAIZ, 'corpus', 'docs', 'computacional.tex')
+  const alvo = path.join(RAIZ, 'papers', 'corpo_computacional.tex')
   const original = fs.readFileSync(alvo, 'utf8')
   let antes = 0, depois = 0, voltou = 0
   try {
-    compoe('corpus/docs/computacional.tex', '/tmp/g_ctrl1.pdf')
+    compoe('papers/corpo_computacional.tex', '/tmp/g_ctrl1.pdf')
     antes = conta(bruto('/tmp/g_ctrl1.pdf'), ' l S ')
     fs.writeFileSync(alvo, original.replace(/\\(top|mid|bottom)rule/g, ''))
-    compoe('corpus/docs/computacional.tex', '/tmp/g_ctrl2.pdf')
+    compoe('papers/corpo_computacional.tex', '/tmp/g_ctrl2.pdf')
     depois = conta(bruto('/tmp/g_ctrl2.pdf'), ' l S ')
   } finally {
     fs.writeFileSync(alvo, original)                 /* devolve-se SEMPRE */
   }
-  compoe('corpus/docs/computacional.tex', '/tmp/g_ctrl3.pdf')
+  compoe('papers/corpo_computacional.tex', '/tmp/g_ctrl3.pdf')
   voltou = conta(bruto('/tmp/g_ctrl3.pdf'), ' l S ')
   console.log('      com as réguas no fonte:   ' + antes)
   console.log('      apagadas do fonte:        ' + depois)

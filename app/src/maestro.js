@@ -1,4 +1,4 @@
-// maestro.js — Realização computacional do Teorema do Maestro (corpus/docs/computacional.tex §assistente).
+// maestro.js — Realização computacional do Teorema do Maestro (papers/corpo_computacional.tex §assistente).
 //
 //   (Π, X, tick, I) → Y     depois    (X, Y, Π) → r
 //

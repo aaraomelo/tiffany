@@ -106,7 +106,7 @@ function ok (q, cond) {
   {
     let falhou = 0
     console.log('      documento                         vfs MiB   vs 4.90')
-    for (const fonte of ['corpus/docs/computacional.tex', 'papers/corpo_analitico.tex', 'teoria.tex', 'enredo.tex', 'catalogo.tex']) {
+    for (const fonte of ['papers/corpo_computacional.tex', 'papers/corpo_analitico.tex', 'teoria.tex', 'enredo.tex', 'catalogo.tex']) {
       const sub = disco.ficheirosPara(fonte, lista)
       const n = sub.reduce((s, f) => s + pares.find((p) => p.nome === f).bytes.length, 0)
       lazyBytes[fonte] = n
@@ -115,7 +115,7 @@ function ok (q, cond) {
       if (!sub.includes(fonte)) falhou++
     }
     ok('§D2 o subset lazy é estritamente menor que o manifesto — o wasm não leva o catálogo no computacional',
-      falhou === 0 && lazyBytes['corpus/docs/computacional.tex'] < 2.2e6 && lazyBytes['catalogo.tex'] < 4e6)
+      falhou === 0 && lazyBytes['papers/corpo_computacional.tex'] < 2.2e6 && lazyBytes['catalogo.tex'] < 4e6)
   }
 
   /* ─── §D3 tempos: disco, grava LS, inflate lazy vs tudo ────────────────────── */
@@ -129,7 +129,7 @@ function ok (q, cond) {
 
     const mapa = disco.leMapa(ls)
     const tLazy = process.hrtime.bigint()
-    const sub = disco.ficheirosPara('corpus/docs/computacional.tex', lista)
+    const sub = disco.ficheirosPara('papers/corpo_computacional.tex', lista)
     let nLazy = 0
     for (const nome of sub) nLazy += (await disco.leFicheiro(ls, mapa, nome)).length
     tempos.inflateLazy = Number(process.hrtime.bigint() - tLazy) / 1e6
@@ -182,7 +182,7 @@ function ok (q, cond) {
       const pag0 = E1.DISCO.buffer.byteLength
       const rss0 = rss()
       const t1 = process.hrtime.bigint()
-      const sub = disco.ficheirosPara('corpus/docs/computacional.tex', lista)
+      const sub = disco.ficheirosPara('papers/corpo_computacional.tex', lista)
       for (const nome of sub) poe(E1, nome, pares.find((p) => p.nome === nome).bytes)
       const msLazy = Number(process.hrtime.bigint() - t1) / 1e6
       const pagLazy = E1.DISCO.buffer.byteLength
@@ -244,7 +244,7 @@ function ok (q, cond) {
         E3.inicia_wasm()
         const pagAntes = E3.DISCO.buffer.byteLength
         if (typeof E3.marca_vfs === 'function') E3.marca_vfs()
-        const enc = Buffer.from('corpus/docs/computacional.tex', 'utf8')
+        const enc = Buffer.from('papers/corpo_computacional.tex', 'utf8')
         const pN = num(E3.vfs_reserva(enc.length + 1))
         const pS = num(E3.vfs_reserva(16))
         const mem = () => new Uint8Array(E3.DISCO.buffer)
@@ -259,7 +259,7 @@ function ok (q, cond) {
         console.log(`   §D5 miss computacional rc=${rc} tam=${tam} miss=${missN} (${(missB / 1048576).toFixed(2)} MiB)` +
           ` DISCO ${(pagAntes / 1048576).toFixed(2)}→${(pagDepois / 1048576).toFixed(2)} MiB  ${msMiss.toFixed(0)} ms`)
         ok('§D5 fopen miss → inflate/Map → poe 1: computacional sem poe prévio, rc=0 e miss>0',
-          rc === 0 && tam > 1e5 && missN > 5 && missB < lazyBytes['corpus/docs/computacional.tex'] + 1e5)
+          rc === 0 && tam > 1e5 && missN > 5 && missB < lazyBytes['papers/corpo_computacional.tex'] + 1e5)
         ram.miss = { missN, missB, pagAntes, pagDepois, msMiss, tam }
       }
     }
