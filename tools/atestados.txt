@@ -233,7 +233,7 @@ grupo d223484f823f262b 0
 guarda fa13a12b95d6b2f9 0
 gume_calculo 8af5f8fd0d0ddcf7 0
 hawking 534879a613246ed0 0
-headjack cea98b9f035a7b44 0
+headjack f48faea16576982f 0
 hilbert_bidual f8c8159a1e1e3878 0
 hiper 209bc5f16330047f 0
 hipercubo32 6f71340587320316 0
@@ -499,7 +499,7 @@ viviani_universal 3891b0e053a8d515 0
 vizinha 57d9510776cbfa07 0
 volta_estrela 83cdfc9b4f029cf9 0
 wasm_sobe eb1381b02664ea88 0
-xx 9c2121b7543c0104 0
+xx cba1b7ac396fc60c 0
 ym_pnp c9dace961b02d965 0
 zero 22f5d1c77e521c6c 0
 zeta b93497f725c73117 0

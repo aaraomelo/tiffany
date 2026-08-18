@@ -356,7 +356,8 @@ int main(void){
              * a grelha di-lo-ia — e ela não sabe que xc existe */
             double melhor = 1e9, arg_melhor = 0;
             long pontos = 0;
-            for(double x = 0.05; x <= 1.5; x += 0.0005){
+            const double PASSO = 0.0005;         /* e a régua É este passo, não um número meu */
+            for(double x = 0.05; x <= 1.5; x += PASSO){
                 double v = pow(x, x);
                 pontos++;
                 if(v < melhor){ melhor = v; arg_melhor = x; }
@@ -372,7 +373,7 @@ int main(void){
                " log(xc.0,99) + 1, e com xc = 1/e isso E' log(0,99): media a monotonia do"
                " logaritmo, verdadeira para qualquer xc e portanto sobre nenhum. E' o mesmo"
                " defeito que o comentario acima ja' tinha descrito uma vez",
-               f_xc < f_e && f_xc < f_d && fabs(arg_melhor - xc) < 0.001 && pontos > 900);
+               f_xc < f_e && f_xc < f_d && fabs(arg_melhor - xc) <= PASSO && pontos > 900);
         }
         conclui("é a MESMA lei do continua.c §C1: o raio é a distância à singularidade mais");
         conclui("próxima. Ali era o polo −σ'; aqui é o ponto onde a função deixa de inverter.");

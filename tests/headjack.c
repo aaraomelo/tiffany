@@ -332,20 +332,50 @@ int main(void){
     puts("");
     {
         /* e o que se GANHA e mensuravel: o que sobrevive e a parte tangencial, e ela e uma
-         * PROJECAO. Metade da informacao, em media sobre direcoes — e isso conta-se. */
-        double soma_vis = 0, soma_tot = 0;
+         * PROJECAO. TRES QUARTOS da energia em media sobre direcoes — e isso conta-se, e
+         * fecha exacto. (Aqui dizia «metade», e a medida logo abaixo derruba-o.) */
+        double soma_vis = 0, soma_tot = 0, soma_e = 0;
         for(int k = 0; k < 1000; k++){
             double th = M_PI*(k%100)/100.0, ph = 2*M_PI*(k/100)/10.0;
             double rh[3] = { sin(th)*cos(ph), sin(th)*sin(ph), cos(th) };
             double Q[3] = { 1, 0, 0 };
             double B[3];
             b_dipolo(Q, rh, B);
-            soma_vis += sqrt(B[0]*B[0]+B[1]*B[1]+B[2]*B[2]);
+            double m2 = B[0]*B[0]+B[1]*B[1]+B[2]*B[2];
+            soma_vis += sqrt(m2);
+            soma_e   += m2;                       /* a ENERGIA, e é ela que fecha exacta */
             soma_tot += 1.0;
         }
         double frac = soma_vis/soma_tot;
-        ok("o que SOBREVIVE ao nucleo e uma fracao mensuravel — nao e tudo nem e nada",
-           frac > 0.3 && frac < 0.99);
+        /* E ISTO TEM FORMA FECHADA, e «entre 0,3 e 0,99» não a via. O `b_dipolo` é o PRODUTO
+         * CRUZADO Q × r̂, logo com |Q| = |r̂| = 1
+         *
+         *      |B|² = 1 − (Q·r̂)²
+         *
+         * e a média de (Q·r̂)² sobre ESTA grelha calcula-se exacta: com r̂_x = sin θ cos φ,
+         *
+         *      ⟨sin²θ⟩ = ½ − (1/200)·Σ_{k=0}^{99} cos(2πk/100) = ½     (a soma é ZERO,
+         *      ⟨cos²φ⟩ = ½ − (1/20)·Σ_{j=0}^{9}  cos(4πj/10)  = ½      raízes da unidade)
+         *
+         * logo ⟨(Q·r̂)²⟩ = ¼ e ⟨|B|²⟩ = 3/4 EXACTO. Medido: 0,749999999999999, com resíduo de
+         * 8e-16 — o ulp de mil somas, não a lei.
+         *
+         * E o comentário acima diz «metade da informação»: é FALSO pelo que aqui se mede.
+         * Sobrevivem TRÊS QUARTOS da energia (e 84% da amplitude média). A metade seria o
+         * que sobra se a projecção matasse uma de duas direcções iguais; o cruzado mata uma
+         * de três, e é por isso que dá ¾. */
+        double media_e = soma_e/soma_tot;
+        long res_e = (long)(fabs(media_e - 0.75) * 1e12);
+        printf("     -> e a ENERGIA que sobrevive tem FORMA FECHADA: ⟨|B|²⟩ = 3/4 exacto"
+               " (medido %.15f, resíduo %ld em 1e-12)\n", media_e, res_e);
+        ok("o que SOBREVIVE ao nucleo tem FORMA FECHADA, e «entre 0,3 e 0,99» nao a via: o"
+           " b_dipolo e' o PRODUTO CRUZADO, logo |B|^2 = 1 - (Q.rhat)^2, e a media de (Q.rhat)^2"
+           " sobre esta grelha e' exactamente 1/4 — porque <sin^2 th> e <cos^2 ph> valem 1/2"
+           " cada, com as somas de cossenos a anularem-se por serem raizes da unidade. Logo"
+           " sobrevivem TRES QUARTOS da energia, e nao «metade», que era o que o comentario"
+           " dizia e o que esta medida derruba: a metade seria matar uma de duas direcoes"
+           " iguais, e o cruzado mata uma de tres",
+           res_e == 0 && frac > 0.84 && frac < 0.85);
         printf("     -> em media sobre 1000 direcoes, sobrevive %.1f%% do dipolo unitario.\n",
                100*frac);
         puts("        O headjack nao invasivo e possivel e a conta do sensor fecha. O que ele");
