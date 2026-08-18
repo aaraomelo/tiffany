@@ -39,3 +39,6 @@ E na mesma hora, pela segunda vez na sessão: `Qz I = …` colidiu com a macro `
 [[feedback-duas-reguas]] na sua forma mais barata.
 
 Ver [[feedback-o-medidor-que-nunca-mediu]], [[feedback-o-exit-sombreado]].
+
+
+**17/08 — o harness do GUME com a mesma doença.** Escrevi `g(){ sed ... > gc.c; cc ... -o $S/gc 2>/dev/null; if [ -x $S/gc ]; then correr; fi }` — caminho do binário reutilizado entre gumes e compilador silenciado. Quando a mutação não compilava, corria o binário do gume ANTERIOR, e o `-x` dava verdade. **Cinco gumes disseram «não mordeu» e eu quase concluí que as asserções eram fracas.** O teste do `[ -x ]` é inútil se o ficheiro não for apagado antes. No harness do gume: `rm -f` o binário, contar as linhas que o `sed` mudou (zero = não aplicou), e testar o exit do `cc` — três verificações baratas antes de acreditar num «não mordeu».

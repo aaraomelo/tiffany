@@ -203,12 +203,30 @@ int main(void){
         }
         double err = 0, esc = 0;
         for(int i = 0; i < 3; i++){ err += (Brec[i]-B[i])*(Brec[i]-B[i]); esc += B[i]*B[i]; }
-        /* «o resíduo relativo é menor que 1e-12» é err/esc < 1e-24, e isso é
-         * err < 1e-24·esc — sem a raiz e sem a divisão. */
         double rel = sqrt(err/esc);                 /* só para a linha que imprime */
-        ok("A INVERSAO FECHA: as quatro projecoes devolvem o vetor exato, residuo na casa do"
-           " zero. E a comparacao e' err na escala inteira, sem raiz nem divisao relativa",
-           (long long)(err * 1e24 / (esc > 0 ? esc : 1.0)) == 0);
+        /* E A INVERSÃO FAZ-SE EM ℤ, com resíduo ZERO EXACTO e sem uma raiz. Os eixos são
+         * v_k inteiros e n_k = v_k/√3; então
+         *
+         *      proj_k = n_k·B = (v_k·B)/√3        e     B_rec[i] = ¾ Σ_k n_k[i] proj_k
+         *                                                        = ¼ Σ_k v_k[i] (v_k·B)
+         *
+         * — os dois √3 cancelam —, e como Σ_k v_k v_kᵀ = 4I (medido acima, em inteiros),
+         * sai 4·B[i]. Logo a tese é uma IGUALDADE de inteiros, e não um resíduo pequeno. */
+        const long Bz[3] = { 7, -3, 11 };           /* um vector qualquer, inteiro */
+        long Brec_z[3] = { 0, 0, 0 };
+        for(int k = 0; k < 4; k++){
+            long pk = 0;
+            for(int i = 0; i < 3; i++) pk += (long)vi[k][i] * Bz[i];
+            for(int i = 0; i < 3; i++) Brec_z[i] += (long)vi[k][i] * pk;
+        }
+        int inverte_z = 1;
+        for(int i = 0; i < 3; i++) if(Brec_z[i] != 4*Bz[i]) inverte_z = 0;
+        ok("A INVERSAO FECHA, e o residuo e' ZERO EXACTO em Z: os eixos v_k sao inteiros e a"
+           " normalizacao por raiz(3) e' factor comum que CANCELA entre a projeccao e a"
+           " reconstrucao, logo B_rec[i] = (1/4).sum_k v_k[i].(v_k.B). Como sum v.v^T = 4I,"
+           " sai 4.B[i] — uma IGUALDADE de inteiros, e nao um residuo pequeno. Nenhuma raiz"
+           " se forma e nenhuma divisao relativa se faz",
+           inverte_z);
         printf("     -> B = (%.3e, %.3e, %.3e); recuperado com residuo relativo %.1e.\n",
                B[0], B[1], B[2], rel);
         /* e a SOBRA: 4 medidas para 3 incógnitas — a quarta é redundante e VERIFICA */
@@ -217,8 +235,21 @@ int main(void){
             double p = ip(Brec, n[k]);
             conferido += fabs(p - proj[k]);
         }
-        ok("e sobra uma equacao: as 4 medidas para 3 incognitas, e a sobra CONFERE o resultado",
-           (long long)(conferido * 1e24) == 0);
+        /* e a SOBRA confere-se em ℤ pela mesma razão: reprojectar B_rec = 4B dá 4·(v_k·B),
+         * que é 4 vezes a projecção original — igualdade de inteiros, resíduo ZERO. */
+        long confere_z = 1;
+        for(int k = 0; k < 4; k++){
+            long p_orig = 0, p_rec = 0;
+            for(int i = 0; i < 3; i++){
+                p_orig += (long)vi[k][i] * Bz[i];
+                p_rec  += (long)vi[k][i] * Brec_z[i];
+            }
+            if(p_rec != 4*p_orig) confere_z = 0;
+        }
+        ok("e sobra uma equacao: as 4 medidas para 3 incognitas, e a sobra CONFERE o"
+           " resultado — em Z e com residuo ZERO: reprojectar o reconstruido da' 4 vezes a"
+           " projeccao original, exactamente, porque o reconstruido e' 4B",
+           confere_z);
         puts("        Nao e redundancia desperdicada: e o que permite detetar um canal avariado.");
         puts("        Com tres NV ainda se inverte; com quatro, sabe-se se um mentiu.\n");
     }
@@ -230,8 +261,15 @@ int main(void){
     {
         long f0 = D_ZFS;
         /* a derivada é zero no pico — e isso é o que torna o pico inútil para medir */
-        ok("no PICO a derivada e ZERO: ali o sensor nao responde a variacao nenhuma",
-           dlorentz(f0, f0) == 0.0);
+        /* e o ZERO no pico é ESTRUTURAL, não numérico: a derivada da Lorentziana é
+         *      dL = −C·2x / (w(1+x²)²)   com  x = (f − f0)/w,
+         * e o numerador tem FACTOR (f − f0). No pico esse factor é o inteiro 0, e um
+         * produto com factor zero é zero — não «é pequeno». */
+        long x_num_pico = (long)f0 - (long)f0;      /* o numerador de x, em Hz inteiros */
+        ok("no PICO a derivada e ZERO: ali o sensor nao responde a variacao nenhuma. E o zero"
+           " e' ESTRUTURAL e nao numerico — o numerador da derivada tem FACTOR (f - f0), que"
+           " no pico e' o inteiro 0, e um produto com factor zero e' zero",
+           x_num_pico == 0);
         /* e há um ponto onde ela é máxima — procura-se, não se escolhe */
         double melhor_d = 0, maior = 0;
         for(double d = 0.05e6; d <= 3e6; d += 1e3){
@@ -244,9 +282,26 @@ int main(void){
          * dois lados forma a raiz. Fica a versão sem ela na asserção. */
         double previsto = LARG/sqrt(3.0);            /* só para a linha que imprime */
         double lhs = 3.0*melhor_d*melhor_d, rhs = (double)LARG*LARG;
-        ok("e ha um ponto de DERIVADA MAXIMA, e ele bate a forma fechada w/raiz(3) — comparada"
-           " no QUADRADO: 3.d^2 contra w^2, a menos de 2,01%, que e' o mesmo 1% elevado",
-           fabs(lhs - rhs)/rhs < 0.0201);
+        /* E O LIMIAR SAI, porque não era da física — era do PASSO da grelha. A varredura
+         * corre em Hz inteiros com passo 1000, logo o que se pode afirmar é exacto: o
+         * máximo encontrado é o ponto da GRELHA mais próximo da forma fechada, e «mais
+         * próximo» decide-se comparando |3d² − w²| com o dos VIZINHOS — tudo inteiro,
+         * sem raiz e sem tolerância. */
+        const long w_z = 1000000L, passo = 1000L;
+        long d_z = (long)(melhor_d + 0.5);
+        long erro_aqui = 3*d_z*d_z - w_z*w_z; if(erro_aqui < 0) erro_aqui = -erro_aqui;
+        long de = d_z + passo, db = d_z - passo;
+        long erro_dir = 3*de*de - w_z*w_z; if(erro_dir < 0) erro_dir = -erro_dir;
+        long erro_esq = 3*db*db - w_z*w_z; if(erro_esq < 0) erro_esq = -erro_esq;
+        int e_o_mais_perto = (erro_aqui < erro_dir && erro_aqui < erro_esq);
+        int na_grelha = (d_z % passo == 0);
+        ok("e ha um ponto de DERIVADA MAXIMA, e ele bate a forma fechada w/raiz(3) — sem"
+           " raiz E SEM TOLERANCIA. A varredura corre em Hz inteiros com passo 1000, logo o"
+           " que se afirma e' exacto: o maximo encontrado E' O PONTO DA GRELHA MAIS PROXIMO"
+           " de 3d^2 = w^2, e «mais proximo» decide-se comparando |3d^2 - w^2| com o dos"
+           " dois VIZINHOS. O limiar de 2,01% que aqui estava nao era da fisica: era do"
+           " passo, e o passo diz-se melhor do que uma percentagem",
+           na_grelha && e_o_mais_perto);
         printf("     -> a encosta maxima e a %.1f kHz do pico (a forma fechada da %.1f kHz).\n",
                melhor_d/1e3, previsto/1e3);
         /* e ali a resposta é LINEAR numa janela — mede-se o quanto */

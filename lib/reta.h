@@ -1524,18 +1524,130 @@ static int rt_ordem_vector(const RtOp *o, long p, long q, int tecto){
  * de volta; 0 se o operador não serve ou se a codificação não representa. A comparação
  * com o original faz-se em ℙ¹ por produto cruzado — quem chama é que a faz, porque é ela
  * a tese e não o ciclo. */
+/* ── O ALGORITMO UNIVERSAL, nos quatro passos ────────────────────────────────────────
+ *
+ * Ele corre no ESPAÇO da def:espaco — V = Q ⊕ Q·m√D, dim 2 — e no seu DUAL, cuja régua é
+ * m† = −1/(mD). São QUATRO passos e não cinco: não há verificação, porque não há nada a
+ * verificar — com |det| = 1 a adjunta é inteira e a volta é exacta POR CONSTRUÇÃO.
+ *
+ *      DESCODIFICA   o texto entra como (p,q) EXACTO      → coordenadas em V
+ *      OPERA         a acção de T, |det T| = 1            → produto ponto a ponto no dual
+ *      INVERTE       adj(T)/det T, inteira                → a deconvolução, pela NORMA
+ *      CODIFICA      palavra (FC) ou dígitos (Cantor)     → sai
+ *
+ * e FECHA: descodifica(w) = (p,q). O que o faz fechar é |det| = 1 — a conservação e a
+ * volta são a mesma frase. E o sentido é o par cone/espiral: o CONE desce em passo
+ * discreto, a ESPIRAL sobe recompondo, e o produto das duas réguas é conservado. */
 static int rt_ciclo(const RtOp *o, RtIdaVolta cod, long p, long q, long *rp, long *rq){
     long a, b, c, d;
     if(!rt_op_valido(o)) return 0;
     rt_opera(o, p, q, &a, &b);
     if(!rt_inverte(o, a, b, &c, &d)) return 0;
     if(d == 0) return 0;                          /* a órbita passou por ∞ */
-    long g = rt_mdc(c < 0 ? -c : c, d < 0 ? -d : d); if(g < 1) g = 1;
-    long ri = c/g, rj = d/g;
+    /* NÃO SE REDUZ. O primeiro passo da transformada já normaliza: a avaliação é linear
+     * e o que se usa é a RAZÃO das folhas, onde o factor cancela — medido em
+     * `transformada_universal.c` §T9, e §T10: quem normaliza é a NORMA, que é o produto
+     * das folhas, e um mdc por cima não acrescenta nada. Medido também pelo lado de fora:
+     * com esta redução neutralizada, os 71 medidores que usam esta lib passam todos. */
+    long ri = c, rj = d;
     if(rj < 0){ ri = -ri; rj = -rj; }
     if(ri < 0) return 0;                          /* as codificações são de p/q >= 0 */
     if(!cod) { *rp = ri; *rq = rj; return 1; }
     return cod(ri, rj, rp, rq);
+}
+
+/* ── DIR e CRUZ dos operadores, e o que CRUZ mede ────────────────────────────────────
+ *
+ * A lib já tem `rt_dir` e `rt_cruz` — as duas leituras sobre VECTORES. Estas são sobre
+ * OPERADORES, que é outro objecto, e por isso levam o sufixo: o objecto aqui é o par [p:q]
+ * de ℙ¹ e a operação é a acção de MATRIZES (def:lei0). As duas leituras do §sec:operacao
+ * lêem-se ali:
+ *
+ *      Dir(A,B)  = ½(AB + BA)      a leitura que NÃO MUDA ao trocar a ordem
+ *      Cruz(A,B) = ½(AB − BA)      a que TROCA DE SINAL
+ *
+ * Guardam-se em DOBRO, para não dividir — `rt_dir_op` e `rt_cruz_op` devolvem AB±BA.
+ *
+ * E o que CRUZ mede é a obstrução à DIAGONALIZAÇÃO SIMULTÂNEA (cor:dir-cruz-folhas):
+ * com o determinante fixo, o traço determina as folhas, e
+ *
+ *      Cruz = 0  ⟺  mesmo traço  ⟺  MESMAS FOLHAS  ⟺  uma avaliação diagonaliza os DOIS
+ *
+ * É esta a condição que autoriza o passo OPERA do ciclo a fazer-se na transformada: a
+ * convolução só vira produto ponto a ponto quando o par tem espectro comum. */
+static void rt_dir_op(const RtOp *A, const RtOp *B, long *R){
+    long AB[4], BA[4];
+    AB[0]=A->T[0]*B->T[0]+A->T[1]*B->T[2]; AB[1]=A->T[0]*B->T[1]+A->T[1]*B->T[3];
+    AB[2]=A->T[2]*B->T[0]+A->T[3]*B->T[2]; AB[3]=A->T[2]*B->T[1]+A->T[3]*B->T[3];
+    BA[0]=B->T[0]*A->T[0]+B->T[1]*A->T[2]; BA[1]=B->T[0]*A->T[1]+B->T[1]*A->T[3];
+    BA[2]=B->T[2]*A->T[0]+B->T[3]*A->T[2]; BA[3]=B->T[2]*A->T[1]+B->T[3]*A->T[3];
+    for(int i = 0; i < 4; i++) R[i] = AB[i] + BA[i];
+}
+static void rt_cruz_op(const RtOp *A, const RtOp *B, long *R){
+    long AB[4], BA[4];
+    AB[0]=A->T[0]*B->T[0]+A->T[1]*B->T[2]; AB[1]=A->T[0]*B->T[1]+A->T[1]*B->T[3];
+    AB[2]=A->T[2]*B->T[0]+A->T[3]*B->T[2]; AB[3]=A->T[2]*B->T[1]+A->T[3]*B->T[3];
+    BA[0]=B->T[0]*A->T[0]+B->T[1]*A->T[2]; BA[1]=B->T[0]*A->T[1]+B->T[1]*A->T[3];
+    BA[2]=B->T[2]*A->T[0]+B->T[3]*A->T[2]; BA[3]=B->T[2]*A->T[1]+B->T[3]*A->T[3];
+    for(int i = 0; i < 4; i++) R[i] = AB[i] - BA[i];
+}
+
+/* o par tem ESPECTRO COMUM? — isto é, uma avaliação diagonaliza os dois. Devolve 1 quando
+ * Cruz é nula, que é a condição que o passo OPERA precisa. */
+static int rt_espectro_comum(const RtOp *A, const RtOp *B){
+    long C[4]; rt_cruz_op(A, B, C);
+    return C[0] == 0 && C[1] == 0 && C[2] == 0 && C[3] == 0;
+}
+
+/* ── A DOURADA DISCRETA: a dourada NA BORDA (thm:dourada-discreta) ───────────────────
+ *
+ * A dourada é Mellin — os caracteres do grupo MULTIPLICATIVO são as POTÊNCIAS, e dilatar
+ * vira transladar. O que a torna DISCRETA é a BORDA: com σ² = mσ + 1, a folha σ é uma
+ * unidade e em F_p tem ORDEM MULTIPLICATIVA finita N, logo os caracteres são as N
+ * potências σ^k. Daí:
+ *
+ *      G(x)_k = Σ_j x_j · σ^{jk}        e        x_j = N⁻¹ Σ_k G(x)_k · σ^{−jk}
+ *
+ * e a volta corre pela RÉGUA DUAL, porque σσ† = −1 dá σ⁻¹ = −σ†. O factor é N e NÃO √N:
+ * a directa junta, a inversa divide por N, e não há metades a repartir.
+ *
+ * Nada aqui usa raízes da unidade — esse é o lado ADITIVO da dualidade, e o nosso é o
+ * MULTIPLICATIVO (as folhas são recíprocas, não estão no círculo). */
+
+/* a folha da borda σ² = mσ + 1 em F_p, ou −1 se ela lá não vive */
+static long rt_folha_borda(long m, long p){
+    for(long x = 1; x < p; x++)
+        if((((x*x - m*x - 1) % p) + p) % p == 0) return x;
+    return -1;
+}
+/* a ORDEM multiplicativa de σ — VERIFICADA por iteração, não suposta; 0 se não fechar */
+static long rt_ordem_mult(long sg, long p){
+    if(sg <= 0 || sg >= p) return 0;
+    long e = 1;
+    for(long k = 1; k < p; k++){ e = e * sg % p; if(e == 1) return k; }
+    return 0;
+}
+/* a DOURADA DISCRETA directa: X[k] = Σ_j x[j]·σ^{jk} em F_p */
+static void rt_dourada(const long *x, long n, long sg, long p, long *X){
+    for(long k = 0; k < n; k++){
+        long acc = 0, w = 1, wk = 1;
+        for(long q = 0; q < k; q++) wk = wk * sg % p;
+        for(long j = 0; j < n; j++){ acc = (acc + x[j] % p * w) % p; w = w * wk % p; }
+        X[k] = (acc + p) % p;
+    }
+}
+/* e a INVERSA, pela outra folha: σ⁻¹ = −σ†. Devolve 0 se N não for invertível em F_p. */
+static int rt_dourada_inv(const long *X, long n, long sg, long p, long *x){
+    long inv_sg = rt_inv_mod(sg, p);          /* a lib já tinha o inverso por Fermat */
+    long invN   = rt_inv_mod(n % p, p);
+    if(!inv_sg || !invN) return 0;
+    for(long j = 0; j < n; j++){
+        long acc = 0, w = 1, wj = 1;
+        for(long q = 0; q < j; q++) wj = wj * inv_sg % p;
+        for(long k = 0; k < n; k++){ acc = (acc + X[k] % p * w) % p; w = w * wj % p; }
+        x[j] = acc * invN % p;
+    }
+    return 1;
 }
 
 #endif /* RETA_H */

@@ -794,6 +794,22 @@ printf("\n§F11 FOURIER E MELLIN SÃO OS DOIS EIXOS, E PONTRYAGIN É O PRODUTO. 
                cabs(zt), carg(zt));
         /* A MATRIZ DE SENSIBILIDADE mede-se sem carg: mesmo angulo <=> cruzamento nulo;
          * rotacao pi/2 <=> produto interno nulo e orientacao positiva. */
+        /* E NADA DISTO PRECISA DE RAIZ. z = 3+4i é inteiro, zr = 2z e zt = iz também, e
+         * as três perguntas fazem-se nos QUADRADOS e nos produtos, que são inteiros:
+         *
+         *      |zr| = 2|z|   <=>   |zr|² = 4|z|²        (100 = 4·25)
+         *      |zt| = |z|    <=>   |zt|² = |z|²         (25 = 25)
+         *
+         * e o cruzado e o interno já eram polinomiais. O cabs só fica na linha que imprime. */
+        const long zx = 3, zy = 4;
+        const long rx = 2*zx, ry = 2*zy;                  /* zr = 2z */
+        const long tx = -zy, ty = zx;                     /* zt = i·z */
+        long n_z  = zx*zx + zy*zy;                        /* |z|²  = 25 */
+        long n_zr = rx*rx + ry*ry;                        /* |zr|² = 100 */
+        long n_zt = tx*tx + ty*ty;                        /* |zt|² = 25 */
+        long cr_r_z = zx*ry - zy*rx;                      /* 0 se o ângulo não mexeu */
+        long cr_t_z = zx*tx + zy*ty;                      /* 0 se roda π/2 */
+        long sgn_t_z = zx*ty - zy*tx;                     /* > 0 se π/2 no sentido CCW */
         double d_r_r = cabs(zr)/cabs(z),
                d_r_t = cabs(zt)/cabs(z);
         double cr_r = creal(z)*cimag(zr) - cimag(z)*creal(zr),   /* 0 se theta igual */
@@ -804,8 +820,11 @@ printf("\n§F11 FOURIER E MELLIN SÃO OS DOIS EIXOS, E PONTRYAGIN É O PRODUTO. 
         printf("        dobrar o raio   %-17.12f %.12f\n", d_r_r, cr_r);
         printf("        rodar pi/2      %-17.12f interno=%.12f sgn=%.12f\n\n", d_r_t, cr_t, sgn_t);
         ok("os dois eixos são INDEPENDENTES: a matriz de sensibilidade é DIAGONAL — medida"
-           " sem carg: dobrar o raio nao mexe no angulo, rodar pi/2 nao mexe no raio",
-           d_r_r == 2.0 && cr_r == 0.0 && d_r_t == 1.0 && cr_t == 0.0 && sgn_t > 0.0);
+           " sem carg E SEM RAIZ: z = 3+4i e' inteiro, e as tres perguntas fazem-se nos"
+           " QUADRADOS (|zr|^2 = 4|z|^2, |zt|^2 = |z|^2) e nos produtos cruzado e interno,"
+           " que ja eram polinomiais. Dobrar o raio nao mexe no angulo, rodar pi/2 nao mexe"
+           " no raio — e os cinco numeros sao 100, 4.25, 25, 0 e 0",
+           n_zr == 4*n_z && cr_r_z == 0 && n_zt == n_z && cr_t_z == 0 && sgn_t_z > 0);
     }
 
     /* (c) e o LOG e o par: log z = log r + iθ. Mellin no real, Fourier no imaginario. */

@@ -1,339 +1,264 @@
-CURSOR.TXT — ELIMINAR OS DOUBLES
-================================
-Para quem entra. Estado em 17/08/2026, bateria 506:506, 37 citações a bater. geometrico.tex: 44 páginas, 56 teoremas.
+CURSOR.TXT — ONDE ESTÁ O TRABALHO, E COMO SE SEGUE
+==================================================
+Não é histórico. É o que precisas para pegar e continuar.
+Estado: 17/08/2026 (noite). Bateria 508:508, 0 falhas. geometrico.tex 55 páginas.
+Verificar sempre com:  bash tools/bateria.sh   (lê AS DUAS linhas: total e unidades)
 
 
-1. A ARQUITECTURA
+0. AS DUAS REGRAS
 -----------------
 
-    papers/*.tex      a teoria. O central é papers/geometrico.tex (44 páginas, 56 teoremas)
-    lib/*.h           as operações. Tudo inteiro. reta.h é a principal; qmd.h é ℚ(m√D)
-    tests/*.c         os medidores. Um por assunto, cada um com asserções `ok(texto, cond)`
-    tools/            a bateria, as citações e os detectores
+    NÃO PRESERVAR APROXIMAÇÃO QUANDO EXISTE FECHAMENTO EXACTO NO CORPO.
 
-O PIPE, que é o desenho de tudo (tests/entrega.c §E6):
+    NÃO TRANSFORMAR UMA DESCOBERTA DE IMPLEMENTAÇÃO EM CAMADA TEÓRICA NOVA
+    SE ELA JÁ É CONSEQUÊNCIA DA TRANSFORMADA UNIVERSAL.
 
-    textos --> UNIDADE (mmc dos denominadores) --> inteiros --> operar --> PALAVRA --> cliente
-               rt_unidade_comum / rt_para_unidade            rt_cf_de / rt_cf_para
-
-    Entre a unidade e a palavra NÃO HÁ VÍRGULA. Um decimal escrito é um racional exacto:
-    "6.3e7" é 63000000/1, "0.45" é 45/100. `rt_le_decimal` faz a leitura.
-
-    ℚ(m√D) vive à parte do pipe racional, mas entra no ciclo universal como VERIFICA RÁPIDA
-    (thm:serie-quadratica): norma, 1/(α−1), S₁=α⁻¹ — uma passagem, sem formar φ.
-
-A REGRA, e é a única:
-
-    DADOS SÃO DADOS. Não há coluna a separar (físico/matemático, lei/dado, sinal/ruído).
-    O ruído faz parte dos dados. Tudo entra pelo pipe do mesmo modo.
-    A régua são AS OITO LEIS, que já estão escritas nos papers e não são segredo.
-    Um limiar justifica-se se sair de uma delas; não saindo, sai ele.
-    O que a representação não aguenta CONTA-SE à parte (`saturou`), não se esconde.
-
-    (Eu inventei duas taxonomias para justificar limiares e as duas eram minhas e falsas.
-     Não voltar a inventar. Aplicar as leis.)
+A primeira governa a migração (§2). A segunda governa o paper: antes de escrever um
+teorema, procura — quase sempre ele já lá está, ou é corolário de um que está.
+CORPO EXACTO PRIMEIRO: fecha em Q, e só depois vê o que sobra.
 
 
-2. OS TEOREMAS CENTRAIS — papers/geometrico.tex
------------------------------------------------
+1. A TAREFA EM CURSO — eliminar os doubles
+------------------------------------------
 
-São a razão pela qual os doubles saem. Cada um dá uma forma exacta de medir.
+    python3 tools/doubles.py        2825 declarados, ~699 alimentam asserções
 
-    thm:fixo-dual        o ponto fixo é o vector próprio, e são DOIS. O par descreve-se
-                         por TRAÇO e DETERMINANTE, ambos inteiros:
-                             σ + σ† = m        σ·σ† = −1
-                         => tudo o que é simétrico nos dois é INTEIRO. Nunca formar a raiz.
+O que conta é o que ALIMENTA uma condição `ok(...)`. Estado dos que já foram tocados:
 
-    thm:corte-fixo       p² − mpq − q² = 0 não tem solução racional. A descida
-                         (p,q) -> (q, p−mq) troca o sinal da forma e encolhe o denominador.
+    cosmico.c      16 →  9        dominios.c      9 →  1
+    liga.c         15 → 11        llm.c           8 →  6
+    colheita.c     14 → 11        nne.c           8 →  7
+    encanamento.c  12 →  9        ---------------------
+    dif.c          10 →  8        nos nove       102 → 67
+    simula.c       10 →  5
 
-    thm:operador         indução (A_m), meta-indução (a DOBRA, A_m⁻¹) e o acumulador (a
-                         PALAVRA) são um só. A dobra é involução de espectro {+1,−1}.
+Nenhum está fechado a zero: o `dominios.c` é o que foi mais longe (9 → 1).
 
-    thm:descida          Q são as classes de equivalência dos pontos fixos pelo TRAÇO.
-                         a/b = tr(σ_a)/tr(σ_b). E x ∈ Q <=> x = x† (o que a dobra fixa).
+POR FAZER: ~50 ficheiros, ~165 doubles a alimentar. Os maiores por tocar:
+    headjack.c 7 · dourada_escala.c 7 · radiacao.c 7 · arraytermico.c 6 · spline.c 6
+    tikz.c 6 · travessia.c 6 · quantico.c 5 · xx.c 5 · corpo_fisico.c 4 · icc.c 4
 
-    thm:residuo-fixo     1 − mx − x² = (1−σx)(1−σ†x). Os polos SÃO os pontos fixos, e
-                         extrair coeficiente é somar sobre eles: a soma dos resíduos É o traço.
-
-    thm:aditiva          A_a·A_0 = T_a, logo A_a·A_0·A_b = A_{a+b}. A soma realiza-se DENTRO
-                         do grupo multiplicativo, com S = A_0 (a inversão) no meio.
-                         Na palavra: um quociente ZERO soma os vizinhos.
-
-    thm:conservacao      A DOBRA É A LEI DE CONSERVAÇÃO.
-                             conserva-se  mdc(p,q)      a energia
-                             gasta-se     q             o orçamento do nível
-                         A paragem é q = 0, e devolve o mdc. |det| = 1 => reversível.
-                         racional = energia finita = a palavra fecha; real = não fecha.
-
-    thm:central-energia  Hurwitz CONTA (Σ ω^{(i−j)k} = N·δ, os cruzados cancelam EXACTO),
-                         Gentil INTEGRA, Lebesgue transporta sem perder a ordem.
-                         O tecto de 8 é da norma EUCLIDIANA; a recta conserva o DETERMINANTE,
-                         que é multiplicativo em todo n e não tem tecto.
-
-    thm:cantor-julia     o shift (Cantor) não gasta o denominador => CICLA, com período
-                         ord_q(base); a Möbius gasta => TERMINA. cantor·julia = −1 = σσ†.
-
-    thm:viviani          a curva é z² = 2a(2a−x), sem trigonometria. Os ramos ±z são o par,
-                         o nó é o ponto fixo da involução. A lei da dobra é a MESMA
-                         recorrência com d a mudar de sinal: t_k = m·t_{k−1} − d·t_{k−2}.
-
-    thm:unificacao       as peças são LEIS, e a ORDEM identifica cada uma:
-                             Cantor/Julia 2 | trial 3 | Viviani 4 | Lei 8 -> 8
-                         lcm(2,3) = 6 é o hexal; lcm de todas = 24 = 8·3.
-
-    thm:toro             O TORO é o invariante geométrico da tríade. As ordens FINITAS de
-                         um automorfismo de T² = R²/Z² são só {1,2,3,4,6} (a restrição
-                         cristalográfica), e são exactamente as da tríade.
-                         A LEI 8 fica de fora (8 não é ordem do toro).
-                         O GATO A_m = [m 1; 1 0] também: det = −1 e disc m²+4 > 0 sempre,
-                         logo hiperbólico e de ordem INFINITA — ele NÃO FECHA NO TORO, e é
-                         isso o CORTE dito pela topologia.
-                         Quem decide é o TRAÇO: com det=+1, |tr| <= 1 fecha, |tr| >= 2 não.
-                         E |det| = 1 é NECESSÁRIO, não uma escolha.
-
-    thm:continuacao      A CONTINUAÇÃO TEM IDA E VOLTA, e as duas são exactas em Q.
-                             IDA    m -> t_k -> L(x) = Σ t_k x^k/k -> −log(1−mx−x²)
-                             VOLTA  L -> c_k -> t_k = k·c_k -> o OPERADOR
-                         A volta devolve os traços INTEIROS, a satisfazer a recorrência, e
-                         t_1 = m. E é ÚNICA: operadores diferentes dão séries diferentes —
-                         sem isso «recuperar m» seria uma escolha.
-                         A volta É o thm:residuo-fixo: extrair coeficiente é somar sobre os
-                         polos, e os polos são os pontos fixos. A continuação de volta não
-                         devolve um número, devolve o PAR DUAL.
-                         E há a segunda volta, a do DOMÍNIO: a projectiva, S: 0 <-> ∞.
-
-    thm:universal        O CICLO UNIVERSAL, e é UM só:
-
-                             DESCODIFICA   (p,q) := o texto, racional EXACTO
-                                           u := mmc dos denominadores
-                             OPERA         exige |det T| = 1
-                                           [p:q] -> [T00·p+T01·q : T10·p+T11·q]
-                             INVERTE       T⁻¹ = adj(T)/det T, INTEIRA porque det = ±1
-                             CODIFICA      w := palavra (FC) ou dígitos (Cantor)
-                             VERIFICA RÁPIDA  qmd_verifica_rapida(m,D,α) em ℚ(m√D)
-                                           norma de α−1, 1/(α−1), S₁=α⁻¹
-                             E FECHA       descodifica(w) == (p,q)
-
-                         O TORO não é mais um operador: é a CONDIÇÃO. Sem |det| = 1 a
-                         inversa não é inteira e o ciclo não fecha — a inversão RECUSA.
-                         O que muda é o OPERADOR (e a sua ORDEM) e a ESCRITA (a codificação).
-                         Viviani tem DUAS ordens: 2 no ponto (P¹) e 4 no vector (Z²) — em
-                         P¹ os vectores v e −v são o mesmo ponto. É o recobrimento duplo.
-
-    thm:serie-quadratica Σ_{n≥1} α^{-n} = 1/(α−1) em ℚ(m√D), exacto. Representação
-                         (a+b·m√D)/den; conjugação, norma, inversão sem sqrt(). φ entra
-                         como instância (D=5, m=1, φ²=φ+1), não como fundamento separado.
-                         Medidor: tests/serie_phi.c. Verificação rápida: universal.c §U5.
-
-    E A SÍNTESE, que é a frase que atravessa os sete:
-        o TRAÇO mede (separa, coordena, muda de andar)
-        o DETERMINANTE conserva (é invariante, e é por isso que há volta)
-
-
-3. O PROCEDIMENTO — como tirar um double
-----------------------------------------
-
-Estado: **0 limiares** em `ok()` (134→0). Fase 2 (`if(... 1e-...)` simples): **0**.
-Fase 3 (comparações aninhadas, ternários, while, atribuições): **0** em código de
-decisão. Restam **~25** literais `1e-` só em: strings `ok()` (histórico), comentários,
-grelhas de dados (`for(l=1e-7…)`), passos de método (`h=1e-5`, PASSO 7). Bateria **506:506**.
-
-Fase 4 (em curso): passos `h` documentados como PASSO 7 onde a lei é analítica;
-promovidos a escala inteira onde fecham (`vizinha.c` paragem, `dif.c` §F5 asserções).
+Para levantar os de um ficheiro (troca X pelo nome):
 
     python3 - <<'PY'
-    import re,glob
-    for f in sorted(glob.glob('tests/*.c')):
-        s=open(f,encoding='utf-8',errors='replace').read(); n=0
-        for mo in re.finditer(r'\bok\s*\(', s):
-            i=mo.end(); d=1; j=i
-            while j<len(s) and d>0:
-                if s[j]=='(': d+=1
-                elif s[j]==')': d-=1
-                j+=1
-            arg=s[i:j]; k=arg.rfind('"'); cond=arg[k+1:] if k>0 else arg
-            n+=len(re.findall(r'\b\d*\.?\d+[eE]-\d+\b', cond))
-        if n: print(f"{n:3d}  {f}")
+    import re; src=open('tests/X.c',encoding='utf-8').read()
+    decl=set(m.group(1) for m in re.finditer(r'\b(?:double|float)\s+([A-Za-z_]\w*)',src))
+    for mo in re.finditer(r'\bok\s*\(',src):
+        i=mo.end();p=1;j=i
+        while j<len(src) and p>0:
+            p+= (src[j]=='(') - (src[j]==')'); j+=1
+        a=src[i:j]; k=a.rfind('"'); c=a[k+1:]
+        u=[n for n in decl if re.search(r'\b'+n+r'\b',c)]
+        if u: print(src[:mo.start()].count('\n')+1, u, ' '.join(c.split())[:80])
     PY
 
-Contagem fase 3 (comparações `>/< 1e-` no código, excl. printf e strings ok):
 
-    python3 - <<'PY'
-    import re,glob
-    pat=re.compile(r'(\>=|\<=|>|<)\s*1e-\d+|\b1e-\d+\s*(\>=|\<=|>|<)')
-    for f in sorted(glob.glob('tests/*.c')):
-        for line in open(f,encoding='utf-8',errors='replace'):
-            if not pat.search(line): continue
-            s=line.strip()
-            if s.startswith('*') or 'printf' in line: continue
-            if re.search(r'ok\s*\([^)]*1e-', line): continue
-            print(f.strip()[:90])
-    PY
-
-Lista de `ok()`: tools/alvos_doubles.txt tem 177 limiares que, trocados
-por igualdade exacta, deixam o medidor VERDE — o compilar-e-correr está feito. NÃO é uma
-autorização para converter cegamente: por cada um, perguntar se o zero é ESTRUTURAL ou
-SORTE dos dados (a lição do recaman.c está escrita no cabeçalho do ficheiro).
-
-PASSO 1 — perguntar de onde vem cada lado da comparação.
-    Se os dois lados descem do mesmo cálculo, não há duas rotas: há uma escrita duas vezes.
-    Foi o caso da maioria dos que saíram hoje.
-
-PASSO 2 — a lei é polinomial? Então mede-se em Z, sem dividir.
-    Multiplicar pelos denominadores tira todas as divisões. Exemplos feitos:
-        paralelo:     R_p·(R2R3+R1R3+R1R2) = R1R2R3       (eletrico.c)
-        Carnot:       W·Tq = Q(Tq−Tf) e Qf·Tq = Q·Tf      (cosmico.c)
-        hermitiana:   2H = A+A', 2K = A−A', 2H+2K = 2A     (quantico.c)
-        discriminante: (a−d)² + 4(b²+c²) >= 0              (quantico.c)
-
-PASSO 3 — envolve raiz quadrada? Então vive em Z[√D] ou ℚ(m√D), e a raiz NUNCA se forma.
-    Guardar 2σ = m + √D como o par (m, 1) e usar rt_zd_mul / rt_zd_pot / rt_zd_norma.
-    Para coeficientes racionais e escala m genérica: lib/qmd.h — soma, mul, conj, norma,
-    inversão, qmd_verifica_rapida (série geométrica thm:serie-quadratica).
-        φ² = φ+1  =>  (2φ)² = 6+2√5 = 2(2φ)+4              (solar.c, serie_phi.c)
-        Σ α^{-n} = 1/(α−1)  =>  qmd_inv_am1, sem decimal   (serie_phi.c, universal.c §U5)
-        σ² = mσ+1 =>  (2σ)² = 2m(2σ)+4, para todo m
-
-PASSO 4 — envolve raiz da unidade / DFT / Fourier? Então vive em F_p.
-    Procurar w de ordem N em F_p (VERIFICAR a ordem), e usar rt_pot_mod / rt_inv_mod.
-        Parseval algébrico:  N·Σ x_j y_j = Σ X_k Y_{−k}    (travessia.c)
-        ortogonalidade:      Σ_k w^{(i−j)k} = N·δ_ij
-
-PASSO 5 — envolve trigonometria? Ternos pitagóricos dão cos e sin RACIONAIS.
-        unitariedade: 5U = [3 −4i; −4i 3], (5U)'(5U) = 25·I  (quantico.c)
-
-PASSO 6 — a série é o objecto, não o valor. Comparar COEFICIENTE A COEFICIENTE em Q.
-    lib/calculo2.h tem Sr (série em Qz), sr_exp, sr_log1p, sr_compoe, sr_mult.
-        −log(1−mx−x²) = Σ t_k x^k/k, 32 de 32 coeficientes    (continua.c)
-
-PASSO 7 — não dá mesmo? Então o limiar fica, MAS:
-    - a condição tem de dizer o que ele mede (o método, o arredondamento, o meio);
-    - a tese principal fica no lado exacto;
-    - o que saturar conta-se à parte.
-
-PASSO 8 — monotonicidade É TEOREMA; mede-se em ℚ ou ℤ[√D], NUNCA em double.
-    A monotonicidade não se postula num loop de vírgula — ela já está nos teoremas:
-      geometrico.tex obs:area   — a face dual encolhe (|σ†|<1)
-      geometrico.tex thm:supremo — E_k(m) decrescente; verifica-se o PASSO m_{k+1}∈{2m_k,2m_k+1}
-      thm:divisao-fibra + calculo exacto — (f(a+h)−f(a))/h é polinómio em h; f'(a)=q(0)
-    O medidor compara INTEIROS ou FRAÇÕES (Fr, Qz, rt_zd_*), como supremo.c §S1:
-        err(h₁) > err(h₂) em ℚ para h₁ > h₂ > 0   (dif.c §F1, série de sen)
-        y''+By'+Cy = 0 pela derivada ANALÍTICA, não FD   (dominios.c §D4)
-        W = −ΔV = ΔT em ℤ na mesma trajectória   (corpo_fisico.c §H4)
-    Loop double com «desce quando h desce» NÃO CONTA — é postulado disfarçado. Se o
-    objecto é polinómio, PASSO 2 (exacto). Se é transcendente, ℤ[√D] ou série em ℚ.
-    Limiar 1e-N só resta onde o double é TESTEMUNHA, nunca juiz.
-
-SEMPRE, no fim: o GUME. Mutar o que a asserção MEDE (não a asserção) e ver cair.
-    - um gume que RELAXA a condição não é gume;
-    - se não morde, verificar 1) se o sed aplicou, 2) se a entrada tem onde o defeito viva;
-    - se continua a não morder, pode ser guarda redundante — e então DIZ-SE no comentário.
-
-
-4. AS FERRAMENTAS
------------------
-
-    bash tools/bateria.sh              corre tudo. Ler as DUAS linhas: total e unidades
-    python3 tools/citacoes.py          os números do paper batem com os medidores
-    python3 tools/doubles.py           o levantamento
-    python3 tools/gume.py X.c [--max N]     muta e diz que asserções SOBREVIVEM a tudo
-    python3 tools/residuo_zero.py      resíduo zero exacto + limiar = candidato
-    python3 tools/definicao_relida.py  a asserção que verifica a própria definição
-    bash tools/gume_todos.sh [max] [par]    o gume sobre a bateria inteira
-
-    tools/gume_relatorio.txt   JÁ CORRIDO (17/08, tecto 18): 377 de 397 medidores .c,
-                               3199 unidades, 1050 sobreviventes em 198 medidores.
-                               É PARCIAL nos dois sentidos, e o topo do ficheiro diz
-                               porquê: o tecto baixo INFLA a lista, e 20 medidores não
-                               entraram porque precisam de ARGUMENTOS que o gume.py não
-                               tem (a bateria.sh tem-nos na sua tabela args()).
-                               Para confirmar uma linha: gume.py nesse medidor com --max 200.
-
-    tools/alvos_doubles.txt    177 limiares que aguentam igualdade exacta, já verificados
-
-    Código MUTADO corre com RLIMIT_FSIZE e RLIMIT_AS (o gume.py já o faz): uma mutação
-    pode pôr um medidor em ciclo, e o rodapé do unidade.h escreve em /tmp sem tecto.
-    Aconteceu: 8,2 GB num ficheiro.
-
-
-5. AS PEÇAS DA LIB QUE INTERESSAM (lib/reta.h)
-----------------------------------------------
-
-    rt_mdc, rt_ipow, rt_raiz_k, rt_log_int         inteiros; as inversas são PARCIAIS e
-                                                   devolvem 0 quando não existem em Z
-    rt_zd_mul, rt_zd_pot, rt_zd_norma, rt_zd_conj  Z[√D], a raiz nunca se forma
-    rt_traco_metalico(m,k)                         σ^k + σ†^k, INTEIRO
-    rt_forma(p,q,m)                                p² − mpq − q², vale ±1 nos convergentes
-    rt_dobra(m,&p,&q)                              a descida: [p:q] -> [q : p−mq]
-    rt_cf_de / rt_cf_para                          racional <-> palavra (é EUCLIDES)
-    rt_cod_shift / rt_desc_shift                   racional <-> dígitos numa base (Cantor)
-    rt_volta_fecha(f, qmax, &tot, &fora)           A VERIFICAÇÃO: a volta tem de fechar
-    rt_ordem(passo, e0, n, tecto)                  a ordem de um operador, MEDIDA
-
-    lib/qmd.h         ℚ(m√D): (a+b·m√D)/den — soma, mul, conj, norma, inv, pow
-    qmd_inv_am1       1/(α−1) pela fórmula fechada do thm:serie-quadratica
-    qmd_verifica_rapida(m,D,α)                     norma + inversa + S₁=α⁻¹, uma passagem
-
-    ── O CICLO UNIVERSAL, promovido (thm:universal) ────────────────────────────────
-    RtOp {long T[4]}                               o operador, em ordem de leitura
-    rt_op_det / rt_op_valido                       |det| = 1 ? (a condição do TORO)
-    rt_opera(&T, p,q, &rp,&rq)                     [p:q] -> T·[p:q], sem dividir
-    rt_inverte(&T, p,q, &rp,&rq)                   adj/det, INTEIRA; RECUSA sem |det|=1
-    rt_ordem_ponto  / rt_ordem_vector              as DUAS ordens (P¹ e Z²)
-    rt_ciclo(&T, cod, p,q, &rp,&rq)                opera+inverte+codifica, o pipe inteiro
-    qmd_verifica_rapida(m,D,alpha)                 VERIFICA RÁPIDA em Q(m√D) — thm:serie-quadratica
-
-    CONVERTER UM MEDIDOR É CHAMAR A PEÇA. Não reimplementar o ciclo: `rt_ciclo` faz-o, e
-    a TESE fica de fora dela — a comparação com o original é de quem chama, porque é ela
-    a tese e não o ciclo.
-    rt_periodo_shift(p,q,base,tecto)               = ord_q(base)
-    rt_pot_mod, rt_inv_mod                         F_p
-    rt_menor_que_sigma, rt_menor_que_zd            comparar com um irracional SEM raiz
-    rt_unidade_comum, rt_para_unidade              a entrada do pipe (o MMC)
-
-    lib/racionais.h   Qz: racional em int 32, com qz_saturou contado à parte
-    lib/calculo2.h    Sr: série em Qz. Integral, Fubini, Green, tudo exacto
-    lib/naturais.h    nt_primo, e o resto de N
-
-
-6. AS ONZE FORMAS DA ASSERÇÃO QUE NÃO PODE FALHAR
+2. COMO SE TIRA UM DOUBLE — o método que funcionou
 --------------------------------------------------
 
-Está tudo em memoria/feedback-assercoes-vazias.md. As que apareceram HOJE:
+Ver o que a asserção DECIDE. É quase sempre uma destas, e nenhuma precisa de vírgula:
 
-     9.  A MESMA EXPRESSÃO DOS DOIS LADOS, com um limiar por cima
-            fabs(r1 − (−sl)) < 1e-12   com −sl a ser r1 letra por letra
-    10.  A DEFINIÇÃO RELIDA — cinco vezes num dia
-            V = Pi*S           depois  razao = V/(Pi*S)
-            Qf = Q − W         depois  W + Qf == Q
-            #define TFIM (N*H) depois  fabs(N*H − TFIM) < 1e-12
-            w = av*s/upem      depois  w12/w10 == 1.2
-            buraco = a − b     depois  b < a && buraco > 0
-    11.  A CONSTANTE QUE PARECE UMA CONTA
-            nona = (MOD_CAT % MOD_CAT != 0)   -> x % x é 0, é a constante false
+  ORDEM      multiplica pelos denominadores e compara inteiros. Se o denominador é
+             COMUM aos dois lados, ele cancela — compara-se os numeradores e acabou.
+             (cosmico §X1: os tectos de Carnot, com Tq fixo)
 
-    E a mais traiçoeira: SIMPLIFICAR À MÃO NO PONTO.
-    Escrevi `v0 = -aa*(1.0) + (0.0 + aa*1.0)` como «a derivada em t=0» — é −a+a.
-    Remédio: escrever a função GERAL e só depois avaliar no ponto.
+  RAZÃO      não formes a razão: passa a produto cruzado. a/b > c/d é a·d > c·b.
+             (encanamento: Friis inteiro em Q; colheita: L_dia/L0)
+
+  RAIZ       eleva ao quadrado o lado positivo, ou enquadra o irracional por racionais
+             — que é o método do CORTE. Exemplos que valem a pena copiar:
+               · o pico de Wien NÃO SE FORMA: 8e-6 <= b/T <= 13e-6, vezes T, dá inteiros
+                 com os 10^6 a cancelarem                            (cosmico §X2)
+               · (a/b)^10 > 10 sem elevar à décima: 63^10 > 10.50^10 põe 63/50 acima de
+                 10^(1/10), e depois basta r > 63/50                 (encanamento)
+               · raiz(2) < 59/30  <=>  1800 < 3481                   (nne)
+               · escolhe onde a norma É inteira: ternos PITAGÓRICOS  (nne, dif)
+
+  ZERO       «é zero» é o inteiro 0, não «menor que a régua que escolhi». Procura o
+             FACTOR que se anula: a derivada da Lorentziana tem factor (f-f0), e no
+             pico esse factor é 0 — produto com factor zero é zero.   (simula)
+
+  LIMITE     «tende a 1» diz-se sem escolher número: o que FALTA é uma fracção de
+             inteiros a decrescer.                                   (cosmico §X3)
+
+  IDENTIDADE se os dois lados descem da mesma álgebra, escreve os NUMERADORES e vê
+             cancelar aos pares. 4m²(re²-w²+B.re+C) = c²+(c²-4km)-2c²+4km = 0.
+             (dominios)
+
+  CONTAGEM   «há parte que não volta» conta-se: quantas amostras mexeram, quantas não.
+             Diz mais que a soma das amplitudes.                     (dominios)
+
+  LEI vs TRANSPORTE
+             separa. O softmax tem exp, mas as suas teses são identidades racionais:
+             S(x_i/S)=1; multiplicar todos por lambda>0 não muda x_i/S; e no RMSNorm a
+             raiz CANCELA — ‖y‖² = Sx².n/Sx² = n, independente dos dados.   (llm)
+
+REGRAS DURAS
+  · O DOUBLE SAI DA CONDIÇÃO. Não o deixes como «testemunha»: se a conta fecha em Q,
+    ele não atesta nada. O corpo auto-atesta.
+  · Se o limiar não sai de uma das oito leis, sai ele.
+  · O que a representação não aguenta CONTA-SE à parte (`saturou`), não se esconde.
+  · Verifica o TECTO: `if(x > LONG_MAX/10)`. O tecto é do TIPO, não teu.
+  · DADOS SÃO DADOS. Não há coluna a separar (físico/matemático, lei/dado, sinal/ruído).
+    Um decimal escrito é um racional exacto: "6.3e7" é 63000000/1, "0.45" é 45/100.
 
 
-7. O QUE NÃO FAZER
+3. O GUME — e os três modos de ele mentir
+-----------------------------------------
+
+Depois de cada conversão, muta e confirma que CAI:
+
+    g(){ rm -f $S/g $S/g.c                       # 1. APAGA o binário antes
+         sed "$2" tests/X.c > $S/g.c
+         [ "$(diff tests/X.c $S/g.c|grep -c '^[<>]')" = 0 ] && { echo "SED NÃO APLICOU"; return; }
+         cc -O2 -std=c99 -I tests -I lib -o $S/g $S/g.c -lm 2>/dev/null \
+           || { echo "não compila"; return; }     # 2. testa o exit do cc
+         (cd tests && timeout 200 $S/g >/dev/null 2>&1; echo "exit=$?"); }
+
+  (a) o binário velho — reutilizar o caminho sem `rm -f` e silenciar o `cc` faz correr
+      o gume ANTERIOR. Deu-me cinco falsos «não mordeu».
+  (b) o sed que não aplica — conta as linhas mudadas.
+  (c) UM GUME QUE RELAXA NÃO É GUME. Trocar `<` por `<=`, alargar um intervalo, baixar
+      um limite: a asserção passa na mesma e isso não diz nada. O gume APERTA — muda o
+      sinal, troca o factor, desloca o alvo para o lado errado.
+
+E se um gume honesto não morder, há duas doenças e só duas:
+    · a asserção é folgada (desigualdade com ordens de margem) → troca por FAIXA;
+    · a guarda é redundante (a lib já garante) → então o gume vai à LIB, não ao medidor.
+
+
+4. O ESPAÇO — e tudo vive aqui (geometrico.tex def:espaco)
+----------------------------------------------------------
+
+    V = Q(m raiz D) = Q + Q.m raizD     espaço VECTORIAL sobre Q, dim 2, base {1, m raizD}
+
+Primeira dobra da torre dim A_n = 2^n dim A_0 do corpo_peano (thm:rn). O DUAL não é a
+conjugação: é o outro lado, com a SUA RÉGUA, que sai da involução v(x) = -1/x:
+
+    s = m raizD    s† = -1/s    ==>    m† = -1/(mD)    V† = Q(m† raizD)
+    (m†)† = m        s.s† = -1        V† = V   (o mesmo corpo, régua invertida)
+
+AS QUATRO PROPRIEDADES — duas de cada lado, em paralelo:
+
+    (P1)  raizD em Q <=> D é QUADRADO     o espaço EXISTE
+    (P2)  m != 0 ==> m raizD fora de Q    o espaço tem RÉGUA (é o m do nome)
+    (D1)  a = a* <=> a em Q               o dual FIXA Q       — é o TRAÇO
+    (D2)  a.a* em Q, sempre               o dual REGRESSA     — é a NORMA
+
+(P1) diz quem entra, (D1) quem fica; (P2) que a escala não regressa, (D2) que o dual
+sempre regressa. UMA SAI, A OUTRA VOLTA. E uma é o CONE (desce em passo discreto) e a
+outra a ESPIRAL (sobe recompondo): como s.s† = -1, a régua que expande tem o dual que
+contrai, exactamente.
+
+PRIMO -> IRRACIONAL é a passagem DISCRETO -> CONTÍNUO (thm:duas-propriedades). O lema de
+Euclides (p | a² ==> p | a) dá a DESCIDA. CUIDADO: primo é SUFICIENTE, não necessário —
+raiz(6) é irracional e 6 não é primo. A condição exacta é (P1).
+
+A CÚSPIDE é disc = tr² - 4det = 0, onde as folhas COLIDEM. tau = sign(disc) em {-1,0,+1}
+É O TRIAL, a cúspide é o ponto do meio, e tau INDEXA A DIMENSÃO (nº de folhas = tau+1).
+Leitura de uma linha, sem tecto:  rev(tau) = -tau  e  rev(tau) = tau <=> tau = 0.
+Cada RACIONAL ancora uma cúspide, logo Q É o conjunto delas e o CORTE é o complemento.
+
+
+5. O ALGORITMO UNIVERSAL — quatro passos (thm:universal)
+--------------------------------------------------------
+
+    DESCODIFICA   (p,q) := o texto, racional EXACTO; u := mmc dos denominadores
+                                                              -> entra em V
+    OPERA         |det T| = 1;  [p:q] -> [T00p+T01q : T10p+T11q]
+                  é a CONVOLUÇÃO — ou, na dourada discreta, produto ponto a ponto
+    INVERTE       T^-1 = adj(T)/det T, INTEIRA
+                  é a DECONVOLUÇÃO — e sigma^-1 = -sigma†: a volta usa a OUTRA FOLHA
+    CODIFICA      w := palavra (FC) ou dígitos (Cantor)          -> sai de V
+    E FECHA       descodifica(w) = (p,q)
+
+SÃO QUATRO E NÃO CINCO. Não há verificação porque não há nada a verificar: com
+|det| = 1 a adjunta é inteira e a volta é exacta POR CONSTRUÇÃO. Não estamos a
+enquadrar o corpo numa estrutura — estamos a LÊ-LO.
+
+E NENHUM PASSO NORMALIZA:
+  · o mmc do primeiro passo é a LEITURA do texto decimal para Z, e mais nada;
+  · quem normaliza é a NORMA — o produto das folhas, que é o primeiro passo;
+  · o gcd no meio foi RETIRADO do rt_ciclo (medido: não faz nada, e os 71 medidores
+    que usam reta.h passam sem ele);
+  · e NÃO é 1/raiz(N): esse vem do lado ADITIVO da dourada (raízes no círculo, m = 0).
+    As nossas folhas são RECÍPROCAS — lado MULTIPLICATIVO.
+
+A DOURADA DISCRETA é a dourada NA BORDA (thm:dourada-discreta): a borda sigma² = m.sigma+1
+faz de sigma uma unidade de ordem N finita, os caracteres são as N potências sigma^k, o
+Dirac dá S_k sigma^((j-j')k) = N.delta, e a inversa corre por sigma^-1 = -sigma†. O
+factor é N, não raiz(N).
+
+PROIBIDO: Fourier/DFT. A dualidade completa-se com a DOURADA (Mellin é Fourier no
+multiplicativo, catalogo.tex sec:dourada). Zero ocorrências de «DFT» no corpus.
+
+
+6. AS PEÇAS DA LIB — PROCURA AQUI ANTES DE ESCREVER
+---------------------------------------------------
+
+lib/reta.h (a principal).  `grep -n "^static .*rt_" lib/reta.h`
+
+  inteiros    rt_mdc rt_mmc rt_sinal rt_modulo rt_ipow rt_raiz_exacta rt_raiz_k
+  modular     rt_inv_mod rt_pot_mod rt_mod rt_det_mod
+  vectores    rt_dir (produto interno) rt_cruz rt_norma rt_cos2 (cosseno em FRACÇÃO)
+              rt_perp rt_paralelos rt_lagrange rt_bivetor2 rt_reduz_vector
+  matrizes    rt_mul_mat rt_traco rt_transpoe rt_pot_mat rt_det_bareiss rt_companheira
+              rt_tracos rt_kron rt_adjunta2 rt_inversa2 rt_aplica
+  operador    rt_orbita rt_dobra rt_forma rt_recorre rt_volta rt_fixo_racional
+  Z[raizD]    rt_zd_mul rt_zd_pot rt_zd_norma rt_zd_conj
+  texto/pipe  rt_le_decimal rt_escreve_decimal rt_cf_de rt_cf_para
+              rt_unidade_comum rt_para_unidade
+  ciclo       RtOp rt_op_valido rt_opera rt_inverte rt_ciclo rt_ordem_ponto
+  Dir/Cruz    rt_dir_op rt_cruz_op rt_espectro_comum   (de OPERADORES — os sem sufixo
+                                                        são de VECTORES)
+  dourada     rt_folha_borda rt_ordem_mult rt_dourada rt_dourada_inv
+
+lib/qmd.h — Q(m raizD): qmd_norma, qmd_conj, qmd_inv, qmd_dtu, qmd_folhas_fp
+
+Escrevi `rt_dir2`/`rt_cruz2` quando já havia `rt_dir`/`rt_cruz`; e reescrevi um inverso
+modular à mão quando `rt_inv_mod` estava lá. O grep é barato.
+
+
+7. AS FORMAS DA ASSERÇÃO QUE NÃO PODE FALHAR
+--------------------------------------------
+
+Pergunta sempre: QUE ENTRADA FARIA ISTO FALHAR?
+
+   1  x == x disfarçado:  V = Pi*S  ...  razao = V/(Pi*S)
+   2  a definição relida: sa = a1+a2  ...  if(sa == a1+a2)
+   3  constante contra constante: det = m*0-1*1 ; tc = -1 ; if(det == tc)
+   4  x % x, -a+a, if(-2 != 0)
+   5  a soma das partes é o todo: Qf = Q-W  ...  W+Qf == Q
+   6  o caso degenerado a fazer passar: os 8 casos que passavam eram a==b, tudo zero
+   7  desigualdade FOLGADA: «> 1e6» quando a razão é 3e21 — nenhuma mutação a derruba
+   8  a ordem quando os valores mudam: F_bom < F_ma sobrevive a estragar a fórmula
+   9  o limiar desligado do cálculo: `limiar = {63,50}` e o corte a usar `63` literal
+  10  o gerador que não varre: i*s mod 13 é uma PERMUTAÇÃO — 8 sementes, 1 só valor
+  11  o contador local: `long falhas = 0` no main SOMBREIA o do lib/unidade.h, e o
+      medidor sai 0 com «NÃO x» impresso. NÃO DECLARES `falhas`. Vem do header.
+  12  o `ok()` que mede a lib com a garantia da própria lib -> muta a LIB
+
+
+8. O QUE NÃO FAZER
 ------------------
 
-    - não inventar categorias para justificar um limiar (eu inventei duas, ambas falsas);
-    - não procurar mistério: não há. Há dados a processar;
-    - não mexer no texto do Aarão com uma régua minha;
-    - não escrever ensaios no comentário: converter;
-    - o total da bateria é o DETECTOR de eu ter escrito por cima de um medidor. Se ele
-      muda sozinho, alguma coisa se perdeu. Ler sempre as duas linhas.
+  · não inventar taxonomias para justificar limiares (já o fiz duas vezes, ambas falsas);
+  · não trazer objectos de fora (Gram-Schmidt, DFT, Fourier) para coisas que já têm base;
+  · não escrever a referência à mão — se ela não muda quando o dado muda, é cópia;
+  · não commitar por cima do trabalho de outro agente sem `git ls-files` antes;
+  · não deixar um medidor novo fora da bateria: ele só é contado se um paper o CITAR;
+  · NÃO CRIAR TEOREMAS DUPLICADOS — procura primeiro (`grep -n "label{" papers/*.tex`),
+    e se a peça já existe, LIGA em vez de reescrever (aconteceu-me com o cone/espiral,
+    que a obs:area já dizia, e com Dir/Cruz, que a lib já tinha);
+  · não reintroduzir DFT/Fourier como transformada discreta — a discreta é a DOURADA
+    na borda, e quando a borda precisa de ser avaliada usa-se a dourada COMPLETA.
 
 
-8. O CHECKPOINT
----------------
+9. O CHECKPOINT — três passos, e é sempre assim
+-----------------------------------------------
 
-    1. escrever a memória em ~/.claude/projects/-home-aaraolopes-Documentos-tiffany/memory/
-    2. bash memoria/sincroniza.sh guarda
-    3. git commit
+  1. escrever a memória em ~/.claude/projects/.../memory/  (+ linha no MEMORY.md)
+  2. bash memoria/sincroniza.sh guarda
+  3. git commit
 
-    O repo é público: varrer por segredo antes de subir.
+O repo é PÚBLICO: varrer por segredos antes de subir.

@@ -1676,5 +1676,172 @@ printf("\n§R24 Normalizar é escolher a unidade — e depois tudo é inteiro.\n
            op_pt == 2 && op_vc == 4 && gt_pt == 0 && gt_vc == 0);
     }
 
+    /* ─── §R28 ── DIR e CRUZ dos operadores: o espectro comum ───────────────────────
+     * A peça da lib (`rt_cruz_op`, `rt_espectro_comum`) e o que ela decide no pipe: a
+     * convolução só vira produto ponto a ponto quando o par tem espectro comum
+     * (cor:dir-cruz-folhas). Mede-se a forma fechada e a cadeia inteira. */
+    {
+        long pares = 0, anti = 0, prop = 0, coincide = 0, dir_sim = 0;
+        for(long a = 1; a <= 8; a++) for(long b = 1; b <= 8; b++){
+            RtOp A = {{ a,1,1,0 }}, B = {{ b,1,1,0 }};
+            long C[4], Dd[4], Dd2[4];
+            rt_cruz_op(&A, &B, C);
+            rt_dir_op(&A, &B, Dd);  rt_dir_op(&B, &A, Dd2);
+            pares++;
+            /* Cruz = ½(a−b)·[0 1; −1 0]; a lib devolve o DOBRO, logo (a−b)·J */
+            if(C[0] == 0 && C[3] == 0 && C[1] == -C[2]) anti++;
+            if(C[1] == (a - b) && C[2] == -(a - b)) prop++;
+            /* e a cadeia: Cruz = 0  <=>  mesmo traço  <=>  espectro comum */
+            int comum = rt_espectro_comum(&A, &B);
+            if(comum == (a == b)) coincide++;
+            /* Dir NÃO muda ao trocar a ordem — é essa a sua leitura */
+            if(Dd[0]==Dd2[0] && Dd[1]==Dd2[1] && Dd[2]==Dd2[2] && Dd[3]==Dd2[3]) dir_sim++;
+        }
+        printf("\n  §R28 Dir e Cruz dos operadores: o espectro comum\n");
+        printf("      pares varridos ..................... %ld\n", pares);
+        printf("      Cruz antissimétrica ................ %ld\n", anti);
+        printf("      e o dobro vale (m−n)·[0 1;−1 0] .... %ld\n", prop);
+        printf("      «Cruz = 0 ⟺ mesmas folhas» ......... %ld\n", coincide);
+        printf("      e Dir NÃO muda ao trocar a ordem ... %ld\n\n", dir_sim);
+        ok("DIR é o que a transformada vê e CRUZ é a obstrução à diagonalização simultânea:"
+           " Cruz(A_m,A_n) vale ½(m−n)·[0 1;−1 0], é sempre antissimétrica, e anula-se"
+           " exactamente quando os traços coincidem — que é quando o par tem ESPECTRO COMUM"
+           " e a convolução vira produto ponto a ponto. Dir, essa, não muda ao trocar a"
+           " ordem, que é a sua leitura",
+           pares == 64 && anti == pares && prop == pares && coincide == pares &&
+           dir_sim == pares);
+    }
+
+    /* ─── §R29 ── AS DUAS NORMALIZAÇÕES DO PIPE, e só uma é necessária ──────────────
+     * O pipe tem duas coisas com o mesmo nome, e é preciso separá-las — a lib teve as
+     * duas durante muito tempo e uma delas não fazia nada:
+     *
+     *   (1) a UNIDADE, na entrada — o mmc dos denominadores dos decimais escritos. Sem
+     *       ela não há inteiros nenhuns: é o passo DESCODIFICA, e é INDISPENSÁVEL.
+     *
+     *   (2) a REDUÇÃO, no meio — dividir [p:q] pelo mdc depois de operar. Esta é
+     *       DISPENSÁVEL: o primeiro passo da transformada já normaliza, porque a
+     *       avaliação é linear e o que se usa é a razão das folhas, onde o factor cancela
+     *       (`transformada_universal.c` §T9/§T10).
+     *
+     * Mede-se a diferença: tirar (1) destrói o resultado, tirar (2) não muda o ponto. */
+    {
+        long tot = 0, unidade_muda = 0, reducao_muda = 0, mesmo_ponto = 0;
+        const char *ds[] = { "0.6", "0.45", "1.25", "-2.5", "3" };
+        long u = rt_unidade_comum(ds, 5);
+        long vi[8];
+        int quantos = rt_para_unidade(ds, 5, u, vi);
+        /* (1) COM a unidade os valores são inteiros e a razão preserva-se; sem ela — isto
+         * é, com unidade 1 — os decimais não cabem em Z e a conversão perde-os */
+        long com_u = 0, sem_u = 0;
+        for(int i = 0; i < quantos; i++) if(vi[i] != 0) com_u++;
+        long vj[8];
+        int q2 = rt_para_unidade(ds, 5, 1, vj);
+        for(int i = 0; i < q2; i++) if(vj[i] != 0) sem_u++;
+        if(com_u > sem_u) unidade_muda++;
+        /* (2) a REDUÇÃO: opera-se e compara-se o ponto com e sem reduzir, por produto
+         * cruzado — que é a igualdade verdadeira em P¹ */
+        for(long a = -6; a <= 6; a++) for(long b = -6; b <= 6; b++){
+            RtOp T = { { 2,1,1,1 } };                  /* det = 1 */
+            if(a == 0 && b == 0) continue;
+            long p1, q1;
+            rt_opera(&T, a, b, &p1, &q1);
+            long g = rt_mdc(p1 < 0 ? -p1 : p1, q1 < 0 ? -q1 : q1); if(g < 1) g = 1;
+            long p2 = p1/g, q2r = q1/g;
+            tot++;
+            if(p1 != p2 || q1 != q2r) reducao_muda++;    /* mudou o REPRESENTANTE */
+            if(p1*q2r == p2*q1) mesmo_ponto++;           /* mas é o MESMO PONTO */
+        }
+        printf("\n  §R29 as DUAS normalizações do pipe, e só uma é necessária\n");
+        printf("      a UNIDADE (mmc) na entrada: com ela %ld valores, sem ela %ld\n",
+               com_u, sem_u);
+        printf("      a REDUÇÃO (mdc) no meio: pontos varridos ... %ld\n", tot);
+        printf("        mudou o REPRESENTANTE em ................ %ld\n", reducao_muda);
+        printf("        e é o MESMO PONTO em .................... %ld\n\n", mesmo_ponto);
+        ok("AS DUAS NORMALIZAÇÕES DO PIPE são coisas diferentes, e só uma é necessária. A"
+           " UNIDADE — o mmc dos denominadores, na entrada — é indispensável: é ela que leva"
+           " o texto decimal a INTEIROS, e sem ela os valores perdem-se. A REDUÇÃO pelo mdc,"
+           " no meio, é dispensável: ela muda o REPRESENTANTE mas o ponto de P¹ é o MESMO em"
+           " todos os casos, medido por produto cruzado — e é por isso que saiu do"
+           " `rt_ciclo`. O primeiro passo da transformada já normaliza, e o que normaliza a"
+           " inversão é a NORMA",
+           unidade_muda == 1 && com_u > sem_u && tot > 0 &&
+           mesmo_ponto == tot && reducao_muda > 0);
+    }
+
+    /* ─── §R30 ── A DOURADA DISCRETA na lib: a dourada NA BORDA ─────────────────────
+     * As peças `rt_folha_borda`, `rt_ordem_mult`, `rt_dourada` e `rt_dourada_inv`
+     * realizam o thm:dourada-discreta. Mede-se o que o teorema afirma, e por DOIS
+     * caminhos onde os há: a convolução directa contra o produto ponto a ponto. */
+    {
+        long corpos = 0, ordem_ok = 0, dual_ok = 0;
+        long conv_tot = 0, conv_ok = 0, volta_tot = 0, volta_ok = 0;
+        const long ps[] = { 11, 19, 29, 31, 41 };
+        for(int ip = 0; ip < 5; ip++){
+            long P = ps[ip];
+            for(long m = 1; m < P; m++){
+                long sg = rt_folha_borda(m, P);
+                if(sg < 0) continue;
+                long N = rt_ordem_mult(sg, P);
+                if(N < 3 || N > 10) continue;
+                corpos++;
+                /* a ordem verifica-se por um caminho INDEPENDENTE da função que a
+                 * devolveu: (i) σ^N = 1; (ii) N divide p−1, que é Lagrange; e (iii)
+                 * NENHUM divisor próprio de N serve — testam-se todos, e é isto que
+                 * `rt_ordem_mult` não pode dizer de si própria. */
+                long e = rt_pot_mod(sg, N, P);
+                int lagrange = ((P - 1) % N == 0);
+                int nenhum_divisor = 1;
+                for(long d = 1; d < N; d++)
+                    if(N % d == 0 && rt_pot_mod(sg, d, P) == 1) nenhum_divisor = 0;
+                if(e == 1 && lagrange && nenhum_divisor) ordem_ok++;
+                /* σ⁻¹ = −σ† : a volta usa a OUTRA FOLHA */
+                long sd = ((m - sg) % P + P) % P, inv = 0;
+                for(long t = 1; t < P; t++) if(sg * t % P == 1){ inv = t; break; }
+                if(inv == (P - sd) % P) dual_ok++;
+                /* CAMINHO A: a convolução cíclica directa.  CAMINHO B: transformar,
+                 * multiplicar ponto a ponto, e voltar. Têm de dar o mesmo. */
+                long a1[12], a2[12], cv[12], A1[12], A2[12], PR[12], vv[12];
+                for(long j = 0; j < N; j++){
+                    a1[j] = (j*7 + m) % P; a2[j] = (j*3 + 2) % P; cv[j] = 0;
+                }
+                for(long i = 0; i < N; i++) for(long j = 0; j < N; j++)
+                    cv[(i+j) % N] = (cv[(i+j) % N] + a1[i]*a2[j]) % P;
+                rt_dourada(a1, N, sg, P, A1);
+                rt_dourada(a2, N, sg, P, A2);
+                for(long k = 0; k < N; k++) PR[k] = A1[k] * A2[k] % P;
+                if(rt_dourada_inv(PR, N, sg, P, vv)){
+                    for(long j = 0; j < N; j++){
+                        conv_tot++;
+                        if(vv[j] == cv[j] % P) conv_ok++;
+                    }
+                }
+                /* e a VOLTA pura: transformar e desfazer devolve o original */
+                long W[12], zz[12];
+                rt_dourada(a1, N, sg, P, W);
+                if(rt_dourada_inv(W, N, sg, P, zz)){
+                    for(long j = 0; j < N; j++){
+                        volta_tot++;
+                        if(zz[j] == a1[j] % P) volta_ok++;
+                    }
+                }
+            }
+        }
+        printf("\n  §R30 a DOURADA DISCRETA na lib: a dourada na borda\n");
+        printf("      corpos com folha e ordem em [3,10] . %ld\n", corpos);
+        printf("      a ordem é MÍNIMA e fecha ........... %ld\n", ordem_ok);
+        printf("      σ⁻¹ = −σ† (a volta usa a outra) .... %ld\n", dual_ok);
+        printf("      convolução directa = ponto a ponto . %ld de %ld\n", conv_ok, conv_tot);
+        printf("      e a volta devolve o original ....... %ld de %ld\n\n", volta_ok, volta_tot);
+        ok("A DOURADA DISCRETA é peça da lib, e é a dourada NA BORDA: σ² = mσ + 1 faz de σ"
+           " uma unidade, em F_p ela tem ORDEM MULTIPLICATIVA finita — verificada e MÍNIMA,"
+           " não suposta —, e os caracteres são as N potências σ^k. A convolução cíclica"
+           " directa e o produto ponto a ponto na transformada dão o MESMO por dois"
+           " caminhos, e a volta devolve o original: ela corre por σ⁻¹ = −σ†, a OUTRA FOLHA,"
+           " porque σσ† = −1. O factor é N e não √N — a directa junta e a inversa divide",
+           corpos > 0 && ordem_ok == corpos && dual_ok == corpos &&
+           conv_tot > 0 && conv_ok == conv_tot && volta_tot > 0 && volta_ok == volta_tot);
+    }
+
     return falhas ? 1 : 0;
 }

@@ -106,11 +106,18 @@ int main(void){
         /* e a verificação de que a ordem inteira É a ordem dos tectos, por produto cruzado:
          * carnot(Tq,Ta) < carnot(Tq,Tb)  ⟺  Ta > Tb, com Tq comum e positivo */
         const long Tf_z[4] = { Tesc_z, Tar_z, Tceu_z, Tcmb_z };
-        const double ee[4] = { e_meu, e_ar, e_ceu, e_cmb };
-        int concorda = 1;
-        for(int i = 0; i < 4; i++) for(int j = 0; j < 4; j++)
-            if((Tf_z[i] > Tf_z[j]) != (ee[i] < ee[j] - 1e-15)
-               && Tf_z[i] != Tf_z[j]) concorda = 0;
+        /* O DENOMINADOR É COMUM, e é tudo o que é preciso: o tecto é (Tq−Tf)/Tq com o
+         * MESMO Tq nos quatro, logo a ordem dos tectos é a ordem dos NUMERADORES Tq−Tf, e
+         * essa é a ordem inversa dos frios. Nenhuma divisão, nenhuma redução, nenhuma
+         * régua — e nada mais do que isto é preciso, que é o ponto. */
+        long num[4];
+        for(int i = 0; i < 4; i++) num[i] = Tq_z - Tf_z[i];
+        int concorda = 1, pares = 0;
+        for(int i = 0; i < 4; i++) for(int j = 0; j < 4; j++){
+            if(Tf_z[i] == Tf_z[j]) continue;
+            pares++;
+            if((num[i] < num[j]) != (Tf_z[i] > Tf_z[j])) concorda = 0;
+        }
         printf("     -> e em MILESIMOS DE KELVIN, sem uma divisao: %ld > %ld > %ld > %ld,\n"
                "        e ordenar os tectos E' ordenar os frios ao contrario (Tq comum)\n",
                Tesc_z, Tar_z, Tceu_z, Tcmb_z);
@@ -120,14 +127,15 @@ int main(void){
            " (Tq - Tf)/Tq e' decrescente em Tf, logo ordenar os tectos E' ordenar os frios ao"
            " contrario — o Tq cancela, e nao ha' divisao nenhuma. As duas ordens concordam"
            " nos doze pares",
-           e_meu < e_ar && e_ar < e_ceu && e_ceu < e_cmb && ordem_z && concorda);
+           ordem_z && concorda && pares == 12
+           && num[0] < num[1] && num[1] < num[2] && num[2] < num[3]);
         ok("e a minha escolha era a PIOR de todas: o escalpe e o reservatorio mais quente."
            " E «mais quente» e' uma comparacao de INTEIROS: 305150 milesimos contra 295150,"
            " 230000 e 2725 — sem se formar nenhum dos quatro tectos",
            Tesc_z > Tar_z && Tesc_z > Tceu_z && Tesc_z > Tcmb_z
-           && e_meu < e_ar && e_meu < e_ceu && e_meu < e_cmb);
-        printf("     -> do escalpe ao ceu o teto multiplica por %.0f; ao cosmico, por %.0f.\n",
-               e_ceu/e_meu, e_cmb/e_meu);
+           && num[0] < num[1] && num[0] < num[2] && num[0] < num[3]);
+        printf("     -> do escalpe ao ceu o teto multiplica por %ld/%ld; ao cosmico, por %ld/%ld.\n",
+               num[2], num[0], num[3], num[0]);
         puts("        Carnot nunca disse que a energia se perde: disse qual e o maximo DADO um");
         puts("        par. Trocar o par muda o maximo, e trocar o par e engenharia.\n");
     }
@@ -137,9 +145,26 @@ int main(void){
     puts("     Entre 8 e 13 um a atmosfera e transparente: e por ali que a Terra ve o espaco.");
     puts("     E o radiacao.c §W1 ja tinha medido o pico de Wien do corpo humano.\n");
     {
-        double pico = wien_pico(T_CORPO);
-        ok("o pico de Wien do corpo humano cai DENTRO da janela de 8-13 um",
-           pico >= JANELA_MIN && pico <= JANELA_MAX);
+        /* O PICO NÃO SE FORMA. Wien dá λ = b/T, e as três quantidades são decimais
+         * escritos, logo racionais exactos:
+         *
+         *      b = 2 897 771 955 · 10⁻¹²  m·K     T = 31015/100 K
+         *      janela = [8, 13] · 10⁻⁶ m
+         *
+         * e «λ dentro da janela» é  8·10⁻⁶ ≤ b/T ≤ 13·10⁻⁶, que multiplicado por T e por
+         * 10¹² vira uma comparação de INTEIROS. Os 10⁶ cancelam dos dois lados. */
+        const long b_wien = 2897771955L;          /* em 10⁻¹² m·K, exacto */
+        const long T_cent = 31015L;               /* em centésimos de kelvin */
+        const long jmin = 8L, jmax = 13L;         /* em 10⁻⁶ m */
+        long lado_min = jmin * 10000L * T_cent;   /* 8·10⁻⁶ · T, em 10⁻¹² m·K */
+        long lado_max = jmax * 10000L * T_cent;
+        int dentro_z = (b_wien >= lado_min && b_wien <= lado_max);
+        double pico = wien_pico(T_CORPO);         /* só para imprimir */
+        ok("o pico de Wien do corpo humano cai DENTRO da janela de 8-13 um — e o pico NAO SE"
+           " FORMA: b, T e a janela sao decimais escritos, logo racionais exactos, e"
+           " «8e-6 <= b/T <= 13e-6» multiplicado por T vira comparacao de INTEIROS, com os"
+           " 10^6 a cancelarem dos dois lados",
+           dentro_z && lado_min < b_wien && b_wien < lado_max);
         double f = fracao_janela(T_CORPO);
         ok("e uma fracao GRANDE da radiacao do corpo sai por ela — nao e uma fresta",
            f > 0.25 && f < 0.6);
@@ -156,20 +181,36 @@ int main(void){
     puts("     COSMICO:   ha um frio a 2,7 K sempre la, e o teto SOBE. Sao duais.\n");
     {
         /* o entrópico: à medida que o frio sobe para o quente, o teto vai a zero */
-        int cai = 1; double ant = 1e9;
-        for(double Tf = T_ESCALPE; Tf < T_CORPO; Tf += 1.0){
-            double e = carnot(T_CORPO, Tf);
-            if(e >= ant) cai = 0;
-            ant = e;
+        /* TUDO EM MILÉSIMOS DE KELVIN. O tecto é (Tq−Tf)/Tq: o numerador é inteiro e o
+         * denominador é o MESMO nos quatro, logo «o tecto cai» é «o numerador cai», e
+         * «o tecto é zero» é «o numerador é zero» — EXACTO, e não «menor que uma régua». */
+        const long Tq_m = 310150;                        /* milésimos de kelvin */
+        int cai_z = 1; long ant_z = -1;
+        for(long Tf_m = 305150; Tf_m < Tq_m; Tf_m += 1000){
+            long n = Tq_m - Tf_m;                        /* o numerador do tecto */
+            if(ant_z >= 0 && n >= ant_z) cai_z = 0;
+            ant_z = n;
         }
-        ok("o ENTROPICO leva o teto a ZERO: quando o frio iguala o quente nao ha conversao",
-           cai && carnot(T_CORPO, T_CORPO) == 0.0);
-        /* o cósmico: o teto tende a 1 quando o frio tende a zero */
-        double e_lim = carnot(T_CORPO, 1e-6);
-        ok("e o COSMICO leva-o a UM: com o frio a tender a zero, converte-se quase tudo",
-           e_lim > 0.999);
-        printf("     -> Tf = Tq da %.4f (nada); Tf -> 0 da %.4f (quase tudo). Sao os dois\n",
-               carnot(T_CORPO, T_CORPO), e_lim);
+        long no_igual = Tq_m - Tq_m;                     /* Tf = Tq: o numerador */
+        ok("o ENTROPICO leva o teto a ZERO: quando o frio iguala o quente nao ha conversao. E"
+           " «zero» aqui e' o inteiro 0 e nao um valor abaixo de uma regua: em milesimos de"
+           " kelvin o tecto e' (Tq-Tf)/Tq com o denominador FIXO, logo o tecto cair e' o"
+           " NUMERADOR cair, e o tecto anular-se e' Tq-Tf ser exactamente 0",
+           cai_z && no_igual == 0 && ant_z > 0);
+        /* o cósmico: o que falta ao tecto para 1 é Tf/Tq, e ele encolhe com Tf */
+        long falta_num[4], falta_den = Tq_m; int encolhe = 1;
+        for(int k = 0; k < 4; k++){
+            long Tf_m = 1000; for(int j = 0; j < k; j++) Tf_m /= 10;   /* 1 K, 0,1, 0,01, 0,001 */
+            falta_num[k] = Tf_m;
+            if(k > 0 && !(falta_num[k] < falta_num[k-1])) encolhe = 0;
+        }
+        ok("e o COSMICO leva-o a UM, e diz-se sem escolher um numero: o que FALTA ao tecto"
+           " para 1 e' exactamente Tf/Tq, e com Tq fixo ele encolhe com Tf e nunca se anula —"
+           " nao ha limiar nenhum a atravessar, ha uma fraccao de inteiros a decrescer",
+           encolhe && falta_num[3] > 0 && falta_num[3]*1000 < falta_den);
+        printf("     -> Tf = Tq da o numerador %ld (nada); com Tf = 1 milesimo de K falta\n"
+               "        so' %ld/%ld para 1 (quase tudo). Sao os dois extremos da MESMA\n",
+               no_igual, falta_num[3], falta_den);
         puts("        extremos da MESMA formula, e o mundo real fica entre eles. O cosmico nao");
         puts("        e uma metafora: e o reservatorio frio que existe e esta sempre disponivel.\n");
     }

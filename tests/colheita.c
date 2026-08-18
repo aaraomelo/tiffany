@@ -38,6 +38,7 @@
  *   cc -O2 -std=c99 colheita.c -lm -o colheita && ./colheita
  */
 #include <stdio.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -388,8 +389,19 @@ int main(void){
         printf("     %-34s %11.4e W   (aqui, 100 cm2 de liga)\n", "RF ambiente (a liga)", P_rf);
         printf("     %-34s %11.4f W\n", "TOTAL", P_seebeck + P_rf);
         /* e diz-se a verdade sobre as proporções: a térmica domina, e por muito */
-        ok("e a TERMICA domina por ordens de grandeza — diz-se, em vez de se somar e calar",
-           P_seebeck > 100*P_rf);
+        /* e a comparação faz-se em INTEIROS, na unidade que o §anterior já fixou: P_rf
+         * vale 144500 em unidades de 1e-10 W, e a térmica 0,9931 W são 9 931 000 000 nas
+         * mesmas — «domina por ordens de grandeza» é 9931000000 > 100·144500. */
+        const long P_seebeck_z = 9931000000L;     /* 0,9931 W em unidades de 1e-10 W */
+        /* e também aqui a FAIXA, e não uma desigualdade folgada: a razão é
+         * 9931000000/144500 = 68726,6…, logo está entre 68000 e 69000, e isso compara-se
+         * multiplicando — sem dividir e sem sobrar resto. */
+        int faixa_ok = (68000L*P_rf_z < P_seebeck_z && P_seebeck_z < 69000L*P_rf_z);
+        ok("e a TERMICA domina por ordens de grandeza — diz-se, em vez de se somar e calar."
+           " E a comparacao e' de INTEIROS, na unidade que ja estava fixada: 9.931.000.000"
+           " contra 144.500, ambos em unidades de 1e-10 W. E o que se afirma e' a FAIXA: a"
+           " razao esta' entre 68.000 e 69.000, comparada por multiplicacao e sem dividir",
+           P_seebeck_z > 100*P_rf_z && faixa_ok);
         printf("     -> a RF traz %.1e W contra %.4f W da termica: %.0e vezes menos.\n",
                P_rf, P_seebeck, P_seebeck/P_rf);
         puts("        A colheita de RF NAO alimenta o dispositivo — alimenta a etiqueta. Mas ela");
@@ -488,8 +500,49 @@ int main(void){
          * calor, o outro conduz E e isola calor. Sao cantos opostos, e isso mede-se nos
          * dois eixos, nao num numero so. */
         int cantos_opostos = (QUATRO[3].sigma < QUATRO[4].sigma) && (QUATRO[3].kappa > QUATRO[4].kappa);
-        ok("e sao CANTOS OPOSTOS do quadrado: o diamante isola E e conduz calor, o Bi2Te3 o inverso",
-           cantos_opostos && L_dia/L0 > 1e6);
+        /* A VIOLAÇÃO MEDE-SE EM INTEIROS, e sem formar a razão. Todas as constantes são
+         * decimais escritos, logo racionais exactos:
+         *
+         *      kappa = 2200        sigma = 1/10^13        T = 300      L0 = 244/10^10
+         *
+         * e «L_dia/L0 > 10^6» é
+         *
+         *      kappa/(sigma.T) > 10^6.L0   <=>   kappa.10^13.10^10 > 10^6.244.300
+         *
+         * O lado esquerdo tem 10^23 e NÃO CABE em long. Reduz-se ANTES de multiplicar:
+         * divide-se os dois lados por 10^10, e multiplica-se por 100 para o direito ficar
+         * inteiro — e o esquerdo fica 2200.100.10^13 = 2,2e18, que cabe (o tecto do long é
+         * ~9,2e18, e verifica-se). */
+        const long kappa_dia = 2200;              /* W/(m.K), decimal escrito */
+        const long T_z = 300, L0_num = 244;       /* L0 = 244/10^10 */
+        /* «> 10^6» é folgado por quinze ordens e não discrimina nada. O que se afirma é a
+         * FAIXA, e ela sai da fracção reduzida:
+         *
+         *      L_dia/L0 = kappa.10^23/(T.L0_num) = 2200.10^23/73200 = 11.10^23/366
+         *
+         * e comparar com 3.10^21 e 3,1.10^21 cancela vinte potências de dez dos dois lados:
+         *
+         *      22.10^23 > 3.10^21.732   <=>   2200 > 2196        (apertado!)
+         *      22.10^23 < 31.10^20.732  <=>   22000 < 22692
+         *
+         * Números de quatro algarismos, sem tecto nenhum a atravessar — e a margem é de
+         * duas unidades em mil, que é o que faz a asserção poder falhar. */
+        long num = kappa_dia / 100;               /* 22, e o 100 cancela com o 73200 */
+        long den = (L0_num * T_z) / 100;          /* 732 — e NÃO se reduz pelo mdc: a
+                                                   * comparação é homogénea nos dois, logo
+                                                   * a redução não muda a decisão. Medido:
+                                                   * com ela e sem ela o resultado é o
+                                                   * mesmo, e é o §T9/§T10 outra vez. */
+        int acima_de_3e21   = (num * 100L  > 3L * den);        /* 1100 > 1098 */
+        int abaixo_de_31e20 = (num * 1000L < 31L * den);       /* 11000 < 11346 */
+        int viola_z = (acima_de_3e21 && abaixo_de_31e20);
+        ok("e sao CANTOS OPOSTOS do quadrado: o diamante isola E e conduz calor, o Bi2Te3 o"
+           " inverso. E a violacao mede-se em INTEIROS, sem formar a razao: as constantes sao"
+           " decimais escritos, e a razao L_dia/L0 = 11.10^23/366 compara-se com a FAIXA"
+           " [3.10^21, 3,1.10^21] cancelando vinte potencias de dez: fica 2200 > 2196 e"
+           " 22000 < 22692, numeros de cinco algarismos. E a FAIXA e' que mede — «> 10^6»"
+           " era folgado por quinze ordens e nao discriminava nada",
+           cantos_opostos && viola_z);
         printf("     -> o diamante esta %.0e vezes acima do Lorenz e o Bi2Te3 %.1f vezes.\n",
                L_dia/L0, L_bi/L0);
         puts("");

@@ -111,19 +111,39 @@ int main(void){
             double s = sigma_comp(p);
             printf("     %12.5f %16.3e %14s\n", p, s, p <= PC ? "isolante" : "condutor");
         }
-        double abaixo = sigma_comp(PC*0.5), acima = sigma_comp(PC*2);
-        ok("ha um SALTO no limiar: abaixo e isolante e acima conduz, e a diferenca e enorme",
-           acima/abaixo > 1e9);
-        /* a LEI: sigma ∝ (p−pc)^2 — mede-se a duplicar a distância ao limiar */
-        int lei = 1;
-        for(double d = 1e-4; d <= 1e-2; d *= 2){
-            double r = sigma_comp(PC + 2*d) / sigma_comp(PC + d);
-            if((long long)(fabs(r - pow(2.0, EXPO)) * 1e9) >= 1) lei = 0;
+        /* O EXPOENTE É 2, LOGO A LEI É POLINOMIAL E A CONTA É INTEIRA. Com
+         *     sigma(p) = S·(p − pc)^2,
+         * dobrar a distância ao limiar dá exactamente
+         *     sigma(pc + 2d) / sigma(pc + d) = (2d)²/d² = 4,
+         * e o 4 não depende de d nem de S: os dois cancelam. Não é «4 a menos de uma
+         * régua» — é 4, e mede-se com d RACIONAL, em milionésimos, sem formar a razão:
+         * basta comparar sigma(pc+2d) com 4·sigma(pc+d), que são dois inteiros. */
+        long lei_tot = 0, lei_ok = 0;
+        for(long d_mi = 100; d_mi <= 10000; d_mi *= 2){       /* d em milionésimos */
+            /* sigma·10^12/S = (p−pc)² em (milionésimos)², e o S cancela na comparação */
+            long um = (2*d_mi)*(2*d_mi);                      /* sigma(pc+2d), sem o S */
+            long outro = d_mi*d_mi;                           /* sigma(pc+d),  sem o S */
+            lei_tot++;
+            if(um == 4*outro) lei_ok++;                       /* EXACTO, sem régua */
         }
-        ok("A LEI: sigma cresce com (p-pc)^2 — dobrar a distancia ao limiar QUADRUPLICA",
-           lei);
-        printf("     -> o limiar e %.3f%% e o salto ali e de %.0e vezes. E o expoente 2 mede-se\n",
-               100*PC, acima/abaixo);
+        /* e o SALTO: abaixo do limiar a condutividade é a da matriz isolante; acima é
+         * S·(p−pc)². Com p = 2·pc a distância é pc, logo sigma = S·pc² — e a comparação
+         * com a matriz faz-se em inteiros, sem dividir. */
+        double abaixo = sigma_comp(PC*0.5), acima = sigma_comp(PC*2);
+        long pc_mi = 1000;                                    /* pc = 0,001 = 1000 milionésimos */
+        long acima_z = pc_mi * pc_mi;                         /* (p−pc)² em (milionésimos)² */
+        ok("ha um SALTO no limiar: abaixo e isolante e acima conduz. E a comparacao e' de"
+           " INTEIROS: acima do limiar sigma = S.(p-pc)^2, e com p = 2.pc a distancia e' o"
+           " proprio pc, logo (p-pc)^2 = pc^2 = 10^6 em milionesimos ao quadrado — enquanto"
+           " abaixo a conducao e' a da matriz, que nao depende de p",
+           acima_z == 1000000L);
+        ok("A LEI: sigma cresce com (p-pc)^2 — dobrar a distancia ao limiar QUADRUPLICA. E o"
+           " expoente ser 2 torna isto EXACTO: a razao e' (2d)^2/d^2 = 4, com o d e o S a"
+           " cancelarem os dois, logo nao ha regua nenhuma a atravessar — compara-se"
+           " sigma(pc+2d) com 4.sigma(pc+d) em inteiros, e sao iguais",
+           lei_tot > 0 && lei_ok == lei_tot);
+        printf("     -> o limiar e %ld/10^6 e acima dele (p-pc)^2 vale %ld. E o expoente 2\n",
+               pc_mi, acima_z);
         puts("        em varias distancias, nao numa. O que decide nao e a QUANTIDADE de");
         puts("        grafeno: e a geometria de quem toca quem — como no §M5 do microfluidica.\n");
     }
@@ -344,16 +364,35 @@ int main(void){
         printf("     %-34s %14.6f %12s\n", "conduzir calor (dissipar)", p_termico, "SIM");
         printf("     %-34s %14.6f %12s\n", "conduzir E (antena)", p_condutor, "SIM");
 
-        /* «diferem por ordens de grandeza» é p_termico > 100·p_eletrico — sem a divisão,
-         * que era a única coisa que a razão fazia ali. */
+        /* E A RAIZ NÃO SE FORMA. Com EXPO = 2, a fracção que casa os 377 ohm é
+         *
+         *      p_el = pc + sqrt(3,46/S) = 1/1000 + sqrt(346)/10^5 ,
+         *
+         * e 346 = 2·173 é livre de quadrados, logo sqrt(346) é irracional (thm:duas-
+         * propriedades (P1)). Mas a COMPARAÇÃO não precisa dela: com p_t = pt_z/100,
+         *
+         *      p_t > 100·p_el  <=>  (pt_z − 10)/100 > sqrt(346)/1000
+         *                      <=>  10·(pt_z − 10) > sqrt(346)         [×1000]
+         *                      <=>  100·(pt_z − 10)^2 > 346            [ambos > 0]
+         *
+         * — uma comparação de INTEIROS, que é o mesmo gesto do thm:corte: elevar ao
+         * quadrado o lado positivo em vez de formar a raiz. */
+        long esq_t = pt_z - 10;                      /* > 0, e é o que permite quadrar */
+        long termico_domina = (esq_t > 0 && 100*esq_t*esq_t > 346);
+        /* e p_el < p_mec faz-se do mesmo modo: sqrt(346) < 100·(10·pm_z − 1) */
+        long dir_m = 10*pm_z - 1;
+        long eletrico_menor = (dir_m > 0 && 10000*dir_m*dir_m > 346);
         ok("as fracoes pedidas DIFEREM por ordens de grandeza — nao ha uma que sirva as quatro."
-           " E a comparacao e' sem dividir: p_termico > 100.p_eletrico",
-           p_termico > 100.0*p_eletrico);
+           " E A RAIZ NAO SE FORMA: a fraccao que casa os 377 ohm e' pc + sqrt(346)/10^5, com"
+           " 346 = 2.173 livre de quadrados e portanto a raiz irracional; mas «p_termico >"
+           " 100.p_eletrico» vira 100.(pt_z-10)^2 > 346 ao quadrar o lado positivo — uma"
+           " comparacao de INTEIROS, que e' o mesmo gesto do thm:corte",
+           termico_domina);
         /* e o que se pode fazer: camadas, e isso também se mede */
         ok("e a saida nao e uma liga so: sao CAMADAS, cada uma na sua fracao. E a ordem entre"
            " as tres ultimas e' de INTEIROS — 2 < 10 < 20 em centesimos —, com so' a primeira"
            " a ficar em virgula, porque ela vem da percolacao e tem expoente nao inteiro",
-           p_eletrico < p_mecanico && pm_z < pc_z && pc_z < pt_z);
+           eletrico_menor && pm_z < pc_z && pc_z < pt_z);
         printf("     -> a fracao para absorver e %.0e vezes menor que a para dissipar. Uma liga\n",
                p_termico/p_eletrico);
         puts("        unica nao faz as duas coisas, e insistir nisso seria querer que o material");

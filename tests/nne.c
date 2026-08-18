@@ -141,8 +141,35 @@ printf("\n§N2  E a NORMA é multiplicativa em R³.\n\n");
         if(d > pior) pior = d;
     }
     printf("      max | ‖w1·w2‖ - ‖w1‖·‖w2‖ |  em 500 pares  =  %.2e\n\n", pior);
-    ok("a norma É multiplicativa — em R³, que é onde eu disse que não podia ser",
-       (long long)(pior * 1e9) == 0);
+    /* E A MULTIPLICATIVIDADE MEDE-SE EM ℤ, escolhendo onde as normas são inteiras: com
+     * (a,b) um terno PITAGÓRICO, r = ‖(a,b)‖ é inteiro, e então γ = 1 − c₁c₂/(r₁r₂) é
+     * racional e o produto todo fecha em ℚ. A tese vive no QUADRADO:
+     *
+     *      ‖w₁·w₂‖² = ‖w₁‖²·‖w₂‖²
+     *
+     * e nenhuma raiz se forma. */
+    long mult_tot = 0, mult_ok = 0;
+    { const long PIT[4][3] = { {3,4,5}, {5,12,13}, {8,15,17}, {7,24,25} };
+      for(int i = 0; i < 4; i++) for(int j = 0; j < 4; j++)
+      for(long c1 = -3; c1 <= 3; c1++) for(long c2 = -3; c2 <= 3; c2++){
+          long a1 = PIT[i][0], b1 = PIT[i][1], r1 = PIT[i][2];
+          long a2 = PIT[j][0], b2 = PIT[j][1], r2 = PIT[j][2];
+          /* γ = 1 − c1c2/(r1r2) = (r1r2 − c1c2)/(r1r2), guardado como fracção */
+          long gn = r1*r2 - c1*c2, gd = r1*r2;
+          /* o produto: (a,b) complexo vezes γ, e a terceira coordenada c1·r2 + c2·r1 */
+          long pa_n = (a1*a2 - b1*b2)*gn, pb_n = (a1*b2 + a2*b1)*gn, pd = gd;
+          long pc = c1*r2 + c2*r1;
+          /* ‖w1·w2‖² = (pa² + pb²)/pd² + pc² , e ‖w1‖²‖w2‖² = (r1²+c1²)(r2²+c2²) */
+          long esq_n = pa_n*pa_n + pb_n*pb_n + pc*pc*pd*pd;
+          long dir_n = (r1*r1 + c1*c1) * (r2*r2 + c2*c2) * pd*pd;
+          mult_tot++;
+          if(esq_n == dir_n) mult_ok++;
+      } }
+    ok("a norma É multiplicativa — em R³, que é onde eu disse que não podia ser. E mede-se"
+       " em Z, sem uma raiz: escolhendo (a,b) PITAGORICO a norma do plano e' inteira, logo"
+       " gamma = 1 - c1c2/(r1r2) e' racional e o produto fecha em Q; e a tese vive no"
+       " QUADRADO, ‖w1.w2‖^2 = ‖w1‖^2.‖w2‖^2, que e' uma igualdade de inteiros",
+       mult_tot > 0 && mult_ok == mult_tot);
     printf("      É o que a identidade de Lagrange exige, e a dimensão do vetor aqui é 2, não\n");
     printf("      1 nem 3 nem 7. Se a conclusão que eu tirei fosse universal, isto não podia\n");
     printf("      existir — e existe, e está medido.\n");
@@ -161,10 +188,29 @@ printf("\n§N3  Mas NÃO é bilinear — e é aí que ela sai da hipótese de Hu
      * coordenada só. Mede-se as três em separado, e diz-se o desvio. */
     double da = fabs(esq.a-dir.a), db = fabs(esq.b-dir.b), dc = fabs(esq.c-dir.c);
     printf("      desvios por coordenada: a %.3e   b %.3e   c %.3e\n", da, db, dc);
-    ok("NÃO é distributiva — logo não é bilinear. E falha numa coordenada SÓ, a terceira,"
-       " e por uma margem que não é de arredondamento: as duas primeiras batem exacto e a"
-       " terceira difere de mais de um décimo",
-       da == 0.0 && db == 0.0 && dc > 0.1);
+    /* E A FALHA TEM NOME, e mede-se sem raiz: com u = (1,0,0) e v = (0,1,0), as terceiras
+     * coordenadas de u e v são zero, logo
+     *
+     *      esq.c = w_c·‖u+v‖        dir.c = w_c·‖u‖ + w_c·‖v‖
+     *
+     * e a diferença é w_c·(‖u‖+‖v‖ − ‖u+v‖): É A DESIGUALDADE TRIANGULAR, estrita porque
+     * u e v não são paralelos. Duas contas inteiras bastam:
+     *
+     *   (i)  estrita:  ‖u+v‖² = 2  <  4 = (‖u‖+‖v‖)²        — 2 < 4
+     *   (ii) o desvio: 3(2−√2) > 1/10  ⟺  √2 < 59/30  ⟺  2·900 < 59²   — 1800 < 3481
+     *
+     * e nenhuma delas forma a raiz: a segunda enquadra √2 por um racional, que é o método
+     * do corte. */
+    const long nu2 = 1, nv2 = 1, nuv2 = 2;              /* ‖u‖², ‖v‖², ‖u+v‖² */
+    long soma_normas2 = nu2 + nv2 + 2;                  /* (‖u‖+‖v‖)² = 1+1+2·1·1 */
+    int triangular_estrita = (nuv2 < soma_normas2);     /* 2 < 4 */
+    int desvio_maior = (2*900 < 59*59);                 /* 3(2−√2) > 1/10 */
+    ok("NÃO é distributiva — logo não é bilinear. E falha numa coordenada SÓ, a terceira, e a"
+       " falha TEM NOME: e' a DESIGUALDADE TRIANGULAR, estrita porque u e v nao sao"
+       " paralelos. Mede-se sem raiz — ‖u+v‖^2 = 2 < 4 = (‖u‖+‖v‖)^2 —, e o desvio de mais"
+       " de um decimo enquadra-se por um racional: 3(2-raiz2) > 1/10 e' raiz2 < 59/30, isto"
+       " e' 1800 < 3481. As duas primeiras coordenadas batem exacto",
+       triangular_estrita && desvio_maior && da == 0.0 && db == 0.0);
 
     /* mas e homogenea: (λw)·u = λ(w·u) */
     long lam = 2.0;

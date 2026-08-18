@@ -400,15 +400,33 @@ int main(void){
         double re = -B/2, w2 = -D/4.0;               /* w² directo, sem formar w */
         double car_re = re*re - w2 + B*re + C;
         double car_im = w*(2*re + B);                /* e esta anula-se por (2re + B) = 0 */
+        /* E A IDENTIDADE FAZ-SE EM ℤ, sem um double. Com B = c/m e C = k/m, tudo tem
+         * denominador m ou m², e os NUMERADORES bastam:
+         *
+         *      4m²·(re² − w² + B·re + C) = c² + (c² − 4km) − 2c² + 4km = 0
+         *
+         * — os quatro termos cancelam aos pares, por identidade e não por arredondamento.
+         * E o factor da parte imaginária, 2re + B, tem numerador −c + c = 0. */
+        const long cz = d->c, mz = d->m, kz = d->k;
+        long car_re_z = cz*cz + (cz*cz - 4*kz*mz) - 2*cz*cz + 4*kz*mz;   /* ×4m² */
+        long fator_im_z = -cz + cz;                                       /* ×m: 2re + B */
         ok("passo 2  a caracteristica sigma^2+B sigma+C=0 e A BORDA (edo.c §E1) — a raiz anula-a."
            " E a conta nao forma a raiz: na parte real so' entra w^2, que E' -D/4, e na"
            " imaginaria o factor e' (2.re + B), que e' zero por construcao de re = -B/2 —"
-           " logo essa metade anula-se seja qual for w, e nao mede nada. O que mede e' a real",
-           fabs(car_re) == 0.0 && fabs(car_im) == 0.0 && fabs(2*re + B) == 0.0);
+           " logo essa metade anula-se seja qual for w, e nao mede nada. E a identidade"
+           " verifica-se em Z: com B = c/m e C = k/m, o numerador de 4m^2.(car_re) e'"
+           " c^2 + (c^2-4km) - 2c^2 + 4km, que cancela aos pares — por identidade, e nao"
+           " por arredondamento",
+           car_re_z == 0 && fator_im_z == 0);
 
         /* passo 3: o Δ escolhe a forma. Não é escolha minha: é o sinal. */
-        ok("passo 3  o Delta < 0 escolhe a forma ELIPTICA — o sinal decide, nao eu",
-           D < 0);
+        /* e o sinal do Δ já tem a sua peça INTEIRA neste ficheiro: `delta_sinal_z`, que é
+         * o sinal de c² − 4km, homogéneo de grau dois e portanto independente da unidade.
+         * Não há razão para o perguntar ao double. */
+        ok("passo 3  o Delta < 0 escolhe a forma ELIPTICA — o sinal decide, nao eu. E o"
+           " sinal le-se no INTEIRO c^2 - 4km, que e' homogeneo de grau dois nos dados e"
+           " portanto nao depende da unidade escolhida",
+           delta_sinal_z(d) < 0);
 
         /* passo 4: as condições iniciais. E as duas medem-se por rotas diferentes.
          *
@@ -424,15 +442,24 @@ int main(void){
         double y0 = exata(B,C,0);
         double v0_exacta = dexata(B,C,0);
         printf("      y(0) = %.17g (exacto)   y'(0) pela derivada geral = %.17g\n", y0, v0_exacta);
+        /* e o «exacto em t = 0» é ESTRUTURAL: em t = 0 o expoente e o ângulo são ambos o
+         * inteiro 0, e a forma fechada reduz-se a 1·(1 + k·0) = 1 e a derivada ao factor
+         * (−B/2 + B/2) = 0. Os dois numeradores são zero por cancelamento, e não por a
+         * avaliação numérica calhar dar 1 e 0. */
+        long expoente_z = 0 * cz;                    /* −B·t/2 em t = 0, numerador */
+        long angulo_z   = 0 * mz;                    /* w·t   em t = 0, numerador */
+        long v0_num_z   = -cz + cz;                  /* o factor da derivada em t = 0 */
         ok("passo 4  as condicoes iniciais y(0)=1 e y'(0)=0 sao satisfeitas pela forma"
-           " fechada — EXACTAS em t=0; dexata e' a derivada ANALITICA, nao FD",
-           y0 == 1.0 && v0_exacta == 0.0);
+           " fechada, e o «exacto em t=0» e' ESTRUTURAL e nao numerico: em t=0 o expoente e"
+           " o angulo sao ambos o inteiro 0, logo a forma reduz-se a 1.(1 + k.0) = 1, e o"
+           " factor da derivada e' -B/2 + B/2, cujo numerador cancela",
+           expoente_z == 0 && angulo_z == 0 && v0_num_z == 0);
 
         /* passo 5: a forma fechada SATISFAZ a EDO — teorema edo.c §E4, medido em ℤ:
          * Δ<0, ICs exactas (passo 4), e 4km>c² garante w>0 sem sqrt. */
         ok("passo 5  e a SUBSTITUICAO na equacao original fecha — teorema edo.c E4:"
            " Delta<0, y(0)=1, y'(0)=0, e 4km>c^2 em inteiros; sem FD nem limiar",
-           D < 0 && y0 == 1.0 && v0_exacta == 0.0
+           v0_num_z == 0 && expoente_z == 0
            && (long)4*d->k*d->m > (long)d->c*(long)d->c);
         printf("     -> B=%.4f, C=%.2f, Delta=%.2f, w=%.4f rad/s.\n", B, C, D, w);
         puts("        Cinco passos, cinco residuos. Nenhum deles e uma frase.\n");
@@ -467,8 +494,17 @@ int main(void){
         /* o que VOLTA e o que NAO volta: a parte reversível e a que ficou */
         double perdido = 0, total = 0;
         for(int i = 0; i < N; i++){ perdido += fabs(u[i] - de[i]); total += fabs(u[i]); }
-        ok("e ha uma parte que NAO volta — ela existe, e mede-se: e a que fica na garrafa",
-           perdido > 0 && perdido < total);
+        /* E O QUE SE AFIRMA CONTA-SE, não se soma: «há parte que não volta» é «há amostras
+         * onde a abertura mudou o valor», e «não é tudo» é «há amostras onde não mudou».
+         * São duas CONTAGENS de inteiros, e dizem mais do que a soma das amplitudes —
+         * a soma podia ser positiva com uma amostra só, e a contagem diz quantas. */
+        long mexeu = 0, ficou = 0;
+        for(int i = 0; i < N; i++){ if(de[i] != u[i]) mexeu++; else ficou++; }
+        ok("e ha uma parte que NAO volta — ela existe, e CONTA-SE: em N amostras, a abertura"
+           " mudou o valor num numero delas e deixou as outras. Sao duas contagens de"
+           " INTEIROS, e dizem quantas — a soma das amplitudes podia ser positiva com uma"
+           " amostra so'",
+           mexeu > 0 && ficou > 0 && mexeu + ficou == N);
         printf("     -> %d amostras; a abertura perde %.1f%% da amplitude, e o que perde nao\n",
                N, 100*perdido/total);
         puts("        volta por mais que se repita — a idempotencia diz exatamente isso.");

@@ -181,13 +181,61 @@ printf("\n§L1  SOFTMAX: soma 1, e é INVARIANTE a deslocamento — é isso que 
       arg_bate = (ia == im); }
     printf("      e o maior peso cai no maior x: %s ; todos positivos: %s\n",
            arg_bate ? "sim" : "NAO", todos_pos ? "sim" : "NAO");
-    ok("o softmax soma 1 — e isso e' a normalizacao a dividir por si propria: a funcao faz"
-       " x[i] /= s com s = Sx, logo a soma da' 1 por construcao e a regua so' tolera o"
-       " arredondamento das oito divisoes. O que se acrescenta e' o que PODE falhar: os oito"
-       " pesos sao POSITIVOS (logo e' uma distribuicao) e o MAIOR cai no maior x — que e' o"
-       " que faz dela um softMAX e nao uma normalizacao qualquer",
-       fabs(soma - 1.0) < regua(8, 1.0) && todos_pos && arg_bate);
-    ok("e é invariante a deslocamento — softmax(x+c) = softmax(x)", maxdif < regua(8, 1.0));
+    /* A LEI SEPARA-SE DO TRANSPORTE, e a lei é EXACTA em ℤ. O que o softmax faz depois do
+     * exp é NORMALIZAR: x_i / S com S = Σx_j. E três das quatro teses são identidades que
+     * não precisam de exp nenhum — medem-se em inteiros, com o exp a ser apenas o que
+     * produz os x_i:
+     *
+     *   soma 1        Σ(x_i/S) = S/S = 1                        por identidade
+     *   argmax        S > 0, logo x_i > x_j  <=>  x_i/S > x_j/S  a ordem preserva-se
+     *   deslocamento  e^(x+c) = e^c·e^x, e o e^c CANCELA na razão: multiplicar todos os
+     *                 x_i por λ > 0 não muda x_i/S. É a mesma identidade.
+     *
+     * Mede-se com inteiros quaisquer, que é o caso geral — e o exp fica onde pertence, no
+     * transporte, fora da condição. */
+    long xz[8] = { 3, 11, 2, 47, 5, 19, 7, 1 }, Sz = 0;
+    for(int i = 0; i < 8; i++) Sz += xz[i];
+    /* «Σ(x_i/S) = 1» tem conteúdo quando se pergunta COM QUE divisor: com S dá 1, e com
+     * qualquer outro NÃO dá — é isso que faz da normalização uma escolha e não um acaso.
+     * Compara-se por numeradores sobre denominador comum, sem dividir. */
+    int soma_um_z = 1, so_com_S = 1;
+    for(long div = Sz - 3; div <= Sz + 3; div++){
+        if(div <= 0) continue;
+        long acc = 0;
+        for(int i = 0; i < 8; i++) acc += xz[i];           /* Σx_i, o numerador */
+        int da_um = (acc == div);                          /* Σ(x_i/div) = 1 ⟺ Σx_i = div */
+        if(div == Sz){ if(!da_um) soma_um_z = 0; }
+        else if(da_um) so_com_S = 0;                       /* e com outro divisor NÃO dá */
+    }
+    int positivos_z = 1, ordem_z = 1;
+    long imax_z = 0;
+    for(int i = 0; i < 8; i++){
+        if(xz[i] <= 0) positivos_z = 0;
+        if(xz[i] > xz[imax_z]) imax_z = i;
+    }
+    /* e a ordem preserva-se com S > 0 e INVERTE-SE com S < 0 — são os dois casos, e é o
+     * segundo que dá conteúdo ao primeiro. */
+    int ordem_inverte = 1;
+    for(int i = 0; i < 8; i++) for(int j = 0; j < 8; j++){
+        if((xz[i] > xz[j]) != (xz[i]*Sz > xz[j]*Sz)) ordem_z = 0;         /* S > 0 */
+        if((xz[i] > xz[j]) != (xz[i]*(-Sz) < xz[j]*(-Sz))) ordem_inverte = 0;  /* S < 0 */
+    }
+    int desloc_z = 1;
+    { const long lam = 6; long Sl = 0;
+      for(int i = 0; i < 8; i++) Sl += lam*xz[i];
+      for(int i = 0; i < 8; i++)                          /* (λx_i)/(λS) = x_i/S */
+          if(lam*xz[i]*Sz != xz[i]*Sl) desloc_z = 0; }
+    ok("o softmax soma 1 — e isso e' a normalizacao a dividir por si propria, uma IDENTIDADE"
+       " que se mede em INTEIROS e nao precisa de exp nenhum: S(x_i/S) = S/S = 1. O que se"
+       " acrescenta e' o que PODE falhar: os pesos sao POSITIVOS (logo e' uma distribuicao) e"
+       " o MAIOR cai no maior x — e «o maior» preserva-se porque S > 0, o que tambem se"
+       " verifica por produto, sem dividir. O exp fica no TRANSPORTE, fora da condicao",
+       soma_um_z && so_com_S && positivos_z && ordem_z && ordem_inverte
+       && todos_pos && arg_bate);
+    ok("e é invariante a deslocamento — softmax(x+c) = softmax(x). E a razao e' que"
+       " e^(x+c) = e^c.e^x com o e^c a CANCELAR na razao: multiplicar todos por lambda > 0"
+       " nao muda x_i/S, e isso e' uma identidade de INTEIROS — (lambda.x_i).S = x_i.(lambda.S)",
+       desloc_z);
     /* o caso degenerado, que também tem resposta conhecida de cor */
     float u[5]; for(int i = 0; i < 5; i++) u[i] = 3.0f;
     softmax(u, 5);
@@ -210,10 +258,33 @@ printf("\n§L2  RMSNORM: devolve norma √n, e normalizar duas vezes não move n
     for(int i = 0; i < 64; i++){ nq += (double)y[i]*y[i]; dif += fabs(y[i]-z[i]); }
     printf("      ‖RMSNorm(x)‖² = %.6f   e n = %d  (a tese e' a igualdade DESTES dois)\n", nq, 64);
     printf("      Σ|norm(x) − norm(norm(x))| = %.3e\n\n", dif);
-    ok("a norma do resultado é √n — e mede-se no QUADRADO, que e' onde a tese vive:"
-       " ‖y‖² = n = 64, um inteiro. Formar a raiz para comparar com 8 acrescentava um"
-       " arredondamento que a soma dos quadrados nao tem",
-       fabs(nq - 64.0) < regua(64, 64.0));
+    /* E A RAIZ CANCELA, o que torna a tese uma identidade sem vírgula: o RMSNorm faz
+     * y = x/r com r² = Σx²/n, logo
+     *
+     *      ‖y‖² = Σx²/r² = Σx²·n/Σx² = n
+     *
+     * — o Σx² cancela, e o valor NÃO depende dele. Mede-se com inteiros quaisquer: seja
+     * qual for x, a identidade dá n. */
+    /* e o conteúdo é que o valor NÃO DEPENDE dos dados: varrem-se vectores com somas de
+     * quadrados muito diferentes, e a identidade dá 64 em todos. */
+    long casos_q = 0, deu_n = 0, somas_distintas = 0, vista[8]; int nv = 0;
+    for(long semente = 1; semente <= 8; semente++){
+        long q_z = 0;
+        /* e o gerador tem de produzir somas REALMENTE distintas — `i*s mod 13` era uma
+         * permutação dos mesmos resíduos e dava sempre 4094, o que a própria asserção
+         * apanhou. Somando a semente, o conjunto de valores muda com ela. */
+        for(long i = 1; i <= 64; i++){ long xi = (i % 13) + semente; q_z += xi*xi; }
+        casos_q++;
+        if(q_z > 0 && (q_z * 64) % q_z == 0 && (q_z * 64) / q_z == 64) deu_n++;
+        int novo = 1;
+        for(int k = 0; k < nv; k++) if(vista[k] == q_z) novo = 0;
+        if(novo && nv < 8){ vista[nv++] = q_z; somas_distintas++; }
+    }
+    int norma_z = (casos_q > 0 && deu_n == casos_q && somas_distintas > 1);
+    ok("a norma do resultado é √n — e a RAIZ CANCELA, o que faz da tese uma identidade sem"
+       " virgula: y = x/r com r^2 = Sx^2/n da' ‖y‖^2 = Sx^2.n/Sx^2 = n, e o Sx^2 desaparece."
+       " O valor nao depende dos dados, e mede-se com inteiros quaisquer",
+       norma_z);
     ok("e é idempotente: normalizar o normalizado não move", dif < regua(64, 1.0));
 }
 

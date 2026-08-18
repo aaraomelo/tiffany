@@ -52,9 +52,20 @@
 static long pj_estouros = 0;
 
 /* o ponto de ℙ¹: [p : q], com (p,q) ≠ (0,0) e a menos de escala.
- * A forma canónica: reduzido pelo mdc, e com o PRIMEIRO não-nulo positivo. */
+ *
+ * E O REPRESENTANTE NÃO SE REDUZ. O primeiro passo da transformada universal já normaliza
+ * sem se lhe fazer nada: a avaliação é linear, eval(λα) = λ·eval(α), e o que se usa é a
+ * RAZÃO das duas folhas — onde o λ cancela (`transformada_universal.c` §T9). Reduzir aqui
+ * pelo mdc seria fazer à mão o que o primeiro passo já fez, e MEDIU-SE que não faz nada:
+ * com a redução neutralizada, as seis asserções de `projetiva.c` passam na mesma e os
+ * estouros continuam ZERO. O que fica é a orientação do sinal, que não é normalização de
+ * escala: é a escolha de qual dos dois vectores antípodas se guarda.
+ *
+ * A igualdade de pontos compara-se por PRODUTO CRUZADO — p·q' = p'·q —, que é a igualdade
+ * verdadeira em ℙ¹ e não depende de representante nenhum. */
 typedef struct { int p, q; } Pj;
 
+/* fica para quem precise do mdc como RESULTADO — não para normalizar o representante */
 static long pj_mdc(long a, long b){
     if(a < 0) a = -a;
     if(b < 0) b = -b;
@@ -64,8 +75,6 @@ static long pj_mdc(long a, long b){
 /* devolve 0 se (0,0) — que NÃO é ponto de ℙ¹, e é a única coisa que aqui se recusa */
 static int pj(long p, long q, Pj *r){
     if(p == 0 && q == 0) return 0;
-    long g = pj_mdc(p, q);
-    p /= g; q /= g;
     if(q < 0 || (q == 0 && p < 0)){ p = -p; q = -q; }
     if(p > 2147483647L || p < -2147483647L || q > 2147483647L){ pj_estouros++; return 0; }
     r->p = (int)p; r->q = (int)q;

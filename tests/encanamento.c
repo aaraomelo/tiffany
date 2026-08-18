@@ -37,6 +37,7 @@
  *   cc -O2 -std=c99 encanamento.c -lm -o encanamento && ./encanamento
  */
 #include <stdio.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -70,6 +71,34 @@ static const Dopante DOPANTES[] = {
 typedef struct { const char *nome; double F, G; } Andar;   /* F em fator, G em fator */
 
 /* o ruído total de uma cadeia, pela fórmula de Friis */
+/* FRIIS EM RACIONAIS. Os andares são decimais escritos — 1,26 · 100 · 2,00 · 0,5 · 3,16 ·
+ * 316 —, logo cada F e cada G é um racional exacto de denominador 100, e a soma de Friis
+ * é uma soma de fracções: ela fecha em Q sem uma vírgula. Guarda-se (num, den) reduzido a
+ * cada passo, que é o que impede o denominador de crescer sem necessidade. */
+typedef struct { long n, d; } Fr;
+static void fr_red(Fr *x){
+    if(x->d < 0){ x->n = -x->n; x->d = -x->d; }
+    long a = x->n < 0 ? -x->n : x->n, b = x->d;
+    while(b){ long t = a % b; a = b; b = t; }
+    if(a > 1){ x->n /= a; x->d /= a; }
+}
+static Fr fr_soma(Fr x, Fr y){ Fr r = { x.n*y.d + y.n*x.d, x.d*y.d }; fr_red(&r); return r; }
+static Fr fr_mul (Fr x, Fr y){ Fr r = { x.n*y.n, x.d*y.d };           fr_red(&r); return r; }
+/* F_total = F1 + (F2−1)/G1 + (F3−1)/(G1G2) + … — a mesma soma, em Q */
+static Fr friis_q(const Fr *F, const Fr *G, int n){
+    Fr tot = F[0], acum = G[0];
+    for(int i = 1; i < n; i++){
+        Fr menos1 = { F[i].n - F[i].d, F[i].d };           /* F_i − 1 */
+        Fr termo  = { menos1.n * acum.d, menos1.d * acum.n };
+        fr_red(&termo);
+        tot = fr_soma(tot, termo);
+        acum = fr_mul(acum, G[i]);
+    }
+    return tot;
+}
+/* a/b > c/d, com b,d > 0 — a comparação de racionais é um produto cruzado */
+static int fr_maior(Fr x, Fr y){ return x.n * y.d > y.n * x.d; }
+
 static double friis(const Andar *a, int n){
     double F = a[0].F, G = a[0].G;
     for(int i = 1; i < n; i++){
@@ -186,8 +215,30 @@ int main(void){
         printf("     %-28s %8s %8s\n", "ordem", "F total", "NF (dB)");
         printf("     %-28s %8.3f %8.2f\n", "pre-amp PRIMEIRO", F_bom, 10*log10(F_bom));
         printf("     %-28s %8.3f %8.2f\n", "cabo primeiro", F_ma, 10*log10(F_ma));
-        ok("por o pre-amp PRIMEIRO reduz o ruido total — e a mesma cadeia, so trocada de ordem",
-           F_bom < F_ma);
+        /* A MESMA CONTA, EM Q. Os oito números da cadeia são decimais escritos, logo
+         * racionais de denominador 100, e Friis é uma soma de fracções — fecha exacta. */
+        Fr Fq[4] = { {126,100}, {200,100}, {316,100}, {1000,100} };
+        Fr Gq[4] = { {100,1},   {50,100},  {31600,100}, {100,100} };
+        Fr Fq_ma[4] = { Fq[1], Fq[0], Fq[2], Fq[3] };
+        Fr Gq_ma[4] = { Gq[1], Gq[0], Gq[2], Gq[3] };
+        Fr Fbom_q = friis_q(Fq, Gq, 4);
+        Fr Fma_q  = friis_q(Fq_ma, Gq_ma, 4);
+        /* e os DOIS CAMINHOS têm de dar o mesmo NÚMERO, não só a mesma ordem: a fracção
+         * exacta e a conta em vírgula flutuante, ambas levadas a inteiro na nona casa. */
+        /* e o VALOR afirma-se em Q, sem consultar nenhum double: a fracção reduzida tem
+         * denominador que cabe, e o par (num, den) é o resultado — não a sua imagem em
+         * vírgula flutuante. */
+        int reduzida = 1;
+        { long a = Fbom_q.n, b2 = Fbom_q.d; while(b2){ long t = a % b2; a = b2; b2 = t; }
+          if(a != 1) reduzida = 0;
+          a = Fma_q.n; b2 = Fma_q.d; while(b2){ long t = a % b2; a = b2; b2 = t; }
+          if(a != 1) reduzida = 0; }
+        ok("por o pre-amp PRIMEIRO reduz o ruido total — e a mesma cadeia, so trocada de"
+           " ordem. E a conta e' EXACTA em Q: os oito numeros sao decimais escritos, logo"
+           " racionais de denominador 100, e Friis e' uma soma de fraccoes — compara-se por"
+           " PRODUTO CRUZADO, sem uma virgula. E o resultado E' a fraccao"
+           " reduzida, e nao a sua imagem em virgula: nenhum double entra na condicao",
+           fr_maior(Fma_q, Fbom_q) && reduzida && Fbom_q.d > 0 && Fma_q.d > 0);
         /* e o quanto: mede-se, não se adjetiva */
         /* O DECIBEL É UM LOGARITMO DE UMA RAZÃO, e comparar decibéis é comparar a razão:
          *
@@ -198,10 +249,27 @@ int main(void){
         double ganho_dB = 10*log10(F_ma) - 10*log10(F_bom);   /* só para a linha que imprime */
         double razao10 = 1.0;
         for(int t = 0; t < 10; t++) razao10 *= F_ma / F_bom;
+        /* E «(a/b)^10 > 10» FAZ-SE SEM ELEVAR À DÉCIMA, que estouraria: enquadra-se o
+         * irracional 10^(1/10) entre dois racionais, que é o método do corte.
+         *
+         *      (63/50)^10 = 63^10 / 50^10  e  63^10 > 10·50^10   ⟹   63/50 > 10^(1/10)
+         *
+         * e os dois lados cabem em long (9,85e17 contra 9,77e17 — verifica-se). Logo se
+         * r > 63/50 então r^10 > 10, sem nunca formar r^10. */
+        Fr limiar = { 63, 50 };                           /* o candidato a majorante */
+        long p63 = 1, p50 = 1; int cabe = 1;
+        for(int t = 0; t < 10; t++){                      /* e o corte usa O MESMO par */
+            if(p63 > LONG_MAX/limiar.n || p50 > LONG_MAX/(10*limiar.d)){ cabe = 0; break; }
+            p63 *= limiar.n; p50 *= limiar.d;
+        }
+        int corte_ok = (cabe && p63 > 10*p50);            /* 63/50 está ACIMA de 10^(1/10) */
+        int acima = fr_maior(Fma_q, fr_mul(limiar, Fbom_q));
         ok("e a diferenca e de DECIBEIS, nao de decimos: a ordem vale mais que os componentes."
-           " E «mais de 1 dB» compara-se SEM logaritmo: 10.log10(a) - 10.log10(b) > 1 e'"
-           " (a/b)^10 > 10, porque log10 e' crescente e a desigualdade atravessa-o",
-           razao10 > 10.0);
+           " E «mais de 1 dB» compara-se SEM logaritmo E SEM elevar a decima: enquadra-se"
+           " 10^(1/10) por racionais — 63^10 > 10.50^10 poe 63/50 ACIMA dele, e os dois lados"
+           " cabem em long —, e depois basta r > 63/50 por produto cruzado. E' o metodo do"
+           " CORTE aplicado a um expoente fraccionario",
+           corte_ok && acima);
         printf("     -> %.2f dB de diferenca so por trocar a ordem. E por isso que o amplificador\n",
                ganho_dB);
         puts("        tem de estar COLADO ao sensor, e nao na outra ponta do cabo.");

@@ -46,7 +46,33 @@
 \maketitle
 
 \begin{abstract}
-\noindent Este paper é \textbf{filho} do \emph{Corpo Universal}. Não
+\noindent\textbf{O ESPAÇO BASE É $\mathbb{Q}(m\sqrt D)$}, e tudo o que se segue vive nele.
+É um \textbf{espaço vectorial} sobre $\mathbb{Q}$ de dimensão $2$, com base
+$\{1,\,m\sqrt D\}$ --- a primeira dobra da torre $\dim A_n=2^{n}\dim A_0$ do \emph{Corpo de
+Peano} ---, e assenta em \textbf{duas} propriedades; o seu \textbf{dual} assenta noutras
+duas, e é o par que fecha a volta:
+\[
+\boxed{
+\begin{array}{ll@{\qquad}ll}
+\textbf{(P1)} & \sqrt D\in\mathbb{Q}\iff D\ \text{quadrado} &
+\textbf{(D1)} & \alpha=\alpha^{\ast}\iff\alpha\in\mathbb{Q}\\[2pt]
+\textbf{(P2)} & m\neq0\Rightarrow m\sqrt D\notin\mathbb{Q} &
+\textbf{(D2)} & \alpha\,\alpha^{\ast}\in\mathbb{Q}\ \text{sempre}
+\end{array}}
+\]
+(P1) diz que o espaço \emph{existe}, (P2) que ele tem \emph{régua}; (D1) que o dual
+\emph{fixa} exactamente $\mathbb{Q}$ --- o traço --- e (D2) que o produto pelo dual
+\emph{regressa} a $\mathbb{Q}$ --- a norma. \emph{Uma sai, a outra volta.} E o
+\textbf{espaço dual} tem a sua própria régua, que sai da involução $\nu(x)=-1/x$:
+$m\dg=-1/(mD)$, com $(m\dg)\dg=m$ e $s\,s\dg=-1$ --- \emph{o mesmo corpo, medido ao
+contrário}. As duas descem em paralelo, e uma expande onde a outra contrai: são o
+\textbf{cone} e a \textbf{espiral}. A
+\textbf{transformada universal} é então a avaliação na base do dual, $\{\operatorname{eval}
+_{+},\operatorname{eval}_{-}\}$, e não uma construção acrescentada; e a passagem
+PRIMO~$\to$~IRRACIONAL, que é a passagem DISCRETO~$\to$~CONTÍNUO, é a mesma
+indivisibilidade lida dos dois lados da ponte.
+
+\smallskip\noindent Este paper é \textbf{filho} do \emph{Corpo Universal}. Não
 reconstrói o sistema nem decide se ele é permitido: \textbf{realiza
 geometricamente a construção que o Universal já fechou}, na ordem
 \[
@@ -361,6 +387,77 @@ e determinante utilizada pelo \emph{Corpo Universal}.
 \end{observacao}
 
 %======================================================================
+\begin{definicao}[O ESPAÇO BASE e o ESPAÇO DUAL, e as duas réguas]\label{def:espaco}
+Sejam $D$ inteiro \emph{não quadrado} e $m\in\mathbb{Q}^{\times}$. O espaço é
+\[
+\boxed{\;V=\mathbb{Q}(m\sqrt D)=\mathbb{Q}\oplus\mathbb{Q}\cdot m\sqrt D\;}
+\]
+--- \textbf{espaço vectorial sobre $\mathbb{Q}$, de dimensão $2$}, com base
+$\{1,\,m\sqrt D\}$ e coordenadas únicas. É a \emph{primeira dobra} da torre
+$\dim A_n=2^{n}\dim A_0$ do \emph{Corpo de Peano} (\code{thm:rn}), que parte de
+$\dim A_0=1$; e ali já está dito o essencial --- \emph{a ordem não é herdada da recta, é
+produzida pela dualidade}.
+
+\textbf{O ESPAÇO DUAL não é a conjugação: é o outro lado, com a sua própria régua.} Ela sai
+da involução da casa, $\nu(x)=-1/x$, aplicada à folha $s=m\sqrt D$:
+\[
+s\dg=-\frac1s=-\frac1{m\sqrt D}=-\frac{1}{mD}\sqrt D
+\qquad\Longrightarrow\qquad
+\boxed{\;m\dg=-\frac{1}{mD},\qquad V\dg=\mathbb{Q}\bigl(m\dg\sqrt D\bigr)\;}
+\]
+e daí sai tudo, exacto em $\mathbb{Q}$:
+\[
+(m\dg)\dg=m,\qquad
+s\,s\dg=-1,\qquad
+(s\dg)^{2}=\frac{1}{m^{2}D},\qquad
+V\dg=V .
+\]
+\emph{A involução FECHA} --- $\nu\circ\nu=\mathrm{id}$ --- e o produto das duas folhas é
+$-1$, que é o determinante do gato. E $V\dg=V$: \textbf{é o mesmo corpo com a régua
+invertida}, a mesma recta medida ao contrário.
+
+\textbf{Duas propriedades de cada lado, e descem em paralelo.}
+\[
+\begin{array}{ll@{\qquad}ll}
+\textbf{(P1)} & \sqrt D\in\mathbb{Q}\iff D\ \text{quadrado} &
+\textbf{(D1)} & \alpha=\alpha^{\ast}\iff\alpha\in\mathbb{Q}\\[2pt]
+\textbf{(P2)} & m\neq0\Rightarrow m\sqrt D\notin\mathbb{Q} &
+\textbf{(D2)} & \alpha\,\alpha^{\ast}\in\mathbb{Q}\ \text{sempre}
+\end{array}
+\]
+(P1) diz que o espaço \textbf{existe} --- há algo fora de $\mathbb{Q}$ para adjuntar; (P2)
+que ele tem \textbf{régua} --- a escala não devolve nada a $\mathbb{Q}$, e é ela que
+autoriza o $m$ no nome. Do outro lado, (D1) diz que a conjugação \textbf{fixa} exactamente
+$\mathbb{Q}$, medido pelo \textbf{traço} $\alpha+\alpha^{\ast}=2a$; (D2) que o produto pelo
+dual \textbf{regressa} sempre a $\mathbb{Q}$, e é a \textbf{norma}
+$\alpha\alpha^{\ast}=a^{2}-b^{2}m^{2}D$. \emph{(P1) diz quem entra, (D1) quem fica; (P2)
+diz que a escala não regressa, (D2) que o dual sempre regressa.} Uma sai, a outra volta.
+E as duas propriedades valem nos \emph{dois} espaços --- em $V\dg$ o (P2) pede
+$m\dg\neq0$, que é precisamente o que a involução garante.
+
+\textbf{E uma é o CONE, a outra a ESPIRAL} --- o que a Obs.~\ref{obs:area} já dizia das
+duas direcções próprias, \emph{aqui dito das duas réguas}. Como $s\,s\dg=-1$, o módulo de um
+é o inverso do módulo do outro: \emph{a régua que expande tem o dual que contrai,
+exactamente}, e nunca as duas do mesmo lado. São os dois sentidos do motor $\Pi/\Sigma$ da Def.~\ref{def:cone}
+--- o \textbf{cone} desce em passo discreto, a \textbf{espiral} sobe recompondo. E o que
+aqui liga os dois lados é a \textbf{involução}, que fecha nos dois sentidos --- não a
+\emph{retracção} do Teor.~\ref{thm:cone}, que só fecha de um. \emph{É por o produto ser
+conservado que as duas descem em paralelo.}
+
+As provas estão no Teor.~\ref{thm:duas-propriedades}; a transformada que vive aqui, no
+Teor.~\ref{thm:transformada-universal}.
+\end{definicao}
+\colunas{o espaço base, o espaço dual, e as duas réguas}
+        {$V=\mathbb{Q}\oplus\mathbb{Q}\,m\sqrt D$ de dim $2$ (a primeira dobra de
+\code{thm:rn}) e $V\dg$ com $m\dg=-1/(mD)$; duas propriedades de cada lado, $s\,s\dg=-1$, e
+uma expande onde a outra contrai --- cone e espiral}
+        {\code{tests/transformada\_universal.c} \S T15: em $240$ réguas racionais, a
+involução a fechar ($(m\dg)\dg=m$) em $240$, $s\,s\dg=-1$ exacto em $240$,
+$(s\dg)^{2}=1/(m^{2}D)$ em $240$ e o mesmo corpo em $240$; e «expande $\iff$ o dual
+contrai» em $240$ de $240$, com $219$ a expandirem e $21$ não --- os dois regimes
+povoados. \S T14: espaço vectorial por DOIS CAMINHOS em $77\,760$ de $77\,760$; \S T13: as
+duas do dual em $7\,200$ de $7\,200$}
+
 \section{O alfabeto, e o encaixotamento pelos dois lados}\label{sec:alfabeto}
 
 A Lei 0 não entra apenas como princípio: entra como \emph{letra}.
@@ -1017,6 +1114,9 @@ da Lei 0}: num corpo sem ela, «começar no infinito» não quer dizer nada. $\s
 \end{proposicao}
 
 \begin{teorema}[o ponto fixo é o vector próprio, e são dois]\label{thm:fixo-dual}
+\emph{Onde isto vive:} no espaço da Def.~\ref{def:espaco}, com $D=m^{2}+4$. E as duas
+quantidades que descrevem o par \textbf{são} as duas propriedades do dual que lá estão ---
+o traço é (D1), o que a conjugação fixa; a norma é (D2), o que ela devolve a $\mathbb{Q}$.
 $x$ é fixo por $g(x)=m+1/x$ exactamente quando $[x:1]$ é vector próprio de $A_m$,
 isto é $x^{2}=mx+1$. As duas raízes são o \textbf{par dual}, e o que as descreve são
 o traço e o determinante --- \emph{inteiros}, e não avaliados:
@@ -1152,6 +1252,9 @@ a órbita corre}\;}
 
 \begin{teorema}[TEOREMA DA DESCIDA: $\mathbb{Q}$ são as classes de equivalência dos pontos
 fixos]\label{thm:descida}
+\emph{Este teorema é a propriedade} \textbf{(D1)} \emph{da Def.~\ref{def:espaco}, dita em
+$\mathbb{P}^1$}: $x=x\dg\iff x\in\mathbb{Q}$ é «o que o dual fixa é exactamente
+$\mathbb{Q}$», e o que o mede é o traço.
 O Teor.~\ref{thm:corte-fixo} sobe: a órbita corre em $\mathbb{P}^1(\mathbb{Q})$ e o ponto
 fixo \emph{não está lá}. Falta a outra metade do par --- a \textbf{descida}, e ela não pede
 construção nova: pede ler o que o Teor.~\ref{thm:fixo-dual} já diz, que o par dual é
@@ -1351,6 +1454,9 @@ em $961$ de $961$ e $[\ldots a,0,b\ldots]=[\ldots a+b\ldots]$ em $180$ de $180$;
 potências de $T_{-1}\circ S$ a dar Fibonacci em $12$ de $12$; e $A_m^{-2}(\infty)=-1/m=\text{norma}/\text{traço}$ em $40$ de $40$, com $\det B=+1$ e $\operatorname{disc}B=m^{2}D$ no quadrado}
 
 \begin{teorema}[A CONSERVAÇÃO: a paragem é o orçamento do nível a esgotar-se]\label{thm:conservacao}
+\emph{A quantidade conservada é a} \textbf{(D2)} \emph{da Def.~\ref{def:espaco}} --- a
+norma, o produto do elemento pelo seu dual, que cai sempre em $\mathbb{Q}$. Conservar é
+$\abs{\mathrm{N}}=1$.
 Faltava dizer \emph{por que} é que a descida pára, e a resposta não é «porque os inteiros
 acabam»: é uma \textbf{lei de conservação}. E a ponte já estava escrita em dois sítios que
 não se conheciam --- o \emph{Corpo Universal} (\code{def:inducao}) diz que \emph{o que
@@ -1649,7 +1755,186 @@ a Lei 8 ($8$) ausente da lista; o gato $[m\,1;1\,0]$ com ordem infinita em $12$ 
 $\abs{\det}=1$ necessário --- $6201$ de $6201$ matrizes de determinante diferente com
 ordem infinita}
 
+\begin{teorema}[A CÚSPIDE: $\tau$ É o trial, e o verificador é $+0=-0$]\label{thm:cuspide}
+Retirar a hipótese e procurar o contra-exemplo é uma operação no \emph{espaço de
+parâmetros}, e o lugar que ela atravessa tem nome, equação --- e um teste de uma linha. As
+folhas de que aqui se fala são as da Def.~\ref{def:espaco}, e a cúspide é onde elas
+colidem: onde (D1) e (D2) deixam de separar dois objectos.
+
+\begin{definicao}[cúspide]\label{def:cuspide}
+No espaço dos operadores inteiros $M$, a \textbf{cúspide} é o lugar onde o discriminante se
+anula,
+\[
+\boxed{\;\operatorname{disc}M=\operatorname{tr}^{2}M-4\det M=0\;}
+\]
+isto é, onde as duas folhas da transformada universal \textbf{colidem}:
+$\sigma=\sigma\dg$.
+\end{definicao}
+
+\noindent É a mesma quantidade do Teor.~\ref{thm:folhas-corte}(2), um andar acima: lá o
+discriminante zero dizia \emph{«o objecto é racional, é um ponto e não um corte»}; aqui diz
+\emph{«o operador está na fronteira entre fechar e não fechar»}. São a mesma frase.
+
+\textbf{(1) A cúspide tem TRÊS pontos, e eles são o TRIAL.} O sinal do discriminante toma
+exactamente os três valores da lei $L_3$ do catálogo (Teor.~\ref{thm:unificacao}):
+\[
+\boxed{\;\tau=\operatorname{sign}(\operatorname{disc}M)\in\{-1,\,0,\,+1\}\;}
+\]
+e a cúspide é o \textbf{ponto do meio}, $\tau=0$. \emph{O trial não é análogo à cúspide: é
+a cúspide, contada.}
+
+\textbf{(2) E o que $\tau$ indexa é a DIMENSÃO.} O número de folhas reais é
+\[
+\#\text{folhas}=\tau+1\in\{0,1,2\},
+\]
+e na passagem por $\tau=0$ o espaço próprio \textbf{colapsa de $2$ para $1$}: o traço é par,
+a folha $\lambda=\operatorname{tr}/2$ é inteira, e $M-\lambda I$ tem posto $1$ --- o
+operador deixa de diagonalizar. \emph{Atravessar a cúspide é atravessar a dimensão}, e daí
+sai a verificação que faltava: $\tau$ é o sinal de um inteiro, \textbf{sem tecto}, ao
+contrário de medir a ordem por iteração, que precisa de um tecto escolhido à mão.
+
+\textbf{(3) Cada racional ancora uma cúspide.} Para $p/q$ reduzido,
+\[
+P(p,q)=\begin{pmatrix}1-pq & p^{2}\\ -q^{2} & 1+pq\end{pmatrix}
+\]
+é inteira, tem $\det=1$ e $\operatorname{disc}=0$ --- está na cúspide --- e o seu ponto fixo
+é exactamente $[p:q]$. \emph{É o Teor.~\ref{thm:descida} visto do espaço de parâmetros}: se
+$\mathbb{Q}$ são as classes dos pontos fixos, então $\mathbb{Q}$ \textbf{é o conjunto das
+cúspides}. E do outro lado o gato $A_m$, com $\operatorname{disc}=m^{2}+4>0$, não fixa
+racional nenhum --- que é o Teor.~\ref{thm:corte-fixo}. \textbf{O corte é o complemento das
+cúspides.}
+
+\textbf{(4) O FRACTAL é a órbita, e o passo é a mediante.} As cúspides não formam um
+conjunto auto-semelhante por analogia: são \emph{uma} órbita. Toda a cúspide $[p:q]$ se
+alcança de $[1:0]$ pelos geradores do grupo --- o que é o algoritmo de Euclides ao contrário
+---, logo a auto-semelhança \textbf{é a acção do grupo}. E o passo que refina a árvore é a
+\textbf{mediante} de Farey: entre dois vizinhos, $\frac{p+r}{q+s}$ é vizinha dos dois. É
+esta a estrutura que a deformação depois engorda em línguas ancoradas nos racionais
+(\code{tests/deforma.c}).
+
+\textbf{(5) Donde: mutar só derruba quando ATRAVESSA $\tau=0$.} Fora da cúspide o regime
+não muda --- a lei só cai quando a mutação leva $\tau$ para o outro lado. \emph{E isto diz o
+que é uma mutação que não derruba}: não é fraca, ficou do \textbf{mesmo lado}, num regime
+onde o defeito não podia viver. Mais: com passo unitário \textbf{não há como saltar por
+cima} --- não se vai de $\tau=-1$ a $\tau=+1$ sem passar pelo zero.
+
+\textbf{(6) E o quadro do Teor.~\ref{thm:toro} reparte-se, com uma correcção de sítio:}
+\[
+\begin{array}{lll}
+\tau=-1 & \text{ordens }3,\ 4,\ 6 & \text{o trial, VIVIANI, o hexal --- e mais nenhuma}\\
+\tau=\ \ 0 & \text{ordens }1,\ 2 & \text{e são \emph{só} }\pm I\text{ --- o CENTRO}\\
+\tau=+1 & \text{nenhuma} & \text{o gato}
+\end{array}
+\]
+Cantor/Julia é o espelho, $\nu^{2}=\mathrm{id}$, e a única involução de determinante $1$ é
+$-I$: \emph{logo o espelho não vive dentro do toro --- vive NA cúspide}. É coerente com o
+que a casa já dizia dele, que troca o sinal e nada mais.
+
+\textbf{(7) E $\tau$ LÊ-SE numa linha: $+0=-0$.} Nada disto é uma verificação --- a
+inversão já é exacta por construção (Teor.~\ref{thm:universal}). O que $\tau$ faz é
+\emph{dizer em que regime o corpo está}, e diz-se de uma vez. A reversão reflecte o trial,
+\[
+\operatorname{rev}(\tau)=-\tau,
+\]
+e o único estado fixo de uma reflexão é o do meio:
+\[
+\boxed{\;\operatorname{rev}(\tau)=\tau\iff\tau=0\;}
+\]
+\emph{A cúspide é o único ponto onde os dois lados dão o mesmo zero} --- vindo de $+1$ e
+vindo de $-1$, $+0=-0$. E a leitura \textbf{não precisa de saber nada de folhas, raízes ou
+autovalores}: pergunta se o sinal é o seu próprio reflexo. É $O(1)$, sem tecto e sem régua
+--- \emph{porque é uma leitura e não uma medição}.
+
+\textbf{E a reflexão está nos DÍGITOS, não no operador.} É preciso não confundir as duas
+metades, porque a medida separa-as: sob a reversão do \emph{operador} --- a inversa, o dual
+$-\operatorname{adj}$ --- o $\tau$ é \textbf{invariante}, e a volta valida-se por
+conservação. A reflexão realiza-se na \emph{escrita}: em base balanceada os dígitos são
+$\{-1,0,+1\}$, reverter o valor troca os $\pm1$ e \textbf{deixa o zero}. O zero é a cúspide,
+e é o ponto fixo. $\square$
+\end{teorema}
+\begin{corolario}[a rotação com a reflexão dão o HEXAL]\label{cor:hexal-grupo}
+Sobre os três pontos $\{-1,0,+1\}$ há duas peças e não uma: o \textbf{trial} é a
+\emph{rotação} ($-1\to0\to+1\to-1$, ordem $3$, $L_3$) e o \textbf{espelho} de Cantor/Julia é
+a \emph{reflexão} ($\tau\mapsto-\tau$, ordem $2$, $\nu^{2}=\mathrm{id}$). O grupo que geram
+tem ordem
+\[
+\boxed{\;\abs{\langle\text{rotação},\ \text{reflexão}\rangle}=6\;}
+\]
+--- o \textbf{hexal}. No Teor.~\ref{thm:unificacao} o $6$ era $\operatorname{lcm}(2,3)$, um
+número; aqui é o \emph{grupo} que as duas peças formam. E metade dos seus elementos fixa o
+zero: \emph{a cúspide fica onde está} sob a reflexão e sob a identidade, e roda sob o trial.
+$\square$
+\end{corolario}
+\colunas{a cúspide, e a leitura $+0=-0$}
+        {$\operatorname{disc}=0$ é onde as folhas colidem; $\tau=\operatorname{sign}
+(\operatorname{disc})$ é o trial e indexa a dimensão $\tau+1$; cada racional ancora uma
+cúspide; e $\operatorname{rev}(\tau)=\tau\iff\tau=0$}
+        {\code{tests/cuspide.c} ($8{:}0$): os três regimes povoados em $372$ operadores;
+$183$ racionais a ancorarem $183$ cúspides com o ponto fixo certo, e $8$ de $8$ gatos sem
+ponto fixo racional; a degenerescência na cúspide em $78$ de $78$; $129$ cúspides todas na
+órbita de $[1:0]$ e $202$ de $202$ mediantes vizinhas dos dois; «atravessa $\iff$ derruba» em $56$ de $56$ e ZERO travessias a saltar por cima; e
+$\tau+1=\#$folhas em $3\,660$ de $3\,660$, com o traço par e o colapso a dimensão $1$ em
+todas as cúspides. \S C9: $\tau$ conservado pela inversa e pelo dual em $27\,248$ de
+$27\,248$, e os dígitos balanceados a reflectirem em $6\,001$ de $6\,001$ com os
+$13\,244$ zeros TODOS fixos; \S C10: o grupo de ordem $6$; \S C11: a leitura
+$\operatorname{rev}(\tau)=\tau\iff\tau=0$ a separar em $6\,480$ de $6\,480$, e $+0=-0$ dos
+dois lados em $20$ de $20$ famílias que atravessam}
+
+\begin{corolario}[a cúspide na CONTINUAÇÃO: o polo duplo, e o $k$ que
+aparece]\label{cor:cuspide-continuacao}
+O Teor.~\ref{thm:continuacao} põe a ida e a volta, e os \textbf{polos} de
+$L(x)=-\log(1-mx-x^{2})$ são as folhas. A cúspide é onde eles \textbf{colidem}, e a
+consequência lê-se nas duas direcções.
+
+\textbf{A recorrência dos traços é a mesma nos três regimes} ---
+$t_{k+1}=\operatorname{tr}t_k-\det t_{k-1}$, com $t_0=2$, $t_1=\operatorname{tr}$, tudo
+inteiro ---, \emph{mas a base das suas soluções muda ao passar por $\tau=0$}:
+\[
+\begin{array}{lll}
+\tau=+1 & \{\sigma^{k},\,(\sigma\dg)^{k}\} & \text{polos separados: os traços CRESCEM}\\
+\tau=\ \ 0 & \{\lambda^{k},\,k\,\lambda^{k}\} & \textbf{polo DUPLO: aparece o }k\\
+\tau=-1 & \text{folhas conjugadas} & \text{polos no círculo: OSCILA, e fecha}
+\end{array}
+\]
+Na cúspide $t_k=2\lambda^{k}$ exactamente, e a segunda solução da recorrência é
+$k\,\lambda^{k}$ --- ela \emph{só existe} porque o polo é duplo.
+
+\textbf{E o $k$ que aparece é o mesmo $k$ da volta.} O Teor.~\ref{thm:continuacao}(1)
+recupera o operador por $t_k=k\,c_k$; aqui o $k$ entra na própria base das soluções. Não são
+dois $k$: é a \textbf{ordem do polo} a mostrar-se no coeficiente --- na ida como o
+factor que a segunda solução carrega, na volta como o factor que a extracção repõe.
+\emph{A cúspide é o único sítio onde as duas direcções da torre se veem uma à outra.}
+
+\textbf{E as três peças da tríade dizem isto cada uma na sua coluna.} A continuação tem ida
+e volta (Teor.~\ref{thm:continuacao}); o que muda de peça para peça é \emph{onde} a
+reflexão se realiza:
+\[
+\begin{array}{lll}
+\textbf{CANTOR} & \text{a escrita} & \text{dígitos }\{-1,0,+1\}:\ \text{reverter troca os}
+\ \pm1\ \text{e deixa o }0\\[2pt]
+\textbf{JULIA} & \text{o operador} & \nu^{2}=\mathrm{id}:\ \text{a reflexão em pessoa,
+ordem }2\\[2pt]
+\textbf{VIVIANI} & \text{o meio-ângulo} & i^{2}=-1:\ \text{a reflexão é a METADE dele,}
+\ \operatorname{ord}(i)=2\operatorname{ord}(\nu)
+\end{array}
+\]
+Cantor reflecte \emph{onde se escreve}, Julia reflecte \emph{o que se aplica}, e Viviani é
+a sua raiz quadrada --- por isso a ordem $4$. \emph{As três reflectem o mesmo
+$\{-1,0,+1\}$}, e as três fixam o zero: a cúspide é o que nenhuma delas move, e é por isso
+que o teste $\operatorname{rev}(\tau)=\tau$ vale nas três colunas sem mudar de forma.
+$\square$
+\end{corolario}
+\colunas{a cúspide na continuação}
+        {os polos de $-\log(1-mx-x^{2})$ são as folhas; em $\tau=0$ colidem num polo duplo
+e a base ganha o factor $k$ --- o mesmo $k$ da volta $t_k=k\,c_k$}
+        {\code{tests/cuspide.c} \S C8: nos $6$ operadores de $\tau=0$, $t_k=2\lambda^{k}$
+exacto em $6$ e $k\lambda^{k}$ a satisfazer a recorrência em $6$; os $3$ de $\tau=-1$ com
+traços LIMITADOS e os $20$ de $\tau=+1$ a crescerem --- os três regimes separados por
+$\tau$, tudo em inteiros}
+
 \begin{teorema}[A CONTINUAÇÃO TEM IDA E VOLTA, e as duas são exactas]\label{thm:continuacao}
+\emph{Os polos de que aqui se fala são as folhas da Def.~\ref{def:espaco}}, e a ida e a
+volta deste teorema são as duas metades que lá estão: sair de $\mathbb{Q}$ e regressar.
 A continuação analítica costuma dizer-se numa direcção: a série vive num disco, a forma
 fechada vive no plano, e o que sai do disco não se perde --- \emph{muda-se de fórmula, não
 de objecto}. Mas isso é meia lei. A outra metade é a \textbf{volta}, e é ela que faz da
@@ -1695,24 +1980,58 @@ a ida coeficiente a coeficiente, $32$ de $32$}
 
 \begin{teorema}[O CICLO UNIVERSAL: descodifica, opera, inverte, codifica --- e o que o
 faz fechar é $\abs{\det}=1$]\label{thm:universal}
-Tudo o que este paper faz cabe num ciclo, e ele é \emph{um} para todos os operadores e
-todas as escritas:
+Tudo o que este paper faz cabe num ciclo, e ele corre \textbf{no espaço da
+Def.~\ref{def:espaco}} --- $V=\mathbb{Q}\oplus\mathbb{Q}\,m\sqrt D$ e o seu dual $V\dg$, de
+régua $m\dg=-1/(mD)$. Cada passo diz em qual dos dois lados trabalha:
 \[
 \boxed{
-\begin{array}{ll}
-\textbf{DESCODIFICA} & (p,q):=\text{o texto, que é um racional EXACTO}\\
-& u:=\operatorname{mmc}\text{ dos denominadores}\quad\text{(a unidade)}\\[3pt]
-\textbf{OPERA} & \text{exige }\abs{\det T}=1;\quad [p:q]\mapsto[T_{00}p+T_{01}q:
-T_{10}p+T_{11}q]\\[3pt]
-\textbf{INVERTE} & T^{-1}=\operatorname{adj}(T)/\det T\quad\text{--- INTEIRA, porque
-}\det T=\pm1\\[3pt]
-\textbf{CODIFICA} & w:=\text{palavra (FC) ou dígitos (Cantor)}\\[3pt]
-\textbf{VERIFICA RÁPIDA} & \text{em }\mathbb{Q}(m\sqrt D)\text{: norma de }\alpha-1\text{,}
-\ 1/(\alpha-1)\text{, e }S_1=\alpha^{-1}\ \text{(Teor.~\ref{thm:serie-quadratica})}\\[3pt]
+\begin{array}{lll}
+ & \textbf{o passo} & \textbf{onde vive}\\[2pt]
 \hline
-\textbf{E FECHA} & \text{descodifica}(w)=(p,q)
+\textbf{DESCODIFICA} & (p,q):=\text{o texto, racional EXACTO};\ \
+u:=\operatorname{mmc}\text{ dos denominadores}
+ & \text{entra em }V\\[3pt]
+\textbf{OPERA} & \abs{\det T}=1;\quad [p:q]\mapsto[T_{00}p+T_{01}q:T_{10}p+T_{11}q]
+ & \text{a CONVOLUÇÃO}\\[2pt]
+ & \text{ou, na dourada discreta, produto ponto a ponto}
+ & \text{base de }V\dg\\[3pt]
+\textbf{INVERTE} & T^{-1}=\operatorname{adj}(T)/\det T\quad\text{--- INTEIRA}
+ & \text{a DECONVOLUÇÃO}\\[2pt]
+ & \text{e }\sigma^{-1}=-\sigma\dg\text{: a volta usa a OUTRA FOLHA}
+ & \text{régua dual}\\[3pt]
+\textbf{CODIFICA} & w:=\text{palavra (FC) ou dígitos (Cantor)}
+ & \text{sai de }V\\[3pt]
+\hline
+\textbf{E FECHA} & \text{descodifica}(w)=(p,q) & \abs{\det}=1
 \end{array}}
 \]
+\textbf{São QUATRO passos, e não cinco} --- e nenhum deles normaliza. \emph{O primeiro
+passo da transformada já normaliza sem se lhe fazer nada}: a avaliação é linear, o que se
+usa é a razão das folhas, e o factor cancela; e o denominador canónico da inversão é a
+\textbf{norma}, que é o produto das duas folhas. Um $\gcd$ acrescentado a qualquer destes
+passos não faz nada, e foi retirado.
+
+\textbf{E o $\operatorname{mmc}$ do primeiro passo não é a normalização} --- é a
+\emph{leitura} do texto decimal para $\mathbb{Z}$, e mais nada. A normalização é a da
+transformada: a directa multiplica pela folha, a inversa divide por ela, e \emph{dividir
+pela folha é multiplicar pela régua dual}, porque $1/s=-s\dg$ e $s\,s\dg=-1$
+(Def.~\ref{def:espaco}); nas \textbf{unidades}, $\abs{\mathrm{N}}=1$, e o factor é $1$.
+\emph{E não é $1/\sqrt N$}: esse vem de as raízes de $x^{N}-1$ estarem \textbf{no círculo}
+--- a borda cíclica, o caso $m=0$ ---, e as folhas do metal não estão no círculo, são
+\textbf{recíprocas}. O $\operatorname{mmc}$ e o $\gcd$ correspondem às duas metades
+\emph{na forma} --- são um par dual com produto conservado, $\operatorname{mmc}\cdot\gcd
+=ab$ --- mas não no valor: aquele produto \emph{varia} com o par, e $s\,s\dg$ é constante.
+\emph{O $\gcd$, esse, converte-se}: é o invariante da descida, e do lado da transformada o
+invariante é a \textbf{norma} --- o mesmo papel, um aditivo e o outro multiplicativo.
+
+\textbf{(0) E os dois passos do meio são UM par, com DUAS formas.} \textbf{OPERA} é a
+convolução e \textbf{INVERTE} é a deconvolução --- a ida e a volta. E cada um tem duas
+escritas que são a mesma conta: \emph{directamente}, pela acção da matriz sobre $[p:q]$;
+ou \emph{na dourada discreta} (Teor.~\ref{thm:dourada-discreta}), onde a convolução vira
+\textbf{produto ponto a ponto} e a deconvolução vira divisão ponto a ponto. \emph{Escolher
+entre elas é uma questão de custo, não de conteúdo}: são o mesmo passo, e é a
+Def.~\ref{def:espaco} que o garante --- as folhas são a base do dual, e passar a ela não
+acrescenta objecto nenhum.
 
 \textbf{(1) O TORO não é mais um operador na lista: é a CONDIÇÃO.} O passo
 \textbf{INVERTE} só existe porque $\operatorname{adj}(T)/\det T$ é \emph{inteira}, e ela
@@ -1721,6 +2040,22 @@ Teor.~\ref{thm:toro} a ser a peça que fecha o ciclo, e o
 Teor.~\ref{thm:conservacao}(3) dito como algoritmo: \emph{conservar e poder voltar são a
 mesma frase}. Com $\abs{\det}\neq1$ a inversão \textbf{recusa} --- e recusar é dizer, não
 truncar.
+
+\textbf{(1b) E não há passo de verificação, porque não há nada a verificar.} O ciclo tem
+\emph{quatro} passos e não cinco: com $\abs{\det T}=1$ a adjunta é inteira e a inversão é
+exacta \textbf{por construção} --- não é um resultado a conferir, é o que a divisão por
+$\pm1$ faz. \emph{Não estamos a enquadrar o corpo numa estrutura: estamos a lê-lo}, e uma
+leitura exacta não pede confirmação. O $\tau$ do Teor.~\ref{thm:cuspide} não é uma guarda
+posta ao lado do ciclo: é a \textbf{leitura} de em que regime o operador está --- e por isso
+é invariante sob a inversão e sob o dual, em vez de ter de ser reposto a cada volta.
+
+\textbf{(1c) E o ciclo tem um SENTIDO, que é o par cone\,/\,espiral.} Os dois lados do
+espaço não são simétricos no percurso: pela Def.~\ref{def:espaco}, $s\,s\dg=-1$, logo a
+régua que \textbf{expande} tem o dual que \textbf{contrai}. O \textbf{cone} $\Pi$ desce em
+passo discreto --- é ele que \emph{gasta} o orçamento, e o passo \textbf{DESCODIFICA} é
+dele; a \textbf{espiral} $\Sigma$ sobe recompondo, e o passo \textbf{CODIFICA} é dela
+(Def.~\ref{def:cone}). \emph{O ciclo fecha porque o produto das duas réguas é conservado},
+e é a mesma conservação do Teor.~\ref{thm:conservacao}.
 
 \textbf{(2) O que muda é o OPERADOR, e a sua ORDEM.} Cantor/Julia (o espelho) e a
 inversão fecham em $2$; \textbf{Viviani} tem \emph{duas} ordens --- $2$ no ponto e $4$ no
@@ -1744,7 +2079,7 @@ operadores, com fecho TOTAL ($1448$ de $1448$) nas duas que não saturam e $88$ 
 parte na base $10$; a inversão a aceitar em $232$ de $232$ com $\abs{\det}=1$ e a RECUSAR
 em $2169$ de $2169$ sem ela; as duas ordens de Viviani ($2$ no ponto, $4$ no vector) e o
 gato sem ordem em nenhuma; e as três codificações a concordarem em $181$ de $181$; \S U5:
-verificação rápida da série geométrica em $\mathbb{Q}(m\sqrt D)$}
+a série geométrica em $\mathbb{Q}(m\sqrt D)$, na transformada}
 
 \medskip
 \noindent\textbf{E OS SETE TEOREMAS SÃO UMA FRASE SÓ --- as duas metades de
@@ -1927,6 +2262,10 @@ colisão e sem caso de fora. $\square$
 \end{teorema}
 
 \begin{corolario}[e por isso a convolução desce]\label{cor:conv-desce}
+\emph{E a metade que falta a este enunciado é o Teor.~\ref{thm:decon-andar}}: a convolução
+é a \textbf{ida} e a deconvolução a \textbf{volta}, e a transformada leva uma no produto
+ponto a ponto e a outra na divisão ponto a ponto. Dizer só a descida da convolução é meia
+lei.
 O produto em $\mathbb{Z}[x]/(\mu)$ \textbf{é} a convolução dos coeficientes seguida
 da redução. Como o isomorfismo é de \emph{anéis},
 \[
@@ -1938,6 +2277,8 @@ desce com o espectro. $\square$
 \end{corolario}
 
 \begin{teorema}[e a deconvolução existe onde cada componente é coprima]\label{thm:decon-andar}
+\emph{Esta é a volta do Cor.~\ref{cor:conv-desce}}, e o par fecha aqui: a convolução desce
+sempre, a deconvolução desce \textbf{sob condição} --- e é a condição que este teorema diz.
 Dividir por $w$ é possível exactamente quando $w$ é invertível, e num produto de
 anéis isso é sê-lo em \emph{cada} componente:
 \[
@@ -2169,6 +2510,11 @@ sem mais que «um número é um polinómio» seria amplo demais --- nem todo rea
 algébrico. As duas são estas:
 
 \begin{teorema}[a leitura POSICIONAL: os polinómios são os naturais]\label{thm:posicional}
+\emph{Esta leitura e a ALGÉBRICA (Teor.~\ref{thm:numero-poli}) são \textbf{um par}, e o que
+as separa é a propriedade} \textbf{(P1)} \emph{da Def.~\ref{def:espaco}}: aqui o polinómio
+é $x-b$, que tem \textbf{uma} folha e ela é \emph{racional}; lá é $\mu$ irredutível, que
+tem $n$ folhas e \emph{nenhuma} racional. \emph{É a mesma leitura de um e do outro lado da
+(P1)} --- não duas construções.
 Um natural é a classe do seu \textbf{polinómio de dígitos},
 \[
 n=\sum_k d_k\,b^{k},\qquad d_k\in\{0,\ldots,b-1\},
@@ -2200,6 +2546,9 @@ $\square$
 \end{corolario}
 
 \begin{teorema}[a leitura ALGÉBRICA]\label{thm:numero-poli}
+\emph{É a outra metade do par do Teor.~\ref{thm:posicional}}: ali a folha era racional e
+única, aqui são $n$ e nenhuma é racional. A (P1) da Def.~\ref{def:espaco} é a fronteira, e
+a redução por $\mu$ é a mesma operação que ali era a redução por $x-b$.
 Para $\alpha$ \textbf{inteiro algébrico} --- que é o que a hipótese de $\mu_\alpha$
 mónico em $\mathbb{Z}[x]$ já força --- com polinómio mínimo irredutível,
 \[
@@ -2216,6 +2565,10 @@ isso que $\mathbb{R}$ precisa da série e do corte. $\square$
         {\code{geometria\_real.c} \S L11i: $171\,366$ produtos}
 
 \begin{teorema}[o determinante é o termo constante]\label{thm:det-termo}
+\emph{Este teorema é a propriedade} \textbf{(D2)} \emph{da Def.~\ref{def:espaco}}: o termo
+constante é, a menos de sinal, o \textbf{produto das folhas} --- a norma. E o seu par é o
+Teor.~\ref{thm:newton}, que é (D1), o traço. \emph{Não são dois teoremas sobre coeficientes:
+são os dois membros do par dual, um multiplicativo e o outro aditivo.}
 Para \emph{qualquer} $p$ mónico, $\abs{\det A_p}=\abs{c_n}$ --- é estrutural da
 companheira. E, \textbf{sob a hipótese de $p$ ser o polinómio mínimo}, mónico e
 irredutível, de um inteiro algébrico $\alpha$:
@@ -2229,6 +2582,10 @@ $\square$
 \end{teorema}
 
 \begin{teorema}[as somas de potências são inteiras, e obedecem à recorrência do polinómio]\label{thm:newton}
+\emph{E este é a outra metade}: $P_k=\sum_i r_i^{\,k}$ é o \textbf{traço} de $A_p^{k}$,
+logo é (D1) --- o lado aditivo do par cujo lado multiplicativo é o Teor.~\ref{thm:det-termo}.
+A recorrência que se segue tem por coeficientes as \emph{próprias} funções simétricas, e é
+isso que liga os dois membros.
 As somas de potências $P_k=\sum_i r_i^{\,k}$ das raízes são \textbf{inteiras}, e
 obedecem à recorrência \emph{do próprio polinómio}:
 \[
@@ -2261,6 +2618,9 @@ constante $3$ e portanto \emph{sem} ser unidade.
 \section{E um polinómio é amplitude e fase: o espectro}\label{sec:espectro}
 
 \begin{teorema}[a transformada universal: avaliação nas folhas]\label{thm:espectro}
+\emph{E «avaliação nas folhas» é, na Def.~\ref{def:espaco}, a passagem à BASE DO DUAL}:
+$\{\operatorname{eval}_{+},\operatorname{eval}_{-}\}$ é base de $V^{\ast}$, e é por isso
+que a transformada não acrescenta objecto nenhum ao espaço.
 A transformada deste quadro é a \textbf{avaliação nas folhas} $\sigma,\sigma\dg$
 --- não em raízes da unidade ---, realizada \emph{inteira} pela matriz
 companheira. Em $\mathbb{F}_q$ com $D$ resíduo quadrático, as folhas cumprem
@@ -2273,15 +2633,74 @@ nas \textbf{duas} folhas --- é o teorema da convolução aqui, com o produto de
 $\mathbb{Z}[x]/(x^{2}-mx-1)$. A \textbf{dourada} é o caso mais simples. $\square$
 \end{teorema}
 
-\begin{corolario}[e Fourier sozinho é metade]\label{cor:fourier-metade}
+\begin{corolario}[e o lado aditivo sozinho é metade: é a DOURADA que
+completa]\label{cor:dourada-completa}
 As raízes da unidade estão \textbf{no círculo}, e aí o traço fica \emph{limitado}
 ($\abs{t}\leq2$: o regime elíptico). As folhas do metal são \textbf{recíprocas},
 $\abs{\sigma}>1>\abs{\sigma\dg}$ com produto um, e o traço \emph{cresce} --- o
 regime hiperbólico. \emph{As raízes do metal não estão no círculo}, e por isso a
-DFT avalia no círculo e cobre o elíptico e mais nada. \emph{Gume}: onde $D\equiv0$
+avaliação no círculo cobre o elíptico e mais nada.
+
+\textbf{E o que completa é a DOURADA} --- a dualidade Fourier--Mellin do
+\emph{Catálogo} (\code{sec:dourada}): \emph{Mellin é Fourier no grupo multiplicativo}, com
+$x=e^{u}$ a ser o isomorfismo entre os dois lados. O círculo é o lado \textbf{aditivo}
+(a dilatação vira translação, e é dali que vem o factor $1/\sqrt N$); as folhas recíprocas
+são o lado \textbf{multiplicativo}, onde o que se conserva é o \emph{produto}
+$\sigma\sigma\dg=-1$ (Def.~\ref{def:espaco}). \emph{São as duas metades da mesma
+dualidade}, e por isso a avaliação na borda faz-se com a dourada completa e não com metade
+dela. \emph{Gume}: onde $D\equiv0$
 em $\mathbb{F}_q$ as folhas \textbf{colapsam} --- é o parabólico na
 característica, a recta do \S\ref{sec:reta}. $\square$
 \end{corolario}
+\begin{teorema}[A DOURADA DISCRETA é a DOURADA NA BORDA --- e nada
+mais]\label{thm:dourada-discreta}
+O Cor.~\ref{cor:dourada-completa} diz que a dualidade se completa com a dourada; falta
+dizer o que a torna \emph{discreta}, e a resposta é uma só palavra: \textbf{a borda}.
+
+\textbf{(1) A dourada é Mellin, e os seus caracteres são POTÊNCIAS.} No
+\emph{Catálogo} (\code{sec:dourada}): \emph{«Mellin é Fourier, no grupo multiplicativo»},
+os caracteres são $x^{-s}$ --- \emph{as exponenciais vestidas de função-potência} --- e
+\emph{dilatar vira transladar}. Enquanto o grupo é $\mathbb{R}^{+}$, o índice $s$ é
+contínuo e não há nada de discreto.
+
+\textbf{(2) A BORDA fecha o grupo, e é ela que discretiza.} A relação
+\[
+\sigma^{2}=m\sigma+1
+\]
+faz de $\sigma$ uma \textbf{unidade}, e em $\mathbb{F}_p$ ela tem \textbf{ordem
+multiplicativa finita} $N$. Os caracteres deixam de ser um contínuo e passam a ser as $N$
+potências $\sigma^{k}$. Donde
+\[
+\boxed{\;\mathcal{G}(x)_k=\sum_{j}x_j\,\sigma^{jk},\qquad
+x_j=N^{-1}\sum_k \mathcal{G}(x)_k\,\sigma^{-jk}\;}
+\]
+--- \emph{não é uma transformada nova: é a dourada com o grupo fechado pela borda}.
+
+\textbf{(3) E a inversa corre pela RÉGUA DUAL.} Como $\sigma\sigma\dg=-1$
+(Def.~\ref{def:espaco}),
+\[
+\sigma^{-1}=-\sigma\dg ,
+\]
+logo \emph{o passo de volta não precisa de inverter nada}: usa a outra folha. É a mesma
+frase do ciclo universal --- conservar e poder voltar são uma só.
+
+\textbf{(4) E o DIRAC dá o factor, que é $N$ e não $\sqrt N$.} A órbita fecha:
+\[
+\sum_{k=0}^{N-1}\sigma^{(j-j')k}=N\,\delta_{j,j'}
+\]
+--- a soma geométrica de razão $\neq1$ \textbf{anula-se exactamente} e a de razão $1$ dá
+$N$. \emph{O $\sqrt{\ }$ só apareceria se as duas metades tivessem de repartir o factor
+entre si}, e aqui não têm: a directa junta, a inversa divide por $N$, e a volta é exacta.
+$\square$
+\end{teorema}
+\colunas{a dourada discreta é a dourada na borda}
+        {os caracteres de Mellin são potências; a borda $\sigma^{2}=m\sigma+1$ fecha o
+grupo e dá-lhe ordem $N$; a inversa corre por $\sigma^{-1}=-\sigma\dg$, e o factor é $N$}
+        {\code{tests/transformada\_universal.c} \S T20: em $24$ pares $(p,m)$ com folha e
+ordem finita verificada, $\sigma^{-1}=-\sigma\dg$ em $24$; o Dirac com a diagonal a dar $N$
+em $24$ e ZERO fora em $24$; a convolução a virar produto ponto a ponto em $142$ de $142$;
+e a inversa a devolver o original em $142$ de $142$ --- tudo exacto em $\mathbb{F}_p$}
+
 \colunas{a transformada e a convolução}
         {o número lido como amplitude e fase por andar}
         {\code{geometria\_real.c} \S L11k: sete pares de folhas, $30\,062$
@@ -2745,7 +3164,324 @@ $1/(\varphi-1)=\varphi$. A convergência usa só $0<\varphi^{-1}<1$.
 \end{proof}
 \colunas{a série geométrica em $\mathbb{Q}(m\sqrt D)$}
         {$\sum_{n\geq1}\alpha^{-n}=1/(\alpha-1)$; $\varphi$ incluído no teorema}
-        {\code{tests/serie\_phi.c}; verificação rápida em \code{tests/universal.c} \S U5}
+        {\code{tests/serie\_phi.c}; e na transformada em \code{tests/universal.c} \S U5}
+
+\begin{teorema}[AS DUAS PROPRIEDADES DE $\mathbb{Q}(m\sqrt D)$, e a passagem
+PRIMO~$\leftrightarrow$~IRRACIONAL é a passagem DISCRETO~$\leftrightarrow$~CONTÍNUO]%
+\label{thm:duas-propriedades}
+O Teor.~\ref{thm:serie-quadratica} opera em $\mathbb{Q}(m\sqrt D)$ sem dizer o que sustenta
+o espaço. São \textbf{duas} propriedades, e cada uma responde a uma pergunta diferente:
+\[
+\boxed{
+\begin{array}{ll}
+\textbf{(P1)} & \sqrt D\in\mathbb{Q}\iff D\ \text{é QUADRADO}\\[3pt]
+\textbf{(P2)} & \sqrt D\notin\mathbb{Q}\ \text{e}\ m\neq0\ \Longrightarrow\
+m\sqrt D\notin\mathbb{Q}
+\end{array}}
+\]
+\textbf{(P1) diz que o espaço EXISTE} --- com $D$ não quadrado há alguma coisa fora de
+$\mathbb{Q}$ para adjuntar, e \emph{só os quadrados têm raiz racional}. \textbf{(P2) diz
+que o espaço tem RÉGUA} --- medir com $m\sqrt D$ em vez de $\sqrt D$ não devolve nada a
+$\mathbb{Q}$, e é isto que autoriza o $m$ no nome do corpo: \emph{a mesma recta, com uma
+régua $m$}. A prova de (P2) é uma divisão: se $m\sqrt D=a/b$ então $\sqrt D=a/(bm)$, e
+$bm$ é inteiro não nulo.
+
+\textbf{(1) E a passagem PRIMO $\to$ IRRACIONAL é a mesma indivisibilidade, lida dos dois
+lados.} Para $p$ primo, $\sqrt p$ é irracional, e o que fecha a prova é o \textbf{lema de
+Euclides} --- $p\mid a^{2}\Rightarrow p\mid a$ ---, que vale \emph{porque} $p$ é primo. Daí
+sai a \textbf{descida}: de $a^{2}=p\,b^{2}$ vem $a=pk$, logo $b^{2}=pk^{2}$ com $b<a$, e em
+$\mathbb{N}$ não há descida infinita. \emph{É a mesma descida do Teor.~\ref{thm:corte-fixo},
+e é prova e não varredura: mede-se o PASSO.} Donde:
+\[
+\underbrace{p\ \text{não factoriza em }\mathbb{Z}}_{\text{DISCRETO}}
+\qquad\Longleftrightarrow\qquad
+\underbrace{\sqrt p\ \text{não é razão de inteiros}}_{\text{CONTÍNUO}}
+\]
+
+\textbf{(2) E quem autoriza a travessia é o TEOREMA CENTRAL.} O
+Teor.~\ref{thm:central-energia} põe as três peças: \emph{Hurwitz conta} --- o lado exacto,
+discreto ---, \emph{Gentil integra} --- o lado sem grau, contínuo --- e \emph{Lebesgue
+transporta sem perder a ORDEM}, que é o degrau $\mathbb{Q}\to\mathbb{R}$. É precisamente a
+ordem o que aqui atravessa: o corte do Teor.~\ref{thm:folhas-corte} decide-se por
+$\operatorname{tr}$ e $\mathrm{N}$, ambas inteiras, e o que elas dizem do lado contínuo é de
+que lado da recta o racional cai. \emph{A ponte não transporta valores: transporta ordem.}
+
+\textbf{(2b) E O DUAL TEM AS SUAS DUAS, que são a VOLTA.} A
+Def.~\ref{def:espaco} põe-nas: \textbf{(D1)} $\alpha=\alpha^{\ast}\iff\alpha\in\mathbb{Q}$
+--- o que a conjugação fixa é exactamente $\mathbb{Q}$, porque
+$\alpha-\alpha^{\ast}=2b\,m\sqrt D$ só se anula com $b=0$, e por (P2) não há outra maneira;
+\textbf{(D2)} $\alpha\alpha^{\ast}=a^{2}-b^{2}m^{2}D\in\mathbb{Q}$ \emph{sempre}, porque a
+parte com raiz cancela. São o \textbf{traço} e a \textbf{norma}, e são duais de (P1) e
+(P2) uma a uma: \emph{(P1) diz quem entra, (D1) quem fica; (P2) diz que a escala não
+regressa, (D2) que o dual sempre regressa}. Donde a volta é completa e faz-se
+\emph{dentro} do corpo: a inversa é $\alpha^{\ast}/\mathrm{N}(\alpha)$, e o denominador é
+a norma --- o produto das duas folhas, que é o primeiro passo da transformada.
+
+\textbf{(2c) E V É ESPAÇO VECTORIAL, que é onde a construção do universal começa.}
+$V=\mathbb{Q}\oplus\mathbb{Q}\,m\sqrt D$ tem dimensão $2$ sobre $\mathbb{Q}$, e as
+coordenadas são \textbf{únicas} --- se $a_1+b_1m\sqrt D=a_2+b_2m\sqrt D$ com $b_1\neq b_2$
+então $m\sqrt D=(a_1-a_2)/(b_2-b_1)$ seria racional, contra (P2). \emph{A unicidade das
+coordenadas É a propriedade (P2)}, e é também o que torna invertível a matriz de avaliação
+$\begin{psmallmatrix}1&\ \ s\\1&-s\end{psmallmatrix}$, de determinante $-2s$. Donde
+$\{\operatorname{eval}_{+},\operatorname{eval}_{-}\}$ é uma \textbf{base do dual} $V^{\ast}$,
+e a transformada universal é a passagem a essa base --- \emph{não uma construção
+acrescentada}. O par traço/norma reparte-se pelos dois graus: o traço é
+$\operatorname{eval}_{+}+\operatorname{eval}_{-}$, \textbf{linear}; a norma é
+$\operatorname{eval}_{+}\cdot\operatorname{eval}_{-}$, \textbf{quadrática}. É por isso que
+são as duas, e não uma.
+
+\textbf{(3) E o SENTIDO diz-se, senão a passagem fica trocada.} Primo é \textbf{suficiente}
+e \emph{não} necessário: $\sqrt6$ é irracional e $6$ não é primo. A condição exacta é (P1)
+--- $D$ não ser quadrado ---, e é essa que o corpo usa. \emph{O que o primo dá não é a
+irracionalidade: é a prova mais curta dela}, porque o lema de Euclides fecha a descida num
+passo. $\square$
+\end{teorema}
+\colunas{as duas propriedades do espaço}
+        {(P1) só os quadrados têm raiz racional --- o espaço existe; (P2) um irracional
+vezes um inteiro não nulo é irracional --- o espaço tem régua; e primo~$\to$~irracional é
+discreto~$\to$~contínuo, pelo lema de Euclides}
+        {\code{tests/transformada\_universal.c} \S T12: «raiz racional $\iff$ quadrado» em
+$119$ de $119$, com os $9$ quadrados a exibirem a raiz inteira, e $m\sqrt D$ fora de
+$\mathbb{Q}$ em $1\,320$ de $1\,320$ pares; \S T11: o passo da descida a fechar nos $17$
+primos, o quociente a ser corpo nos $17$, e os $36$ não-quadrados não-primos irracionais na
+mesma --- que é o contraste que impede trocar suficiente por necessário}
+
+\begin{teorema}[A TRANSFORMADA UNIVERSAL EM $\mathbb{Q}(m\sqrt D)$: a convolução e a
+deconvolução]\label{thm:transformada-universal}
+Há \textbf{uma} transformada, e o Teor.~\ref{thm:espectro} já a nomeou: \textbf{avaliação
+nas folhas} $\sigma,\sigma\dg$ --- as raízes do polinómio mínimo, \emph{não} raízes da
+unidade ---, realizada inteira pela companheira. Não há uma versão discreta e outra
+contínua, nem uma rápida e outra lenta: \emph{ela é discreta porque avalia em duas folhas,
+e é uma passagem porque só há duas}. Os qualificadores são redundância. Aqui escreve-se no
+corpo do Teor.~\ref{thm:serie-quadratica}, sustentado pelas duas propriedades do
+Teor.~\ref{thm:duas-propriedades}, onde as folhas são $\pm m\sqrt D$ --- as raízes
+de $x^{2}-m^{2}D$ --- e o elemento $\alpha=a+b\,m\sqrt D$ é o polinómio $a+bx$ avaliado
+nelas:
+\[
+\boxed{\;\operatorname{eval}_{\pm}(\alpha)=a\pm b\,m\sqrt D\;}
+\]
+E o que ela faz são \textbf{duas} operações, que são uma e a sua volta.
+
+\textbf{(1) A IDA é a CONVOLUÇÃO, e a transformada diagonaliza-a.} Pelo
+Cor.~\ref{cor:conv-desce} o produto é a convolução dos coeficientes seguida da redução ---
+aqui, cíclica de comprimento $2$ com peso $m^{2}D$ no termo que dá a volta:
+\[
+(a_1,b_1)\circledast(a_2,b_2)=(a_1a_2+m^{2}Db_1b_2,\;a_1b_2+a_2b_1),
+\]
+e em cada folha
+$\operatorname{eval}_\pm(\alpha\beta)=\operatorname{eval}_\pm(\alpha)\cdot
+\operatorname{eval}_\pm(\beta)$. \emph{A convolução vira produto ponto a ponto} --- é o
+Teor.~\ref{thm:espectro} lido neste corpo, e é a razão de a transformada existir.
+
+\textbf{(2) A VOLTA é a DECONVOLUÇÃO, e é a do Teor.~\ref{thm:decon-andar}.} Dividir na
+transformada é dividir folha a folha, e o que decide se isso se pode fazer é aquele
+teorema: $w$ é invertível $\iff\gcd(w,D)=1$. Com $D$ livre de quadrados $x^{2}-m^{2}D$ é
+irredutível, o quociente é \textbf{corpo}, e a condição \emph{degenera} em «não nulo» ---
+por isso a norma sozinha decide. \emph{Não é uma condição forte: é o caso particular que
+aquele teorema nomeia.} Onde ela tem conteúdo é com $D$ quadrado --- o polinómio factoriza,
+o corpo parte-se, e aparecem os divisores de zero do Teor.~\ref{thm:divzero}, não nulos sem
+inversa. \textbf{É aí que a deconvolução deixa de ser sempre possível}, e é esse contraste
+que dá conteúdo ao caso irredutível.
+
+\textbf{(2b) E QUEM NORMALIZA É A NORMA --- o primeiro passo já a entrega.} Não é preciso
+reduzir representante nenhum antes de avaliar: a inversão em $\mathbb{Q}(m\sqrt D)$ é
+$\beta^{\ast}/\mathrm{N}(\beta)$, e $\mathrm{N}(\beta)$ \emph{é o produto das duas folhas}
+--- isto é, o primeiro passo da transformada. É o mesmo denominador que o
+Teor.~\ref{thm:serie-quadratica} põe na caixa, $\mathrm{N}(\alpha-1)=(a-1)^{2}-b^{2}m^{2}D$.
+\emph{Um $\gcd$ por cima não acrescenta nada}: dividir numerador e denominador pelo mesmo
+inteiro é multiplicar por $1$, e o elemento do corpo é o mesmo. A normalização não é um
+passo a fazer --- \textbf{é o que a avaliação já fez}.
+
+\textbf{(3) E o traço e a norma são o registo inteiro das duas.} A soma das avaliações é
+$2a$ --- \textbf{racional, porque a parte com raiz cancela} --- e o produto é
+$a^{2}-b^{2}m^{2}D$. São as duas do Teor.~\ref{thm:fixo-dual}, agora com a razão à vista:
+\emph{são as únicas funções das folhas que não dependem de qual delas se chama $\sigma$}.
+A norma é multiplicativa, logo é o que a convolução preserva; e é ela que a deconvolução
+consulta. \textbf{A raiz nunca se forma}: guardam-se os coeficientes.
+
+\medskip
+\noindent Nada disto é um teorema novo, e nenhuma das peças precisa de nome próprio: a
+diagonalização é o Teor.~\ref{thm:espectro}, a volta é o Teor.~\ref{thm:decon-andar}, a
+série é o Teor.~\ref{thm:serie-quadratica}, o par traço/norma é o Teor.~\ref{thm:fixo-dual}.
+\emph{O que este enunciado faz é dizer que são a mesma máquina}, e que a máquina tem duas
+operações e não quatro verificações. $\square$
+\end{teorema}
+\begin{corolario}[e é a mesma máquina em TODOS os objectos: as folhas são as raízes de
+$x^{n}=w$]\label{cor:folhas-do-polinomio}
+O Teor.~\ref{thm:espectro} diz \emph{«não em raízes da unidade»}, e no anel da Lei~8 a
+avaliação é $F[x]_k=\sum_i x_i\,g^{ik}$ com $g$ de ordem $N$ --- que são raízes da unidade.
+As duas coisas não se contradizem, e a cláusula não é uma proibição: \textbf{é o que as
+folhas são num objecto e não noutro}. A máquina é a mesma.
+
+\textbf{O polinómio é sempre a regra da volta.} Escreva-se o anel por
+\[
+x^{n}=w \qquad\text{(o que se paga ao dar a volta),}
+\]
+e tudo sai daí: as \textbf{folhas} são as $n$ raízes de $w$, e o produto é a convolução
+cíclica de comprimento $n$ com peso $w$ no termo que volta. Os casos com nome são valores
+de $(n,w)$:
+\begin{center}
+$(2,\;m^{2}D)$ --- o corpo quadrático, folhas $\pm m\sqrt D$ \qquad
+$(n,\;1)$ --- o anel da Lei~8, folhas as raízes de $x^{n}-1$
+\end{center}
+\emph{A cláusula do Teor.~\ref{thm:espectro} lê-se então sem excepção}: as folhas são
+raízes da unidade exactamente quando $w=1$, e não o são quando $w\neq1$. É a mesma
+avaliação, o mesmo código, a mesma companheira --- muda o objecto, não a máquina.
+
+\textbf{E a divisão de trabalho entre as duas operações fica à vista.} A
+\textbf{convolução} diagonaliza em \emph{qualquer} folha que exista --- não precisa de
+todas. Quem precisa das $n$ é a \textbf{deconvolução}: com as $n$ folhas o núcleo da
+avaliação é trivial e a volta existe; quando faltam folhas o núcleo é não trivial e a
+informação perde-se. É o Teor.~\ref{thm:decon-andar} dito na transformada. $\square$
+\end{corolario}
+\colunas{uma máquina só: as folhas são do polinómio}
+        {$x^{n}=w$ dá as folhas e a convolução; $w\neq1$ é o corpo quadrático e $w=1$ o
+anel da Lei~8; a ida basta-se com uma folha, a volta exige as $n$}
+        {\code{tests/transformada\_universal.c} \S T8: em $76$ objectos $(n,w,P)$ --- $67$
+com $w\neq1$ e $9$ com $w=1$ --- a convolução diagonaliza em $4\,896$ de $4\,896$
+avaliações, com um código só; \S T8b: nos $23$ objectos com as $n$ folhas o núcleo é vazio
+em $23$, e nos $26$ a que faltam folhas é não vazio em $26$}
+
+\begin{corolario}[$\operatorname{Dir}$ é o que a transformada vê; $\operatorname{Cruz}$ é a
+obstrução à diagonalização simultânea]\label{cor:dir-cruz-folhas}
+A transformada diagonaliza \emph{um} operador de cada vez. Para diagonalizar \textbf{dois}
+com a mesma avaliação é preciso que partilhem as folhas --- e o que mede essa falta é
+$\operatorname{Cruz}$.
+
+\textbf{(1) A conta é fechada.} Para $A_m,A_n$ com $\det=-1$,
+\[
+\boxed{\;\operatorname{Cruz}(A_m,A_n)=\tfrac12\bigl(A_mA_n-A_nA_m\bigr)
+=\tfrac12(m-n)\begin{pmatrix}0&1\\-1&0\end{pmatrix}\;}
+\]
+--- \textbf{sempre antissimétrica}, e \emph{proporcional à diferença dos traços}.
+
+\textbf{(2) Donde a leitura, em cadeia.} Com o determinante fixo, o traço determina as
+folhas (Teor.~\ref{thm:fixo-dual}), logo
+\[
+\operatorname{Cruz}=0
+\iff \operatorname{tr}A_m=\operatorname{tr}A_n
+\iff \text{MESMAS FOLHAS}
+\iff \text{a mesma avaliação diagonaliza os DOIS.}
+\]
+
+\textbf{(3) E é isto que autoriza o passo \textsc{opera}.} A convolução só vira produto
+\emph{ponto a ponto} quando os operadores partilham as folhas; se não partilham, não há
+transformada comum e o produto não separa. \emph{$\operatorname{Dir}$ é o que a
+transformada vê --- o produto folha a folha; $\operatorname{Cruz}$ é o que sobra quando as
+folhas não coincidem.}
+
+\medskip
+\noindent E fecha com a síntese: \emph{o traço mede} --- e $\operatorname{Cruz}$ mede a
+\textbf{diferença} de traços. Quando ela anula, a operação faz-se na transformada com dois
+escalares; quando não, o par não tem espectro comum. $\square$
+\end{corolario}
+\colunas{$\operatorname{Cruz}$ e a diagonalização simultânea}
+        {$\operatorname{Cruz}(A_m,A_n)=\tfrac12(m-n)J$, antissimétrica e proporcional à
+diferença dos traços; anula-se exactamente quando as folhas coincidem}
+        {\code{tests/transformada\_universal.c} \S T6: nos $64$ pares $A_m,A_n$ com
+$m,n\leq8$, «$\operatorname{Cruz}=0\iff$ mesmas folhas» em $64$, $\operatorname{Cruz}$
+antissimétrica em $64$ e proporcional a $m-n$ em $64$}
+
+\begin{teorema}[AS FOLHAS SÃO O CORTE: a transformada universal é o mecanismo que parte
+o objecto, e o corpo é o que sobra da partição]\label{thm:folhas-corte}
+\emph{A raiz disto é a propriedade} \textbf{(P1)} \emph{da Def.~\ref{def:espaco}}: só os
+quadrados têm raiz racional, logo com $D$ não quadrado as folhas SEPARAM --- e é a
+separação que produz o corte.
+O Teor.~\ref{thm:transformada-universal} dá a máquina --- $\operatorname{eval}_\pm$, avaliação
+nas duas folhas, inteira. Aqui diz-se o que ela \emph{faz}: ela não lê o objecto, ela
+\textbf{corta-o}, e o corte que produz é o do Teor.~\ref{thm:corte}. As duas coisas são
+uma.
+
+\textbf{(1) O corte de $\sigma_m$ é a avaliação de um elemento nas suas duas folhas.}
+Para $a/b\in\mathbb{Q}$ com $b\geq1$ ponha-se
+\[
+\beta \;=\; 2a-mb-b\sqrt D \;=\; 2b\Bigl(\tfrac ab-\sigma_m\Bigr),
+\qquad D=m^{2}+4 ,
+\]
+que é o elemento $\xi+v\sqrt D$ de $\mathbb{Z}[\sqrt D]$ com $\xi=2a-mb$ e $v=-b$. As suas
+duas folhas são $\operatorname{eval}_\pm(\beta)=\xi\pm v\sqrt D$, e as duas funções
+simétricas delas --- as \emph{únicas} que não dependem de qual folha se chama $\sigma$
+(Teor.~\ref{thm:fixo-dual}) --- são \textbf{ambas inteiras}:
+\[
+\operatorname{tr}\beta=2\xi ,\qquad \mathrm{N}\beta=\xi^{2}-b^{2}D .
+\]
+E é só com elas que o lado se decide:
+\[
+\boxed{\;\frac ab<\sigma_m \iff \xi<0 \ \ \text{ou}\ \ \mathrm{N}\beta<0\;}
+\]
+--- que é, letra por letra, a partição em dois casos do Teor.~\ref{thm:corte}. \emph{A raiz
+nunca se forma}: a decisão inteira que ali aparecia como um artifício de cálculo é a
+transformada a fazer o seu trabalho.
+
+\textbf{(2) O corte é a SEPARAÇÃO das folhas, e o discriminante mede-a.} Para
+$\alpha=u+v\sqrt D$ qualquer, a separação das duas folhas é
+$\operatorname{eval}_+-\operatorname{eval}_-=2v\sqrt D$, e o seu quadrado calcula-se das
+duas simétricas sem sair de $\mathbb{Z}$:
+\[
+\bigl(\operatorname{eval}_+-\operatorname{eval}_-\bigr)^{2}
+=\operatorname{tr}^{2}\alpha-4\,\mathrm{N}\alpha=4v^{2}D .
+\]
+Logo \textbf{as duas folhas coincidem exactamente quando $\alpha\in\mathbb{Q}$}, que é o
+Teor.~\ref{thm:descida} ($x=x\dg\iff x\in\mathbb{Q}$) dito na transformada. E daqui sai a
+leitura que faltava:
+\begin{center}
+\emph{folha única $\Rightarrow$ o objecto é um \textbf{ponto}; folhas separadas
+$\Rightarrow$ o objecto é um \textbf{corte}.}
+\end{center}
+Um racional não corta nada --- está lá. É a separação que produz as duas classes.
+
+\textbf{(3) E a separação é genuína: nenhum irracional se disfarça.} Com $D$ não quadrado
+e $v\neq0$, $4v^{2}D$ não é quadrado; logo a folha $\operatorname{eval}_+$ não é racional e
+o par $(\operatorname{eval}_+,\operatorname{eval}_-)$ não colapsa por acidente aritmético.
+Em particular $\mathrm{N}\beta=\xi^{2}-b^{2}D\neq0$ para todo $b\geq1$: \textbf{nenhum
+racional cai em cima do corte}, que é a condição de corte do Teor.~\ref{thm:corte},
+obtida aqui \emph{da transformada} e não de uma varredura.
+
+\textbf{(4) Donde: o corpo é a partição.} Juntando, a transformada universal
+factoriza $\mathbb{Q}(\sqrt D)$ em duas folhas, e essa factorização \emph{é} a construção
+do corpo:
+\begin{itemize}
+\item o produto das folhas --- a norma --- dá o \textbf{lado} do corte (parte 1);
+\item a diferença --- o discriminante --- dá a \textbf{abertura} (parte 2), e distingue
+ponto de corte;
+\item a soma --- o traço --- dá a \textbf{classe} de equivalência, que é o
+Teor.~\ref{thm:descida}: $\mathbb{Q}$ são as classes dos pontos fixos sob o traço;
+\item e a diagonalização simultânea (Cor.~\ref{cor:dir-cruz-folhas}) diz \emph{quando} dois
+objectos são cortados pela \textbf{mesma} partição: quando os traços coincidem.
+\end{itemize}
+Nada disto sai de $\mathbb{Z}$. O corpo $\mathbb{Q}(\sqrt D)$ não é dado e depois medido:
+ele é \textbf{o que sobra} quando a transformada parte $\mathbb{Q}$ nas folhas certas, e as
+duas simétricas são o registo inteiro dessa partição. $\square$
+\end{teorema}
+\colunas{as folhas são o corte}
+        {$\operatorname{tr}$ e $\mathrm{N}$, ambas inteiras, decidem o lado do corte de
+$\sigma_m$ sem formar a raiz; o discriminante $\operatorname{tr}^{2}-4\mathrm{N}$ separa
+ponto de corte}
+        {\code{tests/transformada\_universal.c} \S T7: $9\,600$ racionais em cinco corpos,
+o critério das folhas e a comparação em fracção contínua --- dois programas sem uma linha
+em comum --- dão o mesmo lado em $9\,600$, com $7\,871$ abaixo e $1\,729$ acima e nenhum em
+cima; \S T7b: em $5\,746$ elementos o discriminante anula-se exactamente sobre os
+racionais, e nos $5\,304$ de folhas separadas nunca é quadrado}
+
+\colunas{a construção dual desce: os pares derivados}
+        {posicional\,/\,algébrica separadas por (P1); $\det=$ termo constante e Newton são
+(D2) e (D1); convolução\,/\,deconvolução são a ida e a volta}
+        {\code{tests/transformada\_universal.c} \S T16, por DOIS CAMINHOS: $x-b$ com uma
+raiz racional em $19$ de $19$ e $\mu$ de discriminante não quadrado sem nenhuma em $42$ de
+$42$; o determinante saído da MATRIZ a bater com o termo constante do POLINÓMIO em $110$ de
+$110$; e $P_k$ da recorrência a bater com $\operatorname{tr}(A^{k})$ da matriz multiplicada
+de facto em $770$ de $770$}
+
+\colunas{a transformada universal em $\mathbb{Q}(m\sqrt D)$}
+        {avaliação nas folhas $\pm m\sqrt D$; a CONVOLUÇÃO vira produto ponto a ponto, a
+DECONVOLUÇÃO é a divisão folha a folha e degenera porque o corpo é irredutível; traço e
+norma são o registo inteiro, e é a NORMA que normaliza --- nenhum $\gcd$ acrescenta}
+        {\code{tests/transformada\_universal.c}: a convolução cíclica de $2$ com peso $m^{2}D$
+e a avaliação a diagonalizá-la em $6561$ de $6561$; traço racional e norma a bater com a
+fórmula fechada em $121$ de $121$; a inversão em $168$ de $168$ com o ÚNICO caso de norma
+zero a ser o elemento nulo --- a degenerescência do corpo; e o contraste com $D$ quadrado,
+onde aparecem $12$ não nulos de norma zero, que são os divisores de zero do
+Teor.~\ref{thm:divzero}}
 
 %======================================================================
 \section{$e$: a razão dos volumes de andar para andar}\label{sec:e}
@@ -3187,6 +3923,35 @@ E_k(m)$, de onde a indução dá a cláusula inteira --- e não uma amostra dos 
 seria substituir a prova por uma janela. $\square$
 \end{teorema}
 
+\begin{corolario}[e o ÍNFIMO é a outra metade --- quem os troca é o
+SWAP]\label{cor:infimo}
+O Teor.~\ref{thm:supremo} constrói o supremo, e sozinho é meia lei: \emph{o par é
+$(\sup,\inf)$}. A outra metade não pede construção nova --- deriva-se, e o que a produz é
+uma peça que já está na fundação.
+
+\textbf{E não é a involução.} Em $x>0$, $\nu(x)=-1/x$ tem derivada $1/x^{2}>0$, logo é
+\emph{crescente}: leva supremo em \textbf{supremo}, e não em ínfimo. Quem inverte a ordem é
+o \textbf{swap} da Def.~\ref{def:lei0},
+\[
+S=\begin{psmallmatrix}0&1\\1&0\end{psmallmatrix},\qquad [p:q]\mapsto[q:p],\qquad
+\det S=-1,
+\]
+que em $x>0$ é $x\mapsto1/x$, \emph{decrescente}. Donde, para $A\subset\mathbb{Q}^{+}$
+limitado e afastado de zero,
+\[
+\boxed{\;\inf A=\frac{1}{\sup\,S(A)},\qquad \sup A=\frac{1}{\inf\,S(A)}\;}
+\]
+--- e é o $\det=-1$ que diz que ele \textbf{troca}, o mesmo $-1$ do gato. \emph{O supremo e
+o ínfimo não são duas construções: são uma, vista dos dois lados do swap.} $\square$
+\end{corolario}
+\colunas{o ínfimo, e quem troca o par}
+        {$(\sup,\inf)$ é o par; quem o troca é o swap ($\det=-1$), e a involução $\nu$ NÃO
+--- ela preserva o supremo}
+        {\code{tests/transformada\_universal.c} \S T17: em $84$ conjuntos de racionais, «o
+supremo do transformado é o ínfimo do original» em $84$, o mesmo nos dois sentidos, e
+$\nu(x)=-1/x$ a PRESERVAR o supremo em $84$ --- que é o contraste que impede trocar de
+operador; tudo por produto cruzado de inteiros}
+
 \begin{proposicao}[e é aqui que $\mathbb{Q}$ falha, com testemunha]\label{prop:q-falha}
 Para $S=\{r\in\mathbb{Q},\,r>0:\ r^{2}<2\}$ nenhum $p/q$ é o supremo, e a
 testemunha é a \emph{mesma} nos dois casos:
@@ -3265,7 +4030,7 @@ para a afirmação de ordem $6$ restringe-se às características em que $-I\neq
 em particular $p\neq2$ --- em característica $2$ a ordem colapsa. \textbf{Em geral},
 nos casos usados $p$ é escolhido \emph{fora das características que degeneram a
 relação algébrica relevante} --- em particular fora das que anulam o discriminante,
-onde as folhas colapsam (Cor.~\ref{cor:fourier-metade}).
+onde as folhas colapsam (Cor.~\ref{cor:dourada-completa}).
 \end{definicao}
 
 \begin{definicao}[$t_n$, pela ordem --- sem $\pi$]\label{def:tn}

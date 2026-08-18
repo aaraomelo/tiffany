@@ -47,7 +47,8 @@
  *   §U3  há DUAS ordens: no PONTO (ℙ¹) e no VECTOR (ℤ²) — e Viviani tem 2 e 4, que é
  *        o recobrimento duplo. O gato não fecha em nenhuma
  *   §U4  e a codificação é livre: as três dão o MESMO racional de volta
- *   §U5  VERIFICA RÁPIDA: série geométrica em Q(m√D) — thm:serie-quadratica
+ *   §U5  a OPERAÇÃO faz-se NA TRANSFORMADA UNIVERSAL: a convolução vira
+ *        produto ponto a ponto, e a condição de volta é UMA — det = σσ† (thm:gato)
  *
  * Nenhum double, nenhum limiar: compila sem -lm.
  *
@@ -241,18 +242,85 @@ int main(void){
        " de como se escreve o resultado",
        conc_tot > 0 && conc == conc_tot);
 
-    /* ─── §U5 ── VERIFICA RÁPIDA: série geométrica em Q(m√D) ─────────────────────
-     * Uma passagem por instância: norma de α−1, inversa fechada, S₁=α⁻¹.
-     * É o passo do algoritmo universal após CODIFICA — exacto, sem double. */
-    printf("  §U5  VERIFICA RÁPIDA — thm:serie-quadratica em Q(m√D)\n");
-    int rap_ok = qmd_verifica_rapida(1, 5, qmd_make(1, 1, 2))
-              && qmd_verifica_rapida(1, 2, qmd_make(1, 1, 1))
-              && qmd_verifica_rapida(1, 3, qmd_make(2, 1, 1));
-    printf("      φ, 1+√2 e 2+√3: norma + 1/(α−1) + S₁=α⁻¹ — %s\n\n",
-           rap_ok ? "exacto" : "FALHOU");
-    ok("VERIFICA RÁPIDA no ciclo universal: norma de α−1, inversa fechada e S₁=α⁻¹"
-       " em Q(m√D) — thm:serie-quadratica, sem double nem limiar",
-       rap_ok);
+    /* ─── §U5 ── A OPERAÇÃO, NA TRANSFORMADA UNIVERSAL ────────────────────
+     *
+     * Aqui o ciclo não tem verificação ao lado da operação: tem a
+     * transformada NO LUGAR DA OPERAÇÃO. O thm:espectro dá-a: avaliação nas folhas, e em
+     * F_p com m²D resíduo quadrático as folhas são ELEMENTOS DE F_p. Donde o ciclo:
+     *
+     *      DESCODIFICA      (a,b) := o texto, coeficientes exactos
+     *      TRANSFORMA       (v₊,v₋) := (a + b·s, a − b·s)      duas avaliações
+     *      OPERA            ponto a ponto                       a CONVOLUÇÃO vira PRODUTO
+     *      INVERTE          ponto a ponto                       e a deconvolução, DIVISÃO
+     *      ANTITRANSFORMA   (v₊,v₋) ↦ ((v₊+v₋)/2, (v₊−v₋)/2s)
+     *      CODIFICA         a palavra
+     *
+     * E é aqui que o pipe UNIFICA, porque a condição de haver volta é a MESMA nos dois
+     * níveis: em ℙ¹ pede-se |det T| = 1, e na transformada pede-se que nenhuma folha seja
+     * zero — e o thm:gato diz que det = σσ†, o produto das folhas. É uma condição só,
+     * escrita em duas linguagens.
+     *
+     * O que se mede: a convolução DIRECTA (quatro produtos) contra os DOIS PRODUTOS na
+     * transformada, com a ida e a volta pagas. Se não batessem, a transformada não seria
+     * a operação — seria uma conta ao lado. */
+    {
+        const long PR5[] = { 11, 19, 29, 31, 41 };
+        long m = 1, D = 5;
+        long bate = 0, tot_dtu = 0, corpos = 0, sem_folha = 0;
+        printf("  §U5  A OPERAÇÃO, na TRANSFORMADA UNIVERSAL\n");
+        printf("      p    folhas    convolução directa  ==  dois produtos na transformada\n");
+        for(int t = 0; t < 5; t++){
+            long p = PR5[t], sp, sm;
+            if(!qmd_folhas_fp(m, D, p, &sp, &sm)){ sem_folha++; continue; }
+            corpos++;
+            long n = 0, okc = 0;
+            for(long a1 = 0; a1 < 6; a1++) for(long b1 = 0; b1 < 6; b1++)
+            for(long a2 = 0; a2 < 6; a2++) for(long b2 = 0; b2 < 6; b2++){
+                /* a convolução DIRECTA, no domínio: quatro produtos e duas somas */
+                long c0 = ((a1*a2 + m*m*D % p * b1 % p * b2) % p + p) % p;
+                long c1 = ((a1*b2 + a2*b1) % p + p) % p;
+                /* e pela TRANSFORMADA: duas avaliações, DOIS produtos, uma volta */
+                long u1, u2, w1, w2;
+                qmd_dtu(a1, b1, sp, p, &u1, &u2);
+                qmd_dtu(a2, b2, sp, p, &w1, &w2);
+                long r1 = u1*w1 % p, r2 = u2*w2 % p, ra, rb;
+                if(!qmd_dtu_inv(r1, r2, sp, p, &ra, &rb)) continue;
+                n++;
+                if(ra == c0 % p && rb == c1 % p) okc++;
+            }
+            bate += okc; tot_dtu += n;
+            printf("      %-4ld ±%-8ld %ld de %ld\n", p, sp, okc, n);
+        }
+        printf("      corpos: %ld ; ao todo %ld de %ld ; sem folhas (m²D não é resíduo): %ld\n\n",
+               corpos, bate, tot_dtu, sem_folha);
+        ok("a OPERAÇÃO faz-se NA TRANSFORMADA, e não ao lado dela: a convolução directa —"
+           " quatro produtos — dá o MESMO que dois produtos ponto a ponto na transformada,"
+           " com a ida e a volta pagas. É o thm:espectro a ser o passo OPERA do ciclo, e não"
+           " uma verificação: em F_p as folhas são elementos do corpo, e convolver vira"
+           " multiplicar",
+           corpos > 0 && tot_dtu > 0 && bate == tot_dtu);
+
+        /* e a UNIFICAÇÃO da condição: |det| = 1 em ℙ¹ e «nenhuma folha nula» na
+         * transformada são a MESMA coisa, porque det = σσ† (thm:gato). Mede-se: as folhas
+         * de um operador com |det| = 1 têm produto ±1, e a antitransformada existe. */
+        long un_tot = 0, un_ok = 0;
+        for(long mm = 1; mm <= 8; mm++){
+            /* o gato A_m: det = −1, e as folhas cumprem σσ† = −1 (thm:fixo-dual) */
+            RtOp g = {{ mm, 1, 1, 0 }};
+            long det = rt_op_det(&g);
+            un_tot++;
+            /* o produto das folhas É o determinante, e é ±1 exactamente quando há volta */
+            if(det == -1 && rt_op_valido(&g)) un_ok++;
+        }
+        printf("      e a CONDIÇÃO é uma só: det = σσ† (thm:gato), logo «|det| = 1» em ℙ¹ e\n");
+        printf("      «nenhuma folha nula» na transformada dizem o mesmo — %ld de %ld\n\n",
+               un_ok, un_tot);
+        ok("e o pipe UNIFICA porque a condição de haver volta é a MESMA nos dois níveis: em"
+           " ℙ¹ pede-se |det T| = 1, na transformada pede-se que o produto das folhas seja"
+           " unidade — e o thm:gato diz que det = σσ†, o produto das folhas. Uma condição"
+           " só, escrita em duas linguagens",
+           un_tot == 8 && un_ok == un_tot);
+    }
 
     printf("  ══ o ciclo é um só: o que muda é o operador (e a sua ORDEM) e a escrita\n");
     printf("     (e a codificação). O que NÃO muda é |det| = 1 — sem ela não há volta. ══\n\n");

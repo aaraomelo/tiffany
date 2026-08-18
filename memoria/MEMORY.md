@@ -76,6 +76,7 @@
 - **[A RETA CONSTRUÍDA](project-a-reta-construida.md)** — ℝ INTEIRO nas oito leis: o ouro é o real mais lento e limita todos. E a lição: não virar JUIZ da teoria, executar a construção.
 - **[A CONTINUIDADE nas duas direcções](project-continuidade-duas-direccoes.md)** — a casa media só «o habitante É o supremo da sua classe»; a volta — dado S limitado, EXISTE sup S — constrói-se em inteiros, e a diagonal tem de sair FORA DA BORDA.
 - **[A condição do encaixe é n ≤ t](project-condicao-pisot-n-menor-t.md)** — a unidade era SUFICIENTE e eu escrevi «necessária»: x²−3x−3 tem |det|=3 e É Pisot. E a fronteira n=t+1 FACTORIZA.
+- **[A CÚSPIDE é o trial](project-a-cuspide-e-o-trial.md)** — `disc = 0` é onde as folhas colidem; τ = sign(disc) É o trial e indexa a dimensão τ+1; ℚ é o conjunto das cúspides e o GUME é atravessar τ=0.
 - **[O TEOREMA DO GATO](project-teorema-do-gato.md)** — det É a medida; sobe em espiral, desce discreto; e o dual do gato é o PASSARINHO — conservar a medida é ser o seu próprio dual métrico.
 - **[A derivada exterior](project-a-derivada-exterior.md)** — o `d` é UMA operação (grad/rot/div são nomes dela) e Green/Stokes/Gauss são UM teorema: a prova é o PROGRAMA ser um só. Sete objectos de cinco andares, uma gramática — a graduação.
 - **[Cálculo II e III](project-calculo-2-3.md)** — a série é o OBJECTO e o valor é que precisa do limite; local→global; e Green/Stokes/Gauss são UMA frase: ∫_∂R ω = ∫_R Dω, com os dois lados sem código em comum.
@@ -117,6 +118,7 @@
 
 ## Checkpoints
 
+- **[17/08 — O ESPAÇO E O SEU DUAL](project-checkpoint-2026-08-17-o-espaco.md)** — `Q(m√D)` com as QUATRO propriedades (duas de cada lado); a transformada é a passagem à BASE DO DUAL; a dourada discreta é a dourada NA BORDA (factor N, não √N); nenhum passo normaliza. Migração 102→67. **508:508.**
 - **[16/08 — A RAIZ SAI POR TEOREMA, a8ed821 → 2298d0f](project-checkpoint-2026-08-16-a-raiz-sai.md)** — o cruzado invariante a potências (e a perpendicularidade NÃO atravessa), ℤ[√D] na lib, a ENTREGA em fracção contínua, as cinco primitivas e a inversão que é a divisão do dual. **Das 1006 raízes e transcendentais, só 17 alimentavam asserções.** 501:501.
 
 - **[14/08 — O DIA LONGO, 36c1fa5 → 74f4139](project-checkpoint-2026-08-14-curadoria.md)** — curadoria, `lib/universal.js`, fases 3–6, a ronda das pontes, a FUNDAÇÃO VETORIAL, O MARTELO, e a ESCADA inteira: ℕ→ℤ→ℚ→ℝ, números, Möbius, elípticas, álgebra, corpos, linear/dual e o espectro. **468:468.**
