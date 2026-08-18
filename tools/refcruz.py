@@ -21,7 +21,7 @@ Confere três coisas, e a terceira é a que a separação exige:
 """
 import re, sys, os
 
-DOCS = {'universal':'papers/universal.tex', 'topologico':'papers/corpo_topologico.tex',
+DOCS = {'universal':'papers/corpo_universal.tex', 'topologico':'papers/corpo_topologico.tex',
         'analitico':'papers/corpo_analitico.tex', 'teoria':'teoria.tex',
         'catalogo':'catalogo.tex', 'enredo':'enredo.tex'}
 CENTRO = 'universal'
