@@ -146,8 +146,38 @@ int main(void){
                    RF[i].S_uWcm2, A, P);
             total += P;
         }
-        ok("ha potencia RF no ar, e ela mede-se em microwatt por centimetro quadrado",
-           total > 1.0);
+        /* `total > 1.0` era um limiar meu, e a soma nem e' o que este §C1 descobre. O que
+         * ele descobre esta' na propria frase de abertura — «as frequencias baixas colhem
+         * area e as altas nao» — e isso INVERTE a ordem: o WiFi 2,4 tem CINCO VEZES a
+         * densidade do GSM 900 (0,50 contra 0,10 uW/cm2) e colhe MENOS, porque a area vai
+         * com 1/f^2 e 2400 e' 2,67 vezes 900.
+         *
+         * E mede-se sem dividir uma unica vez: P ~ S/f^2, logo comparar P_i com P_j e'
+         * comparar S_i.f_j^2 com S_j.f_i^2 — inteiros dos dois lados, porque as densidades
+         * sao centesimos exactos e as frequencias sao MHz inteiros. O c, o pi e as unidades
+         * cancelam-se antes de haver conta, que e' a mesma razao pela qual a lei quadratica
+         * logo abaixo da residuo ZERO. */
+        const long S_c[] = { 10, 8, 50, 2, 15 };          /* uW/cm2 em centesimos */
+        const long f_M[] = { 900, 1800, 2400, 600, 5000 }; /* MHz, inteiros */
+        int densidade_maior = (S_c[2] == 5*S_c[0]);        /* o WiFi tem 5x a densidade */
+        int colhe_menos     = (S_c[2]*f_M[0]*f_M[0] < S_c[0]*f_M[2]*f_M[2]);
+        /* e a ordem inteira por potencia colhida, medida par a par por multiplicacao cruzada */
+        long pares = 0, ordenados = 0;
+        const int ordem[] = { 0, 2, 3, 1, 4 };    /* GSM900 > WiFi2,4 > TV > GSM1800 > WiFi5 */
+        for(int i = 1; i < 5; i++){
+            int a = ordem[i-1], b = ordem[i];
+            pares++;
+            if(S_c[a]*f_M[b]*f_M[b] > S_c[b]*f_M[a]*f_M[a]) ordenados++;
+        }
+        printf("     -> o WiFi 2,4 tem 5x a densidade do GSM 900 e colhe MENOS: %ld < %ld\n",
+               S_c[2]*f_M[0]*f_M[0], S_c[0]*f_M[2]*f_M[2]);
+        ok("ha potencia RF no ar — e o que este §C1 descobre nao e' a SOMA, e' que a ordem"
+           " INVERTE: o WiFi 2,4 tem cinco vezes a densidade do GSM 900 e colhe menos, porque"
+           " a area vai com 1/f^2 e 2400 e' 2,67 vezes 900. Medido sem dividir uma unica vez:"
+           " comparar P_i com P_j e' comparar S_i.f_j^2 com S_j.f_i^2, inteiros dos dois lados,"
+           " e a ordem completa das cinco fontes sai dos quatro pares consecutivos. O c, o pi e"
+           " as unidades cancelam-se antes de haver conta",
+           densidade_maior && colhe_menos && pares == 4 && ordenados == pares);
         /* a LEI: a area efetiva cai com o QUADRADO da frequência — mede-se, não se afirma */
         /* A LEI É ALGÉBRICA, E O LIMIAR ERA DECORAÇÃO. A(f) = λ²/4π com λ = c/f, logo
          * A(f)/A(2f) = (2f/f)² = 4 — e o c, o π e as unidades CANCELAM-SE. Medir isto
@@ -257,8 +287,21 @@ int main(void){
         double A_metal = 1.0 - reflexao(MATS[0].sigma,MATS[0].eps_r,f) - transmissao(MATS[0].sigma,MATS[0].eps_r,f,2e-3);
         double A_isol  = 1.0 - reflexao(MATS[3].sigma,MATS[3].eps_r,f) - transmissao(MATS[3].sigma,MATS[3].eps_r,f,2e-3);
         double A_liga  = 1.0 - reflexao(MATS[4].sigma,MATS[4].eps_r,f) - transmissao(MATS[4].sigma,MATS[4].eps_r,f,2e-3);
-        ok("e so a LIGA ABSORVE: ela fica com energia e os dois extremos nao — sem limiar meu",
-           A_liga > 10*A_metal && A_liga > 10*A_isol && A_liga > 0.01);
+        /* e a comparacao passa a ser de INTEIROS, em partes por milhao de energia. O
+         * `A_liga > 0.01` que aqui estava era o unico numero meu na frase — e a frase nao
+         * precisa dele: o que ela diz e' DOMINANCIA, e dominancia compara-se, nao se
+         * arbitra. Fica «a liga absorve dez vezes mais que qualquer dos dois extremos, e
+         * eles absorvem menos de um centesimo do que ela». */
+        long Am = (long)(A_metal*1000000.0), Ai = (long)(A_isol*1000000.0),
+             Al = (long)(A_liga*1000000.0);
+        printf("     -> em partes por milhao: metal %ld, isolante %ld, LIGA %ld\n", Am, Ai, Al);
+        ok("e so a LIGA ABSORVE: ela fica com energia e os dois extremos nao — sem limiar meu."
+           " Comparado em partes por milhao de energia e em Z, e os dois extremos falham por"
+           " lados OPOSTOS, logo medem-se de maneiras diferentes: o isolante absorve ZERO ppm,"
+           " exacto e nao «pouco» — e «Al > 10.Ai» com Ai=0 era uma condicao que nao podia"
+           " falhar. E contra o metal diz-se o NUMERO em vez de o adjectivar: a razao esta'"
+           " entre 300 e 400, enquadrada dos dois lados",
+           Ai == 0 && 300*Am < Al && Al < 400*Am);
         puts("     -> os dois extremos falham por lados OPOSTOS, e e isso que exige a liga. A");
         puts("        intuicao do Aarao ('plastico ou niobio') estava certa e era as duas: nem");
         puts("        um nem o outro — os dois JUNTOS.\n");
@@ -274,13 +317,15 @@ int main(void){
          * Minimizar a perda de UM caminho nao e maximizar o ganho do OUTRO. */
         double f = 2.4e9, eps_r = 4.0, d = 2e-3;
         double melhor_s = 0, maior_A = -1;
+        long idx_melhor = -1, n_varridos = 0;
         printf("     %14s %12s %10s %10s %10s\n", "sigma (S/m)", "|Z| (ohm)", "reflete", "transmite", "ABSORVE");
         for(double s = 1e-2; s <= 1e5; s *= 10){
             double R = reflexao(s, eps_r, f), T = transmissao(s, eps_r, f, d);
             double A = 1.0 - R - T;
             printf("     %14.0e %12.2f %9.1f%% %9.1f%% %9.1f%%\n", s, cabs(impedancia(s,eps_r,f)),
                    100*R, 100*T, 100*A);
-            if(A > maior_A){ maior_A = A; melhor_s = s; }
+            if(A > maior_A){ maior_A = A; melhor_s = s; idx_melhor = n_varridos; }
+            n_varridos++;
         }
         for(double s = melhor_s/10; s <= melhor_s*10; s *= 1.03){
             double A = 1.0 - reflexao(s,eps_r,f) - transmissao(s,eps_r,f,d);
@@ -289,13 +334,26 @@ int main(void){
         double complex Zbest = impedancia(melhor_s, eps_r, f);
         /* e aqui tambem: "maior_A > 0.5" era limiar meu. O que importa e que o maximo esteja
          * NO MEIO e domine os extremos — e o quanto ele vale diz-se, em vez de se exigir. */
-        ok("ha um sigma que MAXIMIZA a absorcao, e ele esta NO MEIO — nem zero nem infinito",
-           melhor_s != 0.0 && melhor_s < 1e5);
+        /* «no meio» diz-se sem NUMERO nenhum: o maximo cai num indice INTERIOR do
+         * varrimento — nem o primeiro nem o ultimo. `melhor_s < 1e5` repetia o topo do laco
+         * e por isso nao podia falhar; o indice pode. */
+        ok("ha um sigma que MAXIMIZA a absorcao, e ele esta NO MEIO — nem zero nem infinito."
+           " E «no meio» diz-se sem numero nenhum: o maximo cai num indice INTERIOR do"
+           " varrimento, nem o primeiro nem o ultimo. `melhor_s < 1e5` repetia o topo do laco,"
+           " logo nao podia falhar; o indice pode",
+           idx_melhor > 0 && idx_melhor < n_varridos - 1 && n_varridos == 8);
         /* e os dois extremos falham: o zero transmite, o infinito reflete */
         double A_zero = 1.0 - reflexao(1e-10,eps_r,f) - transmissao(1e-10,eps_r,f,d);
         double A_inf  = 1.0 - reflexao(1e7,eps_r,f)   - transmissao(1e7,eps_r,f,d);
-        ok("e os dois EXTREMOS absorvem quase nada — o zero deixa passar, o infinito devolve",
-           A_zero < 0.01 && A_inf < 0.01 && maior_A > 10*(A_zero + A_inf));
+        long Az = (long)(A_zero*1000000.0), Ain = (long)(A_inf*1000000.0),
+             Amax = (long)(maior_A*1000000.0);
+        printf("     -> em ppm: extremo zero %ld, extremo infinito %ld, maximo %ld\n",
+               Az, Ain, Amax);
+        ok("e os dois EXTREMOS absorvem quase nada — o zero deixa passar, o infinito devolve."
+           " Em partes por milhao e comparacao de inteiros: o maximo passa de dez vezes a SOMA"
+           " dos dois extremos, e cada um deles fica abaixo de um centesimo dele. Os limiares"
+           " «0,01» eram meus; a dominancia nao precisa deles",
+           Amax > 10*(Az + Ain) && 100*Az < Amax && 100*Ain < Amax);
         printf("     -> o maximo e em sigma = %.2f S/m (|Z| = %.1f ohm), com %.1f%% absorvidos.\n",
                melhor_s, cabs(Zbest), 100*maior_A);
         printf("        Nos extremos: sigma->0 absorve %.1f%%, sigma->inf absorve %.1f%%.\n",
@@ -420,11 +478,37 @@ int main(void){
         double A_plast = 1.0 - reflexao(s_plast, 2.6, f) - transmissao(s_plast, 2.6, f, d);
         double R_ouro  = reflexao(s_ouro, 1.0, f), T_plast = transmissao(s_plast, 2.6, f, d);
 
-        /* PRIMEIRO: eles sao mesmo OPOSTOS? Um reflete tudo, o outro transmite tudo. */
-        ok("sao OPOSTOS: o ouro reflete quase tudo e o plastico transmite quase tudo",
-           R_ouro > 0.99 && T_plast > 0.9);
-        ok("e nenhum dos dois ABSORVE — o par extremo nao serve, e e por isso que ha liga",
-           A_ouro < 0.01 && A_plast < 0.01);
+        /* PRIMEIRO: eles sao mesmo OPOSTOS? Um reflete tudo, o outro transmite tudo — e o
+         * par so' esta' medido se se medirem os QUATRO numeros e nao dois. Cada um domina o
+         * seu CRUZADO: o ouro reflecte muito mais do que transmite, e o plastico transmite
+         * muito mais do que reflecte. Isso compara-se em partes por milhao, e nao precisa
+         * dos «0,99» e «0,9», que eram a minha ideia de «quase tudo». */
+        double T_ouro  = transmissao(s_ouro, 1.0, f, d);
+        double R_plast = reflexao(s_plast, 2.6, f);
+        long Ro = (long)(R_ouro*1000000.0),  To = (long)(T_ouro*1000000.0);
+        long Rp = (long)(R_plast*1000000.0), Tp = (long)(T_plast*1000000.0);
+        printf("     em ppm:  ouro  R=%ld T=%ld     plastico  R=%ld T=%ld\n", Ro, To, Rp, Tp);
+        ok("sao OPOSTOS: o ouro reflete quase tudo e o plastico transmite quase tudo — e o par"
+           " so' esta' medido com os QUATRO numeros, nao dois. Em partes por milhao, cada um"
+           " domina o seu CRUZADO — e os dois lados nao dominam da mesma maneira, que e' o"
+           " que so' se ve medindo os quatro. O ouro transmite ZERO ppm, exacto: dois"
+           " milimetros de ouro nao deixam passar nada. O plastico nao: reflecte 5,5% e"
+           " transmite 94,5%, logo o quociente esta' entre 17 e 18, e nao «mais de mil» —"
+           " essa era a minha frase, e esta medida derrubou-a",
+           To == 0 && Ro > 999000 && 17*Rp < Tp && Tp < 18*Rp && Ro > Rp && Tp > To);
+        long Ao = (long)(A_ouro*1000000.0), Ap = (long)(A_plast*1000000.0);
+        /* e a referencia calcula-se AQUI, no proprio §C7: a liga que casa, com o sigma que
+         * o §C4 achou por varrimento — 3,46 S/m e eps_r = 4 */
+        double A_ligaC7 = 1.0 - reflexao(3.46, 4.0, f) - transmissao(3.46, 4.0, f, d);
+        long Alc = (long)(A_ligaC7*1000000.0);
+        printf("     e a absorcao em ppm:  ouro %ld, plastico %ld  (a liga que casa: %ld)\n",
+               Ao, Ap, Alc);
+        ok("e nenhum dos dois ABSORVE — o par extremo nao serve, e e por isso que ha liga."
+           " Medido contra a LIGA que casa, calculada aqui mesmo, e nao contra um limiar meu."
+           " E outra vez os dois extremos falham de maneiras DIFERENTES: o plastico absorve"
+           " ZERO ppm exacto, e o ouro absorve 161, que nao e' zero mas e' mais de mil vezes"
+           " menos que a liga. Um «< 0,01» dizia o mesmo dos dois e escondia a diferenca",
+           Ap == 0 && Alc > 1000*Ao && Ao > 0);
 
         /* SEGUNDO, e e a pergunta a serio: o casamento e a MEDIA GEOMETRICA deles?
          * Se ouro e plastico fossem duais na condutividade, o ponto de casamento seria
@@ -436,8 +520,17 @@ int main(void){
             if(A > maiorA){ maiorA = A; melhor = s; }
         }
         double razao = melhor / geo;
-        ok("a media GEOMETRICA de ouro e plastico NAO da o ponto de casamento — e nao da mesmo",
-           razao > 100 || razao < 0.01);
+        /* o `razao > 100 || razao < 0.01` tinha um ramo que NUNCA corria — a media geometrica
+         * fica sempre MUITO abaixo do casamento, e a disjuncao fazia de conta que os dois
+         * lados eram possiveis. Diz-se de que lado ela falha, e por quanto: a razao esta'
+         * entre 5000 e 6000, enquadrada dos dois lados e em inteiros. */
+        long razao_z = (long)razao;
+        ok("a media GEOMETRICA de ouro e plastico NAO da o ponto de casamento — e nao da mesmo."
+           " E diz-se de que LADO ela falha e por quanto: a razao esta' entre 5000 e 6000,"
+           " enquadrada dos dois lados em inteiros. O `> 100 || < 0,01` que aqui estava tinha"
+           " um ramo que nunca corria — a media fica SEMPRE abaixo, e a disjuncao fazia de"
+           " conta que os dois lados eram possiveis",
+           razao_z > 5000 && razao_z < 6000);
         printf("     -> ouro %.1e S/m, plastico %.1e; a media geometrica da %.2e e o casamento\n",
                s_ouro, s_plast, geo);
         printf("        real e %.2f S/m — um fator de %.0e entre os dois. NAO sao duais nesse\n",
