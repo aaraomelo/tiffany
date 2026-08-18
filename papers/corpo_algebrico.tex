@@ -149,19 +149,25 @@ isso que a ida e a volta são exactas.
 %======================================================================
 \section{A hierarquia}\label{sec:hier}
 
-Três colunas, e não se misturam:
+Três colunas, e não se misturam --- e a primeira é \emph{este} documento, não outro:
 \begin{center}
 \begin{tabular}{@{}p{4.4cm}p{4.4cm}p{5.4cm}@{}}
 \toprule
-o \emph{Corpo Algébrico} & este paper & os medidores \\
+\textbf{aqui} ($\tau=0$) & as realizações & os medidores \\
 \midrule
-\textbf{PROVA} e organiza & \textbf{REALIZA} geometricamente & \textbf{VERIFICAM} \\
+\textbf{PROVA} e organiza & \textbf{REALIZAM} & \textbf{VERIFICAM} \\
 as oito leis, a base ortonormal, o Gato, Pisot, o corpo ordenado completo
- & a mesma cadeia, com um objecto geométrico por seta
+ & a mesma cadeia, cada uma na sua língua: $\tau=-1$ o que fecha, $\tau=+1$ o que
+alcança, e a execução
  & cada afirmação, com contagem e gume \\
 \bottomrule
 \end{tabular}
 \end{center}
+
+\noindent\emph{(Esta tabela dizia «o \emph{Corpo Algébrico}» numa coluna e «este paper»
+noutra, como se fossem dois. Eram --- enquanto o \code{geometrico.tex} vivia separado do
+corpo. A fusão de 17/08 juntou-os e a tabela ficou a falar de si própria na terceira
+pessoa.)}
 
 \noindent\textbf{E o gume é automático onde pode ser.} A regra desta casa ---
 \emph{retirar a hipótese e procurar o contra-exemplo} --- está implementada em
@@ -424,7 +430,7 @@ operação $\star$ e os seus dois projectores, o par dual traço\,/\,norma
 (Teor.~\ref{thm:fixo-dual}), o operador e a descida (Teor.~\ref{thm:operador},
 \ref{thm:descida}), a aritmética aditiva (Teor.~\ref{thm:aditiva}), a conservação
 $\abs{\det}=1$ (Teor.~\ref{thm:conservacao}), a transformada universal e a dourada discreta
-(Teor.~\ref{thm:transformada-universal}, \ref{thm:dourada-discreta}). \emph{E a DERIVADA
+(\code{analitico thm:transformada-universal}, \ref{thm:dourada-discreta}). \emph{E a DERIVADA
 pertence a esta camada}, o que costuma surpreender: ela é uma \textbf{avaliação}, não um
 limite. O quociente de diferenças $q(h)=(f(a+h)-f(a))/h$ \emph{é ele próprio} um polinómio
 em $h$ --- o dividendo anula-se em $h=0$, logo é divisível por $h$ \textbf{exactamente},
@@ -447,10 +453,10 @@ sai do \emph{determinante}. \textbf{As duas são condições da estrutura inteir
 álgebra que as impõe, não o espaço.
 
 \textbf{(3) A ANÁLISE é o alcance, e o preço é o limite.} Aqui vivem o corte
-(Teor.~\ref{thm:corte}, \ref{thm:folhas-corte}), a continuação nas duas direcções
+(Teor.~\ref{thm:corte}, \code{analitico thm:folhas-corte}), a continuação nas duas direcções
 (Teor.~\ref{thm:continuacao}), o supremo e o ínfimo (\code{analitico thm:supremo},
 \code{analitico cor:infimo}), a completude (\code{analitico thm:completude}), a série
-(Teor.~\ref{thm:serie-quadratica}), o $e$ e o $\pi$. \emph{É esta camada que chega a
+(\code{analitico thm:serie-quadratica}), o $e$ e o $\pi$. \emph{É esta camada que chega a
 $\mathbb{R}$}, e chega porque aceita o que as outras recusam: um objecto definido por
 \textbf{todos} os passos, e não por um.
 
@@ -459,7 +465,7 @@ $\mathbb{R}$}, e chega porque aceita o que as outras recusam: um objecto definid
 \[
 \begin{array}{lll}
 \text{álgebra}\to\text{análise} & \textbf{O CORTE} &
-\text{as folhas SEPARAM, e a separação é o corte (Teor.~\ref{thm:folhas-corte})}\\[3pt]
+\text{as folhas SEPARAM, e a separação é o corte (\code{analitico thm:folhas-corte})}\\[3pt]
 \text{análise}\to\text{álgebra} & \textbf{O JACOBIANO} &
 \det\text{ transporta a medida, e }\abs{\det}=1\text{ conserva (Teor.~\ref{thm:metrica})}\\[3pt]
 \text{ida}\leftrightarrow\text{volta} & \textbf{O TEOR. FUNDAMENTAL} &
@@ -634,7 +640,7 @@ sua conservação. \emph{Mede:} o que é exacto --- traço, norma, determinante,
 (\code{analitico prop:q-falha}). \emph{Ponte:} entrega aos outros dois o \textbf{operador} e a
 condição $\abs{\det}=1$. \emph{Fica aqui, por ser fundamento comum:}
 Teor.~\ref{thm:fixo-dual}, \ref{thm:operador}, \ref{thm:descida}, \ref{thm:aditiva},
-\ref{thm:conservacao}, \ref{thm:transformada-universal}, \ref{thm:dourada-discreta},
+\ref{thm:conservacao}, \code{analitico thm:transformada-universal}, \ref{thm:dourada-discreta},
 \ref{thm:cuspide}, e a Def.~\ref{def:espaco} com as suas quatro propriedades.
 
 \noindent\textbf{TOPOLÓGICO --- $\tau=-1$, o que FECHA (o desdobramento espacial).}
@@ -677,7 +683,7 @@ a si. É por isso que o palco aguenta composição sem limite nenhum.
 \emph{Não mede:} o que é da forma exacta finita --- ali a álgebra já respondeu, e repetir
 seria trocar uma identidade por um limite. \emph{Ponte:} para o Topológico pelo Jacobiano
 (\code{analitico thm:medida-jacobiano}); para o Universal pelo corte
-(Teor.~\ref{thm:folhas-corte}). \emph{Aritmética:} é onde ela \textbf{fecha} --- o corte
+(\code{analitico thm:folhas-corte}). \emph{Aritmética:} é onde ela \textbf{fecha} --- o corte
 decide-se por $\operatorname{tr}$ e $\mathrm{N}$, ambas inteiras, e o limite entra só
 depois.
 
@@ -934,8 +940,8 @@ aqui liga os dois lados é a \textbf{involução}, que fecha nos dois sentidos -
 \emph{retracção} do Teor.~\ref{thm:cone}, que só fecha de um. \emph{É por o produto ser
 conservado que as duas descem em paralelo.}
 
-As provas estão no Teor.~\ref{thm:duas-propriedades}; a transformada que vive aqui, no
-Teor.~\ref{thm:transformada-universal}.
+As provas estão no \code{analitico thm:duas-propriedades}; a transformada que vive aqui, no
+\code{analitico thm:transformada-universal}.
 \end{definicao}
 \colunas{o espaço base, o espaço dual, e as duas réguas}
         {$V=\mathbb{Q}\oplus\mathbb{Q}\,m\sqrt D$ de dim $2$ (a primeira dobra de
@@ -1405,7 +1411,7 @@ produz, e $\operatorname{Dir}$ e $\operatorname{Cruz}$ são os projectores neles
 (Teor.~\ref{thm:projectores}). \emph{Nada nesta cadeia é importado} --- nem Clifford, nem
 uma norma, nem um axioma de associatividade. Os nomes clássicos entram
 \textbf{depois} dela e por fora, como comparação com um objecto já construído: é o
-estatuto que o \S\ref{sec:central} dá à tríade Hurwitz--Gentil--Lebesgue.
+estatuto que o \code{analitico sec:central} dá à tríade Hurwitz--Gentil--Lebesgue.
 Tudo o que se pergunta \emph{depois} --- se há associatividade, distributividade, uma
 norma multiplicativa --- fica \textbf{abaixo} disto, e muda de forma: a pergunta deixa de
 ser \emph{«que operação satisfaz estes axiomas?»} e passa a ser \emph{«que comportamento
@@ -2395,7 +2401,7 @@ isto é, onde as duas folhas da transformada universal \textbf{colidem}:
 $\sigma=\sigma\dg$.
 \end{definicao}
 
-\noindent É a mesma quantidade do Teor.~\ref{thm:folhas-corte}(2), um andar acima: lá o
+\noindent É a mesma quantidade do \code{analitico thm:folhas-corte}(2), um andar acima: lá o
 discriminante zero dizia \emph{«o objecto é racional, é um ponto e não um corte»}; aqui diz
 \emph{«o operador está na fronteira entre fechar e não fechar»}. São a mesma frase.
 
@@ -2964,154 +2970,6 @@ contra $820$ divisores de zero, com a factorização do zero \emph{exibida} e o 
 irredutível em zero}
 
 %======================================================================
-\section{O Teorema Central funda o limite}\label{sec:central}
-
-\noindent\textbf{E o estatuto desta secção diz-se à entrada, porque ele mudou.} A
-tríade Hurwitz--Gentil--Lebesgue \emph{não} está na cadeia principal da construção ---
-essa é a do \S\ref{sec:operacao}, $L_0,\ldots,L_7\to\star\to\tau\to E_{+}\oplus E_{-}\to
-\operatorname{Dir},\operatorname{Cruz}\to B_8$, e nela não entra nenhum nome de fora.
-\[
-\boxed{\;\text{Hurwitz / Gentil / Lebesgue}\ \not\to\ \text{construção};
-\qquad
-\text{construção}\ \to\ \text{resultado}\ \to\ \text{comparação}\;}
-\]
-O que segue é \textbf{comparação com o objecto já construído}: três nomes clássicos
-postos ao lado dele para dizer o que coincide e o que não, depois de a construção estar
-feita e medida. \emph{Nenhuma peça do \code{analitico sec:supremo} ou do \code{analitico sec:completude}
-depende do que se diz aqui.}
-
-\begin{teorema}[contar pelo domínio e medir por níveis somam ao rectângulo]\label{thm:central}
-\[
-\boxed{
-\begin{array}{ll}
-\textbf{Hurwitz} & \text{a contagem do domínio \emph{assim denominada no Universal}}\\
-\textbf{Gentil} & \text{a \textbf{identidade discreta} que estabelece a compatibilidade}\\
-\textbf{Lebesgue} & \text{a \textbf{interpretação estrutural} da medida da imagem}
-\end{array}}
-\]
-A soma de Gentil, em inteiros,
-\[
-0\leq x_n\leq q\ \Longrightarrow\
-\sum_n x_n \;+\; \sum_{v=1}^{q} \#\{x_n<v\} \;=\; N\!\cdot\!q ,
-\]
-é --- \emph{pela identidade de Gentil estabelecida no Corpo Algébrico} --- a forma
-discreta de $\int f+\int f^{-1}=b\,f(b)-a\,f(a)$: contar pelo \emph{domínio} e
-medir por \emph{níveis} somam ao rectângulo. E o \emph{layer-cake}
-$\sum_v\#\{x_n\geq v\}=\sum_n x_n$ fecha \textbf{sem esperar o limite}, com
-resíduo zero em cada andar. $\square$
-\end{teorema}
-
-\noindent\textbf{E onde cada um entra, para que não fique dúvida:} \emph{Gentil} é
-a identidade discreta, e é a única das três que se \emph{usa} na conta;
-\emph{Lebesgue} entra como interpretação estrutural, e não como ingrediente. E o
-que esta secção faz é \emph{fundar} o limite como ponto fixo --- a
-\textbf{continuidade} propriamente dita, a existência do supremo, constrói-se no
-\code{analitico sec:supremo} e não aqui:
-\[
-\boxed{\;\begin{gathered}
-\text{\emph{nesta realização}, o limite lê-se como o \textbf{ponto fixo}}\\
-\text{da compatibilidade entre as três contagens}
-\end{gathered}\;}
-\]
-
-\begin{corolario}[a tricotomia distribui-se pelas três leituras]\label{cor:distribui}
-\textbf{TERMINA} e \textbf{RODA} são o lado \emph{contável}, que Hurwitz conta:
-fixado $D$, os racionais de denominador $\leq D$ são em número finito, e a quota
-que ocupam nos $2^{K}$ intervalos de profundidade $K$ decresce estritamente com
-$K$ \emph{na discretização diádica utilizada pelo medidor} --- a borda é magra.
-\textbf{FOGE} é o que sobra. $\square$
-\end{corolario}
-\colunas{a tríade Hurwitz--Gentil--Lebesgue como eixo do Teorema Central}
-        {a fundação do corte como ponto fixo, e a distribuição da tricotomia}
-        {\code{geometria\_real.c} \S L11d: $60$ casos de Gentil e do layer-cake;
-$22$ racionais, quota de $22/64$ a $22/4096$}
-
-\noindent\emph{E o par cone/espiral tem a mesma forma da soma reversível}: duas
-leituras do mesmo objecto, que têm de fechar uma na outra.
-
-\medskip
-\noindent\textbf{E o que Gentil preserva é uma norma, mas não a mesma.} É a metade que
-fecha a tríade, e sem ela «Gentil casa» fica sem conteúdo operacional. O produto dele é
-\emph{componente a componente}, $(a,b)\ast(c,d)=(ac,\,-bd)$, e a norma que ele preserva
-é o \textbf{produto das coordenadas} --- o determinante de $\operatorname{diag}(x)$, e
-não a euclidiana:
-\[
-\boxed{\;N(x\ast y)=\prod_i\abs{x_iy_i}=\prod_i\abs{x_i}\cdot\prod_i\abs{y_i}
-=N(x)\,N(y)\qquad\text{em \textbf{toda} a dimensão}\;}
-\]
-Donde o par, e ele explica o tecto:
-\[
-\boxed{
-\begin{array}{lll}
-\textbf{Hurwitz} & \text{norma euclidiana}\ +\ \text{divisão} & \to\ \text{tecto em }8\\[3pt]
-\textbf{Gentil} & \text{norma-produto, \emph{sem} divisão} & \to\ \textbf{sem tecto}
-\end{array}}
-\]
-\textbf{O tecto de $8$ não é do objecto nem do número: é do par (norma, divisão).} Trocar
-a norma tira o tecto e paga a divisão --- e o preço exibe-se: com uma coordenada nula o
-produto tem norma zero sem que nenhum factor seja nulo, logo há \emph{divisores de zero},
-que é exactamente o que a hipótese de Hurwitz proíbe.
-\medskip
-\noindent\textbf{E as operações, andar a andar.} A soma é grupo abeliano em \emph{toda} a
-torre, dos dois lados: \textbf{tudo o que se perde perde-se do lado do produto}. Esse
-perde um axioma por degrau --- comuta até $2$, associa até $4$, sem divisores de zero até
-$8$ ---, e a \textbf{distributividade} é a fronteira dura: Cayley--Dickson tem-na em todos
-os andares, e o lado de Gentil não. Donde os nomes, que dizem o que se pode fazer:
-\[
-\boxed{
-\begin{array}{lll}
-1,\ 2 & \mathbb{R},\ \mathbb{C} & \textbf{corpo}\\[2pt]
-4,\ 8 & \mathbb{H},\ \mathbb{O} & \text{álgebra de divisão}\\[2pt]
-16 & \text{sedeniões} & \text{anel --- há divisores de zero}\\[2pt]
-3 & \text{Gentil} & \text{\emph{nem} anel --- falha a distributividade}
-\end{array}}
-\]
---- e \emph{«quase um corpo» não existe}: falhar um axioma não é gradação, é outro
-objecto. \emph{Verificado:} \code{tests/torre\_corpo.c} ($4{:}0$).
-
-\colunas{a tríade, e o tecto como propriedade da norma}
-        {a norma que Gentil preserva, e o preço que ela cobra}
-        {\code{tests/hurwitz.c} \S H8: a norma-produto multiplicativa em $2,4,8,16,32$,
-e o divisor de zero exibido}
-
-\medskip
-\noindent\textbf{E por que é que a soma tem tecto $8$: está na base.} De
-$N(xy)=N(x)N(y)$ com $N=\sum x_i^{2}$, polarizando em $y$, sai
-\[
-\boxed{\;\langle xy,\,xz\rangle=N(x)\,\langle y,z\rangle\;}
-\]
---- \emph{o produto preserva a ortogonalidade}. Numa base ortonormal $e_0=1,\ldots,
-e_{n-1}$ isso força $e_i^{2}=-1$ e $e_ie_j=-e_je_i$, que são as relações de Clifford:
-\textbf{é a base que as carrega}, e é ela que a base ortonormal do \S\ref{sec:orto}
-realiza.
-
-\noindent\textbf{Mas a saturação não é o tecto --- e a torre não pára.} A tabela
-$e_ie_j$ \emph{satura} a base em todos os andares medidos, até $64$: os produtos caem
-todos nela, e cada andar sai \textbf{completo}. Saturar é o que manda \emph{dobrar}.
-\[
-\boxed{
-\begin{array}{ll}
-\text{preencher os andares \textbf{na ordem}, completos} & \text{é o que a construção
-faz --- e basta}\\[3pt]
-\text{o «tecto» de }8 & \text{é \textbf{uma exigência} posta de fora}
-\end{array}}
-\]
-A exigência é que a norma \emph{euclidiana} seja multiplicativa e que não haja divisores
-de zero. Ela não é a torre: é um pedido que se lhe faz. E cada propriedade que cai pelo
-caminho --- a ordem em $2$, a comutatividade em $4$, a associatividade em $8$ --- é
-\textbf{uma exigência a cair, e não o objecto a falhar}. O outro lado do par mostra-o:
-com a norma de Gentil não há tecto nenhum.
-
-\noindent E o que aparece em $16$, $x,y\neq0$ com $xy=0$, é \textbf{a mesma factorização
-do zero} do Teor.~\ref{thm:divzero}: lá o polinómio a factorizar, aqui a álgebra a
-passar dos oito, e nos dois casos a norma multiplicativa é a primeira exigência a cair.
-\colunas{a base ortonormal das oito leis (\code{teoria thm:ortonormal})}
-        {a polarização, os andares completos, e o tecto como exigência}
-        {\code{tests/hurwitz.c} \S H9--H10: a base satura e os produtos caem nela nos
-SETE andares até $64$, com a norma euclidiana a sobreviver em quatro e o divisor de zero
-de dimensão $16$ exibido}
-
-%======================================================================
 \section{Um número é um polinómio}\label{sec:polinomio}
 
 O que precede é a construção. O que se segue tem um objecto, e ele não é uma
@@ -3557,555 +3415,6 @@ $m=1$ isto é a identidade de Fibonacci, e só aí. $\square$
 \colunas{o encaixe alcança $\mathbb{R}$ (\code{thm:encaixe})}
         {os intervalos, com largura inteira}
         {\code{geometria\_real.c} \S L7}
-
-%======================================================================
-\section{Todo $\mathbb{R}$ --- e o ouro é o extremo}\label{sec:todos}
-
-A realização não se restringe à família metálica.
-
-\begin{definicao}[e o domínio fecha-se dos dois lados]\label{def:real}
-No corpo ordenado completo identificado pelo \emph{Corpo Algébrico}, cada
-elemento admite a expansão canónica por fracção contínua. Os convergentes são
-$p_k/q_k$ com
-\[
-q_{-1}=0,\qquad q_0=1,\qquad q_k=a_kq_{k-1}+q_{k-2},
-\]
-e a correspondência é esta, com as duas metades ditas:
-\[
-\boxed{
-\begin{array}{ll}
-\text{cada IRRACIONAL} & \text{uma sucessão INFINITA }(a_k)_{k\geq1},\ a_k\geq1\\[2pt]
-\text{cada RACIONAL}   & \text{o caso em que o processo TERMINA}
-\end{array}}
-\]
-Dizer só a primeira linha deixaria $\mathbb{R}$ a descoberto, e a afirmação
-deste paper é sobre \textbf{todo} $\mathbb{R}$. Para $a/b$ o algoritmo termina com
-resto zero, o último convergente dá $a/b$ \textbf{exacto} --- não aproximado
----, e a ambiguidade final $[a_0;\ldots,a_n]=[a_0;\ldots,a_n{-}1,1]$ resolve-se
-por convenção canónica.
-\end{definicao}
-
-\begin{corolario}[e por isso a ENTREGA é a palavra, e não um
-decimal]\label{cor:entrega}
-Se a palavra $(a_k)$ \emph{é} o objecto, então nada obriga um programa a
-entregar o seu resultado em decimal --- e entregá-lo assim é converter o
-objecto numa das suas leituras, perdendo as outras. O que sai são os
-$a_k$, inteiros; quem recebe reconstrói o corte que precisar:
-\[
-\text{texto}\ \longrightarrow\ \frac{p}{q}\ \text{exacto}\ \longrightarrow\
-[a_0;a_1,\ldots,a_n]\ \longrightarrow\ \frac{p}{q}\ \longrightarrow\
-\text{decimal, convergentes, ou o que for.}
-\]
-As duas pontas merecem ser ditas porque nenhuma é óbvia. \textbf{À entrada},
-um decimal escrito não é um número aproximado: \code{3.14159} \emph{é}
-$314159/100000$, e o que o estraga é convertê-lo a vírgula flutuante --- em
-base dois $0{,}1$ não é $1/10$, e não é por imprecisão do formato mas porque
-$10\nmid 2^k$. \textbf{À saída}, a mesma palavra dá \emph{todas} as
-representações, e não uma: de \code{3.14159} saem $22/7$ e $355/113$ sem
-ninguém os pedir, porque os convergentes são o que a recorrência do
-$q_k$ produz.
-
-\textbf{E o pipe fecha do outro lado com o MMC.} À entrada, cada texto lido isolado dá o
-seu $p/q$ e um conjunto fica com denominadores diferentes --- o que obriga a cruzar
-fracções a cada operação. O \textbf{mínimo múltiplo comum dos denominadores} é a
-\emph{unidade} do conjunto, e leva-o todo a $\mathbb{Z}$ de uma vez:
-\[
-\text{textos}\ \longrightarrow\ \underbrace{\operatorname{mmc}(q_i)}_{\text{a unidade}}\
-\longrightarrow\ \text{inteiros}\ \longrightarrow\ \text{operar}\ \longrightarrow\
-[a_0;\ldots,a_n]\ \longrightarrow\ \text{o cliente}
-\]
-\emph{e entre a unidade e a palavra não há vírgula em sítio nenhum}. Normalizar, aqui, não
-é dividir por coisa nenhuma --- é \textbf{escolher a régua}, e o que a autoriza é as
-perguntas serem homogéneas: escalar por $\lambda$ multiplica os dois lados de uma
-comparação, e Lagrange é homogénea de grau~4.
-
-\emph{Verificado:} \code{tests/entrega.c} ($11{:}0$). A ida e volta pela
-palavra é exacta nos $10\,000$ decimais de três casas e a comparação é por
-produto cruzado --- a \emph{mesma} fracção, não uma que difere abaixo de uma
-régua; pelo \code{double}, com os mesmos números, $175$ deles não voltam, e
-é esse par de números lado a lado que dá conteúdo ao primeiro. Mede-se
-ainda que a palavra \textbf{é} Euclides --- os seus quocientes são os do
-algoritmo do mdc, um a um e na mesma ordem, em $3600$ pares --- e que os
-dois tectos têm onde bater, com a palavra mais comprida a ser a do ouro:
-dois Fibonacci consecutivos dão a fracção contínua toda de uns, que é a
-Teorema~\ref{thm:ouro} lido como \emph{pior caso da representação}.
-\end{corolario}
-
-\begin{teorema}[a construção corre sobre quocientes arbitrários]\label{thm:todos}
-Para uma sucessão \textbf{qualquer} --- não só a periódica ---:
-$p_kq_{k-1}-p_{k-1}q_k=(-1)^{k-1}$, logo $\abs{\det}=1$ em todos os passos; os
-convergentes alternam de lado; os intervalos formam uma cadeia
-encaixada; e a monotonia lê-se directamente da recorrência:
-\[
-q_1\geq q_0,
-\qquad
-q_{k+1}=a_{k+1}q_k+q_{k-1}>q_k\quad(k\geq1)
-\]
---- o estrito começa em $k\geq1$ porque, com $q_{-1}=0$, $q_0=1$ e $a_1=1$, tem-se
-$q_1=q_0$.
-\emph{O metálico é o caso de quociente parcial constante --- periódico, mas não
-o único periódico, e muito menos o único caso.} $\square$
-\end{teorema}
-
-\begin{teorema}[a extremalidade da régua: $\varphi$ minimiza o crescimento]\label{thm:ouro}
-Com $a_k\geq1$,
-\[
-\boxed{\;q_k\geq F_{k+1}\ \ (k\geq0),\qquad
-\text{com igualdade em TODO }k\ \text{só na sucessão de uns,}\;}
-\]
-na convenção padrão $F_0=0$, $F_1=1$. \textbf{É esta a forma afiada}: com
-$q_{-1}=0$ e $q_0=1$, a sucessão de uns dá exactamente $q_k=F_{k+1}$, e não apenas
-$q_k\geq F_k$. Donde a resolução da régua,
-\[
-\abs{c_{k+1}-c_k}=\frac{1}{q_kq_{k+1}}\ \leq\ \frac{1}{F_{k+1}F_{k+2}}
-\]
---- \textbf{a taxa de Fibonacci fornece o pior caso universal para o crescimento
-dos denominadores} entre as expansões infinitas com $a_k\geq1$. A família metálica não é o escopo
---- é o caso \textbf{extremo}. $\square$
-
-\medskip
-\noindent\emph{E o escopo da palavra «lento» diz-se}, para não privilegiar
-ninguém: o que está demonstrado é $q_k\geq F_{k+1}$ \emph{para cada $k$}, isto é,
-$\varphi=[1;1,1,\ldots]$ \textbf{minimiza ponto a ponto o crescimento dos
-denominadores $q_k$} entre as expansões infinitas com $a_k\geq1$ --- e, como
-consequência assintótica, $F_k\sim\varphi^{k}/\sqrt5$. Não é uma
-propriedade de $\varphi$ contra os outros reais em geral --- os racionais nem
-sequer têm expansão infinita ---, é a \textbf{extremalidade da própria régua}:
-o pior caso do mecanismo, e por isso o que o limita.
-\end{teorema}
-\colunas{a torre, o dual, e a família metálica}
-        {a construção para TODOS os reais, com o ouro a limitar}
-        {\code{geometria\_real.c} \S L8: $220$ sucessões, $3651$ pares, $0$
-excepções; \S L8b: $3660$ racionais, terminação e exactidão em todos}
-
-\begin{observacao}
-A igualdade num índice isolado não caracteriza a sucessão de uns: a caracterização
-é pela igualdade \emph{simultânea em todos} os índices.
-\end{observacao}
-
-\begin{teorema}[Série geométrica em $\mathbb{Q}(m\sqrt D)$]\label{thm:serie-quadratica}
-Sejam $D,m,a,b\in\mathbb{Q}$, com $D$ livre de quadrados,
-$m\neq0$, e seja
-\[
-    \alpha=a+b\,m\sqrt D
-    \in\mathbb{Q}(m\sqrt D).
-\]
-Suponha
-\[
-    \alpha\neq1,
-    \qquad
-    |\alpha|>1
-\]
-na imersão real considerada. Então
-\[
-    \sum_{n=1}^{\infty}\alpha^{-n}
-    =
-    \frac{1}{\alpha-1},
-\]
-e, sempre que $(a-1)^2-b^2m^2D\neq0$,
-\[
-    \boxed{
-    \sum_{n=1}^{\infty}\alpha^{-n}
-    =
-    \frac{a-1-bm\sqrt D}
-         {(a-1)^2-b^2m^2D}
-    }.
-\]
-Toda a operação algébrica ocorre exactamente em
-$\mathbb{Q}(m\sqrt D)$, sem ponto flutuante.
-\emph{Em particular}, com $D=5$, $m=1$ e $\alpha=\varphi=(1+\sqrt5)/2$ satisfazendo
-$\varphi^2=\varphi+1$, obtém-se $\varphi(\varphi-1)=1$, logo $1/(\varphi-1)=\varphi$ e
-$\sum_{n\geq1}\varphi^{-n}=\varphi$ --- o caso dourado é \emph{instância} deste teorema,
-não fundamento separado.
-\end{teorema}
-\begin{proof}
-Escreva
-\[
-    \alpha=a+b\,m\sqrt D.
-\]
-O conjugado quadrático é
-\[
-    \alpha^\ast=a-b\,m\sqrt D.
-\]
-Logo
-\[
-    (\alpha-1)(\alpha^\ast-1)
-    =
-    (a-1)^2-b^2m^2D.
-\]
-Se esse produto é não nulo, a inversa existe e é
-\[
-    \frac1{\alpha-1}
-    =
-    \frac{\alpha^\ast-1}
-         {(\alpha-1)(\alpha^\ast-1)}
-    =
-    \frac{a-1-bm\sqrt D}
-         {(a-1)^2-b^2m^2D}.
-\]
-
-Para $N\geq1$, a soma parcial é a progressão geométrica
-\[
-    S_N
-    =
-    \sum_{n=1}^{N}\alpha^{-n}
-    =
-    \frac{\alpha^{-1}(1-\alpha^{-N})}
-         {1-\alpha^{-1}}.
-\]
-Como
-\[
-    \frac{\alpha^{-1}}
-         {1-\alpha^{-1}}
-    =
-    \frac1{\alpha-1},
-\]
-obtemos
-\[
-    S_N
-    =
-    \frac{1-\alpha^{-N}}
-         {\alpha-1}.
-\]
-
-A hipótese $|\alpha|>1$ implica
-\[
-    \lim_{N\to\infty}\alpha^{-N}=0.
-\]
-Portanto
-\[
-    \boxed{
-    \sum_{n=1}^{\infty}\alpha^{-n}
-    =
-    \frac1{\alpha-1}
-    }.
-\]
-
-\medskip\noindent\emph{Caso $\varphi$.}
-Com $D=5$, $m=1$ e $\alpha=\varphi=(1+\sqrt5)/2$, a relação $\varphi^2=\varphi+1$ dá
-$\varphi=1+1/\varphi$, logo $1/\varphi=\varphi-1$ e $\varphi(\varphi-1)=1$, donde
-$1/(\varphi-1)=\varphi$. A convergência usa só $0<\varphi^{-1}<1$.
-\end{proof}
-\colunas{a série geométrica em $\mathbb{Q}(m\sqrt D)$}
-        {$\sum_{n\geq1}\alpha^{-n}=1/(\alpha-1)$; $\varphi$ incluído no teorema}
-        {\code{tests/serie\_phi.c}; e na transformada em \code{tests/universal.c} \S U5}
-
-\begin{teorema}[AS DUAS PROPRIEDADES DE $\mathbb{Q}(m\sqrt D)$, e a passagem
-PRIMO~$\leftrightarrow$~IRRACIONAL é a passagem DISCRETO~$\leftrightarrow$~CONTÍNUO]%
-\label{thm:duas-propriedades}
-O Teor.~\ref{thm:serie-quadratica} opera em $\mathbb{Q}(m\sqrt D)$ sem dizer o que sustenta
-o espaço. São \textbf{duas} propriedades, e cada uma responde a uma pergunta diferente:
-\[
-\boxed{
-\begin{array}{ll}
-\textbf{(P1)} & \sqrt D\in\mathbb{Q}\iff D\ \text{é QUADRADO}\\[3pt]
-\textbf{(P2)} & \sqrt D\notin\mathbb{Q}\ \text{e}\ m\neq0\ \Longrightarrow\
-m\sqrt D\notin\mathbb{Q}
-\end{array}}
-\]
-\textbf{(P1) diz que o espaço EXISTE} --- com $D$ não quadrado há alguma coisa fora de
-$\mathbb{Q}$ para adjuntar, e \emph{só os quadrados têm raiz racional}. \textbf{(P2) diz
-que o espaço tem RÉGUA} --- medir com $m\sqrt D$ em vez de $\sqrt D$ não devolve nada a
-$\mathbb{Q}$, e é isto que autoriza o $m$ no nome do corpo: \emph{a mesma recta, com uma
-régua $m$}. A prova de (P2) é uma divisão: se $m\sqrt D=a/b$ então $\sqrt D=a/(bm)$, e
-$bm$ é inteiro não nulo.
-
-\textbf{(1) E a passagem PRIMO $\to$ IRRACIONAL é a mesma indivisibilidade, lida dos dois
-lados.} Para $p$ primo, $\sqrt p$ é irracional, e o que fecha a prova é o \textbf{lema de
-Euclides} --- $p\mid a^{2}\Rightarrow p\mid a$ ---, que vale \emph{porque} $p$ é primo. Daí
-sai a \textbf{descida}: de $a^{2}=p\,b^{2}$ vem $a=pk$, logo $b^{2}=pk^{2}$ com $b<a$, e em
-$\mathbb{N}$ não há descida infinita. \emph{É a mesma descida do Teor.~\ref{thm:corte-fixo},
-e é prova e não varredura: mede-se o PASSO.} Donde:
-\[
-\underbrace{p\ \text{não factoriza em }\mathbb{Z}}_{\text{DISCRETO}}
-\qquad\Longleftrightarrow\qquad
-\underbrace{\sqrt p\ \text{não é razão de inteiros}}_{\text{CONTÍNUO}}
-\]
-
-\textbf{(2) E quem autoriza a travessia é o TEOREMA CENTRAL.} O
-Teor.~\ref{thm:central-energia} põe as três peças: \emph{Hurwitz conta} --- o lado exacto,
-discreto ---, \emph{Gentil integra} --- o lado sem grau, contínuo --- e \emph{Lebesgue
-transporta sem perder a ORDEM}, que é o degrau $\mathbb{Q}\to\mathbb{R}$. É precisamente a
-ordem o que aqui atravessa: o corte do Teor.~\ref{thm:folhas-corte} decide-se por
-$\operatorname{tr}$ e $\mathrm{N}$, ambas inteiras, e o que elas dizem do lado contínuo é de
-que lado da recta o racional cai. \emph{A ponte não transporta valores: transporta ordem.}
-
-\textbf{(2b) E O DUAL TEM AS SUAS DUAS, que são a VOLTA.} A
-Def.~\ref{def:espaco} põe-nas: \textbf{(D1)} $\alpha=\alpha^{\ast}\iff\alpha\in\mathbb{Q}$
---- o que a conjugação fixa é exactamente $\mathbb{Q}$, porque
-$\alpha-\alpha^{\ast}=2b\,m\sqrt D$ só se anula com $b=0$, e por (P2) não há outra maneira;
-\textbf{(D2)} $\alpha\alpha^{\ast}=a^{2}-b^{2}m^{2}D\in\mathbb{Q}$ \emph{sempre}, porque a
-parte com raiz cancela. São o \textbf{traço} e a \textbf{norma}, e são duais de (P1) e
-(P2) uma a uma: \emph{(P1) diz quem entra, (D1) quem fica; (P2) diz que a escala não
-regressa, (D2) que o dual sempre regressa}. Donde a volta é completa e faz-se
-\emph{dentro} do corpo: a inversa é $\alpha^{\ast}/\mathrm{N}(\alpha)$, e o denominador é
-a norma --- o produto das duas folhas, que é o primeiro passo da transformada.
-
-\textbf{(2c) E V É ESPAÇO VECTORIAL, que é onde a construção do universal começa.}
-$V=\mathbb{Q}\oplus\mathbb{Q}\,m\sqrt D$ tem dimensão $2$ sobre $\mathbb{Q}$, e as
-coordenadas são \textbf{únicas} --- se $a_1+b_1m\sqrt D=a_2+b_2m\sqrt D$ com $b_1\neq b_2$
-então $m\sqrt D=(a_1-a_2)/(b_2-b_1)$ seria racional, contra (P2). \emph{A unicidade das
-coordenadas É a propriedade (P2)}, e é também o que torna invertível a matriz de avaliação
-$\begin{psmallmatrix}1&\ \ s\\1&-s\end{psmallmatrix}$, de determinante $-2s$. Donde
-$\{\operatorname{eval}_{+},\operatorname{eval}_{-}\}$ é uma \textbf{base do dual} $V^{\ast}$,
-e a transformada universal é a passagem a essa base --- \emph{não uma construção
-acrescentada}. O par traço/norma reparte-se pelos dois graus: o traço é
-$\operatorname{eval}_{+}+\operatorname{eval}_{-}$, \textbf{linear}; a norma é
-$\operatorname{eval}_{+}\cdot\operatorname{eval}_{-}$, \textbf{quadrática}. É por isso que
-são as duas, e não uma.
-
-\textbf{(3) E o SENTIDO diz-se, senão a passagem fica trocada.} Primo é \textbf{suficiente}
-e \emph{não} necessário: $\sqrt6$ é irracional e $6$ não é primo. A condição exacta é (P1)
---- $D$ não ser quadrado ---, e é essa que o corpo usa. \emph{O que o primo dá não é a
-irracionalidade: é a prova mais curta dela}, porque o lema de Euclides fecha a descida num
-passo. $\square$
-\end{teorema}
-\colunas{as duas propriedades do espaço}
-        {(P1) só os quadrados têm raiz racional --- o espaço existe; (P2) um irracional
-vezes um inteiro não nulo é irracional --- o espaço tem régua; e primo~$\to$~irracional é
-discreto~$\to$~contínuo, pelo lema de Euclides}
-        {\code{tests/transformada\_universal.c} \S T12: «raiz racional $\iff$ quadrado» em
-$119$ de $119$, com os $9$ quadrados a exibirem a raiz inteira, e $m\sqrt D$ fora de
-$\mathbb{Q}$ em $1\,320$ de $1\,320$ pares; \S T11: o passo da descida a fechar nos $17$
-primos, o quociente a ser corpo nos $17$, e os $36$ não-quadrados não-primos irracionais na
-mesma --- que é o contraste que impede trocar suficiente por necessário}
-
-\begin{teorema}[A TRANSFORMADA UNIVERSAL EM $\mathbb{Q}(m\sqrt D)$: a convolução e a
-deconvolução]\label{thm:transformada-universal}
-Há \textbf{uma} transformada, e o Teor.~\ref{thm:espectro} já a nomeou: \textbf{avaliação
-nas folhas} $\sigma,\sigma\dg$ --- as raízes do polinómio mínimo, \emph{não} raízes da
-unidade ---, realizada inteira pela companheira. Não há uma versão discreta e outra
-contínua, nem uma rápida e outra lenta: \emph{ela é discreta porque avalia em duas folhas,
-e é uma passagem porque só há duas}. Os qualificadores são redundância. Aqui escreve-se no
-corpo do Teor.~\ref{thm:serie-quadratica}, sustentado pelas duas propriedades do
-Teor.~\ref{thm:duas-propriedades}, onde as folhas são $\pm m\sqrt D$ --- as raízes
-de $x^{2}-m^{2}D$ --- e o elemento $\alpha=a+b\,m\sqrt D$ é o polinómio $a+bx$ avaliado
-nelas:
-\[
-\boxed{\;\operatorname{eval}_{\pm}(\alpha)=a\pm b\,m\sqrt D\;}
-\]
-E o que ela faz são \textbf{duas} operações, que são uma e a sua volta.
-
-\textbf{(1) A IDA é a CONVOLUÇÃO, e a transformada diagonaliza-a.} Pelo
-Cor.~\ref{cor:conv-desce} o produto é a convolução dos coeficientes seguida da redução ---
-aqui, cíclica de comprimento $2$ com peso $m^{2}D$ no termo que dá a volta:
-\[
-(a_1,b_1)\circledast(a_2,b_2)=(a_1a_2+m^{2}Db_1b_2,\;a_1b_2+a_2b_1),
-\]
-e em cada folha
-$\operatorname{eval}_\pm(\alpha\beta)=\operatorname{eval}_\pm(\alpha)\cdot
-\operatorname{eval}_\pm(\beta)$. \emph{A convolução vira produto ponto a ponto} --- é o
-Teor.~\ref{thm:espectro} lido neste corpo, e é a razão de a transformada existir.
-
-\textbf{(2) A VOLTA é a DECONVOLUÇÃO, e é a do Teor.~\ref{thm:decon-andar}.} Dividir na
-transformada é dividir folha a folha, e o que decide se isso se pode fazer é aquele
-teorema: $w$ é invertível $\iff\gcd(w,D)=1$. Com $D$ livre de quadrados $x^{2}-m^{2}D$ é
-irredutível, o quociente é \textbf{corpo}, e a condição \emph{degenera} em «não nulo» ---
-por isso a norma sozinha decide. \emph{Não é uma condição forte: é o caso particular que
-aquele teorema nomeia.} Onde ela tem conteúdo é com $D$ quadrado --- o polinómio factoriza,
-o corpo parte-se, e aparecem os divisores de zero do Teor.~\ref{thm:divzero}, não nulos sem
-inversa. \textbf{É aí que a deconvolução deixa de ser sempre possível}, e é esse contraste
-que dá conteúdo ao caso irredutível.
-
-\textbf{(2b) E QUEM NORMALIZA É A NORMA --- o primeiro passo já a entrega.} Não é preciso
-reduzir representante nenhum antes de avaliar: a inversão em $\mathbb{Q}(m\sqrt D)$ é
-$\beta^{\ast}/\mathrm{N}(\beta)$, e $\mathrm{N}(\beta)$ \emph{é o produto das duas folhas}
---- isto é, o primeiro passo da transformada. É o mesmo denominador que o
-Teor.~\ref{thm:serie-quadratica} põe na caixa, $\mathrm{N}(\alpha-1)=(a-1)^{2}-b^{2}m^{2}D$.
-\emph{Um $\gcd$ por cima não acrescenta nada}: dividir numerador e denominador pelo mesmo
-inteiro é multiplicar por $1$, e o elemento do corpo é o mesmo. A normalização não é um
-passo a fazer --- \textbf{é o que a avaliação já fez}.
-
-\textbf{(3) E o traço e a norma são o registo inteiro das duas.} A soma das avaliações é
-$2a$ --- \textbf{racional, porque a parte com raiz cancela} --- e o produto é
-$a^{2}-b^{2}m^{2}D$. São as duas do Teor.~\ref{thm:fixo-dual}, agora com a razão à vista:
-\emph{são as únicas funções das folhas que não dependem de qual delas se chama $\sigma$}.
-A norma é multiplicativa, logo é o que a convolução preserva; e é ela que a deconvolução
-consulta. \textbf{A raiz nunca se forma}: guardam-se os coeficientes.
-
-\medskip
-\noindent Nada disto é um teorema novo, e nenhuma das peças precisa de nome próprio: a
-diagonalização é o Teor.~\ref{thm:espectro}, a volta é o Teor.~\ref{thm:decon-andar}, a
-série é o Teor.~\ref{thm:serie-quadratica}, o par traço/norma é o Teor.~\ref{thm:fixo-dual}.
-\emph{O que este enunciado faz é dizer que são a mesma máquina}, e que a máquina tem duas
-operações e não quatro verificações. $\square$
-\end{teorema}
-\begin{corolario}[e é a mesma máquina em TODOS os objectos: as folhas são as raízes de
-$x^{n}=w$]\label{cor:folhas-do-polinomio}
-O Teor.~\ref{thm:espectro} diz \emph{«não em raízes da unidade»}, e no anel da Lei~8 a
-avaliação é $F[x]_k=\sum_i x_i\,g^{ik}$ com $g$ de ordem $N$ --- que são raízes da unidade.
-As duas coisas não se contradizem, e a cláusula não é uma proibição: \textbf{é o que as
-folhas são num objecto e não noutro}. A máquina é a mesma.
-
-\textbf{O polinómio é sempre a regra da volta.} Escreva-se o anel por
-\[
-x^{n}=w \qquad\text{(o que se paga ao dar a volta),}
-\]
-e tudo sai daí: as \textbf{folhas} são as $n$ raízes de $w$, e o produto é a convolução
-cíclica de comprimento $n$ com peso $w$ no termo que volta. Os casos com nome são valores
-de $(n,w)$:
-\begin{center}
-$(2,\;m^{2}D)$ --- o corpo quadrático, folhas $\pm m\sqrt D$ \qquad
-$(n,\;1)$ --- o anel da Lei~8, folhas as raízes de $x^{n}-1$
-\end{center}
-\emph{A cláusula do Teor.~\ref{thm:espectro} lê-se então sem excepção}: as folhas são
-raízes da unidade exactamente quando $w=1$, e não o são quando $w\neq1$. É a mesma
-avaliação, o mesmo código, a mesma companheira --- muda o objecto, não a máquina.
-
-\textbf{E a divisão de trabalho entre as duas operações fica à vista.} A
-\textbf{convolução} diagonaliza em \emph{qualquer} folha que exista --- não precisa de
-todas. Quem precisa das $n$ é a \textbf{deconvolução}: com as $n$ folhas o núcleo da
-avaliação é trivial e a volta existe; quando faltam folhas o núcleo é não trivial e a
-informação perde-se. É o Teor.~\ref{thm:decon-andar} dito na transformada. $\square$
-\end{corolario}
-\colunas{uma máquina só: as folhas são do polinómio}
-        {$x^{n}=w$ dá as folhas e a convolução; $w\neq1$ é o corpo quadrático e $w=1$ o
-anel da Lei~8; a ida basta-se com uma folha, a volta exige as $n$}
-        {\code{tests/transformada\_universal.c} \S T8: em $76$ objectos $(n,w,P)$ --- $67$
-com $w\neq1$ e $9$ com $w=1$ --- a convolução diagonaliza em $4\,896$ de $4\,896$
-avaliações, com um código só; \S T8b: nos $23$ objectos com as $n$ folhas o núcleo é vazio
-em $23$, e nos $26$ a que faltam folhas é não vazio em $26$}
-
-\begin{corolario}[$\operatorname{Dir}$ é o que a transformada vê; $\operatorname{Cruz}$ é a
-obstrução à diagonalização simultânea]\label{cor:dir-cruz-folhas}
-A transformada diagonaliza \emph{um} operador de cada vez. Para diagonalizar \textbf{dois}
-com a mesma avaliação é preciso que partilhem as folhas --- e o que mede essa falta é
-$\operatorname{Cruz}$.
-
-\textbf{(1) A conta é fechada.} Para $A_m,A_n$ com $\det=-1$,
-\[
-\boxed{\;\operatorname{Cruz}(A_m,A_n)=\tfrac12\bigl(A_mA_n-A_nA_m\bigr)
-=\tfrac12(m-n)\begin{pmatrix}0&1\\-1&0\end{pmatrix}\;}
-\]
---- \textbf{sempre antissimétrica}, e \emph{proporcional à diferença dos traços}.
-
-\textbf{(2) Donde a leitura, em cadeia.} Com o determinante fixo, o traço determina as
-folhas (Teor.~\ref{thm:fixo-dual}), logo
-\[
-\operatorname{Cruz}=0
-\iff \operatorname{tr}A_m=\operatorname{tr}A_n
-\iff \text{MESMAS FOLHAS}
-\iff \text{a mesma avaliação diagonaliza os DOIS.}
-\]
-
-\textbf{(3) E é isto que autoriza o passo \textsc{opera}.} A convolução só vira produto
-\emph{ponto a ponto} quando os operadores partilham as folhas; se não partilham, não há
-transformada comum e o produto não separa. \emph{$\operatorname{Dir}$ é o que a
-transformada vê --- o produto folha a folha; $\operatorname{Cruz}$ é o que sobra quando as
-folhas não coincidem.}
-
-\medskip
-\noindent E fecha com a síntese: \emph{o traço mede} --- e $\operatorname{Cruz}$ mede a
-\textbf{diferença} de traços. Quando ela anula, a operação faz-se na transformada com dois
-escalares; quando não, o par não tem espectro comum. $\square$
-\end{corolario}
-\colunas{$\operatorname{Cruz}$ e a diagonalização simultânea}
-        {$\operatorname{Cruz}(A_m,A_n)=\tfrac12(m-n)J$, antissimétrica e proporcional à
-diferença dos traços; anula-se exactamente quando as folhas coincidem}
-        {\code{tests/transformada\_universal.c} \S T6: nos $64$ pares $A_m,A_n$ com
-$m,n\leq8$, «$\operatorname{Cruz}=0\iff$ mesmas folhas» em $64$, $\operatorname{Cruz}$
-antissimétrica em $64$ e proporcional a $m-n$ em $64$}
-
-\begin{teorema}[AS FOLHAS SÃO O CORTE: a transformada universal é o mecanismo que parte
-o objecto, e o corpo é o que sobra da partição]\label{thm:folhas-corte}
-\emph{A raiz disto é a propriedade} \textbf{(P1)} \emph{da Def.~\ref{def:espaco}}: só os
-quadrados têm raiz racional, logo com $D$ não quadrado as folhas SEPARAM --- e é a
-separação que produz o corte.
-O Teor.~\ref{thm:transformada-universal} dá a máquina --- $\operatorname{eval}_\pm$, avaliação
-nas duas folhas, inteira. Aqui diz-se o que ela \emph{faz}: ela não lê o objecto, ela
-\textbf{corta-o}, e o corte que produz é o do Teor.~\ref{thm:corte}. As duas coisas são
-uma.
-
-\textbf{(1) O corte de $\sigma_m$ é a avaliação de um elemento nas suas duas folhas.}
-Para $a/b\in\mathbb{Q}$ com $b\geq1$ ponha-se
-\[
-\beta \;=\; 2a-mb-b\sqrt D \;=\; 2b\Bigl(\tfrac ab-\sigma_m\Bigr),
-\qquad D=m^{2}+4 ,
-\]
-que é o elemento $\xi+v\sqrt D$ de $\mathbb{Z}[\sqrt D]$ com $\xi=2a-mb$ e $v=-b$. As suas
-duas folhas são $\operatorname{eval}_\pm(\beta)=\xi\pm v\sqrt D$, e as duas funções
-simétricas delas --- as \emph{únicas} que não dependem de qual folha se chama $\sigma$
-(Teor.~\ref{thm:fixo-dual}) --- são \textbf{ambas inteiras}:
-\[
-\operatorname{tr}\beta=2\xi ,\qquad \mathrm{N}\beta=\xi^{2}-b^{2}D .
-\]
-E é só com elas que o lado se decide:
-\[
-\boxed{\;\frac ab<\sigma_m \iff \xi<0 \ \ \text{ou}\ \ \mathrm{N}\beta<0\;}
-\]
---- que é, letra por letra, a partição em dois casos do Teor.~\ref{thm:corte}. \emph{A raiz
-nunca se forma}: a decisão inteira que ali aparecia como um artifício de cálculo é a
-transformada a fazer o seu trabalho.
-
-\textbf{(2) O corte é a SEPARAÇÃO das folhas, e o discriminante mede-a.} Para
-$\alpha=u+v\sqrt D$ qualquer, a separação das duas folhas é
-$\operatorname{eval}_+-\operatorname{eval}_-=2v\sqrt D$, e o seu quadrado calcula-se das
-duas simétricas sem sair de $\mathbb{Z}$:
-\[
-\bigl(\operatorname{eval}_+-\operatorname{eval}_-\bigr)^{2}
-=\operatorname{tr}^{2}\alpha-4\,\mathrm{N}\alpha=4v^{2}D .
-\]
-Logo \textbf{as duas folhas coincidem exactamente quando $\alpha\in\mathbb{Q}$}, que é o
-Teor.~\ref{thm:descida} ($x=x\dg\iff x\in\mathbb{Q}$) dito na transformada. E daqui sai a
-leitura que faltava:
-\begin{center}
-\emph{folha única $\Rightarrow$ o objecto é um \textbf{ponto}; folhas separadas
-$\Rightarrow$ o objecto é um \textbf{corte}.}
-\end{center}
-Um racional não corta nada --- está lá. É a separação que produz as duas classes.
-
-\textbf{(3) E a separação é genuína: nenhum irracional se disfarça.} Com $D$ não quadrado
-e $v\neq0$, $4v^{2}D$ não é quadrado; logo a folha $\operatorname{eval}_+$ não é racional e
-o par $(\operatorname{eval}_+,\operatorname{eval}_-)$ não colapsa por acidente aritmético.
-Em particular $\mathrm{N}\beta=\xi^{2}-b^{2}D\neq0$ para todo $b\geq1$: \textbf{nenhum
-racional cai em cima do corte}, que é a condição de corte do Teor.~\ref{thm:corte},
-obtida aqui \emph{da transformada} e não de uma varredura.
-
-\textbf{(4) Donde: o corpo é a partição.} Juntando, a transformada universal
-factoriza $\mathbb{Q}(\sqrt D)$ em duas folhas, e essa factorização \emph{é} a construção
-do corpo:
-\begin{itemize}
-\item o produto das folhas --- a norma --- dá o \textbf{lado} do corte (parte 1);
-\item a diferença --- o discriminante --- dá a \textbf{abertura} (parte 2), e distingue
-ponto de corte;
-\item a soma --- o traço --- dá a \textbf{classe} de equivalência, que é o
-Teor.~\ref{thm:descida}: $\mathbb{Q}$ são as classes dos pontos fixos sob o traço;
-\item e a diagonalização simultânea (Cor.~\ref{cor:dir-cruz-folhas}) diz \emph{quando} dois
-objectos são cortados pela \textbf{mesma} partição: quando os traços coincidem.
-\end{itemize}
-Nada disto sai de $\mathbb{Z}$. O corpo $\mathbb{Q}(\sqrt D)$ não é dado e depois medido:
-ele é \textbf{o que sobra} quando a transformada parte $\mathbb{Q}$ nas folhas certas, e as
-duas simétricas são o registo inteiro dessa partição. $\square$
-\end{teorema}
-\colunas{as folhas são o corte}
-        {$\operatorname{tr}$ e $\mathrm{N}$, ambas inteiras, decidem o lado do corte de
-$\sigma_m$ sem formar a raiz; o discriminante $\operatorname{tr}^{2}-4\mathrm{N}$ separa
-ponto de corte}
-        {\code{tests/transformada\_universal.c} \S T7: $9\,600$ racionais em cinco corpos,
-o critério das folhas e a comparação em fracção contínua --- dois programas sem uma linha
-em comum --- dão o mesmo lado em $9\,600$, com $7\,871$ abaixo e $1\,729$ acima e nenhum em
-cima; \S T7b: em $5\,746$ elementos o discriminante anula-se exactamente sobre os
-racionais, e nos $5\,304$ de folhas separadas nunca é quadrado}
-
-\colunas{a construção dual desce: os pares derivados}
-        {posicional\,/\,algébrica separadas por (P1); $\det=$ termo constante e Newton são
-(D2) e (D1); convolução\,/\,deconvolução são a ida e a volta}
-        {\code{tests/transformada\_universal.c} \S T16, por DOIS CAMINHOS: $x-b$ com uma
-raiz racional em $19$ de $19$ e $\mu$ de discriminante não quadrado sem nenhuma em $42$ de
-$42$; o determinante saído da MATRIZ a bater com o termo constante do POLINÓMIO em $110$ de
-$110$; e $P_k$ da recorrência a bater com $\operatorname{tr}(A^{k})$ da matriz multiplicada
-de facto em $770$ de $770$}
-
-\colunas{a transformada universal em $\mathbb{Q}(m\sqrt D)$}
-        {avaliação nas folhas $\pm m\sqrt D$; a CONVOLUÇÃO vira produto ponto a ponto, a
-DECONVOLUÇÃO é a divisão folha a folha e degenera porque o corpo é irredutível; traço e
-norma são o registo inteiro, e é a NORMA que normaliza --- nenhum $\gcd$ acrescenta}
-        {\code{tests/transformada\_universal.c}: a convolução cíclica de $2$ com peso $m^{2}D$
-e a avaliação a diagonalizá-la em $6561$ de $6561$; traço racional e norma a bater com a
-fórmula fechada em $121$ de $121$; a inversão em $168$ de $168$ com o ÚNICO caso de norma
-zero a ser o elemento nulo --- a degenerescência do corpo; e o contraste com $D$ quadrado,
-onde aparecem $12$ não nulos de norma zero, que são os divisores de zero do
-Teor.~\ref{thm:divzero}}
 
 %======================================================================
 \section{$e$: a razão dos volumes de andar para andar}\label{sec:e}
@@ -6548,7 +5857,7 @@ Teorema do Gato, os resíduos e a verificação por energia ---, e o que fica é
 escolha particular}, e por isso pertencem ao segundo escalão. O que continua a ser dívida é
 o centro citá-las para \emph{fundar} --- e nos casos em que ele tem forma própria, passou a
 citar a sua: a base ortonormal é a Prop.~\ref{thm:orto} (a matriz de Gram é a identidade,
-sem escolher anel), e a transformada é o Teor.~\ref{thm:transformada-universal}.
+sem escolher anel), e a transformada é o \code{analitico thm:transformada-universal}.
 
 \medskip
 \noindent\textbf{O critério, que é o mesmo em toda a arrumação:} uma peça é canónica se
