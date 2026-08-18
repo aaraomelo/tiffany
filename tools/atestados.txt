@@ -327,7 +327,7 @@ nove_periodico 71adcc6ffe97b6c4 0
 nucleo_unificado ac7c6cf9a9960bc6 0
 numerica b046ac2b4f6f5a9a 0
 observador_torre 3d55320445a27093 0
-octeto ebabef99e8c5e5a9 0
+octeto 9d8b6654dc2d942e 0
 operacao b49585170243d858 0
 operador_dual e99fab729e1e6546 0
 orbita_real 82a8e8c2f72981ae 0

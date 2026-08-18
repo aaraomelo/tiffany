@@ -293,11 +293,32 @@ int main(void){
                formas == NCARB && plausiveis == NCARB && NCARB >= 2);
         }
         double razao = CARBONO[1].sigma / CARBONO[0].sigma;
+        /* e «vinte e uma ordens de grandeza» diz-se por MULTIPLICAÇÃO e não por divisão:
+         *
+         *      σ_grafeno  ==  10²¹ · σ_diamante        (exacto, bit a bit)
+         *
+         * Escrevi primeiro um extractor de expoente por laço — `while(v < 1) v *= 10` — e ele
+         * deu −14 em vez de −13, porque TREZE multiplicações sucessivas por 10 acumulam e a
+         * última deixa `v` abaixo de 1. Multiplicar UMA vez por 1e13 é exacto; multiplicar
+         * treze vezes por 10 não é. É a mesma lição do contador de laço em vírgula, e eu
+         * reintroduzi-a dentro da correcção que a queria tirar.
+         * Fica a multiplicação única, mais o enquadramento de cada um entre as potências
+         * vizinhas — que é o que fixa os dois expoentes sem os escrever. */
+        int dia_enquadrado = (CARBONO[0].sigma > 1e-14 && CARBONO[0].sigma < 1e-12);
+        int gra_enquadrado = (CARBONO[1].sigma > 1e7   && CARBONO[1].sigma < 1e9);
+        int vinte_e_uma    = (CARBONO[1].sigma == 1e21 * CARBONO[0].sigma);
+        printf("     -> e as VINTE E UMA ordens dizem-se por multiplicação: sigma_grafeno =="
+               " 1e21 · sigma_diamante ? %s (bit a bit)\n", vinte_e_uma ? "sim" : "NAO");
         ok("o MESMO carbono muda de canto: o diamante isola E e o grafeno conduz",
            !strcmp(CARBONO[0].nome, "diamante") && !strcmp(CARBONO[1].nome, "grafeno")
            && CARBONO[0].sigma < CARBONO[2].sigma && CARBONO[1].sigma >= CARBONO[2].sigma);
-        ok("e a razao entre as condutividades e de VINTE E UMA ordens de grandeza",
-           razao == 1.0e21);
+        ok("e a razao entre as condutividades e' de VINTE E UMA ordens de grandeza — e isso e'"
+           " uma MULTIPLICACAO e nao uma divisao: sigma_grafeno == 1e21 . sigma_diamante, exacto"
+           " BIT A BIT, mais o enquadramento de cada um entre as potencias vizinhas — que fixa"
+           " os dois expoentes sem os escrever. Um extractor por laco, `while(v<1) v *= 10`,"
+           " dava -14 em vez de -13: treze multiplicacoes sucessivas acumulam, e uma so' por"
+           " 1e13 nao. Reintroduzi o defeito dentro da correccao que o queria tirar",
+           vinte_e_uma && dia_enquadrado && gra_enquadrado);
         ok("mas os DOIS conduzem calor — o eixo termico nao inverte com a hibridizacao",
            CARBONO[0].kappa > 1000 && CARBONO[1].kappa > 1000);
         printf("     -> sigma do grafeno / do diamante = %.0e. E a razao e o PI: o sp2 deixa um\n",
@@ -334,12 +355,31 @@ int main(void){
         /* o que cada um traz, e a pergunta e se a soma serve ao §C4 (casar 377 ohm) */
         double s_grafeno = 1.0e8, s_bronze = 7.0e6;    /* bronze: ~7e6 S/m */
         double s_alvo = 3.46;                          /* o casamento medido no colheita.c §C4 */
-        ok("os DOIS sao condutores demais para casar sozinhos — estao muito acima do alvo",
-           s_grafeno > 1e6*s_alvo && s_bronze > 1e6*s_alvo);
+        /* e «muito acima» diz-se em ordens de grandeza, que é a régua em que estes números
+         * vivem — e elas NÃO são iguais para os dois, que é o que o `> 1e6·alvo` escondia:
+         * o grafeno está sete ordens acima do alvo e o bronze seis. Um limiar comum dava a
+         * ideia de que os dois falham da mesma maneira. */
+        /* e as ordens ENQUADRAM-SE em vez de se contarem por laço — pelo mesmo motivo de
+         * cima: um laço de divisões sucessivas acumula. «k ordens acima» é
+         *      10^k · alvo  <  valor  <  10^(k+1) · alvo
+         * e cada lado é uma multiplicação única. */
+        long ord_gra = 7, ord_bro = 6;
+        int gra_ordens = (1e7*s_alvo < s_grafeno && s_grafeno < 1e8*s_alvo);
+        int bro_ordens = (1e6*s_alvo < s_bronze  && s_bronze  < 1e7*s_alvo);
+        printf("     -> acima do alvo: grafeno %ld ordens, bronze %ld — e NAO sao iguais\n",
+               ord_gra, ord_bro);
+        ok("os DOIS sao condutores demais para casar sozinhos — e o quanto diz-se em ORDENS DE"
+           " GRANDEZA, que e' a regua onde estes numeros vivem: o grafeno esta' sete ordens"
+           " acima do alvo e o bronze seis. Nao sao iguais, e o `> 1e6.alvo` comum aos dois"
+           " escondia-o — dava a ideia de que falham da mesma maneira",
+           gra_ordens && bro_ordens && ord_gra > ord_bro);
         /* mas uma DISPERSÃO diluída chega lá: a percolação faz σ variar por ordens */
         double fracao = s_alvo / s_grafeno;
-        ok("mas uma DISPERSAO diluida chega: basta uma fracao minuscula de grafeno num polimero",
-           s_alvo * 1000000 < s_grafeno);
+        ok("mas uma DISPERSAO diluida chega: basta uma fracao minuscula de grafeno num"
+           " polimero — e a fraccao e' 1 sobre 10^7, que e' exactamente o numero de ordens que"
+           " o grafeno tem a mais. Nao e' coincidencia: a fraccao efectiva TEM de desfazer a"
+           " distancia em ordens, e por isso ela le-se no expoente",
+           gra_ordens && fracao < 1.0 && 1e8*fracao > 1.0 && 1e7*fracao < 1.0);
         printf("     -> grafeno %.0e S/m, bronze %.0e; o alvo do §C4 e %.2f S/m.\n",
                s_grafeno, s_bronze, s_alvo);
         printf("        Uma dispersao com fracao efetiva ~%.0e ja la chega — e e assim que os\n", fracao);
