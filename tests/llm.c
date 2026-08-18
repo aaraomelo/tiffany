@@ -311,7 +311,23 @@ printf("\n§L3  MATMUL DO DISCO: linha a linha, e bate com a conta em RAM.\n\n")
     printf("      matriz 64×128 = %zu B em disco, e %d floats de RAM por vez\n", sizeof W, C);
     printf("      maior diferença disco vs RAM: %.3e\n", maxdif);
     printf("      régua (128 termos, escala %.2f): %.3e\n\n", escala, regua(C, escala));
-    ok("o produto lido do disco bate com o produto feito em RAM", maxdif < regua(C, escala));
+    /* E A REGUA NAO E' PRECISA AQUI, e a saida ja' o dizia: a maior diferenca e' 0,000e+00.
+     * As duas rotas somam os MESMOS termos na MESMA ordem, com o mesmo acumulador `double` —
+     * logo tem de bater BIT A BIT, e o que o medidor existe para apanhar e' precisamente
+     * alguma coisa mudar nesse caminho. «E' zero» e' mais forte que «e' menor que a regua
+     * que eu escolhi», e conta-se por entrada em vez de se ler um maximo. */
+    long ent = 0, bit_a_bit = 0;
+    for(int i = 0; i < L; i++){
+        ent++;
+        if(memcmp(&y_disco[i], &y_ram[i], sizeof(float)) == 0) bit_a_bit++;
+    }
+    printf("      e as %ld entradas batem BIT A BIT: %ld\n", ent, bit_a_bit);
+    ok("o produto lido do disco bate com o produto feito em RAM — e bate BIT A BIT, nas 64"
+       " entradas: as duas rotas somam os MESMOS termos na MESMA ordem e com o mesmo"
+       " acumulador, logo a igualdade nao tem folga nenhuma a que dar regua. A `regua()`"
+       " continua impressa como testemunha da representacao, mas fora da condicao — «e' zero»"
+       " e' mais forte, e a propria saida ja' dizia 0,000e+00",
+       ent == 64 && bit_a_bit == ent);
     close(fd);
 }
 
@@ -389,8 +405,35 @@ printf("\n§L5  ATENÇÃO: e no caso uniforme ela cai na MÉDIA, que se sabe de 
     for(int t = 0; t < T-1; t++)
         for(int d = 0; d < D; d++)
             if(sa[t*D+d] != sb[t*D+d]) passado_mexeu++;      /* IGUALDADE, não régua */
-    for(int d = 0; d < D; d++)
-        mudou_presente += fabs(sa[(T-1)*D+d] - sb[(T-1)*D+d]);
+    /* e o CONTROLO POSITIVO diz-se por LEI e nao por um numero meu. A atencao e' uma media
+     * CONVEXA dos V com pesos que somam 1, e estragou-se UMA posicao em +50: logo cada
+     * dimensao do presente tem de mexer, e tem de mexer MENOS de 50 — o proprio tamanho da
+     * perturbacao e' o tecto, e ele vem do dado e nao de mim. `mudou_presente > 1.0` era um
+     * numero meu no meio de um intervalo que a convexidade ja' fixa. */
+    const float PERTURBA = 50.0f;
+    long dims = 0, mexeu = 0, sob_o_tecto = 0, todos_iguais = 0;
+    double delta0 = -1;
+    for(int d = 0; d < D; d++){
+        double delta = fabs(sa[(T-1)*D+d] - sb[(T-1)*D+d]);
+        mudou_presente += delta;
+        dims++;
+        if(delta > 0) mexeu++;
+        if(delta < PERTURBA) sob_o_tecto++;
+        /* E HA UMA IDENTIDADE MAIS FORTE QUE O TECTO, e o tecto sozinho nao mordia: a
+         * atencao e' LINEAR em V, e somou-se o MESMO +50 a todas as dimensoes de UMA
+         * posicao. Logo a saida muda em w_last.50 em TODAS as dimensoes — os 16 deltas tem
+         * de ser IGUAIS entre si, e o valor comum e' o peso softmax daquela posicao vezes a
+         * perturbacao. Isso e' uma igualdade, nao um intervalo. */
+        if(d == 0) delta0 = delta;
+        /* e a igualdade e' EXACTA na lei e nao na representacao: em `float` so' 9 dos 16
+         * deltas batem bit a bit, porque cada saida passou pelo seu proprio arredondamento.
+         * A regua aqui e' legitima e tem genealogia — e' FLT_EPSILON vezes os termos da soma,
+         * a regua da REPRESENTACAO, e nao um numero meu. */
+        if(fabs(delta - delta0) < regua(T, delta0)) todos_iguais++;
+    }
+    printf("      e o presente MEXE em %ld de %ld dimensoes, todas abaixo dos %.0f da"
+           " perturbacao — e os %ld deltas sao IGUAIS entre si (%.6f), porque a atencao e'"
+           " linear em V\n", mexeu, dims, (double)PERTURBA, todos_iguais, delta0);
     /* e a metade ESTRUTURAL, que é a causalidade propriamente dita: correndo a posição t,
      * o maior índice que a atenção leu tem de ser EXACTAMENTE t. Isto conta-se, não se
      * tolera — e uma implementação que lesse o futuro cairia aqui mesmo que os números
@@ -410,9 +453,18 @@ printf("\n§L5  ATENÇÃO: e no caso uniforme ela cai na MÉDIA, que se sabe de 
            leu_alem, T);
     ok("o passado não vê o futuro E o presente vê-se a si — a máscara é causal, e a"
        " primeira metade mede-se por IGUALDADE exacta (o passado não se mexe um bit) e"
-       " pela ESTRUTURA (correndo a posição t, o maior índice lido é t). A régua que aqui"
-       " estava media uma consequência numérica do que agora se conta",
-       passado_mexeu == 0 && mudou_presente > 1.0 && leu_alem == 0);
+       " pela ESTRUTURA (correndo a posição t, o maior índice lido é t). E o CONTROLO"
+       " POSITIVO diz-se por LEI: a atenção é uma média CONVEXA dos V, estragou-se UMA posição"
+       " em +50, logo cada dimensão do presente tem de mexer E de mexer menos de 50 — o tecto"
+       " vem do dado. E há uma identidade mais forte que o tecto, que o tecto sozinho não"
+       " mordia: a atenção é LINEAR em V e somou-se o MESMO +50 a todas as dimensões de UMA"
+       " posição, logo os 16 deltas têm de ser IGUAIS entre si — o valor comum é o peso"
+       " softmax daquela posição vezes a perturbação — e ela vale contra a régua da"
+       " REPRESENTAÇÃO (FLT_EPSILON vezes os termos), porque em float só 9 dos 16 batem bit a"
+       " bit. Isso é uma igualdade e não um intervalo, e `mudou_presente > 1.0` era um número meu no meio dele. A régua que aqui estava media uma consequência numérica do que"
+       " agora se conta",
+       passado_mexeu == 0 && leu_alem == 0
+       && dims == D && mexeu == dims && sob_o_tecto == dims && todos_iguais == dims);
 }
 
 printf("\n§L6  A REDE: uma passagem completa, contra a conta direta feita à parte.\n\n");
@@ -449,8 +501,21 @@ printf("\n§L6  A REDE: uma passagem completa, contra a conta direta feita à pa
     printf("      bloco: RMSNorm → Wq (disco) → RoPE → atenção → residual\n");
     printf("      maior diferença contra o mesmo bloco em RAM: %.3e\n", maxdif);
     printf("      régua: %.3e\n\n", regua(D*T, escala));
-    ok("o bloco inteiro com os pesos no DISCO dá o mesmo que em RAM",
-       maxdif < regua(D*T, escala));
+    /* e o mesmo aqui, que a saida tambem ja' dizia: 0,000e+00. O bloco inteiro — RMSNorm,
+     * Wq do disco, RoPE, atencao, residual — nao muda um bit por os pesos virem do disco, e
+     * e' isso que se afirma. Uma cadeia de cinco etapas a bater BIT A BIT nas 32 saidas diz
+     * muito mais do que ficar abaixo de uma regua de 7e-5. */
+    long ent_b = 0, bit_b = 0;
+    for(int i = 0; i < D; i++){
+        ent_b++;
+        if(memcmp(&s1[i], &s2[i], sizeof(float)) == 0) bit_b++;
+    }
+    printf("      e as %ld saidas do bloco batem BIT A BIT: %ld\n", ent_b, bit_b);
+    ok("o bloco inteiro com os pesos no DISCO da' o mesmo que em RAM — e da' BIT A BIT nas 32"
+       " saidas. Sao CINCO etapas encadeadas (RMSNorm, Wq do disco, RoPE, atencao, residual) e"
+       " nenhuma delas move um bit por os pesos virem do disco: e' isso que se afirma, e uma"
+       " igualdade exacta numa cadeia de cinco diz muito mais do que ficar abaixo de 7e-5",
+       ent_b == D && bit_b == ent_b);
     close(fd);
 }
 
