@@ -154,9 +154,19 @@ static double orbita(int g, const double *co, double t){
     return s;
 }
 
+/* O TECTO, e ele estava POR VERIFICAR. A `transforma` escreve até `co[2*g]`, logo um
+ * array de 80 só serve até g = 39 — e o `grau_fecha` era chamado com max = 40, que escreve
+ * em `co[80]`, fora dele. Com a régua do papel a curva fecha muito antes e o ramo NUNCA
+ * corria; apertando a régua cem vezes, o medidor deixa de passar e passa a dar FALHA DE
+ * SEGMENTAÇÃO. Um `40` que ninguém liga ao `80` é documentação, não limite.
+ * Agora o array deriva do grau, e o grau verifica-se onde é usado. */
+#define GMAX   39                        /* o maior g que cabe: 2·39 + 1 = 79 < 80 */
+#define NCOEF  (2*GMAX + 2)              /* e o array deriva DELE, não o contrário */
+
 /* o pior resíduo da órbita de grau g contra os n pontos do relógio */
 static double residuo(int n, const double *ux, const double *uy, int g){
-    double cox[80], coy[80], pr = 0;
+    double cox[NCOEF], coy[NCOEF], pr = 0;
+    if(g < 1 || g > GMAX){ puts("relogio_curva: grau fora do tecto"); exit(1); }
     transforma(n, ux, g, cox);
     transforma(n, uy, g, coy);
     for(int k = 0; k < n; k++){
@@ -260,18 +270,25 @@ int main(void){
         puts("a carta nao esta — e diz-se, em vez de passar em silencio");
         return 0;
     }
-    /* a régua do papel: a 600 dpi um pixel é ~10 unidades da fonte (upem 1000) num
-     * corpo de leitura; a régua da fonte é a própria unidade, 1 */
-    double PAPEL = 10.0, FONTE = 1.0;
+    /* a régua do papel: a 600 dpi um pixel é ~10 unidades da fonte num corpo de leitura;
+     * a régua da fonte é a própria unidade, 1.
+     *
+     * E o 10 DERIVA-SE do upem em vez de se escrever: ele valia 10 porque o upem desta fonte
+     * é 1000, e isso estava no COMENTÁRIO, não na conta — uma fonte com upem 2048 (o comum
+     * nas TrueType) tornaria a régua duas vezes mais apertada do que o papel, sem nada
+     * acusar. A régua é um centésimo do em, e o em pergunta-se à fonte. */
+    double PAPEL = t.upem / 100.0, FONTE = 1.0;
+    printf("  a régua do papel deriva do upem da fonte: upem %d  ->  PAPEL = %.1f unidades\n",
+           t.upem, PAPEL);
 
     gera_relogio();
     printf("O RELOGIO DESENHA A CURVA PLANA — o experimento, medido\n");
     printf("  o pi que a MAQUINA produz (saida, nao entrada): pi_q = %.9f na dobra 12\n\n",
            PI2_Q / 2);
-    int go = prepara(&t, 'o', 1) ? grau_fecha(256, UX, UY, PAPEL, 40) : -1;
+    int go = prepara(&t, 'o', 1) ? grau_fecha(256, UX, UY, PAPEL, GMAX) : -1;
     double ro_fonte = prepara(&t, 'o', 1) ? residuo(256, UX, UY, 8) : 1e9;
-    int ge = prepara(&t, 'e', 1) ? grau_fecha(256, UX, UY, PAPEL, 40) : -1;
-    int gR = prepara(&t, 'R', 1) ? grau_fecha(256, UX, UY, PAPEL, 40) : -1;
+    int ge = prepara(&t, 'e', 1) ? grau_fecha(256, UX, UY, PAPEL, GMAX) : -1;
+    int gR = prepara(&t, 'R', 1) ? grau_fecha(256, UX, UY, PAPEL, GMAX) : -1;
     printf("  grau na regua do papel: o=%d  e=%d  R=%d\n", go, ge, gR);
 
     ok("§R1 a orbita lisa fecha BARATO: o «o» em grau <= 4 na regua do papel",
@@ -281,7 +298,7 @@ int main(void){
     ok("§R3 a estrutura manda no grau: grau(o) < grau(e) <= grau(R) — a quina cobra",
        go > 0 && ge > go && gR >= ge);
 
-    int go_troco = prepara(&t, 'o', 0) ? grau_fecha(256, UX, UY, PAPEL, 40) : -1;
+    int go_troco = prepara(&t, 'o', 0) ? grau_fecha(256, UX, UY, PAPEL, GMAX) : -1;
     ok("§R4 CONTROLO: com o tempo POR TROCO (nao o arco) o «o» nao fecha em <= 4 — "
        "o tempo do relogio E o arco",
        go_troco < 0 || go_troco > 4);
@@ -294,11 +311,11 @@ int main(void){
 
     /* §R6/§R7: o «e» — a assinatura veste a roupa e a volta fecha contra a ORIGINAL */
     if(prepara(&t, 'e', 1)){
-        double cox[80], coy[80];
+        double cox[NCOEF], coy[NCOEF];
         /* O RELOGIO DECIDE O GRAU DA CURVA VESTIDA: sobe harmonicos ate a ROUPA fechar
          * na regua — nao se alarga a regua, sobe-se o grau, que nao tem tecto */
         int g = ge > 0 ? ge : 13, M = 0; double rv = 1e9;
-        for(; g <= 30; g++){
+        for(; g <= GMAX; g++){
             transforma(256, UX, g, cox);
             transforma(256, UY, g, coy);
             M = 2 * g;                 /* um segmento por meia onda do maior harmónico */
@@ -319,7 +336,7 @@ int main(void){
 
     /* §R9: a roupa do relogio e' o RASTO — grau 1, o passo decidido por ele */
     if(prepara(&t, 'e', 1)){
-        double cox[80], coy[80];
+        double cox[NCOEF], coy[NCOEF];
         int g = ge > 0 ? ge : 13;
         transforma(256, UX, g, cox);
         transforma(256, UY, g, coy);
