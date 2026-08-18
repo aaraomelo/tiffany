@@ -118,13 +118,28 @@ int main(void){
     {
         /* o reenquadramento do Aarao: "o cerebro e o microprocessador; estamos fazendo o
          * encanamento". Se o dispositivo so encana, ele nao calcula — e ai a conta fecha. */
-        double colhido = 0.9931;
+        double colhido = 0.9931;                  /* COPIADO do cosmico.c: o céu como frio */
         double encanar = 0.30;                    /* o pior caso do encanamento: escrever */
         double calcular = 15.0;
-        ok("se o dispositivo ENCANA (guarda e transfere), a colheita paga com folga de 3x",
-           colhido > 3*encanar);
-        ok("e se ele CALCULA, nao paga — e a diferenca e de mais de uma ordem de grandeza",
-           calcular > 10*colhido);
+        /* E ESTES TRÊS SÃO DECLARADOS, não medidos aqui — o `colhido` vem do `cosmico.c` e
+         * os outros dois são estimativas de projecto. Logo as asserções são aritmética sobre
+         * números meus, e o que se pode afirmar deles é a RAZÃO, dita e enquadrada dos dois
+         * lados. E vale a pena dizê-la, porque a primeira é APERTADA: `colhido > 3·encanar`
+         * é 0,9931 contra 0,90, três por cento de margem — um encanamento de 0,34 W já não
+         * pagava, e o «folga de 3x» não deixava ver isso. */
+        long r_enc = (long)(colhido/encanar*100), r_cal = (long)(calcular/colhido*100);
+        printf("      -> as duas razões, em centésimos: colhido/encanar = %ld,"
+               " calcular/colhido = %ld\n", r_enc, r_cal);
+        ok("se o dispositivo ENCANA (guarda e transfere), a colheita paga — e a folga diz-se em"
+           " vez de se arredondar para «3x»: a razao e' 331 centesimos, ou seja TRES POR CENTO"
+           " acima do limiar de tres. Um encanamento de 0,34 W ja' nao pagava, e o «3x» nao"
+           " deixava ver isso. Os tres numeros sao DECLARADOS — o colhido vem do cosmico.c e"
+           " os outros dois sao estimativas de projecto —, logo o que se afirma e' a razao. O colheita.c ja' o diz de outro modo: «um valor copiado e' postulado»",
+           r_enc > 330 && r_enc < 332);
+        ok("e se ele CALCULA, nao paga — e a diferenca diz-se: a razao e' 1510 centesimos,"
+           " quinze vezes e meia, enquadrada dos dois lados. «Mais de uma ordem de grandeza»"
+           " era verdade e dizia menos do que se sabe",
+           r_cal > 1500 && r_cal < 1520);
         printf("      -> encanar %.2f W contra %.2f W colhidos: folga de %.1fx.\n",
                encanar, colhido, colhido/encanar);
         printf("         calcular %.0f W contra %.2f W: faltam %.0f W.\n",

@@ -138,7 +138,7 @@ dinamica_inversor 3857d5d566297c2e 0
 dirac_transicao 97341d46b5343b0d 0
 disco 8fc97c29cd393f92 0
 disco_wasm b36d2463b26941fb 0
-dispositivo 6cd11917a617a6af 0
+dispositivo a2f5bdbb805b1c8f 0
 dissipa 04ad16367025408c 0
 dissipa_pagina 15ff096cfd929100 0
 distancia 508543c170ad9fd9 0
@@ -358,7 +358,7 @@ pi_familia ea3960ed8925d824 0
 pi_rei 5d47b698f4b9fe8a 0
 pidual 7a63a603c59c16ed 0
 pimonte 7cdea4ef6d7e9e40 0
-pinos a0bc6d7bb96111e1 0
+pinos 0b8b7442d4a2816d 0
 pisotbase ac67cc7b8fafa9c3 0
 plugs d61e5046294a9857 0
 po_corpo d7acdfc5b77719f2 0

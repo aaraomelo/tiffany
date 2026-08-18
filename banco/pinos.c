@@ -199,8 +199,17 @@ Tn *t = NULL;
      * estao longe (4-5x o acaso, normas a variar dez vezes dentro da mesma matriz), e as de
      * PROJECAO estao perto — o ffn_gate a 1,1x e o token_embd a 1,6x, com normas medias de
      * 0,88 e 0,96. E e' o token_embd que interessa: e' ELE a base do espaco semantico. */
-    ok("o token_embd — a base do espaço semântico — tem normas quase 1",
-       fabs(emb_norma - 1.0) < 0.15);
+    /* e «quase 1» diz-se com o número: a norma média do token_embd é 0,96, e o desvio a 1
+     * é de QUATRO centésimos — não de quinze, que era a folga que o limiar dava. Enquadra-se
+     * dos dois lados, e é isso que separa esta matriz das de atenção (0,36 e 1,56). */
+    long n_emb = (long)(emb_norma*100);
+    printf("      e a norma média do token_embd em centésimos: %ld (as de atenção dão %ld e %ld)\n",
+           n_emb, (long)(0.36*100), (long)(1.56*100));
+    ok("o token_embd — a base do espaço semântico — tem normas quase 1, e o «quase» diz-se:"
+       " a norma média e' 96 centesimos, a quatro de um, enquadrada dos dois lados. O `< 0,15`"
+       " dava quinze centesimos de folga a um desvio de quatro — e e' esse numero que separa"
+       " esta matriz das de atencao, que dao 36 e 156",
+       n_emb > 94 && n_emb < 98);
     ok("e as suas colunas estão a menos de 2x o acaso — quase ortogonais",
        emb_cos < 2.0);
     printf("      A PREMISSA ACERTA ONDE IMPORTA, e falha onde não importava.\n\n");
@@ -301,8 +310,17 @@ printf("\n§P3  LOAD e STORE: a mesma operação dual.\n\n");
      * a inversa da matriz de Gram, e nao apenas das normas na diagonal. */
     double falta = fabs(e2 - px)/px;
     printf("      falta para a projeção exata: %.2f%%\n\n", 100*falta);
-    ok("corrigir só a escala aproxima mas NÃO fecha — a base é oblíqua, não ortogonal",
-       falta > 1e-6 && falta < 0.2);
+    /* e o quanto FALTA diz-se: 3,63%, que é o mesmo número que o `maisum.c` §M cita desta
+     * secção. `> 1e-6 && < 0,2` era um intervalo largo o bastante para o número real e para
+     * quase qualquer outro; enquadrado em milésimos, ele fixa-se. */
+    long falta_mil = (long)(falta*1000);
+    printf("      e o que falta, em milésimos: %ld  (o maisum.c §M cita 3,63%% desta secção)\n",
+           falta_mil);
+    ok("corrigir so' a escala aproxima mas NAO fecha — a base e' obliqua, nao ortogonal. E o"
+       " quanto falta diz-se: 36 milesimos, isto e' 3,63%, que e' o numero que o maisum.c cita"
+       " desta seccao. O `> 1e-6 && < 0,2` era um intervalo largo o bastante para este valor e"
+       " para quase qualquer outro",
+       falta_mil >= 36 && falta_mil <= 37);
     printf("      É o plugue do plugue.sh — `ve` e `poe`, a mesma operação nos dois sentidos —\n");
     printf("      mas com uma diferença que a medida obriga a dizer: como as colunas não são\n");
     printf("      ortogonais, a volta precisa da MÉTRICA da base (a inversa de Gram), e não só\n");
