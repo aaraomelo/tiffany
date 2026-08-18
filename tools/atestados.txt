@@ -474,7 +474,7 @@ transformada 57edcd6ed679edc5 0
 transformada_andar 5a4c77edb0f1c502 0
 transformada_universal 2f0a30b50cdb49d6 0
 transfusao 5c7ec4e1ca8d53df 0
-travessia 77144fbe3ea9c2b7 0
+travessia 1d535f20cfdf2d7d 0
 tres_pontos ab13742c5da648de 0
 tres_reconstroi a1d948036758fc02 0
 tres_regimes ed018e9a25951b57 0

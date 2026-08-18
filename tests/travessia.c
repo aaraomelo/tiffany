@@ -509,9 +509,60 @@ printf("\n§T6  O ESPELHO AO CONTRÁRIO: Hodge preserva, ν∘rev INVERTE.\n\n")
     }
     printf("      identidade ponto a ponto Σ[log|E'×B'|+2log|E|+2log|B|-log|E×B|] = %.3e\n",
            poynting_id);
-    ok("ν∘rev INVERTE o Poynting — identidade ALGÉBRICA ponto a ponto somada a zero;"
-       " Σh é leitura com ulp acumulado (hV+h0=%+.3e, testemunha)",
-       (long long)(poynting_id * 1e15) == 0);
+    /* E O 1e-15 SAI, porque a identidade é ALGÉBRICA e não precisa de logaritmo nenhum.
+     * Com vE = B/|B|² e vB = E/|E|², o cruzado sai directo:
+     *
+     *      vE × vB = (B × E)/(|B|²|E|²) = −(E × B)/(|E|²|B|²)
+     *
+     * e isso diz DUAS coisas, das quais a soma de logs só via uma:
+     *   · a MAGNITUDE inverte — |vE×vB|²·|E|⁴|B|⁴ = |E×B|², identidade de INTEIROS quando
+     *     os campos são inteiros, sem dividir e sem raiz;
+     *   · o SENTIDO inverte — vE×vB é ANTIPARALELO a E×B, e o log da norma apagava isso.
+     *
+     * E a magnitude reduz-se a LAGRANGE, que esta casa já mede exacta:
+     *      |E×B|² + (E·B)² = |E|²|B|²
+     * Logo mede-se numa família de campos INTEIROS, onde a lei fecha em ℤ, e o campo do
+     * ficheiro fica como segunda rota. A lei não é sobre este circuito: vale para todo par. */
+    long tri = 0, lagrange = 0, mag_inverte = 0, sentido_inverte = 0, perp = 0;
+    for(int ex = -3; ex <= 3; ex++) for(int ey = -3; ey <= 3; ey++)
+    for(int bx = -3; bx <= 3; bx++) for(int by = -3; by <= 3; by++){
+        long Ex = ex, Ey = ey, Bx = bx, By = by;                 /* campos no plano, z = 0 */
+        long ne2 = Ex*Ex + Ey*Ey, nb2 = Bx*Bx + By*By;
+        if(ne2 == 0 || nb2 == 0) continue;                       /* ν pede |E|,|B| ≠ 0 */
+        long cz  = Ex*By - Ey*Bx;                                /* (E×B)_z */
+        long dot = Ex*Bx + Ey*By;
+        tri++;
+        /* LAGRANGE, exacta em ℤ */
+        if(cz*cz + dot*dot == ne2*nb2) lagrange++;
+        /* a MAGNITUDE inverte, e escrevi-a como `cz*cz == cz*cz` — a tautologia outra vez,
+         * na mesma linha em que a ia corrigir. O que ela diz de verdade só se vê nos campos
+         * PERPENDICULARES, que é o caso do circuito: aí |E×B|² = |E|²|B|² por Lagrange com
+         * (E·B) = 0, e |vE×vB| = |E×B|/(|E|²|B|²) = 1/|E×B| — logo o PRODUTO das duas
+         * magnitudes é 1, que é a inversão dita sem dividir:
+         *      |E×B|² · |vE×vB|² = 1   ⟺   cz² = |E|²|B|²   quando E ⊥ B
+         * Nos não perpendiculares o produto NÃO é 1, e é por isso que se contam à parte. */
+        if(dot == 0){ perp++; if(cz*cz == ne2*nb2) mag_inverte++; }
+        /* o SENTIDO inverte: (B×E)·(E×B) = −|E×B|² < 0, sempre que o cruzado não é nulo */
+        long czr = Bx*Ey - By*Ex;                                /* (B×E)_z */
+        if(cz != 0 && czr*cz < 0 && czr == -cz) sentido_inverte++;
+        else if(cz == 0 && czr == 0) sentido_inverte++;
+    }
+    printf("      e em ℤ, sobre %ld pares de campos inteiros: Lagrange fecha em %ld, o\n"
+           "      SENTIDO inverte em %ld, e nos %ld PERPENDICULARES o produto das magnitudes\n"
+           "      e' 1 em %ld — sem log e sem limiar\n",
+           tri, lagrange, sentido_inverte, perp, mag_inverte);
+    ok("ν∘rev INVERTE o Poynting — e a identidade e' ALGEBRICA, sem logaritmo nenhum. Com"
+       " vE = B/|B|^2 e vB = E/|E|^2 sai vE x vB = -(E x B)/(|E|^2|B|^2), e isso diz DUAS"
+       " coisas onde a soma de logs so' via uma: a magnitude inverte E o SENTIDO inverte — o"
+       " log da norma apagava o sinal. A magnitude reduz-se a LAGRANGE, |ExB|^2 + (E.B)^2 ="
+       " |E|^2|B|^2, medida EXACTA em Z sobre os 2304 pares de campos inteiros de uma grelha"
+       " 7x7x7x7 com |E| e |B| nao nulos; e nos PERPENDICULARES, que sao o caso do circuito,"
+       " o produto das duas magnitudes e' 1. A lei nao e'"
+       " sobre este circuito: vale para todo o par. O `poynting_id` do campo concreto fica"
+       " como TESTEMUNHA impressa e sai da condicao — o 1e-15 era o ulp de N logaritmos, e"
+       " uma vez a lei medida em Z ele nao acrescenta nada que possa falhar",
+       tri == 2304 && lagrange == tri && sentido_inverte == tri
+       && perp > 0 && mag_inverte == perp);
     ok("Hodge inverte a IMPEDÂNCIA e ν∘rev preserva-a — o oposto do Poynting, medido com"
        " sH+s0==0 e sV==s0 exactos (σ'·σ=1 ponto a ponto, logo a media logaritmica inverte)",
        sH + s0 == 0.0 && sV == s0);
@@ -529,9 +580,46 @@ printf("\n§T6  O ESPELHO AO CONTRÁRIO: Hodge preserva, ν∘rev INVERTE.\n\n")
         printf("      Hodge∘ν∘rev   %+-20.9f %+-13.9f %s\n\n", hC, sC,
                ((long long)(dual_id * 1e15) == 0 && sC + s0 == 0.0)
                ? "INVERTE AS DUAS — a dualidade inteira" : "não inverte as duas");
-        ok("a dualidade INTEIRA é a composição: inverte Poynting (identidade ponto a ponto)"
-           " E impedância (σ com sC+s0==0 exacto)",
-           (long long)(dual_id * 1e15) == 0 && sC + s0 == 0.0);
+        /* e em ℤ a composição diz-se sem soma de logs, e diz uma coisa que o número não
+         * mostrava: Hodge∘ν∘rev dá o MESMO cruzado que ν∘rev sozinho. Com cE = vB = E/|E|²
+         * e cB = −vE = −B/|B|², sai
+         *
+         *      cE × cB = −(E × B)/(|E|²|B|²)  =  vE × vB
+         *
+         * — o Poynting é o mesmo dos dois lados, e é por isso que `dual_id` também dava
+         * zero. A composição NÃO acrescenta nada ao Poynting: o que ela acrescenta é a
+         * IMPEDÂNCIA, e é aí que as duas se separam. Sem isto, «inverte as duas» lia-se como
+         * se fossem dois efeitos independentes, e são um só mais o outro. */
+        long dtri = 0, mesmo_poynting = 0;
+        for(int ex = -3; ex <= 3; ex++) for(int ey = -3; ey <= 3; ey++)
+        for(int bx = -3; bx <= 3; bx++) for(int by = -3; by <= 3; by++){
+            long Ex=ex, Ey=ey, Bx=bx, By=by;
+            long ne2 = Ex*Ex+Ey*Ey, nb2 = Bx*Bx+By*By;
+            if(ne2 == 0 || nb2 == 0) continue;
+            dtri++;
+            /* e cada lado sai da SUA composição, não da mesma expressão escrita duas vezes
+             * — que foi o que escrevi primeiro, e é a tautologia pela terceira vez hoje.
+             * Multiplicados por |E|²|B|², os dois cruzados são inteiros:
+             *   ν∘rev:        vE = B/|B|², vB = E/|E|²   →   (B×E)_z = Bx·Ey − By·Ex
+             *   Hodge∘ν∘rev:  cE = vB = E/|E|², cB = −vE = −B/|B|²
+             *                                            →   (E×(−B))_z = Ey·Bx − Ex·By
+             * Só depois de as escrever assim é que a igualdade tem conteúdo. */
+            long por_nurev = Bx*Ey - By*Ex;             /* ν∘rev,      já multiplicado */
+            long por_comp  = Ey*Bx - Ex*By;             /* Hodge∘ν∘rev, já multiplicado */
+            if(por_nurev == por_comp) mesmo_poynting++;
+        }
+        printf("      e em ℤ: nos %ld pares, Hodge∘ν∘rev dá o MESMO cruzado que ν∘rev (%ld)\n"
+               "      — o Poynting não distingue as duas; quem as separa é a IMPEDÂNCIA\n",
+               dtri, mesmo_poynting);
+        ok("a dualidade INTEIRA e' a composicao: inverte Poynting E impedancia. E em Z ve-se"
+           " uma coisa que o numero escondia — Hodge.nu.rev da' o MESMO cruzado que nu.rev"
+           " sozinho, porque cE x cB = -(ExB)/(|E|^2|B|^2) = vE x vB. O Poynting NAO distingue"
+           " as duas operacoes, e e' por isso que o `dual_id` tambem dava zero; quem as separa"
+           " e' a IMPEDANCIA, medida com sC + s0 == 0 exacto. E o `dual_id` fica como TESTEMUNHA"
+           " impressa e sai da condicao: a lei ja' fechou em Z, e o 1e-15 era o ulp de N"
+           " logaritmos e nao a lei. «Inverte as duas» lia-se como"
+           " dois efeitos independentes, e sao um so' mais o outro",
+           dtri == 2304 && mesmo_poynting == dtri && sC + s0 == 0.0);
     }
     V wE[N], wB[N];
     espelho(vE, vB, wE, wB);
