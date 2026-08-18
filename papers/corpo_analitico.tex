@@ -3532,6 +3532,44 @@ Teor.~\ref{thm:divzero}}
 %======================================================================
 
 
+\section{MELLIN --- o polo MULTIPLICATIVO da transformada}\label{sec:mellin}
+
+\noindent\emph{Vem do centro:} a transformada é UMA só, a avaliação nas folhas
+(\code{algebrico thm:espectro}), e ela decompõe-se nos \textbf{dois polos duais}. Este
+documento é o polo \textbf{multiplicativo}; o aditivo está no
+\code{topologico sec:fourier}.
+
+\[
+\boxed{
+\begin{array}{lll}
+\text{no } \tau=-1 & \textbf{FOURIER} & \text{grupo ADITIVO, o CÍRCULO, } \abs{t}\leq2\\[2pt]
+ & & \text{ELÍPTICO: ordem finita, tudo volta}\\[6pt]
+\textbf{aqui} \ (\tau=+1) & \textbf{MELLIN} & \text{grupo MULTIPLICATIVO, caracteres } x^{-s}\\[2pt]
+ & & \text{as folhas RECÍPROCAS, } \sigma\sigma\dg=-1\\[2pt]
+ & & \text{HIPERBÓLICO: o traço CRESCE, e NÃO fecha}
+\end{array}}
+\]
+
+\noindent\textbf{Por que é que Mellin é deste lado.} Porque os seus caracteres são
+\emph{potências} $x^{-s}$ --- as exponenciais vestidas de função-potência --- e enquanto o
+grupo é $\mathbb{R}^{+}$ o índice $s$ é \textbf{contínuo}: não há nada de discreto. As
+folhas do metal \emph{não estão no círculo}; são recíprocas, com $\abs{\sigma}>1$, e o
+operador \textbf{não volta a si}. É exactamente a propriedade que define $\tau=+1$
+(\code{algebrico thm:cuspide}), e é a mesma pela qual a completude, o supremo e o alcance
+de $\mathbb{R}$ vivem aqui.
+
+\textbf{E o que torna a dourada DISCRETA é a borda}, não Mellin: enquanto o grupo é
+$\mathbb{R}^{+}$ o índice é contínuo, e é ao passar à borda que ele se fecha num número
+finito de passos --- o factor é $N$ e não $\sqrt N$
+(\code{algebrico thm:dourada-discreta}). \emph{O contínuo é deste lado; o que o discretiza
+é a passagem, e ela é canónica.}
+
+\medskip
+\noindent\emph{A tríade obedece à dualidade:} a transformada fica no centro porque é
+\textbf{uma}; os dois polos descem para os lados porque são \textbf{dois}, e a reflexão
+$\tau\mapsto-\tau$ troca-os --- soma $\leftrightarrow$ produto, círculo
+$\leftrightarrow$ folhas, fechar $\leftrightarrow$ não fechar.
+
 \section{A estrela}\label{sec:estrela}
 
 Tudo isto corre, e não corre numa máquina: \textbf{corre numa estrela}. Não é uma maneira de falar

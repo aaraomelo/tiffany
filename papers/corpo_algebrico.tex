@@ -3101,6 +3101,31 @@ constante $3$ e portanto \emph{sem} ser unidade.
 %======================================================================
 \section{E um polinómio é amplitude e fase: o espectro}\label{sec:espectro}
 
+\noindent\textbf{A TRANSFORMADA É UMA, E OS SEUS POLOS SÃO DOIS.} O que fica aqui é a
+transformada --- a avaliação nas folhas (Teor.~\ref{thm:espectro}) ---, porque ela é
+\emph{uma} e o centro é o lugar do que não se desdobra. \emph{Os dois polos duais descem
+para os lados}, porque são dois e a reflexão troca-os:
+\[
+\boxed{
+\begin{array}{lll}
+\textbf{aqui} \ (\tau=0) & \text{a TRANSFORMADA} & \text{a avaliação nas folhas } \sigma,\sigma\dg\\[3pt]
+\tau=-1 & \textbf{FOURIER} & \text{o polo ADITIVO --- \code{topologico sec:fourier}}\\[2pt]
+\tau=+1 & \textbf{MELLIN} & \text{o polo MULTIPLICATIVO --- \code{analitico sec:mellin}}
+\end{array}}
+\]
+\emph{E não é arrumação:} o círculo (Fourier) tem o traço limitado, $\abs{t}\leq2$, e ali o
+operador \textbf{volta a si} --- é o elíptico, $\tau=-1$. As folhas do metal são
+recíprocas, o traço \textbf{cresce}, e o operador \emph{não} volta --- é o hiperbólico,
+$\tau=+1$. \textbf{Os dois polos da transformada SÃO os dois lados da tríade}, e o
+isomorfismo $x=e^{u}$ entre eles é a mesma reflexão que troca os dois documentos.
+
+\medskip
+\noindent A dourada, que completa a dualidade, fica aqui pela mesma razão que a
+transformada: ela é a \emph{ponte} entre os dois polos, e uma ponte não pertence a nenhuma
+das margens. O que a torna \textbf{discreta} --- a borda, com factor $N$ e não $\sqrt N$
+--- é canónico e está no Teor.~\ref{thm:dourada-discreta}.
+
+
 \begin{teorema}[a transformada universal: avaliação nas folhas]\label{thm:espectro}
 \emph{E «avaliação nas folhas» é, na Def.~\ref{def:espaco}, a passagem à BASE DO DUAL}:
 $\{\operatorname{eval}_{+},\operatorname{eval}_{-}\}$ é base de $V^{\ast}$, e é por isso

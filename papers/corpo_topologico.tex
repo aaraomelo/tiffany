@@ -2813,6 +2813,37 @@ do qual este corpo é instância. Aqui eles \emph{medem-se}: os medidores
 citados lá correm sobre os corpos daqui (o cristal, a família metálica,
 o corpus banal), e a instância não re-enuncia o que o quadro já fixou.
 
+\section{FOURIER --- o polo ADITIVO da transformada}\label{sec:fourier}
+
+\noindent\emph{Vem do centro:} a transformada é UMA só, a avaliação nas folhas
+(\code{algebrico thm:espectro}), e ela decompõe-se nos \textbf{dois polos duais}. Este
+documento é o polo \textbf{aditivo}; o multiplicativo está no
+\code{analitico sec:mellin}. \emph{A tríade obedece à dualidade, e a transformada é o
+sítio onde isso se vê melhor.}
+
+\[
+\boxed{
+\begin{array}{lll}
+\textbf{aqui} \ (\tau=-1) & \textbf{FOURIER} & \text{grupo ADITIVO, caracteres } e^{i\omega t}\\[2pt]
+ & & \text{o CÍRCULO --- e nele o traço é limitado, } \abs{t}\leq2\\[2pt]
+ & & \text{regime ELÍPTICO: ordem finita, tudo VOLTA}\\[6pt]
+\text{no } \tau=+1 & \textbf{MELLIN} & \text{grupo MULTIPLICATIVO, caracteres } x^{-s}\\[2pt]
+ & & \text{as folhas RECÍPROCAS, } \abs{\sigma}>1>\abs{\sigma\dg}\\[2pt]
+ & & \text{regime HIPERBÓLICO: o traço cresce, NÃO fecha}
+\end{array}}
+\]
+
+\noindent\textbf{E o isomorfismo entre os dois é $x=e^{u}$}, que leva o multiplicativo no
+aditivo --- a \emph{dilatação vira translação}. É dele que vem o factor de normalização
+deste lado, e é ele que faz das duas metades \emph{uma} dualidade e não duas transformadas.
+
+\textbf{Por que é que Fourier é deste lado.} Porque as raízes da unidade estão \emph{no
+círculo}, e um operador cujas raízes estão no círculo tem \textbf{ordem finita} --- volta a
+si. É a propriedade que define $\tau=-1$ (\code{algebrico thm:cuspide}), e é a mesma pela
+qual o endereçamento, a projecção e a histerese vivem aqui: todas precisam de que o objecto
+volte. \emph{A avaliação no círculo cobre o elíptico e mais nada} --- e é por isso que ela
+sozinha é metade, com a outra metade no polo oposto.
+
 \section{A ponte --- transformada universal e família metálica}\label{sec:ponte}
 
 A visão unificada constrói-se por elos, não por manifesto: uma ponte de
