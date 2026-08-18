@@ -56,18 +56,21 @@ CORPO EXACTO PRIMEIRO: fecha em Q, e só depois vê o que sobra.
 
 O que conta é o que ALIMENTA uma condição `ok(...)`. Estado dos que já foram tocados:
 
-    cosmico.c      16 →  9        dominios.c      9 →  1
-    liga.c         15 → 11        llm.c           8 →  6
-    colheita.c     14 → 11        nne.c           8 →  7
-    encanamento.c  12 →  9        ---------------------
-    dif.c          10 →  8        nos nove       102 → 67
-    simula.c       10 →  5
+    dourada_escala.c 7 →  0  ✔      cosmico.c      16 →  6
+    liga.c          15 →  0  ✔      dif.c          10 →  4
+    colheita.c      14 →  0  ✔      encanamento.c  12 →  4
+    dominios.c       9 →  1         llm.c           8 →  6
+    arraytermico.c   6 →  1         nne.c           8 →  7
+    simula.c        10 →  5         ---------------------
+                                    de 197 para 148
 
-Nenhum está fechado a zero: o `dominios.c` é o que foi mais longe (9 → 1).
+QUATRO estão fechados a zero. Os que ficam com poucos são os que MEDEM vírgula: no
+`nne.c` os doubles restantes são o erro de arredondamento (é o objecto), no `dif.c` e
+no `encanamento.c` são igualdades exactas `== 0.0`, que é o contrário de dar folga.
 
-POR FAZER: ~50 ficheiros, ~165 doubles a alimentar. Os maiores por tocar:
-    headjack.c 7 · dourada_escala.c 7 · radiacao.c 7 · arraytermico.c 6 · spline.c 6
-    tikz.c 6 · travessia.c 6 · quantico.c 5 · xx.c 5 · corpo_fisico.c 4 · icc.c 4
+POR FAZER: ~55 ficheiros, 148 doubles. Os maiores por tocar:
+    nne.c 7 · llm.c 6 · spline.c 6 · tikz.c 6 · travessia.c 6 · xx.c 5 · quantico.c 5
+    simula.c 5 · corpo_fisico.c 4 · icc.c 4
 
 Para levantar os de um ficheiro (troca X pelo nome):
 
