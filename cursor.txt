@@ -68,9 +68,8 @@ QUATRO estão fechados a zero. Os que ficam com poucos são os que MEDEM vírgul
 `nne.c` os doubles restantes são o erro de arredondamento (é o objecto), no `dif.c` e
 no `encanamento.c` são igualdades exactas `== 0.0`, que é o contrário de dar folga.
 
-POR FAZER: ~55 ficheiros, 148 doubles. Os maiores por tocar:
-    nne.c 7 · llm.c 6 · spline.c 6 · tikz.c 6 · travessia.c 6 · xx.c 5 · quantico.c 5
-    simula.c 5 · corpo_fisico.c 4 · icc.c 4
+POR FAZER: ~58 ficheiros, 135 doubles. Os maiores por tocar:
+    nne 7 · xx 6 · spline 6 · tikz 5 · quantico 5 · headjack 5 · continua 5 · travessia 4 · relogio_curva 4 · llm 4
 
 ### E a ferramenta que apanha o que a leitura não apanha
 
