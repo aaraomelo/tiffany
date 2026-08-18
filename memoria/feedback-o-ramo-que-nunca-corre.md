@@ -68,3 +68,37 @@ Só depois de as três passarem é que a sobrevivência diz alguma coisa **sobre
 E o sintoma comum às duas: **eu escrevi o teste sabendo a resposta que queria**, e por isso
 não olhei para ele com a mesma desconfiança com que olho para o código. Vale o mesmo que
 [[feedback-assercoes-vazias]] diz da nona forma — o momento de maior risco é o da correcção.
+
+
+---
+
+## E o mesmo vale para o DETECTOR: o meu, hoje, acusou 20 e 15 eram ruído
+
+Escrevi uma ferramenta para conferir caminhos citados em workflows e scripts. Primeira
+corrida: **20 caminhos quebrados**. Fui investigar um a um — e quinze eram defeito do
+regex, não do repositório:
+
+```python
+r'\.(?:tex|c|js|json|…)'        # `\.c` casa com o INÍCIO de `.claim`
+                                #  `.json` casa com o início de `.jsonl`
+```
+
+Doze «quebrados» eram `conecthus/claims/pareto.claim` lidos como `…/pareto.c`. Outro era
+`docs_tradutor.json → tex_tradutor.js` — dois ficheiros numa frase, colados num caminho
+que nunca existiu. Com `(?![A-Za-z])` a fechar a extensão, ficaram os **cinco**
+verdadeiros.
+
+### Por que é que isto importa mais do que parece
+
+Um detector que acusa três vezes mais ruído que sinal **treina quem o lê a ignorá-lo**. Se
+eu tivesse posto aquela versão na bateria, a linha «20 caminhos quebrados» passaria a ser
+paisagem, e os cinco reais morriam lá dentro. É o mesmo que uma asserção que nunca falha,
+ao contrário: uma que falha sempre.
+
+**Antes de ligar um detector à bateria, investigar TODOS os achados da primeira corrida.**
+Se a maioria for ruído, o detector não está pronto — e o número que ele imprime é pior que
+nenhum, porque parece informação.
+
+Vale para as três ferramentas de hoje: `tools/tautologia.py` (filtrar declarações
+múltiplas e parâmetros de saída), `tools/refcruz.py` (comentários fora), `tools/caminhos.py`
+(a extensão fechada). Nas três, a primeira versão acusava coisas que não eram.
