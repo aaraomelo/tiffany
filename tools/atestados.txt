@@ -78,7 +78,7 @@ config_corpo 402caa41ab0ad090 0
 conico 240f9a2b0e4662ca 0
 conjunto dd6207ec9968448a 0
 conservacao_metrica d1fb4aaebbfef14a 0
-constantes 702a840c7bf9b8e0 0
+constantes 11b8a46a7bc0f3fc 0
 constroi c85b8230866a958f 0
 conta 536fec2fdcf62b34 0
 contagem_cifra 2eff3b0b87eb444e 0
@@ -190,7 +190,7 @@ estacao_front 8809fb26de6b6a2e 0
 estado_caos 4e16ff649dd5aa75 0
 estelar 1483f4ce2664bc7b 0
 estelar_completo 348c213cb314950a 0
-estrela 0348b95681133566 0
+estrela 8cf4d2d6ac41c476 0
 estrela_emite df6467ad48c8bc47 0
 estrela_pontofixo a5b2e26587baa7b1 0
 estrela_unifica 2e442acf7021eeb0 0
@@ -350,7 +350,7 @@ parseval b643a36d4b3f94d4 0
 pascal e306e5225068c636 0
 passagem_global 96703b17e0d7e130 0
 patria_front bd725634b0b6534c 0
-pdf_corpo cc4d54f29134a6b9 0
+pdf_corpo 6b0a0fe5e7999c18 0
 peano_dual c100d72a76dc90ad 0
 pendulo 3f03ef489bef6df0 0
 pi 06d145b2fb0e24df 0
@@ -360,7 +360,7 @@ pidual 7a63a603c59c16ed 0
 pimonte 7cdea4ef6d7e9e40 0
 pinos a0bc6d7bb96111e1 0
 pisotbase ac67cc7b8fafa9c3 0
-plugs 874c6c47835ac809 0
+plugs d61e5046294a9857 0
 po_corpo d7acdfc5b77719f2 0
 polar 9c7b2c5b4b854bac 0
 poligonos 224b5edd1e222e2f 0

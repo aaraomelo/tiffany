@@ -89,6 +89,10 @@ int main(void)
          * o espaco que sobra e' o nucleo dessas duas, e o seu posto e' o que resta. */
         long relacoes[3][3] = { {1,-1,0}, {1,0,-1}, {0,0,0} };
         long p_rel = posto(relacoes, 3, 3);
+        /* e `p_pu == 1` NAO acrescenta a `p_rel == 2`: foi DEFINIDO como `3 - p_rel`. Nem
+         * `soma == p_livre`, que e' `p_rel + (3 - p_rel) == 3`, verdade para qualquer p_rel.
+         * O que se mede e' o POSTO das relacoes, calculado por eliminacao — e e' ele que pode
+         * dar outra coisa se as relacoes mudarem. */
         long p_pu = 3 - p_rel;
         /* PELA METADE: o que as relacoes CORTAM e o que SOBRA — um sozinho nao mede */
         long cortadas = p_rel, sobra = p_pu, soma = cortadas + sobra;
@@ -102,7 +106,7 @@ int main(void)
            " As duas valem, em sitios diferentes — fora do p.u. as tres dimensoes sao"
            " independentes, e dentro dele as duas relacoes (velocidade e acoplamento em um)"
            " cortam duas e sobra UMA. O p.u. nao e' uma convencao de escrita: e' um corte",
-           p_livre == 3 && p_rel == 2 && p_pu == 1 && soma == p_livre);
+           p_livre == 3 && p_rel == 2);
     }
 
     /* ═══ §Z2 — logo a REGUA e' um numero puro ═════════════════════════════════════

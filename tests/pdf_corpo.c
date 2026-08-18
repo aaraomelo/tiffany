@@ -171,6 +171,9 @@ printf("\n§P2  A LEI 1: gerar+ = ler, e a involucao fecha — periodo DOIS.\n\n
          * comecou. O PAR e' a volta inteira — por isso da' 1 — e o PERIODO conta os passos
          * que a volta leva, que sao 2. Contar o par e chamar-lhe periodo era contar voltas e
          * chamar-lhes passos. */
+        /* e `passos_por_volta == 2` NAO acrescenta nada a `periodo == 1`: foi DEFINIDO como
+         * `2 * periodo`, logo a segunda metade da condicao e' a primeira multiplicada por
+         * dois. O que se mede e' o periodo, e ele CONTA-SE aplicando o par ate' voltar. */
         long passos_por_volta = 2 * periodo;            /* cada par sao dois MOVE */
         printf("      aplicando o par: volta ao original ao fim de %ld par(es) = %ld MOVE\n",
                periodo, passos_por_volta);
@@ -184,7 +187,7 @@ printf("\n§P2  A LEI 1: gerar+ = ler, e a involucao fecha — periodo DOIS.\n\n
            " duas, e sao medidas diferentes. E o PERIODO conta MOVE e nao pares: cada par sao"
            " dois MOVE, logo o par volta em UM e a operacao tem periodo DOIS — eu tinha escrito"
            " «periodo dois» debaixo de uma medida que dava um, que e' contar voltas e chamar-"
-           "lhes passos", periodo == 1 && passos_por_volta == 2);
+           "lhes passos", periodo == 1);
     }
 
 printf("\n§P3  A VOLTA: o que se escreveu lê-se de volta. Resíduo 0.\n\n");

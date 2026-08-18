@@ -338,18 +338,20 @@ int main(void){
         int a[24]; int k = cifra(s, a, 20);
         printf("     %8s %20s %18s %14s\n", "corte", "convergente p/q", "valor", "erro");
         int melhora = 0, cortes = 0; double ant = 1e9;
+        long ops_mult = 0, ops_soma = 0, ops_troca = 0, passos_dobra = 0, casas_totais = 0;
         for(int corte = 2; corte <= 10; corte += 2){
             /* reconstroi por dobra: de tras para a frente, so somas e divisoes de INTEIROS */
             long num = a[corte-1], den = 1;
             for(int i = corte-2; i >= 0; i--){
                 long t = num;
-                num = (long)a[i]*num + den;
-                den = t;
+                num = (long)a[i]*num + den;   ops_mult++; ops_soma++;   /* CONTADAS, não afirmadas */
+                den = t;                      ops_troca++;
+                passos_dobra++;
             }
             double v = (double)num/den, e = fabs(v - s);
             printf("     %8d %12ld / %-6ld %18.12f %14.2e\n", corte, num, den, v, e);
             if(e < ant) melhora++;
-            ant = e; cortes++;
+            ant = e; cortes++; casas_totais += corte;
         }
         ok("cada CORTE da um convergente, e cortar mais tarde aproxima mais — sem excecao",
            melhora == cortes);
@@ -361,12 +363,29 @@ int main(void){
         for(int i = 0; i + 1 < kb && i < 8; i++) if(b[i+1] != a[i]) colagem = 0;
         ok("e a COLAGEM e exata: tirar o zero da frente devolve a cifra original, casa a casa",
            colagem);
-        /* e o ponto: NÃO HÁ CÁLCULO. Só somas e uma divisão de inteiros por casa. */
-        long ops_dobra = 2L*k;                     /* uma soma e uma troca por casa */
-        ok("e o custo e LINEAR nas casas: duas operacoes de INTEIRO por casa, e nada mais",
-           ops_dobra == 2L*k && k > 0);
-        printf("     -> %d casas, %ld operacoes de inteiro. Nao ha iteracao a convergir, nao ha\n",
-               k, ops_dobra);
+        /* e o ponto: NÃO HÁ CÁLCULO. Só somas e uma divisão de inteiros por casa.
+         *
+         * E ISTO ERA UMA TAUTOLOGIA PURA: estava escrito `long ops_dobra = 2L*k;` e a seguir
+         * `ok(..., ops_dobra == 2L*k && k > 0)` — a condição relia a linha de cima, palavra
+         * por palavra. Nenhuma entrada a podia fazer falhar, e o que ela dizia («o custo é
+         * linear nas casas») nem sequer era sobre `k`: era sobre o laço da dobra.
+         *
+         * Agora as operações CONTAM-SE onde acontecem. Cada casa faz exactamente uma
+         * multiplicação, uma soma e uma troca — três operações de inteiro —, e o laço de
+         * `corte` casas dá `corte − 1` passos. Somando os cinco cortes (2, 4, 6, 8, 10), são
+         * 30 casas e 25 passos. A LEI é a proporcionalidade, e ela mede-se: mult = soma =
+         * troca = passos, e passos = casas − cortes. */
+        printf("     -> a dobra CONTADA: %ld passos, %ld mult, %ld somas, %ld trocas, sobre"
+               " %ld casas em %d cortes\n",
+               passos_dobra, ops_mult, ops_soma, ops_troca, casas_totais, cortes);
+        ok("e o custo e' LINEAR nas casas: tres operacoes de INTEIRO por casa, e nada mais —"
+           " e elas CONTAM-SE onde acontecem, em vez de se afirmar a formula. Aqui estava"
+           " `ops_dobra = 2*k` seguido de `ops_dobra == 2*k`, a condicao a reler a linha de"
+           " cima palavra por palavra: nenhuma entrada a podia fazer falhar, e o que ela dizia"
+           " nem era sobre o k, era sobre o laco da dobra. Agora: mult = soma = troca ="
+           " passos, e passos = casas - cortes, porque um laco de n casas da' n-1 passos",
+           passos_dobra > 0 && ops_mult == passos_dobra && ops_soma == passos_dobra
+           && ops_troca == passos_dobra && passos_dobra == casas_totais - cortes && k > 0);
         puts("        limite a esperar, nao ha precisao a escolher: a dobra ACABA.");
         puts("");
         puts("        E e por isso que a analogia com Perelman aguenta: a cirurgia dele nao");

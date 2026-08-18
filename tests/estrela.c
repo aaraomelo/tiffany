@@ -103,8 +103,11 @@ int main(void){
            " pares IGUAIS, e nos outros o regime muda de nome — estica quando empurra mais,"
            " contrai quando puxa mais. O que aqui estava punha empurra = puxa e depois"
            " verificava que a razao dava 1: x/x, mais o resto, na mesma linha",
-           razao == U && a == 0 && regime(a) == 0
-           && eq == 5 && br > 0 && ne > 0 && br + ne + eq == tot);
+           /* e o `razao == U && a == 0` SAI: `a` foi DEFINIDO como `razao - U` duas linhas
+            * abaixo do `razao`, logo `a == 0` É `razao == U` reescrito, e os dois vinham de
+            * `empurra = puxa = U`. A nota acima já dizia isto — e a condição continuava a
+            * carregá-lo. Acrescentei a varredura e não TIREI o x/x; é a varredura que mede. */
+           eq == 5 && br > 0 && ne > 0 && br + ne + eq == tot);
     }
 
     /* ═══ §E2 — a estrela E' a borda ═══════════════════════════════════════════════ */
@@ -169,10 +172,25 @@ int main(void){
         long w = p * U / r;                            /* w = p/r, em milesimos */
         printf("      r = %ld/1000 repartida por %ld eixos  ->  p = %ld/1000\n", r, direccoes, p);
         printf("      w = p/r = %ld/1000  (isto e', 1/3)\n\n", w);
+        /* e `p == U` seguia de `r = 3*U` com `direccoes = 3`: era a construcao relida, e
+         * fixar o 3 dos dois lados fazia a conta fechar sozinha. A LEI e' outra e VARIA: com
+         * n eixos, w = 1/n. Isso mede-se varrendo o n, e so' entao o «tres» diz alguma coisa
+         * — porque so' em n = 3 e' que w da' 1/3, e e' esse o trial. */
+        long ns = 0, lei_w = 0, so_o_tres = 0;
+        for(long n = 1; n <= 8; n++){
+            long rn = n*U, pn = rn/n, wn = pn*U/rn;
+            ns++;
+            if(pn == U && wn == U/n) lei_w++;          /* a lei, para todo n */
+            if(n == 3 ? (wn == 333) : (wn != 333)) so_o_tres++;
+        }
+        printf("      e VARIANDO o numero de eixos: a lei w = 1/n vale em %ld de %ld, e"
+               " w = 1/3 SO' em n = 3 (%ld)\n\n", lei_w, ns, so_o_tres);
         ok("a PRESSAO DE RADIACAO deriva-se sem constante nenhuma: a radiacao reparte-se"
-           " pelos TRES eixos do trial, e a pressao e' a parte de um. Dai p = r/3 e w = 1/3 —"
-           " nao se introduziu sigma, nem c, nem nada: contaram-se as direccoes",
-           p == U && w == 333 && direccoes == 3);
+           " pelos eixos e a pressao e' a parte de um, logo w = 1/n. Nao se introduziu sigma,"
+           " nem c, nem nada: contaram-se as direccoes. E mede-se VARIANDO o n, porque com o"
+           " 3 fixo dos dois lados a conta fechava sozinha — `p == U` era `r = 3U` relido."
+           " A lei vale nos oito, e w = 1/3 aparece SO' em n = 3: e' esse o trial",
+           ns == 8 && lei_w == ns && so_o_tres == ns && direccoes == 3 && w == 333);
     }
 
     /* ═══ §E6 — e o w = 1/3 SAI da equacao de estado do catalogo ═════════════════ */
