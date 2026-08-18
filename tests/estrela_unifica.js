@@ -70,7 +70,7 @@ function ok (q, cond) {
   ok('§U1 tex: −1 emite, +1 absorve, 0 não nasce, volta_compila zera',
     emi > 0 && emi === abs && atr0 === 0 && emi7 > 0 && atr7 === emi7 && apos === 0)
 
-  /* ─── §U2 dualsort: Lei 7 viaja + Lei 8 assina ───────────────────────────── */
+  /* ─── §U2 computacional: Lei 7 viaja + Lei 8 assina ───────────────────────────── */
   const man = JSON.parse(fs.readFileSync(path.join(RAIZ, 'app', 'src', 'corpo.json'), 'utf8'))
   const num = (x) => typeof x === 'bigint' ? Number(x) : x
   const mem = () => new Uint8Array(E.DISCO.buffer)
@@ -92,7 +92,7 @@ function ok (q, cond) {
     mem()[pD + bytes.length] = 0
     if (!E.poe_ficheiro(pN, pD, bytes.length)) throw new Error('poe ' + nome)
   }
-  const subset = ['estilo.tex', 'corpus/docs/dualsort.tex', 'papers/gkcapa.tex']
+  const subset = ['estilo.tex', 'corpus/docs/computacional.tex', 'papers/gkcapa.tex']
   for (const f of man.ficheiros) {
     if (!subset.some((s) => f === s || f.endsWith('/' + path.basename(s)))) continue
     const u8 = fs.readFileSync(path.join(RAIZ, f))
@@ -100,13 +100,13 @@ function ok (q, cond) {
   }
   /* poe o manifesto lazy via ficheirosPara se disponível */
   const disco = await import(pathToFileURL(path.join(RAIZ, 'app', 'src', 'corpo_disco.js')).href)
-  for (const f of disco.ficheirosPara('corpus/docs/dualsort.tex', man.ficheiros)) {
+  for (const f of disco.ficheirosPara('corpus/docs/computacional.tex', man.ficheiros)) {
     if (!fs.existsSync(path.join(RAIZ, f))) continue
     poeFich(f, fs.readFileSync(path.join(RAIZ, f)))
   }
   if (typeof E.marca_vfs === 'function') E.marca_vfs()
   E.limpa_saida()
-  const rc = num(E.compila_ficheiro(poeStr('corpus/docs/dualsort.tex'), poeStr('saida.pdf')))
+  const rc = num(E.compila_ficheiro(poeStr('corpus/docs/computacional.tex'), poeStr('saida.pdf')))
   const tam = num(E.tam_saida())
   const end = porta.absorve(E, 14)
   const pdf = Buffer.from(mem().slice(end, end + tam)).toString('latin1')
@@ -117,11 +117,11 @@ function ok (q, cond) {
   const torre = pdf.includes('/TorreDim ')
   const if6 = /\/Interface\s+6\b/.test(pdf)
   console.log(`   §U2 rc=${rc} tam=${tam} Semente=${lei7} AssinaturaOito=${lei8} contrato=${migra} torre=${torre} if=${if6}`)
-  ok('§U2 dualsort: Lei 7 (semente no circuito) e Lei 8 (selo Caelum) no mesmo PDF',
+  ok('§U2 computacional: Lei 7 (semente no circuito) e Lei 8 (selo Caelum) no mesmo PDF',
     rc === 0 && tam > 1e5 && lei7 && lei8 && pdf.includes('%%EOF'))
   ok('§U2b migração régua: /Lado /Interface /PiN /Regua /Norma /Induc viajam na SementeEstrela',
     migra && pdf.includes('/Norma ') && pdf.includes('/Induc '))
-  ok('§U2c interface hexal (6) no dualsort — 1.º ciclo da família', if6)
+  ok('§U2c interface hexal (6) no computacional — 1.º ciclo da família', if6)
   ok('§U2d selo parametrizado: /TorreDim /TorreN no AssinaturaOito', torre)
   ok('§U2e Gentil dim≥16: /AssinaturaTorre N=min(512,dim·32) no arquitetura',
     await (async () => {

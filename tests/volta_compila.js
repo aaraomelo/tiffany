@@ -99,7 +99,7 @@ E.marca_vfs()
 console.log(`   marca_vfs (sem poe): DISCO ${(E.DISCO.buffer.byteLength / 1048576).toFixed(2)} MiB`)
 
 const seq = []
-for (const d of ['catalogo.tex', 'corpus/docs/dualsort.tex', 'enredo.tex']) {
+for (const d of ['catalogo.tex', 'corpus/docs/computacional.tex', 'enredo.tex']) {
   E.volta_compila()
   missN = 0; poeSet.clear()
   console.log(`   a compor ${d} via miss`)
@@ -113,7 +113,7 @@ for (const d of ['catalogo.tex', 'corpus/docs/dualsort.tex', 'enredo.tex']) {
 
 ok('§V1 catálogo via miss: rc=0 e %%EOF',
   seq[0].rc === 0 && seq[0].eof && seq[0].tam > 1e6 && seq[0].miss > 10)
-ok('§V2 dualsort a seguir via miss: rc=0 e tam fresco',
+ok('§V2 o computacional a seguir via miss: rc=0 e tam fresco',
   seq[1].rc === 0 && seq[1].eof && seq[1].tam > 1000 && seq[1].tam < 2.2e6 && seq[1].forms < 800 && seq[1].miss > 5)
 ok('§V3 enredo via miss: fresco (~385 pág.)',
   seq[2].rc === 0 && seq[2].eof && seq[2].tam > 20e6 && seq[2].tam < 80e6
@@ -135,13 +135,13 @@ ok('§V4 catálogo depois do enredo: gato∘esquilo=id — mesmo tam/Forms',
 
 E.volta_compila()
 missN = 0; poeSet.clear()
-const d1 = compoe('corpus/docs/dualsort.tex')
+const d1 = compoe('corpus/docs/computacional.tex')
 const m1 = d1.miss
 E.volta_compila()
 missN = 0; poeSet.clear()
-const d2 = compoe('corpus/docs/dualsort.tex')
-console.log(`   §V5 dualsort×2 miss=${m1}/${d2.miss} tam=${d1.tam}/${d2.tam}`)
-ok('§V5 dualsort×2 via miss: id após volta (FICH zera, Map fica)',
+const d2 = compoe('corpus/docs/computacional.tex')
+console.log(`   §V5 computacional×2 miss=${m1}/${d2.miss} tam=${d1.tam}/${d2.tam}`)
+ok('§V5 computacional×2 via miss: id após volta (FICH zera, Map fica)',
   d1.rc === 0 && d2.rc === 0 && d1.tam === d2.tam && d1.forms === d2.forms
   && m1 > 5 && d2.miss === m1)
 

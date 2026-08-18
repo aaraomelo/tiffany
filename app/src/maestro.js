@@ -1,4 +1,4 @@
-// maestro.js — Realização computacional do Teorema do Maestro (papers/dualsort §assistente).
+// maestro.js — Realização computacional do Teorema do Maestro (corpus/docs/computacional.tex §assistente).
 //
 //   (Π, X, tick, I) → Y     depois    (X, Y, Π) → r
 //
@@ -15,7 +15,7 @@ export const BATUTA = Object.freeze({
 
 /**
  * Corte da massa (max-cut operacional): meia volta nos itens.
- * Mesmo procedimento em 4 ou 4000 — isomorfo ao Maestro do dualsort/max-cut.
+ * Mesmo procedimento em 4 ou 4000 — isomorfo ao Maestro do computacional/max-cut.
  * suporte = A, borda = B; |A|≈|B| quando n par.
  */
 export function corteMassa (itens) {

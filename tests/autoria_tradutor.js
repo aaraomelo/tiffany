@@ -42,8 +42,8 @@ console.log('=== AUTORIA TRADUTOR: docs · λ · selos · teto ===\n')
   console.log(`   ${caminhos.length} docs de produção + ${Object.keys(docsJson.so_teste || {}).length} só-teste\n`)
 }
 
-/* §A1 composição amostral: dualsort (rápido), corpo-peano, arquitetura (Gentil) */
-const amostra = ['dualsort', 'corpo-peano', 'arquitetura', 'torre-induc']
+/* §A1 composição amostral: computacional (rápido), corpo-peano, arquitetura (Gentil) */
+const amostra = ['computacional', 'corpo-peano', 'arquitetura', 'torre-induc']
 const bytes = fs.readFileSync(WASM)
 const cache = new Map(man.ficheiros.map((f) => [f, fs.readFileSync(path.join(RAIZ, f))]))
 /* so_teste pode ainda não estar no corpo.json — põe-se do disco */
@@ -159,9 +159,9 @@ ok('§A3 Gentil: arquitetura dim≥16 com AssinaturaTorre',
 ok('§A4 sem teto do objecto: torre-induc dim>8 (Gentil continua)',
   ti && ti.rc === 0 && ti.dim > 8 && ti.lado === 1 && ti.torre)
 
-/* §A5 volta: 1 bit — recompõe dualsort e volta */
+/* §A5 volta: 1 bit — recompõe o computacional e volta */
 {
-  const r = compoe('dualsort')
+  const r = compoe('computacional')
   const antes = E.DISCO.buffer.byteLength
   const endAntes = num(E.MOVE(14, 1))
   if (typeof E.volta_compila === 'function') E.volta_compila()

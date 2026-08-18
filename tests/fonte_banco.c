@@ -94,7 +94,7 @@ int main(void)
         { "catalogo",      "../catalogo.tex" },
         { "enredo",        "../enredo.tex" },
         { "corpo_analitico", "../papers/corpo_analitico.tex" },
-        { "dualsort",      "../corpus/docs/dualsort.tex" },
+        { "computacional", "../corpus/docs/computacional.tex" },
     };
     const int ND = (int)(sizeof docs / sizeof docs[0]);
 
@@ -143,7 +143,7 @@ printf("\n§F3  O CONTROLO: um byte trocado no banco ACUSA — senao a volta fec
     {
         /* estraga-se UM byte de UM bloco e mede-se se a comparacao o apanha. Sem isto, o §F1
          * so' diria que a leitura devolve alguma coisa — nao que devolve a coisa certa. */
-        const char *alvo = "dualsort";
+        const char *alvo = "computacional";
         char chave[160]; snprintf(chave, sizeof chave, "fonte/%s/000000", alvo);
         unsigned char v[BLOCO];
         long n = ler(&b, chave, v, sizeof v);
@@ -152,12 +152,12 @@ printf("\n§F3  O CONTROLO: um byte trocado no banco ACUSA — senao a volta fec
             unsigned char guardado = v[7];
             v[7] = (unsigned char)(guardado ^ 0xFF);        /* um byte, um so' */
             gravar(&b, chave, v, n);
-            long difs = descer_e_comparar(&b, alvo, "../corpus/docs/dualsort.tex", NULL);
+            long difs = descer_e_comparar(&b, alvo, "../corpus/docs/computacional.tex", NULL);
             apanhou = (difs > 0);
             printf("      um byte trocado no bloco 0: a comparacao acusa %ld diferenca(s)\n", difs);
             v[7] = guardado;                                 /* devolve-se SEMPRE */
             gravar(&b, chave, v, n);
-            devolvido = (descer_e_comparar(&b, alvo, "../corpus/docs/dualsort.tex", NULL) == 0);
+            devolvido = (descer_e_comparar(&b, alvo, "../corpus/docs/computacional.tex", NULL) == 0);
         }
         ok("um unico byte trocado ACUSA, e o ficheiro volta ao original depois — e' a segunda"
            " metade da medida: a primeira diz que o que esta' certo passa, esta diz que o que"

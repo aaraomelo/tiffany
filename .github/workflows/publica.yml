@@ -111,7 +111,7 @@ jobs:
           test -s dist/wasm/tex.wasm || { echo "❌ falta dist/wasm/tex.wasm"; exit 1; }
           test -s dist/docs/cv.pdf || { echo "❌ falta dist/docs/cv.pdf"; exit 1; }
           # o corpo: a lista medida — sem ela o cliente não abre fontes/estilo
-          for f in estilo.tex teoria.tex papers/dualsort.tex lib/fontes/documento-regular.otf; do
+          for f in estilo.tex teoria.tex corpus/docs/computacional.tex lib/fontes/documento-regular.otf; do
             test -s "dist/corpo/$f" || { echo "❌ falta dist/corpo/$f"; exit 1; }
           done
           N=$(find dist/corpo -type f | wc -l | tr -d ' ')
@@ -217,7 +217,7 @@ jobs:
           STATUS=$(curl -sf -o /dev/null -w '%{http_code}' https://goldenkingdom.patriatechnology.com/ || echo FAIL)
           [ "$STATUS" = "200" ] || { echo "❌ health check: $STATUS"; exit 1; }
           # o tradutor no cliente: módulo + um pedaço do corpo (não /docs/*.pdf da teoria)
-          for u in wasm/tex.wasm corpo/estilo.tex corpo/papers/dualsort.tex \
+          for u in wasm/tex.wasm corpo/estilo.tex corpo/corpus/docs/computacional.tex \
                    corpo/conecthus/pipeline.tex wasm/claim.wasm; do
             C=$(curl -sf -o /dev/null -w '%{http_code}' "https://goldenkingdom.patriatechnology.com/$u" || echo FAIL)
             [ "$C" = "200" ] || { echo "❌ /$u -> $C"; exit 1; }

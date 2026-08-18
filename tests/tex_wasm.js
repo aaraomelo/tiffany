@@ -22,7 +22,7 @@
  *   §T4  e o que se escreve no disco lê-se de volta — a Lei 1 no ficheiro, resíduo 0
  *   §T5  Alonzo (a composição): giros, boxed, smallmatrix — /SementeEstrela viaja
  *   §T6  Caelum (o esqueleto): /AssinaturaOito, 256 componentes, dois caminhos batem
- *   §T7  volta_compila: dualsort×2 id (1 bit)
+ *   §T7  volta_compila: computacional×2 id (1 bit)
  */
 'use strict';
 const fs = require('fs');
@@ -331,7 +331,7 @@ catch (e) {
     ok('§T6 Caelum (o esqueleto): /AssinaturaOito 256, dois caminhos batem — o que Alonzo compõe, Caelum assina',
        !trap && cRc === 0 && cEof && cSelo && cSelo.length === 256 && cBate);
 
-    /* §T7 1 bit + miss: instância fresca — dualsort×2, Map → fopen, FICH zera. */
+    /* §T7 1 bit + miss: instância fresca — computacional×2, Map → fopen, FICH zera. */
     let d1 = { rc: -1, tam: 0, forms: 0 }, d2 = { rc: -1, tam: 0, forms: 0 };
     try {
         const cache7 = new Map(man.ficheiros.map((f) => [f, fs.readFileSync(path.join(RAIZ, f))]));
@@ -367,14 +367,14 @@ catch (e) {
         };
         if (typeof E7.volta_compila === 'function') E7.volta_compila();
         poeSet7.clear();
-        d1 = comp7('corpus/docs/dualsort.tex');
+        d1 = comp7('corpus/docs/computacional.tex');
         if (typeof E7.volta_compila === 'function') E7.volta_compila();
         poeSet7.clear();
-        d2 = comp7('corpus/docs/dualsort.tex');
+        d2 = comp7('corpus/docs/computacional.tex');
     } catch (e) { trap = String(e && e.message || e).slice(0, 200); }
     const f1 = d1.pdf ? (d1.pdf.toString('latin1').match(/\/Subtype\/Form/g) || []).length : 0;
     const f2 = d2.pdf ? (d2.pdf.toString('latin1').match(/\/Subtype\/Form/g) || []).length : 0;
-    console.log(`   §T7 dualsort×2 rc=${d1.rc}/${d2.rc} tam=${d1.tam}/${d2.tam} Forms=${f1}/${f2}`);
+    console.log(`   §T7 computacional×2 rc=${d1.rc}/${d2.rc} tam=${d1.tam}/${d2.tam} Forms=${f1}/${f2}`);
     ok('§T7 volta_compila: a segunda composição é a mesma (1 bit, sem recorrência) — resíduo 0',
        !trap && d1.rc === 0 && d2.rc === 0 && d1.tam === d2.tam && f1 === f2 && f1 > 50 && d1.tam > 1e5);
 }

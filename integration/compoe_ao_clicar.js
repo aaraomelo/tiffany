@@ -61,7 +61,7 @@ if (!vivo) {
 console.log('\n=== O PDF SAI DO FONTE AO CLICAR ===========================================\n')
 
 console.log('§Z1  Os cinco documentos saem, e saem com páginas.\n')
-const DOCS = ['teoria', 'catalogo', 'enredo', 'corpo_analitico', 'dualsort']
+const DOCS = ['teoria', 'catalogo', 'enredo', 'corpo_analitico', 'computacional']
 {
   let vazios = 0, sem_pag = 0
   console.log('      documento         bytes        páginas')
@@ -82,7 +82,7 @@ console.log('\n§Z2  A PROVA: muda-se o FONTE e o que sai MUDA; reverte-se e VOL
   /* É AQUI QUE SE SEPARA «composto agora» de «servido de uma cópia», e o 200 não o separa.
    * Escolhe-se uma palavra que não existe em lado nenhum, põe-se no fonte, pede-se, e depois
    * tira-se e pede-se outra vez. O fonte é devolvido SEMPRE, mesmo se algo rebentar. */
-  const alvo = path.join(RAIZ, 'papers', 'dualsort.tex')
+  const alvo = path.join(RAIZ, 'corpus', 'docs', 'computacional.tex')
   const original = fs.readFileSync(alvo, 'utf8')
   const marca = 'SEMPREVIVAZZ'
   const ancora = 'A referência são os naturais'
@@ -91,13 +91,13 @@ console.log('\n§Z2  A PROVA: muda-se o FONTE e o que sai MUDA; reverte-se e VOL
     mordeu = original.includes(ancora)
     if (mordeu) {
       fs.writeFileSync(alvo, original.replace(ancora, ancora + ' ' + marca))
-      pede('dualsort', '/tmp/z_mud.pdf')
+      pede('computacional', '/tmp/z_mud.pdf')
       apareceu = texto('/tmp/z_mud.pdf').includes(marca)
     }
   } finally {
     fs.writeFileSync(alvo, original)                 /* devolve-se SEMPRE */
   }
-  pede('dualsort', '/tmp/z_rev.pdf')
+  pede('computacional', '/tmp/z_rev.pdf')
   sumiu = !texto('/tmp/z_rev.pdf').includes(marca)
   const devolvido = fs.readFileSync(alvo, 'utf8') === original
   console.log('      com a palavra no fonte, o PDF servido tem-na:      ' + (apareceu ? 'sim' : 'NÃO'))
@@ -133,7 +133,7 @@ console.log('\n§Z4  O CONTROLO: sem o tradutor, falha RUIDOSAMENTE — não ser
     fs.renameSync(bin, guardado)
     try {
       codigo = execSync(`curl -s -o /tmp/z_sem.pdf -w "%{http_code}" --max-time 60 ` +
-                        `${JSON.stringify(URL_BASE + '/docs/dualsort.pdf')}`,
+                        `${JSON.stringify(URL_BASE + '/docs/computacional.pdf')}`,
                         { encoding: 'utf8', stdio: 'pipe' }).trim()
       const n = fs.existsSync('/tmp/z_sem.pdf') ? fs.statSync('/tmp/z_sem.pdf').size : 0
       /* «calou-se» = devolveu um PDF na mesma. É isso que não pode ser. */

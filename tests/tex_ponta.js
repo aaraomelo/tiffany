@@ -4,8 +4,8 @@
  * localStorage (GKCORPO), Map inflate, __fich_miss, volta_compila — a mesma
  * sequência de app/src/tex_tradutor.js (sem import JSON do Vite).
  *
- *   §P0  dualsort: %%EOF + Semente + Assinatura, miss>0, origem LS
- *   §P1  2ª visita: dualsort id, inflate do LS (sem re-gravar)
+ *   §P0  computacional: %%EOF + Semente + Assinatura, miss>0, origem LS
+ *   §P1  2ª visita: computacional id, inflate do LS (sem re-gravar)
  *   §P2  1 bit: enredo → catálogo×2 id
  *
  *   node tests/tex_ponta.js
@@ -163,17 +163,17 @@ const now = () => Number(process.hrtime.bigint()) / 1e6
     }
   }
 
-  /* ─── §P0 dualsort ─────────────────────────────────────────────────────────── */
-  const d0 = await compor('corpus/docs/dualsort.tex')
-  console.log(`   §P0 dualsort tam=${d0.tam} pág=${d0.pages} Forms=${d0.forms} miss=${d0.miss}` +
+  /* ─── §P0 computacional ─────────────────────────────────────────────────────────── */
+  const d0 = await compor('corpus/docs/computacional.tex')
+  console.log(`   §P0 computacional tam=${d0.tam} pág=${d0.pages} Forms=${d0.forms} miss=${d0.miss}` +
     ` cache=${d0.cacheN} ${d0.msCompila} ms`)
-  ok('§P0 dualsort: %PDF + Semente + Assinatura + miss>0 (corpo do LS)',
+  ok('§P0 computacional: %PDF + Semente + Assinatura + miss>0 (corpo do LS)',
     d0.pct && d0.eof && d0.semente && d0.selo && d0.miss > 5 && d0.tam > 1e5 && d0.pages > 5)
 
-  /* ─── §P1 2ª dualsort: id, cache quente ────────────────────────────────────── */
-  const d1 = await compor('corpus/docs/dualsort.tex')
-  console.log(`   §P1 2.ª dualsort tam=${d1.tam} Forms=${d1.forms} miss=${d1.miss} cacheMs=${d1.cacheMs}`)
-  ok('§P1 2ª visita: dualsort id (1 bit + Map quente)',
+  /* ─── §P1 2ª computacional: id, cache quente ────────────────────────────────────── */
+  const d1 = await compor('corpus/docs/computacional.tex')
+  console.log(`   §P1 2.ª computacional tam=${d1.tam} Forms=${d1.forms} miss=${d1.miss} cacheMs=${d1.cacheMs}`)
+  ok('§P1 2ª visita: computacional id (1 bit + Map quente)',
     d1.tam === d0.tam && d1.forms === d0.forms && d1.miss === d0.miss && d1.pages === d0.pages)
 
   /* ─── §P2 enredo → catálogo×2 ──────────────────────────────────────────────── */
@@ -190,16 +190,16 @@ const now = () => Number(process.hrtime.bigint()) / 1e6
     && cA.eof && cA.semente && cA.selo && cA.pages > 400
     && cA.tam === cB.tam && cA.forms === cB.forms && cA.miss === cB.miss)
 
-  /* ─── §P3 dualsort após catálogo (sessão longa) ────────────────────────────── */
-  const d2 = await compor('corpus/docs/dualsort.tex')
-  console.log(`   §P3 dualsort após catálogo tam=${d2.tam} Forms=${d2.forms}`)
-  ok('§P3 sessão longa: dualsort volta ao mesmo após catálogo (estrela sem estado)',
+  /* ─── §P3 computacional após catálogo (sessão longa) ────────────────────────────── */
+  const d2 = await compor('corpus/docs/computacional.tex')
+  console.log(`   §P3 computacional após catálogo tam=${d2.tam} Forms=${d2.forms}`)
+  ok('§P3 sessão longa: computacional volta ao mesmo após catálogo (estrela sem estado)',
     d2.tam === d0.tam && d2.forms === d0.forms && d2.pages === d0.pages)
 
   console.log('\n==========================================================================')
   if (!falhas) {
     console.log('  Ponta a ponta fecha: LS (GKCORPO) → Map → __fich_miss → PDF.')
-    console.log(`  dualsort ${d0.pages} pág · enredo ${en.pages} pág · catálogo ${cA.pages} pág.`)
+    console.log(`  computacional ${d0.pages} pág · enredo ${en.pages} pág · catálogo ${cA.pages} pág.`)
   } else console.log(`  FALHOU: ${falhas}`)
   console.log(`#TOTAL ${feitas} ${falhas}`)
   process.exit(falhas ? 1 : 0)

@@ -138,7 +138,7 @@ console.log('\n§T3  E o PDF usa os degraus da escala, não 10 e 14.\n')
   const perto = (t) => admissiveis.some((m) => Math.abs(t - m / 1000) <= 0.02)
   let fora = 0, docs = 0
   console.log('      documento         tamanhos no PDF')
-  for (const [n, f] of [['dualsort', 'corpus/docs/dualsort.tex'], ['teoria', 'teoria.tex']]) {
+  for (const [n, f] of [['computacional', 'corpus/docs/computacional.tex'], ['teoria', 'teoria.tex']]) {
     if (!compoe(f, `/tmp/t_${n}.pdf`)) continue
     docs++
     const ts = tamanhos(`/tmp/t_${n}.pdf`)
@@ -157,17 +157,17 @@ console.log('\n§T4  O CONTROLO: mudada a escala no estilo.tex, o PDF muda — e
   const original = fs.readFileSync(ESTILO, 'utf8')
   let antes = [], depois = [], voltou = [], mordeu = false
   try {
-    compoe('corpus/docs/dualsort.tex', '/tmp/t_a.pdf'); antes = tamanhos('/tmp/t_a.pdf')
+    compoe('corpus/docs/computacional.tex', '/tmp/t_a.pdf'); antes = tamanhos('/tmp/t_a.pdf')
     const alvo = '\\fontsize{10.50}{15.22}'
     mordeu = original.includes(alvo)
     if (mordeu) {
       fs.writeFileSync(ESTILO, original.replace(alvo, '\\fontsize{19.00}{27.55}'))
-      compoe('corpus/docs/dualsort.tex', '/tmp/t_b.pdf'); depois = tamanhos('/tmp/t_b.pdf')
+      compoe('corpus/docs/computacional.tex', '/tmp/t_b.pdf'); depois = tamanhos('/tmp/t_b.pdf')
     }
   } finally {
     fs.writeFileSync(ESTILO, original)                 /* devolve-se SEMPRE */
   }
-  compoe('corpus/docs/dualsort.tex', '/tmp/t_c.pdf'); voltou = tamanhos('/tmp/t_c.pdf')
+  compoe('corpus/docs/computacional.tex', '/tmp/t_c.pdf'); voltou = tamanhos('/tmp/t_c.pdf')
   const devolvido = fs.readFileSync(ESTILO, 'utf8') === original
   const mudou = JSON.stringify(antes) !== JSON.stringify(depois)
   const igual = JSON.stringify(antes) === JSON.stringify(voltou)

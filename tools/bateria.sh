@@ -83,7 +83,8 @@ LISTA=$(mktemp)
 # E conecthus/ é a mesma frase outra vez: o fundamento.tex cita medidores, e um paper que
 # cita sem entrar na varredura é um \medido que a bateria não vê.
 # E corpus/ e cristal/ pela MESMA razao, que e' a terceira vez: o `banco/fala.c` estava
-# citado so' em corpus/docs/dualsort.tex, existia no disco, e a bateria contava 507 onde o
+# citado so' em corpus/docs/dualsort.tex (hoje computacional.tex), existia no disco, e a
+# bateria contava 507 onde o
 # repo tinha 508 medidores. Nao falhou — nunca chegou a entrar, que e' o modo de morrer
 # que esta bateria existe para nao ter. A varredura passa a ser TODO o .tex que cita.
 { grep -ohE '(tests|banco)/[a-z_0-9]+\.(c|py|js)' teoria.tex catalogo.tex enredo.tex papers/*.tex conecthus/*.tex corpus/docs/*.tex corpus/fala/*.tex cristal/*.tex

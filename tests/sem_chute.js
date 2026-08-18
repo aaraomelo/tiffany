@@ -49,7 +49,7 @@ function compoe (fonte, saida) {
 const chutes = (saida) => { const m = /AVISO: (\d+) larguras CHUTADAS/.exec(saida); return m ? Number(m[1]) : 0 }
 
 const DOCS = [
-  ['dualsort',      'corpus/docs/dualsort.tex'],
+  ['computacional',  'corpus/docs/computacional.tex'],
   ['corpo_analitico', 'papers/corpo_analitico.tex'],
   ['teoria',        'teoria.tex'],
   ['catalogo',      'catalogo.tex'],
@@ -236,7 +236,7 @@ console.log('\n§N6  E as linhas JUSTIFICADAS acabam todas na margem.\n')
    * é x_último + avanço·s; as justificadas batem na margem, os fins de
    * parágrafo não. */
   const casa6 = require('./pdf_casa_texto.js')
-  compoe('corpus/docs/dualsort.tex', '/tmp/n_j.pdf')
+  compoe('corpus/docs/computacional.tex', '/tmp/n_j.pdf')
   const d6 = fs.readFileSync('/tmp/n_j.pdf', 'latin1')
   const objs6 = casa6.objetos(d6)
   const ps6 = casa6.paginas(d6, objs6)
@@ -288,7 +288,7 @@ console.log('\n§N6  E as linhas JUSTIFICADAS acabam todas na margem.\n')
     if (dif < 1.0) { just++; if (dif > pior) pior = dif } else ragged++
   }
   console.log('      margem (a moda das bordas): ' + MARGEM.toFixed(1) + 'pt · na margem: ' + just + ', fora: ' + ragged + ', pior desvio ' + pior.toFixed(2) + 'pt')
-  /* o dualsort é metade fórmulas em display — «a maioria» era do documento
+  /* o computacional é metade fórmulas em display — «a maioria» era do documento
    * antigo. O que se afirma: o aglomerado na margem é GRANDE (a justificação
    * existe e fecha na moda) e as fora também existem (fins de parágrafo,
    * displays — a outra metade). */

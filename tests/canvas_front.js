@@ -2,7 +2,7 @@
  * o pintor do dialecto (canvas_tex.js) contra uma composição REAL, no mesmo
  * esquema do PDF — e os corpos de Caelum e Alonzo à vista (eval 13/08).
  *
- * §C0  compõe corpus/docs/dualsort.tex pelo tex.wasm em node (o esquema do PDF:
+ * §C0  compõe corpus/docs/computacional.tex pelo tex.wasm em node (o esquema do PDF:
  *      poe_ficheiro/compila/MOVE(14,+1) — o espelho do tex_wasm.js)
  * §C1  o pintor lê o dialecto: páginas com MediaBox, formas de glifo,
  *      e NENHUM operador desconhecido (o dialecto fecha: q Q cm Do rg RG
@@ -72,8 +72,8 @@ const TMP = process.env.TMPDIR || '/tmp'
   }
   const man = JSON.parse(fs.readFileSync(path.join(RAIZ, 'app', 'src', 'corpo.json'), 'utf8'))
   for (const f of man.ficheiros) poeFich(f, fs.readFileSync(path.join(RAIZ, f)))
-  const r = compoe('corpus/docs/dualsort.tex')
-  ok('§C0 dualsort compõe pelo esquema do PDF (rc=0, %PDF…%%EOF)',
+  const r = compoe('corpus/docs/computacional.tex')
+  ok('§C0 o computacional compõe pelo esquema do PDF (rc=0, %PDF…%%EOF)',
     r.rc === 0 && r.pdf.slice(0, 4).toString() === '%PDF' &&
     r.pdf.includes('%%EOF'))
 

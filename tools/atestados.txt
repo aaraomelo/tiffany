@@ -22,7 +22,7 @@ assinatura_colisoes 22f557e6dc462b7b 0
 assinatura_tradutor 7eca1d4431dcb7f3 0
 ataque 7a82ebf0031e1fab 0
 aurea 896eedc1e433c0c9 0
-autoria_tradutor 0591f5d4efec101f 0
+autoria_tradutor 54dbff42fcf53020 0
 avalia_macros 6dc8be4f913e264f 0
 aya 41a5f3a3acf28519 0
 backend_ttf d424e63b03499a7f 0
@@ -46,7 +46,7 @@ caminho b30bb4976e4ee877 0
 canal bc330921276896cd 0
 cantor 77abef88b3c64a5b 0
 cantor_julia_dual a7ed5d42d10e7b6d 0
-canvas_front a9b68ddadfe0d0ef 0
+canvas_front 6d3ccbcd202036d8 0
 cardinal 03e03627e20f28bd 0
 cards 3abbeef12464d45d 0
 carnot 2a78e35b74445766 0
@@ -95,7 +95,7 @@ coroacao fc3edc511ec0d5a0 0
 corpo 3e35814751fcf7f2 0
 corpo256 acf3f231f051ced7 0
 corpo_autossimilar cfed1db62ac9d8ef 0
-corpo_disco 9387ee6de1c9fef9 0
+corpo_disco 3b464da2ea3f981b 0
 corpo_do_numero d9acc69fc83d6d49 0
 corpo_dual 829b5470e1022d51 0
 corpo_fisico 4b8a2d90341c804a 0
@@ -130,7 +130,7 @@ derivacao_primitivas 3d04c680af7012a7 0
 descida_mobius 7a1f5821136fdfa6 0
 desenha 5918033b43ea7382 0
 design f782a62b62cb35d7 0
-design_no_pdf eb1bcd035128a10c 0
+design_no_pdf af5465953e1e70dd 0
 dif 30e6394f76a66b4f 0
 diferentes e79bff3e124cf01f 0
 dimensoes 5f6df5d3e407c5ad 0
@@ -179,7 +179,7 @@ entropia_dual 0020800d5379fccb 0
 equivalencia_universal 6a6fc94b595de1ff 0
 erg cbe6fa6888b88608 0
 escada 9cc50be41553f6c4 0
-escala 6d0918c3d7acc316 0
+escala f50888d0a3ffffcd 0
 escala_dourada da54f23e82725e22 0
 escala_espaco 26ed3534a655fc9d 0
 escuros 6bc3e85125c6c969 0
@@ -193,7 +193,7 @@ estelar_completo 348c213cb314950a 0
 estrela 8cf4d2d6ac41c476 0
 estrela_emite df6467ad48c8bc47 0
 estrela_pontofixo a5b2e26587baa7b1 0
-estrela_unifica 2e442acf7021eeb0 0
+estrela_unifica 1acebf329bac32c8 0
 estrutura_corpo 2f62a80aac5c3a03 0
 evolutivo a32a5ac5a2b1aac2 0
 exaustao 9841923fa1ee8bb1 0
@@ -208,7 +208,7 @@ fecho_convexo c990307f513c1d36 0
 fermat d626834393ab1867 0
 fisica a71f9aece8be32cd 0
 fita bfd35f11caa044aa 0
-fonte_banco 3a6707d498f1d1bd 0
+fonte_banco e9e80f52fef17813 0
 fonte_corpo b71085ec1b3db094 0
 forca c79f64813e4e93ce 0
 fractal 520a02bd37bb507c 0
@@ -424,7 +424,7 @@ sair_pu a64d5e2b256b4dc8 0
 saltos 8d41227d65c00cca 0
 selberg ee901239b2065270 0
 selo 972c01052066e6ff 0
-sem_chute ccbdf065e3a27042 0
+sem_chute e9fb9eb10ebce54f 0
 sem_ramo 81a20f7c9df8d1e2 0
 semantico 4501b7bcfb9d51c7 0
 semente bdf47d333634825f 0
@@ -455,7 +455,7 @@ termica 1ea9da07cac97566 0
 tesseracto d5df0dc21b1a36b7 0
 tesserato_espiral bd599042b464952c 0
 tex 55f6ef36b59e894f 0
-tex_wasm 35e84e8b69861d91 0
+tex_wasm a52cd986d8b1520c 0
 texto 5bbce62a899f0c00 0
 tikz 8a4d248ee5907d53 0
 toolkit d1e1c23cd0380eac 0
