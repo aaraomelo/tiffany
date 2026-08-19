@@ -28,13 +28,16 @@
  *   §G5  DEQUANTIZAR Q4_K: e o bloco desempacotado tem de ser são
  *   §G6  a RAM não cresce com o modelo — 940 MiB lidos, e o processo não engorda
  *
- *   cc -O2 -std=c99 gguf.c -lm -o gguf && ./gguf [caminho.gguf]
+ *   cc -O2 -std=c99 -I lib tests/gguf.c -o gguf && ./gguf [caminho.gguf]
+ *
+ * LEI vs TRANSPORTE. f16→float, sin/cos nos vectores, variância em vírgula e 1e-4
+ * no desvio eram o método. A lei é o índice a fechar o ficheiro ao byte, os 1,5 B
+ * inteiros, Q16 como pinos.c, linearidade EXACTA W(x+z)=Wx+Wz, W·e_j a coluna j.
  */
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -43,7 +46,8 @@
 #define MAX_TENSORES 512
 #define MAX_NOME     64
 #define QK_K         256
-#define BLOCO_Q4_K   144        /* 2 (d) + 2 (dmin) + 12 (escalas) + 128 (quants) */
+#define BLOCO_Q4_K   144
+#define Q16          65536L
 
 /* os tipos de tensor do ggml que este ficheiro precisa de saber nomear */
 enum { T_F32 = 0, T_F16 = 1, T_Q4_K = 12, T_Q6_K = 14 };
@@ -122,47 +126,49 @@ static void saltar_valor(unsigned tipo){
     if(tipo != 9){ saltar_um(tipo); return; }
     unsigned t_elem = u32();
     unsigned long long n = u64();
-    for(unsigned long long i = 0; i < n && !falhou_leitura; i++) saltar_um(t_elem);
+    for(unsigned long long i = 0; i < n && !falhou_leitura; i += 1) saltar_um(t_elem);
 }
 
-/* ---- §G5  dequantizar um bloco Q4_K ------------------------------------------------------*
+/* ---- §G5  dequantizar um bloco Q4_K em Q16, como pinos.c — sem um float ----------------*
  * O formato: 2 B de escala do super-bloco (f16), 2 B de mínimo (f16), 12 B com oito pares
- * (escala, mínimo) de 6 bits empacotados, e 128 B com 256 valores de 4 bits. Cada sub-bloco de
- * 32 valores tem a sua escala e o seu mínimo próprios — é isso que faz do "K" um K.           */
-static float f16_para_f32(unsigned short h){
-    unsigned sinal = (h >> 15) & 1, expo = (h >> 10) & 0x1F, mant = h & 0x3FF;
-    if(expo == 0){                                  /* subnormal (ou zero) */
-        if(mant == 0) return sinal ? -0.0f : 0.0f;
-        float v = (float)mant * powf(2.0f, -24.0f);
-        return sinal ? -v : v;
-    }
-    if(expo == 31) return sinal ? -INFINITY : INFINITY;
-    float v = (1.0f + (float)mant/1024.0f) * powf(2.0f, (float)expo - 15.0f);
-    return sinal ? -v : v;
+ * (escala, mínimo) de 6 bits empacotados, e 128 B com 256 valores de 4 bits.                  */
+static long f16_q16(unsigned short h){
+    unsigned s = (h >> 15) & 1, e = (h >> 10) & 0x1F, m = h & 0x3FF;
+    if(e == 0){ long v = ((long)m + 128) / 256; return s ? -v : v; }
+    if(e == 31) return s ? -(1L << 30) : (1L << 30);
+    long v = (long)(1024 + m);
+    int sh = (int)e - 9;
+    if(sh >= 0) v <<= sh;
+    else { int r = -sh; v = (v + (1L << (r - 1))) >> r; }
+    return s ? -v : v;
 }
-/* o desempacotamento das escalas de 6 bits — o mesmo de get_scale_min_k4 do ggml */
 static void escala_min_k4(int j, const unsigned char *q, unsigned char *d, unsigned char *m){
     if(j < 4){ *d = q[j] & 63;                       *m = q[j+4] & 63; }
     else     { *d = (q[j+4] & 0xF) | ((q[j-4] >> 6) << 4);
                *m = (q[j+4] >> 4)  | ((q[j-0] >> 6) << 4); }
 }
-static void deq_q4k(const unsigned char *b, float *saida){
+static void deq_q4k(const unsigned char *b, long *y){
     unsigned short hd, hm;
     memcpy(&hd, b, 2); memcpy(&hm, b+2, 2);
-    float d = f16_para_f32(hd), dmin = f16_para_f32(hm);
+    long d = f16_q16(hd), dm = f16_q16(hm);
     const unsigned char *escalas = b + 4;
     const unsigned char *q = b + 16;
     int is = 0, k = 0;
     for(int j = 0; j < QK_K; j += 64){
         unsigned char sc, m;
         escala_min_k4(is + 0, escalas, &sc, &m);
-        float d1 = d * sc, m1 = dmin * m;
+        long long d1 = (long long)d * sc, m1 = (long long)dm * m;
         escala_min_k4(is + 1, escalas, &sc, &m);
-        float d2 = d * sc, m2 = dmin * m;
-        for(int l = 0; l < 32; l++) saida[k++] = d1 * (float)(q[l] & 0xF) - m1;
-        for(int l = 0; l < 32; l++) saida[k++] = d2 * (float)(q[l] >> 4)  - m2;
+        long long d2 = (long long)d * sc, m2 = (long long)dm * m;
+        for(int l = 0; l < 32; l += 1) y[k++] = (long)(d1 * (q[l] & 0xF) - m1);
+        for(int l = 0; l < 32; l += 1) y[k++] = (long)(d2 * (q[l] >> 4) - m2);
         q += 32; is += 2;
     }
+}
+static long pseudo(long i){
+    unsigned long h = (unsigned long)i * 6364136223846793005UL + 1442695040888963407UL;
+    h ^= h >> 33; h *= 0xff51afd7ed558ccdUL; h ^= h >> 33;
+    return (long)(h % 7) - 3;
 }
 
 static long rss_anon_kb(void){
@@ -175,13 +181,13 @@ static long rss_anon_kb(void){
     return v;
 }
 static int acha(const char *nome){
-    for(int i = 0; i < n_tensores; i++)
+    for(int i = 0; i < n_tensores; i += 1)
         if(!strcmp(tensores[i].nome, nome)) return i;
     return -1;
 }
 static long long elementos(const Tensor *t){
     long long n = 1;
-    for(int i = 0; i < t->n_dims; i++) n *= t->dims[i];
+    for(int i = 0; i < t->n_dims; i += 1) n *= t->dims[i];
     return n;
 }
 static long long bytes_de(const Tensor *t){
@@ -211,7 +217,7 @@ if(fd_g < 0){
      * lib/unidade.h, funcao saltou(): a terceira palavra existe para isto. */
     printf("\n    o modelo GGUF nao esta neste sistema — %s\n", caminho);
     printf("    Nao ha nada a medir sem ele, e isso vai CONTADO em vez de calado:\n\n");
-    for(int i = 0; i < 16; i++)
+    for(int i = 0; i < 16; i += 1)
         saltou("as medidas do carregador GGUF (cabecalho, indice, dequantizacao)",
                "o modelo .gguf nao esta no disco — 941 MB, fora do repositorio");
     return 0;
@@ -219,7 +225,7 @@ if(fd_g < 0){
 struct stat st;
 if(fstat(fd_g, &st)){ perror("gguf: fstat"); return 1; }
 long long tam_ficheiro = (long long)st.st_size;
-printf("    tamanho:  %lld B  (%.1f MiB)\n", tam_ficheiro, tam_ficheiro/1048576.0);
+printf("    tamanho:  %lld B  (%lld MiB)\n", tam_ficheiro, tam_ficheiro/1048576);
 
 printf("\n§G1  O CABEÇALHO: magic, versão, e as duas contagens.\n\n");
 unsigned long long n_tens_dito = 0, n_kv = 0;
@@ -243,7 +249,7 @@ printf("\n§G2  OS METADADOS: e têm de bater com o que o `ollama show` diz DE F
 long long emb_dito = 0, ctx_dito = 0, camadas_ditas = 0;
 char arq[64] = {0};
 {
-    for(unsigned long long i = 0; i < n_kv && !falhou_leitura; i++){
+    for(unsigned long long i = 0; i < n_kv && !falhou_leitura; i += 1){
         char chave[128];
         gstr(chave, sizeof chave);
         unsigned tipo = u32();
@@ -275,13 +281,13 @@ char arq[64] = {0};
 
 printf("\n§G3  OS TENSORES: nome, forma, tipo, deslocamento — e a soma fecha o ficheiro.\n\n");
 {
-    for(unsigned long long i = 0; i < n_tens_dito && !falhou_leitura; i++){
+    for(unsigned long long i = 0; i < n_tens_dito && !falhou_leitura; i += 1){
         if(n_tensores >= MAX_TENSORES){ printf("      (teto de %d tensores atingido)\n", MAX_TENSORES); break; }
         Tensor *t = &tensores[n_tensores];
         gstr(t->nome, MAX_NOME);
         t->n_dims = (int)u32();
         if(t->n_dims > 4){ falhou_leitura = 1; break; }
-        for(int d = 0; d < t->n_dims; d++) t->dims[d] = (long long)u64();
+        for(int d = 0; d < t->n_dims; d += 1) t->dims[d] = (long long)u64();
         t->tipo   = u32();
         t->desloc = (long long)u64();
         n_tensores++;
@@ -291,9 +297,9 @@ printf("\n§G3  OS TENSORES: nome, forma, tipo, deslocamento — e a soma fecha 
     inicio_dados = (cur + alinhamento - 1) / alinhamento * alinhamento;
     printf("      lidos %d tensores; os dados começam em %lld\n\n", n_tensores, inicio_dados);
     printf("      %-38s %-14s %-6s %s\n", "nome", "forma", "tipo", "deslocamento");
-    for(int i = 0; i < n_tensores && i < 4; i++){
+    for(int i = 0; i < n_tensores && i < 4; i += 1){
         char forma[32] = {0}; int p = 0;
-        for(int d = 0; d < tensores[i].n_dims; d++)
+        for(int d = 0; d < tensores[i].n_dims; d += 1)
             p += snprintf(forma+p, sizeof forma - (size_t)p, d ? "×%lld" : "%lld", tensores[i].dims[d]);
         printf("      %-38s %-14s %-6s %lld\n", tensores[i].nome, forma,
                nome_tipo(tensores[i].tipo), tensores[i].desloc);
@@ -304,14 +310,14 @@ printf("\n§G3  OS TENSORES: nome, forma, tipo, deslocamento — e a soma fecha 
      * exatamente no fim do ficheiro. Se eu tivesse errado a tabela de tamanhos por tipo, ou o
      * tamanho do bloco Q4_K, este numero nao fechava — e nao ha' aqui folga nenhuma. */
     long long soma = 0, fim_max = 0; int tipo_desconhecido = 0;
-    for(int i = 0; i < n_tensores; i++){
+    for(int i = 0; i < n_tensores; i += 1){
         long long b = bytes_de(&tensores[i]);
         if(b < 0){ tipo_desconhecido++; continue; }
         soma += b;
         long long fim = tensores[i].desloc + b;
         if(fim > fim_max) fim_max = fim;
     }
-    printf("      soma dos tensores      %lld B  (%.1f MiB)\n", soma, soma/1048576.0);
+    printf("      soma dos tensores      %lld B  (%lld MiB)\n", soma, soma/1048576);
     printf("      fim do último tensor   %lld\n", inicio_dados + fim_max);
     printf("      tamanho do ficheiro    %lld\n", tam_ficheiro);
     printf("      diferença              %lld B\n\n", tam_ficheiro - (inicio_dados + fim_max));
@@ -323,11 +329,11 @@ printf("\n§G3  OS TENSORES: nome, forma, tipo, deslocamento — e a soma fecha 
 printf("\n§G4  OS PARÂMETROS: contados das formas, contra os 1,5 B anunciados.\n\n");
 {
     long long total = 0;
-    for(int i = 0; i < n_tensores; i++) total += elementos(&tensores[i]);
-    printf("      parâmetros somados das formas  %lld  (%.2f B)\n", total, total/1e9);
+    for(int i = 0; i < n_tensores; i += 1) total += elementos(&tensores[i]);
+    printf("      parâmetros somados das formas  %lld  (%lld M)\n", total, total/1000000);
     printf("      o ollama anuncia               1.5B\n\n");
     ok("a contagem de parâmetros bate com os 1,5 B anunciados",
-       total > 1.3e9 && total < 1.8e9);
+       total > 1300000000LL && total < 1800000000LL);
     printf("      É um oráculo de fora e é grosseiro de propósito: erra-se por uma dimensão\n");
     printf("      trocada e o número sai fora da janela na hora.\n");
 }
@@ -345,42 +351,41 @@ printf("\n§G5  DEQUANTIZAR Q4_K: e o bloco desempacotado tem de ser são.\n\n")
             printf("      (o tensor não é Q4_K, é %s — nada a desempacotar aqui)\n", nome_tipo(t->tipo));
         } else {
             unsigned char bloco[BLOCO_Q4_K];
-            float vals[QK_K];
-            double soma = 0, soma2 = 0, mn = 1e30, mx = -1e30;
-            int n_blocos = 64, nan = 0;
-            for(int b = 0; b < n_blocos; b++){
+            long vals[QK_K];
+            long long soma = 0, soma2 = 0, mn = 1, mx = -1;
+            int n_blocos = 64, inf = 0, primeiro = 1;
+            for(int b = 0; b < n_blocos; b += 1){
                 if(pread(fd_g, bloco, BLOCO_Q4_K,
                          inicio_dados + t->desloc + (long long)b*BLOCO_Q4_K) != BLOCO_Q4_K) break;
                 deq_q4k(bloco, vals);
-                for(int k = 0; k < QK_K; k++){
-                    float v = vals[k];
-                    if(!isfinite(v)){ nan++; continue; }
-                    soma += v; soma2 += (double)v*v;
-                    if(v < mn) mn = v;
-                    if(v > mx) mx = v;
+                for(int k = 0; k < QK_K; k += 1){
+                    long v = vals[k];
+                    if(v == (1L << 30) || v == -(1L << 30)){ inf += 1; continue; }
+                    soma += v; soma2 += (long long)v * v;
+                    if(primeiro || v < mn) mn = v;
+                    if(primeiro || v > mx) mx = v;
+                    primeiro = 0;
                 }
             }
             long n = (long)n_blocos * QK_K;
-            /* a VARIÂNCIA é o que se mede; o desvio padrão é a leitura dela. A janela
-              * «1e-4 a 1» no desvio é «1e-8 a 1» na variância, e a raiz fica só na linha
-              * que imprime — que é onde ela pertence. */
-            double media = soma/n, var = soma2/n - media*media;
-            double dp = sqrt(var > 0 ? var : 0);
-            printf("      %ld pesos desempacotados de %d blocos:\n\n", n, n_blocos);
-            printf("        média            %+.6f\n", media);
-            printf("        desvio padrão     %.6f\n", dp);
-            printf("        mínimo           %+.6f\n", mn);
-            printf("        máximo           %+.6f\n", mx);
-            printf("        não-finitos       %d\n\n", nan);
-            ok("nenhum peso saiu não-finito", nan == 0);
-            /* A regua nao e' um limiar de gosto: pesos de um transformer treinado ficam
-             * centrados em zero e com desvio da ordem de 0,01-0,1. Um desempacotamento
-             * errado nao erra por pouco — devolve lixo com desvio de ordens de grandeza a
-             * mais, ou colapsa tudo a zero. E' isso que esta janela larga apanha. */
-            ok("os pesos estão centrados perto de zero", fabs(media) < 0.05);
-            ok("e o desvio padrão é de escala plausível (1e-4 a 1) — e a comparacao e' na"
-               " VARIANCIA, 1e-8 a 1, sem se formar a raiz para decidir",
-               var * 100000000.0 >= 1.0 && var < 1.0);
+            /* |média| < 1/20  <=>  |soma|·20 < n·Q16
+             * 1e-8 < var_float < 1  <=>  n·soma2 − soma²  entre  (Q16² n²)/1e8  e  Q16² n² */
+            long long n2 = (long long)n * n;
+            long long q2 = (long long)Q16 * Q16;
+            long long num = (long long)n * soma2 - soma * soma;   /* n² · var_Q16 */
+            int centrado = (soma < 0 ? -soma : soma) * 20 < (long long)n * Q16;
+            int var_ok = (num > 40LL * n2 && num < q2 * n2);
+            printf("      %ld pesos desempacotados de %d blocos, em Q16:\n\n", n, n_blocos);
+            printf("        soma             %lld\n", soma);
+            printf("        mínimo           %ld\n", mn);
+            printf("        máximo           %ld\n", mx);
+            printf("        sentinela inf     %d\n\n", inf);
+            ok("nenhum peso saiu não-finito", inf == 0);
+            ok("os pesos estão centrados perto de zero",
+               centrado);
+            ok("e a variância é de escala plausível — em Q16, sem se formar a raiz:"
+               " |média|<1/20 e n·soma2−soma² entre as potências de Q16, não 1e-8..1 em float",
+               var_ok);
             printf("      Isto não prova que a dequantização está certa — prova que não está\n");
             printf("      grosseiramente errada. A prova a sério é o §G6 do llm.c, quando a\n");
             printf("      saída da rede for comparada com a do ollama para o mesmo prompt.\n");
@@ -401,7 +406,7 @@ printf("\n§G6  A RAM não cresce: lê-se o modelo inteiro e o processo não eng
         lidos += r;
     }
     long depois = rss_anon_kb();
-    printf("      bytes lidos do disco   %lld  (%.1f MiB)\n", lidos, lidos/1048576.0);
+    printf("      bytes lidos do disco   %lld  (%lld MiB)\n", lidos, lidos/1048576);
     printf("      RssAnon antes          %ld kB\n", base);
     printf("      RssAnon depois         %ld kB\n", depois);
     printf("      cresceu                %+ld kB\n\n", depois - base);
@@ -436,65 +441,59 @@ printf("\n§G7  OS PESOS ENTRAM NA MÁQUINA: uma projeção real do qwen, do dis
         printf("      %s   %lld×%lld   Q4_K   %lld B em disco\n\n",
                t->nome, linhas, cols, bytes_de(t));
 
-        static float x[2048], y[2048], z[2048], xy[2048], yxy[2048], linha[2048];
-        int L = 64;                                  /* 64 linhas chegam para medir a lei */
-        for(long long j = 0; j < cols; j++){
-            x[j] = (float)sin(0.7*(double)j);        /* determinista, sem gerador de acaso */
-            z[j] = (float)cos(0.3*(double)j);
+        static long x[2048], y[2048], z[2048], xy[2048], yxy[2048], linha[2048];
+        int L = 64;
+        for(long long j = 0; j < cols; j += 1){
+            x[j] = pseudo(j);
+            z[j] = pseudo(j + 1000);
             xy[j] = x[j] + z[j];
         }
-        /* a matmul: dequantiza a linha do disco e faz o produto interno, e larga a linha */
         long base_rss = rss_anon_kb();
         #define PROJETA(saida, entrada) do {                                              \
-            for(int i = 0; i < L; i++){                                                   \
+            for(int i = 0; i < L; i += 1){                                                \
                 long long off = inicio_dados + t->desloc + (long long)i*cols/QK_K*BLOCO_Q4_K; \
-                for(long long b = 0; b < cols/QK_K; b++){                                 \
+                for(long long b = 0; b < cols/QK_K; b += 1){                              \
                     unsigned char blo[BLOCO_Q4_K];                                        \
                     if(pread(fd_g, blo, BLOCO_Q4_K, off + b*BLOCO_Q4_K) != BLOCO_Q4_K) break; \
                     deq_q4k(blo, linha + b*QK_K);                                         \
                 }                                                                         \
-                double acc = 0;                                                           \
-                for(long long j = 0; j < cols; j++) acc += (double)linha[j]*(entrada)[j];  \
-                (saida)[i] = (float)acc;                                                  \
+                long long acc = 0;                                                        \
+                for(long long j = 0; j < cols; j += 1) acc += (long long)linha[j]*(entrada)[j]; \
+                (saida)[i] = (long)acc;                                                   \
             }                                                                             \
         } while(0)
 
         PROJETA(y,   x);
         PROJETA(yxy, xy);
-        static float y2[2048];
+        static long y2[2048];
         PROJETA(y2,  z);
-        double maxdif = 0, escala = 0;
-        for(int i = 0; i < L; i++){
-            double esperado = (double)y[i] + y2[i];
-            double d = fabs(esperado - yxy[i]);
-            if(d > maxdif) maxdif = d;
-            if(fabs(esperado) > escala) escala = fabs(esperado);
-        }
+        int linear_mau = 0;
+        for(int i = 0; i < L; i += 1)
+            if(y[i] + y2[i] != yxy[i]) linear_mau += 1;
         printf("      LINEARIDADE — W(x+z) contra Wx + Wz, em %d linhas:\n", L);
-        printf("        maior diferença  %.3e   (escala %.3f)\n\n", maxdif, escala);
-        ok("o produto com os pesos reais é linear — a indexação está de pé",
-           (long long)(maxdif / (escala > 1 ? escala : 1) * 1e4) <= 1);
+        printf("        discordâncias  %d   (Q16, exacto)\n\n", linear_mau);
+        ok("o produto com os pesos reais é linear — a indexação está de pé."
+           " 1e-4 relativo era IEEE; W(x+z)=Wx+Wz e' identidade em Z",
+           linear_mau == 0);
 
-        /* a BASE: W·e_j é a coluna j, e a coluna j lê-se por outro caminho */
         long long jj = 700;
-        static float e[2048], col[2048];
-        for(long long j = 0; j < cols; j++) e[j] = (j == jj) ? 1.0f : 0.0f;
+        static long e[2048], col[2048];
+        for(long long j = 0; j < cols; j += 1) e[j] = (j == jj) ? 1 : 0;
         PROJETA(col, e);
-        double maxdif2 = 0;
-        for(int i = 0; i < L; i++){
+        int col_mau = 0;
+        for(int i = 0; i < L; i += 1){
             unsigned char blo[BLOCO_Q4_K];
-            float vals[QK_K];
+            long vals[QK_K];
             long long off = inicio_dados + t->desloc + (long long)i*cols/QK_K*BLOCO_Q4_K
                           + (jj/QK_K)*BLOCO_Q4_K;
             if(pread(fd_g, blo, BLOCO_Q4_K, off) != BLOCO_Q4_K) break;
             deq_q4k(blo, vals);
-            double d = fabs((double)col[i] - vals[jj % QK_K]);
-            if(d > maxdif2) maxdif2 = d;
+            if(col[i] != vals[jj % QK_K]) col_mau += 1;
         }
         printf("      BASE — W·e_%lld contra a coluna %lld lida à parte:\n", jj, jj);
-        printf("        maior diferença  %.3e\n\n", maxdif2);
+        printf("        discordâncias  %d\n\n", col_mau);
         ok("W·e_j concorda com a leitura direta da coluna j",
-           (long long)(maxdif2 * 1e6) <= 1);
+           col_mau == 0);
 
         long subiu = rss_anon_kb() - base_rss;
         printf("      RAM anónima durante as %d projeções: %+ld kB\n\n", L*5, subiu);

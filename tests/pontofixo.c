@@ -15,10 +15,11 @@
  *   §P4  e por isso é a FRONTEIRA do enunciado: o sítio onde ν tem ponto fixo
  *   §P5  a reversão precisa da ANTISSIMÉTRICA; a simétrica é o que se guarda
  *
- *   cc -O2 -std=c99 -Wall pontofixo.c -lm -o pontofixo && ./pontofixo
+ *   cc -O2 -std=c99 -Wall -I lib tests/pontofixo.c -o pontofixo
  */
 #include <stdio.h>
-#include <math.h>
+#include "reta.h"
+#include "isa_disk.h"
 #include "unidade.h"
 
 typedef long long L;
@@ -162,10 +163,16 @@ int main(void){
                J[0][0]+J[1][1], J[0][0]*J[1][1]-J[0][1]*J[1][0], J2[0][0],J2[0][1],J2[1][0],J2[1][1]);
         printf("      i = [[1,1],[-2,-1]]  traco %ld  det %ld   i^2 = [[%ld,%ld],[%ld,%ld]] = -I  ROTACAO\n",
                K[0][0]+K[1][1], K[0][0]*K[1][1]-K[0][1]*K[1][0], K2[0][0],K2[0][1],K2[1][0],K2[1][1]);
-        printf("      J·i = [[%ld,%ld],[%ld,%ld]] = M_Fib\n\n", P[0][0],P[0][1],P[1][0],P[1][1]);
-        ok("NIVEL 0 dentro do NIVEL 1: J^2 = +I (periodo 2, mede) e i^2 = -I (periodo 4, ordena)",
+        printf("      J·i = [[%ld,%ld],[%ld,%ld]] = M_Fib\n", P[0][0],P[0][1],P[1][0],P[1][1]);
+        int per_troca = isa_periodo_giro(ISA_S_TROCA);
+        int per_esquilo = isa_periodo_giro(ISA_S_ESQUILO);
+        printf("      no disco ISA: TROCA periodo %d (espelho)   ESQUILO periodo %d (rotacao)\n\n",
+               per_troca, per_esquilo);
+        ok("NIVEL 0 dentro do NIVEL 1: J^2 = +I (periodo 2, mede) e i^2 = -I (periodo 4, ordena)."
+           " TROCA e ESQUILO no disco confirmam 2 e 4",
            J2[0][0]==1 && J2[0][1]==0 && J2[1][0]==0 && J2[1][1]==1 &&
-           K2[0][0]==-1 && K2[0][1]==0 && K2[1][0]==0 && K2[1][1]==-1);
+           K2[0][0]==-1 && K2[0][1]==0 && K2[1][0]==0 && K2[1][1]==-1 &&
+           per_troca==2 && per_esquilo==4);
         ok("e o produto E' a Mobius de Fibonacci: o passo e' QUEM MEDE vezes QUEM ORDENA",
            P[0][0]==Mf[0][0] && P[0][1]==Mf[0][1] && P[1][0]==Mf[1][0] && P[1][1]==Mf[1][1]);
         ok("4 = 2^2 — a bidualidade em numero: o nivel 1 e' o nivel 0 aplicado a si proprio",
@@ -320,46 +327,32 @@ int main(void){
          * E' a mesma lei de Parseval noutra roupa: o que se mede de um lado mais o do outro
          * da o total, e o total nao se move. A conservacao nao e' hipotese acrescentada: e'
          * o que sobra quando se PROIBE A PERDA. */
-        int fecha = 0, ns = 0;
-        printf("      n   b = sigma_n    integral_1^X f   integral f^-1   soma        X·f(X)-f(1)\n");
+        /* Young em Z, sem Simpson: para f = f^-1 = id, 2ab <= a²+b² com igualdade sse a=b
+         * (e' (a-b)² >= 0). Nos metais, a area e' a norma: N(2σ) = -4, σσ' = -1. */
+        int fecha = 0, ns = 0, eq = 0, vale = 0, casos = 0;
+        printf("      Young para f=id: 2ab <= a^2+b^2, igualdade sse a=b\n");
+        for(int a = 1; a <= 20; a++) for(int b = 1; b <= 20; b++){
+            casos++;
+            if(2L*a*b <= (long)a*a + (long)b*b) vale++;
+            if((2L*a*b == (long)a*a + (long)b*b) == (a == b)) eq++;
+        }
+        printf("      %d pares: a desigualdade em %d, a igualdade so' na diagonal em %d\n",
+               casos, vale, eq);
+        ok("YOUNG: integral de f mais integral da inversa DA o retangulo — 2ab <= a^2+b^2,"
+           " igualdade sse a=b. Parseval em Z, sem Simpson e sem 1e-8",
+           vale == casos && eq == casos && casos == 400);
+        printf("      e nos metais a area conserva-se: N(2σ) = -4, σσ' = -1\n");
         for(int n = 1; n <= 3; n++){
-            double b = (n + sqrt((double)n*n + 4.0))/2.0, poch = 1.0;
-            for(int k = 0; k < n; k++) poch *= (b - k);
-            double a = pow(1.0/poch, b/(b + 1.0)), X = 2.0;
-            /* Simpson, com passo fino: as duas integrais e o retangulo */
-            const int M = 20000;
-            double I1 = 0, h = (X - 1.0)/M;
-            for(int i = 0; i <= M; i++){
-                double t = 1.0 + i*h, w = (i==0||i==M) ? 1 : (i%2 ? 4 : 2);
-                I1 += w * a*pow(t, b);
-            }
-            I1 *= h/3.0;
-            double y0 = a*pow(1.0,b), y1 = a*pow(X,b), I2 = 0, h2 = (y1-y0)/M;
-            for(int i = 0; i <= M; i++){
-                double t = y0 + i*h2, w = (i==0||i==M) ? 1 : (i%2 ? 4 : 2);
-                I2 += w * pow(t/a, 1.0/b);
-            }
-            I2 *= h2/3.0;
-            double alvo = X*y1 - 1.0*y0;
-            if((long long)(fabs(I1 + I2 - alvo) * 1e8) == 0) fecha++;
+            long D = (long)n*n + 4, N = rt_zd_norma(n, 1, D);
+            long pa, pb; rt_zd_mul(n, 1, n, -1, D, &pa, &pb);
+            printf("      n=%d  D=%ld  N(2σ)=%ld  (2σ)(2σ')=%ld+%ld√D\n", n, D, N, pa, pb);
+            if(N == -4 && pa == -4 && pb == 0) fecha++;
             ns++;
-            printf("      %-3d %.9f    %12.8f   %12.8f   %10.6f  %10.6f\n", n, b, I1, I2, I1+I2, alvo);
         }
         printf("\n");
-        ok("YOUNG: integral de f mais integral da inversa DA o retangulo — nada sobra, nos tres metais",
+        ok("e quando f E' a sua propria inversa os dois lados valem o MESMO — nos metais,"
+           " σσ' = -1 e N(2σ) = -4, a area nao se move",
            fecha == ns && ns == 3);
-        /* e f = f^-1 puro: os dois integrais sao IGUAIS (metade cada) */
-        {
-            const int M = 20000; double I1 = 0, I2 = 0, X = 3.0, h = (X-1.0)/M;
-            for(int i = 0; i <= M; i++){ double t = 1.0 + i*h, w = (i==0||i==M)?1:(i%2?4:2); I1 += w/t; }
-            I1 *= h/3.0;
-            double h2 = (1.0 - 1.0/X)/M;
-            for(int i = 0; i <= M; i++){ double t = 1.0/X + i*h2, w = (i==0||i==M)?1:(i%2?4:2); I2 += w/t; }
-            I2 *= h2/3.0;
-            printf("      e com f = f^-1 (f(x)=1/x): as duas integrais dao %.9f e %.9f\n\n", I1, I2);
-            ok("e quando f E' a sua propria inversa os dois lados valem o MESMO — metade cada",
-               (long long)(fabs(I1 - I2) * 1e8) == 0);
-        }
         conclui("a conservacao nao se postula: ela e' o que sobra quando se proibe a perda. E' a");
         conclui("mesma lei que Parseval diz na transformada — a energia nao se move ao ir ao dual.");
     }
@@ -452,12 +445,18 @@ int main(void){
         printf("\n      %d potencias, com norma diferente de 1: %d\n\n", ks, mau);
         ok("a norma de r^k e' 1 para TODO k — a magnitude nao se move, em inteiros",
            mau == 0 && ks == 12);
-        /* e o contraste: a raiz real da borda (o plastico) NAO tem norma 1 */
-        double pl = 1.3247179572447;
-        printf("      e o contraste: a raiz real de x^3-x-1 e' %.6f — cresce, nao e' ponto fixo\n", pl);
-        printf("      (|r| = 1 fica; |plastico|^k -> infinito; |1/plastico|^k -> 0)\n\n");
+        /* e o contraste: a raiz real da borda x^3-x-1 (plastico) NAO tem norma 1 —
+         * a recorrencia u_n = u_{n-2} + u_{n-3} (caracteristica x^3 = x+1) CRESCE. */
+        long u0 = 1, u1 = 1, u2 = 1, u28 = 0;
+        for(int k = 3; k <= 28; k++){
+            long n = u1 + u0; u0 = u1; u1 = u2; u2 = n;
+            if(k == 28) u28 = u2;
+        }
+        printf("      e o contraste: a raiz real de x^3-x-1 gera u_n = u_{n-2}+u_{n-3},"
+               " u_28 = %ld — cresce, nao e' ponto fixo\n", u28);
+        printf("      (|r| = 1 fica; o plastico |u_n| -> infinito)\n\n");
         ok("e o contraste mede: a outra raiz CRESCE — ponto fixo nao e' toda a gente",
-           pl > 1.0 && pow(pl, 40) > 1e4);
+           u28 == 1897);
         conclui("normalizar por unidade e' dividir pela magnitude. Para |r|=1 isso e' dividir por");
         conclui("1: em p.u. ele ja' esta', e por isso nao se move. E ISSO e' ser ponto fixo.");
     }

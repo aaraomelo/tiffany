@@ -23,52 +23,31 @@
  *   §D4  e o BIDUAL: do corpo tira-se o expoente e do expoente o corpo, resíduo 0
  *   §D5  o controlo: uma escala qualquer NÃO dá expoentes inteiros
  *
- *   cc -O2 -std=c99 -Wall -I../lib -lm dourada_escala.c -o dourada_escala
+ *   cc -O2 -std=c99 -Wall -I lib tests/dourada_escala.c -o dourada_escala
  */
 #include <stdio.h>
-#include <math.h>
 #include "unidade.h"
 #include "promove.h"
 
-/* os degraus que o estilo.tex declara, e a escala que a classe usa */
-static const double EST[] = { 7.62, 8.94, 10.50, 12.33, 14.47, 16.99, 19.95, 23.42 };
-static const double CLA[] = { 10.95, 12.0, 14.4, 17.28, 20.74, 24.88 };
-#define N_EST ((int)(sizeof EST / sizeof EST[0]))
-#define N_CLA ((int)(sizeof CLA / sizeof CLA[0]))
+#define N_EST 8
+#define N_CLA 6
+static const long EST_Z[] = { 762, 894, 1050, 1233, 1447, 1699, 1995, 2342 };
+static const long CLA_Z[] = { 1095, 1200, 1440, 1728, 2074, 2488 };
 
 int main(void){
     printf("=== A ESCALA E' A DOURADA, E O DEGRAU E' UM EXPOENTE ======================\n\n");
-    const double PHI = (1.0 + sqrt(5.0)) / 2.0;
-    const double SIG = pow(PHI, 1.0/3.0);
 
     /* ─── §D1 a razao e' UMA ──────────────────────────────────────────────────────── */
-    double pior_r = 0;
-    printf("   degrau   corpo    razao\n");
-    for(int i = 1; i < N_EST; i++){
-        double r = EST[i] / EST[i-1];
-        double d = fabs(r - SIG); if(d > pior_r) pior_r = d;
-        printf("     %d     %6.2f   %.5f\n", i, EST[i], r);
-    }
-    printf("   phi^(1/3) = %.5f   pior desvio %.5f\n", SIG, pior_r);
-    /* E A TESE FAZ-SE AO CUBO, onde a raiz cúbica desaparece e φ se enquadra por
-     * racionais — que é o método do corte. Os corpos são decimais de duas casas, logo em
-     * CENTÉSIMOS são inteiros, e a razão é a/b exacta:
-     *
-     *      r = φ^(1/3)   ⟺   r³ = φ        e     161/100 < φ < 163/100
-     *
-     * A segunda verifica-se sem formar √5: φ > 161/100 ⟺ √5 > 222/100 ⟺ 5 > 4,9284, e
-     * φ < 163/100 ⟺ √5 < 226/100 ⟺ 5 < 5,1076 — duas comparações de inteiros. Então
-     * basta 161·b³ < 100·a³ < 163·b³, e nenhum limiar meu entra.
-     *
-     * (E o ramo «salto duplo» que aqui estava NUNCA corria: r ≈ 1,17 e a guarda pedia
-     * r > 1,3. Saiu — um ramo que nunca corre não é uma ressalva, é código morto.) */
-    const long EST_Z[] = { 762, 894, 1050, 1233, 1447, 1699, 1995, 2342 };
-    const long NZ = (long)(sizeof EST_Z / sizeof EST_Z[0]);
+    printf("   degrau   corpo (centesimos)   razao a/b\n");
+    const long NZ = N_EST;
+    for(long i = 1; i < NZ; i++)
+        printf("     %ld     %ld            %ld/%ld\n", i, EST_Z[i], EST_Z[i], EST_Z[i-1]);
+    /* E A TESE FAZ-SE AO CUBO: r³ = φ ⟺ 161·b³ < 100·a³ < 163·b³, φ entre 161/100 e 163/100. */
     int phi_enquadrado = (5*10000L > 222L*222L && 5*10000L < 226L*226L);
     long pares = 0, na_faixa = 0;
     for(long i = 1; i < NZ; i++){
         long a = EST_Z[i], b = EST_Z[i-1];
-        long a3 = a*a*a, b3 = b*b*b;              /* cabem: 2342³ ≈ 1,3·10¹⁰ */
+        long a3 = a*a*a, b3 = b*b*b;
         pares++;
         if(161*b3 < 100*a3 && 100*a3 < 163*b3) na_faixa++;
     }
@@ -80,27 +59,8 @@ int main(void){
        phi_enquadrado && pares == NZ - 1 && na_faixa == pares);
 
     /* ─── §D2 o expoente e' INTEIRO ───────────────────────────────────────────────── */
-    printf("\n   corpo -> expoente\n");
-    double res = 0;
-    for(int i = 0; i < N_EST; i++){
-        double k = log(EST[i] / EST[0]) / log(SIG);
-        double d = fabs(k - floor(k + 0.5));
-        res += d;
-        printf("   %6.2f -> %7.4f   inteiro %2d   residuo %.4f\n",
-               EST[i], k, (int)floor(k + 0.5), d);
-    }
-    printf("   RESIDUO TOTAL: %.4f\n", res);
-    /* E O LOGARITMO SAI. «O degrau i é o expoente i» é (EST_i/EST_0)³ = φ^i, e φ^i
-     * calcula-se em ℤ, sem transcendente nenhum, porque φ² = φ+1 dá
-     *
-     *      φ^i = F_i·φ + F_{i−1}        (Fibonacci)
-     *
-     * Com φ enquadrado entre 161/100 e 163/100 (§D1), a faixa de φ^i é inteira:
-     *
-     *      (F_i·161 + 100·F_{i−1})·b³  ≤  100·a³  ≤  (F_i·163 + 100·F_{i−1})·b³
-     *
-     * e é isso que se verifica nos oito degraus. Nenhum log, nenhum arredondamento a
-     * inteiro mais próximo, e nenhum limiar meu. */
+    printf("\n   corpo (cent) -> expoente k\n");
+    /* (EST_i/EST_0)^3 = phi^i em Z por Fibonacci; sem log. */
     long fib[12]; fib[0] = 0; fib[1] = 1;
     for(int i = 2; i < 12; i++) fib[i] = fib[i-1] + fib[i-2];
     long b0 = EST_Z[0], b0c = b0*b0*b0;
@@ -112,7 +72,9 @@ int main(void){
         long lo = (fib[i]*161 + 100*fib[i-1]) * b0c;
         long hi = (fib[i]*163 + 100*fib[i-1]) * b0c;
         if(lo <= 100*ac && 100*ac <= hi) com_expoente++;
+        printf("   %ld -> k=%ld\n", EST_Z[i], i);
     }
+    /* E O LOGARITMO SAI: (EST_i/EST_0)³ = φ^i em Z por Fibonacci. */
     ok("cada degrau e' um EXPOENTE INTEIRO da razao — e o LOGARITMO SAI: «o degrau i e' o"
        " expoente i» e' (EST_i/EST_0)^3 = phi^i, e phi^i calcula-se em Z por FIBONACCI,"
        " phi^i = F_i.phi + F_{i-1}, porque phi^2 = phi+1. Com phi enquadrado entre 161/100 e"
@@ -121,25 +83,12 @@ int main(void){
        degraus == NZ && com_expoente == degraus);
 
     /* ─── §D3 a da CLASSE nao e' dourada ──────────────────────────────────────────── */
-    printf("\n   e os tamanhos da CLASSE, na mesma regua:\n");
-    double res_c = 0;
-    for(int i = 0; i < N_CLA; i++){
-        double k = log(CLA[i] / EST[0]) / log(SIG);
-        double d = fabs(k - floor(k + 0.5));
-        res_c += d;
-        printf("   %6.2f -> %7.4f   residuo %.4f\n", CLA[i], k, d);
-    }
-    printf("   RESIDUO TOTAL: %.4f\n", res_c);
-    /* e ISTO e' o que separa as duas reguas — sem esta medida, «a escala e' dourada» era
-     * uma afirmacao sobre nada: qualquer lista de numeros teria expoentes.
-     *
-     * E o controlo mede-se com a MESMA regua do §D2, sem log: para cada corpo da classe,
-     * NENHUM expoente k o enquadra. Nao e' «o residuo e' grande» — e' que a faixa inteira
-     * de phi^k nao o contem, para k nenhum. */
-    long CLA_Z[] = { 1095, 1200, 1440, 1728, 2074, 2488 };
+    printf("\n   e os tamanhos da CLASSE, na mesma regua (cent):\n");
+    /* Sem esta medida «a escala e' dourada» seria sobre nada. NENHUM expoente k enquadra. */
     long corpos_classe = 0, sem_expoente = 0;
     for(int i = 0; i < N_CLA; i++){
         long c = CLA_Z[i], cc = c*c*c;
+        printf("   %ld\n", c);
         int achou = 0;
         for(int k = 0; k < 12; k++){
             long lo = (k ? (fib[k]*161 + 100*fib[k-1]) : 100L) * b0c;
@@ -175,7 +124,7 @@ int main(void){
         }
         corpos++;
         if(quantos == 1 && qual == i) com_um_so++;
-        printf("   %6.2f -> k=%ld (faixas que o contem: %ld)\n", EST[i], qual, quantos);
+        printf("   %ld -> k=%ld (faixas: %ld)\n", EST_Z[i], qual, quantos);
     }
     ok("do corpo tira-se o expoente e do expoente o corpo — e a volta fecha por UNICIDADE,"
        " nao por o desvio ser pequeno: as faixas de phi^k sao disjuntas nesta regua, cada"
@@ -183,17 +132,8 @@ int main(void){
        corpos == NZ && com_um_so == corpos);
 
     /* ─── §D5 o CONTROLO ──────────────────────────────────────────────────────────── */
-    const double QQ[] = { 7.62, 9.0, 11.0, 13.0, 15.0, 18.0, 24.0 };
-    double res_q = 0;
-    for(int i = 0; i < 7; i++){
-        double k = log(QQ[i] / QQ[0]) / log(SIG);
-        res_q += fabs(k - floor(k + 0.5));
-    }
-    printf("\n   controlo: uma escala redonda qualquer da' residuo %.4f\n", res_q);
-    /* e o mesmo controlo na regua inteira: os corpos redondos que NAO sao da escala
-     * (900, 1100, 1300, 1500, 1800, 2400) nao caem em faixa nenhuma. O 762 cai, e tem de
-     * cair: e' o proprio EST_0, que e' phi^0 — um controlo que falha em TUDO nao separa
-     * nada, e este acerta exactamente onde devia acertar. */
+    printf("\n   controlo: escala redonda qualquer (cent)\n");
+    /* Os redondos (900..2400) ficam fora; 762 cai porque e' EST_0 = phi^0. */
     long QQ_Z[] = { 762, 900, 1100, 1300, 1500, 1800, 2400 };
     long redondos = 0, redondos_fora = 0;
     for(int i = 1; i < 7; i++){

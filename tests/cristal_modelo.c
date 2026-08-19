@@ -29,11 +29,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdint.h>
 /* getline e POSIX; com -std=c99 estrito a libc esconde-o, e a bateria compila assim. */
 extern long getline(char **, size_t *, FILE *);
 #include "banco.h"
 #include "../lib/disco.h"
-#define v DISCO_FIXO2(float, D, 22)
+#define v DISCO_FIXO2(int32_t, D, 22)
 #include "unidade.h"
 
 #define D    768                    /* a dimensao do nomic */
@@ -41,8 +42,8 @@ extern long getline(char **, size_t *, FILE *);
 #define VMAXB 4096                  /* o VMAX do banco, em bytes */
 
 int main(void){
-    disco_prende(DISCO_BASE(22),"dados/cm_v.bin",(size_t)(NV)*(D),sizeof(float));
-    disco_zera(v,(size_t)(NV)*(D),sizeof(float));
+    disco_prende(DISCO_BASE(22),"dados/cm_v.bin",(size_t)(NV)*(D),sizeof(int32_t));
+    disco_zera(v,(size_t)(NV)*(D),sizeof(int32_t));
     puts("\n  O MODELO NO BANCO — ler e ESCREVER, e nao so' colher\n");
 
     /* os vectores: do gguf se ele estiver la', senao proprios. o que se mede e' o banco. */
@@ -59,7 +60,7 @@ int main(void){
                     if(p[0]!='0' || (p[1]!='x' && p[1]!='X')) break;
                     char *fim; unsigned u = (unsigned)strtoul(p, &fim, 16);
                     if(fim == p) break;
-                    memcpy(&v[i][d++], &u, sizeof(float)); p = fim;
+                    memcpy(&v[i][d++], &u, sizeof(int32_t)); p = fim;
                 }
                 if(d == D) i++;
             }
@@ -68,7 +69,7 @@ int main(void){
         }
         if(!do_gguf)
             for(int i=0;i<NV;i++) for(int d=0;d<D;d++)
-                v[i][d] = (float)((i*7919 + d*104729) % 2003 - 1000) / 1000.0f;
+                v[i][d] = (int32_t)((i*7919 + d*104729) % 2003 - 1000);
         printf("      vectores: %s\n", do_gguf ? "DO MODELO (/tmp/vetores.txt)"
                                                : "proprios (o modelo nao estava la')");
     }
@@ -80,13 +81,13 @@ int main(void){
     /* ═══ §C1 — o modelo ENTRA no banco ════════════════════════════════════════════
      * cada vector parte-se em pedacos de VMAX, e cada pedaco e' um registo com a sua
      * impressao e o seu crc. e' o mesmo tratamento de qualquer outro cristal. */
-    const int P = (int)((D*sizeof(float) + VMAXB - 1) / VMAXB);   /* pedacos por vector */
+    const int P = (int)((D*sizeof(int32_t) + VMAXB - 1) / VMAXB);   /* pedacos por vector */
     int gravou = 0;
     for(int i=0;i<NV;i++)
         for(int p=0;p<P;p++){
             char c[48]; snprintf(c,sizeof c,"emb.%d.%d",i,p);
             size_t off = (size_t)p*VMAXB;
-            size_t n = D*sizeof(float) - off; if(n > VMAXB) n = VMAXB;
+            size_t n = D*sizeof(int32_t) - off; if(n > VMAXB) n = VMAXB;
             if(gravar(&b, c, (unsigned char*)v[i] + off, (long)n)) gravou++;
         }
     fechar(&b);
@@ -112,13 +113,13 @@ int main(void){
      * o que faltava. de um "doador" so' se tira; num cristal escreve-se — e o que se
      * escreve FICA, que e' onde "aprender" tem de acontecer para nao ser palavra. */
     {
-        float novo[D];
-        for(int d=0; d<D; d++) novo[d] = v[3][d] * 2.0f + 1.0f;   /* uma "licao" qualquer */
+        int32_t novo[D];
+        for(int d=0; d<D; d++) novo[d] = v[3][d] * 2 + 1;   /* uma "licao" qualquer */
         if(!abrir(&b, "/tmp/cm", 0)){ perror("reabrir"); return 1; }
         int reescreveu = 0;
         for(int p=0;p<P;p++){
             char c[48]; snprintf(c,sizeof c,"emb.3.%d",p);
-            size_t off=(size_t)p*VMAXB, n=D*sizeof(float)-off; if(n>VMAXB) n=VMAXB;
+            size_t off=(size_t)p*VMAXB, n=D*sizeof(int32_t)-off; if(n>VMAXB) n=VMAXB;
             if(gravar(&b, c, (unsigned char*)novo + off, (long)n)) reescreveu++;
         }
         fechar(&b);
@@ -174,8 +175,8 @@ int main(void){
         struct base b2;
         unlink("/tmp/cs.dat"); unlink("/tmp/cs.idx");
         if(!abrir(&b2, "/tmp/cs", 1)){ perror("abrir"); return 1; }
-        float licao[D]; for(int d=0;d<D;d++) licao[d] = 2.0f;
-        gravar(&b2, "emb.97.0", (unsigned char*)licao, (long)(D*sizeof(float)));
+        int32_t licao[D]; for(int d=0;d<D;d++) licao[d] = 2;
+        gravar(&b2, "emb.97.0", (unsigned char*)licao, (long)(D*sizeof(int32_t)));
         fechar(&b2);
 
         Mapa ms;
@@ -183,12 +184,12 @@ int main(void){
         long n = 0;
         const unsigned char *tem = banco_ver(&ms, "emb.97.0", &n);
         int bate = 0;
-        if(tem && n == (long)(D*sizeof(float))){
+        if(tem && n == (long)(D*sizeof(int32_t))){
             bate = 1;
             for(int d=0; d<D && bate; d++){
                 unsigned char q[4]; banco_fatia(tem, (long)d*4, q, 4);
-                float x; memcpy(&x, q, 4);
-                if(x != 2.0f) bate = 0;
+                int32_t x; memcpy(&x, q, 4);
+                if(x != 2) bate = 0;
             }
         }
         int caladas = 0;

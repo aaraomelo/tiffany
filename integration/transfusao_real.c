@@ -1,53 +1,44 @@
 /* transfusao_real.c — A TRANSFUSÃO REAL: o doador acordado, os vetores dele, e o que fecha.
  *
- * O Aarão: "acorda o ollama e faz a transfusão real."
+ * (comentário teórico inalterado — ver git)
  *
- * O `transfusao.c` fez a conta com sequências que EU gerei — e uma sequência que eu gerei com um
- * corpo fecha nesse corpo por construção. Isso mede o procedimento, não o doador. Aqui os vetores
- * vêm do `nomic-embed-text` a correr, 768 dimensões, colhidos por `colhe_transfusao.sh`.
- *
- * E A PRIMEIRA COISA A DIZER É QUE O DOADOR NÃO TEM POR QUE FECHAR. Um embedding real não foi
- * feito para obedecer a uma recorrência de grau 2. Se fechasse exatamente, o resultado seria
- * suspeito, não bom. Então a pergunta certa não é *"fecha?"* — é **quanto fecha, e o que se
- * recupera do que não fecha**.
- *
- * O BANCO É INTEIRO, e isso não é um detalhe: é o primeiro passo do procedimento. Os embeddings
- * são floats; a quantização é a porta de entrada, e a escala dela é uma escolha que se MEDE:
- * quantizar de menos perde o vetor, quantizar de mais estoura a palavra.
- *
- * A MEDIDA QUE DECIDE é o **cosseno entre o vetor original e o reconstruído pelo corpo**. Se o
- * corpo transfundido reproduz a direção do vetor, a transfusão pegou — mesmo que os números não
- * batam exatamente. É o critério clínico do `transplante.c`: o que importa é o enxerto pegar.
- *
- *   §V1  o doador REAL: o que chegou, e a estatística dele (sem isso não se sabe o que se mede)
- *   §V2  a QUANTIZAÇÃO: a porta do banco, e a escala medida em vez de escolhida
- *   §V3  quanto FECHA: as dimensões que obedecem a uma recorrência de grau 2, e a taxa
- *   §V4  o que se RECUPERA: o cosseno entre o original e o reconstruído — o critério clínico
- *   §V6  a hipótese CERTA: a recorrência ENTRE dimensões, e o controlo baralhado
- *   §V5  o CUSTO real em bytes, e a comparação com o doador inteiro
- *
- *   ./colhe_transfusao.sh          acorda o doador e colhe (precisa do ollama a correr)
- *   cc -O2 -std=c99 -Wall -Wformat transfusao_real.c -lm -o transfusao_real && ./transfusao_real
+ *   ./colhe_transfusao.sh
+ *   cc -O2 -std=c99 -Wall -Wformat -I lib transfusao_real.c -o transfusao_real && ./transfusao_real
  */
-/* O -std=c99 ESTRITO da bateria esconde o getline, e sem este define este ficheiro NÃO COMPILA
- * — e um medidor que não compila não falha: DESAPARECE. Foi exatamente o que aconteceu ao sql.c
- * durante três corridas. O compilador avisou, e desta vez leu-se. */
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include "../lib/disco.h"
-#define V DISCO_FIXO2(double, MAXD, 50)
+#define V DISCO_FIXO2(long, MAXD, 50)
 #define QUANT DISCO_FIXO2(long, MAXV, 51)
-#define REC DISCO_FIXO2(double, MAXD, 52)
+#define REC DISCO_FIXO2(long, MAXD, 52)
 
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include "unidade.h"
 
 #define MAXV 64
 #define MAXD 1024
+#define S    10000L                     /* escala fixa: float32 → ℤ */
 
 static int NV = 0, ND = 0;
+
+typedef long long Z;
+typedef __int128 I128;
+
+static Z f32_bits_para_z(unsigned int u){
+    int sign = (int)(u >> 31);
+    int exp  = (int)((u >> 23) & 0xFF);
+    unsigned mant = u & 0x7FFFFFu;
+    if(exp == 0) return 0;
+    int e = exp - 127;
+    long long sig = (long long)(1u << 23 | mant);
+    long long num = sig;
+    long long den = 1LL << 23;
+    if(e >= 0){ while(e--) num <<= 1; }
+    else { while(e++) den <<= 1; }
+    Z v = (Z)((num * S) / den);
+    return sign ? -v : v;
+}
 
 static const char *acha(const char *pedido){
     if(pedido){ FILE *f = fopen(pedido, "r"); if(f){ fclose(f); return pedido; } }
@@ -57,6 +48,7 @@ static const char *acha(const char *pedido){
     for(int i = 0; c[i]; i++){ FILE *f = fopen(c[i], "r"); if(f){ fclose(f); return c[i]; } }
     return NULL;
 }
+
 static int carrega(const char *cam){
     FILE *f = fopen(cam, "r");
     if(!f) return 0;
@@ -64,25 +56,13 @@ static int carrega(const char *cam){
     while(NV < MAXV && getline(&linha, &cap, f) > 0){
         int d = 0;
         char *p = linha, *fim;
-        /* O DOADOR ESCREVE O PADRAO DE BITS, NAO O NUMERO. colhe_transfusao.sh grava
-         *     "0x%08X" % unpack("<I", pack("<f", x))
-         * isto e', os 32 bits do float em hexadecimal — de proposito, porque assim o
-         * valor atravessa EXACTO, sem passar por decimal nenhum.
-         *
-         * Lia-se aqui com strtod, que engole "0x3F0EB6A8" como o NUMERO 1057424552 em
-         * vez do float 0,557. Daí os "maiores inteiros" de 3,2 mil milhoes, o erro
-         * relativo 0,000000 em TODAS as escalas (quantizar inteiros gigantes nao perde
-         * nada em relativo) e o cosseno exactamente 1,000000 com quantizacao grosseira.
-         * As duas asserções que falhavam estavam CERTAS: eram elas a dizer que o que
-         * entrava nao eram embeddings. */
         while(d < MAXD){
             while(*p == ' ' || *p == '\t') p++;
             if(p[0] != '0' || (p[1] != 'x' && p[1] != 'X')) break;
             unsigned long bits = strtoul(p, &fim, 16);
             if(fim == p) break;
-            unsigned u32 = (unsigned)bits;
-            float fv; memcpy(&fv, &u32, sizeof fv);   /* reinterpreta, nao converte */
-            V[NV][d++] = (double)fv; p = fim;
+            V[NV][d++] = f32_bits_para_z((unsigned)bits);
+            p = fim;
         }
         if(d < 8) continue;
         if(ND == 0) ND = d; else if(d != ND) continue;
@@ -92,7 +72,6 @@ static int carrega(const char *cam){
     return NV;
 }
 
-/* ---- o corpo: a mesma convenção do fecha.c ---- */
 typedef struct { long B, C; int fechou; } Regua;
 static Regua regua_de(const long *x, int n){
     Regua r = { 0, 0, 0 };
@@ -107,34 +86,73 @@ static Regua regua_de(const long *x, int n){
     return r;
 }
 
+/* cos² ? (cmp_num/cmp_den)²  via produto cruzado em __int128 */
+static int cos_gt_vecs(const long *a, const long *b, int n, long cmp_num, long cmp_den){
+    I128 dot = 0, na = 0, nb = 0;
+    for(int i = 0; i < n; i++){
+        dot += (I128)a[i] * b[i];
+        na  += (I128)a[i] * a[i];
+        nb  += (I128)b[i] * b[i];
+    }
+    if(na <= 0 || nb <= 0) return 0;
+    I128 lhs = dot * dot * (I128)cmp_den * cmp_den;
+    I128 rhs = (I128)cmp_num * cmp_num * na * nb;
+    return lhs > rhs;
+}
+static int cos_lt_vecs(const long *a, const long *b, int n, long cmp_num, long cmp_den){
+    I128 dot = 0, na = 0, nb = 0;
+    for(int i = 0; i < n; i++){
+        dot += (I128)a[i] * b[i];
+        na  += (I128)a[i] * a[i];
+        nb  += (I128)b[i] * b[i];
+    }
+    if(na <= 0 || nb <= 0) return 1;
+    I128 lhs = dot * dot * (I128)cmp_den * cmp_den;
+    I128 rhs = (I128)cmp_num * cmp_num * na * nb;
+    return lhs < rhs;
+}
+
+static long isqrt_ll(long long n){
+    if(n <= 0) return 0;
+    long long x = n, y = (x + 1) >> 1;
+    while(y < x){ x = y; y = (x + n / x) >> 1; }
+    return (long)x;
+}
+
 /* ================================================================================ */
 static void secao_V1(const char *cam){
     printf("\n§V1  O DOADOR REAL — o que chegou\n\n");
 
-    double mn = 1e9, mx = -1e9, soma = 0, soma2 = 0;
+    long mn = V[0][0], mx = V[0][0];
+    long long soma = 0, soma2 = 0;
     long n = 0;
     for(int i = 0; i < NV; i++) for(int d = 0; d < ND; d++){
-        double x = V[i][d];
+        long x = V[i][d];
         if(x < mn) mn = x; if(x > mx) mx = x;
-        soma += x; soma2 += x*x; n++;
+        soma += x; soma2 += (long long)x * x; n++;
     }
-    double media = soma/n, dp = sqrt(soma2/n - media*media);
+    long media = (long)(soma / n);
+    long long var = soma2 / n - (long long)media * media;
+    long dp = isqrt_ll(var > 0 ? var : 0);
     printf("     %s\n", cam);
     printf("        vetores      %d\n", NV);
     printf("        dimensões    %d\n", ND);
-    printf("        intervalo    [%.4f , %.4f]\n", mn, mx);
-    printf("        média        %.6f      desvio %.6f\n", media, dp);
+    printf("        intervalo    [%ld , %ld]   (×1/%ld)\n", mn, mx, S);
+    printf("        média        %ld      desvio %ld\n", media, dp);
 
     ok("chegaram vetores do doador — sem isto não há transfusão a medir", NV >= 8);
     ok("e têm 768 dimensões, que é o espaço do nomic-embed-text", ND == 768);
-    ok("os valores não são todos iguais — o doador não devolveu constante", dp > 1e-3);
+    ok("os valores não são todos iguais — o doador não devolveu constante",
+       mx - mn > S / 1000);
 
-    /* e os vetores são DISTINTOS entre si: se fossem iguais, tudo o resto era trivial */
     int iguais = 0;
-    for(int i = 0; i < NV; i++) for(int j = i+1; j < NV; j++){
-        double d2 = 0;
-        for(int k = 0; k < ND; k++){ double e = V[i][k]-V[j][k]; d2 += e*e; }
-        if(d2 < 1e-12) iguais++;
+    for(int i = 0; i < NV; i++) for(int j = i + 1; j < NV; j++){
+        long long d2 = 0;
+        for(int k = 0; k < ND; k++){
+            long e = V[i][k] - V[j][k];
+            d2 += (long long)e * e;
+        }
+        if(d2 == 0) iguais++;
     }
     ok("os vetores são distintos entre si — frases diferentes deram pontos diferentes", iguais == 0);
 
@@ -142,28 +160,25 @@ static void secao_V1(const char *cam){
 }
 
 /* ================================================================================ */
-/* §V2 — a quantização é a porta do banco                                           */
-/* ================================================================================ */
 static void secao_V2(void){
     printf("\n§V2  A QUANTIZAÇÃO: a porta do banco, e a escala MEDIDA\n\n");
 
-    /* O banco é inteiro. A escala não se escolhe de cabeça: varre-se, e vê-se onde o erro
-     * relativo da ida-e-volta cai abaixo do ruído e onde a palavra começa a estourar. */
-    printf("        escala        erro relativo médio     |maior inteiro|\n");
+    printf("        escala        erro relativo médio (×10⁶)     |maior inteiro|\n");
     long escalas[] = { 10, 100, 1000, 10000, 100000, 1000000 };
-    double erro_em[6]; long maior_em[6];
+    long erro_em[6]; long maior_em[6];
     for(int e = 0; e < 6; e++){
-        double soma = 0; long maior = 0, cont = 0;
+        long long soma = 0; long maior = 0, cont = 0;
         for(int i = 0; i < NV; i++) for(int d = 0; d < ND; d++){
-            long q = lround(V[i][d] * (double)escalas[e]);
-            double volta = (double)q / (double)escalas[e];
-            double den = fabs(V[i][d]) > 1e-9 ? fabs(V[i][d]) : 1e-9;
-            soma += fabs(volta - V[i][d]) / den;
+            /* V já está ×S; re-escala para escalas[e] e volta */
+            long q = (V[i][d] * escalas[e] + (V[i][d] >= 0 ? S/2 : -(S/2))) / S;
+            long volta = (q * S + (q >= 0 ? escalas[e]/2 : -(escalas[e]/2))) / escalas[e];
+            long den = labs(V[i][d]) > 0 ? labs(V[i][d]) : 1;
+            soma += labs(volta - V[i][d]) * 1000000L / den;
             if(labs(q) > maior) maior = labs(q);
             cont++;
         }
-        erro_em[e] = soma/cont; maior_em[e] = maior;
-        printf("        %-12ld  %.6f                %ld\n", escalas[e], erro_em[e], maior);
+        erro_em[e] = (long)(soma / cont); maior_em[e] = maior;
+        printf("        %-12ld  %ld                %ld\n", escalas[e], erro_em[e], maior);
     }
     ok("o erro CAI quando a escala sobe — a quantização está a fazer o que devia",
        erro_em[5] < erro_em[0]);
@@ -171,21 +186,18 @@ static void secao_V2(void){
        erro_em[1] <= erro_em[0] && erro_em[2] <= erro_em[1] &&
        erro_em[3] <= erro_em[2] && erro_em[4] <= erro_em[3] && erro_em[5] <= erro_em[4]);
     ok("e o maior inteiro cabe na palavra do banco em todas as escalas testadas",
-       maior_em[5] < (1L<<62));
+       maior_em[5] < (1L << 62));
 
-    printf("     escolhida: 10000 — o erro é %.2e e o inteiro fica em %ld\n",
+    printf("     escolhida: 10000 — o erro é %ld×10⁻⁶ e o inteiro fica em %ld\n",
            erro_em[3], maior_em[3]);
 
     conclui("a escala não se escolheu: varreu-se, e o número saiu da varredura.");
 }
 
 /* ================================================================================ */
-/* §V3 — quanto fecha                                                               */
-/* ================================================================================ */
-
 static void quantiza(long escala){
     for(int d = 0; d < ND; d++) for(int i = 0; i < NV; i++)
-        QUANT[d][i] = lround(V[i][d] * (double)escala);
+        QUANT[d][i] = (V[i][d] * escala + (V[i][d] >= 0 ? S/2 : -(S/2))) / S;
 }
 
 static void secao_V3(void){
@@ -195,10 +207,9 @@ static void secao_V3(void){
     int fecham = 0, com_previsao = 0;
     long prev_ok = 0, prev_tot = 0;
     for(int d = 0; d < ND; d++){
-        Regua r = regua_de(QUANT[d], 4);          /* colhe n+2 = 4 da série desta dimensão */
+        Regua r = regua_de(QUANT[d], 4);
         if(!r.fechou) continue;
         fecham++;
-        /* e o que ele prevê nos INÉDITOS desta dimensão */
         long a = QUANT[d][2], b = QUANT[d][3];
         int acertou = 0, tentou = 0;
         for(int k = 4; k < NV; k++){
@@ -209,22 +220,14 @@ static void secao_V3(void){
         prev_ok += acertou; prev_tot += tentou;
         if(tentou && acertou == tentou) com_previsao++;
     }
-    double taxa = 100.0*fecham/ND;
+    long taxa100 = 100L * fecham / ND;
     printf("        dimensões               %d\n", ND);
-    printf("        fecham com 4 termos     %d   (%.2f%%)\n", fecham, taxa);
-    printf("        e preveem TODOS os %d inéditos   %d\n", NV-4, com_previsao);
+    printf("        fecham com 4 termos     %d   (%ld%%)\n", fecham, taxa100);
+    printf("        e preveem TODOS os %d inéditos   %d\n", NV - 4, com_previsao);
     printf("        acertos nos inéditos    %ld/%ld\n", prev_ok, prev_tot);
 
-    /* A AFIRMAÇÃO POSITIVA, e é ela que pode falhar: o doador NÃO é uma recorrência de grau 2.
-     * Se a taxa fosse alta, o embedding seria linearmente degenerado — e isso seria notícia má
-     * sobre o doador, não boa sobre nós. */
     ok("a taxa de fecho fica ABAIXO de 20% — o embedding não é uma recorrência de grau 2",
-       taxa < 20.0);
-    /* ESCREVI "e não é zero: alguma estrutura existe" e É ZERO. A asserção caiu e ainda bem —
-     * eu tinha posto uma esperança onde devia estar uma medida. E o zero é informativo: ao longo
-     * da ORDEM DAS FRASES não há recorrência nenhuma, o que faz todo o sentido, porque essa
-     * ordem fui EU que a escolhi ao escrever a lista. Nenhuma dimensão tem razão para ser
-     * função das frases anteriores numa ordem arbitrária. */
+       taxa100 < 20);
     printf("        e fecham ZERO — ao longo de uma ordem que eu inventei, e não há por que fechar\n");
     ok("é exatamente zero — a ordem das frases é minha, e não carrega estrutura do doador",
        fecham == 0);
@@ -233,86 +236,62 @@ static void secao_V3(void){
 }
 
 /* ================================================================================ */
-/* §V4 — o que se recupera: o critério clínico                                      */
-/* ================================================================================ */
-/* O fecho exato é um critério duro demais para um vetor real. O que interessa é se o corpo
- * transfundido reproduz a DIREÇÃO — porque é a direção que carrega o significado num embedding.
- * Reconstrói-se cada vetor a partir dos 4 termos colhidos por dimensão e mede-se o cosseno. */
 static void secao_V4(void){
     printf("\n§V4  O QUE SE RECUPERA — o cosseno entre o original e o reconstruído\n\n");
 
     quantiza(10000);
-    /* a reconstrução: por dimensão, se fecha usa-se a régua; se não fecha, guarda-se o valor
-     * quantizado. É isso que vai para o banco, e é isso que se compara com o original. */
-    
     int por_regua = 0, por_valor = 0;
     for(int d = 0; d < ND; d++){
         Regua r = regua_de(QUANT[d], 4);
         if(r.fechou){
             por_regua++;
             long a = QUANT[d][0], b = QUANT[d][1];
-            REC[0][d] = a/10000.0; REC[1][d] = b/10000.0;
+            REC[0][d] = a; REC[1][d] = b;
             for(int k = 2; k < NV; k++){
                 long p = r.B*b - r.C*a;
-                REC[k][d] = p/10000.0;
+                REC[k][d] = p;
                 a = b; b = p;
             }
         } else {
             por_valor++;
-            for(int k = 0; k < NV; k++) REC[k][d] = QUANT[d][k]/10000.0;
+            for(int k = 0; k < NV; k++) REC[k][d] = QUANT[d][k];
         }
     }
     printf("        dimensões pela RÉGUA    %d   (4 números cada)\n", por_regua);
     printf("        dimensões pelo VALOR    %d   (%d números cada)\n", por_valor, NV);
 
-    printf("\n        vetor   cosseno com o original\n");
-    double pior = 2.0, soma = 0;
+    printf("\n        vetor   cosseno² ≥ 0,999²?\n");
+    int pior_ok = 1, n_ok = 0;
     for(int i = 0; i < NV; i++){
-        double num = 0, na = 0, nb = 0;
-        for(int d = 0; d < ND; d++){ num += V[i][d]*REC[i][d]; na += V[i][d]*V[i][d]; nb += REC[i][d]*REC[i][d]; }
-        double cos = num / (sqrt(na)*sqrt(nb));
-        if(cos < pior) pior = cos;
-        soma += cos;
-        if(i < 6) printf("        %5d   %.8f\n", i, cos);
+        int bom = cos_gt_vecs(V[i], REC[i], ND, 999, 1000);
+        if(!bom) pior_ok = 0;
+        if(bom) n_ok++;
+        if(i < 6) printf("        %5d   %s\n", i, bom ? "sim" : "não");
     }
-    printf("        ...\n        pior    %.8f      média  %.8f\n", pior, soma/NV);
+    printf("        ...\n        passam %d/%d com cos > 0,999\n", n_ok, NV);
 
-    ok("o pior cosseno passa de 0,999 — a transfusão preserva a direção", pior > 0.999);
-    ok("e a média também — não é um vetor sortudo a puxar o resultado", soma/NV > 0.999);
+    ok("o pior cosseno passa de 0,999 — a transfusão preserva a direção", pior_ok);
+    ok("e a média também — não é um vetor sortudo a puxar o resultado", n_ok == NV);
 
-    /* E TEM DE SABER FALHAR: com uma quantização grosseira o cosseno cai. Se não caísse, o
-     * teste não estaria a medir a reconstrução — estaria a medir nada. */
     quantiza(2);
-    double pior2 = 2.0;
+    int pior2_cai = 0;
     for(int i = 0; i < NV; i++){
-        double num = 0, na = 0, nb = 0;
-        for(int d = 0; d < ND; d++){
-            double rec = QUANT[d][i]/2.0;
-            num += V[i][d]*rec; na += V[i][d]*V[i][d]; nb += rec*rec;
-        }
-        double cos = (nb > 0) ? num/(sqrt(na)*sqrt(nb)) : 0;
-        if(cos < pior2) pior2 = cos;
+        long rec[MAXD];
+        for(int d = 0; d < ND; d++) rec[d] = QUANT[d][i] * (S / 2);  /* escala 2 → ×S/2 */
+        if(cos_lt_vecs(V[i], rec, ND, 999, 1000)){ pior2_cai = 1; break; }
     }
-    printf("        com escala 2 (grosseira), o pior cosseno: %.6f\n", pior2);
-    ok("com quantização grosseira o cosseno CAI — logo o teste mede mesmo", pior2 < 0.999);
+    printf("        com escala 2 (grosseira), o pior cosseno cai abaixo de 0,999? %s\n",
+           pior2_cai ? "sim" : "não");
+    ok("com quantização grosseira o cosseno CAI — logo o teste mede mesmo", pior2_cai);
 
     conclui("o critério é clínico: não interessa se os números batem, interessa se o enxerto pega.");
 }
 
 /* ================================================================================ */
-/* §V6 — a hipótese CERTA: a recorrência ENTRE dimensões                            */
-/* ================================================================================ */
-/* O zero do §V3 não é um fim: é um diagnóstico. Procurei a recorrência ao longo das FRASES, numa
- * ordem que eu próprio inventei ao escrever a lista. A estrutura de um embedding, se existir,
- * está DENTRO do vetor — entre as 768 coordenadas, que o modelo produziu juntas.
- *
- * Então a mesma pergunta, virada 90 graus: numa janela de 4 coordenadas consecutivas de UM vetor,
- * há uma régua que prevê as seguintes? Varre-se o vetor inteiro, janela a janela. */
 static void secao_V6(void){
     printf("\n§V6  A HIPÓTESE CERTA: a recorrência ENTRE dimensões, não ao longo das frases\n\n");
 
     quantiza(10000);
-    /* por vetor, varrer janelas de 4 coordenadas e ver quantas fecham E preveem a 5ª */
     long janelas = 0, fecharam = 0, previram = 0;
     for(int i = 0; i < NV; i++){
         for(int d = 0; d + 4 < ND; d++){
@@ -327,25 +306,23 @@ static void secao_V6(void){
         }
     }
     printf("        janelas de 4 coordenadas testadas   %ld\n", janelas);
-    printf("        que fecham numa régua inteira       %ld   (%.3f%%)\n",
-           fecharam, 100.0*fecharam/janelas);
-    printf("        e que preveem a 5ª coordenada       %ld   (%.4f%% do total)\n",
-           previram, 100.0*previram/janelas);
+    printf("        que fecham numa régua inteira       %ld   (%ld‰)\n",
+           fecharam, janelas ? 1000L * fecharam / janelas : 0);
+    printf("        e que preveem a 5ª coordenada       %ld   (%ld‰ do total)\n",
+           previram, janelas ? 1000L * previram / janelas : 0);
 
     ok("há janelas a testar — a varredura correu", janelas > 10000);
 
-    /* E O CONTROLO, que é o que separa achado de acaso: as MESMAS janelas sobre valores
-     * baralhados. Se o vetor real não bater o baralhado, o que se achou foi acaso. */
     long *BAR = DISCO_FIXO(long, 94);
-    disco_prende(DISCO_BASE(94),"dados/BAR_94.bin",(size_t)((MAXD)),sizeof(long));
-    disco_zera(BAR,(size_t)((MAXD)),sizeof(long));
+    disco_prende(DISCO_BASE(94), "dados/BAR_94.bin", (size_t)(MAXD), sizeof(long));
+    disco_zera(BAR, (size_t)(MAXD), sizeof(long));
     long jb = 0, fb = 0, pb = 0;
     unsigned long semente = 12345;
     for(int i = 0; i < NV; i++){
         for(int d = 0; d < ND; d++) BAR[d] = QUANT[d][i];
-        for(int d = ND-1; d > 0; d--){                    /* Fisher-Yates determinista */
-            semente = semente*6364136223846793005UL + 1442695040888963407UL;
-            int j = (int)((semente >> 33) % (unsigned long)(d+1));
+        for(int d = ND - 1; d > 0; d--){
+            semente = semente * 6364136223846793005UL + 1442695040888963407UL;
+            int j = (int)((semente >> 33) % (unsigned long)(d + 1));
             long t = BAR[d]; BAR[d] = BAR[j]; BAR[j] = t;
         }
         for(int d = 0; d + 4 < ND; d++){
@@ -358,11 +335,9 @@ static void secao_V6(void){
         }
     }
     printf("\n        o CONTROLO — as mesmas coordenadas, baralhadas:\n");
-    printf("        fecham %ld (%.3f%%),  preveem %ld (%.4f%%)\n",
-           fb, 100.0*fb/jb, pb, 100.0*pb/jb);
+    printf("        fecham %ld (%ld‰),  preveem %ld (%ld‰)\n",
+           fb, jb ? 1000L * fb / jb : 0, pb, jb ? 1000L * pb / jb : 0);
 
-    /* A afirmação decidível: o vetor real prevê MAIS do que o baralhado? Se não previr, a
-     * ordem das dimensões também não carrega estrutura de grau 2 — e isso é o resultado. */
     printf("\n        real %ld  ×  baralhado %ld\n", previram, pb);
     if(previram > pb)
         printf("        a ORDEM das dimensões carrega alguma coisa\n");
@@ -376,8 +351,6 @@ static void secao_V6(void){
 }
 
 /* ================================================================================ */
-/* §V5 — o custo real                                                               */
-/* ================================================================================ */
 static void secao_V5(void){
     printf("\n§V5  O CUSTO REAL, em bytes\n\n");
 
@@ -386,22 +359,20 @@ static void secao_V5(void){
     for(int d = 0; d < ND; d++) if(regua_de(QUANT[d], 4).fechou) por_regua++;
     long por_valor = ND - por_regua;
 
-    long banco  = por_regua*4*16 + por_valor*(long)NV*16;
-    long bruto  = (long)ND * NV * 4;             /* float32 crus, como o doador os dá */
-    printf("        pela régua   %6ld dim × 4 termos × 16 B = %9ld B\n", por_regua, por_regua*4*16);
-    printf("        pelo valor   %6ld dim × %d termos × 16 B = %9ld B\n", por_valor, NV, por_valor*(long)NV*16);
-    printf("        no banco                                  %9ld B  (%.1f KB)\n", banco, banco/1024.0);
-    printf("        os %d vetores em float32                   %9ld B  (%.1f KB)\n", NV, bruto, bruto/1024.0);
-    printf("        a razão                                    %.2f×\n", (double)banco/bruto);
+    long banco = por_regua * 4 * 16 + por_valor * (long)NV * 16;
+    long bruto = (long)ND * NV * 4;
+    printf("        pela régua   %6ld dim × 4 termos × 16 B = %9ld B\n", por_regua, por_regua * 4 * 16);
+    printf("        pelo valor   %6ld dim × %d termos × 16 B = %9ld B\n", por_valor, NV, por_valor * (long)NV * 16);
+    printf("        no banco                                  %9ld B  (%ld KB)\n", banco, banco / 1024);
+    printf("        os %d vetores em float32                   %9ld B  (%ld KB)\n", NV, bruto, bruto / 1024);
+    printf("        a razão                                    %ld‰\n", bruto ? 1000L * banco / bruto : 0);
 
-    ok("o custo no banco é da ordem de dezenas de KB, e não de MB", banco < 1024L*1024);
+    ok("o custo no banco é da ordem de dezenas de KB, e não de MB", banco < 1024L * 1024);
 
-    /* E A HONESTIDADE QUE FALTA NA CONTA BONITA: com 20 vetores e só 6% de dimensões a fechar,
-     * o banco fica MAIOR do que os floats crus. A compressão do transfusao.c §X5 supunha que
-     * TODAS as dimensões fechavam — e no doador real quase nenhuma fecha. */
     printf("\n     E ISTO DESMENTE A MINHA CONTA ANTERIOR. O §X5 do transfusao.c disse 48 KB por\n");
     printf("     corpo, supondo que TODAS as 768 dimensões fecham com 4 termos. No doador real\n");
-    printf("     fecham %.1f%%, e o resto tem de ir por valor. A conta bonita era um LIMITE\n", 100.0*por_regua/ND);
+    printf("     fecham %ld‰, e o resto tem de ir por valor. A conta bonita era um LIMITE\n",
+           ND ? 1000L * por_regua / ND : 0);
     printf("     INFERIOR, não uma previsão — e eu apresentei-a como se fosse a medida.\n");
     ok("o banco ficou MAIOR que os floats crus — a conta anterior era um limite, não uma previsão",
        banco > bruto);
@@ -416,12 +387,12 @@ static void secao_V5(void){
 
 /* ================================================================================ */
 int main(int argc, char **argv){
-    disco_prende(DISCO_BASE(50),"dados/V.bin",(size_t)(MAXV)*(MAXD),sizeof(double));
-    disco_prende(DISCO_BASE(51),"dados/QUANT.bin",(size_t)(MAXD)*(MAXV),sizeof(long));
-    disco_prende(DISCO_BASE(52),"dados/REC.bin",(size_t)(MAXV)*(MAXD),sizeof(double));
-    disco_zera(V,(size_t)(MAXV)*(MAXD),sizeof(double));
-    disco_zera(QUANT,(size_t)(MAXD)*(MAXV),sizeof(long));
-    disco_zera(REC,(size_t)(MAXV)*(MAXD),sizeof(double));
+    disco_prende(DISCO_BASE(50), "dados/V.bin", (size_t)(MAXV) * (MAXD), sizeof(long));
+    disco_prende(DISCO_BASE(51), "dados/QUANT.bin", (size_t)(MAXD) * (MAXV), sizeof(long));
+    disco_prende(DISCO_BASE(52), "dados/REC.bin", (size_t)(MAXV) * (MAXD), sizeof(long));
+    disco_zera(V, (size_t)(MAXV) * (MAXD), sizeof(long));
+    disco_zera(QUANT, (size_t)(MAXD) * (MAXV), sizeof(long));
+    disco_zera(REC, (size_t)(MAXV) * (MAXD), sizeof(long));
     const char *cam = acha(argc > 1 ? argv[1] : NULL);
     if(!cam || !carrega(cam)){
         printf("NAO MEDIU — sem vetores do doador.\n");

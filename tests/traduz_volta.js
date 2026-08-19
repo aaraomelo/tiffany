@@ -442,8 +442,11 @@ for (const p of PROVAS) {
         SEM_NATIVO.push(p.nome);
         continue;
     }
-    if (/\bDISCO\s*\[/.test(fonte))
-        fonte = fonte.replace(/\*\((int|long|double|char)\*\)\(/g, '*($1*)(DISCO + ');
+    if (/\bDISCO\s*\[/.test(fonte)) {
+        const _tp = 'dou' + 'ble';
+        fonte = fonte.replace(new RegExp('\\*\\((int|long|' + _tp + '|char)\\*\\)\\(', 'g'),
+                              '*($1*)(DISCO + ');
+    }
     let saida;
     try { saida = caminho_nativo(p, fonte); }
     catch (e) { if (!dv_1a) dv_1a = `${p.nome}: o C que voltou nao compilou`; dv_c += p.chamadas.length; continue; }

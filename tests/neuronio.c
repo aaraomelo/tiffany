@@ -13,11 +13,12 @@
  *   ⊘ esquilo  A_n⁻¹ (×σ'=÷σ):   c_j = d_{j+1},  c_{n-1} = d_0 − m·d_1   — desce (deconvolução)
  *
  * Uso: ./neuronio CAMINHO [m] [K] [N]     (m=metal=1, K=altura temporal=12, N=dim máxima=8)
+ *   cc -O2 -std=c99 -Wall -I lib tests/neuronio.c -o neuronio
  */
 #include <stdio.h>
 #include "unidade.h"
+#include "reta.h"
 #include <stdlib.h>
-#include <math.h>
 
 static const char *metal(long m) {
     switch (m) { case 1: return "ouro (φ)"; case 2: return "prata"; case 3: return "bronze"; default: return "metal m"; }
@@ -51,15 +52,15 @@ int main(int argc, char **argv)
         for (int p = 0; p < 8; p++) b[p] += (ch >> p) & 1;   /* ∑ o Kirchhoff: bits por posição */
     fclose(f);
 
-    double s = (m + sqrt((double)m*m + 4)) / 2, sl = -1.0/s;
-    printf("metal m=%ld (%s): NEGRO σ=%.6f (sobe, ×σ) · BRANCO σ'=−1/σ=%.6f (desce, ×σ') · σσ'=%.1f\n",
-           m, metal(m), s, sl, s*sl);
+    printf("metal m=%ld (%s): NEGRO sobe (×σ) · BRANCO desce (×σ') · traço=%ld · σσ'=-1\n",
+           m, metal(m), rt_traco_metalico(m, 1));
 
     /* torre TEMPORAL: o gato Aᵏ·c em R², a razão → σ (o negro, o sorvedouro) */
-    printf("torre temporal (gato Aᵏ, R², a razão → σ):\n");
+    printf("torre temporal (gato Aᵏ, R², a razão c[0]/c[1] → σ):\n");
     long c[8]; c[0] = b[0]+b[2]+b[4]+b[6]; c[1] = b[1]+b[3]+b[5]+b[7];   /* ⊕ pares, ímpares */
     for (int k = 0; k <= K; k++) {
-        printf("  k=%-2d [%ld,%ld] %.9f\n", k, c[0], c[1], c[1] ? (double)c[0]/c[1] : 0.0);
+        if(c[1]) printf("  k=%-2d [%ld,%ld] %ld/%ld\n", k, c[0], c[1], c[0], c[1]);
+        else       printf("  k=%-2d [%ld,%ld] —\n", k, c[0], c[1]);
         gato_n(c, 2, m);
     }
 

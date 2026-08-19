@@ -19,49 +19,39 @@
  * transformação (fraca). "A multiplicação nunca se separou em quatro: era uma só, com quatro modos
  * de manifestação dependentes da configuração local."
  *
- * E É EXATAMENTE O QUE O AARÃO DISSE DO TAO, o que fecha este ficheiro com o `fator.c` de hoje:
- *
  *     S = ‖a×b‖²         é o CRUZADO ao quadrado — o mesmo do fator de potência
  *     s                  é o DIRETO — e Π = 1−s² é o cruzado, porque s² + Π = 1
  *     Π + s² = 1         É cos²θ + sin²θ = 1, a identidade do círculo, e não uma parecença
- *
- * Daí sai a correspondência que este ficheiro existe para medir, e que nenhum dos dois estudos
- * tinha porque foram escritos separados:
  *
  *     s = 0    Π = 1    álgebra COMUTATIVA, compressão máxima   ↔   fp = 0   ortogonal, posto cheio
  *     |s| = 1  Π = 0    QUATERNIOS, sem compressão              ↔   fp = 1   paralelo, posto 1
  *     |s| > 1  Π < 0    além do horizonte                       ↔   a HIPÉRBOLE, a família real
  *
- * A última linha é a que eu não esperava: passar o horizonte |s| = 1 torna a pressão NEGATIVA, e
- * pressão negativa é o regime Δ > 0 do `polar.c` — a hipérbole, onde vive a família real e onde a
- * razão é tanh em vez de tan (`fator.c` §W3). *O horizonte da mecânica algébrica é a fronteira
- * entre o círculo e a hipérbole*, e os dois estudos chegaram-lhe por lados opostos.
- *
- *   §G1  as QUATRO direções, e a mesma equação nas quatro: ẍ = 2x
+ *   §G1  as QUATRO direções, e a mesma equação nas quatro: ẍ = 2x  (o mapa, não Euler)
  *   §G2  o imposto FATORIZA: Π só depende da posição, S só dos operandos
  *   §G3  Π + s² = 1 é a identidade do círculo — a pressão É o cruzado
- *   §G4  o horizonte |s| = 1: onde a pressão troca de sinal, e o círculo vira hipérbole
- *   §G5  a conservação, e a força F = 2sS como direto × cruzado
- *   §G6  as quatro forças são quatro MODOS — e o que as separa é a configuração, não a lei
+ *   §G4  o horizonte |s| = 1: onde a pressão troca de SINAL, e o círculo vira hipérbole
+ *   §G5  a conservação, W = −ΔV = ΔT na mesma trajectória (v² − 2s² constante)
+ *   §G6  as quatro forças são quatro MODOS — o que as separa é a configuração, não a lei
  *   §G7  e o SINAL da involução: sem ele não gira, e o dual é só isso
  *
- *   cc -O2 -std=c99 -I. forca.c -lm -o forca && ./forca
+ * LEI vs TRANSPORTE. Euler contra cosh(√2 t), quadro cos/sin, 2e6 passos e √(−Π)/|s|<1
+ * eram o método. A lei é o mapa SL(2,ℤ) com a=+2 (D>0, foge) e a=−2 (período 4), Lagrange
+ * em ℤ, o SINAL de Π = 1−s², e W=−ΔV=ΔT com v²−2s² constante. Sem uma raiz e sem integrar.
+ *
+ *   cc -O2 -std=c99 -I lib tests/forca.c -o forca && ./forca
  */
-#define _USE_MATH_DEFINES   /* M_PI: -std=c99 estrito não o expõe */
 #include <stdio.h>
-#include <string.h>
-#include <math.h>
-#include "reta.h"      /* Dir e Cruz: a operação */
+#include "reta.h"
 #include "unidade.h"
 
-/* o produto cruzado do R³, que é onde S = ‖a×b‖² se escreve sem rodeios */
-static void cruz(const double *a, const double *b, double *c){
-    c[0] = a[1]*b[2] - a[2]*b[1];
-    c[1] = a[2]*b[0] - a[0]*b[2];
-    c[2] = a[0]*b[1] - a[1]*b[0];
+/* o MAPA simplético de passo 1: v += a·s ; s += v. det = 1 sempre.
+ * a = +2  hiperbólico (foge).  a = −2  elíptico, período 4 (gira).
+ * É o mesmo de corpo_fisico.c §H7 — a equação, não o integrador. */
+static void passo(long *s, long *v, long a){
+    *v += a * (*s);
+    *s += *v;
 }
-static double nrm2(const double *v){ return v[0]*v[0] + v[1]*v[1] + v[2]*v[2]; }
-static double dot(const double *a, const double *b){ return a[0]*b[0]+a[1]*b[1]+a[2]*b[2]; }
 
 int main(void){
 printf("\n=== A FORÇA É UMA SÓ: O IMPOSTO ALGÉBRICO, E O PAR DIRETO/CRUZADO ========\n");
@@ -70,7 +60,7 @@ printf("    é a identidade do círculo — a pressão É o cruzado, e s é o di
 
 /* O CONTRATO DO CRUZADO, que nenhuma asserção tocava: um gerador de mutações trocou o sinal
  * em c[2] = a[0]b[1] − a[1]b[0] e o medidor ficou verde. O que define o produto cruzado são
- * duas identidades, e as duas são EXATAS com vetores inteiros — sem uma tolerância:
+ * duas identidades, e as duas são EXATAS com vetores inteiros:
  *   perpendicularidade   <a×b, a> = <a×b, b> = 0
  *   Lagrange             ‖a×b‖² + <a,b>² = ‖a‖²‖b‖²   (é o Π + s² = 1 deste ficheiro,
  *                                                       antes de normalizar) */
@@ -78,12 +68,6 @@ printf("    é a identidade do círculo — a pressão É o cruzado, e s é o di
     long perp = 0, lagr = 0, pares = 0, nao_nulos = 0;
     for(long ax=-2; ax<=2; ax++) for(long ay=-2; ay<=2; ay++) for(long az=-2; az<=2; az++)
     for(long bx=-2; bx<=2; bx++) for(long by=-2; by<=2; by++) for(long bz=-2; bz<=2; bz++){
-        /* CHAMA-SE A OPERAÇÃO DA LIB, e não se repete a fórmula aqui: um teste que
-         * recalcula o que devia testar mede a sua própria cópia. E chama-se a INTEIRA:
-         * os vectores são inteiros, o cruzado é inteiro, e o que aqui estava convertia
-         * para double, chamava o cruz() local e convertia de volta — uma viagem de ida e
-         * volta justificada com «o double representa exactamente». Representa; mas a
-         * operação inteira existe, e não precisa de ser representada. */
         long A[3] = {ax, ay, az}, B[3] = {bx, by, bz}, C[3];
         rt_cruz3(A, B, C);
         long c0 = C[0], c1 = C[1], c2 = C[2];
@@ -106,192 +90,118 @@ printf("    é a identidade do círculo — a pressão É o cruzado, e s é o di
 
     printf("\n§G1  As QUATRO direções, e a MESMA equação nas quatro: ẍ = 2x.\n\n");
 {
-    /* Mesma lei que corpo_fisico.c §H3: mede-se convergência de ordem de Euler contra a
-     * forma fechada — não «erro pequeno», mas «erro CAI com h na razão ≈10». */
-    printf("      direção   h        x(1) numérico   x(1) fechado     razão\n");
+    /* Euler contra cosh(√2 t) era transporte. A lei é UM operador nas quatro: T₂ em
+     * SL(2,ℤ), D>0. O controlo s̈=3s (T₃) tem det=1 também, mas a órbita é OUTRA — e
+     * é outra nas quatro direcções. Δv=2s era a definição do passo relida. */
+    RtOp T2 = {{ 3, 1, 2, 1 }}, T3 = {{ 4, 1, 3, 1 }};
+    long det2 = rt_op_det(&T2), tr2 = T2.T[0] + T2.T[3], D2 = tr2*tr2 - 4*det2;
+    long det3 = rt_op_det(&T3);
     const char *nome[] = {"p","r","t","s"};
-    double x0[] = {0.3, -0.5, 0.8, 0.2}, v0[] = {0.1, 0.4, -0.2, 0.6};
-    long caiu = 0, ordem = 0, niveis = 0;
-    double ant = 0;
-    const double r2 = sqrt(2.0);
-    for(int e = 4; e <= 6; e++){
-        double h = pow(10.0, -e);
-        double pior = 0;
-        for(int d = 0; d < 4; d++){
-            double x = x0[d], v = v0[d];
-            for(long i = 0; i < (long)(1.0/h + 0.5); i++){ v += 2*x*h; x += v*h; }
-            double fech = x0[d]*cosh(r2) + (v0[d]/r2)*sinh(r2);
-            double dif = fabs(x - fech);
-            if(dif > pior) pior = dif;
-        }
-        double razao = ant > 0 && pior > 0 ? ant/pior : 0;
-        niveis++;
-        if(ant > 0 && pior < ant) caiu++;
-        if(razao > 5 && razao < 20) ordem++;
-        printf("      todas     1e-%d    pior=%.3e              —           %s\n", e, pior,
-               ant > 0 ? (razao > 5 && razao < 20 ? "≈10 (1.ª ordem)" : "FORA") : "—");
-        ant = pior;
+    long s0[] = { 3, -5, 8, 2 }, v0[] = { 1, 4, -2, 6 };
+    int outra = 0;
+    printf("      dir   s₀   v₀     s após a=2    s após a=3    distintas?\n");
+    for(int d = 0; d < 4; d++){
+        long s2 = s0[d], v2 = v0[d], s3 = s0[d], v3 = v0[d];
+        for(int n = 0; n < 3; n++){ passo(&s2, &v2, 2); passo(&s3, &v3, 3); }
+        if(s2 != s3) outra++;
+        printf("      %-3s  %+3ld  %+3ld    %+8ld      %+8ld      %s\n",
+               nome[d], s0[d], v0[d], s2, s3, s2 != s3 ? "sim" : "NÃO");
     }
-    printf("\n      %ld níveis: erro caiu em %ld · razão de 1.ª ordem em %ld\n\n",
-           niveis, caiu, ordem);
-    ok("as quatro direções seguem a MESMA equação ẍ = 2x — medido pela convergência de"
-       " Euler contra cosh(√2 t), e a tese é que o erro CAI COM h na razão ≈10, não que"
-       " |dif| < 1e-4",
-       caiu == 2 && ordem == 2 && niveis == 3);
+    printf("      T₂ det=%ld D=%ld;  T₃ det=%ld\n\n", det2, D2, det3);
+    ok("as quatro direções seguem a MESMA equação ẍ = 2x — um operador SL(2,ℤ), D>0;"
+       " o controlo s̈=3s tem det=1 também, mas a órbita é OUTRA nas quatro. Euler"
+       " contra cosh era o método",
+       outra == 4 && det2 == 1 && D2 > 0 && det3 == 1 && rt_op_valido(&T2));
     printf("      Não são quatro leis com a mesma forma: é uma, e o índice é a direção. É o que\n");
     printf("      o teorema da unificação diz — a multiplicação nunca se separou em quatro.\n");
 }
 
 printf("\n§G2  O imposto FATORIZA: Π só depende da posição, S só dos operandos.\n\n");
 {
-    /* V = Pi(s)*S(a,b). A fatorizacao e' o que da' sentido a "pressao" e "seccao" como coisas
-     * separadas, e mede-se assim: variar s com (a,b) FIXOS tem de mudar V so' pelo fator Pi; e
-     * variar (a,b) com s fixo tem de mudar V so' pelo fator S. Se houvesse acoplamento, a razao
-     * V/(Pi*S) nao seria constante — mede-se que e' 1 em toda a grelha. */
-    double pior = 0; int n = 0;
-    printf("      s      a×b            Π = 1−s²    S = ‖a×b‖²   V = Π·S     V/(Π·S)\n");
-    for(int is = -2; is <= 2; is++){
-        double s = is*0.4;
-        for(int k = 1; k <= 3; k++){
-            double a[3] = {1.0, 0.3*k, -0.2}, b[3] = {0.5, -0.4, 0.7*k}, c[3];
-            cruz(a, b, c);
-            double S = nrm2(c), Pi = 1 - s*s, V = Pi*S;
-            /* `razao` era V/(Pi·S) com V DEFINIDO como Pi·S duas expressões antes: dividia
-             * uma quantidade por si própria e dava 1, e o `pior < 1e-15` mediria só o
-             * arredondamento dessa divisão. «Fatoriza exactamente» não é uma medida — é a
-             * linha de cima relida. O que tem conteúdo está no parágrafo seguinte, e é a
-             * CONSEQUÊNCIA: sem cruzado não há imposto. Mede-se abaixo. */
-            double razao = 1.0;
-            (void)razao;
-            if(n < 5) printf("      %-6.2f (%.2f,%.2f,%.2f)  %-11.4f %-12.4f %-11.4f %.6f\n",
-                             s, c[0], c[1], c[2], Pi, S, V, razao);
-            n++;
-        }
-    }
-    /* A TESE COM CONTEÚDO: se a×b = 0 — campos paralelos — então S = 0 e o imposto
-     * DESAPARECE; e se a×b ≠ 0, ele existe. As duas metades, porque «desaparece» sozinho
-     * valeria por nunca haver imposto nenhum. E o zero é EXACTO: o cruzado de paralelos
-     * subtrai termos idênticos bit a bit. */
+    /* V = Π(s)·S(a,b). «V/(Π·S) = 1» é a definição relida. A tese com conteúdo: se
+     * a×b = 0 — campos paralelos — então S = 0 e o imposto DESAPARECE; e se a×b ≠ 0,
+     * ele existe. O zero é EXACTO: o cruzado de paralelos subtrai termos idênticos. */
     int par_zero = 0, par_tot = 0, nao_par_v = 0, nao_par_tot = 0;
+    printf("      k     a              b∥              S∥    b×              S×\n");
     for(int k = 1; k <= 6; k++){
-        double a[3] = {1.0, 0.3*k, -0.2};
-        double bp[3] = {2.0, 0.6*k, -0.4};              /* PARALELO a `a` (o dobro) */
-        double bn[3] = {0.5, -0.4, 0.7*k};              /* não paralelo */
-        double c1[3], c2[3];
-        cruz(a, bp, c1);  cruz(a, bn, c2);
-        double S1 = nrm2(c1), S2 = nrm2(c2), Pi = 1 - 0.4*0.4;
-        par_tot++;      if(Pi*S1 == 0.0) par_zero++;
-        nao_par_tot++;  if(Pi*S2 != 0.0) nao_par_v++;
+        long a[3]  = { 10, 3*k, -2 };
+        long bp[3] = { 20, 6*k, -4 };                /* PARALELO a `a` (o dobro) */
+        long bn[3] = {  5, -4,  7*k };               /* não paralelo */
+        long c1[3], c2[3];
+        rt_cruz3(a, bp, c1);  rt_cruz3(a, bn, c2);
+        long S1 = rt_norma(c1, 3), S2 = rt_norma(c2, 3);
+        long Pi = 100 - 4*4;                         /* s = 4/10, Π em centésimos² */
+        par_tot++;      if(Pi * S1 == 0) par_zero++;
+        nao_par_tot++;  if(Pi * S2 != 0) nao_par_v++;
+        printf("      %-5d (%ld,%ld,%ld)  (%ld,%ld,%ld)  %ld    (%ld,%ld,%ld)  %ld\n",
+               k, a[0],a[1],a[2], bp[0],bp[1],bp[2], S1, bn[0],bn[1],bn[2], S2);
     }
-    printf("      …\n\n      %d pontos varridos\n", n);
-    printf("      com a×b = 0 (paralelos) o imposto ZERA, exacto: %d de %d\n", par_zero, par_tot);
+    printf("\n      com a×b = 0 (paralelos) o imposto ZERA, exacto: %d de %d\n", par_zero, par_tot);
     printf("      e com a×b ≠ 0 ele EXISTE: %d de %d — o contraste é que mede\n\n",
            nao_par_v, nao_par_tot);
     ok("SEM CRUZADO NÃO HÁ IMPOSTO: com os campos paralelos a×b anula-se e V = Π·S zera"
        " EXACTAMENTE — o cruzado de paralelos subtrai termos idênticos bit a bit —, e com"
-       " eles não paralelos o imposto existe. A asserção que aqui estava media V/(Π·S) com V"
-       " definido como Π·S: dividia uma quantidade por si própria",
+       " eles não paralelos o imposto existe",
        par_tot > 0 && par_zero == par_tot && nao_par_v == nao_par_tot);
-    (void)pior;
     printf("      E a consequência está no paper: se a×b = 0 — mesmo campo local — então S = 0 e\n");
     printf("      o imposto DESAPARECE. Sem cruzado não há imposto: é o cruzado que se paga.\n");
 }
 
 printf("\n§G3  Π + s² = 1 É a identidade do círculo — a pressão é o CRUZADO.\n\n");
 {
-    /* O elo com o fator.c, e o que faz destes dois estudos um so'. Se s e' o direto (cos) entao
-     * Pi = 1 - s^2 e' sin^2, o cruzado ao quadrado. Mede-se de duas maneiras que tem de bater:
-     * (a) pela definicao Pi = 1-s^2; (b) pelo cruzado real de dois vetores UNITARIOS com esse
-     * cosseno. Se batem, nao e' analogia — e' a mesma identidade. */
-    printf("      θ        s = cos θ   Π = 1−s²   sin²θ (cruzado²)   |dif|\n");
-    double pior = 0;
-    for(int i = 0; i <= 6; i++){
-        double th = i*(3.14159265358979323846)/12.0;
-        double s = cos(th), Pi = 1 - s*s;
-        /* o cruzado REAL de dois unitários separados por θ, no plano xy */
-        double a[3] = {1,0,0}, b[3] = {cos(th), sin(th), 0}, c[3];
-        cruz(a,b,c);
-        double cr2 = nrm2(c);              /* = sin²θ para unitários */
-        double dif = fabs(Pi - cr2);
-        if(dif > pior) pior = dif;
-        printf("      %-8.4f %-11.6f %-10.6f %-18.6f %.2e\n", th, s, Pi, cr2, dif);
-    }
-    printf("\n      pior diferença: %.3e\n\n", pior);
-    /* E A IDENTIDADE É EXACTA, SEM ÂNGULO NENHUM. O quadro acima toma θ, calcula cos e
-     * sin, e compara Π com o cruzado² a menos de 1e-15 — mas «Π + s² = 1» é LAGRANGE
-     * normalizado, e o §F1 deste ficheiro já o mede em ℤ com resíduo ZERO:
-     *
-     *      ‖a×b‖² + ⟨a,b⟩² = ‖a‖²·‖b‖²
-     *
-     * Basta não dividir. Com s = ⟨a,b⟩/(‖a‖‖b‖), a pressão Π = 1 − s² multiplicada pelo
-     * denominador comum ‖a‖²‖b‖² dá exactamente ‖a×b‖²:
-     *
-     *      Π·‖a‖²‖b‖²  =  ‖a‖²‖b‖² − ⟨a,b⟩²  =  ‖a×b‖²
-     *
-     * — a mesma frase, em inteiros e sem uma divisão. O cosseno era o preço de ter
-     * normalizado antes de medir. */
-    {
-        long ok_lag = 0, pares = 0, vivos = 0;
-        for(long t = 0; t < 400; t++){
-            long a[3], b[3], c[3];
-            for(int i = 0; i < 3; i++){
-                a[i] = ((t*7 + i*3) % 11) - 5;
-                b[i] = ((t*5 + i*2) % 9)  - 4;
-            }
-            rt_cruz3(a, b, c);
-            long na = rt_norma(a, 3), nb = rt_norma(b, 3);
-            long dir = rt_dir(a, b, 3), cru = rt_norma(c, 3);
-            pares++;
-            /* Π·‖a‖²‖b‖² = ‖a‖²‖b‖² − ⟨a,b⟩², e isso É ‖a×b‖² */
-            if(na*nb - dir*dir == cru) ok_lag++;
-            if(cru) vivos++;                      /* e o cruzado não é nulo */
+    /* Π + s² = 1 é LAGRANGE sem dividir. Com s = ⟨a,b⟩/(‖a‖‖b‖), a pressão Π = 1 − s²
+     * multiplicada pelo denominador comum ‖a‖²‖b‖² dá exactamente ‖a×b‖². O cosseno
+     * era o preço de ter normalizado antes de medir. */
+    long ok_lag = 0, pares = 0, vivos = 0;
+    for(long t = 0; t < 400; t++){
+        long a[3], b[3], c[3];
+        for(int i = 0; i < 3; i++){
+            a[i] = ((t*7 + i*3) % 11) - 5;
+            b[i] = ((t*5 + i*2) % 9)  - 4;
         }
-        printf("      e em INTEIROS, sem ângulo: Π·‖a‖²‖b‖² = ‖a‖²‖b‖² − ⟨a,b⟩² = ‖a×b‖²\n");
-        printf("      em %ld de %ld pares, com o cruzado não nulo em %ld — resíduo ZERO\n\n",
-               ok_lag, pares, vivos);
-        ok("A PRESSÃO ALGÉBRICA É O CRUZADO AO QUADRADO — Π + s² = 1 É cos² + sin² = 1, e"
-           " isto é LAGRANGE, que este ficheiro já media em ℤ no §F1 com resíduo zero. O"
-           " quadro acima toma θ, calcula cos e sin e compara a menos de 1e-15; mas basta"
-           " NÃO DIVIDIR: com s = ⟨a,b⟩/(‖a‖‖b‖), a pressão Π = 1 − s² multiplicada pelo"
-           " denominador comum ‖a‖²‖b‖² dá exactamente ‖a×b‖². A mesma frase, em inteiros e"
-           " sem uma divisão — o cosseno era o preço de ter normalizado antes de medir",
-           ok_lag == pares && vivos > pares/2 && pares == 400);
+        rt_cruz3(a, b, c);
+        long na = rt_norma(a, 3), nb = rt_norma(b, 3);
+        long dir = rt_dir(a, b, 3), cru = rt_norma(c, 3);
+        pares++;
+        if(na*nb - dir*dir == cru) ok_lag++;
+        if(cru) vivos++;
     }
-    printf("      Logo o imposto do hiper e o fator de potência de hoje são a mesma decomposição:\n");
+    printf("      Π·‖a‖²‖b‖² = ‖a‖²‖b‖² − ⟨a,b⟩² = ‖a×b‖²\n");
+    printf("      em %ld de %ld pares, com o cruzado não nulo em %ld — resíduo ZERO\n\n",
+           ok_lag, pares, vivos);
+    ok("A PRESSÃO ALGÉBRICA É O CRUZADO AO QUADRADO — Π + s² = 1 É cos² + sin² = 1, e"
+       " isto é LAGRANGE em ℤ com resíduo zero. Basta NÃO DIVIDIR: o cosseno era o preço"
+       " de ter normalizado antes de medir",
+       ok_lag == pares && vivos > pares/2 && pares == 400);
+    printf("      Logo o imposto do hiper e o fator de potência são a mesma decomposição:\n");
     printf("      s é o DIRETO (mede), Π é o CRUZADO (ordena), e V = Π·S é o que o cruzado custa.\n");
 }
 
 printf("\n§G4  O HORIZONTE |s| = 1: onde a pressão troca de sinal, e o círculo vira hipérbole.\n\n");
 {
-    /* E aqui esta' o que nenhum dos dois estudos tinha, porque foram escritos separados. O paper_A
-     * diz: "para |s| > 1 a pressao e' negativa — a norma do produto supera o produto das normas.
-     * Horizonte em |x| = 1 para cada direcao." O polar.c diz: Delta<0 circulo (tan, ilimitada),
-     * Delta>0 hiperbole (tanh, limitada). Mede-se que o horizonte E' a fronteira entre os dois:
-     * dentro, Pi>0 e a razao e' tan; fora, Pi<0 e a razao e' tanh. */
-    printf("      s       Π = 1−s²    regime        razão      limitada?\n");
-    int dentro = 0, fora = 0, mau = 0;
-    double s_[] = {0.0, 0.5, 0.9, 1.0, 1.1, 1.5, 2.0};
+    /* √(−Π)/|s| < 1 para |s|>1 é sempre verdade — tautologia. A lei é o SINAL de Π:
+     * Π = 1 − s², em décimos s_z, Π_z = 100 − s_z². Dentro Π>0 (círculo), no horizonte
+     * Π=0, fora Π<0 (hipérbole). */
+    printf("      s_z/10    Π = 100−s_z²    regime (pelo SINAL de Π)\n");
+    long s_z[] = { 0, 5, 9, 10, 11, 15, 20 };
+    int dentro = 0, fora = 0, horiz = 0, mau = 0;
     for(int i = 0; i < 7; i++){
-        double s = s_[i], Pi = 1 - s*s;
-        int circ = (Pi > 0), lim;
-        double razao;
-        if(circ){
-            /* círculo: s = cos θ, razão = tan θ = √Π/s — diverge quando s→0 */
-            razao = ((long long)(fabs(s) * 1e12) >= 1) ? sqrt(Pi)/fabs(s) : INFINITY;
-            lim = 0; dentro++;
+        long sz = s_z[i], Pi = 100 - sz*sz;
+        const char *reg;
+        if(Pi > 0){
+            reg = "círculo";    dentro++; if(sz >= 10) mau++;
         } else if(Pi < 0){
-            /* hipérbole: s = cosh u, razão = tanh u = √(−Π)/s — limitada por 1 */
-            razao = sqrt(-Pi)/fabs(s);
-            lim = (razao < 1.0); fora++;
-            if(!lim) mau++;
-        } else { razao = 0; lim = 1; }
-        printf("      %-7.2f %-11.4f %-13s %-10.4f %s\n", s, Pi,
-               Pi > 0 ? "círculo" : (Pi < 0 ? "HIPÉRBOLE" : "o horizonte"),
-               razao, circ ? "não (tan)" : (Pi < 0 ? "sim (tanh)" : "—"));
+            reg = "HIPÉRBOLE";  fora++;   if(sz <= 10) mau++;
+        } else {
+            reg = "o horizonte"; horiz++; if(sz != 10) mau++;
+        }
+        printf("      %-9ld %-16ld %s\n", sz, Pi, reg);
     }
     printf("\n");
-    ok("dentro do horizonte a pressão é positiva: é o círculo", dentro >= 3);
-    ok("FORA do horizonte a pressão é negativa e a razão é limitada — é a hipérbole", fora >= 3 && mau == 0);
+    ok("dentro do horizonte a pressão é positiva: é o círculo",
+       dentro == 3 && mau == 0);
+    ok("FORA do horizonte a pressão é negativa — é a hipérbole — e no |s|=1 ela ZERA",
+       fora == 3 && horiz == 1 && mau == 0);
     printf("      Portanto o horizonte |s| = 1 do paper_A É a fronteira Δ = 0 do polar.c, e os dois\n");
     printf("      estudos chegaram-lhe por lados opostos sem se encontrarem. E do lado de fora vive\n");
     printf("      a FAMÍLIA REAL, que o fator.c §W2 mostrou ser toda hiperbólica.\n");
@@ -299,110 +209,101 @@ printf("\n§G4  O HORIZONTE |s| = 1: onde a pressão troca de sinal, e o círcul
 
 printf("\n§G5  A CONSERVAÇÃO, e a força F = 2sS como direto × cruzado.\n\n");
 {
-    /* A lei de conservacao: E = ½Sṡ² + (1−s²)S. Com F = 2sS e m = S, a tese NÃO é «Euler
-     * não deriva a energia» — isso mede o integrador. A tese é ALGÉBRICA: F = −dV/ds com
-     * V = (1−s²)S, e na mesma trajectória W = −ΔV = ΔT via v² − 2s² = const (corpo_fisico §H4). */
-    double a[3] = {1.0, 0.4, -0.2}, b[3] = {0.3, -0.6, 0.8}, c[3];
-    cruz(a,b,c);
-    double S = nrm2(c);
-    double s0 = 0.2, v0 = 0.1;
-    double V0 = (1 - s0*s0)*S, T0 = 0.5*S*v0*v0, E0 = T0 + V0;
-    printf("      S = ‖a×b‖² = %.6f,  s₀ = %.2f,  ṡ₀ = %.2f,  E₀ = %.6f\n\n", S, s0, v0, E0);
-    int F_ok = 1;
-    for(int k = -20; k <= 20; k++){
-        double s = k * 0.05;
-        double F = 2*s*S, menos_dV = -(-2*s*S);
-        if(F != menos_dV) F_ok = 0;
-    }
-    long tri_ok = 0, tri_tot = 0;
-    long Si = (long)(S + 0.5);
+    /* F = −(−2sS) é a definição relida. A tese é ALGÉBRICA: na mesma trajectória
+     * W = −ΔV = ΔT via v² − 2s² = const (corpo_fisico §H4). E F anula-se nos DOIS
+     * lados: s = 0 (ortogonal) e S = 0 (mesmo campo). */
+    long A[3] = { 10, 4, -2 }, B[3] = { 3, -6, 8 }, C[3];
+    rt_cruz3(A, B, C);
+    long Si = rt_norma(C, 3);
     if(Si <= 0) Si = 1;
+    printf("      S = ‖a×b‖² = %ld\n\n", Si);
+    long tri_ok = 0, tri_tot = 0;
     for(long s_a = -6; s_a <= 6; s_a++) for(long v_a = -6; v_a <= 6; v_a++)
     for(long s_b = -6; s_b <= 6; s_b++) for(long v_b = -6; v_b <= 6; v_b++){
         if(v_a*v_a - 2*s_a*s_a != v_b*v_b - 2*s_b*s_b) continue;
         if(s_a == s_b && v_a == v_b) continue;
         long Wz  = Si*(s_b*s_b - s_a*s_a);
-        long mdV = Si*(s_b*s_b - s_a*s_a);
         long dTx2 = Si*(v_b*v_b - v_a*v_a);
         tri_tot++;
-        if(Wz == mdV && 2*Wz == dTx2) tri_ok++;
+        if(2*Wz == dTx2) tri_ok++;
     }
-    printf("      F = 2sS = −dV/ds em 41 pontos: %s\n", F_ok ? "sim" : "não");
-    printf("      W = −ΔV = ΔT em ℤ (v²−2s² constante): %ld de %ld pares\n\n", tri_ok, tri_tot);
-    ok("a energia conserva-se: F = 2sS com m = S é a força certa — F = −dV/ds exacto e"
-       " W = −ΔV = ΔT na mesma trajectória, sem integrador nem limiar",
-       F_ok && tri_tot > 0 && tri_ok == tri_tot);
+    int anula_s = 0, anula_S = 0, n_s = 0, n_S = 0;
+    for(long s = -5; s <= 5; s++){
+        long F = 2 * s * Si;
+        n_s++;
+        if(s == 0){ if(F == 0) anula_s++; }
+        else      { if(F != 0) anula_s++; }
+    }
+    for(long S = 0; S <= 5; S++){
+        long F = 2 * 3 * S;                          /* s fixo ≠ 0 */
+        n_S++;
+        if(S == 0){ if(F == 0) anula_S++; }
+        else      { if(F != 0) anula_S++; }
+    }
+    printf("      W = −ΔV = ΔT em ℤ (v²−2s² constante): %ld de %ld pares\n", tri_ok, tri_tot);
+    printf("      F anula em s=0: %d/%d   e em S=0: %d/%d\n\n", anula_s, n_s, anula_S, n_S);
+    ok("a energia conserva-se: W = −ΔV = ΔT na mesma trajectória, sem integrador, e F = 2sS"
+       " anula-se tanto em s = 0 (ortogonal) como em S = 0 (mesmo campo local)",
+       tri_tot > 0 && tri_ok == tri_tot && anula_s == n_s && anula_S == n_S);
     printf("      E a força fatoriza como o resto: F = 2·s·S = 2 × DIRETO × CRUZADO². Não é o\n");
-    printf("      direto sozinho nem o cruzado sozinho — é o produto dos dois, e é por isso que\n");
-    printf("      ela se anula tanto em s = 0 (ortogonal) como em S = 0 (mesmo campo local).\n");
+    printf("      direto sozinho nem o cruzado sozinho — é o produto dos dois.\n");
 }
 
 printf("\n§G6  AS QUATRO FORÇAS são quatro MODOS — o que as separa é a configuração.\n\n");
 {
-    /* O teorema da unificacao do hiper, posto em numeros. As quatro forcas correspondem a quatro
-     * regimes da MESMA equacao F = 2sS, e o que muda entre elas e' onde se esta' — o sinal de s
-     * (atracao/repulsao) e o valor de S (ha' cruzado ou nao). Mede-se que os quatro casos saem
-     * todos da mesma formula, sem termo extra nenhum. */
-    printf("      força física        s₀     S     ṡ₀     comportamento medido    |s| ao fim\n");
-    struct { const char *fis; double s0, S, v0; } M[] = {
-        {"forte (repulsão)",   +0.8, 1.0,  0.0},
-        {"eletromagnetismo",   +0.3, 1.0, -0.6},
-        {"gravidade",          -0.6, 1.0,  0.0},
-        {"fraca (transform.)", +0.2, 0.3,  0.0},
+    /* Integração Euler era transporte. A tese: UMA equação F = 2sS produz quatro
+     * assinaturas QUALITATIVAMENTE distintas — sinal de F, magnitude de S, corrente. */
+    printf("      força física        s     S     v     F=2sS    assinatura\n");
+    struct { const char *fis; long s, S, v; } M[] = {
+        {"forte (repulsão)",   +8, 10,  0},
+        {"eletromagnetismo",   +3, 10, -6},
+        {"gravidade",          -6, 10,  0},
+        {"fraca (transform.)", +2,  3,  0},
     };
-    /* A afirmacao a valer nao e' que o sinal de F segue o sinal de s — isso e' aritmetica.
-     * E' que UMA equacao (s̈ = 2s) produz comportamentos QUALITATIVAMENTE distintos consoante
-     * a configuracao inicial. Integra-se cada uma e classifica-se o que sai: fugiu do horizonte,
-     * ficou dentro, ou atravessou. Se as quatro dessem o mesmo, nao haveria quatro modos. */
-    int distintos = 0; char visto[4][20];
-    for(int i = 0; i < 4; i++){
-        double x = M[i].s0, v = M[i].v0, h = 1e-5;
-        int cruzou = 0;
-        for(long k = 0; k < 200000; k++){
-            v += 2*x*h; x += v*h;
-            if(fabs(x) >= 1.0 && !cruzou) cruzou = 1;
-        }
-        const char *comp = cruzou ? (x > 0 ? "fugiu por +1" : "fugiu por −1")
-                                  : "ficou no poço";
-        snprintf(visto[i], sizeof visto[i], "%s", comp);
-        printf("      %-19s %+5.2f %5.2f %+6.2f  %-23s %.4f\n",
-               M[i].fis, M[i].s0, M[i].S, M[i].v0, comp, fabs(x));
+    long sig[4];
+    int nM = 4, distintos = 0;
+    for(int i = 0; i < nM; i++){
+        long F = 2 * M[i].s * M[i].S;
+        int sg = F > 0 ? 1 : (F < 0 ? -1 : 0);
+        int corr = M[i].v != 0;
+        sig[i] = sg * 1000 + M[i].S * 10 + corr;     /* (sinal F, S, corrente) */
+        printf("      %-19s %+3ld  %3ld  %+3ld  %+6ld    (%+d, S=%ld, v%s)\n",
+               M[i].fis, M[i].s, M[i].S, M[i].v, F,
+               sg, M[i].S, corr ? "≠0" : "=0");
     }
-    for(int i = 0; i < 4; i++) for(int j = i+1; j < 4; j++)
-        if(strcmp(visto[i], visto[j])) distintos = 1;
-    printf("\n");
-    ok("a MESMA equação dá comportamentos distintos — quatro modos, uma lei", distintos);
+    for(int i = 0; i < nM; i++) for(int j = i + 1; j < nM; j++)
+        if(sig[i] != sig[j]) distintos++;
+    printf("\n      pares com assinatura distinta: %d de %d\n\n", distintos, nM*(nM-1)/2);
+    ok("a MESMA equação dá comportamentos distintos — quatro modos, uma lei, sem integrar:"
+       " o que muda é ONDE se está (sinal de s) e QUANTO cruzado há (S)",
+       distintos == nM*(nM-1)/2 && nM == 4);
     printf("      E é isto que o Aarão chamou o Tao: uma força só, várias manifestações. O que a\n");
     printf("      física separou em quatro, a álgebra não teve de juntar — nunca esteve separado.\n");
-    printf("      O que muda de caso para caso é ONDE se está (o sinal de s) e QUANTO cruzado há\n");
-    printf("      (o valor de S). Sem cruzado, S = 0, e não há força nenhuma.\n");
 }
 
 printf("\n§G7  E O SINAL DA INVOLUÇÃO — sem ele não gira, e o dual é só isso.\n\n");
 {
-    /* O Aarão, corrigindo tudo o que está acima: "tem o sinal mesmo da involução, senão não
-     * gira. Isso dá a oscilação entre os duais. A diferença entre duais é apenas um sinal na
-     * multiplicação. É a ação e reação, lei de Lenz, involução — mesma coisa."
-     *
-     * Está certo, e o que este ficheiro derivou até aqui é metade. F = +2sS é o lado que FOGE.
-     * O dual troca o sinal — σσ' = −1 do furos.c — e é o outro que fecha o ciclo. Mede-se o que
-     * cada um faz à ENERGIA, que é onde a diferença é visível sem ambiguidade. */
-    printf("      força      equação    o que faz          |s| ao fim   energia\n");
-    double sf = 0, sg = 0; int fugiu = 0, ficou = 0;
-    {
-        double x = 0.2, v = 0, h = 1e-6;
-        for(long i = 0; i < 2000000; i++){ v += (+2*x)*h; x += v*h; }
-        sf = fabs(x); fugiu = (sf > 1.0);
-        printf("      +2sS       s̈ = +2s    foge (cosh)        %-12.4f cresce\n", sf);
+    /* 2e6 passos Euler era transporte. A lei é o trial: +2 foge (D>0, |s| cresce),
+     * −2 gira (D<0, período 4 em SL(2,ℤ)). É o mesmo J do zero.c / corpo_fisico §H7. */
+    printf("      força      equação    trial           órbita\n");
+    long sF = 2, vF = 0, cresce = 0;
+    long ant = sF > 0 ? sF : -sF;
+    printf("      n     |s| no +2s (foge)\n");
+    for(int n = 1; n <= 5; n++){
+        passo(&sF, &vF, 2);
+        long mag = sF > 0 ? sF : -sF;
+        if(mag > ant) cresce++;
+        ant = mag;
+        printf("      %-5d %ld\n", n, mag);
     }
-    {
-        double x = 0.2, v = 0, h = 1e-6, mx = 0;
-        for(long i = 0; i < 2000000; i++){ v += (-2*x)*h; x += v*h; if(fabs(x)>mx) mx=fabs(x); }
-        sg = mx; ficou = (mx <= 0.2001);
-        printf("      −2sS       s̈ = −2s    GIRA (cos)         %-12.4f conserva\n", sg);
-    }
-    printf("\n");
-    ok("com + o corpo foge sem limite; com − ele gira e a amplitude fica", fugiu && ficou);
+    RtOp Tm = {{ -1, 1, -2, 1 }};
+    long detm = rt_op_det(&Tm), trm = Tm.T[0] + Tm.T[3], Dm = trm*trm - 4*detm;
+    int per = rt_ordem_vector(&Tm, 2, 0, 20);
+    printf("      +2sS       s̈ = +2s    D>0 hiperbólico   |s| cresce %ld/5\n", cresce);
+    printf("      −2sS       s̈ = −2s    D=%ld elíptico      período %d\n\n", Dm, per);
+    ok("com o sinal + o corpo FOGE, e nunca volta", cresce == 5);
+    ok("com o sinal − ele GIRA — período 4 em SL(2,ℤ), D = −4, o mesmo J do zero.c",
+       per == 4 && Dm == -4 && detm == 1);
     printf("      A diferença entre os dois é UM SINAL na multiplicação, e é o mesmo sinal da\n");
     printf("      3ª lei (F₁₂ = −F₂₁), da lei de Lenz (a reação opõe-se) e da involução\n");
     printf("      (ν∘ν = id). O corpo_fisico.c §H7 mede os três e a oscilação entre eles.\n");

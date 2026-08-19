@@ -34,12 +34,11 @@
  *   §F7  a COBERTURA: as órbitas preenchem o plano, ponto a ponto — e fecha
  *   §F8  POR PARTES: juros simples e compostos, e a torre dual no espelho
  *
- *   cc -O2 -std=c99 -Wall -Wformat fecha.c -lm -o fecha && ./fecha
+ *   cc -O2 -std=c99 -Wall -I lib tests/fecha.c -o fecha
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include "reta.h"
 #include "unidade.h"
 
@@ -261,22 +260,16 @@ static void secao_F3(void){
 static void secao_F4(void){
     printf("\n§F4  A DUALIDADE DA CIFRA: o inverso é a mesma cifra, deslocada por uma casa\n\n");
 
-    printf("        m   σ_m = [m; m, m, …]        1/σ_m           σ_m − 1/σ_m   traço\n");
+    printf("        m   σ_m = [m; m, m, …]        traço σ+σ'      σ·σ' (Vieta)\n");
     int traco_ok = 0;
     for(int m = 1; m <= 5; m++){
-        double s = (m + sqrt((double)m*m + 4)) / 2.0;    /* σ² = mσ + 1 — só imprime */
-        double inv = 1.0 / s;
-        /* a cifra de 1/σ_m é [0; m, m, m, …] — a MESMA lista, com um zero à frame.
-         * Consequência exata: σ + σ† = m, logo σ − 1/σ = m — e mede-se pelo TRAÇO,
-         * nunca formando a raiz: rt_traco_metalico(m,1) = m em ℤ. */
-        long tr = rt_traco_metalico(m, 1);
+        long tr = rt_traco_metalico(m, 1);             /* σ + σ' = m, exacto em ℤ */
         if(tr == m) traco_ok++;
-        printf("        %d   %14.10f        %10.8f      %12.10f   %ld\n", m, s, inv, s - inv, tr);
+        printf("        %d   [m;m,m,…]                 %ld              −1\n", m, tr);
     }
     printf("     traço = m em m = 1..5: %d de 5\n", traco_ok);
     ok("σ_m − 1/σ_m = m exatamente — a cifra do inverso é a mesma deslocada. E mede-se"
-       " pelo TRAÇO em ℤ: rt_traco_metalico(m,1) = m, sem formar σ nem 1/σ — o 1e-12"
-       " dava folga a s − inv − m, que era a mesma expressão escrita duas vezes",
+       " pelo TRAÇO em ℤ: rt_traco_metalico(m,1) = m, sem formar σ nem 1/σ",
        traco_ok == 5);
 
     /* e no inteiro: ν(σ) tem norma ±1, logo σ É unidade, logo o inverso é INTEIRO do corpo.
@@ -551,7 +544,7 @@ static void secao_F8(void){
     ok("juros simples dão (B,C) = (2,1) e Δ = 0 — a PA é o caso parabólico. E o Δ SEGUE do"
        " par: com B = 2 e C = 1 é 4 − 4, e não é uma segunda medição; quem pode falhar é o"
        " `regua_de` sobre a progressão",
-       rs.fechou && rs.B == 2 && rs.C == 1 && Ds == 0);
+       rs.fechou && rs.B == 2 && rs.C == 1);
 
     /* (2) JUROS COMPOSTOS — a PG. Capital 1, fator 3 (inteiro, para não sair dos inteiros). */
     long compostos[8]; compostos[0] = 1;

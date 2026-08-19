@@ -18,10 +18,16 @@
 #include "unidade.h"
 #include "le_num.h"     /* o MESMO header que o tex.c usa --- fonte única */
 
-/* dois doubles são o MESMO long? (compara os 64 bits, não com tolerância) */
+/* dois longs são os MESMOS 64 bits IEEE? */
 static int mesmos_bits(long a, long b){
     unsigned long long x, y; memcpy(&x, &a, 8); memcpy(&y, &b, 8);
     return x == y;
+}
+/* strtod da libc, mas devolve os bits — a referência da trava */
+static long libc_bits(const char *s, char **end){
+    __typeof__(strtod("", NULL)) d = strtod(s, end);
+    long b; memcpy(&b, &d, 8);
+    return b;
 }
 
 int main(void){
@@ -35,7 +41,7 @@ int main(void){
                             "10.95","23.42","16.99","2.4","0.5","6","3","0.001" };
     int nr = (int)(sizeof reais / sizeof reais[0]), difs1 = 0;
     for(int i = 0; i < nr; i++)
-        if(!mesmos_bits(str2dbl(reais[i], NULL), strtod(reais[i], NULL))) difs1++;
+        if(!mesmos_bits(str2dbl(reais[i], NULL), libc_bits(reais[i], NULL))) difs1++;
     printf("      %d valores reais do estilo, %d diferenças de bits contra o strtod\n\n", nr, difs1);
     ok("§S1 nos valores REAIS do estilo (unidades, razões φ^⅓, corpos) o str2dbl-sem-libc dá o MESMO"
        " long que o strtod da libc, bit a bit --- é o que garante que tirar o sscanf não mexe no PDF",
@@ -49,7 +55,7 @@ int main(void){
     int nc = (int)(sizeof comu / sizeof comu[0]), difs2 = 0;
     for(int i = 0; i < nc; i++){
         const char *e1; long a = str2dbl(comu[i], &e1);
-        char *e2;       long b = strtod(comu[i], &e2);
+        char *e2;       long b = libc_bits(comu[i], &e2);
         if(!mesmos_bits(a, b) || (e1 - comu[i]) != (e2 - comu[i])) difs2++;
     }
     /* e o par que prova a asserção: "1em" NÃO pode parar depois do 'e' */
@@ -69,7 +75,7 @@ int main(void){
         char buf[32]; long div = 1; for(int k = 0; k < d; k++) div *= 10;
         snprintf(buf, sizeof buf, "%ld.%0*ld", N / div, d, N % div);
         tot3++;
-        if(!mesmos_bits(str2dbl(buf, NULL), strtod(buf, NULL))) difs3++;
+        if(!mesmos_bits(str2dbl(buf, NULL), libc_bits(buf, NULL))) difs3++;
     }
     printf("§S3  %ld decimais varridos (1..4 casas), %ld diferenças de bits\n\n", tot3, difs3);
     ok("§S3 numa varredura de 8000 decimais (1 a 4 casas) o str2dbl dá o MESMO long que o strtod em"

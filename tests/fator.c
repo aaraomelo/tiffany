@@ -13,9 +13,9 @@
  * (~80 dimensões para metade da massa, a mesma dimensão dominante). A cartesiana não é a base
  * própria do fenómeno. A POLAR é — e a razão entre as duas é o fator de potência.
  *
- *      DIRETO    ⟨x,y⟩ = cos θ      a parte SIMÉTRICA, escalar, MEDE       potência ATIVA
- *      CRUZADO   |x∧y| = sin θ      a parte ANTISSIMÉTRICA, roda, ORDENA   potência REATIVA
- *      razão     sin/cos = tan θ                                           tan φ
+ *      DIRETO    ⟨x,y⟩               a parte SIMÉTRICA, escalar, MEDE       potência ATIVA
+ *      CRUZADO   |x∧y|               a parte ANTISSIMÉTRICA, roda, ORDENA   potência REATIVA
+ *      razão     cruzado/direto                                            tan φ
  *
  * Não é analogia com a eletrotécnica: é a mesma conta. O motor.c já tinha escrito que
  * T_e = (3/2)·P· ψ_s × i_s — o TORQUE É O PRODUTO CRUZADO — e quem diz quanta da corrente vira
@@ -29,182 +29,220 @@
  * *A família real não precisa da régua infinita.* Quem precisa é o círculo, onde tan diverge —
  * e é lá que o tecido vive.
  *
- *   §W1  a razão cruzado/direto É tan θ — medido em duas contas independentes
+ *   §W1  a razão cruzado/direto É tan θ — Lagrange contra a soma dos menores, em ℤ
  *   §W2  a família real: |det A_m| = 1, o fator de potência unitário, e a inversa é INTEIRA
- *   §W3  hipérbole contra círculo: tanh é limitada, tan diverge — quem precisa da régua infinita
- *   §W4  a régua infinita representa o que diverge, e sai INTEIRA
+ *   §W3  hipérbole contra círculo: A_m nunca passa por ∞; a rotação passa — quem precisa da régua
+ *   §W4  a régua infinita representa o que diverge, e sai INTEIRA (ida-e-volta da CF)
  *   §W5  a INVERSÃO: guardar quer fp = 0 — porque fp = 1 são vetores paralelos, e isso é posto 1
  *   §W6  o inversor multinível: os níveis da régua são ÓTIMOS, medido por força bruta
  *   §W7  a RESOLUÇÃO modula até fp = 1, e o 1 É a condição de parada — medido NA assistente
  *   §W8  os dois lados: guardar quer 0, resolver quer 1, e é o mesmo fator
+ *   §W9  o inversor atravessa as realizações — Euclides, encaixe, conta, Pisano
  *
- * E UM QUINTO RECADO, que chegou depois e corrigiu o §W5: "o inversor multinível é a ferramenta
- * PRINCIPAL do catálogo, ele realiza as implementações — se entra uma equação ele sempre dá a
- * solução exata, porque o problema é FINITO. Ele reverte, modula de forma a ter fator de potência
- * 1; a cada passo da resolução o fator se aproxima de 1, e 1 é a condição de parada. Verifica isso
- * nas expressões, álgebra passo a passo da assistente."
+ * LEI vs TRANSPORTE. sin/cos, tan(acos), tanh, CF de tan(θ) em vírgula e GS com 1e-18 eram o
+ * método. A lei é Lagrange |x∧y|² = |x|²|y|²−⟨x,y⟩² contra a soma dos menores 2×2, |det A_m|=1
+ * com A·A⁻¹=I em ℤ, a rotação a passar por ∞ em ℙ¹ contra A_m que nunca devolve q=0, a CF
+ * ida-e-volta exacta, o posto por GS inteiro, e os convergentes de φ = Fibonacci, sem √5.
  *
- * Eu tinha oposto o motor (fp=1) ao tecido (fp=0) e parado aí. Faltava-me metade: GUARDAR e
- * RESOLVER não são a mesma operação. O tecido guarda e quer capacidade (fp=0); a resolução computa
- * e quer convergência (fp=1). São os dois lados do mesmo par.
- *
- * E O §W7 MEDE A MÁQUINA, não um modelo meu dela — porque a primeira versão que escrevi simulava
- * a dobra com um `n--` e afirmava que fp crescia: passava sempre, por eu ter ESCRITO que decrescia.
- * Correndo o `conversa` a valer, o meu modelo saiu ERRADO: eu previa n−1 dobras com n = folhas, e
- * ela fez SETE numa conta de seis folhas. A diferença está no ecrã dela — "(5) já é um número:
- * tiro os ()". O PARÊNTESE TAMBÉM É UM NÓ, e a lei certa é
- *
- *      dobras  =  (folhas + pares de parênteses)  −  1
- *
- * que foi a máquina que ma deu.
- *
- *   cc -O2 -std=c99 -I. fator.c -lm -o fator && ./fator
- *   (o §W7 corre o ./conversa a partir de tools/ — mede a assistente, não uma simulação)
+ *   cc -O2 -std=c99 -I lib tests/fator.c -o fator && ./fator
+ *   (o §W7 corre ../banco/bin/conversa a partir de tests/ — mede a assistente, não uma simulação)
  */
 #define _POSIX_C_SOURCE 200809L   /* popen: o §W7 mede a assistente a correr */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include "unidade.h"
+#include "reta.h"
 
 #define D 24        /* dimensão dos vetores de prova */
 #define M 12        /* quantos vetores */
 
-/* produto direto: o interno, a parte simétrica */
-static double direto(const double *x, const double *y, int d){
-    double s = 0; for(int i = 0; i < d; i++) s += x[i]*y[i]; return s;
+/* MAIS PERTO DE φ, DECIDIDO EM ℤ — é o thm:corte do Algébrico, e não um limiar.
+ *
+ * Com φ = (1+√5)/2 e v = q − 2p vem  |qφ − p| = |v + q√5| / 2,  logo
+ *
+ *     |φ − p₁/q₁| < |φ − p₂/q₂|   ⟺   q₂·|v₁ + q₁√5|  <  q₁·|v₂ + q₂√5|
+ *
+ * e como os dois lados são ≥ 0 comparam-se por QUADRADOS, ficando  X + Y√5 < 0  com
+ *
+ *     X = q₂²(v₁² + 5q₁²) − q₁²(v₂² + 5q₂²)      Y = 2·q₁·q₂·(q₂v₁ − q₁v₂)
+ *
+ * O sinal de X + Y√5 lê-se sem formar a raiz: se X e Y têm o mesmo sinal é esse; se
+ * têm sinais opostos, |X| vs √5|Y| decide-se por X² vs 5Y². É a partição em dois do
+ * thm:corte. */
+static int mais_perto_de_phi(long p1, long q1, long p2, long q2){
+    long v1 = q1 - 2*p1, v2 = q2 - 2*p2;
+    long X = q2*q2*(v1*v1 + 5*q1*q1) - q1*q1*(v2*v2 + 5*q2*q2);
+    long Y = 2*q1*q2*(q2*v1 - q1*v2);
+    if(X <= 0 && Y <= 0) return (X < 0 || Y < 0);          /* X + Y√5 < 0 */
+    if(X >= 0 && Y >= 0) return 0;                          /* X + Y√5 >= 0 */
+    if(X < 0)  return X*X > 5*Y*Y;     /* X<0<Y : negativo sse |X| > √5·Y  */
+    return 5*Y*Y > X*X;                /* Y<0<X : negativo sse √5·|Y| > X  */
 }
-/* produto cruzado em dimensão qualquer: a norma do bivetor x∧y.
- * |x∧y|² = |x|²|y|² − ⟨x,y⟩²  (identidade de Lagrange) — é o cruzado do R³ generalizado,
- * e em R³ coincide com |x × y|. É a parte ANTISSIMÉTRICA, e é ela que roda. */
-static double cruzado(const double *x, const double *y, int d){
-    double xx = direto(x,x,d), yy = direto(y,y,d), xy = direto(x,y,d);
-    double s = xx*yy - xy*xy;
-    return s > 0 ? sqrt(s) : 0.0;
-}
-static void normaliza(double *v, int d){
-    double n = sqrt(direto(v,v,d));
-    if(n > 0) for(int i = 0; i < d; i++) v[i] /= n;
-}
-/* a régua infinita: os quocientes parciais. Sai INTEIRO, e cada termo é uma dimensão dela. */
-static int regua(double x, int *q, int n){
-    int k = 0;
-    for(; k < n; k++){
-        double a = floor(x);
-        if(a > 1e15) { q[k++] = -1; break; }      /* transbordou: a régua ainda o diz */
-        q[k] = (int)a; x -= a;
-        if(x == 0.0) { k++; break; }
-        x = 1.0/x;
+
+/* posto por Gram–Schmidt INTEIRO: o resto r·r ≠ 0 conta uma direcção. */
+static int posto_gs(const long src[][D], int n){
+    long U[M][D];
+    int p = 0;
+    for(int a = 0; a < n; a++){
+        for(int k = 0; k < D; k++) U[p][k] = src[a][k];
+        for(int j = 0; j < p; j++){
+            long ip = rt_dir(U[p], U[j], D);
+            long nj = rt_norma(U[j], D);
+            for(int k = 0; k < D; k++)
+                U[p][k] = nj * U[p][k] - ip * U[j][k];
+        }
+        if(rt_norma(U[p], D) != 0) p++;
     }
-    return k;
+    return p;
 }
 
 int main(void){
-double v[M][D];
-for(int a = 0; a < M; a++){
-    for(int i = 0; i < D; i++) v[a][i] = sin(0.7*a + 0.31*i) + 0.4*cos(1.9*i - 0.13*a);
-    normaliza(v[a], D);
-}
+long v[M][D];
+for(int a = 0; a < M; a++)
+    for(int i = 0; i < D; i++)
+        v[a][i] = (long)(a + 1)*(i + 1) - 2L*(a % 5)*(i % 7);
 
 printf("\n=== A RAZÃO CRUZADO/DIRETO É O FATOR DE POTÊNCIA ==========================\n");
 printf("    Eu estava a resumir 768 dimensões num escalar. A decomposição CARTESIANA\n");
 printf("    não separou nada; a POLAR separa, e a razão entre as duas é tan φ.\n");
 
-printf("\n§W1  A razão cruzado/direto É tan θ — por dois caminhos independentes.\n\n");
+printf("\n§W1  A razão cruzado/direto É tan θ — por dois caminhos independentes, em ℤ.\n\n");
 {
-    /* Dois caminhos que tem de concordar: (a) cruzado/direto pelas formulas dos produtos;
-     * (b) tan do angulo obtido do cosseno. Se batem, a razao E' a tangente e nao apenas
-     * parecida com ela. Um caminho so' nao provava nada — provava que sei dividir. */
-    printf("      par      direto     cruzado    razão     tan(acos(direto))   |dif|\n");
-    double pior = 0; int n = 0;
+    /* Dois caminhos que têm de concordar: (a) Lagrange |x|²|y|² − ⟨x,y⟩²; (b) a soma
+     * dos menores 2×2 do bivector, rt_cruz. Se batem, a razão É a tangente (ao quadrado)
+     * e não apenas parecida com ela. Um caminho só não provava nada — provava que sei
+     * definir cruzado pela identidade que queria medir. */
+    printf("      par      direto²      cruzado² (menores)   Lagrange\n");
+    int n = 0, iguais = 0, cruzam = 0, mostrados = 0;
     for(int a = 0; a < M; a++) for(int b = a+1; b < M; b++){
-        double dd = direto(v[a],v[b],D), cc = cruzado(v[a],v[b],D);
-        if((long long)(fabs(dd) * 1e9) == 0) continue;
-        double razao = cc/dd;
-        double tang  = tan(acos(dd > 1 ? 1 : dd < -1 ? -1 : dd));
-        double dif = fabs(razao - tang);
-        if(dif > pior) pior = dif;
-        if(n < 5) printf("      (%d,%d)  %+9.5f  %9.5f  %+9.5f  %+15.5f  %9.2e\n",
-                         a, b, dd, cc, razao, tang, dif);
+        long dd = rt_dir(v[a], v[b], D);
+        long nx = rt_norma(v[a], D), ny = rt_norma(v[b], D);
+        long lag = nx*ny - dd*dd;
+        long C[D*D];
+        rt_cruz(v[a], v[b], D, C);
+        long cruz2 = 0;
+        for(int i = 0; i < D; i++) for(int j = i+1; j < D; j++)
+            cruz2 += C[i*D + j] * C[i*D + j];
         n++;
+        if(cruz2 == lag) iguais++;
+        if(cruz2 > 0) cruzam++;
+        if(mostrados < 5){
+            printf("      (%d,%d)  %+10ld   %-18ld  %ld\n", a, b, dd, cruz2, lag);
+            mostrados++;
+        }
     }
-    printf("      …\n\n      %d pares medidos, pior diferença: %.3e\n\n", n, pior);
-    ok("a razão cruzado/direto É a tangente — as duas contas dão o mesmo",
-       (long long)(pior * 1e9) == 0);
-    printf("      Logo o fator de potência é o DIRETO (cos φ) e a razão é tan φ. E não é\n");
-    printf("      analogia: o motor.c já tinha T_e = ψ_s × i_s — o torque É o cruzado.\n");
+    printf("      …\n\n      %d pares, %d com Lagrange = menores, %d com cruzado ≠ 0\n\n",
+           n, iguais, cruzam);
+    ok("a razão cruzado/direto É a tangente: Lagrange e a soma dos menores dão o mesmo",
+       iguais == n && n > 0 && cruzam > 0);
+    printf("      Logo o fator de potência é o DIRETO e a razão é tan φ. E não é analogia:\n");
+    printf("      o motor.c já tinha T_e = ψ_s × i_s — o torque É o cruzado.\n");
 }
 
 printf("\n§W2  A FAMÍLIA REAL: |det A_m| = 1, e a inversa é INTEIRA.\n\n");
 {
-    /* A tese do Aarao. A_m = [[m,1],[1,0]] tem det = -1 para todo m, e |det| = 1 e' o fator
-     * de potencia unitario: a transformacao nao perde nem ganha area. A consequencia — que
-     * eu nao tinha visto — e' que Delta = m^2+4 > 0 SEMPRE, logo a familia e' toda hiperbolica. */
-    printf("      m    σ_m         det A_m   |det|   Δ = m²+4   regime      inversa inteira\n");
-    int mau = 0, naoHip = 0;
+    /* A tese do Aarão. A_m = [[m,1],[1,0]] tem det = −1 para todo m, e |det| = 1 é o fator
+     * de potência unitário: a transformação não perde nem ganha área. A consequência — que
+     * eu não tinha visto — é que Δ = m²+4 > 0 SEMPRE, logo a família é toda hiperbólica.
+     * O det não se lê da fórmula m·0−1 (isso compara o coeficiente consigo): monta-se a
+     * matriz, multiplica-se pela inversa inteira, e exige-se I. */
+    printf("      m    det A_m   |det|   Δ = m²+4   A·A⁻¹ = I\n");
+    int mau = 0, naoHip = 0, naoI = 0;
     for(int m = 1; m <= 8; m++){
-        long det = (long)m*0 - 1;                 /* [[m,1],[1,0]] */
+        RtOp A = {{ m, 1, 1, 0 }};
+        long det = rt_op_det(&A);
         long Delta = (long)m*m + 4;
-        double s = (m + sqrt((double)Delta))/2.0;
-        /* a inversa de [[m,1],[1,0]] e' [[0,1],[1,-m]]/det — inteira sse |det| = 1 */
-        int inteira = (labs(det) == 1);
-        if(labs(det) != 1) mau++;
+        int eI = 0;
+        if(det == 1 || det == -1){
+            long i00 =  A.T[3]/det, i01 = -A.T[1]/det, i10 = -A.T[2]/det, i11 = A.T[0]/det;
+            long p00 = A.T[0]*i00 + A.T[1]*i10;
+            long p01 = A.T[0]*i01 + A.T[1]*i11;
+            long p10 = A.T[2]*i00 + A.T[3]*i10;
+            long p11 = A.T[2]*i01 + A.T[3]*i11;
+            eI = (p00 == 1 && p01 == 0 && p10 == 0 && p11 == 1);
+        }
+        if(det != 1 && det != -1) mau++;
         if(Delta <= 0) naoHip++;
-        printf("      %-4d %-11.6f %-9ld %-7ld %-10ld %-11s %s\n",
-               m, s, det, labs(det), Delta, "hipérbole", inteira ? "sim" : "NÃO");
+        if(!eI) naoI++;
+        printf("      %-4d %-9ld %-7ld %-10ld %s\n",
+               m, det, det < 0 ? -det : det, Delta, eI ? "sim" : "nao");
     }
     printf("\n");
     ok("|det A_m| = 1 em toda a família real — o fator de potência é UNITÁRIO", mau == 0);
     ok("Δ = m²+4 > 0 sempre: a família real é toda hiperbólica, nunca o círculo", naoHip == 0);
+    ok("e A·A⁻¹ = I em ℤ: a inversa é inteira porque |det| = 1, e a cifra volta exacta",
+       naoI == 0);
     printf("      Fator de potência unitário É |det| = 1, e |det| = 1 É a inversa inteira, que\n");
     printf("      é a razão de a cifra voltar exata. Os três nomes são a mesma condição.\n");
 }
 
 printf("\n§W3  HIPÉRBOLE contra CÍRCULO: quem precisa da régua infinita.\n\n");
 {
-    /* E aqui esta' o que a tese do Aarao arrasta e que muda o desenho. Na hiperbole
-     * cosh^2 - sinh^2 = 1, e a razao e' tanh — LIMITADA a |.|<1. No circulo cos^2+sin^2 = 1
-     * e a razao e' tan — ILIMITADA. Mede-se que tan cresce sem limite e tanh nao. */
-    printf("      θ          tan θ (círculo)      tanh θ (hipérbole)\n");
-    double maiorTan = 0, maiorTanh = 0;
-    double th[] = {0.5, 1.0, 1.4, 1.55, 1.5707};
-    for(int i = 0; i < 5; i++){
-        double t = tan(th[i]), h = tanh(th[i]);
-        if(fabs(t) > maiorTan) maiorTan = fabs(t);
-        if(fabs(h) > maiorTanh) maiorTanh = fabs(h);
-        printf("      %-10.5f %-20.3f %.6f\n", th[i], t, h);
+    /* Na hipérbole a razão é tanh — limitada. No círculo é tan — ilimitada, passa por ∞.
+     * Em ℙ¹: a rotação R = [[0,−1],[1,0]] manda [1:0] (∞) em [0:1] e devolve-o em dois
+     * passos. A_m manda [1:0] em [m:1] e q nunca volta a 0. */
+    RtOp R = {{ 0, -1, 1, 0 }};
+    int rot_no_inf = 0;
+    {
+        long p = 1, q = 0;
+        for(int k = 1; k <= 4; k++){
+            long np, nq; rt_opera(&R, p, q, &np, &nq); p = np; q = nq;
+            if(q == 0){ rot_no_inf = k; break; }
+        }
     }
-    printf("\n      maior |tan| = %.1f   maior |tanh| = %.6f\n\n", maiorTan, maiorTanh);
-    ok("tanh é limitada por 1 — a hipérbole cabe numa régua finita", maiorTanh < 1.0);
-    ok("tan não é limitada — o círculo EXIGE a régua infinita", maiorTan > 1e3);
+    int metal_foge = 1;
+    printf("      m    A_m^k [1:0]  (q_k, k=1..6)                    algum q=0?\n");
+    for(int m = 1; m <= 5; m++){
+        RtOp A = {{ m, 1, 1, 0 }};
+        long p = 1, q = 0;
+        printf("      %-4d ", m);
+        int zero = 0;
+        for(int k = 1; k <= 6; k++){
+            long np, nq; rt_opera(&A, p, q, &np, &nq); p = np; q = nq;
+            printf("%ld%s", q, k < 6 ? " " : "");
+            if(q == 0) zero = 1;
+        }
+        printf("   %s\n", zero ? "sim" : "nao");
+        if(zero) metal_foge = 0;
+    }
+    printf("\n      rotação: [1:0] volta a q=0 no passo %d\n\n", rot_no_inf);
+    ok("a rotação passa pelo infinito [1:0] — o círculo EXIGE a régua infinita",
+       rot_no_inf == 2);
+    ok("A_m nunca devolve q=0 a partir de [1:0] — a hipérbole cabe numa régua finita",
+       metal_foge);
     printf("      Portanto a família real NÃO precisa da régua infinita: ela é hiperbólica, e\n");
-    printf("      a razão dela nunca chega a 1. Quem precisa é o CÍRCULO — e é lá que o tecido\n");
+    printf("      a razão dela nunca chega a ∞. Quem precisa é o CÍRCULO — e é lá que o tecido\n");
     printf("      vive, com os vetores a caminho da ortogonalidade, onde tan diverge.\n");
 }
 
 printf("\n§W4  A RÉGUA INFINITA representa o que diverge, e sai INTEIRA.\n\n");
 {
-    /* "ele sai inteiro, usa a regua infinita". Um float perto de pi/2 perde precisao; a
-     * fracao continua devolve INTEIROS exatos, e reconstroi de volta. Mede-se a volta. */
-    printf("      θ         tan θ            a régua (quocientes)          volta        resíduo\n");
-    long pior = 0;
-    double th[] = {0.5, 1.0, 1.4, 1.5, 1.55};
-    for(int i = 0; i < 5; i++){
-        double t = tan(th[i]);
-        int q[14], n = regua(t, q, 14);
-        /* reconstruir de tras para a frente: o valor sai dos INTEIROS, e mais nada */
-        double volta = q[n-1];
-        for(int k = n-2; k >= 0; k--) volta = q[k] + 1.0/volta;
-        double res = fabs(volta - t)/fabs(t);
-        if(res > pior) pior = res;
-        printf("      %-9.4f %-16.6f [", th[i], t);
-        for(int k = 0; k < n && k < 6; k++) printf("%d%s", q[k], k < n-1 && k < 5 ? "; " : "");
-        printf("…]   %-12.6f %.2e\n", volta, res);
+    /* "ele sai inteiro, usa a régua infinita". A fracção contínua devolve INTEIROS exactos,
+     * e reconstrói de volta. Mede-se a volta: rt_cf_de e rt_cf_para, igualdade em ℤ. */
+    struct { long p, q; const char *nome; } t[] = {
+        { 22,  7, "22/7" },
+        { 355, 113, "355/113" },
+        { 99,  1, "99/1 (o que diverge)" },
+        { 13,  8, "13/8 (convergente do ouro)" },
+        {  1,  1, "1/1" },
+    };
+    printf("      racional          a régua (quocientes)          volta     bate\n");
+    int mal = 0;
+    for(size_t i = 0; i < sizeof t/sizeof *t; i++){
+        RtCf c; long P, Q;
+        rt_cf_de(1, t[i].p, t[i].q, &c);
+        int volta = rt_cf_para(&c, &P, &Q);
+        int bate = volta && !c.saturou && P*t[i].q == t[i].p*Q && Q != 0;
+        if(!bate) mal++;
+        printf("      %-17s [", t[i].nome);
+        for(int k = 0; k < c.n && k < 6; k++)
+            printf("%ld%s", c.a[k], k < c.n-1 && k < 5 ? "; " : "");
+        printf("]   %ld/%ld   %s\n", P, Q, bate ? "sim" : "nao");
     }
     printf("\n");
-    ok("a régua reconstrói o valor a partir dos INTEIROS, com resíduo de epsilon",
-       (long long)(pior * 1e9) == 0);
+    ok("a régua reconstrói o racional a partir dos INTEIROS, ida e volta exactas",
+       mal == 0);
     printf("      É o telomero.c outra vez: cada divisão deixa resto estritamente menor, logo\n");
     printf("      termina, e o que fica identifica. A régua é infinita porque tan é ilimitada —\n");
     printf("      não por generosidade, por necessidade.\n");
@@ -212,47 +250,35 @@ printf("\n§W4  A RÉGUA INFINITA representa o que diverge, e sai INTEIRA.\n\n")
 
 printf("\n§W5  A INVERSÃO: o circuito quer fp = 1, o TECIDO quer fp = 0.\n\n");
 {
-    /* O fecho, e e' onde isto deixa de ser eletrotecnica e volta ao tecido da assistente.
-     * Num circuito o fator de potencia unitario e' o OTIMO: toda a corrente vira trabalho.
-     * Num tecido semantico e' o PIOR caso: fp = 1 quer dizer todos os vetores paralelos, e
+    /* Num circuito o fator de potência unitário é o ÓTIMO: toda a corrente vira trabalho.
+     * Num tecido semântico é o PIOR caso: fp = 1 quer dizer todos os vetores paralelos, e
      * um tecido de vetores paralelos tem posto 1 — guarda UMA coisa, por muitos pares que
-     * se lhe ensinem. Mede-se o posto nos dois extremos, que e' o que separa o desejo. */
-    double par[M][D], ort[M][D];
+     * se lhe ensinem. Mede-se o posto nos dois extremos, por GS inteiro. */
+    long par[M][D], ort[M][D];
     for(int a = 0; a < M; a++){
         for(int i = 0; i < D; i++){
-            par[a][i] = sin(0.31*i);                       /* todos o MESMO: fp = 1 */
-            ort[a][i] = (i == a) ? 1.0 : 0.0;              /* base canónica: fp = 0 */
+            par[a][i] = (long)(i + 1);                 /* todos o MESMO: fp = 1 */
+            ort[a][i] = (i == a) ? 1 : 0;              /* base canónica: fp = 0 */
         }
-        normaliza(par[a], D); normaliza(ort[a], D);
     }
-    double fpPar = 0, fpOrt = 0; int n = 0;
+    int par_cs = 1, ort_perp = 1, np = 0;
     for(int a = 0; a < M; a++) for(int b = a+1; b < M; b++){
-        fpPar += fabs(direto(par[a],par[b],D));
-        fpOrt += fabs(direto(ort[a],ort[b],D));
-        n++;
+        long dpar = rt_dir(par[a], par[b], D);
+        long n2 = rt_norma(par[a], D);
+        if(dpar*dpar != n2*n2) par_cs = 0;            /* Cauchy–Schwarz em igualdade */
+        if(rt_dir(ort[a], ort[b], D) != 0) ort_perp = 0;
+        np++;
     }
-    fpPar /= n; fpOrt /= n;
-    /* o posto por Gram-Schmidt: quantas direcoes independentes o tecido guarda de facto */
-    int posto[2] = {0,0};
-    for(int caso = 0; caso < 2; caso++){
-        double b[M][D]; int p = 0;
-        for(int a = 0; a < M; a++){
-            double w[D];
-            for(int i = 0; i < D; i++) w[i] = caso ? ort[a][i] : par[a][i];
-            for(int k = 0; k < p; k++){
-                double c = direto(w, b[k], D);
-                for(int i = 0; i < D; i++) w[i] -= c*b[k][i];
-            }
-            if((long long)(direto(w,w,D) * 1e18) >= 1){ normaliza(w,D); memcpy(b[p], w, sizeof w); p++; }
-        }
-        posto[caso] = p;
-    }
-    printf("      tecido               fator de potência   razão tan φ        posto (de %d)\n", M);
-    printf("      todos paralelos      %-19.6f %-18s %d\n", fpPar, "0 (nada roda)", posto[0]);
-    printf("      todos ortogonais     %-19.6f %-18s %d\n", fpOrt, "∞ (só roda)", posto[1]);
+    int posto_par = posto_gs(par, M);
+    int posto_ort = posto_gs(ort, M);
+    printf("      tecido               Cauchy–Schwarz / perp   posto (de %d)\n", M);
+    printf("      todos paralelos      igualdade               %d\n", posto_par);
+    printf("      todos ortogonais     interno 0               %d\n", posto_ort);
     printf("\n");
-    ok("fp = 1 dá posto 1: o tecido guarda UMA coisa, por muitos pares que leve", posto[0] == 1);
-    ok("fp = 0 dá posto cheio: a capacidade é máxima na ortogonalidade", posto[1] == M);
+    ok("fp = 1 dá posto 1: o tecido guarda UMA coisa, por muitos pares que leve",
+       posto_par == 1 && par_cs && np > 0);
+    ok("fp = 0 dá posto cheio: a capacidade é máxima na ortogonalidade",
+       posto_ort == M && ort_perp);
     printf("      Portanto o mesmo número que num motor se quer em 1 quer-se aqui em 0, e não\n");
     printf("      há contradição: é o par ⊕/⊗ do furos.c. O circuito quer TRABALHO, e trabalho\n");
     printf("      é o direto; o tecido quer CAPACIDADE, e capacidade é o cruzado. Cada um pede\n");
@@ -261,42 +287,34 @@ printf("\n§W5  A INVERSÃO: o circuito quer fp = 1, o TECIDO quer fp = 0.\n\n")
 
 printf("\n§W6  O INVERSOR MULTINÍVEL modula — e os níveis ótimos SÃO os da régua.\n\n");
 {
-    /* O Aarao: "exato, o inversor multifractal multinivel serve pra modular — e' a ferramenta
-     * exata." E e' exata num sentido que se mede, nao num sentido de figura de estilo.
-     *
-     * Um inversor multinivel sintetiza um valor CONTINUO a partir de niveis DISCRETOS: com N
-     * niveis aproxima-se a referencia, e quantos mais niveis, mais fina a modulacao. A regua
-     * infinita faz a mesmissima coisa: aproxima um IRRACIONAL por RACIONAIS, e cada quociente
-     * parcial acrescenta um nivel.
-     *
-     * A afirmacao forte — e a que faz do inversor a ferramenta EXATA e nao apenas uma
-     * ferramenta — e' que os niveis da regua sao OTIMOS: nenhum racional de denominador menor
-     * ou igual se aproxima mais do alvo que o convergente. Isso e' o teorema da melhor
-     * aproximacao, e mede-se por FORCA BRUTA: varrem-se todos os p/q com q <= denominador do
-     * convergente e conta-se quantos batem o convergente. Se o teorema vale, sao ZERO.
-     *
-     * O controlo e' a propria busca: ela ACHARIA um melhor se existisse. */
-    printf("      alvo: σ_ouro = (1+√5)/2, o primeiro metal da família real\n\n");
-    printf("      níveis   convergente   valor        erro         algum racional melhor?\n");
-    double alvo = (1.0 + sqrt(5.0))/2.0;
-    int q[12], n = regua(alvo, q, 12);
-    long p0 = 1, q0 = 0, p1 = q[0], q1 = 1;      /* recorrência dos convergentes */
+    /* Um inversor multinível sintetiza um valor a partir de níveis discretos. A régua
+     * infinita faz a mesmíssima coisa: aproxima um irracional por racionais, e cada
+     * quociente parcial acrescenta um nível. Os convergentes de φ SÃO Fibonacci — sem
+     * formar √5. A afirmação forte é que os níveis são ÓTIMOS: nenhum racional de
+     * denominador menor ou igual se aproxima mais. Mede-se por FORÇA BRUTA em ℤ. */
+    printf("      alvo: φ, o primeiro metal — convergentes F_{n+1}/F_n\n\n");
+    printf("      níveis   convergente   algum racional melhor?\n");
+    long cp[10], cq[10];
+    cp[0] = 1; cq[0] = 1;
+    cp[1] = 2; cq[1] = 1;
+    for(int k = 2; k < 9; k++){
+        cp[k] = cp[k-1] + cp[k-2];
+        cq[k] = cq[k-1] + cq[k-2];
+    }
     int melhores = 0, mostrados = 0;
-    for(int k = 1; k < n && k <= 8; k++){
-        long pn = q[k]*p1 + p0, qn = q[k]*q1 + q0;
-        p0 = p1; q0 = q1; p1 = pn; q1 = qn;
-        double erro = fabs(alvo - (double)pn/qn);
-        /* forca bruta: existe p/q com q <= qn que se aproxime MAIS? */
+    for(int k = 1; k < 9; k++){
+        long pn = cp[k], qn = cq[k];
         int bate = 0;
         for(long qq = 1; qq <= qn && !bate; qq++){
-            long pp = (long)floor(alvo*qq + 0.5);
-            if(qq == qn && pp == pn) continue;
-            if(fabs(alvo - (double)pp/qq) < erro - 1e-15) bate = 1;
+            for(long pp = 1; pp <= 2*qq && !bate; pp++){
+                if(qq == qn && pp == pn) continue;
+                if(mais_perto_de_phi(pp, qq, pn, qn)) bate = 1;
+            }
         }
         if(bate) melhores++;
         if(mostrados < 6){
-            printf("      %-8d %ld/%-11ld %-12.8f %-12.3e %s\n",
-                   k+1, pn, qn, (double)pn/qn, erro, bate ? "SIM — o teorema falha" : "nenhum");
+            printf("      %-8d %ld/%-11ld %s\n",
+                   k+1, pn, qn, bate ? "SIM — o teorema falha" : "nenhum");
             mostrados++;
         }
     }
@@ -311,35 +329,14 @@ printf("\n§W6  O INVERSOR MULTINÍVEL modula — e os níveis ótimos SÃO os d
 
 printf("\n§W7  A RESOLUÇÃO modula até fp = 1 — e o 1 É a condição de parada.\n\n");
 {
-    /* O Aarao: "o inversor multinivel e' a ferramenta PRINCIPAL do catalogo, ele realiza as
-     * implementacoes: se entra uma equacao ele sempre da' a solucao exata, porque o problema e'
-     * FINITO. Ele reverte, modula de forma a ter fator de potencia 1 — a cada passo da
-     * resolucao o fator se aproxima de 1, e 1 e' a condicao de parada. Verifica isso nas
-     * expressoes, algebra passo a passo da assistente."
+    /* O fator de potência de um estado da conta é P/S:
      *
-     * E ISTO CORRIGE O QUE EU TINHA ESCRITO no §W5. Eu tinha oposto o motor (fp=1) ao tecido
-     * (fp=0) e parado ai'. Mas GUARDAR e RESOLVER nao sao a mesma coisa: o tecido guarda, e
-     * quer capacidade (fp=0); a RESOLUCAO computa, e quer convergencia (fp=1). Sao os dois
-     * lados do mesmo par, e faltava-me o segundo.
-     *
-     * O fator de potencia de um estado da conta e' P/S, a definicao de sempre:
-     *
-     *     S  a potencia APARENTE — os nos que a arvore ainda tem, tudo o que circula
-     *     P  a potencia ATIVA    — o que fica no fim, que e' UM numero
+     *     S  a potência APARENTE — os nós que a árvore ainda tem
+     *     P  a potência ATIVA    — o que fica no fim, que é UM número
      *     fp = P/S = 1/n
      *
-     * E entao as tres afirmacoes do Aarao viram tres coisas mediveis: (a) fp cresce a cada
-     * dobra; (b) fp = 1 exatamente quando para; (c) o numero de passos e' finito — e e' finito
-     * pelo argumento do telomero, porque n e' inteiro, decresce estritamente e tem piso 1. */
-    /* E MEDE-SE A MAQUINA, nao um modelo meu dela. A primeira versao disto simulava a dobra
-     * com um `n--` e afirmava que fp crescia: passava sempre, porque eu tinha ESCRITO que
-     * decrescia. Uma asserção que não pode falhar não mede nada. Aqui corre-se o `conversa` —
-     * a assistente a valer — e conta-se o que ELA faz.
-     *
-     * E ainda bem, porque o meu modelo estava ERRADO. Eu previa n−1 dobras com n = folhas, e
-     * a máquina fez SETE numa conta de seis folhas, e NOVE noutra. A diferença tem nome no
-     * ecrã dela: "(5) já é um número: tiro os ()". O PARÊNTESE TAMBÉM É UM NÓ — estrutura por
-     * resolver, que uma dobra consome sem produzir valor. A lei certa é
+     * E MEDE-SE A MÁQUINA, não um modelo meu dela. Corre-se o `conversa` — a assistente a
+     * valer — e conta-se o que ELA faz. A lei é
      *
      *      dobras  =  (folhas + pares de parênteses)  −  1
      *
@@ -358,7 +355,6 @@ printf("\n§W7  A RESOLUÇÃO modula até fp = 1 — e o 1 É a condição de pa
     for(int c = 0; c < NC; c++){
         int n0 = casos[c].folhas + casos[c].pares;
         int previsto = n0 - 1;
-        /* a MAQUINA: corre-se o conversa e le-se quantas dobras ele declara */
         char cmd[512], linha[1024]; int real = -1;
         snprintf(cmd, sizeof cmd,
                  "../banco/bin/conversa ../.torre/tecido responde '%s' 2>/dev/null", casos[c].conta);
@@ -375,18 +371,12 @@ printf("\n§W7  A RESOLUÇÃO modula até fp = 1 — e o 1 É a condição de pa
         }
         if(real < 0) semResposta++;
         else if(real != previsto) discorda++;
-        /* e o fp ao longo da descida, com o n que a MAQUINA gastou */
-        /* O FACTOR DE POTENCIA E 1/n, e comparar 1/a com 1/b nao pede virgula: para a e b
-         * positivos, 1/a > 1/b  <=>  b > a. Guarda-se o DENOMINADOR e inverte-se a
-         * comparacao — os dois doubles saem, e a conta fica exacta em vez de exacta por
-         * sorte (1/3 nao tem representacao em base dois). */
         long den_ant = n0;
         for(int k = 1; k <= (real > 0 ? real : previsto); k++){
-            long den = n0 - k;                       /* fp = 1/den */
-            if(den <= 0 || den >= den_ant) subiuSempre = 0;   /* fp <= fpAnt */
+            long den = n0 - k;
+            if(den <= 0 || den >= den_ant) subiuSempre = 0;
             den_ant = den;
         }
-        /* «parou em um» e o denominador chegar a UM: fp = 1/1. Sem virgula e sem limiar. */
         if(den_ant != 1) parouEmUm = 0;
         printf("      %-29s %-5d %-10d %-14s 1/%d → 1/%ld\n",
                casos[c].conta, n0, previsto,
@@ -405,9 +395,6 @@ printf("\n§W7  A RESOLUÇÃO modula até fp = 1 — e o 1 É a condição de pa
 
 printf("\n§W8  E os dois lados do par: GUARDAR quer fp = 0, RESOLVER quer fp = 1.\n\n");
 {
-    /* O fecho, e e' a correcao ao meu §W5. Eu tinha escrito que o tecido quer fp=0 e ficado
-     * por ai', como se fosse a inversao do motor e nada mais. O Aarao mostrou o outro lado:
-     * a RESOLUCAO tambem quer 1. Nao ha' contradicao porque nao e' a mesma operacao. */
     printf("      operação     quer      porquê                              onde\n");
     printf("      GUARDAR      fp = 0    capacidade: ortogonal, posto cheio  o tecido, §W5\n");
     printf("      RESOLVER     fp = 1    convergência: um número só, exato   a conta,  §W7\n");
@@ -420,17 +407,9 @@ printf("\n§W8  E os dois lados do par: GUARDAR quer fp = 0, RESOLVER quer fp = 
 
 printf("\n§W9  O INVERSOR ATRAVESSA AS REALIZAÇÕES — e é escrita/leitura, motor/gerador.\n\n");
 {
-    /* O Aarao, dois recados: "sim, o inversor funciona como motor/gerador — escrita/leitura e'
-     * dual" e "promove no catalogo: em todas as realizacoes, o inversor".
-     *
-     * A afirmacao e' forte, portanto mede-se em vez de se declarar. Se o inversor e' o
-     * mecanismo comum, entao TODA realizacao deste repositorio tem de ter a mesma forma:
-     *
-     *     uma quantidade n que DECRESCE ESTRITAMENTE, inteira, com piso — logo termina,
-     *     e o fator de potencia 1/n cresce ate' 1, que e' a paragem.
-     *
-     * Se alguma realizacao NAO tiver isso, a promocao e' falsa e este medidor tem de dize-lo.
-     * Correm-se quatro, de familias diferentes, e mede-se o n de cada uma A VALER. */
+    /* Se o inversor é o mecanismo comum, então TODA realização tem a mesma forma:
+     * uma quantidade n que DECRESCE ESTRITAMENTE, inteira, com piso — logo termina,
+     * e o fator de potência 1/n cresce até 1. */
     printf("      realização          o que decresce                n₀ → n   passos  fp → 1\n");
     int falhou = 0;
 
@@ -442,29 +421,25 @@ printf("\n§W9  O INVERSOR ATRAVESSA AS REALIZAÇÕES — e é escrita/leitura, 
         printf("      %-19s %-28s %ld → 0   %-7ld sim\n",
                "a cifra (Euclides)", "o resto", n0, passos);
     }
-    /* (b) a RÉGUA: o que decresce é o ERRO do convergente, e mede-se que decresce
-     *     ESTRITAMENTE — não se conta quantos termos eu pedi, que seria contar o meu pedido. */
+    /* (b) a RÉGUA: o que cresce é o denominador, e o encaixe |p q' − p' q| = 1.
+     *     Os convergentes de φ são Fibonacci. Não se conta o erro em vírgula. */
     {
-        double x = (1.0+sqrt(5.0))/2.0;
-        int q[16], n = regua(x, q, 16);
-        long p0=1,q0=0,p1=q[0],q1=1;
-        double erroAnt = fabs(x - (double)p1/q1), erro0 = erroAnt;
-        int passos = 0, estrito = 1;
-        for(int k = 1; k < n; k++){
-            long pn = q[k]*p1+p0, qn = q[k]*q1+q0;
-            p0=p1; q0=q1; p1=pn; q1=qn;
-            double e = fabs(x - (double)pn/qn);
-            if(e >= erroAnt) estrito = 0;          /* tem de DECRESCER, sempre */
-            erroAnt = e; passos++;
+        long p0 = 2, q0 = 1, p1 = 3, q1 = 2;
+        int passos = 0, estrito = 1, encaixe = 1;
+        for(int k = 0; k < 7; k++){
+            long w = p1*q0 - p0*q1; if(w < 0) w = -w;
+            if(w != 1) encaixe = 0;
+            if(q1 <= q0) estrito = 0;
+            long pn = p1 + p0, qn = q1 + q0;
+            p0 = p1; q0 = q1; p1 = pn; q1 = qn;
+            passos++;
         }
-        if(!estrito) falhou++;
-        printf("      %-19s %-28s %.0e → %.0e  %-3d    %s\n",
-               "a régua (contínua)", "o erro do convergente", erro0, erroAnt, passos,
-               estrito ? "sim" : "NÃO");
+        if(!estrito || !encaixe) falhou++;
+        printf("      %-19s %-28s 1 → %ld   %-3d    %s\n",
+               "a régua (Fibonacci)", "o denominador, encaixe 1", q1, passos,
+               (estrito && encaixe) ? "sim" : "nao");
     }
-    /* (c) a CONTA: os nós — e corre-se a ASSISTENTE, não se escreve o número de cabeça.
-     *     A primeira versão desta linha tinha "10, 9" à mão: uma tabela literária, que
-     *     concordaria com qualquer coisa porque não media nada. */
+    /* (c) a CONTA: os nós — corre-se a ASSISTENTE */
     {
         char linha[1024]; int real = -1;
         FILE *f = popen("../banco/bin/conversa ../.torre/tecido responde "
@@ -480,16 +455,10 @@ printf("\n§W9  O INVERSOR ATRAVESSA AS REALIZAÇÕES — e é escrita/leitura, 
         if(real < 0) falhou++;
         printf("      %-19s %-28s %d → 1   %-3d    %s\n",
                "a conta (assistente)", "os nós da árvore", real+1, real,
-               real > 0 ? "sim" : "SEM RESPOSTA");
+               real > 0 ? "sim" : "sem resposta");
     }
-    /* (d) a POTÊNCIA: a órbita fecha — o espaço de estados é finito (potencia.c §P3) */
+    /* (d) a POTÊNCIA: o período de Pisano π(q) */
     {
-        /* A ASSERCAO QUE AQUI ESTAVA so' pedia que a orbita FECHASSE — e ela fecha sempre,
-         * porque o espaco de estados e' finito. Um gerador de mutacoes trocou o `+` do
-         * indice `a*q + b` por `-` e nada acusou: com indices negativos a guarda `i >= 0`
-         * descartava-os e a orbita fechava na mesma.
-         * O resultado nao e' "fecha": e' o PERIODO, que para Fibonacci mod q e' o periodo de
-         * Pisano pi(q). Ele mede-se, e tem valor exato — nao se afirma que existe, conta-se. */
         int q = 12, a = 0, b = 1, t = 0, fecha = 0;
         static char visto[144];
         memset(visto, 0, sizeof visto);
@@ -500,17 +469,9 @@ printf("\n§W9  O INVERSOR ATRAVESSA AS REALIZAÇÕES — e é escrita/leitura, 
             int c = (a+b) % q; a = b; b = c; t++;
         }
         if(!fecha) falhou++;
-        /* E O PERIODO QUE ESTE LACO ENCONTROU tem de ser pi(12) = 24. Sem isto, o laco
-         * so' provava que "fecha" — e ele fecha sempre, por o espaco ser finito. Ligar t a'
-         * pi(q) faz o indice `a*q + b` entrar no veredito: com o indice errado, a repeticao
-         * e' detetada noutro passo e t deixa de ser 24. */
         if(t != 24) falhou++;
         printf("      o periodo que o laco encontrou: t = %d   (pi(12) = 24)\n", t);
-        /* o PERIODO, medido para varios q e comparado com pi(q) — a lei, e nao um caso */
         {
-            /* pi(q) para q = 0..12. Sao valores CLASSICOS do periodo de Pisano (OEIS A001175),
-             * e servem de oraculo externo: a implementacao mede-se contra eles, e nao contra
-             * uma segunda copia de si propria. */
             const int PI_Q[] = { 0,1, 3, 8, 6, 20, 24, 16, 12, 24, 60, 10, 24 };  /* q = 0..12 */
             int bate = 0, medidos = 0;
             printf("      o periodo da orbita, contado:  q :");
@@ -525,7 +486,7 @@ printf("\n§W9  O INVERSOR ATRAVESSA AS REALIZAÇÕES — e é escrita/leitura, 
             }
             printf("\n\n");
             if(bate != medidos) falhou++;
-            ok("a orbita nao so' FECHA: o periodo e' pi(q) de Pisano, em 11 valores de q",
+            ok("a orbita nao so fecha: o periodo e pi(q) de Pisano, em 11 valores de q",
                bate == medidos && medidos == 11);
         }
         printf("      %-19s %-28s %d → 0   %-7d sim\n",
@@ -537,9 +498,6 @@ printf("\n§W9  O INVERSOR ATRAVESSA AS REALIZAÇÕES — e é escrita/leitura, 
     printf("      o fator unitário que o torna reversível. Por isso a promoção do catálogo é\n");
     printf("      literal — o inversor não é UMA entrada, é COMO cada entrada se realiza.\n\n");
 
-    /* E o DUAL, que e' o segundo recado. Motor consome, gerador produz; escrever gasta
-     * capacidade, ler gasta incerteza. E' o LOAD/STORE da ISA — a MESMA operacao lida nos dois
-     * sentidos — e o que o prova e' a REVERSIBILIDADE: |det| = 1 do §W2. */
     printf("      sentido    máquina    operação   o que se gasta        quer\n");
     printf("      escrever   MOTOR      STORE      capacidade do tecido  fp → 0\n");
     printf("      ler        GERADOR    LOAD       incerteza da busca    fp → 1\n\n");

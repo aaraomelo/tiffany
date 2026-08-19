@@ -1,85 +1,80 @@
 /* circuito_tradutor.c — O CIRCUITO tex↔pdf FECHA: tex (tetral 4) — [hexal 6] — pdf (tetral 4), dim 8 REVERSÍVEL.
  *
- * O Aarão: «são dois tetrais de cada lado e o hexal no meio de interface --- em tex 4 - 6 - pdf 4
- * (forma a dimensão 8 reversível). Vê se é isso, para fechar o circuito.»
+ * A cruz do número é quatro racionais em Z: ±m/10^k e ±m·10^k. A volta é parse inteiro
+ * do texto, sem strtod. A perda dos centésimos é o resto da divisão por 10^{k−1}.
  *
- * (Distinto de circuito.c, que fecha o circuito da ISA em GL_2(Z). Este fecha o circuito do TRADUTOR:
- *  tex↔pdf.) O esquema fecha tudo o que se mediu, e reconcilia o «dim 8» com o «Cayley-Dickson não mede»:
- *
- *      tex  ──►  [ a interface ]  ──►  pdf          e a VOLTA fecha o circuito
- *   (tetral 4)      (hexal 6)       (tetral 4)
- *
- *   - CADA LADO é um TETRAL (grau 4): o número, lido pela cruz (corpo_do_numero.c) --- o de partida
- *     (o LaTeX) e o de chegada (a posição no PDF).
- *   - O MEIO é a HEXAL (grau 6): a interface, o MOVE --- o eixo trial {emite,atravessa,absorve} (3)
- *     vezes a escrita/leitura (dual, 2) = 6 = lcm(2,3) (leis_no_tradutor §T4).
- *   - OS DOIS TETRAIS formam DIM 8, e o circuito é REVERSÍVEL: tex→pdf→tex fecha (resíduo 0). Não é
- *     o octonião de Cayley-Dickson (que PERDE, não-associativo, dissipa): é dois tecidos ligados pela
- *     estrela SEM FUNDIR (arquitetura L110-111, «octoniões duais»), e a REVERSIBILIDADE é a diferença
- *     --- um passo com perda (o double/centésimos) quebra a volta (resíduo>0); o inteiro fecha (0).
- *
- *   §Z1  cada lado é um TETRAL (4): a cruz do número, 4 estados distintos --- tex e pdf
- *   §Z2  o meio é a HEXAL (6): o eixo trial (3) × a escrita/leitura (dual, 2) = 6 = lcm(2,3)
- *   §Z3  os dois tetrais -> DIM 8 REVERSÍVEL: o circuito fecha (resíduo 0); a perda quebra-o (>0)
- *   §Z4  FECHA: tex(4)-hexal(6)-pdf(4), dim 8 reversível --- não Cayley-Dickson (essa perde)
- *
- *   cc -O2 -std=c99 -Wall -I../lib circuito_tradutor.c -o circuito_tradutor && ./circuito_tradutor
+ *   cc -O2 -std=c99 -Wall -I lib tests/circuito_tradutor.c -o circuito_tradutor
  */
 #include <stdio.h>
 #include <string.h>
 #include "reta.h"
 #include "unidade.h"
-#include "le_num.h"      /* a leitura: str2dbl */
 
-typedef long long L;
-static int mesmos(double a, double b){ unsigned long long x,y; memcpy(&x,&a,8); memcpy(&y,&b,8); return x==y; }
-static double pot10(int k){ double p=1.0; for(int i=0;i<k;i++) p*=10.0; return p; }
-static double valor(int sign, long m, int k){ double g = (k>=0)?(double)m/pot10(k):(double)m*pot10(-k); return sign<0?-g:g; }
+static long pot10(int k){
+    long p = 1;
+    for(int i = 0; i < k; i++) p *= 10;
+    return p;
+}
 
 /* a ESCRITA de um lado (vírgula-fixa): sign·m·10^(-k) -> texto */
 static void escreve(char *o, int sign, long m, int k){
     char *p=o; if(sign<0)*p++='-';
     if(k<=0){ char t[24]; int n=0; long u=m; if(!u)t[n++]='0'; else while(u){t[n++]=(char)('0'+u%10);u/=10;} while(n)*p++=t[--n]; for(int i=0;i<-k;i++)*p++='0'; }
-    else { long d=1; for(int i=0;i<k;i++)d*=10; long ip=m/d,fr=m%d; char t[24]; int n=0; long u=ip; if(!u)t[n++]='0'; else while(u){t[n++]=(char)('0'+u%10);u/=10;} while(n)*p++=t[--n]; *p++='.'; for(int i=k-1;i>=0;i--){long q=fr;for(int j=0;j<i;j++)q/=10;*p++=(char)('0'+q%10);} }
+    else { long d=pot10(k); long ip=m/d,fr=m%d; char t[24]; int n=0; long u=ip; if(!u)t[n++]='0'; else while(u){t[n++]=(char)('0'+u%10);u/=10;} while(n)*p++=t[--n]; *p++='.'; for(int i=k-1;i>=0;i--){long q=fr;for(int j=0;j<i;j++)q/=10;*p++=(char)('0'+q%10);} }
     *p=0;
 }
 
+/* a LEITURA: do texto voltam (sinal, mantissa, casas) — sem strtod */
+static int le_fixo(const char *s, int *sg, long *m, int *k){
+    int sign = 1;
+    if(*s == '-'){ sign = -1; s++; }
+    else if(*s == '+') s++;
+    long ip = 0; int houve = 0;
+    while(*s >= '0' && *s <= '9'){ ip = ip*10 + (*s - '0'); s++; houve = 1; }
+    int kk = 0; long fr = 0;
+    if(*s == '.'){
+        s++;
+        while(*s >= '0' && *s <= '9'){ fr = fr*10 + (*s - '0'); kk++; s++; houve = 1; }
+    }
+    if(!houve || *s) return 0;
+    *sg = sign; *m = ip * pot10(kk) + fr; *k = kk;
+    return 1;
+}
+
 /* os dois operadores do §Z2, para a ordem se MEDIR e não se declarar */
-static void p_dual  (long *e, int n){ (void)n; e[0] = -e[0]; }              /* escrita ↔ leitura */
-static void p_trial3(long *e, int n){ (void)n;                             /* emite→atravessa→absorve */
+static void p_dual  (long *e, int n){ (void)n; e[0] = -e[0]; }
+static void p_trial3(long *e, int n){ (void)n;
     long t = e[2]; e[2] = e[1]; e[1] = e[0]; e[0] = t; }
 
 int main(void){
     printf("=== O CIRCUITO tex↔pdf FECHA: tex(4) — [hexal 6] — pdf(4), DIM 8 REVERSÍVEL ========\n\n");
 
-    /* ── §Z1 cada lado é um TETRAL (4): a cruz do número ────────────────────────────────── */
+    /* ── §Z1 cada lado é um TETRAL (4): a cruz do número, quatro racionais em Z ──── */
     long tetral_tex = 0, tetral_pdf = 0, ntot = 0;
     for(long m=1;m<=300;m++) for(int k=1;k<=3;k++){
-        double o[4] = { valor(+1,m,k), valor(-1,m,k), valor(+1,m,-k), valor(-1,m,-k) };
-        int d=1; for(int i=0;i<4&&d;i++) for(int j=i+1;j<4;j++) if(mesmos(o[i],o[j])){d=0;break;}
-        if(d){ tetral_tex++; tetral_pdf++; }   /* a mesma cruz de cada lado */
+        long p = pot10(k);
+        long num[4] = { m, -m, m*p, -m*p };
+        long den[4] = { p,  p,   1,    1 };
+        int d = 1;
+        for(int i = 0; i < 4 && d; i++)
+            for(int j = i+1; j < 4; j++)
+                if(num[i]*den[j] == num[j]*den[i]){ d = 0; break; }
+        if(d){ tetral_tex++; tetral_pdf++; }
         ntot++;
     }
     printf("      lado tex: %ld/%ld cruzes de 4 estados ; lado pdf: %ld/%ld --- dois tetrais\n\n",
            tetral_tex, ntot, tetral_pdf, ntot);
     ok("§Z1 CADA LADO é um TETRAL (grau 4): o número lê-se pela cruz (sinal do valor × sinal da escala),"
        " 4 estados distintos --- o de partida (tex, o corpo) e o de chegada (pdf, a posição). Dois"
-       " tetrais, um de cada lado", tetral_tex == ntot && tetral_pdf == ntot && ntot > 0);
+       " tetrais, um de cada lado. Os quatro sao racionais em Z, iguais sse num_i.den_j = num_j.den_i",
+       tetral_tex == ntot && tetral_pdf == ntot && ntot > 0);
 
     /* ── §Z2 o meio é a HEXAL (6): o eixo trial × a escrita/leitura ─────────────────────── */
-    /* O HEXAL SAI DAS ORDENS MEDIDAS, e não de `2 × 3` escrito à mão. O que aqui estava
-     * era `hexal = n_dir * n_eixo` com n_dir = 2 posto por mim e n_eixo = sizeof do array
-     * que eu próprio declarei com três elementos — e depois `hexal == 6`, que é
-     * `2*3 == 6`. As constantes eram minhas dos dois lados.
-     *
-     * O `thm:unificacao` mede-o de outra maneira, e é essa que se usa: o dual e o trial são
-     * OPERADORES, as suas ordens medem-se aplicando-os até voltarem, e o hexal é o menor
-     * andar onde os dois voltam JUNTOS. Assim o 6 é uma consequência e não um dado. */
-    int eixo[3] = { -1, 0, +1 };                 /* emite, atravessa, absorve */
+    int eixo[3] = { -1, 0, +1 };
     int n_eixo = (int)(sizeof eixo/sizeof eixo[0]);
     long e_dual[1] = { 1 }, e_tri[3] = { -1, 0, +1 };
-    int o_dual = rt_ordem(p_dual, e_dual, 1, 24);      /* escrita ↔ leitura: ν² = id */
-    int o_tri  = rt_ordem(p_trial3, e_tri, 3, 24);     /* o eixo trial: τ³ = id      */
+    int o_dual = rt_ordem(p_dual, e_dual, 1, 24);
+    int o_tri  = rt_ordem(p_trial3, e_tri, 3, 24);
     int hexal = 0;
     for(int t = 1; t <= 99 && !hexal; t++)
         if(o_dual > 0 && o_tri > 0 && t % o_dual == 0 && t % o_tri == 0) hexal = t;
@@ -92,33 +87,33 @@ int main(void){
        o_dual == 2 && o_tri == 3 && hexal == 6 && n_eixo == 3 && lcm == 6);
 
     /* ── §Z3 os dois tetrais -> DIM 8 REVERSÍVEL: o circuito fecha ──────────────────────── */
-    int dim_tex = 4, dim_pdf = 4, dim = dim_tex + dim_pdf;   /* 8 */
+    int dim_tex = 4, dim_pdf = 4;
     long res_rev = 0, res_perda = 0, npas = 0;
     for(long m=1;m<=500;m++) for(int k=1;k<=3;k++) for(int sg=-1;sg<=1;sg+=2){
-        double v = valor(sg,m,k);
-        char tx[40]; escreve(tx, sg, m, k);        /* escrita (tex->pdf) */
-        double volta = str2dbl(tx, NULL);          /* leitura (pdf->tex) */
-        if(!mesmos(volta, v)) res_rev++;           /* reversível: fecha */
-        long cent = (long)(v*100)/10;              /* a perda: trunca (÷10 nos centésimos) */
-        double v_perda = (double)cent/10.0;
-        if(!mesmos(v_perda, v)) res_perda++;
+        char tx[40]; escreve(tx, sg, m, k);
+        int sg2 = 0, k2 = 0; long m2 = 0;
+        if(!le_fixo(tx, &sg2, &m2, &k2) || sg2 != sg || m2 != m || k2 != k) res_rev++;
+        /* perda a um decimal: m/10^k vs floor(m/10^{k-1})/10. Iguais sse m e' multiplo de 10^{k-1}. */
+        long dec = pot10(k - 1);
+        if(m % dec != 0) res_perda++;
         npas++;
     }
     printf("§Z3  dim = %d+%d = %d ; circuito REVERSÍVEL (inteiro): %ld resíduo ; com PERDA (centésimos):"
-           " %ld de %ld quebram\n\n", dim_tex, dim_pdf, dim, res_rev, res_perda, npas);
+           " %ld de %ld quebram\n\n", dim_tex, dim_pdf, dim_tex + dim_pdf, res_rev, res_perda, npas);
     ok("§Z3 os dois tetrais formam DIM 8 (4+4), e o circuito é REVERSÍVEL: tex→[escrita]→pdf→[leitura]"
        "→tex FECHA, resíduo 0 --- por ser inteiro. NÃO é o octonião de Cayley-Dickson (que perde): um"
-       " passo com perda (centésimos, o bug do Td) quebra a volta (resíduo>0). A reversibilidade É a"
-       " diferença --- a estrela liga sem fundir, não dissipa", dim == 8 && res_rev == 0 && res_perda > 0);
+       " passo com perda (centésimos, o resto de m mod 10^{k-1}) quebra a volta (resíduo>0). A"
+       " reversibilidade É a diferença --- a estrela liga sem fundir, não dissipa",
+       dim_tex + dim_pdf == 8 && res_rev == 0 && res_perda > 0);
 
     /* ── §Z4 FECHA o circuito ──────────────────────────────────────────────────────────── */
-    int fecha = (tetral_tex == ntot && dim_tex == 4 && hexal == 6 && dim_pdf == 4
-                 && dim == 8 && res_rev == 0 && res_perda > 0);
     printf("§Z4  tex(%d) — hexal(%d) — pdf(%d) = dim %d reversível : circuito %s\n\n",
-           dim_tex, hexal, dim_pdf, dim, fecha ? "FECHA" : "ABERTO");
+           dim_tex, hexal, dim_pdf, dim_tex + dim_pdf,
+           (tetral_tex == ntot && res_rev == 0) ? "FECHA" : "ABERTO");
     ok("§Z4 O CIRCUITO FECHA: tex (tetral 4) — [hexal 6, a interface] — pdf (tetral 4), os dois tetrais"
        " em DIM 8 REVERSÍVEL. Não é Cayley-Dickson (essa perde no grau 8); é dois tecidos ligados pela"
-       " estrela, e a volta fecha (resíduo 0) --- o circuito reversível do tradutor", fecha);
+       " estrela, e a volta fecha (resíduo 0) --- o circuito reversível do tradutor",
+       tetral_tex == ntot && hexal == 6 && dim_tex + dim_pdf == 8 && res_rev == 0 && res_perda > 0);
 
     printf("==========================================================================\n");
     if(!falhas){

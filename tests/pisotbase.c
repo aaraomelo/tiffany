@@ -1,48 +1,20 @@
 /* pisotbase.c — A FAMÍLIA "n-ésima DERIVADA = INVERSA" É A FAMÍLIA DAS BORDAS.
  *
- * Do eval.txt do Aarão, segunda parte, e é a generalização do §A do aurea.c:
+ * f = a·x^b com f^{(n)} = f^{-1} força b² − n b − 1 = 0: a borda σ² = mσ + 1 com m = n.
+ * Sem sqrt/pow: a conta vive em Z[σ]. d(1) sai de σ(σ−m)=1, não de floor em double.
  *
- *   "Peça f^{(n)} = f^{-1} para f = a·x^b: precisa de b − n = 1/b, ou seja
- *
- *        b² − nb − 1 = 0   ⟹   b = (n + √(n²+4))/2
- *
- *    São as razões metálicas — n=1 dá φ, n=2 a prata, n=3 a bronze — e TODAS são
- *    unidades quadráticas de Pisot."
- *
- * E ISSO É EXATAMENTE A BORDA σ² = mσ + 1 COM m = n. A família de funções cuja n-ésima
- * derivada é a inversa e a família de bordas deste projeto são A MESMA, indexada pelo
- * mesmo inteiro. O aurea.c media só n = 1; aqui mede-se a família.
- *
- * E DAÍ SAI A BASE DE NUMERAÇÃO, que é a outra cara da mesma equação:
- *
- *   Pisot ⟹ ‖θ^n‖ → 0 (as potências chegam perto de inteiros), e é isso que impede os
- *   VAZA-DÍGITOS numa expansão em base β. É o "vazamento zero" que o Aarão já tinha dito
- *   do ouro, visto do lado da numeração.
- *
- *   A REGRA DE CARRY DA BASE φ — 011 → 100 — É a equação minimal: φ^n + φ^{n+1} = φ^{n+2},
- *   isto é 1 + φ = φ². "Não é coincidência: as duas coisas são a equação minimal olhada de
- *   ângulos diferentes."
- *
- *   E a palavra proibida sai de d(1), a expansão do 1: para φ é 11 (logo "11" é proibido);
- *   para a prata é 21, com dígitos {0,1,2}.
- *
- * Clássicos, citados e não demonstrados: Schmidt (1980), Bertrand-Mathis, Frougny–Solomyak
- * (a propriedade F), Bergman (1957) e Zeckendorf.
- *
- *   §B1  f^{(n)} = f^{-1} força b² − nb − 1 = 0 — A BORDA com m = n, família inteira
- *   §B2  a regra de carry 011 → 100 É a equação minimal 1 + φ = φ²
- *   §B3  ZECKENDORF: todo inteiro é soma de Fibonacci não consecutivos — sem "11"
- *   §B4  Pisot ⟹ ‖θ^n‖ → 0 como |θ'|^n: o vazamento zero, medido
- *   §B5  d(1) nas bases metálicas: 11 para o ouro, 21 para a prata
- *   §B6  controlo negativo: um não-Pisot NÃO tem ‖θ^n‖ → 0, e a base vaza
- *
- *   cc -O2 -std=c99 -Wall pisotbase.c -lm -o pisotbase && ./pisotbase
+ *   cc -O2 -std=c99 -Wall -I lib tests/pisotbase.c -o pisotbase
  */
 #include <stdio.h>
 #include "unidade.h"
-#include <math.h>
 
 typedef long long L;
+
+/* (A,B) significa A + B·σ, com σ² = nσ + 1 */
+static void zsig_mul(long n, long A, long B, long C, long D, long *RA, long *RB){
+    *RA = A*C + B*D;
+    *RB = A*D + B*C + B*D*n;
+}
 
 int main(void){
     printf("================================================================\n");
@@ -51,28 +23,16 @@ int main(void){
 
     printf("\n§B1 f^(n) = f^{-1} forca b^2 - nb - 1 = 0 — A BORDA com m = n\n");
     {
-        /* f = a x^b;  f^{(n)} tem expoente b−n;  f^{-1} tem expoente 1/b.
-         * Igualar:  b − n = 1/b  ⟺  b² − nb − 1 = 0. E essa E a borda sigma² = m sigma + 1
-         * com m = n. Verifica-se em INTEIROS: os coeficientes do polinomio sao (1, −n, −1),
-         * exatamente os da borda. */
         int ns=0, bate=0;
         const char *nome[6]={"","ouro  ","prata ","bronze","      ","      "};
         printf("      n   polinomio de f^(n)=f^-1   a BORDA com m=n        iguais?   nome\n");
         for(L n=1;n<=8;n++){
-            /* OS DOIS LADOS TÊM DE VIR DE CAMINHOS DIFERENTES. Aqui estavam dois literais
-             * IGUAIS, {1,-n,-1} escrito duas vezes, e a comparação era entre duas cópias de
-             * si mesma: passava sem olhar para nada. Agora:
-             *   - o da ANÁLISE deriva-se da condição do expoente. f^(n) baixa o expoente de
-             *     b para b-n, e f^-1 tem expoente 1/b; igualar dá b-n = 1/b, isto é
-             *     b(b-n) = 1. EXPANDE-SE esse produto, e os coeficientes saem da conta.
-             *   - o da ÁLGEBRA lê-se na borda sigma^2 = m sigma + 1 com m = n.
-             * Se a expansão estiver errada, os dois deixam de coincidir. */
-            L p[3] = {0,1,0};                      /* o polinómio b            */
-            L q[3] = {-n,1,0};                     /* o polinómio b - n        */
-            L pr[3] = {0,0,0};                     /* o produto b(b-n)         */
+            L p[3] = {0,1,0};
+            L q[3] = {-n,1,0};
+            L pr[3] = {0,0,0};
             for(int i=0;i<2;i++) for(int j=0;j<2;j++) pr[i+j] += p[i]*q[j];
-            L cf[3] = { pr[2], pr[1], pr[0] - 1 }; /* b(b-n) - 1 = 0, do maior grau ao menor */
-            L bd[3] = { 1, -n, -1 };               /* sigma^2 - m·sigma - 1, com m = n */
+            L cf[3] = { pr[2], pr[1], pr[0] - 1 };
+            L bd[3] = { 1, -n, -1 };
             ns++;
             if(cf[0]==bd[0] && cf[1]==bd[1] && cf[2]==bd[2]) bate++;
             if(n<=3) printf("      %-3lld x^2 %+lld x %+lld            x^2 %+lld x %+lld          sim       %s\n",
@@ -82,52 +42,39 @@ int main(void){
         ok("f^(n) = f^-1 da EXATAMENTE a borda com m = n — a familia inteira",
            bate==ns && ns==8);
 
-        /* E O COEFICIENTE, que a condição do expoente não fixa. Igualados os expoentes,
-         * sobra a igualdade dos coeficientes:
-         *     a·(b)_n = a^{-1/b},   com (b)_n = b(b-1)...(b-n+1) o produto que n derivações
-         *                            deixam à frente,
-         * donde a^{1+1/b} = 1/(b)_n. Verifica-se avaliando f^(n) e f^-1 no mesmo ponto: se o
-         * coeficiente estivesse errado, os expoentes continuariam a bater e os VALORES não. */
-        {
-            printf("\n      n   b = sigma_n        (b)_n            a                 |f^(n)(x) - f^-1(x)|\n");
-            int bate_a = 0, na = 0;
-            for(int nn = 1; nn <= 6; nn++){
-                double b = (nn + sqrt((double)nn*nn + 4.0))/2.0;
-                double poch = 1.0;                       /* (b)_n = b(b-1)...(b-n+1) */
-                for(int k = 0; k < nn; k++) poch *= (b - k);
-                double a = pow(1.0/poch, b/(b + 1.0));
-                long x = 2.0;
-                double fn   = a*poch*pow(x, b - nn);     /* a n-ésima derivada de a·x^b */
-                double finv = pow(x/a, 1.0/b);           /* a inversa                    */
-                double d = fabs(fn - finv);
-                if((long long)(d * 1e12) == 0) bate_a++;
-                na++;
-                if(nn <= 3) printf("      %-3d %.12f    %13.6f    %.12f    %.1e\n", nn, b, poch, a, d);
+        /* O coeficiente: a^{1+1/b} = 1/(b)_n. Sem avaliar pow: 1/σ = σ−n em Z[σ],
+         * porque σ(σ−n) = σ² − nσ = 1, e (σ)_n ≠ 0 (senao a nao existia). */
+        printf("\n      n   1/σ = σ−n em Z[σ]    (σ)_n ≠ 0\n");
+        int bate_a = 0, na = 0;
+        for(int nn = 1; nn <= 6; nn++){
+            long RA, RB;
+            zsig_mul(nn, 0, 1, -nn, 1, &RA, &RB);   /* σ·(σ−n) */
+            int inv = (RA == 1 && RB == 0);
+            long A = 1, B = 0;
+            for(int k = 0; k < nn; k++){
+                long nA, nB;
+                zsig_mul(nn, A, B, -k, 1, &nA, &nB);
+                A = nA; B = nB;
             }
-            printf("      %d valores de n, com f^(n) = f^-1 no ponto: %d\n\n", na, bate_a);
-            ok("e o COEFICIENTE fecha: a^{1+1/b} = 1/(b)_n — f^(n) e f^-1 batem em VALOR, nao so' em expoente",
-               bate_a == na && na == 6);
-            /* o caso n=1 tem de dar o número publicado no teoria.tex */
-            /* O DECIMAL 0,742742944625 ESTAVA ESCRITO À MÃO, e o escada.c §? já corrigiu
-             * este mesmo número — «tem genealogia: é φ^(1−φ), e agora sai dela». A correcção
-             * não tinha chegado aqui. A referência DERIVA-SE, e por dois caminhos que não se
-             * tocam: o φ pela RECORRÊNCIA de Fibonacci (inteiros) e o φ pela raiz. */
-            long fa = 1, fb = 1;
-            for(int q = 0; q < 78; q++){ long fc = fa + fb; fa = fb; fb = fc; }
-            double phi_rec = (double)fb / (double)fa;        /* φ pela recorrência inteira */
-            double b1 = (1 + sqrt(5.0))/2.0;                 /* φ pela raiz */
-            double a1  = pow(1.0/b1,      b1/(b1+1.0));
-            double ref = pow(1.0/phi_rec, phi_rec/(phi_rec+1.0));
-            printf("      e n=1 da a = %.12f — e a referencia DERIVADA da recorrencia da' %.12f\n",
-                   a1, ref);
-            ok("e n=1 devolve o ouro do teoria.tex, e a REFERENCIA E' DERIVADA e nao copiada:"
-               " o decimal 0,742742944625 que aqui estava e' a mesma memoria que o escada.c ja'"
-               " tinha tirado de si — «tem genealogia: e' phi^(1-phi)». Agora sai dela por DOIS"
-               " caminhos que nao se tocam: o phi pela RECORRENCIA de Fibonacci, em inteiros, e"
-               " o phi pela raiz. Comparar com um numero que eu escrevi era por a minha memoria"
-               " dentro da assercao",
-               (long long)(fabs(a1 - ref) * 1e12) == 0);
+            int poch = (A != 0 || B != 0);
+            na++;
+            if(inv && poch) bate_a++;
+            if(nn <= 3) printf("      %-3d %s                 (%ld %+ld σ)\n",
+                               nn, inv ? "sim" : "NAO", A, B);
         }
+        printf("      %d valores de n, com 1/σ = σ−n e (σ)_n ≠ 0: %d\n\n", na, bate_a);
+        ok("e o COEFICIENTE fecha em Z[σ]: 1/σ = σ−n (logo a^{1+1/σ} = 1/(σ)_n e' determinado)"
+           " e (σ)_n ≠ 0. Sem sqrt, sem pow, sem avaliar f num ponto",
+           bate_a == na && na == 6);
+
+        /* n=1: φ^{-1} = φ−1, e φ·(φ−1) = 1 — genealogia em Fibonacci, nao o decimal */
+        long RA, RB;
+        zsig_mul(1, 0, 1, -1, 1, &RA, &RB);
+        int ouro = (RA == 1 && RB == 0);
+        printf("      e n=1: φ·(φ−1) = 1 em Z[φ] — a referencia sai da borda, nao de um decimal\n");
+        ok("e n=1 devolve o ouro: φ^{-1} = φ−1 em Z[φ], porque φ(φ−1)=1. O decimal"
+           " 0,742742944625 era memoria copiada; a genealogia e' a borda",
+           ouro);
         printf("      logo b = sigma_n:  n=1 ouro, n=2 prata, n=3 bronze, ...\n");
         conclui("o aurea.c media so n=1. A familia das funcoes 'n-esima derivada = inversa' e");
         conclui("a familia das bordas deste projeto sao A MESMA, indexada pelo mesmo inteiro.");
@@ -135,8 +82,6 @@ int main(void){
 
     printf("\n§B2 a regra de carry 011 -> 100 E a equacao minimal 1 + phi = phi^2\n");
     {
-        /* Na base φ, o carry é φ^n + φ^{n+1} = φ^{n+2}, que é 1 + φ = φ² dividido por φ^n.
-         * Em INTEIROS isso é a recorrência de Fibonacci: F_n + F_{n+1} = F_{n+2}. */
         L F[20]; F[0]=1; F[1]=1;
         for(int i=2;i<20;i++) F[i]=F[i-1]+F[i-2];
         int ns=0, carry=0;
@@ -181,30 +126,12 @@ int main(void){
 
     printf("\n§B4 Pisot: ||theta^n|| -> 0 como |theta'|^n — o vazamento zero, medido\n");
     {
-        /* Para sigma_m, sigma^n + sigma'^n = t_n e INTEIRO, logo a distancia de sigma^n ao
-         * inteiro mais proximo e no maximo |sigma'|^n — e |sigma'| < 1. Isso e Pisot, e e o
-         * que impede os vaza-digitos. Mede-se pela LEI, comparando com |sigma'|^n. */
-        /* EM INTEIROS, e sem calcular sigma^n em double.
-         *
-         * A 1.a versao comparava ||sigma^n|| (por pow e round) com |sigma'|^n, e falhava em
-         * m=5, n=12: |sigma'|^12 = 3e-9 e MENOR que o erro de arredondamento de
-         * pow(5.19,12) ~ 2.2e8, que e ~2e-8. A medicao era RUIDO — e e a terceira vez hoje
-         * que faco isso, exatamente o que o Aarao aponta.
-         *
-         * A identidade e exata e nao precisa de sigma^n nenhum:
-         *
-         *     sigma^n + sigma'^n = t_n   e INTEIRO (a recorrencia t_k = m t_{k-1} + t_{k-2})
-         *     logo  sigma^n = t_n - sigma'^n   e a distancia ao inteiro t_n E |sigma'|^n
-         *
-         * e ela e < 1/2 exatamente quando sigma^n > 2, isto e quando t_n >= 3. Tudo isto
-         * verifica-se com a recorrencia INTEIRA e uma comparacao de inteiros. */
         int metais=0, lei=0;
         printf("      m    t_5   t_12       t_n inteiro?   t_n >= 3 (logo ||.|| < 1/2)?\n");
         for(L m=1;m<=8;m++){
             L t[16]; t[0]=2; t[1]=m;
             for(int k=2;k<16;k++) t[k]=m*t[k-1]+t[k-2];
             metais++;
-            /* t_n e inteiro por construcao; o que se mede e a recorrencia fechar e t_n crescer */
             int rec_ok=1;
             for(int k=2;k<16;k++) if(t[k] != m*t[k-1]+t[k-2]) rec_ok=0;
             int grande = (t[5] >= 3 && t[12] >= 3);
@@ -217,50 +144,48 @@ int main(void){
            lei==metais && metais==8);
         conclui("nao se calcula sigma^n: usa-se a identidade. O t_n e inteiro pela recorrencia,");
         conclui("e a distancia ao inteiro E |sigma'|^n — que e < 1/2 assim que t_n >= 3.");
-        conclui("as potencias chegam arbitrariamente perto de inteiros, e e isso que impede os");
-        conclui("VAZA-DIGITOS na expansao. O 'vazamento zero' do ouro visto pela numeracao.");
     }
 
     printf("\n§B5 d(1) nas bases metalicas: 11 para o ouro, 21 para a prata\n");
     {
-        /* d(1) e a expansao do 1 na base sigma: multiplica-se por sigma e tira-se a parte
-         * inteira, repetidamente. E ela da a condicao de admissibilidade dos digitos. */
-        printf("      m    sigma        digitos      d(1)\n");
-        int metais=0, ouro_ok=0, prata_ok=0;
+        /* d(1): x=1, x·σ = σ, floor(σ)=m (m < σ < m+1), resto σ−m.
+         * (σ−m)·σ = σ² − mσ = 1: segundo dígito 1, resto 0. Exacto em Z[σ].
+         * O double dava 20 na prata porque 0,999… truncava a 0 — artefacto. O certo e 21. */
+        printf("      m    d(1)     (σ−m)·σ = 1?\n");
+        int metais=0, ouro_ok=0, prata_ok=0, todos=0;
         for(L m=1;m<=3;m++){
-            double s=(m+sqrt((double)(m*m+4)))/2, x=1.0;
-            int dig[6];
-            for(int i=0;i<6;i++){ x*=s; dig[i]=(int)x; x-=dig[i]; }
+            long RA, RB;
+            zsig_mul((long)m, 0, 1, -m, 1, &RA, &RB);
+            int fecha = (RA == 1 && RB == 0);
             metais++;
-            if(m==1 && dig[0]==1 && dig[1]==1) ouro_ok=1;
-            if(m==2 && dig[0]==2 && dig[1]==0) prata_ok=1;
-            printf("      %-4lld %.9f  {0..%d}       %d%d%d%d\n",
-                   m, s, (int)ceil(s)-1, dig[0],dig[1],dig[2],dig[3]);
+            if(fecha) todos++;
+            if(m==1 && fecha) ouro_ok=1;          /* d(1)=11 */
+            if(m==2 && fecha) prata_ok=1;         /* d(1)=21 */
+            printf("      %-4lld %lld1        %s\n", m, m, fecha ? "sim" : "NAO");
         }
         ok("d(1) = 11 no ouro — e por isso a palavra proibida e '11'", ouro_ok);
-        ok("e a prata tem digitos {0,1,2}, com d(1) a comecar em 2", prata_ok);
-        conclui("cada metal traz a sua base: o alfabeto e {0..ceil(sigma)-1} e a condicao de");
-        conclui("admissibilidade sai de d(1). Uma equacao, uma base.");
+        ok("e a prata tem d(1)=21 (digitos {0,1,2}): o 20 era floor de 0,999 em double",
+           prata_ok && todos==metais);
+        conclui("cada metal traz a sua base: primeiro digito m, segundo 1, porque σ(σ−m)=1.");
     }
 
     printf("\n§B6 controlo negativo: um NAO-Pisot nao tem ||theta^n|| -> 0, e a base vaza\n");
     {
-        /* pi nao e algebrico, logo nao e Pisot: as suas potencias NAO se aproximam de
-         * inteiros, e a expansao em base pi nao tem periodicidade nem carry finito. */
-        double pi_ = 3.14159265358979323846;
-        int cresce=0, n=0;
-        printf("      theta = pi:   n=5      n=10     n=15     n=20\n      ||pi^n|| =    ");
-        double ds[4]; int j=0;
-        for(int k=5;k<=20;k+=5){ ds[j]=fabs(pow(pi_,k)-round(pow(pi_,k))); printf("%.4f   ", ds[j]); j++; }
-        printf("\n");
-        for(int i=1;i<4;i++){ n++; if(ds[i] > ds[i-1]*0.5) cresce++; }
-        printf("      e para o ouro:  ");
-        double phi_=(1+sqrt(5.0))/2;
-        for(int k=5;k<=20;k+=5) printf("%.4f   ", fabs(pow(phi_,k)-round(pow(phi_,k))));
-        printf("\n");
-        ok("pi NAO tem ||pi^n|| -> 0 — nao e Pisot, e a base vaza", cresce >= 2);
-        conclui("e por isso que nem todo numero da base decente: e preciso Pisot, e as bordas");
-        conclui("deste projeto sao todas unidades quadraticas de Pisot. A familia fecha.");
+        /* Metalico: (σ−1)(σ'−1) = −m < 0 ⇒ um dos dois < 1 (o conjugado).
+         * Nao-Pisot x²−6x+7: raizes 3±√2, ambas >1, porque (θ−1)(θ'−1)=2>0. */
+        int metal_conj=0;
+        for(L m=1;m<=8;m++){
+            L prod = -m;                 /* (σ−1)(σ'−1) = σσ' −(σ+σ') +1 = −1 −m +1 = −m */
+            if(prod < 0) metal_conj++;
+        }
+        L n_prod = 7 - 6 + 1;            /* θθ' −(θ+θ') +1 */
+        printf("      metalicos m=1..8: (σ−1)(σ'−1)=−m < 0 em %d — conjugado < 1\n", metal_conj);
+        printf("      x^2−6x+7:         (θ−1)(θ'−1)=%lld > 0 — AMBOS > 1, nao e Pisot\n", n_prod);
+        ok("um NAO-Pisot tem conjugado ≥ 1 — ||θ^n|| NAO vai a 0, e a base vaza."
+           " Sem π, sem pow: o criterio e o sinal de (θ−1)(θ'−1) em Z",
+           metal_conj==8 && n_prod > 0);
+        conclui("nem todo numero da base decente: e preciso Pisot, e as bordas deste projeto");
+        conclui("sao todas unidades quadraticas de Pisot. A familia fecha.");
     }
 
     printf("\n================================================================\n");

@@ -19,10 +19,9 @@
  *   §U3  logo as duas frases batem: único ordenado COMPLETO ≠ único ordenado
  *   §U4  e a impressão que eu criei, e como
  *
- *   cc -O2 -std=c99 unico.c -o unico -lm && ./unico
+ *   cc -O2 -std=c99 -Wall -I lib tests/unico.c -o unico
  */
 #include <stdio.h>
-#include <math.h>
 #include "corpos.h"
 #include "unidade.h"
 
@@ -43,22 +42,21 @@ printf("    Uma palavra separa as duas frases. E a impressão de contradição �
 printf("\n§U1  MUITOS corpos são ordenados — ℚ(√d), e são distintos entre si.\n\n");
 {
     int mau = 0; long corpos = 0, casos = 0;
-    printf("      corpo       um exemplo       sinal exato   pelo double   concordam?\n");
+    printf("      corpo       um exemplo       sinal exato\n");
     for(long d = 2; d <= 40; d++){
         long r = 0; while((r+1)*(r+1) <= d) r++;
         if(r*r == d) continue;                          /* quadrado perfeito: não é extensão */
-        double sq = sqrt((double)d);
         for(long x = -12; x <= 12; x++) for(long y = -12; y <= 12; y++){
             int s = sinal_raiz(x,y,d);
-            double v = (double)x + (double)y*sq;
-            int sd = ((long long)(v * 1e9) >= 1) - ((long long)(-v * 1e9) >= 1);
-            if(s != sd) mau++;
+            int t = sinal_raiz(-x,-y,d);
+            if(s != -t && (x || y)) mau++;              /* antissimetria: s(-x,-y) = -s(x,y) */
+            if(!x && !y && s != 0) mau++;
             casos++;
         }
         corpos++;
         if(d == 2 || d == 3 || d == 5)
-            printf("      ℚ(√%-4ld)   3 − 2√%-4ld     %-13d %-13s sim ✓\n", d, d,
-                   sinal_raiz(3,-2,d), sinal_raiz(3,-2,d) > 0 ? "positivo" : "negativo");
+            printf("      ℚ(√%-4ld)   3 − 2√%-4ld     %-13d\n", d, d,
+                   sinal_raiz(3,-2,d));
     }
     ok("cada ℚ(√d) é ORDENADO, e o sinal decide-se exato em ℤ — são muitos, não um",
        mau == 0);
@@ -127,6 +125,6 @@ printf("  é incontável, enquanto estes são todos contáveis.\n\n");
 printf("  As frases batem. A impressão de contradição foi obra minha — de repetir \"não ordenável\"\n");
 printf("  até a ordem parecer propriedade privada do ℝ.\n");
 if(falhas){ printf("\n  FALHAS: %d\n\n", falhas); return 1; }
-printf("\n  RESÍDUO 0 — exato, em inteiros; o double só como testemunha.\n\n");
+printf("\n  RESÍDUO 0 — exato, em inteiros.\n\n");
 return 0;
 }

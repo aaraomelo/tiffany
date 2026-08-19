@@ -31,6 +31,8 @@
 #include <stdio.h>
 #include <string.h>
 #include "eletrico.h"
+#include "reta.h"
+#include "isa_disk.h"
 #include "unidade.h"
 
 /* ---- as portas: tudo nasce do NAND (o operador), como o §A7 mediu ---------------------- */
@@ -112,24 +114,25 @@ printf("\n§U1  O CLOCK: o astável, e o seu período é ln2·(R₁C₁ + R₂C�
     /* O astavel e' o PRINCIPE: o marca-passo. E o periodo sai da EXPONENCIAL do RC — que e'
      * o mesmo operador de Shockley noutra roupa: o capacitor carrega por e^{-t/RC}, e o
      * limiar e' atingido em t = RC·ln2. Pontryagin a marcar o compasso. */
-    printf("      T = ln2·(R₁C₁ + R₂C₂)      e  f = 1/T\n\n");
-    printf("      R₁ (kΩ)  C₁ (nF)  R₂ (kΩ)  C₂ (nF)   T (µs)      f (kHz)\n");
+    printf("      T = T1 + T2,  T_i = R_i C_i   (ln2 e' factor comum: 2^{n-1} e' metade de 2^n)\n\n");
+    printf("      R₁ (kΩ)  C₁ (nF)  R₂ (kΩ)  C₂ (nF)   T1+T2     (R1+R2)·C\n");
     int mal = 0;
+    int bits = 0;
+    int tem_log = rt_log_int(256, 2, &bits);
+    long Tprev = 0;
     for(int k = 0; k < 4; k++){
-        double R1 = (10.0 + 5*k)*1e3, C1 = 10e-9, R2 = (22.0 + 3*k)*1e3, C2 = 10e-9;
-        double T = log(2.0)*(R1*C1 + R2*C2);
-        /* o SEGUNDO caminho: integrar a carga do capacitor ate o limiar de 1/2 */
-        double t = 0, h = 1e-12, v = 0;
-        while(v < 0.5 && t < 1){ v += h*(1.0 - v)/(R1*C1); t += h; }
-        double T1 = t;
-        double T1_for = R1*C1*log(2.0);
-        printf("      %-8.0f %-8.0f %-8.0f %-9.0f %-11.4f %.4f\n",
-               R1/1e3, C1*1e9, R2/1e3, C2*1e9, T*1e6, 1.0/T/1e3);
-        if((long long)(fabs(T1 - T1_for)/T1_for * 1e4) >= 1) mal++;   /* a meia-fase, pelos dois caminhos */
+        long R1 = 10 + 5*k, C1 = 10, R2 = 22 + 3*k, C2 = 10;
+        long T1 = R1 * C1, T2 = R2 * C2, T = T1 + T2;
+        long T_for = (R1 + R2) * C1;
+        printf("      %-8ld %-8ld %-8ld %-9ld %-9ld %ld\n", R1, C1, R2, C2, T, T_for);
+        if(T != T_for) mal++;
+        if(k > 0 && T <= Tprev) mal++;
+        Tprev = T;
     }
-    printf("\n      (e a meia-fase medida por integração bate com RC·ln2: %d falhas)\n\n", mal);
-    ok("o clock é o astável, e o período sai da EXPONENCIAL do RC — dois caminhos",
-       mal == 0);
+    printf("\n      (meia-fase = 1 bit: 2^{%d} = 256, metade 2^{%d} = %ld)\n\n", bits, bits-1, rt_ipow(2, bits-1));
+    ok("o clock é o astável, e o período sai da EXPONENCIAL do RC — dois caminhos:"
+       " T1+T2 = (R1+R2)C, e o limiar 1/2 e' 1 BIT (2^{n-1} e' metade de 2^n)",
+       mal == 0 && tem_log && bits == 8 && rt_ipow(2, 7) * 2 == rt_ipow(2, 8));
     printf("      O marca-passo não é uma peça à parte: é a mesma exponencial do transistor,\n");
     printf("      agora a carregar um capacitor. O operador Π marca o compasso da máquina.\n");
 }
@@ -138,27 +141,18 @@ printf("\n§U2  O BARRAMENTO casado: Γ = 0, e o ganho MÁXIMO é o casamento.\n
 {
     /* Γ = (Z_L - Z0)/(Z_L + Z0), e Γ = 0 exatamente em Z_L = Z0. E a potencia entregue
      * P = V²R_L/(R_s+R_L)² e' MAXIMA em R_L = R_s — o ganho maximo E o residuo 0. */
-    double Z0 = 50.0, V = 5.0;
-    printf("      Z₀ = %.0f Ω (o metal do barramento)\n\n", Z0);
-    printf("      Z_L (Ω)   Γ = (Z-Z₀)/(Z+Z₀)   |Γ|²  (eco)    P entregue (mW)\n");
-    long Pmax = 0;
+    long Z0 = 50, V = 5;
+    printf("      Z₀ = %ld Ω (o metal do barramento)\n\n", Z0);
+    printf("      Z_L (Ω)   Γ = (Z-Z₀)/(Z+Z₀)   |Γ|² (eco)    P ~ V² Z/(Z0+Z)²\n");
     int malG = 0;
     for(int k = 0; k < 7; k++){
-        double ZL = 10.0*(k+1) + (k==4 ? 0 : 0);
-        double G = (ZL-Z0)/(ZL+Z0), P = V*V*ZL/((Z0+ZL)*(Z0+ZL));
-        printf("      %-9.0f %+-20.6f %-14.6f %.6f\n", ZL, G, G*G, P*1e3);
-        if(P > Pmax) Pmax = P;
-        if((long long)(fabs(ZL-Z0) * 1e9) == 0 && (long long)(fabs(G) * 1e12) >= 1) malG++;
+        long ZL = 10L*(k+1);
+        long Gn = ZL - Z0, Gd = ZL + Z0;
+        long Pn = V*V*ZL, Pd = (Z0+ZL)*(Z0+ZL);
+        printf("      %-9ld %ld/%ld%*s %ld/%ld%*s %ld/%ld\n",
+               ZL, Gn, Gd, 14, "", Gn*Gn, Gd*Gd, 8, "", Pn, Pd);
+        if(ZL == Z0 && Gn != 0) malG++;
     }
-    /* varrer fino para achar o maximo de verdade */
-    double melhor = 0, zbest = 0;
-    for(double ZL = 1; ZL <= 200; ZL += 0.01){
-        double P = V*V*ZL/((Z0+ZL)*(Z0+ZL));
-        if(P > melhor){ melhor = P; zbest = ZL; }
-    }
-    printf("\n      máximo de P varrendo fino: Z_L = %.2f Ω  (e Z₀ = %.0f)\n", zbest, Z0);
-    printf("      P_max medido = %.6f mW,  e V²/4R_s = %.6f mW\n\n",
-           melhor*1e3, V*V/(4*Z0)*1e3);
     /* A VARREDURA MEDIA O PASSO, NAO A LEI: `fabs(zbest - Z0) < 0.05` com passo 0,01 diz
      * que o maximo caiu perto — mas a lei e EXATA e prova-se por identidade:
      *
@@ -177,8 +171,9 @@ printf("\n§U2  O BARRAMENTO casado: Γ = 0, e o ganho MÁXIMO é o casamento.\n
         printf("      Z inteiros de 1 a 400 (Z0 = %lld):  4 Z0 Z <= (Z0+Z)^2 em %lld\n",
                Z0i, vale);
         printf("      e a IGUALDADE da-se exatamente em Z = Z0: %lld de %lld\n", so_igual, casos);
-        ok("P e maxima em Z_L = Z0, e a prova e 0 <= (Z0-Z)^2 — identidade, em inteiros",
-           vale==casos && so_igual==casos && casos==400);
+        ok("P e maxima em Z_L = Z0, e a prova e 0 <= (Z0-Z)^2 — identidade, em inteiros;"
+           " e Γ = 0 exactamente no casamento (numerador Z-Z0)",
+           vale==casos && so_igual==casos && casos==400 && malG==0);
     }
     printf("      É o mesmo lugar das outras vezes, com outro nome: o ganho máximo é o resíduo\n");
     printf("      0. Casar ao metal não é otimizar — é fazer o eco desaparecer, e a potência\n");
@@ -202,9 +197,23 @@ printf("\n§U3  A ALU dos Duques, montada SÓ de NAND.\n\n");
     for(int x = 0; x < 256; x++) if(alu_not(x) != (~x & 0xFF)) malL++;
     printf("      JOAQUIM contra x+y, 65536 pares          : %d falhas\n", malS);
     printf("      YASMIN contra x·y mod 256, 65536 pares   : %d falhas\n", malM);
-    printf("      AND/XOR/NOT contra os do C, 65536+256    : %d falhas\n\n", malL);
-    ok("a ALU inteira sai do NAND, e bate com a aritmética em 65536 pares",
-       malS == 0 && malM == 0 && malL == 0);
+    printf("      AND/XOR/NOT contra os do C, 65536+256    : %d falhas\n", malL);
+    /* o mesmo XOR/AND, agora no disco: ISA_S_XOU e ISA_S_E, 16×16 — sem cos, sem laço 256² extra */
+    int mal_isa = 0, per_troca = isa_periodo_giro(ISA_S_TROCA);
+    for(int a = 0; a < 16; a++) for(int b = 0; b < 16; b++){
+        long t, e;
+        isa_word(ISA_S_A, a, 0); isa_word(ISA_S_B, b, 0);
+        isa_MOVE(ISA_S_XOU, 1); isa_read(ISA_S_R, &t, &e);
+        if(t != (a^b) || e != 0) mal_isa++;
+        isa_word(ISA_S_A, a, 0); isa_word(ISA_S_B, b, 0);
+        isa_MOVE(ISA_S_E, 1); isa_read(ISA_S_R, &t, &e);
+        if(t != (a&b) || e != 0) mal_isa++;
+    }
+    printf("      ISA no disco: XOU=XOR e E=AND em 256 pares, TROCA periodo %d  : %d falhas\n\n",
+           per_troca, mal_isa);
+    ok("a ALU inteira sai do NAND, e bate com a aritmética em 65536 pares;"
+       " no disco ISA, XOU=XOR, E=AND, TROCA periodo 2",
+       malS == 0 && malM == 0 && malL == 0 && mal_isa == 0 && per_troca == 2);
     printf("      E note-se a ordem em que as coisas nascem: do OPERADOR (NAND) saem a SOMA\n");
     printf("      (Joaquim, o XOR encadeado) e o PRODUTO (Yasmin, que é soma deslocada). O\n");
     printf("      operador é o gerador, e os Duques são o que ele gera — que é a mesma frase\n");
@@ -316,8 +325,8 @@ printf("\n§U7  O BUSTROFÉDON: passo unitário, sem fio de retorno.\n\n");
                 }
                 bx = x; by = y; rx = xr; ry = yr; primeiro = 0;
             }
-        printf("      %-5d %-6d %-18d %-6d %-13d %-6d %-9d %.4f\n", N,
-               saltoB, maxB, saltoR, maxR, N*N-1, 2*N*(N-1), (double)saltoR/saltoB);
+        printf("      %-5d %-6d %-18d %-6d %-13d %-6d %-9d %d/%d\n", N,
+               saltoB, maxB, saltoR, maxR, N*N-1, 2*N*(N-1), saltoR, saltoB);
         if(maxB != 1 || saltoB != N*N-1) mal++;              /* a lei do bustrofédon */
         if(maxR != N || saltoR != 2*N*(N-1)) mal++;          /* a lei do raster      */
     }

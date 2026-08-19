@@ -38,9 +38,10 @@
 #include "../lib/disco.h"
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include <ctype.h>
+#include "reta.h"
 #include "unidade.h"
+#include "isa_disk.h"
 
 #define LMAX 8192
 
@@ -203,40 +204,29 @@ printf("\n§N4  TRADUÇÃO: 64 → 21 PARECE perder — e o lado dual mostra que
         if(conta[c]){ printf("      %-12c %d\n", c, conta[c]); mostrados++; }
     printf("      …  (%d saídas distintas para 64 codões)\n\n", distintos);
 
-    double H_entra = log2(64.0);
-    double H_sai = 0;
-    for(int c = 0; c < 128; c++) if(conta[c]){
-        double p = conta[c]/64.0;
-        H_sai -= p*log2(p);
-    }
-    printf("      entropia à ENTRADA (64 codões equiprováveis)  %.4f bits\n", H_entra);
-    printf("      entropia à SAÍDA  (%d aminoácidos, pesados)    %.4f bits\n", distintos, H_sai);
-    printf("      INFORMAÇÃO PERDIDA por codão                  %.4f bits\n\n", H_entra - H_sai);
-    ok("o código é degenerado: menos saídas do que codões", distintos < 64);
+    int bits_codon = 0;
+    int tem_log = rt_log_int(64, 2, &bits_codon);
+    printf("      entropia à ENTRADA: 64 = 2^%d bits (rt_log_int, sem log2)\n", bits_codon);
+    printf("      saídas distintas: %d aminoácidos para 64 codões\n\n", distintos);
+    ok("o código é degenerado: menos saídas do que codões — e 64 codoes SAO 2^6 bits,"
+       " medido por rt_log_int, sem log2",
+       distintos < 64 && tem_log && bits_codon == 6);
 
     /* ── E AQUI A MINHA CONCLUSÃO ESTAVA ERRADA, E O AARÃO CORRIGIU-A ──────────────────────
      *
      * Eu ia escrever "a tradução NÃO é invertível" e parar. O Aarão: "todo código é
      * reversível, inclusive Hurwitz, pois a torre é dual — nada é reversível só de um lado."
      *
-     * E é isso mesmo. Os 1,78 bits não desaparecem: MUDAM DE LADO. Os codões sinónimos
+     * E é isso mesmo. Os bits que pareciam perder-se MUDAM DE LADO. Os codões sinónimos
      * diferem quase sempre na terceira base, portanto o codão parte-se em duas metades —
      *
      *     codão  =  (aminoácido, qual sinónimo)
      *
      * — e se a informação apenas mudou de lado, a soma tem de fechar EXATAMENTE, pela regra da
-     * cadeia: H(codão) = H(aa) + H(sinónimo | aa). Não é uma esperança: é um teorema, e ou o
-     * número bate ou a minha leitura estava errada outra vez. Mede-se. */
-    double H_dual = 0;
-    for(int c = 0; c < 128; c++) if(conta[c]){
-        double p = conta[c]/64.0;
-        H_dual += p * log2((double)conta[c]);      /* a incerteza que resta DENTRO de cada aa */
-    }
+     * cadeia: H(codão) = H(aa) + H(sinónimo | aa). Nas CONTAGENS: Σ n_c = 64. */
     printf("      E O LADO DUAL — qual dos sinónimos foi usado:\n\n");
-    printf("        H(aminoácido)              %.4f bits   (o lado que se vê)\n", H_sai);
-    printf("        H(sinónimo | aminoácido)   %.4f bits   (o lado dual)\n", H_dual);
-    printf("        soma                       %.4f bits\n", H_sai + H_dual);
-    printf("        H(codão)                   %.4f bits\n\n", H_entra);
+    printf("        H(codão) = 6 bits = log2(64), inteiro\n");
+    printf("        o dual é o ÍNDICE do sinónimo dentro da classe (contagem n_c)\n\n");
     /* A IDENTIDADE VIVE NAS CONTAGENS, e essas são inteiras. Somar entropias em bits e
      * comparar com 1e-12 mede o arredondamento do log2; a cadeia
      *     H(codão) = H(aa) + H(sinónimo|aa)
@@ -255,8 +245,6 @@ printf("\n§N4  TRADUÇÃO: 64 → 21 PARECE perder — e o lado dual mostra que
         conclui("a cadeia da entropia sai daqui: se a partição fecha, os bits fecham. Comparar");
         conclui("H em bits com tolerância mede o log2; comparar as contagens mede a partição.");
     }
-    printf("        (em bits: %.4f + %.4f = %.4f contra %.4f)\n",
-           H_sai, H_dual, H_sai + H_dual, H_entra);
 
     /* e a reconstrução, que é a prova operacional: com os dois lados volta-se ao codão exato */
     int mau_volta = 0;
@@ -284,8 +272,8 @@ printf("\n§N4  TRADUÇÃO: 64 → 21 PARECE perder — e o lado dual mostra que
        mau_volta == 0);
     printf("      Eu ia concluir que a tradução não é invertível, e a conclusão estava errada\n");
     printf("      por olhar um lado só. A função aminoácido não é injetiva — isso é verdade —\n");
-    printf("      mas o PAR é bijeção, e os %.4f bits que \"faltavam\" são exatamente o que o\n", H_dual);
-    printf("      lado dual carrega. É a mesma estrutura da torre de Hurwitz: subir parece\n");
+    printf("      mas o PAR é bijeção, e os bits que \"faltavam\" são exactamente o índice do\n");
+    printf("      sinónimo. É a mesma estrutura da torre de Hurwitz: subir parece\n");
     printf("      perder, e o que se perde está na torre que desce.\n");
 }
 
@@ -313,7 +301,7 @@ printf("\n§N5  MUTAÇÃO e REPARO: irreversível sem registo, reversível com e
     printf("      mutações aplicadas          %d\n", nm);
     printf("      posições diferentes         %d\n", difs);
     printf("      sem registo, hipóteses por posição:  3 (as outras bases)\n");
-    printf("      logo o espaço a adivinhar:  3^%d = %.0f\n", difs, pow(3.0, difs));
+    printf("      logo o espaço a adivinhar:  3^%d = %ld\n", difs, rt_ipow(3, difs));
 
     /* com registo: o reparo devolve exatamente */
     char *rep = DISCO_FIXO(char, 84);
@@ -329,8 +317,8 @@ printf("\n§N5  MUTAÇÃO e REPARO: irreversível sem registo, reversível com e
     ok("a mutação muda mesmo a fita — não é uma operação vazia", difs == nm);
     ok("e o reparo COM registo devolve o original, exato",
        dif_rep == 0 && !memcmp(ck0, ckr, sizeof ck0));
-    printf("      Sem registo há %.0f fitas compatíveis com o que se vê, e nenhuma razão para\n",
-           pow(3.0, difs));
+    printf("      Sem registo há %ld fitas compatíveis com o que se vê, e nenhuma razão para\n",
+           rt_ipow(3, difs));
     printf("      preferir a certa. A reversão não é uma propriedade da mutação: é uma\n");
     printf("      propriedade de haver quem a tenha anotado.\n");
 }
@@ -349,26 +337,30 @@ printf("\n§N6  A LEI É A SIMÉTRICA, e ela dobra-se com operações ANTISSIMÉ
      * E a forma geral disto mede-se, e nao e' sobre DNA: dada QUALQUER involucao s, todo x
      * parte-se em S = (x+s(x))/2 (simetrica, s(S)=+S) e A = (x-s(x))/2 (antissimetrica,
      * s(A)=-A), com x = S+A sempre. A involucao separa; somar de volta desdobra. */
-    printf("      Dada uma involução s, todo x parte-se em S = (x+s(x))/2 e A = (x-s(x))/2:\n\n");
-    printf("      x         s(x)      S (simétrica)   A (antissim.)   S+A = x?   s(S)=S, s(A)=-A?\n");
+    printf("      Dada uma involução s, todo x parte-se em 2S = x+s(x) e 2A = x-s(x),\n");
+    printf("      em Z — sem dividir por 2. A involução no disco é TROCA, período 2.\n\n");
+    printf("      x         s(x)      2S              2A              2S+2A=2x?  s(2S)=2S, s(2A)=-2A?\n");
     int mau_soma = 0, mau_sim = 0, mau_anti = 0; long casos = 0;
+    int per_troca = isa_periodo_giro(ISA_S_TROCA);
     for(int i = -6; i <= 6; i++) for(int j = -6; j <= 6; j++){
-        double x[2] = { (double)i, (double)j };
-        double sx[2] = { x[1], x[0] };            /* a involução: trocar as componentes */
-        double S[2] = { (x[0]+sx[0])/2, (x[1]+sx[1])/2 };
-        double A[2] = { (x[0]-sx[0])/2, (x[1]-sx[1])/2 };
-        double sS[2] = { S[1], S[0] }, sA[2] = { A[1], A[0] };
-        if(fabs(S[0]+A[0]-x[0]) != 0.0 || fabs(S[1]+A[1]-x[1]) != 0.0) mau_soma++;
-        if(fabs(sS[0]-S[0]) != 0.0 || fabs(sS[1]-S[1]) != 0.0) mau_sim++;
-        if(fabs(sA[0]+A[0]) != 0.0 || fabs(sA[1]+A[1]) != 0.0) mau_anti++;
+        long x0 = i, x1 = j;
+        long sx0 = j, sx1 = i;                 /* TROCA: (t,e) → (e,t) */
+        long S0 = x0 + sx0, S1 = x1 + sx1;     /* 2S */
+        long A0 = x0 - sx0, A1 = x1 - sx1;     /* 2A */
+        long sS0 = S1, sS1 = S0, sA0 = A1, sA1 = A0;
+        if(S0 + A0 != 2*x0 || S1 + A1 != 2*x1) mau_soma++;
+        if(sS0 != S0 || sS1 != S1) mau_sim++;
+        if(sA0 != -A0 || sA1 != -A1) mau_anti++;
         casos++;
         if(i == 3 && j >= 4 && j <= 5)
-            printf("      (%2.0f,%2.0f)   (%2.0f,%2.0f)   (%.1f,%.1f)       (%.1f,%.1f)      sim        sim\n",
-                   x[0],x[1], sx[0],sx[1], S[0],S[1], A[0],A[1]);
+            printf("      (%2ld,%2ld)   (%2ld,%2ld)   (%ld,%ld)         (%ld,%ld)         sim        sim\n",
+                   x0, x1, sx0, sx1, S0, S1, A0, A1);
     }
-    printf("\n      %ld casos\n\n", casos);
-    ok("todo x é S + A — a dobra não perde nada, só reparte", mau_soma == 0);
-    ok("a involução FIXA a parte simétrica: s(S) = S", mau_sim == 0);
+    printf("\n      %ld casos ; TROCA periodo %d\n\n", casos, per_troca);
+    ok("todo x é S + A — a dobra não perde nada, só reparte. Em Z: 2S+2A = 2x, sem metade",
+       mau_soma == 0);
+    ok("a involução FIXA a parte simétrica: s(S) = S — e no disco TROCA tem periodo 2",
+       mau_sim == 0 && per_troca == 2);
     ok("e TROCA O SINAL da antissimétrica: s(A) = -A — é a dobra", mau_anti == 0);
     printf("      É isto a lei, e o resto são casos dela. No DNA: a lei são os 6 bits do codão\n");
     printf("      (a simétrica, conservada); a tradução é a dobra que os reparte em 4,2181 +\n");

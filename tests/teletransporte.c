@@ -36,16 +36,16 @@
  *   §X5  a REVERSÃO GARANTIDA: e o controlo, porque zero é o que eu queria ver
  *   §X6  a TELEMETRIA: o protocolo corrido de ponta a ponta, e o resíduo total
  *
- *   cc -O2 -std=c99 -I. teletransporte.c -lm -o teletransporte && ./teletransporte
+ *   cc -O2 -std=c99 -Wall -I lib tests/teletransporte.c -o teletransporte
  */
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include "../lib/disco.h"
 #include <string.h>
-#include <math.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include "unidade.h"
+#include "reta.h"
 #include "cifra.h"          /* o codificador exato, em inteiros — não se escreve um segundo */
 
 #define NMAX 1024
@@ -79,22 +79,28 @@ printf("    por uma operação com volta exata, e o que sai é o que entrou.\n")
 
 printf("\n§X1  O TELÓMERO É RECIPIENTE INFINITO: período finito, conteúdo sem fim.\n\n");
 {
-    /* A fracao continua de sigma_m nao termina — o numero e' irracional, tem infinitas casas —
-     * e mesmo assim o telomero fecha num periodo. Mede-se as duas coisas ao mesmo tempo: que o
-     * periodo e' finito, e que a RECONSTRUCAO a partir dele devolve o numero. Se so' se medisse
-     * o periodo, media-se uma truncatura; e' a volta que prova que o recipiente contem tudo. */
-    printf("      metal   σ_m irracional   período   reconstruído de %d convergentes   resíduo\n", 40);
+    printf("      metal   σ_m em Z[raiz(D)]   período   convergente após 40 termos   resíduo\n");
     int mau = 0;
     for(int m = 1; m <= 4; m++){
         long a[24];
         size_t n = lado(m, -1, a, 12);
-        double s = (m + sqrt((double)m*m + 4.0)) / 2.0;
-        /* a volta: os convergentes, com o período repetido — o recipiente aberto */
-        double v = (double)a[n-1];
-        for(int k = 0; k < 40; k++) v = (double)m + 1.0/v;
-        double res = fabs(v - s);
-        if((long long)(res * 1e12) >= 1 || n == 0) mau++;
-        printf("      %-7d %-16.12f %-9zu %-32.12f %.2e\n", m, s, n, v, res);
+        long D = (long)m*m + 4;
+        long sa, sb, qa, qb;
+        rt_zd_mul(m, 1, m, 1, D, &sa, &sb);
+        rt_zd_mul(2*m, 0, m, 1, D, &qa, &qb);
+        qa += 4;
+        if(sa != qa || sb != qb || n == 0) mau++;
+        /* reconstrói convergente: período repetido 40 vezes, em inteiros */
+        long p0 = 1, p1 = a[0], q0 = 0, q1 = 1;
+        for(int k = 1; k < 40; k++){
+            long ak = a[k % n];
+            long np = ak*p1 + p0, nq = ak*q1 + q0;
+            p0 = p1; q0 = q1; p1 = np; q1 = nq;
+        }
+        long disc = p1*p1 - (long)m*p1*q1 - q1*q1;
+        if(disc != 1 && disc != -1) mau++;
+        printf("      %-7d (%ld,1)/2  D=%ld   %-9zu %ld/%ld              %ld\n",
+               m, (long)m, D, n, p1, q1, disc);
     }
     printf("\n");
     ok("o telómero tem período finito e a volta devolve o irracional", mau == 0);

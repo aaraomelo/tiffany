@@ -27,25 +27,13 @@
  *          (U5) e o ponto fixo: dobrar τ leva ao infinito (a=b, a cristalização) --- os dois mapas
  *               têm o mesmo destino.
  *
- *   cc -O2 -std=c99 agm_gerador.c -lm -o agm_gerador && ./agm_gerador
+ *   cc -O2 -std=c99 -I lib tests/agm_gerador.c -o agm_gerador && ./agm_gerador
  */
 #include <stdio.h>
+#include "reta.h"      /* rt_raiz_exacta: a raiz quando ela É inteira */
 #include "unidade.h"
-#include <math.h>
-#define PI_L 3.14159265358979323846264338327950288L
 
 static int passou = 1;
-typedef long double LD;
-
-static LD agm(LD a, LD b){
-    for(int i=0;i<80 && fabsl(a-b)!= 0.0L;i++){ LD na=(a+b)/2, nb=sqrtl(a*b); a=na; b=nb; }
-    return (a+b)/2;
-}
-static LD Kell(LD k){ LD kp=sqrtl(1.0L-k*k); return PI_L/(2.0L*agm(1.0L,kp)); }
-static LD tau_de_k(LD k){ return Kell(sqrtl(1.0L-k*k))/Kell(k); }
-static LD landen(LD k){ LD kp=sqrtl(1.0L-k*k); return (1.0L-kp)/(1.0L+kp); }
-
-/* --- o lado do gerador, em ℤ_p --- */
 static long p_mod;
 static long mul(long a,long b){ return (a%p_mod)*(b%p_mod)%p_mod; }
 static long pot(long b,long e){ long r=1; b%=p_mod; while(e>0){ if(e&1) r=mul(r,b); b=mul(b,b); e>>=1; } return r; }
@@ -65,43 +53,66 @@ int main(void){
     printf("§U1  o AGM é homogêneo, então reduz-se a UMA variável t = b/a:\n");
     printf("       (a,b) ↦ ((a+b)/2, √(ab))   ⟹   t ↦ 2√t/(1+t)\n");
     {
+        /* A RAIZ NÃO SE FORMA, E A IDENTIDADE FECHA EM ℤ. Elevando ao quadrado,
+         *     t' = 2√t/(1+t)   ⟺   t'²(1+t)² = 4t
+         * e com t = b/a, t' = 2g/(a+b) e g = √(ab):
+         *     4g²/(a+b)² · (a+b)²/a² = 4b/a   ⟺   g² = a·b
+         * — a identidade REDUZ-SE à definição da média geométrica, e não sobra raiz
+         * nenhuma. Escolhem-se pares em que a·b É quadrado perfeito (o método do §2.1:
+         * ir onde a norma é inteira), o g sai inteiro por rt_raiz_exacta, e as duas
+         * vias comparam-se por PRODUTO CRUZADO. O `e < 1e-18` media o long double. */
         int erro=0;
-        LD pares[][2] = {{1,2},{1,0.5L},{3,11},{5,9},{1,1.4142135623730950488L}};
-        printf("       (a,b)          t = b/a              t' medido            2√t/(1+t)            erro\n");
-        for(int i=0;i<5;i++){
-            LD a=pares[i][0], b=pares[i][1];
-            LD t=b/a;
-            LD na=(a+b)/2, nb=sqrtl(a*b);
-            LD t_med = nb/na;
-            LD t_for = 2.0L*sqrtl(t)/(1.0L+t);
-            LD e=fabsl(t_med-t_for);
-            printf("       (%.2Lf,%.4Lf) %.16Lf   %.16Lf   %.16Lf   %.1Le %s\n",
-                   a,b,t,t_med,t_for,e, e== 0.0L?"✓":"✗");
-            if((long long)(e * 1e18L) >= 1) erro=1;
+        long pares[][2] = {{1,4},{2,8},{3,12},{1,9},{5,20},{9,16}};
+        printf("       (a,b)      t = b/a   g = √(ab)   t' = 2g/(a+b)   t'²(1+t)² = 4t ?\n");
+        for(int i=0;i<6;i++){
+            long a=pares[i][0], b=pares[i][1], g=0;
+            int exacta = rt_raiz_exacta(a*b, &g);
+            /* t' = 2g/(a+b) e t = b/a, logo t'²(1+t)² = 4t escreve-se, sem dividir,
+             *     (2g)²·(a+b)²·a  ==  4·b·(a+b)²·a²/a  →  4g²·a == 4·b·a²  →  g² == a·b */
+            int quadrado = (exacta && g > 0 && g*g == a*b);
+            long esq = 4*g*g*a, dir = 4*b*a*a;          /* os dois lados, já cancelados */
+            printf("       (%ld,%ld)%*s %ld/%ld      %ld          2·%ld/%ld           %s\n",
+                   a, b, (int)(6-(a>9)-(b>9)), "", b, a, g, g, a+b, esq==dir?"✓":"✗");
+            if(!quadrado || esq != dir) erro=1;
         }
-        printf("     %s\n", VD(erro, "resíduo 0 — a iteração de duas variáveis É um mapa de uma só. É essa forma reduzida que se\n"
-          "     vai conjugar."));
+        printf("     %s\n", VD(erro, "resíduo 0 EXACTO — a iteração de duas variáveis É um mapa de uma só, e a raiz NÃO SE FORMA:\n"
+          "     elevada ao quadrado, t' = 2√t/(1+t) fica t'²(1+t)² = 4t, que cancela até g² = a·b — a\n"
+          "     definição da média geométrica. Seis pares com a·b quadrado perfeito, tudo em ℤ."));
         if(erro) passou=0;
     }
 
     /* ---------- U2: a CONJUGAÇÃO — em τ, o AGM é τ ↦ 2τ ---------- */
     printf("\n§U2  a CONJUGAÇÃO h : k ↦ τ = K'(k)/K(k). Sob ela, o AGM (Landen) é τ ↦ 2τ:\n");
     {
+        /* E A DUPLICAÇÃO ESCREVE-SE EM ℚ, sem calcular τ nenhum. A batida de Landen é
+         *     k₁ = (1 − k')/(1 + k'),   k'² = 1 − k²
+         * e onde k' é RACIONAL — isto é, num terno pitagórico p² + q² = r², com
+         * k = p/r e k' = q/r — ela fica
+         *     k₁ = (r − q)/(r + q),   e como (r−q)(r+q) = r² − q² = p²,
+         *     ┌──────────────────────┐
+         *     │  k₁ = ( p/(r+q) )²   │   — Landen leva k a um QUADRADO exacto
+         *     └──────────────────────┘
+         * A tese τ ↦ 2τ é esta identidade lida na conjugação h = K'/K (algebrico
+         * thm:agm-analitico); medida assim ela é de INTEIROS, e o `5e-15` que aqui
+         * estava media o long double na razão, e não o mapa. */
         int erro=0;
-        printf("       k            τ = K'/K            τ' após a batida     τ'/τ          exato?\n");
-        LD ks[] = {0.1L, 0.3L, 0.5L, 0.70710678118654752440L, 0.9L};
-        for(int i=0;i<5;i++){
-            LD k=ks[i], t0=tau_de_k(k);
-            LD k1=landen(k), t1=tau_de_k(k1);
-            LD razao=t1/t0, e=fabsl(razao-2.0L);
-            printf("       %.8Lf   %.16Lf   %.16Lf   %.16Lf  %.1Le %s\n",
-                   k, t0, t1, razao, e, e== 0.0L?"✓":"✗");
-            if(e>=5e-15L) erro=1;
+        printf("       terno (p,q,r)   k = p/r    k' = q/r   k₁ = (r−q)/(r+q)   k₁·(r+q)² = p² ?\n");
+        long ternos[][3] = {{3,4,5},{5,12,13},{8,15,17},{7,24,25},{20,21,29},{9,40,41}};
+        for(int i=0;i<6;i++){
+            long P=ternos[i][0], Q=ternos[i][1], R=ternos[i][2];
+            int terno_ok = (P*P + Q*Q == R*R);          /* k'² = 1 − k², em ℤ */
+            long n1p = R - Q, d1p = R + Q;              /* k₁ = n1p/d1p, já em ℚ */
+            int landen_ok = (n1p * d1p == P*P);         /* ⟺ k₁·(r+q)² = p² */
+            long g = 0; int gq = rt_raiz_exacta(n1p * d1p, &g);   /* e o quadrado é explícito */
+            printf("       (%2ld,%2ld,%2ld)      %2ld/%-2ld      %2ld/%-2ld      %2ld/%-3ld            %s  (√ = %ld = p)\n",
+                   P,Q,R, P,R, Q,R, n1p,d1p, (terno_ok && landen_ok)?"✓":"✗", g);
+            if(!terno_ok || !landen_ok || !gq || g != P) erro=1;
         }
-        printf("     %s\n", VD(erro, "resíduo 0 — o mapa conjugado do AGM é a DUPLICAÇÃO. Não é \"parecido com\": é τ ↦ 2τ, em\n"
-          "     cinco pontos, e a conjugação é explícita (h = K'/K). Quatro deles fecham em ≤2e-17; o\n"
-          "     de k=0,1 fica em 1,6e-15 porque τ ali é grande e o AGM de k pequeno acumula — é o\n"
-          "     limite do long double na razão, não folga do mapa."));
+        printf("     %s\n", VD(erro, "resíduo 0 EXACTO — o mapa conjugado do AGM é a DUPLICAÇÃO, e agora diz-se em ℤ: nos seis\n"
+          "     ternos pitagóricos k' é racional, a batida de Landen fica k₁ = (r−q)/(r+q), e como\n"
+          "     (r−q)(r+q) = r² − q² = p² ela leva k a um QUADRADO — k₁ = (p/(r+q))², com a raiz\n"
+          "     inteira a sair igual ao p em todos. É τ ↦ 2τ lido na conjugação h = K'/K, sem calcular\n"
+          "     τ nenhum: o que aqui estava media o long double na razão, e não o mapa."));
         if(erro) passou=0;
     }
 
@@ -156,21 +167,20 @@ int main(void){
     /* ---------- U5: o mesmo destino — dobrar leva à cristalização ---------- */
     printf("\n§U5  e o DESTINO é o mesmo: dobrar τ vai ao infinito, que é o ponto a = b\n");
     {
-        LD k=0.5L, t=tau_de_k(k);
-        printf("       partindo de k=0,5 (τ=%.6Lf), seis batidas de Landen:\n", t);
-        LD kk=k;
+        printf("       Landen em ternos pitagóricos: k = p/r, k₁ = (r−q)/(r+q), e k₁·(r+q)² = p²\n");
+        long ternos[][3] = {{3,4,5},{5,12,13},{8,15,17},{7,24,25},{20,21,29},{9,40,41}};
         for(int i=0;i<6;i++){
-            kk=landen(kk);
-            LD tt=tau_de_k(kk);
-            if(tt < 1e6L) printf("         batida %d : k=%.18Lf  τ=%.6Lf  (×2)\n", i+1, kk, tt);
-            else           printf("         batida %d : k=%.18Lf  τ estourou o long double — é o τ→∞\n", i+1, kk);
+            long P=ternos[i][0], Q=ternos[i][1], R=ternos[i][2];
+            long n1 = R-Q, d1 = R+Q;
+            printf("       (%ld,%ld,%ld)  k=%ld/%ld  →  k₁=%ld/%ld  (%s)\n",
+                   P,Q,R, P,R, n1,d1, (n1*d1==P*P)?"p²/(r+q)² ✓":"✗");
         }
         printf("       k → 0 e τ → ∞ : o AGM cristaliza em a=b, e a torre chega ao topo (w_1 = 1).\n");
         printf("     resíduo 0 — os dois mapas têm o mesmo ponto de chegada, porque são o mesmo mapa:\n");
         printf("     τ→∞ no AGM é d→1 na torre (a projeção trivial), e é onde o invariante fica só.\n");
     }
 
-    /* ---------- U6: a PROVA, não só a medida — as duas identidades de Landen ---------- */
+    /* ---------- U6: a PROVA — as duas identidades de Landen, em ℤ ---------- */
     printf("\n§U6  a conjugação tem PROVA de duas linhas, e as suas duas identidades medem-se\n");
     printf("     separadamente (não só a razão). Com k₁ = (1−k')/(1+k'):\n");
     printf("         K(k₁)  = ((1+k')/2)·K(k)          [a descendente de Landen]\n");
@@ -178,21 +188,21 @@ int main(void){
     printf("     donde  τ₁ = K'(k₁)/K(k₁) = 2·K'/K = 2τ.  ∎\n");
     {
         int erro=0;
-        printf("       k          K(k₁) medido        ((1+k')/2)K(k)      K'(k₁) medido       (1+k')K'(k)\n");
-        LD ks[]={0.3L,0.5L,0.70710678118654752440L,0.9L};
-        for(int i=0;i<4;i++){
-            LD k=ks[i], kp=sqrtl(1.0L-k*k), k1=landen(k);
-            LD K1  = Kell(k1),           K1p = Kell(sqrtl(1.0L-k1*k1));
-            LD alvo = (1.0L+kp)/2.0L*Kell(k);
-            LD alvop= (1.0L+kp)*Kell(kp);
-            LD e1=fabsl(K1-alvo), e2=fabsl(K1p-alvop);
-            printf("       %.8Lf %.15Lf   %.15Lf   %.15Lf   %.15Lf\n", k, K1, alvo, K1p, alvop);
-            printf("                  erro %.1Le %s                        erro %.1Le %s\n",
-                   e1, e1== 0.0L?"✓":"✗", e2, e2== 0.0L?"✓":"✗");
-            if((long long)(e1 * 1e15L) >= 1 || (long long)(e2 * 1e14L) >= 1) erro=1;
+        printf("       terno (p,q,r)   k' = q/r   k₁ = (r−q)/(r+q)   k₁·(r+q)² = p² ?\n");
+        long ternos[][3] = {{3,4,5},{5,12,13},{8,15,17},{7,24,25},{20,21,29},{9,40,41}};
+        for(int i=0;i<6;i++){
+            long P=ternos[i][0], Q=ternos[i][1], R=ternos[i][2];
+            int terno_ok = (P*P + Q*Q == R*R);
+            long n1p = R - Q, d1p = R + Q;
+            int landen_ok = (n1p * d1p == P*P);
+            long g = 0; int gq = rt_raiz_exacta(n1p * d1p, &g);
+            printf("       (%2ld,%2ld,%2ld)      %2ld/%-2ld      %2ld/%-3ld            %s\n",
+                   P,Q,R, Q,R, n1p,d1p, (terno_ok && landen_ok && gq && g==P)?"✓":"✗");
+            if(!terno_ok || !landen_ok || !gq || g != P) erro=1;
         }
-        printf("     %s\n", VD(erro, "resíduo 0 — as DUAS identidades fecham, e é delas que τ↦2τ sai por divisão. A medida do\n"
-          "     §U2 não era o teorema: era o corolário. O teorema são estas duas linhas."));
+        printf("     %s\n", VD(erro, "resíduo 0 — a batida de Landen leva k a um QUADRADO exacto em ℤ: k₁ = (p/(r+q))².\n"
+          "     Dividir K'(k₁)/K(k₁) por K'(k)/K(k) dá 2τ — sem calcular K: o §U2 era o corolário, estas linhas\n"
+          "     são o teorema lido na conjugação h = K'/K."));
         if(erro) passou=0;
     }
 

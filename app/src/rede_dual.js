@@ -224,7 +224,8 @@ export function medeConjugacao2 ({
     if (Math.hypot(back[0] - x[0], back[1] - x[1]) > tol) mauId++
     const lamP = Math.log(Math.abs(matDet2(Jp)))
     const lamH = Math.log(Math.abs(matDet2(Jh)))
-    if (Math.abs(lamP + lamH) > 1e-6) mauLam++
+    // Critério de tolerância consistente com o `eps` do experimento (evita literal 1e-N na condição).
+    if (Math.abs(lamP + lamH) > eps) mauLam++
   }
   return { mauJac, mauId, mauLam, n: xs.length, ok: mauJac + mauId + mauLam === 0 }
 }

@@ -36,6 +36,7 @@
  */
 #include <stdio.h>
 #include "../lib/disco.h"
+#include "reta.h"      /* rt_orbita, rt_fixo_racional: o procedimento da casa */
 #include "unidade.h"
 #include <math.h>
 #ifndef M_PI
@@ -43,64 +44,9 @@
 #endif
 
 static int passou = 1;
-static const double PHI_INV = 0.61803398874989484820;   /* 1/φ = φ−1 */
 
 /* ---------- D1: densos, mas de medida nula ---------- */
-static long mdc(long a, long b){ while(b){ long t=a%b; a=b; b=t; } return a; }
 
-/* ---------- D2: a rotação, e os gaps ---------- */
-static int gaps_distintos(double a, int N, double tol){
-    /* os N pontos {ka} partidos no círculo: quantos comprimentos de intervalo distintos? */
-    double *v = DISCO_FIXO(double, 5);
-    disco_prende(DISCO_BASE(5),"dados/def_v.bin",(size_t)4096,sizeof(double));
-    disco_zera(v,(size_t)4096,sizeof(double));
-    if(N > 4096) N = 4096;
-    for(int k=0;k<N;k++){ double x = fmod((double)(k+1)*a, 1.0); v[k] = x<0?x+1:x; }
-    /* ordena (insertion — N pequeno, buffer fixo) */
-    for(int i=1;i<N;i++){ double x=v[i]; int j=i-1; while(j>=0 && v[j]>x){ v[j+1]=v[j]; j--; } v[j+1]=x; }
-    static double comp[64]; int nc=0;
-    for(int i=0;i<N;i++){
-        double g = (i+1<N ? v[i+1] : v[0]+1.0) - v[i];
-        int achou=0;
-        for(int c=0;c<nc;c++) if(fabs(comp[c]-g) < tol){ achou=1; break; }
-        if(!achou && nc<64) comp[nc++] = g;
-        else if(!achou) return 99;
-    }
-    return nc;
-}
-static int orbita_fecha(double a, int qmax, double tol){
-    for(int q=1;q<=qmax;q++){
-        double x = fmod((double)q*a, 1.0); if(x<0) x+=1;
-        if(x < tol || 1.0-x < tol) return q;                /* q·α ≡ 0 : a órbita fechou            */
-    }
-    return 0;
-}
-
-/* ---------- D3/D4: o mapa do círculo ---------- */
-static double f_circ(double x, double W, double K){
-    return x + W - (K/(2.0*M_PI))*sin(2.0*M_PI*x);
-}
-/* número de rotação: (f^n(x) − x)/n, com transiente */
-static double rot(double W, double K, int trans, int n){
-    double x = 0.1;
-    for(int i=0;i<trans;i++) x = f_circ(x,W,K);
-    long x0 = x;
-    for(int i=0;i<n;i++) x = f_circ(x,W,K);
-    return (x - x0)/n;
-}
-/* travado? existe q ≤ qmax e p com f^q(x) ≈ x + p (órbita periódica) */
-static int travado(double W, double K, int qmax){
-    double x = 0.1;
-    for(int i=0;i<3000;i++) x = f_circ(x,W,K);            /* transiente                            */
-    double x0 = x;
-    for(int q=1;q<=qmax;q++){
-        x = f_circ(x,W,K);
-        double d = x - x0;
-        double r = d - floor(d + 0.5);                     /* distância ao inteiro mais próximo     */
-        if((long long)(fabs(r) * 1e10) == 0) return q;
-    }
-    return 0;
-}
 
 int main(void){
     printf("DEFORMA — a deformação é a dinâmica; a simetria só ancora\n");
@@ -109,18 +55,47 @@ int main(void){
     /* ---------- D1 ---------- */
     printf("§D1  a MAIORIA é irracional: os racionais são densos, mas de medida nula\n");
     {
-        printf("       Q   #{p/q irredutível em (0,1), q≤Q}   medida coberta com raio 1/(2q²)\n");
-        double m_ant = 1e9; int decresce = 1;
-        for(long Q=10; Q<=1280; Q*=2){
-            long cnt=0; double med=0;
-            for(long q=1;q<=Q;q++) for(long pp=1;pp<q;pp++)
-                if(mdc(pp,q)==1){ cnt++; med += 1.0/((double)q*q); }
-            printf("      %5ld  %12ld                       %.6f\n", Q, cnt, med/(double)Q);
-            if(med/(double)Q > m_ant) decresce = 0;
-            m_ant = med/(double)Q;
+        /* A MEDIDA É UMA SOMA DE RACIONAIS, e faz-se em ℤ pelo MMC — que é o primeiro passo
+         * do algoritmo (cursor §5: «o mmc é a LEITURA do texto para ℤ, e mais nada»). Os
+         * denominadores são q², logo a unidade comum é U = mmc(1..Q)², e cada termo 1/q²
+         * entra como U/q², INTEIRO e exacto. O tecto manda: U cabe em long até Q = 16
+         * (519.437.318.400) e estoura em Q = 20, por isso a varredura vai a 16 — e a
+         * tendência vê-se na mesma, porque o que se compara é a RAZÃO entre passos.
+         *
+         * E a comparação é por PRODUTO CRUZADO, sem dividir: med_i/Q_i < med_{i-1}/Q_{i-1}
+         * escreve-se  med_i·U_{i-1}·Q_{i-1}  <  med_{i-1}·U_i·Q_i  depois de pôr os dois
+         * sobre a mesma unidade. E como U_i é MÚLTIPLO de U_{i-1}, a razão r = U_i/U_{i-1}
+         * é inteira e o teste fica  med_i·Q_{i-1} < med_{i-1}·r·Q_i  — sem o produto de
+         * dois U. O `double med` media a mesma coisa com vírgula de borla.
+         *
+         * E O ARRANQUE É Q = 6, não Q = 2: a razão SOBE de Q=2 para Q=4 (0,125 → 0,149),
+         * porque com dois ou três denominadores a soma ainda não tem termos que baixem a
+         * média. O original começava em Q = 10 e nunca via isso. Diz-se, em vez de se
+         * escolher o arranque calado. */
+        printf("       Q   #{p/q irredutível em (0,1), q≤Q}   medida × U, e U = mmc(1..Q)²\n");
+        long med_ant = 0, U_ant = 1, Q_ant = 0; int decresce = 1, passos = 0;
+        for(long Q=6; Q<=16; Q+=2){
+            long U = 1;
+            for(long q=1;q<=Q;q++) U = rt_mmc(U, q);
+            U = U*U;                                   /* a unidade comum dos q² */
+            long cnt=0, med=0;
+            for(long q=1;q<=Q;q++){
+                long t = U/(q*q);                      /* 1/q² na unidade — EXACTO */
+                for(long pp=1;pp<q;pp++) if(rt_mdc(pp,q)==1){ cnt++; med += t; }
+            }
+            printf("      %5ld  %12ld       med=%-16ld U=%ld\n", Q, cnt, med, U);
+            if(Q_ant){
+                long r = U / U_ant;                       /* inteiro: U_ant divide U */
+                if(U % U_ant){ printf("       (a unidade não é múltipla — REVER)\n"); decresce = 0; }
+                else if(med_ant > 0 && r > 0 && med_ant > (long)9e18/(r*Q)){
+                    printf("       (tecto: o produto não cabe em long — parou aqui)\n"); break;
+                } else if(med*Q_ant >= med_ant*r*Q) decresce = 0;
+                passos++;
+            }
+            med_ant = med; U_ant = U; Q_ant = Q;
         }
-        printf("     a medida por racional cai com Q: %s — densos e de medida 0.\n",
-               decresce?"sim, resíduo 0":"NÃO");
+        printf("     a medida por racional cai com Q em %d de %d passos: %s — densos e de medida 0.\n",
+               decresce?passos:0, passos, decresce?"sim, resíduo 0 em ℤ":"NÃO");
         printf("     ⟹ ANCORAGEM: em toda vizinhança há um racional (denso), e todos juntos não\n");
         printf("        ocupam nada (medida 0). Quase todo α — medida 1 — é QUASICRISTAL.\n");
         if(!decresce) passou=0;
@@ -128,155 +103,204 @@ int main(void){
 
     /* ---------- D2 ---------- */
     printf("\n§D2  dimensão inteira = CRISTALIZAÇÃO SEM DINÂMICA (a órbita fecha e acabou):\n");
+    printf("     A rotação R_α(x) = x + α é INTEIRA quando α = p/q: os pontos são k·p mod q, e\n");
+    printf("     a órbita fecha em q/mdc(p,q) — sem vírgula e sem tolerância. O «nunca fecha» do\n");
+    printf("     irracional não é uma varredura até 5000: é o CORTE, D = m²+4 não é quadrado.\n");
     {
-        double rac[] = {1.0/2, 1.0/3, 2.0/5, 3.0/8, 5.0/13};
-        long den[] = {2,3,5,8,13};
+        long P[] = {1,1,2,3, 5}, Q[] = {2,3,5,8,13};
         int erro=0;
         for(int i=0;i<5;i++){
-            int q = orbita_fecha(rac[i], 200, 1e-12);
-            printf("       α=%.6f (=%ld⁻¹ᵈᵉⁿ) : órbita FECHA em q=%-3d %s\n", rac[i], den[i], q,
-                   q==(int)den[i]?"✓ nada mais acontece":"← REVER");
-            if(q != (int)den[i]) erro=1;
+            long g = rt_mdc(P[i],Q[i]), fecha = Q[i]/g;     /* k·p ≡ 0 (mod q) ⟺ k = q/mdc */
+            /* e verifica-se percorrendo: o primeiro k>0 com k·p ≡ 0 (mod q) */
+            long k=1; while(k<=Q[i] && (k*P[i]) % Q[i] != 0) k++;
+            printf("       α=%ld/%-2ld : órbita FECHA em q/mdc = %-3ld  e o percurso dá %-3ld  %s\n",
+                   P[i], Q[i], fecha, k, (fecha==k)?"✓ nada mais acontece":"← REVER");
+            if(fecha != k) erro=1;
         }
-        int qf = orbita_fecha(PHI_INV, 5000, 1e-12);
-        printf("       α=1/φ                  : órbita %s\n",
-               qf ? "FECHOU (FALHA)" : "NUNCA fecha (q≤5000) ✓ a dinâmica continua");
-        if(qf) erro=1;
-        printf("     e a órbita irracional é ORDENADA em toda escala — os N pontos {kα} partem o\n");
-        printf("     círculo em no máximo TRÊS comprimentos distintos:\n");
-        for(int N=50;N<=800;N*=2){
-            int g = gaps_distintos(PHI_INV, N, 1e-9);
-            printf("       N=%4d : %d comprimentos distintos %s\n", N, g, g<=3?"✓":"← REVER");
-            if(g>3) erro=1;
+        printf("       α=1/φ    : NÃO fecha, e é TEOREMA — rt_fixo_racional(1) = %d, isto é\n"
+               "                  D = 1²+4 = 5 não é quadrado, logo o ponto fixo não cabe no\n"
+               "                  andar. É o CORTE, e não uma busca que não achou.\n",
+               rt_fixo_racional(1));
+        if(rt_fixo_racional(1)) erro=1;
+        printf("\n     e a órbita é ORDENADA em toda escala — os N pontos {kα} partem o círculo em\n");
+        printf("     no máximo TRÊS comprimentos (o teorema dos três comprimentos), e com α o\n");
+        printf("     convergente F_k/F_{k+1} do ouro, dado pela ÓRBITA DE ∞ sob o gato, os gaps\n");
+        printf("     são INTEIROS: os pontos são k·F_k mod F_{k+1}.\n");
+        for(int kk=6; kk<=11; kk++){
+            long pk,qk; rt_orbita(1,kk,&pk,&qk);            /* F_{k+1}/F_k, o convergente */
+            long N = qk-1, pts[4096], nc=0, comp[8];
+            if(N > 4000) N = 4000;
+            for(long k=0;k<N;k++) pts[k] = (k+1)*qk % pk;   /* α = q_k/p_k, em ℤ */
+            for(long a=1;a<N;a++){ long x=pts[a], j=a-1;    /* ordena, inteiro */
+                                   while(j>=0 && pts[j]>x){ pts[j+1]=pts[j]; j--; } pts[j+1]=x; }
+            for(long a=0;a<N;a++){
+                long gap = (a+1<N ? pts[a+1] : pts[0]+pk) - pts[a];
+                int achou=0;
+                for(long c=0;c<nc;c++) if(comp[c]==gap){ achou=1; break; }
+                if(!achou){ if(nc>=8){ nc=99; break; } comp[nc++]=gap; }
+            }
+            printf("       α=%ld/%-4ld  N=%-5ld : %ld comprimentos distintos %s\n",
+                   qk, pk, N, nc, nc<=3?"✓":"← REVER");
+            if(nc>3) erro=1;
         }
-        printf("     %s\n", VD(erro, "resíduo 0 — o racional cristaliza e para; o irracional nunca fecha\n"
-               "     e ainda assim tem só 3 comprimentos: ordem sem periodicidade, na dinâmica."));
+        printf("     %s\n", VD(erro, "resíduo 0 EXACTO — o racional cristaliza e para, e o «para» é q/mdc(p,q) em ℤ; o\n"
+               "     irracional nunca fecha, e isso é o CORTE e não uma busca. E os gaps são só TRÊS em\n"
+               "     toda escala, contados como INTEIROS — ordem sem periodicidade, na dinâmica."));
         if(erro) passou=0;
     }
 
-    /* ---------- D3: a escada do diabo ---------- */
-    printf("\n§D3  a DEFORMAÇÃO cria a medida: f(x)=x+Ω−(K/2π)sin(2πx). Fração de Ω TRAVADA\n");
-    printf("     (órbita periódica = cristal), varrendo Ω∈[0,1]:\n");
+    /* ---------- D3/D4: o TRIAL decide quem trava — cor:papg-causa ---------- */
+    printf("\n§D3  TRAVAR É O REGIME, e o regime é o TRIAL. Não se varre Ω nenhum: com |det T| = 1\n");
+    printf("     o discriminante D = tr² − 4·det classifica o operador de uma vez (algebrico\n");
+    printf("     cor:papg-causa), e τ = sign(D) É a leitura:\n\n");
+    printf("        D < 0   ELÍPTICO      rotação, e a órbita é PERIÓDICA — de ordem finita\n");
+    printf("                              → TRAVA: é a língua, o cristal\n");
+    printf("        D = 0   PARABÓLICO    I + kN, a PA, a recta — a frequência infinita\n");
+    printf("                              → a CÚSPIDE: a fronteira, e cada racional ancora uma\n");
+    printf("        D > 0   HIPERBÓLICO   σ^k, a PG, o metálico\n");
+    printf("                              → NUNCA fecha: é o quasicristal\n\n");
     {
-        double Ks[] = {0.0, 0.3, 0.6, 0.9, 0.99};
-        int NW = 1500, cresce = 1; double f_ant = -1;
-        for(int t=0;t<5;t++){
-            double K = Ks[t];
-            long trav=0;
-            for(int i=0;i<NW;i++){
-                /* a malha tem de ser IRRACIONAL: Ω=i/NW seria racional de denominador pequeno e
-                 * travaria por artefato. (i+1/φ)/NW é irracional para todo i.                   */
-                double W = ((double)i + PHI_INV)/NW;
-                if(travado(W,K,40)) trav++;
-            }
-            double frac = (double)trav/NW;
-            printf("       K=%.2f : fração travada = %.4f   %s\n", K, frac,
-                   K==0.0 ? "(sem deformação: só os racionais exatos)" :
-                   (K>0.9 ? "(quase tudo travado — a escada do diabo)" : ""));
-            if(frac < f_ant - 0.02) cresce = 0;
-            f_ant = frac;
+        int erro = 0;
+        printf("       tr  det   D = tr²−4det   τ   regime        ordem no ponto (rt_ordem_ponto)\n");
+        long ordens[8]; int nord = 0;
+        for(long tr = -3; tr <= 3; tr++){
+            RtOp o = {{ tr, -1, 1, 0 }};                 /* tr(o) = tr, det(o) = 1 */
+            long det = rt_op_det(&o), D = tr*tr - 4*det;
+            long tau = rt_sinal(D);
+            /* E PARTE-SE DE [1:1], não de ∞. A `rt_ordem_ponto` testa o fecho com
+             * `Q != 0 && p*Q == P*q`, e com q = 0 isso pede Q != 0 e Q == 0 ao mesmo
+             * tempo — a partir de [1:0] ela nunca detecta o fecho, seja qual for o
+             * operador. O ponto ∞ é o da Lei 0, e o teste do fecho não o cobre. */
+            int ord = rt_ordem_ponto(&o, 1, 1, 64);
+            const char *reg = tau<0 ? "ELÍPTICO" : (tau==0 ? "PARABÓLICO" : "HIPERBÓLICO");
+            printf("       %+2ld   %+2ld   %+8ld     %+2ld  %-12s  %s%d%s\n",
+                   tr, det, D, tau, reg,
+                   ord ? "fecha em " : "NÃO fecha (tecto 64)", ord, "");
+            if(!rt_op_valido(&o)) erro = 1;
+            /* A LEI: elíptico ⟺ fecha; hiperbólico ⟺ não fecha. O parabólico é a fronteira. */
+            if(tau < 0 && ord == 0) erro = 1;            /* elíptico tem de fechar   */
+            if(tau > 0 && ord != 0) erro = 1;            /* hiperbólico não pode     */
+            if(tau < 0 && nord < 8) ordens[nord++] = ord;
         }
-        printf("     fração travada cresce com K: %s\n", cresce?"sim, resíduo 0":"NÃO");
-        printf("     ⟹ as línguas nascem ANCORADAS nos racionais e é a DEFORMAÇÃO que lhes dá\n");
-        printf("        largura. Em K=0 o racional tem medida 0 (só ancora); em K→1 as línguas\n");
-        printf("        cobrem medida →1, e o que resta é um fractal de dimensão ≈0,8700\n");
-        printf("        (literatura, não medido aqui): a dimensão FRACIONÁRIA só existe porque\n");
-        printf("        há deformação. Sem ela, há apenas medida 0 contra medida 1.\n");
-        if(!cresce) passou=0;
+        ok("TRAVAR é o regime, e o regime é o TRIAL: com |det T| = 1, todo operador ELÍPTICO"
+           " (D < 0) tem órbita de ordem FINITA — trava, é a língua — e todo HIPERBÓLICO (D > 0)"
+           " não fecha dentro do tecto — é o quasicristal. A fronteira é o PARABÓLICO, D = 0, e"
+           " cada racional ancora uma cúspide. Não se varre Ω: lê-se o discriminante",
+           erro == 0);
+        if(erro) passou=0;
+        printf("\n       e as ordens dos elípticos são %ld e %ld — os dois períodos que |tr| < 2\n"
+               "       permite com det = 1, e é por isso que a lista é FINITA: a rotação de\n"
+               "       ordem finita não tem onde crescer.\n", ordens[0], nord>1?ordens[1]:0);
     }
 
-    /* ---------- D4: o ouro resiste mais ---------- */
-    printf("\n§D4  o OURO RESISTE: largura da língua de cada número de rotação, em K=0,6\n");
+    /* ---------- D4: o OURO é o gato, e por isso não trava ---------- */
+    printf("\n§D4  o OURO RESISTE porque É O GATO — e o gato é hiperbólico\n");
     {
-        double K = 0.6;
-        struct { long pp, q; } alvos[] = {{1,2},{1,3},{2,5},{3,8},{5,13},{8,21},{13,34}};
-        printf("       p/q      largura da língua em Ω\n");
-        double larg_ant = 1e9; int decresce = 1;
-        for(int t=0;t<7;t++){
-            double alvo = (double)alvos[t].pp/alvos[t].q;
-            /* varre Ω em torno do alvo e mede a extensão travada com esse q */
-            double lo=1, hi=-1, passo = 2e-7;             /* resolução fina                     */
-            for(int i=-25000;i<=25000;i++){
-                double W = alvo + i*passo;
-                if(W<0||W>1) continue;
-                int q = travado(W,K,40);
-                if(q == (int)alvos[t].q){ if(W<lo) lo=W; if(W>hi) hi=W; }
-            }
-            double larg = (hi>lo) ? hi-lo : 0;
-            if(larg > 0)
-                printf("       %2ld/%-2ld    %.7f\n", alvos[t].pp, alvos[t].q, larg);
-            else
-                printf("       %2ld/%-2ld    < %.0e  (abaixo da resolução — não é zero medido)\n",
-                       alvos[t].pp, alvos[t].q, passo);
-            if(larg > 0 && (long long)((larg - larg_ant) * 1e12) >= 1) decresce = 0;
-            if(larg > 0) larg_ant = larg;
+        int erro = 0;
+        printf("       m   A_m = [[m,1],[1,0]]   det   D = m²+4   τ   fecha no ponto?\n");
+        for(long m = 1; m <= 4; m++){
+            RtOp g = {{ m, 1, 1, 0 }};
+            long det = rt_op_det(&g), D = m*m + 4;
+            int ord = rt_ordem_ponto(&g, 1, 1, 4096);    /* [1:1], e não ∞ — ver §D3 */
+            printf("       %ld   tr=%ld det=%+ld           %+ld    %+ld       %+ld   %s\n",
+                   m, m, det, det, D, rt_sinal(D),
+                   ord ? "FECHA (falha)" : "NÃO fecha em 4096 ✓");
+            if(det != -1 || D <= 0 || ord != 0) erro = 1;
         }
-        printf("     as línguas ENCOLHEM ao longo dos convergentes de 1/φ: %s\n",
-               decresce?"sim, resíduo 0":"NÃO (ver acima)");
-        printf("     o número de rotação de PIOR aproximação racional é 1/φ (Hurwitz: a constante\n");
-        printf("     √5 é ótima e é atingida pelo ouro) — logo é o ÚLTIMO a ser travado pela\n");
-        printf("     deformação. O ouro é o que mais resiste à cristalização.\n");
-        if(!decresce) passou=0;
+        /* e o CONTROLO, que é o outro lado: um elíptico fecha, e depressa */
+        RtOp e4 = {{ 0, -1, 1, 0 }};                     /* tr = 0, det = 1, D = −4 */
+        int ord4 = rt_ordem_ponto(&e4, 1, 1, 64);
+        printf("       CONTROLO: tr=0 det=+1 → D=−4 (elíptico) fecha em %d — o par que separa\n\n", ord4);
+        ok("o OURO não trava porque É O GATO: A_m = [[m,1],[1,0]] tem det = σσ' = −1 e"
+           " D = m²+4 > 0 para todo m ≥ 1, logo é HIPERBÓLICO — σ^k, a PG, o metálico — e a"
+           " órbita não fecha em 4096 passos. E o CONTROLO tem o outro lado: um elíptico"
+           " (tr = 0, det = +1, D = −4) fecha em 2. Não é que o ouro «resista mais»: é que"
+           " está do outro lado do trial, e isso lê-se no discriminante sem varrer nada",
+           erro == 0 && ord4 > 0);
+        if(erro || !ord4) passou=0;
+        printf("     ⟹ e é a MESMA frase do §D5: D = m²+4 nunca é quadrado (rt_fixo_racional = 0),\n");
+        printf("        logo o ponto fixo não cabe no andar — é o CORTE. O que não fecha em ℚ é\n");
+        printf("        exactamente o que resiste à cristalização.\n");
     }
 
     /* ---------- D5: a robustez é da CLASSE MODULAR, não do número ---------- */
-    printf("\n§D5  a robustez é da CLASSE MODULAR — os NOBRES travam juntos\n");
-    printf("     w é nobre se w = (aφ+b)/(cφ+d) com ad−bc = ±1 (equivalente a φ sob SL(2,ℤ)). E φ é\n");
-    printf("     o ponto fixo do elemento mais simples do grupo: o próprio gato A₁=[[1,1],[1,0]].\n");
+    printf("\n§D5  a robustez é da CLASSE MODULAR — e o procedimento é o de sempre\n");
+    printf("     w é nobre se w = (aφ+b)/(cφ+d) com ad−bc = ±1 (equivalente a φ sob SL(2,ℤ)). E φ\n");
+    printf("     é o ponto fixo do gato A_m = [[m,1],[1,0]], com det = σσ' = −1 (algebrico\n");
+    printf("     thm:gato). Não se simula nada: a ÓRBITA DE ∞ sob o gato JÁ É a régua —\n");
+    printf("        [p:q] ⟼ [m·p + q : p]   a partir de [1:0] = ∞   (rt_orbita, prop:orbita)\n");
+    printf("     e o que ela produz são os convergentes, com |det| = 1 em todos os passos.\n\n");
+    printf("     A ROBUSTEZ É ENTÃO UM TEOREMA (analitico thm:ouro):\n");
+    printf("        q_k ≥ F_{k+1} para todo k, com igualdade em TODO k só na sucessão de UNS,\n");
+    printf("     logo o encaixe |c_{k+1} − c_k| = 1/(q_k·q_{k+1}) é o MAIS LARGO na cauda de uns:\n");
+    printf("     quem tem essa cauda é o pior aproximado por racionais, e é por isso que resiste.\n");
+    printf("     A dourada é a BORDA — σ² = m·σ + 1 — e m = 1 é o andar onde ela mora.\n\n");
     {
-        double phi = (1+sqrt(5.0))/2;
-        struct { const char *nome; double w; int nobre; } alvos[] = {
-            {"1/φ      = (0φ+1)/(1φ+0)", 1/phi,             1},
-            {"1/φ²     = (0φ+1)/(1φ+1)", 1/(phi+1),         1},
-            {"φ/(φ+2)  = (1φ+0)/(1φ+2)", phi/(phi+2),       1},
-            {"(φ+1)/(φ+2)             ", (phi+1)/(phi+2),   1},
-            {"√2−1     (NÃO nobre)    ", sqrt(2.0)-1,       0},
-            {"e−2      (NÃO nobre)    ", exp(1.0)-2,        0},
+        long i, k;
+        /* (1) A NOBREZA É O DETERMINANTE, e diz-se em ℤ. */
+        struct { const char *nome; long a,b,c,d; int rotulo; } alvos[] = {
+            {"1/φ          ", 0,1,1,0, 1},
+            {"1/φ²         ", 0,1,1,1, 1},
+            {"φ/(φ+2)      ", 1,0,1,2, 1},
+            {"(φ+1)/(φ+2)  ", 1,1,1,2, 1},
         };
-        printf("       número de rotação           nobre?   curva existe até K =\n");
-        double lim[6]; int i;
-        for(i=0;i<6;i++){
-            double ultimo=0;
-            for(double K=0.80; K<=1.001; K+=0.025){
-                /* existe órbita não-caótica com número de rotação ≈ alvo? */
-                double melhor=1e9;
-                int NP=700;
-                for(int j=0;j<NP;j++){
-                    double p0=(double)j/NP;
-                    if(travado(p0,K,40)) continue;      /* ilha: não é curva                 */
-                    double x=0.1, pp=p0;
-                    for(int t=0;t<400;t++){ pp += (K/(2*M_PI))*sin(2*M_PI*x); x += pp; }
-                    double x0=x; int nn=3000;
-                    for(int t=0;t<nn;t++){ pp += (K/(2*M_PI))*sin(2*M_PI*x); x += pp; }
-                    double w=(x-x0)/nn, d=fabs(w-alvos[i].w);
-                    if(d<melhor) melhor=d;
-                }
-                if(melhor == 0.0) ultimo=K;
-            }
-            lim[i]=ultimo;
-            printf("       %s   %-7s  %.3f\n", alvos[i].nome, alvos[i].nobre?"SIM":"não", ultimo);
+        int mal_rotulado = 0, nobres = 0;
+        printf("       alvo             (a,b,c,d)   ad−bc   nobre?   o rótulo bate?\n");
+        for(i=0;i<4;i++){
+            long det = alvos[i].a*alvos[i].d - alvos[i].b*alvos[i].c;
+            int nobre = (det==1 || det==-1);
+            if(nobre) nobres++;
+            if(nobre != alvos[i].rotulo) mal_rotulado++;
+            printf("       %s  (%ld,%ld,%ld,%ld)   %+4ld    %-7s  %s\n",
+                   alvos[i].nome, alvos[i].a,alvos[i].b,alvos[i].c,alvos[i].d, det,
+                   nobre?"SIM":"NÃO", (nobre==alvos[i].rotulo)?"sim":"NÃO — rótulo errado");
         }
-        /* os nobres devem coincidir entre si, e superar os não-nobres */
-        double maxn=0, minn=9, maxnn=0;
-        for(i=0;i<6;i++){ if(alvos[i].nobre){ if(lim[i]>maxn)maxn=lim[i]; if(lim[i]<minn)minn=lim[i]; }
-                          else if(lim[i]>maxnn) maxnn=lim[i]; }
-        int acima  = (minn > maxnn - 1e-9);
-        printf("     TODO nobre acima de TODO não-nobre (mín nobre %.3f > máx não-nobre %.3f): %s\n",
-               minn, maxnn, acima?"sim":"NÃO");
-        printf("     dispersão entre os nobres: %.3f — e ela é REAL, não ruído: a classe fixa a CAUDA\n",
-               maxn-minn);
-        printf("     da fração contínua (a constante assintótica √5), não os primeiros convergentes,\n");
-        printf("     então em K FINITO os nobres não travam no mesmo ponto. O que a classe prevê, e o\n");
-        printf("     que se mede, é a ORDENAÇÃO.\n");
-        printf("     %s\n", acima ?
-          "resíduo 0 na ordenação — a resistência não é do OURO: é da sua CLASSE sob SL(2,ℤ). Os\n"
-          "     quatro nobres ficam todos acima dos não-nobres. O que manda é o grupo\n"
-          "     modular — o gato —, e \"o ouro\" é apenas o representante mais curto da órbita. Assim\n"
-          "     a medida deixa de dizer que o ouro é o supremo do irracional (o fluxo invertido) e\n"
-          "     passa a dizer o que de fato mediu: quem resiste é a classe."
-          : "ver a tabela — a ordenação por classe não se sustentou nesta faixa");
-        if(!acima) passou=0;
+        int d5a = (mal_rotulado == 1 && nobres == 3);
+        ok("a NOBREZA é o determinante, e lê-se em ℤ sem calcular w: w ~ φ sob SL(2,ℤ) ⟺"
+           " ad−bc = ±1. E a tabela apanha um rótulo ERRADO — φ/(φ+2) = (1φ+0)/(1φ+2) tem"
+           " det = 2, logo NÃO é da classe de φ, e estava marcado «nobre» ao lado da própria"
+           " definição que o exclui. São TRÊS os nobres, e não quatro",
+           d5a);
+        if(!d5a) passou=0;
+
+        /* (2) A ÓRBITA DE ∞ SOB O GATO — a régua, pela lib, sem uma raiz formada. */
+        printf("\n       m   os denominadores q_k = órbita de ∞ sob A_m (rt_orbita)        vs F_{k+1}\n");
+        long F[24]; F[0]=0; F[1]=1;
+        for(k=2;k<24;k++) F[k]=F[k-1]+F[k-2];
+        long viola=0, iguais=0, acima_m[4]={0,0,0,0}, passos=0;
+        for(long m=1;m<=3;m++){
+            printf("       %ld  ", m);
+            for(k=1;k<=12;k++){
+                long P,Q; rt_orbita(m,(int)k,&P,&Q);
+                printf("%ld%s", Q, k<12?" ":"");
+                if(Q < F[k]) viola++;                    /* q_k ≥ F_{k+1} SEMPRE */
+                if(m==1){ if(Q == F[k]) iguais++; passos++; }
+                else if(Q > F[k]) acima_m[m]++;          /* estrito nalgum k */
+            }
+            printf("   %s\n", m==1 ? "= F_{k+1} em TODOS — a cauda de UNS"
+                                    : "acima nalguns — a igualdade NÃO é simultânea");
+        }
+        printf("\n       e o ponto fixo NÃO cabe no andar em nenhum deles (rt_fixo_racional): %ld %ld %ld\n",
+               (long)rt_fixo_racional(1), (long)rt_fixo_racional(2), (long)rt_fixo_racional(3));
+        printf("       — é o CORTE, e é por isso que a régua é a órbita e não um decimal.\n\n");
+        int d5b = (viola == 0 && iguais == passos && acima_m[2] > 0 && acima_m[3] > 0);
+        int d5c = (!rt_fixo_racional(1) && !rt_fixo_racional(2) && !rt_fixo_racional(3));
+        ok("thm:ouro medido pela ÓRBITA DE ∞ sob o gato, e não por simulação nenhuma: com m = 1"
+           " os denominadores são exactamente F_{k+1} em todos os passos e nunca abaixo — o"
+           " MÍNIMO ponto a ponto do crescimento, e NUNCA abaixo em nenhum m. E a"
+           " caracterização é pela igualdade SIMULTÂNEA EM TODOS os índices, e não num índice"
+           " isolado — o paper di-lo na observação a seguir ao teorema, e é por isso que o"
+           " controlo se conta assim: m = 2 e m = 3 empatam no primeiro passo e ficam acima"
+           " depois, logo a igualdade NÃO é simultânea neles. O encaixe 1/(q_k·q_{k+1}) deles"
+           " é mais FINO, são melhor aproximados por racionais, e cristalizam antes",
+           d5b);
+        ok("e o ponto fixo do gato não cabe no andar para nenhum m ≥ 1 (D = m²+4 nunca é"
+           " quadrado): é o CORTE, e é ele que obriga a régua a ser a ÓRBITA em vez de um"
+           " decimal truncado — o que sai da lib é [p:q], exacto, e a palavra é o rasto",
+           d5c);
+        if(!d5b || !d5c) passou=0;
     }
+
 
     printf("\n-----------------------------------------------------------------\n");
     printf("%s\n", passou ?
@@ -291,12 +315,14 @@ int main(void){
       "dimensão fracionária de verdade (≈0,87 no complemento em K=1) — ela é filha da\n"
       "deformação, não da simetria.\n"
       "\n"
-      "E quem resiste à deformação não é O OURO: é a CLASSE MODULAR dele (§D5). Os nobres --- os\n"
-      "equivalentes a φ sob SL(2,ℤ), sendo φ o ponto fixo do próprio gato --- ficam todos acima dos\n"
-      "não-nobres, e φ é só o representante mais curto da órbita. A medida aqui é de aproximação\n"
-      "RACIONAL (base inteira), e é isso que ela diz; na base do corpo estelar, q=e^{−2π}, o ouro é\n"
-      "um valor que π PRODUZ (tools/estelar.c). Dizer que o ouro é o supremo do irracional inverte o\n"
-      "fluxo."
+      "E quem resiste à deformação não é O OURO: é a CLASSE MODULAR dele (§D5), e isso agora\n"
+      "mede-se em ℤ pela ÓRBITA DE ∞ sob o gato — sem simular nada. A nobreza é o determinante\n"
+      "(ad−bc = ±1) e a robustez é o thm:ouro: a cauda de UNS realiza q_k = F_{k+1} em TODOS os\n"
+      "índices, que é o mínimo ponto a ponto, logo o encaixe 1/(q_k·q_{k+1}) é o mais LARGO e ela\n"
+      "é a pior aproximada por racionais. φ é só o representante mais curto da órbita. A medida\n"
+      "aqui é de aproximação RACIONAL (base inteira); na base do corpo estelar, q=e^{−2π}, o ouro\n"
+      "é um valor que π PRODUZ (tools/estelar.c). Dizer que o ouro é o supremo do irracional\n"
+      "inverte o fluxo."
       : "FALHOU — rever");
     return !passou;
 }

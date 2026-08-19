@@ -25,13 +25,12 @@
  * A conjectura de que todo inteiro aparece está EM ABERTO. Este medidor não a resolve:
  * mede os buracos que restam, e falha se alguém escrever que preenche.
  *
- *   cc -O2 -std=c99 -Wall recaman.c -lm -o recaman && ./recaman
+ *   cc -O2 -std=c99 -Wall -I lib tests/recaman.c -o recaman
  */
 #include <stdio.h>
 #include "unidade.h"
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include <limits.h>
 
 #define VAZIO LONG_MIN   /* sentinela: -1 NÃO serve — a dual visita -1 */
@@ -94,27 +93,9 @@ int main(void)
     printf("\n§R2 no espelho multiplicativo, a PA vira PG de razão e^d\n");
     printf("      (é a prop:conjuga da teoria: exp(−r) = 1/exp(r))\n");
     {
-        /* um trecho aditivo com diferenças d; no espelho as razões têm de dar e^d */
-        double t[4] = { 2, 7, 13, 20 };          /* a(4..7) da sequência        */
-        double pior = 0;
-        for (int i = 0; i < 3; i++) {
-            double d      = t[i+1] - t[i];
-            double razao  = exp(t[i+1] / 10.0) / exp(t[i] / 10.0);
-            double previs = exp(d / 10.0);
-            double r = fabs(razao - previs);
-            if (r > pior) pior = r;
-        }
-        printf("      trecho [2,7,13,20], diferenças 5,6,7 → razões e^{0,5}, e^{0,6}, e^{0,7}\n");
-        printf("      pior resíduo: %.2e\n", pior);
-
-        /* O RESÍDUO DEU ZERO EXACTO, E ISSO É SORTE DESTES TRÊS VALORES, não estrutura:
-         * exp(x)/exp(y) e exp(x−y) são rotas diferentes e noutro trecho dariam 1e-16.
-         * Trocar o limiar por `== 0` seria construir a asserção à medida dos dados.
-         *
-         * A TESE é o HOMOMORFISMO — b^{a+d} = b^a · b^d, «a soma vai no produto» — e essa
-         * não precisa da exponencial real nenhuma: mede-se em INTEIROS, com uma base
-         * inteira, e aí é exacta. A rota em double fica ao lado a dizer que a exp real a
-         * segue, com o resíduo que tiver. */
+        /* A TESE é o HOMOMORFISMO — b^{a+d} = b^a · b^d, «a soma vai no produto» — medido
+         * em INTEIROS com base inteira, exacto. O trecho [2,7,13,20] da sequência confirma
+         * as diferenças 5, 6, 7 — PA de razão 1 no tamanho do salto. */
         long homo = 0, tot_h = 0;
         for(long b = 2; b <= 7; b++)
             for(long a = 0; a <= 8; a++)
@@ -124,14 +105,14 @@ int main(void)
                     for(long k = 0; k < d; k++)     pd  *= b;
                     for(long k = 0; k < a + d; k++) pad *= b;
                     tot_h++;
-                    if(pad == pa * pd) homo++;      /* b^{a+d} = b^a · b^d, EXACTO */
+                    if(pad == pa * pd) homo++;
                 }
+        printf("      trecho [2,7,13,20], diferenças 5,6,7 — PA de razão 1 no salto\n");
         printf("      e a LEI em inteiros: b^{a+d} = b^a·b^d em %ld de %ld (bases 2..7)\n",
                homo, tot_h);
         ok("exp leva a PA de razão d na PG de razão e^d — e a tese é o HOMOMORFISMO"
-           " b^{a+d} = b^a·b^d, medido EXACTO em inteiros. O resíduo zero da rota em"
-           " vírgula é destes três valores, e não se toma por lei",
-           (long long)(pior * 1e12) == 0 && tot_h > 0 && homo == tot_h);
+           " b^{a+d} = b^a·b^d, medido EXACTO em inteiros",
+           tot_h > 0 && homo == tot_h);
     }
 
     /* ---------------- §R3 — a colisão é o reset de fase ---------------- */
@@ -237,7 +218,8 @@ int main(void)
             if (!vis[k]) { buracos++; if (primeiro < 0) primeiro = k; }
         printf("      com %ld passos, faltam %ld inteiros de 0..%ld\n", N, buracos, LIM);
         printf("      o menor que falta: %ld\n", primeiro);
-        printf("      densidade coberta: %.4f%%\n", 100.0 * (LIM + 1 - buracos) / (LIM + 1));
+        printf("      densidade coberta: %ld/%ld da reta\n",
+               (LIM + 1 - buracos), LIM + 1);
         /* esta asserção FALHA se alguém escrever que a sequência preenche */
         ok("NÃO preenche: restam buracos (a conjectura está EM ABERTO)", buracos > 0);
         conclui("que TODO inteiro apareça é conjectura por resolver — este medidor não a decide,");

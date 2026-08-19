@@ -9,21 +9,20 @@
  * Inverter o gato (o tempo reverso, A⁻¹) troca branco↔negro: o sorvedouro de A é a fonte de A⁻¹.
  * Verificado exato no finito (resíduo 0) e ilustrado no contínuo (a convergência que os separa).
  *
- *   cc -O2 -std=c99 duais.c -o duais -lm
+ *   cc -O2 -std=c99 -I lib tests/duais.c -o duais
  *   ./duais [m] [p]
  */
 #include <stdio.h>
 #include "unidade.h"
 #include <stdlib.h>
-#include <math.h>
 #include "gp2.h"                                   /* a peça: o gato em GF(p²) (mul, add, pw, eq, σ) */
 
 int main(int argc,char**argv){
     m = argc>1? atoi(argv[1]) : 1;
     p = argc>2? atoi(argv[2]) : 7;
     int res=0;
+    long D = (long)m*m + 4;
 
-    double sq=sqrt((double)m*m+4.0), S=(m+sq)/2.0, Sl=(m-sq)/2.0;   /* σ e σ' no contínuo          */
     printf("OS ATRATORES SÃO DIRECIONAIS — brancos (fontes) e negros (sorvedouros)\n");
     printf("================================================================\n");
 
@@ -55,12 +54,14 @@ int main(int argc,char**argv){
 
     /* §2 — classificar por quem DOMINA (o módulo, no contínuo): σ (|·|>1) é o sorvedouro NEGRO;     */
     /*      σ' (|·|<1) é a fonte BRANCA. É a estrutura hiperbólica: um estica, o outro esmaga.        */
+    /* σ = (m+√D)/2 > 1  ⟺  m+√D > 2;  |σ'| = (√D−m)/2 < 1  ⟺  D < (m+2)² — sem avaliar raiz.      */
+    int sigma_gt_1 = (m >= 2) || (D > (long)(2-m)*(2-m));
+    int sigma_prime_lt_1 = (D < (long)(m+2)*(m+2));
     printf("\n§2  BRANCO (fonte) E NEGRO (sorvedouro) — a estrutura hiperbólica, |σ|>1>|σ'|:\n");
-    printf("      NEGRO  (sorvedouro): σ  = %.9f  = [%d;%d,%d,…]  |σ|=%.4f>1  — para ele tudo ENTRA\n",
-           S, m,m,m, fabs(S));
-    printf("      BRANCO (fonte)     : σ' = %.9f  = −1/σ          |σ'|=%.4f<1 — dele tudo SAI\n",
-           Sl, fabs(Sl));
-    res += !(fabs(S)>1.0 && fabs(Sl)<1.0);
+    printf("      NEGRO  (sorvedouro): σ  = [%d;%d,%d,…]  |σ|>1  — para ele tudo ENTRA\n",
+           m, m, m);
+    printf("      BRANCO (fonte)     : σ' = −1/σ          |σ'|<1 — dele tudo SAI\n");
+    res += !(sigma_gt_1 && sigma_prime_lt_1);
 
     /* §3 — DIRECIONAL: iterar o gato x↦m+1/x CONVERGE ao negro (entra); iterar o inverso            */
     /*      x↦1/(x−m) converge ao branco (sai). Não se entra e sai pelo mesmo ponto.                 */
@@ -69,7 +70,6 @@ int main(int argc,char**argv){
      * de precisar de comparar dois doubles com 1e-9 e passa a ser o ENCAIXE, decidido
      * por produto cruzado contra x² − mx − 1 — a raiz nunca se avalia. */
     long P0 = 1, Q0 = 1;                       /* x = 1/1 */
-    long D2 = (long)m*m + 4;
     int alterna = 1, aperta = 1, dentro = 1;
     long antP = P0, antQ = Q0;
     for(int k = 0; k < 40; k++){
@@ -77,8 +77,8 @@ int main(int argc,char**argv){
         if(nP > 1000000000L) break;
         /* de que lado de σ está P/Q? (2P − mQ)² contra Q²Δ, em inteiros */
         long s1 = 2*antP - (long)m*antQ, s2 = 2*nP - (long)m*nQ;
-        int l1 = (s1 < 0) ? -1 : (s1*s1 < antQ*antQ*D2 ? -1 : (s1*s1 > antQ*antQ*D2 ? 1 : 0));
-        int l2 = (s2 < 0) ? -1 : (s2*s2 < nQ*nQ*D2 ? -1 : (s2*s2 > nQ*nQ*D2 ? 1 : 0));
+        int l1 = (s1 < 0) ? -1 : (s1*s1 < antQ*antQ*D ? -1 : (s1*s1 > antQ*antQ*D ? 1 : 0));
+        int l2 = (s2 < 0) ? -1 : (s2*s2 < nQ*nQ*D ? -1 : (s2*s2 > nQ*nQ*D ? 1 : 0));
         if(k > 0 && (l1 == 0 || l2 == 0 || l1 == l2)) alterna = 0;   /* têm de ALTERNAR */
         if(k > 0 && !(nQ > antQ)) aperta = 0;                        /* e apertar       */
         antP = nP; antQ = nQ; P0 = nP; Q0 = nQ;
@@ -125,8 +125,8 @@ int main(int argc,char**argv){
     printf("      o navega caminha da fonte branca ao sorvedouro negro. Cada gato é uma seta ●→○ dual.\n");
 
     printf("\n----------------------------------------------------------------\n");
-    printf("m=%d p=%d  σ=%.6f (negro) σ'=%.6f (branco)   resíduo total = %d   %s\n",
-           m, p, S, Sl, res,
+    printf("m=%d p=%d  σ=[%d;…] (negro, |σ|>1)  σ'=-1/σ (branco, |σ'|<1)   resíduo total = %d   %s\n",
+           m, p, m, res,
            VD(res, "OS ATRATORES SÃO DIRECIONAIS E DUAIS — BRANCO (FONTE) → NEGRO (SORVEDOURO)"));
     return res?1:0;
 }

@@ -28,16 +28,16 @@
  *   §P5  a ESCALA é multiplicativa: MELLIN, que leva escala em translação
  *   §P6  sem vazamento: o que a costura enche, enche até ao resíduo
  *
- *   cc -O2 -std=c99 spline.c -lm -o spline && ./spline
+ * LEI vs TRANSPORTE. cos/sin de Fourier, pow/log de Mellin e w12/w10−1.2 eram o método.
+ * A lei é a área 96·A em ℤ (Green na quadrática, ponto médio dobrado), Parseval
+ * N·Σd²−(Σd)², λ^s homogéneo, e a escala av·s independente do glifo. Sem uma raiz.
+ *
+ *   cc -O2 -std=c99 -I lib tests/spline.c -o spline && ./spline
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
+#include "unidade.h"
 #include "spline.h"
 
 /* ───────────────────────────────────────────── §P3  a ÁREA pela curva
@@ -72,11 +72,11 @@ static long area24_quad_i(long ax, long ay, long bx, long by, long cx, long cy){
 }
 static long area24_glifo(const Contorno *c, long *segmentos, long *implicitos, long *impares){
     long A = 0, seg = 0; int ini = 0;
-    for(int k = 0; k < c->nc; k++){
+    for(int k = 0; k < c->nc; k += 1){
         int f = c->fim[k], m = f - ini + 1;
         if(m <= 0){ ini = f + 1; continue; }
         long px[MAXPT], py[MAXPT]; int on[MAXPT], n = 0;
-        for(int i = 0; i < m; i++){                    /* tudo DOBRADO: o médio é exacto */
+        for(int i = 0; i < m; i += 1){                    /* tudo DOBRADO: o médio é exacto */
             Pt a = c->p[ini + i], b = c->p[ini + (i+1) % m];
             px[n] = 2*a.x; py[n] = 2*a.y; on[n] = a.onda; n++;
             if(!a.onda && !b.onda){
@@ -85,7 +85,7 @@ static long area24_glifo(const Contorno *c, long *segmentos, long *implicitos, l
                 px[n] = a.x + b.x; py[n] = a.y + b.y; on[n] = 1; n++;   /* 2·médio, exacto */
             }
         }
-        int s = 0; while(s < n && !on[s]) s++;
+        int s = 0; while(s < n && !on[s]) s += 1;
         if(s == n){ ini = f + 1; continue; }
         for(int i = 0; i < n; ){
             int i0 = (s+i)%n, i1 = (s+i+1)%n;
@@ -143,43 +143,19 @@ static const short W_NEG[95] = {
  * É a segunda rota da `fourier_fora_do_zero`, e é ela que dispensa o limiar de 1e-18. */
 static long parseval_fora_z(const long *d, int n, long *soma){
     long s = 0, s2 = 0;
-    for(int i = 0; i < n; i++){ s += d[i]; s2 += d[i]*d[i]; }
+    for(int i = 0; i < n; i += 1){ s += d[i]; s2 += d[i]*d[i]; }
     if(soma) *soma = s;
-    return (long)n*s2 - s*s;              /* = N²·(energia fora), inteiro */
+    return (long)n*s2 - s*s;
 }
 
-static double fourier_fora_do_zero(const double *d, int n, double *modo0){
-    double m0 = 0;
-    for(int i = 0; i < n; i++) m0 += d[i];
-    m0 /= n;
-    *modo0 = m0;
-    double e = 0;
-    for(int k = 1; k < n; k++){
-        double re = 0, im = 0;
-        for(int i = 0; i < n; i++){
-            double a = -2.0*M_PI*k*i/n;
-            re += d[i]*cos(a); im += d[i]*sin(a);
-        }
-        e += (re*re + im*im) / (n*(double)n);
-    }
-    return e;
+static long ipow(long b, int e){
+    long r = 1;
+    for(int i = 0; i < e; i += 1) r *= b;
+    return r;
 }
 
 /* ───────────────────────────────────────────── o programa */
 
-static int falhas = 0, feitas = 0;
-static void ok(const char *q, int cond){
-    feitas++; if(!cond) falhas++;
-    /* o idioma da bateria: sem isto ela conta UMA unidade grossa (o exit) em vez das que ha */
-    printf("#UNIT %s %s\n", cond ? "ok" : "falha", q);
-    printf("  [%s] %s\n", cond ? "ok" : "FALHA", q);
-}
-
-/* O ORÁCULO DESTE MEDIDOR É A LIBERATION SANS (metricamente Arial→Helvetica):
- * o §P2 compara o ficheiro contra a tabela base-14 do tex.c, e isso só faz
- * sentido com a Liberation. O SPLINE_REG da lib serve o COMPOSITOR (as fontes
- * do repo primeiro) — a auditoria de 14/08 apanhou o medidor a abrir a fonte
- * errada quando a lista da lib mudou. Aqui a lista é a do oráculo. */
 static const char *CANDIDATAS[] = {
     "/usr/share/fonts/liberation-sans/LiberationSans-Regular.ttf",
     "/usr/share/fonts/liberation/LiberationSans-Regular.ttf",
@@ -205,9 +181,24 @@ int main(void){
     puts("     a fazer: o glifo JA E spline, como no projeto todo dado ja e polinomio na base.\n");
     if(!tem_r){
         puts("  [aviso] a Liberation Sans nao esta neste sistema — sem oraculo externo, nao ha medida.");
-        puts("          E preferivel nao medir a medir contra mim proprio.\n");
-        printf("unidades: 0   falhas: 0\nRESIDUO 0\n");
-        return 0;
+        saltou("o 'B' tem indice de glifo", "Liberation Sans");
+        saltou("o 'o' tem exatamente DOIS contornos", "Liberation Sans");
+        saltou("e ha pontos de CONTROLO", "Liberation Sans");
+        saltou("as duas metricas CONCORDAM", "Liberation Sans");
+        saltou("e a NEGRA tambem", "Liberation Sans");
+        saltou("o '@' e MESMO mais estreito na negra", "Liberation Sans");
+        saltou("a AREA ordena os glifos", "Liberation Sans");
+        saltou("o 'O' e vazado", "Liberation Sans");
+        saltou("um espacamento UNIFORME", "Liberation Sans");
+        saltou("e o texto REAL nao e' uniforme", "Liberation Sans");
+        saltou("a LEI: dobrar o corpo", "Liberation Sans");
+        saltou("a lei de Mellin fecha", "Liberation Sans");
+        saltou("e em log a escala e TRANSLACAO PURA", "Liberation Sans");
+        saltou("na pagina: o 'W' a 12pt", "Liberation Sans");
+        saltou("as 4 linhas fecham a coluna", "Liberation Sans");
+        printf("  %d assercoes, %d falhas\n", unidades, falhas);
+        if(!falhas) printf("  RESIDUO 0\n");
+        return falhas ? 1 : 0;
     }
     printf("     fonte: %s\n     unitsPerEm=%d, %d glifos, loca %s\n\n",
            fr, reg.upem, reg.nglifos, reg.longloca ? "longo" : "curto");
@@ -215,18 +206,19 @@ int main(void){
         Contorno c;
         int g = ttf_glifo(&reg, 'B');
         int leu = g && ttf_contorno(&reg, g, &c);
+        int nB = leu ? c.n : 0, ncB = leu ? c.nc : 0;
         ok("o 'B' tem indice de glifo, e o contorno le-se: pontos e mais de um contorno",
-           leu && c.n > 10 && c.nc >= 2);          /* o B tem o exterior e os dois buracos */
+           leu && nB == 31 && ncB == 3);          /* o B tem o exterior e os dois buracos */
         int g_o = ttf_glifo(&reg, 'o');
         Contorno co; int leu_o = g_o && ttf_contorno(&reg, g_o, &co);
         ok("o 'o' tem exatamente DOIS contornos — o de fora e o buraco",
-           leu_o && co.nc == 2);
+           leu_o && co.nc == 2 && co.n == 23);
         int controlos = 0;
-        for(int i = 0; i < co.n; i++) if(!co.p[i].onda) controlos++;
+        for(int i = 0; i < co.n; i += 1) if(!co.p[i].onda) controlos++;
         ok("e ha pontos de CONTROLO: o 'o' e curva, nao poligono",
-           controlos > 0);
-        printf("     -> o 'o': %d pontos, %d contornos, %d de controlo. A carta e a spline.\n\n",
-               co.n, co.nc, controlos);
+           controlos == 15);
+        printf("     -> o 'B': %d pontos, %d contornos. o 'o': %d pontos, %d contornos, %d de controlo.\n\n",
+               nB, ncB, co.n, co.nc, controlos);
     }
 
     /* ── §P2  OS DOIS CAMINHOS ───────────────────────────────────────────── */
@@ -236,7 +228,7 @@ int main(void){
     puts("     duas discordarem, uma esta errada — e nenhuma delas sou eu a confirmar-me.\n");
     {
         int bate = 0, difere = 0, pior_g = 0, pior_d = 0;
-        for(int ch = 32; ch <= 126; ch++){
+        for(int ch = 32; ch <= 126; ch += 1){
             int g = ttf_glifo(&reg, ch);
             if(!g) continue;
             /* escala para milesimos de em, que e a unidade da tabela */
@@ -245,8 +237,8 @@ int main(void){
             int d = (int)labs(a - tab);
             if(d <= 1) bate++; else { difere++; if(d > pior_d){ pior_d = d; pior_g = ch; } }
         }
-        ok("as duas metricas CONCORDAM na esmagadora maioria dos 95 glifos (<=1/1000 de em)",
-           bate >= 90);
+        ok("as duas metricas CONCORDAM nos 95 glifos ASCII imprimiveis (<=1/1000 de em)",
+           bate == 95 && difere == 0);
         printf("     -> %d batem, %d diferem", bate, difere);
         if(difere) printf(" (o pior: '%c', %d de diferenca)", pior_g, pior_d);
         puts(".");
@@ -254,22 +246,25 @@ int main(void){
         puts("        falhar, porque ela e o que eu escrevi. A curva tem.");
         if(tem_n){
             int bate_n = 0, dif_n = 0;
-            for(int ch = 32; ch <= 126; ch++){
+            for(int ch = 32; ch <= 126; ch += 1){
                 int g = ttf_glifo(&neg, ch);
                 if(!g) continue;
                 long a = (long)ttf_avanco(&neg, g) * 1000 / neg.upem;
                 if(labs(a - W_NEG[ch - 32]) <= 1) bate_n++; else dif_n++;
             }
             ok("e a NEGRA tambem — a tabela da Helvetica-Bold contra a Liberation Sans Bold",
-               bate_n >= 90);
+               bate_n == 95 && dif_n == 0);
             printf("     -> negra: %d batem, %d diferem.\n", bate_n, dif_n);
             /* e o '@', que foi onde eu me enganei: agora ha um terceiro a arbitrar */
             long ar = (long)ttf_avanco(&reg, ttf_glifo(&reg,'@'))*1000/reg.upem;
             long an = (long)ttf_avanco(&neg, ttf_glifo(&neg,'@'))*1000/neg.upem;
             ok("o '@' e MESMO mais estreito na negra — o ficheiro confirma o que eu tinha negado",
-               an < ar);
+               an == 975 && ar == 1015);
             printf("     -> '@': regular %ld, negra %ld (a tabela dizia 1015 e 975). Eu escrevi\n", ar, an);
             puts("        'a negra nunca e mais estreita' de cabeca, e sao as duas fontes a dizer que nao.");
+        } else {
+            saltou("e a NEGRA tambem", "Liberation Sans Bold");
+            saltou("o '@' e MESMO mais estreito na negra", "Liberation Sans Bold");
         }
         puts("");
     }
@@ -298,11 +293,12 @@ int main(void){
         ok("a AREA ordena os glifos como a vista os ordena: M > o > i > espaco(=0), e a"
            " comparacao e INTEIRA — 96·A em long, porque as coordenadas do glifo sao"
            " inteiras e a integral de uma quadratica tem denominador 6",
-           A_M > A_o && A_o > A_i && A_i > 0 && A_esp == 0);
+           A_M == 43110164L && A_o == 22965032L && A_i == 10834560L && A_esp == 0
+           && A_M > A_o && A_o > A_i && A_i > A_esp);
         int gO = ttf_glifo(&reg,'O');
         if(gO && ttf_contorno(&reg,gO,&c)) A_O = area24_glifo(&c,&sO,&impl,&impares);
-        ok("o 'O' e vazado: a area e MENOR que a do retangulo que o contem, e maior que zero",
-           A_O > 0 && A_O < 96L*reg.upem*reg.upem);
+        ok("o 'O' e vazado: a area e MENOR que a do 'M' cheio, e maior que a do 'o'",
+           A_O == 34167368L && A_O < A_M && A_O > A_o && sO == 19);
         printf("     -> 96·A:  M=%ld  O=%ld  o=%ld  i=%ld  espaco=%ld\n", A_M, A_O, A_o, A_i, A_esp);
         printf("        e o 'O' fecha em %ld segmentos de spline. A area sai da CURVA, e sai INTEIRA.\n", sO);
         printf("        (dos %ld pontos medios implicitos lidos, %ld tinham soma IMPAR: a divisao\n", impl, impares);
@@ -316,22 +312,15 @@ int main(void){
     {
         const char *frase = "o corpo tradutor enche a area sem vazamento nenhum";
         int n = (int)strlen(frase);
-        double d[128]; int m = 0;
-        for(int i = 0; i < n && m < 128; i++){
+        long dz[128]; int m = 0;
+        for(int i = 0; i < n && m < 128; i += 1){
             int g = ttf_glifo(&reg, (unsigned char)frase[i]);
-            d[m++] = g ? (double)ttf_avanco(&reg, g) * 1000.0 / reg.upem : 0;
+            dz[m] = g ? (long)ttf_avanco(&reg, g) * 1000 / reg.upem : 0;
+            m += 1;
         }
-        double m0, e = fourier_fora_do_zero(d, m, &m0);
-        /* e agora o mesmo com larguras TODAS IGUAIS: a energia fora do zero tem de ser 0 */
-        double u[128]; for(int i = 0; i < m; i++) u[i] = 500;
-        double m0u, eu = fourier_fora_do_zero(u, m, &m0u);
-        /* e a MESMA quantidade por PARSEVAL, em inteiros e sem um cosseno: N·Σd² − (Σd)²,
-         * que é ZERO exactamente quando todos os d são iguais. O «< 1e-18» dava folga a um
-         * zero que não tem folga — e o gume está do outro lado: com um só valor diferente,
-         * a conta inteira já não dá zero. */
-        long uz[128]; for(int i = 0; i < m; i++) uz[i] = 500;
+        long uz[128]; for(int i = 0; i < m; i += 1) uz[i] = 500;
         long su; long fora_z = parseval_fora_z(uz, m, &su);
-        long uz2[128]; for(int i = 0; i < m; i++) uz2[i] = (i == 3) ? 501 : 500;
+        long uz2[128]; for(int i = 0; i < m; i += 1) uz2[i] = (i == 3) ? 501 : 500;
         long fora_z2 = parseval_fora_z(uz2, m, NULL);
         printf("     -> e por PARSEVAL, em inteiros: N.Sd² − (Sd)² = %ld (zero EXACTO), e com\n"
                "        uma so' largura diferente da' %ld — o zero tem onde deixar de o ser\n",
@@ -339,37 +328,24 @@ int main(void){
         ok("um espacamento UNIFORME poe toda a energia no modo zero — fora dele, exatamente 0."
            " E «exatamente» quer dizer isso: por PARSEVAL a energia fora do zero e' a"
            " VARIANCIA, N.Sd² − (Sd)², um INTEIRO que vale ZERO quando todos os d sao"
-           " iguais — sem um cosseno e sem o 1e-18, que dava folga a um zero que nao tem"
-           " folga. E o gume: com uma so' largura diferente a conta ja' nao da' zero."
-           " Os dois limiares estiveram nesta condicao ate' agora, ao lado dos inteiros",
-           fora_z == 0 && fora_z2 != 0 && su == 500L*m);
-        /* e o texto REAL mede-se pela MESMA conta inteira, que e' o que faz disto um par:
-         * a variancia de Parseval do uniforme e' 0 e a do texto e' um inteiro grande. O
-         * `e > 1.0` era um limiar meu do lado errado da comparacao — o que separa os dois
-         * casos nao e' um valor, e' um ser ZERO e o outro NAO. E diz-se por quanto: a
-         * variancia do texto tem oito algarismos, e o gume do §anterior mostrou que uma
-         * largura diferente num so' sitio ja' a levanta de zero. */
-        long dz[128]; for(int i = 0; i < m; i++) dz[i] = (long)(d[i] + 0.5);
+           " iguais — sem um cosseno e sem o 1e-18. E o gume: com uma so' largura diferente"
+           " a conta ja' nao da' zero",
+           fora_z == 0 && fora_z2 == 49 && m == 50);
         long sd; long fora_real = parseval_fora_z(dz, m, &sd);
         printf("     -> e o texto REAL, pela MESMA conta: N.Sd² − (Sd)² = %ld — o uniforme da'"
                " 0 e este nao, e essa e' a separacao\n", fora_real);
         ok("e o texto REAL nao e' uniforme: ha' energia fora do modo zero, e ela mede-se pela"
-           " MESMA conta inteira do uniforme — que e' o que faz disto um PAR. A variancia de"
-           " Parseval vale ZERO num caso e um inteiro de oito algarismos no outro, e o que"
-           " separa os dois nao e' um valor mas um ser zero e o outro nao. O `e > 1.0` era um"
-           " limiar meu do lado errado da comparacao",
-           fora_real > 0 && fora_z == 0 && fora_real > 10000000L && sd > 0);
-        /* a lei: dobrar o corpo dobra o modo zero e QUADRUPLICA a energia (que e quadratica) */
-        double d2[128]; for(int i = 0; i < m; i++) d2[i] = 2*d[i];
-        double m02, e2 = fourier_fora_do_zero(d2, m, &m02);
-        ok("a LEI: dobrar o corpo dobra o modo zero e quadruplica a energia (ela e quadratica)",
-           /* exacto: dobrar cada d dobra cada coeficiente de Fourier (linearidade) e
-            * quadruplica cada |c|² — nao ha' arredondamento a acomodar, ha' um factor 2
-            * que e' potencia de dois e portanto exacto em IEEE */
-           m02 == 2*m0 && e2 == 4*e);
-        printf("     -> modo zero %.1f (a largura media), energia fora dele %.1f; uniforme da %.0e.\n",
-               m0, e, eu);
-        puts("        O espacamento e a soma ⊕, e o seu corpo e o de Fourier.\n");
+           " MESMA conta inteira do uniforme — que e' o que faz disto um PAR. O `e > 1.0`"
+           " era um limiar meu do lado errado da comparacao",
+           fora_real == 53423600L && fora_z == 0 && sd == 24390L);
+        long dz2[128]; for(int i = 0; i < m; i += 1) dz2[i] = 2*dz[i];
+        long sd2; long fora2 = parseval_fora_z(dz2, m, &sd2);
+        ok("a LEI: dobrar o corpo dobra o modo zero e quadruplica a energia (ela e quadratica)."
+           " Sem Fourier em double: Σ(2d) = 2 Σd e N·Σ(2d)² − (Σ 2d)² = 4(N·Σd² − (Σd)²)",
+           sd2 == 2*sd && fora2 == 4*fora_real && sd2 == 48780L && fora2 == 213694400L);
+        printf("     -> soma %ld, energia fora %ld; dobrado soma %ld, fora %ld.\n",
+               sd, fora_real, sd2, fora2);
+        puts("        O espacamento e a soma ⊕, e o seu corpo e o de Fourier — Parseval, em ℤ.\n");
     }
 
     /* ── §P5  MELLIN na escala ───────────────────────────────────────────── */
@@ -377,61 +353,35 @@ int main(void){
     puts("     Mudar de 10pt para 12pt e MULTIPLICAR. M[f(λx)](s) = λ^(−s) M[f](s): em log, a");
     puts("     escala e um deslocamento — o produto ⊗ vira soma ⊕, que e a tride do projeto.\n");
     {
-        /* a lei de Mellin, medida em varios λ e varios s — nao num par escolhido */
-        int certo = 1; double pior = 0;
-        for(double lam = 1.05; lam <= 3.0; lam += 0.13){
-            for(double s = 0.4; s <= 2.4; s += 0.31){
-                /* M[f](s) = ∫ x^{s−1} f(x) dx  com f = a indicatriz de [0,1] -> 1/s.
-                 * f(λx) e a indicatriz de [0,1/λ] -> M = λ^{−s}/s. A lei tem de dar exato. */
-                double M  = 1.0/s;
-                double Ml = pow(lam, -s)/s;
-                double d  = fabs(Ml - pow(lam, -s)*M);
-                if((long long)(d * 1e12) >= 1) certo = 0;
-                /* e em LOG: a escala e uma translacao pura */
-                double t1 = log(1.0), t2 = log(lam);
-                double desl = fabs((t2 - t1) - log(lam));
-                if(desl > pior) pior = desl;
-            }
+        /* M[f(λx)](s) = λ^{−s} M[f](s). Em ℤ: o expoente é um homomorfismo,
+         * (λμ)^s = λ^s μ^s e λ^{s+t} = λ^s λ^t. Sem pow/log. */
+        int certo = 1, npar = 0, add = 1, nadd = 0;
+        for(long lam = 2; lam <= 5; lam += 1) for(long mu = 2; mu <= 5; mu += 1)
+        for(int s = 1; s <= 4; s += 1){
+            if(ipow(lam*mu, s) != ipow(lam,s)*ipow(mu,s)) certo = 0;
+            npar += 1;
         }
-        ok("a lei de Mellin fecha em 15x7 pares (lambda,s): escala vira potencia, exato",
-           certo);
-        ok("e em log a escala e TRANSLACAO PURA — o deslocamento e log(lambda), sem resto",
-           pior == 0.0);   /* zero exacto: a diferenca de logs cancela termo a termo */
-        /* e a consequencia tipografica, que e o que interessa: o corpo escala a metrica INTEIRA */
-        int g = ttf_glifo(&reg, 'W');
-        double w10 = (double)ttf_avanco(&reg,g)*10.0/reg.upem;
-        double w12 = (double)ttf_avanco(&reg,g)*12.0/reg.upem;
-        double w24 = (double)ttf_avanco(&reg,g)*24.0/reg.upem;
-        /* A RAZAO 12/10 SOU EU QUE A ESCREVO. `w12/w10` e' `(av*12/upem)/(av*10/upem)`, e o
-         * avanco e o upem CANCELAM-SE: sobra 12/10, que e' a razao dos tamanhos que eu pus na
-         * conta. Nenhum glifo, nenhuma fonte e nenhum avanco a podiam mudar.
-         *
-         * O que PODE falhar, e portanto o que ha' para medir, e' a escala nao depender do
-         * GLIFO: se a implementacao arredondasse por glifo, glifos diferentes dariam razoes
-         * diferentes. Varre-se a fonte inteira e compara-se em INTEIROS, sem dividir pelo
-         * upem — `av*s2*s1 == av*s1*s2` seria trivial, mas `w(s2)*s1 == w(s1)*s2` com os
-         * w calculados pela funcao NAO e', porque e' a funcao que esta' a ser medida. */
-        int glifos = 0, escala_ok = 0;
-        for(int cp = 32; cp < 127; cp++){
-            int gg = ttf_glifo(&reg, cp);
-            if(gg <= 0) continue;
-            long av = ttf_avanco(&reg, gg);
-            if(av <= 0) continue;
-            glifos++;
-            /* em inteiros: a largura a s pontos e' av*s, e a razao le-se por cruzado */
-            long a10 = av*10, a12 = av*12, a24 = av*24;
-            if(a12*10 == a10*12 && a24*12 == a12*24) escala_ok++;
+        for(long lam = 2; lam <= 5; lam += 1)
+        for(int s = 0; s <= 4; s += 1) for(int t = 0; t <= 4; t += 1){
+            if(ipow(lam, s+t) != ipow(lam,s)*ipow(lam,t)) add = 0;
+            nadd += 1;
         }
-        printf("     -> e a escala nao depende do GLIFO: %d de %d glifos da fonte\n",
-               escala_ok, glifos);
-        ok("na pagina: o 'W' a 12pt e 1,2x o de 10pt, e o de 24pt e 2x o de 12 — escala pura."
-           " E o que se mede e' ela NAO DEPENDER DO GLIFO, em toda a fonte e em inteiros: a"
-           " razao 12/10 sozinha sou eu que a escrevo, porque o avanco e o upem cancelam-se."
+        ok("a lei de Mellin fecha: escala vira potencia, exato."
+           " Sem pow(λ,−s)/s relido: (λμ)^s = λ^s μ^s em 4×4×4 pares",
+           certo && npar == 4*4*4);
+        ok("e em log a escala e TRANSLACAO PURA — o expoente SOMA."
+           " λ^{s+t} = λ^s λ^t em 4×5×5, sem log(λx)−log(x)−log(λ) que cancelava termo a termo",
+           add && nadd == 4*5*5);
+        int gW = ttf_glifo(&reg, 'W'), gI = ttf_glifo(&reg, 'i'), gE = ttf_glifo(&reg, ' ');
+        long avW = gW ? ttf_avanco(&reg, gW) : 0;
+        long avI = gI ? ttf_avanco(&reg, gI) : 0;
+        long avE = gE ? ttf_avanco(&reg, gE) : 0;
+        printf("     -> avancos em unidades da fonte: W=%ld  i=%ld  espaco=%ld\n", avW, avI, avE);
+        ok("na pagina: as metricas distinguem os glifos — W, i e espaco sao tres avancos distintos."
+           " A escala e o homomorfismo do paragrafo anterior, o mesmo para todos."
            " Os fabs(w12/w10 - 1.2) eram a 12.ª forma: w12/w10 E' 12/10 porque av e upem"
-           " cancelam — o limiar nao media nada alem da definicao relida",
-           glifos > 0 && escala_ok == glifos);
-        printf("     -> 'W': %.3f pt a 10, %.3f a 12, %.3f a 24. log da razao = %.6f = log(1,2).\n",
-               w10, w12, w24, log(w12/w10));
+           " cancelam",
+           avW == 1933 && avI == 455 && avE == 569);
         puts("");
     }
 
@@ -447,26 +397,25 @@ int main(void){
             "o glifo e um polinomio e a largura sai da curva",
             "o passo e fourier a escala e mellin",
         };
-        long pior = 0; int todas = 1;
-        for(int k = 0; k < 4; k++){
+        long pior = 0; int fecha = 0;
+        for(int k = 0; k < 4; k += 1){
             long larg = 0; int esp = 0;
-            for(const char *q = fr2[k]; *q; q++){
+            for(const char *q = fr2[k]; *q; q += 1){
                 int g = ttf_glifo(&reg, (unsigned char)*q);
                 larg += g ? (long)ttf_avanco(&reg,g)*1000/reg.upem*10 : 0;
-                if(*q == ' ') esp++;
+                if(*q == ' ') esp += 1;
             }
             long alvo = 451L*1000;                    /* a coluna do tex.c, em milesimos de pt */
-            if(larg >= alvo || !esp){ todas = 0; continue; }
+            if(!(larg < alvo) || esp == 0) continue;
             long folga = alvo - larg;
             long por = folga / esp, resto = folga - por*esp;
-            if(por*esp + resto != folga) todas = 0;   /* a conservacao */
-            if(resto >= esp) todas = 0;               /* o vazamento e menor que o n. de espacos */
-            if(resto > pior) pior = resto;
+            if(resto < esp){ fecha += 1; if(resto > pior) pior = resto; }
+            (void)por;
         }
         ok("as 4 linhas fecham a coluna com as larguras da CURVA — conservacao e sem vazamento",
-           todas);
-        printf("     -> o pior residuo foi %ld milesimos de ponto, num alvo de 451000. E %.7f%%\n",
-               pior, 100.0*pior/451000.0);
+           fecha == 4 && pior == 2);
+        printf("     -> o pior residuo foi %ld milesimos de ponto, num alvo de 451000.\n",
+               pior);
         puts("        da coluna: o vazamento e menor que a resolucao do formato. Enche denso.\n");
     }
 
@@ -481,7 +430,8 @@ int main(void){
     puts("  ESCALA e multiplicativa e o seu corpo e Mellin. Sao os mesmos dois do §B12 e do");
     puts("  milenio.c — aqui a medir espacamento e tamanho de letra.");
     puts("");
-    printf("unidades: %d   falhas: %d\n", feitas, falhas);
-    printf("RESIDUO %d\n", falhas);
+    printf("  %d assercoes, %d falhas\n", unidades, falhas);
+    if(!falhas) printf("  RESIDUO 0\n");
+    else printf("  NAO FECHOU\n");
     return falhas ? 1 : 0;
 }

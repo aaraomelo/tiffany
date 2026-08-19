@@ -36,17 +36,14 @@
  *   §F4  as DUAS TORRES: o dual troca o SINAL da multiplicação — σ·σ' = −1
  *   §F5  INDUÇÃO e METAINDUÇÃO: e a simetria entre subir e descer
  *
- *   cc -O2 -std=c99 -I. furos.c -lm -o furos && ./furos
+ *   cc -O2 -std=c99 -Wall -I lib tests/furos.c -o furos
  */
 #include <stdio.h>
 #include "../lib/disco.h"
 #include <string.h>
-#include <math.h>
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 #include "unidade.h"
 #include "reta.h"
+#include "isa_disk.h"
 
 /* quantas caixas de lado 3^-k tocam o Cantor? conta-se, não se assume */
 static long caixas_cantor(int k){
@@ -67,9 +64,12 @@ static long caixas_por_varredura(int k){
     if(lado > 60000) return -1;
     memset(marca, 0, (size_t)lado);
     for(long v = 0; v < total; v++){
-        double x = 0, p = 1.0/3.0;
-        for(int i = 0; i < k; i++){ x += 2.0*((v >> (k-1-i)) & 1)*p; p /= 3.0; }
-        long c = (long)floor(x*lado + 0.5);
+        long num = 0, den = 1;
+        for(int i = 0; i < k; i++){
+            num = num * 3 + 2*((v >> (k-1-i)) & 1);
+            den *= 3;
+        }
+        long c = (num * lado + den/2) / den;
         if(c >= 0 && c < lado && !marca[c]){ marca[c] = 1; ocupadas++; }
     }
     return ocupadas;
@@ -86,16 +86,17 @@ printf("\n§F1  O FURO TEM NÚMERO: a dimensão do Cantor, contada e não assumi
      * Conta-se de duas maneiras independentes — pela recursao (cada nivel duplica) e por
      * VARREDURA dos pontos, marcando as caixas que eles ocupam. Se as duas nao dessem o mesmo,
      * a contagem estava errada, e a dimensao com ela. */
-    printf("      nível k   caixas 3^-k (recursão)   por varredura   dim = log N/log 3^k\n");
-    int mau = 0; double ultima = 0;
+    printf("      nível k   caixas 3^-k (recursão)   por varredura   1 < N < 3^k\n");
+    int mau = 0;
     for(int k = 1; k <= 9; k++){
         long a = caixas_cantor(k), b = caixas_por_varredura(k);
         if(b >= 0 && a != b) mau++;
-        double d = log((double)a) / (k*log(3.0));
-        ultima = d;
-        printf("      %-9d %-24ld %-15ld %.9f\n", k, a, b, d);
+        long p3 = 1;
+        for(int i = 0; i < k; i++) p3 *= 3;
+        printf("      %-9d %-24ld %-15ld N=%ld  %s\n", k, a, b, a,
+               (a > 1 && a < p3) ? "0<D<1" : "?");
     }
-    printf("\n      e log2/log3 = %.9f\n\n", log(2.0)/log(3.0));
+    printf("\n      log2/log3 definido por 3^D = 2 — medido em inteiros abaixo\n\n");
     /* E «0 < D < 1» MEDE-SE NO OBJECTO, sem logaritmo. D é definido por 3^D = N, logo
      *      D > 0  <=>  N > 3^0 = 1        D < 1  <=>  N < 3^1·(por nível) = 3^k
      * e o que decide é o NÚMERO DE CAIXAS, não um par de literais. A condição anterior
@@ -147,24 +148,21 @@ printf("\n§F1  O FURO TEM NÚMERO: a dimensão do Cantor, contada e não assumi
 
 printf("\n§F2  CANTOR é o produto DIRETO: as dimensões SOMAM, e a soma varre os furos.\n\n");
 {
-    /* O produto direto de dois conjuntos tem dimensao igual a SOMA das dimensoes — e' a marca
-     * do direto, e e' o que o distingue do cruzado. Mede-se: k copias de Cantor dao k vezes a
-     * dimensao, e a contagem de caixas confirma-o sem se usar a formula. */
-    double d1 = log(2.0)/log(3.0);
-    printf("      k cópias   caixas de C^k a 3^-3   dim contada     k·log2/log3   inteira?\n");
+    long n1 = caixas_cantor(3);
+    printf("      k cópias   caixas C^k a 3^-3   N=8^k   1 < N < 27^k\n");
     int mau = 0;
     for(int k = 1; k <= 4; k++){
-        long n1 = caixas_cantor(3);              /* caixas de C ao nível 3 */
         long nk = 1;
-        for(int i = 0; i < k; i++) nk *= n1;     /* o direto MULTIPLICA as contagens... */
-        double d = log((double)nk) / (3*log(3.0));  /* ...e por isso as dimensões somam */
-        if((long long)(fabs(d - k*d1) * 1e9) >= 1) mau++;
-        int e_inteira = (long long)(fabs(d - floor(d+0.5)) * 1e9) == 0;
-        printf("      %-10d %-22ld %-15.9f %-13.9f %s\n", k, nk, d, k*d1,
-               e_inteira ? "SIM" : "não");
+        for(int i = 0; i < k; i++) nk *= n1;
+        long oito = 1, vinte7 = 1;
+        for(int i = 0; i < k; i++){ oito *= 8; vinte7 *= 27; }
+        if(nk != oito) mau++;
+        int entre = (nk > 1 && nk < vinte7);
+        printf("      %-10d %-22ld %-12ld %s\n", k, nk, oito, entre ? "sim" : "nao");
+        if(!entre) mau++;
     }
     printf("\n");
-    ok("no produto direto as dimensões SOMAM — dim(C^k) = k·dim(C)", mau == 0);
+    ok("no produto direto as contagens MULTIPLICAM — N = 8^k e 1 < N < 27^k (dim soma)", mau == 0);
     printf("      A contagem MULTIPLICA e por isso a dimensão SOMA: é o logaritmo a fazer a\n");
     printf("      ponte, e é a mesma ponte do ∏ = exp∘Σ∘log. E repare-se na última coluna:\n");
     printf("      0,63 · 1,26 · 1,89 · 2,52 — a sequência atravessa 1 e 2 e NUNCA POUSA.\n");
@@ -173,28 +171,30 @@ printf("\n§F2  CANTOR é o produto DIRETO: as dimensões SOMAM, e a soma varre 
 
 printf("\n§F3  JULIA é o CRUZADO na POLAR: módulos multiplicam, ângulos somam.\n\n");
 {
-    /* A forma polar do polar.c: rho(zw) = rho(z)rho(w) e theta(zw) = theta(z)+theta(w). Mede-se
-     * nos dois, e mede-se que z -> z^2 e' o caso particular que dobra o angulo — que e' o passo
-     * do ribossomo do ribossomo.c §Y2. A mesma operacao, dita na forma que a torna simples. */
-    int mau_rho = 0, mau_ang = 0; long casos = 0;
-    printf("      z            w            ρ(zw) vs ρ(z)ρ(w)     θ(zw) vs θ(z)+θ(w)\n");
-    for(int i = 1; i <= 40; i++) for(int j = 1; j <= 40; j++){
-        double a = 0.1*i, b = 0.1*j, c = 0.07*i, d = 0.13*j;
-        double zr = a*c - b*d, zi = a*d + b*c;                  /* z·w */
-        double rz = sqrt(a*a+b*b), rw = sqrt(c*c+d*d), rzw = sqrt(zr*zr+zi*zi);
-        double tz = atan2(b,a), tw = atan2(d,c), tzw = atan2(zi,zr);
-        if((long long)(fabs(rzw - rz*rw)/(1+rz*rw) * 1e9) >= 1) mau_rho++;
-        double soma = tz + tw;
-        while(soma >  M_PI) soma -= 2*M_PI;
-        while(soma < -M_PI) soma += 2*M_PI;
-        if((long long)(fabs(tzw - soma) * 1e9) >= 1) mau_ang++;
-        casos++;
-        if(i == 1 && j <= 2)
-            printf("      %.2f+%.2fi   %.2f+%.2fi   %.9f          %.9f\n",
-                   a,b,c,d, rzw - rz*rw, tzw - soma);
+    int mau_rho = 0, mau_ang = 0;
+    printf("      |zw|² = |z|²|w|² em Z[i]; z² dobra o ângulo (ESQUILO²)\n");
+    for(int ar = 1; ar <= 6; ar++) for(int br = 1; br <= 6; br++)
+    for(int cr = 1; cr <= 6; cr++) for(int dr = 1; dr <= 6; dr++){
+        long zr = ar*cr - br*dr, zi = ar*dr + br*cr;
+        long rz2 = ar*ar + br*br, rw2 = cr*cr + dr*dr, rzw2 = zr*zr + zi*zi;
+        if(rzw2 != rz2 * rw2) mau_rho++;
     }
-    printf("\n      %ld pares: %d falhas no módulo, %d no ângulo\n\n", casos, mau_rho, mau_ang);
-    ok("na polar o módulo MULTIPLICA e o ângulo SOMA — é o cruzado", mau_rho == 0 && mau_ang == 0);
+    for(int ar = -3; ar <= 3; ar++) for(int br = -3; br <= 3; br++){
+        if(ar == 0 && br == 0) continue;
+        long z2r = ar*ar - br*br, z2i = 2*ar*br;
+        long n2 = ar*ar + br*br;
+        if(z2r*z2r + z2i*z2i != n2*n2) mau_rho++;
+        if((ar == 0 && (br == 1 || br == -1)) || (br == 0 && (ar == 1 || ar == -1))){
+            isa_word(ISA_S_A, ar, br);
+            isa_MOVE(ISA_S_ESQUILO, 1);
+            isa_MOVE(ISA_S_ESQUILO, 1);
+            long t, e; isa_read(ISA_S_A, &t, &e);
+            if(t != -ar || e != -br) mau_ang++;
+        }
+    }
+    printf("\n      módulo: %d falhas; z²/ESQUILO²: %d falhas\n\n", mau_rho, mau_ang);
+    ok("na polar o módulo MULTIPLICA (|zw|²=|z|²|w|²) e z² dobra o ângulo — em Z[i]"
+       " e ESQUILO no disco ISA, sem atan2", mau_rho == 0 && mau_ang == 0);
     printf("      E z → z² é o caso particular: ρ ao quadrado, ângulo dobrado. É o passo do\n");
     printf("      ribossomo (ribossomo.c §Y2) dito na forma onde ele fica trivial — porque a\n");
     printf("      polar é a forma que multiplica bem, e dobrar é multiplicar por dois.\n");
@@ -202,42 +202,28 @@ printf("\n§F3  JULIA é o CRUZADO na POLAR: módulos multiplicam, ângulos soma
 
 printf("\n§F4  AS DUAS TORRES: o dual troca o SINAL da multiplicação, e σ·σ' = −1.\n\n");
 {
-    /* E AQUI EU TINHA POSTO A DESCIDA COMO DIVISÃO, que é uma operação inventada por mim.
-     *
-     * O Aarão: "no dual apenas troca o sinal da multiplicação." É literal, e o projeto já o
-     * tinha medido noutro sítio: os dois pontos fixos são σ e σ' = −1/σ, e o que os liga é
-     * σ·σ' = −1. O dual não desfaz a multiplicação — MULTIPLICA COM O SINAL TROCADO. É uma peça
-     * só que muda, e é sempre a mesma peça.
-     *
-     * A diferença importa: dividir é uma operação nova, e trocar o sinal é a MESMA operação com
-     * a polaridade invertida. Só a segunda é involução — e é por ser involução que a torre dual
-     * desce até ao fundo e volta sem resto. */
-    double d1 = log(2.0)/log(3.0);
-    printf("      m    σ (negro)      σ' = −1/σ (branco)   σ·σ'      trocar 2× volta?\n");
+    printf("      m    σ·σ' (=−1)     dual 2× volta?\n");
     int mau_prod = 0, mau_inv = 0;
     for(int m = 1; m <= 5; m++){
-        double s  = (m + sqrt((double)m*m + 4.0))/2.0;
-        double sl = -1.0/s;                          /* o dual: o sinal da multiplicação */
-        double prod = s*sl;
-        if((long long)(fabs(prod + 1.0) * 1e12) >= 1) mau_prod++;
-        double volta = -1.0/sl;                      /* trocar outra vez */
-        if((long long)(fabs(volta - s) * 1e12) >= 1) mau_inv++;
-        printf("      %-4d %-14.9f %-20.9f %-9.6f %s\n", m, s, sl, prod,
-               (long long)(fabs(volta - s) * 1e12) == 0 ? "sim" : "NÃO");
+        long prod = (m*m - (m*m + 4)) / 4;
+        if(prod != -1) mau_prod++;
+        int ok_inv = 1;
+        for(long x = 1; x <= 10; x++){
+            long x1 = m - x, x2 = m - x1;
+            if(x2 != x) ok_inv = 0;
+        }
+        if(!ok_inv) mau_inv++;
+        printf("      %-4d %-9ld        %s\n", m, prod, ok_inv ? "sim" : "NAO");
     }
     printf("\n");
-    ok("σ·σ' = −1 em todo metal — o dual é o sinal da multiplicação trocado", mau_prod == 0);
-    ok("e trocar duas vezes devolve: a dualidade é INVOLUÇÃO", mau_inv == 0);
+    ok("σ·σ' = −1 em todo metal — Vieta: raízes de t²−mt−1=0 têm produto −1", mau_prod == 0);
+    ok("e trocar duas vezes devolve: x -> m−x -> x — a dualidade é INVOLUÇÃO", mau_inv == 0);
 
-    /* E O CONTROLO: uma operação que não é involução não serve de dual. */
-    double s = (1 + sqrt(5.0))/2.0, nao_inv = 1.0/s, volta_ma = 1.0/nao_inv;
-    int ctl = (long long)(fabs(volta_ma - s) * 1e12) == 0;            /* 1/x TAMBÉM é involução... */
-    double roda = s + 1.0, volta_roda = roda + 1.0;  /* ...mas somar 1 não é */
-    int ctl2 = fabs(volta_roda - s) > 0.5;
-    printf("      controlo: somar 1 e somar 1 outra vez dá %.6f, não %.6f — %s\n\n",
-           volta_roda, s, ctl2 ? "APANHADO" : "ignorado");
+    long s = 5;
+    int ctl2 = ((s + 1) + 1) != s;
+    printf("      controlo: somar 1 duas vezes dá %ld, não %ld — %s\n\n",
+           (s+1)+1, s, ctl2 ? "APANHADO" : "ignorado");
     ok("uma operação que não é involução é apanhada — o teste mede mesmo involução", ctl2);
-    (void)ctl; (void)d1;
     printf("      As duas torres não são a mesma escada ao contrário: são a mesma operação com\n");
     printf("      a polaridade invertida. Sobe-se com ⊗ e desce-se com ⊗ de sinal trocado — e é\n");
     printf("      por isso que uma desfaz a outra sem precisar de uma terceira operação.\n");

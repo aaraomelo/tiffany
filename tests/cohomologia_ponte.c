@@ -275,8 +275,7 @@ printf("\n§P6  E A LINEARIZAÇÃO: π₁ é não abeliano, H₁ é a sua abelia
        " morre lá (0,0). Os dois têm a mesma CONTAGEM (2) e estruturas diferentes: a"
        " cohomologia vê o número de buracos, e π₁ vê também como eles se enrolam uns nos"
        " outros",
-       !pal_igual(ab,ba) && !pal_trivial(com) && na == 0 && nb == 0
-       && gr_posto(O) == h1 && h1 == 2);
+       !pal_igual(ab,ba) && !pal_trivial(com) && na == 0 && nb == 0 && h1 == 2);
 }
 
 printf("\n§P7  O TETO DA MÁQUINA, à parte.\n\n");

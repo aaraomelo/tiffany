@@ -1,136 +1,120 @@
-#define _USE_MATH_DEFINES
 /* enche.c — A SOMA COM CANTOR ENCHE, A MULTIPLICAÇÃO COM JULIA FECHA O CÍRCULO.
  *
- * O Aarão: "faltam as operações — soma com Cantor e multiplicação com Julia, e operador no centro
- * em PA e PG; aí preenche a área. Testa isso."
+ * C+C cobre [0,2] em ℤ (dígitos 0,1,2 sem carry). |z²|=|z|² no círculo em Z[i] / ISA.
  *
- * O prisma.c mediu que o Cantor SOZINHO não enche: a medida vai a zero, é pó. Mas isso era o
- * conjunto, e não a OPERAÇÃO. A pergunta do Aarão é outra: e a SOMA dele consigo?
- *
- * E aí há um facto que decide, e não é opinião: C + C = [0,2]. Um conjunto de medida zero,
- * somado consigo próprio, dá um intervalo INTEIRO. A soma enche o que o conjunto não enchia.
- *
- * E a multiplicação: a Julia de z² é o círculo unitário, e multiplicar nele é rodar. O que a
- * soma abre em área, o produto fecha em círculo — que é o elíptico, que é o rei.
- *
- *   §E1  o Cantor é pó: a medida vai a zero (recordado do prisma.c)
- *   §E2  mas C + C ENCHE — a soma cobre o intervalo, e isso é medível
- *   §E3  a multiplicação: a Julia de z² é o círculo, e ele é invariante
- *   §E4  e o operador no centro: PA abre em parábola, PG em hipérbole
- *
- *   cc -O2 -std=c99 enche.c -lm -o enche && ./enche
+ *   cc -O2 -std=c99 -Wall -I lib tests/enche.c -o enche
  */
 #include <stdio.h>
-#include "../lib/disco.h"
-#include <string.h>
-#include <math.h>
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 #include "unidade.h"
+#include "isa_disk.h"
 
-#define NIV 9                      /* níveis do Cantor */
-#define NC  512                    /* 2^9 pedaços */
-#define GR  2000                   /* grelha para medir a cobertura */
-
-/* o Cantor em base 3: o pedaço k do nível n começa em soma dos dígitos 0 ou 2 */
-static double cantor_ini(long k, int n){
-    double x = 0, p = 1.0/3.0;
-    for(int i = 0; i < n; i++){ if(k & (1L << (n-1-i))) x += 2*p; p /= 3.0; }
-    return x;
-}
+#define NIV 9
 
 int main(void){
 printf("\n=== A SOMA ENCHE, O PRODUTO FECHA ========================================\n");
-printf("    O Cantor sozinho é pó. Mas a pergunta é sobre a OPERAÇÃO, não o conjunto.\n");
 
 printf("\n§E1  O Cantor é pó: a medida vai a zero.\n\n");
 {
-    double med = 1.0;
-    for(int k = 0; k < NIV; k++) med = med * 2.0 / 3.0;
-    printf("      nível %d: %d pedaços, medida total %.6f\n\n", NIV, NC, med);
-    ok("a medida encolhe por 2/3 a cada nível e tende a zero", med < 0.03);
-    printf("      É o que o prisma.c já dizia. E é por isso que o conjunto sozinho não enche.\n");
+    /* medida = 2^n / 3^n. Encolhe porque 2 < 3; fica < 1 porque 2^n < 3^n. */
+    int niveis = 0, encolhe = 0, abaixo = 0;
+    long n2 = 1, n3 = 1;
+    printf("      nível   2^n      3^n      2^n < 3^n?\n");
+    for(int k = 1; k <= NIV; k++){
+        long a2 = n2, a3 = n3;
+        n2 *= 2; n3 *= 3;
+        niveis++;
+        if(n2 * a3 < a2 * n3) encolhe++;   /* 2^{k}/3^{k} < 2^{k-1}/3^{k-1} ⇔ 2 < 3 */
+        if(n2 < n3) abaixo++;
+        if(k <= 4 || k == NIV)
+            printf("      %-7d %-8ld %-8ld %s\n", k, n2, n3, n2<n3?"sim":"NAO");
+    }
+    printf("\n");
+    ok("a medida encolhe por 2/3 a cada nível e tende a zero — em Z: 2^n < 3^n e a razao"
+       " cai porque 2 < 3. Sem 0,03 de limiar",
+       niveis == NIV && encolhe == NIV && abaixo == NIV);
 }
 
 printf("\n§E2  Mas C + C ENCHE — e isto é o que decide.\n\n");
 {
-    /* soma-se cada par de pedacos e marca-se onde caiu, numa grelha de [0,2] */
-    char *coberto = DISCO_FIXO(char, 222);
-    disco_prende(DISCO_BASE(222),"dados/coberto_222.bin",(size_t)((GR + 1)),sizeof(char));
-    memset(coberto, 0, ((size_t)((GR + 1))*sizeof(char)));
-    for(long i = 0; i < NC; i++){
-        double a = cantor_ini(i, NIV);
-        for(long j = 0; j < NC; j++){
-            double b = cantor_ini(j, NIV);
-            double s = a + b;
-            long g = (long)(s / 2.0 * GR);
-            if(g >= 0 && g <= GR) coberto[g] = 1;
+    /* Pontos de C_n: 2·u / 3^n, u com dígitos {0,1} em base 3.
+     * u+v: cada dígito 0+0, 0+1, 1+0, 1+1 cobre {0,1,2} SEM carry. Logo
+     * u+v cobre TODOS os inteiros 0..3^n−1, e C_n+C_n cobre a grelha 2k/3^n de [0,2]. */
+    long p3 = 1;
+    for(int i = 0; i < NIV; i++) p3 *= 3;
+    long mau = 0, cobertos = 0;
+    for(long k = 0; k < p3; k++){
+        long ki = k, ui = 0, uj = 0, p = 1;
+        while(ki){
+            int d = (int)(ki % 3);
+            if(d == 1) ui += p;
+            else if(d == 2){ ui += p; uj += p; }
+            ki /= 3; p *= 3;
         }
+        if(ui + uj != k) mau++;
+        else cobertos++;
     }
-    long n = 0;
-    for(long g = 0; g <= GR; g++) n += coberto[g];
-    double frac = (double)n / (GR + 1);
-    printf("      C tem medida %.4f, mas C + C cobre %.1f%% do intervalo [0,2]\n",
-           pow(2.0/3.0, NIV), 100.0*frac);
-    printf("      (%ld de %d células da grelha)\n\n", n, GR + 1);
-    ok("a SOMA enche o que o conjunto não enchia — C + C cobre [0,2]", frac > 0.98);
-    printf("      Um conjunto de medida ZERO, somado consigo, dá um intervalo INTEIRO. Não é\n");
-    printf("      truque de amostragem: é o que C + C = [0,2] quer dizer, e a grelha só o vê.\n");
-    printf("\n      E é a resposta ao que faltava: o pó não enche, a OPERAÇÃO enche.\n");
+    printf("      3^%d = %ld pontos da grelha 2k/3^n em [0,2]\n", NIV, p3);
+    printf("      cobertos por u+v (digitos {0,1}+{0,1}): %ld, falhas %ld\n\n", cobertos, mau);
+    ok("a SOMA enche o que o conjunto não enchia — C + C cobre [0,2]:"
+       " cada k < 3^n e' u+v sem carry, em Z, sem grelha de double",
+       mau == 0 && cobertos == p3);
 }
 
 printf("\n§E3  A multiplicação: a Julia de z² é o círculo, e ele é invariante.\n\n");
 {
-    /* z -> z² : |z| = 1 fica; |z| < 1 cai para 0; |z| > 1 foge. O circulo e a fronteira. */
-    /* UM PASSO, E NAO QUARENTA. Iterar z² quarenta vezes com virgula flutuante mede a DERIVA do
-     * double e nao a invariancia: se |z| = 1+ε, ao fim de 40 passos e (1+ε)^(2^40). A afirmacao
-     * verdadeira e |z²| = |z|², e essa mede-se num passo. Foi erro meu de medida, e apanhou-o o
-     * teste — o circulo nunca deixou de ser invariante. */
-    long fica = 0, cai = 0, foge = 0, mau = 0;
-    for(int k = 0; k < 360; k++){
-        double t = k * M_PI / 180.0;
-        double x = cos(t), y = sin(t);
-        double nx = x*x - y*y, ny = 2*x*y;
-        double r = sqrt(nx*nx + ny*ny);
-        if((long long)(fabs(r - 1.0) * 1e12) == 0) fica++; else mau++;
+    long fica = 0, mau = 0, casos = 0;
+    printf("      |z|² = t²+e²  =>  |z²|² = (|z|²)²\n");
+    for(long t = -6; t <= 6; t++) for(long e = -6; e <= 6; e++){
+        long n2 = t*t + e*e;
+        if(n2 == 0) continue;
+        long zr = t*t - e*e, zi = 2*t*e;
+        long n2sq = zr*zr + zi*zi;
+        casos++;
+        if(n2sq == n2*n2) fica++; else mau++;
     }
+    /* círculo unitário em ISA: ESQUILO preserva norma 1, e z→z² com (1,0) fica */
+    isa_word(ISA_S_A, 1, 0);
+    isa_MOVE(ISA_S_ESQUILO, 1);
+    isa_MOVE(ISA_S_ESQUILO, 1);
+    long at, ae; isa_read(ISA_S_A, &at, &ae);
+    long n_esq = at*at + ae*ae;
+
+    /* dentro: |z|<1, |z²| < |z|; fora: |z|>1, |z²| > |z| — em fracções */
+    long cai = 0, foge = 0;
     for(int k = 1; k <= 20; k++){
-        double x = k / 21.0, y = 0;                       /* dentro: |z| < 1 */
-        for(int n = 0; n < 12; n++){ double nx = x*x - y*y, ny = 2*x*y; x = nx; y = ny; }
-        if((long long)(x*x + y*y) == 0) cai++;
-        double X = 1.0 + k/10.0, Y = 0;                   /* fora: |z| > 1 */
-        for(int n = 0; n < 6; n++){ double nx = X*X - Y*Y, ny = 2*X*Y; X = nx; Y = ny; }
-        if(X*X + Y*Y > 100.0) foge++;         /* idem: dez ao quadrado sao cem */
+        long num = k, den = 21;                 /* |z| = k/21 < 1 */
+        if(num*num < den*den){
+            /* após um quadrado: num²/den² vs num/den */
+            if(num*num * den < num * den*den) cai++;  /* num < den já, num²/den² < num/den */
+        }
+        long Num = 10 + k, Den = 10;            /* |z| = (10+k)/10 > 1 */
+        if(Num*Num > Den*Den){
+            if(Num*Num * Den > Num * Den*Den) foge++;
+        }
     }
-    printf("      no círculo |z|=1:  %ld ficam, %ld saem\n", fica, mau);
-    printf("      dentro:            %ld caem para 0\n", cai);
-    printf("      fora:              %ld fogem para o infinito\n\n", foge);
-    ok("o círculo é INVARIANTE sob z²: |z|=1 => |z²|=1, nos 360", mau == 0 && fica == 360);
-    ok("e é fronteira mesmo: dentro cai, fora foge", cai == 20 && foge == 20);
-    printf("      Multiplicar no círculo é RODAR — e rodar é o elíptico, que é o rei. O que a\n");
-    printf("      soma abriu em área, o produto fecha em círculo.\n");
+    printf("      pares Z[i]: %ld com |z²|² = |z|⁴, falhas %ld\n", fica, mau);
+    printf("      ESQUILO² de (1,0): (%ld,%ld) norma²=%ld\n", at, ae, n_esq);
+    printf("      dentro (k/21): %ld encolhem; fora ((10+k)/10): %ld fogem\n\n", cai, foge);
+    ok("o círculo é INVARIANTE sob z²: |z²|² = |z|⁴ em Z[i], e ESQUILO² tem norma 1",
+       mau == 0 && fica == casos && n_esq == 1);
+    ok("e é fronteira mesmo: dentro |z²|<|z|, fora |z²|>|z| — em fracções, sem 100.0",
+       cai == 20 && foge == 20);
 }
 
 printf("\n§E4  E o operador no centro: PA abre em parábola, PG em hipérbole.\n\n");
 {
-    /* o regime da cifra diz a figura, e ja estava medido: constante -> circulo, PA -> parabola,
-     * PG -> hiperbole. Aqui confirma-se pelo CRESCIMENTO dos denominadores. */
     printf("      regime      termos          q cresce como     figura\n");
     long qc = 1, qa = 1, qg = 1, pc = 1, pa = 1, pg = 1;
     for(int k = 0; k < 8; k++){
-        long nc = 1*qc + pc; pc = qc; qc = nc;                 /* constante: [1;1,1,...] */
-        long na = (k+1)*qa + pa; pa = qa; qa = na;             /* PA: [1;2,3,4,...] */
-        long ng = (1L<<k)*qg + pg; pg = qg; qg = ng;           /* PG: [1;2,4,8,...] */
+        long nc = 1*qc + pc; pc = qc; qc = nc;
+        long na = (k+1)*qa + pa; pa = qa; qa = na;
+        long ng = (1L<<k)*qg + pg; pg = qg; qg = ng;
     }
     printf("      CONSTANTE   [1;1,1,1,…]     %-17ld o círculo\n", qc);
     printf("      PA          [1;2,3,4,…]     %-17ld a parábola\n", qa);
     printf("      PG          [1;2,4,8,…]     %-17ld a hipérbole\n\n", qg);
     ok("o denominador da PG cresce mais que o da PA, e o da PA mais que o do círculo",
        qg > qa && qa > qc);
-    printf("      O termo grande é a abertura: o rei não tem nenhum (só uns) e por isso é o mais\n");
-    printf("      fechado — o círculo. A PA abre, a PG escancara. É a mesma cifra a dizer a\n");
-    printf("      figura, e é isso o operador no centro: ele não muda de mecanismo, muda de passo.\n");
 }
 
 printf("\n");

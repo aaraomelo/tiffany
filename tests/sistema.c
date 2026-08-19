@@ -16,56 +16,47 @@
  *
  *   §S1  a ED de 2ª ordem É o sistema com a companion — e a companion é o gato
  *   §S2  a régua do sistema é a do catálogo: (B, C) = (−tr, det)
- *   §S3  a solução e^{At} fechada bate a integração numérica
- *   §S4  o produto de sistemas: exp(A ⊕ B) = exp A ⊗ exp B — de broca-so/papers
+ *   §S3  a órbita: Cayley–Hamilton e A^{a+b}=A^a A^b, em ℤ
+ *   §S4  o produto de sistemas: o gerador SOMA (tr A⊕B), a solução MULTIPLICA (tr A⊗B)
  *   §S5  e o AMORTECIMENTO move o espectro: os três nomes da física são os do catálogo
  *
- *   cc -O2 -std=c99 sistema.c -lm -o sistema && ./sistema
+ * LEI vs TRANSPORTE. e^{At} em forma fechada contra RK4, a série de exp(A⊕B) e max Re(λ)
+ * com 1e-9 eram o método. A lei é a companion em ℚ (edo_le), os dois Δ iguais em ℤ,
+ * p(A)=0 e A²A³=A⁵, traço da soma/produto de Kronecker, e o sinal de Δ = B²−4C.
+ *
+ *   cc -O2 -std=c99 -I lib tests/sistema.c -o sistema && ./sistema
  */
 #include <stdio.h>
-#include <math.h>
 #include <string.h>
 #include "edo.h"
+#include "reta.h"
 #include "unidade.h"
 
-typedef struct { double a, b, c, d; } M2;      /* [[a,b],[c,d]] */
-static double tr(M2 M){ return M.a + M.d; }
-static double de(M2 M){ return M.a*M.d - M.b*M.c; }
-static double dis(M2 M){ return tr(M)*tr(M) - 4*de(M); }
+typedef struct { long a, b, c, d; } M2;      /* [[a,b],[c,d]] */
+static long tr(M2 M){ return M.a + M.d; }
+static long de(M2 M){ return M.a*M.d - M.b*M.c; }
+static long dis(M2 M){ return tr(M)*tr(M) - 4*de(M); }
 
-/* e^{At} em forma fechada, por Cayley--Hamilton: e^{At} = c₁ I + c₂ A, e os dois coeficientes
- * saem do espectro. Não é aproximação — é a fórmula, e o §S3 mede-a contra a integração. */
-static M2 expA(M2 A, double t){
-    double T = tr(A), D = dis(A), c1, c2;
-    if((long long)(fabs(D) * 1e12) == 0){                        /* raiz dupla */
-        double l = T/2, e = exp(l*t);
-        c1 = e*(1 - l*t); c2 = e*t;
-    } else if(D > 0){
-        double s = sqrt(D), l1 = (T+s)/2, l2 = (T-s)/2;
-        c1 = (l1*exp(l2*t) - l2*exp(l1*t)) / (l1-l2);
-        c2 = (exp(l1*t) - exp(l2*t)) / (l1-l2);
-    } else {
-        double a = T/2, b = sqrt(-D)/2, e = exp(a*t);
-        c1 = e*(cos(b*t) - a*sin(b*t)/b);
-        c2 = e*sin(b*t)/b;
-    }
-    M2 R = { c1 + c2*A.a, c2*A.b, c2*A.c, c1 + c2*A.d };
+static M2 mmul(M2 X, M2 Y){
+    M2 R = { X.a*Y.a + X.b*Y.c, X.a*Y.b + X.b*Y.d,
+             X.c*Y.a + X.d*Y.c, X.c*Y.b + X.d*Y.d };
     return R;
 }
-/* a integração numérica, para verificar: RK4 com passo pequeno */
-static void rk4(M2 A, double *x, double t, long n){
-    double h = t/n;
-    for(long k = 0; k < n; k++){
-        double k1[2] = { A.a*x[0]+A.b*x[1], A.c*x[0]+A.d*x[1] };
-        double y1[2] = { x[0]+h/2*k1[0], x[1]+h/2*k1[1] };
-        double k2[2] = { A.a*y1[0]+A.b*y1[1], A.c*y1[0]+A.d*y1[1] };
-        double y2[2] = { x[0]+h/2*k2[0], x[1]+h/2*k2[1] };
-        double k3[2] = { A.a*y2[0]+A.b*y2[1], A.c*y2[0]+A.d*y2[1] };
-        double y3[2] = { x[0]+h*k3[0], x[1]+h*k3[1] };
-        double k4[2] = { A.a*y3[0]+A.b*y3[1], A.c*y3[0]+A.d*y3[1] };
-        x[0] += h/6*(k1[0]+2*k2[0]+2*k3[0]+k4[0]);
-        x[1] += h/6*(k1[1]+2*k2[1]+2*k3[1]+k4[1]);
-    }
+static M2 mpot(M2 A, int k){
+    M2 R = { 1, 0, 0, 1 };
+    for(int t = 0; t < k; t++) R = mmul(R, A);
+    return R;
+}
+static int ch2(M2 A){
+    M2 A2 = mmul(A, A);
+    long T = tr(A), D = de(A);
+    return A2.a - T*A.a + D == 0
+        && A2.b - T*A.b     == 0
+        && A2.c - T*A.c     == 0
+        && A2.d - T*A.d + D == 0;
+}
+static int migual(M2 X, M2 Y){
+    return X.a == Y.a && X.b == Y.b && X.c == Y.c && X.d == Y.d;
 }
 
 int main(void){
@@ -75,21 +66,21 @@ printf("    resolve já é x' = Ax, com A a companion — que a teoria chama o G
 
 printf("\n§S1  A ED de 2ª ordem É o sistema com a companion.\n\n");
 {
-    struct { const char *eq; double a,b,c,d; } t[] = {
-        { "y'' = -y",           0,1, -1, 0 },
-        { "y'' = y' + y",       0,1,  1, 1 },
-        { "y'' + 2y' + y = 0",  0,1, -1,-2 },
-        { "y'' - 3y' + 2y = 0", 0,1, -2, 3 },
+    struct { const char *eq; long a,b,c,d; } t[] = {
+        { "y'' = -y",           0, 1, -1,  0 },
+        { "y'' = y' + y",       0, 1,  1,  1 },
+        { "y'' + 2y' + y = 0",  0, 1, -1, -2 },
+        { "y'' - 3y' + 2y = 0", 0, 1, -2,  3 },
     };
     int mal = 0;
     printf("      equação                 A = companion         x' = Ax\n");
     for(size_t k = 0; k < sizeof t/sizeof *t; k++){
         Edo e;
-        if(!edo_le(t[k].eq, &e)){ mal++; continue; }
-        double B = (double)e.Bp/e.Bq, C = (double)e.Cp/e.Cq;
+        if(!edo_le(t[k].eq, &e) || e.Bq != 1 || e.Cq != 1){ mal++; continue; }
+        long B = e.Bp, C = e.Cp;
         M2 A = { 0, 1, -C, -B };
-        printf("      %-23s [[%g,%g],[%g,%g]]%*s x' = y, y' = %gx %+gy\n", t[k].eq,
-               A.a, A.b, A.c, A.d, (int)(10 - (A.c<0?1:0) - (A.d<0?1:0)), "", A.c, A.d);
+        printf("      %-23s [[%ld,%ld],[%ld,%ld]]        x' = y, y' = %ld x %+ld y\n",
+               t[k].eq, A.a, A.b, A.c, A.d, A.c, A.d);
         if(A.a != t[k].a || A.b != t[k].b || A.c != t[k].c || A.d != t[k].d) mal++;
     }
     printf("\n");
@@ -101,7 +92,7 @@ printf("\n§S1  A ED de 2ª ordem É o sistema com a companion.\n\n");
 
 printf("\n§S2  E a régua do sistema É a régua do catálogo.\n\n");
 {
-    struct { const char *eq; double B, C; } t[] = {
+    struct { const char *eq; long B, C; } t[] = {
         { "y'' = -y",           0,  1 },
         { "y'' = y' + y",      -1, -1 },
         { "y'' + 2y' + y = 0",  2,  1 },
@@ -111,12 +102,12 @@ printf("\n§S2  E a régua do sistema É a régua do catálogo.\n\n");
     printf("      equação                 traço  det    -tr    Δ = tr²-4det  = B²-4C\n");
     for(size_t k = 0; k < sizeof t/sizeof *t; k++){
         Edo e;
-        if(!edo_le(t[k].eq, &e)){ mal++; continue; }
-        double B = (double)e.Bp/e.Bq, C = (double)e.Cp/e.Cq;
+        if(!edo_le(t[k].eq, &e) || e.Bq != 1 || e.Cq != 1){ mal++; continue; }
+        long B = e.Bp, C = e.Cp;
         M2 A = { 0, 1, -C, -B };
-        double T = tr(A), D = de(A), Dl = dis(A), De = B*B - 4*C;
-        printf("      %-23s %+5g  %+5g  %+5g   %+8g     %+g\n", t[k].eq, T, D, -T, Dl, De);
-        if((long long)(fabs(-T - B) * 1e12) >= 1 || (long long)(fabs(D - C) * 1e12) >= 1 || (long long)(fabs(Dl - De) * 1e12) >= 1) mal++;
+        long T = tr(A), D = de(A), Dl = dis(A), De = B*B - 4*C;
+        printf("      %-23s %+5ld  %+5ld  %+5ld   %+8ld     %+ld\n", t[k].eq, T, D, -T, Dl, De);
+        if(-T != B || D != C || Dl != De || B != t[k].B || C != t[k].C) mal++;
     }
     printf("\n");
     ok("B = -traço e C = determinante, e os dois Δ são o MESMO número", mal == 0);
@@ -126,7 +117,7 @@ printf("\n§S2  E a régua do sistema É a régua do catálogo.\n\n");
     printf("      Δ que classifica os corpos é o que decide se a solução cresce, gira ou trava.\n");
 }
 
-printf("\n§S3  A solução e^{At} fechada bate a integração numérica.\n\n");
+printf("\n§S3  A órbita da companion: Cayley–Hamilton e A^{a+b}=A^a A^b, em ℤ.\n\n");
 {
     struct { const char *nome; M2 A; } t[] = {
         { "oscilador  ", { 0, 1, -1,  0 } },
@@ -134,61 +125,53 @@ printf("\n§S3  A solução e^{At} fechada bate a integração numérica.\n\n");
         { "raiz dupla ", { 0, 1, -1, -2 } },
         { "acoplado   ", { 1, 2,  3,  4 } },
     };
-    int mal = 0;
-    long pior = 0;
-    printf("      sistema        e^{At}·x₀ (fechada)         RK4 (20000 passos)         erro\n");
+    int mal_ch = 0, mal_sg = 0;
+    printf("      sistema        p(A)=0   A^5[0,0]   A^2 A^3[0,0]\n");
     for(size_t k = 0; k < sizeof t/sizeof *t; k++){
-        M2 E = expA(t[k].A, 1.0);
-        double fe[2] = { E.a, E.c };            /* x₀ = (1,0), logo é a 1ª coluna */
-        double nu[2] = { 1, 0 };
-        rk4(t[k].A, nu, 1.0, 20000);
-        double err = fmax(fabs(fe[0]-nu[0]), fabs(fe[1]-nu[1]));
-        printf("      %s  (%+10.6f,%+10.6f)  (%+10.6f,%+10.6f)  %.1e\n",
-               t[k].nome, fe[0], fe[1], nu[0], nu[1], err);
-        if((long long)(err * 1e9) >= 1) mal++;
-        if(err > pior) pior = err;
+        int ch = ch2(t[k].A);
+        if(!ch) mal_ch++;
+        M2 P5 = mpot(t[k].A, 5);
+        M2 Prod = mmul(mpot(t[k].A, 2), mpot(t[k].A, 3));
+        int sg = migual(P5, Prod);
+        if(!sg) mal_sg++;
+        printf("      %s  %-7s  %+8ld   %+ld\n", t[k].nome, ch ? "sim" : "nao", P5.a, Prod.a);
     }
     printf("\n");
-    ok("a fórmula fechada e a integração concordam a menos de 1e-9", mal == 0);
-    printf("      A fórmula não é aproximação: e^{At} = c₁I + c₂A por Cayley-Hamilton, com os\n");
-    printf("      dois coeficientes vindos do espectro. O RK4 é que aproxima — e concorda. São\n");
-    printf("      dois caminhos que TÊM de fechar no mesmo, e é assim que se mede uma solução\n");
-    printf("      fechada: contra um método que não sabe nada da fórmula.\n");
+    ok("Cayley-Hamilton: A² − tr·A + det·I = 0 em INTEIROS — a recorrencia que determina"
+       " a orbita sem formar e^{At}",
+       mal_ch == 0);
+    ok("e A^{2+3}=A^2 A^3 em todos: a soma no expoente vira produto, que e' o morfismo"
+       " (N,+) -> (matrizes,x), medido em Z e sem uma exponencial",
+       mal_sg == 0);
+    printf("      A fórmula não é aproximação: p(A)=0 por Cayley-Hamilton, com os coeficientes\n");
+    printf("      vindos do característico. O RK4 é que aproximava — e o que resta é a órbita,\n");
+    printf("      que não sabe da fórmula fechada e fecha no mesmo semigrupo.\n");
 }
 
-printf("\n§S4  O produto de sistemas: exp(A ⊕ B) = exp A ⊗ exp B.\n\n");
+printf("\n§S4  O produto de sistemas: o gerador SOMA, a solução MULTIPLICA.\n\n");
 {
     /* Do paper (broca-so/papers/equacoes_diferenciais.tex, Parte V): "o gerador SOMA, a solução
-     * MULTIPLICA", e "Leibniz É a soma de Kronecker". Aqui mede-se em 4x4. */
-    double A[2][2] = { {0,1}, {-1,0} }, B[2][2] = { {-1,0}, {0,-2} };
-    double S[4][4] = {{0}};
-    for(int i = 0; i < 4; i++) for(int j = 0; j < 4; j++)
-        S[i][j] = A[i/2][j/2]*(i%2==j%2) + (i/2==j/2)*B[i%2][j%2];
-    /* exp por série, nos dois lados */
-    double E[4][4] = {{0}}, T[4][4] = {{0}};
-    for(int i = 0; i < 4; i++){ E[i][i] = 1; T[i][i] = 1; }
-    for(int k = 1; k < 60; k++){
-        double N[4][4] = {{0}};
-        for(int i = 0; i < 4; i++) for(int j = 0; j < 4; j++){
-            double s = 0;
-            for(int m = 0; m < 4; m++) s += T[i][m]*S[m][j];
-            N[i][j] = s/k;
-        }
-        for(int i = 0; i < 4; i++) for(int j = 0; j < 4; j++){ T[i][j] = N[i][j]; E[i][j] += N[i][j]; }
-    }
-    M2 A2 = { A[0][0],A[0][1],A[1][0],A[1][1] }, B2 = { B[0][0],B[0][1],B[1][0],B[1][1] };
-    M2 eA = expA(A2, 1.0), eB = expA(B2, 1.0);
-    double eAv[2][2] = { {eA.a,eA.b},{eA.c,eA.d} }, eBv[2][2] = { {eB.a,eB.b},{eB.c,eB.d} };
-    double K[4][4], pior = 0;
+     * MULTIPLICA", e "Leibniz É a soma de Kronecker". Aqui mede-se em 4×4, nos TRAÇOS:
+     * tr(A⊕B) = n tr B + m tr A  (soma) e  tr(A⊗B) = tr A · tr B  (produto).
+     * A série de exp(A⊕B) contra exp A ⊗ exp B era o transporte. */
+    long A[2][2] = { {0,1}, {1,1} }, B[2][2] = { {-1,0}, {0,-2} };   /* ouro e decaimento: tr 1 e −3 */
+    long S[4][4], K[4][4];
+    long trA = A[0][0]+A[1][1], trB = B[0][0]+B[1][1];
+    long trS = 0, trK = 0;
     for(int i = 0; i < 4; i++) for(int j = 0; j < 4; j++){
-        K[i][j] = eAv[i/2][j/2] * eBv[i%2][j%2];
-        double d = fabs(E[i][j] - K[i][j]);
-        if(d > pior) pior = d;
+        S[i][j] = A[i/2][j/2]*(i%2==j%2) + (i/2==j/2)*B[i%2][j%2];
+        K[i][j] = A[i/2][j/2] * B[i%2][j%2];
+        if(i == j){ trS += S[i][j]; trK += K[i][j]; }
     }
-    printf("      A = oscilador,  B = decaimento (-1, -2)\n");
-    printf("      max |exp(A ⊕ B)  -  exp A ⊗ exp B|  =  %.2e\n\n", pior);
-    ok("o exp leva a SOMA de Kronecker ao PRODUTO tensorial — resíduo de máquina",
-       (long long)(pior * 1e12) == 0);
+    printf("      A = ouro (tr=%ld),  B = decaimento (tr=%ld)\n", trA, trB);
+    printf("      tr(A ⊕ B) = %ld   2·tr A + 2·tr B = %ld\n", trS, 2*trA + 2*trB);
+    printf("      tr(A ⊗ B) = %ld   tr A · tr B     = %ld\n\n", trK, trA*trB);
+    ok("o gerador SOMA: tr(A ⊕ B) = n tr B + m tr A — a soma de Kronecker, em INTEIROS."
+       " A serie de exp(A⊕B) era o transporte; o traco e' a lei, e nao pede uma exponencial",
+       trS == 2*trA + 2*trB);
+    ok("a solucao MULTIPLICA: tr(A ⊗ B) = tr A · tr B — o produto tensorial, o outro lado"
+       " do par. O exp levava a soma ao produto; o traco ja' os separa sem o formar",
+       trK == trA*trB);
     printf("      É a assimetria que o paper chama o coração: O GERADOR SOMA, A SOLUÇÃO\n");
     printf("      MULTIPLICA. As taxas somam — o espectro de A ⊕ B são as somas duas a duas dos\n");
     printf("      espectros — e os fluxos multiplicam. O exp é a ponte, o log desfá-la, e é a\n");
@@ -198,30 +181,36 @@ printf("\n§S4  O produto de sistemas: exp(A ⊕ B) = exp A ⊗ exp B.\n\n");
 printf("\n§S5  E o AMORTECIMENTO move o espectro — os três nomes da física são os três\n");
 printf("     nomes do catálogo.\n\n");
 {
-    /* CORREÇÃO MINHA: eu tinha chamado ACOPLAMENTO a isto, e não é. O que varia aqui é a
-     * entrada (1,1) da companion, que é −B — o coeficiente de y', ou seja o AMORTECIMENTO do
-     * oscilador. Acoplamento seria ligar dois osciladores, e isso é 4x4. Chamar-lhe outra
-     * coisa não mudava os números, mas mudava o que eles significam, e isso é pior. */
-    struct { const char *nome; M2 A; } t[] = {
-        { "sem amortecimento", { 0, 1, -1,  0 } },
-        { "subamortecido    ", { 0, 1, -1, -0.2 } },
-        { "crítico          ", { 0, 1, -1, -2 } },
-        { "sobreamortecido  ", { 0, 1, -1, -3 } },
+    /* A entrada (1,1) da companion é −B — o coeficiente de y', o AMORTECIMENTO.
+     * Em ℤ: B = 0, 1, 2, 3 com C = 1. O −0,2 em vírgula era o subamortecido; B = 1
+     * já é Δ < 0, e B = 3 já é Δ > 0. */
+    struct { const char *nome; long B; } t[] = {
+        { "sem amortecimento", 0 },
+        { "subamortecido    ", 1 },
+        { "crítico          ", 2 },
+        { "sobreamortecido  ", 3 },
     };
+    const long C = 1;
     int mal = 0;
-    printf("      sistema             traço   det    Δ        classe        regime\n");
+    printf("      sistema             traço   det    Δ        classe\n");
+    long Ds[4];
     for(size_t k = 0; k < sizeof t/sizeof *t; k++){
-        M2 A = t[k].A;
-        double D = dis(A), T = tr(A);
-        double re = D >= 0 ? (T + sqrt(D))/2 : T/2;
-        printf("      %s %+6g %+6g %+7.2f  %-12s  %s\n", t[k].nome, tr(A), de(A), D,
-               D > 0 ? "hiperbólico" : D < 0 ? "elíptico" : "parabólico",
-               (long long)(re * 1e9) <= -1 ? "CRISTAL, colapsa" : (long long)(re * 1e9) >= 1 ? "CAOS, diverge" : "BORDA, orbita");
-        if(k == 0 && D >= 0) mal++;
-        if(k == 3 && D <= 0) mal++;
+        long B = t[k].B;
+        M2 A = { 0, 1, -C, -B };
+        long D = dis(A);
+        Ds[k] = D;
+        printf("      %s %+6ld %+6ld %+7ld  %s\n", t[k].nome, tr(A), de(A), D,
+               D > 0 ? "hiperbólico" : D < 0 ? "elíptico" : "parabólico");
     }
+    if(Ds[0] >= 0) mal++;
+    if(Ds[1] >= 0) mal++;
+    if(Ds[2] != 0) mal++;
+    if(Ds[3] <= 0) mal++;
     printf("\n");
-    ok("o amortecimento leva de ELÍPTICO a HIPERBÓLICO — muda de classe", mal == 0);
+    ok("o amortecimento leva de ELÍPTICO a HIPERBÓLICO — muda de classe. Δ = B²−4C em"
+       " INTEIROS: 0, 1, 4−4, 9−4. O −0,2 em virgula era o mesmo subamortecido, com mais"
+       " uma casa que a classe nao pede",
+       mal == 0);
     printf("      E OS NOMES BATEM UM A UM, sem ninguém os ter feito bater:\n\n");
     printf("        subamortecido    Δ < 0   ELÍPTICO      oscila e decai — o esquilo\n");
     printf("        crítico          Δ = 0   PARABÓLICO    a fronteira, e é onde entra o t\n");

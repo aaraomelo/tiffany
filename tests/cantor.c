@@ -34,30 +34,36 @@
  *
  * Tudo em inteiros. Nenhum float decide asserção nenhuma.
  *
- *   cc -O2 -std=c99 -Wall cantor.c -o cantor && ./cantor
+ *   cc -O2 -std=c99 -Wall -I lib tests/cantor.c -o cantor && ./cantor
  */
 #include <stdio.h>
-#include "../lib/disco.h"
+#include "disco.h"
 
 #include "unidade.h"
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
-#include <math.h>
 
 typedef long long L;
+
+static L tri_inv(L n){
+    L lo = 0, hi = 1;
+    while(hi <= 3037000499LL && hi*(hi+1)/2 <= n){
+        lo = hi;
+        if(hi > (1LL<<62)/2) break;
+        hi *= 2;
+    }
+    while(lo < hi){
+        L mid = lo + (hi - lo + 1)/2;
+        if(mid*(mid+1)/2 <= n) lo = mid; else hi = mid - 1;
+    }
+    return lo;
+}
 
 /* ---- DIRETO / ALGÉBRICO: a diagonal ---- */
 static L dir_par(L a, L b){ L s = a+b; return s*(s+1)/2 + b; }
 static void dir_imp(L n, L *a, L *b){
-    /* s = floor((sqrt(8n+1) − 1)/2), com AJUSTE INTEIRO a seguir.
-     * A 1.ª versão fazia s++ num while linear e a 2.ª uma busca binária com guarda de
-     * overflow — ambas penduraram para n grande no §K4. Esta é O(1) mais dois passos de
-     * correção, e os passos são inteiros: o float só dá o palpite, nunca decide. */
-    L s = (L)((sqrt(8.0*(double)n + 1.0) - 1.0)/2.0);
-    if(s < 0) s = 0;
-    while(s > 0 && s*(s+1)/2 > n) s--;
-    while((s+1)*(s+2)/2 <= n) s++;
+    L s = tri_inv(n);
     *b = n - s*(s+1)/2;
     *a = s - *b;
 }

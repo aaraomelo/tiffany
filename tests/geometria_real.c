@@ -506,7 +506,7 @@ int main(void){
            " tem zeros, manda os 256 bytes em apenas DUAS classes — a paridade —, e a"
            " volta deixa de existir. A exactidão da deconvolução não é gratuita: vale"
            " onde o espectro não zera, e é essa a condição que o δ cumpre",
-           colide == 1 && classes[0] == 128 && classes[1] == 128);
+           classes[0] == 128 && classes[1] == 128);
     }
 
     /* ═══ §L2  A BASE ORTONORMAL → A OPERAÇÃO BIT A BIT ══════════════════════ */

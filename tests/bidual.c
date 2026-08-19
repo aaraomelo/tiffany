@@ -17,11 +17,11 @@
  *   §B5  Pontryagin   G -> G^ -> G^^              condicao: localmente compacto (aqui: finito)
  *   §B6  A CONDICAO   dim finita fecha; infinita NAO — e e' por isso que o corpo e' finito
  *
- *   cc -O2 -std=c99 -Wall bidual.c -lm -o bidual && ./bidual
+ *   cc -O2 -std=c99 -Wall -I lib tests/bidual.c -o bidual
  */
 #include <stdio.h>
-#include "../lib/disco.h"
-#include <math.h>
+#include "disco.h"
+#include "corpos.h"
 #include "unidade.h"
 
 typedef long long L;
@@ -689,19 +689,15 @@ int main(void){
 
         /* (b) E A UNIDADE E' O PRODUTO DO PAR DUAL. Por Vieta, lido nos coeficientes de
          * x^2 - n·x - 1: o produto das raizes e' -1, logo |sigma·sigma'| = 1. Exato em Z. */
-        /* DOIS CAMINHOS, que tem de concordar: (i) calcular as raizes e multiplica-las;
-         * (ii) ler o termo independente. Escrevi aqui, primeiro, "produto = -1" e depois
-         * testei se era -1 — tautologia. Ver feedback-assercoes-vazias. */
+        /* DOIS CAMINHOS: (i) σ·σ' em ℤ[σ] via au_prod; (ii) termo independente de x²−n·x−1. */
         long mau = 0, casos = 0;
         for(L n=-9;n<=9;n++){
-            double r  = sqrt((double)n*n + 4.0);
-            double s  = (n + r)/2.0, s2 = (n - r)/2.0;
-            double por_raizes = s * s2;                /* caminho 1: multiplicar as raizes */
-            long por_coefs  = -1.0;                  /* caminho 2: o termo independente de x²-nx-1 */
-            if((long long)(fabs(por_raizes - por_coefs) * 1e12) >= 1) mau++;
-            if((long long)(fabs(fabs(por_raizes) - 1.0) * 1e12) >= 1) mau++;
+            long por_coefs = -1;
+            Par sig = {0, 1}, sigp = {n, -1};
+            Par prod = au_prod(sig, sigp, n);          /* σ·σ' = −1 pela borda */
+            if(prod.a != por_coefs || prod.b != 0) mau++;
             casos++; }
-        printf("      sigma·sigma' pelas RAIZES contra o termo independente, n = -9..9: %ld falhas\n",
+        printf("      sigma·sigma' em Z[sigma] contra o termo independente, n = -9..9: %ld falhas\n",
                mau);
         ok("a unidade nao e' um elemento a mais: e' o que SOBRA ao multiplicar x pelo seu dual",
            mau == 0 && casos == 19);

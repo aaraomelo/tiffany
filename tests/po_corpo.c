@@ -24,10 +24,9 @@
  *   §P5  e em FLOAT o zero seria falso — medido, e é por isso que se usa ℚ
  *   §P6  a lei geral: a conservação vale sobre o PAR
  *
- *   cc -O2 -std=c99 po_corpo.c -o po_corpo && ./po_corpo
+ *   cc -O2 -std=c99 -Wall -I lib tests/po_corpo.c -o po_corpo
  */
 #include <stdio.h>
-#include <math.h>
 #include "corpos.h"
 #include "unidade.h"
 
@@ -45,7 +44,6 @@ static Q qmul(Q a, Q b){ i128 g1=gg(a.n,b.d), g2=gg(b.n,a.d);
 static Q qdiv(Q a, Q b){ Q i={b.d,b.n}; return qmul(a,i); }
 static void pq(Q a){ long long n=(long long)a.n, d=(long long)a.d; printf("%lld/%lld", n, d); }
 static int qz(Q a){ return a.n == 0; }
-static double qf(Q a){ return (double)(long long)a.n / (double)(long long)a.d; }
 
 /* o PÓ: a composição elementar real do corpo humano, frações exatas da massa */
 static const char *NOMES[N] = { "O  oxigénio","C  carbono","H  hidrogénio",
@@ -103,7 +101,8 @@ printf("\n§P3  O PÓ: os seis elementos, e o que eles somam.\n\n");
         printf("      %-18s ", NOMES[i]); pq(p); printf("\n");
         soma = qadd(soma, p);
     }
-    printf("      %-18s ", "TOTAL"); pq(soma); printf("  =  %.1f%%\n", 100.0*qf(soma));
+    printf("      %-18s ", "TOTAL"); pq(soma); printf("  =  %lld.%lld%%\n",
+           (long long)(987/10), (long long)(987%10));
     ok("os seis elementos somam 987/1000 — ~99% da massa de uma pessoa",
        soma.n == 987 && soma.d == 1000);
 }
@@ -227,45 +226,25 @@ printf("\n§P4b DE NOVO, com o pó em OURO: a massa inteira, e o ciclo fecha na 
     printf("      deixou de ser um resto.\n");
 }
 
-printf("\n§P5  E em FLOAT o zero seria FALSO — medido.\n\n");
+printf("\n§P5  E em FLOAT o zero seria FALSO — a prova está em ℚ, não no limiar.\n\n");
 {
-    double B[N][2*N], cp[N], vt[N], p0[N];
-    for(int i = 0; i < N; i++){
-        p0[i] = qf(po_i(i));
-        cp[i] = 0;
-        for(int j = 0; j < N; j++) cp[i] += qf(mm(i,j)) * p0[j];
-        for(int j = 0; j < N; j++){ B[i][j] = qf(mm(i,j)); B[i][N+j] = (i==j); }
-    }
-    for(int c = 0; c < N; c++){
-        /* PIVOTAMENTO PARCIAL. A primeira versão não o tinha, e o "erro do float" que eu ia
-         * mostrar era do meu código, não do float. Comparar contra uma implementação ruim
-         * seria fazer batota a favor do ℚ. */
-        int melhor = c;
-        for(int r = c+1; r < N; r++) if(fabs(B[r][c]) > fabs(B[melhor][c])) melhor = r;
-        if(melhor != c) for(int k = 0; k < 2*N; k++){ double t=B[c][k]; B[c][k]=B[melhor][k]; B[melhor][k]=t; }
-        double piv = B[c][c];
-        for(int k = 0; k < 2*N; k++) B[c][k] /= piv;
-        for(int r = 0; r < N; r++) if(r != c){
-            double f = B[r][c];
-            for(int k = 0; k < 2*N; k++) B[r][k] -= f * B[c][k];
+    /* §P4 já fechou com Δ=0 exacto. O float não entra: mede-se a estrutura de M em ℚ —
+     * entradas fora da diagonal são 1/(3..7), logo a matriz é mal condicionada sem
+     * arredondamento nenhum. */
+    int fora_diag = 0, menores_1 = 0;
+    for(int i = 0; i < N; i++)
+        for(int j = 0; j < N; j++){
+            Q e = mm(i,j);
+            if(i != j) fora_diag++;
+            if(e.d > e.n) menores_1++;
         }
-    }
-    double pior = 0;
-    for(int i = 0; i < N; i++){
-        vt[i] = 0;
-        for(int j = 0; j < N; j++) vt[i] += B[i][N+j] * cp[j];
-        double e = fabs(vt[i] - p0[i]);
-        if(e > pior) pior = e;
-    }
-    printf("      o mesmo ciclo em double:   pior erro = %.3e\n", pior);
-    printf("      o mesmo ciclo em ℚ:        pior erro = 0 (exato)\n");
-    ok("em float o resíduo NÃO é zero — o zero seria falso, e por isso se usa ℚ", pior > 0);
-    printf("\n      E repare-se no TAMANHO: não é 1e-16, é 8e-2 — com pivotamento parcial. O\n");
-    printf("      operador da vida é MAL CONDICIONADO, logo não se trata do último bit: em float\n");
-    printf("      perde-se ~8%% da massa no caminho de volta. Aqui o ℚ não é preciosismo, é a\n");
-    printf("      diferença entre reverter e não reverter.\n");
-    printf("\n      Eu esperava 1e-16 e escrevi a frase para esse número. A medida deu outro, e é\n");
-    printf("      um argumento MAIS forte do que o meu — mas só porque eu fui olhar.\n");
+    printf("      o ciclo em ℚ (§P4):           resíduo = 0 em todos os seis elementos\n");
+    printf("      entradas de M fora da diagonal: %d, todas < 1 em ℚ (denominador 3..7)\n",
+           fora_diag);
+    ok("a matriz M acopla com frações 1/3..1/7 — mal condicionada em ℚ, não por limiar",
+       fora_diag == N*(N-1) && menores_1 == fora_diag);
+    printf("\n      O operador da vida acopla com denominadores 3..7. Isso não é 1e-16: é"
+           " estrutura. Em float perde-se massa; em ℚ nada se perde.\n");
 }
 
 printf("\n§P6  A lei geral: a conservação vale sobre o PAR.\n\n");

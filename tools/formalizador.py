@@ -84,7 +84,7 @@ class Formalizador:
         self.falhas: list[str] = []
         self.sem_dentes: list[str] = []
         self.triviais: list[str] = []
-        self.pares: list[float] = []
+        self.pares: list[int] = []  # em meios: −1 = −½, −2 = −1,0
         if titulo:
             print("=" * 78)
             print(titulo)
@@ -161,14 +161,14 @@ class Formalizador:
             return None, f"exceção: {type(e).__name__}: {e}"
 
     @staticmethod
-    def emparelhamento(testa_ok: bool, refuta_ok: bool) -> float:
+    def emparelhamento(testa_ok: bool, refuta_ok: bool) -> int:
         """<X(b), X(b_T)> = -½·d(b, b_T)²  com b = (testa, refuta) e b_T = (1,1).
 
-        Zero se e só se a afirmação é congruente a True (sem dentes).
+        Devolve o valor em MEIOS (−1 = −½, −2 = −1,0, 0 = trivial).
         """
-        b = (1.0 if testa_ok else 0.0, 1.0 if refuta_ok else 0.0)
-        d2 = (b[0] - 1.0) ** 2 + (b[1] - 1.0) ** 2
-        return -0.5 * d2
+        bt, br = (1 if testa_ok else 0), (1 if refuta_ok else 0)
+        d2 = (bt - 1) ** 2 + (br - 1) ** 2
+        return -d2
 
     @staticmethod
     def _registar(marca: str, nome: str, detalhe: str) -> None:
@@ -187,7 +187,10 @@ class Formalizador:
         if self.falhas:
             print(f"  FALHAS       : {len(self.falhas)}  -> {self.falhas}")
         if self.pares:
-            print(f"  ponteiro     : {min(self.pares):.1f} em todas as {len(self.pares)} certificadas"
+            m = min(self.pares)
+            sinal = "−" if m < 0 else ""
+            a = abs(m)
+            print(f"  ponteiro     : {sinal}{a // 2},{'5' if a % 2 else '0'} em todas as {len(self.pares)} certificadas"
                   "   ⟨X,X_⊤⟩ = −½·d²: a distância conforme à afirmação trivial")
         residuo = len(self.falhas) + len(self.sem_dentes)
         print(f"  resíduo      : {residuo}" + ("  (medida consistente)" if residuo == 0 else ""))

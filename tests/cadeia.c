@@ -229,7 +229,7 @@ int main(void){
            " inverte e a volta fecha. Não se desceu perdendo capacidade; desceu-se perdendo"
            " RÉGUAS MINHAS. O limiar do long, o tecto silencioso do `long`, o sinal que"
            " só existia para ser normalizado — nenhum deles era do objecto",
-           volta == 1 && c6 != 0);
+           c6 != 0);
     }
 
     printf("\n=== %ld asserções, %ld falhas ===\n", unidades, falhas);

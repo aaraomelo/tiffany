@@ -30,11 +30,10 @@
  *   §T6  a FAMÍLIA METÁLICA: os metais são os telómeros mais curtos que existem
  *   §T7  LIGAR: o endereço É a cifra do conteúdo — e mede-se a colisão
  *
- *   cc -O2 -std=c99 telomero.c -lm -o telomero && ./telomero
+ *   cc -O2 -std=c99 -Wall -I lib tests/telomero.c -o telomero
  */
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
 #include "unidade.h"
 #include "reta.h"
 #include "cifra.h"        /* o codificador EXATO, em inteiros — não se escreve um segundo */
@@ -139,14 +138,10 @@ printf("\n§T1  O TELÓMERO ENCURTA E TERMINA — e o que fica é o período.\n\
     long F[64]; F[0] = 0; F[1] = 1;
     for(int i = 2; i < 64; i++) F[i] = F[i-1] + F[i-2];
     long lame_fib = F[maior + 2];
-    /* e a FRONTEIRA, que é o que torna o limite apertado e não uma folga qualquer: com um
-     * passo a mais o Fibonacci já ultrapassa o n, logo o limite não podia ser maior. */
     long lame_prox = F[maior + 3];
-    double lame = log(400.0*sqrt(5.0)) / log((1.0+sqrt(5.0))/2.0);  /* só para a linha impressa */
     printf("      E o teto não é meu: Lamé (1844) na forma INTEIRA — %ld passos exigem\n", maior);
-    printf("      F(%ld) = %ld <= 400, e F(%ld) = %ld ja' passa. (A forma assintotica\n",
+    printf("      F(%ld) = %ld <= 400, e F(%ld) = %ld ja' passa.\n\n",
            maior+2, lame_fib, maior+3, lame_prox);
-    printf("      log(400.raiz5)/log(phi) da' %.1f, e e' a mesma coisa aproximada.)\n\n", lame);
     ok("o comprimento respeita o limite de Lamé — e na forma INTEIRA de 1844, que e' a"
        " exacta: k passos sobre n exigem F(k+2) <= n, e aqui F(k+2) cabe em 400 enquanto"
        " F(k+3) ja' o ultrapassa. A versao com log_phi e raiz(5) que aqui estava e' a"
@@ -179,20 +174,13 @@ printf("\n§T2  BASE e FRAÇÃO CONTÍNUA são o MESMO algoritmo: muda o divisor
     size_t n2 = divide_e_itera(137, 4, 0, saida, MAXT);
     for(size_t i = 0; i < n2; i++) printf("%ld ", saida[i]);
     printf("\n");
-    /* e a volta da fracao continua: convergentes de tras para a frente */
-    double v = saida[n2-1];
-    for(size_t i = n2-1; i > 0; i--) v = saida[i-1] + 1.0/v;
-    /* E A VOLTA É EXACTA EM ℚ, não «a menos de 1e-9». Os quocientes são a PALAVRA de 137/4,
-     * e a `rt_cf_para` da reta.h reconstrói o racional pela recorrência dos convergentes —
-     * lida de trás para a frente, tal como o laço acima, mas em INTEIROS. A comparação
-     * faz-se por produto cruzado: p·4 == 137·q, sem se formar quociente nenhum. */
     RtCf pal;
     pal.sinal = 1; pal.n = (int)n2; pal.saturou = 0;
     for(size_t i = 0; i < n2 && i < (size_t)RT_CF_MAX; i++) pal.a[i] = saida[i];
     long pz = 0, qz2 = 0;
     int voltou = rt_cf_para(&pal, &pz, &qz2);
-    printf("      e a volta dá %.6f (era %.6f) — e em INTEIROS dá %ld/%ld\n\n",
-           v, 137.0/4.0, pz, qz2);
+    printf("      e a volta dá %ld/%ld (era 137/4) — em inteiros, produto cruzado\n\n",
+           pz, qz2);
     ok("com divisor variável, devolve a fração contínua — e a volta também é exata. E"
        " «exacta» quer dizer isso: os quocientes sao a PALAVRA de 137/4, e a `rt_cf_para` da"
        " reta.h reconstroi o racional pela recorrencia dos convergentes, em INTEIROS. A"
@@ -315,14 +303,13 @@ printf("\n§T6  A FAMÍLIA METÁLICA: os metais são os telómeros mais curtos q
         int todos_m = (n > 0);
         for(size_t k = 0; k < n; k++) if(a[k] != m) todos_m = 0;
         if(!todos_m) mau++;
-        double s = (m + sqrt((double)m*m + 4.0)) / 2.0;
         const char *nome = m==1?"ouro":m==2?"prata":m==3?"bronze":"—";
         char termos[64] = {0}; int p = 0;
         for(size_t k = 0; k < n && k < 6; k++)
             p += snprintf(termos+p, sizeof termos - (size_t)p,
                           k == 0 ? "%ld" : (k == 1 ? "; %ld" : ", %ld"), a[k]);
-        printf("      %-9d %-13.8f [%s, ...]%*s %-2zu   %s\n",
-               m, s, termos, (int)(12 - strlen(termos)), "", n, nome);
+        printf("      %-9d x²-%dx-1=0       [%s, ...]%*s %-2zu   %s\n",
+               m, m, termos, (int)(12 - strlen(termos)), "", n, nome);
     }
     printf("\n");
     ok("cada metal tem telómero de período UM — são os mais curtos que ainda cifram",
@@ -370,12 +357,11 @@ printf("\n§T7  LIGAR: o endereço É a cifra do conteúdo — e mede-se a colis
         if(enderecos[i] == enderecos[j]) colisoes++;
     printf("      ... (%d conteúdos)\n\n", N);
     printf("      colisões em %d conteúdos, espaço 4^6 = 4096:  %d\n", N, colisoes);
-    /* O oraculo NAO e' um limiar meu: e' o paradoxo do aniversario. Com N objetos em M casas,
-     * o numero esperado de colisoes e' N(N-1)/(2M) — formula fechada, nao estimativa. */
-    double esperado = (double)N*(N-1)/(2.0*4096.0);
-    printf("      e o aniversário dizia N(N−1)/2M = %.4f\n\n", esperado);
+    /* paradoxo do aniversário: colisões esperadas ≈ N(N−1)/(2·4096) — comparação cruzada */
+    long num = (long)N * (N - 1), den = 2L * 4096L;
+    printf("      e o aniversário dizia N(N−1)/2M = %ld/%ld\n\n", num, den);
     ok("as colisões ficam na ordem do que o paradoxo do aniversário prevê",
-       (double)colisoes <= esperado + 3.0);
+       (long)colisoes * den <= num + 3L * den);
     printf("      O telómero está ligado: o conteúdo diz onde mora. E o preço está medido —\n");
     printf("      não é zero, é o do aniversário, e cresce com N² sobre o espaço.\n");
 }

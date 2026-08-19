@@ -39,22 +39,13 @@
  *   §O5  Gram ↔ Wronskiano: dois determinantes, a mesma pergunta
  *   §O6  controlo negativo: com a base dependente, det G = 0 EXATO
  *
- *   cc -O2 -std=c99 -Wall ortogonal.c -lm -o ortogonal && ./ortogonal
+ *   cc -O2 -std=c99 -Wall -I lib tests/ortogonal.c -o ortogonal
  */
 #include <stdio.h>
+#include "isa_disk.h"
 #include "unidade.h"
-#include <math.h>
 
 typedef long long L;
-
-/* racional exato */
-typedef struct { L p, q; } Q;
-static L mdc(L a, L b){ if(a<0)a=-a; if(b<0)b=-b; while(b){ L t=a%b; a=b; b=t; } return a?a:1; }
-static Q qr(L p, L q){ if(q<0){p=-p;q=-q;} L g=mdc(p,q); Q r={p/g,q/g}; return r; }
-static Q qsub(Q a, Q b){ return qr(a.p*b.q - b.p*a.q, a.q*b.q); }
-static Q qmul(Q a, Q b){ return qr(a.p*b.p, a.q*b.q); }
-static Q qdiv(Q a, Q b){ return qr(a.p*b.q, a.q*b.p); }
-static double qv(Q a){ return (double)a.p/(double)a.q; }
 
 int main(void){
     printf("================================================================\n");
@@ -89,7 +80,7 @@ int main(void){
     printf("\n§O2 det G(1,σ) = Δ = m²+4 — o Gram É o discriminante, em inteiros\n");
     {
         int metais=0, igual=0;
-        printf("      m    det G = 2·t_2 − t_1²    Δ = m²+4    σ = (m+√Δ)/2\n");
+        printf("      m    det G = 2·t_2 − t_1²    Δ = m²+4    t_2 = σ²+σ'²\n");
         for(L m=1; m<=8; m++){
             L t[6]; t[0]=2; t[1]=m;
             for(int k=2;k<6;k++) t[k] = m*t[k-1] + t[k-2];
@@ -97,8 +88,8 @@ int main(void){
             L D = m*m + 4;
             metais++;
             if(det == D) igual++;
-            if(m<=4) printf("      %-4lld %-22lld %-11lld %.12f\n",
-                            m, det, D, (m+sqrt((double)D))/2.0);
+            if(m<=4) printf("      %-4lld %-22lld %-11lld %lld\n",
+                            m, det, D, t[2]);
         }
         printf("      metais: %d   com det G = Δ: %d\n", metais, igual);
         ok("det Gram(1,σ) = Δ = m²+4 — EXATO, e é o mesmo Δ de σ = (m+√Δ)/2",
@@ -168,31 +159,37 @@ int main(void){
     /* ---------------- §O4 — os caracteres vêm prontos ---------------- */
     printf("\n§O4 os caracteres são ortogonais DE GRAÇA: Gram = n·I, sem construção\n");
     {
-        /* Base de caracteres de Z/n: χ_k(j) = ω^{jk} com ω = e^{2πi/n}.
-         * ⟨χ_k, χ_l⟩ = Σ_j ω^{j(k−l)} = n·δ_{kl}. Aqui em REAIS, com n par, usando
-         * as raízes reais ±1 do subgrupo — ou simplesmente medindo a soma de Σ cos.  */
+        /* Base de caracteres de Z/n: χ_k(j) = ω^{jk}. ⟨χ_k, χ_l⟩ = Σ_j ω^{j(k−l)} = n·δ.
+         * ω vive no disco: n=2 é ESQUILO² (×−1), n=4 é ESQUILO (×i). Sem cos, sem 2π. */
         int ns=0, diag_ok=0, fora_ok=0;
-        printf("      n    ⟨χ_k,χ_k⟩ = n    max |⟨χ_k,χ_l⟩| com k≠l\n");
-        for(int n=2; n<=12; n+=2){
-            double pior_fora = 0; int diag_bom = 1;
+        int per4 = isa_periodo_giro(ISA_S_ESQUILO);
+        printf("      n    ⟨χ_k,χ_k⟩ = n    max |⟨χ_k,χ_l⟩| k≠l    ω no disco\n");
+        for(int n = 2; n <= 4; n += 2){
+            long pior_fora = 0; int diag_bom = 1;
             for(int k=0;k<n;k++) for(int l=0;l<n;l++){
-                double re=0, im=0;
+                long re=0, im=0;
                 for(int j=0;j<n;j++){
-                    double th = 2.0*3.14159265358979323846*j*(k-l)/n;
-                    re += cos(th); im += sin(th);
+                    isa_word(ISA_S_A, 1, 0);
+                    int e = ((j*(k-l)) % n + n) % n;
+                    int giros = (n == 2) ? 2*e : e;     /* n=2: cada passo é ×(−1)=ESQUILO² */
+                    for(int g = 0; g < giros; g++) isa_MOVE(ISA_S_ESQUILO, 1);
+                    long t, ei; isa_read(ISA_S_A, &t, &ei);
+                    re += t; im += ei;
                 }
-                double mod = sqrt(re*re+im*im);
-                if(k==l){ if((long long)(fabs(mod - n) * 1e9) >= 1) diag_bom = 0; }
-                else if(mod > pior_fora) pior_fora = mod;
+                long mod2 = re*re + im*im;
+                if(k==l){ if(mod2 != (long)n*(long)n) diag_bom = 0; }
+                else if(mod2 > pior_fora) pior_fora = mod2;
             }
             ns++;
             if(diag_bom) diag_ok++;
-            if((long long)(pior_fora * 1e9) == 0) fora_ok++;
-            printf("      %-4d %-16d %.2e\n", n, n, pior_fora);
+            if(pior_fora == 0) fora_ok++;
+            printf("      %-4d %-16d %-18ld ESQUILO^%d\n", n, n, pior_fora, n==2 ? 2 : 1);
         }
-        printf("      n testados: %d   diagonal = n: %d   fora da diagonal = 0: %d\n",
-               ns, diag_ok, fora_ok);
-        ok("a diagonal do Gram dos caracteres é n — sem construção nenhuma", diag_ok==ns);
+        printf("      n testados: %d   diagonal = n: %d   fora da diagonal = 0: %d"
+               "   ESQUILO periodo %d\n", ns, diag_ok, fora_ok, per4);
+        ok("a diagonal do Gram dos caracteres é n — sem construção nenhuma."
+           " ω é ESQUILO no disco, periodo 4",
+           diag_ok==ns && per4==4);
         ok("e fora da diagonal é ZERO: a base já vem ortogonal", fora_ok==ns);
         conclui("é o par: a base de POTÊNCIAS é oblíqua e custa Δ a endireitar; a de");
         conclui("CARACTERES já vem pronta. Uma mede (as coordenadas do corpo), a outra ordena");
@@ -207,18 +204,27 @@ int main(void){
          * Wronskiano: det(f_i^{(j)}) — independência de FUNÇÕES.
          * Ambos degeneram exatamente onde a independência se perde. Mede-se o Gram com
          * vetores que se aproximam da dependência, e vê-se o determinante a ir a zero. */
-        printf("      ângulo   v_1 = (1,0)   v_2 = (cos θ, sin θ)   det G = sin²θ\n");
+        /* Gram: det(⟨v_i,v_j⟩). v1=(1,0), v2=(a,b) ⇒ det G = b², e anula-se sse alinhados.
+         * 90° é ESQUILO: (1,0)→(0,1), det=1. Sem θ, sem sin. */
+        printf("      v1=(1,0)  v2=(a,b)   det G = b²\n");
         int ts=0, lei_ok=0;
-        for(double th=1.2; th>0.001; th/=4.0){
-            double g11=1.0, g12=cos(th), g22=1.0;
-            double det = g11*g22 - g12*g12;
+        struct { L a, b; } vs[] = { {3,4}, {5,12}, {0,1}, {1,0} };
+        isa_word(ISA_S_A, 1, 0);
+        isa_MOVE(ISA_S_ESQUILO, 1);
+        long er, ei; isa_read(ISA_S_A, &er, &ei);
+        for(int i = 0; i < 4; i++){
+            L a = vs[i].a, b = vs[i].b;
+            L g11 = 1, g12 = a, g22 = a*a + b*b;
+            L det = g11*g22 - g12*g12;
             ts++;
-            if((long long)(fabs(det - sin(th)*sin(th)) * 1e12) == 0) lei_ok++;
-            printf("      %.5f  (1,0)         (%.5f, %.5f)      %.12e\n",
-                   th, cos(th), sin(th), det);
+            if(det == b*b) lei_ok++;
+            printf("      (%lld,%lld)                 %lld\n", a, b, det);
         }
-        printf("      ângulos: %d   com det G = sin²θ: %d\n", ts, lei_ok);
-        ok("det Gram = sin²θ: vai a ZERO quando os vetores se alinham", lei_ok==ts);
+        printf("      pares: %d   com det G = b²: %d   ESQUILO(1,0)=(%ld,%ld)\n",
+               ts, lei_ok, er, ei);
+        ok("det Gram = b²: vai a ZERO quando os vetores se alinham (b=0)."
+           " O quarto de volta é ESQUILO: (1,0)→(0,1)",
+           lei_ok==ts && er==0 && ei==1);
         conclui("o Wronskiano do lambert.c §Y8 faz o mesmo para FUNÇÕES, e lá EXPLODE em vez");
         conclui("de anular — porque as derivadas divergem mais depressa do que as funções se");
         conclui("aproximam. Mesma pergunta, respostas opostas: é isso que os torna o par.");

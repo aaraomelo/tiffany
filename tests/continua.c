@@ -44,7 +44,12 @@
  *   §C7  partir do ZERO nas duas direcções: t_{-k} = (-1)^k t_k, e do centro os Lucas
  *   §C8  a continuação tem IDA e VOLTA: t_k = k·c_k devolve o operador, e ela é ÚNICA
  *
- *   cc -O2 -std=c99 -Wall continua.c -lm -o continua && ./continua
+ * LEI vs TRANSPORTE. pow(σ,k)+pow(σ',k), somar 2000 termos em vírgula, −log(den),
+ * ⌈log2/log(1/|σ'|)⌉ e 400 000 passos de atan eram o método. A lei é t_k inteiro
+ * (três rotas), a série formal em ℚ, −σ anula 1−mx−x² em ℤ[√D], t_{−k}=(−1)^k t_k,
+ * k_min pelo corte D ≶ (m+1)², e A_0 de ordem 2 em P¹ — sem formar a raiz.
+ *
+ *   cc -O2 -std=c99 -I lib tests/continua.c -o continua && ./continua
  */
 #include <stdio.h>
 #include "unidade.h"
@@ -53,7 +58,6 @@
 #include "racionais.h"
 #include "linear.h"
 #include "calculo2.h"
-#include <math.h>
 
 typedef long long L;
 
@@ -198,28 +202,30 @@ int main(void){
     /* ---------------- §C3 — fora do disco, SEM atravessar o polo ---------------- */
     printf("\n§C3 fora do disco: a série EXPLODE e a forma fechada continua finita\n");
     {
+        /* |x|=2 > 1/σ para todo m≥1 (σ < m+1 ≤ 9, 1/σ > 1/9). O termo cresce quando
+         * |t_{k+1} x|·k > |t_k|·(k+1). −log(den) era transporte: finito ⇔ den ≠ 0. */
         int casos=0, explode=0, finita=0;
-        printf("      m    x        |termo 60|      forma fechada    1−mx−x²\n");
-        for(L m=1; m<=6; m++){
-            double s = (m + sqrt((double)(m*m+4)))/2.0, R = 1.0/s;
-            for(double f=1.3; f<=2.31; f+=0.5){
-                double x = -f*R;
-                double den = 1.0 - m*x - x*x;
-                if(den <= 0) continue;            /* o polo é o §C7 — aqui é só fora do raio */
-                double ta=2, tb=m, xp=x*x, ultimo=tb*x;
-                for(int k=2;k<=60;k++){ double tk=m*tb+ta; ta=tb; tb=tk; ultimo=tk*xp/k; xp*=x; }
-                double fech = -log(den);
-                casos++;
-                if(fabs(ultimo) > 1e3) explode++;
-                if(isfinite(fech)) finita++;
-                if(m<=2 && f<1.9)
-                    printf("      %lld  %7.4f  %13.4e  %14.8f  %10.6f\n", m, x, fabs(ultimo), fech, den);
+        long x = -2;
+        long ax = x < 0 ? -x : x;
+        printf("      m    1−m x−x²    |termo k+1| > |termo k| (k=5..11)\n");
+        for(L m=2; m<=7; m++){
+            long den = 1 - m*x - x*x;                 /* 2m−3, e o polo não é x=−2 */
+            long t[16]; t[0]=2; t[1]=m;
+            for(int k=2;k<16;k++) t[k] = m*t[k-1] + t[k-2];
+            int cresce = 0, n = 0;
+            for(int k=5;k<12;k++){
+                n++; casos++;
+                /* |t_{k+1} x|·k > |t_k|·(k+1) — ax entra, senão x na conta era enfeite */
+                if(ax * t[k+1] * k > t[k] * (k + 1)){ explode++; cresce++; }
             }
+            if(den != 0) finita++;
+            printf("      %-4lld %-12ld %d de %d\n", m, den, cresce, n);
         }
-        printf("      pontos fora do raio (sem polo no caminho): %d   série a explodir: %d   fechada finita: %d\n",
-               casos, explode, finita);
-        ok("fora do raio a SÉRIE explode — ela não alcança lá", explode==casos && casos == 18);
-        ok("e a forma fechada dá valor FINITO no mesmo ponto", finita==casos);
+        printf("      termos a crescer: %d de %d   den ≠ 0: %d de 6\n", explode, casos, finita);
+        ok("fora do raio a SÉRIE explode — o termo cresce, ela não alcança lá",
+           explode==casos && casos == 42);
+        ok("e a forma fechada dá valor FINITO no mesmo ponto — 1−mx−x² ≠ 0, sem −log",
+           finita==6);
         conclui("é isto a continuação: o objeto não acabou no bordo do disco — a FÓRMULA é que");
         conclui("acabou. Troca-se de fórmula e o valor está lá, e é único por analiticidade.");
     }
@@ -301,7 +307,7 @@ int main(void){
          * E a contagem estava inflacionada 3,3x: 3 720 são REPRESENTANTES, não pontos.
          * Em P¹ dois pares são o mesmo ponto se diferem por escala — contam-se os
          * PRIMITIVOS (mdc = 1, normalizados por sinal). */
-        int reps=0, primitivos=0, fixos=0, fixos_esperados=0;
+        int reps=0, primitivos=0, fixos_esperados=0, degenerados=0;
         for(L u=-30; u<=30; u++) for(L v=-30; v<=30; v++){
             if(u==0 && v==0) continue;
             reps++;
@@ -311,8 +317,10 @@ int main(void){
             if(prim) primitivos++;
             /* ponto fixo de A_0: (v:u) ~ (u:v), isto é u·u = v·v */
             int e_fixo = (u*u == v*v);
-            if(e_fixo) fixos++;
-            if(prim && e_fixo) fixos_esperados++;
+            if(prim && e_fixo){
+                fixos_esperados++;
+                if(u==0 || v==0) degenerados++;     /* 0 = (0:1), ∞ = (1:0) */
+            }
         }
         printf("      representantes varridos: %d   PONTOS de P¹ (primitivos): %d\n",
                reps, primitivos);
@@ -320,7 +328,7 @@ int main(void){
                fixos_esperados);
         ok("A_0 tem EXATAMENTE dois pontos fixos em P¹: ±1", fixos_esperados==2);
         ok("e nenhum deles é 0 nem ∞ — a troca 0 ↔ ∞ não tem ponto parado",
-           fixos_esperados==2 && ((0*0)!=(1*1)));
+           fixos_esperados==2 && degenerados==0);
         conclui("os pontos fixos são a fronteira do §1: onde as duas coordenadas coincidem.");
         conclui("e a contagem certa é 1 112 pontos, não 3 720 representantes — a diferença é");
         conclui("a escala, e um revisor apanhou a sobrecontagem de 3,3x.");
@@ -332,26 +340,25 @@ int main(void){
     /* ---------------- §C6 — o controlo negativo ---------------- */
     printf("\n§C6 controlo negativo: fora do disco, somar MAIS termos PIORA\n");
     {
-        /* Se a continuação fosse "somar mais termos", o erro cairia com N. Mede-se que
-         * CRESCE — e é isso que impede o texto de dizer que a série alcança lá fora. */
+        /* Se a continuação fosse "somar mais termos", os termos iriam a 0 (Cauchy).
+         * Fora do raio não vão: |t_{k+1} x|·k > |t_k|·(k+1). Comparar com −log era o
+         * transporte; a lei é a série não ser Cauchy. */
         L m = 2;
-        double s = (m + sqrt((double)(m*m+4)))/2.0, R = 1.0/s;
-        double x = -2.0*R;                              /* fora do disco */
-        L t[200]; t[0]=2; t[1]=m;
-        for(int k=2;k<200;k++) t[k] = m*t[k-1] + t[k-2];
-        double fech = -log(1.0 - m*x - x*x);
-        double erro_ant = -1; int cresceu = 0, medidas = 0;
-        printf("      m=2, x=%.5f (fora do raio %.5f), alvo = %.8f\n", x, R, fech);
-        printf("      N termos     soma            |erro|\n");
-        for(int N=10; N<=50; N+=10){
-            double soma=0, xp=x;
-            for(int k=1;k<=N;k++){ soma += (double)t[k]*xp/k; xp *= x; }
-            double e = fabs(soma - fech);
-            printf("      %6d   %16.6f   %.4e\n", N, soma, e);
-            if(erro_ant >= 0){ medidas++; if(e > erro_ant) cresceu++; }
-            erro_ant = e;
+        long x = -2;
+        long ax = x < 0 ? -x : x;
+        L t[24]; t[0]=2; t[1]=m;
+        for(int k=2;k<24;k++) t[k] = m*t[k-1] + t[k-2];
+        int cresceu = 0, medidas = 0;
+        printf("      m=2, x=%ld (|x|=%ld > 1/σ): o termo cresce, somar mais PIORA\n", x, ax);
+        printf("      k     t_k        |x|·t_{k+1}·k > t_k·(k+1)\n");
+        for(int k=8; k<=16; k+=2){
+            int cresce = (ax * t[k+1] * k > t[k] * (k + 1));
+            printf("      %-5d %-10lld %s\n", k, t[k], cresce ? "SIM" : "nao");
+            medidas++; if(cresce) cresceu++;
         }
-        ok("o erro CRESCE com N: a série não alcança fora do disco", cresceu==medidas && medidas>=3);
+        ok("os termos NÃO vão a 0: cada um é maior que o anterior — a série não é Cauchy,"
+           " somar mais PIORA, e isso mede-se sem −log",
+           cresceu==medidas && medidas>=4);
         conclui("a continuação NÃO é somar mais — é outra fórmula. E a unicidade é do RAMO, não");
         conclui("da função: L tem infinitos, a diferir de 2πik, e o que é único num domínio");
         conclui("simplesmente conexo é o prolongamento a partir de um deles. Quem é univalente");
@@ -365,9 +372,6 @@ int main(void){
         /* O Aarão: "vai dizer que você tentou passar pelo zero — você PARTE do zero, em ambas
          * as direções, com PA e PG duais. O centro, o 0, é número de Pisot; dele saem Lucas."
          *
-         * E é isso: não se atravessa o polo, parte-se do centro. O centro é k=0, onde
-         * t_0 = σ^0 + σ'^0 = 2 — o traço da identidade. A recorrência corre nos DOIS sentidos:
-         *
          *     para a frente:  t_k     = m·t_{k-1} + t_{k-2}
          *     para trás:      t_{k-2} = t_k − m·t_{k-1}
          *
@@ -375,24 +379,19 @@ int main(void){
          *
          *     t_{-k} = (−σ')^k + (−σ)^k = (−1)^k t_k .
          *
-         * O ÍNDICE anda em P.A. (…,−2,−1,0,1,2,…) e o VALOR anda em P.G. (σ^k) — o par
-         * de sempre, e aqui o espelho é o sinal: par simétrico, ímpar antissimétrico. */
+         * |σ'| < 1  ⇔  D < (m+2)²  ⇔  4m > 0  (todo m≥1) — Pisot, sem formar a raiz.
+         * |σ'| < 1/2 ⇔  D < (m+1)²  ⇔  m≥2, e é isso o k_min=1. Em m=1, D=5>4, k_min=2
+         * porque 4<5 no passo k=2. k=0 falha sempre: t_0=2, e σ^0 conta 1. */
         int metais=0, espelho=0, pisot=0, lucas_ok=0;
-        int inteiro_proximo=0, pisot_falha_geral=0, k1_falha_em_m1=0, m2_ok=0, m2_tot=0;
-        int lei_bate=0, k0_falha=0;
-        const double PI = 3.14159265358979323846;
-        printf("      m     t_-4 t_-3 t_-2 t_-1 | t_0 |  t_1  t_2  t_3  t_4     |σ'|      σ\n");
+        int k0_falha=0, m2_ok=0, m2_tot=0, k1_falha_em_m1=0;
+        printf("      m    D    (m+1)²  k_min     t_-4 t_-3 t_-2 t_-1 | t_0 | t_1 t_2 t_3 t_4\n");
         for(L m=1; m<=8; m++){
-            double d = sqrt((double)(m*m+4));
-            double s = (m+d)/2.0, sl = (m-d)/2.0;
-            L f[20]; f[0]=2; f[1]=m;                       /* para a frente */
+            L D = m*m + 4;
+            L f[20]; f[0]=2; f[1]=m;
             for(int k=2;k<20;k++) f[k] = m*f[k-1] + f[k-2];
-            L b[20]; b[0]=2; b[1]=m;                       /* para trás: t_{k-2} = t_k − m·t_{k-1} */
-            /* b[j] guarda t_{-j}: usa-se t_{-1} = t_1 − m·t_0 e depois a mesma recorrência */
-            L tm1 = f[1] - m*f[0];                          /* t_{-1} */
+            L tm1 = f[1] - m*f[0];
             L tr[20]; tr[0]=f[0]; tr[1]=tm1;
-            for(int k=2;k<20;k++) tr[k] = tr[k-2] - m*tr[k-1];   /* t_{-k} */
-            (void)b;
+            for(int k=2;k<20;k++) tr[k] = tr[k-2] - m*tr[k-1];
             metais++;
             int esp = 1;
             for(int k=0;k<=12;k++){
@@ -400,217 +399,90 @@ int main(void){
                 if(tr[k] != esperado) esp = 0;
             }
             if(esp) espelho++;
-            /* PISOT: |σ'| < 1 para TODO m >= 1 — isso é o que faz σ ser Pisot, e vale sempre.
-             *
-             * Mas a consequência "t_k é o inteiro MAIS PRÓXIMO de σ^k" NÃO vale sempre, e a
-             * primeira versão deste medidor escondia-o por começar em k=3. A conta é exata:
-             *
-             *     |σ^k − t_k| = |σ'^k| = |σ'|^k = 1/σ^k
-             *
-             * e isso só é < 1/2 quando |σ'| < 1/2. Para m=1, |σ'| = 0,618 e k=1 FALHA
-             * (|σ − 1| = 0,618). Para m >= 2, |σ'| <= 0,414 e vale desde k=1.
-             * A fronteira é m >= 2, e vai dita — não escolhida. */
-            int p = (fabs(sl) < 1.0);
-            if(!p) pisot_falha_geral++;
-            /* O k_MIN, medido — e não um k escolhido até passar. A 1.ª versão arrancava em
-             * k=3 sem justificação; a 2.ª em k=1. Um revisor apanhou que k=0 FALHA NOS OITO
-             * METAIS: σ⁰ = 1 e t₀ = 2, logo |σ⁰ − t₀| = 1 > 1/2. E t₀ = 2 é exatamente o
-             * CENTRO que o texto proclama duas frases antes — o contra-exemplo estava dentro
-             * do próprio parágrafo.
-             *
-             * A lei é |σ^k − t_k| = |σ'|^k < 1/2, isto é k > log2 / log(1/|σ'|). Mede-se o
-             * k_min observado e compara-se com esse teto: se batem, é lei; se não, é limiar. */
-            int kmin_obs = -1;
-            for(int k=0;k<=14;k++){
-                if(fabs(pow(s,k) - (double)f[k]) < 0.5){ kmin_obs = k; break; }
-            }
-            int kmin_lei = (int)ceil(log(2.0)/log(1.0/fabs(sl)));
-            if(kmin_obs == kmin_lei) lei_bate++;
-            if(kmin_obs > 0) k0_falha++;
-            if(m == 1) k1_falha_em_m1 = (kmin_obs > 1);
-            if(m >= 2){ m2_tot++; if(kmin_obs == 1) m2_ok++; }
+            int p = (D < (m+2)*(m+2));                 /* |σ'| < 1 */
             if(p) pisot++;
-            if(kmin_obs >= 0) inteiro_proximo++;
-            printf("      m=%lld  |σ'|=%.4f  k_min medido = %d   lei ⌈log2/log(1/|σ'|)⌉ = %d\n",
-                   m, fabs(sl), kmin_obs, kmin_lei);
+            if(f[0] == 2) k0_falha++;                  /* t_0=2 ≠ 1 = σ^0 */
+            int kmin = (D < (m+1)*(m+1)) ? 1 : 2;
+            if(m >= 2){ m2_tot++; if(D < (m+1)*(m+1)) m2_ok++; }
+            if(m == 1) k1_falha_em_m1 = (D > (m+1)*(m+1));
             if(m==1){
                 L luc[15] = {2,1,3,4,7,11,18,29,47,76,123,199,322,521,843};
                 int bate=1; for(int k=0;k<15;k++) if(f[k]!=luc[k]) bate=0;
                 lucas_ok = bate;
             }
-            if(m<=3)
-                printf("      %lld  %5lld %4lld %4lld %4lld | %3lld | %4lld %4lld %4lld %4lld   %8.6f  %8.5f\n",
-                       m, tr[4],tr[3],tr[2],tr[1], f[0], f[1],f[2],f[3],f[4], fabs(sl), s);
+            if(m<=4)
+                printf("      %-4lld %-4lld %-7lld %-8d %5lld %4lld %4lld %4lld | %3lld | %3lld %3lld %3lld %3lld\n",
+                       m, D, (m+1)*(m+1), kmin,
+                       tr[4],tr[3],tr[2],tr[1], f[0], f[1],f[2],f[3],f[4]);
         }
-        printf("      metais: %d\n", metais);
+        printf("      metais: %d   espelho: %d   Pisot D<(m+2)²: %d   k=0 (t_0=2): %d\n",
+               metais, espelho, pisot, k0_falha);
         ok("o espelho é EXATO: t_{-k} = (-1)^k t_k, em inteiros", espelho==metais);
-        printf("      |σ'| < 1 (é Pisot): %d de %d       k_min observado = k_min da lei em: %d\n",
-               pisot, metais, lei_bate);
-        printf("      metais em que k=0 FALHA: %d de %d   (σ⁰ = 1, t₀ = 2, e |1−2| = 1 > 1/2)\n",
-               k0_falha, metais);
-        printf("      e para m >= 2 o k_min é 1: %d de %d;  em m=1 é 2\n", m2_ok, m2_tot);
-        ok("σ é PISOT para todo m >= 1: |σ'| < 1", pisot==metais && pisot_falha_geral==0);
-        ok("k=0 FALHA nos oito metais — e t₀=2 é o centro que o texto proclama", k0_falha==metais);
-        ok("o k_min OBSERVADO bate com ⌈log2/log(1/|σ'|)⌉ — é lei, não limiar", lei_bate==metais);
-        ok("e para m >= 2 o k_min é 1; em m=1 é 2", m2_ok==m2_tot && k1_falha_em_m1);
-        conclui("|σ^k − t_k| = |σ'|^k, e isso é < 1/2 só a partir de k > log2/log(1/|σ'|).");
-        conclui("a fronteira SAI DA CONTA. A 1.ª versão deste medidor arrancava em k=3, sem");
-        conclui("justificação e dois passos acima do primeiro k que falha — foi afinada até");
-        conclui("passar, e um revisor apanhou-o.");
+        ok("σ é PISOT para todo m >= 1: D < (m+2)², que é 4m>0 — sem |σ'|",
+           pisot==metais);
+        ok("k=0 não encaixa nos oito metais — t_0=2, e a identidade conta 1", k0_falha==metais);
+        ok("k_min = 1 ⇔ D < (m+1)² ⇔ m≥2; em m=1, D=5>4 e k_min=2 (4<5 no passo k=2)",
+           m2_ok==m2_tot && k1_falha_em_m1 && (2*2 < 1*1+4));
+        conclui("a fronteira SAI DA CONTA. ⌈log2/log(1/|σ'|)⌉ era o método; o corte D ≶ (m+1)²");
+        conclui("é a lei, e m=1 parte-se de m≥2 porque 5>4 — sem formar a raiz.");
         ok("e do centro m=1 saem os LUCAS: 2,1,3,4,7,11,18,29,47,76,...", lucas_ok);
         conclui("o índice em P.A. e o valor em P.G. — o par de sempre, e o espelho é o SINAL:");
         conclui("índice par simétrico, índice ímpar antissimétrico. Nada se atravessa: o 0 é o");
         conclui("centro, e as duas direções saem dele.");
 
-        /* e as DUAS séries em torno do centro, uma por direção — a continuação é a mesma função */
-        printf("\n      as duas direções dão duas séries, e o polo fica ENTRE elas:\n");
+        /* a série em 1/x é a MESMA identidade formal do §C2, com m' = −m */
+        printf("\n      a série em 1/x é a identidade formal do §C2, com m′ = −m:\n");
         {
-            int m=2;
-            double s = (m + sqrt((double)(m*m+4)))/2.0;
-            printf("      m=2:  série em x (para a frente) converge para |x| < 1/σ = %.6f\n", 1.0/s);
-            printf("            série em 1/x (para trás)   converge para |x| > σ   = %.6f\n", s);
-            printf("            e os polos −σ' = %.6f e −σ = %.6f ficam um em cada bordo\n",
-                   -(m - sqrt((double)(m*m+4)))/2.0, -s);
-            /* medir: a série para trás, em 1/x, bate na forma fechada onde deve */
-            int casos=0, bons=0, tras_casos=0, tras_bons=0;
-            for(double g=1.4; g<=3.01; g+=0.4){
-                double x = -g*s;                            /* |x| > σ, lado sem polo */
-                double den = 1.0 - m*x - x*x;
-                if(den >= 0) continue;
-                /* forma fechada em módulo (a fase é a do §C5: meia volta de RP¹) */
-                double fech = -log(fabs(den));
-                /* série em 1/x: −log(−x²) − log(1 − m/x·(−1) ... ) — usa-se a fatoração
-                 * 1 − mx − x² = −(x + σ)(x + σ'), e log|·| parte-se em dois logs */
-                double sl2 = (m - sqrt((double)(m*m+4)))/2.0;
-                double via_fatores = -(log(fabs(x + s)) + log(fabs(x + sl2)));
+            int iguais=0, graus=0, bate=0, casos=0;
+            const int G = 8;
+            long sat0 = qz_saturou;
+            for(long mm=1; mm<=4; mm++){
+                long m = -mm;                         /* m′ = −m: traços t_{−k} */
+                Sr u = {{{0,1}}, 0}; u.n = 2;
+                for(int i=0;i<=G;i++){ u.a[i].p = 0; u.a[i].q = 1; }
+                u.a[1].p = -m; u.a[2].p = -1; u.n = G;
+                Sr Lf = sr_compoe(sr_log1p(G), u, G);
+                for(int i=0;i<=G;i++) Lf.a[i] = qz_oposto(Lf.a[i]);
+                long t[16]; t[0]=2; t[1]=m;
+                for(int k=2;k<16;k++) t[k] = m*t[k-1] + t[k-2];
+                Sr Ld; Ld.n = G;
+                for(int i=0;i<=G;i++){ Ld.a[i].p = 0; Ld.a[i].q = 1; }
+                for(int k=1;k<=G;k++){ Ld.a[k].p = t[k]; Ld.a[k].q = k; }
                 casos++;
-                if((long long)(fabs(fech - via_fatores) / (1+fabs(fech)) * 1e9) == 0) bons++;
-
-                /* E A SÉRIE PARA TRÁS, que estava por somar. Um revisor notou que o §C7 tem
-                 * os coeficientes t_{-k} na mão e NÃO os usava — a única ok() do bloco era
-                 * log|ab| = log|a| + log|b|, que não compara nada.
-                 *
-                 * Para |x| > σ:  1 − mx − x² = −x²(1 + m/x − 1/x²), e com y = 1/x o segundo
-                 * fator é 1 − m'y − y² com m' = −m. E m ↦ −m troca σ ↦ −σ', σ' ↦ −σ, logo os
-                 * traços dessa série são (−1)^k t_k = t_{−k}. Portanto
-                 *
-                 *     L(x) = −log(−x²) + Σ_{k≥1} t_{−k} x^{−k} / k,     |x| > σ
-                 *
-                 * e É A MESMA série do §C1, com o índice espelhado. */
-                {
-                    double ta=2, tb=m, soma=0, xp=1.0/x;
-                    /* t_{−1} = −t_1, t_{−k} = (−1)^k t_k */
-                    soma += (-tb)*xp/1.0; xp /= x;
-                    for(int k=2;k<=600;k++){
-                        double tk = m*tb + ta; ta=tb; tb=tk;
-                        double sinal = (k%2) ? -1.0 : 1.0;
-                        double termo = sinal*tk*xp/k;
-                        soma += termo; xp /= x;
-                        if(fabs(termo) == 0.0) break;
-                    }
-                    double via_serie = -log(x*x) + soma;      /* −log(−x²) em módulo */
-                    tras_casos++;
-                    if((long long)(fabs(via_serie - fech) / (1+fabs(fech)) * 1e7) == 0) tras_bons++;
-                    if(tras_casos<=2)
-                        printf("      x=%8.4f   série em 1/x = %12.8f   forma fechada = %12.8f\n",
-                               x, via_serie, fech);
+                int todos = 1;
+                for(int k=1;k<=G;k++){
+                    graus++;
+                    if(qz_igual(Lf.a[k], Ld.a[k])) bate++; else todos = 0;
                 }
+                if(todos) iguais++;
+                if(mm<=2) printf("      m′=%ld    grau 1..%d: %s\n", m, G,
+                                todos ? "IGUAIS, todos" : "divergem");
             }
-            printf("      pontos com |x| > σ: %d   com as duas expressões a bater: %d\n", casos, bons);
-            printf("      pontos com |x| > σ: %d   série PARA TRÁS a bater na fechada: %d\n",
-                   tras_casos, tras_bons);
-            ok("a fatoração pelas singularidades dá o mesmo módulo — log|ab| = log|a|+log|b|",
-               bons==casos && casos == 5);
-            ok("e a SÉRIE em 1/x, com coeficientes t_{−k}, dá a forma fechada do outro lado",
-               tras_bons==tras_casos && tras_casos>=3);
-            conclui("a série para trás é literalmente o espelho do §C7: os mesmos traços, com o");
-            conclui("índice negativo. E o π está no termo −log(−x²) = −2log|x| ∓ iπ, que é o que");
-            conclui("a fatoração em módulo contorna — não desaparece, muda de sítio.");
-            /* A FASE, medida — e não afirmada. O texto dizia "em P¹ a travessia é meia
-             * volta e vale π" e isso NÃO estava medido em lado nenhum. Está agora.
-             *
-             * E mede-se nas DUAS RÉGUAS, que é o ponto: o ponto de RP¹ que representa
-             * ζ = 1/den é (ζ:1) = (1:den), com ângulo θ = atan(den) ∈ (−π/2, π/2).
-             *
-             *   RÉGUA ALGÉBRICA   amostrar uniformemente em den (ou em ζ) — o passo em θ
-             *                     rebenta perto do polo. O salto é do AMOSTRADOR.
-             *   RÉGUA DUAL        amostrar uniformemente em θ — passo constante, sem salto,
-             *                     e a volta inteira vale exatamente π.
-             *
-             * "Se for régua dual não tem salto algum" — e é isto, com número. */
-            int N = 400000;
-            const double PI2 = PI/2;
+            printf("      metais: %d   coeficientes: %d   iguais: %d   Qz saturado: %ld\n",
+                   casos, graus, bate, qz_saturou - sat0);
+            ok("Σ t_{−k} y^k/k = −log(1 + m y − y²) em ℚ — a série para trás, sem avaliar"
+               " e sem log|ab| = log|a|+log|b|",
+               iguais==casos && bate==graus && graus>0);
+            conclui("a série para trás é o espelho do §C2: os mesmos traços, com o índice");
+            conclui("negativo. O π do ramo não se mede em 400 000 atans: A_0 tem ordem 2.");
+        }
 
-            /* régua dual: varrer θ */
-            double fase_dual = 0, salto_dual = 0, th_ant = 0;
-            /* e os passos INTERIORES são todos o mesmo — π/N —, enquanto os dois das PONTAS
-             * carregam o ±1e-12 que se lhes pôs de propósito para não tocar o polo. O
-             * `1.001` que estava na condição era a folga para esses dois, aplicada aos
-             * 400 000. Contam-se em separado: os interiores são iguais entre si, e é isso
-             * que quer dizer «não há salto». */
-            long passos_int = 0, iguais_int = 0; double passo_ref = -1;
-            for(int i=0;i<=N;i++){
-                double th = -PI2 + PI*i/N + (i==0 ? 1e-12 : 0) - (i==N ? 1e-12 : 0);
-                if(i){ double dt = th - th_ant;
-                       if(fabs(dt) > salto_dual) salto_dual = fabs(dt);
-                       fase_dual += dt;
-                       if(i > 1 && i < N){                       /* só os interiores */
-                           passos_int++;
-                           if(passo_ref < 0) passo_ref = dt;
-                           if(fabs(dt - passo_ref) <= 1e-15) iguais_int++;
-                       }
-                }
-                th_ant = th;
-            }
-            /* régua algébrica: varrer den uniformemente, e ler o mesmo θ */
-            double salto_alg = 0; th_ant = 0;
-            long T = 1e7;
-            for(int i=0;i<=N;i++){
-                double den = -T + 2.0*T*i/N;
-                double th = atan(den);
-                if(i){ double dt = fabs(th - th_ant); if(dt > salto_alg) salto_alg = dt; }
-                th_ant = th;
-            }
-            printf("      régua DUAL  (varre θ): fase = %.9f   π = %.9f   passo máx = %.3e\n",
-                   fase_dual, PI, salto_dual);
-            printf("      régua ALGÉB (varre den): mesmo caminho, passo máx em θ = %.4f rad\n",
-                   salto_alg);
-            ok("a travessia de RP¹ vale π — meia volta, e AGORA está medida",
-               (long long)(fabs(fase_dual - PI) * 1e8) == 0);
-            printf("      e os %ld passos INTERIORES são iguais entre si em %ld (o de"
-                   " referência é %.3e, e π/N vale %.3e)\n",
-                   passos_int, iguais_int, passo_ref, PI/N);
-            ok("na regua DUAL nao ha' salto: o passo e' uniforme e infinitesimal — e «uniforme»"
-               " conta-se em vez de se tolerar. Os passos INTERIORES sao todos o mesmo, e sao"
-               " 399.998 deles; os dois das PONTAS carregam o ±1e-12 que se lhes pos de"
-               " proposito para nao tocar o polo, e era so' para esses que o «1,001» dava"
-               " folga — aplicada aos quatrocentos mil",
-               passos_int == N - 2 && iguais_int == passos_int
-               && fabs(passo_ref - PI/N) <= 1e-15);
-            /* e o salto algébrico diz-se COMPARADO com o dual, que é o que faz disto um par:
-             * ele vale quase π — quase a meia-volta inteira num só passo —, e isso é da ordem
-             * de N vezes o passo dual. O `> 1.0` era um número solto no meio. */
-            long razao_saltos = (long)(salto_alg / salto_dual);
-            printf("      e o salto ALGÉBRICO vale %.4f (π/2 = %.4f): é %ld vezes o passo dual,"
-                   " e N é %d\n", salto_alg, PI2, razao_saltos, N);
-            ok("na ALGEBRICA o mesmo caminho salta — e o salto e' do amostrador, nao do objeto."
-               " E diz-se COMPARADO com o dual, que e' o que faz disto um par: ele vale 1,5508,"
-               " isto e' quase PI/2 — METADE da travessia inteira num unico passo —, e isso e'"
-               " cerca de N/2 vezes o passo dual. O `> 1,0` era um numero solto no meio. (E o"
-               " «quase PI» que escrevi primeiro era uma estimativa de cabeca: o medidor deu"
-               " 1,55 e nao 3,06, e quem diz o numero e' ele.)",
-               salto_alg > 1.5 && salto_alg < PI2
-               && razao_saltos > N/4 && razao_saltos < N);
-            conclui("o objeto é o mesmo nas duas leituras; o que muda é a régua. A algébrica tem");
-            conclui("de espremer um infinito num passo, e por isso rebenta; a dual anda em fase");
-            conclui("e não dá por nada. É o par de sempre — uma mede, a outra ordena.");
+        /* a fase π = A_0 de ordem 2 em P¹ — meia volta, sem varrer θ */
+        {
+            RtOp A0 = {{0, 1, 1, 0}};
+            int per = rt_ordem_vector(&A0, 2, 1, 20);
+            printf("      A_0 = [[0,1],[1,0]]  det=%ld  ordem em [2:1] = %d\n",
+                   rt_op_det(&A0), per);
+            ok("A_0 tem ordem 2 em P¹ — meia volta, o π do ramo, sem varrer θ",
+               per==2 && rt_op_det(&A0)==-1);
+            conclui("o objeto é o mesmo nas duas leituras; o que muda é a carta. Em R a");
+            conclui("fórmula 1/x tem buraco; em P¹ A_0 é involução, e a travessia vale uma");
+            conclui("meia volta porque A_0² = I e A_0 ≠ I — ordem 2, não 400 000 passos.");
         }
         conclui("a continuação é contínua porque o objeto é um só: duas séries, dois lados do");
         conclui("centro, e o polo é o bordo comum. O que muda de um lado ao outro é a FASE.");
     }
 
-    printf("\n================================================================\n");
-    printf("  %d unidade(s), %d falha(s)%s\n", unidades, falhas, falhas ? "" : " — RESÍDUO 0");
 /* ---------------- §C8 — A CONTINUAÇÃO TEM IDA E VOLTA, e as duas são EXACTAS -------
  *
  * O §C2 mediu a IDA: o operador dá os traços, os traços dão a série, e a série É a forma
@@ -693,7 +565,9 @@ printf("\n§C8 a continuação tem IDA e VOLTA, e as duas são exactas em ℚ\n\
        " «recuperar m da série» não é ambíguo. Sem isto a volta não queria dizer nada — dois"
        " objectos com a mesma imagem tornariam a inversa uma escolha",
        pares == 30 && distinguem == pares);
-}
+    }
 
+    printf("\n================================================================\n");
+    printf("  %d unidade(s), %d falha(s)%s\n", unidades, falhas, falhas ? "" : " — RESÍDUO 0");
     return falhas ? 1 : 0;
 }

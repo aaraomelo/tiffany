@@ -19,10 +19,9 @@
  *   §Z5  a forma tensorial: n fatores, e o chicote que nunca se degrada
  *   §Z6  infinito a infinito — e todo truncamento é finito e representa
  *
- *   cc -O2 -std=c99 zero.c -lm -o zero && ./zero
+ *   cc -O2 -std=c99 -Wall -I lib tests/zero.c -o zero
  */
 #include <stdio.h>
-#include <math.h>
 #include "unidade.h"
 
 typedef struct { long a, b, c, d; } M2;               /* [[a,b],[c,d]] */
@@ -141,15 +140,13 @@ printf("\n§Z4  Com os termos no NEUTRO sai o rei — e das mesmas sementes sai 
 {
     /* todos os termos iguais a 1 (o neutro do produto) -> Fibonacci -> sigma */
     long h1 = 1, h2 = 0, k1 = 0, k2 = 1;
-    printf("      n    convergente   valor\n");
+    printf("      n    convergente\n");
     for(int n = 1; n <= 20; n++){
         long nh = h1 + h2, nk = k1 + k2;
         h2 = h1; h1 = nh; k2 = k1; k1 = nk;
-        if(n <= 3 || n >= 18) printf("      %-4d %5ld/%-5ld     %.9f\n", n, h1, k1, (double)h1/k1);
+        if(n <= 3 || n >= 18) printf("      %-4d %5ld/%-5ld\n", n, h1, k1);
         else if(n == 4) printf("      ...\n");
     }
-    double s = (1 + sqrt(5.0)) / 2;
-    printf("      sigma                   %.9f\n\n", s);
     /* A TOLERANCIA QUE AQUI ESTAVA (1e-8) foi ESCOLHIDA — e o comentario que a acompanhava
      * dizia-o: eu tinha posto 1e-4, a assercao caiu, e eu afrouxei-a. Isso e ajustar a regua
      * ate passar. E NAO E PRECISO: que h/k seja um convergente de sigma diz-se EXATAMENTE em
@@ -218,9 +215,6 @@ printf("\n§Z5  A forma tensorial: n fatores, e o chicote que nunca se degrada.\
      *     A^2 = tr(A).A - det(A).I ,
      * que se verifica em inteiros, sem uma raiz quadrada. */
     {
-        double s = (1 + sqrt(5.0)) / 2, s2 = -1.0 / s;
-        printf("      as duas raízes (ilustração):  sigma = %.9f   e  -1/sigma = %.9f\n", s, s2);
-
         long A[2][2] = {{1,1},{1,0}};
         long tr = A[0][0] + A[1][1];
         long dt = A[0][0]*A[1][1] - A[0][1]*A[1][0];
@@ -252,9 +246,8 @@ printf("\n§Z5  A forma tensorial: n fatores, e o chicote que nunca se degrada.\
 
 printf("\n§Z6  Infinito a infinito — e todo truncamento é finito e representa.\n\n");
 {
-    double s = (1 + sqrt(5.0)) / 2;
     long h1 = 1, h2 = 0, k1 = 0, k2 = 1;
-    printf("      n     convergente    erro\n");
+    printf("      n     convergente    |h²-hk-k²|\n");
     /* NÃO "cresce sempre": Fibonacci começa 1, 1, e o primeiro passo não cresce. A asserção
      * certa é que NUNCA DECRESCE e vai ao infinito — e a errada caiu vermelha, que é o que
      * ela devia fazer. Escrevi uma afirmação mais forte do que o objeto aguenta. */
@@ -264,8 +257,11 @@ printf("\n§Z6  Infinito a infinito — e todo truncamento é finito e represent
         h2 = h1; h1 = nh; k2 = k1; k1 = nk;
         if(k1 < anterior) nunca_decresce = 0;
         anterior = k1;
-        if(n == 1 || n == 5 || n == 10 || n == 15 || n == 20)
-            printf("      %-5d %5ld/%-6ld  %.3e\n", n, h1, k1, fabs((double)h1/k1 - s));
+        if(n == 1 || n == 5 || n == 10 || n == 15 || n == 20){
+            long nb = h1*h1 - h1*k1 - k1*k1;
+            if(nb < 0) nb = -nb;
+            printf("      %-5d %5ld/%-6ld  %ld\n", n, h1, k1, nb);
+        }
     }
     printf("\n");
     printf("      o denominador nunca decresce, e ao fim de 20 passos vale %ld\n\n", k1);

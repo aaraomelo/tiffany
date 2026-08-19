@@ -8,40 +8,24 @@
  * (`\pgfmathsetmacro`), condicional (`\ifnum`) e definição (`\newcommand`) — e com isso desenha
  * uma órbita SEM QUE OS PONTOS ESTEJAM ESCRITOS: eles são calculados quando o documento compila.
  *
- * É AÍ QUE ESTÁ A COISA. Se os pontos estivessem escritos, a figura seria um retrato do que eu
- * calculei e não teria como discordar de mim. Sendo calculados pelo próprio LaTeX, há **dois
- * caminhos**: o C integra a equação, o TikZ integra-a outra vez com a aritmética dele, e as duas
- * trajetórias têm de coincidir. Uma figura que pode desmentir o texto é uma medida; uma que não
- * pode é uma ilustração.
+ * Se os pontos estivessem escritos, a figura seria um retrato do que eu calculei e não teria
+ * como discordar de mim. Sendo calculados pelo próprio LaTeX, há **dois caminhos**: o C integra
+ * a equação, o TikZ integra-a outra vez com a aritmética dele, e as duas trajetórias têm de
+ * coincidir. Uma figura que pode desmentir o texto é uma medida; uma que não pode é uma
+ * ilustração.
  *
- * E o MATLAB entra pela porta que já estava aberta: ele é a linguagem das MATRIZES, e o
- * `mecanica.c` já diz que "toda matriz é PALAVRA nos geradores da ISA". Uma expressão de matrizes
- * não pede máquina nova — pede leitura.
+ * LEI vs TRANSPORTE. RK4 vs exp(−Bt/2)·(cos wt + …), Euler em 400 passos e 1e-6 no erro eram
+ * o método. A lei é a companion em ℚ, Cayley–Hamilton com o (B,C) do catálogo, o Euler
+ * I+hA contra a recorrência (y,v)↦(y+hv, v+h(−Cy−Bv)), A^{a+b}=A^a A^b (a soma no expoente
+ * vira produto), det(I+hA)=1−hB+h²C < 1 (o amortecimento, sem o exp), e A⁴=I quando B=0
+ * (o i, período 4). Sem uma raiz e sem um seno.
  *
- *   §K1  o TikZ é a nona roupa: a marca do nível é o PONTO-E-VÍRGULA, e o escopo é a chave
- *   §K2  a LINGUAGEM: laço, aritmética e macro — e o que ela sabe fazer, medido
- *   §K3  a DINÂMICA gerada: o sistema do corpo diferencial sai em TikZ que se COMPILA
- *   §K4  OS DOIS CAMINHOS: o C integra, o TikZ integra, e as trajetórias coincidem
- *   §K5  a ANIMAÇÃO: os quadros são a órbita amostrada, e o tempo é o parâmetro
- *   §K6  o MATLAB: a expressão de matrizes é palavra na ISA — nenhuma máquina nova
- *
- *   cc -O2 -std=c99 tikz.c -lm -o tikz && ./tikz
+ *   cc -O2 -std=c99 -I lib tests/tikz.c -o tikz && ./tikz
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
-/* ───────────────────────────────────────────────────────────────────────────
- * §K1  A NONA ROUPA — a marca do nível do TikZ
- *
- * No TikZ cada comando acaba em `;` e o escopo abre com `{` — então a marca é DUPLA: o
- * ponto-e-vírgula fecha a instrução, a chave fecha o nível. É a primeira roupa com duas marcas
- * desde o LaTeX (que também as tem: a barra para o comando, o ambiente para o bloco).
- * ─────────────────────────────────────────────────────────────────────────── */
+#include "unidade.h"
 
 typedef struct { long instrucoes, nivel_max, escopos; int fecha; } Tk;
 
@@ -50,60 +34,22 @@ static Tk tikz_desce(const char *s){
     long nivel = 0;
     for(const char *p = s; *p; p++){
         if(*p == '%'){ while(*p && *p != '\n') p++; if(!*p) break; continue; }
-        if(*p == ';') t.instrucoes++;
-        else if(*p == '{'){ nivel++; if(nivel > t.nivel_max) t.nivel_max = nivel; }
-        else if(*p == '}'){ nivel--; if(nivel < 0){ t.fecha = 0; nivel = 0; } }
-        else if(!strncmp(p, "\\begin{scope}", 13)) t.escopos++;
+        if(*p == ';') t.instrucoes += 1;
+        else if(*p == '{'){ nivel += 1; if(nivel > t.nivel_max) t.nivel_max = nivel; }
+        else if(*p == '}'){ nivel -= 1; if(nivel < 0){ t.fecha = 0; nivel = 0; } }
+        else if(!strncmp(p, "\\begin{scope}", 13)) t.escopos += 1;
     }
     if(nivel != 0) t.fecha = 0;
     return t;
 }
 
-/* ───────────────────────────────────────────────────────────────────────────
- * §K3/§K4  A DINÂMICA — o sistema do corpo diferencial
- *
- * O `edo.c` §E1: a equação característica É a borda do corpo, y'' + By' + Cy = 0 <-> σ² = −C − Bσ.
- * Em forma de sistema (a companion do §E5), com x = (y, y'):
- *
- *      x' = A x ,   A = [ 0    1 ]        e a régua do catálogo é (B,C) = (−traço, det)
- *                       [ −C  −B ]
- *
- * Escolhe-se o oscilador amortecido, que é o caso com Δ < 0 — elíptico, o do §E4 onde "o oscilador
- * é o i". A solução é conhecida em FORMA FECHADA, e é ela o oráculo: nem o C nem o TikZ a definem.
- * ─────────────────────────────────────────────────────────────────────────── */
-
-#define B_DIN  0.30                                /* o amortecimento */
-#define C_DIN  1.00                                /* a rigidez */
-
-/* a solução exata: Δ = B²−4C < 0, logo w = sqrt(4C−B²)/2 e y = e^{−Bt/2}(cos wt + (B/2w) sin wt),
- * com y(0)=1, y'(0)=0. Esta é a forma fechada do §E4, não uma aproximação. */
-static double exata(double t){
-    double w = sqrt(4*C_DIN - B_DIN*B_DIN)/2.0;
-    return exp(-B_DIN*t/2.0) * (cos(w*t) + (B_DIN/(2*w))*sin(w*t));
-}
-
-/* o caminho C: Runge-Kutta 4, o passo clássico */
-static void rk4(double *y, double *v, double h){
-    double k1y = *v,                 k1v = -C_DIN*(*y)          - B_DIN*(*v);
-    double k2y = *v + h*k1v/2,       k2v = -C_DIN*(*y+h*k1y/2)  - B_DIN*(*v+h*k1v/2);
-    double k3y = *v + h*k2v/2,       k3v = -C_DIN*(*y+h*k2y/2)  - B_DIN*(*v+h*k2v/2);
-    double k4y = *v + h*k3v,         k4v = -C_DIN*(*y+h*k3y)    - B_DIN*(*v+h*k3v);
-    *y += h*(k1y + 2*k2y + 2*k3y + k4y)/6.0;
-    *v += h*(k1v + 2*k2v + 2*k3v + k4v)/6.0;
-}
-
-/* o caminho TikZ: EULER, porque é o que a aritmética do \pgfmath faz sem esforço — e é de
- * propósito que os dois métodos são DIFERENTES. Se ambos fossem RK4 eu estaria a comparar duas
- * cópias do mesmo código; sendo diferentes, o que os faz concordar é a EQUAÇÃO, não o método. */
-static void euler(double *y, double *v, double h){
-    double ny = *y + h*(*v);
-    double nv = *v + h*(-C_DIN*(*y) - B_DIN*(*v));
-    *y = ny; *v = nv;
-}
-
-/* ───────────────────────────────────────────────────────────────────────────
- * §K2  A LINGUAGEM — o que o TikZ sabe fazer, e é o que faz dele linguagem
- * ─────────────────────────────────────────────────────────────────────────── */
+/* y'' + B y' + C y = 0, B = 3/10, C = 1 — elíptico, Δ = 9−40 = −31. */
+#define Bn 3
+#define Bd 10
+#define Cn 1
+#define NPASSOS 400
+#define hn 1
+#define hd 50
 
 typedef struct { const char *cmd; const char *papel; const char *equivale; } Ling;
 static const Ling PGF[] = {
@@ -115,13 +61,6 @@ static const Ling PGF[] = {
     { "\\xdef",             "estado global","variável"   },
 };
 #define NPGF ((int)(sizeof PGF / sizeof PGF[0]))
-
-/* ───────────────────────────────────────────────────────────────────────────
- * §K6  O MATLAB — a expressão de matrizes é PALAVRA na ISA
- *
- * O `mecanica.c`: "toda matriz é PALAVRA nos geradores da ISA". O MATLAB é a linguagem cujas
- * primitivas SÃO matrizes — logo uma expressão dele lê-se diretamente como palavra, sem tradutor.
- * ─────────────────────────────────────────────────────────────────────────── */
 
 typedef struct { const char *matlab; const char *isa; const char *o_que; } Mat;
 static const Mat MATLAB[] = {
@@ -135,46 +74,51 @@ static const Mat MATLAB[] = {
 };
 #define NMAT ((int)(sizeof MATLAB / sizeof MATLAB[0]))
 
-/* ───────────────────────────────────────────────────────── o programa */
+/* Matriz 2×2 racional: entradas / den. */
+typedef struct { long a, b, c, d, den; } M;
 
-static int falhas = 0, feitas = 0;
-static void ok(const char *q, int cond){
-    feitas++; if(!cond) falhas++;
-    printf("#UNIT %s %s\n", cond ? "ok" : "falha", q);
-    printf("  [%s] %s\n", cond ? "ok" : "FALHA", q);
+static M mmul(M x, M y){
+    M z;
+    z.a = x.a*y.a + x.b*y.c;
+    z.b = x.a*y.b + x.b*y.d;
+    z.c = x.c*y.a + x.d*y.c;
+    z.d = x.c*y.b + x.d*y.d;
+    z.den = x.den * y.den;
+    return z;
+}
+static int migual(M x, M y){
+    return x.a*y.den == y.a*x.den && x.b*y.den == y.b*x.den
+        && x.c*y.den == y.c*x.den && x.d*y.den == y.d*x.den;
+}
+static M mpot(M A, int n){
+    M I = {1,0,0,1,1}, p = I;
+    for(int k = 0; k < n; k += 1) p = mmul(p, A);
+    return p;
 }
 
-#define NPASSOS 400
-#define H       0.02
-#define TFIM    (NPASSOS*H)
-
-/* gera o TikZ que INTEGRA a equação com a aritmética do próprio LaTeX. Os pontos NÃO vão
- * escritos: vão as regras que os produzem. */
 static void gera(FILE *f, int quadros){
     fprintf(f,
-"%% gerado por tools/tikz.c — os pontos NAO estao aqui: esta a REGRA que os produz.\n"
-"%% Se estivessem escritos, esta figura seria um retrato do que o C calculou e nao teria\n"
-"%% como discordar dele. Assim ela integra a equacao outra vez, com a aritmetica do LaTeX.\n"
+"%% gerado por tests/tikz.c — os pontos NAO estao aqui: esta a REGRA que os produz.\n"
 "\\documentclass[tikz,border=6pt]{standalone}\n"
 "\\usepackage{tikz}\n"
 "\\usetikzlibrary{arrows.meta}\n"
 "\\begin{document}\n"
-"%% a equacao do corpo diferencial (edo.c §E1):  y'' + B y' + C y = 0\n"
-"\\newcommand{\\Bdin}{%.4f}\n"
-"\\newcommand{\\Cdin}{%.4f}\n"
-"\\newcommand{\\passo}{%.4f}\n", B_DIN, C_DIN, H);
+"%% y'' + B y' + C y = 0, B=3/10, C=1, passo=1/50 — racionais, o pgfmath avalia\n"
+"\\newcommand{\\Bdin}{3/10}\n"
+"\\newcommand{\\Cdin}{1}\n"
+"\\newcommand{\\passo}{1/50}\n");
 
-    for(int q = 0; q < quadros; q++){
+    for(int q = 0; q < quadros; q += 1){
         int ate = (NPASSOS * (q+1)) / quadros;
         fprintf(f,
 "\\begin{tikzpicture}[x=1.1cm,y=2.4cm]\n"
-"  \\draw[gray!30] (0,-1.1) -- (%.2f,-1.1);\n"
+"  \\draw[gray!30] (0,-1.1) -- (8,-1.1);\n"
 "  \\draw[gray!30] (0,-1.1) -- (0,1.1);\n"
 "  %% EULER, passo a passo, calculado pelo pgfmath — nao ha ponto escrito aqui\n"
-"  \\pgfmathsetmacro{\\yy}{1.0}\n"
-"  \\pgfmathsetmacro{\\vv}{0.0}\n"
-"  \\pgfmathsetmacro{\\tt}{0.0}\n"
-"  \\coordinate (p0) at (0,1.0);\n"
+"  \\pgfmathsetmacro{\\yy}{1}\n"
+"  \\pgfmathsetmacro{\\vv}{0}\n"
+"  \\pgfmathsetmacro{\\tt}{0}\n"
+"  \\coordinate (p0) at (0,1);\n"
 "  \\foreach \\i in {1,...,%d}{\n"
 "    \\pgfmathsetmacro{\\ny}{\\yy + \\passo*\\vv}\n"
 "    \\pgfmathsetmacro{\\nv}{\\vv + \\passo*(-\\Cdin*\\yy - \\Bdin*\\vv)}\n"
@@ -185,7 +129,7 @@ static void gera(FILE *f, int quadros){
 "    \\pgfmathtruncatemacro{\\j}{\\i-1}\n"
 "    \\draw[blue!70,thick] (p\\j) -- (p\\i);\n"
 "  }\n"
-"\\end{tikzpicture}\n", TFIM, ate);
+"\\end{tikzpicture}\n", ate);
     }
     fprintf(f, "\\end{document}\n");
 }
@@ -193,10 +137,8 @@ static void gera(FILE *f, int quadros){
 int main(void){
     puts("tikz.c — O TikZ E LINGUAGEM: a dinamica desenhada, e VALIDADA contra a integracao\n");
 
-    /* ── §K1 ─────────────────────────────────────────────────────────────── */
     puts("§K1  A NONA ROUPA: a marca do nivel do TikZ e DUPLA");
-    puts("     O ponto-e-virgula fecha a INSTRUCAO, a chave fecha o NIVEL. E a segunda roupa com");
-    puts("     duas marcas (o LaTeX tambem as tem: a barra para o comando, o ambiente para o bloco).\n");
+    puts("     O ponto-e-virgula fecha a INSTRUCAO, a chave fecha o NIVEL.\n");
     {
         static const char AMOSTRA[] =
             "\\begin{tikzpicture}\n"
@@ -206,9 +148,6 @@ int main(void){
             "  \\end{scope}\n"
             "  %% este comentario tem um ; que NAO conta\n"
             "\\end{tikzpicture}\n";
-        /* Escrevi "== 3" de cabeca e sao 2 — a terceira forma do defeito, e a QUARTA vez hoje.
-         * O antidoto nao e trocar 3 por 2: e medir a LEI. A mesma amostra COM e SEM o comentario
-         * tem de dar a MESMA contagem, e isso nao tem numero nenhum onde eu enfiar um palpite. */
         static const char SEM_COMENTARIO[] =
             "\\begin{tikzpicture}\n"
             "  \\draw (0,0) -- (1,1);\n"
@@ -224,16 +163,14 @@ int main(void){
            t.fecha && u.fecha);
         ok("o comentario nao conta: a MESMA amostra com e sem ele da a MESMA contagem",
            t.instrucoes == u.instrucoes && t.nivel_max == u.nivel_max);
-        printf("     -> %ld instrucoes, nivel maximo %ld, %ld escopo. Nona roupa, mesma descida.\n\n",
+        printf("     -> %ld instrucoes, nivel maximo %ld, %ld escopo.\n\n",
                t.instrucoes, t.nivel_max, t.escopos);
     }
 
-    /* ── §K2 ─────────────────────────────────────────────────────────────── */
-    puts("§K2  A LINGUAGEM: o TikZ tem laco, aritmetica, condicional e definicao");
-    puts("     Nao e notacao de figura — e uma linguagem, e e isso que permite o §K4.\n");
+    puts("§K2  A LINGUAGEM: o TikZ tem laco, aritmetica, condicional e definicao\n");
     {
         int tem_laco = 0, tem_arit = 0, tem_cond = 0, tem_def = 0;
-        for(int i = 0; i < NPGF; i++){
+        for(int i = 0; i < NPGF; i += 1){
             if(!strcmp(PGF[i].papel, "laço")) tem_laco = 1;
             if(!strcmp(PGF[i].papel, "aritmética")) tem_arit = 1;
             if(!strcmp(PGF[i].papel, "condicional")) tem_cond = 1;
@@ -242,13 +179,11 @@ int main(void){
         }
         ok("tem as QUATRO pecas de uma linguagem: laco, aritmetica, condicional e definicao",
            tem_laco && tem_arit && tem_cond && tem_def);
-        puts("     -> com laco e aritmetica ela INTEGRA. E integrando, ela pode DISCORDAR de mim.\n");
+        conclui("Com laco e aritmetica ela INTEGRA. E integrando, ela pode DISCORDAR de mim.");
     }
 
-    /* ── §K3 ─────────────────────────────────────────────────────────────── */
-    puts("§K3  A DINAMICA GERADA: o sistema do corpo diferencial sai em TikZ que compila");
-    puts("     y'' + B y' + C y = 0 (edo.c §E1), com B=0,30 e C=1,00: o Delta e negativo, logo");
-    puts("     e o caso ELIPTICO — o do §E4, onde 'o oscilador e o i'.\n");
+    puts("\n§K3  A DINAMICA GERADA: o sistema do corpo diferencial sai em TikZ que compila");
+    puts("     y'' + (3/10) y' + y = 0: Delta = 9−40 = −31, ELIPTICO — o do §E4.\n");
     {
         const char *saida = "/tmp/tikz_dinamica.tex";
         FILE *f = fopen(saida, "w");
@@ -259,7 +194,6 @@ int main(void){
             FILE *g = fopen(saida, "rb");
             fseek(g, 0, SEEK_END); bytes = ftell(g); fclose(g);
         }
-        /* e o que se gerou tem de ser TikZ que a descida do §K1 aceite */
         char *buf = NULL;
         if(escreveu){
             FILE *g = fopen(saida, "rb");
@@ -268,163 +202,150 @@ int main(void){
             fclose(g);
         }
         Tk t = buf ? tikz_desce(buf) : (Tk){0,0,0,0};
-        /* e aqui tambem: ">50" era outro numero de cabeca (sao 40). A lei e que o tamanho
-         * CRESCE com o numero de quadros — mede-se gerando dois e comparando. */
         FILE *f2 = fopen("/tmp/tikz_2q.tex", "w");
         long b2 = 0;
         if(f2){ gera(f2, 2); fclose(f2);
                 FILE *g2 = fopen("/tmp/tikz_2q.tex","rb"); fseek(g2,0,SEEK_END); b2=ftell(g2); fclose(g2); }
         ok("gerou-se TikZ, ele PASSA na propria descida do §K1, e CRESCE com o numero de quadros",
            escreveu && t.fecha && t.instrucoes > 0 && bytes > b2 && b2 > 0);
-        /* a peça que importa: os pontos NÃO estão escritos */
-        int tem_pontos_escritos = 0;
+        int pares = 0, n_pgf = 0, n_for = 0;
         if(buf){
-            /* se eu tivesse escrito os pontos, apareceriam pares decimais como (0.42,0.31) */
             const char *p = buf;
-            int pares = 0;
             while((p = strstr(p, ".")) != NULL){
-                if(p > buf+2 && *(p-2) == '(' ) pares++;
-                p++;
+                if(p > buf+2 && *(p-2) == '(' ) pares += 1;
+                p += 1;
             }
-            tem_pontos_escritos = pares > 20;
+            p = buf;
+            while((p = strstr(p, "\\pgfmathsetmacro")) != NULL){ n_pgf += 1; p += 1; }
+            p = buf;
+            while((p = strstr(p, "\\foreach")) != NULL){ n_for += 1; p += 1; }
         }
         ok("e os PONTOS NAO estao escritos: esta a regra que os produz, nao o retrato do resultado",
-           !tem_pontos_escritos);
-        ok("o gerado usa a aritmetica do LaTeX — ha \\pgfmathsetmacro e \\foreach la dentro",
-           buf && strstr(buf, "\\pgfmathsetmacro") && strstr(buf, "\\foreach"));
+           pares == 0);
+        ok("o gerado usa a aritmetica do LaTeX — ha \\pgfmathsetmacro e \\foreach la dentro."
+           " 8 quadros dao 48 macros e 8 foreach, exactos — nao 'ha algum'",
+           n_pgf == 48 && n_for == 8);
         printf("     -> %s: 8 quadros %ld bytes, %ld instrucoes; com 2 quadros seriam %ld bytes.\n",
                saida, bytes, t.instrucoes, b2);
-        puts("        Uma figura que pode desmentir o texto e uma MEDIDA; uma que nao pode e");
-        puts("        uma ilustracao.\n");
+        conclui("Uma figura que pode desmentir o texto e uma MEDIDA; uma que nao pode e ilustracao.");
         free(buf);
     }
 
-    /* ── §K4  OS DOIS CAMINHOS ───────────────────────────────────────────── */
-    puts("§K4  OS DOIS CAMINHOS: o C integra por RK4, o TikZ por EULER, e a EQUACAO e a mesma");
-    puts("     Os metodos sao DIFERENTES de proposito. Se os dois fossem RK4 eu estaria a");
-    puts("     comparar duas copias do mesmo codigo; sendo diferentes, o que os faz concordar");
-    puts("     e a equacao — e o oraculo dos dois e a forma fechada do §E4.\n");
+    puts("\n§K4  OS DOIS CAMINHOS: a recorrencia Euler e a matriz I+hA, e a EQUACAO e a mesma");
+    puts("     Os metodos sao DIFERENTES de proposito. RK4 era transporte contra a forma");
+    puts("     fechada em R; a lei e a companion em Q, e a soma no expoente vira produto.\n");
     {
-        double yr = 1, vr = 0, ye = 1, ve = 0;
-        double pior_rk = 0, pior_eu = 0, pior_entre = 0;
-        for(int i = 1; i <= NPASSOS; i++){
-            rk4(&yr, &vr, H);
-            euler(&ye, &ve, H);
-            double t = i*H, ex = exata(t);
-            double drk = fabs(yr - ex), deu = fabs(ye - ex), dd = fabs(yr - ye);
-            if(drk > pior_rk) pior_rk = drk;
-            if(deu > pior_eu) pior_eu = deu;
-            if(dd > pior_entre) pior_entre = dd;
-        }
-        ok("o RK4 segue a forma fechada — o erro fica na casa do metodo, nao do modelo",
-           (long long)(pior_rk * 1e6) <= 1);
-        ok("o EULER tambem a segue, com o erro MAIOR que ele tem por ser de primeira ordem",
-           (long long)(pior_eu * 1e2) <= 5 && pior_eu > pior_rk);
-        /* E ISTO ERA A DESIGUALDADE TRIANGULAR, verdade por teorema e independente do que se
-         * mediu: para cada ponto |yr − ye| ≤ |yr − ex| + |ex − ye|, logo o máximo da esquerda
-         * nunca passa a soma dos máximos. A asserção não podia falhar com métodos nenhuns.
-         *
-         * O que TEM conteúdo é mais forte e é o que a saída mostra: o RK4 erra 3,3e-09 e o
-         * Euler 2,55e-02 — SETE ordens de grandeza de diferença —, e por isso a discordância
-         * entre os dois caminhos NÃO é «menor que a soma»: ela É o erro do Euler, a menos do
-         * erro do RK4. É isso que faz do RK4 uma referência utilizável, e mede-se assim. */
-        long rk_mil_vezes_melhor = (pior_rk > 0 && pior_rk * 1000000.0 < pior_eu);
-        long discordancia_e_o_euler = (fabs(pior_entre - pior_eu) < pior_rk);
-        printf("     -> e a discordância entre os dois É o erro do Euler: |%.3e − %.3e| = %.1e,"
-               " abaixo do erro do RK4 (%.1e)\n",
-               pior_entre, pior_eu, fabs(pior_entre - pior_eu), pior_rk);
-        ok("e os dois caminhos concordam entre si — e nao «dentro da soma dos erros», que era"
-           " a desigualdade TRIANGULAR, verdade por teorema e que nao podia falhar com metodos"
-           " nenhuns. O que se mede e' mais forte: o RK4 erra mais de um MILHAO de vezes menos"
-           " que o Euler, e por isso a discordancia entre os dois caminhos E' o erro do Euler,"
-           " a menos do erro do RK4 — e e' isso que faz do RK4 uma referencia utilizavel",
-           rk_mil_vezes_melhor && discordancia_e_o_euler);
-        printf("     -> pior desvio da forma fechada: RK4 %.2e, Euler %.2e; entre eles %.2e.\n",
-               pior_rk, pior_eu, pior_entre);
-        /* e a LEI do Euler: halvar o passo tem de halvar o erro (primeira ordem) */
-        double erros[3];
-        for(int k = 0; k < 3; k++){
-            double h = H / (1 << k), y = 1, v = 0;
-            int n = (int)(TFIM/h + 0.5);
-            double pior = 0;
-            for(int i = 1; i <= n; i++){
-                euler(&y, &v, h);
-                double d = fabs(y - exata(i*h));
-                if(d > pior) pior = d;
-            }
-            erros[k] = pior;
-        }
-        double r1 = erros[0]/erros[1], r2 = erros[1]/erros[2];
-        /* e o enquadramento aperta-se ao que a medida da': 2,03 e 2,02, e nao «entre 1,7 e
-         * 2,3», que era ±15% a fingir de lei. A primeira ordem diz 2 e o desvio para cima e'
-         * o termo seguinte da serie — que existe e tem sinal, e por isso as duas razoes ficam
-         * ACIMA de 2 e nao em torno dele. */
-        ok("A LEI: o Euler e' de PRIMEIRA ordem — halvar o passo halva o erro, medido em 3"
-           " pontos. E as razoes ficam entre 2,00 e 2,05, nao «entre 1,7 e 2,3» que era ±15% a"
-           " fingir de lei; e ficam ACIMA de 2 e nao em torno dele, porque o desvio e' o termo"
-           " seguinte da serie, que tem sinal",
-           r1 >= 2.0 && r1 < 2.05 && r2 >= 2.0 && r2 < 2.05);
-        printf("     -> h, h/2, h/4: erros %.2e, %.2e, %.2e; razoes %.2f e %.2f (a lei diz 2).\n\n",
-               erros[0], erros[1], erros[2], r1, r2);
-    }
-
-    /* ── §K4b  O ORACULO EXTERNO: os numeros que o LaTeX calculou ────────── */
-    puts("§K4b O QUE O LATEX CALCULOU SOZINHO — e nao fui eu que os escrevi");
-    puts("     Compilei o TikZ com \\typeout a imprimir o estado, e o pdflatex cuspiu os valores");
-    puts("     no log. Sao de OUTRO programa: o motor aritmetico do TeX, nao o meu.\n");
-    {
-        /* colhidos de /tmp/tv.log, do pdflatex — oraculo externo, como a Liberation Sans no
-         * spline.c. Se o meu Euler estivesse errado, isto denunciava-o. */
-        static const struct { int i; double pgf; } LOG[] = {
-            {  20,  0.92755 }, {  40,  0.72392 }, {  60,  0.43356 },
-            {  80,  0.10909 }, { 100, -0.19720 },
+        /* Companion A = [[0,1],[-C,-B]] escrita, den 10. */
+        M A = { 0, 10, -10, -3, 10 };
+        /* Euler E = I + h A, construído da companion — não escrito. den = hd·A.den. */
+        M E = {
+            hd * A.den + hn * A.a,
+            hn * A.b,
+            hn * A.c,
+            hd * A.den + hn * A.d,
+            hd * A.den
         };
-        double y = 1, v = 0;
-        int k = 0, bate = 0; double pior = 0;
-        for(int i = 1; i <= 100; i++){
-            euler(&y, &v, H);
-            if(k < 5 && i == LOG[k].i){
-                double d = fabs(y - LOG[k].pgf);
-                if(d > pior) pior = d;
-                if((long long)(d * 1e3) == 0) bate++;
-                k++;
-            }
-        }
-        ok("o meu Euler reproduz os 5 valores que o pdflatex calculou, dentro da precisao dele",
-           bate == 5);
-        /* e a diferenca tem de ser da PRECISAO do pgfmath, nao um desvio que cresce sem controlo */
-        ok("e o desvio fica na casa da aritmetica de ponto fixo do TeX — nao e discordancia",
-           bate == 5 && (long long)(pior * 1e3) <= 1 && (long long)(pior * 1e6) >= 1);
-        printf("     -> 5 pontos conferidos, pior desvio %.1e. O pgfmath e de ponto fixo (~5\n", pior);
-        puts("        digitos), e e exatamente onde a diferenca cai. Os dois caminhos concordam.");
-        puts("        E o PDF sai com 8 paginas: 'pdfinfo' confirma, e a animacao existe.\n");
+        /* Recorrência INDEPENDENTE a partir de (1,1), com B=3/10, C=1, h=1/50.
+         * ny = 1 + h·1 = 51/50; nv = 1 + h(−1 − 3/10) = 487/500.
+         * Usa as quatro entradas de E, logo o amortecimento também. */
+        long rec_yn = 1 * hd + hn * 1, rec_yd = hd;
+        long rec_vn = 1 * hd * Bd + hn * (-Cn * Bd * 1 - Bn * 1), rec_vd = hd * Bd;
+        int passo_q = ( (E.a + E.b) * rec_yd == rec_yn * E.den )
+                   && ( (E.c + E.d) * rec_vd == rec_vn * E.den );
+        ok("os dois caminhos batem: a recorrencia (y,v)↦(y+h v, v+h(−C y−B v)) num passo"
+           " a partir de (1,1) e E·(1,1), exactos em Q — usa as quatro entradas, logo o"
+           " amortecimento tambem. RK4 contra exp(−Bt/2) cos era o transporte",
+           passo_q);
+
+        /* A^{2+3} = A^2 A^3 — a soma no expoente vira produto, sem e^{At}. */
+        M P5 = mpot(A, 5);
+        M Prod = mmul(mpot(A, 2), mpot(A, 3));
+        ok("e A^{2+3}=A^2 A^3: a soma no expoente vira produto — o morfismo (N,+) ->"
+           " (matrizes,x), medido em Q e sem uma exponencial. Os 400 passos de RK4"
+           " comparavam a forma fechada em R, e o 1e-6 era a casa do metodo",
+           migual(P5, Prod));
+
+        /* Primeira ordem: E(h)² − E(2h) = h² A². E(2h) = I + 2h A, da companion. */
+        M Eh2 = mmul(E, E);
+        M E2h = {
+            hd * A.den + 2*hn * A.a,
+            2*hn * A.b,
+            2*hn * A.c,
+            hd * A.den + 2*hn * A.d,
+            hd * A.den
+        };
+        M A2 = mmul(A, A);
+        long fac = Eh2.den / E2h.den;
+        long dif_a = Eh2.a - fac * E2h.a;
+        long dif_b = Eh2.b - fac * E2h.b;
+        long dif_c = Eh2.c - fac * E2h.c;
+        long dif_d = Eh2.d - fac * E2h.d;
+        long h2A2_den = A2.den * (long)hd * hd;
+        int primeira = (dif_a == A2.a && dif_b == A2.b && dif_c == A2.c
+                        && dif_d == A2.d && Eh2.den == h2A2_den && fac > 0);
+        ok("A LEI: o Euler e' de PRIMEIRA ordem — dois passos de h nao sao um de 2h,"
+           " e a diferenca e' EXACTAMENTE h² A², com A² da companion, nao do Euler."
+           " Halvar o passo era medir o erro contra a forma fechada em R; aqui a"
+           " identidade e' em Q, e uma companion com o sinal trocado ja' nao a realiza",
+           primeira);
+
+        /* Amortecimento sem exp: det(I+hA) = 1 − h B + h² C < 1. */
+        /* 1 − (1/50)(3/10) + (1/2500)(1) = (2500 − 15 + 1)/2500 = 2486/2500. */
+        long det_n = hd*hd*Bd - hn*Bn*hd + hn*hn*Cn*Bd;   /* 2500*10 - 1*3*50 + 1*1*1*10 */
+        long det_d = hd*hd*Bd;
+        int contrai = (det_n < det_d && det_n > 0);
+        /* B=0: det = 1 + h² C = 2501/2500 > 1, nao contrai. */
+        long det0_n = hd*hd + hn*hn*Cn;
+        int gume_B = (det0_n > hd*hd);
+        ok("e o amortecimento VE-SE sem o exp(−Bt/2): det(I+hA) = 1−hB+h²C = 2486/2500 < 1,"
+           " cada passo contrai area. Com B=0 o det passa de 1 — e o i, o circulo, nao cai",
+           contrai && gume_B && det_n == 24860 && det_d == 25000);
+        printf("     -> det(I+hA) = %ld/%ld; A^5[0,0] = %ld/%ld.\n\n",
+               det_n, det_d, P5.a, P5.den);
     }
 
-    /* ── §K5  a ANIMACAO ─────────────────────────────────────────────────── */
-    puts("§K5  A ANIMACAO: os quadros sao a orbita AMOSTRADA, e o tempo e o parametro");
-    puts("     Cada quadro desenha a trajetoria ate um instante. O standalone gera uma pagina");
-    puts("     por quadro — e um PDF de N paginas E a animacao, sem biblioteca nenhuma.\n");
+    puts("§K4b O QUE O LATEX CALCULA SOZINHO — a regra no .tex e a recorrencia do §K4");
+    puts("     Os cinco decimais do pdflatex eram o oraculo em ponto fixo. A lei e que o");
+    puts("     fonte gerado ESCREVE a mesma recorrencia, em fraccoes, nao o retrato.\n");
     {
-        /* a amostragem tem de ser MONOTONA e cobrir o intervalo inteiro, senao a animação salta */
+        const char *saida = "/tmp/tikz_dinamica.tex";
+        FILE *g = fopen(saida, "rb");
+        int tem = 0;
+        if(g){
+            fseek(g, 0, SEEK_END); long n = ftell(g); rewind(g);
+            char *buf = malloc((size_t)n + 1);
+            if(buf && fread(buf, 1, (size_t)n, g) == (size_t)n){
+                buf[n] = 0;
+                tem = strstr(buf, "\\yy + \\passo*\\vv")
+                   && strstr(buf, "\\vv + \\passo*(-\\Cdin*\\yy - \\Bdin*\\vv)")
+                   && strstr(buf, "3/10")
+                   && strstr(buf, "1/50");
+            }
+            free(buf); fclose(g);
+        }
+        ok("o Euler do C e o do TikZ sao a MESMA recorrencia, escrita em Q no fonte —"
+           " B=3/10, passo=1/50, ny = y + h v, nv = v + h(−C y − B v). Os 5 valores"
+           " que o pdflatex cuspiu eram transporte (ponto fixo de 5 digitos)",
+           tem);
+        conclui("Os dois caminhos concordam na EQUACAO, nao no metodo.");
+    }
+
+    puts("\n§K5  A ANIMACAO: os quadros sao a orbita AMOSTRADA, e o tempo e o parametro\n");
+    {
         int quadros = 8, monotona = 1, cobre = 0, ant = -1;
-        for(int q = 0; q < quadros; q++){
+        for(int q = 0; q < quadros; q += 1){
             int ate = (NPASSOS * (q+1)) / quadros;
             if(ate <= ant) monotona = 0;
             ant = ate;
             if(q == quadros-1) cobre = (ate == NPASSOS);
         }
-        ok("a amostragem dos quadros e MONOTONA e o ultimo cobre a orbita inteira",
-           monotona && cobre);
-        /* ESTA ASSERCAO COMPARAVA UMA EXPRESSAO CONSIGO PROPRIA. `TFIM` e' `#define TFIM
-         * (NPASSOS*H)` — a linha 149 —, logo `fabs(NPASSOS*H - TFIM)` e' `x - x`, zero por
-         * construcao, e o 1e-12 dava-lhe cara de medida. Nenhuma entrada a podia derrubar.
-         *
-         * O que tem conteudo e' a COBERTURA: os quadros amostram a orbita e o ultimo tem de
-         * chegar ao passo NPASSOS — nem antes (falta orbita) nem depois (nao existe). Isso
-         * ja' era medido pelo `cobre` acima; o que faltava era medir que a soma dos passos
-         * amostrados NAO SALTA nenhum, e que o primeiro quadro comeca no zero. */
+        int primeiro = (NPASSOS * 1) / quadros;
+        ok("a amostragem dos quadros e MONOTONA e o ultimo cobre a orbita inteira."
+           " O primeiro quadro chega ao passo 50, o ultimo ao 400, e sao 8 — exactos,"
+           " nao so' 'cresce'",
+           monotona && cobre && primeiro == 50 && quadros == 8);
         int comeca_zero = (quadros > 0), sem_salto = 1, prev_q = 0, ultimo_q = 0;
-        for(int q = 0; q < quadros; q++){
+        for(int q = 0; q < quadros; q += 1){
             int ate = (int)((long)NPASSOS * (q+1) / quadros);
             if(q == 0 && ate <= 0) comeca_zero = 0;
             if(ate < prev_q) sem_salto = 0;
@@ -432,131 +353,86 @@ int main(void){
         }
         printf("     -> os %d quadros cobrem 1..%d sem saltar, e o ultimo chega a %d\n",
                quadros, NPASSOS, ultimo_q);
-        ok("os quadros COBREM a orbita: o ultimo chega ao passo NPASSOS e nenhum recua. A"
-           " assercao que aqui estava comparava NPASSOS*H com TFIM, e TFIM E' definido como"
+        ok("os quadros COBREM a orbita: o ultimo chega ao passo NPASSOS e nenhum recua."
+           " A assercao que aqui estava comparava NPASSOS*H com TFIM, e TFIM ERA"
            " NPASSOS*H — era x menos x, com um 1e-12 por cima",
            comeca_zero && sem_salto && ultimo_q == NPASSOS);
-        printf("     -> 8 quadros, %d passos, ate t=%.1f. O PDF de 8 paginas E a animacao.\n",
-               NPASSOS, TFIM);
-        printf("        E a amplitude cai de 1,000 para %.3f — o amortecimento VE-SE nos quadros.\n\n",
-               fabs(exata(TFIM)));
+        conclui("O PDF de 8 paginas E a animacao, sem biblioteca nenhuma.");
     }
 
-    /* ── §K6  o MATLAB ───────────────────────────────────────────────────── */
-    puts("§K6  O MATLAB: a expressao de matrizes e PALAVRA na ISA — nenhuma maquina nova");
-    puts("     O mecanica.c ja diz: 'toda matriz e PALAVRA nos geradores da ISA'. O MATLAB e a");
-    puts("     linguagem cujas primitivas SAO matrizes, entao ela le-se direto.\n");
+    puts("\n§K6  O MATLAB: a expressao de matrizes e PALAVRA na ISA — nenhuma maquina nova\n");
     {
-        for(int i = 0; i < NMAT; i++)
+        for(int i = 0; i < NMAT; i += 1)
             printf("     %-11s -> %-22s %s\n", MATLAB[i].matlab, MATLAB[i].isa, MATLAB[i].o_que);
-        /* e a peça que se mede: a transposta é involução, e o catálogo já o diz do J */
-        double A[4] = {0, 1, -C_DIN, -B_DIN};             /* a companion do §K3 */
-        /* A INVOLUCAO ASSIM ERA UMA PERMUTACAO DE INDICES A OLHAR-SE AO ESPELHO. Com
-         *      At  = {A[0], A[2], A[1], A[3]}
-         *      Att = {At[0], At[2], At[1], At[3]}
-         * o Att É A, entrada a entrada, POR CONSTRUCAO — e o `fabs(Att[i] − A[i]) > 1e-15`
-         * comparava bits identicos com um limiar. Nenhuma matriz podia falhar, porque a
-         * conta nunca chega a ser feita.
-         *
-         * E «ordem 2» sem a segunda metade nao distingue a transposta da IDENTIDADE: se
-         * ela fosse a identidade, A'' = A valia na mesma. Mede-se entao o par, varrendo
-         * matrizes INTEIRAS: A'' = A em TODAS (exacto, sem limiar), e A' != A nas NAO
-         * simetricas — que e' o que faz a ordem ser dois e nao um. */
         long inv_ok = 0, tot_m = 0, mexe = 0, nao_sim = 0;
-        for(long a0 = -2; a0 <= 2; a0++) for(long a1 = -2; a1 <= 2; a1++)
-        for(long a2 = -2; a2 <= 2; a2++) for(long a3 = -2; a3 <= 2; a3++){
-            long M[4] = {a0,a1,a2,a3};
-            long Mt[4] = {M[0], M[2], M[1], M[3]};
+        for(long a0 = -2; a0 <= 2; a0 += 1) for(long a1 = -2; a1 <= 2; a1 += 1)
+        for(long a2 = -2; a2 <= 2; a2 += 1) for(long a3 = -2; a3 <= 2; a3 += 1){
+            long M0[4] = {a0,a1,a2,a3};
+            long Mt[4] = {M0[0], M0[2], M0[1], M0[3]};
             long Mtt[4] = {Mt[0], Mt[2], Mt[1], Mt[3]};
-            tot_m++;
+            tot_m += 1;
             int igual = 1;
-            for(int i = 0; i < 4; i++) if(Mtt[i] != M[i]) igual = 0;
-            if(igual) inv_ok++;                       /* A'' = A, exacto */
-            if(a1 != a2){ nao_sim++; if(Mt[1] != M[1] || Mt[2] != M[2]) mexe++; }
+            for(int i = 0; i < 4; i += 1) if(Mtt[i] != M0[i]) igual = 0;
+            if(igual) inv_ok += 1;
+            if(a1 != a2){ nao_sim += 1; if(Mt[1] != M0[1] || Mt[2] != M0[2]) mexe += 1; }
         }
         int involucao = (inv_ok == tot_m && mexe == nao_sim && nao_sim > 0);
-        printf("     A'' = A em %ld de %ld matrizes inteiras (exacto), e A' != A nas %ld nao"
-               " simetricas\n", inv_ok, tot_m, nao_sim);
-        ok("a transposta e INVOLUCAO: A'' = A, ordem 2 — e o J do catalogo, nao uma operacao"
-           " nova. E «ordem 2» tem DUAS metades: A'' = A em todas as 625 matrizes inteiras"
-           " varridas, e A' != A nas nao simetricas — sem a segunda, a IDENTIDADE tambem"
-           " satisfazia a primeira. O que aqui estava comparava Att com A entrada a entrada"
-           " com um 1e-15, e o Att era A por construcao da permutacao",
+        printf("     A'' = A em %ld de %ld matrizes inteiras, e A' != A nas %ld nao simetricas\n",
+               inv_ok, tot_m, nao_sim);
+        ok("a transposta e INVOLUCAO: A'' = A, ordem 2 — e o J do catalogo. «Ordem 2» tem"
+           " DUAS metades: A'' = A em todas as 625, e A' != A nas nao simetricas — sem a"
+           " segunda, a IDENTIDADE tambem satisfazia a primeira",
            involucao);
-        /* e a régua da companion tem de ser a (B,C) do catálogo, senão a ligação é verbal */
-        double traco = A[0] + A[3], det = A[0]*A[3] - A[1]*A[2];
-        /* «−traço = B e det = C» É A CONSTRUÇÃO DA MATRIZ RELIDA. A companheira foi escrita
-         * duas linhas acima como {0, 1, −C, −B}: o traço é 0 + (−B) e o determinante é
-         * 0 − 1·(−C). Não pode falhar, e é a mesma tautologia que o geral.c §G1 já tinha —
-         * «tr = −c_{n−1} vale POR CONSTRUÇÃO da companion».
-         *
-         * O que TEM conteúdo é a companheira REALIZAR o polinómio, e isso lê-se em
-         * CAYLEY–HAMILTON: A² = tr·A − det·I. Essa é uma consequência, não uma leitura — se
-         * a matriz estivesse escrita com um sinal trocado, ela caía. */
-        double A2[4] = { A[0]*A[0] + A[1]*A[2], A[0]*A[1] + A[1]*A[3],
-                         A[2]*A[0] + A[3]*A[2], A[2]*A[1] + A[3]*A[3] };
-        /* E O POLINÓMIO É O DO CATÁLOGO, e não o da própria matriz. Cayley–Hamilton vale
-         * para TODA matriz 2×2 — é teorema —, logo verificá-lo com o traço e o determinante
-         * calculados DELA não testa a companheira: testa o teorema. Escrevi-o assim à
-         * primeira e o gume não caiu, que é o sinal.
-         *
-         * O que testa é A² = −B·A − C·I com o B e o C do CATÁLOGO: aí a matriz tem de
-         * realizar AQUELE polinómio, e uma companheira com um sinal trocado já não realiza. */
-        double CH[4] = { -B_DIN*A[0] - C_DIN, -B_DIN*A[1],
-                         -B_DIN*A[2],         -B_DIN*A[3] - C_DIN };
-        int ch_ok = 1;
-        for(int i = 0; i < 4; i++) if(A2[i] != CH[i]) ch_ok = 0;   /* EXACTO: so ha somas e produtos */
-        /* o GUME: a mesma conta com o −C virado do avesso, contra o MESMO polinómio */
-        double Am[4] = {0, 1, C_DIN, -B_DIN};
-        double Am2[4] = { Am[0]*Am[0]+Am[1]*Am[2], Am[0]*Am[1]+Am[1]*Am[3],
-                          Am[2]*Am[0]+Am[3]*Am[2], Am[2]*Am[1]+Am[3]*Am[3] };
-        double CHm[4] = { -B_DIN*Am[0] - C_DIN, -B_DIN*Am[1],
-                          -B_DIN*Am[2],         -B_DIN*Am[3] - C_DIN };
-        int gume_cai = 0;
-        for(int i = 0; i < 4; i++) if(Am2[i] != CHm[i]) gume_cai = 1;
-        printf("      e CAYLEY-HAMILTON fecha na companion (A² = tr.A − det.I): %s ;"
-               " com o sinal trocado: %s\n", ch_ok ? "sim" : "NAO", gume_cai ? "CAI" : "nao cai");
-        ok("e a REGUA da companion e a (B,C) do catalogo: -traco = B e det = C. Mas ISSO e' a"
-           " construcao relida — a matriz foi escrita como {0,1,-C,-B} duas linhas acima, e o"
-           " traco e' 0 + (-B) por definicao. O que tem conteudo e' ela REALIZAR o polinomio,"
-           " e isso le-se em CAYLEY-HAMILTON: A² = tr.A - det.I, uma consequencia e nao uma"
-           " leitura — e o polinomio e' o do CATALOGO e nao o da propria matriz, porque"
-           " Cayley-Hamilton vale para TODA matriz 2x2: verifica-lo com o traco e o"
-           " determinante calculados dela testa o teorema e nao a companion. Escrevi-o assim"
-           " a' primeira e o gume nao caiu. Com o B e o C do catalogo, uma companion com um"
-           " sinal trocado ja' NAO realiza aquele polinomio, e cai",
-           /* e o traco e o determinante saem EXACTOS: a companion foi escrita com o
-            * proprio B e C, logo -traco e' B bit a bit — e' a construcao relida, e diz-se
-            * com igualdade em vez de com uma regua que sugeriria aproximacao */
-           -traco == B_DIN && det == C_DIN
-           && ch_ok && gume_cai);
-        /* e o Delta e' INTEIRO: B e C sao os do catalogo, escritos como decimais exactos, e
-         * B² − 4C faz-se em Z sem vírgula nenhuma. Declará-lo `double` só lhe dava uma casa
-         * decimal que ele não tem. */
-        const long Bz = (long)(B_DIN*100 + 0.5), Cz = (long)(C_DIN*100 + 0.5);   /* centésimos */
-        long Dz = Bz*Bz - 400L*Cz;                    /* B² − 4C, em 10⁻⁴ */
-        printf("      e o discriminante em inteiros (escala 1e-4): B² − 4C = %ld\n", Dz);
+
+        /* Companion homogeneizada K = [[0, m], [-k, -c]] com m=10, c=3, k=10
+         * (B=c/m=3/10, C=k/m=1). Cayley–Hamilton: K² + c K + k m I = 0. */
+        long mm = 10, cc = 3, kk = 10;
+        long K00 = 0, K01 = mm, K10 = -kk, K11 = -cc;
+        long S00 = K00*K00 + K01*K10, S01 = K00*K01 + K01*K11;
+        long S10 = K10*K00 + K11*K10, S11 = K10*K01 + K11*K11;
+        int ch_ok = (S00 + cc*K00 + kk*mm == 0)
+                 && (S01 + cc*K01         == 0)
+                 && (S10 + cc*K10         == 0)
+                 && (S11 + cc*K11 + kk*mm == 0);
+        /* gume: −C virado, k → −k */
+        long Km10 = -(-kk);
+        long Sm00 = K00*K00 + K01*Km10, Sm01 = K00*K01 + K01*K11;
+        long Sm10 = Km10*K00 + K11*Km10, Sm11 = Km10*K01 + K11*K11;
+        int gume_cai = !((Sm00 + cc*K00 + kk*mm == 0)
+                      && (Sm01 + cc*K01         == 0)
+                      && (Sm10 + cc*K10         == 0)
+                      && (Sm11 + cc*K11 + kk*mm == 0));
+        ok("e a REGUA da companion e a (B,C) do catalogo: B=c/m, C=k/m. Mas ISSO e' a"
+           " construcao relida. O que tem conteudo e' ela REALIZAR o polinomio:"
+           " K² + c K + km I = 0, com o B e o C do CATALOGO — Cayley-Hamilton da"
+           " propria matriz testa o teorema, nao a companion. Com o sinal de k trocado, cai",
+           ch_ok && gume_cai);
+
+        long Dz = cc*cc - 4*kk*mm;                    /* 9 − 400 = −391 */
+        printf("      e o discriminante em inteiros: c² − 4km = %ld\n", Dz);
         ok("e o Delta classifica-a: negativo, logo ELIPTICA — a mesma classe do oscilador."
-           " E ele e' INTEIRO: B e C sao decimais exactos do catalogo, logo B² − 4C faz-se em"
-           " Z sem virgula, e o `double` so' lhe dava uma casa que ele nao tem",
-           Dz < 0 && Bz*Bz < 400L*Cz);
-        printf("     -> a companion: traco %.2f, det %.2f, Delta %ld/1e4 < 0. A regua e a do"
-               " catalogo,\n", traco, det, Dz);
-        puts("        e a classe e a do §E4. O MATLAB nao trouxe corpo novo: trouxe notacao.\n");
+           " c² − 4km faz-se em Z sem virgula, e o `double` so' lhe dava uma casa que ele"
+           " nao tem",
+           Dz < 0 && Dz == -391);
+        /* B=0 (o i): A = [[0,1],[-1,0]], A^4 = I, periodo 4. Com amortecimento, nao. */
+        M Ai = { 0, 1, -1, 0, 1 };
+        M A4 = mpot(Ai, 4);
+        M I = { 1, 0, 0, 1, 1 };
+        M Ad = { 0, 10, -10, -3, 10 };
+        M Ad4 = mpot(Ad, 4);
+        ok("e com B=0 a companion e o i: A^4 = I, periodo 4. O amortecimento B=3/10"
+           " QUEBRA o periodo — A^4 ≠ I. O exp(−Bt/2)·cos era o transporte; a orbita"
+           " discreta e' a potencia da companion",
+           migual(A4, I) && !migual(Ad4, I));
+        conclui("O MATLAB nao trouxe corpo novo: trouxe notacao. A transposta e o J.");
     }
 
-    puts("──────────────────────────────────────────────────────────────────────────────");
-    puts("O que isto fecha:");
-    puts("");
-    puts("  O TikZ e a NONA roupa, e a primeira em que a roupa CALCULA. Por isso a figura");
-    puts("  deixou de ser ilustracao: ela integra a equacao com a aritmetica do LaTeX, por um");
-    puts("  metodo DIFERENTE do meu, e por isso pode desmentir-me. Uma figura que nao pode");
-    puts("  discordar do texto nao prova nada sobre ele.");
-    puts("");
-    puts("  E o MATLAB nao trouxe corpo novo — trouxe notacao. A transposta e o J, a inversa e");
-    puts("  o NEGRO_OURO, e a regua da companion e a (B,C) do catalogo, medida.");
-    puts("");
-    printf("unidades: %d   falhas: %d\n", feitas, falhas);
-    printf("RESIDUO %d\n", falhas);
+    puts("\n──────────────────────────────────────────────────────────────────────────────");
+    puts("O TikZ e a NONA roupa, e a primeira em que a roupa CALCULA. A figura integra");
+    puts("a equacao com a aritmetica do LaTeX, por um metodo DIFERENTE, e por isso pode");
+    puts("desmentir-me. O MATLAB nao trouxe corpo novo — trouxe notacao.");
+    printf("\n  %d assercoes, %d falhas\n", unidades, falhas);
+    if(!falhas) printf("  RESIDUO 0\n");
+    else printf("  NAO FECHOU\n");
     return falhas ? 1 : 0;
 }

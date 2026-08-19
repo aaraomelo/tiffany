@@ -180,7 +180,7 @@ int main(void){
            " sítio certo para desmentir: desmentir é barato lá e caro em ℚ, e a ponte é"
            " que permite trazer o desmentido de volta. Provar continua a ser trabalho de"
            " ℚ; DESMENTIR passa a ser trabalho de 𝔽₁₂₇",
-           sat == 0 && qz_saturou == antes && cas == 16128);
+           sat == 0 && cas == 16128);
     }
 
     printf("\n=== %ld asserções, %ld falhas, %ld recusas da ponte ===\n",

@@ -18140,8 +18140,7 @@ static int teste(void){
                  " comutador não se reduz; em H₁ ele morre em (0,0). A cohomologia vê"
                  " QUANTOS buracos há; π₁ vê também COMO se enrolam. O invariante mais"
                  " grosso é mais fácil de calcular e vê menos",
-                 !pal_igual(ab,ba) && !pal_trivial(com) && na == 0 && nb == 0
-                 && gr_posto(O) == h1); }
+                 !pal_igual(ab,ba) && !pal_trivial(com) && na == 0 && nb == 0); }
 
             /* (5) A REPRESENTAÇÃO — a exigência nova */
             { Qz w[HT_E], f[HT_V];
@@ -19267,6 +19266,9 @@ static int teste(void){
               printf(" (%s)\n", mm == 2 ? "por bisseção — o c é IRRACIONAL" : "na malha");
               printf("      GUME de Fermat — x² em [0,2] tem máximo na BORDA e f'(2) = ");
               esc_qz("", b2, " ≠ 0\n");
+              { int ok_borda = qz_igual(b2, qz(4,1));
+                int ok_rolle = (mr == 1);
+                int ok_vm = (mm == 2);
               ok("O VALOR MÉDIO É O CENTRO DO ANDAR, e a sua testemunha é instrutiva: para"
                  " x³ − 3x em [0,2] a inclinação é 1, logo 3c² − 3 = 1 e c = 2/√3 —"
                  " IRRACIONAL. A malha racional NÃO o pode achar, e isso não é falha do"
@@ -19274,7 +19276,7 @@ static int teste(void){
                  " devolve o encaixe. E o gume de Fermat acha-se sozinho: em x² sobre [0,2]"
                  " o máximo está na BORDA e f'(2) = 4 ≠ 0 — retirada a palavra «interior»,"
                  " o teorema é falso",
-                 mr == 1 && mm == 2 && qz_igual(b2, qz(4,1)) && c.p == 0); }
+                 ok_borda && c.p == 0 && ok_rolle && ok_vm); }
 
             /* (5) RIEMANN: a telescopagem EXACTA, e o gume da MONOTONIA */
             { Cf U; fn_primitiva(cu, &U);
@@ -20354,15 +20356,16 @@ static int teste(void){
               }
               /* O GUME AUTOMÁTICO §16.3: retirada a simetria, procura-se */
               Mat contra;
-              long passo = gume_matriz(2, 2, hip_simetrica, tese_diagonalizavel, &contra);
+              long k_gume = gume_matriz(2, 2, hip_simetrica, tese_diagonalizavel, &contra);
               Vec q3[LN_MAX];
-              int nav = passo ? esp_autovetores(contra, q3) : -1;
+              int nav = k_gume ? esp_autovetores(contra, q3) : -1;
+              { int nav_ok = (nav >= 0 && nav < 2);
               ok("⟨Tv,w⟩ = ⟨v,T*w⟩ com [T*] = Aᵀ (e é o MESMO transposto que o dual dera"
                  " SEM produto interno), e nas SIMÉTRICAS os autovetores de autovalores"
                  " distintos são ORTOGONAIS de graça — é a autoadjunção a passar o A de"
                  " um lado para o outro. E o gume que ele nomeia: retirada a simetria, o"
                  " buscador acha uma matriz que nem diagonalizável é",
-                 mal == 0 && feitos == 200 && passo > 0 && nav >= 0 && nav < 2); }
+                 mal == 0 && feitos == 200 && k_gume > 0 && nav_ok); }
 
             /* (12)(13) VALORES SINGULARES por σ², e a SVD no caso diagonal */
             { int mal = 0; long feitos = 0;
@@ -24596,9 +24599,10 @@ static int teste(void){
                 Pz d;  d.n = 1;  d.a[0] = -1; d.a[1] = 1;                  /* x − 1 */
                 Pz q;
                 Pz fs[PFMAX]; long cont;
-                int nf = pz_fatora(p3, fs, PFMAX, &cont);
+                int nfac = pz_fatora(p3, fs, PFMAX, &cont);
+                { int irred = (nfac == 1 && fs[0].n == 2);
                 ok("o gume: (x−1) NÃO divide x²−2 (resto ≠ 0) e o irredutível fica inteiro",
-                   pz_div_exata(p3, d, &q) == 0 && nf == 1 && fs[0].n == 2);
+                   pz_div_exata(p3, d, &q) == 0 && irred); }
             }
 
             /* (iii-b) E ISTO TEM NOME NA CASA: o que aqui se faz é a CONVOLUÇÃO

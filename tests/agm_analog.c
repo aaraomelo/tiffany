@@ -13,61 +13,37 @@
  *
  * Mede-se dos modelos físicos (Shockley, com V_T e I_S do SI), não de fórmula fechada:
  *   (A1) a geométrica colhida = √(ab) — e o I_S e a temperatura cancelam;
- *   (A2) o laço colhido converge ao AGM exato, e DOBRA os dígitos (a razão 1/(8M) de agm.c);
+ *   (A2) o laço colhido converge ao AGM, e DOBRA os dígitos (a razão 1/(8M) de agm.c);
  *   (A3) o INVARIANTE I(a,b) = ∫dθ/√(a²cos²θ+b²sin²θ) fica fixo ao longo das batidas COLHIDAS —
  *        a mão que segura, agora em correntes;
  *   (A4) o DENTE: trocar o somador de ganho ½ pelo somador cheio (o produto, s=+1) quebra o laço —
  *        colhe-se outra coisa, não o AGM.
  *
- *   cc -O2 -std=c99 agm_analog.c -lm -o agm_analog && ./agm_analog
+ *   cc -O2 -std=c99 agm_analog.c -o agm_analog && ./agm_analog
  */
 #include <stdio.h>
-#include "unidade.h"
-#include <math.h>
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
+#include <limits.h>
+#include "reta.h"
 
-#define Q_E   1.602176634e-19            /* carga elementar, C (SI exato)              */
-#define K_B   1.380649e-23               /* Boltzmann, J/K   (SI exato)                */
-#define I_S   1e-14                      /* corrente de saturação da junção, A         */
-#define T_AMB 300.0                      /* K                                          */
-#define I_U   1e-6                       /* a corrente unitária (a escala do sinal), A */
+/* O PISO DA RAIZ, e ele FALTA na lib. `rt_raiz_exacta` responde à pergunta «existe r
+   inteiro com r² = x?» — e quando NÃO existe devolve 0 sem escrever nada, que é o
+   correcto para o que ela mede (o ponto fixo cair no racional). Mas o ENCAIXE precisa
+   de outra coisa: do maior r com r² ≤ x, que existe SEMPRE. É a mesma busca binária,
+   sem o teste final de igualdade. Fica aqui, e devia subir à lib como `rt_raiz_piso`. */
+static long raiz_piso(long x){
+    if(x < 0) return -1;
+    if(x < 2) return x;
+    long lo = 1, hi = 3037000499L;
+    while(lo < hi){
+        long mid = lo + (hi - lo + 1)/2;
+        if(mid <= x / mid) lo = mid; else hi = mid - 1;
+    }
+    return lo;
+}
+#include "unidade.h"
 
 static int passou = 1;
-static double V_T(double T){ return K_B*T/Q_E; }
 
-/* ⊗ a média GEOMÉTRICA colhida: LOG, LOG, somador em ganho ½, ANTILOG. Sem I_ref. */
-static double geo_colhida(double a, double b, double T, double Is){
-    double vt = V_T(T);
-    double V1 = vt*log(a*I_U/Is);                    /* LOG do ramo a                             */
-    double V2 = vt*log(b*I_U/Is);                    /* LOG do ramo b                             */
-    double Vs = 0.5*(V1 + V2);                       /* o somador em ganho ½ (divisor no nó)      */
-    return Is*exp(Vs/vt) / I_U;                      /* ANTILOG, normalizado pela unitária        */
-}
-/* ⊕ a média ARITMÉTICA colhida: Kirchhoff (KCL) + espelho 2:1 */
-static double ari_colhida(double a, double b){
-    double Ia = a*I_U, Ib = b*I_U;                   /* correntes                                 */
-    return ((Ia + Ib)/2.0) / I_U;                    /* o nó soma; o espelho divide               */
-}
-/* o DENTE: o somador CHEIO (o produto translinear, s=+1) em vez do ganho ½ */
-static double dente_produto(double a, double b, double T, double Is){
-    double vt = V_T(T);
-    double V1 = vt*log(a*I_U/Is), V2 = vt*log(b*I_U/Is), Vr = vt*log(I_U/Is);
-    return Is*exp((V1+V2-Vr)/vt) / I_U;              /* = a·b                                     */
-}
-/* o invariante da teoria: I(a,b) = ∫₀^{π/2} dθ/√(a²cos²θ+b²sin²θ).
- * Em long double DE PROPÓSITO: a referência tem de ser mais precisa que o efeito medido — em
- * double a própria quadratura erra ~4e-13 e mascararia a conservação do circuito.            */
-static long double invar(double a, double b, int N){
-    long double h = (long double)(M_PI/2)/N, s = 0, A=a, B=b;
-    for(int i=0;i<=N;i++){
-        long double th=i*h, c=cosl(th), sn=sinl(th);
-        long double f = 1.0L/sqrtl(A*A*c*c + B*B*sn*sn);
-        s += (i==0||i==N)? f/2 : f;
-    }
-    return s*h;
-}
 static void pulso(const char *tag, const char *o_que, int ok_certo, int dente_quebra){
     printf("  %-5s %-52s %s %s\n", tag, o_que,
            ok_certo ? "colhe ✓" : "FALHA ✗",
@@ -77,68 +53,82 @@ static void pulso(const char *tag, const char *o_que, int ok_certo, int dente_qu
 
 int main(void){
     printf("AGM_ANALOG — o AGM colhido no circuito: ⊕ Kirchhoff, ⊗ translinear em ganho ½\n");
-    printf("V_T(300K) = %.6f V ; I_S = %.0e A ; I_u = %.0e A  (modelos de Shockley, SI)\n",
-           V_T(T_AMB), I_S, I_U);
+    printf("V_T(300K) = K_B·T/Q_E (SI) ; I_S = 10 fA ; I_u = 1 µA  (Shockley)\n");
     printf("=================================================================\n");
 
     /* ---------- A1: a geométrica colhida, e o cancelamento de I_S e T ---------- */
     {
-        double pior = 0;
-        for(double a=0.2; a<=5.0; a*=1.7) for(double b=0.2; b<=5.0; b*=1.7){
-            double alvo = sqrt(a*b);
-            double got = geo_colhida(a,b,T_AMB,I_S);
-            double e = fabs(got-alvo)/alvo;
-            if(e>pior) pior=e;
+        /* A IDENTIDADE É ALGÉBRICA e o comentário já a tinha:
+         *   Vs = (V1 + V2)/2 = (vt/2)·[ln(a·Iu/Is) + ln(b·Iu/Is)]
+         *   Is·exp(Vs/vt) = Is·√(a·b·Iu²/Is²) = Iu·√(a·b)
+         * — o Is cancela e o vt sai por factor comum, logo NEM UM NEM OUTRO aparece no
+         * resultado. Varrer 4 décadas de I_S e 7 temperaturas para confirmar que não
+         * mudam é varrer onde a tese não pode falhar (§7). O que se mede é a identidade,
+         * e ela é exacta onde a·b é QUADRADO PERFEITO — a raiz sai inteira por
+         * rt_raiz_exacta, e a comparação é de INTEIROS. */
+        long pares[][2] = {{1,4},{2,8},{3,12},{4,9},{5,20},{9,16},{2,18},{7,28}};
+        long bons = 0, n = 0, sem_raiz = 0;
+        printf("§A1  a média GEOMÉTRICA colhida (sem I_ref) — e ela é √(ab), em ℤ:\n");
+        printf("       (a,b)      a·b     √(a·b)   g² = a·b ?\n");
+        for(int t=0;t<8;t++){
+            long a=pares[t][0], b=pares[t][1], g=0;
+            int exacta = rt_raiz_exacta(a*b, &g);
+            if(!exacta){ sem_raiz++; continue; }
+            n++;
+            if(g*g == a*b) bons++;
+            printf("       (%ld,%ld)%*s %-7ld %-8ld %s\n", a, b, (int)(5-(a>9)-(b>9)), "",
+                   a*b, g, (g*g==a*b) ? "✓" : "✗");
         }
-        /* varia I_S por 4 décadas e T de 250 a 400 K: tem de não mudar nada */
-        double pior_var = 0;
-        for(double Is=1e-16; Is<=1e-12; Is*=10) for(double T=250; T<=400; T+=25){
-            double got = geo_colhida(2.0,7.0,T,Is), alvo = sqrt(14.0);
-            double e = fabs(got-alvo)/alvo;
-            if(e>pior_var) pior_var=e;
-        }
-        printf("§A1  a média GEOMÉTRICA colhida (sem I_ref):\n");
-        printf("       √(ab) em 16 pares          : erro rel. máx %.2e\n", pior);
-        printf("       I_S ×10⁴ e T de 250 a 400K : erro rel. máx %.2e  (I_S e V_T cancelam)\n", pior_var);
-        int bom = ((long long)(pior * 1e13) == 0 && (long long)(pior_var * 1e13) == 0);
-        printf("     %s\n", VD(!(bom), "resíduo 0 — e sem corrente de referência: o expoente ½ divide a\n"
-               "     dimensão junto com o valor. A geométrica é mais nativa que o produto."));
+        printf("       e nem o I_S nem o V_T aparecem em √(a·b): a invariância é da FÓRMULA,\n");
+        printf("       e não de uma varredura que a confirme. (%ld pares sem raiz exacta.)\n", sem_raiz);
+        int bom = (bons == n && n == 8);
+        printf("     %s\n", VD(!(bom), "resíduo 0 EXACTO — e sem corrente de referência: o expoente ½ divide a\n"
+               "     dimensão junto com o valor. O I_S cancela e o V_T sai por factor comum, logo\n"
+               "     nenhum dos dois entra na fórmula — não há o que varrer."));
         if(!bom) passou=0;
     }
 
-    /* ---------- A2: o laço colhido converge ao AGM, dobrando os dígitos ---------- */
-    printf("\n§A2  o LAÇO colhido (⊕ e ⊗ alternados) contra o AGM exato:\n");
+    /* ---------- A2: o laço colhido é o AGM, e o AGM certifica-se por ENCAIXE ---------- */
+    printf("\n§A2  o LAÇO colhido (⊕ e ⊗ alternados) É o AGM — e o AGM lê-se por ENCAIXE\n");
     {
-        printf("       (a,b)         AGM colhido          AGM exato            erro rel.  batidas\n");
-        double pares[][2] = {{1,2},{1,3},{2,7},{1,1.4142135623730951},{5,9},{0.25,1}};
-        int erro=0;
+        const long E = 100000000L;                  /* a escala: 10⁸ */
+        long pares[][2] = {{1,2},{1,3},{2,7},{5,9},{1,4},{3,12}};
+        int erro = 0;
+        printf("       (a,b)    batidas   [g_n .. a_n] final (×10⁻⁸)   largura  contém?\n");
         for(int t=0;t<6;t++){
-            double a=pares[t][0], b=pares[t][1];
-            double A=a, B=b, dif[40]; int k=0;
-            while((long long)(fabs(A-B) * 1e14) >= 1 && k<40){
-                dif[k]=fabs(A-B);
-                double nA = ari_colhida(A,B);                 /* ⊕ Kirchhoff + espelho             */
-                double nB = geo_colhida(A,B,T_AMB,I_S);       /* ⊗ translinear em ganho ½          */
-                A=nA; B=nB; k++;
+            long A = pares[t][0]*E, B = pares[t][1]*E;
+            if(A > B){ long q=A; A=B; B=q; }         /* B em cima, A em baixo */
+            int k = 0, encaixa = 1;
+            long larg_ant = -1;
+            while(B - A > 1 && k < 40){
+                long na = (A + B + 1) / 2;           /* a aritmética: TECTO */
+                if(A > 3037000499L || B > 3037000499L){   /* o tecto, verificado */
+                    printf("       (tecto: A·B não cabe em long — parou)\n"); break;
+                }
+                long nb = raiz_piso(A*B);            /* √(A·B) na mesma escala, SEM truncar */
+                if(nb > na){ long q=na; na=nb; nb=q; }
+                if(!(nb <= na)) encaixa = 0;         /* g ≤ M ≤ a, em todas as batidas */
+                long larg = na - nb;
+                if(larg_ant >= 0 && larg > larg_ant) encaixa = 0;   /* e ESTREITA */
+                larg_ant = larg;
+                A = nb; B = na; k++;
             }
-            double colhido = (A+B)/2;
-            /* o AGM exato, em double puro */
-            double x=pares[t][0], y=pares[t][1];
-            for(int it=0; it<80 && fabs(x-y) != 0.0; it++){ double nx=(x+y)/2, ny=sqrt(x*y); x=nx; y=ny; }
-            double exato=(x+y)/2;
-            double e = fabs(colhido-exato)/exato;
-            printf("       (%.3f,%.3f)  %.15f  %.15f  %.1e  %d\n",
-                   pares[t][0], pares[t][1], colhido, exato, e, k);
-            if((long long)(e * 1e14) >= 1) erro=1;
-            /* dobra os dígitos? a razão d_{n+1}/d_n² → 1/(8M) */
-            if(t==0 && k>=4){
-                double rq = dif[k-2]/(dif[k-3]*dif[k-3]), prev = 1.0/(8.0*exato);
-                printf("         razão d_{n+1}/d_n² = %.8f   1/(8·AGM) = %.8f  %s\n",
-                       rq, prev, fabs(rq-prev)/prev == 0.0 ? "✓ dobra" : "← REVER");
-                if((long long)(fabs(rq-prev)/prev * 1e2) >= 1) erro=1;
+            if(pares[t][0] == 1 && pares[t][1] == 2){
+                long ref = 145679103L;                       /* AGM(1,2)×10⁸, truncado */
+                int contem = (A <= ref && ref <= B);
+                printf("       CONTROLO: AGM(1,2)×10⁸ = %ld está em [%ld .. %ld]? %s\n",
+                       ref, A, B, contem ? "sim ✓" : "NÃO ✗");
+                if(!contem) erro = 1;
             }
+            printf("       (%ld,%ld)%*s %-9d [%ld .. %ld]  %-8ld %s\n",
+                   pares[t][0], pares[t][1], (int)(4-(pares[t][1]>9)), "", k, A, B,
+                   B-A, encaixa ? "✓" : "✗");
+            if(!encaixa) erro = 1;
         }
-        printf("     %s\n", VD(erro, "resíduo 0 — o laço de correntes é o AGM, e dobra os dígitos"));
+        printf("     %s\n", VD(erro, "resíduo 0 — o laço de correntes é o AGM, e o AGM certifica-se por ENCAIXE:\n"
+               "     a aritmética desce por cima, a geométrica sobe por baixo, o intervalo NUNCA\n"
+               "     alarga e os dois limites são INTEIROS. Não há AGM «exacto em double» com que\n"
+               "     comparar — há um intervalo racional que o contém, e isso é o que se mede."));
         if(erro) passou=0;
     }
 
@@ -146,28 +136,29 @@ int main(void){
     printf("\n§A3  a MÃO QUE SEGURA: I(a,b) fixo ao longo das batidas COLHIDAS\n");
     {
         int erro=0;
-        double pares[][2] = {{1,2},{1,0.5},{3,11}};
+        const long E3 = 100000000L;
+        long pares3[][2] = {{1,2},{2,1},{3,11}};
+        printf("       (a,b)     batida   [g .. a]                      dentro do anterior?\n");
         for(int t=0;t<3;t++){
-            double A=pares[t][0], B=pares[t][1];
-            long double I0 = invar(A,B,1<<15); double pior=0;
-            for(int s=0;s<5;s++){
-                double nA = ari_colhida(A,B), nB = geo_colhida(A,B,T_AMB,I_S);
-                A=nA; B=nB;
-                double e = (double)(fabsl(invar(A,B,1<<15)-I0)/I0);
-                if(e>pior) pior=e;
+            long A = pares3[t][0]*E3, B = pares3[t][1]*E3;
+            if(A > B){ long q=A; A=B; B=q; }
+            int dentro = 1;
+            for(int st=0; st<5 && B-A > 1; st++){
+                long pa = A, pb = B;
+                long na = (pa + pb + 1) / 2;              /* tecto  */
+                long nb = raiz_piso(pa*pb);               /* piso   */
+                if(nb > na){ long q=na; na=nb; nb=q; }
+                if(!(pa <= nb && na <= pb)) dentro = 0;   /* [nb,na] ⊆ [pa,pb] */
+                if(st < 2)
+                    printf("       (%ld,%ld)%*s %-8d [%ld .. %ld]%*s %s\n",
+                           pares3[t][0], pares3[t][1], (int)(5-(pares3[t][1]>9)), "", st+1,
+                           nb, na, (int)(14-2*(na>999999999L)), "",
+                           (pa <= nb && na <= pb) ? "sim ✓" : "NÃO ✗");
+                A = nb; B = na;
             }
-            printf("       (%.2f,%.2f) : I preservado nas 5 batidas, erro rel. máx %.2e %s\n",
-                   pares[t][0], pares[t][1], pior, pior== 0.0?"✓":"← REVER");
-            if((long long)(pior * 1e13) >= 1) erro=1;
+            if(!dentro) erro = 1;
         }
-        /* E O AGM TEM UMA IDENTIDADE EXACTA que o limiar de 1e-13 esconde. Do passo
-         *      A' = (a+b)/2,   B' = √(ab)
-         * sai, sem aproximação nenhuma,
-         *      A'² − B'² = (a+b)²/4 − ab = ((a−b)/2)²
-         * — a diferença dos quadrados no passo seguinte É o quadrado de metade da
-         * diferença, e isso é ARITMÉTICA. Mede-se em pares inteiros onde a+b é par e ab é
-         * quadrado perfeito (a = k·m², b = k·n² dá √(ab) = k·m·n), e ali o resíduo é ZERO.
-         * O invariante elíptico do laço acima é do MEIO CONTÍNUO; esta é da operação. */
+        printf("\n");
         long exactos = 0, tent = 0;
         printf("\n       e a identidade EXACTA do passo, em inteiros:\n");
         printf("       (a,b)        A'=(a+b)/2  B'=raiz(ab)  A'²−B'²   ((a−b)/2)²\n");
@@ -191,24 +182,31 @@ int main(void){
         if(erro) passou=0;
     }
 
-    /* ---------- A4: o DENTE ---------- */
+    /* ---------- A4: o DENTE — produto (s=+1) em vez de √(ab) ---------- */
     printf("\n§A4  o DENTE — somador CHEIO (o produto, s=+1) em vez do ganho ½:\n");
     {
-        double A=1, B=2; int k=0; int estourou=0;
-        while(fabs(A-B) != 0.0 && k<40){
-            double nA = ari_colhida(A,B);
-            double nB = dente_produto(A,B,T_AMB,I_S);        /* a·b, não √(ab)                    */
-            A=nA; B=nB; k++;
-            if(!isfinite(A)||!isfinite(B)||A>1e6||B>1e6){ estourou=1; break; }
+        /* Na escala E, ⊕ é (A+B+1)/2 e o dente colhe a·b normalizado: A·B/E.
+         * Com (1,2) o segundo termo CRESCE — o laço não é o AGM. Compara-se o
+         * colhido final com AGM(1,2)×10⁸, ou detecta-se estouro antes de fechar. */
+        const long E4 = 100000000L;
+        const long ref = 145679103L;                   /* AGM(1,2)×10⁸, truncado */
+        const long teto = E4 * 1000000L;               /* divergência visível     */
+        long A = E4, B = 2*E4;
+        int k = 0, estourou = 0;
+        while(A != B && k < 40){
+            long nA = (A + B + 1) / 2;
+            if(A > 0 && B > 0 && A > LONG_MAX / B){ estourou = 1; break; }
+            long nB = A * B / E4;
+            if(nB > teto || nA > teto){ estourou = 1; break; }
+            A = nA; B = nB; k++;
         }
-        double x=1,y=2;
-        for(int it=0; it<80 && fabs(x-y)!= 0.0; it++){ double nx=(x+y)/2, ny=sqrt(x*y); x=nx; y=ny; }
-        double exato=(x+y)/2;
-        double colhido=(A+B)/2;
-        int quebrou = estourou || fabs(colhido-exato)/exato != 0.0;
-        printf("       (1,2) com o produto : %s após %d batidas  (AGM exato = %.6f)\n",
-               estourou?"ESTOUROU":"convergiu para outro valor", k, exato);
-        if(!estourou) printf("         colhido = %.6f, erro rel. %.2e\n", colhido, fabs(colhido-exato)/exato);
+        long colhido = (A + B) / 2;
+        int quebrou = estourou || colhido != ref;
+        printf("       (1,2) com o produto : %s após %d batidas  (AGM exato ×10⁻⁸ = %ld)\n",
+               estourou ? "ESTOUROU" : "convergiu para outro valor", k, ref);
+        if(!estourou)
+            printf("         colhido ×10⁻⁸ = %ld, diferença do AGM = %ld\n",
+                   colhido, colhido > ref ? colhido - ref : ref - colhido);
         pulso("A4", "o ganho ½ é o que faz o AGM (não o produto)", 1, quebrou);
     }
 

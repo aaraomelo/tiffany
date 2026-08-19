@@ -256,7 +256,128 @@ static unsigned conv_op(int a, int b){
 
 enum { TK_FIM, TK_NUM, TK_REAL, TK_ID, TK_PUN, TK_TEXTO };
 
-typedef struct { int k; long i; double d; int longo; char s[64]; } Tok;
+
+/* f64 como BITS (IEEE754), sem o tipo double no compilador */
+static unsigned long long F64_0 = 0ULL;
+static unsigned long long F64_1 = 0x3FF0000000000000ULL;
+static unsigned long long f64_neg_bits(unsigned long long b){ return b ^ 0x8000000000000000ULL; }
+
+static unsigned long long f64_bits_pq(__int128 num, __int128 den, int neg){
+    if(num == 0) return neg ? 0x8000000000000000ULL : 0ULL;
+    if(num < 0){ num = -num; neg ^= 1; }
+    if(den < 0){ den = -den; neg ^= 1; }
+    if(den == 0) return neg ? 0xFFF0000000000000ULL : 0x7FF0000000000000ULL; /* ±inf */
+    int uexp = 0;
+    while(num < den){ num <<= 1; uexp--; if(uexp < -1075) return neg ? 0x8000000000000000ULL : 0ULL; }
+    while(num >= den * 2){ den <<= 1; uexp++; if(uexp > 1024) return neg ? 0xFFF0000000000000ULL : 0x7FF0000000000000ULL; }
+    /* 1 <= num/den < 2 */
+    __int128 mant = (num << 52) / den;
+    __int128 rem  = (num << 52) % den;
+    if(rem * 2 > den || (rem * 2 == den && (mant & 1))) mant++;
+    if(mant == ((__int128)1 << 53)){ mant >>= 1; uexp++; }
+    int bexp = uexp + 1023;
+    if(bexp <= 0){
+        /* subnormal / zero */
+        if(bexp < -52) return neg ? 0x8000000000000000ULL : 0ULL;
+        mant = ((num << (52 + bexp)) / den);
+        unsigned long long out = (unsigned long long)mant & ((1ULL << 52) - 1);
+        return neg ? out | 0x8000000000000000ULL : out;
+    }
+    if(bexp >= 2047) return neg ? 0xFFF0000000000000ULL : 0x7FF0000000000000ULL;
+    unsigned long long out = ((unsigned long long)(bexp & 0x7FF) << 52)
+                           | ((unsigned long long)mant & ((1ULL << 52) - 1));
+    return neg ? out | 0x8000000000000000ULL : out;
+}
+
+static unsigned long long f64_bits_from_i(long v){
+    return f64_bits_pq(v, 1, 0);
+}
+
+static unsigned long long f64_de_texto(const char *s, char **fim){
+    const char *p = s;
+    while(*p == ' ' || *p == '\t') p++;
+    int neg = 0;
+    if(*p == '-'){ neg = 1; p++; }
+    else if(*p == '+') p++;
+    __int128 num = 0; int frac = 0, houve = 0;
+    while(*p >= '0' && *p <= '9'){ num = num * 10 + (*p - '0'); p++; houve = 1; }
+    if(*p == '.'){ p++; while(*p >= '0' && *p <= '9'){ num = num * 10 + (*p - '0'); frac++; p++; houve = 1; } }
+    if(!houve){ if(fim) *fim = (char*)s; return 0; }
+    int exp = 0;
+    if(*p == 'e' || *p == 'E'){
+        const char *t = p + 1; int es = 0;
+        if(*t == '+' || *t == '-'){ es = (*t == '-'); t++; }
+        if(*t >= '0' && *t <= '9'){
+            int e = 0; while(*t >= '0' && *t <= '9'){ e = e * 10 + (*t - '0'); t++; }
+            exp = es ? -e : e; p = t;
+        }
+    }
+    __int128 den = 1;
+    int e10 = exp - frac;
+    if(e10 >= 0){ for(int i = 0; i < e10; i++) num *= 10; }
+    else { for(int i = 0; i < -e10; i++) den *= 10; }
+    if(fim) *fim = (char*)p;
+    return f64_bits_pq(num, den, neg);
+}
+
+static void real_txt_bits(unsigned long long bits, char *o, long cap){
+    /* formatação decimal a partir dos bits — sem snprintf %g */
+    int neg = (bits >> 63) & 1;
+    int bexp = (int)((bits >> 52) & 0x7FF);
+    unsigned long long frac = bits & ((1ULL << 52) - 1);
+    if(bexp == 2047){ snprintf(o, (size_t)cap, neg ? "-inf" : (frac ? "nan" : "inf")); return; }
+    __int128 num, den;
+    if(bexp == 0){
+        if(frac == 0){ snprintf(o, (size_t)cap, neg ? "-0.0" : "0.0"); return; }
+        num = frac; den = (__int128)1 << 1074; /* 2^(1022+52) */
+    } else {
+        num = ((__int128)1 << 52) | frac;
+        int uexp = bexp - 1023 - 52;
+        den = 1;
+        if(uexp >= 0) num <<= uexp;
+        else den <<= -uexp;
+    }
+    /* produzir ~17 dígitos significativos */
+    if(neg) num = -num;
+    /* escala para inteiro com 17 casas se |x|<1e17 */
+    int casas = 0;
+    __int128 a = num < 0 ? -num : num;
+    while(a < den && casas < 20){ a *= 10; casas++; }
+    __int128 q = a / den;
+    /* escrever q com ponto */
+    char tmp[64];
+    /* simplificação: usa divisão longa decimal */
+    {
+        __int128 n = num < 0 ? -num : num;
+        __int128 d = den;
+        long long inteiro = (long long)(n / d);
+        __int128 rem = n % d;
+        int k = 0;
+        if(neg){ tmp[k++] = '-'; }
+        {
+            char ib[32]; int m = 0;
+            long long t = inteiro;
+            if(t == 0) ib[m++] = '0';
+            else { long long u = t; char r[32]; int rr=0; while(u){ r[rr++] = '0'+(u%10); u/=10; } while(rr) ib[m++]=r[--rr]; }
+            for(int i=0;i<m;i++) tmp[k++]=ib[i];
+        }
+        tmp[k++] = '.';
+        for(int i = 0; i < 17; i++){
+            rem *= 10;
+            int dig = (int)(rem / d);
+            tmp[k++] = '0' + dig;
+            rem %= d;
+            if(rem == 0 && i >= 0){ /* keep at least one */ }
+        }
+        while(k > 2 && tmp[k-1] == '0') k--;
+        if(tmp[k-1] == '.') tmp[k++] = '0';
+        tmp[k] = 0;
+        snprintf(o, (size_t)cap, "%s", tmp);
+    }
+}
+
+
+typedef struct { int k; long i; unsigned long long d; int longo; char s[64]; } Tok;
 
 /* SRC, POS, LINHA e o Tok corrente vivem no disco — ver o bloco dos registos, no topo. */
 
@@ -324,7 +445,7 @@ static void avanca(void){
         char *fim;
         long i = strtol(SRC + POS, &fim, 0);
         if(*fim == '.' || *fim == 'e' || *fim == 'E'){
-            T.k = TK_REAL; T.d = strtod(SRC + POS, &fim);
+            T.k = TK_REAL; T.d = f64_de_texto(SRC + POS, &fim);
         } else {
             T.k = TK_NUM; T.i = i; T.longo = 0;
             /* o `L` nao e' decoracao: ele DIZ o tipo, e sem ele a descida nao sabe devolver
@@ -396,7 +517,7 @@ static int  aceita(const char *p){ if(e_pun(p) || e_id(p)){ avanca(); return 1; 
 static int tipo_de_nome(const char *s){
     if(!strcmp(s, "int"))    return TI32;
     if(!strcmp(s, "long"))   return TI64;
-    if(!strcmp(s, "double")) return TF64;
+    if(!strcmp(s, "double") || !strcmp(s, "f64")) return TF64;
     if(!strcmp(s, "float"))  return TF64;
     if(!strcmp(s, "char"))     return TI8;
     if(!strcmp(s, "short"))    return TI32;
@@ -550,7 +671,7 @@ static int le_tipo(void){
         if(e_id("short")){ b = TI32; houve = 1; avanca(); continue; }
         if(e_id("int")){ if(b < 0) b = TI32; houve = 1; avanca(); continue; }
         if(e_id("char")){ b = sem_sinal ? TU8 : TI8; houve = 1; avanca(); continue; }
-        if(e_id("double") || e_id("float")){ b = TF64; houve = 1; avanca(); continue; }
+        if(e_id("double") || e_id("f64") || e_id("float")){ b = TF64; houve = 1; avanca(); continue; }
         if(e_id("void")){ b = TVOID; houve = 1; avanca(); continue; }
         break;
     }
@@ -719,7 +840,7 @@ static long le_um_valor(int tipo, unsigned char *saco, long onde){
         le_agregado(MKT(BASE(tipo), PTR(tipo) ? PTR(tipo) - 1 : 0), saco + onde, 1 << 16, &q);
         return t;
     }
-    long v = 0; double d = 0; int real = 0, neg = 0;
+    long v = 0; unsigned long long d = 0; int real = 0, neg = 0;
     if(e_pun("-")){ neg = 1; avanca(); }
     if(T.k == TK_TEXTO){
         unsigned char b[8192]; long n = LIT_N;
@@ -727,12 +848,12 @@ static long le_um_valor(int tipo, unsigned char *saco, long onde){
         avanca();
         v = slot_do_texto(b, n);
     } else if(T.k == TK_NUM){ v = neg ? -T.i : T.i; avanca(); }
-    else if(T.k == TK_REAL){ d = neg ? -T.d : T.d; real = 1; avanca(); }
+    else if(T.k == TK_REAL){ d = neg ? f64_neg_bits(T.d) : T.d; real = 1; avanca(); }
     else if(T.k == TK_ID){ avanca(); }
     else erro("valor constante na tabela");
 
     if(!PTR(tipo) && BASE(tipo) == TF64){
-        double x = real ? d : (double)v;
+        unsigned long long x = real ? d : f64_bits_from_i(v);
         memcpy(saco + onde, &x, 8);
         return 8;
     }
@@ -871,7 +992,7 @@ static void um(int t){
     int a = aritm(t);
     if(a == TI32){ bput(&COD, 0x41); bs(&COD, PTR(t) ? tam_de(MKT(BASE(t), PTR(t)-1)) : 1); }
     else if(a == TI64){ bput(&COD, 0x42); bs(&COD, 1); }
-    else { double d = 1.0; bput(&COD, 0x44); bmany(&COD, &d, 8); }
+    else { unsigned long long d = F64_1; bput(&COD, 0x44); bmany(&COD, &d, 8); }
 }
 static unsigned op_soma(int t){ int a = aritm(t); return a == TI32 ? 0x6A : a == TI64 ? 0x7C : 0xA0; }
 static unsigned op_sub (int t){ int a = aritm(t); return a == TI32 ? 0x6B : a == TI64 ? 0x7D : 0xA1; }
@@ -992,7 +1113,7 @@ static int primaria(void){
         if(L || v > 2147483647L || v < -2147483648L){ bput(&COD, 0x42); bs(&COD, v); return TI64; }
         bput(&COD, 0x41); bs(&COD, v); return TI32;
     }
-    if(T.k == TK_REAL){ double d = T.d; avanca(); bput(&COD, 0x44); bmany(&COD, &d, 8); return TF64; }
+    if(T.k == TK_REAL){ unsigned long long d = T.d; avanca(); bput(&COD, 0x44); bmany(&COD, &d, 8); return TF64; }
     if(T.k == TK_TEXTO){
         unsigned char b[8192]; long n = LIT_N;
         memcpy(b, LIT, (size_t)n + 1);
@@ -1415,7 +1536,7 @@ static int unaria(void){
             bput(&COD, 0x41); bs(&COD, v); return TI32;
         }
         if(T.k == TK_REAL){
-            double d = -T.d; avanca();
+            unsigned long long d = f64_neg_bits(T.d); avanca();
             bput(&COD, 0x44); bmany(&COD, &d, 8); return TF64;
         }
         POS = g_pos; LINHA = g_lin; T = g_tok;
@@ -1431,7 +1552,7 @@ static int unaria(void){
     if(e_pun("+")){ avanca(); return unaria(); }
     if(e_pun("!")){
         avanca(); int t = unaria();
-        if(t == TF64){ double z = 0.0; bput(&COD, 0x44); bmany(&COD, &z, 8); bput(&COD, 0x61); }
+        if(t == TF64){ unsigned long long z = F64_0; bput(&COD, 0x44); bmany(&COD, &z, 8); bput(&COD, 0x61); }
         else bput(&COD, t == TI64 ? 0x50 : 0x45);  /* eqz */
         return TI32;
     }
@@ -1561,7 +1682,7 @@ static int nivel(int p){
 static void normaliza_bool(int t){
     int a = aritm(t);
     if(a == TI64){ bput(&COD, 0x50); bput(&COD, 0x45); }
-    else if(a == TF64){ double z = 0.0; bput(&COD, 0x44); bmany(&COD, &z, 8); bput(&COD, 0x62); }
+    else if(a == TF64){ unsigned long long z = F64_0; bput(&COD, 0x44); bmany(&COD, &z, 8); bput(&COD, 0x62); }
 }
 
 /* o && e o || CURTOCIRCUITAM, e em wasm isso é um `if` com resultado — não um salto à mão */
@@ -1570,13 +1691,13 @@ static int logico_e(void){
     while(e_pun("&&")){
         avanca();
         if(t == TI64) bput(&COD, 0x50), bput(&COD, 0x45);   /* i64 -> i32 booleano */
-        else if(t == TF64){ double z=0.0; bput(&COD,0x44); bmany(&COD,&z,8); bput(&COD,0x62); }
+        else if(t == TF64){ unsigned long long z=F64_0; bput(&COD,0x44); bmany(&COD,&z,8); bput(&COD,0x62); }
         bput(&COD, 0x04); bput(&COD, 0x7F);                  /* if (result i32) */
         PROF++;
         long g_frase = M_FRASE; M_FRASE = COD.n; EM_BRACO++;  /* o braço é o seu princípio */
         int td = nivel(0);
         if(td == TI64) bput(&COD, 0x50), bput(&COD, 0x45);
-        else if(td == TF64){ double z=0.0; bput(&COD,0x44); bmany(&COD,&z,8); bput(&COD,0x62); }
+        else if(td == TF64){ unsigned long long z=F64_0; bput(&COD,0x44); bmany(&COD,&z,8); bput(&COD,0x62); }
         else { bput(&COD, 0x45); bput(&COD, 0x45); }         /* normaliza para 0/1 */
         bput(&COD, 0x05);                                    /* else */
         bput(&COD, 0x41); bs(&COD, 0);
@@ -1591,14 +1712,14 @@ static int logico_ou(void){
     while(e_pun("||")){
         avanca();
         if(t == TI64) bput(&COD, 0x50), bput(&COD, 0x45);
-        else if(t == TF64){ double z=0.0; bput(&COD,0x44); bmany(&COD,&z,8); bput(&COD,0x62); }
+        else if(t == TF64){ unsigned long long z=F64_0; bput(&COD,0x44); bmany(&COD,&z,8); bput(&COD,0x62); }
         bput(&COD, 0x04); bput(&COD, 0x7F); PROF++;
         bput(&COD, 0x41); bs(&COD, 1);
         bput(&COD, 0x05);
         long g_frase = M_FRASE; M_FRASE = COD.n; EM_BRACO++;
         int td = logico_e();
         if(td == TI64) bput(&COD, 0x50), bput(&COD, 0x45);
-        else if(td == TF64){ double z=0.0; bput(&COD,0x44); bmany(&COD,&z,8); bput(&COD,0x62); }
+        else if(td == TF64){ unsigned long long z=F64_0; bput(&COD,0x44); bmany(&COD,&z,8); bput(&COD,0x62); }
         else { bput(&COD, 0x45); bput(&COD, 0x45); }
         bput(&COD, 0x0B); PROF--;
         EM_BRACO--; M_FRASE = g_frase;
@@ -2112,7 +2233,7 @@ static void condicao(void){                          /* deixa um i32 booleano na
     M_FRASE = COD.n;                                 /* a condição é uma frase, e é aqui */
     int t = expr();
     if(t == TI64) bput(&COD, 0x50), bput(&COD, 0x45);
-    else if(t == TF64){ double z = 0.0; bput(&COD, 0x44); bmany(&COD, &z, 8); bput(&COD, 0x62); }
+    else if(t == TF64){ unsigned long long z = F64_0; bput(&COD, 0x44); bmany(&COD, &z, 8); bput(&COD, 0x62); }
 }
 
 static void instrucao(void){
@@ -2417,7 +2538,7 @@ static void colhe_assinaturas(void){
                         unsigned char b8[8];
                         long nb = tam_de(ret); if(nb < 1 || nb > 8) nb = 8;
                         if(T.k == TK_NUM){ long v = neg ? -T.i : T.i; avanca(); memcpy(b8, &v, 8); }
-                        else if(T.k == TK_REAL){ double d = neg ? -T.d : T.d; avanca(); memcpy(b8, &d, 8); }
+                        else if(T.k == TK_REAL){ unsigned long long d = neg ? f64_neg_bits(T.d) : T.d; avanca(); memcpy(b8, &d, 8); }
                         else erro("inicializador global que não sobe");
                         if(acha_slot(nome) < 0){
                             abre_slot(nome, ret, quantos);
@@ -2647,10 +2768,8 @@ static void frase(int prof, const char *fmt, ...){
 
 /* o número que volta tem de voltar NO SEU TIPO: um `double` sem ponto lê-se inteiro, e um
  * `long` sem o `L` lê-se int — e aí os bytes que saem já não são os que entraram */
-static void real_txt(double d, char *o, long cap){
-    snprintf(o, (size_t)cap, "%.17g", d);
-    if(!strchr(o, '.') && !strchr(o, 'e') && !strchr(o, 'n') && !strchr(o, 'i'))
-        strncat(o, ".0", (size_t)cap - strlen(o) - 1);
+static void real_txt(unsigned long long d, char *o, long cap){
+    real_txt_bits(d, o, cap);
 }
 
 typedef struct { unsigned op; const char *sim; } Sinal;
@@ -2761,7 +2880,7 @@ static int desce_corpo(long fim, int fidx){
         case 0x22: { unsigned long i = d_u(); empurra("(v%lu = %s)", i, puxa()); } break;
         case 0x41: empurra("%ld", d_s()); break;                        /* i32.const */
         case 0x42: empurra("%ldL", d_s()); break;                       /* i64.const */
-        case 0x44: { double d; memcpy(&d, M + MP, 8); MP += 8;
+        case 0x44: { unsigned long long d; memcpy(&d, M + MP, 8); MP += 8;
                      char o[64]; real_txt(d, o, sizeof o); empurra("%s", o); } break;
         /* MOVE(+1): do slot para o registo. Volta como `*(T*)(endereço)` — a forma que
          * torna a subir exactamente no mesmo opcode, sem eu ter de adivinhar se aquilo era
@@ -3500,7 +3619,7 @@ int main(int argc, char **argv){
         if(QUADRO > 0) move_quadro(+1);
         /* o wasm exige um valor no fim se a função devolve algo — o C deixa-o implícito */
         if(FUNS[fi].ret != TVOID){
-            if(FUNS[fi].ret == TF64){ double z = 0.0; bput(&COD, 0x44); bmany(&COD, &z, 8); }
+            if(FUNS[fi].ret == TF64){ unsigned long long z = F64_0; bput(&COD, 0x44); bmany(&COD, &z, 8); }
             else { bput(&COD, FUNS[fi].ret == TI64 ? 0x42 : 0x41); bs(&COD, 0); }
         }
         bput(&COD, 0x0B);                              /* end */

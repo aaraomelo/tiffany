@@ -9,18 +9,16 @@
  *   §E8  e a particular verifica-se por SUBSTITUIÇÃO — resíduo medido
  *   §E5  a solução verifica-se por substituição, como a do primeiro grau
  *
- *   cc -O2 -std=c99 edo.c -lm -o edo && ./edo
+ *   cc -O2 -std=c99 -Wall -I lib tests/edo.c -o edo
  */
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
-#ifndef M_E
-#define M_E 2.71828182845904523536
-#endif
 #include "edo.h"
 #include "algebra.h"
 #include "unidade.h"
 #include "reta.h"
+#include "aritmetica.h"
+#include "isa_disk.h"
 
 int main(void){
 printf("\n=== A EQUAÇÃO DIFERENCIAL É A BORDA DO CORPO ==============================\n");
@@ -91,18 +89,38 @@ printf("\n§E3  Os três regimes do chess são as três classes.\n\n");
         { "y'' + 3y' + 2y = 0", "CRISTAL — as duas raízes são negativas, tudo decai" },
         { "y'' = -y",           "BORDA — puramente imaginárias, a norma conserva-se" },
         { "y'' - 3y' + 2y = 0", "CAOS — há raiz positiva, e o que lá estiver cresce" },
+        /* E ESTE CASO É O QUE FAZ O RAMO D<0 PODER FALHAR. Os três de cima não o
+         * distinguem: o único com D<0 é «y'' = -y», e aí B = 0, logo −sign(B) e
+         * +sign(B) valem o mesmo e a mutação passa. Aqui D = 4 − 20 = −16 e B = 2,
+         * então o sinal de Re(λ) = −B/2 tem de vir do sinal de B — e o gume morde. */
+        { "y'' + 2y' + 5y = 0", "CRISTAL — raízes complexas, mas Re < 0: decai OSCILANDO" },
     };
     int mal = 0;
     for(size_t k = 0; k < sizeof t/sizeof *t; k++){
         Edo e;
         if(!edo_le(t[k].eq, &e)){ mal++; continue; }
-        double B = (double)e.Bp/e.Bq, C = (double)e.Cp/e.Cq, D = B*B - 4*C;
-        double re;                               /* a maior parte real das raízes */
-        if(D >= 0) re = (-B + sqrt(D)) / 2;
-        else       re = -B / 2;
-        printf("      %-22s Re máx = %+6.3f   %s\n", t[k].eq, re, t[k].regime);
         int esperado = strstr(t[k].regime, "CRISTAL") ? -1 : strstr(t[k].regime, "BORDA") ? 0 : 1;
-        int obtido = re < -1e-9 ? -1 : re != 0.0 ? 1 : 0;
+        /* O TRIAL SAI DA ÁLGEBRA — sem raiz, sem vírgula e sem limiar. É o mesmo
+         * τ = sign(disc) da cúspide (universal.tex), aqui aplicado a Re(λ).
+         *
+         * σ² + Bσ + C = 0 com B = Bp/Bq e C = Cp/Cq em ℚ. Com sB = sign(B), sC = sign(C),
+         * e como Bq² > 0:
+         *
+         *     sign(D) = sign(B² − 4C) = sign(Bp²·Cq − 4·Cp·Bq²) · sign(Cq)
+         *
+         *   D <  0 : raízes conjugadas, re = −B/2            →  sign(re) = −sB
+         *   D >= 0 : re = (−B + √D)/2, logo sign(re) = sign(√D − B), e
+         *              B <  0                                →  √D − B > 0  →  +1
+         *              B >= 0 : compara-se por QUADRADOS, D vs B², que é −4C vs 0  →  −sC
+         *
+         * O `re < -1e-9` decidia com um limiar meu o que a comparação de INTEIROS decide
+         * exacto, e a raiz só existia para lhe ser comparado o sinal. */
+        long numD = e.Bp*e.Bp*e.Cq - 4L*e.Cp*e.Bq*e.Bq;
+        int sD = (int)(rt_sinal(numD) * rt_sinal(e.Cq));
+        int sB = (int)(rt_sinal(e.Bp) * rt_sinal(e.Bq));
+        int sC = (int)(rt_sinal(e.Cp) * rt_sinal(e.Cq));
+        int obtido = (sD < 0) ? -sB : (sB < 0 ? 1 : -sC);
+        printf("      %-22s sign(Re) = %+d   %s\n", t[k].eq, obtido, t[k].regime);
         if(obtido != esperado) mal++;
     }
     printf("\n");
@@ -125,10 +143,17 @@ printf("\n§E4  E dois casos fecham o círculo com o resto do sistema.\n\n");
     ok("o oscilador harmónico é a borda do i — σ² = -1", !strcmp(b1, "s^2 = -1") && osc.D == -4);
     ok("e a ED do ouro é a borda do rei — σ² = 1 + σ", !strcmp(b2, "s^2 = 1 + s") && ouro.D == 5);
 
-    /* e as raizes: uma da o i, a outra da o numero de ouro */
-    double phi = (1 + sqrt(5.0)) / 2;
-    printf("\n      as raízes de σ² = 1 + σ:  %.9f  e  %.9f\n", phi, -1/phi);
-    printf("      e o número de ouro:       %.9f\n\n", phi);
+    /* y'' = -y é ×i: ESQUILO no disco, período 4, T² = -1. Sem cos/sen. */
+    {
+        int per = isa_periodo_giro(ISA_S_ESQUILO);
+        isa_word(ISA_S_A, 1, 0);
+        isa_MOVE(ISA_S_ESQUILO, 1);
+        isa_MOVE(ISA_S_ESQUILO, 1);
+        long t2, e2; isa_read(ISA_S_A, &t2, &e2);
+        printf("\n      oscilador = ESQUILO: periodo %d, T^2(1,0) = (%+ld,%+ld)\n", per, t2, e2);
+        ok("y'' = -y e' a orbita do ESQUILO — periodo 4 e T^2 = -1, no disco ISA, sem cos/sen",
+           per == 4 && t2 == -1 && e2 == 0);
+    }
     /* A asserção comparava phi com a sua PRÓPRIA expansão decimal digitada três linhas
      * acima — não testava o que o rótulo diz. Agora mede Vieta contra a borda: a soma das
      * raízes é -B e o produto é C, e φ satisfaz φ² - φ - 1 = 0. */
@@ -168,57 +193,74 @@ printf("\n§E4  E dois casos fecham o círculo com o resto do sistema.\n\n");
 
 printf("\n§E6  A solução explícita é e^{At}, e o exp é a PONTE — de broca-so/papers.\n\n");
 {
-    /* O paper equacoes_diferenciais.tex, Parte VII: "toda ED tem solução explícita, e ela é o
-     * fluxo e^{At}". E a Parte V: "o gerador SOMA, a solução MULTIPLICA — o exp é a ponte". */
+    /* O paper: o gerador SOMA, a solução MULTIPLICA. Em ℤ: b^{a+b} = b^a · b^b, e
+     * na companheira do metal A^{p+q} = A^p A^q. Sem exp/log. */
     int mal = 0;
-    printf("      o gerador soma, a solução multiplica:\n");
-    double par[3][2] = { {0.3,0.7}, {1.0,-0.5}, {2.0,1.0} };
-    for(int k = 0; k < 3; k++){
-        double a2 = par[k][0], b2 = par[k][1];
-        double esq = exp(a2 + b2), dir = exp(a2) * exp(b2);
-        printf("        e^(%.1f + %.1f) = %.9f     e^%.1f · e^%.1f = %.9f\n",
-               a2, b2, esq, a2, b2, dir);
-        if((long long)(fabs(esq - dir) * 1e12) >= 1) mal++;
-    }
-    printf("\n");
-    ok("exp leva a SOMA dos geradores ao PRODUTO dos fluxos", mal == 0);
-    printf("      As taxas somam, as soluções multiplicam, e o exp é a ponte. É a mesma\n");
-    printf("      dualidade que gera os metais — x² de um lado, mx+1 do outro — e a mesma que o\n");
-    printf("      log desfaz. O paper chama-lhe a assimetria que é o coração.\n");
-
-    printf("\n      E daí sai que o METAL é o exp da taxa: σ = e^λ, λ = log σ.\n\n");
-    printf("        m   σ (o metal)     λ = log σ (a taxa)   e^λ\n");
-    mal = 0;
-    for(int m = 1; m <= 4; m++){
-        double sg = (m + sqrt((double)m*m + 4)) / 2, lam = log(sg);
-        printf("        %d   %.9f     %.9f          %.9f\n", m, sg, lam, exp(lam));
-        if((long long)(fabs(exp(lam) - sg) * 1e12) >= 1) mal++;
-    }
-    printf("\n");
-    ok("σ = e^λ nos quatro metais — a reta é o log do metal", mal == 0);
-    printf("      O dicionário do chess dizia \"metal = o autovalor σₙ\" e \"reta = a taxa\n");
-    printf("      Re(λ) = log σ\". Aqui está medido: o metal do catálogo e a taxa da equação\n");
-    printf("      diferencial são o mesmo número, um do lado do produto e outro do da soma.\n");
-
-    printf("\n      E a CIFRA aproxima o fluxo — o Padé [k/k] de e^x é uma fração contínua:\n\n");
+    printf("      o gerador soma, a solução multiplica — em Z, 2^{a+c} = 2^a · 2^c:\n");
     {
-        /* Pade [k/k] de e^1, por recorrencia dos coeficientes — a diagonal da fracao continua */
-        printf("        k    Padé [k/k] de e        erro\n");
-        long melhor = 1;
-        for(int k = 1; k <= 8; k++){
-            double num = 0, den = 0;
-            for(int j = 0; j <= k; j++){
-                double cf = 1;
-                for(int i = 0; i < j; i++) cf *= (double)(k - i) / ((2*k - i) * (double)(i+1));
-                num += cf; den += (j % 2) ? -cf : cf;
+        int par[3][2] = { {1,2}, {3,4}, {0,5} };
+        for(int k = 0; k < 3; k++){
+            int a = par[k][0], c = par[k][1];
+            long esq = rt_ipow(2, a + c), dir = rt_ipow(2, a) * rt_ipow(2, c);
+            printf("        2^(%d+%d) = %ld     2^%d · 2^%d = %ld\n", a, c, esq, a, c, dir);
+        }
+    }
+    for(int a = 0; a <= 8; a++)
+        for(int c = 0; c <= 8; c++)
+            if(rt_ipow(2, a + c) != rt_ipow(2, a) * rt_ipow(2, c)) mal++;
+    printf("\n");
+    ok("exp leva a SOMA dos geradores ao PRODUTO dos fluxos — e e' 2^{a+c} = 2^a·2^c,"
+       " exacto em Z, sem libm e sem limiar 1e-12",
+       mal == 0);
+
+    printf("\n      E o METAL e' a mesma ponte: σσ' = -1 (Vieta) e A^{p+q} = A^p A^q.\n\n");
+    printf("        m   D=m^2+4   (m+√D)(m-√D)   det A\n");
+    mal = 0;
+    int mat_mal = 0, mat_casos = 0;
+    for(int m = 1; m <= 4; m++){
+        long D = (long)m*m + 4;
+        long na, nb;
+        rt_zd_mul(m, 1, m, -1, D, &na, &nb);
+        long A[4] = { m, 1, 1, 0 };
+        long det = A[0]*A[3] - A[1]*A[2];
+        printf("        %d   %-8ld  %ld + %ld√D         %ld\n", m, D, na, nb, det);
+        if(na != -4 || nb != 0 || det != -1) mal++;
+        for(int p = 0; p <= 5; p++)
+            for(int q = 0; q <= 5; q++){
+                long Pa[4], Pq[4], Pab[4], Prod[4];
+                rt_pot_mat(A, 2, p, Pa);
+                rt_pot_mat(A, 2, q, Pq);
+                rt_pot_mat(A, 2, p + q, Pab);
+                rt_mul_mat(Pa, Pq, 2, Prod);
+                mat_casos++;
+                for(int i = 0; i < 4; i++) if(Prod[i] != Pab[i]) mat_mal++;
             }
-            double v = num / den, err = fabs(v - M_E);
-            if(k == 1 || k == 2 || k == 4 || k == 6 || k == 8)
-                printf("        %d    %.10f          %.1e\n", k, v, err);
-            if(k == 8) melhor = err;
+    }
+    printf("\n");
+    ok("σ = e^λ nos quatro metais — a reta e' o log do metal. Em Z: (m+√D)(m-√D) = -4"
+       " logo σσ' = -1, e a companheira A=[[m,1],[1,0]] cumpre A^{p+q}=A^p A^q e det=-1."
+       " O exp(log σ)=σ era tautologia IEEE; aqui o morfismo mede-se no gerador",
+       mal == 0 && mat_mal == 0 && mat_casos > 0);
+
+    printf("\n      E a CIFRA aproxima o fluxo — a fracao continua de e tem |det|=1:\n\n");
+    {
+        /* e = [2; 1,2,1, 1,4,1, 1,6,1, 1,8, ...] — Padé e convergentes sao o mesmo objecto. */
+        unsigned long ae[12] = { 2, 1, 2, 1, 1, 4, 1, 1, 6, 1, 1, 8 };
+        unsigned long P[12], Q[12];
+        int nc = nt_convergentes(ae, 12, P, Q);
+        long det1 = 0;
+        printf("        n    p_n/q_n          |p q' - p' q|\n");
+        for(int k = 1; k < nc; k++){
+            long det = (long)P[k]*(long)Q[k-1] - (long)P[k-1]*(long)Q[k];
+            if(det == 1 || det == -1) det1++;
+            if(k == 1 || k == 2 || k == 4 || k == 6 || k == 8 || k == 11)
+                printf("        %-4d %lu/%lu              %ld\n", k, P[k], Q[k], det);
         }
         printf("\n");
-        ok("o Padé de ordem 8 bate e no limite do double", melhor == 0.0);
+        ok("a fracao continua de e tem |p_n q_{n-1} - p_{n-1} q_n| = 1 em todos os"
+           " convergentes — e' o |det|=1 que gera os metais e aproxima o fluxo. O Pade"
+           " de ordem 8 a 'bater e no limite do double' era coincidencia IEEE",
+           det1 == nc - 1 && nc == 12);
         printf("        A fração contínua faz as DUAS coisas, e é o que o paper sublinha: na base\n");
         printf("        do invariante |det| = 1 ela GERA os metais (o ponto fixo) e APROXIMA o\n");
         printf("        fluxo de qualquer equação diferencial (o Padé). O mesmo objeto do lado\n");

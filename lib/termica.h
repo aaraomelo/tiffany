@@ -5,31 +5,37 @@
  *
  * Aqui só as leis e as constantes, medidas no `radiacao.c`. Elas são de tabela — CODATA e as
  * definições do SI — e não há uma escolhida por mim.
+ *
+ * Uma constante física NÃO É EXCEPÇÃO: é um decimal escrito, logo um racional. σT⁴, λT = b
+ * e hc/λkT vivem em ℤ — Wien por CORTE (como cosmico.c / radiacao.c), Stefan–Boltzmann é
+ * T⁴ por definição, e o expoente de Planck é produto (Π), sem exp().
  */
 #ifndef TERMICA_H
 #define TERMICA_H
-#include <math.h>
 
-#define SIGMA_SB   5.670374419e-8      /* Stefan–Boltzmann, W/(m²·K⁴) — exata no SI de 2019 */
-#define WIEN_B     2.897771955e-3      /* deslocamento de Wien, m·K */
-#define K_B        1.380649e-23        /* Boltzmann, J/K — exata por definição */
-#define H_PLANCK   6.62607015e-34      /* Planck, J·s — exata por definição */
-#define C_LUZ      2.99792458e8        /* velocidade da luz, m/s — exata por definição */
+/* SI exactos como inteiros (o decimal escrito, sem vírgula). */
+#define C_LUZ        299792458L       /* m/s — exacta por definição */
+#define WIEN_B_p12   2897771955L      /* 2.897771955×10^{-3} m·K, em 10^{-12} */
+#define K_B_n        1380649L         /* 1.380649×10^{-23} J/K */
+#define H_PLANCK_n   662607015L       /* 6.62607015×10^{-34} J·s */
 
-/* Stefan–Boltzmann: a potência radiada por unidade de área de um corpo negro */
-static double sb_potencia(double T){ return SIGMA_SB * T*T*T*T; }
+/* Stefan–Boltzmann: P ∝ T⁴ por DEFINIÇÃO. (2T)⁴ / T⁴ = 16, exacto em ℤ. */
+static long tm_sb_pot(long T){ return T*T*T*T; }
 
-/* Wien: o comprimento de onda do pico */
-static double wien_pico(double T){ return WIEN_B / T; }
-
-/* Planck: a radiância espectral, W/(m²·sr·m) */
-static double planck(double lambda, double T){
-    double a = 2.0 * H_PLANCK * C_LUZ*C_LUZ / (lambda*lambda*lambda*lambda*lambda);
-    double b = H_PLANCK * C_LUZ / (lambda * K_B * T);
-    return a / (exp(b) - 1.0);
+/* Wien por CORTE: o pico NÃO SE FORMA. b, T e a janela são racionais; «lmin ≤ b/T ≤ lmax»
+ * vira comparação de inteiros. Escalas: as do radiacao.c (b em 10^{-12} m·K, T em
+ * centésimos de K, λ em µm × 10000). */
+static int tm_wien_corte(long b, long T, long lmin, long lmax){
+    return b > lmin * T && b < lmax * T;
 }
 
-/* a derivada da potência com a temperatura: dP/dT = 4σT³ — é o que um sensor térmico mede */
-static double sb_derivada(double T){ return 4.0 * SIGMA_SB * T*T*T; }
+/* Planck: o expoente é hc/λkT. Π = produto — dois (λ,T) têm o mesmo x sse λT iguais.
+ * Sem exp(), sem grelha de nm. É a lei de deslocamento, outra vez. */
+static int tm_planck_mesmo_x(long l1, long T1, long l2, long T2){
+    return l1 * T1 == l2 * T2;
+}
+
+/* dP/dT ∝ 4 T³ — o que um sensor térmico mede, em unidades de σ. */
+static long tm_sb_dP(long T){ return 4L * T*T*T; }
 
 #endif

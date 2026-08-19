@@ -31,7 +31,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include <time.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -39,11 +38,11 @@
 #include <sys/mman.h>
 #include "unidade.h"
 
-/* ---- O TEMPO, para se poder dizer "é rápido" com um número ------------------------------- */
-static double agora_s(void){
+/* tempo em nanosegundos — inteiro, sem vírgula e sem régua 1e-9 */
+static long agora_ns(void){
     struct timespec t;
     clock_gettime(CLOCK_MONOTONIC, &t);
-    return (double)t.tv_sec + (double)t.tv_nsec/1e9;
+    return t.tv_sec * 1000000000L + t.tv_nsec;
 }
 
 #define MAX_GENES 512
@@ -239,7 +238,7 @@ long rss_base = rss_anon_kb();
      * isso que é rápido: o caminho mais curto entre dois pontos do disco não passa pela RAM. */
     long long pos = 0;
     int erros = 0;
-    double t0 = agora_s();
+    long t0 = agora_ns();
     for(int i = 0; i < n_genes; i++){
         Gene *g = &genes[i];
         g->desloc_fita = pos;
@@ -251,13 +250,13 @@ long rss_base = rss_anon_kb();
             restam -= r; pos += r; total_escrito += r;
         }
     }
-    double t_cfr = agora_s() - t0;
+    long t_cfr = agora_ns() - t0;
     close(fd_f);
     printf("      genes transcritos     %d\n", n_genes);
-    printf("      bytes na fita         %lld  (%.1f MiB)\n", total_escrito, total_escrito/1048576.0);
+    printf("      bytes na fita         %lld  (%lld MiB)\n", total_escrito, total_escrito/1048576);
     printf("      erros                 %d\n", erros);
-    printf("      tempo (copy_file_range, dentro do kernel)  %.3f s   %.0f MiB/s\n\n",
-           t_cfr, (total_escrito/1048576.0)/(t_cfr > 0 ? t_cfr : 1e-9));
+    printf("      tempo (copy_file_range, dentro do kernel)  %ld ms   %ld MiB/s\n\n",
+           t_cfr/1000000L, t_cfr > 0 ? (total_escrito/1048576)*1000000000L/t_cfr : 0);
     ok("todos os genes foram transcritos, sem erro", erros == 0);
 
     /* E O REFLINK, QUE NÃO ACONTECEU — e é melhor medi-lo do que supô-lo.
@@ -277,8 +276,8 @@ long rss_base = rss_anon_kb();
         long long real = (long long)sf.st_blocks * 512;
         printf("      alinhamento dos dados na origem   %lld  (%% 4096 = %lld)\n",
                inicio_dados, inicio_dados % 4096);
-        printf("      espaço aparente da fita           %.1f MiB\n", (double)sf.st_size/1048576.0);
-        printf("      espaço REAL em disco              %.1f MiB\n", real/1048576.0);
+        printf("      espaço aparente da fita           %lld MiB\n", (long long)sf.st_size/1048576);
+        printf("      espaço REAL em disco              %lld MiB\n", real/1048576);
         printf("      houve reflink?                    %s\n\n",
                real < total_escrito/2 ? "SIM — partilhou extensões" : "não — copiou mesmo");
         ok("o espaço real da fita é medido, e diz se houve partilha ou cópia", real > 0);
@@ -291,7 +290,7 @@ long rss_base = rss_anon_kb();
         snprintf(f_alt, sizeof f_alt, "%s/fita_alt.bin", dir_fita);
         int fd_a = open(f_alt, O_WRONLY|O_CREAT|O_TRUNC, 0644);
         static unsigned char buf[BUF];
-        double t1 = agora_s();
+        long t1 = agora_ns();
         long long feito = 0;
         for(int i = 0; i < n_genes && fd_a >= 0; i++){
             long long restam = genes[i].bytes, off = inicio_dados + genes[i].desloc_gguf;
@@ -303,17 +302,18 @@ long rss_base = rss_anon_kb();
                 off += r; restam -= r; feito += r;
             }
         }
-        double t_buf = agora_s() - t1;
+        long t_buf = agora_ns() - t1;
         if(fd_a >= 0) close(fd_a);
         unlink(f_alt);
-        printf("      o MESMO trabalho pelo buffer de 64 kB:     %.3f s   %.0f MiB/s\n",
-               t_buf, (feito/1048576.0)/(t_buf > 0 ? t_buf : 1e-9));
+        printf("      o MESMO trabalho pelo buffer de 64 kB:     %ld ms   %ld MiB/s\n",
+               t_buf/1000000L, t_buf > 0 ? (feito/1048576)*1000000000L/t_buf : 0);
         printf("      e os bytes atravessaram a fronteira        %lld vezes (contra 0)\n\n",
                feito/BUF*2);
+        int cfr_rapida = (2 * t_cfr <= 3 * t_buf);
         ok("a transcrição dentro do kernel não é mais lenta que a que passa pela RAM",
-           t_cfr <= t_buf * 1.5);
-        printf("      Os dois escreveram %.1f MiB. A diferença não está no que fizeram — está\n",
-               feito/1048576.0);
+           cfr_rapida);
+        printf("      Os dois escreveram %lld MiB. A diferença não está no que fizeram — está\n",
+               feito/1048576);
         printf("      em por onde os bytes passaram.\n");
     }
 
@@ -367,7 +367,7 @@ printf("\n§D2  REPLICAR: reler a fita e comparar com o original, byte a byte.\n
     fstat(fd_g, &s_org);
     unsigned char *org = mmap(NULL, (size_t)s_org.st_size, PROT_READ, MAP_PRIVATE, fd_g, 0);
     unsigned char *fit = mmap(NULL, (size_t)total_escrito, PROT_READ, MAP_PRIVATE, fd_f, 0);
-    double t0 = agora_s();
+    long t0 = agora_ns();
     if(org != MAP_FAILED && fit != MAP_FAILED){
         madvise(org, (size_t)s_org.st_size, MADV_SEQUENTIAL);
         madvise(fit, (size_t)total_escrito,  MADV_SEQUENTIAL);
@@ -379,15 +379,15 @@ printf("\n§D2  REPLICAR: reler a fita e comparar com o original, byte a byte.\n
             genes_vistos++;
         }
     }
-    double t_cmp = agora_s() - t0;
+    long t_cmp = agora_ns() - t0;
     if(org != MAP_FAILED) munmap(org, (size_t)s_org.st_size);
     if(fit != MAP_FAILED) munmap(fit, (size_t)total_escrito);
     close(fd_f);
     printf("      genes comparados      %d  (TODOS, não uma amostra)\n", genes_vistos);
-    printf("      bytes comparados      %lld  (%.1f MiB)\n", comparados, comparados/1048576.0);
+    printf("      bytes comparados      %lld  (%lld MiB)\n", comparados, comparados/1048576);
     printf("      genes divergentes     %d\n", divergentes);
-    printf("      tempo                 %.3f s   (%.0f MiB/s, e por mmap)\n\n",
-           t_cmp, (comparados/1048576.0)/(t_cmp > 0 ? t_cmp : 1e-9));
+    printf("      tempo                 %ld ms   (%ld MiB/s, e por mmap)\n\n",
+           t_cmp/1000000L, t_cmp > 0 ? (comparados/1048576)*1000000000L/t_cmp : 0);
     ok("a fita replica o original byte a byte — o clone é exato", divergentes == 0);
     ok("e comparou-se a fita INTEIRA, gene a gene", genes_vistos == n_genes &&
        comparados == total_escrito);
@@ -452,14 +452,14 @@ printf("\n§D4  A RAM: 940 MiB atravessaram a transcrição, e não ficaram.\n\n
     printf("      comparação são mmap (páginas de FICHEIRO, que o kernel descarta e relê do\n");
     printf("      disco de graça, porque estão limpas). Os %d kB de buffer que restam existem\n", BUF/1024);
     printf("      só no caminho ALTERNATIVO, o que serve de cronómetro ao outro.\n\n");
-    printf("      %.1f MiB de tráfego — ler, escrever, e reler a fita inteira para conferir —\n",
-           (total_escrito*2.0)/1048576.0);
+    printf("      %lld MiB de tráfego — ler, escrever, e reler a fita inteira para conferir —\n",
+           (total_escrito*2)/1048576);
     printf("      e a página anónima do processo não se mexeu. A fita é longa; o que a lê, não.\n");
 }
 
 printf("\n=== FECHO ==================================================================\n");
-printf("    O llama está dentro. %d genes, %.1f MiB, cada um com a sua ponta cifrada,\n",
-       n_genes, total_escrito/1048576.0);
+printf("    O llama está dentro. %d genes, %lld MiB, cada um com a sua ponta cifrada,\n",
+       n_genes, total_escrito/1048576);
 printf("    e a replicação confere byte a byte. A partir daqui o modelo é material\n");
 printf("    do sistema, endereçado pelas coordenadas do sistema.\n\n");
 printf("    %d asserções, %d falhas.\n\n", unidades, falhas);

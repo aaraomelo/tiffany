@@ -23,7 +23,7 @@
  *   cc -O2 -std=c99 hiper.c -lm -o hiper && ./hiper
  */
 #include <stdio.h>
-#include <math.h>
+#include "isa_disk.h"
 #include "unidade.h"
 
 #define NMAX 10
@@ -37,26 +37,28 @@ static Mn companion(int n, long m){
     C.a[n-1][n-1] = m;
     return C;
 }
-/* determinante por eliminação em racionais de numerador/denominador inteiros pequenos:
- * aqui basta trabalhar em double e arredondar, porque as entradas são 0, 1 e m. */
-static double det(Mn M){
+/* determinante inteiro por Bareiss — entradas 0, 1 e m, |det|=1, sem divisão inexacta */
+static long det(Mn M){
     long A[NMAX][NMAX];
     int n = M.n;
-    for(int i = 0; i < n; i++) for(int j = 0; j < n; j++) A[i][j] = (double)M.a[i][j];
-    long d = 1;
-    for(int c = 0; c < n; c++){
-        int p = -1;
-        for(int r = c; r < n; r++) if((long long)(fabs(A[r][c]) * 1e12) >= 1){ p = r; break; }
-        if(p < 0) return 0;
-        if(p != c){ for(int k = 0; k < n; k++){ double t = A[c][k]; A[c][k] = A[p][k]; A[p][k] = t; }
-                    d = -d; }
-        d *= A[c][c];
-        for(int r = c+1; r < n; r++){
-            double f = A[r][c] / A[c][c];
-            for(int k = c; k < n; k++) A[r][k] -= f * A[c][k];
+    for(int i = 0; i < n; i++) for(int j = 0; j < n; j++) A[i][j] = M.a[i][j];
+    long ant = 1; int sinal = 1;
+    for(int k = 0; k < n - 1; k++){
+        if(A[k][k] == 0){
+            int t = -1;
+            for(int i = k + 1; i < n; i++) if(A[i][k]){ t = i; break; }
+            if(t < 0) return 0;
+            for(int j = 0; j < n; j++){ long v = A[k][j]; A[k][j] = A[t][j]; A[t][j] = v; }
+            sinal = -sinal;
         }
+        for(int i = k + 1; i < n; i++)
+            for(int j = k + 1; j < n; j++){
+                long num = A[i][j]*A[k][k] - A[i][k]*A[k][j];
+                A[i][j] = num / ant;
+            }
+        ant = A[k][k];
     }
-    return d;
+    return sinal * A[n-1][n-1];
 }
 /* a ordem de [[0,−C],[1,B]] em GL2(Z), ou 0 se infinita */
 static int ordem2(long B, long C){
@@ -84,10 +86,11 @@ printf("\n§H1  O determinante da companion é ±1 em TODA dimensão e todo meta
     for(int n = 2; n <= 8; n++){
         printf("      %-6d", n);
         for(long m = 1; m <= 4; m++){
-            double d = det(companion(n, m));
+            long d = det(companion(n, m));
             quantos++;
-            if((long long)(fabs(fabs(d) - 1.0) * 1e9) >= 1) mau++;
-            printf("%+5.0f  ", d);
+            long ad = d < 0 ? -d : d;
+            if(ad != 1) mau++;
+            printf("%+5ld  ", d);
         }
         printf("\n");
     }
@@ -107,19 +110,21 @@ printf("\n§H2  Em n=2 o polinómio da teoria É o da cifra [m;m,m,…].\n\n");
      * convergentes, h_k = m h_{k-1} + h_{k-2}, tem exatamente este polinomio caracteristico —
      * com as sementes 1/0 e 0/1 do zero.c. */
     int mau = 0;
-    printf("      m   p_2(x)          raiz            convergente 20     erro\n");
+    printf("      m   p_2(x)          convergente   N = p²−m p q−q²\n");
     for(long m = 1; m <= 4; m++){
-        long h1 = 1, h2 = 0, k1 = 0, k2 = 1;      /* AS MESMAS DUAS SEMENTES */
+        long h1 = 1, h2 = 0, k1 = 0, k2 = 1;
         for(int t = 0; t < 20; t++){
             long nh = m*h1 + h2, nk = m*k1 + k2;
             h2 = h1; h1 = nh; k2 = k1; k1 = nk;
         }
-        double s = (m + sqrt((double)m*m + 4)) / 2, c = (double)h1 / k1;
-        printf("      %ld   x² - %ldx - 1     %.9f     %.9f     %.1e\n", m, m, s, c, fabs(c - s));
-        if((long long)(fabs(c - s) * 1e6) >= 1) mau++;
+        long N = h1*h1 - m*h1*k1 - k1*k1;
+        long aN = N < 0 ? -N : N;
+        printf("      %ld   x² - %ldx - 1     %ld/%ld          %ld\n", m, m, h1, k1, N);
+        if(aN != 1) mau++;
     }
     printf("\n");
-    ok("os convergentes das MESMAS sementes convergem para a raiz de p_2", mau == 0);
+    ok("os convergentes das MESMAS sementes satisfazem p² − m p q − q² = ±1 — a forma"
+       " de Pell, sem formar σ", mau == 0);
     printf("      x² = m x + 1 é a mesma equação que x = m + 1/x, que é a cifra de termo\n");
     printf("      constante m. A borda da teoria — σ^n = m σ^(n−1) + 1 — é, em n=2, a\n");
     printf("      recorrência dos convergentes. O ouro (m=1) é o caso do termo NEUTRO, e é\n");
@@ -133,9 +138,9 @@ printf("\n§H3  As sementes em R^n são as n colunas de I_n — o 0/0 é o caso 
     for(int n = 2; n <= 6; n++){
         Mn I = {{{0}}, n};
         for(int i = 0; i < n; i++) I.a[i][i] = 1;
-        double d = det(I);
-        if((long long)(fabs(d - 1.0) * 1e9) >= 1) mau++;
-        printf("      %-4d I_%-18d %+.0f    os %d eixos da base %s\n", n, n, d, n,
+        long d = det(I);
+        if(d != 1) mau++;
+        printf("      %-4d I_%-18d %+ld    os %d eixos da base %s\n", n, n, d, n,
                n == 2 ? "<- e aqui são o ZERO e o INFINITO" : "");
     }
     printf("\n");
@@ -176,8 +181,15 @@ printf("\n§H4  O i ESTÁ na construção: a MESMA recursão, com outra BORDA.\n
                t[k].x0,t[k].x1,t[k].y0,t[k].y1, t[k].r0,t[k].r1);
         if(r0 != t[k].r0 || r1 != t[k].r1) mau++;
     }
+    int per_i = isa_periodo_giro(ISA_S_ESQUILO);
+    isa_word(ISA_S_A, 0, 1);
+    isa_MOVE(ISA_S_ESQUILO, 1);
+    long it, ie; isa_read(ISA_S_A, &it, &ie);
+    printf("\n      ESQUILO no disco: i·i = (%ld,%ld), periodo %d\n", it, ie, per_i);
     printf("\n");
-    ok("a recursão da teoria com a borda σ² = -1 DÁ o produto complexo", mau == 0);
+    ok("a recursão da teoria com a borda σ² = -1 DÁ o produto complexo."
+       " No disco, ESQUILO (×i) tem periodo 4 e i² = −1",
+       mau == 0 && per_i == 4 && it == -1 && ie == 0);
     printf("      Não é uma máquina parecida: é a MESMA fórmula, com o excedente a baixar por\n");
     printf("      outra borda. σ² = mσ + 1 dá os metais; σ² = -1 dá o i. A construção é\n");
     printf("      Z[x]/(p) com p irredutível, e os dois são casos dela.\n");

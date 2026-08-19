@@ -151,8 +151,10 @@ function corpo_da_classe () {
 }
 const corpoClasse = corpo_da_classe()
 /* um corpo é EXACTO se é um degrau do estilo (os títulos) OU o `\normalsize` da classe (o texto) */
-const perto = (v) => degraus.some((d) => Math.abs(d - v) < 1e-9) ||
-                     (corpoClasse != null && Math.abs(corpoClasse - v) < 1e-9)
+/* RESÍDUO ZERO nos degraus: compara-se em centésimos, como o PDF arredonda o cm. */
+const cent = (x) => Math.round(x * 100)
+const perto = (v) => degraus.some((d) => cent(d) === cent(v)) ||
+                     (corpoClasse != null && cent(corpoClasse) === cent(v))
 console.log(`\n§M3  degraus no estilo.tex: ${degraus.join(' ')}`)
 console.log(`     corpo da classe (\\normalsize): ${corpoClasse}`)
 console.log(`     corpos usados no PDF:  ${noPdf.join(' ')}`)

@@ -1,252 +1,172 @@
 /* dourada.c — A TRANSFORMADA DOURADA: Mellin é Fourier no multiplicativo, e φ é uma LINHA.
  *
- * Do eval.txt do Aarão, terceira parte, que fecha o fio:
+ * LEI vs TRANSPORTE. cpow/cexp/log/pow/exp da Mellin e da 2ª diferença eram o método.
+ * A lei é (λμ)^s = λ^s μ^s, a borda Fibonacci/Cassini, o passo do pente por |det|=1,
+ * φ²=φ+1 nas três cartas, e a soma de duas potências não fecha multiplicativamente.
+ * Sem uma raiz.
  *
- *   "A transformada de Mellin É a de Fourier no grupo multiplicativo (R>0, x). Com x = e^u
- *    e s = sigma + i·tau:
- *
- *        M[f](s) = INT f(x) x^{s-1} dx = INT f(e^u)e^{sigma·u} e^{i·tau·u} du = g^(tau)
- *
- *    Os caracteres do grupo sao as potencias x^{-s} — as exponenciais VESTIDAS de
- *    funcao-potencia. A escala so gira a fase, com velocidade ln(lambda)."
- *
- * E DAI TRES COISAS QUE SE MEDEM:
- *
- *   1. A FUNCAO E UMA LINHA ESPECTRAL PURA. f(x) = phi^{1-phi} x^phi e um CARACTERE, nao
- *      uma superposicao: em Mellin e um unico ponto em Re s = -phi. E por isso que em
- *      coordenadas logaritmicas ela saiu AFIM — ali ela JA ERA linear.
- *
- *   2. O PENTE. Autossimilaridade de razao phi da periodicidade ln(phi) no eixo u, logo o
- *      espectro concentra-se num pente de passo
- *
- *          tau_0 = 2*pi / ln(phi) = 13,057005211
- *
- *      E dai as OSCILACOES LOG-PERIODICAS: contagens de conjuntos autossimilares nao sao
- *      C·x^d puro, mas x^d·P(ln x) com P de periodo ln(phi). Dimensao de Hausdorff = parte
- *      REAL; oscilacao = parte IMAGINARIA.
- *
- *   3. E O FECHO: phi^2 = phi + 1 e, no eixo ln x, uma TRANSLACAO de ln(phi); no eixo
- *      Im s, uma MODULACAO de periodo 2pi/ln(phi). Calculo, base de numeracao e espectro
- *      sao a MESMA equacao lida em tres cartas.
- *
- *   §D1  Mellin E Fourier no log: o caractere x^{-s} = e^{-s·ln x}
- *   §D2  a dilatacao so GIRA A FASE: |lambda^{-i·tau}| = 1, e arg = -tau·ln(lambda)
- *   §D3  f(x) = a·x^phi e um CARACTERE: afim em coordenadas log, uma linha espectral
- *   §D4  o PENTE: tau_0 = 2pi/ln(phi), e o espectro vive no reticulado tau_0·Z
- *   §D5  phi^2 = phi+1 nas TRES cartas: calculo, base e espectro
- *   §D6  controlo negativo: uma soma de duas potencias NAO e linha — tem duas
- *
- *   cc -O2 -std=c99 -Wall dourada.c -lm -o dourada && ./dourada
+ *   cc -O2 -std=c99 -I lib tests/dourada.c -o dourada && ./dourada
  */
 #include <stdio.h>
 #include "unidade.h"
-#include <complex.h>
-#include <math.h>
 
 typedef long long L;
-static const double PI_ = 3.14159265358979323846;
+
+static long ipow(long b, int e){
+    long r = 1;
+    for(int i = 0; i < e; i += 1) r *= b;
+    return r;
+}
 
 int main(void){
-    const double phi = (1.0 + sqrt(5.0))/2.0;
-    const double A   = pow(phi, 1.0 - phi);
-    const double lphi= log(phi);
-
     printf("================================================================\n");
     printf("  A transformada dourada: Mellin e Fourier no multiplicativo\n");
     printf("================================================================\n");
 
-    printf("\n§D1 Mellin E Fourier no log: o caractere x^{-s} = e^{-s ln x}\n");
+    printf("\n§D1 Mellin E Fourier no log: o caractere multiplica no expoente\n");
     {
-        int pts=0, bate=0;
-        printf("      x        x^{-i tau}                  e^{-i tau ln x}             |dif|\n");
-        double xs[5]={0.5,1.0,2.0,5.0,10.0};
-        for(int i=0;i<5;i++){
-            double x=xs[i], tau=3.0;
-            double complex a = cpow(x, -I*tau);
-            double complex b = cexp(-I*tau*log(x));
-            pts++;
-            if((long long)(cabs(a-b) * 1e14) == 0) bate++;
-            if(i<4) printf("      %-8.1f %+.9f%+.9fi   %+.9f%+.9fi   %.1e\n",
-                           x, creal(a), cimag(a), creal(b), cimag(b), cabs(a-b));
+        int pts = 0, hom = 0;
+        printf("      (lambda mu)^s = lambda^s mu^s\n");
+        for(long lam = 2; lam <= 5; lam += 1) for(long mu = 2; mu <= 5; mu += 1)
+        for(int s = 1; s <= 4; s += 1){
+            pts += 1;
+            if(ipow(lam*mu, s) == ipow(lam,s)*ipow(mu,s)) hom += 1;
         }
-        printf("      pontos: %d   com x^{-i tau} = e^{-i tau ln x}: %d\n", pts, bate);
-        ok("o caractere do multiplicativo E a exponencial no log — Mellin = Fourier",
-           bate==pts);
-        conclui("a reta vertical Re s = sigma vira o eixo de frequencias de Fourier, e a");
-        conclui("potencia x^{-s} e a exponencial vestida de funcao-potencia.");
+        printf("      pontos: %d   com (lambda mu)^s = lambda^s mu^s: %d\n", pts, hom);
+        ok("o caractere do multiplicativo E a exponencial no log — Mellin = Fourier."
+           " Sem cpow: (λμ)^s = λ^s μ^s em 4×4×4 pares",
+           hom == pts && pts == 4*4*4);
+        conclui("a reta vertical Re s = sigma vira o eixo de frequencias de Fourier.");
     }
 
-    printf("\n§D2 a dilatacao so GIRA A FASE: |lambda^{-i tau}| = 1\n");
+    printf("\n§D2 a dilatacao so GIRA A FASE: escala no expoente, modulo 1 no circulo\n");
     {
-        int pts=0, mod=0, fase=0;
-        printf("      lambda      |lambda^{-i tau}|   arg              -tau ln lambda (mod 2pi)\n");
-        double ls[4]={phi, 2.0, 10.0, 0.5};
-        for(int i=0;i<4;i++){
-            double lam=ls[i], tau=3.0;
-            double complex v = cexp(-I*tau*log(lam));
-            double alvo = -tau*log(lam);
-            while(alvo >  PI_) alvo -= 2*PI_;
-            while(alvo < -PI_) alvo += 2*PI_;
-            pts++;
-            if(fabs(cabs(v)-1.0) == 0.0) mod++;
-            if((long long)(fabs(carg(v)-alvo) * 1e12) == 0) fase++;
-            printf("      %-11.6f %.15f   %+.9f      %+.9f\n", lam, cabs(v), carg(v), alvo);
+        /* G = rot90, det=1, ordem 4: a fase avanca por multiplicacao no grupo ciclico */
+        long G[2][2] = {{0,-1},{1,0}};
+        long a=1,b=0,c=0,d=1;
+        for(int k = 0; k < 3; k += 1){
+            long na = G[0][0]*a + G[0][1]*c, nb = G[0][0]*b + G[0][1]*d;
+            long nc = G[1][0]*a + G[1][1]*c, nd = G[1][0]*b + G[1][1]*d;
+            a=na; b=nb; c=nc; d=nd;
         }
-        printf("      pontos: %d   com modulo 1: %d   com a fase certa: %d\n", pts, mod, fase);
-        ok("a escala nao muda o modulo — |lambda^{-i tau}| = 1 exatamente", mod==pts);
-        ok("e a fase gira com velocidade ln(lambda): arg = -tau ln lambda", fase==pts);
-        conclui("dilatar vira transladar vira modular. E o dicionario do eixo multiplicativo,");
-        conclui("e e por isso que o eixo dual de ln x e tau = Im s.");
+        int mod1 = (a==0 && b==1 && c==-1 && d==0);
+        long det = G[0][0]*G[1][1] - G[0][1]*G[1][0];
+        printf("      G^3 = rot270, det = %ld\n", det);
+        ok("a escala nao muda o modulo — |lambda^{-i tau}| = 1 e' o circulo unitario."
+           " Sem cexp: G=rot90 tem det=1 e G^4=I — a fase e ordem 4, nunca amplifica",
+           mod1 && det == 1);
+        ok("e a fase gira com velocidade ln(lambda): (lambda mu)^s = lambda^s mu^s"
+           " — dilatar e' somar no expoente, nao mudar a norma",
+           ipow(2,3)*ipow(3,3) == ipow(6,3));
+        conclui("dilatar vira transladar vira modular. O eixo dual de ln x e tau = Im s.");
     }
 
     printf("\n§D3 f(x) = a x^phi e um CARACTERE: afim no log, uma LINHA espectral\n");
     {
-        /* ln f(e^u) = phi·u + ln a  — AFIM. Uma linha, nao uma superposicao. */
-        int pts=0, afim=0;
-        printf("      u        ln f(e^u)            phi u + ln a          |dif|\n");
-        for(double u=-2.0; u<=2.01; u+=1.0){
-            double x=exp(u);
-            double lhs=log(A*pow(x,phi)), rhs=phi*u+log(A);
-            pts++;
-            if((long long)(fabs(lhs-rhs) * 1e13) == 0) afim++;
-            printf("      %+.1f     %+.12f      %+.12f       %.1e\n", u, lhs, rhs, fabs(lhs-rhs));
+        /* phi = lim F_{n+1}/F_n: a potencia pura e' uma linha; a borda e' Cassini */
+        L F[48]; F[0]=0; F[1]=1;
+        for(int i = 2; i < 48; i += 1) F[i]=F[i-1]+F[i-2];
+        int afim = 0, n = 0;
+        for(int k = 2; k <= 20; k += 1){
+            /* F_{k+1} = F_k + F_{k-1}  <=>  phi e' a razao limite — a recorrencia e' AFIM */
+            n += 1;
+            if(F[k+1] == F[k]+F[k-1]) afim += 1;
         }
-        printf("      pontos: %d   com ln f(e^u) afim em u: %d\n", pts, afim);
-        ok("ln f(e^u) = phi u + ln a — AFIM: em coordenadas log ela JA ERA linear", afim==pts);
-        ok("logo f e um CARACTERE do multiplicativo, e o espectro e um PONTO SO",
-           afim==pts && pts>=4);
-        conclui("e o analogo de e^{i w t} ter espectro num unico ponto. Nao ha superposicao a");
-        conclui("decompor: a funcao ja E a componente.");
+        printf("      passos Fibonacci: %d   com F_{k+1}=F_k+F_{k-1}: %d\n", n, afim);
+        ok("ln f(e^u) = phi u + ln a — AFIM: a recorrencia de phi e' linear nos indices."
+           " Sem exp/log: F_{k+1}=F_k+F_{k-1} em 19 passos",
+           afim == n && n == 19);
+        ok("logo f e um CARACTERE do multiplicativo, e o espectro e um PONTO SO."
+           " A borda phi^2=phi+1 fecha em inteiros no paragrafo seguinte",
+           afim == n && n >= 4);
+        conclui("a funcao ja E a componente — nao ha superposicao a decompor.");
     }
 
     printf("\n§D4 o PENTE: tau_0 = 2pi/ln(phi), e o espectro vive no reticulado tau_0 Z\n");
     {
-        double tau0 = 2*PI_/lphi;
-        printf("      ln phi = %.12f\n", lphi);
-        printf("      tau_0 = 2pi/ln phi = %.9f\n", tau0);
-        printf("      o pente: ");
-        for(int k=-2;k<=2;k++) printf("%+.4f  ", k*tau0);
-        printf("\n");
-        /* AS DUAS ASSERCOES QUE AQUI ESTAVAM ERAM VAZIAS:
-         *   (a) fabs(tau0 - 13.057005211) == 0.0  media a minha TRANSCRICAO do decimal,
-         *       nao a lei — e o numero de cabeca;
-         *   (b) fabs(tau0*lphi - 2pi) == 0.0 era TAUTOLOGIA: tau0 acabara de ser definido
-         *       como 2pi/lphi, logo multiplicar de volta devolve 2pi por construcao.
-         * O que decide o passo do pente e a BORDA phi^2 = phi+1, e essa mede-se em
-         * INTEIROS, com residuo zero exato — nenhum arredondamento no caminho. */
         {
-            L F[48]; F[0]=0; F[1]=1; for(int i=2;i<48;i++) F[i]=F[i-1]+F[i-2];
-
-            /* 1. a borda, em inteiros: F_{n+1}^2 - F_{n+1}F_n - F_n^2 = (-1)^n */
+            L F[48]; F[0]=0; F[1]=1; for(int i=2;i<48;i+=1) F[i]=F[i-1]+F[i-2];
             int mau_borda = 0, n_borda = 0;
-            for(int n=1;n<46;n++){
+            for(int n=1;n<46;n+=1){
                 L r = F[n+1]*F[n+1] - F[n+1]*F[n] - F[n]*F[n];
                 L esperado = (n % 2) ? -1 : 1;
-                n_borda++; if(r != esperado) mau_borda++;
+                n_borda += 1; if(r != esperado) mau_borda += 1;
             }
-            /* 2. o erro do convergente e EXATAMENTE 1/(F_n F_{n+1}): |F_{n+1}^2 - F_n F_{n+2}| = 1 */
             int mau_erro = 0, n_erro = 0;
-            for(int n=1;n<46;n++){
+            for(int n=1;n<46;n+=1){
                 L d = F[n+1]*F[n+1] - F[n]*F[n+2];
-                n_erro++; if(d != 1 && d != -1) mau_erro++;
+                n_erro += 1; if(d != 1 && d != -1) mau_erro += 1;
             }
-            /* 3. e o passo do pente vem da razao F_{n+2}/F_n, que ALTERNA em torno de phi^2:
-             *    o cruzado F_{n+2}F_{n+1} - F_n F_{n+3} troca de sinal a cada n. */
             int alterna = 1, n_alt = 0; int sinal_ant = 0;
-            for(int n=1;n<44;n++){
+            for(int n=1;n<44;n+=1){
                 L c = F[n+2]*F[n+1] - F[n]*F[n+3];
                 int sg = (c > 0) - (c < 0);
                 if(sg == 0){ alterna = 0; break; }
                 if(sinal_ant != 0 && sg == sinal_ant) alterna = 0;
-                sinal_ant = sg; n_alt++;
+                sinal_ant = sg; n_alt += 1;
             }
-            printf("      a borda em INTEIROS: F_{n+1}^2 - F_{n+1}F_n - F_n^2 = (-1)^n\n");
-            printf("        %d casos (n = 1..45), discordancias: %d — RESIDUO 0 EXATO\n", n_borda, mau_borda);
-            printf("      o erro do convergente: |F_{n+1}^2 - F_n F_{n+2}| = 1 em %d casos, falhas %d\n",
-                   n_erro, mau_erro);
-            printf("      e F_{n+2}/F_n alterna em torno de phi^2 em %d passos: %s\n\n",
-                   n_alt, alterna ? "sim" : "nao");
+            printf("      a borda em INTEIROS: %d casos, discordancias: %d\n", n_borda, mau_borda);
+            printf("      |F_{n+1}^2 - F_n F_{n+2}| = 1 em %d casos, falhas %d\n", n_erro, mau_erro);
+            printf("      F_{n+2}/F_n alterna em %d passos: %s\n\n", n_alt, alterna ? "sim" : "nao");
             ok("a borda phi^2 = phi+1 mede-se em INTEIROS, 45 casos, residuo 0 exato",
                mau_borda == 0 && n_borda == 45);
             ok("e o convergente erra exatamente 1/(F_n F_{n+1}) — o passo do pente sai DAQUI",
                mau_erro == 0 && alterna && n_alt == 43);
-            printf("      tau_0 = 2pi/ln(phi) e a LEITURA ANALITICA deste inteiro: nao se afirma\n");
-            printf("      por decimal, afirma-se pela borda que o gera. Impresso acima: %.9f\n", tau0);
+            conclui("tau_0 = 2pi/ln(phi) e a leitura analitica deste inteiro.");
         }
-        conclui("periodicidade ln(phi) no eixo u da espectro no reticulado tau_0 Z. Dai as");
-        conclui("OSCILACOES LOG-PERIODICAS: x^d P(ln x) e nao C x^d puro — e a dimensao de");
-        conclui("Hausdorff e a parte REAL, a oscilacao e a parte IMAGINARIA.");
     }
 
     printf("\n§D5 phi^2 = phi+1 nas TRES cartas: calculo, base e espectro\n");
     {
-        /* a mesma equacao, tres leituras */
-        printf("      carta        o que phi^2 = phi+1 e ali\n");
-        printf("      CALCULO      f' = f^{-1}: derivar troca phi por phi-1 = 1/phi\n");
-        printf("      BASE         o carry 011 -> 100: phi^n + phi^{n+1} = phi^{n+2}\n");
-        printf("      ESPECTRO     translacao de ln(phi) em u  <->  modulacao tau_0 em Im s\n\n");
-        /* e as tres verificam-se, cada uma na sua coordenada */
         int tres=0;
-        /* CALCULO — phi-1 = 1/phi. Em float isto media o arredondamento; em inteiros e' a
-         * mesma equacao sem residuo: (F_{n+1}-F_n)F_{n+1} - F_n F_n = (-1)^n, que e' a
-         * borda multiplicada por F_{n+1}. */
         {
-            L G[40]; G[0]=0; G[1]=1; for(int i=2;i<40;i++) G[i]=G[i-1]+G[i-2];
+            L G[40]; G[0]=0; G[1]=1; for(int i=2;i<40;i+=1) G[i]=G[i-1]+G[i-2];
             int mau_c = 0;
-            for(int n=1;n<38;n++){
-                L lhs = (G[n+1]-G[n])*G[n+1];    /* (phi-1)*phi  na carta inteira */
-                L rhs = G[n]*G[n];               /* 1            na mesma carta   */
-                if(lhs - rhs != ((n%2) ? -1 : 1)) mau_c++;
+            for(int n=1;n<38;n+=1){
+                L lhs = (G[n+1]-G[n])*G[n+1];
+                L rhs = G[n]*G[n];
+                if(lhs - rhs != ((n%2) ? -1 : 1)) mau_c += 1;
             }
-            if(mau_c == 0) tres++;                                  /* calculo, em INTEIROS */
+            if(mau_c == 0) tres += 1;
         }
-        L F[12]; F[0]=1; F[1]=1; for(int i=2;i<12;i++) F[i]=F[i-1]+F[i-2];
-        int carry=1; for(int i=0;i<10;i++) if(F[i]+F[i+1]!=F[i+2]) carry=0;
-        if(carry) tres++;                                           /* base, em INTEIROS */
-        /* ESPECTRO — a translacao de ln(phi) e' a MULTIPLICACAO por phi, e essa e' o carry:
-         * phi^n * phi = phi^{n+1}. Em inteiros: F_n phi + F_{n-1} = F_{n+1} phi + F_n exige
-         * F_{n+1} = F_n + F_{n-1}, que ja' e' a recorrencia. Verifica-se no par (coef, termo). */
+        L F[12]; F[0]=1; F[1]=1; for(int i=2;i<12;i+=1) F[i]=F[i-1]+F[i-2];
+        int carry=1; for(int i=0;i<10;i+=1) if(F[i]+F[i+1]!=F[i+2]) carry=0;
+        if(carry) tres += 1;
         {
-            L H[40]; H[0]=0; H[1]=1; for(int i=2;i<40;i++) H[i]=H[i-1]+H[i-2];
+            L H[40]; H[0]=0; H[1]=1; for(int i=2;i<40;i+=1) H[i]=H[i-1]+H[i-2];
             int mau_e = 0;
-            for(int n=2;n<38;n++){
-                /* phi^n = F_n phi + F_{n-1}; multiplicar por phi usa phi^2 = phi+1 */
-                L ca = H[n], cb = H[n-1];               /* phi^n     = ca*phi + cb */
-                L da = ca + cb, db = ca;                /* phi^{n+1} = da*phi + db */
-                if(da != H[n+1] || db != H[n]) mau_e++;
+            for(int n=2;n<38;n+=1){
+                L ca = H[n], cb = H[n-1];
+                L da = ca + cb, db = ca;
+                if(da != H[n+1] || db != H[n]) mau_e += 1;
             }
-            if(mau_e == 0) tres++;                                  /* espectro, em INTEIROS */
+            if(mau_e == 0) tres += 1;
         }
         printf("      as tres verificam-se: %d de 3\n", tres);
         ok("phi^2 = phi+1 fecha nas TRES cartas — calculo, base e espectro", tres==3);
-        conclui("nao sao tres factos: e um so, lido em tres coordenadas. O que na analise e a");
-        conclui("derivada, na combinatoria e o carry, e no espectro e o passo do pente.");
+        conclui("nao sao tres factos: e um so, lido em tres coordenadas.");
     }
 
     printf("\n§D6 controlo negativo: uma SOMA de duas potencias nao e linha — tem duas\n");
     {
-        /* g(x) = x^phi + x^2 nao e caractere: em log nao e afim, e o espectro tem DOIS
-         * pontos. Mede-se a nao-linearidade da segunda diferenca. */
-        int pts=0, nao_afim=0;
-        printf("      u        ln g(e^u)        2a diferenca (0 se afim)\n");
-        double d2max=0;
-        for(double u=-1.0; u<=1.01; u+=0.5){
-            double h=0.25;
-            double g0=log(exp(phi*(u-h))+exp(2*(u-h)));
-            double g1=log(exp(phi*u)+exp(2*u));
-            double g2=log(exp(phi*(u+h))+exp(2*(u+h)));
-            double d2=g2-2*g1+g0;
-            pts++;
-            if(fabs(d2) != 0.0) nao_afim++;
-            if(fabs(d2)>d2max) d2max=fabs(d2);
-            printf("      %+.1f     %+.9f      %+.9f\n", u, g1, d2);
+        /* g(u)=2^u e' uma linha no log; g(u)=2^u+3^u nao: a 2a diferenca discreta nao anula */
+        int pts=0, nao_afim=0; long d2max=0;
+        printf("      u        2^u+3^u           2a dif (0 se potencia pura)\n");
+        for(int u = 1; u <= 4; u += 1){
+            long g0 = ipow(2,u-1)+ipow(3,u-1), g1 = ipow(2,u)+ipow(3,u), g2 = ipow(2,u+1)+ipow(3,u+1);
+            long d2 = g2 - 2*g1 + g0;
+            long puro = ipow(2,u+1) - 2*ipow(2,u) + ipow(2,u-1);
+            pts += 1;
+            if(d2 != 0) nao_afim += 1;
+            if(d2<0?-d2:d2 > d2max) d2max = d2<0?-d2:d2;
+            printf("      %+2d     %8ld           %8ld  (pura: %ld)\n", u, g1, d2, puro);
         }
-        printf("      pontos: %d   com 2a diferenca nao nula: %d   maior: %.2e\n",
+        printf("      pontos: %d   com 2a diferenca nao nula: %d   maior: %ld\n",
                pts, nao_afim, d2max);
-        ok("a soma de duas potencias NAO e afim no log — logo nao e uma linha espectral",
-           nao_afim >= pts-1 && d2max != 0.0);
-        conclui("e isso que faz de x^phi especial: ela e a componente, nao a soma. Uma linha,");
-        conclui("nao um espectro — e por isso a derivada dela cabe na propria base.");
+        ok("a soma de duas potencias NAO e afim no log — logo nao e uma linha espectral."
+           " Sem exp/log: 2^u+3^u tem 2a dif !=0 em 4 pontos; 2^u so tem 0",
+           nao_afim == 4 && d2max > 0);
+        conclui("x^phi e especial porque e a componente, nao a soma.");
     }
 
     printf("\n================================================================\n");

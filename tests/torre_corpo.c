@@ -29,13 +29,12 @@
  *   §C3  a DISTRIBUTIVIDADE, que é o que liga os dois — e onde ela falha
  *   §C4  o VEREDICTO por andar: corpo, álgebra de divisão, anel, ou nem isso
  *
- * Cayley–Dickson corre em inteiros. O Gentil de dimensão ímpar precisa de r = √(a²+b²),
- * e isso diz-se: ali há double, e o resíduo mede-se contra a norma que ele preserva.
+ * Cayley–Dickson corre em inteiros. O Gentil de dimensão ímpar usa r = √(a²+b²) só
+ * quando r² é QUADRADO PERFEITO — o produto fecha em ℚ, como em nne.c.
  *
- *   cc -O2 -std=c99 -I. -I../lib torre_corpo.c -lm -o torre_corpo && ./torre_corpo
+ *   cc -O2 -std=c99 -I lib tests/torre_corpo.c -o torre_corpo && ./torre_corpo
  */
 #include <stdio.h>
-#include <math.h>
 #include <string.h>
 #include "unidade.h"
 
@@ -73,21 +72,59 @@ static int zerov(const long *x, int n){
     return 1;
 }
 
-/* ── o lado de GENTIL: o produto do corpus, em R³ ───────────────────────────── */
-typedef struct { double a, b, c; } W;
-static W gen(W u, W v){
-    double r1 = hypot(u.a, u.b), r2 = hypot(v.a, v.b);
-    W r;
-    if(r1 == 0 && r2 == 0){ r.a = -u.c*v.c; r.b = 0; r.c = 0; return r; }
-    if(r1 == 0){ r.a = -u.c*v.c*v.a/r2; r.b = -u.c*v.c*v.b/r2; r.c = u.c*r2; return r; }
-    if(r2 == 0){ r.a = -u.c*v.c*u.a/r1; r.b = -u.c*v.c*u.b/r1; r.c = v.c*r1; return r; }
-    double g = 1.0 - u.c*v.c/(r1*r2);
-    r.a = (u.a*v.a - u.b*v.b)*g;
-    r.b = (u.a*v.b + v.a*u.b)*g;
-    r.c = u.c*r2 + v.c*r1;
-    return r;
+/* ── o lado de GENTIL: produto nne-3D em ℚ, quando ‖(a,b)‖ é inteiro ─────────── */
+typedef struct { long a, b, c; } Wz;
+
+static int raiz_exata(long x, long *r){
+    if(x < 0) return 0;
+    long t = 0;
+    while(t*t < x) t++;
+    if(t*t != x) return 0;
+    *r = t;
+    return 1;
 }
-static W wsoma(W x, W y){ W r = { x.a+y.a, x.b+y.b, x.c+y.c }; return r; }
+static long mdc_pos(long a, long b){
+    if(a < 0) a = -a; if(b < 0) b = -b;
+    while(b){ long t = a % b; a = b; b = t; }
+    return a ? a : 1;
+}
+static int nne_z(Wz w1, Wz w2, long *an, long *bn, long *d, long *c){
+    long r1, r2;
+    if(!raiz_exata(w1.a*w1.a + w1.b*w1.b, &r1)) return 0;
+    if(!raiz_exata(w2.a*w2.a + w2.b*w2.b, &r2)) return 0;
+    if(r1 == 0 && r2 == 0){
+        *an = -w1.c*w2.c; *bn = 0; *d = 1; *c = 0; return 1;
+    }
+    if(r1 == 0){
+        *an = -w1.c*w2.c*w2.a; *bn = -w1.c*w2.c*w2.b; *d = r2; *c = w1.c*r2; return 1;
+    }
+    if(r2 == 0){
+        *an = -w1.c*w2.c*w1.a; *bn = -w1.c*w2.c*w1.b; *d = r1; *c = w2.c*r1; return 1;
+    }
+    long gn = r1*r2 - w1.c*w2.c, gd = r1*r2;
+    *an = (w1.a*w2.a - w1.b*w2.b)*gn;
+    *bn = (w1.a*w2.b + w2.a*w1.b)*gn;
+    *d  = gd;
+    *c  = w1.c*r2 + w2.c*r1;
+    long g = mdc_pos(mdc_pos(*an, *bn), *d);
+    *an /= g; *bn /= g; *d /= g;
+    if(*d < 0){ *an = -*an; *bn = -*bn; *d = -*d; }
+    return 1;
+}
+static Wz wsoma(Wz x, Wz y){ return (Wz){ x.a+y.a, x.b+y.b, x.c+y.c }; }
+
+static int gentil_dist_falha(Wz x, Wz y, Wz z){
+    Wz yz = wsoma(y, z);
+    long an1, bn1, d1, c1, an2, bn2, d2, c2, an3, bn3, d3, c3;
+    if(!nne_z(x, yz, &an1, &bn1, &d1, &c1)) return 0;
+    if(!nne_z(x, y, &an2, &bn2, &d2, &c2)) return 0;
+    if(!nne_z(x, z, &an3, &bn3, &d3, &c3)) return 0;
+    long rd = d2*d3;
+    long rn_a = an2*d3 + an3*d2, rn_b = bn2*d3 + bn3*d2, rc = c2 + c3;
+    return !(an1*rd == rn_a*d1 && bn1*rd == rn_b*d1 && c1 == rc);
+}
+
+static const long PIT[4][3] = { {3,4,5}, {5,12,13}, {8,15,17}, {7,24,25} };
 
 int main(void){
     printf("\n=== SOMA E PRODUTO NA TORRE TODA: onde cada axioma de corpo vale ===\n");
@@ -122,15 +159,16 @@ int main(void){
                    f?"sim":"NÃO", a2?"sim":"NÃO", c2?"sim":"NÃO", ne?"sim":"NÃO", op?"sim":"NÃO");
         }
         /* e do lado de Gentil, a mesma soma — é a de R³, componente a componente */
-        long g_ok = 0;
-        for(long t = 0; t < 200; t++){
-            W x = { sin(2.0*t+1), cos(2.0*t+2), 0.3+0.1*t };
-            W y = { sin(3.0*t+3), cos(3.0*t+4), 0.7-0.05*t };
-            W s1 = wsoma(x,y), s2 = wsoma(y,x);
-            if((long long)(fabs(s1.a-s2.a) * 1e12) == 0 && (long long)(fabs(s1.b-s2.b) * 1e12) == 0 && (long long)(fabs(s1.c-s2.c) * 1e12) == 0) g_ok++;
+        long g_ok = 0, g_tot = 0;
+        for(int i = 0; i < 4; i += 1) for(int j = 0; j < 4; j += 1)
+        for(long c1 = -3; c1 <= 3; c1 += 1) for(long c2 = -3; c2 <= 3; c2 += 1){
+            Wz x = { PIT[i][0], PIT[i][1], c1 }, y = { PIT[j][0], PIT[j][1], c2 };
+            Wz s1 = wsoma(x,y), s2 = wsoma(y,x);
+            g_tot++;
+            if(s1.a == s2.a && s1.b == s2.b && s1.c == s2.c) g_ok++;
         }
         printf("      Gentil 3D: a soma é a de R³, componente a componente — comutativa em"
-               " %ld de 200\n\n", g_ok);
+               " %ld de %ld\n\n", g_ok, g_tot);
         ok("A SOMA É GRUPO ABELIANO EM TODOS OS ANDARES, E É ELA QUE ORGANIZA A TABELA:"
            " fecho, associatividade, comutatividade, neutro e oposto valem nos cinco"
            " andares de Cayley–Dickson e no lado de Gentil. Não se afirma que «a soma é"
@@ -138,7 +176,7 @@ int main(void){
            " nenhuma pergunta seguinte teria sentido. TUDO O QUE SE PERDE NA TORRE PERDE-SE"
            " DO LADO DO PRODUTO",
            andares == 5 && fecho == andares && assoc == andares && comut == andares
-           && neutro == andares && oposto == andares && g_ok == 200);
+           && neutro == andares && oposto == andares && g_ok == g_tot);
     }
 
     /* ═══ §C2  O PRODUTO: ONDE CADA AXIOMA CAI ══════════════════════════════ */
@@ -213,14 +251,15 @@ int main(void){
         /* e o Gentil de dimensão ímpar: NÃO distribui — já medido no nne.c §N3, e aqui
          * mede-se outra vez porque a tabela não cita, mede */
         long g_falhas = 0, g_casos = 0;
-        for(long t = 0; t < 300; t++){
-            W x = { sin(2.0*t+1)*3, cos(2.0*t+2)*3, 0.5+0.2*sin(t) };
-            W y = { sin(3.0*t+3)*3, cos(3.0*t+4)*3, 0.6+0.1*cos(t) };
-            W z = { sin(5.0*t+5)*3, cos(5.0*t+6)*3, 0.4+0.3*sin(2.0*t) };
-            W e = gen(x, wsoma(y,z));
-            W d = wsoma(gen(x,y), gen(x,z));
+        for(int i = 0; i < 4; i += 1) for(int j = 0; j < 4; j += 1)
+        for(long c1 = -2; c1 <= 2; c1 += 1) for(long c2 = -2; c2 <= 2; c2 += 1)
+        for(long cx = -2; cx <= 2; cx += 1){
+            /* y+z com norma inteira: (a,b)+(a,−b) = (2a,0), r = 2a */
+            Wz x = { PIT[j][0], PIT[j][1], cx };
+            Wz y = { PIT[i][0], PIT[i][1], c1 };
+            Wz z = { PIT[i][0], -PIT[i][1], c2 };
             g_casos++;
-            if((long long)(fabs(e.a-d.a) * 1e9) >= 1 || (long long)(fabs(e.b-d.b) * 1e9) >= 1 || (long long)(fabs(e.c-d.c) * 1e9) >= 1) g_falhas++;
+            if(gentil_dist_falha(x, y, z)) g_falhas++;
         }
         printf("      Gentil (ímpar)      3     NÃO — falha em %ld de %ld\n\n",
                g_falhas, g_casos);
@@ -232,7 +271,7 @@ int main(void){
            " dura da tabela, e é ela que explica por que o teorema de Hurwitz não alcança"
            " o Gentil — Hurwitz classifica álgebras BILINEARES, e sem distributividade não"
            " há bilinearidade",
-           h_dist == h_and && h_and == 5 && g_falhas > 0 && g_casos == 300);
+           h_dist == h_and && h_and == 5 && g_falhas > 0 && g_casos > 0);
     }
 
     /* ═══ §C4  O VEREDICTO POR ANDAR ════════════════════════════════════════ */
@@ -312,15 +351,18 @@ int main(void){
         }
         /* e o de Gentil: não distribui, logo «nem anel» — e nenhum outro nome lhe serve */
         {
-            long g_falha = 0;
-            for(long t = 0; t < 120; t++){
-                W x = { sin(2.0*t+1)*3, cos(2.0*t+2)*3, 0.5+0.2*sin(t) };
-                W y = { sin(3.0*t+3)*3, cos(3.0*t+4)*3, 0.6+0.1*cos(t) };
-                W z = { sin(5.0*t+5)*3, cos(5.0*t+6)*3, 0.4+0.3*sin(2.0*t) };
-                W e = gen(x, wsoma(y,z)), d = wsoma(gen(x,y), gen(x,z));
-                if((long long)(fabs(e.a-d.a) * 1e9) >= 1 || (long long)(fabs(e.b-d.b) * 1e9) >= 1 || (long long)(fabs(e.c-d.c) * 1e9) >= 1) g_falha++;
+            long g_falha = 0, g_tot = 0;
+            for(int i = 0; i < 4; i += 1) for(int j = 0; j < 4; j += 1)
+            for(long c1 = -2; c1 <= 2; c1 += 1) for(long c2 = -2; c2 <= 2; c2 += 1)
+            for(long cx = -2; cx <= 2; cx += 1){
+                Wz x = { PIT[j][0], PIT[j][1], cx };
+                Wz y = { PIT[i][0], PIT[i][1], c1 };
+                Wz z = { PIT[i][0], -PIT[i][1], c2 };
+                g_tot++;
+                if(gentil_dist_falha(x, y, z)) g_falha++;
             }
             if(!g_falha) coerente = 0;              /* se distribuísse, o nome mudava */
+            (void)g_tot;
         }
         printf("      e os nomes SAEM dos flags, não são postos à mão: ");
         for(long k = 0; k < nomeados; k++) printf("%s%s", nomes[k], k+1<nomeados?" · ":"\n");

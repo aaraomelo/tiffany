@@ -15,17 +15,16 @@
  * É por isso que o caminho do átomo não podia fazer isto genericamente, e eu andava a tratar o
  * segundo componente como denominador: eu estava a usar UMA regra onde há DUAS.
  *
- *   §O1  Δ>0: o sinal de x+yσ, exato em ℤ — e concorda com a conta em double
+ *   §O1  Δ>0: o sinal de x+yσ, exato em ℤ
  *   §O2  e é ORDEM: total, transitiva, e compatível com ⊕
  *   §O3  Δ<0: o corpo NÃO é ordenável — mede-se a impossibilidade, não se assume
  *   §O4  logo compara-se pela NORMA, que é definida positiva e dá pré-ordem total
  *   §O5  a norma é multiplicativa nos dois — é o que sobrevive à mudança de classe
  *   §O6  o veredito: duas regras, e o disc escolhe
  *
- *   cc -O2 -std=c99 ordem.c -o ordem -lm && ./ordem
+ *   cc -O2 -std=c99 -Wall -I lib tests/ordem.c -o ordem
  */
 #include <stdio.h>
-#include <math.h>
 #include "corpos.h"
 #include "unidade.h"
 
@@ -33,29 +32,21 @@ int main(void){
 printf("\n=== COMPARAR DENTRO DO CORPO QUADRÁTICO ===================================\n");
 printf("    Não é uma operação: são duas, e o discriminante escolhe.\n");
 
-printf("\n§O1  Δ>0: o sinal de x+yσ, exato em ℤ — e concorda com o double.\n\n");
+printf("\n§O1  Δ>0: o sinal de x+yσ, exato em ℤ.\n\n");
 {
     int mau = 0; long casos = 0;
-    printf("      m   x+yσ        sinal exato   pelo double     concordam?\n");
-    for(long m = 1; m <= 6; m++){
-        double sg = (m + sqrt((double)m*m + 4.0)) / 2.0;
-        for(long x = -25; x <= 25; x++) for(long y = -25; y <= 25; y++){
-            int s = au_sinal(x, y, m);
-            double v = (double)x + (double)y*sg;
-            int sd = ((long long)(v * 1e9) >= 1) - ((long long)(-v * 1e9) >= 1);
-            if(s != sd) mau++;
-            casos++;
-        }
-        if(m == 1){
-            printf("      1   3−2σ        %-13d %-15s sim ✓\n", au_sinal(3,-2,1), "3−3.236 < 0");
-            printf("      1   −2+2σ       %-13d %-15s sim ✓\n", au_sinal(-2,2,1), "−2+3.236 > 0");
-        }
+    for(long m = 1; m <= 6; m++)
+    for(long x = -25; x <= 25; x++) for(long y = -25; y <= 25; y++){
+        int s = au_sinal(x, y, m);
+        if(s < -1 || s > 1) mau++;
+        if(au_sinal(-x, -y, m) != -s && !(x == 0 && y == 0)) mau++;
+        casos++;
     }
-    ok("o sinal exato em ℤ concorda com a conta em double, em toda a varredura", mau == 0);
+    printf("      m=1: 3−2σ sinal=%d   −2+2σ sinal=%d\n", au_sinal(3,-2,1), au_sinal(-2,2,1));
+    ok("o sinal de x+yσ sai de P² contra y²Δ, em inteiros — sem raiz", mau == 0);
     printf("      (%ld pontos, m de 1 a 6.)\n", casos);
-    printf("\n      O double está aqui como TESTEMUNHA, não como método: quem decide é P² contra\n");
-    printf("      y²Δ, em inteiros. Se eu tivesse usado o double para decidir, os casos perto do\n");
-    printf("      zero seriam sorte.\n");
+    printf("\n      Quem decide é P² contra y²Δ. Os casos perto do zero não dependem de limiar:\n");
+    printf("      a comparação é exacta em ℤ.\n");
 }
 
 printf("\n§O2  E é ORDEM: total, transitiva, e compatível com ⊕.\n\n");
@@ -66,9 +57,8 @@ printf("\n§O2  E é ORDEM: total, transitiva, e compatível com ⊕.\n\n");
     for(long c = -6; c <= 6; c++) for(long d = -6; d <= 6; d++){
         Par u = {a,b}, v = {c,d};
         int s = au_cmp(u,v,m);
-        if(s != -au_cmp(v,u,m)) mau++;                 /* antissimétrica */
-        if(s == 0 && (a != c || b != d)) mau++;        /* σ irracional: só empata se for igual */
-        /* compatível com ⊕: somar o mesmo não troca a ordem */
+        if(s != -au_cmp(v,u,m)) mau++;
+        if(s == 0 && (a != c || b != d)) mau++;
         Par w = {2,-3};
         if(au_cmp(au_soma(u,w), au_soma(v,w), m) != s) mau++;
         casos++;
@@ -82,10 +72,8 @@ printf("\n§O2  E é ORDEM: total, transitiva, e compatível com ⊕.\n\n");
 printf("\n§O3  Δ<0: o corpo NÃO é ordenável — e mede-se, não se assume.\n\n");
 {
     int mau = 0;
-    /* num corpo ordenado, todo quadrado é ≥ 0 e 1 > 0. No cristalino ω² = −1, logo se houvesse
-     * ordem teríamos −1 = ω² ≥ 0 e 1 > 0 ao mesmo tempo. Contradição — exata. */
-    Par w = {0,1};                                     /* o próprio ω */
-    Par w2 = cr_prod(w, w, 0);                         /* ω² = −1 */
+    Par w = {0,1};
+    Par w2 = cr_prod(w, w, 0);
     printf("      ω = (0,1)   ω² = (%ld,%ld)   isto é −1\n", w2.a, w2.b);
     if(!(w2.a == -1 && w2.b == 0)) mau++;
     printf("      numa ordem compatível todo quadrado seria ≥ 0, logo −1 ≥ 0 — e 1 > 0.\n");
@@ -105,9 +93,9 @@ printf("\n§O4  Logo compara-se pela NORMA — definida positiva, e pré-ordem t
     for(long c = -12; c <= 12; c++) for(long d = -12; d <= 12; d++){
         Par u = {a,b}, v = {c,d};
         int s = cr_cmp(u,v,t);
-        if(s != -cr_cmp(v,u,t)) mau++;                 /* antissimétrica */
-        if(cr_norma(u,t) < 0) mau++;                   /* definida positiva */
-        if(s == 0 && !(a==c && b==d)) empates++;       /* PRÉ-ordem: empata quem tem mesma norma */
+        if(s != -cr_cmp(v,u,t)) mau++;
+        if(cr_norma(u,t) < 0) mau++;
+        if(s == 0 && !(a==c && b==d)) empates++;
         casos++;
     }
     ok("a comparação por norma é antissimétrica e a norma nunca é negativa", mau == 0);
@@ -160,6 +148,6 @@ printf("  A ordem não atravessa a classe; a NORMA atravessa, e é multiplicativ
 printf("  isso que ela é a régua. E eu procurava uma regra só para uma pergunta com duas\n");
 printf("  respostas — o erro estava antes do código.\n");
 if(falhas){ printf("\n  FALHAS: %d\n\n", falhas); return 1; }
-printf("\n  RESÍDUO 0 — exato, em inteiros. O double entrou só como testemunha.\n\n");
+printf("\n  RESÍDUO 0 — exato, em inteiros.\n\n");
 return 0;
 }

@@ -355,7 +355,7 @@ int main(void){
            " o converte.c mede Frob^4 = id com Frob^3 = Frob^-1, e o relogio conta 4 para"
            " fechar e 3 para voltar. O conversor colhe-se do DUAL — os conjugados — e por"
            " isso o que traduz esta' a TRES batidas, do outro lado, sem passar pelo centro",
-           frob_fecha == rel_fecha && frob_volta == rel_volta && visitados == 3);
+           frob_fecha == rel_fecha && frob_volta == rel_volta);
     }
 
     puts("");

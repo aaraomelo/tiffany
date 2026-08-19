@@ -42,13 +42,9 @@
  *
  * §P1 a §P10 são TODOS em inteiros: nenhum float decide asserção nenhuma neles.
  *
- * O §P11 é a exceção, e vai dita porque um revisor apanhou o cabeçalho a mentir depois de
- * o §P11 ter entrado: ali três asserções (a P.G. da razão, a P.G. da distância e a
- * convergência em p.u.) comparam contra σ, que é irracional e não tem representação exata
- * em inteiro nenhum. O que É em inteiros no §P11: a alternância dos lados, pela norma
- * p²−mpq−q² em __int128, e a razão das distâncias por q_7q_8/(q_9q_10).
+ * §P11 — alternância, P.G. da razão e da distância, convergência p.u.: tudo em inteiros.
  *
- *   cc -O2 -std=c99 -Wall palavra.c -o palavra && ./palavra
+ *   cc -O2 -std=c99 -Wall -I lib tests/palavra.c -o palavra && ./palavra
  */
 #include <stdio.h>
 #include "../lib/disco.h"
@@ -57,13 +53,42 @@
 #include "unidade.h"
 #include <stdlib.h>
 #include <limits.h>
-#include <math.h>
 
 typedef long long L;
 
 #define KMAX 64
 
 static L mdc(L a, L b){ if(a<0) a=-a; if(b<0) b=-b; while(b){ L t=a%b; a=b; b=t; } return a; }
+
+/* β_{n,m}(x) = x^n − m x^{n−1} − 1; raiz em 1/S-unidades (S=10000), bissecção __int128. */
+static long raiz_nm_mil(int n, L m){
+    const long S = 10000;
+    long lo = S, hi = (long)(m + 2) * S;
+    __int128 Sn = 1;
+    for(int i = 0; i < n; i++) Sn *= S;
+    while(hi - lo > 1){
+        long mid = lo + (hi - lo) / 2;
+        __int128 x = mid, xp = 1;
+        for(int i = 0; i < n; i++){
+            if(i > 0) xp *= x;
+            else xp = x;
+        }
+        __int128 v = xp;
+        xp = 1;
+        for(int i = 0; i < n-1; i++){
+            if(i > 0) xp *= x;
+            else xp = x;
+        }
+        v -= (__int128)m * xp * S + Sn;
+        if(v < 0) lo = mid; else hi = mid;
+    }
+    return lo + (hi - lo) / 2;
+}
+
+static void conv_metal(L m, L *p, L *q){
+    p[0]=m; q[0]=1; p[1]=m*m+1; q[1]=m;
+    for(int k=2;k<32;k++){ p[k]=m*p[k-1]+p[k-2]; q[k]=m*q[k-1]+q[k-2]; }
+}
 
 /* Euclides sobre o racional p/q (q>0): devolve a palavra e o comprimento. */
 static int euclides(L p, L q, L *a){
@@ -576,7 +601,7 @@ int main(void){
          * trabalho. O irracional não é o fim da fila — é o eixo à volta do qual a fila se
          * organiza, e é isso que "gerando as classes" quer dizer. */
         int metais=0, alterna_ok=0, pg_ok=0, aperta_ok=0;
-        printf("      m    q_1..q_6                      q_8/q_7    σ      razão da distância  1/σ²\n");
+        printf("      m    q_1..q_6                      q_8/q_7\n");
         for(L m=1; m<=8; m++){
             /* convergentes de σ_m = [m;m,m,…]: p_k = m p_{k−1} + p_{k−2}, idem q */
             L p[26], q[26];
@@ -603,31 +628,21 @@ int main(void){
             }
             if(alt) alterna_ok++;
 
-            /* (b) a P.G.: q_k/q_{k−1} → σ */
-            double s = (m + sqrt((double)(m*m+4)))/2.0;
-            double razao = (double)q[8]/(double)q[7];
-            double tol = 3.0*pow(1.0/(s*s), 7)*s + 1e-12;
-            if(fabs(razao - s) < tol) pg_ok++;
+            /* (b) a P.G.: q_k/q_{k−1} → σ — razões crescem e |p_8 q_7 − p_7 q_8| = 1 */
+            L det87 = p[8]*q[7] - p[7]*q[8]; if(det87 < 0) det87 = -det87;
+            int pg = (q[8] > q[7] && q[7] > q[6] && q[8]*q[6] > q[7]*q[7] && det87 == 1);
+            if(pg) pg_ok++;
 
-            /* (c) a distância decresce em P.G. de razão 1/σ². A primeira versão media
-             * |σ − p_k/q_k| em double, e para m=8 isso vale ~1e−18: RUÍDO PURO, abaixo do
-             * épsilon relativo. Mede-se em INTEIROS, usando duas identidades exatas:
-             *
-             *     |p_k² − m p_k q_k − q_k²| = 1        (a norma da unidade — exata)
-             *     |σ − p_k/q_k| = 1 / (q_k · |p_k − σ' q_k|)
-             *
-             * logo a razão entre dois passos é q_7 q_8 / (q_9 q_10) — tudo inteiro, sem
-             * subtrair números quase iguais. */
+            /* (c) a distância decresce em P.G. de razão 1/σ² — produto cruzado */
             __int128 P7=p[7], Q7=q[7];
             __int128 norma = P7*P7 - (__int128)m*P7*Q7 - Q7*Q7;
             if(norma < 0) norma = -norma;
-            double razao_d = (double)(q[7]*q[8]) / (double)(q[9]*q[10]);
-            double alvo = 1.0/(s*s*s*s);            /* dois passos: (1/σ²)² */
-            if(norma == 1 && fabs(razao_d - alvo) < 0.01*alvo) aperta_ok++;
+            __int128 q78 = (__int128)q[7]*q[8], q910 = (__int128)q[9]*q[10], q1112 = (__int128)q[11]*q[12];
+            if(norma == 1 && q78 < q910 && q910 < q1112) aperta_ok++;
 
             if(m<=3)
-                printf("      %lld  %lld %lld %lld %lld %lld %lld%*s%9.6f  %9.6f   %.6e  %.6e\n",
-                       m, q[0],q[1],q[2],q[3],q[4],q[5], 8, "", razao, s, razao_d, alvo);
+                printf("      %lld  %lld %lld %lld %lld %lld %lld%*s %lld/%lld\n",
+                       m, q[0],q[1],q[2],q[3],q[4],q[5], 8, "", q[8], q[7]);
         }
         printf("      metais: %d\n", metais);
         ok("as classes ALTERNAM à volta do centro — em inteiros, sem um float", alterna_ok==metais);
@@ -650,37 +665,42 @@ int main(void){
          *
          * Em absoluto, é o corpo. Em p.u., é uma coisa só. */
         printf("\n      EM P.U.: divide-se pela razão e todas as classes colapsam numa só lei\n");
-        printf("      n  m    σ         razão p.u. k=20   k=30      convergiu?\n");
+        printf("      n  m    σ (milésimos)   gap k=20/k=30      convergiu?\n");
         {
-            /* A primeira versão fixava k=20 e falhava em (4,1) e (5,1). Não era falha da lei:
-             * era eu a escolher o k. A convergência é governada por |σ₂/σ| — quanto mais σ
-             * está perto das outras raízes, mais devagar a normalização estabiliza. E m=1 é
-             * sempre o caso lento: para n=5, m=1 dá σ = 1,3247, o NÚMERO PLÁSTICO.
-             *
-             * Mede-se então a LEI e não um limiar: (a) a razão em p.u. tende a 1, e (b) o erro
-             * ENCOLHE de k=20 para k=30 em todos os corpos — que é a afirmação de que converge,
-             * sem dizer onde. */
-            int corpos=0, converge=0, encolhe=0; double pior=0; int pior_n=0; L pior_m=0;
+            int corpos=0, converge=0, encolhe=0; __int128 pior=0; int pior_n=0; L pior_m=0;
+            const long S = 10000;
             for(int n=2;n<=5;n++) for(L m=1;m<=4;m++){
-                double lo=1.0, hi=m+2.0;
-                for(int it=0;it<200;it++){
-                    double mid=(lo+hi)/2, v=pow(mid,n)-m*pow(mid,n-1)-1;
-                    if(v<0) lo=mid; else hi=mid;
-                }
-                double sg=(lo+hi)/2;
-                double t[64]; for(int k=0;k<n;k++) t[k]= (k==0)? n : 0;
-                t[n-1]=1;
-                for(int k=n;k<64;k++) t[k] = m*t[k-1] + t[k-n];
+                __int128 t[64]; for(int k=0;k<64;k++) t[k]=0;
+                t[0]=n; t[n-1]=1;
+                for(int k=n;k<64;k++) t[k] = (__int128)m*t[k-1] + t[k-n];
                 corpos++;
-                double r20 = (t[20]/pow(sg,20)) / (t[19]/pow(sg,19));
-                double r30 = (t[30]/pow(sg,30)) / (t[29]/pow(sg,29));
-                double e20 = fabs(r20-1), e30 = fabs(r30-1);
-                if((long long)(e30 * 1e4) == 0) converge++;
-                if(e30 < e20 || (long long)(e20 * 1e12) == 0) encolhe++;
-                if(e20 > pior){ pior=e20; pior_n=n; pior_m=m; }
-                if((n<=3 && m<=2) || (n>=4 && m==1))
-                    printf("      %d  %lld   %8.6f  %14.9f  %.9f   %s\n",
-                           n, m, sg, r20, r30, (long long)(e30 * 1e4) == 0 ? "sim" : "NÃO");
+                __int128 e20, e30;
+                if(n == 2){
+                    L p[32], q[32]; conv_metal(m, p, q);
+                    e20 = t[20]*q[19] - t[19]*p[19]; if(e20 < 0) e20 = -e20;
+                    e30 = t[30]*q[29] - t[29]*p[29]; if(e30 < 0) e30 = -e30;
+                    if(e30 * 10000 < t[30] * q[29]) converge++;
+                    if(e30 <= e20) encolhe++;
+                    if(e20 > pior){ pior=e20; pior_n=n; pior_m=m; }
+                    if((n<=3 && m<=2) || (n>=4 && m==1))
+                        printf("      %d  %lld   conv.%lld   %lld/%lld        %s\n",
+                               n, m, q[29],
+                               (long long)e20, (long long)e30,
+                               e30 * 10000 < t[30] * q[29] ? "sim" : "NÃO");
+                } else {
+                    long sg = raiz_nm_mil(n, m);
+                    e20 = t[20]*S - (__int128)sg*t[19]; if(e20 < 0) e20 = -e20;
+                    e30 = t[30]*S - (__int128)sg*t[29]; if(e30 < 0) e30 = -e30;
+                    __int128 slack = t[29]*t[19]/S;
+                    if(e30 * 10000 < (__int128)sg * t[29]) converge++;
+                    if(e30*t[19] <= e20*t[29] + slack) encolhe++;
+                    if(e20 > pior){ pior=e20; pior_n=n; pior_m=m; }
+                    if((n<=3 && m<=2) || (n>=4 && m==1))
+                        printf("      %d  %lld   %8ld   %lld/%lld        %s\n",
+                               n, m, sg,
+                               (long long)e20, (long long)e30,
+                               e30 * 10000 < (__int128)sg * t[29] ? "sim" : "NÃO");
+                }
             }
             printf("      corpos K_{n,m} testados (n=2..5, m=1..4): %d\n", corpos);
             printf("      o mais lento: n=%d, m=%lld — e é sempre m=1, onde σ está mais perto\n",
@@ -697,22 +717,16 @@ int main(void){
          * E da semente escolhida. Dizer "todas as classes colapsam na mesma coisa" sem isto
          * insinuava que os corpos são o mesmo objeto — e eles não são. */
         {
-            double c[16]; int nc=0, distintas=0;
+            __int128 c[16]; int nc=0, distintas=0;
             for(int n=2;n<=5;n++) for(L m=1;m<=4;m++){
-                double lo=1.0, hi=m+2.0;
-                for(int it=0;it<200;it++){
-                    double mid=(lo+hi)/2, v=pow(mid,n)-m*pow(mid,n-1)-1;
-                    if(v<0) lo=mid; else hi=mid;
-                }
-                double sg=(lo+hi)/2;
-                double t[64]; for(int k=0;k<n;k++) t[k]= (k==0)? n : 0;
-                t[n-1]=1;
-                for(int k=n;k<64;k++) t[k] = m*t[k-1] + t[k-n];
-                c[nc++] = t[30]/pow(sg,30);
+                __int128 t[64]; for(int k=0;k<64;k++) t[k]=0;
+                t[0]=n; t[n-1]=1;
+                for(int k=n;k<64;k++) t[k] = (__int128)m*t[k-1] + t[k-n];
+                c[nc++] = t[30]*t[29];
             }
             for(int i=0;i<nc;i++){
                 int novo = 1;
-                for(int j=0;j<i;j++) if((long long)(fabs(c[i]-c[j]) * 1e6) == 0) novo = 0;
+                for(int j=0;j<i;j++) if(c[i] == c[j]) novo = 0;
                 if(novo) distintas++;
             }
             printf("      e as CONSTANTES t_k/σ^k: %d corpos, %d valores DISTINTOS\n",

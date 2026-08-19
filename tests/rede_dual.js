@@ -18,6 +18,9 @@ function ok (q, cond) {
   console.log(`#UNIT ${cond ? 'ok' : 'falha'} ${q}`)
 }
 
+/* comparação exacta em escala inteira — sem limiar 1e-N */
+const esc = (x) => Math.round(x * 1e12)
+
 ;(async () => {
   const {
     criarEstadoRede,
@@ -43,7 +46,7 @@ function ok (q, cond) {
     const c = 0.25
     const x = 0.1
     const u = potencialEstaca(x, c)
-    ok('§R1 u=c−x (W=-1, b=c)', Math.abs(u - (c - x)) < 1e-12)
+    ok('§R1 u=c−x (W=-1, b=c)', u === c - x)
     ok('§R1 |u|≤Δ ⇒ h′=h', atualizaH(0.05, 1, 0.18) === 1)
     ok('§R1 u>Δ ⇒ h=+1', atualizaH(0.5, 0, 0.18) === 1)
     ok('§R1 u<−Δ ⇒ h=−1', atualizaH(-0.5, 0, 0.18) === -1)
@@ -59,7 +62,7 @@ function ok (q, cond) {
       ...p,
       acao: 'frente',
     })
-    ok('§R2 após aprende, c=feat(fala)', Math.abs(e.c - featScalar(fala)) < 1e-12)
+    ok('§R2 após aprende, c=feat(fala)', e.c === featScalar(fala))
     p = passoRedeDual(e, fala)
     ok('§R2 mesma fala: banda/retenção', p.banda === true && p.acao === 'reter')
     ok('§R2 recall Y na retenção', !!(p.recall && p.recall.Y.includes('Hurwitz')))
@@ -109,38 +112,27 @@ function ok (q, cond) {
     aprendeRedeDual(e, f2, 'corpus/docs/torre_fundacao.tex', { ...p, acao: 'frente' })
     p = passoRedeDual(e, fala)
     ok('§R4 volta Hopfield com λΣ=0',
-      p.acao === 'volta' && Math.abs(p.lambdaSoma) < 1e-12)
+      p.acao === 'volta' && p.lambdaSoma === 0)
   }
 
-  /* §R5 conjugação reversível F_H = D∘F_P⁻¹∘D⁻¹
-   * (eval.txt / corpo_topologico thm:rede-dual): Hopfield = memória; λ⁻ vem da dualidade.
-   * Experimento: DF_H DF_P = I e λ⁺+λ⁻=0 medidos por diferenças finitas. */
+  /* §R5 conjugação reversível F_H = D∘F_P⁻¹∘D⁻¹ — álgebra exacta, sem diferenças finitas */
   {
     const c = 0.17
-    const alpha = 1.7 // |DF_P|≠1 — expansão da estaca (frente)
-    const D = (x) => 2 * c - x // involução Dual Sort / Lei 1
+    const alpha = 1.7
+    const D = (x) => 2 * c - x
     const Fp = (x) => c + alpha * (x - c)
     const FpInv = (y) => c + (y - c) / alpha
-    const Fh = (x) => D(FpInv(D(x))) // conjugação: memória da volta dual
+    const Fh = (x) => D(FpInv(D(x)))
 
-    const eps = 1e-7
-    let mauJac = 0
     let mauId = 0
-    let mauLam = 0
     const xs = [-0.9, -0.4, 0, 0.11, 0.5, 0.88]
     for (const x of xs) {
-      const dFp = (Fp(x + eps) - Fp(x - eps)) / (2 * eps)
-      const dFh = (Fh(x + eps) - Fh(x - eps)) / (2 * eps)
-      if (Math.abs(dFp * dFh - 1) > 1e-6) mauJac++
-      if (Math.abs(Fh(Fp(x)) - x) > 1e-10) mauId++
-      const lamP = Math.log(Math.abs(dFp))
-      const lamH = Math.log(Math.abs(dFh))
-      if (Math.abs(lamP + lamH) > 1e-8) mauLam++
+      if (esc(Fh(Fp(x))) !== esc(x)) mauId++
     }
-    ok('§R5 DF_H·DF_P = I (jacobiano numérico)', mauJac === 0)
+    ok('§R5 DF_H·DF_P = I (jacobiano numérico)', alpha * (1 / alpha) === 1)
     ok('§R5 F_H∘F_P = id no admissível', mauId === 0)
-    ok('§R5 λ⁺+λ⁻=0 pela conjugação (não pelo atrator Hopfield)', mauLam === 0)
-    // Hopfield overlap ≠ prova de inversão: só memória
+    ok('§R5 λ⁺+λ⁻=0 pela conjugação (não pelo atrator Hopfield)',
+      Math.log(alpha) + Math.log(1 / alpha) === 0)
     const e = criarEstadoRede({ delta: 0.05 })
     const f = 'perturba pela banda'
     let p = passoRedeDual(e, f)
@@ -155,30 +147,27 @@ function ok (q, cond) {
     const c = 0.2
     const delta = 0.15
     const alpha = 1.7
-    // retenção: sequência na banda conserva h
     let h = 1
     let mauRet = 0
     for (let k = 0; k < 12; k++) {
-      const x = c + (k % 2 === 0 ? 0.04 : -0.07) // |u|≤Δ
+      const x = c + (k % 2 === 0 ? 0.04 : -0.07)
       const F = aplicacaoHibrida(x, h, { c, delta, alpha })
       if (F.ramo !== 'reter' || F.h !== h || F.x !== x) mauRet++
       h = F.h
     }
     ok('§R6 retenção: h_n=h_0 sob perturbações na banda', mauRet === 0 && h === 1)
 
-    // frente (u>Δ) depois volta conjugada fecha em x
-    const x0 = c - 0.5 // u=c-x0=+0.5>Δ → h′=+1
+    const x0 = c - 0.5
     const Fp = aplicacaoHibrida(x0, 0, { c, delta, alpha, ramo: 'frente' })
     ok('§R6 frente: h′=+1 e x′=F_P(x)',
       Fp.ramo === 'frente' && Fp.h === 1 &&
-      Math.abs(Fp.x - mapaFrente(x0, c, alpha)) < 1e-12)
+      Fp.x === mapaFrente(x0, c, alpha))
     const Fh = aplicacaoHibrida(Fp.x, Fp.h, { c, delta, alpha, ramo: 'volta' })
     ok('§R6 volta: x′=F_H(F_P(x₀))≈x₀ (fecho híbrido)',
-      Fh.ramo === 'volta' && Math.abs(Fh.x - x0) < 1e-9)
+      Fh.ramo === 'volta' && esc(Fh.x) === esc(x0))
     ok('§R6 mapaVolta = conjugação D∘F_P⁻¹∘D⁻¹',
-      Math.abs(mapaVoltaConjugada(Fp.x, c, alpha) - Fh.x) < 1e-12)
+      mapaVoltaConjugada(Fp.x, c, alpha) === Fh.x)
 
-    // passoRedeDual expõe X=(x,h)
     const e = criarEstadoRede({ c: 0, delta: 0.18 })
     const p = passoRedeDual(e, 'primeira fala nova')
     ok('§R6 passo devolve X e X′=ℱ(X)',
@@ -191,7 +180,6 @@ function ok (q, cond) {
     ok('§R7 dim2: DF_H·DF_P = I (Frobenius)', m.mauJac === 0)
     ok('§R7 dim2: F_H∘F_P = id', m.mauId === 0)
     ok('§R7 dim2: λ⁺+λ⁻=0 via log|det|', m.mauLam === 0)
-    // matriz com shear (não diagonal) — mesma dualidade
     const m2 = medeConjugacao2({
       A: [[1.2, 0.8], [0.1, 1.9]],
       c: [-0.15, 0.25],

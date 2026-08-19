@@ -181,8 +181,11 @@ static void secao_S2(void){
            liq_dado, AGENTES[a.agente].nome, a.trabalho);
     printf("        entrada de TIQUE  → liquidou = %d, agente %s, trabalho %ld\n",
            liq_tique, AGENTES[b.agente].nome, b.trabalho);
+    { int mesmo_agente = (a.agente == b.agente);
+      int mesmo_trabalho = (a.trabalho == b.trabalho);
+      int mesmo_liq = (liq_dado == liq_tique);
     ok("dado e tique dão o MESMO resultado — não há duas categorias de entrada",
-       liq_dado == liq_tique && a.agente == b.agente && a.trabalho == b.trabalho);
+       mesmo_agente && mesmo_trabalho && mesmo_liq); }
 
     /* e SEM entrada nenhuma nada se liquida: o tempo não corre sozinho (liquida.c §Q4) */
     Liquidacao c = liquida(termos, 0, 12);

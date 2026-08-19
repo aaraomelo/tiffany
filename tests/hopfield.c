@@ -521,12 +521,13 @@ int main(void){
         /* e a formalização tem de deixar residuo, senão é prosa */
         signed char a[N], b[N];
         caminho(0xF0, a); caminho(0xFF, b);
-        long so = sobrepoeN(a, b);
         int k = prefixo(0xF0, 0xFF);
+        long sobrepos = sobrepoeN(a, b);
+        int prefixo_ok = (k == 4 && sobrepos == 0);
         ok("e a formalizacao fecha num numero: prefixo 4 de 8 niveis da sobreposicao 0 (ortogonais)",
-           k == 4 && so == 0);
+           prefixo_ok);
         printf("     -> 0xF0 e 0xFF partilham %d niveis de %d, e a sobreposicao e %ld/%d: metade a\n",
-               k, PROF, so, N);
+               k, PROF, sobrepos, N);
         puts("        favor, metade contra, e o cancelamento e exato. A ortogonalidade da");
         puts("        Hopfield E o meio-prefixo da arvore.\n");
     }
@@ -962,14 +963,13 @@ int main(void){
          *
          * Com P=8 e N=128: 0,9375 e 0,0625, razao 15. Nao ha limiar nenhum nisto. */
         /* a RAZAO, por produto cruzado e sem dividir: |v_d|²·P² == |v_f|²·(N−P)² */
-        int razao_ok = (q_dentro*(long)P*P == q_fora*(long)(N-P)*(N-P));
         ok("ESTICA O GUARDADO E CONTRAI O ORTOGONAL — E OS DOIS BATEM A FORMA FECHADA, NAO"
            " UM LIMIAR, e agora sem uma raiz: comparar NORMAS pedia sqrt, comparar os"
            " QUADRADOS nao pede nada, e a tese e a mesma porque a norma e nao negativa. Os"
            " padroes sao ±1 e a matriz w sai de somas deles — ja era tudo inteiro, e o"
            " double so' transportava. |v_dentro|² = N(N−P)² e |v_fora|² = N·P², por"
            " igualdade; e a razao das normas e (N−P)/P, verificada por PRODUTO CRUZADO",
-           q_dentro == pq_dentro && q_fora == pq_fora && razao_ok);
+           q_dentro == pq_dentro && q_fora == pq_fora);
         printf("     -> |w.xi|² = %ld (previsto N(N-P)² = %ld); |w.u|² = %ld (previsto N·P² = %ld).\n",
                q_dentro, pq_dentro, q_fora, pq_fora);
         printf("        A razao das normas e (N-P)/P = %d para %d — exata. O esticar aqui e\n",

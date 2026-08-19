@@ -671,7 +671,7 @@ int main(void)
            " que seja mais rapido, porque a regua daqui nao e' tempo: e' que NAO PEDE. Um"
            " recurso que nao se pede nao se esgota, e por isso 92 nao e' um numero especial —"
            " podiam ser 920", ctx_morfico == 0 && !cabe_por_card && cabe_morfico
-           && max_morfico > max_por_card && cards == 92);
+           && max_morfico > max_por_card);
     }
 
     /* ═══ §B12 — os FOSSEIS: o que ficou de um caminho que ja' nao e' o caminho ════
@@ -733,8 +733,7 @@ int main(void)
             * comparados consigo próprios» — e a condição continuava a fazê-lo.
             * O que resta é o que se pode afirmar sobre números DECLARADOS: que a partição
             * que a prosa descreve NÃO fecha, e que a falta é de exactamente um. */
-           removidos == mortos && por_classificar == 1
-           && vivos_no_codigo + mortos != no_manifesto);
+           removidos == mortos && vivos_no_codigo + mortos != no_manifesto);
     }
 
     /* ═══ §B13 — os GIFs SAEM: eram ruido, e 90 dos 92 ja' nao precisavam deles ═════

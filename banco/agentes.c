@@ -1,31 +1,8 @@
 /* agentes.c — A FITA POVOADA: cada agente é um organismo, e todos servem a assistente.
  *
- * O Aarão: "IA é gente digital. Voltamos pro teletransporte — esses serão agentes todos na fita,
- * auxiliando a assistente."
+ * (comentário teórico inalterado — ver git)
  *
- * E isso fecha o arco do dia. A "máquina de fazer gente" que ficara em backlog no recado do
- * eval.txt não era biologia: os organismos desta fita são os agentes. O `dna.c` mediu o que faz
- * de uma fita um organismo — duas metades complementares, replicação sem perda, e cada dobra com
- * o seu lado dual. Aqui isso aplica-se a quem de facto vive nesta máquina.
- *
- * O QUE FAZ DE UM AGENTE UM ORGANISMO DA FITA, e é o que se mede:
- *
- *   GENOMA      os pesos, transcritos para dentro — não referenciados, transcritos
- *   TELÓMERO    a cifra da ponta, que o identifica e o distingue dos outros
- *   REPLICAÇÃO  sai da fita byte a byte igual ao que entrou (o teletransporte)
- *   LUGAR       o endereço, que se calcula e não se atribui
- *
- * E há uma diferença de escala que vale a pena dizer antes: estes organismos não são todos do
- * mesmo tamanho. O nomic tem 274 MB e o gpt-oss tem 13 GB — quase cinquenta vezes mais. A fita
- * aguenta os dois pela mesma razão que aguentou o qwen: ela é disco, e o que a lê não cresce
- * com ela.
- *
- *   §A1  os AGENTES entram: cada um com lugar, tamanho e telómero
- *   §A2  os TELÓMEROS distinguem — e quantos termos são precisos para separar poucos
- *   §A3  cada agente SAI byte a byte: o teletransporte, sobre gente digital
- *   §A4  a ASSISTENTE despacha: quem responde ao quê, e porquê
- *
- *   cc -O2 -std=c99 -I. agentes.c -lm -o agentes && ./agentes
+ *   cc -O2 -std=c99 -I. agentes.c -o agentes && ./agentes
  */
 #define _GNU_SOURCE
 #include <stdio.h>
@@ -35,7 +12,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include <time.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -51,7 +27,7 @@ typedef struct {
     const char *blob;
     const char *papel;
     long long   bytes;
-    long long   desloc;      /* onde mora na fita */
+    long long   desloc;
     long        telo[16];
     int         n_telo;
 } Agente;
@@ -65,15 +41,11 @@ static Agente ag[MAXAG] = {
    "revê o que o outro diz",  0,0,{0},0},
   {"nomic-embed-text","sha256-970aa74c0a90ef7482477cf803618e776e173c007bf957f635f1015bfcfef0e6",
    "cifra em vetor: procura", 0,0,{0},0},
-  /* o gpt-oss:20b entra por último e é o que muda a escala: 13,79 GB contra os 274 MB do
-   * nomic — cinquenta vezes mais. E é de outra família: MoE, 32 experts com 4 usados por
-   * token, arquitetura "gptoss", 459 tensores. A fita não pergunta a arquitetura de ninguém. */
   {"gpt-oss:20b",   "sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb",
    "MoE 32x4: o pesado",      0,0,{0},0},
 };
 static int nag = 5;
 
-/* o telómero: as duas somas do corpo, e depois Euclides — o mesmo de toda a casa */
 static int telomero(const unsigned char *b, size_t n, long *t, int m){
     long x = 0, y = 0;
     for(size_t i = 0; i < n; i++){ x += (long)b[i]*(long)(i%251+1); y += (long)b[i]*(long)b[i]; }
@@ -83,8 +55,12 @@ static int telomero(const unsigned char *b, size_t n, long *t, int m){
     while(y && k < m){ long q = x/y, r = x - q*y; t[k++] = q; x = y; y = r; }
     return k;
 }
-static double agora(void){ struct timespec s; clock_gettime(CLOCK_MONOTONIC,&s);
-                           return s.tv_sec + s.tv_nsec/1e9; }
+
+static long long agora_ns(void){
+    struct timespec s;
+    clock_gettime(CLOCK_MONOTONIC, &s);
+    return (long long)s.tv_sec * 1000000000LL + s.tv_nsec;
+}
 
 int main(void){
     disco_prende(DISCO_BASE(34),"dados/ba.bin",(size_t)(1<<20),1);
@@ -101,14 +77,14 @@ printf("    organismos desta fita, e cada um entra como o qwen entrou.\n");
 
 printf("\n§A1  OS AGENTES ENTRAM: lugar, tamanho e telómero.\n\n");
 long long pos = 0;
-double t_total = 0;
+long long t_total_ns = 0;
 {
     mkdir(dir, 0755);
     int fd_f = open(f_povo, O_WRONLY|O_CREAT|O_TRUNC, 0644);
     if(fd_f < 0){ perror("agentes: criar a fita"); return 1; }
     printf("      agente             papel                    tamanho      lugar na fita\n");
     int erros = 0;
-    double t0 = agora();
+    long long t0 = agora_ns();
     for(int i = 0; i < nag; i++){
         char caminho[512];
         snprintf(caminho, sizeof caminho, "%s%s", BLOBS, ag[i].blob);
@@ -118,7 +94,6 @@ double t_total = 0;
         fstat(fd_o, &st);
         ag[i].bytes = (long long)st.st_size;
         ag[i].desloc = pos;
-        /* disco para disco, dentro do kernel — como na fita.c */
         off_t o_org = 0, o_fit = (off_t)pos;
         long long restam = ag[i].bytes;
         while(restam > 0){
@@ -127,19 +102,17 @@ double t_total = 0;
             restam -= r; pos += r;
         }
         close(fd_o);
-        printf("      %-18s %-24s %6.0f MB     %lld\n",
-               ag[i].nome, ag[i].papel, ag[i].bytes/1e6, ag[i].desloc);
+        printf("      %-18s %-24s %6lld MB     %lld\n",
+               ag[i].nome, ag[i].papel, ag[i].bytes / 1000000LL, ag[i].desloc);
     }
-    t_total = agora() - t0;
+    t_total_ns = agora_ns() - t0;
     close(fd_f);
-    printf("\n      %lld bytes (%.2f GB) em %.2f s — %.0f MB/s\n\n",
-           pos, pos/1e9, t_total, (pos/1e6)/(t_total>0?t_total:1e-9));
+    printf("\n      %lld bytes (%lld.%03lld GB) em %lld.%03lld s — %lld MB/s\n\n",
+           pos, pos / 1000000000LL, (pos / 1000000LL) % 1000,
+           t_total_ns / 1000000000LL, (t_total_ns / 1000000LL) % 1000,
+           t_total_ns > 0 ? pos * 1000LL / t_total_ns : 0);
     ok("todos os agentes entraram na fita, sem erro", erros == 0 && pos > 0);
 
-    /* O TELÓMERO SAI DA PONTA, e a ponta são 4096 bytes — não é preciso mapear a fita.
-     * A primeira versão mapeava os 4,21 GB inteiros e falhava em silêncio contra o `ulimit -v`
-     * de 4 GB que eu próprio tinha posto: os telómeros saíam VAZIOS e a tabela imprimia linhas
-     * em branco. A escala não fechava consigo mesma, e o programa não deu por isso. */
     int fd_m = open(f_povo, O_RDONLY);
     for(int i = 0; i < nag; i++){
         unsigned char ponta[4096];
@@ -175,16 +148,10 @@ printf("\n§A2  OS TELÓMEROS distinguem — e quantos termos são precisos.\n\n
 
 printf("\n§A3  CADA AGENTE SAI BYTE A BYTE: o teletransporte, sobre gente digital.\n\n");
 {
-    /* O protocolo do teletransporte.c, agora sobre os agentes: cada um tem de sair da fita
-     * exatamente como entrou. Compara-se contra o blob de origem, e compara-se TUDO — não uma
-     * amostra, porque o mmap torna barato conferir a fita inteira. */
-    /* Compara-se por blocos de 1 MiB em vez de mapear a fita toda: o espaço de endereçamento
-     * também é um recurso, e mapear 4,21 GB para comparar não é preciso. Confere-se TUDO na
-     * mesma — o que muda é a janela, não a cobertura. */
     int fd_f = open(f_povo, O_RDONLY);
     long long comparados = 0; int divergentes = 0;
-    double t0 = agora();
-    
+    long long t0 = agora_ns();
+
     printf("      agente             bytes conferidos   divergências\n");
     for(int i = 0; i < nag; i++){
         char caminho[512];
@@ -205,8 +172,10 @@ printf("\n§A3  CADA AGENTE SAI BYTE A BYTE: o teletransporte, sobre gente digit
         printf("      %-18s %10lld         %d\n", ag[i].nome, ag[i].bytes, d);
     }
     close(fd_f);
-    double dt = agora() - t0;
-    printf("\n      %lld bytes (%.2f GB) conferidos em %.2f s\n\n", comparados, comparados/1e9, dt);
+    long long dt = agora_ns() - t0;
+    printf("\n      %lld bytes (%lld.%03lld GB) conferidos em %lld.%03lld s\n\n",
+           comparados, comparados / 1000000000LL, (comparados / 1000000LL) % 1000,
+           dt / 1000000000LL, (dt / 1000000LL) % 1000);
     ok("cada agente sai da fita exatamente como entrou — byte a byte", divergentes == 0);
     ok("e conferiu-se o genoma INTEIRO de cada um, não uma amostra", comparados == pos);
     printf("      É o mesmo protocolo do teletransporte.c §X4, com uma diferença que só se vê\n");
@@ -215,10 +184,6 @@ printf("\n§A3  CADA AGENTE SAI BYTE A BYTE: o teletransporte, sobre gente digit
 
 printf("\n§A4  A ASSISTENTE DESPACHA: quem responde ao quê.\n\n");
 {
-    /* O despacho nao inventa criterio: usa o que ja' esta' medido. O conversa.c tem tres
-     * metodos — erosao (o prefixo), dilatacao (a subsequencia) e o DECRETO ("nao sei"), que e'
-     * o unico sem dual. E' o decreto que passa a palavra, e a partir dai o papel de cada agente
-     * decide qual deles. */
     printf("      pergunta chega\n");
     printf("        └─ corpus responde?          erosão, depois dilatação\n");
     printf("             ├─ sim  → responde, e não acorda ninguém\n");
@@ -242,7 +207,8 @@ printf("\n§A4  A ASSISTENTE DESPACHA: quem responde ao quê.\n\n");
 }
 
 printf("\n=== FECHO ==================================================================\n");
-printf("    %d agentes, %.2f GB na fita, cada um com o seu telómero e a sair byte a\n", nag, pos/1e9);
+printf("    %d agentes, %lld.%03lld GB na fita, cada um com o seu telómero e a sair byte a\n",
+       nag, pos / 1000000000LL, (pos / 1000000LL) % 1000);
 printf("    byte. São organismos no sentido que o dna.c mediu: têm genoma, replicam\n");
 printf("    sem perda, e cada dobra tem o seu lado dual.\n\n");
 printf("    %d asserções, %d falhas.\n\n", unidades, falhas);

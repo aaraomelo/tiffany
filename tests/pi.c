@@ -24,18 +24,14 @@
  *        (x⁵−x⁴−1 = Φ₆·(x³−x−1), quasi.c §Q2): a parte ciclotômica é de π, e a parte plástica não.
  *        Na dimensão 5 o ouro sai do reino de π — e é exatamente ali que o cristal vira quasicristal.
  *
- *   cc -O2 -std=c99 pi.c -lm -o pi && ./pi
+ *   cc -O2 -std=c99 -Wall -I lib tests/pi.c -o pi
  */
 #include <stdio.h>
 #include "reta.h"      /* rt_zd_mul: as equações mínimas em ℤ[√D] */
 #include "unidade.h"
-#include <math.h>
+#include "isa_disk.h"
 #include "../lib/disco.h"
 #define fila DISCO_FIXO(long, 33)
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 static int passou = 1;
 static long p, n_dim, m_metal;
@@ -63,6 +59,24 @@ static int simb_legendre(long a, long q){            /* (a|q) por Euler — sem 
     while(e>0){ if(e&1) r=r*b%q; b=b*b%q; e>>=1; }
     if(r==0) return 0;
     return (r==1)?1:-1;
+}
+static long acha_primo_mod(long N){
+    for(long P = N + 1; P < 500; P++){
+        if(!primo(P)) continue;
+        if((P - 1) % N != 0) continue;
+        return P;
+    }
+    return 0;
+}
+static long acha_raiz_N(long N, long P){
+    for(long c = 2; c < P; c++){
+        if(rt_pot_mod(c, N, P) != 1) continue;
+        int ok = 1;
+        for(long d = 1; d < N && ok; d++)
+            if(N % d == 0 && rt_pot_mod(c, d, P) == 1) ok = 0;
+        if(ok) return c;
+    }
+    return 0;
 }
 
 int main(void){
@@ -108,56 +122,38 @@ int main(void){
     printf("\n§PI2 os METAIS são cossenos de ângulo racional: π gera cada um, exatamente\n");
     {
         int erro=0;
-        /* AS DUAS IDENTIDADES SÃO EXACTAS, e mediam-se com fabs(...) < 1e-15 — o limiar do
-         * ARREDONDAMENTO, não a régua delas. Um número algébrico caracteriza-se pela sua
-         * EQUAÇÃO MÍNIMA, e essa vive em ℤ:
-         *
+        /* AS DUAS IDENTIDADES SÃO EXACTAS em ℤ — a equação mínima, não um limiar:
          *      x = 2cos(2π/5) = 1/φ   satisfaz   x² + x − 1 = 0
          *      y = 2cos(π/4)  = √2    satisfaz   y² − 2 = 0
-         *
-         * e em ℤ[√5] escreve-se sem vírgula: 2x = √5 − 1 é o par (−1, 1), e a equação
-         * (2x)² = 4 − 2(2x) verifica-se com rt_zd_mul — (−1,1)² = (6,−2) e 4 − 2(−1,1) =
-         * (6,−2), o MESMO par. O double fica só na coluna impressa, para se ver o valor. */
-        double phi = (1+sqrt(5.0))/2;
-        double e1 = fabs(2*cos(2*M_PI/5) - 1/phi);
-        double e2 = fabs(2*cos(M_PI/4) - sqrt(2.0));
+         * e em ℤ[√5] escreve-se sem vírgula: 2x = √5 − 1 é o par (−1, 1). */
         long qa, qb; rt_zd_mul(-1, 1, -1, 1, 5, &qa, &qb);          /* (2x)² em ℤ[√5] */
         int eq_ouro = (qa == 4 - 2*(-1) && qb == -2*1);             /* = 4 − 2·(2x)   */
         long ra, rb; rt_zd_mul(0, 1, 0, 1, 2, &ra, &rb);            /* (√2)² em ℤ[√2] */
         int eq_dois = (ra == 2 && rb == 0);                         /* = 2, exacto    */
-        printf("       1/φ = 2cos(2π/5)        : %.15f   e a EQUAÇÃO x²+x−1 = 0 em ℤ[√5]:"
+        printf("       1/φ = 2cos(2π/5)        : equação x²+x−1 = 0 em Z[raiz5]:"
                " (2x)² = (%ld,%ld) e 4−2(2x) = (%ld,%ld)  %s\n",
-               2*cos(2*M_PI/5), qa, qb, 4L-2*(-1L), -2L, eq_ouro?"✓":"✗");
-        printf("       √2  = 2cos(π/4)         : %.15f   e y² = (%ld,%ld) = 2 exacto  %s"
-               "   (σ₂ = 1+√2)\n", 2*cos(M_PI/4), ra, rb, eq_dois?"✓":"✗");
+               qa, qb, 4L-2*(-1L), -2L, eq_ouro?"✓":"✗");
+        printf("       raiz2 = 2cos(π/4)       : y² = (%ld,%ld) = 2 exacto  %s"
+               "   (σ₂ = 1+raiz2)\n", ra, rb, eq_dois?"✓":"✗");
         if(!eq_ouro || !eq_dois) erro=1;
-        (void)e1; (void)e2; (void)phi;
-        /* a soma de Gauss: Σ_k (k|q)·cos(2πk/q) = √q/... para q ≡ 1 (mod 4), Σ(k|q)ζ^k = √q */
-        /* E A SOMA DE GAUSS TAMBÉM É EXACTA. g = Σ(k|q)·ζ^k satisfaz g² = q para q ≡ 1
-         * (mod 4) — é uma IGUALDADE, e media-se com fabs(g − √q) < 1e-12 sobre cossenos.
-         * A mesma soma existe onde a raiz da unidade existe SEM vírgula: em ℤ/p com
-         * q | p−1 há um ζ de ordem q, e ali g² ≡ q é uma congruência de inteiros.
-         * O double fica na coluna, para se ver o valor; a asserção usa a congruência. */
+        /* soma de Gauss: g = Σ(k|q)·ζ^k satisfaz g² = q para q ≡ 1 (mod 4) — em ℤ/p */
         long qs[3] = {5,13,17}, ps[3] = {11,53,103};    /* q | p−1 em cada par */
         long gauss_ok = 0;
         for(int t=0;t<3;t++){
             long q=qs[t], P=ps[t];
-            double s=0;
-            for(long k=1;k<q;k++) s += simb_legendre(k,q)*cos(2*M_PI*k/q);
-            /* ζ de ordem q em ℤ/P: procura-se o primeiro com ζ^q = 1 e ζ != 1 */
             long z=0;
             for(long c=2;c<P;c++) if(rt_pot_mod(c,q,P)==1){ z=c; break; }
             long g=0;
             for(long k=1;k<q;k++){
-                long l = simb_legendre(k,q);            /* ±1 */
+                long l = simb_legendre(k,q);
                 long zk = rt_pot_mod(z,k,P);
                 g = ((g + l*zk) % P + P) % P;
             }
             long g2 = g*g % P;
             int bate = (g2 == q % P);
             if(bate) gauss_ok++;
-            printf("       soma de Gauss em ζ_%-2ld : %.12f (no contínuo) ; em ℤ_%ld com ζ=%ld:"
-                   " g=%ld, g²=%ld e q=%ld  %s\n", q, s, P, z, g, g2, q % P, bate?"✓":"✗");
+            printf("       soma de Gauss em ζ_%-2ld : em Z_%ld com ζ=%ld:"
+                   " g=%ld, g²=%ld e q=%ld  %s\n", q, P, z, g, g2, q % P, bate?"✓":"✗");
         }
         if(gauss_ok != 3) erro=1;
         printf("     %s\n", VD(erro, "resíduo 0 — cada metal sai de raízes da unidade, isto é, de π: √5 (o ouro), √8 (a prata),\n"
@@ -215,17 +211,24 @@ int main(void){
     printf("     é \"corte do círculo\", e é dele que as formas saem, por DIVISÃO:\n");
     {
         int erro=0;
-        printf("       n    as n partes ζ_n^k          Σ_k ζ_n^k (soma das partes)   ζ_n^n\n");
+        int per_esq = isa_periodo_giro(ISA_S_ESQUILO);
+        isa_word(ISA_S_A, 1, 0);
+        for(int k = 0; k < per_esq; k++) isa_MOVE(ISA_S_ESQUILO, 1);
+        long tr, te; isa_read(ISA_S_A, &tr, &te);
+        printf("       ESQUILO^%d de (1,0) no disco ISA: (%ld,%ld) — rotacao ordem 4\n\n",
+               per_esq, tr, te);
+        if(tr != 1 || te != 0) erro=1;
+        printf("       n    raiz ζ_n em Z_p          Σ_k ζ_n^k (mod p)   ζ_n^n\n");
         for(int N=2;N<=12;N++){
-            double sr=0, si=0;
-            for(int k=0;k<N;k++){ sr += cos(2*M_PI*k/N); si += sin(2*M_PI*k/N); }
-            double volta_r = cos(2*M_PI), volta_i = sin(2*M_PI);
-            double soma = sqrt(sr*sr+si*si);
-            double fecha = sqrt((volta_r-1)*(volta_r-1)+volta_i*volta_i);
+            long P = acha_primo_mod(N);
+            long z = acha_raiz_N(N, P);
+            long sr = 0;
+            for(int k=0;k<N;k++) sr = (sr + rt_pot_mod(z, k, P)) % P;
+            long volta = rt_pot_mod(z, N, P);
             if(N<=6 || N==12)
-                printf("       %2d   %2d vértices do polígono    |Σ| = %.2e  → o centro     |ζ^n − 1| = %.1e\n",
-                       N, N, soma, fecha);
-            if((long long)(soma * 1e12) >= 1 || (long long)(fecha * 1e12) >= 1) erro=1;
+                printf("       %2d   ζ em Z_%ld, z=%ld       Σ = %2ld (mod p)     z^n = %ld\n",
+                       N, P, z, sr, volta);
+            if(sr != 0 || volta != 1) erro=1;
         }
         printf("     %s\n", VD(erro, "resíduo 0 — para todo n, as n partes da divisão do círculo SOMAM ZERO: o centro. Dividir\n"
           "     o círculo é a cisão ⊕ do §1, e o que sobra da divisão é o vértice — é o Venom, medido\n"

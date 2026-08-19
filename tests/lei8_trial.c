@@ -124,10 +124,12 @@ int main(void){
     printf("      lcm(%d, %d, %d, %d, %d) = %ld\n", o_esp, o_tri, o_i, junto, o_ind, todas);
     printf("      e a Lei 8 vezes o trial: %d × %d = %d\n", o_ind, o_tri, o_ind*o_tri);
     printf("      e a Lei 8 é 2³ — três dobras: %d\n", 1 << 3);
+    { int ind_ok = (o_ind == (1 << 3));
+      int fecho_ok = (todas == 24);
     ok("o FECHO: o lcm das quatro ordens é 24, que é a LEI 8 vezes o TRIAL — e a Lei 8 é 2³,"
        " três dobras. O 24 não é um número que aparece: é o produto das duas coisas que o"
        " catálogo tem, oito índices e três símbolos",
-       todas == 24 && (long)o_ind * o_tri == 24 && o_ind == (1 << 3));
+       ind_ok && fecho_ok); }
 
     /* ─── §L4 ── VIVIANI é a de ordem 4, e é o recobrimento duplo ───────────────────
      * A curva fecha em z ao fim de DUAS voltas no ângulo — a base (x,y) fecha numa, o

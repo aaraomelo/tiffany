@@ -37,12 +37,12 @@
  *   §D5  as DUAS transformadas: mesma recorrência, razão σ², coeficiente t_2 = m²+2
  *   §D6  controlo negativo: sem a alternância o encaixe QUEBRA, e mede-se
  *
- *   cc -O2 -std=c99 -Wall dualreta.c -lm -o dualreta && ./dualreta
+ *   cc -O2 -std=c99 -Wall -I lib tests/dualreta.c -o dualreta
  */
 #include <stdio.h>
-#include "reta.h"      /* rt_zd_norma: a norma em Z[sqrt(D)], inteira */
+#include "reta.h"
+#include "isa_disk.h"
 #include "unidade.h"
-#include <math.h>
 #include <string.h>
 
 typedef long long L;
@@ -185,8 +185,11 @@ int main(void){
             if(m<=3) printf("      %-4lld %s\n", m, lin);
         }
         printf("      metais: %d   com alternancia perfeita: %d\n", metais, alt_ok);
-        ok("os convergentes ALTERNAM os lados sem falha — em inteiros, pela norma",
-           alt_ok==metais);
+        int per_troca = isa_periodo_giro(ISA_S_TROCA);
+        printf("      TROCA no disco (os dois lados Q e Q*): periodo %d\n", per_troca);
+        ok("os convergentes ALTERNAM os lados sem falha — em inteiros, pela norma."
+           " TROCA no disco tem periodo 2: e' a dualidade dos dois lados",
+           alt_ok==metais && per_troca==2);
         conclui("R = Q + Q* nao e figura: sao duas subsequencias, uma por baixo e outra por");
         conclui("cima, e o real e o que fica entre elas.");
     }
@@ -211,14 +214,16 @@ int main(void){
              * com o indice. A 1.a versao comparava q[10]/q[8] com tolerancia 1e-6 e
              * falhava no OURO — que e o pior aproximavel e converge mais devagar que
              * todos. O limiar media a minha paciencia; a lei mede a sucessao. */
-            double s=(m+sqrt((double)(m*m+4)))/2.0;
-            double e1 = fabs((double)q[8]/q[6]  - s*s);
-            double e2 = fabs((double)q[10]/q[8] - s*s);
-            double e3 = fabs((double)q[12]/q[10]- s*s);
-            if(e2 < e1 && e3 < e2) raz_ok++;
-            if(m<=3) printf("      %-4lld %lld %lld %lld %lld%*s %lld %lld %lld %lld%*s %-13lld %.6f\n",
+            /* A LEI, e nao um limiar: a razao q_{2k}/q_{2k-2} e de Cauchy para σ².
+             * |q8/q6 - q10/q8| > |q10/q8 - q12/q10|  <=>
+             * |q8²-q6 q10| · q10  >  |q10²-q8 q12| · q6, em Z, sem σ. */
+            L c1 = q[8]*q[8] - q[6]*q[10]; if(c1 < 0) c1 = -c1;
+            L c2 = q[10]*q[10] - q[8]*q[12]; if(c2 < 0) c2 = -c2;
+            L c3 = q[12]*q[12] - q[10]*q[14]; if(c3 < 0) c3 = -c3;
+            if(c1 * q[10] > c2 * q[6] && c2 * q[12] > c3 * q[8]) raz_ok++;
+            if(m<=3) printf("      %-4lld %lld %lld %lld %lld%*s %lld %lld %lld %lld%*s %-13lld %lld/%lld\n",
                             m, q[0],q[2],q[4],q[6], 8, "", q[1],q[3],q[5],q[7], 6, "",
-                            t2, (double)q[10]/q[8]);
+                            t2, q[10], q[8]);
         }
         printf("      metais: %d   com a recorrencia x_k = t_2 x_{k-1} - x_{k-2}: %d   razao -> sigma^2: %d\n",
                metais, rec_ok, raz_ok);
@@ -282,19 +287,25 @@ int main(void){
         /* Se se tomassem os convergentes todos do mesmo lado, nao haveria encaixe: a
          * sucessao seria monotona e o limite ficaria por cima ou por baixo, nunca cercado.
          * Mede-se: a subsequencia PAR sozinha nunca cruza sigma. */
-        L m=1; double s=(m+sqrt(5.0))/2.0;
+        L m=1;
         L p[16], q[16];
         p[0]=m; q[0]=1; p[1]=m*m+1; q[1]=m;
         for(int i=2;i<16;i++){ p[i]=m*p[i-1]+p[i-2]; q[i]=m*q[i-1]+q[i-2]; }
-        int cruza=0, n=0;
+        int cruza=0, n=0, sant=0;
         printf("      so os PARES:  ");
         for(int k=0;k<12;k+=2){
-            double v=(double)p[k]/q[k];
-            printf("%.6f ", v);
-            n++; if(v > s) cruza++;
+            L nn = p[k]*p[k] - m*p[k]*q[k] - q[k]*q[k];
+            int sg = (nn>0)-(nn<0);
+            printf("%lld/%lld ", p[k], q[k]);
+            n++;
+            if(sant && sg != sant) cruza++;
+            if(!sant) sant = sg;
         }
-        printf("\n      sigma = %.6f   quantos ficam ACIMA: %d de %d\n", s, cruza, n);
-        ok("a subsequencia PAR sozinha NUNCA cruza sigma — um lado so nao cerca", cruza==0);
+        printf("\n      sinal da norma constante nos pares: %s   (%d de %d mudaram de lado)\n",
+               cruza ? "NAO" : "sim", cruza, n);
+        ok("a subsequencia PAR sozinha NUNCA cruza sigma — um lado so nao cerca. O sinal da"
+           " norma p^2-m p q-q^2 e' constante nos pares, sem formar σ",
+           cruza==0 && n==6 && sant == -1);
         conclui("e por isso e preciso o par: um lado aproxima por baixo e o outro por cima, e");
         conclui("o real e o que fica entre eles. Uma transformada so nao chega ao limite.");
     }

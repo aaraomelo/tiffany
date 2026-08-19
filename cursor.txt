@@ -1,383 +1,590 @@
 CURSOR.TXT — ONDE ESTÁ O TRABALHO, E COMO SE SEGUE
 ==================================================
 Não é histórico. É o que precisas para pegar e continuar.
-Estado: 18/08/2026 (manhã). Bateria 508:508, 0 falhas. A arquitectura FIRMADA:
-o algoritmo desceu ao código (tests/reta.c traz a tabela dos quatro passos com o
-τ de cada um), e as migrações de hoje foram escolhidas por realizarem o ciclo.
-Verificar sempre com:  bash tools/bateria.sh   (lê AS DUAS linhas: total e unidades)
 
-A TRÍADE, e quem mora em cada casa
-----------------------------------
+ESTADO
+------
+19/08/2026, sobre o commit 4f9c287, com dezenas de ficheiros modificados e POR COMMITAR
+(68 vieram de outra sessão, 13:59–14:17; o resto é a migração dos doubles).
 
-    τ=−1  papers/corpo_topologico.tex     o que FECHA          41 pp.   [GPT]
-    τ= 0  papers/corpo_algebrico.tex      o CENTRO, canónico   67 pp.   [Grok]
-    τ=+1  papers/corpo_analitico.tex      o que NÃO fecha      56 pp.   [Claude]
-          papers/corpo_computacional.tex  realização DENTRO do τ=−1   11 pp.
+    bateria     508 : 507 verdes, 1 falha
+                (banco/conversa.c NÃO COMPILOU — pré-existente no diff por commitar)
+    doubles     3906 → 0              python3 tools/doubles_todos.py  (C/H esgotados)
+    limiares    58 → 0 régua JS/PY (+4 valor físico)   python3 tools/doubles_todos.py
+    selo        31874aa9f2db0d54     (bateria completa por correr — memória)
 
-    E NÃO HÁ QUARTA CASA. «O centro não escolhe lado: ele é o sítio onde a dualidade
-    ainda não se partiu» — ele não é o terceiro lado do par, é o lugar ANTERIOR à
-    separação. Se algo é computacional, é realização dentro de uma das três, e a
-    posição LÊ-SE pelo que consome (o computacional consome do centro e do τ=−1, e
-    nada do τ=+1, porque ordenar TERMINA).
+Verificar SEMPRE com:  bash tools/bateria.sh   (lê AS DUAS linhas: total e unidades)
 
-    A REGRA DAS RÉGUAS:  centro --distribui--> {polo −1, polo +1} --medidores--> centro
-    Cada bloco que desce leva o seu medidor, e a contagem de citados não muda. É por
-    isso que dividir não dilui.
 
-    raiz  teoria.tex     segundo escalão: realizações específicas      98 pp.
-          catalogo.tex   mais específico ainda                        488 pp.
-          enredo.tex     a história                                   365 pp.
+0. A LEI: NÃO HÁ MOTIVO PARA DOUBLES
+=====================================
+Não é estilo nem limpeza. É o Corpo Algébrico lido no código, e cada peça cita-se:
 
-O EIXO É O τ, e ele tem TRÊS valores porque sign() tem três. O centro é canónico
-por SE FIXAR: rev(τ) = τ ⟺ τ = 0, provado em ℤ (algebrico prop:zero-dual-zero).
-A reflexão troca os polos e deixa o meio — é a dualidade discreto ↔ contínuo com o
-fundamento quieto. O computacional NÃO é um quarto valor de τ: é a execução.
+  A CADEIA DA DESCIDA     double → long → int → uint8 → bit, e em NENHUM degrau se perde
+  algebrico sec:do-bit    a matemática. O que se perde é o LIMIAR do double, a ILUSÃO de
+  tests/cadeia.c (7:0)    tecto do long, e o SINAL.
 
-    A TRANSFORMADA é UMA e fica no centro; os POLOS são dois e descem:
-        FOURIER   grupo ADITIVO, o círculo, |t|≤2, elíptico   → topologico sec:fourier
-        MELLIN    grupo MULTIPLICATIVO, folhas recíprocas     → analitico sec:mellin
-    e o isomorfismo x = eᵘ entre eles É a reflexão τ ↦ −τ.
+      «o bit não está mais longe de R do que o double estava:
+       estão os dois do mesmo lado, e nenhum lá chega.»
 
-O CRITÉRIO DE ARRUMAÇÃO, que decide tudo
------------------------------------------
-Uma peça é CANÓNICA se algum dos quatro a usa para FUNDAR; é de SEGUNDO ESCALÃO se
-só ilustra, ou se muda de enunciado quando se troca o sítio onde é lida (um anel
-concreto, uma fonte, um material).
+  R alcança-se pelo CORTE, PERPENDICULAR à descida. O double não é um degrau para R:
+  está do mesmo lado que o bit, e é o lado caro — não compra R e traz um limiar meu.
 
-    o canónico fica no centro, sem excepção
-    a realização vai para o lado a que pertence E NOMEIA a peça de que parte
-    o mais específico que os canónicos vive no teoria.tex
-    o mais específico que o teoria vive no catalogo.tex
+  O CORTE É INTEIRO        a/b < sigma_m  <=>  2a−mb < b·raiz(D), e parte-se em dois SEM
+  algebrico thm:corte      PERDA: 2a−mb < 0, ou 2a−mb >= 0 e (2a−mb)² < b²D.
 
-AS TRÊS CONFERÊNCIAS (correm na bateria, e nasceram todas de defeitos reais)
-----------------------------------------------------------------------------
+  O ENCAIXE TAMBÉM         |c_{k+1} − c_k| = 1/(q_k·q_{k+1}) — «exacta, a partir de
+  algebrico thm:encaixe    inteiros, e SEM AVALIAÇÃO DE NENHUMA RAIZ».
 
-    tools/refcruz.py    as referências CRUZADAS entre documentos. `\code{topologico
-                        thm:x}` não é um \ref — o pdflatex não a vê. Confere que o
-                        documento existe, que o label existe LÁ, e conta as
-                        DIRECÇÕES. Hoje: centro→lado 59, lado→centro 59 (iguais, e
-                        é isso que «obedecer à dualidade» quer dizer aqui).
+  E NÃO USA R              a operação define-se sobre qualquer corpo de característica
+  algebrico thm:nao-circular  != 2 e corre em F_p com os mesmos 36 e 28.
 
-    tools/caminhos.py   os caminhos citados em WORKFLOWS, SCRIPTS e CONFIGS. Um
-                        `test -s dist/corpo/papers/x.tex` num workflow só falha em
-                        produção. Foi assim que o deploy ficou quebrado de 15/08 a
-                        18/08 sem ninguém dar por isso.
+  O QUE SE ENTREGA É A PALAVRA, não um decimal (analitico cor:entrega). 3.14159 É
+  314159/100000; pelo double, 175 de 10000 NÃO VOLTAM (tests/entrega.c, 11:0).
 
-    tools/tautologia.py a asserção que não pode falhar por RELEITURA: uma variável
-                        da condição definida, linhas acima, em função de outra da
-                        mesma condição. Apanhou quatro num dia.
+    Lei 0 → bit → oito leis → dual → Pisot → corte → supremo → R  (algebrico sec:fechada)
+    — e nenhum degrau tem vírgula.
 
-    tools/doubles_cond.py  quais doubles ALIMENTAM uma condição — e só isso conta.
+REVOGADO: «se o double não entra numa condição, morre num printf e fica» (tools/doubles.py).
+A APRESENTAÇÃO TAMBÉM SAI.
 
-INVARIANTE DE QUALQUER REORGANIZAÇÃO: contar os medidores CITADOS antes e depois.
-São 508. Um medidor que nenhum documento cita DEIXA DE SER TESTADO, e a contagem
-parece completa sem estar. Contar não chega: há referências que um grep por texto
-não vê — path.join('papers','x.tex') partido em pedaços, e ficheiros GERADOS
-(cristal_*.tex, app/dist/) que não se editam à mão: corrige-se a FONTE e regenera.
-
-0. AS DUAS REGRAS
------------------
-
+E AS DUAS REGRAS ANTIGAS FICAM:
     NÃO PRESERVAR APROXIMAÇÃO QUANDO EXISTE FECHAMENTO EXACTO NO CORPO.
-
-    NÃO TRANSFORMAR UMA DESCOBERTA DE IMPLEMENTAÇÃO EM CAMADA TEÓRICA NOVA
+    NÃO TRANSFORMAR DESCOBERTA DE IMPLEMENTAÇÃO EM CAMADA TEÓRICA NOVA
     SE ELA JÁ É CONSEQUÊNCIA DA TRANSFORMADA UNIVERSAL.
 
-A primeira governa a migração (§2). A segunda governa o paper: antes de escrever um
-teorema, procura — quase sempre ele já lá está, ou é corolário de um que está.
-CORPO EXACTO PRIMEIRO: fecha em Q, e só depois vê o que sobra.
+
+1. O ALGORITMO UNIVERSAL — e o procedimento é SEMPRE o mesmo
+============================================================
+algebrico thm:universal · realizado em lib/reta.h · medido em tests/reta.c
+(nenhum dos dois tem um double)
+
+    DESCODIFICA   (p,q) := texto, racional EXACTO; u := mmc dos denominadores
+                  tau=0  CENTRO — a leitura para Z, e mais nada     rt_le_decimal
+                                                                    rt_unidade_comum
+    OPERA         |det T| = 1;  [p:q] -> [T00p+T01q : T10p+T11q]
+                  tau=−1 o que FECHA — a CONVOLUÇÃO; no discreto,   rt_opera
+                         o produto ponto a ponto sobre as N potências
+    INVERTE       T^-1 = adj(T)/det T, INTEIRA;  sigma^-1 = −sigma†
+                  tau=+1 a volta usa a OUTRA FOLHA — a DECONVOLUÇÃO rt_inverte
+    CODIFICA      w := palavra (FC) ou dígitos                      rt_cf_de/rt_cf_para
+                  tau=0  CENTRO — a saída de V
+    E FECHA       descodifica(w) = (p,q)                            rt_ciclo
+
+SÃO QUATRO PASSOS E NÃO CINCO: com |det T| = 1 a adjunta é inteira e a volta é exacta
+POR CONSTRUÇÃO. O TORO é a condição, não um passo — sem |det| = 1 a inversão RECUSA, e
+recusar é dizer, não truncar.
+
+E NENHUM PASSO NORMALIZA. O mmc é a LEITURA do texto para Z. Quem normaliza é a NORMA.
+E NÃO é 1/raiz(N): esse vem do lado ADITIVO (raízes no círculo, m = 0); as nossas folhas
+são RECÍPROCAS — lado MULTIPLICATIVO, e o factor é N.
+
+A DOURADA É A BORDA (algebrico thm:dourada-discreta). Na borda sigma² = m·sigma + 1
+sobre F_p, sigma é unidade de ordem N finita e os caracteres são as N potências sigma^k:
+
+    X_k = S_j x_j·sigma^{jk}        x_j = N^-1 S_k X_k·sigma^{−jk}
+    rt_folha_borda   rt_ordem_mult   rt_dourada   rt_dourada_inv
+
+PROIBIDO trazer Fourier/DFT de fora. Fourier é um POLO (tau=−1, topologico sec:fourier)
+e Mellin é o outro (tau=+1, analitico sec:mellin). Zero ocorrências de «DFT» no corpus.
 
 
-1. A TAREFA EM CURSO — eliminar os doubles
-------------------------------------------
+2. O MÉTODO — como se tira um double
+=====================================
+Ver o que a asserção DECIDE. É quase sempre uma destas, e nenhuma precisa de vírgula.
 
-    python3 tools/doubles_cond.py   o que ALIMENTA uma condição — e só isso conta
-
-    A conta ingénua INFLACIONA, e o nome tem de fechar dos DOIS lados: `\bt\b` casa
-    com o `t` de `t.instrucoes` (campo long de struct) e `\ba\b` casa com o `a` de
-    `e2.a`. Fechar só um lado deixa passar metade.
-
-    E os quatro números, medidos — o de partida que este ficheiro citava («197») não
-    correspondia a medição nenhuma:
-
-                      início (8e4da41)   hoje
-        régua ingénua       257           135
-        régua fechada       237           110      ← esta é a boa
-
-    Ou seja o trabalho desta sessão é 237 → 110, menos 127. Quando a ferramenta muda,
-    remedir o PONTO DE PARTIDA com a régua nova — senão o progresso é a diferença
-    entre duas réguas, e não entre dois estados.
-
-O que conta é o que ALIMENTA uma condição `ok(...)`. Estado dos que já foram tocados:
-
-    dourada_escala.c 7 →  0  ✔      cosmico.c      16 →  6
-    liga.c          15 →  0  ✔      dif.c          10 →  4
-    colheita.c      14 →  0  ✔      encanamento.c  12 →  4
-    dominios.c       9 →  1         llm.c           8 →  6
-    arraytermico.c   6 →  1         nne.c           8 →  7
-    simula.c        10 →  5         ---------------------
-                                    de 197 para 148
-
-QUATRO estão fechados a zero. Os que ficam com poucos são os que MEDEM vírgula: no
-`nne.c` os doubles restantes são o erro de arredondamento (é o objecto), no `dif.c` e
-no `encanamento.c` são igualdades exactas `== 0.0`, que é o contrário de dar folga.
-
-POR FAZER: ~51 ficheiros, 108 doubles. Os maiores por tocar:
-    xx 6 · continua 5 · tikz 4 · spline 4 · relogio_curva 4 · encanamento 4 · cosmico 4 · corpo_fisico 4 · travessia 3 · quantico 3
-
-### E a ferramenta que apanha o que a leitura não apanha
-
-    python3 tools/tautologia.py [ficheiro.c ...]
-
-Procura uma variável da condição DEFINIDA, poucas linhas acima, **em função de outra
-variável da mesma condição** — e essa é a forma que passa despercebida, porque a condição
-sozinha parece boa. Apanhou quatro num dia:
-
-    long ops_dobra = 2L*k;                ok(..., ops_dobra == 2L*k && k > 0)      plugs.c
-    long a = razao - U;                   ok(..., razao == U && a == 0 && …)       estrela.c
-    janela_fechada = janela_aberta*G;     ok(..., janela_fechada > janela_aberta)  simula.c
-    por_classificar = M - v - m;          ok(..., v + m + por_classificar == M)    cards.c
-
-Em TRÊS dos quatro, a nota por cima da condição já **descrevia** o defeito — e a condição
-mantinha-o. Corrigir a asserção e não voltar a apontar-lhe o gume é o modo de isto sobreviver:
-a nota dá a sensação de estar resolvido. **A correcção leva gume, como se fosse nova.**
-
-Cada achado é um CANDIDATO. O veredito é sempre mutar e ver se cai.
-
-Para levantar os de um ficheiro (troca X pelo nome):
-
-    python3 - <<'PY'
-    import re; src=open('tests/X.c',encoding='utf-8').read()
-    decl=set(m.group(1) for m in re.finditer(r'\b(?:double|float)\s+([A-Za-z_]\w*)',src))
-    for mo in re.finditer(r'\bok\s*\(',src):
-        i=mo.end();p=1;j=i
-        while j<len(src) and p>0:
-            p+= (src[j]=='(') - (src[j]==')'); j+=1
-        a=src[i:j]; k=a.rfind('"'); c=a[k+1:]
-        u=[n for n in decl if re.search(r'\b'+n+r'\b',c)]
-        if u: print(src[:mo.start()].count('\n')+1, u, ' '.join(c.split())[:80])
-    PY
-
-
-2. COMO SE TIRA UM DOUBLE — o método que funcionou
---------------------------------------------------
-
-Ver o que a asserção DECIDE. É quase sempre uma destas, e nenhuma precisa de vírgula:
-
-  ORDEM      multiplica pelos denominadores e compara inteiros. Se o denominador é
-             COMUM aos dois lados, ele cancela — compara-se os numeradores e acabou.
-             (cosmico §X1: os tectos de Carnot, com Tq fixo)
-
-  RAZÃO      não formes a razão: passa a produto cruzado. a/b > c/d é a·d > c·b.
-             (encanamento: Friis inteiro em Q; colheita: L_dia/L0)
-
-  RAIZ       eleva ao quadrado o lado positivo, ou enquadra o irracional por racionais
-             — que é o método do CORTE. Exemplos que valem a pena copiar:
-               · o pico de Wien NÃO SE FORMA: 8e-6 <= b/T <= 13e-6, vezes T, dá inteiros
-                 com os 10^6 a cancelarem                            (cosmico §X2)
-               · (a/b)^10 > 10 sem elevar à décima: 63^10 > 10.50^10 põe 63/50 acima de
-                 10^(1/10), e depois basta r > 63/50                 (encanamento)
-               · raiz(2) < 59/30  <=>  1800 < 3481                   (nne)
-               · escolhe onde a norma É inteira: ternos PITAGÓRICOS  (nne, dif)
-
-  ZERO       «é zero» é o inteiro 0, não «menor que a régua que escolhi». Procura o
-             FACTOR que se anula: a derivada da Lorentziana tem factor (f-f0), e no
-             pico esse factor é 0 — produto com factor zero é zero.   (simula)
-
-  LIMITE     «tende a 1» diz-se sem escolher número: o que FALTA é uma fracção de
-             inteiros a decrescer.                                   (cosmico §X3)
-
-  IDENTIDADE se os dois lados descem da mesma álgebra, escreve os NUMERADORES e vê
-             cancelar aos pares. 4m²(re²-w²+B.re+C) = c²+(c²-4km)-2c²+4km = 0.
-             (dominios)
-
-  CONTAGEM   «há parte que não volta» conta-se: quantas amostras mexeram, quantas não.
-             Diz mais que a soma das amplitudes.                     (dominios)
-
+  ORDEM        multiplica pelos denominadores e compara inteiros; se o denominador é
+               COMUM, cancela e comparam-se os numeradores.
+  RAZÃO        não formes a razão: a/b > c/d é a·d > c·b.
+  RAIZ         eleva ao quadrado o lado positivo, ou enquadra por racionais — o CORTE.
+               · escolhe onde a norma É inteira: ternos PITAGÓRICOS, quadrados perfeitos
+               · raiz(2) < 59/30  <=>  1800 < 3481
+  ZERO         «é zero» é o inteiro 0. Procura o FACTOR que se anula.
+  LIMITE       «tende a 1» diz-se sem número: o que FALTA é uma fracção a decrescer.
+               E muitas vezes NÃO é limite — ver Cauchy-Schwarz no §4.
+  IDENTIDADE   se os dois lados descem da mesma álgebra, escreve os NUMERADORES e vê
+               cancelar aos pares.
+  CONTAGEM     «há parte que não volta» conta-se: quantas mexeram, quantas não.
   LEI vs TRANSPORTE
-             separa. O softmax tem exp, mas as suas teses são identidades racionais:
-             S(x_i/S)=1; multiplicar todos por lambda>0 não muda x_i/S; e no RMSNorm a
-             raiz CANCELA — ‖y‖² = Sx².n/Sx² = n, independente dos dados.   (llm)
+               separa. O exp está no TRANSPORTE e a tese é uma identidade racional:
+               ANTILOG(log a + log b − log ref) = a·b, e o I_s e o V_T cancelam.
+               O softmax tem exp e as suas teses são racionais.
+
+E TRÊS ALVOS QUE NÃO PRECISAM DE MÉTODO NENHUM:
+
+  O DOUBLE MORTO — declarado e nunca lido. `cc -Wunused-variable -Wunused-but-set-variable`
+     aponta-os. ITERA ATÉ AO PONTO FIXO: tirar um cria o seguinte. Casos que o aviso não
+     cobre: a variável ATRIBUÍDA e nunca lida (apagar a declaração deixa a atribuição
+     órfã), e a declaração MÚLTIPLA (`double p=1, ant=1;` — só o p morre).
+     Foram 24, e o repo está a zero.
+  O DOUBLE QUE SÓ TRANSPORTA — `v[j] = 1 + (seed*7 + j*13) % 20` é um RESTO em double.
+  O HELPER ÓRFÃO — depois de migrar um bloco, os helpers dele ficam. `grep -c` chega.
 
 REGRAS DURAS
-  · O DOUBLE SAI DA CONDIÇÃO. Não o deixes como «testemunha»: se a conta fecha em Q,
-    ele não atesta nada. O corpo auto-atesta.
+  · O DOUBLE SAI. Não o deixes como «testemunha»: se a conta fecha em Q, ele não atesta.
   · Se o limiar não sai de uma das oito leis, sai ele.
   · O que a representação não aguenta CONTA-SE à parte (`saturou`), não se esconde.
   · Verifica o TECTO: `if(x > LONG_MAX/10)`. O tecto é do TIPO, não teu.
-  · DADOS SÃO DADOS. Não há coluna a separar (físico/matemático, lei/dado, sinal/ruído).
-    Um decimal escrito é um racional exacto: "6.3e7" é 63000000/1, "0.45" é 45/100.
+  · DADOS SÃO DADOS: "6.3e7" é 63000000/1, "0.45" é 45/100.
+  · UMA CONSTANTE FÍSICA NÃO É EXCEPÇÃO — é um decimal escrito, logo um racional. O que
+    a separa de um limiar meu é a GENEALOGIA, não o tipo.
+  · E AS RAZÕES DERIVAM-SE DAS UNIDADES, nunca de cabeça. Escrevi «Iu/Is = 1e6» e era
+    1e5; apanhou-me o texto antigo do próprio ficheiro.
 
 
-3. O GUME — e os três modos de ele mentir
------------------------------------------
-
+3. O GUME — e os CINCO modos de ele mentir
+===========================================
 Depois de cada conversão, muta e confirma que CAI:
 
+    S=/tmp/gume; mkdir -p $S
     g(){ rm -f $S/g $S/g.c                       # 1. APAGA o binário antes
          sed "$2" tests/X.c > $S/g.c
          [ "$(diff tests/X.c $S/g.c|grep -c '^[<>]')" = 0 ] && { echo "SED NÃO APLICOU"; return; }
          cc -O2 -std=c99 -I tests -I lib -o $S/g $S/g.c -lm 2>/dev/null \
            || { echo "não compila"; return; }     # 2. testa o exit do cc
-         (cd tests && timeout 200 $S/g >/dev/null 2>&1; echo "exit=$?"); }
+         (cd tests && timeout 300 $S/g >/dev/null 2>&1; echo "exit=$?"); }
 
-  (a) o binário velho — reutilizar o caminho sem `rm -f` e silenciar o `cc` faz correr
-      o gume ANTERIOR. Deu-me cinco falsos «não mordeu».
-  (b) o sed que não aplica — conta as linhas mudadas.
-  (c) UM GUME QUE RELAXA NÃO É GUME. Trocar `<` por `<=`, alargar um intervalo, baixar
-      um limite: a asserção passa na mesma e isso não diz nada. O gume APERTA — muda o
-      sinal, troca o factor, desloca o alvo para o lado errado.
+  (a) o BINÁRIO VELHO — sem `rm -f` e com o cc silenciado, corre o gume ANTERIOR.
+      Aconteceu DUAS vezes nesta sessão, uma delas a devolver «0 discordâncias».
+  (b) o SED QUE NÃO APLICA — conta as linhas mudadas.
+  (c) UM GUME QUE RELAXA NÃO É GUME. `<` por `<=`, alargar um intervalo: passa na mesma.
+      O gume APERTA — muda o sinal, troca o factor, desloca o alvo para o lado errado.
+  (d) a MENSAGEM QUE NÃO PODE FALHAR — `cc …; echo "compilou"` imprime «compilou» com a
+      compilação falhada, e o binário velho responde ao teste seguinte.
+  (e) O EXIT SOMBREADO — e este foi o que mais custou. Ao reescrever um bloco removi o
+      `if(!X) passou=0` e as asserções novas deixaram de decidir o `return !passou`:
+      TODOS os gumes saíram exit=0, e nenhum mordia porque nenhuma asserção mordia.
+      NÃO BASTA ler as duas linhas do total — VER QUEM DECIDE O EXIT do medidor.
+      (E não declares `falhas`: vem do lib/unidade.h. Um `long falhas = 0` local
+      sombreia-o e o medidor sai 0 com «NÃO x» impresso.)
 
-E se um gume honesto não morder, há duas doenças e só duas:
-    · a asserção é folgada (desigualdade com ordens de margem) → troca por FAIXA;
-    · a guarda é redundante (a lib já garante) → então o gume vai à LIB, não ao medidor.
+  (f) A RAM. `python3 tools/gume.py --max 20` em medidor COM LAÇO GRANDE (mcu 256²,
+      pontofixo 19⁴, Gelfand 121²) NÃO SE CORRE: cada mutação recompila reta.h e, se o
+      `ok()` cair dentro do laço, unidade.h escreve `/tmp/uni_*.txt` sem tecto (já deu
+      8 GB). Compilar OS TRÊS em paralelo também enche. Procedimento: um `cc` de cada
+      vez; tautologia.py e doubles_todos.py (baratos); gume só em medidor LEVE, e um
+      ficheiro de cada vez. NÃO correr bateria completa. Rotação/fase: `lib/isa_disk.h`
+      (ESQUILO ordem 4, TROCA ordem 2) — nunca cos/sin/complex.h.
 
+E se um gume honesto não morder, há TRÊS causas e só três:
+    · a asserção é folgada  -> troca por FAIXA
+    · a guarda é redundante -> o gume vai à LIB, não ao medidor
+    · o ramo NUNCA CORRE    -> verifica isto ANTES de falar do código
 
-4. O ESPAÇO — e tudo vive aqui (universal.tex def:espaco)
-----------------------------------------------------------
+O GUME DA REALIZAÇÃO. Um double que não decide nada não derruba asserção nenhuma. O que
+prova é a COMPARAÇÃO: guarda a saída ANTES, converte, e exige `diff` vazio.
 
-    V = Q(m raiz D) = Q + Q.m raizD     espaço VECTORIAL sobre Q, dim 2, base {1, m raizD}
+    (cd tests && ./X > $S/antes.txt)   …converter…   ./X > $S/depois.txt; diff
 
-Primeira dobra da torre dim A_n = 2^n dim A_0 do corpo_topologico (thm:rn). O DUAL não é a
-conjugação: é o outro lado, com a SUA RÉGUA, que sai da involução v(x) = -1/x:
-
-    s = m raizD    s† = -1/s    ==>    m† = -1/(mD)    V† = Q(m† raizD)
-    (m†)† = m        s.s† = -1        V† = V   (o mesmo corpo, régua invertida)
-
-AS QUATRO PROPRIEDADES — duas de cada lado, em paralelo:
-
-    (P1)  raizD em Q <=> D é QUADRADO     o espaço EXISTE
-    (P2)  m != 0 ==> m raizD fora de Q    o espaço tem RÉGUA (é o m do nome)
-    (D1)  a = a* <=> a em Q               o dual FIXA Q       — é o TRAÇO
-    (D2)  a.a* em Q, sempre               o dual REGRESSA     — é a NORMA
-
-(P1) diz quem entra, (D1) quem fica; (P2) que a escala não regressa, (D2) que o dual
-sempre regressa. UMA SAI, A OUTRA VOLTA. E uma é o CONE (desce em passo discreto) e a
-outra a ESPIRAL (sobe recompondo): como s.s† = -1, a régua que expande tem o dual que
-contrai, exactamente.
-
-PRIMO -> IRRACIONAL é a passagem DISCRETO -> CONTÍNUO (thm:duas-propriedades). O lema de
-Euclides (p | a² ==> p | a) dá a DESCIDA. CUIDADO: primo é SUFICIENTE, não necessário —
-raiz(6) é irracional e 6 não é primo. A condição exacta é (P1).
-
-A CÚSPIDE é disc = tr² - 4det = 0, onde as folhas COLIDEM. tau = sign(disc) em {-1,0,+1}
-É O TRIAL, a cúspide é o ponto do meio, e tau INDEXA A DIMENSÃO (nº de folhas = tau+1).
-Leitura de uma linha, sem tecto:  rev(tau) = -tau  e  rev(tau) = tau <=> tau = 0.
-Cada RACIONAL ancora uma cúspide, logo Q É o conjunto delas e o CORTE é o complemento.
+E HÁ UM DEFEITO QUE O GUME NÃO APANHA: o CONTADOR QUE DEIXOU DE CONTAR. Se uma migração
+põe a coluna toda a zero, a asserção fica VERDE (`0 >= 0`), o gume morde na mesma e o
+total continua 508. Depois de trocar um limiar por igualdade, OLHA PARA OS NÚMEROS
+IMPRESSOS. Foi assim que se achou o `deforma.c` morto desde 17/08, e por acidente.
 
 
-5. O ALGORITMO — quatro passos, e cada um tem CASA (algebrico thm:universal)
----------------------------------------------------------------------------
+4. O QUE JÁ SE MIGROU — e o molde que saiu daí
+===============================================
+TRINTA E SEIS ficheiros fechados em ZERO, e os trinta e seis pela MESMA leitura:
 
-Isto não é arrumação: é o que decide QUE FUNÇÃO se chama.
+    tests/deforma.c          51 -> 0
+    tests/gerador_analog.c  146 -> 0     (era o maior do repo)
+    tests/analog.c           94 -> 0
+    tests/agm_analog.c       29 -> 0
+    tests/llm.c              98 -> 0     (lei vs transporte: softmax/RMS/RoPE em ℤ)
+    tests/colheita.c         88 -> 0     (folha σ·d·Z0=1, Fresnel n=8/5)
+    tests/relogio_curva.c    86 -> 0     (rotor em ℤ; §R8 NTT exacta)
+    tests/dominios.c         84 -> 0     (companion em ℤ, Cayley–Hamilton, Euler racional)
+    lib/eletrico.h           80 -> 0     (Π = produto; Δ pelo sinal; Verlet em ℤ)
+    tests/eletrico.c              -> 0     (o medidor da tríade, veio com a lib)
+    banco/pinos.c            76 -> 0     (pesos GGUF em Q16; LOAD/STORE duais; sonda elíptica)
+    tests/lambert.c          74 -> 0     (ℤ[i] período 4; Catalan/Newton/Vieta; e é o corte)
+    tests/dtcn.c             71 -> 0     (⋆_s em ℤ; Lagrange; histerese em ‖e‖²)
+    tests/xx.c               71 -> 0     (Cayley/ℚ; Cauchy–Hadamard; 2^4=4^2 os dois ramos)
+    tests/dif.c              69 -> 0     (F em ℤ₁₇; ouro = q_k = F_k; Parseval exacto)
+    tests/zeta.c             66 -> 0     (dobra/vinco em ℤ; ξ nos Bernoulli; Euler em ℚ)
+    tests/corpo_fisico.c     64 -> 0     (mapa SL(2,ℤ); +2s foge D>0; −2s gira período 4)
+    tests/liga.c             61 -> 0     (percolação (p−pc)²; |Z|⁴ racional; mistura partição)
+    tests/robo.c             61 -> 0     (rot90 det 1; adjunção em ℤ; J J⁺ e = e em ℚ)
+    tests/cosmico.c          60 -> 0     (Carnot em ℤ; Wien por corte; Newton g′=(23/25)g)
+    tests/deforma_d.c        57 -> 0     (Delannoy em ℤ; kick-drift det 1; metal |det|=1)
+    tests/radiacao.c         57 -> 0     (Wien por corte; cruzado vs directo; Pitágoras em ℤ)
+    tests/simula.c           54 -> 0     (tetraedro em ℤ; encosta 3d²=w² duas rotas; √N)
+    tests/milenio.c          51 -> 0     (caracteres em Z/n; NTT ℤ₁₇; 2^a·2^b=2^{a+b})
+    tests/encaixa.c          47 -> 0     (GS inteiro; posto em ℚ; Parseval exacto)
+    tests/forca.c            47 -> 0     (mapa SL(2,ℤ); sinal de Π; +2 foge −2 período 4)
+    tests/neuronio_analog.c  19 -> 0     (gato = A_m; translinear = produto; σσ'=−1 em ℤ[√D])
+    tests/maisum.c           46 -> 0     (simplex em ℤ; tight frame (n+1)²; rt_orbita |det|=1)
+    tests/continua.c         45 -> 0     (t_k em ℤ; série formal em ℚ; k_min pelo corte D ≶ (m+1)²; A_0 ordem 2)
+    tests/icc.c              45 -> 0     (Nyquist 2·passo < período; posto 1; adjuncção em ℤ)
+    tests/solar.c            43 -> 0     (PA em ℤ; φ²=φ+1 em ℤ[√5]; reversão (1,−1,−1); F_n)
+    tests/travessia.c        43 -> 0     (A^{a+b}=A^a A^b; encaixe 1/(q q'); NTT; Hodge E×B)
+    tests/fator.c            42 -> 0     (Lagrange vs menores; |det A_m|=1; rotação passa por ∞; CF ida-e-volta; GS posto; F_n)
+    tests/geral.c            42 -> 0     (Newton/Lucas; gcd raiz dupla; p(A)=0; Hurwitz; Sturm)
+    tests/headjack.c         41 -> 0     (π cancela; fT; √N sem raiz; cruzado nulo; Lagrange 2/3)
+    tests/sistema.c          41 -> 0     (companion em ℚ; p(A)=0; Kronecker tr soma/produto; Δ em ℤ)
+    tests/nne.c              39 -> 0     (Gentil em ℚ; norma no quadrado; recursão R²–R⁷; dual |ab|)
+    tests/motor.c            38 -> 0     (Clarke p²+3s²; Lagrange; GF(2)³; DTC órbita 24)
+    tests/aurea.c            37 -> 0     (borda m=1; ℤ[φ]; disc=5 não quadrado; M^n Fibonacci)
+    tests/semantico.c        37 -> 0     (Lagrange Frobenius; bivetor; Hadamard HᵀH=nI; Parseval)
+    tests/gguf.c             36 -> 0     (índice fecha o ficheiro; Q16; W(x+z)=Wx+Wz exacto)
+    tests/polar.c            36 -> 0     (N multiplicativa; ℤ[√Δ]; cone P²>Δv²; De Moivre; ν)
 
-    DESCODIFICA  (p,q) := texto, racional EXACTO; u := mmc dos denominadores
-                 τ=0   CENTRO — a leitura para Z, e mais nada          -> entra em V
-    OPERA        |det T| = 1;  [p:q] -> [T00p+T01q : T10p+T11q]
-                 τ=−1  o que FECHA — é a CONVOLUÇÃO, e no discreto é produto ponto
-                       a ponto sobre as N potências de sigma (ordem FINITA)
-    INVERTE      T^-1 = adj(T)/det T, INTEIRA;  sigma^-1 = −sigma†
-                 τ=+1  a volta usa a OUTRA FOLHA — deconvolução, e a folha dual é
-                       recíproca: |sigma| > 1 > |sigma†|, e NÃO fecha
-    CODIFICA     w := palavra (FC) ou dígitos (Cantor)
-                 τ=0   CENTRO — a saída de V                            -> sai de V
-    E FECHA      descodifica(w) = (p,q)
+    O MOLDE: um medidor que ITERA um sistema quando o objecto é o OPERADOR.
+    Onde havia iteração, havia uma ÓRBITA. Onde havia sin/cos, uma ROTAÇÃO de det 1.
+    Onde havia exp/log, SOMA NO EXPOENTE a virar produto.
 
-OS DOIS POLOS ESTÃO DENTRO DO ALGORITMO. `OPERA` é o aditivo (fecha, ordem finita,
-Fourier) e `INVERTE` é o multiplicativo (não fecha, folhas recíprocas, Mellin). O
-centro guarda a ENTRADA e a SAÍDA — a transformada é UMA, e só ao operar se parte
-em dois. É a mesma frase da arquitectura, lida no código.
+AS PEÇAS QUE RESOLVERAM, uma a uma:
 
-SÃO QUATRO E NÃO CINCO. Não há verificação porque não há nada a verificar: com
-|det| = 1 a adjunta é inteira e a volta é exacta POR CONSTRUÇÃO. Não estamos a
-enquadrar o corpo numa estrutura — estamos a LÊ-LO.
+  a ÓRBITA DE INFINITO SOB O GATO   [p:q] -> [m·p+q : p] desde [1:0]     rt_orbita
+     é a régua: o que sai são os convergentes, |det| = 1 em todos.
+  o TRIAL decide o REGIME           D = tr² − 4det, e tau = sign(D)      cor:papg-causa
+     D<0 ELÍPTICO    rotação, órbita PERIÓDICA      -> trava, é a língua
+     D=0 PARABÓLICO  I + kN, a PA, a recta          -> a CÚSPIDE, e cada racional ancora
+     D>0 HIPERBÓLICO sigma^k, a PG, o metálico      -> nunca fecha, é o quasicristal
+     Não se varre parâmetro nenhum — lê-se o discriminante.
+  o OURO É O GATO       A_m = [[m,1],[1,0]], det = sigma·sigma' = −1, D = m²+4 > 0
+     logo HIPERBÓLICO, e não fecha. Não «resiste mais»: está do outro lado do trial.
+  a ROBUSTEZ é o thm:ouro   q_k >= F_{k+1} sempre, com igualdade em TODOS os índices só
+     na cauda de UNS. A caracterização é pela igualdade SIMULTÂNEA — o paper di-lo na
+     observação a seguir ao teorema, e eu escrevi «estrito em todos» e caí.
+  a NOBREZA é o DETERMINANTE   w ~ phi sob SL(2,Z)  <=>  ad − bc = ±1, em Z.
+  o AGM certifica-se por ENCAIXE   g_n <= M <= a_n, em intervalos racionais
+     thm:agm-analitico. Os DOIS lados arredondam PARA FORA: a aritmética é o limite de
+     cima e vai a TECTO, a geométrica é o de baixo e vai a PISO. Com os dois a truncar
+     para baixo o intervalo colapsa e DEIXA DE CONTER o AGM.
+  o FP não é um LIMITE   FP² = (Svi)²/(Sv²·Si²) é razão de inteiros, e FP = 1 é o caso
+     de IGUALDADE de CAUCHY–SCHWARZ — vale sse a corrente está em fase.
+  o SEPARADOR de meios   o «analógico» nunca foi um meio APROXIMADO do digital: era a
+     MESMA peça noutra borda. Migrado, os dois dão o mesmo inteiro e a tese fica MAIS
+     forte — o resíduo passa de 1e-9 e de «erro < 0,5» para ZERO.
 
-E NENHUM PASSO NORMALIZA:
-  · o mmc do primeiro passo é a LEITURA do texto decimal para Z, e mais nada;
-  · quem normaliza é a NORMA — o produto das folhas, que é o primeiro passo;
-  · o gcd no meio foi RETIRADO do rt_ciclo (medido: não faz nada, e os medidores
-    que usam reta.h passam sem ele);
-  · e NÃO é 1/raiz(N): esse vem do lado ADITIVO da dourada (raízes no círculo,
-    m = 0). As nossas folhas são RECÍPROCAS — lado MULTIPLICATIVO.
+E TRÊS COISAS QUE SÓ SE APRENDEM FAZENDO:
 
-A DOURADA DISCRETA é a dourada NA BORDA (algebrico thm:dourada-discreta): a borda
-sigma² = m·sigma+1 faz de sigma uma unidade de ordem N finita, os caracteres são as
-N potências sigma^k, o Dirac dá S_k sigma^((j−j')k) = N·delta, e a inversa corre
-por sigma^-1 = −sigma†. O factor é N, não raiz(N).
-
-PROIBIDO: Fourier/DFT como FERRAMENTA que eu traga de fora. Fourier é um POLO da
-transformada (τ=−1, `topologico sec:fourier`) e Mellin é o outro (τ=+1,
-`analitico sec:mellin`) — são objectos medidos, não bibliotecas a importar. A
-dualidade completa-se com a DOURADA. Zero ocorrências de «DFT» no corpus.
-
-O código: `lib/reta.h` realiza, `tests/reta.c` mede (o cabeçalho dele traz esta
-mesma tabela), e nenhum dos dois tem um double.
+  A ROTAÇÃO EM Z SÓ É EXACTA *E* LIMITADA COM ORDEM FINITA — períodos 1, 2, 3, 4, 6.
+     A pitagórica (3,4,5) com divisão inteira COLAPSA (o truncamento tira magnitude e a
+     órbita decai ao ponto fixo em ~25 passos); a exacta multiplica a magnitude por 5 e
+     estoura. Para desenhar uma onda, usa o elíptico a=1, período 6.
+  `rt_ordem_ponto` NÃO FECHA A PARTIR DE INFINITO. O teste é `Q != 0 && p*Q == P*q`, e
+     com [1:0] isso pede Q!=0 e Q=0 ao mesmo tempo: devolve 0 para QUALQUER operador.
+     Parte de [1:1].
+  FALTA UMA PEÇA NA LIB: `rt_raiz_exacta` responde «existe r com r² = x?» e não escreve
+     nada quando não existe. O ENCAIXE precisa do PISO, que existe sempre. Está escrito
+     à mão em tests/agm_analog.c e tests/relogio_curva.c como `raiz_piso` — devia subir à lib.
 
 
-6. AS PEÇAS DA LIB — PROCURA AQUI ANTES DE ESCREVER
----------------------------------------------------
+5. POR FAZER — por onde pegar
+==============================
+    python3 tools/doubles_todos.py        o total e a frente de trabalho
+    python3 tools/doubles_todos.py -v     todos os ficheiros
+    python3 tools/doubles_todos.py f.c    um ficheiro, linha a linha e classificado
 
-lib/reta.h (a principal).  `grep -n "^static .*rt_" lib/reta.h`
+A frente, hoje:
+
+     29  tests/agm_analog.c     FECHADO — §A4 em ℤ, zero doubles
+     98  tests/llm.c            FECHADO — lei em ℤ, RoPE = G período 4, zero doubles
+     88  tests/colheita.c       FECHADO — folha Salisbury + Fresnel 8/5, zero doubles
+     86  tests/relogio_curva.c  FECHADO — rotor em ℤ (meio-ângulo + raiz próxima), NTT §R8, zero doubles
+     84  tests/dominios.c       FECHADO — companion em ℤ, Cayley–Hamilton, Euler racional, zero doubles
+     80  lib/eletrico.h         FECHADO — Π = produto, Δ pelo sinal, Verlet em ℤ; medidor tests/eletrico.c veio junto
+     76  banco/pinos.c          FECHADO — GGUF em Q16, LOAD/STORE duais, sonda elíptica a=1
+     77  integration/dualcifra.c   <- mas ver §6 antes
+     74  tests/lambert.c        FECHADO — ℤ[i] período 4, Catalan inteiro, Newton t², e é o corte
+     71  tests/dtcn.c           FECHADO — ⋆_s em ℤ, Lagrange, histerese em ‖e‖²
+     71  tests/xx.c             FECHADO — Cayley/ℚ, Cauchy–Hadamard, 2^4=4^2 os dois ramos
+     69  tests/dif.c            FECHADO — F em ℤ₁₇, ouro = q_k = F_k, Parseval exacto
+     66  tests/_t.c             APAGADO (lixo: cópia de zeta.c, não citado)
+     66  tests/zeta.c           FECHADO — dobra/vinco em ℤ, ξ nos Bernoulli, Euler em ℚ
+     64  tests/corpo_fisico.c   FECHADO — mapa SL(2,ℤ), +2s foge, −2s período 4
+     61  tests/liga.c           FECHADO — percolação (p−pc)², |Z|⁴ racional, mistura partição
+     61  tests/robo.c           FECHADO — rot90 det 1, adjunção em ℤ, J J⁺ e = e em ℚ
+     60  tests/cosmico.c        FECHADO — Carnot em ℤ, Wien por corte, Newton g′=(23/25)g
+     57  tests/deforma_d.c      FECHADO — Delannoy em ℤ, kick-drift det 1, metal |det|=1
+     57  tests/radiacao.c       FECHADO — Wien por corte, cruzado vs directo, Pitágoras em ℤ
+     54  tests/simula.c         FECHADO — tetraedro em ℤ, encosta 3d²=w² duas rotas, √N
+     51  tests/milenio.c        FECHADO — caracteres em Z/n, NTT ℤ₁₇, 2^a·2^b=2^{a+b}
+     47  tests/encaixa.c        FECHADO — GS inteiro, posto em ℚ, Parseval exacto
+     47  tests/forca.c          FECHADO — mapa SL(2,ℤ), sinal de Π, +2 foge −2 período 4
+     19  tests/neuronio_analog.c FECHADO — gato = A_m, translinear = produto, σσ'=−1 em ℤ[√D]
+     46  tests/maisum.c         FECHADO — simplex em ℤ, tight frame (n+1)², rt_orbita |det|=1
+     45  tests/continua.c       FECHADO — t_k em ℤ, série formal em ℚ, corte D ≶ (m+1)², A_0 ordem 2
+     45  tests/icc.c            FECHADO — 2·passo < período, posto 1, adjuncção em ℤ
+     43  tests/solar.c          FECHADO — PA em ℤ, φ²=φ+1 em ℤ[√5], reversão do ouro, F_n
+     43  tests/travessia.c      FECHADO — companheira, encaixe, NTT, Hodge E×B em ℤ
+     42  tests/fator.c          FECHADO — Lagrange vs menores, |det|=1, rotação passa por ∞, CF, GS, F_n
+     42  tests/geral.c          FECHADO — Newton/Lucas, gcd raiz dupla, p(A)=0, Hurwitz, Sturm
+     41  tests/headjack.c       FECHADO — π cancela, fT, √N sem raiz, cruzado nulo, Lagrange 2/3
+     41  tests/sistema.c        FECHADO — companion em ℚ, p(A)=0, Kronecker tr, Δ em ℤ
+     39  tests/nne.c            FECHADO — Gentil em ℚ, norma no quadrado, recursão R²–R⁷, dual |ab|
+     38  tests/motor.c          FECHADO — Clarke p²+3s², Lagrange, GF(2)³, DTC órbita 24
+     37  tests/aurea.c          FECHADO — borda m=1, ℤ[φ], disc=5 não quadrado, M^n Fibonacci
+     37  tests/semantico.c      FECHADO — Lagrange Frobenius, bivetor, Hadamard HᵀH=nI, Parseval
+     36  tests/gguf.c           FECHADO — índice fecha o ficheiro, Q16, W(x+z)=Wx+Wz exacto
+     36  tests/polar.c          FECHADO — N multiplicativa, ℤ[√Δ], cone P²>Δv², De Moivre, ν
+     35  tests/encanamento.c    FECHADO — octeto ±1, tipo·V invariante, Friis em ℚ, Av enquadrado
+     35  tests/sombra_cone.c    FECHADO — w_i+1=N e_i, n⟨,⟩+‖w‖²=0, tight frame (n+1)²
+     35  tests/tikz.c           FECHADO — companion em ℚ, I+hA vs recorrência, A^{a+b}=A^a A^b, A⁴=I
+     34  tests/amplifica.c      FECHADO — Kirchhoff, n·(n−1)!=n!, Af em ℚ, |Av| 96–97, GF(2)
+     33  tests/fisica.c         FECHADO — ℤ[ε]/(ε²), cone 0/2/4, Einstein ⊕ em ℚ, 1/(c²−1)
+     33  tests/vizinha.c        FECHADO — Kirchhoff em ℤ, rt_orbita ±1, rácio ≠ ouro
+     30  tests/arraytermico.c   FECHADO — grelha em dmm, Seebeck em μV, Carnot 500/31015
+     30  tests/escada.c         FECHADO — ℤ[σ], Vieta, Pisot em ℤ, Cassini −1
+     30  tests/plugs.c          FECHADO — Dirac ℤ[i] n=4, órbita ±1, σ_{-m}σ_m=1
+     29  tests/dual.c           FECHADO — ℤ, N multiplicativa, i ordem 4 / ε ordem 2, cone 80
+     29  tests/spline.c         FECHADO — Parseval em ℤ, Mellin λ^s, Liberation vs base-14
+     28  tests/selberg.c        FECHADO — ℤ[σ], t₄(1)=7 t₄(2)=34, factor anula em 1/16
+     27  tests/dualrn.c         FECHADO — R^n/R^n* em ℤ, z·conj(z)=(N,0), corte √2
+     27  tests/luz_periodo.c    FECHADO — q_n=n·2^(n−1), G^4=I, torre 2^{j+n−1}
+     27  tests/ribossomo.c      FECHADO — Cantor base 3, shift=2v, raízes em ℤ[i]/ℤ[ω]
+     23  tests/dourada.c        FECHADO — Mellin (λμ)^s=λ^sμ^s, G rot90, Fibonacci/Cassini, 2ª dif 2^u+3^u  (9:0)
+     23  tests/koch.c           FECHADO — área (8·9^N−3·4^N)/(8·9^N), Julia/Mandelbrot fixo 1/1000, F_n  (14:0)
+     23  tests/palavra.c        FECHADO — §P11 em __int128, K_{n,m} bissecção S=10000, zero math.h  (33:0)
+     18  tests/dourada_bidual.c FECHADO — ESQUILO ISA §W2, rt_ipow/rt_log_int, zero math.h  (5:0)
+     16  tests/dourada_escala.c FECHADO — só ℤ centésimos, Fibonacci φ^i, zero math.h  (10:0)
+     16  tests/dourada_lei2.c   FECHADO — Lei 2 = ESQUILO ordem 4, J²=−I, isa_disk.h  (5:0)
+     22  tests/cone_espiral.c FECHADO — Π/Σ Euclides+convergentes, Hurwitz em Z  (7:0)
+     19  tests/furos.c        FECHADO — Cantor/Julia Z[i], ESQUILO, Vieta σσ'=−1  (8:0)
+     19  tests/quantico.c     FECHADO — Pauli Z[i], comutador=cruzado, isa_disk.h  (12:0)
+     18  tests/pisotbase.c    FECHADO — borda em Z[σ], d(1)=m1 exacto, não-Pisot (θ−1)(θ'−1)  (9:0)
+     18  tests/tesserato_espiral.c FECHADO — Cantor base 3, ESQUILO^4, cone r²=t²  (12:0)
+     16  tests/enche.c        FECHADO — C+C em dígitos 0,1,2, |z²|²=|z|⁴ em Z[i]  (5:0)
+     16  tests/escala_dourada.c FECHADO — centésimos+Fibonacci φ^k, sem log/pow  (5:0)
+     15  tests/edo.c          FECHADO — ESQUILO y''=-y, 2^{a+c}=2^a 2^c, FC de e |det|=1  (13:0)
+     15  tests/octeto.c       FECHADO — cos −1/3 e −1/2 em Z, expoentes σ 8−(−13)=21  (15:0)
+     13  tests/circuito_tradutor.c FECHADO — cruz em Q, volta le_fixo, perda m mod 10^{k-1}  (4:0)
+     13  tests/cristal_modelo.c FECHADO — embeddings int32, crc byte a byte, sem float  (5:0)
+     13  tests/dna.c          FECHADO — 64=2^6, TROCA período 2, 2S+2A=2x  (13:0)
+     13  tests/pontofixo.c    FECHADO — Young em Z, plástico u_28=1897, TROCA/ESQUILO no disco  (40:0)
+     12  tests/dualreta.c     FECHADO — Cauchy das razões em Z, TROCA período 2, sem sqrt  (9:0)
+     12  tests/mcu.c          FECHADO — RC em kΩ·nF, Γ em Q, XOU/E no disco ISA  (9:0)
+     11  lib/termica.h        FECHADO — SI em ℤ, Wien por corte, Planck λT, sem exp  (header)
+     11  tests/corpo_do_numero.c FECHADO — cruz em Q, le_fixo, TROCA período 2  (4:0)
+     11  tests/limiares.c     FECHADO — A(f)/A(2f)=4 em ℤ, adjunção Z[i], ESQUILO  (5:0)
+     11  tests/ortogonal.c    FECHADO — Gram=Δ, caracteres ESQUILO n=2/4, det G=b²  (8:0)
+     10  banco/fita.c         FECHADO — tempo em ns, 2 t_cfr ≤ 3 t_buf, MiB em ℤ  (compile)
+      9  tests/hiper.c        FECHADO — Bareiss |det|=1, Pell ±1, i² ESQUILO  (8:0)
+      9  tests/po_corpo.c     FECHADO — Gauss-Jordan em Q, §P5 sem float, percentagem 987/1000  (7:0)
+      8  tests/dispositivo.c  FECHADO — potências em µW, Vieta Z[√D], sem sqrt  (7:0)
+      8  tests/pi.c           FECHADO — Gauss em Z/p, PI5 ESQUILO+Σζ^k=0 mod p  (4 ok + VD)
+      7  tests/dissipa_pagina.c FECHADO — arredondamento em milesimos, |N|=1 em Z[φ]  (8:0)
+      7  tests/orbitas.c      FECHADO — σ em Z[√D], rt_zd_pot, órbitas mod p  (11 sec VD)
+      7  tests/telomero.c     FECHADO — Lamé Fibonacci, rt_cf_para, aniversário cruzado  (11:0)
+      6  tests/entrega.c      FECHADO — FC exacta, float vs potência de 2, pipe MMC  (11:0)
+      6  tests/recaman.c      FECHADO — homomorfismo b^{a+d}, colisão=fase, sem exp  (8:0)
+      6  tests/teletransporte.c FECHADO — telómero Z[√D], plugues, F∘F=n·id  (10:0)
+      5  tests/entre.c         FECHADO — CF convergentes, concordância ±5% cruzada, rank 2  (3:0)
+      5  tests/ordem.c         FECHADO — au_sinal antissimétrico, sem sqrt, corpos.h  (5:0)
+      5  tests/saltos.c        FECHADO — §3 Lucas L_{2k}, quaternions ℍ=M_2  (6:0)
+      5  tests/unico.c         FECHADO — sinal_raiz antissimétrico, Cauchy ℚ(√2)  (3:0)
+      5  tests/zero.c          FECHADO — 0/0 sementes, norma ±1 Fibonacci, Cayley-Hamilton  (10:0)
+      4  tests/bidual.c        FECHADO — au_prod σσ'=−1, bidualidade 21 secções  (resíduo 0)
+      4  tests/guarda.c        FECHADO — float32 como bits hex, Legendre, 3 pontos Möbius  (6:0)
+      3  tests/fecha.c         FECHADO — régua de termos, rt_traco_metalico §F4, 8 secções  (resíduo 0)
+      3  tests/neuronio.c      FECHADO — gato/esquilo Rⁿ, razão c[0]/c[1], bit único  (2:0)
+      3  tests/torre_corpo.c   FECHADO — Gentil em ℚ pitagórico, Cayley intacto  (4:0)
+      2  tests/agm.c           FECHADO — AGM por encaixe ℤ, identidade do passo  (resíduo 0)
+      2  tests/duais.c         FECHADO — |σ|>1 por corte D, §2/§5 sem sqrt  (resíduo 0)
+      2  tests/fermat.c        FECHADO — ℤ[σ] §1, Legendre/Hasse §2, zero math.h  (resíduo 0)
+      2  tests/mobilidade.c    FECHADO — média inteira §X2, unidade.h -I lib  (resíduo 0)
+      2  tests/prensor.c       FECHADO — cone Q em ℤ, |Q| conservado, r²=F_{2k+3} m=1  (resíduo 0)
+      1  tests/agm_deforma.c  FECHADO — §AD1/AD2 em ℤ, Landen pitagórico §AD3  (resíduo 0)
+      1  tests/agm_gerador.c   FECHADO — conjugação τ↦2τ em ℤ, torre ℤ_p, sem Kell  (resíduo 0)
+      1  tests/cantor.c        FECHADO — dir_imp por tri_inv, Cantor² inteiro  (resíduo 0)
+      1  tests/estelar.c       FECHADO — Q_m em Z[σ], colisão PG/PA, Ramanujan  (resíduo 0)
+      1  tests/isserlis.c      FECHADO — Isserlis em ℚ, N_k=k!!, sem quadratura  (resíduo 0)
+      1  tests/lemniscata.c    FECHADO — AGM encaixe, Landen ℤ, 2k²=1  (resíduo 0)
+      0  tests/traduz_volta.js FECHADO — regex sem token double; f64 só em crases (fonte C de teste)
+      0  tests/agm_analog.c    FECHADO — cabeçalho em fA/µA; §A1–A4 já eram ℤ  (resíduo 0)
+      0  tests/analog.c        FECHADO — #define I_S morto; §B.1–B.10 já eram ℤ  (resíduo 0)
+      0  tests/avalia_macros.js FECHADO — §M3 degraus em centésimos, zero limiares  (9/9)
+      0  tests/rede_dual.js    FECHADO — igualdade exacta/esc(1e12), §R5 álgebra  (28/28)
+      0  integration/dualcifra.c FECHADO — ℤ+NTT mod 769, parse_z sem float  (compile; doador §6)
+      0  tools/icecube.c       FECHADO — int64 fixo, parse_fp, sin Taylor, sem math.h
+      0  integration/campomedio.c FECHADO — ℤ[i] S=10⁴, defeito/campo/limiar sem complex.h
+      0  integration/liquida_doador.c FECHADO — produto cruzado, régua ℤ, sem atan2  (compile; §6)
+      0  integration/transfusao_real.c FECHADO — f32→ℤ S=10⁴, cos cruzado __int128  (compile; §6)
+      0  tools/libc.c          FECHADO — tipo f64 no dialecto; atofr/poe_real sem double
+      0  tools/traduz.c        FECHADO — IEEE bits ull, f64_de_texto, keyword f64
+      0  integration/protocolo.c FECHADO — parse_dec6, σ/μ cruzados, sem math.h  (compile; §6)
+      0  integration/folhas.c  FECHADO — |N|−1 inteiro, Δ decide raízes, sem amostragem
+      0  integration/cifrando.c FECHADO — f32→ℤ, cifra_rat Euclides, sem floor  (compile; §6)
+      0  banco/agentes.c       FECHADO — agora_ns int64, MB/s sem double
+      0  integration/antissim.c FECHADO — parse_dec6, período exacto, sem math.h  (compile; §6)
+      0  lib/le_emb.h          FECHADO — emb_z/emb_bits, f32→ℤ S=10⁴, sem strtod
+      0  lib/le_num.h          FECHADO — str2dbl→bits IEEE, le_f64_bits_pq __int128
+      0  banco/sql.c           FECHADO — taxa H/s em ns int64, sem double
+      0  lib/disco.h           FECHADO — disco_u64 no lugar de disco_f64
+      0  tools/bench_dualsort.c FECHADO — agora_ns, ms em décimos int64
+      0  tools/bench_pares.c   FECHADO — agora_ns, ms em décimos int64
+      0  tools/formalizador.py FECHADO — emparelhamento em meios int
+      0  tools/bench_dissipa.c FECHADO — bits/elem em décimos int64
+      0  tools/doubles.py      FECHADO — --puros sem float()
+      0  tools/residuo_zero.py FECHADO — e_zero por mantissa, sem float()
+      0  tests/str2dbl_dual.c  FECHADO — libc_bits via __typeof__(strtod)
+      0  tools/tectos.py       FECHADO — _minusculo com Decimal
+
+A frente, agora (top da régua):
+    C/H: 0 double/float em todo o repo (git ls-files).
+    JS/PY: 0 double/float; restam 4 limiares (4 valor físico, 0 régua).
+
+Os limiares que ainda DECIDEM: 0 (restam só limiares de valor físico, não régua).
+
+
+6. AS QUATRO ARMADILHAS DO ESCOPO
+==================================
+  (1) `integration/*.c` NÃO ESTÁ EM NENHUMA RÉGUA NEM NA BATERIA.
+      audita_tipos.sh e triagem_limiares.sh varrem `lib/*.h tests/*.c tools/*.c banco/*.c`;
+      doubles_cond.py varre `tests/ banco/`; bateria.sh compila `tests/ banco/ tools/`.
+      Lá vivem 23 doubles em condição — e OS SEIS MEDIDORES NÃO CORREM: dizem «NAO MEDIU»
+      e saem com exit=2, porque pedem ficheiros em /tmp colhidos de um doador vivo por
+      scripts que saíram do repo em 05/08. As asserções são INALCANÇÁVEIS, logo não têm
+      gume. Decidir ANTES de migrar: fixture versionada, migrar só pela álgebra (e dizê-lo
+      no commit), ou tirá-los do caminho como o crivo de 14/08 previa.
+  (2) NENHUMA das três ferramentas antigas conta `float` — 255 ocorrências invisíveis.
+      `doubles_todos.py` conta, e usa `git ls-files` para não ter glob que se esqueça.
+  (3) UM LIMIAR SÓ CONTA SE DECIDIR. Dos 244 literais `1e-N`, 186 são VALOR (SIGMA_SB,
+      K_B, H_PLANCK, um passo de grelha, uma escala em nm), 7 são GUARDA contra divisão
+      por zero, e 43 são RÉGUA. E há uma quarta forma que JÁ É a solução: o ENQUADRAMENTO
+      (`sigma > 1e-14 && sigma < 1e-12` são as potências vizinhas a fixar o expoente).
+  (4) OS NÚMEROS DOS PAPERS ESTÃO DESACTUALIZADOS. `algebrico sec:do-bit` afirma «3616
+      ocorrências em 165 ficheiros» e «918 limiares, 583 decoração»; as mesmas ferramentas
+      dão hoje 870/78 e 28 régua. Foram TRANSPORTADOS na reorganização de 18/08 sem serem
+      remedidos — e «ocorrências» está errado de qualquer modo: o audita_tipos.sh faz
+      `grep -c`, que conta LINHAS.
+
+
+7. AS FORMAS DA ASSERÇÃO QUE NÃO PODE FALHAR
+=============================================
+Pergunta sempre: QUE ENTRADA FARIA ISTO FALHAR?
+
+   1  x == x disfarçado:  V = Pi*S … razao = V/(Pi*S)
+   2  a definição relida: sa = a1+a2 … if(sa == a1+a2)
+   3  constante contra constante: det = m*0-1*1 ; tc = -1 ; if(det == tc)
+   4  x % x, -a+a, if(-2 != 0)
+   5  a soma das partes é o todo: Qf = Q-W … W+Qf == Q
+   6  o caso degenerado a fazer passar: os 8 casos que passavam eram a==b, tudo zero
+   7  desigualdade FOLGADA: «> 1e6» quando a razão é 3e21
+   8  a ordem quando os valores mudam: F_bom < F_ma sobrevive a estragar a fórmula
+   9  o limiar desligado do cálculo: `limiar = {63,50}` e o corte a usar `63` literal
+  10  o gerador que não varre: i*s mod 13 é PERMUTAÇÃO — 8 sementes, 1 só valor
+  11  o contador local que sombreia o do header (ver §3(e))
+  12  o `ok()` que mede a lib com a garantia da própria lib -> muta a LIB
+  13  a TAUTOLOGIA POR RELEITURA: uma variável da condição definida linhas acima em
+      função de OUTRA da mesma condição. `python3 tools/tautologia.py` acha-as.
+  14  VARRER ONDE NADA PODE FALHAR: 15 pontos de operação a confirmar que T e I_s não
+      mudam a resposta — quando a lei é `a·b` e nem T nem I_s aparecem lá.
+
+E A PIOR DE TODAS É A QUE SE ESCREVE DENTRO DA CORRECÇÃO. Migrei `com = a*b` e testei
+`com == a*b`; escrevi `num = -kq*D + kq*D` e testei `num == 0`. O cancelamento tem de
+acontecer NO CÓDIGO — monta a expressão como ela é e deixa a divisão/subtracção fazer o
+trabalho, para que os dois lados partam de sítios DIFERENTES.
+
+
+8. O QUE NÃO FAZER
+===================
+  · não inventar taxonomias para justificar limiares;
+  · NÃO INVENTAR PEÇA NENHUMA — está tudo nos papers e na lib. Perdi três voltas a
+    escrever um critério de Greene, uma régua do encaixe à mão e uma máquina de fracção
+    contínua minha, e a resposta era `rt_orbita` + `thm:ouro`;
+  · não trazer Gram-Schmidt/DFT/Fourier para coisas que já têm base;
+  · não escrever a referência à mão — se ela não muda quando o dado muda, é cópia;
+  · não publicar um total sem o ESCOPO na mesma frase;
+  · não usar replace GLOBAL: a linha `double vol = 1e-9, comp = 1e-3, rhat[3]…` aparece
+    TRÊS vezes idênticas no radiacao.c e só numa os dois estão mortos. Edita por LINHA;
+  · fazer BACKUP antes de reescrever um bloco grande — um `re.sub` meu comeu o fecho de
+    uma função e o cabeçalho da secção seguinte;
+  · não commitar por cima do trabalho de outro agente sem `git ls-files` antes;
+  · não deixar um medidor novo fora da bateria: só conta se um paper o CITAR;
+  · NÃO CRIAR TEOREMAS DUPLICADOS — `grep -n "label{" papers/*.tex` primeiro.
+
+
+9. AS PEÇAS DA LIB — PROCURA AQUI ANTES DE ESCREVER
+====================================================
+lib/reta.h.  `grep -n "^static .*rt_" lib/reta.h`
 
   inteiros    rt_mdc rt_mmc rt_sinal rt_modulo rt_ipow rt_raiz_exacta rt_raiz_k
   modular     rt_inv_mod rt_pot_mod rt_mod rt_det_mod
-  vectores    rt_dir (produto interno) rt_cruz rt_norma rt_cos2 (cosseno em FRACÇÃO)
-              rt_perp rt_paralelos rt_lagrange rt_bivetor2 rt_reduz_vector
+  vectores    rt_dir rt_cruz rt_norma rt_cos2 (cosseno em FRACÇÃO) rt_perp rt_paralelos
+              rt_lagrange rt_bivetor2 rt_reduz_vector
   matrizes    rt_mul_mat rt_traco rt_transpoe rt_pot_mat rt_det_bareiss rt_companheira
               rt_tracos rt_kron rt_adjunta2 rt_inversa2 rt_aplica
   operador    rt_orbita rt_dobra rt_forma rt_recorre rt_volta rt_fixo_racional
   Z[raizD]    rt_zd_mul rt_zd_pot rt_zd_norma rt_zd_conj
   texto/pipe  rt_le_decimal rt_escreve_decimal rt_cf_de rt_cf_para
               rt_unidade_comum rt_para_unidade
-  ciclo       RtOp rt_op_valido rt_opera rt_inverte rt_ciclo rt_ordem_ponto
-  Dir/Cruz    rt_dir_op rt_cruz_op rt_espectro_comum   (de OPERADORES — os sem sufixo
-                                                        são de VECTORES)
+  ciclo       RtOp rt_op_valido rt_op_det rt_opera rt_inverte rt_ciclo rt_ordem_ponto
+  Dir/Cruz    rt_dir_op rt_cruz_op rt_espectro_comum  (de OPERADORES; os sem sufixo são
+                                                       de VECTORES)
   dourada     rt_folha_borda rt_ordem_mult rt_dourada rt_dourada_inv
 
 lib/qmd.h — Q(m raizD): qmd_norma, qmd_conj, qmd_inv, qmd_dtu, qmd_folhas_fp
 
-Escrevi `rt_dir2`/`rt_cruz2` quando já havia `rt_dir`/`rt_cruz`; e reescrevi um inverso
-modular à mão quando `rt_inv_mod` estava lá. O grep é barato.
+AS QUE A MIGRAÇÃO USA MAIS:
+    rt_orbita                 a régua: os convergentes, sem uma raiz
+    rt_op_det / rt_op_valido  o trial e a condição do toro
+    rt_ordem_ponto            o período — mas parte de [1:1], não de infinito
+    rt_folha_borda/rt_dourada a rotação exacta, no lugar de sin/cos
+    rt_raiz_exacta            a raiz quando ela É inteira (e o falso quando não)
+    rt_mmc / rt_para_unidade   a soma de racionais, de uma vez para Z
+    rt_cos2                   o cosseno como FRACÇÃO — mata os `< 0.999`
 
 
-7. AS FORMAS DA ASSERÇÃO QUE NÃO PODE FALHAR
---------------------------------------------
+10. AS CONFERÊNCIAS E AS RÉGUAS
+================================
+  tools/doubles_todos.py    TODOS os doubles, `git ls-files`, double+float, e os
+                            limiares separados por CAUSA (régua/guarda/valor)
+  tools/doubles_cond.py     os que alimentam ok() — tests/+banco por defeito
+  tools/audita_tipos.sh     a matriz das 4 classes — 4 globs, só `double`, conta LINHAS
+  tools/triagem_limiares.sh os 1e-N por causa (A/B/C) — 4 globs
+  tools/tautologia.py       a asserção que não pode falhar por releitura (forma 13)
+  tools/refcruz.py          as referências CRUZADAS entre documentos (`\code{x thm:y}`
+                            não é um \ref — o pdflatex não a vê)
+  tools/caminhos.py         os caminhos citados em workflows/scripts/configs (foi assim
+                            que o deploy ficou quebrado de 15/08 a 18/08)
 
-Pergunta sempre: QUE ENTRADA FARIA ISTO FALHAR?
-
-   1  x == x disfarçado:  V = Pi*S  ...  razao = V/(Pi*S)
-   2  a definição relida: sa = a1+a2  ...  if(sa == a1+a2)
-   3  constante contra constante: det = m*0-1*1 ; tc = -1 ; if(det == tc)
-   4  x % x, -a+a, if(-2 != 0)
-   5  a soma das partes é o todo: Qf = Q-W  ...  W+Qf == Q
-   6  o caso degenerado a fazer passar: os 8 casos que passavam eram a==b, tudo zero
-   7  desigualdade FOLGADA: «> 1e6» quando a razão é 3e21 — nenhuma mutação a derruba
-   8  a ordem quando os valores mudam: F_bom < F_ma sobrevive a estragar a fórmula
-   9  o limiar desligado do cálculo: `limiar = {63,50}` e o corte a usar `63` literal
-  10  o gerador que não varre: i*s mod 13 é uma PERMUTAÇÃO — 8 sementes, 1 só valor
-  11  o contador local: `long falhas = 0` no main SOMBREIA o do lib/unidade.h, e o
-      medidor sai 0 com «NÃO x» impresso. NÃO DECLARES `falhas`. Vem do header.
-  12  o `ok()` que mede a lib com a garantia da própria lib -> muta a LIB
+INVARIANTE DE QUALQUER REORGANIZAÇÃO: contar os medidores CITADOS antes e depois. São
+508. Um medidor que nenhum documento cita DEIXA DE SER TESTADO.
 
 
-8. O QUE NÃO FAZER
-------------------
+11. A TRÍADE — onde as peças vivem
+===================================
+    tau=−1  papers/corpo_topologico.tex     o que FECHA          41 pp.   [GPT]
+    tau= 0  papers/corpo_algebrico.tex      o CENTRO, canónico   67 pp.   [Grok]
+    tau=+1  papers/corpo_analitico.tex      o que NÃO fecha      56 pp.   [Claude]
+            papers/corpo_computacional.tex  realização DENTRO do tau=−1   11 pp.
+    raiz    teoria.tex 98 pp. · catalogo.tex 488 pp. · enredo.tex 365 pp.
 
-  · não inventar taxonomias para justificar limiares (já o fiz duas vezes, ambas falsas);
-  · não trazer objectos de fora (Gram-Schmidt, DFT, Fourier) para coisas que já têm base;
-  · não escrever a referência à mão — se ela não muda quando o dado muda, é cópia;
-  · não commitar por cima do trabalho de outro agente sem `git ls-files` antes;
-  · não deixar um medidor novo fora da bateria: ele só é contado se um paper o CITAR;
-  · NÃO CRIAR TEOREMAS DUPLICADOS — procura primeiro (`grep -n "label{" papers/*.tex`),
-    e se a peça já existe, LIGA em vez de reescrever (aconteceu-me com o cone/espiral,
-    que a obs:area já dizia, e com Dir/Cruz, que a lib já tinha);
-  · não reintroduzir DFT/Fourier como transformada discreta — a discreta é a DOURADA
-    na borda, e quando a borda precisa de ser avaliada usa-se a dourada COMPLETA.
+E NÃO HÁ QUARTA CASA. O centro não é o terceiro lado do par: é o lugar ANTERIOR à
+separação. A posição LÊ-SE pelo que a peça consome.
+
+O EIXO É O tau, e tem três valores porque sign() tem três. O centro é canónico por SE
+FIXAR: rev(tau) = tau  <=>  tau = 0 (algebrico prop:zero-dual-zero).
+
+    A TRANSFORMADA é UMA e fica no centro; os POLOS são dois e descem:
+        FOURIER  grupo ADITIVO, o círculo, |t|<=2, elíptico  -> topologico sec:fourier
+        MELLIN   grupo MULTIPLICATIVO, folhas recíprocas     -> analitico sec:mellin
+    e o isomorfismo x = e^u entre eles É a reflexão tau -> −tau.
+
+CRITÉRIO DE ARRUMAÇÃO: canónica é a peça que algum dos quatro usa para FUNDAR; de
+segundo escalão é a que só ilustra, ou muda de enunciado quando se troca o sítio onde é
+lida. O canónico fica no centro, sem excepção.
+
+O ESPAÇO (universal.tex def:espaco):  V = Q(m raizD) = Q + Q·m raizD, dim 2, base
+{1, m raizD}
+    s = m raizD    s† = −1/s    ==>   s·s† = −1,   V† = V (o mesmo corpo, régua invertida)
+    (P1) raizD em Q  <=>  D é QUADRADO     o espaço EXISTE
+    (P2) m != 0  ==>  m raizD fora de Q    o espaço tem RÉGUA
+    (D1) a = a*  <=>  a em Q               o dual FIXA Q    — é o TRAÇO
+    (D2) a·a* em Q, sempre                 o dual REGRESSA  — é a NORMA
+    UMA SAI, A OUTRA VOLTA: uma é o CONE (desce discreto), a outra a ESPIRAL (sobe
+    recompondo), e s·s† = −1 diz que a régua que expande tem o dual que contrai.
+
+A CÚSPIDE é disc = tr² − 4det = 0, onde as folhas COLIDEM. tau = sign(disc) É O TRIAL, e
+INDEXA A DIMENSÃO (nº de folhas = tau+1). Cada RACIONAL ancora uma cúspide, logo Q é o
+conjunto delas e o CORTE é o complemento.
 
 
-9. O CHECKPOINT — três passos, e é sempre assim
------------------------------------------------
-
+12. O CHECKPOINT — três passos, e é sempre assim
+=================================================
   1. escrever a memória em ~/.claude/projects/.../memory/  (+ linha no MEMORY.md)
   2. bash memoria/sincroniza.sh guarda
   3. git commit

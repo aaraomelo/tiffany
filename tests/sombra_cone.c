@@ -15,27 +15,25 @@
  * cima depois de se perder uma dimensão. As relações entre os vetores de baixo são a sombra da
  * AUSÊNCIA de relações em cima.
  *
- * E é por isso que o +1 «completa, torna dual e reversível»: acrescentar a dimensão não é somar
- * um vetor qualquer — é subir ao andar onde a base já era ortonormal, e onde a reconstrução é
- * trivial porque não há nada a corrigir.
+ * LEI vs TRANSPORTE. Projectar, normalizar com sqrt e sin a gerar x eram o método. A lei é
+ * w_i = (n+1) e_i − 1 em ℤ^{n+1}: w_i + 1 = (n+1) e_i (a identidade da projecção, sem
+ * dividir), n⟨w_i,w_j⟩ + ‖w‖² = 0 (é −1/n), Σ⟨x,w⟩w = (n+1)² x no hiperplano, e n²−n−1 ≠ 0
+ * (a razão não é φ). Sem uma raiz.
  *
- *   §Z1  o SIMPLEX é a sombra: projeta-se e_i e sai exatamente o simplex
- *   §Z2  o ÂNGULO de baixo é o que a projeção produz — fórmula fechada, não ajuste
- *   §Z3  o CONE: a sombra vive no hiperplano Σx=0, e a normal é a dimensão perdida
- *   §Z4  SUBIR restitui a ortogonalidade — e é isso que torna reversível
- *   §Z5  e a PROJEÇÃO ÁUREA: onde φ aparece, e onde eu não a encontro
- *
- *   cc -O2 -std=c99 -I. sombra_cone.c -lm -o sombra_cone && ./sombra_cone
+ *   cc -O2 -std=c99 -I lib tests/sombra_cone.c -o sombra_cone && ./sombra_cone
  */
 #include <stdio.h>
-#include <string.h>
-#include <math.h>
+#include "reta.h"
 #include "unidade.h"
 
-#define NM 16
+#define DMAX 10
 
-static double dot(const double*a,const double*b,int n){
-    double s=0; for(int i=0;i<n;i++) s+=a[i]*b[i]; return s;
+/* A sombra inteira: N e_i − 1, N = n+1. É a projecção no hiperplano Σ = 0, vezes N. */
+static void sombra(int n, long w[DMAX][DMAX]){
+    int d = n + 1;
+    for(int i = 0; i < d; i += 1)
+        for(int j = 0; j < d; j += 1)
+            w[i][j] = (i == j) ? n : -1;
 }
 
 int main(void){
@@ -45,189 +43,159 @@ printf("    vetores são a projeção de uma base ortonormal que vive um andar a
 
 printf("\n§Z1  O SIMPLEX É A SOMBRA: projeta-se e_i e sai exatamente o simplex.\n\n");
 {
-    /* Tomam-se os n+1 eixos ortonormais de R^(n+1) e projeta-se cada um no hiperplano
-     * ortogonal a (1,1,...,1) — o hiperplano da soma zero. O que sai tem de ser o simplex
-     * regular, e mede-se contra as duas propriedades que o §M2 do maisum.c usou: soma nula, e
-     * todos os angulos iguais. Se saisse outra coisa, a sombra nao era o simplex. */
-    printf("      n    e_i em R^(n+1)   sombra em Σx=0   ‖Σ sombras‖   ⟨s_i,s_j⟩   −1/n\n");
-    int mau = 0;
-    for(int n = 2; n <= 8; n++){
-        int N = n+1;
-        double s[NM][NM];
-        for(int i = 0; i < N; i++){
-            for(int d = 0; d < N; d++) s[i][d] = (i==d) ? 1.0 : 0.0;   /* e_i em R^(n+1) */
-            double m = 0;
-            for(int d = 0; d < N; d++) m += s[i][d];
-            m /= N;
-            for(int d = 0; d < N; d++) s[i][d] -= m;                   /* projeta em Σx=0 */
-            double nn = sqrt(dot(s[i],s[i],N));
-            for(int d = 0; d < N; d++) s[i][d] /= nn;                  /* normaliza a sombra */
+    /* w_i + 1⃗ = N e_i — a identidade da projecção, sem dividir por N. Se a sombra
+     * não viesse dos eixos, esta conta não fechava. */
+    printf("      n    N    w_i+1 = N e_i?   Σw = 0?   n⟨,⟩+‖w‖² = 0?\n");
+    int mau = 0, ns = 0;
+    for(int n = 2; n <= 8; n += 1){
+        long w[DMAX][DMAX];
+        sombra(n, w);
+        int d = n + 1;
+        int proj = 1, sum0 = 1, ang = 1;
+        long soma[DMAX] = {0};
+        for(int i = 0; i < d; i += 1){
+            for(int j = 0; j < d; j += 1){
+                long eixo = (i == j) ? d : 0;
+                if(w[i][j] + 1 != eixo) proj = 0;
+                soma[j] += w[i][j];
+            }
         }
-        double soma[NM] = {0};
-        for(int i = 0; i < N; i++) for(int d = 0; d < N; d++) soma[d] += s[i][d];
-        double ns = sqrt(dot(soma,soma,N));
-        double pior = 0, ip = dot(s[0],s[1],N);
-        for(int i = 0; i < N; i++) for(int j = i+1; j < N; j++){
-            double g = dot(s[i],s[j],N);
-            if(fabs(g + 1.0/n) > pior) pior = fabs(g + 1.0/n);
+        for(int j = 0; j < d; j += 1) if(soma[j]) sum0 = 0;
+        long ip = rt_dir(w[0], w[1], d), nw = rt_norma(w[0], d);
+        for(int i = 0; i < d; i += 1) for(int j = i + 1; j < d; j += 1){
+            long g = rt_dir(w[i], w[j], d);
+            if(g != ip) ang = 0;
+            if(n * g + nw != 0) ang = 0;
         }
-        if((long long)(ns * 1e12) >= 1 || (long long)(pior * 1e12) >= 1) mau++;
-        printf("      %-4d %-16d %-16s %-13.2e %-11.6f %.6f\n",
-               n, n+1, "Σx=0", ns, ip, -1.0/n);
+        for(int i = 0; i < d; i += 1) if(rt_norma(w[i], d) != nw) ang = 0;
+        ns += 1;
+        if(!proj || !sum0 || !ang) mau += 1;
+        printf("      %-4d %-4d %-16s %-10s %s\n",
+               n, d, proj ? "sim" : "NÃO", sum0 ? "sim" : "NÃO", ang ? "sim" : "NÃO");
     }
     printf("\n");
-    ok("a projeção dos n+1 eixos dá EXATAMENTE o simplex — soma nula e ângulo −1/n",
-       mau == 0);
-    printf("      Não se construiu simplex nenhum: projetou-se a base canónica de cima e ele\n");
-    printf("      apareceu. O simplex do maisum.c §M2 e esta sombra são o mesmo objeto.\n");
+    ok("a projecao dos n+1 eixos da EXACTAMENTE o simplex — w_i + 1 = N e_i, soma nula"
+       " e n⟨w_i,w_j⟩ + ‖w‖² = 0, que e' −1/n sem dividir nem raiz. Nao se construiu"
+       " simplex nenhum: projectou-se a base canonica de cima e ele apareceu",
+       mau == 0 && ns == 7);
+    conclui("O simplex do maisum.c §M2 e esta sombra sao o mesmo objeto.");
 }
 
-printf("\n§Z2  O ÂNGULO de baixo é o que a projeção PRODUZ — fórmula fechada.\n\n");
+printf("\n§Z2  O ÂNGULO de baixo é o que a projecção PRODUZ — fórmula fechada.\n\n");
 {
-    /* De onde vem o -1/n. Em cima, <e_i,e_j> = 0. A projecao tira a componente ao longo de
-     * (1,...,1)/sqrt(N), e cada e_i tem 1/sqrt(N) dessa direcao. Logo o produto interno das
-     * sombras e' 0 - 1/N, e a norma de cada uma e' sqrt(1 - 1/N). Dividindo:
-     *
-     *     cos = (-1/N) / (1 - 1/N) = -1/(N-1) = -1/n
-     *
-     * — e o -1/n nao e' escolhido, e' o que resta de uma ortogonalidade a que se tirou uma
-     * dimensao. Mede-se a formula contra o valor medido. */
-    printf("      n    ⟨e_i,e_j⟩ em cima   componente em 1⃗   cos da sombra   −1/n      bate\n");
-    int mau = 0;
-    for(int n = 2; n <= 8; n++){
-        double N = n+1;
-        double ip_cima = 0.0;
-        double comp = 1.0/N;                       /* o que cada e_i tem da direção (1,…,1) */
-        /* cos = (−1/N)/(1−1/N) = −1/(N−1) = −1/n — a identidade é exacta; a conta
-         * em double pode dar −0,499999…, logo compara-se cos·n contra −1, não == −1.0 */
-        double cos_sombra = (ip_cima - comp)/(1.0 - comp);
-        if((long long)(fabs(cos_sombra * (double)n + 1.0) * 1e12) >= 1) mau++;
-        printf("      %-4d %-19.1f %-18.6f %-15.6f %-9.6f %s\n",
-               n, ip_cima, comp, cos_sombra, -1.0/n,
-               (long long)(fabs(cos_sombra * (double)n + 1.0) * 1e12) == 0 ? "sim" : "NÃO");
+    /* Em cima ⟨e_i,e_j⟩ = 0. A sombra s = N e − 1 dá
+     *      ⟨s_i,s_j⟩ = N²⟨e_i,e_j⟩ − N − N + N = −N     (usou-se a ortogonalidade)
+     *      ‖s‖² = N(N−1)
+     * e n⟨s_i,s_j⟩ + ‖s‖² = (N−1)(−N) + N(N−1) = 0. Se os eixos de cima NÃO fossem
+     * ortogonais, o −N não saía. */
+    printf("      n    ⟨e_i,e_j⟩   ⟨s_i,s_j⟩   −N    n⟨s,s⟩+‖s‖²\n");
+    int mau = 0, ns = 0, gume_cai = 0;
+    for(int n = 2; n <= 8; n += 1){
+        int N = n + 1;
+        long ip_cima = 0;
+        long ip_s = N*N*ip_cima - N - N + N;
+        long nw = (long)N * n;
+        long id = n * ip_s + nw;
+        ns += 1;
+        if(ip_s != -N || id != 0) mau += 1;
+        printf("      %-4d %-12ld %-12ld %-6d %ld\n", n, ip_cima, ip_s, -N, id);
+        /* gume: dois eixos com ⟨e_i,e_j⟩ = 1 (não ortogonais) — o −N cai */
+        long ip_mau = N*N*1 - N - N + N;
+        if(ip_mau != -N) gume_cai += 1;
     }
-    ok("o ângulo da sombra sai da fórmula, não de ajuste: −1/N sobre 1−1/N = −1/n",
-       mau == 0);
-    printf("      É a frase do Aarão com número: as relações de baixo são o que sobra da\n");
-    printf("      AUSÊNCIA de relações em cima. Lá os eixos não se falam; cá, a dimensão que\n");
-    printf("      lhes falta obriga-os a um ângulo comum, e esse ângulo é −1/n.\n");
+    printf("\n");
+    ok("o angulo da sombra sai da formula, nao de ajuste: ⟨s_i,s_j⟩ = −N vem de"
+       " ⟨e_i,e_j⟩ = 0 em cima, e n⟨s,s⟩+‖s‖² = 0 e' −1/n. Com eixos NAO ortogonais"
+       " o −N cai — a ortogonalidade de cima e' a hipotese, nao o resultado",
+       mau == 0 && ns == 7 && gume_cai == 7);
+    conclui("As relacoes de baixo sao o que sobra da AUSENCIA de relacoes em cima.");
 }
 
 printf("\n§Z3  O CONE: a sombra vive em Σx=0, e a normal é a dimensão perdida.\n\n");
 {
-    /* O hiperplano Sx=0 e' o corpo de baixo; a normal (1,...,1)/sqrt(N) e' exatamente a
-     * direcao que se perdeu. Mede-se que TODA sombra e' ortogonal a essa normal — se alguma
-     * nao fosse, nao estava no corpo de baixo. */
-    int n = 6, N = n+1;
-    double s[NM][NM], normal[NM];
-    for(int d = 0; d < N; d++) normal[d] = 1.0/sqrt((double)N);
-    double pior = 0;
+    int n_dim = 6, Ndim = n_dim + 1;
+    long w[DMAX][DMAX], normal[DMAX];
+    sombra(n_dim, w);
+    for(int d = 0; d < Ndim; d += 1) normal[d] = 1;
     int orto = 0;
-    for(int i = 0; i < N; i++){
-        for(int d = 0; d < N; d++) s[i][d] = (i==d) ? 1.0 : 0.0;
-        double m = 0;
-        for(int d = 0; d < N; d++) m += s[i][d];
-        m /= N;
-        for(int d = 0; d < N; d++) s[i][d] -= m;
-        /* Σ_d s[d] = 0 em ℤ: cada componente vale (N−1)/N ou −1/N, soma exacta */
-        long soma_N = 0;
-        for(int d = 0; d < N; d++) soma_N += (i==d ? N-1 : -1);
-        if(soma_N == 0) orto++;
-        double c = fabs(dot(s[i], normal, N));
-        if(c > pior) pior = c;
+    for(int i = 0; i < Ndim; i += 1){
+        long s1 = 0, cn = rt_dir(w[i], normal, Ndim);
+        for(int d = 0; d < Ndim; d += 1) s1 += w[i][d];
+        if(s1 == 0 && cn == 0) orto += 1;
     }
-    printf("      n = %d, o corpo de baixo é o hiperplano Σx = 0 em R^%d\n", n, N);
-    printf("      a normal perdida é (1,…,1)/√%d\n", N);
-    printf("      sombras com Σs = 0 exacto (N·s ∈ ℤ): %d de %d  (pior |⟨s,n⟩| = %.3e)\n\n",
-           orto, N, pior);
-    ok("toda sombra é ortogonal à normal — vive inteiramente no corpo de baixo. E mede-se"
-       " por Σ_d s[d] = 0 em ℤ: projectar e_i dá (N−1)/N e −1/N, que somam 0 exactos —"
-       " o 1e-15 comparava ⟨s,n⟩ depois, com folga à mesma projectura",
-       orto == N && (long long)(pior * 1e15) == 0);
-    printf("      A dimensão que falta não está espalhada pelas sombras: está TODA na normal,\n");
-    printf("      e é por isso que se pode devolvê-la de uma vez só. O +1 não repara n coisas —\n");
-    printf("      repõe uma.\n");
+    printf("      n = %d, o corpo de baixo e o hiperplano Σx = 0 em Z^%d\n", n_dim, Ndim);
+    printf("      a normal perdida e (1,…,1) — sem dividir por raiz(N)\n");
+    printf("      sombras com Σs = 0 e ⟨s,1⟩ = 0: %d de %d\n\n", orto, Ndim);
+    ok("toda sombra e ortogonal a normal — vive inteiramente no corpo de baixo."
+       " Projectar e_i da (N−1, −1, …, −1), que somam 0 exactos, e o produto com"
+       " (1,…,1) e' zero em Z. O 1e-15 comparava ⟨s,n⟩ depois de normalizar",
+       orto == Ndim);
+    conclui("A dimensao que falta nao esta espalhada pelas sombras: esta TODA na normal.");
 }
 
 printf("\n§Z4  SUBIR restitui a ortogonalidade — e é isso que torna reversível.\n\n");
 {
-    /* O fecho. Em baixo a reconstrucao precisa da constante (n+1)/n (maisum.c §M3); em cima
-     * ela e' a identidade pura, porque a base e' ortonormal. Mede-se os dois, lado a lado, e a
-     * diferenca entre eles E' o preco de ter perdido a dimensao. */
-    printf("      n    reconstrução em BAIXO   constante   reconstrução em CIMA   constante\n");
-    int mau = 0;
-    for(int n = 2; n <= 6; n++){
-        int N = n+1;
-        double s[NM][NM];
-        for(int i = 0; i < N; i++){
-            for(int d = 0; d < N; d++) s[i][d] = (i==d) ? 1.0 : 0.0;
-            double m = 0;
-            for(int d = 0; d < N; d++) m += s[i][d];
-            m /= N;
-            for(int d = 0; d < N; d++) s[i][d] -= m;
-            double nn = sqrt(dot(s[i],s[i],N));
-            for(int d = 0; d < N; d++) s[i][d] /= nn;
+    printf("      n    reconstrucao em BAIXO     em CIMA\n");
+    int mau = 0, tot = 0;
+    for(int n = 2; n <= 6; n += 1){
+        long w[DMAX][DMAX];
+        sombra(n, w);
+        int d = n + 1;
+        long c0 = (long)d * d;
+        long x[DMAX], rec[DMAX] = {0}, rec2[DMAX] = {0};
+        long sx = 0;
+        for(int j = 0; j < n; j += 1){ x[j] = j + 1; sx += x[j]; }
+        x[n] = -sx;
+        for(int i = 0; i < d; i += 1){
+            long c = rt_dir(x, w[i], d);
+            for(int j = 0; j < d; j += 1) rec[j] += c * w[i][j];
         }
-        /* em baixo: x no hiperplano, reconstruído pelas sombras */
-        double x[NM], rec[NM] = {0};
-        for(int d = 0; d < N; d++) x[d] = sin(1.7*d);
-        double m = 0;
-        for(int d = 0; d < N; d++) m += x[d];
-        m /= N;
-        for(int d = 0; d < N; d++) x[d] -= m;                  /* x no corpo de baixo */
-        for(int i = 0; i < N; i++){
-            double c = dot(x, s[i], N);
-            for(int d = 0; d < N; d++) rec[d] += c*s[i][d];
+        for(int i = 0; i < d; i += 1) rec2[i] = x[i];
+        int baixo = 1, cima = 1;
+        for(int j = 0; j < d; j += 1){
+            if(rec[j] != c0 * x[j]) baixo = 0;
+            if(rec2[j] != x[j]) cima = 0;
         }
-        double c_baixo = dot(rec,x,N)/dot(x,x,N);
-        /* em cima: os e_i, ortonormais — a reconstrução é a identidade */
-        double rec2[NM] = {0};
-        for(int i = 0; i < N; i++) rec2[i] = x[i];             /* <x,e_i> e_i = x, trivial */
-        double c_cima = dot(rec2,x,N)/dot(x,x,N);
-        long e = 0;
-        for(int d = 0; d < N; d++){ double t = rec[d]/c_baixo - x[d]; e += t*t; }
-        if((long long)(e * 1e24) >= 1 || (long long)(fabs(c_cima - 1.0) * 1e12) >= 1) mau++;
-        printf("      %-4d %-23s %-11.6f %-22s %.6f\n",
-               n, "exata (÷ constante)", c_baixo, "exata (identidade)", c_cima);
+        tot += 1;
+        if(!baixo || !cima) mau += 1;
+        printf("      %-4d rec = %ld·x ? %s          identidade? %s\n",
+               n, c0, baixo ? "sim" : "NÃO", cima ? "sim" : "NÃO");
     }
     printf("\n");
-    ok("em cima a reconstrução é a identidade; em baixo, exata a menos da constante",
-       mau == 0);
-    printf("      É isto o «completa, torna dual e reversível»: subir devolve a ortogonalidade,\n");
-    printf("      e com ela a volta deixa de precisar de constante nenhuma. O corpo de baixo é\n");
-    printf("      reversível PORQUE é sombra de um corpo onde a reversão é trivial.\n");
+    ok("em cima a reconstrucao e a identidade; em baixo, exacta a menos da constante"
+       " (n+1)² — tight frame, sem ortogonalizar. sin(1.7 d) era transporte",
+       mau == 0 && tot == 5);
+    conclui("Subir devolve a ortogonalidade, e com ela a volta deixa de precisar de constante.");
 }
 
 printf("\n§Z5  E A PROJEÇÃO ÁUREA: onde φ aparece, e onde eu NÃO a encontro.\n\n");
 {
-    /* O Aarao disse "projecao AUREA". Procura-se phi nas quantidades desta projecao — e diz-se
-     * o que se acha e o que nao se acha, em vez de forcar. */
-    double phi = (1.0 + sqrt(5.0))/2.0;
-    printf("      φ = %.10f\n\n", phi);
-    printf("      n    ‖sombra‖/‖e_i‖ = √(n/(n+1))   é φ ou 1/φ?\n");
-    int achou = 0;
-    for(int n = 2; n <= 8; n++){
-        double r = sqrt((double)n/(n+1.0));
-        int e_phi = (long long)(fabs(r - phi) * 1e6) == 0 || (long long)(fabs(r - 1/phi) * 1e6) == 0;
-        if(e_phi) achou++;
-        printf("      %-4d %-30.10f %s\n", n, r, e_phi ? "SIM" : "não");
+    printf("      n    n²−n−1    (n+3)²    5(n+1)²    e' φ?\n");
+    int achou = 0, ns = 0, coinc = 0;
+    long Fb[8] = {1,1,2,3,5,8,13,21};
+    for(int n = 2; n <= 8; n += 1){
+        long p = (long)n*n - n - 1;
+        long a = (long)(n+3)*(n+3), b = 5L*(n+1)*(n+1);
+        int e_phi = (p == 0) || (a == b);
+        if(e_phi) achou += 1;
+        ns += 1;
+        for(int k = 0; k < 7; k += 1)
+            if(n * Fb[k+1] == (n+1) * Fb[k]) coinc += 1;
+        printf("      %-4d %-10ld %-10ld %-12ld %s\n", n, p, a, b, e_phi ? "SIM" : "não");
     }
     printf("\n");
-    ok("a razão de projeção NÃO é a áurea — é √(n/(n+1)), e depende de n", achou == 0);
-    printf("      Não encontro φ aqui, e digo-o em vez de o forçar: a razão entre a sombra e o\n");
-    printf("      eixo é √(n/(n+1)), que varia com a dimensão e não estabiliza em φ.\n\n");
-    /* onde ela ESTÁ, e isso mede-se: no ângulo entre um eixo e a sua própria sombra, no caso
-     * n = 1 — e no facto de σ ser o ponto fixo da projeção iterada, que é outra coisa */
-    printf("      Onde φ ESTÁ, e está medido noutro sítio: σ = 1 + 1/σ é o ponto fixo da\n");
-    printf("      realimentação (checkup.c), e σ·σ' = −1 é a dualidade (furos.c §F4). A\n");
-    printf("      projeção que aqui se mede é ORTOGONAL, e a ortogonal não tem φ dentro.\n");
-    printf("      Se a projeção áurea existir, é outra projeção — e teria de se dizer qual.\n");
+    ok("a razao de projecao NAO e a aurea — e n/(n+1), e depende de n. n²−n−1 = 0"
+       " seria n = φ, e (n+3)² = 5(n+1)² seria n/(n+1) = 1/φ². Nenhum n de 2 a 8"
+       " satisfaz. A coincidencia Fibonacci n/(n+1)=F_k/F_{k+1} acontece UMA vez (n=2,"
+       " 2/3), nao em todos — a razao nao e a sequencia aurea. Sem formar a raiz nem φ",
+       achou == 0 && ns == 7 && coinc == 1);
+    conclui("A projeccao que aqui se mede e ORTOGONAL, e a ortogonal nao tem φ dentro.");
 }
 
 printf("\n=== FECHO ==================================================================\n");
-printf("    O simplex não é construção: é a sombra da base de cima. O −1/n é o que\n");
-printf("    resta da ortogonalidade depois de se perder uma dimensão, e a dimensão\n");
-printf("    perdida está toda na normal — por isso o +1 repõe uma coisa e não n.\n\n");
-printf("    %d asserções, %d falhas.\n\n", unidades, falhas);
+printf("    O simplex nao e construcao: e a sombra da base de cima. O −1/n e o que\n");
+printf("    resta da ortogonalidade depois de se perder uma dimensao, e a dimensao\n");
+printf("    perdida esta toda na normal — por isso o +1 repoem uma coisa e nao n.\n\n");
+printf("    %d assercoes, %d falhas.\n\n", unidades, falhas);
 return falhas != 0;
 }

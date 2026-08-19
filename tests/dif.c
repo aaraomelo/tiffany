@@ -31,23 +31,17 @@
  *   §F9  e FECHOU? contra o contrato — e o par (D,∫) NÃO é a dualidade
  *   §F6  a régua do corpo diferencial, e onde ele cai no catálogo
  *
- *   cc -O2 -std=c99 dif.c -lm -o dif && ./dif
+ *   cc -O2 -std=c99 -I lib tests/dif.c -o dif && ./dif
  */
 #include <stdio.h>
-#include <math.h>
-#include <string.h>
-#include <complex.h>
 #include "unidade.h"
 #include "reta.h"
 #include "racionais.h"
 #include "calculo.h"
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 #define N 16                                   /* a caixa: N pontos. Finito, e dito. */
 
-/* O FACTOR DA DFT UNITÁRIA É √N — e aqui ele é INTEIRO, porque N = 16 é quadrado
+/* O FACTOR DA UNITÁRIA É √N — e aqui ele é INTEIRO, porque N = 16 é quadrado
  * perfeito. Estava escrito `sqrt((double)N)`, o que é pedir a uma função de vírgula um
  * número que vale exactamente 4. A `rt_raiz_exacta` da reta.h decide-o por busca binária
  * em inteiros, e o medidor abaixo (§F0) verifica que decidiu — porque um factor assumido
@@ -56,15 +50,32 @@
 static long RAIZ_N = 0;
 static int  RAIZ_N_EXACTA = 0;
 
-static void dft(const double complex *x, double complex *X, int inv){
+/* A TRANSFORMADA SOBRE ℤ₁₇. N = 16, w = 3 tem ordem 16, √N = 4 com inverso 13.
+ * É a avaliação nas N raízes da unidade — a mesma F do §F2, sem cosseno. */
+#define P17    17L
+#define W17     3L
+#define INV_RN 13L                             /* 4·13 ≡ 1 (mod 17) */
+
+static long potW(long e){
+    e %= N; if(e < 0) e += N;
+    return rt_pot_mod(W17, e, P17);
+}
+static void dft_z(const long *x, long *X, int inv){
     for(int k = 0; k < N; k++){
-        double complex s = 0;
+        long s = 0;
         for(int j = 0; j < N; j++){
-            double a = (inv ? 2 : -2) * M_PI * j * k / N;
-            s += x[j] * (cos(a) + I*sin(a));
+            long e = inv ? ((j * (long)k) % N) : ((N - (j * (long)k % N)) % N);
+            s = (s + x[j] * potW(e)) % P17;
         }
-        X[k] = s / (double)RAIZ_N;             /* unitária dos dois lados: é assim que F⁴ = id */
+        X[k] = s * INV_RN % P17;
     }
+}
+/* o caractere por RECORRÊNCIA: χ(0)=1, χ(t+1)=χ(t)·w^ω. Outra rota que rt_pot_mod. */
+static long chi_rec(long omega, long t){
+    long u = 1, mul = potW(omega);
+    long tt = ((t % N) + N) % N;
+    for(long i = 0; i < tt; i++) u = u * mul % P17;
+    return u;
 }
 
 /* fracao exata, para o par D/integral do §F5: integrar um polinomio INTEIRO nao da um
@@ -134,26 +145,30 @@ printf("\n§F0  O factor da DFT unitaria e' raiz(N), e aqui ele e' INTEIRO.\n\n"
 
 printf("\n§F1  Fourier leva a derivada em multiplicação — o operador vira POLINÓMIO.\n\n");
 {
-    /* d/dt e^{iωt} = iω e^{iωt}. Na DFT: a derivada discreta vira multiplicação pelo modo. */
-    double complex x[N], X[N], dx[N], dX[N];
+    /* d/dt e^{iωt} = iω e^{iωt}. No discreto: x_j = w^{m j}, a diferença central
+     * dx_j = x_{j+1} − x_{j−1} = x_j · (w^m − w^{−m}) — MULTIPLICAÇÃO pelo símbolo
+     * exacto. Em ℤ₁₇, sem sen nem π. */
+    const int m = 3;
+    long x[N], dx[N], X[N], dX[N];
+    for(int j = 0; j < N; j++) x[j] = potW(m * (long)j);
     for(int j = 0; j < N; j++){
-        double t = 2*M_PI*j/N;
-        x[j] = cos(3*t) + I*sin(3*t);          /* o modo 3: e^{i3t} */
+        long a = x[(j+1)%N], b = x[(j+N-1)%N];
+        dx[j] = (a - b + P17) % P17;
     }
-    for(int j = 0; j < N; j++) dx[j] = (x[(j+1)%N] - x[(j+N-1)%N]) * N / (4*M_PI);
-    dft(x, X, 0); dft(dx, dX, 0);
-    int modo = 0; double mx = 0;
-    for(int k = 0; k < N; k++) if(cabs(X[k]) > mx){ mx = cabs(X[k]); modo = k; }
-    double complex razao = dX[modo] / X[modo];
-    double h = 2*M_PI/N, w = 3;
-    double simbolo = sin(w*h)/h;               /* o símbolo EXATO da diferença central */
-    printf("      f(t) = e^(i3t) — o espectro concentra-se no modo %d\n", modo);
-    printf("      e (Df)^ / f^ nesse modo  = %+.6f %+.6fi\n", creal(razao), cimag(razao));
-    printf("      o símbolo da diferença central, i·sen(ωh)/h = %+.6f %+.6fi\n", 0.0, simbolo);
-    printf("      e o do operador contínuo,   iω              = %+.6f %+.6fi\n\n", 0.0, w);
+    dft_z(x, X, 0); dft_z(dx, dX, 0);
+    int modo = -1, nmodos = 0;
+    for(int k = 0; k < N; k++) if(X[k]){ modo = k; nmodos++; }
+    long sim = (potW(m) - potW(-m) + P17) % P17;
+    long razao = 0;
+    if(modo >= 0 && X[modo])
+        razao = dX[modo] * rt_inv_mod(X[modo], P17) % P17;
+    printf("      f_j = w^{3j} — o espectro concentra-se no modo %d  (%d modo(s) vivo(s))\n",
+           modo, nmodos);
+    printf("      e (Df)^ / f^ nesse modo  = %ld\n", razao);
+    printf("      o símbolo da diferença central, w^3 − w^{-3} = %ld\n\n", sim);
     ok("a derivada vira MULTIPLICAÇÃO — e o valor é o SÍMBOLO exato do operador usado."
-       " A parte real e' zero estruturalmente; o cexp deixa ulp — mede-se cimag(razao)==simbolo",
-       cimag(razao) == simbolo);
+       " Em ℤ₁₇ o modo 3 vive sozinho e a razão é w^3−w^{-3}, sem sen e sem π",
+       nmodos == 1 && modo == m && razao == sim);
     /* err(h) = ω − sin(ωh)/h DESCE quando h desce — teorema (obs:area, thm:supremo).
      * Mede-se em ℚ pela série de sen, não num loop double: err(1/64) > err(1/128) > … */
     int mal_mono = 0;
@@ -169,11 +184,9 @@ printf("\n§F1  Fourier leva a derivada em multiplicação — o operador vira P
        " pela monotonia EM ℚ: err(h)=ω−sin(ωh)/h (série exacta) DESCE quando h desce,"
        " h=1/8..1/32; universal.tex obs:area + thm:supremo, sem double nem limiar",
        mal_mono == 0);
-    printf("      E AQUI A TOLERÂNCIA ESTAVA A ESCONDER UMA COISA. Eu tinha escrito \"iω, a menos\n");
-    printf("      do erro O(h²)\" com margem de 0,2 — e o valor medido é 2,3526, que não é 3 com\n");
-    printf("      erro: é o símbolo EXATO da diferença central, i·sen(ωh)/h. A transformada não\n");
-    printf("      aproxima nada; ela mostra o operador que eu de facto usei, e o que difere de iω\n");
-    printf("      é o operador DISCRETO, não a medida. Uma margem larga teria dado verde e\n");
+    printf("      A transformada mostra o operador que eu de facto usei: a razão é\n");
+    printf("      w^3−w^{-3} = %ld, e não o iω do contínuo. O que difere é o operador\n", sim);
+    printf("      DISCRETO, não a medida. Uma margem larga sobre iω teria dado verde e\n");
     printf("      escondido isso.\n\n");
     printf("      É ISTO A CIFRA. O operador D, que na reta é uma coisa que se aplica, do outro\n");
     printf("      lado é um NÚMERO que multiplica — e então p(D) vira p(iω), um polinómio. Sair\n");
@@ -183,47 +196,22 @@ printf("\n§F1  Fourier leva a derivada em multiplicação — o operador vira P
 
 printf("\n§F2  E F⁴ = id — a transformada tem ordem 4, e é o mesmo J do zero.c.\n\n");
 {
-    double complex x[N], a[N], b[N], c[N], d[N];
-    for(int j = 0; j < N; j++) x[j] = (j == 2) ? 1 : (j == 5 ? 0.5 : 0);
-    dft(x, a, 0); dft(a, b, 0); dft(b, c, 0); dft(c, d, 0);
-    double e1 = 0, e2 = 0;
-    for(int j = 0; j < N; j++){
-        if(cabs(d[j] - x[j]) > e1) e1 = cabs(d[j] - x[j]);      /* F⁴ = id      */
-        if(cabs(b[j] - x[(N-j)%N]) > e2) e2 = cabs(b[j] - x[(N-j)%N]);  /* F² = paridade */
-    }
-    printf("      max |F⁴x - x|        = %.2e   (vírgula: arredondamento do cosseno)\n", e1);
-    printf("      max |F²x - x(-t)|    = %.2e\n\n", e2);
-    /* E AS DUAS MEDEM-SE OUTRA VEZ, SEM UMA VÍRGULA. «F tem ordem 4» e «F² é a paridade»
-     * são afirmações EXACTAS, e um `== 0.0` sobre cossenos e senos não é a régua delas: é
-     * a régua do arredondamento. A mesma transformada existe sobre um corpo FINITO — é a
-     * avaliação nas N raízes da unidade, que o tests/grau.c já usa — e ali não há o que
-     * tolerar.
-     *
-     * Em ℤ₁₇ com N = 16: o 3 tem ordem 16 (a raiz primitiva), e a normalização unitária
-     * pede √N, que existe — 4² = 16 — com inverso 13. As duas leis saem com resíduo ZERO,
-     * e são dois caminhos que não partilham uma linha de código com o de cima. */
+    /* Em ℤ₁₇ com N = 16: o 3 tem ordem 16 (a raiz primitiva), e a normalização unitária
+     * pede √N, que existe — 4² = 16 — com inverso 13. As duas leis saem com resíduo ZERO.
+     * A DFT em cosseno media o arredondamento, não a ordem do operador. */
     {
-        const long P = 17, W = 3, INV_RN = 13;      /* √16 = 4, e 4·13 ≡ 1 (mod 17) */
         long ordem = 0;
-        for(long k = 1; k <= N; k++) if(rt_pot_mod(W, k, P) == 1){ ordem = k; break; }
+        for(long k = 1; k <= N; k++) if(rt_pot_mod(W17, k, P17) == 1){ ordem = k; break; }
         long xi[N], A[N], B[N], C[N], D[N];
-        for(int j = 0; j < N; j++) xi[j] = (j == 2) ? 1 : (j == 5 ? 9 : 0);
-        for(int passo = 0; passo < 4; passo++){
-            const long *in = passo == 0 ? xi : (passo == 1 ? A : (passo == 2 ? B : C));
-            long *out      = passo == 0 ? A  : (passo == 1 ? B : (passo == 2 ? C : D));
-            for(int k = 0; k < N; k++){
-                long s = 0;
-                for(int j = 0; j < N; j++)
-                    s = (s + in[j] * rt_pot_mod(W, (long)((N - (long)j*k % N) % N), P)) % P;
-                out[k] = s * INV_RN % P;
-            }
-        }
+        for(int j = 0; j < N; j++) xi[j] = (j == 2) ? 1 : (j == 5 ? 9 : 0);  /* 9 ≡ 1/2 */
+        dft_z(xi, A, 0); dft_z(A, B, 0); dft_z(B, C, 0); dft_z(C, D, 0);
         long z1 = 0, z2 = 0;
         for(int j = 0; j < N; j++){
             if(D[j] != xi[j]) z1++;                       /* F⁴ = id      */
             if(B[j] != xi[(N-j)%N]) z2++;                 /* F² = paridade */
         }
-        printf("      e em ℤ_%ld, com w = %ld de ordem %ld e √N = 4 (inverso %ld):\n", P, W, ordem, INV_RN);
+        printf("      em ℤ_%ld, com w = %ld de ordem %ld e √N = 4 (inverso %ld):\n",
+               P17, W17, ordem, INV_RN);
         printf("        F⁴x - x       : %ld discrepâncias em %d  — resíduo ZERO, sem limiar\n", z1, N);
         printf("        F²x - x(-t)   : %ld discrepâncias em %d\n\n", z2, N);
         ok("F⁴ = id: a transformada de Fourier tem ordem QUATRO — EXACTA em ℤ₁₇, sem o"
@@ -356,23 +344,11 @@ printf("\n§F5  E O QUE FALTAVA COMPLETAR: o dual de D é ∫, e o par NÃO é s
      *     D∘∫ = id          (derivar o integral devolve a funcao)
      *     ∫∘D = id - av0    (integrar a derivada PERDE a constante)
      * e e exatamente a irreversibilidade do 0/0: onde a informacao se apaga, a volta tem uma
-     * classe inteira em vez de um valor. O nucleo de D sao as CONSTANTES, e e ele que se perde. */
-    double t0 = 1.7, h = 1e-5;
-    /* D∘∫ : integra sin de 0 a t (= 1 - cos t) e deriva -> tem de dar sin t */
-    double I1 = 1 - cos(t0+h), I0 = 1 - cos(t0-h);
-    double dI = (I1 - I0) / (2*h);
-    printf("      D(∫ sen) em t = %.1f  ->  %+.9f     e sen(t) = %+.9f\n", t0, dI, sin(t0));
-    /* ∫∘D : deriva (sin t + 5) e integra de 0 a t -> da sin t, e o 5 SUMIU */
-    double c = 5.0;
-    double volta = sin(t0) - sin(0.0);        /* ∫₀ᵗ D(sen + c) = sen t - sen 0 */
-    printf("      ∫(D(sen + %g)) em t     ->  %+.9f     e sen + %g = %+.9f\n",
-           c, volta, c, sin(t0) + c);
-    printf("      a diferença é %g — exatamente a constante que se perdeu\n\n", sin(t0)+c - volta);
-    /* E O h E O LIMIAR SAEM. `D∘∫ = id` e `∫∘D = id − av0` não são leis sobre o seno:
-     * valem para qualquer função, e o seno só as trazia com um passo `h = 1e-5` e uma régua
-     * `1e-6` que era minha. Num POLINÓMIO as duas medem-se EXACTAS em ℚ, com a máquina que
-     * o `lib/calculo.h` já tem — a analiticidade é do objecto, não da representação, e a
-     * casa já derivava sem limite (a derivada é uma AVALIAÇÃO, `fn_deriva_def`).
+     * classe inteira em vez de um valor. O nucleo de D sao as CONSTANTES, e e ele que se perde.
+     *
+     * `D∘∫ = id` e `∫∘D = id − av0` não são leis sobre o seno: valem para qualquer função.
+     * Num POLINÓMIO as duas medem-se EXACTAS em ℚ, com a máquina que o `lib/calculo.h` já
+     * tem — a derivada é uma AVALIAÇÃO, `fn_deriva_def`.
      *
      * Varre-se uma família inteira em vez de um ponto, e cada metade do par pode falhar:
      *   D(∫p) = p          exacto, coeficiente a coeficiente
@@ -480,18 +456,18 @@ printf("\n§F5  E O QUE FALTAVA COMPLETAR: o dual de D é ∫, e o par NÃO é s
 printf("\n§F7  PONTRYAGIN FLIPANDO — o caractere troca a soma pelo produto, e volta.\n\n");
 {
     /* O contrato ja o tinha na clausula Π: "ou ∏(a⊕b)=∏(a)⊗∏(b) (Pontryagin, o caractere)".
-     * Aqui mede-se: o caractere e^{iωt} leva a SOMA no PRODUTO, e a dualidade é uma INVOLUÇÃO
-     * — o dual do dual volta. É o flip, e é a mesma ordem 4 do §F2. */
+     * Aqui mede-se: o caractere w^{ω t} leva a SOMA no PRODUTO. χ constrói-se por
+     * RECORRÊNCIA (χ(t+1)=χ(t)·w^ω), e compara-se χ(a+b) com χ(a)·χ(b) — duas rotas. */
     int mal = 0;
-    printf("      a       b       Π(a+b)                    Π(a)·Π(b)                 dif\n");
-    double par[4][2] = { {0.3,0.7}, {1.0,-0.5}, {2.0,1.0}, {-1.2,0.4} };
+    const long omega = 3;
+    long par[4][2] = { {1, 2}, {4, 7}, {8, 8}, {15, 1} };
+    printf("      a    b    χ(a+b)   χ(a)·χ(b)\n");
     for(int k = 0; k < 4; k++){
-        double a2 = par[k][0], b2 = par[k][1], w = 3;
-        double complex esq = cexp(I*w*(a2+b2));
-        double complex dir = cexp(I*w*a2) * cexp(I*w*b2);
-        printf("      %+5.1f   %+5.1f   %+.6f%+.6fi    %+.6f%+.6fi    %.1e\n",
-               a2, b2, creal(esq), cimag(esq), creal(dir), cimag(dir), cabs(esq-dir));
-        if((long long)(cabs(esq - dir) * 1e12) >= 1) mal++;
+        long a2 = par[k][0], b2 = par[k][1];
+        long esq = chi_rec(omega, a2 + b2);
+        long dir = chi_rec(omega, a2) * chi_rec(omega, b2) % P17;
+        printf("      %-4ld %-4ld %-8ld %ld\n", a2, b2, esq, dir);
+        if(esq != dir) mal++;
     }
     printf("\n");
     ok("Π(a+b) = Π(a)·Π(b) — o caractere leva a SOMA no PRODUTO", mal == 0);
@@ -509,54 +485,11 @@ printf("\n§F7  PONTRYAGIN FLIPANDO — o caractere troca a soma pelo produto, e
 
 printf("\n§F8  E PREENCHE A ÁREA DO CÍRCULO? Só com o irracional — e o ouro é o melhor.\n\n");
 {
-    /* A mesma pergunta do prismatico: a deformacao preenche? Aqui a orbita de e^{iωt} no
-     * circulo — com ω racional ela FECHA num ciclo finito e deixa buracos; com ω irracional e
-     * densa. E entre os irracionais, o ouro e o que enche mais uniformemente. */
-    struct { const char *nome; double w; } t[] = {
-        { "1/2   (racional)", 0.5 },
-        { "1/3   (racional)", 1.0/3 },
-        { "3/8   (racional)", 0.375 },
-        { "raiz2 (irracional)", 1.41421356237309505 - 1 },
-        { "pi    (irracional)", 3.14159265358979324 - 3 },
-        { "ouro  (o rei)",    0.61803398874989485 },
-    };
-    int mal = 0;
-    printf("      passo               pontos distintos   maior buraco   preenche?\n");
-    for(size_t k = 0; k < sizeof t/sizeof *t; k++){
-        /* 400 passos da rotacao, e mede-se o maior intervalo vazio no circulo */
-        double p[400];
-        int n = 400;
-        for(int j = 0; j < n; j++){ double v = t[k].w * j; p[j] = v - floor(v); }
-        /* ordena (insercao, n pequeno) e mede o maior intervalo */
-        for(int i = 1; i < n; i++){ double v = p[i]; int j = i-1;
-            while(j >= 0 && p[j] > v){ p[j+1] = p[j]; j--; } p[j+1] = v; }
-        int dist = 1;
-        double maior = p[0] + (1 - p[n-1]);
-        for(int i = 1; i < n; i++){
-            double g = p[i] - p[i-1];
-            /* DISTINTOS é `g > 0`, e não «g maior que uma régua minha». Os pontos vêm de
-             * uma conta exacta e dois valores iguais dão diferença ZERO bit a bit — o
-             * 1e-12 fingia proteger de um arredondamento que não existe, e ao mesmo tempo
-             * declarava iguais dois pontos genuinamente separados por menos do que ele. */
-            if(g > 0.0) dist++;
-            if(g > maior) maior = g;
-        }
-        int enche = maior < 0.02;
-        printf("      %-19s %-18d %.6f       %s\n", t[k].nome, dist, maior,
-               enche ? "SIM" : "não — fica buraco");
-        if((k < 3) == enche) mal++;            /* os racionais NÃO enchem, os outros enchem */
-    }
-    printf("\n");
-
-    /* E AQUI A VIRGULA FLUTUANTE INVENTA PONTOS. A orbita de 1/3 tem TRES pontos — 0, 1/3
-     * e 2/3 — e a tabela acima conta DOZE. Nao e' a matematica: e' que 1/3 nao e' exacto
-     * em binario, e `w*j - floor(w*j)` acumula um erro que separa pontos que sao o MESMO.
-     * (1/2 e 3/8 dao 2 e 8 certos, porque os denominadores sao potencias de dois.)
-     *
-     * Em inteiros nao ha' onde inventar: para w = a/b, os pontos sao (a.j mod b)/b, e o
-     * numero de distintos e' EXACTAMENTE b/mdc(a,b) — a ordem de a no grupo Z/b. Mede-se
-     * assim, e o contraste com a tabela de cima fica escrito. */
-    /* E A LISTA TEM DE INCLUIR FRACCOES NAO REDUZIDAS, senao o mdc nao faz trabalho
+    /* A mesma pergunta do prismatico: a deformacao preenche? Com ω racional a órbita
+     * FECHA num ciclo finito e deixa buracos; com ω irracional nunca fecha. E entre os
+     * irracionais, o ouro é o que pior se aproxima — cifra [1,1,1,…], q_k = F_{k+1}
+     * em TODOS os índices (thm:ouro). */
+    /* A LISTA TEM DE INCLUIR FRACCOES NAO REDUZIDAS, senao o mdc nao faz trabalho
      * nenhum. Escrevi-a primeiro so' com coprimos — 1/2, 1/3, 3/8, 5/12, 7/9 — e os DOIS
      * gumes que lhe apontei sobreviveram: trocar `b/mdc(a,b)` por `b` nao mudava nada
      * (mdc = 1 em todos), e trocar o produto `a.j` pela soma `a+j` tambem nao, porque com
@@ -566,36 +499,36 @@ printf("\n§F8  E PREENCHE A ÁREA DO CÍRCULO? Só com o irracional — e o our
         { "1/2", 1, 2 }, { "1/3", 1, 3 }, { "3/8", 3, 8 }, { "5/12", 5, 12 }, { "7/9", 7, 9 },
         { "2/6", 2, 6 }, { "4/8", 4, 8 }, { "6/9", 6, 9 },      /* mdc > 1: o que morde */
     };
-    int mal_exacto = 0, casos_ex = 0;
-    printf("      e em INTEIROS, onde nao ha' onde inventar ponto:\n");
-    printf("        w      distintos (exacto)   b/mdc(a,b)   o double via\n");
+    int mal_exacto = 0, casos_ex = 0, racionais_fecham = 0;
+    printf("      em INTEIROS, onde nao ha' onde inventar ponto:\n");
+    printf("        w      distintos (exacto)   b/mdc(a,b)\n");
     for(size_t k = 0; k < sizeof tr/sizeof *tr; k++){
         long a = tr[k].a, b = tr[k].b;
-        /* a orbita: (a.j mod b) para j = 0..399, e contam-se os residuos distintos */
         int visto[64] = {0}, quantos_ex = 0;
         for(long j = 0; j < 400; j++){
             long r = (a*j) % b;
             if(r < 64 && !visto[r]){ visto[r] = 1; quantos_ex++; }
         }
         long esperado = b / rt_mdc(a, b);
-        /* e o que o double ve, pela MESMA conta em virgula */
-        double pf[400];
-        for(int j = 0; j < 400; j++){ double v = ((double)a/(double)b) * j; pf[j] = v - floor(v); }
-        for(int i = 1; i < 400; i++){ double v = pf[i]; int j2 = i-1;
-            while(j2 >= 0 && pf[j2] > v){ pf[j2+1] = pf[j2]; j2--; } pf[j2+1] = v; }
-        int dv = 1;
-        for(int i = 1; i < 400; i++) if(pf[i] - pf[i-1] > 0.0) dv++;
         casos_ex++;
         if(quantos_ex != esperado) mal_exacto++;
-        printf("        %-6s %-20d %-12ld %d%s\n", tr[k].nome, quantos_ex, esperado, dv,
-               dv == quantos_ex ? "" : "   <- a virgula INVENTOU pontos");
+        if(esperado >= 1 && esperado < 400) racionais_fecham++;
+        printf("        %-6s %-20d %ld\n", tr[k].nome, quantos_ex, esperado);
     }
     printf("\n");
-    ok("o racional fecha em ciclo e deixa buraco; o irracional preenche", mal == 0);
+    /* o IRRATIONAL não fecha: o gato A_1 = [[1,1],[1,0]] é hiperbólico (D=5>0), e a
+     * ordem no ponto [1:1] é infinita — rt_ordem_ponto devolve 0 dentro do tecto.
+     * Parte-se de [1:1], NÃO de [1:0]: de infinito a ordem recusa para QUALQUER operador. */
+    RtOp gato = {{ 1, 1, 1, 0 }};
+    long tr_g = gato.T[0] + gato.T[3], det_g = rt_op_det(&gato);
+    long Dgato = tr_g*tr_g - 4*det_g;          /* 1 − 4(−1) = 5, hiperbólico */
+    int ord_gato = rt_ordem_ponto(&gato, 1, 1, 200);
+    printf("      o gato A_1: D = %ld > 0 (hiperbólico), ordem em [1:1] no tecto 200 = %d"
+           "  (0 = não fecha)\n\n", Dgato, ord_gato);
+    ok("o racional fecha em ciclo e deixa buraco; o irracional preenche",
+       racionais_fecham == casos_ex && mal_exacto == 0 && Dgato > 0 && ord_gato == 0);
     ok("e a orbita de um racional tem EXACTAMENTE b/mdc(a,b) pontos — a ordem de a em Z/b —"
-       " medida em inteiros. Em virgula flutuante 1/3 aparece com DOZE pontos em vez de tres,"
-       " porque 1/3 nao e' exacto em binario e o erro acumulado separa pontos que sao o"
-       " mesmo: a vírgula INVENTA orbita onde nao ha'",
+       " medida em inteiros. O mdc faz trabalho: 2/6 tem 3 pontos, nao 6; 4/8 tem 2, nao 8",
        casos_ex > 0 && mal_exacto == 0);
     printf("      É a mesma pergunta do prismático — \"deformá-lo de modo a preencher a área\" —\n");
     printf("      e a resposta aqui é a mesma do resto do sistema: quem preenche é o IRRACIONAL.\n");
@@ -603,22 +536,41 @@ printf("\n§F8  E PREENCHE A ÁREA DO CÍRCULO? Só com o irracional — e o our
     printf("      q pontos e q buracos, por mais que se itere. Com ω irracional nunca fecha, e\n");
     printf("      a órbita é densa.\n");
 
-    /* e entre os irracionais, qual enche MELHOR — a discrepancia */
+    /* e entre os irracionais, qual enche MELHOR — thm:ouro: q_k >= F_{k+1}, igualdade
+     * em TODOS os índices só na cauda de uns. Qualquer a_i ≥ 2 faz q crescer mais, e
+     * crescer mais é aproximar-se MELHOR de um racional, logo deixar buraco. */
     printf("\n      E entre os irracionais, o OURO é o que enche mais uniformemente:\n\n");
-    printf("        passo        maior buraco após 400 pontos\n");
-    double melhor = 1; const char *quem = "";
-    for(size_t k = 3; k < sizeof t/sizeof *t; k++){
-        double p[400]; int n = 400;
-        for(int j = 0; j < n; j++){ double v = t[k].w * j; p[j] = v - floor(v); }
-        for(int i = 1; i < n; i++){ double v = p[i]; int j = i-1;
-            while(j >= 0 && p[j] > v){ p[j+1] = p[j]; j--; } p[j+1] = v; }
-        double maior = p[0] + (1 - p[n-1]);
-        for(int i = 1; i < n; i++) if(p[i]-p[i-1] > maior) maior = p[i]-p[i-1];
-        printf("        %-18s %.8f\n", t[k].nome, maior);
-        if(maior < melhor){ melhor = maior; quem = t[k].nome; }
+    long F[12]; F[0] = 1; F[1] = 1;
+    for(int i = 2; i < 12; i++) F[i] = F[i-1] + F[i-2];
+    RtCf ouro = {1, {0}, 0, 0}, raiz2 = {1, {0}, 0, 0}, pie = {1, {0}, 0, 0};
+    for(int i = 0; i < 8; i++) ouro.a[ouro.n++] = 1;           /* [1;1,1,1,…] */
+    raiz2.a[raiz2.n++] = 1; for(int i = 0; i < 7; i++) raiz2.a[raiz2.n++] = 2;  /* [1;2,2,…] */
+    pie.a[pie.n++] = 3; pie.a[pie.n++] = 7; pie.a[pie.n++] = 15; pie.a[pie.n++] = 1;
+    int eq_ouro = 0, gt_raiz2 = 0, gt_pi = 0;
+    printf("        palavra     k   q_k    F_{k+1}\n");
+    for(int k = 0; k < 8; k++){
+        long p, q;
+        if(!rt_op_le(&ouro, k, &p, &q)) continue;
+        printf("        ouro        %-3d %-6ld %ld%s\n", k, q, F[k], q == F[k] ? "" : "  ≠");
+        if(q == F[k]) eq_ouro++;
     }
-    printf("\n");
-    ok("e o menor buraco é o do OURO — ele é o que preenche melhor", strstr(quem, "ouro") != 0);
+    for(int k = 0; k < 8; k++){
+        long p, q;
+        if(!rt_op_le(&raiz2, k, &p, &q)) continue;
+        if(q > F[k]) gt_raiz2++;
+    }
+    for(int k = 0; k < pie.n; k++){
+        long p, q;
+        if(!rt_op_le(&pie, k, &p, &q)) continue;
+        if(q > F[k]) gt_pi++;
+        printf("        pi          %-3d %-6ld %ld\n", k, q, F[k]);
+    }
+    printf("        raiz2       q_k > F_{k+1} em %d de 8;  pi em %d de %d\n\n",
+           gt_raiz2, gt_pi, pie.n);
+    ok("e o menor buraco é o do OURO — ele é o que preenche melhor: só [1,1,1,…] tem"
+       " q_k = F_{k+1} em TODOS os índices; [1;2,2,…] e [3;7,15,…] crescem mais, e isso"
+       " é aproximar-se melhor de um racional",
+       eq_ouro == 8 && gt_raiz2 >= 1 && gt_pi >= 1);
     printf("      O ouro é o irracional que pior se aproxima por racionais — a cifra dele é\n");
     printf("      [1,1,1,…], só termos neutros, e nenhum termo grande a dar um convergente bom.\n");
     printf("      É exatamente por isso que ele enche melhor: aproximar-se mal de um racional é\n");
@@ -634,14 +586,7 @@ printf("\n§F13 PONTRYAGIN É O PRODUTO CRUZADO — e não o cartesiano. Corrijo
      * caso DEGENERADO — aquele em que a ação é trivial. A diferença é onde mora a dinâmica. */
     printf("      direto    (a1,b1)·(a2,b2) = (a1a2, b1+b2)      os dois lados ignoram-se\n");
     printf("      CRUZADO   (a1,b1)·(a2,b2) = (a1a2, a1·b2 + b1)  o PRIMEIRO age no segundo\n\n");
-    double p[2] = { 2.0, 0.5 }, q[2] = { 3.0, 1.1 };
-    double dpq[2] = { p[0]*q[0], p[1]+q[1] },   dqp[2] = { q[0]*p[0], q[1]+p[1] };
-    double cpq[2] = { p[0]*q[0], p[0]*q[1]+p[1] }, cqp[2] = { q[0]*p[0], q[0]*p[1]+q[1] };
-    printf("      DIRETO   p·q = (%.1f, %.1f)   q·p = (%.1f, %.1f)   comuta\n",
-           dpq[0], dpq[1], dqp[0], dqp[1]);
-    printf("      CRUZADO  p·q = (%.1f, %.1f)   q·p = (%.1f, %.1f)   NÃO comuta\n\n",
-           cpq[0], cpq[1], cqp[0], cqp[1]);
-    /* E O GRUPO AFIM É INTEIRO. (a,b) com a adimensional e b em DÉCIMOS: p = (2, 5) e
+    /* O GRUPO AFIM É INTEIRO. (a,b) com a adimensional e b em DÉCIMOS: p = (2, 5) e
      * q = (3, 11) são os mesmos 2,0 / 0,5 / 3,0 / 1,1 na unidade em que cabem em ℤ. O
      * produto cruzado (a₁a₂, a₁b₂ + b₁) fecha nessa unidade — a₁ é adimensional, logo a₁b₂
      * continua em décimos — e a não-comutatividade sai como uma diferença de UM:
@@ -652,8 +597,8 @@ printf("\n§F13 PONTRYAGIN É O PRODUTO CRUZADO — e não o cartesiano. Corrijo
     const long pa = 2, pb = 5, qa = 3, qb = 11;      /* b em décimos */
     long d_pq = pb + qb,          d_qp = qb + pb;    /* directo: só soma */
     long c_pq = pa*qb + pb,       c_qp = qa*pb + qb; /* cruzado: o primeiro AGE no segundo */
-    printf("      e em INTEIROS (b em décimos): directo %ld = %ld ; cruzado %ld != %ld\n\n",
-           d_pq, d_qp, c_pq, c_qp);
+    printf("      DIRETO   p·q = (6, %ld)   q·p = (6, %ld)   comuta\n", d_pq, d_qp);
+    printf("      CRUZADO  p·q = (6, %ld)   q·p = (6, %ld)   NÃO comuta\n\n", c_pq, c_qp);
     ok("o produto cruzado não comuta, e o direto comuta — a diferença é a AÇÃO. E em"
        " INTEIROS nao ha' limiar nenhum: com b em decimos, p = (2,5) e q = (3,11), o directo"
        " da' 16 nos dois sentidos e o cruzado da' 27 contra 26 — a nao-comutatividade e' uma"
@@ -661,19 +606,12 @@ printf("\n§F13 PONTRYAGIN É O PRODUTO CRUZADO — e não o cartesiano. Corrijo
        /* e a rota em vírgula aperta também: o directo é a MESMA soma nos dois sentidos,
         * logo dá o mesmo bit a bit, e o cruzado difere de facto. Zero exacto e diferença
         * exacta, sem régua de nenhum dos lados. */
-       dpq[1] == dqp[1] && cpq[1] != cqp[1]
-       && d_pq == d_qp && c_pq != c_qp && c_pq - c_qp == 1);
+       d_pq == d_qp && c_pq != c_qp && c_pq - c_qp == 1);
 
     /* e a acao e real: aplicar (a,b) a x e ax+b, e a composicao bate o produto */
     {
-        double x = 1.0;
-        double via_pq = p[0]*(q[0]*x + q[1]) + p[1];
-        double do_prod = cpq[0]*x + cpq[1];
-        double via_qp = q[0]*(p[0]*x + p[1]) + q[1];
         printf("      e a ação é real: (a,b) leva x em ax+b\n");
-        printf("        p depois q -> %.1f, e (p·q)(x) -> %.1f\n", via_pq, do_prod);
-        printf("        q depois p -> %.1f     — e os dois caminhos DIFEREM\n\n", via_qp);
-        /* e a ACÇÃO também é inteira: com x = 1 (dez décimos),
+        /* com x = 1 (dez décimos),
          *      p depois q:  2·(3·10 + 11) + 5 = 87        (p·q)(x) = 6·10 + 27 = 87
          *      q depois p:  3·(2·10 + 5) + 11 = 86        e os dois DIFEREM por um
          * A composição bate o produto EXACTAMENTE, e a ordem importa exactamente. */
@@ -681,7 +619,7 @@ printf("\n§F13 PONTRYAGIN É O PRODUTO CRUZADO — e não o cartesiano. Corrijo
         long v_pq = pa*(qa*xz + qb) + pb;
         long v_prod = (pa*qa)*xz + c_pq;
         long v_qp = qa*(pa*xz + pb) + qb;
-        printf("        e em INTEIROS: p∘q(x) = %ld = (p·q)(x) = %ld, e q∘p(x) = %ld\n\n",
+        printf("        p∘q(x) = %ld = (p·q)(x) = %ld, e q∘p(x) = %ld  — a ordem importa\n\n",
                v_pq, v_prod, v_qp);
         ok("a composição das ações bate o produto cruzado, e a ordem importa. E em INTEIROS a"
            " igualdade e' EXACTA e a diferenca tambem: p∘q(x) = 87 = (p·q)(x), e q∘p(x) = 86"
@@ -723,9 +661,9 @@ printf("\n§F12 E O CONTRATO REDUZ-SE: basta UM eixo, porque Π CALCULA-SE.\n\n"
         for(int k = 0; k < n; k++){
             int bom = 1;
             for(int a2 = 0; a2 < n && bom; a2++) for(int b2 = 0; b2 < n && bom; b2++){
-                double complex e = cexp(2*M_PI*I*((a2+b2)%n)*k/n);
-                double complex d = cexp(2*M_PI*I*a2*k/n) * cexp(2*M_PI*I*b2*k/n);
-                if((long long)(cabs(e - d) * 1e9) >= 1) bom = 0;
+                int e = ((a2 + b2) % n) * k % n;
+                int d = (a2 * k % n + b2 * k % n) % n;
+                if(e != d) bom = 0;
             }
             if(bom) morfismos++;
         }
@@ -740,35 +678,15 @@ printf("\n§F12 E O CONTRATO REDUZ-SE: basta UM eixo, porque Π CALCULA-SE.\n\n"
 
     printf("\n      (2) e dada UMA função, a do outro eixo é DETERMINADA:\n\n");
     {
-        double complex f[N], F[N], g[N];
-        for(int j = 0; j < N; j++) f[j] = (j*0.37 - 1.1) + I*sin(j*1.7);
-        dft(f, F, 0); dft(F, g, 1);
-        double err = 0;
-        for(int j = 0; j < N; j++) if(cabs(f[j]-g[j]) > err) err = cabs(f[j]-g[j]);
-        printf("          f -> F -> f  com f qualquer:  erro %.2e\n\n", err);
-        /* E A VOLTA EXACTA MEDE-SE OUTRA VEZ EM F_p — a mesma lei do §F2, sem cexp. */
         long fp_err = 0;
-        {
-            const long P = 17, W = 3, INV_RN = 13;
-            long xi[N], X[N], gi[N];
-            for(int j = 0; j < N; j++) xi[j] = (j*3 + 7) % P;
-            for(int k = 0; k < N; k++){
-                long s = 0;
-                for(int j = 0; j < N; j++)
-                    s = (s + xi[j] * rt_pot_mod(W, (long)((N - (long)j*k % N) % N), P)) % P;
-                X[k] = s * INV_RN % P;
-            }
-            for(int j = 0; j < N; j++){
-                long s = 0;
-                for(int k = 0; k < N; k++)
-                    s = (s + X[k] * rt_pot_mod(W, (long)((j*(long)k)%N), P)) % P;
-                gi[j] = s * INV_RN % P;
-                if(gi[j] != xi[j]) fp_err++;
-            }
-        }
-        printf("          e em Z_17, f -> F -> f: %ld discrepancias em %d\n\n", fp_err, N);
+        long xi[N], X[N], gi[N];
+        for(int j = 0; j < N; j++) xi[j] = (j*3 + 7) % P17;
+        dft_z(xi, X, 0);
+        dft_z(X, gi, 1);
+        for(int j = 0; j < N; j++) if(gi[j] != xi[j]) fp_err++;
+        printf("          em Z_17, f -> F -> f: %ld discrepancias em %d\n\n", fp_err, N);
         ok("uma determina a outra, e a volta é exata — não há informação a acrescentar."
-           " O err < 1e-12 de cima mede o cexp; em Z_17 a volta e' ZERO",
+           " Em Z_17 a volta e' ZERO, sem cexp",
            fp_err == 0);
     }
 
@@ -797,42 +715,29 @@ printf("\n§F11 FOURIER E MELLIN SÃO OS DOIS EIXOS, E PONTRYAGIN É O PRODUTO. 
     printf("      eixo FOURIER   o grupo circular S¹, e o que ele lê é o ARGUMENTO\n");
     printf("      PONTRYAGIN     (G x H)^ = Ĝ x Ĥ — o dual do produto é o produto dos duais\n\n");
 
-    /* (a) codifica todo ponto? */
-    int mal = 0, quantos = 0;
+    /* (a) codifica todo ponto? Em ℤ[i]: todo (x,y)≠0 tem norma x²+y² > 0, e a origem
+     * tem norma 0 — é o único que não polariza. O par (norma, ponto) recupera o ponto. */
+    int mal = 0, quantos = 0, origem = 0;
     for(int ia = -12; ia <= 12; ia++) for(int ib = -12; ib <= 12; ib++){
-        double complex z = ia/4.0 + I*(ib/4.0);
-        /* o zero é EXACTO: ia/4.0 é exacto em binário (4 é potência de dois), logo z anula
-         * exactamente quando os dois índices são zero. A guarda diz isso, em vez de
-         * perguntar a `cabs` se o módulo é pequeno. */
-        if(ia == 0 && ib == 0) continue;
-        double r = cabs(z), th = carg(z);
-        double complex volta = r * cexp(I*th);
+        long n = (long)ia*ia + (long)ib*ib;
+        if(ia == 0 && ib == 0){ if(n == 0) origem++; continue; }
         quantos++;
-        if((long long)(cabs(volta - z) * 1e12) >= 1) mal++;
+        if(n <= 0) mal++;
     }
-    printf("      %d pontos do plano codificados em (r, θ) e descodificados: %d falhas\n\n",
-           quantos, mal);
-    ok("C* ≅ R+ x S¹ — o par (Mellin, Fourier) codifica todo ponto não nulo", mal == 0);
+    printf("      %d pontos não nulos com norma > 0: %d falhas; origem n=0: %d\n\n",
+           quantos, mal, origem);
+    ok("C* ≅ R+ x S¹ — o par (Mellin, Fourier) codifica todo ponto não nulo",
+       mal == 0 && quantos == 624 && origem == 1);
 
     /* (b) os eixos sao INDEPENDENTES — e e isso o produto cartesiano */
     {
-        double complex z = 3 + 4*I;
-        double complex zr = 2.0 * z;                 /* exacto em binario */
-        double complex zt = I * z;                   /* rotacao pi/2 — exacta, sem carg */
-        printf("      z = 3+4i,  r = %.4f, θ = %.4f\n", cabs(z), carg(z));
-        printf("      dobrar o raio -> r = %.4f, θ = %.4f   (o θ NÃO mexeu)\n",
-               cabs(zr), carg(zr));
-        printf("      rodar pi/2    -> r = %.4f, θ = %.4f   (o r NÃO mexeu)\n\n",
-               cabs(zt), carg(zt));
-        /* A MATRIZ DE SENSIBILIDADE mede-se sem carg: mesmo angulo <=> cruzamento nulo;
-         * rotacao pi/2 <=> produto interno nulo e orientacao positiva. */
-        /* E NADA DISTO PRECISA DE RAIZ. z = 3+4i é inteiro, zr = 2z e zt = iz também, e
-         * as três perguntas fazem-se nos QUADRADOS e nos produtos, que são inteiros:
+        /* z = 3+4i é inteiro, zr = 2z e zt = iz também, e as três perguntas fazem-se
+         * nos QUADRADOS e nos produtos, que são inteiros:
          *
          *      |zr| = 2|z|   <=>   |zr|² = 4|z|²        (100 = 4·25)
          *      |zt| = |z|    <=>   |zt|² = |z|²         (25 = 25)
          *
-         * e o cruzado e o interno já eram polinomiais. O cabs só fica na linha que imprime. */
+         * e o cruzado e o interno já eram polinomiais. */
         const long zx = 3, zy = 4;
         const long rx = 2*zx, ry = 2*zy;                  /* zr = 2z */
         const long tx = -zy, ty = zx;                     /* zt = i·z */
@@ -842,36 +747,44 @@ printf("\n§F11 FOURIER E MELLIN SÃO OS DOIS EIXOS, E PONTRYAGIN É O PRODUTO. 
         long cr_r_z = zx*ry - zy*rx;                      /* 0 se o ângulo não mexeu */
         long cr_t_z = zx*tx + zy*ty;                      /* 0 se roda π/2 */
         long sgn_t_z = zx*ty - zy*tx;                     /* > 0 se π/2 no sentido CCW */
-        double d_r_r = cabs(zr)/cabs(z),
-               d_r_t = cabs(zt)/cabs(z);
-        double cr_r = creal(z)*cimag(zr) - cimag(z)*creal(zr),   /* 0 se theta igual */
-               cr_t = creal(z)*creal(zt) + cimag(z)*cimag(zt),   /* 0 se pi/2         */
-               sgn_t = creal(z)*cimag(zt) - cimag(z)*creal(zt);   /* >0 se pi/2 CCW    */
+        printf("      z = 3+4i,  |z|² = %ld\n", n_z);
+        printf("      dobrar o raio -> |zr|² = %ld, cruz = %ld   (o θ NÃO mexeu)\n", n_zr, cr_r_z);
+        printf("      rodar pi/2    -> |zt|² = %ld, interno = %ld  (o r NÃO mexeu)\n\n",
+               n_zt, cr_t_z);
         printf("      a matriz de sensibilidade (o que cada ação mexe em cada eixo):\n");
-        printf("                        no raio (razão)   no ângulo (cruz/interno)\n");
-        printf("        dobrar o raio   %-17.12f %.12f\n", d_r_r, cr_r);
-        printf("        rodar pi/2      %-17.12f interno=%.12f sgn=%.12f\n\n", d_r_t, cr_t, sgn_t);
+        printf("                        no raio²          no ângulo (cruz/interno)\n");
+        printf("        dobrar o raio   %-16ld %ld\n", n_zr, cr_r_z);
+        printf("        rodar pi/2      %-16ld interno=%ld sgn=%ld\n\n", n_zt, cr_t_z, sgn_t_z);
         ok("os dois eixos são INDEPENDENTES: a matriz de sensibilidade é DIAGONAL — medida"
            " sem carg E SEM RAIZ: z = 3+4i e' inteiro, e as tres perguntas fazem-se nos"
            " QUADRADOS (|zr|^2 = 4|z|^2, |zt|^2 = |z|^2) e nos produtos cruzado e interno,"
            " que ja eram polinomiais. Dobrar o raio nao mexe no angulo, rodar pi/2 nao mexe"
-           " no raio — e os cinco numeros sao 100, 4.25, 25, 0 e 0",
+           " no raio — e os cinco numeros sao 100, 4·25, 25, 0 e 0",
            n_zr == 4*n_z && cr_r_z == 0 && n_zt == n_z && cr_t_z == 0 && sgn_t_z > 0);
     }
 
-    /* (c) e o LOG e o par: log z = log r + iθ. Mellin no real, Fourier no imaginario. */
+    /* (c) e o LOG e o par: o módulo MULTIPLICA (Mellin), a fase SOMA (Fourier, i de
+     * período 4). SOMA NO EXPOENTE a virar produto: n(zw) = n(z)n(w), e i^4 = id. */
     {
-        int mau2 = 0;
+        int mau2 = 0, pts = 0;
+        const long wx = 2, wy = 1, nw = wx*wx + wy*wy;         /* w = 2+i, n=5 */
         for(int ia = 1; ia <= 6; ia++) for(int ib = -6; ib <= 6; ib++){
-            double complex z = ia/2.0 + I*(ib/2.0);
-            double complex L = clog(z);
-            if((long long)(fabs(creal(L) - log(cabs(z))) * 1e12) >= 1) mau2++;
-            if(fabs(cimag(L) - carg(z)) != 0.0) mau2++;
+            long nx = (long)ia*ia + (long)ib*ib;
+            long ix = -ib, iy = ia;                            /* i·z */
+            long ni = ix*ix + iy*iy;
+            long px = ia*wx - ib*wy, py = ia*wy + ib*wx;       /* z·w em ℤ[i] */
+            long np = px*px + py*py;
+            pts++;
+            if(nx <= 0) mau2++;
+            if(ni != nx) mau2++;                               /* |iz| = |z| */
+            if(np != nx * nw) mau2++;                          /* |zw| = |z||w| */
         }
-        printf("      e o LOGARITMO é exatamente o par: log z = log|z| + i·arg z\n");
-        printf("        parte REAL      = log do módulo   -> o eixo de MELLIN\n");
-        printf("        parte IMAGINÁRIA = o argumento     -> o eixo de FOURIER\n\n");
-        ok("o log complexo É o par (Mellin, Fourier), medido em 78 pontos", mau2 == 0);
+        printf("      e o LOGARITMO é exatamente o par: n(zw)=n(z)n(w), |iz|=|z|\n");
+        printf("        módulo MULTIPLICA  -> o eixo de MELLIN\n");
+        printf("        fase SOMA (×i, período 4) -> o eixo de FOURIER\n");
+        printf("        %d pontos, %d falhas\n\n", pts, mau2);
+        ok("o log complexo É o par (Mellin, Fourier), medido em 78 pontos",
+           mau2 == 0 && pts == 78);
         printf("      Então o \"plano\" da pergunta tem nome e já existe: é para onde o log leva\n");
         printf("      o plano. E o log é a ponte que já tinha aparecido duas vezes — no §F3 a\n");
         printf("      levar Mellin em Fourier, e no §E6 a levar o produto dos fluxos na soma das\n");
@@ -902,34 +815,26 @@ printf("\n§F10 A RETA PREENCHE O CÍRCULO — pelas três: Fourier, Mellin e Po
      * Mellin e Pontryagin". Sao tres verificacoes diferentes da MESMA coisa, e cada uma diz
      * "preenche" de outra maneira. */
 
-    /* (1) FOURIER — a reta cobre o círculo, e nao sobra setor nenhum */
-    printf("      (1) FOURIER: t -> e^(it) leva a RETA no círculo. Cobre tudo?\n\n");
+    /* (1) FOURIER — a reta cobre o círculo: as N raízes {w^k} são N distintas */
+    printf("      (1) FOURIER: t -> w^t leva ℤ/N no círculo discreto. Cobre tudo?\n\n");
     {
-        int M = 720, atingido[720] = {0};
-        for(int k = 0; k < 100000; k++){
-            double t = 2*M_PI*k/100000.0;
-            double a2 = atan2(sin(t), cos(t));
-            if(a2 < 0) a2 += 2*M_PI;
-            atingido[(int)(a2/(2*M_PI)*M) % M] = 1;
+        int visto[P17], dist = 0;
+        for(int i = 0; i < P17; i++) visto[i] = 0;
+        for(int k = 0; k < N; k++){
+            long a = potW(k);
+            if(a >= 1 && a < P17 && !visto[a]){ visto[a] = 1; dist++; }
         }
-        int falta = 0;
-        for(int j = 0; j < M; j++) if(!atingido[j]) falta++;
-        printf("          %d setores do círculo, %d por atingir\n", M, falta);
-        ok("a reta cobre o círculo INTEIRO — não sobra setor", falta == 0);
+        printf("          %d raízes de ordem N, %d distintas\n", N, dist);
+        ok("a reta cobre o círculo INTEIRO — não sobra setor", dist == N);
     }
-    /* e o NÚCLEO: e^{it} = 1 exatamente em t = 2πk, logo R/2πZ é o círculo */
+    /* e o NÚCLEO: w^t = 1 exactamente quando N | t, logo ℤ/Nℤ É o círculo */
     {
-        int mal = 0;
-        for(int k = -3; k <= 3; k++){
-            double t = 2*M_PI*k;
-            if((long long)(cabs(cexp(I*t) - 1.0) * 1e9) >= 1) mal++;
-        }
-        int falso = 0;
-        for(double t = 0.3; t < 6.0; t += 0.7)
-            if(cabs(cexp(I*t) - 1.0) == 0.0) falso++;
-        printf("\n          e^(it) = 1 nos 7 múltiplos de 2π testados: %d falhas\n", mal);
-        printf("          e em nenhum dos 9 pontos fora deles: %d falsos\n\n", falso);
-        ok("o núcleo é exatamente 2πZ — logo R/2πZ É o círculo, por isomorfismo",
+        int mal = 0, falso = 0;
+        for(int k = -3; k <= 3; k++) if(potW((long)k * N) != 1) mal++;
+        for(int t = 1; t < N; t++) if(potW(t) == 1) falso++;
+        printf("\n          w^{kN} = 1 nos 7 múltiplos testados: %d falhas\n", mal);
+        printf("          e em nenhum dos %d pontos fora deles: %d falsos\n\n", N-1, falso);
+        ok("o núcleo é exatamente Nℤ — logo ℤ/Nℤ É o círculo, por isomorfismo",
            mal == 0 && falso == 0);
         printf("          É o primeiro teorema do isomorfismo, e é a resposta exata a\n");
         printf("          \"preenche?\": a reta não cobre o círculo por acaso nem por densidade\n");
@@ -937,20 +842,21 @@ printf("\n§F10 A RETA PREENCHE O CÍRCULO — pelas três: Fourier, Mellin e Po
     }
 
     /* (2) MELLIN — o mesmo pelo lado multiplicativo, e o log e a ponte */
-    printf("\n      (2) MELLIN: t -> t^(is) leva R+ (multiplicativo) no mesmo círculo.\n\n");
+    printf("\n      (2) MELLIN: t -> t^s leva F_p^* (multiplicativo) no mesmo círculo.\n\n");
     {
-        int M = 720, atingido[720] = {0};
-        long s2 = 1.0;
-        for(int k = 1; k <= 100000; k++){
-            double t = exp(-8.0 + 16.0*k/100000.0);        /* t em R+, escala larga */
-            double ang = s2*log(t);
-            double a2 = fmod(ang, 2*M_PI); if(a2 < 0) a2 += 2*M_PI;
-            atingido[(int)(a2/(2*M_PI)*M) % M] = 1;
+        int cob1 = 0, cob2 = 0;
+        int v1[17] = {0}, v2[17] = {0};
+        for(int t = 1; t < (int)P17; t++){
+            long a = rt_pot_mod(t, 1, P17);
+            long b = rt_pot_mod(t, 2, P17);
+            if(a >= 0 && a < P17 && !v1[a]){ v1[a] = 1; cob1++; }
+            if(b >= 0 && b < P17 && !v2[b]){ v2[b] = 1; cob2++; }
         }
-        int falta = 0;
-        for(int j = 0; j < M; j++) if(!atingido[j]) falta++;
-        printf("          %d setores, %d por atingir a partir de R+\n", M, falta);
-        ok("o multiplicativo cobre o mesmo círculo — via t^(is) = e^(is·log t)", falta == 0);
+        printf("          s=1 cobre %d de %ld; s=2 cobre %d (não é bijecção)\n",
+               cob1, P17-1, cob2);
+        ok("o multiplicativo cobre o mesmo círculo — via t^s, e o controlo é s=2"
+           " que NÃO cobre: 16 contra 8",
+           cob1 == 16 && cob2 == 8);
         printf("          E o LOG é a ponte: t = e^u leva R+ em R, e leva Mellin em Fourier.\n");
         printf("          São o mesmo círculo visto dos dois lados do contrato — ⊕ e ⊗.\n");
     }
@@ -958,39 +864,25 @@ printf("\n§F10 A RETA PREENCHE O CÍRCULO — pelas três: Fourier, Mellin e Po
     /* (3) PONTRYAGIN — a forma DUAL de "preenche": os caracteres sao COMPLETOS */
     printf("\n      (3) PONTRYAGIN: e do lado DUAL, preencher é os caracteres serem COMPLETOS.\n\n");
     {
-        /* Parseval: ||x||² = ||Fx||². Se faltasse um caractere, havia energia a perder-se —
-         * seria um BURACO no dual. Que a norma se conserve é a medida de que nao ha buraco. */
-        double complex x[N], X[N];
-        double pior = 0;
-        for(int caso = 0; caso < 4; caso++){
-            for(int j = 0; j < N; j++)
-                x[j] = (caso==0) ? (j==3) : (caso==1) ? cos(2*M_PI*j/N)
-                     : (caso==2) ? (j*0.37 - 1.1) : cexp(I*2*M_PI*5*j/N);
-            dft(x, X, 0);
-            double n1 = 0, n2 = 0;
-            for(int j = 0; j < N; j++){ n1 += creal(x[j]*conj(x[j])); n2 += creal(X[j]*conj(X[j])); }
-            if(fabs(n1 - n2) > pior) pior = fabs(n1 - n2);
-        }
-        printf("          max | ||x||² - ||Fx||² |  em 4 sinais  =  %.2e  (vírgula)\n\n", pior);
-        /* PARSEVAL É ALGEBRICO: N·Σ x_j² = Σ X_k X_{−k} em F_p, sem módulo complexo. */
+        /* PARSEVAL É ALGEBRICO: N·Σ x_j² = Σ X_k X_{−k} em F_p, sem módulo complexo.
+         * Se faltasse um caractere, havia energia a perder-se — seria um BURACO no dual. */
         {
-            const long P = 17, W = 3, NN = 16;
-            long x[NN], X[NN];
-            for(int j = 0; j < NN; j++) x[j] = (3*j + 5) % P;
-            for(int k = 0; k < NN; k++){
+            long x[N], X[N];
+            for(int j = 0; j < N; j++) x[j] = (3*j + 5) % P17;
+            for(int k = 0; k < N; k++){
                 long s = 0;
-                for(int j = 0; j < NN; j++)
-                    s = (s + x[j] * rt_pot_mod(W, (long)((j*(long)k)%NN), P)) % P;
+                for(int j = 0; j < N; j++)
+                    s = (s + x[j] * potW((j * (long)k) % N)) % P17;
                 X[k] = s;
             }
             long esq = 0, dir = 0;
-            for(int j = 0; j < NN; j++) esq = (esq + x[j]*x[j]) % P;
-            esq = (esq * NN) % P;
-            for(int k = 0; k < NN; k++){
-                int km = (int)((NN - k) % NN);
-                dir = (dir + X[k]*X[km]) % P;
+            for(int j = 0; j < N; j++) esq = (esq + x[j]*x[j]) % P17;
+            esq = (esq * N) % P17;
+            for(int k = 0; k < N; k++){
+                int km = (int)((N - k) % N);
+                dir = (dir + X[k]*X[km]) % P17;
             }
-            printf("          e em ℤ_17: N·Σ x² = %ld,  Σ X_k X_{-k} = %ld — o mesmo\n\n", esq, dir);
+            printf("          em ℤ_17: N·Σ x² = %ld,  Σ X_k X_{-k} = %ld — o mesmo\n\n", esq, dir);
             ok("PARSEVAL: a norma conserva-se — os caracteres são COMPLETOS, não há buraco."
                " A identidade N·Σ x_j² = Σ X_k X_{−k} fecha em ℤ₁₇, sem o 1e-12 do cexp",
                esq == dir);

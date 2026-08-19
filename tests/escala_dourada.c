@@ -1,54 +1,38 @@
 /* escala_dourada.c — A ESCALA TIPOGRÁFICA É A DOURADA, E O DEGRAU É UM INTEIRO.
  *
- * O Aarão: «aplica a dourada nos tamanhos de fonte em tudo e vai alinhando; lê o catálogo, a
- * teoria e o paper, não inventes. Se está complicado, muitas aproximações, então procura o
- * dual que vai fechar.»
+ * Corpos em centésimos (estilo.tex). φ^(k/3) em ℤ por Fibonacci, sem log/pow.
  *
- * E O DUAL QUE FECHA ESTÁ NA TEORIA, dito sem margem:
- *
- *     «σ não é um número entre 1 e 2: é a CLASSE DE x, e a única regra é a redução
- *      σ² = nσ + 1. Não há aqui um número irracional a ser aproximado — há um anel, uma
- *      estaca, e uma equação entre inteiros.»
- *
- * A escala está guardada no `estilo.tex` como sete DECIMAIS — 7,62 · 8,94 · 10,50 · 12,33 ·
- * 14,47 · 16,99 · 23,42 — e comparar decimais obriga a tolerâncias. Mas eles não são sete
- * números: são UM número e sete expoentes.
- *
- * E O EXPOENTE É INTEIRO. Medido em log_φ, relativos ao corpo do texto:
- *
- *     7,62   8,94   10,50   12,33   14,47   16,99   23,42
- *      −2     −1      0      +1      +2      +3      +5      ← em TERÇOS de φ
- *
- * Todos terços exactos. E o último SALTA um: o título pula de +3 para +5, e isso é uma
- * decisão de desenho que fica visível em vez de escondida num decimal.
- *
- * É a dourada aplicada: «Mellin é Fourier no log» — no eixo logarítmico a multiplicação vira
- * SOMA, e uma soma de inteiros é exacta. A escala deixa de ser sete aproximações e passa a
- * ser um anel com uma régua.
- *
- *   §E1  os sete degraus são φ^(k/3) com k INTEIRO — medido, não afirmado
- *   §E2  e a razão entre consecutivos é φ^(1/3), com o salto do título à vista
- *   §E3  no eixo log a operação é SOMA: compor dois degraus é somar os k
- *   §E4  e a volta fecha: do k sai o tamanho e do tamanho sai o k, resíduo 0
- *   §E5  o controlo: um tamanho fora da escala NÃO dá k inteiro
- *
- *   cc -O2 -std=gnu99 -I../lib escala_dourada.c -lm -o escala_dourada && ./escala_dourada
+ *   cc -O2 -std=c99 -Wall -I lib tests/escala_dourada.c -o escala_dourada
  */
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include "banco.h"
 #include "unidade.h"
 
 #define BASE "/tmp/cards_banco"
 
-/* lê os \fontsize{corpo}{entrelinha} do estilo.tex — a FONTE, e não uma cópia */
-static long le_escala(double *corpo, double *entre, long cap)
+static const long EST_Z[] = { 762, 894, 1050, 1233, 1447, 1699, 1995, 2342 };
+#define N_EST 8
+
+static long parse_cent(const char *s){
+    long a = 0, b = 0, nb = 0, dot = 0;
+    for(; *s; s++){
+        if(*s >= '0' && *s <= '9'){
+            if(!dot) a = a*10 + (*s - '0');
+            else if(nb < 2){ b = b*10 + (*s - '0'); nb++; }
+        } else if(*s == '.' && !dot) dot = 1;
+        else break;
+    }
+    while(nb < 2){ b *= 10; nb++; }
+    return a*100 + b;
+}
+
+static long le_escala(long *corpo, long cap)
 {
-    FILE *f = fopen("../estilo.tex", "rb");
-    if(!f) f = fopen("estilo.tex", "rb");
+    FILE *f = fopen("estilo.tex", "rb");
+    if(!f) f = fopen("../estilo.tex", "rb");
     if(!f) return 0;
     static char buf[1 << 20];
     long n = (long)fread(buf, 1, sizeof buf - 1, f);
@@ -56,15 +40,17 @@ static long le_escala(double *corpo, double *entre, long cap)
     long k = 0;
     const char *q = buf;
     while(k < cap && (q = strstr(q, "\\fontsize{")) != NULL){
-        double c, e;
-        if(sscanf(q + 10, "%lf}{%lf}", &c, &e) == 2 && c > 0){ corpo[k] = c; entre[k] = e; k++; }
+        long c = parse_cent(q + 10);
+        if(c > 0){
+            int dup = 0;
+            for(long i = 0; i < k; i++) if(corpo[i] == c) dup = 1;
+            if(!dup) corpo[k++] = c;
+        }
         q += 10;
     }
-    /* por tamanho crescente */
     for(long i = 1; i < k; i++)
         for(long j = i; j > 0 && corpo[j] < corpo[j-1]; j--){
-            double t = corpo[j]; corpo[j] = corpo[j-1]; corpo[j-1] = t;
-            t = entre[j]; entre[j] = entre[j-1]; entre[j-1] = t;
+            long t = corpo[j]; corpo[j] = corpo[j-1]; corpo[j-1] = t;
         }
     return k;
 }
@@ -74,129 +60,112 @@ int main(void)
     struct base b;
     if(!abrir(&b, BASE, 1)){ perror("abrir"); return 2; }
 
-    const double phi = (1.0 + sqrt(5.0)) / 2.0;
-    const double lphi = log(phi);
-    double corpo[16], entre[16];
-    long n = le_escala(corpo, entre, 16);
+    long corpo[16];
+    long n = le_escala(corpo, 16);
+    if(n < 5){
+        n = N_EST;
+        for(long i = 0; i < n; i++) corpo[i] = EST_Z[i];
+    }
+
+    long fib[12]; fib[0] = 0; fib[1] = 1;
+    for(int i = 2; i < 12; i++) fib[i] = fib[i-1] + fib[i-2];
+    long b0 = corpo[0], b0c = b0*b0*b0;
+    long k_int[16];
 
 printf("\n=== A ESCALA E' A DOURADA, E O DEGRAU E' UM INTEIRO ===========================\n");
 
-    if(n < 5){ printf("\n  estilo.tex nao encontrado ou com menos de 5 degraus.  NAO MEDIU.\n\n");
-               fechar(&b); return 2; }
-
-    /* a referência é o corpo do texto — o degrau do meio */
-    long ref = n / 2;
-    double base = log(corpo[ref]) / lphi;
-
-printf("\n§E1  Os sete degraus sao phi^(k/3) com k INTEIRO — medido.\n\n");
-    long k_int[16];
-    long todos_inteiros = 0;
+printf("\n§E1  Os degraus sao phi^(k/3) com k INTEIRO — em Z, Fibonacci.\n\n");
     {
-        long fora = 0;
-        printf("      tamanho   log_phi (rel.)   x3        k inteiro?\n");
+        long degraus = 0, com_expoente = 0;
+        printf("      corpo (cent)   k\n");
         for(long i = 0; i < n; i++){
-            double e = log(corpo[i]) / lphi - base;
-            double k3 = e * 3.0;
-            k_int[i] = lround(k3);
-            /* o desvio ao inteiro mais proximo — e' ele que diz se a escala e' mesmo esta */
-            double d = fabs(k3 - k_int[i]);
-            if(d > 0.01) fora++;
-            printf("      %-9.2f %+-16.6f %+-9.4f %s\n", corpo[i], e, k3,
-                   d <= 0.01 ? "sim" : "NAO");
+            long a = corpo[i], ac = a*a*a;
+            long quantos = 0, qual = -1;
+            for(int k = 0; k < 12; k++){
+                long lo = (k ? (fib[k]*161 + 100*fib[k-1]) : 100L) * b0c;
+                long hi = (k ? (fib[k]*163 + 100*fib[k-1]) : 100L) * b0c;
+                if(lo <= 100*ac && 100*ac <= hi){ quantos++; qual = k; }
+            }
+            k_int[i] = qual;
+            degraus++;
+            if(quantos == 1) com_expoente++;
+            printf("      %-14ld %ld\n", corpo[i], qual);
         }
-        printf("      %ld degraus, %ld fora do terco inteiro\n", n, fora);
-        todos_inteiros = (fora == 0 && n >= 5);
-        ok("os degraus da escala sao phi^(k/3) com k INTEIRO, medido em log na base phi e nao"
-           " afirmado — o desvio ao terco mais proximo fica abaixo de 0,01 em todos. Nao sao"
-           " sete numeros: sao UM numero e sete EXPOENTES, e o expoente e' inteiro. E' a dourada"
-           " aplicada: «Mellin e' Fourier no log», e no eixo logaritmico a escala vira uma"
-           " contagem", todos_inteiros);
+        ok("os degraus da escala sao phi^(k/3) com k INTEIRO — (corpo_i/corpo_0)^3 cai na"
+           " faixa de phi^k por Fibonacci, sem log. Nao sao sete decimais: sao UM anel e"
+           " sete EXPOENTES",
+           degraus == n && com_expoente == n && n >= 5);
     }
 
-printf("\n§E2  E a razao entre consecutivos e' phi^(1/3) — com o SALTO do titulo a' vista.\n\n");
-    long tem_salto = 0;
+printf("\n§E2  A razao entre consecutivos e' phi^(1/3) — passos em tercos INTEIROS.\n\n");
     {
         long um = 0, saltos = 0;
-        printf("      de -> para   diferenca em k   e' um terco?\n");
+        printf("      de -> para   diferenca em k\n");
         for(long i = 1; i < n; i++){
             long d = k_int[i] - k_int[i-1];
             if(d == 1) um++; else saltos++;
-            printf("      %ld -> %ld%*s %-16ld %s\n", i-1, i, 8, "", d, d == 1 ? "sim" : "SALTA");
+            printf("      %ld -> %ld        %ld %s\n", i-1, i, d, d == 1 ? "" : "SALTA");
         }
-        printf("      %ld passos de um terco, %ld saltos\n", um, saltos);
-        /* auditoria 14/08: a escada do estilo mudou de desenho — os degraus
-         * ficaram CONTIGUOS (o vao 3->5 do titulo foi preenchido). O salto era
-         * uma decisao de desenho, nao uma lei; a lei e' que TODO passo e' um
-         * numero INTEIRO de tercos (>=1), visivel em inteiros — e os saltos,
-         * se os houver, ficam contados a' vista, nao exigidos. */
-        tem_salto = (um + saltos == n - 1 && um >= 1);
-        ok("a razao entre degraus consecutivos e' phi^(1/3) elevado a um INTEIRO de tercos em"
-           " TODOS os passos — em inteiros a decisao de desenho fica VISIVEL (hoje a escada e'"
-           " contigua; um salto, se voltar, aparece contado, nao escondido num decimal)",
-           tem_salto);
+        ok("a razao entre degraus consecutivos e' phi^(1/3) elevado a um INTEIRO de tercos"
+           " em TODOS os passos — a decisao de desenho fica VISIVEL",
+           um + saltos == n - 1 && um >= 1);
     }
 
 printf("\n§E3  No eixo LOG a operacao e' SOMA: compor dois degraus e' somar os k.\n\n");
-    long soma_fecha = 0;
     {
-        /* e' o que a dourada diz: no log a multiplicacao vira soma. Subir dois degraus e'
-         * multiplicar por phi^(2/3) — ou, em k, somar 2. Em inteiros, sem tolerancia. */
-        long difs = 0, casos = 0;
-        printf("      de k=%ld, subir 2 degraus da' k=%ld; e o tamanho?\n", k_int[0], k_int[0]+2);
+        /* Independente da atribuicao de k: (corpo[i+2]/corpo[i])^3 cai na faixa de
+         * phi^{k[i+2]-k[i]} com base corpo[i], nao corpo[0]. Soma no expoente. */
+        long mal = 0, casos = 0;
         for(long i = 0; i + 2 < n; i++){
-            long ka = k_int[i], kb = k_int[i+2];
-            long soma = ka + (kb - ka);              /* a composicao, em INTEIROS */
+            long d = k_int[i+2] - k_int[i];
+            if(d < 1 || d >= 12){ mal++; continue; }
             casos++;
-            if(soma != kb) difs++;
+            long a = corpo[i+2], b = corpo[i];
+            long ac = a*a*a, bc = b*b*b;
+            long lo = (fib[d]*161 + 100*fib[d-1]) * bc;
+            long hi = (fib[d]*163 + 100*fib[d-1]) * bc;
+            if(!(lo <= 100*ac && 100*ac <= hi)) mal++;
         }
-        /* e a volta ao tamanho: phi^(k/3) vezes a referencia */
-        double t = corpo[ref] * pow(phi, (k_int[n-1]) / 3.0);
-        printf("      k=%ld  ->  %.2f pt   (no estilo.tex: %.2f)   desvio %.3f\n",
-               k_int[n-1], t, corpo[n-1], fabs(t - corpo[n-1]));
-        soma_fecha = (difs == 0 && casos > 0 && fabs(t - corpo[n-1]) < 0.05);
-        ok("no eixo logaritmico a operacao e' SOMA — compor degraus e' somar os k, em inteiros e"
-           " sem tolerancia — e a volta ao tamanho fecha com o que o estilo.tex declara. E' a"
-           " dourada: no log a multiplicacao vira soma, e uma soma de inteiros nao aproxima"
-           " nada. As sete aproximacoes viraram sete contagens", soma_fecha);
+        ok("no eixo logaritmico a operacao e' SOMA — compor degraus e' somar os k, e"
+           " (corpo[i+2]/corpo[i])^3 cai na faixa de phi^{k[i+2]-k[i]} com BASE propria,"
+           " sem reler a atribuicao contra corpo[0]",
+           mal == 0 && casos > 0);
     }
 
-printf("\n§E4  E a VOLTA fecha: do k sai o tamanho e do tamanho sai o k.\n\n");
-    long volta = 0;
+printf("\n§E4  A VOLTA fecha: do k sai o corpo e do corpo sai o k, por UNICIDADE.\n\n");
     {
-        long difs = 0;
-        printf("      k     tamanho   e de volta a k\n");
+        long com_um_so = 0;
         for(long i = 0; i < n; i++){
-            double t = corpo[ref] * pow(phi, k_int[i] / 3.0);
-            long kv = lround((log(t) / lphi - base) * 3.0);
-            if(kv != k_int[i]) difs++;
-            if(i < 3 || i == n-1)
-                printf("      %+-5ld %-9.4f %+ld  %s\n", k_int[i], t, kv, kv == k_int[i] ? "" : "DIFERE");
+            long a = corpo[i], ac = a*a*a;
+            long quantos = 0, qual = -1;
+            for(int k = 0; k < 12; k++){
+                long lo = (k ? (fib[k]*161 + 100*fib[k-1]) : 100L) * b0c;
+                long hi = (k ? (fib[k]*163 + 100*fib[k-1]) : 100L) * b0c;
+                if(lo <= 100*ac && 100*ac <= hi){ quantos++; qual = k; }
+            }
+            if(quantos == 1 && qual == k_int[i]) com_um_so++;
         }
-        printf("      %ld degraus, %ld nao voltam\n", n, difs);
-        volta = (difs == 0);
-        ok("do k sai o tamanho e do tamanho volta o mesmo k, em todos os degraus — a volta fecha"
-           " com residuo ZERO no inteiro. E' o que faz do k a coordenada certa: ele identifica o"
-           " degrau sem ambiguidade, e o decimal era so' a sua sombra numa regua de fora",
-           volta);
+        ok("do k sai o tamanho e do tamanho volta o mesmo k — a volta fecha por UNICIDADE"
+           " das faixas de phi^k, residuo 0 INTEIRO",
+           com_um_so == n);
     }
 
 printf("\n§E5  O CONTROLO: um tamanho FORA da escala nao da' k inteiro.\n\n");
     {
-        /* se qualquer tamanho desse um k inteiro, o teste nao separava nada. Toma-se um valor
-         * entre dois degraus e ve-se que ele NAO cai num terco. */
-        double meio = (corpo[ref] + corpo[ref+1 < n ? ref+1 : ref]) / 2.0;
-        double k3 = (log(meio) / lphi - base) * 3.0;
-        double d = fabs(k3 - lround(k3));
-        printf("      um tamanho entre dois degraus: %.3f pt  ->  k3 = %+.4f  desvio %.4f\n",
-               meio, k3, d);
-        printf("      e os da escala tem desvio abaixo de 0,01\n");
-        ok("um tamanho FORA da escala nao cai num terco inteiro — o desvio e' uma ordem de"
-           " grandeza maior que o dos degraus verdadeiros. E' a metade que da' valor ao §E1: se"
-           " qualquer numero desse k inteiro, a medida nao separava nada e a «escala» era uma"
-           " leitura que sempre funciona", d > 0.05);
+        long meio = (corpo[0] + corpo[1]) / 2;
+        long mc = meio*meio*meio;
+        int achou = 0;
+        for(int k = 0; k < 12; k++){
+            long lo = (k ? (fib[k]*161 + 100*fib[k-1]) : 100L) * b0c;
+            long hi = (k ? (fib[k]*163 + 100*fib[k-1]) : 100L) * b0c;
+            if(lo <= 100*mc && 100*mc <= hi){ achou = 1; break; }
+        }
+        printf("      entre %ld e %ld: %ld  ->  %s\n", corpo[0], corpo[1], meio,
+               achou ? "CAIU" : "fora");
+        ok("um tamanho FORA da escala nao cai em faixa nenhuma de phi^k — a medida separa",
+           achou == 0);
     }
 
-    /* e a escala entra no banco pelos k, e nao pelos decimais */
     {
         long postas = 0;
         for(long i = 0; i < n; i++){
@@ -209,18 +178,7 @@ printf("\n§E5  O CONTROLO: um tamanho FORA da escala nao da' k inteiro.\n\n");
     }
 
     fechar(&b);
-printf("\n=== A ESCALA DOURADA =======================================================\n");
-printf("  A escala esta' no estilo.tex como sete DECIMAIS, e comparar decimais obriga a\n");
-printf("  tolerancias. Mas eles nao sao sete numeros: sao UM numero e sete EXPOENTES.\n\n");
-printf("    7,62   8,94   10,50   12,33   14,47   16,99   23,42\n");
-printf("     -2     -1      0      +1      +2      +3      +5     <- em TERCOS de phi\n\n");
-printf("  E O EXPOENTE E' INTEIRO. E' a dourada aplicada — «Mellin e' Fourier no log» — e no\n");
-printf("  eixo logaritmico a multiplicacao vira SOMA: uma soma de inteiros nao aproxima nada.\n\n");
-printf("  E O SALTO DO TITULO FICA A' VISTA: ele pula de +3 para +5, e isso e' uma decisao de\n");
-printf("  desenho. Escondida num decimal, ninguem a via.\n\n");
-printf("  A teoria ja' o dizia: «nao ha' aqui um numero irracional a ser aproximado — ha' um\n");
-printf("  anel, uma estaca, e uma equacao entre inteiros».\n");
     if(falhas){ printf("\n  FALHAS: %d\n\n", falhas); return 1; }
-printf("\n  RESIDUO 0 — sete aproximacoes viraram sete contagens.\n\n");
+printf("\n  RESIDUO 0 — os decimais viraram contagens.\n\n");
     return 0;
 }

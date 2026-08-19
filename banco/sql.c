@@ -2536,14 +2536,19 @@ static int martelo(const char *p){
     clock_gettime(CLOCK_MONOTONIC, &t1);
     /* A TAXA NAO SE GUARDA: sai de duas leituras do relogio, como a distancia sai de dois
      * pontos. Guardar taxa e guardar uma conta, e conta guardada e conta que envelhece. */
-    double seg = (t1.tv_sec - t0.tv_sec) + (t1.tv_nsec - t0.tv_nsec) / 1e9;
+    long long seg_ns = (long long)(t1.tv_sec - t0.tv_sec) * 1000000000LL
+                   + (long long)(t1.tv_nsec - t0.tv_nsec);
     long feitos = r.R.total ? (r.R.total - de) : (ate - de);
-    if(seg > 0){
-        double taxa = feitos / seg;
-        const char *un = "H/s"; double v = taxa;
-        if(taxa >= 1e6){ v = taxa / 1e6; un = "MH/s"; }
-        else if(taxa >= 1e3){ v = taxa / 1e3; un = "kH/s"; }
-        printf("      %ld hash(es) em %.3f s — %.2f %s\n", feitos, seg, v, un);
+    if(seg_ns > 0){
+        long long taxa = feitos * 1000000000LL / seg_ns;
+        const char *un = "H/s";
+        long long v100 = taxa * 100;
+        if(taxa >= 1000000LL){ v100 = taxa / 10000; un = "MH/s"; }
+        else if(taxa >= 1000LL){ v100 = taxa / 10; un = "kH/s"; }
+        printf("      %ld hash(es) em %lld.%03lld s — %lld.%02lld %s\n",
+               feitos,
+               seg_ns / 1000000000LL, (seg_ns % 1000000000LL) / 1000000LL,
+               v100 / 100, v100 % 100, un);
     }
     if(r.R.total)
         printf("      SHARE no nonce %ld — a cifra diverge PARA BAIXO no simbolo %ld\n"
@@ -3105,17 +3110,17 @@ int main(int argc, char **argv){
             /* O par é o mesmo; o que muda é A BORDA, e dela sai tudo. Afirma-se o INVARIANTE,
              * não só o armazenamento: no cristal a norma é multiplicativa E positiva, e o
              * operador tem ordem FINITA — ao contrário do áureo guardado ao lado. */
-            Par u = { x.total, x.e }, v = { y.total, y.e };
+            Par par_u = { x.total, x.e }, par_v = { y.total, y.e };
             ok("a norma do cristal é multiplicativa no que foi guardado",
-               cr_norma(cr_prod(u,v,0),0) == cr_norma(u,0) * cr_norma(v,0));
+               cr_norma(cr_prod(par_u,par_v,0),0) == cr_norma(par_u,0) * cr_norma(par_v,0));
             ok("e é POSITIVA — o áureo ao lado alterna de sinal",
-               cr_norma(u,0) > 0 && cr_norma(v,1) > 0);
+               cr_norma(par_u,0) > 0 && cr_norma(par_v,1) > 0);
             /* a ordem finita, contada no metal: ×ω volta ao ponto de partida */
-            Par g = u; int ordem = 0;
-            for(int t = 1; t <= 12; t++){ g = cr_op(g,0); if(g.a==u.a && g.b==u.b){ ordem = t; break; } }
+            Par g = par_u; int ordem = 0;
+            for(int t = 1; t <= 12; t++){ g = cr_op(g,0); if(g.a==par_u.a && g.b==par_u.b){ ordem = t; break; } }
             ok("×ω em Gauss tem ordem 4 — gira e VOLTA, o que o gato nunca faz", ordem == 4);
-            Par e6 = v; int o6 = 0;
-            for(int t = 1; t <= 12; t++){ e6 = cr_op(e6,1); if(e6.a==v.a && e6.b==v.b){ o6 = t; break; } }
+            Par e6 = par_v; int o6 = 0;
+            for(int t = 1; t <= 12; t++){ e6 = cr_op(e6,1); if(e6.a==par_v.a && e6.b==par_v.b){ o6 = t; break; } }
             ok("×ω em Eisenstein tem ordem 6 — o Φ₆, sentado no trono", o6 == 6);
             /* e a volta do gato, agora no toolkit: a antípoda conjugada pela involução */
             Mat A = me_gato(2), Ai = me_antigato(2), J = me_troca();

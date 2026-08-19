@@ -25,10 +25,9 @@
  *
  * Zero doubles nas contas que decidem. Onde houver um, é para exibir o que ele custa.
  *
- *   cc -O2 -std=c99 -Wall -I../lib dissipa_pagina.c -o dissipa_pagina -lm
+ *   cc -O2 -std=c99 -Wall -I lib tests/dissipa_pagina.c -o dissipa_pagina
  */
 #include <stdio.h>
-#include <math.h>
 #include "unidade.h"
 #include "promove.h"
 
@@ -40,8 +39,6 @@ int main(void){
     printf("=== ONDE A PAGINA DISSIPA, E QUANTO ======================================\n\n");
 
     /* ─── §P1 a TRANSLACAO reverte ────────────────────────────────────────────────── */
-    /* a posicao e' a SOMA das larguras, e em milesimos ela e' INTEIRA: nao ha' resto a
-     * perder enquanto nao se dividir. Reverter e' subtrair pela ordem inversa. */
     long x = 0, hist[NW + 1];
     hist[0] = 0;
     for(int i = 0; i < NW; i++){ x += W[i]; hist[i+1] = x; }
@@ -50,15 +47,12 @@ int main(void){
     printf("   avanço total %ld milesimos, e a volta da' %ld\n", x, volta);
     ok("a TRANSLACAO reverte: somar e desfazer devolve o zero, residuo 0 INTEIRO", volta == 0);
 
-    /* e cada passo isolado reverte tambem — nao so' o total */
     int passo_ok = 1;
     for(int i = 0; i < NW; i++) if(hist[i+1] - W[i] != hist[i]) passo_ok = 0;
     ok("e CADA passo reverte, nao so' o total: x_{n+1} - w_n = x_n", passo_ok);
 
     /* ─── §P2 a ESCALA reverte, em Z[phi] ─────────────────────────────────────────── */
-    /* sigma^3 = phi, e phi^k = F_k.phi + F_{k-1}. O dual de phi^k e' phi^{-k}, e o produto
-     * e' 1: a alfandega |N| = 1. Tudo inteiro, nenhuma raiz avaliada. */
-    long a = 1, b = 0;                      /* phi^0 = 1 + 0.phi */
+    long a = 1, b = 0;
     int k = 0, esc_ok = 1, ate = 0;
     for(;; k++){
         long N = a*a + a*b - b*b;
@@ -73,51 +67,42 @@ int main(void){
        esc_ok && ate > 40);
 
     /* ─── §P3 onde a pagina DISSIPA ───────────────────────────────────────────────── */
-    /* A posicao vive em milesimos, INTEIRA. Mas o PDF escreve-a com `%.2f` — dois decimais
-     * de ponto, isto e' CENTESIMOS. Cada `Td` deita fora o que estiver abaixo disso, e o
-     * que se deita fora nao volta: e' apagar, e apagar e' o que dissipa.
-     *
-     * Conta-se em BITS, que e' a moeda do corpo_analitico: quantos bits distinguem os valores
-     * que o arredondamento junta. */
-    const double CORPO = 10.95;
-    long perdidos = 0, casos = 0;
-    double pior = 0;
+    /* CORPO = 10950/1000 pt (10,95). Posicao em milesimos; o PDF arredonda a CENTESIMOS
+     * (dez milesimos): perda quando exacta mod 10 != 0 apos arredondamento. */
+    const long CORPO_NUM = 10950L, CORPO_DEN = 1000L;
+    long perdidos = 0, casos = 0, pior = 0;
     for(int i = 0; i < NW; i++){
         for(int rep = 1; rep <= 40; rep++){
-            /* a posicao exacta, em milesimos de ponto */
-            long exacta = (long)W[i] * rep * (long)(CORPO * 1000) / 1000;
-            /* a que o PDF escreve: centesimos de ponto */
-            double pt = exacta / 1000.0;
-            double escrita = floor(pt * 100.0 + 0.5) / 100.0;
-            double d = fabs(pt - escrita);
+            long exacta = (long)W[i] * rep * CORPO_NUM / CORPO_DEN;
+            long cent = (exacta + 5) / 10;
+            long escrita = cent * 10;
+            long d = exacta - escrita;
+            if(d < 0) d = -d;
             if(d > pior) pior = d;
             if(d > 0) perdidos++;
             casos++;
         }
     }
     printf("\n   %ld de %ld posicoes NAO cabem em centesimos de ponto\n", perdidos, casos);
-    printf("   pior perda por posicao: %.5f pt\n", pior);
-    /* 10 bits: a diferenca entre milesimos e centesimos e' um factor 10, e log2(10) ~ 3,32;
-     * mas o que se conta aqui e' se HA' perda, nao quanta — e ha'. */
+    printf("   pior perda por posicao: %ld milesimos de pt\n", pior);
     ok("O `%.2f` do `Td` DISSIPA: ha' posicoes que nao cabem em centesimos", perdidos > 0);
 
-    /* e quanto ACUMULA ao longo de uma linha: o erro de cada glifo soma-se aos seguintes,
-     * porque espacar SOMA — e' o mesmo mecanismo do espaco que sumia */
-    double acum = 0, exato = 0;
+    long acum = 0, exato = 0;
     for(int i = 0; i < NW; i++){
-        double w = W[i] * CORPO / 1000.0;
+        long w = W[i] * CORPO_NUM / CORPO_DEN;
         exato += w;
-        acum += floor(w * 100.0 + 0.5) / 100.0;
+        long cent = (w + 5) / 10;
+        acum += cent * 10;
     }
-    printf("   ao longo de %d glifos: exacto %.5f pt, escrito %.5f pt, deriva %.5f\n",
-           NW, exato, acum, fabs(exato - acum));
+    long deriva = exato - acum;
+    if(deriva < 0) deriva = -deriva;
+    printf("   ao longo de %d glifos: exacto %ld milesimos, escrito %ld milesimos, deriva %ld\n",
+           NW, exato, acum, deriva);
     ok("e a perda ACUMULA ao longo da linha — espacar soma, e o erro tambem",
-       fabs(exato - acum) > 0);
+       deriva > 0);
 
     /* ─── §P4 o ESPACAMENTO vertical ──────────────────────────────────────────────── */
-    /* a entrelinha e' uma SOMA repetida, e em milesimos e' inteira: 20 linhas descem
-     * exactamente 20 entrelinhas, e voltar sobe as mesmas 20. */
-    const long ENTRE = 13600;               /* 13,6 pt em milesimos — o da classe */
+    const long ENTRE = 13600;
     long y = 768000, y0 = y;
     for(int i = 0; i < 20; i++) y -= ENTRE;
     for(int i = 0; i < 20; i++) y += ENTRE;
@@ -125,8 +110,6 @@ int main(void){
     ok("o ESPACAMENTO VERTICAL reverte: descer e subir devolve o mesmo y, residuo 0",
        y == y0);
 
-    /* e o horizontal, que e' o `Tw`: o espaco extra distribui-se pelos espacos da linha e
-     * a soma tem de dar o alvo — se nao der, sobra ou falta, e isso ve-se na margem */
     const long ALVO = 447000, LARG = 400000;
     const int N_ESP = 7;
     long extra = (ALVO - LARG) / N_ESP, resto = (ALVO - LARG) % N_ESP;
@@ -137,10 +120,8 @@ int main(void){
        soma == ALVO);
 
     /* ─── §P5 o CONTROLO ──────────────────────────────────────────────────────────── */
-    /* uma operacao que APAGA nao reverte, e a diferenca mede-se. Sem isto, «reverte» era
-     * uma afirmacao sobre operacoes escolhidas por serem reversiveis. */
     long z = 12345, z_ap = z;
-    z_ap = z_ap / 100 * 100;                /* apagar os dois digitos de baixo */
+    z_ap = z_ap / 100 * 100;
     printf("\n   controlo: %ld apagado nos centesimos da' %ld — a volta perde %ld\n",
            z, z_ap, z - z_ap);
     ok("uma operacao que APAGA nao reverte — e o que se perde conta-se", z != z_ap);

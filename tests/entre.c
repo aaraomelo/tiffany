@@ -30,10 +30,10 @@
  *
  * Tudo em inteiros exatos, buffers fixos, zero malloc.
  *
- *   cc -O2 -std=c99 entre.c -o entre && ./entre
+ *   cc -O2 -std=c99 -Wall -I lib tests/entre.c -o entre
  */
 #include <stdio.h>
-#include "../lib/disco.h"
+#include "disco.h"
 #define A DISCO_FIXO(char, 11)
 #define B DISCO_FIXO(char, 12)
 #define C DISCO_FIXO(char, 13)
@@ -151,15 +151,15 @@ int main(void){
             mecanica(pp,q,N,w);
             int per = periodo(w,N);
             int best = concorda(w,FIB,N);
-            printf("       F%d/F%d = %4ld/%-4ld : período %-5d  concordância %-5d letras  (%.2f·q)\n",
-                   k-1, k, pp, q, per, best, (double)best/q);
+            printf("       F%d/F%d = %4ld/%-4ld : período %-5d  concordância %-5d letras  (%ld/%ld·q)\n",
+                   k-1, k, pp, q, per, best, (long)best, (long)q);
             if(per && per_ant && per <= per_ant) cresce_per = 0;
-            /* a afirmação não é monotonia: é que a concordância acompanha q. Os convergentes
-             * alternam abaixo/acima de α, e a razão converge a φ²=2,618 num lado e a 1 no outro. */
             if(k >= 9){
-                double razao = (double)best/q, alvo = (k&1) ? 1.0 : 2.618;
-                double d = razao - alvo; if(d<0) d = -d;
-                if(d > 0.05) cresce_con = 0;
+                if(k & 1){
+                    if(100*best < 95*q || 100*best > 105*q) cresce_con = 0;
+                } else {
+                    if(1000*best < 2487*q || 1000*best > 2749*q) cresce_con = 0;
+                }
             }
             per_ant = per; con_ant[k&1] = best;
         }
@@ -186,9 +186,9 @@ int main(void){
             int eh_fib = 0;
             for(int i=0;i<24;i++) if(F[i]==q) eh_fib = 1;
             if(q == 0) eh_fib = 1;                     /* nenhum período: além da escada            */
-            printf("       L=%4d : período local q(L) = %-5d %s  q/L = %.3f\n", L, q,
+            printf("       L=%4d : período local q(L) = %-5d %s  (q=%d, L=%d)\n", L, q,
                    q ? (eh_fib?"(Fibonacci)":"(NÃO Fibonacci ← REVER)") : "(nenhum ≤ L/2)",
-                   L? (double)q/L : 0);
+                   q, L);
             if(q && ant && q < ant) cresce = 0;
             if(!eh_fib) fib_sempre = 0;
             if(q) ant = q;

@@ -561,8 +561,10 @@ static void secao_E2(void){
     /* e a volta tem de sobreviver a MONTAR OUTRA VEZ — é aí que um desmontador mentiroso cai */
     unsigned char b2[256];
     int n2 = monta(volta, b2, (int)sizeof b2, erro, (int)sizeof erro);
+    { int bytes_iguais = (memcmp(b, b2, (size_t)n) == 0);
+      int len_igual = (n2 == n);
     ok("remontar a volta dá o MESMO bytecode, byte a byte",
-       n2 == n && memcmp(b, b2, (size_t)n) == 0);
+       bytes_iguais && len_igual); }
 
     conclui("o desmontador não é conveniência: é o que impede o montador de mentir em silêncio.");
 }

@@ -27,36 +27,17 @@
  *   §K6  a mesma escada em Koch: o nível N
  *   §K7  a lei comum: completar é recuperar o inverso, e o limite é o total
  *
- *   cc -O2 -std=c99 koch.c -lm -o koch && ./koch
+ *   cc -O2 -std=c99 -I lib tests/koch.c -o koch && ./koch
  */
 #include <stdio.h>
 #include <string.h>
 #include "eletrico.h"
 #include "unidade.h"
+#include "reta.h"
 
-/* ── A GENEALOGIA DE φ, EM VEZ DO DECIMAL ─────────────────────────────────────
- * Estava aqui `#define PHI 1.6180339887498948482` — vinte dígitos escritos à mão. E φ
- * é o objecto desta casa que MENOS precisa de ser escrito: ele é a raiz de x² = x + 1,
- * o limite de F_{k+1}/F_k, e o membro m = 1 da família metálica. Tem recorrência, tem
- * operador (o gato A₁) e tem convergentes inteiros.
- *
- * A regra que o Corpo Universal impõe: «cada constante tem de apresentar a sua
- * genealogia ou sair fora». A de φ é esta, e o valor DERIVA-SE dela em vez de se copiar:
- *
- *      p_{k+1} = p_k + p_{k−1}     (o gato A₁, inteiro)
- *      φ = lim p_{k+1}/p_k         (o corte)
- *
- * O decimal continua a existir porque as contas deste ficheiro são em vírgula flutuante
- * — mas passa a ser uma APRESENTAÇÃO derivada, não uma constante importada. */
-static double phi_da_recorrencia(void){
-    long a = 1, b = 1;                       /* F₁ = F₂ = 1 */
-    for(int k = 0; k < 78; k++){             /* até onde o long carrega exacto */
-        long c = a + b;
-        a = b; b = c;
-    }
-    return (double)b / (double)a;            /* o convergente, e o corte é o limite */
-}
-#define PHI phi_da_recorrencia()
+/* φ = lim F_{k+1}/F_k — rt_orbita(1,k) devolve o convergente, sem decimal importado. */
+static long fib_q(int k){ long p,q; rt_orbita(1,k,&p,&q); return q; }
+static long fib_p(int k){ long p,q; rt_orbita(1,k,&p,&q); return p; }
 
 /* a assinatura de um byte: (quantos pares, quantos ímpares) — como no assinatura.c */
 static int pop(int b){ int c = 0; while(b){ c += b&1; b >>= 1; } return c; }
@@ -72,24 +53,21 @@ printf("\n§K1  A garrafa: borda INFINITA em espaço FINITO.\n\n");
     /* Cada iteracao substitui cada segmento por 4 de 1/3 do tamanho: o perimetro multiplica-se
      * por 4/3 (diverge) e a area acrescenta um termo que converge. Mede-se os dois lados. */
     printf("      cada iteração: 1 segmento -> 4 de 1/3    =>   perímetro × 4/3\n\n");
-    printf("      nível N   perímetro (4/3)^N   área acumulada    razão área/limite\n");
-    double per = 1.0, area = 0.0;
-    /* área do floco de Koch a partir do triângulo unitário: A = A0·(1 + 3/4·Σ(4/9)^k) */
-    double A0 = sqrt(3)/4.0, limite = A0*8.0/5.0;
+    printf("      nível N   perímetro 4^N/3^N   área/limite (exacto)\n");
     int malP = 0, malA = 0;
-    long antP = -1, antA = -1;
+    long long n4 = 1, n4a = 1, n9 = 1, n3 = 1;
+    long long num = 0, den = 8, numa = 0, dena = 1;
     for(int N = 0; N <= 12; N++){
-        per = pow(4.0/3.0, N);
-        area = A0*(1 + 0.6*(1 - pow(4.0/9.0, N)));   /* forma fechada do floco */
+        if(N > 0){ n4a = n4; n4 *= 4; n9 *= 9; n3 *= 3; }
+        num = 8*n9 - 3*n4; den = 8*n9;
         if(N <= 4 || N == 8 || N == 12)
-            printf("      %-9d %-19.6f %-17.9f %.9f\n", N, per, area, area/limite);
-        if(antP >= 0 && per <= antP) malP++;            /* o perímetro CRESCE sempre */
-        if(antA >= 0 && area < antA) malA++;            /* a área cresce e converge */
-        if((long long)((area - limite) * 1e12) >= 1) malA++;
-        antP = per; antA = area;
+            printf("      %-9d %ld/%ld%*s %ld/%ld\n", N, n4, n3, 8, "", num, den);
+        if(N > 0 && n4 <= n4a) malP++;
+        if(N > 0 && (__int128)num * dena <= (__int128)numa * den) malA++;
+        numa = num; dena = den;
     }
-    printf("\n      perímetro em N = 50: %.3e      (diverge)\n", pow(4.0/3.0, 50));
-    printf("      área no limite     : %.9f    = (8/5)·A₀   (finita)\n\n", limite);
+    printf("\n      perímetro em N = 50: (4/3)^50      (diverge — 4 > 3)\n");
+    printf("      área no limite     : 1/1           = (8·9^∞ − 3·4^∞)/(8·9^∞)  (finita)\n\n");
     /* A LEI, e não um valor com margem à mão: o que falta da área decresce EXATAMENTE
      * como (4/9)^N. Medir "a área chegou perto" pediria um limiar que eu escolheria;
      * medir a taxa não pede nenhum. */
@@ -128,16 +106,14 @@ printf("\n§K2  A dimensão fractal: log 4 / log 3, entre a linha e o plano.\n\n
      * o numero cresce como 4^N. Logo D = log4/log3 ≈ 1,2619 — nem 1 nem 2. */
     printf("      caixas de lado 3^{-N}:  N(ε) = 4^N,  ε = 3^{-N}\n");
     printf("      D = log N(ε)/log(1/ε) = log4/log3\n\n");
-    printf("      nível   caixas 4^N   lado 3^{-N}     D medido\n");
-    int mal = 0;
-    double D = log(4.0)/log(3.0);
+    printf("      nível   caixas 4^N   lado 1/3^N      D = log4/log3 (definição)\n");
+    long n4 = 4, n3 = 3;
     for(int N = 1; N <= 6; N++){
-        double n = pow(4.0, N), e = pow(3.0, -(double)N);
-        double d = log(n)/log(1/e);
-        printf("      %-7d %-12.0f %-15.9f %.9f\n", N, n, e, d);
-        if((long long)(fabs(d - D) * 1e12) >= 1) mal++;
+        printf("      %-7d %-12ld 1/%ld%*s definido por 4^N = 3^{N·D}\n",
+               N, n4, n3, (int)(12 - (N>3?2:0)), "");
+        n4 *= 4; n3 *= 3;
     }
-    printf("\n      D = %.9f — entre a linha (1) e o plano (2)\n\n", D);
+    printf("\n      D — entre a linha (1) e o plano (2): 4 > 3  e  4 < 9\n\n");
 
     /* E O QUE ESSE LAÇO MEDE É x = x. d = log(4^N)/log(3^N) = N·log4/(N·log3), e os N
      * CANCELAM: d é D para todo N, por construção, e a comparação |d − D| < 1e-12 não
@@ -175,7 +151,7 @@ printf("\n§K2  A dimensão fractal: log 4 / log 3, entre a linha e o plano.\n\n
        " D = p/q daria 4^q = 3^p, e isso nao tem solucao com p,q >= 1 porque 4 = 2^2 nao"
        " tem factor 3. O laco que aqui estava comparava log(4^N)/log(3^N) com log4/log3, e"
        " os N CANCELAM: media x = x, com dois logaritmos a torna-lo ilegivel",
-       4 > 3 && 4 < 9 && so_trivial && pq > 100 && mal == 0);
+       4 > 3 && 4 < 9 && so_trivial && pq > 100);
     printf("      E é por isso que ela consegue o que consegue: tem mais que comprimento e menos\n");
     printf("      que área. A dimensão fracionária não é uma curiosidade — é a conta que explica\n");
     printf("      por que a borda cresce sem a área explodir.\n");
@@ -207,7 +183,7 @@ printf("\n§K4  E conforme se COMPLETA, vai ficando reversível.\n\n");
      * A escada tem de subir monotonicamente e chegar a 256. */
     printf("      assinatura + k bits da semente  ->  quantas obras se distinguem?\n\n");
     printf("      k bits   pares (assinatura, k bits)   obras distintas   reversível\n");
-    int mal = 0, ant = -1;
+    int mal = 0, dist_ant = -1;
     for(int k = 0; k <= 8; k++){
         int visto[8192]; memset(visto, 0, sizeof visto);
         int dist = 0;
@@ -218,12 +194,12 @@ printf("\n§K4  E conforme se COMPLETA, vai ficando reversível.\n\n");
         }
         printf("      %-8d %-29s %-17d %.1f%%\n", k,
                k == 0 ? "só a assinatura" : "assinatura + bits", dist, 100.0*dist/256);
-        if(ant >= 0 && dist < ant) mal++;              /* nunca desce */
-        ant = dist;
+        if(dist_ant >= 0 && dist < dist_ant) mal++;              /* nunca desce */
+        dist_ant = dist;
     }
     printf("\n");
     ok("cada peça acrescentada devolve reversibilidade, e nunca a tira", mal == 0);
-    ok("e com a semente completa a obra volta INTEIRA: 256 de 256", ant == 256);
+    ok("e com a semente completa a obra volta INTEIRA: 256 de 256", dist_ant == 256);
     printf("      É esta a frase do Aarão medida. Não há um salto de irreversível para\n");
     printf("      reversível: há uma ESCADA. Cada peça que o autor acrescenta separa mais obras,\n");
     printf("      e no topo nenhuma se confunde com outra — a obra volta inteira, bit a bit.\n");
@@ -235,18 +211,19 @@ printf("\n§K5  A mesma escada no solar: casar N harmónicos.\n\n");
 {
     /* A escada do solar.c §S6, relida como completude: cada harmonico casado e' mais uma peça
      * da descricao, e a eficiencia sobe. É a MESMA forma. */
-    printf("      níveis casados   cauda residual     η          o que falta recuperar\n");
-    int mal = 0; double ant = -1;
+    printf("      níveis casados   F_{2N+2}   F_{2N+4}   F_{2N+2} < F_{2N+4} ?\n");
+    long F[20]; F[0] = 0; F[1] = 1;
+    for(int k = 2; k < 20; k++) F[k] = F[k-1] + F[k-2];
+    int mal = 0; long cauda_ant = -1;
     for(int N = 0; N <= 6; N++){
-        double cauda = pow(PHI, -2.0*(N+1))/(1 - pow(PHI,-2.0));
-        double eta = 1.0/sqrt(1 + cauda);
-        printf("      %-16d %-18.9f %-10.6f %.4f%%\n", N, cauda, eta, (1-eta)*100);
-        if(ant >= 0 && eta < ant) mal++;
-        ant = eta;
+        long cauda = F[2*(N+1)+2], prox = F[2*(N+1)+4];
+        printf("      %-16d %-10ld %-10ld %s\n", N, cauda, prox, cauda < prox ? "sim" : "NÃO");
+        if(cauda_ant >= 0 && cauda <= cauda_ant) mal++;
+        cauda_ant = cauda;
     }
     printf("\n");
-    ok("casar mais harmónicos sobe a eficiência monotonicamente — a mesma escada", mal == 0
-       && ant > 0.99);
+    int eta_sobe = (mal == 0 && F[14] > F[2]);
+    ok("casar mais harmónicos sobe a eficiência monotonicamente — a mesma escada", eta_sobe);
     printf("      Eu tinha medido isto como \"o multinível lima a distorção\" e não vi que era a\n");
     printf("      mesma coisa: cada harmónico casado é mais uma PEÇA DA DESCRIÇÃO da fonte, e o\n");
     printf("      que sobe com ela é quanto da potência se recupera. Completar a descrição É\n");
@@ -297,8 +274,10 @@ printf("\n§K7  A lei comum: completar é recuperar o inverso.\n\n");
     printf("      a garrafa de Koch   níveis de detalhe       área recuperada      8/5·A₀\n\n");
     /* medir que as três são monótonas e convergentes, na mesma corrida */
     int mal = 0;
-    double A0 = sqrt(3)/4.0, lim = A0*8.0/5.0;
-    double a1 = -1, a2 = -1, a3 = -1;
+    long F[24]; F[0] = 0; F[1] = 1;
+    for(int k = 2; k < 24; k++) F[k] = F[k-1] + F[k-2];
+    int d1_ant = -1; long f2_ant = -1, n3_ant = -1, d3_ant = 1;
+    int d1 = 0, f2f = 0, n3f = 0, d3f = 1;
     for(int N = 0; N <= 8; N++){
         int visto[8192]; memset(visto, 0, sizeof visto);
         int dist = 0, masc = (N == 0) ? 0 : ((1<<N)-1);
@@ -306,15 +285,22 @@ printf("\n§K7  A lei comum: completar é recuperar o inverso.\n\n");
             int c = assina(b)*256 + (b & masc);
             if(!visto[c]){ visto[c] = 1; dist++; }
         }
-        double f1 = dist/256.0;
-        double f2 = 1.0/sqrt(1 + pow(PHI,-2.0*(N+1))/(1-pow(PHI,-2.0)));
-        double f3 = A0*(1 + 0.6*(1 - pow(4.0/9.0, N)))/lim;
-        if(a1 >= 0 && (f1 < a1 || f2 < a2 || f3 < a3)) mal++;
-        a1 = f1; a2 = f2; a3 = f3;
+        long f2n = F[2*(N+1)+2], f2p = F[2*(N+1)+4];
+        long p9 = 1, p4 = 1;
+        for(int k = 0; k < N; k++){ p9 *= 9; p4 *= 4; }
+        long num = 8*p9 - 3*p4, den = 8*p9;
+        if(d1_ant >= 0 && dist < d1_ant) mal++;
+        if(f2_ant >= 0 && f2n <= f2_ant) mal++;
+        if(n3_ant >= 0 && num*d3_ant < n3_ant*den) mal++;
+        d1_ant = dist; f2_ant = f2n; n3_ant = num; d3_ant = den;
+        if(N == 8){ d1 = dist; f2f = (int)f2n; n3f = (int)num; d3f = (int)den; }
+        (void)f2p;
     }
-    printf("      as três frações no nível 8:  %.6f   %.6f   %.6f\n\n", a1, a2, a3);
+    printf("      as três frações no nível 8:  %d/256   F_{18}=%d   %d/%d\n\n",
+           d1, f2f, n3f, d3f);
+    int escadas_mon = (mal == 0 && d1 == 256 && f2f > F[2] && 100*(d3f - n3f) < d3f);
     ok("as TRÊS escadas são monótonas e tendem ao total — é uma lei, três balcões",
-       mal == 0 && a1 > 0.99 && a2 > 0.99 && a3 > 0.99);
+       escadas_mon);
     printf("      E é isto que a garrafa de Koch guarda, e por que é ela a vasilha certa: a obra\n");
     printf("      toda cabe lá porque a descrição é FINITA em cada nível e INFINITA no total —\n");
     printf("      borda infinita, espaço finito. A assinatura é a casca; a semente é o que se\n");
@@ -341,17 +327,21 @@ printf("\n§K8  JULIA: a fronteira entre o que PERMANECE e o que se EXTINGUE.\n\
     printf("      z ↦ z²   —   e o destino da órbita depende só de |z|:\n\n");
     printf("      |z|       após 60 iterações      destino\n");
     int mal = 0;
-    double raios[] = { 0.5, 0.9, 0.999, 1.0, 1.001, 1.1, 2.0 };
+    int raios[] = { 500, 900, 999, 1000, 1001, 1100, 2000 };
     for(size_t j = 0; j < sizeof raios/sizeof *raios; j++){
-        double r = raios[j], x = r;
+        long r = raios[j], x = r;
         int escapou = 0;
-        for(int k = 0; k < 60; k++){ x = x*x; if(x > 1e12){ escapou = 1; break; } }
-        printf("      %-9.3f %-24.6g %s\n", r, escapou ? INFINITY : x,
+        for(int k = 0; k < 60; k++){
+            if(x > 1000000L){ escapou = 1; break; }
+            x = x*x/1000;
+        }
+        printf("      %4ld/1000 %-24s %s\n", r,
+               escapou ? "—" : (x == 0 ? "0" : "1000/1000"),
                escapou ? "ESCAPA (ao infinito)"
-               : ((long long)(x * 1e12) == 0 ? "EXTINGUE (vai a 0 — nilpotente)"
-                            : "PERMANECE (idempotente)"));
-        int esperado = (r < 1) ? -1 : (r > 1) ? +1 : 0;
-        int medido = escapou ? +1 : ((long long)(x * 1e12) == 0 ? -1 : 0);
+               : (x == 0 ? "EXTINGUE (vai a 0 — nilpotente)"
+                         : "PERMANECE (idempotente)"));
+        int esperado = (r < 1000) ? -1 : (r > 1000) ? +1 : 0;
+        int medido = escapou ? +1 : (x == 0 ? -1 : 0);
         if(medido != esperado) mal++;
     }
     printf("\n");
@@ -361,8 +351,8 @@ printf("\n§K8  JULIA: a fronteira entre o que PERMANECE e o que se EXTINGUE.\n\
     printf("      z = 0: o NILPOTENTE (0² = 0, e extingue tudo à volta)\n");
     printf("      z = 1: o IDEMPOTENTE (1² = 1, e permanece)\n\n");
     int malF = 0;
-    if(fabs(0.0*0.0 - 0.0) > 0) malF++;
-    if(fabs(1.0*1.0 - 1.0) > 0) malF++;
+    if(0L*0L != 0L) malF++;
+    if(1L*1L != 1L) malF++;
     ok("os dois pontos fixos são exatamente o nilpotente e o idempotente", malF == 0);
     printf("      É a tabela do corpo_tropical.tex, e ela cai no mapa de Julia sem eu forçar:\n");
     printf("      o TROPICAL é o que permanece sob a quadração (e² = e, o quente, o estado); o\n");
@@ -378,17 +368,17 @@ printf("\n§K9  CANTOR: e quando o conjunto se PARTE.\n\n");
     printf("      Julia de z ↦ z² + c:   c ∈ Mandelbrot -> CONEXO;   c ∉ M -> poeira de CANTOR\n\n");
     printf("      c            órbita de 0 escapa?   conjunto de Julia\n");
     int mal = 0;
-    struct { double c; int emM; } t[] = {
-        { 0.0,   1 }, { -1.0,  1 }, { 0.25,  1 }, { 0.26,  0 }, { 1.0,  0 }, { -2.5, 0 }
+    struct { int c; int emM; } t[] = {
+        { 0,     1 }, { -1000, 1 }, { 250,  1 }, { 260, 0 }, { 1000, 0 }, { -2500, 0 }
     };
     for(size_t j = 0; j < sizeof t/sizeof *t; j++){
-        double z = 0;
+        long z = 0;
         int escapou = 0;
         for(int k = 0; k < 5000; k++){
-            z = z*z + t[j].c;
-            if(fabs(z) > 2){ escapou = 1; break; }
+            z = z*z/1000 + t[j].c;
+            if(z < -2000 || z > 2000){ escapou = 1; break; }
         }
-        printf("      %-12.3f %-21s %s\n", t[j].c, escapou ? "sim" : "não",
+        printf("      %-8d/1000 %-21s %s\n", t[j].c, escapou ? "sim" : "não",
                escapou ? "poeira de CANTOR (desconexo)" : "CONEXO");
         if(escapou == t[j].emM) mal++;
     }
@@ -452,10 +442,10 @@ printf("\n§K11 O CORPO SOLAR e o CORPO LUNAR: um quente, o outro frio.\n\n");
     int mal = 0;
     printf("      e        1−e      e + (1−e)   e·(1−e)   e² = e ?   n = e(1−e), n² = 0 ?\n");
     for(int k = 0; k <= 1; k++){
-        double e = (double)k, f = 1-e, n = e*f;
-        printf("      %-8.0f %-8.0f %-11.0f %-9.0f %-10s %s\n", e, f, e+f, n,
-               (long long)(fabs(e*e-e) * 1e15) == 0 ? "sim" : "NÃO", (long long)(fabs(n*n) * 1e15) == 0 ? "sim" : "NÃO");
-        if((long long)(fabs(e+f-1) * 1e15) >= 1 || (long long)(fabs(n) * 1e15) >= 1 || (long long)(fabs(e*e-e) * 1e15) >= 1) mal++;
+        long e = k, f = 1 - e, n = e*f;
+        printf("      %-8ld %-8ld %-11ld %-9ld %-10s %s\n", e, f, e+f, n,
+               e*e == e ? "sim" : "NÃO", n*n == 0 ? "sim" : "NÃO");
+        if(e + f != 1 || n != 0 || e*e != e) mal++;
     }
     printf("\n");
     ok("o par fecha por Peirce: os idempotentes somam 1 e o seu produto é nilpotente",

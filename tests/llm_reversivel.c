@@ -198,33 +198,34 @@ int main(void){
         long rF   = pico_reversivel(FUNDO, a0, b0, &vF);
         long rss_rev = rss_kb() - r0;                        /* o reversivel nao pediu nada */
 
-        long c1   = pico_comum(N1,    a0, b0, &w1);
-        long c10  = pico_comum(N2,    a0, b0, &w10);
-        long c100 = pico_comum(N3,    a0, b0, &w100);
-        long cF   = pico_comum(FUNDO, a0, b0, &wF);
+        long pico_com1   = pico_comum(N1,    a0, b0, &w1);
+        long pico_com10  = pico_comum(N2,    a0, b0, &w10);
+        long pico_com100 = pico_comum(N3,    a0, b0, &w100);
+        long pico_comF   = pico_comum(FUNDO, a0, b0, &wF);
         long rss_com = rss_kb() - r0 - rss_rev;              /* o comum pediu */
 
         printf("      camadas :  reversivel (pico)   camada comum (pico)\n");
-        printf("        1     :  %8ld bytes      %8ld bytes\n", r1, c1);
-        printf("       10     :  %8ld bytes      %8ld bytes\n", r10, c10);
-        printf("      100     :  %8ld bytes      %8ld bytes\n", r100, c100);
-        printf("     %5d     :  %8ld bytes      %8ld bytes\n", FUNDO, rF, cF);
+        printf("        1     :  %8ld bytes      %8ld bytes\n", r1, pico_com1);
+        printf("       10     :  %8ld bytes      %8ld bytes\n", r10, pico_com10);
+        printf("      100     :  %8ld bytes      %8ld bytes\n", r100, pico_com100);
+        printf("     %5d     :  %8ld bytes      %8ld bytes\n", FUNDO, rF, pico_comF);
         printf("      e a volta e' exacta nos dois: reversivel %s, comum %s (por ter guardado)\n",
                (v1&&v10&&v100&&vF)?"sim":"NAO", (w1&&w10&&w100&&wF)?"sim":"NAO");
         printf("      ru_maxrss: o reversivel fez subir %ld KB, a camada comum %ld KB\n",
                rss_rev, rss_com);
 
+        { int linear = ((pico_com100 - pico_com10) * (N2 - N1)
+                        == (pico_com10 - pico_com1) * (N3 - N2));
         ok("CEM CAMADAS custam o mesmo que UMA, em BYTES: o pico do reversivel nao mexe de"
            " 1 para 4000 camadas e a residencia do processo nao sobe, enquanto o controlo"
            " — a camada comum, que para voltar tem de guardar — cresce em linha com N",
            v1 && v10 && v100 && vF && w1 && w10 && w100 && wF
            && r1 == r10 && r10 == r100 && r100 == rF         /* o reversivel nao cresce */
            && rss_rev == 0                                   /* nem na residencia do processo */
-           && c1 > r1 && c100 > c10 && c10 > c1 && cF > c100 /* e o controlo cresce */
-           /* e cresce LINEARMENTE em N — o declive dos dois trocos e' o mesmo, e o factor
-            * sai dos proprios pontos de medida e nao de um numero escrito a' mao */
-           && (c100 - c10) * (N2 - N1) == (c10 - c1) * (N3 - N2)
-           && rss_com > 0);
+           && pico_com1 > r1 && pico_com100 > pico_com10 && pico_com10 > pico_com1
+           && pico_comF > pico_com100 /* e o controlo cresce */
+           && linear
+           && rss_com > 0); }
     }
 
     /* ═══ §L4 — o CONTROLO: a camada comum NAO volta ════════════════════════════════

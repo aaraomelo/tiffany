@@ -1,135 +1,105 @@
 /* eletrico.h — O CORPO TRANSISTOR: resolver, simular e validar circuitos.
  *
- * O Aarão: "agora a assistente vai resolver, simular e validar circuitos elétricos. Recupera o
- * corpo transistor, e vamos seguir — é onde vive o operador."
- *
- * A fonte é chess/sandbox/corpo_transistor.tex, e o teorema central é a TRÍADE encarnada:
+ * A tríade encarnada, e nenhuma peça pede vírgula:
  *
  *     SOMA      (⊕, Clifford)   =  KIRCHHOFF   — o RESISTOR, linear
  *     PRODUTO   (⊗, La Hire)    =  o GANHO     — o POTENCIÔMETRO, V_out = α·V_in
- *     OPERADOR  (Π, Pontryagin) =  o TRANSISTOR — Shockley, I = I_s·e^{V/V_T}
+ *     OPERADOR  (Π, Pontryagin) =  o TRANSISTOR — soma de tensões vira PRODUTO de correntes
  *
- * É por isso que "é onde vive o operador": Π = exp∘Σ∘log não é uma metáfora aqui, é a equação de
- * Shockley. O transistor leva SOMA de tensões em PRODUTO de correntes, e a Gilbert cell
- * (log-Σ-antilog) multiplica dois sinais somando os seus logs. Pontryagin em silício.
- *
- * E as multiplicidades fecham a tríade nos reativos: o INDUTOR é s^{+1} (deriva), o CAPACITOR é
- * s^{-1} (integra), e o RESISTOR é s^0. A dualidade L ⋈ C é +1 ⋈ -1 — soma 0 (o resistor) e
- * média geométrica √(L/C) = Z₀, o metal.
+ * Π = exp∘Σ∘log não se avalia: a soma no expoente É o produto. A Gilbert cell é I1·I2/Iref,
+ * exacta em ℚ. As raízes (ω₀, Z₀, fp) vivem ao QUADRADO: ω₀² = 1/(LC), Z₀² = L/C,
+ * fp² = Re²/(Re²+Im²). O sinal de Δ é o de R²C − 4L, sem dividir.
  */
 #ifndef ELETRICO_H
 #define ELETRICO_H
 
-#include <math.h>
-#include <complex.h>
-
+#include <math.h>                      /* os medidores que ainda não migraram puxavam daqui */
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
+#define VT 0.025852                    /* 25852/1000000 V a 300 K — a constante, não o tipo */
 
-/* ---- as três impedâncias, e a multiplicidade de cada uma ------------------------------- */
-static double complex z_R(double R, double w){ (void)w; return R; }                 /* s^0  */
-static double complex z_L(double L, double w){ return I*w*L; }                      /* s^+1 */
-static double complex z_C(double C, double w){ return (w == 0) ? INFINITY : 1.0/(I*w*C); } /* s^-1 */
+typedef long long LL;
+typedef __int128 I128;
 
-/* ---- KIRCHHOFF: a SOMA. Em série somam as impedâncias; em paralelo, as admitâncias. ---- */
-static double complex el_serie(const double complex *z, int n){
-    double complex s = 0;
-    for(int k = 0; k < n; k++) s += z[k];
+/* ---- KIRCHHOFF: a SOMA. Série soma; paralelo lê-se sem dividir. ------------------- */
+static long el_serie(const long *R, int n){
+    long s = 0;
+    for(int k = 0; k < n; k++) s += R[k];
     return s;
 }
-static double complex el_paralelo(const double complex *z, int n){
-    double complex y = 0;
-    for(int k = 0; k < n; k++) y += 1.0/z[k];
-    return 1.0/y;
-}
-/* ---- O GANHO: o PRODUTO. O divisor de tensão, e compor divisores multiplica. ----------- */
-static double complex el_divisor(double complex z1, double complex z2){
-    return z2/(z1+z2);                       /* V_out/V_in = α */
-}
-/* ---- O OPERADOR: SHOCKLEY. Leva soma de tensões em produto de correntes. --------------- */
-#define VT 0.025852                          /* a tensão térmica a 300 K */
-static double el_shockley(double V, double Is){ return Is*(exp(V/VT) - 1.0); }
-static double el_shockley_inv(double Ic, double Is){ return VT*log(Ic/Is + 1.0); }
-/* a Gilbert cell: multiplicar É somar os logs, e depois antilog */
-static double el_gilbert(double I1, double I2, double Iref){
-    return exp(log(I1) + log(I2) - log(Iref));
+/* Rp = (R1 R2 R3) / (R2R3+R1R3+R1R2), reduzido. A lei é pn·soma = prod·pd. */
+static void el_paralelo3(long R1, long R2, long R3, long *pn, long *pd){
+    *pn = R1*R2*R3;
+    *pd = R2*R3 + R1*R3 + R1*R2;
 }
 
-/* ---- o RLC, e o casamento --------------------------------------------------------------- */
-static double complex el_rlc(double R, double L, double C, double w){
-    return R + I*(w*L - 1.0/(w*C));
-}
-static double el_ressonancia(double L, double C){ return 1.0/sqrt(L*C); }
-static double el_fp(double complex Z){ return creal(Z)/cabs(Z); }   /* cos(arg Z) */
-static double el_Z0(double L, double C){ return sqrt(L/C); }        /* o metal, La Hire */
-
-/* ── AS MESMAS TRÊS, AO QUADRADO — e é aí que as perguntas vivem ─────────────────────
- *
- * As três de cima formam uma raiz, e nenhuma pergunta desta casa precisa dela:
- *
- *      fp² = Re(Z)²/|Z|²        e |Z|² = Re² + Im², sem cabs
- *      Z₀² = L/C                uma FRACÇÃO, e comparar Z₀ é comparar L/C
- *      ω₀² = 1/(LC)             idem
- *
- * «Comparar quadrados dispensa sqrt», e a razão é um teorema e não uma economia: x ↦ x²
- * é monótona nos não negativos, logo a ORDEM das raízes é a ordem dos quadrados. E o
- * factor de potência unitário é um dos TRÊS NOMES de |det| = 1 — a mesma condição que
- * faz o cruzado atravessar a órbita no `thm:cruzado-potencia` —, logo fp = 1 é fp² = 1,
- * uma igualdade que não passa por raiz nenhuma.
- *
- * As de cima ficam para a linha que IMPRIME, que é o sítio delas. */
-static double el_fp2(double complex Z){
-    double re = creal(Z), im = cimag(Z);
-    double n2 = re*re + im*im;
-    return n2 == 0 ? 0 : (re*re)/n2;
-}
-static double el_Z0q(double L, double C){ return L/C; }             /* Z₀², a fracção */
-static double el_w0q(double L, double C){ return 1.0/(L*C); }       /* ω₀² */
-/* a régua do RLC — a MESMA (B,C) do resto do projeto: L·s² + R·s + 1/C = 0 */
-static double el_delta(double R, double L, double C){ return R*R - 4.0*L/C; }
-
-/* E O SINAL DO DISCRIMINANTE NÃO PRECISA DA DIVISÃO. Δ = R² − 4L/C, e com C > 0 o sinal
- * é o de R²·C − 4L — uma expressão sem quociente, e INTEIRA se R, L e C o forem na
- * unidade escolhida. É o mesmo gesto do §M3 do microfluidica e do §D? do dominios: a
- * classe lê-se no sinal, e o sinal não precisa de formar o número. */
-static int el_delta_sinal(double R, double L, double C){
-    double v = R*R*C - 4.0*L;
-    return C <= 0 ? 0 : (v > 0 ? 1 : (v < 0 ? -1 : 0));
+/* ---- O GANHO: o PRODUTO. α = Z2/(Z1+Z2), e compor multiplica os α. --------------- */
+static void el_divisor(long z1, long z2, long *pn, long *pd){
+    *pn = z2; *pd = z1 + z2;
 }
 
-/* ---- Wheatstone: a medida por ANULAÇÃO ------------------------------------------------- */
-/* A convenção dos braços, e ela tem de ser a MESMA nas duas funções:
- *
- *        ramo A:  Z1 em cima, Z2 em baixo   ->  V_A = V·Z2/(Z1+Z2)
- *        ramo B:  Z3 em cima, Zx em baixo   ->  V_B = V·Zx/(Z3+Zx)
- *        equilíbrio: V_A = V_B  <=>  Z2·Z3 = Z1·Zx  <=>  Zx = Z2·Z3/Z1
- *
- * Na primeira versão o detector comparava `divisor(z1,zx)` com `divisor(z2,z3)` — outra
- * numeração — e por isso não zerava onde a fórmula dizia. O medidor apanhou: duas funções
- * minhas que tinham de concordar e não concordavam. */
-static double complex el_wheatstone(double complex z1, double complex z2, double complex z3){
-    return z2*z3/z1;                         /* o Z_x que zera o detector */
-}
-static double complex el_detector(double complex z1, double complex z2,
-                                  double complex z3, double complex zx, double complex V){
-    return V*(el_divisor(z1,z2) - el_divisor(z3,zx));
+/* ---- O OPERADOR: soma no expoente vira produto. k é I/Is na região exponencial. ---- */
+static long el_shockley_prod(long k1, long k2){ return k1 * k2; }
+/* Gilbert: log-Σ-antilog É o produto. I1·I2/Iref em ℚ. */
+static void el_gilbert(long I1, long I2, long Iref, long *pn, long *pd){
+    *pn = I1 * I2; *pd = Iref;
 }
 
-/* ---- simular no tempo, para ter o SEGUNDO caminho -------------------------------------- */
-/* L·q'' + R·q' + q/C = V(t), integrado por Verlet de velocidade. É o caminho independente
- * que tem de concordar com a solução fechada — e é a comparação, não a asserção, que apanha. */
-static void el_simula(double R, double L, double C, double q0, double i0,
-                      double h, int passos, double *qf, double *if_){
-    double q = q0, ii = i0;
+/* ---- as três impedâncias: |Z_L|=ωL, |Z_R|=R, |Z_C|=1/(ωC)  (s^{+1}, s^0, s^{-1}) ---- */
+static long el_zL(long L, long w){ return w * L; }
+static long el_zR(long R){ return R < 0 ? -R : R; }
+static void el_zC(long C, long w, long *pn, long *pd){ *pn = 1; *pd = w * C; }
+
+/* Im Z do RLC, homogeneizado: (ω² L C − 1). Zero na ressonância ω² = 1/(LC). */
+static long el_rlc_im_num(long L, long C, long w2n, long w2d){
+    return w2n * L * C - w2d;
+}
+static void el_w0q(long L, long C, long *pn, long *pd){ *pn = 1; *pd = L * C; }
+static void el_Z0q(long L, long C, long *pn, long *pd){ *pn = L; *pd = C; }
+/* fp = 1  <=>  fp² = 1  <=>  Im = 0 (e Re ≠ 0). Sem cabs. */
+static int el_fp_unitario(long re, long im){ return im == 0 && re != 0; }
+
+/* Δ = R² − 4L/C; o sinal é o de R²C − 4L, inteiro se R,L,C o forem. */
+static int el_delta_sinal(long R, long L, long C){
+    if(C <= 0) return 0;
+    long v = R*R*C - 4*L;
+    return v > 0 ? 1 : (v < 0 ? -1 : 0);
+}
+
+/* ---- Wheatstone: equilíbrio Z1·Zx = Z2·Z3. O detector é o numerador Z2 Z3 − Z1 Zx. ---- */
+static void el_wheatstone(long z1, long z2, long z3, long *pn, long *pd){
+    *pn = z2 * z3; *pd = z1;
+}
+static long el_detector_num(long z1, long z2, long z3, long zx_n, long zx_d){
+    return z2 * z3 * zx_d - z1 * zx_n;
+}
+
+/* ---- Verlet em ℤ: L q'' + R q' + q/C = 0. h = hn/hd. Devolve q, i e as trocas de sinal. */
+#ifndef EL_AMP
+#define EL_AMP 1000000LL
+#endif
+static void el_simula(long R, long L, long C, long hn, long hd, int passos,
+                      long *qf, long *if_, int *sings){
+    LL q = EL_AMP, ii = 0;
+    int prev = 1, sc = 0;
+    I128 a_den = (I128)L * C;
+    if(hd == 0 || a_den == 0){ if(qf) *qf = 0; if(if_) *if_ = 0; if(sings) *sings = 0; return; }
     for(int k = 0; k < passos; k++){
-        double a = (-R*ii - q/C)/L;
-        ii += 0.5*h*a;
-        q  += h*ii;
-        double a2 = (-R*ii - q/C)/L;
-        ii += 0.5*h*a2;
-        (void)a2;
+        I128 a_num = -(I128)R * ii * C - q;
+        I128 i2 = (I128)ii * hd * 2 * a_den + (I128)hn * a_num;
+        ii = (LL)(i2 / (2 * hd * a_den));
+        I128 q2 = (I128)q * hd + (I128)hn * ii;
+        q = (LL)(q2 / hd);
+        a_num = -(I128)R * ii * C - q;
+        i2 = (I128)ii * hd * 2 * a_den + (I128)hn * a_num;
+        ii = (LL)(i2 / (2 * hd * a_den));
+        int s = q > 0 ? 1 : q < 0 ? -1 : 0;
+        if(s && prev && s != prev) sc++;
+        if(s) prev = s;
     }
-    *qf = q; *if_ = ii;
+    if(qf) *qf = (long)q;
+    if(if_) *if_ = (long)ii;
+    if(sings) *sings = sc;
 }
 #endif

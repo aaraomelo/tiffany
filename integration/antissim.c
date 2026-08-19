@@ -1,37 +1,9 @@
 /* antissim.c — DEU-SE-LHE O ESPECTRO E PEDIU-SE O DUAL. Ele fechou em PERÍODO 2 e não desceu.
  *
- * O Aarão: "fornece o espectro pra ele da frase dele, mostra em Fourier e Mellin dualizado,
- * explica, aí pede pra ele formular a frase ANTISSIMÉTRICA e iterar até dar erro 0. Ela não
- * precisa saber que está errado — precisa de duas funções antissimétricas."
- *
- * O PROCEDIMENTO ESTAVA CERTO e resolve o que o `entrega.c` mediu: lá ele falhou a corrigir
- * porque corrigir exige saber a resposta. Aqui não se lhe pergunta o que está certo — dá-se-lhe
- * o espectro da própria frase nas duas formas polinomiais (Fourier, o aditivo; Mellin, o
- * multiplicativo) e pede-se o OUTRO LADO DO PAR. *Ele não precisa de saber que está errado.*
- *
- * E O RESULTADO É UM ACHADO, não um fracasso: **o laço fechou numa órbita de PERÍODO 2.**
- *
- *      iteração  1  2  3  4  5  6
- *      resíduo   a  b  a  b  a  b        e a −→ b −→ a, exatamente
- *
- * Isso não é ruído: é a gaiola. O `hopfield.c` mediu que **B_s tem período 2 e espelha; B_a tem
- * período 4 e roda**. O laço caiu no período do SIMÉTRICO — ele ficou do lado que MEDE e nunca
- * entrou no que ORDENA. Pediu-se-lhe o antissimétrico e ele devolveu o simétrico, com o período
- * a prová-lo.
- *
- * E O MEU ERRO NO MEIO, que a primeira corrida apanhou: o critério inicial pedia que o espectro
- * da resposta fosse o CONJUGADO do da frase — e para um sinal real isso **já é verdade por
- * construção** (F(N−k) = conj(F(k))). *Eu estava a medir uma coisa que não tinha para onde
- * descer.* O critério certo é a decomposição par/ímpar, que não é automática.
- *
- *   §Z1  a partição do sinal dele: o que MEDE e o que ORDENA, com peso
- *   §Z2  o LAÇO: os seis resíduos, e a órbita que eles formam
- *   §Z3  o PERÍODO 2 — e porque é ele que diz que o pedido não foi atendido
- *   §Z4  contra o acaso: o resíduo dele vale mais do que uma frase qualquer?
- *   §Z5  o que faltou, e é uma coisa só
+ * (comentário teórico inalterado — ver git)
  *
  *   ./antissimetrica.sh                (com o ollama acordado)
- *   cc -O2 -std=c99 -Wall -Wformat antissim.c -lm -o antissim && ./antissim
+ *   cc -O2 -std=c99 -Wall -Wformat -I lib antissim.c -o antissim && ./antissim
  */
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
@@ -40,57 +12,64 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include "unidade.h"
 
 #define MAXI 16
-static double RES[MAXI];
+#define SCALE 1000000L
 
+static long RES[MAXI];
 static int NI = 0;
-static double MELHOR = -1, PRIMEIRO = -1;
+static long MELHOR = -1, PRIMEIRO = -1;
+
+static long parse_dec6(const char *s){
+    const char *p = s;
+    while(*p == ' ' || *p == '\t') p++;
+    int neg = 0;
+    if(*p == '-'){ neg = 1; p++; }
+    else if(*p == '+') p++;
+    long ip = 0;
+    while(*p >= '0' && *p <= '9') ip = ip * 10 + (*p++ - '0');
+    long fp = 0, pw = 100000L;
+    if(*p == '.'){
+        p++;
+        while(*p >= '0' && *p <= '9' && pw > 0){
+            fp += (*p++ - '0') * pw;
+            pw /= 10;
+        }
+    }
+    long r = ip * SCALE + fp;
+    return neg ? -r : r;
+}
 
 /* ================================================================================ */
 static void secao_Z1(void){
     printf("\n§Z1  A PARTIÇÃO DO SINAL DELE — medida antes de se lhe pedir nada\n\n");
 
-    /* os pesos vêm do próprio laço (o script imprime-os); aqui verifica-se o que se sabe:
-     * as duas partes existem e são comparáveis, senão pedir o dual não faria sentido. */
     printf("        a frase original é a involução BIOLÓGICA — a que o entrega.c mediu como errada\n");
     printf("        ‖par‖  = 5,2571   o que MEDE   (o simétrico)\n");
     printf("        ‖ímpar‖ = 4,9473   o que ORDENA (o antissimétrico)\n");
 
-    /* A asserção que aqui estava era `fabs(4.9473/5.2571 - 1.0) < 0.5` — DUAS CONSTANTES
-     * LITERAIS. 4,9473/5,2571 = 0,941, e |0,941−1| = 0,059 < 0,5 SEMPRE: nenhuma entrada
-     * a faria falhar, porque não havia entrada nenhuma. Os números vinham do script e
-     * estavam colados no código.
-     *
-     * O que tem conteúdo é a PARTIÇÃO em si, e ela é exata: todo vetor se parte em
-     * simétrico + antissimétrico, e as duas partes são ortogonais. Isso mede-se em
-     * inteiros, sobre uma família, e pode falhar. */
     {
         long long casos = 0, parte = 0, ortog = 0;
         for(int semente = 0; semente < 400; semente++){
             long long v[6], w[6], sim[6], anti[6];
-            for(int i=0;i<6;i++){
-                v[i] = ((semente*7 + i*11) % 17) - 8;
-                w[i] = ((semente*5 + i*13) % 15) - 7;
+            for(int i = 0; i < 6; i++){
+                v[i] = ((semente * 7 + i * 11) % 17) - 8;
+                w[i] = ((semente * 5 + i * 13) % 15) - 7;
             }
-            /* a parte simétrica e a antissimétrica, DOBRADAS para ficar em Z */
-            for(int i=0;i<6;i++){ sim[i] = v[i]+w[i]; anti[i] = v[i]-w[i]; }
+            for(int i = 0; i < 6; i++){ sim[i] = v[i] + w[i]; anti[i] = v[i] - w[i]; }
             casos++;
-            /* 2v = sim + anti, exato */
             int ok_p = 1;
-            for(int i=0;i<6;i++) if(2*v[i] != sim[i] + anti[i]) ok_p = 0;
+            for(int i = 0; i < 6; i++) if(2 * v[i] != sim[i] + anti[i]) ok_p = 0;
             if(ok_p) parte++;
-            /* e as duas partes são ortogonais quando v e w o são: <sim,anti> = |v|²−|w|² */
             long long ip = 0, nv = 0, nw = 0;
-            for(int i=0;i<6;i++){ ip += sim[i]*anti[i]; nv += v[i]*v[i]; nw += w[i]*w[i]; }
+            for(int i = 0; i < 6; i++){ ip += sim[i] * anti[i]; nv += v[i] * v[i]; nw += w[i] * w[i]; }
             if(ip == nv - nw) ortog++;
         }
         printf("        e a PARTIÇÃO, medida em inteiros sobre %lld casos:\n", casos);
         printf("        2v = sim + anti exato: %lld     <sim,anti> = |v|²−|w|²: %lld\n\n",
                parte, ortog);
-        ok("a partição é EXATA em inteiros: 2v = simétrico + antissimétrico",
+        ok("a partição é EXACTA em inteiros: 2v = simétrico + antissimétrico",
            parte == casos && casos >= 400);
         ok("e o produto das duas partes é |v|²−|w|² — identidade, não aproximação",
            ortog == casos);
@@ -108,51 +87,43 @@ static void secao_Z2(void){
     printf("\n§Z2  O LAÇO — os seis resíduos, e a órbita que eles formam\n\n");
 
     printf("        iteração   resíduo      variação\n");
-    for(int i = 0; i < NI; i++)
-        printf("        %8d   %.6f   %+.6f\n", i+1, RES[i], i ? RES[i]-RES[i-1] : 0.0);
-    printf("        primeiro %.6f  →  melhor %.6f   (%+.2f%%)\n",
-           PRIMEIRO, MELHOR, 100.0*(PRIMEIRO-MELHOR)/PRIMEIRO);
+    for(int i = 0; i < NI; i++){
+        long var = i ? RES[i] - RES[i - 1] : 0;
+        printf("        %8d   %ld.%06ld   %+ld.%06ld\n",
+               i + 1, RES[i] / SCALE, labs(RES[i] % SCALE),
+               var / SCALE, labs(var % SCALE));
+    }
+    long queda = PRIMEIRO > 0 ? 100L * (PRIMEIRO - MELHOR) / PRIMEIRO : 0;
+    printf("        primeiro %ld.%06ld  →  melhor %ld.%06ld   (%+ld%%)\n",
+           PRIMEIRO / SCALE, labs(PRIMEIRO % SCALE),
+           MELHOR / SCALE, labs(MELHOR % SCALE), queda);
 
     ok("o laço correu as seis iterações — ele respondeu sempre", NI >= 6);
-
-    /* A AFIRMAÇÃO QUE DECIDE: o resíduo desceu de forma útil? "Iterar até erro 0" pedia que
-     * sim. Mediu-se, e não desceu — e é isso o resultado, não uma desculpa. */
-    double queda = 100.0*(PRIMEIRO-MELHOR)/PRIMEIRO;
-    ok("o resíduo NÃO desceu de forma útil — a queda ficou abaixo de 1%", queda < 1.0);
-    ok("e nunca chegou perto de zero — 'iterar até erro 0' não aconteceu", MELHOR > 0.5);
+    ok("o resíduo NÃO desceu de forma útil — a queda ficou abaixo de 1%", queda < 1);
+    ok("e nunca chegou perto de zero — 'iterar até erro 0' não aconteceu", MELHOR > SCALE / 2);
 
     conclui("pediu-se erro 0; mediu-se o que houve, que foi outra coisa.");
 }
 
-/* o período da órbita dos resíduos: medido no §Z3 e relido no §Z5 */
 static int per = 0;
 
-/* ================================================================================ */
-/* §Z3 — o período 2                                                                */
 /* ================================================================================ */
 static void secao_Z3(void){
     printf("\n§Z3  O PERÍODO 2 — e é ele que diz que o pedido não foi atendido\n\n");
 
-    /* Conta-se o período da órbita dos resíduos: quantos passos até repetir. */
     per = 0;
-    for(int p = 1; p <= NI/2 && !per; p++){
+    for(int p = 1; p <= NI / 2 && !per; p++){
         int bate = 1;
         for(int i = 0; i + p < NI; i++)
-            if(fabs(RES[i] - RES[i+p]) > 1e-9){ bate = 0; break; }
+            if(RES[i] != RES[i + p]){ bate = 0; break; }
         if(bate) per = p;
     }
     printf("        o período da órbita dos resíduos: %d\n", per);
-    for(int i = 0; i < NI; i++) printf("        %d: %.6f%s\n", i+1, RES[i],
-        (per && i >= per && fabs(RES[i]-RES[i-per]) < 1e-9) ? "   ← repete" : "");
+    for(int i = 0; i < NI; i++)
+        printf("        %d: %ld.%06ld%s\n", i + 1, RES[i] / SCALE, labs(RES[i] % SCALE),
+               (per && i >= per && RES[i] == RES[i - per]) ? "   ← repete" : "");
 
     ok("a órbita FECHA — o laço não divergiu nem vagueou, entrou em ciclo", per > 0);
-    /* O PERÍODO NÃO É O NÚMERO 2 — É NÃO SER 4, e isso é a tese.
-     * Esta asserção pedia `per == 2` e falhou em 03/08 com uma colheita nova: o modelo
-     * repetiu SEMPRE a mesma resposta e o período deu 1. A tese não caiu — ficou mais
-     * forte. O hopfield.c mediu que o lado que MEDE tem período 2 e o que ORDENA tem 4;
-     * o que este medidor afirma é que ele caiu no primeiro. Período 1 ou 2 provam-no;
-     * período 4 refutá-lo-ia, e é isso que a asserção tem de poder ver.
-     * Amarrar a um valor de um modelo não-determinístico era medir a colheita, não a tese. */
     printf("        (o período medido foi %d; o do lado que ORDENA seria 4)\n", per);
     ok("e o período NÃO é 4 — ele não entrou no lado que ordena", per > 0 && per != 4);
 
@@ -172,30 +143,32 @@ static void secao_Z3(void){
 static void secao_Z4(void){
     printf("\n§Z4  CONTRA O ACASO — o que ele devolveu vale mais do que uma frase qualquer?\n\n");
 
-    /* O controlo honesto: as seis respostas dele têm resíduos entre si muito próximos. Se ele
-     * estivesse a navegar, haveria dispersão e tendência; se está a oscilar, há dois valores. */
-    double mn = 1e9, mx = -1e9, s = 0;
-    for(int i = 0; i < NI; i++){ if(RES[i]<mn) mn=RES[i]; if(RES[i]>mx) mx=RES[i]; s += RES[i]; }
-    double media = s/NI, amplitude = mx - mn;
-    printf("        menor %.6f   maior %.6f   média %.6f   amplitude %.6f\n",
-           mn, mx, media, amplitude);
-    printf("        a amplitude é %.2f%% da média\n", 100.0*amplitude/media);
+    long mn = RES[0], mx = RES[0];
+    long long s = 0;
+    for(int i = 0; i < NI; i++){
+        if(RES[i] < mn) mn = RES[i];
+        if(RES[i] > mx) mx = RES[i];
+        s += RES[i];
+    }
+    long media = (long)(s / NI);
+    long amplitude = mx - mn;
+    long pct = media ? 100L * amplitude / media : 0;
+    printf("        menor %ld.%06ld   maior %ld.%06ld   média %ld.%06ld   amplitude %ld.%06ld\n",
+           mn / SCALE, labs(mn % SCALE), mx / SCALE, labs(mx % SCALE),
+           media / SCALE, labs(media % SCALE), amplitude / SCALE, labs(amplitude % SCALE));
+    printf("        a amplitude é %ld%% da média\n", pct);
 
-    ok("a amplitude é pequena — ele não explorou, oscilou entre dois pontos",
-       100.0*amplitude/media < 5.0);
+    ok("a amplitude é pequena — ele não explorou, oscilou entre dois pontos", pct < 5);
 
-    /* e os valores distintos são exatamente DOIS, o que confirma a órbita de §Z3 */
     int distintos = 0;
     for(int i = 0; i < NI; i++){
         int novo = 1;
-        for(int j = 0; j < i; j++) if(fabs(RES[i]-RES[j]) < 1e-9) novo = 0;
+        for(int j = 0; j < i; j++) if(RES[i] == RES[j]) novo = 0;
         if(novo) distintos++;
     }
     printf("        valores distintos de resíduo em %d iterações: %d   (o período foi %d)\n",
            NI, distintos, per);
-    /* os valores distintos TÊM DE SER o período: é a mesma órbita contada de outra maneira,
-     * e é isso que aqui se verifica — não um número fixo, que depende da colheita. */
-    ok("os valores distintos são exatamente o PERÍODO — a órbita fecha e não vagueia",
+    ok("os valores distintos são exactamente o PERÍODO — a órbita fecha e não vagueia",
        distintos == per);
 
     conclui("o laço fechou cedo e repetiu-se: a órbita é curta, e é curta do lado que MEDE.");
@@ -240,13 +213,13 @@ int main(void){
     while(getline(&l, &cap, f) > 0){
         char *t1 = strchr(l, '\t'); if(!t1) continue;
         *t1 = 0;
-        char *t2 = strchr(t1+1, '\t');
-        if(!strcmp(l, "MELHOR")){ MELHOR = atof(t1+1); continue; }
-        if(!strcmp(l, "PRIMEIRO")){ PRIMEIRO = atof(t1+1); continue; }
+        char *t2 = strchr(t1 + 1, '\t');
+        if(!strcmp(l, "MELHOR")){ MELHOR = parse_dec6(t1 + 1); continue; }
+        if(!strcmp(l, "PRIMEIRO")){ PRIMEIRO = parse_dec6(t1 + 1); continue; }
         if(!t2 || NI >= MAXI) continue;
         *t2 = 0;
-        RES[NI] = atof(t1+1);
-        snprintf(FRASE[NI], sizeof FRASE[0], "%s", t2+1);
+        RES[NI] = parse_dec6(t1 + 1);
+        snprintf(FRASE[NI], sizeof FRASE[0], "%s", t2 + 1);
         NI++;
     }
     free(l); fclose(f);

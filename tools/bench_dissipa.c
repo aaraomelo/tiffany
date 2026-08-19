@@ -107,8 +107,11 @@ static unsigned long rnd(void){ sem ^= sem<<13; sem ^= sem>>7; sem ^= sem<<17; r
 static void zera(void){ apagou_cmp = apagou_esc = trocas = 0; }
 static void linha(const char *nome, long n){
     long total = apagou_cmp + apagou_esc;
-    printf("  %-12s %14ld %14ld %12ld %10.1f\n",
-           nome, apagou_cmp, apagou_esc, trocas, (double)total/n);
+    long long x10 = (long long)total * 10 / (long long)n;  /* bits/elem em décimos, sem float */
+    long long whole = x10 / 10;
+    long long frac = x10 % 10;
+    printf("  %-12s %14ld %14ld %12ld %10lld.%1lld\n",
+           nome, apagou_cmp, apagou_esc, trocas, whole, frac);
 }
 
 int main(void){

@@ -113,9 +113,13 @@ static const char *nome_caso[5] = {
     "uniforme", "quase ordenado", "invertido", "8 valores", "enviesado"
 };
 
-static double agora(void){
+static long long agora_ns(void){
     struct timespec t; clock_gettime(CLOCK_MONOTONIC, &t);
-    return t.tv_sec + t.tv_nsec/1e9;
+    return (long long)t.tv_sec * 1000000000LL + (long long)t.tv_nsec;
+}
+static void ms10_print(long long ns){
+    long long v = (ns + 50000) / 100000;   /* décimos de ms */
+    printf("%10lld.%lld", v / 10, v % 10);
 }
 
 int main(void){
@@ -134,17 +138,17 @@ int main(void){
 
     for(int caso = 0; caso < 5; caso++){
         gera(orig, N, caso);
-        double t[5];
-        memcpy(a, orig, N*sizeof(long)); double t0=agora(); dual_sort(a, N, tmp);      t[0]=agora()-t0;
+        long long t[5];
+        memcpy(a, orig, N*sizeof(long)); long long t0=agora_ns(); dual_sort(a, N, tmp);      t[0]=agora_ns()-t0;
         /* e a confirmacao: saiu mesmo ordenado? */
         long mau = 0; for(long i=1;i<N;i++) if(a[i-1]>a[i]) mau++;
-        memcpy(a, orig, N*sizeof(long)); t0=agora(); qsort(a,N,sizeof(long),cmp); t[1]=agora()-t0;
-        memcpy(a, orig, N*sizeof(long)); t0=agora(); quick(a, N);                 t[2]=agora()-t0;
-        memcpy(a, orig, N*sizeof(long)); t0=agora(); mrg(a, tmp, N);              t[3]=agora()-t0;
-        memcpy(a, orig, N*sizeof(long)); t0=agora(); heap(a, N);                  t[4]=agora()-t0;
-        printf("  %-16s %10.1f %10.1f %10.1f %10.1f %10.1f%s\n", nome_caso[caso],
-               t[0]*1000, t[1]*1000, t[2]*1000, t[3]*1000, t[4]*1000,
-               mau ? "   <- NAO ORDENOU" : "");
+        memcpy(a, orig, N*sizeof(long)); t0=agora_ns(); qsort(a,N,sizeof(long),cmp); t[1]=agora_ns()-t0;
+        memcpy(a, orig, N*sizeof(long)); t0=agora_ns(); quick(a, N);                 t[2]=agora_ns()-t0;
+        memcpy(a, orig, N*sizeof(long)); t0=agora_ns(); mrg(a, tmp, N);              t[3]=agora_ns()-t0;
+        memcpy(a, orig, N*sizeof(long)); t0=agora_ns(); heap(a, N);                  t[4]=agora_ns()-t0;
+        printf("  %-16s", nome_caso[caso]);
+        for(int k = 0; k < 5; k++) ms10_print(t[k]);
+        printf("%s\n", mau ? "   <- NAO ORDENOU" : "");
     }
 
     puts("");

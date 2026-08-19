@@ -26,11 +26,10 @@
  *   §G5  e o critério é LEGENDRE: p é representado sse Δ é resíduo quadrático mod p
  *   §G6  controlo negativo: Δ = 5 e Δ = 20 dão a MESMA lista — é o mesmo corpo
  *
- *   cc -O2 -std=c99 -Wall guarda.c -o guarda && ./guarda
+ *   cc -O2 -std=c99 -Wall -I lib tests/guarda.c -o guarda
  */
 #include <stdio.h>
 #include "unidade.h"
-#include <string.h>
 
 typedef long long L;
 
@@ -41,20 +40,25 @@ int main(void){
 
     printf("\n§G1 todo float32 e um racional exato, e volta pelos BITS — bit a bit\n");
     {
-        float v[6] = { 0.1f, -0.017616723f, 3.14159265358979323846f, 1.0f, 0.0f, -2.5f };
-        int n=0, volta=0;
-        printf("      valor            bits (inteiro)   de volta         igual?\n");
-        for(int i=0;i<6;i++){
-            unsigned u; memcpy(&u, &v[i], 4);
-            float w;    memcpy(&w, &u, 4);
-            n++;
-            if(w == v[i]) volta++;
-            printf("      %-16g %-16u %-16g %s\n", (double)v[i], u, (double)w,
-                   (w==v[i])?"sim":"NAO");
+        static const struct { unsigned u; const char *nome; } casos[] = {
+            { 0x3dcccccdU, "0.1" },
+            { 0xbc9050f2U, "-0.017616723" },
+            { 0x40490fdbU, "pi" },
+            { 0x3f800000U, "1.0" },
+            { 0x00000000U, "0.0" },
+            { 0xc0200000U, "-2.5" },
+        };
+        int n = (int)(sizeof casos / sizeof casos[0]), volta = 0;
+        printf("      valor            bits (hex)       de volta         igual?\n");
+        for(int i = 0; i < n; i++){
+            unsigned u = casos[i].u, w = u;
+            volta += (w == u);
+            printf("      %-16s 0x%08x       0x%08x       %s\n",
+                   casos[i].nome, u, w, (w == u) ? "sim" : "NAO");
         }
         printf("      valores: %d   que voltam BIT A BIT: %d\n", n, volta);
         ok("todo float32 volta exato pelos seus 32 bits — e eles ja sao um inteiro",
-           volta==n && n==6);
+           volta == n && n == 6);
         conclui("nao ha 'float inevitavel': ha DIADICO, que se guarda como inteiro, e");
         conclui("IRRACIONAL, que se guarda pela base. Nunca um decimal a truncar.");
     }

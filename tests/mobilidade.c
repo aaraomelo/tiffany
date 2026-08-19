@@ -29,10 +29,10 @@
  * Aleatorio com semente FIXA por corrida, e varias corridas — reprodutivel, e a dispersao
  * e' medida antes de qualquer conclusao.
  *
- *   cc -O2 -std=c99 -Wall mobilidade.c -o mobilidade && ./mobilidade
+ *   cc -O2 -std=c99 -Wall -I lib tests/mobilidade.c -o mobilidade && ./mobilidade
  */
 #include <stdio.h>
-#include "../lib/unidade.h"
+#include "unidade.h"
 
 /* pecas: 0 vazio; +1..+6 brancas (P,N,B,R,Q,K); negativo pretas */
 enum { P=1, N=2, B=3, R=4, Q=5, K=6 };
@@ -211,9 +211,10 @@ int main(void){
     puts("\n      a curva (media de lances legais sem captura disponiveis, por lance):");
     for(int i=0;i<40;i+=4){
         if(!amostras[i]) break;
-        printf("      lance %2d: %5.1f      lance %2d: %5.1f\n",
-               i, (double)curva[i]/amostras[i],
-               i+2, amostras[i+2]? (double)curva[i+2]/amostras[i+2] : 0.0);
+        long m0x = (curva[i]*10 + amostras[i]/2) / amostras[i];
+        long m2x = amostras[i+2] ? (curva[i+2]*10 + amostras[i+2]/2) / amostras[i+2] : 0;
+        printf("      lance %2d: %ld.%ld      lance %2d: %ld.%ld\n",
+               i, m0x/10, m0x%10, i+2, m2x/10, m2x%10);
     }
     int m0 = amostras[0]? curva[0]/amostras[0] : 0;
     int m20= amostras[20]? curva[20]/amostras[20] : 0;

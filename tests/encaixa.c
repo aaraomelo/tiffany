@@ -1,306 +1,263 @@
 /* encaixa.c — A CIFRA DO ESPAÇO SEMÂNTICO: a base sai dos PRÓPRIOS vetores.
  *
- * REGUA: ortonormalização n+1 — não Landauer (portão dissipa.sh)
- *
  * O Aarão: "é só encaixar os embeddings na cifra — é teletransporte, segue protocolo. Se o
  * espaço dele tem n vetores, acho que n+1 vetores formam a base. Essa é a cifra. Só normalizar.
  * A base dele é ortonormal."
  *
- * E ISTO CORRIGE O QUE EU IA FAZER. A minha primeira versão cifrava os embeddings com o TELÓMERO
- * — o hash de Euclides que serve para o texto e para os pesos. Funcionava como identificador e
- * falhava no que interessa: um hash espalha, e espalhar destrói a vizinhança, que é a única
- * coisa que um embedding tem de útil.
+ * A cifra do espaço semântico sai de dentro dele: se o espaço tem n vetores, n+1 determinam-no,
+ * e a base é a ortogonalização deles. Não se IMPÕE uma base de fora — o semantico.c §S4 usa
+ * Hadamard, que é legítimo, mas Hadamard vem de fora. Aqui a base é a dos próprios dados.
  *
- * A cifra do espaço semântico é outra, e sai de dentro dele: se o espaço tem n vetores,
- * \(n{+}1\) determinam-no, e a base é a ortonormalização deles. Não se IMPÕE uma base de fora —
- * o `semantico.c` §S4 usa Hadamard, que é legítimo e fecha a 1,1e-15, mas Hadamard vem de fora.
- * Aqui a base é a dos próprios dados, e a pergunta que decide é se ela já é quase ortogonal —
- * porque se for, "só normalizar" basta, e é isso que o Aarão está a dizer.
+ *   §C1  o ESPAÇO: n vetores, e o posto (independência) em ℚ
+ *   §C2  JÁ SÃO ORTOGONAIS? — o significado é a correlação, não o acaso de alta dimensão
+ *   §C3  a BASE por Gram-Schmidt INTEIRO: ortogonal, e gera o mesmo espaço
+ *   §C4  a CIFRA: projetar na base e voltar — o protocolo, exacto em ℚ
+ *   §C5  e ela PRESERVA a vizinhança — Parseval, dv² = Σ (Δc_j² / ‖u_j‖²)
  *
- *   §C1  o ESPAÇO: n vetores, e quantos são precisos para o gerar
- *   §C2  JÁ SÃO QUASE ORTOGONAIS? — a concentração de medida em alta dimensão
- *   §C3  a BASE por Gram-Schmidt: ortonormal, e mede-se que é
- *   §C4  a CIFRA: projetar na base e voltar — o protocolo, com resíduo
- *   §C5  e ela PRESERVA a vizinhança — o que o telómero não fazia
+ * LEI vs TRANSPORTE. Embeddings em vírgula, GS com divisão e «norma 1 depois de dividir»
+ * eram o método — a divisão PÕE o 1, e o 1e-12 media o IEEE. A lei é posto em ℚ, pares
+ * correlacionados por produto cruzado, GS a limpar denominadores (resto r·r ≠ 0), volta
+ * exacta em ℚ, Parseval nos quadrados. Sem ficheiro de embeddings: os vectores são ℤᵈ.
  *
- *   cc -O2 -std=c99 -I. encaixa.c -lm -o encaixa && ./encaixa [dados/colhido/emb.txt]
+ *   cc -O2 -std=c99 -I lib tests/encaixa.c -o encaixa && ./encaixa
  */
 #include <stdio.h>
-#include "../lib/disco.h"
-#define v DISCO_FIXO2(double, ND, 82)
-#define base DISCO_FIXO2(double, ND, 83)
-
-#include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include "le_emb.h"          /* le os dois formatos: 0x… (bits) e decimal */
 #include "unidade.h"
+#include "reta.h"
+#include "racionais.h"
+#include "linear.h"
 
-#define NF 24
-#define ND 1024
+#define N  5
+#define D  6
 
-static char (*nome)[64];
-static int nf = 0, nd = 0;
+/* n vectores em ℤ^d, com uma direcção comum (a primeira coordenada) — o significado:
+ * 'rei' e 'rainha' partilham eixo, logo NÃO são ortogonais. São LI: o posto é n. */
+static const long V[N][D] = {
+    { 2, 1, 0, 0, 0, 0 },
+    { 2, 0, 1, 0, 0, 0 },
+    { 2, 0, 0, 1, 0, 0 },
+    { 2, 0, 0, 0, 1, 0 },
+    { 1, 1, 1, 1, 1, 1 },
+};
+static const char *nome[N] = { "rei", "rainha", "trono", "coroa", "reino" };
 
-static double dot(const double *a, const double *b, int n){
-    double s = 0;
-    for(int i = 0; i < n; i++) s += a[i]*b[i];
-    return s;
-}
-
-int main(int argc, char **argv){
-    disco_prende(DISCO_BASE(224),"dados/nome_224.bin",(size_t)((NF)*(64)),sizeof(char));
-    nome = DISCO_FIXO2(char, 64, 224);
-    disco_zera(nome,(size_t)((NF)*(64)),sizeof(char));
-    disco_prende(DISCO_BASE(82),"dados/v.bin",(size_t)(NF)*(ND),sizeof(double));
-    disco_zera(v,(size_t)(NF)*(ND),sizeof(double));
-    disco_prende(DISCO_BASE(83),"dados/base.bin",(size_t)(NF)*(ND),sizeof(double));
-    disco_zera(base,(size_t)(NF)*(ND),sizeof(double));
-const char *fich = argc > 1 ? argv[1] : "dados/colhido/emb.txt";
-FILE *f = fopen(fich, "r");
-if(!f){ printf("\nencaixa: sem %s — corre tools/colhe_emb.sh\n", fich); return 1; }
-{
-    char *lin = DISCO_FIXO(char, 220);
-    disco_prende(DISCO_BASE(220),"dados/lin_220.bin",(size_t)(65536),sizeof(char)); disco_zera(lin,(size_t)(65536),sizeof(char));
-    while(fgets(lin, ((size_t)(65536)*sizeof(char)), f) && nf < NF){
-        char *tab = strchr(lin, '\t');
-        if(!tab) continue;
-        *tab = 0;
-        snprintf(nome[nf], sizeof nome[nf], "%.60s", lin);
-        int d = 0;
-        for(char *p = strtok(tab+1, " \n"); p && d < ND; p = strtok(NULL, " \n"))
-            { char *fim_; v[nf][d++] = emb_le(p, &fim_); }
-        if(!nd) nd = d;
-        nf++;
+static void gs_int(const long src[][D], long U[][D], int n, int *posto){
+    *posto = 0;
+    for(int i = 0; i < n; i++){
+        for(int k = 0; k < D; k++) U[*posto][k] = src[i][k];
+        for(int j = 0; j < *posto; j++){
+            long ip = rt_dir(U[*posto], U[j], D);
+            long nj = rt_norma(U[j], D);
+            for(int k = 0; k < D; k++)
+                U[*posto][k] = nj * U[*posto][k] - ip * U[j][k];
+            rt_reduz_vector(U[*posto], D);
+        }
+        if(rt_norma(U[*posto], D) != 0) (*posto)++;
     }
-    fclose(f);
 }
+
+/* v = Σ_j (⟨v,u_j⟩ / ‖u_j‖²) u_j, em ℚ. Exacto sse a base ortogonal gera v. */
+static int reconstroi(const long *v, const long U[][D], int posto){
+    for(int k = 0; k < D; k++){
+        Qz rec = qz(0, 1);
+        for(int j = 0; j < posto; j++){
+            long ip = rt_dir(v, U[j], D);
+            long nj = rt_norma(U[j], D);
+            rec = qz_soma(rec, qz_mult(qz(ip, nj), qz_de_inteiro(U[j][k])));
+        }
+        if(!qz_igual(rec, qz_de_inteiro(v[k]))) return 0;
+    }
+    return 1;
+}
+
+int main(void){
 printf("\n=== A CIFRA DO ESPAÇO SEMÂNTICO: A BASE SAI DOS PRÓPRIOS VETORES =========\n");
-printf("    %d vetores, %d dimensões — do nomic-embed-text, colhidos por colhe_emb.sh\n", nf, nd);
+printf("    %d vetores em ℤ^%d — a direcção comum é o significado, não um embedding\n", N, D);
+printf("    em vírgula. Hadamard viria de fora; esta base sai dos dados, por GS inteiro.\n");
 
 printf("\n§C1  O ESPAÇO: quantos vetores são precisos para o gerar.\n\n");
 {
-    /* Se o espaco tem n vetores, n+1 determinam-no — e' o simplex. Mas o que se mede aqui e' o
-     * POSTO real: quantos dos n sao linearmente independentes. Se forem todos, o espaco que
-     * eles geram tem dimensao n, e n+1 seria um a mais — que e' exatamente o que fecha. */
-    double (*m)[ND] = DISCO_FIXO2(double, ND, 170);
-    disco_prende(DISCO_BASE(170),"dados/enc_m.bin",(size_t)(NF)*(ND),sizeof(double));
-    memcpy(m, v, ((size_t)(NF)*(ND)*sizeof(double)));
-    int posto = 0;
-    for(int i = 0; i < nf; i++){
-        for(int j = 0; j < posto; j++){
-            double c = dot(m[i], m[j], nd) / dot(m[j], m[j], nd);
-            for(int d = 0; d < nd; d++) m[i][d] -= c*m[j][d];
-        }
-        double n2 = dot(m[i], m[i], nd);
-        if(n2 != 0.0){
-            if(posto != i) memcpy(m[posto], m[i], sizeof m[i]);
-            posto++;
-        }
-    }
-    printf("      vetores colhidos            %d\n", nf);
-    printf("      dimensão do espaço          %d\n", nd);
-    printf("      posto (independentes)       %d\n", posto);
+    /* Se o espaço tem n vetores, n+1 determinam-no — é o simplex. O que se mede é o
+     * POSTO: quantos dos n são linearmente independentes. Gauss-Jordan em ℚ, sem pivô
+     * parcial e sem tolerância: o pivô é zero ou não é. */
+    long flat[D * N];
+    for(int i = 0; i < N; i++) for(int k = 0; k < D; k++)
+        flat[k * N + i] = V[i][k];
+    Mat A = mat_de_inteiros(D, N, flat);
+    int posto = mat_posto(A);
+    printf("      vetores                         %d\n", N);
+    printf("      dimensão do espaço              %d\n", D);
+    printf("      posto (independentes, em ℚ)     %d\n", posto);
     printf("      logo geram um subespaço de dimensão %d, e %d+1 = %d o determinam\n\n",
-           posto, posto, posto+1);
+           posto, posto, posto + 1);
     ok("os vetores são linearmente independentes — nenhum é combinação dos outros",
-       posto == nf);
-    printf("      Em 768 dimensões, %d vetores quaisquer serem independentes não é sorte: é o\n", nf);
-    printf("      que se espera quando há muito mais eixos do que vetores. O espaço é largo,\n");
-    printf("      e é essa largura que faz o resto funcionar.\n");
+       posto == N);
+
+    /* GUME: dois iguais baixam o posto. Sem este lado, «posto = n» valia por eu ter
+     * escrito n vectores e não ter medido independência. */
+    long gume[D * N];
+    memcpy(gume, flat, sizeof flat);
+    for(int k = 0; k < D; k++) gume[k * N + 1] = gume[k * N + 0];
+    int posto_g = mat_posto(mat_de_inteiros(D, N, gume));
+    printf("      gume: dois iguais  →  posto %d (caiu)\n\n", posto_g);
+    ok("e o gume morde: dois vectores iguais baixam o posto — a independência CARREGA",
+       posto_g == N - 1 && posto == N);
+    printf("      Em %d dimensões, %d vectores LI não é sorte: há mais eixos do que\n", D, N);
+    printf("      vectores. O espaço é largo, e é essa largura que faz o resto funcionar.\n");
 }
 
 printf("\n§C2  JÁ SÃO QUASE ORTOGONAIS? — e é isto que autoriza o \"só normalizar\".\n\n");
 {
-    /* A afirmacao do Aarao — "so normalizar" — so' vale se os vetores ja' vierem quase
-     * ortogonais. Em alta dimensao isso e' esperado por concentracao de medida: dois vetores
-     * ao acaso em R^768 tem cosseno ~ 1/sqrt(768) = 0,036. Mede-se o cosseno REAL entre pares
-     * e compara-se com esse valor — que nao e' regua minha, e' o que a dimensao impoe. */
-    /* O COSSENO NÃO PRECISA DA RAIZ para responder a esta pergunta. O que se quer saber é
-     * se |cos| excede o do acaso, 1/√nd — e isso é uma comparação, logo vive nos QUADRADOS:
+    /* «Só normalizar» só vale se os vectores já vierem quase ortogonais. Estes NÃO:
+     * partilham a primeira coordenada, e isso É o significado. A decisão vive nos
+     * quadrados, sem raiz:
      *
-     *      |c| > 3/√nd   ⟺   c² > 9/nd   ⟺   ⟨u,v⟩²·nd > 9·‖u‖²‖v‖²
+     *      |cos| > 1/2   ⟺   ⟨u,v⟩² · 4 > ‖u‖² ‖v‖²
      *
-     * sem uma raiz e sem uma divisão. É o `rt_cos2` da reta.h — cos²(a,b) como par
-     * (numerador, denominador) — e a pergunta decide-se por produto cruzado. */
-    double pior = 0, soma = 0; int n = 0;
-    long acima = 0, pares_c = 0;
-    for(int i = 0; i < nf; i++) for(int j = i+1; j < nf; j++){
-        double nii = dot(v[i],v[i],nd), njj = dot(v[j],v[j],nd), dij = dot(v[i],v[j],nd);
-        /* a decisão, nos quadrados: c²·nd > 9  ⟺  dij²·nd > 9·nii·njj */
-        pares_c++;
-        if(dij*dij*(double)nd > 9.0*nii*njj) acima++;
-        /* e o valor, só para a tabela — a raiz fica no sítio dela, que é a apresentação */
-        double c = dij / sqrt(nii*njj);
-        if(fabs(c) > pior) pior = fabs(c);
-        soma += fabs(c); n++;
+     * (o 3/√d do acaso em 768 dimensões não cabe aqui: em d=6 esse tecto passa de 1.) */
+    long acima = 0, pares = 0, n_orto = 0;
+    printf("      par            ⟨u,v⟩   ‖u‖²  ‖v‖²   4⟨u,v⟩² > ‖u‖²‖v‖² ?\n");
+    for(int i = 0; i < N; i++) for(int j = i + 1; j < N; j++){
+        long uu = rt_norma(V[i], D), vv = rt_norma(V[j], D), uv = rt_dir(V[i], V[j], D);
+        pares++;
+        if(uv == 0) n_orto++;
+        int corr = (uv * uv * 4 > uu * vv);
+        if(corr) acima++;
+        if(pares <= 6)
+            printf("      %-6s %-6s  %4ld   %4ld  %4ld    %s\n",
+                   nome[i], nome[j], uv, uu, vv, corr ? "sim" : "não");
     }
-    double media = soma/n, esperado = 1.0/sqrt((double)nd);
-    printf("      cosseno médio entre pares        %.4f\n", media);
-    printf("      pior caso                        %.4f\n", pior);
-    printf("      o acaso em %d dimensões daria    %.4f\n\n", nd, esperado);
-    printf("      e a DECISAO, sem raiz: %ld dos %ld pares tem cos^2.nd > 9, que e' |cos| acima\n"
-           "      do triplo do acaso — comparado por produto cruzado, dij^2.nd > 9.nii.njj\n\n",
-           acima, pares_c);
-    ok("os vetores NÃO são ortogonais — o cosseno médio excede muito o do acaso. E a"
-       " decisao nao precisa da raiz: |c| > 3/raiz(nd) e' c^2 > 9/nd, que e'"
-       " dij^2.nd > 9.nii.njj, sem uma raiz e sem uma divisao. A raiz fica so' na linha"
-       " que IMPRIME, que e' o sitio dela — e a assercao depende SO' da rota sem raiz:"
-       " o `media > 3.esperado` que aqui estava usava valores que ja' tinham passado pelo"
-       " sqrt, e era a mesma pergunta feita duas vezes, uma delas pior",
-       acima > pares_c/2);
-    printf("      E aqui a medida diz o contrário do que \"só normalizar\" sugere: estes vetores\n");
-    printf("      têm cosseno médio %.2f, muito acima dos %.3f do acaso. Não é defeito — é o\n", media, esperado);
-    printf("      SIGNIFICADO: 'rei' e 'rainha' não são ortogonais porque não são independentes.\n");
-    printf("      Normalizar arruma o comprimento e não arruma o ângulo, portanto sozinho não\n");
-    printf("      dá base ortonormal. É preciso ortogonalizar — e é o que o §C3 faz.\n");
+    printf("\n      %ld de %ld pares com |cos| > 1/2  ·  ortogonais: %ld\n\n",
+           acima, pares, n_orto);
+    ok("os vetores NÃO são ortogonais — a maioria dos pares tem |cos| > 1/2, comparado"
+       " por produto cruzado 4⟨u,v⟩² > ‖u‖²‖v‖², sem raiz. Normalizar arruma o comprimento"
+       " e não arruma o ângulo: é preciso ortogonalizar",
+       acima > pares / 2 && n_orto == 0 && pares == N * (N - 1) / 2);
+
+    /* GUME: sem a direcção comum, a correlação cai. Hadamard (de fora) seria ortogonal. */
+    long W[N][D];
+    for(int i = 0; i < N; i++){
+        for(int k = 0; k < D; k++) W[i][k] = V[i][k];
+        W[i][0] = 0;                                 /* tira o eixo partilhado */
+    }
+    long acima_g = 0, pares_g = 0;
+    for(int i = 0; i < N; i++) for(int j = i + 1; j < N; j++){
+        long uu = rt_norma(W[i], D), vv = rt_norma(W[j], D), uv = rt_dir(W[i], W[j], D);
+        pares_g++;
+        if(uu && vv && uv * uv * 4 > uu * vv) acima_g++;
+    }
+    printf("      gume: sem o eixo comum, correlacionados %ld de %ld (caiu)\n\n",
+           acima_g, pares_g);
+    ok("e o gume morde: sem a direcção comum a correlação cai — o significado CARREGA",
+       acima_g <= pares_g / 2 && acima > pares / 2);
+    printf("      'rei' e 'rainha' não são ortogonais porque não são independentes.\n");
+    printf("      É o contrário do que «só normalizar» sugere, e é o §C3 que arruma o ângulo.\n");
 }
 
-printf("\n§C3  A BASE por Gram-Schmidt: e mede-se que ela É ortonormal.\n\n");
+printf("\n§C3  A BASE por Gram-Schmidt: ortogonal, e GERA o mesmo espaço.\n\n");
 {
-    /* Gram-Schmidt: tira-se de cada vetor o que ele tem dos anteriores, e normaliza-se. O que
-     * se mede nao e' que o algoritmo correu — e' que o RESULTADO tem as duas propriedades:
-     * norma 1 em cada, e produto interno 0 entre quaisquer dois. */
-    int degenerados = 0;
-    for(int i = 0; i < nf; i++){
-        memcpy(base[i], v[i], (size_t)nd*sizeof(double));
-        for(int j = 0; j < i; j++){
-            double c = dot(base[i], base[j], nd);
-            for(int d = 0; d < nd; d++) base[i][d] -= c*base[j][d];
-        }
-        double nn = sqrt(dot(base[i], base[i], nd));
-        /* O VECTOR QUE NAO SE NORMALIZA CONTA-SE. Se nn cair abaixo do limiar, o vector e'
-         * dependente dos anteriores e a base fica com menos elementos do que nf — e isso
-         * mudava a tese sem se ver, porque o ramo passava calado. */
-        if(nn != 0.0){ for(int d = 0; d < nd; d++) base[i][d] /= nn; }
-        else degenerados++;
+    /* GS inteiro: u ← ‖u_j‖² u − ⟨u,u_j⟩ u_j, e reduz-se pelo mdc. Não se normaliza:
+     * a divisão pela norma PÕE o 1, e medir «norma 1» depois disso é reler a divisão.
+     * O que o GS tem de garantir é RESTO NÃO NULO (independência) e ⟨u_i,u_j⟩ = 0. */
+    long U[N][D];
+    int posto = 0;
+    gs_int(V, U, N, &posto);
+    int degenerados = N - posto;
+    long orto = 0, pares_u = 0;
+    for(int i = 0; i < posto; i++) for(int j = i + 1; j < posto; j++){
+        pares_u++;
+        if(rt_dir(U[i], U[j], D) == 0) orto++;
     }
-    double pior_norma = 0, pior_orto2 = 0;
-    for(int i = 0; i < nf; i++){
-        double e = fabs(sqrt(dot(base[i],base[i],nd)) - 1.0);
-        if(e > pior_norma) pior_norma = e;
-        for(int j = i+1; j < nf; j++){
-            double c = dot(base[i], base[j], nd);
-            double c2 = c * c;
-            if(c2 > pior_orto2) pior_orto2 = c2;
-        }
+    printf("      posto após GS                   %d  (degenerados %d)\n", posto, degenerados);
+    printf("      pares ortogonais                %ld de %ld\n", orto, pares_u);
+    for(int i = 0; i < posto; i++){
+        printf("      u_%d  (", i);
+        for(int k = 0; k < D; k++) printf("%s%ld", k ? "," : "", U[i][k]);
+        printf(")   ‖u‖² = %ld\n", rt_norma(U[i], D));
     }
+    printf("\n");
+    ok("a base GS é ORTOGONAL e sem degenerados — ⟨u_i,u_j⟩ = 0 exacto em ℤ, resto r·r ≠ 0",
+       posto == N && orto == pares_u && pares_u == N * (N - 1) / 2);
 
-    /* A TESE REAL, e a que aqui faltava. «Cada vector da base tem norma 1» era medido DEPOIS
-     * de eu ter dividido cada um pela sua norma: a divisao POE la' o 1, e o que o 1e-12
-     * mediria era o arredondamento do IEEE, nao o Gram-Schmidt. E' o «normalizar nao e'
-     * medir» na forma mais pura — uma tabela de 1 que eu proprio escrevi.
-     *
-     * O que o Gram-Schmidt tem de garantir, e pode falhar, e' que a base GERA O MESMO
-     * ESPACO: cada vector original tem de se reconstruir a partir das suas projeccoes. Isso
-     * mede-se pelo residuo da reconstrucao, e um erro no algoritmo derruba-o. */
-    double pior_rec = 0;
-    for(int i = 0; i < nf; i++){
-        double rec[512];
-        for(int d = 0; d < nd && d < 512; d++) rec[d] = 0;
-        for(int j = 0; j < nf; j++){
-            double c = dot(v[i], base[j], nd);
-            for(int d = 0; d < nd && d < 512; d++) rec[d] += c*base[j][d];
-        }
-        double num = 0, den = 0;
-        for(int d = 0; d < nd && d < 512; d++){
-            double dd = rec[d] - v[i][d];
-            num += dd*dd; den += v[i][d]*v[i][d];
-        }
-        /* a comparacao vive nos QUADRADOS: rel < t ⟺ num < t².den. Duas raizes a menos,
-         * e o que se guarda e' num/den, que e' o quadrado do residuo relativo. */
-        double rel2 = den > 0 ? num/den : num;
-        if(rel2 > pior_rec) pior_rec = rel2;
-    }
-
-    printf("      pior desvio da norma 1           %.3e   (e' o ARREDONDAMENTO: a norma\n",
-           pior_norma);
-    printf("                                              foi POSTA a 1 pela divisao)\n");
-    printf("      pior produto interno² entre pares %.3e\n", pior_orto2);
-    printf("      pior residuo de RECONSTRUCAO²    %.3e   (esta e' a tese: a base gera,\n",
-           pior_rec);
-    printf("                                              e a comparacao vive nos QUADRADOS)\n");
-    printf("      vectores degenerados (nao normalizados) %d\n\n", degenerados);
-    ok("a base GERA o espaço: cada vetor original reconstrói-se das suas projeções. A"
-       " asserção que aqui estava media que a norma era 1 DEPOIS de eu dividir por ela —"
-       " uma tabela de 1 que eu próprio escrevi, com o limiar a medir o arredondamento",
-       (long long)(pior_rec * 1e18) == 0 && degenerados == 0);
-    printf("      (ortogonalidade: consequência do GS — ⟨e_i,e_j⟩² = %.3e, testemunha)\n",
-           pior_orto2);
-    printf("      A base sai dos DADOS, não de fora. O semantico.c §S4 usa Hadamard, que fecha\n");
-    printf("      igualmente bem e vem de fora; esta vem de dentro, e é isso que a torna a\n");
-    printf("      cifra DESTE espaço e não de um espaço qualquer.\n");
+    int gera = 0;
+    qz_saturou = 0;
+    for(int i = 0; i < N; i++) if(reconstroi(V[i], U, posto)) gera++;
+    printf("      reconstrução exacta em ℚ        %d de %d   (qz_saturou %ld)\n\n",
+           gera, N, qz_saturou);
+    ok("a base GERA o espaço: cada vetor original reconstrói-se das projecções, exacto em ℚ."
+       " A asserção que aqui estava media que a norma era 1 DEPOIS de dividir por ela",
+       gera == N && qz_saturou == 0);
+    printf("      A base sai dos DADOS, não de fora. O semantico.c §S4 usa Hadamard, que\n");
+    printf("      fecha igualmente e vem de fora; esta vem de dentro, e é isso que a torna\n");
+    printf("      a cifra DESTE espaço e não de um espaço qualquer.\n");
 }
 
-printf("\n§C4  A CIFRA: projetar na base e voltar — o protocolo, com resíduo.\n\n");
+printf("\n§C4  A CIFRA: projetar na base e voltar — o protocolo, exacto.\n\n");
 {
-    /* O protocolo do teletransporte.c: entra (projeta-se), atravessa, volta (recompoe-se), e
-     * mede-se o residuo. Como a base e' ortonormal e gera o subespaco dos vetores, a volta tem
-     * de ser EXATA — e exata quer dizer na casa do epsilon, nao "quase". */
-    printf("      vetor            ‖v‖²       ‖v reconstruído‖²  residuo²/‖v‖²\n");
-    double pior_rel2 = 0;
-    for(int i = 0; i < nf; i++){
-        double coef[NF];
-        for(int k = 0; k < nf; k++) coef[k] = dot(v[i], base[k], nd);
-        double rec_norm2 = 0;
-        for(int k = 0; k < nf; k++) rec_norm2 += coef[k]*coef[k];
-        double e = 0, den = 0;
-        for(int d = 0; d < nd; d++){
-            double recon = 0;
-            for(int k = 0; k < nf; k++) recon += coef[k]*base[k][d];
-            double t = recon - v[i][d];
-            e += t*t; den += v[i][d]*v[i][d];
-        }
-        double rel2 = den > 0 ? e/den : e;
-        if(rel2 > pior_rel2) pior_rel2 = rel2;
-        if(i < 4) printf("      %-16s %-10.4f %-18.4f %.3e\n",
-                         nome[i], sqrt(den), sqrt(rec_norm2), rel2);
+    /* Entra (projeta-se), atravessa (n coeficientes), volta (recompõe-se). Como a base
+     * ortogonal gera o subespaço, a volta é EXACTA em ℚ — não «na casa do epsilon». */
+    long U[N][D];
+    int posto = 0;
+    gs_int(V, U, N, &posto);
+    printf("      vetor            n coef.   d orig.   volta exacta?\n");
+    int volta = 0;
+    qz_saturou = 0;
+    for(int i = 0; i < N; i++){
+        int ok_i = reconstroi(V[i], U, posto);
+        if(ok_i) volta++;
+        printf("      %-16s %-9d %-9d %s\n", nome[i], posto, D, ok_i ? "sim" : "não");
     }
-    printf("      …\n\n      pior residuo²/‖v‖²: %.3e\n\n", pior_rel2);
-    ok("o vetor cifrado na base própria volta EXATO — ‖v−Σc_k e_k‖²/‖v‖² na casa do"
-       " epsilon, sem raiz na condição",
-       (long long)(pior_rel2 * 1e24) == 0);
-    printf("      %d coeficientes bastam para guardar um vetor de %d dimensões, e a volta é\n", nf, nd);
-    printf("      exata — porque a base gera exatamente o subespaço onde os vetores vivem.\n");
-    printf("      É compressão sem perda, e não por sorte: por ortonormalidade.\n");
+    printf("\n      %d coeficientes guardam um vetor de %d dimensões, e a volta é exacta.\n\n",
+           posto, D);
+    ok("o vetor cifrado na base própria volta EXATO — compressão sem perda, por a base"
+       " gerar exactamente o subespaço, sem residual IEEE",
+       volta == N && posto == N && posto < D && qz_saturou == 0);
 }
 
 printf("\n§C5  E ELA PRESERVA A VIZINHANÇA — o que o telómero não fazia.\n\n");
 {
-    /* A diferenca que decide entre esta cifra e o telomero. Um hash espalha; uma base
-     * ORTONORMAL preserva distancias — e' Parseval, e mede-se: a distancia entre dois vetores
-     * tem de ser IGUAL a distancia entre os seus coeficientes. Se isto falhasse, a cifra
-     * servia para identificar e nao para procurar. */
-    long long pior_esc = 0; long vivos = 0;
-    for(int i = 0; i < nf; i++) for(int j = i+1; j < nf; j++){
-        double ci[NF], cj[NF];
-        for(int k = 0; k < nf; k++){ ci[k] = dot(v[i],base[k],nd); cj[k] = dot(v[j],base[k],nd); }
-        double dv = 0, dc = 0;
-        for(int d = 0; d < nd; d++){ double t = v[i][d]-v[j][d]; dv += t*t; }
-        for(int k = 0; k < nf; k++){ double t = ci[k]-cj[k]; dc += t*t; }
-        if(dv > 0){
-            vivos++;
-            double num = dv > dc ? dv - dc : dc - dv;
-            long long esc = (long long)(num / dv * 1e15);
-            if(esc > pior_esc) pior_esc = esc;
+    /* Um hash espalha; uma base ORTOGONAL preserva distâncias — Parseval, e mede-se
+     * nos quadrados, sem normalizar:
+     *
+     *      ‖v−w‖²  =  Σ_j  ⟨v−w, u_j⟩² / ‖u_j‖²
+     *
+     * Os dois lados em ℚ. Se isto falhasse, a cifra servia para identificar e não para
+     * procurar. */
+    long U[N][D];
+    int posto = 0;
+    gs_int(V, U, N, &posto);
+    long vivos = 0, fecha = 0;
+    qz_saturou = 0;
+    for(int i = 0; i < N; i++) for(int j = i + 1; j < N; j++){
+        long dif[D];
+        for(int k = 0; k < D; k++) dif[k] = V[i][k] - V[j][k];
+        long dv2 = rt_norma(dif, D);
+        if(dv2 == 0) continue;
+        vivos++;
+        Qz esq = qz_de_inteiro(dv2);
+        Qz dir = qz(0, 1);
+        for(int t = 0; t < posto; t++){
+            long dc = rt_dir(dif, U[t], D);
+            long nj = rt_norma(U[t], D);
+            dir = qz_soma(dir, qz(dc * dc, nj));
         }
+        if(qz_igual(esq, dir)) fecha++;
     }
-    printf("      pior |dv² − dc²|/dv² (escala 1e-15): %lld\n"
-           "      (e sao %ld pares com distancia nao nula — sem isso «preserva» valia por\n"
-           "       ser tudo zero)\n\n", pior_esc, vivos);
-    ok("a cifra preserva as distâncias — Parseval: dv² = dc² nos pares não nulos,"
-       " medido nos quadrados sem raiz (desvio relativo em escala inteira)",
-       pior_esc <= 3000 && vivos > 0);
-    printf("      É aqui que esta cifra e o telómero se separam, e cada uma serve para o que a\n");
-    printf("      outra não serve: o telómero ESPALHA (por isso identifica sem colidir) e esta\n");
-    printf("      PRESERVA (por isso procura). Não são duas versões da mesma coisa — são o par\n");
-    printf("      dual, e a busca precisa das duas, como o dna.c §N6 já dizia.\n");
+    printf("      Parseval dv² = Σ Δc_j²/‖u_j‖² em %ld de %ld pares (qz_saturou %ld)\n\n",
+           fecha, vivos, qz_saturou);
+    ok("a cifra preserva as distâncias — Parseval: dv² = Σ Δc²/n_j nos pares não nulos,"
+       " exacto em ℚ, sem raiz e sem escala 1e-15",
+       fecha == vivos && vivos > 0 && qz_saturou == 0);
+    printf("      É aqui que esta cifra e o telómero se separam: o telómero ESPALHA (por\n");
+    printf("      isso identifica sem colidir) e esta PRESERVA (por isso procura). São o\n");
+    printf("      par dual, e a busca precisa das duas, como o dna.c §N6 já dizia.\n");
 }
 
 printf("\n=== FECHO ==================================================================\n");
-printf("    A base sai dos próprios vetores e é ortonormal por construção; a volta é\n");
-printf("    exata; e as distâncias sobrevivem. Mas 'só normalizar' não bastava — os\n");
-printf("    vetores têm cosseno médio muito acima do acaso, e isso é o significado.\n\n");
+printf("    A base sai dos próprios vetores e é ortogonal por GS inteiro; a volta é\n");
+printf("    exacta em ℚ; e as distâncias sobrevivem. Mas 'só normalizar' não bastava —\n");
+printf("    os vetores partilham eixo, e isso é o significado.\n\n");
 printf("    %d asserções, %d falhas.\n\n", unidades, falhas);
 return falhas != 0;
 }

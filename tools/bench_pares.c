@@ -100,9 +100,13 @@ static int cmp(const void *x, const void *y){
 static unsigned long sem = 88172645463325252UL;
 static unsigned long rnd(void){ sem ^= sem<<13; sem ^= sem>>7; sem ^= sem<<17; return sem; }
 
-static double agora(void){
+static long long agora_ns(void){
     struct timespec t; clock_gettime(CLOCK_MONOTONIC, &t);
-    return t.tv_sec + t.tv_nsec/1e9;
+    return (long long)t.tv_sec * 1000000000LL + (long long)t.tv_nsec;
+}
+static void ms10_print(long long ns){
+    long long v = (ns + 50000) / 100000;
+    printf("%10lld.%lld", v / 10, v % 10);
 }
 
 int main(void){
@@ -122,14 +126,15 @@ int main(void){
             orig[i].a = (long)(rnd() % (unsigned long)chaves[c]);
             orig[i].b = (long)(rnd() % 1000000);
         }
-        double d[4];
-        memcpy(v, orig, N*sizeof(Par)); double t0=agora(); dual_pares(v, N, 0); d[0]=agora()-t0;
+        long long d[4];
+        memcpy(v, orig, N*sizeof(Par)); long long t0=agora_ns(); dual_pares(v, N, 0); d[0]=agora_ns()-t0;
         long mau = 0; for(long i=1;i<N;i++) if(menor(v[i],v[i-1])) mau++;
-        memcpy(v, orig, N*sizeof(Par)); t0=agora(); qsort(v,N,sizeof(Par),cmp); d[1]=agora()-t0;
-        memcpy(v, orig, N*sizeof(Par)); t0=agora(); quick(v, N);                d[2]=agora()-t0;
-        memcpy(v, orig, N*sizeof(Par)); t0=agora(); mrg(v, t, N);               d[3]=agora()-t0;
-        printf("  %-22ld %10.1f %10.1f %10.1f %10.1f%s\n", chaves[c],
-               d[0]*1000, d[1]*1000, d[2]*1000, d[3]*1000, mau?"  <- NAO ORDENOU":"");
+        memcpy(v, orig, N*sizeof(Par)); t0=agora_ns(); qsort(v,N,sizeof(Par),cmp); d[1]=agora_ns()-t0;
+        memcpy(v, orig, N*sizeof(Par)); t0=agora_ns(); quick(v, N);                d[2]=agora_ns()-t0;
+        memcpy(v, orig, N*sizeof(Par)); t0=agora_ns(); mrg(v, t, N);               d[3]=agora_ns()-t0;
+        printf("  %-22ld", chaves[c]);
+        for(int k = 0; k < 4; k++) ms10_print(d[k]);
+        printf("%s\n", mau?"  <- NAO ORDENOU":"");
     }
     puts("");
     free(orig); free(v); free(t);

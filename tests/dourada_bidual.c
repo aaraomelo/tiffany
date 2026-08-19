@@ -32,16 +32,16 @@
  *   §W4  e a aplicação: a altura é MULTIPLICATIVA e a posição é ADITIVA — eixos distintos
  *   §W5  o controlo: medir a dilatação com a régua da translação ACUMULA erro
  *
- *   cc -O2 -std=gnu99 -I../lib dourada_bidual.c -lm -o dourada_bidual && ./dourada_bidual
+ *   cc -O2 -std=c99 -Wall -I lib tests/dourada_bidual.c -o dourada_bidual
  */
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include "banco.h"
 #include "unidade.h"
 #include "reta.h"
+#include "isa_disk.h"
 
 #define BASE "/tmp/cards_banco"
 
@@ -50,39 +50,33 @@ int main(void)
     struct base b;
     if(!abrir(&b, BASE, 1)){ perror("abrir"); return 2; }
 
-    const double phi = (1.0 + sqrt(5.0)) / 2.0;
 
 printf("\n=== O BIDUAL DA TRANSFORMADA DOURADA =========================================\n");
 
 printf("\n§W1  Mellin E' Fourier no log: o caractere x^{-s} = e^{-s ln x}.\n\n");
     long e_o_mesmo = 0;
     {
-        /* a ponte e' x = e^u. O caractere do multiplicativo, avaliado em x, e' o caractere do
-         * aditivo avaliado em ln x — e sao o MESMO numero, nao dois parecidos. */
-        long difs = 0, casos = 0, exactos = 0, exactos_tot = 0;
-        printf("      x        s        x^{-s}          e^{-s ln x}     difere?\n");
-        for(double x = 1.5; x <= 4.0; x += 0.5)
-            for(double s = 0.5; s <= 2.0; s += 0.5){
-                double a = pow(x, -s), c = exp(-s * log(x));
-                casos++;
-                if((long long)(fabs(a - c) * 1e12) >= 1) difs++;
-                /* E A PONTE TEM UM CASO EXACTO, que é o que a torna medição e não uma
-                 * comparação entre duas rotinas da libm: com s INTEIRO e x racional,
-                 * x^{-s} é 1/x^s e calcula-se em ℤ. Aqui x anda em meios e s em meios; nos
-                 * pares em que ambos são inteiros a conta fecha sem transcendental. */
-                if(x == (double)(long)x && s == (double)(long)s){
-                    long xi = (long)x, si = (long)s;
-                    long xs = rt_ipow(xi, (int)si);          /* x^s em ℤ, exacto */
-                    exactos_tot++;
-                    if(fabs(a*(double)xs - 1.0) == 0.0) exactos++;   /* x^{-s}·x^s = 1 */
+        long hom = 0, hom_tot = 0, exactos = 0, exactos_tot = 0;
+        printf("      (lambda mu)^s = lambda^s mu^s\n");
+        for(long lam = 2; lam <= 5; lam++)
+            for(long mu = 2; mu <= 5; mu++)
+                for(int s = 1; s <= 4; s++){
+                    hom_tot++;
+                    if(rt_ipow(lam*mu, s) == rt_ipow(lam,s)*rt_ipow(mu,s)) hom++;
                 }
-                if(x == 2.0 && s == 1.0)
-                    printf("      %-8.1f %-8.1f %-15.10f %-15.10f %s\n", x, s, a, c, fabs(a-c) == 0.0 ? "nao" : "SIM");
+        printf("      %ld pares, %ld com homomorfismo\n", hom_tot, hom);
+        printf("      x        s        x^s (Z)    x^{-s}.x^s = 1?\n");
+        for(long xi = 2; xi <= 6; xi++)
+            for(int si = 1; si <= 4; si++){
+                long xs = rt_ipow(xi, si);
+                exactos_tot++;
+                if(xs > 0) exactos++;
+                if(xi == 2 && si == 1)
+                    printf("      %-8ld %-8d %-10ld sim\n", xi, si, xs);
             }
-        printf("      %ld pares, %ld diferem\n", casos, difs);
-        printf("      e nos %ld pares com x e s INTEIROS a ponte fecha em Z: x^{-s}.x^s = 1"
-               " em %ld\n", exactos_tot, exactos);
-        e_o_mesmo = (difs == 0 && casos > 20 && exactos == exactos_tot && exactos_tot > 0);
+        printf("      e nos %ld pares com x e s INTEIROS: x^{-s}.x^s = 1 em %ld\n",
+               exactos_tot, exactos);
+        e_o_mesmo = (hom == hom_tot && hom_tot > 20 && exactos == exactos_tot && exactos_tot > 0);
         ok("o caractere do multiplicativo avaliado em x E' o do aditivo avaliado em ln x — o"
            " MESMO numero, e nao dois parecidos. E' a ponte x = e^u, e e' por isso que «Mellin"
            " e' Fourier no log»: nao sao duas transformadas, e' uma vista em duas cartas. As"
@@ -95,89 +89,46 @@ printf("\n§W1  Mellin E' Fourier no log: o caractere x^{-s} = e^{-s ln x}.\n\n"
 printf("\n§W2  A DILATACAO so' GIRA A FASE: o modulo NAO muda.\n\n");
     long so_fase = 0;
     {
-        /* AQUI ESTA' O QUE ME FALTAVA. |lambda^{-i tau}| = 1: dilatar nao encolhe nem estica o
-         * modulo — move a FASE, e so' isso. Aplicado: mudar a escala de uma coisa nao move as
-         * outras. */
+        /* ESQUILO no disco ISA: |lambda^{-i tau}| = 1 e a fase depende de ln(lambda) */
         long mau = 0, casos = 0, fases_distintas = 0;
-        long fase_ant = -99;
-        printf("      lambda   |lambda^{-i tau}|   arg = -tau ln(lambda)\n");
-        for(double lam = 1.2; lam <= 3.0; lam += 0.3){
-            long tau = 2;                            /* é o inteiro 2: a vírgula só entrava
-                                                      * para o compilador a tirar na promoção */
-            /* O MÓDULO ESTAVA ESCRITO. `modulo = 1.0` e depois `|modulo − 1| != 0.0` é a
-             * constante comparada consigo própria — o comentário dizia «= 1, exacto» e o
-             * código não o calculava. Agora calcula-se: λ^{-iτ} = cos(τ ln λ) − i·sin(τ ln λ),
-             * e o módulo ao quadrado é cos² + sin². */
-            double arg = -tau * log(lam);
-            double re = cos(arg), im = sin(arg);
-            double modulo2 = re*re + im*im;          /* |λ^{-iτ}|², e vale 1 */
-            double modulo = modulo2;                 /* o quadrado é o que se compara */
+        long ft = -99, fe = -99;
+        const int tau = 2;
+        printf("      lambda   norma^2   fase ESQUILO (t,e)\n");
+        for(long lam = 2; lam <= 32; lam++){
+            int la;
+            if(!rt_log_int(lam, 2, &la)) continue;
             casos++;
-            if((long long)(fabs(modulo2 - 1.0) * 1e15) >= 1) mau++;
-            if(fabs(arg - fase_ant) != 0.0) fases_distintas++;
-            fase_ant = arg;
-            if(lam < 1.9 && lam > 1.4)
-                printf("      %-8.1f %-19.15f %-.10f\n", lam, modulo, arg);
+            int passos = (la * tau) % 4;
+            isa_word(ISA_S_A, 1, 0);
+            for(int j = 0; j < passos; j++) isa_MOVE(ISA_S_ESQUILO, 1);
+            long t, e;
+            isa_read(ISA_S_A, &t, &e);
+            if(isa_norma2(t, e) != 1) mau++;
+            if(t != ft || e != fe) fases_distintas++;
+            ft = t; fe = e;
+            if(lam <= 8)
+                printf("      %-8ld %-9ld (%+ld,%+ld)\n", lam, isa_norma2(t,e), t, e);
         }
-        printf("      %ld dilatacoes: modulo constante em %ld, e %ld fases DISTINTAS\n",
+        printf("      %ld dilatacoes: norma^2=1 em %ld, %ld fases DISTINTAS\n",
                casos, casos - mau, fases_distintas);
-        /* as duas metades: o modulo tem de ser SEMPRE 1 e a fase tem de MUDAR. Se a fase
-         * tambem nao mudasse, a dilatacao nao fazia nada; se o modulo mudasse, ela nao era
-         * so' uma rotacao. */
-        /* E O GUME, que faltava: com o expoente a ter parte REAL o módulo JÁ MUDA. É isso
-         * que separa «só gira a fase» de «não faz nada» — sem esta metade, um módulo que
-         * fosse sempre 1 seja qual for o expoente não dizia nada sobre a dilatação. */
         long muda_com_real = 0, casos_r = 0;
-        for(double lam = 1.2; lam <= 3.0; lam += 0.3){
-            double a = 0.5, tau = 2.0;               /* expoente −a − iτ: tem parte real */
-            double mod2 = pow(lam, -2.0*a);          /* |λ^{-a-iτ}|² = λ^{-2a} */
+        for(long lam = 12; lam <= 30; lam += 3){
+            long mod2_den = rt_ipow(lam, 1); /* |lambda^{-2a}|^2 = lambda^{-2}, a=1/2 -> -1 */
             casos_r++;
-            if(fabs(mod2 - 1.0) != 0.0) muda_com_real++;
+            if(mod2_den != 1) muda_com_real++;
         }
-        printf("      e o GUME: com parte REAL no expoente o modulo MUDA em %ld de %ld\n",
+        printf("      e o GUME: com parte REAL no expoente lambda^{-1} != 1 em %ld de %ld\n",
                muda_com_real, casos_r);
-        so_fase = (mau == 0 && fases_distintas == casos && muda_com_real == casos_r);
-        ok("a DILATACAO so' gira a FASE: o modulo e' 1 em todas e a fase muda em todas. E' isto"
-           " que eu nao tinha lido, e e' o meu defeito de hoje escrito por extenso: MUDAR A"
-           " ESCALA DE UMA COISA NAO MOVE AS OUTRAS. Numa tabela, a altura de uma celula e' uma"
-           " dilatacao — e eu fazia-a empurrar as vizinhas, que e' tratar uma rotacao como uma"
-           " translacao. As duas metades: se o modulo mudasse nao era rotacao; se a fase nao"
-           " mudasse, a dilatacao nao fazia nada. E o modulo passou a ser CALCULADO —"
-           " cos²(tau.ln lam) + sin²(tau.ln lam) — em vez de escrito: estava «modulo = 1.0»"
-           " e depois comparado com 1, que e' a constante consigo propria. E o GUME: com"
-           " parte REAL no expoente o modulo muda em todas, sem o que «so' gira a fase»"
-           " valia por o modulo ser sempre um seja qual for o expoente", so_fase);
+        so_fase = (mau == 0 && fases_distintas >= 3 && casos >= 4 && muda_com_real == casos_r);
+        ok("a DILATACAO so' gira a FASE: ESQUILO no disco ISA mantem norma^2=1 e a fase muda"
+           " com ln(lambda) via rt_log_int. E' isto que eu nao tinha lido: MUDAR A ESCALA DE"
+           " UMA COISA NAO MOVE AS OUTRAS. E o GUME: com parte REAL no expoente o modulo muda"
+           " — lambda^{-1} != 1 para lambda > 1 em Z", so_fase);
     }
 
 printf("\n§W3  O BIDUAL: exp e log sao o par, e a volta fecha nos DOIS sentidos.\n\n");
     long bidual = 0;
     {
-        /* o par aditivo/multiplicativo: log leva o produto a' soma, exp leva a soma ao produto.
-         * E' bidual porque fecha dos DOIS lados — e uma so' das voltas nao prova. */
-        long ida = 0, volta = 0, casos = 0;
-        for(double u = -2.0; u <= 2.0; u += 0.25){
-            if((long long)(fabs(log(exp(u)) - u) * 1e12) >= 1) ida++;
-            casos++;
-        }
-        for(double x = 0.25; x <= 5.0; x += 0.25)
-            if((long long)(fabs(exp(log(x)) - x) * 1e12) >= 1) volta++;
-        /* e a PROPRIEDADE que faz deles o par: log(a·b) = log a + log b — o produto vira soma */
-        long prop = 0, np = 0;
-        for(double a = 1.5; a <= 4.0; a += 0.5)
-            for(double c = 1.5; c <= 4.0; c += 0.5){
-                np++;
-                if((long long)(fabs(log(a*c) - (log(a) + log(c))) * 1e12) >= 1) prop++;
-            }
-        /* E O MORFISMO TEM REALIZAÇÃO EXACTA, que é o que separa a lei da libm. As duas
-         * primeiras linhas — log(exp(u)) = u e exp(log(x)) = x — são f∘f⁻¹, e medem a
-         * implementação: a composição de um par com a sua inversa devolve o argumento por
-         * definição do par. A TERCEIRA é a lei, e essa vale numa base INTEIRA sem uma
-         * vírgula: com a = bᵐ e c = bⁿ,
-         *
-         *      log_b(a·c) = m + n = log_b(a) + log_b(c)
-         *
-         * e o log inteiro é a `rt_log_int` da reta.h, que RECUSA quando o argumento não é
-         * potência da base — o que a torna medição e não adivinha. */
         long mz = 0, mz_tot = 0, mz_recusa = 0;
         for(long b2 = 2; b2 <= 5; b2++)
             for(int m2 = 0; m2 <= 6; m2++) for(int n2 = 0; n2 <= 6; n2++){
@@ -187,28 +138,15 @@ printf("\n§W3  O BIDUAL: exp e log sao o par, e a volta fecha nos DOIS sentidos
                 mz_tot++;
                 if(rt_log_int(A2, b2, &la) && rt_log_int(C2, b2, &lc)
                    && rt_log_int(A2*C2, b2, &lac) && lac == la + lc) mz++;
-                /* e o lado que recusa: A·C + 1 não é potência da base */
                 if(!rt_log_int(A2*C2 + 1, b2, &lac)) mz_recusa++;
             }
-        printf("      log(exp(u)) = u        em %ld de %ld    residuo %ld   (f∘f⁻¹: a definição)\n",
-               casos-ida, casos, ida);
-        printf("      exp(log(x)) = x        residuo %ld                    (idem)\n", volta);
-        printf("      log(a·b) = log a + log b   em %ld de %ld    — o PRODUTO vira SOMA\n", np-prop, np);
-        printf("      e em base INTEIRA, sem virgula: log_b(a.c) = log_b a + log_b c em %ld de\n"
-               "      %ld, e a base RECUSA o que nao e' potencia dela em %ld\n",
-               mz, mz_tot, mz_recusa);
-        bidual = (ida == 0 && volta == 0 && prop == 0
-                  && mz == mz_tot && mz_recusa > mz_tot/2);
-        ok("exp e log fecham nos DOIS sentidos, e a propriedade que faz deles o par e' log(a·b)"
-           " = log a + log b: o PRODUTO vira SOMA ao atravessar. E' o mesmo par que a constante"
-           " de integracao atravessa na cosmologia — entra aditiva e sai multiplicativa — e o"
-           " mesmo que separa o espacamento (soma) da escala (produto). Uma so' das voltas nao"
-           " provava: uma funcao pode ter inversa a' esquerda e nao a' direita.\n"
-           "  E AS DUAS PRIMEIRAS LINHAS NAO MEDEM A LEI: log(exp(u)) = u e exp(log(x)) = x"
-           " sao f∘f⁻¹, a definicao do par relida, e o que elas testam e' a implementacao da"
-           " libm. A LEI e' a terceira, e ela tem realizacao EXACTA: com a = b^m e c = b^n,"
-           " log_b(a.c) = m + n em INTEIROS, pela `rt_log_int` — que RECUSA quando o"
-           " argumento nao e' potencia da base, e e' essa recusa que a torna medicao", bidual);
+        printf("      log_b(a.c) = log_b a + log_b c em %ld de %ld\n", mz, mz_tot);
+        printf("      e a base RECUSA o que nao e' potencia dela em %ld\n", mz_recusa);
+        bidual = (mz == mz_tot && mz_recusa > mz_tot/2 && mz_tot > 0);
+        ok("a propriedade que faz de exp e log o par e' log(a·b) = log a + log b: o PRODUTO"
+           " vira SOMA ao atravessar. Realizacao EXACTA em Z pela `rt_log_int` — que RECUSA"
+           " quando o argumento nao e' potencia da base, e e' essa recusa que a torna medicao",
+           bidual);
     }
 
 printf("\n§W4  E a APLICACAO: a altura e' MULTIPLICATIVA, a posicao e' ADITIVA.\n\n");

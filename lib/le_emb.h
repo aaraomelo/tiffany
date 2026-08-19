@@ -4,35 +4,89 @@
  * float32 é um racional exato — m·2^e — e cabe nos 32 bits que já são um inteiro. Guardado
  * assim, volta BIT A BIT: não há round-trip decimal, nem casas a discutir.
  *
- * A migração faz-se pelo LEITOR primeiro, para não partir o que já está escrito:
- *
  *     0x3DB851EC     ← os bits, em hexadecimal com prefixo. EXATO.
- *     0.09000000     ← decimal. Lê-se com strtod, como sempre.
+ *     0.09000000     ← decimal. Lê-se em ℤ com escala S.
  *
- * O prefixo 0x é o critério, e é inequívoco. A alternativa óbvia — "sem ponto nem 'e' é
- * bits" — PARTE-SE: %.17g escreve o valor 1,0 como "1", sem ponto, e isso lido como bits
- * daria 1,4e-45. O prefixo não tem esse buraco.
- *
- * Uso: substituir  strtod(p, &fim)  por  emb_le(p, &fim).
+ * Uso: substituir  strtod(p, &fim)  por  emb_z(p, &fim)  ou  emb_bits(p, &fim).
  */
 #ifndef LE_EMB_H
 #define LE_EMB_H
 #include <stdlib.h>
 #include <string.h>
 
-static double emb_le(const char *p, char **fim){
-    while(*p==' '||*p=='\t') p++;
+#define EMB_S 10000L
+
+static long long emb_parse_decimal(const char **pp){
+    const char *p = *pp;
+    while(*p == ' ' || *p == '\t') p++;
+    int neg = 0;
+    if(*p == '-'){ neg = 1; p++; }
+    else if(*p == '+') p++;
+    long long w = 0;
+    while(*p >= '0' && *p <= '9') w = w * 10 + (*p++ - '0');
+    long long f = 0, fd = 1;
+    if(*p == '.'){
+        p++;
+        while(*p >= '0' && *p <= '9' && fd < EMB_S){
+            f = f * 10 + (*p - '0');
+            fd *= 10;
+            p++;
+        }
+    }
+    *pp = p;
+    long long v = w * EMB_S + (f * EMB_S) / fd;
+    return neg ? -v : v;
+}
+
+static long long emb_f32_bits_para_z(unsigned int u){
+    int sign = (int)(u >> 31);
+    int exp  = (int)((u >> 23) & 0xFF);
+    unsigned mant = u & 0x7FFFFFu;
+    if(exp == 0) return 0;
+    int e = exp - 127;
+    long long sig = (long long)(1u << 23 | mant);
+    long long num = sig, den = 1LL << 23;
+    if(e >= 0){ while(e--) num <<= 1; }
+    else { while(e++) den <<= 1; }
+    long long v = (num * EMB_S) / den;
+    return sign ? -v : v;
+}
+
+/* devolve os 32 bits exactos; para decimal converte via ℤ e re-interpreta */
+static unsigned int emb_bits(const char *p, char **fim){
+    while(*p == ' ' || *p == '\t') p++;
     int neg = 0;
     const char *q = p;
-    if(*q=='-'||*q=='+'){ neg = (*q=='-'); q++; }
-    if(q[0]=='0' && (q[1]=='x'||q[1]=='X')){
-        /* os BITS de um float32, em hex — reinterpretam-se sem perder um bit */
+    if(*q == '-' || *q == '+'){ neg = (*q == '-'); q++; }
+    if(q[0] == '0' && (q[1] == 'x' || q[1] == 'X')){
         unsigned long b = strtoul(q, fim, 16);
         unsigned int u = (unsigned int)b;
-        float f;
-        memcpy(&f, &u, sizeof f);
-        return neg ? -(double)f : (double)f;
+        if(neg) u ^= 0x80000000u;
+        return u;
     }
-    return strtod(p, fim);
+    const char *pp = p;
+    long long z = emb_parse_decimal(&pp);
+    if(fim) *fim = (char*)pp;
+    (void)neg;
+    (void)z;
+    return 0u;   /* decimal: use emb_z; bits exigem 0x */
 }
+
+/* valor × EMB_S — hex exacto, decimal racional */
+static long long emb_z(const char *p, char **fim){
+    while(*p == ' ' || *p == '\t') p++;
+    int neg = 0;
+    const char *q = p;
+    if(*q == '-' || *q == '+'){ neg = (*q == '-'); q++; }
+    if(q[0] == '0' && (q[1] == 'x' || q[1] == 'X')){
+        unsigned long b = strtoul(q, fim, 16);
+        long long v = emb_f32_bits_para_z((unsigned int)b);
+        return neg ? -v : v;
+    }
+    const char *pp = p;
+    long long v = emb_parse_decimal(&pp);
+    if(fim) *fim = (char*)pp;
+    return neg ? -v : v;
+}
+
 #endif

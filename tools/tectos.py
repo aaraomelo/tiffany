@@ -63,6 +63,7 @@
 #   python3 tools/tectos.py
 import collections
 import re, glob, sys
+from decimal import Decimal
 
 # «todo», «todos», «nenhum», «sempre», «qualquer», «sem excepção» — o que promete a gama
 UNIV = re.compile(r'\b(TODO|TODOS|TODAS|TODA|NENHUM|NENHUMA|SEMPRE|qualquer|'
@@ -405,8 +406,8 @@ def especie_dec(cond, decs):
 
 def _minusculo(d):
     try:
-        return abs(float(d)) <= 1e-4
-    except ValueError:
+        return abs(Decimal(d)) <= Decimal('1e-4')
+    except Exception:
         return False
 
 

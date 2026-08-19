@@ -25,10 +25,9 @@
  *   §D4  e a conta muda com o PAPEL: guardar, transferir, ou calcular
  *   §D5  os terminais: dois para fora, e o resto dentro
  *
- *   cc -O2 -std=c99 -Wall -Wformat dispositivo.c -lm -o dispositivo && ./dispositivo
+ *   cc -O2 -std=c99 -Wall -I lib tests/dispositivo.c -o dispositivo
  */
 #include <stdio.h>
-#include <math.h>
 #include "unidade.h"
 #include "reta.h"
 
@@ -59,19 +58,12 @@ int main(void){
     /* ── §D2 ─────────────────────────────────────────────────────────────── */
     puts("§D2  A RAM DA LLM EM CELULAS: quantas, e quanto espaco\n");
     {
-        /* TUDO ISTO SAO CONTAGENS, e contagens sao inteiros: bytes, bits, celulas e a
-         * densidade de um die. Os doubles nao carregavam virgula nenhuma — carregavam
-         * numeros grandes, que e outra coisa, e o `long` leva-os sem perder um bit.
-         * A area e uma RAZAO de duas contagens, e nao se forma: compara-se por PRODUTO
-         * CRUZADO, que e a regra da casa —
-         *      bits/bpm > 1/10   <=>   10·bits > bpm
-         *      bits/bpm < 100    <=>   bits < 100·bpm
-         * e assim a asserção deixa de precisar de uma virgula para dizer o que diz. */
         long bytes_llm = 1300000000L;            /* o llama3.2:1b, quantizado */
         long bits = bytes_llm * 8;
         long celulas_slc = bits;                 /* 1 bit por célula */
         long celulas_qlc = bits / 4;             /* 4 bits por célula, o QLC comercial */
         long bits_por_mm2 = 1000000000000L / 100;   /* 1 Tb em ~100 mm² */
+        (void)celulas_slc;
         ok("a RAM do modelo cabe numa area de escala de CHIP, e nao de sala — e a area e uma"
            " RAZAO de duas contagens, comparada por produto cruzado e sem formar a divisao",
            10*bits > bits_por_mm2 && bits < 100*bits_por_mm2);
@@ -84,30 +76,33 @@ int main(void){
     /* ── §D3  O BALANÇO ──────────────────────────────────────────────────── */
     puts("§D3  O BALANCO: o que a colheita da contra o que o dispositivo gasta\n");
     {
-        /* o que a colheita deu, medido nos outros medidores */
-        double p_seebeck = 0.9931;                /* W — arraytermico.c §A5 com o ceu */
-        double p_rf      = 21e-6;                 /* W — colheita.c §C1, antena isotropica */
-        double colhido   = p_seebeck + p_rf;
+        /* potências em µW: 993100 = 0,9931 W (arraytermico), 21 = 21 µW (colheita) */
+        long p_seebeck_uw = 993100L;
+        long p_rf_uw      = 21L;
+        long colhido_uw   = p_seebeck_uw + p_rf_uw;
 
-        /* o que gasta, por papel — numeros de ordem, de folhas de dados publicas */
-        struct { const char *papel; double watts; } GASTO[] = {
-            { "guardar (NAND em repouso)",   1e-6  },   /* retencao: praticamente zero */
-            { "ler sequencial (100 MB/s)",   0.05  },
-            { "escrever (100 MB/s)",         0.30  },
-            { "inferencia da LLM em CPU",   15.0   },
+        struct { const char *papel; long uw; } GASTO[] = {
+            { "guardar (NAND em repouso)",        1L       },
+            { "ler sequencial (100 MB/s)",    50000L       },
+            { "escrever (100 MB/s)",         300000L       },
+            { "inferencia da LLM em CPU", 15000000L       },
         };
-        printf("      %-32s %12s %14s\n", "papel", "gasto (W)", "colheita paga?");
+        printf("      %-32s %12s %14s\n", "papel", "gasto (µW)", "colheita paga?");
         int pagos = 0, n = 4;
         for(int i = 0; i < n; i++){
-            int paga = GASTO[i].watts < colhido;
-            printf("      %-32s %12.2e %14s\n", GASTO[i].papel, GASTO[i].watts,
+            int paga = GASTO[i].uw < colhido_uw;
+            printf("      %-32s %12ld %14s\n", GASTO[i].papel, GASTO[i].uw,
                    paga ? "SIM" : "NAO");
             if(paga) pagos++;
         }
         ok("a colheita paga GUARDAR, LER e ESCREVER — mas NAO paga a inferencia",
            pagos == 3);
-        printf("      -> colhido %.4f W (Seebeck %.4f + RF %.1e). A inferencia pede %.0fx mais.\n",
-               colhido, p_seebeck, p_rf, GASTO[3].watts/colhido);
+        long falta_uw = GASTO[3].uw - colhido_uw;
+        long raz_cal = GASTO[3].uw * 100L / colhido_uw;
+        printf("      -> colhido %ld µW (Seebeck %ld + RF %ld). A inferencia pede %ld centesimos"
+               " de colheita (x%ld).\n",
+               colhido_uw, p_seebeck_uw, p_rf_uw, raz_cal, raz_cal / 100);
+        (void)falta_uw;
         conclui("e este e o numero que decide o dispositivo. Nao e o espaco, nao e o NAND: e a");
         conclui("distancia de quinze vezes entre o que a liga colhe e o que calcular custa.");
         puts("");
@@ -116,18 +111,11 @@ int main(void){
     /* ── §D4  o PAPEL ────────────────────────────────────────────────────── */
     puts("§D4  E A CONTA MUDA COM O PAPEL — guardar, transferir, ou calcular\n");
     {
-        /* o reenquadramento do Aarao: "o cerebro e o microprocessador; estamos fazendo o
-         * encanamento". Se o dispositivo so encana, ele nao calcula — e ai a conta fecha. */
-        double colhido = 0.9931;                  /* COPIADO do cosmico.c: o céu como frio */
-        double encanar = 0.30;                    /* o pior caso do encanamento: escrever */
-        double calcular = 15.0;
-        /* E ESTES TRÊS SÃO DECLARADOS, não medidos aqui — o `colhido` vem do `cosmico.c` e
-         * os outros dois são estimativas de projecto. Logo as asserções são aritmética sobre
-         * números meus, e o que se pode afirmar deles é a RAZÃO, dita e enquadrada dos dois
-         * lados. E vale a pena dizê-la, porque a primeira é APERTADA: `colhido > 3·encanar`
-         * é 0,9931 contra 0,90, três por cento de margem — um encanamento de 0,34 W já não
-         * pagava, e o «folga de 3x» não deixava ver isso. */
-        long r_enc = (long)(colhido/encanar*100), r_cal = (long)(calcular/colhido*100);
+        long colhido_uw = 993100L;                /* COPIADO do cosmico.c: o céu como frio */
+        long encanar_uw = 300000L;
+        long calcular_uw = 15000000L;
+        long r_enc = colhido_uw * 100L / encanar_uw;
+        long r_cal = calcular_uw * 100L / colhido_uw;
         printf("      -> as duas razões, em centésimos: colhido/encanar = %ld,"
                " calcular/colhido = %ld\n", r_enc, r_cal);
         ok("se o dispositivo ENCANA (guarda e transfere), a colheita paga — e a folga diz-se em"
@@ -140,10 +128,10 @@ int main(void){
            " quinze vezes e meia, enquadrada dos dois lados. «Mais de uma ordem de grandeza»"
            " era verdade e dizia menos do que se sabe",
            r_cal > 1500 && r_cal < 1520);
-        printf("      -> encanar %.2f W contra %.2f W colhidos: folga de %.1fx.\n",
-               encanar, colhido, colhido/encanar);
-        printf("         calcular %.0f W contra %.2f W: faltam %.0f W.\n",
-               calcular, colhido, calcular - colhido);
+        printf("      -> encanar %ld µW contra %ld µW colhidos: folga %ld centesimos.\n",
+               encanar_uw, colhido_uw, r_enc);
+        printf("         calcular %ld µW contra %ld µW: faltam %ld µW.\n",
+               calcular_uw, colhido_uw, calcular_uw - colhido_uw);
         conclui("O REENQUADRAMENTO DO AARAO E O QUE FAZ A CONTA FECHAR. Se o cerebro e o");
         conclui("processador e o dispositivo so encana, ele vive da liga. Se tivesse de calcular,");
         conclui("nao viveria — e nenhuma liga melhor resolveria, porque a distancia e de 15x.");
@@ -153,58 +141,34 @@ int main(void){
     /* ── §D5  os TERMINAIS ───────────────────────────────────────────────── */
     puts("§D5  OS TERMINAIS: dois para fora, e o resto dentro\n");
     {
-        /* o §P7 mediu que o par (sigma, sigma') tem polaridade e sigma.sigma' = -1.
-         * Aqui conta-se o que atravessa a fronteira: dois terminais, e mais nada. */
-        /* σσ' = −1 é EXATA em Z[σ] e não precisa de raiz nenhuma: σ e σ' são as raízes de
-         * x² − mx − 1, logo o produto delas É o termo constante, −1. Verifica-se pelo
-         * polinómio, em inteiros, e para toda a família — não só para o ouro. */
-        double s = (1 + sqrt(5.0))/2, sl = (1 - sqrt(5.0))/2;   /* só para as linhas que imprimem */
         {
-            /* O QUE AQUI ESTAVA NÃO PODIA FALHAR:
-             *      long long soma = m, produto = -1;
-             *      if(produto == -1 && soma == m) exatos++;
-             * as duas comparações são com o que a linha de cima atribuiu. A asserção dizia
-             * «Vieta, em inteiros» e media as suas próprias atribuições.
-             *
-             * Vieta mede-se em ℤ[√D], onde σ e σ' EXISTEM como pares e as contas acontecem:
-             * guarda-se 2σ = (m, 1) e 2σ' = (m, −1), com D = m² + 4. Então
-             *
-             *      (2σ)(2σ') = m² − D = −4      ⟹  σ·σ' = −1     — e é a NORMA
-             *      (2σ) + (2σ') = (2m, 0)       ⟹  σ + σ' = m    — a parte irracional CANCELA
-             *
-             * e o cancelamento do √D na soma é o conteúdo: é a conjugação, a dobra b ↦ −b. */
             int metais = 0, prod_ok = 0, soma_ok = 0, pol_ok = 0;
             for(long m = 1; m <= 12; m++){
                 long D = m*m + 4;
                 metais++;
-                /* o produto, pela norma de ℤ[√D] — e ela é uma CONTA, não uma atribuição */
                 long pa, pb;
                 rt_zd_mul(m, 1, m, -1, D, &pa, &pb);
-                if(pa == -4 && pb == 0) prod_ok++;          /* (2σ)(2σ') = −4 + 0·√D */
-                /* a soma: a parte em √D tem de CANCELAR, e é isso que a conjugação faz */
+                if(pa == -4 && pb == 0) prod_ok++;
                 long sa = m + m, sb = 1 + (-1);
                 if(sa == 2*m && sb == 0) soma_ok++;
-                /* e a polaridade, sem raiz: σ' < 0 ⟺ m < √D ⟺ m² < D = m²+4, sempre */
                 if(m*m < D) pol_ok++;
             }
-            printf("        e em ℤ[√D]: (2σ)(2σ') = m² − D = −4 e a parte em √D CANCELA na\n");
+            printf("        e em Z[raiz(D)]: (2σ)(2σ') = m² − D = −4 e a parte em raiz(D) CANCELA na\n");
             printf("        soma, em %d metais e sem uma raiz quadrada\n", metais);
             ok("os terminais sao DOIS e tem polaridade oposta — o + e o -, do §P7. E mede-se"
                " sem raiz: σ' < 0 e' m < raiz(D), que e' m^2 < D = m^2+4, verdadeiro para"
                " toda a familia e nao so' para o ouro",
                pol_ok == metais && metais == 12);
-            ok("sigma.sigma' = -1 EXATO em ℤ[√D], e agora a conta ACONTECE: (2σ)(2σ') sai"
+            ok("sigma.sigma' = -1 EXATO em Z[raiz(D)], e agora a conta ACONTECE: (2σ)(2σ') sai"
                " por rt_zd_mul e da' -4 + 0.raiz(D) nos doze metais, donde σσ' = -1. E a"
                " SOMA e' a outra metade — a parte em raiz(D) CANCELA, que e' a conjugacao,"
                " a dobra b -> -b. O que aqui estava atribuia `produto = -1` e comparava com"
                " -1: nao podia falhar, e dizia «Vieta, em inteiros»",
                prod_ok == metais && soma_ok == metais);
         }
-        /* esta linha media sigma*sigma' em double contra 1e-14; a versao exata esta no
-         * bloco acima (Vieta, em inteiros, e para toda a familia). Fica o registo do valor,
-         * sem asserção sobre ele. */
-        printf("        (em double, para o ouro: sigma*sigma' = %+.15f)\n", s*sl);
-        printf("      -> sigma = %.6f (+), sigma' = %.6f (-), produto %.1f.\n", s, sl, s*sl);
+        /* ouro m=1: σ=(1,1), σ'=(1,−1) em Z[√5]; F_{8}/F_{7}=21/13 aproxima (1+√5)/2 */
+        printf("        (ouro: σ=(1,1), σ'=(1,−1) em Z[raiz5]; F8/F7 = 21/13 ≈ terminal +)\n");
+        printf("      -> dois terminais: + e −, produto σσ' = −1 em Z[raiz(D)].\n");
         conclui("tudo dentro, so os dois terminais fora: a alimentacao entra por inducao na liga");
         conclui("(colheita.c: ler e escrever sao adjuntos, logo a mesma espira faz as duas), e o");
         conclui("sinal sai pelo par. Nao ha uma terceira coisa a atravessar a fronteira.");
@@ -212,8 +176,6 @@ int main(void){
     }
 
     puts("──────────────────────────────────────────────────────────────────────────────");
-    /* O VEREDITO, que faltava. O programa tinha sete asserções e devolvia 0 sem dizer nada —
-     * quem lê fica dependente do código de saída, que é mais fraco do que a frase. */
     printf("\n  %d asserções, %d falhas\n", unidades, falhas);
     if(!falhas) printf("  RESIDUO 0\n");
     else        printf("  NAO FECHOU\n");

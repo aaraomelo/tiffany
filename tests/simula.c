@@ -28,62 +28,19 @@
  *   §S5  o CIRCUITO ponta a ponta: campo -> NV -> pré-amp -> ADC, e o que chega
  *   §S6  o CONTROLO: a realimentação, e porque ela alarga a janela
  *
- *   cc -O2 -std=c99 -Wall -Wformat simula.c -lm -o simula && ./simula
+ * LEI vs TRANSPORTE. acos, √3, a Lorentziana em Hz e o SNR com shot 1/√N eram o método.
+ * A lei é o tetraedro em ℤ (cos = −1/3, |v|² = 3, soma 0), a inversão Σ v vᵀ = 4I,
+ * a encosta em 3d² = w² por duas rotas, √N pelas razões 4 vs 16, e ganho×banda constante.
+ *
+ *   cc -O2 -std=c99 -I lib tests/simula.c -o simula && ./simula
  */
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
+#include "unidade.h"
 #include "reta.h"
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
-/* ───────────────────────────────────────────────────────────────────────────
- * §S1  AS QUATRO DIREÇÕES — e não são escolhidas: são as ligações do cristal
- * ─────────────────────────────────────────────────────────────────────────── */
+typedef __int128 I128;
 
-/* os quatro vértices do tetraedro, normalizados — as direções <111> do diamante */
-static void direcao_nv(int k, double *n){
-    static const double v[4][3] = { {1,1,1}, {1,-1,-1}, {-1,1,-1}, {-1,-1,1} };
-    double m = sqrt(3.0);
-    for(int i = 0; i < 3; i++) n[i] = v[k][i]/m;
-}
-
-static double ip(const double *a, const double *b){ return a[0]*b[0]+a[1]*b[1]+a[2]*b[2]; }
-static double nrm(const double *a){ return sqrt(ip(a,a)); }
-
-/* ───────────────────────────────────────────────────────────────────────────
- * §S4  A RESSONÂNCIA — a Lorentziana do ODMR, e é ela que não é linear
- *
- * O contraste de fluorescência em torno da ressonância:  C(f) = A / (1 + ((f−f0)/w)²)
- * e a frequência de ressonância desloca-se com a projeção: f0 = D + γ·(B·n̂).
- * ─────────────────────────────────────────────────────────────────────────── */
-
-#define D_ZFS   2.87e9        /* o desdobramento de campo nulo do NV, Hz */
-#define GAMMA   28.0e9        /* razão giromagnética, Hz/T */
-#define LARG    1.0e6         /* largura da linha, Hz */
-#define CONTR   0.03          /* contraste, 3% */
-
-static double lorentz(double f, double f0){
-    double x = (f - f0)/LARG;
-    return CONTR / (1.0 + x*x);
-}
-
-/* a derivada da Lorentziana — e é ela a "transcondutância" do sensor */
-static double dlorentz(double f, double f0){
-    double x = (f - f0)/LARG;
-    return -CONTR * 2.0*x / (LARG * (1.0 + x*x)*(1.0 + x*x));
-}
-
-/* ───────────────────────────────────────────────────────── o programa */
-
-static int falhas = 0, feitas = 0;
-static void ok(const char *q, int cond){
-    feitas++; if(!cond) falhas++;
-    printf("#UNIT %s %s\n", cond ? "ok" : "falha", q);
-    printf("  [%s] %s\n", cond ? "ok" : "FALHA", q);
-}
+static const long Vt[4][3] = { {1,1,1}, {1,-1,-1}, {-1,1,-1}, {-1,-1,1} };
 
 int main(void){
     puts("simula.c — O CIRCUITO COMPLETO: o NV multidimensional, a leitura e o controlo\n");
@@ -94,49 +51,33 @@ int main(void){
     puts("     octeto.c §O2, com arccos(-1/3) entre elas. O sensor e multidimensional PORQUE o");
     puts("     cristal tem quatro ligacoes.\n");
     {
-        double n[4][3];
-        for(int k = 0; k < 4; k++) direcao_nv(k, n[k]);
-        int normais = 0, angulos_ok = 0, pares = 0;
-        double alvo = acos(-1.0/3.0)*180/M_PI;
-        for(int k = 0; k < 4; k++)
-            if((long long)(fabs(nrm(n[k]) - 1.0) * 1e15) == 0) normais++;
-        for(int a = 0; a < 4; a++)
-            for(int b = a+1; b < 4; b++){
-                double ang = acos(ip(n[a],n[b]))*180/M_PI;
-                if((long long)(fabs(ang - alvo) * 1e9) == 0) angulos_ok++;
+        /* acos e √3 eram transporte. O cosseno é RACIONAL: ⟨vi,vj⟩ = −1, |v|² = 3,
+         * logo 3⟨vi,vj⟩ = −|v|²  ⇔  cos = −1/3, sem formar o ângulo. */
+        long pares = 0, cos_um_terco = 0, normas_iguais = 0;
+        for(int i = 0; i < 4; i++){
+            if(rt_dir(Vt[i], Vt[i], 3) == 3) normas_iguais++;
+            for(int j = i+1; j < 4; j++){
                 pares++;
+                long d = rt_dir(Vt[i], Vt[j], 3);
+                long ni = rt_dir(Vt[i], Vt[i], 3), nj = rt_dir(Vt[j], Vt[j], 3);
+                if(d == -1 && ni == 3 && nj == 3 && 3*d == -ni) cos_um_terco++;
             }
-        ok("as quatro direcoes sao unitarias — sao versores, e nao vetores quaisquer",
-           normais == 4);
-        ok("e o angulo entre QUAISQUER duas e o mesmo: arccos(-1/3), nos seis pares",
-           angulos_ok == pares && pares == 6);
-        /* e elas somam ZERO — é o que faz delas um tetraedro e não quatro direções soltas */
-        double soma[3] = {0,0,0};
-        for(int k = 0; k < 4; k++) for(int i = 0; i < 3; i++) soma[i] += n[k][i];
-        /* E A SOMA É ZERO EXACTO NOS VÉRTICES, que são INTEIROS. Os versores são os
-         * vértices do tetraedro no cubo divididos por √3 — e todos têm a mesma norma, logo
-         * a soma dos versores é a soma dos vértices sobre √3. Essa soma faz-se em ℤ e é
-         * (0,0,0) sem folga; o «< 1e-15» era do arredondamento das quatro divisões por √3,
-         * e não do facto. É a mesma geometria do octeto.c §O2, agora exacta nos dois. */
-        long Vt[4][3] = { {1,1,1}, {1,-1,-1}, {-1,1,-1}, {-1,-1,1} };
+        }
         long sz[3] = {0,0,0};
         for(int k = 0; k < 4; k++) for(int i = 0; i < 3; i++) sz[i] += Vt[k][i];
-        long normas_iguais = 0;
-        for(int k = 0; k < 4; k++) if(rt_dir(Vt[k], Vt[k], 3) == 3) normas_iguais++;
-        printf("     -> e nos VERTICES, em inteiros: a soma e' (%ld,%ld,%ld) — ZERO exacto —\n"
-               "        e as quatro tem a mesma norma ao quadrado (3) em %ld de 4\n",
-               sz[0], sz[1], sz[2], normas_iguais);
+        ok("as quatro direcoes sao unitarias no cubo — |v|² = 3 nas quatro, e nao versores"
+           " divididos por raiz(3). A normalizacao e' factor comum; a tese e' a NORMA INTEIRA",
+           normas_iguais == 4);
+        ok("e o angulo entre QUAISQUER duas e o mesmo: arccos(-1/3), nos seis pares. E o que"
+           " se mede e' o COSSENO, racional: <vi,vj> = -1 e |v|² = 3, logo 3<vi,vj> = -|v|²."
+           " acos e pi eram transporte — dois acos a mascarar x = x, como o octeto.c ja' disse",
+           cos_um_terco == pares && pares == 6);
         ok("e as quatro SOMAM ZERO — e isso que as faz um tetraedro, e nao quatro soltas. E o"
-           " zero e' EXACTO nos vertices, que sao INTEIROS: (1,1,1) + (1,-1,-1) + (-1,1,-1) +"
-           " (-1,-1,1) = (0,0,0), sem folga. Os versores sao esses vertices sobre raiz(3), e"
-           " como as quatro normas sao iguais a soma deles e' a soma dos vertices sobre a"
-           " mesma raiz — o «< 1e-15» era do arredondamento das quatro divisoes, e nao do"
-           " facto. Mesma geometria do octeto.c §O2, e agora exacta nos dois — e o proprio"
-           " «< 1e-15» esteve nesta condicao ate' agora, ao lado da frase que o dispensa",
-           sz[0] == 0 && sz[1] == 0 && sz[2] == 0
-           && normas_iguais == 4);
-        printf("     -> 6 pares, todos a %.4f graus; a soma dos quatro versores tem norma %.1e.\n",
-               alvo, nrm(soma));
+           " zero e' EXACTO nos vertices, que sao INTEIROS: (1,1,1)+(1,-1,-1)+(-1,1,-1)+"
+           " (-1,-1,1) = (0,0,0), sem folga",
+           sz[0] == 0 && sz[1] == 0 && sz[2] == 0 && normas_iguais == 4);
+        printf("     -> 6 pares, todos com <vi,vj> = -1 e |v|^2 = 3; soma (%ld,%ld,%ld).\n",
+               sz[0], sz[1], sz[2]);
         puts("        E o mesmo numero do octeto.c §O2, e nao foi copiado: foi recalculado aqui");
         puts("        a partir dos vertices. Dois medidores, uma geometria.\n");
     }
@@ -145,44 +86,10 @@ int main(void){
     puts("§S2  Cada NV mede uma PROJECAO — e QUATRO projecoes sobredeterminam o vetor");
     puts("§S3  A INVERSAO: das quatro leituras ao campo, com residuo medido\n");
     {
-        /* o campo a medir — um valor de MEG, e as três componentes distintas */
-        double B[3] = { 0.7e-12, -1.1e-12, 0.4e-12 };
-        double n[4][3], proj[4];
-        for(int k = 0; k < 4; k++){ direcao_nv(k, n[k]); proj[k] = ip(B, n[k]); }
-
-        printf("     %8s %14s %14s\n", "NV", "projecao (T)", "f0 - D (Hz)");
-        for(int k = 0; k < 4; k++)
-            printf("     %8d %14.4e %14.4f\n", k, proj[k], GAMMA*proj[k]);
-
-        /* a INVERSÃO por mínimos quadrados: B = (NᵀN)⁻¹ Nᵀ p. Para o tetraedro, NᵀN = (4/3)I,
-         * e isso é uma propriedade da geometria — verifica-se antes de a usar. */
-        double NtN[3][3] = {{0}};
-        for(int k = 0; k < 4; k++)
-            for(int i = 0; i < 3; i++)
-                for(int j = 0; j < 3; j++) NtN[i][j] += n[k][i]*n[k][j];
-        int isotropico = 1;
-        for(int i = 0; i < 3; i++)
-            for(int j = 0; j < 3; j++){
-                double alvo = (i==j) ? 4.0/3.0 : 0.0;
-                if((long long)(fabs(NtN[i][j] - alvo) * 1e14) >= 1) isotropico = 0;
-            }
-
-        /* E A TESE NAO PRECISA DA RAIZ NENHUMA. Os quatro eixos do tetraedro sao vectores
-         * INTEIROS — (1,1,1), (1,-1,-1), (-1,1,-1), (-1,-1,1) — e a normalizacao por raiz(3)
-         * e' um factor COMUM que sai para fora:
-         *
-         *     sum_k n_k n_k^T = (1/3) sum_k v_k v_k^T = (1/3) . 4I = (4/3) I
-         *
-         * logo a isotropia le-se em `sum v v^T = 4I`, que e' uma identidade de INTEIROS. E a
-         * diagonal e a fora-diagonal dizem coisas diferentes: a diagonal da 4 porque cada
-         * componente e' +-1 e ha quatro; a fora-diagonal ANULA-SE porque os sinais cancelam
-         * aos pares. Contam-se as duas em separado, senao «isotropico» ficava a valer por
-         * uma delas so'. */
         long S[3][3] = {{0}};
-        static const long vi[4][3] = { {1,1,1}, {1,-1,-1}, {-1,1,-1}, {-1,-1,1} };
         for(int k = 0; k < 4; k++)
             for(int i = 0; i < 3; i++)
-                for(int j = 0; j < 3; j++) S[i][j] += vi[k][i]*vi[k][j];
+                for(int j = 0; j < 3; j++) S[i][j] += Vt[k][i]*Vt[k][j];
         int diag_ok = 0, fora_ok = 0, fora_tot = 0;
         for(int i = 0; i < 3; i++)
             for(int j = 0; j < 3; j++){
@@ -194,30 +101,14 @@ int main(void){
         ok("N^T.N e ISOTROPICO e vale (4/3).I — o tetraedro nao privilegia direcao nenhuma."
            " E mede-se EXACTO em inteiros: a normalizacao por raiz(3) e' factor comum, logo a"
            " tese e' sum v.v^T = 4I, com a diagonal e a fora-diagonal contadas em separado",
-           isotropico && diag_ok == 3 && fora_ok == fora_tot && fora_tot == 6);
+           diag_ok == 3 && fora_ok == fora_tot && fora_tot == 6);
 
-        double Brec[3] = {0,0,0};
-        for(int i = 0; i < 3; i++){
-            for(int k = 0; k < 4; k++) Brec[i] += n[k][i]*proj[k];
-            Brec[i] *= 3.0/4.0;
-        }
-        double err = 0, esc = 0;
-        for(int i = 0; i < 3; i++){ err += (Brec[i]-B[i])*(Brec[i]-B[i]); esc += B[i]*B[i]; }
-        double rel = sqrt(err/esc);                 /* só para a linha que imprime */
-        /* E A INVERSÃO FAZ-SE EM ℤ, com resíduo ZERO EXACTO e sem uma raiz. Os eixos são
-         * v_k inteiros e n_k = v_k/√3; então
-         *
-         *      proj_k = n_k·B = (v_k·B)/√3        e     B_rec[i] = ¾ Σ_k n_k[i] proj_k
-         *                                                        = ¼ Σ_k v_k[i] (v_k·B)
-         *
-         * — os dois √3 cancelam —, e como Σ_k v_k v_kᵀ = 4I (medido acima, em inteiros),
-         * sai 4·B[i]. Logo a tese é uma IGUALDADE de inteiros, e não um resíduo pequeno. */
-        const long Bz[3] = { 7, -3, 11 };           /* um vector qualquer, inteiro */
+        const long Bz[3] = { 7, -3, 11 };
         long Brec_z[3] = { 0, 0, 0 };
         for(int k = 0; k < 4; k++){
             long pk = 0;
-            for(int i = 0; i < 3; i++) pk += (long)vi[k][i] * Bz[i];
-            for(int i = 0; i < 3; i++) Brec_z[i] += (long)vi[k][i] * pk;
+            for(int i = 0; i < 3; i++) pk += Vt[k][i] * Bz[i];
+            for(int i = 0; i < 3; i++) Brec_z[i] += Vt[k][i] * pk;
         }
         int inverte_z = 1;
         for(int i = 0; i < 3; i++) if(Brec_z[i] != 4*Bz[i]) inverte_z = 0;
@@ -227,22 +118,13 @@ int main(void){
            " sai 4.B[i] — uma IGUALDADE de inteiros, e nao um residuo pequeno. Nenhuma raiz"
            " se forma e nenhuma divisao relativa se faz",
            inverte_z);
-        printf("     -> B = (%.3e, %.3e, %.3e); recuperado com residuo relativo %.1e.\n",
-               B[0], B[1], B[2], rel);
-        /* e a SOBRA: 4 medidas para 3 incógnitas — a quarta é redundante e VERIFICA */
-        double conferido = 0;
-        for(int k = 0; k < 4; k++){
-            double p = ip(Brec, n[k]);
-            conferido += fabs(p - proj[k]);
-        }
-        /* e a SOBRA confere-se em ℤ pela mesma razão: reprojectar B_rec = 4B dá 4·(v_k·B),
-         * que é 4 vezes a projecção original — igualdade de inteiros, resíduo ZERO. */
+
         long confere_z = 1;
         for(int k = 0; k < 4; k++){
             long p_orig = 0, p_rec = 0;
             for(int i = 0; i < 3; i++){
-                p_orig += (long)vi[k][i] * Bz[i];
-                p_rec  += (long)vi[k][i] * Brec_z[i];
+                p_orig += Vt[k][i] * Bz[i];
+                p_rec  += Vt[k][i] * Brec_z[i];
             }
             if(p_rec != 4*p_orig) confere_z = 0;
         }
@@ -250,6 +132,8 @@ int main(void){
            " resultado — em Z e com residuo ZERO: reprojectar o reconstruido da' 4 vezes a"
            " projeccao original, exactamente, porque o reconstruido e' 4B",
            confere_z);
+        printf("     -> B = (%ld, %ld, %ld); reconstruido 4B = (%ld, %ld, %ld).\n",
+               Bz[0], Bz[1], Bz[2], Brec_z[0], Brec_z[1], Brec_z[2]);
         puts("        Nao e redundancia desperdicada: e o que permite detetar um canal avariado.");
         puts("        Com tres NV ainda se inverte; com quatro, sabe-se se um mentiu.\n");
     }
@@ -259,205 +143,146 @@ int main(void){
     puts("     O contraste e uma Lorentziana em torno de f0, e f0 desloca-se com o campo. Ler no");
     puts("     PICO nao serve: ali a derivada e zero. Le-se na encosta, e mede-se onde ela e maxima.\n");
     {
-        long f0 = D_ZFS;
-        /* a derivada é zero no pico — e isso é o que torna o pico inútil para medir */
-        /* e o ZERO no pico é ESTRUTURAL, não numérico: a derivada da Lorentziana é
-         *      dL = −C·2x / (w(1+x²)²)   com  x = (f − f0)/w,
-         * e o numerador tem FACTOR (f − f0). No pico esse factor é o inteiro 0, e um
-         * produto com factor zero é zero — não «é pequeno». */
-        long x_num_pico = (long)f0 - (long)f0;      /* o numerador de x, em Hz inteiros */
-        ok("no PICO a derivada e ZERO: ali o sensor nao responde a variacao nenhuma. E o zero"
-           " e' ESTRUTURAL e nao numerico — o numerador da derivada tem FACTOR (f - f0), que"
-           " no pico e' o inteiro 0, e um produto com factor zero e' zero",
-           x_num_pico == 0);
-        /* e há um ponto onde ela é máxima — procura-se, não se escolhe */
-        double melhor_d = 0, maior = 0;
-        for(double d = 0.05e6; d <= 3e6; d += 1e3){
-            double s = fabs(dlorentz(f0 + d, f0));
-            if(s > maior){ maior = s; melhor_d = d; }
-        }
-        /* a forma fechada: o máximo da derivada de uma Lorentziana é em x = 1/√3 */
-        /* a forma fechada é x = w/√3, e «bate a 1%» compara-se nos QUADRADOS: a condição
-         * |d − w/√3| / (w/√3) < 0,01 é, elevada, |3·d² − w²| / w² < 0,0201 — e nenhum dos
-         * dois lados forma a raiz. Fica a versão sem ela na asserção. */
-        double previsto = LARG/sqrt(3.0);            /* só para a linha que imprime */
-        double lhs = 3.0*melhor_d*melhor_d, rhs = (double)LARG*LARG;
-        /* E O LIMIAR SAI, porque não era da física — era do PASSO da grelha. A varredura
-         * corre em Hz inteiros com passo 1000, logo o que se pode afirmar é exacto: o
-         * máximo encontrado é o ponto da GRELHA mais próximo da forma fechada, e «mais
-         * próximo» decide-se comparando |3d² − w²| com o dos VIZINHOS — tudo inteiro,
-         * sem raiz e sem tolerância. */
+        /* dL ∝ −2x / (1+x²)² com x = (f−f0)/w. O numerador tem FACTOR (f−f0) = d.
+         * No pico d = 0 (inteiro 0); um passo ao lado d = passo ≠ 0. Sem f0−f0. */
         const long w_z = 1000000L, passo = 1000L;
-        long d_z = (long)(melhor_d + 0.5);
-        long erro_aqui = 3*d_z*d_z - w_z*w_z; if(erro_aqui < 0) erro_aqui = -erro_aqui;
-        long de = d_z + passo, db = d_z - passo;
+        conclui("no PICO a derivada e ZERO: o numerador tem FACTOR d=(f-f0), e no pico d e' o");
+        conclui("inteiro 0. Um passo ao lado nao e'. O que aqui estava era f0-f0, a definicao relida");
+
+        /* duas rotas para o máximo: (1) forma fechada 3d² = w², o ponto da GRELHA mais
+         * perto; (2) maximizar |dL| ∝ d / (w²+d²)² na mesma grelha, em __int128. */
+        long d_forma = -1, err_forma = 0;
+        {
+            int prim = 1;
+            for(long d = passo; d <= 3*w_z; d += passo){
+                long e = 3*d*d - w_z*w_z; if(e < 0) e = -e;
+                if(prim || e < err_forma){ err_forma = e; d_forma = d; prim = 0; }
+            }
+        }
+        long d_max = -1;
+        {
+            int prim = 1;
+            I128 melhor = 0;
+            for(long d = passo; d <= 3*w_z; d += passo){
+                I128 den = (I128)w_z*(I128)w_z + (I128)d*(I128)d;
+                if(prim){ melhor = den*den; d_max = d; prim = 0; continue; }
+                I128 den2 = den*den;
+                I128 esq = (I128)d * melhor;
+                I128 dir = (I128)d_max * den2;
+                if(esq > dir){ melhor = den2; d_max = d; }
+            }
+        }
+        long de = d_forma + passo, db = d_forma - passo;
+        long erro_aqui = 3*d_forma*d_forma - w_z*w_z; if(erro_aqui < 0) erro_aqui = -erro_aqui;
         long erro_dir = 3*de*de - w_z*w_z; if(erro_dir < 0) erro_dir = -erro_dir;
         long erro_esq = 3*db*db - w_z*w_z; if(erro_esq < 0) erro_esq = -erro_esq;
         int e_o_mais_perto = (erro_aqui < erro_dir && erro_aqui < erro_esq);
-        int na_grelha = (d_z % passo == 0);
+        int na_grelha = (d_forma % passo == 0);
         ok("e ha um ponto de DERIVADA MAXIMA, e ele bate a forma fechada w/raiz(3) — sem"
-           " raiz E SEM TOLERANCIA. A varredura corre em Hz inteiros com passo 1000, logo o"
-           " que se afirma e' exacto: o maximo encontrado E' O PONTO DA GRELHA MAIS PROXIMO"
-           " de 3d^2 = w^2, e «mais proximo» decide-se comparando |3d^2 - w^2| com o dos"
-           " dois VIZINHOS. O limiar de 2,01% que aqui estava nao era da fisica: era do"
-           " passo, e o passo diz-se melhor do que uma percentagem",
-           na_grelha && e_o_mais_perto);
-        printf("     -> a encosta maxima e a %.1f kHz do pico (a forma fechada da %.1f kHz).\n",
-               melhor_d/1e3, previsto/1e3);
-        /* e ali a resposta é LINEAR numa janela — mede-se o quanto */
-        /* A minha primeira versao disto tinha uma variavel morta e uma expressao sem sentido
-         * (um "(real/fabs(real))>0 ? 1 : 1", que da 1 sempre). Escrevi codigo a mais e nao o
-         * li. A medida limpa e outra: a RAZAO resposta/df tem de ser CONSTANTE na janela —
-         * e ser constante E ser linear, sem eu precisar de comparar com uma aproximacao. */
-        double f_op = f0 + melhor_d;
-        double S = fabs(dlorentz(f_op, f0));               /* a "transcondutância" do sensor */
-        double razao0 = 0, pior = 0; int n = 0, linear = 1;
-        for(double dB = -1e-9; dB <= 1e-9 + 1e-12; dB += 2e-10){
-            double df = GAMMA*dB;
-            if((long long)(fabs(df) * 1e9) == 0) continue;                  /* o ponto zero nao diz nada */
-            double resp = lorentz(f_op, f0 + df) - lorentz(f_op, f0);
-            double razao = resp/df;
-            if(n == 0) razao0 = razao;
-            else {
-                double e = fabs(razao - razao0)/fabs(razao0);
-                if(e > pior) pior = e;
-                if(e > 0.05) linear = 0;
-            }
-            n++;
-        }
-        ok("e na encosta a razao resposta/df e CONSTANTE em +-1 nT — e ser constante E ser linear",
-           linear && n >= 8);
-        printf("        %d pontos na janela, e a razao varia no maximo %.2f%%. A sensibilidade e\n",
-               n, 100*pior);
-        printf("        %.3e por hertz — e a DERIVADA, que e o gm do §A1.\n", S);
+           " raiz, sem Lorentziana e SEM TOLERANCIA. Duas rotas na grelha de 1000 Hz: o"
+           " ponto mais perto de 3d^2 = w^2, e o maximo de |dL| ∝ d/(w^2+d^2)^2 em __int128."
+           " As duas CAEM NO MESMO d. O limiar de 2% era do passo, e o passo diz-se melhor"
+           " do que uma percentagem",
+           na_grelha && e_o_mais_perto && d_max == d_forma && d_forma > passo);
+        printf("     -> a encosta maxima e a %ld Hz do pico (grelha), e as duas rotas batem.\n",
+               d_forma);
         puts("        'So linearizar' e exatamente isto: escolher o ponto de trabalho na encosta");
-        puts("        e usar a DERIVADA como ganho. E a mesma frase do amplifica.c, noutra curva.\n");
+        puts("        e usar a DERIVADA como ganho. E a mesma frase do amplifica.c, noutra curva.");
+        puts("        A janela de +-1 nT com razao a 5% era o metodo (a Lorentziana avaliada).\n");
     }
 
     /* ── §S5  o CIRCUITO ─────────────────────────────────────────────────── */
     puts("§S5  O CIRCUITO PONTA A PONTA: campo -> NV -> pre-amp -> ADC, e o que chega\n");
     {
-        double B = 1.25e-12;                       /* o sinal da MEG */
-        double df = GAMMA * B;                     /* o deslocamento em frequência */
-        double S = fabs(dlorentz(D_ZFS + LARG/sqrt(3.0), D_ZFS));
-        double dC = S * df;                        /* a variação de contraste */
-        long fotons = 1e6;                       /* fotões por medida */
-        double ruido_shot = 1.0/sqrt(fotons);      /* o ruído de contagem, relativo */
-        double snr = dC / ruido_shot;
-
-        printf("     %-30s %14s\n", "etapa", "valor");
-        printf("     %-30s %12.3e T\n", "campo a medir (MEG)", B);
-        printf("     %-30s %12.3f Hz\n", "deslocamento da linha", df);
-        printf("     %-30s %12.3e\n", "variacao de contraste", dC);
-        printf("     %-30s %12.3e\n", "ruido de shot (1e6 fotoes)", ruido_shot);
-        printf("     %-30s %12.3e\n", "SNR de UMA medida", snr);
-        /* «abaixo de 1» tinha um milhao e meio de vezes de folga: o SNR de um disparo e'
-         * 6,8e-07. Diz-se o numero, enquadrado dos dois lados em unidades de 1e-9 — e o que
-         * ele significa nao e' «nao chega», e' que falta SEIS ordens de grandeza. */
-        long snr_z = (long)(snr * 1000000000.0);        /* SNR em bilionesimos */
-        printf("     -> o SNR de um disparo vale %ld bilionesimos: nao e' «abaixo de 1», e'"
-               " SEIS ordens de grandeza abaixo\n", snr_z);
-        ok("uma medida SO' nao chega — e o quanto diz-se: o SNR de um unico disparo vale 681"
-           " bilionesimos — entre 600 e 700, enquadrado —, ou seja falta SEIS ordens de"
-           " grandeza, e nao «fica abaixo de 1»,"
-           " que tinha um milhao e meio de vezes de folga",
-           snr_z > 600 && snr_z < 700);
-        /* e a lei do √N outra vez, e ela diz quantas medidas */
-        double N = (1.0/snr)*(1.0/snr) * 100;      /* para SNR = 10 */
-        /* e `N > 1` tinha folga astronomica — N vale 2,1e14. A lei do raiz(N) e' uma
-         * IDENTIDADE, N.snr² = 100, e e' isso que se mede; o valor sai dela e diz-se com a
-         * consequencia, que e' a conclusao verdadeira: a 1 MHz de repeticao, 2,1e14 medidas
-         * sao mais de SEIS ANOS por ponto. */
-        double check = N * snr * snr;                   /* tem de dar 100, pela lei */
-        long anos = (long)(N / 1e6 / (365.25*24*3600));
-        printf("     -> e a lei do raiz(N): N.snr² = %.6f (tem de ser 100), N = %.2e, e a"
-               " 1 MHz isso sao %ld ANOS por ponto\n", check, N, anos);
-        ok("e a lei do raiz(N) diz quantas medias sao precisas — e ela e' uma IDENTIDADE,"
-           " N.snr^2 = 100, e nao a desigualdade `N > 1`, que tinha folga astronomica. O valor"
-           " sai da identidade e diz-se com a CONSEQUENCIA: a 1 MHz de repeticao sao SEIS ANOS"
-           " por ponto, e e' isso que fecha a seccao",
-           fabs(check - 100.0) < 1e-6 && anos >= 6 && anos < 8);
-        printf("     -> para SNR = 10 sao precisas %.1e medidas. A 1 MHz de repeticao, isso e\n", N);
-        printf("        %.2f segundos por ponto.\n", N/1e6);
-        puts("        E o mesmo raiz(N) do headjack.c §H3 e do radiacao.c §W4, agora no tempo em");
-        puts("        vez de no espaco. A escolha entre promediar em sensores ou em tempo e de");
-        puts("        DESENHO, e a lei e a mesma nas duas.\n");
+        /* γ·B, dlorentz, 1/√fotões e N = 100/snr² eram transporte: o SNR de um disparo
+         * e a identidade N·snr² = 100 (N definido como 100/snr²). A lei é o √N em ℤ,
+         * o mesmo do radiacao.c §W4 e do headjack.c §H3 — agora no TEMPO. */
+        conclui("uma medida SO' nao chega: o SNR de um disparo MEG e seis ordens abaixo de 1,");
+        conclui("e N.snr^2 = 100 e a definicao de N para SNR=10 — reler nao e medir. A 1 MHz");
+        conclui("sao anos por ponto; a conta fecha com a lei, nao com o decimal do disparo");
+        {
+            long est = 12345, K = 4000, ok_ind = 0, ok_cor = 0, niv = 0;
+            long ant_i = 0, ant_c = 0;
+            printf("     a LEI, medida em inteiros: variancia da SOMA de n amostras\n");
+            printf("     n      independentes         razao   correlacionadas       razao\n");
+            for(int n = 4; n <= 256; n *= 4){
+                long q_ind = 0, q_cor = 0;
+                for(long k = 0; k < K; k++){
+                    long Si = 0, Sc = 0;
+                    est = (est*1103515245L + 12345L) % 2147483647L;
+                    long comum = (est >> 11) % 201 - 100;
+                    for(int j = 0; j < n; j++){
+                        est = (est*1103515245L + 12345L) % 2147483647L;
+                        Si += (est >> 11) % 201 - 100;
+                        Sc += comum;
+                    }
+                    q_ind += Si*Si; q_cor += Sc*Sc;
+                }
+                q_ind /= K; q_cor /= K;
+                long r_i = ant_i ? q_ind/ant_i : 0, r_c = ant_c ? q_cor/ant_c : 0;
+                printf("     %-6d %-21ld %-7s %-21ld %s\n", n, q_ind,
+                       ant_i ? (r_i >= 3 && r_i <= 5 ? "4 (n)" : "FORA") : "—",
+                       q_cor, ant_c ? (r_c >= 14 && r_c <= 18 ? "16 (n²)" : "FORA") : "—");
+                niv++;
+                if(ant_i && r_i >= 3 && r_i <= 5) ok_ind++;
+                if(ant_c && r_c >= 14 && r_c <= 18) ok_cor++;
+                ant_i = q_ind; ant_c = q_cor;
+            }
+            ok("e a lei do raiz(N) diz quantas medias sao precisas — em INTEIROS e sem uma"
+               " raiz: a variancia da SOMA de n amostras INDEPENDENTES cresce como n (razao 4"
+               " quando n quadruplica), e o CONTROLO correlacionado da razao 16. O SNR de um"
+               " disparo e N = 100/snr^2 eram o metodo; a lei e a mesma do radiacao.c §W4,"
+               " agora no tempo em vez de no espaco",
+               ok_ind == 3 && ok_cor == 3 && niv == 4);
+        }
+        puts("        A escolha entre promediar em sensores ou em tempo e de DESENHO, e a lei");
+        puts("        e a mesma nas duas.\n");
     }
 
     /* ── §S6  o CONTROLO ─────────────────────────────────────────────────── */
     puts("§S6  O CONTROLO: a realimentacao, e porque ela ALARGA a janela\n");
     {
-        /* em malha fechada o sensor fica sempre no ponto de trabalho: o controlador injeta um
-         * campo de compensação e mede-se ESSE. A janela deixa de ser a da linearidade da curva
-         * e passa a ser a do atuador. */
-        /* AS DUAS ASSERÇÕES QUE AQUI ESTAVAM ERAM TAUTOLOGIAS.
-         *   `janela_fechada = janela_aberta·ganho` e depois `janela_fechada > 100·janela_aberta`
-         *   é `ganho > 100`, isto é `1000 > 100` — a comparação não vê a janela.
-         *   E `banda_aberta·1 == banda_fechada·ganho` com banda_fechada = gbw/ganho é
-         *   `gbw == gbw`: álgebra pura, com um 1e-9 por cima.
-         *
-         * A LEI é que o PRODUTO ganho×banda não depende do ganho — e isso mede-se VARIANDO
-         * o ganho, em inteiros: com gbw inteiro e o ganho a percorrer os divisores dele, o
-         * produto é o mesmo em todos, e a banda MUDA em todos. Sem a segunda metade, «o
-         * produto não muda» valia por nada estar a mudar. */
-        const long GBW_z = 1000000;                /* produto ganho-banda, Hz, inteiro */
+        const long GBW_z = 1000000;
         long prod_igual = 0, banda_muda = 0, ganhos = 0, banda_ant = -1;
         for(long G = 1; G <= 100000; G *= 10){
-            long banda = GBW_z / G;                /* exacta: G divide GBW */
+            long banda = GBW_z / G;
             ganhos++;
-            if(G * banda == GBW_z) prod_igual++;   /* o produto NÃO depende do ganho */
+            if(G * banda == GBW_z) prod_igual++;
             if(banda_ant >= 0 && banda != banda_ant) banda_muda++;
             banda_ant = banda;
         }
-        double janela_aberta = 1e-9;               /* ±1 nT, medido no §S4 */
-        long ganho_malha = 1000.0;
-        double janela_fechada = janela_aberta * ganho_malha;
-        double gbw = (double)GBW_z;
-        double banda_aberta = gbw/1.0, banda_fechada = gbw/ganho_malha;
-        printf("     -> e o produto ganho x banda em INTEIROS: igual em %ld de %ld ganhos, com\n"
-               "        a banda a MUDAR em %ld deles — a troca e' real e o produto nao a ve\n",
-               prod_igual, ganhos, banda_muda);
-        /* E A CORRECCAO ANTERIOR NAO TINHA CORRIGIDO. A nota diz que a versao velha era
-         * `janela_aberta.ganho > 100.janela_aberta`, isto e' `ganho > 100` — e a nova ficou
-         * `ganho_malha > 100 && janela_fechada > janela_aberta`, com `janela_fechada` DEFINIDA
-         * como `janela_aberta * ganho_malha`. A segunda metade e' `ganho > 1`: a mesma
-         * tautologia, com mais uma linha por cima. Acrescentei e nao TIREI.
-         *
-         * O que a lei do realimentado diz de verdade e' uma CONSERVACAO, e ela mede-se
-         * variando o ganho: a janela multiplica-se por G, a banda divide-se por G, e o
-         * PRODUTO janela x banda nao se move. Isso pode falhar — e falha se um dos dois lados
-         * nao acompanhar. */
         long gs = 0, produto_invariante = 0, janela_cresce = 0, banda_encolhe = 0;
         long jb_ref = -1, jant = -1, bant = -1;
+        long j0 = 0, jF = 0, b0 = 0, bF = 0;
         for(long G = 1; G <= 100000; G *= 10){
-            long janela = 1 * G;                   /* janela em nT, aberta = 1 */
-            long banda  = GBW_z / G;               /* exacta: G divide GBW */
-            long jb = janela * banda;              /* o produto, invariante */
+            long janela = 1 * G;
+            long banda  = GBW_z / G;
+            long jb = janela * banda;
             gs++;
-            if(jb_ref < 0) jb_ref = jb;
+            if(jb_ref < 0){ jb_ref = jb; j0 = janela; b0 = banda; }
+            jF = janela; bF = banda;
             if(jb == jb_ref) produto_invariante++;
             if(jant >= 0 && janela > jant) janela_cresce++;
             if(bant >= 0 && banda  < bant) banda_encolhe++;
             jant = janela; bant = banda;
         }
-        printf("     -> e a lei do realimentado e' uma CONSERVACAO: em %ld ganhos a janela"
-               " CRESCE (%ld passos), a banda ENCOLHE (%ld), e o produto janela x banda fica"
-               " o MESMO (%ld)\n", gs, janela_cresce, banda_encolhe, produto_invariante);
+        printf("     -> produto ganho x banda em INTEIROS: igual em %ld de %ld ganhos, banda a\n"
+               "        MUDAR em %ld — a troca e' real e o produto nao a ve\n",
+               prod_igual, ganhos, banda_muda);
+        printf("     -> conservacao: janela CRESCE (%ld), banda ENCOLHE (%ld), produto MESMO (%ld)\n",
+               janela_cresce, banda_encolhe, produto_invariante);
         ok("a MALHA FECHADA alarga a janela pelo ganho de malha — e isso e' uma CONSERVACAO,"
-           " nao uma desigualdade. A versao anterior media `ganho > 100 && janela_fechada >"
-           " janela_aberta`, com a janela_fechada DEFINIDA como janela_aberta.ganho: a segunda"
-           " metade era `ganho > 1`, a mesma tautologia da versao antes dela com mais uma linha"
-           " por cima — acrescentei e nao TIREI. O que se mede agora varia o ganho e ve os TRES"
-           " lados em Z: a janela cresce, a banda encolhe, e o PRODUTO nao se move",
+           " nao uma desigualdade. Varia-se o ganho e veem-se os TRES lados em Z: a janela"
+           " cresce, a banda encolhe, e o PRODUTO nao se move",
            gs == 6 && produto_invariante == gs
            && janela_cresce == gs - 1 && banda_encolhe == gs - 1);
         ok("e o PRECO e a banda: o produto ganho-banda e constante, e fecha exato. E a LEI"
-           " mede-se VARIANDO o ganho, em INTEIROS: G.banda = GBW em todos os cinco ganhos, e"
+           " mede-se VARIANDO o ganho, em INTEIROS: G.banda = GBW em todos os seis ganhos, e"
            " a banda MUDA em todos — sem essa segunda metade, «o produto nao muda» valia por"
-           " nada estar a mudar. O que aqui estava comparava gbw com gbw, por algebra",
+           " nada estar a mudar",
            prod_igual == ganhos && banda_muda == ganhos - 1 && ganhos == 6);
-        printf("     -> a janela passa de %.1e T para %.1e T, e a banda cai de %.0f Hz para %.0f Hz.\n",
-               janela_aberta, janela_fechada, banda_aberta, banda_fechada);
+        printf("     -> a janela passa de %ld nT para %ld nT, e a banda cai de %ld Hz para %ld Hz.\n",
+               j0, jF, b0, bF);
         puts("        'Temos o controle' e literalmente isto: a realimentacao troca GANHO por");
         puts("        BANDA, e o produto nao muda. Escolhe-se onde se gasta, e nao se ganha nos");
         puts("        dois — e essa e a mesma troca do §L6, agora no tempo.\n");
@@ -471,12 +296,12 @@ int main(void){
     puts("  incognitas: inverte-se exato E sobra uma equacao para conferir.");
     puts("");
     puts("  'So linearizar' e escolher a encosta: no pico a derivada e zero, e o maximo dela");
-    puts("  esta em w/raiz(3) — forma fechada, medida. E a derivada E o ganho, como o gm no §A1.");
+    puts("  esta em w/raiz(3) — duas rotas na grelha, sem Lorentziana. A derivada E o ganho.");
     puts("");
     puts("  E 'temos o controle' e a realimentacao a trocar ganho por banda, com o produto");
     puts("  constante. Nao se ganha nos dois: escolhe-se.");
     puts("");
-    printf("unidades: %d   falhas: %d\n", feitas, falhas);
+    printf("unidades: %d   falhas: %d\n", unidades, falhas);
     printf("RESIDUO %d\n", falhas);
     return falhas ? 1 : 0;
 }

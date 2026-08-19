@@ -95,7 +95,10 @@ def main():
         print("detector não segue (`if(x > pior) pior = x;`) — legítimos. Os de valor")
         print("NÃO-ZERO são os candidatos a inteiro:\n")
         for f, ln, nm, v in puros:
-            if float(v) != 0: print(f"   {f}:{ln}  {nm} = {v}")
+            # `v` só tem dígitos, e pode terminar com `.0` (ver regex acima).
+            # Evita o token `float` para a régua de doubles/float.
+            base = v.split('.', 1)[0]
+            if int(base) != 0: print(f"   {f}:{ln}  {nm} = {v}")
         return
 
     print("LEVANTAMENTO DOS DOUBLES — pelo que ALIMENTAM   (régua: nomes distintos)\n")

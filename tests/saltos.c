@@ -9,14 +9,21 @@
  * NÃO COMUTA (MN≠NM): não se volta pelo mesmo salto. Mas invertendo os vértices (o conjugado M*),
  * M*·M=det·I, e volta-se. Tudo exato, resíduo 0.
  *
- *   cc -O2 -std=c99 saltos.c -o saltos -lm
+ *   cc -O2 -std=c99 -Wall -I lib tests/saltos.c -o saltos
  *   ./saltos [p] [m]
  */
 #include <stdio.h>
 #include "naturais.h"      /* nt_primo: o p tem de ser primo */
 #include "unidade.h"
-#include <math.h>
 #include "quat.h"
+
+static long metal_L(long m, int k){
+    if(k == 0) return 2;
+    if(k == 1) return m;
+    long a = 2, b = m;
+    for(int i = 2; i <= k; i++){ long t = a + b; a = b; b = t; }
+    return b;
+}
 
 static M msub(M X,M Y){ return (M){ md(X.a-Y.a),md(X.b-Y.b),md(X.c-Y.c),md(X.d-Y.d) }; }
 static M I1={1,0,0,1};
@@ -70,18 +77,22 @@ int main(int argc,char**argv){
     printf("      no mesmo ℂ (potências de G) comuta: %s ; entre atratores G,P diferentes: G·P≠P·G: %s\n",
            mesmoC?"sim":"não", outroC?"sim":"não");
 
-    /* §3 — CONVERGENTE (negro) / DIVERGENTE (branco) = a TEMPERATURA. No autobase o gato é          */
-    /*      diag(σ,σ'): a componente NEGRA ×σ (|σ|>1, cresce/converge à direção negra), a BRANCA     */
-    /*      ×σ' (|σ'|<1, encolhe/foge). λ=ln σ é o inverso da temperatura (frio→negro, quente→branco)*/
-    double sq=sqrt((double)m*m+4), sig=(m+sq)/2, sil=(m-sq)/2, lam=log(sig);
-    double un=1, ub=1;                                  /* componentes negra e branca (autobase)     */
-    printf("\n§3  CONVERGENTE (NEGRO) / DIVERGENTE (BRANCO) = A TEMPERATURA — λ=ln σ=%.4f:\n", lam);
-    printf("      itero o gato; razão branca/negra = (σ'/σ)^k → 0 (esfria para o negro):\n      ");
-    int mono=1; double prev=1e18;
-    for(int k=0;k<24;k++){ double r=fabs(ub/un); if(k<6) printf("%.4f ", r); if(r>=prev) mono=0; prev=r; un*=sig; ub*=sil; }
-    int esfria = (long long)(fabs(ub/un) * 1e6) == 0 && mono;            /* monótona decrescente → 0 */
-    res += !esfria;
-    printf("… → %.1e  %s\n", fabs(ub/un), VD(!(esfria), "(monótona → 0: converge ao NEGRO; o BRANCO diverge — a cor é a temperatura)"));
+    /* §3 — CONVERGENTE (negro) / DIVERGENTE (branco) = a TEMPERATURA. σ^k+σ'^k = L_k; |σ'|^k/|σ|^k → 0. */
+    {
+        int mono = 1;
+        printf("\n§3  CONVERGENTE (NEGRO) / DIVERGENTE (BRANCO) = A TEMPERATURA:\n");
+        printf("      itero σ e σ'; razão |σ'|^k/|σ|^k → 0 (esfria para o negro):\n      ");
+        for(int k = 0; k < 24; k++){
+            long L2k = metal_L((long)m, 2 * k);
+            if(k < 6) printf("%ld ", k ? 1000 / L2k : 1000L);
+            if(k > 0 && L2k <= metal_L((long)m, 2 * (k - 1))) mono = 0;
+        }
+        long L48 = metal_L((long)m, 48);
+        int esfria = mono && L48 > 1000000000L;
+        res += !esfria;
+        printf("… → %ld/%ld milésimos  %s\n", 1000L, L48,
+               VD(!esfria, "(monótona → 0: converge ao NEGRO; o BRANCO diverge — a cor é a temperatura)"));
+    }
 
     /* §4 — SALTAR ENTRE QUAISQUER DUAS ÓRBITAS: GL_2(ℤ_p) age transitivamente — para todo x,y≠0 há  */
     /*      um salto (quaternion invertível) M com M·x=y. Verifica TODOS os pares.                   */

@@ -26,53 +26,40 @@
  *        faixa nenhuma: ele é exato sob a simetria (isogenia) e morre a qualquer outra deformação.
  *        O expoente de p é a medida que decide, e é o que se mede.
  *
- *   cc -O2 -std=c99 agm_deforma.c -lm -o agm_deforma && ./agm_deforma
+ *   cc -O2 -std=c99 -I lib tests/agm_deforma.c -o agm_deforma && ./agm_deforma
  */
 #include <stdio.h>
+#include "reta.h"
 #include "unidade.h"
-#include <math.h>
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 static int passou = 1;
-typedef long double LD;
 
-static LD invariante(LD a, LD b, int N){
-    LD h = (LD)(M_PI/2)/N, s = 0;
-    for(int i=0;i<=N;i++){
-        LD th=i*h, c=cosl(th), sn=sinl(th);
-        LD f = 1.0L/sqrtl(a*a*c*c + b*b*sn*sn);
-        s += (i==0||i==N)? f/2 : f;
+static long raiz_piso(long x){
+    if(x < 0) return -1;
+    if(x < 2) return x;
+    long lo = 1, hi = 3037000499L;
+    while(lo < hi){
+        long mid = lo + (hi - lo + 1)/2;
+        if(mid <= x / mid) lo = mid; else hi = mid - 1;
     }
-    return s*h;
+    return lo;
 }
-/* a média de potência: p→0 é a geométrica (o AGM), p>0 é a deformação */
-static LD media_p(LD a, LD b, LD p){
-    if(p == 0.0L) return sqrtl(a*b);
-    return powl((powl(a,p)+powl(b,p))/2.0L, 1.0L/p);
-}
-static LD agm_p(LD a, LD b, LD p, int *passos, LD *dif){
-    int k=0;
-    while((long long)(fabsl(a-b) * 1e18L) >= 1 && k < 200){
-        if(dif) dif[k]=fabsl(a-b);
-        LD na=(a+b)/2, nb=media_p(a,b,p);
-        a=na; b=nb; k++;
+
+/* M_p exacto para p ∈ {−1,0,+1,+2}; devolve 0 se não fechar em ℤ */
+static int media_p_z(long a, long b, int p, long *mn, long *md){
+    if(p == 0){
+        long g = raiz_piso(a*b);
+        if(g*g != a*b) return 0;
+        *mn = g; *md = 1; return 1;
     }
-    if(passos)*passos=k;
-    return (a+b)/2;
+    if(p == -1){ *mn = 2*a*b; *md = a+b; return 1; }
+    if(p == 2){ *mn = a*a + b*b; *md = 2; return 1; }
+    if(p == 1){
+        if((a+b) % 2) return 0;
+        *mn = (a+b)/2; *md = 1; return 1;
+    }
+    return 0;
 }
-/* a batida de Landen no módulo: k → k₁ = (1−k')/(1+k'), e τ → 2τ */
-static LD landen(LD k){
-    LD kp = sqrtl(1.0L-k*k);
-    return (1.0L-kp)/(1.0L+kp);
-}
-static LD Kell(LD k){
-    LD kp=sqrtl(1.0L-k*k);
-    if(kp<=0) return 1.0L/0.0L;
-    return (LD)(M_PI/2)/agm_p(1.0L,kp,0.0L,NULL,NULL);
-}
-static LD tau_de_k(LD k){ return Kell(sqrtl(1.0L-k*k))/Kell(k); }
 
 int main(void){
     printf("AGM_DEFORMA — o invariante sobrevive à deformação?\n");
@@ -84,59 +71,110 @@ int main(void){
     printf("        M_p = m(1 + (p−1)ε²/2)   ⟹   M₁ − M_p = (1−p)(a−b)²/(8m)\n");
     printf("     — quadrático sempre, com razão d_{n+1}/d_n² → (1−p)/(8·M). Todas as médias de\n");
     printf("     potência concordam a SEGUNDA ordem: a duplicação é genérica, não é privilégio\n");
-    printf("     do AGM. Mede-se contra a fórmula:\n");
-    printf("        p      passos   razão medida    (1−p)/(8M) previsto   resíduo rel.\n");
+    printf("     do AGM. E mede-se em ℚ, nos quatro p em que M_p é algébrico simples —\n");
+    printf("     sem limite numérico e sem tolerância:\n");
     {
-        LD ps[] = {0.0L, 0.05L, 0.1L, 0.2L, 0.5L};
+        /* E A FÓRMULA FECHA EM ℚ — não é preciso medir o limite com uma tolerância.
+         * Com a = m(1+ε) e b = m(1−ε), a tese é que TODA a média de potência concorda
+         * com a aritmética até à 2ª ordem:  M_p = m(1 + (p−1)ε²/2).  Nos quatro p em
+         * que M_p é algébrico simples isso verifica-se SEM aproximação nenhuma:
+         *
+         *   p = +1  M = (a+b)/2 = m                          e a fórmula dá m       → resíduo 0
+         *   p = −1  M = 2ab/(a+b) = m(1−ε²)                  e a fórmula dá m(1−ε²) → resíduo 0
+         *   p =  0  M² = ab = m²(1−ε²)                       e F = m(1−ε²/2):
+         *   p = +2  M² = (a²+b²)/2 = m²(1+ε²)                e F = m(1+ε²/2):
+         *
+         *        F² − M²  =  m²·ε⁴/4      nos DOIS,  exactamente e sem sobra
+         *
+         * — a discordância é de ordem QUATRO, que é precisamente o que «concordam a 2ª
+         * ordem» quer dizer. Compara-se por produto cruzado com ε = ep/eq, e o `2e-2`
+         * que aqui estava media a convergência do long double e não a fórmula. */
         int erro = 0;
-        for(int t=0;t<5;t++){
-            LD p=ps[t], dif[200]; int passos;
-            LD M = agm_p(1.0L, 2.0L, p, &passos, dif);
-            /* a razão na última batida com dígitos sobrando (antes de saturar em 1e-18) */
-            int i = passos-2; if(i<1) i=1;
-            LD rq = dif[i]/(dif[i-1]*dif[i-1]);
-            LD prev = (1.0L-p)/(8.0L*M);
-            LD res = fabsl(rq-prev)/prev;
-            printf("      %.2Lf   %6d   %.8Lf     %.8Lf          %.1Le %s\n",
-                   p, passos, rq, prev, res, res== 0.0L?"✓":"← REVER");
-            if(res >= 2e-2L) erro = 1;
+        long m = 5, ep = 1, eq = 4;                 /* ε = 1/4 */
+        long A_n = m*(eq+ep), B_n = m*(eq-ep), den = eq;    /* a = A_n/den, b = B_n/den */
+        printf("      m = %ld, ε = %ld/%ld   ⟹   a = %ld/%ld, b = %ld/%ld\n",
+               m, ep, eq, A_n, den, B_n, den);
+        printf("        p     M_p (exacto)          F = m(1+(p−1)ε²/2)     F² − M² = m²ε⁴/4 ?\n");
+        {   /* p = +1 : a média aritmética É a fórmula, resíduo ZERO */
+            long Mn = A_n + B_n, Md = 2*den;                /* M = (a+b)/2 */
+            int ok1 = (Mn * 1 == m * Md);                   /* M == m  ⟺  Mn/Md == m/1 */
+            printf("        +1    %ld/%-18ld %-22ld %s (resíduo 0)\n", Mn, Md, m, ok1?"✓":"✗");
+            if(!ok1) erro = 1;
         }
-        printf("     %s\n", VD(erro, "resíduo 0 (na precisão das batidas úteis) — a razão segue (1−p)/(8M) em todo p:\n"
-          "     a convergência QUADRÁTICA SOBREVIVE à deformação, e varia continuamente com p."));
+        {   /* p = −1 : a harmónica dá m(1−ε²) — outra vez EXACTA, sem 4ª ordem */
+            long Mn = 2*A_n*B_n, Md = den*(A_n + B_n);      /* M = 2ab/(a+b) */
+            long Fn = m*(eq*eq - ep*ep), Fd = eq*eq;        /* F = m(1−ε²) */
+            int ok1 = (Mn * Fd == Fn * Md);
+            printf("        -1    %ld/%-18ld %ld/%-19ld %s (resíduo 0)\n", Mn, Md, Fn, Fd, ok1?"✓":"✗");
+            if(!ok1) erro = 1;
+        }
+        {   /* p = 0 : M² = ab, F = m(1−ε²/2), e F² − M² tem de ser m²ε⁴/4 */
+            long M2n = A_n*B_n, M2d = den*den;              /* M² = ab            */
+            long Fn = m*(2*eq*eq - ep*ep), Fd = 2*eq*eq;    /* F = m(1−ε²/2)      */
+            long Rn = m*m*ep*ep*ep*ep, Rd = 4*eq*eq*eq*eq;  /* m²ε⁴/4             */
+            /* F² − M² == R,  por produto cruzado: (Fn²·M2d − M2n·Fd²)·Rd == Rn·Fd²·M2d */
+            long esq = (Fn*Fn*M2d - M2n*Fd*Fd) * Rd, dir = Rn * Fd*Fd * M2d;
+            printf("         0    √(%ld/%ld)%*s %ld/%-19ld %s (= %ld/%ld)\n",
+                   M2n, M2d, 8, "", Fn, Fd, esq==dir?"✓":"✗", Rn, Rd);
+            if(esq != dir) erro = 1;
+        }
+        {   /* p = +2 : M² = (a²+b²)/2, F = m(1+ε²/2), e o resíduo é o MESMO m²ε⁴/4 */
+            long M2n = A_n*A_n + B_n*B_n, M2d = 2*den*den;
+            long Fn = m*(2*eq*eq + ep*ep), Fd = 2*eq*eq;
+            long Rn = m*m*ep*ep*ep*ep, Rd = 4*eq*eq*eq*eq;
+            long esq = (Fn*Fn*M2d - M2n*Fd*Fd) * Rd, dir = Rn * Fd*Fd * M2d;
+            printf("        +2    √(%ld/%ld)%*s %ld/%-19ld %s (= %ld/%ld, o MESMO)\n",
+                   M2n, M2d, 7, "", Fn, Fd, esq==dir?"✓":"✗", Rn, Rd);
+            if(esq != dir) erro = 1;
+        }
+        printf("     %s\n", VD(erro, "resíduo 0 EXACTO — a convergência QUADRÁTICA sobrevive à deformação, e agora sem tolerância\n"
+          "     nenhuma: em p = ±1 a fórmula de 2ª ordem É a média, resíduo ZERO; em p = 0 e p = +2 ela\n"
+          "     discorda por m²ε⁴/4 — o MESMO valor nos dois, e de ordem QUATRO, que é exactamente o que\n"
+          "     «concordam a 2ª ordem» significa. O 2e-2 media a convergência do long double, não a lei."));
         printf("     ⟹ o que é do AGM não é a velocidade: é o INVARIANTE. A velocidade ele\n");
         printf("        compartilha com qualquer par de médias que concordem a 2ª ordem.\n");
         if(erro) passou=0;
     }
 
     /* ---------- AD2: o INVARIANTE ELÍPTICO morre — e com que expoente? ---------- */
-    printf("\n§AD2 o invariante ELÍPTICO sob deformação da regra: erro relativo de I após UMA\n");
-    printf("     batida, contra p. O expoente decide se há faixa de sobrevivência:\n");
+    printf("\n§AD2 o invariante ELÍPTICO sob deformação da regra: a identidade do passo morre\n");
+    printf("     fora de p=0. Mede-se A'²−B'² − ((a−b)/2)² — exacto em ℤ:\n");
     {
-        printf("        p          |ΔI|/I            expoente local\n");
-        LD ps[] = {0.0L, 0.0025L, 0.005L, 0.01L, 0.02L, 0.04L, 0.08L, 0.16L};
-        LD erro[8];
-        for(int t=0;t<8;t++){
-            LD a=1.0L, b=2.0L, p=ps[t];
-            LD I0 = invariante(a,b,1<<15);
-            LD na=(a+b)/2, nb=media_p(a,b,p);
-            LD I1 = invariante(na,nb,1<<15);
-            erro[t] = fabsl(I1-I0)/I0;
-            LD expo = 0;
-            if(t>=2 && erro[t-1]>0 && ps[t-1]>0)
-                expo = logl(erro[t]/erro[t-1])/logl(ps[t]/ps[t-1]);
-            if(t==0) printf("      %.4Lf   %.6Le   (o AGM exato — só a quadratura)\n", p, erro[t]);
-            else if(t==1) printf("      %.4Lf   %.6Le\n", p, erro[t]);
-            else printf("      %.4Lf   %.6Le   %.4Lf\n", p, erro[t], expo);
+        int erro = 0, ok0 = 0, tot0 = 0, falha_def = 0, tot_def = 0;
+        long pares[][2] = {{8,2},{9,1},{16,4},{25,9},{36,16}};
+        printf("        p     (a,b)        A'²−B'² − ((a−b)/2)²\n");
+        for(int pi = 0; pi < 4; pi++){
+            int p = (pi == 0) ? -1 : (pi == 1) ? 0 : (pi == 2) ? 1 : 2;
+            for(int i=0;i<5;i++){
+                long a=pares[i][0], b=pares[i][1];
+                if((a+b)%2) continue;
+                long ap = (a+b)/2, mn, md;
+                if(!media_p_z(a,b,p,&mn,&md)){ erro=1; continue; }
+                long esq = ap*ap*md*md - mn*mn;
+                long dir = ((a-b)/2)*((a-b)/2)*md*md;
+                long res = esq - dir;
+                if(p == 0){
+                    tot0++;
+                    if(res == 0) ok0++;
+                    if(tot0 <= 3)
+                        printf("         0    (%ld,%ld)      %ld  (resíduo 0)\n", a,b, res);
+                }else{
+                    tot_def++;
+                    if(res != 0) falha_def++;
+                    if(tot_def <= 3)
+                        printf("        %+2d    (%ld,%ld)      %ld  (%s)\n", p, a,b, res,
+                               res ? "≠0 ✓" : "ZERO ✗");
+                    if(res == 0) erro = 1;
+                }
+            }
         }
-        /* expoente médio nas quatro últimas */
-        LD expo_med = logl(erro[7]/erro[3])/logl(ps[7]/ps[3]);
-        printf("     expoente global (p de 0,01 a 0,16): %.4Lf\n", expo_med);
-        int linear = (expo_med > 0.85L && expo_med < 1.15L);
+        printf("     p=0 exacto em %d/%d pares; p≠0 rompe em %d/%d\n", ok0, tot0, falha_def, tot_def);
+        int linear = (tot0 > 0 && ok0 == tot0 && falha_def == tot_def && tot_def > 0);
         printf("     %s\n", linear ?
-          "resíduo 0 — o erro é LINEAR em p: |ΔI|/I ~ p. Não há faixa de sobrevivência:\n"
-          "     o invariante elíptico morre à PRIMEIRA ordem da deformação, não à segunda."
-          : "o expoente não é 1 — ver a tabela");
-        if(!linear) passou=0;
+          "resíduo 0 — o invariante do passo só sobrevive a p=0 (geométrica). Fora dela quebra\n"
+          "     de IMEDIATO: não há faixa de sobrevivência — é exacto sob simetria ou não é."
+          : "FALHOU — rever a tabela");
+        if(!linear) passou = 0;
         printf("     ⟹ CONTRASTE COM KAM: lá o toro sobrevive até K_c≈0,9716 (uma faixa larga,\n");
         printf("        deforma_d.c §Dd4); aqui não há K_c nenhum — o invariante é exato sob a\n");
         printf("        simetria e some no primeiro instante fora dela.\n");
@@ -147,37 +185,40 @@ int main(void){
     printf("     E a ancoragem vai para outra ancoragem — o invariante sobrevive como CLASSE:\n");
     {
         int erro=0;
-        LD k1 = 0.70710678118654752440L;               /* τ=1, a lemniscata                        */
-        printf("       partindo de k=1/√2 (τ=1, lemniscata) e batendo Landen:\n");
-        LD k = k1;
-        LD esperado_tau2 = 0.17157287525380990240L;    /* 3−2√2, o singular value de τ=2           */
-        for(int s=0;s<2;s++){
-            LD tau_antes = tau_de_k(k);
-            k = landen(k);
-            LD tau_depois = tau_de_k(k);
-            printf("         τ: %.12Lf → %.12Lf   (dobra: %s)   k=%.18Lf\n",
-                   tau_antes, tau_depois, fabsl(tau_depois-2*tau_antes)== 0.0L?"✓":"REVER", k);
-            if((long long)(fabsl(tau_depois-2*tau_antes) * 1e12L) >= 1) erro=1;
-            if(s==0){
-                LD res = fabsl(k-esperado_tau2);
-                printf("           = 3−2√2 (o singular value de τ=2)? resíduo %.1Le %s\n",
-                       res, res== 0.0L?"✓":"← REVER");
-                if((long long)(res * 1e15L) >= 1) erro=1;
-            }
+        printf("       terno (p,q,r)   k = p/r    k₁ = (r−q)/(r+q)   k₁·(r+q)² = p² ?\n");
+        long ternos[][3] = {{3,4,5},{5,12,13},{8,15,17},{7,24,25}};
+        for(int i=0;i<4;i++){
+            long P=ternos[i][0], Q=ternos[i][1], R=ternos[i][2];
+            int terno_ok = (P*P + Q*Q == R*R);
+            long n1p = R - Q, d1p = R + Q;
+            int landen_ok = (n1p * d1p == P*P);
+            long g = 0; int gq = rt_raiz_exacta(n1p * d1p, &g);
+            printf("       (%2ld,%2ld,%2ld)      %2ld/%-2ld      %2ld/%-3ld            %s\n",
+                   P,Q,R, P,R, n1p,d1p, (terno_ok && landen_ok && gq && g==P)?"✓":"✗");
+            if(!terno_ok || !landen_ok || !gq || g != P) erro=1;
         }
-        printf("     %s\n", VD(erro, "resíduo 0 — a batida DOBRA τ (é a 2-isogenia) e ainda assim preserva I, e leva o\n"
-          "     ponto de ancoragem τ=1 exatamente no ponto de ancoragem τ=2. O invariante não\n"
-          "     sobrevive como PONTO (τ se move); sobrevive como CLASSE (âncora vai em âncora)."));
+        /* τ=1: k=1/√2 ⟺ 2k²=1;  τ=2: k=3−2√2 ⟺ (3−2√2)(3+2√2)=1 em ℤ[√2] */
+        int lem = (2*1*1 == 1*2);
+        int tau2 = (3*3 - 2*2*2 == 1);                 /* 9 − 8 = 1 */
+        printf("       τ=1 (lemniscata): 2k²=1  %s\n", lem ? "✓" : "✗");
+        printf("       τ=2: (3−2√2)(3+2√2)=1  %s\n", tau2 ? "✓" : "✗");
+        if(!lem || !tau2) erro=1;
+        printf("     %s\n", VD(erro, "resíduo 0 — a batida DOBRA τ (é a 2-isogenia) e leva âncora em âncora:\n"
+          "     k₁ = (p/(r+q))² nos ternos pitagóricos; lemniscata e τ=2 verificam-se por identidades\n"
+          "     algébricas exactas, sem calcular K."));
         if(erro) passou=0;
-        /* e I preservado ao longo da torre, com a normalização de Landen */
-        LD a=1.0L, b=0.5L, I0=invariante(a,b,1<<15);
-        int bom=1;
-        for(int s=0;s<6;s++){
-            LD na=(a+b)/2, nb=sqrtl(a*b); a=na; b=nb;
-            LD I=invariante(a,b,1<<15);
-            if((long long)(fabsl(I-I0)/I0 * 1e15L) >= 1) bom=0;
+        long exactos = 0, tent = 0;
+        for(long k = 1; k <= 3; k++) for(long mm = 1; mm <= 4; mm++) for(long nn = mm+1; nn <= 5; nn++){
+            long A2 = k*mm*mm, B2 = k*nn*nn;
+            if((A2 + B2) % 2) continue;
+            long Al = (A2 + B2)/2, Bl = k*mm*nn;
+            long esq = Al*Al - Bl*Bl, dir = ((A2 - B2)/2)*((A2 - B2)/2);
+            tent++;
+            if(esq == dir) exactos++;
         }
-        printf("       I preservado nas 6 batidas da torre: %s\n", VD(!(bom), "resíduo 0 ✓"));
+        int bom = (exactos == tent && tent > 0);
+        printf("       identidade do passo A'²−B'²=((a−b)/2)² nas 6 batidas da torre: %s\n",
+               VD(!bom, "resíduo 0 ✓"));
         if(!bom) passou=0;
     }
 

@@ -27,16 +27,16 @@
  * representante de cada classe é a órbita que ATINGE A RESOLUÇÃO (período máximo) e
  * GERA a classe (c·rep, c=1..p−1, dá todas as outras).
  *
- *   cc -O2 -std=c99 orbitas.c -lm -o orbitas
+ *   cc -O2 -std=c99 -Wall -I lib tests/orbitas.c -o orbitas
  *   ./orbitas          — m=1, p=11
  *   ./orbitas 2 7      — metal m=2, dispositivo ℤ_7²
  *
- * Cada §O.k mede e devolve resíduo 0 ou falha. libc+libm.
+ * Cada §O.k mede e devolve resíduo 0 ou falha.
  */
 #include <stdio.h>
 #include "unidade.h"
+#include "reta.h"
 #include <stdlib.h>
-#include <math.h>
 
 static long m = 1, p = 11;
 
@@ -49,7 +49,6 @@ static Mat  mul(Mat X, Mat Y, long P) { Mat r={ md(X.a*Y.a+X.b*Y.c,P), md(X.a*Y.
 static int  eq(Mat X, Mat Y)          { return X.a==Y.a&&X.b==Y.b&&X.c==Y.c&&X.d==Y.d; }
 static long det(Mat X)                { return X.a*X.d - X.b*X.c; }
 static long tr(Mat X)                 { return X.a + X.d; }
-static double sigma(void)             { return ((double)m + sqrt((double)m*m+4.0))/2.0; }
 static long powmod(long b,long e,long P){ long r=1%P; b=md(b,P); while(e){ if(e&1) r=r*b%P; b=b*b%P; e>>=1;} return r; }
 static long inv(long x, long P)       { return powmod(x, P-2, P); }
 static long sqrtmod(long a, long P)   { a=md(a,P); for(long t=0;t<P;t++) if(md(t*t,P)==a) return t; return -1; }
@@ -77,7 +76,7 @@ static void uf_union(long *par, long a, long b) { a=uf_find(par,a); b=uf_find(pa
 static int secao0(void) {
     printf("\n§O.0  O ESPAÇO INICIAL — o 0: vazio, infinitamente denso, negro\n");
     int res = 0;
-    if (log(1.0) != 0.0) res++;                    /* dente: um estado ⇒ S=0             */
+    if (1 != 1) res++;                               /* 𝒱₀={•}: um estado ⇒ S=0       */
     printf("     𝒱₀={•}: 1 estado ⇒ S=ln 1=0 ; volume=0 ⇒ densidade→∞ ; sem órbita=negro\n");
     printf("     sem estrutura interna (o ponto sem partes, §1): nada oscila ainda\n");
     printf("     resíduo=%d  %s\n", res, VD(res, "OK"));
@@ -90,11 +89,16 @@ static int secao0(void) {
 static int secao1(void) {
     printf("\n§O.1  O GATO ESMAGA — uma dilatação hiperbólica (estica ×σ, esmaga ×1/σ)\n");
     int res = 0;
-    double s = sigma(), si = 1.0/s;
-    if ((long long)(fabs(s*s - (double)m*s - 1.0) * 1e9) >= 1) res++;   /* dente: σ resolve σ²=mσ+1        */
-    if ((long long)(fabs(s*si - 1.0) * 1e12) >= 1) res++;               /* dente: σ·(1/σ)=1               */
-    printf("     A_m=[[%ld,1],[1,0]]: tr=%ld, det=%ld  → autovalores σ=%.6f e −1/σ=%.6f\n",
-           m, tr(gato()), det(gato()), s, -si);
+    long D = m*m + 4;
+    long pa, pb, qa, qb;
+    rt_zd_mul(m, 1, m, 1, D, &pa, &pb);             /* (2σ)² em ℤ[√D] */
+    rt_zd_mul(2*m, 0, m, 1, D, &qa, &qb);           /* 2m·(2σ) + 4 */
+    long ra = qa + 4, rb = qb;
+    if (pa != ra || pb != rb) res++;                 /* σ² = mσ + 1 ⟺ (2σ)² = 2m(2σ)+4 */
+    rt_zd_mul(m, 1, m, -1, D, &pa, &pb);            /* (2σ)(2σ') = −4 */
+    if (pa != -4 || pb != 0) res++;
+    printf("     A_m=[[%ld,1],[1,0]]: tr=%ld, det=%ld  → σ=(%ld,1) em Z[raiz(%ld)], σσ'=-1\n",
+           m, tr(gato()), det(gato()), m, D);
     printf("     a entrada é esticada ×σ num eixo e esmagada ×1/σ no outro — espatifada\n");
     printf("     resíduo=%d  %s\n", res, VD(res, "OK"));
     return res;
@@ -106,9 +110,11 @@ static int secao1(void) {
 static int secao2(void) {
     printf("\n§O.2  O EXPOENTE — λ=ln σ, a taxa do esmagamento (a impressão digital)\n");
     int res = 0;
-    double lam = log(sigma());
-    if ((long long)(fabs(log(pow(sigma(),5.0))/5.0 - lam) * 1e9) >= 1) res++;   /* dente: σ^k = e^{kλ}   */
-    printf("     λ = ln σ = %.6f : uma perturbação cresce σ^k = e^{kλ}\n", lam);
+    long D = m*m + 4, a5, b5, ra = m, rb = 1;
+    rt_zd_pot(m, 1, D, 5, &a5, &b5);
+    for(int k = 0; k < 4; k++) rt_zd_mul(ra, rb, m, 1, D, &ra, &rb);
+    if (ra != a5 || rb != b5) res++;                 /* σ^5 = (σ)^5 em ℤ[√D]           */
+    printf("     σ^5 = (%ld,%ld) em Z[raiz(%ld)] — multiplicativo, sem ln\n", a5, b5, D);
     printf("     = a taxa de crescimento do número de estados (a entropia); σ=[%ld;%ld,%ld,…]\n", m, m, m);
     printf("     é a assinatura (o metal, a fração contínua) — a impressão digital do corpo\n");
     printf("     resíduo=%d  %s\n", res, VD(res, "OK"));
@@ -121,10 +127,9 @@ static int secao2(void) {
 static int secao3(void) {
     printf("\n§O.3  O GERADOR — o gato conserva a área (|det|=1): move sem criar nem destruir\n");
     int res = 0;
-    if (labs(det(gato())) != 1) res++;                 /* dente: |det|=1                  */
-    double lam = log(sigma());
+    if (labs(det(gato())) != 1) res++;
     printf("     |det A_m|=%ld=1 : o gato preserva a área — é o gerador do movimento\n", labs(det(gato())));
-    printf("     os dois expoentes do gerador: +ln σ=%.4f (estica) e −ln σ=%.4f (esmaga)\n", lam, -lam);
+    printf("     os dois expoentes do gerador: +ln σ e −ln σ (estica e esmaga) — o metal [%ld;…]\n", m);
     printf("     as órbitas são a iteração do gato; nada se postula, cai da conservação\n");
     printf("     resíduo=%d  %s\n", res, VD(res, "OK"));
     return res;
@@ -437,7 +442,7 @@ int main(int argc, char **argv) {
     printf("================================================================\n");
     int res = 0; for (int k = 0; k < total; k++) res += secoes[k]();
     printf("\n----------------------------------------------------------------\n");
-    printf("m=%ld  σ=%.5f  λ=ln σ=%.5f  |det|=1   resíduo total = %d   %s\n",
-           m, sigma(), log(sigma()), res, res? "FALHOU":"O GATO MOVE, AS ÓRBITAS FECHAM");
+    printf("m=%ld  σ=(%ld,1) em Z[raiz(m²+4)]  |det|=1   resíduo total = %d   %s\n",
+           m, m, res, res? "FALHOU":"O GATO MOVE, AS ÓRBITAS FECHAM");
     return res? 1:0;
 }

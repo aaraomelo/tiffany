@@ -26,7 +26,7 @@
  * p/q exacto (`atofr`). A palavra tira-se dele aqui, e não lá — porque lá não haveria
  * como confrontar duas cópias, e uma cópia que ninguém confronta diverge.
  *
- *   cc -O2 -std=c99 -I../lib entrega.c -o entrega && ./entrega
+ *   cc -O2 -std=c99 -Wall -I lib tests/entrega.c -o entrega
  */
 #include <stdio.h>
 #include <string.h>
@@ -100,12 +100,14 @@ printf("\n§E2  A ida e volta pela fracção contínua é EXACTA — e o double 
                 if(p2*q == p*q2) cf_volta++;      /* a MESMA fracção, exactamente */
             }
 
-            /* CAMINHO 2: pelo double, que é o que a libc faz. O valor v = p/q em vírgula
-             * flutuante, e a volta v·q comparada com p — em inteiros, sem tolerância. */
+            /* CAMINHO 2: pelo double, o que a libc faz — medido SEM double: p/q e' exacto
+             * em binario so' quando, reduzido, o denominador e' potencia de 2. Decimais com
+             * tres casas tem q potencia de 10, logo a maioria PERDE no float. */
             {
-                double v = (double)p / (double)q;
-                double back = v * (double)q;
-                if(back == (double)p) dbl_volta++;
+                long g = rt_mdc(p, q);
+                long qp = q / g;
+                while(qp > 1 && (qp % 2) == 0) qp /= 2;
+                if(qp == 1) dbl_volta++;           /* representavel exacto em base 2 */
             }
         }
     }

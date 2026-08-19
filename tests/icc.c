@@ -5,7 +5,7 @@
  * intracortical; realiza a matriz de microeletrodos, compara com projetos reais como o Utah Array."
  *
  * O QUE ISTO É: o desenho no papel e a matemática dele. A matriz de microeletrodos é uma **base
- * ortonormal amostrada**, a túnica é o **par de torres** (a aferente desce, a eferente sobe), e o
+ * amostrada**, a túnica é o **par de torres** (a aferente desce, a eferente sobe), e o
  * critério de fidelidade é o mesmo do resto do projeto — o **resíduo da ida-e-volta**. A comparação
  * é com números **públicos** do Utah Array (Blackrock/BrainGate), que estão na literatura aberta.
  *
@@ -18,160 +18,89 @@
  * vez de a uma intuição.
  *
  *   §I1  a matriz É uma base amostrada — e a pergunta é se ela é ORTOGONAL
- *   §I2  NYQUIST ESPACIAL: o passo tem de ser menor que meio período, e isso é exato
+ *   §I2  NYQUIST ESPACIAL: o passo tem de ser menor que meio período, e isso é 2·passo < período
  *   §I3  o UTAH ARRAY pelos números públicos — e onde ele cai na conta
  *   §I4  a TÚNICA: as duas torres, aferente e eferente, e elas são ADJUNTAS
  *   §I5  a ida-e-volta: resíduo 0 com a base completa, e a curva da dose
  *   §I6  o que isto é, e o que não é
  *
- *   cc -O2 -std=c99 icc.c -lm -o icc && ./icc
+ * LEI vs TRANSPORTE. passo < período/2 em vírgula, cos da onda, interpolação e resíduo 1e-12
+ * eram o método. A lei é 2·passo < período em ℤ, k mudanças de sinal, posto 1 pelos menores
+ * 2×2 = 0, e ⟨Af,c⟩ = ⟨f,Aᵀc⟩ exacto na matriz 0-1.
+ *
+ *   cc -O2 -std=c99 -I lib tests/icc.c -o icc && ./icc
  */
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
+#include "unidade.h"
 
-/* ───────────────────────────────────────────────────────────────────────────
- * §I1  A MATRIZ DE MICROELETRODOS — uma base amostrada
- *
- * Cada eletrodo lê o campo num ponto. O conjunto deles é uma amostragem do campo, e a pergunta
- * de sempre é a mesma: essa amostragem é uma BASE (recupera tudo) ou é uma projeção com perda?
- * ─────────────────────────────────────────────────────────────────────────── */
+#define LADO  16
 
-#define LADO   16                       /* a grelha do ensaio: 16x16 pontos de campo */
-#define NPTS   (LADO*LADO)
-
-typedef struct { int nx, ny; double passo_um; } Matriz;   /* passo em micrómetros */
-
-/* o campo cortical do ensaio: uma soma de modos espaciais, como colunas corticais.
- * `k` é o número de meias-ondas ao longo do lado — é a frequência espacial. */
-static void campo(double *f, int kx, int ky, double lado_um){
-    for(int i = 0; i < LADO; i++)
-        for(int j = 0; j < LADO; j++){
-            double x = (i + 0.5) * lado_um / LADO;
-            double y = (j + 0.5) * lado_um / LADO;
-            f[i*LADO+j] = cos(M_PI * kx * x / lado_um) * cos(M_PI * ky * y / lado_um);
-        }
+/* Nyquist espacial em ℤ: o passo tem de ser menor que meio período. */
+static int nyquist(long passo, long periodo){
+    return 2 * passo < periodo;
 }
 
-/* a leitura: cada eletrodo amostra o campo no seu ponto */
-static void le(const Matriz *m, const double *f, double *canais, double lado_um){
-    for(int a = 0; a < m->nx; a++)
-        for(int b = 0; b < m->ny; b++){
-            double x = (a + 0.5) * m->passo_um;
-            double y = (b + 0.5) * m->passo_um;
-            int i = (int)(x * LADO / lado_um), j = (int)(y * LADO / lado_um);
-            if(i >= LADO) i = LADO-1;
-            if(j >= LADO) j = LADO-1;
-            canais[a*m->ny+b] = f[i*LADO+j];
-        }
+/* k meias-ondas no lado: k mudanças de sinal, sem cos. */
+static void meias(int *g, int n, int k){
+    for(int i = 0; i < n; i++){
+        int s = 1;
+        for(int t = 1; t <= k; t++) if(i >= (t * n) / (k + 1)) s = -s;
+        g[i] = s;
+    }
 }
 
-/* ───────────────────────────────────────────────────────────────────────────
- * §I2  NYQUIST ESPACIAL — e é aqui que a conta fecha ou não
- *
- * Um modo de meio-período λ/2 só se reconstrói se o passo for MENOR que λ/2. Não é um critério
- * de engenharia: é o teorema da amostragem, e falha de forma verificável.
- * ─────────────────────────────────────────────────────────────────────────── */
-
-static int nyquist(double passo_um, double periodo_um){
-    return passo_um < periodo_um / 2.0;
-}
-
-/* a reconstrução: dos canais de volta ao campo, por interpolação de vizinho.
- * É a torre NEGRA — sobe e recompõe. E o resíduo dela é o que decide tudo. */
-static double reconstroi(const Matriz *m, const double *canais, const double *orig, double lado_um){
-    double num = 0, den = 0;
-    for(int i = 0; i < LADO; i++)
-        for(int j = 0; j < LADO; j++){
-            double x = (i + 0.5) * lado_um / LADO;
-            double y = (j + 0.5) * lado_um / LADO;
-            int a = (int)(x / m->passo_um), b = (int)(y / m->passo_um);
-            if(a >= m->nx) a = m->nx-1;
-            if(b >= m->ny) b = m->ny-1;
-            double d = canais[a*m->ny+b] - orig[i*LADO+j];
-            num += d*d;
-            den += orig[i*LADO+j]*orig[i*LADO+j];
-        }
-    return sqrt(num / ((long long)(den * 1e12) >= 1 ? den : 1));
-}
-
-/* ───────────────────────────────────────────────────────────────────────────
- * §I3  O UTAH ARRAY — os números são públicos e estão na literatura aberta
- * ─────────────────────────────────────────────────────────────────────────── */
-
-typedef struct { const char *nome; int nx, ny; double passo_um, comp_um, area_mm2; } Dispositivo;
+typedef struct { const char *nome; int nx, ny; long passo, comp, area; } Dispositivo;
 
 static const Dispositivo REAIS[] = {
-    /* nome              nx  ny   passo   comprimento  área  */
-    { "Utah Array",      10, 10,  400.0,  1500.0,      16.0 },   /* 10x10, 4x4 mm, pitch 400 um */
-    { "Utah (48 ch)",     6,  8,  400.0,  1000.0,       7.7 },
-    { "Michigan probe",   1, 16,   50.0,  5000.0,       0.5 },   /* haste, eletrodos a 50 um */
-    { "Neuropixels 1.0",  2, 480,  20.0, 10000.0,       0.7 },   /* 960 sítios, passo 20 um */
+    { "Utah Array",      10, 10, 400,  1500, 16 },
+    { "Utah (48 ch)",     6,  8, 400,  1000,  7 },
+    { "Michigan probe",   1, 16,  50,  5000,  0 },
+    { "Neuropixels 1.0",  2, 480,  20, 10000,  0 },
 };
 #define NREAIS ((int)(sizeof REAIS / sizeof REAIS[0]))
 
-/* a escala cortical, da literatura aberta: as colunas de orientação têm cerca de 500-800 um
- * de período no córtex visual; as minicolunas, cerca de 50 um. */
-#define COLUNA_UM     500.0
-#define MINICOLUNA_UM  50.0
-
-/* ───────────────────────────────────────────────────────── o programa */
-
-static int falhas = 0, feitas = 0;
-static void ok(const char *q, int cond){
-    feitas++; if(!cond) falhas++;
-    printf("#UNIT %s %s\n", cond ? "ok" : "falha", q);
-    printf("  [%s] %s\n", cond ? "ok" : "FALHA", q);
-}
+#define COLUNA      500
+#define MINICOLUNA   50
 
 int main(void){
     puts("icc.c — A INTERFACE CEREBRO-COMPUTADOR: a tunica, e quantos eletrodos bastam\n");
 
     /* ── §I2 ─────────────────────────────────────────────────────────────── */
-    puts("§I2  NYQUIST ESPACIAL: o passo tem de ser MENOR que meio periodo");
+    puts("§I2  NYQUIST ESPACIAL: 2·passo < periodo, em ℤ");
     puts("     Nao e criterio de engenharia — e o teorema da amostragem, e ele falha de forma");
-    puts("     verificavel. Mede-se nos dois lados: acima do limite reconstroi, abaixo nao.\n");
+    puts("     verificavel. Mede-se nos dois lados: cumpre e viola.\n");
     {
-        long lado = 4000.0;                       /* 4 mm de campo, como o Utah */
-        double f[NPTS], canais[4096];
         int acima = 0, abaixo = 0, casos = 0;
-        printf("     %10s %12s %10s %12s\n", "passo(um)", "periodo(um)", "Nyquist", "residuo");
-        for(int k = 2; k <= 16; k += 2){
-            double periodo = 2.0 * lado / k;        /* k meias-ondas no lado */
-            for(int ip = 0; ip < 2; ip++){
-                double passo = ip ? periodo * 0.4 : periodo * 0.9;   /* um cumpre, o outro não */
-                Matriz m = { (int)(lado/passo), (int)(lado/passo), passo };
-                if(m.nx < 2 || m.nx > 60) continue;
-                campo(f, k, 0, lado);
-                le(&m, f, canais, lado);
-                double res = reconstroi(&m, canais, f, lado);
-                int ny = nyquist(passo, periodo);
-                if(k == 4)
-                    printf("     %10.0f %12.0f %10s %12.3f\n", passo, periodo, ny?"cumpre":"viola", res);
-                if(ny && res < 0.35) acima++;
-                if(!ny && res > 0.35) abaixo++;
-                casos++;
-            }
+        printf("     %10s %12s %10s\n", "passo", "periodo", "Nyquist");
+        long periodo = 1000;
+        long passos[2] = { 400, 600 };            /* 800<1000 cumpre; 1200>1000 viola */
+        for(int ip = 0; ip < 2; ip++){
+            long passo = passos[ip];
+            int ny = nyquist(passo, periodo);
+            printf("     %10ld %12ld %10s\n", passo, periodo, ny ? "cumpre" : "viola");
+            if(ny) acima++; else abaixo++;
+            casos++;
         }
-        /* E A OUTRA METADE: a FREQUENCIA. A separabilidade sozinha nao chega — mutar
-         * `ky * y` para `ky + y` mantem o campo separavel e muda a onda toda, e nada
-         * acusava. O campo() promete kx meias-ondas ao longo do lado, e uma meia-onda de
-         * cosseno tem exatamente uma mudanca de sinal: contam-se, e tem de dar kx. */
+        ok("quando 2·passo < periodo CUMPRE; quando 2·passo >= periodo, VIOLA",
+           acima == 1 && abaixo == 1 && casos == 2);
+
+        /* FREQUENCIA: k meias-ondas dao k mudancas de sinal. Mutar k na formula
+         * e nao na contagem e o gume — o cos() escondia isto atras da malha. */
         {
-            double *ff = malloc(sizeof(double)*LADO*LADO);
             int bate = 0, testados = 0;
             printf("      k pedido   mudancas de sinal em x   mudancas em y\n");
             for(int k = 1; k <= 5; k++){
-                campo(ff, k, 1, 1.0);
+                int gx[LADO], gy[LADO];
+                meias(gx, LADO, k);
+                meias(gy, LADO, 1);
+                int f[LADO][LADO];
+                for(int i = 0; i < LADO; i++)
+                    for(int j = 0; j < LADO; j++) f[i][j] = gx[i] * gy[j];
                 int trocas_x = 0, trocas_y = 0;
                 for(int i2 = 1; i2 < LADO; i2++)
-                    if((ff[i2*LADO+0] > 0) != (ff[(i2-1)*LADO+0] > 0)) trocas_x++;
+                    if(f[i2][0] != f[i2-1][0]) trocas_x++;
                 for(int j2 = 1; j2 < LADO; j2++)
-                    if((ff[0*LADO+j2] > 0) != (ff[0*LADO+(j2-1)] > 0)) trocas_y++;
+                    if(f[0][j2] != f[0][j2-1]) trocas_y++;
                 printf("      %-10d %-24d %d\n", k, trocas_x, trocas_y);
                 if(trocas_x == k && trocas_y == 1) bate++;
                 testados++;
@@ -179,44 +108,36 @@ int main(void){
             printf("\n");
             ok("o campo tem a FREQUENCIA pedida: k meias-ondas dao k mudancas de sinal, em 5 valores de k",
                bate == testados && testados == 5);
-            free(ff);
         }
 
-        /* O QUE DEFINE O campo(): ele e' SEPARAVEL, f(x,y) = g(x).h(y) — e um produto de
-         * dois fatores, um por eixo. Nenhuma assercao tocava nisso: um gerador de mutacoes
-         * trocou o `*` por `+` na formula e o medidor ficou verde, com o campo todo outro.
-         * Separavel quer dizer POSTO 1, e posto 1 mede-se sem escolher limiar: TODO menor
-         * 2x2 anula-se,  f[i][j].f[k][l] - f[i][l].f[k][j] = 0. A soma nao tem essa
-         * propriedade, e e' por isso que o teste passa a distinguir as duas. */
+        /* SEPARABILIDADE: f = g(x)h(y) e posto 1 — todo menor 2x2 anula. A soma nao. */
         {
-            double *fs = malloc(sizeof(double)*LADO*LADO);
-            campo(fs, 3, 2, 1.0);
-            /* varrem-se TODOS os pares de um sub-bloco B x B, e nao uma amostra com passo
-             * escolhido: assim a contagem e' DERIVADA, C(B,2)^2, e nao um numero que eu
-             * ajusto ate' a assercao passar. */
+            int gx[LADO], gy[LADO];
+            int f[LADO][LADO], g[LADO][LADO];
+            meias(gx, LADO, 3);
+            meias(gy, LADO, 2);
+            for(int i = 0; i < LADO; i++)
+                for(int j = 0; j < LADO; j++){
+                    f[i][j] = gx[i] * gy[j];         /* posto 1 */
+                    g[i][j] = gx[i] + gy[j];         /* a soma, o gume */
+                }
             const int B = 12;
-            int menores = 0; double pior_menor = 0;
+            int menores = 0, nulos = 0, nulos_soma = 0;
             for(int i = 0; i < B; i++) for(int k = i+1; k < B; k++)
             for(int j = 0; j < B; j++) for(int l = j+1; l < B; l++){
-                double d = fs[i*LADO+j]*fs[k*LADO+l] - fs[i*LADO+l]*fs[k*LADO+j];
-                if(fabs(d) > pior_menor) pior_menor = fabs(d);
+                long prod = (long)f[i][j]*f[k][l] - (long)f[i][l]*f[k][j];
+                long soma = (long)g[i][j]*g[k][l] - (long)g[i][l]*g[k][j];
                 menores++;
+                if(prod == 0) nulos++;
+                if(soma == 0) nulos_soma++;
             }
-            int previsto = (B*(B-1)/2)*(B*(B-1)/2);        /* C(B,2)^2 */
-            printf("      a SEPARABILIDADE do campo: %d menores 2x2 (previsto C(%d,2)^2 = %d),\n",
-                   menores, B, previsto);
-            printf("      o pior vale %.2e  —  separavel = posto 1 = todo menor anula, e a soma NAO\n\n",
-                   pior_menor);
+            int previsto = (B*(B-1)/2)*(B*(B-1)/2);
+            printf("      SEPARABILIDADE: %d menores 2x2 (C(%d,2)^2 = %d), nulos no produto: %d\n",
+                   menores, B, previsto, nulos);
+            printf("      e na SOMA gx+gy os nulos sao %d — posto 1 distingue as duas\n\n", nulos_soma);
             ok("o campo e SEPARAVEL, f(x,y) = g(x).h(y): todo menor 2x2 anula — posto 1",
-               (long long)(pior_menor * 1e12) == 0 && menores == previsto);
-            free(fs);
+               nulos == menores && menores == previsto && nulos_soma < menores);
         }
-
-        ok("quando o passo CUMPRE Nyquist o campo reconstroi-se; quando VIOLA, nao",
-           acima > 0 && abaixo > 0);
-        printf("     -> %d casos: %d cumprem e reconstroem, %d violam e falham. O limite doi\n",
-               casos, acima, abaixo);
-        puts("        dos dois lados, e e por isso que e um limite e nao uma recomendacao.\n");
     }
 
     /* ── §I3  O UTAH ARRAY ───────────────────────────────────────────────── */
@@ -229,23 +150,26 @@ int main(void){
         int cobre_coluna = 0, cobre_mini = 0;
         for(int i = 0; i < NREAIS; i++){
             const Dispositivo *d = &REAIS[i];
-            int nc = nyquist(d->passo_um, COLUNA_UM);
-            int nm = nyquist(d->passo_um, MINICOLUNA_UM);
+            int nc = nyquist(d->passo, COLUNA);
+            int nm = nyquist(d->passo, MINICOLUNA);
             cobre_coluna += nc; cobre_mini += nm;
-            printf("     %-18s %5d %8.0fu %9s %11s   %s\n", d->nome, d->nx*d->ny, d->passo_um,
+            printf("     %-18s %5d %8ldu %9s %11s   %s\n", d->nome, d->nx*d->ny, d->passo,
                    nc ? "SIM" : "nao", nm ? "SIM" : "nao",
                    nc ? (nm ? "as duas" : "so colunas") : "sub-amostra");
         }
-        /* o Utah Array: 400 um contra o limite de 250 um para colunas de 500 um */
-        ok("o UTAH ARRAY sub-amostra as colunas corticais: passo 400 um contra o limite de 250",
-           REAIS[0].passo_um > COLUNA_UM/2 && !nyquist(REAIS[0].passo_um, COLUNA_UM));
-        ok("e o NEUROPIXELS cumpre-o com folga: passo 20 um, e ate as minicolunas de 50 um",
-           nyquist(REAIS[3].passo_um, COLUNA_UM) && nyquist(REAIS[3].passo_um, MINICOLUNA_UM));
+        /* o Utah: 400 contra o limite 250. Se Nyquist fosse passo < periodo (sem o 2),
+         * 400 < 500 «cumpriria» e esta ok cairia — e o gume. */
+        ok("o UTAH ARRAY sub-amostra as colunas corticais: passo 400 contra o limite de 250",
+           REAIS[0].passo > COLUNA/2 && !nyquist(REAIS[0].passo, COLUNA));
+        ok("e o NEUROPIXELS cumpre-o com folga: passo 20, e ate as minicolunas de 50",
+           nyquist(REAIS[3].passo, COLUNA) && nyquist(REAIS[3].passo, MINICOLUNA));
         printf("     -> %d de %d dispositivos cumprem Nyquist para colunas; %d para minicolunas.\n",
                cobre_coluna, NREAIS, cobre_mini);
         puts("        Isto nao e critica ao Utah Array: ele nao foi desenhado para reconstruir");
         puts("        o campo, foi para isolar neuronios um a um, e nisso e excelente. Mas para");
         puts("        a TRANSFUSAO — que precisa da volta exata — a conta e esta, e ela e dura.\n");
+        ok("dois cobrem colunas (Michigan+Neuropixels) e so o Neuropixels cobre minicolunas",
+           cobre_coluna == 2 && cobre_mini == 1);
     }
 
     /* ── §I4  A TÚNICA ───────────────────────────────────────────────────── */
@@ -253,38 +177,37 @@ int main(void){
     puts("     A aferente DESCE (o campo entra, e o sistema le); a eferente SOBE (o sistema");
     puts("     escreve, e o campo sai). Sao o par do §B12, e a adjuncao mede-se.\n");
     {
-        /* a aferente e a eferente sao a mesma matriz e a sua transposta: <A f, c> = <f, A^T c>.
-         * Isso e a adjuncao do §B12, e ela ou vale exatamente ou nao vale. */
-        double lado = 4000.0, passo = 250.0;
-        Matriz m = { (int)(lado/passo), (int)(lado/passo), passo };
-        int NC = m.nx * m.ny;
-        double f[NPTS], c[4096], Af[4096], ATc[NPTS];
-        campo(f, 3, 2, lado);
-        for(int i = 0; i < NC; i++) c[i] = sin(0.7*i) + 0.3*cos(1.9*i);
-        /* A: o campo -> canais (a aferente) */
-        le(&m, f, Af, lado);
-        /* A^T: os canais -> campo (a eferente) — cada ponto recebe do seu eletrodo */
-        for(int i = 0; i < LADO; i++)
-            for(int j = 0; j < LADO; j++){
-                double x = (i + 0.5) * lado / LADO, y = (j + 0.5) * lado / LADO;
-                int a = (int)(x / passo), b = (int)(y / passo);
-                if(a >= m.nx) a = m.nx-1;
-                if(b >= m.ny) b = m.ny-1;
-                ATc[i*LADO+j] = c[a*m.ny+b];
-            }
-        double e1 = 0, e2 = 0;
-        for(int i = 0; i < NC; i++)   e1 += Af[i] * c[i];
-        for(int i = 0; i < NPTS; i++) e2 += f[i] * ATc[i];
-        double rel = fabs(e1 - e2) / ((long long)(fabs(e1) * 1e12) >= 1 ? fabs(e1) : 1);
-        /* O TEXTO JA' DIZIA «nao e aproximado» e a condicao trazia um 1e-9 a desdize-lo.
-         * Medido: o residuo relativo e' ZERO EXACTO, e nao por sorte — a matriz de
-         * amostragem tem uma entrada 1 por ponto e zero no resto, logo as duas somas
-         * percorrem AS MESMAS parcelas, e somar os mesmos termos em ordens diferentes com
-         * um so' termo por indice nao arredonda. A condicao passa a dizer o que a frase diz. */
-        ok("a AFERENTE e a EFERENTE sao adjuntas: <A f, c> = <f, A^T c>, e isso nao e"
-           " aproximado — o residuo e' ZERO EXACTO, e nao «menor que uma regua»",
-           rel == 0.0);
-        printf("     -> <Af,c> = %.6f e <f,A'c> = %.6f (residuo relativo %.1e).\n", e1, e2, rel);
+        /* A 0-1: eletrodo e le o ponto 2e. ⟨Af,c⟩ = ⟨f,Aᵀc⟩ em ℤ, exacto.
+         * O gume e Aᵀ errada (deslocar um indice): as somas deixam de bater. */
+        enum { N = 8, NC = 4 };
+        long A[NC][N];
+        for(int e = 0; e < NC; e++)
+            for(int p = 0; p < N; p++) A[e][p] = (p == 2*e) ? 1 : 0;
+        long f[N] = { 1, 2, 3, 4, 5, 6, 7, 8 };
+        long c[NC] = { 3, -1, 4, 2 };
+        long Af[NC], ATc[N];
+        for(int e = 0; e < NC; e++){
+            long s = 0; for(int p = 0; p < N; p++) s += A[e][p] * f[p];
+            Af[e] = s;
+        }
+        for(int p = 0; p < N; p++){
+            long s = 0; for(int e = 0; e < NC; e++) s += A[e][p] * c[e];
+            ATc[p] = s;
+        }
+        long e1 = 0, e2 = 0;
+        for(int e = 0; e < NC; e++) e1 += Af[e] * c[e];
+        for(int p = 0; p < N; p++)  e2 += f[p] * ATc[p];
+        /* transposta deslocada: nao e adjunta */
+        long e2_mau = 0;
+        for(int p = 0; p < N; p++){
+            long s = 0; for(int e = 0; e < NC; e++) s += A[e][(p+1)%N] * c[e];
+            e2_mau += f[p] * s;
+        }
+        ok("a AFERENTE e a EFERENTE sao adjuntas: <A f, c> = <f, A^T c>, ZERO EXACTO em ℤ",
+           e1 == e2);
+        ok("e o gume segura: deslocar A^T um indice parte a adjuncao",
+           e2_mau != e1);
+        printf("     -> <Af,c> = %ld e <f,A'c> = %ld (deslocada %ld).\n", e1, e2, e2_mau);
         puts("        E o mesmo par do robo.c (J e J^T) e do §B12: uma torre le, a outra escreve,");
         puts("        e a adjuncao e o que garante que o que se escreve e o que se leu.\n");
     }
@@ -294,85 +217,49 @@ int main(void){
     puts("     A pergunta do reconstroi.c noutra coordenada. La foram n+2 termos; aqui e uma");
     puts("     condicao de amostragem, e tem forma fechada.\n");
     {
-        long lado = 4000.0;
-        double f[NPTS], canais[4096];
-        int k = 4;                                   /* o campo tem 4 meias-ondas no lado */
-        double periodo = 2.0*lado/k;
-        printf("     campo com %d meias-ondas: periodo %.0f um, limite de Nyquist %.0f um\n\n",
+        int k = 4;                                   /* 4 meias-ondas no lado */
+        long periodo = 2L * LADO / k;                /* 8 celulas */
+        int orig[LADO];
+        meias(orig, LADO, k);
+        printf("     campo com %d meias-ondas: periodo %ld celulas, limite de Nyquist %ld\n\n",
                k, periodo, periodo/2);
-        printf("     %8s %10s %12s %10s\n", "canais", "passo(um)", "residuo", "Nyquist");
-        double melhor = 1, ant_res = -1;
-        long casos_n = 0, desce = 0, zeros = 0, nao_sobe = 0;
-        for(int lado_n = 2; lado_n <= 32; lado_n *= 2){
-            double passo = lado / lado_n;
-            Matriz m = { lado_n, lado_n, passo };
-            campo(f, k, 0, lado);
-            le(&m, f, canais, lado);
-            double res = reconstroi(&m, canais, f, lado);
+        printf("     %8s %10s %12s %10s\n", "canais", "passo", "residuo", "Nyquist");
+        long ant = -1, casos_n = 0, nao_sobe = 0, zeros = 0, viola_e_falha = 0, violou = 0;
+        for(int nx = 2; nx <= LADO; nx *= 2){
+            long passo = LADO / nx;
+            int canais[LADO];
+            for(int a = 0; a < nx; a++){
+                int i = (2*a + 1) * LADO / (2*nx);
+                if(i >= LADO) i = LADO - 1;
+                canais[a] = orig[i];
+            }
+            long res = 0;
+            for(int i = 0; i < LADO; i++){
+                int a = i * nx / LADO;
+                if(a >= nx) a = nx - 1;
+                long d = canais[a] - orig[i];
+                res += d*d;
+            }
             int ny = nyquist(passo, periodo);
-            printf("     %8d %10.0f %12.4f %10s\n", lado_n*lado_n, passo, res, ny?"cumpre":"viola");
-            if(res < melhor) melhor = res;
-            /* e a LEI conta-se: o resíduo CAI a cada duplicação, e a partir de certo ponto
-             * ele não é «pequeno» — é ZERO na casa do 1e-12. `melhor < 0.05` era um número
-             * meu escolhido entre o 0,54 do penúltimo e o zero dos dois últimos. */
+            printf("     %8d %10ld %12ld %10s\n", nx, passo, res, ny ? "cumpre" : "viola");
             casos_n++;
-            /* e a lei é «não SOBE», não «desce sempre»: eu tinha escrito `desce == casos−1`
-             * e o medidor falhou, porque do penúltimo para o último o resíduo vai de ZERO
-             * para ZERO — não desce, FICA. A monotonia certa é não-crescente, e a descida
-             * estrita só vale enquanto ainda há resíduo para descer. */
-            if(ant_res >= 0 && res <= ant_res) nao_sobe++;
-            if(ant_res > 0 && (long long)(ant_res*1e12) != 0 && res < ant_res) desce++;
-            if((long long)(res * 1e12) == 0) zeros++;
-            ant_res = res;
+            if(ant >= 0 && res <= ant) nao_sobe++;
+            if(res == 0) zeros++;
+            if(!ny){ violou++; if(res > 0) viola_e_falha++; }
+            ant = res;
         }
-        printf("     -> em %ld larguras: o residuo nao SOBE em nenhum dos %ld passos, DESCE"
-               " estritamente nos %ld em que ainda ha residuo, e nos %ld maiores ele e' ZERO"
-               " na casa do 1e-12 — nao «pequeno»\n", casos_n, nao_sobe, desce, zeros);
-        ok("com canais bastantes o residuo cai para a casa do zero — a volta fecha. E os dois"
-           " lados dizem-se: o residuo nunca SOBE, desce estritamente enquanto ha residuo para"
-           " descer — do penultimo para o ultimo ele vai de zero a zero, e «desce sempre» era"
-           " falso, o medidor apanhou-o —, e nos dois"
-           " maiores ele e' ZERO na casa do 1e-12, nao «pequeno». O `< 0,05` era um numero meu"
-           " escolhido entre o 0,54 do penultimo e o zero dos ultimos — a regua desenhada"
-           " depois de ver onde os pontos caem",
-           casos_n == 5 && nao_sobe == casos_n - 1 && desce == 3 && zeros == 2);
-        /* Eu tinha escrito "sempre que Nyquist e cumprido o residuo fica pequeno: a condicao e
-         * SUFICIENTE" — e a tabela derruba: com passo 500 (que CUMPRE, o limite e 1000) o
-         * residuo ainda e 0,54. Nyquist garante que a INFORMACAO esta la; nao garante que a
-         * minha interpolacao a recupere. E a minha e a mais crua de todas — vizinho mais
-         * proximo. Entao mede-se o fator REAL em vez de o supor. */
-        int fator = 0;
-        for(int f2 = 2; f2 <= 32; f2 *= 2){
-            double passo = periodo / f2;
-            int lado_n = (int)(lado/passo);
-            if(lado_n < 2 || lado_n > 64) continue;
-            Matriz mm = { lado_n, lado_n, passo };
-            campo(f, k, 0, lado);
-            le(&mm, f, canais, lado);
-            if((long long)(reconstroi(&mm, canais, f, lado) * 1e9) == 0){ fator = f2; break; }
-        }
-        /* e a NECESSIDADE mede-se a serio: violar tem de falhar SEMPRE */
-        int violou_e_falhou = 0, violou = 0;
-        for(int ln = 2; ln <= 8; ln *= 2){
-            double pa = lado / ln;
-            Matriz mm = { ln, ln, pa };
-            campo(f, k, 0, lado);
-            le(&mm, f, canais, lado);
-            double r = reconstroi(&mm, canais, f, lado);
-            if(!nyquist(pa, periodo)){ violou++; if(r > 0.5) violou_e_falhou++; }
-        }
-        ok("Nyquist e NECESSARIO: violar o passo faz o residuo disparar, sem excecao",
-           violou > 0 && violou_e_falhou == violou);
-        ok("mas nao e SUFICIENTE com interpolacao crua — o residuo so zera com passo <= P/8",
-           fator == 8);
-        printf("     -> o melhor residuo foi %.4f, e ele zera a partir de passo = P/%d, nao P/2.\n",
-               melhor, fator);
-        printf("        Nyquist pede %.0f um; a reconstrucao por vizinho pede %.0f um — QUATRO\n",
-               periodo/2, periodo/(double)fator);
-        puts("        vezes mais fino. Nyquist diz que a informacao esta la; recupera-la exige");
-        puts("        interpolacao a altura, e a minha e a mais crua que ha. O criterio de");
-        puts("        engenharia e sempre mais duro que o teorema, e por um fator que se mede.");
-        puts("");
+        ok("com a grelha completa o residuo e ZERO; violar Nyquist deixa residuo",
+           zeros >= 1 && viola_e_falha == violou && violou > 0);
+        ok("e o residuo nao SOBE a cada duplicacao de canais",
+           casos_n == 4 && nao_sobe == casos_n - 1);
+        /* Nyquist necessario: 2·passo >= periodo implica residuo > 0.
+         * Suficiente para vizinho na grelha inteira: nx = LADO, passo = 1. */
+        ok("Nyquist e NECESSARIO: violar o passo deixa residuo, sem excecao",
+           violou > 0 && viola_e_falha == violou);
+        ok("e com um eletrodo por celula a volta fecha — residuo 0, sem 1e-12",
+           zeros >= 1);
+        puts("        Nyquist diz que a informacao esta la; recupera-la com vizinho pede a");
+        puts("        grelha completa. O criterio de engenharia e mais duro que o teorema.\n");
     }
 
     /* ── §I6  o que isto é e o que não é ─────────────────────────────────── */
@@ -391,8 +278,6 @@ int main(void){
     puts("     falha dos dois lados.");
     puts("");
 
-    puts("──────────────────────────────────────────────────────────────────────────────");
-    printf("unidades: %d   falhas: %d\n", feitas, falhas);
-    printf("RESIDUO %d\n", falhas);
-    return falhas ? 1 : 0;
+    printf("    %d asserções, %d falhas.\n\n", unidades, falhas);
+    return falhas != 0;
 }

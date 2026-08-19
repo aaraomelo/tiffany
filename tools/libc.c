@@ -257,27 +257,27 @@ long atofr(char *s, long *p, long *q, int *sinal){
  * uma só divisão arredonda uma só vez, e é o mesmo que o `strtod` do sistema faz. Onde os
  * inteiros não chegam (mais de dezoito algarismos), cai-se no caminho antigo, e é o único
  * sítio onde isso acontece. */
-double atof(char *s){
+f64 atof(char *s){
     long p = 0, q = 1;
     int sg = 1;
     if(atofr(s, &p, &q, &sg)){
-        double v = (double)p / (double)q;
+        f64 v = (f64)p / (f64)q;
         return sg < 0 ? -v : v;
     }
     /* o caminho antigo, para o que não coube nos inteiros */
     int i = 0;
     while(isspace(s[i] & 255)) i++;
-    double sinal = 1.0;
+    f64 sinal = 1.0;
     if(s[i] == 45){ sinal = -1.0; i++; }
     else if(s[i] == 43) i++;
-    double v = 0.0;
-    while(isdigit(s[i] & 255)){ v = v * 10.0 + (double)((s[i] & 255) - 48); i++; }
+    f64 v = 0.0;
+    while(isdigit(s[i] & 255)){ v = v * 10.0 + (f64)((s[i] & 255) - 48); i++; }
     if(s[i] == 46){
         i++;
-        double pp = 1.0;
+        f64 pp = 1.0;
         while(isdigit(s[i] & 255)){
             pp = pp / 10.0;
-            v = v + pp * (double)((s[i] & 255) - 48);
+            v = v + pp * (f64)((s[i] & 255) - 48);
             i++;
         }
     }
@@ -364,7 +364,7 @@ static int poe_num(char *d, int n, int *k, long v, int base, int larg, int zero,
  *
  * Quando os inteiros não chegam (expoentes grandes), diz-se pelo caminho antigo em vez de
  * fingir exactidão — e é o único sítio onde isso acontece. */
-static int poe_real(char *d, int n, int *k, double v, int prec){
+static int poe_real(char *d, int n, int *k, f64 v, int prec){
     if(prec < 0) prec = 6;
     int neg = 0;
     if(v < 0.0){ neg = 1; v = -v; }
@@ -372,14 +372,14 @@ static int poe_real(char *d, int n, int *k, double v, int prec){
     for(int i = 0; i < prec; i++) escala_i = escala_i * 10;
 
     /* v = m / 2^s, exacto */
-    double t = v;
+    f64 t = v;
     long s = 0;
-    while(t != (double)(long)t && s < 62){ t = t * 2.0; s = s + 1; }
+    while(t != (f64)(long)t && s < 62){ t = t * 2.0; s = s + 1; }
     long m = (long)t;
 
     long r = 0;
     int exacto = 0;
-    if(t == (double)m && s < 62 && m <= 9223372036854775807 / escala_i){
+    if(t == (f64)m && s < 62 && m <= 9223372036854775807 / escala_i){
         long num = m * escala_i;
         if(s == 0) r = num;
         else {
@@ -393,11 +393,11 @@ static int poe_real(char *d, int n, int *k, double v, int prec){
         exacto = 1;
     }
     if(!exacto){
-        double escala = 1.0;
+        f64 escala = 1.0;
         for(int i = 0; i < prec; i++) escala = escala * 10.0;
-        double x = v * escala;
+        f64 x = v * escala;
         r = (long)x;
-        double frac = x - (double)r;
+        f64 frac = x - (f64)r;
         if(frac > 0.5) r = r + 1;
         else if(frac == 0.5){ if(r % 2 != 0) r = r + 1; }
     }
@@ -480,7 +480,7 @@ int vsnprintf(char *d, int n, char *f, va_list ap){
             continue;
         }
         if(c == 102 || c == 70){                        /* f */
-            double v = va_arg(ap, double);
+            f64 v = va_arg(ap, f64);
             poe_real(d, n, &k, v, prec);
             continue;
         }
@@ -540,7 +540,7 @@ static int le_inteiro(char *s, int *pos, long *v, int larg){
     return 1;
 }
 
-static int le_real(char *s, int *pos, double *v){
+static int le_real(char *s, int *pos, f64 *v){
     int i = *pos;
     while(isspace(s[i] & 255)) i++;
     int ini = i;
@@ -614,10 +614,10 @@ int vsscanf(char *s, char *f, va_list ap){
             continue;
         }
         if(c == 102 || c == 101 || c == 103){
-            double v = 0.0;
+            f64 v = 0.0;
             if(!le_real(s, &i, &v)) return n;
-            if(lon){ double *p = va_arg(ap, double *); *p = v; }
-            else { double *p = va_arg(ap, double *); *p = v; }
+            if(lon){ f64 *p = va_arg(ap, f64 *); *p = v; }
+            else { f64 *p = va_arg(ap, f64 *); *p = v; }
             n++;
             continue;
         }

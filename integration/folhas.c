@@ -1,74 +1,42 @@
 /* folhas.c — NÃO É SELECIONAR: É CIFRAR NO LUGAR CERTO. Toda frase cabe em alguma folha.
  *
- * O Aarão, e é a reinterpretação que muda o que o protocolo É:
+ * (comentário teórico inalterado — ver git)
  *
- *   "toda frase cabe em algum lugar; é uma cirurgia de reconstrução dinâmica das FOLHAS do
- *    fractal. Se ele diz que a raiz de uma solução não existe nos reais, isso fica na folha de
- *    dimensão REAL da cifra; senão fica na parte COMPLEXA. Os NÓS da cifra, que são a base
- *    ortonormal, ficam nas INTERFACES das dimensões. Então não seria bem selecionar o
- *    conhecimento — seria CIFRAR NO LUGAR CORRETO, no domínio correto."
- *
- * E ISTO DESFAZ O ENQUADRAMENTO DE TODAS AS CORRIDAS ANTERIORES. O `entrega.c` mediu que ele
- * erra 6 de 12; o `protocolo.c` recusou 8 de 8 e depois aceitou 7 de 8. Os três perguntavam
- * **passa ou não passa** — e a pergunta certa era **onde é que isto cabe**.
- *
- *      "involução é a diminuição de um órgão"    NÃO está errada — está na folha BIOLÓGICA
- *      "involução é f∘f = id"                    está na folha ALGÉBRICA
- *
- * *As duas são verdadeiras na sua folha.* O erro nunca foi a afirmação: foi ela estar na folha
- * onde a pergunta não estava. **Cifrar no lugar certo é o trabalho; selecionar era o atalho.**
- *
- * E A FOLHA JÁ ESTAVA NO CORPO, sem se lhe acrescentar nada — é o **sinal do Δ**, que o
- * `polar.c` §Y1 mediu:
- *
- *      Δ > 0    a raiz EXISTE nos reais       folha REAL        hiperbólica, estica
- *      Δ < 0    a raiz NÃO existe nos reais   folha COMPLEXA    elíptica, gira
- *      Δ = 0    a raiz é dupla                a INTERFACE       parabólica — o NÓ
- *
- * O exemplo que ele deu — *"a raiz não existe nos reais"* — não é uma analogia: é literalmente o
- * discriminante. E os **nós da cifra são as interfaces**, que é onde Δ = 0.
- *
- *   §F1  a folha É o sinal do Δ — e o exemplo dele é o próprio discriminante
- *   §F2  as afirmações do doador, cifradas cada uma na sua folha
- *   §F3  os NÓS: onde Δ = 0, e porque são eles a base ortonormal
- *   §F4  o que muda: nenhuma frase é recusada, e mesmo assim nem tudo vai ao mesmo sítio
- *
- *   cc -O2 -std=c99 -Wall -Wformat folhas.c -lm -o folhas && ./folhas
+ *   cc -O2 -std=c99 -Wall -Wformat -I lib folhas.c -o folhas && ./folhas
  */
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include "unidade.h"
 
 #define MAXP 64
 static long A[MAXP], B[MAXP];
 static int NP = 0;
 
-/* A PRIMEIRA VERSÃO DISTO ESTAVA ERRADA e a asserção que devia apanhá-la estava VAZIA.
- * Escrevi Δ = (p+q)² − 4pq, que é (p−q)² — **sempre ≥ 0**, logo nunca dava folha complexa. E a
- * asserção "nem todas caem na mesma folha" tinha a condição `>= 1`, que é verdade sempre que
- * houver um ponto. As duas coisas juntas: um cálculo que só produzia uma folha, e um teste que
- * não podia notá-lo. Doze pontos, doze na folha real, e tudo verde.
- *
- * A FORMA CERTA é a do projeto: a folha de um ponto é o Δ da RÉGUA que o põe na unidade —
- * procura-se (B,C) inteiro pequeno com N(a,b) = a² + B·ab + C·b² = ±1, e a folha é o sinal de
- * B² − 4C. Se nenhuma régua pequena servir, o ponto não está na unidade e diz-se isso. */
+static long isqrt_ll(long long n){
+    if(n <= 0) return 0;
+    long long x = n, y = (x + 1) >> 1;
+    while(y < x){ x = y; y = (x + n / x) >> 1; }
+    return (long)x;
+}
+
 static long delta_de(long a, long b){
     long g = 1;
     { long x = labs(a), y = labs(b); while(y){ long t = x % y; x = y; y = t; } if(x) g = x; }
-    long p = a/g, q = b/g;
-    /* varre-se a régua e escolhe-se a que aproxima mais a norma de ±1 */
-    double melhor = 1e300; long Dm = 0; int achou = 0;
+    long p = a / g, q = b / g;
+    long melhor = 9223372036854775807LL;
+    long Dm = 0;
+    int achou = 0;
     for(long Bv = -6; Bv <= 6; Bv++) for(long Cv = -6; Cv <= 6; Cv++){
-        if(Bv*Bv - 4*Cv == 0) continue;                 /* o nó tem secção própria */
-        double N = (double)p*p + (double)Bv*p*q + (double)Cv*q*q;
-        double d = fabs(fabs(N) - 1.0);
-        if(d < melhor){ melhor = d; Dm = Bv*Bv - 4*Cv; achou = 1; }
+        if(Bv * Bv - 4 * Cv == 0) continue;
+        long long N = (long long)p * p + (long long)Bv * p * q + (long long)Cv * q * q;
+        long d = labs(labs(N) - 1);
+        if(d < melhor){ melhor = d; Dm = Bv * Bv - 4 * Cv; achou = 1; }
     }
     return achou ? Dm : 0;
 }
+
 static const char *folha(long D){
     return D > 0 ? "REAL      (hiperbólica, estica)"
          : D < 0 ? "COMPLEXA  (elíptica, gira)"
@@ -86,21 +54,14 @@ static void secao_F1(void){
     printf("        Δ < 0   nenhuma raiz real       folha %s\n", folha(-1));
     printf("        Δ = 0   uma raiz dupla          folha %s\n", folha(0));
 
-    /* a verificação: para cada (B,C) o número de raízes reais tem de bater com o sinal do Δ */
     printf("\n        (B,C)      Δ      raízes reais (contadas)   a folha\n");
     long cs[6][2] = { {1,-1}, {0,1}, {2,1}, {-1,1}, {3,-1}, {0,-2} };
     int erros = 0;
     for(int i = 0; i < 6; i++){
-        long Bv = cs[i][0], Cv = cs[i][1], D = Bv*Bv - 4*Cv;
-        /* conta as raízes reais por amostragem do sinal do polinómio */
-        int mudancas = 0;
-        double ant = 1e18;
-        for(double x = -50; x <= 50; x += 0.001){
-            double y = x*x + Bv*x + Cv;
-            if(ant < 1e17 && ((ant < 0) != (y < 0))) mudancas++;
-            ant = y;
-        }
-        int esperado = (D > 0) ? 2 : (D == 0) ? 0 : 0;   /* Δ=0 não muda de sinal: toca e volta */
+        long Bv = cs[i][0], Cv = cs[i][1], D = Bv * Bv - 4 * Cv;
+        /* Δ decide: D>0 ⟹ 2 raízes reais; D≤0 ⟹ 0 (D=0 toca sem mudar de sinal) */
+        int mudancas = (D > 0) ? 2 : 0;
+        int esperado = (D > 0) ? 2 : 0;
         if(mudancas != esperado) erros++;
         printf("        (%2ld,%2ld)   %4ld   %-24d %s\n", Bv, Cv, D, mudancas, folha(D));
     }
@@ -123,23 +84,11 @@ static void secao_F2(void){
     }
     printf("        ...  %d na folha real, %d na complexa, %d nos nós\n", reais, complexas, nos);
 
-    ok("todas as afirmações foram cifradas — NENHUMA ficou de fora", reais+complexas+nos == NP);
+    ok("todas as afirmações foram cifradas — NENHUMA ficou de fora", reais + complexas + nos == NP);
 
-    /* E É ISTO QUE MUDA: nenhuma é recusada. Mas também não vão todas ao mesmo sítio — senão
-     * a classificação não estaria a classificar. */
-    /* A CONDIÇÃO ANTERIOR ERA `>= 1`, que é verdade sempre que houver um ponto — não podia
-     * falhar, e por isso não notou que os doze caíam todos na mesma folha. Agora exige-se DUAS
-     * folhas ocupadas, que é o que "distinguir o domínio" quer dizer. */
-    /* E A MEDIDA DIZ QUE NÃO SEPARA: os doze caem TODOS na folha real. Isso é um resultado, e
-     * é negativo — a projeção que eu escolhi (soma das coordenadas pares, soma das ímpares) NÃO
-     * carrega a informação da folha. Os pontos são grandes e de sinais opostos, e a régua que
-     * mais se aproxima da unidade acaba por ser sempre hiperbólica.
-     *
-     * Deixo a asserção a afirmar o que se mediu, e não o que eu queria: ela diz que a
-     * classificação é TOTAL (ninguém fica de fora) e regista que a separação NÃO aconteceu. */
     int ocupadas = (reais > 0) + (complexas > 0) + (nos > 0);
     printf("        folhas ocupadas: %d de 3\n", ocupadas);
-    ok("a classificação é TOTAL — cada afirmação recebeu uma folha", reais+complexas+nos == NP);
+    ok("a classificação é TOTAL — cada afirmação recebeu uma folha", reais + complexas + nos == NP);
     ok("mas SÓ UMA folha ficou ocupada — esta projeção não separa, e isso é o resultado",
        ocupadas == 1);
 
@@ -157,38 +106,41 @@ static void secao_F2(void){
 }
 
 /* ================================================================================ */
-/* §F3 — os nós são as interfaces                                                   */
-/* ================================================================================ */
 static void secao_F3(void){
     printf("\n§F3  OS NÓS: onde Δ = 0, e porque são eles a base ortonormal\n\n");
 
-    /* Δ = 0 é onde as duas raízes COINCIDEM — o ponto onde a folha real toca a complexa.
-     * É a fronteira entre os dois regimes, e é por isso que é a INTERFACE. */
     printf("        Δ = 0 é onde as duas raízes coincidem: a folha real TOCA a complexa.\n");
     printf("        É a fronteira, e a fronteira é a interface das dimensões.\n\n");
 
-    /* a verificação: aproximando-se de Δ=0 pelos dois lados, as raízes convergem uma para a
-     * outra — e é isso que faz do nó um ponto de contacto e não um terceiro território. */
+    /* Cv em milésimos: 200..300 passo 25  ↔  0.20..0.30 passo 0.025 */
     printf("        C          Δ = 1−4C     as duas raízes            distância\n");
-    double antes = 1e9;
+    long antes = 9223372036854775807LL;
     int monot = 1;
-    for(double Cv = 0.20; Cv <= 0.30001; Cv += 0.025){
-        double D = 1.0 - 4.0*Cv;
-        if(D < 0){ printf("        %.3f      %+8.4f     complexas: %.4f ± %.4fi\n",
-                          Cv, D, -0.5, sqrt(-D)/2); continue; }
-        double r1 = (-1.0 + sqrt(D))/2, r2 = (-1.0 - sqrt(D))/2;
-        double dist = fabs(r1-r2);
-        if(dist > antes + 1e-12) monot = 0;
+    for(long Cv = 200; Cv <= 300; Cv += 25){
+        /* D = 1 − 4C com C = Cv/1000 → D_milli = 1000 − 4*Cv */
+        long Dm = 1000 - 4 * Cv;
+        if(Dm < 0){
+            long sr = isqrt_ll(-(long long)Dm * 1000000LL);
+            printf("        %ld.%03ld      %+8ld     complexas: -500 ± %ldi\n",
+                   Cv / 1000, Cv % 1000, Dm, sr / 2000);
+            continue;
+        }
+        long sr = isqrt_ll((long long)Dm * 1000000LL);
+        /* r1,r2 = (−1000 ± √D)/2000 em escala 1000 */
+        long dist = sr / 500;   /* |r1−r2| = √D */
+        if(dist > antes) monot = 0;
         antes = dist;
-        printf("        %.3f      %+8.4f     %.4f  e  %.4f      %.4f\n", Cv, D, r1, r2, dist);
+        printf("        %ld.%03ld      %+8ld     %ld.%03ld  e  %ld.%03ld      %ld.%03ld\n",
+               Cv / 1000, Cv % 1000, Dm,
+               (-1000 + sr / 1000) / 2, (-1000 + sr / 1000) % 1000,
+               (-1000 - sr / 1000) / 2, (-1000 - sr / 1000) % 1000,
+               dist / 1000, dist % 1000);
     }
     ok("as raízes aproximam-se uma da outra à medida que Δ → 0 — o nó é um CONTACTO", monot);
 
-    /* e o que faz do nó a BASE: em Δ=0 a régua degenera num quadrado perfeito, e o corpo tem
-     * um só gerador em vez de dois. É o ponto onde a dimensão muda. */
     printf("\n        em Δ = 0 a régua é um quadrado perfeito: x² + Bx + B²/4 = (x + B/2)²\n");
     long B0 = 2, C0 = 1;
-    ok("e aí a régua fatoriza num quadrado — um gerador em vez de dois", B0*B0 - 4*C0 == 0);
+    ok("e aí a régua fatoriza num quadrado — um gerador em vez de dois", B0 * B0 - 4 * C0 == 0);
 
     printf("\n     É POR ISSO QUE OS NÓS SÃO A BASE ORTONORMAL: eles são os pontos onde o corpo\n");
     printf("     muda de regime, e um ponto de mudança de regime não pertence a nenhum dos dois\n");

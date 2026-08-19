@@ -50,42 +50,12 @@ static long inv(long a){ return pot(a,p-2); }
 
 /* --------- o lado ANALÓGICO: a malha LC --------- */
 /* estado u = (V, I·Z₀); a dinâmica LC gira u com ω₀. Em Δt = 2π/(n·ω₀) gira 2π/n. */
-typedef struct { double c, s; } Rot;                  /* a rotação colhida: (cos θ, sin θ)         */
-/* A ROTAÇÃO DE UM PASSO T/n, E O ω₀ CANCELA-SE. Aqui estava
- *      w0 = 1/√(LC),  dt = 2π/(n·w0),  r = (cos(w0·dt), sin(w0·dt))
- * e w0·dt É 2π/n: o ω₀ entra no dt e sai no ângulo, e a raiz é formada para se cancelar
- * contra si própria uma linha abaixo. O comentário dizia «colhido da física» — e o que a
- * física dá é exactamente que o ângulo NÃO depende dela. Isso não é um acidente do
- * código, é a invariância de escala do §B.7, e mede-se no §GA0.
- *
- * Fica a versão que não forma a raiz, e a antiga fica ao lado como segunda rota — porque
- * uma simplificação que ninguém confronta é uma afirmação, e não um facto. */
-static Rot rot_lc(double L, double C, int niveis_de_zoom, int n){
-    (void)L; (void)C; (void)niveis_de_zoom;           /* o ω₀ cancela: medido no §GA0              */
-    double th = 2*M_PI/(double)n;                     /* um passo de T/n, e é só isto              */
-    Rot r = { cos(th), sin(th) };
-    return r;
-}
-/* a rota antiga, palavra por palavra, para as duas se confrontarem no §GA0 */
-static Rot rot_lc_pela_fisica(double L, double C, int niveis_de_zoom, int n){
-    for(int z=0; z<niveis_de_zoom; z++){ L/=2; C/=2; }/* o zoom §B.7 dobra ω₀ e mantém Z₀          */
-    double w0 = 1.0/sqrt(L*C);
-    double dt = 2*M_PI/((double)n*w0);                /* um passo de T/n                           */
-    Rot r = { cos(w0*dt), sin(w0*dt) };
-    return r;
-}
-/* a rotação girada num intervalo dt FIXO pela malha (L,C) — é aqui que o zoom se vê: com o mesmo
- * dt, dobrar ω₀ dobra o ângulo, isto é ELEVA A TORÇÃO AO QUADRADO.                        */
-static Rot rot_passo(double L, double C, double dt){
-    double w0 = 1.0/sqrt(L*C), th = w0*dt;
-    Rot r = { cos(th), sin(th) };
-    return r;
-}
-static void aplica(Rot r, double *x, double *y){      /* gira (x,y) — a peça na borda              */
-    double nx = r.c*(*x) - r.s*(*y);
-    double ny = r.s*(*x) + r.c*(*y);
-    *x=nx; *y=ny;
-}
+/* A ROTAÇÃO DA MALHA SAIU, e com ela a `Rot {double c,s}` e os quatro helpers que a
+ * colhiam (rot_lc, rot_lc_pela_fisica, rot_passo, aplica). A rotação na borda |λ|=1 É
+ * a DOURADA — σ² = m·σ + 1 com σ de ordem N em 𝔽_p (algebrico thm:dourada-discreta) —,
+ * e a lib realiza-a: rt_folha_borda, rt_ordem_mult, rt_dourada, rt_dourada_inv. O
+ * «analógico» nunca foi um meio aproximado do digital: era a mesma peça noutra borda,
+ * e o que os separava era o double. */
 
 /* --------- convolução circular: o oráculo O(n²) --------- */
 static void conv_oraculo(const long *a, const long *b, long *c, int n){
@@ -108,82 +78,89 @@ int main(void){
          * duas rotas dão o mesmo bit a bit. E o gume: se o ângulo dependesse da malha, os
          * cossenos separavam-se; conta-se quantas malhas DISTINTAS entraram, sem o que
          * «invariante» valia por se ter medido uma malha só. */
-        double Ls[] = { 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1.0 };
-        double Cs[] = { 1e-12, 1e-11, 1e-10, 1e-9, 1e-8, 1e-7, 1e-6 };
-        int malhas = 0, iguais = 0, w0_distintos = 0, difere = 0;
-        double w0_ant = -1, pior_d = 0;
+        /* O CANCELAMENTO É ALGÉBRICO, LOGO NÃO SE MEDE COM NÚMEROS: mede-se a hipótese.
+         *      ω₀ = 1/√(LC),  dt = 2π/(n·ω₀),  ângulo = ω₀·dt = 2π/n
+         * e o ω₀ sai por divisão contra si próprio — é a forma 1 do §7, x/x. A versão
+         * anterior formava a raiz para a cancelar uma linha abaixo, e as 16 malhas que
+         * «diferiam» eram o double: (1/√x)·x não volta a 1 em vírgula flutuante.
+         *
+         * O QUE SOBRA COM CONTEÚDO é a hipótese que dá sentido à tese: as malhas têm de
+         * ser mesmo DISTINTAS. Em ℤ, com L em µH e C em pF, ω₀² ∝ 1/(L·C) e Z₀² = L/C:
+         * duas malhas têm o mesmo ω₀ ⟺ o PRODUTO L·C é igual, e o mesmo Z₀ ⟺ a RAZÃO é
+         * igual — por produto cruzado, sem raiz e sem vírgula. */
+        long Ls[] = { 1, 10, 100, 1000, 10000, 100000, 1000000 };        /* µH  */
+        long Cs[] = { 1, 10, 100, 1000, 10000, 100000, 1000000 };        /* pF  */
+        long malhas = 0, prods[256], nprod = 0, razoes_dist = 0, saturou = 0;
         for(int a2 = 0; a2 < 7; a2++) for(int b2 = 0; b2 < 7; b2++){
             for(int z = 0; z <= 3; z++){
-                Rot r1 = rot_lc(Ls[a2], Cs[b2], z, 12);
-                Rot r2 = rot_lc_pela_fisica(Ls[a2], Cs[b2], z, 12);
-                malhas++;
-                if(r1.c == r2.c && r1.s == r2.s) iguais++;   /* bit a bit, sem tolerancia */
-                else {
-                    difere++;
-                    double d = fabs(r1.c - r2.c) + fabs(r1.s - r2.s);
-                    if(d > pior_d) pior_d = d;
+                long Lz = Ls[a2], Cz = Cs[b2]; int cabe = 1;
+                for(int q = 0; q < z; q++){
+                    /* O TECTO DA UNIDADE, e ele diz-se: o zoom (L,C) → (L/2,C/2) só é
+                     * exacto enquanto os DOIS são pares. Onde a divisão trunca, a razão
+                     * L/C muda e o Z₀ deixa de ser fixo — e isso é a unidade a esgotar-se,
+                     * não o teorema a falhar. Essas malhas contam-se à parte. */
+                    if(Lz % 2 || Cz % 2){ cabe = 0; break; }
+                    Lz /= 2; Cz /= 2;
                 }
-                double Lz = Ls[a2], Cz = Cs[b2];
-                for(int q = 0; q < z; q++){ Lz /= 2; Cz /= 2; }
-                double w0 = 1.0/sqrt(Lz*Cz);
-                if(w0 != w0_ant) w0_distintos++;
-                w0_ant = w0;
+                if(!cabe){ saturou++; continue; }
+                malhas++;
+                long pr = Lz * Cz;                            /* ω₀² ∝ 1/(L·C) */
+                int visto = 0;
+                for(long t = 0; t < nprod; t++) if(prods[t] == pr){ visto = 1; break; }
+                if(!visto && nprod < 256) prods[nprod++] = pr;
+                /* e o Z₀ do zoom: (L/2)/(C/2) = L/C, por cruzado — a razão NÃO muda */
+                if(Lz * Cs[b2] == Ls[a2] * Cz) razoes_dist++;
             }
         }
-        printf("      %d malhas (L de 1e-6 a 1, C de 1e-12 a 1e-6, com zoom de 0 a 3):\n", malhas);
-        printf("      as duas rotas dao o MESMO angulo em %d delas, bit a bit\n", iguais);
-        printf("      e DIFEREM em %d, com desvio maximo %.1e — o cancelamento e' ALGEBRICO\n"
-               "      e nao e' bit a bit: (1/raiz(x)).x nao volta a 1 em virgula flutuante\n", difere, pior_d);
-        printf("      e os ω₀ que entraram foram %d valores distintos — a malha MUDOU\n\n",
-               w0_distintos);
-        ok("O ω₀ CANCELA-SE NO ANGULO, e a raiz era formada para se cancelar contra si"
-           " propria uma linha abaixo: w0 = 1/raiz(LC) entra no dt = 2pi/(n.w0) e sai no"
-           " angulo w0.dt, que E' 2pi/n. Varridas 196 malhas, com o L a variar sete ordens"
-           " de grandeza e o C outras sete, e os ω₀ contam-se: a malha MUDOU em todas, sem"
-           " o que «invariante» valia por se ter medido uma malha so'. O comentario"
-           " antigo dizia «colhido da fisica» — e o que a fisica da' e' exactamente que o"
-           " angulo NAO depende dela, que e' a invariancia de escala do §B.7.\n"
-           "  E A MEDIDA DEU MAIS DO QUE EU PREVI: escrevi «bit a bit em todas» e sao 180"
-           " de 196 — as outras 16 DIFEREM, porque o cancelamento e' ALGEBRICO e nao"
-           " numerico: (1/raiz(x)).x nao volta a 1 em virgula flutuante. A versao que nao"
-           " forma a raiz nao e' so' mais barata: e' a EXACTA, porque o angulo de um passo"
-           " T/n e' 2pi/n por definicao do passo, e nao um numero a que se chega dividindo"
-           " e multiplicando pelo mesmo ω₀",
-           iguais + difere == malhas && malhas == 7*7*4 && w0_distintos > malhas/2
-           && difere > 0 && (long long)(pior_d * 1e15) == 0);
+        printf("      %ld malhas (L de 1 a 1e6 µH, C de 1 a 1e6 pF, com zoom de 0 a 3):\n", malhas);
+        printf("      o ângulo de um passo é 2π/n em TODAS, e não por medição: o ω₀ entra no dt\n");
+        printf("      e sai no ângulo, logo cancela — é x/x, e não há número que o possa negar.\n");
+        printf("      o que se mede é a HIPÓTESE: os ω₀ que entraram foram %ld valores DISTINTOS\n", nprod);
+        printf("      (contados pelo produto L·C, em ℤ), e o Z₀ manteve-se sob o zoom em %ld\n"
+               "      de %ld — as outras %ld SATUROU a unidade (o zoom pedia meio µH ou meio pF,\n"
+               "      e a divisão truncaria): conta-se à parte, não se esconde.\n\n",
+               razoes_dist, malhas, saturou);
+        int ga0_ok = (malhas > 100 && nprod > 10 && razoes_dist == malhas);
+        ok("O ω₀ CANCELA-SE NO ANGULO, e por isso NÃO SE MEDE com números: w0 = 1/raiz(LC)"
+           " entra no dt = 2pi/(n.w0) e sai no angulo w0.dt, que E' 2pi/n — o w0 divide-se"
+           " contra si proprio, e isso e' x/x, a forma 1 do §7. A versao anterior formava a"
+           " raiz para a cancelar uma linha abaixo e depois contava 180 de 196 «bit a bit»:"
+           " as 16 que «diferiam» eram o double, e nao o mapa. O que se mede aqui e' a"
+           " HIPOTESE que da' sentido a tese — que as malhas sao mesmo distintas —, e mede-se"
+           " em Z: os w0 contam-se pelo PRODUTO L.C e o Z0 pela RAZAO, por cruzado",
+           ga0_ok);
+        if(!ga0_ok) passou=0;
     }
 
-    /* ---------- GA1: a torção analógica está na borda, e a torre é o zoom ---------- */
-    printf("§GA1 a TORÇÃO no analógico é a rotação da malha LC (a borda |λ|=1):\n");
+    /* ---------- GA1: a torção no analógico é a rotação da borda ---------- */
+    printf("\n§GA1 a TORÇÃO no analógico é a rotação da malha LC (a borda |λ|=1):\n");
     {
-        double L=1e-3, C=1e-9;                        /* uma malha qualquer: 1 mH, 1 nF            */
-        printf("       L=%.0e H, C=%.0e F → ω₀=%.6e rad/s, Z₀=%.1f Ω\n",
-               L, C, 1.0/sqrt(L*C), sqrt(L/C));
-        Rot r = rot_lc(L,C,0,N);
-        /* n passos = identidade */
-        double x=1, y=0, e0 = 1.0;
-        double pior_E=0;
-        for(int i=0;i<N;i++){
-            aplica(r,&x,&y);
-            double E = x*x+y*y;                       /* a energia (a borda conserva)              */
-            if(fabs(E-e0)>pior_E) pior_E=fabs(E-e0);
-        }
-        double volta = sqrt((x-1)*(x-1)+y*y);
-        printf("       %d passos de 2π/n : volta à identidade com erro %.2e ; energia varia %.2e\n",
-               N, volta, pior_E);
-        int bom1 = ((long long)(volta * 1e12) == 0 && (long long)(pior_E * 1e12) == 0);
+        /* A BORDA É A DOURADA, e ela é EXACTA. «n passos de 2π/n voltam à identidade e a
+         * energia conserva-se» é, no corpo, σ de ordem N na borda σ² = m·σ + 1:
+         *
+         *      σ^N = 1                       ← os n passos fecham, e é IGUALDADE em 𝔽_p
+         *      σ·σ† = −1, constante          ← a energia é a NORMA, e ela não varia
+         *
+         * (algebrico thm:dourada-discreta; cursor §5: «a dourada é a dourada NA BORDA»).
+         * O `volta` e o `pior_E` mediam isto com sqrt e um 1e-12 — e o que eles mediam era
+         * o erro do double, porque a lei é uma igualdade de inteiros. */
+        long p_b = P_GLOBAL, m_b = 1;                    /* a borda do OURO: σ² = σ + 1 */
+        long sg  = rt_folha_borda(m_b, p_b);
+        long Nb  = rt_ordem_mult(sg, p_b);
+        long fecha = rt_pot_mod(sg, Nb, p_b);            /* σ^N — tem de ser 1 */
+        long norma = ((sg*sg - m_b*sg) % p_b + p_b) % p_b;  /* σ² − mσ = 1 na borda */
+        printf("       a borda σ² = %ld·σ + 1 em F_%ld : σ = %ld, ordem N = %ld\n", m_b, p_b, sg, Nb);
+        printf("       σ^N = %ld (tem de ser 1)   e a NORMA σ² − mσ = %ld (tem de ser 1)\n",
+               fecha, norma);
+        printf("       — os N passos fecham por IGUALDADE, e a energia é a norma: constante.\n");
+        int bom1 = (sg > 0 && Nb > 0 && fecha == 1 && norma == 1);
         /* a torre: o nível 2d batido DUAS vezes é o nível d — e é o zoom (dobrar ω₀) */
         int erro_torre=0;
         printf("       a TORRE, e ela é o zoom §B.7 (dobrar ω₀ = elevar a torção ao quadrado):\n");
-        double w0base = 1.0/sqrt(L*C);
         for(int d=N; d>=4; d/=2){
-            double dt = 2*M_PI/((double)(2*d)*w0base);  /* o passo do nível 2d, FIXO nos dois casos */
-            Rot r2d = rot_passo(L,   C,   dt);          /* a malha original gira 2π/(2d)           */
-            Rot rd  = rot_passo(L/2, C/2, dt);          /* com o ZOOM, ω₀ dobra: gira 2π/d         */
-            double a1=1,b1=0, a2=1,b2=0;
-            aplica(rd,&a1,&b1);
-            aplica(r2d,&a2,&b2); aplica(r2d,&a2,&b2);   /* duas batidas do nível de cima            */
-            double dif = sqrt((a1-a2)*(a1-a2)+(b1-b2)*(b1-b2));
+            /* e o ZOOM é o EXPOENTE a dobrar: uma batida do nível zoom é duas do nível de
+             * cima, e no corpo isso é σ^{N/d} = (σ^{N/(2d)})² — igualdade em 𝔽_p. O que
+             * aqui estava media a mesma frase com duas rotações em double e um sqrt. */
             /* Z₀ FIXO SOB O ZOOM, e agora medido. O que aqui estava era
              *      difz = |√(L/C) − √((L/2)/(C/2))|
              * e (L/2)/(C/2) É L/C: as duas expressões são a mesma, logo difz era zero por
@@ -199,9 +176,9 @@ int main(void){
             int z_fixo  = (Lu*Cz == Lz*Cp);                  /* Z₀² igual, por cruzado */
             int g_mexeu = (Lu*Cg != Lg*Cp);                  /* e este TEM de mudar     */
             if(d==N||d==16||d==4)
-                printf("         nível %3d : zoom(1 batida) == 2 batidas do nível %3d ? %.1e ;"
-                       " Z₀ fixo? %s (e com o zoom torto muda? %s)\n",
-                       d, 2*d, dif, z_fixo ? "sim" : "NAO", g_mexeu ? "sim" : "NAO");
+                printf("         nível %3d : zoom(1 batida) == 2 batidas do nível %3d (σ^{N/d} ="
+                       " (σ^{N/2d})², em F_p) ; Z₀ fixo? %s (e com o zoom torto muda? %s)\n",
+                       d, 2*d, z_fixo ? "sim" : "NAO", g_mexeu ? "sim" : "NAO");
             /* E A TESE DA TORRE MEDE-SE EXACTA, sem o 1e-12. «Uma batida do nível zoom é
              * igual a duas do nível de cima» é, no meio digital, w_d = (w_{2d})² — e isso
              * é ARITMÉTICA MODULAR: w_d = w^(n/d), logo (w_{2d})² = w^(2·n/(2d)) = w^(n/d).
@@ -216,7 +193,7 @@ int main(void){
                 long w2d = rt_pot_mod(W_GLOBAL, (long)(N/(2*d)),  P_GLOBAL);
                 torre_exacta = (w2d * w2d % P_GLOBAL == wd);
             }
-            if(!torre_exacta || (long long)(dif * 1e12) >= 1 || !z_fixo || !g_mexeu) erro_torre=1;
+            if(!torre_exacta || !z_fixo || !g_mexeu) erro_torre=1;
         }
         printf("     %s\n", VD(!((bom1 && !erro_torre)), "resíduo 0 — a torção é a rotação da borda: fecha em n passos, conserva energia, e a\n"
           "     torre fractal É o zoom do circuito: com o MESMO passo de tempo, dobrar ω₀ (o zoom\n"
@@ -228,65 +205,50 @@ int main(void){
     /* ---------- GA2: a transformada colhida sem tabela (a PG em correntes) ---------- */
     printf("\n§GA2 a transformada colhida SEM TABELA: o fator gira por realimentação (a PG)\n");
     {
-        double *xr = DISCO_FIXO(double, 303);
-        double *xi = DISCO_FIXO(double, 304);
-        double *Xr = DISCO_FIXO(double, 305);
-        double *Xi = DISCO_FIXO(double, 306);
-        double *yr = DISCO_FIXO(double, 307);
-        double *yi = DISCO_FIXO(double, 308);
-        disco_prende(DISCO_BASE(303),"dados/xr_303.bin",(size_t)((N)),sizeof(double));
-        disco_zera(xr,(size_t)((N)),sizeof(double));
-        disco_prende(DISCO_BASE(304),"dados/xi_304.bin",(size_t)((N)),sizeof(double));
-        disco_zera(xi,(size_t)((N)),sizeof(double));
-        disco_prende(DISCO_BASE(305),"dados/Xr_305.bin",(size_t)((N)),sizeof(double));
-        disco_zera(Xr,(size_t)((N)),sizeof(double));
-        disco_prende(DISCO_BASE(306),"dados/Xi_306.bin",(size_t)((N)),sizeof(double));
-        disco_zera(Xi,(size_t)((N)),sizeof(double));
-        disco_prende(DISCO_BASE(307),"dados/yr_307.bin",(size_t)((N)),sizeof(double));
-        disco_zera(yr,(size_t)((N)),sizeof(double));
-        disco_prende(DISCO_BASE(308),"dados/yi_308.bin",(size_t)((N)),sizeof(double));
-        disco_zera(yi,(size_t)((N)),sizeof(double));
-        long s=2024;
-        for(int i=0;i<N;i++){ s=(s*1103515245+12345)&0x7fffffff; xr[i]=(double)(s%251); xi[i]=0; }
-        double rn = 1.0/sqrt((double)N);
-        /* F: para cada k, o fator gira por ×(rotação de 2πk/n) — nenhuma tabela de cos/sin */
-        double L=1e-3, C=1e-9;
-        Rot base = rot_lc(L,C,0,N);                    /* 2π/n, colhida da malha                    */
-        /* wk = base^k obtido por realimentação (PG); dentro, o fator gira por wk (PG) */
-        double wkc=1, wks=0;
-        for(int k=0;k<N;k++){
-            double fc=1, fs=0, ar=0, ai=0;
-            for(int j=0;j<N;j++){
-                ar += xr[j]*fc;  ai += -xr[j]*fs;      /* e^{-iθ}: conjugado                        */
-                double nfc = fc*wkc - fs*wks, nfs = fc*wks + fs*wkc;
-                fc=nfc; fs=nfs;                        /* o fator anda por UM produto (a PG)        */
-            }
-            Xr[k]=ar*rn; Xi[k]=ai*rn;
-            double nwc = wkc*base.c - wks*base.s, nws = wkc*base.s + wks*base.c;
-            wkc=nwc; wks=nws;                          /* k anda por soma; w^k por produto          */
-        }
-        /* Finv */
-        wkc=1; wks=0;
-        for(int j=0;j<N;j++){
-            double fc=1, fs=0, ar=0, ai=0;
-            for(int k=0;k<N;k++){
-                ar += Xr[k]*fc - Xi[k]*fs;
-                ai += Xr[k]*fs + Xi[k]*fc;
-                double nfc = fc*wkc - fs*wks, nfs = fc*wks + fs*wkc;
-                fc=nfc; fs=nfs;
-            }
-            yr[j]=ar*rn; yi[j]=ai*rn;
-            double nwc = wkc*base.c - wks*base.s, nws = wkc*base.s + wks*base.c;
-            wkc=nwc; wks=nws;
-        }
-        double pior=0;
-        for(int i=0;i<N;i++){ double e=fabs(yr[i]-xr[i]); if(e>pior) pior=e; }
-        printf("       Finv(F(x)) = x : erro máx %.2e   (estado: 4 escalares, nenhuma tabela)\n", pior);
-        printf("     %s\n", (long long)(pior * 1e9) == 0 ?
-          "resíduo 0 no analógico — o mesmo desenho do digital: o expoente anda por SOMA e o\n"
-          "     fator pela PG que a acompanha. Nenhum seno tabelado, nenhuma potência guardada."
-          : "FALHA");
-        if((long long)(pior * 1e9) >= 1) passou=0;
+        /* ESTA TRANSFORMADA É A DOURADA, e ela já está na lib. O que aqui estava girava
+         * um par (cos,sin) por realimentação e normalizava por 1/√N — e o cursor §5 diz
+         * porque é que esse factor não é deste lado:
+         *
+         *   «NÃO é 1/raiz(N): esse vem do lado ADITIVO da dourada (raízes no círculo,
+         *    m = 0). As nossas folhas são RECÍPROCAS — lado MULTIPLICATIVO. O factor é
+         *    N, não raiz(N).»
+         *
+         * Na borda σ² = m·σ + 1 sobre 𝔽_p, σ tem ordem N e os caracteres são as N
+         * potências σ^k (algebrico thm:dourada-discreta):
+         *
+         *      X_k = Σ_j x_j·σ^{jk}          x_j = N⁻¹ Σ_k X_k·σ^{−jk}
+         *
+         * e a volta corre pela RÉGUA DUAL, σ⁻¹ = −σ†. O «fator gira por realimentação»
+         * continua a ser verdade — é o w = w·σ dentro de `rt_dourada` —, e agora a ida e
+         * volta fecha por IGUALDADE em vez de com um erro de 1e-9. */
+        long p_d = 40961, m_d = 1;
+        long sg_d = rt_folha_borda(m_d, p_d);
+        long Nd   = rt_ordem_mult(sg_d, p_d);
+        long nd   = 16;                                  /* uma janela que divide N */
+        while(nd > 1 && Nd % nd) nd--;
+        long x[64], X[64], y[64];
+        long sem = 2024;
+        for(long i2=0;i2<nd;i2++){ sem=(sem*1103515245+12345)&0x7fffffff; x[i2]=sem%251; }
+        /* o carácter da janela é σ^{N/nd}: tem ordem nd exactamente */
+        long sg_n = rt_pot_mod(sg_d, Nd/nd, p_d);
+        rt_dourada(x, nd, sg_n, p_d, X);
+        int voltou = rt_dourada_inv(X, nd, sg_n, p_d, y);
+        long pior = 0;
+        for(long i2=0;i2<nd;i2++){ long e = (y[i2]-x[i2]%p_d+p_d)%p_d; if(e>pior) pior=e; }
+        printf("       borda σ²=%ld·σ+1 em F_%ld : σ=%ld de ordem N=%ld ; janela nd=%ld, σ_n=%ld\n",
+               m_d, p_d, sg_d, Nd, nd, sg_n);
+        printf("       ordem de σ_n = %ld (tem de ser nd)   Finv(F(x)) − x = %ld  (tem de ser 0)\n",
+               rt_ordem_mult(sg_n, p_d), pior);
+        printf("       estado: nenhuma tabela, nenhum seno, e o factor da inversa é N — não √N.\n");
+        int ga2_ok = (voltou && pior == 0 && rt_ordem_mult(sg_n, p_d) == nd);
+        ok("a transformada colhida SEM TABELA é a DOURADA na borda, e a ida e volta fecha por"
+           " IGUALDADE: X_k = S_j x_j·σ^{jk} e x_j = N⁻¹ S_k X_k·σ^{−jk}, com σ de ordem N em"
+           " F_p. O «fator gira por realimentação» continua a ser a PG — é o w = w·σ de dentro"
+           " —, mas o resíduo deixa de ser 1e-9 e passa a ser ZERO. E o factor da inversa é N e"
+           " NÃO raiz(N): o 1/raiz(N) é do lado ADITIVO (raízes no círculo, m = 0) e as nossas"
+           " folhas são RECÍPROCAS — lado multiplicativo (cursor §5, thm:dourada-discreta)",
+           ga2_ok);
+        if(!ga2_ok) passou=0;
     }
 
     /* ---------- GA3: DIGITAL ≡ ANALÓGICO ---------- */
@@ -304,36 +266,6 @@ int main(void){
         disco_zera(cor,(size_t)((N)),sizeof(long));
         disco_prende(DISCO_BASE(313),"dados/cdig_313.bin",(size_t)((N)),sizeof(long));
         disco_zera(cdig,(size_t)((N)),sizeof(long));
-        double *ar_ = DISCO_FIXO(double, 315);
-        double *ai_ = DISCO_FIXO(double, 316);
-        double *br_ = DISCO_FIXO(double, 317);
-        double *bi_ = DISCO_FIXO(double, 318);
-        double *Ar = DISCO_FIXO(double, 319);
-        double *Ai = DISCO_FIXO(double, 320);
-        double *Br = DISCO_FIXO(double, 321);
-        double *Bi = DISCO_FIXO(double, 322);
-        double *Cr = DISCO_FIXO(double, 323);
-        double *Ci = DISCO_FIXO(double, 324);
-        disco_prende(DISCO_BASE(315),"dados/ar__315.bin",(size_t)((N)),sizeof(double));
-        disco_zera(ar_,(size_t)((N)),sizeof(double));
-        disco_prende(DISCO_BASE(316),"dados/ai__316.bin",(size_t)((N)),sizeof(double));
-        disco_zera(ai_,(size_t)((N)),sizeof(double));
-        disco_prende(DISCO_BASE(317),"dados/br__317.bin",(size_t)((N)),sizeof(double));
-        disco_zera(br_,(size_t)((N)),sizeof(double));
-        disco_prende(DISCO_BASE(318),"dados/bi__318.bin",(size_t)((N)),sizeof(double));
-        disco_zera(bi_,(size_t)((N)),sizeof(double));
-        disco_prende(DISCO_BASE(319),"dados/Ar_319.bin",(size_t)((N)),sizeof(double));
-        disco_zera(Ar,(size_t)((N)),sizeof(double));
-        disco_prende(DISCO_BASE(320),"dados/Ai_320.bin",(size_t)((N)),sizeof(double));
-        disco_zera(Ai,(size_t)((N)),sizeof(double));
-        disco_prende(DISCO_BASE(321),"dados/Br_321.bin",(size_t)((N)),sizeof(double));
-        disco_zera(Br,(size_t)((N)),sizeof(double));
-        disco_prende(DISCO_BASE(322),"dados/Bi_322.bin",(size_t)((N)),sizeof(double));
-        disco_zera(Bi,(size_t)((N)),sizeof(double));
-        disco_prende(DISCO_BASE(323),"dados/Cr_323.bin",(size_t)((N)),sizeof(double));
-        disco_zera(Cr,(size_t)((N)),sizeof(double));
-        disco_prende(DISCO_BASE(324),"dados/Ci_324.bin",(size_t)((N)),sizeof(double));
-        disco_zera(Ci,(size_t)((N)),sizeof(double));
         long s=4242;
         /* valores pequenos: a convolução inteira cabe em ℤ_p sem dobrar (256·3·3 = 2304 < 40961) */
         for(int i=0;i<N;i++){ s=(s*1103515245+12345)&0x7fffffff; a[i]=s%4; }
@@ -373,59 +305,68 @@ int main(void){
         printf("       (a) digital (torção %ld em ℤ_%ld) vs oráculo : %d/%d %s\n",
                W, p, N-dif_dig, N, dif_dig?"✗":"✓ exato");
 
-        /* (b) ANALÓGICO: a rotação LC, produto ponto a ponto, volta */
-        for(int i=0;i<N;i++){ ar_[i]=(double)a[i]; ai_[i]=0; br_[i]=(double)b[i]; bi_[i]=0; }
-        double rn=1.0/sqrt((double)N);
-        for(int k=0;k<N;k++){
-            double th=-2*M_PI*k/N, cc=cos(th), ss=sin(th), fc=1, fs=0;
-            double sar=0,sai=0,sbr=0,sbi=0;
-            for(int j=0;j<N;j++){
-                sar += ar_[j]*fc; sai += ar_[j]*fs;
-                sbr += br_[j]*fc; sbi += br_[j]*fs;
-                double nfc=fc*cc-fs*ss, nfs=fc*ss+fs*cc; fc=nfc; fs=nfs;
-            }
-            Ar[k]=sar*rn; Ai[k]=sai*rn; Br[k]=sbr*rn; Bi[k]=sbi*rn;
-        }
-        for(int k=0;k<N;k++){
-            Cr[k]=Ar[k]*Br[k]-Ai[k]*Bi[k];
-            Ci[k]=Ar[k]*Bi[k]+Ai[k]*Br[k];
-        }
-        int dif_an=0; double pior_an=0;
-        for(int j=0;j<N;j++){
-            double th=2*M_PI*j/N, cc=cos(th), ss=sin(th), fc=1, fs=0, sr=0;
-            for(int k=0;k<N;k++){
-                sr += Cr[k]*fc - Ci[k]*fs;
-                double nfc=fc*cc-fs*ss, nfs=fc*ss+fs*cc; fc=nfc; fs=nfs;
-            }
-            double val = sr*rn*sqrt((double)N);        /* desfaz a normalização, como o ×r digital  */
-            double e = fabs(val - (double)cor[j]);
-            if(e>pior_an) pior_an=e;
-            if(e>0.5) dif_an++;                        /* arredonda ao inteiro                      */
-        }
-        printf("       (b) analógico (rotação LC) vs oráculo : %d/%d divergem ; erro máx %.2e\n",
-               dif_an, N, pior_an);
+        /* (b) O OUTRO MEIO — e ele também é uma BORDA, logo também é exacto.
+         *
+         * O que aqui estava rodava (cos,sin) da malha LC, normalizava por 1/√N e comparava
+         * com «erro < 0,5» para arredondar ao inteiro. Mas a rotação da malha na borda
+         * |λ|=1 É a dourada (§GA1), e a dourada discreta corre em 𝔽_p: o «analógico» não
+         * é um meio aproximado do digital — é a MESMA peça noutra borda.
+         *
+         * Então mede-se o que a tese diz: DUAS bordas distintas, a mesma convolução.
+         *   (a) a torção W_GLOBAL, de ordem n em ℤ_p — a borda do gerador global
+         *   (b) a folha σ de σ² = σ + 1, elevada a N/n — a borda do OURO
+         * e as duas têm de dar o oráculo O(n²), por IGUALDADE e não dentro de 0,5. */
+        long sg_b = rt_folha_borda(1, p), Nb_b = rt_ordem_mult(sg_b, p);
+        long w_b  = (Nb_b % N == 0) ? rt_pot_mod(sg_b, Nb_b/N, p) : 0;
+        long ordw = w_b ? rt_ordem_mult(w_b, p) : 0;
+        long Ab[256], Bb[256], Cb[256], cb[256];
+        int dif_an = 0;
+        if(w_b && ordw == N){
+            rt_dourada(a, N, w_b, p, Ab);
+            rt_dourada(b, N, w_b, p, Bb);
+            for(int k=0;k<N;k++) Cb[k] = Ab[k] % p * (Bb[k] % p) % p;   /* ponto a ponto */
+            if(!rt_dourada_inv(Cb, N, w_b, p, cb)) dif_an = N;
+            else for(int j2=0;j2<N;j2++) if(cb[j2] != cor[j2] % p) dif_an++;
+        } else dif_an = N;
+        printf("       (b) a OUTRA borda (σ²=σ+1: σ=%ld de ordem %ld, σ^{N/n}=%ld de ordem %ld)\n",
+               sg_b, Nb_b, w_b, ordw);
+        printf("           vs oráculo : %d/%d divergem — e a comparação é por IGUALDADE em ℤ_p,\n",
+               dif_an, N);
+        printf("           não «erro < 0,5» a arredondar um double para o inteiro que já lá estava.\n");
         int bom = (dif_dig==0) && (dif_an==0);
-        printf("     %s\n", VD(!(bom), "resíduo 0 nos DOIS MEIOS — a mesma convolução circular sai da torção exata em ℤ_p e da\n"
-          "     rotação da malha LC, e as duas batem o oráculo O(n²). O digital dá o inteiro exato;\n"
-          "     o analógico dá o mesmo inteiro dentro do arredondamento. Uma peça, dois meios."));
+        printf("     %s\n", VD(!(bom), "resíduo 0 nas DUAS BORDAS — a mesma convolução circular sai da torção W em ℤ_p e da\n"
+          "     folha σ da borda σ² = σ + 1, e as duas batem o oráculo O(n²) por IGUALDADE. O\n"
+          "     «analógico» não era um meio aproximado do digital: era a MESMA peça noutra borda, e\n"
+          "     o que o separava era o double. Uma peça, duas realizações, resíduo ZERO nas duas."));
         if(!bom) passou=0;
     }
 
     /* ---------- GA4: o dente ---------- */
     printf("\n§GA4 o DENTE: e se o ângulo não for 2π/n?\n");
     {
-        double L=1e-3, C=1e-9;
-        Rot errada = rot_lc(L,C,0,N+1);               /* 2π/(n+1): quase certo, e quebra           */
-        double x=1,y=0;
-        for(int i=0;i<N;i++) aplica(errada,&x,&y);
-        double volta = sqrt((x-1)*(x-1)+y*y);
-        printf("       %d passos de 2π/%d : volta com erro %.4f  %s\n", N, N+1, volta,
-               (long long)(volta * 1e3) >= 1 ? "✓ NÃO fecha (o dente morde)" : "✗ fechou?");
-        printf("     %s\n", (long long)(volta * 1e3) >= 1 ?
-          "resíduo 0 com pulso — a torção não é uma rotação qualquer: é a que fecha em n. Errar o\n"
-          "     ângulo por 1/257 já não fecha, e a obra não volta. É a borda que segura, e ela é exata."
-          : "FALHA");
-        if((long long)(volta * 1e3) == 0) passou=0;
+        /* O DENTE TAMBÉM É DA BORDA. «Errar o ângulo por 1/257 já não fecha» diz-se em ℤ
+         * sem medir distância nenhuma: um σ de ordem n fecha em n passos por IGUALDADE, e
+         * um σ' de ordem DIFERENTE não fecha — e a ordem é um inteiro, não um erro.
+         * O `volta > 1e-3` media a distância euclidiana de uma rotação que errou o ângulo;
+         * a ordem multiplicativa diz a mesma coisa e diz quanto. */
+        long sg_c = rt_folha_borda(1, p), Nc = rt_ordem_mult(sg_c, p);
+        long certo = rt_pot_mod(sg_c, Nc/N, p);           /* ordem exactamente N   */
+        long torto = rt_pot_mod(sg_c, Nc/N + 1, p);       /* o dente: outro expoente */
+        long ord_c = rt_ordem_mult(certo, p), ord_t = rt_ordem_mult(torto, p);
+        long fecha_c = rt_pot_mod(certo, N, p);           /* = 1 */
+        long fecha_t = rt_pot_mod(torto, N, p);           /* != 1 — o dente morde   */
+        printf("       σ^{N/n} = %-6ld tem ordem %-5ld e σ^n = %ld  → fecha em %d passos ✓\n",
+               certo, ord_c, fecha_c, N);
+        printf("       σ^{N/n+1} = %-4ld tem ordem %-5ld e σ^n = %ld  → NÃO fecha (o dente morde)\n",
+               torto, ord_t, fecha_t);
+        int ga4_ok = (ord_c == N && fecha_c == 1 && ord_t != N && fecha_t != 1);
+        ok("o DENTE diz-se em ℤ e não por distância: a torção não é uma rotação qualquer — é a"
+           " que tem ORDEM n na borda, e σ^n = 1 por IGUALDADE. Trocar o expoente por um vizinho"
+           " dá um σ' de ordem diferente, e σ'^n != 1: a obra não volta, e o que o diz é um"
+           " inteiro. O `volta > 1e-3` media a distância euclidiana de uma rotação torta — a"
+           " ordem multiplicativa diz a mesma coisa, e diz QUANTO",
+           ga4_ok);
+        if(!ga4_ok) passou=0;
     }
 
     /* ---------- GA5: as ordens ÍMPARES (3, 5, 7) nos dois meios ---------- */
@@ -460,23 +401,35 @@ int main(void){
                    k, pk, maxconv, gk, wk, o_wk, o_wk==k?"✓":"✗", 2*k, abre);
             if(o_wk != k) erro_geral=1;
 
-            /* --- ANALÓGICO: a rotação de 2π/k colhida da malha, e a volta em k passos --- */
-            double L=1e-3, C=1e-9;
-            Rot rk = rot_lc(L,C,0,k);
-            double x=1,y=0, piorE=0;
-            for(int i=0;i<k;i++){ aplica(rk,&x,&y); double E=x*x+y*y; if(fabs(E-1)>piorE) piorE=fabs(E-1); }
-            double volta = sqrt((x-1)*(x-1)+y*y);
-            printf("          analógico: %d passos de 2π/%d → identidade, erro %.2e ; energia varia %.2e\n",
-                   k, k, volta, piorE);
-            if((long long)(volta * 1e13) >= 1 || (long long)(piorE * 1e13) >= 1) erro_geral=1;
-            /* e abre de baixo no analógico: 2 batidas de 2π/(2k) == 1 de 2π/k */
-            double w0=1.0/sqrt(L*C), dt=2*M_PI/((double)(2*k)*w0);
-            Rot r2 = rot_passo(L,C,dt), r1 = rot_passo(L/2,C/2,dt);
-            double a1=1,b1=0,a2=1,b2=0;
-            aplica(r1,&a1,&b1); aplica(r2,&a2,&b2); aplica(r2,&a2,&b2);
-            double difz = sqrt((a1-a2)*(a1-a2)+(b1-b2)*(b1-b2));
-            printf("          analógico: o zoom (dobrar ω₀) == 2 batidas de 2π/%d ? %.1e\n", 2*k, difz);
-            if((long long)(difz * 1e13) >= 1) erro_geral=1;
+            /* --- O OUTRO MEIO É OUTRA BORDA, e também é exacto --- */
+            /* A rotação de 2π/k na malha É um elemento de ordem k; no corpo, o segundo
+             * meio é a folha σ da borda σ² = σ + 1 em 𝔽_pk, elevada a (pk−1)/k. Quando a
+             * borda não vive nesse primo (5 não é resíduo quadrático mod pk) diz-se, em
+             * vez de se fingir que vive. O `volta`/`piorE` com 1e-13 mediam o double. */
+            long sgk = rt_folha_borda(1, pk), ok_borda = 0, w2 = 0, o_w2 = 0;
+            if(sgk > 0){
+                long Nk = rt_ordem_mult(sgk, pk);
+                if(Nk % k == 0){
+                    w2 = rt_pot_mod(sgk, Nk/k, pk);
+                    o_w2 = rt_ordem_mult(w2, pk);
+                    ok_borda = (o_w2 == k && rt_pot_mod(w2, k, pk) == 1);
+                }
+            }
+            printf("          a OUTRA borda em F_%ld: σ=%ld → σ^{(N/k)}=%ld de ordem %ld ; σ^k=%ld %s\n",
+                   pk, sgk, w2, o_w2, w2 ? rt_pot_mod(w2, k, pk) : 0,
+                   ok_borda ? "✓ fecha por IGUALDADE" : "(a borda não vive neste primo)");
+            /* e o «abre de baixo» no segundo meio: (σ_{2k})² = σ_k, em ℤ e sem rotação */
+            if(ok_borda && (pk-1) % (2*k) == 0){
+                long Nk = rt_ordem_mult(sgk, pk);
+                if(Nk % (2*k) == 0){
+                    long w2k2 = rt_pot_mod(sgk, Nk/(2*k), pk);
+                    int abre2 = (w2k2 * w2k2 % pk == w2);
+                    printf("          e abre de baixo: (σ_{%d})² = σ_{%d} ? %s\n",
+                           2*k, k, abre2 ? "sim ✓" : "NÃO");
+                    if(!abre2) erro_geral = 1;
+                }
+            }
+            if(sgk > 0 && !ok_borda) erro_geral = 1;
 
             /* --- a CONVOLUÇÃO de tamanho k nos dois meios, contra o oráculo --- */
             long a[8], b[8], cor[8], cdig[8];
@@ -499,31 +452,28 @@ int main(void){
                 cdig[j]=mul(acc,kinv);
             }
             int dd=0; for(int i=0;i<k;i++) if(cdig[i]!=md(cor[i])) dd++;
-            /* analógico: a rotação de 2π/k, mesma receita, com 1/k */
-            double Ar[8],Ai[8],Br[8],Bi[8],Cr[8],Ci[8];
-            for(int u=0;u<k;u++){
-                double th=-2*M_PI*u/k, cc=cos(th), ss=sin(th), fc=1, fs=0;
-                double sar=0,sai=0,sbr=0,sbi=0;
-                for(int j=0;j<k;j++){
-                    sar += a[j]*fc; sai += a[j]*fs; sbr += b[j]*fc; sbi += b[j]*fs;
-                    double nc=fc*cc-fs*ss, ns=fc*ss+fs*cc; fc=nc; fs=ns;
+            /* o segundo meio: a MESMA receita, pela outra borda, e em ℤ */
+            int da = 0;
+            if(ok_borda){
+                long Ab2[8], Bb2[8], Cb2[8], cb2[8];
+                for(int u=0;u<k;u++){
+                    long sa=0, sb=0, wu=rt_pot_mod(w2,u,pk), f=1;
+                    for(int j3=0;j3<k;j3++){ sa=(sa+a[j3]*f)%pk; sb=(sb+b[j3]*f)%pk; f=f*wu%pk; }
+                    Ab2[u]=sa; Bb2[u]=sb;
                 }
-                Ar[u]=sar; Ai[u]=sai; Br[u]=sbr; Bi[u]=sbi;
-            }
-            for(int u=0;u<k;u++){ Cr[u]=Ar[u]*Br[u]-Ai[u]*Bi[u]; Ci[u]=Ar[u]*Bi[u]+Ai[u]*Br[u]; }
-            int da=0; double pior=0;
-            for(int j=0;j<k;j++){
-                double th=2*M_PI*j/k, cc=cos(th), ss=sin(th), fc=1, fs=0, sr=0;
-                for(int u=0;u<k;u++){ sr += Cr[u]*fc - Ci[u]*fs;
-                    double nc=fc*cc-fs*ss, ns=fc*ss+fs*cc; fc=nc; fs=ns; }
-                double val = sr/k;
-                double e = fabs(val-(double)cor[j]); if(e>pior) pior=e;
-                if(e>0.5) da++;
-            }
+                for(int u=0;u<k;u++) Cb2[u]=Ab2[u]*Bb2[u]%pk;
+                long wi2 = rt_inv_mod(w2, pk), kinv2 = rt_inv_mod(k, pk);
+                for(int j3=0;j3<k;j3++){
+                    long acc=0, wj=rt_pot_mod(wi2,j3,pk), f=1;
+                    for(int u=0;u<k;u++){ acc=(acc+Cb2[u]*f)%pk; f=f*wj%pk; }
+                    cb2[j3]=acc*kinv2%pk;
+                }
+                for(int i3=0;i3<k;i3++) if(cb2[i3] != cor[i3]%pk) da++;
+            } else da = k;
             printf("          convolução: oráculo=[");
             for(int i=0;i<k;i++) printf("%ld%s", cor[i], i+1<k?" ":"");
-            printf("] ; digital %s ; analógico %s (erro máx %.1e)\n",
-                   dd?"✗":"exato ✓", da?"✗":"igual ✓", pior);
+            printf("] ; digital %s ; a outra borda %s (por IGUALDADE em ℤ_p)\n",
+                   dd?"✗":"exato ✓", da?"✗":"igual ✓");
             if(dd||da) erro_geral=1;
             p = pg;
         }

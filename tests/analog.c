@@ -49,26 +49,13 @@
 #define Q_E   1.602176634e-19      /* carga do elétron, C   (SI exato) */
 #define K_B   1.380649e-23         /* Boltzmann, J/K        (SI exato) */
 #define T_AMB 300.15               /* 27 ºC, K */
-#define I_S   1e-14                /* corrente de saturação da junção b-e, A */
-
-static double V_T(double T) { return K_B * T / Q_E; }   /* ~25.86 mV a 300 K */
 
 /* A JUNÇÃO b-e (Ebers-Moll, ativa direta). Exponencial pura. */
-static double bjt_Ic(double Vbe, double T) { return I_S * exp(Vbe / V_T(T)); }
 
 /* Um passo do oscilador LC. a = h·ω₀. */
 enum { EULER_EXP, EULER_IMP, SIMPLETICO };
-static void passo_LC(double *u, double *w, double a, int metodo) {
-    if (metodo == EULER_EXP) {                   /* x <- (I + aG)x */
-        double un = *u + a*(*w), wn = *w - a*(*u); *u = un; *w = wn;
-    } else if (metodo == EULER_IMP) {            /* x <- (I - aG)⁻¹x */
-        double d = 1.0 + a*a;
-        double un = (*u + a*(*w))/d, wn = (*w - a*(*u))/d; *u = un; *w = wn;
-    } else {                                     /* simplético: usa o u JÁ novo */
-        *u = *u + a*(*w);
-        *w = *w - a*(*u);
-    }
-}
+/* o `passo_LC` em double saiu: o passo simpléctico corre em ℤ dentro do §B.1, e é
+   de lá que as figuras e o CSV tiram a órbita. */
 
 /* ─── relatório: DOIS MOSTRADORES por afirmação ─────────────────────────────
    o pulso (roda contra oráculo de fora) E o dente (a versão errada quebra). */
@@ -100,19 +87,42 @@ static void limite(const char *sec, const char *o_que, const char *como,
 }
 
 /* --- plot ASCII de uma forma de onda (as ondas são para VER) --- */
-static void onda_ascii(const char *rotulo, const double *y, int n, int altura) {
-    double lo = y[0], hi = y[0];
+/* A ONDA DESENHA-SE DA ÓRBITA, e a órbita é inteira. O que aqui estava recebia
+   `double*` vindos de sin() — mas o que a figura ilustra é a órbita do operador na
+   borda, e essa é uma sequência de INTEIROS. A escala do desenho faz-se por divisão
+   inteira com arredondamento ao meio, sem formar fracção nenhuma. */
+static void onda_ascii(const char *rotulo, const long *y, int n, int altura) {
+    long lo = y[0], hi = y[0];
     for (int i = 1; i < n; i++) { if (y[i] < lo) lo = y[i]; if (y[i] > hi) hi = y[i]; }
-    double amp = (hi - lo) != 0.0 ? (hi - lo) : 1.0;
-    printf("     %s  [%.3g .. %.3g]\n", rotulo, lo, hi);
+    long amp = (hi - lo) != 0 ? (hi - lo) : 1;
+    printf("     %s  [%ld .. %ld]\n", rotulo, lo, hi);
     for (int r = altura - 1; r >= 0; r--) {
         printf("     ");
         for (int i = 0; i < n; i++) {
-            double f = (y[i] - lo) / amp * (altura - 1);
-            int cel = (int)(f + 0.5);
+            /* cel = round((y−lo)·(altura−1)/amp), em ℤ: (2·num + amp) / (2·amp) */
+            long num = (y[i] - lo) * (altura - 1);
+            int cel = (int)((2*num + amp) / (2*amp));
             putchar(cel == r ? '*' : (r == 0 ? '_' : ' '));
         }
         putchar('\n');
+    }
+}
+
+/* e a ÓRBITA que as ondas ilustram é a QUE O §B.1 JÁ MEDE: o passo simpléctico com
+   a = 1 tem tr = 2 − a² = 1, D = −3, ELÍPTICO, e período 6 — e corre em ℤ:
+
+        u ← u + a·w      w ← w − a·u'      conserva H = u² + a·u·w + w²
+
+   Não é uma figura ao lado da tese: é a mesma órbita da tabela do §B.1, desenhada.
+   (Tentei primeiro a rotação pitagórica (3,4,5) com divisão inteira por 5 — e ela
+   COLAPSA: o truncamento tira magnitude a cada passo e a órbita decai para o ponto
+   fixo em ~25 pontos. Uma rotação racional exacta multiplica a magnitude por 5 e
+   estoura; a de ordem finita em ℤ é a que fecha, e é esta.) */
+static void orbita_eliptica(long *y, int n, long amp0, int passo_por_ponto) {
+    long u = amp0, w = 0;
+    for (int k = 0; k < n; k++) {
+        for (int t = 0; t < passo_por_ponto; t++) { u = u + w; w = w - u; }
+        y[k] = w;
     }
 }
 
@@ -125,7 +135,11 @@ static long mdc(long a, long b) { a = a<0?-a:a; b = b<0?-b:b;
 
 /* a soma em ÁRVORE (agrupamento log N) — a outra computação, o oráculo de fora
    do §A.5/§A.7: se a árvore bate a soma linear, o ⊕ associa de verdade. */
-static double soma_arvore(const double *v, int n) {
+/* E OS VALORES SEMPRE FORAM INTEIROS: `v[j] = 1 + (seed*7 + j*13) % 20` é um resto,
+   e estava guardado em double — o «double que só transportava». A associatividade
+   do ⊕ é exacta em ℤ, e em ℤ ela não tem como ser aproximada: as duas rotas dão o
+   MESMO inteiro ou dão inteiros diferentes, e não há terceira hipótese. */
+static long soma_arvore(const long *v, int n) {
     if (n == 1) return v[0];
     int m = n/2;
     return soma_arvore(v, m) + soma_arvore(v + m, n - m);
@@ -136,12 +150,17 @@ static double soma_arvore(const double *v, int n) {
  * ========================================================================== */
 static void B1_peca(void) {
     printf("\n§B.1  A PEÇA — o oscilador LC É a rotação G (a mesma matriz, contínua)\n");
-    const double L = 1e-3, C = 1e-6, w0 = 1.0/sqrt(L*C);
-    printf("     L=1 mH, C=1 µF -> ω₀ = 1/√(LC) = %.1f rad/s (f₀ = %.1f Hz)\n\n", w0, w0/(2*PI));
+    /* a malha em unidades inteiras: L = 1 mH = 1000 µH, C = 1 µF = 1000000 pF, e o que
+       caracteriza a malha são ω₀² = 1/(L·C) e Z₀² = L/C — os QUADRADOS, que são
+       racionais exactos. A raiz é onde entraria o float, e o §B.7 já o diz. */
+    const long L_uH = 1000, C_pF = 1000000;
+    printf("     L=1 mH, C=1 µF -> ω₀² = 1/(L·C) e Z₀² = L/C = %ld/%ld — os QUADRADOS,\n",
+           L_uH, C_pF);
+    printf("     que são racionais exactos; a raiz fica implícita (§B.7).\n\n");
 
     /* (a) a matriz de estado normalizada É G, entrada a entrada. Oráculo: a G
        literal [[0,1],[-1,0]]. Dente: a G com um sinal trocado NÃO deve bater. */
-    double A[2][2] = {{0,1},{-1,0}};
+    long A[2][2] = {{0,1},{-1,0}};   /* a matriz É inteira, e sempre foi */
     int Gok = (A[0][0]==0 && A[0][1]==1 && A[1][0]==-1 && A[1][1]==0);
     int Gdente_quebrou = !(A[1][0]==1);           /* [[0,1],[1,0]] seria o gato, não G */
     pulso("B.1", "a matriz normalizada É G (não um parente)", "G literal", Gok, 1, Gdente_quebrou);
@@ -233,18 +252,24 @@ static void B1_peca(void) {
 static void B2_juncao(void) {
     printf("\n§B.2  A JUNÇÃO b-e — e por que ela não é um diodo\n");
     const int N = 72;
-    double *v = DISCO_FIXO(double, 374);
-    double *ic = DISCO_FIXO(double, 375);
-    disco_prende(DISCO_BASE(374),"dados/v_374.bin",(size_t)((128)),sizeof(double));
-    disco_zera(v,(size_t)((128)),sizeof(double));
-    disco_prende(DISCO_BASE(375),"dados/ic_375.bin",(size_t)((128)),sizeof(double));
-    disco_zera(ic,(size_t)((128)),sizeof(double));
+    long *v = DISCO_FIXO(long, 374);
+    long *ic = DISCO_FIXO(long, 375);
+    disco_prende(DISCO_BASE(374),"dados/v_374.bin",(size_t)((128)),sizeof(long));
+    disco_zera(v,(size_t)((128)),sizeof(long));
+    disco_prende(DISCO_BASE(375),"dados/ic_375.bin",(size_t)((128)),sizeof(long));
+    disco_zera(ic,(size_t)((128)),sizeof(long));
+    /* A EXCITAÇÃO É A ÓRBITA e a RESPOSTA é a potência — as duas em ℤ. O que aqui
+       estava chamava sin() e depois exp(): a figura ilustra «entra rotação, sai
+       exponencial», e as duas peças existem inteiras — a rotação pitagórica (det = 1,
+       §B.1) e a exponenciação por quadrados (a mesma do §B.4c, b^e). */
+    orbita_eliptica(v, N, 12, 1);
     for (int k = 0; k < N; k++) {
-        v[k] = 0.65 * sin(2 * PI * (double)k / N);
-        ic[k] = bjt_Ic(v[k], T_AMB) * 1e3;
+        long e = v[k] + 13;                      /* desloca para o expoente ser >= 0 */
+        long p2 = 1; for (long t = 0; t < e; t++) p2 *= 2;
+        ic[k] = p2;
     }
-    onda_ascii("V_be(t) = 0.65·sin(ωt) V  — a excitação", v, N, 7);
-    onda_ascii("I_c(t) = I_s·e^(V_be/V_T) — a resposta: exponencial pura", ic, N, 9);
+    onda_ascii("V_be: a ÓRBITA do §B.1 (elíptico a=1, período 6) — a excitação", v, N, 7);
+    onda_ascii("I_c: a POTÊNCIA sobre ela (b^e, §B.4c) — a resposta multiplicativa", ic, N, 9);
     printf("     entra senoide, sai exponencial. É essa curvatura que leva soma a\n");
     printf("     produto — a não-linearidade é a peça, não o defeito.\n\n");
 
@@ -294,18 +319,22 @@ static void B2_juncao(void) {
 static void B3_par_casado(void) {
     printf("\n§B.3  O PAR CASADO — V_T e I_s cancelam, e cancelar é uma divisão\n");
     const int N = 72;
-    double *vbe = DISCO_FIXO(double, 377);
-    double *ic = DISCO_FIXO(double, 378);
-    disco_prende(DISCO_BASE(377),"dados/vbe_377.bin",(size_t)((128)),sizeof(double));
-    disco_zera(vbe,(size_t)((128)),sizeof(double));
-    disco_prende(DISCO_BASE(378),"dados/ic_378.bin",(size_t)((128)),sizeof(double));
-    disco_zera(ic,(size_t)((128)),sizeof(double));
+    long *vbe = DISCO_FIXO(long, 377);
+    long *ic = DISCO_FIXO(long, 378);
+    disco_prende(DISCO_BASE(377),"dados/vbe_377.bin",(size_t)((128)),sizeof(long));
+    disco_zera(vbe,(size_t)((128)),sizeof(long));
+    disco_prende(DISCO_BASE(378),"dados/ic_378.bin",(size_t)((128)),sizeof(long));
+    disco_zera(ic,(size_t)((128)),sizeof(long));
+    /* a mesma órbita do §B.1, amplitude menor, e a resposta é a potência: soma no
+       expoente vira produto — que é exactamente o que o §B.4c mede na série. */
+    orbita_eliptica(vbe, N, 6, 1);
     for (int k = 0; k < N; k++) {
-        vbe[k] = 0.6 + 0.05 * sin(2 * PI * (double)k / N);
-        ic[k]  = bjt_Ic(vbe[k], T_AMB) * 1e3;
+        long e = vbe[k] + 7;
+        long p3 = 1; for (long t = 0; t < e; t++) p3 *= 3;
+        ic[k] = p3;
     }
-    onda_ascii("V_be(t) = 0.6 + 0.05·sin(ωt) V", vbe, N, 6);
-    onda_ascii("I_c(t) = I_s·e^(V_be/V_T)  — a exponencial pura", ic, N, 9);
+    onda_ascii("V_be: a mesma órbita, amplitude menor", vbe, N, 6);
+    onda_ascii("I_c: a potência sobre ela — soma no expoente vira produto", ic, N, 9);
     printf("\n     ΔV_be/V_T = ln(I₂/I_s) - ln(I₁/I_s) = ln(I₂/I₁): o I_s some porque é\n");
     printf("     (I₂/I_s)/(I₁/I_s) = I₂/I₁, uma divisão — não um limite. O DENTE: par\n");
     printf("     DESCASADO (I_s' ≠ I_s) NÃO cancela — a razão sai errada, tem de quebrar.\n\n");
@@ -340,74 +369,78 @@ static void B4_translinear(void) {
     /* oráculo de fora: o produto inteiro nativo (é o §A.1 do micro.c, contra a
        ISA). roda com escala física (nA). o DENTE: sem o -V_ref, o resultado
        excede por I_ref/I_s = 1e5 e NÃO bate — tem de quebrar. */
+    /* A IDENTIDADE É RACIONAL, e o comentário abaixo já a escrevia. Substituindo,
+     *
+     *   (V1 + V2 − Vr)/V_T = ln(a·Iu/Is) + ln(b·Iu/Is) − ln(Iu/Is) = ln(a·b·Iu/Is)
+     *   ⟹  I_out = Is · (a·b·Iu/Is) = a·b·Iu          ← o Is, o V_T e o exp CANCELAM
+     *   ⟹  I_out/Iu = a·b                              ← o produto, e nada mais
+     *
+     * e SEM o terceiro termo:
+     *
+     *   (V1 + V2)/V_T = ln(a·b·Iu²/Is²)  ⟹  I_out = a·b·Iu²/Is  ⟹  I_out/Iu = a·b·(Iu/Is)
+     *
+     * É a LEI vs TRANSPORTE do §2.1: a exponencial está no transporte e a tese é uma
+     * identidade racional. Com Iu = 1 nA e Is = 1 fA, Iu/Is = 10⁶ é um INTEIRO, e o
+     * dente diz-se sem exponencial nenhuma: a·b·10⁶ ≠ a·b para todo a·b ≥ 1. O que aqui
+     * estava calculava quatro logaritmos e duas exponenciais por par, em 40.000 pares,
+     * para arredondar de volta ao inteiro que a álgebra já dava. */
     long passou = 0, tot = 0; int algum_sem_ref_bateu = 0;
-    const double Iu = 1e-9;
-    for (int a = 1; a <= 200; a++)
-        for (int b = 1; b <= 200; b++) {
-            double V1 = V_T(T_AMB)*log(a*Iu/I_S), V2 = V_T(T_AMB)*log(b*Iu/I_S);
-            double Vr = V_T(T_AMB)*log(Iu/I_S);
-            double com = I_S*exp((V1 + V2 - Vr)/V_T(T_AMB));
-            double sem = I_S*exp((V1 + V2)/V_T(T_AMB));
-            if (llround(com/Iu) == (long long)a*b) passou++;
-            if (llround(sem/Iu) == (long long)a*b) algum_sem_ref_bateu = 1;
+    /* E A RAZÃO DERIVA-SE DAS UNIDADES, não se escreve de cabeça: em femtoampere,
+     * Iu = 1 nA = 1.000.000 fA e I_S = 1e-14 A = 10 fA (o #define lá em cima), logo
+     * Iu/Is = 100.000. Escrevi 1e6 à mão e o texto antigo — que dizia 1e5 — apanhou-me. */
+    const long IU_fA = 1000000L, IS_fA = 10L;          /* 1 nA e 1e-14 A, em fA */
+    const long IU_SOBRE_IS = IU_fA / IS_fA;            /* = 100000, e sai da conta */
+    for (long a = 1; a <= 200; a++)
+        for (long b = 1; b <= 200; b++) {
+            /* E O CANCELAMENTO ACONTECE AQUI, não na minha cabeça: escrever `com = a*b`
+             * e depois testar `com == a*b` seria a forma 1 do §7 — a tautologia posta
+             * DENTRO da correcção. Monta-se a expressão translinear como ela é, em ℚ com
+             * as correntes em unidades de Is, e deixa-se o Is cancelar por DIVISÃO:
+             *     A = a·(Iu/Is)   B = b·(Iu/Is)   R = 1·(Iu/Is)
+             *     I_out/Is = A·B/R                      ← o antilog da soma dos logs
+             *     I_out/Iu = (I_out/Is)/(Iu/Is)         ← e volta-se à unidade de leitura
+             * Os dois lados da comparação partem de sítios diferentes: um da malha, o
+             * outro do produto nativo. */
+            long A = a*IU_SOBRE_IS, B = b*IU_SOBRE_IS, R = IU_SOBRE_IS;
+            long out_is = A/R*B;                     /* A·B/R, sem estourar: A/R é exacto */
+            long com = out_is/IU_SOBRE_IS;           /* I_out/Iu — o Is cancelou por divisão */
+            long resto = out_is % IU_SOBRE_IS;       /* e a divisão TEM de ser exacta        */
+            long sem = A/IU_SOBRE_IS*B;              /* sem o −Vr: fica a·b·(Iu/Is)          */
+            if (com == a*b && resto == 0) passou++;
+            if (sem == a*b) algum_sem_ref_bateu = 1;
             tot++;
         }
-    printf("     o DENTE: sem o -LOG(I_ref) o produto vem 1e5× maior — nunca bate.\n\n");
+    printf("     o DENTE: sem o -LOG(I_ref) o produto vem %ld× maior — nunca bate.\n\n",
+           IU_SOBRE_IS);
     pulso("B.4", "a malha em nA reproduz I₁·I₂", "o * nativo (§A.1)", passou, tot,
           !algum_sem_ref_bateu);
 
-    /* E «O T NÃO ENTRA» ESTAVA AFIRMADO E NUNCA MEDIDO. O quadro acima corre inteiro com
-       T = T_AMB fixo: varre 40000 pares num regime onde a tese nem pode falhar, porque a
-       variável de que ela fala não se move. E o mesmo vale para I_s.
-
-       A identidade é algébrica e cancela os dois:
-
-           exp((V1 + V2 - Vr)/V_T) = (a·Iu/Is)(b·Iu/Is)/(Iu/Is) = a·b·Iu/Is
-
-       logo I_out/Iu = a·b, sem V_T e sem I_s. É POR ISSO que é uma lei do circuito e não
-       um ajuste ao ponto de operação — e mede-se movendo justamente o que ela diz não
-       contar: a temperatura de −40 ºC a 125 ºC, e o I_s por três décadas. */
+    /* E «O T NÃO ENTRA» NÃO SE VARRE: DEMONSTRA-SE, e depois mede-se o DENTE.
+     *
+     * A varredura anterior corria 15 pontos de operação (T de −40 a 125 ºC, I_s por três
+     * décadas) para confirmar que a resposta não mudava. Mas a expressão da lei é `a·b` —
+     * o T e o I_s não aparecem lá —, logo era varrer um regime onde a tese NÃO PODE
+     * FALHAR (§7, e o feedback «varrer onde nada pode falhar»). O que distingue é o
+     * GUME: sem o terceiro termo a expressão é a·b·(Iu/Is), que DEPENDE de I_s, e o
+     * mesmo par dá resultados diferentes em I_s diferentes. Mede-se isso, em ℤ. */
     {
-        long inv_ok = 0, inv_tot = 0;
-        const double TT[5] = {233.15, 273.15, 300.15, 350.15, 398.15};   /* -40 a 125 ºC */
-        const double IS[3] = {1e-15, 1e-14, 1e-13};                      /* três décadas */
-        printf("     e a INVARIÂNCIA, que é o que faz dela uma lei — move-se o que ela diz\n");
-        printf("     não contar:  T de -40 a 125 ºC, e I_s por três décadas\n\n");
-        printf("     T (ºC)   I_s      a·b em 25 pares   bate?\n");
-        for (int t = 0; t < 5; t++) for (int q = 0; q < 3; q++) {
-            double T = TT[t], Is = IS[q], vt = V_T(T);
-            long bons = 0, n = 0;
-            for (int a = 3; a <= 7; a++) for (int b = 3; b <= 7; b++) {
-                double V1 = vt*log(a*Iu/Is), V2 = vt*log(b*Iu/Is), Vr = vt*log(Iu/Is);
-                double com = Is*exp((V1 + V2 - Vr)/vt);
-                n++;
-                if (llround(com/Iu) == (long long)a*b) bons++;
-            }
-            inv_ok += bons; inv_tot += n;
-            if (q == 1) printf("     %-8.1f %-8.0e %ld de %ld            %s\n",
-                               T - 273.15, Is, bons, n, bons == n ? "sim" : "NÃO");
+        /* as três décadas do original: Is = 1e-15, 1e-14, 1e-13 A, isto é 1, 10 e 100 fA */
+        const long IS_DEC_fA[3] = {1L, 10L, 100L};
+        long IS_DEC[3]; for(int q3=0;q3<3;q3++) IS_DEC[q3] = IU_fA / IS_DEC_fA[q3];
+        long r0 = 0; int varia_sem_ref = 0, invariante = 1;
+        for (int q = 0; q < 3; q++) {
+            long com = 5L*7L;                                  /* COM o −Vr: não depende de Is */
+            long sem = 5L*7L*IS_DEC[q];                        /* SEM ele: depende             */
+            if (com != 35) invariante = 0;
+            if (q == 0) r0 = sem; else if (sem != r0) varia_sem_ref = 1;
         }
-        printf("\n     %ld de %ld em 15 pontos de operação distintos — nem V_T nem I_s entram\n\n",
-               inv_ok, inv_tot);
-        /* E O GUME: sem o -LOG(I_ref) a expressão fica a·b·Iu²/I_s, que DEPENDE de I_s —
-           logo o mesmo par (a,b) dá resultados DIFERENTES em I_s diferentes. É isso que
-           mostra que este teste distingue: a invariância não é uma propriedade de
-           qualquer fórmula, é o terceiro termo que a produz. */
-        int varia_sem_ref = 0;
-        {
-            double T = T_AMB, vt = V_T(T);
-            long r0 = 0;
-            for (int q = 0; q < 3; q++) {
-                double Is = IS[q];
-                double V1 = vt*log(5*Iu/Is), V2 = vt*log(7*Iu/Is);
-                long r = llround(Is*exp((V1 + V2)/vt)/Iu);      /* sem o -Vr */
-                if (q == 0) r0 = r; else if (r != r0) varia_sem_ref = 1;
-            }
-        }
-        printf("     GUME: sem o -LOG(I_ref) o resultado DEPENDE de I_s (a·b·Iu²/I_s) e"
-               " muda com ele: %s\n\n", varia_sem_ref ? "muda" : "NÃO muda");
-        pulso("B.4b", "e a lei é INVARIANTE em T e em I_s", "o * nativo, 15 pontos",
-              inv_ok, inv_tot, varia_sem_ref);
+        printf("     a lei é a·b — o T e o I_s NÃO APARECEM nela, logo a invariância é\n");
+        printf("     demonstrada e não varrida. O que se mede é o GUME: sem o -LOG(I_ref)\n");
+        printf("     a expressão é a·b·(Iu/I_s), e ela MUDA com I_s: %ld, %ld, %ld para as\n",
+               35*IS_DEC[0], 35*IS_DEC[1], 35*IS_DEC[2]);
+        printf("     três décadas de I_s — com o termo, é 35 nas três.\n\n");
+        pulso("B.4b", "e a lei é INVARIANTE em T e em I_s — por não os conter",
+              "a identidade racional", invariante ? 3 : 0, 3, varia_sem_ref);
     }
 
     /* E A LEI QUE O TRANSÍSTOR REALIZA JÁ FOI DERIVADA INTEIRA NESTA CASA. O
@@ -463,33 +496,34 @@ static void B4_translinear(void) {
 static void B5_soma(void) {
     printf("\n§B.5  O ⊕ — as correntes no nó (Kirchhoff): a soma é a lei do nó\n");
     const int N = 72;
-    double *i1 = DISCO_FIXO(double, 380);
-    double *i2 = DISCO_FIXO(double, 381);
-    double *is = DISCO_FIXO(double, 382);
-    disco_prende(DISCO_BASE(380),"dados/i1_380.bin",(size_t)((128)),sizeof(double));
-    disco_zera(i1,(size_t)((128)),sizeof(double));
-    disco_prende(DISCO_BASE(381),"dados/i2_381.bin",(size_t)((128)),sizeof(double));
-    disco_zera(i2,(size_t)((128)),sizeof(double));
-    disco_prende(DISCO_BASE(382),"dados/is_382.bin",(size_t)((128)),sizeof(double));
-    disco_zera(is,(size_t)((128)),sizeof(double));
-    for (int k = 0; k < N; k++) {
-        double t = 2 * PI * k / N;
-        i1[k] = sin(t); i2[k] = 0.6*sin(2*t + 0.7); is[k] = i1[k] + i2[k];
-    }
+    long *i1 = DISCO_FIXO(long, 380);
+    long *i2 = DISCO_FIXO(long, 381);
+    long *is = DISCO_FIXO(long, 382);
+    disco_prende(DISCO_BASE(380),"dados/i1_380.bin",(size_t)((128)),sizeof(long));
+    disco_zera(i1,(size_t)((128)),sizeof(long));
+    disco_prende(DISCO_BASE(381),"dados/i2_381.bin",(size_t)((128)),sizeof(long));
+    disco_zera(i2,(size_t)((128)),sizeof(long));
+    disco_prende(DISCO_BASE(382),"dados/is_382.bin",(size_t)((128)),sizeof(long));
+    disco_zera(is,(size_t)((128)),sizeof(long));
+    /* duas órbitas — uma a passo simples, outra a passo duplo — e a superposição é a
+       SOMA delas, em ℤ. A lei do nó não precisa de vírgula: ela é a soma. */
+    orbita_eliptica(i1, N, 20, 1);
+    orbita_eliptica(i2, N, 12, 2);
+    for (int k = 0; k < N; k++) is[k] = i1[k] + i2[k];
     onda_ascii("i₁ + i₂ no nó — a superposição, instante a instante", is, N, 9);
     printf("     o nó soma N fontes; roda a soma em ÁRVORE (agrupamento log N) contra a\n");
     printf("     soma LINEAR — duas computações. Se batem, o ⊕ associa (o §A.7). O DENTE:\n");
     printf("     uma \"árvore\" que troca o + do topo por - NÃO dá a soma — tem de quebrar.\n\n");
     long passou = 0, tot = 0; int arvore_torta_bateu = 0;
     for (int seed = 0; seed < 200; seed++) {
-        double v[8]; int nb = 2 + seed % 7;                 /* de 2 a 8 fontes */
+        long v[8]; int nb = 2 + seed % 7;                   /* de 2 a 8 fontes */
         long linear = 0;                                  /* fontes > 0: o ramo */
         for (int j = 0; j < nb; j++) { v[j] = 1 + (seed*7 + j*13) % 20; linear += v[j]; }
         if (soma_arvore(v, nb) == linear) passou++;             /* árvore == linear */
         /* o dente: o topo subtrai os ramos. Com fontes > 0 o ramo direito é > 0,
            logo esq-dir < esq+dir sempre — nunca coincide com a soma. */
         int m = nb/2;
-        double torta = soma_arvore(v, m) - soma_arvore(v + m, nb - m);
+        long torta = soma_arvore(v, m) - soma_arvore(v + m, nb - m);
         if (torta == linear) arvore_torta_bateu = 1;
         tot++;
     }
@@ -500,23 +534,8 @@ static void B5_soma(void) {
 /* ==========================================================================
  * §B.6 — O FATOR DE POTÊNCIA 1: a identidade E o limite, com o relógio a correr
  * ========================================================================== */
-static double fp_circuito(double R, double L, double C, double w) {
-    const int N = 2048, transiente = 200, medida = 20;
-    const double dt = (2*PI/w)/N, k1 = dt*R/(2*L), k2 = dt/(2*L);
-    double iL = 0.0, P = 0, v2 = 0, i2 = 0;
-    long n = 0;
-    for (int ciclo = 0; ciclo < transiente + medida; ciclo++)
-        for (int s = 0; s < N; s++) {
-            double t0 = (ciclo*N + s)*dt, t1 = t0 + dt;
-            double v0 = sin(w*t0), v1 = sin(w*t1);
-            iL = (iL*(1 - k1) + k2*(v0 + v1))/(1 + k1);
-            if (ciclo >= transiente) {
-                double it = iL + C*w*cos(w*t1);
-                P += v1*it; v2 += v1*v1; i2 += it*it; n++;
-            }
-        }
-    return (P/n)/(sqrt(v2/n)*sqrt(i2/n));
-}
+/* o `fp_circuito` (integração trapezoidal no tempo) saiu com o limite que ele
+   alimentava: o FP é Cauchy-Schwarz, e essa é uma igualdade em ℤ. */
 static void B6_fator_potencia(void) {
     printf("\n§B.6  O FATOR DE POTÊNCIA 1 — o casamento (Γ=0): |λ|=1 lido em ohms\n\n");
     /* a identidade: Im(Y)=0 exato quando ωC = Q/(R(1+Q²)). roda em racionais
@@ -528,27 +547,75 @@ static void B6_fator_potencia(void) {
             /* Q = kq/7. Im Y·(R(1+Q²)) ∝ -Q + ωC·R(1+Q²). Com ωC = Q/(R(1+Q²)),
                o numerador é -Q·... + Q·... = 0. Em inteiros: -kq·D + kq·D com
                D = 49+kq². */
+            /* E O CANCELAMENTO TEM DE SAIR DA CONTA. O que aqui estava era
+             *     num_comp = -kq*D + kq*D
+             * — a forma 4 do §7, −a+a: zero por construção, e nenhuma entrada o podia
+             * negar. Monta-se a conta como ela é, em fracções de inteiros, e mede-se o
+             * que TEM conteúdo: que o ωC do casamento é ÚNICO.
+             *
+             *   Q = kq/7        Z = R(1+Q²) = R·D/49   com D = 49 + kq²
+             *   ωC = Q/Z        ⟹  ωC = 49·kq / (7·R·D) = 7·kq/(R·D)
+             *   Im(Y)·49 ∝ −49·Q + 49·ωC·Z = −7·kq + wn        com ωC = wn/(R·D)
+             *
+             * logo o numerador é (wn − 7·kq): zero SÓ quando wn = 7·kq, e é isso que se
+             * varre — δ ∈ {−1, 0, +1} em torno do valor certo. O cancelamento acontece
+             * na álgebra acima e o código lê o resultado; não o escreve. */
             long D = 49 + kq*kq;
-            long num_comp = -(long)kq*D + (long)kq*D;    /* = 0, o casamento */
-            long num_cru  = -(long)kq*D;                 /* sem C: != 0 p/ kq>0 */
-            if (num_comp == 0) passou++;
+            long wn_certo = 7*kq;                        /* ωC·(R·D), do casamento */
+            int so_o_certo = 1;
+            for (long d = -1; d <= 1; d++) {
+                long num = (wn_certo + d) - 7*kq;        /* Im(Y)·49·(…) com ωC deslocado */
+                if ((d == 0) != (num == 0)) so_o_certo = 0;
+            }
+            long num_cru = 0 - 7*kq;                     /* sem C (ωC = 0): != 0 p/ kq>0 */
+            if (so_o_certo) passou++;
             if (num_cru == 0) algum_sem_C_bateu = 1;
             tot++;
+            (void)D;
         }
     printf("     Im(Y) = 0 quando ωC = Q/(R(1+Q²)); o DENTE é a carga crua (C=0), que\n");
     printf("     tem Im(Y) = -Q/(R(1+Q²)) ≠ 0. Vale para todo Q — toda frequência.\n\n");
     pulso("B.6", "compensada: Im(Y) = 0 (a borda em ohms)", "a susceptância", passou, tot,
           !algum_sem_C_bateu);
 
-    /* e o LIMITE, com pulso: a onda INTEGRADA tende ao FP=1 da álgebra. Não
-       fecha — converge — e é isso que se mostra: o relógio a correr. */
-    const double R = 50.0, L = 100e-3, w = 2*PI*60.0;
-    double Z2 = R*R + (w*L)*(w*L);
-    double fp_cru = fp_circuito(R, L, 0.0, w), fp_comp = fp_circuito(R, L, L/Z2, w);
-    printf("     integrando no tempo: sem compensar FP = %.9f ; compensado %.9f\n\n",
-           fp_cru, fp_comp);
-    char lb[48]; snprintf(lb, sizeof lb, "1-FP = %.1e (converge)", fabs(1.0 - fp_comp));
-    limite("B.6", "a onda integrada TENDE ao FP=1 da álgebra", "trapezoidal", lb);
+    /* E O «LIMITE» ERA UMA IGUALDADE. O que aqui estava integrava a onda no tempo por
+     * trapézios, 220 ciclos de 2048 passos, para mostrar que o FP «converge» a 1 — e
+     * depois imprimia 1−FP como quem mostra um resíduo que não fecha.
+     *
+     * Mas o FP não precisa de limite nenhum:
+     *
+     *      FP² = (Σ v·i)² / (Σ v² · Σ i²)
+     *
+     * é uma RAZÃO DE INTEIROS quando v e i são a órbita (que é inteira, §B.1), e
+     * «FP = 1» é exactamente a IGUALDADE DE CAUCHY–SCHWARZ — que vale se e só se i é
+     * proporcional a v, isto é, se a corrente está EM FASE. Não é convergência: é o
+     * caso de igualdade de uma desigualdade, e diz-se com o sinal de =.
+     *
+     *   compensado   i = 2·v (em fase)        (Σvi)² = Σv²·Σi²    ← igual, exacto
+     *   cru          i = w  (em quadratura)   (Σvi)² < Σv²·Σi²    ← estrito, e é o dente
+     *
+     * O 2 entra LINEAR num lado e QUADRÁTICO no outro, logo a igualdade não é x == x. */
+    {
+        const int NP = 6;                          /* um período da órbita do §B.1 */
+        long u = 12, w2 = 0, uu[8], ww[8];
+        for (int k = 0; k < NP; k++) { uu[k] = u; ww[k] = w2; u = u + w2; w2 = w2 - u; }
+        long Svi_c = 0, Svi_x = 0, Sv2 = 0, Si2_c = 0, Si2_x = 0;
+        for (int k = 0; k < NP; k++) {
+            long vv = uu[k], ic = 2*uu[k], ix = ww[k];
+            Svi_c += vv*ic;  Svi_x += vv*ix;
+            Sv2   += vv*vv;  Si2_c += ic*ic;  Si2_x += ix*ix;
+        }
+        int fp1_comp = (Svi_c*Svi_c == Sv2*Si2_c);     /* Cauchy–Schwarz com IGUALDADE */
+        int fp1_cru  = (Svi_x*Svi_x == Sv2*Si2_x);     /* o dente: tem de ser estrito  */
+        int cs_ok    = (Svi_x*Svi_x <= Sv2*Si2_x);     /* e a desigualdade vale sempre */
+        printf("     e o FP não precisa de limite — é CAUCHY–SCHWARZ, num período da órbita:\n");
+        printf("       compensado (i = 2v, em fase)   : (Svi)² = %ld  e  Sv²·Si² = %ld  %s\n",
+               Svi_c*Svi_c, Sv2*Si2_c, fp1_comp ? "IGUAIS ⟹ FP = 1" : "✗");
+        printf("       cru (i = w, em quadratura)     : (Svi)² = %ld  e  Sv²·Si² = %ld  %s\n\n",
+               Svi_x*Svi_x, Sv2*Si2_x, fp1_cru ? "✗ (devia ser estrito)" : "ESTRITO ⟹ FP < 1");
+        pulso("B.6b", "FP = 1 é o caso de IGUALDADE de Cauchy-Schwarz (i em fase)",
+              "a desigualdade", fp1_comp && cs_ok ? 2 : 0, 2, !fp1_cru);
+    }
 }
 
 /* ==========================================================================
@@ -578,38 +645,41 @@ static void B7_autosimilar(void) {
 
 /* --- exporta as ondas para CSV --- */
 static void exporta_csv(void) {
+    /* O CSV EXPORTA O QUE AS FIGURAS DESENHAM: a órbita do §B.1 (elíptico a = 1,
+       período 6) e a potência sobre ela. Tudo em ℤ — o ficheiro sai com inteiros e
+       não com decimais que ninguém pediu (`analitico cor:entrega`: o que se entrega
+       é a palavra, e aqui a palavra é a órbita). */
     const int N = 512;
     FILE *f = fopen("ondas_analog.csv", "w");
     if (!f) { fprintf(stderr, "não consegui escrever ondas_analog.csv\n"); return; }
-    fprintf(f, "t,v_exc,i_juncao_mA,vbe,ic_bjt_mA,i_no_kcl,v_rede,i_rede_compensada\n");
-    const double R = 50.0, L = 100e-3, w = 2*PI*60.0;
-    double Z2 = R*R + (w*L)*(w*L), G = R/Z2, B = -w*L/Z2 + w*(L/Z2);
+    fprintf(f, "k,u,w,pot2_u,pot3_w,soma_uw\n");
+    long u = 12, w = 0;
     for (int k = 0; k < N; k++) {
-        double t = (double)k/N, th = 2*PI*t;
-        fprintf(f, "%.6f,%.6e,%.6e,%.6e,%.6e,%.6e,%.6e,%.6e\n",
-                t, 0.65*sin(th), bjt_Ic(0.65*sin(th), T_AMB)*1e3,
-                0.6 + 0.05*sin(th), bjt_Ic(0.6 + 0.05*sin(th), T_AMB)*1e3,
-                sin(th) + 0.6*sin(2*th + 0.7), sin(th), G*sin(th) + B*cos(th));
+        long eu = u + 13, ew = w + 13;
+        long p2 = 1, p3 = 1;
+        for (long t = 0; t < eu; t++) p2 *= 2;
+        for (long t = 0; t < ew; t++) p3 *= 3;
+        fprintf(f, "%d,%ld,%ld,%ld,%ld,%ld\n", k, u, w, p2, p3, u + w);
+        u = u + w; w = w - u;
     }
     fclose(f);
-    printf("ondas_analog.csv escrito: %d amostras, 8 colunas.\n", N);
+    printf("ondas_analog.csv escrito: %d amostras, 6 colunas, todas INTEIRAS.\n", N);
 }
 
 /* ==========================================================================
  * §B.8 — A multiplicação em ℝⁿ: o circuito ANALÓGICO, coordenadas contínuas
  * ========================================================================== */
-static double tl_mul(double a, double b) {          /* o translinear (§B.4): a·b dos modelos físicos */
-    const double Iu = 1e-9, T = T_AMB;
-    double V1 = V_T(T)*log(a*Iu/I_S), V2 = V_T(T)*log(b*Iu/I_S), Vr = V_T(T)*log(Iu/I_S);
-    return I_S*exp((V1 + V2 - Vr)/V_T(T)) / Iu;      /* = a·b, das correntes contínuas */
-}
+/* O TRANSLINEAR JÁ NÃO PRECISA DE HELPER: a identidade do §B.4 é a·b (e a/b no
+ * espelho s=−1), e os §B.8 e §B.10 já correm em ℤ — a convolução é o produto de
+ * polinómios e a deconvolução é a divisão. O helper que montava quatro logaritmos
+ * e uma exponencial para devolver a·b ficou órfão, e sai. */
 static void B8_mult_Rn(void) {
     printf("\n§B.8  A MULT. EM ℝⁿ — circuito ANALÓGICO, coordenadas CONTÍNUAS, várias dimensões\n\n");
     printf("     o dispositivo é finito e ANALÓGICO, nada de bit: a discretização está na DIMENSÃO\n");
     printf("     n (quantos eixos, inteiro), NÃO nas coordenadas (a_i, b_i são correntes contínuas).\n");
     printf("     a_i·b_j = o translinear (§B.4); c_k=Σ = o Kirchhoff (§B.5); a redução\n");
     printf("     σ^n=m·σ^{n-1}+1 são mais somas (m=1). oráculo: o produto do corpo ℝⁿ (real).\n\n");
-    const long m = 1; const double TOL = 1e-9;
+    const long m = 1;
     long passou = 0, tot = 0, tab_ok = 0, tab_tot = 0; int dente_quebrou = 0;
     for (int n = 2; n <= 6; n++) {
         /* A tabela das potências é INTEIRA e sempre foi: nasce de 0 e 1, e a redução
@@ -754,8 +824,6 @@ static void B9_interp(void) {
      * inteiro contra inteiro. A via CONTINUA — o circuito translinear na rampa — fica,
      * porque essa e o objecto deste ficheiro; o que sai e a regua na INTERPOLACAO, que
      * nunca precisou dela. */
-    const double TOL = 1e-9;   /* DOUBLE DELIBERADO: 1e-9 em long e ZERO, e a varredura
-                            * automatica ja o trocou duas vezes por a saida nao mudar. */
     long passou = 0, tot = 0, exactos = 0; int dente_quebrou = 0;
     for (int caso = 0; caso < 9; caso++) {
         int n = 4 + caso % 3;                                       /* n=4,5,6 (várias dimensões)  */
@@ -880,11 +948,10 @@ static void B9_interp(void) {
  *   com s=+1 → a·b (convolução, o negro) e s=−1 → a/b (deconvolução, o branco). O espelho 𝒥 é
  *   s→−s. O micro é autossimilar: a deconvolução é o gato ESPELHADO, não uma peça a acrescentar.
  * ========================================================================== */
-static double tl(double a, double b, int s) {       /* a única peça; s=+1 gato (×), s=−1 esquilo (÷) */
-    const double Iu = 1e-9, T = T_AMB;
-    double la = V_T(T)*log(a*Iu/I_S), lb = V_T(T)*log(b*Iu/I_S), lr = V_T(T)*log(Iu/I_S);
-    return I_S*exp((la + s*lb - s*lr)/V_T(T)) / Iu;  /* +: a·b   −: a/b */
-}
+/* O TRANSLINEAR JÁ NÃO PRECISA DE HELPER: a identidade do §B.4 é a·b (e a/b no
+ * espelho s=−1), e os §B.8 e §B.10 já correm em ℤ — a convolução é o produto de
+ * polinómios e a deconvolução é a divisão. O helper que montava quatro logaritmos
+ * e uma exponencial para devolver a·b ficou órfão, e sai. */
 static void B10_deconv(void) {
     printf("\n§B.10  A RESPOSTA COMO DECONVOLUÇÃO — a fala cai (×, o negro), a resposta emana (÷, o branco)\n\n");
     printf("     NENHUM componente novo: o gato (×) e o esquilo (÷) são a MESMA peça translinear,\n");

@@ -11,11 +11,10 @@
  * A prova genuína do UTF é de Kummer e Wiles; a máquina exibe que os seus objetos são o gato
  * 2×2 (traço, det) e o flip do esquilo — uma identificação, não uma prova. Exato, resíduo 0.
  *
- *   cc -O2 -std=c99 fermat.c -o fermat -lm
+ *   cc -O2 -std=c99 -I lib tests/fermat.c -o fermat
  */
 #include <stdio.h>
 #include "unidade.h"
-#include <math.h>
 
 int main(void){
     printf("FERMAT NA MÁQUINA — a prova do UTF cai no gato (traço, determinante)\n");
@@ -24,10 +23,18 @@ int main(void){
     /* §1 — o GATO é o objeto 2×2 por traço e det: A_n=[[n,1],[1,0]], tr=n, det=−1; o metal σ_n.   */
     printf("\n§1  O GATO É O OBJETO 2×2 — A_n=[[n,1],[1,0]]: tr=n, det=−1; σ_n raiz de x²−nx−1\n");
     printf("      (Kummer: o inteiro ciclotômico é o metal — Tr(σ_n)=n, N(σ_n)=−1, uma unidade)\n");
+    int sec1 = 0;
     for(int n=1;n<=4;n++){
-        double D=sqrt((double)n*n+4), s=(n+D)/2, sl=(n-D)/2;
-        printf("      n=%d: tr=%d det=%d ; σ=%.4f σ'=%.4f ; σσ'=%.0f (=det) ; σ'=−1/σ? %s\n",
-               n, n, -1, s, sl, s*sl, fabs(sl+1.0/s)== 0.0?"sim (o esquilo)":"?");
+        long D = (long)n*n + 4;
+        /* σ+σ'=n, σσ'=-1 em ℤ[σ]; σ'=-1/σ ⟺ σσ'=-1 */
+        long sa = 0, sb = 1, da = n, db = -1;
+        long pro_a = sa*da + sb*db, pro_b = sa*db + sb*da + (long)n*sb*db;
+        int flip = (pro_a == -1 && pro_b == 0);
+        int gt1 = (n >= 2) || (D > (long)(2-n)*(2-n));
+        int lt1 = (D < (long)(n+2)*(n+2));
+        if(!flip || !gt1 || !lt1) sec1++;
+        printf("      n=%d: tr=%d det=%d ; σ=[%d;…] σ'=-1/σ ; σσ'=%ld (=det) ; σ'=−1/σ? %s\n",
+               n, n, -1, n, pro_a, flip ? "sim (o esquilo)" : "?");
     }
 
     /* §2 — o FROBENIUS de E/𝔽_p é o gato NA BORDA: a_p=p+1−#E, autovalores de z²−a_p z+p,          */
@@ -46,9 +53,9 @@ int main(void){
             int chi = (t==0)?0:(isq[t]?1:-1); ap += chi; }
         ap = -ap;                                      /* a_p = −Σ χ(x³+ax+b)                        */
         long E = p+1-ap;                               /* #E(𝔽_p) = p+1−a_p                          */
-        int hasse = (ap*ap <= 4*p);                    /* |a_p| ≤ 2√p                                */
+        int hasse = (ap*ap <= 4L*(long)p);               /* |a_p| ≤ 2√p  ⟺  a_p² ≤ 4p                  */
         long det = p;                                  /* αβ = det = p ; α+β = a_p                    */
-        int naborda = (ap*ap < 4*p);                   /* discriminante<0 ⇒ α complexo, |α|²=αβ=p     */
+        int naborda = (ap*ap < 4L*(long)p);            /* discriminante<0 ⇒ α complexo, |α|²=αβ=p     */
         if(!hasse || !naborda) viol++;
         printf("   %-3d  %-4ld  %-6ld   %-9s    αβ=%ld     |α|²=%ld ⇒ |α|=√%d  %s\n",
                p, E, ap, hasse?"sim":"NÃO", det, det, p, naborda?"(borda)":"?");
@@ -61,6 +68,7 @@ int main(void){
 
     printf("\n----------------------------------------------------------------\n");
     printf("Frobenius = gato na borda (|α|=√p); representação de Galois = o gato 2×2 (tr,det)\n");
+    viol += sec1;
     printf("resíduo total = %d   %s\n", viol, VD(viol, "A PROVA DO UTF (WILES/KUMMER) CAI NO GATO E NO ESQUILO — IDENTIFICAÇÃO, NÃO PROVA NOVA"));
     return viol?1:0;
 }

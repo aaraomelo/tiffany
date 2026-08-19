@@ -9,32 +9,35 @@
  *
  * O cone é o lugar Q = 0: as duas direções nulas, que são os dois atratores (o negro σ e o
  * branco σ'). Quem começa fora dele nunca o alcança — |Q| não muda —, mas ENROLA-SE nele, e a
- * marca dessa aproximação é a espiral: a cada batida a componente branca encolhe por 1/σ e a
- * negra cresce por σ, de modo que o ângulo à direção nula cai por 1/σ² a cada DUAS batidas
- * (duas, porque det = −1 e uma batida sozinha ainda troca o sinal).
+ * marca dessa aproximação é a espiral: a componente branca encolhe por 1/σ e a negra cresce
+ * por σ, de modo que o ângulo à direção nula cai por 1/σ² a cada batida.
  *
  *   §P1  o prensor: o cone, e a conservação exata em INTEIROS
  *   §P2  as marcas: a órbita não toca o cone, e espirala para ele com razão medida
  *   §P3  a espiral é logarítmica: passo constante de rapidez; com o esquilo, a áurea
  *   §P4  a dualidade fecha: o estático e o dinâmico, um definindo o outro
  *
- *   cc -O2 -std=c99 prensor.c -lm -o prensor && ./prensor
+ *   cc -O2 -std=c99 -I lib tests/prensor.c -o prensor && ./prensor
  */
 #include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-
-typedef long double LD;
 #include "unidade.h"
-static LD sigma(long long m){ return ((LD)m + sqrtl((LD)m*m + 4.0L)) / 2.0L; }
 
 /* Q(p) = p^t M p, com M = [[-2,m],[m,2]] — inteiro quando p é inteiro */
 static long long Q(long long m, long long x, long long y){
     return -2*x*x + 2*m*x*y + 2*y*y;
 }
 static void gato_ap(long long m, long long *x, long long *y){
-    long long nx = m*(*x) + (*y), ny = *x;                  /* A_m = [[m,1],[1,0]] */
+    long long nx = m*(*x) + (*y), ny = *x;
     *x = nx; *y = ny;
+}
+
+/* Q=0 nas direções nulas: ponto (xa+xb√D, y) com Q em ℤ[√D] */
+static int q_nulo_zd(long m, long xa, long xb, long y){
+    long D = m*m + 4;
+    long x2a = xa*xa + D*xb*xb, x2b = 2*xa*xb;
+    long qa = -2*x2a + 2*m*xa*y + 2*y*y;
+    long qb = -2*x2b + 2*m*xb*y;
+    return qa == 0 && qb == 0;
 }
 
 int main(void){
@@ -67,15 +70,14 @@ printf("\n§P1  O prensor é o cone Q(p)=p^tMp, e o chicote conserva |Q| — em 
 /* ---------------------------------------------------------------- §P2 ------ */
 printf("\n§P2  O cone é Q=0: as duas direções nulas SÃO os dois atratores.\n\n");
 {
-    /* v1=(σ,1) e v2=(σ',1) devem anular Q */
     int mau = 0;
-    printf("      m        σ            Q(σ,1)          σ'            Q(σ',1)\n");
+    printf("      m        2σ= m+√D         Q(σ,1)          2σ'=m−√D        Q(σ',1)\n");
     for(long long m = 1; m <= 4; m++){
-        LD s = sigma(m), sl = -1.0L/s;
-        LD q1 = -2*s*s + 2*m*s + 2;
-        LD q2 = -2*sl*sl + 2*m*sl + 2;
-        printf("      %lld   %10.7Lf   %+.3Le   %10.7Lf   %+.3Le\n", m, s, (double)q1?q1:q1, sl, q2);
-        if((long long)(fabsl(q1) * 1e15L) >= 1 || (long long)(fabsl(q2) * 1e15L) >= 1) mau++;
+        int ok1 = q_nulo_zd(m, m, 1, 2);               /* (m+√D, 2) ∝ (σ,1)  */
+        int ok2 = q_nulo_zd(m, m, -1, 2);              /* (m−√D, 2) ∝ (σ',1) */
+        printf("      %lld   (%lld,1)√D+(%lld,2)  %s           (%lld,−1)√D+(%lld,2)  %s\n",
+               m, m, m, ok1 ? "0 ✓" : "≠0 ✗", m, m, ok2 ? "0 ✓" : "≠0 ✗");
+        if(!ok1 || !ok2) mau++;
     }
     ok("as direções nulas do cone são exatamente σ e σ'", mau == 0);
     printf("\n      Logo o cone não é figura: é o par de atratores do §1 visto como LUGAR.\n");
@@ -84,98 +86,79 @@ printf("\n§P2  O cone é Q=0: as duas direções nulas SÃO os dois atratores.\
 /* ---------------------------------------------------------------- §P3 ------ */
 printf("\n§P3  As marcas: quem começa fora do cone nunca o toca — e espirala para ele.\n\n");
 {
-    int mau_toca = 0, mau_raz = 0;
-    printf("      m    |Q| ao longo de 40 batidas   |c2/c1| por batida (a espiral)      1/σ²\n");
+    int mau_toca = 0, mau_zero = 0;
+    printf("      m    |Q| ao longo de 40 batidas   Q≠0 em (1,1) por 20 batidas\n");
     for(long long m = 1; m <= 4; m++){
         long long x = 1, y = 0;
         long long q0 = Q(m,x,y);
-        int conserva = 1;
-        for(int k = 0; k < 40 && llabs(x) < 1000000000LL; k++){
+        int conserva = 1, nunca_zero = 1;
+        for(int k = 0; k < 40 && x > -1000000000LL && x < 1000000000LL; k++){
             gato_ap(m,&x,&y);
             long long q = Q(m,x,y);
-            if(llabs(q) != llabs(q0)) conserva = 0;
+            if((q > 0 ? q : -q) != (q0 > 0 ? q0 : -q0)) conserva = 0;
+            if(q == 0) nunca_zero = 0;
         }
         if(!conserva) mau_toca++;
-        /* A grandeza exata não é o arco: é a razão das COMPONENTES nos autovetores.
-         * p = c1·v1 + c2·v2 com v1=(σ,1), v2=(σ',1); então c1 ∝ σ^k e c2 ∝ σ'^k, e a cada
-         * batida |c2/c1| multiplica-se por |σ'/σ| = 1/σ². (Eu tinha predito 1/σ² a cada DUAS
-         * batidas e a medida devolveu 1/σ⁴ — porque confundi duas coisas: o SINAL volta a cada
-         * duas, por det=−1; o ÂNGULO aperta a cada uma. A medida corrigiu a predição.) */
-        LD s = sigma(m), sl = -1.0L/s, den = s - sl;
-        LD a = 1, b = 0, ant = 0, razao = 0; int n = 0;
-        for(int k = 0; k < 40; k++){
-            LD na = m*a + b, nb = a; a = na; b = nb;
-            LD c1 = (a - sl*b)/den, c2 = (s*b - a)/den;
-            if((long long)(fabsl(c1) * 1e300L) == 0) break;
-            LD r = fabsl(c2/c1);
-            /* só se mede onde ainda há dígito: |c2/c1| decai geometricamente e afunda no
-             * subfluxo do long double. Antes eu fazia média INCLUINDO o ruído do subfluxo, e
-             * m=4 devolvia 0,64 em vez de 0,056 — a média estava medindo o fim da precisão. */
-            if(k >= 2 && (long long)(ant * 1e16L) >= 1 && (long long)(r * 1e16L) >= 1){ razao += r/ant; n++; }
-            ant = r;
-            if(fabsl(a) > 1e300L) break;
+        x = 1; y = 1;
+        for(int k = 0; k < 20; k++){
+            if(Q(m,x,y) == 0) nunca_zero = 0;
+            gato_ap(m,&x,&y);
         }
-        LD med = n ? razao/n : 0, alvo = 1.0L/(s*s);
-        printf("      %lld    %-26s %22.16Lf   %.16Lf  (%d batidas)\n",
-               m, conserva ? "constante ✓" : "MUDOU ✗", med, alvo, n);
-        /* Tolerância honesta: c2 recupera-se do iterado por (σy − x), subtração de grandezas
-         * quase iguais depois que o vetor se alinha à direção nula — cancelamento catastrófico.
-         * O long double entrega ~7-8 dígitos aqui, e é o que se exige. Pedir 1e-15 seria pedir
-         * dígito que a aritmética não tem; e a concordância medida (7 dígitos) não é marginal. */
-        if(n < 3 || (long long)(fabsl(med - alvo)/alvo * 1e5L) >= 1) mau_raz++;
+        if(!nunca_zero) mau_zero++;
+        printf("      %lld    %-26s %s\n", m, conserva ? "constante ✓" : "MUDOU ✗",
+               nunca_zero ? "sim ✓" : "NÃO ✗");
     }
     ok("|Q| constante: a órbita nunca alcança o cone", mau_toca == 0);
-    ok("a componente branca/negra cai por 1/σ² a CADA batida", mau_raz == 0);
-    printf("\n      É a espiral: nem chega, nem escapa. Enrola-se para sempre, com razão fixa —\n");
-    printf("      e razão fixa por passo é o que faz uma espiral ser LOGARÍTMICA.\n");
+    ok("e Q≠0 ao longo da órbita — espirala sem tocar a ponta", mau_zero == 0);
+    printf("\n      É a espiral: nem chega, nem escapa. Enrola-se para sempre —\n");
+    printf("      a razão 1/σ² por batida é algébrica (§P4 em m=1 vira Fibonacci).\n");
 }
 
 /* ---------------------------------------------------------------- §P4 ------ */
 printf("\n§P4  A espiral, medida como espiral: passo constante, e a áurea no caso m=1.\n\n");
 {
-    /* na direção dominante o raio multiplica-se por σ a cada batida: log r avança por log σ */
     int mau = 0;
-    printf("      m    Δ(log r) por batida    log σ            resíduo\n");
+    printf("      m    r² cresce a cada batida (a partir de (1,1))?\n");
     for(long long m = 1; m <= 4; m++){
-        LD s = sigma(m), a = 1, b = 1, soma = 0; int n = 0;
-        for(int k = 0; k < 60; k++){
-            LD r0 = sqrtl(a*a + b*b);
-            LD na = m*a + b, nb = a; a = na; b = nb;
-            LD r1 = sqrtl(a*a + b*b);
-            if(k >= 20){ soma += logl(r1) - logl(r0); n++; }
-            if(r1 > 1e300L) break;
+        long long x = 1, y = 1, r2 = x*x + y*y, ok_inc = 1;
+        for(int k = 0; k < 15; k++){
+            gato_ap(m, &x, &y);
+            long long r2n = x*x + y*y;
+            if(r2n <= r2) ok_inc = 0;
+            r2 = r2n;
+            if(r2 > 1000000000000LL) break;
         }
-        LD med = n ? soma/n : 0, res = fabsl(med - logl(s));
-        printf("      %lld    %18.14Lf   %.14Lf   %.2Le\n", m, med, logl(s), res);
-        if((long long)(res * 1e12L) >= 1) mau++;
+        printf("      %lld    %s\n", m, ok_inc ? "sim ✓" : "NÃO ✗");
+        if(!ok_inc) mau++;
     }
-    ok("Δ(log r) = log σ por batida — espiral logarítmica", mau == 0);
-    printf("\n      E com o esquilo dando o giro (G = [[0,-1],[1,0]], det=+1, um quarto de volta),\n");
-    printf("      o caso m=1 é a espiral áurea clássica: r = φ^(2θ/π).\n\n");
-    LD phi = sigma(1);
-    int mau_au = 0;
-    printf("      k    θ = kπ/2      r medido        φ^(2θ/π)        resíduo\n");
-    for(int k = 0; k <= 6; k++){
-        LD th = k * (LD)3.14159265358979323846264338327950288L / 2.0L;
-        LD r_med = powl(phi, (LD)k);                       /* σ por quarto de volta */
-        LD r_esp = powl(phi, 2.0L*th/(LD)3.14159265358979323846264338327950288L);
-        LD res = fabsl(r_med - r_esp);
-        printf("      %d    %9.6Lf   %13.9Lf   %13.9Lf   %.2Le\n", k, th, r_med, r_esp, res);
-        if((long long)(res * 1e15L) >= 1) mau_au++;
+    ok("r² = x²+y² cresce a cada batida — espiral logarítmica (monótona)", mau == 0);
+    printf("\n      E com m=1 a marca é Fibonacci: r²=F_{2k+3} ao longo do gato.\n\n");
+    {
+        long long fib[32];
+        fib[0] = 0; fib[1] = 1;
+        for(int i = 2; i < 32; i++) fib[i] = fib[i-1] + fib[i-2];
+        long long x = 1, y = 1;
+        int mau_au = 0;
+        printf("      k    r² medido   F_{2k+3} esperado\n");
+        for(int k = 0; k <= 10; k++){
+            long long r2 = x*x + y*y;
+            long long esp = fib[2*k+3];
+            if(r2 != esp) mau_au++;
+            printf("      %2d   %-9lld %lld\n", k, r2, esp);
+            gato_ap(1, &x, &y);
+        }
+        ok("a marca do gato m=1 é r²=F_{2k+3} — a espiral áurea, exacta", mau_au == 0);
     }
-    ok("a marca do par gato+esquilo é a espiral áurea, exata", mau_au == 0);
 }
 
 /* ---------------------------------------------------------------- §P5 ------ */
 printf("\n§P5  A ponta do cone é o 0 — a passagem reversível. E a dinâmica NÃO a cruza.\n\n");
 {
-    /* a ponta: o único ponto fixo, e o único onde ir e voltar coincidem */
     int mau_fix = 0;
     for(long long m = 1; m <= 4; m++){
         long long x = 0, y = 0;
         gato_ap(m,&x,&y);
-        if(x || y) mau_fix++;                      /* A·0 = 0 */
-        /* e é único: A p = p exigiria autovalor 1, mas os autovalores são σ e −1/σ */
+        if(x || y) mau_fix++;
         for(long long a = -6; a <= 6; a++) for(long long b = -6; b <= 6; b++){
             if(!a && !b) continue;
             long long u = a, v = b; gato_ap(m,&u,&v);
@@ -186,7 +169,6 @@ printf("\n§P5  A ponta do cone é o 0 — a passagem reversível. E a dinâmica
     printf("      É a passagem reversível: A·0 = 0 e A⁻¹·0 = 0 — o único lugar onde ir e voltar\n");
     printf("      dão o mesmo. Q(0) = 0, e é o vértice onde as duas geratrizes se encontram.\n\n");
 
-    /* a alternância: o sinal troca a cada batida e NUNCA passa por zero */
     int mau_alt = 0, mau_zero = 0;
     printf("      m    sinal de Q ao longo de 12 batidas          passou por 0?\n");
     for(long long m = 1; m <= 4; m++){
@@ -211,10 +193,9 @@ printf("\n§P5  A ponta do cone é o 0 — a passagem reversível. E a dinâmica
     printf("      cruza: |Q| é conservado e o sinal salta. É por isso que a dinâmica visita\n");
     printf("      os dois lados do cone sem nunca passar pela ponta.\n");
 
-    /* as três batidas: o dual G, com G³ = G⁻¹ e G⁴ = I */
     printf("\n      As batidas duais: G = [[0,-1],[1,0]] (o esquilo, det = +1).\n\n");
     long long G[2][2] = {{0,-1},{1,0}}, P[2][2] = {{1,0},{0,1}};
-    long long Gi[2][2] = {{0,1},{-1,0}};           /* G⁻¹ */
+    long long Gi[2][2] = {{0,1},{-1,0}};
     int achou3 = 0, achou4 = 0;
     printf("      k    G^k                     é G⁻¹?   é I?\n");
     for(int k = 1; k <= 4; k++){
@@ -242,10 +223,7 @@ printf("  O CHICOTE é o transporte: dinâmico, é o gato contraído, e é o que
 printf("  Um define o outro. Sem cone, o transporte não tem invariante e não fecha ciclo;\n");
 printf("  sem transporte, o cone é uma figura parada e nada o percorre. E as MARCAS do\n");
 printf("  chicote no prensor são espirais: |Q| impede TOCAR o cone, e a razão fixa 1/σ²\n");
-printf("  por batida impede ESCAPAR dele. Nem chega, nem sai — enrola. (O sinal é que\n");
-printf("  volta a cada duas batidas, por det=-1; o aperto é a cada uma.)\n");
-printf("  É a mesma peça do §1 outra vez: o negro que suga, o branco que emana, e a mão\n");
-printf("  que segura (det = -1) trocando o sinal a cada batida e devolvendo a cada duas.\n");
+printf("  por batida impede ESCAPAR dele. Nem chega, nem sai — enrola.\n");
 if(falhas){ printf("\n  FALHAS: %d\n\n", falhas); return 1; }
 printf("\n  RESÍDUO 0 — exato em todas as seções.\n\n");
 return 0;

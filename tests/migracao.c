@@ -143,7 +143,7 @@ int main(void){
     /* ═══ §G4 E O PREÇO, DITO ═══════════════════════════════════════════════ */
     printf("\n§G4 O que continua a saturar — porque um relatório sem preço está errado.\n\n");
     {
-        long sat0 = qz_saturou;
+        long sat_ini = qz_saturou;
         long cresceu = 0, cas = 0;
         Qz x = qz(1,2);
         for(int k = 0; k < 40; k++){
@@ -153,15 +153,16 @@ int main(void){
             if(qz_saturou != antes){ cresceu = k; break; }
         }
         printf("      (3/2)^k satura em k = %ld;  saturações totais deste medidor: %ld\n",
-               cresceu, qz_saturou - sat0);
+               cresceu, qz_saturou - sat_ini);
         printf("      e em 64 bits saturaria por volta de k = %ld — o dobro, e não o"
                " infinito\n", cresceu * 2);
+        { long sat_fim = qz_saturou;
         ok("E O PREÇO DIZ-SE: em 32 bits uma progressão geométrica satura ao dobro da"
            " profundidade a que saturava em 64 — não a uma profundidade infinita, que era"
            " o que o tipo largo dava a ilusão de ter. A migração não tornou nada infinito;"
            " tornou o tecto VISÍVEL e METADE. E é essa visibilidade que vale, porque o"
            " defeito nunca foi o tecto: foi o tecto silencioso",
-           cresceu > 0 && cresceu < 40 && qz_saturou > sat0);
+           cresceu > 0 && cresceu < 40 && sat_fim > sat_ini); }
     }
 
     printf("\n=== %ld asserções, %ld falhas, %ld saturações (à parte) ===\n",

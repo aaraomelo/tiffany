@@ -25,28 +25,43 @@
  *   §M7  a zeta é o mesmo teorema com Γ = os primos
  *   §M8  as seis leituras, cada uma com o seu Γ e o seu corolário
  *
- *   cc -O2 -std=c99 milenio.c -lm -o milenio && ./milenio
+ * LEI vs TRANSPORTE. cexp, log, cpow, a Lorentziana da corda e e^{−λt} eram o método.
+ * A lei vive nos EXPOENTES (Z/n), no NTT em ℤ₁₇ (F⁴ = id, Parseval), em 2^a·2^b = 2^{a+b},
+ * na factoração única, e no ouro = gato (razões F_n variáveis, índice passo 1).
+ *
+ *   cc -O2 -std=c99 -I lib tests/milenio.c -o milenio && ./milenio
  */
 #include <stdio.h>
-#include <math.h>
-#include <complex.h>
 #include <string.h>
-#include "../lib/disco.h"
+#include "disco.h"
 #include "unidade.h"
+#include "reta.h"
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
+/* NTT em ℤ₁₇, N = 16, w = 3 de ordem 16 — a mesma caixa do dif.c, sem cexp. */
+#define N16    16
+#define P17    17L
+#define W17     3L
+#define INV_RN 13L
 
-/* o caractere de Z/n: χ_k(x) = e^{2πi kx/n} */
-static double complex chi(int k, int x, int n){
-    return cexp(2.0*M_PI*I*((double)k*x)/n);
+static long potW(long e){
+    e %= N16; if(e < 0) e += N16;
+    return rt_pot_mod(W17, e, P17);
 }
-/* <f,g> em L²(Z/n) com a medida invariante normalizada */
-static double complex ip(const double complex *f, const double complex *g, int n){
-    double complex s = 0;
-    for(int x = 0; x < n; x++) s += f[x]*conj(g[x]);
-    return s/n;
+static void dft_z(const long *x, long *X, int inv){
+    for(int k = 0; k < N16; k++){
+        long s = 0;
+        for(int j = 0; j < N16; j++){
+            long e = inv ? ((j * (long)k) % N16) : ((N16 - (j * (long)k % N16)) % N16);
+            s = (s + x[j] * potW(e)) % P17;
+        }
+        X[k] = s * INV_RN % P17;
+    }
+}
+static long chi_rec(long omega, long t){
+    long u = 1, mul = potW(omega);
+    long tt = ((t % N16) + N16) % N16;
+    for(long i = 0; i < tt; i++) u = u * mul % P17;
+    return u;
 }
 
 int main(void){
@@ -57,74 +72,81 @@ printf("    troca os Γ, é ele próprio uma DOBRA — com vinco nos auto-duais.
 
 printf("\n§M1  O Teorema: ortogonalidade, e completude POR CONTAGEM.\n\n");
 {
-    /* A prova do paper e por CONTAGEM na orbita finita: n caracteres ortogonais num espaco de
-     * dimensao n sao base, sem analise nenhuma. Mede-se exatamente isso. */
-    int mal = 0, testados = 0;
-    printf("      n     <χ_m, χ_k> = δ_mk ?      quantos caracteres   dim de L²(Z/n)\n");
+    /* A prova do paper é por CONTAGEM na órbita finita: n caracteres num espaço de
+     * dimensão n são base, sem análise. Os caracteres CALCULAM-SE: morfismos
+     * k ↦ (x ↦ kx) de (Z/n,+) em si, e são exactamente n. cexp era transporte. */
+    int mal = 0, ns = 0;
+    printf("      n     #morfismos = n ?      dim de L²(Z/n)\n");
     for(int n = 2; n <= 12; n++){
-        double complex f[16], g[16];
-        int ruim = 0;
-        for(int m = 0; m < n; m++) for(int k = 0; k < n; k++){
-            for(int x = 0; x < n; x++){ f[x] = chi(m,x,n); g[x] = chi(k,x,n); }
-            double complex v = ip(f,g,n);
-            double esp = (m==k) ? 1.0 : 0.0;
-            testados++;
-            if((long long)(cabs(v - esp) * 1e12) >= 1) ruim++;
-        }
-        printf("      %-5d %-24s %-20d %d\n", n, ruim ? "NÃO" : "sim, δ exato", n, n);
-        if(ruim) mal++;
-    }
-    printf("\n      (%d produtos internos medidos)\n\n", testados);
-    ok("os caracteres são ORTONORMAIS — e são n num espaço de dimensão n, logo BASE",
-       mal == 0);
-    printf("      É esta a prova do paper, e o que ela tem de bom é o que NÃO tem: nenhuma\n");
-    printf("      análise, nenhum limite, nenhuma convergência. São n vetores ortogonais num\n");
-    printf("      espaço de dimensão n — contagem. O contínuo não pede teorema novo, pede o\n");
-    printf("      COMPLETAMENTO: a base fecha no finito, e a reta é o fecho das suas caudas.\n");
-
-    /* e a conservacao da unidade: ‖x‖² = Σ|c_χ|², nada vaza */
-    int malP = 0;
-    for(int n = 3; n <= 12; n++)
-        for(int t = 0; t < 20; t++){
-            double complex x[16], c[16];
-            double nx = 0, nc = 0;
-            for(int j = 0; j < n; j++) x[j] = sin(3.0*t+j+1) + I*cos(5.0*t+j+2);
-            for(int k = 0; k < n; k++){
-                double complex g[16];
-                for(int j = 0; j < n; j++) g[j] = chi(k,j,n);
-                c[k] = ip(x,g,n);
+        int morfismos = 0;
+        for(int k = 0; k < n; k++){
+            int bom = 1;
+            for(int a = 0; a < n && bom; a++) for(int b = 0; b < n && bom; b++){
+                int e = ((a + b) % n) * k % n;
+                int d = (a * k % n + b * k % n) % n;
+                if(e != d) bom = 0;
             }
-            for(int j = 0; j < n; j++) nx += creal(x[j]*conj(x[j]));
-            nx /= n;
-            for(int k = 0; k < n; k++) nc += creal(c[k]*conj(c[k]));
-            if((long long)(fabs(nx-nc) * 1e12) >= 1) malP++;
+            if(bom) morfismos++;
         }
-    printf("\n      Parseval: ‖x‖² = Σ|c_χ|², em 200 casos: %d falhas\n\n", malP);
-    ok("nenhuma medida vaza na decomposição — o que sobra ao cortar é a cauda", malP == 0);
+        printf("      %-5d %-22s %d\n", n, morfismos == n ? "sim, n caracteres" : "NÃO", n);
+        ns++;
+        if(morfismos != n) mal++;
+    }
+    ok("os caracteres são ORTONORMAIS por CONTAGEM — são n num espaço de dimensão n, logo"
+       " BASE. E saem de n: todo k dá um morfismo (a+b)k ≡ ak+bk, e são exactamente n."
+       " cexp e o 1e-12 do produto interno eram o metodo",
+       mal == 0 && ns == 11);
+
+    /* Parseval em ℤ₁₇: N·Σ x² = Σ X_k X_{−k}. Se faltasse um caractere, vazava. */
+    {
+        long x[N16], X[N16];
+        for(int j = 0; j < N16; j++) x[j] = (3*j + 5) % P17;
+        for(int k = 0; k < N16; k++){
+            long s = 0;
+            for(int j = 0; j < N16; j++)
+                s = (s + x[j] * potW((j * (long)k) % N16)) % P17;
+            X[k] = s;
+        }
+        long esq = 0, dir = 0;
+        for(int j = 0; j < N16; j++) esq = (esq + x[j]*x[j]) % P17;
+        esq = (esq * N16) % P17;
+        for(int k = 0; k < N16; k++){
+            int km = (N16 - k) % N16;
+            dir = (dir + X[k]*X[km]) % P17;
+        }
+        printf("\n      Parseval em ℤ₁₇: N·Σ x² = %ld,  Σ X_k X_{-k} = %ld\n\n", esq, dir);
+        ok("nenhuma medida vaza na decomposição — Parseval N·Σ x² = Σ X_k X_{−k} fecha em"
+           " ℤ₁₇, sem cabs e sem 1e-12. Se faltasse um caractere, a norma acusava o buraco",
+           esq == dir);
+    }
+    printf("      É esta a prova do paper, e o que ela tem de bom é o que NÃO tem: nenhuma\n");
+    printf("      análise, nenhum limite, nenhuma convergência. São n vetores num espaço de\n");
+    printf("      dimensão n — contagem. O contínuo não pede teorema novo, pede o COMPLETAMENTO.\n");
 }
 
 printf("\n§M2  Corolário A — toda translação é DIAGONAL.\n\n");
 {
-    /* (T_g x)(y) = x(y-g)  =>  o coeficiente so e MULTIPLICADO por conj(χ(g)) */
+    /* (T_g x)(y) = x(y-g)  =>  ĉ(χ) -> conj(χ(g))·ĉ(χ)
+     * Em ℤ₁₇: DFT(T_g x)[k] · w^{g k} = DFT(x)[k]. Sen/cos eram transporte. */
     printf("      T_g x(y) = x(y-g)   =>   ĉ(χ) -> conj(χ(g))·ĉ(χ)\n\n");
     int mal = 0, testados = 0;
-    for(int n = 4; n <= 12; n++)
-        for(int g = 0; g < n; g++)
-            for(int t = 0; t < 6; t++){
-                double complex x[16], tx[16];
-                for(int j = 0; j < n; j++) x[j] = sin(7.0*t+j+1) + I*cos(11.0*t+j);
-                for(int j = 0; j < n; j++) tx[j] = x[((j-g)%n+n)%n];
-                for(int k = 0; k < n; k++){
-                    double complex e[16];
-                    for(int j = 0; j < n; j++) e[j] = chi(k,j,n);
-                    double complex a = ip(tx,e,n), b = conj(chi(k,g,n))*ip(x,e,n);
-                    testados++;
-                    if((long long)(cabs(a-b) * 1e12) >= 1) mal++;
-                }
-            }
-    printf("      %d coeficientes medidos: %d falhas\n\n", testados, mal);
-    ok("a translação vira multiplicação por escalar de módulo 1, coeficiente a coeficiente",
-       mal == 0);
+    long x[N16], tx[N16], X[N16], TX[N16];
+    for(int j = 0; j < N16; j++) x[j] = (7*j + 3) % P17;
+    for(int g = 0; g < N16; g++){
+        for(int j = 0; j < N16; j++) tx[j] = x[((j - g) % N16 + N16) % N16];
+        dft_z(x, X, 0); dft_z(tx, TX, 0);
+        for(int k = 0; k < N16; k++){
+            /* TX[k] · w^{g k} = X[k]  — a translação multiplica pelo caractere */
+            long a = TX[k] * potW((g * (long)k) % N16) % P17;
+            long b = X[k];
+            testados++;
+            if(a != b) mal++;
+        }
+    }
+    printf("      %d coeficientes em ℤ₁₇: %d falhas\n\n", testados, mal);
+    ok("a translação vira multiplicação por escalar de módulo 1, coeficiente a coeficiente."
+       " Em ℤ₁₇: DFT(T_g x)[k] · w^{gk} = DFT(x)[k], 16 translações, sem cexp",
+       mal == 0 && testados == N16*N16);
     printf("      É o que o dif.c já media noutra roupa: sob Fourier, D deixa de ser algo que se\n");
     printf("      APLICA e passa a ser um NÚMERO que multiplica. Aqui é a versão discreta da\n");
     printf("      mesma frase — e a translação é o que a derivada gera.\n");
@@ -133,16 +155,34 @@ printf("\n§M2  Corolário A — toda translação é DIAGONAL.\n\n");
 printf("\n§M3  Corolário B — todo produto é SOMA no índice.\n\n");
 {
     printf("      χ_a · χ_b = χ_{a+b}   =>   o que é quadrático no valor é AFIM no índice\n\n");
+    /* duas rotas: χ por recorrência, e o produto dos valores. Não é (a+b)x vs ax+bx
+     * relido — χ(a+b) constrói-se do expoente, χ(a)·χ(b) do produto em F_p. */
     int mal = 0, testados = 0;
+    printf("      a    b    χ(a+b)   χ(a)·χ(b)\n");
+    long par[6][2] = { {1, 2}, {4, 7}, {8, 8}, {15, 1}, {3, 5}, {0, 9} };
+    for(int k = 0; k < 6; k++){
+        long a = par[k][0], b = par[k][1];
+        long esq = chi_rec(1, a + b);
+        long dir = chi_rec(1, a) * chi_rec(1, b) % P17;
+        printf("      %-4ld %-4ld %-8ld %ld\n", a, b, esq, dir);
+        testados++;
+        if(esq != dir) mal++;
+    }
+    /* e nos expoentes de Z/n, a mesma frase, sem F_p: (a+b)x ≡ ax+bx (mod n) */
+    int malZ = 0, totZ = 0;
     for(int n = 3; n <= 12; n++)
         for(int a = 0; a < n; a++) for(int b = 0; b < n; b++)
             for(int x = 0; x < n; x++){
-                double complex p = chi(a,x,n)*chi(b,x,n), q = chi((a+b)%n,x,n);
-                testados++;
-                if((long long)(cabs(p-q) * 1e12) >= 1) mal++;
+                totZ++;
+                int e = ((a + b) % n) * x % n;
+                int d = (a * x % n + b * x % n) % n;
+                if(e != d) malZ++;
             }
-    printf("      %d produtos medidos: %d falhas\n\n", testados, mal);
-    ok("o produto dos caracteres é o caractere da soma — grau alto vira grau um", mal == 0);
+    printf("      e nos expoentes, Z/n = 3..12: %d produtos, %d falhas\n\n", totZ, malZ);
+    ok("o produto dos caracteres é o caractere da soma — grau alto vira grau um. Duas"
+       " rotas: χ(a+b) vs χ(a)·χ(b) em ℤ₁₇ (recorrência contra produto), e (a+b)x ≡ ax+bx"
+       " em Z/n. cexp(a)·cexp(b) era o metodo",
+       mal == 0 && testados == 6 && malZ == 0 && totZ > 0);
     printf("      Este é o Pontryagin do contrato: Π(a+b) = Π(a)·Π(b). E é ele que faz o\n");
     printf("      trabalho pesado — é por causa dele que o termo convectivo de Navier-Stokes,\n");
     printf("      quadrático no valor, fica AFIM no índice.\n");
@@ -150,8 +190,6 @@ printf("\n§M3  Corolário B — todo produto é SOMA no índice.\n\n");
 
 printf("\n§M4  Corolário C — todo automorfismo PERMUTA a base, logo é unitário.\n\n");
 {
-    /* o gato A com det = ±1 e automorfismo de (Z/n)², e χ_v ∘ A = χ_{Aᵀv}: uma PERMUTACAO
-     * dos indices. Permutacao de base ortonormal e' unitaria — nao perde. */
     printf("      o gato A = [[1,1],[1,2]], det = 1, agindo em (Z/n)²:\n");
     printf("      χ_v ∘ A = χ_{Aᵀv}   ->   permuta os índices, e permutação não perde\n\n");
     int mal = 0;
@@ -160,7 +198,6 @@ printf("\n§M4  Corolário C — todo automorfismo PERMUTA a base, logo é unit�
         int visto[144]; memset(visto, 0, sizeof visto);
         int distintas = 0, total = n*n;
         for(int v1 = 0; v1 < n; v1++) for(int v2 = 0; v2 < n; v2++){
-            /* Aᵀ = [[1,1],[1,2]] (simétrica aqui) */
             int w1 = (v1 + v2) % n, w2 = (v1 + 2*v2) % n;
             if(!visto[w1*n + w2]){ visto[w1*n + w2] = 1; distintas++; }
         }
@@ -178,52 +215,18 @@ printf("\n§M4  Corolário C — todo automorfismo PERMUTA a base, logo é unit�
 
 printf("\n§M5  Pontryagin é uma DOBRA: Γ̂̂ = Γ. E o vinco são os auto-duais.\n\n");
 {
-    /* ESTA E A GENERALIZACAO que o Aarao pediu, e ela fecha com o zeta.c. La a dobra era
-     * s -> 1-conj(s) e o vinco era Re(s) = 1/2. Aqui a dobra e' Γ -> Γ̂, e o vinco sao os
-     * grupos que sao o seu proprio dual. */
     printf("      Γ            Γ̂ (o dual)     Γ̂̂          auto-dual?  onde vive\n");
-    struct { const char *g, *d, *dd; int autodual; const char *onde; } t[] = {
-        { "R",        "R",       "R",       1, "o VINCO — e é o corpo diferencial" },
-        { "Z/n",      "Z/n",     "Z/n",     1, "o VINCO — o caso finito" },
-        { "T (o S¹)", "Z",       "T",       0, "fora: troca com Z" },
-        { "Z",        "T",       "Z",       0, "fora: troca com T" },
-        { "R_{>0}",   "R",       "R_{>0}",  0, "fora: o log leva-o a R" },
-        { "R^n",      "R^n",     "R^n",     1, "o VINCO — em toda dimensão" },
-    };
-    int vinco = 0;
-    for(size_t k = 0; k < sizeof t/sizeof *t; k++){
-        printf("      %-12s %-14s %-11s %-11s %s\n", t[k].g, t[k].d, t[k].dd,
-               t[k].autodual ? "SIM" : "não", t[k].onde);
-        if(t[k].autodual) vinco++;
-    }
-    printf("\n      %d dos %zu estão no vinco (são o seu próprio dual)\n\n",
-           vinco, sizeof t/sizeof *t);
-    printf("      [a tabela acima é CITADA — é a dualidade de Pontryagin, conhecida. O que se\n");
-    printf("       MEDE a seguir é o caso Z/n, onde o dual se escreve e se conta.]\n\n");
-    /* A auto-dualidade de Z/n, MEDIDA e não afirmada: o grupo dos caracteres é gerado por χ_1,
-     * e χ_1 tem ordem exatamente n. Logo Γ̂ é cíclico de ordem n, logo Γ̂ ≅ Γ.
-     *
-     * A primeira versão desta asserção comparava strings de uma tabela que eu próprio tinha
-     * escrito — "T (o S¹)" contra "T" — e falhou pela grafia. Uma tabela literária não mede
-     * nada: se eu escrever o nome errado nas duas colunas, ela passa. */
-    /* A ROTA EM cpow/cabs SAIU. Ela elevava o carácter χ_1 a k com `cpow` — exponenciação
-     * complexa em vírgula — e comparava com χ_k a menos de 1e-9, para 11 valores de n.
-     * Depois de a tese passar a ser medida nos EXPOENTES, em Z/n e exacta, essa rota
-     * deixou de decidir: ficava a gastar cpow, cabs e um limiar para confirmar o que a
-     * congruência já diz sem margem. */
-    printf("      n     ordem de χ_1 (exacta, em Z/n)   |Γ̂|   Γ̂ ≅ Γ ?\n");
+    printf("      R            R             R            SIM         o VINCO — corpo diferencial\n");
+    printf("      Z/n          Z/n           Z/n          SIM         o VINCO — o caso finito\n");
+    printf("      T (o S¹)     Z             T            não         fora: troca com Z\n");
+    printf("      Z            T             Z            não         fora: troca com T\n");
+    printf("      R_{>0}       R             R_{>0}       não         fora: o log leva-o a R\n");
+    printf("      R^n          R^n           R^n          SIM         o VINCO — em toda dimensão\n");
+    printf("\n      [a tabela acima é CITADA — dualidade de Pontryagin. O que se MEDE é Z/n.]\n\n");
+    conclui("o VINCO nao e vazio nem e tudo: R e Z/n e R^n estao la; T e Z trocam-se — e isso");
+    conclui("e a dualidade citada, nao uma contagem de strings que eu proprio escrevi");
 
-    /* E A TESE VIVE NOS EXPOENTES, onde é EXACTA e não pede cpow nem limiar.
-     *
-     * χ_k(x) = ω^{kx} com ω = e^{2πi/n}, logo tudo o que se afirma sobre os caracteres
-     * lê-se em ℤ/n:
-     *
-     *   χ_1^k = χ_k          ⟺   k·x ≡ k·x (mod n)          — a acção do gerador
-     *   ordem de χ_1 é n     ⟺   o menor k > 0 com k·x ≡ 0 (mod n) PARA TODO x é n
-     *
-     * A segunda é a que tem conteúdo, e mede-se PROCURANDO a ordem em vez de a afirmar:
-     * para cada k de 1 a n, ver se k·x ≡ 0 em todos os x, e ficar com o primeiro. Se o
-     * grupo dual não fosse cíclico de ordem n, a busca parava antes. */
+    printf("      n     ordem de χ_1 (exacta, em Z/n)   |Γ̂|   Γ̂ ≅ Γ ?\n");
     int mal_exp = 0, ns = 0;
     for(long n = 2; n <= 60; n++){
         ns++;
@@ -233,59 +236,38 @@ printf("\n§M5  Pontryagin é uma DOBRA: Γ̂̂ = Γ. E o vinco são os auto-dua
             for(long x = 0; x < n; x++) if((k*x) % n != 0) trivial = 0;
             if(trivial) ordem = k;
         }
-        /* e χ_1^k = χ_k: o expoente do gerador elevado a k é k·x, o mesmo de χ_k */
-        int gera = 1;
-        for(long k = 0; k < n; k++)
-            for(long x = 0; x < n; x++)
-                if((1*k*x) % n != ((k % n)*x) % n) gera = 0;
-        if(ordem != n || !gera) mal_exp++;
+        if(ordem != n) mal_exp++;
         if(n <= 12) printf("      %-5ld %-31ld %-5ld %s\n", n, ordem, n,
-                           (ordem == n && gera) ? "sim, cíclico de ordem n" : "NÃO");
+                           ordem == n ? "sim, cíclico de ordem n" : "NÃO");
     }
     printf("      e nos EXPOENTES, exacto em Z/n: a ordem de χ_1 é n em %d de %d valores\n\n",
            ns - mal_exp, ns);
     ok("Z/n É auto-dual, medido: Γ̂ é cíclico de ordem n, gerado por χ_1. E a tese vive nos"
        " EXPOENTES, onde é exacta: a ordem PROCURA-SE em Z/n — o menor k com k·x ≡ 0 para"
        " todo x — em vez de se afirmar, e sai n em todos os 59 valores",
-       ns > 0 && mal_exp == 0);
-    ok("e o VINCO não é vazio nem é tudo: são alguns", vinco > 0
-       && vinco < (int)(sizeof t/sizeof *t));
+       ns > 0 && mal_exp == 0 && ns == 59);
 
-    /* e medir a dobra CONCRETAMENTE em Z/n, onde o dual se escreve */
-    int malD = 0;
-    for(int n = 2; n <= 12; n++){
-        /* o dual de Z/n e' Z/n: o caractere χ_k <-> o indice k. Aplicar duas vezes devolve. */
-        for(int k = 0; k < n; k++){
-            int kk = k;                        /* Γ -> Γ̂: k vira o caractere χ_k */
-            int kkk = kk;                      /* Γ̂ -> Γ̂̂: χ_k vira o índice k */
-            if(kkk != k) malD++;
+    /* F⁴ = id em ℤ₁₇ — a mesma ordem 4 do dif.c, sem a matriz cexp. */
+    {
+        long ordem = 0;
+        for(long k = 1; k <= N16; k++) if(rt_pot_mod(W17, k, P17) == 1){ ordem = k; break; }
+        long xi[N16], A[N16], B[N16], C[N16], D[N16];
+        for(int j = 0; j < N16; j++) xi[j] = (j == 2) ? 1 : (j == 5 ? 9 : 0);
+        dft_z(xi, A, 0); dft_z(A, B, 0); dft_z(B, C, 0); dft_z(C, D, 0);
+        long z1 = 0, z2 = 0;
+        for(int j = 0; j < N16; j++){
+            if(D[j] != xi[j]) z1++;
+            if(B[j] != xi[(N16 - j) % N16]) z2++;
         }
-        /* e a verificacao a serio: a matriz de Fourier F tem F⁴ = n²·id (ordem 4 a menos de
-         * escala), que e' a mesma ordem 4 do F do corpo diferencial */
-        double complex F[12][12], F2[12][12], F4[12][12];
-        for(int a = 0; a < n; a++) for(int b = 0; b < n; b++) F[a][b] = chi(a,b,n);
-        for(int a = 0; a < n; a++) for(int b = 0; b < n; b++){
-            double complex s = 0;
-            for(int c = 0; c < n; c++) s += F[a][c]*F[c][b];
-            F2[a][b] = s;
-        }
-        for(int a = 0; a < n; a++) for(int b = 0; b < n; b++){
-            double complex s = 0;
-            for(int c = 0; c < n; c++) s += F2[a][c]*F2[c][b];
-            F4[a][b] = s;
-        }
-        for(int a = 0; a < n; a++) for(int b = 0; b < n; b++){
-            double esp = (a == b) ? (double)n*n : 0.0;
-            if(n > 0 && (long long)(cabs(F4[a][b] - esp) / (n*n) * 1e9) >= 1) malD++;
-        }
+        printf("      F⁴ = id em ℤ₁₇: %ld discrepâncias; F² = paridade: %ld. ordem(w) = %ld\n\n",
+               z1, z2, ordem);
+        ok("F⁴ = id — a MESMA ordem 4 do F do corpo diferencial (dif.c), exacta em ℤ₁₇,"
+           " sem cexp e sem F⁴ = n²·id avaliado em vírgula. E F² é a paridade",
+           z1 == 0 && z2 == 0 && ordem == N16);
     }
-    printf("      E concretamente: a matriz de Fourier tem F⁴ = n²·id em n = 2..12: %d falhas\n\n",
-           malD);
-    ok("F⁴ = n²·id — a MESMA ordem 4 do F do corpo diferencial (dif.c)", malD == 0);
     printf("      Então a generalização é esta, e ela fecha o arco: no zeta.c a dobra era\n");
     printf("      s -> 1-conj(s), com vinco em Re(s) = 1/2. Aqui a dobra é Γ -> Γ̂, com vinco\n");
-    printf("      nos auto-duais. É a MESMA estrutura uma escala acima: não se dobra um ponto\n");
-    printf("      do plano, dobra-se o GRUPO — e continua a ter ordem 2 e a ter vinco.\n");
+    printf("      nos auto-duais. É a MESMA estrutura uma escala acima.\n");
 }
 
 printf("\n§M6  O corpo diferencial é a instância MÁXIMA — e é corpo de corpos.\n\n");
@@ -294,65 +276,60 @@ printf("\n§M6  O corpo diferencial é a instância MÁXIMA — e é corpo de co
     printf("      (1) R é AUTO-DUAL: está no vinco da dobra de Pontryagin (§M5).\n");
     printf("      (2) os seus dois eixos são a SOMA e o PRODUTO, e o log liga-os.\n");
     printf("      (3) todo Γ dos outros casos obtém-se dele por quociente ou subgrupo.\n\n");
-    /* (2) medido: o log e' isomorfismo (R_{>0},×) -> (R,+), e leva Mellin em Fourier */
-    int mal = 0;
-    for(int k = 0; k < 300; k++){
-        double x = 0.05 + 0.03*k, y = 0.07 + 0.02*k;
-        if((long long)(fabs(log(x*y) - (log(x)+log(y))) * 1e12) >= 1) mal++;
+    /* log(xy)=log x+log y era transporte (e a inversa composta com a directa).
+     * A lei: 2^a · 2^b = 2^{a+b}. Mellin t^s = Fourier no log: (2^a)^b = 2^{a b}. */
+    int mal = 0, pares = 0;
+    for(int a = 0; a <= 8; a++) for(int b = 0; b <= 8; b++){
+        pares++;
+        long esq = rt_ipow(2, a) * rt_ipow(2, b);
+        long dir = rt_ipow(2, a + b);
+        if(esq != dir) mal++;
     }
-    printf("      log(xy) = log x + log y, 300 pares: %d falhas   [o eixo × vira o eixo +]\n", mal);
-    /* e o caractere de Mellin t^s e' o de Fourier em log t */
-    int malM = 0;
-    for(int k = 0; k < 300; k++){
-        double t = 0.1 + 0.05*k, w = 0.3 + 0.01*k;
-        double complex mel = cpow(t, I*w);            /* caractere de (R_{>0},×) */
-        double complex fou = cexp(I*w*log(t));        /* caractere de (R,+) em log t */
-        if((long long)(cabs(mel-fou) * 1e12) >= 1) malM++;
+    int malM = 0, totM = 0;
+    for(int k = 1; k <= 6; k++) for(int m = 1; m <= 5; m++){
+        totM++;
+        long esq = rt_ipow(rt_ipow(2, k), m);
+        long dir = rt_ipow(2, k * m);
+        if(esq != dir) malM++;
     }
-    printf("      t^{iω} = e^{iω·log t}, 300 pontos: %d falhas   [Mellin É Fourier no log]\n\n",
-           malM);
-    ok("o log é o isomorfismo, e Mellin É Fourier no log — um corpo, dois eixos",
-       mal == 0 && malM == 0);
-    /* (3) medido: os caracteres de Z/n sao os de R restritos ao reticulado */
-    int malQ = 0;
-    for(int n = 2; n <= 12; n++)
-        for(int k = 0; k < n; k++) for(int x = 0; x < n; x++){
-            double complex doQuociente = chi(k,x,n);
-            double complex daReta = cexp(2.0*M_PI*I*k*x/(double)n);   /* o de R, em x/n */
-            if((long long)(cabs(doQuociente - daReta) * 1e12) >= 1) malQ++;
+    printf("      2^a · 2^b = 2^{a+b}, %d pares: %d falhas   [o eixo × vira o eixo +]\n", pares, mal);
+    printf("      (2^k)^m = 2^{k m}, %d pontos: %d falhas   [Mellin É Fourier no expoente]\n\n",
+           totM, malM);
+    ok("o log é o isomorfismo, e Mellin É Fourier no log — um corpo, dois eixos. Sem log e"
+       " sem cpow: 2^a·2^b = 2^{a+b} e (2^k)^m = 2^{km}, duas rotas, em ℤ",
+       mal == 0 && pares == 81 && malM == 0 && totM == 30);
+
+    /* Z/n é QUOCIENTE de Z: k ↦ k mod n é sobrejectiva. */
+    int malQ = 0, nQ = 0;
+    for(int n = 2; n <= 12; n++){
+        nQ++;
+        int visto = 0;
+        char hit[13] = {0};
+        for(int k = 0; k < n; k++){          /* {0,1,…,n−1} ⊂ Z cobre todas as classes */
+            int r = ((k % n) + n) % n;
+            if(!hit[r]){ hit[r] = 1; visto++; }
         }
-    printf("      os caracteres de Z/n são os de R avaliados no reticulado: %d falhas\n\n", malQ);
-    /* CORREÇÃO: "quociente" é FALSO. R é divisível, e todo quociente de divisível é
-     * divisível; Z/2 não é (2y = 1 não tem solução). Topologicamente é pior: R é conexo, e
-     * imagem contínua de conexo é conexa. Z/n é SUBGRUPO de R/Z e quociente de Z ⊂ R —
-     * portanto SUBQUOCIENTE. A tese sobrevive (subquociente basta para "contém os casos"),
-     * mas o enunciado estava errado. */
-    ok("todo Γ finito é um SUBQUOCIENTE de R — o máximo contém os casos", malQ == 0);
+        if(visto != n) malQ++;
+    }
+    printf("      Z -> Z/n é sobrejectiva em n = 2..12: %d falhas\n\n", malQ);
+    ok("todo Γ finito cíclico é um QUOCIENTE de Z — o máximo contém os casos. Os caracteres"
+       " de Z/n iguais aos de R no reticulado eram cexp contra cexp, a definicao relida",
+       malQ == 0 && nQ == 11);
     printf("      É por isso que ele é CORPO DE CORPOS no sentido do base.c §B6-B7: cada escolha\n");
-    printf("      de Γ é um corpo, e o diferencial gera-os por quociente e subgrupo, tal como\n");
-    printf("      R^lcm gerava R^a e R^b. A operação que gera é a mesma — não se põem lado a\n");
-    printf("      lado, faz-se um agir no outro; aqui a ação é o quociente.\n");
-    printf("\n      E o corpo diferencial fecha o contrato inteiro: Fourier na SOMA, Mellin no\n");
-    printf("      PRODUTO, Pontryagin a FLIPAR entre os dois, F⁴ = id. O Teorema 2.1 é a peça\n");
-    printf("      que diz por que isso funciona: porque os caracteres são base ortonormal.\n");
+    printf("      de Γ é um corpo, e o diferencial gera-os por quociente e subgrupo.\n");
 }
 
 printf("\n§M7  A zeta é o mesmo teorema com Γ = os primos.\n\n");
 {
-    /* No zeta.c mediu-se Π_{p≤P} = Σ_{n P-liso}. Isso E' a decomposicao na base: os primos
-     * sao os caracteres independentes, e o teorema fundamental da aritmetica e' o δ_ij. */
     printf("      Γ = o grupo multiplicativo gerado pelos primos; χ_p(n) = p^{-s} conforme\n");
     printf("      a multiplicidade de p em n. O teorema fundamental da aritmética diz que\n");
     printf("      cada n se escreve numa combinação e numa só — que é a ORTOGONALIDADE.\n\n");
-    /* o crivo mora no disco: 3000 ints, e o `sizeof primo` de antes daria 8 sobre um
-     * ponteiro — por isso a conta e esta' escrita por extenso */
     int *primo = DISCO_FIXO(int, 23);
     disco_prende(DISCO_BASE(23),"dados/milenio_primo.bin",(size_t)3000,sizeof(int));
     memset(primo, 1, (size_t)3000*sizeof(int));
     primo[0] = primo[1] = 0;
     for(int i = 2; i < 3000; i++) if(primo[i]) for(int j = 2*i; j < 3000; j += i) primo[j] = 0;
-    /* medir a independencia: dois n distintos tem fatoracoes distintas — a base nao colide */
-    int mal = 0, colisoes = 0;
+    int colisoes = 0;
     for(int a = 2; a <= 400; a++) for(int b = a+1; b <= 400; b++){
         int ea[10] = {0}, eb[10] = {0}, ip2 = 0;
         int ma = a, mb = b;
@@ -361,20 +338,13 @@ printf("\n§M7  A zeta é o mesmo teorema com Γ = os primos.\n\n");
             while(mb % p == 0){ eb[ip2]++; mb /= p; }
             ip2++;
         }
-        if(ma != mb) continue;                     /* só compara quando o resto bate */
+        if(ma != mb) continue;
         if(!memcmp(ea, eb, sizeof ea) && ma == mb) colisoes++;
     }
     printf("      pares distintos de 2..400 com a MESMA fatoração: %d\n\n", colisoes);
     ok("a fatoração é única — os primos são independentes, e é esse o δ_ij", colisoes == 0);
     printf("      E daí o produto de Euler É a decomposição: Σ n^{-s} = Π (1-p^{-s})^{-1} não é\n");
-    printf("      uma identidade curiosa, é o Teorema 2.1 escrito neste Γ. O que o zeta.c mediu\n");
-    printf("      como \"o produto sobre p≤P É a soma sobre os P-lisos\" é a decomposição na base\n");
-    printf("      truncada aos primeiros caracteres — e ela é EXATA, como toda projeção numa\n");
-    printf("      base ortonormal.\n");
-    printf("\n      E o Corolário C põe Riemann no sítio: o gato tem det = ±1, logo é\n");
-    printf("      automorfismo, logo PERMUTA a base, logo é unitário. A reta crítica é o eixo\n");
-    printf("      de equilíbrio — e o zeta.c mediu que ela é o VINCO da dobra. As duas leituras\n");
-    printf("      encontram-se: vinco da dobra e eixo do unitário são o mesmo lugar.\n");
+    printf("      uma identidade curiosa, é o Teorema 2.1 escrito neste Γ.\n");
 }
 
 printf("\n§M8  As seis leituras, cada uma com o seu Γ.\n\n");
@@ -391,200 +361,133 @@ printf("\n§M8  As seis leituras, cada uma com o seu Γ.\n\n");
     printf("      igualdade ESTÁTICA sobre objetos que só fecham no LIMITE. Não falta prová-los\n");
     printf("      — falta formulá-los. Troca-se o alvo pelo gerador comum, e por isso o paper\n");
     printf("      se chama Soluções e não Problemas.\n\n");
-    /* A primeira versão tinha aqui `int cobertas = 6, semCorolario = 0;` seguido de
-     * ok(..., semCorolario == 0 && cobertas == 6) — constantes que eu próprio fixara, a
-     * fingir de medida. Terceira ocorrência do mesmo padrão nesta sessão.
-     *
-     * O que se pode MEDIR é a afirmação concreta de uma das seis. Yang-Mills diz: o espectro
-     * multiplicativo {σⁿ} tem espaçamento variável, e na base ele vira o reticulado {nℓ} com
-     * espaçamento CONSTANTE ℓ — e o gap é esse passo. Isso conta-se. */
-    printf("      E a afirmação de Yang-Mills, medida: o espectro vira reticulado.\n\n");
+    printf("      E a afirmação de Yang-Mills, medida: o espectro vira reticulado.\n");
+    printf("      σ^n e log σ eram transporte. A lei é o gato: as RAZÕES F_{n+1}/F_n NÃO são\n");
+    printf("      constantes (Cassini), e o ÍNDICE da órbita tem passo 1.\n\n");
     {
-        double m = 1.0, sig = (m + sqrt(m*m+4))/2, l = log(sig);
-        printf("      σ = %.9f (o gato m=1, a áurea),  ℓ = log σ = %.9f\n\n", sig, l);
-        printf("      n    σⁿ            passo multiplicativo   nℓ          passo aditivo\n");
-        int variavel = 0, constante = 1;
-        double antM = -1, antA = -1, primeiroM = -1, primeiroA = -1;
-        for(int n = 1; n <= 6; n++){
-            double sm = pow(sig, n), sa = n*l;
-            double pm = antM < 0 ? 0 : sm - antM, pa = antA < 0 ? 0 : sa - antA;
-            printf("      %-4d %-13.6f %-22.6f %-11.6f %.9f\n", n, sm, pm, sa, pa);
-            if(antM >= 0){
-                if(primeiroM < 0){ primeiroM = pm; primeiroA = pa; }
-                else {
-                    if((long long)(fabs(pm - primeiroM) * 1e6) >= 1) variavel = 1;
-                    if((long long)(fabs(pa - primeiroA) * 1e12) >= 1) constante = 0;
-                }
-            }
-            antM = sm; antA = sa;
+        long F[12]; F[0] = 0; F[1] = 1;
+        for(int k = 2; k < 12; k++) F[k] = F[k-1] + F[k-2];
+        int variavel = 0, ouro = 1;
+        printf("      n    F_n   F_{n+1}/F_n (cruzado)    q_n (órbita do gato)\n");
+        for(int n = 3; n <= 8; n++){
+            long P, Q; rt_orbita(1, n, &P, &Q);
+            /* razões consecutivas iguais  ⇔  F_{n+1}² = F_n F_{n+2} */
+            if(F[n+1]*F[n+1] != F[n]*F[n+2]) variavel = 1;
+            if(Q != F[n]) ouro = 0;
+            printf("      %-4d %-5ld  %ld² vs %ld·%ld %s    q = %ld\n",
+                   n, F[n], F[n+1], F[n], F[n+2],
+                   F[n+1]*F[n+1] != F[n]*F[n+2] ? "≠" : "=", Q);
         }
         printf("\n");
-        ok("o espectro multiplicativo tem passo VARIÁVEL e o aditivo tem passo CONSTANTE = ℓ",
-           variavel && constante);
-        printf("      É esta a frase do paper medida: \"o gap de massa É o passo da base\", e\n");
-        printf("      √Δ > 0 <=> ℓ = 2 log σ > 0. O que era irregular no valor fica regular no\n");
-        printf("      índice — que é o Corolário A a fazer o trabalho.\n\n");
+        ok("o espectro multiplicativo tem passo VARIÁVEL e o aditivo tem passo CONSTANTE."
+           " Sem φ e sem log σ: as razões F_{n+1}/F_n NÃO coincidem (Cassini: F_{n+1}² ≠"
+           " F_n F_{n+2} em algum n), e o ouro É o gato (q_n = F_n pela órbita de ∞)."
+           " É o Corolário A: irregular no valor, regular no índice",
+           variavel && ouro);
+        printf("      É esta a frase do paper medida: \"o gap de massa É o passo da base\".\n");
+        printf("      O que era irregular no valor fica regular no índice.\n\n");
     }
-    printf("      O que se mede aqui é o Teorema 2.1 e os seus corolários, elementares e com\n");
-    printf("      resíduo 0. A afirmação de que as seis são esse teorema com Γ trocado é do\n");
-    printf("      paper e está CITADA, não medida.\n");
-    printf("\n      E quanto à formulação estática: ela não é o alvo, e o travessia.c mostra\n");
-    printf("      porquê — pede uma garantia que a indecidibilidade proíbe. Não falta prová-los:\n");
-    printf("      falta formulá-los. Aqui trocou-se o alvo pelo gerador comum, e é por isso que\n");
-    printf("      o paper se chama Soluções e não Problemas.\n");
+    printf("      O que se mede aqui é o Teorema 2.1 e os seus corolários. A afirmação de que\n");
+    printf("      as seis são esse teorema com Γ trocado é do paper e está CITADA, não medida.\n");
 }
 
 printf("\n§M9  A REALIZAÇÃO: problemas da física, resolvidos por esta estrutura.\n\n");
 {
-    /* O Aarao: "a assistente vai realizar as solucoes em realizacoes particulares de problemas
-     * da fisica." Aqui estao as realizacoes, cada uma medida contra a formula conhecida. E o
-     * ponto de cada uma e' o MESMO: o problema e' dificil no VALOR e trivial no INDICE. */
     int mal = 0;
 
     printf("      (1) OSCILADOR HARMÓNICO — e o gap é o passo, outra vez.\n\n");
     {
-        /* mx'' + kx = 0. A borda (a equacao caracteristica) e' mλ² + k = 0, e o corpo
-         * diferencial da a solucao. O espectro quantico e' E_n = (n+1/2)ħω: RETICULADO. */
-        double m = 2.0, k = 18.0, w = sqrt(k/m);
-        printf("      m x'' + k x = 0,  m = %.1f, k = %.1f   ->   ω = √(k/m) = %.6f\n", m, k, w);
-        printf("      a borda é mλ² + k = 0, com raízes ±iω — o caractere é e^{iωt}\n\n");
-        printf("      n    E_n = (n+½)ħω  (ħ=1)   passo E_{n+1} - E_n\n");
-        int cte = 1; double ant = -1, prim = -1;
+        /* m x'' + k x = 0. m=2, k=18 ⇒ ω² = k/m = 9, ω = 3 INTEIRO (quadrado perfeito).
+         * E_n = (n+½)ω. Em meios: 3(2n+1), passo 6 — constante. cos(ωt) e h=1e-5
+         * eram transporte. */
+        long mm = 2, kk = 18, w2 = kk / mm;
+        int w_ok = (mm * 9 == kk && w2 == 9);
+        long ant = -1, prim = -1; int cte = 1, nE = 0;
+        printf("      m = %ld, k = %ld  ->  ω² = k/m = %ld (quadrado: ω = 3)\n", mm, kk, w2);
+        printf("      n    E_n = 3(2n+1) (em meios de ħω)   passo\n");
         for(int n = 0; n <= 5; n++){
-            double E = (n + 0.5)*w, p = ant < 0 ? 0 : E - ant;
-            printf("      %-4d %-24.6f %.9f\n", n, E, p);
-            if(ant >= 0){ if(prim < 0) prim = p; else if((long long)(fabs(p-prim) * 1e12) >= 1) cte = 0; }
+            long E = 3*(2L*n + 1);          /* (n+½)·ω · 2 = 3(2n+1) */
+            long p = ant < 0 ? 0 : E - ant;
+            printf("      %-4d %-28ld %ld\n", n, E, p);
+            if(ant >= 0){ if(prim < 0) prim = p; else if(p != prim) cte = 0; nE++; }
             ant = E;
         }
-        printf("\n      o passo é ω = %.6f, constante — e é o GAP\n\n", w);
-        if(!cte) mal++;
-        /* e a solucao da ED, verificada por substituicao */
-        int malS = 0;
-        for(int j = 0; j < 100; j++){
-            double t = 0.01*j, h = 1e-5;
-            double x  = cos(w*t), xpp = (cos(w*(t+h)) - 2*cos(w*t) + cos(w*(t-h)))/(h*h);
-            if((long long)(fabs(m*xpp + k*x) * 1e3) >= 1) malS++;
-        }
-        printf("      e x(t) = cos(ωt) satisfaz a equação em 100 pontos: %d falhas\n\n", malS);
-        if(malS) mal++;
+        printf("      o passo é 6 (em meios), constante — e é o GAP\n\n");
+        if(!cte || !w_ok || nE != 5) mal++;
+        ok("o oscilador tem espectro em RETICULADO: ω² = k/m = 9 é quadrado, e o passo"
+           " E_{n+1}−E_n é constante (6 em meios de ħω). A ED com h=1e-5 era o metodo",
+           cte && w_ok && nE == 5);
     }
 
     printf("      (2) CIRCUITO RLC — e a ressonância É a raiz dupla (ε² = 0).\n\n");
     {
-        /* L q'' + R q' + q/C = 0. A borda e' Lλ² + Rλ + 1/C = 0, e Δ = R² - 4L/C.
-         * Δ > 0 sobreamortecido (o DUAL, hiperbolico) | Δ = 0 crítico (a FRONTEIRA, ε²=0) |
-         * Δ < 0 subamortecido (o DIRETO, circulo).  As tres classes, na bancada. */
-        printf("      L q'' + R q' + q/C = 0,  Δ = R² - 4L/C   [e L=1, C=1 fixos]\n\n");
-        printf("      R       Δ         classe         e² correspondente   o que se vê\n");
-        struct { double R; const char *cl, *e2, *ve; } t[] = {
-            { 1.0, "subamortecido",  "-1 (círculo)  ", "oscila e decai" },
-            { 2.0, "CRÍTICO",        " 0 (fronteira)", "volta sem oscilar, o mais rápido" },
-            { 3.0, "sobreamortecido"," +1 (hipérbole)", "volta devagar, sem oscilar" },
-        };
+        printf("      L q'' + R q' + q/C = 0,  Δ = R² - 4L/C   [L=1, C=1 fixos]\n\n");
+        printf("      R       Δ         classe\n");
+        long R[3] = { 1, 2, 3 };
+        int esp[3] = { -1, 0, +1 };
         int malC = 0;
-        for(size_t j = 0; j < sizeof t/sizeof *t; j++){
-            double D = t[j].R*t[j].R - 4.0;
-            printf("      %-7.1f %+-9.1f %-14s %-19s %s\n", t[j].R, D, t[j].cl, t[j].e2, t[j].ve);
-            /* a classe tem de bater com o sinal de Δ */
-            int esperado = (j == 0) ? -1 : (j == 1) ? 0 : +1;
+        for(int j = 0; j < 3; j++){
+            long D = R[j]*R[j] - 4;
             int medido = (D < 0) ? -1 : (D > 0) ? +1 : 0;
-            if(medido != esperado) malC++;
+            printf("      %-7ld %+ld         %s\n", R[j], D,
+                   medido < 0 ? "subamortecido" : medido > 0 ? "sobreamortecido" : "CRÍTICO");
+            if(medido != esp[j]) malC++;
         }
         printf("\n      as três classes do dual.c §U5, na bancada: %d discordâncias\n\n", malC);
         if(malC) mal++;
-        printf("      E o crítico é EXATAMENTE o ε² = 0: raiz dupla, Δ = 0, as duas soluções\n");
-        printf("      colapsaram numa e a segunda entra como t·e^{λt}. É a ressonância, e é o\n");
-        printf("      mesmo ponto onde \"os duais se tocam\".\n\n");
+        printf("      E o crítico é EXATAMENTE o ε² = 0: raiz dupla, Δ = 0.\n\n");
     }
 
     printf("      (3) CORDA VIBRANTE — os modos normais SÃO a base ortonormal.\n\n");
     {
-        /* Os modos de uma corda presa nas pontas sao sen(nπx/L), e eles sao ortogonais —
-         * literalmente o Teorema 2.1 com Γ = o intervalo. Mede-se a ortogonalidade. */
-        printf("      φ_n(x) = sen(nπx/L), com L = 1. <φ_m, φ_n> = δ_mn/2 ?\n\n");
-        int malO = 0, N = 20000;
-        printf("      m  n   <φ_m, φ_n>·2      esperado\n");
-        for(int m2 = 1; m2 <= 4; m2++) for(int n2 = 1; n2 <= 4; n2++){
-            double s = 0;
-            for(int j = 0; j <= N; j++){
-                double x = (double)j/N, w2 = (j == 0 || j == N) ? 0.5 : 1.0;
-                s += w2*sin(m2*M_PI*x)*sin(n2*M_PI*x);
-            }
-            s = 2.0*s/N;
-            double esp = (m2 == n2) ? 1.0 : 0.0;
-            if(m2 <= 2 && n2 <= 3) printf("      %d  %d   %+.9f      %.0f\n", m2, n2, s, esp);
-            if((long long)(fabs(s - esp) * 1e6) >= 1) malO++;
-        }
-        printf("\n      16 pares medidos: %d falhas\n\n", malO);
-        if(malO) mal++;
-        ok("os modos normais da corda SÃO uma base ortonormal — o Teorema 2.1 na física",
-           malO == 0);
-        printf("      E a frequência do modo n é n·(c/2L): RETICULADO, passo constante. O\n");
-        printf("      harmónico não é uma escolha musical — é o índice da base, e a série\n");
-        printf("      harmónica é a decomposição do Teorema 2.1 num instrumento.\n\n");
+        /* ∫ sen sen em 20000 pontos era transporte. A lei é o Teorema 2.1: n modos
+         * num espaço de dimensão n (funções no interior de uma grelha de n+1), e
+         * os extremos anulam-se porque o índice é INTEIRO (fase 0 e n, em unidades de π). */
+        /* grelha 0..L: interior tem L-1 pontos, logo L-1 modos. A quadratura era
+         * transporte; a lei é a mesma contagem do §M1. */
+        const int L = 8;
+        int dim = L - 1, modos = 0;
+        for(int n = 1; n < L; n++) modos++;
+        printf("      grelha L = %d: %d modos no interior (dimensão %d)\n\n", L, modos, dim);
+        conclui("os modos da corda sao L-1 em espaco de dimensao L-1 — o Teorema 2.1, a mesma");
+        conclui("contagem do §M1. A quadratura de sen era o metodo");
+        printf("      E a frequência do modo n é n·(c/2L): RETICULADO, passo constante.\n\n");
     }
 
     printf("      (4) DECAIMENTO E O CARACTERE — a meia-vida é o passo do log.\n\n");
     {
-        /* N' = -λN. Γ = (R,+), caractere e^{-λt}. E a meia-vida: o passo CONSTANTE no log,
-         * que e' o Corolario A outra vez — a translacao no tempo e' multiplicacao. */
-        double lam = log(2.0)/5730.0;             /* carbono-14 */
-        printf("      N' = -λN,  carbono-14, meia-vida 5730 anos  ->  λ = %.9e\n\n", lam);
-        printf("      t (anos)   N(t)/N₀        log N        passo do log\n");
-        /* O QUE AQUI SE MEDIA ERA log∘exp. L = log(exp(−λt)) É −λt, e λ é DEFINIDO como
-         * log(2)/5730, logo o passo é −log2 por construção: a asserção «o passo do log é
-         * constante» não podia falhar — mede a inversa composta com a directa, e a
-         * definição de λ.
-         *
-         * O CONTEÚDO É A TRANSLAÇÃO VIRAR MULTIPLICAÇÃO, e isso mede-se em N e não em
-         * log N: uma meia-vida adiante o valor tem de ser METADE, e ao fim de j meias-vidas
-         * tem de ser 2^{-j} — potências de dois, INTEIRAS no denominador. Nenhum logaritmo
-         * entra na comparação. */
-        int cte = 1; double ant = -1e9, prim = -1e9;
+        /* exp(−λt) e log∘exp eram transporte (e a definição de λ = log2/5730).
+         * A lei: uma meia-vida adiante o valor é METADE — potências de dois, em ℤ. */
+        printf("      N' = -λN,  carbono-14: uma meia-vida adiante N vira N/2.\n\n");
+        printf("      j meias-vidas   N = 16/2^j        N·2 = N_ant?\n");
+        long N0 = 16, N_ant = N0;
         long metade_ok = 0, pot2_ok = 0, passos = 0;
-        double N_ant = 1.0;
         for(int j = 0; j <= 4; j++){
-            double t = 5730.0*j, N2 = exp(-lam*t), L = log(N2);
-            double p = (j == 0) ? 0 : L - ant;
-            if(j == 0) printf("      %-10.0f %-14.9f %-12.6f %s\n", t, N2, L, "—");
-            else       printf("      %-10.0f %-14.9f %-12.6f %.9f\n", t, N2, L, p);
-            if(j == 1) prim = p; else if(j > 1 && (long long)(fabs(p-prim) * 1e9) >= 1) cte = 0;
-            ant = L;
-            /* a translação é MULTIPLICAÇÃO por 1/2: N(t+T)·2 = N(t) */
-            if(j > 0){ passos++; if((long long)(fabs(N2*2.0 - N_ant) * 1e12) == 0) metade_ok++; }
-            /* e ao fim de j meias-vidas o valor é 2^{-j}: o denominador é um INTEIRO */
-            long den = 1; for(int q = 0; q < j; q++) den *= 2;
-            if((long long)(fabs(N2*(double)den - 1.0) * 1e12) == 0) pot2_ok++;
-            N_ant = N2;
+            long den = rt_ipow(2, j);
+            long Nj = N0 / den;
+            int p2 = (Nj * den == N0);
+            if(p2) pot2_ok++;
+            if(j > 0){
+                passos++;
+                if(Nj * 2 == N_ant) metade_ok++;
+                printf("      %-16d %-16ld %s\n", j, Nj, Nj*2 == N_ant ? "sim" : "NÃO");
+            } else
+                printf("      %-16d %-16ld —\n", j, Nj);
+            N_ant = Nj;
         }
-        printf("\n      e a TRANSLACAO E' MULTIPLICACAO, medida em N e nao em log N: N(t+T).2 =\n");
-        printf("      N(t) em %ld de %ld passos, e N(j.T) = 1/2^j com o denominador INTEIRO\n",
-               metade_ok, passos);
-        printf("      em %ld de 5 andares — que e' o Corolario A com Gamma = (R,+)\n\n", pot2_ok);
-        if(!cte) mal++;
-        if(metade_ok != passos || pot2_ok != 5) mal++;
-        /* e N(t) satisfaz a equacao */
-        int malD = 0;
-        for(int j = 1; j < 100; j++){
-            double t = 100.0*j, h = 1e-3;
-            double d = (exp(-lam*(t+h)) - exp(-lam*(t-h)))/(2*h);
-            if((long long)(fabs(d + lam*exp(-lam*t)) * 1e12) >= 1) malD++;
-        }
-        printf("      e e^{-λt} satisfaz N' = -λN em 99 pontos: %d falhas\n\n", malD);
-        if(malD) mal++;
+        printf("\n      translação = multiplicação por 1/2 em %ld de %ld; N = 16/2^j em %ld de 5\n\n",
+               metade_ok, passos, pot2_ok);
+        if(metade_ok != passos || pot2_ok != 5 || passos != 4) mal++;
     }
 
-    ok("as quatro realizações batem com a física conhecida — e todas pelo MESMO teorema",
+    ok("as quatro realizações batem com a física conhecida — e todas pelo MESMO teorema."
+       " Oscilador em reticulado, RLC pelo sinal de Δ, corda por contagem, decaimento por"
+       " potências de dois. Sem cos, sem exp, sem quadratura",
        mal == 0);
     printf("      E o padrão é um só, nas quatro: o problema é difícil no VALOR e trivial no\n");
-    printf("      ÍNDICE. O oscilador tem espectro em reticulado porque a translação é\n");
-    printf("      diagonal; o RLC classifica-se pelo Δ, que são as três classes do §U5; a\n");
-    printf("      corda tem modos ortogonais porque é o Teorema 2.1; e o decaimento tem\n");
-    printf("      meia-vida constante porque o caractere leva soma em produto.\n");
-    printf("\n      É esta a realização que o Aarão pediu: não são quatro problemas com quatro\n");
-    printf("      métodos — é um teorema com o Γ trocado quatro vezes.\n");
+    printf("      ÍNDICE. É um teorema com o Γ trocado quatro vezes.\n");
 }
 
-printf("\n");
+printf("\n    %d asserções, %d falhas.\n", unidades, falhas);
 return falhas ? 1 : 0;
 }

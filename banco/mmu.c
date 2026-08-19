@@ -330,8 +330,11 @@ printf("\n§M4  OS DOIS CAMINHOS CONCORDAM: escrito por A, lido por B — byte a
     printf("      mesmo endereço %ld, duas profundidades na MESMA raiz:\n", prefixo);
     printf("        n = 4  ->  \"%.*s\"\n", r4 > 0 ? r4 : 0, c4);
     printf("        n = 6  ->  \"%.*s\"\n\n", r6 > 0 ? r6 : 0, c6);
+    { int dif = (memcmp(c4, c6, 17) != 0);
+      int len4 = (r4 == 17);
+      int len6 = (r6 == 17);
     ok("profundidades diferentes coexistem — a folha não é confundível com o nó",
-       r4 == 17 && r6 == 17 && memcmp(c4, c6, 17) != 0);
+       dif && len4 && len6); }
     printf("      Era aqui que as duas realizações se separavam. O deslocamento é\n");
     printf("      auto-delimitado (n entra na multiplicação); a árvore não era, porque o\n");
     printf("      caminho de um prefixo é um caminho válido. O sufixo devolve a delimitação.\n");

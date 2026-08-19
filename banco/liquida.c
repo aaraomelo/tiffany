@@ -116,20 +116,22 @@ printf("\n§Q2  A erosão acha o que venceu; a dilatação escreve o saldo.\n\n"
 
 printf("\n§Q3  Liquidar é idempotente: o que já foi não volta a ser.\n\n");
 {
-    long antes = liquidados;
+    long liq_antes = liquidados;
     int n = entra(26, "mais um dado");
     printf("      nova entrada em t=26: liquidou %d, total continua %ld\n", n, liquidados);
-    ok("o que ja foi liquidado nao liquida outra vez", n == 0 && liquidados == antes);
+    { int idem = (liquidados == liq_antes);
+    ok("o que ja foi liquidado nao liquida outra vez", n == 0 && idem); }
     printf("\n      E por isso a verificacao pode correr a CADA entrada sem medo: correr de mais\n");
     printf("      nao custa nada, e correr de menos e que perde um vencimento.\n");
 }
 
 printf("\n§Q4  E sem entrada nenhuma, nada se liquida — o tempo não corre sozinho.\n\n");
 {
-    long antes = liquidados;
+    long liq_antes = liquidados;
     sleep(0);                                        /* passa tempo REAL, e nao entra nada */
     printf("      passou tempo real, zero entradas: total continua %ld\n", liquidados);
-    ok("sem entrada, nada acontece — o relogio nao e ambiente, e ENTRADA", liquidados == antes);
+    { int parado = (liquidados == liq_antes);
+    ok("sem entrada, nada acontece — o relogio nao e ambiente, e ENTRADA", parado); }
     int n = entra(30, NULL);
     printf("      um tique em t=30: liquidou %d, total %ld\n", n, liquidados);
     ok("e basta um tique para o terceiro vencer e liquidar", n == 1);

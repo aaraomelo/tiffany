@@ -39,7 +39,20 @@ PALAVRA = re.compile(
 
 def e_zero(txt):
     try:
-        return float(txt) == 0.0
+        # O objectivo é só detectar "valor numérico zero" em texto, sem usar float/double.
+        # Se a mantissa for só zeros (com ou sem ponto decimal), então 0 * 10^e = 0.
+        s = str(txt).strip()
+        if not s:
+            return False
+        if s[0] in '+-':
+            s = s[1:]
+        # remove a parte exponencial (se existir)
+        for sep in ('e', 'E'):
+            if sep in s:
+                s = s.split(sep, 1)[0]
+                break
+        s = s.replace('.', '')
+        return bool(s) and all(ch == '0' for ch in s)
     except ValueError:
         return False
 

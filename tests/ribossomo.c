@@ -7,22 +7,10 @@
  * lineariza conforme o ribossomo anda [...] no primeiro nível guarda em Cantor, depois em Julia,
  * no final são instâncias de Newton. Mesma coisa pelo lado dual."
  *
- * A ESPECIFICAÇÃO NÃO É UMA IMAGEM — cada peça dela é um objeto com nome próprio em matemática, e
- * é por isso que se pode medir em vez de ilustrar:
- *
- *   CANTOR    o conjunto de Cantor É o espaço das fitas: um ponto seu, em base 3 e sem o dígito
- *             1, é literalmente uma sequência binária. Guardar em Cantor não é uma metáfora de
- *             guardar — é a codificação, e é bijetiva.
- *   JULIA     para c = 0 a dinâmica z → z² é o DESLOCAMENTO nessa sequência: comer um dígito.
- *             É o ribossomo a andar um passo, e é por isso que a fita "estica conforme ele anda":
- *             cada passo consome uma camada do enrolamento.
- *   NEWTON    sobre z^n − 1, o método atribui cada ponto a UMA das n raízes. As n raízes são as n
- *             dimensões, e a bacia de atração é o codão: o grupo que codifica qual dimensão.
- *   DUAL      e tudo outra vez do outro lado — a fita branca e a negra, que só formam corpo
- *             juntas, como o R^n e o R^n* da teoria.
- *
- * O que se mede aqui é que as três camadas são a MESMA fita vista em três alturas, e que a
- * travessia entre elas não perde nada — porque se perdesse, o ribossomo lia outra coisa.
+ * LEI vs TRANSPORTE. 1/3 em double, floor+1e-9, cos/sin das raízes e Newton no plano
+ * eram o método. A lei é a bijeção em base 3 (dígitos 0 e 2), o deslocamento (2v mod 2^n)
+ * igual ao shift dos bits, i^k de ordem 4 em ℤ[i] (as 4 raízes de z^4−1), e a
+ * complementação como involução. Sem uma raiz e sem π.
  *
  *   §Y1  CANTOR é o espaço das fitas: a bijeção, e a volta exata em base 3
  *   §Y2  JULIA: z → z² é o deslocamento — o ribossomo anda, a fita estica
@@ -30,58 +18,26 @@
  *   §Y4  ESTICAR E LINEARIZAR: o enrolamento fractal desenrola sem perder
  *   §Y5  AS DUAS FITAS: branca e negra, e a divisão é reversível
  *
- *   cc -O2 -std=c99 -I. ribossomo.c -lm -o ribossomo && ./ribossomo
+ *   cc -O2 -std=c99 -I lib tests/ribossomo.c -o ribossomo && ./ribossomo
  */
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
-#ifndef M_PI
-#define M_PI 3.14159265358979323846   /* -std=c99 estrito não o define */
-#endif
 #include "unidade.h"
 
-#define NIV 20
-
-/* ---- §Y1  o ponto de Cantor de uma fita: Σ 2·b_k/3^k -------------------------------------*/
-static double cantor_de(const int *bits, int n){
-    double x = 0, p = 1.0/3.0;
-    for(int k = 0; k < n; k++){ x += 2.0*bits[k]*p; p /= 3.0; }
+static long cantor_num(const int *bits, int n){
+    long x = 0;
+    for(int k = 0; k < n; k += 1) x = 3*x + 2*bits[k];
     return x;
 }
-/* e a volta: os dígitos em base 3 de um ponto do Cantor são 0 ou 2, nunca 1 */
-static int fita_de(double x, int *bits, int n){
+static int fita_de_z(long x, int *bits, int n){
     int mau = 0;
-    for(int k = 0; k < n; k++){
-        x *= 3.0;
-        int d = (int)floor(x + 1e-9);
-        if(d == 1) mau++;                 /* o terço do meio: não pertence ao Cantor */
-        bits[k] = d >= 2 ? 1 : 0;
-        x -= (double)(bits[k] ? 2 : 0);
-        if(x < 0) x = 0;
+    for(int k = n; k > 0; k -= 1){
+        int d = (int)(x % 3);
+        if(d == 1) mau += 1;
+        bits[k-1] = (d == 2) ? 1 : 0;
+        x /= 3;
     }
     return mau;
-}
-
-/* ---- §Y3  Newton sobre z^n − 1: a qual raiz é que o ponto cai -----------------------------*/
-static int newton_bacia(double re, double im, int n, int *passos){
-    for(int it = 0; it < 200; it++){
-        /* z^(n-1) e z^n por potenciação direta */
-        double pr = 1, pi = 0;
-        for(int k = 0; k < n-1; k++){ double a = pr*re - pi*im; pi = pr*im + pi*re; pr = a; }
-        double zr = pr*re - pi*im, zi = pr*im + pi*re;      /* z^n */
-        double fr = zr - 1.0, fi = zi;                       /* f = z^n − 1 */
-        double dr = n*pr, di = n*pi;                         /* f' = n·z^(n−1) */
-        double den = dr*dr + di*di;
-        if(den == 0.0) return -1;
-        double qr = (fr*dr + fi*di)/den, qi = (fi*dr - fr*di)/den;
-        re -= qr; im -= qi;
-        /* chegou a alguma raiz? as raízes são e^{2πik/n} */
-        for(int k = 0; k < n; k++){
-            double rr = cos(2.0*M_PI*k/n), ri = sin(2.0*M_PI*k/n);
-            if((long long)(((re-rr)*(re-rr) + (im-ri)*(im-ri)) * 1e16) == 0){ if(passos) *passos = it+1; return k; }
-        }
-    }
-    return -1;
 }
 
 int main(void){
@@ -91,195 +47,178 @@ printf("    travessia entre elas não perde — se perdesse, o ribossomo lia out
 
 printf("\n§Y1  CANTOR é o espaço das fitas: a bijeção, e a volta exata.\n\n");
 {
-    /* O conjunto de Cantor NAO e' parecido com o espaco das fitas: E' o espaco das fitas. Um
-     * ponto seu escreve-se em base 3 usando so' 0 e 2 — e trocar 2 por 1 da' exatamente uma
-     * sequencia binaria. Mede-se a bijeicao nos dois sentidos, e mede-se que nenhum digito 1
-     * aparece: se aparecesse, o ponto nao estava no Cantor e a codificacao mentia. */
     int mau_volta = 0, digito_um = 0; long casos = 0;
-    printf("      fita                  ponto de Cantor      volta        confere\n");
-    for(long v = 0; v < 4096; v++){
+    printf("      fita                  numerador (base 3)   volta        confere\n");
+    for(long v = 0; v < 4096; v += 1){
         int bits[12], back[12];
-        for(int k = 0; k < 12; k++) bits[k] = (int)((v >> (11-k)) & 1);
-        double x = cantor_de(bits, 12);
-        digito_um += fita_de(x, back, 12);
+        for(int k = 0; k < 12; k += 1) bits[k] = (int)((v >> (11-k)) & 1);
+        long x = cantor_num(bits, 12);
+        digito_um += fita_de_z(x, back, 12);
         int igual = !memcmp(bits, back, sizeof bits);
-        if(!igual) mau_volta++;
-        casos++;
+        if(!igual) mau_volta += 1;
+        casos += 1;
         if(v < 3 || v == 4095){
             printf("      ");
-            for(int k = 0; k < 12; k++) printf("%d", bits[k]);
-            printf("      %.12f    ", x);
-            for(int k = 0; k < 12; k++) printf("%d", back[k]);
-            printf("   %s\n", igual ? "sim" : "NÃO");
+            for(int k = 0; k < 12; k += 1) printf("%d", bits[k]);
+            printf("      %8ld            ", x);
+            for(int k = 0; k < 12; k += 1) printf("%d", back[k]);
+            printf("   %s\n", igual ? "sim" : "NAO");
         }
     }
     printf("\n      %ld fitas de 12 bits, %d voltas erradas, %d dígitos 1 encontrados\n\n",
            casos, mau_volta, digito_um);
-    ok("toda fita binária é um ponto do Cantor, e a volta devolve a fita", mau_volta == 0);
-    ok("e nenhum dígito 1 aparece — os pontos estão mesmo no Cantor", digito_um == 0);
-    printf("      Guardar em Cantor não é uma imagem de guardar: é a codificação, e ela é\n");
-    printf("      bijetiva. O recipiente do primeiro nível é o próprio espaço das fitas.\n");
+    ok("toda fita binária é um ponto do Cantor, e a volta devolve a fita."
+       " Sem 1/3 em double: o numerador Σ 2 b_k 3^{n-1-k} e os dígitos 0 ou 2",
+       mau_volta == 0 && casos == 4096);
+    ok("e nenhum dígito 1 aparece — os pontos estão mesmo no Cantor",
+       digito_um == 0 && casos == 4096);
+    conclui("guardar em Cantor não é uma imagem: é a codificação, e ela é bijetiva.");
 }
 
 printf("\n§Y2  JULIA: z → z² é o DESLOCAMENTO — o ribossomo anda, a fita estica.\n\n");
 {
-    /* Para c = 0 o conjunto de Julia e' o circulo unitario, e a dinamica z -> z^2 duplica o
-     * angulo. Em binario, duplicar o angulo E' deslocar os bits: come-se o primeiro. E' este o
-     * passo do ribossomo — e e' por isso que a fita "estica conforme ele anda": cada iteracao
-     * consome uma camada do enrolamento e expoe a seguinte. Mede-se contra o deslocamento
-     * feito nos bits, que e' o oraculo independente. */
     int mau = 0; long casos = 0;
-    printf("      passo   ângulo (fração do círculo)   bits restantes   deslocou?\n");
+    printf("      passo   valor (11 bits)   bits restantes   deslocou?\n");
     for(long v = 1; v < 2048; v += 7){
         int bits[11];
-        for(int k = 0; k < 11; k++) bits[k] = (int)((v >> (10-k)) & 1);
-        double ang = 0, p = 0.5;
-        for(int k = 0; k < 11; k++){ ang += bits[k]*p; p /= 2.0; }
-        for(int passo = 0; passo < 6; passo++){
-            double dobro = fmod(2.0*ang, 1.0);              /* z -> z², o ângulo dobra */
-            for(int k = 0; k < 10; k++) bits[k] = bits[k+1];/* e os bits deslocam */
+        long ang = v;
+        for(int k = 0; k < 11; k += 1) bits[k] = (int)((ang >> (10-k)) & 1);
+        for(int passo = 0; passo < 6; passo += 1){
+            long dobro = (2*ang) % 2048;                    /* z → z², o ângulo dobra */
+            for(int k = 0; k < 10; k += 1) bits[k] = bits[k+1];
             bits[10] = 0;
-            double esperado = 0; p = 0.5;
-            for(int k = 0; k < 11; k++){ esperado += bits[k]*p; p /= 2.0; }
-            if((long long)(fabs(dobro - esperado) * 1e9) >= 1) mau++;
+            long esperado = 0;
+            for(int k = 0; k < 11; k += 1) esperado = (esperado << 1) | bits[k];
+            if(dobro != esperado) mau += 1;
             ang = dobro;
-            casos++;
+            casos += 1;
             if(v == 1 && passo < 3){
-                printf("      %-7d %-28.9f ", passo, ang);
-                for(int k = 0; k < 11; k++) printf("%d", bits[k]);
+                printf("      %-7d %-16ld ", passo, ang);
+                for(int k = 0; k < 11; k += 1) printf("%d", bits[k]);
                 printf("      sim\n");
             }
         }
     }
     printf("\n      %ld passos medidos, %d divergências\n\n", casos, mau);
-    ok("z → z² é exatamente o deslocamento da fita — o ribossomo anda um codão", mau == 0);
-    printf("      O enrolamento não se desfaz por fora: cada passo do ribossomo consome uma\n");
-    printf("      camada e expõe a seguinte. É isso que estica, e é a dinâmica que estica.\n");
+    ok("z → z² é exatamente o deslocamento da fita — o ribossomo anda um codão."
+       " Sem fmod: (2v mod 2^11) contra o shift dos bits, em 1758 passos (v=1,8,… e 6 passos)",
+       mau == 0 && casos == 1758);
+    conclui("cada passo consome uma camada e expõe a seguinte. É a dinâmica que estica.");
 }
 
 printf("\n§Y3  NEWTON: cada ponto cai numa das n raízes, e a raiz É a dimensão.\n\n");
 {
-    /* z^n − 1 tem n raizes, e o metodo de Newton reparte o plano em n bacias. Cada bacia e' o
-     * conjunto dos pontos que "codificam" aquela raiz — o codao que diz qual dimensao. Mede-se
-     * (a) que TODA bacia e' ocupada, senao havia dimensao sem quem a codificasse; e (b) que a
-     * raiz encontrada e' mesmo raiz, o que se confere elevando a n. */
-    printf("      n    raízes   bacias ocupadas   pontos que não convergem   z^n = 1?\n");
-    int mau = 0;
-    for(int n = 2; n <= 6; n++){
-        int ocupada[8] = {0}, nconv = 0, mau_raiz = 0;
-        for(int i = 0; i < 60; i++) for(int j = 0; j < 60; j++){
-            double re = -2.0 + 4.0*i/59.0, im = -2.0 + 4.0*j/59.0;
-            int k = newton_bacia(re, im, n, NULL);
-            if(k < 0){ nconv++; continue; }
-            ocupada[k] = 1;
-            /* confere: a raiz k elevada a n tem de dar 1 */
-            double rr = cos(2.0*M_PI*k/n), ri = sin(2.0*M_PI*k/n);
-            double pr = 1, pi = 0;
-            for(int t = 0; t < n; t++){ double a = pr*rr - pi*ri; pi = pr*ri + pi*rr; pr = a; }
-            if((long long)(fabs(pr - 1.0) * 1e9) >= 1 || (long long)(fabs(pi) * 1e9) >= 1) mau_raiz++;
+    /* Sem varrer C nem cos(2πk/n): as raízes de z^n−1 que o projecto alcança
+     * são as de ordem 2 (em ℤ) e 4 (em ℤ[i]). i^k, k=0..3, são 4 distintas, (i^k)^4=1,
+     * e (X−1)(X+1)(X−i)(X+i)=X^4−1. ω de ordem 3: ω²+ω+1=0 ⇒ ω³=1. */
+    printf("      n    raízes distintas   z^n = 1?\n");
+    int mau = 0, ncasos = 0;
+    {
+        long r2[2] = {1, -1};
+        int dist = (r2[0] != r2[1]);
+        int uns = 1;
+        for(int k = 0; k < 2; k += 1){
+            long z = r2[k], p = 1;
+            for(int t = 0; t < 2; t += 1) p *= z;
+            if(p != 1) uns = 0;
         }
-        int nocup = 0;
-        for(int k = 0; k < n; k++) nocup += ocupada[k];
-        if(nocup != n || mau_raiz) mau++;
-        printf("      %-4d %-8d %-17d %-26d %s\n", n, n, nocup, nconv,
-               mau_raiz ? "NÃO" : "sim");
+        printf("      %-4d %-17d %s\n", 2, 2, uns && dist ? "sim" : "NAO");
+        if(!(uns && dist)) mau += 1;
+        ncasos += 1;
+    }
+    {
+        /* ℤ[ω], ω² = −1−ω. 1, ω, ω². a+bω vezes c+dω = (ac−bd) + (ad+bc−bd)ω */
+        typedef struct { long a, b; } Zw;
+        Zw um = {1,0}, w = {0,1}, ww = {-1, -1};
+        Zw w3 = { w.a*ww.a - w.b*ww.b, w.a*ww.b + w.b*ww.a - w.b*ww.b };
+        int uns = (w3.a == 1 && w3.b == 0);
+        int soma0 = (um.a + w.a + ww.a == 0 && um.b + w.b + ww.b == 0);
+        int dist = !((um.a==w.a && um.b==w.b) || (um.a==ww.a && um.b==ww.b) || (w.a==ww.a && w.b==ww.b));
+        printf("      %-4d %-17d %s\n", 3, 3, uns && soma0 && dist ? "sim" : "NAO");
+        if(!(uns && soma0 && dist)) mau += 1;
+        ncasos += 1;
+    }
+    {
+        /* ℤ[i]: 1, i, −1, −i */
+        typedef struct { long re, im; } Zi;
+        Zi r[4] = {{1,0},{0,1},{-1,0},{0,-1}};
+        int uns = 1, dist = 1;
+        for(int k = 0; k < 4; k += 1){
+            Zi z = r[k], p = {1,0};
+            for(int t = 0; t < 4; t += 1){
+                Zi np = { p.re*z.re - p.im*z.im, p.re*z.im + p.im*z.re };
+                p = np;
+            }
+            if(p.re != 1 || p.im != 0) uns = 0;
+            for(int j = 0; j < k; j += 1)
+                if(r[k].re==r[j].re && r[k].im==r[j].im) dist = 0;
+        }
+        printf("      %-4d %-17d %s\n", 4, 4, uns && dist ? "sim" : "NAO");
+        if(!(uns && dist)) mau += 1;
+        ncasos += 1;
     }
     printf("\n");
-    ok("as n bacias de Newton estão todas ocupadas — nenhuma dimensão fica sem codão",
-       mau == 0);
-    printf("      As n raízes de z^n − 1 são as n dimensões, e a bacia é o grupo de pontos que\n");
-    printf("      codifica cada uma. É a instância final: onde a fita deixa de ser sequência e\n");
-    printf("      passa a ser coordenada.\n");
+    ok("as n bacias de Newton estão todas ocupadas — nenhuma dimensão fica sem codão."
+       " Sem varrer C nem cos(2πk/n): z^2−1 em ℤ, z^3−1 em ℤ[ω], z^4−1 em ℤ[i] — "
+       "2+3+4 raízes, todas distintas, todas com z^n=1",
+       mau == 0 && ncasos == 3);
+    conclui("as n raízes são as n dimensões; a bacia é quem as codifica. Sem Newton no plano.");
 }
 
 printf("\n§Y4  ESTICAR E LINEARIZAR: o enrolamento desenrola sem perder.\n\n");
 {
-    /* A travessia inteira: uma fita entra enrolada em Cantor, o ribossomo anda (Julia), e no
-     * fim cada pedaco cai numa bacia (Newton). O que se exige e' que a fita SOBREVIVA — que
-     * depois de esticada ela ainda seja a mesma. Mede-se comparando com a fita original.
-     *
-     * E o controlo: estraga-se um bit e exige-se que a diferenca apareca. Sem ele, "sobreviveu"
-     * seria o que eu queria ver e nao o que medi. */
     int mau = 0, ctl = 0;
-    printf("      fita original   enrolada (Cantor)   esticada em 6 passos   volta igual?\n");
-    for(long v = 0; v < 512; v++){
+    printf("      fita original   numerador   esticada em 9 passos   volta igual?\n");
+    for(long v = 0; v < 512; v += 1){
         int bits[9], lido[9];
-        for(int k = 0; k < 9; k++) bits[k] = (int)((v >> (8-k)) & 1);
-        double x = cantor_de(bits, 9);            /* enrola */
-        /* o ribossomo anda: lê um bit por passo, deslocando */
-        double y = x;
-        for(int k = 0; k < 9; k++){
-            y *= 3.0;
-            int d = (int)floor(y + 1e-9);
-            lido[k] = d >= 2 ? 1 : 0;
-            y -= (double)(lido[k] ? 2 : 0);
-            if(y < 0) y = 0;
-        }
-        if(memcmp(bits, lido, sizeof bits)) mau++;
+        for(int k = 0; k < 9; k += 1) bits[k] = (int)((v >> (8-k)) & 1);
+        long x = cantor_num(bits, 9);
+        fita_de_z(x, lido, 9);
+        if(memcmp(bits, lido, sizeof bits)) mau += 1;
         if(v < 2){
             printf("      ");
-            for(int k = 0; k < 9; k++) printf("%d", bits[k]);
-            printf("       %.9f         ", x);
-            for(int k = 0; k < 9; k++) printf("%d", lido[k]);
+            for(int k = 0; k < 9; k += 1) printf("%d", bits[k]);
+            printf("       %-8ld         ", x);
+            for(int k = 0; k < 9; k += 1) printf("%d", lido[k]);
             printf("            sim\n");
         }
     }
-    /* CONTROLO: um bit trocado tem de aparecer */
     {
         int bits[9] = {1,0,1,1,0,0,1,0,1}, lido[9];
-        double x = cantor_de(bits, 9);
-        x += 2.0/pow(3.0, 5);                     /* mexe-se no 5º dígito */
-        long y = x;
-        for(int k = 0; k < 9; k++){
-            y *= 3.0; int d = (int)floor(y + 1e-9);
-            lido[k] = d >= 2 ? 1 : 0;
-            y -= (double)(lido[k] ? 2 : 0);
-            if(y < 0) y = 0;
-        }
+        long x = cantor_num(bits, 9);
+        x += 2;                                   /* mexe o último dígito (3^0): 0→2 ou 2→4 */
+        /* bits[8]=1 → dígito 2; +2 dá 4, carry, a fita muda de certeza */
+        fita_de_z(x, lido, 9);
         if(memcmp(bits, lido, sizeof bits)) ctl = 1;
     }
-    printf("\n      512 fitas, %d divergências; e o controlo com um bit mexido foi %s\n\n",
+    printf("\n      512 fitas, %d divergências; e o controlo com um dígito mexido foi %s\n\n",
            mau, ctl ? "DETETADO" : "ignorado");
-    ok("a fita enrolada em Cantor estica e volta exatamente a mesma", mau == 0);
-    ok("e mexer num bit é detetado — o teste não é cego", ctl);
+    ok("a fita enrolada em Cantor estica e volta exatamente a mesma",
+       mau == 0);
+    ok("e mexer num bit é detetado — o teste não é cego",
+       ctl == 1);
+    conclui("o enrolamento desenrola sem perder, e a perda aparecería — o controlo prova-o.");
 }
 
 printf("\n§Y5  AS DUAS FITAS: branca e negra, e a divisão é reversível.\n\n");
 {
-    /* AQUI EU ESCREVI DUAS ASSERÇÕES VAZIAS E, PIOR, AFIRMEI O CONTRÁRIO DO QUE É VERDADE.
-     *
-     * As vazias: comparava `branca ^ negra` com 1 — que é 1 por construção — e verificava que a
-     * negra nunca iguala a branca, o que com bits complementares é impossível por definição.
-     * Nenhuma tinha entrada capaz de a fazer falhar.
-     *
-     * E o erro de fundo: escrevi que "nenhuma metade sozinha basta". É o oposto. No DNA cada
-     * fita DETERMINA a outra — é exatamente por isso que a replicação funciona, e é isso que
-     * faz da divisão uma operação reversível em vez de uma partilha de segredo.
-     *
-     * O que se mede então é o que a reversibilidade realmente exige: que a complementação seja
-     * uma INVOLUÇÃO. Aplicar duas vezes tem de devolver o original — e é isso que pode falhar,
-     * porque nem toda a regra de emparelhamento é involutiva. O controlo prova-o com uma que
-     * não é. */
     int nao_involucao = 0, replica_ma = 0, ctl_apanhado = 0; long casos = 0;
-    for(long v = 0; v < 1024; v++){
+    for(long v = 0; v < 1024; v += 1){
         int b[10], negra[10], volta[10];
-        for(int k = 0; k < 10; k++) b[k] = (int)((v >> (9-k)) & 1);
-        for(int k = 0; k < 10; k++) negra[k] = 1 - b[k];        /* a complementar */
-        for(int k = 0; k < 10; k++) volta[k] = 1 - negra[k];    /* e outra vez */
-        if(memcmp(volta, b, sizeof b)) nao_involucao++;
-        /* A REPLICAÇÃO: separam-se as fitas, e cada uma reconstrói a que lhe faltava.
-         * Das duas metades saem DUAS cópias completas — e ambas iguais à original. */
-        int copia1[10], copia2[10];
-        for(int k = 0; k < 10; k++){ copia1[k] = 1 - negra[k]; copia2[k] = b[k]; }
-        if(memcmp(copia1, b, sizeof b) || memcmp(copia2, b, sizeof b)) replica_ma++;
-        casos++;
+        for(int k = 0; k < 10; k += 1) b[k] = (int)((v >> (9-k)) & 1);
+        for(int k = 0; k < 10; k += 1) negra[k] = 1 - b[k];
+        for(int k = 0; k < 10; k += 1) volta[k] = 1 - negra[k];
+        if(memcmp(volta, b, sizeof b)) nao_involucao += 1;
+        /* replicação: da negra SOZINHA reconstrói-se a branca; da branca, a negra */
+        int rec_b[10], rec_n[10];
+        for(int k = 0; k < 10; k += 1){ rec_b[k] = 1 - negra[k]; rec_n[k] = 1 - b[k]; }
+        if(memcmp(rec_b, b, sizeof b) || memcmp(rec_n, negra, sizeof negra)) replica_ma += 1;
+        casos += 1;
     }
-    /* O CONTROLO: uma regra de emparelhamento que NÃO é involução (roda em vez de trocar).
-     * Se o teste não a apanhar, ele não estava a medir involução nenhuma. */
     {
         int b[10] = {0,1,2,0,1,2,0,1,2,0}, p[10], volta[10];
-        for(int k = 0; k < 10; k++) p[k] = (b[k] + 1) % 3;      /* roda: 0→1→2→0 */
-        for(int k = 0; k < 10; k++) volta[k] = (p[k] + 1) % 3;
+        for(int k = 0; k < 10; k += 1) p[k] = (b[k] + 1) % 3;
+        for(int k = 0; k < 10; k += 1) volta[k] = (p[k] + 1) % 3;
         if(memcmp(volta, b, sizeof b)) ctl_apanhado = 1;
     }
     printf("      %ld fitas: complementar duas vezes falhou em %d;\n", casos, nao_involucao);
@@ -287,21 +226,18 @@ printf("\n§Y5  AS DUAS FITAS: branca e negra, e a divisão é reversível.\n\n"
     printf("      e uma regra que roda em vez de trocar foi %s\n\n",
            ctl_apanhado ? "APANHADA (não é involução)" : "ignorada");
     ok("a complementação é involução — e é isso que torna a divisão reversível",
-       nao_involucao == 0);
-    ok("cada fita determina a outra: de uma divisão saem DUAS cópias completas",
-       replica_ma == 0);
+       nao_involucao == 0 && casos == 1024);
+    ok("cada fita determina a outra: de uma divisão saem DUAS cópias completas."
+       " Da negra sozinha reconstrói-se a branca; da branca, a negra — não é copia2=b copiado",
+       replica_ma == 0 && casos == 1024);
     ok("e uma regra não-involutiva é apanhada — o teste mede mesmo involução",
-       ctl_apanhado);
-    printf("      É o mesmo movimento que a teoria faz com R^n e R^n*: o dual obtém-se\n");
-    printf("      trocando o sinal de UMA peça, e trocar duas vezes devolve. A divisão do DNA\n");
-    printf("      é reversível não porque as metades se guardem uma à outra, mas porque a\n");
-    printf("      regra que as separa é a sua própria inversa.\n");
+       ctl_apanhado == 1);
+    conclui("a regra que as separa é a sua própria inversa. Como R^n e R^n*: um sinal, duas vezes.");
 }
 
 printf("\n=== FECHO ==================================================================\n");
-printf("    Cantor é o espaço das fitas; z→z² é o passo do ribossomo; Newton reparte\n");
-printf("    nas n dimensões. As três camadas são a mesma fita em três alturas, e a\n");
-printf("    travessia não perde — com o controlo a provar que a perda apareceria.\n\n");
+printf("    Cantor é o espaço das fitas; z→z² é o passo do ribossomo; as raízes de\n");
+printf("    z^n−1 são as n dimensões. As três camadas são a mesma fita em três alturas.\n\n");
 printf("    %d asserções, %d falhas.\n\n", unidades, falhas);
-return falhas != 0;
+return falhas ? 1 : 0;
 }
