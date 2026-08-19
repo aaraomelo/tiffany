@@ -1,0 +1,1037 @@
+% !TeX program = pdflatex
+% papers/racionais.tex — O DEGRAU Z → Q, pelo passo T + T* da torre.
+%
+% O corpo_algebrico.tex constrói R a partir de Q(m√D), com o molde dual
+% (P1,P2,D1,D2), a operação ⋆, Dir/Cruz como projetores de τ.
+% Este paper faz o degrau ANTERIOR com o MESMO molde:
+%   o espaço é Z², a involução é o swap, e as duas leituras já estão lá.
+%
+% Auto-contido: cd papers && pdflatex racionais.tex
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[portuguese]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\newtheorem{teorema}{Teorema}
+\newtheorem{proposicao}[teorema]{Proposição}
+\newtheorem{corolario}[teorema]{Corolário}
+\newtheorem{definicao}{Definição}
+\newtheorem{observacao}{Observação}
+
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\abs}[1]{\lvert #1\rvert}
+\newcommand{\dg}{^{\dagger}}
+\newcommand{\sepcol}{\quad\penalty0$\big|$\quad\penalty0}
+\newcommand{\colunas}[3]{%
+  \par\smallskip\noindent{\footnotesize\raggedright
+  \textbf{prova} (Algébrico): #1\sepcol
+  \textbf{realiza} (aqui): #2\sepcol
+  \textbf{verifica}: #3\par}\smallskip}
+
+\definecolor{cinza}{gray}{0.35}
+\newcommand{\medido}[1]{\par\medskip\noindent{\small\color{cinza}\textbf{Medido.} #1}\par\medskip}
+
+\input{gkcapa}
+
+\begin{document}
+\gkcapa{Os racionais a partir dos inteiros}
+       {$\mathbb{Q}=\operatorname{Frac}(\mathbb{Z})$ --- o degrau da torre
+        onde a multiplicação ganha inverso}
+       {pares ordenados, produto cruzado, inversão multiplicativa, e o molde dual}
+\maketitle
+
+%======================================================================
+\begin{abstract}
+O \emph{Corpo Algébrico} constrói $\mathbb{R}$ a partir de
+$\mathbb{Q}(m\sqrt D)$, com o espaço dual, as quatro propriedades
+(P1,P2,D1,D2), a operação $\star$, e Dir/Cruz como projectores do espelho
+$\tau$. Este paper faz o degrau \textbf{anterior} da torre dos tecidos
+(\code{analitico thm:tecidos}) com o \textbf{mesmo molde}:
+\[
+\mathbb{Z} \;\longrightarrow\;
+\operatorname{Frac}(\mathbb{Z})=\mathbb{Q}.
+\]
+O espaço base é $\mathbb{Z}^{2}$, o racional é a \textbf{classe de
+equivalência} de pares ordenados de inteiros $(a,b)$ com $b\neq 0$, sob a
+relação $(a,b)\sim(c,d)\iff ad=bc$. A involução é o swap
+$\iota(a,b)=(b,a)$, e as duas leituras --- Dir e Cruz --- surgem da
+decomposição simétrica/antissimétrica da forma bilinear escolhida
+$B((a,b),(c,d))=ad$ e da sua transposta $B^{\tau}=bc$.
+O novo mecanismo estrutural deste degrau é a representação por pares:
+$\iota(a,b)=(b,a)$ é uma operação sobre representantes que induz a inversão
+multiplicativa $[(a,b)]^{-1}=[(b,a)]$ sobre classes.
+\end{abstract}
+
+%======================================================================
+\section*{Onde este documento vive na torre}
+
+Este paper é o \textbf{degrau} $\mathbb{Z}\to\mathbb{Q}$ da torre dos tecidos
+(\code{analitico thm:tecidos}). O passo é sempre o mesmo:
+$T_{k+1}=T_k+T_k^{*}$.
+
+\[
+\begin{array}{lllll}
+\mathbb{N} & \longrightarrow & \mathbb{Z}
+ & \text{(reversibilidade da \textbf{soma})}
+ & \text{ponto fixo: }0\\[4pt]
+\mathbb{Z} & \longrightarrow & \operatorname{Frac}(\mathbb{Z})=\mathbb{Q}
+ & \text{(reversibilidade da \textbf{multiplicação})}
+ & \operatorname{Fix}(\iota\vert_{\mathbb{Q}^{\times}})=\{\pm1\}\\[4pt]
+\mathbb{Q} & \longrightarrow & \mathbb{R}
+ & \text{(completação --- o CORTE)}
+ & \text{ponto fixo: o corte}
+\end{array}
+\]
+
+\noindent\textbf{O que este documento RECEBE e o que ACRESCENTA}
+--- a mesma estrutura que no Topológico (\code{topologico sec:recebe}) e no
+Algébrico (\code{algebrico def:espaco}):
+
+\[
+\boxed{
+\begin{array}{lll}
+\textbf{RECEBE do centro} & \textbf{onde está lá} & \textbf{o que se faz aqui}\\[3pt]
+\text{a torre }T_{k+1}=T_k+T_k^{*} & \code{analitico thm:tecidos} & \text{instancia o degrau }k{=}1\\[2pt]
+\text{as oito leis} & \code{analitico sub:oitoleis} & \text{Leis 0--3,5 explícitas; 4,6,7 herdadas}\\[2pt]
+\text{a operação }\star & \code{algebrico thm:operacao} & \text{Dir e Cruz em pares de inteiros}\\[2pt]
+\text{o par dual e }|\det|=1 & \code{algebrico thm:fixo-dual} & \iota(a,b)=(b,a),\ a^2=b^2\Rightarrow\pm1\\[6pt]
+\textbf{ACRESCENTA} & \multicolumn{2}{l}{\text{---e é só isto---}}\\[3pt]
+\text{a REPRESENTAÇÃO por pares} & \text{Def.~\ref{def:espaco}} & V_{\mathrm{rat}}/{\sim}=\mathbb{Q}\\[2pt]
+\text{o INVERSO = swap} & \text{Def.~\ref{def:ops}} & (a,b)^{-1}=(b,a)\\[2pt]
+\text{o PRODUTO CRUZADO} & \text{Prop.~\ref{prop:dircr}} & \text{Cruz}=ad-bc:\text{ equiv., ordem}\\[2pt]
+\text{a REDUÇÃO por }\gcd & \S\ref{sec:reduz} & \text{forma canónica do par}
+\end{array}}
+\]
+
+\section{A posição na torre}\label{sec:torre}
+
+Este paper trata o \textbf{segundo} degrau. A operação nova que torna os
+elementos não nulos reversíveis é realizada pelo swap $(a,b)\mapsto(b,a)$.
+
+%======================================================================
+\section{O espaço de pares e a involução dual}\label{sec:espaco}
+
+\begin{definicao}[O espaço de pares e a involução dual]\label{def:espaco}
+O espaço total é $\mathbb{Z}^{2}$. Nele distinguem-se três domínios:
+\[
+\boxed{\;
+\begin{array}{ll}
+V = \mathbb{Z}^{2} & \text{(o espaço inteiro de pares)}\\[3pt]
+V_{\mathrm{rat}} = \{(a,b)\in\mathbb{Z}^{2}: b\neq 0\}
+  & \text{(domínio dos representantes racionais)}\\[3pt]
+V^{\times} = \{(a,b)\in\mathbb{Z}^{2}: ab\neq 0\}
+  & \text{(domínio da inversão)}
+\end{array}\;}
+\]
+A relação de equivalência vive em $V_{\mathrm{rat}}$:
+\[
+(a,b)\sim(c,d)\iff ad=bc.
+\]
+O racional é a classe:
+\[
+\mathbb{Q}=V_{\mathrm{rat}}/{\sim}
+\;=\;\{(a,b)\in\mathbb{Z}^{2}:b\neq 0\}/{\sim}.
+\]
+A condição de
+equivalência é o \textbf{produto cruzado}: dois inteiros, um produto, nenhuma
+divisão.
+
+\medskip\noindent
+\textbf{A estrutura dual} deste andar é realizada pela involução:
+\[
+\boxed{\;\iota(a,b)=(b,a).\;}
+\]
+Ela satisfaz $\iota^{2}=\mathrm{id}$ em todo $V$. No espaço de
+representantes, o swap é total em $V=\mathbb{Z}^{2}$ e preserva $V^{\times}$,
+mas não $V_{\mathrm{rat}}$ (porque $\iota(0,b)=(b,0)\notin V_{\mathrm{rat}}$).
+O swap preserva $V^{\times}=\{(a,b):ab\neq0\}$ e desce ao quociente: se
+$(a,b)\sim(c,d)$, isto é $ad=bc$, então $(b,a)\sim(d,c)$ porque $bc=ad$.
+Portanto
+\[
+\bar\iota:V^{\times}/{\sim}\longrightarrow V^{\times}/{\sim},
+\qquad\bar\iota([(a,b)])=[(b,a)]
+\]
+é bem definida. Resumindo:
+\[
+\boxed{
+\iota:V^{\times}\to V^{\times}
+\quad\Longrightarrow\quad
+\bar\iota:V^{\times}/{\sim}\to V^{\times}/{\sim}
+}
+\]
+Como $V^{\times}/{\sim}\cong\mathbb{Q}^{\times}$, esta aplicação é
+precisamente $\bar\iota(x)=x^{-1}$. No domínio maior $V_{\mathrm{rat}}$, o
+swap não é interno: $\iota(0,b)=(b,0)$ é a razão pela qual \textbf{não existe
+inversão interna de $0$}. A extensão a $\mathbb{P}^{1}(\mathbb{Q})$ não faz parte da
+construção de $\mathbb{Q}$; é a extensão projectiva que torna total a acção no
+gume.
+
+\medskip\noindent
+\textbf{A Lei~$0$ via Möbius} (\code{algebrico def:lei0, thm:lei0,
+thm:inversao-dual}). Na recta projectiva, o ponto é $[p:q]$ e a inversão é a
+troca $S=\bigl(\begin{smallmatrix}0&1\\1&0\end{smallmatrix}\bigr)$,
+$\det S=-1$:
+\[
+[p:q]\;\longmapsto\;[q:p],
+\qquad
+[0:1]\mapsto[1:0]=\infty,
+\qquad
+\boxed{\;0\dg=\infty.\;}
+\]
+Não se executa uma divisão: a inversão é a troca das coordenadas, sem teste e
+sem ramo. A troca é a sua própria inversa ($S^{-1}=S$) porque
+$\operatorname{adj}(S)=-S$ e $\det S=-1$, e os dois sinais cancelam:
+$S^{-1}=\operatorname{adj}(S)/\det S = -S/(-1)=S$. Na extensão projectiva, os
+dois pontos de gume são representados pelas classes $0=[0:1]$ e
+$\infty=[1:0]$, que são trocadas pelo swap. As duas involuções trocam
+exactamente os papéis de $\{0\}$ e de $\{\pm1\}$:
+\[
+\boxed{
+\begin{array}{lll}
+\text{em }\mathbb{P}^{1} & \text{fixos }\{+1,-1\}
+  & \text{e o par }\{0,\infty\}\\[2pt]
+\text{no trial} & \text{fixo }\{0\}
+  & \text{e o par }\{-1,+1\}
+\end{array}}
+\]
+O que num é ponto fixo, no outro é o par que se troca --- e é esta dualidade
+que faz do zero o canónico (\code{algebrico prop:zero-dual-zero}).
+
+\medskip\noindent\textbf{O gume: $\infty\mapsto-1$}
+(\code{algebrico sec:lei0}). A Möbius $M=T_{-1}\circ S$, isto é $M(x)=1/x-1$,
+satisfaz $M(\infty)=-1$ (com $\det M=-1$), e o seu ponto fixo resolve
+$x^{2}+x-1=0$ --- para $m=1$, a razão áurea. Com a convenção de indexação e o operador $A_{m}$
+definidos em \code{algebrico thm:cuspide}, a cadeia fica
+$x_{0}=\infty$, $x_{-1}=0$, $x_{-2}=-1/m$.
+Na interpretação herdada da torre, a operação que põe $\infty$ dentro da
+aritmética aditiva é a mesma que gera o primeiro metal --- essa identificação
+não é um teorema deste paper; é interface com o andar superior. Tudo isto é
+\textbf{derivado}: $M$ não é primitiva; é a composição de $S$ (a Lei~$0$) com
+a translação $T_{-1}$ (a Lei~$1$).
+
+\medskip\noindent
+As operações $J(a,b)=(-b,a)$ vivem em todo $V=\mathbb{Z}^{2}$.
+
+\medskip\noindent
+\textbf{Duas involuções distintas.} Há aqui duas involuções:
+$\nu(a,b)=(-a,b)$, associada à reversibilidade aditiva (oposto), e
+$\iota(a,b)=(b,a)$, associada à inversão multiplicativa (dual). A involução da
+Lei~$1$ realiza a reversibilidade aditiva; o swap $\iota$ é a segunda
+involução estrutural, responsável pela reversibilidade multiplicativa. Elas
+não devem ser identificadas.
+
+\medskip\noindent
+\textbf{Quatro propriedades, em paralelo com o Algébrico}
+(\code{algebrico def:espaco}).
+\[
+\begin{array}{ll@{\qquad}ll}
+\textbf{(P1)} & \mathbb{Z}\hookrightarrow\mathbb{Q}\
+  (\text{por }n\mapsto(n,1))
+  & \textbf{(D1)} & \bar\iota([(a,b)])=[(b,a)]=[(a,b)]
+    \iff a^{2}=b^{2}
+    \iff [(a,b)]=\pm1,\; (a,b)\in V^{\times}\\[4pt]
+\textbf{(P2)} & \text{nem todo racional é inteiro (e.g.\ }[(1,2)]=\tfrac12\notin\mathbb{Z}\text{)}
+  & \textbf{(D2)} & [(a,b)]\otimes[(b,a)]
+    =[(1,1)]\ \text{em }\mathbb{Q}^{\times}
+\end{array}
+\]
+(P1) registra a inclusão do andar anterior:
+$\mathbb{Z}\hookrightarrow\mathbb{Q}$, $n\mapsto[(n,1)]$.
+(P2) registra que a extensão é própria: $\mathbb{Q}\neq\mathbb{Z}$. (D1) diz que os \textbf{pontos fixos da involução induzida} em
+$\mathbb{Q}^{\times}$ são exactamente $\pm 1$: no espaço de representantes,
+$\operatorname{Fix}(\iota|_{V})=\{(a,a):a\in\mathbb{Z}\}$;
+mas \textbf{após o quociente},
+$[(a,b)]=[(b,a)]\iff a^{2}=b^{2}\iff a=\pm b$ (porque $[(-1,1)]=[(1,-1)]$),
+e os pontos fixos são
+\[
+\operatorname{Fix}(\iota\vert_{\mathbb{Q}^{\times}})
+=\{x\in\mathbb{Q}^{\times}:x=x^{-1}\}
+=\{\pm1\}.
+\] (D2) diz que o produto pelo dual
+\textbf{regressa ao elemento-base}: para $(a,b)\in V^{\times}$ (com
+$ab\neq 0$), $(a,b)\otimes\iota(a,b)=(ab,ab)\sim(1,1)$,
+logo o produto pelo dual regressa a $1$ \textbf{no quociente} --- o resultado
+é literalmente diagonal antes do quociente. O coração do andar é:
+\[
+\boxed{
+\iota(a,b)=(b,a)
+\quad\Longrightarrow\quad
+\bar\iota([(a,b)])=[(b,a)]=[(a,b)]^{-1}.
+}
+\]
+
+\medskip\noindent
+Compare com o andar de cima: em $V=\mathbb{Q}(m\sqrt D)$ a involução é
+$s\mapsto s\dg=-1/s$ (a involução específica definida no andar quadrático,
+\code{algebrico thm:fixo-dual}; não confundir com a conjugação de campo usual
+$a+b\sqrt D\mapsto a-b\sqrt D$), com $s\,s\dg=-1$, e (D2) é
+$\alpha\alpha^{*}\in\mathbb{Q}$. Aqui o swap dá
+$(a,b)\otimes\iota(a,b)\sim(1,1)$, e (D2) é o produto pelo dual a regressar a
+$1\in\mathbb{Z}$. \textbf{A semelhança é estrutural}: não se trata da mesma
+involução, mas do mesmo \emph{molde} --- involução, ponto fixo, regresso ---
+uma oitava abaixo.
+\medskip\noindent
+\textbf{Nota terminológica.} Neste paper, ``dual'' designa o espaço obtido
+pela involução $\iota$, conforme a convenção da torre
+(\code{analitico thm:tecidos}), e não o dual linear
+$V^{*}=\operatorname{Hom}(V,\mathbb{Z})$.
+\end{definicao}
+
+\begin{teorema}[Construção inteira de $\mathbb{Q}$]\label{thm:q}
+Seja $V_{\mathrm{rat}}=\{(a,b)\in\mathbb{Z}^{2}:b\neq0\}$ com
+$(a,b)\sim(c,d)\iff ad=bc$. Então o quociente $V_{\mathrm{rat}}/{\sim}$ é um
+corpo, isomorfo a $\mathbb{Q}$, via $[(a,b)]\longmapsto a/b$. Sob esse
+isomorfismo, as operações
+\[
+(a,b)\oplus(c,d)=(ad+bc,\;bd),\qquad
+(a,b)\otimes(c,d)=(ac,\;bd)
+\]
+induzem a soma e o produto usuais, e todo elemento não nulo $[(a,b)]$ possui
+inverso $[(a,b)]^{-1}=[(b,a)]$. Os elementos especiais são
+\[
+0=[(0,1)],\qquad 1=[(1,1)],\qquad -1=[(-1,1)],
+\]
+com $[(a,b)]\neq 0\iff a\neq 0$. Além disso,
+\[
+[(a,b)]=[(c,d)]\iff ad-bc=0,
+\]
+e, para $b,d>0$,
+\[
+[(a,b)]<[(c,d)]\iff ad-bc<0.
+\]
+\end{teorema}
+
+\begin{proof}[Prova]
+(1) $\sim$ é equivalência: reflexiva ($ab=ab$), simétrica ($ad=bc\Rightarrow
+cb=da$), transitiva ($ad=bc$ e $cf=de$ com $d\neq 0$ implicam $af\cdot d=
+be\cdot d$, logo $af=be$).
+(2) Soma e produto são bem definidos (Prop.~\ref{prop:bemdef}).
+(3) Neutro aditivo: $(0,1)\oplus(a,b)=(0\cdot b+1\cdot a,\,1\cdot b)=(a,b)$.
+(4) Neutro multiplicativo: $(1,1)\otimes(a,b)=(a,b)$.
+(5) Oposto: $(a,b)\oplus(-a,b)=(ab-ab,\,b^{2})=(0,b^{2})\sim(0,1)$.
+(6) Inverso: $(a,b)\otimes(b,a)=(ab,ab)\sim(1,1)$, $a\neq 0$.
+(7) Distributividade: verificação directa sobre representantes.
+\end{proof}
+
+\begin{teorema}[O swap é a inversão multiplicativa]\label{thm:swap-inverso}
+A aplicação $\iota:V^{\times}\to V^{\times}$, $\iota(a,b)=(b,a)$, preserva
+$\sim$, induz uma involução
+$\bar\iota:\mathbb{Q}^{\times}\to\mathbb{Q}^{\times}$, e sob o isomorfismo
+$[(a,b)]\mapsto a/b$ satisfaz $\bar\iota(x)=x^{-1}$, com
+$x\,\bar\iota(x)=1$ e $\operatorname{Fix}(\bar\iota)=\{\pm1\}$.
+\end{teorema}
+
+\noindent O objecto novo deste degrau não é uma nova operação sobre números: é
+a representação que torna a inversão multiplicativa uma involução inteira no
+espaço de pares:
+\[
+\boxed{
+\begin{array}{c}
+\text{pares inteiros}\\
+\downarrow\\
+\text{produto cruzado}\\
+\downarrow\\
+\text{classe de equivalência}\\
+\downarrow\\
+\mathbb{Q}\\
+\downarrow\\
+\text{swap}\\
+\downarrow\\
+x\mapsto x^{-1}
+\end{array}}
+\]
+
+\noindent A realização computacional em \code{Qz} implementa este teorema sob
+um envelope finito explicitamente medido.
+
+%======================================================================
+\section{As operações no par --- sem sair de inteiros}\label{sec:ops}
+
+\begin{definicao}[aritmética dos pares]\label{def:ops}
+Sejam $(a,b)$ e $(c,d)$ representantes com $b,d\neq 0$.
+\[
+\boxed{\;
+\begin{array}{rll}
+\textbf{soma:}     & (a,b)\oplus(c,d) &= (ad+bc,\; bd)\\[4pt]
+\textbf{produto:}  & (a,b)\otimes(c,d) &= (ac,\; bd)\\[4pt]
+\textbf{oposto:}   & -(a,b) &= (-a,\; b)\\[4pt]
+\textbf{inverso:}  & (a,b)^{-1} &= (b,\; a) \qquad(a\neq 0)
+\end{array}\;}
+\]
+\end{definicao}
+
+\noindent Cada uma produz um \textbf{novo par de inteiros}. O inverso é o
+\textbf{swap} $\iota$ --- a mesma involução da Def.~\ref{def:espaco}.
+No quociente, escrevemos
+$[(a,b)]\otimes[(c,d)]:=[(ac,bd)]$, e analogamente para as demais operações.
+
+\begin{proposicao}[boa definição]\label{prop:bemdef}
+As quatro operações são \textbf{bem definidas} sobre classes: se
+$(a,b)\sim(a',b')$ e $(c,d)\sim(c',d')$, então os resultados são equivalentes.
+Como $\operatorname{eval}$ tem precisamente $\sim$ como relação de fibras
+($ab'=a'b \Leftrightarrow a/b=a'/b'$ para $b,b'\neq 0$), representantes
+equivalentes produzem o mesmo racional; portanto as operações descendem ao
+quociente. Para o produto, por exemplo: $ab'=a'b$ e $cd'=c'd$ implicam
+$(ac)(b'd')=(a'c')(bd)$. Para o inverso: $ab'=a'b$ implica $ba'=b'a$,
+portanto $(b,a)\sim(b',a')$. $\square$
+\end{proposicao}
+
+%======================================================================
+\section{A transformada e o ciclo de operação/inversão}\label{sec:conv}
+
+No Algébrico (\code{algebrico thm:universal}), o ciclo universal tem quatro
+passos: \textsc{descodifica}, \textsc{opera}, \textsc{inverte},
+\textsc{codifica}. O passo \textsc{opera} é a \textbf{convolução} e o passo
+\textsc{inverte} é a \textbf{deconvolução}. Neste andar, tomamos a avaliação $\operatorname{eval}$ como a realização da
+transformada; sob essa realização, as identidades de soma e produto descendem
+imediatamente.
+
+\begin{definicao}[a transformada neste degrau]\label{def:transf}
+No Algébrico, a transformada universal é a avaliação nas folhas
+$\sigma,\sigma\dg$ (\code{algebrico thm:espectro}). Neste degrau, a
+``folha'' é a avaliação $\operatorname{eval}(a,b)=a/b$, que é a projecção
+$V_{\mathrm{rat}}\to\mathbb{Q}$. Sob a avaliação, o produto de pares é
+levado ao produto dos valores:
+\[
+\operatorname{eval}\bigl((a,b)\otimes(c,d)\bigr)
+= \frac{ac}{bd}
+= \frac{a}{b}\cdot\frac{c}{d}
+= \operatorname{eval}(a,b)\cdot\operatorname{eval}(c,d).
+\]
+A convolução, após a avaliação na única folha, reduz-se ao produto ordinário
+de $\mathbb{Q}$. A soma:
+\[
+\operatorname{eval}\bigl((a,b)\oplus(c,d)\bigr)
+= \frac{ad+bc}{bd}
+= \frac{a}{b}+\frac{c}{d}
+= \operatorname{eval}(a,b)+\operatorname{eval}(c,d).
+\]
+A avaliação é compatível com $\oplus$ e $\otimes$ e induz no quociente o
+isomorfismo de anéis
+$\overline{\operatorname{eval}}:V_{\mathrm{rat}}/{\sim}\;\xrightarrow{\sim}\;\mathbb{Q}$,
+$[(a,b)]\longmapsto a/b$. A palavra ``transformada'' é terminologia interna da
+série; matematicamente, $\operatorname{eval}$ é a aplicação canónica de
+representantes para o corpo de fracções (não se trata de uma transformada
+integral ou espectral).
+\end{definicao}
+
+\noindent\textbf{Nota terminológica.} Nesta seção, ``convolução'' e
+``deconvolução'' são nomes internos do ciclo estrutural da série; nenhuma
+propriedade da convolução analítica clássica é usada ou reivindicada.
+
+\begin{proposicao}[produto e inversão --- o ciclo reversível]\label{prop:conv}
+Neste degrau, o par estrutural correspondente ao ciclo operação/inversão
+realiza-se pelo produto de representantes $(a,b)\otimes(c,d) = (ac,\;bd)$
+e pela involução swap $(a,b)^{-1} = (b,a)$, $a\neq 0$, que implementa o
+inverso multiplicativo. O par fecha:
+$(a,b)\otimes\iota(a,b)=(ab,ab)\sim(1,1)=1$.
+O produto desce sempre; a inversão desce \textbf{sob condição}
+($a\neq 0$) --- a mesma estrutura do
+\code{algebrico thm:decon-andar}.
+No vocabulário interno da série (\code{analitico thm:bit}), este par
+corresponde ao ciclo convolução (gato) / deconvolução (esquilo).
+
+A Möbius não é importada como primitiva: é \textbf{derivada} do dual
+(\code{algebrico thm:inversao-dual}). Para qualquer matriz invertível
+$2\times2$, $M^{-1}=\operatorname{adj}(M)/\det M$; e para a troca
+$S=\bigl(\begin{smallmatrix}0&1\\1&0\end{smallmatrix}\bigr)$, com
+$|\det S|=1$, a inversa fica em $\mathbb{Z}$. É por isso que o swap inteiro
+nos pares realiza a inversão multiplicativa sem sair dos inteiros. $\square$
+\end{proposicao}
+
+%======================================================================
+\section{Dir e Cruz: componentes simétrica e antissimétrica da leitura}\label{sec:operacao}
+
+Da transformada (Def.~\ref{def:transf}) derivam-se as duas leituras: Dir e
+Cruz são os \textbf{numeradores inteiros das leituras de soma e diferença
+quando colocadas sobre o denominador comum $bd$}. A leitura bilinear $B$ e a
+troca de seus argumentos produzem a forma transposta $B^{\tau}$; os dois
+acoplamentos resultantes são $ad$ e $bc$.
+
+\begin{definicao}[Dir e Cruz como decomposição da
+transformada]\label{def:dircr}
+Escolha-se a forma bilinear $B((a,b),(c,d))=ad$, compatível com o primeiro
+acoplamento da soma em denominador comum; a troca dos argumentos induz a forma
+transposta $B^{\tau}(x,y)=B(y,x)$:
+\[
+B\bigl((a,b),(c,d)\bigr) = ad,\qquad
+B^{\tau}\bigl((a,b),(c,d)\bigr) = bc.
+\]
+A troca dos argumentos da forma bilinear produz a forma transposta $B^{\tau}$,
+e os dois acoplamentos $ad$ e $bc$ são precisamente os termos obtidos dessa
+dupla leitura. $B$ fornece o primeiro dos dois acoplamentos inteiros que
+compõem o numerador da soma no denominador comum $bd$.
+As partes simétrica e antissimétrica são:
+\[
+\boxed{\;
+\operatorname{Dir} = B + B^{\tau} = ad+bc,
+\qquad
+\operatorname{Cruz} = B - B^{\tau} = ad-bc.
+\;}
+\]
+Após extensão dos escalares a $\mathbb{Q}$,
+$P_{\pm}:\operatorname{Bil}(V,V;\mathbb{Q})\to
+\operatorname{Bil}(V,V;\mathbb{Q})$, $P_{\pm}(B)=\frac{1}{2}(B\pm B^{\tau})$,
+são os projectores sobre as partes simétrica e antissimétrica do espaço de
+formas bilineares. Sobre $\mathbb{Z}$, Dir e Cruz são os numeradores inteiros
+correspondentes, $\operatorname{Dir},\operatorname{Cruz}\in
+\operatorname{Bil}(\mathbb{Z}^{2},\mathbb{Z})$:
+$\operatorname{Dir}=2P_{+}(B)$, $\operatorname{Cruz}=2P_{-}(B)$.
+Os projectores $P_{\pm}$ são introduzidos apenas como interpretação racional
+da decomposição; Dir e Cruz permanecem definidos integralmente.
+
+\medskip\noindent\textbf{A derivação pela transformada.} No Algébrico
+(\code{algebrico cor:dir-cruz}), Dir é o que a transformada vê --- o produto
+folha a folha --- e Cruz é o que sobra quando as folhas coincidem. Neste
+degrau, com uma única folha $\operatorname{eval}$:
+\begin{itemize}
+\item $\operatorname{Dir}((a,b),(c,d)) = ad+bc$: é o numerador de
+  $\operatorname{eval}(a,b)+\operatorname{eval}(c,d)$ no denominador comum
+  $bd$. \textbf{Dir é a soma vista pela transformada.}
+\item $\operatorname{Cruz}((a,b),(c,d)) = ad-bc$: é o numerador de
+  $\operatorname{eval}(a,b)-\operatorname{eval}(c,d)$ no denominador comum
+  $bd$. \textbf{Cruz é a diferença vista pela transformada.}
+\end{itemize}
+As duas leituras são construídas a partir da forma bilinear e da sua
+transposição induzida pelo swap;
+não são axiomas adicionais.
+\end{definicao}
+
+\begin{proposicao}[as propriedades são as do Algébrico]\label{prop:dircr}
+\emph{(i)} Dir é simétrico: $ad+bc=cb+da$. \emph{(ii)} Cruz é
+antissimétrico: $ad-bc=-(cb-da)$. \emph{(iii)} $\operatorname{Cruz}=0 \iff
+ad=bc \iff (a,b)\sim(c,d)$: a igualdade de racionais \textbf{é} o cruzado
+nulo. \emph{(iv)} A \textbf{ordem} (com $b,d>0$) é
+$a/b < c/d \iff ad-bc<0$. $\square$
+\end{proposicao}
+
+\noindent O produto cruzado não é apenas uma implementação da equivalência:
+\textbf{é a própria testemunha inteira da equivalência}. A relação
+$(a,b)\sim(c,d)\iff ad-bc=0$ é o núcleo do paper.
+
+\begin{observacao}[por que uma folha e não duas]
+No andar quadrático, $\mathbb{Q}(m\sqrt D)$ tem \textbf{duas} folhas
+$\sigma,\sigma\dg$, e a dourada discreta (\code{algebrico
+thm:dourada-discreta}) opera com ambas. Neste degrau, para cada representante $(a,b)$ com $b\neq0$, a
+relação $bx-a=0$ é linear sobre $\mathbb{Q}$ e determina a única raiz
+$x=a/b$. Neste modelo, a realização da transformada possui uma única folha
+racional, dada pela avaliação $a/b$, e o par
+convolução\,/\,deconvolução é exactamente o produto\,/\,divisão de
+racionais. No modelo quadrático adotado no andar seguinte, essa passagem
+manifesta-se como a introdução de duas folhas $\sigma,\sigma\dg$
+(\code{algebrico thm:fixo-dual}).
+\end{observacao}
+
+%======================================================================
+\section{O gume: a divisão por zero}\label{sec:gume}
+
+O gume deste andar é a \textbf{ausência de fibra} na divisão por zero:
+$0\cdot x = 0$ para todo $x$, logo nenhum $x$ cumpre $0\cdot x=c$ com
+$c\neq 0$. O swap $\iota(0,b)=(b,0)$ \textbf{sai do espaço racional}
+($b\neq 0$ mas $0$ na segunda posição): é exactamente a Lei~$0$ a levar $0$
+a $\infty$ em $\mathbb{P}^{1}$. Por isso, o swap realiza uma involução de
+$\mathbb{Q}^{\times}$, não de $\mathbb{Q}$, pois $0$ não possui inverso
+(\code{lib/racionais.h}, \code{qz\_inverso}):
+\[
+\boxed{
+\mathbb{Q}^{\times}
+\overset{\iota}{\longrightarrow}
+\mathbb{Q}^{\times}
+\qquad\text{(swap nos invertíveis)},
+\qquad
+\mathbb{P}^{1}(\mathbb{Q})
+\overset{\iota}{\longrightarrow}
+\mathbb{P}^{1}(\mathbb{Q})
+\quad\text{(swap total)}.
+}
+
+%======================================================================
+\section{A redução: o fator comum removido}\label{sec:reduz}
+
+O par $(a,b)$ não se guarda como calhou: \textbf{reduz-se} pelo $\gcd$, que
+remove a redundância de representação, com a convenção canónica $b>0$ e
+$\gcd(\lvert a\rvert,b)=1$:
+\[
+(a,b)\mapsto\left(\frac{a}{g},\;\frac{b}{g}\right),\qquad g=\gcd(a,b),
+\quad\text{com sinal ajustado para }b>0.
+\]
+No produto $(a,b)\otimes(c,d)$, cancela-se em \textbf{cruz}:
+$g_{1}=\gcd(a,d)$, $g_{2}=\gcd(c,b)$, e substitui-se
+$a\leftarrow a/g_{1}$, $d\leftarrow d/g_{1}$,
+$c\leftarrow c/g_{2}$, $b\leftarrow b/g_{2}$,
+\emph{antes} de multiplicar. Isto evita
+crescimento artificial devido à redundância de representação; a permanência
+dentro de um envelope de $16$~bits é uma propriedade adicional,
+verificada pelos testes da cadeia.
+
+%======================================================================
+\section{As oito leis neste andar}\label{sec:leis}
+
+As leis não são redefinidas axiomaticamente: este paper \textbf{realiza}, no
+espaço de pares, as operações herdadas da construção universal
+(\code{analitico sub:oitoleis}). Quando a operação é explicitada, a preservação
+do domínio inteiro é imediata; quando depende de estrutura adicional, a
+referência é ao teorema correspondente do \emph{Corpo Algébrico}.
+
+\begin{center}\small
+\begin{tabular}{@{}clll@{}}
+\toprule
+lei & realização no par & domínio & estatuto \\
+\midrule
+\textbf{0} & $0=(+1)\oplus(-1)$ em $\mathbb{Q}$; $0\leftrightarrow\infty$ em $\mathbb{P}^{1}$ &
+  $\mathbb{Q}$, $\mathbb{P}^{1}(\mathbb{Q})$ & mista \\
+\textit{dual do andar} & $\iota(a,b)=(b,a)$, $\iota^{2}=I$ (involução multiplicativa) &
+  $\mathbb{Q}^{\times}$ & estrutura do degrau \\
+\textbf{1} & $\nu(a,b)=(-a,b)$, $\nu^{2}=I$ & $\mathbb{Z}^{2}$ & explícita \\
+\textbf{2} & $V\xrightarrow{\sim} V^{**}$ (dual linear canónico) & $\mathbb{Z}^{2}$ & canónica \\
+\textbf{3} & $\operatorname{sgn}(a/b)\in\{-1,0,+1\}$ & $\mathbb{Q}$ & explícita \\
+\textbf{4} & $T+T^{*}$ (tecidos) & --- & \code{algebrico thm:juntas} \\
+\textbf{5} & $J(a,b)=(-b,a)$, $J^{2}=-I$ & $\mathbb{Z}^{2}$ & explícita \\
+\textbf{6} & operação de interface (hexal) & --- & herdada \\
+\textbf{7} & junta dual (octonião) & --- & herdada \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent As Leis $1$, $3$ e $5$ possuem \textbf{realização interna imediata}
+em $\mathbb{Z}^{2}$; a Lei~$0$ possui realização aditiva interna
+($0=(+1)\oplus(-1)$) e realização do gume apenas após a extensão projectiva; a Lei~$2$ é canónica: $V=\mathbb{Z}^{2}\overset{\sim}{\longrightarrow}V^{**}$
+pelo mapa $v\mapsto(\phi\mapsto\phi(v))$, que é isomorfismo porque $V$ é livre
+de posto finito, e não depende do swap. (A palavra ``dual'' na Lei~$2$ refere-se
+ao dual linear $V^{*}=\operatorname{Hom}(V,\mathbb{Z})$, não ao dual da torre
+$\iota$, nem ao dual quadrático $s^{\dagger}=-1/s$ do Corpo Algébrico; as três
+noções não devem ser confundidas.) As Leis $4$, $6$ e $7$ pertencem à estrutura global recebida da torre; este
+paper não fornece uma nova realização independente delas --- são registadas
+para explicitar a posição do degrau na hierarquia. A identidade $J^{4}=I$ é consequência da
+Lei~$5$: $J^{2}=-I$ é a realização em $\operatorname{End}(\mathbb{Z}^{2})$ da
+relação $x^{2}=-1$, portanto $J^{4}=I$.
+
+As realizações são inteiras em $\mathbb{Z}^{2}$; quando o resultado deve
+permanecer em $\mathbb{Q}$, a Lei~$0$ aplica-se em $\mathbb{Q}^{\times}$, e a
+sua extensão natural é $\mathbb{P}^{1}(\mathbb{Q})$.
+
+%======================================================================
+\section{A ligação com o andar quadrático}\label{sec:zsigma}
+
+No andar de cima, o par $(a,b)$ é \textbf{coordenada linear na base}:
+$\alpha=a+b\sigma$ em $\mathbb{Q}(\sigma)$. Neste andar, o par $(a,b)$ é
+\textbf{coordenada homogénea}: $[a:b]$ com $b\neq 0$ dá $\mathbb{Q}$
+(a parte afim de $\mathbb{P}^{1}(\mathbb{Q})$); incluindo $[1:0]=\infty$
+obtém-se $\mathbb{P}^{1}(\mathbb{Q})$.
+São dois papéis diferentes do mesmo dado $(a,b)$:
+\[
+\boxed{\;
+\begin{array}{ll}
+\mathbb{Q}: & [a:b],\ b\neq 0\\[3pt]
+\mathbb{P}^{1}(\mathbb{Q}): & [a:b]\ \text{incluindo }[1:0]=\infty\\[3pt]
+\mathbb{Q}(\sigma): & a+b\sigma \quad\text{(coordenada linear)}
+\end{array}\;}
+\]
+No andar racional, o swap realiza a inversão multiplicativa e normaliza o
+produto dual para $1$. No andar quadrático, a involução específica
+$s\mapsto s\dg=-1/s$ satisfaz $s\,s\dg=-1$; ela \textbf{não} é a conjugação
+de campo $a+b\sqrt{D}\mapsto a-b\sqrt{D}$, embora ambas sejam involuções:
+\[
+\begin{array}{lll}
+\text{conjugação} & a+b\sqrt{D}\mapsto a-b\sqrt{D} & N(s)\in\mathbb{Q},
+\quad\operatorname{Fix}=\mathbb{Q}\\[2pt]
+\text{dobra }\dagger & s\mapsto -1/s & s\,s\dg=-1,
+\quad\operatorname{Fix}=\{s:s^{2}=-1\}
+\end{array}
+\]
+A semelhança é \emph{estrutural} --- não se trata da mesma involução.
+
+\subsection*{O ponto fixo e a descida}
+
+Na parametrização específica do \emph{Corpo Algébrico}
+(\code{algebrico thm:fixo-dual}), o ponto fixo de $g(x)=m+1/x$ é o vector
+próprio de $A_m$, raiz de $x^{2}=mx+1$. O par dual $\sigma,\sigma\dg$
+satisfaz $\sigma+\sigma\dg=m$ (traço, inteiro) e $\sigma\,\sigma\dg=-1$
+(norma, constante). Na parametrização adotada, o inteiro associado ao ponto
+fixo é o seu traço, e a classe de equivalência é realizada, no modelo
+quadrático adotado, pela fibra do traço
+(\code{algebrico thm:descida}):
+\[
+\mathbb{Z}\;\cong\;\{\text{pontos fixos}\}/{\sim},
+\qquad
+\sigma\sim\tau\iff\operatorname{tr}\sigma=\operatorname{tr}\tau.
+\]
+Na parametrização específica adoptada no \emph{Corpo Algébrico}, em que
+$\operatorname{tr}(\sigma_m)=m$, o racional aparece como \textbf{razão de
+traços}: $a/b = \operatorname{tr}(\sigma_a) / \operatorname{tr}(\sigma_b)$; e a relação $(a,b)\sim(c,d)\iff ad=bc$ é
+\emph{recuperada} dos traços cruzados. Esta identificação não é uma construção
+de $\operatorname{Frac}(\mathbb{Z})$; é uma realização particular da interface
+com o andar quadrático já construída no \emph{Corpo Algébrico}.
+Dentro de cada corpo $\mathbb{Q}(m\sqrt D)$, a cópia de $\mathbb{Q}$ é o
+auto-espaço $+1$ da \textbf{conjugação de campo}
+$a+b\sqrt{D}\mapsto a-b\sqrt{D}$, não da involução específica
+$s\dg=-1/s$ (cujo ponto fixo satisfaria $s^{2}=-1$)
+(\code{algebrico thm:descida}(4)).
+
+\subsection*{A posição na tríade: Hurwitz, Gentil e Lebesgue}
+
+\noindent A identificação que se segue com a tríade é uma interpretação
+herdada da arquitectura global; não é usada na prova da construção de
+$\mathbb{Q}$.
+
+No vocabulário da série, o teorema central (\code{analitico thm:central}) diz
+que \textbf{contar} (Hurwitz, o lado discreto --- a norma
+$N(x)=\sum x_i^{2}$) e \textbf{integrar} (Gentil, o lado contínuo --- a fusão
+homogénea) são duais
+pela medida. Se $f:[a,b]\to[f(a),f(b)]$ é uma bijecção monotónica contínua e
+as integrais envolvidas existem, a soma reversível de Lebesgue dá:
+\[
+\int_a^b f \;+\; \int_{f(a)}^{f(b)} f^{-1} \;=\; b\,f(b)-a\,f(a).
+\]
+Neste degrau, a posição é precisa:
+\begin{itemize}
+\item O par $(a,b)$ e o produto cruzado $ad-bc$ vivem no lado
+  \textbf{discreto}: são contagem inteira, sem raiz, sem limite --- Hurwitz.
+\item A completação $\mathbb{Q}\to\mathbb{R}$ pelo corte é o salto para o
+  lado \textbf{contínuo}: o ponto fixo que falta ao andar racional
+  (\code{algebrico thm:corte-fixo}) é alcançado pela soma reversível, não por
+  uma raiz --- Gentil.
+\item No vocabulário da série, a preservação da ordem pelo produto cruzado
+  (sob $b,d>0$) é a interface que será interpretada no andar contínuo como
+  parte do transporte associado à medida (Lebesgue).
+\end{itemize}
+No vocabulário da tríade adoptado nesta série, o degrau
+$\mathbb{Z}\to\mathbb{Q}$ pertence ao lado discreto (Hurwitz): \textbf{tudo é
+contagem}. O salto seguinte $\mathbb{Q}\to\mathbb{R}$ é onde Gentil entra, e
+a reversibilidade da soma é o mecanismo que liga os dois sem avaliar uma raiz.
+
+%======================================================================
+\section{O zero como cúspide e ponto fixo}\label{sec:cuspide}
+
+\noindent\textbf{Nota.} As identificações desta secção são estrutura herdada
+da geometria do \emph{Corpo Algébrico}; não são necessárias para a construção
+de $\mathbb{Q}$ apresentada no Teorema~\ref{thm:q} e são usadas aqui apenas
+para posicionamento na torre.
+
+\medskip\noindent
+No \emph{Corpo Algébrico} (Teor.~\ref*{thm:cuspide} ali), a cúspide é o lugar
+onde o discriminante se anula e as duas folhas da transformada universal
+colidem: $\operatorname{disc}M=\operatorname{tr}^{2}M-4\det M=0$.
+No formalismo geométrico herdado, os racionais aparecem como dados associados
+à cúspide, e os cortes irracionais são o complemento.
+
+\medskip\noindent\textbf{A inversão é derivada, não primitiva} --- cf.\
+Prop.~\ref{prop:conv}.
+
+\medskip\noindent\textbf{O zero é o ponto fixo da reflexão.} A tríade
+$\tau\in\{-1,0,+1\}$ indexa os regimes (elíptico, parabólico, hiperbólico). A
+reflexão $\tau\mapsto-\tau$ é uma involução, e o seu único ponto fixo em
+$\mathbb{Z}$ é $\tau=0$:
+\[
+\boxed{\;\tau\dg=\tau\iff -\tau=\tau\iff 2\tau=0\iff\tau=0.\;}
+\]
+É por isso que o zero é canónico: não se escolhe a origem --- \emph{quem se
+fixa é a origem}. No nível dos pares, $0=[(0,1)]$ é a classe cujo swap
+$(1,0)\notin V_{\mathrm{rat}}$ escapa para a extensão projectiva; a
+Lei~$0$ é a realização projectiva deste gume.
+
+\medskip\noindent\textbf{Observação --- interpretação herdada da torre.}
+\[
+\begin{array}{clll}
+\tau=-1 & \text{elíptico} & \textbf{topologia} & \text{fecha: ordem finita, tudo volta}\\[2pt]
+\tau=\phantom{-}0 & \text{cúspide} & \textbf{álgebra} & \text{ponto fixo: só }\pm I\text{ fecham}\\[2pt]
+\tau=+1 & \text{hiperbólico} & \textbf{análise} & \text{não fecha: é o corte}
+\end{array}
+\]
+A reflexão troca topologia com análise e fixa a álgebra --- é a dualidade
+discreto\,$\leftrightarrow$\,contínuo com o fundamento quieto. A
+identificação entre esses dois papéis do zero --- $0=[(0,1)]$ como neutro
+aditivo de $\mathbb{Q}$ e $\tau=0$ como ponto fixo da reflexão --- é uma
+\textbf{compatibilidade herdada} da estrutura global; não é necessária para a
+construção do corpo $\mathbb{Q}$. Na interpretação herdada da torre, este
+degrau está localizado na cúspide ($\tau=0$); a passagem ao corte ($\tau=+1$)
+é o degrau seguinte.
+
+%======================================================================
+\section{O degrau seguinte: a completação}\label{sec:qstar}
+
+O degrau seguinte da torre é
+$\mathbb{Q}\longrightarrow\mathbb{R}$.
+Neste formalismo, $\mathbb{R}$ é obtido pela adjunção dos pontos determinados
+pelos cortes de $\mathbb{Q}$. Na linguagem da torre
+(\code{analitico thm:tecidos}):
+\[
+T_{k+1}=T_{k}+\mathcal{C}(T_{k}),
+\]
+onde $\mathcal{C}(\mathbb{Q})$ é o conjunto de cortes que $\mathbb{Q}$ não
+contém. É neste degrau que surge a completude necessária à passagem do domínio
+enumerável para a estrutura contínua de $\mathbb{R}$.
+
+\subsection*{Três caminhos para o mesmo ponto}
+
+O \code{lib/reais.h} fornece três realizações do mesmo valor real $\sqrt{a}$;
+a cadeia de testes verifica que elas concordam. A equivalência entre essas
+realizações é uma propriedade da interface com o andar seguinte; não é
+necessária para o Teorema~\ref{thm:q}.
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+caminho & construção & tipo \\
+\midrule
+\textbf{1. o corte} & $A=\{q\in\mathbb{Q}:q\leq 0 \text{ ou } q^2<a\}$ --- decisão inteira &
+\code{Corte \{a, n\}} \\
+\textbf{2. o ponto fixo} & $x\mapsto(a+bx)/(x+b)$, Möbius --- cada iterado é racional &
+\code{rz\_passo} \\
+\textbf{3. a fração contínua} & periódica por Lagrange & \code{lado} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent As etapas finitas das três realizações usam a aritmética de pares
+deste paper; o objecto limite pertence à completude.
+
+\subsection*{O que a completação acrescenta à migração}
+
+\begin{enumerate}
+  \item As decisões finitas que constroem o corte não exigem um tipo aritmético
+        novo: são realizadas sobre pares de inteiros. O objecto completo
+        determinado pelo corte pertence ao novo domínio $\mathbb{R}$.
+  \item A bisseção (\code{rz\_encaixota}) e o Möbius (\code{rz\_passo}) operam
+        sobre \code{Qz} --- o par deste paper.
+  \item Neste formalismo, o salto $\mathbb{Q}\to\mathbb{R}$ é o primeiro desta
+        cadeia em que a completude passa a ser uma propriedade estrutural
+        necessária.
+\end{enumerate}
+
+%======================================================================
+\section{Irracionalidade de $\sqrt{2}$}\label{sec:sqrt2}
+
+O buraco que $\mathbb{Q}$ não contém é visível pelo \textbf{corte}.
+Defina
+\[
+A = \{r\in\mathbb{Q}: r\leq 0 \text{ ou } r^2 < 2\}.
+\]
+$A$ é um corte de Dedekind: não vazio, fechado para baixo, sem maior elemento.
+Para ver que $A$ não tem máximo: se $r\in A$ com $r>0$ e $r^{2}<2$, escolha
+racional $0<h<\min\{1,\,(2-r^{2})/(2r+1)\}$; como $h<1$ implica $h^{2}<h$,
+$(r+h)^{2}=r^{2}+2rh+h^{2}<r^{2}+(2r+1)h<2$, logo $r+h\in A$ e $r+h>r$.
+O real determinado por esse corte não pertence a $\mathbb{Q}$: se $s=p/q$ com $\gcd(p,q)=1$ e $s>0$,
+então $s^{2}=2$ implica $p^{2}=2q^{2}$, que obriga $p$ par; escrevendo $p=2k$,
+$4k^{2}=2q^{2}$ obriga $q$ par --- contradição com $\gcd(p,q)=1$.
+
+\noindent Logo o corte $A$ define um real que não é racional. A decisão
+``$r^{2}<2$?'' é inteira: $(p,q)\mapsto p^{2}$ vs $2q^{2}$, produto cruzado
+de pares --- \textbf{nenhum limiar, nenhuma tolerância}.
+
+\begin{observacao}[o MMC não pertence ao núcleo]
+A construção de $\mathbb{Q}$ por pares de inteiros não requer uma unidade
+comum de denominadores. O MMC pertence somente ao caminho de representação que
+escolhe uma escala comum para vários racionais. No núcleo algébrico, soma,
+produto, inversão e comparação operam directamente sobre pares, com
+cancelamento por $\gcd$ e produto cruzado:
+\[
+\text{MMC é uma normalização opcional de representação;}\qquad
+\gcd + \text{Cruz são suficientes para a construção.}
+\]
+\end{observacao}
+
+%======================================================================
+\section{Resumo para a migração}\label{sec:migra}
+
+\begin{enumerate}
+  \item O racional \textbf{é a classe} de um par ordenado de inteiros $(a,b)$,
+        $b\neq 0$.
+  \item As operações fazem-se por aritmética de inteiros: soma, produto, oposto,
+        inverso (swap).
+  \item A ordem é por produto cruzado: $ad$ vs $bc$, com $b,d>0$.
+  \item Reduzir pelo $\gcd$ remove a redundância de representação.
+  \item As leis $0$--$3$ e $5$ têm realizações inteiras explícitas em
+        $\mathbb{Z}^{2}$.
+  \item O tipo computacional é o \code{Qz \{int p, q;\}} de
+        \code{lib/racionais.h}, com comparação por \code{d32\_cmp\_prod}.
+  \item Para descer a $16$ bits, a representação passa a ser
+        \code{Q16 \{int16 p, q;\}}, mantendo a mesma estrutura de pares. Os
+        produtos intermediários continuam a ser realizados em largura superior
+        ($32$ bits) e reduzidos antes de voltar ao domínio de $16$ bits. A
+        validade da migração depende de um envelope de valores que deve ser
+        medido pelos testes da cadeia. $\mathbb{Q}$ não é limitada a $16$
+        bits; \code{Q16} é uma realização finita verificada de um envelope.
+\end{enumerate}
+
+%======================================================================
+\section{Resultados já obtidos}\label{sec:ja}
+
+\noindent\textbf{Objecto matemático versus realização finita.} O objecto
+matemático é $\mathbb{Z}^{2}/{\sim}\cong\mathbb{Q}$, que é infinito. A
+realização computacional \code{Qz}/\code{Q16} é uma janela finita medida
+dentro desse objecto. Os testes verificam a janela, não a infinitude de
+$\mathbb{Q}$.
+
+\medskip\noindent
+Cada realização computacional finita descrita neste paper já foi
+\textbf{implementada} e \textbf{medida} nos domínios indicados. Os testes abaixo não substituem as demonstrações matemáticas:
+verificam a realização computacional das identidades em domínios finitos
+explicitamente especificados.
+Os três ficheiros centrais são \code{lib/racionais.h},
+\code{lib/dual16.h}, e \code{tests/racionais\_fixos.c}.
+
+%----------------------------------------------------------------------
+\subsection*{O par como tipo: \code{lib/racionais.h}}
+
+As operações matemáticas preservam o domínio $\mathbb{Z}^{2}$; a realização
+\code{Qz} preserva apenas o subconjunto finito coberto pelo envelope medido.
+O envelope canónico é
+\[
+E_{16}=\bigl\{(p,q)\in\mathbb{Z}^{2}:
+-32768\le p\le 32767,\;1\le q\le 32767,\;\gcd(|p|,q)=1\bigr\}.
+\]
+\code{Qz} não realiza todo $\mathbb{Q}$, nem é um subcorpo finito; é um
+envelope finito de representantes canónicos.  Cada operação deve retornar
+elemento de $E_{16}$ ou sinalizar saturação.  Em particular,
+$\operatorname{red}(0,b)=(0,1)$ para todo $b\neq 0$.
+
+O objecto matemático é $\mathbb{Z}^{2}$; \code{Qz} é uma realização finita
+desse objecto num envelope de $16$~bits:
+\begin{verbatim}
+    typedef struct { int16_t p, q; } Qz;   /* p/q em par de 16 bits, q ≠ 0 */
+\end{verbatim}
+As operações da Def.~\ref{def:ops} estão realizadas:
+
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+operação (§\ref{sec:ops}) & função & o que faz & nota \\
+\midrule
+soma        & \code{qz\_soma}     & $(ad'+cb',\,g\,b'd')$ com $g=\gcd(b,d)$, $b'=b/g$, $d'=d/g$ & cancela em cruz \\
+produto     & \code{qz\_mult}     & $(ac',\,bd')$ com cancelamento & $\gcd(a,d)$ e $\gcd(c,b)$ \\
+oposto      & \code{qz\_oposto}   & $(-a,\,b)$ & Lei 1 \\
+inverso     & \code{qz\_inverso}  & $(b,\,a)$ & swap (involução multiplicativa) \\
+divisão     & \code{qz\_divide}   & $a \otimes b^{-1}$ & recusa $b=0$ \\
+redução     & \code{qz}           & divide por $\gcd$, $q>0$ (inverte ambos se necessário) & forma canónica do representante \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent A saturação (\code{qz\_saturou}) é \textbf{contada à parte dos
+defeitos}: o que não cabe conta-se, e não enrola calado.
+
+%----------------------------------------------------------------------
+\subsection*{Produto exacto: par opera com par e resulta em par}
+
+As operações deste degrau operam \textbf{pares com pares e resultam em pares}.
+Cada produto inteiro entre componentes de $16$~bits é representado exactamente
+por uma palavra de $32$~bits, materializada como dois blocos de $16$~bits
+$(alto,baixo)$ --- sem depender de um tipo inteiro nativo de largura superior:
+\begin{verbatim}
+    typedef struct { uint16_t alto, baixo; } D32;
+\end{verbatim}
+A largura dupla é realizada estruturalmente por dois blocos de $16$~bits.
+O par de palavras $(alto,baixo)$ representa exactamente os $32$~bits do
+resultado em complemento de dois; a interpretação assinada ocorre após a
+recomposição. Não se interpreta o overflow de um
+\code{int16\_t} como o produto inteiro: a decomposição $(alto,baixo)$
+\textbf{representa o resultado completo}. A redução ao domínio \code{Q16}
+ocorre posteriormente, sob o envelope medido.
+
+Todas as operações preservam a representação racional por pares; os produtos
+intermediários podem exigir representação de largura dupla, aqui realizada por
+duas palavras de $16$~bits:
+\begin{itemize}
+\item \textbf{soma}: $(a,b)\oplus(c,d)=(ad+bc,\;bd)$ --- os produtos
+  intermediários são de largura dupla, o resultado é um par racional;
+\item \textbf{produto}: $(a,b)\otimes(c,d)=(ac,\;bd)$ --- cada componente é
+  um produto de $16$~bits em largura dupla, reduzido após cancelamento;
+\item \textbf{comparação}: $\operatorname{sinal}(ad-bc)$ --- os produtos
+  cruzados são de largura dupla, o sinal é lido do alto.
+\end{itemize}
+
+A comparação de ordem opera directamente nos pares:
+\begin{verbatim}
+    int d16_cmp_prod(int16_t a, int16_t b,
+                     int16_t c, int16_t d);  /* sinal de a·b − c·d */
+\end{verbatim}
+que compara $ab$ com $cd$ \textbf{sem materializar nenhum dos dois como objecto
+\code{Qz}}: compara o alto (interpretado como signed de $16$~bits) primeiro; em caso de
+igualdade, compara o baixo (unsigned) --- produto cruzado exacto na
+representação em palavras de $16$~bits.
+
+A comparação $|a/b - c/d| < \varepsilon$, com $\varepsilon=e/f$, $f>0$
+(\code{qz\_dist\_menor}) é reduzida a comparação inteira e opera inteiramente
+por pares. Nenhuma das medições listadas utiliza \code{double}
+nem decisões por limiar de ponto flutuante.
+
+%----------------------------------------------------------------------
+\subsection*{Dir e Cruz medidos: \code{tests/racionais\_fixos.c}}
+
+O teste §Q4 varre $12^4 = 20\,736$ quádruplos ($a,b,c,d\in\{-6,\ldots,5\}$,
+excluindo denominadores nulos) e verifica que a
+\textbf{implementação computacional} da equivalência coincide entrada a entrada
+com o predicado inteiro $ad=bc$ --- zero divergências.
+
+\subsection*{Compatibilidade com o andar quadrático}
+
+Os testes Q5--Q8 não pertencem ao núcleo deste degrau ($\mathbb{Z}\to\mathbb{Q}$);
+verificam a interface com a realização já existente no andar superior.
+
+\medskip\noindent
+O teste §Q5 mede Dir e Cruz em cinco corpos quadráticos ($D=5,8,13,20,29$):
+\begin{itemize}
+  \item Dir tem parte $\sqrt D$ nula --- \textbf{é racional}.
+  \item Cruz tem parte inteira nula --- \textbf{é irracional puro}.
+  \item Dir $+$ Cruz devolve $x$ sem resto.
+  \item Com a identidade no lugar da dobra, \emph{todos} seriam fixos --- o gume.
+\end{itemize}
+\textbf{Prova.} Para todo $D$ não quadrado, a conjugação de
+$\mathbb{Q}(\sqrt{D})$ tem auto-espaço $+1$ igual a $\mathbb{Q}$.
+\textbf{Verifica.} Q5 testa essa identidade nas instâncias
+$D=5,8,13,20,29$.
+
+O teste §Q7 mede a descida: $F(p,q)\neq 0$ em toda truncatura.
+
+O teste §Q8 verifica o teorema dos resíduos: um resíduo sozinho é irracional,
+e a soma dos dois cai em $\mathbb{Z}$ --- são os dois que dão o inteiro.
+
+%----------------------------------------------------------------------
+\subsection*{Inventário}
+
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+afirmação & função / teste & ficheiro & resultado \\
+\midrule
+o par $(a,b)$ & \code{Qz \{p, q\}} & \code{lib/racionais.h} & tipo \\
+soma por inteiros & \code{qz\_soma} & \code{lib/racionais.h} & $\checkmark$ \\
+produto por inteiros & \code{qz\_mult} & \code{lib/racionais.h} & $\checkmark$ \\
+inverso = swap & \code{qz\_inverso} & \code{lib/racionais.h} & $\checkmark$ \\
+oposto = Lei 1 & \code{qz\_oposto} & \code{lib/racionais.h} & $\checkmark$ \\
+redução pelo $\gcd$ & \code{qz} & \code{lib/racionais.h} & $\checkmark$ \\
+saturação contada & \code{qz\_saturou} & \code{lib/racionais.h} & $\checkmark$ \\
+$16\times16$ exacto em par & \code{d16\_mult} & \code{lib/dual16.h} & $\checkmark$ \\
+ordem por prod.\ cruzado & \code{d16\_cmp\_prod} & \code{lib/dual16.h} & $\checkmark$ \\
+$|a-b|<\varepsilon$ & \code{qz\_dist\_menor} & \code{lib/racionais.h} & $\checkmark$ \\
+$x^2$ vs $c$ & \code{qz\_cmp\_quad} & \code{lib/racionais.h} & $\checkmark$ \\
+traço = inteiro & §Q1 & \code{tests/racionais\_fixos.c} & $60/60$ \\
+norma $=-1$ (gume) & §Q2 & \code{tests/racionais\_fixos.c} & $60/60$ \\
+$\sigma_m$ irracional & §Q3 & \code{tests/racionais\_fixos.c} & $60/60$ \\
+equiv.\ por traço = $ad{=}bc$ & §Q4 & \code{tests/racionais\_fixos.c} & $20736/20736$ \\
+$\operatorname{Fix}(\tau)=\mathbb{Q}$ em $\mathbb{Q}(\sqrt D)$ & §Q5 & \code{tests/racionais\_fixos.c} & $845$ \\
+recorrência do pto fixo & §Q6 & \code{tests/racionais\_fixos.c} & $144/144$ \\
+descida: $F\neq0$ & §Q7 & \code{tests/racionais\_fixos.c} & $\checkmark$ \\
+resíduos $\to$ traço & §Q8 & \code{tests/racionais\_fixos.c} & $\checkmark$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Nenhuma destas medições usa \code{double} ou limiar de ponto
+flutuante}, nos caminhos de execução cobertos pelos testes Q1--Q8.
+
+\medskip\noindent A construção de $\mathbb{Q}$ é o primeiro andar em que
+pares, dualidade, produto cruzado e aritmética inteira aparecem
+simultaneamente na representação do objecto; o andar seguinte muda de natureza porque introduz completude.
+A migração para \code{int16} não está a inventar uma representação
+computacional nova: está a materializar o andar
+$\mathbb{Z}\to\operatorname{Frac}(\mathbb{Z})$ que já estava implícito na
+torre.
+
+\end{document}

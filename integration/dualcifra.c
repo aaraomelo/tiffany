@@ -15,16 +15,16 @@
 #define MAXF 32
 #define MAXP 128
 #define D 768
-#define S 10000LL                         /* escala fixa: embedding ×10⁴            */
+#define S 10000L                          /* escala fixa: embedding ×10⁴            */
 #define P 769                             /* primo com P−1 = 768 — NTT exacta     */
 
-#define PA DISCO_FIXO2(long long, D, 53)
-#define FR DISCO_FIXO2(long long, D, 121)
+#define PA DISCO_FIXO2(long, D, 53)
+#define FR DISCO_FIXO2(long, D, 121)
 
 static int NPAL[MAXF];
 static int NF = 0, NP = 0;
 
-typedef long long Z;
+typedef long Z;
 
 static long modp(long x){
     x %= P;
@@ -76,9 +76,9 @@ static Z parse_decimal_z(const char **pp){
     int neg = 0;
     if(*p == '-'){ neg = 1; p++; }
     else if(*p == '+') p++;
-    long long w = 0;
+    long w = 0;
     while(*p >= '0' && *p <= '9'){ w = w * 10 + (*p - '0'); p++; }
-    long long f = 0, fd = 1;
+    long f = 0, fd = 1;
     if(*p == '.'){
         p++;
         while(*p >= '0' && *p <= '9' && fd < S){
@@ -98,9 +98,9 @@ static Z f32_bits_para_z(unsigned int u){
     unsigned mant = u & 0x7FFFFFu;
     if(exp == 0) return 0;
     int e = exp - 127;
-    long long sig = (long long)(1u << 23 | mant);
-    long long num = sig;
-    long long den = 1LL << 23;
+    long sig = (long)(1u << 23 | mant);
+    long num = sig;
+    long den = 1LL << 23;
     if(e >= 0){ while(e--) num <<= 1; }
     else { while(e++) den <<= 1; }
     Z v = (Z)((num * S) / den);
@@ -143,28 +143,28 @@ static int le_emb(const char *cam, Z (*dst)[D], int max){
 
 /* cosseno em ℚ: dot²·den² ? cmp²·na·nb  (cmp/den = limiar) */
 static int cos_gt(Z *a, Z *b, long cmp_num, long cmp_den){
-    long long dot = 0, na = 0, nb = 0;
+    long dot = 0, na = 0, nb = 0;
     for(int i = 0; i < D; i++){
-        dot += (long long)a[i] * b[i];
-        na  += (long long)a[i] * a[i];
-        nb  += (long long)b[i] * b[i];
+        dot += (long)a[i] * b[i];
+        na  += (long)a[i] * a[i];
+        nb  += (long)b[i] * b[i];
     }
     if(na <= 0 || nb <= 0) return 0;
-    long long lhs = dot * dot * (long long)cmp_den * cmp_den;
-    long long rhs = (long long)cmp_num * cmp_num * na * nb;
+    long lhs = dot * dot * (long)cmp_den * cmp_den;
+    long rhs = (long)cmp_num * cmp_num * na * nb;
     return lhs > rhs;
 }
 
 static int cos_ge(Z *a, Z *b, long cmp_num, long cmp_den){
-    long long dot = 0, na = 0, nb = 0;
+    long dot = 0, na = 0, nb = 0;
     for(int i = 0; i < D; i++){
-        dot += (long long)a[i] * b[i];
-        na  += (long long)a[i] * a[i];
-        nb  += (long long)b[i] * b[i];
+        dot += (long)a[i] * b[i];
+        na  += (long)a[i] * a[i];
+        nb  += (long)b[i] * b[i];
     }
     if(na <= 0 || nb <= 0) return 0;
-    long long lhs = dot * dot * (long long)cmp_den * (long long)cmp_den;
-    long long rhs = (long long)cmp_num * (long long)cmp_num * na * nb;
+    long lhs = dot * dot * (long)cmp_den * (long)cmp_den;
+    long rhs = (long)cmp_num * (long)cmp_num * na * nb;
     return lhs >= rhs;
 }
 
@@ -179,9 +179,9 @@ static void conv_mod(const long *a, const long *b, long *c){
 
 static void conv_z(Z *a, Z *b, Z *c){
     for(int k = 0; k < D; k++){
-        long long s = 0;
+        long s = 0;
         for(int j = 0; j < D; j++)
-            s += (long long)a[j] * b[(k - j + D) % D];
+            s += (long)a[j] * b[(k - j + D) % D];
         c[k] = (Z)s;
     }
 }
@@ -195,7 +195,7 @@ static void secao_W1(void){
     printf("\n§W1  ELE ENTRA SOMANDO — a torre branca, medida\n\n");
     printf("        frase   palavras   cos>ruido?\n");
     int base = 0, melhor_que_ruido = 0;
-    long long soma_c = 0, soma_r = 0;
+    long soma_c = 0, soma_r = 0;
     for(int i = 0; i < NF; i++){
         Z s[D] = {0};
         for(int k = 0; k < NPAL[i]; k++)
@@ -204,10 +204,10 @@ static void secao_W1(void){
         int c_gt = cos_gt(FR[i], s, 1, 1);
         int r_gt = cos_gt(FR[i], PA[outra], 1, 1);
         if(c_gt && !r_gt) melhor_que_ruido++;
-        long long dot_c = 0, dot_r = 0;
+        long dot_c = 0, dot_r = 0;
         for(int d = 0; d < D; d++){
-            dot_c += (long long)FR[i][d] * s[d];
-            dot_r += (long long)FR[i][d] * PA[outra][d];
+            dot_c += (long)FR[i][d] * s[d];
+            dot_r += (long)FR[i][d] * PA[outra][d];
         }
         soma_c += dot_c; soma_r += dot_r;
         printf("        %5d   %8d   %s\n", i, NPAL[i], c_gt ? "sim" : "nao");
@@ -215,7 +215,7 @@ static void secao_W1(void){
     }
     ok("a SOMA das palavras aponta na direção da frase em todas", melhor_que_ruido == NF);
     ok("e em média muito acima do controlo — a operação natural dele É ⊕",
-       soma_c > soma_r + (long long)NPAL[0] * S / 10);
+       soma_c > soma_r + (long)NPAL[0] * S / 10);
     conclui("o zero estava certo; a pergunta é que estava errada.");
 }
 
@@ -293,12 +293,12 @@ static void secao_W4(void){
     long B = 0, C = 1;
     long Q[4][2] = { {3,2}, {-3,2}, {-3,-2}, {3,-2} };
     const char *nome[4] = { "I  (+,+)", "II (−,+)", "III(−,−)", "IV (+,−)" };
-    long long mod0 = 0;
+    long mod0 = 0;
     int modulos_iguais = 1;
     for(int i = 0; i < 4; i++){
         long a = Q[i][0], b = Q[i][1], cc = 1, d = 1;
         long ra = a*cc - C*b*d, rb = a*d + b*cc + B*b*d;
-        long long m = (long long)ra*ra + (long long)rb*rb;
+        long m = (long)ra*ra + (long)rb*rb;
         if(i == 0) mod0 = m;
         else if(m != mod0) modulos_iguais = 0;
         printf("        %-11s (%2ld,%2ld)   (%3ld,%3ld)       %lld\n", nome[i], a, b, ra, rb, m);
@@ -318,7 +318,7 @@ static void secao_W5(void){
     printf("\n§W5  DUAS COORDENADAS — o par, e não 768 séries\n\n");
     long pares[MAXF][2];
     for(int i = 0; i < NF; i++){
-        long long a = 0, b = 0;
+        long a = 0, b = 0;
         for(int d = 0; d < D; d += 2) a += FR[i][d];
         for(int d = 1; d < D; d += 2) b += FR[i][d];
         pares[i][0] = (long)(a / S);
@@ -349,13 +349,13 @@ static void secao_W6(void){
     printf("\n        frase   n²·inv² (escala S)\n");
     int um = 0;
     for(int i = 0; i < NF && i < 5; i++){
-        long long n2 = 0;
-        for(int d = 0; d < D; d++) n2 += (long long)FR[i][d] * FR[i][d];
+        long n2 = 0;
+        for(int d = 0; d < D; d++) n2 += (long)FR[i][d] * FR[i][d];
         if(n2 <= 0) continue;
         /* inv = S²/n em escala: n²·(S²/n)² = S⁴/n² · n² = S⁴ — verifica n²·inv² = S⁴ */
-        long long inv2 = (S * S) / n2;
+        long inv2 = (S * S) / n2;
         if(n2 * inv2 == S * S) um++;
-        printf("        %5d   n²·inv² = %lld\n", i, (long long)(n2 * inv2));
+        printf("        %5d   n²·inv² = %lld\n", i, (long)(n2 * inv2));
     }
     ok("a escala dele vezes a nossa dá 1 em todos — a conservação é exata", um == (NF < 5 ? NF : 5));
     conclui("um estica, o outro contrai, e o que fica de pé é o produto — que é 1.");
@@ -363,10 +363,10 @@ static void secao_W6(void){
 
 /* ================================================================================ */
 int main(void){
-    disco_prende(DISCO_BASE(121), "dados/FR.bin", (size_t)(MAXF) * D, sizeof(long long));
-    disco_zera(FR, (size_t)(MAXF) * D, sizeof(long long));
-    disco_prende(DISCO_BASE(53), "dados/PA.bin", (size_t)MAXP * D, sizeof(long long));
-    disco_zera(PA, (size_t)MAXP * D, sizeof(long long));
+    disco_prende(DISCO_BASE(121), "dados/FR.bin", (size_t)(MAXF) * D, sizeof(long));
+    disco_zera(FR, (size_t)(MAXF) * D, sizeof(long));
+    disco_prende(DISCO_BASE(53), "dados/PA.bin", (size_t)MAXP * D, sizeof(long));
+    disco_zera(PA, (size_t)MAXP * D, sizeof(long));
     NF = le_emb("/tmp/frases.txt", FR, MAXF);
     NP = le_emb("/tmp/palavras.txt", PA, MAXP);
     FILE *m = fopen("/tmp/mapa.txt", "r");
