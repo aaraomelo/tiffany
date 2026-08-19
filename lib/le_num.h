@@ -12,6 +12,7 @@
 #define LE_NUM_H
 
 #include <string.h>
+#include <stdint.h>
 
 /* um dígito hex -> valor (0..15), ou -1 se não for hex */
 static int hex1(int c){
@@ -26,29 +27,58 @@ static int hex2(const char *s){
     return (a < 0 || b < 0) ? -1 : (a << 4) | b;
 }
 
+/* divisão exacta sem 128 bits: computa q = floor((num << shift)/den) e r = (num<<shift)%den */
+static void divmod_shift_u64(uint64_t num, uint64_t den, unsigned shift, uint64_t *q, uint64_t *r){
+    /* long division do inteiro representado por (num<<shift),
+       com implementação por bits, sem materializar 128 bits. */
+    uint64_t qq = 0, rr = 0;
+    /* o maior bit do num fica em 63, então (num<<shift) tem no máx. 64+shift bits */
+    for(int i = 63 + (int)shift; i >= 0; i--){
+        uint64_t bit = 0;
+        if((unsigned)i >= shift) bit = (num >> ((unsigned)i - shift)) & 1ULL;
+        rr = (rr << 1) | bit;
+        qq <<= 1;
+        if(rr >= den){ rr -= den; qq |= 1ULL; }
+    }
+    *q = qq;
+    *r = rr;
+}
+
 /* f64 como BITS IEEE754, racional exacto num/den — sem o tipo double no compilador */
-static unsigned long long le_f64_bits_pq(__int128 num, __int128 den, int neg){
+static uint64_t le_f64_bits_pq(uint64_t num, uint64_t den, int neg){
     if(num == 0) return neg ? 0x8000000000000000ULL : 0ULL;
-    if(num < 0){ num = -num; neg ^= 1; }
-    if(den < 0){ den = -den; neg ^= 1; }
     if(den == 0) return neg ? 0xFFF0000000000000ULL : 0x7FF0000000000000ULL;
+
     int uexp = 0;
-    while(num < den){ num <<= 1; uexp--; if(uexp < -1075) return neg ? 0x8000000000000000ULL : 0ULL; }
-    while(num >= den * 2){ den <<= 1; uexp++; if(uexp > 1024) return neg ? 0xFFF0000000000000ULL : 0x7FF0000000000000ULL; }
-    __int128 mant = (num << 52) / den;
-    __int128 rem  = (num << 52) % den;
-    if(rem * 2 > den || (rem * 2 == den && (mant & 1))) mant++;
-    if(mant == ((__int128)1 << 53)){ mant >>= 1; uexp++; }
+    while(num < den){
+        num <<= 1;
+        uexp--;
+        if(uexp < -1075) return neg ? 0x8000000000000000ULL : 0ULL;
+    }
+    while(den && num >= (den << 1)){
+        den <<= 1;
+        uexp++;
+        if(uexp > 1024) return neg ? 0xFFF0000000000000ULL : 0x7FF0000000000000ULL;
+    }
+
+    /* 1 <= num/den < 2 */
+    uint64_t mant, rem;
+    divmod_shift_u64(num, den, 52, &mant, &rem); /* mant = floor((num<<52)/den) */
+    if((rem << 1) > den || ((rem << 1) == den && (mant & 1ULL))) mant++;
+    if(mant == (1ULL << 53)){ mant >>= 1; uexp++; }
+
     int bexp = uexp + 1023;
     if(bexp <= 0){
         if(bexp < -52) return neg ? 0x8000000000000000ULL : 0ULL;
-        mant = ((num << (52 + bexp)) / den);
-        unsigned long long out = (unsigned long long)mant & ((1ULL << 52) - 1);
+        unsigned shift = (unsigned)(52 + bexp); /* bexp<=0, então shift em [0,52] */
+        uint64_t dummy;
+        divmod_shift_u64(num, den, shift, &mant, &dummy);
+        uint64_t out = mant & ((1ULL << 52) - 1);
         return neg ? out | 0x8000000000000000ULL : out;
     }
     if(bexp >= 2047) return neg ? 0xFFF0000000000000ULL : 0x7FF0000000000000ULL;
-    unsigned long long out = ((unsigned long long)(bexp & 0x7FF) << 52)
-                           | ((unsigned long long)mant & ((1ULL << 52) - 1));
+
+    uint64_t out = ((uint64_t)(bexp & 0x7FF) << 52) | (mant & ((1ULL << 52) - 1));
     return neg ? out | 0x8000000000000000ULL : out;
 }
 
@@ -61,7 +91,7 @@ static long str2dbl(const char *s, const char **end){
     while(*s == ' ' || *s == '\t') s++;
     int neg = 0;
     if(*s == '+' || *s == '-'){ neg = (*s == '-'); s++; }
-    __int128 num = 0; int frac = 0, houve = 0;
+    uint64_t num = 0; int frac = 0, houve = 0;
     while(*s >= '0' && *s <= '9'){ num = num * 10 + (*s - '0'); s++; houve = 1; }
     if(*s == '.'){ s++; while(*s >= '0' && *s <= '9'){ num = num * 10 + (*s - '0'); frac++; s++; houve = 1; } }
     if(!houve){ if(end) *end = s0; return 0; }
@@ -74,12 +104,12 @@ static long str2dbl(const char *s, const char **end){
             exp = es ? -e : e; s = t;
         }
     }
-    __int128 den = 1;
+    uint64_t den = 1;
     int e10 = exp - frac;
     if(e10 >= 0){ for(int i = 0; i < e10; i++) num *= 10; }
     else        { for(int i = 0; i < -e10; i++) den *= 10; }
     if(end) *end = s;
-    unsigned long long bits = le_f64_bits_pq(num, den, neg);
+    uint64_t bits = le_f64_bits_pq(num, den, neg);
     long out; memcpy(&out, &bits, 8);
     return out;
 }

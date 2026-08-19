@@ -47,6 +47,8 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdarg.h>
+#include <stdint.h>
+#include <inttypes.h>
 #include "../lib/disco.h"   /* «o ficheiro É o vector»: o endereço é CONSTANTE, não variável */
 
 /* ─────────────────────────────────────────────────────── o buffer, e o LEB128 dos dois sinais */
@@ -258,50 +260,186 @@ enum { TK_FIM, TK_NUM, TK_REAL, TK_ID, TK_PUN, TK_TEXTO };
 
 
 /* f64 como BITS (IEEE754), sem o tipo double no compilador */
-static unsigned long long F64_0 = 0ULL;
-static unsigned long long F64_1 = 0x3FF0000000000000ULL;
-static unsigned long long f64_neg_bits(unsigned long long b){ return b ^ 0x8000000000000000ULL; }
+static uint64_t F64_0 = 0ULL;
+static uint64_t F64_1 = 0x3FF0000000000000ULL;
+static uint64_t f64_neg_bits(uint64_t b){ return b ^ 0x8000000000000000ULL; }
 
-static unsigned long long f64_bits_pq(__int128 num, __int128 den, int neg){
+/* divisão exacta sem 128 bits: computa q = floor((num<<shift)/den) e r = (num<<shift)%den */
+static void divmod_shift_u64(uint64_t num, uint64_t den, unsigned shift, uint64_t *q, uint64_t *r){
+    uint64_t qq = 0, rr = 0;
+    for(int i = 63 + (int)shift; i >= 0; i--){
+        uint64_t bit = 0;
+        if((unsigned)i >= shift) bit = (num >> ((unsigned)i - shift)) & 1ULL;
+        rr = (rr << 1) | bit;
+        qq <<= 1;
+        if(rr >= den){ rr -= den; qq |= 1ULL; }
+    }
+    *q = qq;
+    *r = rr;
+}
+
+static uint64_t f64_bits_pq(uint64_t num, uint64_t den, int neg){
     if(num == 0) return neg ? 0x8000000000000000ULL : 0ULL;
-    if(num < 0){ num = -num; neg ^= 1; }
-    if(den < 0){ den = -den; neg ^= 1; }
     if(den == 0) return neg ? 0xFFF0000000000000ULL : 0x7FF0000000000000ULL; /* ±inf */
     int uexp = 0;
     while(num < den){ num <<= 1; uexp--; if(uexp < -1075) return neg ? 0x8000000000000000ULL : 0ULL; }
-    while(num >= den * 2){ den <<= 1; uexp++; if(uexp > 1024) return neg ? 0xFFF0000000000000ULL : 0x7FF0000000000000ULL; }
+    while(den && num >= (den << 1)){
+        den <<= 1;
+        uexp++;
+        if(uexp > 1024) return neg ? 0xFFF0000000000000ULL : 0x7FF0000000000000ULL;
+    }
     /* 1 <= num/den < 2 */
-    __int128 mant = (num << 52) / den;
-    __int128 rem  = (num << 52) % den;
-    if(rem * 2 > den || (rem * 2 == den && (mant & 1))) mant++;
-    if(mant == ((__int128)1 << 53)){ mant >>= 1; uexp++; }
+    uint64_t mant, rem;
+    divmod_shift_u64(num, den, 52, &mant, &rem); /* mant = floor((num<<52)/den) */
+    if((rem << 1) > den || ((rem << 1) == den && (mant & 1ULL))) mant++;
+    if(mant == (1ULL << 53)){ mant >>= 1; uexp++; }
     int bexp = uexp + 1023;
     if(bexp <= 0){
-        /* subnormal / zero */
         if(bexp < -52) return neg ? 0x8000000000000000ULL : 0ULL;
-        mant = ((num << (52 + bexp)) / den);
-        unsigned long long out = (unsigned long long)mant & ((1ULL << 52) - 1);
+        unsigned shift = (unsigned)(52 + bexp); /* bexp<=0 => shift in [0,52] */
+        uint64_t dummy;
+        divmod_shift_u64(num, den, shift, &mant, &dummy);
+        uint64_t out = mant & ((1ULL << 52) - 1);
         return neg ? out | 0x8000000000000000ULL : out;
     }
     if(bexp >= 2047) return neg ? 0xFFF0000000000000ULL : 0x7FF0000000000000ULL;
-    unsigned long long out = ((unsigned long long)(bexp & 0x7FF) << 52)
-                           | ((unsigned long long)mant & ((1ULL << 52) - 1));
+    uint64_t out = ((uint64_t)(bexp & 0x7FF) << 52) | (mant & ((1ULL << 52) - 1));
     return neg ? out | 0x8000000000000000ULL : out;
 }
 
-static unsigned long long f64_bits_from_i(long v){
-    return f64_bits_pq(v, 1, 0);
+static uint64_t f64_bits_from_i(long v){
+    return f64_bits_pq(v < 0 ? (uint64_t)(-v) : (uint64_t)v, 1, v < 0);
 }
 
-static unsigned long long f64_de_texto(const char *s, char **fim){
+static uint64_t f64_de_texto(const char *s, char **fim){
     const char *p = s;
     while(*p == ' ' || *p == '\t') p++;
     int neg = 0;
     if(*p == '-'){ neg = 1; p++; }
     else if(*p == '+') p++;
-    __int128 num = 0; int frac = 0, houve = 0;
-    while(*p >= '0' && *p <= '9'){ num = num * 10 + (*p - '0'); p++; houve = 1; }
-    if(*p == '.'){ p++; while(*p >= '0' && *p <= '9'){ num = num * 10 + (*p - '0'); frac++; p++; houve = 1; } }
+    /* caminho 1: hex-float C99 (emitido por real_txt_bits) */
+    if(p[0] == '0' && (p[1] == 'x' || p[1] == 'X')){
+        p += 2;
+        uint64_t mant_hex = 0;
+        int frac_len = 0;
+        int houve = 0;
+
+        while(isxdigit((unsigned char)*p)){
+            int d;
+            if(*p >= '0' && *p <= '9') d = *p - '0';
+            else if(*p >= 'a' && *p <= 'f') d = *p - 'a' + 10;
+            else d = *p - 'A' + 10;
+            mant_hex = (mant_hex << 4) | (uint64_t)d;
+            p++;
+            houve = 1;
+        }
+
+        if(*p == '.'){
+            p++;
+            while(isxdigit((unsigned char)*p)){
+                int d;
+                if(*p >= '0' && *p <= '9') d = *p - '0';
+                else if(*p >= 'a' && *p <= 'f') d = *p - 'a' + 10;
+                else d = *p - 'A' + 10;
+                mant_hex = (mant_hex << 4) | (uint64_t)d;
+                p++;
+                frac_len++;
+                houve = 1;
+            }
+        }
+
+        if(!houve){
+            if(fim) *fim = (char*)s;
+            return 0;
+        }
+
+        if(*p == 'p' || *p == 'P'){
+            p++;
+            int es = 0;
+            if(*p == '+' || *p == '-'){ es = (*p == '-'); p++; }
+            int E = 0;
+            while(*p >= '0' && *p <= '9'){ E = E * 10 + (*p - '0'); p++; }
+            if(es) E = -E;
+
+            int shift = E - 4 * frac_len; /* valor = M * 2^shift */
+
+            if(mant_hex == 0){
+                if(fim) *fim = (char*)p;
+                return neg ? 0x8000000000000000ULL : 0ULL;
+            }
+
+            int h = 63 - __builtin_clzll(mant_hex); /* mant_hex tem bits em [h..0] com h>=0 */
+            int exponent2 = h + shift;
+
+            if(exponent2 > 1023){
+                if(fim) *fim = (char*)p;
+                uint64_t inf = neg ? 0xFFF0000000000000ULL : 0x7FF0000000000000ULL;
+                return inf;
+            }
+            if(exponent2 < -1074){
+                if(fim) *fim = (char*)p;
+                return neg ? 0x8000000000000000ULL : 0ULL;
+            }
+
+            /* normalização/rounding para mantissa de 53 bits */
+            uint64_t mant53 = 0;
+            if(h > 52){
+                unsigned r = (unsigned)(h - 52);
+                uint64_t rem = mant_hex & ((1ULL << r) - 1);
+                mant53 = mant_hex >> r;
+                uint64_t half = 1ULL << (r - 1);
+                if(rem > half || (rem == half && (mant53 & 1ULL))) mant53++;
+            } else {
+                mant53 = mant_hex << (52 - h);
+            }
+            if(mant53 == (1ULL << 53)){
+                mant53 >>= 1;
+                exponent2++;
+            }
+
+            if(exponent2 >= -1022){
+                uint64_t exp_field = (uint64_t)(exponent2 + 1023);
+                uint64_t frac_field = mant53 & ((1ULL << 52) - 1);
+                uint64_t out = (exp_field << 52) | frac_field;
+                if(neg) out |= 0x8000000000000000ULL;
+                if(fim) *fim = (char*)p;
+                return out;
+            }
+
+            /* subnormal: exponent field 0, valor = frac * 2^-1074 */
+            int shift_sub = (-1022 - exponent2); /* >=1 */
+            if(shift_sub >= 64){
+                if(fim) *fim = (char*)p;
+                return neg ? 0x8000000000000000ULL : 0ULL;
+            }
+            uint64_t rem = 0;
+            uint64_t frac_field = mant53;
+            if(shift_sub > 0){
+                rem = mant53 & ((1ULL << shift_sub) - 1);
+                frac_field = mant53 >> shift_sub;
+                uint64_t half = 1ULL << (shift_sub - 1);
+                if(rem > half || (rem == half && (frac_field & 1ULL))) frac_field++;
+                /* se arredondar para o próximo normal, cai no mínimo normal */
+                if(frac_field == (1ULL << 52)){
+                    frac_field = 0;
+                    uint64_t out = (1ULL << 52);
+                    if(neg) out |= 0x8000000000000000ULL;
+                    if(fim) *fim = (char*)p;
+                    return out;
+                }
+            }
+            frac_field &= ((1ULL << 52) - 1);
+            if(neg) frac_field |= 0x8000000000000000ULL;
+            if(fim) *fim = (char*)p;
+            return frac_field;
+        }
+        /* formato hex sem 'p': não é hex-float reconhecido */
+    }
+
+    /* caminho 2: decimal (o comportamento original) */
+    uint64_t num = 0; int frac = 0, houve = 0;
+    while(*p >= '0' && *p <= '9'){ num = num * 10 + (uint64_t)(*p - '0'); p++; houve = 1; }
+    if(*p == '.'){ p++; while(*p >= '0' && *p <= '9'){ num = num * 10 + (uint64_t)(*p - '0'); frac++; p++; houve = 1; } }
     if(!houve){ if(fim) *fim = (char*)s; return 0; }
     int exp = 0;
     if(*p == 'e' || *p == 'E'){
@@ -312,7 +450,7 @@ static unsigned long long f64_de_texto(const char *s, char **fim){
             exp = es ? -e : e; p = t;
         }
     }
-    __int128 den = 1;
+    uint64_t den = 1;
     int e10 = exp - frac;
     if(e10 >= 0){ for(int i = 0; i < e10; i++) num *= 10; }
     else { for(int i = 0; i < -e10; i++) den *= 10; }
@@ -320,64 +458,33 @@ static unsigned long long f64_de_texto(const char *s, char **fim){
     return f64_bits_pq(num, den, neg);
 }
 
-static void real_txt_bits(unsigned long long bits, char *o, long cap){
-    /* formatação decimal a partir dos bits — sem snprintf %g */
-    int neg = (bits >> 63) & 1;
-    int bexp = (int)((bits >> 52) & 0x7FF);
-    unsigned long long frac = bits & ((1ULL << 52) - 1);
-    if(bexp == 2047){ snprintf(o, (size_t)cap, neg ? "-inf" : (frac ? "nan" : "inf")); return; }
-    __int128 num, den;
-    if(bexp == 0){
-        if(frac == 0){ snprintf(o, (size_t)cap, neg ? "-0.0" : "0.0"); return; }
-        num = frac; den = (__int128)1 << 1074; /* 2^(1022+52) */
-    } else {
-        num = ((__int128)1 << 52) | frac;
-        int uexp = bexp - 1023 - 52;
-        den = 1;
-        if(uexp >= 0) num <<= uexp;
-        else den <<= -uexp;
+static void real_txt_bits(uint64_t bits, char *o, long cap){
+    /* hex-float garante reconstituição exacta dos bits no cc do sistema */
+    int sign = (int)((bits >> 63) & 1);
+    uint64_t exp = (bits >> 52) & 0x7FF;
+    uint64_t frac = bits & ((1ULL << 52) - 1);
+
+    if(exp == 0x7FF){
+        if(frac == 0) snprintf(o, (size_t)cap, "%sinf", sign ? "-" : "");
+        else          snprintf(o, (size_t)cap, "%snan", sign ? "-" : "");
+        return;
     }
-    /* produzir ~17 dígitos significativos */
-    if(neg) num = -num;
-    /* escala para inteiro com 17 casas se |x|<1e17 */
-    int casas = 0;
-    __int128 a = num < 0 ? -num : num;
-    while(a < den && casas < 20){ a *= 10; casas++; }
-    __int128 q = a / den;
-    /* escrever q com ponto */
-    char tmp[64];
-    /* simplificação: usa divisão longa decimal */
-    {
-        __int128 n = num < 0 ? -num : num;
-        __int128 d = den;
-        long long inteiro = (long long)(n / d);
-        __int128 rem = n % d;
-        int k = 0;
-        if(neg){ tmp[k++] = '-'; }
-        {
-            char ib[32]; int m = 0;
-            long long t = inteiro;
-            if(t == 0) ib[m++] = '0';
-            else { long long u = t; char r[32]; int rr=0; while(u){ r[rr++] = '0'+(u%10); u/=10; } while(rr) ib[m++]=r[--rr]; }
-            for(int i=0;i<m;i++) tmp[k++]=ib[i];
+    if(exp == 0){
+        if(frac == 0){
+            snprintf(o, (size_t)cap, "%s0.0", sign ? "-" : "");
+            return;
         }
-        tmp[k++] = '.';
-        for(int i = 0; i < 17; i++){
-            rem *= 10;
-            int dig = (int)(rem / d);
-            tmp[k++] = '0' + dig;
-            rem %= d;
-            if(rem == 0 && i >= 0){ /* keep at least one */ }
-        }
-        while(k > 2 && tmp[k-1] == '0') k--;
-        if(tmp[k-1] == '.') tmp[k++] = '0';
-        tmp[k] = 0;
-        snprintf(o, (size_t)cap, "%s", tmp);
+        /* subnormal: value = frac * 2^-1074, e em hex-float isso corresponde a p=-1022 */
+        snprintf(o, (size_t)cap, "%s0x0.%013" PRIx64 "p-1022", sign ? "-" : "", frac);
+        return;
     }
+
+    int e = (int)exp - 1023;
+    snprintf(o, (size_t)cap, "%s0x1.%013" PRIx64 "p%+d", sign ? "-" : "", frac, e);
 }
 
 
-typedef struct { int k; long i; unsigned long long d; int longo; char s[64]; } Tok;
+typedef struct { int k; long i; uint64_t d; int longo; char s[64]; } Tok;
 
 /* SRC, POS, LINHA e o Tok corrente vivem no disco — ver o bloco dos registos, no topo. */
 
@@ -840,7 +947,7 @@ static long le_um_valor(int tipo, unsigned char *saco, long onde){
         le_agregado(MKT(BASE(tipo), PTR(tipo) ? PTR(tipo) - 1 : 0), saco + onde, 1 << 16, &q);
         return t;
     }
-    long v = 0; unsigned long long d = 0; int real = 0, neg = 0;
+    long v = 0; uint64_t d = 0; int real = 0, neg = 0;
     if(e_pun("-")){ neg = 1; avanca(); }
     if(T.k == TK_TEXTO){
         unsigned char b[8192]; long n = LIT_N;
@@ -853,7 +960,7 @@ static long le_um_valor(int tipo, unsigned char *saco, long onde){
     else erro("valor constante na tabela");
 
     if(!PTR(tipo) && BASE(tipo) == TF64){
-        unsigned long long x = real ? d : f64_bits_from_i(v);
+        uint64_t x = real ? d : f64_bits_from_i(v);
         memcpy(saco + onde, &x, 8);
         return 8;
     }
@@ -992,7 +1099,7 @@ static void um(int t){
     int a = aritm(t);
     if(a == TI32){ bput(&COD, 0x41); bs(&COD, PTR(t) ? tam_de(MKT(BASE(t), PTR(t)-1)) : 1); }
     else if(a == TI64){ bput(&COD, 0x42); bs(&COD, 1); }
-    else { unsigned long long d = F64_1; bput(&COD, 0x44); bmany(&COD, &d, 8); }
+    else { uint64_t d = F64_1; bput(&COD, 0x44); bmany(&COD, &d, 8); }
 }
 static unsigned op_soma(int t){ int a = aritm(t); return a == TI32 ? 0x6A : a == TI64 ? 0x7C : 0xA0; }
 static unsigned op_sub (int t){ int a = aritm(t); return a == TI32 ? 0x6B : a == TI64 ? 0x7D : 0xA1; }
@@ -1113,7 +1220,7 @@ static int primaria(void){
         if(L || v > 2147483647L || v < -2147483648L){ bput(&COD, 0x42); bs(&COD, v); return TI64; }
         bput(&COD, 0x41); bs(&COD, v); return TI32;
     }
-    if(T.k == TK_REAL){ unsigned long long d = T.d; avanca(); bput(&COD, 0x44); bmany(&COD, &d, 8); return TF64; }
+    if(T.k == TK_REAL){ uint64_t d = T.d; avanca(); bput(&COD, 0x44); bmany(&COD, &d, 8); return TF64; }
     if(T.k == TK_TEXTO){
         unsigned char b[8192]; long n = LIT_N;
         memcpy(b, LIT, (size_t)n + 1);
@@ -1536,7 +1643,7 @@ static int unaria(void){
             bput(&COD, 0x41); bs(&COD, v); return TI32;
         }
         if(T.k == TK_REAL){
-            unsigned long long d = f64_neg_bits(T.d); avanca();
+            uint64_t d = f64_neg_bits(T.d); avanca();
             bput(&COD, 0x44); bmany(&COD, &d, 8); return TF64;
         }
         POS = g_pos; LINHA = g_lin; T = g_tok;
@@ -1552,7 +1659,7 @@ static int unaria(void){
     if(e_pun("+")){ avanca(); return unaria(); }
     if(e_pun("!")){
         avanca(); int t = unaria();
-        if(t == TF64){ unsigned long long z = F64_0; bput(&COD, 0x44); bmany(&COD, &z, 8); bput(&COD, 0x61); }
+        if(t == TF64){ uint64_t z = F64_0; bput(&COD, 0x44); bmany(&COD, &z, 8); bput(&COD, 0x61); }
         else bput(&COD, t == TI64 ? 0x50 : 0x45);  /* eqz */
         return TI32;
     }
@@ -1682,7 +1789,7 @@ static int nivel(int p){
 static void normaliza_bool(int t){
     int a = aritm(t);
     if(a == TI64){ bput(&COD, 0x50); bput(&COD, 0x45); }
-    else if(a == TF64){ unsigned long long z = F64_0; bput(&COD, 0x44); bmany(&COD, &z, 8); bput(&COD, 0x62); }
+    else if(a == TF64){ uint64_t z = F64_0; bput(&COD, 0x44); bmany(&COD, &z, 8); bput(&COD, 0x62); }
 }
 
 /* o && e o || CURTOCIRCUITAM, e em wasm isso é um `if` com resultado — não um salto à mão */
@@ -1691,13 +1798,13 @@ static int logico_e(void){
     while(e_pun("&&")){
         avanca();
         if(t == TI64) bput(&COD, 0x50), bput(&COD, 0x45);   /* i64 -> i32 booleano */
-        else if(t == TF64){ unsigned long long z=F64_0; bput(&COD,0x44); bmany(&COD,&z,8); bput(&COD,0x62); }
+        else if(t == TF64){ uint64_t z=F64_0; bput(&COD,0x44); bmany(&COD,&z,8); bput(&COD,0x62); }
         bput(&COD, 0x04); bput(&COD, 0x7F);                  /* if (result i32) */
         PROF++;
         long g_frase = M_FRASE; M_FRASE = COD.n; EM_BRACO++;  /* o braço é o seu princípio */
         int td = nivel(0);
         if(td == TI64) bput(&COD, 0x50), bput(&COD, 0x45);
-        else if(td == TF64){ unsigned long long z=F64_0; bput(&COD,0x44); bmany(&COD,&z,8); bput(&COD,0x62); }
+        else if(td == TF64){ uint64_t z=F64_0; bput(&COD,0x44); bmany(&COD,&z,8); bput(&COD,0x62); }
         else { bput(&COD, 0x45); bput(&COD, 0x45); }         /* normaliza para 0/1 */
         bput(&COD, 0x05);                                    /* else */
         bput(&COD, 0x41); bs(&COD, 0);
@@ -1712,14 +1819,14 @@ static int logico_ou(void){
     while(e_pun("||")){
         avanca();
         if(t == TI64) bput(&COD, 0x50), bput(&COD, 0x45);
-        else if(t == TF64){ unsigned long long z=F64_0; bput(&COD,0x44); bmany(&COD,&z,8); bput(&COD,0x62); }
+        else if(t == TF64){ uint64_t z=F64_0; bput(&COD,0x44); bmany(&COD,&z,8); bput(&COD,0x62); }
         bput(&COD, 0x04); bput(&COD, 0x7F); PROF++;
         bput(&COD, 0x41); bs(&COD, 1);
         bput(&COD, 0x05);
         long g_frase = M_FRASE; M_FRASE = COD.n; EM_BRACO++;
         int td = logico_e();
         if(td == TI64) bput(&COD, 0x50), bput(&COD, 0x45);
-        else if(td == TF64){ unsigned long long z=F64_0; bput(&COD,0x44); bmany(&COD,&z,8); bput(&COD,0x62); }
+        else if(td == TF64){ uint64_t z=F64_0; bput(&COD,0x44); bmany(&COD,&z,8); bput(&COD,0x62); }
         else { bput(&COD, 0x45); bput(&COD, 0x45); }
         bput(&COD, 0x0B); PROF--;
         EM_BRACO--; M_FRASE = g_frase;
@@ -2233,7 +2340,7 @@ static void condicao(void){                          /* deixa um i32 booleano na
     M_FRASE = COD.n;                                 /* a condição é uma frase, e é aqui */
     int t = expr();
     if(t == TI64) bput(&COD, 0x50), bput(&COD, 0x45);
-    else if(t == TF64){ unsigned long long z = F64_0; bput(&COD, 0x44); bmany(&COD, &z, 8); bput(&COD, 0x62); }
+    else if(t == TF64){ uint64_t z = F64_0; bput(&COD, 0x44); bmany(&COD, &z, 8); bput(&COD, 0x62); }
 }
 
 static void instrucao(void){
@@ -2538,7 +2645,7 @@ static void colhe_assinaturas(void){
                         unsigned char b8[8];
                         long nb = tam_de(ret); if(nb < 1 || nb > 8) nb = 8;
                         if(T.k == TK_NUM){ long v = neg ? -T.i : T.i; avanca(); memcpy(b8, &v, 8); }
-                        else if(T.k == TK_REAL){ unsigned long long d = neg ? f64_neg_bits(T.d) : T.d; avanca(); memcpy(b8, &d, 8); }
+                        else if(T.k == TK_REAL){ uint64_t d = neg ? f64_neg_bits(T.d) : T.d; avanca(); memcpy(b8, &d, 8); }
                         else erro("inicializador global que não sobe");
                         if(acha_slot(nome) < 0){
                             abre_slot(nome, ret, quantos);
@@ -2768,7 +2875,7 @@ static void frase(int prof, const char *fmt, ...){
 
 /* o número que volta tem de voltar NO SEU TIPO: um `double` sem ponto lê-se inteiro, e um
  * `long` sem o `L` lê-se int — e aí os bytes que saem já não são os que entraram */
-static void real_txt(unsigned long long d, char *o, long cap){
+static void real_txt(uint64_t d, char *o, long cap){
     real_txt_bits(d, o, cap);
 }
 
@@ -2880,7 +2987,7 @@ static int desce_corpo(long fim, int fidx){
         case 0x22: { unsigned long i = d_u(); empurra("(v%lu = %s)", i, puxa()); } break;
         case 0x41: empurra("%ld", d_s()); break;                        /* i32.const */
         case 0x42: empurra("%ldL", d_s()); break;                       /* i64.const */
-        case 0x44: { unsigned long long d; memcpy(&d, M + MP, 8); MP += 8;
+        case 0x44: { uint64_t d; memcpy(&d, M + MP, 8); MP += 8;
                      char o[64]; real_txt(d, o, sizeof o); empurra("%s", o); } break;
         /* MOVE(+1): do slot para o registo. Volta como `*(T*)(endereço)` — a forma que
          * torna a subir exactamente no mesmo opcode, sem eu ter de adivinhar se aquilo era
@@ -3619,7 +3726,7 @@ int main(int argc, char **argv){
         if(QUADRO > 0) move_quadro(+1);
         /* o wasm exige um valor no fim se a função devolve algo — o C deixa-o implícito */
         if(FUNS[fi].ret != TVOID){
-            if(FUNS[fi].ret == TF64){ unsigned long long z = F64_0; bput(&COD, 0x44); bmany(&COD, &z, 8); }
+            if(FUNS[fi].ret == TF64){ uint64_t z = F64_0; bput(&COD, 0x44); bmany(&COD, &z, 8); }
             else { bput(&COD, FUNS[fi].ret == TI64 ? 0x42 : 0x41); bs(&COD, 0); }
         }
         bput(&COD, 0x0B);                              /* end */
