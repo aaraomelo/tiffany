@@ -233,21 +233,60 @@ console.log('\n§T3  E o PDF usa os degraus da escala, não 10 e 14.\n')
     admissiveis.push(b0)
     for (const [a, b] of pares) admissiveis.push(Math.floor(b0 * a / b))
   }
-  const perto = (t) => admissiveis.some((m) => Math.abs(t - m / 1000) <= 0.02)
-  let fora = 0, docs = 0
+  /* auditoria 20/08: aqui estava `Math.abs(t - m/1000) <= 0.02` — mais uma régua
+   * escrita à mão, e larga: MEDIDO, seis dos oito tamanhos batem EXACTAMENTE e os
+   * outros dois falham por 1 e por 4 milésimos. Vinte milésimos de folga é cinco
+   * vezes o que o objecto pede, e uma folga assim não mede: absorve.
+   *
+   * A comparação é INTEIRA. O PDF escreve a escala do cm com seis casas
+   * (`0.023420`), logo o corpo em pontos é exacto ao MILÉSIMO, e os degraus do
+   * estilo.tex já entram aqui em milésimos (`mil`). Não há vírgula a comparar.
+   *
+   * E a folga sai da FONTE, como no §T1: o estilo escreve DUAS casas, logo cada
+   * degrau é exacto a ±5 milésimos. Um tamanho DERIVADO — o produto cruzado de
+   * dois degraus que o compositor faz — herda essa meia-casa, e é essa a única
+   * folga que existe. Um degrau NÃO derivado não tem folga nenhuma: bate ou não. */
+  /* e a folga DERIVA-SE das casas que o estilo escreve, em vez de ser escrita: com
+   * `e` decimais, a granularidade em milésimos é 1000/10^e e a meia casa é metade.
+   * Assim, se o estilo passar a três decimais, a folga aperta sozinha — e a frase
+   * da asserção continua verdadeira sem ninguém lhe tocar. */
+  const CASAS = Math.max(...D.map((d) => d.corpoD.e))
+  const FOLGA_DERIVADO = 1000 / Math.pow(10, CASAS) / 2   /* 2 casas → 5 milésimos */
+  const base = new Set(mil)                        /* os degraus, sem derivação */
+  const milDe = (t) => Math.round(t * 1000)        /* t tem 2 casas: exacto */
+  const exacto = (t) => base.has(milDe(t))
+  const perto = (t) => exacto(t) ||
+    admissiveis.some((m) => Math.abs(milDe(t) - m) <= FOLGA_DERIVADO)
+  let fora = 0, docs = 0, exactos = 0, derivados = 0, piorDerivado = 0
   console.log('      documento         tamanhos no PDF')
   for (const [n, f] of [['computacional', 'papers/arquitetura.tex'], ['teoria', 'teoria.tex']]) {
     if (!compoe(f, `/tmp/t_${n}.pdf`)) continue
     docs++
     const ts = tamanhos(`/tmp/t_${n}.pdf`)
-    for (const t of ts) if (!perto(t)) fora++
+    for (const t of ts) {
+      if (!perto(t)) fora++
+      if (exacto(t)) exactos++; else {
+        derivados++
+        let d = Infinity
+        for (const m of admissiveis) d = Math.min(d, Math.abs(milDe(t) - m))
+        if (d > piorDerivado) piorDerivado = d
+      }
+    }
     console.log('      ' + n.padEnd(17) + ts.join(', ') + ' pt')
   }
   console.log('      degraus (exatos): ' + D.map((d) => d.corpo).join(', ') +
               ' — e os derivados por produto cruzado dos pares (0,4) e (1,3)')
+  console.log('      ' + exactos + ' tamanhos batem um degrau EXACTAMENTE (0 milésimos) · ' +
+              derivados + ' são derivados, pior desvio ' + piorDerivado + ' milésimos' +
+              ' (a folga é ' + FOLGA_DERIVADO + ' = meia casa das ' + CASAS +
+              ' que o estilo.tex escreve, derivada e não escrita)')
   ok('todos os tamanhos que aparecem no PDF são degraus da escala do estilo.tex, e nenhum vem' +
      ' de fora dela. Antes eram 10, 12 e 15 — três números escritos à mão, e o do meio nem' +
-     ' sequer da mesma família', docs === 2 && fora === 0)
+     ' sequer da mesma família. E a comparação é INTEIRA, em milésimos: ' + exactos + ' batem um' +
+     ' degrau com desvio ZERO e ' + derivados + ' são derivados (produto cruzado de dois degraus),' +
+     ' dentro da meia-casa que as duas decimais do estilo dão. O `<= 0,02` que aqui estava era' +
+     ' vinte milésimos — cinco vezes o pior desvio real, e uma folga que absorve em vez de medir',
+     docs === 2 && fora === 0 && exactos > 0 && piorDerivado <= FOLGA_DERIVADO)
 }
 
 console.log('\n§T4  O CONTROLO: mudada a escala no estilo.tex, o PDF muda — e volta.\n')

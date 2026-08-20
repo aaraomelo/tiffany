@@ -183,7 +183,7 @@ entropia_dual 0e62dee11e3fc413 0
 equivalencia_universal db7d0dc65a704ccf 0
 erg 018ff0de6dcd8a6a 0
 escada ae20f8b70c7d45e4 0
-escala 0b7bd90b9b7b5b0e 0
+escala b5c334f9d5c62319 0
 escala_dourada 5c990fc76f6f0948 0
 escala_espaco 26ed3534a655fc9d 0
 escuros 6bc3e85125c6c969 0

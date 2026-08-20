@@ -17,7 +17,7 @@ Fase PG: Trios PG1–PG4 FECHADOS. A PROMOÇÃO (saturo→promove) está PROPAGA
     formatos    0 avisos -Wformat no repo (eram 216; ver §17)
     git         0 includes fora do repositório  tests/refs.c §R5  (eram 3 headers)
     js          5 medidores .js passaram a emitir #UNIT: 26 unidades finas (§22)
-    selo        44f982a7e2563880      bash tools/bateria.sh
+    selo        610fb6ed2aa4e400      bash tools/bateria.sh
 
 Verificar SEMPRE com:  bash tools/bateria.sh   (lê AS DUAS linhas: total e unidades)
 
@@ -1011,6 +1011,19 @@ JAVASCRIPT — o limiar escrito à mão, nos dois medidores onde ele decidia
   · traduz_pi_dim.js `|piMotor − piHarness| > 0.001` → IGUALDADE EXACTA em nanos
                      inteiros, os dois lados em BigInt. 42 de 42 linhas comparadas
                      e 42 iguais; um nano de perturbação derruba 40.
+
+E O SEGUNDO QUE FICOU POR CORRIGIR — no MESMO ficheiro que a frente arrumou:
+`escala.js` §T3 tinha `Math.abs(t − m/1000) <= 0,02`, outra régua escrita à mão.
+Medido, a folga não era precisa: dos tamanhos que o PDF traz, 14 batem um degrau
+com desvio ZERO e só 3 são derivados (produto cruzado de dois degraus), com pior
+desvio de 4 milésimos. Vinte milésimos é cinco vezes isso — absorve em vez de
+medir. Agora a comparação é INTEIRA (o PDF escreve a escala com 6 casas, logo o
+corpo é exacto ao milésimo) e a folga DERIVA-SE das casas que o estilo escreve:
+1000/10^casas/2, que dá 5. Se o estilo passar a três decimais, a folga aperta
+sozinha e a frase da asserção continua verdadeira.
+  gume: folga 3 (abaixo do pior desvio) → cai · a base deslocada 1 milésimo → cai
+        (e a primeira tentativa sobreviveu: eu tinha deslocado só `mil`, e o corpo
+        da CLASSE é acrescentado depois e continuava a bater — guarda parcial)
 
 E O QUE EU ACHEI AO VERIFICAR: cinco medidores `.js` chamavam `ok()` e NÃO
 emitiam `#UNIT` — app_arranca (6), design_no_pdf (4), dois_streams (5),
