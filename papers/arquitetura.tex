@@ -965,7 +965,7 @@ E_{16}=\bigl\{(p,q)\in\Z^{2}:
 \code{Qz} não realiza todo $\Q$ --- é janela finita medida; saturação conta-se
 à parte (\code{qz\_saturou}).
 
-\medido{\code{tests/dual16.c} §E0--§E3 ($5/5$); \code{tests/dual32.c} (trava
+\medido{\code{tests/dual16.c} §E0--§EW ($6/6$); \code{tests/dual32.c} (trava
 \code{\_\_int128}); \code{tests/migracao.c} §G5: \code{sizeof(Qz)=4},
 \code{d16\_mult} concorda com int32 em $6480$ casos.}
 \colunas{\code{algebrico thm:torre}; \code{topologico thm:rn}}
@@ -1009,8 +1009,8 @@ na \emph{representação}; a operação reversível recupera-a.
 
 \medido{\code{tests/torre\_alg.c} §T1--§T4; \code{tests/reta.c} §R27:
 \code{rt\_ciclo\_i16/i32/long} concordam;
-\code{tests/transformada\_universal.c} §T21: RtOp $T\in E_{16}$ opera
-coordenadas \code{int16}.}
+\code{tests/transformada\_universal.c} §T21 §TW: RtOp $T\in E_{16}$ opera
+coordenadas \code{int16} e envelope $\Word_8$.}
 \colunas{\code{algebrico def:cone} / \code{thm:cone}}
         {três pipelines em \code{torre\_alg.h}}
         {\code{tests/torre\_alg.c} §T1--§T4; §T4 distingue os três}
@@ -1273,7 +1273,8 @@ $G_{\mathrm{geom}}=|p^{-1}|$). A paridade $G\bmod 2$ é o bit que sobrevive
 (\code{tests/aranha\_g.c} §AG6--§AG7).
 
 \medskip\noindent\textbf{Ligação à cadeia global} abaixo: $\Word_8$ alimenta
-$E_{16}$ quando o par sobe para inteiros de 16~bits; a equivalência em
+$E_{16}$ quando o par sobe para inteiros de 16~bits (\code{dual16.c} §EW,
+\code{transformada\_universal.c} §TW); a equivalência em
 uint16 precede qualquer projeção para byte, como \code{d16\_mult} precede
 \code{Qz} em \code{racionais.tex}.
 
@@ -1515,14 +1516,14 @@ fixa como contrato verificável.
 \toprule
 tema & medidor & resultado \\
 \midrule
-$16\times16$ & \code{tests/dual16.c} & $5/5$ \\
+$16\times16$ & \code{tests/dual16.c} & $6/6$ \\
 $\Q$ migrado & \code{tests/migracao.c} & $7/7$ \\
 descida & \code{tests/cadeia.c} & $10/10$ \\
 firma torre & \code{tests/torre\_alg.c} & §T1--§T4 ($4/4$ cada) \\
 $\Q$ analítico & \code{banco/conversa.c} & 331/331 (completude em $E_{16}$) \\
 quadratura & \code{tests/calculo2.c} & §C1--§C10 \\
 recta / ciclo & \code{tests/reta.c} & $43/43$ \\
-transformada & \code{tests/transformada\_universal.c} & §T21 \\
+transformada & \code{tests/transformada\_universal.c} & §T21 §TW ($26/26$) \\
 ponte $\mathbb{F}_{127}$ & \code{tests/reducao.c} & §DW, §D6 ($8/8$) \\
 $\Q$ fixos & \code{tests/racionais\_fixos.c} & §Q1--§Q8 \\
 ordenar / banco & \code{tests/dualsort.c} & ver §\ref{sec:pecas} \\

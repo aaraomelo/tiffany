@@ -4,11 +4,14 @@
  * §E1  ordem por produto cruzado
  * §E2  soma e diferença do par
  * §E3  operações ⊕ e ⊗ no par racional — racionais.tex Def. def:ops
+ * §EW  W_8² → E₁₆: byte sobe para int16; cruz uint16 antes de d16_mult
  *
  *   cc -O2 -std=c99 -I lib tests/dual16.c -o dual16 && ./dual16
  */
 #include <stdio.h>
 #include <stdint.h>
+#include "naturais.h"
+#include "inteiros.h"
 #include "dual16.h"
 #include "unidade.h"
 
@@ -101,6 +104,34 @@ int main(void){
                casos, mal_m, mal_s);
         ok("(a,b)⊗(c,d)=(ac,bd) exacto no par D32", mal_m == 0);
         ok("(a,b)⊕(c,d)=(ad+bc,bd) exacto no par D32", mal_s == 0);
+    }
+
+    printf("\n§EW W_8² sobe para E₁₆: cruz uint16, produto via d16_mult.\n\n");
+    {
+        long eq_ok = 0, eq_tot = 0, prod_ok = 0, prod_tot = 0;
+        for(int a = 0; a < 256; a += 7) for(int b = 0; b < 256; b += 11)
+        for(int c = 0; c < 256; c += 13) for(int d = 0; d < 256; d += 17){
+            uint8_t ua = (uint8_t)a, ub = (uint8_t)b, uc = (uint8_t)c, ud = (uint8_t)d;
+            eq_tot++;
+            if(w8_equiv(ua, ub, uc, ud) == iz_equiv(a, b, c, d)) eq_ok++;
+        }
+        for(int a = 0; a < 256; a += 3) for(int b = 0; b < 256; b += 5){
+            int16_t ia = (int16_t)(uint8_t)a, ib = (int16_t)(uint8_t)b;
+            D32 p = d16_mult(ia, ib);
+            prod_tot++;
+            if(d32_to_i32(p) == (int32_t)ia * (int32_t)ib) prod_ok++;
+        }
+        uint16_t cruz = w8_cruz_ld(200, 100);
+        int cruz_ok = (cruz == 300u);
+        w8_wrap = 0; w8_saturou = 0;
+        uint8_t w = w8_proj_wrap(cruz);
+        int pol = (w == 44 && w8_wrap == 1 && w8_saturou == 0);
+        printf("      W_8⁴ equiv %ld/%ld; produtos byte→int16 %ld/%ld;"
+               " cruz(200,100)=%u wrap=%u\n",
+               eq_ok, eq_tot, prod_ok, prod_tot, (unsigned)cruz, (unsigned)w);
+        ok("§EW W_8→E₁₆: ∼ em uint16 separada de wrap; d16_mult exacto nos bytes elevados",
+           eq_tot > 0 && eq_ok == eq_tot && prod_tot > 0 && prod_ok == prod_tot
+           && cruz_ok && pol);
     }
 
     printf("\n=== %ld asserções, %ld falhas ===\n", unidades, falhas);

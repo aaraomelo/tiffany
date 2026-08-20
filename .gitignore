@@ -201,6 +201,8 @@ tests/cadeia
 tests/inteiros
 tests/metrica
 tests/migracao
+tests/dual16
+tests/transformada_universal
 tests/reducao
 tests/config_corpo
 tests/disco_wasm

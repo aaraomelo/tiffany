@@ -16,7 +16,8 @@
  *   §T5      o contraste com D quadrado: os divisores de zero (thm:divzero)
  *   §T6      CRUZ é a obstrução à diagonalização simultânea (cor:dir-cruz-folhas)
  *   §T7      AS FOLHAS SÃO O CORTE (thm:folhas-corte)
- *   §T7b     folhas coincidem ⟺ o objecto é racional ⟺ é um PONTO, não um corte
+ *   §T21     RtOp E₁₆ — coordenadas int16 no ciclo (Fase D)
+ *   §TW      W_8 → E₁₆ — coordenadas byte no operador SL(2,ℤ)
  *
  * A raiz nunca se forma: guardam-se os coeficientes, e as duas simétricas são inteiras.
  *
@@ -24,6 +25,7 @@
  */
 #include <stdio.h>
 #include <stdint.h>
+#include "naturais.h"
 #include "qmd.h"
 #include "reta.h"
 #include "unidade.h"
@@ -1462,6 +1464,38 @@ int main(void){
            " nas coordenadas pequenas — T em int16, produto via int32, sem widen calado",
            mal == 0 && cas >= 300 && c16 && c32 && cl &&
            c16p == (int16_t)c32p && c16q == (int16_t)c32q && clp == c32p && clq == c32q);
+    }
+
+    /* ─── §TW ── W_8 → E₁₆: coordenadas byte no RtOp ───────────────────────────
+     * O envelope W_8 alimenta E₁₆ quando (p,q) cabem no byte; a equivalência cruzada
+     * vive em uint16 (naturais.h) — aqui mede-se só que o operador aceita a subida. */
+    {
+        RtOp T = {{ 0, 1, 1, 0 }};
+        long mal = 0, cas = 0;
+        for(int a = 0; a < 256; a += 19) for(int b = 1; b < 256; b += 23){
+            int16_t ip = (int16_t)(uint8_t)a, iq = (int16_t)(uint8_t)b;
+            int16_t hp, hq;
+            int32_t jp, jq;
+            long lp, lq;
+            rt_opera_i16(&T, ip, iq, &hp, &hq);
+            rt_opera_i32(&T, (int32_t)ip, (int32_t)iq, &jp, &jq);
+            rt_opera(&T, ip, iq, &lp, &lq);
+            cas++;
+            if(hp != (int16_t)jp || hq != (int16_t)jq || lp != jp || lq != jq) mal++;
+        }
+        int16_t cp, cq;
+        int32_t c32p, c32q;
+        long clp, clq;
+        int cw = rt_ciclo_i16(&T, rt_iv_palavra, (int16_t)5, (int16_t)3, &cp, &cq);
+        int c32 = rt_ciclo_i32(&T, rt_iv_palavra, 5, 3, &c32p, &c32q);
+        int cl  = rt_ciclo(&T, rt_iv_palavra, 5, 3, &clp, &clq);
+        printf("  §TW W_8→E₁₆: RtOp com coordenadas byte\n");
+        printf("      amostra W_8² ....................... %ld\n", cas);
+        printf("      opera divergências i16/i32/long .... %ld\n", mal);
+        printf("      rt_ciclo_i16/i32/long .............. %d / %d / %d\n\n", cw, c32, cl);
+        ok("§TW W_8→E₁₆: coordenadas byte operam em int16 — mesma peça que §T21, envelope menor",
+           mal == 0 && cas > 100 && cw && c32 && cl
+           && cp == (int16_t)c32p && cq == (int16_t)c32q && clp == c32p && clq == c32q);
     }
 
     printf("  ══ é UMA transformada, e faz DUAS coisas: leva a CONVOLUÇÃO no produto\n");
