@@ -105,8 +105,7 @@ Contrato: lib/torre_alg.h
 
 0. A LEI — a construção que fundamenta a migração
 ==================================================
-papers/inteiros.tex — degrau N → Z, construção formal (FECHADO paper; migração
-em curso):
+papers/inteiros.tex — degrau N → Z, construção formal (FECHADO):
 
     N² → N²/∼ ≅ Z       (a,b)∼(c,d) ⟺ a+d=b+c   (soma cruzada; SEM a-b antes do ∼)
 
@@ -267,7 +266,7 @@ Motivo: matar 64 e escala primeiro; reta.h depende de int32 estável; depois
 fechar descida 8 bits do degrau inteiros.
 
 
-─── FASE E — DESCIDA 8 BITS (degrau inteiros) ────────────────────────────
+─── FASE E — DESCIDA 8 BITS (degrau inteiros) ──────────────── FECHADA ───
 Objectivo: propagar W_8 / uint16-cruz / G_geom pela torre sem contaminar ∼.
 
   Princípios (inteiros.tex + arquitetura.tex §sec:descida):
