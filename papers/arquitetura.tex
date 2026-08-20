@@ -1279,7 +1279,8 @@ uint16 precede qualquer projeção para byte, como \code{d16\_mult} precede
 
 \medido{\code{inteiros.c} §NT1--§NT11 ($14/14$); \code{aranha\_g.c} §AG1--§AG11;
 \code{metrica.c} §M3--§M8 (conservação $|\det|=1$ em $\mathbb{Z}^{2}$);
-\code{migracao.c} §GW; \code{cadeia.c} §KW ($10/10$).}
+\code{migracao.c} §GW; \code{cadeia.c} §KW ($10/10$);
+\code{reducao.c} §DW.}
 \colunas{\code{inteiros.tex}; \code{algebrico thm:metrica}}
         {$\Word_8$; cruz uint16; $G_{\mathrm{alg}}\neq G_{\mathrm{geom}}$; dragão}
         {§NT1--§NT11; §AG2, §AG5--§AG7; §M8}
@@ -1312,13 +1313,14 @@ lógica); a álgebra \emph{ainda opera} no fim da cadeia
 (\code{tests/cadeia.c} §K3).
 
 \medskip\noindent A cadeia medida (\code{tests/cadeia.c}): §KW confirma
-$(a,b)\sim(c,d)$ em uint16 antes do \code{long}; §K2b confirma $Q_z\in E_{16}$ e
+$(a,b)\sim(c,d)$ em uint16 antes do \code{long}; \code{reducao.c} §DW fecha
+$W_8^2\to E_{16}\to\mathbb{F}_{127}$; §K2b confirma $Q_z\in E_{16}$ e
 \code{rt\_opera\_i16}; §K3 exaustão $\mathbb{P}^1(\mathbb{F}_{127})=128$
 pontos; \code{tests/reducao.c} §D6 lê $E_{16}$ sem widen;
 \code{tests/aranha\_g.c} §AG6--§AG7 ($G\bmod2$ na grade).}
 \colunas{\code{teoria sec:duasescadas}; \code{algebrico sec:pontofixo} (corte)}
         {cadeia $\Word_8^2\to\text{long}\to\mathrm{GF}(2)$; perde régua minha, não lei}
-        {\code{tests/cadeia.c} $10/10$; \code{tests/reducao.c} §D6}
+        {\code{tests/cadeia.c} $10/10$; \code{tests/reducao.c} §DW, §D6}
 
 % ═══════════════════════════════════════════════════════════════════════════
 \section{Fronteira I/O: escala só na leitura}\label{sec:fronteira}
@@ -1521,7 +1523,7 @@ $\Q$ analítico & \code{banco/conversa.c} & 331/331 (completude em $E_{16}$) \\
 quadratura & \code{tests/calculo2.c} & §C1--§C10 \\
 recta / ciclo & \code{tests/reta.c} & $43/43$ \\
 transformada & \code{tests/transformada\_universal.c} & §T21 \\
-ponte $\mathbb{F}_{127}$ & \code{tests/reducao.c} & §D6 \\
+ponte $\mathbb{F}_{127}$ & \code{tests/reducao.c} & §DW, §D6 ($8/8$) \\
 $\Q$ fixos & \code{tests/racionais\_fixos.c} & §Q1--§Q8 \\
 ordenar / banco & \code{tests/dualsort.c} & ver §\ref{sec:pecas} \\
 MOVE / ISA & \code{tests/move.c} & ver §\ref{sec:isa} \\

@@ -10,14 +10,23 @@
  * §D3  E ENTÃO ELA REFUTA: uma identidade falsa em ℚ cai em 𝔽₁₂₇, exaustivamente
  * §D4  e o que ela NÃO prova: coincidir em 𝔽₁₂₇ não é ser igual em ℚ — com testemunha
  * §D5  o custo: o refutador varre TODOS os casos e não tem um ramo
+ * §DW  W_8² → E₁₆ → 𝔽₁₂₇: Φ sobe de byte-par; redução herda sem widen
+ * §D6  a ponte lê E₁₆: int16 mod 127, sem widen silencioso
  */
 #include <stdio.h>
+#include <stdint.h>
+#include "naturais.h"
+#include "inteiros.h"
 #include "dual16.h"
 #include "dual32.h"
 #include "racionais.h"
 #include "reta.h"
 #include "reducao.h"
 #include "unidade.h"
+
+static int16_t rd_w8_phi(uint8_t a, uint8_t b){
+    return (int16_t)a - (int16_t)b;
+}
 
 int main(void){
     printf("\n=== A PONTE ENTRE AS FACES: 𝔽₁₂₇ refuta, não prova ===\n");
@@ -183,6 +192,40 @@ int main(void){
            " que permite trazer o desmentido de volta. Provar continua a ser trabalho de"
            " ℚ; DESMENTIR passa a ser trabalho de 𝔽₁₂₇",
            sat == 0 && cas == 16128);
+    }
+
+    /* ═══ §DW W_8² → E₁₆ → 𝔽₁₂₇: inteiro antes da ponte ═════════════════════ */
+    printf("\n§DW De byte-par a 𝔽₁₂₇: Φ em E₁₆, depois mod 127.\n\n");
+    {
+        long bate = 0, tot = 0, eq_ok = 0, eq_tot = 0;
+        for(int a = 0; a < 256; a += 9) for(int b = 0; b < 256; b += 11)
+        for(int c = 0; c < 256; c += 13) for(int d = 0; d < 256; d += 17){
+            uint8_t ua = (uint8_t)a, ub = (uint8_t)b, uc = (uint8_t)c, ud = (uint8_t)d;
+            eq_tot++;
+            if(w8_equiv(ua, ub, uc, ud) == iz_equiv(a, b, c, d)) eq_ok++;
+            if(!w8_equiv(ua, ub, uc, ud)) continue;
+            tot++;
+            Qz qa = qz_de_inteiro((long)rd_w8_phi(ua, ub));
+            Qz qc = qz_de_inteiro((long)rd_w8_phi(uc, ud));
+            Pr ra, rc;
+            if(rd_de_qz(qa, &ra) && rd_de_qz(qc, &rc) && sr_igual(ra, rc)) bate++;
+        }
+        /* (2,0)~(3,1): Φ=2; em 𝔽₁₂₇ é [2:1] */
+        Qz z2 = qz_de_inteiro(2);
+        Pr r2;
+        int nt10 = w8_equiv(2, 0, 3, 1)
+            && rd_w8_phi(2, 0) == rd_w8_phi(3, 1)
+            && rd_de_qz(z2, &r2)
+            && sr_igual(r2, sr_pt((Fp)2, (Fp)1));
+        /* 200+50=250 em uint16 → Φ=150 → 150 mod 127 = 23 */
+        int z150 = rd_de_qz(qz_de_inteiro(150), &r2)
+            && sr_igual(r2, sr_pt((Fp)23, (Fp)1));
+        printf("      W_8⁴ equiv %ld/%ld; classes equivalentes → mesma redução %ld/%ld\n",
+               eq_ok, eq_tot, bate, tot);
+        printf("      (2,0)~(3,1) → [2:1]? %s; Φ(200,50)=150 → [%d:1] em 𝔽₁₂₇? %s\n",
+               nt10 ? "sim" : "nao", z150 ? 23 : -1, z150 ? "sim" : "nao");
+        ok("§DW W_8²→E₁₆→𝔽₁₂₇: equivalentes em uint16 reduzem ao mesmo ponto — ℕ≠W_8, ∼ antes de mod 127",
+           eq_tot > 0 && eq_ok == eq_tot && tot > 0 && bate == tot && nt10 && z150);
     }
 
     /* ═══ §D6 A PONTE LÊ E₁₆: int16 mod 127, sem widen silencioso ═══════════ */

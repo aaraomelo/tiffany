@@ -201,6 +201,7 @@ tests/cadeia
 tests/inteiros
 tests/metrica
 tests/migracao
+tests/reducao
 tests/config_corpo
 tests/disco_wasm
 tests/dtc_viveiro

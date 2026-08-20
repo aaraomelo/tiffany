@@ -5,10 +5,10 @@ Não é histórico. É o que precisas para pegar e continuar.
 ESTADO
 ------
 19/08/2026. Fase A Trios 1–10 fechados. Fase D FECHADA: Qz em E₁₆.
-Fase E (descida 8 bits): Trios 1–3 FECHADOS (início).
+Fase E (descida 8 bits): Trios 1–3 FECHADOS; reducao §DW liga W_8²→𝔽₁₂₇.
 
     inteiros    §NT1–§NT11b (14/14) · cadeia §KW (10/10) · migracao §GW (7/7)
-    aranha_g    §AG1–§AG11 (11/11) · metrica §M1–§M8b (9/9)
+    reducao     §DW (8/8) · aranha_g §AG1–§AG11 (11/11) · metrica §M1–§M8b (9/9)
     bateria     510 : 497 verdes (cristal/refs pré-existentes)
     doubles     3906 → 0              python3 tools/doubles_todos.py  FECHADO
     limiares    58 → 0 régua          (+4 valor físico JS, não alvo)
@@ -254,7 +254,7 @@ padrão dual16. Escrever lib/dual16.h (espelho de dual32: 16×16 → par int16).
     cadeia §K2b: Qz E₁₆ + RtOp int16; reta §R27 cross-check i16/i32/long
   Trio 3:  propagação pelos dependentes   FECHADO (início)
     migracao.c §G5: envelope Qz + d16_mult
-    reducao.c §D6: rd_de_qz lê int16 mod 127
+    reducao §DW: W_8² → Qz E₁₆ → 𝔽₁₂₇ — 8/8 asserções
     transformada_universal.c §T21: rt_opera_i16 / rt_ciclo_i16
 
   Nota: a transformada dourada discreta (tests/gerador_analog.c, GA1/GA2) usa
@@ -287,6 +287,7 @@ Objectivo: propagar W_8 / uint16-cruz / G_geom pela torre sem contaminar ∼.
   Trio 3:  ligação W_8 → E_16 → cadeia.c   FECHADO (início)
     cadeia §KW: W_8² antes de long — 10/10 asserções
     migracao §GW: envelope W_8² → Qz E₁₆ — 7/7 asserções
+    reducao §DW: W_8² → 𝔽₁₂₇ via E₁₆ — 8/8 asserções
 
   Medidores âncora:
     §NT8   equivalência uint16 vs wrap

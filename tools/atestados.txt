@@ -12,7 +12,8 @@ analiticas 970ca1566c452f3a 0
 analog 42c142c0f7d6da49 0
 antissimetrico e48993492f8aa75d 0
 app_arranca abb24b0fe22e3ae2 0
-aritmetica c9272deb01cbb1e5 0
+aranha_g 448e1f5e4400277c 0
+aritmetica a189863630894607 0
 arquimedes_area 3fb4925bc7f62b48 0
 arraytermico d700a92b448f7ffd 0
 artefato ae99b4cae14e442f 0
@@ -40,7 +41,7 @@ bidual f77f0e0070d1bd52 0
 bit_metropolis cf253e5784f3dd06 0
 borda_sem_teto e07519056705af7d 0
 buracos d80eae4b72a7e693 0
-cadeia 9138fe8862b54286 0
+cadeia 7f6c3d03c9cdd524 0
 calculo2 19582a4e67582d14 0
 caminho b30bb4976e4ee877 0
 canal 32b2526a21a0013f 0
@@ -70,7 +71,7 @@ cohomologia_ponte 9c223c5e012c4bc1 0
 colheita 2d8538f5faf3cbdb 0
 colisor_corpos ab5d526892f6dda6 0
 completo 2ba7121e7577db1f 0
-complexo d93dd8e284b81ea1 0
+complexo b1de72d3096e9adc 0
 condicao_pisot 20e5398ec58f76bd 0
 cone_espiral c70d46b54d994a4b 0
 cone_nulo e0b4d86159a39096 0
@@ -87,7 +88,7 @@ continuo 1d0a9f1306dba964 0
 contorno_riemann 6cf7ea38b2e3b6b7 1
 contrato 1dc40867d020a679 0
 controlo_front e94ce67fbef877c1 0
-conversa d2cae688bf38693a 0
+conversa 91119412bdc6da45 0
 converte aed943df396fe8b2 0
 convolucao_universal fc0e5813ad42301b 0
 coroa b7ee5ecba9494c3f 0
@@ -186,7 +187,7 @@ escala_espaco 26ed3534a655fc9d 0
 escuros 6bc3e85125c6c969 0
 espelho 3f83c56f92a7f4d4 0
 espurio 83395778350a5830 0
-esquilo 50446d72cdbc883b 0
+esquilo 9204fc0a5732f8ad 0
 estacao_front 8809fb26de6b6a2e 0
 estado_caos 91765af7f0331eff 0
 estelar 7e929b0eb5730ddb 0
@@ -194,7 +195,7 @@ estelar_completo cb36c48ce439ce5b 0
 estrela 8cf4d2d6ac41c476 0
 estrela_emite df6467ad48c8bc47 0
 estrela_pontofixo 9ade9bcc076378a2 0
-estrela_unifica f7384cdf191bdacc 1
+estrela_unifica 8177ee796d412675 0
 estrutura_corpo 2f62a80aac5c3a03 0
 evolutivo 0977332a2715868b 0
 exaustao 9841923fa1ee8bb1 0
@@ -246,6 +247,7 @@ hurwitz 1504bb355f1e9e1d 0
 icc e80be34cd2b3af21 0
 inducao 279c5cee6b301331 0
 instrumento d09d241923908750 0
+inteiros f48ca229a56474d3 0
 interface_padrao d5102ce78f3704d3 0
 inversor_trial 1dcf9d322733ba89 0
 isa4 7a0f4f0c1bc558e8 0
@@ -298,7 +300,7 @@ metronomo_autossimilar daf675c96c99ac84 0
 metronomo_fourier b70d83baa019ad03 0
 metronomo_pi 09b2eb77df540fd5 0
 microfluidica 8fd624c6207a1ab4 0
-migracao 2131548a7404978a 0
+migracao 98867b53cd9858d4 0
 migracao_universal d9fe2cd32070d3fb 1
 milenio c6d7cef7f0c08c00 0
 milenio_trial 19ffaded906c14ed 0
@@ -314,7 +316,7 @@ morfologia_universal cf0164d1ea38683b 0
 motor 8f86554b63adcee8 0
 move f6eee9bc52a47a86 0
 natural 7ef14b6be6077148 0
-navega a19d400f043c852b 0
+navega 70c7a0fc61f785b7 0
 navegante 4d7f4477cfbcd6b7 0
 navier_corpo 59af373b2600e81c 0
 neuronio 432885729866fc11 0
@@ -417,12 +419,12 @@ reversao 2e091bbdd10e2a80 0
 ribossomo 616faff37ba3f76f 0
 rn 285a2a8f53a81e4f 0
 robo db5cc6c1663337e7 0
-rotacao 352bfbc07bb82323 0
+rotacao 52ce341d5d61d038 0
 rotaciona fbdcddd468f66ecb 0
 rotulos 28c554e2d4f0fbe9 0
 roupa 2bc4f32f508b44a4 0
 sair_pu a64d5e2b256b4dc8 0
-saltos 36033ae754750577 0
+saltos d14ff1183cdeee96 0
 selberg 48f58a9cd271066d 0
 selo 178fcc4bb50fd9d2 0
 sem_chute 7ac03d19c66454b5 0
@@ -455,7 +457,7 @@ teoria_vetorial 4720f0890da571d2 0
 termica f2de749a0c38067e 0
 tesseracto d5df0dc21b1a36b7 0
 tesserato_espiral 364f3aa5ff7c3ae4 0
-tex 472530fa3179dbdc 0
+tex f725986a052c1d4b 0
 tex_wasm d362abf0a7b80c8e 1
 texto b15f5a20ebb7866a 0
 tikz fbaba755700a45f5 0
@@ -467,7 +469,7 @@ torre_alg 242522b855be33cc 0
 torre_corpo e4577c27756ef9ad 0
 torre_induc 30e9703511504c95 0
 torres 6ff6769aa88a97d3 0
-traducao 28976f04b2e24be9 0
+traducao a07cb56a81774153 0
 traduz ee62ed48db7c9a81 0
 traduz_pi_dim e3de288015d88fdc 0
 traduz_volta 7b40fc8a3fe4494b 0
