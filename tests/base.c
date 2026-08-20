@@ -655,30 +655,59 @@ printf("\n§B12 A branca e a negra: cada torre antissimétrica, as duas juntas s
         if(q != 0) malC1++;                          /* <Ax,x> = 0 */
     }
     printf("      <Ax, x> = 0 com A = S-D, em 200 casos: %d falhas\n", malC1);
-    /* e o fluxo e ortogonal: ‖exp(tA)x‖ = ‖x‖ */
-    {
-        long t = 0.7, E[8][8] = {{0}}, T[8][8] = {{0}};
-        for(int i = 0; i < m; i++) E[i][i] = T[i][i] = 1;
-        for(int p = 1; p <= 40; p++){                          /* exp(tA) por serie */
-            long N2[8][8] = {{0}};
-            for(int i = 0; i < m; i++) for(int j = 0; j < m; j++){
-                long s = 0;
-                for(int r = 0; r < m; r++) s += T[i][r]*A[r][j];
-                N2[i][j] = s*t/p;
+    /* ── E O FLUXO CONSERVA A NORMA, E ISSO MEDE-SE EXACTO — SEM SÉRIE ─────────────
+     * Estava aqui `exp(tA)` somado a 40 termos com `long t = 0.7`. O 0,7 truncava
+     * para ZERO ao entrar no long, cada termo da série dava `s*0/p = 0`, e E ficava
+     * a IDENTIDADE. A asserção «o fluxo é ortogonal» era ‖I·x‖ = ‖x‖ — verdadeira
+     * sem A, sem t e sem exponencial nenhuma —, e o texto impresso continuava a
+     * dizer «com t = 0,7».
+     *
+     * E não é caso de pôr o 0,7 de volta: uma série TRUNCADA de exp NÃO é ortogonal,
+     * nem em ℝ. Comparar normas com `!=` só podia passar por acidente.
+     *
+     * A forma fechada existe e é exacta em ℤ — CAYLEY. Para A antissimétrica,
+     * Q = (I−A)(I+A)⁻¹ é ortogonal; e ‖Qx‖ = ‖x‖ para todo x é o mesmo que
+     *
+     *     ‖(I−A)y‖ = ‖(I+A)y‖   para todo y            (y = (I+A)⁻¹x)
+     *
+     * que se expande, com Aᵀ = −A, em (I+A)(I−A) = I − A² dos DOIS lados. Sem
+     * inversa, sem divisão, sem limite: é uma identidade entre inteiros.
+     *
+     * E o GUME está do lado que tem de falhar: a mesma conta com M = S+D, que é
+     * SIMÉTRICA, tem de dar normas DIFERENTES — senão a igualdade de cima não era
+     * sobre a antissimetria, era sobre a conta. */
+    long Msim[8][8], difs = 0;
+    for(int i = 0; i < m; i++) for(int j = 0; j < m; j++) Msim[i][j] = S[i][j] + Dn[i][j];
+    for(int k = 0; k < 100; k++){
+        long x[8], menos[8] = {0}, mais[8] = {0}, sm[8] = {0}, sp[8] = {0};
+        long n1 = 0, n2 = 0, c1 = 0, c2 = 0;
+        for(int i = 0; i < m; i++) x[i] = ((41*k + i*3 + 1) % 11 - 5);
+        for(int i = 0; i < m; i++){
+            menos[i] = x[i]; mais[i] = x[i]; sm[i] = x[i]; sp[i] = x[i];
+            for(int j = 0; j < m; j++){
+                menos[i] -= A[i][j]*x[j];      mais[i] += A[i][j]*x[j];
+                sm[i]    -= Msim[i][j]*x[j];   sp[i]   += Msim[i][j]*x[j];
             }
-            for(int i = 0; i < m; i++) for(int j = 0; j < m; j++){ T[i][j] = N2[i][j]; E[i][j] += N2[i][j]; }
         }
-        for(int k = 0; k < 100; k++){
-            long x[8], y[8] = {0}, n1 = 0, n2 = 0;
-            for(int i = 0; i < m; i++) x[i] = ((41*k + i*3 + 1) % 11 - 5);
-            for(int i = 0; i < m; i++) for(int j = 0; j < m; j++) y[i] += E[i][j]*x[j];
-            for(int i = 0; i < m; i++){ n1 += x[i]*x[i]; n2 += y[i]*y[i]; }
-            if(n1 != n2) malC2++;
+        for(int i = 0; i < m; i++){
+            n1 += menos[i]*menos[i]; n2 += mais[i]*mais[i];
+            c1 += sm[i]*sm[i];       c2 += sp[i]*sp[i];
         }
-        printf("      ‖exp(tA)x‖ = ‖x‖ com t = 0,7, em 100 casos: %d falhas\n\n", malC2);
+        if(n1 != n2) malC2++;
+        if(c1 != c2) difs++;
     }
-    ok("A CONSERVAÇÃO: <Ax,x> = 0 e o fluxo exp(tA) é ortogonal — a norma não se move",
-       malC1 == 0 && malC2 == 0);
+    printf("      ‖(I−A)x‖ = ‖(I+A)x‖ (Cayley, A antissimétrica), 100 casos: %d falhas\n",
+           malC2);
+    printf("      e o controlo com M = S+D, SIMÉTRICA: %ld dos 100 dão normas DIFERENTES\n\n",
+           difs);
+    ok("A CONSERVAÇÃO: <Ax,x> = 0, e o fluxo de CAYLEY conserva a norma EXACTAMENTE —"
+       " ‖(I−A)x‖ = ‖(I+A)x‖ em ℤ, que é (I+A)(I−A) = I − A² lido dos dois lados,"
+       " sem inversa, sem série e sem limite. A exponencial truncada não servia aqui:"
+       " ela não é ortogonal nem em ℝ, e a versão anterior só passava porque o t"
+       " truncava para zero e o «fluxo» era a identidade. E o gume é o controlo"
+       " SIMÉTRICO: com M = S+D as duas normas separam-se, logo a igualdade de cima"
+       " é sobre a ANTISSIMETRIA e não sobre a aritmética",
+       malC1 == 0 && malC2 == 0 && difs > 50);
     printf("      E é este o fecho. Antissimétrico não é um adjetivo sobre a matriz: é a mesma\n");
     printf("      coisa que conservar. <Ax,x> = 0 diz que o movimento é sempre PERPENDICULAR ao\n");
     printf("      raio, logo o raio não muda — e exp de antissimétrico é ortogonal, que é a\n");
@@ -711,12 +740,12 @@ printf("\n§B13 A recursão salta entre as torres — e no fim a dual está vazi
     int fora = 0; long traco = 0;
     for(int i = 0; i < m; i++){
         traco += K[i][i];
-        if(K[i][i] != 0){ printf("      andar %d: %+g\n", i, K[i][i]); fora++; }
+        if(K[i][i] != 0){ printf("      andar %d: %+ld\n", i, K[i][i]); fora++; }
     }
     int malK = 0;
     for(int i = 0; i < m; i++) for(int j = 0; j < m; j++)
         if(i != j && K[i][j] != 0) malK++;              /* fora da diagonal: nada */
-    printf("\n      só %d dos %d andares sobrevivem, e são as duas PONTAS; traço = %g\n\n",
+    printf("\n      só %d dos %d andares sobrevivem, e são as duas PONTAS; traço = %ld\n\n",
            fora, m, traco);
     ok("o salto de um e um cancela em todo o meio — sobram as pontas, e o traço é 0",
        fora == 2 && traco == 0 && malK == 0);

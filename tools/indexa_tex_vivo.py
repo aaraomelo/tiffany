@@ -72,7 +72,8 @@ def main() -> int:
             if chave in vistos:
                 continue
             vistos.add(chave)
-            marc = f"@TEX {r}"
+            # #âncora: responde abre a secção certa (sem # cai na 1.ª)
+            marc = f"@TEX {r}#{tit}"
             if lista:
                 print(f"{tit}\t{r}")
             else:

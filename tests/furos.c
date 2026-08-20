@@ -121,12 +121,12 @@ printf("\n§F1  O FURO TEM NÚMERO: a dimensão do Cantor, contada e não assumi
      * 3 < 4 < 9. */
     long pq_c = 0, resolve_c = 0;
     for(long q2 = 1; q2 <= 36; q2++){
-        long e2 = 1; int cabe = 1;
-        for(long t = 0; t < q2; t++){ if(e2 > 4000000000000000000L/2){ cabe = 0; break; } e2 *= 2; }
+        int e2 = 1; int cabe = 1;
+        for(int t = 0; t < q2; t++){ if(e2 > 4000000000000000000L/2){ cabe = 0; break; } e2 *= 2; }
         if(!cabe) continue;
         for(long p2 = 1; p2 <= 36; p2++){
             long e3 = 1; cabe = 1;
-            for(long t = 0; t < p2; t++){ if(e3 > 4000000000000000000L/3){ cabe = 0; break; } e3 *= 3; }
+            for(int t = 0; t < p2; t++){ if(e3 > 4000000000000000000L/3){ cabe = 0; break; } e3 *= 3; }
             if(!cabe) continue;
             pq_c++;
             if(e2 == e3) resolve_c++;
@@ -188,7 +188,7 @@ printf("\n§F3  JULIA é o CRUZADO na POLAR: módulos multiplicam, ângulos soma
             isa_word(ISA_S_A, ar, br);
             isa_MOVE(ISA_S_ESQUILO, 1);
             isa_MOVE(ISA_S_ESQUILO, 1);
-            long t, e; isa_read(ISA_S_A, &t, &e);
+            int t, e; isa_read(ISA_S_A, &t, &e);
             if(t != -ar || e != -br) mau_ang++;
         }
     }

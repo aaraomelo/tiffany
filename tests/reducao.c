@@ -159,7 +159,7 @@ int main(void){
             cas++;
             if(rd_refuta(a,b) == 0 && !qz_igual(a,b)){ coincide++; t1 = a; t2 = b; }
         }
-        printf("      testemunha: %d/%d e %d/%d são DIFERENTES em ℚ e IGUAIS na redução\n",
+        printf("      testemunha: %ld/%ld e %ld/%ld são DIFERENTES em ℚ e IGUAIS na redução\n",
                t1.p, t1.q, t2.p, t2.q);
         printf("      (porque diferem por um múltiplo de 127 — e a redução não vê isso)\n");
         ok("E O QUE A PONTE NÃO PROVA DIZ-SE, COM TESTEMUNHA: coincidir na redução NÃO é"
@@ -255,7 +255,7 @@ int main(void){
            mal == 0 && cas > 15000);
     }
 
-    printf("\n=== %ld asserções, %ld falhas, %ld recusas da ponte ===\n",
+    printf("\n=== %d asserções, %d falhas, %ld recusas da ponte ===\n",
            unidades, falhas, rd_recusas);
     return falhas ? 1 : 0;
 }

@@ -281,6 +281,6 @@ int main(void){
            amal == 0 && dentro == oc && fora == oc && id_de < oc && id_ed < oc);
     }
 
-    printf("\n=== %ld asserções, %ld falhas ===\n", unidades, falhas);
+    printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

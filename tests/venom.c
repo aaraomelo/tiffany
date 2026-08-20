@@ -59,7 +59,7 @@ int main(int argc, char **argv){
     printf("  resta UM vértice — a média de tudo, a origem: %d\n", img[0]);
     printf("  as %ld memórias (as diferenças): =0: %ld ; |d|=1: %ld ; maiores: %ld\n", total, z0, z1, zg);
     printf("  ⇒ %ld%% das memórias são ~0 (|d|≤1): a estrutura caiu da cisão, eu não a impus\n",
-           100.0*(z0+z1)/total);
+           100*(z0+z1)/total);
 
     /* A IMAGEM CAI NO NEGRO (liga `duais`) — a cisão é o fluxo direcional branco→negro.       */
     /* O gato tem dois pontos fixos: o NEGRO (σ, sorvedouro, tudo entra) e o BRANCO (σ', fonte,*/
@@ -77,7 +77,7 @@ int main(int argc, char **argv){
            negro, media_px, vies, niveis,
            bate? "é a média, a menos do arredondamento que a junta desfaz (resíduo 0)" : "?");
     printf("    ○ as memórias são o BRANCO (fonte): %ld%% ~0; a junta (o gato ← A⁻¹) as faz re-emergir\n",
-           100.0*(z0+z1)/total);
+           100*(z0+z1)/total);
 
     /* a compressão JÁ está aqui, sem perda: cada memória custa só os bits do seu valor    */
     /* (as ~0 quase nada), o vértice idem. Nada quantizado, nada cortado — reversível.     */

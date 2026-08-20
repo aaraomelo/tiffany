@@ -1062,23 +1062,24 @@ retração e subida ao mesmo degrau.
 %----------------------------------------------------------------------
 \subsection*{O par como tipo: \code{lib/racionais.h}}
 
-As operações matemáticas preservam o domínio $\mathbb{Z}^{2}$; a realização
-\code{Qz} preserva apenas o subconjunto finito coberto pelo envelope medido.
-O envelope canónico é
+As operações matemáticas preservam o domínio $\mathbb{Z}^{2}$. O envelope
+canónico $E_{16}$ continua o \textbf{detector} do Gato:
 \[
 E_{16}=\bigl\{(p,q)\in\mathbb{Z}^{2}:
--32768\le p\le 32767,\;1\le q\le 32767,\;\gcd(|p|,q)=1\bigr\}.
+-32767\le p\le 32767,\;1\le q\le 32767,\;\gcd(|p|,q)=1\bigr\}.
 \]
-\code{Qz} não realiza todo $\mathbb{Q}$, nem é um subcorpo finito; é um
-envelope finito de representantes canónicos.  Cada operação deve retornar
-elemento de $E_{16}$ ou sinalizar saturação.  Em particular,
+Hot path (20/08, \textsc{saturo}$\to$\textsc{promove}): fora de $E_{16}$,
+\code{qz()} \emph{conta} (\code{qz\_saturou}) e \textbf{guarda} o representante
+exacto em \code{int64} --- já não devolve $\pm32767$. \code{QzP} (I128) é o
+testemunho acima do \code{int64}.
+\begin{verbatim}
+    typedef struct { int64_t p, q; } Qz;   /* E16 ou promovido; q != 0 */
+    typedef struct { I128 p, q; } QzP;     /* fora do int64 */
+\end{verbatim}
+\code{Qz} não realiza todo $\mathbb{Q}$; realiza a classe exacta enquanto
+couber em \code{int64}, com $E_{16}$ a marcar a primeira promoção.
 $\operatorname{red}(0,b)=(0,1)$ para todo $b\neq 0$.
 
-O objecto matemático é $\mathbb{Z}^{2}$; \code{Qz} é uma realização finita
-desse objecto num envelope de $16$~bits:
-\begin{verbatim}
-    typedef struct { int16_t p, q; } Qz;   /* p/q em par de 16 bits, q != 0 */
-\end{verbatim}
 As operações da Def.~\ref{def:ops} estão realizadas:
 
 \begin{center}\small
@@ -1096,8 +1097,8 @@ redução     & \code{qz}           & divide por $\gcd$, $q>0$ (inverte ambos se
 \end{tabular}
 \end{center}
 
-\noindent A saturação (\code{qz\_saturou}) é \textbf{contada à parte dos
-defeitos}: o que não cabe conta-se, e não enrola calado.
+\noindent A saída de $E_{16}$ (\code{qz\_saturou}) é \textbf{contada à parte dos
+defeitos}: o que não cabe no detector promove-se, e não se devolve tecto falso.
 
 %----------------------------------------------------------------------
 \subsection*{Produto exacto: par opera com par e resulta em par}

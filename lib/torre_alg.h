@@ -51,8 +51,9 @@
  *                                              leitura │ escrita
  *                                              λ⁻ / Σ  │ λ⁺ / Π
  *
- *   Peça: SlotWord {total, e} — 16 bytes/slot (slot_mem.h)
- *   FC:   S_CF = 2048, stride RT_CF_MAX+2 (slot_map.h)
+ *   Peça: SlotWord = Word_8 = 1 byte/slot (slot_mem.h; def:w8)
+ *         Par (a,b) da classe ℤ = dois slots. Par ≠ classe (Lei 7).
+ *   FC:   S_CF = 2048, stride RT_CF_MAX+3 (sinal, n, termos, flag)
  *   API:  rt_cf_slot_* (rt_cf_slot.h) ≡ sql.c / conversa.c / isa_disk.h
  *
  *   Soma de coeficientes + carry; produto = convolução + carry (posicional).

@@ -73,9 +73,17 @@
 #include "medida.h"     /* a conservacao metrica por dualidade, e a meta-inducao */
 #include "dforma.h"     /* o d: Lambda^0 -> ... -> Lambda^3, e os tres viram UM */
 #include "eletrico.h"
+#include "../lib/slot_mem.h"
+#include <stdint.h>
 
-typedef struct { long a, b; } Slot;
-#define SL 16
+/* Átomo = Word_8 = 1 B. Par lógico {a,b} da árvore = 8 átomos (dois u32 LE).
+ * Endereços e contagens não cabem num Word_8; codificam-se em sequência de átomos.
+ * (inteiros: a classe ℤ é Word_8²; ponteiros são outra coisa — Peano em bytes.) */
+typedef struct { uint32_t a, b; } Slot;  /* par lógico; disco = 8 átomos u32 LE */
+#define SL_ATOM       SLOT_WORD_BYTES
+#define PAR_ATOMS     8
+#define phys(i)       ((long)(i) * PAR_ATOMS)
+
 /* O BARRAMENTO. A assistente deixa de ser um ficheiro e passa a ser N bancos nele — a fala e
  * emitida, e responde quem a tiver. Ninguem coordena.
  *
@@ -97,13 +105,35 @@ static void barr_abre(const char *base){
 }
 static void no_banco(int b){ fd = fdv[b]; }
 
+static uint8_t le_atom(long p){
+    uint8_t v = 0;
+    if(fd >= 0) pread(fd, &v, SL_ATOM, (off_t)p * SL_ATOM);
+    return v;
+}
+static void grava_atom(long p, uint8_t v){
+    if(fd >= 0) pwrite(fd, &v, SL_ATOM, (off_t)p * SL_ATOM);
+}
+
 /* A ENTRADA E A SAIDA SAO UMA OPERACAO: MOVE(slot, sentido). E' a unica instrucao da
  * ISA, e o que a define e' o SINAL — `+1` traz do slot, `-1` leva para o slot. Nao sao
  * duas operacoes que calham ser inversas: e' UMA, e a Lei 1 escreve-a, 1† = -1.
- * `le` e `grava` ficam como os dois sentidos, e nao como duas funcoes. */
+ * `le` e `grava` ficam como os dois sentidos, e nao como duas funcoes.
+ * slot = índice LÓGICO do par; no disco = phys(slot)..+7 átomos. */
 static Slot MOVE(long slot, int sentido, Slot v){
-    if(sentido > 0){ Slot s = {0,0}; pread(fd, &s, SL, slot*SL); return s; }
-    pwrite(fd, &v, SL, slot*SL); return v;
+    long p = phys(slot);
+    if(sentido > 0){
+        unsigned long A = 0, B = 0;
+        for(int k = 0; k < 4; k++){
+            A |= (unsigned long)le_atom(p + k) << (8 * k);
+            B |= (unsigned long)le_atom(p + 4 + k) << (8 * k);
+        }
+        return (Slot){ (long)A, (long)B };
+    }
+    for(int k = 0; k < 4; k++){
+        grava_atom(p + k,     (uint8_t)(((unsigned long)v.a >> (8 * k)) & 0xffu));
+        grava_atom(p + 4 + k, (uint8_t)(((unsigned long)v.b >> (8 * k)) & 0xffu));
+    }
+    return v;
 }
 static Slot le(long i){ Slot z = {0,0}; return MOVE(i, +1, z); }
 static void grava(long i, Slot s){ MOVE(i, -1, s); }
@@ -113,7 +143,7 @@ static void grava(long i, Slot s){ MOVE(i, -1, s); }
 #define H_PARES 1
 #define RAIZ    2
 #define LARG    6            /* filhos por registo de nó — o resto encadeia */
-/* nó = [nfilhos | resposta][s1|f1][s2|f2]...[s6|f6][0|continuação] = 8 slots */
+/* nó = [nfilhos | resposta][s1|f1][s2|f2]...[s6|f6][0|continuação] = 8 pares lógicos */
 #define NOSL    8
 #define RESP_LIM 4096        /* respostas longas do corpus — não cortar a meio */
 
@@ -146,29 +176,23 @@ static long filho(long no, long sim, int abrir){
         no = c;
     }
 }
-/* O texto guarda-se onde couber, comprimento à frente do registo (não da cifra). */
+/* Texto: comprimento no par lógico; bytes em átomos a seguir (1 B = 1 átomo). */
 static long poe_texto(const char *s){
     size_t n = strlen(s);
     long base = le(H_LIVRE).a;
     if(base < RAIZ + NOSL) base = RAIZ + NOSL;
     Slot c = { (long)n, 0 }; grava(base, c);
-    size_t ns = (n + SL - 1) / SL;
-    for(size_t k = 0; k < ns; k++){
-        Slot w; memset(&w, 0, SL);
-        size_t r = n - k*SL; if(r > SL) r = SL;
-        memcpy(&w, s + k*SL, r);
-        grava(base + 1 + (long)k, w);
-    }
-    Slot l = { base + 1 + (long)ns, 0 }; grava(H_LIVRE, l);
+    long p0 = phys(base) + PAR_ATOMS;
+    for(size_t k = 0; k < n; k++) grava_atom(p0 + (long)k, (uint8_t)s[k]);
+    long atoms = PAR_ATOMS + (long)n;
+    long logical = (atoms + PAR_ATOMS - 1) / PAR_ATOMS;
+    Slot l = { base + logical, 0 }; grava(H_LIVRE, l);
     return base;
 }
 static void le_texto(long base, char *out, size_t lim){
     size_t n = (size_t)le(base).a, m = n < lim - 1 ? n : lim - 1;
-    for(size_t k = 0; k*SL < m; k++){
-        Slot w = le(base + 1 + (long)k);
-        size_t r = m - k*SL; if(r > SL) r = SL;
-        memcpy(out + k*SL, &w, r);
-    }
+    long p0 = phys(base) + PAR_ATOMS;
+    for(size_t k = 0; k < m; k++) out[k] = (char)le_atom(p0 + (long)k);
     out[m] = 0;
 }
 /* O SÍMBOLO, COM O ACENTO ACERTADO.
@@ -224,7 +248,7 @@ static int CORPUS(const char *fala, const char *resp, int sentido){
         long r = poe_texto(resp);
         Slot nc = { cab.a, r }; grava(no, nc);      /* uma resposta só: a nova substitui */
         Slot pc = le(H_PARES); pc.a++; grava(H_PARES, pc);
-        printf("aprendido — %ld par(es) no corpus\n", pc.a);
+        printf("aprendido — %d par(es) no corpus\n", pc.a);
         return 1;
     }
     if(!cab.b) return 0;                            /* não havia resposta para retirar */
@@ -624,22 +648,15 @@ static int pergunta_ao_barramento(const char *fala, char *resp, size_t lim){
 #define S_CAM   1024
 static void cam_le(char *out, size_t lim){
     size_t n = (size_t)le(S_CAM).a, m = n < lim - 1 ? n : lim - 1;
-    for(size_t k = 0; k*SL < m; k++){
-        Slot w = le(S_CAM + 1 + (long)k);
-        size_t r = m - k*SL; if(r > SL) r = SL;
-        memcpy(out + k*SL, &w, r);
-    }
+    long p0 = phys(S_CAM) + PAR_ATOMS;
+    for(size_t k = 0; k < m; k++) out[k] = (char)le_atom(p0 + (long)k);
     out[m] = 0;
 }
 static void cam_poe(const char *s){
     size_t n = strlen(s);
     Slot c = { (long)n, 0 }; grava(S_CAM, c);
-    for(size_t k = 0; k*SL < n; k++){
-        Slot w; memset(&w, 0, SL);
-        size_t r = n - k*SL; if(r > SL) r = SL;
-        memcpy(&w, s + k*SL, r);
-        grava(S_CAM + 1 + (long)k, w);
-    }
+    long p0 = phys(S_CAM) + PAR_ATOMS;
+    for(size_t k = 0; k < n; k++) grava_atom(p0 + (long)k, (uint8_t)s[k]);
 }
 /* O ponto da conversa vive no campo .b do H_PARES. Eu tinha-o posto no slot 3 — que esta DENTRO
  * do no raiz (2..9) — e corrompia a raiz a cada resposta. O cabecalho tem dois campos por slot;
@@ -1987,7 +2004,7 @@ static void cmetrica_resolve(int n){
               printf("        (a+b)² = a² + b²              %ld de %ld  ← falsa\n",
                      rf, cf);
               Qz t1 = qz(1,1), t2 = qz(128,1);
-              printf("      e o LIMITE: %d/%d e %d/%d são diferentes em ℚ e IGUAIS na"
+              printf("      e o LIMITE: %ld/%ld e %ld/%ld são diferentes em ℚ e IGUAIS na"
                      " redução\n", t1.p, t1.q, t2.p, t2.q);
               tique7(4, "a testemunha são os DOIS controlos: a identidade verdadeira nunca"
                         " é refutada e a falsa cai em quase todos os casos. Se a verdadeira"
@@ -3432,6 +3449,8 @@ static const struct { int n; const char *nome; const char *enunciado; } PN10[] =
  {  9, "nao linear",        "π₁ é não abeliano; H₁ é a sua abelianização — apagar a ordem" },
  { 10, "a representacao",   "o buraco pode ser invisível numa e visível noutra" },
 };
+/* Prosa canónica PN1–PN10: corpus/docs/ponte_exercicios.tex (TeX vivo).
+ * Este switch MEDE. */
 static void ponte_resolve(int n){
     TICK_N = 0;
     printf("   %d — %s\n", n, PN10[n-1].enunciado);
@@ -3753,6 +3772,8 @@ static const struct { int n; const char *nome; const char *enunciado; } HM14[] =
  { 13, "recobrimento",      "o levantamento: a volta é a diferença dos extremos" },
  { 14, "a torre",           "métrica → topologia → homotopia → π₁ → invariantes" },
 };
+/* Prosa canónica HM1–HM14: corpus/docs/homotopia_exercicios.tex (TeX vivo).
+ * Este switch MEDE. */
 static int hm_laco(int n, int r, int *v){
     int k = 0; v[k] = 0;
     int passos = n * (r < 0 ? -r : r), d = (r < 0) ? n - 1 : 1;
@@ -4076,6 +4097,8 @@ static void esc_conj(int m, int n){
     }
     printf("}");
 }
+/* Prosa canónica TP1–TP20: corpus/docs/topologia_exercicios.tex (TeX vivo).
+ * Este switch MEDE. */
 static void topo_resolve(int n){
     TICK_N = 0;
     printf("   %d — %s\n", n, TP20[n-1].enunciado);
@@ -4514,6 +4537,8 @@ static const struct { int n; const char *nome; const char *enunciado; } MT16[] =
  { 15, "gume",              "o buscador acha em ℚ e volta VAZIO em ℝ — com controlo" },
  { 16, "sintese",           "métrica → convergência → Cauchy → completude → ponto fixo" },
 };
+/* Prosa canónica MT1–MT16: corpus/docs/metrico_exercicios.tex (TeX vivo).
+ * Este switch MEDE. */
 static void metrico_resolve(int n){
     TICK_N = 0;
     printf("   %d — %s\n", n, MT16[n-1].enunciado);
@@ -4973,6 +4998,8 @@ static const struct { int n; const char *nome; const char *enunciado; } HI9[] = 
  {  8, "instancias",        "Green, Stokes e Gauss são instâncias da realização contínua" },
  {  9, "o que nao afirmo",  "a fronteira: o que é lei, o que é leitura, o que é clássico" },
 };
+/* Prosa canónica HI1–HI9: corpus/docs/hierarquia_exercicios.tex (TeX vivo).
+ * Este switch MEDE. */
 static void hier_resolve(int n){
     TICK_N = 0;
     printf("   %d — %s\n", n, HI9[n-1].enunciado);
@@ -5288,6 +5315,8 @@ static const struct { int n; const char *nome; const char *enunciado; } DF21[] =
  { 20, "o buraco",          "onde fechada NÃO dá exacta, e porque em ℚ[x,y,z] não se vê" },
  { 21, "a linguagem unica", "o que entrou todo: directo, cruzado, exterior, estrela, borda" },
 };
+/* Prosa canónica DF1–DF21: corpus/docs/formas_exercicios.tex (TeX vivo).
+ * Este switch MEDE. */
 static void dforma_resolve(int n){
     TICK_N = 0;
     printf("   %d — %s\n", n, DF21[n-1].enunciado);
@@ -7493,6 +7522,8 @@ static const struct { int n; const char *nome; const char *enunciado; } UN23[] =
  { 22, "memoria",           "a memória é o projector espectral ∘ Quantizador — gramática exacta" },
  { 23, "dicionario",         "a tradução inteira: o que é consagrado e o que o paper propõe" },
 };
+/* Prosa canónica UN1–UN23: corpus/docs/universal_exercicios.tex (TeX vivo).
+ * Este switch MEDE. */
 static void universal_resolve(int n){
     TICK_N = 0;
     printf("   %d — %s\n", n, UN23[n-1].enunciado);
@@ -8106,6 +8137,8 @@ static const struct { int n; const char *nome; const char *enunciado; } TR16[] =
  { 15, "lebesgue",         "o corte da IMAGEM fecha com o do DOMÍNIO, resíduo 0" },
  { 16, "teorema central",  "Hurwitz conta, Lebesgue mede, Gentil casa — e a estrela é a volta" },
 };
+/* Prosa canónica TR1–TR16: corpus/docs/torre_exercicios.tex (TeX vivo).
+ * Este switch MEDE. */
 static void torre_resolve(int n){
     TICK_N = 0;
     printf("   %d — %s\n", n, TR16[n-1].enunciado);
@@ -8704,6 +8737,8 @@ static const struct { int n; const char *nome; const char *enunciado; } EX15[] =
  { 14, "cruzado",            "u×v = ⋆(u∧v), e só é VETOR em dimensão 3" },
  { 15, "fecho do dual",      "directo² + cruzado² = N(u)N(v) — e porque o degrau é 4" },
 };
+/* Prosa canónica EX1–EX15: corpus/docs/exterior_exercicios.tex (TeX vivo).
+ * Este switch MEDE. */
 static void exterior_resolve(int n){
     TICK_N = 0;
     printf("   %d — %s\n", n, EX15[n-1].enunciado);
@@ -9189,6 +9224,8 @@ static const struct { int n; const char *nome; const char *enunciado; } TS16[] =
  { 15, "exterior",         "Λⁿ T é a multiplicação por det T — o volume orientado" },
  { 16, "nucleo do dual estrutural", "ker T* = (im T)° provado ELO A ELO, sem varredura" },
 };
+/* Prosa canónica TS1–TS16: corpus/docs/tensor_exercicios.tex (TeX vivo).
+ * Este switch MEDE. */
 static void tensor_resolve(int n){
     TICK_N = 0;
     printf("   %d — %s\n", n, TS16[n-1].enunciado);
@@ -9837,6 +9874,8 @@ static const struct { int n; const char *nome; const char *enunciado; } FQ16[] =
  { 15, "jordan",          "ter autovalores NÃO dá diagonalizável — o gume [[1,1],[0,1]]" },
  { 16, "a casa ja tinha", "onde este andar já corria, com outro nome" },
 };
+/* Prosa canónica FQ1–FQ16: corpus/docs/forma_exercicios.tex (TeX vivo).
+ * Este switch MEDE. */
 static void forma_resolve(int n){
     TICK_N = 0;
     printf("   %d — %s\n", n, FQ16[n-1].enunciado);
@@ -10572,6 +10611,8 @@ static const struct { int n; const char *nome; const char *enunciado; } LI16[] =
  { 15, "autovalores",      "Av = λv, e det(A − λI) = 0" },
  { 16, "diagonalizacao",   "A = PDP⁻¹, e Aⁿ = PDⁿP⁻¹" },
 };
+/* Prosa canónica LI1–LI16: corpus/docs/linear_exercicios.tex (TeX vivo).
+ * DU1–DU14: corpus/docs/dual_exercicios.tex. Os switches MEDEM. */
 static const struct { int n; const char *nome; const char *enunciado; } DU14[] = {
  {  1, "dual",             "V* = Hom(V,K): o espaço das MEDIÇÕES lineares" },
  {  2, "dual e espaco",    "V* é espaço vetorial, com as operações ponto a ponto" },
@@ -10588,6 +10629,7 @@ static const struct { int n; const char *nome; const char *enunciado; } DU14[] =
  { 13, "dual da transformacao", "T*(φ) = φ∘T, e [T*] = Aᵀ" },
  { 14, "nucleo do dual",   "ker T* = (im T)° — o chefão" },
 };
+/* Prosa canónica LI1–LI16: corpus/docs/linear_exercicios.tex (TeX vivo). Este switch MEDE. */
 static void linear_resolve(int n){
     TICK_N = 0;
     printf("   %d — %s\n", n, LI16[n-1].enunciado);
@@ -11139,6 +11181,7 @@ static void linear_resolve(int n){
         break; }
     }
 }
+/* Prosa canónica DU1–DU14: corpus/docs/dual_exercicios.tex (TeX vivo). Este switch MEDE. */
 static void dual_resolve(int n){
     TICK_N = 0;
     printf("   %d — %s\n", n, DU14[n-1].enunciado);
@@ -13088,6 +13131,8 @@ static const struct { int n; const char *nome; const char *enunciado; } EL12[] =
  { 11, "lagrange",      "ord(P) | #E(𝔽ₚ), e NP = 𝒪" },
  { 12, "double and add","19P por dobras, não por 19 somas" },
 };
+/* Prosa canónica EL1–EL12: corpus/docs/eliptica_exercicios.tex (TeX vivo).
+ * Este switch MEDE (tique). */
 static void eliptica_resolve(int n){
     TICK_N = 0;
     Qz a = qz_de_inteiro(-2), b = qz_de_inteiro(1);      /* a curva do ficheiro */
@@ -13433,6 +13478,8 @@ static const struct { int n; const char *nome; const char *enunciado; } TN17[] =
  { 16, "mobius",             "Σ_{d|n} μ(d) para n = 12" },
  { 17, "a orbita unica",     "Euclides = MDC = Bézout = FC, com a volta" },
 };
+/* Prosa canónica TN1–TN17: corpus/docs/numeros_exercicios.tex (TeX vivo).
+ * Este switch MEDE (tique). */
 static void tn_euclides(long a, long b, int mostra){    /* a descida, e é ela tudo */
     long x = a, y = b;
     while(y){
@@ -14108,6 +14155,8 @@ static const struct { int n; const char *nome; const char *enunciado; } EX20[] =
  { 19, "irracionais densos","os irracionais são densos em ℝ" },
  { 20, "cauchy converge",   "toda sucessão de Cauchy converge em ℝ" },
 };
+/* Prosa canónica EX1–EX20: corpus/docs/reais_exercicios.tex (TeX vivo).
+ * Este switch MEDE (tique). EX12–13 delegam a resolve_reais. */
 static void prova_real(int n){
     TICK_N = 0;
     printf("   exercício %d — %s\n", n, EX20[n-1].enunciado);

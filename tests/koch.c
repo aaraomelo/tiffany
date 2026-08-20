@@ -195,8 +195,9 @@ printf("\n§K4  E conforme se COMPLETA, vai ficando reversível.\n\n");
             int chave = assina(b)*256 + (b & mascara);
             if(!visto[chave]){ visto[chave] = 1; dist++; }
         }
-        printf("      %-8d %-29s %-17d %.1f%%\n", k,
-               k == 0 ? "só a assinatura" : "assinatura + bits", dist, 100.0*dist/256);
+        printf("      %-8d %-29s %-17d %d,%d%%\n", k,
+               k == 0 ? "só a assinatura" : "assinatura + bits", dist,
+               1000*dist/256/10, 1000*dist/256%10);
         if(dist_ant >= 0 && dist < dist_ant) mal++;              /* nunca desce */
         dist_ant = dist;
     }
@@ -332,7 +333,8 @@ printf("\n§KK A garrafa oscila: W_8 na casca, Verlet em I128 no circuito.\n\n")
             eq_ok++;
     }
     w8_wrap = 0; w8_saturou = 0;
-    uint8_t w300 = w8_proj_wrap(300), s300 = w8_proj_sat(300);
+    uint8_t w300 = w8_proj_wrap(300);
+    uint16_t s300 = w8_proj_sat(300);
     int visto[26]; memset(visto, 0, sizeof visto);
     int nc = 0;
     for(int b = 0; b < 256; b++){
@@ -347,11 +349,11 @@ printf("\n§KK A garrafa oscila: W_8 na casca, Verlet em I128 no circuito.\n\n")
     el_simula(400, L, C, 1, 1, 400, &qf, &ii, &sings_over);
     printf("      assinatura: %d classes em 256 bytes (W_8); W_8⁴ equiv %ld/%ld\n",
            nc, eq_ok, eq_tot);
-    printf("      wrap(300)=%u sat(300)=%u; Δ<0 trocas=%d  Δ>0 trocas=%d\n",
+    printf("      wrap(300)=%u promove(300)=%u; Δ<0 trocas=%d  Δ>0 trocas=%d\n",
            (unsigned)w300, (unsigned)s300, sings_sub, sings_over);
     ok("§KK W_8≠ℕ na casca; Verlet I128 oscila sse Δ<0 — completar é recuperar o inverso",
        nc > 1 && nc < 256 && eq_tot > 0 && eq_ok == eq_tot
-       && w300 == 44 && s300 == 255 && w8_wrap == 1 && w8_saturou == 1
+       && w300 == 44 && s300 == 300 && w8_wrap == 1 && w8_saturou == 1
        && sg_sub < 0 && sings_sub > 0 && sg_over > 0 && sings_over == 0);
 }
 
@@ -449,7 +451,8 @@ printf("\n§K10 A GARRAFA É A SALA DE ESPERA: fica até ter dual.\n\n");
         int circ = 0;
         for(int b = 0; b < 256; b++) if(conta[assina(b)*256 + (b & masc)] == 1) circ++;
         (void)visto;
-        printf("      %-12d %-24d %-22d %.1f%%\n", k, circ, 256-circ, 100.0*circ/256);
+        printf("      %-12d %-24d %-22d %d,%d%%\n", k, circ, 256-circ,
+               1000*circ/256/10, 1000*circ/256%10);
         if(antCirc >= 0 && circ < antCirc) mal++;      /* nunca volta para a garrafa */
         antCirc = circ;
     }

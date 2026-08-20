@@ -43,12 +43,9 @@
 #include "unidade.h"
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-
-#define PI    3.14159265358979323846
-#define Q_E   1.602176634e-19      /* carga do elétron, C   (SI exato) */
-#define K_B   1.380649e-23         /* Boltzmann, J/K        (SI exato) */
-#define T_AMB 300.15               /* 27 ºC, K */
+/* PI, Q_E, K_B, T_AMB e o próprio math.h saíram: NENHUM era usado. As chamadas a
+ * sin/exp/fabs que este ficheiro cita vivem todas em comentários — são o registo do
+ * que ele DEIXOU de fazer. Um #define não usado não migra a constante: esconde-a. */
 
 /* A JUNÇÃO b-e (Ebers-Moll, ativa direta). Exponencial pura. */
 

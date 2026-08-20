@@ -210,6 +210,6 @@ int main(void){
            mal == 0 && m == 2147483648u);
     }
 
-    printf("\n=== %ld asserções, %ld falhas ===\n", unidades, falhas);
+    printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

@@ -57,7 +57,7 @@
 \toprule
 camada & o que é & onde mora \\
 \midrule
-\textbf{byte level} & o átomo: $\Word_8$, GF(2), slot de 16\,B & \code{naturais}, \code{binario.h}, slots \\
+\textbf{byte level} & o átomo: $\Word_8$ = 1\,B/slot; GF(2) & \code{naturais}, \code{slot\_mem.h} \\
 \textbf{ISA / metal} & \code{MOVE}, \code{LOAD}/\code{STORE}, disco=\code{.mem} & \code{banco/sql.c}, \code{erg.c} \\
 \textbf{API SQL} & a porta comercial: query $\mapsto$ programa ISA & \code{SELECT}/\code{INSERT}/\code{IMPORT}/\code{GET} \\
 \bottomrule
@@ -1159,29 +1159,18 @@ o construtor devolve \emph{já é} o andar de cima:
 é o \code{promove.h} literal: \emph{escrever o par não apaga nada, porque o par
 contém a volta}. Deitar fora o alto é a única linha que perde.
 
-\medskip\noindent\textbf{A troca está demonstrada; fazê-la é decisão do
-coordenador.} Mede-se a \textbf{preservação de resultado}, que é o que uma
-substituição em caminho quente tem de mostrar \emph{antes}: onde não satura, o
-promovido coincide com as duas políticas actuais em todos os casos --- a troca não
-mexeria em nada que hoje está certo. Onde satura, truncar erra em \emph{todos} e
-promover acerta em todos; e as duas políticas de hoje nem entre si concordam.
-Nada foi substituído.
+\medskip\noindent\textbf{A troca foi feita (20/08).}
+\code{qz()} fora de $E_{16}$ conta (\code{qz\_saturou}) e \emph{guarda} o exacto em
+\code{int64}; \code{w8\_proj\_sat} devolve o exacto em \code{uint16}. Já não se
+devolve $\pm32767$ nem $\min(s,255)$.
 
-\medido{\code{tests/promocao.c} §SP0--§SP5 ($6{:}0$), exaustivo nos $65\,536$ pares
-de $\Word_8$: §SP0 o detector ($63\,568$ produtos e $32\,640$ somas saturam; zero
-enganos); §SP1 \textbf{preservação} --- nos $32\,896$ pares que cabem, enrolar,
-saturar e promover dão o mesmo, zero diferenças; §SP2 onde satura, truncar erra em
-$63\,568/63\,568$, promover em $0$, e wrap$\neq$sat em $63\,448$; §SP3 encadeia
-$8\to16\to32$ com resíduo $0$ ($100\,000$ cadeias), como \code{promove.c} §Q4;
-§SP4 quantifica o custo actual no \code{Qz} ($240$ chamadas fora do tecto, todas
-devolvendo $\pm32767$); §SP5 o \textbf{controlo} --- o detector poupa metade na
-soma ($50{,}2\%$ cabe) e quase nada no produto ($3{,}0\%$), pelo que o argumento
-da economia vale na soma e o do produto é só correcção. Gume: duas mutações,
-$4/3$ asserções caídas.}
-\medido{\code{tests/promocao\_qz.c} §SQ0--§SQ6 ($7{:}0$): detector
-$=$ não cabe em $E_{16}$; §SQ6 \code{QzX} no mesmo passo.
-\code{lib/racionais.h}: \code{QzP}/\code{qz\_prom*}, \code{QzX}/\code{qz\_x*}
-(estreito legado + promovido exacto; \code{qz()} intacto).
+\medido{\code{tests/promocao.c} §SP0--§SP6 ($10{:}0$), exaustivo nos $65\,536$ pares
+de $\Word_8$: §SP0 o detector; §SP1 preservação onde cabe; §SP2 truncar erra,
+\code{w8\_proj\_sat} promove; §SP3 encadeia $8\to16\to32$; §SP4 \code{qz()} exacto
+fora de $E_{16}$; §SP5 controlo; §SP6 \code{W8X}.}
+\medido{\code{tests/promocao\_qz.c} §SQ0--§SQ6 ($7{:}0$).
+\code{lib/racionais.h}: \code{Qz}=\{\code{int64\_t}\}, \code{QzP}/\code{QzX}.
+\code{lib/naturais.h}: \code{w8\_proj\_sat}$\to$\code{uint16} exacto.
 Cadeia \code{naturais→reais} no corpo WASM (\code{corpo.sh}, 72 ficheiros;
 \code{tex\_wasm.js} §T8).}
 
@@ -1214,7 +1203,8 @@ espaço de trabalho.
 
 \medskip\noindent Peças do contrato:
 \begin{itemize}\itemsep2pt
-\item \code{SlotWord \{total, e\}} --- 16 bytes/slot (ABI disco)
+\item \code{SlotWord} --- $\Word_8$, 1 byte/slot (ABI disco). Par $(a,b)$ da
+      classe $\mathbb{Z}$ = \textbf{dois} slots (\code{inteiros def:w8}, Lei~7)
 \item \code{S\_CF=2048}, \code{rt\_cf\_slot\_*} --- acumulador FC; soma de
       coeficientes + carry; produto = convolução + carry
 \item \code{slot\_mem.h} --- \code{pread/pwrite}; caminho \code{sql.c},
@@ -1743,9 +1733,18 @@ comando & camada & efeito \\
 \code{GET CORPO} & I/O & bytes crus --- o front serve daqui \\
 \code{/sql} (Vite) & HTTP & \code{POST} com a query; stdout do \code{sql} \\
 \code{/corpo/*} & HTTP & lê o banco, não o filesystem do repo \\
+\code{pgwire} (FEBE) & TCP & apps: listener em \code{banco/} (\code{pgwire}); porto 5432 se livre, senão 55432 \\
 \bottomrule
 \end{tabular}
 \end{center}
+
+\medskip\noindent\textbf{Entrada das apps.} O manifesto declara
+\code{entrada\_apps=pgwire}: drivers falam o Frontend/Backend Protocol
+(v3) com a Tiffany --- Auth trust, Simple Query, Extended Query
+(Parse/Bind/Execute/Sync; \$1 em RAM de sessão) ---
+sem instalar Postgres. A \emph{interface padrão} continua
+\code{interface\_padrao=sql} (\code{banco/sql.c}); o listener é só a face
+de rede. Medidor: \code{tests/pgwire.c} §W4--§W6.
 
 \medskip\noindent\textbf{Tradutor universal.} SQL é a \emph{porta}; as linguagens
 do manifesto (\code{latex}, \code{c}, \code{ptx}, \code{wasm}, \code{dafny},
@@ -1755,15 +1754,18 @@ documento$\leftrightarrow$PDF (\code{tex.wasm}); isso não o torna interface ---
 torna-o a realização de ``compor''. A interface padrão declara-se
 \code{interface\_padrao=sql} e mede-se em \code{tests/interface\_padrao.js}.
 
-\medskip\noindent\textbf{Byte level por baixo.} Cada slot é 16\,bytes
-(\code{SlotWord \{total, e\}}). \code{LOAD}/\code{STORE} mudam de backend
+\medskip\noindent\textbf{Byte level por baixo.} Cada slot é 1\,byte
+($\Word_8$). O inteiro é a \emph{classe} $[(a,b)]$ (\code{inteiros thm:z});
+o representante ocupa \textbf{dois} slots consecutivos --- não um struct.
+\code{LOAD}/\code{STORE} mudam de backend
 (disco, canal, pool) sem a ISA crescer. A árvore do banco são oito slots por
 nó. Ordenar, consultar e importar o corpo são o mesmo ciclo
 lê$\to$opera$\to$escreve no ambiente --- não um servidor à parte.
 
 \medido{\code{banco/sql.c}; \code{app/vite.config.js} (\code{/sql}, \code{/corpo});
 \code{tests/interface\_padrao.js}; \code{tests/backends\_wasm.js} §W5;
-\code{tests/fonte\_banco.c} (fonte sobe/desce).}
+\code{tests/fonte\_banco.c} (fonte sobe/desce);
+\code{tests/pgwire.c} §W0--§W6 (FEBE --- Trios PG1--PG4; Simple + Extended + listener TCP; sem Postgres instalado).}
 \colunas{\code{topologico def:peano}; porta \code{MOVE}}
         {\code{sql.c} $\mapsto$ ISA; blobs \code{\_corpo}; manifesto backends}
         {\code{interface\_padrao.js}; \code{backends\_wasm.js}; bateria \code{sql}}
@@ -1808,8 +1810,9 @@ header & papel \\
 \code{binario.h} & torre $F_1\to F_8$: $\oplus$, $\otimes$, régua derivada \\
 \code{largura.h} & \code{lg\_mult}$(w,\cdot,\cdot)$: uma lei, $w$ parâmetro \\
 \code{promove.h} & unfold/fold: \code{promove}/\code{desce}, par $(S,A)$ \\
-\code{naturais.h} & envelope $\Word_8$, cruz uint16, wrap/sat contados \\
-\code{racionais.h} & $E_{16}$, \code{Qz}/\code{QzP}/\code{QzX}, operações $\Q$ \\
+\code{naturais.h} & envelope $\Word_8$, cruz uint16, wrap/sat, \code{W8X} \\
+\code{palavra8.h} & $\Word_8$ bit a bit, $F_8$, $\mathbb{N}$, largura, \code{W8Par} \\
+\code{racionais.h} & $E_{16}$ detector; \code{Qz}=\{\code{int64}\}, \code{QzP}/\code{QzX} \\
 \code{dual16.h} / \code{dual32.h} / \code{i128.h} & produto exacto por dobra \\
 \code{torre.h} & hip\_*, subida Cayley--Dickson \\
 \code{reta.h} & RtOp, ciclo, inversão, mod por largura \\
@@ -1887,6 +1890,14 @@ CL1--CL21 & \code{calculo\_exercicios.tex} & Cálculo I \\
 AR1--AR25 & \code{analise\_exercicios.tex} & Análise Real \\
 C2-1--C2-21 & \code{calculo2\_exercicios.tex} & Cálculo II \\
 C3-1--C3-21 & \code{calculo3\_exercicios.tex} & Cálculo III \\
+EX1--EX15 & \code{exterior\_exercicios.tex} & álgebra exterior \\
+TS1--TS16 & \code{tensor\_exercicios.tex} & formas / tensores \\
+FQ1--FQ16 & \code{forma\_exercicios.tex} & bilinear / espectro \\
+LI1--LI16 & \code{linear\_exercicios.tex} & álgebra linear \\
+DU1--DU14 & \code{dual\_exercicios.tex} & espaço dual \\
+EL1--EL12 & \code{eliptica\_exercicios.tex} & curvas elípticas \\
+TN1--TN17 & \code{numeros\_exercicios.tex} & teoria dos números \\
+EX1--EX20 & \code{reais\_exercicios.tex} & provas em $\mathbb{R}$ \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -1922,9 +1933,10 @@ $\Q$ fixos & \code{tests/racionais\_fixos.c} & §Q1--§Q8 \\
 ordenar / banco & \code{tests/dualsort.c} & ver §\ref{sec:pecas} \\
 MOVE / ISA & \code{tests/move.c} & ver §\ref{sec:isa} \\
 promover / par & \code{tests/promove.c} & $1\to2\to4$ \\
+Word$_8$ bit a bit & \code{tests/palavra8.c} & §P0--§P4 ($5/5$) \\
 torre binária & \code{tests/naturais.c} & §NB0--§NB13 ($14/14$) \\
 escada largura & \code{tests/largura.c} & §LG0--§LG5 ($6/6$) \\
-saturo W$_8$ & \code{tests/promocao.c} & §SP0--§SP5 ($6/6$) \\
+saturo W$_8$ & \code{tests/promocao.c} & §SP0--§SP6 ($10/10$) \\
 saturo Qz & \code{tests/promocao\_qz.c} & §SQ0--§SQ6 ($7/7$) \\
 fibra / pata & \code{tests/conservacao\_metrica.c} & §M10 (\code{teoria cor:pata}) \\
 multiplicidade $G$ & \code{tests/aranha\_g.c} & §AG1--§AG11 (ciclo completo) \\
@@ -1935,6 +1947,7 @@ frase$\to$órbita inversa & \code{tests/idioma\_orbita.c} & §IO1--§IO5 (corpus
 álgebra ES / dragão & \code{tests/espanhol\_aranha.c} & §EA1--§EA8 (ñ↔nh; mesma tubagem) \\
 hexal PDF & \code{tests/estrela\_unifica.js} & §U2c (\code{/Interface~6}) \\
 API SQL / interface & \code{tests/interface\_padrao.js} & $8/8$ (\code{interface\_padrao=sql}) \\
+FEBE / pgwire & \code{tests/pgwire.c} & §W0--§W6 (Trios PG1--PG4) \\
 backends ISA & \code{tests/backends\_wasm.js} & §W0--§W7 (sql+latex) \\
 fonte no banco & \code{tests/fonte\_banco.c} & §F1--§F4 \\
 \bottomrule

@@ -25,22 +25,51 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <stdint.h>
 #include "unidade.h"
+#include "../lib/slot_mem.h"
 
-typedef struct { long a, b; } Slot;
-#define SL 16
+/* Par lógico {a,b} = 8 átomos (dois u32 LE) — como conversa.c. Sem struct de 16 B.
+ * Texto: comprimento no par; bytes a seguir, 1 B = 1 átomo. */
+typedef struct { uint32_t a, b; } Slot;  /* par lógico; disco = 8 átomos u32 LE */
+#define SL_ATOM    SLOT_WORD_BYTES
+#define PAR_ATOMS  8
+#define phys(i)    ((long)(i) * PAR_ATOMS)
 #define NSL 8
 #define LARG 6
 #define RAIZ 2
 #define H_LIVRE 0
 static int fd = -1;
-/* A E/S e' UMA operacao — MOVE(slot, sentido), com o sinal a decidir. E' a Lei 1: 1† = -1. */
+
+static uint8_t le_atom(long p){
+    uint8_t v = 0;
+    if(fd >= 0) pread(fd, &v, SL_ATOM, (off_t)p * SL_ATOM);
+    return v;
+}
+static void grava_atom(long p, uint8_t v){
+    if(fd >= 0) pwrite(fd, &v, SL_ATOM, (off_t)p * SL_ATOM);
+}
+
+/* MOVE(slot, sentido): Lei 1 — 1† = -1. slot lógico → phys(slot)..+7. */
 static Slot MOVE(long slot, int sentido, Slot v){
-    if(sentido > 0){ Slot s = {0,0}; pread(fd, &s, SL, slot*SL); return s; }
-    pwrite(fd, &v, SL, slot*SL); return v;
+    long p = phys(slot);
+    if(sentido > 0){
+        unsigned long A = 0, B = 0;
+        for(int k = 0; k < 4; k++){
+            A |= (unsigned long)le_atom(p + k) << (8 * k);
+            B |= (unsigned long)le_atom(p + 4 + k) << (8 * k);
+        }
+        return (Slot){ (long)A, (long)B };
+    }
+    for(int k = 0; k < 4; k++){
+        grava_atom(p + k,     (uint8_t)(((unsigned long)v.a >> (8 * k)) & 0xffu));
+        grava_atom(p + 4 + k, (uint8_t)(((unsigned long)v.b >> (8 * k)) & 0xffu));
+    }
+    return v;
 }
 static Slot le(long i){ Slot z = {0,0}; return MOVE(i, +1, z); }
 static void grava(long i, Slot s){ MOVE(i, -1, s); }
+
 static long novo_no(void){
     long l = le(H_LIVRE).a; if(l < RAIZ + NSL) l = RAIZ + NSL;
     Slot h = { l + NSL, 0 }; grava(H_LIVRE, h);
@@ -61,28 +90,25 @@ static long filho(long no, long sim, int abrir){
     }
 }
 static long simb(int c){ if(c >= 'A' && c <= 'Z') c += 32; return (long)(unsigned char)c - 31; }
+
 static long poe_txt(const char *s){
     size_t n = strlen(s);
-    long b = le(H_LIVRE).a; if(b < RAIZ + NSL) b = RAIZ + NSL;
-    Slot c = { (long)n, 0 }; grava(b, c);
-    size_t ns = (n + SL - 1) / SL;
-    for(size_t k = 0; k < ns; k++){
-        Slot w; memset(&w, 0, SL);
-        size_t r = n - k*SL; if(r > SL) r = SL;
-        memcpy(&w, s + k*SL, r); grava(b + 1 + (long)k, w);
-    }
-    Slot l = { b + 1 + (long)ns, 0 }; grava(H_LIVRE, l);
-    return b;
+    long base = le(H_LIVRE).a; if(base < RAIZ + NSL) base = RAIZ + NSL;
+    Slot c = { (long)n, 0 }; grava(base, c);
+    long p0 = phys(base) + PAR_ATOMS;
+    for(size_t k = 0; k < n; k++) grava_atom(p0 + (long)k, (uint8_t)s[k]);
+    long atoms = PAR_ATOMS + (long)n;
+    long logical = (atoms + PAR_ATOMS - 1) / PAR_ATOMS;
+    Slot l = { base + logical, 0 }; grava(H_LIVRE, l);
+    return base;
 }
 static void le_txt(long b, char *o, size_t lim){
     size_t n = (size_t)le(b).a, m = n < lim - 1 ? n : lim - 1;
-    for(size_t k = 0; k*SL < m; k++){
-        Slot w = le(b + 1 + (long)k);
-        size_t r = m - k*SL; if(r > SL) r = SL;
-        memcpy(o + k*SL, &w, r);
-    }
+    long p0 = phys(b) + PAR_ATOMS;
+    for(size_t k = 0; k < m; k++) o[k] = (char)le_atom(p0 + (long)k);
     o[m] = 0;
 }
+
 /* O LEXICO NAO E BIJETIVO, E NAO DEVE SER. Uma palavra tem varias traducoes, e isso nao e
  * problema: quem desdobra sao as OPERACOES NA CIFRA durante a navegacao. Eu guardava uma so e a
  * nova substituia a anterior — estava a impor bijecao onde a lingua nao a tem.

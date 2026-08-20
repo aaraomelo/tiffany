@@ -150,8 +150,31 @@ static uint8_t w8_proj_wrap(uint16_t s){
     return (uint8_t)s;
 }
 
-static uint8_t w8_proj_sat(uint16_t s){
-    if(s > 255u){ w8_saturou++; return 255; }
-    return (uint8_t)s;
+/* saturo→promove: devolve o exacto em E₁₆ (uint16); conta saída do byte.
+ * Já não é min(s,255). Quem ainda quer o byte usa (uint8_t) ou W8X.estreito legado. */
+static uint16_t w8_proj_sat(uint16_t s){
+    if(s > 255u) w8_saturou++;
+    return s;
+}
+
+/* ── W8X: promovido = exacto; estreito = antiga política sat (byte) ─────────── */
+typedef struct { uint8_t estreito; uint16_t promovido; int saturo; } W8X;
+
+static W8X w8_x_soma(uint8_t a, uint8_t b){
+    W8X r;
+    r.promovido = (uint16_t)a + (uint16_t)b;
+    r.saturo = (r.promovido > 255u);
+    r.estreito = r.saturo ? 255 : (uint8_t)r.promovido; /* vista legado sat */
+    return r;
+}
+static W8X w8_x_mult(uint8_t a, uint8_t b){
+    W8X r;
+    r.promovido = (uint16_t)a * (uint16_t)b;
+    r.saturo = (r.promovido > 255u);
+    r.estreito = r.saturo ? 255 : (uint8_t)r.promovido;
+    return r;
+}
+static int w8_x_igual_exacto(W8X x, unsigned exacto){
+    return (unsigned)x.promovido == exacto;
 }
 #endif

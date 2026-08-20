@@ -37,9 +37,6 @@
 #include <stdint.h>
 #include <inttypes.h>
 #include "reta.h"
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 /* ───────────────────────────────────────────────────────────────────────────
  * §M1  O CANAL — e os números são de água em PDMS, não escolhidos para dar certo

@@ -180,8 +180,11 @@ printf("\n§Y4  O custo, contado: n−1 batidas contra p^n − 2.\n\n");
         long dual = n_mult;
         /* Fermat ingênuo: x^(2^n − 2) por multiplicação repetida */
         long fermat = (1L << n) - 3;                     /* mults numa potência ingênua */
-        printf("      %d    %15ld   %28ld   %5.1fx\n", n, dual, fermat,
-               dual ? (long)fermat/dual : 0.0);
+        /* a razão em INTEIROS com a casa decimal a sair do resto: o ternário misturava
+         * `long` com `0.0`, o que fazia a expressão inteira virar double para depois
+         * imprimir sempre «,0» — uma casa decimal anunciada e nunca usada. */
+        printf("      %d    %15ld   %28ld   %ld,%ldx\n", n, dual, fermat,
+               dual ? fermat*10/dual/10 : 0L, dual ? fermat*10/dual%10 : 0L);
     }
     conclui("o dual é linear em n; Fermat é exponencial");
     printf("\n      São n−1 Frobenius e n−1 produtos — e o Frobenius, sendo linear, nem conta\n");
@@ -227,7 +230,7 @@ printf("     elemento, tem na ESTRUTURA: a correspondência de Galois troca gcd 
         long dual_g = n/g, l_dual = mmc(n/a, n/b);
         if(dual_g != l_dual) mau_gl++;
         if((a==4&&b==6)||(a==2&&b==3)||(a==6&&b==12))
-            printf("      %-4d %-4d R^%-10ld Z/%ld  ∨  Z/%ld = Z/%ld\n",
+            printf("      %-4d %-4d R^%-10ld Z/%d  ∨  Z/%d = Z/%ld\n",
                    a, b, g, n/a, n/b, l_dual);
     }
     ok("dual(gcd) = lcm dos duais — encontro vira junção", mau_gl == 0);

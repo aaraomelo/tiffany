@@ -50,7 +50,7 @@ int main(void){
         e_mais_medido = n;                     /* conta um dobramento */
         if(sep != (1LL << n)) mede_frente = 0; /* MEDIDO: δ⁺(n) = 2^n, e daí e⁺ = n */
         if(n <= 3 || n == 40)
-            printf("      %2d | %12ld | %12ld | %d\n", n, sep, (1LL<<n), e_mais_medido);
+            printf("      %2d | %12ld | %12ld | %d\n", n, sep, (1L<<n), e_mais_medido);
     }
     /* λ⁺ = e⁺/n = 40/40 = 1 bit/passo, medido da frente; a metade refletida (a inversa) dá o mesmo
      * módulo com sinal trocado (§L2): λ = (λ⁺ − λ⁻)/2 = 1. */

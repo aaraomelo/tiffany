@@ -97,20 +97,110 @@ int main(void){
             total += p; achados += achou;
             if(p > pior) pior = p;
         }
-        long alfa = (long)M / (long)nslot;
-        long medio = (long)total / (long)M;
-        printf("      %ld chaves em %ld marcas: densidade %ld\n", M, nslot, alfa);
-        printf("      sondas por leitura: media %ld, pior caso %ld\n", medio, pior);
+        /* A DENSIDADE E' UM RACIONAL, E A FORMA FECHADA TAMBEM. Estava
+         *
+         *     long alfa = M / nslot;            (divisao INTEIRA: da' 0)
+         *     long previsto = (1.0 + 1.0/(1.0 - alfa)) / 2.0;
+         *
+         * — com alfa truncado a 0 a forma fechada avaliava-se em alfa = 0 SEMPRE e
+         * devolvia 1, fosse qual fosse a ocupacao. A «conta» que a assercao invocava
+         * nao era da tabela: era da constante 0.
+         *
+         * Com alfa = M/n em ℚ, a forma fechada de Knuth para a sondagem linear
+         *
+         *     (1 + 1/(1-alfa))/2  com alfa = M/n   =   (2n - M) / (2(n - M))
+         *
+         * e' uma fraccao de INTEIROS, e a comparacao faz-se por produto cruzado —
+         * sem formar quociente nenhum. Precisa de n > M, que e' a hipotese da formula
+         * (a tabela nao esta cheia) e diz-se. */
+        long medio_num = total, medio_den = M;          /* medio = total/M, exacto */
+        printf("      %ld chaves em %ld marcas: densidade %ld/%ld\n", M, nslot, M, nslot);
+        printf("      sondas por leitura: media %ld/%ld, pior caso %ld\n",
+               medio_num, medio_den, pior);
         ok("todas as chaves sao ACHADAS pela sondagem — a volta encontra o ponto fixo",
            achados == M);
 
-        /* a forma fechada da sondagem linear com densidade alfa: (1 + 1/(1-alfa))/2.
-         * NAO e' limiar meu — e' a conta, e compara-se com o que se contou. */
-        long previsto = (1.0 + 1.0/(1.0 - alfa)) / 2.0;
-        printf("      forma fechada para densidade %ld: %ld sondas\n", alfa, previsto);
-        ok("e o CONTADOR bate com a forma fechada: com a volta quase vazia, uma sonda"
-           " chega — a densidade e' que decide o custo, e mediu-se em vez de se estimar",
-           medio >= 1.0 && medio <= previsto + 0.5);
+        int cabe_formula = (nslot > M);
+        long pv_num = 2*nslot - M, pv_den = 2*(nslot - M);      /* previsto = pv_num/pv_den */
+        long lim_num = 3*nslot - 2*M, lim_den = 2*(nslot - M);  /* previsto + 1/2 */
+        printf("      forma fechada para densidade %ld/%ld: %ld/%ld sondas%s\n",
+               M, nslot, pv_num, pv_den, cabe_formula ? "" : "  (n <= M: NAO se aplica)");
+        /* E ISTO SOZINHO NAO DISCRIMINA, E E' PRECISO DIZE-LO. Com alfa = 3000/65536
+         * a forma fechada vale ~1,02 e a folga de +1/2 engole qualquer formula que
+         * devolva «perto de 1» — incluindo a constante 1, que e' exactamente o que a
+         * versao truncada fazia. Uma banda vinte vezes maior que a quantidade que ela
+         * compara nao mede a formula: mede o regime.
+         *
+         * A formula VIVE onde alfa cresce: em 1/2 vale 3/2, em 7/10 vale ~13/6. Entao
+         * varre-se AI, numa tabela sintetica com a MESMA sondagem linear e as mesmas
+         * chaves de texto do banco.
+         *
+         * E O QUE SE EXIGE NAO E' «bate dentro de um decimo», porque isso seria um
+         * limiar meu. (1 + 1/(1-alfa))/2 e' um resultado ASSINTOTICO sob hashing
+         * UNIFORME; medido, o contador fica sistematicamente ABAIXO dela — um hash bom
+         * sobre chaves regulares agrupa MENOS que o acaso. Entao a forma fechada e' um
+         * MAJORANTE, e e' isso que se afirma, sem tolerancia nenhuma:
+         *
+         *     1 <= media <= (2n-M)/(2(n-M))     em cada densidade
+         *     e a media CRESCE com alfa          (o conteudo da formula)
+         *
+         * O gume e' a versao anterior: a constante 1 respeita o majorante mas NAO
+         * cresce, logo cai na segunda clausula. Sem ela, «<= majorante» passava com
+         * qualquer coisa perto de 1. */
+        long dens_mal = 0, dens_ok = 0, cresce = 0, const1_cai = 0;
+        {
+            enum { NS = 4096 };
+            static long tab[NS];
+            static uint64_t hh[NS];
+            const long NUM[] = { 1, 1, 1, 1, 7 }, DEN[] = { 8, 4, 3, 2, 10 };
+            long ant_n = 0, ant_d = 1;
+            for(int d = 0; d < 5; d++){
+                long Md = NS * NUM[d] / DEN[d], soma = 0;
+                for(long i = 0; i < NS; i++) tab[i] = 0;
+                for(long k = 1; k <= Md; k++){          /* as chaves do banco: texto */
+                    char c[32]; snprintf(c, sizeof c, "k-%ld", k);
+                    hh[k-1] = fp64(c, strlen(c));
+                }
+                for(long k = 1; k <= Md; k++)           /* insere: anda +1 ate' vazio */
+                    for(long j = 0; j < NS; j++){
+                        long i = (long)((hh[k-1] + (uint64_t)j) % (uint64_t)NS);
+                        if(tab[i] == 0){ tab[i] = k; break; }
+                    }
+                for(long k = 1; k <= Md; k++)           /* e conta-se a LEITURA */
+                    for(long j = 0; j < NS; j++){
+                        long i = (long)((hh[k-1] + (uint64_t)j) % (uint64_t)NS);
+                        soma++;
+                        if(tab[i] == k || tab[i] == 0) break;
+                    }
+                long pn = 2*NS - Md, pd = 2*(NS - Md);        /* majorante = pn/pd */
+                int dentro = (soma >= Md) && (soma * pd <= Md * pn);   /* 1 <= media <= pn/pd */
+                if(dentro) dens_ok++; else dens_mal++;
+                if(d && soma * ant_d > ant_n * Md) cresce++;           /* cresce com alfa */
+                ant_n = soma; ant_d = Md;
+                printf("      alfa = %ld/%ld  em %d marcas: media %ld/%ld  ·  majorante %ld/%ld  %s\n",
+                       NUM[d], DEN[d], NS, soma, Md, pn, pd,
+                       dentro ? "dentro" : "FORA");
+            }
+            /* o CONTROLO: a constante 1 cumpre o majorante e NAO cresce — tem de cair */
+            const1_cai = (cresce == 4);
+        }
+        ok("E O CONTADOR BATE COM A FORMA FECHADA, e as duas em ℚ EXACTO: a densidade e'"
+           " M/n e nao a sua parte inteira — que era ZERO e fazia a formula avaliar-se"
+           " sempre no mesmo ponto, dizendo «1 sonda» sem olhar para a tabela. Agora"
+           " (1 + 1/(1-alfa))/2 = (2n-M)/(2(n-M)) e' uma fraccao de inteiros, a media"
+           " medida e' total/M, e a comparacao e' por PRODUTO CRUZADO. E a formula"
+           " mede-se ONDE ELA VARIA: a densidade do banco e' 3000/65536, onde a fechada"
+           " vale ~1 e a folga engoliria qualquer coisa perto de 1 — entao varre-se"
+           " alfa = 1/8, 1/4, 1/3, 1/2 e 7/10 numa tabela sintetica com as MESMAS chaves"
+           " de texto. E sem tolerancia inventada: a forma fechada e' assintotica sob"
+           " hashing uniforme, o contador fica sempre ABAIXO dela — um hash bom agrupa"
+           " menos que o acaso —, logo o que se afirma e' 1 <= media <= (2n-M)/(2(n-M))"
+           " em cada densidade E que a media CRESCE com alfa. O gume e' a versao"
+           " anterior: a constante 1 respeita o majorante e NAO cresce, logo cai",
+           cabe_formula
+             && medio_num >= medio_den                                   /* media >= 1 */
+             && medio_num * lim_den <= medio_den * lim_num               /* <= previsto + 1/2 */
+             && dens_mal == 0 && dens_ok == 5 && cresce == 4 && const1_cai);
 
         /* ═══ §B4 — o slot retem a OPERACAO, e o crc recusa sem ler ═══════════════ */
         long n = 0;
@@ -183,8 +273,8 @@ int main(void){
         clock_gettime(CLOCK_MONOTONIC, &t2);
         banco_larga(&m);
 
-        long mapa = (t1.tv_sec-t0.tv_sec)*1e9 + (t1.tv_nsec-t0.tv_nsec);
-        long ler  = (t2.tv_sec-t1.tv_sec)*1e9 + (t2.tv_nsec-t1.tv_nsec);
+        long mapa = (t1.tv_sec-t0.tv_sec)*1000000000L + (t1.tv_nsec-t0.tv_nsec);
+        long ler  = (t2.tv_sec-t1.tv_sec)*1000000000L + (t2.tv_nsec-t1.tv_nsec);
         printf("\n      o acoplamento (banco_mapa): %ld ns, UMA vez\n", mapa);
         printf("      3000 leituras: %ld ns, %ld ns cada\n", ler, ler/3000);
         printf("      o mapa vale %ld leituras — e nao se repete\n", mapa/(ler/3000));
@@ -195,7 +285,7 @@ int main(void){
            /* o limiar usa o numero que o printf acima ja' calcula: quantas LEITURAS vale
             * o mapa. A primeira versao escrevia 200.0*(ler/3000)*3000, que e' 200*ler —
             * 3000x mais frouxo do que a frase, e um revisor apanhou-o. */
-           achados == 3000 && mapa/(ler/3000) < 200.0);
+           achados == 3000 && mapa/(ler/3000) < 200);
     }
 
     puts("");

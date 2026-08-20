@@ -23,6 +23,7 @@
  * §SP3  a promoção ENCADEIA e tem volta: 8→16→32 e descer, resíduo 0
  * §SP4  o custo do que hoje se faz: `qz()` ao saturar devolve ±32767 — não é o resultado
  * §SP5  o CONTROLO: onde o detector vale (na soma) e onde poupa pouco (no produto)
+ * §SP6  W8X paralelo: promovido exacto; estreito = sat legado (sem trocar o hot path)
  *
  * ── O ESCOPO, dito ────────────────────────────────────────────────────────────────
  * Mede-se a fronteira W_8 → E_16 (a que o `inteiros.tex` §sec:palavra8 e o
@@ -89,30 +90,26 @@ int main(void){
            difere_wrap == 0 && difere_sat == 0 && nao_sat > 0);
     }
 
-    /* ═══ §SP2 ONDE SATURA: o truncado erra, o promovido acerta ════════════════ */
+    /* ═══ §SP2 ONDE SATURA: o truncado erra; w8_proj_sat agora PROMOVE ════════ */
     printf("\n§SP2 E onde satura, conta-se quem acerta.\n\n");
     {
-        long sat = 0, trunc_errou = 0, prom_errou = 0, wrap_vs_sat = 0;
+        long sat = 0, trunc_errou = 0, prom_errou = 0, wrap_errou = 0;
         for(unsigned a = 0; a < 256; a++) for(unsigned b = 0; b < 256; b++){
             unsigned exacto = a * b;
             LgPar p = lg_mult(8, a, b);
             if(p.alto == 0) continue;
             sat++;
-            if(p.baixo != exacto) trunc_errou++;             /* guardar só o baixo */
-            if(lg_val(p, 8) != exacto) prom_errou++;         /* promover: o par */
-            uint16_t s16 = (uint16_t)exacto;
-            if(w8_proj_wrap(s16) == w8_proj_sat(s16)) continue;
-            wrap_vs_sat++;                                    /* as duas políticas divergem */
+            if(p.baixo != exacto) trunc_errou++;
+            if(lg_val(p, 8) != exacto) prom_errou++;
+            if(w8_proj_sat((uint16_t)exacto) != (uint16_t)exacto) prom_errou++;
+            if((unsigned)w8_proj_wrap((uint16_t)exacto) != exacto) wrap_errou++;
         }
         printf("        %ld produtos saturam: truncar erra em %ld, promover erra em %ld;"
-               " wrap≠sat em %ld\n", sat, trunc_errou, prom_errou, wrap_vs_sat);
-        ok("E É AQUI QUE AS DUAS POLÍTICAS DE HOJE SE DENUNCIAM: onde o produto sai do byte,"
-           " guardar só o baixo erra em TODOS os casos, e as duas políticas actuais nem"
-           " sequer concordam entre si — enrolar e saturar dão números diferentes para o"
-           " mesmo produto, e nenhum deles é o produto. Promover acerta em todos, porque não"
-           " calcula nada de novo: lê o par que o construtor já tinha na mão. Contar a"
-           " saturação à parte foi honesto; não a corrigir é que era a dívida",
-           sat > 0 && trunc_errou == sat && prom_errou == 0 && wrap_vs_sat > 0);
+               " wrap≠exacto em %ld\n", sat, trunc_errou, prom_errou, wrap_errou);
+        ok("A TROCA FOI FEITA: onde o produto sai do byte, guardar só o baixo erra;"
+           " `w8_proj_sat` agora devolve o exacto em uint16 (saturo→promove). Wrap"
+           " continua a política que perde. Contar a saída do envelope mantém-se",
+           sat > 0 && trunc_errou == sat && prom_errou == 0 && wrap_errou == sat);
     }
 
     /* ═══ §SP3 A PROMOÇÃO ENCADEIA, E TEM VOLTA ════════════════════════════════ */
@@ -142,34 +139,33 @@ int main(void){
            mal == 0 && casos > 0 && subiu_dois > 0);
     }
 
-    /* ═══ §SP4 O CUSTO DO QUE HOJE SE FAZ, no Qz ═══════════════════════════════ */
-    printf("\n§SP4 Hoje, ao saturar, `qz()` devolve ±32767 — que não é o resultado.\n\n");
+    /* ═══ §SP4 Qz: saturo→promove — exacto em int64, não ±32767 ═══════════════ */
+    printf("\n§SP4 `qz()` ao sair de E₁₆ promove: guarda o exacto (não ±32767).\n\n");
     {
-        long antes = qz_saturou, vistos = 0, deformados = 0, iguais_a_teto = 0;
+        long antes = qz_saturou, vistos = 0, deformados = 0, exactos = 0, tectos = 0;
         for(long p = 32000; p < 32120; p++) for(long q = 1; q <= 3; q++){
-            Qz r = qz(p * 3, q);                             /* força passar do tecto */
+            long num = p * 3;
+            Qz r = qz(num, q);
             vistos++;
-            long exacto_p = (p * 3) / qz_mdc(p * 3, q);
-            if(!qz_cabe(exacto_p)){
+            long g = qz_mdc(num, q);
+            long ep = num / g, eq = q / g;
+            if(!qz_cabe(ep) || !qz_cabe(eq)){
                 deformados++;
-                if(r.p == 32767 || r.p == -32767) iguais_a_teto++;
+                if(r.p == ep && r.q == eq) exactos++;
+                if(r.p == 32767 || r.p == -32767) tectos++;
             }
         }
-        printf("        %ld chamadas: %ld não cabiam · %ld devolveram o tecto ±32767 ·"
-               " qz_saturou subiu %ld\n", vistos, deformados, iguais_a_teto,
+        printf("        %ld chamadas: %ld fora de E₁₆ · %ld exactos · %ld tectos ·"
+               " qz_saturou +%ld\n", vistos, deformados, exactos, tectos,
                qz_saturou - antes);
-        ok("E O MESMO PADRÃO ESTÁ UM ANDAR ACIMA, NO RACIONAL, com o preço à vista: quando o"
-           " numerador reduzido não cabe em 16 bits, `qz()` conta — e devolve ±32767, um"
-           " número que não é o resultado de nada. O contador é honesto e o valor não é; e"
-           " quem receber esse ±32767 não tem como saber que o recebeu. Aqui só se"
-           " QUANTIFICA: a troca no `Qz` envolve mdc e 128 bits e pede a sua própria"
-           " demonstração — não se faz de arrasto com a de W_8",
-           vistos > 0 && deformados > 0 && iguais_a_teto == deformados
+        ok("A TROCA NO Qz: fora de E₁₆, `qz()` conta (`qz_saturou`) e GUARDA o"
+           " numerador/denominador exactos em int64 — zero tectos ±32767",
+           vistos > 0 && deformados > 0 && exactos == deformados && tectos == 0
              && qz_saturou - antes == deformados);
     }
 
-    /* ═══ §SP5 O CONTROLO: os dois extremos são ambos maus ═════════════════════ */
-    printf("\n§SP5 Promover sempre é desperdício; nunca promover é o estado actual.\n\n");
+    /* ═══ §SP5 O CONTROLO: onde o detector vale ════════════════════════════════ */
+    printf("\n§SP5 Controlo: fração que cabe no byte (economia do detector).\n\n");
     {
         long total = 0, cabe_p = 0, cabe_s = 0;
         for(unsigned a = 0; a < 256; a++) for(unsigned b = 0; b < 256; b++){
@@ -177,17 +173,38 @@ int main(void){
             if(lg_mult(8,a,b).alto == 0) cabe_p++;           /* o produto coube */
             if(a + b <= 255) cabe_s++;                        /* a soma coube */
         }
-        printf("        de %ld pares: cabem no byte --- produto %ld (%.1f%%), soma %ld"
-               " (%.1f%%)\n", total, cabe_p, 100.0*cabe_p/total, cabe_s, 100.0*cabe_s/total);
-        ok("E O CONTROLO DIZ ONDE O DETECTOR VALE, QUE NÃO É EM TODA A PARTE --- e o número"
-           " obriga a dizê-lo com cuidado. No PRODUTO de bytes quase tudo sai do byte (só"
-           " 3% cabe), de modo que ali promover sempre custaria pouco: o detector poupa"
-           " pouco e o que decide é a correcção. Na SOMA cabe cerca de metade, e é aí que"
-           " condicionar ao alto do par poupa mesmo metade das promoções. Os dois extremos"
-           " continuam maus --- nunca promover perde nos 63 568 produtos que não cabem ---,"
-           " mas o argumento da ECONOMIA vale na soma, não no produto, e sem esta secção"
-           " §SP1--§SP2 diriam «o critério faz diferença» sem dizer onde",
+        printf("        de %ld pares: cabem no byte --- produto %ld (%ld,%ld%%), soma %ld"
+               " (%ld,%ld%%)\n", total,
+               cabe_p, 1000*cabe_p/total/10, 1000*cabe_p/total%10,
+               cabe_s, 1000*cabe_s/total/10, 1000*cabe_s/total%10);
+        ok("O CONTROLO DIZ ONDE O DETECTOR VALE: no produto quase tudo sai do byte;"
+           " na soma cabe ~metade. Após a troca, promover é o caminho quente; o"
+           " detector continua a contar a saída do envelope",
            cabe_p > 0 && cabe_s > 0 && cabe_s > cabe_p && total == 65536);
+    }
+
+    /* ═══ §SP6 W8X: promovido exacto; estreito = vista sat legado ══════════════ */
+    printf("\n§SP6 W8X: promovido exacto; estreito = antiga sat (byte).\n\n");
+    {
+        W8X x = w8_x_mult(200, 200);
+        ok("200*200: saturo e promovido=40000 (exacto)",
+           x.saturo && w8_x_igual_exacto(x, 40000u) && x.estreito == 255);
+        x = w8_x_mult(3, 4);
+        ok("3*4: cabe — saturo=0, estreito=promovido=12",
+           !x.saturo && x.estreito == 12 && w8_x_igual_exacto(x, 12u));
+        x = w8_x_soma(200, 200);
+        ok("200+200: saturo e promovido=400",
+           x.saturo && w8_x_igual_exacto(x, 400u) && x.estreito == 255);
+        /* Varredura: sempre que saturo, promovido = produto exacto uint16 */
+        int ok_var = 1;
+        for(unsigned a = 0; a < 256 && ok_var; a++) for(unsigned b = 0; b < 256; b++){
+            W8X y = w8_x_mult((uint8_t)a, (uint8_t)b);
+            unsigned ex = a * b;
+            if(!w8_x_igual_exacto(y, ex)){ ok_var = 0; break; }
+            if(y.saturo && y.estreito != 255){ ok_var = 0; break; }
+            if(!y.saturo && y.estreito != (uint8_t)ex){ ok_var = 0; break; }
+        }
+        ok("varredura 256×256: promovido sempre exacto; estreito=sat legado", ok_var);
     }
 
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);

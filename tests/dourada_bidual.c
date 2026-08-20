@@ -101,13 +101,13 @@ printf("\n§W2  A DILATACAO so' GIRA A FASE: o modulo NAO muda.\n\n");
             int passos = (la * tau) % 4;
             isa_word(ISA_S_A, 1, 0);
             for(int j = 0; j < passos; j++) isa_MOVE(ISA_S_ESQUILO, 1);
-            long t, e;
+            int t, e;
             isa_read(ISA_S_A, &t, &e);
             if(isa_norma2(t, e) != 1) mau++;
             if(t != ft || e != fe) fases_distintas++;
             ft = t; fe = e;
             if(lam <= 8)
-                printf("      %-8ld %-9ld (%+ld,%+ld)\n", lam, isa_norma2(t,e), t, e);
+                printf("      %-8ld %-9d (%+d,%+d)\n", lam, isa_norma2(t,e), t, e);
         }
         printf("      %ld dilatacoes: norma^2=1 em %ld, %ld fases DISTINTAS\n",
                casos, casos - mau, fases_distintas);

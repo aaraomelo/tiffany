@@ -173,7 +173,7 @@ int main(void){
                     int e = ((j*(k-l)) % n + n) % n;
                     int giros = (n == 2) ? 2*e : e;     /* n=2: cada passo é ×(−1)=ESQUILO² */
                     for(int g = 0; g < giros; g++) isa_MOVE(ISA_S_ESQUILO, 1);
-                    long t, ei; isa_read(ISA_S_A, &t, &ei);
+                    int t, ei; isa_read(ISA_S_A, &t, &ei);
                     re += t; im += ei;
                 }
                 long mod2 = re*re + im*im;
@@ -211,7 +211,7 @@ int main(void){
         struct { L a, b; } vs[] = { {3,4}, {5,12}, {0,1}, {1,0} };
         isa_word(ISA_S_A, 1, 0);
         isa_MOVE(ISA_S_ESQUILO, 1);
-        long er, ei; isa_read(ISA_S_A, &er, &ei);
+        int er, ei; isa_read(ISA_S_A, &er, &ei);
         for(int i = 0; i < 4; i++){
             L a = vs[i].a, b = vs[i].b;
             L g11 = 1, g12 = a, g22 = a*a + b*b;
@@ -220,7 +220,7 @@ int main(void){
             if(det == b*b) lei_ok++;
             printf("      (%ld,%ld)                 %ld\n", a, b, det);
         }
-        printf("      pares: %d   com det G = b²: %d   ESQUILO(1,0)=(%ld,%ld)\n",
+        printf("      pares: %d   com det G = b²: %d   ESQUILO(1,0)=(%d,%d)\n",
                ts, lei_ok, er, ei);
         ok("det Gram = b²: vai a ZERO quando os vetores se alinham (b=0)."
            " O quarto de volta é ESQUILO: (1,0)→(0,1)",

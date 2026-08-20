@@ -178,7 +178,7 @@ int main(void){
         printf("      %ld circulos (q de 2 a 512, %ld pares e %ld impares): %ld discordancias\n",
                casos, pares, impares, mau);
         printf("      num circulo de %ld marcas: %ld fases ficam no eixo, %ld saem (%ld%%)\n",
-               q, ficam, saem, 100.0 * (long)ficam / (long)q);
+               q, ficam, saem, 100 * (long)ficam / (long)q);
         /* as que saem contam-se a' parte, e o que se exige delas sai do proprio q e das que
          * ficam: nao ha' limiar escrito a' mao */
         ok("o raio no diametro E' OBRIGADO A DESVIAR: das q fases ficam no eixo DUAS se q e'"

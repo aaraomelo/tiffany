@@ -338,8 +338,8 @@ int main(void){
             L nr = ra*ra + 5*rb*rb;
             if(nr >= ny) falhou++;                 /* o resto NÃO encolhe */
         }
-        printf("      divisões em Z[√−5]: %d   em que o resto NÃO encolhe: %d  (%.1f%%)\n",
-               casos, falhou, 100.0*falhou/casos);
+        printf("      divisões em Z[√−5]: %d   em que o resto NÃO encolhe: %d  (%d,%d%%)\n",
+               casos, falhou, 1000*falhou/casos/10, 1000*falhou/casos%10);
         printf("      e a identidade q·y + r = x falha em %d delas\n", mau_ident);
         ok("a divisão é consistente: q·y + r = x em todas as 23120 — a fórmula do resto não mente",
            mau_ident == 0 && casos == 23120);

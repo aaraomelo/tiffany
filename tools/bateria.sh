@@ -138,9 +138,14 @@ negativo_esperado() { return 1; }
 assinatura() {
   { cat "$1" 2>/dev/null || cat "${1%.c}.py" 2>/dev/null || cat "${1%.c}.js"
     case "$1" in *.c)
-      cc -MM -I "$RAIZ/lib" -I "$RAIZ/tests" -I "$RAIZ/tools" "$1" 2>/dev/null \
+      cc -MM -I "$RAIZ/lib" -I "$RAIZ/banco" -I "$RAIZ/tests" -I "$RAIZ/tools" "$1" 2>/dev/null \
         | tr ' \\' '\n\n' | grep '\.h$' | sort -u \
-        | while read -r h; do [ -f "$h" ] && cat "$h"; done ;;
+        | while read -r h; do [ -f "$h" ] && cat "$h"; done
+      # pgwire liga sql.c + pgwire.c (Trios PG2–PG3)
+      if [ "$(basename "$1")" = pgwire.c ]; then
+        [ -f "$RAIZ/banco/sql.c" ] && cat "$RAIZ/banco/sql.c"
+        [ -f "$RAIZ/banco/pgwire.c" ] && cat "$RAIZ/banco/pgwire.c"
+      fi ;;
     esac
     printf '%s' "$2"
   } | sha256sum | cut -c1-16
@@ -281,7 +286,13 @@ for f in $(cat "$LISTA"); do
     else printf '%-26s %-9s %s\n' "$f" "FALHA" "exit $r"; falha=$((falha+1)); fi
     continue
   fi
-  if ! cc -O2 -std=c99 -I. -I../tools -I../lib -I../tests "$base.c" -lm -o "$bin" 2>/dev/null; then
+  if [ "$base" = pgwire ]; then
+    if ! cc -O2 -std=c99 -w -I. -I../tools -I../lib -I../banco -I../tests \
+         -DSQL_NO_MAIN -DPGWIRE_NO_MAIN "$base.c" ../banco/sql.c ../banco/pgwire.c -lm \
+         -o "$bin" 2>/dev/null; then
+      printf '%-26s %-9s %s\n' "$f" "—" "NÃO COMPILOU"; falha=$((falha+1)); continue
+    fi
+  elif ! cc -O2 -std=c99 -I. -I../tools -I../lib -I../tests "$base.c" -lm -o "$bin" 2>/dev/null; then
     printf '%-26s %-9s %s\n' "$f" "—" "NÃO COMPILOU"; falha=$((falha+1)); continue
   fi
   rodados=$((rodados+1))

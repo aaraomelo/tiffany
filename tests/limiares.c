@@ -162,6 +162,6 @@ int main(void){
            A + B + C == tot && tot == 918);
     }
 
-    printf("\n=== %ld asserções, %ld falhas ===\n", unidades, falhas);
+    printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

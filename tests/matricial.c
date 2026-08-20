@@ -1657,7 +1657,7 @@ printf("\n§M16 A COORDENADA REAL É A FRAÇÃO 1/n DO TRAÇO — e nenhum metal
         int limite = (m == 2);                   /* m = 2 é o caso no limite */
         /* β(m) = mⁿ − m·m^{n−1} − 1 = −1, exacto; β(m+1) = (m+1)^{n−1} − 1 > 0 */
         long bm = -1, bm1 = 1;
-        for(int t = 0; t < n-1 && bm1 < (long)1e15; t++) bm1 *= (m+1);
+        for(int t = 0; t < n-1 && bm1 < 1000000000000000L; t++) bm1 *= (m+1);
         bm1 -= 1;
         int sinais = (bm < 0 && bm1 > 0);
         /* e h(x) = m·x tem exactamente UM zero no disco, contado pela ordem em x = 0 */

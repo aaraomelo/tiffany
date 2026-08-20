@@ -129,7 +129,7 @@ printf("\n§U1  O CLOCK: o astável, e o seu período é ln2·(R₁C₁ + R₂C�
         if(k > 0 && T <= Tprev) mal++;
         Tprev = T;
     }
-    printf("\n      (meia-fase = 1 bit: 2^{%d} = 256, metade 2^{%d} = %ld)\n\n", bits, bits-1, rt_ipow(2, bits-1));
+    printf("\n      (meia-fase = 1 bit: 2^{%d} = 256, metade 2^{%d} = %d)\n\n", bits, bits-1, rt_ipow(2, bits-1));
     ok("o clock é o astável, e o período sai da EXPONENCIAL do RC — dois caminhos:"
        " T1+T2 = (R1+R2)C, e o limiar 1/2 e' 1 BIT (2^{n-1} e' metade de 2^n)",
        mal == 0 && tem_log && bits == 8 && rt_ipow(2, 7) * 2 == rt_ipow(2, 8));
@@ -201,7 +201,7 @@ printf("\n§U3  A ALU dos Duques, montada SÓ de NAND.\n\n");
     /* o mesmo XOR/AND, agora no disco: ISA_S_XOU e ISA_S_E, 16×16 — sem cos, sem laço 256² extra */
     int mal_isa = 0, per_troca = isa_periodo_giro(ISA_S_TROCA);
     for(int a = 0; a < 16; a++) for(int b = 0; b < 16; b++){
-        long t, e;
+        int t, e;
         isa_word(ISA_S_A, a, 0); isa_word(ISA_S_B, b, 0);
         isa_MOVE(ISA_S_XOU, 1); isa_read(ISA_S_R, &t, &e);
         if(t != (a^b) || e != 0) mal_isa++;

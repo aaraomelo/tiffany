@@ -143,6 +143,6 @@ int main(void){
            passou == RF_NP);
     }
 
-    printf("\n=== %ld asserções, %ld falhas ===\n", unidades, falhas);
+    printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

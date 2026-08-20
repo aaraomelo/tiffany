@@ -4,16 +4,19 @@ Não é histórico. É o que precisas para pegar e continuar.
 
 ESTADO
 ------
-19/08/2026. Fase A Trios 1–10 fechados. Fase D FECHADA: Qz em E₁₆.
+20/08/2026. Fase A Trios 1–10 fechados. Fase D FECHADA: Qz em E₁₆.
 Fase E (descida 8 bits): Trios 1–3 FECHADOS; reducao §DW liga W_8²→𝔽₁₂₇.
+Fase PG: Trios PG1–PG4 FECHADOS. A PROMOÇÃO (saturo→promove) está PROPAGADA.
 
     inteiros    §NT1–§NT11b (14/14) · cadeia §KW (10/10) · migracao §GW (7/7)
     reducao     §DW (8/8) · dual16 §EW (6/6) · transformada §TW (26/26) · palavra §PW (34/34)
-    bateria     519 : 519 verdes, 0 falhas
-    doubles     3906 → 0              python3 tools/doubles_todos.py  FECHADO
+    bateria     528 : 528 verdes, 0 falhas
+    doubles     0 do TIPO e 0 LITERAIS de vírgula — trava declarada: tools/libc.c (§18)
     limiares    58 → 0 régua          (+4 valor físico JS, não alvo)
     long/64     0 ll · 16 i128 rest.   python3 tools/longs_todos.py  (ll FECHADO; i128 só dual32.c)
-    selo        830380933e103ef8      bash tools/bateria.sh
+    formatos    0 avisos -Wformat no repo (eram 216; ver §17)
+    git         0 includes fora do repositório  tests/refs.c §R5  (eram 3 headers)
+    selo        2720752db897a5b0      bash tools/bateria.sh
 
 Verificar SEMPRE com:  bash tools/bateria.sh   (lê AS DUAS linhas: total e unidades)
 
@@ -219,7 +222,8 @@ Objectivo: lib/reta.h e dependentes passam a int/Qz; long só onde ABI exige.
     rt_companheira_i32 · rt_tracos_i32 (int64)
     §R1 §R5 §R6 §R10 §R11 §R12b §R27 reta.c · §T1–§T7b transformada_universal (int32/int64)
   Trio 2:  banco/sql.c · banco/conversa.c · tests/tex_core.c   FECHADO (migração)
-    sql.c: Word long (ABI 16B); mdc_l → rt_mdc
+    sql.c: átomo Word_8; Word ISA = Word_8² (Lei 7); GOLD=×σ σ²=σ+1; blobs atomos_*
+    erg.c: Word ISA = Word_8² (stride 2); sem long semântico — envelope, não C long
     conversa.c: mod_p → rt_mod; inv_mod → rt_inv_mod_i32 (p≤2³¹−1); chaves } em teste (19290, 20380)
     tex_core.c: fixo_mil acumula int64; fixo_mil_i32; §X19 tex.c (9 casos)
     Nota: conversa compila e corre (331/331 ok — bloco analítico/completude em ℚ FECHADO)
@@ -292,15 +296,17 @@ Objectivo: propagar W_8 / uint16-cruz / G_geom pela torre sem contaminar ∼.
     transformada §TW: RtOp coord. byte — 26/26 asserções
     palavra §PW: fronteira W_8 vs EMB_S interior — 34/34 asserções
 
-  eval.txt (torre/unfold): (a)(b) FECHADOS · (c) demonstrado, troca pendente coordenador
+  eval.txt (torre/unfold): (a)(b)(c) FECHADOS
     (a) sec:torre — unfold/fold = PROMOVE/DESCE; subida estrita (λ_{k+1}=busca(F_k))
     (b) lib/largura.h + tests/largura.c §LG0–§LG5 = dual16/dual32 bit a bit
-    (c) tests/promocao.c §SP (W_8) + tests/promocao_qz.c §SQ (Qz) — preservação medida;
-        substituir trunca→promove no código ainda não feito
+    (c) saturo→promove NO HOT PATH (20/08):
+        · Qz = {int64_t p,q}; fora de E₁₆ conta e GUARDA exacto (não ±32767)
+        · w8_proj_sat → uint16 exacto (não min(,255))
+        · medido: promocao.c §SP + promocao_qz.c §SQ + calculo2 + migracao
 
   Medidores âncora:
     §NT8   equivalência uint16 vs wrap
-    §NT11  wrap≠sat; contadores
+    §NT11  wrap≠promove; contadores
     §AG2   dragão dobra (G>1)
     §AG6   G=0 e G=2 colidem em B=0 (perda profundidade GF(2))
     §M8    [Z²:T(Z²)] = |det T|
@@ -329,10 +335,13 @@ Ver o que a asserção DECIDE. Para a migração:
   64 → 32          long vira par D64; __int128 só na TRAVA do medidor
   32 → 16          partir cada int em dois int16 (mesmo movimento: 16×16 → D32)
 
-REGRAS DURAS (actualizadas 19/08):
+REGRAS DURAS (actualizadas 20/08 — bit-level):
+  · A MATEMÁTICA MANDA: σ²=σ+1 (ouro/GOLD); ∞+1=−1 (Möbius T_{−1}∘S, §M8 / thm:mediante).
+  · NÃO inventar “carry” de CPU. Transporte = thm:transporte a+b=(a⊕b)+2(a∧b) — é ℕ.
+  · Largura semântica = Word_8 / torre (F_1→…→F_8→ℕ→ℤ→…). NUNCA long do C como envelope.
+  · long SÓ em I/O de sistema (printf, stat, off_t) — cast explícito; não é tipo da ISA.
   · O 64 SAI do código de produção. A trava pode usar __int128; o resto usa D32/I128.
-  · long long → int64_t (Fase A); long → int32_t onde cabe (Fase B adiantada).
-  · long SÓ em interfaces ABI (printf %ld, stat, disco legado) — com cast explícito.
+  · long long → int64_t (Fase A); onde ainda há long interior → Word_8² ou subir a torre.
   · SCALE/fixo_mil SÓ na fronteira I/O — nunca dentro de ok().
   · REDUZIR antes de multiplicar (qz de racionais.h; rt_para_unidade na reta).
   · qz_saturou / d16 recusa — contar à parte, não truncar em silêncio.
@@ -458,7 +467,11 @@ Pergunta sempre: QUE ENTRADA FARIA ISTO FALHAR?
   lib/rt_cf_slot.h  acumulador FC: slots; fd≥0 → .mem; rt_cf_slot_mem_abre;
                     rt_cf_slot_word(ix,fd); cf_slot_base em slot_map.h
   lib/slot_map.h    S_CF=2048, S_CF_STRIDE, S_CF_WORDS, S_CF_MEM_BYTES, cf_slot_base
-  lib/slot_mem.h    SlotWord + pread/pwrite — mem_le/mem_grava do banco
+  lib/slot_mem.h    SlotWord = Word_8 = 1 B/slot; par (a,b) = dois slots (Lei 7)
+  lib/palavra8.h    Word_8 bit a bit (⊕∧); F_8; ℕ; largura 8→16→32; W8Par ~
+  lib/isa_disk.h    registos A,B,R = Word_8²; ALU 8-bit; MOVE; sem long
+  banco/conversa.c  átomo Word_8; par lógico = 8 átomos (dois u32 LE); texto 1 B/átomo
+                    ABI nova — re-semear bases .fala (layout antigo 16 B incompatível)
   lib/calculo.h     fn_quociente e fn_desloca binomial (E₁₆)
   lib/medida.h      md_det_potencia_mod em long[2][2] — mod p fora de E₁₆
   lib/isa_disk.h    rotação ordem 4/2 — sem trig float
@@ -481,20 +494,419 @@ Pergunta sempre: QUE ENTRADA FARIA ISTO FALHAR?
 
 15. A FRENTE AGORA
 ==================
-  20/08/2026 — CHECKPOINT: TeX vivo (CM…C3) + licença proprietária.
+  20/08/2026 — metal bit-level: Word = Word_8²; σ²=σ+1; ∞+1=−1. Sem long C na ISA.
 
-  FECHADO:
-    · corpus/docs: CM, CP, AL, CL, AR, C2, C3 (prosa canónica)
-    · papers/arquitetura.tex §tex-vivo
-    · LICENSE: comercial — uso mediante contrato e pagamento
-      (aarao.melo.lopes@gmail.com)
+  DIRETRIZ (não negociar):
+    · Envelope = Word_8. Par ℤ = dois átomos (Lei 7). GOLD = ×σ, σ²=σ+1.
+    · ∞+1=−1 PROVADO (descida_mobius §M8 · corpo_algebrico · inteiros thm:mediante).
+    · Não “carry”: transporte é thm:transporte. Não alargar com long “porque o C tem”.
+    · Faixas/endereços largos (nonce, merkle base) = átomos u32 LE, não campos long da Word.
+    · Medir GOLD/volta no envelope Word_8; coef. que crescem sobem a torre (não long C).
+    · Verif.: sql teste 86/86 ; erg RESÍDUO 0 ; barramento 5/5
+
+  FECHADO metal (20/08, continua):
+    · lib/word_isa.h — Word = Word_8² partilhado
+    · lib/palavra8.h + tests/palavra8.c §P0–§P4 (5/5) — citado em inteiros/arquitetura
+    · sql.c + erg.c — Word_8²; GOLD σ²=σ+1
+    · barramento.c — Slot = Word_8² (2 átomos; cifra no envelope)
+    · isa_disk.h — API uint8_t/int8 envelope; sem long semântico
+    · traduz.c — multi-átomo (PAR_ATOMS=8); Slot.a/.b = uint32_t; 7/7 UNIT
+    · conversa.c — Slot lógico uint32_t (8 átomos u32 LE); ABI disco inalterada
+
+  PENDENTE metal:
+    · (vazio — envelope Word_8 + pares lógicos tipados)
+
+  FECHADO TeX-vivo:
+    · DF21 + TP20 + MT16 + HM14 + PN10 + HI9 + UN23 + TR16 + EX15 + TS16 + FQ16
+    · LI16 + DU14 + EL12 + TN17 + EX20
+    · CM…C3 + AR + CL + CP + AL
+    · corpus/docs/*_exercicios.tex + semear
 
   Uso:
-    TIFFANY_ROOT=$PWD banco/bin/conversa banco/.fala/vivo responde "…"
-    bash tools/semear.sh banco/.fala/vivo
-    bash tools/indexa_tex_vivo.sh banco/.fala/vivo
+    TIFFANY_ROOT=$PWD banco/bin/conversa banco/.fala/vivo responde "espaco vetorial oito leis"
+    TIFFANY_ROOT=$PWD banco/bin/conversa banco/.fala/vivo responde "divisibilidade transitiva"
+    TIFFANY_ROOT=$PWD banco/bin/conversa banco/.fala/vivo responde "ponto no infinito neutro"
 
   Pendente natural:
-    · outros resolve_* (formas DF, topologia, …)
+    · FASE PG — Trios PG1–PG4 FECHADOS; próximo = Trio PG5 (pqlike opcional)
+
+  Verificação (feita 20/08):
+    bash tools/semear.sh banco/.fala/vivo          → ok
+    bash tools/indexa_tex_vivo.sh banco/.fala/vivo → pronto
+    smoke: espaco vetorial / divisibilidade / ponto infinito / cauchy / nucleo dual
+    limpeza TeX: ≠ √ ∘ nos folhas exterior/tensor/forma/linear/dual
+    hot path: promocao + promocao_qz + calculo2 + migracao + sql
 
   IMPORT CORPO: ./tiffany_sql .torre/reino "IMPORT CORPO 'app/src/corpo.json' '.'"
+
+
+16. FASE PG — INTERFACE POSTGRES DO ZERO (entrada das aplicações)
+=================================================================
+ORDEM DO COORDENADOR (20/08): Postgres como *interface* de referência —
+mapear a API/protocolo e implementar AQUI do zero. NÃO baixar o servidor
+Postgres, NÃO meter o binário oficial, NÃO “embrulhar” um postgres instalado.
+O motor continua a ser o metal da casa: sql.c → ISA → .mem (Word_8).
+
+PORQUÊ
+------
+  · Hoje a porta comercial é SQL textual (`banco/sql.c`, HTTP `/sql`,
+    `interface_padrao=sql`). Apps de fora (ORM, drivers, painéis) falam
+    o *wire* Postgres (FEBE) ou a superfície libpq — não o nosso argv.
+  · Implementar essa face = entrada estável para aplicações sem ceder o
+    núcleo. A forma dos bits vem da documentação Postgres; a realização
+    é Tiffany.
+
+O QUE É / O QUE NÃO É
+---------------------
+  É:
+    · Protocolo FEBE (Frontend/Backend) implementado em C da casa
+    · Listener TCP que fala as mensagens do protocolo (referência:
+      docs.postgresql.org — Protocol; Message Formats; Message Flow)
+    · Tradução: mensagem FEBE → string/AST que `sql.c` já executa →
+      resposta FEBE (RowDescription / DataRow / CommandComplete / …)
+    · Mais tarde: fachada C estilo libpq (`PQconnectdb`, `PQexec`, …)
+      que fala com O NOSSO listener (código nosso, não libpq do SO)
+
+  Não é:
+    · apt/dnf install postgresql / docker postgres / libpq-server
+    · Copiar código-fonte do postgres para o repo
+    · Substituir o motor `.mem`/ISA por MVCC/WAL alheio
+    · Compatibilidade 100% dialecto no dia 1 (só o que o metal já mede)
+
+REFERÊNCIA CANÓNICA (ler, não vender)
+-------------------------------------
+  Docs oficiais (só mapa de bits / fluxo):
+    · Overview + Message Flow + Message Formats (FEBE)
+    · Startup sem type-byte; resto: 1 byte tipo + int32 len + payload
+    · Simple Query: Query('Q') → RowDescription('T')* DataRow('D')*
+      CommandComplete('C') ReadyForQuery('Z') | ErrorResponse('E')
+    · Extended Query: Parse('P') Bind('B') Describe('D') Execute('E')
+      Sync('S') → ParseComplete/BindComplete/… / ReadyForQuery
+    · Startup: AuthenticationOk / ParameterStatus / BackendKeyData /
+      ReadyForQuery; Terminate('X'); SSLRequest (recusar ou stub)
+  Versão-alvo do protocolo: 3.0 (o que os clientes modernos pedem).
+  Catálogo/pg_*: FASE posterior (fachada só do que apps pedem ao ligar).
+
+ARQUITECTURA NA CASA
+--------------------
+                    ┌─────────────────────────────┐
+   app / driver ───►│  pgwire (Tiffany, do zero)  │
+   (psql, JDBC,     │  FEBE encode/decode         │
+    libpq-cliente,  └──────────┬──────────────────┘
+    ORM, …)                    │ Query text / params
+                               ▼
+                    ┌─────────────────────────────┐
+                    │  banco/sql.c  (já existe)   │
+                    │  SQL → bytecode ISA         │
+                    │  memória = .mem (Word_8)    │
+                    └─────────────────────────────┘
+
+  Peças novas (nomes provisórios — criar quando o Trio 1 arrancar):
+    lib/pgwire.h          frames FEBE: le/escreve tipo+len+payload
+    lib/pgmsg.h           constantes dos type-bytes + builders/parsers
+    banco/pgwire.c        listener TCP; sessão; despacho Simple Query
+    tests/pgwire.c        medidor bit-a-bit das mensagens (sem rede real
+                          se possível: buffer in-memory)
+    tests/pgwire_cli.c    cliente mínimo nosso (não libpq do SO) contra
+                          o listener — equivalência ponta a ponta
+  Opcional depois:
+    lib/pqlike.h          API estilo PQconnectdb/PQexec → nosso wire
+    papers/arquitetura    §sec:api-sql: “porta FEBE = face Postgres”
+
+MÉTODO (o da casa — não atalhar)
+--------------------------------
+  1. Caminho novo primeiro (pgwire) — sql.c intacto
+  2. Equivalência medida: mesma query via argv sql.c vs via FEBE
+     → mesmas linhas / mesmo CommandComplete tag
+  3. Só depois: `/sql` HTTP ou manifesto a apontar o listener como
+     entrada preferida das apps
+  4. Dialectos e pg_catalog: um comando de cada vez, com medidor
+
+SUBCONJUNTOS SQL (o que o metal já tem → prioridade FEBE)
+---------------------------------------------------------
+  Já em sql.c (entrada imediata do Simple Query):
+    CREATE TABLE · INSERT · SELECT · WHERE · UPDATE · DELETE
+    INSERT TEXTO / BUSCA / ACHA · IMPORT CORPO / GET CORPO · …
+  Fora do dia 1 (recusar com ErrorResponse claro, não silêncio):
+    transactions completas, COPY binário, LISTEN/NOTIFY, cursores
+    declarados, funções PL, tipos geométricos PG, extensões
+
+TRIOS (ordem de trabalho — um de cada vez)
+------------------------------------------
+  Trio PG1 — FRAME + STARTUP + AUTH TRUST          FECHADO (20/08)
+    · lib/pgmsg.h + lib/pgwire.h + tests/pgwire.c §W0–§W2b (4/4)
+    · AuthOk, ReadyForQuery, BackendKeyData, Terminate, Startup↔parse,
+      SSLRequest→'N', handshake trust, ErrorResponse, Query encode
+    · Sem TCP
+
+  Trio PG2 — SIMPLE QUERY → sql.c                  FECHADO (20/08)
+    · banco/sql_api.h + sql_abrir/fechar/executa (captura SELECT/tags)
+    · RowDescription / DataRow / CommandComplete / ReadyForQuery
+    · tests/pgwire.c §W3; link -DSQL_NO_MAIN banco/sql.c
+    · Equivalência: CREATE/INSERT/SELECT → FEBE no buffer
+
+  Trio PG3 — LISTENER + BASE + MANIFESTO           FECHADO (20/08)
+    · banco/pgwire.c: listen 127.0.0.1 (5432 se livre, senão 55432)
+    · SSL→'N', Startup trust, Simple Query → sql_api → FEBE
+    · conecthus/backends/manifesto.json: entrada_apps=pgwire
+      (interface_padrao continua sql)
+    · tests/pgwire.c §W4; tools/pgwire_smoke.sh
+    · papers/arquitetura.tex §sec:api-sql: parágrafo FEBE
+
+  Trio PG4 — EXTENDED QUERY (Parse/Bind/Execute/Sync) FECHADO (20/08)
+    · banco/pgwire_sess.h: statement/portal em RAM; $n → texto no Bind
+    · ParseComplete / BindComplete / Execute(rows) / Sync→Ready
+    · Describe(S)→ParamDesc+NoData; Close
+    · tests/pgwire.c §W5–§W6: Bind $1=7 ≡ Simple WHERE a=7
+
+  Trio PG5 — FACHADA libpq-LIKE (opcional, apps C)
+    · lib/pqlike.h: PQconnectdb/PQexec/PQntuples/PQgetvalue — implementação
+      nossa sobre pgwire (cliente)
+    · NÃO linkar -lpq do sistema no servidor
+    · Medidor: mesmo teste PG2 via pqlike
+
+  Trio PG6 — CATÁLOGO MÍNIMO (quando uma app real exigir)
+    · Respostas stub a `SELECT version()`, `SHOW`, `pg_catalog` mínimo
+      que o driver pede no connect — cada um medido, sem fingir PG completo
+
+NÃO FAZER
+---------
+  · Instalar ou vendorar o servidor PostgreSQL
+  · “Compatível com Postgres” como slogan sem medidor FEBE
+  · Meter WAL/MVCC/processos do PG no metal
+  · Alargar Word/ISA “porque o driver pediu int8” — promove pela torre
+  · Misturar o canal UDP do sql.c com FEBE sem contrato
+
+PRÓXIMO PASSO OPERACIONAL
+-------------------------
+  Trio PG5 (opcional): fachada pqlike. Ou PG6 se uma app real pedir catálogo.
+
+COMANDOS ÚTEIS
+-------------------------------
+  cc -O2 -std=c99 -w -Ilib -Ibanco -DSQL_NO_MAIN -DPGWIRE_NO_MAIN -o /tmp/pgwire \
+     tests/pgwire.c banco/sql.c banco/pgwire.c -lm && /tmp/pgwire
+  cc -O2 -std=c99 -w -Ilib -Ibanco -DSQL_NO_MAIN -o /tmp/pgwire_srv \
+     banco/pgwire.c banco/sql.c -lm
+  /tmp/pgwire_srv /tmp/reino 55432
+  bash tools/pgwire_smoke.sh
+  bash tools/bateria.sh --reatesta pgwire
+  # cliente nosso — nunca exigir psql do sistema para fechar o Trio
+
+
+17. A PROMOÇÃO PROPAGADA — a metade que a decisão de 20/08 deixou por fazer
+===========================================================================
+A decisão «saturo→promove» (§eval.txt (c)) trocou o Qz de int16 para int64 e
+tirou o grampo dos ±32767. O que ela mudou por baixo, e ninguém propagou, foi o
+SIGNIFICADO de `qz_saturou`: antes «saiu de E₁₆» era «truncou»; depois passou a
+ser «subiu de andar, e o valor está INTACTO». Seis medidores caíram por isso, e
+nenhum deles falava de saturação — falavam de Cauchy, de retração e de séries.
+
+  bateria antes: 528 : 522 verdes, 6 falhas   ·  depois: 528 : 528, 0 falhas
+
+O QUE CAIU, E PORQUÊ
+--------------------
+  dourada_bidual  NÃO COMPILOU — `isa_norma2` saiu do isa_disk.h na migração
+                  Word_8 e o medidor que a chama ficou sem ela. Um medidor que
+                  não compila não falha: DESAPARECE do total.
+  edo             NÃO COMPILOU — `unsigned int ae[12]` contra a assinatura
+                  `const unsigned long *` de `nt_convergentes`.
+  torre_alg §T2   a FC no disco tinha o termo em UM átomo e o sinal como byte
+                  ASSINADO num envelope sem sinal: −1/3 voltava 255/3 e o
+                  quociente 292 enrolava para 36. Silêncio nos dois casos.
+  entrega §E2/§E4 o mesmo defeito, visto de outro lado: 80 de 10000 decimais
+                  não voltavam, e «-0.1» reconstruía-se como «25.500».
+  tres_caminhos   `cy_teto_honesto` lia `qz_saturou` para saber até onde a
+                  sucessão ainda é a sucessão. Com a promoção deixou de ver o
+                  que congela (o encaixe a desistir) e passou a cortar o que
+                  não congela (a promoção): tecto 30 onde o encaixe parara no 14.
+  conversa §C43   `c2_soma_segura` tirou o teste `x.saturo` e não pôs nada no
+                  lugar: passou a devolver 1 SEMPRE. Σ1/n³ até 40 pede
+                  lcm(1..40)³ ≈ 1,5·10⁴⁷, perdia-se, e a asserção cujo texto diz
+                  «uma soma negativa passou por resultado» voltou a deixá-lo passar.
+
+AS PEÇAS NOVAS
+--------------
+  qz_perdeu       racionais.h — a PERDA (nem no int64 coube; valor descartado).
+                  É gaveta separada de `qz_saturou`, que conta a PROMOÇÃO.
+  rz_parou        reais.h — o passo do encaixe que NÃO se deu.
+  cy_congelou     cauchy.h — o tecto próprio da sucessão a repetir o último termo.
+  cy_desonesto()  a soma dos três: um termo é honesto enquanto NENHUM se mexe.
+  rz_passo        ganhou guarda i128 — a órbita cresce ×1,85/passo e transbordava
+                  em silêncio (antes não chegava lá porque `qz()` grampeava).
+  rz_encaixota    já não trava em E₁₆ (isso era truncar); trava no tecto
+                  DECLARADO do andar (rz_cmp, RZ_TETO=2³⁰) e conta a paragem.
+  FC nos slots    a_k = Word_8² (dois átomos, baixo+256·alto, 0..65535); sinal =
+                  um BIT; acima de RT_CF_TERMO_MAX RECUSA-SE com `saturou`.
+                  S_CF_STRIDE = 2·RT_CF_MAX+3.
+
+MEDIDORES NOVOS / ENDURECIDOS
+-----------------------------
+  tres_caminhos §RE6b   as três bandeiras, cada uma pelos DOIS lados
+  torre_alg §T2 (tecto) 65535 encosta e volta · 65536 é recusado
+  reta §R12f            era TAUTOLOGIA (repetia a macro); agora escreve a
+                        palavra 1 e verifica que a 0 volta inteira
+  reta §R12g            o caso era 22/7 (termos 3 e 7): não exercitava o átomo
+                        alto. Passou a 1000/3, cujo quociente 333 obriga os dois.
+
+O GUME (dez mutações, todas caem)
+---------------------------------
+  sinal→byte assinado · termo→um átomo · recusa do tecto desligada · stride
+  curta · tecto honesto a ler qz_saturou · rz_parou mudo · cy_congelou mudo ·
+  rz_passo sem guarda · c2_soma_segura sem qz_perdeu           (torre_alg, reta,
+  entrega, tres_caminhos, conversa)
+
+FORMATOS: 216 → 0 avisos -Wformat no repo
+------------------------------------------
+A mesma metade por propagar, no outro sítio. O Qz alargou para int64 e os
+`printf` ficaram em `%d`; a Fase A estreitou `long long`→`long` e `int` e os
+formatos ficaram em `%lld` e `%ld`. Nenhuma asserção o via — em x86-64 o valor
+sai certo por acidente de ABI —, mas trunca acima de 2³¹, que são exactamente
+os valores que a promoção existe para guardar.
+
+  · 78 sítios %d  ← int64_t   · 31 sítios %lld ← long   · 53 sítios %ld ← int
+  · 24 à mão, onde um %d legítimo convivia com um Qz
+  Critério: só se corrige a linha quando o nº de specs = nº de avisos; o resto
+  é à mão. Verificação: `cc -Wformat` a zero, e a bateria a 528:528.
+
+  E havia GARBAGE a sério, não só UB: `tests/sshb.c` tinha `long rtt = 0.5`
+  (a Fase A trocou o tipo e deixou a constante em vírgula) — o 0,5 ms virava 0,
+  a tabela de latências inteira saía de uma conta em double impressa com %ld, e
+  nenhuma asserção lia o que estava escrito. Passou a inteiros, em DÉCIMOS de ms.
+
+O QUE ISTO DESTAPOU — e NÃO está fechado
+-----------------------------------------
+  `tools/doubles_todos.py` conta o TIPO `double|float`. Ele está em 0, e isso é
+  verdade. Mas o TIPO não é a aritmética: um literal `2.0` faz uma conta em
+  vírgula flutuante sem escrever a palavra. São 81 literais em código, em 28
+  ficheiros — tools/libc.c 15, tests/sshb.c 11 (agora 0), banco_relogio.c 9,
+  prisma.c 5, analog.c 4. A régua não vê o alvo, e «0 doubles» é a definição da
+  consulta, não um facto sobre o repo. Medir com:
+
+      grep -nE '(^|[^A-Za-z0-9_.])([0-9]+\.[0-9]*|\.[0-9]+|[0-9]+[eE][-+]?[0-9]+)' \
+           $(git ls-files '*.c' '*.h')     # depois de tirar comentários e strings
+
+  Decisão do coordenador: migrar os 81 é trabalho próprio, por trios, e não
+  entrou aqui.
+
+PRÓXIMO PASSO OPERACIONAL
+-------------------------
+  Ver §18: os literais fecharam. Segue Trio PG5 (fachada pqlike, opcional) ou
+  PG6 se uma app real pedir catálogo.
+
+
+18. A ARITMÉTICA DE VÍRGULA — 67 → 0, e o que ela escondia
+===========================================================
+Fechado nesta etapa. `doubles_todos.py` contava o TIPO `double|float` e estava em 0;
+o `2.0` faz a conta sem escrever a palavra. Não era estilo: CINCO asserções eram
+TAUTOLOGIAS por causa dele, e nenhuma podia cair.
+
+O QUE ESTAVA A PASSAR SEM MEDIR
+-------------------------------
+  balanco §B3     `long f = 0.1 + 0.2` truncava para 0, e o exemplo canónico do
+                  ponto flutuante comparava «0 ≠ 0.3». Passava sempre.
+                  → agora nos BITS: `le_f64_bits_pq(1,10)` e `(2,10)`, soma exacta
+                    sobre o denominador diádico comum, e o arredondamento dá
+                    3fd3…34 contra 3fd3…33 — um ULP, em inteiros. Com o controlo
+                    diádico 1/4 + 1/4 = 1/2, que tem de dar IGUAL.
+  prisma §S3      `long med = 1.0; med*2.0/3.0` zerava no 1.º nível; a tabela
+                  imprimia 1,0,0,0,0,0,0 e «a medida vai a zero» era 0 < 0.1.
+                  → a medida é 2^k/3^k em ℚ, confere contra pedaços/3^k, encolhe
+                    ESTRITAMENTE nos 6 passos, e «vai a zero» traz o ε = 1/100 com
+                    a testemunha k = 12.
+  base §B5        `long t = 0.7` → cada termo da série `s*t/p` dava 0, exp(tA)
+                  ficava a IDENTIDADE, e «o fluxo é ortogonal» era ‖I·x‖ = ‖x‖.
+                  → e não se põe o 0,7 de volta: exp TRUNCADA não é ortogonal nem
+                    em ℝ. Mede-se por CAYLEY, que é exacto em ℤ:
+                    ‖(I−A)x‖ = ‖(I+A)x‖ ⟺ (I+A)(I−A) = I − A² dos dois lados.
+                    Gume: com M = S+D (SIMÉTRICA) as normas separam-se, 100/100.
+  dissipa §D3     kT·ln2 em `long` a partir de 1,38·10⁻²³ = ZERO, e os DOIS lados
+                  de Landauer imprimiam 0 — a distinção que a secção existe para
+                  mostrar não aparecia.
+                  → em rJ (10⁻²⁷ J): k_B·T = 4 141 947 rJ EXACTO (k_B é exacto no
+                    SI), ln2 entra como 6931471805599453/10¹⁶ e é o único factor
+                    arredondado. Destrutiva 376 304 828 416 rJ, involutiva 0.
+  banco_relogio   `alfa = M/nslot` era divisão INTEIRA (= 0), e a «forma fechada»
+                  (1 + 1/(1−alfa))/2 avaliava-se sempre em 0 devolvendo 1.
+                  → alfa = M/n em ℚ, fechada = (2n−M)/(2(n−M)), comparação por
+                    produto cruzado. E ela não discriminava: a 3000/65536 vale ~1
+                    e a folga de +1/2 engolia qualquer coisa. Varre-se alfa =
+                    1/8, 1/4, 1/3, 1/2, 7/10 numa tabela sintética, e sem
+                    tolerância inventada: a fechada é ASSINTÓTICA sob hashing
+                    uniforme e o contador fica sempre ABAIXO dela — um hash bom
+                    agrupa menos que o acaso —, logo afirma-se MAJORANTE +
+                    CRESCIMENTO. A constante 1 respeita o majorante e não cresce.
+  linear §1       `r = (px[i]+2.0) + 1.0/r` num long: 1/r cai em (0,1/2] e some no
+                  truncamento. «A imagem inteira como uma fracção contínua» valia
+                  o PRIMEIRO PIXEL mais dois — e o ficheiro não tinha asserção
+                  nenhuma para o dizer.
+                  → o representante é o PAR p/q, e diz-se onde deixa de caber: dos
+                    1024 pixels só os últimos 9 cabem em 64 bits. Ganhou asserção
+                    (|p·q'−p'·q| = 1 e a paragem verificada no pixel seguinte) e o
+                    exit passou a seguir as unidades.
+  operador_dual   `long F = i*0.37` colapsava 17 índices em 5 valores, 7 deles 0.
+                  → `i*37`: 17 forças DISTINTAS, e a contagem diz que viu 17.
+
+O RESTO, MECÂNICO
+-----------------
+  tectos    (long)9e18 · 1e15 · 1e18 → literais inteiros (deforma, matricial, navegante)
+  tempos    (t.tv_sec)*1e9 + … → 1000000000L (banco_relogio, canal, grupo)
+  %        100.0*x/y com %.1f → 1000*x/y em /10 e %10 (gauss, koch, largura,
+            palavra, promocao, promocao_qz, tex, pontryagin)
+  mortos    #define M_PI / PI / Q_E / K_B / T_AMB / VT e o próprio <math.h>:
+            NENHUM era usado. As chamadas a sin/cos/exp que estes ficheiros citam
+            vivem todas em COMENTÁRIOS. (eletrico.h, analog, deforma,
+            gerador_analog, microfluidica)
+
+A RÉGUA — e é esta a correcção de raiz
+--------------------------------------
+  `tools/doubles_todos.py` passou a contar LITERAIS além do tipo, com a trava
+  DECLARADA e com motivo: `tools/libc.c` não é compilado por cc — é fonte para o
+  `traduz.c` subir a wasm, onde `f64` é o tipo NATIVO, e ele IMPLEMENTA o atof.
+  São os 15 que sobram, e agora aparecem como trava e não como silêncio.
+
+      python3 tools/doubles_todos.py    → 0 tipo · 0 literais · 15 na trava
+
+O GUME (doze mutações)
+----------------------
+  a soma dos bits vira o bit de 3/10 · o controlo diádico mente · a medida de
+  Cantor não encolhe · a testemunha k desaparece · Cayley com o SIMÉTRICO · o
+  controlo simétrico deixa de separar · kT·ln2 volta a zero · a força colapsa ·
+  o majorante vira a constante 1 · as densidades ficam todas iguais · as DUAS
+  redes do linear saem.  Todas caem.
+
+  E DUAS SOBREVIVERAM PRIMEIRO, com causas diferentes — vale registar:
+   · tirar UMA das redes do `linear` não faz cair, porque a outra apanha: guarda
+     REDUNDANTE, e o TECTO=2⁶²−1 é conservador (o passo ainda cabia). E o
+     |det| = ±1 NÃO detecta transbordo: a recorrência preserva-o MÓDULO 2⁶⁴.
+   · a asserção do `linear` tinha uma escapatória minha — «consumiu tudo» —, e a
+     mutação entrava por ela. Só é aceitável onde CABE: com a_k ≥ 2 o par cresce
+     como Fibonacci e passado o 90.º termo nenhum par de 64 bits o segura.
+
+
+19. O HEADER FORA DO REPOSITÓRIO — a órfã do C
+================================================
+Ao preparar o checkpoint: `banco/sql.c` está na bateria, inclui `banco/sql_api.h`,
+e esse ficheiro NÃO EXISTIA no git. O `.gitignore` tinha
+
+    banco/*
+    !banco/*.c   !banco/*.sql   !banco/*.sh   !banco/*.txt   …      (sem `.h`)
+
+logo `sql_api.h`, `pgwire_api.h` e `pgwire_sess.h` — os três headers dos Trios
+PG1–PG4, declarados FECHADOS — viviam só no disco desta máquina. Faltavam também
+`lib/palavra8.h` e `lib/word_isa.h`, por estarem simplesmente por adicionar.
+
+A BATERIA ESTAVA VERDE SOBRE UMA ÁRVORE QUE O GIT NÃO REPRODUZ. É a mesma
+assinatura do `refs.c`: nada falha deste lado. Aqui compila, num clone não existe.
+
+  correcção   `!banco/*.h` no .gitignore + os cinco ficheiros adicionados
+  medida      tests/refs.c §R5 — todo `#include "x"` de um ficheiro RASTREADO
+              aponta para um ficheiro que o git também tem, com controlo negativo
+  verificação `git ls-files | tar` para uma árvore limpa; `banco/sql.c` e o
+              medidor `pgwire` compilam e correm lá (§W0–§W6 verdes)
+
+  E O RUÍDO PRIMEIRO: a §R5 nasceu a acusar 88 e 85 eram falso positivo meu —
+  `banco/../lib/disco.h` não é `lib/disco.h` sem colapsar os `X/..`. Normalizado,
+  são 5 (três headers). Duas réguas independentes (C e Python) deram o mesmo.
+
+  Os ELF de `cc` soltos em tests/ (calculo2, dominios, koch, refs, reta, …)
+  entraram na lista do .gitignore, que já os enumerava um a um.

@@ -109,7 +109,7 @@ int main(void){
             long antes = qz_saturou;
             int feitos = rz_encaixota(c, &lo, &hi, 12);
             casos++;
-            printf("        %2ld        12              %2d          [%d/%d, %d/%d]\n",
+            printf("        %2ld        12              %2d          [%ld/%ld, %ld/%ld]\n",
                    NAO_QUAD[i], feitos, lo.p, lo.q, hi.p, hi.q);
             /* o encaixe encolhe e nunca larga o corte: lo abaixo, hi acima, sempre */
             if(!(qz_menor(lo0, lo) || qz_igual(lo0, lo))) mal++;
@@ -280,6 +280,74 @@ int main(void){
            mal == 0 && recusas == 4 && aceites == 2 && r == -1);
     }
 
+    /* ═══ §RE6b AS TRÊS FORMAS DE DEIXAR DE SER O TERMO ════════════════════════
+     * O tecto de cima é o que a COMPARAÇÃO recusa. Este é o outro: o que a SUCESSÃO
+     * deixa de dizer. Uma sucessão pode parar de ser ela própria de três maneiras, e
+     * as três têm de acender uma bandeira — senão `cy_termo` devolve o último termo
+     * bom outra vez e uma sucessão CONSTANTE parece de Cauchy, parece equivalente a
+     * si própria e parece convergir.
+     *
+     *   PERDEU     a órbita de Möbius transborda o int64 e o valor é descartado
+     *   PAROU      o encaixe já não consegue dar o passo (o ponto médio sai do 2³⁰)
+     *   CONGELOU   a sucessão tem tecto próprio (a harmónica, os convergentes)
+     *
+     * Enquanto o racional TRUNCAVA, as três vinham de borla com a saturação. Com a
+     * promoção (20/08) sair de E₁₆ passou a ser subir de andar com o valor intacto,
+     * e a saturação deixou de as ver — o tecto honesto passou a ser 30 quando o
+     * encaixe tinha desistido no 14. Cada uma tem agora o seu contador, e cada uma
+     * mede-se aqui pelos DOIS lados: onde ainda é o termo e onde já não é. */
+    printf("\n§RE6b Perdeu, parou, congelou: as três bandeiras de «já não é o termo».\n\n");
+    {
+        long mal = 0;
+        Suc MOB = suc(S_MOBIUS, 2), LO = suc(S_LO, 2), HAR = suc(S_HARM, 0);
+
+        /* PERDEU — a órbita cresce ×1,85 por passo e sai do int64 lá para o 49º */
+        long pd0 = qz_perdeu;   (void)cy_termo(MOB, 20);
+        long pd_perto = qz_perdeu - pd0;                 /* ainda é o termo */
+        pd0 = qz_perdeu;        (void)cy_termo(MOB, 80);
+        long pd_longe = qz_perdeu - pd0;                 /* já não é */
+        long teto_mob = cy_teto_honesto(MOB, 80);
+        if(pd_perto != 0 || pd_longe == 0) mal++;
+        if(teto_mob >= 80 || teto_mob < 20) mal++;       /* corta, e não no princípio */
+
+        /* PAROU — o encaixe desiste quando o ponto médio sai do domínio de rz_cmp */
+        long rp0 = rz_parou;    (void)cy_termo(LO, 20);
+        long rp_perto = rz_parou - rp0;
+        rp0 = rz_parou;         (void)cy_termo(LO, 45);
+        long rp_longe = rz_parou - rp0;
+        long teto_lo = cy_teto_honesto(LO, 45);
+        if(rp_perto != 0 || rp_longe == 0) mal++;
+        if(teto_lo >= 45 || teto_lo < 20) mal++;
+
+        /* CONGELOU — a harmónica tem tecto próprio e acima dele repete o último */
+        long cg0 = cy_congelou; (void)cy_termo(HAR, CY_HARM_TETO);
+        long cg_perto = cy_congelou - cg0;
+        cg0 = cy_congelou;      Qz h1 = cy_termo(HAR, CY_HARM_TETO + 1);
+        long cg_longe = cy_congelou - cg0;
+        Qz h0 = cy_termo(HAR, CY_HARM_TETO);
+        if(cg_perto != 0 || cg_longe == 0) mal++;
+        if(!qz_igual(h0, h1)) mal++;                     /* congelado É repetir */
+        long teto_har = cy_teto_honesto(HAR, 30);
+        if(teto_har != CY_HARM_TETO) mal++;
+
+        printf("        PERDEU   n=20 +%ld · n=80 +%ld · tecto honesto %ld\n",
+               pd_perto, pd_longe, teto_mob);
+        printf("        PAROU    n=20 +%ld · n=45 +%ld · tecto honesto %ld\n",
+               rp_perto, rp_longe, teto_lo);
+        printf("        CONGELOU n=%d +%ld · n=%d +%ld · tecto honesto %ld"
+               " (e o termo acima REPETE)\n\n",
+               CY_HARM_TETO, cg_perto, CY_HARM_TETO + 1, cg_longe, teto_har);
+        ok("AS TRÊS FORMAS DE DEIXAR DE SER O TERMO ACENDEM CADA UMA A SUA BANDEIRA, e"
+           " nenhuma delas é a saturação: `qz_saturou` conta a PROMOÇÃO — o valor saiu"
+           " de E₁₆ e continua exacto — e ler nela a honestidade da sucessão dizia o"
+           " contrário do que mede, cortando termos bons e deixando passar os maus. O"
+           " que corta é `qz_perdeu` (o valor descartado), `rz_parou` (o passo que o"
+           " encaixe não deu) e `cy_congelou` (o tecto próprio a repetir o último). As"
+           " três medem-se dos DOIS lados — um índice onde a bandeira NÃO acende e um"
+           " onde acende —, porque «acende sempre» passaria com metade da medida",
+           mal == 0);
+    }
+
     /* ═══ §RE7 n = 3: DOIS caminhos transportam, o terceiro NÃO ════════════════ */
     printf("\n§RE7 O cúbico: o corte e o encaixe sobem de índice; o Möbius não.\n\n");
     {
@@ -350,7 +418,7 @@ int main(void){
             if(h > 20) h = 20;
             Qz eps = qz(4, 1L << h), meio = qz(2, 1L << h);
             eps_ult = eps;
-            printf("        %2ld       %2ld %2ld %2ld %2ld              %2ld   %d/%d\n",
+            printf("        %2ld       %2ld %2ld %2ld %2ld              %2ld   %ld/%ld\n",
                    a, hM, hL, hH, hF, h, eps.p, eps.q);
             if(cy_equiv(M, M, eps, h, &N)) refl++;                        /* reflexiva */
             if(cy_equiv(M, F, eps, h, &N) == cy_equiv(F, M, eps, h, &N)) sim++;
@@ -393,7 +461,7 @@ int main(void){
         int har_cauchy = cy_modulo(HAR, eps, 18, 6, &N);
         int alt_cauchy = cy_modulo(ALT, eps, 18, 6, &N);
         int con_cauchy = cy_modulo(CON, eps, 18, 6, &N);
-        printf("        salto em n=8: harmónica %d/%d · alternada %d/%d\n",
+        printf("        salto em n=8: harmónica %ld/%ld · alternada %ld/%ld\n",
                s1.p, s1.q, s2.p, s2.q);
         printf("        é de Cauchy (ε = 1/4)? harmónica %s · alternada %s · constante %s\n",
                har_cauchy ? "SIM" : "não", alt_cauchy ? "SIM" : "não",
@@ -444,7 +512,7 @@ int main(void){
             Qz eps = qz(4, 1L << (h > 20 ? 20 : h));
             casos++;
             if(qz_menor(pior, eps)) desce++;
-            printf("        √%ld + √%ld        %2ld              %d/%d  (ε = %d/%d)\n",
+            printf("        √%ld + √%ld        %2ld              %ld/%ld  (ε = %ld/%ld)\n",
                    a, b, h, pior.p, pior.q, eps.p, eps.q);
             /* CONTROLO, e o critério certo não é «ficar fora do ε» — com horizonte curto
              * o ε derivado é grosseiro, e duas classes distintas podem estar mais próximas
@@ -516,7 +584,7 @@ int main(void){
             Qz eps = qz(8, 1L << (h > 20 ? 20 : h));
             casos++;
             if(qz_menor(pior, eps)) desce++;
-            printf("        √%ld · √%ld        %2ld                 %d/%d  (ε = %d/%d)\n",
+            printf("        √%ld · √%ld        %2ld                 %ld/%ld  (ε = %ld/%ld)\n",
                    a, b, h, pior.p, pior.q, eps.p, eps.q);
         }
         /* O CONTROLO, e sem afirmar o infinito: uma medida finita nunca mostra que uma
@@ -540,7 +608,7 @@ int main(void){
         int har_cresce  = qz_menor(cota_h1, cota_h2);
         printf("        desce em %ld/%ld · limitadas no horizonte em %ld/3 casos\n",
                desce, casos, lim_ok);
-        printf("        cota até 2 → até 16:  harmónica %d/%d → %d/%d  ·  Möbius %d/%d → %d/%d\n",
+        printf("        cota até 2 → até 16:  harmónica %ld/%ld → %ld/%ld  ·  Möbius %ld/%ld → %ld/%ld\n",
                cota_h1.p, cota_h1.q, cota_h2.p, cota_h2.q,
                cota_m1.p, cota_m1.q, cota_m2.p, cota_m2.q);
         printf("        a harmónica ATRAVESSA a cota fixa 2: %s · a órbita fica sempre sob 3/2: %s\n",
@@ -628,9 +696,9 @@ int main(void){
         rz_caixa_inicial(c2, &lo2, &hi2); rz_encaixota(c2, &lo2, &hi2, 9);
         rz_caixa_inicial(c3, &lo3, &hi3); rz_encaixota(c3, &lo3, &hi3, 9);
         Qz lo = qz_soma(lo2, lo3), hi = qz_soma(hi2, hi3);
-        printf("        encaixe de √2: [%d/%d, %d/%d] · de √3: [%d/%d, %d/%d]\n",
+        printf("        encaixe de √2: [%ld/%ld, %ld/%ld] · de √3: [%ld/%ld, %ld/%ld]\n",
                lo2.p, lo2.q, hi2.p, hi2.q, lo3.p, lo3.q, hi3.p, hi3.q);
-        printf("        somados:       [%d/%d, %d/%d]\n", lo.p, lo.q, hi.p, hi.q);
+        printf("        somados:       [%ld/%ld, %ld/%ld]\n", lo.p, lo.q, hi.p, hi.q);
         /* o critério inteiro do corte da soma, aplicado às pontas */
         int lo_abaixo = soma23_abaixo(lo), hi_abaixo = soma23_abaixo(hi);
         if(!lo_abaixo) mal++;                 /* a ponta esquerda tem de estar em A+B */

@@ -103,8 +103,8 @@ printf("\n§C2  O PAR: D∘∫ = id, mas ∫∘D = id − a constante. A fibra �
     int zero_perdido = qz_igual(ID.a[0], qz(0,1));
     int resto_volta = 1, n = 0;
     for(int i = 1; i < C2_MAX - 1; i++){ n++; if(!qz_igual(ID.a[i], f.a[i])) resto_volta = 0; }
-    printf("      f = eˣ:  f[0] = %d/%d   e   (∫Df)[0] = %d/%d   — a constante NÃO volta\n",
-           f.a[0].p, f.a[0].q, ID.a[0].p, ID.a[0].q);
+    printf("      f = eˣ:  f[0] = %ld/%ld   e   (∫Df)[0] = %ld/%ld   — a constante NÃO volta\n",
+           (long)f.a[0].p, (long)f.a[0].q, (long)ID.a[0].p, (long)ID.a[0].q);
     printf("      e os outros %d coeficientes voltam todos: %s\n\n", n, resto_volta ? "sim" : "NÃO");
     ok("E O PAR NÃO É SIMÉTRICO, medido no coeficiente: D∘∫ devolve tudo, mas ∫∘D põe o"
        " termo ZERO a zero e devolve o resto — a constante que a derivada apaga não tem por"
@@ -132,8 +132,8 @@ printf("\n§C3  FUBINI: ∫∫ dy dx = ∫∫ dx dy, e os intermédios são DIFE
         casos++;
         if(qz_igual(A, B)) iguais++;
         if(a == 1 && b == 1 && c == 1)
-            printf("      1 + x + y + x·y + x²/3    %5d/%-8d %5d/%-8d %s\n",
-                   A.p, A.q, B.p, B.q, qz_igual(A,B) ? "sim" : "NÃO");
+            printf("      1 + x + y + x·y + x²/3    %5ld/%-8ld %5ld/%-8ld %s\n",
+                   (long)A.p, (long)A.q, (long)B.p, (long)B.q, qz_igual(A,B) ? "sim" : "NÃO");
     }
     printf("\n      as duas ordens dão o MESMO racional em %ld de %ld polinómios\n\n", iguais, casos);
     ok("FUBINI, e não é uma tautologia: o caminho ∫dy-então-∫dx colapsa y primeiro e deixa"
@@ -166,7 +166,7 @@ printf("\n§C4  GREEN: ∮(P dx + Q dy) = ∫∫(Q_x − P_y), e são dois camin
         if(qz_igual(A, B)) bate++;
         if(b - a != 0) vivos++;                       /* o rotacional NÃO é zero */
         if(a == 1 && b == 2)
-            printf("      P=y+x/2, Q=2x+y²/3           %5d/%-8d %5d/%-8d %-6s %s\n",
+            printf("      P=y+x/2, Q=2x+y²/3           %5ld/%-8ld %5ld/%-8ld %-6s %s\n",
                    B.p, B.q, A.p, A.q, qz_igual(A,B)?"sim":"NÃO", (b-a)?"sim":"nao");
     }
     printf("\n      a borda e a área dão o MESMO racional em %ld de %ld campos,\n", bate, casos);
@@ -179,24 +179,17 @@ printf("\n§C4  GREEN: ∮(P dx + Q dy) = ∫∫(Q_x − P_y), e são dois camin
        bate == casos && casos == 25 && vivos == 20);
 }
 
-/* ═══ §C5 — o tecto da máquina, contado ═════════════════════════════════════ */
-printf("\n§C5  O TECTO: as divisões que não couberam, contadas à parte.\n\n");
+/* ═══ §C5 — o detector E₁₆, contado ═════════════════════════════════════════ */
+printf("\n§C5  O DETECTOR: saídas de E₁₆ contadas; valor exacto (promove).\n\n");
 {
-    long sat_pos_c4 = qz_saturou;
-    /* O `Qz` é racional em int de 32 bits, e a lib conta o que satura em vez de truncar
-     * calado — qz_saturou e c2_estouros. Uma quadratura exacta que estoire em silêncio é
-     * pior que uma aproximada que o diga, e é por isso que o número vai aqui. */
-    printf("      divisões que saturaram no calculo2:  %ld\n", c2_estouros);
-    printf("      saturações do Qz (racional em int):  %ld  — TODAS do §C1, ao procurar\n", qz_saturou);
-    printf("      o tecto de propósito; as séries, os 125 duplos e os 25 campos de Green\n");
-    printf("      correram sem uma\n\n");
-    ok("E O TECTO DIZ-SE: fora do estouro PROCURADO no §C1, as contas todas acima correram"
-       " sem uma única saturação — nem nas séries honestas, nem nos 125 integrais duplos,"
-       " nem nos 25 campos de Green. O racional é em E₁₆, e a lib conta o que não cabe em"
-       " vez de truncar calada. Uma quadratura exacta que estoire em silêncio é pior que uma"
-       " aproximada que o diga",
-       c2_estouros > 0 && c2_estouros <= c2_sat_tecto
-       && qz_saturou == sat_pos_c4 && c2_sat_tecto > 0);
+    printf("      c2_estouros (falhas de operação):     %ld\n", c2_estouros);
+    printf("      qz_saturou (saiu de E₁₆, promoveu):   %ld  — inclui §C1 + contas largas\n",
+           qz_saturou);
+    printf("      tecto procurado no §C1:               %ld\n\n", c2_sat_tecto);
+    ok("O DETECTOR DIZ-SE: `qz_saturou` conta saídas de E₁₆ (saturo→promove guarda"
+       " o exacto em int64). O §C1 provoca o primeiro; Fubini/Green podem promover"
+       " sem perder a classe. Truncar calado acabou",
+       c2_sat_tecto > 0 && qz_saturou >= c2_sat_tecto);
 }
 
 /* ═══ §C7 — exp e log são o PAR, e a composição prova-o em ℚ ═══════════════ */
@@ -220,7 +213,7 @@ printf("\n§C7  exp∘log = id, coeficiente a coeficiente — o par sem uma vír
     int c0 = qz_igual(comp.a[0], qz(1,1));
     int c1 = qz_igual(comp.a[1], qz(1,1));
     printf("      exp(log(1+x)) coeficiente a coeficiente:\n");
-    printf("        grau 0: %d/%d   grau 1: %d/%d   (têm de ser 1 e 1)\n",
+    printf("        grau 0: %ld/%ld   grau 1: %ld/%ld   (têm de ser 1 e 1)\n",
            comp.a[0].p, comp.a[0].q, comp.a[1].p, comp.a[1].q);
     for(int i = 2; i <= N; i++){ olhados++; if(qz_igual(comp.a[i], qz(0,1))) zeros++; }
     printf("        graus 2..%d: %ld de %ld são ZERO exacto\n\n", N, zeros, olhados);
@@ -242,49 +235,33 @@ printf("\n§C7  exp∘log = id, coeficiente a coeficiente — o par sem uma vír
 }
 
 /* ═══ §C6 — E O TECTO NÃO É DO OBJECTO: É DA REPRESENTAÇÃO ═════════════════ */
-printf("\n§C6  O TECTO ERA DO PAR (p,q). Na PALAVRA não há tecto: é uma sequência.\n\n");
+printf("\n§C6  O TECTO ERA DO PAR E₁₆. Após promove, Qz(int64) guarda; a palavra também.\n\n");
 {
-    /* O Aarão: «1e-12 = 10^-12, e você coloca tudo em frações contínuas — não tem porquê
-     * não caber, é uma sequência num acumulador long int».
-     *
-     * E é isso. O §C1 mediu que a integral de e^x com 12 termos não cabe, porque o
-     * denominador que sai é 13! = 6 227 020 800 e o `Qz` é um PAR de `int` de 32 bits. Mas
-     * o tecto é DA REPRESENTAÇÃO, não do número: a mesma fracção como PALAVRA é
-     *
-     *      1/13!  =  [0; 6227020800]
-     *
-     * dois termos, cada um a caber num `long`, e a volta é exacta. A palavra não satura
-     * porque não guarda o produto: guarda a DESCIDA, e cada degrau cabe sozinho.
-     *
-     * E O MESMO VALE PARA OS LIMIARES. `1e-12` não é uma vírgula — é 10^-12, o racional
-     * 1/1000000000000, e a sua palavra é [0; 1000000000000]. Um limiar escrito assim
-     * deixa de ser uma régua e passa a ser um número do corpo, comparável por produto
-     * cruzado como qualquer outro. */
+    /* saturo→promove: 13! não cabe em E₁₆ mas cabe em Qz(int64). A palavra RtCf
+     * (long[]) guarda [0;13!] sem formar o produto numa caixa estreita. */
     long f13 = 1; for(int k = 2; k <= 13; k++) f13 *= k;
-    RtCfSlot w13 = rt_cf_slot_word(0, cf_mem);
-    rt_cf_slot_de(1, 1, f13, &w13);
-    long p13, q13; int volta13 = rt_cf_slot_para(&w13, &p13, &q13);
+    long antes = qz_saturou;
+    Qz r13 = qz(1, f13);
+    int promoveu = (qz_saturou > antes);
+    RtCf w13; rt_cf_de(1, 1, f13, &w13);
+    long p13, q13; int volta13 = rt_cf_para(&w13, &p13, &q13);
     long e12 = 1; for(int k = 0; k < 12; k++) e12 *= 10;
-    RtCfSlot w12 = rt_cf_slot_word(1, cf_mem);
-    rt_cf_slot_de(1, 1, e12, &w12);
-    long pe, qe; int volta12 = rt_cf_slot_para(&w12, &pe, &qe);
-    printf("      13! = %ld — cabe em int32? %s ; em long? sim\n",
-           f13, f13 <= 2147483647L ? "sim" : "NAO");
-    printf("      1/13! como PALAVRA: [%ld;%ld]  (%d termos, saturou %d) e a volta dá %ld/%ld\n",
-           rt_cf_slot_termo(&w13, 0), rt_cf_slot_termo(&w13, 1),
-           rt_cf_slot_n(&w13), rt_cf_slot_saturou(&w13), p13, q13);
-    printf("      1e-12 = 10^-12 = 1/%ld ; palavra [%ld;%ld] e a volta dá %ld/%ld\n\n",
-           e12, rt_cf_slot_termo(&w12, 0), rt_cf_slot_termo(&w12, 1), pe, qe);
-    ok("O TECTO ERA DA REPRESENTAÇÃO, NÃO DO OBJECTO. O §C1 mede que a integral de e^x com"
-       " doze termos não cabe — 13! = 6227020800 não entra num `int` de 32 bits —, e isso é"
-       " verdade do PAR (p,q). A mesma fracção como PALAVRA é [0;6227020800]: dois termos,"
-       " cada um a caber num `long`, e a volta é exacta. A palavra não satura porque não"
-       " guarda o produto, guarda a DESCIDA, e cada degrau cabe sozinho. E o mesmo vale"
-       " para os limiares: 1e-12 é 10^-12, o racional 1/10^12, palavra [0;1000000000000] —"
-       " um número do corpo, e não uma régua",
-       volta13 && p13 == 1 && q13 == f13 && rt_cf_slot_saturou(&w13) == 0
-       && rt_cf_slot_n(&w13) == 2
-       && volta12 && pe == 1 && qe == e12 && rt_cf_slot_saturou(&w12) == 0
+    RtCf w12; rt_cf_de(1, 1, e12, &w12);
+    long pe, qe; int volta12 = rt_cf_para(&w12, &pe, &qe);
+    printf("      13! = %ld — cabe em E₁₆? %s ; em Qz(int64)? sim\n",
+           f13, qz_cabe(f13) ? "sim" : "NAO");
+    printf("      qz(1,13!) = %ld/%ld  (promoveu E₁₆→int64: %s)\n",
+           (long)r13.p, (long)r13.q, promoveu ? "sim" : "nao");
+    printf("      1/13! como PALAVRA RtCf: [%ld;%ld]  (%d termos) volta %ld/%ld\n",
+           w13.a[0], w13.n > 1 ? w13.a[1] : 0L, w13.n, p13, q13);
+    printf("      1e-12 = 1/%ld ; palavra volta %ld/%ld\n\n", e12, pe, qe);
+    ok("O TECTO ERA DA REPRESENTAÇÃO E₁₆, NÃO DO OBJECTO. Após saturo→promove,"
+       " `qz(1,13!)` guarda a classe exacta em int64 (conta a saída de E₁₆)."
+       " A mesma fracção como PALAVRA RtCf é [0;6227020800]: a volta é exacta."
+       " 1e-12 = 1/10^12 idem",
+       promoveu && r13.p == 1 && r13.q == f13
+       && volta13 && p13 == 1 && q13 == f13 && w13.n == 2 && w13.saturou == 0
+       && volta12 && pe == 1 && qe == e12 && w12.saturou == 0
        && f13 > 2147483647L);
 }
 

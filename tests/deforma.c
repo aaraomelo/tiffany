@@ -38,10 +38,6 @@
 #include "../lib/disco.h"
 #include "reta.h"      /* rt_orbita, rt_fixo_racional: o procedimento da casa */
 #include "unidade.h"
-#include <math.h>
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 static int passou = 1;
 
@@ -87,7 +83,7 @@ int main(void){
             if(Q_ant){
                 long r = U / U_ant;                       /* inteiro: U_ant divide U */
                 if(U % U_ant){ printf("       (a unidade não é múltipla — REVER)\n"); decresce = 0; }
-                else if(med_ant > 0 && r > 0 && med_ant > (long)9e18/(r*Q)){
+                else if(med_ant > 0 && r > 0 && med_ant > 9000000000000000000L/(r*Q)){
                     printf("       (tecto: o produto não cabe em long — parou aqui)\n"); break;
                 } else if(med*Q_ant >= med_ant*r*Q) decresce = 0;
                 passos++;
@@ -202,7 +198,7 @@ int main(void){
             RtOp g = {{ m, 1, 1, 0 }};
             long det = rt_op_det(&g), D = m*m + 4;
             int ord = rt_ordem_ponto(&g, 1, 1, 4096);    /* [1:1], e não ∞ — ver §D3 */
-            printf("       %ld   tr=%ld det=%+ld           %+ld    %+ld       %+ld   %s\n",
+            printf("       %ld   tr=%ld det=%+ld           %+ld    %+ld       %+d   %s\n",
                    m, m, det, det, D, rt_sinal(D),
                    ord ? "FECHA (falha)" : "NÃO fecha em 4096 ✓");
             if(det != -1 || D <= 0 || ord != 0) erro = 1;

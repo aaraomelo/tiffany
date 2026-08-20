@@ -103,21 +103,32 @@ static int rz_caixa_inicial(Corte c, Qz *lo, Qz *hi){
     }
     return 0;
 }
+/* ── E QUANDO O ENCAIXE PÁRA, QUEM ESTÁ DE FORA TEM DE PODER SABÊ-LO ─────────────
+ * `rz_encaixota` devolve quantos passos fez, e quem lhe pede n passos e recebe k < n
+ * fica com as pontas CONGELADAS no passo k. Quem chama pela sucessão (`cy_termo`) só
+ * vê o valor, e um valor congelado é indistinguível de um valor refinado: os termos
+ * n > k deixam de ser os termos e nada o diz. Este contador é o que o diz.
+ *
+ * Ele contava-se de graça enquanto `qz()` truncava — o ponto médio saturava, e a
+ * saturação era a bandeira. Com saturo→promove o ponto médio deixou de saturar e a
+ * bandeira apagou-se sozinha, sem que uma linha aqui mudasse. */
+static long rz_parou = 0;
 static int rz_encaixota(Corte c, Qz *lo, Qz *hi, int passos){
     for(int k = 0; k < passos; k++){
-        /* ponto médio "honesto": o critério de saturação é o mesmo de qz_medio,
-         * mas aqui a detecção é local (sem tocar qz_saturou). */
+        /* ponto médio "honesto": só se recusa quando o exacto NÃO CABE no int64 —
+         * sair de E₁₆ é promoção e não perda, e travar aí congelava o encaixe a meio
+         * dizendo-o só pelo retorno, que ninguém lia. O tecto declarado do andar é o
+         * do `rz_cmp` (RZ_TETO = 2³⁰), e é ele que manda parar. */
         I128 n = i128_add(i128_smul((int64_t)lo->p, (int64_t)hi->q),
                            i128_smul((int64_t)hi->p, (int64_t)lo->q));
         I128 den = i128_smul_i128(i128_from_i64(2LL * (int64_t)lo->q), (int64_t)hi->q);
-        if(!i128_fits_i64(n) || !i128_fits_i64(den)) return k;
+        if(!i128_fits_i64(n) || !i128_fits_i64(den)){ rz_parou++; return k; }
         int64_t num = i128_to_i64(n), d = i128_to_i64(den);
         long g = qz_mdc(num < 0 ? -num : num, d < 0 ? -d : d);
         num /= g; d /= g;
-        if(!qz_cabe((long)num) || !qz_cabe((long)d)) return k;
         Qz m = qz((long)num, (long)d);
         int bom, s = rz_cmp(m, c.n, c.a, &bom);
-        if(!bom) return k;                        /* parou por não caber, e diz quantos */
+        if(!bom){ rz_parou++; return k; }          /* parou por não caber, e diz quantos */
         if(s == 0){ *lo = m; *hi = m; return k + 1; }
         if(s < 0) *lo = m; else *hi = m;
     }
@@ -130,7 +141,15 @@ static int rz_encaixota(Corte c, Qz *lo, Qz *hi, int passos){
  * a sucessão é de Cauchy em ℚ e **não tem limite racional**. É o buraco à vista.
  * Só para n = 2: é o andar quadrático, o mesmo onde a FC é periódica (Lagrange). */
 static long rz_b(long a){ long r = raizi(a); return r + 1; }   /* b² > a, garantido */
+/* (a + bx)/(x + b), tudo inteiro — e o guarda está ONDE OS NÚMEROS CRESCEM.
+ * Com o Qz em int64 a órbita cresce por quadratura e `a·x.q + b·x.p` transborda em
+ * silêncio por volta do décimo passo; antes não transbordava porque `qz()` grampeava
+ * em 32767 e a órbita nunca lá chegava. O produto forma-se em I128 e, se o exacto não
+ * couber, PERDE-SE — e o contador diz que se perdeu. */
 static Qz rz_passo(long a, long b, Qz x){
-    return qz(a * x.q + b * x.p, x.p + b * x.q);   /* (a + bx)/(x + b), tudo inteiro */
+    I128 num = i128_add(i128_smul(a, x.q), i128_smul(b, x.p));
+    I128 den = i128_add(i128_from_i64(x.p), i128_smul(b, x.q));
+    if(!i128_fits_i64(num) || !i128_fits_i64(den)){ qz_perdeu++; return qz(0, 1); }
+    return qz((long)i128_to_i64(num), (long)i128_to_i64(den));
 }
 #endif

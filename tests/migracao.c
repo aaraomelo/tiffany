@@ -63,11 +63,12 @@ int main(void){
             && (2u + 0u) != (3u + 1u);
         w8_wrap = 0; w8_saturou = 0;
         uint16_t cruz = w8_cruz_ld(200, 100);   /* 300 — exacto em uint16 */
-        uint8_t w = w8_proj_wrap(cruz), s = w8_proj_sat(cruz);
-        int pol = (cruz == 300u && w == 44 && s == 255 && w8_wrap == 1 && w8_saturou == 1);
+        uint8_t w = w8_proj_wrap(cruz);
+        uint16_t s = w8_proj_sat(cruz);
+        int pol = (cruz == 300u && w == 44 && s == 300 && w8_wrap == 1 && w8_saturou == 1);
         printf("      amostra W_8⁴: equiv %ld/%ld; Φ invariante %ld/%ld;"
                " Qz igual %ld/%ld\n", eq_ok, eq_tot, phi_ok, phi_tot, qz_ok, qz_tot);
-        printf("      (2,0)~(3,1)? %s; cruz(200,100)=%u wrap=%u sat=%u\n",
+        printf("      (2,0)~(3,1)? %s; cruz(200,100)=%u wrap=%u promove=%u\n",
                nt10 ? "sim" : "nao", (unsigned)cruz, (unsigned)w, (unsigned)s);
         ok("§GW W_8²→E₁₆: ∼ em uint16; Φ([(a,b)]) sobe para Qz sem wrap; equivalentes"
            " dão o mesmo racional em E₁₆",
@@ -153,11 +154,11 @@ int main(void){
         Qz enorme = qz(2000000000L, 1), r = qz_mult(enorme, enorme);
         long depois = qz_saturou;
         printf("      2·10⁹ ao quadrado: o contador subiu %ld (e o valor devolvido é"
-               " %d/%d)\n", depois - antes, r.p, r.q);
+               " %ld/%ld)\n", depois - antes, r.p, r.q);
         long antes2 = qz_saturou;
         Qz pequeno = qz(3,4), r2 = qz_mult(pequeno, pequeno);
         long depois2 = qz_saturou;
-        printf("      e (3/4)²: o contador subiu %ld, e dá %d/%d\n",
+        printf("      e (3/4)²: o contador subiu %ld, e dá %ld/%ld\n",
                depois2 - antes2, r2.p, r2.q);
         ok("O GUARDA PERGUNTA À OPERAÇÃO EM VEZ DE ADIVINHAR O TECTO, e a diferença é a"
            " que esta casa passou o dia a aprender: um guarda que compara com um número"
@@ -182,7 +183,7 @@ int main(void){
             if(!qz_divide(num, den, &y) || qz_saturou != antes) break;
             x = y; honesto++;
         }
-        printf("      a órbita de Möbius é honesta até n = %ld, e o termo lá é %d/%d\n",
+        printf("      a órbita de Möbius é honesta até n = %ld, e o termo lá é %ld/%ld\n",
                honesto, x.p, x.q);
         ok("E NUNCA SE COMPARA CONTRA UM VALOR SATURADO: a partir do índice em que o termo"
            " deixa de caber, o que se lê não é o termo — é o valor grampeado, e uma"
@@ -218,25 +219,25 @@ int main(void){
     }
 
     /* ═══ §G5 O ENVELOPE E₁₆ ════════════════════════════════════════════════ */
-    printf("\n§G5 O envelope E₁₆: Qz cabe em 32 bits, e d16_mult bate int32.\n\n");
+    printf("\n§G5 O envelope E₁₆: detector qz_cabe; Qz promove a int64.\n\n");
     {
         long mal = 0, cas = 0;
         for(int16_t ap = -80; ap <= 80; ap++) for(int16_t aq = 1; aq <= 40; aq++){
             Qz x = qz(ap, aq);
             cas++;
-            if((int)sizeof(Qz) != 4) mal++;
             if(!qz_cabe(x.p) || !qz_cabe(x.q)) mal++;
-            D32 pq = d16_mult(x.p, x.q);
+            D32 pq = d16_mult((int16_t)x.p, (int16_t)x.q);
             if(d32_to_i32(pq) != (int32_t)x.p * (int32_t)x.q) mal++;
         }
-        printf("      sizeof(Qz) = %zu;  %ld racionais: %ld falhas de envelope\n",
+        printf("      sizeof(Qz) = %zu (int64×2);  %ld racionais E₁₆: %ld falhas\n",
                sizeof(Qz), cas, mal);
-        ok("O ENVELOPE E₁₆ FECHA: Qz são dois int16 (32 bits), cada produto p·q é exacto"
-           " em D32 via d16_mult, e qz_cabe confirma que o guarda leu antes de grampear",
-           mal == 0 && cas > 6000);
+        ok("O ENVELOPE E₁₆ FECHA COMO DETECTOR: pares que cabem confirmam qz_cabe;"
+           " produto p·q exacto em D32. Fora de E₁₆, qz promove a int64"
+           " (saturo→promove) em vez de grampear ±32767",
+           mal == 0 && cas > 6000 && sizeof(Qz) == 16);
     }
 
-    printf("\n=== %ld asserções, %ld falhas, %ld saturações (à parte) ===\n",
+    printf("\n=== %d asserções, %d falhas, %ld saturações (à parte) ===\n",
            unidades, falhas, qz_saturou);
     return falhas ? 1 : 0;
 }

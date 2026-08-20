@@ -858,23 +858,24 @@ Par $(a,b)\in\Word_8^{2}$. A equivalência $(a,b)\sim(c,d)$ testa-se pela
 \quad\text{(uint16, como \code{d16\_mult} em \code{racionais.tex})}.
 \]
 $(a,b)\sim(c,d)\iff \widetilde{C}(a,d)=\widetilde{C}(b,c)$ --- \emph{sem}
-projectar para o byte. Quando o resultado deve \textbf{armazenar-se} em
-$\Word_8$, há duas políticas distintas:
+projectar para o byte. Quando o resultado sai do byte, o hot path (20/08) é
+\textsc{saturo}$\to$\textsc{promove}:
 \[
 \pi_{\mathrm{wrap}}(s):=s\bmod 256,\qquad
-\pi_{\mathrm{sat}}(s):=\min(s,255).
+\pi_{\mathrm{prom}}(s):=s\in\{0,\ldots,65535\}
+\quad\text{(\code{uint16} exacto)}.
 \]
-Contadores \code{w8\_wrap} e \code{w8\_saturou} registam transbordos
-\textbf{contados à parte dos defeitos} (cf.\ \code{qz\_saturou} em
-\code{racionais.tex}, §Resultados já obtidos).
+A antiga $\pi_{\mathrm{sat}}(s)=\min(s,255)$ ficou só como vista legado em
+\code{W8X.estreito}. Contadores \code{w8\_wrap} e \code{w8\_saturou} registam
+saídas do envelope \textbf{à parte dos defeitos} (cf.\ \code{qz\_saturou}).
 \end{definicao}
 
 \begin{proposicao}[Políticas de overflow]\label{prop:perde8}
-$\pi_{\mathrm{wrap}}$ e $\pi_{\mathrm{sat}}$ são construções distintas:
-para $s>255$, $\pi_{\mathrm{wrap}}(s)\neq\pi_{\mathrm{sat}}(s)$ em geral
-(ex.: $s=256$ dá $0$ vs.\ $255$). A equivalência $\sim$ em $\Word_8^{2}$
+$\pi_{\mathrm{wrap}}$ e $\pi_{\mathrm{prom}}$ são construções distintas:
+para $s>255$, $\pi_{\mathrm{wrap}}(s)\neq\pi_{\mathrm{prom}}(s)$ em geral
+(ex.: $s=300$ dá $44$ vs.\ $300$). A equivalência $\sim$ em $\Word_8^{2}$
 \textbf{não} depende de nenhuma das duas --- usa $\widetilde{C}$ em uint16
-(§NT8). Só a \emph{escrita} no envelope escolhe política.
+(§NT8). Só a \emph{escrita} no envelope escolhe política; o hot path promove.
 \end{proposicao}
 
 \medskip\noindent\textbf{Implementação} (\code{lib/naturais.h}):
@@ -885,15 +886,22 @@ operação & função & o que faz & nota \\
 \midrule
 equiv.\ cruzada & \code{w8\_equiv} & $a+d=b+c$ em uint16 & não projecta \\
 projeção wrap & \code{w8\_proj\_wrap} & $s\bmod 256$ & conta \code{w8\_wrap} \\
-projeção sat. & \code{w8\_proj\_sat} & $\min(s,255)$ & conta \code{w8\_saturou} \\
+projeção/promove & \code{w8\_proj\_sat} & exacto em uint16 & conta \code{w8\_saturou} \\
+migração vista & \code{W8X}/\code{w8\_x*} & estreito$=$sat legado & \code{.promovido} exacto \\
 sucessor byte & \code{nt\_S} em $\Word_8$ & wrap $255\to0$ & conta \code{nt\_wrap} \\
 \bottomrule
 \end{tabular}
 \end{center}
 
+\noindent Hot path (20/08): \textsc{saturo}$\to$\textsc{promove} ---
+\code{w8\_proj\_sat} já não devolve $\min(s,255)$; \code{qz()} já não devolve
+$\pm32767$ (\code{arquitetura sec:pipelines}; \code{tests/promocao.c}).
+
 \medido{\code{inteiros.c} §NT1--§NT11; \code{aranha\_g.c} §AG6--§AG7;
 \code{cadeia.c} §KW ($10/10$); \code{migracao.c} §GW ($7/7$);
-\code{reducao.c} §DW; \code{dual16.c} §EW; \code{palavra.c} §PW.}
+\code{reducao.c} §DW; \code{dual16.c} §EW; \code{palavra.c} §PW;
+\code{palavra8.c} §P0--§P4 ($5/5$): $\oplus$/$\wedge$, $F_8$, subida a $\mathbb{N}$,
+largura $8\to16\to32$, $\sim$ em $\Word_8^{2}$ via \code{lib/palavra8.h}.}
 
 %======================================================================
 \section{Fundamentação --- inventário das oito leis}\label{sec:fundamentacao}

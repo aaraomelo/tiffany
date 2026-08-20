@@ -149,8 +149,8 @@ printf("\n§E4  E dois casos fecham o círculo com o resto do sistema.\n\n");
         isa_word(ISA_S_A, 1, 0);
         isa_MOVE(ISA_S_ESQUILO, 1);
         isa_MOVE(ISA_S_ESQUILO, 1);
-        long t2, e2; isa_read(ISA_S_A, &t2, &e2);
-        printf("\n      oscilador = ESQUILO: periodo %d, T^2(1,0) = (%+ld,%+ld)\n", per, t2, e2);
+        int t2, e2; isa_read(ISA_S_A, &t2, &e2);
+        printf("\n      oscilador = ESQUILO: periodo %d, T^2(1,0) = (%+d,%+d)\n", per, t2, e2);
         ok("y'' = -y e' a orbita do ESQUILO — periodo 4 e T^2 = -1, no disco ISA, sem cos/sen",
            per == 4 && t2 == -1 && e2 == 0);
     }
@@ -245,6 +245,9 @@ printf("\n§E6  A solução explícita é e^{At}, e o exp é a PONTE — de broc
     printf("\n      E a CIFRA aproxima o fluxo — a fracao continua de e tem |det|=1:\n\n");
     {
         /* e = [2; 1,2,1, 1,4,1, 1,6,1, 1,8, ...] — Padé e convergentes sao o mesmo objecto. */
+        /* a assinatura de `nt_convergentes` pede `const unsigned long *`: o vector dos
+         * quocientes tem de ser DESSE tipo. Estreitá-lo para `unsigned` deixou de
+         * compilar — e um medidor que não compila não falha, DESAPARECE da bateria. */
         unsigned long ae[12] = { 2, 1, 2, 1, 1, 4, 1, 1, 6, 1, 1, 8 };
         unsigned long P[12], Q[12];
         int nc = nt_convergentes(ae, 12, P, Q);

@@ -134,6 +134,6 @@ int main(void){
            && cruz_ok && pol);
     }
 
-    printf("\n=== %ld asserções, %ld falhas ===\n", unidades, falhas);
+    printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

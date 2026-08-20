@@ -467,7 +467,7 @@ int main(void){
         ok("e SO com o direto ela NAO fecha: o cruzado nao e enfeite, e o que fecha o circuito",
            (npd - nz*nw) != 0);
         printf("     -> ||z||^2.||w||^2 = %ld; com as duas pecas da %ld (residuo %ld), so com\n",
-               nz*nw, npr, fabs(npr - nz*nw));
+               nz*nw, npr, labs(npr - nz*nw));
         printf("        o direto da %ld — falta %ld. E o cruzado que devolve o que falta.\n",
                npd, nz*nw - npd);
         puts("        SIMETRICA = DIRETO (mede, espelha, ordem 2)   ANTISSIMETRICA = CRUZADO");

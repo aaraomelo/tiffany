@@ -67,6 +67,33 @@ def despe(s):
     return ''.join(out)
 
 TIPO = re.compile(r'\b(?:double|float)\b')
+
+# ── E O TIPO NÃO É A ARITMÉTICA ────────────────────────────────────────────────
+# Esta régua fechou em 0 ocorrências do TIPO e o cursor escreveu «doubles FECHADO».
+# Em 20/08 a conta era outra: 67 LITERAIS de vírgula flutuante em código, 28 ficheiros.
+# Um `2.0` faz a conta em ponto flutuante sem a palavra `double` aparecer — e o que
+# eles fizeram não foi estilo:
+#
+#   tests/balanco.c   `long f = 0.1 + 0.2` truncava para 0 e a asserção do exemplo
+#                     canónico passou a comparar «0 ≠ 0.3»: TAUTOLOGIA
+#   tests/prisma.c    `long med = 1.0; med*2.0/3.0` zerava no 1.º nível e «a medida
+#                     de Cantor vai a zero» passava antes de o Cantor começar
+#   tests/base.c      `long t = 0.7` → exp(tA) ficava a IDENTIDADE, e «o fluxo é
+#                     ortogonal» era ‖I·x‖ = ‖x‖
+#   tests/dissipa.c   kT·ln2 truncava para 0 e os DOIS lados de Landauer imprimiam 0
+#   tests/sshb.c      `long rtt = 0.5` → a tabela de latências inteira em double,
+#                     impressa com %ld
+#
+# Um alvo que a régua não vê não é um alvo a menos: é um alvo que ninguém sabe que
+# existe — e era isto que o cabeçalho já dizia, sobre o `float`, em Julho.
+LITERAL = re.compile(r'(?<![\w.])(?:\d+\.\d*(?:[eE][-+]?\d+)?|\.\d+(?:[eE][-+]?\d+)?'
+                     r'|\d+[eE][-+]?\d+)(?![\w.])')
+
+# A TRAVA, DECLARADA E COM MOTIVO — como o `tests/dual32.c` é a trava do __int128.
+# `tools/libc.c` não é compilado por cc: é fonte para o `tools/traduz.c` a subir para
+# wasm, onde `f64` é o tipo NATIVO da máquina. Ele IMPLEMENTA o atof e a escrita de
+# vírgula — tirar-lhe os literais era não implementar o que ele existe para implementar.
+TRAVA_LITERAL = {'tools/libc.c'}
 DECL = re.compile(r'\b(?:double|float)\s+(?:\*\s*)?([A-Za-z_]\w*)')
 LIM  = re.compile(r'\b1[eE]-\d+')
 
@@ -159,9 +186,13 @@ def varre(f):
     for _, L in linhas:
         cls[classe(L)] += len(TIPO.findall(L))
     v, g, r = limiares(src)
+    # o literal só se conta em C/H — em .js e .py a vírgula é o tipo da linguagem
+    lit = len(LITERAL.findall(src)) if f.endswith(('.c', '.h')) else 0
     return dict(f=f, tipo=len(TIPO.findall(src)), nomes=len(set(DECL.findall(src))),
                 lim=len(LIM.findall(src)), cls=cls, linhas=linhas, emb=emb,
                 lim_valor=v, lim_guarda=g, lim_regua=r,
+                lit=lit if f not in TRAVA_LITERAL else 0,
+                lit_trava=lit if f in TRAVA_LITERAL else 0,
                 ok=em_ok(src) if f.endswith(('.c', '.h')) else [])
 
 # ── escopo: o repo inteiro, e não um glob ─────────────────────────────────────
@@ -177,7 +208,8 @@ else:
 # `tests/rede_dual.js` — 10 limiares `1e-N` e zero doubles —, e a coluna dos limiares
 # saía subcontada sem ninguém dar por isso: um ficheiro sem double pode estar cheio de
 # régua minha, e a régua é o defeito, não o tipo.
-rows = [r for r in (varre(f) for f in alvos) if r and (r['tipo'] or r['ok'] or r['lim'] or r['emb'])]
+rows = [r for r in (varre(f) for f in alvos)
+        if r and (r['tipo'] or r['ok'] or r['lim'] or r['emb'] or r['lit'] or r['lit_trava'])]
 
 if args and len(args) <= 4:
     for r in rows:
@@ -206,6 +238,10 @@ def total(sel, nome):
     lv = sum(r['lim_valor'] for r in sel); lg = sum(r['lim_guarda'] for r in sel)
     lr = sum(r['lim_regua'] for r in sel)
     print(f"  {'':<22} {'':>6} limiares por CAUSA: {lr} régua (alvo) · {lg} guarda · {lv} valor físico")
+    lt = sum(r['lit'] for r in sel); ltv = sum(r['lit_trava'] for r in sel)
+    if lt or ltv:
+        print(f"  {'':<22} {lt:>6} LITERAIS de vírgula em código (a ARITMÉTICA, não o tipo)"
+              + (f" · {ltv} na trava declarada {sorted(TRAVA_LITERAL)}" if ltv else ""))
     return t, k
 
 print("O QUE FALTA ELIMINAR — todos são alvo, e o escopo é `git ls-files`")
@@ -230,7 +266,8 @@ if kc + kj:
             print(f"     L{ln:<5d} {u}  {c}")
 
 print("\n\nA FRENTE DE TRABALHO — por ocorrências" + ("" if verboso else " (top 40; `-v` dá todos)"))
-print(f"  {'ficheiro':<40}{'ocorr':>7}{'nomes':>7}{'MED':>6}{'1e-N':>6}{'ok()':>6}")
-for r in sorted(rows, key=lambda r: -r['tipo'])[:None if verboso else 40]:
+print(f"  {'ficheiro':<40}{'ocorr':>7}{'nomes':>7}{'MED':>6}{'1e-N':>6}{'ok()':>6}{'lit':>6}")
+for r in sorted(rows, key=lambda r: (-r['tipo'], -r['lit']))[:None if verboso else 40]:
     k = len({x for _, u, _ in r['ok'] for x in u})
-    print(f"  {r['f']:<40}{r['tipo']:>7}{r['nomes']:>7}{r['cls']['medicao']:>6}{r['lim']:>6}{k:>6}")
+    print(f"  {r['f']:<40}{r['tipo']:>7}{r['nomes']:>7}{r['cls']['medicao']:>6}"
+          f"{r['lim']:>6}{k:>6}{r['lit']:>6}")

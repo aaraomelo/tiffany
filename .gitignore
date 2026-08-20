@@ -20,6 +20,11 @@
 # Só o fonte entra; os binários compilados e os ficheiros de dados ficam fora.
 banco/*
 !banco/*.c
+# E OS HEADERS. `banco/*` sem `!banco/*.h` deixava `sql_api.h`, `pgwire_api.h` e
+# `pgwire_sess.h` FORA do repositório — e o `banco/sql.c`, que está na bateria e
+# inclui o primeiro, não compilava a partir de um clone limpo. A bateria era verde
+# sobre uma árvore que o git não reproduzia. (20/08; ver tests/refs.c §RF3.)
+!banco/*.h
 !banco/*.sql
 !banco/*.sh
 !banco/*.txt
@@ -172,6 +177,15 @@ tests/desenha
 tests/design
 tests/dissipa_pagina
 tests/dourada_banco
+tests/calculo2
+tests/dominios
+tests/tick_idioma
+tests/reta
+tests/refs
+tests/portugues_aranha
+tests/koch
+tests/ingles_aranha
+tests/idioma_orbita
 tests/dourada_bidual
 tests/dourada_escala
 tests/dourada_lei2

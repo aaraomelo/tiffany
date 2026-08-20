@@ -333,7 +333,7 @@ printf("\n§R6  CONTROLAR: a ponta segue o alvo, e valida-se pelos dois caminhos
         xd1 = qz_soma(xd1, qz_mult(qz(J[1][j],1), qd[j]));
     }
     int reproduz = tem_inv && qz_igual(xd0, qz(ex,1)) && qz_igual(xd1, qz(ey,1));
-    printf("      J q̇ = (%d/%d, %d/%d)  =  e ?  %s\n\n",
+    printf("      J q̇ = (%ld/%ld, %ld/%ld)  =  e ?  %s\n\n",
            xd0.p, xd0.q, xd1.p, xd1.q, reproduz ? "sim" : "NÃO");
     /* potência: ⟨e, J q̇⟩ = ⟨Jᵀ e, q̇⟩ */
     Qz Pp = qz_soma(qz_mult(qz(ex,1), xd0), qz_mult(qz(ey,1), xd1));
@@ -343,7 +343,7 @@ printf("\n§R6  CONTROLAR: a ponta segue o alvo, e valida-se pelos dois caminhos
         Pj = qz_soma(Pj, qz_mult(qz(tau,1), qd[j]));
     }
     int pot = qz_igual(Pp, Pj);
-    printf("      potência ponta %d/%d  juntas %d/%d  iguais? %s\n\n",
+    printf("      potência ponta %ld/%ld  juntas %ld/%ld  iguais? %s\n\n",
            Pp.p, Pp.q, Pj.p, Pj.q, pot ? "sim" : "NÃO");
     /* e o alvo É alcançável no grupo: existe q com ponta = (12, 0). */
     int alcanca = 0;

@@ -116,7 +116,7 @@ int main(void){
         isa_word(ISA_S_A, 1, 0);
         isa_MOVE(ISA_S_ESQUILO, 1);
         isa_MOVE(ISA_S_ESQUILO, 1);
-        long t,e; isa_read(ISA_S_A, &t, &e);
+        int t,e; isa_read(ISA_S_A, &t, &e);
         ok("ESQUILO² = −1 no disco ISA confirma U(π)", t==-1 && e==0 && gi_eq(U2pi, gi_id()));
     }
 

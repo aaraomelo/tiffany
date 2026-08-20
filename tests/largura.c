@@ -157,8 +157,8 @@ int main(void){
             if(lg_val(g,16) != (uint64_t)a*b) mal++;          /* a volta reconstrói */
             if(g.baixo != (uint64_t)((unsigned)a*b & 0xFFFFu)) mal++;  /* o baixo é o truncado */
         }
-        printf("        %ld produtos: %ld (%.1f%%) têm alto ≠ 0 — perdidos se se guardar 16 bits\n",
-               total, com_alto, 100.0*com_alto/total);
+        printf("        %ld produtos: %ld (%ld,%ld%%) têm alto ≠ 0 — perdidos se se guardar 16 bits\n",
+               total, com_alto, 1000*com_alto/total/10, 1000*com_alto/total%10);
         ok("O PAR NÃO É UMA CONVENIÊNCIA: é a metade que a divisão perderia. O produto de"
            " dois de 16 bits SAI do tipo, e guardar só o baixo é exactamente truncar — o que"
            " se mede aqui dos dois lados: o valor reconstrói-se do par (alto·2^16 + baixo é o"

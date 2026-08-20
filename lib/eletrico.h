@@ -14,12 +14,11 @@
 #define ELETRICO_H
 
 #include <stdint.h>
-#include <math.h>                      /* os medidores que ainda não migraram puxavam daqui */
 #include "i128.h"
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-#define VT 0.025852                    /* 25852/1000000 V a 300 K — a constante, não o tipo */
+/* O math.h, o M_PI e o VT SAÍRAM: nenhum era usado. Ficaram do tempo em que este
+ * header calculava em vírgula, e um `#define` que ninguém lê não é documentação da
+ * constante — é a constante a contar como migrada sem o estar. As únicas ocorrências
+ * de sin/cos/exp neste ficheiro e nos quatro que o acompanham estão em COMENTÁRIOS. */
 
 typedef int64_t LL;
 

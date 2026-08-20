@@ -84,10 +84,16 @@ ok('§I0 o manifesto declara interface_padrao = sql', man.interface_padrao === '
   ok('§I4 o pleno banco/sql.c está verde na bateria (sql … 0)', / 0$/.test(linha.trim()))
 }
 
+/* §I5 — entrada das apps = FEBE Tiffany (não muda interface_padrao) */
+ok('§I5 manifesto declara entrada_apps = pgwire', man.entrada_apps === 'pgwire')
+ok('§I5 interface_padrao continua sql (pgwire é face, não motor)',
+  man.interface_padrao === 'sql')
+
 console.log('')
 if (!falhas) {
   console.log('  O SQL é a interface padrão: query compila para a ISA, traduz programas,')
   console.log('  e as linguagens (LaTeX incluído) continuam backends de porta única.')
+  console.log('  Apps ligam por pgwire (FEBE); o motor continua sql.c.')
 }
 console.log(`#TOTAL ${feitas} ${falhas}`)
 process.exit(falhas ? 1 : 0)

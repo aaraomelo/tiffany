@@ -285,6 +285,6 @@ int main(void){
            duvidas == 0 && duais > 0 && preservas > 0 && moves > 0);
     }
 
-    printf("\n=== %ld asserções, %ld falhas ===\n", unidades, falhas);
+    printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

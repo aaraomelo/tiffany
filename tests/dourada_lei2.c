@@ -17,7 +17,7 @@
 #define BASE "/tmp/cards_banco"
 
 static long isa_orbita_periodo(long dest){
-    long t0, e0, t, e;
+    int t0, e0, t, e;
     isa_word(ISA_S_A, 1, 0);
     isa_read(ISA_S_A, &t0, &e0);
     for(long k = 1; k <= 8; k++){
@@ -68,19 +68,19 @@ printf("\n§L2  A LEI 2 na dourada: T2 = -1, e a orbita tem QUATRO — contado.\
         isa_word(ISA_S_A, 1, 0);
         isa_MOVE(ISA_S_ESQUILO, 1);
         isa_MOVE(ISA_S_ESQUILO, 1);
-        long t2, e2;
+        int t2, e2;
         isa_read(ISA_S_A, &t2, &e2);
         long e_menos_um = (t2 == -1 && e2 == 0);
         printf("      passo   ESQUILO^k(1)     simetrico?\n");
         isa_word(ISA_S_A, 1, 0);
         for(long k = 1; k <= 4; k++){
             isa_MOVE(ISA_S_ESQUILO, 1);
-            long t, e;
+            int t, e;
             isa_read(ISA_S_A, &t, &e);
-            printf("      %-7ld (%+ld,%+ld)           %s\n", k, t, e,
+            printf("      %-7ld (%+d,%+d)           %s\n", k, t, e,
                    (k == 2 && t == -1 && e == 0) ? "SIM — T2 = -1" : "");
         }
-        printf("      T2 = (%+ld,%+ld)   periodo CONTADO: %ld\n", t2, e2, per);
+        printf("      T2 = (%+d,%+d)   periodo CONTADO: %ld\n", t2, e2, per);
         ok("a LEI 2 na dourada da' T2 = -1 e periodo QUATRO — o dual do dual da' o SIMETRICO, e"
            " nao a identidade. O T e' ESQUILO no disco ISA (x i, ordem 4). E o periodo conta-se"
            " aplicando ate' voltar. As duas metades: se T2 fosse +1 era a Lei 1 outra vez, e se"
@@ -141,7 +141,7 @@ printf("\n§L5  O CONTROLO: com MEIA volta a orbita fecha em DOIS — deixa de s
         long per = 0;
         isa_word(ISA_S_A, 1, 0);
         for(long k = 1; k <= 8; k++){
-            long t, e;
+            int t, e;
             isa_read(ISA_S_A, &t, &e);
             isa_word(ISA_S_A, -t, -e);
             isa_read(ISA_S_A, &t, &e);
@@ -150,9 +150,9 @@ printf("\n§L5  O CONTROLO: com MEIA volta a orbita fecha em DOIS — deixa de s
         isa_word(ISA_S_A, 1, 0);
         isa_MOVE(ISA_S_ESQUILO, 1);
         isa_MOVE(ISA_S_ESQUILO, 1);
-        long t2, e2;
+        int t2, e2;
         isa_read(ISA_S_A, &t2, &e2);
-        printf("      com meia volta ESQUILO^2: T = (%+ld,%+ld), orbita de -1 periodo %ld\n",
+        printf("      com meia volta ESQUILO^2: T = (%+d,%+d), orbita de -1 periodo %ld\n",
                t2, e2, per);
         printf("      logo e' a LEI 1 (T2 = +1, periodo 2) e nao a Lei 2\n");
         ok("com MEIA volta o quadrado da' +1 e a orbita fecha em DOIS — volta a ser a Lei 1, e a"

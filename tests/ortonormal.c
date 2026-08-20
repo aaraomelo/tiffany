@@ -197,6 +197,6 @@ int main(void){
            achou == cas && cas == 5 && L[1] == 1 && L[3] == 4 && L[5] == 11 && L[7] == 29);
     }
 
-    printf("\n=== %ld asserções, %ld falhas ===\n", unidades, falhas);
+    printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

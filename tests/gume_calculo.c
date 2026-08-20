@@ -80,7 +80,7 @@ int main(void){
         long sem = fn_gume(4, hip_livre, tese_rolle, &c2);
         printf("      hipótese f(0) = f(1)   → contra-exemplos: %ld   (a lei vale)\n", com);
         printf("      hipótese RETIRADA      → contra-exemplos: %ld   (ela trabalha)\n", sem);
-        if(sem) printf("      e o primeiro exibe-se: f = %d/%d·x² %+d/%d·x %+d/%d\n",
+        if(sem) printf("      e o primeiro exibe-se: f = %ld/%ld·x² %+ld/%ld·x %+ld/%ld\n",
                        c2.c[2].p, c2.c[2].q, c2.c[1].p, c2.c[1].q, c2.c[0].p, c2.c[0].q);
         /* E O NÚMERO PREVÊ-SE, que é o que torna isto uma medida e não um «achou alguma
          * coisa». A tese não depende de c, logo tudo se conta em (a,b) e multiplica por 9:

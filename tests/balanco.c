@@ -17,7 +17,8 @@
  *   cc -O2 -std=c99 balanco.c -o balanco -lm && ./balanco
  */
 #include <stdio.h>
-#include <math.h>
+#include <stdint.h>
+#include "le_num.h"                    /* le_f64_bits_pq: os bits IEEE a partir de p/q */
 #include "corpos.h"
 #include "unidade.h"
 
@@ -72,16 +73,57 @@ printf("\n§B2  ℝ NÃO é algebricamente fechado. x²+1 não tem raiz nele.\n\
 printf("\n§B3  ℝ NÃO é exato na máquina. ℚ é — e hoje isso custou 8%% da massa.\n\n");
 {
     int mau = 0;
-    /* o exemplo canónico: 0.1 + 0.2 ≠ 0.3 em ponto flutuante; em ℚ é exato */
-    long f = 0.1 + 0.2;
-    int flutuante_falha = (f != 0.3);
+    /* O EXEMPLO CANÓNICO, E ELE MEDE-SE NOS BITS. Estava escrito
+     *
+     *     long f = 0.1 + 0.2;   int flutuante_falha = (f != 0.3);
+     *
+     * e a Fase A, ao trocar o tipo, tornou-o numa TAUTOLOGIA: `0.1 + 0.2` trunca
+     * para 0 ao entrar no long, e o que a asserção passou a comparar foi «0 ≠ 0.3»
+     * — verdade sempre, e sem nada a ver com vírgula flutuante. A saída dizia-o à
+     * vista («0.1 + 0.2 em long   0») e nenhuma asserção o via.
+     *
+     * A tese não precisa do tipo `double` para ser medida: precisa do ARREDONDAMENTO
+     * IEEE, e esse já está na casa em inteiros — `le_f64_bits_pq` dá os 64 bits do
+     * double mais próximo de um racional exacto p/q, sem o compilador ver um double.
+     *
+     * Cada double é um racional diádico m·2^e. Somam-se os DOIS arredondamentos de
+     * forma exacta sobre o denominador comum, arredonda-se a soma, e compara-se com
+     * o arredondamento de 3/10. Tudo em uint64. */
+    uint64_t b1 = le_f64_bits_pq(1, 10, 0);      /* o double mais próximo de 1/10 */
+    uint64_t b2 = le_f64_bits_pq(2, 10, 0);      /* … de 2/10 */
+    uint64_t b3 = le_f64_bits_pq(3, 10, 0);      /* … de 3/10 */
+    uint64_t m1 = (b1 & ((1ULL<<52)-1)) | (1ULL<<52), m2 = (b2 & ((1ULL<<52)-1)) | (1ULL<<52);
+    int e1 = (int)((b1 >> 52) & 0x7FF) - 1023 - 52;
+    int e2 = (int)((b2 >> 52) & 0x7FF) - 1023 - 52;
+    int emin = e1 < e2 ? e1 : e2;                /* denominador comum 2^(-emin) */
+    uint64_t num = (m1 << (e1 - emin)) + (m2 << (e2 - emin));
+    uint64_t bs = le_f64_bits_pq(num, 1ULL << (unsigned)(-emin), 0);  /* soma arredondada */
+    int flutuante_falha = (bs != b3);
     Par a = ra_classe((Par){1,10}), b = ra_classe((Par){2,10});
     Par soma = ra_soma(a,b);
     int racional_ok = (ra_cmp(soma, ra_classe((Par){3,10})) == 0);
-    if(!flutuante_falha || !racional_ok) mau++;
-    printf("      0.1 + 0.2 em long   %ld   %s\n", f, flutuante_falha ? "≠ 0.3" : "= 0.3");
+    /* e o GUME: se a régua estivesse partida, ela diria «≠» a tudo. Um racional que
+     * É diádico — 1/4 + 1/4 = 1/2 — tem de dar IGUAL pelo mesmo caminho. Sem este
+     * lado, «os bits diferem» passava com uma função que devolvesse lixo. */
+    uint64_t q1 = le_f64_bits_pq(1, 4, 0), q2 = le_f64_bits_pq(1, 2, 0);
+    uint64_t n1 = (q1 & ((1ULL<<52)-1)) | (1ULL<<52);
+    int f1 = (int)((q1 >> 52) & 0x7FF) - 1023 - 52;
+    uint64_t qs = le_f64_bits_pq(n1 + n1, 1ULL << (unsigned)(-f1), 0);
+    int diadico_fecha = (qs == q2);
+    if(!flutuante_falha || !racional_ok || !diadico_fecha) mau++;
+    printf("      0.1 + 0.2 nos BITS  %016llx   0.3 é %016llx   %s\n",
+           (unsigned long long)bs, (unsigned long long)b3,
+           flutuante_falha ? "≠ 0.3" : "= 0.3");
+    printf("      e o controlo diádico  1/4 + 1/4 = 1/2   %s\n",
+           diadico_fecha ? "IGUAL (a régua sabe dizer «=»)" : "FALHA");
     printf("      1/10 + 2/10 em ℚ      %ld/%ld%*s= 3/10 exato\n", soma.a, soma.b, 14, "");
-    ok("ℝ na máquina é aproximação; ℚ é exato — e é por isso que este trabalho vive em ℚ",
+    ok("ℝ NA MÁQUINA É APROXIMAÇÃO E ℚ É EXACTO, e agora mede-se sem um double no"
+       " compilador: os 64 bits IEEE de 1/10 e de 2/10 saem de `le_f64_bits_pq` a"
+       " partir do racional, somam-se EXACTOS sobre o denominador diádico comum, e o"
+       " arredondamento da soma NÃO É o arredondamento de 3/10 — enquanto em ℚ"
+       " 1/10 + 2/10 = 3/10 no nariz. E o gume está do lado que pode falhar: 1/4 + 1/4"
+       " dá 1/2 pelo MESMO caminho, logo a régua sabe dizer «igual» e o «≠» de cima é"
+       " sobre o número e não sobre a régua",
        mau == 0);
     printf("\n      Não é detalhe de implementação: o po_corpo.c mediu que, num operador mal\n");
     printf("      condicionado, o mesmo ciclo perde 8%% da massa em long e 0%% em ℚ. O corpo\n");

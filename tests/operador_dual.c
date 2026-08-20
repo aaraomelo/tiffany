@@ -101,11 +101,19 @@ printf("\n§D1  TODO corpo tem ν, e ν∘ν = id — com o controlo de quem NÃ
     /* (d) a mecânica: a força */
     {
         long pior = 0;
+        /* A força varria `i*0.37` num long: o 0,37 truncava e os 17 índices caíam em
+         * CINCO valores distintos, sete deles zero. A involução passava — em cinco
+         * pontos, três dos quais o mesmo 0. O 37 fica, sem a vírgula: são 17 forças
+         * DISTINTAS, e o sítio onde ν∘ν podia falhar é visitado 17 vezes. */
+        long vistos = 0, ultimo = 0;
         for(int i = -8; i <= 8; i++){
-            long F = i*0.37, y = nu_forca(nu_forca(F));
-            long d = fabs(y - F);
+            long F = (long)i*37, y = nu_forca(nu_forca(F));
+            long d = y - F; if(d < 0) d = -d;
             if(d > pior) pior = d;
+            if(i == -8 || F != ultimo) vistos++;
+            ultimo = F;
         }
+        if(vistos != 17) mau++;                    /* e a varredura diz quantos viu */
         if(pior > 0) mau++;
         printf("      %-19s %-26s %-11s %ld\n", "mecânica (força)", "F ↦ −F",
                pior==0?"sim":"NÃO", pior);

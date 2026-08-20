@@ -184,8 +184,8 @@ printf("\n§H4  O i ESTÁ na construção: a MESMA recursão, com outra BORDA.\n
     int per_i = isa_periodo_giro(ISA_S_ESQUILO);
     isa_word(ISA_S_A, 0, 1);
     isa_MOVE(ISA_S_ESQUILO, 1);
-    long it, ie; isa_read(ISA_S_A, &it, &ie);
-    printf("\n      ESQUILO no disco: i·i = (%ld,%ld), periodo %d\n", it, ie, per_i);
+    int it, ie; isa_read(ISA_S_A, &it, &ie);
+    printf("\n      ESQUILO no disco: i·i = (%d,%d), periodo %d\n", it, ie, per_i);
     printf("\n");
     ok("a recursão da teoria com a borda σ² = -1 DÁ o produto complexo."
        " No disco, ESQUILO (×i) tem periodo 4 e i² = −1",

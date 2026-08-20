@@ -180,7 +180,7 @@ printf("\n§N3  Dois bancos, ida e volta na ANTENA — sem espera lógica.\n\n")
     bump(rec2, ks2, lido2, (size_t)g2);
     int ok2 = ((size_t)g2 == m && memcmp(lido2, resposta, m) == 0);
     clock_gettime(CLOCK_MONOTONIC, &t1);
-    long us = (t1.tv_sec-t0.tv_sec)*1e6 + (t1.tv_nsec-t0.tv_nsec)/1e3;
+    long us = (t1.tv_sec-t0.tv_sec)*1000000L + (t1.tv_nsec-t0.tv_nsec)/1000L;
 
     printf("      A -> B  \"%s\"\n", pergunta);
     printf("      B -> A  \"%s\"\n", resposta);

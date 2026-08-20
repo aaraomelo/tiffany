@@ -79,12 +79,13 @@ int main(void){
             && w8_cruz_ld(2, 1) == w8_cruz_bc(0, 3)
             && (2u + 0u) != (3u + 1u);
         w8_wrap = 0; w8_saturou = 0;
-        uint8_t w300 = w8_proj_wrap(300), s300 = w8_proj_sat(300);
-        int pol = (w300 == 44 && s300 == 255 && w8_wrap == 1 && w8_saturou == 1);
+        uint8_t w300 = w8_proj_wrap(300);
+        uint16_t s300 = w8_proj_sat(300);
+        int pol = (w300 == 44 && s300 == 300 && w8_wrap == 1 && w8_saturou == 1);
         printf("      amostra %ld quádruplos W_8⁴: %ld batem, %ld divergem\n", cas, bate, diverge);
-        printf("      (2,0)~(3,1)? %s; wrap(300)=%u sat(300)=%u (w8_wrap=%ld w8_saturou=%ld)\n",
-               nt10 ? "sim" : "nao", w300, s300, w8_wrap, w8_saturou);
-        ok("§KW W_8²: (a,b)~(c,d) ⟺ a+d=b+c em uint16 — ℕ≠W_8, equivalência separada de wrap/sat",
+        printf("      (2,0)~(3,1)? %s; wrap(300)=%u promove(300)=%u (w8_wrap=%ld w8_saturou=%ld)\n",
+               nt10 ? "sim" : "nao", w300, (unsigned)s300, w8_wrap, w8_saturou);
+        ok("§KW W_8²: (a,b)~(c,d) ⟺ a+d=b+c em uint16 — ℕ≠W_8, equivalência separada de wrap/promove",
            cas > 0 && diverge == 0 && bate == cas && nt10 && pol);
     }
 
@@ -295,6 +296,6 @@ int main(void){
            c6 != 0);
     }
 
-    printf("\n=== %ld asserções, %ld falhas ===\n", unidades, falhas);
+    printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

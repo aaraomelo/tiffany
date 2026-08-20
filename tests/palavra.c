@@ -137,7 +137,7 @@ int main(void){
             /* a 1.ª coluna É p/q, já reduzida — igualdade de INTEIROS, não de floats */
             if(p1==p && q1==q) exatos++;
         }
-        printf("      racionais testados: %d   palavra mais longa: %d dígitos (q=%lld)\n",
+        printf("      racionais testados: %d   palavra mais longa: %d dígitos (q=%ld)\n",
                casos, maxk, piorq);
         printf("      reconstruídos com p e q IGUAIS aos de partida: %d\n", exatos);
         printf("      que bateram no tecto de %d dígitos: %d\n", KMAX, no_tecto);
@@ -418,7 +418,7 @@ int main(void){
         printf("      lista com %d palavras; a diagonal difere de cada uma na posição própria\n", M);
         printf("      a diagonal é palavra legítima (todos os dígitos >= 1): %s\n", valida?"sim":"NÃO");
         printf("      palavras da lista iguais à diagonal: %d\n", iguais);
-        printf("      det da Möbius da diagonal (12 dígitos): %lld\n", det);
+        printf("      det da Möbius da diagonal (12 dígitos): %ld\n", det);
         ok("a diagonal está NO DOMÍNIO: é uma palavra do mesmo alfabeto", valida);
         ok("e NÃO está na lista: difere de TODAS as palavras dela", difere_de_todas);
         ok("e nomeia um real como qualquer outra: det = ±1", det==1 || det==-1);
@@ -511,10 +511,10 @@ int main(void){
                 if(( K11*c1 - K01*c2) % dK == 0 && (-K10*c1 + K00*c2) % dK == 0) alc_gl++;
 
             printf("      criptogramas varridos: %d\n", total);
-            printf("      com det = 2  — decifráveis: %d  (%.1f%%)\n",
-                   alcancados, 100.0*alcancados/total);
-            printf("      com det = ±1 — decifráveis: %d  (%.1f%%)\n",
-                   alc_gl, 100.0*alc_gl/total);
+            printf("      com det = 2  — decifráveis: %d  (%d,%d%%)\n",
+                   alcancados, 1000*alcancados/total/10, 1000*alcancados/total%10);
+            printf("      com det = ±1 — decifráveis: %d  (%d,%d%%)\n",
+                   alc_gl, 1000*alc_gl/total/10, 1000*alc_gl/total%10);
             ok("com det ≠ ±1 há criptogramas SEM origem: a cifra não é sobre", alcancados < total);
             ok("com det = ±1 TODO criptograma decifra — e é isso que a faz cifra", alc_gl == total);
         }
@@ -557,7 +557,7 @@ int main(void){
         /* A_0 é a involução x -> 1/x: ordem 2, troca 0 e ∞, fixa ±1 */
         L z[1] = { 0 }; L a00,a01,a10,a11; matriz(z,1,&a00,&a01,&a10,&a11);
         L d0[2] = { 0, 0 }; L b00,b01,b10,b11; matriz(d0,2,&b00,&b01,&b10,&b11);
-        printf("      A_0 = [[%lld,%lld],[%lld,%lld]]   A_0·A_0 = [[%lld,%lld],[%lld,%lld]]\n",
+        printf("      A_0 = [[%ld,%ld],[%ld,%ld]]   A_0·A_0 = [[%ld,%ld],[%ld,%ld]]\n",
                a00,a01,a10,a11, b00,b01,b10,b11);
         ok("A_0 é involução: A_0·A_0 = I, e é ν com ν∘ν = id", b00==1&&b01==0&&b10==0&&b11==1);
         /* troca 0 com ∞: (0,1) -> (1,0) e (1,0) -> (0,1), em coordenadas projetivas */
@@ -648,7 +648,7 @@ int main(void){
                && i128_cmp(q78, q910) < 0 && i128_cmp(q910, q1112) < 0) aperta_ok++;
 
             if(m<=3)
-                printf("      %lld  %lld %lld %lld %lld %lld %lld%*s %lld/%lld\n",
+                printf("      %ld  %ld %ld %ld %ld %ld %ld%*s %ld/%ld\n",
                        m, q[0],q[1],q[2],q[3],q[4],q[5], 8, "", q[8], q[7]);
         }
         printf("      metais: %d\n", metais);
@@ -692,7 +692,7 @@ int main(void){
                     if(i128_cmp(e30, e20) <= 0) encolhe++;
                     if(i128_cmp(e20, pior) > 0){ pior=e20; pior_n=n; pior_m=m; }
                     if((n<=3 && m<=2) || (n>=4 && m==1))
-                        printf("      %d  %lld   conv.%lld   %lld/%lld        %s\n",
+                        printf("      %d  %ld   conv.%ld   %ld/%ld        %s\n",
                                n, m, q[29],
                                (long)i128_to_i64(e20), (long)i128_to_i64(e30),
                                i128_cmp(i128_smul_i128(e30, EMB_S), i128_smul_i128(t[30], q[29])) < 0 ? "sim" : "NÃO");
@@ -707,14 +707,14 @@ int main(void){
                     if(i128_cmp(i128_mul(e30, t[19]), i128_add(i128_mul(e20, t[29]), slack)) <= 0) encolhe++;
                     if(i128_cmp(e20, pior) > 0){ pior=e20; pior_n=n; pior_m=m; }
                     if((n<=3 && m<=2) || (n>=4 && m==1))
-                        printf("      %d  %lld   %8ld   %lld/%lld        %s\n",
+                        printf("      %d  %ld   %8ld   %ld/%ld        %s\n",
                                n, m, sg,
                                (long)i128_to_i64(e20), (long)i128_to_i64(e30),
                                i128_cmp(i128_smul_i128(e30, EMB_S), i128_mul(i128_from_i64(sg), t[29])) < 0 ? "sim" : "NÃO");
                 }
             }
             printf("      corpos K_{n,m} testados (n=2..5, m=1..4): %d\n", corpos);
-            printf("      o mais lento: n=%d, m=%lld — e é sempre m=1, onde σ está mais perto\n",
+            printf("      o mais lento: n=%d, m=%ld — e é sempre m=1, onde σ está mais perto\n",
                    pior_n, pior_m);
             printf("      das outras raízes (n=5,m=1 dá σ = 1,3247: o número plástico)\n");
             ok("EM P.U. a razão vai a 1 em TODOS os corpos K_{n,m}", converge==corpos);
@@ -804,7 +804,7 @@ int main(void){
                KQ, palavras, estourou);
         printf("      com q_k >= F_k em todo k: %d      estritamente crescente para k>=2: %d\n",
                fib_ok, cresce);
-        printf("      maior q_%d alcançado: %lld\n", KQ, pior_q);
+        printf("      maior q_%d alcançado: %ld\n", KQ, pior_q);
         ok("q_k >= F_k para toda palavra com a_i >= 1 — logo q_k → ∞",
            fib_ok == palavras - estourou && fib_ok > 300);
         ok("e q_k cresce estritamente para k>=2, logo 1/(q_k q_{k−1}) → 0: Cauchy",
@@ -817,10 +817,10 @@ int main(void){
             L q[10]; q[0]=1; q[1]=3;
             L digs[8] = {2, 0, 2, 0, 2, 0, 2, 0};          /* zeros alternados */
             int estagnou = 0;
-            printf("      com dígito 0 no meio, os q_k: %lld %lld", q[0], q[1]);
+            printf("      com dígito 0 no meio, os q_k: %ld %ld", q[0], q[1]);
             for(int k=2;k<9;k++){
                 q[k] = digs[k-2]*q[k-1] + q[k-2];
-                printf(" %lld", q[k]);
+                printf(" %ld", q[k]);
                 if(q[k] <= q[k-1]) estagnou = 1;
             }
             printf("\n");
@@ -852,14 +852,15 @@ int main(void){
                == iz_equiv((L)a, (L)b, (L)c, (L)d)) eq_ok++;
         }
         w8_wrap = 0; w8_saturou = 0;
-        uint8_t w = w8_proj_wrap(300), s = w8_proj_sat(300);
+        uint8_t w = w8_proj_wrap(300);
+        uint16_t s = w8_proj_sat(300);
         printf("      racionais p,q<=127: %ld cabem E₁₆; %ld reduzem em F127\n", cabe, reduz);
-        printf("      W_8⁴ equiv %ld/%ld; wrap(300)=%u sat(300)=%u (EMB_S=%d interior)\n",
+        printf("      W_8⁴ equiv %ld/%ld; wrap(300)=%u promove(300)=%u (EMB_S=%ld interior)\n",
                eq_ok, eq_tot, (unsigned)w, (unsigned)s, EMB_S);
         ok("§PW W_8≠ℕ: envelope byte na fronteira; convergentes pequenos cabem E₁₆ e reduzem;"
            " equivalência cruzada em uint16 não usa wrap",
            tot > 3000 && cabe == tot && reduz == tot && eq_tot > 0 && eq_ok == eq_tot
-           && w == 44 && s == 255 && w8_wrap == 1 && w8_saturou == 1);
+           && w == 44 && s == 300 && w8_wrap == 1 && w8_saturou == 1);
     }
 
     printf("\n================================================================\n");

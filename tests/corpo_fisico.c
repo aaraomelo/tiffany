@@ -67,7 +67,7 @@ S_ex = qz(n2, 1000);
 V_ex = fn0(); V_ex.n = 2; V_ex.c[0] = S_ex; V_ex.c[2] = qz_oposto(S_ex);
 printf("\n    a = (%ld, %ld, %ld)/10   b = (%ld, %ld, %ld)/10\n",
        A[0],A[1],A[2], B[0],B[1],B[2]);
-printf("    a×b = (%ld, %ld, %ld)/100   e   S = ‖a×b‖² = %d/%d   EXACTO\n",
+printf("    a×b = (%ld, %ld, %ld)/100   e   S = ‖a×b‖² = %ld/%ld   EXACTO\n",
        C[0],C[1],C[2], S_ex.p, S_ex.q);
 printf("    ← e esta é a MASSA, porque a massa é o cruzado\n");
 
@@ -87,7 +87,7 @@ printf("\n§H1  A FORÇA sai por DERIVADA do imposto — e o resíduo é ZERO EX
         if(achou) def_ok++;
         if(achou && qz_igual(reg, def)) concordam++;
         if(qz_igual(qz_oposto(reg), Ff)) fechada++;
-        printf("      %+3d/10   %+6d/%-6d %+6d/%-6d  %+6d/%-6d      %-8s %s\n",
+        printf("      %+3d/10   %+6ld/%-6ld %+6ld/%-6ld  %+6ld/%-6ld      %-8s %s\n",
                i, Vs.p, Vs.q, reg.p, reg.q, def.p, def.q,
                (achou && qz_igual(reg,def)) ? "sim" : "NÃO",
                qz_igual(qz_oposto(reg), Ff) ? "sim" : "NÃO");
@@ -126,7 +126,7 @@ printf("\n§H2  EULER–LAGRANGE devolve s̈ = 2s — sem se lá pôr.\n\n");
         pontos++;
         if(qz_igual(dLdv, p_esp)) bate_p++;
         if(div_ok && qz_igual(acel, a_esp)) bate_a++;
-        printf("      %+3d/20  %+3d/20  %+7d/%-9d %+7d/%-9d  %+6d/%-7d %s\n",
+        printf("      %+3d/20  %+3d/20  %+7ld/%-9ld %+7ld/%-9ld  %+6ld/%-7ld %s\n",
                i, 1+i, dLdv.p, dLdv.q, dLds.p, dLds.q, acel.p, acel.q,
                (div_ok && qz_igual(acel, a_esp)) ? "sim" : "NÃO");
     }
@@ -209,7 +209,7 @@ printf("\n§H5  O IMPULSO é Δp, e o momento CONSERVA-SE quando a força se anu
         Qz dJ = qz_mult(Fq, hh);
         Qz dv = qz_mult(qz_mult(qz(2,1), sq), hh);
         Qz ddp = qz_mult(S_ex, dv);
-        printf("      um passo: ΔJ = %d/%d   S·Δv = %d/%d\n", dJ.p, dJ.q, ddp.p, ddp.q);
+        printf("      um passo: ΔJ = %ld/%ld   S·Δv = %ld/%ld\n", dJ.p, dJ.q, ddp.p, ddp.q);
         ok("o impulso É a variação do momento — EXACTO em Qz: cada passo dá ΔJ = F·h = S·Δv;"
            " identidade algébrica por passo, sem double nem limiar",
            qz_igual(dJ, ddp) && cl_estouros == 0);
@@ -219,7 +219,7 @@ printf("\n§H5  O IMPULSO é Δp, e o momento CONSERVA-SE quando a força se anu
         Qz F5 = qz_mult(qz_mult(qz(2,1), qz(1,2)), S_ex);
         int momento_parado = (F0.p == 0);
         int momento_move = (F5.p != 0);
-        printf("      s=0: F = %d/%d (nula);  s=1/2: F = %d/%d (mexe)\n\n",
+        printf("      s=0: F = %ld/%ld (nula);  s=1/2: F = %ld/%ld (mexe)\n\n",
                F0.p, F0.q, F5.p, F5.q);
         ok("em s = 0 a força é nula e o momento NÃO se mexe — o controlo. E ele precisa das"
            " DUAS metades: com s = 0 tudo fica em zero por dVds(0) = 0, e essa comparacao"

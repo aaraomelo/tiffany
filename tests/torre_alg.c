@@ -96,6 +96,38 @@ printf("\n§T2  RETRAÇÃO Σ∘Π = Id — FC nos slots S_CF=2048 (representaç
        " — quatro racionais, ida e volta EXACTA, sem float. É Σ∘Π sobre a representação"
        " posicional (corpo_algebrico.tex def:cone), ancorada em S_CF=2048 (slot_map.h)",
        fecha == n && n == 4);
+
+    /* ── E O TECTO DO TERMO TEM ONDE BATER, senão é comentário e não limite ────────
+     * O envelope de um a_k é Word_8² (0..65535). Acima disso a escrita RECUSA-SE e
+     * acende `saturou` — não enrola. Os dois lados medem-se: um quociente ENCOSTADO
+     * ao tecto tem de passar e voltar exacto, um quociente ACIMA tem de ser recusado.
+     * Sem o primeiro, «recusa sempre» passava; sem o segundo, «nunca recusa» passava. */
+    {
+        struct { long p, q; int cabe; } tecto[] = {
+            { RT_CF_TERMO_MAX,     1, 1 },   /* a_0 = 65535 — encosta e cabe */
+            { RT_CF_TERMO_MAX + 1, 1, 0 },   /* a_0 = 65536 — não cabe, RECUSA */
+        };
+        long mau = 0;
+        printf("      a_0        cabe?   saturou   volta\n");
+        for(int k = 0; k < 2; k++){
+            rt_cf_slot_de(1, tecto[k].p, tecto[k].q, &cf);
+            int sat = rt_cf_slot_saturou(&cf);
+            long p2 = 0, q2 = 0;
+            int volta = !sat && rt_cf_slot_para(&cf, &p2, &q2)
+                     && p2 == tecto[k].p && q2 == tecto[k].q;
+            if(tecto[k].cabe ? (sat || !volta) : (!sat || volta)) mau++;
+            printf("      %-10ld %-7s %-9s %s\n", tecto[k].p,
+                   tecto[k].cabe ? "sim" : "não", sat ? "sim" : "não",
+                   volta ? "exacta" : "—");
+        }
+        printf("\n");
+        ok("O TECTO DO TERMO É MEDIDO NOS DOIS LADOS: o a_k vive em Word_8² e 65535"
+           " ENCOSTA — escreve-se e volta exacto —, enquanto 65536 é RECUSADO com"
+           " `saturou` aceso e sem valor devolvido. Um tecto que só se cita não é"
+           " limite: é documentação. E medir só o lado que passa deixava «recusa"
+           " sempre» indistinguível de «recusa quando deve»",
+           mau == 0);
+    }
     if(cf_fd >= 0) close(cf_fd);
 }
 

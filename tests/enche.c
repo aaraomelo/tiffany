@@ -64,7 +64,7 @@ printf("\n§E3  A multiplicação: a Julia de z² é o círculo, e ele é invari
 {
     long fica = 0, mau = 0, casos = 0;
     printf("      |z|² = t²+e²  =>  |z²|² = (|z|²)²\n");
-    for(long t = -6; t <= 6; t++) for(long e = -6; e <= 6; e++){
+    for(int t = -6; t <= 6; t++) for(int e = -6; e <= 6; e++){
         long n2 = t*t + e*e;
         if(n2 == 0) continue;
         long zr = t*t - e*e, zi = 2*t*e;
@@ -76,7 +76,7 @@ printf("\n§E3  A multiplicação: a Julia de z² é o círculo, e ele é invari
     isa_word(ISA_S_A, 1, 0);
     isa_MOVE(ISA_S_ESQUILO, 1);
     isa_MOVE(ISA_S_ESQUILO, 1);
-    long at, ae; isa_read(ISA_S_A, &at, &ae);
+    int at, ae; isa_read(ISA_S_A, &at, &ae);
     long n_esq = at*at + ae*ae;
 
     /* dentro: |z|<1, |z²| < |z|; fora: |z|>1, |z²| > |z| — em fracções */
@@ -93,7 +93,7 @@ printf("\n§E3  A multiplicação: a Julia de z² é o círculo, e ele é invari
         }
     }
     printf("      pares Z[i]: %ld com |z²|² = |z|⁴, falhas %ld\n", fica, mau);
-    printf("      ESQUILO² de (1,0): (%ld,%ld) norma²=%ld\n", at, ae, n_esq);
+    printf("      ESQUILO² de (1,0): (%d,%d) norma²=%ld\n", at, ae, n_esq);
     printf("      dentro (k/21): %ld encolhem; fora ((10+k)/10): %ld fogem\n\n", cai, foge);
     ok("o círculo é INVARIANTE sob z²: |z²|² = |z|⁴ em Z[i], e ESQUILO² tem norma 1",
        mau == 0 && fica == casos && n_esq == 1);

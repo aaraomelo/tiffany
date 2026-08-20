@@ -3,6 +3,8 @@
   "nota": "Fonte de verdade das claims: conecthus/claims/*.claim. C→traduz→wasm. Paper/teste/código são projeções.",
   "interface_padrao": "sql",
   "interface_nota": "Quando nada se especifica, o corpo entra e sai como query SQL: banco/sql.c compila para a ISA, memória no disco, e traduz programas. LaTeX e as outras linguagens continuam backends de porta única — tex.wasm é o tradutor pleno do latex, não da interface. Medidor: tests/interface_padrao.js",
+  "entrada_apps": "pgwire",
+  "entrada_apps_nota": "Apps e drivers falam FEBE (Postgres wire) com banco/pgwire.c — tipicamente 127.0.0.1:5432 se livre, senão 55432. Não é o servidor PostgreSQL; é a face Tiffany do protocolo. Motor e interface_padrao continuam sql (banco/sql.c). Medidor: tests/pgwire.c §W4.",
   "nulo_disco": 8,
   "export_memoria": "DISCO",
   "linguagens": [

@@ -38,10 +38,10 @@ static long p, n_dim, m_metal;
 
 /* GF(pⁿ) com σⁿ = m σ^{n−1} + 1, elementos codificados na base p */
 static long md(long x){ x%=p; return x<0?x+p:x; }
-static void decod(long e, long *c){ for(int i=0;i<n_dim;i++){ c[i]=e%p; e/=p; } }
-static long cod(const long *c){ long e=0, b=1; for(int i=0;i<n_dim;i++){ e+=md(c[i])*b; b*=p; } return e; }
-static long mais1(long e){ long c[8]; decod(e,c); c[0]=md(c[0]+1); return cod(c); }
-static long gato(long e){                            /* ×σ, com a borda baixando σⁿ                */
+static void decod(int e, long *c){ for(int i=0;i<n_dim;i++){ c[i]=e%p; e/=p; } }
+static long cod(const long *c){ int e=0, b=1; for(int i=0;i<n_dim;i++){ e+=md(c[i])*b; b*=p; } return e; }
+static long mais1(int e){ long c[8]; decod(e,c); c[0]=md(c[0]+1); return cod(c); }
+static long gato(int e){                            /* ×σ, com a borda baixando σⁿ                */
     long c[8], d[9];
     decod(e,c);
     for(int i=0;i<=n_dim;i++) d[i]=0;
@@ -103,7 +103,7 @@ int main(void){
             long e1=cod(um);
             visto[e1]=1; fila[fim++]=e1;
             while(ini<fim){
-                long e=fila[ini++];
+                int e=fila[ini++];
                 long a=mais1(e), b=gato(e);
                 if(!visto[a]){ visto[a]=1; fila[fim++]=a; }
                 if(!visto[b]){ visto[b]=1; fila[fim++]=b; }
@@ -214,8 +214,8 @@ int main(void){
         int per_esq = isa_periodo_giro(ISA_S_ESQUILO);
         isa_word(ISA_S_A, 1, 0);
         for(int k = 0; k < per_esq; k++) isa_MOVE(ISA_S_ESQUILO, 1);
-        long tr, te; isa_read(ISA_S_A, &tr, &te);
-        printf("       ESQUILO^%d de (1,0) no disco ISA: (%ld,%ld) — rotacao ordem 4\n\n",
+        int tr, te; isa_read(ISA_S_A, &tr, &te);
+        printf("       ESQUILO^%d de (1,0) no disco ISA: (%d,%d) — rotacao ordem 4\n\n",
                per_esq, tr, te);
         if(tr != 1 || te != 0) erro=1;
         printf("       n    raiz ζ_n em Z_p          Σ_k ζ_n^k (mod p)   ζ_n^n\n");

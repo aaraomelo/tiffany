@@ -40,13 +40,25 @@ typedef struct { Tipo t; long a, p, q; } Suc;
  * tipo é um número que a máquina não mediu. */
 #define CY_HARM_TETO 20
 
+/* ── O TERMO CONGELADO ─────────────────────────────────────────────────────────
+ * Duas sucessões daqui têm tecto próprio: a harmónica pára em CY_HARM_TETO e os
+ * convergentes param quando o denominador passa 2²⁸. Acima disso `cy_termo` devolve
+ * SEMPRE o último termo bom — e uma sucessão constante parece de Cauchy, parece
+ * equivalente a si própria e parece convergir. O tecto não é o defeito; o defeito era
+ * ele ser MUDO: quem lê o valor não distingue «refinou» de «desistiu».
+ *
+ * Enquanto `qz()` truncava, o congelamento vinha acompanhado de saturação e a bandeira
+ * levantava-se por acidente. Com a promoção deixou de vir, e passou a ser preciso
+ * dizê-lo à mão — que é onde devia estar desde o princípio. */
+static long cy_congelou = 0;
+
 static Qz cy_termo(Suc s, long n){
     switch(s.t){
     case S_CONST: return qz(s.p, s.q);
     case S_INV:   return qz(1, n + 1);
     case S_ALT:   return qz_de_inteiro((n % 2) ? -1 : 1);
     case S_HARM: {
-        if(n > CY_HARM_TETO) n = CY_HARM_TETO;
+        if(n > CY_HARM_TETO){ cy_congelou++; n = CY_HARM_TETO; }
         Qz h = qz(0,1);
         for(long k = 1; k <= n + 1; k++) h = qz_soma(h, qz(1, k));
         return h; }
@@ -69,7 +81,7 @@ static Qz cy_termo(Suc s, long n){
         for(long i = 0; i <= n; i++){
             long ai = t[(size_t)i < nt ? (size_t)i : (1 + (i - 1) % (long)(nt > 1 ? nt - 1 : 1))];
             long pp = ai*pn + pa, qq = ai*qn + qa;
-            if(qq > (1L<<28)) break;
+            if(qq > (1L<<28)){ cy_congelou++; break; }
             pa = pn; qa = qn; pn = pp; qn = qq;
         }
         if(qn <= 0) return qz(0,1);
@@ -84,10 +96,10 @@ static Qz cy_dist(Qz a, Qz b){                    /* |a − b| */
     I128 y = i128_smul((int64_t)b.p, (int64_t)a.q);
     I128 n = i128_cmp(x, y) >= 0 ? i128_sub(x, y) : i128_sub(y, x);
     if(i128_negativo(n)) n = i128_neg(n);
-    if(!i128_fits_i64(n)){ qz_saturou++; return qz(32767, 1); }
+    if(!i128_fits_i64(n)){ qz_saturou++; qz_perdeu++; return qz(0, 1); }
     int64_t num = i128_to_i64(n);
     int64_t den = (int64_t)a.q * (int64_t)b.q;
-    if(den <= 0){ qz_saturou++; return qz(32767, 1); }
+    if(den <= 0){ qz_saturou++; qz_perdeu++; return qz(0, 1); }
     long g = qz_mdc(num < 0 ? -num : num, den);
     return qz((long)(num / g), (long)(den / g));
 }
@@ -101,13 +113,22 @@ static Qz cy_dist(Qz a, Qz b){                    /* |a − b| */
  * que fazer: uma saturação não é um resultado, e não pode entrar numa asserção como se
  * fosse. Logo o varrimento pára no último índice HONESTO, e esse índice diz-se.
  *
- * Mede-se pelo contador `qz_saturou`, que é o mesmo que o racional usa — a detecção está
- * dentro da operação, e não numa releitura do valor depois de ele já ter enrolado. */
+ * A RÉGUA É A PERDA, E NÃO A PROMOÇÃO. Isto lia `qz_saturou`, e enquanto sair de E₁₆
+ * era truncar as duas coisas eram uma só. Desde a promoção (20/08) sair de E₁₆ é subir
+ * de andar com o valor INTACTO, e ler ali dava um tecto CURTO — cortava termos bons —
+ * ao mesmo tempo que deixava passar os maus, porque quem congela a sucessão é o encaixe
+ * a desistir (`rz_parou`) e a órbita a transbordar (`qz_perdeu`), não a promoção.
+ *
+ * Os três contadores dizem as três formas de deixar de ser o termo: `qz_perdeu` é o
+ * valor que se descartou, `rz_parou` é o passo do encaixe que não se deu, `cy_congelou`
+ * é o tecto próprio da sucessão a devolver o último bom outra vez. Um termo é honesto
+ * enquanto NENHUM dos três se mexe. */
+static long cy_desonesto(void){ return qz_perdeu + rz_parou + cy_congelou; }
 static long cy_teto_honesto(Suc s, long ate){
     for(long n = 0; n <= ate; n++){
-        long antes = qz_saturou;
+        long antes = cy_desonesto();
         (void)cy_termo(s, n);
-        if(qz_saturou != antes) return n > 0 ? n - 1 : 0;
+        if(cy_desonesto() != antes) return n > 0 ? n - 1 : 0;
     }
     return ate;
 }

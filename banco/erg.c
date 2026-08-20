@@ -15,7 +15,7 @@
  * duas transcrições da mesma ISA, e a única prova de que são a mesma é confrontá-las.
  *
  * SEM RAM, como o resto: o programa vive num ficheiro e lê-se byte a byte com `pread`; a
- * memória vive noutro ficheiro, um slot de 16 bytes por vez. Os únicos registos são A, B, R,
+ * memória vive noutro ficheiro, um átomo Word_8 (1 B) por slot. Os únicos registos são A, B, R,
  * o `pc` e as flags — três palavras, como no metal.
  *
  * AS DUAS ARMADILHAS DA ISA, que o piloto tem de saber antes de escrever a primeira linha, e
@@ -59,7 +59,8 @@
 #include <fcntl.h>
 #include "unidade.h"
 
-typedef struct { long total, e; } Word;
+#include "../lib/word_isa.h"
+/* Word ISA = word_isa.h (Word_8²). */
 
 /* ---------------- a ISA (transcrita do sql.c, e §E1 confronta-a com ele) ---------------- */
 enum { OP_HALT=0, OP_LOAD, OP_STORE, OP_ADD, OP_SUB, OP_AND, OP_OR, OP_XOR,
@@ -107,17 +108,25 @@ static const Instr *acha_op(int op){
     return NULL;
 }
 
-/* ---------------- a memória: um ficheiro, um slot de cada vez. Sem RAM. ---------------- */
-#define SLOT 16
+/* ---------------- a memória: um ficheiro, SlotWord = Word_8 (1 B) no disco ---------------- */
+#include "../lib/slot_mem.h"
+#define SLOT SLOT_WORD_BYTES
 static int fmem = -1;
 
+/* Word lógico = dois átomos consecutivos (Lei 7). Índice ISA = base/2. */
 static Word mem_le(unsigned slot){
     Word w = { 0, 0 };
-    if(fmem >= 0) (void)!pread(fmem, &w, sizeof w, (off_t)slot * SLOT);
+    if(fmem >= 0){
+        w.total = slot_mem_le(fmem, slot * 2u);
+        w.e     = slot_mem_le(fmem, slot * 2u + 1u);
+    }
     return w;
 }
 static void mem_grava(unsigned slot, Word w){
-    if(fmem >= 0) (void)!pwrite(fmem, &w, sizeof w, (off_t)slot * SLOT);
+    if(fmem >= 0){
+        slot_mem_grava(fmem, slot * 2u,     w.total);
+        slot_mem_grava(fmem, slot * 2u + 1u, w.e);
+    }
 }
 
 /* ---------------- a máquina: um passo, fiel ao sql.c ---------------- */
@@ -153,10 +162,10 @@ static long ula_soma_l(long a, long b){
     return s;
 }
 static Word ula_add(Word a, Word b){
-    Word r = { ula_soma_l(a.total,b.total), ula_soma_l(a.e,b.e) }; return r; }
+    Word r = { (Word8)ula_soma_l(a.total,b.total), (Word8)ula_soma_l(a.e,b.e) }; return r; }
 static Word ula_sub(Word a, Word b){
-    Word r = { ula_soma_l(a.total, ula_soma_l(ula_nand_l(b.total,b.total),1)),
-               ula_soma_l(a.e,     ula_soma_l(ula_nand_l(b.e,b.e),1)) }; return r; }
+    Word r = { (Word8)ula_soma_l(a.total, ula_soma_l(ula_nand_l(b.total,b.total),1)),
+               (Word8)ula_soma_l(a.e,     ula_soma_l(ula_nand_l(b.e,b.e),1)) }; return r; }
 /* ── AND E OR DERIVAM DE NAND, E AQUI DERIVAM-SE MESMO ────────────────────────────
  *
  * O Aarao: "transforma o excedente em funcao primeiro, depois sai trocando."
@@ -174,11 +183,11 @@ static Word ula_sub(Word a, Word b){
  * mesmo. A reducao FINAL acontece quando o slot o aplicar na leitura — no banco, nao no
  * processador — e ai eles saem da ISA sem se perder nada.
  */
-static Word ula_nand(Word a, Word b){ Word r = { ~(a.total&b.total), ~(a.e&b.e) }; return r; }
+static Word ula_nand(Word a, Word b){ Word r = { (Word8)~(a.total&b.total), (Word8)~(a.e&b.e) }; return r; }
 static Word ula_and(Word a, Word b){ Word n = ula_nand(a,b); return ula_nand(n,n); }
 static Word ula_or (Word a, Word b){ Word na = ula_nand(a,a), nb = ula_nand(b,b);
                                      return ula_nand(na,nb); }
-static Word ula_xor(Word a, Word b){ Word r = { a.total^b.total, a.e^b.e }; return r; }
+static Word ula_xor(Word a, Word b){ Word r = { (Word8)(a.total^b.total), (Word8)(a.e^b.e) }; return r; }
 static int  zero(Word w){ return w.total == 0 && w.e == 0; }
 
 /* o gato, e a volta. cifra_an(w,1) = (total + e, total) — det −1, logo a volta é INTEIRA. */
@@ -204,8 +213,8 @@ static int  zero(Word w){ return w.total == 0 && w.e == 0; }
  * trocar implementacao correcta por implementacao elegante nao e' reducao — e' risco. */
 static Word gato_an(Word w, int n, int para_tras){
     Word r;
-    if(para_tras){ r.total = w.e;                       r.e = w.total - (long)n*w.e; }
-    else         { r.total = (long)n*w.total + w.e;     r.e = w.total;               }
+    if(para_tras){ r.total = w.e; r.e = (Word8)((int)w.total - n*(int)w.e); }
+    else         { r.total = (Word8)(n*(int)w.total + (int)w.e); r.e = w.total; }
     return r;
 }
 static Word cifra_an  (Word w, int n){ return gato_an(w, n, 0); }
@@ -451,22 +460,28 @@ static long corre_texto(const char *texto, const char *mem, long teto, char *err
 static void zera_mem(const char *caminho, int nslots){
     int f = open(caminho, O_WRONLY | O_CREAT | O_TRUNC, 0644);
     if(f < 0) return;
-    Word z = { 0, 0 };
-    for(int i = 0; i < nslots; i++) (void)!write(f, &z, sizeof z);
+    SlotWord z = 0;
+    for(int i = 0; i < nslots * 2; i++) (void)!write(f, &z, SLOT);  /* n Words = 2n átomos */
     close(f);
 }
+/* Disco: Word ISA = 2 átomos (total,e), base = slot*2 (Lei 7). */
 static void poe_slot(const char *caminho, unsigned slot, long total, long e){
     int f = open(caminho, O_WRONLY | O_CREAT, 0644);
     if(f < 0) return;
-    Word w = { total, e };
-    (void)!pwrite(f, &w, sizeof w, (off_t)slot * SLOT);
+    SlotWord a = (SlotWord)(int8_t)total, b = (SlotWord)(int8_t)e;
+    (void)!pwrite(f, &a, SLOT, (off_t)(slot * 2u) * SLOT);
+    (void)!pwrite(f, &b, SLOT, (off_t)(slot * 2u + 1u) * SLOT);
     close(f);
 }
 static Word ve_slot(const char *caminho, unsigned slot){
     Word w = { 0, 0 };
     int f = open(caminho, O_RDONLY);
     if(f < 0) return w;
-    (void)!pread(f, &w, sizeof w, (off_t)slot * SLOT);
+    SlotWord a = 0, b = 0;
+    (void)!pread(f, &a, SLOT, (off_t)(slot * 2u) * SLOT);
+    (void)!pread(f, &b, SLOT, (off_t)(slot * 2u + 1u) * SLOT);
+    w.total = a;
+    w.e = b;
     close(f);
     return w;
 }
@@ -481,6 +496,8 @@ static void secao_E1(void){
     printf("\n§E1  A ISA É A DO sql.c — e a medida lê-a de lá, não da minha memória\n\n");
 
     FILE *f = fopen("sql.c", "r");
+    if(!f) f = fopen("banco/sql.c", "r");
+    if(!f) f = fopen("../banco/sql.c", "r");
     if(!f) f = fopen("tools/sql.c", "r");
     if(!f){ ok("o sql.c abre para o confronto dos opcodes", 0); return; }
 
@@ -587,7 +604,7 @@ static void secao_E3(void){
 
     printf("        (total, e)      → GOLD →      → NEGRO_OURO →   volta?\n");
     int falhou = 0, cresceu = 0;
-    long pontos[8][2] = {{1,0},{0,1},{3,5},{-2,7},{13,8},{100,-3},{1,1},{55,34}};
+    long pontos[8][2] = {{1,0},{0,1},{3,5},{-2,7},{13,8},{100,-3},{1,1},{55,34}}; /* int8 */
     for(int i = 0; i < 8; i++){
         zera_mem(mem, 8);
         poe_slot(mem, 1, pontos[i][0], pontos[i][1]);
@@ -595,10 +612,10 @@ static void secao_E3(void){
         Word g = ve_slot(mem, 2);
         if(corre_texto(prog_volta, mem, 100, erro, (int)sizeof erro) < 0){ falhou++; continue; }
         Word v = ve_slot(mem, 3);
-        int bate = (v.total == pontos[i][0] && v.e == pontos[i][1]);
+        int bate = ((int8_t)v.total == (int8_t)pontos[i][0] && (int8_t)v.e == (int8_t)pontos[i][1]);
         if(!bate) falhou++;
-        if(labs(g.total) > labs(pontos[i][0]) && pontos[i][0] > 0) cresceu++;
-        printf("        (%4ld,%4ld)      (%4ld,%4ld)      (%4ld,%4ld)      %s\n",
+        if((int)(int8_t)g.total != (int)(int8_t)pontos[i][0] && pontos[i][0] > 0) cresceu++;
+        printf("        (%4ld,%4ld)      (%4d,%4d)      (%4d,%4d)      %s\n",
                pontos[i][0], pontos[i][1], g.total, g.e, v.total, v.e, bate ? "sim" : "NÃO");
     }
     ok("a volta é exata nos 8 pontos — inteiro a inteiro, sem resto", falhou == 0);
@@ -628,7 +645,7 @@ static void secao_E4(void){
             snprintf(p + off, sizeof p - (size_t)off, "STORE 2\nHALT\n");
             if(corre_texto(p, mem, 100, erro, (int)sizeof erro) < 0){ volta4 = 0; break; }
             Word w = ve_slot(mem, 2);
-            int igual = (w.total == a && w.e == b);
+            int igual = ((int8_t)w.total == (int8_t)a && (int8_t)w.e == (int8_t)b);
             if(k == 4 && !igual) volta4 = 0;
             if(k < 4 && igual) volta_cedo++;
         }
@@ -648,7 +665,7 @@ static void secao_E4(void){
             snprintf(p + off, sizeof p - (size_t)off, "STORE 2\nHALT\n");
             if(corre_texto(p, mem, 100, erro, (int)sizeof erro) < 0){ volta2 = 0; break; }
             Word w = ve_slot(mem, 2);
-            int igual = (w.total == a && w.e == b);
+            int igual = ((int8_t)w.total == (int8_t)a && (int8_t)w.e == (int8_t)b);
             if(k == 2 && !igual) volta2 = 0;
             if(k == 1 && igual) t_cedo++;      /* só se a=b, e os pontos são escolhidos com a≠b */
         }
@@ -686,7 +703,7 @@ static void secao_E5(void){
     long passos = corre_texto(p, mem, 100, erro, (int)sizeof erro);
     if(passos < 0){ printf("     erro: %s\n", erro); ok("o programa da armadilha corre", 0); return; }
     Word w = ve_slot(mem, 3);
-    printf("     A valia 99 e R valia 20 no momento do STORE; o slot 3 ficou com (%ld, %ld)\n",
+    printf("     A valia 99 e R valia 20 no momento do STORE; o slot 3 ficou com (%d, %d)\n",
            w.total, w.e);
     ok("o slot ficou com R (20), NÃO com A (99)", w.total == 20 && w.e == 0);
     ok("e não ficou com o valor que A tinha — a confusão é distinguível", w.total != 99);
@@ -703,8 +720,8 @@ static void secao_E5(void){
         "HALT\n";
     if(corre_texto(remedio, mem, 100, erro, (int)sizeof erro) < 0){ ok("o remédio corre", 0); return; }
     Word c = ve_slot(mem, 4);
-    printf("     o remédio (LOAD k; LOAD zero; ADD; STORE s) pôs (%ld, %ld) no slot 4\n", c.total, c.e);
-    ok("o remédio grava a constante, componente a componente", c.total == 7 && c.e == 3);
+    printf("     o remédio (LOAD k; LOAD zero; ADD; STORE s) pôs (%d, %d) no slot 4\n", c.total, c.e);
+    ok("o remédio grava a constante, componente a componente", c.total == 7 && c.e == 3);  /* cabe Word_8 */
 
     conclui("pôr uma constante num slot custa quatro instruções, e não duas. É a ISA, não um defeito.");
 }
@@ -727,7 +744,7 @@ static void secao_E6(void){
 
     printf("        x                y                ISA              C                bate\n");
     int erros = 0;
-    long casos[6][4] = {{1,0,0,1},{3,5,7,11},{-4,9,4,-9},{1000,1,1,1000},{0,0,0,0},{-7,-7,7,7}};
+    long casos[6][4] = {{1,0,0,1},{3,5,7,11},{-4,9,4,-9},{100,1,1,100},{0,0,0,0},{-7,-7,7,7}};
     for(int i = 0; i < 6; i++){
         zera_mem(mem, 8);
         poe_slot(mem, 1, casos[i][0], casos[i][1]);
@@ -735,9 +752,9 @@ static void secao_E6(void){
         if(corre_texto(app, mem, 100, erro, (int)sizeof erro) < 0){ erros++; continue; }
         Word r = ve_slot(mem, 3);
         long ct = casos[i][0] + casos[i][2], ce = casos[i][1] + casos[i][3];
-        int bate = (r.total == ct && r.e == ce);
+        int bate = (r.total == (Word8)ct && r.e == (Word8)ce);
         if(!bate) erros++;
-        printf("        (%5ld,%5ld)   (%5ld,%5ld)   (%5ld,%5ld)   (%5ld,%5ld)   %s\n",
+        printf("        (%5ld,%5ld)   (%5ld,%5ld)   (%5d,%5d)   (%5ld,%5ld)   %s\n",
                casos[i][0], casos[i][1], casos[i][2], casos[i][3],
                r.total, r.e, ct, ce, bate ? "sim" : "NÃO");
     }
@@ -829,7 +846,7 @@ static void secao_E7(void){
         Word c = ve_slot(mem, 1);
         long prev = 9L*N - 1;
         if(passos != prev || c.total != 0) erros++;
-        printf("        %d     %11ld   %7ld    (%ld, %ld)\n", N, prev, passos, c.total, c.e);
+        printf("        %d     %11ld   %7ld    (%d, %d)\n", N, prev, passos, c.total, c.e);
     }
     ok("os passos batem com 9N−1 em N = 1..6 — o salto relativo está certo", erros == 0);
 
@@ -881,7 +898,7 @@ int main(int argc, char **argv){
     if(argc >= 2 && !strcmp(argv[1], "ve")){
         if(argc < 4){ fprintf(stderr, "uso: erg ve <mem.dat> <slot>\n"); return 2; }
         Word w = ve_slot(argv[2], (unsigned)strtoul(argv[3], NULL, 0));
-        printf("%ld %ld\n", w.total, w.e);
+        printf("%d %d\n", w.total, w.e);
         return 0;
     }
     if(argc >= 2 && !strcmp(argv[1], "poe")){

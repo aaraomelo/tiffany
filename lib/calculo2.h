@@ -51,7 +51,9 @@ typedef struct { Qz a[C2_MAX+1]; int n; } Sr;
 static Sr sr0(void){ Sr s; s.n = C2_MAX; for(int i = 0; i <= C2_MAX; i++) s.a[i] = qz(0,1); return s; }
 static int c2_divide_segura(Qz a, Qz b, Qz *r){
     QzX x;
-    if(!qz_x_divide(a, b, &x) || x.saturo){ c2_estouros++; return 0; }
+    long antes = qz_perdeu;
+    /* saturo = saiu de E₁₆ e o valor é exacto; o que faz falhar é a PERDA */
+    if(!qz_x_divide(a, b, &x) || qz_perdeu != antes){ c2_estouros++; return 0; }
     *r = x.estreito;
     return 1;
 }
@@ -194,22 +196,27 @@ static Sr sr_cos(int termos){
  * Agora não se adivinha tecto nenhum: PERGUNTA-SE À OPERAÇÃO. O `qz` conta o que não lhe
  * coube, e o guarda lê esse contador. A detecção está dentro da conta, e não numa
  * releitura do valor depois de ele já ter enrolado. */
+/* saturo = saiu de E₁₆ e o valor CONTINUA exacto: isso não é estouro e não se conta.
+ * Estouro é a PERDA — nem no int64 coube e o valor foi descartado —, e quem a diz é
+ * `qz_perdeu`. Trocar um pelo outro deixava esta função a devolver sempre 1: a série-p
+ * em p=3, N=40 pede lcm(1..40)³ ≈ 1,5·10⁴⁷, perdia-se, e o «detectado e devolvido» do
+ * comentário acima passou a ser só o comentário. */
 static int c2_soma_segura(Qz a, Qz b, Qz *r){
+    long antes = qz_perdeu;
     QzX x = qz_x_soma(a, b);
-    if(x.saturo){ c2_estouros++; return 0; }
-    *r = x.estreito;
+    if(qz_perdeu != antes){ c2_estouros++; return 0; }
+    *r = x.estreito;                     /* promove: estreito = classe exacta */
     return 1;
 }
 /* a soma parcial exacta — mas com o estouro DETECTADO e devolvido, em vez de escondido */
 static int sr_p_parcial(long p, long N, Qz *saida){
     Qz s = qz(0,1);
     for(long n = 1; n <= N; n++){
-        /* nº: o denominador é n^p, e ele também tem de caber — a mesma pergunta,
-         * feita ao mesmo contador em vez de a um número que eu escolhesse */
         Qz t = qz(1,1);
         for(long k = 0; k < p; k++){
+            long antes = qz_perdeu;
             QzX x = qz_x_mult(t, qz(1, n));
-            if(x.saturo){ c2_estouros++; return 0; }
+            if(qz_perdeu != antes){ c2_estouros++; return 0; }
             t = x.estreito;
         }
         if(!c2_soma_segura(s, t, &s)) return 0;

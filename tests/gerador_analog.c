@@ -29,10 +29,6 @@
 #include "../lib/disco.h"
 #include "reta.h"      /* rt_pot_mod: a torre em Z_p, exacta */
 #include "unidade.h"
-#include <math.h>
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 #define N 256
 #define P_GLOBAL 40961L

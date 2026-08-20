@@ -20,9 +20,19 @@
  *        mas cada .tex compila SOZINHO e lá sairia "??"
  *   §R4  o CONTROLO NEGATIVO: injeta-se uma órfã e uma duplicada em memória, e o
  *        medidor TEM de as apanhar. Sem isto §R1–§R3 passariam num repositório vazio.
+ *   §R5  A MESMA LEI NO ANDAR DE BAIXO: todo `#include "x.h"` de um ficheiro que o
+ *        git RASTREIA aponta para um ficheiro que o git também tem. Um header fora
+ *        do repositório é a referência órfã do C — aqui compila (o disco tem-no) e
+ *        num clone limpo não existe, e nada falha DESTE lado.
+ *        Foi assim que `banco/*.h` viveu fora do git: o `.gitignore` tinha
+ *        `banco/*` com excepção só para `.c`, e o `banco/sql_api.h` — incluído pelo
+ *        `banco/sql.c`, que está na bateria — nunca lá entrou. A bateria estava
+ *        verde sobre uma árvore que o git não reproduzia.
+ *        E o controlo negativo é o mesmo: injecta-se um include inexistente.
  *
  *   cc -O2 -std=c99 -Wall refs.c -o refs && ./refs
  */
+#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include "../lib/disco.h"
 #define refs_ DISCO_FIXO(Marca, 45)
@@ -177,6 +187,104 @@ int main(void)
     }
 
     nlab = nlab0; nref = nref0;   /* desfaz-se a injeção: o estado volta ao medido */
+
+    /* ---------------- §R5 — o include órfão: existe no disco, não no git ---------- */
+    printf("\n§R5 todo #include de um ficheiro RASTREADO está ele próprio no git\n");
+    printf("      (um header fora do repositório compila AQUI e falha em toda a parte;\n");
+    printf("       é a mesma órfã do §R1, um andar abaixo — e também não falha nada)\n");
+    {
+        static char rast[8192][MAXL];
+        int nrast = 0, fora = 0, vistos = 0;
+        FILE *g = popen("cd .. 2>/dev/null && git ls-files", "r");
+        if (g) {
+            char l[MAXL];
+            while (nrast < 8192 && fgets(l, sizeof l, g)) {
+                size_t n = strlen(l);
+                while (n && (l[n-1] == '\n' || l[n-1] == '\r')) l[--n] = 0;
+                if (n) { snprintf(rast[nrast], MAXL, "%s", l); nrast++; }
+            }
+            pclose(g);
+        }
+        /* NORMALIZAR ANTES DE ACUSAR. `banco/agentes.c` inclui "../lib/disco.h" e o
+         * candidato sai `banco/../lib/disco.h` — que o git não conhece por esse nome,
+         * embora tenha `lib/disco.h`. Sem colapsar os `X/..`, esta secção acusava 88
+         * ficheiros e 85 eram ruído meu: mais falso positivo que defeito, que é como
+         * as ferramentas desta casa costumam nascer. */
+        /* rastreado? — comparação por caminho normalizado desde a raiz */
+        #define ERASTREADO(P) ({ int _a = 0; for (int _i = 0; _i < nrast; _i++) \
+                                 if (!strcmp(rast[_i], (P))) { _a = 1; break; } _a; })
+        /* colapsa "a/b/../c" em "a/c", em cima do próprio buffer */
+        #define NORMALIZA(P) do { \
+            char *_q; \
+            while ((_q = strstr((P), "/../"))) { \
+                char *_p = _q; \
+                while (_p > (P) && *(_p-1) != '/') _p--; \
+                if (_p == (P)) { memmove((P), _q + 4, strlen(_q + 4) + 1); break; } \
+                memmove(_p, _q + 4, strlen(_q + 4) + 1); \
+            } \
+            while (!strncmp((P), "./", 2)) memmove((P), (P) + 2, strlen((P) + 2) + 1); \
+        } while (0)
+        for (int r = 0; r < nrast; r++) {
+            const char *f = rast[r];
+            size_t nf = strlen(f);
+            if (nf < 3 || (strcmp(f + nf - 2, ".c") && strcmp(f + nf - 2, ".h"))) continue;
+            char cam[512];
+            snprintf(cam, sizeof cam, "../%s", f);
+            FILE *fp = fopen(cam, "r");
+            if (!fp) continue;
+            char dir[512];
+            snprintf(dir, sizeof dir, "%s", f);
+            char *barra = strrchr(dir, '/');
+            if (barra) *barra = 0; else dir[0] = 0;
+            char linha[4096];
+            while (fgets(linha, sizeof linha, fp)) {
+                char *inc = strstr(linha, "#include");
+                if (!inc) continue;
+                char *a = strchr(inc, '"');
+                if (!a) continue;
+                char *b = strchr(a + 1, '"');
+                if (!b) continue;
+                *b = 0;
+                const char *alvo = a + 1;
+                /* candidatos: relativo ao ficheiro, e as raízes da casa */
+                const char *RAIZ[] = { NULL, "lib", "tests", "tools", "banco" };
+                char cand[512], achou[512]; int existe = 0, no_git = 0;
+                for (int k = 0; k < 5; k++) {
+                    if (k == 0) {
+                        if (dir[0]) snprintf(cand, sizeof cand, "%s/%s", dir, alvo);
+                        else        snprintf(cand, sizeof cand, "%s", alvo);
+                    } else snprintf(cand, sizeof cand, "%s/%s", RAIZ[k], alvo);
+                    NORMALIZA(cand);
+                    char disco[600];
+                    snprintf(disco, sizeof disco, "../%s", cand);
+                    FILE *t = fopen(disco, "r");
+                    if (!t) continue;
+                    fclose(t);
+                    if (!existe) { existe = 1; snprintf(achou, sizeof achou, "%s", cand); }
+                    if (ERASTREADO(cand)) { no_git = 1; break; }
+                }
+                if (!existe) continue;          /* header do sistema ou ausente: outro assunto */
+                vistos++;
+                if (!no_git) {
+                    fora++;
+                    printf("      FORA DO GIT  %s  inclui \"%s\" (existe em %s)\n", f, alvo, achou);
+                }
+            }
+            fclose(fp);
+        }
+        printf("      %d ficheiros rastreados, %d includes locais resolvidos, %d fora do git\n",
+               nrast, vistos, fora);
+        /* o CONTROLO: um include que garantidamente não está no git tem de ser apanhado */
+        int viu_falso = !ERASTREADO("lib/este-header-nao-existe-de-proposito.h");
+        ok("nenhum #include de ficheiro rastreado aponta para fora do git — a órfã do C."
+           " O `.gitignore` tinha `banco/*` sem excepção para `.h`, e o `banco/sql_api.h`,"
+           " que o `banco/sql.c` da bateria inclui, nunca entrou no repositório: aqui"
+           " compilava e num clone limpo não existia. Nada falhava deste lado, que é a"
+           " assinatura do defeito que este ficheiro persegue",
+           fora == 0 && vistos > 100 && nrast > 100 && viu_falso);
+        #undef ERASTREADO
+        #undef NORMALIZA
+    }
 
     printf("\n================================================================\n");
     conclui("um \\ref órfão não falha o pdflatex: emite Warning, imprime \"??\" e o PDF sai.");

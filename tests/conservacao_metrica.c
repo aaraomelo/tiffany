@@ -439,7 +439,7 @@ int main(void){
            duas > 0 && uma == 1 && ctrl_uma == ctrl && cone_duas > 0 && casos == 401);
     }
 
-    printf("\n=== %ld asserções, %ld falhas, %ld estouros, %ld saturações"
+    printf("\n=== %d asserções, %d falhas, %ld estouros, %ld saturações"
            " (que não são falhas) ===\n", unidades, falhas, md_estouros, md_saturou);
     return falhas ? 1 : 0;
 }

@@ -2843,7 +2843,7 @@ static const char *puxa(void){
     if(NP <= 0){ fprintf(stderr, "traduz: pilha vazia na descida (fn=%d op=0x%02X MP=%ld)\n",
                           DBG_FN, DBG_OP, (long)DBG_MP);
                  for(int z = 0; z < 64; z++){ int k = (DBG_I + z) & 63;
-                     fprintf(stderr, "  anel[%2d] MP=%ld op=0x%02X NP=%d\n", z, DBG_AMP[k], (long)DBG_ANEL[k], DBG_NP[k]); }
+                     fprintf(stderr, "  anel[%2d] MP=%ld op=0x%02X NP=%d\n", z, DBG_AMP[k], (unsigned)DBG_ANEL[k], DBG_NP[k]); }
                  exit(2); }
     return PILHA[--NP];
 }

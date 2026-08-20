@@ -70,15 +70,48 @@ printf("\n§S3  O Cantor: a reta em três, e o que sai disso.\n\n");
 {
     /* o conjunto de Cantor: a reta dividida em 3, fica-se com 2. A cada nivel, 2^k pedacos de
      * comprimento 3^-k. O que se mede: a medida vai a ZERO e a contagem vai a INFINITO. */
+    /* A MEDIDA É UM RACIONAL EXACTO, 2^k/3^k, e é aqui que ela estava a mentir. Havia
+     *
+     *     long med = 1.0;   …   med = med * 2.0 / 3.0;   …   ok(…, med < 0.1 …)
+     *
+     * e a Fase A, ao trocar o tipo, matou a construção inteira: 1*2.0/3.0 trunca para
+     * ZERO no primeiro nível, a coluna «medida total» imprimia 1,0,0,0,0,0,0 e a
+     * asserção «a medida vai a zero» passou a ser «0 < 0.1» — verdadeira antes de o
+     * Cantor começar. A coluna do comprimento era pior: `1.0/med*pedacos*med/pedacos*0
+     * + (long)(k?1:1)`, que é uma divisão por zero anulada por um `*0` e um 1 fixo.
+     *
+     * Em ℚ não há nada a truncar: 2^k e 3^k são inteiros e a razão é a classe. */
     printf("      nível   pedaços   comprimento de cada   medida total\n");
-    long med = 1.0;
-    long pedacos = 1, mau = 0;
+    Par med = ra_classe((Par){1,1});
+    long pedacos = 1, tres_k = 1, mau = 0, decresce = 0;
     for(int k = 0; k <= 6; k++){
-        printf("      %-7d %-9ld 1/%-19.0f %ld\n", k, pedacos, 1.0/med*pedacos*med/pedacos*0+ (long)(k?1:1), med);
-        if(k < 6){ pedacos *= 2; med = med * 2.0 / 3.0; }
+        printf("      %-7d %-9ld 1/%-19ld %ld/%ld\n", k, pedacos, tres_k, med.a, med.b);
+        if(med.a * tres_k != pedacos * med.b) mau++;      /* medida = pedaços/3^k */
+        if(k < 6){
+            Par ant = med;
+            pedacos *= 2; tres_k *= 3;
+            med = ra_prod(med, ra_classe((Par){2,3}));
+            if(ra_cmp(med, ant) < 0) decresce++;          /* encolhe SEMPRE, e conta-se */
+        }
     }
-    printf("\n      a medida encolhe por 2/3 a cada nível e vai a zero; os pedaços dobram.\n");
-    ok("a medida vai a zero e a contagem vai ao infinito — é o Cantor", med < 0.1 && pedacos == 64);
+    /* «vai a zero» com o ε EXIBIDO e a testemunha devolvida: dado ε = 1/N, existe k com
+     * 2^k/3^k < ε. Sem o k a frase é uma esperança; com ele é uma medida. */
+    long k_test = -1;
+    { Par m = ra_classe((Par){1,1}), eps = ra_classe((Par){1,100});
+      for(long k = 0; k <= 40 && k_test < 0; k++){
+          if(ra_cmp(m, eps) < 0){ k_test = k; break; }
+          m = ra_prod(m, ra_classe((Par){2,3}));
+      } }
+    printf("\n      a medida encolhe por 2/3 a cada nível: %ld de 6 passos ESTRITAMENTE\n",
+           decresce);
+    printf("      e dado ε = 1/100, a testemunha é k = %ld — 2^k/3^k < ε a partir dali\n",
+           k_test);
+    ok("A MEDIDA VAI A ZERO E A CONTAGEM VAI AO INFINITO, e as duas em ℚ EXACTO: a medida"
+       " do nível k é 2^k/3^k, confere-se contra pedaços/3^k em todos os sete níveis, e"
+       " encolhe ESTRITAMENTE nos seis passos. E «vai a zero» diz-se como se deve — com o"
+       " ε racional EXIBIDO (1/100) e o k que o cumpre devolvido, não com um limiar meu"
+       " contra um valor truncado",
+       mau == 0 && pedacos == 64 && decresce == 6 && k_test > 0 && k_test <= 40);
     printf("\n      E É POR ISSO QUE O CANTOR SOZINHO NÃO ENCHE. Ele tira o meio e o que fica\n");
     printf("      tem medida nula — é pó, não é área. Para ENCHER o triângulo a subdivisão tem\n");
     printf("      de GUARDAR os três, e não dois: é a diferença entre o Cantor e o Sierpinski\n");

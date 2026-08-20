@@ -748,10 +748,34 @@ int main(void){
                    && (rt_cf_slot_banco(1) == (long)(S_CF + S_CF_STRIDE))
                    && (S_CF_END == S_CF + S_CF_WORDS * S_CF_STRIDE)
                    && (S_CF_END <= 4096u);
-        printf("      palavra 0 → slot %ld, palavra 1 → %ld, região até %u\n\n",
-               rt_cf_slot_banco(0), rt_cf_slot_banco(1), (unsigned)S_CF_END);
+        /* AS TRÊS LINHAS ACIMA SÃO VERDADEIRAS PARA QUALQUER STRIDE: cada uma repete a
+         * conta que a própria macro faz. O que a stride tem de garantir é OUTRA coisa —
+         * que a palavra 1 começa DEPOIS do último slot da palavra 0 —, e isso mede-se
+         * escrevendo as duas e vendo se a primeira sobrevive à segunda. Com a stride
+         * curta a palavra 1 entra por cima dos termos da 0 e a volta muda. */
+        int nao_pisa = ((long)S_CF_STRIDE >= 2L*RT_CF_MAX + 3L);
+        {
+            int fd2 = rt_cf_slot_mem_abre("dados/rtcf_stride.mem");
+            RtCfSlot w0 = rt_cf_slot_word(0, fd2), w1 = rt_cf_slot_word(1, fd2);
+            long a0 = 0, b0 = 0;
+            rt_cf_slot_de(1, 103993, 33102, &w0);     /* palavra longa: 5 termos, um = 292 */
+            rt_cf_slot_de(1, 355, 113, &w1);          /* a vizinha escreve por cima? */
+            if(!rt_cf_slot_para(&w0, &a0, &b0) || a0 != 103993 || b0 != 33102)
+                nao_pisa = 0;
+            if(fd2 >= 0) close(fd2);
+            unlink("dados/rtcf_stride.mem");
+        }
+        mapa_ok = mapa_ok && nao_pisa;
+        printf("      palavra 0 → slot %ld, palavra 1 → %ld, região até %u"
+               " · a vizinha NÃO pisa: %s\n\n",
+               rt_cf_slot_banco(0), rt_cf_slot_banco(1), (unsigned)S_CF_END,
+               nao_pisa ? "sim" : "NÃO");
         ok("S_CF está reservado no mapa do .mem — entre S_VIVO e S_LIN, com stride"
-           " RT_CF_MAX+2, e rt_cf_slot_banco(i) aponta para o slot base correcto",
+           " 2·RT_CF_MAX+3 (sinal, n, os termos em PARES de átomos, flag), e"
+           " rt_cf_slot_banco(i) aponta o base. E a stride mede-se pelo que ela tem de"
+           " garantir e não pela conta que a define: a palavra 1 escreve-se DEPOIS da"
+           " palavra 0 e a 0 volta inteira. Comparar rt_cf_slot_banco(1) com"
+           " S_CF+S_CF_STRIDE era repetir a macro, e passava com a stride errada",
            mapa_ok);
     }
 
@@ -761,27 +785,42 @@ int main(void){
         const char *path = "dados/rtcf_sql.mem";
         int fd = rt_cf_slot_mem_abre(path);
         RtCfSlot w = rt_cf_slot_word(0, fd);
-        rt_cf_slot_de(1, 22, 7, &w);
+        /* 1000/3 = [333; 3]: o 333 NÃO CABE num átomo e obriga os dois. Com 22/7 os
+         * termos eram 3 e 7, e ler só o átomo baixo dava o mesmo — a testemunha do
+         * layout não via metade do layout que testemunhava. */
+        rt_cf_slot_de(1, 1000, 3, &w);
         unsigned base = cf_slot_base(0);
         long mau = 0;
-        SlotWord meta = slot_mem_le(fd, base);
+        /* o sinal é um BIT: 0 = +, 1 = −. E cada a_k ocupa DOIS átomos (baixo, alto),
+         * que é a Word_8² da ISA — um quociente não cabe num átomo. */
+        SlotWord sinal = slot_mem_le(fd, base);
+        SlotWord nn    = slot_mem_le(fd, base + 1u);
         int wn = rt_cf_slot_n(&w);
-        if(meta.total != 1 || meta.e != wn) mau++;
+        if(sinal != 0 || nn != (SlotWord)wn) mau++;
         for(int i = 0; i < wn; i++){
-            SlotWord tw = slot_mem_le(fd, base + 1u + (unsigned)i);
-            if(tw.total != rt_cf_slot_termo(&w, i) || tw.e != 0) mau++;
+            long baixo = slot_mem_le(fd, base + 2u + 2u*(unsigned)i);
+            long alto  = slot_mem_le(fd, base + 3u + 2u*(unsigned)i);
+            if((baixo | (alto << 8)) != rt_cf_slot_termo(&w, i)) mau++;
         }
-        SlotWord fl = slot_mem_le(fd, base + (unsigned)RT_CF_MAX + 1u);
-        if(fl.total != (long)rt_cf_slot_saturou(&w)) mau++;
+        SlotWord fl = slot_mem_le(fd, base + 2u + 2u*(unsigned)RT_CF_MAX);
+        if(fl != (SlotWord)rt_cf_slot_saturou(&w)) mau++;
         long p22 = 0, q7 = 0;
         int volta = rt_cf_slot_para(&w, &p22, &q7);
+        int alto_vivo = 0;                       /* algum termo usou o átomo alto? */
+        for(int i = 0; i < wn; i++)
+            if(rt_cf_slot_termo(&w, i) > 255) alto_vivo = 1;
         close(fd);
         unlink(path);
-        printf("      22/7: %ld termos, slot_mem vs rt_cf_slot: %ld divergências;"
-               " volta %s\n\n", (long)wn, mau, volta && p22 == 22 && q7 == 7 ? "ok" : "NAO");
-        ok("mem_le no banco usa slot_mem_grava/le — o que rt_cf_slot escreve no fd é"
-           " byte-a-byte o que sql.c lê em S_CF: meta, termos consecutivos, flag saturou",
-           mau == 0 && volta && p22 == 22 && q7 == 7);
+        printf("      1000/3: %ld termos, slot_mem vs rt_cf_slot: %ld divergências;"
+               " átomo alto usado: %s; volta %s\n\n", (long)wn, mau,
+               alto_vivo ? "sim" : "NÃO",
+               volta && p22 == 1000 && q7 == 3 ? "ok" : "NAO");
+        ok("1 byte/slot: o que rt_cf_slot escreve é o que slot_mem lê — sinal (bit), n,"
+           " a_k em PARES de átomos (Word_8², baixo+256·alto), flag. E o caso escolhido"
+           " OBRIGA os dois átomos — 1000/3 tem o quociente 333, que não cabe num —,"
+           " porque com termos abaixo de 256 ler só o átomo baixo dava o mesmo e a"
+           " testemunha do layout não via metade dele",
+           mau == 0 && volta && p22 == 1000 && q7 == 3 && alto_vivo);
     }
 
     /* ═══ §R13 O PONTO FIXO: NÃO CABE EM ℚ, E CABE EM 𝔽ₚ ═══════════════════ */

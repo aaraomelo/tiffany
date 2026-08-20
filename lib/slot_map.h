@@ -1,23 +1,24 @@
-/* slot_map.h — Regiões fixas de slots no .mem do banco (16 bytes por slot).
+/* slot_map.h — Regiões fixas: 1 byte = 1 slot (Word_8).
  *
- * Partilhado entre banco/sql.c, lib/rt_cf_slot.h e medidores. O mapa completo do SQL
- * continua em sql.c; aqui ficam só as fronteiras que a lib precisa de saber. */
+ * FC: meta em DOIS slots (sinal, n); depois cada a_k em DOIS slots (Word_8², a Word
+ * da ISA); flag no fim. O termo é um PAR de átomos porque um quociente não cabe num
+ * átomo — e o que não cabe no par acende `saturou` em vez de enrolar. */
 #ifndef SLOT_MAP_H
 #define SLOT_MAP_H
+
+#include "slot_mem.h"
 
 #ifndef RT_CF_MAX
 #define RT_CF_MAX 48
 #endif
 
-/* Fração contínua (acumulador thm:operador): entre S_VIVO (≤1023) e S_LIN (4096).
- * Cada palavra: meta + até RT_CF_MAX termos + flag saturou = S_CF_STRIDE slots. */
 #define S_CF         2048u
-#define S_CF_STRIDE  (RT_CF_MAX + 2u)
+/* sinal + n + RT_CF_MAX termos de DOIS átomos + flag */
+#define S_CF_STRIDE  (2u * RT_CF_MAX + 3u)
 #define S_CF_WORDS   8u
 #define S_CF_END     (S_CF + S_CF_WORDS * S_CF_STRIDE)
 
-/* Tamanho mínimo do .mem para a região FC (medidores locais). O sql.c usa mapa maior. */
-#define S_CF_MEM_BYTES  ((unsigned long)S_CF_END * 16u)
+#define S_CF_MEM_BYTES  ((unsigned long)S_CF_END * (unsigned long)SLOT_WORD_BYTES)
 
 static inline unsigned cf_slot_base(unsigned word_ix){
     return (unsigned)(S_CF + word_ix * S_CF_STRIDE);

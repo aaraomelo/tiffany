@@ -188,7 +188,7 @@ static int secao3(void) {
     vis3=calloc((size_t)MN,1); if (!vis3){ printf("     (sem memória)\n"); return 1; }
     caminhos=0; violapar=0; capado=0;
     int exaustivo = (MN<=16);
-    TETO_CAM = exaustivo ? (long)1e18 : 200000;
+    TETO_CAM = exaustivo ? 1000000000000000000L : 200000;
     TETO_PROF = exaustivo ? (int)MN : 40;
     vis3[0]=1; dfs(0,0);
     /* o par (§7): em profundidade prof há prof cisões e prof memórias; o centro 0

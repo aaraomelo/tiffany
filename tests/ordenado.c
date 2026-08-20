@@ -264,6 +264,6 @@ int main(void){
            mal == 0 && cas == 100 && cresce > 80);
     }
 
-    printf("\n=== %ld asserções, %ld falhas ===\n", unidades, falhas);
+    printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

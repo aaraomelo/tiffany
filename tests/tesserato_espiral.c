@@ -125,8 +125,8 @@ printf("\n§E4  CARTESIANO e POLAR: o mesmo percurso nos dois retratos.\n\n");
     /* polar: 16 passos de 1/16 fecham 1 volta — o índice, não a soma de 2π */
     isa_word(ISA_S_A, 1, 0);
     for(int k = 0; k < 4; k++) isa_MOVE(ISA_S_ESQUILO, 1);
-    long t, e; isa_read(ISA_S_A, &t, &e);
-    printf("      …\n\n      ciclo no INDICE: NV ≡ 0 (mod NV); ESQUILO^4 = I: (%ld,%ld)\n\n", t, e);
+    int t, e; isa_read(ISA_S_A, &t, &e);
+    printf("      …\n\n      ciclo no INDICE: NV ≡ 0 (mod NV); ESQUILO^4 = I: (%d,%d)\n\n", t, e);
     ok("o percurso fecha no INDICE: NV passos voltam, os NV-1 intermedios nao."
        " ESQUILO^4 = I no disco ISA — a volta polar sem 2π em double",
        volta_no_fim && nao_volta_antes == NV - 1 && t == 1 && e == 0);

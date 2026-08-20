@@ -210,7 +210,7 @@ printf("\n§G4  O banco distribuído: cada um responde, na mesma banda.\n\n");
         }
     }
     clock_gettime(CLOCK_MONOTONIC, &t1);
-    long us = (t1.tv_sec-t0.tv_sec)*1e6 + (t1.tv_nsec-t0.tv_nsec)/1e3;
+    long us = (t1.tv_sec-t0.tv_sec)*1000000L + (t1.tv_nsec-t0.tv_nsec)/1000L;
     printf("      pergunta emitida uma vez; %d banco(s) aceitaram faixa, em %ld us\n",
            respostas, us);
     ok("o trabalho reparte-se sem coordenador: cada um pega na sua faixa", respostas == n);

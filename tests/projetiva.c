@@ -233,7 +233,7 @@ int main(void){
            recusou == deg && aceitou == boas && colisoes == 0 && vistos > 50);
     }
 
-    printf("\n=== %ld asserções, %ld falhas, %ld estouros ===\n",
+    printf("\n=== %d asserções, %d falhas, %ld estouros ===\n",
            unidades, falhas, pj_estouros);
     return falhas ? 1 : 0;
 }

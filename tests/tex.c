@@ -1593,8 +1593,9 @@ int main(int argc, char **argv){
                com_curva != com_tabela);
             printf("     -> a mesma linha: %ld pela curva, %ld pela tabela. Diferenca de %ld milesimos\n",
                    com_curva, com_tabela, labs(com_curva - com_tabela));
-            printf("        de em (%.2f%%) — e num paragrafo inteiro e onde a linha quebra.\n",
-                   100.0*labs(com_curva - com_tabela)/com_tabela);
+            printf("        de em (%ld,%02ld%%) — e num paragrafo inteiro e onde a linha quebra.\n",
+                   10000*labs(com_curva - com_tabela)/com_tabela/100,
+                   10000*labs(com_curva - com_tabela)/com_tabela%100);
             puts("");
         }
     }

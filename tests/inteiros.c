@@ -204,18 +204,18 @@ int main(void){
         int pol_ok = 1;
         for(uint16_t s = 250; s <= 260; s++){
             uint8_t w = w8_proj_wrap(s);
-            uint8_t t = w8_proj_sat(s);
+            uint16_t t = w8_proj_sat(s);           /* saturo→promove: exacto */
             uint8_t ew = (uint8_t)s;
-            uint8_t et = (s <= 255u) ? (uint8_t)s : 255;
-            if(w != ew || t != et) pol_ok = 0;
+            if(w != ew || t != s) pol_ok = 0;
         }
-        ok("§NT11 W_8: cruz exacta em uint16; wrap≠sat; w8_wrap/w8_saturou contados",
+        ok("§NT11 W_8: cruz exacta em uint16; wrap≠promove; w8_wrap/w8_saturou contados",
            eq_tot > 0 && eq_ok == eq_tot && pol_ok
            && w8_wrap == 5 && w8_saturou == 5);
         {
-            uint8_t w300 = w8_proj_wrap(300), s300 = w8_proj_sat(300);
-            ok("§NT11b projeções 300: wrap=44, sat=255; contadores incrementam",
-               w300 == 44 && s300 == 255 && w8_wrap == 6 && w8_saturou == 6);
+            uint8_t w300 = w8_proj_wrap(300);
+            uint16_t s300 = w8_proj_sat(300);
+            ok("§NT11b projeções 300: wrap=44, promove=300; contadores incrementam",
+               w300 == 44 && s300 == 300 && w8_wrap == 6 && w8_saturou == 6);
         }
     }
 

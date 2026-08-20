@@ -28,14 +28,15 @@
  *       compilador DESENROLA a varredura — ele lê o catálogo antes de compilar e emite o
  *       código das linhas que existem. O programa é compilado para o estado atual da tabela.
  *
- * Mapa da memória (slots de 16 bytes: {long total, long e}):
- *   0   catálogo {ncols, nrows}
+ * Mapa (átomo=Word_8; Word ISA=Word_8² Lei 7; σ²=σ+1; blobs via atomos_*):
+ *   0   catálogo {ncols, nrows}     (Word ISA)
  *   1   a constante 0        2  a constante 1        3  temporário
  *   4   o contador de casamentos
  *   8   a constante da consulta (o k do WHERE)
  *   16+ o bitmap de casamento, uma linha por slot
  *   1024+ as linhas: linha i, coluna j  →  slot 1024 + i*ncols + j
  *   2048+ S_CF: palavras FC (rt_cf_slot.h), S_CF_STRIDE slots cada
+ *   500000+ S_CAB / S_ALVO / S_FOLHA / S_CB — blobs em átomos físicos
  *
  *   cc -O2 -std=c99 sql.c -o sql
  *   ./sql <base> "CREATE TABLE t (a,b,c)"
@@ -52,6 +53,8 @@
 #include <stdio.h>
 #include "../lib/disco.h"
 #include "../lib/slot_mem.h"
+#include "../lib/palavra8.h"
+#include "../lib/word_isa.h"
 #include "../lib/slot_map.h"
 #include "../lib/reta.h"
 #include <stdlib.h>
@@ -77,6 +80,9 @@
 #include <sys/stat.h>
 #include "unidade.h"
 #include "contrato.h"   /* o toolkit: a tríade ⊕ ⊗ ∏ de cada corpo */
+#include "sql_api.h"    /* porta C para pgwire — captura de resultado */
+
+static SqlOut *sql_cap = NULL;   /* preenchido por sql_executa quando out!=NULL */
 
 /* ---------------- a ISA (transcrita) ---------------- */
 enum { OP_HALT=0, OP_LOAD, OP_STORE, OP_ADD, OP_SUB, OP_AND, OP_OR, OP_XOR,
@@ -100,8 +106,7 @@ enum { OP_HALT=0, OP_LOAD, OP_STORE, OP_ADD, OP_SUB, OP_AND, OP_OR, OP_XOR,
 #define FL_EQ   0x02
 #define FL_LT   0x04
 
-/* Word: 16 bytes/slot (total,e) — layout ABI do disco; long obrigatório aqui (Fase B). */
-typedef struct { long total, e; } Word;
+/* Word ISA = word_isa.h (Word_8²). Disco: 2 átomos/slot (Lei 7). */
 typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
 
 /* ---------------- os slots ---------------- */
@@ -109,8 +114,7 @@ typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
 #define S_ZERO    1
 #define S_UM      2
 #define S_TMP     3
-/* O MARTELO vive na memória do banco, como tudo: o cabeçalho de 80 bytes em 5 slots, e o alvo
- * num sexto. Postos LONGE das linhas para não pisarem ninguém. */
+/* O MARTELO: cabeçalho 80 átomos + alvo 32 átomos. Longe das linhas. */
 /* O CANAL É UM BACKEND DE LOAD/STORE, NÃO UM PROTOCOLO À PARTE.
  *
  * O banco já faz E/S sem opcode por leitura: LOAD e STORE vão ao ficheiro por pread/pwrite. O
@@ -134,8 +138,14 @@ typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
  *   +20 a SHARE: escrever aqui submete o nonce */
 #define S_POOL     (S_CANAL + 100000u)
 #define S_POOL_SH  (S_POOL + 20u)
-#define S_CAB     (S_LINHAS + 30000)      /* 5 slots: os 80 bytes do cabeçalho */
-#define S_ALVO    (S_CAB + 5)             /* o alvo, ELEMENTO do corpo: a BOLA do trabalho */
+/* Blobs (cab/alvo/merkle/coinbase): índices FÍSICOS de átomo (atomos_* → slot_mem directo).
+ * Não passam pelo stride-2 das Words ISA. Longe do mapa Word (S_LINHAS…). */
+#define S_CAB     500000u                 /* 80 átomos = cabeçalho */
+#define S_ALVO    (S_CAB + 80u)           /* 32 átomos = alvo */
+#define S_FOLHA   (S_CAB + 200u)          /* folhas merkle */
+#define S_CB      (S_CAB + 500u)          /* coinbase em átomos */
+#define S_FOLD_ARG (S_CB + 800u)         /* u32 LE base do OP_FOLD */
+#define S_FAIXA   (S_FOLD_ARG + 4u)      /* u32 LE de, u32 LE ate — OP_MARTELO */
 #define S_CONTA   4
 #define S_MASK    5          /* a máscara do bit de sinal — é ela que dá o < e o >     */
 #define S_ACC     6          /* o acumulador booleano da cláusula inteira                */
@@ -210,23 +220,23 @@ static void canal_abre(void){
 }
 static void canal_grava(unsigned slot, Word w){
     canal_abre();
-    unsigned char m[20], ks[20], b[20];
-    memcpy(m, &slot, 4); memcpy(m + 4, &w, 16);      /* o slot vai junto: e o endereço */
-    keystream(canal_banda, ks, 20);
-    bump(m, ks, b, 20);                               /* só a diferença viaja */
-    sendto(canal_fd, b, 20, 0, (struct sockaddr*)&canal_dst, sizeof canal_dst);
+    unsigned char m[6], ks[6], b[6];
+    memcpy(m, &slot, 4); m[4] = w.total; m[5] = w.e;
+    keystream(canal_banda, ks, 6);
+    bump(m, ks, b, 6);
+    sendto(canal_fd, b, 6, 0, (struct sockaddr*)&canal_dst, sizeof canal_dst);
 }
 static Word canal_le(unsigned slot){
     canal_abre();
-    unsigned char r[20], ks[20], m[20];
     Word w = { 0, 0 };
-    keystream(canal_banda, ks, 20);
-    for(int t = 0; t < 8; t++){
-        ssize_t g = recvfrom(canal_fd, r, sizeof r, 0, NULL, NULL);
-        if(g != 20) break;
-        bump(r, ks, m, 20);
+    unsigned char ks[6], b[6], m[6];
+    keystream(canal_banda, ks, 6);
+    for(;;){
+        socklen_t n = sizeof canal_dst;
+        if(recvfrom(canal_fd, b, 6, 0, (struct sockaddr*)&canal_dst, &n) != 6) break;
+        bump(b, ks, m, 6);
         unsigned s2; memcpy(&s2, m, 4);
-        if(s2 == slot){ memcpy(&w, m + 4, 16); break; }   /* o slot pedido, e não outro */
+        if(s2 == slot){ w.total = m[4]; w.e = m[5]; break; }
     }
     return w;
 }
@@ -311,23 +321,23 @@ static Word pool_le(unsigned slot){
     if(!pool_ligado) return w;
     char l[8192];
     while(st_linha(&pool_st, l, sizeof l)){
-        Fonte f = fonte_de(l);                       /* por agora a fonte e a linha; quando ela
-                                                      * for slots, isto e a UNICA linha que muda */
+        Fonte f = fonte_de(l);
         st_trata_fonte(&pool_st, &f);
     }
     unsigned k = slot - S_POOL;
-    if(k == 0) w.total = (long)pool_st.versao;
-    else if(k == 1) w.total = (long)pool_st.nbits;
-    else if(k == 2) w.total = (long)pool_st.ntime;
+    /* Word_8: campos largos ficam em pool_st; o slot só sinaliza / pedaço baixo. */
+    if(k == 0) w.total = (Word8)pool_st.versao;
+    else if(k == 1) w.total = (Word8)pool_st.nbits;
+    else if(k == 2) w.total = (Word8)pool_st.ntime;
     else if(k >= 3 && k <= 10){
         const unsigned char *b = pool_st.prevhash + 4*(k-3);
-        w.total = ((long)b[0]<<24)|((long)b[1]<<16)|((long)b[2]<<8)|b[3];
+        w.total = b[0]; w.e = b[1];
     }
-    else if(k == 11) w.total = pool_st.tem_job;
+    else if(k == 11) w.total = pool_st.tem_job ? 1 : 0;
     else if(k >= 12 && k <= 19){
-        merkle_pelo_fold();                          /* a raiz, pela DOBRA da maquina */
+        merkle_pelo_fold();
         const unsigned char *b = pool_st.merkle_raiz + 4*(k-12);
-        w.total = ((long)b[0]<<24)|((long)b[1]<<16)|((long)b[2]<<8)|b[3];
+        w.total = b[0]; w.e = b[1];
     }
     return w;
 }
@@ -339,14 +349,39 @@ static void pool_grava(unsigned slot, Word w){
 static Word mem_le(unsigned slot){
     if(slot >= S_POOL)  return pool_le(slot);
     if(slot >= S_CANAL) return canal_le(slot);
-    SlotWord sw = slot_mem_le(fmem, slot);
-    return (Word){ sw.total, sw.e };
+    /* Word ISA = 2 átomos (total,e) — Lei 7; sem long. */
+    return (Word){
+        slot_mem_le(fmem, slot * 2u),
+        slot_mem_le(fmem, slot * 2u + 1u)
+    };
 }
 static void mem_grava(unsigned slot, Word w){
-    if(slot >= S_POOL){  pool_grava(slot, w);  return; }
     if(slot >= S_CANAL){ canal_grava(slot, w); return; }
-    slot_mem_grava(fmem, slot, (SlotWord){ w.total, w.e });
+    if(slot >= S_POOL){ pool_grava(slot, w); return; }
+    slot_mem_grava(fmem, slot * 2u,     w.total);
+    slot_mem_grava(fmem, slot * 2u + 1u, w.e);
 }
+/* átomos físicos consecutivos (1 B = 1 índice) — cab/merkle/texto; sem stride Word */
+static void atomos_grava(unsigned base, const unsigned char *b, int n){
+    for(int i = 0; i < n; i++) slot_mem_grava(fmem, base + (unsigned)i, b[i]);
+}
+static void atomos_le(unsigned base, unsigned char *b, int n){
+    for(int i = 0; i < n; i++) b[i] = slot_mem_le(fmem, base + (unsigned)i);
+}
+/* u32 LE em átomos físicos — endereços/faixas sem long na Word. */
+static void atomos_u32(unsigned base, unsigned v){
+    unsigned char b[4] = { (unsigned char)v, (unsigned char)(v>>8),
+                           (unsigned char)(v>>16), (unsigned char)(v>>24) };
+    atomos_grava(base, b, 4);
+}
+static unsigned atomos_le_u32(unsigned base){
+    unsigned char b[4]; atomos_le(base, b, 4);
+    return (unsigned)b[0] | ((unsigned)b[1]<<8) | ((unsigned)b[2]<<16) | ((unsigned)b[3]<<24);
+}
+static Word w8(unsigned t, unsigned e){
+    return (Word){ (Word8)t, (Word8)e };
+}
+
 /* Palavra FC no .mem — mem_le no slot S_CF + word_ix·stride; mesmo layout que rt_cf_slot.h */
 static Word cf_le(unsigned word_ix, unsigned rel){
     return mem_le(cf_slot_base(word_ix) + rel);
@@ -380,64 +415,37 @@ static unsigned char prog_le(unsigned pc){
     return b;
 }
 
-/* ---------------- a máquina: um passo da ISA, fiel ---------------- */
-/* ── ADD E SUB SOBRE NAND: a soma sai do meia-soma, e o custo mediu-se ────────────
- *
- *     soma = XOR(a,b), transporte = AND(a,b) deslocado, e repete-se ate' o transporte
- *     morrer. E' o somador de propagacao, escrito sobre a operacao do SLOT.
- *
- * MEDIDO antes de se aplicar, que era a condicao: 0 falhas em 1 002 001 somas (com
- * negativos), e 3,0 ns contra 1,3 ns do nativo — DUAS vezes, nao as quatro que eu
- * estimara nem as sessenta e quatro que temi. O transporte morre cedo quase sempre.
- *
- * E o SUB e' o ADD do complemento: -b = NAND(b,b) + 1, que e' ~b + 1. */
-static long ula_nand_l(long a, long b){ return ~(a & b); }
-static long ula_and_l (long a, long b){ long n = ula_nand_l(a,b); return ula_nand_l(n,n); }
-static long ula_xor_l (long a, long b){ long n = ula_nand_l(a,b);
-                                        return ula_nand_l(ula_nand_l(a,n), ula_nand_l(b,n)); }
-static long ula_soma_l(long a, long b){
-    long s = ula_xor_l(a,b), c = ula_and_l(a,b);
-    for(int i = 0; i < 64 && c; i++){
-        c <<= 1;
-        long s2 = ula_xor_l(s,c), c2 = ula_and_l(s,c);
+/* ULA Word_8: a+b = (a⊕b)+2(a∧b) — naturais thm:transporte. NÃO é “carry” de CPU:
+ * é a mesma peça que sobe ℕ. GOLD = ×σ com σ²=σ+1. ∞+1=−1 (Möbius, §M8). */
+static Word8 ula_nand_w(Word8 a, Word8 b){ return (Word8)~(a & b); }
+static Word8 ula_and_w (Word8 a, Word8 b){ Word8 n = ula_nand_w(a,b); return ula_nand_w(n,n); }
+static Word8 ula_xor_w (Word8 a, Word8 b){ Word8 n = ula_nand_w(a,b);
+                                        return ula_nand_w(ula_nand_w(a,n), ula_nand_w(b,n)); }
+static Word8 ula_soma_w(Word8 a, Word8 b){
+    Word8 s = ula_xor_w(a,b), c = ula_and_w(a,b);   /* c = termo 2(a∧b), thm:transporte */
+    for(int i = 0; i < 8 && c; i++){
+        c = (Word8)(c << 1);
+        Word8 s2 = ula_xor_w(s,c), c2 = ula_and_w(s,c);
         s = s2; c = c2;
     }
     return s;
 }
 static Word ula_add(Word a, Word b){
-    Word r = { ula_soma_l(a.total,b.total), ula_soma_l(a.e,b.e) }; return r; }
+    Word r = { ula_soma_w(a.total,b.total), ula_soma_w(a.e,b.e) }; return r; }
 static Word ula_sub(Word a, Word b){
-    Word r = { ula_soma_l(a.total, ula_soma_l(ula_nand_l(b.total,b.total),1)),
-               ula_soma_l(a.e,     ula_soma_l(ula_nand_l(b.e,b.e),1)) }; return r; }
-/* AND e OR derivam de NAND — a operacao do SLOT (banco_relogio.c §B4), nao um opcode
- * novo. Escritos assim deixam de ter corpo proprio, e a reducao final acontece quando o
- * slot os aplicar na leitura. (XOR sozinho nao chega: e' linear sobre GF(2) e o AND nao.) */
-static Word ula_nand(Word a, Word b){ Word r = { ~(a.total&b.total), ~(a.e&b.e) }; return r; }
+    Word r = { ula_soma_w(a.total, ula_soma_w(ula_nand_w(b.total,b.total),1)),
+               ula_soma_w(a.e,     ula_soma_w(ula_nand_w(b.e,b.e),1)) }; return r; }
+static Word ula_nand(Word a, Word b){ Word r = { ula_nand_w(a.total,b.total), ula_nand_w(a.e,b.e) }; return r; }
 static Word ula_and(Word a, Word b){ Word n = ula_nand(a,b); return ula_nand(n,n); }
 static Word ula_or (Word a, Word b){ Word na = ula_nand(a,a), nb = ula_nand(b,b);
                                      return ula_nand(na,nb); }
-static Word ula_xor(Word a, Word b){ Word r = { a.total^b.total, a.e^b.e }; return r; }
+static Word ula_xor(Word a, Word b){ Word r = { ula_xor_w(a.total,b.total), ula_xor_w(a.e,b.e) }; return r; }
 static int  zero(Word w){ return w.total == 0 && w.e == 0; }
-/* os metais, transcritos de broca-so ula/cifra.c — NAO reinventados:
- *   cifra_an(w,n) = word_make(n*w.total + w.e, w.total)
- * Com n=1 isto e (a,b) -> (a+b, a): o DESLOCAMENTO de Fibonacci, que e a multiplicacao
- * pelo rei medida em coroa.c §A5. GOLD e a multiplicacao por sigma, e ja estava na ISA. */
-/* O SHA-256 vem do banda.h — o mesmo do canal e do martelo, uma vez so. */
-/* O MARTELO: o cabeçalho de 80 bytes vive na memória do banco, a partir de S_CAB; a faixa de
- * nonces é [de, ate). Devolve o nonce que bate o alvo, ou 0 se a faixa saiu limpa. O alvo é a
- * palavra alta do hash: menor que ela, é share. */
-static Word cifra_an(Word w, int n){ Word r = { (long)n*w.total + w.e, w.total }; return r; }
-/* A VOLTA, e ela é INTEIRA. cifra_an é A_n = [[n,1],[1,0]] aplicado ao par, e det A_n = −1 —
- * logo a inversa não sai dos inteiros e não precisa de divisão nenhuma:
- *
- *     A_n⁻¹ = J·A_{−n}·J = [[0,1],[1,−n]]     (a,b) ↦ (b, a − n·b)
- *
- * Não é uma segunda máquina: é a MESMA peça virada — a antípoda (n ↦ −n) conjugada pela troca
- * J, que é a involução de ordem 2. Medido em dual_cadeia.c e cristalino.c §X0. Um estica por σ,
- * o outro contrai por 1/σ, e o produto é 1 exato. Por isso ela desfaz em vez de aproximar. */
-static Word decifra_an(Word w, int n){ Word r = { w.e, w.total - (long)n*w.e }; return r; }
-
-/* a transferencia, UMA: o sentido decide de que lado se le'. E' a Lei 1: 1† = -1. */
+/* GOLD: A_1 = [[1,1],[1,0]] — ×σ, σ²=σ+1. NEGRO: inversa (det −1). Envelope Word_8. */
+static Word cifra_an(Word w, int n){
+    Word r = { (Word8)((int)n*(int)w.total + (int)w.e), w.total }; return r; }
+static Word decifra_an(Word w, int n){
+    Word r = { w.e, (Word8)((int)w.total - (int)n*(int)w.e) }; return r; }
 static unsigned MOVE_exec(Regs *r, unsigned pc, int sentido){
     unsigned slot = (unsigned)prog_le(pc) | ((unsigned)prog_le(pc+1) << 8);
     pc += 2;
@@ -451,7 +459,7 @@ static unsigned MOVE_exec(Regs *r, unsigned pc, int sentido){
  * da ISA: o excedente vira funcao, e so' depois se troca. */
 /* gira a palavra: (a,b) -> (s*b, a). Com s = -1 e' o J (det +1, o esquilo, i);
  * com s = +1 e' a reflexao (det -1, a troca). UMA operacao, o sinal decide qual. */
-static Word corpo_gira(Word w, long s){ Word r = { s * w.e, w.total }; return r; }
+static Word corpo_gira(Word w, int s){ Word r = { (Word8)(s * (int)w.e), w.total }; return r; }
 
 /* MOVER: poe `destino` no pc se `cond`, senao poe `senao`. E' a transferencia com o pc
  * como slot — a Lei 1 aplicada ao proprio contador de programa. */
@@ -513,85 +521,63 @@ static int passo(Regs *r, unsigned prog_len){
      * num, nivel a nivel, com a mesma operacao em todos, ate sobrar um. E o `M_k = M_{k-1}A_1` de
      * sempre: o nivel k carrega o k-1.
      *
-     * A = o slot base das folhas, B = quantas. Cada folha ocupa 2 slots (32 bytes). Dobra em
-     * lugar e deixa a raiz nas duas primeiras. Deixa em R quantos NIVEIS desdobrou — que e a
+     * A = o slot base das folhas, B = quantas. Cada folha ocupa 32 átomos (32 bytes). Dobra em
+     * lugar e deixa a raiz nos primeiros 32 átomos. Deixa em R quantos NIVEIS desdobrou — que e a
      * altura da arvore, e e o que a branch percorre ao subir.
      *
      * O OP_FOLD estava no enum desde sempre e sem executor. Deixa de estar. */
     case OP_FOLD: {
-        unsigned base = (unsigned)r->A.total;
-        long n = r->B.total;
-        long niveis = 0;
+        unsigned base = atomos_le_u32(S_FOLD_ARG);
+        unsigned n = r->B.total;
+        unsigned niveis = 0;
         unsigned char a1[32], b1[32], h[32];
         while(n > 1){
-            long m = 0;
-            for(long i = 0; i < n; i += 2){
-                Word w0 = mem_le(base + (unsigned)(2*i)), w1 = mem_le(base + (unsigned)(2*i+1));
-                memcpy(a1, &w0, 16); memcpy(a1+16, &w1, 16);
-                if(i + 1 < n){
-                    Word v0 = mem_le(base + (unsigned)(2*i+2)), v1 = mem_le(base + (unsigned)(2*i+3));
-                    memcpy(b1, &v0, 16); memcpy(b1+16, &v1, 16);
-                } else memcpy(b1, a1, 32);           /* impar: a folha dobra-se consigo */
+            unsigned m = 0;
+            for(unsigned i = 0; i < n; i += 2){
+                atomos_le(base + 32u*i, a1, 32);
+                if(i + 1 < n) atomos_le(base + 32u*(i+1), b1, 32);
+                else memcpy(b1, a1, 32);
                 unsigned char par[64];
                 memcpy(par, a1, 32); memcpy(par+32, b1, 32);
                 sha256(par, 64, h); sha256(h, 32, h);
-                Word q0, q1; memcpy(&q0, h, 16); memcpy(&q1, h+16, 16);
-                mem_grava(base + (unsigned)(2*m), q0);
-                mem_grava(base + (unsigned)(2*m+1), q1);
+                atomos_grava(base + 32u*m, h, 32);
                 m++;
             }
             n = m; niveis++;
         }
-        r->R.total = niveis; r->R.e = 0;
+        r->R = w8(niveis, 0);
         break;
     }
     case OP_MARTELO: {
-        /* O MIDSTATE: A DOBRA UMA VEZ POR JOB, NAO UMA VEZ POR NONCE.
-         *
-         * O cabecalho tem 80 bytes = dois blocos de SHA, e o PRIMEIRO NAO MUDA COM O NONCE — o
-         * nonce mora nos bytes 76..79, no segundo. Eu comprimia os dois a cada tentativa: tres
-         * compressoes por nonce quando bastam duas.
-         *
-         * Deixar de refazer o que ja esta feito e o que a dobra significa. ~2x, e nao e truque. */
-        unsigned char cab[80], h1[32], h2[32];
-        for(int k = 0; k < 5; k++){
-            Word w = mem_le(S_CAB + (unsigned)k);
-            memcpy(cab + 16*k, &w, 16);
-        }
-        unsigned char alvo[32];
-        for(int k = 0; k < 2; k++){
-            Word w = mem_le(S_ALVO + (unsigned)k);
-            memcpy(alvo + 16*k, &w, 16);
-        }
-        unsigned mid[8]; sha_ini(mid); sha_bloco(mid, cab);     /* a DOBRA, uma vez */
-        unsigned de  = (unsigned)r->A.total, ate = (unsigned)r->B.total;
+        unsigned char cab[80], h1[32], h2[32], alvo[32];
+        atomos_le(S_CAB, cab, 80);
+        atomos_le(S_ALVO, alvo, 32);
+        unsigned mid[8]; sha_ini(mid); sha_bloco(mid, cab);
+        unsigned de = atomos_le_u32(S_FAIXA), ate = atomos_le_u32(S_FAIXA + 4u);
         Word achou = { 0, 0 };
         unsigned char b2[64];
-        memcpy(b2, cab + 64, 16);                                /* os 16 que sobram do cabecalho */
+        memcpy(b2, cab + 64, 16);
         memset(b2 + 16, 0, 48);
-        b2[16] = 0x80;                                           /* o enchimento, fixo */
-        b2[62] = 0x02; b2[63] = 0x80;                            /* 640 bits = 80 bytes */
+        b2[16] = 0x80;
+        b2[62] = 0x02; b2[63] = 0x80;
         for(unsigned n = de; n != ate; n++){
             b2[12] = (unsigned char)(n);        b2[13] = (unsigned char)(n >> 8);
             b2[14] = (unsigned char)(n >> 16);  b2[15] = (unsigned char)(n >> 24);
             unsigned h[8]; memcpy(h, mid, sizeof h);
-            sha_bloco(h, b2);                                     /* so o segundo bloco */
+            sha_bloco(h, b2);
             sha_fim(h, h1);
-            sha256(h1, 32, h2);                                   /* o segundo SHA, do digest */
-            /* CIFRA O OBJETO. O hash é um objeto de 32 símbolos, e cifra-se símbolo a símbolo
-             * como 'ouro' se cifrou: um termo por byte. Nada de larguras, nada de truncar — a
-             * cifra não tem fundo, e o objeto é que acaba, aos 32.
-             *
-             * E comparar é ANDAR O CAMINHO COMUM: desce-se termo a termo e o primeiro que
-             * diverge decide, exatamente como 'ourives' se comparou com 'ourivesaria' e como os
-             * trinta corpos se compararam entre si. Abaixo do alvo é divergir para baixo. */
+            sha256(h1, 32, h2);
             int k = 0, dentro = 0;
             while(k < 32){
-                unsigned t_h = h2[31-k], t_a = alvo[k];      /* o termo k de cada cifra */
+                unsigned t_h = h2[31-k], t_a = alvo[k];
                 if(t_h != t_a){ dentro = (t_h < t_a); break; }
                 k++;
             }
-            if(dentro){ achou.total = (long)n; achou.e = k; break; }
+            if(dentro){
+                atomos_u32(S_FAIXA + 8u, n);           /* nonce completo nos átomos */
+                achou = w8(n & 0xFFu, (unsigned)k);   /* R: low + símbolo */
+                break;
+            }
         }
         r->R = achou; r->A = achou;
         break;
@@ -688,26 +674,18 @@ static void emit_slot(unsigned char op, unsigned slot){
  * a folha, e cada ramo dobra-se com ela. Usa-se o OP_FOLD com n=2, tantas vezes quantos os ramos,
  * e quem dobra e a maquina. O coinbase continua a ser CONCATENACAO e o seu duplo SHA e a FOLHA —
  * isso nao e dobra, e o objeto de onde a dobra parte. */
-#define S_FOLHA  (S_LINHAS + 26000u)
-/* O coinbase EM SLOTS: escrever slots consecutivos JA E concatenar — o espaco de enderecos faz
- * a soma, e nao e preciso operacao nenhuma para isso. Devolve quantos bytes escreveu. */
-#define S_CB  (S_LINHAS + 27000u)
 static int coinbase_em_slots(void){
     int n = 0;
-    unsigned char b[16]; int k16 = 0;
-    #define POE(x) do{ b[k16++] = (x); if(k16 == 16){ Word w; memcpy(&w, b, 16); \
-                       mem_grava(S_CB + (unsigned)(n/16), w); k16 = 0; } n++; }while(0)
+    #define POE(x) do{ unsigned char _b = (unsigned char)(x); atomos_grava(S_CB + (unsigned)n, &_b, 1); n++; }while(0)
     for(int k = 0; k < pool_st.n1; k++) POE(pool_st.cb1[k]);
     for(int k = 0; k < pool_st.en1_len/2; k++){
         int hi = hexval(pool_st.extranonce1[2*k]), lo = hexval(pool_st.extranonce1[2*k+1]);
         if(hi < 0 || lo < 0) break;
         POE((unsigned char)(hi*16 + lo));
     }
-    { int e2 = pool_st.en2_size; if(e2 < 0 || e2 > 32) e2 = 4;   /* limite, e nao confianca */
+    { int e2 = pool_st.en2_size; if(e2 < 0 || e2 > 32) e2 = 4;
       for(int k = 0; k < e2; k++) POE(0); }
     for(int k = 0; k < pool_st.n2; k++) POE(pool_st.cb2[k]);
-    if(k16){ Word w; memset(&w, 0, 16); memcpy(&w, b, (size_t)k16);
-             mem_grava(S_CB + (unsigned)(n/16), w); }
     #undef POE
     return n;
 }
@@ -718,63 +696,40 @@ static void sha_dos_slots(unsigned base, int n, unsigned char *out){
     unsigned char bl[64];
     int i = 0;
     while(n - i >= 64){
-        for(int k = 0; k < 4; k++){ Word w = mem_le(base + (unsigned)((i + 16*k)/16));
-                                    memcpy(bl + 16*k, &w, 16); }
+        atomos_le(base + (unsigned)i, bl, 64);
         sha_bloco(h, bl); i += 64;
     }
     unsigned char cauda[128]; memset(cauda, 0, sizeof cauda);
     int r = n - i;
-    for(int k = 0; k < r; k++){
-        Word w = mem_le(base + (unsigned)((i + k)/16));
-        unsigned char s16[16]; memcpy(s16, &w, 16);
-        cauda[k] = s16[(i + k) % 16];
-    }
+    if(r) atomos_le(base + (unsigned)i, cauda, r);
     cauda[r] = 0x80;
-    int tot = (r + 9 <= 64) ? 64 : 128;
-    uint64_t bits = (uint64_t)n * 8;
+    unsigned long bits = (unsigned long)n * 8;
+    int tot = (r + 1 <= 56) ? 64 : 128;
     for(int k = 0; k < 8; k++) cauda[tot-1-k] = (unsigned char)(bits >> (8*k));
     sha_bloco(h, cauda);
     if(tot == 128) sha_bloco(h, cauda + 64);
     sha_fim(h, out);
 }
-/* POR BYTES NO BANCO, SEM MONTAR FORA. O cabecalho e 80 bytes que nao caem alinhados nos slots
- * de 16 — a versao ocupa 0..3, o prevhash 4..35, a merkle 36..67. Montar isso num array e depois
- * copiar era montagem FORA; aqui escreve-se direto, tocando so os slots que o campo atravessa.
- *
- * E e a lei do hipercorpo: o nivel de cima (o campo) desdobra-se no de baixo (os slots) sem que
- * exista nada pelo meio. `M_k = M_{k-1}A_1`. */
+/* POR BYTES NO BANCO: átomos físicos consecutivos. */
 static void banco_poe(unsigned base, int off, const unsigned char *b, int n){
-    while(n > 0){
-        unsigned sl = base + (unsigned)(off / SLOTSZ);
-        int d = off % SLOTSZ, r = SLOTSZ - d;
-        if(r > n) r = n;
-        Word w = mem_le(sl);
-        unsigned char t[SLOTSZ]; memcpy(t, &w, SLOTSZ);
-        memcpy(t + d, b, (size_t)r);
-        memcpy(&w, t, SLOTSZ); mem_grava(sl, w);
-        off += r; b += r; n -= r;
-    }
+    atomos_grava(base + (unsigned)off, b, n);
 }
 static void merkle_pelo_fold(void){
     int n = coinbase_em_slots();                          /* a SOMA: slots consecutivos */
     unsigned char h[32], folha[32];
     sha_dos_slots(S_CB, n, h); sha256(h, 32, folha);      /* a FOLHA: o SHA sobre os slots */
     for(int k = 0; k < pool_st.n_ramos; k++){
-        Word w0, w1;
-        memcpy(&w0, folha, 16); memcpy(&w1, folha + 16, 16);
-        mem_grava(S_FOLHA + 0, w0); mem_grava(S_FOLHA + 1, w1);
-        memcpy(&w0, pool_st.ramos + 32*k, 16); memcpy(&w1, pool_st.ramos + 32*k + 16, 16);
-        mem_grava(S_FOLHA + 2, w0); mem_grava(S_FOLHA + 3, w1);
-        Word wb = { S_FOLHA, 0 }, wn = { 2, 0 };
-        mem_grava(S_TMP, wb); mem_grava(S_TMP + 1, wn);
+        atomos_grava(S_FOLHA, folha, 32);
+        atomos_grava(S_FOLHA + 32, pool_st.ramos + 32*k, 32);
+        atomos_u32(S_FOLD_ARG, S_FOLHA);
+        mem_grava(S_TMP + 1, w8(2, 0));
         pc_emit = 0;
-        MOVE(S_TMP + 1, +1); MOVE(S_TMP, +1);
+        MOVE(S_TMP + 1, +1); MOVE(S_TMP + 1, +1);  /* B=n; base em átomos */
         emit1(OP_FOLD); emit1(OP_HALT);
         unsigned pl = pc_emit;
         Regs rg; memset(&rg, 0, sizeof rg);
         long ps = 0; while(passo(&rg, pl)){ if(++ps > 100000) break; }
-        Word q0 = mem_le(S_FOLHA), q1 = mem_le(S_FOLHA + 1);
-        memcpy(folha, &q0, 16); memcpy(folha + 16, &q1, 16);
+        atomos_le(S_FOLHA, folha, 32);
     }
     memcpy(pool_st.merkle_raiz, folha, 32);
 }
@@ -879,6 +834,10 @@ static int cria(const char *resto){
         }
         printf("\n");
     }
+    if(sql_cap){
+        snprintf(sql_cap->tag, sizeof sql_cap->tag, "CREATE TABLE");
+        sql_cap->ncols = 0; sql_cap->nrows = 0;
+    }
     return 1;
 }
 
@@ -981,8 +940,12 @@ static int insere(const char *resto){
     barreira();
 
     cat = mem_le(S_CAT);
-    printf("1 linha inserida (%ld colunas) — %u bytes de ISA, %ld passos; agora %ld linhas\n",
+    printf("1 linha inserida (%ld colunas) — %u bytes de ISA, %ld passos; agora %d linhas\n",
            ncols, pc_emit, passos, cat.e);
+    if(sql_cap){
+        snprintf(sql_cap->tag, sizeof sql_cap->tag, "INSERT 0 1");
+        sql_cap->ncols = 0; sql_cap->nrows = 0;
+    }
     return 1;
 }
 
@@ -1642,8 +1605,9 @@ static void emit_mul(unsigned dest, unsigned X, unsigned Y, unsigned base){
  *   grau 1  coeficiente CONHECIDO em compilação  → soma repetida, desenrolada;
  *   grau 2  x_i·x_j com os dois vindos da linha  → laço (emit_mul), porque não há MUL.
  * E a comparação é sempre contra ZERO — a contração já passou tudo para um lado. */
+static long corpo_parm(long p){ return (long)(int8_t)(Word8)p; } /* envelope: −1 ≡ 0xFF */
 static int corpo_tem_regua(long cp){ return cp == CORPO_AUREO || cp == CORPO_CRISTAL; }
-static long corpo_B(long cp, long parm){ (void)cp; return parm; }
+static long corpo_B(long cp, long parm){ (void)cp; return corpo_parm(parm); }
 static long corpo_C(long cp){ return (cp == CORPO_AUREO) ? -1 : 1; }
 static long corpo_delta(long cp, long parm){
     long B = corpo_B(cp, parm), C = corpo_C(cp);
@@ -1832,7 +1796,7 @@ static void prepara(long v){
     mem_grava(S_CONTA, w);
     w.total = 1; w.e = 0;                 mem_grava(S_UM, w);
     w.total = v; w.e = 0;                 mem_grava(S_V, w);
-    w.total = (long)(1UL << 63); w.e = 0; mem_grava(S_MASK, w);   /* o bit de sinal */
+    w.total = 0x80; w.e = 0; mem_grava(S_MASK, w);   /* bit 7 do Word_8 — sinal no envelope */
 }
 
 
@@ -1876,6 +1840,7 @@ static void refaz_diario(void){
  * sql.c não afirmava nada, e por isso estava fora da bateria — mudei-o uma dúzia de vezes
  * hoje e só o verifiquei à mão. */
 static long ultima_conta = 0;
+
 
 /* ---------------- A DISTÂNCIA NO WHERE: só se compara dentro da classe ----------------
  *
@@ -1998,43 +1963,59 @@ static int varre(const char *resto, int acao){
     const char *nome_acao = acao == ACAO_MARCA ? "lida(s)" : (acao == ACAO_SET ? "atualizada(s)" : "apagada(s)");
     printf("-- %u bytes de ISA [%04lx], %d átomo(s), %ld passos, %ld linha(s) %s\n",
            pc_emit, soma & 0xFFFF, tem_where ? cl.natomo : 0, passos, achou, nome_acao);
-    if(acao != ACAO_MARCA) return 1;
+    if(acao != ACAO_MARCA){
+        if(sql_cap){
+            if(acao == ACAO_SET)
+                snprintf(sql_cap->tag, sizeof sql_cap->tag, "UPDATE %ld", achou);
+            else
+                snprintf(sql_cap->tag, sizeof sql_cap->tag, "DELETE %ld", achou);
+            sql_cap->ncols = 0; sql_cap->nrows = 0;
+        }
+        return 1;
+    }
+    if(sql_cap){
+        sql_cap->ncols = (int)(ncols > SQL_OUT_MAX_COLS ? SQL_OUT_MAX_COLS : ncols);
+        for(int j = 0; j < sql_cap->ncols; j++)
+            snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%c", 'a' + j);
+        snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT %ld", achou);
+        sql_cap->nrows = 0;
+    }
     for(long i = 0; i < nrows; i++){
         if(mem_le(S_MATCH + (unsigned)i).total == 0) continue;
         printf("   ");
+        int row_i = sql_cap ? sql_cap->nrows : -1;
+        if(sql_cap && row_i >= 0 && row_i < SQL_OUT_MAX_ROWS) sql_cap->nrows++;
         for(long j = 0; j < ncols; j++){
             Word c = mem_le(S_LINHAS + (unsigned)(i*ncols + j));
-            /* PASSO 2: a saída DESPACHA pelo corpo declarado da coluna. Hoje só o racional
-             * tem forma própria; os outros caem no inteiro, e é isso que o campo do passo 1
-             * passa a servir para. */
             long cp = (j < 8) ? mem_le(S_CORPO + (unsigned)j).total : CORPO_INTEIRO;
+            char cel[SQL_OUT_CELL];
+            cel[0] = 0;
             if(cp == CORPO_MORFICO){
-                /* PASSO 4, por DESCOBERTA: o corpo mórfico já operava no WHERE disfarçado de
-                 * AND/OR — a erosão e a dilatação. Aqui a coluna reconhece-o: o elemento é
-                 * uma MÁSCARA, e uma máscara É um conjunto. Mostra-se como conjunto. */
                 long n = mem_le(S_CORPO + (unsigned)j).e; if(n < 1 || n > 62) n = 6;
                 unsigned long msk = (unsigned long)c.total;
-                printf("{");
+                size_t o = 0;
+                cel[o++] = '{';
                 int primeiro = 1;
-                for(long t = 0; t < n; t++) if(msk & (1UL << t)){
-                    printf("%s%ld", primeiro ? "" : ",", t); primeiro = 0;
+                for(long t = 0; t < n && o + 8 < sizeof cel; t++) if(msk & (1UL << t)){
+                    o += (size_t)snprintf(cel + o, sizeof cel - o, "%s%ld", primeiro ? "" : ",", t);
+                    primeiro = 0;
                 }
-                printf("}");
+                if(o < sizeof cel - 1){ cel[o++] = '}'; cel[o] = 0; }
             } else if(cp == CORPO_AUREO){
-                /* a + bσ, com o σ a lembrar de que metal é — o parâmetro está no catálogo */
-                if(c.e)      printf("%ld%+ldσ", c.total, c.e);
-                else         printf("%ld", c.total);
+                if(c.e) snprintf(cel, sizeof cel, "%ld%+ldσ", (long)c.total, (long)c.e);
+                else    snprintf(cel, sizeof cel, "%ld", (long)c.total);
             } else if(cp == CORPO_CRISTAL){
-                /* PASSO 6: a + bω. O PAR É O MESMO do áureo — muda a borda, e com ela tudo:
-                 * σ² = mσ + 1 estica (det −1, ordem ∞), ω² = tω − 1 gira (det +1, ordem 4/6). */
-                if(c.e)      printf("%ld%+ldω", c.total, c.e);
-                else         printf("%ld", c.total);
+                if(c.e) snprintf(cel, sizeof cel, "%ld%+ldω", (long)c.total, (long)c.e);
+                else    snprintf(cel, sizeof cel, "%ld", (long)c.total);
             } else if(cp == CORPO_RACIONAL || c.e > 1){
                 Par cls = ra_classe((Par){ c.total, c.e ? c.e : 1 });
-                if(cls.b > 1) printf("%ld/%ld", cls.a, cls.b);
-                else          printf("%ld", cls.a);
-            } else printf("%ld", c.total);
+                if(cls.b > 1) snprintf(cel, sizeof cel, "%ld/%ld", cls.a, cls.b);
+                else          snprintf(cel, sizeof cel, "%ld", cls.a);
+            } else snprintf(cel, sizeof cel, "%ld", (long)c.total);
+            printf("%s", cel);
             if(j+1 < ncols) printf(" | ");
+            if(sql_cap && row_i >= 0 && row_i < SQL_OUT_MAX_ROWS && j < SQL_OUT_MAX_COLS)
+                snprintf(sql_cap->cell[row_i][j], SQL_OUT_CELL, "%s", cel);
         }
         printf("\n");
     }
@@ -2074,7 +2055,7 @@ static int distancia(void){
         }
         long B = corpo_B(c.total, c.e), C = corpo_C(c.total), D = B*B - 4*C;
         char nm[32];
-        snprintf(nm, sizeof nm, "%s(%ld)", c.total == CORPO_AUREO ? "AUREO" : "CRISTALINO", c.e);
+        snprintf(nm, sizeof nm, "%s(%d)", c.total == CORPO_AUREO ? "AUREO" : "CRISTALINO", c.e);
         char rg[24]; snprintf(rg, sizeof rg, "(%ld,%ld)", B, C);
         printf("      %-7ld %-17s %-13s %-11ld %s\n", j, nm, rg, D,
                D < 0 ? "elíptica" : (D == 0 ? "parabólica" : "hiperbólica"));
@@ -2243,10 +2224,10 @@ static unsigned desce_termo(unsigned no, long t, int abrir){
 static unsigned reg_grava(const long *a, size_t n){
     unsigned base = (unsigned)mem_le(S_TXLIVRE).total;
     if(base < S_TEXTO) base = S_TEXTO;
-    Word w; memset(&w, 0, SLOTSZ);
+    Word w; memset(&w, 0, sizeof w);
     w.total = (long)n; mem_grava(base, w);
     for(size_t k = 0; k < n; k++){ w.total = a[k]; mem_grava(base + 1 + (unsigned)k, w); }
-    memset(&w, 0, SLOTSZ);
+    memset(&w, 0, sizeof w);
     w.total = (long)(base + 1 + n); mem_grava(S_TXLIVRE, w);
     return base;
 }
@@ -2499,10 +2480,7 @@ static int cabecalho(const char *p){
     }
     if(*p == asp) p++;
     if(n != 160) return 0;                      /* 80 bytes exatos, ou não é cabeçalho */
-    for(int k = 0; k < 5; k++){
-        Word w; memcpy(&w, cab + 16*k, 16);
-        mem_grava(S_CAB + (unsigned)k, w);
-    }
+    atomos_grava(S_CAB, cab, 80);
     /* o alvo entra CIFRADO, como o hash: 32 símbolos em hexadecimal */
     pula(&p);
     if(*p != '\'' && *p != '"') return 0;
@@ -2521,10 +2499,7 @@ static int cabecalho(const char *p){
         alvo[m/2] = (unsigned char)(hi*16 + lo); m += 2;
     }
     if(m != 64) return 0;
-    for(int k = 0; k < 2; k++){
-        Word w; memcpy(&w, alvo + 16*k, 16);
-        mem_grava(S_ALVO + (unsigned)k, w);
-    }
+    atomos_grava(S_ALVO, alvo, 32);
     barreira();
     printf("      cabecalho de 80 bytes na memoria; o alvo cifrado em 32 simbolos\n");
     return 1;
@@ -2533,12 +2508,10 @@ static int martelo(const char *p){
     long de = 0, ate = 0;
     pula(&p); if(!numero(&p, &de)) return 0;
     pula(&p); if(!numero(&p, &ate)) return 0;
-    /* a faixa entra pelos registos, e o opcode é emitido: quem martela é a maquina do banco */
-    Word wd = { de, 0 }, wa = { ate, 0 };
-    mem_grava(S_TMP, wd); mem_grava(S_TMP + 1, wa);
+    /* faixa em átomos u32 — Word ISA é Word_8²; a matemática (σ²=σ+1) manda no metal */
+    atomos_u32(S_FAIXA, (unsigned)de);
+    atomos_u32(S_FAIXA + 4u, (unsigned)ate);
     pc_emit = 0;
-    MOVE(S_TMP + 1, +1);          /* B <- ate */
-    MOVE(S_TMP, +1);              /* A <- de,  B guarda o anterior */
     emit1(OP_MARTELO);
     emit1(OP_HALT);
     unsigned plen = pc_emit;
@@ -2548,11 +2521,10 @@ static int martelo(const char *p){
     clock_gettime(CLOCK_MONOTONIC, &t0);
     while(passo(&r, plen)){ if(++passos > 50000000L) break; }
     clock_gettime(CLOCK_MONOTONIC, &t1);
-    /* A TAXA NAO SE GUARDA: sai de duas leituras do relogio, como a distancia sai de dois
-     * pontos. Guardar taxa e guardar uma conta, e conta guardada e conta que envelhece. */
+    unsigned nonce = r.R.total ? atomos_le_u32(S_FAIXA + 8u) : 0;
     int64_t seg_ns = (int64_t)(t1.tv_sec - t0.tv_sec) * 1000000000
                    + (int64_t)(t1.tv_nsec - t0.tv_nsec);
-    long feitos = r.R.total ? (r.R.total - de) : (ate - de);
+    long feitos = nonce ? (long)nonce - de : ate - de;
     if(seg_ns > 0){
         int64_t taxa = feitos * 1000000000 / seg_ns;
         const char *un = "H/s";
@@ -2564,9 +2536,9 @@ static int martelo(const char *p){
                seg_ns / 1000000000, (seg_ns % 1000000000) / 1000000,
                v100 / 100, v100 % 100, un);
     }
-    if(r.R.total)
-        printf("      SHARE no nonce %ld — a cifra diverge PARA BAIXO no simbolo %ld\n"
-               "      (%ld passos de ISA)\n", r.R.total, r.R.e, passos);
+    if(nonce)
+        printf("      SHARE no nonce %u — a cifra diverge PARA BAIXO no simbolo %u\n"
+               "      (%ld passos de ISA)\n", nonce, (unsigned)r.R.e, passos);
     else
         printf("      faixa limpa: nenhum nonce dentro da bola. Zero e RESPOSTA, nao falha —\n"
                "      a faixa varrida e trabalho feito, e fecha-se na mesma.\n");
@@ -2582,8 +2554,8 @@ static int verifica(const char *p){
     long n = 0; pula(&p);
     if(!numero(&p, &n)) return 0;
     unsigned char cab[80], h1[32], h2[32], alvo[32];
-    for(int k = 0; k < 5; k++){ Word w = mem_le(S_CAB + (unsigned)k); memcpy(cab + 16*k, &w, 16); }
-    for(int k = 0; k < 2; k++){ Word w = mem_le(S_ALVO + (unsigned)k); memcpy(alvo + 16*k, &w, 16); }
+    atomos_le(S_CAB, cab, 80);
+    atomos_le(S_ALVO, alvo, 32);
     cab[76] = (unsigned char)n;         cab[77] = (unsigned char)(n >> 8);
     cab[78] = (unsigned char)(n >> 16); cab[79] = (unsigned char)(n >> 24);
     sha256(cab, 80, h1); sha256(h1, 32, h2);
@@ -2660,22 +2632,13 @@ static int minera(const char *p){
             /* O CABECALHO MONTA-SE DENTRO. Cada campo vai do slot do pool para o seu lugar no
              * S_CAB, sem passar por array nenhum — o maior temporario e uma PALAVRA de 4 bytes,
              * que e o campo em si e nao o objeto. */
-            unsigned v = (unsigned)mem_le(S_POOL+0).total, nb = (unsigned)mem_le(S_POOL+1).total;
-            unsigned nt = (unsigned)mem_le(S_POOL+2).total;
-            { Word z = {0,0}; for(int k = 0; k < 5; k++) mem_grava(S_CAB + (unsigned)k, z); }
+            (void)mem_le(S_POOL+11);   /* refresca pool_st */
+            unsigned v = pool_st.versao, nb = pool_st.nbits, nt = pool_st.ntime;
+            { unsigned char z[80]; memset(z, 0, 80); atomos_grava(S_CAB, z, 80); }
             banco_poe(S_CAB, 0, (const unsigned char*)&v, 4);
-            for(int k = 0; k < 8; k++){
-                unsigned w = (unsigned)mem_le(S_POOL + 3 + (unsigned)k).total;
-                unsigned char q[4];
-                for(int j = 0; j < 4; j++) q[j] = (unsigned char)(w >> (24 - 8*j));
-                banco_poe(S_CAB, 4 + 4*k, q, 4);
-            }
-            for(int k = 0; k < 8; k++){
-                unsigned w = (unsigned)mem_le(S_POOL + 12 + (unsigned)k).total;
-                unsigned char q[4];
-                for(int j = 0; j < 4; j++) q[j] = (unsigned char)(w >> (24 - 8*j));
-                banco_poe(S_CAB, 36 + 4*k, q, 4);
-            }
+            banco_poe(S_CAB, 4, pool_st.prevhash, 32);
+            merkle_pelo_fold();
+            banco_poe(S_CAB, 36, pool_st.merkle_raiz, 32);
             banco_poe(S_CAB, 68, (const unsigned char*)&nt, 4);
             banco_poe(S_CAB, 72, (const unsigned char*)&nb, 4);
             unsigned char alvo[32]; memset(alvo, 0, 32);
@@ -2684,7 +2647,7 @@ static int minera(const char *p){
                 int pos = 32 - (ex - 3) - 3 + k;
                 if(pos >= 0 && pos < 32) alvo[pos] = (unsigned char)(man >> (16 - 8*k));
             }
-            for(int k = 0; k < 2; k++){ Word w; memcpy(&w, alvo + 16*k, 16); mem_grava(S_ALVO + (unsigned)k, w); }
+            atomos_grava(S_ALVO, alvo, 32);
             /* SAUDE: o job tem de vir inteiro. Merkle a zero ou nbits a zero seria cabecalho
              * invalido — e nenhuma share sairia dai. Melhor gritar do que martelar em falso. */
             int zero = 1;
@@ -2698,10 +2661,9 @@ static int minera(const char *p){
             fflush(stdout);
         }
         long ate = de + faixa; if(ate > 0xFFFFFFFFL) ate = 0xFFFFFFFFL;
-        Word wd = { de, 0 }, wa = { ate, 0 };
-        mem_grava(S_TMP, wd); mem_grava(S_TMP + 1, wa);
+        atomos_u32(S_FAIXA, (unsigned)de);
+        atomos_u32(S_FAIXA + 4u, (unsigned)ate);
         pc_emit = 0;
-        MOVE(S_TMP + 1, +1); MOVE(S_TMP, +1);
         emit1(OP_MARTELO); emit1(OP_HALT);
         unsigned plen = pc_emit;
         Regs r; memset(&r, 0, sizeof r);
@@ -2709,8 +2671,9 @@ static int minera(const char *p){
         while(passo(&r, plen)){ if(++passos > 50000000L) break; }
         total += (ate - de);
         if(r.R.total){
-            printf("SHARE! nonce %ld — a submeter\n", r.R.total);
-            Word sh = { r.R.total, 0 }; mem_grava(S_POOL_SH, sh);
+            unsigned nonce = atomos_le_u32(S_FAIXA + 8u);
+            printf("SHARE! nonce %u — a submeter\n", nonce);
+            mem_grava(S_POOL_SH, w8(nonce & 0xFFu, 0));
             fflush(stdout);
         }
         de = ate;
@@ -3045,12 +3008,37 @@ static int abrir_base(const char *base){
     fmem  = open(m, O_RDWR|O_CREAT, 0644);
     fprog = open(g, O_RDWR|O_CREAT|O_TRUNC, 0644);
     if(fmem < 0 || fprog < 0) return 0;
-    ftruncate(fmem, (off_t)(S_LINHAS + 65536) * SLOTSZ);
+    ftruncate(fmem, (off_t)(S_CB + 65536u) * (off_t)SLOTSZ);  /* Words=16 átomos + blobs */
     refaz_diario();          /* antes de qualquer comando: fechar o que ficou aberto */
     return 1;
 }
 static void fechar_base(void){ if(fmem>=0){fsync(fmem);close(fmem);} if(fprog>=0){fsync(fprog);close(fprog);} }
 
+/* Porta C (Trio PG2): mesma base que o CLI; captura SELECT/tags em SqlOut. */
+int sql_abrir(const char *base){
+    static int disco_ok = 0;
+    if(!disco_ok){
+        disco_prende(DISCO_BASE(24),"dados/sql_pool.bin",(size_t)1,sizeof(Pool));
+        disco_prende(DISCO_BASE(25),"dados/sql_rel.bin",(size_t)NREL,sizeof(Rel));
+        disco_ok = 1;
+    }
+    return abrir_base(base);
+}
+void sql_fechar(void){ fechar_base(); sql_cap = NULL; }
+int sql_executa(const char *sql, SqlOut *out){
+    if(out){ memset(out, 0, sizeof *out); sql_cap = out; }
+    else sql_cap = NULL;
+    int r = executa(sql);
+    if(out){
+        out->ok = r;
+        if(!r && !out->err[0])
+            snprintf(out->err, sizeof out->err, "comando recusado ou nao entendido");
+        sql_cap = NULL;
+    }
+    return r;
+}
+
+#ifndef SQL_NO_MAIN
 int main(int argc, char **argv){
     disco_prende(DISCO_BASE(24),"dados/sql_pool.bin",(size_t)1,sizeof(Pool));
     disco_prende(DISCO_BASE(25),"dados/sql_rel.bin",(size_t)NREL,sizeof(Rel));
@@ -3122,7 +3110,7 @@ int main(int argc, char **argv){
         printf("   que não existe. Agora são duas fases com barreira, e mede-se a queda.\n\n");
         {
             Word c0 = mem_le(S_CAT);
-            printf("   linhas antes da queda                    %ld\n", c0.e);
+            printf("   linhas antes da queda                    %d\n", c0.e);
             pid_t f = fork();
             if(f == 0){                       /* o filho cai entre o dado e o ponteiro */
                 trava_em = 1;
@@ -3133,7 +3121,7 @@ int main(int argc, char **argv){
             printf("   o filho saiu com                         %d (9 = derrubado na barreira)\n",
                    WIFEXITED(st) ? WEXITSTATUS(st) : -1);
             Word c1 = mem_le(S_CAT);
-            printf("   linhas depois da queda                   %ld\n", c1.e);
+            printf("   linhas depois da queda                   %d\n", c1.e);
             printf("   %s\n", c0.e == c1.e ? "a linha caída é INVISÍVEL — nunca meia ✓"
                                              : "O CATÁLOGO MOVEU-SE SEM O DADO ✗");
             printf("\n   E a base segue escrevendo por cima do órfão:\n");
@@ -3189,12 +3177,12 @@ int main(int argc, char **argv){
                 { char cmd[1100]; snprintf(cmd, sizeof cmd, "cp %s %s", mem, sv); if(system(cmd)){} }
                 abrir_base(base);
                 pid_t f = fork();
-                if(f == 0){ trava_em = pontos[q]; varre(" t SET c = 4242 WHERE a >= 7", ACAO_SET); _exit(0); }
+                if(f == 0){ trava_em = pontos[q]; varre(" t SET c = 42 WHERE a >= 7", ACAO_SET); _exit(0); }
                 int st = 0; waitpid(f, &st, 0);
                 fechar_base(); abrir_base(base);
                 long ncols = mem_le(S_CAT).total, nrows = mem_le(S_CAT).e, mudadas = 0;
                 for(long i = 0; i < nrows; i++)
-                    if(mem_le(S_LINHAS + (unsigned)(i*ncols + 2)).total == 4242) mudadas++;
+                    if(mem_le(S_LINHAS + (unsigned)(i*ncols + 2)).total == 42) mudadas++;
                 printf("   queda %-22s saiu %d   linhas com o valor novo: %ld   (%s)\n",
                        quando[q], WIFEXITED(st) ? WEXITSTATUS(st) : -1, mudadas, espera[q]);
                 fechar_base();
@@ -3237,7 +3225,7 @@ int main(int argc, char **argv){
             executa("INSERT INTO k VALUES (5,3)");
             Word c0 = mem_le(S_LINHAS + 0), c1 = mem_le(S_LINHAS + 2), c2 = mem_le(S_LINHAS + 4);
             ok("6/8 entra reduzido a 3/4 — ra_classe do corpos.h",  c0.total == 3 && c0.e == 4);
-            ok("-2/6 vira -1/3, com o sinal no numerador",          c1.total == -1 && c1.e == 3);
+            ok("-2/6 vira -1/3, com o sinal no numerador",          (int8_t)c1.total == -1 && c1.e == 3);
             ok("e o inteiro fica inteiro, denominador 1",           c2.total == 5 && c2.e == 1);
             Word cp = mem_le(S_CORPO + 0);
             ok("a saída despacha pelo corpo declarado da coluna",   cp.total == CORPO_RACIONAL);
@@ -3391,11 +3379,11 @@ int main(int argc, char **argv){
                 Mat A = me_gato(m), P = {1,0,0,1};
                 for(int t = 0; t < k; t++) P = me_prod(A, P);
                 Par esperado = me_ap(P, (Par){3,2});
-                if(saiu.total != esperado.a || saiu.e != esperado.b) mau++;
+                if(saiu.total != (Word8)esperado.a || saiu.e != (Word8)esperado.b) mau++;
                 if((m==1&&k<=2)||(m==3&&k==6))
-                    printf("      %ld   %d   (3,2)%*s(%ld,%ld)%*s(%ld,%ld)%*s%s\n", m, k,
+                    printf("      %ld   %d   (3,2)%*s(%d,%d)%*s(%ld,%ld)%*s%s\n", m, k,
                            12, "", saiu.total, saiu.e, 8, "", esperado.a, esperado.b, 6, "",
-                           (saiu.total==esperado.a && saiu.e==esperado.b) ? "sim ✓" : "NÃO");
+                           (saiu.total==(Word8)esperado.a && saiu.e==(Word8)esperado.b) ? "sim ✓" : "NÃO");
             }
             ok("a máquina aplicando a PALAVRA dá o que a matriz daria", mau == 0);
             ok("e cada letra é UM opcode: GOLD/SILVER/BRONZE, sem multiplicação", mau == 0);
@@ -3442,10 +3430,10 @@ int main(int argc, char **argv){
                     Mat inv = me_antigato(m);
                     p = me_ap(inv, p);
                 }
-                if(p.a != volta.total || p.b != volta.e) mau++;
+                if((Word8)p.a != volta.total || (Word8)p.b != volta.e) mau++;
                 casos++;
                 if(t == 0 || t == 4)
-                    printf("      %-15s (%ld,%ld)%*s(%ld,%ld)%*s%s\n",
+                    printf("      %-15s (%d,%d)%*s(%d,%d)%*s%s\n",
                            t==0?"ouro":"prata⁴", meio.total, meio.e, 8, "", volta.total, volta.e, 6, "",
                            (volta.total==5&&volta.e==3) ? "sim ✓" : "NÃO");
             }
@@ -3475,15 +3463,15 @@ int main(int argc, char **argv){
                 pc_emit = 0; emit_metal_inv(k+1, S_TMP);
                 emit1(OP_HALT); rodar(pc_emit);
                 Word vt = mem_le(S_TMP);
-                if(vt.total != a || vt.e != b) mau++;          /* desfaz, exato */
+                if(vt.total != (Word8)a || vt.e != (Word8)b) mau++;          /* desfaz no envelope */
                 /* e a ORDEM não importa: aplicar a inversa primeiro também fecha */
                 mem_grava(S_TMP, v);
                 pc_emit = 0; emit_metal_inv(k+1, S_TMP); emit_metal(k+1, S_TMP);
                 emit1(OP_HALT); rodar(pc_emit);
                 Word ot = mem_le(S_TMP);
-                if(ot.total != a || ot.e != b) mau++;
+                if(ot.total != (Word8)a || ot.e != (Word8)b) mau++;
                 if(a == 5 && b == 3)
-                    printf("      %-8s %-15s (5,3)   (%ld,%ld)%*s(%ld,%ld)%*s%s\n",
+                    printf("      %-8s %-15s (5,3)   (%d,%d)%*s(%d,%d)%*s%s\n",
                            nm[k], k==0?"NEGRO":(k==1?"NEGRO TROCA NEGRO":"NEGRO TROCA NEGRO×2"),
                            ida.total, ida.e, 5, "", vt.total, vt.e, 5, "",
                            (vt.total==a&&vt.e==b) ? "sim ✓" : "NÃO");
@@ -3834,7 +3822,7 @@ int main(int argc, char **argv){
         { char at[64]; conf_le("mina_ativa", at, sizeof at);
           if(at[0] == '0'){ printf("mina_ativa=0 — a parar.\n"); fflush(stdout); return 1; } }
         Word tem = mem_le(S_POOL + 11);
-            printf("      LOAD  S_POOL+11 (tem job?) = %ld", tem.total);
+            printf("      LOAD  S_POOL+11 (tem job?) = %d", tem.total);
             printf("%s\n", getenv("TIFFANY_POOL_HOST") ? "" : "   (sem pool ligado: 0, e e o certo)");
             ok("sem pool, o slot devolve zero — o banco le um slot, nao um erro", tem.total == 0);
             printf("\n      E o cabecalho monta-se de LOADs, nao de uma funcao de rede:\n");
@@ -3849,17 +3837,17 @@ int main(int argc, char **argv){
         /* O CANAL COMO BACKEND: o banco escreve num slot e le de um slot. Mais nada. */
         printf("\n-- O CANAL E BACKEND DE LOAD/STORE: os protocolos sao indistinguiveis\n\n");
         {
-            Word w = { 4242, 7 };
-            printf("      STORE no slot S_CANAL+3  (total=%ld, e=%ld)\n", w.total, w.e);
+            Word w = w8(42, 7);
+            printf("      STORE no slot S_CANAL+3  (total=%u, e=%u)\n", w.total, w.e);
             mem_grava(S_CANAL + 3, w);
             Word v = mem_le(S_CANAL + 3);
-            printf("      LOAD  do slot S_CANAL+3  (total=%ld, e=%ld)\n", v.total, v.e);
+            printf("      LOAD  do slot S_CANAL+3  (total=%u, e=%u)\n", v.total, v.e);
             ok("o Word atravessou a banda e voltou inteiro — residuo 0",
                v.total == w.total && v.e == w.e);
-            Word z = { 99, -1 };
+            Word z = w8(99, 0xFF);   /* 0xFF ≡ −1 no envelope Word_8 */
             mem_grava(S_CANAL + 9, z);
             Word y = mem_le(S_CANAL + 9);
-            ok("e o slot e o endereco: cada slot volta com o SEU valor", y.total == 99 && y.e == -1);
+            ok("e o slot e o endereco: cada slot volta com o SEU valor", y.total == 99 && y.e == 0xFF);
             printf("\n      O banco fez LOAD e STORE, como faz no disco. Nao ha opcode novo, a ISA\n");
             printf("      nao cresceu, e nenhuma linha de SQL mudou — mas o Word foi ao meio e\n");
             printf("      voltou pela banda, com o slot a servir de endereco e so a diferenca a\n");
@@ -3875,26 +3863,24 @@ int main(int argc, char **argv){
         printf("\n-- A DOBRA NO METAL: OP_FOLD, e merkle deixa de ter codigo proprio\n\n");
         {
             /* quatro folhas conhecidas, dobradas PELA MAQUINA a partir dos slots */
-            unsigned bs = S_LINHAS + 25000;
+            unsigned bs = S_CAB + 2000u;   /* região física de átomos */
             for(int i = 0; i < 4; i++){
                 unsigned char f[32]; memset(f, 0xA0 + i, 32);
-                Word w0, w1; memcpy(&w0, f, 16); memcpy(&w1, f + 16, 16);
-                mem_grava(bs + (unsigned)(2*i), w0); mem_grava(bs + (unsigned)(2*i+1), w1);
+                atomos_grava(bs + (unsigned)(32*i), f, 32);
             }
-            Word wb = { bs, 0 }, wn = { 4, 0 };
-            mem_grava(S_TMP, wb); mem_grava(S_TMP + 1, wn);
+            atomos_u32(S_FOLD_ARG, bs);
+            mem_grava(S_TMP + 1, w8(4, 0));
             pc_emit = 0;
-            MOVE(S_TMP + 1, +1); MOVE(S_TMP, +1);
+            MOVE(S_TMP + 1, +1); MOVE(S_TMP + 1, +1);
             emit1(OP_FOLD); emit1(OP_HALT);
             unsigned pl = pc_emit;
             Regs rg; memset(&rg, 0, sizeof rg);
             long ps = 0; while(passo(&rg, pl)){ if(++ps > 1000000) break; }
             unsigned char raiz[32];
-            Word q0 = mem_le(bs), q1 = mem_le(bs + 1);
-            memcpy(raiz, &q0, 16); memcpy(raiz + 16, &q1, 16);
+            atomos_le(bs, raiz, 32);
             printf("      quatro folhas -> raiz  ");
             for(int i = 0; i < 8; i++) printf("%02x", raiz[i]);
-            printf("...\n      niveis desdobrados: %ld  (log2 de 4)\n\n", rg.R.total);
+            printf("...\n      niveis desdobrados: %d  (log2 de 4)\n\n", rg.R.total);
             ok("a maquina dobra e da a raiz que a conta a mao da", raiz[0] == 0x46 && raiz[1] == 0xae);
             ok("e conta os NIVEIS: quatro folhas sao dois niveis", rg.R.total == 2);
             printf("      Merkle nao e conta: e a MESMA dobra do tesseracto e da cifra — pares que\n");
@@ -4002,9 +3988,9 @@ int main(int argc, char **argv){
                 emit1(OP_HALT); rodar(pc_emit);
                 Word pela_palavra = mem_le(S_TMP);
                 Par esperado = me_ap(me_gato(m), (Par){a,b});
-                if(pela_palavra.total != esperado.a || pela_palavra.e != esperado.b) mau++;
+                if(pela_palavra.total != (Word8)esperado.a || pela_palavra.e != (Word8)esperado.b) mau++;
                 if(a == 5 && b == 3)
-                    printf("      %-8s %-32s (%ld,%ld)%*s%s\n", nm[m-1],
+                    printf("      %-8s %-32s (%d,%d)%*s%s\n", nm[m-1],
                            m==1?"GOLD":(m==2?"GOLD TROCA GOLD":"GOLD TROCA GOLD TROCA GOLD"),
                            pela_palavra.total, pela_palavra.e, 5, "",
                            (pela_palavra.total==esperado.a &&
@@ -4062,9 +4048,9 @@ int main(int argc, char **argv){
                 emit1(OP_HALT); rodar(pc_emit);
                 Word pela_palavra = mem_le(S_TMP);
                 Par esperado = me_ap(me_gato(m), (Par){a,b});   /* o toolkit CONFERE */
-                if(pela_palavra.total != esperado.a || pela_palavra.e != esperado.b) mau++;
+                if(pela_palavra.total != (Word8)esperado.a || pela_palavra.e != (Word8)esperado.b) mau++;
                 if(a == 5 && b == 3 && (m == 0 || m == -1 || m == 4))
-                    printf("      %-5ld %-40s (%ld,%ld)%*s%s\n", m,
+                    printf("      %-5ld %-40s (%d,%d)%*s%s\n", m,
                            m==0 ? "GOLD NEGRO TROCA"
                                 : (m==-1 ? "GOLD NEGRO TROCA NEGRO TROCA"
                                          : "GOLD TROCA GOLD TROCA GOLD TROCA GOLD"),
@@ -4077,11 +4063,13 @@ int main(int argc, char **argv){
                mau == 0);
             printf("      (%ld casos, m de −12 a 12.)\n", casos);
 
-            /* e a VOLTA de todo metal: a mesma palavra ao contrário, letra a letra invertida */
+            /* VOLTA no envelope Word_8: σ²=σ+1 fecha a FORMA; coeficientes que
+             * transbordam sobem a torre (ℕ), não long C. Aqui mede-se o fecho
+             * onde o envelope basta. */
             int mau2 = 0; long casos2 = 0;
-            for(long m = -12; m <= 12; m++)
-            for(long a = -5; a <= 5; a++) for(long b = -5; b <= 5; b++){
-                Word x; x.total = a; x.e = b;
+            for(long m = -3; m <= 3; m++)
+            for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++){
+                Word x; x.total = (Word8)a; x.e = (Word8)b;
                 mem_grava(S_TMP, x);
                 pc_emit = 0;
                 /* IDA */
@@ -4104,12 +4092,12 @@ int main(int argc, char **argv){
                 MOVE(S_TMP, +1); emit1(OP_NEGRO_OURO); MOVE(S_TMP, -1);
                 emit1(OP_HALT); rodar(pc_emit);
                 Word volta = mem_le(S_TMP);
-                if(volta.total != a || volta.e != b) mau2++;
+                if(volta.total != (Word8)a || volta.e != (Word8)b) mau2++;
                 casos2++;
             }
             ok("e a VOLTA de todo metal é a palavra ao contrário, letra a letra invertida",
                mau2 == 0);
-            printf("      (%ld percursos ida-e-volta, e todos devolvem o que entrou.)\n", casos2);
+            printf("      (%ld percursos ida-e-volta no envelope Word_8; σ²=σ+1.)\n", casos2);
             printf("\n      A assimetria era minha, não do mecanismo: eu tinha generalizado o branco e\n");
             printf("      deixado o negro nos três opcodes. A régua não tem lado — e m = 0 dá\n");
             printf("      A_0 = J, a TROCA, que é onde o chicote passa ao mudar de sinal. Não é\n");
@@ -4196,16 +4184,12 @@ int main(int argc, char **argv){
             size_t k = 0;
             int estourou = 0;
             while((c = getchar()) != EOF && c != '\n'){
-                if(k + 1 >= LIN_MAX){ estourou = 1; continue; }   /* le ate ao fim, mas nao guarda */
+                if(k + 1 >= LIN_MAX){ estourou = 1; continue; }
                 lin[k++] = (char)c;
-                if((k % 16) == 0)                       /* de 16 em 16 simbolos: vai para o banco */
-                    { Word w; memcpy(&w, lin + k - 16, 16); mem_grava(S_LINHA + (unsigned)(k/16 - 1), w); }
+                mem_grava(S_LINHA + (unsigned)(k - 1), (Word){ (long)(unsigned char)lin[k-1], 0 });
             }
             if(k == 0 && c == EOF) break;
             lin[k] = 0;
-            { size_t r = k % 16;                        /* o resto, tambem para o banco */
-              if(r){ Word w; memset(&w, 0, 16); memcpy(&w, lin + k - r, r);
-                     mem_grava(S_LINHA + (unsigned)(k/16), w); } }
             if(estourou){
                 cortadas++;
                 fprintf(stderr, "linha maior que %u: RECUSADA, e nao truncada em silencio\n", LIN_MAX);
@@ -4233,3 +4217,4 @@ int main(int argc, char **argv){
     fprintf(stderr, "uso: sql teste | sql <base> \"<comando SQL>\" | sql <base> -   (script na entrada)\n");
     return 2;
 }
+#endif /* SQL_NO_MAIN */

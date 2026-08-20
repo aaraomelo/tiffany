@@ -265,7 +265,7 @@ int main(int argc, char **argv){
         uint64_t as = bb * Tastro[er] / ICE_SCALE;
         uint64_t tot = at + as;
         long frac = tot > 0 ? (long)(as * 100 / tot) : 0;
-        printf("   %ld.%03ld  %8ld  %8" PRIu64 " %8" PRIu64 "     %ld.%02ld\n",
+        printf("   %d.%03d  %8ld  %8" PRIu64 " %8" PRIu64 "     %ld.%02ld\n",
                (ER0 + ERW * er + ERW / 2) / 1000,
                (ER0 + ERW * er + ERW / 2) % 1000,
                Nobs[er], at, as, frac / 100, frac % 100);

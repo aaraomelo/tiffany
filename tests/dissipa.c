@@ -110,13 +110,38 @@ int main(void){
      * kT ln2 a 300 K. O numero e' minusculo por operacao — o ponto nao e' a grandeza, e'
      * que UM DELES E' EXACTAMENTE ZERO e nao aproximadamente zero. */
     {
-        const long kT_ln2 = 1.380649e-23 * 300.0 * 0.6931471805599453;
-        printf("      a %ld J por bit: destrutiva %ld J, involutiva %ld J\n",
-               kT_ln2, perdidos_d*kT_ln2, perdidos_i*kT_ln2);
-        printf("      e uma DRAM que refresque isto 8192x/s pagaria %ld J/s so' por existir\n",
-               (long)N*32*8192*kT_ln2);
-        ok("e o piso da involutiva e' ZERO EXACTO, e nao um numero pequeno: nao ha' bit"
-           " apagado, logo nao ha' minimo termodinamico nenhum a pagar", perdidos_i == 0);
+        /* A CONSTANTE COM A UNIDADE, E CADA FACTOR COM A SUA GENEALOGIA.
+         *
+         * Estava `const long kT_ln2 = 1.380649e-23 * 300.0 * 0.693…`, que em long dá
+         * ZERO — e com ele a linha imprimia «destrutiva 0 J, involutiva 0 J». O
+         * comentário logo acima diz que o ponto é «UM DELES E' EXACTAMENTE ZERO e nao
+         * aproximadamente zero»: com a constante a zero os dois eram zero e a
+         * distinção — que é a secção inteira — deixava de se ver.
+         *
+         * O número é minúsculo em joules, e é isso que a UNIDADE resolve. Em rJ (10⁻²⁷ J)
+         * o produto é inteiro e exacto até onde cada factor o é:
+         *
+         *   k_B = 1,380649·10⁻²³ J/K   EXACTO por definição do SI (2019)
+         *   T   = 300 K                escolhido, e dito
+         *   k_B·T = 1380649·300·10⁻²⁹ J = 4 141 947 rJ                 (exacto)
+         *   ln2 = 0,6931471805599453   IRRACIONAL — entra como 6931471805599453/10¹⁶,
+         *                              e é o ÚNICO factor arredondado aqui
+         *   k_B·T·ln2 = 2 870 978 rJ   (resto 0,885… de rJ, truncado — dito)
+         *
+         * ≈ 2,871·10⁻²¹ J por bit apagado, que é o limite de Landauer a 300 K. */
+        const long KT_LN2_rJ = 2870978L;             /* 10⁻²⁷ J; ln2 truncado, ver acima */
+        printf("      a %ld rJ (10⁻²⁷ J) por bit: destrutiva %ld rJ, involutiva %ld rJ\n",
+               KT_LN2_rJ, perdidos_d*KT_LN2_rJ, perdidos_i*KT_LN2_rJ);
+        printf("      e uma DRAM que refresque isto 8192x/s pagaria %ld rJ/s so' por existir\n",
+               (long)N*32*8192*KT_LN2_rJ);
+        ok("E O PISO DA INVOLUTIVA E' ZERO EXACTO, e nao um numero pequeno: nao ha' bit"
+           " apagado, logo nao ha' minimo termodinamico nenhum a pagar. E os dois lados"
+           " têm de ser VISÍVEIS para a frase valer: a destrutiva paga um número > 0 na"
+           " mesma unidade (rJ = 10⁻²⁷ J), a involutiva paga 0. Enquanto a constante"
+           " estava em `long` a partir de 1,38·10⁻²³ ela era ZERO, e os dois lados"
+           " imprimiam o mesmo — a distinção que esta secção existe para mostrar não"
+           " aparecia em lado nenhum",
+           perdidos_i == 0 && perdidos_d > 0 && KT_LN2_rJ > 0);
     }
 
     /* ═══ §D4 — o CONTROLO: e se ela nao fosse involutiva? ═════════════════════════

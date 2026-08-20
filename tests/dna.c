@@ -301,7 +301,7 @@ printf("\n§N5  MUTAÇÃO e REPARO: irreversível sem registo, reversível com e
     printf("      mutações aplicadas          %d\n", nm);
     printf("      posições diferentes         %d\n", difs);
     printf("      sem registo, hipóteses por posição:  3 (as outras bases)\n");
-    printf("      logo o espaço a adivinhar:  3^%d = %ld\n", difs, rt_ipow(3, difs));
+    printf("      logo o espaço a adivinhar:  3^%d = %d\n", difs, rt_ipow(3, difs));
 
     /* com registo: o reparo devolve exatamente */
     char *rep = DISCO_FIXO(char, 84);
@@ -317,7 +317,7 @@ printf("\n§N5  MUTAÇÃO e REPARO: irreversível sem registo, reversível com e
     ok("a mutação muda mesmo a fita — não é uma operação vazia", difs == nm);
     ok("e o reparo COM registo devolve o original, exato",
        dif_rep == 0 && !memcmp(ck0, ckr, sizeof ck0));
-    printf("      Sem registo há %ld fitas compatíveis com o que se vê, e nenhuma razão para\n",
+    printf("      Sem registo há %d fitas compatíveis com o que se vê, e nenhuma razão para\n",
            rt_ipow(3, difs));
     printf("      preferir a certa. A reversão não é uma propriedade da mutação: é uma\n");
     printf("      propriedade de haver quem a tenha anotado.\n");

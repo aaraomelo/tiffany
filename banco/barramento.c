@@ -31,42 +31,51 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "unidade.h"
+#include "../lib/word_isa.h"
 
 #define NB 4                       /* bancos no barramento */
 #define NS 256                     /* slots por banco */
+#define SL WORD_ISA_ATOMS          /* Word_8² = 2 átomos */
 
 /* Cada banco é um ficheiro. Nenhum sabe da existência dos outros. */
 static int fd[NB];
-typedef struct { long a, b; } Slot;
-/* A E/S e' UMA operacao — MOVE(banco, slot, sentido). O sinal decide o sentido: e' a
- * Lei 1, 1† = -1, e e' a mesma instrucao unica da ISA. */
-static Slot MOVE(int b, long slot, int sentido, Slot v){
-    if(sentido > 0){ Slot s = {0,0}; pread(fd[b], &s, 16, slot*16); return s; }
-    pwrite(fd[b], &v, 16, slot*16); return v;
+typedef Word Slot;                 /* Word ISA = Word_8² — sem long */
+/* A E/S e' UMA operacao — MOVE(banco, slot, sentido). Lei 1: 1† = -1. */
+static Slot MOVE(int b, unsigned slot, int sentido, Slot v){
+    unsigned char buf[2];
+    if(sentido > 0){
+        Slot s = {0,0};
+        if(pread(fd[b], buf, SL, (off_t)slot * SL) == (ssize_t)SL){
+            s.total = buf[0]; s.e = buf[1];
+        }
+        return s;
+    }
+    buf[0] = v.total; buf[1] = v.e;
+    pwrite(fd[b], buf, SL, (off_t)slot * SL);
+    return v;
 }
-static Slot le(int b, long i){ Slot z = {0,0}; return MOVE(b, i, +1, z); }
-static void grava(int b, long i, Slot s){ MOVE(b, i, -1, s); }
+static Slot le(int b, unsigned i){ Slot z = {0,0}; return MOVE(b, i, +1, z); }
+static void grava(int b, unsigned i, Slot s){ MOVE(b, i, -1, s); }
 
-/* A CIFRA DO DADO. É ela o endereço — e é ela que decide em que banco ele mora, porque o banco é
- * a faixa da cifra. Não há repartidor: o dado diz onde fica, ao ser o que é. */
-static long cifra_do(const char *d){
-    long c = 0;
-    for(const char *p = d; *p; p++) c = c*31 + ((unsigned char)*p - 31);
-    return c < 0 ? -c : c;
+/* CIFRA no envelope Word_8 — o endereço É o byte; banco = cifra % NB. */
+static Word8 cifra_do(const char *d){
+    unsigned c = 0;
+    for(const char *p = d; *p; p++) c = c*31u + ((unsigned)(unsigned char)*p - 31u);
+    return (Word8)c;
 }
-static int banco_da(long cifra){ return (int)(cifra % NB); }
+static int banco_da(Word8 cifra){ return (int)(cifra % NB); }
 
 /* REAGIR. Cada banco vê tudo o que passa e decide sozinho se aquilo é seu — pela cifra, e não
  * porque alguém lhe disse. É a liquidação: entrou, verifica. */
-static long reagiu[NB];
+static unsigned reagiu[NB];
 static void reage(int b, const char *dado){
     reagiu[b]++;
-    long c = cifra_do(dado);
-    if(banco_da(c) != b) return;                   /* não é da minha faixa: passa ao lado */
-    for(long i = 0; i < NS; i++){                  /* guarda no primeiro slot livre */
+    Word8 c = cifra_do(dado);
+    if(banco_da(c) != b) return;
+    for(unsigned i = 0; i < NS; i++){
         Slot s = le(b, i);
-        if(s.a == c) return;                       /* já cá está */
-        if(!s.a){ Slot n = { c, (long)strlen(dado) }; grava(b, i, n); return; }
+        if(s.total == c) return;
+        if(!s.total){ Slot n = word_isa(c, (Word8)strlen(dado)); grava(b, i, n); return; }
     }
 }
 /* EMITIR: uma vez, para o barramento. Todos os bancos veem — ninguém é endereçado. */
@@ -75,13 +84,13 @@ static void emite(const char *dado){
 }
 /* PEDIR: também é emitir. Quem tem responde; quem não tem cala-se, e não é perguntado. */
 static int pede(const char *dado, int *quem){
-    long c = cifra_do(dado);
+    Word8 c = cifra_do(dado);
     int achou = 0;
     for(int b = 0; b < NB; b++)
-        for(long i = 0; i < NS; i++){
+        for(unsigned i = 0; i < NS; i++){
             Slot s = le(b, i);
-            if(!s.a) break;
-            if(s.a == c){ achou = 1; if(quem) *quem = b; }
+            if(!s.total) break;
+            if(s.total == c){ achou = 1; if(quem) *quem = b; }
         }
     return achou;
 }
@@ -106,8 +115,8 @@ printf("\n§R1  O dado entra e TODOS reagem — ninguém é chamado pelo nome.\n
 {
     for(int i = 0; i < ND; i++) emite(dados[i]);
     printf("      %d dados emitidos, e cada banco reagiu a:", ND);
-    long mau = 0;
-    for(int b = 0; b < NB; b++){ printf("  b%d=%ld", b, reagiu[b]); if(reagiu[b] != ND) mau++; }
+    int mau = 0;
+    for(int b = 0; b < NB; b++){ printf("  b%d=%u", b, reagiu[b]); if(reagiu[b] != (unsigned)ND) mau++; }
     printf("\n");
     ok("todos os bancos veem TUDO o que passa — uma emissao, N reacoes", mau == 0);
     printf("\n      Nao ha entrega dirigida: o dado passa e cada um decide sozinho. E o que a\n");
@@ -125,9 +134,9 @@ printf("\n§R2  Onde ele fica decide-se pela CIFRA, e não por repartidor.\n\n")
     for(int b = 0; b < NB; b++)
         for(long i = 0; i < NS; i++){
             Slot s = le(b, i);
-            if(!s.a) break;
+            if(!s.total) break;
             total++;
-            if(banco_da(s.a) != b) mau++;          /* nenhum dado esta fora da sua faixa */
+            if(banco_da(s.total) != b) mau++;          /* nenhum dado esta fora da sua faixa */
         }
     printf("\n      %ld dados guardados, %ld fora da faixa da sua cifra\n", total, mau);
     ok("cada dado esta no banco que a SUA CIFRA diz — nao houve repartidor", mau == 0 && total == ND);
@@ -156,8 +165,8 @@ printf("\n§R4  E não há registo de quem tem o quê.\n\n");
     for(int b = 0; b < NB; b++)
         for(long i = 0; i < NS; i++){
             Slot s = le(b, i);
-            if(!s.a) break;
-            if(s.b > 4096) indices++;             /* nada aqui e um indice: sao cifras e medidas */
+            if(!s.total) break;
+            if(s.e > 64) indices++;             /* nada aqui e um indice: sao cifras e medidas */
         }
     printf("      procurado um indice de quem-tem-o-que: %ld encontrados\n", indices);
     ok("nao ha registo nenhum — a pergunta nao tem onde ser feita", indices == 0);

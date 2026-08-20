@@ -215,7 +215,7 @@ int main(void){
            mal == 0 && nt == 3 && om == 0 && casos > 0);
     }
 
-    printf("\n=== %ld asserções, %ld falhas, %ld estouros ===\n",
+    printf("\n=== %d asserções, %d falhas, %ld estouros ===\n",
            unidades, falhas, sq_estouros);
     return falhas ? 1 : 0;
 }
