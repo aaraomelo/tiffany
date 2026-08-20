@@ -1,73 +1,45 @@
-Este repositório é distribuído sob DUAS licenças, conforme a natureza de cada parte.
+Este repositório é software e documentação PROPRIETÁRIOS.
+
+Copyright (c) 2026 Aarão Melo Lopes. Todos os direitos reservados.
 
 ═══════════════════════════════════════════════════════════════════════════════
-  1. CÓDIGO — Licença MIT
+  LICENÇA COMERCIAL — USO MEDIANTE CONTRATO E PAGAMENTO
 ═══════════════════════════════════════════════════════════════════════════════
 
-Aplica-se a: tests/, lib/, tools/, banco/, app/ e a todo o ficheiro de código
-fonte deste repositório (.c, .h, .sh, .py, .js, .sql, .yml).
+Aplica-se a TODO o repositório: código (tests/, lib/, tools/, banco/, app/ e
+qualquer fonte .c, .h, .sh, .py, .js, .sql, …), papers/ e demais textos
+(.tex, PDF gerados, figuras em assets/, memoria/, corpus/), salvo indicação
+explícita em contrário num ficheiro concreto.
 
-Copyright (c) 2026 Aarão Melo Lopes
+NÃO é concedida licença gratuita de uso, cópia, modificação, distribuição,
+sublicenciamento, publicação ou exploração comercial.
 
-É concedida, gratuitamente, a qualquer pessoa que obtenha uma cópia deste
-software e dos ficheiros de documentação associados (o "Software"), permissão
-para utilizar o Software sem restrição, incluindo, sem limitação, os direitos
-de usar, copiar, modificar, fundir, publicar, distribuir, sublicenciar e/ou
-vender cópias do Software, e permitir que as pessoas a quem o Software é
-fornecido o façam, sujeito às seguintes condições:
+Quem quiser usar o código, os papers ou qualquer parte substancial deste
+trabalho precisa de:
+  1. acordo escrito com o titular dos direitos; e
+  2. pagamento nas condições desse acordo.
 
-O aviso de copyright acima e este aviso de permissão devem ser incluídos em
-todas as cópias ou partes substanciais do Software.
+Contacto para licenciamento:
+  Aarão Melo Lopes
+  aarao.melo.lopes@gmail.com
+  https://goldenkingdom.patriatechnology.com
 
-O SOFTWARE É FORNECIDO "TAL COMO ESTÁ", SEM GARANTIA DE QUALQUER TIPO, EXPRESSA
-OU IMPLÍCITA, INCLUINDO MAS NÃO SE LIMITANDO ÀS GARANTIAS DE COMERCIALIZAÇÃO,
-ADEQUAÇÃO A UM DETERMINADO FIM E NÃO INFRAÇÃO. EM NENHUM CASO OS AUTORES OU
-TITULARES DO COPYRIGHT SERÃO RESPONSÁVEIS POR QUALQUER RECLAMAÇÃO, DANOS OU
-OUTRA RESPONSABILIDADE, SEJA NUMA AÇÃO CONTRATUAL, DELITUAL OU OUTRA,
-DECORRENTE DE, OU EM CONEXÃO COM, O SOFTWARE OU O USO OU OUTRAS NEGOCIAÇÕES NO
-SOFTWARE.
+Sem licença válida: é proibido usar, copiar, modificar, fundir, publicar,
+distribuir, sublicenciar ou vender o Software ou os textos, no todo ou em
+parte.
 
-═══════════════════════════════════════════════════════════════════════════════
-  2. TEXTOS, FIGURAS E RESULTADOS — Creative Commons Atribuição 4.0 Internacional
-═══════════════════════════════════════════════════════════════════════════════
-
-Aplica-se a: teoria.tex, catalogo.tex, enredo.tex, livro.tex, estilo.tex, aos
-PDFs deles gerados, às figuras em assets/ e a memoria/.
-
-Copyright (c) 2026 Aarão Melo Lopes
-
-Esta obra está licenciada sob a Licença Creative Commons Atribuição 4.0
-Internacional (CC BY 4.0).
-
-  Você tem o direito de:
-    COMPARTILHAR — copiar e redistribuir o material em qualquer suporte ou
-                   formato, para qualquer fim, mesmo comercial.
-    ADAPTAR      — remixar, transformar e criar a partir do material, para
-                   qualquer fim, mesmo comercial.
-
-  De acordo com os termos seguintes:
-    ATRIBUIÇÃO   — Você deve dar o crédito apropriado a Aarão Melo Lopes,
-                   fornecer um link para a licença e indicar se foram feitas
-                   alterações.
-
-  Sem restrições adicionais — você não pode aplicar termos jurídicos ou medidas
-  de caráter tecnológico que restrinjam legalmente outros de fazerem algo que a
-  licença permita.
-
-Texto integral da licença: https://creativecommons.org/licenses/by/4.0/deed.pt
+O SOFTWARE E OS TEXTOS SÃO FORNECIDOS «TAL COMO ESTÃO», SEM GARANTIA DE
+QUALQUER TIPO, EXPRESSA OU IMPLÍCITA. EM NENHUM CASO O AUTOR SERÁ RESPONSÁVEL
+POR RECLAMAÇÕES, DANOS OU OUTRA RESPONSABILIDADE DECORRENTE DO USO OU DA
+IMPOSSIBILIDADE DE USO.
 
 ═══════════════════════════════════════════════════════════════════════════════
   NOTA DO AUTOR
 ═══════════════════════════════════════════════════════════════════════════════
 
-Este trabalho é meu e por isso posso dispor dele. Disponho assim: é de todos.
-
-Use, copie, adapte, publique, venda se quiser. A única condição é dizer de onde
-veio — não por vaidade, mas porque um resultado sem origem não pode ser
-verificado, e este trabalho inteiro assenta em ser verificável.
-
-Os medidores em tests/ existem para que ninguém tenha de acreditar em mim.
-Corram-nos.
+Este trabalho é meu e por isso disponho dele. Disponho assim: quem quiser
+usar, paga e combina. Os medidores em tests/ existem para quem tiver licença
+verificar — não para uso livre.
 
   — Aarão Melo Lopes, agosto de 2026
 
@@ -75,6 +47,7 @@ Corram-nos.
   OBRAS DE TERCEIROS
 ═══════════════════════════════════════════════════════════════════════════════
 
-Os PDFs de obras de terceiros usados como referência de leitura NÃO fazem parte
-deste repositório e estão excluídos em .gitignore. As fontes públicas em que o
-trabalho se apoia estão citadas nos próprios documentos.
+Os PDFs de obras de terceiros usados como referência de leitura NÃO fazem
+parte deste repositório e estão excluídos em .gitignore. As fontes públicas
+em que o trabalho se apoia estão citadas nos próprios documentos e
+mantêm as suas licenças originais.

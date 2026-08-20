@@ -1,0 +1,426 @@
+% !TeX program = pdflatex
+% corpus/docs/calculo_exercicios.tex — ticks CL1–CL21 (limites → tradução).
+%
+% Prosa canónica; testemunhas em calculo_resolve() (banco/conversa.c).
+% Espinha: HIPÓTESES → DEFINIÇÃO → TRANSIÇÃO → LEI → TESTEMUNHA → CONCLUSÃO → VOLTA.
+%
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[portuguese]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\medido}[1]{\par\medskip\noindent{\small\color{gray}\textbf{Medido.} #1}\par\medskip}
+
+\begin{document}
+\title{Cálculo I --- exercícios\\
+\large CL1--CL21: limite $\to$ tradução}
+\author{Tiffany --- corpus vivo}
+\date{}
+\maketitle
+
+\begin{abstract}
+\noindent Vinte e um exercícios (\code{CL21[]} em \code{banco/conversa.c}) ---
+este ficheiro fecha o catálogo. Operação ao vivo: nomes do catálogo via
+\code{responde} / \code{calculo N}.
+\end{abstract}
+
+\section{como se le este documento}
+Espinha dos sete slots. Lotes: CL1--CL8 (limite\ldots cadeia);
+CL9--CL16 (Fermat\ldots fundamental I); CL17--CL21 (fundamental II\ldots tradução).
+
+%======================================================================
+\section{unicidade do limite}\label{sec:unicidade-limite}
+\textbf{Enunciado.} Dois limites forçam $|L-M|<\varepsilon$ para todo
+$\varepsilon$, logo $L=M$.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f$ com $\lim_{x\to a}f(x)=L$ e também $=M$.
+\item \textbf{TRADUÇÃO.} $|L-M|\leq|L-f(x)|+|f(x)-M|<2\varepsilon$ para todo
+  $\varepsilon$.
+\item \textbf{OPERAÇÃO.} Desigualdade triangular no mesmo $x$: o único racional
+  menor que todo $2\varepsilon>0$ é zero.
+\item \textbf{LEI.} $\varepsilon$-$\delta$ exacta (racionais; malha do intervalo).
+\item \textbf{TESTEMUNHA.} $\delta$ EXIBIDO para cada $\varepsilon$; controlo com
+  $L$ errado volta VAZIO.
+\item \textbf{CONCLUSÃO.} Limite único.
+\item \textbf{VOLTA.} Tradução: $\varepsilon$-$\delta$ $=$ escada de observadores
+  (\code{thm:escada}).
+\end{enumerate}
+\medido{\code{calculo\_resolve(1)} / \code{fn\_acha\_delta}: $\delta$ para
+$3x+1\to7$; $L=8$ vazio.}
+
+%----------------------------------------------------------------------
+\section{limite da soma}\label{sec:limite-soma}
+\textbf{Enunciado.} $\lim(f+g)=\lim f+\lim g$, com
+$\delta=\min(\delta_1,\delta_2)$ EXIBIDO.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $\lim f=L$ e $\lim g=M$ em $x\to a$.
+\item \textbf{TRADUÇÃO.} O $\delta$ da soma é o mínimo dos dois.
+\item \textbf{OPERAÇÃO.} Cada limite dá o seu $\delta$; o mínimo serve à conjunção.
+\item \textbf{LEI.} $\varepsilon$-$\delta$ exacta.
+\item \textbf{TESTEMUNHA.} Mesmo buscador de $\delta$ + controlo com limite errado.
+\item \textbf{CONCLUSÃO.} Limite da soma $=$ soma dos limites.
+\item \textbf{VOLTA.} Mesma escada de observadores.
+\end{enumerate}
+\medido{\code{calculo\_resolve(2)}: $\delta=\min$ exibido; controlo vazio.}
+
+%----------------------------------------------------------------------
+\section{sanduiche}\label{sec:sanduiche}
+\textbf{Enunciado.} $g\leq f\leq h$ com limites iguais prende $f$ --- e a
+hipótese da ordem.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $g\leq f\leq h$ perto de $a$; $\lim g=\lim h=L$.
+\item \textbf{TRADUÇÃO.} $L-\varepsilon<g\leq f\leq h<L+\varepsilon$.
+\item \textbf{OPERAÇÃO.} $f$ fica PRESO --- cerca-se, não se estima.
+\item \textbf{LEI.} $\varepsilon$-$\delta$ + ordem.
+\item \textbf{TESTEMUNHA.} $\delta$ exibido; controlo com $L$ errado.
+\item \textbf{CONCLUSÃO.} $\lim f=L$.
+\item \textbf{VOLTA / GUME.} Sem a ordem, o cerco não existe. Tradução: cerco $=$
+  corte (\code{thm:real-caminho}).
+\end{enumerate}
+\medido{\code{calculo\_resolve(3)}: sanduíche com controlos.}
+
+%----------------------------------------------------------------------
+\section{polinomio continuo}\label{sec:polinomio-continuo}
+\textbf{Enunciado.} Todo polinómio é contínuo: soma e produto de contínuas.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $p$ polinómio com coeficientes racionais.
+\item \textbf{TRADUÇÃO.} $x\mapsto x$ contínua; soma e produto preservam.
+\item \textbf{OPERAÇÃO.} Indução na construção: identidade + constantes + soma/
+  produto em passos finitos.
+\item \textbf{LEI.} Contínuas formam um anel --- a estrutura, não a fórmula.
+\item \textbf{TESTEMUNHA.} $\delta$ para $x^3-3x$ em $a=2$.
+\item \textbf{CONCLUSÃO.} Todo polinómio contínuo em todo ponto.
+\item \textbf{VOLTA.} Continuidade $=$ membrana (\code{def:membrana}).
+\end{enumerate}
+\medido{\code{calculo\_resolve(4)} / \code{fn\_acha\_delta} em $x^3-3x$.}
+
+%----------------------------------------------------------------------
+\section{valor intermediario}\label{sec:valor-intermediario}
+\textbf{Enunciado.} $f(a)<0<f(b)\Rightarrow$ existe raiz --- por BISSEÇÃO.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f$ contínua em $[a,b]$ com $f(a)<0<f(b)$.
+\item \textbf{TRADUÇÃO.} Existe $c\in(a,b)$ com $f(c)=0$.
+\item \textbf{OPERAÇÃO.} Bisseção: fica a metade onde o sinal ainda troca.
+\item \textbf{LEI.} Completude como CORTE --- intervalo encaixante, não «a raiz»
+  como decimal.
+\item \textbf{TESTEMUNHA.} Intervalo exibido; gume: sem troca de sinal, RECUSA.
+\item \textbf{CONCLUSÃO.} Existe $c$ com $f(c)=0$ --- um corte (pode ser irracional).
+\item \textbf{VOLTA.} \code{thm:real-caminho}: o real é o caminho; a folha não é nó.
+\end{enumerate}
+\medido{\code{calculo\_resolve(5)} / \code{fn\_bissec}: $[1,2]$ corta $\sqrt{3}$;
+$[3,4]$ recusa.}
+
+%----------------------------------------------------------------------
+\section{derivada por quociente}\label{sec:derivada}
+\textbf{Enunciado.} $f'(a)=q(0)$ com $f(a+h)-f(a)=h\cdot q(h)$: AVALIAÇÃO, não limite.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f,g$ polinómios sobre $\mathbb{Q}$; $a$ racional.
+\item \textbf{TRADUÇÃO.} $f(a+h)-f(a)=h\,q(h)$, $f'(a)=q(0)$.
+\item \textbf{OPERAÇÃO.} Diferença sem termo constante $\Rightarrow$ divisível por
+  $h$ exactamente; $q$ polinómio; $q(0)$ avaliação.
+\item \textbf{LEI.} Divisão exacta / fibra (\code{thm:divisao-fibra}).
+\item \textbf{TESTEMUNHA.} Três caminhos: regra formal, $q(0)$, parte $\varepsilon$
+  do dual --- concordam.
+\item \textbf{CONCLUSÃO.} Derivada existe e é exacta, sem limite.
+\item \textbf{VOLTA.} Fibra + dual $\varepsilon^2=0$ + metrónomo-Fourier.
+\end{enumerate}
+\medido{\code{calculo\_resolve(6)} / \code{fn\_deriva\_def}, \code{fn\_av\_dual}:
+$0$ divergências.}
+
+%----------------------------------------------------------------------
+\section{regra do produto}\label{sec:regra-produto}
+\textbf{Enunciado.} $(fg)'=f'g+fg'$, e o termo cruzado $h\cdot f'g'$ é o que morre.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Mesmos $f,g$ polinómios.
+\item \textbf{TRADUÇÃO.} $(fg)'=f'g+fg'$.
+\item \textbf{OPERAÇÃO.} Abrir $(fg)(a+h)-(fg)(a)$: termo cruzado carrega $h$ e
+  morre em $h=0$.
+\item \textbf{LEI.} Divisão exacta / fibra.
+\item \textbf{TESTEMUNHA.} Definição contra $f'g+fg'$ em pontos racionais.
+\item \textbf{CONCLUSÃO.} Regra do produto exacta.
+\item \textbf{VOLTA.} Mesma tradução dual / fibra.
+\end{enumerate}
+\medido{\code{calculo\_resolve(7)}: definição vs $f'g+fg'$, $0$ divergências.}
+
+%----------------------------------------------------------------------
+\section{regra da cadeia}\label{sec:regra-cadeia}
+\textbf{Enunciado.} $(f\circ g)'=(f'\circ g)\cdot g'$, pela composição dos quocientes.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Mesmos $f,g$.
+\item \textbf{TRADUÇÃO.} $(f\circ g)'=(f'\circ g)\cdot g'$.
+\item \textbf{OPERAÇÃO.} Compor quocientes: diferença de $f\circ g$ $=$ quociente de
+  $f$ em $g(a)$ vezes quociente de $g$ em $a$.
+\item \textbf{LEI.} Divisão exacta / fibra.
+\item \textbf{TESTEMUNHA.} Definição contra $(f'\circ g)\cdot g'$.
+\item \textbf{CONCLUSÃO.} Cadeia $=$ composição das duas fibras.
+\item \textbf{VOLTA.} Mesma.
+\end{enumerate}
+\medido{\code{calculo\_resolve(8)}: definição vs cadeia, $0$ divergências.}
+
+%======================================================================
+\section{fermat extremo interior}\label{sec:fermat}
+\textbf{Enunciado.} Extremo interior + derivável $\Rightarrow f'(c)=0$, e o gume
+é a borda.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $c$ extremo INTERIOR; $f$ derivável em $c$.
+\item \textbf{TRADUÇÃO.} $f'(c)=0$.
+\item \textbf{OPERAÇÃO.} Sinais opostos dos quocientes à esquerda/direita; ambos
+  $\to f'(c)$ $\Rightarrow$ zero.
+\item \textbf{LEI.} Fermat --- Rolle e Valor Médio derivam dela.
+\item \textbf{TESTEMUNHA.} Gume: $x^2$ em $[0,2]$ --- máximo na borda, $f'(2)=4\neq0$.
+\item \textbf{CONCLUSÃO.} Fermat vale no interior; sem «interior» é falso.
+\item \textbf{VOLTA.} Extremo $=$ testemunha caçada (como assinatura de forma).
+\end{enumerate}
+\medido{\code{calculo\_resolve(9)}: gume $f'(2)=4$ na borda.}
+
+%----------------------------------------------------------------------
+\section{rolle}\label{sec:rolle}
+\textbf{Enunciado.} $f(a)=f(b)\Rightarrow$ existe $c$ com $f'(c)=0$.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f$ derivável com $f(a)=f(b)$.
+\item \textbf{TRADUÇÃO.} Existe $c\in(a,b)$ com $f'(c)=0$.
+\item \textbf{OPERAÇÃO.} Weierstrass + Fermat: extremo interior ou constante.
+\item \textbf{LEI.} Fermat + Weierstrass.
+\item \textbf{TESTEMUNHA.} $x^2-1$ em $[-1,1]$: $c=0$, $f'(c)=0$.
+\item \textbf{CONCLUSÃO.} Rolle.
+\item \textbf{VOLTA.} Mesma caça de testemunha.
+\end{enumerate}
+\medido{\code{calculo\_resolve(10)} / \code{fn\_acha\_c}: Rolle exacto.}
+
+%----------------------------------------------------------------------
+\section{valor medio}\label{sec:valor-medio}
+\textbf{Enunciado.} $f'(c)=(f(b)-f(a))/(b-a)$ --- e o $c$ pode NÃO ser racional.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f$ contínua em $[a,b]$, derivável em $(a,b)$.
+\item \textbf{TRADUÇÃO.} Existe $c$ com a igualdade da inclinação.
+\item \textbf{OPERAÇÃO.} Rolle em $\varphi(x)=f(x)-rx$ com $r=(f(b)-f(a))/(b-a)$.
+\item \textbf{LEI.} Rolle após inclinar.
+\item \textbf{TESTEMUNHA.} $x^3-3x$ em $[0,2]$: $c=2/\sqrt{3}$ irracional ---
+  bisseção devolve o corte.
+\item \textbf{CONCLUSÃO.} Valor médio; $c$ pode viver no corte.
+\item \textbf{VOLTA.} Devolver real $=$ intervalo encaixante.
+\end{enumerate}
+\medido{\code{calculo\_resolve(11)}: $c$ irracional; encaixe por bisseção.}
+
+%----------------------------------------------------------------------
+\section{monotonia}\label{sec:monotonia}
+\textbf{Enunciado.} $f'>0$ num intervalo $\Rightarrow$ estritamente crescente.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f(x)=x^3-3x$ (exemplo).
+\item \textbf{TRADUÇÃO.} $f'>0$ em $I\Rightarrow f$ estritamente crescente em $I$.
+\item \textbf{OPERAÇÃO.} Valor médio: $f(y)-f(x)=f'(c)(y-x)>0$ se $f'>0$.
+\item \textbf{LEI.} Valor médio --- local $\to$ global.
+\item \textbf{TESTEMUNHA.} Varredura onde $f'>0$ (cresce) e onde $f'<0$ (decresce).
+\item \textbf{CONCLUSÃO.} $f'$ decide a monotonia.
+\item \textbf{VOLTA.} Observador local não vê o global (\code{thm:escada}).
+\end{enumerate}
+\medido{\code{calculo\_resolve(12)}: dois regimes; $0$ violações.}
+
+%----------------------------------------------------------------------
+\section{extremos}\label{sec:extremos}
+\textbf{Enunciado.} Os extremos de $x^3-3x$, e a prova de que o candidato é global.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Mesmo $f=x^3-3x$.
+\item \textbf{TRADUÇÃO.} $f'=3x^2-3=0\Rightarrow x=\pm1$.
+\item \textbf{OPERAÇÃO.} Concavidade $f''=6x$ decide máx/mín locais.
+\item \textbf{LEI.} Valor médio / Fermat.
+\item \textbf{TESTEMUNHA.} $f(-1)=2$ máx local; $f(1)=-2$ mín local; $f$ ilimitada.
+\item \textbf{CONCLUSÃO.} Extremos LOCAIS --- não globais (honestidade do eval).
+\item \textbf{VOLTA.} Não dizer «máximo» sem «local».
+\end{enumerate}
+\medido{\code{calculo\_resolve(13)}: locais $\pm2$; sem extremo global.}
+
+%----------------------------------------------------------------------
+\section{soma de riemann}\label{sec:soma-riemann}
+\textbf{Enunciado.} $\mathrm{dir}-\mathrm{esq}=(f(b)-f(a))\cdot h$ EXACTO, por
+telescopagem.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f$ integrável; partição uniforme.
+\item \textbf{TRADUÇÃO.} Diferença das somas $=$ telescopagem exacta.
+\item \textbf{OPERAÇÃO.} $\sum(f(x_{k+1})-f(x_k))\cdot h=(f(b)-f(a))\cdot h$.
+\item \textbf{LEI.} O cerco --- distância exacta entre esquerda e direita.
+\item \textbf{TESTEMUNHA.} Telescopagem em malhas; cerco para monótona; gume sem
+  monotonia ($x^3-3x$).
+\item \textbf{CONCLUSÃO.} Cerco é teorema COM hipótese (monotonia).
+\item \textbf{VOLTA.} Integral $=$ soma reversível de Gentil (obs:triade-central).
+\end{enumerate}
+\medido{\code{calculo\_resolve(14)} / \code{fn\_riemann}: telescopagem $0$ falhas;
+gume cai.}
+
+%----------------------------------------------------------------------
+\section{propriedades da integral}\label{sec:propriedades-integral}
+\textbf{Enunciado.} Linearidade e aditividade no intervalo, exactas.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Mesmas somas de Riemann.
+\item \textbf{TRADUÇÃO.} Linear na função; aditiva no intervalo.
+\item \textbf{OPERAÇÃO.} Propriedades das somas --- sobrevivem ao limite por serem
+  finitas.
+\item \textbf{LEI.} Cerco / telescopagem.
+\item \textbf{TESTEMUNHA.} Mesmas malhas + gume monotonia.
+\item \textbf{CONCLUSÃO.} Propriedades exactas das somas.
+\item \textbf{VOLTA.} Mesma tradução Gentil.
+\end{enumerate}
+\medido{\code{calculo\_resolve(15)}: linearidade/aditividade nas somas.}
+
+%----------------------------------------------------------------------
+\section{fundamental i}\label{sec:fundamental-i}
+\textbf{Enunciado.} $F(x)=\int_a^x f\Rightarrow F'=f$ --- a derivada desfaz a soma.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f$ contínua; $G$ primitiva.
+\item \textbf{TRADUÇÃO.} $F(x)=\int_a^x f\Rightarrow F'(x)=f(x)$.
+\item \textbf{OPERAÇÃO.} $F(x+h)-F(x)=f(\xi)\cdot h$; dividir por $h$ $\to f(x)$
+  (Valor Médio na integral).
+\item \textbf{LEI.} A VOLTA --- derivar e integrar são inversas.
+\item \textbf{TESTEMUNHA.} Dois caminhos: derivar primitiva vs $f$, ponto a ponto.
+\item \textbf{CONCLUSÃO.} TFC I fecha.
+\item \textbf{VOLTA.} Distinção: TFC inverte OPERAÇÕES; $\int f+\int f^{-1}$ inverte
+  FUNÇÕES --- não identificar.
+\end{enumerate}
+\medido{\code{calculo\_resolve(16)}: $(F)'=f$ em pontos; $0$ divergências.}
+
+%----------------------------------------------------------------------
+\section{fundamental ii}\label{sec:fundamental-ii}
+\textbf{Enunciado.} $\int_a^b f=G(b)-G(a)$ quando $G'=f$ --- a VOLTA.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f$ contínua em $[a,b]$; $G$ primitiva de $f$.
+\item \textbf{TRADUÇÃO.} $\int_a^b f=G(b)-G(a)$.
+\item \textbf{OPERAÇÃO.} Derivar desfaz somar: o Valor Médio na integral dá TFC~I;
+  avaliar a primitiva nos extremos dá TFC~II.
+\item \textbf{LEI.} A VOLTA --- derivar e integrar são inversas; a certidão é o TFC.
+\item \textbf{TESTEMUNHA.} $G(b)-G(a)$ entre $S_{\mathrm{esq}}$ e $S_{\mathrm{dir}}$;
+  distância exacta $(f(b)-f(a))\cdot h$.
+\item \textbf{CONCLUSÃO.} A volta fecha: uma operação desfaz a outra.
+\item \textbf{VOLTA.} Distinção: TFC inverte OPERAÇÕES; $\int f+\int f^{-1}$ inverte
+  FUNÇÕES --- correspondência arquitectural, não identificação com
+  \code{thm:central}.
+\end{enumerate}
+\medido{\code{calculo\_resolve(17)}: cerco de $G(b)-G(a)$ com $n=64$.}
+
+%----------------------------------------------------------------------
+\section{substituicao}\label{sec:substituicao}
+\textbf{Enunciado.} $\int f(g(x))g'(x)\,dx=\int f(u)\,du$ --- a cadeia lida ao
+contrário.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f$ e $g$ com $g$ derivável.
+\item \textbf{TRADUÇÃO.} $\int f(g(x))g'(x)\,dx=\int f(u)\,du$.
+\item \textbf{OPERAÇÃO.} Se $F'=f$, então $(F\circ g)'=(f\circ g)\cdot g'$; integrar
+  os dois lados.
+\item \textbf{LEI.} Regra da cadeia virada --- não é técnica, é teorema.
+\item \textbf{TESTEMUNHA.} Mesma malha TFC: primitiva composta vs composição da
+  primitiva.
+\item \textbf{CONCLUSÃO.} Substituição $=$ cadeia invertida.
+\item \textbf{VOLTA.} Fibra outra vez: a troca $u=g(x)$ é divisão exacta no
+  diferencial.
+\end{enumerate}
+\medido{\code{calculo\_resolve(18)}: cadeia invertida; $0$ falhas no TFC.}
+
+%----------------------------------------------------------------------
+\section{integracao por partes}\label{sec:integracao-partes}
+\textbf{Enunciado.} $\int fg'=fg-\int f'g$ --- o produto lido ao contrário.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f$ e $g$ deriváveis.
+\item \textbf{TRADUÇÃO.} $\int fg'=fg-\int f'g$.
+\item \textbf{OPERAÇÃO.} $(fg)'=f'g+fg'$; integrar e rearranjar.
+\item \textbf{LEI.} Regra do produto virada --- mesma lei, sentido inverso.
+\item \textbf{TESTEMUNHA.} Com $g=3x+1$: $\int fg' = fg\big|_a^b - \int f'g$,
+  igualdade exacta.
+\item \textbf{CONCLUSÃO.} Partes $=$ produto invertido.
+\item \textbf{VOLTA.} Daqui deriva $\int f+\int f^{-1}$ (clássico) --- distinto do
+  TFC, mas da mesma família «a volta fecha».
+\end{enumerate}
+\medido{\code{calculo\_resolve(19)}: $\int fg'=fg-\int f'g$ exacto em $[0,2]$.}
+
+%----------------------------------------------------------------------
+\section{analise completa}\label{sec:analise-completa}
+\textbf{Enunciado.} $x^3-3x$ inteiro: zeros, extremos, concavidade, inflexão.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f=x^3-3x$ sobre $\mathbb{Q}$.
+\item \textbf{TRADUÇÃO.} Zeros, extremos, concavidade e inflexão --- tudo exacto.
+\item \textbf{OPERAÇÃO.} $f'=3x^2-3$; $f''=6x$; Valor Médio transporta o local ao
+  intervalo.
+\item \textbf{LEI.} Valor Médio no centro: local $\to$ global no intervalo; não
+  global no domínio.
+\item \textbf{TESTEMUNHA.} Máx local $2$ em $-1$; mín local $-2$ em $1$; inflexão
+  em $0$; varredura dos dois regimes de monotonia.
+\item \textbf{CONCLUSÃO.} Análise completa e exacta --- extremos LOCAIS.
+\item \textbf{VOLTA.} Honestidade do eval: sem extremo global; observador local
+  (\code{thm:escada}).
+\end{enumerate}
+\medido{\code{calculo\_resolve(20)}: zeros $\pm\sqrt{3}$; locais $\pm2$; inflexão $0$.}
+
+%----------------------------------------------------------------------
+\section{traducao}\label{sec:traducao-calculo}
+\textbf{Enunciado.} Cada teorema do Cálculo I no teorema do universal que o diz.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Ordem: tudo tem tradução nos teoremas do corpo universal.
+\item \textbf{TRADUÇÃO.} Tabela teorema a teorema (Cálculo I $\to$ universal).
+\item \textbf{OPERAÇÃO.} A tradução muda o método: intervalo encaixante, não
+  decimal; divisão exacta, não processo infinito; cerco por telescopagem.
+\item \textbf{LEI.} O resultado é o sujeito; o nome clássico é cláusula; a casa
+  acrescenta a régua.
+\item \textbf{TESTEMUNHA.} Andar inteiro sem \texttt{double}: $\delta$ exibidos,
+  encaixes, telescopagem, gumes.
+\item \textbf{CONCLUSÃO.} Achado: para polinómio, $q(h)$ é polinómio --- derivada
+  $=$ avaliação, não limite.
+\item \textbf{VOLTA.} «Uma transformação fecha quando existe a volta» --- $\nu\circ\nu=\mathrm{id}$,
+  resíduo $0$; TFC é a certidão.
+\end{enumerate}
+
+\begin{center}
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+Cálculo I & Corpo Universal \\
+\midrule
+limite / cerco & corte: \code{thm:real-caminho} \\
+$\varepsilon$-$\delta$ & escada: \code{thm:escada} \\
+continuidade & membrana: \code{def:membrana} \\
+derivada ($\div h$) & fibra: \code{thm:divisao-fibra} \\
+derivada no espectro & \code{thm:metronomo-fourier} \\
+valor médio & local decide o global (escada) \\
+integral & soma reversível (Gentil) \\
+Teorema Fundamental & a VOLTA (operações inversas) \\
+aproximação linear & \code{thm:batuta-continuo} \\
+extremo & testemunha caçada \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent{\small⚠ TFC $\neq$ \code{thm:central}: aquele inverte \emph{funções}
+($\int f+\int f^{-1}$); este inverte \emph{operações}. Correspondência
+arquitectural, não identificação.}
+
+\medido{\code{calculo\_resolve(21)}: tabela impressa; andar sem \texttt{double}.}
+
+%======================================================================
+\section{o que fica no conversa}
+A prosa canónica CL1--CL21 é este ficheiro. \code{calculo\_resolve} \textbf{mede}.
+Catálogo de Cálculo I fechado.
+
+\end{document}

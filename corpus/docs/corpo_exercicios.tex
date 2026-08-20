@@ -1,0 +1,490 @@
+% !TeX program = pdflatex
+% corpus/docs/corpo_exercicios.tex — ticks CP1–CP8 (corpo: definição e primeiros teoremas).
+%
+% Prosa canónica; testemunhas ao vivo em corpo_resolve() (banco/conversa.c).
+% Espinha: HIPÓTESES → DEFINIÇÃO → TRANSIÇÃO → LEI → TESTEMUNHA → CONCLUSÃO → VOLTA.
+% «corpo = toda operação com fibra tem volta» — excepto 0⁻¹.
+%
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[portuguese]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\medido}[1]{\par\medskip\noindent{\small\color{gray}\textbf{Medido.} #1}\par\medskip}
+
+\begin{document}
+\title{Corpos --- exercícios\\
+\large CP1--CP25: catálogo completo}
+\author{Tiffany --- corpus vivo}
+\date{}
+\maketitle
+
+\begin{abstract}
+\noindent Corpo é o ponto em que «toda operação com fibra tem volta» vira estrutura
+algébrica formal. A excepção continua a ser exactamente $0^{-1}$.
+Vinte e cinco exercícios (\code{CP25[]} em \code{banco/conversa.c}) ---
+este ficheiro fecha o catálogo. Operação ao vivo:
+\code{conversa <base> resolve <nome>}.
+\end{abstract}
+
+\section{como se le este documento}
+Espinha dos sete slots. Níveis: estrutura (CP1--6); finitos (CP7--11);
+extensões (CP12--20); máquina pesada (CP21--25).
+
+%======================================================================
+\section{Q e um corpo}\label{sec:q-corpo}
+\textbf{Enunciado.} $\mathbb{Q}$ é um corpo.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $\mathbb{Q}$ com as operações usuais.
+\item \textbf{TRADUÇÃO.} Corpo: $(K,+)$ e $(K\setminus\{0\},\cdot)$ grupos abelianos,
+  distributividade a ligar:
+  $a+b=b+a$, $a+(-a)=0$, $aa^{-1}=1$ para $a\neq0$.
+\item \textbf{OPERAÇÃO.} Soma é grupo (andar de $\mathbb{Z}$); produto comutativo
+  e associativo; todo $p/q\neq0$ tem inverso $q/p$.
+\item \textbf{LEI.} Construção de $\mathbb{Q}$ por classes de pares: o inverso
+  CONSTRÓI-SE trocando numerador e denominador --- não se postula.
+\item \textbf{TESTEMUNHA.} O próprio $q/p$; multiplica-se de volta; distributividade
+  varre-se.
+\item \textbf{CONCLUSÃO.} $\mathbb{Q}$ é corpo --- o que $\mathbb{Z}$ não era.
+\item \textbf{VOLTA.} Cada inverso $\times$ original $=1$; único sem inverso é $0$.
+\end{enumerate}
+\medido{\code{corpo\_resolve(1)} / \code{qz\_inverso}: inversos e distributividade
+sem falhas.}
+
+%----------------------------------------------------------------------
+\section{Z nao e corpo}\label{sec:z-nao-corpo}
+\textbf{Enunciado.} $\mathbb{Z}$ NÃO é corpo: $2^{-1}=1/2\notin\mathbb{Z}$.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $\mathbb{Z}$ anel comutativo com unidade --- nega-se só
+  a última condição.
+\item \textbf{TRADUÇÃO.} Mesma definição de corpo.
+\item \textbf{OPERAÇÃO.} Soma cumpre; produto cumpre tudo MENOS o inverso. Basta
+  um elemento sem inverso.
+\item \textbf{LEI.} «TODO não nulo tem inverso» --- quantificação universal;
+  nega-se com UM contra-exemplo.
+\item \textbf{TESTEMUNHA.} O $2$: $2b=1$ sem solução inteira ($2b$ sempre par).
+\item \textbf{CONCLUSÃO.} $\mathbb{Z}$ NÃO é corpo --- salto que $\mathbb{Q}$ faz.
+\item \textbf{VOLTA.} Em $\mathbb{Q}$, $2^{-1}=1/2$; a diferença dos andares cabe
+  neste elemento.
+\end{enumerate}
+\medido{\code{corpo\_resolve(2)}: $2b=1$ em 801 inteiros $=0$ soluções;
+em $\mathbb{Q}$ resíduo $0$.}
+
+%----------------------------------------------------------------------
+\section{unicidade do inverso}\label{sec:unicidade-inverso}
+\textbf{Enunciado.} O inverso multiplicativo é único.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $b$ e $c$ dois inversos de $a$: $ab=1$ e $ac=1$.
+\item \textbf{TRADUÇÃO.} Inverso devolve à unidade: $aa^{-1}=1$.
+\item \textbf{OPERAÇÃO.} $b=b\cdot1=b(ac)=(ba)c=1\cdot c=c$ --- cinco passos.
+\item \textbf{LEI.} Associatividade (passo do meio) e comutatividade ($ba=ab=1$).
+\item \textbf{TESTEMUNHA.} Produto $b\cdot a\cdot c$ lido de duas maneiras;
+  $\mathbb{Z}_m$ ($2..13$): nenhum elemento com dois inversos.
+\item \textbf{CONCLUSÃO.} $b=c$; notação $a^{-1}$ legítima.
+\item \textbf{VOLTA.} Quem não tem inverso são os não-coprimos --- outra coisa.
+\end{enumerate}
+\medido{\code{corpo\_resolve(3)} / \code{an\_zn}: $0$ com mais de um inverso.}
+
+%----------------------------------------------------------------------
+\section{cancelamento multiplicativo}\label{sec:cancelamento}
+\textbf{Enunciado.} $a\neq0$ e $ab=ac\Longrightarrow b=c$.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $a\neq0$ num corpo, $ab=ac$.
+\item \textbf{TRADUÇÃO.} Cancelar $=$ tirar o $a$ dos dois lados.
+\item \textbf{OPERAÇÃO.} $a^{-1}(ab)=a^{-1}(ac)\Rightarrow b=c$.
+\item \textbf{LEI.} Existência do inverso ($a\neq0$) e associatividade.
+\item \textbf{TESTEMUNHA.} O $a^{-1}$ --- o que a hipótese compra.
+\item \textbf{CONCLUSÃO.} $b=c$.
+\item \textbf{VOLTA / GUME.} Em $\mathbb{Z}_6$ (não corpo) falha: $2\cdot1=2\cdot4$
+  com $1\neq4$. A hipótese «corpo» faz o teorema.
+\end{enumerate}
+\medido{\code{corpo\_resolve(4)}: $\mathbb{F}_7$ $0$ falhas; $\mathbb{Z}_6$ falhas
+exibidas.}
+
+%----------------------------------------------------------------------
+\section{sem divisores de zero}\label{sec:sem-divisores}
+\textbf{Enunciado.} Num corpo, $ab=0\Longrightarrow a=0$ ou $b=0$.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $ab=0$ num corpo; suponha-se $a\neq0$.
+\item \textbf{TRADUÇÃO.} Domínio integral $=$ anel sem divisores de zero.
+\item \textbf{OPERAÇÃO.} $a^{-1}(ab)=a^{-1}\cdot0\Rightarrow b=0$.
+\item \textbf{LEI.} Inverso, associatividade, $r\cdot0=0$ (distributividade).
+\item \textbf{TESTEMUNHA.} O inverso --- a hipótese $a\neq0$ entrega-o.
+\item \textbf{CONCLUSÃO.} $b=0$: corpo sem divisores de zero.
+\item \textbf{VOLTA.} $\mathbb{Z}_m$ corpos: nenhum divisor; $\mathbb{Z}_6$ tem
+  (exibe-se).
+\end{enumerate}
+\medido{\code{corpo\_resolve(5)} / \code{an\_corpo}, \code{an\_dominio}:
+corpos sem divisores; $\mathbb{Z}_6$ com.}
+
+%----------------------------------------------------------------------
+\section{caracteristica}\label{sec:caracteristica}
+\textbf{Enunciado.} $\operatorname{char}(\mathbb{Q})=\operatorname{char}(\mathbb{R})=0$,
+$\operatorname{char}(\mathbb{F}_5)=5$.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Menor $n>0$ com $n\cdot1=0$ (ou $0$ se não existe).
+\item \textbf{TRADUÇÃO.}
+  $\operatorname{char}(K)=\min\{n>0:n\cdot1=0\}$.
+\item \textbf{OPERAÇÃO.} Em $\mathbb{Q}$, somar $1$ nunca dá $0$. Em $\mathbb{F}_p$,
+  $p$ vezes dá $0$ por construção.
+\item \textbf{LEI.} Inclusão $\mathbb{Z}\hookrightarrow K$: subanel gerado pelo $1$
+  decide ($\mathbb{Z}$ ou $\mathbb{Z}_n$).
+\item \textbf{TESTEMUNHA.} Em $\mathbb{F}_5$ o próprio $5$; em $\mathbb{Q}$ a
+  AUSÊNCIA (teto varrido).
+\item \textbf{CONCLUSÃO.} $\operatorname{char}(\mathbb{Q},\mathbb{R},\mathbb{C})=0$;
+  $\operatorname{char}(\mathbb{F}_p)=p$.
+\item \textbf{VOLTA.} Em $\mathbb{F}_p$, $p\cdot1$ volta ao $0$ exactamente no
+  $p$-ésimo passo.
+\end{enumerate}
+\medido{\code{corpo\_resolve(6)} / \code{corpo\_carac}: $\mathbb{Q}$ até $2000$;
+$\mathbb{F}_p$ passo a passo.}
+
+%----------------------------------------------------------------------
+\section{Zp e corpo quando p primo}\label{sec:zp-corpo}
+\textbf{Enunciado.} $\mathbb{Z}_p$ é corpo quando $p$ é primo.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $p$ primo; $\mathbb{Z}_p=\mathbb{Z}/p\mathbb{Z}$.
+\item \textbf{TRADUÇÃO.} Corpo pede inverso para todo não nulo.
+\item \textbf{OPERAÇÃO.} $\gcd(a,p)=1$ ($p$ primo, $a<p$); Bézout:
+  $ax+py=1\Rightarrow ax\equiv1\pmod{p}$.
+\item \textbf{LEI.} Primalidade $+$ Bézout --- o andar dos números a servir este.
+\item \textbf{TESTEMUNHA.} O $x$ de Bézout (tabela em $\mathbb{F}_7$).
+\item \textbf{CONCLUSÃO.} $\mathbb{Z}_p$ corpo para todo $p$ primo.
+\item \textbf{VOLTA / GUME.} «primo passa, composto cai» ---
+  corpo $\Leftrightarrow m$ primo em $\mathbb{Z}_m$.
+\end{enumerate}
+\medido{\code{corpo\_resolve(7)} / \code{iz\_gcd}, \code{nm\_inv\_mod};
+\code{an\_corpo} $\Leftrightarrow$ \code{nt\_primo}.}
+
+%----------------------------------------------------------------------
+\section{Z6 nao e corpo}\label{sec:z6-nao-corpo}
+\textbf{Enunciado.} $\mathbb{Z}_6$ não é corpo: $2\cdot3=0$.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $\mathbb{Z}_6$ com operações módulo $6$.
+\item \textbf{TRADUÇÃO.} Mesmo pedido de inverso.
+\item \textbf{OPERAÇÃO.} $6=2\cdot3$; $2\cdot3\equiv0$ com ambos não nulos ---
+  divisores de zero.
+\item \textbf{LEI.} Teorema 5 lido ao contrário: exibir divisores nega o corpo.
+\item \textbf{TESTEMUNHA.} O par $(2,3)$; $2$ sem inverso em $\mathbb{Z}_6$.
+\item \textbf{CONCLUSÃO.} $\mathbb{Z}_6$ NÃO é corpo.
+\item \textbf{VOLTA / GUME.} Mesmo varredura: composto cai.
+\end{enumerate}
+\medido{\code{corpo\_resolve(8)} / \code{an\_dominio}: $2\cdot3=0$;
+inverso de $2$ recusa.}
+
+%======================================================================
+\section{inversos em F7}\label{sec:inversos-f7}
+\textbf{Enunciado.} Os inversos de todos os não nulos de $\mathbb{F}_7$.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $\mathbb{F}_7$; inversos dos não nulos.
+\item \textbf{TRADUÇÃO.} $aa^{-1}\equiv1\pmod{7}$.
+\item \textbf{OPERAÇÃO.} Três caminhos: procurar, Euclides estendido,
+  $a^{-1}=a^{p-2}$ (Fermat) --- os três iguais.
+\item \textbf{LEI.} Bézout + Fermat; a concordância é a medida.
+\item \textbf{TESTEMUNHA.} Produto $a\cdot a^{-1}=1$ em cada linha.
+\item \textbf{CONCLUSÃO.} Todo não nulo tem inverso --- isso é ser corpo.
+\item \textbf{VOLTA.} Euclides e $a^{p-2}$ dão a mesma tabela; produtos fecham em $1$.
+\end{enumerate}
+\medido{\code{corpo\_resolve(9)} / \code{nm\_inv\_mod}, \code{iz\_pot\_mod}.}
+
+%----------------------------------------------------------------------
+\section{carac zero ou primo}\label{sec:carac-primo}
+\textbf{Enunciado.} A característica de um corpo é $0$ ou prima.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $\operatorname{char}(K)=n>0$ composto, $n=ab$ com
+  $1<a,b<n$.
+\item \textbf{TRADUÇÃO.} $n\cdot1=0$ e $n=ab$.
+\item \textbf{OPERAÇÃO.} $(a\cdot1)(b\cdot1)=0$; sem divisores (CP5)
+  $\Rightarrow a\cdot1=0$ ou $b\cdot1=0$ --- contradiz minimalidade.
+\item \textbf{LEI.} Teorema 5 (sem divisores) --- vale em corpos, não em anéis
+  quaisquer.
+\item \textbf{TESTEMUNHA.} $a\cdot1$ (ou $b\cdot1$) anula-se com $a<n$.
+\item \textbf{CONCLUSÃO.} $n$ primo: $\operatorname{char}(K)=0$ ou $p$.
+\item \textbf{VOLTA / GUME.} Em $\mathbb{Z}_6$ (não corpo) char $=6$ composta ---
+  o teorema é sobre o corpo.
+\end{enumerate}
+\medido{\code{corpo\_resolve(10)}: $\mathbb{Z}_m$ $2..20$; char prima
+$\Leftrightarrow$ corpo.}
+
+%----------------------------------------------------------------------
+\section{p elevado a n}\label{sec:p-elevado-n}
+\textbf{Enunciado.} Todo corpo finito tem $p^n$ elementos.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $K$ corpo finito.
+\item \textbf{TRADUÇÃO.} $|K|=p^n$ com $p=\operatorname{char}(K)$ primo.
+\item \textbf{OPERAÇÃO.} Contém cópia de $\mathbb{F}_p$; $K$ é $\mathbb{F}_p$-espaço
+  de dimensão $n$; $|K|=p^n$ por contagem de coordenadas.
+\item \textbf{LEI.} Contagem do produto cartesiano $\mathbb{F}_p^n$.
+\item \textbf{TESTEMUNHA.} Base de $K$ sobre $\mathbb{F}_p$; lista $p^n$ possíveis
+  vs compostos impossíveis.
+\item \textbf{CONCLUSÃO.} $|K|=p^n$, sempre.
+\item \textbf{VOLTA.} Para cada $p^n$ constrói-se o corpo ($\mathbb{F}_4$,
+  $\mathbb{F}_9$, $\mathbb{F}_8$) e mede-se.
+\end{enumerate}
+\medido{\code{corpo\_resolve(11)} / \code{nt\_fatora}, \code{corpo\_ext}.}
+
+%----------------------------------------------------------------------
+\section{x2-2 irredutivel}\label{sec:x2-2}
+\textbf{Enunciado.} $x^2-2$ é irredutível em $\mathbb{Q}[x]$.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $x^2-2$ sobre $\mathbb{Q}$; $\alpha=\sqrt{2}$.
+\item \textbf{TRADUÇÃO.} Irredutível $=$ não fatora em graus menores.
+\item \textbf{OPERAÇÃO.} Grau $2$ fatora $\Leftrightarrow$ tem raiz em $\mathbb{Q}$;
+  raiz $\Leftrightarrow\sqrt{2}\in\mathbb{Q}$.
+\item \textbf{LEI.} $\sqrt{d}\in\mathbb{Q}\Leftrightarrow$ todo expoente primo de
+  $d$ é PAR; aqui $2^1$ ímpar.
+\item \textbf{TESTEMUNHA.} O primo de expoente ímpar; varredura de racionais.
+\item \textbf{CONCLUSÃO.} $x^2-2$ irredutível em $\mathbb{Q}[x]$.
+\item \textbf{VOLTA.} $\alpha^2-2=0$ em $\mathbb{Q}(\sqrt{2})$ exacto.
+\end{enumerate}
+\medido{\code{corpo\_resolve(12)} / \code{rz\_cmp}, \code{qs}: $0$ raízes
+racionais; resíduo $0$.}
+
+%----------------------------------------------------------------------
+\section{Q raiz de 2}\label{sec:q-raiz-2}
+\textbf{Enunciado.} A construção de $\mathbb{Q}(\sqrt{2})$, e
+$[\mathbb{Q}(\sqrt{2}):\mathbb{Q}]=2$.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $\mathbb{Q}$ e $\alpha=\sqrt{2}$ algébrico.
+\item \textbf{TRADUÇÃO.}
+  $\mathbb{Q}(\sqrt{2})=\{a+b\sqrt{2}:a,b\in\mathbb{Q}\}$.
+\item \textbf{OPERAÇÃO.} Fecha sob $+$ e $\times$: $\sqrt{2}\cdot\sqrt{2}=2$
+  volta a $\mathbb{Q}$ --- basta grau $1$.
+\item \textbf{LEI.} Relação $\alpha^2=2$ (polinómio mínimo reduz potências).
+\item \textbf{TESTEMUNHA.} Norma: $(a+b\sqrt{2})(a-b\sqrt{2})=a^2-2b^2$ só zero
+  se $a=b=0$.
+\item \textbf{CONCLUSÃO.} $\mathbb{Q}(\sqrt{2})$ é corpo; base $\{1,\sqrt{2}\}$.
+\item \textbf{VOLTA.} Cada inverso $\times$ original $=1+0\sqrt{2}$.
+\end{enumerate}
+\medido{\code{corpo\_resolve(13)} / \code{qs\_inverso}, \code{qs\_norma}.}
+
+%----------------------------------------------------------------------
+\section{constroi F4}\label{sec:constroi-f4}
+\textbf{Enunciado.} $\mathbb{F}_4=\mathbb{F}_2[x]/(x^2+x+1)$.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $\mathbb{F}_2$ e polinómio mónico grau $2$.
+\item \textbf{TRADUÇÃO.} Quociente por irredutível:
+  $\mathbb{F}_4=\mathbb{F}_2[x]/(x^2+x+1)$.
+\item \textbf{OPERAÇÃO.} Irredutibilidade: grau $2$ fatora $\Leftrightarrow$ raiz;
+  testam-se as $p$ raízes --- nenhuma zero.
+\item \textbf{LEI.} Irredutível : polinómio $::$ primo : inteiro --- quociente
+  é corpo.
+\item \textbf{TESTEMUNHA.} Tábua: todo não nulo tem inverso; $|K|=4=2^2$.
+\item \textbf{CONCLUSÃO.} Quociente é corpo com $4$ elementos.
+\item \textbf{VOLTA / GUME.} Polinómio redutível ($x^2+1=(x+1)^2$ em $\mathbb{F}_2$):
+  quociente NÃO é corpo.
+\end{enumerate}
+\medido{\code{corpo\_resolve(14)} / \code{corpo\_ext}, \code{fx\_irredutivel}.}
+
+%----------------------------------------------------------------------
+\section{inversos em F4}\label{sec:inversos-f4}
+\textbf{Enunciado.} Os inversos em $\mathbb{F}_4$.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $\mathbb{F}_4=\mathbb{F}_2[x]/(x^2+x+1)$; elementos
+  $0,1,x,x+1$.
+\item \textbf{TRADUÇÃO.} $aa^{-1}=1$ em $\mathbb{F}_4$.
+\item \textbf{OPERAÇÃO.} $x\cdot(x+1)=1$ via $x^2=x+1$ (característica $2$).
+\item \textbf{LEI.} Redução módulo o polinómio --- mesmo mecanismo do resto.
+\item \textbf{TESTEMUNHA.} Tábua reduzida dos três não nulos.
+\item \textbf{CONCLUSÃO.} Todo não nulo tem inverso; $x^{-1}=x+1=x^2$
+  (inversão $=$ potência).
+\item \textbf{VOLTA.} Produtos dão $1$; $0$ sem fibra.
+\end{enumerate}
+\medido{\code{corpo\_resolve(15)} / \code{corpo\_inv}, \code{corpo\_primitivo}.}
+
+%----------------------------------------------------------------------
+\section{quociente e corpo}\label{sec:quociente-corpo}
+\textbf{Enunciado.} $K[x]/(p)$ é corpo quando $p$ é irredutível.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $K$ corpo; $p(x)\in K[x]$ irredutível.
+\item \textbf{TRADUÇÃO.} Quociente pelo ideal $(p(x))$.
+\item \textbf{OPERAÇÃO.} $f\neq0\Rightarrow\gcd(f,p)=1$; Bézout em $K[x]$:
+  $fu+pv=1\Rightarrow fu\equiv1$.
+\item \textbf{LEI.} Bézout em $K[x]$ --- mesma descida de Euclides (divisão com resto).
+\item \textbf{TESTEMUNHA.} O $u$ do rastro de Euclides polinomial.
+\item \textbf{CONCLUSÃO.} $K[x]/(p)$ corpo --- cadeia
+  corpo$\to$polinómio$\to$fatoração$\to$irredutível$\to$quociente.
+\item \textbf{VOLTA.} Equivalência: irredutível $\Leftrightarrow$ corpo (gume no
+  redutível).
+\end{enumerate}
+\medido{\code{corpo\_resolve(16)}: quatro quocientes;
+irredutível $\Leftrightarrow$ corpo.}
+
+%======================================================================
+\section{polinomio minimo}\label{sec:polinomio-minimo}
+\textbf{Enunciado.} O polinómio mínimo de $\sqrt{3}$.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $x^2-3$ sobre $\mathbb{Q}$; $\alpha=\sqrt{3}$.
+\item \textbf{TRADUÇÃO.} $m_{\alpha}(x)$ mónico, irredutível, $m_{\alpha}(\alpha)=0$.
+\item \textbf{OPERAÇÃO.} Grau $2$ fatora $\Leftrightarrow$ raiz racional;
+  $\sqrt{3}\in\mathbb{Q}\Leftrightarrow$ expoentes pares --- $3^1$ ímpar.
+\item \textbf{LEI.} Mesma do andar de $\mathbb{R}$ (CP12).
+\item \textbf{TESTEMUNHA.} Primo de expoente ímpar; varredura de racionais.
+\item \textbf{CONCLUSÃO.} $m_{\sqrt{3}}(x)=x^2-3$, único.
+\item \textbf{VOLTA.} $\alpha^2-3=0$ em $\mathbb{Q}(\sqrt{3})$ exacto.
+\end{enumerate}
+\medido{\code{corpo\_resolve(17)} / \code{qs} com $d=3$: resíduo $0$.}
+
+%----------------------------------------------------------------------
+\section{sem corpo de 6}\label{sec:sem-corpo-6}
+\textbf{Enunciado.} Não existe corpo com $6$ elementos.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Suponha-se corpo com $6$ elementos.
+\item \textbf{TRADUÇÃO.} $|K|=p^n$ (CP11).
+\item \textbf{OPERAÇÃO.} $6=2\cdot3$ --- dois primos distintos, não é $p^n$.
+\item \textbf{LEI.} Contagem / factorização (CP11).
+\item \textbf{TESTEMUNHA.} Factorização do número pedido.
+\item \textbf{CONCLUSÃO.} Não existe corpo com $6$ elementos.
+\item \textbf{VOLTA.} Os que existem ($\mathbb{F}_4,\mathbb{F}_8,\mathbb{F}_9$)
+  constroem-se e medem-se.
+\end{enumerate}
+\medido{\code{corpo\_resolve(18)} / \code{nt\_fatora}: $6=2\cdot3$.}
+
+%----------------------------------------------------------------------
+\section{sem corpo de 10}\label{sec:sem-corpo-10}
+\textbf{Enunciado.} Nem com $10$ --- e a razão é a mesma.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Suponha-se corpo com $10$ elementos.
+\item \textbf{TRADUÇÃO.} $|K|=p^n$.
+\item \textbf{OPERAÇÃO.} $10=2\cdot5$ --- dois primos; char teria de ser $2$ e $5$.
+\item \textbf{LEI.} Mesma (CP11).
+\item \textbf{TESTEMUNHA.} Factorização.
+\item \textbf{CONCLUSÃO.} Não existe corpo com $10$ elementos.
+\item \textbf{VOLTA.} Mesma: construir os $p^n$ que existem.
+\end{enumerate}
+\medido{\code{corpo\_resolve(19)} / \code{nt\_fatora}: $10=2\cdot5$.}
+
+%----------------------------------------------------------------------
+\section{corpo de 9}\label{sec:corpo-de-9}
+\textbf{Enunciado.} A construção de um corpo com $9$ elementos.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $\mathbb{F}_3$ e polinómio mónico grau $2$.
+\item \textbf{TRADUÇÃO.} $\mathbb{F}_9=\mathbb{F}_3[x]/(x^2+1)$.
+\item \textbf{OPERAÇÃO.} Irredutibilidade: nenhuma raiz em $\mathbb{F}_3$.
+\item \textbf{LEI.} Quociente por irredutível $=$ corpo (como $\mathbb{Z}/p$).
+\item \textbf{TESTEMUNHA.} Tábua; $|K|=9=3^2$; corpo; char $=3$.
+\item \textbf{CONCLUSÃO.} Corpo com $9$ elementos.
+\item \textbf{VOLTA / GUME.} Redutível $\Rightarrow$ não corpo (mesmo mecanismo CP14).
+\end{enumerate}
+\medido{\code{corpo\_resolve(20)} / \code{corpo\_ext} com $p=3$, $x^2+1$.}
+
+%----------------------------------------------------------------------
+\section{multiplicativo ciclico}\label{sec:multiplicativo-ciclico}
+\textbf{Enunciado.} $K^{\times}$ é CÍCLICO quando $K$ é finito.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $K$ finito, $|K|=q$; quer-se $g$ que gere $K^{\times}$.
+\item \textbf{TRADUÇÃO.} $K^{\times}=\langle g\rangle$, $|K^{\times}|=q-1$.
+\item \textbf{OPERAÇÃO.} Para $d\mid q-1$, $x^d-1$ tem $\leq d$ raízes num corpo;
+  a contagem só fecha se existir ordem $q-1$.
+\item \textbf{LEI.} «Polinómio de grau $d$ tem $\leq d$ raízes num CORPO» ---
+  depende de sem divisores (CP5).
+\item \textbf{TESTEMUNHA.} Elemento primitivo em cada $\mathbb{Z}_p$ e extensões.
+\item \textbf{CONCLUSÃO.} $K^{\times}$ cíclico --- todo corpo finito tem primitivo.
+\item \textbf{VOLTA.} Potências de $g$ percorrem os $q-1$ não nulos sem repetir.
+\end{enumerate}
+\medido{\code{corpo\_resolve(21)} / \code{corpo\_primitivo} em $\mathbb{Z}_p$
+e $\mathbb{F}_4,\mathbb{F}_8,\mathbb{F}_9$.}
+
+%----------------------------------------------------------------------
+\section{primitivo de F7}\label{sec:primitivo-f7}
+\textbf{Enunciado.} Um elemento primitivo de $\mathbb{F}_7$.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $\mathbb{F}_7$; $g$ que gere o grupo multiplicativo.
+\item \textbf{TRADUÇÃO.} $K^{\times}=\{1,g,g^2,\ldots,g^{q-2}\}$.
+\item \textbf{OPERAÇÃO.} $g$ primitivo $\Leftrightarrow$ ordem $=q-1=6$; órbita
+  de cada candidato.
+\item \textbf{LEI.} Lagrange: ordem divide $6$ ($1,2,3,6$); primitivo $=$ caso $6$.
+\item \textbf{TESTEMUNHA.} Órbita inteira exibida.
+\item \textbf{CONCLUSÃO.} $3$ e $5$ primitivos; $1,2,4,6$ não.
+\item \textbf{VOLTA.} Ordens dividem $6$; $\#\{\mathrm{primitivos}\}=\varphi(6)=2$.
+\end{enumerate}
+\medido{\code{corpo\_resolve(22)} / \code{nm\_ordem}, \code{nm\_phi}.}
+
+%----------------------------------------------------------------------
+\section{fermat pelo grupo}\label{sec:fermat-grupo}
+\textbf{Enunciado.} O pequeno Fermat pelo grupo multiplicativo.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $p$ primo; $a\neq0$ em $\mathbb{F}_p$.
+\item \textbf{TRADUÇÃO.} $a^{p-1}=1$ em $\mathbb{F}_p$.
+\item \textbf{OPERAÇÃO.} $\mathbb{F}_p^{\times}$ grupo ordem $p-1$;
+  $\mathrm{ord}(a)\mid p-1\Rightarrow a^{p-1}=1$.
+\item \textbf{LEI.} Lagrange --- três linhas; sem o grupo seria indução com binómios.
+\item \textbf{TESTEMUNHA.} $k=(p-1)/\mathrm{ord}(a)$ exibe-se.
+\item \textbf{CONCLUSÃO.} $a^{p-1}=1$ para todo $a\neq0$.
+\item \textbf{VOLTA.} $a^{-1}=a^{p-2}$ --- inversão vira potência.
+\end{enumerate}
+\medido{\code{corpo\_resolve(23)}: todos $a^{p-1}=1$; ordens dividem $p-1$.}
+
+%----------------------------------------------------------------------
+\section{inverso por euclides}\label{sec:inverso-euclides}
+\textbf{Enunciado.} A inversão em $\mathbb{F}_p$ por Euclides.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $p$ primo; $a\neq0$; inverso SEM tentativa.
+\item \textbf{TRADUÇÃO.} $ax+py=\gcd(a,p)=1\Rightarrow ax\equiv1\pmod{p}$.
+\item \textbf{OPERAÇÃO.} $\gcd=1$ ($p$ primo); descida produz $x$; reduz módulo $p$.
+\item \textbf{LEI.} Primalidade + Bézout; custo $\log p$ vs $p$ passos.
+\item \textbf{TESTEMUNHA.} O $x$ do mesmo rastro do gcd.
+\item \textbf{CONCLUSÃO.} Inversão em $\mathbb{F}_p$ é Euclides, não busca.
+\item \textbf{VOLTA.} Três caminhos: Bézout, $a^{p-2}$, produto $=1$ --- concordam.
+\end{enumerate}
+\medido{\code{corpo\_resolve(24)}: $\mathbb{F}_{13}$, $12$ não nulos,
+Bézout $=$ Fermat $=$ inverso.}
+
+%----------------------------------------------------------------------
+\section{a orbita e o corpo}\label{sec:orbita-corpo}
+\textbf{Enunciado.} Euclides $\leftrightarrow$ MDC $\leftrightarrow$ Bézout
+$\leftrightarrow$ inverso $\leftrightarrow$ corpo.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $a,p$ com $\gcd(a,p)=1$; cinco coisas são UMA.
+\item \textbf{TRADUÇÃO.} A cadeia acima.
+\item \textbf{OPERAÇÃO.} Descida $a=pq+r$: do MESMO rastro saem gcd, Bézout,
+  inverso; se gcd sempre $1$, o corpo.
+\item \textbf{LEI.} Uma só: DIVISÃO COM RESTO --- faz a descida terminar.
+\item \textbf{TESTEMUNHA.} Cadeia de restos (ex.: Euclides$(13,5)$).
+\item \textbf{CONCLUSÃO.} Cinco leituras do mesmo rastro; corpo $=$ isto para TODO
+  não nulo.
+\item \textbf{VOLTA.} Equivalência: $\mathbb{F}_p$ corpo $\Leftrightarrow$
+  Euclides devolve sempre $1$ $\Leftrightarrow$ Bézout dá sempre inverso.
+\end{enumerate}
+\medido{\code{corpo\_resolve(25)}: «Euclides dá sempre $1$» $\Leftrightarrow$
+«é corpo» em $\mathbb{Z}_m$ até ao teto.}
+
+%======================================================================
+\section{o que fica no conversa}
+A prosa canónica CP1--CP25 é este ficheiro --- o catálogo dos corpos
+\textbf{fecha} aqui. \code{corpo\_resolve} \textbf{mede}.
+Próximo lote natural: outros \code{resolve\_*} (álgebra moderna, cálculo, \ldots)
+no mesmo molde TeX vivo.
+
+\end{document}

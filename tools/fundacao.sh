@@ -146,25 +146,20 @@ aprende "o que e a partitura pi" "Π=assinatura+notação: o quê do Maestro. Tr
 aprende "como a partitura entra na assistente" "partituraFala→Π; I da batuta; ℱ escolhe ramo; Metrónomo lê r. app/src/maestro.js"
 aprende "mostra a partitura" "corpus/docs/partitura.tex — partitura-wasm.pdf"
 
-# ========== Ingestão estrutural ==========
-echo "ingere teoria.tex…"
-python3 "$D/ingere.py" "$ROOT/teoria.tex" | "$CV" "$B" - >/dev/null
-echo "ingere torre_fundacao.tex…"
-python3 "$D/ingere.py" "$ROOT/corpus/docs/torre_fundacao.tex" | "$CV" "$B" - >/dev/null
-echo "ingere conversa_fundacao.tex…"
-python3 "$D/ingere.py" "$ROOT/corpus/fala/conversa_fundacao.tex" | "$CV" "$B" - >/dev/null || true
-echo "ingere conversa_andar_peano.tex…"
-python3 "$D/ingere.py" "$ROOT/corpus/fala/conversa_andar_peano.tex" | "$CV" "$B" - >/dev/null || true
-echo "ingere conversa_rede_dual.tex…"
-python3 "$D/ingere.py" "$ROOT/corpus/fala/conversa_rede_dual.tex" | "$CV" "$B" - >/dev/null || true
-echo "ingere conversa_arvore_n1_rede_dual.tex…"
-python3 "$D/ingere.py" "$ROOT/corpus/fala/conversa_arvore_n1_rede_dual.tex" | "$CV" "$B" - >/dev/null || true
-# corpo_topologico: só secções leves via paper conversa; não ingerir o paper inteiro ainda
+# ========== Índice vivo (sem duplicar corpos TeX) ==========
+echo "indexa tex vivo (teoria + fundação + falas)…"
+export TIFFANY_ROOT="$ROOT"
+python3 "$D/indexa_tex_vivo.py" 2>/dev/null | "$CV" "$B" - >/dev/null || true
+# ponteiros curtos que o índice pode não ter como título exacto
+aprende "mostra a fundação" "@TEX corpus/docs/torre_fundacao.tex"
+aprende "mostra a teoria" "@TEX teoria.tex"
+aprende "mostra o corpo de peano" "@TEX papers/corpo_topologico.tex"
 
-echo "fundação+andar: base=$B"
+echo "fundação+andar: base=$B (tex vivo)"
+export TIFFANY_ROOT="$ROOT"
 for q in "o que é um corpo" "o que é a lei 1" "o que faz o maestro" "o que e histerese aqui" "o que e a rede dual" "mostra a fundação"; do
   echo "Q: $q"
-  "$CV" "$B" responde "$q" | head -1
+  "$CV" "$B" responde "$q" | head -2
 done
 
 if [ "${ARVORE:-0}" = "1" ]; then

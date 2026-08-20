@@ -46,7 +46,7 @@ def main() -> None:
 }
 \begin{document}
 
-% CC BY 4.0 · Copyright (c) 2026 Aarão Melo Lopes · ver LICENSE na raiz.
+% Proprietário · Copyright (c) 2026 Aarão Melo Lopes · ver LICENSE na raiz.
 
 \newgeometry{margin=2.5cm}
 \begin{center}
@@ -86,7 +86,7 @@ As versões também existem em separado:
 \,·\,
 \href{https://goldenkingdom.patriatechnology.com}{goldenkingdom.patriatechnology.com}
 \\[4pt]
-CC BY 4.0 (textos) · MIT (código)}
+Proprietário — contrato e pagamento (LICENSE)}
 \end{center}
 
 \newpage

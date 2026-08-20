@@ -1,0 +1,427 @@
+% !TeX program = pdflatex
+% corpus/docs/calculo2_exercicios.tex — ticks C2-1–C2-21 (partes → Green).
+%
+% Prosa canónica; testemunhas em calculo2_resolve() (banco/conversa.c).
+% Espinha: HIPÓTESES → DEFINIÇÃO → TRANSIÇÃO → LEI → TESTEMUNHA → CONCLUSÃO → VOLTA.
+%
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[portuguese]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\medido}[1]{\par\medskip\noindent{\small\color{gray}\textbf{Medido.} #1}\par\medskip}
+
+\begin{document}
+\title{Cálculo II --- exercícios\\
+\large C2-1--C2-21: partes $\to$ Green}
+\author{Tiffany --- corpus vivo}
+\date{}
+\maketitle
+
+\begin{abstract}
+\noindent Vinte e um exercícios (\code{C2\_21[]} em \code{banco/conversa.c}) ---
+este ficheiro fecha o catálogo. Eixo: LOCAL $\to$ GLOBAL.
+Operação ao vivo: \code{responde} / \code{calculo2 N}.
+\end{abstract}
+
+\section{como se le este documento}
+Espinha dos sete slots. Lotes: C2-1--C2-8 (partes\ldots geométrica);
+C2-9--C2-16 (raio\ldots cadeia multi); C2-17--C2-21 (Hessiana\ldots Green).
+Colisões: \code{bolzano monotona}; \code{taylor momentos};
+\code{lagrange multiplicadores}.
+
+%======================================================================
+\section{partes}\label{sec:partes-c2}
+\textbf{Enunciado.} $\int u\,dv=uv-\int v\,du$, e sai DIRECTO da regra do produto.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $u,v$ deriváveis num intervalo.
+\item \textbf{TRADUÇÃO.} $\int u\,dv=uv-\int v\,du$.
+\item \textbf{OPERAÇÃO.} Regra do produto lida ao contrário: $(uv)'=u'v+uv'$;
+  integrar.
+\item \textbf{LEI.} Teorema Fundamental --- partes e substituição são produto e
+  cadeia invertidos.
+\item \textbf{TESTEMUNHA.} Dois caminhos: $\int f g'$ vs $fg\big|_a^b-\int f'g$
+  exactos.
+\item \textbf{CONCLUSÃO.} A fórmula é a regra do produto integrada.
+\item \textbf{VOLTA.} LOCAL $\to$ GLOBAL: produto local; integrar torna global
+  (TFC).
+\end{enumerate}
+\medido{\code{calculo2\_resolve(1)}: $\int fg'=fg-\int f'g$ em $[0,2]$.}
+
+%----------------------------------------------------------------------
+\section{impropria}\label{sec:impropria}
+\textbf{Enunciado.} $\int_1^\infty dx/x^p$ converge exactamente quando $p>1$.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $p\ge1$ inteiro; integral (e série-p gémea).
+\item \textbf{TRADUÇÃO.} Convergência exacta para $p>1$.
+\item \textbf{OPERAÇÃO.} Não acumular soma parcial monstro --- comparar com soma
+  que TELESCOPA.
+\item \textbf{LEI.} Para $p\ge2$: $1/n^p\le1/(n(n-1))=1/(n-1)-1/n$; $\Sigma<1$.
+\item \textbf{TESTEMUNHA.} Majoração vale em $p\ge2$, FALHA em $p=1$ (falhas
+  contadas); harmónica por blocos.
+\item \textbf{CONCLUSÃO.} Converge para $p>1$; diverge em $p=1$.
+\item \textbf{VOLTA.} Objecto errado (soma estoura) $\neq$ guarda --- convergência
+  decide-se por comparação.
+\end{enumerate}
+\medido{\code{calculo2\_resolve(2)} / \code{sr\_majora}: falha só em $p=1$.}
+
+%----------------------------------------------------------------------
+\section{sequencia}\label{sec:sequencia-c2}
+\textbf{Enunciado.} $a_n=n/(n+1)\to1$, com o $N$ PROCURADO --- e $(-1)^n$ é o
+gume.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $a_n=n/(n+1)$.
+\item \textbf{TRADUÇÃO.} $\forall\varepsilon>0\,\exists N:\ n>N\Rightarrow|a_n-1|<\varepsilon$.
+\item \textbf{OPERAÇÃO.} $|n/(n+1)-1|=1/(n+1)$ exacto; achar $N$ em $\mathbb{Q}$.
+\item \textbf{LEI.} $N$ não se promete --- PROCURA-SE (como o $\delta$ do Cálculo~I).
+\item \textbf{TESTEMUNHA.} $N$ exibido por $\varepsilon$; gume $(-1)^n$ limitada e
+  não monótona.
+\item \textbf{CONCLUSÃO.} $n/(n+1)\to1$ com $N=\lceil1/\varepsilon\rceil$.
+\item \textbf{VOLTA.} Escada de observadores (\code{thm:escada}): quem não
+  estabiliza não converge.
+\end{enumerate}
+\medido{\code{calculo2\_resolve(3)} / \code{sq\_acha\_N}: $N$ para cada
+$\varepsilon$.}
+
+%----------------------------------------------------------------------
+\section{bolzano monotona}\label{sec:bolzano-c2}
+\textbf{Enunciado.} Limitada $+$ monótona $\Rightarrow$ convergente; e só limitada
+NÃO basta.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $(a_n)$ limitada.
+\item \textbf{TRADUÇÃO.} Limitada $+$ monótona $\Rightarrow$ convergente.
+\item \textbf{OPERAÇÃO.} Completude: crescente limitada tem $\sup$ e converge para
+  ele; monotonia impede oscilação.
+\item \textbf{LEI.} As duas hipóteses operam; retirada a monotonia, cai.
+\item \textbf{TESTEMUNHA.} Gume $(-1)^n$: limitada, NÃO monótona, NÃO converge ---
+  dois limites de subsucessão.
+\item \textbf{CONCLUSÃO.} Limitada sozinha NÃO chega; monotonia é operacional.
+\item \textbf{VOLTA.} Bolzano--Weierstrass salva subsucessão --- aqui podem ser
+  duas, com limites distintos.
+\end{enumerate}
+\medido{\code{calculo2\_resolve(4)}: $N$ da sequencia + gume $(-1)^n$.}
+
+%----------------------------------------------------------------------
+\section{serie}\label{sec:serie-c2}
+\textbf{Enunciado.} A série é o objecto; o VALOR é que precisa do limite.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $\sum a_n x^n$ com coeficientes racionais.
+\item \textbf{TRADUÇÃO.} $S_N=\sum_{n=0}^{N}a_n$; converge $\Leftrightarrow S_N\to S$.
+\item \textbf{OPERAÇÃO.} Objecto $=$ vector de coeficientes (soma, produto, deriva
+  sem limite); valor precisa do limite.
+\item \textbf{LEI.} Série FORMAL --- como Dirichlet pelos coeficientes
+  (\code{dirichlet.h}).
+\item \textbf{TESTEMUNHA.} Identidade formal $(1-x)\sum x^n=1$ com resíduo zero;
+  somas parciais à parte.
+\item \textbf{CONCLUSÃO.} Objecto existe antes; convergência é pergunta sobre o
+  valor.
+\item \textbf{VOLTA.} LOCAL $\to$ GLOBAL: coeficientes locais; convergência global;
+  extremos à parte.
+\end{enumerate}
+\medido{\code{calculo2\_resolve(5)}: objecto formal vs valor.}
+
+%----------------------------------------------------------------------
+\section{termo geral}\label{sec:termo-geral}
+\textbf{Enunciado.} $a_n\to0$ é NECESSÁRIO e não suficiente --- a harmónica é o
+gume.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $\sum a_n$; tipicamente $a_n=1/n^p$.
+\item \textbf{TRADUÇÃO.} $\sum a_n$ converge $\Rightarrow a_n\to0$ --- recíproca
+  FALSA.
+\item \textbf{OPERAÇÃO.} Termo geral LOCAL; convergência GLOBAL --- o salto não é
+  automático.
+\item \textbf{LEI.} Necessário $\neq$ suficiente.
+\item \textbf{TESTEMUNHA.} Em $p=1$ o termo vai a zero e a série DIVERGE (blocos
+  $\ge1/2$).
+\item \textbf{CONCLUSÃO.} $a_n\to0$ necessário e não suficiente; harmónica prova.
+\item \textbf{VOLTA.} LOCAL $\to$ GLOBAL na forma mais crua deste andar.
+\end{enumerate}
+\medido{\code{calculo2\_resolve(6)} / \code{sr\_termo\_a\_zero}: gume harmónica.}
+
+%----------------------------------------------------------------------
+\section{serie p}\label{sec:serie-p}
+\textbf{Enunciado.} $\sum1/n^p$: a comparação que TELESCOPA, e a soma exacta
+ESTOURA.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $\sum_{n\ge1}1/n^p$.
+\item \textbf{TRADUÇÃO.} Converge exactamente quando $p>1$.
+\item \textbf{OPERAÇÃO.} Objecto da soma parcial exacta ESTOURA o \texttt{long};
+  comparação telescópica fica pequena.
+\item \textbf{LEI.} $1/n^p\le1/(n-1)-1/n$ para $p\ge2$; $\Sigma\le1-1/N<1$.
+\item \textbf{TESTEMUNHA.} Telescopagem $=$ forma fechada; majoração $0$ falhas em
+  $p=2,3$; falha em $p=1$.
+\item \textbf{CONCLUSÃO.} Converge $p\ge2$; diverge $p=1$ --- sem monstro.
+\item \textbf{VOLTA.} Objecto errado (soma) $\neq$ guarda; critério estrutural.
+\end{enumerate}
+\medido{\code{calculo2\_resolve(7)} / \code{sr\_telescopa}: identidade exacta.}
+
+%----------------------------------------------------------------------
+\section{geometrica}\label{sec:geometrica}
+\textbf{Enunciado.} $(1-x)\cdot\sum x^n=1$ como série FORMAL, sem convergência
+nenhuma.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Série de potências $\sum x^n$.
+\item \textbf{TRADUÇÃO.} $(1-x)\sum_{n\ge0}x^n=1$.
+\item \textbf{OPERAÇÃO.} Produto de Cauchy exacto: coeficientes cancelam-se aos
+  pares; sobra $1$ --- sem convergência.
+\item \textbf{LEI.} Identidade entre vectores de coeficientes.
+\item \textbf{TESTEMUNHA.} $a_0=1$ e zero nulos acima; somas parciais em $x=1/2$ à
+  parte.
+\item \textbf{CONCLUSÃO.} Identidade FORMAL; convergência é pergunta SEPARADA.
+\item \textbf{VOLTA.} Extremos do raio ($x=\pm1$) examinam-se à parte --- o salto
+  local/global não é sozinho.
+\end{enumerate}
+\medido{\code{calculo2\_resolve(8)} / \code{sr\_geometrica}: resíduo zero.}
+
+%----------------------------------------------------------------------
+\section{raio}\label{sec:raio}
+\textbf{Enunciado.} $|x-c|<R$ converge, $>R$ diverge, e os extremos à parte.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $\sum a_n(x-c)^n$ com coeficientes racionais.
+\item \textbf{TRADUÇÃO.} $|x-c|<R$ converge; $|x-c|>R$ diverge.
+\item \textbf{OPERAÇÃO.} Raio decide o aberto; extremos ($|x-c|=R$) examinados
+  SEPARADAMENTE.
+\item \textbf{LEI.} Série formal vs valor --- o raio é pergunta sobre o valor.
+\item \textbf{TESTEMUNHA.} $\sum x^n/n$ com $R=1$: em $x=1$ diverge (harmónica);
+  em $x=-1$ converge (alternada).
+\item \textbf{CONCLUSÃO.} Interior do disco pelo raio; bordo à parte.
+\item \textbf{VOLTA.} LOCAL $\to$ GLOBAL: extremos são onde o salto não se faz
+  sozinho.
+\end{enumerate}
+\medido{\code{calculo2\_resolve(9)}: extremos $x=\pm1$ separados.}
+
+%----------------------------------------------------------------------
+\section{taylor momentos}\label{sec:taylor-c2}
+\textbf{Enunciado.} $f$ pelos seus coeficientes --- e são os MOMENTOS do
+observador.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f$ suficientemente derivável em torno de $a$.
+\item \textbf{TRADUÇÃO.} $f(x)=\sum_{n=0}^{N}f^{(n)}(a)/n!\,(x-a)^n+R_N(x)$.
+\item \textbf{OPERAÇÃO.} Ler a função pelos COEFICIENTES --- objectos algébricos
+  FINITOS; grau $=$ quanto se vê.
+\item \textbf{LEI.} Identidades de derivação $=$ identidades de coeficientes.
+\item \textbf{TESTEMUNHA.} $\exp'=\exp$, $\sin'=\cos$, $\cos'=-\sin$ termo a termo;
+  $\sin^2+\cos^2=1$ como série.
+\item \textbf{CONCLUSÃO.} Taylor lê por coeficientes; identidades sobrevivem.
+\item \textbf{VOLTA.} Coeficientes $=$ momentos $\Phi_m$ (\code{thm:escada});
+  truncamento $=$ degrau do observador (\code{thm:teto-oito}).
+\end{enumerate}
+\medido{\code{calculo2\_resolve(10)}: identidades nos coeficientes; $0$ falhas.}
+
+%----------------------------------------------------------------------
+\section{exp seno cosseno}\label{sec:exp-seno-cosseno}
+\textbf{Enunciado.} $\exp'=\exp$, $\sin'=\cos$, $\cos'=-\sin$: nos COEFICIENTES.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Séries $e^x$, $\sin x$, $\cos x$ truncadas.
+\item \textbf{TRADUÇÃO.} Derivação termo a termo das três.
+\item \textbf{OPERAÇÃO.} Verificar coeficiente a coeficiente, sem avaliar.
+\item \textbf{LEI.} Mesma lei de Taylor --- identidades de coeficientes.
+\item \textbf{TESTEMUNHA.} Três derivações $0$ falhas; $\sin^2+\cos^2=1$ com
+  $a_0=1$ e nulos acima.
+\item \textbf{CONCLUSÃO.} As três identidades fecham nos coeficientes.
+\item \textbf{VOLTA.} Pitágoras sem ângulo e sem decimal --- só série formal.
+\end{enumerate}
+\medido{\code{calculo2\_resolve(11)} / \code{sr\_exp},\code{sr\_sin},\code{sr\_cos}.}
+
+%----------------------------------------------------------------------
+\section{parciais}\label{sec:parciais}
+\textbf{Enunciado.} $\partial f/\partial x$ e $\partial f/\partial y$ formais e
+exactas.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f(x,y)$ polinomial com coeficientes racionais.
+\item \textbf{TRADUÇÃO.} Parciais formais e exactas.
+\item \textbf{OPERAÇÃO.} Derivada formal num índice; o outro congelado --- Cálculo~I
+  numa família de índices.
+\item \textbf{LEI.} Mesma operação do quociente / regra formal.
+\item \textbf{TESTEMUNHA.} Gradiente exibido; Schwarz em 625 polinómios.
+\item \textbf{CONCLUSÃO.} Parciais exactas em polinómios.
+\item \textbf{VOLTA.} Par dual: $df$ funcional vs $\nabla f$ vector
+  (\code{thm:produto-dual}).
+\end{enumerate}
+\medido{\code{calculo2\_resolve(12)}: parciais formais; varredura Schwarz.}
+
+%----------------------------------------------------------------------
+\section{gradiente}\label{sec:gradiente-c2}
+\textbf{Enunciado.} $\nabla f$ é o DUAL: o funcional $df$ lido como vector.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Mesmo $f$ polinomial.
+\item \textbf{TRADUÇÃO.} $\nabla f=(\partial f/\partial x,\partial f/\partial y)$.
+\item \textbf{OPERAÇÃO.} $\nabla f$ VECTOR; $df$ FUNCIONAL --- métrica identifica.
+\item \textbf{LEI.} Sem produto interno há $df$ e não há $\nabla f$.
+\item \textbf{TESTEMUNHA.} $\nabla f$ em ponto com coordenadas exactas.
+\item \textbf{CONCLUSÃO.} $\nabla f$ $=$ par ordenado das parciais.
+\item \textbf{VOLTA.} Nomear um sem o outro é meio teorema
+  (\code{thm:produto-dual}).
+\end{enumerate}
+\medido{\code{calculo2\_resolve(13)} / \code{p2\_gradiente}: vector exacto.}
+
+%----------------------------------------------------------------------
+\section{schwarz}\label{sec:schwarz}
+\textbf{Enunciado.} $f_{xy}=f_{yx}$ --- VERIFICADO nos coeficientes, não assumido.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f(x,y)$ polinomial.
+\item \textbf{TRADUÇÃO.} $f_{xy}=f_{yx}$.
+\item \textbf{OPERAÇÃO.} Derivar em $x$ depois $y$ multiplica por $i$ e por $j$;
+  ordem não importa em $\mathbb{Q}$.
+\item \textbf{LEI.} Comutatividade da multiplicação --- Schwarz sem continuidade das
+  segundas.
+\item \textbf{TESTEMUNHA.} $625$ polinómios: $0$ falhas na ordem das parciais.
+\item \textbf{CONCLUSÃO.} Parciais comutam para polinómios.
+\item \textbf{VOLTA.} Identidade verificável --- não postulado.
+\end{enumerate}
+\medido{\code{calculo2\_resolve(14)}: $625$ polinómios; $0$ falhas.}
+
+%----------------------------------------------------------------------
+\section{derivada linear}\label{sec:derivada-linear}
+\textbf{Enunciado.} $Df(a)$ NÃO é um número: é um OPERADOR LINEAR local.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f:\mathbb{R}^n\to\mathbb{R}^m$ derivável.
+\item \textbf{TRADUÇÃO.} $Df(a):\mathbb{R}^n\to\mathbb{R}^m$ --- não um número.
+\item \textbf{OPERAÇÃO.} Salto do andar: Cálculo~I dava inclinação (número); aqui
+  MATRIZ $=$ melhor aproximação linear local.
+\item \textbf{LEI.} Único $L$ linear com $f(a+h)=f(a)+Lh+o(h)$; em polinómios
+  $o(h)$ exacto (grau $\ge2$).
+\item \textbf{TESTEMUNHA.} Jacobiana de aplicação linear; $\det=$ factor de volume.
+\item \textbf{CONCLUSÃO.} Objecto muda de tipo --- liga cálculo à álgebra linear.
+\item \textbf{VOLTA.} Matriz local; volume que move é global
+  ($\Lambda^n T=\det T$).
+\end{enumerate}
+\medido{\code{calculo2\_resolve(15)} / \code{p2\_jacobiana}: matriz e $\det$.}
+
+%----------------------------------------------------------------------
+\section{cadeia multi}\label{sec:cadeia-multi}
+\textbf{Enunciado.} $D(f\circ g)=Df(g(x))\cdot Dg(x)$: compor vira MULTIPLICAR
+matrizes.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f,g$ deriváveis entre espaços.
+\item \textbf{TRADUÇÃO.} $D(f\circ g)(x)=Df(g(x))\,Dg(x)$.
+\item \textbf{OPERAÇÃO.} Compor funções $\Leftrightarrow$ multiplicar operadores; a
+  ordem importa.
+\item \textbf{LEI.} Linearidade da aproximação; $\det(AB)=\det A\cdot\det B$.
+\item \textbf{TESTEMUNHA.} Dois caminhos: jacobiana da composta vs produto das
+  jacobianas --- quatro entradas.
+\item \textbf{CONCLUSÃO.} Compor É multiplicar; volumes compõem-se.
+\item \textbf{VOLTA.} Teorema do gato: VOLUME como segunda vida --- dualidade /
+  medida.
+\end{enumerate}
+\medido{\code{calculo2\_resolve(16)}: $Df\cdot Dg=$ jacobiana da composta.}
+
+%----------------------------------------------------------------------
+\section{hessiana}\label{sec:hessiana}
+\textbf{Enunciado.} $H$ simétrica, e a assinatura decide: mínimo, máximo ou SELA.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $a$ ponto crítico: $\nabla f(a)=0$.
+\item \textbf{TRADUÇÃO.} $H>0\Rightarrow$ mínimo; $H<0\Rightarrow$ máximo;
+  indefinida $\Rightarrow$ SELA.
+\item \textbf{OPERAÇÃO.} Segunda ordem: $f(a+h)-f(a)=\frac12 h^T H h+\ldots$; o
+  SINAL da forma decide --- a ASSINATURA, não a matriz olhada.
+\item \textbf{LEI.} Formas quadráticas: procurar TESTEMUNHAS, não ler a matriz.
+\item \textbf{TESTEMUNHA.} $x^2-y^2$ sela (par de vectores $+/-$); $x^2+y^2$ mín;
+  $-x^2-y^2$ máx; $x^2$ DEGENERADA (critério não decide).
+\item \textbf{CONCLUSÃO.} Assinatura classifica; degenerado é quarto estado.
+\item \textbf{VOLTA.} Hessiana LOCAL classifica um ponto; extremo GLOBAL precisa do
+  que o Cálculo~I já ensinou.
+\end{enumerate}
+\medido{\code{calculo2\_resolve(17)} / \code{p2\_classifica}: quatro estados.}
+
+%----------------------------------------------------------------------
+\section{lagrange multiplicadores}\label{sec:lagrange-c2}
+\textbf{Enunciado.} $\nabla f=\lambda\nabla g$ no extremo --- e o gume é a
+regularidade do vínculo.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Extremizar $f(x,y)$ sujeito a $g(x,y)=c$.
+\item \textbf{TRADUÇÃO.} $\nabla f=\lambda\nabla g$.
+\item \textbf{OPERAÇÃO.} No extremo vinculado, $\nabla f$ perpendicular à curva de
+  nível de $g$ --- logo paralelo a $\nabla g$.
+\item \textbf{LEI.} Mesma caça de testemunhas das formas.
+\item \textbf{TESTEMUNHA.} Gume: $\nabla g=0$ na origem em $g=x^3-y^2$; nenhum
+  $\lambda$ --- método não se aplica a singularidade do vínculo.
+\item \textbf{CONCLUSÃO.} Condição com regularidade $\nabla g\neq0$; sem ela, cai.
+\item \textbf{VOLTA.} Gume pedido pelo eval: regularidade do vínculo é hipótese
+  operacional.
+\end{enumerate}
+\medido{\code{calculo2\_resolve(18)}: gume $\nabla g=(0,0)$; sem $\lambda$.}
+
+%----------------------------------------------------------------------
+\section{fubini}\label{sec:fubini-c2}
+\textbf{Enunciado.} As duas ordens dão o mesmo, por caminhos intermédios DISTINTOS.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f$ polinomial no rectângulo $R$.
+\item \textbf{TRADUÇÃO.} $\iint_R f\,dA=\int(\int f\,dy)\,dx=\int(\int f\,dx)\,dy$.
+\item \textbf{OPERAÇÃO.} Dois objectos intermédios DIFERENTES (polinómio em $x$ vs
+  em $y$); só o número final coincide --- teorema, não tautologia.
+\item \textbf{LEI.} INTERIOR $\leftrightarrow$ BORDA na forma fraca (duas iterações).
+\item \textbf{TESTEMUNHA.} Duas ordens exactas iguais em $[0,2]\times[0,3]$.
+\item \textbf{CONCLUSÃO.} Fubini vale por caminhos distintos.
+\item \textbf{VOLTA.} LOCAL $\to$ GLOBAL: o número é global; os caminhos são locais
+  distintos.
+\end{enumerate}
+\medido{\code{calculo2\_resolve(19)}: $\int\!dy\,dx=\int\!dx\,dy$.}
+
+%----------------------------------------------------------------------
+\section{jacobiano}\label{sec:jacobiano-c2}
+\textbf{Enunciado.} $dV=|\det J|\,du\,dv$ --- o determinante como MEDIDA DE VOLUME.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Mudança $(u,v)\mapsto(x,y)$.
+\item \textbf{TRADUÇÃO.} $dV=|\det J|\,du\,dv$.
+\item \textbf{OPERAÇÃO.} $|\det J|$ não é correcção: é a MEDIDA --- acção do
+  operador no volume (andar exterior).
+\item \textbf{LEI.} $\det$ como $\Lambda^n T$.
+\item \textbf{TESTEMUNHA.} Jacobiana de $(u,v)\mapsto(2u+v,u+3v)$: $\det$ exacto.
+\item \textbf{CONCLUSÃO.} Determinante $=$ factor de volume.
+\item \textbf{VOLTA.} Matriz local; volume global --- mesma frase da cadeia multi.
+\end{enumerate}
+\medido{\code{calculo2\_resolve(20)}: $\det J$ factor de volume.}
+
+%----------------------------------------------------------------------
+\section{green}\label{sec:green-c2}
+\textbf{Enunciado.} $\oint_{\partial D}=\iint_D$: o INTERIOR contra a BORDA,
+medido dos dois lados.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $R=[x_0,x_1]\times[y_0,y_1]$; campo $(P,Q)$ polinomial.
+\item \textbf{TRADUÇÃO.} $\oint_{\partial R}P\,dx+Q\,dy=\iint_R(Q_x-P_y)\,dA$.
+\item \textbf{OPERAÇÃO.} Esquerda $=$ soma na BORDA (quatro segmentos); direita $=$
+  soma no INTERIOR --- contas diferentes, mesmo número.
+\item \textbf{LEI.} INTERIOR $\leftrightarrow$ BORDA --- forma forte de LOCAL
+  $\to$ GLOBAL.
+\item \textbf{TESTEMUNHA.} $P=-y$, $Q=x$: borda $=$ área $=12$; $625$ campos,
+  $0$ divergências.
+\item \textbf{CONCLUSÃO.} Green liga interior à borda --- global pelo contorno.
+\item \textbf{VOLTA.} \code{thm:borda-dirac}; adjunto $\delta\dashv\varepsilon$;
+  Green/Gauss/Stokes $=$ mesma frase em dimensões diferentes.
+\end{enumerate}
+\medido{\code{calculo2\_resolve(21)} / \code{p2\_green\_*}: $625$ campos; $0$ falhas.}
+
+%======================================================================
+\section{o que fica no conversa}
+A prosa canónica C2-1--C2-21 é este ficheiro. \code{calculo2\_resolve} \textbf{mede}.
+Catálogo de Cálculo II fechado.
+
+\end{document}

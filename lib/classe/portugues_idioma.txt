@@ -1,0 +1,21 @@
+# portugues_idioma.txt — álgebra PT para IMPORT IDIOMA no banco.
+# Formato: tipo  resto…
+#   alfabeto card=N
+#   lexico   DE|PARA
+#   regra    NOME|op
+alfabeto card=144
+lexico o |the 
+lexico a |the 
+lexico ouro|gold
+lexico prata|silver
+lexico rei|king
+lexico casa|house
+lexico do |of the 
+lexico é |is 
+lexico  e | and 
+lexico dragão|dragon
+lexico órbita|orbit
+lexico álgebra|algebra
+regra concat|op
+regra dual_lex|op
+regra identifica|op

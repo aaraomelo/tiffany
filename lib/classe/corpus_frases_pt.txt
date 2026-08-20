@@ -1,0 +1,402 @@
+# corpus_frases_pt.txt — recuperado de corpus/fala/conversa.tex + órbita
+# Uma frase por linha.
+o ouro do rei é álgebra e órbita do dragão
+a prata e o ouro da casa do rei
+álgebra do dragão na órbita do ouro
+o que é a aranha
+curva do dragão
+órbita de uma frase
+bom dia
+boa tarde
+boa noite
+olá
+oi tudo bem
+tudo bem
+como estás
+como vai
+obrigado
+obrigada
+tchau
+até logo
+quem és tu
+como te chamas
+ajuda
+nao sei
+gostas de café
+está a chover
+estou cansado
+conta uma piada curta
+prazer em conhecer-te
+gosto de conversar contigo
+música
+musica
+maestro
+metrônomo
+metronomo
+partitura
+orquestra
+computador
+documento
+informação
+informacao
+configuração
+configuracao
+janela
+motor
+escreves em latex
+aceitas latex
+como escrevo uma fracção
+sabes fatorar
+sabes dividir polinómios
+o que é o mdc de dois polinómios
+podes ir mais devagar
+sabes integrar
+porque é que a integral tem mais C
+sabes lógica
+o que é a anf
+sabes simplificar
+o que é a expansão de shannon
+o mais é ou ou xor
+sabes demonstrar
+o que é uma contingência
+sabes conjuntos
+como provas igualdade de conjuntos
+sabes relações e funções
+o que é uma bijeção
+sabes fatorar números
+o que é bezout
+o que os inteiros acrescentam
+sabes bezout
+o que os racionais acrescentam
+sabes dividir frações
+quanto é 2/3 dividido por 5/4
+por que não se divide por zero
+o que é uma fração
+sabes simplificar frações
+o que é a densidade
+o que os reais acrescentam
+o que é um número real
+sabes construir a raiz de dois
+por que a raiz de dois não é racional
+o que é um corte de dedekind
+o que é o encaixotamento
+escreves as raízes em decimal
+sabes provar os exercícios de análise
+o que é uma sequência de cauchy
+a harmónica é de cauchy
+como se constrói os reais por cauchy
+a órbita e a bisseção dão o mesmo número
+onde é que a completude se paga
+o fecho depende do método
+como sabes que os quatro métodos dão o mesmo ponto
+o que é um indeciso
+o caminho importa ou só a folha
+o que os racionais têm e não têm
+sabes teoria dos números
+o que Euclides tem a ver com frações contínuas
+qual é o inverso de 17 módulo 43
+por que o lema de euclides precisa que p seja primo
+os convergentes são sempre a melhor aproximação
+o que é a convolução de dirichlet
+o que é o mobius de verdade
+o que é a inversão de mobius
+sabes curvas elípticas
+o que decide a operação numa curva elíptica
+como se divide num corpo finito
+sabes álgebra moderna
+o que é um grupo
+todo grupo é comutativo
+o que é um homomorfismo
+por que o núcleo é normal
+o que diz o teorema de lagrange
+sabes teoria dos corpos
+o que é um corpo
+como se constrói um corpo com quatro elementos
+existe corpo com seis elementos
+qual é a característica de um corpo
+o que é o polinómio mínimo
+sabes álgebra linear
+o que é o gume automático
+sabes espaços duais
+o que é uma coordenada
+o produto de matrizes é o quê
+por que o núcleo é uma fibra
+sabes formas e espectro
+como mede Cauchy-Schwarz sem raiz
+por que não normalizas em gram-schmidt
+a casa já tinha álgebra linear
+o que é a massa com direção
+sabes formas quadráticas e tensores
+como se lê a assinatura de uma forma
+qual a diferença entre congruência e semelhança
+onde falha a polarização
+o espectro determina a matriz
+o que é o determinante de verdade
+sabes álgebra exterior
+o que é o produto exterior
+o produto cruzado existe em toda dimensão
+o que é a estrela de Hodge
+o que é o Pfaffiano
+o que é o fecho do dual
+porque Cauchy Schwarz é uma desigualdade
+porque a torre de Hurwitz tem o degrau quatro
+a torre para em oito
+a torre tem limite dimensional
+o que é o octonião dual
+quem é Gentil
+o que é a soma reversível
+o que é o observador
+o que é a borda
+o que é o furo na torre
+o real é um ponto da árvore
+sabes cálculo
+a derivada precisa de limite
+o que é a derivada aqui
+quantos caminhos tem a derivada
+como se prova o valor intermediário
+o ponto do valor médio é racional
+o que é a soma de Riemann aqui
+o teorema fundamental do cálculo
+sabes cálculo dois
+a série precisa do limite para existir
+o termo geral ir a zero basta
+como se prova que a série p converge
+o que é a derivada em várias variáveis
+a hessiana decide sempre
+o que diz o teorema de Green
+sabes cálculo três
+como se mostra que um limite em duas variáveis não existe
+o que é o gradiente de verdade
+quando é que um campo é conservativo
+trabalho depende do caminho
+Green Stokes e Gauss são três teoremas
+quantos estados tem a hessiana
+sabes formas diferenciais
+grad rot e div são três operadores
+quantas identidades tem o cálculo vetorial
+Green Stokes e Gauss são quantos teoremas
+o sinal na regra de Leibniz importa
+a borda e a derivada
+toda forma fechada é exacta
+sabes espaços métricos
+o que é a hierarquia
+o teorema central é Green Stokes e Gauss
+a idempotência conserva a energia
+Cauchy é o mesmo que convergente
+como se prova que Q não é completo
+sabes topologia
+a topologia vem sempre de uma métrica
+como se calcula o fecho sem distância
+bijeção contínua é homeomorfismo
+Q é conexo
+todo espaço limitado é compacto
+o que a torre larga em cada passo
+sabes homotopia
+o círculo e a reta são iguais localmente
+onde é que vive o buraco do círculo
+como se conta o buraco
+o que é o número de voltas
+todo grupo fundamental é abeliano
+o que um invariante prova
+sabes analise real
+por que o andar R precisava de existir
+O que eu poderia dizer...
+Até onde eu sei, o tópico é digno de ser discutido.
+O que ele está dizendo não faz sentido algum.
+Obrigado pela informação.
+Como estou muito ocupado, não conte comigo.
+Como era bom sentir o teu abraço!
+O que modifica o mundo é comunicação, não informação.
+Até ontem eu não sabia nada sobre isso.
+Como você tem sorte!
+Como você é gentil!
+Como eu senti saudades de você!
+Bom dia, Mike.
+Boa noite. Bons sonhos.
+Bom dia!
+Oi, eu sou Nancy.
+Bom dia a todos.
+Olá!
+Bom apetite!
+Como eu poderia ser um robô? Robôs não sonham.
+Como estou de folga hoje, vamos para a praia.
+Como ele é velho!
+O que aconteceu? Há água por todo o apartamento.
+Oi, eu só queria te avisar que o problema foi resolvido.
+Quem disse isso? Está completamente errado!
+O que ele me disse me chocou.
+O que você disse não faz absolutamente nenhum sentido para mim.
+Como falavam em chinês, não percebi nada do que eles disseram.
+Boa noite, Timmy.
+Olá, eu sou Sepideh.
+Olá, eu sou Bashir.
+Até onde eu sei, este livro nunca foi traduzido para o japonês.
+Até outro dia.
+Quem sabe você tenha sucesso.
+Até mais tarde!
+Quem abrolhos semeia espinhos colhe.
+Quem à pressa se casa, com vagar se arrepende.
+Quem tem inimigo, não dorme.
+Quem tem vergonha morre de fome.
+Como estava frio, acendemos uma fogueira.
+Boa sorte na prova!
+Quais canções famosas vocês gostariam de ter composto e por quê?
+Onde é conveniente para você?
+Você sabe se ele tem namorada?
+Devo ligar de volta para Ken?
+Tem alguém aí?
+De que horas você foi para a cama ontem de noite?
+Você poderia colocar esses numa caixa?
+Por falar nisso, qual é o problema com ele?
+Quem vai dar a festa?
+Como está o tempo lá?
+Gostaria de dançar comigo?
+O que acha de uma outra rodada?
+Você gosta de maçãs ou de laranjas?
+Agora eu coloco essa carta no chapéu. Viu?
+Devemos ir ao cinema?
+Você pode manter o barulho baixo?
+Essa carta deve ser escrita em inglês?
+Qual é o número do ônibus que eu pego para ir para Waikiki?
+Por que você veio ao Japão?
+O que ele disse?
+O que está acontecendo lá embaixo?
+Nós podemos comprar um novo carro?
+Onde estão os ovos, por favor?
+Você ama música?
+Qual você escolhe?
+As suas mãos estão limpas?
+Qual é o seu real objetivo?
+Onde fica sua escola?
+Quem é sua professora?
+Inglês é difícil, não é?
+Você poderia repetir, por favor?
+Bob veio aqui, não foi?
+Quer casar comigo?
+É uma foto recente?
+Quantos assinantes essa revista tem?
+Por que você recusou a oferta dele?
+Sentiu saudades de mim?
+Oi, como você está?
+Quem fez o boneco de neve?
+Onde ele nasceu?
+Com quem eu falo?
+Quantos amigos íntimos você tem?
+Quanto custa essa gravata?
+Posso fazer uma pergunta?
+Quem é ele?
+Posso lhe ajudar?
+Você recebeu a carta?
+Você está com dor de cabeça?
+Você sabe qual é o seu tamanho?
+Ele sabe que você o ama?
+Você decidiu ir para o Japão?
+Você deseja beber algo?
+Você quer tomar alguma coisa?
+Como você pode ter um laptop e não ter um celular?
+Você está escovando seus dentes direito?
+Você poderia falar mais devagar, por favor?
+Você quer ver um filme francês, não é?
+O que está acontecendo nessa cidade?
+Que horas são agora?
+Você já terminou a leitura recomendada?
+Nós aceitamos sua oferta com prazer.
+Mais que nunca, precisamos da reforma do sistema de saúde.
+Ele voltou para o Japão pela primeira vez em oito anos.
+Nosso time ganhou a partida ontem.
+Estou planejando ir esquiar com minha namorada.
+Eu vou para o Japão com a minha namorada em agosto.
+O sonho de Mayuko se tornou realidade.
+O chão parece molhado.
+Ele disse que era melhor você ir embora.
+A senhora Smith vai à igreja de carro.
+Ele se tornou câmera depois de se formar na universidade.
+No começo ele a odiava, mas aos poucos acabou a amando.
+Tanto a mãe como o pai dele estão mortos.
+"Para ser honesto, estou com medo de altura". "Você é um covarde!"
+Nós vamos todos sentir saudades quando você for embora.
+O pensamento é livre.
+Você está dando muito duro. Pegue leve por um tempo.
+John é louco por música pop.
+Não há nada como uma caminhada.
+Você não devia comer tantos doces.
+Me mostre outro exemplo.
+O homem que você viu ontem é meu tio.
+Nós estávamos muito felizes no café da manhã.
+Dick morreu aos dez anos de idade.
+Você está pálido hoje.
+Gatos odeiam serem molhados.
+Ele decidiu ser médico.
+Esse é o lugar onde o incidente ocorreu.
+Não fique triste.
+Eu estou brincando.
+Os prédios são pequenos em comparação com os arranha-céus de Nova York.
+Você está do meu lado. Agora tudo está bem.
+Você é o meu tipo.
+"Eu gosto de viajar." "Eu também."
+Coelhos têm orelhas grandes.
+Venha aqui, John.
+Estou comendo uma maçã.
+Nada é mais prazeroso do que viajar.
+Eu irei.
+Eu gosto de tomar sopa quente.
+O pássaro símbolo do estado de Minnesota é o mosquito.
+Por favor, espere um pouco mais.
+Bata na porta da felicidade.
+Que pôr-do-sol lindo.
+Nosso chefe de cozinha está muito ocupado hoje.
+Eu sempre mantive minhas promessas.
+Aaron matou Elizabeth.
+Eu não vou com a cara de Alice.
+Ele adora ir à pesca.
+Não saia, pois está chovendo.
+Não quero pôr a sua teoria em dúvida.
+Você está do meu lado, agora tudo está bem.
+O pássaro foi para longe.
+O livro é fácil de ler.
+Aos domingos eu não trabalho.
+Ontem eu fui ao parque.
+Linguagens de programação são seu passatempo.
+Eu vou chegar já, já.
+A palavra adquire um vasto significado.
+Há um gato sobre a cadeira.
+As palavras voam, os escritos ficam.
+Afronte os fatos.
+Ela foi para trás do prédio.
+Caiu muita neve.
+Está na ponta da língua.
+O egoísmo dele me enerva.
+Ele me explicou a regra.
+Todos estavam procurando a criança desaparecida.
+O rio Kiso geralmente é chamado "o Reno do Japão".
+Às vezes eu fico pensando demais em besteiras.
+Todas religiões proíbem o assassinato.
+Seu rosto expressou aflição e raiva.
+Tom está sempre atrasado.
+É de manhã que podemos notar como a natureza é bela.
+Bill é um jogador de basebol.
+Estou satisfeito com o meu trabalho.
+O carro deu uma acelerada e passou o caminhão.
+Eu só tenho um desejo.
+Mesmo que ele faça algo ruim, ele nunca admitirá que fez.
+O contrário da paz é a guerra.
+Encontrei-o no caminho de volta da escola.
+Ela gosta muito da escola dele.
+Ela subiu na escada.
+Junte o tofu e deixe dourar.
+Pegue a geleia na estante do topo.
+A carne ainda não está pronta.
+A campanha política parece estar indo de forma favorável.
+Jim entrou com cuidado no quarto para que ele não acordasse o bebê.
+Eu devo falar hoje à noite.
+Paul nasceu em Roma.
+José mostrou ser uma pessoa de mau caráter.
+Queria ter ido ao teatro ontem à noite.
+O quadro da parede foi pintado por Picasso.
+Eles estão se vendo.
+Esta é a embaixada americana.
+Eu sei jogar tênis.
+Comprei o carro.
+Eu tenho umas fotos para lhe mostrar.
+Entendo o que quer dizer.
+Sem problemas. Se X acontecer, temos Y como alternativa B.

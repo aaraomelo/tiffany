@@ -1,0 +1,427 @@
+% !TeX program = pdflatex
+% corpus/docs/ciencia_dragao.tex — ENSINAR CIÊNCIA pela cadeia do bit ao dragão.
+%
+% A solução dos problemas mapeados NÃO mora na cabeça da assistente nem em
+% strings do conversa.c: mora AQUI, em ticks (passo a passo). A base só guarda
+% @TEX este ficheiro; responde() lê o corpo AO VIVO e devolve em LaTeX.
+%
+% Cadeia (papers):
+%   F_2 → F_8≡W_8 → ℕ (naturais) → ℤ (inteiros) → ℚ (racionais) → ℝ (reais)
+%   → realização Heighway / aranha / inversa (arquitetura §aranha).
+%
+% Membrana: entrada ASCII (desdobra); saída LaTeX (veste). Ver §membrana.
+%
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[portuguese]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\newtheorem{definicao}{Definição}
+\newtheorem{proposicao}{Proposição}
+\newtheorem{observacao}{Observação}
+
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\Word}{\mathcal{W}}
+\newcommand{\medido}[1]{\par\medskip\noindent{\small\color{gray}\textbf{Medido.} #1}\par\medskip}
+
+\begin{document}
+\title{Ciência pelo dragão\\
+\large cadeia do bit $\to$ Heighway --- ticks de resolução}
+\author{Tiffany --- corpus vivo}
+\date{}
+\maketitle
+
+\begin{abstract}
+\noindent Ensinar ciência aqui é \textbf{seguir a cadeia} e resolver em
+\textbf{ticks}: cada tick nomeia o que fez. A geometria final é a curva do
+dragão (Heighway): $G>1$ na base, levantamento $\tilde\pi$ com
+$\tilde G\equiv1$. Fontes: \code{papers/naturais.tex},
+\code{inteiros.tex}, \code{racionais.tex}, \code{reais.tex},
+\code{arquitetura.tex} §aranha. Nada se inventa fora destes papers --- este
+documento \emph{ordena} os passos e firma a membrana LaTeX$\leftrightarrow$ASCII.
+\end{abstract}
+
+%----------------------------------------------------------------------
+\section{a cadeia do basico ao dragao}\label{sec:cadeia}
+\[
+\boxed{\;
+\mathrm{GF}(2)
+\;\xrightarrow{\ \code{naturais}\ }\;
+\Word_8
+\;\xrightarrow{\ \mathrm{transporte}\ }\;
+\mathbb{N}
+\;\xrightarrow{\ \code{inteiros}\ }\;
+\mathbb{Z}
+\;\xrightarrow{\ \code{racionais}\ }\;
+\mathbb{Q}
+\;\xrightarrow{\ \code{reais}\ }\;
+\mathbb{R}
+\;\xrightarrow{\ \pi\ \mathrm{Heighway}\ }\;
+G
+\;\xrightarrow{\ \tilde\pi\ }\;
+\tilde G\equiv1
+\;}
+\]
+\noindent\textbf{Tick de leitura.} Da esquerda para a direita \emph{constrói-se};
+da direita para a esquerda \emph{projecta-se}. O dragão não inventa a
+aritmética --- realiza a órbita discreta $I$ que a álgebra já emitiu.
+
+\section{como se ensina --- os ticks}
+Cada resolução tem seis slots (o relógio da casa):
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO} --- o objecto e o corpo onde vive;
+\item \textbf{TRADUÇÃO} --- LaTeX $\leftrightarrow$ ASCII (membrana);
+\item \textbf{OPERAÇÃO} --- a lei que se aplica;
+\item \textbf{DEMONSTRAÇÃO} --- o passo com resíduo~$0$;
+\item \textbf{CONTRAEXEMPLO} --- se falhar, onde falha;
+\item \textbf{VOLTA} --- dual / projecção / verificação.
+\end{enumerate}
+Operacionalmente: \code{conversa <base> tick "\ldots"} ou a cascata
+\code{resolve\_*} em \code{banco/conversa.c} (cada \texttt{tique7} é um slot
+ao vivo). A prosa canónica das resoluções migra para \code{corpus/docs/}:
+conservação métrica CM1--CM8 em \code{conservacao\_metrica.tex}.
+
+%----------------------------------------------------------------------
+\section{membrana latex ascii}\label{sec:membrana}
+A interface padrão é LaTeX; o motor resolve em ASCII desdobrado; a resposta
+\textbf{veste-se} de novo.
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+sentido & operação & exemplo \\
+\midrule
+entrada ($+1$) & \code{latex\_desdobra} / \code{MEMBRANA}$(+1)$
+  & \verb|\frac{1}{2}| $\to$ \texttt{(1)/(2)} \\
+saída ($-1$) & \code{veste\_valor} / \code{MEMBRANA}$(-1)$
+  & $v/q$ $\to$ \verb|\frac{v}{q}| \\
+ASCII pontos & \code{lib/ascii.h} & $128=|\mathbb{P}^{1}(\mathbb{F}_{127})|$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{Regra.} Pergunta com \verb|\frac|, \verb|$| ou \verb|^{}| ---
+desdobra na entrada. Resposta numérica da fita --- veste em LaTeX. Corpo lido
+de \texttt{@TEX} --- \textbf{preserva} o LaTeX do ficheiro (não se limpa a matemática).
+
+\subsection*{tabela de conversao}
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+LaTeX & ASCII (fita) \\
+\midrule
+\verb|\frac{a}{b}| & \texttt{(a)/(b)} \\
+\verb|\sqrt{x}| / \verb|\sqrt{x}| & \texttt{raiz (x)} \\
+\verb|x^{2}| & \texttt{x\^{}2} \\
+\verb|\cdot| / \verb|\times| & \texttt{x} \\
+\verb|\mathbb{N},\mathbb{Z},\mathbb{Q},\mathbb{R}| & \texttt{N,Z,Q,R} (nome) \\
+\verb|\oplus| & \texttt{xor} / soma em $\mathrm{GF}(2)$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+%----------------------------------------------------------------------
+\section{tick bit --- GF(2)}\label{sec:tick-bit}
+\textbf{DEFINIÇÃO.} $F_1=\mathrm{GF}(2)=\{0,1\}$ com $1+1=0$.
+
+\textbf{TRADUÇÃO.} \verb|1+1| em ASCII é a conta; em LaTeX
+$1+1$ no corpo $\mathrm{GF}(2)$.
+
+\textbf{OPERAÇÃO.} Em $\mathrm{GF}(2)$ a soma é XOR: $a\oplus b$.
+
+\textbf{DEMONSTRAÇÃO.} $1\oplus1=0$ --- resíduo~$0$ na tabuada.
+
+\textbf{CONTRAEXEMPLO.} Em $\mathbb{Z}$, $1+1=2\neq0$ --- o corpo tem de estar dito.
+
+\textbf{VOLTA.} Dual em $\mathrm{GF}(2)$: $-x=x$.
+
+\section{tick naturais --- transporte}\label{sec:tick-N}
+\textbf{DEFINIÇÃO.} $\Word_8=\{0,\ldots,255\}$; $\mathbb{N}$ pela torre
+$F_{2w}=F_w+F_w^{*}$ e o transporte (\code{naturais.tex}).
+
+\textbf{OPERAÇÃO.} Soma com transporte:
+\[
+a+b \;=\; (a\oplus b) \;+\; 2(a\wedge b).
+\]
+
+\textbf{DEMONSTRAÇÃO.} Medido em \code{naturais thm:transporte}; a cadeia
+de papers não redefine o que recebe.
+
+\textbf{VOLTA.} Dual da torre: $\nu\circ\nu=\mathrm{id}$.
+
+\section{tick inteiros --- o sinal}\label{sec:tick-Z}
+\textbf{DEFINIÇÃO.} $\mathbb{Z}=\mathbb{N}^{2}/{\sim}$ --- o sinal é a
+escolha de metade (\code{inteiros.tex}).
+
+\textbf{OPERAÇÃO.} $a+x=b$ tem solução em $\mathbb{Z}$ sempre; em $\mathbb{N}$
+só se $b\ge a$.
+
+\textbf{VOLTA.} $\nu(z)=-z$.
+
+\section{tick racionais --- a fibra}\label{sec:tick-Q}
+\textbf{DEFINIÇÃO.} $\mathbb{Q}$ --- produto com inverso nos não-nulos
+(\code{racionais.tex}).
+
+\textbf{TRADUÇÃO.} \verb|\frac{1}{2}+\frac{1}{3}| $\to$ \texttt{(1)/(2)+(1)/(3)}
+$\to$ veste $\frac{5}{6}$.
+
+\textbf{OPERAÇÃO.} $\frac{a}{b}+\frac{c}{d}=\frac{ad+bc}{bd}$ (corpo).
+
+\textbf{VOLTA.} Inverso $\frac{b}{a}$ se $a\neq0$.
+
+\section{tick reais --- o corte}\label{sec:tick-R}
+\textbf{DEFINIÇÃO.} O real é o \textbf{corte}, nunca um decimal
+(\code{reais.tex}).
+
+\textbf{OPERAÇÃO.} Completude: cinco formas equivalentes (problema~25 da casa).
+
+\textbf{VOLTA.} Cauchy$(\mathbb{Q})/{\sim}$ --- o mesmo ponto por quatro portas
+(\code{identifica.h}).
+
+%----------------------------------------------------------------------
+\section{tick dragao --- Heighway e G}\label{sec:tick-dragao}
+\textbf{DEFINIÇÃO.} $\pi\colon I\to\mathbb{Z}^{2}$ (Heighway);
+$G(x)=|\pi^{-1}(x)|$. Auto-intersecção $\Rightarrow G>1$
+(\code{arquitetura.tex}, \code{tests/aranha\_g.c}).
+
+\textbf{OPERAÇÃO (aranha).}
+\begin{enumerate}\itemsep2pt
+\item escreve $G\mathrel{+}=1$;
+\item lê vizinhança;
+\item decide por $\min G$;
+\item fecha $R^{4}=\mathrm{id}$.
+\end{enumerate}
+
+\textbf{DEMONSTRAÇÃO.} §AG1--§AG11: Heighway dobra; recta $G\le1$; paridade
+$G\bmod2$ em $\mathrm{GF}(2)$.
+
+\textbf{VOLTA (inversa).} $\tilde\pi(i)=(\pi(i),k(i))$, $\tilde G\equiv1$,
+$\mathrm{pr}_{1}\circ\tilde\pi=\pi$ (\code{thm:aranha-inversa}).
+
+\section{tick orbita de uma frase}\label{sec:tick-frase}
+\textbf{DEFINIÇÃO.} Frase do corpus $\to$ álgebra do idioma ($I$ em
+$\Word_8$) $\to$ $\pi$ Heighway $\to$ $\tilde\pi$.
+
+\textbf{OPERAÇÃO.} \code{tests/idioma\_orbita.c} §IO1--§IO5.
+
+\textbf{VOLTA.} Indexar: \code{idioma/pt/orbita/\ldots} via
+\code{IMPORT IDIOMA} + \code{corpus\_orbitas\_pt.txt}.
+
+%----------------------------------------------------------------------
+\section{1 mais 1 em dois corpos}
+Depende do corpo (tick~bit vs tick~$\mathbb{Z}$):
+\[
+1+1 \;=\;
+\begin{cases}
+0 & \text{em }\mathrm{GF}(2),\\
+2 & \text{em }\mathbb{Z}.
+\end{cases}
+\]
+Sem o corpo declarado a pergunta está incompleta.
+ASCII: \texttt{1+1} desdobra na fita; LaTeX devolve os dois casos vestidos.
+
+\section{resolve um terco}
+Em base~$10$: $0{,}333\ldots$ (não fecha). Em base~$3$: $0{,}1$ exacto.
+Em LaTeX: $\frac{1}{3}$. ASCII desdobrado: \texttt{(1)/(3)}.
+
+\section{resolve a raiz de 2}
+Em $\mathbb{Q}$: não existe ($p^{2}=2q^{2}$ força paridade). Em
+$\mathbb{Z}/7$: $3^{2}\equiv2$. Em $\mathbb{R}$: o corte positivo.
+LaTeX: $\sqrt{2}$; ASCII: \texttt{raiz (2)}.
+
+\section{o que e o dragao}
+A curva de Heighway: realização geométrica que dobra --- $G>1$ nas
+auto-intersecções. Papers: \code{arquitetura.tex} §aranha;
+medidor \code{tests/aranha\_g.c}. Inversa: $\tilde G\equiv1$.
+
+\section{ensina a cadeia}
+Começa no bit (\S\ref{sec:tick-bit}), sobe naturais--reais, realiza no
+dragão (\S\ref{sec:tick-dragao}). Cada degrau tem paper próprio; este
+documento só ordena os \textbf{ticks} e a membrana. Pergunta
+«mostra a fundação» para a escada Corpos$\to$Peano
+(\code{torre\_fundacao.tex}).
+
+\section{mostra a ciencia do dragao}
+Este ficheiro: \code{corpus/docs/ciencia\_dragao.tex}. Índice vivo:
+\code{bash tools/indexa\_tex\_vivo.sh}. Resposta em LaTeX ao vivo ---
+alterar o \texttt{.tex} altera o que a assistente ensina, sem reingerir.
+
+%======================================================================
+\section{o que e o tick}\label{sec:tick-teoria}
+Três leituras, \textbf{uma} estrutura --- o quantum do relógio da casa.
+
+\subsection*{Maestro (corpo de Peano)}
+O Teorema do Maestro (\code{corpo\_topologico thm:proj-maestro}):
+\[
+\boxed{\;\mathcal{P}_k \;=\; \mathrm{tick}\circ\mathrm{batuta}\circ\Pi\;}
+\]
+--- projecta $\pi_k$ a cada tick; \textbf{não} inventa estrutura.
+Recebe $(\Pi,\,\mathrm{tick},\,I)$ com batuta $I\in\{-1,0,+1\}$.
+O tick é o \textbf{ciclo de processamento} (Lei~6 / janela): uma
+passagem do projector. O Metrónomo \emph{lê} o resíduo; o Maestro
+\emph{avança} o índice.
+
+\subsection*{Quantizador / relógio (assistente)}
+Em \code{conversa.c}: o tick é o quantum da fita --- uma ou $2^{m}$
+dobras por chamada (\texttt{TICKS}$\in\{1,2,4,8\}$, andares da torre;
+o $3$ recusa-se). O estado mora em disco (\texttt{<base>.tick}): fechar
+o programa não perde a conta. \emph{Medido:} a velocidade só sobe por
+dobra --- o mesmo princípio $\omega_{2M}^{2}=\omega_M$ do Quantizador
+(\code{corpo\_algebrico thm:batuta-continuo}: o gap entre dois ticks
+consecutivos \emph{é} o comprimento do segmento afim).
+
+\subsection*{Ensino (seis slots)}
+Cada resolução nomeia o corte: DEFINIÇÃO, TRADUÇÃO, OPERAÇÃO,
+DEMONSTRAÇÃO, CONTRAEXEMPLO, VOLTA --- \texttt{tique7} no conversa.
+Aqui o tick não é tempo físico: é \textbf{granularidade da prova}.
+
+\medskip\noindent\textbf{Síntese.}
+\[
+\boxed{
+\mathrm{tick}
+\;=\;
+\text{quantum do índice}
+\;=\;
+\text{uma dobra da torre / uma passagem de }\mathcal{P}_k
+\;=\;
+\text{um passo nomeado da resolução}.
+}
+\]
+
+%----------------------------------------------------------------------
+\section{regua do idioma --- dinamica}\label{sec:regua-idioma}
+A «régua» do idioma \textbf{não} é métrica euclidiana: é a álgebra sobre
+$\Word_8$ que \emph{emite} a órbita discreta $I$
+(\code{lib/portugues.h}, gémeas EN/ES).
+
+\subsection*{Geração de $I$}
+\begin{enumerate}\itemsep2pt
+\item $\Sigma\subseteq\Word_8$ --- alfabeto (bytes que existem);
+\item monoide $\Sigma^{*}$ --- concatena;
+\item léxico $\nu$ com $\nu\circ\nu=\mathrm{id}$ --- dual;
+\item regras (concat, dual, identifica) --- transformações no monoide.
+\end{enumerate}
+\code{pt\_emite\_orbita}: cada byte $\in\Sigma$ é um \textbf{índice};
+cada dual léxico fechado é outro índice (código $>255$). Donde
+\[
+|I| \;=\; \#\{\text{bytes lidos}\} \;+\; \#\{\text{regras aplicadas}\}.
+\]
+$|I|$ parametriza Heighway: $\pi$ tem $|I|$ pontos
+(\code{tests/idioma\_orbita.c}).
+
+\subsection*{Dinâmica}
+O tempo do idioma é o índice $i\in I$:
+\[
+i \;\longmapsto\; i+1
+\qquad\text{(ler o próximo byte ou aplicar a próxima regra)}.
+\]
+Não há relógio externo: a frase \emph{é} a fita; o tick da régua é
+avançar $i$. A batuta do Maestro, neste regime, escolhe o sentido
+(ler / dual / identificar); o Metrónomo confere que o passo ainda está
+em $\Sigma$ ou na regra --- senão o símbolo «não existe no sistema».
+
+\subsection*{Ligação à cifra}
+A mesma casa compara por fração contínua (\code{sql.c} / cifra): a
+régua do idioma emite $I$; a cifra endereça textos no banco. Duas
+réguas, um suporte $\Word_8$ --- como ASCII $\leftrightarrow$
+$\mathbb{P}^{1}(\mathbb{F}_{127})$ (\code{lib/ascii.h}).
+
+%----------------------------------------------------------------------
+\section{algoritmo inverso e o tick}\label{sec:tick-inverso}
+A cadeia \emph{directa} (thm:multiplicidade):
+\[
+I \;\xrightarrow{\ \pi\ }\; \mathbb{Z}^{2},\qquad
+G(x)=|\pi^{-1}(x)|
+\quad(G>1\text{ nas dobras Heighway}).
+\]
+A cadeia \emph{inversa} (thm:aranha-inversa):
+\[
+\tilde\pi(i)=\bigl(\pi(i),\,k(i)\bigr),\qquad
+\tilde G\equiv1,\qquad
+\mathrm{pr}_{1}\circ\tilde\pi=\pi.
+\]
+\textbf{Cada $i\in I$ é já um tick} da realização. O inverso não cria
+tempo novo: em cada tick $i$,
+\begin{enumerate}\itemsep2pt
+\item lê $x=\pi(i)$ --- estado na grade;
+\item incrementa $c[x]$; põe $k(i)=c[x]$ --- folha;
+\item emite $\tilde\pi(i)=(x,k(i))$ --- multiplicidade~$1$.
+\end{enumerate}
+A fibra que $|\det|=1$ perdia (§M10) restaura-se \emph{tick a tick}
+como coordenada $k$.
+
+%----------------------------------------------------------------------
+\section{integrar o tick no algoritmo}\label{sec:tick-integra}
+Uma só linha de tempo para idioma + dragão + Maestro:
+
+\[
+\boxed{\;
+\begin{array}{c}
+\text{frase}
+\;\xrightarrow{\ \mathrm{tick}_{alg}\ }\;
+I[i]
+\;\xrightarrow{\ \mathrm{tick}_{\pi}\ }\;
+\pi(i)
+\;\xrightarrow{\ \mathrm{tick}_{\tilde\pi}\ }\;
+\tilde\pi(i)
+\\[0.6em]
+\mathcal{P}
+\;=\;
+\mathrm{tick}\circ\mathrm{batuta}\circ\Pi
+\quad\text{com}\quad
+\Pi=\text{frase/partitura},\;
+I_{\mathrm{bat}}\in\{-1,0,+1\}.
+\end{array}
+\;}
+\]
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+papel & no idioma/dragão & no Maestro \\
+\midrule
+$\Pi$ & frase / partitura & especificação \\
+batuta $I$ & ler / dual / identificar & trial $\{-1,0,+1\}$ \\
+tick & avançar $i\in I$ & ciclo $\mathcal{P}_k$ \\
+$\pi_k$ / $\pi$ & Heighway no passo $i$ & retração de andar \\
+Metrónomo & $\tilde G\equiv1$, resíduo $0$ & auditoria / Lyapunov \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{Consequência operacional.}
+\begin{enumerate}\itemsep2pt
+\item \texttt{pt\_emite\_orbita} --- produz a fita de ticks algébricos;
+\item Heighway --- um tick geométrico por índice (escreve $G\mathrel{+}=1$);
+\item inverso --- um tick de levantamento por índice;
+\item assistente --- \texttt{tick "\ldots"} / \texttt{tique7} nomeiam o
+      mesmo quantum na fala (Quantizador + ensino).
+\end{enumerate}
+Não são quatro relógios: é \textbf{um} índice $i$, lido em quatro
+cartas (álgebra, grade, folha, discurso). Integrar o tick no algoritmo
+é fazer o Maestro avançar $i$ sobre a órbita do idioma, e o Metrónomo
+exigir $\tilde G\equiv1$ (ou resíduo~$0$ na fita) a cada passo.
+
+\medido{\code{tests/tick\_idioma.c} §TI1--§TI6 ($6{:}0$): $\Pi$ emite $I$
+via \code{pt\_emite\_orbita}; o Maestro avança um tick $\to$ um ponto
+Heighway; batuta $+1/-1$ partilha $G$ e a ordem é dual; levantamento
+tick~a~tick com $\tilde G\equiv1$; $P=\mathrm{tick}\circ\mathrm{batuta}\circ\Pi$
+coincide com Heighway em lote; Metrónomo $\mathrm{pr}_{1}\circ\tilde\pi=\pi$,
+$\sum G=|I|$.}
+
+\section{o tick na teoria do dragao}
+Resposta curta: o tick é o quantum do índice $i\in I$; a régua do
+idioma emite $I$; Heighway realiza; o inverso levanta a fibra
+tick~a~tick; o Maestro é $\mathrm{tick}\circ\mathrm{batuta}\circ\Pi$
+sobre essa mesma fita. Fontes:
+\code{corpo\_topologico thm:proj-maestro},
+\code{arquitetura thm:aranha-inversa},
+\code{lib/portugues.h},
+\code{conversa.c} (relógio / \texttt{TICKS}).
+
+\end{document}

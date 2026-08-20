@@ -1305,6 +1305,14 @@ não diz quantas patas a produziram; conservar $|\det|=1$
 \emph{reconta a fibra} que a projecção do gato perdia: estado $\neq$ traço
 observado, e $G$ é o traço.
 
+\medskip\noindent\textbf{Ensinar a cadeia --- ticks no corpus vivo.}
+As resoluções passo a passo (bit$\to\mathbb{N}\to\mathbb{Z}\to\mathbb{Q}\to\mathbb{R}\to$Heighway)
+e a membrana LaTeX$\leftrightarrow$ASCII concentram-se em
+\code{corpus/docs/ciencia\_dragao.tex}: a assistente indexa só
+\code{@TEX} e lê o corpo ao vivo, \textbf{vestido} em LaTeX
+(\code{tex\_veste\_corpo} em \code{conversa.c}). Alterar o
+\texttt{.tex} altera o ensino sem reingerir.
+
 \medskip\noindent\textbf{A curva do dragão (Heighway)} é o modelo
 geométrico mínimo da identificação $\pi(i)=\pi(j)$: auto-intersecção
 $\Rightarrow$ $G>1$. Medido em \code{tests/aranha\_g.c} §AG1--§AG11
@@ -1358,6 +1366,106 @@ Cada passo do autómato \emph{é} um cláusula do teorema, não um extra:
 \]
 A aranha é só o último passo dinâmico. O mecanismo é $\pi$ e $G$.
 
+\medskip\noindent\textbf{O algoritmo inverso --- curva do dragão com $G\equiv1$.}
+A cadeia directa perde a fibra na projecção: $|\det|=1$ conserva a
+\textbf{medida} e não o percurso (\code{algebrico thm:metrica};
+\code{conservacao\_metrica.c} §M10 --- \emph{a pata some na marca}).
+$G$ reconta o que a métrica esquece. O inverso restaura a
+representação injectiva:
+
+\begin{teorema}[levantamento da aranha --- $G\equiv1$ na folha]\label{thm:aranha-inversa}
+Seja $\pi\colon I\to\mathbb{Z}^{2}$ uma realização (p.ex.\ Heighway) e
+$G(x)=|\pi^{-1}(x)|$. Para cada $i\in I$ seja
+\[
+k(i)\;=\;\bigl|\{j\in I:j\le i,\ \pi(j)=\pi(i)\}\bigr|
+\]
+o número de visita à célula $\pi(i)$ até ao índice $i$
+($1\le k(i)\le G(\pi(i))$). O \textbf{levantamento em folhas}
+\[
+\tilde\pi\colon I\longrightarrow\mathbb{Z}^{2}\times\mathbb{N},\qquad
+\tilde\pi(i)=\bigl(\pi(i),\,k(i)\bigr)
+\]
+satisfaz:
+\begin{enumerate}\itemsep2pt
+\item \textbf{Injectividade:} $\tilde\pi(i)=\tilde\pi(j)\Rightarrow i=j$.
+      Logo $\tilde G\bigl(\tilde\pi(i)\bigr)=1$ em todo o percurso --- cada
+      vértice da curva levantada tem multiplicidade $1$.
+\item \textbf{Projecção recupera o dragão:}
+      $\mathrm{pr}_{1}\circ\tilde\pi=\pi$. As dobras $G>1$ são exactamente
+      as fibras verticais $\{\tilde\pi(i):\mathrm{pr}_{1}(\tilde\pi(i))=x\}$.
+\item \textbf{Conservação:} $|\mathrm{im}\,\tilde\pi|=|I|=\sum_x G(x)$
+      --- a métrica de contagem sobrevive; a fibra que a pata perdia
+      (§M10) é restaurada como coordenada de folha.
+\end{enumerate}
+A \textbf{curva inversa do dragão} é $\tilde\pi(I)$: mesma órbita
+combinatória, representação sem auto-intersecção no espaço total.
+A recta injectiva (§AG3) é o caso degenerado $G\equiv1$ já na base
+(folha única). O endereçamento de Peano (\code{topologico def:peano})
+é outro levantamento: índice $\mapsto$ endereço injectivo, $G\equiv1$
+por construção.
+\end{teorema}
+
+\begin{proof}
+Se $\tilde\pi(i)=\tilde\pi(j)$, então $\pi(i)=\pi(j)$ e $k(i)=k(j)$.
+Mas $k$ enumera as visitas à mesma célula por ordem de índice; dois
+índices com a mesma ordem de visita à mesma célula coincidem. Donde
+$\tilde\pi$ injectiva e $\tilde G\equiv1$. A projecção $\mathrm{pr}_{1}$
+apaga $k$ e devolve $\pi$. A igualdade $|I|=\sum G$ é §AG5; cada
+ponto de $\mathrm{im}\,\tilde\pi$ corresponde a exactamente um índice.
+\end{proof}
+
+\medskip\noindent\textbf{Algoritmo (inverso da aranha).}
+Dada uma órbita realizada $\pi$ (ou o campo $G$ com a sequência de
+células visitadas):
+\begin{enumerate}\itemsep2pt
+\item Percorrer $i=0,\ldots,N$; em cada passo ler $x=\pi(i)$.
+\item Incrementar o contador local $c[x]$; pôr $k(i)=c[x]$.
+\item Emitir $\tilde\pi(i)=(x,k(i))$ --- vértice de multiplicidade $1$.
+\item Opcional: projectar de volta $\mathrm{pr}_{1}$ para verificar
+      resíduo $0$ contra $\pi$; comparar com a recta (§AG3) como
+      controlo já injectivo na base.
+\end{enumerate}
+Não inventa geometria nova: desfaz a identificação $i\sim j$ que o
+dragão fez na grade. A métrica unimodular continua a governar a base;
+a folha é a fibra que $|\det|=1$ não via.
+
+\medskip\noindent\textbf{O tick integra as três fitas.}
+O quantum do Maestro $\mathcal{P}_k=\mathrm{tick}\circ\mathrm{batuta}\circ\Pi$
+(\code{thm:proj-maestro}) é o mesmo índice $i\in I$ que a régua do
+idioma emite e que o inverso levanta: um tick algébrico $\to$ um tick
+Heighway $\to$ um tick $\tilde\pi$. Investigação e tabela de papéis:
+\code{corpus/docs/ciencia\_dragao.tex} §§\texttt{tick-teoria},
+\texttt{regua-idioma}, \texttt{tick-inverso}, \texttt{tick-integra}.
+
+\medido{\code{tests/tick\_idioma.c} §TI1--§TI6 ($6{:}0$): Maestro
+avança $i$ sobre \code{pt\_emite\_orbita}; um tick $=$ um ponto
+Heighway; batuta $+1/-1$ (mesmo $G$, ordem dual); $\tilde G\equiv1$
+tick~a~tick; lote $\equiv$ tick~a~tick; $\sum G=|I|$.}
+
+\medskip\noindent\textbf{Aplicação aos idiomas.}
+Dada uma frase do corpus, a álgebra do idioma emite a órbita discreta
+$I$ (\code{lib/portugues.h} e gémeas); $\pi$ realiza $I$ no Heighway;
+a inversa devolve $\tilde\pi$ --- a órbita injectiva da frase
+(\code{tests/idioma\_orbita.c} §IO1--§IO5;
+corpus \code{lib/classe/corpus\_frases\_pt.txt}).
+
+\medskip\noindent\textbf{Idiomas = álgebras sobre $\Word_8$.}
+Nada fora da álgebra está no sistema. Um idioma natural (português
+primeiro; inglês e espanhol a seguir, mesma tubagem) é $\Sigma\subseteq\Word_8$, o monoide
+$\Sigma^{\ast}$, o léxico como injecção parcial com dual $\nu$
+($\nu\circ\nu=\mathrm{id}$), e as regras gramaticais como transformações no
+monoide. Toda órbita discreta dessa álgebra realiza-se no dragão: a frase
+emite $I$, $\pi$ é Heighway, $G=|\pi^{-1}|$ regista a dobra
+(\code{lib/portugues.h}, \code{lib/ingles.h}, \code{lib/espanhol.h};
+\code{tests/portugues\_aranha.c} §PA1--§PA8;
+\code{tests/ingles\_aranha.c} §IA1--§IA8;
+\code{tests/espanhol\_aranha.c} §EA1--§EA8).
+No banco: \code{IMPORT IDIOMA 'pt'|'en'|'es'} indexa
+\code{idioma/\{pt,en,es\}/\{alfabeto,lexico,regra\}}; as órbitas
+$\tilde\pi$ das frases do corpus entram como
+\code{idioma/pt/orbita/<meta>} (\code{lib/classe/corpus\_orbitas\_pt.txt},
+\code{tests/indexa\_orbitas.c} §IX1--§IX4).
+
 \medskip\noindent\textbf{Ponte com slots e banco.}
 O mesmo ciclo lê$\to$opera$\to$escreve governa autómato, tradutor, \code{sql.c} e
 \code{conversa.c}: $G\mapsto G'$ é transformação do espaço de trabalho
@@ -1376,13 +1484,27 @@ espaço legível.}}
 \code{tests/aranha\_g.c} §AG1--§AG11 (Heighway $G>1$; recta $G\le1$;
 paridade $G\bmod2$; descida $\mathrm{GF}(2)$ §AG6--§AG7; decisão min-$G$ §AG8;
 caminhada §AG10; fecho $R^{4}$ §AG9/§AG11); fibra \code{tests/conservacao\_metrica.c} §M10
-(\code{teoria cor:pata}); ciclo de slots \code{tests/reta.c} §R12d--§R12g;
+(\code{teoria cor:pata}); Teor.~\ref{thm:aranha-inversa}
+\code{tests/aranha\_inversa.c} §AI1--§AI7 (levantamento $\tilde G\equiv1$);
+\code{tests/idioma\_orbita.c} §IO1--§IO5 (frase$\to\tilde\pi$);
+ciclo de slots \code{tests/reta.c} §R12d--§R12g;
 \code{tests/dualsort\_banco.c}; GF(2) \code{tests/cadeia.c} §K3;
-Koch \code{tests/koch.c}.}
+Koch \code{tests/koch.c};
+álgebra PT \code{tests/portugues\_aranha.c} §PA1--§PA8;
+álgebra EN \code{tests/ingles\_aranha.c} §IA1--§IA8;
+álgebra ES \code{tests/espanhol\_aranha.c} §EA1--§EA8.}
 \colunas{\code{algebrico thm:gato}; \code{teoria cor:pata};
-\code{teoria thm:dobra-temporal}}
-        {ciclo lê$\to$opera$\to$escreve; $G[y,x]\mathrel{+}=1$}
+\code{teoria thm:dobra-temporal}; \code{lib/portugues.h}; \code{lib/ingles.h};
+\code{lib/espanhol.h}; \code{thm:aranha-inversa}}
+        {ciclo lê$\to$opera$\to$escreve; $G[y,x]\mathrel{+}=1$;
+         $\Sigma\subseteq\Word_8\to I\to\pi\to G$;
+         levantamento $\tilde\pi=(\pi,k)$, $\tilde G\equiv1$}
         {\code{tests/aranha\_g.c} §AG1--§AG11;
+         \code{tests/aranha\_inversa.c} §AI1--§AI7;
+         \code{tests/idioma\_orbita.c} §IO1--§IO5;
+         \code{tests/portugues\_aranha.c} §PA1--§PA8;
+         \code{tests/ingles\_aranha.c} §IA1--§IA8;
+         \code{tests/espanhol\_aranha.c} §EA1--§EA8;
          \code{tests/conservacao\_metrica.c} §M10; \code{tests/cadeia.c} §K3}
 
 % ═══════════════════════════════════════════════════════════════════════════
@@ -1745,6 +1867,41 @@ fixa como contrato verificável.
         {bateria + \code{refcruz.py}; inventário abaixo}
 
 % ═══════════════════════════════════════════════════════════════════════════
+\section{Checkpoint --- prosa canónica em TeX vivo}\label{sec:tex-vivo}
+\emph{20/08/2026.} As resoluções \texttt{tique7} deixam de carregar o corpo
+narrativo em \code{banco/conversa.c}. A prosa canónica mora em
+\code{corpus/docs/*.tex}; o C só \textbf{mede}. A base guarda
+\code{@TEX caminho} (opcionalmente \code{\#secção}); \code{responde} lê o
+ficheiro \emph{agora} (\code{expande\_tex\_vivo} /
+\code{tex\_veste\_corpo}).
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+catálogo & ficheiro & slots \\
+\midrule
+CM1--CM24 & \code{conservacao\_metrica.tex} & descida$\ldots$ascii \\
+CP1--CP25 & \code{corpo\_exercicios.tex} & corpos \\
+AL1--AL20 & \code{algebra\_moderna.tex} & álgebra moderna \\
+CL1--CL21 & \code{calculo\_exercicios.tex} & Cálculo I \\
+AR1--AR25 & \code{analise\_exercicios.tex} & Análise Real \\
+C2-1--C2-21 & \code{calculo2\_exercicios.tex} & Cálculo II \\
+C3-1--C3-21 & \code{calculo3\_exercicios.tex} & Cálculo III \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent Nomes exactos do catálogo disparam o
+\code{*_resolve} ao vivo; frases longas apontam ao TeX
+(\code{tools/semear.sh}, \code{tools/indexa\_tex\_vivo.py}). Colisões de
+título resolvem-se por sufixo distintivo (ex.\ \code{lagrange multiplicadores},
+\code{valor medio na analise}, \code{green no plano}).
+
+\medido{Smoke: \code{responde} com âncora \code{\#secção} devolve o slot;
+alterar o \texttt{.tex} altera a resposta sem reingerir. Frente:
+\code{cursor.txt} §15.}
+
+% ═══════════════════════════════════════════════════════════════════════════
 \section*{Inventário (medidores âncora)}
 
 \begin{center}\small
@@ -1771,6 +1928,11 @@ saturo W$_8$ & \code{tests/promocao.c} & §SP0--§SP5 ($6/6$) \\
 saturo Qz & \code{tests/promocao\_qz.c} & §SQ0--§SQ6 ($7/7$) \\
 fibra / pata & \code{tests/conservacao\_metrica.c} & §M10 (\code{teoria cor:pata}) \\
 multiplicidade $G$ & \code{tests/aranha\_g.c} & §AG1--§AG11 (ciclo completo) \\
+aranha inversa / $G\equiv1$ & \code{tests/aranha\_inversa.c} & §AI1--§AI7 (levantamento folhas) \\
+frase$\to$órbita inversa & \code{tests/idioma\_orbita.c} & §IO1--§IO5 (corpus$\to\tilde\pi$) \\
+álgebra PT / dragão & \code{tests/portugues\_aranha.c} & §PA1--§PA8 ($\Sigma\subseteq\Word_8\to G$) \\
+álgebra EN / dragão & \code{tests/ingles\_aranha.c} & §IA1--§IA8 (mesma tubagem) \\
+álgebra ES / dragão & \code{tests/espanhol\_aranha.c} & §EA1--§EA8 (ñ↔nh; mesma tubagem) \\
 hexal PDF & \code{tests/estrela\_unifica.js} & §U2c (\code{/Interface~6}) \\
 API SQL / interface & \code{tests/interface\_padrao.js} & $8/8$ (\code{interface\_padrao=sql}) \\
 backends ISA & \code{tests/backends\_wasm.js} & §W0--§W7 (sql+latex) \\
@@ -1789,6 +1951,6 @@ Selo em \code{tools/atestados.txt}. Referências órfãs: \code{tests/refs.c} ($
 Irmãos: \code{corpo\_algebrico.tex} · \code{corpo\_topologico.tex} ·
 \code{racionais.tex} · \code{catalogo.tex}. Teoria e catálogo em
 \href{https://goldenkingdom.patriatechnology.com}{goldenkingdom.patriatechnology.com}.
-CC BY 4.0 (textos) $\cdot$ MIT (código).\par}
+Proprietário --- uso mediante contrato e pagamento (ver \texttt{LICENSE}).\par}
 
 \end{document}

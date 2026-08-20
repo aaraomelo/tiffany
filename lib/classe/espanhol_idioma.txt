@@ -1,0 +1,18 @@
+# espanhol_idioma.txt — álgebra ES para IMPORT IDIOMA no banco.
+alfabeto card=144
+lexico el |o 
+lexico la |a 
+lexico oro|ouro
+lexico plata|prata
+lexico rey|rei
+lexico casa|casa
+lexico del |do 
+lexico es |é 
+lexico  y | e 
+lexico dragón|dragão
+lexico órbita|órbita
+lexico álgebra|álgebra
+lexico ñ|nh
+regra concat|op
+regra dual_lex|op
+regra identifica|op

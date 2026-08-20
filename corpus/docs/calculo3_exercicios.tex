@@ -1,0 +1,414 @@
+% !TeX program = pdflatex
+% corpus/docs/calculo3_exercicios.tex — ticks C3-1–C3-21 (caminhos → mesma estrutura).
+%
+% Prosa canónica; testemunhas em calculo3_resolve() (banco/conversa.c).
+% Espinha: HIPÓTESES → DEFINIÇÃO → TRANSIÇÃO → LEI → TESTEMUNHA → CONCLUSÃO → VOLTA.
+%
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[portuguese]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\medido}[1]{\par\medskip\noindent{\small\color{gray}\textbf{Medido.} #1}\par\medskip}
+
+\begin{document}
+\title{Cálculo III --- exercícios\\
+\large C3-1--C3-21: caminhos $\to$ mesma estrutura}
+\author{Tiffany --- corpus vivo}
+\date{}
+\maketitle
+
+\begin{abstract}
+\noindent Vinte e um exercícios (\code{C3\_21[]} em \code{banco/conversa.c}) ---
+este ficheiro fecha o catálogo. Eixo: campo $\to$ borda.
+Operação ao vivo: \code{responde} / \code{calculo3 N}.
+\end{abstract}
+
+\section{como se le este documento}
+Espinha dos sete slots. Lotes: C3-1--C3-8 (caminhos\ldots ponto crítico);
+C3-9--C3-16 (Lagrange\ldots linha); C3-17--C3-21 (fluxo\ldots mesma estrutura).
+Colisões: \code{lagrange vinculo}; \code{green no plano};
+\code{stokes rot face}; \code{gauss fluxo caixa}.
+
+%======================================================================
+\section{limite por caminhos}\label{sec:limite-caminhos}
+\textbf{Enunciado.} Em $\mathbb{R}^n$ o limite exige TODOS os caminhos --- e um par
+basta para matar.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f:\mathbb{R}^2\to\mathbb{R}$; $a$ no plano.
+\item \textbf{TRADUÇÃO.} $\lim_{(x,y)\to a}f$ existe $\Rightarrow$ o limite é o mesmo
+  por TODO caminho que chega a $a$.
+\item \textbf{OPERAÇÃO.} Em $\mathbb{R}$ bastam dois lados; em $\mathbb{R}^n$ há
+  INFINITOS caminhos --- difícil de provar, fácil de REFUTAR.
+\item \textbf{LEI.} Refutar precisa de DOIS caminhos; provar precisaria de todos.
+\item \textbf{TESTEMUNHA.} $xy/(x^2+y^2)$: eixo $\to0$; diagonal $\to1/2$ --- exactos
+  para todo $x\neq0$.
+\item \textbf{CONCLUSÃO.} Limite NÃO existe; demonstração curta (um par).
+\item \textbf{VOLTA.} Bola $=$ vizinhança $=$ degrau da escada (\code{thm:escada}).
+\end{enumerate}
+\medido{\code{calculo3\_resolve(1)}: dois caminhos, dois limites.}
+
+%----------------------------------------------------------------------
+\section{bola}\label{sec:bola}
+\textbf{Enunciado.} $\|\cdot\|$ e a bola aberta: a vizinhança que substitui o
+intervalo.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Mesmo quadro em $\mathbb{R}^2$.
+\item \textbf{TRADUÇÃO.} $B(a,r)=\{x:\|x-a\|<r\}$.
+\item \textbf{OPERAÇÃO.} Vizinhança deixa de ser intervalo e passa a bola; norma ao
+  QUADRADO --- $\|\mathbf{x}\|^2=\sum x_i^2$ exacta; raiz por tirar.
+\item \textbf{LEI.} Distância $=$ norma; sem decimal.
+\item \textbf{TESTEMUNHA.} $\|(3,4)\|^2=25$; $\|(1,1)\|^2=2$ --- $\sqrt{2}$ fica.
+\item \textbf{CONCLUSÃO.} Bola substitui o intervalo.
+\item \textbf{VOLTA.} LOCAL $\to$ GLOBAL: limite fala de TODA a vizinhança, não de
+  um caminho.
+\end{enumerate}
+\medido{\code{calculo3\_resolve(2)}: norma ao quadrado, sem raiz.}
+
+%----------------------------------------------------------------------
+\section{direcional}\label{sec:direcional}
+\textbf{Enunciado.} $D_u f=\nabla f\cdot u$, e o gradiente é a direção de maior
+crescimento.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f(x,y)$ polinomial; $u$ unitário.
+\item \textbf{TRADUÇÃO.} $D_u f(a)=\nabla f(a)\cdot u$.
+\item \textbf{OPERAÇÃO.} Todas as direccionais saem de duas parciais --- linearidade;
+  máximo de $\nabla f\cdot u$ na direcção de $\nabla f$.
+\item \textbf{LEI.} Linearidade da aproximação: um objecto (gradiente), não colecção.
+\item \textbf{TESTEMUNHA.} Cauchy--Schwarz $(\nabla f\cdot u)^2\le\|\nabla f\|^2\|u\|^2$
+  em muitas direcções; $0$ violações.
+\item \textbf{CONCLUSÃO.} Gradiente $=$ direcção de maior crescimento (teorema).
+\item \textbf{VOLTA.} Folga $=\|\nabla f\wedge u\|^2$ --- fecho do dual.
+\end{enumerate}
+\medido{\code{calculo3\_resolve(3)}: Cauchy--Schwarz; $0$ violações.}
+
+%----------------------------------------------------------------------
+\section{plano tangente}\label{sec:plano-tangente}
+\textbf{Enunciado.} $z=f(a)+\nabla f(a)\cdot(x-a)$: a aproximação linear, exacta no
+resto.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Mesmo $f$ polinomial.
+\item \textbf{TRADUÇÃO.} $z=f(a)+\nabla f(a)\cdot(x-a)$.
+\item \textbf{OPERAÇÃO.} Parte LINEAR do deslocamento; em polinómios
+  $f(a+h)-f(a)-\nabla f\cdot h=$ termos de grau $\ge2$ --- escrevem-se.
+\item \textbf{LEI.} Linearidade da aproximação.
+\item \textbf{TESTEMUNHA.} Gradiente e direccionais do mesmo $f$ no ponto.
+\item \textbf{CONCLUSÃO.} Plano tangente exacto no resto polinomial.
+\item \textbf{VOLTA.} Par dual: $df$ funcional / $\nabla f$ vector
+  (\code{thm:produto-dual}).
+\end{enumerate}
+\medido{\code{calculo3\_resolve(4)}: resto $=$ grau $\ge2$ exacto.}
+
+%----------------------------------------------------------------------
+\section{diferencial}\label{sec:diferencial-c3}
+\textbf{Enunciado.} $df=\nabla f\cdot dx$ --- o FUNCIONAL, e $\nabla f$ é o vector
+que a métrica dá.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Mesmo quadro.
+\item \textbf{TRADUÇÃO.} $df=\nabla f\cdot d\mathbf{x}$.
+\item \textbf{OPERAÇÃO.} $df$ em $V^*$; $\nabla f$ em $V$ --- métrica identifica;
+  sem produto interno há $df$ e não há $\nabla f$.
+\item \textbf{LEI.} Distinção do andar linear.
+\item \textbf{TESTEMUNHA.} Mesmo gradiente e Cauchy--Schwarz.
+\item \textbf{CONCLUSÃO.} Nomear um sem o outro é meio teorema.
+\item \textbf{VOLTA.} \code{thm:produto-dual}: no corpo é central e é a membrana.
+\end{enumerate}
+\medido{\code{calculo3\_resolve(5)}: par dual $df$/$\nabla f$.}
+
+%----------------------------------------------------------------------
+\section{jacobiana}\label{sec:jacobiana-c3}
+\textbf{Enunciado.} $Df(a)$ é a MATRIZ, e compor funções é multiplicá-las.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f:\mathbb{R}^n\to\mathbb{R}^m$, $g:\mathbb{R}^k\to\mathbb{R}^n$
+  polinomiais.
+\item \textbf{TRADUÇÃO.} $D(f\circ g)(x)=Df(g(x))\,Dg(x)$.
+\item \textbf{OPERAÇÃO.} Eixo: NÚMERO $\to$ VECTOR $\to$ OPERADOR; ordem importa.
+\item \textbf{LEI.} $\det(AB)=\det A\cdot\det B$ --- volumes compõem-se.
+\item \textbf{TESTEMUNHA.} Jacobiana da composta vs produto das jacobianas; $\det$
+  multiplica.
+\item \textbf{CONCLUSÃO.} Compor É multiplicar operadores.
+\item \textbf{VOLTA.} $\det J=\Lambda^n T$; $\Lambda^n$ functorial.
+\end{enumerate}
+\medido{\code{calculo3\_resolve(6)}: $Df\cdot Dg=$ composta.}
+
+%----------------------------------------------------------------------
+\section{taylor multi}\label{sec:taylor-multi}
+\textbf{Enunciado.} $f(a+h)=f(a)+Df\cdot h+\frac12 D^2f[h,h]+\ldots$ --- exacto em
+polinómios.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Mesmas $f,g$ polinomiais.
+\item \textbf{TRADUÇÃO.} Desenvolvimento multivariado.
+\item \textbf{OPERAÇÃO.} Em polinómios a série TERMINA --- resto zero a partir do
+  grau; reescrita, não aproximação.
+\item \textbf{LEI.} Mesma dos volumes: $\det(AB)=\det A\cdot\det B$.
+\item \textbf{TESTEMUNHA.} Cadeia + $\det$ (mesmo bloco da jacobiana).
+\item \textbf{CONCLUSÃO.} Taylor multi exacto em polinómios.
+\item \textbf{VOLTA.} $\Lambda^n(AB)=\Lambda^n(A)\cdot\Lambda^n(B)$.
+\end{enumerate}
+\medido{\code{calculo3\_resolve(7)}: resto zero do grau em diante.}
+
+%----------------------------------------------------------------------
+\section{ponto critico}\label{sec:ponto-critico}
+\textbf{Enunciado.} $\nabla f=0$, e a Hessiana com QUATRO estados decide (ou não).
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $a$ com $\nabla f(a)=0$.
+\item \textbf{TRADUÇÃO.} Definida $+$; definida $-$; INDEFINIDA (sela); SEMIDEFINIDA
+  (não decide).
+\item \textbf{OPERAÇÃO.} Quarto estado: critério DEIXA DE DECIDIR --- reconhecê-lo
+  vale tanto como o veredicto.
+\item \textbf{LEI.} Formas: caçar TESTEMUNHAS; semidefinida $=$ sem testemunha de um
+  sinal.
+\item \textbf{TESTEMUNHA.} Quatro $f$: sela / mín / máx / $x^2$ semidefinida
+  ($Q(1,0)>0$, $Q(0,1)=0$).
+\item \textbf{CONCLUSÃO.} Quatro estados; saber onde a ferramenta se cala.
+\item \textbf{VOLTA.} LOCAL $\to$ GLOBAL: classifica um ponto; extremo global é outra
+  pergunta.
+\end{enumerate}
+\medido{\code{calculo3\_resolve(8)} / \code{p2\_classifica}: quatro estados.}
+
+%----------------------------------------------------------------------
+\section{lagrange vinculo}\label{sec:lagrange-c3}
+\textbf{Enunciado.} $\nabla f=\lambda\nabla g$, e o gume é a regularidade do
+vínculo.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Extremizar $f$ sujeito a $g=c$.
+\item \textbf{TRADUÇÃO.} $\nabla f=\lambda\nabla g$.
+\item \textbf{OPERAÇÃO.} No extremo vinculado $\nabla f$ normal à superfície de
+  restrição --- paralelo a $\nabla g$.
+\item \textbf{LEI.} Formas: caçar testemunhas; regularidade $\nabla g\neq0$.
+\item \textbf{TESTEMUNHA.} Gume $g=x^3-y^2$ na origem: $\nabla g=(0,0)$; sem
+  $\lambda$ para $f$ genérico.
+\item \textbf{CONCLUSÃO.} Método exige vínculo regular; singularidade não coberta.
+\item \textbf{VOLTA.} Gume operacional --- ponto singular da restrição fora do
+  método.
+\end{enumerate}
+\medido{\code{calculo3\_resolve(9)}: gume $\nabla g=(0,0)$.}
+
+%----------------------------------------------------------------------
+\section{integral multipla}\label{sec:integral-multipla}
+\textbf{Enunciado.} Dupla e tripla, e Fubini por caminhos intermédios distintos.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f$ polinomial numa caixa.
+\item \textbf{TRADUÇÃO.} $\iiint f\,dV=\int(\int(\int f\,dz)\,dy)\,dx$.
+\item \textbf{OPERAÇÃO.} Ordens constroem objectos intermédios DIFERENTES; só o
+  número final coincide --- teorema.
+\item \textbf{LEI.} $\det(AB)=\det A\cdot\det B$ nas mudanças.
+\item \textbf{TESTEMUNHA.} Tripla exacta em caixa $[0,2]\times[0,1]\times[0,3]$.
+\item \textbf{CONCLUSÃO.} Fubini vale; caminhos distintos, mesmo número.
+\item \textbf{VOLTA.} Número global; caminhos locais distintos.
+\end{enumerate}
+\medido{\code{calculo3\_resolve(10)} / \code{p3\_int\_caixa}: tripla exacta.}
+
+%----------------------------------------------------------------------
+\section{jacobiano volume}\label{sec:jacobiano-volume}
+\textbf{Enunciado.} $dV=|\det J|\,du\,dv\,dw$ --- o determinante É a medida.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Mudança $(u,v,w)\mapsto(x,y,z)$.
+\item \textbf{TRADUÇÃO.} $dV=|\det J|\,du\,dv\,dw$.
+\item \textbf{OPERAÇÃO.} Factor NÃO é correcção: é a MEDIDA --- $\Lambda^n T$.
+\item \textbf{LEI.} Compor mudanças multiplica factores de volume.
+\item \textbf{TESTEMUNHA.} Jacobiana diagonal $(2u,v,3w)$: $\det=$ esticamento.
+\item \textbf{CONCLUSÃO.} Jacobiano $=$ medida.
+\item \textbf{VOLTA.} Teorema do gato, terceira vida --- a MEDIDA
+  (\code{teoria.tex} cartas equiareais).
+\end{enumerate}
+\medido{\code{calculo3\_resolve(11)}: $\det J$ factor de volume.}
+
+%----------------------------------------------------------------------
+\section{coordenadas}\label{sec:coordenadas-c3}
+\textbf{Enunciado.} Polares, cilíndricas, esféricas: o factor sai do Jacobiano.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Mesma mudança de coordenadas.
+\item \textbf{TRADUÇÃO.} Polares $dA=r\,dr\,d\theta$; esféricas
+  $dV=\rho^2\sin\varphi\,d\rho\,d\varphi\,d\theta$.
+\item \textbf{OPERAÇÃO.} $r$ e $\rho^2\sin\varphi$ são $|\det J|$ --- não
+  convenções.
+\item \textbf{LEI.} Determinante como medida.
+\item \textbf{TESTEMUNHA.} Factores escritos; seno/cosseno NÃO se avaliam em
+  $\mathbb{Q}$ (medir seria fingir).
+\item \textbf{CONCLUSÃO.} Coordenadas clássicas $=$ reescrita que carrega a medida.
+\item \textbf{VOLTA.} Mesma $\Lambda^n T$; gato na medida.
+\end{enumerate}
+\medido{\code{calculo3\_resolve(12)}: factores escritos; sem fingir $\sin/\cos$.}
+
+%----------------------------------------------------------------------
+\section{campo}\label{sec:campo-c3}
+\textbf{Enunciado.} $F:\mathbb{R}^3\to\mathbb{R}^3$, e o par: div ATRAVESSA, rot
+RODA.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $F=(F_1,F_2,F_3)$ polinomial.
+\item \textbf{TRADUÇÃO.} $\nabla\cdot F$ (directo) e $\nabla\times F$ (cruzado).
+\item \textbf{OPERAÇÃO.} Literal: interno $=$ atravessa; cruzado $=$ roda --- par do
+  corpo estelar.
+\item \textbf{LEI.} $\mathrm{rot}(\nabla\varphi)=0$ e $\mathrm{div}(\mathrm{rot} F)=0$
+  --- complexo $\nabla\to\mathrm{rot}\to\mathrm{div}$.
+\item \textbf{TESTEMUNHA.} Varredura: $0$ falhas nas duas identidades.
+\item \textbf{CONCLUSÃO.} Div/rot $=$ directo/cruzado.
+\item \textbf{VOLTA.} Mesmo par que fecha Lagrange no exterior, com $\nabla$.
+\end{enumerate}
+\medido{\code{calculo3\_resolve(13)}: complexo varrido; $0$ falhas.}
+
+%----------------------------------------------------------------------
+\section{conservativo}\label{sec:conservativo}
+\textbf{Enunciado.} $F=\nabla\varphi$ é uma FIBRA, e ela é vazia quando
+$\mathrm{rot} F\neq0$.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Mesmo campo polinomial.
+\item \textbf{TRADUÇÃO.} $F=\nabla\varphi$ --- e $\mathrm{rot} F=0$ é a condição.
+\item \textbf{OPERAÇÃO.} «Dado $F$, achar $\varphi$» $=$ FIBRA; constrói-se o
+  potencial --- fecha ou não.
+\item \textbf{LEI.} Complexo: $\mathrm{rot}\circ\nabla=0$.
+\item \textbf{TESTEMUNHA.} Potencial construído e conferido; gume $F=(-y,x,0)$:
+  fibra RECUSADA.
+\item \textbf{CONCLUSÃO.} Conservativo $\Leftrightarrow$ fibra não vazia.
+\item \textbf{VOLTA.} \code{thm:divisao-fibra}; voltar com resíduo $0$.
+\end{enumerate}
+\medido{\code{calculo3\_resolve(14)} / \code{cp\_potencial}: gume vazio.}
+
+%----------------------------------------------------------------------
+\section{trabalho}\label{sec:trabalho}
+\textbf{Enunciado.} Independente do caminho $\Leftrightarrow$ conservativo --- os
+dois lados medidos.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Trabalho ao longo de caminhos.
+\item \textbf{TRADUÇÃO.} Independente do caminho $\Leftrightarrow$ conservativo.
+\item \textbf{OPERAÇÃO.} Equivalência pelos DOIS lados: conservativo $\Rightarrow$
+  iguais; não conservativo $\Rightarrow$ diferentes.
+\item \textbf{LEI.} Mesma do complexo / fibra.
+\item \textbf{TESTEMUNHA.} Mesmo par de caminhos: conservativo $36=36$; não
+  conservativo $6$ e $-6$.
+\item \textbf{CONCLUSÃO.} Equivalência medida inteira --- não pela metade.
+\item \textbf{VOLTA.} Diferença $=$ circulação no laço fechado.
+\end{enumerate}
+\medido{\code{calculo3\_resolve(15)}: dois regimes, mesmos caminhos.}
+
+%----------------------------------------------------------------------
+\section{integral de linha}\label{sec:integral-linha}
+\textbf{Enunciado.} $\int_C F\cdot d\mathbf{r}$, e a circulação numa curva fechada.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Curva $C$; campo $F$.
+\item \textbf{TRADUÇÃO.} $\int_C F\cdot d\mathbf{r}$.
+\item \textbf{OPERAÇÃO.} Integral de UMA variável com as outras congeladas; curva
+  fechada $=$ lados com sinais do sentido positivo.
+\item \textbf{LEI.} Complexo e independência do caminho.
+\item \textbf{TESTEMUNHA.} Linhas nos eixos; circulação no laço (diferença dos
+  trabalhos).
+\item \textbf{CONCLUSÃO.} Linha e circulação exactas em polinómios.
+\item \textbf{VOLTA.} Fibra / volta --- mesma frase do conservativo.
+\end{enumerate}
+\medido{\code{calculo3\_resolve(16)} / \code{cp\_linha\_eixo}: caminhos medidos.}
+
+%----------------------------------------------------------------------
+\section{fluxo}\label{sec:fluxo}
+\textbf{Enunciado.} $\iint_S F\cdot\mathbf{n}\,dS$ --- o que atravessa a superfície.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Campo $F$ polinomial; superfície $S$.
+\item \textbf{TRADUÇÃO.} $\iint_S F\cdot\mathbf{n}\,dS$.
+\item \textbf{OPERAÇÃO.} Fluxo $=$ o que atravessa; par com circulação (linha).
+\item \textbf{LEI.} INTERIOR $\leftrightarrow$ BORDA (prepara Gauss).
+\item \textbf{TESTEMUNHA.} Fluxo na caixa vs $\iiint\mathrm{div} F$ (mesmo bloco
+  Green/Stokes/Gauss).
+\item \textbf{CONCLUSÃO.} Fluxo exacto em polinómios na caixa.
+\item \textbf{VOLTA.} Div atravessa --- mesma frase do campo.
+\end{enumerate}
+\medido{\code{calculo3\_resolve(17)} / \code{cp\_fluxo\_caixa}: faces vs volume.}
+
+%----------------------------------------------------------------------
+\section{green no plano}\label{sec:green-c3}
+\textbf{Enunciado.} $\oint_{\partial D}P\,dx+Q\,dy=\iint_D(Q_x-P_y)\,dA$.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Região $D$ no plano; campo $(P,Q)$.
+\item \textbf{TRADUÇÃO.} Circulação na borda $=$ rotacional no interior (2D).
+\item \textbf{OPERAÇÃO.} Green $=$ Stokes achatado --- mesma estrutura, dimensão 2.
+\item \textbf{LEI.} INTERIOR $\leftrightarrow$ BORDA.
+\item \textbf{TESTEMUNHA.} Bloco com Stokes/Gauss: lados sem código comum.
+\item \textbf{CONCLUSÃO.} Green é a frase em 2D.
+\item \textbf{VOLTA.} Adjunto $\delta\dashv\varepsilon$ (\code{thm:morf-par},
+  \code{thm:borda-dirac}).
+\end{enumerate}
+\medido{\code{calculo3\_resolve(18)}: Green $=$ Stokes achatado.}
+
+%----------------------------------------------------------------------
+\section{stokes rot face}\label{sec:stokes-c3}
+\textbf{Enunciado.} $\oint_{\partial S}F\cdot d\mathbf{r}=\iint_S(\mathrm{rot} F)\cdot\mathbf{n}\,dS$.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Superfície $S$ com borda $\partial S$; campo $F$.
+\item \textbf{TRADUÇÃO.} Circulação na borda $=$ fluxo do rotacional.
+\item \textbf{OPERAÇÃO.} Dois lados SEM NADA EM COMUM: quatro segmentos vs área do
+  rotacional.
+\item \textbf{LEI.} $\int_{\partial R}\omega=\int_R D\omega$ com $D=\mathrm{rot}$.
+\item \textbf{TESTEMUNHA.} $625$ campos: circulação $=$ rot na face; $0$ falhas.
+\item \textbf{CONCLUSÃO.} Stokes fecha no rectângulo.
+\item \textbf{VOLTA.} Mesma frase que Green/Gauss --- muda o nome de $D$.
+\end{enumerate}
+\medido{\code{calculo3\_resolve(19)} / \code{cp\_circulacao},\code{cp\_rot\_face}:
+$0$ falhas.}
+
+%----------------------------------------------------------------------
+\section{gauss fluxo caixa}\label{sec:gauss-c3}
+\textbf{Enunciado.} $\iiint_V\mathrm{div} F\,dV=\iint_{\partial V}F\cdot\mathbf{n}\,dS$.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Volume $V$ com borda $\partial V$.
+\item \textbf{TRADUÇÃO.} Integral da divergência $=$ fluxo na fronteira.
+\item \textbf{OPERAÇÃO.} Seis faces vs volume do $\mathrm{div}$ --- caminhos
+  distintos.
+\item \textbf{LEI.} $\int_{\partial R}\omega=\int_R D\omega$ com $D=\mathrm{div}$.
+\item \textbf{TESTEMUNHA.} $625$ campos: fluxo $=$ $\iiint\mathrm{div}$; $0$ falhas.
+\item \textbf{CONCLUSÃO.} Gauss fecha na caixa.
+\item \textbf{VOLTA.} INTERIOR $\leftrightarrow$ BORDA --- forma forte LOCAL
+  $\to$ GLOBAL.
+\end{enumerate}
+\medido{\code{calculo3\_resolve(20)} / \code{cp\_fluxo\_caixa}: $0$ falhas.}
+
+%----------------------------------------------------------------------
+\section{a mesma estrutura}\label{sec:mesma-estrutura}
+\textbf{Enunciado.} Os três são $\int_{\partial R}\omega=\int_R D\omega$ --- e o que
+falta é o $d$.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Green, Stokes, Gauss.
+\item \textbf{TRADUÇÃO.} $\int_{\partial R}\omega=\int_R D\omega$ --- $D$ muda de
+  nome (rot 2D / rot 3D / div).
+\item \textbf{OPERAÇÃO.} Medir a ESTRUTURA, não três teoremas separados.
+\item \textbf{LEI.} INTERIOR $\leftrightarrow$ BORDA.
+\item \textbf{TESTEMUNHA.} Stokes e Gauss $0$ falhas em $625$ cada; tabela borda /
+  interior.
+\item \textbf{CONCLUSÃO.} Uma frase, três dimensões.
+\item \textbf{VOLTA.} O que AINDA NÃO ESTÁ FEITO: formas diferenciais --- $\Lambda^k$,
+  cunha, $\star$, $\iota_v$ já cá; falta o $d$ (derivada exterior) para os três
+  virarem $d\omega$. Andar seguinte.
+\end{enumerate}
+\medido{\code{calculo3\_resolve(21)}: estrutura comum; $d$ por vir.}
+
+%======================================================================
+\section{o que fica no conversa}
+A prosa canónica C3-1--C3-21 é este ficheiro. \code{calculo3\_resolve} \textbf{mede}.
+Catálogo de Cálculo III fechado.
+
+\end{document}

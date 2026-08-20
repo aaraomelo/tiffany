@@ -1,0 +1,502 @@
+% !TeX program = pdflatex
+% corpus/docs/analise_exercicios.tex — ticks AR1–AR25 (supremo → cinco vias).
+%
+% Prosa canónica; testemunhas em analise_resolve() (banco/conversa.c).
+% Espinha: HIPÓTESES → DEFINIÇÃO → TRANSIÇÃO → LEI → TESTEMUNHA → CONCLUSÃO → VOLTA.
+%
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[portuguese]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\medido}[1]{\par\medskip\noindent{\small\color{gray}\textbf{Medido.} #1}\par\medskip}
+
+\begin{document}
+\title{Análise real --- exercícios\\
+\large AR1--AR25: supremo $\to$ cinco vias}
+\author{Tiffany --- corpus vivo}
+\date{}
+\maketitle
+
+\begin{abstract}
+\noindent Vinte e cinco exercícios (\code{AR25[]} em \code{banco/conversa.c}) ---
+este ficheiro fecha o catálogo. Operação ao vivo: nomes do catálogo via
+\code{responde} / \code{analise N}.
+\end{abstract}
+
+\section{como se le este documento}
+Espinha dos sete slots. Lotes: AR1--AR8 (supremo\ldots Bolzano);
+AR9--AR16 ($\varepsilon$-$N$\ldots Weierstrass);
+AR17--AR25 (derivada\ldots cinco vias).
+Títulos que colidem com Cálculo I levam sufixo distintivo
+(\code{derivada limite e quociente}, \code{valor medio na analise},
+\code{rolle e o gume}).
+
+%======================================================================
+\section{supremo}\label{sec:supremo}
+\textbf{Enunciado.} $\sup$ e $\inf$: a EXISTÊNCIA separada do atingimento.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $A\subseteq\mathbb{Q}$ não vazio e limitado; $\varepsilon>0$
+  racional.
+\item \textbf{TRADUÇÃO.} $\sup A$ existe $\not\Rightarrow\sup A\in A$.
+\item \textbf{OPERAÇÃO.} Lista finita confunde os três estados; $A=\{q>0:q^2<2\}$
+  separa-os.
+\item \textbf{LEI.} Ordem em $\mathbb{Q}$ por produto cruzado --- dois inteiros.
+\item \textbf{TESTEMUNHA.} Existir / ser atingido / ser racional --- três estados
+  distintos no mesmo $A$.
+\item \textbf{CONCLUSÃO.} Existência do supremo é propriedade do ESPAÇO --- e
+  $\mathbb{Q}$ não a tem.
+\item \textbf{VOLTA.} O que $\mathbb{R}$ acrescenta é exactamente o supremo que falta
+  (cinco formas na fala~25).
+\end{enumerate}
+\medido{\code{analise\_resolve(1)}: lista finita atinge; $A$ de $\sqrt{2}$ não.}
+
+%----------------------------------------------------------------------
+\section{arquimediana}\label{sec:arquimediana}
+\textbf{Enunciado.} Dado $\varepsilon$, achar $n$ com $1/n<\varepsilon$ ---
+construtivo, não «existe».
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $\varepsilon=p/q>0$ racional.
+\item \textbf{TRADUÇÃO.} $\forall\varepsilon>0\ \exists n:\ 1/n<\varepsilon$.
+\item \textbf{OPERAÇÃO.} $n=\lfloor q/p\rfloor+1$ --- ESTE $n$, verificado.
+\item \textbf{LEI.} Ordem em $\mathbb{Q}$ (produto cruzado).
+\item \textbf{TESTEMUNHA.} $n$ exibido para cada $\varepsilon$ da malha.
+\item \textbf{CONCLUSÃO.} $\mathbb{Q}$ é arquimediano --- nenhum racional
+  «infinitamente pequeno».
+\item \textbf{VOLTA.} Existência construtiva $>$ existência só provada.
+\end{enumerate}
+\medido{\code{analise\_resolve(2)} / \code{an\_arquimedes}: $n$ para cada
+$\varepsilon$; $0$ falhas.}
+
+%----------------------------------------------------------------------
+\section{densidade}\label{sec:densidade-q}
+\textbf{Enunciado.} Um racional entre quaisquer dois: o ponto médio.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $a<b$ racionais.
+\item \textbf{TRADUÇÃO.} $a<(a+b)/2<b$.
+\item \textbf{OPERAÇÃO.} Ponto médio exacto em $\mathbb{Q}$ --- uma linha, toda a
+  densidade.
+\item \textbf{LEI.} Fecho de $\mathbb{Q}$ para a média.
+\item \textbf{TESTEMUNHA.} Médio exibido em $[1/3,1/2]$ e em $[0,1/1000]$.
+\item \textbf{CONCLUSÃO.} $\mathbb{Q}$ denso em si próprio.
+\item \textbf{VOLTA.} Entre quaisquer dois há racionais --- e também irracionais
+  (fala seguinte).
+\end{enumerate}
+\medido{\code{analise\_resolve(3)} / \code{an\_entre}: médio sempre cabe.}
+
+%----------------------------------------------------------------------
+\section{irracionais densos}\label{sec:irracionais-densos}
+\textbf{Enunciado.} $q+\sqrt{2}/n$ dentro de qualquer intervalo --- e o que NÃO se
+avalia.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $a<b$ racionais; candidato $q+\sqrt{2}/n$.
+\item \textbf{TRADUÇÃO.} Irracional no intervalo, sem avaliar $\sqrt{2}$.
+\item \textbf{OPERAÇÃO.} Desigualdade AO QUADRADO: $(b-q)^2 n^2>2$ --- exacta em
+  $\mathbb{Q}$.
+\item \textbf{LEI.} Paridade / não-raiz em $\mathbb{Q}$ --- não comparação decimal.
+\item \textbf{TESTEMUNHA.} Quadrado comparado; $\sqrt{2}$ fica por tirar.
+\item \textbf{CONCLUSÃO.} Irracionais densos; entre dois racionais há dos dois tipos.
+\item \textbf{VOLTA.} Escrever «$\sqrt{2}\approx1{,}414$» traz o decimal --- e o
+  decimal não é o objecto.
+\end{enumerate}
+\medido{\code{analise\_resolve(4)}: desigualdade ao quadrado; sem avaliar a raiz.}
+
+%----------------------------------------------------------------------
+\section{dedekind}\label{sec:dedekind}
+\textbf{Enunciado.} O corte de $\sqrt{2}$, e as DUAS propriedades verificadas.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Sucessão racional que aproxima $\sqrt{2}$.
+\item \textbf{TRADUÇÃO.} $A=\{q\le0\}\cup\{q:q^2<2\}$, $B=$ o resto.
+\item \textbf{OPERAÇÃO.} $A$ fechado para baixo; $A$ sem máximo --- dado $a\in A$,
+  exibe-se $a'>a$ em $A$ ($a'=(2a+2)/(a+2)$).
+\item \textbf{LEI.} Nenhum racional tem quadrado $2$ (paridade dos expoentes).
+\item \textbf{TESTEMUNHA.} PASSO verificado em muitos $a\in A$ independentes --- não
+  só a órbita.
+\item \textbf{CONCLUSÃO.} $(A,B)$ corte legítimo; fronteira não racional.
+\item \textbf{VOLTA.} Completamento: $\mathbb{R}$ é onde Cauchy e «ter limite»
+  coincidem.
+\end{enumerate}
+\medido{\code{analise\_resolve(5)} / \code{an\_passo\_sobe}: $0$ falhas no passo.}
+
+%----------------------------------------------------------------------
+\section{cauchy em Q}\label{sec:cauchy-em-q}
+\textbf{Enunciado.} De Cauchy sem usar o limite --- o gume, na assinatura.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Mesma sucessão racional a aproximar $\sqrt{2}$.
+\item \textbf{TRADUÇÃO.} $\forall\varepsilon>0\ \exists N:\ m,n>N\Rightarrow|x_m-x_n|<\varepsilon$.
+\item \textbf{OPERAÇÃO.} Módulo compara $|x_m-x_n|$ e NUNCA menciona limite --- a
+  sucessão aproxima-se DE SI.
+\item \textbf{LEI.} Ser de Cauchy $\neq$ ter limite; $\mathbb{Q}$ separa as duas.
+\item \textbf{TESTEMUNHA.} $N$ achado para cada $\varepsilon$; busca exaustiva do
+  limite racional volta VAZIA.
+\item \textbf{CONCLUSÃO.} Cauchy pertence à sucessão; limite depende do espaço.
+\item \textbf{VOLTA.} Completude $=$ coincidência das duas afirmações.
+\end{enumerate}
+\medido{\code{analise\_resolve(6)} / \code{cy\_modulo}: Cauchy sim; limite em
+$\mathbb{Q}$ não.}
+
+%----------------------------------------------------------------------
+\section{completude}\label{sec:completude}
+\textbf{Enunciado.} Cauchy converge $\Leftrightarrow$ todo limitado tem supremo.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Duas afirmações sobre $\mathbb{R}$.
+\item \textbf{TRADUÇÃO.} Todo Cauchy converge $\Leftrightarrow$ todo limitado
+  superiormente tem $\sup$.
+\item \textbf{OPERAÇÃO.} Duas direcções À PARTE: ida (conjunto $\to$ sucessão);
+  volta (sucessão $\to$ conjunto) --- mesma bisseção, dois sentidos.
+\item \textbf{LEI.} Bisseção: motor das duas; muda o que se procura.
+\item \textbf{TESTEMUNHA.} Encaixe medido; módulo de Cauchy para $\varepsilon$ fino.
+\item \textbf{CONCLUSÃO.} As duas são a MESMA --- «completude» nomeia a coincidência.
+\item \textbf{VOLTA.} Em $\mathbb{Q}$ falham JUNTAS: encaixe sem ponto, conjunto sem
+  $\sup$.
+\end{enumerate}
+\medido{\code{analise\_resolve(7)}: $24$ bissecções + módulo; ambas fecham.}
+
+%----------------------------------------------------------------------
+\section{bolzano}\label{sec:bolzano}
+\textbf{Enunciado.} Limitada tem subsucessão convergente --- procurada.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $(x_n)$ limitada em $[1,2]$ --- convergentes de $\sqrt{2}$.
+\item \textbf{TRADUÇÃO.} Limitada $\Rightarrow$ existe subsucessão convergente.
+\item \textbf{OPERAÇÃO.} Bisseção: metade com mais termos; sempre há uma.
+\item \textbf{LEI.} Encaixe: caixas encolhem com termos; em $\mathbb{R}$ o ponto é o
+  limite.
+\item \textbf{TESTEMUNHA.} Índices EXIBIDOS; caixa final; ponto não racional
+  ($p^2=2q^2$ vazio).
+\item \textbf{CONCLUSÃO.} Subsucessão sempre; limite só em $\mathbb{R}$ --- duas
+  afirmações.
+\item \textbf{VOLTA.} Bolzano--Weierstrass É forma da completude (fala~25).
+\end{enumerate}
+\medido{\code{analise\_resolve(8)} / \code{an\_subsuc}: índices e caixa; sem raiz
+racional.}
+
+%----------------------------------------------------------------------
+\section{epsilon N}\label{sec:epsilon-n}
+\textbf{Enunciado.} $(2n+1)/(n+3)\to2$ com o $N$ CONSTRUÍDO de $\varepsilon$.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $x_n=(2n+1)/(n+3)$.
+\item \textbf{TRADUÇÃO.} $|x_n-2|=5/(n+3)<\varepsilon$ para $n>5/\varepsilon-3$.
+\item \textbf{OPERAÇÃO.} $N$ sai da CONTA em $\mathbb{Q}$ --- o limite aparece como o
+  valor para o qual a diferença encolhe.
+\item \textbf{LEI.} Completude de $\mathbb{R}$ (encaixe tem ponto).
+\item \textbf{TESTEMUNHA.} $N$ construído e distância VERIFICADA para cada
+  $\varepsilon$.
+\item \textbf{CONCLUSÃO.} $x_n\to2$ com $N$ explícito.
+\item \textbf{VOLTA.} Bolzano--Weierstrass: divergir ainda permite subsucessões
+  convergentes.
+\end{enumerate}
+\medido{\code{analise\_resolve(9)}: $N=5/\varepsilon-3$; $0$ falhas.}
+
+%----------------------------------------------------------------------
+\section{duas subsucessoes}\label{sec:duas-subsucessoes}
+\textbf{Enunciado.} Dois limites diferentes provam a divergência.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $(x_n)$ limitada --- tipicamente $(-1)^n$.
+\item \textbf{TRADUÇÃO.} Dois limites de subsucessão distintos $\Rightarrow$ diverge.
+\item \textbf{OPERAÇÃO.} Pares $\to+1$, ímpares $\to-1$; critérios de cauda
+  separam.
+\item \textbf{LEI.} Completude: encaixe pode ter ponto; convergência da sucessão
+  exige um só.
+\item \textbf{TESTEMUNHA.} Par $(-1)^n$ vs $1/(n+1)$: limsup/liminf iguais só no
+  segundo.
+\item \textbf{CONCLUSÃO.} Divergência PROVADA por dois limites distintos.
+\item \textbf{VOLTA.} Existência de subsucessão $\neq$ existência de limite da
+  sucessão.
+\end{enumerate}
+\medido{\code{analise\_resolve(10)}: $(-1)^n$ nunca iguala caudas.}
+
+%----------------------------------------------------------------------
+\section{limsup}\label{sec:limsup}
+\textbf{Enunciado.} Converge $\Leftrightarrow$ limsup $=$ liminf, e $(-1)^n$ é o
+gume.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $(x_n)$ limitada.
+\item \textbf{TRADUÇÃO.} Converge $\Leftrightarrow\lim_n\sup_{k\ge n}x_k=\lim_n\inf_{k\ge n}x_k$.
+\item \textbf{OPERAÇÃO.} Limsup/liminf $=$ $\sup$/$\inf$ da CAUDA --- existem sempre;
+  convergência é a igualdade.
+\item \textbf{LEI.} Caracterização completa, não só critério suficiente.
+\item \textbf{TESTEMUNHA.} $(-1)^n$: $+1$ e $-1$ nunca se aproximam; $1/(n+1)$:
+  distância encolhe.
+\item \textbf{CONCLUSÃO.} Converge $\Leftrightarrow$ limsup $=$ liminf.
+\item \textbf{VOLTA.} Mesmo divergindo, $(-1)^n$ tem subsucessões convergentes
+  (Bolzano).
+\end{enumerate}
+\medido{\code{analise\_resolve(11)} / \code{an\_cauda}: gume vs convergente.}
+
+%----------------------------------------------------------------------
+\section{tres continuidades}\label{sec:tres-continuidades}
+\textbf{Enunciado.} $\varepsilon$-$\delta$, sequencial e $f^{-1}(F)$ fechado --- as
+três.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f(x)=x^2$, $a\in\mathbb{Q}$.
+\item \textbf{TRADUÇÃO.} $\varepsilon$-$\delta$; sequencial; $f^{-1}(F)$ fechado.
+\item \textbf{OPERAÇÃO.} Medem-se À PARTE: $\delta$ da factorização
+  $|x^2-a^2|=|x-a|\,|x+a|$; sequencial com $x_n=a+1/n$; topológica sem distância.
+\item \textbf{LEI.} $\delta=\min(1,\varepsilon/(2|a|+1))$.
+\item \textbf{TESTEMUNHA.} Três colunas: $\delta$ serve; distâncias descem; forma
+  topológica sem régua.
+\item \textbf{CONCLUSÃO.} Coincidem em métricos; SÓ a terceira generaliza.
+\item \textbf{VOLTA.} Irmão mais forte: continuidade uniforme (fala~13) --- ordem dos
+  quantificadores.
+\end{enumerate}
+\medido{\code{analise\_resolve(12)} / \code{an\_delta}: três vias; $0$ falhas.}
+
+%----------------------------------------------------------------------
+\section{uniforme}\label{sec:uniforme-ar}
+\textbf{Enunciado.} $1/x$ em $(0,1)$: contínua e NÃO uniformemente.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f(x)=1/x$ em $(0,1)$.
+\item \textbf{TRADUÇÃO.} $\delta$ depende do PONTO, não só de $\varepsilon$.
+\item \textbf{OPERAÇÃO.} Contínua: $\exists\delta$ por $x$; uniforme: $\exists\delta$
+  para TODOS $x$ --- ordem dos quantificadores.
+\item \textbf{LEI.} $\forall x\,\exists\delta$ contra $\exists\delta\,\forall x$.
+\item \textbf{TESTEMUNHA.} De cada $\delta$: $x=\delta/2$, $y=\delta/3$; salto
+  exacto $1/\delta$ --- nenhum $\delta$ serve para $\varepsilon=1$.
+\item \textbf{CONCLUSÃO.} Contínua e NÃO uniformemente contínua.
+\item \textbf{VOLTA.} Em $[a,b]$ compacto toda contínua é uniformemente contínua ---
+  falta a $(0,1)$ a compacidade.
+\end{enumerate}
+\medido{\code{analise\_resolve(13)} / \code{an\_falha\_uniforme}: salto $1/\delta$.}
+
+%----------------------------------------------------------------------
+\section{compacto}\label{sec:compacto-ar}
+\textbf{Enunciado.} Sucessão em compacto tem limite DENTRO dele.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $K\subseteq\mathbb{R}$ compacto; $f$ contínua em $K$.
+\item \textbf{TRADUÇÃO.} Toda sucessão em $K$ tem subsucessão convergente COM limite
+  em $K$.
+\item \textbf{OPERAÇÃO.} Limite fica DENTRO: compacto é fechado --- contém os seus
+  limites.
+\item \textbf{LEI.} Completude: diferença $\mathbb{Q}$ vs $\mathbb{R}$.
+\item \textbf{TESTEMUNHA.} Convergentes de $\sqrt{2}$ em $[1,2]\cap\mathbb{Q}$:
+  dentro, sem limite racional.
+\item \textbf{CONCLUSÃO.} Em $\mathbb{R}$ o limite fica em $K$; em $\mathbb{Q}$ o
+  mesmo intervalo falha.
+\item \textbf{VOLTA.} Weierstrass herda: sem compacidade, contínua pode não atingir
+  máximo.
+\end{enumerate}
+\medido{\code{analise\_resolve(14)}: $[1,2]\cap\mathbb{Q}$ não compacto.}
+
+%----------------------------------------------------------------------
+\section{heine borel}\label{sec:heine-borel}
+\textbf{Enunciado.} Compacto $\Leftrightarrow$ fechado e limitado --- as duas
+direcções.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $K\subseteq\mathbb{R}$ (métrico).
+\item \textbf{TRADUÇÃO.} $K$ compacto $\Leftrightarrow$ $K$ fechado e limitado.
+\item \textbf{OPERAÇÃO.} «Compacto $\Rightarrow$ fechado e limitado» geral; a
+  RECÍPROCA precisa de $\mathbb{R}^n$ e FALHA em $\mathbb{Q}$.
+\item \textbf{LEI.} Completude sustenta a recíproca.
+\item \textbf{TESTEMUNHA.} $[1,2]\cap\mathbb{Q}$: fechado em $\mathbb{Q}$, limitado,
+  NÃO compacto.
+\item \textbf{CONCLUSÃO.} «Fechado e limitado $\Rightarrow$ compacto» é de
+  $\mathbb{R}^n$, não verdade geral.
+\item \textbf{VOLTA.} Trio: uniforme (13), extremos (16), Heine--Borel (esta) --- uma
+  hipótese.
+\end{enumerate}
+\medido{\code{analise\_resolve(15)}: contra-exemplo em $\mathbb{Q}$ fecha.}
+
+%----------------------------------------------------------------------
+\section{weierstrass}\label{sec:weierstrass-ar}
+\textbf{Enunciado.} Contínua em compacto atinge máximo e mínimo.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f$ contínua no compacto $[a,b]$.
+\item \textbf{TRADUÇÃO.} Contínua em $K$ compacto $\Rightarrow$ atinge máximo e
+  mínimo.
+\item \textbf{OPERAÇÃO.} «Atinge»: $f(K)$ limitado (há $\sup$) e fechado ($\sup$
+  pertence) --- imagem contínua de compacto.
+\item \textbf{LEI.} Heine--Borel na imagem.
+\item \textbf{TESTEMUNHA.} $x^2-2x$ em $[0,3]$: extremos em pontos do compacto;
+  $1/x$ em $(0,1)$: $\sup$ cresce com a malha.
+\item \textbf{CONCLUSÃO.} Compacidade faz «atinge»; no aberto a contínua nem é
+  limitada.
+\item \textbf{VOLTA.} Trio do andar: uniforme / extremos / Heine--Borel --- três
+  teoremas, uma hipótese.
+\end{enumerate}
+\medido{\code{analise\_resolve(16)} / \code{an\_extremos}: mín $-1$ em $x=1$ exacto.}
+
+%----------------------------------------------------------------------
+\section{derivada limite e quociente}\label{sec:derivada-ar}
+\textbf{Enunciado.} O limite contra o quociente polinomial do Cálculo I.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f$ polinomial sobre $\mathbb{Q}$; $[a,b]$ racional.
+\item \textbf{TRADUÇÃO.} $f'(a)=\lim_{h\to0}(f(a+h)-f(a))/h$ e $f'(a)=q(0)$.
+\item \textbf{OPERAÇÃO.} Análise usa LIMITE; Cálculo I usa DIVISÃO EXACTA --- mesmo
+  número; em polinómios $q(h)$ é polinómio.
+\item \textbf{LEI.} Rolle (as outras derivam dela); $c$ pode ser irracional.
+\item \textbf{TESTEMUNHA.} Três vias da derivada em muitos pontos; $0$ divergências.
+\item \textbf{CONCLUSÃO.} As vias concordam; o $c$ do Valor Médio pode ser irracional
+  (supremo em $\mathbb{R}$).
+\item \textbf{VOLTA.} Cálculo I devolvia o corte; aqui há a maquinaria para o PROVAR.
+\end{enumerate}
+\medido{\code{analise\_resolve(17)}: três vias; $0$ divergências.}
+
+%----------------------------------------------------------------------
+\section{valor medio na analise}\label{sec:valor-medio-ar}
+\textbf{Enunciado.} $f'(c)=(f(b)-f(a))/(b-a)$, e o $c$ pode ser irracional.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f$ polinomial; intervalo racional.
+\item \textbf{TRADUÇÃO.} $f'(c)=(f(b)-f(a))/(b-a)$.
+\item \textbf{OPERAÇÃO.} Rolle na função inclinada --- não é teorema novo.
+\item \textbf{LEI.} Rolle; em polinómios tudo exacto excepto o ponto $c$.
+\item \textbf{TESTEMUNHA.} $x^3-3x$ em $[0,2]$: $c=2/\sqrt{3}$ por encaixe.
+\item \textbf{CONCLUSÃO.} $c$ pode ser IRRACIONAL --- vive como supremo.
+\item \textbf{VOLTA.} Análise explica o que o Cálculo I já devolveu por bisseção.
+\end{enumerate}
+\medido{\code{analise\_resolve(18)}: $c$ irracional; encaixe.}
+
+%----------------------------------------------------------------------
+\section{rolle e o gume}\label{sec:rolle-ar}
+\textbf{Enunciado.} Retirar $f(a)=f(b)$ e PROCURAR o contra-exemplo.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Mesmo quadro polinomial.
+\item \textbf{TRADUÇÃO.} $f(a)=f(b)\Rightarrow\exists c:\ f'(c)=0$.
+\item \textbf{OPERAÇÃO.} Gume: sem $f(a)=f(b)$, o teorema CAI --- $f(x)=x$ em
+  $[0,1]$, $f'\equiv1$.
+\item \textbf{LEI.} A hipótese trabalha; o contra-exemplo é o mais barato.
+\item \textbf{TESTEMUNHA.} Busca de $c$ com $f'(c)=0$ em $f(x)=x$: não acha.
+\item \textbf{CONCLUSÃO.} Hipótese necessária; sem ela não há $c$.
+\item \textbf{VOLTA.} Máquina de $\mathbb{R}$: $c$ como supremo, não só corte.
+\end{enumerate}
+\medido{\code{analise\_resolve(19)}: gume $f(x)=x$; busca vazia.}
+
+%----------------------------------------------------------------------
+\section{taylor}\label{sec:taylor-ar}
+\textbf{Enunciado.} O resto medido, não estimado.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f=x^3-3x+2$, $a=1$.
+\item \textbf{TRADUÇÃO.} $f(x)=\sum_{k=0}^{n}f^{(k)}(a)/k!\,(x-a)^k+R_n(x)$.
+\item \textbf{OPERAÇÃO.} Medir o resto: construir $T_n$ e subtrair --- resto é
+  função, não cota.
+\item \textbf{LEI.} Coeficiente $k$ $=$ $f^{(k)}(a)/k!$ exacto em $\mathbb{Q}$.
+\item \textbf{TESTEMUNHA.} $R_n$ anula-se a partir do grau; $R_n(a)=0$ em toda a
+  ordem.
+\item \textbf{CONCLUSÃO.} Em polinómios Taylor é IDENTIDADE --- resto $=$ parte cortada.
+\item \textbf{VOLTA.} Fora dos polinómios o resto NÃO se anula: majorar é o conteúdo
+  analítico.
+\end{enumerate}
+\medido{\code{analise\_resolve(20)} / \code{an\_taylor}: resto zero do grau em diante.}
+
+%----------------------------------------------------------------------
+\section{series}\label{sec:series-ar}
+\textbf{Enunciado.} Critérios ESTRUTURAIS, e nunca pela soma parcial.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $\sum1/n$, $\sum1/n^2$, $\sum(-1)^n/n$.
+\item \textbf{TRADUÇÃO.} Decidir por critérios --- não pela soma parcial.
+\item \textbf{OPERAÇÃO.} Blocos (harmónica); majoração telescópica ($p\ge2$);
+  alternada.
+\item \textbf{LEI.} Comparação com soma que TELESCOPA: $1/n^p\le1/(n-1)-1/n$.
+\item \textbf{TESTEMUNHA.} Três veredictos sem somar; majoração falha exactamente em
+  $p=1$; telescopagem $=$ forma fechada.
+\item \textbf{CONCLUSÃO.} Critérios decidem sem monstro aritmético.
+\item \textbf{VOLTA.} Forma fechada custa nada; soma bruta estoura --- medido.
+\end{enumerate}
+\medido{\code{analise\_resolve(21)}: blocos / majoração / telescopagem.}
+
+%----------------------------------------------------------------------
+\section{convergencia uniforme}\label{sec:conv-uniforme}
+\textbf{Enunciado.} $x^n$ em $[0,1]$: pontual sim, uniforme NÃO.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f_n(x)=x^n$ em $[0,1]$.
+\item \textbf{TRADUÇÃO.} $f_n\to f$ ponto a ponto, mas $\sup|f_n-f|\to0$ falha.
+\item \textbf{OPERAÇÃO.} Mesma troca de quantificadores: $N$ por $x$ vs $N$ para
+  todos; $N$ explode perto de $1$.
+\item \textbf{LEI.} $\forall x\,\exists N$ contra $\exists N\,\forall x$.
+\item \textbf{TESTEMUNHA.} $x_n=1-1/(2n)$ com $x_n^n>1/2$; limite pontual
+  descontínuo em $1$.
+\item \textbf{CONCLUSÃO.} Pontual sim, uniforme NÃO.
+\item \textbf{VOLTA.} Uniforme $\Rightarrow$ pontual; a recíproca precisa de
+  compacidade.
+\end{enumerate}
+\medido{\code{analise\_resolve(22)} / \code{an\_falha\_uniforme\_seq}: $x_n^n>1/2$.}
+
+%----------------------------------------------------------------------
+\section{riemann}\label{sec:riemann-ar}
+\textbf{Enunciado.} $U(f,P)-L(f,P)\to0$, e a distância é exacta.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f=x^2$ em $[0,2]$; $P$ partição uniforme.
+\item \textbf{TRADUÇÃO.} $U(f,P)-L(f,P)=(f(b)-f(a))\cdot h$ EXACTO.
+\item \textbf{OPERAÇÃO.} Monótona: diferença TELESCOPA --- igualdade, não estimativa.
+\item \textbf{LEI.} Telescopagem (mesma das séries).
+\item \textbf{TESTEMUNHA.} $U-L$ coincide com $(f(b)-f(a))\cdot h$ em todas as
+  partições; $\int$ no meio.
+\item \textbf{CONCLUSÃO.} Integrabilidade pela igualdade --- $h\to0$ de graça.
+\item \textbf{VOLTA.} Cálculo I: primitiva dava o valor; aqui o sanduíche explica POR
+  QUÊ.
+\end{enumerate}
+\medido{\code{analise\_resolve(23)}: $U-L$ exacto; $0$ falhas.}
+
+%----------------------------------------------------------------------
+\section{troca de limite}\label{sec:troca-limite}
+\textbf{Enunciado.} Qual hipótese torna $\lim\int=\int\lim$ legítimo.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f_n(x)=x^n$ em $[0,1]$.
+\item \textbf{TRADUÇÃO.} $\lim\int f_n=\int\lim f_n$ sob QUE hipótese?
+\item \textbf{OPERAÇÃO.} Hipótese suficiente: convergência UNIFORME --- aqui os lados
+  coincidem SEM ela (cuidado: suficiente, não necessária).
+\item \textbf{LEI.} $|\int f_n-\int f|\le\sup|f_n-f|\cdot(b-a)$ --- o SUP precisa de
+  ir a zero.
+\item \textbf{TESTEMUNHA.} $\int$ desce a $0$; $\sup$ fica em $1$; não-uniformidade
+  exibida.
+\item \textbf{CONCLUSÃO.} Uniforme é suficiente e NÃO necessária neste exemplo.
+\item \textbf{VOLTA.} Hipótese mais fraca: dominação ($x^n\le1$) --- razão VERDADEIRA
+  da troca aqui.
+\end{enumerate}
+\medido{\code{analise\_resolve(24)}: lados coincidem; $\sup$ não desce.}
+
+%----------------------------------------------------------------------
+\section{cinco vias}\label{sec:cinco-vias}
+\textbf{Enunciado.} As cinco formas da completude --- e NENHUMA arbitra as outras.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Cinco formas da completude de $\mathbb{R}$.
+\item \textbf{TRADUÇÃO.} Dedekind $\cdot$ Cauchy $\cdot$ supremo $\cdot$ encaixantes
+  $\cdot$ Bolzano--Weierstrass.
+\item \textbf{OPERAÇÃO.} Cada uma SOZINHA, com testemunha da falha em $\mathbb{Q}$;
+  NENHUMA função chama outra.
+\item \textbf{LEI.} Equivalência demonstra-se --- não se escolhe árbitro.
+\item \textbf{TESTEMUNHA.} Cinco colunas: passo de Möbius; módulo de Cauchy; Newton;
+  bisseção; caixa --- mesmo buraco ($p^2\neq2q^2$).
+\item \textbf{CONCLUSÃO.} Cinco falham em $\mathbb{Q}$ pelo MESMO motivo e por
+  CAMINHOS INDEPENDENTES.
+\item \textbf{VOLTA.} Por que $\mathbb{R}$ precisava de existir: cinco perguntas, a
+  mesma resposta «não» em $\mathbb{Q}$; em $\mathbb{R}$ passam a «sim».
+\end{enumerate}
+\medido{\code{analise\_resolve(25)}: cinco programas; $0$ falhas; buraco comum.}
+
+%======================================================================
+\section{o que fica no conversa}
+A prosa canónica AR1--AR25 é este ficheiro. \code{analise\_resolve} \textbf{mede}.
+Catálogo de Análise Real fechado.
+
+\end{document}

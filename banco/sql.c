@@ -2915,6 +2915,80 @@ static int get_corpo(const char *p){
     return 1;
 }
 
+/* Idioma natural = álgebra byte-level: idioma/<iso>/{alfabeto,lexico,regra,orbita}/…
+ * Ficheiros: lib/classe/{portugues,ingles,espanhol}_idioma.txt
+ *            lib/classe/corpus_orbitas_pt.txt  (tipo orbita → idioma/pt/orbita/…) */
+static int import_idioma(const char *p){
+    char iso[16], cam[512], iso_norm[8], def[128];
+    pula(&p);
+    iso[0] = 0;
+    if(*p == '\'' || *p == '"'){
+        char asp = *p++; size_t k = 0;
+        while(*p && *p != asp && k + 1 < sizeof iso) iso[k++] = *p++;
+        iso[k] = 0;
+        if(*p == asp) p++;
+    } else if(*p){
+        size_t k = 0;
+        while(*p && *p != ' ' && *p != '\t' && k + 1 < sizeof iso) iso[k++] = *p++;
+        iso[k] = 0;
+    }
+    if(!iso[0]) snprintf(iso, sizeof iso, "pt");
+    if(!strcasecmp(iso, "pt") || !strcasecmp(iso, "portugues"))
+        snprintf(iso_norm, sizeof iso_norm, "pt");
+    else if(!strcasecmp(iso, "en") || !strcasecmp(iso, "ingles") || !strcasecmp(iso, "english"))
+        snprintf(iso_norm, sizeof iso_norm, "en");
+    else if(!strcasecmp(iso, "es") || !strcasecmp(iso, "espanhol") || !strcasecmp(iso, "spanish"))
+        snprintf(iso_norm, sizeof iso_norm, "es");
+    else {
+        printf("IMPORT IDIOMA: pt|en|es neste passo (pediu '%s')\n", iso);
+        return 0;
+    }
+    if(!strcmp(iso_norm, "en"))
+        snprintf(def, sizeof def, "lib/classe/ingles_idioma.txt");
+    else if(!strcmp(iso_norm, "es"))
+        snprintf(def, sizeof def, "lib/classe/espanhol_idioma.txt");
+    else
+        snprintf(def, sizeof def, "lib/classe/portugues_idioma.txt");
+    le_caminho_arg(&p, cam, sizeof cam, def);
+    {
+        const char *q = p; pula(&q);
+        if(*q && *q != '\'' && *q != '"' && strcmp(cam, def) == 0){
+            size_t k = 0;
+            while(*q && *q != '\n' && *q != '\r' && k + 1 < sizeof cam) cam[k++] = *q++;
+            cam[k] = 0;
+        }
+    }
+    FILE *f = fopen(cam, "rb");
+    if(!f){
+        snprintf(cam, sizeof cam, "../%s", def);
+        f = fopen(cam, "rb");
+    }
+    if(!f){ printf("nao abri idioma %s\n", iso_norm); return 0; }
+    long antes = txt_n(), postas = 0;
+    char lin[512];
+    while(fgets(lin, sizeof lin, f)){
+        if(lin[0] == '#' || lin[0] == '\n' || lin[0] == '\r') continue;
+        char tipo[32], resto[400];
+        if(sscanf(lin, "%31s %399[^\n\r]", tipo, resto) != 2) continue;
+        char entrada[480];
+        if(!strcmp(tipo, "alfabeto"))
+            snprintf(entrada, sizeof entrada, "idioma/%s/alfabeto|%s", iso_norm, resto);
+        else if(!strcmp(tipo, "lexico"))
+            snprintf(entrada, sizeof entrada, "idioma/%s/lexico/%s", iso_norm, resto);
+        else if(!strcmp(tipo, "regra"))
+            snprintf(entrada, sizeof entrada, "idioma/%s/regra/%s", iso_norm, resto);
+        else if(!strcmp(tipo, "orbita"))
+            /* resto = slug|n=…;maxG=…;tilde1=…;ck=…  → idioma/<iso>/orbita/<slug>|meta */
+            snprintf(entrada, sizeof entrada, "idioma/%s/orbita/%s", iso_norm, resto);
+        else continue;
+        if(poe_chave_texto(entrada)) postas++;
+    }
+    fclose(f);
+    printf("      IMPORT IDIOMA %s: %ld chaves (%ld -> %ld) de %s\n",
+           iso_norm, postas, antes, txt_n(), cam);
+    return postas > 0;
+}
+
 static int executa(const char *sql){
     const char *p = sql;
     if(palavra(&p, "CREATE")){ if(!palavra(&p, "TABLE")) return 0; return cria(p); }
@@ -2927,6 +3001,7 @@ static int executa(const char *sql){
         const char *q = p; pula(&q);
         if(!strncasecmp(q, "LINGUAGENS", 10)) return import_linguagens(q+10);
         if(!strncasecmp(q, "CORPO", 5)) return import_corpo(q+5);
+        if(!strncasecmp(q, "IDIOMA", 6)) return import_idioma(q+6);
         return 0;
     }
     if(palavra(&p, "GET")){

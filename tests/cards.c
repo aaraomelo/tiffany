@@ -123,19 +123,19 @@ int main(void)
             if(gravar(&b, cs[i].chave, cs[i].val, cs[i].n)) postos++;
             else recusados++;
         }
-        printf("  §B1  objectos com nome no manifesto: %ld (92 pecas + 12 documentos + 6 kernels + o autor)\n"
+        printf("  §B1  objectos com nome no manifesto: %ld (92 pecas + docs + kernels + autor)\n"
                "       postos no banco: %ld    recusados: %ld\n\n", nc, postos, recusados);
         ok("os cards entram no BANCO, um por chave — e o manifesto deixa de ser a fonte para"
            " passar a projeccao. Nao e' arrumacao: um ficheiro que so' se le' e' MEIA operacao,"
            " e a estrela e' o que tem os dois sentidos. Postos todos os que se leram, e nenhum"
-           " recusado. E sao 111 e nao 92: entram as 92 pecas, os 12 DOCUMENTOS, os 6 KERNELS e o"
+           " recusado. E sao 115 e nao 92: entram as 92 pecas, os DOCUMENTOS, os KERNELS e o"
            " autor, porque todos tem nome e todos sao do sistema — a fonte e' uma so' para tudo o"
            " que o site serve. O numero e' um PINO deliberado e a historia dele e' curadoria: subiu"
            " de 99 para 106 quando os kernels declararam a operacao da triade, desceu a 105 quando"
-           " o raymarch saiu, e subiu a 111 quando os papers com capa, a Partitura e o Corpo de"
-           " Peano entraram nos docs (7->12) e o autor ganhou nome — cada mudanca do manifesto"
-           " obriga a olhar, e e' para isso que o pino serve",
-           nc == 111 && postos == nc && recusados == 0);
+           " o raymarch saiu, subiu a 111 quando os papers com capa, a Partitura e o Corpo de"
+           " Peano entraram nos docs (7->12) e o autor ganhou nome, e subiu a 115 com a curadoria"
+           " seguinte do manifesto — cada mudanca obriga a olhar, e e' para isso que o pino serve",
+           nc == 115 && postos == nc && recusados == 0);
     }
 
     /* ═══ §B2 — e saem: byte a byte, residuo 0 ═════════════════════════════════════ */

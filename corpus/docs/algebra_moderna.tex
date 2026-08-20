@@ -1,0 +1,390 @@
+% !TeX program = pdflatex
+% corpus/docs/algebra_moderna.tex — ticks AL1–AL8 (grupos: neutro → injectividade).
+%
+% Prosa canónica; testemunhas em algebra_resolve() (banco/conversa.c).
+% Espinha: HIPÓTESES → DEFINIÇÃO → TRANSIÇÃO → LEI → TESTEMUNHA → CONCLUSÃO → VOLTA.
+%
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[portuguese]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\medido}[1]{\par\medskip\noindent{\small\color{gray}\textbf{Medido.} #1}\par\medskip}
+
+\begin{document}
+\title{Álgebra moderna --- exercícios\\
+\large AL1--AL20: catálogo completo}
+\author{Tiffany --- corpus vivo}
+\date{}
+\maketitle
+
+\begin{abstract}
+\noindent Vinte teoremas (\code{AL20[]} em \code{banco/conversa.c}) com o rastro
+de sete ticks --- este ficheiro fecha o catálogo. Operação ao vivo: nomes do
+catálogo via \code{responde} / \code{algebra N}.
+\end{abstract}
+
+\section{como se le este documento}
+Espinha dos sete slots. Lotes: AL1--AL8 (neutro\ldots injectivo);
+AL9--AL16 (Lagrange\ldots operação); AL17--AL20 (contra-exemplos e fecho).
+
+%======================================================================
+\section{o neutro e unico}\label{sec:identidade-unica}
+\textbf{Enunciado.} O elemento neutro é ÚNICO.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $(G,\star)$ com DOIS neutros $e$ e $e'$ --- ambos
+  cumprem a definição.
+\item \textbf{TRADUÇÃO.} Neutro não mexe em ninguém, dos dois lados:
+  $e\star a=a\star e=a$.
+\item \textbf{OPERAÇÃO.} $e\star e'=e'$ (por $e$) e $e\star e'=e$ (por $e'$).
+\item \textbf{LEI.} A própria definição de neutro, usada duas vezes --- sem
+  associatividade nem inverso.
+\item \textbf{TESTEMUNHA.} O elemento $e\star e'$, que tem de ser os dois.
+\item \textbf{CONCLUSÃO.} $e=e'$; a palavra «o» neutro passa a ser legítima.
+\item \textbf{VOLTA.} Varre-se o grupo à procura de TODOS os neutros --- se
+  aparecesse um segundo, o teorema caía.
+\end{enumerate}
+\medido{\code{algebra\_resolve(1)}: $\mathbb{Z}_{12}$, $S_3$, $\mathbb{Z}_6$ ---
+um só neutro cada.}
+
+%----------------------------------------------------------------------
+\section{inverso unico}\label{sec:inverso-unico}
+\textbf{Enunciado.} O inverso de cada elemento é ÚNICO.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $a$ com dois inversos $b,c$: $a\star b=b\star a=e$ e
+  $a\star c=c\star a=e$.
+\item \textbf{TRADUÇÃO.} Inverso devolve ao neutro: $a\star a^{-1}=a^{-1}\star a=e$.
+\item \textbf{OPERAÇÃO.} $b=b\star e=b\star(a\star c)=(b\star a)\star c=e\star c=c$.
+\item \textbf{LEI.} Associatividade (passo do meio) --- unicidade é de semigrupo
+  com neutro, não só de grupo.
+\item \textbf{TESTEMUNHA.} $b\star a\star c$ lido de duas maneiras.
+\item \textbf{CONCLUSÃO.} $b=c$; notação $a^{-1}$ autorizada.
+\item \textbf{VOLTA.} Contam-se inversos em $\mathbb{Z}_{12}$ e $S_3$ --- nenhum
+  tem dois.
+\end{enumerate}
+\medido{\code{algebra\_resolve(2)}: $0$ elementos com mais de um inverso.}
+
+%----------------------------------------------------------------------
+\section{cancelamento}\label{sec:cancelamento-alg}
+\textbf{Enunciado.} $ab=ac\Rightarrow b=c$.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Num GRUPO, $a\star b=a\star c$.
+\item \textbf{TRADUÇÃO.} Cancelar $=$ tirar o $a$ dos dois lados.
+\item \textbf{OPERAÇÃO.} Multiplica-se à esquerda por $a^{-1}$; associatividade
+  reagrupa.
+\item \textbf{LEI.} Inverso (grupo) + associatividade; lado importa se não abeliano.
+\item \textbf{TESTEMUNHA.} O $a^{-1}$ --- existe por ser grupo.
+\item \textbf{CONCLUSÃO.} $b=c$: em grupo, cancelar é legítimo.
+\item \textbf{VOLTA / GUME.} Em monoide $(\mathbb{Z}_6,\times)$ falha:
+  $2\cdot1=2\cdot4$ com $1\neq4$.
+\end{enumerate}
+\medido{\code{algebra\_resolve(3)}: $S_3$ $0$ falhas; $(\mathbb{Z}_6,\times)$ gume.}
+
+%----------------------------------------------------------------------
+\section{todo subgrupo contem o neutro}\label{sec:subgrupo-neutro}
+\textbf{Enunciado.} Todo subgrupo contém o neutro.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $H$ subgrupo de $G$, $H\neq\emptyset$: existe $a\in H$.
+\item \textbf{TRADUÇÃO.} Critério: $a,b\in H\Rightarrow ab^{-1}\in H$.
+\item \textbf{OPERAÇÃO.} $b=a$ no critério: $a\cdot a^{-1}\in H$.
+\item \textbf{LEI.} O próprio critério no caso $a=b$; definição de inverso.
+\item \textbf{TESTEMUNHA.} O $a$ que existe por $H$ não vazio --- o vazio NÃO é
+  subgrupo.
+\item \textbf{CONCLUSÃO.} $e\in H$, sempre.
+\item \textbf{VOLTA.} Todos os subgrupos de $\mathbb{Z}_{12}$ contêm $0$; vazio
+  falha o critério.
+\end{enumerate}
+\medido{\code{algebra\_resolve(4)}: $4096$ subconjuntos; $0$ subgrupos sem neutro.}
+
+%----------------------------------------------------------------------
+\section{intersecao}\label{sec:intersecao}
+\textbf{Enunciado.} A interseção de subgrupos é subgrupo.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $H,K$ subgrupos de $G$ --- nada mais.
+\item \textbf{TRADUÇÃO.} $H\cap K=\{g:g\in H\text{ e }g\in K\}$.
+\item \textbf{OPERAÇÃO.} $a,b\in H\cap K\Rightarrow ab^{-1}\in H$ e $\in K$
+  $\Rightarrow\in H\cap K$.
+\item \textbf{LEI.} Critério do subgrupo, aplicado DUAS VEZES.
+\item \textbf{TESTEMUNHA.} O neutro: em $H$ e em $K$ (AL4) --- interseção não vazia.
+\item \textbf{CONCLUSÃO.} $H\cap K$ é subgrupo.
+\item \textbf{VOLTA / GUME.} União NÃO é: $\{0,6\}\cup\{0,4,8\}$ tem $6+4=10$ fora.
+\end{enumerate}
+\medido{\code{algebra\_resolve(5)}: pares de subgrupos de $\mathbb{Z}_{12}$;
+união falha.}
+
+%----------------------------------------------------------------------
+\section{imagem subgrupo}\label{sec:imagem-subgrupo}
+\textbf{Enunciado.} A imagem de um homomorfismo é subgrupo.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f:G\to H$ homomorfismo.
+\item \textbf{TRADUÇÃO.} $\operatorname{Im}f=\{f(g):g\in G\}$.
+\item \textbf{OPERAÇÃO.} $f(a),f(b)\in\operatorname{Im}$:
+  $f(a)f(b)^{-1}=f(a)f(b^{-1})=f(ab^{-1})\in\operatorname{Im}$.
+\item \textbf{LEI.} Homomorfismo preserva operação e inverso.
+\item \textbf{TESTEMUNHA.} Exemplo $f(x)=3x$ em $\mathbb{Z}_{12}$ --- imagem
+  fechada pelo critério.
+\item \textbf{CONCLUSÃO.} $\operatorname{Im}f$ é subgrupo de $H$.
+\item \textbf{VOLTA.} Critério verificado na imagem medida.
+\end{enumerate}
+\medido{\code{algebra\_resolve(6)} / $f(x)=3x$ em $\mathbb{Z}_{12}$.}
+
+%----------------------------------------------------------------------
+\section{nucleo normal}\label{sec:nucleo-normal}
+\textbf{Enunciado.} O núcleo de um homomorfismo é subgrupo NORMAL.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Mesmo $f:G\to H$.
+\item \textbf{TRADUÇÃO.} $\ker f=\{g:f(g)=e_H\}$; normal:
+  $gHg^{-1}\subseteq H$.
+\item \textbf{OPERAÇÃO.} $f(ghg^{-1})=f(g)f(h)f(g)^{-1}=e$ se $h\in\ker$ --- conjugado
+  fica no núcleo.
+\item \textbf{LEI.} Homomorfismo + definição de normal.
+\item \textbf{TESTEMUNHA.} Mesmo $f(x)=3x$: núcleo normal em $\mathbb{Z}_{12}$.
+\item \textbf{CONCLUSÃO.} $\ker f$ é subgrupo normal.
+\item \textbf{VOLTA.} Conjugados de elementos do núcleo ficam no núcleo.
+\end{enumerate}
+\medido{\code{algebra\_resolve(7)}: núcleo de $f(x)=3x$ normal.}
+
+%----------------------------------------------------------------------
+\section{injetivo nucleo}\label{sec:injetivo-nucleo}
+\textbf{Enunciado.} $f$ é injetivo $\Leftrightarrow$ o núcleo é trivial.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Mesmo $f$.
+\item \textbf{TRADUÇÃO.} Injectivo $\Leftrightarrow\ker f=\{e\}$.
+\item \textbf{OPERAÇÃO.} $f(a)=f(b)\Rightarrow f(ab^{-1})=e\Rightarrow ab^{-1}\in\ker$;
+  se $\ker=\{e\}$ então $a=b$. Recíproco: $f(g)=e\Rightarrow g=e$ se injectivo.
+\item \textbf{LEI.} Homomorfismo + definição de núcleo.
+\item \textbf{TESTEMUNHA.} Mesmo $f$: $\ker$ não trivial $\Leftrightarrow$ não injectivo.
+\item \textbf{CONCLUSÃO.} Equivalência.
+\item \textbf{VOLTA.} Os dois sentidos medidos no mesmo exemplo.
+\end{enumerate}
+\medido{\code{algebra\_resolve(8)}: $\ker$ trivial $\Leftrightarrow$ injectivo.}
+
+%======================================================================
+\section{lagrange classes laterais}\label{sec:lagrange}
+\textbf{Enunciado.} $|H|$ divide $|G|$ --- e as classes particionam.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $G$ finito, $H\leq G$ (ex.: $\mathbb{Z}_{12}$,
+  $H=\{0,4,8\}$).
+\item \textbf{TRADUÇÃO.} Classe lateral: $gH=\{g\star h:h\in H\}$.
+\item \textbf{OPERAÇÃO.} Classes iguais ou disjuntas; todas com $|H|$ elementos
+  ($g\star\cdot$ bijectiva) --- particionam $G$.
+\item \textbf{LEI.} Cancelamento (AL3) + critério $gH=g'H\Leftrightarrow g^{-1}g'\in H$.
+\item \textbf{TESTEMUNHA.} $[G:H]$; $|G|=[G:H]\cdot|H|$.
+\item \textbf{CONCLUSÃO.} $|H|$ divide $|G|$.
+\item \textbf{VOLTA.} Partição medida: cobrem $G$, não se cruzam.
+\end{enumerate}
+\medido{\code{algebra\_resolve(9)}: $3\cdot4=12$; união $=$ grupo; cruzamentos $0$.}
+
+%----------------------------------------------------------------------
+\section{cayley}\label{sec:cayley}
+\textbf{Enunciado.} Todo grupo mergulha num grupo de permutações.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $G$ finito, $|G|=n$.
+\item \textbf{TRADUÇÃO.} $\lambda_g:G\to G$, $\lambda_g(x)=g\star x$.
+\item \textbf{OPERAÇÃO.} Cada $\lambda_g$ bijecção; $\lambda_{gh}=\lambda_g\circ\lambda_h$
+  --- $g\mapsto\lambda_g$ homomorfismo em $S_n$.
+\item \textbf{LEI.} Bijetividade $=$ cancelamento; preservação $=$ associatividade.
+\item \textbf{TESTEMUNHA.} $\lambda_g=\lambda_h\Rightarrow\lambda_g(e)=\lambda_h(e)
+  \Rightarrow g=h$ --- o neutro como sonda.
+\item \textbf{CONCLUSÃO.} $G$ isomorfo a um subgrupo de $S_n$.
+\item \textbf{VOLTA.} Translações $=$ linhas da tábua de Cayley.
+\end{enumerate}
+\medido{\code{algebra\_resolve(10)}: $\mathbb{Z}_6$, $S_3$ --- $\lambda$ injectiva
+e homo.}
+
+%----------------------------------------------------------------------
+\section{primeiro isomorfismo}\label{sec:primeiro-iso}
+\textbf{Enunciado.} $G/\ker f\cong\operatorname{Im}f$.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f:G\to H$ homo; $K=\ker f$, $I=\operatorname{Im}f$
+  (ex.: $f(x)=3x$ em $\mathbb{Z}_{12}$).
+\item \textbf{TRADUÇÃO.} Quociente identifica o que $f$ não distingue.
+\item \textbf{OPERAÇÃO.} $\varphi(gK)=f(g)$ bem definida, homo, sobrejectiva em
+  $\operatorname{Im}$, injectiva.
+\item \textbf{LEI.} Normalidade do núcleo (AL7) --- sem ela o quociente não existe.
+\item \textbf{TESTEMUNHA.} Representante $g$: a escolha NÃO importa.
+\item \textbf{CONCLUSÃO.} Quociente e imagem são a mesma álgebra noutra representação.
+\item \textbf{VOLTA.} Bijeção que preserva operação (exaustiva em $m!$).
+\end{enumerate}
+\medido{\code{algebra\_resolve(11)}: $|G|=|K|\cdot|\operatorname{Im}|$;
+isomorfismo sim.}
+
+%----------------------------------------------------------------------
+\section{ideal nucleo}\label{sec:ideal-nucleo}
+\textbf{Enunciado.} Os ideais são os núcleos dos homomorfismos de anéis.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $R$ anel; $I$ ideal.
+\item \textbf{TRADUÇÃO.} Ideal: subgrupo aditivo que ABSORVE o produto.
+\item \textbf{OPERAÇÃO.} $\pi:R\to R/I$ tem núcleo $I$; reciproco: núcleo de homo
+  de anéis é ideal ($f(ra)=f(r)\cdot0=0$).
+\item \textbf{LEI.} Ida $=$ construção do quociente; volta $=$ preservação do PRODUTO
+  (absorção que núcleos de grupos não tinham).
+\item \textbf{TESTEMUNHA.} $f(r)\cdot0=0$.
+\item \textbf{CONCLUSÃO.} Ideais e núcleos são a mesma coisa, dois lados.
+\item \textbf{VOLTA.} $64$ subconjuntos de $\mathbb{Z}_6$; cada ideal $=$ núcleo da
+  projecção.
+\end{enumerate}
+\medido{\code{algebra\_resolve(12)} / \code{an\_ideal} em $\mathbb{Z}_6$.}
+
+%----------------------------------------------------------------------
+\section{iso aneis}\label{sec:iso-aneis}
+\textbf{Enunciado.} $R/I\cong\operatorname{Im}f$, o isomorfismo para anéis.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $f:R\to S$ homo de anéis; $I=\ker f$.
+\item \textbf{TRADUÇÃO.} Mesmo enunciado do grupo, duas operações.
+\item \textbf{OPERAÇÃO.} $\varphi(a+I)=f(a)$ preserva soma e produto.
+\item \textbf{LEI.} Absorção do ideal --- produto de classes bem definido.
+\item \textbf{TESTEMUNHA.} $(a+i)(b+j)=ab+(aj+ib+ij)$ com os três em $I$.
+\item \textbf{CONCLUSÃO.} Teorema do isomorfismo vale para anéis.
+\item \textbf{VOLTA.} Preservação das DUAS operações em todos os pares.
+\end{enumerate}
+\medido{\code{algebra\_resolve(13)}: $\mathbb{Z}_{12}\to\mathbb{Z}_6$;
+$144$ pares $\times2$ operações.}
+
+%----------------------------------------------------------------------
+\section{ideais de Z}\label{sec:ideais-de-z}
+\textbf{Enunciado.} Todo ideal de $\mathbb{Z}$ é $n\mathbb{Z}$.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $I$ ideal de $\mathbb{Z}$.
+\item \textbf{TRADUÇÃO.} $(n)=n\mathbb{Z}=\{nk:k\in\mathbb{Z}\}$.
+\item \textbf{OPERAÇÃO.} $n=$ menor positivo de $I$; divisão $a=nq+r$ com $r\in I$
+  e $r<n\Rightarrow r=0$.
+\item \textbf{LEI.} Boa ordenação de $\mathbb{N}$ + divisão com resto (mesma cadeia
+  do gcd).
+\item \textbf{TESTEMUNHA.} O resto $r$ --- menor que o menor só se $r=0$.
+\item \textbf{CONCLUSÃO.} Todo ideal é $n\mathbb{Z}$ --- DIP.
+\item \textbf{VOLTA.} Cada ideal de $\mathbb{Z}_{12}$ reconstrói-se do menor positivo.
+\end{enumerate}
+\medido{\code{algebra\_resolve(14)}: ideais de $\mathbb{Z}_{12}$ $=$ gerados pelo
+menor.}
+
+%----------------------------------------------------------------------
+\section{corpo e dominio}\label{sec:corpo-dominio}
+\textbf{Enunciado.} Todo corpo é domínio integral.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $K$ corpo; $ab=0$ com $a\neq0$.
+\item \textbf{TRADUÇÃO.} Corpo $=$ anel onde todo não nulo tem inverso.
+\item \textbf{OPERAÇÃO.} $a^{-1}(ab)=0\Rightarrow b=0$.
+\item \textbf{LEI.} Inverso + associatividade + $r\cdot0=0$.
+\item \textbf{TESTEMUNHA.} O $a^{-1}$ --- existência consumida.
+\item \textbf{CONCLUSÃO.} Corpo $\Rightarrow$ domínio integral.
+\item \textbf{VOLTA / GUME.} Recíproca falsa: $\mathbb{Z}$ domínio e não corpo.
+\end{enumerate}
+\medido{\code{algebra\_resolve(15)}: corpo $\Rightarrow$ domínio em $\mathbb{Z}_m$;
+$\mathbb{Z}$ gume.}
+
+%----------------------------------------------------------------------
+\section{operacao neutro}\label{sec:operacao-neutro}
+\textbf{Enunciado.} $a\star b=a+b+1$: fechada, e o neutro é $-1$.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $\star$ em $\mathbb{Z}$: $a\star b=a+b+1$.
+\item \textbf{TRADUÇÃO.} Operação binária $A\times A\to A$.
+\item \textbf{OPERAÇÃO.} Fechada (soma em $\mathbb{Z}$); neutro: $a+e+1=a\Rightarrow e=-1$.
+\item \textbf{LEI.} Fecho de $\mathbb{Z}$ para a soma.
+\item \textbf{TESTEMUNHA.} Neutro $-1$ (em $\mathbb{Z}_9$: $8$).
+\item \textbf{CONCLUSÃO.} $(\mathbb{Z},\star)$ monoide (e de facto grupo:
+  inverso $-a-2$).
+\item \textbf{VOLTA.} Associatividade + neutro dos dois lados na tábua.
+\end{enumerate}
+\medido{\code{algebra\_resolve(16)} / \code{es\_mais\_um}: neutro $8$ em
+$\mathbb{Z}_9$.}
+
+%======================================================================
+\section{nao associativa}\label{sec:nao-associativa}
+\textbf{Enunciado.} $a\star b=a-b$ NÃO é associativa, e o contra-exemplo exibe-se.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $\star$ por $a\star b=a-b$.
+\item \textbf{TRADUÇÃO.} Semigrupo pede $(a\star b)\star c=a\star(b\star c)$.
+\item \textbf{OPERAÇÃO.} Esquerda: $a-b-c$; direita: $a-b+c$ --- só coincidem se
+  $c=-c$.
+\item \textbf{LEI.} Associatividade da soma NÃO transporta para a diferença.
+\item \textbf{TESTEMUNHA.} Um triplo concreto --- sem exibir, a negação não prova.
+\item \textbf{CONCLUSÃO.} $(\mathbb{Z},-)$ NÃO é semigrupo.
+\item \textbf{VOLTA.} Conta-se em quantos triplos falha; $(\mathbb{Z}_5,+)$ falha em $0$.
+\end{enumerate}
+\medido{\code{algebra\_resolve(17)} / \code{es\_menos}: falhas em triplos;
+$(\mathbb{Z}_5,+)$ controlo.}
+
+%----------------------------------------------------------------------
+\section{todo grupo comuta}\label{sec:todo-grupo-comuta}
+\textbf{Enunciado.} «Prove que todo grupo é comutativo» --- a RECUSA.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} O pedido é provar que todo grupo é abeliano. Primeiro:
+  ver se é verdade.
+\item \textbf{TRADUÇÃO.} Abeliano: $a\star b=b\star a$ para todos.
+\item \textbf{OPERAÇÃO.} Axiomas de grupo são quatro --- nenhum é comutatividade.
+  Se fosse dedutível, seria supérflua na definição de abeliano.
+\item \textbf{LEI.} Independência dos axiomas --- exibir modelo que cumpre os
+  quatro e não o quinto.
+\item \textbf{TESTEMUNHA.} $S_3$ e um par concreto que não comuta.
+\item \textbf{CONCLUSÃO.} A afirmação é FALSA --- RECUSAR a demonstração.
+\item \textbf{VOLTA.} $S_3$ falha em pares; $\mathbb{Z}_{12}$ falha em zero.
+\end{enumerate}
+\medido{\code{algebra\_resolve(18)}: $S_3$ grupo não abeliano; $\mathbb{Z}_{12}$
+abeliano.}
+
+%----------------------------------------------------------------------
+\section{exponencial soma produto}\label{sec:exponencial}
+\textbf{Enunciado.} A soma vira produto: $(\mathbb{Z}_n,+)\cong(\mathbb{Z}_p^{*},\times)$.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Isomorfismo que leva soma no produto (clássico $e^x$;
+  aqui realização finita).
+\item \textbf{TRADUÇÃO.} $f(x+y)=f(x)\cdot f(y)$.
+\item \textbf{OPERAÇÃO.} $e^x$ pedia decimais; o conteúdo algébrico realiza-se
+  exacto: raiz primitiva $g$ de $\mathbb{Z}_p$ dá $x\mapsto g^x$.
+\item \textbf{LEI.} $g^{x+y}=g^x\cdot g^y$ --- propriedade da POTÊNCIA, não do $e$.
+\item \textbf{TESTEMUNHA.} Raiz primitiva $g$ ($\mathbb{Z}_p^{*}$ cíclico).
+\item \textbf{CONCLUSÃO.} $(\mathbb{Z}_{p-1},+)\cong(\mathbb{Z}_p^{*},\times)$.
+\item \textbf{VOLTA.} Logaritmo discreto $=f^{-1}$ (corresponde ao $\ln$).
+\end{enumerate}
+\medido{\code{algebra\_resolve(19)}: $p=13$, $g$ primitivo; homo+injectivo;
+log discreto.}
+
+%----------------------------------------------------------------------
+\section{menos vezes}\label{sec:menos-vezes}
+\textbf{Enunciado.} $(-a)b=-(ab)$ num anel qualquer.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $R$ anel; $a,b\in R$ --- sem comutatividade nem unidade.
+\item \textbf{TRADUÇÃO.} Oposto atravessa o produto: $(-a)b=-(ab)$.
+\item \textbf{OPERAÇÃO.} $(-a)b+ab=(-a+a)b=0\cdot b=0$.
+\item \textbf{LEI.} Distributividade + oposto aditivo + $0\cdot b=0$.
+\item \textbf{TESTEMUNHA.} $(-a)b+ab=0$ --- logo $(-a)b$ é o oposto de $ab$ (único).
+\item \textbf{CONCLUSÃO.} $(-a)b=-(ab)$ em qualquer anel.
+\item \textbf{VOLTA.} Varre $\mathbb{Z}_m$ ($2..12$): conclusão E passo do meio.
+\end{enumerate}
+\medido{\code{algebra\_resolve(20)}: pares em $11$ anéis; daí $(-a)(-b)=ab$.}
+
+%======================================================================
+\section{o que fica no conversa}
+A prosa canónica AL1--AL20 é este ficheiro --- o catálogo da álgebra moderna
+\textbf{fecha} aqui. \code{algebra\_resolve} \textbf{mede}.
+Próximo lote natural: outros \code{resolve\_*} (cálculo, análise, \ldots)
+no mesmo molde TeX vivo.
+
+\end{document}

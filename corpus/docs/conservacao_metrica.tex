@@ -1,0 +1,557 @@
+% !TeX program = pdflatex
+% corpus/docs/conservacao_metrica.tex — ticks CM1–CM8 da conservação métrica.
+%
+% A prosa das resoluções mora AQUI (não em strings do conversa.c).
+% As testemunhas ao vivo continuam em cmetrica_resolve() — medições, não narrativa.
+% Fontes: lib/medida.h, papers/corpo_topologico.tex, papers/arquitetura.tex.
+%
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[portuguese]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\medido}[1]{\par\medskip\noindent{\small\color{gray}\textbf{Medido.} #1}\par\medskip}
+
+\begin{document}
+\title{Conservação métrica\\
+\large descida $\to$ ascii --- ticks CM1--CM24}
+\author{Tiffany --- corpus vivo}
+\date{}
+\maketitle
+
+\begin{abstract}
+\noindent A conservação da medida por dualidade prova-se pela \textbf{descida}
+(indução lida ao contrário), e só depois pelo determinante como factor de
+volume. Cada secção é um tick de sete slots (DEFINIÇÃO$\ldots$VOLTA).
+Operação ao vivo: \code{conversa <base> resolve <nome>}
+(\code{cmetrica\_resolve} em \code{banco/conversa.c}).
+\end{abstract}
+
+\section{como se le este documento}
+Espinha: HIPÓTESE $\to$ DEFINIÇÃO $\to$ TRANSIÇÃO $\to$ LEI $\to$
+TESTEMUNHA $\to$ CONCLUSÃO $\to$ VOLTA.
+A ordem obriga: primeiro a DESCIDA; só depois a conservação que ela prova.
+Catálogo completo CM1--CM24: \code{descida}\ldots\code{ascii}
+(\code{CM10[]} em \code{banco/conversa.c}).
+
+%======================================================================
+\section{descida}\label{sec:descida}
+\textbf{Enunciado.} A descida é o dual da indução, e procura o contra-exemplo
+mínimo.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Seja $P(n)$ uma proposição sobre andares da torre.
+\item \textbf{TRADUÇÃO.} Indução e descida:
+  $P(0)$ e $P(n)\Rightarrow P(n+1)$; a negação: «há um PRIMEIRO $N$ onde falha».
+\item \textbf{OPERAÇÃO.} As duas usam o mesmo facto: $\mathbb{N}$ é bem ordenado.
+  A indução \emph{projecta} (da base constrói o andar seguinte); a descida
+  \emph{lê} (nega a tese e procura o primeiro andar onde falha). Involução:
+  inverter a ordem, $\nu\circ\nu=\mathrm{id}$.
+\item \textbf{LEI.} A boa ordem de $\mathbb{N}$ --- a única que as duas metades usam.
+\item \textbf{TESTEMUNHA.} A busca VAZIA do primeiro andar onde a conservação
+  falha; só vale porque o passo \emph{sabotado} acha em $N=1$.
+\item \textbf{CONCLUSÃO.} Não existe primeiro andar onde falhe $\Rightarrow$ não
+  existe andar nenhum --- descida $=$ indução dita ao contrário.
+\item \textbf{VOLTA.} O que a indução produz é exactamente aquilo em que a
+  descida não tem onde morder.
+\end{enumerate}
+\medido{\code{cmetrica\_resolve(1)} / \code{mi\_procura\_minimo}: passo
+verdadeiro vazio até 400; sabotado acha em $N=1$.}
+
+%----------------------------------------------------------------------
+\section{meta inducao}\label{sec:meta-inducao}
+\textbf{Enunciado.} Mede-se o PASSO, não uma tabela de andares.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Seja $P(n)$ sobre andares; o objecto a medir é o passo.
+\item \textbf{TRADUÇÃO.} Meta-indução:
+  $\mathcal{C}(n)\to\mathcal{C}(n+1)$ sem que a construção mencione $n$.
+\item \textbf{OPERAÇÃO.} Se o corpo do passo não menciona $n$, então «para todo
+  $n$» sai da FORMA. Uma tabela de andares só prova os andares da tabela.
+\item \textbf{LEI.} Boa ordem de $\mathbb{N}$ (a mesma).
+\item \textbf{TESTEMUNHA.} Dupla e independente: o passo vale em entradas
+  (não em andares); e o passo \emph{recusa} quando $\det=0$ (o $0^{-1}$ da escada).
+\item \textbf{CONCLUSÃO.} A lei vale em todo andar; a prova é do PASSO.
+\item \textbf{VOLTA.} Indução e descida tocam-se no mesmo produto.
+\end{enumerate}
+\medido{\code{cmetrica\_resolve(2)}: \code{mi\_passo\_vale} em entradas;
+controlo \code{mi\_passo} com $\det=0$ recusa.}
+
+%----------------------------------------------------------------------
+\section{sem teto}\label{sec:sem-teto}
+\textbf{Enunciado.} A ausência de tecto é da FORMA, não de uma varredura.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $T_{n+1}=T_n\oplus T_n^{*}$.
+\item \textbf{TRADUÇÃO.} A conta do passo: $\det(T\oplus T^{*})=\det(T)\cdot(1/\det(T))=1$.
+\item \textbf{OPERAÇÃO.} A ausência de tecto \textbf{não} se varre --- sai da
+  forma da construção. Array a 64 ou «5 de 8» com \code{long} a estourar
+  mediram o tamanho da representação, não o teorema.
+\item \textbf{LEI.} Boa ordem / forma do passo --- a conta NÃO MENCIONA a dimensão.
+\item \textbf{TESTEMUNHA.} Uma AUSÊNCIA: a função do passo não recebe $n$.
+\item \textbf{CONCLUSÃO.} A torre não tem tecto dimensional: a conservação é
+  TRANSPORTADA pela dualidade, não reintroduzida em cada andar.
+\item \textbf{VOLTA.} Se uma realização finita transborda, mediu-se a
+  representação. Falha de representação $\neq$ contra-exemplo --- verifica-se
+  numa SEGUNDA realização independente.
+\end{enumerate}
+\medido{\code{cmetrica\_resolve(3)}: base $\det(I)=1$; passo sem $n$ no corpo.}
+
+%----------------------------------------------------------------------
+\section{determinante}\label{sec:determinante}
+\textbf{Enunciado.} $\det$ é o factor de volume:
+$A(v_1)\wedge\cdots\wedge A(v_n)=\det(A)\,v_1\wedge\cdots\wedge v_n$.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $A$ transformação linear de $\mathbb{R}^n$ com entradas
+  racionais.
+\item \textbf{TRADUÇÃO.} O determinante como factor de volume (cunha).
+\item \textbf{OPERAÇÃO.} $\det$ deixa de ser regra de cálculo: é o coeficiente
+  com que $A$ multiplica a $n$-forma. Donde $|\det A|=1\Rightarrow\mu(AE)=\mu(E)$.
+\item \textbf{LEI.} Alternância: $\Lambda^n$ tem dimensão $1$; a acção é
+  multiplicação por um escalar.
+\item \textbf{TESTEMUNHA.} Dois caminhos sem código em comum: eliminação por
+  menores vs cunha das colunas --- em $2\times2$ e $3\times3$.
+\item \textbf{CONCLUSÃO.} $|\det A|$ é o factor de escala da medida $n$-dimensional;
+  $|\det A|=1$ é a conservação.
+\item \textbf{VOLTA.} $|\det|=1$, factor unitário, inversa inteira, conservação
+  da norma --- nomes da mesma condição; o quinto é a MEDIDA.
+\end{enumerate}
+\medido{\code{cmetrica\_resolve(4)}: \code{mat\_det} vs \code{md\_volume\_wedge}.}
+
+%----------------------------------------------------------------------
+\section{quatro contas}\label{sec:quatro-contas}
+\textbf{Enunciado.} Álgebra, geometria, espectro e CONTAGEM --- um só número.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} O mesmo $A$; quatro leituras.
+\item \textbf{TRADUÇÃO.} Eliminação $\cdot$ cunha $\cdot$ espectro $\cdot$ contagem.
+\item \textbf{OPERAÇÃO.} O eval define $\sigma_n(A):=|\det A|$ --- com isso
+  «$\lvert\det\rvert=\sigma_n$» não pode falhar e não mede. Mede-se que o
+  \textbf{mesmo} número sai de quatro contas sem código em comum.
+\item \textbf{LEI.} Alternância / $\Lambda^n$ (a mesma).
+\item \textbf{TESTEMUNHA.} Quatro colunas; a quarta (contagem) nunca calcula
+  determinante --- divide e vê resto zero. Segunda contagem independente
+  (gerar vs divisibilidade).
+\item \textbf{CONCLUSÃO.} As quatro coincidem; a igualdade com $\sigma_n$ é notação.
+\item \textbf{VOLTA.} Cinco nomes da mesma condição, o quinto a medida.
+\end{enumerate}
+\medido{\code{cmetrica\_resolve(5)}: eliminação/cunha/espectro/contagem
+concordam; gato cobre a caixa.}
+
+%----------------------------------------------------------------------
+\section{gato}\label{sec:gato-cm}
+\textbf{Enunciado.} $\det=\sigma\sigma'$, e $\sigma\sigma'=-1$ DÁ $|\det|=1$ ---
+a seta é numa direcção.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Hipótese estrutural: $\sigma\sigma'=-1$ e $|\det A_m|=1$.
+\item \textbf{TRADUÇÃO.} A seta: $\sigma\sigma'=-1\Rightarrow|\det|=1$; o recíproco
+  é falso ($|\det|=1$ admite $\sigma\sigma'=+1$).
+\item \textbf{OPERAÇÃO.} $\det=\sigma\sigma'$ é identidade (produto dos valores
+  próprios). O gato estica por $\sigma$ e encolhe por $1/\sigma$; o produto é $1$
+  --- conservação da área. Ligação à MEDIDA que faltava no Corpo de Peano.
+\item \textbf{LEI.} Alternância / espectro pelos coeficientes (sem avaliar raiz).
+\item \textbf{TESTEMUNHA.} Em metais: $\sigma^2=m\sigma+1\Rightarrow\sigma(m-\sigma)=-1$
+  --- uma linha de álgebra; a varredura só confirma.
+\item \textbf{CONCLUSÃO.} $\sigma\sigma'=-1$ como relação de passagem DÁ a
+  conservação; o sinal negativo é inversão de orientação (a medida não vê).
+\item \textbf{VOLTA.} Torre: cinco nomes, o quinto a medida.
+\end{enumerate}
+\medido{\code{cmetrica\_resolve(6)} / \code{md\_gato}: 40 metais,
+\code{md\_estaca\_fecha}, produto próprio $-1$.}
+
+%----------------------------------------------------------------------
+\section{jacobiano}\label{sec:jacobiano}
+\textbf{Enunciado.} A lei é LOCAL, e o cisalhamento não linear prova-o.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $T:\mathbb{R}^2\to\mathbb{R}^2$, $E$ mensurável.
+\item \textbf{TRADUÇÃO.} Mudança de variável:
+  $\mu_n(T(E))=\int_E|\det DT(x)|\,d\mu_n(x)$.
+\item \textbf{OPERAÇÃO.} O factor passa a ser FUNÇÃO DO PONTO. No linear era
+  constante; a graduação transforma constante em campo.
+\item \textbf{LEI.} O determinante é o coeficiente da $n$-forma --- topo do
+  complexo, onde $d$ já não sobe.
+\item \textbf{TESTEMUNHA.} Cisalhamento $T(x,y)=(x+y^2+3y+5,y)$: a derivada
+  MUDA em cada ponto e $|\det DT|=1$ em todos.
+\item \textbf{CONCLUSÃO.} Conservação da medida não é propriedade de matrizes:
+  é do factor de volume ponto a ponto.
+\item \textbf{VOLTA.} Cálculo III desta casa: o Jacobiano não é correcção ---
+  é a medida.
+\end{enumerate}
+\medido{\code{cmetrica\_resolve(7)} / \code{md\_jacobiano\_cisalha}:
+$|\det|=1$ com coluna a variar.}
+
+%----------------------------------------------------------------------
+\section{gume da area}\label{sec:gume-area}
+\textbf{Enunciado.} Retirar $|\det|=1$, e a medida escala pelo determinante.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Mesmo $T$, $E$; agora sem a hipótese $|\det|=1$.
+\item \textbf{TRADUÇÃO.} O gume: $|\det DT|=k\neq1\Rightarrow\mu_n(T(E))=k\,\mu_n(E)$.
+\item \textbf{OPERAÇÃO.} Retira-se a hipótese e procura-se o contra-exemplo
+  mais barato --- dilatação por $k$ multiplica a área por $k$.
+\item \textbf{LEI.} Mesma: coeficiente da $n$-forma.
+\item \textbf{TESTEMUNHA.} Dois controlos: dilatações (tem de achar) e metais
+  (tem de voltar vazio). Sem o segundo, um buscador que achasse tudo passaria.
+\item \textbf{CONCLUSÃO.} A hipótese $|\det|=1$ TRABALHA: retirada, a conservação cai.
+\item \textbf{VOLTA.} O nome do factor --- a medida.
+\end{enumerate}
+\medido{\code{cmetrica\_resolve(8)} / \code{md\_jacobiano\_dilata}:
+acha em $k=2..6$; metais vazios.}
+
+%======================================================================
+\section{representacao}\label{sec:representacao}
+\textbf{Enunciado.} Falha de representação $\neq$ contra-exemplo matemático.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Uma realização \emph{finita} da lei.
+\item \textbf{TRADUÇÃO.} A regra do eval: saturação do tipo $\neq$ falha da lei.
+\item \textbf{OPERAÇÃO.} Nasceu de um erro: «5 de 8» em Newton --- o numerador não
+  cabia em \code{long}. Saturação não é teorema.
+\item \textbf{LEI.} O teorema tem de sobreviver à troca de representação; quando a
+  primeira satura, a verificação passa a uma SEGUNDA.
+\item \textbf{TESTEMUNHA.} Inteiros exactos saturam em $k$; resíduos em três primos
+  respondem até $k=400$ --- saturação numa coluna SEPARADA dos defeitos.
+\item \textbf{CONCLUSÃO.} A lei permanece definida enquanto a operação matemática
+  permanecer definida; representação insuficiente é afirmação sobre a representação.
+\item \textbf{VOLTA.} Sempre que uma realização atinge o limite, a conservação
+  verifica-se noutra --- parte do enunciado, não conselho.
+\end{enumerate}
+\medido{\code{cmetrica\_resolve(9)}: \code{md\_det\_potencia\_exacto} satura;
+\code{md\_det\_potencia\_mod} fecha em 3 primos.}
+
+%----------------------------------------------------------------------
+\section{passarinho}\label{sec:passarinho}
+\textbf{Enunciado.} O corpo, o gato e a fronteira --- e o Universal é corpo SOBRE corpos.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Três camadas: Universal $\to$ Peano $\to$ Estelar.
+\item \textbf{TRADUÇÃO.} A mesma lei em três níveis.
+\item \textbf{OPERAÇÃO.} PASSARINHO $=$ corpo na realização particular (viveiro);
+  GATO $=$ operador de passagem (sobe/desce); FRONTEIRA $=|\det|=1$ (muda andar e
+  orientação, não a medida).
+\item \textbf{LEI.} O teorema sobrevive à troca de representação (a mesma).
+\item \textbf{TESTEMUNHA.} Três camadas, três meios que não se conhecem: lei /
+  álgebra / contagem de pontos.
+\item \textbf{CONCLUSÃO.} Determinante, medida e dualidade são três realizações de
+  uma. O Universal aplica-se aos CORPOS (meta-indução um andar acima).
+\item \textbf{VOLTA.} $\sigma_m\sigma_m'=-1$ é hipótese estrutural da torre; sem ela
+  não há teorema --- há definição a olhar para si.
+\end{enumerate}
+\medido{\code{cmetrica\_resolve(10)}: descida vazia; contagem do reticulado fecha.}
+
+%----------------------------------------------------------------------
+\section{bidualidade}\label{sec:bidualidade}
+\textbf{Enunciado.} O gato é o PONTO FIXO da 1.ª; o passarinho volta pela 2.ª.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} $d$ factor de medida; $\dagger$ dual métrico.
+\item \textbf{TRADUÇÃO.} $d\mapsto 1/d$ (1.ª, NÃO identidade); $d\mapsto 1/d\mapsto d$
+  (2.ª, bidual $=$ Lei~1).
+\item \textbf{OPERAÇÃO.} $\det(T^{*})=1/\det(T)$: dualidade age na medida como
+  $d\mapsto 1/d$. Duas leis, papéis diferentes --- não juntar.
+\item \textbf{LEI.} Toda representação tem dual e o PASSO é o dual; daí $|\det|=1$.
+\item \textbf{TESTEMUNHA.} Coluna «ponto fixo»: SIM exactamente em $\pm1$.
+\item \textbf{CONCLUSÃO.} Conservar a medida $=$ ser o próprio dual métrico:
+  $d=1/d\Rightarrow d^{2}=1$. O gato volta à 1.ª; um corpo qualquer à 2.ª.
+\item \textbf{VOLTA.} Dual do gato é o PASSARINHO: o que distingue é QUANTAS
+  dualidades cada um precisa para voltar a si.
+\end{enumerate}
+\medido{\code{cmetrica\_resolve(11)} / \code{md\_dual\_medida},
+\code{md\_bidual}, \code{md\_ponto\_fixo}.}
+
+%----------------------------------------------------------------------
+\section{a pata}\label{sec:a-pata}
+\textbf{Enunciado.} A marca NÃO é o estado: conserva a medida, perde a FIBRA.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Uma projecção e o traço que deixa.
+\item \textbf{TRADUÇÃO.} Estado $\neq$ traço observado; estrutura $\to$ marca.
+\item \textbf{OPERAÇÃO.} Corolário da dobra temporal: $x\mapsto x^{2}$ colapsa
+  $\pm\sqrt{\sigma}$; uma pata pisa a marca da outra.
+\item \textbf{LEI.} A projecção conserva a MEDIDA e não conserva a FIBRA --- par
+  nomeado dos dois lados.
+\item \textbf{TESTEMUNHA.} Controlo injectivo: fibra 1 sempre; na projecção
+  $x\mapsto x^{2}$ a fibra vale 2 (excepto o zero).
+\item \textbf{CONCLUSÃO.} Conservar a medida $\not\Rightarrow$ conservar o percurso;
+  a perda conta-se: é 2.
+\item \textbf{VOLTA.} $\Sigma\circ\Pi=\mathrm{Id}$ mas $\Pi\circ\Sigma\neq\mathrm{Id}$
+  --- fibra contada, não só observada.
+\end{enumerate}
+\medido{\code{cmetrica\_resolve(12)} / \code{md\_fibra\_quadrado},
+\code{md\_fibra\_desloca}.}
+
+%----------------------------------------------------------------------
+\section{dois duais de 32}\label{sec:dois-duais}
+\textbf{Enunciado.} 64 bits são dois de 32 --- o alto é a metade que ORDENA.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Dois números de 32 bits e o produto.
+\item \textbf{TRADUÇÃO.} $(\mathrm{alto},\mathrm{baixo})$,
+  $a\cdot b=\mathrm{alto}\cdot 2^{32}+\mathrm{baixo}$.
+\item \textbf{OPERAÇÃO.} Multiplicar dois de 32 dá 64; guardar só 32 perde metade ---
+  dualidade $=$ memória da divisão.
+\item \textbf{LEI.} Cada parcela $16\times16$ cabe em 32; o que NÃO cabe é a soma
+  das duas do meio (transporte).
+\item \textbf{TESTEMUNHA.} Comparar só pelo baixo erra em quase um terço; o gato
+  pelo par fecha $\det=-1$.
+\item \textbf{CONCLUSÃO.} O 64 NÃO é primitivo: é o dual de dois 32.
+\item \textbf{VOLTA.} Sinal à parte da magnitude --- a parte que ORDENA e a que
+  ORIENTA; $-2^{31}$ deixa de precisar de excepção.
+\end{enumerate}
+\medido{\code{cmetrica\_resolve(13)} / \code{d64\_mult}, \code{d64\_cmp},
+\code{d32\_det2}.}
+
+%----------------------------------------------------------------------
+\section{livro razao}\label{sec:livro-razao}
+\textbf{Enunciado.} O que cada etapa conserva e o que esquece --- as duas colunas.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} A cadeia do coqueiro à marca no chão.
+\item \textbf{TRADUÇÃO.} gato $\to$ espiral $\to$ torre $\to$ descida $\to$ cone
+  $\to$ projecção $\to$ marca.
+\item \textbf{OPERAÇÃO.} Em cada etapa algo é PRESERVADO e algo é ESQUECIDO ---
+  colunas medidas, não descritas.
+\item \textbf{LEI.} Do Gato: a medida atravessa a cadeia; o percurso não.
+\item \textbf{TESTEMUNHA.} Livro-razão com as DUAS colunas cheias (conserva /
+  esquece); descida vazia; fibra de $x\mapsto x^{2}$ em 16 $=2$.
+\item \textbf{CONCLUSÃO.} A medida atravessa a cadeia inteira e o percurso não ---
+  o gato é mecanismo, não decoração.
+\item \textbf{VOLTA.} O passarinho faz o gato mover-se: sem instância o operador
+  não age. Par gato/passarinho $=$ lei/face.
+\end{enumerate}
+\medido{\code{cmetrica\_resolve(14)}: descida vazia; retracção; fibra $=2$.}
+
+%----------------------------------------------------------------------
+\section{dois ramos}\label{sec:dois-ramos}
+\textbf{Enunciado.} $|\det|=1$ tem DOIS: o que mede e cresce, e o que roda.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Matriz inteira $2\times2$ que conserva a medida.
+\item \textbf{TRADUÇÃO.} $\det=-1$: GATO (hiperbólico); $\det=+1$: ESQUILO
+  (elíptico).
+\item \textbf{OPERAÇÃO.} O esquilo NÃO é remendo: é DUAL. O $+1$ é família inteira
+  (Lei~2), não só a identidade.
+\item \textbf{LEI.} Discriminante $t^{2}-4d$ --- decide pelos coeficientes, sem raiz.
+\item \textbf{TESTEMUNHA.} Gato: sem período, satura; esquilo: período 3/4/6, nunca
+  satura. Cada um tem o que falta ao outro.
+\item \textbf{CONCLUSÃO.} Os dois ramos esgotam a lei: gato conserva MEDINDO;
+  esquilo conserva SEM MEDIR.
+\item \textbf{VOLTA.} Ambos $|\det|=1$, diferem no SINAL; a medida não vê o sinal,
+  a orientação vê.
+\end{enumerate}
+\medido{\code{cmetrica\_resolve(15)} / \code{sq\_ramo}, \code{sq\_gato},
+\code{sq\_periodo}.}
+
+%----------------------------------------------------------------------
+\section{lei 8}\label{sec:lei-8}
+\textbf{Enunciado.} No anel o gato ganha período --- o ramo é da REALIZAÇÃO.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} O gato e o anel da Lei~8: $\mathbb{Z}_{65537}$,
+  $65537=2^{16}+1$.
+\item \textbf{TRADUÇÃO.} No anel o grupo é FINITO --- toda órbita fecha.
+\item \textbf{OPERAÇÃO.} Não é «o anel salva o gato»: hiperbólico/elíptico é da
+  REALIZAÇÃO.
+\item \textbf{LEI.} Discriminante $t^{2}-4d$ (a mesma).
+\item \textbf{TESTEMUNHA.} A mesma matriz muda de comportamento ao mudar de corpo,
+  sem mudar de determinante --- LEI vs FACE.
+\item \textbf{CONCLUSÃO.} $|\det|=1$ é universal; o ramo é da instância.
+\item \textbf{VOLTA.} Rodar E ser inteiro só permite traços $-1,0,1$ (ordens 3,4,6)
+  --- restrição cristalográfica.
+\end{enumerate}
+\medido{\code{cmetrica\_resolve(16)} / \code{sq\_periodo\_anel} em
+\code{SQ\_LEI8}.}
+
+%======================================================================
+\section{as cinco}\label{sec:as-cinco}
+\textbf{Enunciado.} As 5 primitivas são UMA: o dual emparelha com cada uma.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} As cinco operações do corpo universal.
+\item \textbf{TRADUÇÃO.} Emparelhamento em duas categorias: álgebra
+  ($M+M^{\dagger}=\mathrm{tr}\,M\cdot I$, $MM^{\dagger}=\det M\cdot I$,
+  $M^{-1}=M^{\dagger}/\det M$) e ordem ($\varepsilon(A)=\neg\,\delta(\neg A)$).
+\item \textbf{OPERAÇÃO.} A quinta linha NÃO é corolário: erosão $=$ dilatação do
+  dual, como inversão $=$ divisão do dual. Muda só quem é o dual (adjunta /
+  complemento).
+\item \textbf{LEI.} O DUAL é transversal: não ao lado das outras quatro --- liga-as.
+\item \textbf{TESTEMUNHA.} A diferença: $a-b=$ soma$\circ$sinal; $\dagger\circ\dagger=\mathrm{id}$.
+\item \textbf{CONCLUSÃO.} Cinco primitivas $=$ uma coisa vista de cinco lados;
+  morfológica é a quinta linha do mesmo teorema.
+\item \textbf{VOLTA.} Na álgebra o dual é INVOLUÇÃO; na ordem é ADJUNÇÃO
+  ($\delta\varepsilon\subseteq A\subseteq\varepsilon\delta$) --- mesma distinção
+  $\nu\circ\nu=\mathrm{id}$ vs $\Sigma\circ\Pi=\mathrm{Id}$.
+\end{enumerate}
+\medido{\code{cmetrica\_resolve(17)}: diferença $=$ soma$+$sinal; Lei~1 no racional.}
+
+%----------------------------------------------------------------------
+\section{zero e infinito}\label{sec:zero-infinito}
+\textbf{Enunciado.} São INVERSOS --- e não há regra especial para o zero.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} A inversão e a recta projectiva.
+\item \textbf{TRADUÇÃO.} $\iota:[p:q]\mapsto[q:p]$, $(p,q)\neq(0,0)$ --- uma TROCA.
+\item \textbf{OPERAÇÃO.} «$0^{-1}$ não existe» era sobre a CARTA, não o objecto.
+  Em $\mathbb{Q}$ a inversão é divisão; em $\mathbb{P}^{1}$ é troca --- a pergunta
+  pelo zero não tem onde ser feita.
+\item \textbf{LEI.} Acção de Möbius com $\det\neq0$; com $|\det|=1$ é a do Gato.
+\item \textbf{TESTEMUNHA.} Código: inversão $=$ troca $p\leftrightarrow q$; preço:
+  $\infty+\infty$ e $0\cdot\infty$ RECUSAM ($\mathbb{P}^{1}$ não é corpo).
+\item \textbf{CONCLUSÃO.} Zero e infinito são inversos pela mesma operação; a
+  excepção mudou de sítio (construção, não ramo à mão).
+\item \textbf{VOLTA.} Não é primitiva nova --- sai do mecanismo de inversão na
+  extensão projectiva.
+\end{enumerate}
+\medido{\code{cmetrica\_resolve(18)} / \code{pj\_inverte}, \code{pj\_gato}:
+$\iota\circ\iota=\mathrm{id}$; soma/produto no $\infty$ recusam.}
+
+%----------------------------------------------------------------------
+\section{sem ramo}\label{sec:sem-ramo}
+\textbf{Enunciado.} Os \texttt{if} vêm da normalização --- e em $\mathbb{F}_{127}$
+não há normalização.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} A aritmética e os ramos que ela tem.
+\item \textbf{TRADUÇÃO.} crescimento $\to$ normalização $\to$
+  $\{\mathrm{sinal},\mathrm{zero},\mathrm{tecto}\}\to$ ramos.
+\item \textbf{OPERAÇÃO.} Dez \texttt{if} do racional testam sinal/zero/tecto ---
+  vêm da normalização (em $\mathbb{Q}$ os números crescem). Em $\mathbb{F}_{127}$
+  nada cresce: sem normalizar, os três desaparecem.
+\item \textbf{LEI.} Não se elimina ramo por estética: elimina-se quando a condição
+  é absorvida (primitiva, tipo, domínio, dualidade, representação).
+\item \textbf{TESTEMUNHA.} Contagem na fonte: dez \texttt{if} no racional, zero na
+  camada $\mathbb{F}_{127}$; inversão sem ramo fecha exaustivamente.
+\item \textbf{CONCLUSÃO.} Ramos ABSORVIDOS, cada um por algo com nome --- não
+  removidos.
+\item \textbf{VOLTA.} O ramo que NÃO se tira: índice do $\infty$ é CONVENÇÃO
+  (imprimir, não calcular).
+\end{enumerate}
+\medido{\code{cmetrica\_resolve(19)} / \code{sr\_inverte}: $16128$ pares,
+$0$ divergências.}
+
+%----------------------------------------------------------------------
+\section{refuta}\label{sec:refuta}
+\textbf{Enunciado.} A face pequena REFUTA e não prova --- e é exaustiva.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} Duas faces: $\mathbb{Q}$ e $\mathbb{F}_{127}$.
+\item \textbf{TRADUÇÃO.} A ponte:
+  $[p:q]\mapsto[p\bmod 127:q\bmod 127]$.
+\item \textbf{OPERAÇÃO.} Homomorfismo: identidade em $\mathbb{Q}$ TEM de valer na
+  redução; falhar lá $\Rightarrow$ falsa cá --- o contrário não vale.
+\item \textbf{LEI.} Teorema do Gato: lei universal, face da instância; face
+  exaustível DESMENTE, não prova.
+\item \textbf{TESTEMUNHA.} Dois controlos: verdadeira nunca refutada; falsa cai
+  em quase todos. Limite: $1$ e $128$ iguais na redução, distintos em $\mathbb{Q}$.
+\item \textbf{CONCLUSÃO.} A face pequena REFUTA: falsa em $\mathbb{Q}$ cai na
+  redução sem ramo e sem crescer.
+\item \textbf{VOLTA.} Provar $=\mathbb{Q}$; desmentir $=\mathbb{F}_{127}$ (onde é
+  barato).
+\end{enumerate}
+\medido{\code{cmetrica\_resolve(20)} / \code{rd\_refuta}: $(a+b)^{2}$ verdadeira
+vs falsa.}
+
+%----------------------------------------------------------------------
+\section{duas testemunhas}\label{sec:duas-testemunhas}
+\textbf{Enunciado.} A face exacta PROVA; a finita CAÇA o contra-exemplo.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} As identidades que esta casa afirma.
+\item \textbf{TRADUÇÃO.} asserção $\to$ redução $\to$ falha: REFUTADA; passa: segue
+  para prova em $\mathbb{Q}$.
+\item \textbf{OPERAÇÃO.} Exaustão baixando o primo ($\mathbb{F}_{13}$ vs
+  $\mathbb{F}_{127}$); vários primos (acidentes de característica).
+\item \textbf{LEI.} Assimetria do Teorema da ponte: refutar é conclusivo; passar
+  não é.
+\item \textbf{TESTEMUNHA.} Duas colunas: nenhuma verdadeira cai; todas as mutações
+  caem (primo e valores ditos).
+\item \textbf{CONCLUSÃO.} Refutador $=$ segunda testemunha permanente.
+\item \textbf{VOLTA.} Matemática GRANDE ($\mathbb{Q}$); detector PEQUENO (face
+  finita). Cada face faz em que é barata.
+\end{enumerate}
+\medido{\code{cmetrica\_resolve(21)} / \code{rf\_refuta}: 5 verdadeiras vazias;
+5 mutações caem.}
+
+%----------------------------------------------------------------------
+\section{um bit em F2}\label{sec:um-bit}
+\textbf{Enunciado.} Em $\mathbb{F}_{2}$ o dual é a IDENTIDADE, e $0\leftrightarrow\infty$
+sobrevive.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} O corpo com dois elementos.
+\item \textbf{TRADUÇÃO.} Cinco primitivas colapsam: $x\oplus y$, $x\wedge y$,
+  $-x=x$ (dual $=$ identidade).
+\item \textbf{OPERAÇÃO.} Em $\mathbb{F}_{2}$ a álgebra fica NUA: oposto $=x$;
+  diferença $=$ soma --- o par degenera mas continua verdadeiro.
+\item \textbf{LEI.} Corolário $0\leftrightarrow\infty$: inversão é TROCA, sem sinal.
+\item \textbf{TESTEMUNHA.} Coluna $-x=x$; $\mathbb{P}^{1}(\mathbb{F}_{2})$ tem 3
+  pontos ($0,1,\infty$).
+\item \textbf{CONCLUSÃO.} O corpo mais pobre ainda realiza a lei --- vê-se o que
+  cada peça fazia.
+\item \textbf{VOLTA.} \code{neuronio.c} já somava bits por posição; gato em
+  $\mathbb{F}_{2}$ tem período $3=|\mathbb{P}^{1}(\mathbb{F}_{2})|$.
+\end{enumerate}
+\medido{\code{cmetrica\_resolve(22)}: tabela $\oplus/\wedge/-$; 3 pontos em
+$\mathbb{P}^{1}(\mathbb{F}_{2})$.}
+
+%----------------------------------------------------------------------
+\section{as oito no byte}\label{sec:as-oito}
+\textbf{Enunciado.} A posição $k$ reservada à Lei $k$ --- a arquitectura declara.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} As oito leis do catálogo, e o byte.
+\item \textbf{TRADUÇÃO.} DECLARAÇÃO (não teorema):
+  $B=\sum_{k=0}^{7}b_k 2^{k}$, $b_k\leftrightarrow$ Lei $k$.
+\item \textbf{OPERAÇÃO.} Reserva de posição --- convenção que se cumpre ou não.
+  Arquitectura DECLARA; neurónio MEDE.
+\item \textbf{LEI.} Catálogo: ciclo gerador de período oito; o byte tem oito
+  posições por causa disso.
+\item \textbf{TESTEMUNHA.} Tabela nos 256 bytes: dual inverte TODAS; bidual
+  preserva TODAS; gerador período 8.
+\item \textbf{CONCLUSÃO.} Declaração cumpre-se: cada operação faz uma das três
+  coisas em toda a parte.
+\item \textbf{VOLTA.} Mesma do \code{neuronio.c} --- órbita fecha no que existe.
+\end{enumerate}
+\medido{\code{cmetrica\_resolve(23)} / \code{lei1\_dual}\ldots\code{lei\_gera}:
+período 8; colunas definidas.}
+
+%----------------------------------------------------------------------
+\section{ascii e a cifra}\label{sec:ascii-cm}
+\textbf{Enunciado.} Os 128 códigos SÃO os 128 pontos, e o gato é uma CIFRA.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{DEFINIÇÃO.} A tabela ASCII.
+\item \textbf{TRADUÇÃO.} $c\in\{0,\ldots,126\}\mapsto[c:1]$; $127$ (DEL)
+  $\mapsto[1:0]=\infty$.
+\item \textbf{OPERAÇÃO.} Encaixe não foi procurado: 127 primo, topo do
+  \code{int8\_t}, ASCII a sete bits. DEL $=\infty$ por ser o único código que
+  sobra.
+\item \textbf{LEI.} Corolário $0\leftrightarrow\infty$ (a mesma).
+\item \textbf{TESTEMUNHA.} NUL $\mapsto$ DEL; tabela bijectiva; gato permutação;
+  gato NÃO respeita XOR (duas álgebras no mesmo suporte).
+\item \textbf{CONCLUSÃO.} ASCII carrega DUAS álgebras: como $\mathbb{P}^{1}$ o
+  byte é PONTO (gato $=$ cifra); como $\mathbb{F}_{2}^{7}$ é VECTOR (soma $=$ XOR).
+\item \textbf{VOLTA.} A cifra não tem chave: é a lei. Gato permuta; esquilo
+  desfaz (acção à direita) --- já medido no teorema do esquilo.
+\end{enumerate}
+\medido{\code{cmetrica\_resolve(24)} / \code{as\_ponto}, \code{as\_gato}:
+bijecção 128; XOR incompatível.}
+
+%======================================================================
+\section{o que fica no conversa}
+A prosa canónica CM1--CM24 é este ficheiro --- o catálogo da conservação
+métrica fecha aqui. Em \code{banco/conversa.c}, \code{cmetrica\_resolve}
+\textbf{mede}: corre as buscas, imprime tabelas, afirma ou «NÃO afirmo».
+Próximo lote natural: outros \code{resolve\_*} (corpo CP25, cálculo, \ldots)
+no mesmo molde TeX vivo.
+
+\end{document}

@@ -1417,7 +1417,10 @@ static void tique7(int slot, const char *porque);
  * «det|·| = σ_n» é verdade POR DEFINIÇÃO, e uma frase que não pode falhar não é um
  * teorema. O conteúdo está nas QUATRO CONTAS: o mesmo número é o determinante (álgebra),
  * o factor da ação em Λⁿ (geometria), o produto σσ′ (espectro) e a razão de pontos do
- * reticulado (contagem). Digo-o em vez de o esconder. */
+ * reticulado (contagem). Digo-o em vez de o esconder.
+ *
+ * Prosa canónica CM1–CM24: corpus/docs/conservacao_metrica.tex (TeX vivo).
+ * Este switch MEDE — tabelas, buscas, afirma / NÃO afirmo. */
 static const struct { int n; const char *nome; const char *enunciado; } CM10[] = {
  { 1, "descida",        "a descida é o dual da indução, e procura o contra-exemplo MÍNIMO" },
  { 2, "meta inducao",   "mede-se o PASSO, não uma tabela de andares" },
@@ -2545,6 +2548,8 @@ static const struct { int n; const char *nome; const char *enunciado; } AR25[] =
  { 24, "troca de limite",   "qual hipótese torna lim∫ = ∫lim legítimo" },
  { 25, "cinco vias",        "as cinco formas da completude — e NENHUMA arbitra as outras" },
 };
+/* Prosa canónica AR1–AR25: corpus/docs/analise_exercicios.tex (TeX vivo).
+ * Este switch MEDE. */
 static void analise_resolve(int n){
     TICK_N = 0;
     printf("   %d — %s\n", n, AR25[n-1].enunciado);
@@ -5797,6 +5802,8 @@ static const struct { int n; const char *nome; const char *enunciado; } C3_21[] 
  { 20, "gauss",             "∭_V div F dV = ∬_∂V F·n dS" },
  { 21, "a mesma estrutura", "os três são ∫_∂R ω = ∫_R Dω — e o que falta é o d" },
 };
+/* Prosa canónica C3-1–C3-21: corpus/docs/calculo3_exercicios.tex (TeX vivo).
+ * Este switch MEDE. */
 static void calculo3_resolve(int n){
     TICK_N = 0;
     printf("   %d — %s\n", n, C3_21[n-1].enunciado);
@@ -6300,6 +6307,8 @@ static const struct { int n; const char *nome; const char *enunciado; } C2_21[] 
  { 20, "jacobiano",         "dV = |det J| du dv — o determinante como MEDIDA DE VOLUME" },
  { 21, "green",             "∮_∂D = ∬_D: o INTERIOR contra a BORDA, medido dos dois lados" },
 };
+/* Prosa canónica C2-1–C2-21: corpus/docs/calculo2_exercicios.tex (TeX vivo).
+ * Este switch MEDE. */
 static void calculo2_resolve(int n){
     TICK_N = 0;
     printf("   %d — %s\n", n, C2_21[n-1].enunciado);
@@ -6839,6 +6848,8 @@ static const struct { int n; const char *nome; const char *enunciado; } CL21[] =
  { 20, "analise completa",  "x³−3x inteiro: zeros, extremos, concavidade, inflexão" },
  { 21, "traducao",          "cada teorema do Cálculo I no teorema do universal que o diz" },
 };
+/* Prosa canónica CL1–CL21: corpus/docs/calculo_exercicios.tex (TeX vivo).
+ * Este switch MEDE. */
 static void calculo_resolve(int n){
     TICK_N = 0;
     printf("   %d — %s\n", n, CL21[n-1].enunciado);
@@ -11564,7 +11575,10 @@ static int resolve_linear(const char *f){
  *    descobriram: 0⁻¹ não existe.»
  *
  * São 25 exercícios em quatro níveis, e quase todos correm em máquina que já existia:
- * corpo → polinómio → fatoração → irredutibilidade → quociente. */
+ * corpo → polinómio → fatoração → irredutibilidade → quociente.
+ *
+ * Prosa canónica CP1–CP25: corpus/docs/corpo_exercicios.tex (TeX vivo).
+ * Este switch MEDE — tabelas, Bézout, anéis ℤₘ. */
 static const struct { int n; const char *nome; const char *enunciado; } CP25[] = {
  {  1, "Q corpo",             "ℚ é um corpo" },
  {  2, "Z nao corpo",         "ℤ NÃO é corpo: 2⁻¹ = 1/2 ∉ ℤ" },
@@ -12300,7 +12314,10 @@ static int resolve_corpo(const char *f){
  * testemunha exibe-se. Um teorema que salte a testemunha fica com um buraco visível.
  *
  * A DEFINIÇÃO vai em LaTeX, no seu tick, para o tradutor a compor. É a membrana a
- * carregar a matemática e não só o texto. */
+ * carregar a matemática e não só o texto.
+ *
+ * Prosa canónica AL1–AL20: corpus/docs/algebra_moderna.tex (TeX vivo).
+ * Este switch MEDE. */
 static const char *ES7[7] = { "HIPÓTESES", "DEFINIÇÃO", "TRANSIÇÃO", "LEI USADA",
                               "TESTEMUNHA", "CONCLUSÃO", "VOLTA" };
 static void tique7(int slot, const char *porque){
@@ -16690,6 +16707,261 @@ static int resolve_data(void){
 /* «mostra X» — o parâmetro vira slug e procura-se no catálogo: a ponte que os pares
  * fixos já faziam nome a nome, agora com o parâmetro extraído. Se o ficheiro não
  * existe, devolve 0 e o corpus decide — os pares curados continuam a valer. */
+/* ── TEX VIVO: a base só guarda "@TEX caminho"; o corpo lê-se do ficheiro AGORA ─
+ * Assim o corpus NÃO se duplica: alterar o .tex altera a resposta sem reingerir. */
+static const char *tiffany_raiz(void){
+    static char raiz[512];
+    static int feita = 0;
+    if(feita) return raiz[0] ? raiz : 0;
+    feita = 1; raiz[0] = 0;
+    {
+        const char *e = getenv("TIFFANY_ROOT");
+        if(e && e[0]){
+            snprintf(raiz, sizeof raiz, "%s", e);
+            return raiz;
+        }
+    }
+    /* sobe a partir da base / do cwd até achar papers/arquitetura.tex */
+    const char *cands[] = { ".", "..", "../..", barr_base[0] ? barr_base : ".", 0 };
+    for(int i = 0; cands[i]; i++){
+        char prova[640];
+        if(cands[i] == barr_base){
+            /* dirname aproximado: corta o último componente */
+            snprintf(prova, sizeof prova, "%s", barr_base);
+            char *slash = strrchr(prova, '/');
+            if(slash) *slash = 0;
+            slash = strrchr(prova, '/');
+            if(slash) *slash = 0;
+            char t[700]; snprintf(t, sizeof t, "%s/papers/arquitetura.tex", prova);
+            if(access(t, R_OK) == 0){ snprintf(raiz, sizeof raiz, "%s", prova); return raiz; }
+        } else {
+            snprintf(prova, sizeof prova, "%s/papers/arquitetura.tex", cands[i]);
+            if(access(prova, R_OK) == 0){
+                if(!strcmp(cands[i], ".")){
+                    char cwd[512]; if(getcwd(cwd, sizeof cwd)) snprintf(raiz, sizeof raiz, "%s", cwd);
+                    else snprintf(raiz, sizeof raiz, ".");
+                } else {
+                    char cwd[512]; if(getcwd(cwd, sizeof cwd))
+                        snprintf(raiz, sizeof raiz, "%s/%s", cwd, cands[i][0]=='.' && cands[i][1]=='.' ? ".." : cands[i]);
+                    else snprintf(raiz, sizeof raiz, "%s", cands[i]);
+                    /* normaliza .. */
+                    if(!strcmp(cands[i], "..")){
+                        if(getcwd(cwd, sizeof cwd)){
+                            char *s = strrchr(cwd, '/'); if(s) *s = 0;
+                            snprintf(raiz, sizeof raiz, "%s", cwd);
+                        }
+                    }
+                }
+                return raiz;
+            }
+        }
+    }
+    return 0;
+}
+static void tex_limpa_titulo(char *d, size_t dn, const char *s, size_t n){
+    /* títulos: sem comandos — só para casar a fala */
+    size_t o = 0; int esp = 1;
+    for(size_t i = 0; i < n && o + 1 < dn; ){
+        if(s[i] == '\\'){
+            i++;
+            while(i < n && ((s[i] >= 'a' && s[i] <= 'z') || (s[i] >= 'A' && s[i] <= 'Z'))) i++;
+            if(i < n && s[i] == '*') i++;
+            if(i < n && s[i] == '['){ while(i < n && s[i] != ']') i++; if(i < n) i++; }
+            if(i < n && s[i] == '{'){ int depth = 1; i++;
+                while(i < n && depth){ if(s[i]=='{') depth++; else if(s[i]=='}') depth--; i++; } }
+            if(!esp && o + 1 < dn){ d[o++] = ' '; esp = 1; }
+            continue;
+        }
+        if(s[i] == '%' && (i == 0 || s[i-1] != '\\')){ while(i < n && s[i] != '\n') i++; continue; }
+        if(s[i] == '{' || s[i] == '}' || s[i] == '$'){ i++; continue; }
+        unsigned char c = (unsigned char)s[i++];
+        if(c <= 32){ if(!esp && o + 1 < dn){ d[o++] = ' '; esp = 1; } continue; }
+        d[o++] = (char)c; esp = 0;
+    }
+    while(o && d[o-1] == ' ') o--;
+    d[o] = 0;
+}
+/* Corpo para RESPONDER: preserva LaTeX (frac, mathbb, $, ^, _). Só tira comentários
+ * e ambientes de ruído; a membrana de saída fica vestida. */
+static void tex_veste_corpo(char *d, size_t dn, const char *s, size_t n){
+    static const char *ruido[] = {
+        "begin", "end", "label", "cite", "ref", "pageref", "bibliography",
+        "maketitle", "tableofcontents", "noindent", "medskip", "smallskip",
+        "bigskip", "par", "item", "includegraphics", 0
+    };
+    size_t o = 0; int esp = 0;
+    for(size_t i = 0; i < n && o + 2 < dn; ){
+        if(s[i] == '%' && (i == 0 || s[i-1] != '\\')){
+            while(i < n && s[i] != '\n') i++;
+            continue;
+        }
+        if(s[i] == '\\'){
+            size_t j = i + 1;
+            char nome[32]; size_t nk = 0;
+            while(j < n && nk + 1 < sizeof nome
+                  && ((s[j] >= 'a' && s[j] <= 'z') || (s[j] >= 'A' && s[j] <= 'Z')))
+                nome[nk++] = s[j++];
+            nome[nk] = 0;
+            int drop = 0;
+            for(int r = 0; ruido[r]; r++)
+                if(!strcmp(nome, ruido[r])){ drop = 1; break; }
+            if(drop){
+                i = j;
+                if(i < n && s[i] == '*') i++;
+                if(i < n && s[i] == '['){ while(i < n && s[i] != ']') i++; if(i < n) i++; }
+                if(i < n && s[i] == '{'){ int depth = 1; i++;
+                    while(i < n && depth){ if(s[i]=='{') depth++; else if(s[i]=='}') depth--; i++; } }
+                if(!esp && o + 1 < dn){ d[o++] = ' '; esp = 1; }
+                continue;
+            }
+            /* preservar comando matemático inteiro + argumentos curtos */
+            d[o++] = '\\';
+            for(size_t k = 0; k < nk && o + 1 < dn; k++) d[o++] = nome[k];
+            i = j;
+            if(i < n && s[i] == '*'){ d[o++] = '*'; i++; }
+            for(int args = 0; args < 3 && i < n && o + 1 < dn; args++){
+                if(s[i] == '['){
+                    d[o++] = '['; i++;
+                    while(i < n && s[i] != ']' && o + 1 < dn) d[o++] = s[i++];
+                    if(i < n && s[i] == ']' && o + 1 < dn){ d[o++] = ']'; i++; }
+                } else if(s[i] == '{'){
+                    int depth = 0;
+                    do {
+                        if(s[i] == '{') depth++;
+                        else if(s[i] == '}') depth--;
+                        if(o + 1 < dn) d[o++] = s[i];
+                        i++;
+                    } while(i < n && depth > 0 && o + 1 < dn);
+                } else break;
+            }
+            esp = 0;
+            continue;
+        }
+        unsigned char c = (unsigned char)s[i++];
+        if(c <= 32){
+            if(!esp && o + 1 < dn){ d[o++] = ' '; esp = 1; }
+            continue;
+        }
+        d[o++] = (char)c; esp = 0;
+    }
+    while(o && d[o-1] == ' ') o--;
+    d[o] = 0;
+}
+/* compat: limpa = título (antigo nome) */
+static void tex_limpa_trecho(char *d, size_t dn, const char *s, size_t n){
+    tex_limpa_titulo(d, dn, s, n);
+}
+static int tex_titulo_igual(const char *a, const char *b){
+    const char *p = a, *q = b;
+    for(;;){
+        while(*p == ' ' || *p == '\t') p++;
+        while(*q == ' ' || *q == '\t') q++;
+        if(!*p && !*q) return 1;
+        if(!*p || !*q) return 0;
+        long sa = prox_simb(&p), sb = prox_simb(&q);
+        if(sa != sb) return 0;
+    }
+}
+static int tex_titulo_casa(const char *fala, const char *tit){
+    if(tex_titulo_igual(fala, tit)) return 1;
+    /* prefixo: «tick dragao» casa em «tick dragao --- Heighway…» */
+    const char *p = fala, *q = tit;
+    int n = 0;
+    for(;;){
+        while(*p == ' ' || *p == '\t') p++;
+        while(*q == ' ' || *q == '\t') q++;
+        if(!*p) return n >= 2;
+        if(!*q) return 0;
+        long sa = prox_simb(&p), sb = prox_simb(&q);
+        if(sa != sb) return 0;
+        n++;
+    }
+}
+/* Lê .tex ao vivo: procura \\section{titulo} (fala ou #âncora) e devolve o corpo. */
+static int le_tex_vivo(const char *rel, const char *titulo, char *out, size_t lim){
+    const char *raiz = tiffany_raiz();
+    if(!raiz || !rel || !rel[0]) return 0;
+    char cam[768];
+    if(rel[0] == '/') snprintf(cam, sizeof cam, "%s", rel);
+    else snprintf(cam, sizeof cam, "%s/%s", raiz, rel);
+    FILE *f = fopen(cam, "rb");
+    if(!f) return 0;
+    if(fseek(f, 0, SEEK_END) != 0){ fclose(f); return 0; }
+    long sz = ftell(f); if(sz < 0 || sz > 8<<20){ fclose(f); return 0; }
+    if(fseek(f, 0, SEEK_SET) != 0){ fclose(f); return 0; }
+    char *buf = (char*)malloc((size_t)sz + 1);
+    if(!buf){ fclose(f); return 0; }
+    size_t n = fread(buf, 1, (size_t)sz, f); buf[n] = 0; fclose(f);
+
+    const char *melhor = 0; size_t mlen = 0; int exacto = 0;
+    const char *fallback = 0; size_t flen = 0;
+    for(size_t i = 0; i + 10 < n; i++){
+        if(buf[i] != '\\') continue;
+        int avanca = 0;
+        if(!strncmp(buf + i, "\\section", 8)) avanca = 8;
+        else if(!strncmp(buf + i, "\\subsection", 11)) avanca = 11;
+        else if(!strncmp(buf + i, "\\subsubsection", 14)) avanca = 14;
+        else continue;
+        const char *q = buf + i + avanca;
+        if(*q == '*') q++;
+        if(*q != '{') continue;
+        q++;
+        const char *ti = q; int depth = 1;
+        while(*q && depth){
+            if(*q == '{') depth++;
+            else if(*q == '}') depth--;
+            if(depth) q++;
+        }
+        if(depth) break;
+        char tit_limpo[256];
+        tex_limpa_titulo(tit_limpo, sizeof tit_limpo, ti, (size_t)(q - ti));
+        q++;
+        const char *corpo = q;
+        const char *fim = 0;
+        for(const char *s = corpo; *s; s++){
+            if(s[0] != '\\') continue;
+            if(!strncmp(s, "\\section", 8) || !strncmp(s, "\\subsection", 11)
+               || !strncmp(s, "\\subsubsection", 14)){ fim = s; break; }
+        }
+        if(!fim) fim = buf + n;
+        size_t cl = (size_t)(fim - corpo);
+        char ensaio[RESP_LIM];
+        tex_veste_corpo(ensaio, sizeof ensaio, corpo, cl > 1200 ? 1200 : cl);
+        if((int)strlen(ensaio) < 40) continue;      /* só ruído — próxima secção */
+        if(titulo && titulo[0] && tex_titulo_casa(titulo, tit_limpo)){
+            melhor = corpo; mlen = cl; exacto = 1; break;
+        }
+        if(!exacto && !fallback){ fallback = corpo; flen = cl; }
+    }
+    if(!melhor){ melhor = fallback; mlen = flen; }
+    int ok = 0;
+    if(melhor){
+        tex_veste_corpo(out, lim, melhor, mlen > 1200 ? 1200 : mlen);
+        ok = (int)strlen(out) >= 20;
+    }
+    free(buf);
+    return ok;
+}
+/* Expande marcador "@TEX caminho" ou "@TEX caminho#titulo". */
+static int expande_tex_vivo(const char *fala, const char *marc, char *out, size_t lim){
+    if(!marc || strncmp(marc, "@TEX ", 5)) return 0;
+    const char *p = marc + 5;
+    while(*p == ' ') p++;
+    char rel[512]; size_t k = 0;
+    while(*p && *p != '#' && *p != ' ' && k + 1 < sizeof rel) rel[k++] = *p++;
+    rel[k] = 0;
+    const char *tit = fala;
+    if(*p == '#'){ p++; tit = p; }
+    if(!le_tex_vivo(rel, tit, out, lim)){
+        /* última tentativa: qualquer 1.ª secção do ficheiro */
+        if(!le_tex_vivo(rel, 0, out, lim)) return 0;
+    }
+    /* rodapé: de onde veio, sem duplicar o corpo na base */
+    size_t L = strlen(out);
+    if(L + 48 < lim)
+        snprintf(out + L, lim - L, "  [%s]", rel);
+    return 1;
+}
 static int resolve_mostra_em(const char *f, const char *raiz){
     const char *p = f + 7;                          /* depois de "mostra " */
     if(!strncmp(p, "o ", 2) || !strncmp(p, "a ", 2)) p += 2;
@@ -16703,8 +16975,29 @@ static int resolve_mostra_em(const char *f, const char *raiz){
     slug[o] = 0;
     if(!o) return 0;
     char cam[512]; snprintf(cam, sizeof cam, "%s/%s.tex", raiz, slug);
-    if(access(cam, R_OK) != 0) return 0;
-    printf("vê papers/%s.tex\n   (o catálogo tem — o tradutor abre)\n", slug);
+    if(access(cam, R_OK) != 0){
+        /* tenta sob TIFFANY_ROOT/papers e corpus/docs */
+        const char *tr = tiffany_raiz();
+        if(tr){
+            snprintf(cam, sizeof cam, "%s/papers/%s.tex", tr, slug);
+            if(access(cam, R_OK) != 0)
+                snprintf(cam, sizeof cam, "%s/corpus/docs/%s.tex", tr, slug);
+        }
+        if(access(cam, R_OK) != 0) return 0;
+    }
+    char corpo[RESP_LIM];
+    char rel[512];
+    {
+        const char *tr = tiffany_raiz();
+        if(tr && !strncmp(cam, tr, strlen(tr)))
+            snprintf(rel, sizeof rel, "%s", cam + strlen(tr) + (cam[strlen(tr)]=='/'?1:0));
+        else snprintf(rel, sizeof rel, "%s.tex", slug);
+    }
+    if(le_tex_vivo(rel, 0, corpo, sizeof corpo)){
+        printf("%s\n   (tex vivo — %s)\n", corpo, rel);
+        return 1;
+    }
+    printf("vê %s\n   (o catálogo tem — o tradutor abre)\n", rel);
     return 1;
 }
 static int e_mostra(const char *f){ return !strncmp(f, "mostra ", 7); }
@@ -16912,6 +17205,18 @@ static void responde(const char *fala){
         return;
     }
     char t[RESP_LIM]; le_texto(r, t, sizeof t);
+    /* @TEX vivo: a base só tem o ponteiro; o corpo vem do ficheiro AGORA */
+    if(!strncmp(t, "@TEX ", 5)){
+        char vivo[RESP_LIM];
+        if(expande_tex_vivo(efetiva, t, vivo, sizeof vivo)){
+            printf("%s\n", vivo);
+            printf("   (%s → tex vivo, %d símbolo(s) de caminho)\n", via, d);
+            return;
+        }
+        printf("não sei.\n");
+        printf("   (ponteiro @TEX mas o ficheiro não abriu — TIFFANY_ROOT?)\n");
+        return;
+    }
     if(prefixal){                                  /* o corte: a moldura escolheu, o
                                                     * parâmetro escreve-se no buraco */
         char cheio[RESP_LIM + 512];

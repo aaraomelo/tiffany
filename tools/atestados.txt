@@ -13,6 +13,7 @@ analog 42c142c0f7d6da49 0
 antissimetrico e48993492f8aa75d 0
 app_arranca abb24b0fe22e3ae2 0
 aranha_g 448e1f5e4400277c 0
+aranha_inversa ac86462a26ec984e 0
 aritmetica a189863630894607 0
 arquimedes_area 3fb4925bc7f62b48 0
 arraytermico d700a92b448f7ffd 0
@@ -27,7 +28,7 @@ autoria_tradutor 54dbff42fcf53020 0
 avalia_macros 570641b1d2651ef7 0
 aya 41a5f3a3acf28519 0
 backend_ttf d424e63b03499a7f 0
-backends_wasm 36dc32f59dd36e1a 0
+backends_wasm 722e91f3af901796 0
 balanco 73d1cc8a2733ebbb 0
 banco 65871676a87669aa 0
 banco_relogio dc5a94cdd1b4961b 0
@@ -49,7 +50,7 @@ cantor a61f8c800549ce95 0
 cantor_julia_dual 6bff83a60f07952b 0
 canvas_front 76e5a0e283adc271 0
 cardinal 03e03627e20f28bd 0
-cards 65f8dcd068c9879f 0
+cards a57c860ddcf0d966 0
 carnot c388920072bdd257 0
 catalogo aaba9b8518406c6f 0
 central_continuo 2806a99350c5d4e4 0
@@ -88,7 +89,7 @@ continuo 1d0a9f1306dba964 0
 contorno_riemann f675c33725a349a3 0
 contrato 1dc40867d020a679 0
 controlo_front e94ce67fbef877c1 0
-conversa e5f824d546abea5f 0
+conversa 6429780b6834af97 0
 converte aed943df396fe8b2 0
 convolucao_universal fc0e5813ad42301b 0
 coroa b7ee5ecba9494c3f 0
@@ -186,6 +187,7 @@ escala cbfb95a30df86d4b 0
 escala_dourada 5c990fc76f6f0948 0
 escala_espaco 26ed3534a655fc9d 0
 escuros 6bc3e85125c6c969 0
+espanhol_aranha 95ea513f8cba1bf5 0
 espelho 3f83c56f92a7f4d4 0
 espurio 83395778350a5830 0
 esquilo 9204fc0a5732f8ad 0
@@ -247,10 +249,13 @@ hodge_viviani 9e53debee8151fb9 0
 hopfield fa5962b6da636f1d 0
 hurwitz 1504bb355f1e9e1d 0
 icc e80be34cd2b3af21 0
+idioma_orbita c6d1625040bc6bd9 0
+indexa_orbitas a510bf95b2d7fb95 0
 inducao 279c5cee6b301331 0
+ingles_aranha 496226db44a25d25 0
 instrumento d09d241923908750 0
 inteiros f48ca229a56474d3 0
-interface_padrao d5102ce78f3704d3 0
+interface_padrao 1db3a402776bf3a8 0
 inversor_trial 1dcf9d322733ba89 0
 isa4 7a0f4f0c1bc558e8 0
 isa_dupla 153fd4762a86077d 0
@@ -374,6 +379,7 @@ poligonos fc89d3dd407824ee 0
 ponte_universal_metalica 6bdedb0d4a48d0b8 0
 pontofixo 8e23414322dd3ca7 0
 pontryagin f1c722ef46d93572 0
+portugues_aranha 88489cfe63663cd3 0
 posto_viviani d6eeac3d7d845b41 0
 potencia 7349e8c2aa8caa4f 0
 prensor cd1d45c4c2fb2a2b 0
@@ -448,7 +454,7 @@ sombra_cone 5e3a81a74d93d005 0
 sombras 4cdee1845f8c56fd 0
 spinor32 52cc87063065a82e 0
 spline 5fa4c5faf3ddbb4c 0
-sql 66fd9072933714cf 0
+sql b1f131b1693d2e9d 0
 sshb 87867429592fc40b 0
 str2dbl_dual 7a67f5b0e1b47955 0
 superficie_tate 42631bd983dc985c 0
@@ -466,6 +472,7 @@ tesserato_espiral 364f3aa5ff7c3ae4 0
 tex f725986a052c1d4b 0
 tex_wasm acc91ca1832e4b32 0
 texto b15f5a20ebb7866a 0
+tick_idioma 1acc77b18ee4dbf0 0
 tikz fbaba755700a45f5 0
 toolkit 3d7e0c240d31ba83 0
 toolkit_llm 506bd345232193ba 0

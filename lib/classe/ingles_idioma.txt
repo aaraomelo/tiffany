@@ -1,0 +1,16 @@
+# ingles_idioma.txt — álgebra EN para IMPORT IDIOMA no banco.
+alfabeto card=78
+lexico the |o 
+lexico gold|ouro
+lexico silver|prata
+lexico king|rei
+lexico house|casa
+lexico of the |do 
+lexico is |é 
+lexico  and | e 
+lexico dragon|dragão
+lexico orbit|órbita
+lexico algebra|álgebra
+regra concat|op
+regra dual_lex|op
+regra identifica|op

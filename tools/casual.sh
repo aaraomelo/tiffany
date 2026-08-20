@@ -41,20 +41,22 @@ aprende "estou cansado" "compreendo — um descanso e água ajudam. queres falar
 aprende "conta uma piada curta" "porque o livro de matemática estava triste? tinha muitos problemas."
 aprende "prazer em conhecer-te" "o prazer é meu. vamos conversar com calma."
 
-# Ponte mínima ao catálogo (só se pedirem explicitamente o paper)
-aprende "mostra a partitura" "a partitura canónica está em corpus/docs/partitura.tex"
-aprende "mostra o dual sort" "vê papers/arquitetura.tex"
-aprende "mostra o corpo de peano" "papers/corpo_topologico.tex"
-aprende "mostra a rede dual" "papers/corpo_topologico.tex §rede-dual — também corpus/fala/conversa_rede_dual.tex"
-aprende "mostra a teoria" "a formalização: teoria.tex — mas a fundação vem antes: corpus/docs/torre_fundacao.tex"
-aprende "mostra a fundação" "Corpos→Dinâmica→Topologia→Hilbert/Clifford→Peano: corpus/docs/torre_fundacao.tex"
-aprende "torre de fundação" "a escada antes do Corpo de Peano: corpus/docs/torre_fundacao.tex"
-aprende "mostra o catalogo" "o bestiário: catalogo.tex"
-aprende "mostra o catálogo" "o bestiário: catalogo.tex"
+# Ponte ao catálogo: ponteiro @TEX (corpo lido ao vivo — sem duplicar)
+aprende "mostra a partitura" "@TEX corpus/docs/partitura.tex"
+aprende "mostra o dual sort" "@TEX papers/arquitetura.tex"
+aprende "mostra o corpo de peano" "@TEX papers/corpo_topologico.tex"
+aprende "mostra a rede dual" "@TEX papers/corpo_topologico.tex"
+aprende "mostra a teoria" "@TEX teoria.tex"
+aprende "mostra a fundação" "@TEX corpus/docs/torre_fundacao.tex"
+aprende "torre de fundação" "@TEX corpus/docs/torre_fundacao.tex"
+aprende "mostra o catalogo" "@TEX catalogo.tex"
+aprende "mostra o catálogo" "@TEX catalogo.tex"
 
-python3 "$D/ingere.py" "$ROOT/corpus/fala/conversa.tex" | "$CV" "$B" - >/dev/null
+# conversa.tex: NÃO ingerir corpo — títulos entram via indexa_tex_vivo.sh
+# (se já indexado, as secções casuais respondem ao vivo)
 
 echo "casual (banal): base=$B"
+export TIFFANY_ROOT="$ROOT"
 "$CV" "$B" responde "bom dia" | head -2
 "$CV" "$B" responde "gostas de café" | head -2
 "$CV" "$B" responde "estou cansado" | head -2

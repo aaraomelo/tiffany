@@ -23,10 +23,11 @@ D=$(dirname "$0")
 "$D/semear.sh"  "$B" >/dev/null
 CV="$D/../banco/bin/conversa"
 [ -x "$CV" ] || CV="$D/conversa"
-python3 "$D/ingere.py" "$D/../teoria.tex"   | "$CV" "$B" - >/dev/null
-python3 "$D/ingere.py" "$D/../catalogo.tex" | "$CV" "$B" - >/dev/null
-# o cristal recuperado (eval 13/08): falas + 4286 conceitos pelas projeções
+# TeX: índice vivo (só @TEX), NÃO copiar corpos
+export TIFFANY_ROOT="$(cd "$D/.." && pwd)"
+python3 "$D/indexa_tex_vivo.py" | "$CV" "$B" - >/dev/null
+# o cristal recuperado — se for TeX de conceitos, preferir vivo; senão cristal.sh
 "$D/cristal.sh" "$B" >/dev/null
-# casual: conversas + citações → tradutor
+# casual: cumprimentos (não TeX)
 "$D/casual.sh" "$B" >/dev/null
 echo "corpus: $("$CV" "$B" conversa </dev/null 2>&1 | head -1)"

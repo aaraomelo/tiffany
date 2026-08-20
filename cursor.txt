@@ -481,21 +481,20 @@ Pergunta sempre: QUE ENTRADA FARIA ISTO FALHAR?
 
 15. A FRENTE AGORA
 ==================
-  20/08/2026 — banco próprio + interface SQL + arquitetura byte-level.
+  20/08/2026 — CHECKPOINT: TeX vivo (CM…C3) + licença proprietária.
 
-  FECHADO nesta etapa:
-    · interface_padrao = sql (manifesto + tests/interface_padrao.js 8/8)
-    · conecthus/backends/sql/consultar.c → consultar.wasm (involução §W5)
-    · banco/sql.c: IMPORT LINGUAGENS / IMPORT CORPO / GET CORPO
-      (blobs em <base>_corpo/; índice TEXTO)
-    · app/vite.config.js: /sql + /corpo/* serve do banco (.torre/reino_corpo)
-    · papers/arquitetura.tex reestruturado: capa byte level · API SQL;
-      §Três camadas; §sec:api-sql; inventário interface/backends/fonte
-      (PDF 23 pp, pdflatex OK)
+  FECHADO:
+    · corpus/docs: CM, CP, AL, CL, AR, C2, C3 (prosa canónica)
+    · papers/arquitetura.tex §tex-vivo
+    · LICENSE: comercial — uso mediante contrato e pagamento
+      (aarao.melo.lopes@gmail.com)
+
+  Uso:
+    TIFFANY_ROOT=$PWD banco/bin/conversa banco/.fala/vivo responde "…"
+    bash tools/semear.sh banco/.fala/vivo
+    bash tools/indexa_tex_vivo.sh banco/.fala/vivo
 
   Pendente natural:
-    · re-atestar interface_padrao / backends_wasm / sql na bateria
-    · bit-level fino (além de Word_8) quando o coordenador mandar
+    · outros resolve_* (formas DF, topologia, …)
 
-  Verificação: bash tools/bateria.sh · node tests/interface_padrao.js
-  IMPORT: ./tiffany_sql .torre/reino "IMPORT CORPO 'app/src/corpo.json' '.'"
+  IMPORT CORPO: ./tiffany_sql .torre/reino "IMPORT CORPO 'app/src/corpo.json' '.'"

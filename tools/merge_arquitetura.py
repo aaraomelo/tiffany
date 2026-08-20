@@ -153,7 +153,7 @@ footer = r"""
 {\footnotesize\color{cinza}\noindent
 Teoria e catálogo em
 \href{https://goldenkingdom.patriatechnology.com}{goldenkingdom.patriatechnology.com}.
-CC BY 4.0 (textos) $\cdot$ MIT (código).\par}
+Proprietário --- uso mediante contrato e pagamento (ver \\texttt{LICENSE}).\par}
 
 \end{document}
 """
