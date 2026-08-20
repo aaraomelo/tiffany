@@ -381,10 +381,14 @@ $k<0$, $\Phi([(0,-k)])=k$.
 (3) Injectiva: $\Phi([(a,b)])=\Phi([(c,d)])$ $\Rightarrow$ $a-b=c-d$
 $\Rightarrow$ $a+d=b+c$ $\Rightarrow$ $[(a,b)]=[(c,d)]$.
 (4) $\Phi$ preserva $+$ e $\cdot$: Thm.~\ref{thm:bem-definido}.
-(5) Como $\Phi$ é bijecção e transporta $\oplus,\otimes$ para $+,\cdot$
-usuais, associatividade, comutatividade, distributividade, identidades e
-inversos em $\mathbb{Z}$ descem a $V_{\mathrm{int}}/{\sim}$: o quociente
-\textbf{é} anel e $\Phi$ isomorfismo de anéis.
+(5) $(\mathbb{Z},+,\cdot)$ é anel. Como $\Phi$ é bijecção e
+$\Phi(x\oplus y)=\Phi(x)+\Phi(y)$,
+$\Phi(x\otimes y)=\Phi(x)\Phi(y)$, transportam-se os axiomas: associatividade
+e comutatividade de $\oplus$ e $\otimes$, distributividade,
+$[(0,0)]$ neutro de $\oplus$, $[(1,0)]$ neutro de $\otimes$,
+$[(b,a)]$ oposto aditivo de $[(a,b)]$. Logo
+$(V_{\mathrm{int}}/{\sim},\oplus,\otimes)$ \textbf{é} anel e $\Phi$ isomorfismo
+de anéis.
 (6) Ordem: $x\le y\iff\Phi(x)\le\Phi(y)$ com a ordem usual em $\mathbb{Z}$.
 $\square$
 \end{proof}
@@ -719,7 +723,7 @@ sucessor byte & \code{nt\_S} em $\Word_8$ & wrap $255\to0$ & conta \code{nt\_wra
 
 \medido{\code{inteiros.c} §NT1--§NT11; \code{aranha\_g.c} §AG6--§AG7;
 \code{cadeia.c} §KW ($10/10$); \code{migracao.c} §GW ($7/7$);
-\code{reducao.c} §DW; \code{dual16.c} §EW.}
+\code{reducao.c} §DW; \code{dual16.c} §EW; \code{palavra.c} §PW.}
 
 %======================================================================
 \section{Fundamentação --- inventário das oito leis}\label{sec:fundamentacao}

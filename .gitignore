@@ -202,6 +202,7 @@ tests/inteiros
 tests/metrica
 tests/migracao
 tests/dual16
+tests/palavra
 tests/transformada_universal
 tests/reducao
 tests/config_corpo

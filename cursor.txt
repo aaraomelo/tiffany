@@ -8,7 +8,7 @@ ESTADO
 Fase E (descida 8 bits): Trios 1–3 FECHADOS; reducao §DW liga W_8²→𝔽₁₂₇.
 
     inteiros    §NT1–§NT11b (14/14) · cadeia §KW (10/10) · migracao §GW (7/7)
-    reducao     §DW (8/8) · dual16 §EW (6/6) · transformada §TW (26/26)
+    reducao     §DW (8/8) · dual16 §EW (6/6) · transformada §TW (26/26) · palavra §PW (34/34)
     bateria     510 : 497 verdes (cristal/refs pré-existentes)
     doubles     3906 → 0              python3 tools/doubles_todos.py  FECHADO
     limiares    58 → 0 régua          (+4 valor físico JS, não alvo)
@@ -290,6 +290,7 @@ Objectivo: propagar W_8 / uint16-cruz / G_geom pela torre sem contaminar ∼.
     reducao §DW: W_8² → 𝔽₁₂₇ via E₁₆ — 8/8 asserções
     dual16 §EW: W_8 → E₁₆ d16_mult — 6/6 asserções
     transformada §TW: RtOp coord. byte — 26/26 asserções
+    palavra §PW: fronteira W_8 vs EMB_S interior — 34/34 asserções
 
   Medidores âncora:
     §NT8   equivalência uint16 vs wrap

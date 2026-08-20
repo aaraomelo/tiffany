@@ -43,6 +43,7 @@
  * §P1 a §P10 são TODOS em inteiros: nenhum float decide asserção nenhuma neles.
  *
  * §P11 — alternância, P.G. da razão e da distância, convergência p.u.: tudo em inteiros.
+ * §PW  fronteira W_8: convergentes pequenos em E₁₆; EMB_S só I/O
  *
  *   cc -O2 -std=c99 -Wall -I lib tests/palavra.c -o palavra && ./palavra
  */
@@ -56,6 +57,10 @@
 #include <stdint.h>
 #include "i128.h"
 #include "le_emb.h"   /* EMB_S=10⁴ — fronteira I/O (raiz β_{n,m}, convergência p.u.) */
+#include "naturais.h"
+#include "inteiros.h"
+#include "racionais.h"
+#include "reducao.h"
 
 typedef int64_t L;
 
@@ -825,6 +830,36 @@ int main(void){
         conclui("que são identidades forçadas — a alternância é o sinal de (−1)^k na norma, e a");
         conclui("desigualdade sai de x − p_j/q_j = (−1)^j/(q_j(α_{j+1}q_j + q_{j−1})) com α>1.");
         conclui("a parte que podia falhar é q_k → ∞, e agora está medida sobre N* arbitrário.");
+    }
+
+    /* ---------------- §PW — fronteira W_8 vs interior EMB_S --------------------- */
+    printf("\n§PW Fronteira W_8: convergentes pequenos em E₁₆; escala só na I/O.\n");
+    {
+        long cabe = 0, tot = 0, reduz = 0;
+        for(L q = 1; q <= 127; q++) for(L p = 0; p <= 127; p++){
+            if(mdc(p, q) != 1) continue;
+            tot++;
+            Qz x = qz(p, q);
+            Pr r;
+            if(qz_cabe(x.p) && qz_cabe(x.q)) cabe++;
+            if(rd_de_qz(x, &r)) reduz++;
+        }
+        long eq_ok = 0, eq_tot = 0;
+        for(int a = 0; a < 256; a += 31) for(int b = 0; b < 256; b += 37)
+        for(int c = 0; c < 256; c += 41) for(int d = 0; d < 256; d += 43){
+            eq_tot++;
+            if(w8_equiv((uint8_t)a, (uint8_t)b, (uint8_t)c, (uint8_t)d)
+               == iz_equiv((L)a, (L)b, (L)c, (L)d)) eq_ok++;
+        }
+        w8_wrap = 0; w8_saturou = 0;
+        uint8_t w = w8_proj_wrap(300), s = w8_proj_sat(300);
+        printf("      racionais p,q<=127: %ld cabem E₁₆; %ld reduzem em F127\n", cabe, reduz);
+        printf("      W_8⁴ equiv %ld/%ld; wrap(300)=%u sat(300)=%u (EMB_S=%d interior)\n",
+               eq_ok, eq_tot, (unsigned)w, (unsigned)s, EMB_S);
+        ok("§PW W_8≠ℕ: envelope byte na fronteira; convergentes pequenos cabem E₁₆ e reduzem;"
+           " equivalência cruzada em uint16 não usa wrap",
+           tot > 3000 && cabe == tot && reduz == tot && eq_tot > 0 && eq_ok == eq_tot
+           && w == 44 && s == 255 && w8_wrap == 1 && w8_saturou == 1);
     }
 
     printf("\n================================================================\n");
