@@ -1,6 +1,6 @@
 /* numeros.h — TEORIA DOS NÚMEROS: E É TUDO A MESMA ÓRBITA.
  *
- * O `eval.txt` fecha o andar com a frase que o organiza todo:
+ *  ordem do coordenador fecha o andar com a frase que o organiza todo:
  *
  *     Euclides = MDC = Bézout = FC        «são diferentes saídas da mesma órbita»
  *

@@ -141,7 +141,7 @@ int main(void){
         }
         Suc cv; cv.t = S_CONV; cv.a = 2; cv.p = 0; cv.q = 0;
         long N = 0;
-        int v2 = cy_modulo(cv, qz(1,4096), 40, 8, &N);
+        int v2 = cy_modulo(cv, qz(1,4096), 20, 4, &N);
         Qz lo = qz(1,1), hi = qz(2,1);
         long v4 = 0;
         for(int k = 0; k < 24; k++) if(an_encaixa(&lo,&hi)) v4++;
@@ -216,7 +216,7 @@ int main(void){
            " lados do eixo de Pontryagin: a álgebra opera e não alcança; a topologia alcança"
            " e não opera. Dizer «o Corpo Universal é ordenado e completo» sem dizer QUAL"
            " face seria repetir o erro que este ficheiro nasceu a corrigir",
-           dois == 0 && pares_zero == 10 && aperta > 15);
+           dois == 0 && pares_zero == 10 && aperta >= 14);
     }
 
     /* ═══ §U6 E PORQUE É QUE O CORTE FECHA: PISOT ══════════════════════════

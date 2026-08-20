@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include "unidade.h"
 
-typedef long long L;
+typedef long L;
 
 static long ipow(long b, int e){
     long r = 1;

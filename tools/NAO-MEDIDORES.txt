@@ -20,7 +20,7 @@ tatoeba/tiffany.c      a assistente: conversa e responde, não afirma — como a
 tools/bench_dualsort.c — banco de ensaio, não medidor. Compara tempos do Dual Sort com
   qsort/quicksort/mergesort/heapsort em cinco distribuições. TEMPO NÃO É DETERMINISTA e
   por isso não entra na bateria: o mesmo binário dá números diferentes conforme a máquina
-  e a carga. Corre-se à mão, e os números vão para papers/corpo_computacional.tex com a dispersão
+  e a carga. Corre-se à mão, e os números vão para papers/arquitetura.tex com a dispersão
   declarada. O que É determinista sobre o algoritmo está em tests/dualsort.c.
 
 tools/bench_dissipa.c — banco de ensaio, não medidor. Conta o que cada ordenação APAGA

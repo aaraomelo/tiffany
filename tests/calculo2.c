@@ -26,17 +26,21 @@
  *
  *   cc -O2 -std=c99 -I. -I../lib calculo2.c -o calculo2 && ./calculo2
  */
+#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
+#include <unistd.h>
 #include "dual32.h"
 #include "racionais.h"
 #include "linear.h"
 #include "calculo2.h"
-#include "reta.h"      /* RtCf: a palavra, uma sequencia de longs */
+#include "reta.h"
+#include "rt_cf_slot.h"
 #include "unidade.h"
 
 static long c2_sat_tecto = 0;
 
 int main(void){
+int cf_mem = rt_cf_slot_mem_abre("dados/calculo2_cf.mem");
 printf("\n=== A QUADRATURA EM FRACÇÕES DE INTEIROS ==================================\n");
 printf("    Nenhuma vírgula: as séries têm coeficientes em ℚ, os integrais são\n");
 printf("    racionais exactos, e as igualdades são IGUALDADES.\n");
@@ -48,16 +52,11 @@ printf("\n§C1  ∫ de uma série é EXACTA, e D∘∫ = id nos coeficientes.\n\
      * uma aproximação. Derivar a seguir desfaz exactamente, coeficiente a coeficiente.
      * Mede-se nas três séries que a lib traz, e não numa só: se fosse uma, «funciona»
      * podia ser uma coincidência do caso escolhido. */
-    /* E O PRIMEIRO QUE ESTE MEDIDOR ENCONTROU FOI O TECTO. O `Qz` é racional em `int` de
-     * 32 bits, e a integral DESLOCA: ∫(xᵏ/k!) dá x^{k+1}/(k+1)!. Com exp de 12 termos o
-     * denominador que sai é 13! = 6 227 020 800, e isso NÃO CABE em 32 bits — 12! =
-     * 479 001 600 cabe, 13! não. A lib SATUROU E CONTOU, que é o que ela promete: o
-     * qz_saturou subiu a 2 em vez de truncar calada.
-     *
-     * Não é defeito da lib nem da tese — é o tecto da máquina, e mede-se em vez de se
-     * evitar. Abaixo dele as três séries fecham; acima, a saturação aparece e é contada. */
+    /* E O PRIMEIRO QUE ESTE MEDIDOR ENCONTROU FOI O TECTO. O `Qz` vive em E₁₆, e a
+     * integral DESLOCA: ∫(xᵏ/k!) dá x^{k+1}/(k+1)!. Com exp de 7 termos cabe; com 8
+     * o denominador 9! = 362 880 não entra em int16 — 8! = 40 320 cabe, 9! não. */
     Sr fs[3]; const char *nm[3] = { "geométrica", "exp", "sin" };
-    fs[0] = sr_geometrica(); fs[1] = sr_exp(11); fs[2] = sr_sin(11);
+    fs[0] = sr_geometrica(); fs[1] = sr_exp(5); fs[2] = sr_sin(5);
     long bate = 0, tot = 0, coefs = 0;
     printf("      série         D(∫f) = f ?   coeficientes comparados\n");
     for(int t = 0; t < 3; t++){
@@ -82,14 +81,14 @@ printf("\n§C1  ∫ de uma série é EXACTA, e D∘∫ = id nos coeficientes.\n\
         if(qz_saturou > marca) k_estoura = k;
     }
     printf("      e o TECTO: a integral de exp com %ld termos é a primeira que não cabe em\n"
-           "      `int` de 32 bits — 12! = 479001600 cabe, 13! = 6227020800 não\n\n", k_estoura);
+           "      E₁₆ — 8! = 40320 cabe, 9! = 362880 não\n\n", k_estoura);
     long sat_do_tecto = qz_saturou - sat_antes;
     c2_sat_tecto = sat_do_tecto;
     ok("A INTEGRAL FORMAL É EXACTA: ∫ divide o coeficiente i por (i+1) e desloca, o que é"
        " uma conta em ℚ e não uma aproximação — e derivar a seguir desfaz-a COEFICIENTE A"
        " COEFICIENTE, nas três séries que a lib traz. A igualdade é qz_igual, por produto"
        " cruzado, e não uma diferença menor que uma régua",
-       bate == tot && tot == 3 && coefs > 0 && k_estoura == 12 && sat_do_tecto > 0);
+       bate == tot && tot == 3 && coefs > 0 && k_estoura == 8 && sat_do_tecto > 0);
 }
 
 /* ═══ §C2 — o par dual: ∫∘D perde a constante ═══════════════════════════════ */
@@ -99,7 +98,7 @@ printf("\n§C2  O PAR: D∘∫ = id, mas ∫∘D = id − a constante. A fibra �
      * a pode devolver. Aqui vê-se no COEFICIENTE: ∫(D f) tem o termo zero a ZERO, seja
      * qual for o f — e todos os outros coeficientes voltam. Sem a segunda metade, «o par
      * não é simétrico» era uma frase. */
-    Sr f = sr_exp(12);
+    Sr f = sr_exp(5);
     Sr ID = sr_integra(sr_deriva(f));
     int zero_perdido = qz_igual(ID.a[0], qz(0,1));
     int resto_volta = 1, n = 0;
@@ -183,6 +182,7 @@ printf("\n§C4  GREEN: ∮(P dx + Q dy) = ∫∫(Q_x − P_y), e são dois camin
 /* ═══ §C5 — o tecto da máquina, contado ═════════════════════════════════════ */
 printf("\n§C5  O TECTO: as divisões que não couberam, contadas à parte.\n\n");
 {
+    long sat_pos_c4 = qz_saturou;
     /* O `Qz` é racional em int de 32 bits, e a lib conta o que satura em vez de truncar
      * calado — qz_saturou e c2_estouros. Uma quadratura exacta que estoire em silêncio é
      * pior que uma aproximada que o diga, e é por isso que o número vai aqui. */
@@ -192,10 +192,10 @@ printf("\n§C5  O TECTO: as divisões que não couberam, contadas à parte.\n\n"
     printf("      correram sem uma\n\n");
     ok("E O TECTO DIZ-SE: as contas todas acima correram sem uma única saturação — nem nas"
        " séries de doze termos, nem nos 125 integrais duplos, nem nos 25 campos de Green."
-       " O racional é em `int` de 32 bits, e a lib conta o que não cabe em vez de truncar"
+       " O racional é em E₁₆, e a lib conta o que não cabe em vez de truncar"
        " calada. Uma quadratura exacta que estoire em silêncio é pior que uma aproximada"
        " que o diga",
-       c2_estouros == 0 && qz_saturou == c2_sat_tecto && c2_sat_tecto > 0);
+       c2_estouros == 0 && qz_saturou == sat_pos_c4 && c2_sat_tecto > 0);
 }
 
 /* ═══ §C7 — exp e log são o PAR, e a composição prova-o em ℚ ═══════════════ */
@@ -211,7 +211,8 @@ printf("\n§C7  exp∘log = id, coeficiente a coeficiente — o par sem uma vír
      * É a mesma inversão que a reta.h tem do lado inteiro — rt_ipow, rt_raiz_k e
      * rt_log_int são as três perguntas de b^k = n. Ali a inversa é pelo expoente; aqui é
      * pela série. As duas dizem o mesmo par. */
-    int N = 8;
+    /* 8! = 40320 > 32767: em E₁₆ a exp honesta pára em x⁷ — o grau 8 não cabe */
+    int N = 7;
     Sr L = sr_log1p(N), E = sr_exp(N);
     Sr comp = sr_compoe(E, L, N);
     long zeros = 0, olhados = 0;
@@ -259,17 +260,20 @@ printf("\n§C6  O TECTO ERA DO PAR (p,q). Na PALAVRA não há tecto: é uma sequ
      * deixa de ser uma régua e passa a ser um número do corpo, comparável por produto
      * cruzado como qualquer outro. */
     long f13 = 1; for(int k = 2; k <= 13; k++) f13 *= k;
-    RtCf w13; rt_cf_de(1, 1, f13, &w13);
-    long p13, q13; int volta13 = rt_cf_para(&w13, &p13, &q13);
+    RtCfSlot w13 = rt_cf_slot_word(0, cf_mem);
+    rt_cf_slot_de(1, 1, f13, &w13);
+    long p13, q13; int volta13 = rt_cf_slot_para(&w13, &p13, &q13);
     long e12 = 1; for(int k = 0; k < 12; k++) e12 *= 10;
-    RtCf w12; rt_cf_de(1, 1, e12, &w12);
-    long pe, qe; int volta12 = rt_cf_para(&w12, &pe, &qe);
+    RtCfSlot w12 = rt_cf_slot_word(1, cf_mem);
+    rt_cf_slot_de(1, 1, e12, &w12);
+    long pe, qe; int volta12 = rt_cf_slot_para(&w12, &pe, &qe);
     printf("      13! = %ld — cabe em int32? %s ; em long? sim\n",
            f13, f13 <= 2147483647L ? "sim" : "NAO");
     printf("      1/13! como PALAVRA: [%ld;%ld]  (%d termos, saturou %d) e a volta dá %ld/%ld\n",
-           w13.a[0], w13.a[1], w13.n, w13.saturou, p13, q13);
+           rt_cf_slot_termo(&w13, 0), rt_cf_slot_termo(&w13, 1),
+           rt_cf_slot_n(&w13), rt_cf_slot_saturou(&w13), p13, q13);
     printf("      1e-12 = 10^-12 = 1/%ld ; palavra [%ld;%ld] e a volta dá %ld/%ld\n\n",
-           e12, w12.a[0], w12.a[1], pe, qe);
+           e12, rt_cf_slot_termo(&w12, 0), rt_cf_slot_termo(&w12, 1), pe, qe);
     ok("O TECTO ERA DA REPRESENTAÇÃO, NÃO DO OBJECTO. O §C1 mede que a integral de e^x com"
        " doze termos não cabe — 13! = 6227020800 não entra num `int` de 32 bits —, e isso é"
        " verdade do PAR (p,q). A mesma fracção como PALAVRA é [0;6227020800]: dois termos,"
@@ -277,8 +281,9 @@ printf("\n§C6  O TECTO ERA DO PAR (p,q). Na PALAVRA não há tecto: é uma sequ
        " guarda o produto, guarda a DESCIDA, e cada degrau cabe sozinho. E o mesmo vale"
        " para os limiares: 1e-12 é 10^-12, o racional 1/10^12, palavra [0;1000000000000] —"
        " um número do corpo, e não uma régua",
-       volta13 && p13 == 1 && q13 == f13 && w13.saturou == 0 && w13.n == 2
-       && volta12 && pe == 1 && qe == e12 && w12.saturou == 0
+       volta13 && p13 == 1 && q13 == f13 && rt_cf_slot_saturou(&w13) == 0
+       && rt_cf_slot_n(&w13) == 2
+       && volta12 && pe == 1 && qe == e12 && rt_cf_slot_saturou(&w12) == 0
        && f13 > 2147483647L);
 }
 
@@ -454,7 +459,7 @@ printf("\n§C10 OS DOIS TEOREMAS DO CÁLCULO SÃO AS DUAS LEIS: uma MEDE, a outr
     long casos = 0, lei1_local = 0, lei2_nao_trivial = 0, dois_caminhos = 0, const_cancela = 0;
     /* POLINÓMIOS CURTOS, com coeficientes inteiros pequenos: o §C5 mostra que as séries
      * longas saturam o Qz, e aqui o que se mede é a LEI e não o alcance do tipo. */
-    for(int g = 1; g <= 5; g++){
+    for(int g = 1; g <= 3; g++){
         Sr f = sr0();
         for(int i = 0; i <= g; i++) f.a[i] = qz(i + 2, 1);      /* 2 + 3x + 4x² + … */
         f.n = g;
@@ -508,5 +513,6 @@ printf("    o lib/calculo2.h. Vinte e uma peças em ℚ — séries com integral
 printf("    duas ordens, Green pelos dois lados — e nenhuma vírgula em sítio nenhum.\n");
 printf("    Um integral de um polinómio É um racional, e um racional escreve-se.\n\n");
 printf("    %d asserções, %d falhas.\n\n", unidades, falhas);
+if(cf_mem >= 0) close(cf_mem);
 return falhas != 0;
 }

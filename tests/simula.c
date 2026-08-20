@@ -35,10 +35,9 @@
  *   cc -O2 -std=c99 -I lib tests/simula.c -o simula && ./simula
  */
 #include <stdio.h>
+#include "i128.h"
 #include "unidade.h"
 #include "reta.h"
-
-typedef __int128 I128;
 
 static const long Vt[4][3] = { {1,1,1}, {1,-1,-1}, {-1,1,-1}, {-1,-1,1} };
 
@@ -161,15 +160,14 @@ int main(void){
         }
         long d_max = -1;
         {
-            int prim = 1;
-            I128 melhor = 0;
+            I128 melhor = i128_zero();
             for(long d = passo; d <= 3*w_z; d += passo){
-                I128 den = (I128)w_z*(I128)w_z + (I128)d*(I128)d;
-                if(prim){ melhor = den*den; d_max = d; prim = 0; continue; }
-                I128 den2 = den*den;
-                I128 esq = (I128)d * melhor;
-                I128 dir = (I128)d_max * den2;
-                if(esq > dir){ melhor = den2; d_max = d; }
+                I128 den = i128_add(i128_smul(w_z, w_z), i128_smul(d, d));
+                if(i128_is_zero(melhor)){ melhor = i128_mul(den, den); d_max = d; continue; }
+                I128 den2 = i128_mul(den, den);
+                I128 esq = i128_mul(i128_from_i64(d), melhor);
+                I128 dir = i128_mul(i128_from_i64(d_max), den2);
+                if(i128_cmp(esq, dir) > 0){ melhor = den2; d_max = d; }
             }
         }
         long de = d_forma + passo, db = d_forma - passo;
@@ -180,7 +178,7 @@ int main(void){
         int na_grelha = (d_forma % passo == 0);
         ok("e ha um ponto de DERIVADA MAXIMA, e ele bate a forma fechada w/raiz(3) — sem"
            " raiz, sem Lorentziana e SEM TOLERANCIA. Duas rotas na grelha de 1000 Hz: o"
-           " ponto mais perto de 3d^2 = w^2, e o maximo de |dL| ∝ d/(w^2+d^2)^2 em __int128."
+           " ponto mais perto de 3d^2 = w^2, e o maximo de |dL| ∝ d/(w^2+d^2)^2 em I128."
            " As duas CAEM NO MESMO d. O limiar de 2% era do passo, e o passo diz-se melhor"
            " do que uma percentagem",
            na_grelha && e_o_mais_perto && d_max == d_forma && d_forma > passo);

@@ -35,6 +35,7 @@
  *   8   a constante da consulta (o k do WHERE)
  *   16+ o bitmap de casamento, uma linha por slot
  *   1024+ as linhas: linha i, coluna j  →  slot 1024 + i*ncols + j
+ *   2048+ S_CF: palavras FC (rt_cf_slot.h), S_CF_STRIDE slots cada
  *
  *   cc -O2 -std=c99 sql.c -o sql
  *   ./sql <base> "CREATE TABLE t (a,b,c)"
@@ -50,9 +51,13 @@
 #define _DEFAULT_SOURCE
 #include <stdio.h>
 #include "../lib/disco.h"
+#include "../lib/slot_mem.h"
+#include "../lib/slot_map.h"
+#include "../lib/reta.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <inttypes.h>
 #include <unistd.h>
 #include <time.h>
 #include <fcntl.h>
@@ -94,6 +99,7 @@ enum { OP_HALT=0, OP_LOAD, OP_STORE, OP_ADD, OP_SUB, OP_AND, OP_OR, OP_XOR,
 #define FL_EQ   0x02
 #define FL_LT   0x04
 
+/* Word: 16 bytes/slot (total,e) — layout ABI do disco; long obrigatório aqui (Fase B). */
 typedef struct { long total, e; } Word;
 typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
 
@@ -163,9 +169,10 @@ typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
 #define S_DEN     33792      /* o DENOMINADOR de cada célula, no TOTAL do seu slot: a ISA não
                               * move e→total, e a conta precisa de q como número. */
 #define S_LINHAS  1024
+/* S_CF definido em lib/slot_map.h — região FC, 2048..S_CF_END */
 #define MAXLIN    250
 #define MAXNO     64         /* nós da árvore do WHERE                                  */
-#define SLOTSZ    16
+#define SLOTSZ    SLOT_WORD_BYTES
 
 /* ---------------- a memória É o disco ---------------- */
 static int fmem = -1, fprog = -1;
@@ -330,14 +337,20 @@ static void pool_grava(unsigned slot, Word w){
 static Word mem_le(unsigned slot){
     if(slot >= S_POOL)  return pool_le(slot);
     if(slot >= S_CANAL) return canal_le(slot);
-    Word w = {0,0};
-    if(pread(fmem, &w, SLOTSZ, (off_t)slot*SLOTSZ) != SLOTSZ){ w.total = 0; w.e = 0; }
-    return w;
+    SlotWord sw = slot_mem_le(fmem, slot);
+    return (Word){ sw.total, sw.e };
 }
 static void mem_grava(unsigned slot, Word w){
     if(slot >= S_POOL){  pool_grava(slot, w);  return; }
     if(slot >= S_CANAL){ canal_grava(slot, w); return; }
-    pwrite(fmem, &w, SLOTSZ, (off_t)slot*SLOTSZ);
+    slot_mem_grava(fmem, slot, (SlotWord){ w.total, w.e });
+}
+/* Palavra FC no .mem — mem_le no slot S_CF + word_ix·stride; mesmo layout que rt_cf_slot.h */
+static Word cf_le(unsigned word_ix, unsigned rel){
+    return mem_le(cf_slot_base(word_ix) + rel);
+}
+static void cf_grava(unsigned word_ix, unsigned rel, Word w){
+    mem_grava(cf_slot_base(word_ix) + rel, w);
 }
 /* A BARREIRA DO BANCO: dado, fsync, ponteiro, fsync.
  *
@@ -642,7 +655,6 @@ static long passo_do_slot(unsigned s){
     if(s >= S_MATCH && s < S_VIVO) return 1; /* o bitmap: uma por linha         */
     return 0;                                /* constantes e rascunho: parados  */
 }
-static long mdc_l(long a, long b){ if(a<0)a=-a; if(b<0)b=-b; while(b){ long t=a%b; a=b; b=t; } return a?a:1; }
 /* ── MOVE: A OPERACAO, E E' UMA SO' ──────────────────────────────────────────────────
  *
  * O Aarao: "e' o paradigma novo da sexta dimensao — la', onde 1+2+3 = 6 = 3x2x1, o sistema
@@ -717,7 +729,7 @@ static void sha_dos_slots(unsigned base, int n, unsigned char *out){
     }
     cauda[r] = 0x80;
     int tot = (r + 9 <= 64) ? 64 : 128;
-    unsigned long long bits = (unsigned long long)n * 8;
+    uint64_t bits = (uint64_t)n * 8;
     for(int k = 0; k < 8; k++) cauda[tot-1-k] = (unsigned char)(bits >> (8*k));
     sha_bloco(h, cauda);
     if(tot == 128) sha_bloco(h, cauda + 64);
@@ -1054,7 +1066,7 @@ static struct tensor ten_zero(void){ struct tensor t; memset(&t,0,sizeof t); t.d
 static void ten_reduz(struct tensor *t){
     if(t->den < 0){ t->den = -t->den; for(int i = 0; i < NMON; i++) t->c[i] = -t->c[i]; }
     long g = t->den;
-    for(int i = 0; i < NMON; i++) if(t->c[i]) g = mdc_l(g, t->c[i]);
+    for(int i = 0; i < NMON; i++) if(t->c[i]) g = rt_mdc(g, t->c[i]);
     if(g > 1){ t->den /= g; for(int i = 0; i < NMON; i++) t->c[i] /= g; }
     if(t->den == 0) t->den = 1;
 }
@@ -2536,18 +2548,18 @@ static int martelo(const char *p){
     clock_gettime(CLOCK_MONOTONIC, &t1);
     /* A TAXA NAO SE GUARDA: sai de duas leituras do relogio, como a distancia sai de dois
      * pontos. Guardar taxa e guardar uma conta, e conta guardada e conta que envelhece. */
-    long long seg_ns = (long long)(t1.tv_sec - t0.tv_sec) * 1000000000LL
-                   + (long long)(t1.tv_nsec - t0.tv_nsec);
+    int64_t seg_ns = (int64_t)(t1.tv_sec - t0.tv_sec) * 1000000000
+                   + (int64_t)(t1.tv_nsec - t0.tv_nsec);
     long feitos = r.R.total ? (r.R.total - de) : (ate - de);
     if(seg_ns > 0){
-        long long taxa = feitos * 1000000000LL / seg_ns;
+        int64_t taxa = feitos * 1000000000 / seg_ns;
         const char *un = "H/s";
-        long long v100 = taxa * 100;
-        if(taxa >= 1000000LL){ v100 = taxa / 10000; un = "MH/s"; }
-        else if(taxa >= 1000LL){ v100 = taxa / 10; un = "kH/s"; }
-        printf("      %ld hash(es) em %lld.%03lld s — %lld.%02lld %s\n",
+        int64_t v100 = taxa * 100;
+        if(taxa >= 1000000){ v100 = taxa / 10000; un = "MH/s"; }
+        else if(taxa >= 1000){ v100 = taxa / 10; un = "kH/s"; }
+        printf("      %ld hash(es) em %" PRId64 ".%03" PRId64 " s — %" PRId64 ".%02" PRId64 " %s\n",
                feitos,
-               seg_ns / 1000000000LL, (seg_ns % 1000000000LL) / 1000000LL,
+               seg_ns / 1000000000, (seg_ns % 1000000000) / 1000000,
                v100 / 100, v100 % 100, un);
     }
     if(r.R.total)

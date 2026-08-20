@@ -31,7 +31,7 @@
 #include <stdio.h>
 #include "unidade.h"
 
-typedef long long L;
+typedef long L;
 
 int main(void){
     printf("================================================================\n");
@@ -75,10 +75,10 @@ int main(void){
             if(a*d-b*c != 1 && a*d-b*c != -1) continue;
             if(c==b && a==b+d){
                 cnt++;
-                if(most<4){ printf("        [[%lld,%lld],[%lld,%lld]]\n", a,b,c,d); most++; }
+                if(most<4){ printf("        [[%ld,%ld],[%ld,%ld]]\n", a,b,c,d); most++; }
             }
         }
-        printf("      total: %lld  (e sao INFINITAS: a condicao c=b, a=b+d nao limita)\n", cnt);
+        printf("      total: %ld  (e sao INFINITAS: a condicao c=b, a=b+d nao limita)\n", cnt);
         ok("um ponto fixo NAO determina a Mobius — muitas o partilham", cnt > 2);
         conclui("guardar 'o ponto fixo' nao chega: ele nao identifica a operacao que o gerou.");
     }
@@ -102,7 +102,7 @@ int main(void){
             if(bate) achadas++;
         }
         printf("      a Mobius [[2,1],[1,1]] leva 0,1,2 em 1/1, 3/2, 5/3\n");
-        printf("      matrizes de GL2(Z) que reproduzem os TRES pares: %lld\n", achadas);
+        printf("      matrizes de GL2(Z) que reproduzem os TRES pares: %ld\n", achadas);
         ok("com TRES pontos so ha uma Mobius — as duas achadas sao M e -M, a mesma em P^1",
            achadas == 2);
         conclui("e por isso que 3 reconstroi e 1 nao: a Mobius tem 4 entradas menos a escala");
@@ -130,7 +130,7 @@ int main(void){
             }
             metais++;
             if(nl>0) tem++;
-            printf("      %-3lld %-7lld ", m, D);
+            printf("      %-3ld %-7ld ", m, D);
             for(int i=0;i<nl;i++) printf("%d ", lista[i]);
             printf("\n");
         }
@@ -160,7 +160,7 @@ int main(void){
                 testes++;
                 if(qr==rep) bate++;
                 if(testes<=8)
-                    printf("      %-2lld %-6lld %-4lld %-23s %s\n",
+                    printf("      %-2ld %-6ld %-4ld %-23s %s\n",
                            m, D, p, qr?"sim":"nao", rep?"SIM":"nao");
             }
         }

@@ -30,7 +30,7 @@
 #include "reta.h"      /* as operações da recta */
 #include "unidade.h"
 
-typedef long long L;
+typedef long L;
 static const L P = 2147483647; /* 2^31 - 1, primo de Mersenne */
 
 static L estrela(L x){ if(x % P == 0) return 0; return (P - rt_inv_mod(x, P)) % P; }
@@ -50,7 +50,7 @@ int main(void){
         e_mais_medido = n;                     /* conta um dobramento */
         if(sep != (1LL << n)) mede_frente = 0; /* MEDIDO: δ⁺(n) = 2^n, e daí e⁺ = n */
         if(n <= 3 || n == 40)
-            printf("      %2d | %12lld | %12lld | %d\n", n, sep, (1LL<<n), e_mais_medido);
+            printf("      %2d | %12ld | %12ld | %d\n", n, sep, (1LL<<n), e_mais_medido);
     }
     /* λ⁺ = e⁺/n = 40/40 = 1 bit/passo, medido da frente; a metade refletida (a inversa) dá o mesmo
      * módulo com sinal trocado (§L2): λ = (λ⁺ − λ⁻)/2 = 1. */
@@ -73,7 +73,7 @@ int main(void){
         if(s != x0) reflete = 0;                 /* e⁺ + e⁻ = 0 ⇒ volta exacta */
         res_refl += (s - x0);
     }
-    printf("§L2  frente 2^20 e metade refletida 2^-20: volta exacta em 19999 valores, residuo %lld\n\n", res_refl);
+    printf("§L2  frente 2^20 e metade refletida 2^-20: volta exacta em 19999 valores, residuo %ld\n\n", res_refl);
     ok("§L2 A REGRA DA SOMA ±λ, MEDIDA: a frente expande 2^20 (e+=+20) e a metade refletida (a inversa)"
        " contrai 2^20 (e-=-20); e+ + e- = 0 realiza-se como a VOLTA EXACTA (s regressa a x, residuo 0"
        " em 19999 valores). E' a metade que a dualidade guarda, e licencia medir λ por uma metade e"
@@ -90,8 +90,8 @@ int main(void){
     for(L x = 1; x < 20000; x++){ L v = estrela(estrela(x)); if(v != x % P){ rev_volta = 0; } rev_residuo += (v != x % P); }
     int perda_naovolta = 0; L perda_total = 0;
     for(L x = 1; x < 20000; x++){ L g = (x/2)*2; L res = x - g; if(res != 0) perda_naovolta++; perda_total += res; }
-    printf("§L3  reversivel (estrela) ν∘ν=id: residuo %lld em 19999 ; com perda g(x)=(x/2)·2:"
-           " %d valores nao voltam (resíduo total %lld)\n\n", rev_residuo, perda_naovolta, perda_total);
+    printf("§L3  reversivel (estrela) ν∘ν=id: residuo %ld em 19999 ; com perda g(x)=(x/2)·2:"
+           " %d valores nao voltam (resíduo total %ld)\n\n", rev_residuo, perda_naovolta, perda_total);
     ok("§L3 TEOREMA OPERACIONAL DA MEDICAO: mede-se pela metade refletida, e a medida so' e' fiavel se"
        " ela VOLTA com residuo 0 (λ_medida=0). A estrela reversivel volta (residuo 0); a medida COM"
        " PERDA (o bit descartado --- double, estado sobrescrito, malloc) NAO volta (residuo>0): 'nao"
@@ -120,7 +120,7 @@ int main(void){
         L esperado = ((1LL << d) - 1) * soma_x;           /* (2^d - 1)·Σx --- referência que muda com d */
         if(erro != esperado) quantifica = 0;
         if(d <= 3 || d == 10)
-            printf("      %2d | %11lld | %11lld\n", d, erro, esperado);
+            printf("      %2d | %11ld | %11ld\n", d, erro, esperado);
     }
     printf("\n");
     ok("§L4 O ERRO QUANTIFICA-SE EM ATRASOS UNITARIOS: d atrasos (z^-1) num lado desbalancam, e o erro"

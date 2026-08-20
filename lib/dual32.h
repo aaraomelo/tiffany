@@ -32,11 +32,16 @@
  * produto calcula-se em `__int128` no medidor — e os dois têm de dar o mesmo em toda a
  * varredura. Se divergirem, é este ficheiro que está errado, e não a régua.
  *
- * Não precisa de nada. */
+ * Não precisa de nada.
+ *
+ * ANDAR 64 da torre (torre_alg.h): produto 32×32 → par D64. Anterior: dual16.h.
+ * Seguinte: i128.h (128). Involução racional: d32_par_dual; par: d64_dual. */
 #ifndef DUAL32_H
 #define DUAL32_H
 
-/* o PAR: dois de 32, e o `alto` é o dual do `baixo` — o que a multiplicação perderia */
+#include "dual16.h"
+
+/* o PAR de 64 bits: dois de 32 — produto 32×32 */
 typedef struct { unsigned alto, baixo; } D64;
 
 #define D32_META 0xFFFFu          /* a máscara dos 16 de baixo */
@@ -53,20 +58,18 @@ static D64 d64_mult(unsigned a, unsigned b){
     unsigned a0 = a & D32_META, a1 = a >> D32_MEIO;
     unsigned b0 = b & D32_META, b1 = b >> D32_MEIO;
 
-    unsigned p00 = a0 * b0;              /* < 2³² */
+    unsigned p00 = a0 * b0;
     unsigned p01 = a0 * b1;
     unsigned p10 = a1 * b0;
     unsigned p11 = a1 * b1;
 
-    /* as duas do meio somam-se, e a soma pode dar a volta: o transporte é um bit,
-     * e ele vale 2¹⁶ na palavra de cima */
     unsigned meio = p01 + p10;
-    unsigned transp = (meio < p01) ? 1u : 0u;      /* a volta do unsigned É definida */
+    unsigned transp = (meio < p01) ? 1u : 0u;
 
     D64 r;
     r.alto  = p11 + (meio >> D32_MEIO) + (transp << D32_MEIO);
     unsigned baixo = p00 + (meio << D32_MEIO);
-    if(baixo < p00) r.alto++;                      /* o transporte do baixo para o alto */
+    if(baixo < p00) r.alto++;
     r.baixo = baixo;
     return r;
 }
@@ -161,4 +164,45 @@ static int d32_det2(int a, int b, int c, int d, int *saida){
     *saida = sinal * (int)r.baixo;
     return 1;
 }
+/* ── UTILITÁRIOS para somas de quadrados e raiz, sem long long ────────────────
+ * `d64_sqr_i` e `d64_cruz_i` cobrem os casos em que os operandos cabem em int32.
+ * `d64_u64`/`d64_de_u64` recompõem o par num único valor de 64 bits quando
+ * precisa de dividir ou tirar raiz — o par continua a ser a forma canónica. */
+static D64 d64_sqr_i(int v){
+    return d64_mult(d32_abs(v), d32_abs(v));
+}
+static int d64_cruz_i(int a, int b, int a0, int b0, int *saida){
+    return d32_det2(a, b0, b, a0, saida);
+}
+static long d64_as_long(D64 x){
+    if(x.alto != 0) return -1;
+    return (long)x.baixo;
+}
+
+/* ── OPERAÇÕES NO PAR RACIONAL — racionais.tex Def. def:ops ─────────────────
+ * (a,b) ⊕ (c,d) = (ad+bc, bd)   ;   (a,b) ⊗ (c,d) = (ac, bd) */
+typedef struct { D64 p; D64 q; } D64par;
+
+static void d32_par_mult(int a, int b, int c, int d, D64par *r){
+    r->p = d64_mult(d32_abs(a), d32_abs(c));
+    r->q = d64_mult(d32_abs(b), d32_abs(d));
+}
+
+static void d32_par_soma(int a, int b, int c, int d, D64par *r){
+    D64 ad = d64_mult(d32_abs(a), d32_abs(d));
+    D64 bc = d64_mult(d32_abs(b), d32_abs(c));
+    r->p = d64_soma(ad, bc);
+    r->q = d64_mult(d32_abs(b), d32_abs(d));
+}
+
+static D64par d32_par_dual(D64par x){
+    D64par r = {x.q, x.p};
+    return r;
+}
+
+static D64 d64_dual(D64 x){
+    D64 r = {x.baixo, x.alto};
+    return r;
+}
+
 #endif

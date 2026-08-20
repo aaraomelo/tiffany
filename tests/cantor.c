@@ -44,7 +44,7 @@
 #include <string.h>
 #include <limits.h>
 
-typedef long long L;
+typedef long L;
 
 static L tri_inv(L n){
     L lo = 0, hi = 1;
@@ -104,13 +104,13 @@ int main(void){
             if(x==a && y==b) voltas++;
         }
         int buracos=0; for(L n=0;n<=maior;n++) if(!visto[n]) buracos++;
-        printf("      pares mapeados: %d   repetições: %d   buracos em [0,%lld]: %d\n",
+        printf("      pares mapeados: %d   repetições: %d   buracos em [0,%ld]: %d\n",
                pares, repetidos, maior, buracos);
         printf("      inversas exatas (a,b) → n → (a,b): %d\n", voltas);
         ok("o direto é INJETIVO: zero repetições", repetidos==0);
         ok("e SOBREJETIVO: zero buracos até ao maior alcançado", buracos==0);
         ok("e a inversa devolve (a,b) EXATO — resíduo 0", voltas==pares);
-        printf("      π(0,0)=%lld  π(1,0)=%lld  π(0,1)=%lld  π(2,3)=%lld\n",
+        printf("      π(0,0)=%ld  π(1,0)=%ld  π(0,1)=%ld  π(2,3)=%ld\n",
                dir_par(0,0), dir_par(1,0), dir_par(0,1), dir_par(2,3));
     }
 
@@ -130,13 +130,13 @@ int main(void){
             if(x==a && y==b) voltas++;
         }
         int buracos=0; for(L n=0;n<=maior;n++) if(!visto[n]) buracos++;
-        printf("      pares mapeados: %d   repetições: %d   buracos em [0,%lld]: %d\n",
+        printf("      pares mapeados: %d   repetições: %d   buracos em [0,%ld]: %d\n",
                pares, repetidos, maior, buracos);
         printf("      inversas exatas: %d\n", voltas);
         ok("o polar é INJETIVO: zero repetições", repetidos==0);
         ok("e SOBREJETIVO: zero buracos", buracos==0);
         ok("e a inversa devolve (a,b) EXATO", voltas==pares);
-        printf("      ρ(0,0)=%lld  ρ(1,0)=%lld  ρ(0,1)=%lld  ρ(2,3)=%lld\n",
+        printf("      ρ(0,0)=%ld  ρ(1,0)=%ld  ρ(0,1)=%ld  ρ(2,3)=%ld\n",
                pol_par(0,0), pol_par(1,0), pol_par(0,1), pol_par(2,3));
     }
 
@@ -156,7 +156,7 @@ int main(void){
             L passo = (segundo>=0) ? segundo-primeiro : -1;
             L esperado = 1; for(L i=0;i<=s;i++) esperado *= 2;
             if(passo != esperado) pol_ok=0;
-            printf("      %lld          %d              %lld         %6d            %lld  (=2^%lld)\n",
+            printf("      %ld          %d              %ld         %6d            %ld  (=2^%ld)\n",
                    s, c, s, d, passo, s+1);
         }
         ok("a fibra do DIRETO tem s+1 elementos — finita, e cresce com s", dir_ok);
@@ -266,7 +266,7 @@ int main(void){
                     if(d2 > pior_pol) pior_pol = d2;
                 }
             }
-            printf("      maior desvio do espelho em [0,20]²:  DIRETO %lld   POLAR %lld\n",
+            printf("      maior desvio do espelho em [0,20]²:  DIRETO %ld   POLAR %ld\n",
                    pior_dir, pior_pol);
             printf("      (no direto o desvio é |a−b| <= 20; no polar cresce como 2^max)\n");
             ok("o desvio do DIRETO é limitado por |a−b| — o aditivo quase não sente o espelho",
@@ -296,7 +296,7 @@ int main(void){
          * (n < ant ou n <= 0) DEPOIS de ter crescido, que é o sinal do overflow em
          * s(s+1)/2. A tese é que ele cresce em TODOS os passos até ao tecto da máquina —
          * e o tecto é da máquina, não do objecto, o que já vai dito na conclusão. */
-        printf("      k    π aplicado k vezes a (1,1,1,…)      cresceu?   cabe em long long?\n");
+        printf("      k    π aplicado k vezes a (1,1,1,…)      cresceu?   cabe em long?\n");
         int estourou_em = 0, cresceu = 0;
         L n = 1;
         for(int k=1;k<=12;k++){
@@ -306,7 +306,7 @@ int main(void){
             int deu_volta = (n < ant || n <= 0);
             if(subiu && !estourou_em) cresceu++;
             if(deu_volta && !estourou_em) estourou_em = k;
-            printf("      %2d   %22lld           %-10s %s\n", k, n,
+            printf("      %2d   %22ld           %-10s %s\n", k, n,
                    subiu ? "sim" : "nao", deu_volta ? "NAO — estourou" : "sim");
         }
         printf("\n      cresceu em %d passos seguidos, e estourou no %d\n\n", cresceu, estourou_em);

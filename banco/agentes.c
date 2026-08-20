@@ -16,6 +16,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <stdint.h>
+#include <inttypes.h>
 #include <sys/mman.h>
 #include "unidade.h"
 
@@ -26,8 +28,8 @@ typedef struct {
     const char *nome;
     const char *blob;
     const char *papel;
-    long long   bytes;
-    long long   desloc;
+    int64_t   bytes;
+    int64_t   desloc;
     long        telo[16];
     int         n_telo;
 } Agente;
@@ -56,10 +58,10 @@ static int telomero(const unsigned char *b, size_t n, long *t, int m){
     return k;
 }
 
-static long long agora_ns(void){
+static int64_t agora_ns(void){
     struct timespec s;
     clock_gettime(CLOCK_MONOTONIC, &s);
-    return (long long)s.tv_sec * 1000000000LL + s.tv_nsec;
+    return (int64_t)s.tv_sec * (int64_t)1000000000 + (int64_t)s.tv_nsec;
 }
 
 int main(void){
@@ -76,15 +78,15 @@ printf("    A 'máquina de fazer gente' do recado não era biologia. Estes são 
 printf("    organismos desta fita, e cada um entra como o qwen entrou.\n");
 
 printf("\n§A1  OS AGENTES ENTRAM: lugar, tamanho e telómero.\n\n");
-long long pos = 0;
-long long t_total_ns = 0;
+int64_t pos = 0;
+int64_t t_total_ns = 0;
 {
     mkdir(dir, 0755);
     int fd_f = open(f_povo, O_WRONLY|O_CREAT|O_TRUNC, 0644);
     if(fd_f < 0){ perror("agentes: criar a fita"); return 1; }
     printf("      agente             papel                    tamanho      lugar na fita\n");
     int erros = 0;
-    long long t0 = agora_ns();
+    int64_t t0 = agora_ns();
     for(int i = 0; i < nag; i++){
         char caminho[512];
         snprintf(caminho, sizeof caminho, "%s%s", BLOBS, ag[i].blob);
@@ -92,25 +94,25 @@ long long t_total_ns = 0;
         if(fd_o < 0){ printf("      %-18s (sem acesso ao blob)\n", ag[i].nome); erros++; continue; }
         struct stat st;
         fstat(fd_o, &st);
-        ag[i].bytes = (long long)st.st_size;
+        ag[i].bytes = (int64_t)st.st_size;
         ag[i].desloc = pos;
         off_t o_org = 0, o_fit = (off_t)pos;
-        long long restam = ag[i].bytes;
+        int64_t restam = ag[i].bytes;
         while(restam > 0){
             ssize_t r = copy_file_range(fd_o, &o_org, fd_f, &o_fit, (size_t)restam, 0);
             if(r <= 0){ erros++; break; }
             restam -= r; pos += r;
         }
         close(fd_o);
-        printf("      %-18s %-24s %6lld MB     %lld\n",
-               ag[i].nome, ag[i].papel, ag[i].bytes / 1000000LL, ag[i].desloc);
+        printf("      %-18s %-24s %6" PRId64 " MB     %" PRId64 "\n",
+               ag[i].nome, ag[i].papel, ag[i].bytes / (int64_t)1000000, ag[i].desloc);
     }
     t_total_ns = agora_ns() - t0;
     close(fd_f);
-    printf("\n      %lld bytes (%lld.%03lld GB) em %lld.%03lld s — %lld MB/s\n\n",
-           pos, pos / 1000000000LL, (pos / 1000000LL) % 1000,
-           t_total_ns / 1000000000LL, (t_total_ns / 1000000LL) % 1000,
-           t_total_ns > 0 ? pos * 1000LL / t_total_ns : 0);
+    printf("\n      %" PRId64 " bytes (%" PRId64 ".%03" PRId64 " GB) em %" PRId64 ".%03" PRId64 " s — %" PRId64 " MB/s\n\n",
+           pos, pos / (int64_t)1000000000, (pos / (int64_t)1000000) % 1000,
+           t_total_ns / (int64_t)1000000000, (t_total_ns / (int64_t)1000000) % 1000,
+           t_total_ns > 0 ? pos * (int64_t)1000 / t_total_ns : 0);
     ok("todos os agentes entraram na fita, sem erro", erros == 0 && pos > 0);
 
     int fd_m = open(f_povo, O_RDONLY);
@@ -149,8 +151,8 @@ printf("\n§A2  OS TELÓMEROS distinguem — e quantos termos são precisos.\n\n
 printf("\n§A3  CADA AGENTE SAI BYTE A BYTE: o teletransporte, sobre gente digital.\n\n");
 {
     int fd_f = open(f_povo, O_RDONLY);
-    long long comparados = 0; int divergentes = 0;
-    long long t0 = agora_ns();
+    int64_t comparados = 0; int divergentes = 0;
+    int64_t t0 = agora_ns();
 
     printf("      agente             bytes conferidos   divergências\n");
     for(int i = 0; i < nag; i++){
@@ -158,10 +160,10 @@ printf("\n§A3  CADA AGENTE SAI BYTE A BYTE: o teletransporte, sobre gente digit
         snprintf(caminho, sizeof caminho, "%s%s", BLOBS, ag[i].blob);
         int fd_o = open(caminho, O_RDONLY);
         if(fd_o < 0) continue;
-        long long restam = ag[i].bytes, oo = 0, of = ag[i].desloc;
+        int64_t restam = ag[i].bytes, oo = 0, of = ag[i].desloc;
         int d = 0;
         while(restam > 0){
-            size_t p = restam > (long long)((size_t)((1<<20))*sizeof(unsigned char)) ? ((size_t)((1<<20))*sizeof(unsigned char)) : (size_t)restam;
+            size_t p = restam > (int64_t)((size_t)((1<<20))*sizeof(unsigned char)) ? ((size_t)((1<<20))*sizeof(unsigned char)) : (size_t)restam;
             if(pread(fd_o, ba, p, oo) != (ssize_t)p){ d = 1; break; }
             if(pread(fd_f, bb, p, of) != (ssize_t)p){ d = 1; break; }
             if(memcmp(ba, bb, p)){ d = 1; break; }
@@ -169,13 +171,13 @@ printf("\n§A3  CADA AGENTE SAI BYTE A BYTE: o teletransporte, sobre gente digit
         }
         close(fd_o);
         divergentes += d;
-        printf("      %-18s %10lld         %d\n", ag[i].nome, ag[i].bytes, d);
+        printf("      %-18s %10" PRId64 "         %d\n", ag[i].nome, ag[i].bytes, d);
     }
     close(fd_f);
-    long long dt = agora_ns() - t0;
-    printf("\n      %lld bytes (%lld.%03lld GB) conferidos em %lld.%03lld s\n\n",
-           comparados, comparados / 1000000000LL, (comparados / 1000000LL) % 1000,
-           dt / 1000000000LL, (dt / 1000000LL) % 1000);
+    int64_t dt = agora_ns() - t0;
+    printf("\n      %" PRId64 " bytes (%" PRId64 ".%03" PRId64 " GB) conferidos em %" PRId64 ".%03" PRId64 " s\n\n",
+           comparados, comparados / (int64_t)1000000000, (comparados / (int64_t)1000000) % 1000,
+           dt / (int64_t)1000000000, (dt / (int64_t)1000000) % 1000);
     ok("cada agente sai da fita exatamente como entrou — byte a byte", divergentes == 0);
     ok("e conferiu-se o genoma INTEIRO de cada um, não uma amostra", comparados == pos);
     printf("      É o mesmo protocolo do teletransporte.c §X4, com uma diferença que só se vê\n");
@@ -207,8 +209,8 @@ printf("\n§A4  A ASSISTENTE DESPACHA: quem responde ao quê.\n\n");
 }
 
 printf("\n=== FECHO ==================================================================\n");
-printf("    %d agentes, %lld.%03lld GB na fita, cada um com o seu telómero e a sair byte a\n",
-       nag, pos / 1000000000LL, (pos / 1000000LL) % 1000);
+printf("    %d agentes, %" PRId64 ".%03" PRId64 " GB na fita, cada um com o seu telómero e a sair byte a\n",
+       nag, pos / (int64_t)1000000000, (pos / (int64_t)1000000) % 1000);
 printf("    byte. São organismos no sentido que o dna.c mediu: têm genoma, replicam\n");
 printf("    sem perda, e cada dobra tem o seu lado dual.\n\n");
 printf("    %d asserções, %d falhas.\n\n", unidades, falhas);

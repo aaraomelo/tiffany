@@ -1,6 +1,6 @@
 /* cauchy.h — A SUCESSÃO É UM OBJETO, E ℝ = Cauchy(ℚ)/∼.
  *
- * O `eval.txt` dá a segunda construção do andar, e ela é o dual da primeira: o CORTE diz
+ *  ordem do coordenador dá a segunda construção do andar, e ela é o dual da primeira: o CORTE diz
  * onde o ponto está (uma decisão sobre ℚ); a SUCESSÃO vai lá (um caminho por ℚ). O corte
  * é estático e a sucessão é dinâmica, e o mesmo real sai dos dois.
  *
@@ -69,16 +69,27 @@ static Qz cy_termo(Suc s, long n){
         for(long i = 0; i <= n; i++){
             long ai = t[(size_t)i < nt ? (size_t)i : (1 + (i - 1) % (long)(nt > 1 ? nt - 1 : 1))];
             long pp = ai*pn + pa, qq = ai*qn + qa;
-            if(qq > (1L<<28)) break;              /* o teto, e diz-se onde */
+            if(qq > (1L<<28)) break;
             pa = pn; qa = qn; pn = pp; qn = qq;
         }
-        return qn ? qz(pn, qn) : qz(0,1); }
+        if(qn <= 0) return qz(0,1);
+        { long g = qz_mdc(pn < 0 ? -pn : pn, qn);
+          pn /= g; qn /= g; }
+        return qz(pn, qn); }
     }
     return qz(0,1);
 }
 static Qz cy_dist(Qz a, Qz b){                    /* |a − b| */
-    Qz d = qz_soma(a, qz_oposto(b));
-    return d.p < 0 ? qz_oposto(d) : d;
+    I128 x = i128_smul((int64_t)a.p, (int64_t)b.q);
+    I128 y = i128_smul((int64_t)b.p, (int64_t)a.q);
+    I128 n = i128_cmp(x, y) >= 0 ? i128_sub(x, y) : i128_sub(y, x);
+    if(i128_negativo(n)) n = i128_neg(n);
+    if(!i128_fits_i64(n)){ qz_saturou++; return qz(32767, 1); }
+    int64_t num = i128_to_i64(n);
+    int64_t den = (int64_t)a.q * (int64_t)b.q;
+    if(den <= 0){ qz_saturou++; return qz(32767, 1); }
+    long g = qz_mdc(num < 0 ? -num : num, den);
+    return qz((long)(num / g), (long)(den / g));
 }
 /* O MÓDULO DE CONVERGÊNCIA: o menor N tal que |aₘ − aₙ| < ε para todo m,n na janela
  * acima de N. A JANELA DIZ-SE — não se varre o infinito, e fingir que sim era pior que
@@ -102,7 +113,8 @@ static long cy_teto_honesto(Suc s, long ate){
 }
 static int cy_modulo(Suc s, Qz eps, long teto, long janela, long *N){
     long h = cy_teto_honesto(s, teto + janela);
-    if(h < janela) return 0;
+    if(h < 1) return 0;
+    if(janela > h) janela = h;
     if(teto > h - janela) teto = h - janela;
     for(long k = 0; k <= teto; k++){
         int bom = 1;
@@ -142,6 +154,8 @@ static int cy_equiv(Suc x, Suc y, Qz eps, long teto, long *N){
 }
 /* LIMITADA: exibe-se a cota M, e é ela a testemunha */
 static int cy_limitada(Suc s, long ate, Qz *M){
+    long h = cy_teto_honesto(s, ate);
+    if(h >= 0 && ate > h) ate = h;
     Qz m = qz(0,1);
     for(long k = 0; k <= ate; k++){
         Qz a = cy_termo(s, k), aa = a.p < 0 ? qz_oposto(a) : a;
@@ -151,6 +165,8 @@ static int cy_limitada(Suc s, long ate, Qz *M){
     return 1;
 }
 static int cy_crescente(Suc s, long ate){
+    long h = cy_teto_honesto(s, ate);
+    if(h >= 0 && ate > h) ate = h;
     for(long k = 0; k < ate; k++)
         if(!qz_menor(cy_termo(s, k), cy_termo(s, k+1))) return 0;
     return 1;
@@ -164,6 +180,9 @@ static int cy_decrescente(Suc s, long ate){
  * bisseção fechou. É assim que uma sucessão de ℚ aponta para um ponto de ℝ sem que o
  * ponto seja fração. */
 static int cy_aponta(Suc s, Corte c, int dobras, long ate, long *N){
+    long h = cy_teto_honesto(s, ate);
+    if(h < 0) return 0;
+    if(ate > h) ate = h;
     Qz lo, hi;
     if(!rz_caixa_inicial(c, &lo, &hi)) return 0;
     rz_encaixota(c, &lo, &hi, dobras);

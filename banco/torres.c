@@ -31,6 +31,8 @@
  *   cc -O2 -std=c99 -I. torres.c -lm -o torres && ./torres
  */
 #define _POSIX_C_SOURCE 200809L
+#include <stdint.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include "../lib/disco.h"
 #include <string.h>
@@ -262,8 +264,8 @@ printf("\n§R5  O LLAMA nesse ambiente: um gene real, ida e volta, byte a byte.\
             for(long i = 0; i < n; i++) if(z[i] != n*x[i]) bom = 0;
             if(!bom) mal++;
             blocos++;
-            printf("      %-14lld %3ld %3ld %3ld %3ld %3ld …          %s\n",
-                   (long long)off, x[0],x[1],x[2],x[3],x[4], bom ? "sim" : "NÃO");
+            printf("      %-14" PRId64 " %3ld %3ld %3ld %3ld %3ld …          %s\n",
+                   (int64_t)off, x[0],x[1],x[2],x[3],x[4], bom ? "sim" : "NÃO");
         }
         close(fd);
         printf("\n      %d blocos de %ld pesos, do material real\n\n", blocos, n);

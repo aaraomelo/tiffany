@@ -22,7 +22,7 @@
 #include "unidade.h"
 #include "caminho.h"     /* RECUPERA as assinaturas dos formatos de texto: FORMATOS[] */
 
-typedef long long L;
+typedef long L;
 
 /* o crc32 IEEE do banco.h (lib/banco.h): a assinatura de um formato binário. Reescrito à mesma
  * régua --- é o mesmo polinómio 0xEDB88320, e §G2 confere-o contra um valor conhecido. */

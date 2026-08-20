@@ -32,6 +32,8 @@
  *   cc -O2 -std=c99 -Wall -Wformat gitb.c -o gitb && ./gitb [caminho-do-.git]
  */
 #define _POSIX_C_SOURCE 200809L
+#include <stdint.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -245,13 +247,13 @@ static void secao_G3(void){
     printf("        marca    \"%c%c%c%c\"\n", cab[0], cab[1], cab[2], cab[3]);
     printf("        versão   %u\n", versao);
     printf("        objetos  %u        ← o número vem ANTES de qualquer objeto\n", nobj);
-    printf("        tamanho  %lld bytes\n", (long long)st.st_size);
+    printf("        tamanho  %" PRId64 " bytes\n", (int64_t)st.st_size);
 
     ok("a marca é PACK — os 4 primeiros bytes, sem procurar nada",
        cab[0]=='P' && cab[1]=='A' && cab[2]=='C' && cab[3]=='K');
     ok("a versão é 2 ou 3 — o formato que está em uso", versao == 2 || versao == 3);
     ok("o número de objetos vem à cabeça, e é plausível para o tamanho do ficheiro",
-       nobj > 0 && (long long)nobj < st.st_size);
+       nobj > 0 && (int64_t)nobj < (int64_t)st.st_size);
 
     conclui("família 1: quem diz o tamanho à cabeça desce por soma, e não por procura de fecho.");
 }

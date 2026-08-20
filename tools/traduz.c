@@ -637,6 +637,10 @@ static int tipo_de_nome(const char *s){
     if(!strcmp(s, "FILE"))      return TI32;
     if(!strcmp(s, "size_t"))    return TI32;
     if(!strcmp(s, "time_t"))    return TI64;
+    if(!strcmp(s, "uint64_t"))  return TI64;
+    if(!strcmp(s, "int64_t"))   return TI64;
+    if(!strcmp(s, "uint32_t"))  return TI32;
+    if(!strcmp(s, "int32_t"))   return TI32;
     { int e = acha_estr(s); if(e >= 0) return MKT(EST0 + e, 0); }
     return -1;
 }

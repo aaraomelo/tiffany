@@ -595,7 +595,7 @@ int main(void){
     }
 
     /* ─── §C11 ── τ LÊ-SE NUMA LINHA: +0 = −0 ───────────────────────────────────────
-     * O Aarão, no `eval.txt`: «dos dois lados vai dar +0 = −0». E depois: «não é necessário
+     * O Aarão, no ordem do coordenador: «dos dois lados vai dar +0 = −0». E depois: «não é necessário
      * verificar nada, porque não estamos a enquadrar o corpo numa estrutura, estamos a LER
      * o corpo; o método já garante a inversão exacta».
      *

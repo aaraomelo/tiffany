@@ -82,7 +82,7 @@ console.log('\n§Z2  A PROVA: muda-se o FONTE e o que sai MUDA; reverte-se e VOL
   /* É AQUI QUE SE SEPARA «composto agora» de «servido de uma cópia», e o 200 não o separa.
    * Escolhe-se uma palavra que não existe em lado nenhum, põe-se no fonte, pede-se, e depois
    * tira-se e pede-se outra vez. O fonte é devolvido SEMPRE, mesmo se algo rebentar. */
-  const alvo = path.join(RAIZ, 'papers', 'corpo_computacional.tex')
+  const alvo = path.join(RAIZ, 'papers', 'arquitetura.tex')
   const original = fs.readFileSync(alvo, 'utf8')
   const marca = 'SEMPREVIVAZZ'
   const ancora = 'A referência são os naturais'

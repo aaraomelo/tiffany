@@ -19,7 +19,7 @@
 #include "unidade.h"
 #include "reta.h"
 
-typedef long long L;
+typedef long L;
 typedef struct { L a, b; } Zs;
 static Zs zs_mul(Zs x, Zs y, L m){
     Zs r; r.a = x.a*y.a + x.b*y.b;
@@ -49,7 +49,7 @@ int main(void){
             Zs i2 = zs_mul(inv,inv,m), i4 = zs_mul(i2,i2,m);
             Zs uu = zs_mul(s4, i4, m);
             if(uu.a==1 && uu.b==0) quatro += 1;
-            if(m<=4) printf("      %-4lld %+lld%+lldσ            %+lld%+lldσ        %+lld%+lldσ         %+lld%+lldσ\n",
+            if(m<=4) printf("      %-4ld %+ld%+ldσ            %+ld%+ldσ        %+ld%+ldσ         %+ld%+ldσ\n",
                             m, inv.a, inv.b, prod.a, prod.b, s4.a, s4.b, uu.a, uu.b);
         }
         printf("      metais: %d   com σ·σ^{-1} = 1: %d   com σ^{-4}·σ^4 = 1: %d\n",
@@ -71,7 +71,7 @@ int main(void){
             L nn = zs_nrm(i4, m);
             metais += 1;
             if(nn==1 || nn==-1) unidades_ok += 1;
-            printf("      %-4lld %+lld%+lldσ            %lld\n", m, i4.a, i4.b, nn);
+            printf("      %-4ld %+ld%+ldσ            %ld\n", m, i4.a, i4.b, nn);
         }
         printf("      metais: %d   unidades: %d\n", metais, unidades_ok);
         ok("o peso da geodésica é um elemento de Z[σ] — dois inteiros."
@@ -108,7 +108,7 @@ int main(void){
                 fat += 1;
                 if(zs_eq(esq, dir_z)) exatos += 1;
                 if(fat<=6)
-                    printf("      %-2lld %-2lld %-3lld %+lld%+lldσ\n", m, sv, k, f.a, f.b);
+                    printf("      %-2ld %-2ld %-3ld %+ld%+ldσ\n", m, sv, k, f.a, f.b);
             }
         }
         printf("      fatores testados: %d   exatos: %d\n", fat, exatos);
@@ -132,7 +132,7 @@ int main(void){
                 for(L i=0; i<e; i += 1) p = zs_mul(p, sig, m);
                 if(!(p.a==1 && p.b==0)) nunca1 += 1;
             }
-            printf("      %-4lld %s                 σ^4, σ^8 ≠ 1\n", m, maior?"sim":"NAO");
+            printf("      %-4ld %s                 σ^4, σ^8 ≠ 1\n", m, maior?"sim":"NAO");
         }
         printf("      casos: %d   σ>1: %d/4   σ^{4s}≠1: %d\n", casos, razao, nunca1);
         ok("o produto converge para todo m e s >= 1 — a razão é σ^{-4} < 1."
@@ -149,7 +149,7 @@ int main(void){
         int cresce=1; long ant=0; int nmet=0;
         for(L m=1; m<=8; m += 1){
             long t4 = rt_traco_metalico((long)m, 4);
-            printf("      %-4lld %ld\n", m, t4);
+            printf("      %-4ld %ld\n", m, t4);
             if(m > 1 && t4 <= ant) cresce=0;
             ant = t4; nmet += 1;
         }
@@ -176,7 +176,7 @@ int main(void){
         Zs um={1,0}, p={1,0};
         Zs f = zs_sub(um, p);
         printf("      expoente 4(s+k) anula-se em %ld de %ld pares (s,k) em 0..3\n", anula, total);
-        printf("      e 1 − σ^0 = %+lld%+lldσ\n", f.a, f.b);
+        printf("      e 1 − σ^0 = %+ld%+ldσ\n", f.a, f.b);
         ok("em s = 0 o produto ANULA-SE — o bordo é real, e mede-se."
            " Não é 1−1 relido: o expoente 4(s+k) é zero em EXACTAMENTE um par, (0,0),"
            " e nos outros 15 de {0..3}² não. O factor em σ^0 é o zero de ℤ[σ]",

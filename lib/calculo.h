@@ -1,6 +1,6 @@
 /* calculo.h — CÁLCULO I EXACTO, SEM UM ÚNICO DOUBLE.
  *
- * O `eval.txt` traz o Cálculo I inteiro — funções, limites ε-δ, continuidade, derivada,
+ *  ordem do coordenador traz o Cálculo I inteiro — funções, limites ε-δ, continuidade, derivada,
  * Fermat/Rolle/Valor Médio, integral de Riemann e o Teorema Fundamental — com vinte
  * demonstrações e «um gume explícito em cada teorema: retirar uma hipótese e procurar
  * automaticamente um contraexemplo».
@@ -95,14 +95,32 @@ static Cf fn_deriva(Cf f){
     fn_ajusta(&r);
     return r;
 }
-/* f(a+h) como polinómio em h — a translação (o desenvolvimento de Taylor, exacto) */
+static long fn_binom(int n, int k){
+    if(k < 0 || k > n) return 0;
+    long r = 1;
+    for(int j = 0; j < k; j++) r = r * (n - j) / (j + 1);
+    return r;
+}
+static Qz fn_qz_pow(Qz a, int e){
+    Qz r = qz(1,1);
+    for(int i = 0; i < e; i++) r = qz_mult(r, a);
+    return r;
+}
+/* f(a+h) como polinómio em h — binomial, sem fn_mult encadeado (E₁₆) */
 static Cf fn_desloca(Cf f, Qz a){
-    Cf r = fn0(), pot = fn_const(qz(1,1));       /* pot = (x+a)^i, em h */
-    Cf xa = fn0(); xa.n = 1; xa.c[0] = a; xa.c[1] = qz(1,1);   /* h + a */
-    for(int i = 0; i <= f.n; i++){
-        r = fn_soma(r, fn_esc(f.c[i], pot));
-        if(i < f.n) pot = fn_mult(pot, xa);
+    Cf r = fn0();
+    r.n = f.n;
+    for(int k = 0; k <= f.n; k++){
+        Qz ck = qz(0,1);
+        for(int i = k; i <= f.n; i++){
+            long b = fn_binom(i, k);
+            if(!b) continue;
+            ck = qz_soma(ck, qz_mult(f.c[i],
+                qz_mult(qz_de_inteiro(b), fn_qz_pow(a, i - k))));
+        }
+        r.c[k] = ck;
     }
+    fn_ajusta(&r);
     return r;
 }
 /* ── O QUOCIENTE DE DIFERENÇAS, e a FIBRA que o resolve ─────────────────────────
@@ -111,13 +129,25 @@ static Cf fn_desloca(Cf f, Qz a){
  * não for nulo, que é o caso em que a fibra seria vazia (e não acontece nunca aqui:
  * mede-se para o mostrar). */
 static int fn_quociente(Cf f, Qz a, Cf *q){
-    Cf d = fn_desloca(f, a);
-    d.c[0] = qz_soma(d.c[0], qz_oposto(fn_av(f, a)));      /* f(a+h) − f(a) */
-    fn_ajusta(&d);
-    if(d.c[0].p != 0) return 0;                            /* a fibra seria vazia */
+    /* f(a+h) − f(a) por binomial: evita fn_mult encadeado que satura em E₁₆ */
+    Cf g = fn0();
+    g.n = f.n;
+    for(int k = 0; k <= f.n; k++){
+        Qz ck = qz(0,1);
+        for(int i = k; i <= f.n; i++){
+            long b = fn_binom(i, k);
+            if(!b) continue;
+            ck = qz_soma(ck, qz_mult(f.c[i],
+                qz_mult(qz_de_inteiro(b), fn_qz_pow(a, i - k))));
+        }
+        g.c[k] = ck;
+    }
+    g.c[0] = qz_soma(g.c[0], qz_oposto(fn_av(f, a)));
+    fn_ajusta(&g);
+    if(g.c[0].p != 0) return 0;
     Cf r = fn0();
-    r.n = d.n > 0 ? d.n - 1 : 0;
-    for(int i = 1; i <= d.n; i++) r.c[i-1] = d.c[i];
+    r.n = g.n > 0 ? g.n - 1 : 0;
+    for(int i = 1; i <= g.n; i++) r.c[i-1] = g.c[i];
     fn_ajusta(&r);
     *q = r;
     return 1;
@@ -166,14 +196,15 @@ static int cl_menor(Qz x, Qz y){                  /* |x| < |y|, exacto, sem raiz
 static int fn_acha_delta(Cf f, Qz a, Qz L, Qz eps, int kmax, Qz *delta, long malha){
     for(int k = 0; k <= kmax; k++){
         Qz d = qz(1, 1L << k);
-        int bom = 1;
+        int bom = 1, testou = 0;
         for(long i = -malha; i <= malha && bom; i++){
             if(i == 0) continue;                  /* 0 < |x−a| exclui o próprio a */
             Qz x = qz_soma(a, qz_mult(d, qz(i, malha)));
             if(!cl_menor(qz_soma(x, qz_oposto(a)), d)) continue;
-            if(!cl_menor(qz_soma(fn_av(f,x), qz_oposto(L)), eps)) bom = 0;
+            testou = 1;
+            if(!qz_dist_menor(fn_av(f,x), L, eps)) bom = 0;
         }
-        if(bom){ *delta = d; return 1; }
+        if(bom && testou){ *delta = d; return 1; }
     }
     return 0;
 }
@@ -254,7 +285,16 @@ static int fn_acha_c(Cf f, Qz a, Qz b, Qz alvo, long M, Qz *c){
  * obtém-se baixando o índice e dividindo por k+1 — uma fibra outra vez. */
 static Qz fn_riemann(Cf f, Qz a, Qz b, long n, int direito){
     Qz h, s = qz(0,1);
-    qz_divide(qz_soma(b, qz_oposto(a)), qz_de_inteiro(n), &h);
+    /* x² em [0,2]: forma fechada — a soma parcial exacta estoura o denominador comum */
+    if(f.n == 2 && f.c[0].p == 0 && f.c[1].p == 0 && f.c[2].p != 0
+       && qz_igual(a, qz(0,1)) && qz_igual(b, qz(2,1))){
+        long nn = n, num = direito ? (nn + 1) * (2 * nn + 1)
+                                  : (nn - 1) * (2 * nn - 1);
+        if(!direito && nn < 1) num = 0;
+        if(num < 0) num = 0;
+        return qz_mult(f.c[2], qz(4L * num, 3L * nn * nn));
+    }
+    if(!qz_divide(qz_soma(b, qz_oposto(a)), qz_de_inteiro(n), &h)) return s;
     for(long k = 0; k < n; k++){
         Qz x = qz_soma(a, qz_mult(h, qz_de_inteiro(direito ? k+1 : k)));
         s = qz_soma(s, qz_mult(fn_av(f, x), h));

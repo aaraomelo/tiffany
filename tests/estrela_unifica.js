@@ -92,21 +92,21 @@ function ok (q, cond) {
     mem()[pD + bytes.length] = 0
     if (!E.poe_ficheiro(pN, pD, bytes.length)) throw new Error('poe ' + nome)
   }
-  const subset = ['estilo.tex', 'papers/corpo_computacional.tex', 'papers/gkcapa.tex']
+  const subset = ['estilo.tex', 'papers/arquitetura.tex', 'papers/gkcapa.tex']
   for (const f of man.ficheiros) {
-    if (!subset.some((s) => f === s || f.endsWith('/' + path.basename(s)))) continue
+    if (!subset.includes(f)) continue
     const u8 = fs.readFileSync(path.join(RAIZ, f))
     poeFich(f, u8)
   }
   /* poe o manifesto lazy via ficheirosPara se disponível */
   const disco = await import(pathToFileURL(path.join(RAIZ, 'app', 'src', 'corpo_disco.js')).href)
-  for (const f of disco.ficheirosPara('papers/corpo_computacional.tex', man.ficheiros)) {
+  for (const f of disco.ficheirosPara('papers/arquitetura.tex', man.ficheiros)) {
     if (!fs.existsSync(path.join(RAIZ, f))) continue
     poeFich(f, fs.readFileSync(path.join(RAIZ, f)))
   }
   if (typeof E.marca_vfs === 'function') E.marca_vfs()
   E.limpa_saida()
-  const rc = num(E.compila_ficheiro(poeStr('papers/corpo_computacional.tex'), poeStr('saida.pdf')))
+  const rc = num(E.compila_ficheiro(poeStr('papers/arquitetura.tex'), poeStr('saida.pdf')))
   const tam = num(E.tam_saida())
   const end = porta.absorve(E, 14)
   const pdf = Buffer.from(mem().slice(end, end + tam)).toString('latin1')

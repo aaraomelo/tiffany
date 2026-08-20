@@ -41,6 +41,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <stdint.h>
+#include <inttypes.h>
 #include "unidade.h"
 
 #define MAX_TENSORES 512
@@ -79,34 +81,34 @@ static int bloco_valores(unsigned t){
 typedef struct {
     char     nome[MAX_NOME];
     int      n_dims;
-    long long dims[4];
+    int64_t dims[4];
     unsigned tipo;
-    long long desloc;           /* relativo ao início dos dados */
+    int64_t desloc;           /* relativo ao início dos dados */
 } Tensor;
 
 static Tensor tensores[MAX_TENSORES];
 static int    n_tensores = 0;
-static long long inicio_dados = 0;
+static int64_t inicio_dados = 0;
 
 /* ---- leitura sequencial por pread: o cursor é nosso, o ficheiro nunca é mapeado ----------*/
 static int fd_g = -1;
-static long long cur = 0;
+static int64_t cur = 0;
 static int falhou_leitura = 0;
 
 static void ler(void *dest, size_t n){
     ssize_t r = pread(fd_g, dest, n, cur);
     if(r != (ssize_t)n){ falhou_leitura = 1; memset(dest, 0, n); return; }
-    cur += (long long)n;
+    cur += (int64_t)n;
 }
 static unsigned u32(void){ unsigned v = 0; ler(&v, 4); return v; }
-static unsigned long long u64(void){ unsigned long long v = 0; ler(&v, 8); return v; }
+static uint64_t u64(void){ uint64_t v = 0; ler(&v, 8); return v; }
 /* uma string GGUF: u64 de comprimento, e os bytes. Trunca-se para o índice, e o teto é dito. */
 static void gstr(char *dest, size_t cap){
-    unsigned long long n = u64();
+    uint64_t n = u64();
     size_t copiar = n < cap-1 ? (size_t)n : cap-1;
-    if(dest) ler(dest, copiar); else cur += (long long)copiar;
+    if(dest) ler(dest, copiar); else cur += (int64_t)copiar;
     if(dest) dest[copiar] = 0;
-    cur += (long long)(n - copiar);           /* salta o resto sem o guardar */
+    cur += (int64_t)(n - copiar);           /* salta o resto sem o guardar */
 }
 
 /* saltar um valor de metadado, seja do tipo que for — só nos interessam alguns */
@@ -125,8 +127,8 @@ static void saltar_um(unsigned tipo){
 static void saltar_valor(unsigned tipo){
     if(tipo != 9){ saltar_um(tipo); return; }
     unsigned t_elem = u32();
-    unsigned long long n = u64();
-    for(unsigned long long i = 0; i < n && !falhou_leitura; i += 1) saltar_um(t_elem);
+    uint64_t n = u64();
+    for(uint64_t i = 0; i < n && !falhou_leitura; i += 1) saltar_um(t_elem);
 }
 
 /* ---- §G5  dequantizar um bloco Q4_K em Q16, como pinos.c — sem um float ----------------*
@@ -157,9 +159,9 @@ static void deq_q4k(const unsigned char *b, long *y){
     for(int j = 0; j < QK_K; j += 64){
         unsigned char sc, m;
         escala_min_k4(is + 0, escalas, &sc, &m);
-        long long d1 = (long long)d * sc, m1 = (long long)dm * m;
+        int64_t d1 = (int64_t)d * sc, m1 = (int64_t)dm * m;
         escala_min_k4(is + 1, escalas, &sc, &m);
-        long long d2 = (long long)d * sc, m2 = (long long)dm * m;
+        int64_t d2 = (int64_t)d * sc, m2 = (int64_t)dm * m;
         for(int l = 0; l < 32; l += 1) y[k++] = (long)(d1 * (q[l] & 0xF) - m1);
         for(int l = 0; l < 32; l += 1) y[k++] = (long)(d2 * (q[l] >> 4) - m2);
         q += 32; is += 2;
@@ -185,12 +187,12 @@ static int acha(const char *nome){
         if(!strcmp(tensores[i].nome, nome)) return i;
     return -1;
 }
-static long long elementos(const Tensor *t){
-    long long n = 1;
+static int64_t elementos(const Tensor *t){
+    int64_t n = 1;
     for(int i = 0; i < t->n_dims; i += 1) n *= t->dims[i];
     return n;
 }
-static long long bytes_de(const Tensor *t){
+static int64_t bytes_de(const Tensor *t){
     int bv = bloco_valores(t->tipo);
     if(!bv) return -1;
     return elementos(t) / bv * bloco_bytes(t->tipo);
@@ -224,11 +226,11 @@ if(fd_g < 0){
 }
 struct stat st;
 if(fstat(fd_g, &st)){ perror("gguf: fstat"); return 1; }
-long long tam_ficheiro = (long long)st.st_size;
-printf("    tamanho:  %lld B  (%lld MiB)\n", tam_ficheiro, tam_ficheiro/1048576);
+int64_t tam_ficheiro = (int64_t)st.st_size;
+printf("    tamanho:  %" PRId64 " B  (%" PRId64 " MiB)\n", tam_ficheiro, tam_ficheiro/1048576);
 
 printf("\n§G1  O CABEÇALHO: magic, versão, e as duas contagens.\n\n");
-unsigned long long n_tens_dito = 0, n_kv = 0;
+uint64_t n_tens_dito = 0, n_kv = 0;
 {
     cur = 0;
     char magic[5] = {0};
@@ -238,18 +240,18 @@ unsigned long long n_tens_dito = 0, n_kv = 0;
     n_kv        = u64();
     printf("      magic         %s\n", magic);
     printf("      versão        %u\n", versao);
-    printf("      tensores      %llu\n", n_tens_dito);
-    printf("      metadados     %llu\n\n", n_kv);
+    printf("      tensores      %" PRIu64 "\n", n_tens_dito);
+    printf("      metadados     %" PRIu64 "\n\n", n_kv);
     ok("o magic é GGUF e a versão é 3", !strcmp(magic, "GGUF") && versao == 3);
     ok("as contagens são sãs (tensores e metadados > 0)",
        n_tens_dito > 0 && n_tens_dito < MAX_TENSORES && n_kv > 0);
 }
 
 printf("\n§G2  OS METADADOS: e têm de bater com o que o `ollama show` diz DE FORA.\n\n");
-long long emb_dito = 0, ctx_dito = 0, camadas_ditas = 0;
+int64_t emb_dito = 0, ctx_dito = 0, camadas_ditas = 0;
 char arq[64] = {0};
 {
-    for(unsigned long long i = 0; i < n_kv && !falhou_leitura; i += 1){
+    for(uint64_t i = 0; i < n_kv && !falhou_leitura; i += 1){
         char chave[128];
         gstr(chave, sizeof chave);
         unsigned tipo = u32();
@@ -268,9 +270,9 @@ char arq[64] = {0};
     }
     printf("      chave                       no ficheiro     o ollama diz\n");
     printf("      general.architecture        %-15s qwen2\n", arq);
-    printf("      qwen2.embedding_length      %-15lld 1536\n", emb_dito);
-    printf("      qwen2.context_length        %-15lld 32768\n", ctx_dito);
-    printf("      qwen2.block_count           %-15lld (28 camadas)\n\n", camadas_ditas);
+    printf("      qwen2.embedding_length      %-15" PRId64 " 1536\n", emb_dito);
+    printf("      qwen2.context_length        %-15" PRId64 " 32768\n", ctx_dito);
+    printf("      qwen2.block_count           %-15" PRId64 " (28 camadas)\n\n", camadas_ditas);
     ok("a arquitetura lida é qwen2, como o ollama anuncia", !strcmp(arq, "qwen2"));
     ok("o embedding lido é 1536, como o ollama anuncia", emb_dito == 1536);
     ok("o contexto lido é 32768, como o ollama anuncia", ctx_dito == 32768);
@@ -281,27 +283,27 @@ char arq[64] = {0};
 
 printf("\n§G3  OS TENSORES: nome, forma, tipo, deslocamento — e a soma fecha o ficheiro.\n\n");
 {
-    for(unsigned long long i = 0; i < n_tens_dito && !falhou_leitura; i += 1){
+    for(uint64_t i = 0; i < n_tens_dito && !falhou_leitura; i += 1){
         if(n_tensores >= MAX_TENSORES){ printf("      (teto de %d tensores atingido)\n", MAX_TENSORES); break; }
         Tensor *t = &tensores[n_tensores];
         gstr(t->nome, MAX_NOME);
         t->n_dims = (int)u32();
         if(t->n_dims > 4){ falhou_leitura = 1; break; }
-        for(int d = 0; d < t->n_dims; d += 1) t->dims[d] = (long long)u64();
+        for(int d = 0; d < t->n_dims; d += 1) t->dims[d] = (int64_t)u64();
         t->tipo   = u32();
-        t->desloc = (long long)u64();
+        t->desloc = (int64_t)u64();
         n_tensores++;
     }
     /* o alinhamento: os dados começam no próximo múltiplo de 32 depois do índice */
-    long long alinhamento = 32;
+    int64_t alinhamento = 32;
     inicio_dados = (cur + alinhamento - 1) / alinhamento * alinhamento;
-    printf("      lidos %d tensores; os dados começam em %lld\n\n", n_tensores, inicio_dados);
+    printf("      lidos %d tensores; os dados começam em %" PRId64 "\n\n", n_tensores, inicio_dados);
     printf("      %-38s %-14s %-6s %s\n", "nome", "forma", "tipo", "deslocamento");
     for(int i = 0; i < n_tensores && i < 4; i += 1){
         char forma[32] = {0}; int p = 0;
         for(int d = 0; d < tensores[i].n_dims; d += 1)
-            p += snprintf(forma+p, sizeof forma - (size_t)p, d ? "×%lld" : "%lld", tensores[i].dims[d]);
-        printf("      %-38s %-14s %-6s %lld\n", tensores[i].nome, forma,
+            p += snprintf(forma+p, sizeof forma - (size_t)p, d ? "×%" PRId64 : "%" PRId64, tensores[i].dims[d]);
+        printf("      %-38s %-14s %-6s %" PRId64 "\n", tensores[i].nome, forma,
                nome_tipo(tensores[i].tipo), tensores[i].desloc);
     }
     printf("      ... (%d no total)\n\n", n_tensores);
@@ -309,28 +311,29 @@ printf("\n§G3  OS TENSORES: nome, forma, tipo, deslocamento — e a soma fecha 
     /* A SOMA FECHA? Cada tensor ocupa dos seus bytes, e o fim do ultimo tem de cair
      * exatamente no fim do ficheiro. Se eu tivesse errado a tabela de tamanhos por tipo, ou o
      * tamanho do bloco Q4_K, este numero nao fechava — e nao ha' aqui folga nenhuma. */
-    long long soma = 0, fim_max = 0; int tipo_desconhecido = 0;
+    int64_t soma = 0, fim_max = 0; int tipo_desconhecido = 0;
     for(int i = 0; i < n_tensores; i += 1){
-        long long b = bytes_de(&tensores[i]);
+        int64_t b = bytes_de(&tensores[i]);
         if(b < 0){ tipo_desconhecido++; continue; }
         soma += b;
-        long long fim = tensores[i].desloc + b;
+        int64_t fim = tensores[i].desloc + b;
         if(fim > fim_max) fim_max = fim;
     }
-    printf("      soma dos tensores      %lld B  (%lld MiB)\n", soma, soma/1048576);
-    printf("      fim do último tensor   %lld\n", inicio_dados + fim_max);
-    printf("      tamanho do ficheiro    %lld\n", tam_ficheiro);
-    printf("      diferença              %lld B\n\n", tam_ficheiro - (inicio_dados + fim_max));
+    printf("      soma dos tensores      %" PRId64 " B  (%" PRId64 " MiB)\n", soma, soma/1048576);
+    printf("      fim do último tensor   %" PRId64 "\n", inicio_dados + fim_max);
+    printf("      tamanho do ficheiro    %" PRId64 "\n", tam_ficheiro);
+    printf("      diferença              %" PRId64 " B\n\n", tam_ficheiro - (inicio_dados + fim_max));
     ok("nenhum tensor tem tipo que eu não saiba medir", tipo_desconhecido == 0);
+    int64_t diff_fim = tam_ficheiro - (inicio_dados + fim_max);
     ok("o fim do último tensor cai no fim do ficheiro — a tabela de tamanhos fecha",
-       llabs(tam_ficheiro - (inicio_dados + fim_max)) < 32);
+       (diff_fim < 0 ? -diff_fim : diff_fim) < 32);
 }
 
 printf("\n§G4  OS PARÂMETROS: contados das formas, contra os 1,5 B anunciados.\n\n");
 {
-    long long total = 0;
+    int64_t total = 0;
     for(int i = 0; i < n_tensores; i += 1) total += elementos(&tensores[i]);
-    printf("      parâmetros somados das formas  %lld  (%lld M)\n", total, total/1000000);
+    printf("      parâmetros somados das formas  %" PRId64 "  (%" PRId64 " M)\n", total, total/1000000);
     printf("      o ollama anuncia               1.5B\n\n");
     ok("a contagem de parâmetros bate com os 1,5 B anunciados",
        total > 1300000000LL && total < 1800000000LL);
@@ -345,23 +348,23 @@ printf("\n§G5  DEQUANTIZAR Q4_K: e o bloco desempacotado tem de ser são.\n\n")
     if(i < 0){ printf("      (não achei um tensor Q4_K para medir)\n"); }
     else {
         Tensor *t = &tensores[i];
-        printf("      tensor  %s   forma %lldx%lld   tipo %s\n\n",
+        printf("      tensor  %s   forma %" PRId64 "x%" PRId64 "   tipo %s\n\n",
                t->nome, t->dims[0], t->n_dims > 1 ? t->dims[1] : 1, nome_tipo(t->tipo));
         if(t->tipo != T_Q4_K){
             printf("      (o tensor não é Q4_K, é %s — nada a desempacotar aqui)\n", nome_tipo(t->tipo));
         } else {
             unsigned char bloco[BLOCO_Q4_K];
             long vals[QK_K];
-            long long soma = 0, soma2 = 0, mn = 1, mx = -1;
+            int64_t soma = 0, soma2 = 0, mn = 1, mx = -1;
             int n_blocos = 64, inf = 0, primeiro = 1;
             for(int b = 0; b < n_blocos; b += 1){
                 if(pread(fd_g, bloco, BLOCO_Q4_K,
-                         inicio_dados + t->desloc + (long long)b*BLOCO_Q4_K) != BLOCO_Q4_K) break;
+                         inicio_dados + t->desloc + (int64_t)b*BLOCO_Q4_K) != BLOCO_Q4_K) break;
                 deq_q4k(bloco, vals);
                 for(int k = 0; k < QK_K; k += 1){
                     long v = vals[k];
                     if(v == (1L << 30) || v == -(1L << 30)){ inf += 1; continue; }
-                    soma += v; soma2 += (long long)v * v;
+                    soma += v; soma2 += (int64_t)v * v;
                     if(primeiro || v < mn) mn = v;
                     if(primeiro || v > mx) mx = v;
                     primeiro = 0;
@@ -370,13 +373,13 @@ printf("\n§G5  DEQUANTIZAR Q4_K: e o bloco desempacotado tem de ser são.\n\n")
             long n = (long)n_blocos * QK_K;
             /* |média| < 1/20  <=>  |soma|·20 < n·Q16
              * 1e-8 < var_float < 1  <=>  n·soma2 − soma²  entre  (Q16² n²)/1e8  e  Q16² n² */
-            long long n2 = (long long)n * n;
-            long long q2 = (long long)Q16 * Q16;
-            long long num = (long long)n * soma2 - soma * soma;   /* n² · var_Q16 */
-            int centrado = (soma < 0 ? -soma : soma) * 20 < (long long)n * Q16;
+            int64_t n2 = (int64_t)n * n;
+            int64_t q2 = (int64_t)Q16 * Q16;
+            int64_t num = (int64_t)n * soma2 - soma * soma;   /* n² · var_Q16 */
+            int centrado = (soma < 0 ? -soma : soma) * 20 < (int64_t)n * Q16;
             int var_ok = (num > 40LL * n2 && num < q2 * n2);
             printf("      %ld pesos desempacotados de %d blocos, em Q16:\n\n", n, n_blocos);
-            printf("        soma             %lld\n", soma);
+            printf("        soma             %" PRId64 "\n", soma);
             printf("        mínimo           %ld\n", mn);
             printf("        máximo           %ld\n", mx);
             printf("        sentinela inf     %d\n\n", inf);
@@ -399,14 +402,14 @@ printf("\n§G6  A RAM não cresce: lê-se o modelo inteiro e o processo não eng
      * carregador estivesse a acumular seja o que for, era aqui que aparecia. */
     long base = rss_anon_kb();
     unsigned char buf[65536];
-    long long lidos = 0;
-    for(long long off = 0; off < tam_ficheiro; off += (long long)sizeof buf){
+    int64_t lidos = 0;
+    for(int64_t off = 0; off < tam_ficheiro; off += (int64_t)sizeof buf){
         ssize_t r = pread(fd_g, buf, sizeof buf, off);
         if(r <= 0) break;
         lidos += r;
     }
     long depois = rss_anon_kb();
-    printf("      bytes lidos do disco   %lld  (%lld MiB)\n", lidos, lidos/1048576);
+    printf("      bytes lidos do disco   %" PRId64 "  (%" PRId64 " MiB)\n", lidos, lidos/1048576);
     printf("      RssAnon antes          %ld kB\n", base);
     printf("      RssAnon depois         %ld kB\n", depois);
     printf("      cresceu                %+ld kB\n\n", depois - base);
@@ -437,13 +440,13 @@ printf("\n§G7  OS PESOS ENTRAM NA MÁQUINA: uma projeção real do qwen, do dis
         printf("      (sem tensor Q4_K para projetar)\n");
     } else {
         Tensor *t = &tensores[idx];
-        long long cols = t->dims[0], linhas = t->dims[1];
-        printf("      %s   %lld×%lld   Q4_K   %lld B em disco\n\n",
+        int64_t cols = t->dims[0], linhas = t->dims[1];
+        printf("      %s   %" PRId64 "×%" PRId64 "   Q4_K   %" PRId64 " B em disco\n\n",
                t->nome, linhas, cols, bytes_de(t));
 
         static long x[2048], y[2048], z[2048], xy[2048], yxy[2048], linha[2048];
         int L = 64;
-        for(long long j = 0; j < cols; j += 1){
+        for(int64_t j = 0; j < cols; j += 1){
             x[j] = pseudo(j);
             z[j] = pseudo(j + 1000);
             xy[j] = x[j] + z[j];
@@ -451,14 +454,14 @@ printf("\n§G7  OS PESOS ENTRAM NA MÁQUINA: uma projeção real do qwen, do dis
         long base_rss = rss_anon_kb();
         #define PROJETA(saida, entrada) do {                                              \
             for(int i = 0; i < L; i += 1){                                                \
-                long long off = inicio_dados + t->desloc + (long long)i*cols/QK_K*BLOCO_Q4_K; \
-                for(long long b = 0; b < cols/QK_K; b += 1){                              \
+                int64_t off = inicio_dados + t->desloc + (int64_t)i*cols/QK_K*BLOCO_Q4_K; \
+                for(int64_t b = 0; b < cols/QK_K; b += 1){                              \
                     unsigned char blo[BLOCO_Q4_K];                                        \
                     if(pread(fd_g, blo, BLOCO_Q4_K, off + b*BLOCO_Q4_K) != BLOCO_Q4_K) break; \
                     deq_q4k(blo, linha + b*QK_K);                                         \
                 }                                                                         \
-                long long acc = 0;                                                        \
-                for(long long j = 0; j < cols; j += 1) acc += (long long)linha[j]*(entrada)[j]; \
+                int64_t acc = 0;                                                        \
+                for(int64_t j = 0; j < cols; j += 1) acc += (int64_t)linha[j]*(entrada)[j]; \
                 (saida)[i] = (long)acc;                                                   \
             }                                                                             \
         } while(0)
@@ -476,21 +479,21 @@ printf("\n§G7  OS PESOS ENTRAM NA MÁQUINA: uma projeção real do qwen, do dis
            " 1e-4 relativo era IEEE; W(x+z)=Wx+Wz e' identidade em Z",
            linear_mau == 0);
 
-        long long jj = 700;
+        int64_t jj = 700;
         static long e[2048], col[2048];
-        for(long long j = 0; j < cols; j += 1) e[j] = (j == jj) ? 1 : 0;
+        for(int64_t j = 0; j < cols; j += 1) e[j] = (j == jj) ? 1 : 0;
         PROJETA(col, e);
         int col_mau = 0;
         for(int i = 0; i < L; i += 1){
             unsigned char blo[BLOCO_Q4_K];
             long vals[QK_K];
-            long long off = inicio_dados + t->desloc + (long long)i*cols/QK_K*BLOCO_Q4_K
+            int64_t off = inicio_dados + t->desloc + (int64_t)i*cols/QK_K*BLOCO_Q4_K
                           + (jj/QK_K)*BLOCO_Q4_K;
             if(pread(fd_g, blo, BLOCO_Q4_K, off) != BLOCO_Q4_K) break;
             deq_q4k(blo, vals);
             if(col[i] != vals[jj % QK_K]) col_mau += 1;
         }
-        printf("      BASE — W·e_%lld contra a coluna %lld lida à parte:\n", jj, jj);
+        printf("      BASE — W·e_%" PRId64 " contra a coluna %" PRId64 " lida à parte:\n", jj, jj);
         printf("        discordâncias  %d\n\n", col_mau);
         ok("W·e_j concorda com a leitura direta da coluna j",
            col_mau == 0);

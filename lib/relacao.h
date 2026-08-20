@@ -1,6 +1,6 @@
 /* relacao.h — RELAÇÃO, FUNÇÃO, BIJEÇÃO: e a bijeção é a que TEM VOLTA.
  *
- * O `eval.txt` fecha assim, e é o desenho desta casa em miniatura:
+ *  ordem do coordenador fecha assim, e é o desenho desta casa em miniatura:
  *
  *     A×B → pares → relação → função → bijetividade → inversa → volta
  *

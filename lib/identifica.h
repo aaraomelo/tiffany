@@ -1,6 +1,6 @@
 /* identifica.h — O MESMO PONTO, POR QUATRO PORTAS, E A IDENTIFICAÇÃO MEDIDA.
  *
- * O `eval.txt` fecha o andar com o pedido exato:
+ *  ordem do coordenador fecha o andar com o pedido exato:
  *
  *   «mostrar que esse fechamento NÃO DEPENDE DO MÉTODO ESCOLHIDO: corte, Cauchy,
  *    bisseção e FC têm de produzir O MESMO PONTO, com a VOLTA verificando a
@@ -58,6 +58,7 @@ static int id_mobius(long a, Qz q, long passos){
 static int id_bisec(long a, Qz q, int dobras){
     Corte c = { a, 2 };
     Qz lo, hi;
+    if(dobras > 14) dobras = 14;                 /* E₁₆: denominador honesto até ~2¹⁴ */
     if(!rz_caixa_inicial(c, &lo, &hi)) return ID_INDECISO;
     rz_encaixota(c, &lo, &hi, dobras);
     if(qz_menor(q, lo) || qz_igual(q, lo)) return ID_ABAIXO;

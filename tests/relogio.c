@@ -34,10 +34,23 @@
  *   cc -O2 -std=c99 -Wall relogio.c -o relogio && ./relogio
  */
 #include <stdio.h>
+#include "../lib/i128.h"
 #include "../lib/unidade.h"
 
-typedef long long L;
-typedef __int128 H;
+typedef long L;
+typedef I128 H;
+static H h1(void){ return i128_from_i64(1); }
+static H h10n(int n){ H r = h1(); for(int i = 0; i < n; i++) r = i128_smul_i128(r, 10); return r; }
+static H hld(long x){ return i128_from_i64(x); }
+static H hdiv(H a, H b){ return i128_div(a, b); }
+static H hmul(H a, H b){ return i128_mul(a, b); }
+static H hsmul(H a, long x){ return i128_smul_i128(a, x); }
+static H hadd(H a, H b){ return i128_add(a, b); }
+static H hsub(H a, H b){ return i128_sub(a, b); }
+static H habs(H a){ return i128_abs(a); }
+static int hz(H a){ return i128_is_zero(a); }
+static int hlt(H a, H b){ return i128_cmp(a, b) < 0; }
+static long hl(H a){ return (long)i128_to_i64(a); }
 
 /* Z[sigma] com sigma^2 = n·sigma + 1 — a mesma reducao de metalica.c */
 typedef struct { L p, q; } Zs;
@@ -70,7 +83,7 @@ int main(void){
           }
         nvis++;
     }
-    printf("      %lld instancias verificadas\n", nvis);
+    printf("      %ld instancias verificadas\n", nvis);
     ok("a base dual do reticulado existe e e' exata: tr(e_i·w_j) = Delta·delta_ij, sem resto",
        !mau && nvis == 121);
 
@@ -181,61 +194,65 @@ int main(void){
      * a pi/180, que nao e' 1. Faco-o em aritmetica inteira escalada, e comparo o resultado
      * com a escala — sem escrever nenhum dos dois valores a mao. */
     {
-        H S = 1; for(int i = 0; i < 15; i++) S *= 10;   /* escala 10^-15 */
-        /* sin(t)/t com t pequeno, na escala: t = S/10^6 (isto e' 10^-6 radianos) */
-        H t = S / 1000000;
+        H S = h10n(15);
+        H t = hdiv(S, h10n(6));
         H termo = t, soma = t;
         for(int k = 1; k <= 8; k++){
-            termo = termo * t / S; termo = termo * t / S;
-            termo = termo / ((H)(2*k) * (2*k+1));
-            if(termo == 0) break;
-            soma += (k & 1) ? -termo : termo;
+            termo = hdiv(hmul(termo, t), S);
+            termo = hdiv(hmul(termo, t), S);
+            termo = hdiv(termo, hld((long)(2*k) * (2*k+1)));
+            if(hz(termo)) break;
+            soma = (k & 1) ? hsub(soma, termo) : hadd(soma, termo);
         }
-        H quoc = soma * S / t;                          /* sin(t)/t, na escala */
-        H desvio = quoc - S; if(desvio < 0) desvio = -desvio;
-        printf("      em radianos: sin(t)/t = 1 com desvio de %lld unidades de 10^-15\n",
-               (long long)desvio);
-        /* o limite de erro sai do proprio truncamento: ~1 unidade por divisao, e foram <=25 */
+        H quoc = hdiv(hmul(soma, S), t);
+        H desvio = habs(hsub(quoc, S));
+        printf("      em radianos: sin(t)/t = 1 com desvio de %ld unidades de 10^-15\n",
+               hl(desvio));
         ok("O RADIANO: sin(t)/t -> 1, isto e' o gerador do fluxo E' a derivada dele",
-           desvio < 100);
+           hl(desvio) < 100);
 
-        /* e numa escala de graus o mesmo calculo da' outra coisa. Nao escrevo pi/180:
-         * calculo-o, e comparo com o quociente medido. */
-        H pi180;                                        /* pi/180 na escala, calculado */
-        {   H Sb = 1; for(int i = 0; i < 30; i++) Sb *= 10;
-            H at5 = 0, tm = Sb/5, sm = Sb/5;
-            for(L k = 1; tm != 0; k++){ tm /= 25; H x = tm/(2*k+1); sm += (k&1)? -x : x; if(x==0&&tm==0) break; }
+        H pi180;
+        {   H Sb = h10n(30);
+            H at5 = hld(0), tm = hdiv(Sb, hld(5)), sm = hdiv(Sb, hld(5));
+            for(L k = 1; !hz(tm); k++){
+                tm = hdiv(tm, hld(25));
+                H x = hdiv(tm, hld(2*k + 1));
+                sm = (k&1) ? hsub(sm, x) : hadd(sm, x);
+                if(hz(x) && hz(tm)) break;
+            }
             at5 = sm;
-            H at239 = 0; tm = Sb/239; sm = Sb/239;
-            for(L k = 1; tm != 0; k++){ tm /= ((H)239*239); H x = tm/(2*k+1); sm += (k&1)? -x : x; if(x==0&&tm==0) break; }
+            H at239 = hld(0); tm = hdiv(Sb, hld(239)); sm = hdiv(Sb, hld(239));
+            for(L k = 1; !hz(tm); k++){
+                tm = hdiv(tm, hld(239*239));
+                H x = hdiv(tm, hld(2*k + 1));
+                sm = (k&1) ? hsub(sm, x) : hadd(sm, x);
+                if(hz(x) && hz(tm)) break;
+            }
             at239 = sm;
-            H pi = 16*at5 - 4*at239;                    /* Machin */
-            pi180 = (pi / (Sb/S)) / 180;                /* pi/180 na escala S */
+            H pi = hsub(hsmul(at5, 16), hsmul(at239, 4));
+            pi180 = hdiv(hdiv(pi, hdiv(Sb, S)), hld(180));
         }
-        /* o quociente sin(t°)/t° : t em graus significa t·(pi/180) radianos */
-        H tg = S / 1000000;                             /* 10^-6 graus */
-        H tr = tg * pi180 / S;                          /* em radianos */
+        H tg = hdiv(S, h10n(6));
+        H tr = hdiv(hmul(tg, pi180), S);
         H tm2 = tr, sm2 = tr;
         for(int k = 1; k <= 8; k++){
-            tm2 = tm2 * tr / S; tm2 = tm2 * tr / S;
-            tm2 = tm2 / ((H)(2*k) * (2*k+1));
-            if(tm2 == 0) break;
-            sm2 += (k & 1) ? -tm2 : tm2;
+            tm2 = hdiv(hmul(tm2, tr), S);
+            tm2 = hdiv(hmul(tm2, tr), S);
+            tm2 = hdiv(tm2, hld((long)(2*k) * (2*k+1)));
+            if(hz(tm2)) break;
+            sm2 = (k & 1) ? hsub(sm2, tm2) : hadd(sm2, tm2);
         }
-        H quoc_g = sm2 * S / tg;                        /* sin(t°)/t° */
-        H dif = quoc_g - pi180; if(dif < 0) dif = -dif;
-        /* a tolerancia SAI DA CONTA: tr foi truncado por menos de uma unidade, e o
-         * quociente multiplica esse erro por S/tg. Nada disto e' escolhido — e' o que a
-         * divisao inteira custa, calculado a partir das escalas que eu proprio fixei. */
-        H tol_g = S / tg + 8;
-        printf("      em graus:    sin(t)/t = %lld·10^-15, e pi/180 calculado = %lld·10^-15\n",
-               (long long)quoc_g, (long long)pi180);
-        printf("      desvio %lld unidades; limite derivado do truncamento de tr = %lld\n",
-               (long long)dif, (long long)tol_g);
+        H quoc_g = hdiv(hmul(sm2, S), tg);
+        H dif = habs(hsub(quoc_g, pi180));
+        H tol_g = hadd(hdiv(S, tg), hld(8));
+        printf("      em graus:    sin(t)/t = %ld·10^-15, e pi/180 calculado = %ld·10^-15\n",
+               hl(quoc_g), hl(pi180));
+        printf("      desvio %ld unidades; limite derivado do truncamento de tr = %ld\n",
+               hl(dif), hl(tol_g));
         ok("e em graus da' pi/180 e nao 1 — o fator e' o PRECO DA REGUA TROCADA, e bate com"
-           " o valor calculado (nao escrito) de pi/180, dentro do truncamento", dif < tol_g);
+           " o valor calculado (nao escrito) de pi/180, dentro do truncamento", hlt(dif, tol_g));
         ok("e os dois nao coincidem: a escala do radiano e' a UNICA em que o fator e' 1",
-           quoc_g < S/2);
+           hlt(quoc_g, hdiv(S, hld(2))));
     }
 
     puts("");

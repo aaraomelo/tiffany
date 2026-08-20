@@ -44,10 +44,10 @@
  *   cc -O2 -std=c99 -I../lib xx.c -o xx && ./xx
  */
 #include <stdio.h>
+#include "i128.h"
 #include "unidade.h"
 
-typedef long long L;
-typedef __int128 I128;
+typedef long L;
 
 typedef struct { L p, q; } Q;
 static Q CG[17]; static int MG = 0;
@@ -59,9 +59,9 @@ static L labsL(L a){ return a<0 ? -a : a; }
 
 /* |a/b| ? |c/d|  sobre as razões |c_k/c_{k+1}| */
 static int cmp_abs_frac(L a, L b, L c, L d){
-    I128 lhs = (I128)labsL(a) * labsL(d);
-    I128 rhs = (I128)labsL(c) * labsL(b);
-    return lhs < rhs ? -1 : lhs > rhs ? 1 : 0;
+    I128 lhs = i128_mul(i128_from_i64(labsL(a)), i128_from_i64(labsL(d)));
+    I128 rhs = i128_mul(i128_from_i64(labsL(c)), i128_from_i64(labsL(b)));
+    return i128_cmp(lhs, rhs);
 }
 
 int main(void){
@@ -98,7 +98,7 @@ int main(void){
             else       { if(quantas == 2) dois++; }
             if(viu1) tem_1++;
             if(viun) tem_n++;
-            if(n<=5) printf("      %-4lld %-33d %s%s\n", n, quantas,
+            if(n<=5) printf("      %-4ld %-33d %s%s\n", n, quantas,
                             viu1 ? "x=1 " : "", viun ? "x=n" : "");
         }
         printf("      n testados: %d   com x=1 raiz: %d   com x=n raiz: %d\n",
@@ -107,7 +107,7 @@ int main(void){
         printf("      e com UMA só, em n=1 (colidem): %d\n", um);
         printf("      n em que algum x^x não coube no long: %d  (contado, não escondido)\n",
                saltou_teto);
-        printf("      e o maior x que a varredura DECIDIU: %lld\n", maior_decidido);
+        printf("      e o maior x que a varredura DECIDIU: %ld\n", maior_decidido);
         ok("x = 1 e x = n são raízes de x^x = x^n, e NÃO HÁ OUTRAS: a varredura conta"
            " exactamente duas para n > 1",
            tem_1==casos && tem_n==casos && dois==casos-1);
@@ -133,7 +133,7 @@ int main(void){
             L esperado = (k<=2) ? 1 : pot/k;
             ks++;
             if(arvores == esperado) bate++;
-            printf("      %-4lld %-20lld %-22lld %lld\n", k, arvores, pot, k*arvores);
+            printf("      %-4ld %-20ld %-22ld %ld\n", k, arvores, pot, k*arvores);
         }
         printf("      k testados: %d   com Prüfer a bater: %d\n", ks, bate);
         ok("k^{k−2} conta as árvores rotuladas (Prüfer), e k^{k−1} = k · k^{k−2}",
@@ -174,23 +174,23 @@ int main(void){
             Q num = qred(B[k].p*resto.q - resto.p*B[k].q, B[k].q*resto.q);
             c[k] = qred(num.p*A[1].q, num.q*A[1].p);
         }
-        printf("      A_1 = %lld/%lld  (a inversão divide por ele — e por isso ele entra)\n",
+        printf("      A_1 = %ld/%ld  (a inversão divide por ele — e por isso ele entra)\n",
                A[1].p, A[1].q);
         ok("A_1 = 1: o coeficiente linear de (1+u)ln(1+u), e a inversão usa-o",
            A[1].p==1 && A[1].q==1);
         printf("      k    c_k (exato)\n");
         for(int k=1;k<=M;k++)
-            printf("      %-4d %lld/%lld\n", k, c[k].p, c[k].q);
+            printf("      %-4d %ld/%ld\n", k, c[k].p, c[k].q);
 
         /* DENTRO do raio, |t|=1/10 < R: os termos |c_k t^k| DECRESCEM. Sem bisseção. */
         int decresce = 0, nt = 0;
         printf("      t=1/10 (dentro do raio): |c_{k+1} t^{k+1}| < |c_k t^k| ?\n");
         for(int k=1; k<M; k++){
             /* |c_{k+1}|/10^{k+1}  <  |c_k|/10^k  ⇔  |c_{k+1}.p| c_k.q < 10 |c_k.p| c_{k+1}.q */
-            I128 lhs = (I128)labsL(c[k+1].p) * c[k].q;
-            I128 rhs = (I128)10 * labsL(c[k].p) * c[k+1].q;
+            I128 lhs = i128_mul(i128_from_i64(labsL(c[k+1].p)), i128_from_i64(c[k].q));
+            I128 rhs = i128_mul(i128_from_i64(10 * labsL(c[k].p)), i128_from_i64(c[k+1].q));
             nt++;
-            if(lhs < rhs) decresce++;
+            if(i128_cmp(lhs, rhs) < 0) decresce++;
         }
         printf("      %d razões consecutivas, a decrescer: %d\n", nt, decresce);
         ok("c_1 = 1 e c_2 = −1 exatos", c[1].p==1 && c[1].q==1 && c[2].p==-1 && c[2].q==1);
@@ -218,7 +218,7 @@ int main(void){
             nraz++;
             if(ok_e) entre++;
             if(ant_a && cmp_abs_frac(a,b, ant_a,ant_b) < 0) desce++;
-            printf("      %-4d %lld/%lld                    %s\n", k, a, b, ok_e?"sim":"nao");
+            printf("      %-4d %ld/%ld                    %s\n", k, a, b, ok_e?"sim":"nao");
             ant_a = a; ant_b = b;
         }
         printf("      razões k=4..%d: %d entre 1/4 e 1, e a descer: %d\n\n", MG-1, entre, desce);
@@ -236,10 +236,10 @@ int main(void){
             int hi = (4*2 < 9*1);                   /* 4/9 < 1/2 */
             /* e as duas bordas do enquadramento: (3/2)^2 < (3/2)^3 é óbvio; o clássico
              * (1+1/2)^2 < (1+1/3)^3 contra (1+1/2)^3 > (1+1/3)^4 confirma o corte. */
-            I128 a = 1; for(int i=0;i<2;i++) a *= 3;           /* 3^2 */
-            I128 b = 1; for(int i=0;i<2;i++) b *= 2;           /* 2^2 */
-            I128 c = 1; for(int i=0;i<3;i++) c *= 4;           /* 4^3 */
-            I128 d = 1; for(int i=0;i<3;i++) d *= 3;           /* 3^3 */
+            I128 a = i128_from_i64(1); for(int i=0;i<2;i++) a = i128_smul_i128(a, 3);
+            I128 b = i128_from_i64(1); for(int i=0;i<2;i++) b = i128_smul_i128(b, 2);
+            I128 c = i128_from_i64(1); for(int i=0;i<3;i++) c = i128_smul_i128(c, 4);
+            I128 d = i128_from_i64(1); for(int i=0;i<3;i++) d = i128_smul_i128(d, 3);
             /* (1+1/2)^2 = 9/4, (1+1/3)^3 = 64/27.  9/4 < 64/27 ? 9*27=243, 64*4=256. SIM cresce. */
             int cresce = (9*27 < 64*4);
             /* (1+1/2)^3 = 27/8, (1+1/3)^4 = 256/81.  27/8 > 256/81 ? 27*81=2187, 256*8=2048. SIM desce. */
@@ -264,7 +264,7 @@ int main(void){
         int iguais = 1;                            /* a identidade 2^{-1/2} = 2^{-1/2} */
         /* o que se MEDE: os expoentes −1/2 e −2/4 coincidem em ℚ. */
         Q e1 = qred(-1, 2), e2 = qred(-2, 4);
-        printf("      expoentes em ℚ: %lld/%lld  e  %lld/%lld\n", e1.p, e1.q, e2.p, e2.q);
+        printf("      expoentes em ℚ: %ld/%ld  e  %ld/%ld\n", e1.p, e1.q, e2.p, e2.q);
         ok("para n < 1 há DUAS raízes racionais de x^x iguais: (1/2)^{1/2} = (1/4)^{1/4}, expoente −1/2",
            e1.p==e2.p && e1.q==e2.q && iguais);
         ok("e COLIDEM em n = e^{−1/e} no contínuo; aqui os dois ramos estão de um lado e do outro"
@@ -275,7 +275,7 @@ int main(void){
 
         /* n=4, x=2: a forma fechada É um natural. */
         L x4 = 1; for(int i=0;i<2;i++) x4 *= 2;     /* 2^2 */
-        printf("      e n=4: 2^2 = %lld — a fechada é exacta, a série com t=3 > R não alcança\n", x4);
+        printf("      e n=4: 2^2 = %ld — a fechada é exacta, a série com t=3 > R não alcança\n", x4);
         ok("a forma fechada bate onde a série não chega: n=4 dá x=2 EXATO",
            x4 == 4);
     }
@@ -294,7 +294,7 @@ int main(void){
             }
             nats++;
             if(achou){ inteiros++; if(n==4 && quem==2) so_4=1; }
-            if(n<=6) printf("      %-5lld %s\n", n, achou ? "sim" : "não");
+            if(n<=6) printf("      %-5ld %s\n", n, achou ? "sim" : "não");
         }
         printf("      naturais 2..20: %d   com x natural: %d   e é n=4, x=2: %s\n",
                nats, inteiros, so_4?"sim":"nao");
@@ -313,13 +313,13 @@ int main(void){
         printf("      t=1 > R: |c_{k+1}| > |c_k|  (os coeficientes explodem)\n");
         int cresceu = 0, medidas = 0;
         for(int k=3; k<MG; k++){
-            I128 a = (I128)labsL(CG[k+1].p) * CG[k].q;
-            I128 b = (I128)labsL(CG[k].p) * CG[k+1].q;
+            I128 a = i128_mul(i128_from_i64(labsL(CG[k+1].p)), i128_from_i64(CG[k].q));
+            I128 b = i128_mul(i128_from_i64(labsL(CG[k].p)), i128_from_i64(CG[k+1].q));
             medidas++;
-            if(a > b) cresceu++;
-            if(k>=7) printf("      |c_%d|=%lld/%lld   |c_%d|=%lld/%lld   cresce? %s\n",
+            if(i128_cmp(a, b) > 0) cresceu++;
+            if(k>=7) printf("      |c_%d|=%ld/%ld   |c_%d|=%ld/%ld   cresce? %s\n",
                             k, labsL(CG[k].p), CG[k].q, k+1, labsL(CG[k+1].p), CG[k+1].q,
-                            a>b?"sim":"nao");
+                            i128_cmp(a, b) > 0 ? "sim" : "nao");
         }
         printf("      %d razões, a crescer: %d\n", medidas, cresceu);
         ok("o |c_k| CRESCE com k: a série não alcança fora do raio (t=1 > R ≈ 1/4)",
@@ -338,7 +338,7 @@ int main(void){
         for(L i = 0; i < b; i++) lhs *= a;                 /* 2^4 */
         for(L i = 0; i < a; i++) rhs *= b;                 /* 4^2 */
         Q xa = qred(1, a), xb = qred(1, b);
-        printf("      2^4 = %lld    4^2 = %lld    e os ramos 1/2, 1/4\n", lhs, rhs);
+        printf("      2^4 = %ld    4^2 = %ld    e os ramos 1/2, 1/4\n", lhs, rhs);
         printf("      x=1/2     ν(x)=1/4     ν(ν(x))=1/2\n");
         ok("ν∘ν = id: 2^4 = 4^2, e os ramos 1/2 e 1/4 trocam-se — a volta devolve o original",
            lhs == rhs && lhs == 16 && xa.p==1 && xa.q==2 && xb.p==1 && xb.q==4);

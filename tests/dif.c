@@ -32,10 +32,15 @@
  *   §F6  a régua do corpo diferencial, e onde ele cai no catálogo
  *
  *   cc -O2 -std=c99 -I lib tests/dif.c -o dif && ./dif
+ *   cc -O2 -std=c99 -I. -I../lib dif.c -o dif && ./dif
  */
+#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
+#include <stdint.h>
+#include <unistd.h>
 #include "unidade.h"
 #include "reta.h"
+#include "rt_cf_slot.h"
 #include "racionais.h"
 #include "calculo.h"
 
@@ -86,18 +91,18 @@ static Fr fr(long n, long d){ if(d<0){ n=-n; d=-d; } long g=mdc_f(n,d); Fr r={n/
 static Fr fr_mul_i(Fr x, long k){ return fr(x.n*k, x.d); }
 static Fr fr_div_i(Fr x, long k){ return fr(x.n, x.d*k); }
 static Fr fr_mul(Fr x, Fr y){
-    return fr((long)((long long)x.n*y.n), (long)((long long)x.d*y.d));
+    return fr((long)((int64_t)x.n*y.n), (long)((int64_t)x.d*y.d));
 }
 static Fr fr_div(Fr x, Fr y){
-    return fr((long)((long long)x.n*y.d), (long)((long long)x.d*y.n));
+    return fr((long)((int64_t)x.n*y.d), (long)((int64_t)x.d*y.n));
 }
 static Fr fr_sub(Fr x, Fr y){
-    return fr((long)((long long)x.n*y.d - (long long)y.n*x.d),
-              (long)((long long)x.d*y.d));
+    return fr((long)((int64_t)x.n*y.d - (int64_t)y.n*x.d),
+              (long)((int64_t)x.d*y.d));
 }
 static int fr_eq(Fr x, Fr y){ return x.n==y.n && x.d==y.d; }
 static int fr_cmp(Fr x, Fr y){
-    long long L = (long long)x.n * y.d, R = (long long)y.n * x.d;
+    int64_t L = (int64_t)x.n * y.d, R = (int64_t)y.n * x.d;
     return L < R ? -1 : L > R ? 1 : 0;
 }
 /* sin(x) = x − x³/6 + x⁵/120 − x⁷/5040 — quatro termos, exacto em ℚ */
@@ -115,6 +120,7 @@ static Fr fr_err_sin(int w, Fr h){
 }
 
 int main(void){
+int cf_mem = rt_cf_slot_mem_abre("dados/dif_cf.mem");
 RAIZ_N_EXACTA = rt_raiz_exacta(N, &RAIZ_N);
 printf("\n=== O CORPO DIFERENCIAL — cifra e deformação, como os outros ==============\n");
 printf("    A cifra é a RETA: o operador D, e as funções e^(λt) com λ real, que\n");
@@ -542,31 +548,39 @@ printf("\n§F8  E PREENCHE A ÁREA DO CÍRCULO? Só com o irracional — e o our
     printf("\n      E entre os irracionais, o OURO é o que enche mais uniformemente:\n\n");
     long F[12]; F[0] = 1; F[1] = 1;
     for(int i = 2; i < 12; i++) F[i] = F[i-1] + F[i-2];
-    RtCf ouro = {1, {0}, 0, 0}, raiz2 = {1, {0}, 0, 0}, pie = {1, {0}, 0, 0};
-    for(int i = 0; i < 8; i++) ouro.a[ouro.n++] = 1;           /* [1;1,1,1,…] */
-    raiz2.a[raiz2.n++] = 1; for(int i = 0; i < 7; i++) raiz2.a[raiz2.n++] = 2;  /* [1;2,2,…] */
-    pie.a[pie.n++] = 3; pie.a[pie.n++] = 7; pie.a[pie.n++] = 15; pie.a[pie.n++] = 1;
+    RtCfSlot ouro = rt_cf_slot_word(0, cf_mem);
+    RtCfSlot raiz2 = rt_cf_slot_word(1, cf_mem);
+    RtCfSlot pie = rt_cf_slot_word(2, cf_mem);
+    rt_cf_slot_init(&ouro, 1, ouro.base);
+    for(int i = 0; i < 8; i++) rt_cf_slot_escreve(&ouro, 1);
+    rt_cf_slot_init(&raiz2, 1, raiz2.base);
+    rt_cf_slot_escreve(&raiz2, 1);
+    for(int i = 0; i < 7; i++) rt_cf_slot_escreve(&raiz2, 2);
+    rt_cf_slot_init(&pie, 1, pie.base);
+    rt_cf_slot_escreve(&pie, 3); rt_cf_slot_escreve(&pie, 7);
+    rt_cf_slot_escreve(&pie, 15); rt_cf_slot_escreve(&pie, 1);
     int eq_ouro = 0, gt_raiz2 = 0, gt_pi = 0;
     printf("        palavra     k   q_k    F_{k+1}\n");
     for(int k = 0; k < 8; k++){
         long p, q;
-        if(!rt_op_le(&ouro, k, &p, &q)) continue;
+        if(!rt_cf_slot_le(&ouro, k, &p, &q)) continue;
         printf("        ouro        %-3d %-6ld %ld%s\n", k, q, F[k], q == F[k] ? "" : "  ≠");
         if(q == F[k]) eq_ouro++;
     }
     for(int k = 0; k < 8; k++){
         long p, q;
-        if(!rt_op_le(&raiz2, k, &p, &q)) continue;
+        if(!rt_cf_slot_le(&raiz2, k, &p, &q)) continue;
         if(q > F[k]) gt_raiz2++;
     }
-    for(int k = 0; k < pie.n; k++){
+    int pie_n = rt_cf_slot_n(&pie);
+    for(int k = 0; k < pie_n; k++){
         long p, q;
-        if(!rt_op_le(&pie, k, &p, &q)) continue;
+        if(!rt_cf_slot_le(&pie, k, &p, &q)) continue;
         if(q > F[k]) gt_pi++;
         printf("        pi          %-3d %-6ld %ld\n", k, q, F[k]);
     }
     printf("        raiz2       q_k > F_{k+1} em %d de 8;  pi em %d de %d\n\n",
-           gt_raiz2, gt_pi, pie.n);
+           gt_raiz2, gt_pi, pie_n);
     ok("e o menor buraco é o do OURO — ele é o que preenche melhor: só [1,1,1,…] tem"
        " q_k = F_{k+1} em TODOS os índices; [1;2,2,…] e [3;7,15,…] crescem mais, e isso"
        " é aproximar-se melhor de um racional",
@@ -1002,5 +1016,6 @@ printf("\n§F6  A régua do corpo diferencial, e onde ele cai no catálogo.\n\n"
 }
 
 printf("\n");
+if(cf_mem >= 0) close(cf_mem);
 return falhas ? 1 : 0;
 }

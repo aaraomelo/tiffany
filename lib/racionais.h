@@ -1,6 +1,6 @@
 /* racionais.h — ℚ: A REVERSIBILIDADE DA MULTIPLICAÇÃO NÃO NULA.
  *
- * O `eval.txt` põe a escada e o que cada andar acrescenta:
+ *  ordem do coordenador põe a escada e o que cada andar acrescenta:
  *
  *     ℕ: + ×        ℤ: + × −  (reversibilidade da SOMA)
  *     ℚ: + × − ÷    (reversibilidade da MULTIPLICAÇÃO não nula)
@@ -18,11 +18,11 @@
  * O racional é uma CLASSE, não o par que calhou escrito: (a,b) ~ (c,d) ⟺ ad = bc. Por
  * isso cada operação tem de estar BEM DEFINIDA — trocar o representante não pode mudar
  * o resultado —, e é isso que aqui se mede. */
-/* ═══ O RACIONAL MIGRADO PARA O TEOREMA DO GATO ═══════════════════════════════
- * Três coisas mudam aqui, e as três saem do Gato:
+/* ═══ O RACIONAL MIGRADO PARA O TEOREMA DO GATO — ENVELOPE E₁₆ ════════════════
+ * Três coisas mudam aqui, e as três saem do Gato e de `racionais.tex` §Q16:
  *
- *   1. O racional vive em 32 bits. O par (`dual32.h`) segura os intermédios exactos, e
- *      o 64 deixa de ser um tipo primitivo para ser o dual de dois 32.
+ *   1. O racional vive em 16 bits. O par (`dual16.h`) segura os intermédios exactos de
+ *      16×16; produtos triplos escalam para `dual32.h` sem materializar ℚ.
  *   2. REDUZ-SE ANTES DE MULTIPLICAR. Cancelar em cruz mantém os números pequenos, e é
  *      a fibra a ser tirada primeiro — que é a ordem certa em todo o resto desta casa.
  *   3. O que não cabe CONTA-SE, e não enrola em silêncio. `qz_saturou` é um sítio
@@ -35,9 +35,11 @@
 #ifndef RACIONAIS_H
 #define RACIONAIS_H
 
+#include "dual16.h"
 #include "dual32.h"
+#include "i128.h"
 
-typedef struct { int p, q; } Qz;               /* p/q em 32 bits, com q ≠ 0 */
+typedef struct { int16_t p, q; } Qz;         /* p/q em E₁₆, com q ≠ 0 */
 
 static long qz_saturou = 0;    /* o que não coube — contado À PARTE dos defeitos */
 
@@ -68,8 +70,8 @@ static long qz_mdc(long a, long b){
     while(b){ long t = a % b; a = b; b = t; }
     return a ? a : 1;
 }
-/* cabe em 32 bits com sinal? — a pergunta do Gato, feita a cada valor que se guarda */
-static int qz_cabe(long v){ return v <= 2147483647L && v >= -2147483647L; }
+/* cabe em E₁₆? — a pergunta do Gato, feita a cada valor que se guarda */
+static int qz_cabe(long v){ return v <= 32767L && v >= -32767L; }
 
 /* a forma REDUZIDA, com o sinal no numerador — e é ela a única por classe.
  * Aceita `long` para que os chamadores não mudem, e é AQUI que se decide se cabe. */
@@ -81,19 +83,18 @@ static Qz qz(long p, long q){
     if(p == 0) q = 1;
     if(!qz_cabe(p) || !qz_cabe(q)){
         qz_saturou++;                    /* não cabe: conta-se, e NÃO se enrola calado */
-        r.p = (p < 0) ? -2147483647 : 2147483647;
+        r.p = (p < 0) ? (int16_t)-32767 : (int16_t)32767;
         r.q = 1;
         return r;
     }
     qz_ve(p); qz_ve(q);
-    r.p = (int)p; r.q = (int)q;
+    r.p = (int16_t)p; r.q = (int16_t)q;
     return r;
 }
 /* ── A ORDEM E A IGUALDADE: PELO PAR, e nunca saturam ─────────────────────────
- * O produto cruzado de dois de 32 é exacto no par, sempre. Esta é a operação que a casa
- * mais usa, e é a que passa a não ter tecto nenhum. */
-static int qz_igual(Qz a, Qz b){ return d32_cmp_prod(a.p, b.q, b.p, a.q) == 0; }
-static int qz_menor(Qz a, Qz b){ return d32_cmp_prod(a.p, b.q, b.p, a.q) < 0; }
+ * O produto cruzado de dois de 16 é exacto no par D32, sempre. */
+static int qz_igual(Qz a, Qz b){ return d16_cmp_prod(a.p, b.q, b.p, a.q) == 0; }
+static int qz_menor(Qz a, Qz b){ return d16_cmp_prod(a.p, b.q, b.p, a.q) < 0; }
 
 /* ── A SOMA: cancela-se em cruz ANTES de multiplicar ──────────────────────────
  * a/b + c/d = (a·(d/g) + c·(b/g)) / (b·(d/g)), com g = mdc(b,d). Assim o denominador é o
@@ -136,8 +137,15 @@ static int qz_divide(Qz a, Qz b, Qz *r){
 }
 /* a DENSIDADE: entre dois há sempre o ponto médio — e é ele a testemunha */
 static Qz qz_medio(Qz a, Qz b){
-    Qz s = qz_soma(a, b);
-    return qz(s.p, 2L * s.q);
+    I128 n = i128_add(i128_smul((int64_t)a.p, (int64_t)b.q),
+                        i128_smul((int64_t)b.p, (int64_t)a.q));
+    I128 den = i128_smul_i128(i128_from_i64(2LL * (int64_t)a.q), (int64_t)b.q);
+    if(!i128_fits_i64(n) || !i128_fits_i64(den)){ qz_saturou++; return qz(0,1); }
+    int64_t num = i128_to_i64(n), d = i128_to_i64(den);
+    long g = qz_mdc(num < 0 ? -num : num, d < 0 ? -d : d);
+    num /= g; d /= g;
+    if(!qz_cabe(num) || !qz_cabe(d)){ qz_saturou++; return qz(0,1); }
+    return qz((long)num, (long)d);
 }
 /* o ARQUIMEDIANO: existe n natural com n > |q| — e o n exibe-se */
 static long qz_arquimediano(Qz a){
@@ -145,51 +153,43 @@ static long qz_arquimediano(Qz a){
     return n / a.q + 1;                        /* ⌊|p|/q⌋ + 1 serve sempre */
 }
 /* ── COMPARAR |a − b| COM ε SEM FORMAR A DIFERENÇA ────────────────────────────
- * Este é o sítio que faltava migrar, e é o mesmo defeito que a aritmética natural já
- * tinha diagnosticado: para decidir |a − b| < ε formava-se a diferença, e formá-la
- * obriga a multiplicar os denominadores — o produto é o QUADRADO do que os números
- * precisam. Era isso que fazia o módulo de Cauchy saturar.
- *
  *      |a.p/a.q − b.p/b.q| < e.p/e.q   ⟺   |a.p·b.q − b.p·a.q| · e.q  <  e.p · a.q·b.q
  *
- * Os dois lados são produtos de TRÊS inteiros de 32 bits, e o par (`dual32.h`) segura-os
- * exactos. Nenhum racional novo é construído, nenhum denominador é reduzido, e não há
- * nada a saturar. É a regra desta casa: comparar em vez de construir. */
+ * Pares 16×16 via `d16_mult`; o produto triplo escala para D64 sem construir ℚ. */
 static int qz_dist_menor(Qz a, Qz b, Qz eps){
-    if(eps.p <= 0) return 0;
-    /* o numerador da diferença, em módulo, como PAR — sem o formar como racional */
-    unsigned ap = d32_abs(a.p), bq = d32_abs(b.q);
-    unsigned bp = d32_abs(b.p), aq = d32_abs(a.q);
-    int s1 = (a.p < 0) ? -1 : 1, s2 = (b.p < 0) ? -1 : 1;   /* q > 0 sempre */
-    D64 x = d64_mult(ap, bq), y = d64_mult(bp, aq), n;
-    if(s1 == s2){
-        n = (d64_cmp(x,y) >= 0) ? d64_menos(x,y) : d64_menos(y,x);
-    } else {
-        n = d64_soma(x, y);
-    }
-    D64 d = d64_mult((unsigned)a.q, (unsigned)b.q);
-    D64 esq, dir;
-    if(!d64_esc(n, d32_abs(eps.q), &esq)) return 0;         /* não coube: recusa */
-    if(!d64_esc(d, d32_abs(eps.p), &dir)) return 0;
-    return d64_cmp(esq, dir) < 0;
+    if(eps.p <= 0 || eps.q <= 0) return 0;           /* ε inválido ou saturado */
+    I128 x = i128_smul((int64_t)a.p, (int64_t)b.q);
+    I128 y = i128_smul((int64_t)b.p, (int64_t)a.q);
+    I128 n = i128_cmp(x, y) >= 0 ? i128_sub(x, y) : i128_sub(y, x);
+    if(i128_negativo(n)) n = i128_neg(n);
+    I128 esq = i128_smul_i128(n, (int64_t)(uint16_t)d16_abs_u(eps.q));
+    I128 d = i128_smul((int64_t)(uint16_t)d16_abs_u(a.q), (int64_t)(uint16_t)d16_abs_u(b.q));
+    I128 dir = i128_smul_i128(d, (int64_t)(uint16_t)d16_abs_u(eps.p));
+    return i128_cmp(esq, dir) < 0;
 }
 /* ── COMPARAR x² COM UM INTEIRO SEM FORMAR x² ─────────────────────────────────
- * O mesmo defeito noutro sítio: para saber se x² < c formava-se x², e x² tem o DOBRO dos
- * dígitos de x — logo uma bisseção honesta em 32 bits morria a meio. Pelo par, p² e c·q²
- * são exactos e a comparação decide sem construir nada. Devolve −1, 0, +1, e 0 com
- * `*bom = 0` quando nem o par chega (que não acontece para c pequeno). */
+ * p² e c·q² são exactos no par; a comparação decide sem construir x². */
 static int qz_cmp_quad(Qz x, long c, int *bom){
     if(bom) *bom = 1;
     if(c < 0) return 1;
-    D64 e = d64_mult(d32_abs(x.p), d32_abs(x.p));
-    D64 q2 = d64_mult((unsigned)x.q, (unsigned)x.q), d;
-    if(!d64_esc(q2, (unsigned)c, &d)){ if(bom) *bom = 0; return 0; }
-    return d64_cmp(e, d);
+    D32 e = d16_mult(x.p, x.p);
+    D32 q2 = d16_mult(x.q, x.q);
+    D64 d;
+    if(!d64_esc(d64_de((unsigned)d32_to_i32(q2)), (unsigned)c, &d)){ if(bom) *bom = 0; return 0; }
+    return d64_cmp(d64_de((unsigned)d32_to_i32(e)), d);
 }
 /* e o mesmo com a diferença dos DOIS lados de um encaixe: |a − b| ≤ ε */
 static int qz_dist_menor_ig(Qz a, Qz b, Qz eps){
-    return qz_dist_menor(a, b, eps) || qz_igual(a, b);
+    if(eps.p <= 0 || eps.q <= 0) return 0;
+    I128 x = i128_smul((int64_t)a.p, (int64_t)b.q);
+    I128 y = i128_smul((int64_t)b.p, (int64_t)a.q);
+    I128 n = i128_cmp(x, y) >= 0 ? i128_sub(x, y) : i128_sub(y, x);
+    if(i128_negativo(n)) n = i128_neg(n);
+    I128 esq = i128_smul_i128(n, (int64_t)(uint16_t)d16_abs_u(eps.q));
+    I128 d = i128_smul((int64_t)(uint16_t)d16_abs_u(a.q), (int64_t)(uint16_t)d16_abs_u(b.q));
+    I128 dir = i128_smul_i128(d, (int64_t)(uint16_t)d16_abs_u(eps.p));
+    return i128_cmp(esq, dir) <= 0;
 }
 /* a inclusão ℤ ↪ ℚ: n ↦ n/1 */
-static Qz qz_de_inteiro(long n){ Qz r; r.p = n; r.q = 1; return r; }
+static Qz qz_de_inteiro(long n){ return qz(n, 1); }
 #endif

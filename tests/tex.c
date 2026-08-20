@@ -13,13 +13,13 @@ static int quer_tempo(void){
     if(v < 0){ const char *e = getenv("TEX_TEMPO"); v = (e && e[0] == '1') ? 1 : 0; }
     return v;
 }
-static long agora_ms(void){
+static int64_t agora_ms(void){
     struct timespec t; clock_gettime(CLOCK_MONOTONIC, &t);
-    return t.tv_sec * 1000L + t.tv_nsec / 1000000L;
+    return (int64_t)t.tv_sec * 1000 + t.tv_nsec / 1000000;
 }
 #else
 static int quer_tempo(void){ return 0; }
-static long agora_ms(void){ return 0; }
+static int64_t agora_ms(void){ return 0; }
 #endif
 
 /* ── funcoes wrapper movidas do nucleo: costuras nativas, parsers de setup, macros, a volta ──
@@ -336,7 +336,8 @@ static long expande_corre(char *s, long n, char *o, long *quantas){
             continue;
         }
         if(!strncmp(nome,"newcommand",10) || !strncmp(nome,"providecommand",14)
-              || !strncmp(nome,"renewcommand",12) || !strcmp(nome,"begin") || !strcmp(nome,"end")){
+              || !strncmp(nome,"renewcommand",12) || !strcmp(nome,"begin") || !strcmp(nome,"end")
+              || !strcmp(nome,"interfacen")){
             if(o) o[len] = s[i]; len++; i++; continue;
         }
         int m = -1;
@@ -843,7 +844,7 @@ static void carrega_config(void){
 }
 
 int compila_ficheiro(const char *ent, const char *sai){
-    long t0 = 0, t_le = 0, t_cfg = 0, t_mac = 0, t_write = 0;
+    int64_t t0 = 0, t_le = 0, t_cfg = 0, t_mac = 0, t_write = 0;
     long t_pass0 = 0, t_pass1 = 0, t_pass2 = 0;
 #ifdef TEX_COM_LIBC_WASM
     /* esquilo no .bss: estrela grau 6 sem estado.
@@ -858,6 +859,7 @@ int compila_ficheiro(const char *ent, const char *sai){
     N_MAC = 0; EXPANDIDAS = 0;
     N_DES = 0; CORPO_CORRENTE = 0;
     FONTE_OTF = 0; N_FPDF = 0; N_ESP = 0; N_XGC = 0;
+    tex_interfacen(0);           /* zera declaração hexal — repõe-se em interface_do_tex */
     /* bestiário no LS; as CARTAS no DISCO apontavam ao FICH past MARCO — UAF após volta.
      * CARTA_TENTADO=0 reabre as fontes via miss (1 bit / neuronio). */
     CARTA_TENTADO = 0; CARTA = 0; N_CARTA = 0;
@@ -980,11 +982,11 @@ int compila_ficheiro(const char *ent, const char *sai){
         int n_ant = N_TOC;
         for(int t = 0; t < n_ant && t < MAX_TOC; t++) PAG_ANT[t] = TOC[t].pag;
         Pdf pp; pdf_abre(&pp, pdfbuf, pdf_cap); pagina_abre(&pp);
-        { long tp = 0; if(quer_tempo()) tp = agora_ms();
+        { int64_t tp = 0; if(quer_tempo()) tp = agora_ms();
           compila(s, &pp, &g);
           pdf_fecha(&pp);
           if(quer_tempo()){
-              long dt = agora_ms() - tp;
+              int64_t dt = agora_ms() - tp;
               if(passo == 0) t_pass0 = dt;
               else if(passo == 1) t_pass1 = dt;
               else t_pass2 = dt;
@@ -1012,7 +1014,7 @@ int compila_ficheiro(const char *ent, const char *sai){
         free(s);
         return 1;
     }
-    { long tw = 0; if(quer_tempo()) tw = agora_ms();
+    { int64_t tw = 0; if(quer_tempo()) tw = agora_ms();
 #ifdef TEX_COM_LIBC_WASM
       marca_saida((char*)pdfbuf, (int)pdflen);       /* slot 14: MOVE(+1), sem cópia SAIDA */
 #else
@@ -2319,6 +2321,42 @@ int main(int argc, char **argv){
         ok("§X18 o titulo vem do IDIOMA (refname): o e-circunflexo de «Referencias»"
            " esta na pagina, posto pela config e nao por mim",
            ne >= 1);
+    }
+
+    /* ── §X19  FIXO_MIL int32 — fronteira I/O, interior int64 ─────────────── */
+    puts("§X19 fixo_mil_i32: mantissa 10^-3 de ponto, acumula int64, cabe em int32");
+    {
+        static const char *casos[] = {
+            "0", "1", "72", "3.14", "10.5", "-2.5", "0.001", "21.91", "6mm", NULL
+        };
+        int n_ok = 0, n_tot = 0;
+        for(int i = 0; casos[i]; i++){
+            const char *e1, *e2;
+            long a = fixo_mil(casos[i], &e1);
+            int32_t b = fixo_mil_i32(casos[i], &e2);
+            n_tot++;
+            if(a == (long)b && e1 == e2) n_ok++;
+        }
+        ok("§X19 fixo_mil_i32 concorda com fixo_mil nos casos que cabem em int32",
+           n_ok == n_tot);
+    }
+
+    /* ── §X20  FIXO_MIL via rt_le_decimal — arredondamento na 4.ª casa ─────── */
+    puts("§X20 fixo_mil: rt_le_decimal_end + unidade 10^-3");
+    {
+        static const struct { const char *s; long esp; } casos[] = {
+            { "3.141", 3141 }, { "3.1414", 3141 }, { "3.1415", 3142 },
+            { "3.14149", 3141 }, { "10", 10000 }, { "1e1", 10000 }, { NULL, 0 }
+        };
+        int n_ok = 0, n_tot = 0;
+        for(int i = 0; casos[i].s; i++){
+            const char *e;
+            long v = fixo_mil(casos[i].s, &e);
+            n_tot++;
+            if(v == casos[i].esp) n_ok++;
+        }
+        ok("§X20 fixo_mil concorda com milésimos exactos e arredonda na 4.ª casa",
+           n_ok == n_tot);
     }
 
     /* ── o fecho ─────────────────────────────────────────────────────────── */

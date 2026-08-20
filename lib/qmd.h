@@ -14,6 +14,7 @@
 #ifndef QMD_H
 #define QMD_H
 
+#include <stdint.h>
 #include "reta.h"   /* rt_inv_mod: a inversão em F_p */
 
 typedef struct { long a, b, den; } Qmd;
@@ -52,8 +53,8 @@ static Qmd qmd_mul(Qmd x, Qmd y, long m, long D){
 }
 
 static int qmd_eq(Qmd x, Qmd y){
-    return (long long)x.a * y.den == (long long)y.a * x.den
-        && (long long)x.b * y.den == (long long)y.b * x.den;
+    return (int64_t)x.a * y.den == (int64_t)y.a * x.den
+        && (int64_t)x.b * y.den == (int64_t)y.b * x.den;
 }
 
 static void qmd_conj(Qmd x, long *ca, long *cb){
@@ -62,13 +63,13 @@ static void qmd_conj(Qmd x, long *ca, long *cb){
 }
 
 /* numerador de N(x)·den² = a² − b²m²D */
-static long long qmd_norm_num(Qmd x, long m, long D){
-    long long md = (long long)m * m * D;
-    return (long long)x.a * x.a - (long long)x.b * x.b * md;
+static int64_t qmd_norm_num(Qmd x, long m, long D){
+    int64_t md = (int64_t)m * m * D;
+    return (int64_t)x.a * x.a - (int64_t)x.b * x.b * md;
 }
 
 static Qmd qmd_inv(Qmd x, long m, long D){
-    long long c = qmd_norm_num(x, m, D);
+    int64_t c = qmd_norm_num(x, m, D);
     return qmd_make((long)(x.den * x.a), (long)(-x.den * x.b), (long)c);
 }
 
@@ -85,16 +86,16 @@ static Qmd qmd_pow(Qmd x, int k, long m, long D){
 static Qmd qmd_one(void){ return qmd_make(1, 0, 1); }
 
 /* numerador de N(α−1) com α = (a+b·m√D)/den */
-static long long qmd_norm_am1(Qmd alpha, long m, long D){
+static int64_t qmd_norm_am1(Qmd alpha, long m, long D){
     long am1 = alpha.a - alpha.den;
-    long long md = (long long)m * m * D;
-    return (long long)am1 * am1 - (long long)alpha.b * alpha.b * md;
+    int64_t md = (int64_t)m * m * D;
+    return (int64_t)am1 * am1 - (int64_t)alpha.b * alpha.b * md;
 }
 
 /* 1/(α−1) pela fórmula fechada do thm:serie-quadratica */
 static Qmd qmd_inv_am1(Qmd alpha, long m, long D){
     long am1 = alpha.a - alpha.den;
-    long long norm = qmd_norm_am1(alpha, m, D);
+    int64_t norm = qmd_norm_am1(alpha, m, D);
     return qmd_make(alpha.den * am1, -alpha.den * alpha.b, (long)norm);
 }
 
@@ -106,7 +107,7 @@ static int qmd_verifica_rapida(long m, long D, Qmd alpha){
     long ca, cb;
     qmd_conj(am1, &ca, &cb);
     Qmd prod = qmd_mul(am1, qmd_make(ca, cb, am1.den), m, D);
-    long long den2 = (long long)am1.den * am1.den;
+    int64_t den2 = (int64_t)am1.den * am1.den;
     if(!qmd_eq(prod, qmd_make((long)qmd_norm_am1(alpha, m, D), 0, (long)den2)))
         return 0;
     if(!qmd_eq(qmd_inv(am1, m, D), qmd_inv_am1(alpha, m, D)))

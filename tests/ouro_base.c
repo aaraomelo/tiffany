@@ -36,7 +36,8 @@
 #include <stdio.h>
 
 #include "unidade.h"
-typedef long long big;
+
+typedef long big;
 
 /* φ^k = F(k)·φ + F(k−1), válido para k negativo também: F(−n) = (−1)^(n+1)·F(n) */
 #define KALTO  10
@@ -155,7 +156,7 @@ printf("\n§O4  A ambiguidade que toda base tem: aqui é 1 = 0,11, e é FINITA.\
     /* φ⁻¹ + φ⁻² = φ⁻²(φ + 1) = φ⁻²·φ² = 1. Em Z[φ]: φ⁻¹ = φ−1, φ⁻² = −φ+2 */
     big A = Fi(-2) + Fi(-3), B = Fi(-1) + Fi(-2);   /* φ⁻¹ + φ⁻², como a + bφ */
     int igual_a_um = (A == 1 && B == 0);
-    printf("      φ⁻¹ + φ⁻²  =  %lld + %lld·φ\n", (long long)A, (long long)B);
+    printf("      φ⁻¹ + φ⁻²  =  %ld + %ld·φ\n", (long)A, (long)B);
     printf("      logo       0,11  =  1        %s\n", igual_a_um ? "exato ✓" : "NÃO");
     ok("a junta do sistema é 1 = 0,11 — dois dígitos, não uma cauda", igual_a_um);
     printf("\n      Em base dez a mesma junta é 0,999… = 1, e precisa de uma cauda infinita para\n");

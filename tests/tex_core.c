@@ -73,6 +73,7 @@
  *   como texto, nao como expoente.
  */
 #include <stdio.h>
+#include <stdint.h>
 #include <time.h>
 #include <stdlib.h>
 #include <string.h>
@@ -86,9 +87,66 @@
 int INTERFACE_N = 6;   /* hexal por defeito */
 int LADO_N = 0;        /* 0=Hurwitz (bilinear); 1=Gentil */
 #endif
+static int INTERFACE_DECL = 0; /* \interfacen{N} no .tex: declara o ciclo (6,12,24…) */
+void tex_interfacen(long v){
+    if(v == 0) INTERFACE_DECL = 0;
+    else if(v >= 6 && v <= 384) INTERFACE_DECL = (int)v;
+}
+static void interface_do_tex(const char *s, long n){
+    for(long i = 0; i + 12 < n; i++){
+        if(s[i] != '\\' || strncmp(s + i + 1, "interfacen", 10)) continue;
+        long q = i + 11;
+        while(q < n && (s[q] == ' ' || s[q] == '\n' || s[q] == '\t' || s[q] == '\r')) q++;
+        if(q >= n || s[q] != '{') continue;
+        char *ep = NULL;
+        long v = strtol(s + q + 1, &ep, 10);
+        if(ep != s + q + 1 && v >= 6 && v <= 384){ INTERFACE_DECL = (int)v; return; }
+    }
+}
 #include "spline.h"   /* a carta da fonte: a largura vem da CURVA */
 #include "disco.h"    /* «o ficheiro É o vector»: os buffers grandes vivem no DISCO */
 #include "le_num.h"   /* o strtod e o hex do núcleo, sem libc --- fonte única, travada em str2dbl_dual.c */
+#ifndef TEX_COM_LIBC_WASM
+#include "reta.h"     /* rt_le_decimal_end — parse exacto na fronteira I/O (Fase C) */
+#else
+/* wasm: só rt_le_decimal_end — reta.h inteira puxa RtIdaVolta… que o traduz não traduz */
+static int rt_le_decimal_end(const char *s, int *sinal, long *p, long *q, const char **end){
+    int i = 0;
+    while(s[i] == ' ' || s[i] == '\t') i++;
+    *sinal = 1;
+    if(s[i] == '-'){ *sinal = -1; i++; }
+    else if(s[i] == '+') i++;
+    long v = 0, d = 1;
+    int digitos = 0;
+    while(s[i] >= '0' && s[i] <= '9'){
+        if(v > 922337203685477580L) return 0;
+        v = v*10 + (s[i]-'0'); i++; digitos++;
+    }
+    if(s[i] == '.'){
+        i++;
+        while(s[i] >= '0' && s[i] <= '9'){
+            if(v > 922337203685477580L || d > 922337203685477580L) return 0;
+            v = v*10 + (s[i]-'0'); d *= 10; i++; digitos++;
+        }
+    }
+    if(!digitos) return 0;
+    if(s[i] == 'e' || s[i] == 'E'){
+        i++;
+        int es = 1;
+        if(s[i] == '-'){ es = -1; i++; }
+        else if(s[i] == '+') i++;
+        int e = 0;
+        while(s[i] >= '0' && s[i] <= '9'){ e = e*10 + (s[i]-'0'); i++; if(e > 30) return 0; }
+        for(int k = 0; k < e; k++){
+            if(es > 0){ if(v > 922337203685477580L) return 0; v *= 10; }
+            else       { if(d > 922337203685477580L) return 0; d *= 10; }
+        }
+    }
+    *p = v; *q = d;
+    if(end) *end = s + i;
+    return 1;
+}
+#endif
 
 /* ── 0 DE MEMÓRIA: OS BUFFERS GRANDES VÃO PARA O DISCO ───────────────────────────────
  *
@@ -1177,25 +1235,24 @@ static long deforma(long folga, int n_esp, long *por_espaco){
  * do ficheiro (10^-3). Os valores do estilo têm até três casas — a leitura é EXACTA, zero
  * arredondamento; com uma quarta casa arredonda UMA vez, o único e o correcto. É o
  * str2dbl de lib/le_num.h sem o passo final para o contínuo: a mantissa fica inteira. */
+/* Fase C: rt_le_decimal_end + unidade 10^-3 (milésimos de ponto). Arredonda na 4.ª casa. */
+static long fixo_mil_de_pq(int sg, long p, long q){
+    if(q <= 0) return 0;
+    int64_t num = (int64_t)p * 1000 + q / 2;
+    int64_t v = num / q;
+    return sg < 0 ? -(long)v : (long)v;
+}
 static long fixo_mil(const char *s, const char **end){
-    const char *p = s; int neg = 0, houve = 0;
-    while(*p == ' ' || *p == '\t') p++;
-    if(*p == '+' || *p == '-'){ neg = (*p == '-'); p++; }
-    long v = 0;
-    while(*p >= '0' && *p <= '9'){ v = v * 10 + (*p - '0'); houve = 1; p++; }
-    v *= 1000;
-    if(*p == '.'){
-        p++; long casa = 100; int quarta = -1;
-        while(*p >= '0' && *p <= '9'){
-            if(casa){ v += (*p - '0') * casa; casa /= 10; }
-            else if(quarta < 0) quarta = *p - '0';
-            houve = 1; p++;
-        }
-        if(quarta >= 5) v += 1;
-    }
-    if(!houve){ if(end) *end = s; return 0; }
-    if(end) *end = p;
-    return neg ? -v : v;
+    int sg; long p, q; const char *e;
+    if(!rt_le_decimal_end(s, &sg, &p, &q, &e)){ if(end) *end = s; return 0; }
+    if(end) *end = e;
+    return fixo_mil_de_pq(sg, p, q);
+}
+static int32_t fixo_mil_i32(const char *s, const char **end){
+    long r = fixo_mil(s, end);
+    if(end && *end == s) return 0;
+    if(r < (long)INT32_MIN || r > (long)INT32_MAX) return 0;
+    return (int32_t)r;
 }
 /* a unidade é uma RAZÃO de inteiros — 72 pt por polegada, 2,54 cm por polegada — e o
  * valor converte-se por produto cruzado, com a divisão única do escrever */
@@ -3028,6 +3085,7 @@ static void pdf_fecha(Pdf *p){
       int torre_lado = (torre_alc >= 3) ? 1 : 0;
       int torre_iface = 6, ik = torre_alc / 3;
       while(ik > 0){ torre_iface *= 2; ik--; }
+      if(INTERFACE_DECL >= 6) torre_iface = INTERFACE_DECL;
       { extern int INTERFACE_N; extern int LADO_N;
         if(torre_iface >= 6) INTERFACE_N = torre_iface;
         LADO_N = torre_lado;
@@ -3125,42 +3183,42 @@ static void pdf_fecha(Pdf *p){
       long piN = 0;
       if(lado){
           /* Gentil/Lebesgue: meia-corda — cap cresce a cada 3 andares (corpo_topologico) */
-          long long sq = S;
+          int64_t sq = S;
           for(int s = 0; s < iters; s++){
-              long long sq2 = (sq * sq) / S, inner = S - sq2;
+              int64_t sq2 = (sq * sq) / S, inner = S - sq2;
               if(inner < 0) inner = 0;
-              { unsigned long long ux = (unsigned long long)inner * (unsigned long long)S;
-                unsigned long long g = ux, h = (g + 1) / 2;
+              { uint64_t ux = (uint64_t)inner * (uint64_t)S;
+                uint64_t g = ux, h = (g + 1) / 2;
                 while(h < g){ g = h; h = (g + ux / g) / 2; }
-                inner = (long long)g; }
-              { unsigned long long ux = (unsigned long long)(2 * S + 2 * inner) * (unsigned long long)S;
-                unsigned long long g = ux, h = (g + 1) / 2;
+                inner = (int64_t)g; }
+              { uint64_t ux = (uint64_t)(2 * S + 2 * inner) * (uint64_t)S;
+                uint64_t g = ux, h = (g + 1) / 2;
                 while(h < g){ g = h; h = (g + ux / g) / 2; }
                 if(g <= 0) g = 1;
-                sq = (sq * S) / (long long)g; }
+                sq = (sq * S) / (int64_t)g; }
           }
-          { unsigned long long num = (unsigned long long)sq * 1000000000ULL;
+          { uint64_t num = (uint64_t)sq * 1000000000u;
             int e = iters + 1;
             while(e > 0){ num <<= 1; e--; }
-            piN = (long)(num / (unsigned long long)S); }
+            piN = (long)(num / (uint64_t)S); }
       } else {
           long q = (dim > 0 && dim < 31) ? ((long)dim << (dim - 1)) : (1L << 30);
-          long long c = -S;
+          int64_t c = -S;
           for(int s = 0; s < iters; s++){
-              long long t = (S + c) / 2;
-              { unsigned long long ux = (unsigned long long)t * (unsigned long long)S;
-                unsigned long long g = ux, h = (g + 1) / 2;
+              int64_t t = (S + c) / 2;
+              { uint64_t ux = (uint64_t)t * (uint64_t)S;
+                uint64_t g = ux, h = (g + 1) / 2;
                 while(h < g){ g = h; h = (g + ux / g) / 2; }
-                c = (long long)g; }
+                c = (int64_t)g; }
           }
-          { long long t = (S - c) / 2;
-            unsigned long long g, ux = (unsigned long long)t * (unsigned long long)S;
-            g = ux; { unsigned long long h = (g + 1) / 2;
+          { int64_t t = (S - c) / 2;
+            uint64_t g, ux = (uint64_t)t * (uint64_t)S;
+            g = ux; { uint64_t h = (g + 1) / 2;
             while(h < g){ g = h; h = (g + ux / g) / 2; } }
-            { unsigned long long num = g * 1000000000ULL;
+            { uint64_t num = g * 1000000000u;
               int e = iters + 1;
               while(e > 0){ num <<= 1; e--; }
-              piN = (long)(num / (unsigned long long)S); } }
+              piN = (long)(num / (uint64_t)S); } }
       }
       int obj = p->nobj + 1; p->nobj = obj;
       p->off[obj] = s_pos(&p->sf);
@@ -3612,6 +3670,7 @@ static int bib_num(const char *c, int len){
 static void compila(const char *s, Pdf *p, long *glifos){
     Est *e = EST_E;
     memset(e, 0, sizeof(Est));
+    interface_do_tex(s, (long)strlen(s));
     BX_ON = 0; BX_ATESTOU = 0; BX_FECHOU = 0;
     BX_Y0 = 0; BX_Y1 = 0; BX_X0 = 0; BX_XM = 0; BX_PAD = 0; BX_M3 = 0;
     e->p = p; e->fonte = F_REG; e->nfp = 0;
@@ -5014,6 +5073,21 @@ static void compila(const char *s, Pdf *p, long *glifos){
                  * Sem isto, \morfv não dilata — Ind^8 exige a estrela. */
                 e->estrela = 1;
                 i = j; continue;
+            }
+            if(!strcmp(cmd, "interfacen")){
+                /* Declara o ciclo hexal no /SementeEstrela: 6, 12, 24…
+                 * Sobrescreve o derivado do alcance da espiral — o paper
+                 * diz em que ciclo da família vive (Lei 6 computacional). */
+                long q = ate_abre(s, j, n);
+                if(q < n && s[q] == '{'){
+                    const char *pr = s + q + 1;
+                    char *ep = NULL;
+                    long v = strtol(pr, &ep, 10);
+                    if(ep != pr && v >= 6 && v <= 384) INTERFACE_DECL = (int)v;
+                    long f = fecha_chave(s, n, q);
+                    if(f >= 0) q = f + 1;
+                }
+                i = q; continue;
             }
             if(!strcmp(cmd, "morfv")){
                 /* Coordenada H (thm:morfologico): Ind^8 / Estrela. Sem estrela,

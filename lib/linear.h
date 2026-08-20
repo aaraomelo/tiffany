@@ -1,6 +1,6 @@
 /* linear.h — ÁLGEBRA LINEAR EXATA, E O GUME QUE PROCURA A HIPÓTESE QUE CARREGA.
  *
- * O `eval.txt` acrescenta uma exigência que NÃO é conteúdo, é MECANISMO:
+ *  ordem do coordenador acrescenta uma exigência que NÃO é conteúdo, é MECANISMO:
  *
  *     «um gume obrigatório em cada teorema: SE A HIPÓTESE FOR RETIRADA, PROCURAR
  *      AUTOMATICAMENTE UM CONTRA-EXEMPLO. Aí não é só resolver álgebra linear: é fazer o

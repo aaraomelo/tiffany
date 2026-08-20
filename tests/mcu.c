@@ -161,16 +161,16 @@ printf("\n§U2  O BARRAMENTO casado: Γ = 0, e o ganho MÁXIMO é o casamento.\n
      * e a igualdade da-se SO em Z = Z0. E a media aritmetico-geometrica, e mede-se em
      * INTEIROS sem varrer nada. */
     {
-        long long Z0i = (long long)Z0, casos=0, vale=0, so_igual=0;
-        for(long long Z=1; Z<=400; Z++){
-            long long lhs = 4*Z0i*Z, rhs = (Z0i+Z)*(Z0i+Z);
+        long casos=0, vale=0, so_igual=0;
+        for(long Z=1; Z<=400; Z++){
+            long lhs = 4*Z0*Z, rhs = (Z0+Z)*(Z0+Z);
             casos++;
             if(lhs <= rhs) vale++;
-            if((lhs == rhs) == (Z == Z0i)) so_igual++;
+            if((lhs == rhs) == (Z == Z0)) so_igual++;
         }
-        printf("      Z inteiros de 1 a 400 (Z0 = %lld):  4 Z0 Z <= (Z0+Z)^2 em %lld\n",
-               Z0i, vale);
-        printf("      e a IGUALDADE da-se exatamente em Z = Z0: %lld de %lld\n", so_igual, casos);
+        printf("      Z inteiros de 1 a 400 (Z0 = %ld):  4 Z0 Z <= (Z0+Z)^2 em %ld\n",
+               Z0, vale);
+        printf("      e a IGUALDADE da-se exatamente em Z = Z0: %ld de %ld\n", so_igual, casos);
         ok("P e maxima em Z_L = Z0, e a prova e 0 <= (Z0-Z)^2 — identidade, em inteiros;"
            " e Γ = 0 exactamente no casamento (numerador Z-Z0)",
            vale==casos && so_igual==casos && casos==400 && malG==0);

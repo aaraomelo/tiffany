@@ -28,13 +28,19 @@
  *
  *   cc -O2 -std=c99 -Wall -I lib tests/entrega.c -o entrega
  */
+#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include "unidade.h"
 #include "reta.h"
+#include "rt_cf_slot.h"
 #include "aritmetica.h"
 
 int main(void){
+int cf_mem = rt_cf_slot_mem_abre("dados/entrega_cf.mem");
+RtCfSlot cf0 = rt_cf_slot_word(0, cf_mem);
 printf("\n=== A ENTREGA EM FRACÇÃO CONTÍNUA ==========================================\n");
 printf("    O número não sai em decimal arredondado: sai como a PALAVRA que o gera,\n");
 printf("    em long, e quem recebe reconstrói o corte que quiser.\n");
@@ -92,11 +98,12 @@ printf("\n§E2  A ida e volta pela fracção contínua é EXACTA — e o double 
 
             /* CAMINHO 1: pela palavra. p/q → [a₀;…] → p'/q', e compara-se por produto
              * cruzado, que é como se comparam fracções sem as dividir. */
-            RtCf c;
-            rt_cf_de(sg, p, q, &c);
-            if(c.n > maior_n) maior_n = c.n;
+            cf0 = rt_cf_slot_word(0, cf_mem);
+            rt_cf_slot_de(sg, p, q, &cf0);
+            int cn = rt_cf_slot_n(&cf0);
+            if(cn > maior_n) maior_n = cn;
             long p2, q2;
-            if(!c.saturou && rt_cf_para(&c, &p2, &q2)){
+            if(!rt_cf_slot_saturou(&cf0) && rt_cf_slot_para(&cf0, &p2, &q2)){
                 if(p2*q == p*q2) cf_volta++;      /* a MESMA fracção, exactamente */
             }
 
@@ -134,18 +141,19 @@ printf("\n§E3  A palavra é EUCLIDES — os mesmos quocientes do mdc, noutra co
      * e o último resto não nulo é o mdc. Duas rotas pelo mesmo objecto. */
     long pares = 0, bate_q = 0, bate_mdc = 0;
     for(long p = 1; p <= 60; p++) for(long q = 1; q <= 60; q++){
-        RtCf c;
-        rt_cf_de(1, p, q, &c);
-        if(c.saturou) continue;
+        cf0 = rt_cf_slot_word(0, cf_mem);
+        rt_cf_slot_de(1, p, q, &cf0);
+        if(rt_cf_slot_saturou(&cf0)) continue;
         pares++;
         /* o mdc, pela descida de Euclides escrita aqui, e os seus quocientes */
         long P = p, Q = q; int i = 0, igual = 1;
+        int cn = rt_cf_slot_n(&cf0);
         while(Q != 0){
             long quo = P / Q, r = P % Q;
-            if(i >= c.n || c.a[i] != quo) igual = 0;
+            if(i >= cn || rt_cf_slot_termo(&cf0, i) != quo) igual = 0;
             i++; P = Q; Q = r;
         }
-        if(igual && i == c.n) bate_q++;
+        if(igual && i == cn) bate_q++;
         if(P == rt_mdc(p, q)) bate_mdc++;         /* e o último resto não nulo É o mdc */
     }
     printf("      pares (p,q) em [1,60]²: %ld ; os quocientes batem em %ld ; o ultimo resto\n"
@@ -171,8 +179,9 @@ printf("\n§E4  O cliente reconstrói o que quiser — e a divisão longa não a
     for(int k = 0; k < n; k++){
         int sg; long p, q;
         rt_le_decimal(casos[k].t, &sg, &p, &q);
-        RtCf c;  rt_cf_de(sg, p, q, &c);
-        long p2, q2;  rt_cf_para(&c, &p2, &q2);       /* passou pela PALAVRA, ida e volta */
+        cf0 = rt_cf_slot_word(0, cf_mem);
+        rt_cf_slot_de(sg, p, q, &cf0);
+        long p2, q2;  rt_cf_slot_para(&cf0, &p2, &q2);
         char d[64];
         rt_escreve_decimal(p2 < 0 ? -1 : 1, p2, q2, casos[k].casas, d, sizeof d);
         int bate = (strcmp(d, casos[k].esp) == 0);
@@ -191,10 +200,13 @@ printf("\n§E4  O cliente reconstrói o que quiser — e a divisão longa não a
      * aproximação racional óptima em cada denominador */
     int sg; long p, q;
     rt_le_decimal("3.14159", &sg, &p, &q);
-    RtCf c; rt_cf_de(sg, p, q, &c);
+    cf0 = rt_cf_slot_word(0, cf_mem);
+    rt_cf_slot_de(sg, p, q, &cf0);
     unsigned long ua[RT_CF_MAX], up[RT_CF_MAX], uq[RT_CF_MAX];
-    for(int i = 0; i < c.n; i++) ua[i] = (unsigned long)c.a[i];
-    int nc = nt_convergentes(ua, c.n, up, uq);
+    long la[RT_CF_MAX];
+    int cn = rt_cf_slot_copia_termos(&cf0, la, RT_CF_MAX);
+    for(int i = 0; i < cn; i++) ua[i] = (unsigned long)la[i];
+    int nc = nt_convergentes(ua, cn, up, uq);
     printf("      e a MESMA palavra da outra representacao — os convergentes de 3.14159:\n      ");
     for(int i = 0; i < nc && i < 6; i++) printf("%lu/%lu  ", up[i], uq[i]);
     printf("\n      (o 22/7 e o 355/113 sao os de sempre, e sairam da palavra sem se pedirem)\n\n");
@@ -236,18 +248,20 @@ printf("\n§E5  A saturação conta-se em lugar SEPARADO — e há onde ela acon
     {
         long f1 = 1, f2 = 1;
         for(int i = 0; i < 40; i++){ long t = f1 + f2; f1 = f2; f2 = t; }
-        RtCf c; rt_cf_de(1, f2, f1, &c);
-        cf_n = c.n;
-        for(int i = 0; i < c.n; i++) if(c.a[i] == 1) uns++;
+        cf0 = rt_cf_slot_word(1, cf_mem);
+        rt_cf_slot_de(1, f2, f1, &cf0);
+        cf_n = rt_cf_slot_n(&cf0);
+        for(int i = 0; i < cf_n; i++) if(rt_cf_slot_termo(&cf0, i) == 1) uns++;
 
         /* e continua-se a subir Fibonacci até a palavra NÃO CABER: aí `saturou` acende */
         long g1 = f1, g2 = f2;
         for(int i = 0; i < 40; i++){
             if(g2 > 4611686018427387903L - g1) break;      /* o long também tem tecto */
             long t = g1 + g2; g1 = g2; g2 = t;
-            RtCf d; rt_cf_de(1, g2, g1, &d);
+            RtCfSlot fd = rt_cf_slot_word(2, cf_mem);
+            rt_cf_slot_de(1, g2, g1, &fd);
             fib_passos++;
-            if(d.saturou) saturou_palavra++; else coube_palavra++;
+            if(rt_cf_slot_saturou(&fd)) saturou_palavra++; else coube_palavra++;
         }
     }
     /* e o outro tecto, o dos produtos: `nt_convergentes` da aritmetica.h pára quando o
@@ -321,11 +335,13 @@ printf("\n§E6  O PIPE FECHADO: o MMC à entrada, e daí em diante não há vír
            soma, u, dir, u, cr[0], cr[1], cr[2], u, lag ? "sim" : "NAO");
 
     /* E A SAÍDA: cada resultado sai como PALAVRA, com o denominador que a unidade dá. */
-    RtCf cs;  rt_cf_de(soma < 0 ? -1 : 1, soma, u, &cs);
-    long ps, qs;  rt_cf_para(&cs, &ps, &qs);
+    cf0 = rt_cf_slot_word(3, cf_mem);
+    rt_cf_slot_de(soma < 0 ? -1 : 1, soma, u, &cf0);
+    long ps, qs;  rt_cf_slot_para(&cf0, &ps, &qs);
     char dec[32];  rt_escreve_decimal(ps < 0 ? -1 : 1, ps, qs, 4, dec, sizeof dec);
     printf("      a soma entregue: palavra [");
-    for(int i = 0; i < cs.n; i++) printf("%ld%s", cs.a[i], i+1 < cs.n ? ";" : "");
+    for(int i = 0; i < rt_cf_slot_n(&cf0); i++)
+        printf("%ld%s", rt_cf_slot_termo(&cf0, i), i+1 < rt_cf_slot_n(&cf0) ? ";" : "");
     printf("] = %ld/%ld = %s\n", ps, qs, dec);
 
     /* O CONTROLO DO PIPE: a soma dos racionais, calculada pelo caminho ANTIGO — cruzando
@@ -367,5 +383,6 @@ printf("  O que sai daqui sao longs. O decimal, a fraccao, os convergentes e o\n
 printf("  double sao todos reconstrucoes DELES — e nenhuma delas e' o numero.\n");
 printf("  O numero e' a palavra.\n");
 printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
+if(cf_mem >= 0) close(cf_mem);
 return falhas ? 1 : 0;
 }

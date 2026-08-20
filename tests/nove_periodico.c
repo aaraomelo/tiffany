@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include "unidade.h"
 
-typedef long long L;
+typedef long L;
 
 int main(void){
     printf("=== 0,999... E' O DUAL DE 1: a orbita nunca chega, o limite e' o ponto fixo ========\n\n");
@@ -36,7 +36,7 @@ int main(void){
         if(num_residuo != 1) nunca_chega = 0;       /* o resíduo é sempre 1/10^k */
         if(num_residuo == 0) nunca_chega = 0;       /* e nunca 0 -> nunca chega */
         if(k <= 4 || k == 18)
-            printf("     %2d | %18lld/%-lld | 1/%-18lld | %lld\n", k, num_orbita, den, den, num_residuo);
+            printf("     %2d | %18ld/%-ld | 1/%-18ld | %ld\n", k, num_orbita, den, den, num_residuo);
     }
     printf("\n");
     ok("§N1 a ORBITA 0,9;0,99;0,999... NUNCA chega a 1: o residuo e' 1/10^k, numerador 1 --- nunca 0"
@@ -48,7 +48,7 @@ int main(void){
     int decresce = 1; L d1 = 10, d2 = 100;          /* compara 1/10^k com 1/10^{k+1}: den cresce */
     for(int k = 1; k <= 17; k++){ if(d2 <= d1) decresce = 0; d1 = d2; d2 *= 10; }
     L den_grande = 1; for(int k = 0; k < 18; k++) den_grande *= 10;   /* 10^18: residuo ínfimo */
-    printf("§N2  o residuo 1/10^k decresce sem teto: em k=18 e' 1/%lld (o limite e' 0, o ponto fixo 1)\n\n",
+    printf("§N2  o residuo 1/10^k decresce sem teto: em k=18 e' 1/%ld (o limite e' 0, o ponto fixo 1)\n\n",
            den_grande);
     ok("§N2 o LIMITE e' 1: o residuo 1/10^k -> 0 (o denominador 10^k cresce sem teto), e 0 e' o ponto"
        " fixo --- o real 1 (o continuo, Gentil). Como LIMITE, 0,999... = 1", decresce && den_grande > 0);

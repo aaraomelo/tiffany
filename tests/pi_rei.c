@@ -39,8 +39,17 @@
  */
 #include <stdio.h>
 
+#include "i128.h"
 #include "unidade.h"
-typedef __int128 big;
+typedef I128 big;
+
+static big b1(void){ return i128_from_i64(1); }
+static big b0(void){ return i128_zero(); }
+static int blt(big a, big b){ return i128_cmp(a, b) < 0; }
+static int bgt(big a, big b){ return i128_cmp(a, b) > 0; }
+static int beq(big a, big b){ return i128_cmp(a, b) == 0; }
+static int bz(big a){ return i128_is_zero(a); }
+static long bl(big a){ return (long)i128_to_i64(a); }
 
 /* Fibonacci com índice negativo: F(−n) = (−1)^(n+1) F(n). φ^k = F(k)φ + F(k−1) para todo k. */
 #define KALTO  3
@@ -55,32 +64,31 @@ typedef __int128 big;
  * Os indices negativos saem da propria recorrencia lida ao contrario:
  *     F(k-2) = F(k) - F(k-1),  logo F(-n) = (-1)^(n+1) F(n). */
 static big Fi(int k){
-    if(k == 0) return 0;
-    if(k > 0){ big a = 0, b = 1; for(int i = 2; i <= k; i++){ big t = a + b; a = b; b = t; }
-               return k == 1 ? (big)1 : b; }
-    big v = Fi(-k);                       /* F(-n) = (-1)^(n+1) F(n) */
-    return ((-k) % 2) ? v : -v;
+    if(k == 0) return b0();
+    if(k > 0){ big a = b0(), b = b1(); for(int i = 2; i <= k; i++){ big t = i128_add(a, b); a = b; b = t; }
+               return k == 1 ? b1() : b; }
+    big v = Fi(-k);
+    return ((-k) % 2) ? v : i128_neg(v);
 }
 static void prepara_fib(void){ }          /* nada a preparar: o valor calcula-se */
 
 /* sinal de u + v·φ, exato: φ = (1+√5)/2, logo 2(u+vφ) = (2u+v) + v√5 */
 static int sinal(big u, big v){
-    big s = 2*u + v;
-    if(v == 0) return (s > 0) - (s < 0);
-    if(v > 0 && s >= 0) return (s == 0 && v == 0) ? 0 : 1;
-    if(v < 0 && s <= 0) return -1;
-    big a = s*s, b = 5*v*v;
-    if(v > 0)  return (b > a) ? 1 : ((b == a) ? 0 : -1);   /* s<0: positivo se v√5 > |s| */
-    else       return (a > b) ? 1 : ((a == b) ? 0 : -1);   /* s>0: positivo se s > |v|√5 */
+    big s = i128_add(i128_add(u, u), v);
+    if(bz(v)) return bgt(s, b0()) - blt(s, b0());
+    if(bgt(v, b0()) && !blt(s, b0())) return (bz(s) && bz(v)) ? 0 : 1;
+    if(blt(v, b0()) && !bgt(s, b0())) return -1;
+    big a = i128_mul(s, s), b = i128_smul_i128(i128_mul(v, v), 5);
+    if(bgt(v, b0()))  return blt(b, a) ? 1 : (beq(b, a) ? 0 : -1);
+    else              return blt(a, b) ? 1 : (beq(a, b) ? 0 : -1);
 }
 
 /* expansão gulosa de (num/den) na base φ. Devolve os dígitos em dig[k−KBAIXO]. */
 static void expande(big num, big den, int *dig){
-    /* resto R = (A + B·φ)/den, começa em (num + 0·φ)/den */
-    big A = num, B = 0;
+    big A = num, B = b0();
     for(int k = KALTO; k >= KBAIXO; k--){
-        /* R ≥ φ^k ⟺ (A − den·F(k−1)) + (B − den·F(k))·φ ≥ 0 */
-        big u = A - den * Fi(k-1), v = B - den * Fi(k);
+        big u = i128_sub(A, i128_mul(den, Fi(k-1)));
+        big v = i128_sub(B, i128_mul(den, Fi(k)));
         if(sinal(u, v) >= 0){ dig[k - KBAIXO] = 1; A = u; B = v; }
         else                  dig[k - KBAIXO] = 0;
     }
@@ -98,17 +106,16 @@ printf("\n§Pi0  DEFINE-SE π_rei = [1,1,1,1,…]. E ele não é escolha: é a v
      * ouro. Aqui mede-se isso pelos convergentes, em inteiros: p/q = [1;1,…,1] com n uns
      * tem p = F(n+1), q = F(n), e a equação x² − x − 1 = 0 aparece como p² − pq − q² = ±1. */
     int mau = 0;
-    big p = 1, q = 1, pa = 1, qa = 0;
+    big p = b1(), q = b1(), pa = b1(), qa = b0();
     printf("      uns   p/q          p² − pq − q²   x = 1 + 1/x confere?\n");
     for(int n = 1; n <= 20; n++){
-        big np = p + pa, nq = q + qa;       /* termo 1: p_{k+1} = 1·p_k + p_{k−1} */
+        big np = i128_add(p, pa), nq = i128_add(q, qa);
         pa = p; qa = q; p = np; q = nq;
-        big norma = p*p - p*q - q*q;
-        if(norma != 1 && norma != -1) mau++;
-        /* x = 1 + 1/x nos convergentes: p/q ≈ 1 + q/p ⟺ p² ≈ pq + q², o mesmo desvio ±1 */
+        big norma = i128_sub(i128_sub(i128_mul(p, p), i128_mul(p, q)), i128_mul(q, q));
+        if(!beq(norma, b1()) && !beq(norma, i128_neg(b1()))) mau++;
         if(n <= 4 || n == 20)
-            printf("      %-5d %ld/%-11ld %-14ld %s\n", n+1, (long)p, (long)q, (long)norma,
-                   (norma==1||norma==-1) ? "sim ✓" : "NÃO");
+            printf("      %-5d %ld/%-11ld %-14ld %s\n", n+1, bl(p), bl(q), bl(norma),
+                   (beq(norma,b1())||beq(norma,i128_neg(b1()))) ? "sim ✓" : "NÃO");
     }
     ok("[1,1,1,…] é o ponto fixo de x = 1 + 1/x, com desvio ±1 exato", mau == 0);
     printf("\n      A régua do rei produz o próprio π ao se fechar sobre si: a realimentação\n");
@@ -133,19 +140,17 @@ printf("    Dá-se, é exato, e não adianta nada. Medido a seguir.\n");
 
 /* --------------------------------------------------------------- §Pi1 ------ */
 printf("\n§Pi1  O CERCO: dois convergentes de π, que provadamente o encerram.\n\n");
-big pl = 103993, ql = 33102;      /* convergente por baixo */
-big pu = 104348, qu = 33215;      /* o seguinte, por cima  */
+big pl = i128_from_i64(103993), ql = i128_from_i64(33102);
+big pu = i128_from_i64(104348), qu = i128_from_i64(33215);
 {
-    /* convergentes consecutivos satisfazem |p_n q_{n+1} − p_{n+1} q_n| = 1 e alternam
-     * em torno do limite — a diferença entre eles limita o erro, e é exata */
-    big det = pl*qu - pu*ql;
-    int alterna = (det == 1 || det == -1);
-    printf("      por baixo   %ld/%ld\n", (long)pl, (long)ql);
-    printf("      por cima    %ld/%ld\n", (long)pu, (long)qu);
-    printf("      p_n·q_(n+1) − p_(n+1)·q_n = %ld   (tem de ser ±1)\n", (long)det);
+    big det = i128_sub(i128_mul(pl, qu), i128_mul(pu, ql));
+    int alterna = beq(det, b1()) || beq(det, i128_neg(b1()));
+    printf("      por baixo   %ld/%ld\n", bl(pl), bl(ql));
+    printf("      por cima    %ld/%ld\n", bl(pu), bl(qu));
+    printf("      p_n·q_(n+1) − p_(n+1)·q_n = %ld   (tem de ser ±1)\n", bl(det));
     ok("são convergentes CONSECUTIVOS: encerram π, e o cerco é legítimo", alterna);
     printf("\n      A largura do cerco é 1/(q·q') = 1/%ld — e é ela que decide quantos dígitos\n",
-           (long)(ql*qu));
+           bl(i128_mul(ql, qu)));
     printf("      eu posso afirmar. O que ela não cobre, eu não sei, e não vou escrever.\n");
 }
 
@@ -195,12 +200,11 @@ printf("\n§Pi3  A REGRA DO SISTEMA: nenhum par de uns consecutivos.\n\n");
 printf("\n§Pi4  A VOLTA: somar os φ^k acesos cai DENTRO do cerco.\n\n");
 {
     /* soma = Σ φ^k sobre os dígitos certificados, em Z[φ]: (A + B·φ) */
-    big A = 0, B = 0;
+    big A = b0(), B = b0();
     for(int t = KALTO; t > KALTO - certificados; t--)
-        if(dl[t - KBAIXO]){ A += Fi(t-1); B += Fi(t); }
-    /* compara com as duas pontas: soma ≤ π_cima e soma ≥ π_baixo − (o que falta abaixo) */
-    int abaixo_do_teto = sinal(A*qu - pu, B*qu) <= 0;
-    int acima_do_chao  = sinal(A*ql - pl, B*ql) <= 0;   /* a soma trunca, logo fica ≤ π */
+        if(dl[t - KBAIXO]){ A = i128_add(A, Fi(t-1)); B = i128_add(B, Fi(t)); }
+    int abaixo_do_teto = sinal(i128_sub(i128_mul(A, qu), pu), i128_mul(B, qu)) <= 0;
+    int acima_do_chao  = sinal(i128_sub(i128_mul(A, ql), pl), i128_mul(B, ql)) <= 0;
     printf("      a soma reconstruída está abaixo do teto do cerco   %s\n", abaixo_do_teto?"sim ✓":"NÃO");
     printf("      e é um truncamento, logo não passa do chão tampouco %s\n", acima_do_chao?"sim ✓":"NÃO");
     ok("os dígitos reconstroem π dentro do cerco — a volta fecha", abaixo_do_teto);

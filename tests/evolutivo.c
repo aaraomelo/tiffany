@@ -21,6 +21,9 @@
  *   cc -O2 -std=c99 -Wall -I../lib evolutivo.c -o evolutivo
  */
 #include <stdio.h>
+#include <stdint.h>
+#include <inttypes.h>
+#include "i128.h"
 #include "unidade.h"
 
 #define NT 6                          /* tipos de peca no exercito */
@@ -45,18 +48,18 @@ int main(void){
      * Isto PODE falhar: basta o sinal do s estar trocado, ou a norma ser 1+s^2, ou a
      * regua ser p(1-p) em vez do inverso. Varre-se N e k em vez de escolher um. */
     {
-        long long mau = 0, casos = 0, pior_esq = 0, pior_dir = 0;
-        for(long long N = 2; N <= 400; N++)
-            for(long long k = 1; k < N; k++){
-                long long s_num = 2*k - N;                    /* s = s_num / N */
-                long long esq = N*N - s_num*s_num;            /* numerador de 1-s^2 */
-                long long dir = 4*k*(N-k);                    /* o que a regua desconta */
+        int64_t mau = 0, casos = 0, pior_esq = 0, pior_dir = 0;
+        for(int64_t N = 2; N <= 400; N++)
+            for(int64_t k = 1; k < N; k++){
+                int64_t s_num = 2*k - N;                    /* s = s_num / N */
+                int64_t esq = N*N - s_num*s_num;            /* numerador de 1-s^2 */
+                int64_t dir = 4*k*(N-k);                    /* o que a regua desconta */
                 casos++;
                 if(esq != dir){ mau++; if(!pior_esq){ pior_esq = esq; pior_dir = dir; } }
             }
-        printf("      N de 2 a 400, todo k interior: %lld casos\n", casos);
-        printf("      N^2-(2k-N)^2  contra  4k(N-k):  %lld discordancias\n", mau);
-        if(mau) printf("      primeira: %lld != %lld\n", pior_esq, pior_dir);
+        printf("      N de 2 a 400, todo k interior: %" PRId64 " casos\n", casos);
+        printf("      N^2-(2k-N)^2  contra  4k(N-k):  %" PRId64 " discordancias\n", mau);
+        if(mau) printf("      primeira: %" PRId64 " != %" PRId64 "\n", pior_esq, pior_dir);
         ok("(1-s^2) . g(p) = 4 EXACTO para todo p: a norma do corpo evolutivo e' o INVERSO"
            " da regua de Fisher — o catalogo e a teoria mediam o mesmo corpo com nomes"
            " diferentes, e a costura e' uma identidade inteira", mau == 0);
@@ -70,19 +73,19 @@ int main(void){
      * de que corpo era. Aqui verifica-se que o argmax da regua E' o ponto fixo, para todo
      * N par, achado por varrimento e nao por formula. */
     {
-        long long mau = 0, testados = 0;
-        for(long long N = 2; N <= 400; N += 2){
-            long long melhor = -1, arg = -1;
-            for(long long k = 1; k < N; k++){
-                long long v = k*(N-k);                        /* 1/g, a menos de N^2 */
+        int64_t mau = 0, testados = 0;
+        for(int64_t N = 2; N <= 400; N += 2){
+            int64_t melhor = -1, arg = -1;
+            for(int64_t k = 1; k < N; k++){
+                int64_t v = k*(N-k);                        /* 1/g, a menos de N^2 */
                 if(v > melhor){ melhor = v; arg = k; }
             }
             testados++;
             /* o argmax tem de ser o ponto fixo da involucao k -> N-k */
             if(arg != N - arg) mau++;
         }
-        printf("      %lld valores de N par: o argmax de 1/g e' o ponto fixo de k->N-k\n", testados);
-        printf("      discordancias: %lld\n", mau);
+        printf("      %" PRId64 " valores de N par: o argmax de 1/g e' o ponto fixo de k->N-k\n", testados);
+        printf("      discordancias: %" PRId64 "\n", mau);
         ok("o PONTO FIXO da involucao p->1-p e' exactamente onde a regua custa MENOS —"
            " achado por varrimento, nao por formula: evoluir E' afastar-se do ponto fixo,"
            " e por isso encarece nas pontas", mau == 0 && testados > 0);
@@ -100,10 +103,10 @@ int main(void){
      * Schwarz, com igualdade SO' quando todos os w com peso sao iguais. Nao e' decreto:
      * varrem-se populacoes e aptidoes geradas por uma recorrencia inteira. */
     {
-        long long mau = 0, casos = 0, iguais = 0, subiu = 0;
-        long long semente = 1;
+        int64_t mau = 0, casos = 0, iguais = 0, subiu = 0;
+        int64_t semente = 1;
         for(int rodada = 0; rodada < 2000; rodada++){
-            long long a[NT], w[NT], D = 0;
+            int64_t a[NT], w[NT], D = 0;
             int uniforme = (rodada % 7 == 0);                 /* de vez em quando, o ponto fixo */
             for(int i = 0; i < NT; i++){
                 semente = (semente * 6364136223846793005LL + 1442695040888963407LL);
@@ -112,7 +115,7 @@ int main(void){
                 w[i] = uniforme ? 5 : 1 + ((semente >> 35) & 0x0F);   /* 1..16, ou todos 5 */
                 D += a[i];
             }
-            long long Dl = 0, S2 = 0;
+            int64_t Dl = 0, S2 = 0;
             for(int i = 0; i < NT; i++){ Dl += a[i]*w[i]; S2 += a[i]*w[i]*w[i]; }
             /* <w>' >= <w>  <=>  S2/D' >= D'/D  <=>  S2 . D >= D'^2   (D, D' > 0) */
             casos++;
@@ -124,7 +127,7 @@ int main(void){
              * medir. O que se mede e' o SENTIDO, que e' a lei. */
             if(uniforme && S2 * D != Dl * Dl) mau++;           /* uniforme tem de EMPATAR */
         }
-        printf("      %lld populacoes de %d tipos: subiu %lld, empatou %lld, desceu %lld\n",
+        printf("      %" PRId64 " populacoes de %d tipos: subiu %" PRId64 ", empatou %" PRId64 ", desceu %" PRId64 "\n",
                casos, NT, subiu, iguais, mau);
         ok("a REPRODUCAO so' sobe — <w>' >= <w> em todas, e o empate acontece SO' onde as"
            " aptidoes sao iguais, que e' o ponto fixo do replicador: a lei de Fisher do"
@@ -141,10 +144,10 @@ int main(void){
      * a 1/w_i, e a conta e' a mesma com u no lugar de w para o peso, mantendo w para a
      * aptidao que se mede. */
     {
-        long long desceu = 0, nao_desceu = 0;
-        long long semente = 99;
+        int64_t desceu = 0, nao_desceu = 0;
+        int64_t semente = 99;
         for(int rodada = 0; rodada < 500; rodada++){
-            long long a[NT], w[NT], D = 0;
+            int64_t a[NT], w[NT], D = 0;
             for(int i = 0; i < NT; i++){
                 semente = (semente * 6364136223846793005LL + 1442695040888963407LL);
                 a[i] = 1 + ((semente >> 33) & 0x1F);
@@ -156,17 +159,17 @@ int main(void){
             for(int i = 1; i < NT; i++) if(w[i] != w[0]) todos_iguais = 0;
             if(todos_iguais) continue;
 
-            long long W = 1; for(int i = 0; i < NT; i++) W *= w[i];   /* <= 9^6 = 531441 */
+            int64_t W = 1; for(int i = 0; i < NT; i++) W *= w[i];   /* <= 9^6 = 531441 */
             /* peso pelo INVERSO: b_i = a_i . (W/w_i) */
-            long long Db = 0, Sw = 0, D0 = 0;
+            int64_t Db = 0, Sw = 0, D0 = 0;
             for(int i = 0; i < NT; i++){
-                long long b = a[i] * (W / w[i]);
+                int64_t b = a[i] * (W / w[i]);
                 Db += b;  Sw += b * w[i];  D0 += a[i] * w[i];
             }
             /* <w> antes = D0/D ; <w> depois = Sw/Db.  desce  <=>  Sw . D < D0 . Db */
-            if((__int128)Sw * D < (__int128)D0 * Db) desceu++; else nao_desceu++;
+            if(i128_cmp(i128_smul(Sw, D), i128_smul(D0, Db)) < 0) desceu++; else nao_desceu++;
         }
-        printf("      anti-replicador em %lld populacoes: desceu %lld, nao desceu %lld\n",
+        printf("      anti-replicador em %" PRId64 " populacoes: desceu %" PRId64 ", nao desceu %" PRId64 "\n",
                desceu + nao_desceu, desceu, nao_desceu);
         ok("e a dinamica TROCADA faz <w> DESCER em todas — logo o §E3 nao e' uma conta que"
            " sobe por acaso: e' a DIRECCAO do replicador que a faz subir",

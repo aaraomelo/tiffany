@@ -1,6 +1,6 @@
 /* naturais.h — O CHÃO: e é aqui que o motor DEMONSTRA OS PRÓPRIOS INSTRUMENTOS.
  *
- * O `eval.txt` põe a escada e diz para que serve:
+ *  ordem do coordenador põe a escada e diz para que serve:
  *
  *     0 → S → + → × → ≤ → | → gcd → primos → fatoração
  *

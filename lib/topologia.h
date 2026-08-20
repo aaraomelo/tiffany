@@ -1,6 +1,6 @@
 /* topologia.h — A TOPOLOGIA SEM RÉGUA.
  *
- * O `eval.txt` traz vinte problemas de topologia e um gume que é a alma do andar:
+ *  ordem do coordenador traz vinte problemas de topologia e um gume que é a alma do andar:
  *
  *        «REMOVA A MÉTRICA.»
  *

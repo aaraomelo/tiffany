@@ -8,9 +8,11 @@
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include "../lib/disco.h"
-#define V DISCO_FIXO2(long, 768, 71)
+#define V DISCO_FIXO2(int32_t, 768, 71)
 
 #include <stdlib.h>
+#include <stdint.h>
+#include <inttypes.h>
 #include <string.h>
 #include "unidade.h"
 
@@ -22,7 +24,7 @@ static int NV = 0, ND = 0;
 static int (*CIF)[MAXC];
 static int *NC;
 
-typedef long long Z;
+typedef int32_t Z;
 
 static Z f32_bits_para_z(unsigned int u){
     int sign = (int)(u >> 31);
@@ -30,8 +32,8 @@ static Z f32_bits_para_z(unsigned int u){
     unsigned mant = u & 0x7FFFFFu;
     if(exp == 0) return 0;
     int e = exp - 127;
-    long long sig = (long long)(1u << 23 | mant);
-    long long num = sig, den = 1LL << 23;
+    int64_t sig = (int64_t)(1u << 23 | mant);
+    int64_t num = sig, den = (int64_t)1 << 23;
     if(e >= 0){ while(e--) num <<= 1; }
     else { while(e++) den <<= 1; }
     Z v = (Z)((num * S) / den);
@@ -47,12 +49,12 @@ static int cifra_rat(Z num, Z den, int *saida, int max){
         return n;
     }
     for(int k = 0; k < max; k++){
-        Z q = num / den;
+        int64_t q = (int64_t)num / den;
         if(q > 1000000000LL || q < -1000000000LL) break;
         saida[n++] = (int)q;
-        Z r = num % den;
+        int64_t r = (int64_t)num % den;
         if(r == 0) break;
-        num = den; den = r;
+        num = (Z)den; den = (Z)r;
     }
     return n;
 }
@@ -61,14 +63,14 @@ static void secao_Q1(void){
     printf("\n§Q1  ELE FALA, NÓS CIFRAMOS — e a cifra é DELE\n\n");
     printf("        #    a razão do ponto        a cifra (os primeiros termos)\n");
     for(int i = 0; i < NV; i++){
-        Z a = 0, b = 0;
+        int64_t a = 0, b = 0;
         for(int d = 0; d < ND; d += 2) a += V[i][d];
         for(int d = 1; d < ND; d += 2) b += V[i][d];
-        NC[i] = cifra_rat(a, b != 0 ? b : 1, CIF[i], MAXC);
+        NC[i] = cifra_rat((Z)a, b != 0 ? (Z)b : 1, CIF[i], MAXC);
         if(i < 8){
             printf("        %-3d  ", i);
-            if(b != 0) printf("%lld/%lld    ", (long long)a, (long long)b);
-            else printf("%lld/1    ", (long long)a);
+            if(b != 0) printf("%" PRId32 "/%" PRId32 "    ", (int32_t)a, (int32_t)b);
+            else printf("%" PRId32 "/1    ", (int32_t)a);
             for(int k = 0; k < NC[i] && k < 8; k++) printf("%d ", CIF[i][k]);
             printf("\n");
         }
@@ -93,10 +95,10 @@ static void secao_Q2(void){
 
     int instavel = 0;
     for(int i = 0; i < NV; i++){
-        Z a = 0, b = 0;
+        int64_t a = 0, b = 0;
         for(int d = 0; d < ND; d += 2) a += V[i][d];
         for(int d = 1; d < ND; d += 2) b += V[i][d];
-        int c2[MAXC], n2 = cifra_rat(a, b != 0 ? b : 1, c2, MAXC);
+        int c2[MAXC], n2 = cifra_rat((Z)a, b != 0 ? (Z)b : 1, c2, MAXC);
         if(n2 != NC[i] || memcmp(c2, CIF[i], (size_t)n2 * sizeof(int))) instavel++;
     }
     ok("e o mesmo ponto dá sempre a MESMA cifra — o endereço é função do conteúdo", instavel == 0);
@@ -158,8 +160,8 @@ int main(void){
     disco_prende(DISCO_BASE(180), "dados/NC_180.bin", (size_t)((MAXV)), sizeof(int));
     NC = DISCO_FIXO(int, 180);
     disco_zera(NC, (size_t)((MAXV)), sizeof(int));
-    disco_prende(DISCO_BASE(71), "dados/V.bin", (size_t)((size_t)(MAXV) * 768), sizeof(long));
-    disco_zera(V, (size_t)((size_t)(MAXV) * 768), sizeof(long));
+    disco_prende(DISCO_BASE(71), "dados/V.bin", (size_t)((size_t)(MAXV) * 768), sizeof(int32_t));
+    disco_zera(V, (size_t)((size_t)(MAXV) * 768), sizeof(int32_t));
     FILE *f = fopen("/tmp/vetores.txt", "r");
     if(!f){ printf("NAO MEDIU — sem vetores. Corra  ./colhe_transfusao.sh\n"); return 2; }
     char *l = NULL; size_t cap = 0;

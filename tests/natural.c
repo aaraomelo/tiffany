@@ -40,7 +40,7 @@
 #include <stdio.h>
 #include "unidade.h"
 
-typedef long long L;
+typedef long L;
 
 /* ─── matrizes n×n inteiras, n<=3, em vetor de 9 ─────────────────────────────────── */
 #define NMAX 3
@@ -127,9 +127,9 @@ int main(void)
                 casos++;
             }
         }
-        printf("      %lld pares (f, x, φ) percorridos, sem escolher nada\n", casos);
-        printf("      caminho A ≠ caminho B em .......... %lld casos\n", mal);
-        printf("      com o dual trocado (A em vez de Aᵀ)  %lld casos discordam\n", mal_errado);
+        printf("      %ld pares (f, x, φ) percorridos, sem escolher nada\n", casos);
+        printf("      caminho A ≠ caminho B em .......... %ld casos\n", mal);
+        printf("      com o dual trocado (A em vez de Aᵀ)  %ld casos discordam\n", mal_errado);
         printf("\n");
         ok("ev é natural: empurrar-e-medir = puxar-e-medir, resíduo 0 exato em todos os casos",
            mal == 0);
@@ -168,7 +168,7 @@ int main(void)
                 for(int j=0;j<n;j++) ladoB += (lam*f[j])*x[j];
                 L d = ladoA - ladoB; rv += d<0 ? -d : d;
             }
-            printf("        %3lld  %17lld  %11lld  %16lld\n", lam, r, prev, rv);
+            printf("        %3ld  %17ld  %11ld  %16ld\n", lam, r, prev, rv);
             if(r != prev) mal_regua++;
             if(rv != 0)   mal_volta++;
             if(r == 0)    zeros++;
@@ -217,10 +217,10 @@ int main(void)
             }
             if(!falhou) cx_ev++;
         }
-        printf("      caixa: todas as matrizes 2×2 com entradas em {-2..2} .... %lld\n", cx_total);
-        printf("      preservam a régua J = diag(1,1)   (o círculo) .......... %lld\n", guarda_id);
-        printf("      preservam a régua J = diag(1,-1)  (a hipérbole) ........ %lld\n", guarda_hip);
-        printf("      preservam a régua J = [[2,1],[1,3]] (outra qualquer) ... %lld\n", guarda_outra);
+        printf("      caixa: todas as matrizes 2×2 com entradas em {-2..2} .... %ld\n", cx_total);
+        printf("      preservam a régua J = diag(1,1)   (o círculo) .......... %ld\n", guarda_id);
+        printf("      preservam a régua J = diag(1,-1)  (a hipérbole) ........ %ld\n", guarda_hip);
+        printf("      preservam a régua J = [[2,1],[1,3]] (outra qualquer) ... %ld\n", guarda_outra);
         printf("\n");
         ok("nenhuma régua é preservada por toda a caixa — o transporte falha para quase todo f",
            guarda_id < cx_total && guarda_hip < cx_total && guarda_outra < cx_total);
@@ -230,10 +230,10 @@ int main(void)
 
         puts("§N4  O NÚMERO QUE FECHA — a mesma caixa, os dois transportes lado a lado");
         puts("");
-        printf("        o que se transporta      quantos dos %lld morfismos o preservam\n", cx_total);
+        printf("        o que se transporta      quantos dos %ld morfismos o preservam\n", cx_total);
         printf("        -----------------------  ----------------------------------\n");
-        printf("        a VOLTA  (ev: V->V**)    %lld   — todos\n", cx_ev);
-        printf("        a RÉGUA  (J: V->V*)      %lld   — o grupo ortogonal de J, e mais nada\n", guarda_id);
+        printf("        a VOLTA  (ev: V->V**)    %ld   — todos\n", cx_ev);
+        printf("        a RÉGUA  (J: V->V*)      %ld   — o grupo ortogonal de J, e mais nada\n", guarda_id);
         printf("\n");
         ok("a volta transporta por TODO morfismo da caixa, sem excepção", cx_ev == cx_total);
 
@@ -282,7 +282,7 @@ int main(void)
 
         puts("§N5  A HIPÓTESE É ESSENCIAL — com a régua degenerada, tudo passa");
         puts("");
-        printf("      preservam J = 0 (degenerada, não é isomorfismo) ........ %lld de %lld\n",
+        printf("      preservam J = 0 (degenerada, não é isomorfismo) ........ %ld de %ld\n",
                guarda_deg, cx_total);
         printf("\n");
         ok("com J degenerada o quadrado fecha para todo f — logo é o ISOMORFISMO que quebra",

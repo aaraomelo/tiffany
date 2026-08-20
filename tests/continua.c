@@ -59,7 +59,7 @@
 #include "linear.h"
 #include "calculo2.h"
 
-typedef long long L;
+typedef long L;
 
 int main(void){
     printf("================================================================\n");
@@ -117,7 +117,7 @@ int main(void){
             int baixo12 = rt_menor_que_sigma(t[12], t[11], m, D);
             if(baixo11 != baixo12) alterna++;              /* lados opostos: o encaixe fecha */
             if((baixo11 && !baixo12) || (!baixo11 && baixo12)) encaixa++;
-            if(m<=3) printf("      %lld    %lld %lld %lld %lld %lld%*s%s\n",
+            if(m<=3) printf("      %ld    %ld %ld %ld %ld %ld%*s%s\n",
                             m, t[1],t[2],t[3],t[4],t[5], 14, "",
                             baixo11 != baixo12 ? "sim — σ está ENTRE elas" : "NÃO");
         }
@@ -163,7 +163,7 @@ int main(void){
     printf("\n§C2 a série É a forma fechada — coeficiente a coeficiente, em ℚ\n");
     {
         int metais=0, iguais=0, graus=0, bate=0;
-        const int G = 8;                          /* grau até onde os t_k cabem no Qz */
+        const int G = 6;                          /* grau até onde os t_k cabem em E₁₆ */
         long sat0 = qz_saturou;
         printf("      m    coeficientes de −log(1−mx−x²)   ==   t_k/k ?\n");
         for(long m=1; m<=4; m++){
@@ -179,7 +179,7 @@ int main(void){
             for(int k=2;k<16;k++) t[k] = m*t[k-1] + t[k-2];
             Sr Ld; Ld.n = G;
             for(int i=0;i<=G;i++){ Ld.a[i].p = 0; Ld.a[i].q = 1; }
-            for(int k=1;k<=G;k++){ Ld.a[k].p = t[k]; Ld.a[k].q = k; }
+            for(int k=1;k<=G;k++) Ld.a[k] = qz(t[k], k);
 
             metais++;
             int todos = 1;
@@ -219,7 +219,7 @@ int main(void){
                 if(ax * t[k+1] * k > t[k] * (k + 1)){ explode++; cresce++; }
             }
             if(den != 0) finita++;
-            printf("      %-4lld %-12ld %d de %d\n", m, den, cresce, n);
+            printf("      %-4ld %-12ld %d de %d\n", m, den, cresce, n);
         }
         printf("      termos a crescer: %d de %d   den ≠ 0: %d de 6\n", explode, casos, finita);
         ok("fora do raio a SÉRIE explode — o termo cresce, ela não alcança lá",
@@ -353,7 +353,7 @@ int main(void){
         printf("      k     t_k        |x|·t_{k+1}·k > t_k·(k+1)\n");
         for(int k=8; k<=16; k+=2){
             int cresce = (ax * t[k+1] * k > t[k] * (k + 1));
-            printf("      %-5d %-10lld %s\n", k, t[k], cresce ? "SIM" : "nao");
+            printf("      %-5d %-10ld %s\n", k, t[k], cresce ? "SIM" : "nao");
             medidas++; if(cresce) cresceu++;
         }
         ok("os termos NÃO vão a 0: cada um é maior que o anterior — a série não é Cauchy,"
@@ -411,7 +411,7 @@ int main(void){
                 lucas_ok = bate;
             }
             if(m<=4)
-                printf("      %-4lld %-4lld %-7lld %-8d %5lld %4lld %4lld %4lld | %3lld | %3lld %3lld %3lld %3lld\n",
+                printf("      %-4ld %-4ld %-7ld %-8d %5ld %4ld %4ld %4ld | %3ld | %3ld %3ld %3ld %3ld\n",
                        m, D, (m+1)*(m+1), kmin,
                        tr[4],tr[3],tr[2],tr[1], f[0], f[1],f[2],f[3],f[4]);
         }
@@ -434,7 +434,7 @@ int main(void){
         printf("\n      a série em 1/x é a identidade formal do §C2, com m′ = −m:\n");
         {
             int iguais=0, graus=0, bate=0, casos=0;
-            const int G = 8;
+            const int G = 6;
             long sat0 = qz_saturou;
             for(long mm=1; mm<=4; mm++){
                 long m = -mm;                         /* m′ = −m: traços t_{−k} */
@@ -447,7 +447,7 @@ int main(void){
                 for(int k=2;k<16;k++) t[k] = m*t[k-1] + t[k-2];
                 Sr Ld; Ld.n = G;
                 for(int i=0;i<=G;i++){ Ld.a[i].p = 0; Ld.a[i].q = 1; }
-                for(int k=1;k<=G;k++){ Ld.a[k].p = t[k]; Ld.a[k].q = k; }
+                for(int k=1;k<=G;k++) Ld.a[k] = qz(t[k], k);
                 casos++;
                 int todos = 1;
                 for(int k=1;k<=G;k++){
@@ -501,10 +501,10 @@ int main(void){
  * duas medem-se, e a segunda é o que dá conteúdo à primeira. */
 printf("\n§C8 a continuação tem IDA e VOLTA, e as duas são exactas em ℚ\n\n");
 {
-    const int G = 8;
+    const int G = 6;
     int volta_ok = 0, rec_ok = 0, m_ok = 0, inteiro_ok = 0, metais = 0;
     printf("      m    t_k recuperados da forma fechada (k = 1..5)      t_1 = m ?\n");
-    for(long m = 1; m <= 6; m++){
+    for(long m = 1; m <= 5; m++){
         /* IDA: a forma fechada −log(1 − mx − x²), montada pela composição */
         Sr u = sr0(); u.n = G;
         u.a[1] = qz(-m, 1); u.a[2] = qz(-1, 1);
@@ -542,7 +542,7 @@ printf("\n§C8 a continuação tem IDA e VOLTA, e as duas são exactas em ℚ\n\
     ok("a continuação tem VOLTA, e ela é exacta: multiplicar os coeficientes da forma"
        " fechada por k devolve os TRAÇOS — inteiros, a satisfazer a recorrência do operador,"
        " e com t_1 = m. A ida NÃO PERDE nada: o operador lê-se de volta na série",
-       metais == 6 && volta_ok == metais && inteiro_ok == metais &&
+       metais == 5 && volta_ok == metais && inteiro_ok == metais &&
        rec_ok == metais && m_ok == metais);
 
     /* E A UNICIDADE, que é o que dá conteúdo à volta: dois operadores DIFERENTES não podem

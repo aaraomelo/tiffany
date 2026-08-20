@@ -22,12 +22,14 @@
  * §K0  a cadeia, degrau a degrau, com o que se perdeu e o que se ganhou
  * §K1  long → inteiro: os valores JÁ eram inteiros, e o long só trazia um limiar
  * §K2  64 → 32: a ordem passa pelo par e fica EXACTA — nada se perde, o tecto aparece
+ * §K2b 32 → 16: Qz em E₁₆, RtOp em int16 — coordenadas pequenas do ciclo
  * §K3  32 → uint8: 𝔽₁₂₇, e o espaço passa a ser EXAUSTÍVEL
  * §K4  uint8 → bit: GF(2), e as cinco operações continuam lá (a leitura é do booleana.h)
  * §K5  E O REAL NÃO ESTÁ NA CADEIA: é o CORTE, perpendicular a ela
  * §K6  o balanço: o que cada degrau custou, e o que cada um comprou
  */
 #include <stdio.h>
+#include "dual16.h"
 #include "dual32.h"
 #include "racionais.h"
 #include "reta.h"      /* rt_inv_mod: canonizar [p:q] */
@@ -90,7 +92,7 @@ int main(void){
             Qz a = qz(ap,aq), b = qz(bp, aq + 1);
             cas++;
             int meu = qz_menor(a,b);
-            int reg = ((__int128)a.p*b.q < (__int128)b.p*a.q);
+            int reg = (d16_cmp_prod(a.p, b.q, b.p, a.q) < 0);
             if(meu != reg) mal++;
         }
         printf("      a ordem em %ld comparações: %ld divergências contra a régua larga\n",
@@ -103,6 +105,39 @@ int main(void){
            " tecto da CONSTRUÇÃO — e mudou para melhor, porque passou a ser contado em vez"
            " de silencioso",
            mal == 0 && cas > 20000);
+    }
+
+    /* ═══ §K2b 32 → 16: Qz e RtOp no envelope E₁₆ ═══════════════════════════ */
+    printf("\n§K2b De 32 para 16: o racional e o operador cabem no envelope.\n\n");
+    {
+        long mal_q = 0, cas_q = 0, mal_op = 0, cas_op = 0;
+        for(int ap = -127; ap <= 127; ap += 5) for(int aq = 1; aq <= 15; aq++)
+        for(int bp = -63; bp <= 63; bp += 7){
+            Qz a = qz(ap, aq), b = qz(bp, aq + 1);
+            cas_q++;
+            if(!qz_cabe(a.p) || !qz_cabe(a.q) || !qz_cabe(b.p) || !qz_cabe(b.q)) mal_q++;
+            if(qz_menor(a, b) != (d16_cmp_prod(a.p, b.q, b.p, a.q) < 0)) mal_q++;
+        }
+        RtOp esp = {{ -1, 0, 0, 1 }};
+        for(int16_t p = -20; p <= 20; p++) for(int16_t q = 1; q <= 20; q++){
+            int16_t ip, iq;
+            int32_t jp, jq;
+            long hp, hq;
+            rt_opera_i16(&esp, p, q, &ip, &iq);
+            rt_opera_i32(&esp, (int32_t)p, (int32_t)q, &jp, &jq);
+            rt_opera(&esp, p, q, &hp, &hq);
+            cas_op++;
+            if(ip != (int16_t)jp || iq != (int16_t)jq || hp != jp || hq != jq) mal_op++;
+        }
+        printf("      Qz em %ld casos: %ld falhas (envelope ou ordem)\n", cas_q, mal_q);
+        printf("      RtOp espelho em %ld pares (p,q): %ld divergências i16/i32/long\n",
+               cas_op, mal_op);
+        ok("DE 32 PARA 16 O RACIONAL VIVE EM E₁₆: qz guarda int16, a ordem usa d16_cmp_prod,"
+           " e qz_saturou conta o que não cabe — sem enrolar calado",
+           mal_q == 0 && cas_q > 5000);
+        ok("DE 32 PARA 16 O OPERADOR T EM E₁₆ OPERA COORDENADAS int16: rt_opera_i16 bate"
+           " rt_opera_i32 e rt_opera nos pares que cabem",
+           mal_op == 0 && cas_op > 800);
     }
 
     /* ═══ §K3 32 → uint8: o espaço fica EXAUSTÍVEL ══════════════════════════ */

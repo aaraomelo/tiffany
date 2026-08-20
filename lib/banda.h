@@ -2,6 +2,7 @@
  * porque p2p e pNp sao a mesma coisa com mais ouvidos. */
 #ifndef BANDA_H
 #define BANDA_H
+#include <stdint.h>
 #include <string.h>
 /* o sha256 do martelo, o mesmo — a banda e sha256(tecido) */
 static const unsigned K256[64] = {
@@ -46,7 +47,7 @@ static void sha256(const unsigned char *m, size_t n, unsigned char *out){
     size_t tot=((n+9+63)/64)*64; unsigned char b[1024];
     if(tot>sizeof b) return;
     memset(b,0,tot); memcpy(b,m,n); b[n]=0x80;
-    unsigned long long bits=(unsigned long long)n*8;
+    uint64_t bits=(uint64_t)n*8;
     for(int i=0;i<8;i++) b[tot-1-i]=(unsigned char)(bits>>(8*i));
     for(size_t o=0;o<tot;o+=64){
         unsigned w[64];

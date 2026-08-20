@@ -1,6 +1,6 @@
 /* dforma.h — A DERIVADA EXTERIOR: Λ⁰ →d Λ¹ →d Λ² →d Λ³, com d² = 0.
  *
- * O `eval.txt` aponta o andar pelo nome, e diz porquê: «aí vocês fecham o buraco que
+ *  ordem do coordenador aponta o andar pelo nome, e diz porquê: «aí vocês fecham o buraco que
  * ficou aberto no Cálculo III e, pela primeira vez, o directo/cruzado, exterior,
  * estrela, contração e borda podem entrar TODOS NA MESMA LINGUAGEM».
  *

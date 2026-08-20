@@ -23,6 +23,7 @@
  *   cc -O2 -std=c99 canal.c -o canal && ./canal
  */
 #define _POSIX_C_SOURCE 200809L
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -50,7 +51,7 @@ static void sha256(const unsigned char *m, size_t n, unsigned char *out){
     size_t tot=((n+9+63)/64)*64; unsigned char b[1024];
     if(tot>sizeof b) return;
     memset(b,0,tot); memcpy(b,m,n); b[n]=0x80;
-    unsigned long long bits=(unsigned long long)n*8;
+    uint64_t bits=(uint64_t)n*8;
     for(int i=0;i<8;i++) b[tot-1-i]=(unsigned char)(bits>>(8*i));
     for(size_t o=0;o<tot;o+=64){
         unsigned w[64];

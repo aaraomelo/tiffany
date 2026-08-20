@@ -27,7 +27,7 @@
 #include "reta.h"      /* as operações da recta */
 #include "unidade.h"
 
-typedef long long L;
+typedef long L;
 static const L P = 2147483647;                 /* 2^31-1, primo de Mersenne */
 
 static L involucao(L x){ if(x%P==0) return 0; return (P - rt_inv_mod(x,P)) % P; }  /* ν(x)=-1/x, a Poincaré-dualidade */
@@ -98,7 +98,7 @@ int main(void){
     for(int nlvl = 0; nlvl < 8; nlvl++){ if(dim0 != (1L << nlvl)) torre_dobra = 0; dim0 = dim0 * 2; }
     /* o boost incompressível: [[1,1],[0,1]] --- |det| = 1·1 - 1·0 = 1 (não muda o volume) */
     L boost_det = 1*1 - 1*0;
-    printf("§M4  TETRAL (tecidos): dim A_{n+1}=2·dim A_n → 1,2,4,8...; NS o boost |det|=%lld\n\n", boost_det);
+    printf("§M4  TETRAL (tecidos): dim A_{n+1}=2·dim A_n → 1,2,4,8...; NS o boost |det|=%ld\n\n", boost_det);
     ok("§M4 a LEI 4 é a TETRALIDADE --- os tecidos: a indução dim A_{n+1}=2·dim A_n (a torre 1→2→4→8, a"
        " estrela iterada, thm:tecidos); e Navier-Stokes é o boost incompressível, |det|=1 (Liouville, o"
        " volume que não muda) --- a unidade da torre, o sétimo problema", torre_dobra && boost_det == 1);
@@ -113,7 +113,7 @@ int main(void){
     Gauss menos_um = {-1, 0}, sobre_i = {0, -1};     /* 1/i = -i */
     Gauss nu_i = g_mul(menos_um, sobre_i);           /* -1 · (1/i) = -1·(-i) = i */
     int estrela_fixa = (nu_i.re == i.re && nu_i.im == i.im);
-    printf("§M5  PENTAL (ponto fixo): i²=(%lld,%lld) [= -1, o bit]; ν(i)=(%lld,%lld) [= i, o fixo]\n\n",
+    printf("§M5  PENTAL (ponto fixo): i²=(%ld,%ld) [= -1, o bit]; ν(i)=(%ld,%ld) [= i, o fixo]\n\n",
            i2.re, i2.im, nu_i.re, nu_i.im);
     ok("§M5 a LEI 5 é a PENTALIDADE --- o PONTO FIXO: a estrela ν(x)=-1/x fixa-se em x²=-1, que é o BIT"
        " (i). Em ℝ não existe (o bit estende); em ℤ[i] é EXACTO: i²=-1 e ν(i)=i. É o corolário --- o"
@@ -128,7 +128,7 @@ int main(void){
     L primeiro_junto = 0;
     for(L t = 1; t <= interface; t++) if(t % periodo_dual == 0 && t % periodo_trial == 0){ primeiro_junto = t; break; }
     int hexal = (interface == 6 && primeiro_junto == 6);
-    printf("§M6  HEXAL (relógio/inversor): dual bate em 2, trial em 3, a interface = lcm(2,3) = %lld\n\n", interface);
+    printf("§M6  HEXAL (relógio/inversor): dual bate em 2, trial em 3, a interface = lcm(2,3) = %ld\n\n", interface);
     ok("§M6 a LEI 6 é a HEXALIDADE --- o RELÓGIO, o inversor, a INTERFACE: o relógio do dual bate em 2"
        " (a reflexão), o do trial em 3 (os três eixos), e a interface é onde sincronizam --- lcm(2,3)=6,"
        " o menor instante comum (o viveiro). O inversor casa os dois relógios no 6", hexal);

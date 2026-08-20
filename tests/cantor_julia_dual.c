@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include "unidade.h"
 
-typedef long long L;
+typedef long L;
 
 /* ── ℤ[i]: um inteiro de Gauss (re, im). O quadrado é multiplicação, não fórmula. ─────── */
 typedef struct { L re, im; } Zi;
@@ -50,8 +50,8 @@ int main(void){
         if(!zi_igual(q_mult, q_add)) res_dual++;
         npar++;
     }
-    printf("      q=4: o quadrado (Julia, mult.) vs a duplicação do ângulo (Cantor, aditiva): %lld"
-           " de %lld batem, resíduo %lld\n\n", npar - res_dual, npar, res_dual);
+    printf("      q=4: o quadrado (Julia, mult.) vs a duplicação do ângulo (Cantor, aditiva): %ld"
+           " de %ld batem, resíduo %ld\n\n", npar - res_dual, npar, res_dual);
     ok("§CJ1 CANTOR e JULIA são o DUAL aditivo↔multiplicativo: a duplicação do ângulo θ→2θ (o SHIFT de"
        " Cantor, aditivo) É o quadrado z→z² (Julia, multiplicativo), conjugados por z=e^{2πiθ} --- o"
        " quadrado de Gauss bate a duplicação do ângulo, exato, resíduo 0. É o contar↔integrar",
@@ -68,7 +68,7 @@ int main(void){
     /* e que c=−1 é MESMO o que faz z²=z+1: a constante do ponto fixo z²=z−c é −c, e −(−1)=+1 */
     L c = -1, constante = -c;             /* z² = z + (−c) */
     int c_da_unidade = (constante == 1);
-    printf("§CJ2  φ² em ℤ[φ] = (%lld,%lld) ; φ+1 = (1,1) ; áureo: %s ; c=−1 dá z²=z+%lld: %s\n\n",
+    printf("§CJ2  φ² em ℤ[φ] = (%ld,%ld) ; φ+1 = (1,1) ; áureo: %s ; c=−1 dá z²=z+%ld: %s\n\n",
            phi2.a, phi2.b, aureo ? "sim" : "não", constante, c_da_unidade ? "sim" : "não");
     ok("§CJ2 o ponto fixo de z²+c satisfaz z²=z−c, e em c=−1 é z²=z+1 --- o ÁUREO φ (φ²=φ+1, exato em"
        " ℤ[φ], resíduo 0). É a forma HONESTA do «x²=y+1»: julia²=julia+1 (o ponto fixo de Julia), o"
@@ -116,7 +116,7 @@ int main(void){
     int octoniao_dual = 1; { L m = 1; for(int k = 0; k < 3; k++) m *= 2; octoniao_dual = (m == 8); }  /* 3 dobras = 8 */
     int lcm23 = 0; for(int t = 1; t <= 99; t++) if(t % 2 == 0 && t % 3 == 0){ lcm23 = t; break; }
     int hexal6 = (lcm23 == 6);
-    printf("§CJ4  compor o quadrado n vezes = ×2^n (resíduo %lld) ; 3 dobras = %d (octonião dual) ;"
+    printf("§CJ4  compor o quadrado n vezes = ×2^n (resíduo %ld) ; 3 dobras = %d (octonião dual) ;"
            " interface = lcm(2,3) = %d (hexal)\n\n", res_torre, octoniao_dual ? 8 : 0, lcm23);
     ok("§CJ4 a COMPOSIÇÃO (Alonzo) sobe a torre: z→z² é a DOBRA dos tecidos (compor n vezes = ×2^n), e"
        " TRÊS dobras dão GRAU 8 = o OCTONIÃO DUAL (dois tecidos, reversível, def:octoniao-dual). E a"
@@ -157,8 +157,8 @@ int main(void){
     int plena = zf_igual(prod_phi, soma_phi);    /* na plena, produto = soma */
     L x = 2, prod_x = x * x, soma_x = x + 1;     /* controlo: um não-golden separa-os */
     int nao_plena = (prod_x != soma_x);
-    printf("§CJ6  golden: φ·φ = (%lld,%lld) = φ+1 = (%lld,%lld) -> produto=soma: %s ; controlo x=2:"
-           " 2·2=%lld, 2+1=%lld, separados: %s\n\n", prod_phi.a, prod_phi.b, soma_phi.a, soma_phi.b,
+    printf("§CJ6  golden: φ·φ = (%ld,%ld) = φ+1 = (%ld,%ld) -> produto=soma: %s ; controlo x=2:"
+           " 2·2=%ld, 2+1=%ld, separados: %s\n\n", prod_phi.a, prod_phi.b, soma_phi.a, soma_phi.b,
            plena ? "sim" : "não", prod_x, soma_x, nao_plena ? "sim" : "não");
     ok("§CJ6 na HEXAL (grau 6, a PLENA) SOMA=PRODUTO, e a forma ÁUREA é exactamente isso: φ·φ=φ+1 --- o"
        " PRODUTO (o quadrado, multiplicativo) É a SOMA (+1, aditiva). O golden é o ponto onde multiplicar"
@@ -178,8 +178,8 @@ int main(void){
     Zf soma_r = {r1.a + r2.a, r1.b + r2.b}; Zf um = {1, 0};   /* Vieta: soma */
     Zf prod_r = zf_mul(r1, r2);             Zf mn1 = {-1, 0}; /* Vieta: produto */
     int vieta = zf_igual(soma_r, um) && zf_igual(prod_r, mn1);
-    printf("§CJ7  x²−x−1=0: raiz φ resíduo (%lld,%lld), raiz ψ resíduo (%lld,%lld) ; Vieta: soma=(%lld,%lld)"
-           " produto=(%lld,%lld)\n\n", r1z.a, r1z.b, r2z.a, r2z.b, soma_r.a, soma_r.b, prod_r.a, prod_r.b);
+    printf("§CJ7  x²−x−1=0: raiz φ resíduo (%ld,%ld), raiz ψ resíduo (%ld,%ld) ; Vieta: soma=(%ld,%ld)"
+           " produto=(%ld,%ld)\n\n", r1z.a, r1z.b, r2z.a, r2z.b, soma_r.a, soma_r.b, prod_r.a, prod_r.b);
     ok("§CJ7 RESOLVE-SE a equação x²=x+1 (a hexal, soma=produto): as duas raízes são cantor=φ e"
        " julia=ψ (x²−x−1=0 exacto em ℤ[φ], as duas, resíduo 0), e por VIETA a SOMA cantor+julia=1 e o"
        " PRODUTO cantor·julia=−1 (o inversor, a estaca). A equação resolve-se NO PAR cantor/julia",
@@ -202,8 +202,8 @@ int main(void){
     int dois_lados = zf_igual(cz, zr) && zf_igual(jz, zr);   /* os dois lados: o mesmo golden */
     Zf s_cj = {ct.a + jl.a, ct.b + jl.b}, s_jc = {jl.a + ct.a, jl.b + ct.b};
     int cruz_inv = zf_igual(s_cj, s_jc) && zf_igual(zf_mul(ct, jl), zf_mul(jl, ct));
-    printf("§CJ8  estaca troca (cantor·julia=−1): %s ; os dois lados golden (resíduo (%lld,%lld) e"
-           " (%lld,%lld)): %s ; cruz (soma,produto) invariante: %s\n\n", estaca_troca ? "sim" : "não",
+    printf("§CJ8  estaca troca (cantor·julia=−1): %s ; os dois lados golden (resíduo (%ld,%ld) e"
+           " (%ld,%ld)): %s ; cruz (soma,produto) invariante: %s\n\n", estaca_troca ? "sim" : "não",
            cz.a, cz.b, jz.a, jz.b, dois_lados ? "sim" : "não", cruz_inv ? "sim" : "não");
     ok("§CJ8 é SIMÉTRICO, os DOIS lados: cantor e julia são um par dual, a estaca x†=−1/x (o inversor)"
        " TROCA-OS (cantor·julia=−1, cantor†=julia, período 2), e a CRUZ (x⊕x†, x⊗x†)=(soma,produto)"

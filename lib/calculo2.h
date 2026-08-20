@@ -1,6 +1,6 @@
 /* calculo2.h — CÁLCULO II EXACTO: séries, várias variáveis, e a borda.
  *
- * O `eval.txt` sobe para o Cálculo II e acrescenta uma coisa nova à espinha:
+ *  ordem do coordenador sobe para o Cálculo II e acrescenta uma coisa nova à espinha:
  *
  *        LOCAL  →  GLOBAL
  *
@@ -35,6 +35,8 @@
  * Tudo em Qz. Precisa de `racionais.h`, `linear.h` e `calculo.h`. */
 #ifndef CALCULO2_H
 #define CALCULO2_H
+
+#include <stdint.h>
 
 #define C2_MAX 24                 /* termos de série guardados; o tecto verifica-se */
 static long c2_estouros = 0;
@@ -86,11 +88,17 @@ static Sr sr_geometrica(void){                   /* 1/(1−x) = Σ xⁿ */
 }
 static Sr sr_exp(int termos){                    /* eˣ = Σ xⁿ/n! */
     Sr s = sr0();
-    long f = 1;
+    Qz t = qz(1,1);
+    int ult = 0;
     for(int i = 0; i <= termos && i <= C2_MAX; i++){
-        if(i) { if(f > 1000000000L/i){ c2_estouros++; break; } f *= i; }
-        s.a[i] = qz(1, f);
+        s.a[i] = t;
+        ult = i;
+        if(i < termos && i < C2_MAX){
+            long antes = qz_saturou;
+            if(!qz_divide(t, qz_de_inteiro(i + 1), &t) || qz_saturou != antes) break;
+        }
     }
+    s.n = ult;
     return s;
 }
 /* log(1+x) = Σ (−1)^{n+1} xⁿ/n — a INVERSA da exponencial, do lado da série, e com os
@@ -121,21 +129,38 @@ static Sr sr_compoe(Sr f, Sr g, int N){
 
 static Sr sr_sin(int termos){
     Sr s = sr0();
-    long f = 1;
-    for(int i = 1, k = 0; i <= termos && i <= C2_MAX; i += 2, k++){
-        f = 1;
-        for(int j = 2; j <= i; j++){ if(f > 1000000000L/j){ c2_estouros++; return s; } f *= j; }
-        s.a[i] = qz((k % 2) ? -1 : 1, f);
+    Qz t = qz(1,1);
+    int sign = 1, ult = 0;
+    for(int i = 1; i <= termos && i <= C2_MAX; i += 2){
+        s.a[i] = qz_mult(qz_de_inteiro(sign), t);
+        ult = i;
+        sign = -sign;
+        if(i + 2 <= termos && i + 2 <= C2_MAX){
+            long antes = qz_saturou;
+            if(!qz_divide(t, qz_de_inteiro(i + 1), &t) || qz_saturou != antes) break;
+            antes = qz_saturou;
+            if(!qz_divide(t, qz_de_inteiro(i + 2), &t) || qz_saturou != antes) break;
+        }
     }
+    s.n = ult;
     return s;
 }
 static Sr sr_cos(int termos){
     Sr s = sr0();
-    for(int i = 0, k = 0; i <= termos && i <= C2_MAX; i += 2, k++){
-        long f = 1;
-        for(int j = 2; j <= i; j++){ if(f > 1000000000L/j){ c2_estouros++; return s; } f *= j; }
-        s.a[i] = qz((k % 2) ? -1 : 1, f);
+    Qz t = qz(1,1);
+    int sign = 1, ult = 0;
+    for(int i = 0; i <= termos && i <= C2_MAX; i += 2){
+        s.a[i] = qz_mult(qz_de_inteiro(sign), t);
+        ult = i;
+        sign = -sign;
+        if(i + 2 <= termos && i + 2 <= C2_MAX){
+            long antes = qz_saturou;
+            if(!qz_divide(t, qz_de_inteiro(i + 1), &t) || qz_saturou != antes) break;
+            antes = qz_saturou;
+            if(!qz_divide(t, qz_de_inteiro(i + 2), &t) || qz_saturou != antes) break;
+        }
     }
+    s.n = ult;
     return s;
 }
 /* ── A SÉRIE-p: E O ERRO QUE A PRIMEIRA VERSÃO COMETEU ──────────────────────────
@@ -205,11 +230,18 @@ static void sr_telescopa(long N, Qz *somado, Qz *fechado){
 static long sr_majora(long p, long N){
     long falhas = 0;
     for(long n = 2; n <= N; n++){
-        __int128 d = 1;
-        for(long k = 0; k < p; k++){ d *= n; if(d > 4000000000000000000LL){ c2_estouros++; return -1; } }
-        Qz esq = qz(1, (long)d);
-        Qz dir = qz_soma(qz(1, n-1), qz_oposto(qz(1, n)));      /* = 1/(n(n−1)) */
-        if(!(esq.p * dir.q <= dir.p * esq.q)) falhas++;
+        if(p >= 2){
+            int64_t np = 1;
+            for(long k = 0; k < p; k++){
+                np *= n;
+                if(np > 4000000000000000000LL){ c2_estouros++; return -1; }
+            }
+            if(np < n * (n - 1)) falhas++;
+        } else {
+            Qz esq = qz(1, n);
+            Qz dir = qz_soma(qz(1, n-1), qz_oposto(qz(1, n)));
+            if(qz_menor(dir, esq)) falhas++;
+        }
     }
     return falhas;
 }
@@ -234,7 +266,7 @@ static long sr_harmonica_blocos(int m, Qz *minorante){
 /* o TERMO GERAL vai a zero? — a condição NECESSÁRIA, e o gume é que NÃO BASTA:
  * em p = 1 o termo vai a zero e a série diverge na mesma. */
 static int sr_termo_a_zero(long p, long N, Qz *ultimo){
-    __int128 d = 1;
+    int64_t d = 1;
     for(long k = 0; k < p; k++){ d *= N; if(d > 4000000000000000000LL){ c2_estouros++; return 0; } }
     *ultimo = qz(1, (long)d);
     return 1;

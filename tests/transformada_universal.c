@@ -23,7 +23,9 @@
  *   cc -O2 -std=c99 -I. -I../lib transformada_universal.c -o transformada_universal
  */
 #include <stdio.h>
+#include <stdint.h>
 #include "qmd.h"
+#include "reta.h"
 #include "unidade.h"
 
 /* A AVALIAÇÃO NAS DUAS FOLHAS: eval±(α) = a ± b·m√D. Guardam-se os COEFICIENTES e não o
@@ -39,7 +41,7 @@ static Folhas eval_folhas(Qmd x){
 int main(void){
     printf("\n══ A TRANSFORMADA UNIVERSAL EM Q(m√D): a convolução e a deconvolução ══\n");
 
-    const long m = 1, D = 5;
+    const int32_t m = 1, D = 5;
 
     /* ─── §T1 e §T2 ── a convolução, e a avaliação que a diagonaliza ────────────────
      * Duas coisas, e a primeira dá sentido à segunda:
@@ -48,26 +50,25 @@ int main(void){
      *   (b) e a avaliação nas folhas leva-a no produto, FOLHA A FOLHA (thm:espectro).
      * Verifica-se nas duas folhas e NÃO pela norma: a norma já é o produto delas, e usá-la
      * seria tomar a consequência por causa. */
-    long conv_ok = 0, diag = 0, tot = 0;
-    for(long a1 = -4; a1 <= 4; a1++) for(long b1 = -4; b1 <= 4; b1++)
-    for(long a2 = -4; a2 <= 4; a2++) for(long b2 = -4; b2 <= 4; b2++){
+    int32_t conv_ok = 0, diag = 0, tot = 0;
+    for(int32_t a1 = -4; a1 <= 4; a1++) for(int32_t b1 = -4; b1 <= 4; b1++)
+    for(int32_t a2 = -4; a2 <= 4; a2++) for(int32_t b2 = -4; b2 <= 4; b2++){
         Qmd x = qmd_make(a1, b1, 1), y = qmd_make(a2, b2, 1);
         Qmd xy = qmd_mul(x, y, m, D);
         tot++;
-        /* (a) a convolução, escrita à parte */
-        long cv0 = a1*a2 + m*m*D*b1*b2, cv1 = a1*b2 + a2*b1;
+        int64_t cv0 = (int64_t)a1*a2 + (int64_t)m*m*D*b1*b2;
+        int64_t cv1 = (int64_t)a1*b2 + (int64_t)a2*b1;
         if(xy.a == cv0 && xy.b == cv1) conv_ok++;
-        /* (b) a avaliação nas duas folhas, e o produto folha a folha */
         Folhas f = eval_folhas(xy);
-        long p_mais_a  = a1*a2 + m*m*D*b1*b2, p_mais_b  =  a1*b2 + a2*b1;
-        long p_menos_a = a1*a2 + m*m*D*b1*b2, p_menos_b = -(a1*b2 + a2*b1);
-        if(f.a_mais == p_mais_a && f.b_mais == p_mais_b &&
-           f.a_menos == p_menos_a && f.b_menos == p_menos_b) diag++;
+        int64_t p_mais_b  = cv1;
+        int64_t p_menos_b = -cv1;
+        if(f.a_mais == cv0 && f.b_mais == p_mais_b &&
+           f.a_menos == cv0 && f.b_menos == p_menos_b) diag++;
     }
     printf("\n  §T1/§T2  a convolução, e a avaliação nas folhas que a diagonaliza\n");
-    printf("      pares varridos ................................. %ld\n", tot);
-    printf("      o produto É a convolução cíclica de 2, peso m²D  %ld\n", conv_ok);
-    printf("      e a avaliação diagonaliza-a, FOLHA A FOLHA ..... %ld\n\n", diag);
+    printf("      pares varridos ................................. %d\n", tot);
+    printf("      o produto É a convolução cíclica de 2, peso m²D  %d\n", conv_ok);
+    printf("      e a avaliação diagonaliza-a, FOLHA A FOLHA ..... %d\n\n", diag);
     ok("o produto É a CONVOLUÇÃO dos coeficientes (cor:conv-desce) — cíclica de comprimento"
        " 2 com peso m²D no termo que dá a volta, escrita à parte e comparada — e a AVALIAÇÃO"
        " NAS FOLHAS ±m√D diagonaliza-a, folha a folha. É o thm:espectro lido neste corpo, e"
@@ -78,17 +79,17 @@ int main(void){
      * A soma das duas avaliações é 2a — RACIONAL, porque a parte com raiz cancela — e o
      * produto é a² − b²m²D. São as duas do thm:fixo-dual, e a razão de serem essas está à
      * vista: são as únicas funções das folhas que não dependem de qual delas se chama σ. */
-    long sim_tr = 0, sim_nm = 0, sim_tot = 0;
-    for(long a = -5; a <= 5; a++) for(long b = -5; b <= 5; b++){
+    int32_t sim_tr = 0, sim_nm = 0, sim_tot = 0;
+    for(int32_t a = -5; a <= 5; a++) for(int32_t b = -5; b <= 5; b++){
         Qmd x = qmd_make(a, b, 1);
         Folhas f = eval_folhas(x);
         sim_tot++;
         if(f.a_mais + f.a_menos == 2*a && f.b_mais + f.b_menos == 0) sim_tr++;
-        long long prod = (long long)a*a - (long long)b*b*m*m*D;
+        int64_t prod = (int64_t)a*a - (int64_t)b*b*m*m*D;
         if(prod == qmd_norm_num(x, m, D)) sim_nm++;
     }
     printf("  §T3  traço e norma são as FUNÇÕES SIMÉTRICAS das folhas\n");
-    printf("      α varridos: %ld ; a soma dá 2a e a raiz cancela em %ld ; a norma em %ld\n\n",
+    printf("      α varridos: %d ; a soma dá 2a e a raiz cancela em %d ; a norma em %d\n\n",
            sim_tot, sim_tr, sim_nm);
     ok("o TRAÇO e a NORMA são as funções simétricas das folhas: a soma das avaliações é 2a"
        " — racional, porque a parte com raiz cancela — e o produto é a² − b²m²D. São as duas"
@@ -102,17 +103,17 @@ int main(void){
      * x² − m²D É irredutível, o quociente é CORPO, e «invertível» degenera em «não nulo».
      *
      * Diz-se, em vez de se apresentar como conteúdo: o único α de norma zero é o ZERO. */
-    long inv_ok = 0, inv_tot = 0, nz_total = 0, nz_naonulo = 0;
-    for(long a = -6; a <= 6; a++) for(long b = -6; b <= 6; b++){
+    int32_t inv_ok = 0, inv_tot = 0, nz_total = 0, nz_naonulo = 0;
+    for(int32_t a = -6; a <= 6; a++) for(int32_t b = -6; b <= 6; b++){
         Qmd x = qmd_make(a, b, 1);
-        long long n = qmd_norm_num(x, m, D);
+        int64_t n = qmd_norm_num(x, m, D);
         if(n == 0){ nz_total++; if(a || b) nz_naonulo++; continue; }
         inv_tot++;
         if(qmd_eq(qmd_mul(x, qmd_inv(x, m, D), m, D), qmd_one())) inv_ok++;
     }
     printf("  §T4  a DECONVOLUÇÃO degenera: o corpo é irredutível\n");
-    printf("      α com norma ≠ 0 e α·α⁻¹ = 1 ......... %ld de %ld\n", inv_ok, inv_tot);
-    printf("      α com norma ZERO .................... %ld, e NÃO NULOS entre eles: %ld\n\n",
+    printf("      α com norma ≠ 0 e α·α⁻¹ = 1 ......... %d de %d\n", inv_ok, inv_tot);
+    printf("      α com norma ZERO .................... %d, e NÃO NULOS entre eles: %d\n\n",
            nz_total, nz_naonulo);
     ok("a inversão DEGENERA aqui, e diz-se: com D livre de quadrados o polinómio é"
        " irredutível, o quociente é CORPO, e «invertível» vira «não nulo» — o caso"
@@ -124,20 +125,20 @@ int main(void){
      * Com D QUADRADO PERFEITO o polinómio x² − m²D factoriza, o corpo parte-se, e aparecem
      * os DIVISORES DE ZERO do thm:divzero — não nulos de norma zero, sem inversa. É aí que
      * «invertível» deixa de ser «não nulo», e é este contraste que dá conteúdo ao §T4. */
-    long dq_casos = 0, dq_com_divzero = 0, dq_naonulos = 0;
-    const long MQ[] = {1,1,2}, DQ[] = {4,9,4};
+    int32_t dq_casos = 0, dq_com_divzero = 0, dq_naonulos = 0;
+    const int32_t MQ[] = {1,1,2}, DQ[] = {4,9,4};
     printf("  §T5  o CONTRASTE: com D quadrado o corpo parte-se (thm:divzero)\n");
     printf("      m  D    não nulos com norma ZERO (divisores de zero)\n");
     for(int t = 0; t < 3; t++){
-        long mm = MQ[t], dd = DQ[t], nn = 0;
-        for(long a = -6; a <= 6; a++) for(long b = -6; b <= 6; b++){
+        int32_t mm = MQ[t], dd = DQ[t], nn = 0;
+        for(int32_t a = -6; a <= 6; a++) for(int32_t b = -6; b <= 6; b++){
             if(!a && !b) continue;
-            if((long long)a*a - (long long)b*b*mm*mm*dd == 0) nn++;
+            if((int64_t)a*a - (int64_t)b*b*mm*mm*dd == 0) nn++;
         }
         dq_casos++;
         if(nn > 0) dq_com_divzero++;
         dq_naonulos += nn;
-        printf("      %ld  %ld    %ld\n", mm, dd, nn);
+        printf("      %d  %d    %d\n", mm, dd, nn);
     }
     printf("\n");
     ok("e o CONTRASTE dá conteúdo ao anterior: com D QUADRADO o polinómio factoriza, o corpo"
@@ -165,29 +166,29 @@ int main(void){
      * E é isto que autoriza o passo OPERA: a convolução só vira produto ponto a ponto
      * quando os operadores partilham as folhas. Dir é o que a transformada vê — o produto
      * folha a folha; Cruz é o que sobra quando elas não coincidem. */
-    long cz_tot = 0, cz_coincide = 0, cz_anti = 0, cz_prop = 0;
+    int32_t cz_tot = 0, cz_coincide = 0, cz_anti = 0, cz_prop = 0;
     printf("  §T6  CRUZ é a obstrução à diagonalização simultânea\n");
     printf("      A_m,A_n     Cruz (×2)          folhas iguais?\n");
-    for(long mm = 1; mm <= 8; mm++) for(long nn = 1; nn <= 8; nn++){
-        long A[4] = { mm,1,1,0 }, B[4] = { nn,1,1,0 };
-        long AB[4] = { A[0]*B[0]+A[1]*B[2], A[0]*B[1]+A[1]*B[3],
-                       A[2]*B[0]+A[3]*B[2], A[2]*B[1]+A[3]*B[3] };
-        long BA[4] = { B[0]*A[0]+B[1]*A[2], B[0]*A[1]+B[1]*A[3],
-                       B[2]*A[0]+B[3]*A[2], B[2]*A[1]+B[3]*A[3] };
-        long cr[4];
-        for(int i = 0; i < 4; i++) cr[i] = AB[i] - BA[i];      /* ×2, sem dividir */
+    for(int32_t mm = 1; mm <= 8; mm++) for(int32_t nn = 1; nn <= 8; nn++){
+        int32_t A[4] = { mm,1,1,0 }, B[4] = { nn,1,1,0 };
+        int32_t AB[4] = { A[0]*B[0]+A[1]*B[2], A[0]*B[1]+A[1]*B[3],
+                          A[2]*B[0]+A[3]*B[2], A[2]*B[1]+A[3]*B[3] };
+        int32_t BA[4] = { B[0]*A[0]+B[1]*A[2], B[0]*A[1]+B[1]*A[3],
+                          B[2]*A[0]+B[3]*A[2], B[2]*A[1]+B[3]*A[3] };
+        int32_t cr[4];
+        for(int i = 0; i < 4; i++) cr[i] = AB[i] - BA[i];
         cz_tot++;
         int zero = (cr[0]==0 && cr[1]==0 && cr[2]==0 && cr[3]==0);
-        int mesmas_folhas = (mm == nn);        /* mesmo traço e mesmo det ⟹ mesmas folhas */
+        int mesmas_folhas = (mm == nn);
         if(zero == mesmas_folhas) cz_coincide++;
         if(cr[0] == 0 && cr[3] == 0 && cr[1] == -cr[2]) cz_anti++;
-        if(cr[1] == (mm - nn) && cr[2] == -(mm - nn)) cz_prop++;   /* ∝ (m−n) */
+        if(cr[1] == (mm - nn) && cr[2] == -(mm - nn)) cz_prop++;
         if(mm <= 3 && nn <= 3)
-            printf("      A_%ld,A_%ld       [%2ld %2ld; %2ld %2ld]      %s\n",
+            printf("      A_%d,A_%d       [%2d %2d; %2d %2d]      %s\n",
                    mm, nn, cr[0], cr[1], cr[2], cr[3], mesmas_folhas ? "sim" : "não");
     }
-    printf("      pares: %ld ; «Cruz = 0 ⟺ mesmas folhas» em %ld\n", cz_tot, cz_coincide);
-    printf("      Cruz antissimétrica em %ld ; e ∝ à diferença dos traços em %ld\n\n",
+    printf("      pares: %d ; «Cruz = 0 ⟺ mesmas folhas» em %d\n", cz_tot, cz_coincide);
+    printf("      Cruz antissimétrica em %d ; e ∝ à diferença dos traços em %d\n\n",
            cz_anti, cz_prop);
     ok("DIR é o que a transformada vê e CRUZ é a OBSTRUÇÃO à diagonalização simultânea:"
        " Cruz(A_m,A_n) = ½(m−n)·[0 1;−1 0] é sempre antissimétrica e proporcional à"
@@ -211,22 +212,20 @@ int main(void){
      * lê-se termo a termo com a alternância de sinal. */
     {
         /* a FC de a/b por Euclides — nenhuma norma, nenhum quadrado */
-        int fc_n; long fc_t[64];
-        long tot = 0, acordo = 0, abaixo = 0, acima = 0, em_cima = 0, separam = 0;
-        for(long m = 1; m <= 5; m++){
-            long D = m*m + 4;
-            for(long b = 1; b <= 30; b++) for(long a = 0; a <= (m+1)*b + 1; a++){
-                /* CAMINHO A — as folhas: traço e norma, os dois inteiros */
-                long xi = 2*a - m*b;
-                long Nb = xi*xi - b*b*D;
+        int fc_n; int32_t fc_t[64];
+        int32_t tot = 0, acordo = 0, abaixo = 0, acima = 0, em_cima = 0, separam = 0;
+        for(int32_t m = 1; m <= 5; m++){
+            int32_t D = m*m + 4;
+            for(int32_t b = 1; b <= 30; b++) for(int32_t a = 0; a <= (m+1)*b + 1; a++){
+                int64_t xi = (int64_t)2*a - (int64_t)m*b;
+                int64_t Nb = xi*xi - (int64_t)b*b*D;
                 int menor_folhas = (xi < 0) || (Nb < 0);
-                if(Nb == 0) em_cima++;             /* um racional em cima do corte */
-                if(b != 0) separam++;              /* eval₊ − eval₋ = 2b√D ≠ 0 */
+                if(Nb == 0) em_cima++;
+                if(b != 0) separam++;
 
-                /* CAMINHO B — a fracção contínua: só Euclides */
-                long u = a, v = b; fc_n = 0;
+                int32_t u = a, v = b; fc_n = 0;
                 while(v != 0 && fc_n < 64){
-                    long q = u / v, r = u - q*v;
+                    int32_t q = u / v, r = u - q*v;
                     fc_t[fc_n++] = q; u = v; v = r;
                 }
                 int menor_fc = -1;
@@ -240,12 +239,12 @@ int main(void){
             }
         }
         printf("  §T7  as folhas SÃO o corte: traço e norma decidem o lado\n");
-        printf("      racionais varridos ................. %ld\n", tot);
-        printf("      as folhas e a FC concordam em ...... %ld\n", acordo);
-        printf("      caem ABAIXO de σ_m ................. %ld\n", abaixo);
-        printf("      caem ACIMA ......................... %ld\n", acima);
-        printf("      caem EM CIMA (N = 0) ............... %ld\n", em_cima);
-        printf("      e as folhas SEPARAM em ............. %ld\n\n", separam);
+        printf("      racionais varridos ................. %d\n", tot);
+        printf("      as folhas e a FC concordam em ...... %d\n", acordo);
+        printf("      caem ABAIXO de σ_m ................. %d\n", abaixo);
+        printf("      caem ACIMA ......................... %d\n", acima);
+        printf("      caem EM CIMA (N = 0) ............... %d\n", em_cima);
+        printf("      e as folhas SEPARAM em ............. %d\n\n", separam);
         ok("as FOLHAS são o CORTE: a avaliação parte o objecto, e o lado decide-se pelas"
            " duas funções simétricas — traço e norma, ambas INTEIRAS —, sem nunca formar"
            " a raiz. Um segundo programa que não partilha nada com este, a comparação em"
@@ -263,13 +262,13 @@ int main(void){
      *
      * que é o quadrado da separação eval₊ − eval₋. Zero ⟺ uma folha só. */
     {
-        long tot = 0, disc_zero = 0, racionais = 0, casa = 0, separa_genuina = 0, v_nao_zero = 0;
-        for(long D = 2; D <= 40; D++){
-            long r = 0; while(r*r < D) r++;
-            if(r*r == D) continue;                 /* D quadrado sai: outro corpo */
-            for(long u = -6; u <= 6; u++) for(long v = -6; v <= 6; v++){
-                long tr = 2*u, N = u*u - v*v*D;    /* as duas simétricas, inteiras */
-                long disc = tr*tr - 4*N;           /* = (eval₊ − eval₋)² */
+        int32_t tot = 0, disc_zero = 0, racionais = 0, casa = 0, separa_genuina = 0, v_nao_zero = 0;
+        for(int32_t D = 2; D <= 40; D++){
+            int32_t r = 0; while((int64_t)r*r < D) r++;
+            if((int64_t)r*r == D) continue;
+            for(int32_t u = -6; u <= 6; u++) for(int32_t v = -6; v <= 6; v++){
+                int64_t tr = (int64_t)2*u, N = (int64_t)u*u - (int64_t)v*v*D;
+                int64_t disc = tr*tr - 4*N;
                 tot++;
                 if(disc == 0) disc_zero++;
                 if(v == 0) racionais++;
@@ -278,17 +277,17 @@ int main(void){
                  * logo nenhum irracional se disfarça de racional na avaliação */
                 if(v != 0){
                     v_nao_zero++;
-                    long q = 0; while(q*q < disc) q++;
+                    int64_t q = 0; while(q*q < disc) q++;
                     if(q*q != disc) separa_genuina++;
                 }
             }
         }
         printf("  §T7b as folhas COINCIDEM ⟺ o objecto é racional ⟺ não há corte\n");
-        printf("      elementos varridos ................. %ld\n", tot);
-        printf("      discriminante ZERO em .............. %ld\n", disc_zero);
-        printf("      e são exactamente os racionais ..... %ld\n", casa);
-        printf("      com folhas separadas ............... %ld\n", v_nao_zero);
-        printf("      e a separação nunca é quadrado ..... %ld\n\n", separa_genuina);
+        printf("      elementos varridos ................. %d\n", tot);
+        printf("      discriminante ZERO em .............. %d\n", disc_zero);
+        printf("      e são exactamente os racionais ..... %d\n", casa);
+        printf("      com folhas separadas ............... %d\n", v_nao_zero);
+        printf("      e a separação nunca é quadrado ..... %d\n\n", separa_genuina);
         ok("e a outra metade do par: o DISCRIMINANTE da transformada — tr² − 4N, calculado"
            " das duas simétricas e igual ao quadrado da separação das folhas — anula-se"
            " exactamente sobre os racionais, que é o thm:descida dito na transformada. Um"
@@ -937,7 +936,7 @@ int main(void){
                 if(pn == -1 && pd == 1) norma_um++;
                 /* (s†)² = m†²D  contra  1/(m²D) */
                 long q1n = dn*dn*D, q1d = dd*dd, q2n = b*b, q2d = a*a*D;
-                if((long long)q1n*q2d == (long long)q2n*q1d) quadr++;
+                if((int64_t)q1n*q2d == (int64_t)q2n*q1d) quadr++;
                 /* MESMO CORPO: m† é múltiplo racional NÃO NULO de m */
                 if(dn != 0) mesmo_corpo++;
                 /* as duas direcções: |s|² = m²D contra 1, e |s†|² = 1/(m²D) contra 1.
@@ -1423,6 +1422,46 @@ int main(void){
            " O factor é N e não √N, e a inversa devolve o original exactamente",
            tot > 0 && dual_e_inversa == tot && dirac_diag == tot && dirac_fora == tot &&
            conv_tot > 0 && conv_ok == conv_tot && inv_tot > 0 && inv_ok == inv_tot);
+    }
+
+    /* ─── §T21 ── Fase D: RtOp em E₁₆, coordenadas int16 no ciclo ───────────────
+     * A transformada vive em Q(m√D); o operador SL(2,ℤ) do pipe tem T em int16 e as
+     * coordenadas pequenas descem para rt_opera_i16 — mesma peça que §R27, outro sítio. */
+    {
+        RtOp esp = {{ -1, 0, 0, 1 }};
+        long mal = 0, cas = 0;
+        for(int16_t p = -12; p <= 12; p++) for(int16_t q = 1; q <= 12; q++){
+            int16_t hp, hq;
+            int32_t ip, iq;
+            long lp, lq;
+            rt_opera_i16(&esp, p, q, &hp, &hq);
+            rt_opera_i32(&esp, (int32_t)p, (int32_t)q, &ip, &iq);
+            rt_opera(&esp, p, q, &lp, &lq);
+            cas++;
+            if(hp != (int16_t)ip || hq != (int16_t)iq || lp != ip || lq != iq) mal++;
+            int16_t rp16, rq16;
+            int32_t rp32, rq32;
+            long rpl, rql;
+            if(!rt_inverte_i16(&esp, hp, hq, &rp16, &rq16)) mal++;
+            else if(!rt_inverte_i32(&esp, ip, iq, &rp32, &rq32)) mal++;
+            else if(!rt_inverte(&esp, lp, lq, &rpl, &rql)) mal++;
+            else if(rp16 != (int16_t)rp32 || rq16 != (int16_t)rq32 || rpl != rp32 || rql != rq32)
+                mal++;
+        }
+        int16_t c16p, c16q;
+        int32_t c32p, c32q;
+        long clp, clq;
+        int c16 = rt_ciclo_i16(&esp, rt_iv_palavra, 3, 2, &c16p, &c16q);
+        int c32 = rt_ciclo_i32(&esp, rt_iv_palavra, 3, 2, &c32p, &c32q);
+        int cl  = rt_ciclo(&esp, rt_iv_palavra, 3, 2, &clp, &clq);
+        printf("  §T21 Fase D: RtOp E₁₆ opera coordenadas int16\n");
+        printf("      pares (p,q) varridos ............... %ld\n", cas);
+        printf("      opera/inverte divergências ......... %ld\n", mal);
+        printf("      rt_ciclo_i16/i32/long .............. %d / %d / %d\n\n", c16, c32, cl);
+        ok("A TRANSFORMADA HERDA E₁₆ DO PIPE: rt_opera_i16 e rt_ciclo_i16 batem i32 e long"
+           " nas coordenadas pequenas — T em int16, produto via int32, sem widen calado",
+           mal == 0 && cas >= 300 && c16 && c32 && cl &&
+           c16p == (int16_t)c32p && c16q == (int16_t)c32q && clp == c32p && clq == c32q);
     }
 
     printf("  ══ é UMA transformada, e faz DUAS coisas: leva a CONVOLUÇÃO no produto\n");

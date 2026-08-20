@@ -912,14 +912,19 @@ void limpa_saida(void){ PDF_N = 0; SAIDA_N = 0; }
 static int acha_ficheiro(char *nome){
     int ln = strlen(nome);
     if(ln <= 0) return -1;
+    /* 1.º caminho exacto — «papers/arquitetura.tex» não pode cair no corpus homónimo */
+    for(int i = 0; i < N_FICH; i++){
+        char *fn = FICH_NOME[i];
+        if(!fn) continue;
+        if((int)strlen(fn) == ln && !strcmp(fn, nome)) return i;
+    }
     for(int i = 0; i < N_FICH; i++){
         char *fn = FICH_NOME[i];
         if(!fn) continue;
         int li = strlen(fn);
         if(li == 0) continue;
-        if(li == ln && strcmp(fn, nome) == 0) return i;
-        if(li < ln && strcmp(fn, nome + (ln - li)) == 0) return i;
-        if(ln < li && strcmp(fn + (li - ln), nome) == 0) return i;
+        if(li < ln && !strcmp(fn, nome + (ln - li))) return i;
+        if(ln < li && !strcmp(fn + (li - ln), nome)) return i;
         {
             char *aa = fn;
             char *bb = nome;

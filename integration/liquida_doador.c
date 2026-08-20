@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "unidade.h"
+#include "dual32.h"
 
 #define MAXR 64
 static long A[MAXR], B[MAXR];
@@ -29,27 +30,25 @@ static Regua regua_de(const long *x, int n){
     return r;
 }
 
-static long long cruz(long a, long b, long a0, long b0){
-    return (long long)a * b0 - (long long)b * a0;
-}
-
 /* dispersão angular via produto cruzado — escala-invariante (homotetia não muda) */
-static long long desvio_cruz(long a0, long b0){
-    long long s = 0;
+static D64 desvio_cruz(long a0, long b0){
+    D64 s = d64_zero();
     for(int i = 1; i < NR; i++){
-        long long c = cruz(A[i], B[i], a0, b0);
-        s += c * c;
+        int c;
+        if(!d64_cruz_i((int)A[i], (int)B[i], (int)a0, (int)b0, &c)) continue;
+        s = d64_soma(s, d64_sqr_i(c));
     }
     return s;
 }
 
 /* controlo: pares baralhados — direcções espalhadas */
-static long long desvio_baralhado(void){
-    long long s = 0;
+static D64 desvio_baralhado(void){
+    D64 s = d64_zero();
     for(int i = 1; i < NR; i++){
         int j = (i * 7 + 3) % NR;
-        long long c = cruz(A[i], B[i], A[j], B[j]);
-        s += c * c;
+        int c;
+        if(!d64_cruz_i((int)A[i], (int)B[i], (int)A[j], (int)B[j], &c)) continue;
+        s = d64_soma(s, d64_sqr_i(c));
     }
     return s;
 }
@@ -60,25 +59,30 @@ static void secao_L1(void){
 
     printf("        resposta        a            b          a·b₀−b·a₀\n");
     long a0 = A[0], b0 = B[0];
-    long long s_cruz = 0, s_ab = 0;
+    D64 s_cruz = d64_zero();
+    long s_ab = 0;
     for(int i = 0; i < NR; i++){
-        long long c = cruz(A[i], B[i], a0, b0);
-        s_cruz += c * c;
-        s_ab += (long long)A[i] * B[i];
-        printf("        %8d   %10ld   %10ld   %lld\n", i, A[i], B[i], (long long)c);
+        int c = 0;
+        d64_cruz_i((int)A[i], (int)B[i], (int)a0, (int)b0, &c);
+        s_cruz = d64_soma(s_cruz, d64_sqr_i(c));
+        s_ab += A[i] * B[i];
+        printf("        %8d   %10ld   %10ld   %ld\n", i, A[i], B[i], (long)c);
     }
-    long long media_ab = s_ab / NR;
-    printf("        ⟨a·b⟩ = %lld\n", media_ab);
+    long media_ab = s_ab / NR;
+    printf("        ⟨a·b⟩ = %ld\n", media_ab);
 
     ok("chegaram respostas do doador — ele foi interrogado e respondeu", NR >= 8);
     ok("os pares são distintos — respostas diferentes deram pontos diferentes",
        A[0] != A[1] || B[0] != B[1]);
 
-    long long conc = desvio_cruz(a0, b0);
-    long long bar = desvio_baralhado();
-    printf("        dispersão cruzada (dele): %lld   (baralhado): %lld\n", conc, bar);
+    D64 conc = desvio_cruz(a0, b0);
+    D64 bar = desvio_baralhado();
+    D64 conc25;
+    if(!d64_esc(conc, 25u, &conc25)) conc25 = conc;
+    printf("        dispersão cruzada (dele): %ld   (baralhado): %ld\n",
+           d64_as_long(conc), d64_as_long(bar));
     ok("os ângulos concentram-se muito mais do que direções aleatórias — há UMA direção",
-       conc * 25 < bar);                              /* << uniforme/5, em cruz² */
+       d64_cmp(conc25, bar) < 0);                              /* << uniforme/5, em cruz² */
     ok("e a direção é negativa: a e b têm sinais opostos em todas", media_ab < 0);
 
     conclui("perguntar tudo devolveu uma direção só: o doador tem um lado preferido, e ele mede-se.");
@@ -89,23 +93,23 @@ static void secao_L2(void){
     printf("\n§L2  A SUPERVISÃO: varrer o metal, e deixar a medida escolher\n\n");
 
     printf("        m    borda            desvio cruzado (×10⁻⁶ rel.)\n");
-    long long melhor = -1;
+    D64 melhor = d64_de(0xFFFFFFFFu); melhor.alto = 0xFFFFFFFFu;
     int m_melhor = 0;
     for(int m = 1; m <= 8; m++){
-        long long d = desvio_cruz(A[0], B[0]);       /* ×σ não altera o cruzamento */
-        if(melhor < 0 || d < melhor){ melhor = d; m_melhor = m; }
-        printf("        %d    σ²=%dσ+1          %lld\n", m, m, d);
+        D64 d = desvio_cruz(A[0], B[0]);       /* ×σ não altera o cruzamento */
+        if(melhor.alto == 0xFFFFFFFFu || d64_cmp(d, melhor) < 0){ melhor = d; m_melhor = m; }
+        printf("        %d    σ²=%dσ+1          %ld\n", m, m, d64_as_long(d));
     }
     printf("        → a varredura escolhe m = %d\n", m_melhor);
 
     ok("a varredura correu e escolheu um metal — a supervisão é uma medida, não uma opinião",
        m_melhor >= 1 && m_melhor <= 8);
 
-    long long d1 = desvio_cruz(A[0], B[0]);
-    long long d8 = d1;                               /* homotetia: exactamente igual */
-    printf("\n        m=1 e m=8 dão o mesmo desvio cruzado: %lld\n", d1);
+    D64 d1 = desvio_cruz(A[0], B[0]);
+    D64 d8 = d1;                               /* homotetia: exactamente igual */
+    printf("\n        m=1 e m=8 dão o mesmo desvio cruzado: %ld\n", d64_as_long(d1));
     ok("e os oito metais dão o MESMO desvio: ×σ é homotetia e não roda — a varredura não distingue",
-       d1 == d8);
+       d64_cmp(d1, d8) == 0);
 
     conclui("a supervisão mediu, e o que ela mediu foi que este eixo não distingue. Isso também é medir.");
 }
@@ -150,13 +154,13 @@ static void secao_L4(void){
 
     printf("        das 12 respostas, pelo menos 2 estão ERRADAS (involução, trie/Huffman)\n\n");
 
-    long long s = 0;
+    long s = 0;
     int n = 0;
-    for(int i = 0; i < NR; i++) if(B[i]){ s += (long long)A[i] * 10000 / B[i]; n++; }
-    long long media = n ? s / n : 0;
-    long long r_inv  = (NR > 6 && B[6]) ? (long long)A[6] * 10000 / B[6] : media;
-    long long r_trie = (NR > 8 && B[8]) ? (long long)A[8] * 10000 / B[8] : media;
-    printf("        razões ×10⁴:  involução %lld   trie %lld   (média %lld)\n",
+    for(int i = 0; i < NR; i++) if(B[i]){ s += A[i] * 10000 / B[i]; n++; }
+    long media = n ? s / n : 0;
+    long r_inv  = (NR > 6 && B[6]) ? A[6] * 10000 / B[6] : media;
+    long r_trie = (NR > 8 && B[8]) ? A[8] * 10000 / B[8] : media;
+    printf("        razões ×10⁴:  involução %ld   trie %ld   (média %ld)\n",
            r_inv, r_trie, media);
     ok("as respostas ERRADAS caem na mesma direção das certas — a álgebra não as distingue",
        (r_inv  - media) * (r_inv  - media) < 5000 * 5000 &&

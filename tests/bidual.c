@@ -24,7 +24,7 @@
 #include "corpos.h"
 #include "unidade.h"
 
-typedef long long L;
+typedef long L;
 
 /* ─── contagem de componentes conexas numa grelha L^d, para o §B2 ─────────────────────────
  * sem alocacao dinamica: a grelha maior usada e' 7^3 = 343 casas. */
@@ -191,7 +191,7 @@ int main(void){
             long rts = pts, formula = q*q + q + 1;
             if(pts != formula || rts != formula) mau++;
             testados++;
-            printf("      %3lld %10ld %10ld %10lld   %s\n", q, pts, rts, (long long)formula,
+            printf("      %3ld %10ld %10ld %10ld   %s\n", q, pts, rts, formula,
                    (pts == rts && pts == formula) ? "sim" : "NAO"); }
         printf("\n      discordancias com q^2+q+1: %ld\n\n", mau);
         ok("BIDUALIDADE PROJETIVA: #pontos = #rectas = q^2+q+1 — a troca e' uma involucao",
@@ -224,7 +224,7 @@ int main(void){
             if(distintos != n || bidual != n) mau++;
             testados++;
             if(n <= 6 || n == 24)
-                printf("      %4lld %10lld %12ld %12ld   %s\n", n, n, distintos, bidual,
+                printf("      %4ld %10ld %12ld %12ld   %s\n", n, n, distintos, bidual,
                        (bidual == n) ? "sim" : "NAO"); }
         printf("      ...\n      discordancias em n = 2..24: %ld\n\n", mau);
         ok("BIDUALIDADE DE PONTRYAGIN em Z/n: |G^| = |G| e o bidual devolve G — 23 casos",
@@ -247,7 +247,7 @@ int main(void){
             if(bidual != d) mau++;
             dims++;
             if(d <= 5 || d == 40)
-                printf("      %8lld %10lld %10lld   sim\n", d, dual, bidual); }
+                printf("      %8ld %10ld %10ld   sim\n", d, dual, bidual); }
         printf("      ...\n");
         printf("      %8s %10s %10s   NAO — a injecao V -> V** nao e' sobrejetiva\n",
                "infinita", "MAIOR", "MAIOR");
@@ -519,7 +519,7 @@ int main(void){
             L exp_fluxo = (e - 1) + (d - 1);
             if(exp_fluxo != 0) mau_fluxo++;            /* fluxo constante <=> expoente 0 */
             dims++;
-            printf("      %3lld %12s %12s %14s %13lld\n", d,
+            printf("      %3ld %12s %12s %14s %13ld\n", d,
                    d==2 ? "ln r" : "1/r^{d-2}", "1/r^{d-1}", "r^{d-1}", lap); }
         printf("\n        laplaciano nao nulo: %ld   |   fluxo nao constante: %ld   (em %ld dimensoes)\n",
                mau_lap, mau_fluxo, dims);
@@ -590,7 +590,7 @@ int main(void){
             if(k == 0 && D <= 0) mau_c++;
             if(k == 1 && D >= 0) mau_c++;
             linhas_c++;
-            printf("      %-24s %5lld %6lld %8lld   %s\n", C[k].nome, C[k].tr, C[k].det, D, cl); }
+            printf("      %-24s %5ld %6ld %8ld   %s\n", C[k].nome, C[k].tr, C[k].det, D, cl); }
         printf("\n");
         ok("J e' HIPERBOLICO (Delta = 4) e i e' ELIPTICO (Delta = -4) — bate com J^2=+I, i^2=-I",
            mau_c == 0 && linhas_c == 5);
@@ -642,7 +642,7 @@ int main(void){
             L na = a + b*M, nb = -b;
             if(na == a && nb == b && nS < 64){ Sx[nS][0]=a; Sx[nS][1]=b; nS++; }
             if(na == -a && nb == -b && nA < 64){ Ax[nA][0]=a; Ax[nA][1]=b; nA++; } }
-        printf("      em Z[sigma] com m = %lld, |a|,|b| <= 6:  simetricos %ld, antissimetricos %ld\n",
+        printf("      em Z[sigma] com m = %ld, |a|,|b| <= 6:  simetricos %ld, antissimetricos %ld\n",
                M, nS, nA);
         long p_ss=0,p_sa=0,p_aa=0, m_ss=0,m_sa=0,m_aa=0;
         for(long i=0;i<nS;i++) for(long j=0;j<nS;j++){
@@ -781,7 +781,7 @@ int main(void){
         L c2 = Dc[0][0]*Dc[0][0] + Dc[0][1]*Dc[1][0];   /* entrada (0,0) de D^2 */
         L h2 = Dh2[0][0]*Dh2[0][0] + Dh2[0][1]*Dh2[1][0];
         L p2 = Dp[0][0]*Dp[0][0] + Dp[0][1]*Dp[1][0];
-        printf("        derivado de D^2: circulo %+lld, plano %+lld, hiperbole %+lld\n\n", c2, p2, h2);
+        printf("        derivado de D^2: circulo %+ld, plano %+ld, hiperbole %+ld\n\n", c2, p2, h2);
         ok("a trichotomia de Jacobi E' a das tres geometrias — derivada de D^2, nao escrita",
            c2 == -1 && p2 == 0 && h2 == 1);
         conclui("nenhuma destas pontes e' resultado novo: sao classicos, e vao citados. O que");
@@ -829,12 +829,12 @@ int main(void){
             if(!melhor_num || n2*melhor_den < melhor_num*d2){ melhor_num = n2; melhor_den = d2; }
             amostras++;
             if(k==1 || k==2 || k==5 || k==9)
-                printf("        %8lld/10 %11lld/%-2lld   %s\n", k, n2, d2,
+                printf("        %8ld/10 %11ld/%-2ld   %s\n", k, n2, d2,
                        k==5 ? "<- MINIMO: distinguir custa menos no meio" : "");
         }
         /* o minimo tem de ser em p = 1/2, onde g = 4 */
         if(!(melhor_num == 4 && melhor_den == 1)) mau_min++;
-        printf("\n        o menor g encontrado: %lld/%lld   (previsto 4/1, em p = 1/2)\n\n",
+        printf("\n        o menor g encontrado: %ld/%ld   (previsto 4/1, em p = 1/2)\n\n",
                melhor_num, melhor_den);
         ok("a metrica de Fisher e' MINIMA em p = 1/2 e explode nas pontas — derivado, em Q",
            mau_min == 0 && amostras == 9);
@@ -891,7 +891,7 @@ int main(void){
         L J[2][2] = {{0,1},{-1,0}}, J2[2][2];
         for(int u=0;u<2;u++) for(int v=0;v<2;v++)
             J2[u][v] = J[u][0]*J[0][v] + J[u][1]*J[1][v];
-        printf("      os pontos fixos sao {a·I + b·J} com J = [[0,1],[-1,0]] e J^2 = [[%lld,%lld],[%lld,%lld]] = -I\n",
+        printf("      os pontos fixos sao {a·I + b·J} com J = [[0,1],[-1,0]] e J^2 = [[%ld,%ld],[%ld,%ld]] = -I\n",
                J2[0][0],J2[0][1],J2[1][0],J2[1][1]);
         printf("        norma a^2+b^2 > 0 em %ld elementos nao nulos: %ld falhas  -> E' UM CORPO\n\n",
                nao_nulos, mau_n);
@@ -956,7 +956,7 @@ int main(void){
                 if(bx != x || by != y) ml++;
                 if(!k) vets++; }
             mau_ciclo += me + ml; formas++;
-            printf("      [[%2lld,%2lld],[%2lld,%2lld]]        %12s %12s\n",
+            printf("      [[%2ld,%2ld],[%2ld,%2ld]]        %12s %12s\n",
                    J[0][0],J[0][1],J[1][0],J[1][1], me?"FALHA":"sim", ml?"FALHA":"sim"); }
         printf("\n      falhas totais no ciclo, em %ld formas x %ld vetores: %ld\n\n",
                formas, vets, mau_ciclo);
@@ -1064,7 +1064,7 @@ int main(void){
         for(int k=2;k<=10;k++){
             L c = Fi[k+1]*Fi[k-1] - Fi[k]*Fi[k];
             if(c == 1 || c == -1) cauchy++;            /* o erro e' 1/(F_k·F_{k+1}) -> 0 */
-            if(k<=5) printf("      %4d %8lld/%-5lld   |%lld|\n", k, Fi[k+1], Fi[k], c<0?-c:c); }
+            if(k<=5) printf("      %4d %8ld/%-5ld   |%ld|\n", k, Fi[k+1], Fi[k], c<0?-c:c); }
         printf("      ...\n");
         /* e o limite nao esta' em Q: D nunca e' quadrado perfeito */
         for(L mm=1;mm<=200;mm++){
@@ -1103,7 +1103,7 @@ int main(void){
             L sinal = (n % 2) ? -1 : 1;
             /* o previsto: alterna, e a dimensao dobra */
             if(n && dim != (L)1 << n) mau_alt++;
-            printf("      %6d %8s %6lld %14lld   %s\n", n, nomes[n], dim, sinal,
+            printf("      %6d %8s %6ld %14ld   %s\n", n, nomes[n], dim, sinal,
                    (n%2) ? "preto" : "branco");
             dim *= 2; andares++; }
         printf("\n");
@@ -1211,7 +1211,7 @@ int main(void){
             long tot = p*p - 1;
             if(n1 >= tot) mau_col++;                           /* tem de haver colisao real */
             corpos++;
-            printf("      %8lld %14ld %12ld   %ld:1\n", p, n1, tot, tot/(n1?n1:1)); }
+            printf("      %8ld %14ld %12ld   %ld:1\n", p, n1, tot, tot/(n1?n1:1)); }
         printf("\n");
         ok("no ponto fixo a NORMA COLIDE: muitos elementos partilham a mesma leitura",
            mau_col == 0 && corpos == 4);
@@ -1381,7 +1381,7 @@ int main(void){
             for(int i=0;i<quantos[k];i++) q *= dims[k][i];
             if(q != p) mau_d++;
             casos_d++;
-            printf("      %20s %10lld   %lld andares (nas potencias de 2)\n",
+            printf("      %20s %10ld   %ld andares (nas potencias de 2)\n",
                    k==0?"(2,3)":k==1?"(2,3,5)":k==2?"(4,4,4)":"(2,2,2,2)", p, soma_log2); }
         printf("\n");
         ok("a dimensao MULTIPLICA no tensorial, e o log soma — o par aditivo/multiplicativo",
@@ -1561,7 +1561,7 @@ int main(void){
             L prev = k; for(int e=1;e<k;e++) prev *= a;
             if(dv != prev) mau_d++;
             fs++;
-            printf("        %6s %28s %10lld\n", k==1?"x":k==2?"x²":"x³", q, dv); }
+            printf("        %6s %28s %10ld\n", k==1?"x":k==2?"x²":"x³", q, dv); }
         printf("\n");
         ok("a derivada sai do limite do quociente, e bate com a regra da potencia em Z",
            mau_d == 0 && fs == 3);

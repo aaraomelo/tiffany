@@ -33,7 +33,7 @@
 #include <string.h>
 #include "unidade.h"
 
-typedef long long L;
+typedef long L;
 #define MAXD 64
 
 /* ── Cayley-Dickson, em inteiros ─────────────────────────────────────────────────────
@@ -92,7 +92,7 @@ static void c1(void){
         casos++;
         if(soma == n && prod == n){ achados++; if(n == 6) oseis = 1; }
     }
-    printf("   varridos %lld inteiros: %lld com soma = produto = n nos divisores proprios\n", casos, achados);
+    printf("   varridos %ld inteiros: %ld com soma = produto = n nos divisores proprios\n", casos, achados);
     ok("§C1 o SEIS e' o unico onde soma = produto dos divisores proprios — a plena, uma so'",
        achados == 1 && oseis == 1);
     /* e o que a plena SIGNIFICA: reversivel = ler e' escrever = as duas operacoes coincidem,
@@ -153,7 +153,7 @@ static void c3(void){
                         casos++;
                         if(cd_norma(d, xy) != cd_norma(d, x) * cd_norma(d, y)) mau++;
                     }
-        printf("   bilinear (Cayley-Dickson) dim %2d: %lld falhas de norma em %lld pares\n", d, mau, casos);
+        printf("   bilinear (Cayley-Dickson) dim %2d: %ld falhas de norma em %ld pares\n", d, mau, casos);
         if(d == 8) mau8 = mau; else mau16 = mau;
     }
     ok("§C3 o lado DISCRETO (Hurwitz, o bilinear) fecha em 8 e falha em 16 — o limite e' do"
@@ -187,9 +187,9 @@ static void cbij(void){
         if(col == lin) iguais++;                          /* os dois cortes de ∫f: a MESMA contagem */
         if(col + intinv == a*M - a) young++;              /* ∫f + ∫f⁻¹ = a·f(a) menos a diagonal (o reticulado) */
     }
-    printf("   os dois cortes de ∫f (dominio=Riemann/Hurwitz, imagem=Lebesgue/Gentil): %lld de %lld iguais\n",
+    printf("   os dois cortes de ∫f (dominio=Riemann/Hurwitz, imagem=Lebesgue/Gentil): %ld de %ld iguais\n",
            iguais, casos);
-    printf("   e ∫f + ∫f⁻¹ = a·f(a) - a (Young no reticulado, a diagonal j=k^2): fecha em %lld de %lld\n",
+    printf("   e ∫f + ∫f⁻¹ = a·f(a) - a (Young no reticulado, a diagonal j=k^2): fecha em %ld de %ld\n",
            young, casos);
     ok("§Cbij a BIJECAO DUAL (a estrela) e' reversivel: os dois cortes de ∫f dao a mesma contagem, e"
        " ∫f + ∫f⁻¹ fecha (Young) — contar (Hurwitz) e integrar (Gentil) sao um PAR, sem uma raiz",
@@ -231,11 +231,11 @@ static void cosc(void){
         L r1x = rx, r1y = -ry, r2x = r1x, r2y = -r1y;
         if(r2x == rx && r2y == ry) per2++;
     }
-    printf("   Lei 2 (rotor J): a²+b² nao se move em %lld/%lld, J^4 = id (periodo 4) em %lld/%lld\n",
+    printf("   Lei 2 (rotor J): a²+b² nao se move em %ld/%ld, J^4 = id (periodo 4) em %ld/%ld\n",
            conserva, casos, per4, casos);
-    printf("   um sobe enquanto o outro desce, e trocam (90 graus fora de fase) em %lld/%lld\n",
+    printf("   um sobe enquanto o outro desce, e trocam (90 graus fora de fase) em %ld/%ld\n",
            fora_fase, casos);
-    printf("   Lei 1 (reflexao R): periodo 2 (R^2 = id) em %lld/%lld\n", per2, casos);
+    printf("   Lei 1 (reflexao R): periodo 2 (R^2 = id) em %ld/%ld\n", per2, casos);
     ok("§Cosc o OSCILADOR: Lei 2 roda (periodo 4, norma imovel), Lei 1 reflecte (periodo 2), e um"
        " lado sobe enquanto o outro desce e trocam — a bijecao dual OSCILA, tudo inteiro",
        conserva == casos && per4 == casos && per2 == casos && fora_fase == casos && casos > 20);
@@ -262,7 +262,7 @@ static void ctempo(void){
         x[0] = 1; y[0] = 1;                              /* UM produto: combinar o par */
         cd_mul(d, x, y, o);
         tempo[nd++] = MULS;
-        printf("   dim %2d: combinar o PAR custa %3lld produtos (o relogio bilinear corre em n²)%s\n",
+        printf("   dim %2d: combinar o PAR custa %3ld produtos (o relogio bilinear corre em n²)%s\n",
                d, MULS, d == 8 ? "   <- dois lances = 64 lances" : "");
     }
     /* o tempo e' n² (1,4,16,64,256): NAO e' constante -> dimensoes diferentes correm tempos
@@ -301,7 +301,7 @@ static void c4(void){
             for(int k = 0; k < 4; k++) if(xy[k] != xyh[k]) bate = 0;  /* e IGUAL ao produto em H */
             if(bate) fecha++;
         }
-    printf("   (a,0)(c,0) em O fica em H e bate com o produto de H, em %lld de %lld casos\n", fecha, casos);
+    printf("   (a,0)(c,0) em O fica em H e bate com o produto de H, em %ld de %ld casos\n", fecha, casos);
     ok("§C4 O contem H: dois quaternioes colam num octoniao, e o primeiro fecha dentro — dois grau 4",
        fecha == casos && casos == 16);
 }
@@ -320,7 +320,7 @@ static void c5(void){
             casos++;
             if(!cd_igual(d, x, c2v)) mau++;
         }
-    printf("   a estrela reverte: x -> x† -> x†† devolve o proprio em %lld casos, %lld falhas\n",
+    printf("   a estrela reverte: x -> x† -> x†† devolve o proprio em %ld casos, %ld falhas\n",
            casos, mau);
     ok("§C5 a ESTRELA reverte: a involucao ida-e-volta e' o proprio, residuo 0 — liga sem apagar",
        mau == 0 && casos > 500);

@@ -1,6 +1,6 @@
 /* medida.h — A CONSERVAÇÃO MÉTRICA POR DUALIDADE, e a meta-indução que a prova.
  *
- * O `eval.txt` abre com a correção que este ficheiro existe para honrar:
+ *  ordem do coordenador abre com a correção que este ficheiro existe para honrar:
  *
  *   «estourar o tipo NÃO é resultado matemático. É falha de representação. O teorema tem
  *    de sobreviver à troca de representação.»
@@ -46,6 +46,8 @@
  * Precisa de `racionais.h`, `linear.h`, `exterior.h`, `corpos.h`. */
 #ifndef MEDIDA_H
 #define MEDIDA_H
+
+#include <stdint.h>
 
 static long md_estouros = 0;
 static long md_saturou  = 0;    /* quantas vezes uma REPRESENTAÇÃO não coube — e isto
@@ -238,29 +240,33 @@ static Mat md_jacobiano_dilata(long k){
  * cresce nunca, porque os resíduos vivem numa caixa fixa.
  *
  * E o ponto é o que se conclui quando a primeira falha: NADA sobre a lei. A saturação
- * conta-se em `md_saturou`, que é outro sítio que não os defeitos. */
-static long md_det_mod(Mat A, long P){
-    long a = ((A.a[0][0].p % P) + P) % P, b = ((A.a[0][1].p % P) + P) % P;
-    long c = ((A.a[1][0].p % P) + P) % P, d = ((A.a[1][1].p % P) + P) % P;
+ * conta-se em `md_saturou`, que é outro sítio que não os defeitos.
+ *
+ * Os resíduos mod P vivem em `long` puro — NÃO em Qz/E₁₆: P pode exceder 32767, e a
+ * segunda realização não herda o envelope da primeira. */
+static long md_det2_mod(const long R[2][2], long P){
+    long a = ((R[0][0] % P) + P) % P, b = ((R[0][1] % P) + P) % P;
+    long c = ((R[1][0] % P) + P) % P, d = ((R[1][1] % P) + P) % P;
     return (((a*d - b*c) % P) + P) % P;
 }
-static Mat md_mat_mod(Mat A, Mat B, long P){
-    Mat C = mat0(2,2);
+static void md_mat2_mod_mul(long R[2][2], const long A[2][2], long P){
+    long C[2][2];
     for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
         long s = 0;
-        for(int k = 0; k < 2; k++) s = (s + A.a[i][k].p * B.a[k][j].p) % P;
-        C.a[i][j] = qz_de_inteiro(((s % P) + P) % P);
+        for(int t = 0; t < 2; t++) s = (s + R[i][t] * A[t][j]) % P;
+        C[i][j] = ((s % P) + P) % P;
     }
-    return C;
+    for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++) R[i][j] = C[i][j];
 }
 /* a potência k-ésima do gato, em resíduos: nunca cresce, e responde a todo k */
 static long md_det_potencia_mod(long m, long k, long P){
-    Mat A = md_gato(m);
-    for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
-        A.a[i][j] = qz_de_inteiro(((A.a[i][j].p % P) + P) % P);
-    Mat R = mat_id(2);
-    for(long i = 0; i < k; i++) R = md_mat_mod(R, A, P);
-    return md_det_mod(R, P);
+    long A[2][2] = {
+        { ((m % P) + P) % P, 1 },
+        { 1, 0 }
+    };
+    long R[2][2] = { {1, 0}, {0, 1} };
+    for(long i = 0; i < k; i++) md_mat2_mod_mul(R, A, P);
+    return md_det2_mod(R, P);
 }
 /* e a primeira realização, que SATURA — e conta-se onde deve */
 static int md_det_potencia_exacto(long m, long k, Qz *det){
@@ -268,9 +274,9 @@ static int md_det_potencia_exacto(long m, long k, Qz *det){
     for(long i = 0; i < k; i++){
         Mat C = mat0(2,2);
         for(int a = 0; a < 2; a++) for(int b = 0; b < 2; b++){
-            __int128 s = 0;
+            int64_t s = 0;
             for(int c = 0; c < 2; c++)
-                s += (__int128)R.a[a][c].p * A.a[c][b].p;
+                s += (int64_t)R.a[a][c].p * A.a[c][b].p;
             if(s > 3000000000LL || s < -3000000000LL){ md_saturou++; return 0; }
             C.a[a][b] = qz_de_inteiro((long)s);
         }

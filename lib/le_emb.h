@@ -12,19 +12,21 @@
 #ifndef LE_EMB_H
 #define LE_EMB_H
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 
 #define EMB_S 10000L
+#define EMB_S6 1000000LL          /* escala 10⁻⁶ — fronteira I/O (protocolo, antissim) */
 
-static long long emb_parse_decimal(const char **pp){
+static int64_t emb_parse_decimal(const char **pp){
     const char *p = *pp;
     while(*p == ' ' || *p == '\t') p++;
     int neg = 0;
     if(*p == '-'){ neg = 1; p++; }
     else if(*p == '+') p++;
-    long long w = 0;
+    int64_t w = 0;
     while(*p >= '0' && *p <= '9') w = w * 10 + (*p++ - '0');
-    long long f = 0, fd = 1;
+    int64_t f = 0, fd = 1;
     if(*p == '.'){
         p++;
         while(*p >= '0' && *p <= '9' && fd < EMB_S){
@@ -34,21 +36,43 @@ static long long emb_parse_decimal(const char **pp){
         }
     }
     *pp = p;
-    long long v = w * EMB_S + (f * EMB_S) / fd;
+    int64_t v = w * EMB_S + (f * EMB_S) / fd;
     return neg ? -v : v;
 }
 
-static long long emb_f32_bits_para_z(unsigned int u){
+/* decimal com seis casas fixas — só na fronteira; interior usa o int64 sem escala */
+static int64_t emb_parse_dec6(const char *s){
+    const char *p = s;
+    while(*p == ' ' || *p == '\t') p++;
+    int neg = 0;
+    if(*p == '-'){ neg = 1; p++; }
+    else if(*p == '+') p++;
+    int64_t ip = 0;
+    while(*p >= '0' && *p <= '9') ip = ip * 10 + (*p++ - '0');
+    int64_t fp = 0, pw = 100000LL;
+    if(*p == '.'){
+        p++;
+        while(*p >= '0' && *p <= '9' && pw > 0){
+            fp += (*p - '0') * pw;
+            pw /= 10;
+            p++;
+        }
+    }
+    int64_t r = ip * EMB_S6 + fp;
+    return neg ? -r : r;
+}
+
+static int64_t emb_f32_bits_para_z(unsigned int u){
     int sign = (int)(u >> 31);
     int exp  = (int)((u >> 23) & 0xFF);
     unsigned mant = u & 0x7FFFFFu;
     if(exp == 0) return 0;
     int e = exp - 127;
-    long long sig = (long long)(1u << 23 | mant);
-    long long num = sig, den = 1LL << 23;
+    int64_t sig = (int64_t)(1u << 23 | mant);
+    int64_t num = sig, den = (int64_t)1 << 23;
     if(e >= 0){ while(e--) num <<= 1; }
     else { while(e++) den <<= 1; }
-    long long v = (num * EMB_S) / den;
+    int64_t v = (num * EMB_S) / den;
     return sign ? -v : v;
 }
 
@@ -65,7 +89,7 @@ static unsigned int emb_bits(const char *p, char **fim){
         return u;
     }
     const char *pp = p;
-    long long z = emb_parse_decimal(&pp);
+    int64_t z = emb_parse_decimal(&pp);
     if(fim) *fim = (char*)pp;
     (void)neg;
     (void)z;
@@ -73,18 +97,18 @@ static unsigned int emb_bits(const char *p, char **fim){
 }
 
 /* valor × EMB_S — hex exacto, decimal racional */
-static long long emb_z(const char *p, char **fim){
+static int64_t emb_z(const char *p, char **fim){
     while(*p == ' ' || *p == '\t') p++;
     int neg = 0;
     const char *q = p;
     if(*q == '-' || *q == '+'){ neg = (*q == '-'); q++; }
     if(q[0] == '0' && (q[1] == 'x' || q[1] == 'X')){
         unsigned long b = strtoul(q, fim, 16);
-        long long v = emb_f32_bits_para_z((unsigned int)b);
+        int64_t v = emb_f32_bits_para_z((unsigned int)b);
         return neg ? -v : v;
     }
     const char *pp = p;
-    long long v = emb_parse_decimal(&pp);
+    int64_t v = emb_parse_decimal(&pp);
     if(fim) *fim = (char*)pp;
     return neg ? -v : v;
 }

@@ -22,10 +22,11 @@
  *
  * cc -O2 tres_reconstroi.c -o tres_reconstroi && ./tres_reconstroi
  */
+#include <stdint.h>
 #include <stdio.h>
 #include "unidade.h"
 
-typedef long long i64;
+typedef int64_t i64;
 static const i64 P = 40961, G = 3;      /* primo com 4096 | P-1, para blocos grandes */
 
 static i64 md(i64 x) { x %= P; return x < 0 ? x + P : x; }

@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include "unidade.h"
 
-typedef long long L;
+typedef long L;
 #define K 4                          /* o reticulado é 3^K × 3^K = 81×81; o índice vai a 9^K=6561 */
 
 /* o complemento ternário aplicado m vezes: identidade se m par, 2-d se m ímpar */
@@ -63,7 +63,7 @@ int main(void){
     }
     L cobertas = 0;
     for(int x = 0; x < lado; x++) for(int y = 0; y < lado; y++) if(inv[x][y] != -1) cobertas++;
-    printf("§PN1  a curva d->(x,y) em %d×%d: cobertas %lld de %lld, repetida? %s, fora? %s\n\n",
+    printf("§PN1  a curva d->(x,y) em %d×%d: cobertas %ld de %ld, repetida? %s, fora? %s\n\n",
            lado, lado, cobertas, total, repetida?"sim":"nao", foradolugar?"sim":"nao");
     ok("§PN1 a curva de Peano ENCHE: d->(x,y) e' BIJECAO — cobre as 9^K casas, cada uma UMA vez"
        " (o bit desenha tudo, o lado continuo de Gentil)", cobertas == total && !repetida && !foradolugar);
@@ -77,7 +77,7 @@ int main(void){
         L passo = (L)(x1>x0?x1-x0:x0-x1) + (y1>y0?y1-y0:y0-y1);
         if(passo != 1){ nao_unitario++; if(passo > pior) pior = passo; }
     }
-    printf("§PN2  passos não-unitários: %d (o pior salto: %lld) — 0 é o traço contínuo\n\n",
+    printf("§PN2  passos não-unitários: %d (o pior salto: %ld) — 0 é o traço contínuo\n\n",
            nao_unitario, pior);
     ok("§PN2 e' uma CURVA: indices consecutivos caem em casas adjacentes (passo unitario), o traço"
        " continuo 1D cuja imagem enche o 2D — nao um salto", nao_unitario == 0);
@@ -91,7 +91,7 @@ int main(void){
         int xv, yv; encher(d, &xv, &yv);         /* encher: 1D -> 2D */
         if(xv != x || yv != y) residuo++;
     }
-    printf("§PN3  contar∘encher: resíduo %lld em %lld casas (0 = a involução fecha)\n\n",
+    printf("§PN3  contar∘encher: resíduo %ld em %ld casas (0 = a involução fecha)\n\n",
            residuo, total);
     ok("§PN3 a DUAL fecha: CONTAR (2D->1D, o indice, Hurwitz) e ENCHER (1D->2D, Gentil) sao a"
        " bijecao dual — contar∘encher = id, ν∘ν=id, residuo 0. E' o teorema central no espaço",

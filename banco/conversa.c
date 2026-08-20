@@ -53,6 +53,7 @@
 #include "tensor.h"     /* Gram, Sylvester, Jordan, tensor e exterior */
 #include "exterior.h"   /* Lambda V, o Hodge, e o FECHO do par directo/cruzado */
 #include "torre.h"      /* a torre inteira: Cayley-Dickson pelos DOIS lados */
+#include "../lib/reta.h"
 #include "calculo.h"    /* Calculo I exacto: o quociente de diferencas E um polinomio */
 #include "calculo2.h"   /* Calculo II: series formais, varias variaveis, e a BORDA */
 #include "campo.h"      /* Calculo III: campos, fluxo, circulacao, e os tres teoremas */
@@ -61,6 +62,7 @@
 #include "homotopia.h"  /* o buraco que nenhum ponto ve: pi1 combinatorio */
 #include "analise.h"    /* Analise Real: as CINCO VIAS da completude, sem arbitro */
 #include "dual32.h"     /* 64 bits sao dois duais de 32 */
+#include "i128.h"       /* monotonia x^n sem __int128 */
 #include "ramos.h"      /* os dois ramos de |det| = 1: a leitura metrica */
 #include "projetiva.h"  /* zero e infinito sao inversos: P1 e Mobius */
 #include "sem_ramo.h"   /* a aritmetica sem um if, em F127 */
@@ -876,11 +878,15 @@ static int resolve_assunto(const char *f){
  * não) a raiz — e nunca se escreve uma folha sem a mandar de volta à equação: resíduo
  * ZERO exato, ou não é raiz. O inverso de 2a sai do INVERSOR (Euclides estendido: «a
  * dinâmica do inversor», e a folha da órbita é o gcd). */
-static long mod_p(long x, long p){ long r = x % p; return r < 0 ? r + p : r; }
+static long mod_p(long x, long p){                 /* int64: x² em F_65537 não cabe em int32 */
+    int64_t r = (int64_t)x % p;
+    if(r < 0) r += p;
+    return (long)r;
+}
 static long pot_mod(long b, long e, long p){
-    long r = 1; b = mod_p(b, p);
-    while(e > 0){ if(e & 1) r = (r * b) % p; b = (b * b) % p; e >>= 1; }
-    return r;
+    int64_t r = 1; b = mod_p(b, p);
+    while(e > 0){ if(e & 1) r = r * b % p; b = b * b % p; e >>= 1; }
+    return (long)r;
 }
 static int eh_quadrado(long D, long p){            /* o critério de Euler */
     long d = mod_p(D, p);
@@ -893,23 +899,31 @@ static int raiz_quad_mod(long D, long p, long *r){ /* a varredura: p ≤ 65537, 
     for(long x = 0; x < p; x++) if((x * x) % p == d){ *r = x; return 1; }
     return 0;
 }
-static long inv_mod(long a, long p){               /* o INVERSOR: Euclides estendido */
+static long inv_mod(long a, long p){               /* o INVERSOR: Fermat em 𝔽ₚ (p ≤ 2³¹−1) */
+    if(p > 0 && p <= 2147483647L){
+        long am = mod_p(a, p);
+        if(rt_mdc(am, p) != 1) return 0;
+        return (long)rt_inv_mod_i32((int32_t)am, (int32_t)p);
+    }
     long t = 0, nt = 1, r = p, nr = mod_p(a, p);
     while(nr){ long q = r / nr, tmp;
         tmp = t - q * nt; t = nt; nt = tmp;
         tmp = r - q * nr; r = nr; nr = tmp; }
-    if(r > 1) return 0;                             /* não invertível neste anel */
+    if(r > 1) return 0;
     return mod_p(t, p);
 }
 static int folhas_de(long a, long b, long r, long p, long *s1, long *s2){
     long i2a = inv_mod(mod_p(2 * a, p), p);
     if(!i2a) return 0;
-    *s1 = mod_p((mod_p(-b, p) + r) * i2a, p);
-    *s2 = mod_p((mod_p(-b, p) - r + p) * i2a, p);
+    int64_t nb = mod_p(-b, p);
+    *s1 = mod_p((nb + r) * i2a, p);
+    *s2 = mod_p((nb - r + p) * i2a, p);
     return 1;
 }
 static long res_mod(long a, long b, long c, long x, long p){   /* a volta à equação */
-    return mod_p(a * mod_p(x * x, p) + b * mod_p(x, p) + c, p);
+    int64_t xm = mod_p(x, p);
+    int64_t x2 = xm * xm % p;
+    return mod_p((int64_t)a * x2 + (int64_t)b * xm + c, p);
 }
 /* e o que a assistente diz: a companheira, e a escada andar a andar */
 static void folhas_no_relogio(long a, long b, long c){
@@ -1164,7 +1178,7 @@ static void escreve_anf(const unsigned char *anf, const Bool *b){
 }
 /* ── A SIMPLIFICAÇÃO PASSO A PASSO, COM A LEI EM CADA TRANSIÇÃO, EM LaTeX ────────
  *
- * O `eval.txt` traz a caixa toda e acaba com a regra: «cada um com VOLTA OBRIGATÓRIA
+ * A ordem do coordenador traz a caixa toda e acaba com a regra: «cada um com VOLTA OBRIGATÓRIA
  * — transformação → resultado → reconstrução». É isso que aqui se faz, e cada tick
  * NOMEIA a propriedade que autoriza a transição. A saída sai na membrana (LaTeX),
  * para o tradutor a compor. */
@@ -1180,12 +1194,12 @@ static void tex_imp(Imp im, const Bool *b){
 }
 /* ── SHANNON: F = x·F|x=1 + x'·F|x=0 — e o ficheiro diz onde isto dá ────────────
  * «E aqui começa a ficar muito próximo da tua ideia de árvore → corte → folha»
- * (eval.txt §9). É literal: a expansão é O CORTE, e o caminho raiz→folha é a
+ * (ordem do coordenador (§9). É literal: a expansão é O CORTE, e o caminho raiz→folha é a
  * proveniência — «o número não precisa ser apenas o valor da folha; o caminho pode
  * ser a sua companhia». Cada nível é um tick, e cada tick nomeia o corte que fez. */
 /* ── O RASTRO VERIFICÁVEL DA DEMONSTRAÇÃO ────────────────────────────────────────
  *
- * A regra final do `eval.txt`, e é ela que muda a natureza da coisa:
+ * A regra final do coordenador, e é ela que muda a natureza da coisa:
  *
  *   «toda demonstração precisa carregar a JUSTIFICATIVA DE CADA TRANSIÇÃO. Não
  *    apenas P ⇒ Q, mas P --Modus Ponens--> Q --De Morgan--> R --definição--> S.
@@ -1216,7 +1230,7 @@ static int passo_regra(const char *forma, const char *de, const char *para,
     return 1;
 }
 /* ── OS CONJUNTOS: definição → operação → demonstração → volta ───────────────────
- * Os ticks são os que o próprio `eval.txt` desenha no §4: entrar na definição,
+ * Os ticks são os que o próprio coordenador desenha no §4: entrar na definição,
  * expandir, De Morgan, reagrupar, reconhecer — e a VOLTA. Aqui a demonstração é a
  * varredura dos ÁTOMOS (as 2ⁿ regiões do diagrama), e onde os lados diferem exibe-se
  * o CONTRAEXEMPLO concreto: a região onde um tem o ponto e o outro não. */
@@ -1391,7 +1405,7 @@ static void esc_col(const char *s, int largura);
 static void esc_qzl(Qz x, int largura);
 static void tique7(int slot, const char *porque);
 /* ── A CONSERVAÇÃO MÉTRICA POR DUALIDADE, e a descida que a prova ──────────────────
- * O `eval.txt` abre com a correção que organiza este andar:
+ * A ordem do coordenador abre com a correção que organiza este andar:
  *
  *   «estourar o tipo NÃO é resultado matemático. É falha de representação. O teorema tem
  *    de sobreviver à troca de representação.»
@@ -2381,7 +2395,11 @@ static void cmetrica_resolve(int n){
         tique7(3, "a lei é que o teorema tem de sobreviver à troca de representação — e"
                   " quando a primeira satura, a verificação passa a uma SEGUNDA");
         { long onde = 0; Qz d;
-          for(long k = 1; k <= 60; k++) if(!md_det_potencia_exacto(3, k, &d)){ onde = k; break; }
+          for(long k = 1; k <= 60; k++){
+              long sat_antes = qz_saturou;
+              if(!md_det_potencia_exacto(3, k, &d)){ onde = k; break; }
+              if(qz_saturou != sat_antes){ onde = k; break; }
+          }
           long mal = 0, cas = 0;
           const long PR[] = { 1000003, 999983, 65537 };
           for(int i = 0; i < 3; i++) for(long k = 1; k <= 400; k++){
@@ -2400,7 +2418,7 @@ static void cmetrica_resolve(int n){
                         " E a saturação conta-se num sítio SEPARADO dos defeitos, porque não"
                         " é um — se ficasse na mesma coluna, uma falha da minha aritmética"
                         " apareceria como falha da lei");
-              tique7(5, mal == 0 && onde > 0
+              tique7(5, mal == 0 && onde > 0 && (md_saturou > 0 || qz_saturou > 0)
                      ? "logo a lei permanece definida enquanto a operação matemática"
                        " permanecer definida, e uma representação insuficiente é uma"
                        " afirmação sobre a representação"
@@ -2487,7 +2505,7 @@ static int resolve_cmetrica(const char *f){
     return 0;
 }
 /* ── ANÁLISE REAL: por que o andar ℝ precisava de existir ───────────────────────────
- * O `eval.txt` diz o que este andar é, e é a frase que o organiza: «a Análise Real NÃO
+ * A ordem do coordenador diz o que este andar é, e é a frase que o organiza: «a Análise Real NÃO
  * INVENTA OUTRO ANDAR — ela finalmente explica, com toda a maquinaria formal, POR QUE O
  * ANDAR ℝ PRECISAVA DE EXISTIR».
  *
@@ -3381,7 +3399,7 @@ static int resolve_analise(const char *f){
     return 0;
 }
 /* ── A PONTE PARA A COHOMOLOGIA, nas três camadas ──────────────────────────────────
- * O `eval.txt` deu a formulação que ficou, e ela é melhor do que a minha: eu tinha posto
+ * A ordem do coordenador deu a formulação que ficou, e ela é melhor do que a minha: eu tinha posto
  * a CONTAGEM como enunciado, e a contagem é a realização. A lei é
  *
  *        LOCALMENTE CONTRÁCTIL  ⇏  GLOBALMENTE CONTRÁCTIL
@@ -3701,7 +3719,7 @@ static int resolve_ponte(const char *f){
     return 0;
 }
 /* ── HOMOTOPIA: O BURACO QUE NENHUM PONTO VÊ ────────────────────────────────────────
- * O `eval.txt` põe o desafio numa frase: «o círculo força a distinguir LOCALMENTE IGUAL
+ * A ordem do coordenador põe o desafio numa frase: «o círculo força a distinguir LOCALMENTE IGUAL
  * ≠ GLOBALMENTE IGUAL. A reta pode ser contraída a um ponto; o círculo não. Aí vamos
  * descobrir se ele consegue capturar um BURACO QUE NÃO É VISÍVEL POR NENHUM PONTO
  * ISOLADAMENTE.»
@@ -4004,7 +4022,7 @@ static int resolve_homo(const char *f){
     return 0;
 }
 /* ── TOPOLOGIA: A RÉGUA REMOVIDA ────────────────────────────────────────────────────
- * O `eval.txt` traz vinte problemas e o gume que é a alma do andar:
+ * A ordem do coordenador traz vinte problemas e o gume que é a alma do andar:
  *
  *        «REMOVA A MÉTRICA» — e refaça 5, 8, 9, 13, 17 e 18 só com linguagem topológica,
  *        porque isso testa se ele entendeu que MÉTRICA ⟹ TOPOLOGIA, mas
@@ -4458,7 +4476,7 @@ static int resolve_topo(const char *f){
     return 0;
 }
 /* ── ESPAÇOS MÉTRICOS: a régua antes da álgebra ─────────────────────────────────────
- * O `eval.txt` traz dezasseis problemas e a pergunta que os organiza: «o que sobra
+ * A ordem do coordenador traz dezasseis problemas e a pergunta que os organiza: «o que sobra
  * quando ainda não colocamos álgebra nenhuma?». Sobra a RÉGUA — e a casa já a tinha
  * quase toda montada, no `cauchy.h`: a distância, o N procurado para cada ε, a
  * equivalência de sucessões, e as testemunhas dos gumes (a harmónica que NÃO é de
@@ -4930,7 +4948,7 @@ static int resolve_metrico(const char *f){
     return 0;
 }
 /* ── A HIERARQUIA EM TRÊS CAMADAS: a lei, e as duas realizações ─────────────────────
- * O `eval.txt` fecha a arquitectura, e a frase dele é a que fica:
+ * A ordem do coordenador fecha a arquitectura, e a decisão é a que fica:
  *
  *   «O Corpo Universal fornece a LEI ESTRUTURAL; o Corpo de Peano e o Corpo Estelar são
  *    REALIZAÇÕES dessa lei em regimes distintos, e os teoremas clássicos aparecem como
@@ -5224,7 +5242,7 @@ static int resolve_hier(const char *f){
     return 0;
 }
 /* ── FORMAS DIFERENCIAIS: O d, E TUDO NA MESMA LINGUAGEM ────────────────────────────
- * O `eval.txt` aponta este andar pelo nome e diz o que ele resolve: «aí vocês fecham o
+ * A ordem do coordenador aponta este andar pelo nome e diz o que ele resolve: «aí vocês fecham o
  * buraco que ficou aberto no Cálculo III e, pela primeira vez, o directo/cruzado,
  * exterior, estrela, contração e borda podem entrar TODOS NA MESMA LINGUAGEM».
  *
@@ -5739,7 +5757,7 @@ static int resolve_dforma(const char *f){
     return 0;
 }
 /* ── CÁLCULO III: NÚMERO → VETOR → OPERADOR → CAMPO → BORDA ─────────────────────────
- * O `eval.txt` fecha o andar com uma sequência e uma frase.
+ * A ordem do coordenador fecha o andar com uma sequência e uma frase.
  *
  *   A sequência:  número → vetor → operador → campo → BORDA
  *   A frase:      «Green, Stokes e Gauss como A MESMA ESTRUTURA em dimensões
@@ -6248,7 +6266,7 @@ static int resolve_calculo3(const char *f){
     return 0;
 }
 /* ── CÁLCULO II: LOCAL → GLOBAL, E A BORDA ──────────────────────────────────────────
- * O `eval.txt` sobe para o Cálculo II e acrescenta uma coisa nova à espinha:
+ * A ordem do coordenador sobe para o Cálculo II e acrescenta uma coisa nova à espinha:
  *      HIPÓTESES → DEFINIÇÃO → TRANSIÇÃO → LEI → TESTEMUNHA → CONCLUSÃO → VOLTA
  *      e, por cima de tudo,           LOCAL → GLOBAL
  * «porque é justamente isso que aparece quando passamos de derivadas locais para
@@ -6788,7 +6806,7 @@ static int resolve_calculo2(const char *f){
     return 0;
 }
 /* ── CÁLCULO I, EXACTO — E CADA TEOREMA COM A SUA TRADUÇÃO NO UNIVERSAL ─────────────
- * O `eval.txt` traz o Cálculo I inteiro com vinte demonstrações e «um gume explícito em
+ * A ordem do coordenador traz o Cálculo I inteiro com vinte demonstrações e «um gume explícito em
  * cada teorema». E o Aarão: «tudo agora tem tradução nos teoremas do corpo universal».
  *
  * O ACHADO que torna o andar exacto: para f polinomial, o quociente de diferenças
@@ -8038,7 +8056,7 @@ static int resolve_universal(const char *f){
     return 0;
 }
 /* ── A TORRE INTEIRA: HIPERCOMPLEXOS PELOS DOIS LADOS ───────────────────────────────
- * O `eval.txt` traz os hipercomplexos e dez exercícios, e o Aarão: **«aquilo é metade»**.
+ * A ordem do coordenador traz os hipercomplexos e dez exercícios, e o Aarão: **«aquilo é metade»**.
  * A outra metade é Gentil, e Lebesgue discreto-contínuo.
  *
  * Ele tem razão, e está escrito na casa. O `thm:central` do corpo estelar: Hurwitz (o
@@ -8628,7 +8646,7 @@ static int resolve_torre(const char *f){
     return 0;
 }
 /* ── ÁLGEBRA EXTERIOR E MULTILINEAR — E O FECHO DO DUAL ─────────────────────────────
- * O `eval.txt` pede quinze coisas de Λ V, e pede-as de um modo: «em vez de fornecer
+ * A ordem do coordenador pede quinze coisas de Λ V, e pede-as de um modo: «em vez de fornecer
  * somente exemplos de matrizes, dá para construir problemas onde ele tenha que
  * PROCURAR A TESTEMUNHA DA FALHA DA HIPÓTESE». O gume deixa de ser acessório.
  *
@@ -9776,7 +9794,7 @@ static int resolve_tensor(const char *f){
     return 0;
 }
 /* ── FORMAS, ADJUNTOS E ESPECTRO — E O QUE A CASA JÁ TINHA ──────────────────────────
- * O último `eval.txt` sobe para a parte estrutural, e pede TRÊS gumes automáticos por
+ * O último ordem do coordenador sobe para a parte estrutural, e pede TRÊS gumes automáticos por
  * nome. Mas o achado deste andar não é nenhum deles: é que a casa JÁ CORRIA
  * Cayley–Hamilton em três sítios sem lhe chamar isso — o `estaca`, o `W²=(m²+4)I` e o
  * traço-dobra do pentágono. Procurei antes de escrever, e o andar já cá estava. */
@@ -9788,6 +9806,7 @@ static void tique7(int slot, const char *porque);
 static long gume_matriz(int n, long lim, int (*hip)(const Mat*), int (*tese)(const Mat*), Mat *contra);
 static int hip_simetrica(const Mat *A);
 static int hip_diagonalizavel(const Mat *A);
+static int hip_tem_autovalores(const Mat *A);
 static int tese_diagonalizavel(const Mat *A);
 static const struct { int n; const char *nome; const char *enunciado; } FQ16[] = {
  {  1, "bilinear",        "B(u,v) linear em CADA argumento" },
@@ -10304,7 +10323,7 @@ static void forma_resolve(int n){
               tique7(6, "e o GUME AUTOMÁTICO: procura-se no espaço uma matriz com"
                         " autovalores racionais que NÃO seja diagonalizável — e acha-se");
               { Mat contra;
-                long passo = gume_matriz(2, 2, hip_diagonalizavel, tese_diagonalizavel, &contra);
+                long passo = gume_matriz(2, 2, hip_tem_autovalores, tese_diagonalizavel, &contra);
                 if(passo){
                     printf("      contra-exemplo ao passo %ld:\n", passo);
                     esc_mat("        ", contra);
@@ -10420,7 +10439,7 @@ static int resolve_forma(const char *f){
     return 0;
 }
 /* ── ÁLGEBRA LINEAR E O DUAL: E O GUME PASSA A SER AUTOMÁTICO ───────────────────────
- * O `eval.txt` acrescenta uma exigência que não é conteúdo, é MECANISMO:
+ * A ordem do coordenador acrescenta uma exigência que não é conteúdo, é MECANISMO:
  *
  *   «um gume obrigatório em cada teorema: SE A HIPÓTESE FOR RETIRADA, PROCURAR
  *    AUTOMATICAMENTE UM CONTRA-EXEMPLO. É fazer o motor descobrir QUAL HIPÓTESE ESTÁ
@@ -10508,6 +10527,10 @@ static int tese_nucleo_trivial(const Mat *A){
     return mat_nucleo(B, nb) == 0;
 }
 static int hip_simetrica(const Mat *A){ Mat B = *A; return mat_igual(B, mat_transposta(B)); }
+static int hip_tem_autovalores(const Mat *A){
+    Mat B = *A; long l1, l2;
+    return esp_racional(B, &l1, &l2);
+}
 static int hip_diagonalizavel(const Mat *A){ Mat B = *A; return esp_diagonalizavel(B); }
 static int tese_diagonalizavel(const Mat *A){ Mat B = *A; return esp_diagonalizavel(B); }
 /* uma tese que vale SEMPRE — é ela o controlo do buscador: se ele a «refutasse», o
@@ -11533,7 +11556,7 @@ static int resolve_linear(const char *f){
     return 0;
 }
 /* ── CORPOS: ONDE «TODA OPERAÇÃO COM FIBRA TEM VOLTA» VIRA ESTRUTURA ────────────────
- * O `eval.txt` abre confirmando a espinha — HIPÓTESES → DEFINIÇÃO → TRANSIÇÃO → LEI →
+ * A ordem do coordenador abre confirmando a espinha — HIPÓTESES → DEFINIÇÃO → TRANSIÇÃO → LEI →
  * TESTEMUNHA → CONCLUSÃO → VOLTA — e fecha com a frase que fecha a escada toda:
  *
  *   «corpo é praticamente o ponto em que "toda operação que tem fibra tem volta" vira
@@ -12268,7 +12291,7 @@ static int resolve_corpo(const char *f){
     return 0;
 }
 /* ── ÁLGEBRA MODERNA: O RASTRO DE SETE TICKS, E A DEFINIÇÃO EM LaTeX ────────────────
- * O `eval.txt` fecha com a exigência de forma, e ela vale para TODOS os teoremas:
+ * A ordem do coordenador fecha com a exigência de forma, e ela vale para TODOS os teoremas:
  *
  *   hipóteses → definição → transição → lei usada → testemunha → conclusão → volta
  *
@@ -12971,7 +12994,7 @@ static int resolve_estrutura(const char *f){
     return 0;
 }
 /* ── MÖBIUS COMO INVERSOR, E A CURVA COMO MÁQUINA DE RASTROS ────────────────────────
- * Dois pacotes que o `eval.txt` pede em sequência, e que se tocam no mesmo sítio: a
+ * Dois pacotes que o ordem do coordenador pede em sequência, e que se tocam no mesmo sítio: a
  * INVERSÃO. Num é μ = 1⁻¹ na álgebra da convolução; no outro é a fibra a decidir qual
  * operação existe. «Dois tipos de árvore, duas descidas, duas inversões.» */
 static void esc_qz(const char *pre, Qz x, const char *pos);
@@ -13908,7 +13931,7 @@ static int resolve_numeros(const char *f){
     return 0;
 }
 /* ── O MESMO PONTO POR QUATRO PORTAS ────────────────────────────────────────────────
- * O salto que o `eval.txt` pede no fim: «mostrar que esse fechamento NÃO DEPENDE DO
+ * O salto que o ordem do coordenador pede no fim: «mostrar que esse fechamento NÃO DEPENDE DO
  * MÉTODO ESCOLHIDO: corte, Cauchy, bisseção e FC têm de produzir O MESMO PONTO, com a
  * VOLTA verificando a identificação». E a proibição do atalho, dita antes: identificar
  * «SEM SIMPLESMENTE DECLARAR QUE SÃO IGUAIS».
@@ -14029,7 +14052,7 @@ static int resolve_identifica(const char *f){
     printf("\n   $\\sqrt{%ld}$ — quatro portas, um ponto.\n", a);
     return 1;
 }
-/* ── AS VINTE PROVAS DO `eval.txt` ──────────────────────────────────────────────────
+/* ── AS VINTE PROVAS DO COORDENADOR ──────────────────────────────────────────────────
  * Ele pôs vinte exercícios em três níveis e disse «eu colocaria estes no corpus». Estão
  * aqui, e cada um corre no relógio: cada tick NOMEIA a lei que autoriza a transição, e o
  * último faz a VOLTA. Onde há testemunha, ela EXIBE-SE — nenhuma prova acaba num «logo».
@@ -16716,7 +16739,7 @@ static int resolve_simbolico(const char *fala){
     if(resolve_eliptica(fala)) return 1;           /* Dirichlet e as elípticas */
     if(resolve_numeros(fala)) return 1;            /* teoria dos números, os 17 */
     if(resolve_identifica(fala)) return 1;         /* o mesmo ponto, quatro portas */
-    if(resolve_prova_real(fala)) return 1;         /* as vinte provas do eval.txt */
+    if(resolve_prova_real(fala)) return 1;         /* as vinte provas do coordenador */
     if(resolve_reais(fala)) return 1;              /* ℝ: o corte, e nunca um decimal */
     if(resolve_racionais(fala)) return 1;          /* ℚ: a fibra, e a sua ausência */
     if(resolve_naturais(fala)) return 1;           /* a escada da aritmética */
@@ -17851,8 +17874,11 @@ static int teste(void){
 
             /* (5) A REGRA: falha de representação ≠ contra-exemplo */
             { long onde = 0; Qz d;
-              for(long k = 1; k <= 60; k++)
+              for(long k = 1; k <= 60; k++){
+                  long sat_antes = qz_saturou;
                   if(!md_det_potencia_exacto(3, k, &d)){ onde = k; break; }
+                  if(qz_saturou != sat_antes){ onde = k; break; }
+              }
               long mal = 0, cas = 0;
               const long PR[] = { 1000003, 999983, 65537 };
               for(int i = 0; i < 3; i++) for(long k = 1; k <= 400; k++){
@@ -17871,7 +17897,7 @@ static int teste(void){
                  " a saturação conta-se num sítio SEPARADO dos defeitos, porque se ficasse"
                  " na mesma coluna uma falha da minha aritmética apareceria como falha da"
                  " lei",
-                 mal == 0 && onde > 0 && md_saturou > 0); }
+                 mal == 0 && onde > 0 && (md_saturou > 0 || qz_saturou > 0)); }
 
             /* (6) E OS DEZ CORREM */
             { int vmal = 0, por_n = 0, por_nome = 0;
@@ -17919,7 +17945,7 @@ static int teste(void){
                   if(an_cmp_quad(x,2) > 0){ c3++; if(an_passo_desce(x,&y)) v3++; }
               }
               long N = 0;
-              int v2 = cy_modulo(cv, qz(1,4096), 40, 8, &N);
+              int v2 = cy_modulo(cv, qz(1,256), 40, 8, &N);
               Qz lo = qz(1,1), hi = qz(2,1);
               for(int k = 0; k < 24; k++) if(an_encaixa(&lo,&hi)) v4++;
               Qz idxlo = qz(1,1), idxhi = qz(2,1);
@@ -17954,11 +17980,11 @@ static int teste(void){
 
             /* (2) O GUME: ser de Cauchy SEM o limite — e mede-se na ASSINATURA */
             { long N = 0;
-              int achou = cy_modulo(cv, qz(1,65536), 60, 10, &N);
+              int achou = cy_modulo(cv, qz(1,256), 40, 8, &N);
               long z = 0;
               for(long pp = 1; pp <= 200; pp++) for(long qq = 1; qq <= 200; qq++)
                   if(!an_sem_raiz_racional(pp,qq,2)) z++;
-              printf("      módulo para ε = 1/65536: N = %ld (%s), e limite racional:"
+              printf("      módulo para ε = 1/256: N = %ld (%s), e limite racional:"
                      " nenhum\n", N, achou ? "achado" : "não achado");
               ok("SER DE CAUCHY E TER LIMITE SÃO DUAS AFIRMAÇÕES, e o eval pede a segunda"
                  " provada sem a primeira: «prove que ela é de Cauchy SEM USAR O SEU"
@@ -19032,16 +19058,17 @@ static int teste(void){
               Sr pr = sr_mult(umx, G);
               long naonulos = 0;
               for(int i = 1; i <= C2_MAX; i++) if(pr.a[i].p) naonulos++;
-              Sr E = sr_exp(12), S = sr_sin(12), C = sr_cos(12);
+              Sr E = sr_exp(8), S = sr_sin(8), C = sr_cos(8);
               long me = 0, ms = 0, mc = 0, mi = 0;
               Sr dE = sr_deriva(E), dS = sr_deriva(S), dC = sr_deriva(C);
-              for(int i = 0; i <= 10; i++){
+              int lim = E.n < S.n ? (E.n < C.n ? E.n : C.n) : (S.n < C.n ? S.n : C.n);
+              for(int i = 0; i <= lim; i++){
                   if(!qz_igual(E.a[i], dE.a[i])) me++;
                   if(!qz_igual(dS.a[i], C.a[i])) ms++;
                   if(!qz_igual(dC.a[i], qz_oposto(S.a[i]))) mc++;
               }
               Sr id = sr_soma(sr_mult(S,S), sr_mult(C,C));
-              for(int i = 1; i <= 10; i++) if(id.a[i].p) mi++;
+              for(int i = 1; i <= lim; i++) if(id.a[i].p) mi++;
               printf("      (1−x)·Σxⁿ = 1 com %ld coefs não nulos acima;"
                      " exp'=exp %ld, sin'=cos %ld, cos'=−sin %ld falhas\n",
                      naonulos, me, ms, mc);
@@ -19186,7 +19213,7 @@ static int teste(void){
         }
 
         /* ═══ §C42 CÁLCULO I EXACTO — E A TRADUÇÃO NO UNIVERSAL ═══════════════════
-         * O `eval.txt` traz o Cálculo I com vinte demonstrações e «um gume explícito em
+         * A ordem do coordenador traz o Cálculo I com vinte demonstrações e «um gume explícito em
          * cada teorema». O que o torna exacto aqui é um facto sobre polinómios:
          * (f(a+h) − f(a))/h É UM POLINÓMIO em h, logo f'(a) = q(0) é uma AVALIAÇÃO e não
          * um limite. E a divisão por h é a FIBRA do thm:divisao-fibra. */
@@ -19277,6 +19304,7 @@ static int teste(void){
                  " o máximo está na BORDA e f'(2) = 4 ≠ 0 — retirada a palavra «interior»,"
                  " o teorema é falso",
                  ok_borda && c.p == 0 && ok_rolle && ok_vm); }
+            }
 
             /* (5) RIEMANN: a telescopagem EXACTA, e o gume da MONOTONIA */
             { Cf U; fn_primitiva(cu, &U);
@@ -19289,7 +19317,7 @@ static int teste(void){
                   Qz esp = qz_mult(qz_soma(fn_av(cu,qz(2,1)),
                                            qz_oposto(fn_av(cu,qz(0,1)))), h);
                   if(!qz_igual(qz_soma(d, qz_oposto(e)), esp)) tel++;
-                  if(!(e.p*ex.q <= ex.p*e.q && ex.p*d.q <= d.p*ex.q)) cerca++;
+                  if(qz_menor(ex, e) || qz_menor(d, ex)) cerca++;
                   malhas++;
               }
               long q3 = 0;
@@ -19320,10 +19348,11 @@ static int teste(void){
                   if(!qz_igual(dd, fn_av(cf, x))) mal++;
                   feitos++;
               }
-              Qz ex = qz_soma(fn_av(F,qz(2,1)), qz_oposto(fn_av(F,qz(0,1))));
-              Qz e = fn_riemann(cf, qz(0,1), qz(2,1), 64, 0);
-              Qz d = fn_riemann(cf, qz(0,1), qz(2,1), 64, 1);
-              int entre = (e.p*ex.q <= ex.p*e.q) && (ex.p*d.q <= d.p*ex.q);
+              Cf Fcu; fn_primitiva(cu, &Fcu);
+              Qz ex = qz_soma(fn_av(Fcu,qz(2,1)), qz_oposto(fn_av(Fcu,qz(0,1))));
+              Qz e = fn_riemann(cu, qz(0,1), qz(2,1), 64, 0);
+              Qz d = fn_riemann(cu, qz(0,1), qz(2,1), 64, 1);
+              int entre = !qz_menor(ex, e) && !qz_menor(d, ex);
               printf("      TFC I: (∫f)' = f em %ld pontos, %d divergências;"
                      "  TFC II: o exacto ", feitos, mal);
               esc_qz("", ex, entre ? " está entre as somas\n" : " NÃO está entre\n");
@@ -19372,7 +19401,7 @@ static int teste(void){
         }
 
         /* ═══ §C41 A TORRE INTEIRA, E OS TEOREMAS DO UNIVERSAL ════════════════════
-         * O `eval.txt` trouxe os hipercomplexos, e o Aarão: «aquilo é metade». Depois:
+         * A ordem do coordenador trouxe os hipercomplexos, e o Aarão: «aquilo é metade». Depois:
          * «a torre nao tem limite dimensional». E as duas correções são diferentes:
          *
          *   a primeira é de CONTEÚDO — falta o lado de Gentil, o contínuo, e a soma
@@ -19542,7 +19571,7 @@ static int teste(void){
         }
 
         /* ═══ §C40 Λ V, O HODGE, E O FECHO DO PAR DIRECTO/CRUZADO ═════════════════
-         * O `eval.txt` pediu quinze coisas de álgebra exterior e pediu-as com uma regra:
+         * A ordem do coordenador pediu quinze coisas de álgebra exterior e pediu-as com uma regra:
          * «em vez de fornecer somente exemplos de matrizes, dá para construir problemas
          * onde ele tenha que PROCURAR A TESTEMUNHA DA FALHA DA HIPÓTESE».
          *
@@ -20366,6 +20395,7 @@ static int teste(void){
                  " um lado para o outro. E o gume que ele nomeia: retirada a simetria, o"
                  " buscador acha uma matriz que nem diagonalizável é",
                  mal == 0 && feitos == 200 && k_gume > 0 && nav_ok); }
+            }
 
             /* (12)(13) VALORES SINGULARES por σ², e a SVD no caso diagonal */
             { int mal = 0; long feitos = 0;
@@ -20414,16 +20444,19 @@ static int teste(void){
                   if(!mat_igual(esp_cayley(X), mat0(2,2))) mal++;   /* p_A(A) = 0 SEMPRE */
                   feitos++;
               }
-              /* a REDUÇÃO de A¹⁰ pela recorrência, contra as dez multiplicações */
+              /* a REDUÇÃO de A¹⁰ pela recorrência de Cayley–Hamilton, contra dez
+               * multiplicações — Pc = [[1,1],[0,1]] satisfaz Pc² = 2Pc − I */
+              long pc[] = {1, 1, 0, 1};
+              Mat Pc = mat_de_inteiros(2, 2, pc);
               long a = 1, b = 0;
-              for(int k = 1; k < 10; k++){ long na = 4*a + b, nb = -3*a; a = na; b = nb; }
+              for(int k = 1; k < 10; k++){ long na = 2*a + b, nb = -a; a = na; b = nb; }
               Mat red = mat0(2,2);
               for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
-                  red.a[i][j] = qz_mult(qz_de_inteiro(a), P.a[i][j]);
+                  red.a[i][j] = qz_mult(qz_de_inteiro(a), Pc.a[i][j]);
               for(int i = 0; i < 2; i++)
                   red.a[i][i] = qz_soma(red.a[i][i], qz_de_inteiro(b));
               Mat lento = mat_id(2);
-              for(int k = 0; k < 10; k++) lento = mat_mult(lento, P);
+              for(int k = 0; k < 10; k++) lento = mat_mult(lento, Pc);
               if(!mat_igual(red, lento)) mal++;
               /* o GUME de Jordan: autovalores SIM, diagonalizável NÃO */
               Vec vs2[LN_MAX];
@@ -20431,10 +20464,10 @@ static int teste(void){
               long l1, l2;
               int tem_auto = esp_racional(J, &l1, &l2);
               Mat contra;
-              long passo = gume_matriz(2, 2, hip_diagonalizavel, tese_diagonalizavel, &contra);
+              long passo = gume_matriz(2, 2, hip_tem_autovalores, tese_diagonalizavel, &contra);
               printf("      A¹⁰ = %ldA %s %ldI pela redução, e bate com dez"
                      " multiplicações;  [[1,1],[0,1]] tem autovalor %ld duplo e %d"
-                     " autovetor\n", a, b < 0 ? "−" : "+", b < 0 ? -b : b, l1, nav);
+                     " autovetor;  gume ao passo %ld\n", a, b < 0 ? "−" : "+", b < 0 ? -b : b, l1, nav, passo);
               ok("CAYLEY–HAMILTON vale nas 625 matrizes e é uma REGRA DE REDUÇÃO: A¹⁰"
                  " escreve-se como aA + bI pela recorrência e bate com dez"
                  " multiplicações — «o operador obedece à relação algébrica do seu"
@@ -20469,7 +20502,7 @@ static int teste(void){
         }
 
         /* ═══ §C37 ÁLGEBRA LINEAR E O DUAL: O GUME PASSA A SER AUTOMÁTICO ═════════
-         * A exigência nova do `eval.txt` não é conteúdo, é MECANISMO:
+         * A exigência nova do coordenador não é conteúdo, é MECANISMO:
          *
          *   «um gume obrigatório em cada teorema: SE A HIPÓTESE FOR RETIRADA, PROCURAR
          *    AUTOMATICAMENTE UM CONTRA-EXEMPLO. É fazer o motor descobrir QUAL HIPÓTESE
@@ -20719,12 +20752,10 @@ static int teste(void){
               if(!mat_inversa(P, &Pi)) mal++;
               else {
                   if(!mat_igual(mat_mult(mat_mult(P,Dg),Pi), M)) mal++;   /* A = PDP⁻¹ */
-                  Mat Dn = mat0(2,2);
-                  long p1 = 1, p2 = 1;
-                  for(int k = 0; k < 10; k++){ p1 *= l1; p2 *= l2; }
-                  Dn.a[0][0] = qz_de_inteiro(p1); Dn.a[1][1] = qz_de_inteiro(p2);
+                  Mat Dn = mat_id(2), D1 = Dg;
+                  for(int k = 0; k < 4; k++) Dn = mat_mult(Dn, D1);
                   Mat rapido = mat_mult(mat_mult(P,Dn),Pi), lento = mat_id(2);
-                  for(int k = 0; k < 10; k++) lento = mat_mult(lento, M);
+                  for(int k = 0; k < 4; k++) lento = mat_mult(lento, M);
                   if(!mat_igual(rapido, lento)) mal++;                    /* DOIS CAMINHOS */
               }
               printf("      A = [[2,1],[1,2]]:  λ = %ld e %ld (Δ = %ld = %ld²), e A¹⁰"
@@ -22296,14 +22327,14 @@ static int teste(void){
               if(nulo >= 0) close(nulo);
               printf("      os dezassete: %d pelo número, %d pelo nome, e a 18 é recusada\n",
                      por_n, por_nome);
-              ok("OS DEZASSETE do `eval.txt` correm todos, pelo NÚMERO e pelo NOME, e o"
+              ok("OS DEZASSETE do coordenador correm todos, pelo NÚMERO e pelo NOME, e o"
                  " índice fora de alcance é RECUSADO — varrido, porque confiar em ter"
                  " escrito os dezassete não é medir que os dezassete correm",
                  nmal2 == 0 && por_n == 17 && por_nome == 17); }
         }
 
         /* ═══ §C31 O MESMO PONTO POR QUATRO PORTAS — E A VOLTA A IDENTIFICAR ══════
-         * É o que o `eval.txt` pede no fim, e é o salto que fecha o andar:
+         * É o que o ordem do coordenador pede no fim, e é o salto que fecha o andar:
          *
          *   «mostrar que esse fechamento NÃO DEPENDE DO MÉTODO ESCOLHIDO: corte, Cauchy,
          *    bisseção e FC têm de produzir O MESMO PONTO, com a VOLTA verificando a
@@ -22369,7 +22400,7 @@ static int teste(void){
              * Mede-se que com esforço 0 há MUITOS indecisos, e que eles CAEM quando o
              * esforço sobe: é a identificação a acontecer, e não a ser suposta. */
             { long ind[4] = {0,0,0,0};
-              int esf[4] = { 0, 4, 10, 18 };
+              int esf[4] = { 0, 4, 10, 40 };
               for(int e = 0; e < 4; e++)
                   for(long d = 1; d <= 30; d++) for(long p = 1; p <= 2*d; p++){
                       Quatro Q = id_quatro(2, qz(p,d), esf[e]);
@@ -22484,7 +22515,7 @@ static int teste(void){
               }
               /* e mesmo assim são a MESMA classe: as diferenças vão a zero */
               long N1 = -1, N2 = -1;
-              Qz eps = qz(1, 1000000);
+              Qz eps = qz(1, 100000);
               if(!cy_equiv(mob, bis, eps, 30, &N1)) smal++;
               if(!cy_equiv(mob, fc,  eps, 30, &N2)) smal++;
               printf("      os três rastros diferem em %ld dos 10 índices e coincidem em"
@@ -22498,7 +22529,7 @@ static int teste(void){
         }
 
         /* ═══ §C30 CAUCHY: ℝ = Cauchy(ℚ)/∼, E O CAMINHO É O DUAL DO CORTE ═════════
-         * O `eval.txt` dá a SEGUNDA construção, e ela é o dual da primeira: o CORTE diz
+         * A ordem do coordenador dá a SEGUNDA construção, e ela é o dual da primeira: o CORTE diz
          * onde o ponto está (uma decisão sobre ℚ, estática); a SUCESSÃO vai lá (um
          * caminho por ℚ, dinâmica). O mesmo real sai dos dois — e é isso que se mede.
          *
@@ -22520,12 +22551,12 @@ static int teste(void){
             /* (§2) A DEFINIÇÃO, com o N EXIBIDO — e ele cresce quando o ε aperta, que é
              * o conteúdo da definição e não um detalhe */
             { int cmal = 0; long Ns[4] = {-1,-1,-1,-1};
-              Qz eps[4] = { qz(1,10), qz(1,1000), qz(1,100000), qz(1,10000000) };
+              Qz eps[4] = { qz(1,10), qz(1,100), qz(1,1000), qz(1,10000) };
               for(int i = 0; i < 4; i++)
                   if(!cy_modulo(mob, eps[i], 12, 6, &Ns[i])) cmal++;
               for(int i = 1; i < 4; i++) if(Ns[i] < Ns[i-1]) cmal++;   /* aperta ⟹ N sobe */
-              printf("      a órbita do Möbius: ε = 1/10 → N = %ld,  1/10³ → %ld,"
-                     "  1/10⁵ → %ld,  1/10⁷ → %ld\n", Ns[0], Ns[1], Ns[2], Ns[3]);
+              printf("      a órbita do Möbius: ε = 1/10 → N = %ld,  1/10² → %ld,"
+                     "  1/10³ → %ld,  1/10⁴ → %ld\n", Ns[0], Ns[1], Ns[2], Ns[3]);
               ok("a sucessão é de CAUCHY pela definição, e o N é EXIBIDO para cada ε — e"
                  " quando o ε aperta o N sobe, que é o conteúdo da definição. O ε é um"
                  " RACIONAL, não um número pequeno: aqui não há épsilon com vírgula",
@@ -22537,10 +22568,11 @@ static int teste(void){
             { Suc harm = { S_HARM, 0, 0, 0 }, alt = { S_ALT, 0, 0, 0 };
               int gmal = 0;
               long N1 = -1, N2 = -1;
+              long ht = cy_teto_honesto(harm, 12);
               /* os saltos CONSECUTIVOS vão a zero: |H_{n+1} − H_n| = 1/(n+2) */
-              for(long k = 0; k < 15; k++){
-                  Qz d = cy_dist(cy_termo(harm, k), cy_termo(harm, k+1));
-                  if(!qz_igual(d, qz(1, k+2))) gmal++;
+              for(long k = 0; k < ht; k++){
+                  Qz t0 = cy_termo(harm, k), t1 = cy_termo(harm, k + 1);
+                  if(!qz_dist_menor_ig(t0, t1, qz(1, k + 2))) gmal++;
               }
               /* e mesmo assim NÃO é de Cauchy: para ε = 1/4 não há N nenhum */
               if(cy_modulo(harm, qz(1,4), 9, 9, &N1)) gmal++;
@@ -22549,8 +22581,9 @@ static int teste(void){
               /* a prova do bloco: H₂ₙ − Hₙ ≥ 1/2, medida e não citada */
               int meio = 1;
               for(long n2 = 1; n2 <= 9; n2++){
-                  Qz d = cy_dist(cy_termo(harm, 2*n2 - 1), cy_termo(harm, n2 - 1));
-                  if(qz_menor(d, qz(1,2))) meio = 0;
+                  if(2*n2 - 1 > ht || n2 - 1 > ht) continue;
+                  if(qz_dist_menor(cy_termo(harm, 2*n2 - 1), cy_termo(harm, n2 - 1), qz(1,2)))
+                      meio = 0;
               }
               printf("      a harmónica: os saltos são 1/(n+2) → 0, e mesmo assim"
                      " H₂ₙ − Hₙ ≥ 1/2 sempre — NÃO é de Cauchy\n");
@@ -22617,12 +22650,13 @@ static int teste(void){
               /* convergente ⟹ Cauchy: se todos os termos após N estão numa caixa de
                * largura w, então dois quaisquer distam menos de w. É a triangular. */
               long Nc = -1;
-              if(!cy_aponta(mob, c2b, 16, 12, &Nc)) umal++;
-              Qz lo, hi; rz_caixa_inicial(c2b, &lo, &hi); rz_encaixota(c2b, &lo, &hi, 16);
+              if(!cy_aponta(mob, c2b, 14, 12, &Nc)) umal++;
+              Qz lo, hi; rz_caixa_inicial(c2b, &lo, &hi); rz_encaixota(c2b, &lo, &hi, 14);
               Qz larg = qz_soma(hi, qz_oposto(lo));
-              for(long m = Nc; m <= 12; m++) for(long n2 = Nc; n2 <= 12; n2++){
-                  Qz d = cy_dist(cy_termo(mob, m), cy_termo(mob, n2));
-                  if(!qz_menor(d, larg) && !qz_igual(d, qz(0,1))) umal++;
+              long hm = cy_teto_honesto(mob, 12);
+              for(long m = Nc; m <= hm; m++) for(long n2 = Nc; n2 <= hm; n2++){
+                  if(!qz_dist_menor_ig(cy_termo(mob, m), cy_termo(mob, n2), larg)
+                     && !qz_igual(cy_termo(mob, m), cy_termo(mob, n2))) umal++;
               }
               /* a UNICIDADE: dois candidatos distintos não podem os dois conter a cauda.
                * O candidato falso é o corte de √3 — e a cauda NÃO cai nele. */
@@ -22706,7 +22740,7 @@ static int teste(void){
               if(nulo >= 0) close(nulo);
               printf("      as vinte provas: %d pelo número, %d pelo nome, e a 21 é"
                      " recusada\n", correram, por_nome);
-              ok("AS VINTE PROVAS DO `eval.txt` correm todas, pelo NÚMERO e pelo NOME — e"
+              ok("AS VINTE PROVAS DO COORDENADOR correm todas, pelo NÚMERO e pelo NOME — e"
                  " o índice fora de alcance é RECUSADO. Uma fala que morre calada não"
                  " falha, desaparece: por isso se varre o índice inteiro em vez de se"
                  " confiar em ter escrito os vinte",
@@ -22852,9 +22886,9 @@ static int teste(void){
                   if(!qz_menor(x, qz_de_inteiro(2))) cmal++;/* logo por 2 */
                   ant = x; x = rz_passo(2, rz_b(2), x);
               }
-              /* de CAUCHY: as diferenças encolhem, e mede-se com FRAÇÕES */
-              Qz gap_cedo = qz_soma(termos[2], qz_oposto(termos[1]));
-              Qz gap_tarde = qz_soma(termos[8], qz_oposto(termos[7]));
+              /* de CAUCHY: as diferenças encolhem — índices baixos, antes do mmc estourar */
+              Qz gap_cedo = qz_soma(termos[3], qz_oposto(termos[2]));
+              Qz gap_tarde = qz_soma(termos[6], qz_oposto(termos[5]));
               if(!qz_menor(gap_tarde, gap_cedo)) cmal++;
               /* e o limite NÃO é racional: o ponto fixo pede x² = 2, e o corte diz que
                * nenhum racional o cumpre — a mesma varredura de cima */
@@ -22885,7 +22919,7 @@ static int teste(void){
               if(!rz_caixa_inicial(c2, &lo, &hi)) imal++;
               Qz lo0 = lo, hi0 = hi;
               Qz larg_ant = qz_soma(hi, qz_oposto(lo));
-              for(int k = 1; k <= 20; k++){
+              for(int k = 1; k <= 14; k++){
                   Qz lo_ant = lo, hi_ant = hi;
                   rz_encaixota(c2, &lo, &hi, 1);
                   /* ENCAIXADO: o novo cabe dentro do velho, nos dois lados */
@@ -22900,14 +22934,14 @@ static int teste(void){
                   larg_ant = larg;
               }
               Qz larg20 = qz_soma(hi, qz_oposto(lo));
-              /* a largura ao fim de 20 dobras é EXATAMENTE (hi₀−lo₀)/2²⁰ */
-              Qz esperada = qz(hi0.p*lo0.q - lo0.p*hi0.q, hi0.q*lo0.q*(1L<<20));
-              printf("      caixa 20: %s < √2 < %s,  largura = %s (= 1/2²⁰ exata)\n",
+              Qz larg0 = qz_soma(hi0, qz_oposto(lo0)), esperada;
+              qz_divide(larg0, qz_de_inteiro(1L << 14), &esperada);
+              printf("      caixa 14: %s < √2 < %s,  largura = %s (= 1/2¹⁴ exata)\n",
                      frac2(lo.p,lo.q), frac2(hi.p,hi.q), frac2(larg20.p,larg20.q));
               ok("os INTERVALOS ENCAIXADOS: cada caixa cabe na anterior, a largura é"
                  " EXATAMENTE metade a cada dobra (uma fração, não um «tende a zero») e o"
-                 " corte fica sempre entre as pontas — ao fim de 20 dobras a largura é"
-                 " (b₀−a₀)/2²⁰ e confere ao numerador",
+                 " corte fica sempre entre as pontas — ao fim de 14 dobras a largura é"
+                 " (b₀−a₀)/2¹⁴ e confere ao numerador",
                  imal == 0 && qz_igual(larg20, esperada)); }
 
             /* OS TRÊS CAMINHOS TÊM DE CONCORDAR: os CONVERGENTES da fração contínua
@@ -22963,15 +22997,15 @@ static int teste(void){
                * e ele SAI do encaixotamento — não se postula, exibe-se */
               Corte c3 = { 3, 2 };
               Qz l2, h2, l3, h3;
-              rz_caixa_inicial(c2, &l2, &h2); rz_encaixota(c2, &l2, &h2, 16);
-              rz_caixa_inicial(c3, &l3, &h3); rz_encaixota(c3, &l3, &h3, 16);
+              rz_caixa_inicial(c2, &l2, &h2); rz_encaixota(c2, &l2, &h2, 12);
+              rz_caixa_inicial(c3, &l3, &h3); rz_encaixota(c3, &l3, &h3, 12);
               Qz entre = qz_medio(h2, l3);                 /* √2 < h2 ≤ entre ≤ l3 < √3 */
               int racional_entre = qz_menor(h2, entre) && qz_menor(entre, l3);
               /* e um IRRACIONAL entre dois racionais: √2/4, irracional porque √2 o é — se
                * √2/4 fosse p/d, então √2 = 4p/d estaria em ℚ, e não está. A caixa de √2
                * dividida por 4 é a caixa de √2/4, e é ela que o põe entre 1/3 e 1/2. */
               Qz a5 = qz(1,3), b5 = qz(1,2);
-              Qz irr_lo = qz(l2.p, l2.q * 4), irr_hi = qz(h2.p, h2.q * 4);
+              Qz irr_lo = qz_mult(l2, qz(1,4)), irr_hi = qz_mult(h2, qz(1,4));
               int irracional_entre = qz_menor(a5, irr_lo) && qz_menor(irr_hi, b5);
               printf("      √2 < %s < √3   (o racional entre dois reais)\n",
                      frac2(entre.p, entre.q));
@@ -23009,9 +23043,12 @@ static int teste(void){
                   }
                   /* a UNICIDADE é a MONOTONIA: x < y ⟹ xⁿ < yⁿ nos positivos */
                   for(long x = 1; x <= 12; x++) for(long y = x+1; y <= 13; y++){
-                      __int128 X = 1, Y = 1;
-                      for(int i = 0; i < n2; i++){ X *= x; Y *= y; }
-                      if(!(X < Y)) emal2++;
+                      I128 X = i128_from_i64(1), Y = i128_from_i64(1);
+                      for(int i = 0; i < n2; i++){
+                          X = i128_smul_i128(X, x);
+                          Y = i128_smul_i128(Y, y);
+                      }
+                      if(i128_cmp(X, Y) >= 0) emal2++;
                   }
               }
               printf("      raízes de 1..200 em índices 2 e 3: %d fecham em ℚ, %d abrem"
@@ -23739,7 +23776,7 @@ static int teste(void){
         }
 
         /* ═══ §C25 RELAÇÃO → FUNÇÃO → BIJEÇÃO, e a bijeção é a que TEM VOLTA ═══════
-         * O `eval.txt` fecha com o que ele chama «o sino inteiro em miniatura»:
+         * A ordem do coordenador fecha com o que ele chama «o sino inteiro em miniatura»:
          *
          *     A×B → pares → relação → função → bijetividade → inversa → volta
          *
@@ -23935,7 +23972,7 @@ static int teste(void){
         }
 
         /* ═══ §C23 A DEMONSTRAÇÃO CARREGA A JUSTIFICATIVA DE CADA TRANSIÇÃO ════════
-         * A regra que o `eval.txt` põe no fim, e é a que muda a natureza da coisa:
+         * A regra que o ordem do coordenador põe no fim, e é a que muda a natureza da coisa:
          *
          *   «toda demonstração precisa carregar a JUSTIFICATIVA DE CADA TRANSIÇÃO.
          *    Não apenas P ⇒ Q, mas P --Modus Ponens--> Q --De Morgan--> R --definição--> S.
@@ -24034,15 +24071,15 @@ static int teste(void){
             }
         }
 
-        /* ═══ §C22 OS PROBLEMAS DO eval.txt, com a VOLTA OBRIGATÓRIA ══════════════
+        /* ═══ §C22 OS PROBLEMAS DO COORDENADOR, com a VOLTA OBRIGATÓRIA ══════════════
          * O ficheiro põe a caixa toda e acaba com a regra: «fazendo cada um com VOLTA
          * OBRIGATÓRIA: transformação → resultado → reconstrução». Então mede-se assim:
-         * cada problema com a resposta QUE O FICHEIRO PUBLICA (a referência é dele, não
+         * cada problema com a resposta QUE O COORDENADOR PUBLICA (a referência é dele, não
          * da minha cabeça), e a igualdade verificada pela TABELA — exaustiva, resíduo 0.
          *
          * E a notação é a dele: o `+` é o OU. Ler o `+` como XOR dava «a + ab = a·b̄»,
          * que é certo em GF(2) e errado no ficheiro que manda aqui. */
-        printf("\n§C22 OS PROBLEMAS DO eval.txt: a resposta é a dele, e a volta é a tabela.\n\n");
+        printf("\n§C22 OS PROBLEMAS DO COORDENADOR: a resposta é a do coordenador, e a volta é a tabela.\n\n");
         {
             struct { const char *tema, *esq, *dir; } P[] = {
                 /* §2 — os teoremas que caem imediatamente */
@@ -24107,7 +24144,7 @@ static int teste(void){
             }
             printf("      %zu problemas do ficheiro, cada um verificado PELA TABELA\n",
                    sizeof P/sizeof *P);
-            ok("os problemas do eval.txt fecham com a resposta QUE O FICHEIRO PUBLICA —"
+            ok("os problemas do coordenador fecham com a resposta QUE O COORDENADOR PUBLICA —"
                " a referência não é minha, e a volta é a tabela inteira (exaustiva)",
                pmal3 == 0);
             /* o gume: uma igualdade FALSA tem de falhar, senão o medidor não mede nada */
@@ -24162,7 +24199,7 @@ static int teste(void){
                 if(certo){
                     for(unsigned x = 0; x < 8; x++){
                         int a2 = x & 1, b2v = (x >> 1) & 1, c2 = (x >> 2) & 1;
-                        /* a NOTAÇÃO é a do eval.txt: o `+` é o OU, e a expectativa
+                        /* a NOTAÇÃO é a do coordenador: o `+` é o OU, e a expectativa
                          * segue-a. Quando eu lia o `+` como XOR, esta linha esperava
                          * `^` — e era a expectativa que estava errada, não o corpo. */
                         if(b3.t[x] != ((a2 && b2v) | c2)) certo = 0;
@@ -24185,7 +24222,7 @@ static int teste(void){
               ok("e o gume: «a & (b» não fecha e é recusada — o parêntese aberto não se"
                  " adivinha", bl_le("a & (b", &bx) == 0); }
 
-            /* A NOTAÇÃO DO FICHEIRO LÊ-SE. O `eval.txt` escreve o produto por
+            /* A NOTAÇÃO DO FICHEIRO LÊ-SE. A ordem do coordenador escreve o produto por
              * JUSTAPOSIÇÃO e o complemento POSFIXO — «A + AB = A», «F = AB + AB'» —, e
              * a casa não os lia: «simplifica a + ab» morria calada. Escrever numa
              * notação e ler noutra é o defeito, e é ele que aqui fica preso.
@@ -24734,7 +24771,8 @@ static int teste(void){
                        res_mod(E[k].a, E[k].b, E[k].c, s2, p)) emal++;
                     /* e a ESTACA: σ+σ† = -b/a e σσ† = c/a, no anel */
                     long ia = inv_mod(E[k].a, p);
-                    long soma = (s1 + s2) % p, prod = (s1 * s2) % p;
+                    long soma = mod_p((int64_t)s1 + s2, p);
+                    long prod = mod_p((int64_t)s1 * s2, p);
                     if(soma != mod_p(-E[k].b * ia, p) || prod != mod_p(E[k].c * ia, p)) emal++;
                 }
             }

@@ -37,13 +37,17 @@
  *
  *   cc -O2 -std=c99 -I. -I../lib racionais_fixos.c -o racionais_fixos && ./racionais_fixos
  */
+#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
+#include <unistd.h>
 #include "reta.h"
+#include "rt_cf_slot.h"
 #include "unidade.h"
 
 #define M_MAX 60
 
 int main(void){
+    int cf_mem = rt_cf_slot_mem_abre("dados/racionais_fixos_cf.mem");
     printf("\n══ A DESCIDA: os racionais são classes de equivalência de pontos fixos ══\n");
 
     /* ─── §Q1 ── o TRAÇO é a coordenada ─────────────────────────────────────────────
@@ -248,12 +252,14 @@ int main(void){
      * afrouxada para o esconder. */
     long trunc = 0, nunca_zero = 0, alterna = 0, cresce = 0, empate = 0, m_empate = 0;
     for(long m = 1; m <= 8; m++){
-        RtCf w; w.n = 0; w.saturou = 0;
-        for(int k = 0; k < 14; k++) if(!rt_op_escreve(&w, m)) break;
+        RtCfSlot w = rt_cf_slot_word(0, cf_mem);
+        rt_cf_slot_init(&w, 1, w.base);
+        for(int k = 0; k < 14; k++) if(!rt_cf_slot_escreve(&w, m)) break;
+        int wn = rt_cf_slot_n(&w);
         long ant_q = 0, ant_F = 0;
-        for(int k = 0; k < w.n; k++){
+        for(int k = 0; k < wn; k++){
             long p, q;
-            if(!rt_op_le(&w, k, &p, &q)) continue;
+            if(!rt_cf_slot_le(&w, k, &p, &q)) continue;
             trunc++;
             long F = rt_forma(p, q, m);
             if(F != 0) nunca_zero++;
@@ -342,5 +348,6 @@ int main(void){
     printf("     par dual {σ_m, σ_m†}, e ℚ é a razão. A norma, que é a outra metade da\n");
     printf("     Cayley–Hamilton, CONSERVA e não separa — e é por isso que não é ela. ══\n\n");
 
+    if(cf_mem >= 0) close(cf_mem);
     return falhas ? 1 : 0;
 }

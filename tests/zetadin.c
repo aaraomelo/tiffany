@@ -38,7 +38,7 @@
 #include <stdio.h>
 #include "unidade.h"
 
-typedef long long L;
+typedef long L;
 #define NC 24
 
 static void zeta_coef(L m, L *c, int N){
@@ -76,7 +76,7 @@ int main(void){
                 int ig=1; for(int n=0;n<12;n++) if(c[n]!=f[n]) ig=0;
                 fib=ig;
             }
-            if(m<=3) printf("      %-4lld %lld %lld %lld %lld %lld %lld %lld%*s[%lld %lld %lld %lld ...]\n",
+            if(m<=3) printf("      %-4ld %ld %ld %ld %ld %ld %ld %ld%*s[%ld %ld %ld %ld ...]\n",
                             m,c[0],c[1],c[2],c[3],c[4],c[5],c[6],8,"",p[0],p[1],p[2],p[3]);
         }
         printf("      metais: %d   com ζ·(1−mx−x²) = 1: %d\n", metais, ok_um);
@@ -100,7 +100,7 @@ int main(void){
                 int ig=1; for(int k=0;k<12;k++) if(t[k]!=lu[k]) ig=0;
                 luc=ig;
             }
-            if(m<=3) printf("      %-4lld %lld %lld %lld %lld %lld %lld %lld%*s%lld %lld %lld %lld\n",
+            if(m<=3) printf("      %-4ld %ld %ld %ld %ld %ld %ld %ld%*s%ld %ld %ld %ld\n",
                             m,t[0],t[1],t[2],t[3],t[4],t[5],t[6],8,"",
                             c[2]+c[0],c[3]+c[1],c[4]+c[2],c[5]+c[3]);
         }
@@ -126,7 +126,7 @@ int main(void){
             int bom=(chk[0]==1); for(int n=1;n<NC-5;n++) if(chk[n]!=0) bom=0;
             if(bom) fecha++;
             if(pares<=3)
-                printf("      %lld  %lld    %lld %lld %lld %lld %lld%*s[%lld %lld %lld %lld %lld]   [%lld %lld %lld %lld ...]\n",
+                printf("      %ld  %ld    %ld %ld %ld %ld %ld%*s[%ld %ld %ld %ld %ld]   [%ld %ld %ld %ld ...]\n",
                        ma,mb,cc[0],cc[1],cc[2],cc[3],cc[4],6,"",
                        dd[0],dd[1],dd[2],dd[3],dd[4],chk[0],chk[1],chk[2],chk[3]);
         }
@@ -154,7 +154,7 @@ int main(void){
             int ig=1; for(int n=0;n<NC-2;n++) if(q[n]!=ca[n]) ig=0;
             if(ig) exatos++;
             if(casos<=3)
-                printf("      %lld  %lld    %lld %lld %lld %lld %lld   contra   %lld %lld %lld %lld %lld    %s\n",
+                printf("      %ld  %ld    %ld %ld %ld %ld %ld   contra   %ld %ld %ld %ld %ld    %s\n",
                        ma,mb,q[0],q[1],q[2],q[3],q[4],ca[0],ca[1],ca[2],ca[3],ca[4],ig?"SIM":"nao");
         }
         printf("      pares: %d   a devolver ζ_A exatamente: %d\n", casos, exatos);
@@ -177,7 +177,7 @@ int main(void){
             pares++;
             if(nao_soma>=5) ok_par++;
             if(pares<=3)
-                printf("      %lld  %lld    %lld %lld %lld %lld %lld%*s%lld %lld %lld  (soma daria %lld %lld %lld)\n",
+                printf("      %ld  %ld    %ld %ld %ld %ld %ld%*s%ld %ld %ld  (soma daria %ld %ld %ld)\n",
                        ma,mb,ta[1]+tb[1],ta[2]+tb[2],ta[3]+tb[3],ta[4]+tb[4],ta[5]+tb[5],6,"",
                        cc[2],cc[3],cc[4],ca[2]+cb[2],ca[3]+cb[3],ca[4]+cb[4]);
         }
@@ -192,7 +192,7 @@ int main(void){
     {
         /* dividir por b com b_0 = 2: q_0 = r_0/2, e se r_0 e impar sai de Z. */
         L b0 = 2, r0 = 1;
-        printf("      b_0 = %lld,  r_0 = %lld   →  q_0 = r_0/b_0 = %lld/%lld\n", b0, r0, r0, b0);
+        printf("      b_0 = %ld,  r_0 = %ld   →  q_0 = r_0/b_0 = %ld/%ld\n", b0, r0, r0, b0);
         printf("      e divisivel? %s\n", (r0 % b0)? "NAO — sai de Z" : "sim");
         ok("com b_0 = 2 e r_0 impar a deconvolucao sai dos inteiros", (r0 % b0) != 0);
         /* e b_0 = 0: nao ha q_0 nenhum */

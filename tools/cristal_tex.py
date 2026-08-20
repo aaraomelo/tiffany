@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""cristal_tex.py — projeção LaTeX do cristal (eval.txt: LaTeX = projeção verificável).
+"""cristal_tex.py — projeção LaTeX do cristal (ordem do coordenador: LaTeX = projeção verificável).
 
 Lê cristal/cristal.jsonl (a fonte, extraída por cristal_extrai.py) e emite
 cristal/cristal_<grupo>.tex — um documento por grupo de domínios, no formato da

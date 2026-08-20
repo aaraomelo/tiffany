@@ -8,7 +8,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
+#include <inttypes.h>
 #include "unidade.h"
+#include "dual32.h"
 
 #define MAXZ 64
 #define S    10000L                    /* escala: |z|² ≈ S² após normalizar */
@@ -22,34 +25,39 @@ static int NZ = 0;
 static Zi zi(long a, long b){ Zi z = {a, b}; return z; }
 static Zi zi_add(Zi a, Zi b){ return zi(a.re + b.re, a.im + b.im); }
 static Zi zi_sub(Zi a, Zi b){ return zi(a.re - b.re, a.im - b.im); }
-static long long nr2(Zi z){ return (long long)z.re * z.re + (long long)z.im * z.im; }
 
-static long isqrt_ll(long long n){
-    if(n <= 0) return 0;
-    long long x = n, y = (x + 1) >> 1;
+static uint64_t nr2(Zi z){
+    D64 r = d64_soma(d64_sqr_i((int)z.re), d64_sqr_i((int)z.im));
+    return ((uint64_t)r.alto << 32) | (uint64_t)r.baixo;
+}
+
+static long isqrt_u64(uint64_t n){
+    if(n == 0) return 0;
+    uint64_t x = n, y = (x + 1) >> 1;
     while(y < x){ x = y; y = (x + n / x) >> 1; }
     return (long)x;
 }
 
 static void normaliza(Zi *z, int n){
-    long long tot = 0;
+    uint64_t tot = 0;
     for(int i = 0; i < n; i++) tot += nr2(z[i]);
-    if(tot <= 0) return;
-    long long alvo = (long long)n * S * S;
-    long k = isqrt_ll(alvo * 1000000LL / tot);   /* escala ×10³ para precisão */
+    if(tot == 0) return;
+    uint64_t alvo = (uint64_t)n * (uint64_t)S * (uint64_t)S;
+    long k = (long)isqrt_u64(alvo * 1000000u / tot);   /* escala ×10³ para precisão */
     for(int i = 0; i < n; i++){
-        z[i].re = (long)((long long)z[i].re * k / 1000);
-        z[i].im = (long)((long long)z[i].im * k / 1000);
+        z[i].re = (long)((int64_t)z[i].re * k / 1000);
+        z[i].im = (long)((int64_t)z[i].im * k / 1000);
     }
 }
 
-static long long defeito(const Zi *z, int n){
-    long long s = 0;
+static uint64_t defeito(const Zi *z, int n){
+    uint64_t s = 0;
+    int64_t s2 = (int64_t)S * (int64_t)S;
     for(int i = 0; i < n; i++){
-        long long d = nr2(z[i]) - (long long)S * S;
-        s += d * d;
+        int64_t d = (int64_t)nr2(z[i]) - s2;
+        s += (uint64_t)(d * d);
     }
-    return s / n;
+    return s / (uint64_t)n;
 }
 
 static unsigned long rng = 20260802UL;
@@ -71,14 +79,14 @@ static void secao_C1(void){
     printf("\n§C1  AO PLANO COMPLEXO — a torre branca é o conjunto dos pontos dele\n\n");
 
     printf("        #    z = a + bi                    |z|²\n");
-    long long soma_r = 0;
+    uint64_t soma_r = 0;
     for(int i = 0; i < NZ && i < 8; i++){
-        long long n2 = nr2(Z[i]);
-        soma_r += isqrt_ll(n2);
-        printf("        %-3d  %10ld %+10ld   %lld\n", i, Z[i].re, Z[i].im, n2);
+        uint64_t n2 = nr2(Z[i]);
+        soma_r += (uint64_t)isqrt_u64(n2);
+        printf("        %-3d  %10ld %+10ld   %" PRIu64 "\n", i, Z[i].re, Z[i].im, n2);
     }
-    for(int i = 8; i < NZ; i++) soma_r += isqrt_ll(nr2(Z[i]));
-    printf("        ...  %d pontos, |z| médio ≈ %lld\n", NZ, soma_r / NZ);
+    for(int i = 8; i < NZ; i++) soma_r += (uint64_t)isqrt_u64(nr2(Z[i]));
+    printf("        ...  %d pontos, |z| médio ≈ %" PRIu64 "\n", NZ, soma_r / (uint64_t)NZ);
 
     ok("a torre branca fechou — há pontos complexos para medir", NZ >= 8);
     ok("e nenhum é o zero — todo ponto tem norma e ângulo",
@@ -97,14 +105,14 @@ static void secao_C2(void){
     printf("        do livro (cap01_tensorial):  E_k(B) = E[ (‖B(a₁,…)‖² − 1)² ]\n");
     printf("        aqui:                        E    = ⟨ (|z|² − S²)² ⟩ / S⁴\n\n");
 
-    long long E = defeito(Z, NZ);
-    printf("        o defeito do conjunto dele:  E = %lld\n", E);
+    uint64_t E = defeito(Z, NZ);
+    printf("        o defeito do conjunto dele:  E = %" PRIu64 "\n", E);
 
     Zi R[MAXZ];
     for(int i = 0; i < NZ; i++) R[i] = controle_aleatorio(NZ);
     normaliza(R, NZ);
-    long long Er = defeito(R, NZ);
-    printf("        o mesmo, com normas ao acaso: E = %lld   (%lld× maior)\n",
+    uint64_t Er = defeito(R, NZ);
+    printf("        o mesmo, com normas ao acaso: E = %" PRIu64 "   (%" PRIu64 "× maior)\n",
            Er, Er / (E ? E : 1));
 
     ok("o defeito dele é MUITO menor que o do acaso — as normas concentram-se", E * 3 < Er);
@@ -122,55 +130,52 @@ static void secao_C3(void){
     printf("\n§C3  A ÓRBITA: as razões consecutivas, e a distância a φ\n\n");
 
     printf("        k    |z_{k+1}| / |z_k|     desvio de φ\n");
-    long long soma = 0, soma2 = 0; int n = 0;
+    int64_t soma = 0, soma2 = 0; int n = 0;
+    int64_t phi_ref = (int64_t)PHI_NUM * 1000000 / (int64_t)PHI_DEN;
     for(int k = 0; k + 1 < NZ; k++){
-        long rk = isqrt_ll(nr2(Z[k+1]));
-        long r0 = isqrt_ll(nr2(Z[k]));
+        long rk = isqrt_u64(nr2(Z[k+1]));
+        long r0 = isqrt_u64(nr2(Z[k]));
         if(!r0) continue;
-        long long r = (long long)rk * 1000000L / r0;
+        int64_t r = (int64_t)rk * 1000000 / r0;
         soma += r; soma2 += r * r; n++;
         if(k < 7){
-            long long desv = r * (long)PHI_DEN - (long long)PHI_NUM * 1000000L / (long)PHI_DEN;
-            printf("        %-3d  %lld.%06lld   %+lld\n",
+            int64_t desv = r * (int64_t)PHI_DEN - (int64_t)PHI_NUM * 1000000 / (int64_t)PHI_DEN;
+            printf("        %-3d  %" PRId64 ".%06" PRId64 "   %+" PRId64 "\n",
                    k, r / 1000000, r % 1000000, desv / 1000000);
         }
     }
-    long long media = soma / n;
-    long long media2 = soma2 / n;
-    long long dp2 = media2 - media * media / 1000000L;
-    long dp = isqrt_ll(dp2 > 0 ? dp2 : 0);
-    printf("        ...  média %lld.%06lld   desvio %ld\n",
+    int64_t media = soma / n;
+    int64_t media2 = soma2 / n;
+    int64_t dp2 = media2 - media * media / 1000000;
+    long dp = isqrt_u64(dp2 > 0 ? (uint64_t)dp2 : 0);
+    printf("        ...  média %" PRId64 ".%06" PRId64 "   desvio %ld\n",
            media / 1000000, media % 1000000, dp);
-    printf("        φ ≈ %ld.%06ld;  a média dista %lld de φ\n",
-           PHI_NUM / PHI_DEN, PHI_NUM % PHI_DEN,
-           (media > (long long)PHI_NUM * 1000000L / PHI_DEN ?
-            media - (long long)PHI_NUM * 1000000L / PHI_DEN :
-            (long long)PHI_NUM * 1000000L / PHI_DEN - media));
+    int64_t dist_phi = media > phi_ref ? media - phi_ref : phi_ref - media;
+    printf("        φ ≈ %ld.%06ld;  a média dista %" PRId64 " de φ\n",
+           PHI_NUM / PHI_DEN, PHI_NUM % PHI_DEN, dist_phi);
 
     ok("há razões consecutivas para medir", n >= 6);
 
     printf("\n        estável?  o desvio das razões é %ld — %s\n", dp,
            dp < 500000L ? "sim, a órbita não dispersa" : "NÃO, as razões saltam");
-    printf("        áurea?    a média %lld.%06lld contra φ — %s\n",
+    printf("        áurea?    a média %" PRId64 ".%06" PRId64 " contra φ — %s\n",
            media / 1000000, media % 1000000,
-           (media > (long long)PHI_NUM * 1000000L / PHI_DEN ?
-            media - (long long)PHI_NUM * 1000000L / PHI_DEN :
-            (long long)PHI_NUM * 1000000L / PHI_DEN - media) < 500000L ? "perto" : "longe");
+           dist_phi < 500000 ? "perto" : "longe");
 
     Zi B[MAXZ];
     for(int i = 0; i < NZ; i++) B[i] = Z[(i * 7 + 3) % NZ];
-    long long sb = 0, sb2 = 0; int nb = 0;
+    int64_t sb = 0, sb2 = 0; int nb = 0;
     for(int k = 0; k + 1 < NZ; k++){
-        long rk = isqrt_ll(nr2(B[k+1]));
-        long r0 = isqrt_ll(nr2(B[k]));
+        long rk = isqrt_u64(nr2(B[k+1]));
+        long r0 = isqrt_u64(nr2(B[k]));
         if(!r0) continue;
-        long long r = (long long)rk * 1000000L / r0;
+        int64_t r = (int64_t)rk * 1000000 / r0;
         sb += r; sb2 += r * r; nb++;
     }
-    long long mb = sb / nb;
-    long long mb2 = sb2 / nb;
-    long long dpb2 = mb2 - mb * mb / 1000000L;
-    long dpb = isqrt_ll(dpb2 > 0 ? dpb2 : 0);
+    int64_t mb = sb / nb;
+    int64_t mb2 = sb2 / nb;
+    int64_t dpb2 = mb2 - mb * mb / 1000000;
+    long dpb = isqrt_u64(dpb2 > 0 ? (uint64_t)dpb2 : 0);
     printf("        com os pontos BARALHADOS o desvio é %ld  (o dele: %ld)\n", dpb, dp);
     ok("a órbita DELE é mais estável do que uma ordem qualquer — a ordem carrega estrutura",
        dp <= dpb);
@@ -183,39 +188,40 @@ static void secao_C3(void){
 static void secao_C4(void){
     printf("\n§C4  O CAMPO MÉDIO: cada ponto contra a média de todos\n\n");
 
-    long long cr = 0, ci = 0;
+    int64_t cr = 0, ci = 0;
     for(int i = 0; i < NZ; i++){ cr += Z[i].re; ci += Z[i].im; }
     cr /= NZ; ci /= NZ;
-    long long nc = (long long)cr * cr + (long long)ci * ci;
-    printf("        o campo médio  ⟨z⟩ = %lld %+.lldi   |⟨z⟩|² = %lld\n", cr, ci, nc);
+    uint64_t nc = (uint64_t)(cr * cr + ci * ci);
+    printf("        o campo médio  ⟨z⟩ = %" PRId64 " %+" PRId64 "i   |⟨z⟩|² = %" PRIu64 "\n",
+           cr, ci, nc);
 
     printf("\n        #    |z − ⟨z⟩|²     dentro do limiar?\n");
-    long long soma = 0, pior = 0;
+    uint64_t soma = 0, pior = 0;
     for(int i = 0; i < NZ; i++){
-        long long dr = Z[i].re - cr, di = Z[i].im - ci;
-        long long d2 = dr * dr + di * di;
-        soma += isqrt_ll(d2); if(d2 > pior) pior = d2;
-        if(i < 6) printf("        %-3d  %lld\n", i, d2);
+        int64_t dr = Z[i].re - cr, di = Z[i].im - ci;
+        uint64_t d2 = (uint64_t)(dr * dr + di * di);
+        soma += (uint64_t)isqrt_u64(d2); if(d2 > pior) pior = d2;
+        if(i < 6) printf("        %-3d  %" PRIu64 "\n", i, d2);
     }
-    long long medio = soma / NZ;
-    printf("        ...  desvio médio ≈ %lld   pior² %lld\n", medio, pior);
+    uint64_t medio = soma / (uint64_t)NZ;
+    printf("        ...  desvio médio ≈ %" PRIu64 "   pior² %" PRIu64 "\n", medio, pior);
 
     ok("o campo médio existe e não é zero — os pontos têm uma direção comum",
-       nc > (long long)S * S / 100);
+       nc > (uint64_t)S * (uint64_t)S / 100u);
     ok("e o desvio ao campo é menor que a norma média — eles orbitam-no",
-       medio < S);
+       medio < (uint64_t)S);
 
-    long long chi = 0;
+    uint64_t chi = 0;
     for(int i = 0; i < NZ; i++){
-        long long dr = Z[i].re - cr, di = Z[i].im - ci;
-        chi += dr * dr + di * di;
+        int64_t dr = Z[i].re - cr, di = Z[i].im - ci;
+        chi += (uint64_t)(dr * dr + di * di);
     }
-    chi /= NZ;
-    printf("        a suscetibilidade  χ = ⟨|z − ⟨z⟩|²⟩ = %lld\n", chi);
-    printf("        o parâmetro de ordem  |⟨z⟩|/S = %lld\n",
-           isqrt_ll(nc) * 1000 / S);
+    chi /= (uint64_t)NZ;
+    printf("        a suscetibilidade  χ = ⟨|z − ⟨z⟩|²⟩ = %" PRIu64 "\n", chi);
+    printf("        o parâmetro de ordem  |⟨z⟩|/S = %ld\n",
+           isqrt_u64(nc) * 1000 / S);
     ok("o parâmetro de ordem passa de 0,5 — o sistema está ORDENADO, não disperso",
-       nc > (long long)S * S / 4);
+       nc > (uint64_t)S * (uint64_t)S / 4u);
 
     conclui("o campo médio troca N² interações por N — e é por isso que a física o usa.");
 }
@@ -224,16 +230,16 @@ static void secao_C4(void){
 static void secao_C5(void){
     printf("\n§C5  O LIMIAR: onde se põe, e porque NÃO no valor exacto de nada\n\n");
 
-    long long cr = 0, ci = 0;
+    int64_t cr = 0, ci = 0;
     for(int i = 0; i < NZ; i++){ cr += Z[i].re; ci += Z[i].im; }
     cr /= NZ; ci /= NZ;
-    long long chi = 0;
+    uint64_t chi = 0;
     for(int i = 0; i < NZ; i++){
-        long long dr = Z[i].re - cr, di = Z[i].im - ci;
-        chi += dr * dr + di * di;
+        int64_t dr = Z[i].re - cr, di = Z[i].im - ci;
+        chi += (uint64_t)(dr * dr + di * di);
     }
-    chi /= NZ;
-    long sigma = isqrt_ll(chi);
+    chi /= (uint64_t)NZ;
+    long sigma = isqrt_u64(chi);
     long limiar = 2 * sigma;
 
     printf("        σ = √χ = %ld\n", sigma);
@@ -243,10 +249,10 @@ static void secao_C5(void){
     int passa[5], monot = 1;
     for(int k = 1; k <= 4; k++){
         int d = 0;
-        long long lim2 = (long long)k * k * chi;
+        uint64_t lim2 = (uint64_t)k * (uint64_t)k * chi;
         for(int i = 0; i < NZ; i++){
-            long long dr = Z[i].re - cr, di = Z[i].im - ci;
-            long long d2 = dr * dr + di * di;
+            int64_t dr = Z[i].re - cr, di = Z[i].im - ci;
+            uint64_t d2 = (uint64_t)(dr * dr + di * di);
             if(d2 <= lim2) d++;
         }
         passa[k] = d;

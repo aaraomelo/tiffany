@@ -22,6 +22,7 @@
  *   cc -O2 -std=c99 -Wall -I lib tests/unico.c -o unico
  */
 #include <stdio.h>
+#include "i128.h"
 #include "corpos.h"
 #include "unidade.h"
 
@@ -30,9 +31,10 @@ static int sinal_raiz(long x, long y, long d){
     if(y == 0) return (x > 0) - (x < 0);
     if(y > 0 && x >= 0) return (x || y) ? 1 : 0;
     if(y < 0 && x <= 0) return (x || y) ? -1 : 0;
-    __int128 a2 = (__int128)x*x, b2 = (__int128)y*y*d;
-    if(y > 0) return (b2 > a2) ? 1 : ((b2 < a2) ? -1 : 0);
-    return (a2 > b2) ? 1 : ((a2 < b2) ? -1 : 0);
+    I128 a2 = i128_smul(x, x);
+    I128 b2 = i128_smul_i128(i128_smul(y, y), d);
+    if(y > 0) return i128_cmp(b2, a2);
+    return i128_cmp(a2, b2);
 }
 
 int main(void){

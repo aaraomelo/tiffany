@@ -20,14 +20,16 @@
  *   cc -O2 -std=c99 -I lib tests/prensor.c -o prensor && ./prensor
  */
 #include <stdio.h>
+#include <stdint.h>
+#include <inttypes.h>
 #include "unidade.h"
 
 /* Q(p) = p^t M p, com M = [[-2,m],[m,2]] — inteiro quando p é inteiro */
-static long long Q(long long m, long long x, long long y){
+static int64_t Q(int64_t m, int64_t x, int64_t y){
     return -2*x*x + 2*m*x*y + 2*y*y;
 }
-static void gato_ap(long long m, long long *x, long long *y){
-    long long nx = m*(*x) + (*y), ny = *x;
+static void gato_ap(int64_t m, int64_t *x, int64_t *y){
+    int64_t nx = m*(*x) + (*y), ny = *x;
     *x = nx; *y = ny;
 }
 
@@ -49,16 +51,16 @@ printf("\n§P1  O prensor é o cone Q(p)=p^tMp, e o chicote conserva |Q| — em 
 {
     int mau = 0; long testes = 0;
     printf("      m    exemplos                                  |Q| conservado, sinal troca\n");
-    for(long long m = 1; m <= 4; m++){
+    for(int64_t m = 1; m <= 4; m++){
         int bom = 1;
-        for(long long x = -12; x <= 12; x++) for(long long y = -12; y <= 12; y++){
-            long long q0 = Q(m,x,y), a = x, b = y;
+        for(int64_t x = -12; x <= 12; x++) for(int64_t y = -12; y <= 12; y++){
+            int64_t q0 = Q(m,x,y), a = x, b = y;
             gato_ap(m,&a,&b);
-            long long q1 = Q(m,a,b);
+            int64_t q1 = Q(m,a,b);
             testes++;
             if(q1 != -q0){ bom = 0; mau++; }
         }
-        printf("      %lld    %ld pontos do reticulado                  %s\n",
+        printf("      %" PRId64 "    %ld pontos do reticulado                  %s\n",
                m, 25L*25L, bom ? "sim ✓" : "NÃO ✗");
     }
     printf("\n      testes: %ld\n", testes);
@@ -72,10 +74,10 @@ printf("\n§P2  O cone é Q=0: as duas direções nulas SÃO os dois atratores.\
 {
     int mau = 0;
     printf("      m        2σ= m+√D         Q(σ,1)          2σ'=m−√D        Q(σ',1)\n");
-    for(long long m = 1; m <= 4; m++){
+    for(int64_t m = 1; m <= 4; m++){
         int ok1 = q_nulo_zd(m, m, 1, 2);               /* (m+√D, 2) ∝ (σ,1)  */
         int ok2 = q_nulo_zd(m, m, -1, 2);              /* (m−√D, 2) ∝ (σ',1) */
-        printf("      %lld   (%lld,1)√D+(%lld,2)  %s           (%lld,−1)√D+(%lld,2)  %s\n",
+        printf("      %" PRId64 "   (%" PRId64 ",1)√D+(%" PRId64 ",2)  %s           (%" PRId64 ",−1)√D+(%" PRId64 ",2)  %s\n",
                m, m, m, ok1 ? "0 ✓" : "≠0 ✗", m, m, ok2 ? "0 ✓" : "≠0 ✗");
         if(!ok1 || !ok2) mau++;
     }
@@ -88,13 +90,13 @@ printf("\n§P3  As marcas: quem começa fora do cone nunca o toca — e espirala
 {
     int mau_toca = 0, mau_zero = 0;
     printf("      m    |Q| ao longo de 40 batidas   Q≠0 em (1,1) por 20 batidas\n");
-    for(long long m = 1; m <= 4; m++){
-        long long x = 1, y = 0;
-        long long q0 = Q(m,x,y);
+    for(int64_t m = 1; m <= 4; m++){
+        int64_t x = 1, y = 0;
+        int64_t q0 = Q(m,x,y);
         int conserva = 1, nunca_zero = 1;
         for(int k = 0; k < 40 && x > -1000000000LL && x < 1000000000LL; k++){
             gato_ap(m,&x,&y);
-            long long q = Q(m,x,y);
+            int64_t q = Q(m,x,y);
             if((q > 0 ? q : -q) != (q0 > 0 ? q0 : -q0)) conserva = 0;
             if(q == 0) nunca_zero = 0;
         }
@@ -105,7 +107,7 @@ printf("\n§P3  As marcas: quem começa fora do cone nunca o toca — e espirala
             gato_ap(m,&x,&y);
         }
         if(!nunca_zero) mau_zero++;
-        printf("      %lld    %-26s %s\n", m, conserva ? "constante ✓" : "MUDOU ✗",
+        printf("      %" PRId64 "    %-26s %s\n", m, conserva ? "constante ✓" : "MUDOU ✗",
                nunca_zero ? "sim ✓" : "NÃO ✗");
     }
     ok("|Q| constante: a órbita nunca alcança o cone", mau_toca == 0);
@@ -119,32 +121,32 @@ printf("\n§P4  A espiral, medida como espiral: passo constante, e a áurea no c
 {
     int mau = 0;
     printf("      m    r² cresce a cada batida (a partir de (1,1))?\n");
-    for(long long m = 1; m <= 4; m++){
-        long long x = 1, y = 1, r2 = x*x + y*y, ok_inc = 1;
+    for(int64_t m = 1; m <= 4; m++){
+        int64_t x = 1, y = 1, r2 = x*x + y*y, ok_inc = 1;
         for(int k = 0; k < 15; k++){
             gato_ap(m, &x, &y);
-            long long r2n = x*x + y*y;
+            int64_t r2n = x*x + y*y;
             if(r2n <= r2) ok_inc = 0;
             r2 = r2n;
             if(r2 > 1000000000000LL) break;
         }
-        printf("      %lld    %s\n", m, ok_inc ? "sim ✓" : "NÃO ✗");
+        printf("      %" PRId64 "    %s\n", m, ok_inc ? "sim ✓" : "NÃO ✗");
         if(!ok_inc) mau++;
     }
     ok("r² = x²+y² cresce a cada batida — espiral logarítmica (monótona)", mau == 0);
     printf("\n      E com m=1 a marca é Fibonacci: r²=F_{2k+3} ao longo do gato.\n\n");
     {
-        long long fib[32];
+        int64_t fib[32];
         fib[0] = 0; fib[1] = 1;
         for(int i = 2; i < 32; i++) fib[i] = fib[i-1] + fib[i-2];
-        long long x = 1, y = 1;
+        int64_t x = 1, y = 1;
         int mau_au = 0;
         printf("      k    r² medido   F_{2k+3} esperado\n");
         for(int k = 0; k <= 10; k++){
-            long long r2 = x*x + y*y;
-            long long esp = fib[2*k+3];
+            int64_t r2 = x*x + y*y;
+            int64_t esp = fib[2*k+3];
             if(r2 != esp) mau_au++;
-            printf("      %2d   %-9lld %lld\n", k, r2, esp);
+            printf("      %2d   %-9" PRId64 " %" PRId64 "\n", k, r2, esp);
             gato_ap(1, &x, &y);
         }
         ok("a marca do gato m=1 é r²=F_{2k+3} — a espiral áurea, exacta", mau_au == 0);
@@ -155,13 +157,13 @@ printf("\n§P4  A espiral, medida como espiral: passo constante, e a áurea no c
 printf("\n§P5  A ponta do cone é o 0 — a passagem reversível. E a dinâmica NÃO a cruza.\n\n");
 {
     int mau_fix = 0;
-    for(long long m = 1; m <= 4; m++){
-        long long x = 0, y = 0;
+    for(int64_t m = 1; m <= 4; m++){
+        int64_t x = 0, y = 0;
         gato_ap(m,&x,&y);
         if(x || y) mau_fix++;
-        for(long long a = -6; a <= 6; a++) for(long long b = -6; b <= 6; b++){
+        for(int64_t a = -6; a <= 6; a++) for(int64_t b = -6; b <= 6; b++){
             if(!a && !b) continue;
-            long long u = a, v = b; gato_ap(m,&u,&v);
+            int64_t u = a, v = b; gato_ap(m,&u,&v);
             if(u == a && v == b) mau_fix++;
         }
     }
@@ -171,13 +173,13 @@ printf("\n§P5  A ponta do cone é o 0 — a passagem reversível. E a dinâmica
 
     int mau_alt = 0, mau_zero = 0;
     printf("      m    sinal de Q ao longo de 12 batidas          passou por 0?\n");
-    for(long long m = 1; m <= 4; m++){
-        long long x = 3, y = 1, q0 = Q(m,x,y);
+    for(int64_t m = 1; m <= 4; m++){
+        int64_t x = 3, y = 1, q0 = Q(m,x,y);
         int s0 = q0 > 0 ? 1 : -1, ok_alt = 1, tocou = 0;
-        printf("      %lld    ", m);
+        printf("      %" PRId64 "    ", m);
         for(int k = 1; k <= 12; k++){
             gato_ap(m,&x,&y);
-            long long q = Q(m,x,y);
+            int64_t q = Q(m,x,y);
             if(q == 0) tocou = 1;
             int esperado = ((k % 2) ? -s0 : s0);
             if((q > 0 ? 1 : -1) != esperado) ok_alt = 0;
@@ -194,20 +196,20 @@ printf("\n§P5  A ponta do cone é o 0 — a passagem reversível. E a dinâmica
     printf("      os dois lados do cone sem nunca passar pela ponta.\n");
 
     printf("\n      As batidas duais: G = [[0,-1],[1,0]] (o esquilo, det = +1).\n\n");
-    long long G[2][2] = {{0,-1},{1,0}}, P[2][2] = {{1,0},{0,1}};
-    long long Gi[2][2] = {{0,1},{-1,0}};
+    int64_t G[2][2] = {{0,-1},{1,0}}, P[2][2] = {{1,0},{0,1}};
+    int64_t Gi[2][2] = {{0,1},{-1,0}};
     int achou3 = 0, achou4 = 0;
     printf("      k    G^k                     é G⁻¹?   é I?\n");
     for(int k = 1; k <= 4; k++){
-        long long R[2][2];
+        int64_t R[2][2];
         for(int i=0;i<2;i++) for(int j=0;j<2;j++){
-            long long t = 0; for(int l=0;l<2;l++) t += P[i][l]*G[l][j]; R[i][j] = t; }
+            int64_t t = 0; for(int l=0;l<2;l++) t += P[i][l]*G[l][j]; R[i][j] = t; }
         for(int i=0;i<2;i++) for(int j=0;j<2;j++) P[i][j] = R[i][j];
         int eh_inv = (P[0][0]==Gi[0][0] && P[0][1]==Gi[0][1] && P[1][0]==Gi[1][0] && P[1][1]==Gi[1][1]);
         int eh_id  = (P[0][0]==1 && P[0][1]==0 && P[1][0]==0 && P[1][1]==1);
         if(k == 3 && eh_inv) achou3 = 1;
         if(k == 4 && eh_id)  achou4 = 1;
-        printf("      %d    [[%2lld,%2lld],[%2lld,%2lld]]         %s      %s\n",
+        printf("      %d    [[%2" PRId64 ",%2" PRId64 "],[%2" PRId64 ",%2" PRId64 "]]         %s      %s\n",
                k, P[0][0],P[0][1],P[1][0],P[1][1], eh_inv?"sim ✓":"nao", eh_id?"sim ✓":"nao");
     }
     ok("TRÊS batidas numa direção = uma na inversa (G³ = G⁻¹)", achou3);

@@ -18,6 +18,7 @@
  * §D4  o gume: sem o alto, a comparação erra — e conta-se quantas vezes
  * §D5  INT_MIN, que é o caso que parte as implementações
  */
+#include <stdint.h>
 #include <stdio.h>
 #include "dual32.h"
 #include "unidade.h"
@@ -41,8 +42,8 @@ int main(void){
             unsigned a = (unsigned)V[i], b = (unsigned)V[j];
             D64 p = d64_mult(a, b);
             __int128 e = (__int128)a * b;
-            unsigned long long alto = (unsigned long long)(e >> 32);
-            unsigned long long baixo = (unsigned long long)(e & 0xFFFFFFFFull);
+            uint64_t alto = (uint64_t)(e >> 32);
+            uint64_t baixo = (uint64_t)(e & 0xFFFFFFFFu);
             casos++;
             if(p.alto != (unsigned)alto || p.baixo != (unsigned)baixo) mal++;
         }
@@ -52,8 +53,8 @@ int main(void){
             D64 p = d64_mult(x, y);
             __int128 e = (__int128)x * y;
             casos++;
-            if(p.alto != (unsigned)(unsigned long long)(e >> 32)
-               || p.baixo != (unsigned)(unsigned long long)(e & 0xFFFFFFFFull)) mal++;
+            if(p.alto != (unsigned)(uint64_t)(e >> 32)
+               || p.baixo != (unsigned)(uint64_t)(e & 0xFFFFFFFFu)) mal++;
         }
         printf("      o par contra o __int128 em %ld produtos: %ld divergências\n",
                casos, mal);
@@ -110,14 +111,14 @@ int main(void){
             D64 s = d64_soma(x, y);
             __int128 es = ex + ey;
             casos++;
-            if(s.alto != (unsigned)(unsigned long long)(es >> 32)
-               || s.baixo != (unsigned)(unsigned long long)(es & 0xFFFFFFFFull)) mal++;
+            if(s.alto != (unsigned)(uint64_t)(es >> 32)
+               || s.baixo != (unsigned)(uint64_t)(es & 0xFFFFFFFFu)) mal++;
             if(x.baixo + y.baixo < x.baixo) houve++;      /* houve transporte */
             if(d64_cmp(x,y) >= 0){
                 D64 df = d64_menos(x, y);
                 __int128 ed = ex - ey;
-                if(df.alto != (unsigned)(unsigned long long)(ed >> 32)
-                   || df.baixo != (unsigned)(unsigned long long)(ed & 0xFFFFFFFFull)) mal++;
+                if(df.alto != (unsigned)(uint64_t)(ed >> 32)
+                   || df.baixo != (unsigned)(uint64_t)(ed & 0xFFFFFFFFu)) mal++;
             }
         }
         printf("      soma e diferença em %ld pares: %ld divergências;  e houve transporte"

@@ -136,9 +136,9 @@ int main(void){
             /* e o RESIDUO: quanto e' que os dois lados diferem, em fraccao do maior.
              * Se a conservacao fosse exacta seria zero; ela nao e', e o que se mede e'
              * que o residuo DESCE com m — a conservacao e' ASSINTOTICA. */
-            long long r = (long long)(esq_a - dir_a);
+            long r = esq_a - dir_a;
             if(r < 0) r = -r;
-            long long escala = (long long)esq_a; if(escala < 0) escala = -escala;
+            long escala = esq_a; if(escala < 0) escala = -escala;
             rn[nr] = (long)r; rd[nr] = (long)escala; nr++;
         }
         /* a monotonia, em TODOS os 59 passos e por produto cruzado: r_k/e_k > r_{k+1}/e_{k+1}

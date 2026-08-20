@@ -28,55 +28,46 @@
  *   cc -O2 -std=c99 -I lib tests/zeta.c -o zeta && ./zeta
  */
 #include <stdio.h>
+#include "i128.h"
 #include "reta.h"
 #include "unidade.h"
 
-typedef __int128 I128;
 typedef struct { I128 n, d; } Fr;
 
-static I128 iabs128(I128 a){ return a < 0 ? -a : a; }
-static I128 mdc128(I128 a, I128 b){
-    a = iabs128(a); b = iabs128(b);
-    while(b){ I128 t = a % b; a = b; b = t; }
-    return a ? a : 1;
-}
 static Fr fr(I128 n, I128 d){
-    if(d < 0){ n = -n; d = -d; }
-    I128 g = mdc128(n, d);
-    Fr r; r.n = n/g; r.d = d/g; return r;
+    if(i128_cmp(d, i128_zero()) < 0){ n = i128_neg(n); d = i128_neg(d); }
+    I128 g = i128_gcd(n, d);
+    Fr r; r.n = i128_div(n, g); r.d = i128_div(d, g); return r;
 }
-static Fr fr_mul(Fr x, Fr y){ return fr(x.n*y.n, x.d*y.d); }
-static Fr fr_div(Fr x, Fr y){ return fr(x.n*y.d, x.d*y.n); }
-static Fr fr_add(Fr x, Fr y){ return fr(x.n*y.d + y.n*x.d, x.d*y.d); }
-static int fr_eq(Fr x, Fr y){ return x.n == y.n && x.d == y.d; }
+static Fr fr_mul(Fr x, Fr y){ return fr(i128_mul(x.n, y.n), i128_mul(x.d, y.d)); }
+static Fr fr_div(Fr x, Fr y){ return fr(i128_mul(x.n, y.d), i128_mul(x.d, y.n)); }
+static Fr fr_add(Fr x, Fr y){ return fr(i128_add(i128_mul(x.n, y.d), i128_mul(y.n, x.d)), i128_mul(x.d, y.d)); }
+static int fr_eq(Fr x, Fr y){ return i128_cmp(x.n, y.n) == 0 && i128_cmp(x.d, y.d) == 0; }
 static int fr_cmp(Fr x, Fr y){
-    I128 L = x.n * y.d, R = y.n * x.d;
-    return L < R ? -1 : L > R ? 1 : 0;
+    I128 L = i128_mul(x.n, y.d), R = i128_mul(y.n, x.d);
+    return i128_cmp(L, R);
 }
-static int fr_zero(Fr x){ return x.n == 0; }
-static I128 ipow128(I128 b, int e){
-    I128 r = 1;
-    for(int i = 0; i < e; i++) r *= b;
+static int fr_zero(Fr x){ return i128_is_zero(x.n); }
+static I128 ipow128(long b, int e){
+    I128 r = i128_from_i64(1), bb = i128_from_i64(b);
+    for(int i = 0; i < e; i++) r = i128_mul(r, bb);
     return r;
 }
 static I128 fat128(int n){
-    I128 r = 1;
-    for(int i = 2; i <= n; i++) r *= i;
+    I128 r = i128_from_i64(1);
+    for(int i = 2; i <= n; i++) r = i128_smul_i128(r, i);
     return r;
 }
 static void fr_print(Fr x){
-    if(x.n <= 9223372036854775807LL && x.n >= -9223372036854775807LL
-       && x.d <= 9223372036854775807LL)
-        printf("%lld/%lld", (long long)x.n, (long long)x.d);
+    if(i128_fits_i64(x.n) && i128_fits_i64(x.d))
+        printf("%ld/%ld", (long)i128_to_i64(x.n), (long)i128_to_i64(x.d));
     else printf("(fracção grande)");
 }
 
 /* Bernoulli B_2, B_4, … B_12 — os pares; os ímpares > 1 são zero, e isso É o zero trivial. */
 static const int Bpar_n[] = { 1, -1, 1, -1, 5, -691 };
 static const int Bpar_d[] = { 6, 30, 42, 30, 66, 2730 };
-static Fr B_par(int k){          /* B_{2k}, k≥1 */
-    return fr(Bpar_n[k-1], Bpar_d[k-1]);
-}
+static Fr B_par(int k){ return fr(i128_from_i64(Bpar_n[k-1]), i128_from_i64(Bpar_d[k-1])); }
 
 /* primos ≤ 31 — chega para o Euler truncado em ℚ, sem crivo de 300 000. */
 static const int PRIMOS[] = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31 };
@@ -84,13 +75,13 @@ static const int PRIMOS[] = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31 };
 
 /* soma-rota: Π_p (1 + p^{-s} + … + p^{-E s}) por multiplicação iterada */
 static Fr euler_soma(int P, int s, int E){
-    Fr acc = fr(1, 1);
+        Fr acc = fr(i128_from_i64(1), i128_from_i64(1));
     for(int i = 0; i < NP && PRIMOS[i] <= P; i++){
         I128 ps = ipow128(PRIMOS[i], s);
-        Fr novo = fr(0, 1), termo = acc;
+        Fr novo = fr(i128_zero(), i128_from_i64(1)), termo = acc;
         for(int k = 0; k <= E; k++){
             novo = fr_add(novo, termo);
-            termo = fr_div(termo, fr(ps, 1));
+            termo = fr_div(termo, fr(ps, i128_from_i64(1)));
         }
         acc = novo;
     }
@@ -98,20 +89,21 @@ static Fr euler_soma(int P, int s, int E){
 }
 /* produto-rota: Π_p (p^{s(E+1)}−1) / ((p^s−1) p^{s E}) — a soma geométrica fechada */
 static Fr euler_prod(int P, int s, int E){
-    Fr acc = fr(1, 1);
+    Fr acc = fr(i128_from_i64(1), i128_from_i64(1));
     for(int i = 0; i < NP && PRIMOS[i] <= P; i++){
-        I128 p = PRIMOS[i], ps = ipow128(p, s);
-        Fr f = fr(ipow128(p, s*(E+1)) - 1, (ps - 1) * ipow128(p, s*E));
+        I128 ps = ipow128(PRIMOS[i], s);
+        Fr f = fr(i128_sub(ipow128(PRIMOS[i], s*(E+1)), i128_from_i64(1)),
+                  i128_mul(i128_sub(ps, i128_from_i64(1)), ipow128(PRIMOS[i], s*E)));
         acc = fr_mul(acc, f);
     }
     return acc;
 }
 /* Euler infinito (s inteiro): Π_{p≤P} p^s / (p^s − 1) */
 static Fr euler_inf(int P, int s){
-    Fr acc = fr(1, 1);
+    Fr acc = fr(i128_from_i64(1), i128_from_i64(1));
     for(int i = 0; i < NP && PRIMOS[i] <= P; i++){
         I128 ps = ipow128(PRIMOS[i], s);
-        acc = fr_mul(acc, fr(ps, ps - 1));
+        acc = fr_mul(acc, fr(ps, i128_sub(ps, i128_from_i64(1))));
     }
     return acc;
 }
@@ -188,17 +180,17 @@ printf("\n§Z3  A dobra guarda a simetria: ξ(s) = ξ(1-s).\n\n");
     for(int k = 1; k <= 5; k++){
         Fr Bk = B_par(k);
         /* rota A: ξ(2k)/π^k = k(2k-1)(k-1)! (−1)^{k+1} B_{2k} 2^{2k-1} / (2k)! */
-        I128 sinal = (k % 2) ? 1 : -1;                 /* (−1)^{k+1} */
-        Fr esq = fr(sinal * k * (2*k - 1) * fat128(k - 1) * ipow128(2, 2*k - 1),
-                    fat128(2*k));
-        esq = fr_mul(esq, Bk);
-        /* rota B: Γ(½−k)/√π = r_k, r_0=1, r_j = r_{j-1}·2/(1−2j)
-         * ξ(1−2k)/π^k = k(2k-1) r_k (−B_{2k}) / (2k) */
-        Fr rk = fr(1, 1);
-        for(int j = 1; j <= k; j++) rk = fr_mul(rk, fr(2, 1 - 2*j));
-        Fr dir = fr(k * (2*k - 1), 2*k);
+        I128 sinal = i128_from_i64((k % 2) ? 1 : -1);
+        I128 num = i128_smul_i128(sinal, k);
+        num = i128_smul_i128(num, 2*k - 1);
+        num = i128_mul(num, fat128(k - 1));
+        num = i128_mul(num, ipow128(2, 2*k - 1));
+        Fr esq = fr_mul(fr(num, fat128(2*k)), Bk);
+        Fr rk = fr(i128_from_i64(1), i128_from_i64(1));
+        for(int j = 1; j <= k; j++) rk = fr_mul(rk, fr(i128_from_i64(2), i128_from_i64(1 - 2*j)));
+        Fr dir = fr(i128_smul(k * (2*k - 1), 1), i128_from_i64(2*k));
         dir = fr_mul(dir, rk);
-        dir = fr_mul(dir, fr(-Bk.n, Bk.d));            /* −B_{2k} */
+        dir = fr_mul(dir, fr(i128_neg(Bk.n), Bk.d));
         printf("      %-3d ", k);
         fr_print(esq); printf("             ");
         fr_print(dir);
@@ -247,7 +239,7 @@ printf("\n§Z4  O DESENROLAR: a soma vira produto.\n\n");
     printf("      E o caso completo, medido como encaixe — o produto CRESCE com P:\n\n");
     int Ps[] = { 5, 7, 11, 13 };
     int sobe = 0, nP = 4;
-    Fr ant = fr(0, 1);
+    Fr ant = fr(i128_zero(), i128_from_i64(1));
     printf("      P     Π p²/(p²-1)\n");
     for(int i = 0; i < nP; i++){
         Fr q = euler_inf(Ps[i], 2);
@@ -279,11 +271,11 @@ printf("\n§Z5  E nos ZEROS: os triviais são simples, logo a zeta NÃO degenera
         /* B_{n+1}: se n+1 ímpar > 1, é 0; se n+1=1, B1=−1/2; se par, B_par. */
         Fr B;
         int m = n + 1;
-        if(m == 1) B = fr(-1, 2);
-        else if(m % 2 == 1) B = fr(0, 1);
+        if(m == 1) B = fr(i128_from_i64(-1), i128_from_i64(2));
+        else if(m % 2 == 1) B = fr(i128_zero(), i128_from_i64(1));
         else B = B_par(m / 2);
-        I128 sinal = (n % 2) ? -1 : 1;
-        zval[n] = fr(sinal * B.n, B.d * m);            /* (−1)^n B_{n+1}/(n+1) */
+        I128 sinal = i128_from_i64((n % 2) ? -1 : 1);
+        zval[n] = fr(i128_mul(sinal, B.n), i128_smul_i128(B.d, m));
         int ezero = fr_zero(zval[n]);
         if(n >= 2 && n % 2 == 0){
             zeros++;
@@ -315,14 +307,14 @@ printf("\n§Z6  Onde ela degenera, então? O polo s = 1.\n\n");
      * Π p/(p−1) — cresce com P. Os zeros triviais são ZEROS, não polos: ζ(−2n)=0 finito. */
     printf("      H_n = Σ_{k=1}^n 1/k estritamente crescente, e Π_{p≤P} p/(p−1) também:\n\n");
     int cresceH = 0, cresceE = 0;
-    Fr H = fr(0, 1), Hant = fr(0, 1);
+    Fr H = fr(i128_zero(), i128_from_i64(1)), Hant = fr(i128_zero(), i128_from_i64(1));
     for(int n = 1; n <= 12; n++){
-        H = fr_add(H, fr(1, n));
+        H = fr_add(H, fr(i128_from_i64(1), i128_from_i64(n)));
         if(n > 1 && fr_cmp(H, Hant) > 0) cresceH++;
         Hant = H;
     }
     int Pe[] = { 3, 5, 7, 11 };
-    Fr Eant = fr(0, 1);
+    Fr Eant = fr(i128_zero(), i128_from_i64(1));
     printf("      P     Π p/(p-1)\n");
     for(int i = 0; i < 4; i++){
         Fr e = euler_inf(Pe[i], 1);
@@ -332,7 +324,7 @@ printf("\n§Z6  Onde ela degenera, então? O polo s = 1.\n\n");
     }
     /* e os triviais NÃO são polos: ζ(−2), ζ(−4) são 0/1, denominador 1 */
     int triviais_finitos = 1;                           /* ζ(−2)=0 finito; ζ(−1)=−1/12 ≠ ∞ */
-    Fr zm1 = fr(-1, 12), zm2 = fr(0, 1);
+    Fr zm1 = fr(i128_from_i64(-1), i128_from_i64(12)), zm2 = fr(i128_zero(), i128_from_i64(1));
     if(!(fr_zero(zm2) && !fr_zero(zm1))) triviais_finitos = 0;
     printf("\n      H_n subiu %d de 11 passos; Euler s=1 subiu %d de 3 degraus\n\n",
            cresceH, cresceE);

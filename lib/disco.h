@@ -131,6 +131,7 @@
 #define _POSIX_C_SOURCE 200809L
 #endif
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -179,8 +180,8 @@ static void *disco_mapa(const char *path, size_t n, size_t tam)
 
 static unsigned      *disco_u32(const char *p, size_t n){ return (unsigned*)      disco_mapa(p,n,sizeof(unsigned)); }
 static unsigned char *disco_u8 (const char *p, size_t n){ return (unsigned char*) disco_mapa(p,n,1); }
-static unsigned long long *disco_u64(const char *p, size_t n){ return (unsigned long long*)disco_mapa(p,n,sizeof(unsigned long long)); }
-static long long     *disco_i64(const char *p, size_t n){ return (long long*)     disco_mapa(p,n,sizeof(long long)); }
+static uint64_t      *disco_u64(const char *p, size_t n){ return (uint64_t*)      disco_mapa(p,n,sizeof(uint64_t)); }
+static int64_t       *disco_i64(const char *p, size_t n){ return (int64_t*)       disco_mapa(p,n,sizeof(int64_t)); }
 
 /* comeca limpo — o disco persiste, e nem sempre e' isso que se quer */
 /* ── disco_zera APAGA, E APAGAR E' A UNICA COISA QUE CUSTA ─────────────────────────
@@ -243,7 +244,7 @@ static void disco_larga(void *p, size_t n, size_t tam){ if(p) munmap(p, n*tam); 
 #define DISCO_BASE(i_)   ((void*)(DISCO_LAJE + (unsigned long)(i_)*DISCO_PASSO))
 #define DISCO_FIXO(T_,i_)  ((T_*)DISCO_BASE(i_))
 /* 2D sem tocar num unico acesso: um PONTEIRO PARA ARRAY mantem a sintaxe V[i][j].
- *     static long long V[MAXV][MAXD];   ->   #define V DISCO_FIXO2(long long, MAXD, k) */
+ *     static int64_t V[MAXV][MAXD];   ->   #define V DISCO_FIXO2(int64_t, MAXD, k) */
 #define DISCO_FIXO2(T_,cols_,i_)  ((T_(*)[cols_])DISCO_BASE(i_))
 
 static void disco_prende(void *onde, const char *path, size_t n, size_t tam)

@@ -10,6 +10,8 @@
  *
  *   cc -O2 -std=c99 -I../lib relogio_curva.c -o relogio_curva && ./relogio_curva
  */
+#include <stdint.h>
+#include "i128.h"
 #include "spline.h"
 
 #define NAM   512
@@ -21,8 +23,7 @@
 #define NCOEF (2*GMAX + 2)
 #define P8    65537LL
 
-typedef long long LL;
-typedef __int128 I128;
+typedef int64_t LL;
 
 static long raiz_piso(long x){
     if(x < 0) return -1;
@@ -37,9 +38,9 @@ static long raiz_piso(long x){
 static long raiz_perto(long x){
     if(x <= 0) return 0;
     long r = raiz_piso(x);
-    I128 dlo = (I128)x - (I128)r * r;
-    I128 dhi = (I128)(r + 1) * (r + 1) - x;
-    return (dhi < dlo) ? r + 1 : r;
+    I128 dlo = i128_sub(i128_from_i64(x), i128_smul(r, r));
+    I128 dhi = i128_sub(i128_smul(r + 1, r + 1), i128_from_i64(x));
+    return i128_cmp(dhi, dlo) < 0 ? r + 1 : r;
 }
 
 static int falhas = 0, feitas = 0;
@@ -53,15 +54,16 @@ static long TC[QREL], TS[QREL];
 static long MARCA_S;                 /* sen de uma marca: o π discreto sai daqui */
 static int relogio_ok = 0;
 
-static long mulsc(long a, long b){
-    I128 p = (I128)a * b;
-    if(p >= 0) return (long)((p + SC/2) / SC);
-    return (long)((p - SC/2) / SC);
-}
 static long div_arred(I128 n, I128 d){
-    if(d < 0){ n = -n; d = -d; }
-    if(n >= 0) return (long)((n + d/2) / d);
-    return (long)((n - d/2) / d);
+    if(i128_is_zero(d)) return 0;
+    if(i128_negativo(d)){ n = i128_neg(n); d = i128_neg(d); }
+    I128 half = i128_div(d, i128_from_i64(2));
+    if(!i128_negativo(n))
+        return (long)i128_to_i64(i128_div(i128_add(n, half), d));
+    return (long)i128_to_i64(i128_div(i128_sub(n, half), d));
+}
+static long mulsc(long a, long b){
+    return div_arred(i128_smul(a, b), i128_from_i64(SC));
 }
 
 static void gera_relogio(void){
@@ -69,11 +71,12 @@ static void gera_relogio(void){
     long c = -SC, sn = 0;                       /* dimensão 2: cos π = −1, sem avaliar π */
     for(int q = 2; q < QREL; q *= 2){
         long c0 = c;
-        I128 ac = (I128)SC * (SC + c0) / 2;
-        I128 as = (I128)SC * (SC - c0) / 2;
-        if(ac < 0) ac = 0; if(as < 0) as = 0;
-        c  = raiz_perto((long)ac);
-        sn = raiz_perto((long)as);
+        I128 ac = i128_div(i128_smul(SC, SC + c0), i128_from_i64(2));
+        I128 as = i128_div(i128_smul(SC, SC - c0), i128_from_i64(2));
+        if(i128_negativo(ac)) ac = i128_zero();
+        if(i128_negativo(as)) as = i128_zero();
+        c  = raiz_perto((long)i128_to_i64(ac));
+        sn = raiz_perto((long)i128_to_i64(as));
     }
     MARCA_S = sn;
     TC[0] = SC; TS[0] = 0;
@@ -159,37 +162,41 @@ static void relogio_tempo(int nd, const long *xs, const long *ys,
 /* co[0] em unidades da fonte; co[ímpar/par] = amplitude · SC (o rotor ainda escala) */
 static void transforma(int n, const long *v, int g, long *co){
     gera_relogio();
-    I128 s0 = 0;
-    for(int k = 0; k < n; k++) s0 += v[k];
-    co[0] = div_arred(s0, n);
+    I128 s0 = i128_zero();
+    for(int k = 0; k < n; k++) s0 = i128_add(s0, i128_from_i64(v[k]));
+    co[0] = div_arred(s0, i128_from_i64(n));
     for(int h = 1; h <= g; h++){
-        I128 ca = 0, sa = 0;
+        I128 ca = i128_zero(), sa = i128_zero();
         for(int k = 0; k < n; k++){
-            ca += (I128)v[k] * cosq(h, k, n);
-            sa += (I128)v[k] * senq(h, k, n);
+            ca = i128_add(ca, i128_smul(v[k], cosq(h, k, n)));
+            sa = i128_add(sa, i128_smul(v[k], senq(h, k, n)));
         }
-        co[2*h-1] = div_arred(2 * ca, n);
-        co[2*h]   = div_arred(2 * sa, n);
+        co[2*h-1] = div_arred(i128_smul_i128(ca, 2), i128_from_i64(n));
+        co[2*h]   = div_arred(i128_smul_i128(sa, 2), i128_from_i64(n));
     }
 }
 
 static I128 orbita_sc(int g, const long *co, int k, int n){
-    I128 s = (I128)co[0] * SC;
-    for(int h = 1; h <= g; h++)
-        s += ((I128)co[2*h-1]*cosq(h, k, n) + (I128)co[2*h]*senq(h, k, n)) / SC;
+    I128 s = i128_smul_i128(i128_from_i64(co[0]), SC);
+    for(int h = 1; h <= g; h++){
+        I128 term = i128_add(i128_smul(co[2*h-1], cosq(h, k, n)),
+                             i128_smul(co[2*h],   senq(h, k, n)));
+        s = i128_add(s, i128_div(term, i128_from_i64(SC)));
+    }
     return s;
 }
 static long orbita(int g, const long *co, int k, int n){
-    return div_arred(orbita_sc(g, co, k, n), SC);
+    return div_arred(orbita_sc(g, co, k, n), i128_from_i64(SC));
 }
-/* derivada d/dt, t = k/n — o 2π é o perímetro do polígono: QREL·MARCA_S / SC */
 static long orbita_d(int g, const long *co, int k, int n){
-    I128 acc = 0;
+    I128 acc = i128_zero();
     for(int h = 1; h <= g; h++)
-        acc += ((I128)h) * (-(I128)co[2*h-1]*senq(h, k, n)
-                            + (I128)co[2*h]*cosq(h, k, n));
-    I128 PI2 = (I128)QREL * MARCA_S;
-    return div_arred(acc * PI2, (I128)SC * SC * SC);
+        acc = i128_add(acc, i128_smul_i128(
+            i128_sub(i128_smul(co[2*h], cosq(h, k, n)),
+                     i128_smul(co[2*h-1], senq(h, k, n))), h));
+    I128 num = i128_mul(acc, i128_smul(QREL, MARCA_S));
+    I128 den = i128_smul_i128(i128_smul(SC, SC), SC);
+    return div_arred(num, den);
 }
 
 static long veste_e_mede(int g, const long *cox, const long *coy, int M, int n,
@@ -313,9 +320,10 @@ int main(void){
         transforma(NCLK, UY, 8, coy);
         r5 = 1;
         for(int k = 0; k < NCLK; k++){
-            I128 dx = orbita_sc(8, cox, k, NCLK) - (I128)UX[k] * SC; if(dx < 0) dx = -dx;
-            I128 dy = orbita_sc(8, coy, k, NCLK) - (I128)UY[k] * SC; if(dy < 0) dy = -dy;
-            if(dx >= (I128)FONTE * SC || dy >= (I128)FONTE * SC) r5 = 0;
+            I128 lim = i128_smul(FONTE, SC);
+            I128 dx = i128_sub(orbita_sc(8, cox, k, NCLK), i128_smul(UX[k], SC));
+            I128 dy = i128_sub(orbita_sc(8, coy, k, NCLK), i128_smul(UY[k], SC));
+            if(i128_cmp(i128_abs(dx), lim) >= 0 || i128_cmp(i128_abs(dy), lim) >= 0) r5 = 0;
         }
         /* o pior em tiques da fonte, para o relato */
         ro_fonte = residuo(NCLK, UX, UY, 8);

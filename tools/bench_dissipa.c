@@ -24,7 +24,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdlib.h>
+#include <stdint.h>
+#include <inttypes.h>
 
 #define BASE 256
 #define BITS 64
@@ -107,10 +108,10 @@ static unsigned long rnd(void){ sem ^= sem<<13; sem ^= sem>>7; sem ^= sem<<17; r
 static void zera(void){ apagou_cmp = apagou_esc = trocas = 0; }
 static void linha(const char *nome, long n){
     long total = apagou_cmp + apagou_esc;
-    long long x10 = (long long)total * 10 / (long long)n;  /* bits/elem em décimos, sem float */
-    long long whole = x10 / 10;
-    long long frac = x10 % 10;
-    printf("  %-12s %14ld %14ld %12ld %10lld.%1lld\n",
+    int64_t x10 = (int64_t)total * 10 / (int64_t)n;  /* bits/elem em décimos, sem float */
+    int64_t whole = x10 / 10;
+    int64_t frac = x10 % 10;
+    printf("  %-12s %14ld %14ld %12ld %10" PRId64 ".%" PRId64 "\n",
            nome, apagou_cmp, apagou_esc, trocas, whole, frac);
 }
 

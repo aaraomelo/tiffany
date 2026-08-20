@@ -22,14 +22,14 @@ Confere três coisas, e a terceira é a que a separação exige:
 import re, sys, os
 
 DOCS = {'algebrico':'papers/corpo_algebrico.tex', 'topologico':'papers/corpo_topologico.tex',
-        'analitico':'papers/corpo_analitico.tex', 'computacional':'papers/corpo_computacional.tex',
+        'analitico':'papers/corpo_analitico.tex', 'computacional':'papers/arquitetura.tex',
+        'sintese':'papers/arquitetura.tex',
         'teoria':'teoria.tex', 'catalogo':'catalogo.tex', 'enredo':'enredo.tex'}
 CENTRO = 'algebrico'
-# A TRÍADE É DE TRÊS. `computacional` NÃO é um lado: é uma realização que vive DENTRO do
-# τ=−1 (lê-se pelo que consome — do centro e do endereçamento, e nada do τ=+1). Contá-lo
-# como lado era criar a quarta casa que a arquitectura recusa.
+# A TRÍADE É DE TRÊS. `computacional`/`sintese` NÃO são lados: são realizações dentro do
+# τ=−1 (lê-se pelo que consome — do centro e do endereçamento, e nada do τ=+1).
 LADOS  = {'topologico', 'analitico'}
-REALIZ = {'computacional': 'topologico'}   # realização : polo onde vive
+REALIZ = {'computacional': 'topologico', 'sintese': 'topologico'}   # realização : polo onde vive
 PARTICULARES = {'teoria', 'catalogo', 'enredo'}   # segundo escalão: mais específicos
 
 raiz = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

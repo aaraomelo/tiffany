@@ -2,7 +2,7 @@
  *
  * «Naturais eram o primeiro relógio; os inteiros acrescentam a REVERSIBILIDADE, porque
  * agora todo a tem uma folha (−a) que retorna ao zero. E depois divisibilidade/MDC/
- * Bézout transformam essa reversibilidade numa máquina de cortes.» (`eval.txt`)
+ * Bézout transformam essa reversibilidade numa máquina de cortes.» (ordem do coordenador)
  *
  * É a linguagem desta casa dita de outro lado: o oposto é a VOLTA da soma, e `a+(−a)=0`
  * é a Lei 1 no grupo aditivo. Daí a construção por PARES — (a,b) ~ a−b, com

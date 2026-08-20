@@ -34,7 +34,9 @@
  *   cc -O2 -std=c99 -I. -I../lib geometria_real.c -o geometria_real && ./geometria_real
  */
 #include <stdio.h>
+#include <stdint.h>
 #include "unidade.h"
+#include "../lib/reta.h"
 
 #define G_LIMF 100000000L      /* o tecto: com Δ ≤ 68, Δ·F² e (t+1)² cabem em long */
 #define G_MMAX 8
@@ -64,6 +66,14 @@ static int g_cmp(long a, long b, long m){
     long e = s*s, d = b*b*D;
     return e < d ? -1 : (e > d ? 1 : 0);
 }
+/* Fase B: produtos int64; envelope m ≤ G_MMAX e a,b moderados */
+static int g_cmp_i32(int32_t a, int32_t b, int32_t m){
+    int64_t s = 2*(int64_t)a - (int64_t)m*b;
+    if(s < 0) return -1;
+    int64_t D = (int64_t)m*(int64_t)m + 4;
+    int64_t e = s*s, d = (int64_t)b*(int64_t)b*D;
+    return e < d ? -1 : (e > d ? 1 : 0);
+}
 /* ⌊√n⌋ em inteiros, por Newton — sem uma única raiz de vírgula flutuante */
 static long g_isqrt(long n){
     if(n < 2) return n;
@@ -77,6 +87,20 @@ static int g_peso(int x){ int p = 0; while(x){ p += x & 1; x >>= 1; } return p; 
 static int g_par(int x){ return g_peso(x) & 1; }        /* ⟨a,b⟩ = paridade(a ∧ b) */
 /* a ordem da companheira C = [[t,−1],[1,0]] em 𝔽_p — o relógio do andar */
 static int g_ordem(long t, long p){
+    if(p > 0 && p <= 2147483647L){
+        int32_t pi = (int32_t)p;
+        int32_t c11 = rt_mod((int32_t)t, pi), c12 = rt_mod((int32_t)(p - 1), pi);
+        int32_t x11 = 1, x12 = 0, x21 = 0, x22 = 1;
+        for(int32_t k = 1; k <= 4*pi + 4; k++){
+            int32_t y11 = rt_mod((int32_t)((int64_t)x11*c11 + (int64_t)x12), pi);
+            int32_t y12 = rt_mod((int32_t)((int64_t)x11*c12), pi);
+            int32_t y21 = rt_mod((int32_t)((int64_t)x21*c11 + (int64_t)x22), pi);
+            int32_t y22 = rt_mod((int32_t)((int64_t)x21*c12), pi);
+            x11 = y11; x12 = y12; x21 = y21; x22 = y22;
+            if(x11 == 1 && x12 == 0 && x21 == 0 && x22 == 1) return (int)k;
+        }
+        return -1;
+    }
     long x11=1,x12=0,x21=0,x22=1, c11=((t%p)+p)%p, c12=(p-1)%p;
     for(long k = 1; k <= 4*p+4; k++){
         long y11=(x11*c11+x12)%p, y12=(x11*c12)%p;
@@ -791,6 +815,19 @@ int main(void){
            " U_{k+1}² − U_{k+2}U_k = (−1)^k a largura é exactamente 1/(U_k U_{k+1}) —"
            " régua inteira, e a divisão nunca se faz",
            cass == casos && alterna == casos && encaixa == pod && aperta == casos);
+    }
+
+    /* §L7b — g_cmp_i32 ≡ g_cmp onde cabe (Fase B) */
+    {
+        long n_ok = 0, n_tot = 0;
+        for(int32_t m = 1; m <= G_MMAX; m++)
+            for(int32_t b = 1; b <= 300; b++)
+                for(int32_t a = 0; a <= 300; a++){
+                    n_tot++;
+                    if(g_cmp(a, b, m) == g_cmp_i32(a, b, m)) n_ok++;
+                }
+        ok("§L7b g_cmp_i32 concorda com g_cmp nos casos que cabem em int32",
+           n_ok == n_tot && n_tot > 1000);
     }
 
     /* ═══ §L8  ℝ INTEIRO — E O OURO É O EXTREMO QUE LIMITA TODOS ═════════════ */

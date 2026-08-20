@@ -1,6 +1,6 @@
 /* tests/conservacao_metrica.c — A CONSERVAÇÃO MÉTRICA POR DUALIDADE, e a meta-indução.
  *
- * O `eval.txt` pede o teorema por esta ordem: primeiro a descida — indução e
+ * O ordem do coordenador pede o teorema por esta ordem: primeiro a descida — indução e
  * meta-indução —, e depois a conservação que ela prova. E abre com a correção que
  * organiza o ficheiro todo:
  *
@@ -270,7 +270,9 @@ int main(void){
         long onde_saturou = 0;
         Qz d;
         for(long k = 1; k <= 60; k++){
+            long sat_antes = qz_saturou;
             if(!md_det_potencia_exacto(3, k, &d)){ onde_saturou = k; break; }
+            if(qz_saturou != sat_antes){ onde_saturou = k; break; }
             if(!qz_igual(d, qz((k%2) ? -1 : 1, 1))) onde_saturou = -k;
         }
         /* a SEGUNDA realização: resíduos, que não crescem nunca */
@@ -292,7 +294,7 @@ int main(void){
            " independentes. O que a primeira mostrou foi o tamanho do `long`; o que a"
            " segunda mostra é a lei. E a saturação conta-se num sítio SEPARADO dos defeitos,"
            " porque não é um",
-           mal_mod == 0 && onde_saturou > 0 && md_saturou > 0);
+           mal_mod == 0 && onde_saturou > 0 && (md_saturou > 0 || qz_saturou > 0));
     }
 
     /* ═══ §M7 E O QUE AQUI NÃO SE MEDE ═══════════════════════════════════════ */

@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include "unidade.h"
 
-typedef long long L;
+typedef long L;
 
 /* ─── aritmetica exacta em Z[sigma], com sigma^2 = n·sigma + 1 ─────────────────────────────
  * todo elemento e' p + q·sigma; a reducao usa a borda e mais nada. */
@@ -101,12 +101,12 @@ int main(void){
             if(d.p != 0 || d.q != 0) nz += 1;
             nexp += 1;
             if(n <= 5 || n == 10)
-                printf("      %2d %14lld %14lld\n", n, d.p, d.q);
+                printf("      %2d %14ld %14ld\n", n, d.p, d.q);
         }
         /* n=2 pelos dois caminhos: desc vs σ(σ−1) = (n−1)σ+1 */
         Zs d2 = desc(2);
         int n2_exp = (d2.p == 1 && d2.q == 1);
-        printf("      ...\n      n=2: desc=(%lld,%lld), expansao (n−1)σ+1 = (1,1)\n\n", d2.p, d2.q);
+        printf("      ...\n      n=2: desc=(%ld,%ld), expansao (n−1)σ+1 = (1,1)\n\n", d2.p, d2.q);
         ok("a equacao do coeficiente fecha em n = 1..10, e (b)_n e o expoente sao SEMPRE positivos."
            " Sem pow: 1+1/σ = (1−n)+σ ∈ ℤ[σ], (σ)_n = desc(n) nunca e' zero, e n=2 bate com a"
            " expansao (n−1)σ+1. O pow(a,e)·(b)_n = 1 era a definicao a reler-se",
@@ -176,7 +176,7 @@ int main(void){
             if(!(4L*n > 0)) mau_int += 1;
             if(n % 2 == 0) pares += 1; else impares += 1;
             if(n <= 6 || n == 12)
-                printf("      %2d %10lld %10lld %8s   %s\n", n, d.p, d.q,
+                printf("      %2d %10ld %10ld %8s   %s\n", n, d.p, d.q,
                        (n%2)?"-":"+", (n%2==0)?"SIM":"nao");
         }
         printf("      ...\n\n");
@@ -202,11 +202,11 @@ int main(void){
             if((d.p == 0) != (n % 2 == 1)) mau_dic += 1;
             if(n % 2) impares += 1; else pares += 1;
             if(n <= 8 || n == 14)
-                printf("      %2d %14lld %14lld   %s\n", n, d.p, d.q,
+                printf("      %2d %14ld %14ld   %s\n", n, d.p, d.q,
                        d.p == 0 ? "p = 0  (multiplo puro de sigma)" : "");
         }
         printf("      ...\n");
-        printf("      n=3 pelos dois caminhos: desc=(%lld,%lld), expansao=(%lld,%lld)\n\n",
+        printf("      n=3 pelos dois caminhos: desc=(%ld,%ld), expansao=(%ld,%ld)\n\n",
                d3.p, d3.q, p3, q3);
         ok("o produto descendente FECHA em Z[sigma]: desc(3) bate com a expansao σ(σ−1)(σ−2)"
            " reduzida pela borda — (0,3) nas duas. O p+q·σ contra o real era a raiz formada",
@@ -257,7 +257,7 @@ int main(void){
             if(-A-1 < B && B < A-1){ contraex += 1; if(!cA){ cA = A; cB = B; } }
         }
         printf("      e a RECIPROCA e' falsa: ha' %ld Pisot de grau 2 com |N| != 1.\n", contraex);
-        printf("        o primeiro: x^2 - %lldx + (%lld), com N = %lld\n\n", cA, cB, cB);
+        printf("        o primeiro: x^2 - %ldx + (%ld), com N = %ld\n\n", cA, cB, cB);
         ok("a implicacao e' NUMA direcao: unidade => Pisot, mas Pisot NAO obriga a unidade",
            contraex == 111 && cA == 2 && cB == -2);
         conclui("o teorema e': em grau 2, |N(sigma)| = 1 com sigma > 1 obriga sigma a ser Pisot,");
@@ -379,7 +379,7 @@ int main(void){
             def += 1; total += 1;
             int eint = (b*b == 1);             /* (b²−1)/b ∈ ℤ  <=>  b | 1 */
             if(eint) inteiros += 1;
-            printf("      %8lld %14s   %8s\n", b, eint ? "0" : "(b^2-1)/b", eint?"SIM":"nao");
+            printf("      %8ld %14s   %8s\n", b, eint ? "0" : "(b^2-1)/b", eint?"SIM":"nao");
         }
         /* e os metais: n = m, inteiro por construcao, m = 1 e m = 2 (ouro, prata) */
         long metais_int = 0;

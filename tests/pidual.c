@@ -26,17 +26,33 @@
  *   §P5  e a construcao efetiva: pi encaixotado por DOIS caminhos que tem de concordar
  *   §P6  a assinatura: exp(tJ) tem periodo 2pi e a estaca tem periodo 2 — e 2pi/2 = pi
  *
- * Aritmetica: inteiros e __int128. Zero doubles — o que e' o proprio ponto, porque um
+ * Aritmetica: inteiros e I128 (lib/i128.h). Zero doubles — o que e' o proprio ponto, porque um
  * ficheiro que calcula pi sem virgula flutuante mostra que a construcao nao depende da
  * representacao decimal dele.
  *
  *   cc -O2 -std=c99 -Wall pidual.c -o pidual && ./pidual
  */
 #include <stdio.h>
+#include "../lib/i128.h"
 #include "../lib/unidade.h"
 
-typedef long long L;
-typedef __int128 H;
+typedef long L;
+typedef I128 H;
+static H h1(void){ return i128_from_i64(1); }
+static H h10n(int n){ H r = h1(); for(int i = 0; i < n; i++) r = i128_smul_i128(r, 10); return r; }
+static H hld(long x){ return i128_from_i64(x); }
+static H hdiv(H a, H b){ return i128_div(a, b); }
+static H hmul(H a, H b){ return i128_mul(a, b); }
+static H hsmul(H a, long x){ return i128_smul_i128(a, x); }
+static H hadd(H a, H b){ return i128_add(a, b); }
+static H hsub(H a, H b){ return i128_sub(a, b); }
+static H hneg(H a){ return i128_neg(a); }
+static H habs(H a){ return i128_abs(a); }
+static int hz(H a){ return i128_is_zero(a); }
+static int heq(H a, H b){ return i128_cmp(a, b) == 0; }
+static int hlt(H a, H b){ return i128_cmp(a, b) < 0; }
+static int hgt(H a, H b){ return i128_cmp(a, b) > 0; }
+static long hl(H a){ return (long)i128_to_i64(a); }
 
 /* ─── o passo racional do fluxo: as ternas pitagoricas ────────────────────────────────
  * Um elemento do circulo com coordenadas racionais e' (a + b·J)/c com a^2 + b^2 = c^2.
@@ -56,20 +72,22 @@ static L den_traco(Rot z){ return z.c; }
 
 /* ─── arctan(1/n) em escala inteira: soma alternada, divisao inteira, sem virgula ───── */
 static H arctan_inv(L n, H S){
-    H termo = S / n, soma = termo, n2 = (H)n*n;
-    for(L k = 1; termo != 0; k++){
-        termo /= n2;
-        H t = termo / (2*k + 1);
-        soma += (k & 1) ? -t : t;
-        if(t == 0 && termo == 0) break;
+    H termo = hdiv(S, hld(n)), soma = termo, n2 = hld(n*n);
+    for(L k = 1; ; k++){
+        termo = hdiv(termo, n2);
+        H t = hdiv(termo, hld(2*k + 1));
+        soma = (k & 1) ? hsub(soma, t) : hadd(soma, t);
+        if(hz(t) && hz(termo)) break;
     }
     return soma;
 }
 static void imprime(const char *rot, H v, int dig){
-    /* imprime v/S como d.ddddd..., so' para o utilizador ver; nao entra em nenhuma assercao */
     char buf[64]; int i = 0;
-    H x = v;
-    while(x > 0 && i < 60){ buf[i++] = '0' + (int)(x % 10); x /= 10; }
+    H x = v, ten = hld(10);
+    while(hgt(x, h1()) && i < 60){
+        buf[i++] = '0' + (int)i128_to_i64(i128_mod(x, ten));
+        x = hdiv(x, ten);
+    }
     printf("      %s ", rot);
     for(int j = i-1; j >= 0 && i-1-j <= dig; j--){ putchar(buf[j]); if(j == i-1) putchar('.'); }
     putchar('\n');
@@ -90,7 +108,7 @@ int main(void){
             if(z.a*z.a + z.b*z.b != z.c*z.c) mau++;
             casos++;
             z = rmul(z, base[i]);
-            if(z.c > 1000000000LL) break;             /* sem crescer sem controlo */
+            if(z.c > 1000000000L) break;             /* sem crescer sem controlo */
         }
     }
     printf("      %d passos do fluxo racional verificados\n", casos);
@@ -106,7 +124,7 @@ int main(void){
         if(num_traco(z)*den_traco(w) != num_traco(w)*den_traco(z)) move++;  /* tracos diferem */
         if(z.a*z.a + z.b*z.b == z.c*z.c && w.a*w.a + w.b*w.b == w.c*w.c) fixa++;
         z = w; w = rmul(w, base[0]);
-        if(w.c > 1000000000LL) break;
+        if(w.c > 1000000000L) break;
     }
     ok("o traco MUDA de passo para passo enquanto a norma fica: a cruz tem uma coordenada movel",
        move >= 3 && fixa >= 3);
@@ -142,33 +160,31 @@ int main(void){
           while(b*b < b2) b++;
           if(b*b != b2 || b == 0) continue;
           /* quao perto de -2 chega o traco 2a/c ? comparo fraccoes por produto cruzado */
-          if((H)2*a*melhor_d < (H)melhor_n*c){ melhor_n = 2*a; melhor_d = c; achados++; }
+          if(i128_cmp(i128_smul(2*a, melhor_d), i128_smul(melhor_n, c)) < 0){
+              melhor_n = 2*a; melhor_d = c; achados++; }
       }
-    printf("      o traco mais proximo de -2 alcancado por passo proprio: %lld/%lld\n", melhor_n, melhor_d);
+    printf("      o traco mais proximo de -2 alcancado por passo proprio: %ld/%ld\n", melhor_n, melhor_d);
     ok("a orbita racional aproxima-se do alvo sem o atingir: o melhor traco e' > -2, estritamente",
-       achados > 0 && (H)melhor_n*1 > (H)(-2)*melhor_d);
+       achados > 0 && i128_cmp(i128_smul(melhor_n, 1), i128_smul(-2, melhor_d)) > 0);
 
     /* ═══ §P5 — a construcao efetiva, por DOIS caminhos que tem de concordar ═══════════
      * Aqui pi e' produzido. Nao se escreve 3.14159 nenhures: calculam-se duas somas
      * alternadas independentes, em aritmetica inteira, e exige-se que coincidam. Se eu
      * tivesse copiado os digitos de cabeca, esta assercao nao poderia falhar — assim
      * pode, e falha se qualquer um dos dois caminhos estiver errado. */
-    H S = (H)1; for(int i = 0; i < 30; i++) S *= 10;         /* escala 10^30 */
-    /* Machin:  pi/4 = 4·arctan(1/5) - arctan(1/239)  */
-    H machin = 16*arctan_inv(5, S) - 4*arctan_inv(239, S);
-    /* Euler:   pi/4 = arctan(1/2) + arctan(1/3)      */
-    H euler  = 4*arctan_inv(2, S) + 4*arctan_inv(3, S);
-    /* Hermann: pi/4 = 2·arctan(1/2) - arctan(1/7)    */
-    H herman = 8*arctan_inv(2, S) - 4*arctan_inv(7, S);
+    H S = h10n(30);
+    H machin = hsub(hsmul(arctan_inv(5, S), 16), hsmul(arctan_inv(239, S), 4));
+    H euler  = hadd(hsmul(arctan_inv(2, S), 4), hsmul(arctan_inv(3, S), 4));
+    H herman = hsub(hsmul(arctan_inv(2, S), 8), hsmul(arctan_inv(7, S), 4));
     imprime("Machin ", machin, 24);
     imprime("Euler  ", euler,  24);
     imprime("Hermann", herman, 24);
-    /* compara os primeiros 24 digitos: divido os tres pela mesma potencia e exijo igualdade */
-    H corte = (H)1; for(int i = 0; i < 6; i++) corte *= 10;  /* deita fora os 6 ultimos */
+    H corte = h10n(6);
     ok("Machin e Euler dao o MESMO valor a 24 casas, por somas alternadas independentes",
-       machin/corte == euler/corte);
+       heq(hdiv(machin, corte), hdiv(euler, corte)));
     ok("e Hermann concorda com os dois — tres caminhos, nenhum digito escrito a mao",
-       machin/corte == herman/corte && euler/corte == herman/corte);
+       heq(hdiv(machin, corte), hdiv(herman, corte))
+       && heq(hdiv(euler, corte), hdiv(herman, corte)));
 
     /* e o valor produzido tem de bater com a definicao: e' o t em que o fluxo faz meia volta.
      * cos(pi) = -1 verifica-se pela serie, em inteiros, com a mesma escala. */
@@ -182,70 +198,64 @@ int main(void){
          * soma-se o truncamento das divisoes, que e' UMA unidade por operacao e conta-se. */
         /* A escala da serie tem de ser MENOR que a dos arctan: aqui multiplicam-se dois
          * numeros da ordem da escala, e a 10^30 o produto seria 10^60, que estoura o
-         * __int128. A 10^15 o produto e' 10^30 e cabe com folga. */
-        H S2 = 1; for(int i = 0; i < 15; i++) S2 *= 10;
-        H red = S / S2;                              /* fator de conversao entre as escalas */
-        H x = (machin / red) / 4, termo = S2, soma = S2;
-        int ops = 0; H omitido = 0;
+         * I128. A 10^15 o produto e' 10^30 e cabe com folga. */
+        H S2 = h10n(15);
+        H red = hdiv(S, S2);
+        H mach_quarter = hdiv(hdiv(machin, red), hld(4));
+        H x = mach_quarter, termo = S2, soma = S2;
+        int ops = 0; H omitido = h1();
         for(int k = 1; k <= 40; k++){
-            termo = termo * x / S2;  ops++;
-            termo = termo * x / S2;  ops++;
-            termo = termo / ((H)(2*k-1) * (2*k)); ops++;
-            if(termo == 0){ omitido = 0; break; }
-            soma += (k & 1) ? -termo : termo;
-            omitido = termo;                        /* o ultimo somado majora o seguinte */
+            termo = hdiv(hmul(termo, x), S2);  ops++;
+            termo = hdiv(hmul(termo, x), S2);  ops++;
+            termo = hdiv(termo, hld((long)(2*k-1) * (2*k))); ops++;
+            if(hz(termo)){ omitido = i128_zero(); break; }
+            soma = (k & 1) ? hsub(soma, termo) : hadd(soma, termo);
+            omitido = termo;
         }
-        H cos1 = soma;                               /* cos(pi/4)  */
-        H cos2 = 2*cos1*cos1/S2 - S2;                /* cos(pi/2)  */
-        H cos4 = 2*cos2*cos2/S2 - S2;                /* cos(pi)    */
-        H err = cos4 + S2; if(err < 0) err = -err;
-        /* o limite sai do algoritmo: cada divisao inteira perde ate' 1 unidade, a serie
-         * alternada erra menos que o ultimo termo somado, e cada duplicacao dobra o que
-         * ja' havia e acrescenta a sua propria divisao. Nada disto foi escolhido a olho. */
-        H tol = (omitido + ops + 1) * 4 + 4;
+        H cos1 = soma;
+        H cos2 = hsub(hdiv(hmul(hld(2), hmul(cos1, cos1)), S2), S2);
+        H cos4 = hsub(hdiv(hmul(hld(2), hmul(cos2, cos2)), S2), S2);
+        H err = hadd(cos4, S2); if(hlt(err, h1())) err = hneg(err);
+        H tol = hadd(hmul(hadd(omitido, hld((long)(ops + 1))), hld(4)), hld(4));
         printf("      cos(pi/4) -> cos(pi/2) -> cos(pi) por duplicacao; %d divisoes inteiras\n", ops);
-        printf("      residuo |cos(pi)+1| = %lld unidades de 10^-15; limite derivado = %lld\n",
-               (long long)err, (long long)tol);
+        printf("      residuo |cos(pi)+1| = %ld unidades de 10^-15; limite derivado = %ld\n",
+               hl(err), hl(tol));
         ok("o valor produzido satisfaz a DEFINICAO: cos(pi) = -1, com residuo abaixo do erro"
-           " de truncamento DERIVADO do algoritmo (nao de um limiar escolhido)", err < tol);
-        /* E AQUI HA' UMA COISA A DIZER, que so' apareceu por eu ter tentado fazer a
-         * assercao falhar. Perturbei pi na decima casa e o residuo de cos NAO se moveu.
-         * Nao e' defeito da medicao: e' que pi e' PONTO ESTACIONARIO de cos — a derivada
-         * la' e' -sin(pi) = 0 —, logo cos(pi) = -1 e' insensivel a erro de primeira ordem
-         * em pi. Verificar a definicao por cos e' um teste fraco, e o proprio facto tem
-         * conteudo: O ALVO DA LEI 1 E' UM PONTO ESTACIONARIO, e e' por isso que a meia
-         * volta e' estavel. Quem separa e' o seno, cuja derivada em pi e' -1. */
-        H seno = 0, tsen, xs = (machin / red) / 4;
+           " de truncamento DERIVADO do algoritmo (nao de um limiar escolhido)", hlt(err, tol));
+        H seno, tsen, xs = mach_quarter;
         {   /* sin(pi/4) pela serie, depois duplicacao: sin(2u) = 2 sin(u) cos(u) */
             tsen = xs; seno = xs;
             for(int k = 1; k <= 40; k++){
-                tsen = tsen * xs / S2; tsen = tsen * xs / S2;
-                tsen = tsen / ((H)(2*k) * (2*k+1));
-                if(tsen == 0) break;
-                seno += (k & 1) ? -tsen : tsen;
+                tsen = hdiv(hmul(hdiv(hmul(tsen, xs), S2), xs), S2);
+                tsen = hdiv(tsen, hld((long)(2*k) * (2*k+1)));
+                if(hz(tsen)) break;
+                seno = (k & 1) ? hsub(seno, tsen) : hadd(seno, tsen);
             }
         }
-        H sen2 = 2*seno*cos1/S2;                     /* sin(pi/2) */
-        H sen4 = 2*sen2*cos2/S2;                     /* sin(pi)   */
-        H es = sen4 < 0 ? -sen4 : sen4;
-        printf("      sin(pi) = %lld unidades de 10^-15 (o alvo e' 0)\n", (long long)es);
+        H sen2 = hdiv(hmul(hld(2), hmul(seno, cos1)), S2);
+        H sen4 = hdiv(hmul(hld(2), hmul(sen2, cos2)), S2);
+        H es = sen4; if(hlt(es, h1())) es = hneg(es);
+        printf("      sin(pi) = %ld unidades de 10^-15 (o alvo e' 0)\n", hl(es));
         ok("e a mesma construcao da' sin(pi) = 0 — a segunda coordenada, e esta e' sensivel",
-           es < tol);
-        /* agora sim, o criterio separa: perturbar pi move o seno linearmente */
-        H xp = (machin / red + 100000) / 4;           /* pi perturbado em 4·10^-10 */
+           hlt(es, tol));
+        H xp = hdiv(hadd(hdiv(machin, red), hld(100000)), hld(4));
         H tp = xp, sp = xp, cp = S2, tc = S2;
         for(int k = 1; k <= 40; k++){
-            tp = tp * xp / S2; tp = tp * xp / S2; tp = tp / ((H)(2*k) * (2*k+1));
-            tc = tc * xp / S2; tc = tc * xp / S2; tc = tc / ((H)(2*k-1) * (2*k));
-            if(tp == 0 && tc == 0) break;
-            sp += (k & 1) ? -tp : tp;
-            cp += (k & 1) ? -tc : tc;
+            tp = hdiv(hmul(hdiv(hmul(tp, xp), S2), xp), S2);
+            tp = hdiv(tp, hld((long)(2*k) * (2*k+1)));
+            tc = hdiv(hmul(hdiv(hmul(tc, xp), S2), xp), S2);
+            tc = hdiv(tc, hld((long)(2*k-1) * (2*k)));
+            if(hz(tp) && hz(tc)) break;
+            sp = (k & 1) ? hsub(sp, tp) : hadd(sp, tp);
+            cp = (k & 1) ? hsub(cp, tc) : hadd(cp, tc);
         }
-        H sp2 = 2*sp*cp/S2, cp2 = 2*cp*cp/S2 - S2;
-        H sp4 = 2*sp2*cp2/S2; if(sp4 < 0) sp4 = -sp4;
-        printf("      com pi perturbado em 4·10^-10 o seno passa a %lld unidades\n", (long long)sp4);
+        H sp2 = hdiv(hmul(hld(2), hmul(sp, cp)), S2);
+        H cp2 = hsub(hdiv(hmul(hld(2), hmul(cp, cp)), S2), S2);
+        H sp4 = hdiv(hmul(hld(2), hmul(sp2, cp2)), S2);
+        if(hlt(sp4, h1())) sp4 = hneg(sp4);
+        printf("      com pi perturbado em 4·10^-10 o seno passa a %ld unidades\n", hl(sp4));
         ok("e o criterio SEPARA: perturbar pi move o seno para muito acima do limite — logo"
-           " a assercao anterior podia falhar e nao falhou", sp4 >= tol);
+           " a assercao anterior podia falhar e nao falhou", !hlt(sp4, tol));
     }
 
     /* ═══ §P6 — a assinatura: os dois periodos, e a razao entre eles ═══════════════════

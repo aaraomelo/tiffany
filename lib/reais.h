@@ -25,6 +25,8 @@
 #ifndef REAIS_H
 #define REAIS_H
 
+#include "i128.h"
+
 /* ── O CORTE ─────────────────────────────────────────────────────────────────────
  * ⁿ√a como decomposição de ℚ. Não guarda casas: guarda o critério que as decidiria
  * todas. */
@@ -43,11 +45,14 @@ static int rz_cabe(long p, long d, int n){
 static int rz_cmp(Qz q, int n, long a, int *bom){
     if(bom) *bom = 1;
     if(!rz_cabe(q.p, q.q, n)){ if(bom) *bom = 0; return 0; }
-    __int128 P = 1, D = 1;
-    for(int i = 0; i < n; i++){ P *= q.p; D *= q.q; }
-    __int128 R = (__int128)a * D;
-    if(P < R) return -1;
-    if(P > R) return +1;
+    I128 P = i128_from_i64(1), D = i128_from_i64(1);
+    for(int i = 0; i < n; i++){
+        P = i128_smul_i128(P, q.p);
+        D = i128_smul_i128(D, q.q);
+    }
+    I128 R = i128_smul(a, i128_to_i64(D));
+    if(i128_cmp(P, R) < 0) return -1;
+    if(i128_cmp(P, R) > 0) return +1;
     return 0;
 }
 /* q ∈ A? — «q < 0 ou qⁿ < a», que é o corte que ele escreve para o √2 */
@@ -70,15 +75,15 @@ static int rz_fecha_em_q(Corte c, long *r){
     else {                                       /* o índice geral sobe um degrau de cada vez */
         x = 0;
         while(x < RZ_TETO){
-            __int128 P = 1;
-            for(int i = 0; i < c.n; i++) P *= (x + 1);
-            if(P > c.a) break;
+            I128 P = i128_from_i64(1);
+            for(int i = 0; i < c.n; i++) P = i128_smul_i128(P, x + 1);
+            if(i128_cmp(P, i128_from_i64(c.a)) > 0) break;
             x++;
         }
     }
-    __int128 P = 1;
-    for(int i = 0; i < c.n; i++) P *= x;
-    if(P == c.a){ if(r) *r = x; return 1; }
+    I128 P = i128_from_i64(1);
+    for(int i = 0; i < c.n; i++) P = i128_smul_i128(P, x);
+    if(i128_cmp(P, i128_from_i64(c.a)) == 0){ if(r) *r = x; return 1; }
     return 0;
 }
 
@@ -100,7 +105,9 @@ static int rz_caixa_inicial(Corte c, Qz *lo, Qz *hi){
 }
 static int rz_encaixota(Corte c, Qz *lo, Qz *hi, int passos){
     for(int k = 0; k < passos; k++){
+        long sat = qz_saturou;
         Qz m = qz_medio(*lo, *hi);
+        if(qz_saturou != sat) return k;                /* o médio saturou: pára honesto */
         int bom, s = rz_cmp(m, c.n, c.a, &bom);
         if(!bom) return k;                        /* parou por não caber, e diz quantos */
         if(s == 0){ *lo = m; *hi = m; return k + 1; }

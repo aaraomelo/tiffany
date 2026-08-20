@@ -1,6 +1,6 @@
 /* metrico.h — ESPAÇOS MÉTRICOS: só o que faltava.
  *
- * O `eval.txt` traz dezasseis problemas de espaços métricos e diz «ingerir tudo». Mas
+ *  ordem do coordenador traz dezasseis problemas de espaços métricos e diz «ingerir tudo». Mas
  * procurei antes de escrever, e o `cauchy.h` já tinha metade do andar montado:
  *
  *   · `cy_termo`/`cy_dist` — a sucessão e a distância |a − b|, exactas em ℚ

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""cristal_extrai.py — arqueologia do cristal grande (eval.txt, 13/08).
+"""cristal_extrai.py — arqueologia do cristal grande (ordem do coordenador, 13/08).
 
 O cristal do projeto vive no broca-so: conversa/dados/conhecimento.graph.jsonl,
 um jornal de 75.165 registos onde cada conceito foi reescrito ao longo do tempo.

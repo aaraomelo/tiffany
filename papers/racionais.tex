@@ -874,7 +874,9 @@ Cada realização computacional finita descrita neste paper já foi
 verificam a realização computacional das identidades em domínios finitos
 explicitamente especificados.
 Os três ficheiros centrais são \code{lib/racionais.h},
-\code{lib/dual16.h}, e \code{tests/racionais\_fixos.c}.
+\code{lib/dual16.h}, e \code{tests/racionais\_fixos.c}; a firma da torre
+(\code{lib/torre\_alg.h}, \code{tests/torre\_alg.c}) amarra involução,
+retração e subida ao mesmo degrau.
 
 %----------------------------------------------------------------------
 \subsection*{O par como tipo: \code{lib/racionais.h}}
@@ -993,6 +995,25 @@ O teste §Q8 verifica o teorema dos resíduos: um resíduo sozinho é irracional
 e a soma dos dois cai em $\mathbb{Z}$ --- são os dois que dão o inteiro.
 
 %----------------------------------------------------------------------
+\subsection*{Firma da torre: \code{tests/torre\_alg.c}}
+
+\noindent Este degrau $\mathbb{Z}\to\mathbb{Q}$ é o primeiro andar em que pares,
+dualidade e produto cruzado coexistem na representação. O \emph{Corpo Algébrico}
+(\code{corpo\_algebrico.tex} Teor.~\ref{thm:torre}) dobra a estrutura por
+$T_{k+1}=T_k+T_k^{*}$; a Def.~\ref{def:cone} do mesmo documento separa
+\textbf{involução} ($\nu\circ\nu=\mathrm{id}$) de \textbf{retração}
+($\Sigma\circ\Pi=\mathrm{Id}$). O contrato computacional
+\code{lib/torre\_alg.h} fixa três \emph{pipelines} sobre a mesma família de
+operações --- involução, retração e subida --- sem confundi-los. A realização
+passa por \code{lib/dual16.h}, \code{lib/dual32.h},
+\code{lib/rt\_cf\_slot.h} e persistência \code{.mem}; o medidor §T1--§T4 verifica
+que cada pipeline fecha no seu domínio e que
+$\text{involução}\neq\text{retração}\neq\text{subida}$ mesmo quando, em casos
+particulares, dois caminhos devolvem o mesmo valor numérico.
+A síntese transversal destes três pipelines, slots e descida está em
+\code{papers/arquitetura.tex}.
+
+%----------------------------------------------------------------------
 \subsection*{Inventário}
 
 \begin{center}\small
@@ -1009,6 +1030,10 @@ redução pelo $\gcd$ & \code{qz} & \code{lib/racionais.h} & $\checkmark$ \\
 saturação contada & \code{qz\_saturou} & \code{lib/racionais.h} & $\checkmark$ \\
 $16\times16$ exacto em par & \code{d16\_mult} & \code{lib/dual16.h} & $\checkmark$ \\
 ordem por prod.\ cruzado & \code{d16\_cmp\_prod} & \code{lib/dual16.h} & $\checkmark$ \\
+produto 16×16 vs int32 & §E0--§E3 & \code{tests/dual16.c} & $5/5$ \\
+migração Q em E₁₆ & §G0--§G5 & \code{tests/migracao.c} & $6/6$ \\
+descida 32→16 & §K2b & \code{tests/cadeia.c} & $\checkmark$ \\
+RtOp coord.\ int16 & §R27 §T21 & \code{tests/reta.c} & $\checkmark$ \\
 $|a-b|<\varepsilon$ & \code{qz\_dist\_menor} & \code{lib/racionais.h} & $\checkmark$ \\
 $x^2$ vs $c$ & \code{qz\_cmp\_quad} & \code{lib/racionais.h} & $\checkmark$ \\
 traço = inteiro & §Q1 & \code{tests/racionais\_fixos.c} & $60/60$ \\
@@ -1019,6 +1044,12 @@ $\operatorname{Fix}(\tau)=\mathbb{Q}$ em $\mathbb{Q}(\sqrt D)$ & §Q5 & \code{te
 recorrência do pto fixo & §Q6 & \code{tests/racionais\_fixos.c} & $144/144$ \\
 descida: $F\neq0$ & §Q7 & \code{tests/racionais\_fixos.c} & $\checkmark$ \\
 resíduos $\to$ traço & §Q8 & \code{tests/racionais\_fixos.c} & $\checkmark$ \\
+\midrule
+\multicolumn{4}{@{}l@{}}{\emph{Firma da torre --- três pipelines (contrato \code{lib/torre\_alg.h}):}} \\
+involução $\nu^2=\mathrm{id}$ & §T1 & \code{tests/torre\_alg.c} & $4/4$ \\
+retração $\Sigma\circ\Pi=\mathrm{Id}$ & §T2 & \code{tests/torre\_alg.c} & $4/4$ \\
+subida $T_k\to T_{k+1}$ & §T3 & \code{tests/torre\_alg.c} & $4/4$ \\
+$\text{involução}\neq\text{retração}\neq\text{subida}$ & §T4 & \code{tests/torre\_alg.c} & $4/4$ \\
 \bottomrule
 \end{tabular}
 \end{center}

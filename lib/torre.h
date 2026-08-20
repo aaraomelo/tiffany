@@ -1,6 +1,6 @@
 /* torre.h — A TORRE INTEIRA: Cayley–Dickson pelos DOIS lados.
  *
- * O `eval.txt` traz os hipercomplexos: ℂ, ℍ, 𝕆, a construção A_{n+1} = A_n ⊕ A_n e, a
+ *  ordem do coordenador traz os hipercomplexos: ℂ, ℍ, 𝕆, a construção A_{n+1} = A_n ⊕ A_n e, a
  * tabela das perdas (comuta até 2, associa até 4, divide até 8) e dez exercícios.
  *
  * E o Aarão: **«aquilo é metade»**. A outra metade é Gentil, e Lebesgue discreto-contínuo.
@@ -40,7 +40,11 @@
  *     Σₙ xₙ + Σ_v #{xₙ < v} = N·q,  exacta, em inteiros, sem esperar limite nenhum.
  * É o ∫f + ∫f⁻¹ da casa em forma discreta. Cita-se; não se reconstrói.
  *
- * Tudo em `long`. Cayley–Dickson só usa +, − e ×, portanto não sai de ℤ. */
+ * Tudo em `long`. Cayley–Dickson só usa +, − e ×, portanto não sai de ℤ.
+ *
+ * SUBIDA DA TORRE (torre_alg.h): tr_mult / hip_conj implementam T_{k+1}=T_k+T_k*.
+ * Para contrato e mapa de andares → lib/torre_alg.h. Para E₁₆/D32/D64/I128 →
+ * racionais.h, dual16.h, dual32.h, i128.h. */
 #ifndef TORRE_H
 #define TORRE_H
 

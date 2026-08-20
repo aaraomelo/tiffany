@@ -1,6 +1,6 @@
 /* dirichlet.h — A CONVOLUÇÃO SOBRE A ÁRVORE DOS DIVISORES, E μ = 1⁻¹.
  *
- * O `eval.txt` pede o pacote nesta ordem, e a ordem é o argumento:
+ *  ordem do coordenador pede o pacote nesta ordem, e a ordem é o argumento:
  *
  *   funções aritméticas → convolução → multiplicativas → μ como INVERSOR → inversão
  *   → série de Dirichlet

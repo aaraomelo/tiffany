@@ -45,7 +45,7 @@
 #include "isa_disk.h"
 #include "unidade.h"
 
-typedef long long L;
+typedef long L;
 
 int main(void){
     printf("================================================================\n");
@@ -67,7 +67,7 @@ int main(void){
             metais++;
             /* t_2 tem de ser m²+2, e é o traço de σ² */
             if(t[2] == m*m + 2) bate++;
-            if(m<=4) printf("      %-4lld %-4lld %-4lld %-8lld [[%lld,%lld],[%lld,%lld]]\n",
+            if(m<=4) printf("      %-4ld %-4ld %-4ld %-8ld [[%ld,%ld],[%ld,%ld]]\n",
                             m, t[0], t[1], t[2], t[0],t[1],t[1],t[2]);
         }
         printf("      metais: %d   com t_2 = m²+2: %d\n", metais, bate);
@@ -88,7 +88,7 @@ int main(void){
             L D = m*m + 4;
             metais++;
             if(det == D) igual++;
-            if(m<=4) printf("      %-4lld %-22lld %-11lld %lld\n",
+            if(m<=4) printf("      %-4ld %-22ld %-11ld %ld\n",
                             m, det, D, t[2]);
         }
         printf("      metais: %d   com det G = Δ: %d\n", metais, igual);
@@ -218,7 +218,7 @@ int main(void){
             L det = g11*g22 - g12*g12;
             ts++;
             if(det == b*b) lei_ok++;
-            printf("      (%lld,%lld)                 %lld\n", a, b, det);
+            printf("      (%ld,%ld)                 %ld\n", a, b, det);
         }
         printf("      pares: %d   com det G = b²: %d   ESQUILO(1,0)=(%ld,%ld)\n",
                ts, lei_ok, er, ei);
@@ -244,7 +244,7 @@ int main(void){
             L det = g11*g22 - g12*g12;
             casos++;
             if(det == 0) zeros++;
-            if(lam<=3) printf("      (%lld,%lld)      (%lld,%lld)          %lld\n", a,b,c,d,det);
+            if(lam<=3) printf("      (%ld,%ld)      (%ld,%ld)          %ld\n", a,b,c,d,det);
         }
         printf("      casos: %d   com det G = 0 exato: %d\n", casos, zeros);
         ok("com a base dependente o Gram anula-se — em INTEIROS, sem arredondamento",

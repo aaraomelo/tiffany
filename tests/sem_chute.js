@@ -49,7 +49,7 @@ function compoe (fonte, saida) {
 const chutes = (saida) => { const m = /AVISO: (\d+) larguras CHUTADAS/.exec(saida); return m ? Number(m[1]) : 0 }
 
 const DOCS = [
-  ['computacional',  'papers/corpo_computacional.tex'],
+  ['computacional',  'papers/arquitetura.tex'],
   ['corpo_analitico', 'papers/corpo_analitico.tex'],
   ['teoria',        'teoria.tex'],
   ['catalogo',      'catalogo.tex'],
@@ -236,7 +236,7 @@ console.log('\n§N6  E as linhas JUSTIFICADAS acabam todas na margem.\n')
    * é x_último + avanço·s; as justificadas batem na margem, os fins de
    * parágrafo não. */
   const casa6 = require('./pdf_casa_texto.js')
-  compoe('papers/corpo_computacional.tex', '/tmp/n_j.pdf')
+  compoe('papers/arquitetura.tex', '/tmp/n_j.pdf')
   const d6 = fs.readFileSync('/tmp/n_j.pdf', 'latin1')
   const objs6 = casa6.objetos(d6)
   const ps6 = casa6.paginas(d6, objs6)

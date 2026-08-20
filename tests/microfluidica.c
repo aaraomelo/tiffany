@@ -34,6 +34,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
+#include <inttypes.h>
 #include "reta.h"
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -194,15 +196,15 @@ int main(void){
      * Isso e uma identidade sobre inteiros e nao precisa de tolerancia 0,5 — mede-se com
      * lados INTEIROS e a razao sai exata. */
     {
-        long long casos=0, exatos=0;
-        for(long long lado=2; lado<=40; lado+=2){
-            long long h = lado/2;
+        int64_t casos=0, exatos=0;
+        for(int64_t lado=2; lado<=40; lado+=2){
+            int64_t h = lado/2;
             /* R ~ 1/l^4: a razao R(h)/R(lado) = (lado/h)^4 = 2^4 = 16, em inteiros */
-            long long num = lado*lado*lado*lado, den = h*h*h*h;
+            int64_t num = lado*lado*lado*lado, den = h*h*h*h;
             casos++;
             if(num == 16*den) exatos++;
         }
-        printf("      lados pares de 2 a 40: %lld   com (lado/h)^4 = 16 EXATO: %lld\n",
+        printf("      lados pares de 2 a 40: %" PRId64 "   com (lado/h)^4 = 16 EXATO: %" PRId64 "\n",
                casos, exatos);
         ok("A LEI: halvar o lado multiplica a resistencia por 16 — EXATO, em inteiros",
            exatos==casos && casos == 20);
@@ -447,19 +449,19 @@ int main(void){
          * as condutancias, e as duas dao resultados DIFERENTES — o paralelo e sempre menor que
          * qualquer das partes. Isso mede-se, e em racionais exatos. */
         {
-            long long casos=0, lei_ok=0;
-            for(long long ra=1; ra<=12; ra++) for(long long rb=1; rb<=12; rb++){
+            int64_t casos=0, lei_ok=0;
+            for(int64_t ra=1; ra<=12; ra++) for(int64_t rb=1; rb<=12; rb++){
                 /* serie = ra+rb ; paralelo = ra*rb/(ra+rb), comparado por produto cruzado */
-                long long s_num = ra+rb, s_den = 1;
-                long long p_num = ra*rb, p_den = ra+rb;
+                int64_t s_num = ra+rb, s_den = 1;
+                int64_t p_num = ra*rb, p_den = ra+rb;
                 casos++;
                 /* a lei: paralelo < min(ra,rb) <= max <= serie, tudo por produto cruzado */
-                long long mn = ra<rb?ra:rb;
+                int64_t mn = ra<rb?ra:rb;
                 int ok1 = (p_num < mn*p_den);            /* paralelo < min */
                 int ok2 = (s_num*1 > mn*s_den);          /* serie > min */
                 if(ok1 && ok2) lei_ok++;
             }
-            printf("      pares (Ra,Rb) inteiros: %lld   com paralelo < min <= serie: %lld\n",
+            printf("      pares (Ra,Rb) inteiros: %" PRId64 "   com paralelo < min <= serie: %" PRId64 "\n",
                    casos, lei_ok);
             ok("a LEI: em serie somam as resistencias, em paralelo as condutancias — e o"
                " paralelo fica SEMPRE abaixo do menor ramo", lei_ok==casos && casos == 144);

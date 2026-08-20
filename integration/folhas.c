@@ -7,6 +7,7 @@
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include "unidade.h"
 
@@ -14,9 +15,9 @@
 static long A[MAXP], B[MAXP];
 static int NP = 0;
 
-static long isqrt_ll(long long n){
+static long isqrt_i64(int64_t n){
     if(n <= 0) return 0;
-    long long x = n, y = (x + 1) >> 1;
+    int64_t x = n, y = (x + 1) >> 1;
     while(y < x){ x = y; y = (x + n / x) >> 1; }
     return (long)x;
 }
@@ -30,7 +31,7 @@ static long delta_de(long a, long b){
     int achou = 0;
     for(long Bv = -6; Bv <= 6; Bv++) for(long Cv = -6; Cv <= 6; Cv++){
         if(Bv * Bv - 4 * Cv == 0) continue;
-        long long N = (long long)p * p + (long long)Bv * p * q + (long long)Cv * q * q;
+        int64_t N = (int64_t)p * p + (int64_t)Bv * p * q + (int64_t)Cv * q * q;
         long d = labs(labs(N) - 1);
         if(d < melhor){ melhor = d; Dm = Bv * Bv - 4 * Cv; achou = 1; }
     }
@@ -120,12 +121,12 @@ static void secao_F3(void){
         /* D = 1 − 4C com C = Cv/1000 → D_milli = 1000 − 4*Cv */
         long Dm = 1000 - 4 * Cv;
         if(Dm < 0){
-            long sr = isqrt_ll(-(long long)Dm * 1000000LL);
+            long sr = isqrt_i64(-(int64_t)Dm * (int64_t)1000000);
             printf("        %ld.%03ld      %+8ld     complexas: -500 ± %ldi\n",
                    Cv / 1000, Cv % 1000, Dm, sr / 2000);
             continue;
         }
-        long sr = isqrt_ll((long long)Dm * 1000000LL);
+        long sr = isqrt_i64((int64_t)Dm * (int64_t)1000000);
         /* r1,r2 = (−1000 ± √D)/2000 em escala 1000 */
         long dist = sr / 500;   /* |r1−r2| = √D */
         if(dist > antes) monot = 0;

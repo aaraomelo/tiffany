@@ -22,6 +22,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <stdint.h>
+#include <inttypes.h>
 
 /* ── O RELOGIO LE AS MARCAS ─────────────────────────────────────────────────────────
  * «Uma colisao e' uma marca do contador», e «o relogio LE em vez de perguntar». Cada
@@ -113,13 +115,13 @@ static const char *nome_caso[5] = {
     "uniforme", "quase ordenado", "invertido", "8 valores", "enviesado"
 };
 
-static long long agora_ns(void){
+static int64_t agora_ns(void){
     struct timespec t; clock_gettime(CLOCK_MONOTONIC, &t);
-    return (long long)t.tv_sec * 1000000000LL + (long long)t.tv_nsec;
+    return (int64_t)t.tv_sec * 1000000000 + (int64_t)t.tv_nsec;
 }
-static void ms10_print(long long ns){
-    long long v = (ns + 50000) / 100000;   /* décimos de ms */
-    printf("%10lld.%lld", v / 10, v % 10);
+static void ms10_print(int64_t ns){
+    int64_t v = (ns + 50000) / 100000;   /* décimos de ms */
+    printf("%10" PRId64 ".%" PRId64, v / 10, v % 10);
 }
 
 int main(void){
@@ -138,8 +140,8 @@ int main(void){
 
     for(int caso = 0; caso < 5; caso++){
         gera(orig, N, caso);
-        long long t[5];
-        memcpy(a, orig, N*sizeof(long)); long long t0=agora_ns(); dual_sort(a, N, tmp);      t[0]=agora_ns()-t0;
+        int64_t t[5];
+        memcpy(a, orig, N*sizeof(long)); int64_t t0=agora_ns(); dual_sort(a, N, tmp);      t[0]=agora_ns()-t0;
         /* e a confirmacao: saiu mesmo ordenado? */
         long mau = 0; for(long i=1;i<N;i++) if(a[i-1]>a[i]) mau++;
         memcpy(a, orig, N*sizeof(long)); t0=agora_ns(); qsort(a,N,sizeof(long),cmp); t[1]=agora_ns()-t0;

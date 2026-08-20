@@ -47,8 +47,11 @@
  *
  *   cc -O2 -std=c99 -I. -I../lib descida_mobius.c -o descida_mobius && ./descida_mobius
  */
+#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
+#include <unistd.h>
 #include "reta.h"
+#include "rt_cf_slot.h"
 #include "unidade.h"
 
 /* as matrizes 2×2 inteiras, como [a b; c d] em ordem de leitura */
@@ -65,6 +68,7 @@ static int meq(const long *A, const long *B){
 static long mdet(const long *A){ return A[0]*A[3] - A[1]*A[2]; }
 
 int main(void){
+    int cf_mem = rt_cf_slot_mem_abre("dados/descida_cf.mem");
     printf("\n══ A descida via Möbius: o algoritmo da fracção contínua É o operador ══\n");
 
     /* ─── §M1 ── o passo de Euclides É a Möbius inversa ─────────────────────────────
@@ -73,8 +77,10 @@ int main(void){
      * descida, as palavras saem iguais TERMO A TERMO — e não só o último valor. */
     long pares = 0, iguais = 0, termos = 0, termos_iguais = 0;
     for(long p = 1; p <= 60; p++) for(long q = 1; q <= 60; q++){
-        RtCf w; rt_cf_de(1, p, q, &w);
-        if(w.saturou) continue;
+        RtCfSlot w = rt_cf_slot_word(0, cf_mem);
+        rt_cf_slot_de(1, p, q, &w);
+        if(rt_cf_slot_saturou(&w)) continue;
+        int wn = rt_cf_slot_n(&w);
 
         /* a MESMA descida, escrita como Möbius: [p:q] ↦ [q : p − a·q], com a = ⌊p/q⌋.
          * O `rt_dobra(m,…)` da lib faz exactamente isso — e aqui o m de cada passo não é
@@ -86,10 +92,10 @@ int main(void){
             rt_dobra(a, &P, &Q);            /* [P:Q] ↦ [Q : P − a·Q] */
         }
         pares++;
-        int bate = (n == w.n);
-        for(int i = 0; i < n && i < w.n; i++){
+        int bate = (n == wn);
+        for(int i = 0; i < n && i < wn; i++){
             termos++;
-            if(b[i] == w.a[i]) termos_iguais++; else bate = 0;
+            if(b[i] == rt_cf_slot_termo(&w, i)) termos_iguais++; else bate = 0;
         }
         if(bate) iguais++;
     }
@@ -162,13 +168,15 @@ int main(void){
      * — que é o que distingue o racional (§thm:descida: a palavra que fecha). */
     long casos = 0, volta_ok = 0, terminou = 0, passos_tot = 0;
     for(long p = 1; p <= 60; p++) for(long q = 1; q <= 60; q++){
-        RtCf w; rt_cf_de(1, p, q, &w);
-        if(w.saturou) continue;
+        RtCfSlot w = rt_cf_slot_word(0, cf_mem);
+        rt_cf_slot_de(1, p, q, &w);
+        if(rt_cf_slot_saturou(&w)) continue;
+        int wn = rt_cf_slot_n(&w);
         casos++;
-        if(w.n > 0) terminou++;                       /* a palavra fechou */
-        passos_tot += w.n;
+        if(wn > 0) terminou++;                       /* a palavra fechou */
+        passos_tot += wn;
         long rp, rq;
-        if(rt_cf_para(&w, &rp, &rq)){
+        if(rt_cf_slot_para(&w, &rp, &rq)){
             long g = rt_mdc(p, q); if(g < 1) g = 1;
             if(rp == p/g && rq == q/g) volta_ok++;    /* devolve a fracção REDUZIDA */
         }
@@ -193,12 +201,14 @@ int main(void){
     for(long m = 1; m <= 12; m++){
         met++;
         /* o convergente de ordem k de [m;m,m,…], e a dobra a levá-lo ao anterior */
-        RtCf w; w.n = 0; w.saturou = 0;
-        for(int k = 0; k < 12; k++) if(!rt_op_escreve(&w, m)) break;
+        RtCfSlot w = rt_cf_slot_word(1, cf_mem);
+        rt_cf_slot_init(&w, 1, w.base);
+        for(int k = 0; k < 12; k++) if(!rt_cf_slot_escreve(&w, m)) break;
+        int wn = rt_cf_slot_n(&w);
         int rep = 1;
-        for(int k = 1; k < w.n; k++){
+        for(int k = 1; k < wn; k++){
             long p, q;
-            if(!rt_op_le(&w, k, &p, &q)) continue;
+            if(!rt_cf_slot_le(&w, k, &p, &q)) continue;
             obs++;
             if(rt_forma(p, q, m) != 0) nunca_zero++;
             /* a dobra devolve o convergente ANTERIOR: é a descida a andar para trás */
@@ -228,11 +238,13 @@ int main(void){
     /* e ao longo de uma descida inteira, o det do produto acumulado */
     long acum_ok = 0, acum_tot = 0;
     for(long p = 7; p <= 60; p += 7) for(long q = 3; q <= 60; q += 5){
-        RtCf w; rt_cf_de(1, p, q, &w);
-        if(w.saturou || w.n == 0) continue;
+        RtCfSlot w = rt_cf_slot_word(2, cf_mem);
+        rt_cf_slot_de(1, p, q, &w);
+        if(rt_cf_slot_saturou(&w) || rt_cf_slot_n(&w) == 0) continue;
+        int wn = rt_cf_slot_n(&w);
         long M[4] = {1,0,0,1};
-        for(int k = 0; k < w.n; k++){
-            long A[4] = {w.a[k], 1, 1, 0};
+        for(int k = 0; k < wn; k++){
+            long A[4] = {rt_cf_slot_termo(&w, k), 1, 1, 0};
             mm(M, A, M);
         }
         acum_tot++;
@@ -279,13 +291,15 @@ int main(void){
     }
     /* e a mesma coisa na palavra: o zero soma os vizinhos */
     for(long c = 0; c <= 4; c++) for(long a = 1; a <= 6; a++) for(long b = 1; b <= 6; b++){
-        RtCf w1; w1.n = 0; w1.saturou = 0; w1.sinal = 1;
-        rt_op_escreve(&w1, c); rt_op_escreve(&w1, a);
-        rt_op_escreve(&w1, 0); rt_op_escreve(&w1, b);
-        RtCf w2; w2.n = 0; w2.saturou = 0; w2.sinal = 1;
-        rt_op_escreve(&w2, c); rt_op_escreve(&w2, a + b);
+        RtCfSlot w1 = rt_cf_slot_word(6, cf_mem);
+        rt_cf_slot_init(&w1, 1, w1.base);
+        rt_cf_slot_escreve(&w1, c); rt_cf_slot_escreve(&w1, a);
+        rt_cf_slot_escreve(&w1, 0); rt_cf_slot_escreve(&w1, b);
+        RtCfSlot w2 = rt_cf_slot_word(7, cf_mem);
+        rt_cf_slot_init(&w2, 1, w2.base);
+        rt_cf_slot_escreve(&w2, c); rt_cf_slot_escreve(&w2, a + b);
         long p1, q1, p2, q2;
-        if(rt_cf_para(&w1, &p1, &q1) && rt_cf_para(&w2, &p2, &q2)){
+        if(rt_cf_slot_para(&w1, &p1, &q1) && rt_cf_slot_para(&w2, &p2, &q2)){
             pal++;
             if(p1*q2 == p2*q1) pal_ok++;                 /* igual em ℙ¹, sem dividir */
         }
@@ -520,13 +534,15 @@ int main(void){
     for(long m = 1; m <= 12; m++){
         /* a órbita de σ_m: parte de um convergente e desce; F vale ±1 e NUNCA zero, logo o
          * par nunca chega a (g, 0) — a energia é 1 e nunca se gasta */
-        RtCf w; w.n = 0; w.saturou = 0;
-        for(int k = 0; k < 12; k++) if(!rt_op_escreve(&w, m)) break;
+        RtCfSlot w = rt_cf_slot_word(3, cf_mem);
+        rt_cf_slot_init(&w, 1, w.base);
+        for(int k = 0; k < 12; k++) if(!rt_cf_slot_escreve(&w, m)) break;
         long p, q;
         inf_met++;
         int nunca_esgota = 1;
-        for(int k = 1; k < w.n; k++){
-            if(!rt_op_le(&w, k, &p, &q)) continue;
+        int wn = rt_cf_slot_n(&w);
+        for(int k = 1; k < wn; k++){
+            if(!rt_cf_slot_le(&w, k, &p, &q)) continue;
             if(rt_forma(p, q, m) == 0) nunca_esgota = 0;   /* se F zerasse, teria parado */
             if(rt_mdc(p, q) != 1) nunca_esgota = 0;        /* e a energia vale sempre 1 */
         }
@@ -741,5 +757,6 @@ int main(void){
     printf("     desce até ∞, e S troca os dois extremos porque 0 = 1/∞. E as duas usam\n");
     printf("     as MESMAS duas peças — inverter e transladar — na ordem oposta. ══\n\n");
 
+    if(cf_mem >= 0) close(cf_mem);
     return falhas ? 1 : 0;
 }

@@ -35,6 +35,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <stdint.h>
+#include <inttypes.h>
 #include <sys/mman.h>
 #include "unidade.h"
 
@@ -53,11 +55,11 @@ static long agora_ns(void){
 typedef struct {
     char      nome[MAX_NOME];
     int       n_dims;
-    long long dims[4];
+    int64_t dims[4];
     unsigned  tipo;
-    long long desloc_gguf;      /* onde está no blob do ollama */
-    long long desloc_fita;      /* onde fica na nossa fita */
-    long long bytes;
+    int64_t desloc_gguf;      /* onde está no blob do ollama */
+    int64_t desloc_fita;      /* onde fica na nossa fita */
+    int64_t bytes;
     long      telomero[24];     /* a cifra da ponta */
     size_t    n_telo;
 } Gene;
@@ -73,25 +75,25 @@ typedef struct {
  * ficheiro; ele declara a sua no §D4, em voz alta, e eu li-a como obstaculo. */
 static Gene genes[MAX_GENES];
 static int  n_genes = 0;
-static long long inicio_dados = 0;
+static int64_t inicio_dados = 0;
 
 static int fd_g = -1;
-static long long cur = 0;
+static int64_t cur = 0;
 static int falhou = 0;
 
 static void ler(void *d, size_t n){
     ssize_t r = pread(fd_g, d, n, cur);
     if(r != (ssize_t)n){ falhou = 1; memset(d, 0, n); return; }
-    cur += (long long)n;
+    cur += (int64_t)n;
 }
 static unsigned u32(void){ unsigned v = 0; ler(&v, 4); return v; }
-static unsigned long long u64(void){ unsigned long long v = 0; ler(&v, 8); return v; }
+static uint64_t u64(void){ uint64_t v = 0; ler(&v, 8); return v; }
 static void gstr(char *d, size_t cap){
-    unsigned long long n = u64();
+    uint64_t n = u64();
     size_t c = n < cap-1 ? (size_t)n : cap-1;
-    if(d) ler(d, c); else cur += (long long)c;
+    if(d) ler(d, c); else cur += (int64_t)c;
     if(d) d[c] = 0;
-    cur += (long long)(n - c);
+    cur += (int64_t)(n - c);
 }
 static void saltar_valor(unsigned t);
 static void saltar_um(unsigned t){
@@ -107,8 +109,8 @@ static void saltar_um(unsigned t){
 }
 static void saltar_valor(unsigned t){
     if(t != 9){ saltar_um(t); return; }
-    unsigned te = u32(); unsigned long long n = u64();
-    for(unsigned long long i = 0; i < n && !falhou; i++) saltar_um(te);
+    unsigned te = u32(); uint64_t n = u64();
+    for(uint64_t i = 0; i < n && !falhou; i++) saltar_um(te);
 }
 static int bloco_bytes(unsigned t){
     switch(t){ case 0: return 4; case 1: return 2; case 12: return 144; case 14: return 210; }
@@ -192,20 +194,20 @@ cur = 0;
 char magic[5] = {0};
 ler(magic,4);
 unsigned versao = u32();
-unsigned long long nt = u64(), nkv = u64();
+uint64_t nt = u64(), nkv = u64();
 if(strcmp(magic,"GGUF") || versao != 3){ printf("\nfita: não é um GGUF v3\n"); return 1; }
-for(unsigned long long i = 0; i < nkv && !falhou; i++){
+for(uint64_t i = 0; i < nkv && !falhou; i++){
     char ch[128]; gstr(ch, sizeof ch); saltar_valor(u32());
 }
-for(unsigned long long i = 0; i < nt && !falhou && n_genes < MAX_GENES; i++){
+for(uint64_t i = 0; i < nt && !falhou && n_genes < MAX_GENES; i++){
     Gene *g = &genes[n_genes];
     gstr(g->nome, MAX_NOME);
     g->n_dims = (int)u32();
     if(g->n_dims > 4){ falhou = 1; break; }
-    for(int d = 0; d < g->n_dims; d++) g->dims[d] = (long long)u64();
+    for(int d = 0; d < g->n_dims; d++) g->dims[d] = (int64_t)u64();
     g->tipo = u32();
-    g->desloc_gguf = (long long)u64();
-    long long el = 1;
+    g->desloc_gguf = (int64_t)u64();
+    int64_t el = 1;
     for(int d = 0; d < g->n_dims; d++) el *= g->dims[d];
     int bv = bloco_valores(g->tipo);
     g->bytes = bv ? el/bv*bloco_bytes(g->tipo) : 0;
@@ -215,7 +217,7 @@ inicio_dados = (cur + 31) / 32 * 32;
 printf("    genes:   %d\n", n_genes);
 
 printf("\n§D1  TRANSCREVER: os %d genes do llama para dentro da fita.\n\n", n_genes);
-long long total_escrito = 0;
+int64_t total_escrito = 0;
 long rss_base = rss_anon_kb();
 {
     mkdir(dir_fita, 0755);
@@ -236,14 +238,14 @@ long rss_base = rss_anon_kb();
      * fita — o kernel pode ainda resolvê-la por REFLINK: as extensões passam a ser partilhadas
      * e não se copia byte nenhum, com escrita-ao-copiar a tratar de quem mudar depois. É por
      * isso que é rápido: o caminho mais curto entre dois pontos do disco não passa pela RAM. */
-    long long pos = 0;
+    int64_t pos = 0;
     int erros = 0;
     long t0 = agora_ns();
     for(int i = 0; i < n_genes; i++){
         Gene *g = &genes[i];
         g->desloc_fita = pos;
         off_t o_org = (off_t)(inicio_dados + g->desloc_gguf), o_fit = (off_t)pos;
-        long long restam = g->bytes;
+        int64_t restam = g->bytes;
         while(restam > 0){
             ssize_t r = copy_file_range(fd_g, &o_org, fd_f, &o_fit, (size_t)restam, 0);
             if(r <= 0){ erros++; break; }
@@ -253,7 +255,7 @@ long rss_base = rss_anon_kb();
     long t_cfr = agora_ns() - t0;
     close(fd_f);
     printf("      genes transcritos     %d\n", n_genes);
-    printf("      bytes na fita         %lld  (%lld MiB)\n", total_escrito, total_escrito/1048576);
+    printf("      bytes na fita         %" PRId64 "  (%" PRId64 " MiB)\n", total_escrito, total_escrito/1048576);
     printf("      erros                 %d\n", erros);
     printf("      tempo (copy_file_range, dentro do kernel)  %ld ms   %ld MiB/s\n\n",
            t_cfr/1000000L, t_cfr > 0 ? (total_escrito/1048576)*1000000000L/t_cfr : 0);
@@ -273,11 +275,11 @@ long rss_base = rss_anon_kb();
     {
         struct stat sf;
         stat(f_fita, &sf);
-        long long real = (long long)sf.st_blocks * 512;
-        printf("      alinhamento dos dados na origem   %lld  (%% 4096 = %lld)\n",
+        int64_t real = (int64_t)sf.st_blocks * 512;
+        printf("      alinhamento dos dados na origem   %" PRId64 "  (%% 4096 = %" PRId64 ")\n",
                inicio_dados, inicio_dados % 4096);
-        printf("      espaço aparente da fita           %lld MiB\n", (long long)sf.st_size/1048576);
-        printf("      espaço REAL em disco              %lld MiB\n", real/1048576);
+        printf("      espaço aparente da fita           %" PRId64 " MiB\n", (int64_t)sf.st_size/1048576);
+        printf("      espaço REAL em disco              %" PRId64 " MiB\n", real/1048576);
         printf("      houve reflink?                    %s\n\n",
                real < total_escrito/2 ? "SIM — partilhou extensões" : "não — copiou mesmo");
         ok("o espaço real da fita é medido, e diz se houve partilha ou cópia", real > 0);
@@ -291,9 +293,9 @@ long rss_base = rss_anon_kb();
         int fd_a = open(f_alt, O_WRONLY|O_CREAT|O_TRUNC, 0644);
         static unsigned char buf[BUF];
         long t1 = agora_ns();
-        long long feito = 0;
+        int64_t feito = 0;
         for(int i = 0; i < n_genes && fd_a >= 0; i++){
-            long long restam = genes[i].bytes, off = inicio_dados + genes[i].desloc_gguf;
+            int64_t restam = genes[i].bytes, off = inicio_dados + genes[i].desloc_gguf;
             while(restam > 0){
                 size_t p = restam > BUF ? BUF : (size_t)restam;
                 ssize_t r = pread(fd_g, buf, p, off);
@@ -307,12 +309,12 @@ long rss_base = rss_anon_kb();
         unlink(f_alt);
         printf("      o MESMO trabalho pelo buffer de 64 kB:     %ld ms   %ld MiB/s\n",
                t_buf/1000000L, t_buf > 0 ? (feito/1048576)*1000000000L/t_buf : 0);
-        printf("      e os bytes atravessaram a fronteira        %lld vezes (contra 0)\n\n",
+        printf("      e os bytes atravessaram a fronteira        %" PRId64 " vezes (contra 0)\n\n",
                feito/BUF*2);
         int cfr_rapida = (2 * t_cfr <= 3 * t_buf);
         ok("a transcrição dentro do kernel não é mais lenta que a que passa pela RAM",
            cfr_rapida);
-        printf("      Os dois escreveram %lld MiB. A diferença não está no que fizeram — está\n",
+        printf("      Os dois escreveram %" PRId64 " MiB. A diferença não está no que fizeram — está\n",
                feito/1048576);
         printf("      em por onde os bytes passaram.\n");
     }
@@ -343,7 +345,7 @@ long rss_base = rss_anon_kb();
     FILE *ix = fopen(f_idx, "w");
     if(ix){
         for(int i = 0; i < n_genes; i++){
-            fprintf(ix, "%s\t%lld\t%lld\t", genes[i].nome, genes[i].desloc_fita, genes[i].bytes);
+            fprintf(ix, "%s\t%" PRId64 "\t%" PRId64 "\t", genes[i].nome, genes[i].desloc_fita, genes[i].bytes);
             for(size_t k = 0; k < genes[i].n_telo; k++) fprintf(ix, "%ld ", genes[i].telomero[k]);
             fprintf(ix, "\n");
         }
@@ -362,7 +364,7 @@ printf("\n§D2  REPLICAR: reler a fita e comparar com o original, byte a byte.\n
      * aloca um único byte para isto, e compara a fita INTEIRA em vez de uma amostra. */
     int fd_f = open(f_fita, O_RDONLY);
     if(fd_f < 0){ perror("fita: não consigo reler"); return 1; }
-    long long comparados = 0; int divergentes = 0, genes_vistos = 0;
+    int64_t comparados = 0; int divergentes = 0, genes_vistos = 0;
     struct stat s_org;
     fstat(fd_g, &s_org);
     unsigned char *org = mmap(NULL, (size_t)s_org.st_size, PROT_READ, MAP_PRIVATE, fd_g, 0);
@@ -384,7 +386,7 @@ printf("\n§D2  REPLICAR: reler a fita e comparar com o original, byte a byte.\n
     if(fit != MAP_FAILED) munmap(fit, (size_t)total_escrito);
     close(fd_f);
     printf("      genes comparados      %d  (TODOS, não uma amostra)\n", genes_vistos);
-    printf("      bytes comparados      %lld  (%lld MiB)\n", comparados, comparados/1048576);
+    printf("      bytes comparados      %" PRId64 "  (%" PRId64 " MiB)\n", comparados, comparados/1048576);
     printf("      genes divergentes     %d\n", divergentes);
     printf("      tempo                 %ld ms   (%ld MiB/s, e por mmap)\n\n",
            t_cmp/1000000L, t_cmp > 0 ? (comparados/1048576)*1000000000L/t_cmp : 0);
@@ -397,7 +399,7 @@ printf("\n§D3  OS TELÓMEROS: cada gene tem a sua cifra, e elas distinguem.\n\n
 {
     printf("      %-34s %-10s %s\n", "gene", "bytes", "telómero (12 primeiros)");
     for(int i = 0; i < n_genes && i < 5; i++){
-        printf("      %-34s %-10lld ", genes[i].nome, genes[i].bytes);
+        printf("      %-34s %-10" PRId64 " ", genes[i].nome, genes[i].bytes);
         for(size_t k = 0; k < genes[i].n_telo && k < 12; k++) printf("%ld ", genes[i].telomero[k]);
         printf("\n");
     }
@@ -452,13 +454,13 @@ printf("\n§D4  A RAM: 940 MiB atravessaram a transcrição, e não ficaram.\n\n
     printf("      comparação são mmap (páginas de FICHEIRO, que o kernel descarta e relê do\n");
     printf("      disco de graça, porque estão limpas). Os %d kB de buffer que restam existem\n", BUF/1024);
     printf("      só no caminho ALTERNATIVO, o que serve de cronómetro ao outro.\n\n");
-    printf("      %lld MiB de tráfego — ler, escrever, e reler a fita inteira para conferir —\n",
+    printf("      %" PRId64 " MiB de tráfego — ler, escrever, e reler a fita inteira para conferir —\n",
            (total_escrito*2)/1048576);
     printf("      e a página anónima do processo não se mexeu. A fita é longa; o que a lê, não.\n");
 }
 
 printf("\n=== FECHO ==================================================================\n");
-printf("    O llama está dentro. %d genes, %lld MiB, cada um com a sua ponta cifrada,\n",
+printf("    O llama está dentro. %d genes, %" PRId64 " MiB, cada um com a sua ponta cifrada,\n",
        n_genes, total_escrito/1048576);
 printf("    e a replicação confere byte a byte. A partir daqui o modelo é material\n");
 printf("    do sistema, endereçado pelas coordenadas do sistema.\n\n");

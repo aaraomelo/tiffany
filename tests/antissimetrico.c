@@ -13,6 +13,8 @@
  */
 #include <stdio.h>
 #include <math.h>
+#include <stdint.h>
+#include <inttypes.h>
 
 #include "unidade.h"
 
@@ -41,15 +43,15 @@ static int detp(int n, int M[NX][NX]){
 }
 
 /* |GL_n(q)| = prod_{i=0}^{n-1}(q^n - q^i) ;  |Sp_2m(q)| = q^{m^2} prod_{i=1}^{m}(q^{2i}-1) */
-static long long ipow_ll(long long b, int e){ long long r = 1; while(e--) r *= b; return r; }
-static long long ord_gl(int n, int q){
-    long long r = 1, qn = ipow_ll(q, n);
-    for(int i = 0; i < n; i++) r *= (qn - ipow_ll(q, i));
+static int64_t ipow_i64(int64_t b, int e){ int64_t r = 1; while(e--) r *= b; return r; }
+static int64_t ord_gl(int n, int q){
+    int64_t r = 1, qn = ipow_i64(q, n);
+    for(int i = 0; i < n; i++) r *= (qn - ipow_i64(q, i));
     return r;
 }
-static long long ord_sp(int m, int q){
-    long long r = ipow_ll(q, m * m);
-    for(int i = 1; i <= m; i++) r *= (ipow_ll(q, 2 * i) - 1);
+static int64_t ord_sp(int m, int q){
+    int64_t r = ipow_i64(q, m * m);
+    for(int i = 1; i <= m; i++) r *= (ipow_i64(q, 2 * i) - 1);
     return r;
 }
 
@@ -88,8 +90,8 @@ printf("      p   n    formas         não-deg.   |GL_n|/|Sp_n|   uma classe?\n"
             long nd = 0;
             int B[NX][NX];
             for(long c = 0; c < tot; c++){ alt_de(n, c, B); if(detp(n, B)) nd++; }
-            long long pred = (n % 2 == 0) ? ord_gl(n, P) / ord_sp(n / 2, P) : 0;
-            printf("      %d   %d   %8ld   %10ld   %13lld    %s\n",
+            int64_t pred = (n % 2 == 0) ? ord_gl(n, P) / ord_sp(n / 2, P) : 0;
+            printf("      %d   %d   %8ld   %10ld   %13" PRId64 "    %s\n",
                    P, n, tot, nd, pred, (nd == pred) ? "sim ✓" : "NÃO ✗");
             if(nd != pred) falhas++;
         }

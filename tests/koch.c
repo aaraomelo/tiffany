@@ -31,6 +31,7 @@
  */
 #include <stdio.h>
 #include <string.h>
+#include "i128.h"
 #include "eletrico.h"
 #include "unidade.h"
 #include "reta.h"
@@ -55,15 +56,15 @@ printf("\n§K1  A garrafa: borda INFINITA em espaço FINITO.\n\n");
     printf("      cada iteração: 1 segmento -> 4 de 1/3    =>   perímetro × 4/3\n\n");
     printf("      nível N   perímetro 4^N/3^N   área/limite (exacto)\n");
     int malP = 0, malA = 0;
-    long long n4 = 1, n4a = 1, n9 = 1, n3 = 1;
-    long long num = 0, den = 8, numa = 0, dena = 1;
+    long n4 = 1, n4a = 1, n9 = 1, n3 = 1;
+    long num = 0, den = 8, numa = 0, dena = 1;
     for(int N = 0; N <= 12; N++){
         if(N > 0){ n4a = n4; n4 *= 4; n9 *= 9; n3 *= 3; }
         num = 8*n9 - 3*n4; den = 8*n9;
         if(N <= 4 || N == 8 || N == 12)
             printf("      %-9d %ld/%ld%*s %ld/%ld\n", N, n4, n3, 8, "", num, den);
         if(N > 0 && n4 <= n4a) malP++;
-        if(N > 0 && (__int128)num * dena <= (__int128)numa * den) malA++;
+        if(N > 0 && i128_cmp(i128_smul(num, dena), i128_smul(numa, den)) <= 0) malA++;
         numa = num; dena = den;
     }
     printf("\n      perímetro em N = 50: (4/3)^50      (diverge — 4 > 3)\n");
@@ -83,9 +84,9 @@ printf("\n§K1  A garrafa: borda INFINITA em espaço FINITO.\n\n");
      * sobra resíduo para comparar com nada. */
     int malTaxa = 0;
     {
-        long long n4 = 1, n9 = 1;                     /* (4/9)^0 = 1/1 */
+        long n4 = 1, n9 = 1;                     /* (4/9)^0 = 1/1 */
         for(int N = 1; N <= 12; N++){
-            long long p4 = n4, p9 = n9;               /* (4/9)^{N−1} */
+            long p4 = n4, p9 = n9;               /* (4/9)^{N−1} */
             n4 *= 4; n9 *= 9;                         /* (4/9)^N */
             /* falta_N/falta_{N−1} = (n4/n9)/(p4/p9) = 4/9  ⟺  n4·p9·9 == 4·n9·p4 */
             if(n4*p9*9 != 4*n9*p4) malTaxa++;

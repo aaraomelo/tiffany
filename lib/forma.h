@@ -1,6 +1,6 @@
 /* forma.h — FORMAS, ADJUNTOS E ESPECTRO. E A RAIZ NUNCA SE TIRA.
  *
- * O `eval.txt` sobe para a parte estrutural: forma bilinear → simétrica → quadrática →
+ *  ordem do coordenador sobe para a parte estrutural: forma bilinear → simétrica → quadrática →
  * produto interno → Cauchy–Schwarz → ortogonalidade → Gram–Schmidt → adjunto →
  * autoadjunto → espectral → valores singulares → SVD → Cayley–Hamilton → Jordan.
  *

@@ -35,6 +35,8 @@
  *   cc -O2 -std=c99 -Wall -Wformat kernelb.c -o kernelb && ./kernelb
  */
 #define _POSIX_C_SOURCE 200809L
+#include <stdint.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -181,7 +183,7 @@ static void secao_K3(void){
         close(f);
         if(n > 0) leram++;
         if(st.st_size == 0 && n > 0) mentem++;
-        printf("        %-24s %14lld    %11zd\n", alvos[i], (long long)st.st_size, n);
+        printf("        %-24s %14" PRId64 "    %11zd\n", alvos[i], (int64_t)st.st_size, n);
     }
     ok("os ficheiros leem-se — há conteúdo", leram >= 2);
     ok("e o stat diz TAMANHO 0 enquanto a leitura devolve bytes — não estava guardado",

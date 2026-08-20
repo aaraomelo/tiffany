@@ -97,7 +97,7 @@ int main(void){
            r.forward == 100 && r.reverse == 100 && r.residual == 0);
     }
 
-    /* §C4 GUT / PDCA — mesma IR, não módulos à parte (eval.txt) */
+    /* §C4 GUT / PDCA — mesma IR, não módulos à parte (ordem do coordenador) */
     {
         ClaimInput in; memset(&in, 0, sizeof in);
         in.n = 3; in.v[0] = 3; in.v[1] = 4; in.v[2] = 5;   /* score 60 */

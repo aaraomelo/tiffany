@@ -47,9 +47,16 @@
  *
  *   cc -O2 -std=c99 -I. -I../lib reta.c -o reta && ./reta
  */
+#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include "reta.h"
+#include "rt_cf_slot.h"
+#include "slot_map.h"
+#include "slot_mem.h"
 #include "unidade.h"
 
 /* o determinante pela DEFINIÇÃO: soma sobre as permutações, com o sinal. É a segunda
@@ -123,60 +130,51 @@ int main(void){
     /* ═══ §R1  A POTÊNCIA E O INVERSO EM 𝔽ₚ ═════════════════════════════════ */
     printf("\n§R1 rt_ipow e rt_inv_mod — e o inverso DESFAZ, que é a definição.\n\n");
     {
-        long pot_ok = 0, pot_tot = 0, inv_ok = 0, inv_tot = 0, nao_inv = 0;
-        for(long b = -4; b <= 4; b++) for(int e = 0; e <= 8; e++){
-            long r = rt_ipow(b, e), m = 1;
-            for(int k = 0; k < e; k++) m *= b;       /* a segunda rota: o laço directo */
+        int32_t pot_ok = 0, pot_tot = 0, inv_ok = 0, inv_tot = 0;
+        int32_t inv_i32_ok = 0;
+        for(int32_t b = -4; b <= 4; b++) for(int e = 0; e <= 8; e++){
+            int32_t r = rt_ipow(b, e), m = 1;
+            for(int k = 0; k < e; k++) m *= b;
             pot_tot++;
             if(r == m) pot_ok++;
         }
-        const long PR[4] = {7, 101, 1009, 65537};
+        const int32_t PR[4] = {7, 101, 1009, 65537};
         for(int t = 0; t < 4; t++){
-            long p = PR[t];
-            for(long a = 1; a < p && a <= 60; a++){
-                long v = rt_inv_mod(a, p);
+            int32_t p = PR[t];
+            for(int32_t a = 1; a < p && a <= 60; a++){
+                int32_t v = rt_inv_mod_i32(a, p);
+                int32_t vl = (int32_t)rt_inv_mod(a, p);
                 inv_tot++;
-                if(a*v % p == 1) inv_ok++;           /* a DEFINIÇÃO: a·a⁻¹ = 1 */
+                if((int64_t)a * v % p == 1) inv_ok++;
+                if(v == vl) inv_i32_ok++;
             }
         }
-        /* o GUME: em 𝔽ₚ o zero NÃO tem inverso, e um `a` múltiplo de p também não —
-         * sem este lado, «o inverso desfaz» valia por nunca se lhe pedir o impossível */
-        /* E O GUME NÃO MORDIA. `p*v % p != 1` é SEMPRE verdade — p·v ≡ 0 (mod p) para
-         * qualquer v —, portanto `nao_inv == 4` passava independentemente do que
-         * rt_inv_mod devolvesse. A tautologia estava escondida por o teste parecer usar o
-         * resultado da função.
-         *
-         * O que se afirma verifica-se CONTANDO SOLUÇÕES, e é aí que há conteúdo: em 𝔽ₚ a
-         * equação a·v = 1 tem EXACTAMENTE uma solução quando a ≠ 0 e NENHUMA quando a = 0.
-         * Varre-se v e conta-se — e as duas metades vão juntas, porque «não há inverso do
-         * zero» sem «há um e um só dos outros» não distingue um corpo de um anel qualquer. */
-        long zero_sem = 0, outros_um = 0, testados_a = 0, varridos = 0;
-        for(int t = 0; t < 4; t++){                  /* os primos que cabem: varre-se TUDO */
-            long p = PR[t];
-            if(p > 1100) continue;                   /* 1009² ainda cabe; 65537² não */
+        int32_t zero_sem = 0, outros_um = 0, testados_a = 0, varridos = 0;
+        for(int t = 0; t < 4; t++){
+            int32_t p = PR[t];
+            if(p > 1100) continue;
             varridos++;
-            long quantos0 = 0;
-            for(long v = 0; v < p; v++) if((0 * v) % p == 1) quantos0++;
-            if(quantos0 == 0) zero_sem++;            /* o zero: NENHUMA solução */
-            for(long a = 1; a < p; a++){
-                long quantos = 0;
-                for(long v = 0; v < p; v++) if((a * v) % p == 1) quantos++;
+            int32_t quantos0 = 0;
+            for(int32_t v = 0; v < p; v++) if((0 * v) % p == 1) quantos0++;
+            if(quantos0 == 0) zero_sem++;
+            for(int32_t a = 1; a < p; a++){
+                int32_t quantos = 0;
+                for(int32_t v = 0; v < p; v++) if((int64_t)a * v % p == 1) quantos++;
                 testados_a++;
-                if(quantos == 1) outros_um++;        /* os outros: UMA, e uma só */
+                if(quantos == 1) outros_um++;
             }
         }
-        nao_inv = zero_sem;
-        printf("      rt_ipow contra o laço directo: %ld de %ld\n", pot_ok, pot_tot);
-        printf("      rt_inv_mod: a·a⁻¹ = 1 em %ld de %ld, em quatro primos\n", inv_ok, inv_tot);
+        printf("      rt_ipow contra o laço directo: %d de %d\n", pot_ok, pot_tot);
+        printf("      rt_inv_mod_i32: a·a⁻¹ = 1 em %d de %d, em quatro primos\n", inv_ok, inv_tot);
+        printf("      rt_inv_mod_i32 = rt_inv_mod (long) .............. %d de %d\n", inv_i32_ok, inv_tot);
         printf("      GUME, por CONTAGEM DE SOLUÇÕES de a·v = 1 em 𝔽ₚ:\n");
-        printf("        a = 0 : nenhuma solução, em %ld de %ld primos varridos por inteiro\n",
+        printf("        a = 0 : nenhuma solução, em %d de %d primos varridos por inteiro\n",
                zero_sem, varridos);
-        printf("        a ≠ 0 : exactamente UMA, em %ld de %ld valores\n\n", outros_um, testados_a);
+        printf("        a ≠ 0 : exactamente UMA, em %d de %d valores\n\n", outros_um, testados_a);
         ok("A POTÊNCIA E O INVERSO EM 𝔽ₚ, e o inverso mede-se pela DEFINIÇÃO — a·a⁻¹ = 1,"
-           " e não contra uma segunda fórmula do inverso, que seria escrevê-lo duas vezes."
-           " Quatro primos até 65537. Com o gume: o zero não tem inverso, e sem esse lado"
-           " «o inverso desfaz» valia por nunca se lhe pedir o impossível",
-           pot_ok == pot_tot && inv_ok == inv_tot && pot_tot > 0
+           " em int32 (rt_ipow, rt_inv_mod_i32). Quatro primos até 65537. Com o gume: o zero"
+           " não tem inverso, e a rota int32 concorda com rt_inv_mod long onde ambas cabem",
+           pot_ok == pot_tot && inv_ok == inv_tot && inv_i32_ok == inv_tot && pot_tot > 0
            && varridos == 3 && zero_sem == varridos
            && outros_um == testados_a && testados_a > 0);
     }
@@ -274,67 +272,76 @@ int main(void){
     /* ═══ §R5  A ÓRBITA DE ∞ ════════════════════════════════════════════════ */
     printf("\n§R5 rt_orbita: os convergentes, e a forma vale ±1 e NUNCA zero.\n\n");
     {
-        long casos = 0, unidade = 0, zeros = 0, rec_ok = 0;
+        long casos = 0, unidade = 0, zeros = 0, rec_ok = 0, bate_long = 0, cabe_i32 = 0;
         for(long m = 1; m <= 8; m++){
             long ap = 1, aq = 0;
             for(int k = 1; k <= 16; k++){
                 long p, q;
                 rt_orbita(m, k, &p, &q);
-                /* (i) a forma que o PONTO FIXO anularia vale ±1 — e nunca 0, que é o corte */
-                long forma = p*p - m*p*q - q*q;
+                int32_t pi, qi;
+                int tem_i32 = rt_orbita_i32((int32_t)m, k, &pi, &qi);
                 casos++;
+                if(tem_i32){
+                    cabe_i32++;
+                    if(p == pi && q == qi) bate_long++;
+                }
+                long forma = p*p - m*p*q - q*q;
                 if(forma == 1 || forma == -1) unidade++;
                 if(forma == 0) zeros++;
-                /* (ii) e a recorrência: cada convergente sai do anterior pela Möbius */
                 if(p == m*ap + aq && q == ap) rec_ok++;
                 ap = p; aq = q;
             }
         }
         printf("      %ld passos em 8 metais: |p² − m·p·q − q²| = 1 em %ld, e ZERO em %ld\n",
                casos, unidade, zeros);
+        printf("      cabem em int32: %ld de %ld; rt_orbita_i32 = long .... %ld de %ld\n",
+               cabe_i32, casos, bate_long, cabe_i32);
         printf("      e a recorrência [p:q] ⟼ [m·p+q : p] fecha em %ld\n\n", rec_ok);
-        ok("A ÓRBITA DE ∞ DÁ OS CONVERGENTES, e a forma que o PONTO FIXO anularia vale ±1 em"
-           " todos os passos e ZERO em nenhum — que é o corte medido de frente: o ponto fixo"
-           " pediria a forma = 0, e isso não tem solução em ℤ. É por isso que ele não cabe"
-           " neste andar, e é por isso que um decimal não o representa: um decimal truncado"
-           " não é o objecto, é outro número",
-           unidade == casos && zeros == 0 && rec_ok == casos && casos == 128);
+        ok("A ÓRBITA DE ∞ DÁ OS CONVERGENTES, e a forma vale ±1 em todos os passos e ZERO"
+           " em nenhum — onde cabe int32, rt_orbita_i32 concorda com long. É o corte medido"
+           " de frente: o ponto fixo pediria forma = 0, e isso não tem solução em ℤ",
+           unidade == casos && zeros == 0 && rec_ok == casos && casos == 128
+           && bate_long == cabe_i32 && cabe_i32 > 0);
     }
 
     /* ═══ §R6  A REVERSÃO É INVOLUÇÃO ═══════════════════════════════════════ */
     printf("\n§R6 rt_reverte: involução, e leva a borda do ouro na equação do recíproco.\n\n");
     {
-        long casos = 0, volta = 0, muda = 0;
-        for(long s = 0; s < 200; s++){
-            long a[6], r[6], rr[6];
+        int32_t casos = 0, volta = 0, muda = 0, bate_long = 0;
+        for(int32_t s = 0; s < 200; s++){
+            int32_t a[6], r[6], rr[6];
+            long al[6], rl[6];
             int n = 5;
             for(int k = 0; k <= n; k++) a[k] = ((s*7 + k*3) % 9) - 4;
-            rt_reverte(a, n, r);
-            rt_reverte(r, n, rr);                    /* reverter duas vezes devolve */
+            rt_reverte_i32(a, n, r);
+            rt_reverte_i32(r, n, rr);
+            for(int k = 0; k <= n; k++) al[k] = a[k];
+            rt_reverte(al, n, rl);
             casos++;
-            int igual = 1, dif = 0;
+            int igual = 1, dif = 0, bate = 1;
             for(int k = 0; k <= n; k++){
                 if(rr[k] != a[k]) igual = 0;
                 if(r[k] != a[k]) dif = 1;
+                if(r[k] != rl[k]) bate = 0;
             }
             if(igual) volta++;
-            if(dif) muda++;                          /* e NÃO é a identidade */
+            if(dif) muda++;
+            if(bate) bate_long++;
         }
-        /* e o caso que o `solar.c` usa: a borda do ouro revertida é a equação do recíproco */
-        long ouro[3] = {1, -1, -1}, rev[3];
-        rt_reverte(ouro, 2, rev);
+        int32_t ouro[3] = {1, -1, -1}, rev[3];
+        rt_reverte_i32(ouro, 2, rev);
         int bate_ouro = (rev[0] == -1 && rev[1] == -1 && rev[2] == 1);
-        printf("      %ld polinómios: reverter duas vezes devolve em %ld, e MUDA em %ld\n",
+        printf("      %d polinómios: reverter duas vezes devolve em %d, e MUDA em %d\n",
                casos, volta, muda);
-        printf("      e a borda do ouro (1,−1,−1) revertida dá (%ld,%ld,%ld) = −(1,1,−1),\n"
+        printf("      rt_reverte_i32 = rt_reverte (long) .......... %d de %d\n",
+               bate_long, casos);
+        printf("      e a borda do ouro (1,−1,−1) revertida dá (%d,%d,%d) = −(1,1,−1),\n"
                "      que é x² + x − 1: a equação do RECÍPROCO — %s\n\n",
                rev[0], rev[1], rev[2], bate_ouro ? "sim" : "NÃO");
-        ok("A REVERSÃO É INVOLUÇÃO — revertida duas vezes devolve —, e não é a identidade,"
-           " que é o controlo sem o qual «volta» valia por ela não fazer nada. E é ela que"
-           " troca DENTRO por FORA no disco (Rouché no dual, §M17) e que faz do RECÍPROCO"
-           " do ouro a raiz do polinómio revertido: (1,−1,−1) ao contrário é −(1,1,−1),"
-           " isto é x² + x − 1, que é a equação do fator de potência do solar.c",
-           volta == casos && muda > casos/2 && bate_ouro && casos == 200);
+        ok("A REVERSÃO É INVOLUÇÃO em int32 — revertida duas vezes devolve —, e não é a"
+           " identidade; a rota int32 concorda com rt_reverte long. E faz do RECÍPROCO do"
+           " ouro a raiz revertida: (1,−1,−1) ao contrário é −(1,1,−1), isto é x²+x−1",
+           volta == casos && muda > casos/2 && bate_ouro && bate_long == casos && casos == 200);
     }
 
     /* ═══ §R7  ROUTH–HURWITZ ════════════════════════════════════════════════ */
@@ -430,65 +437,90 @@ int main(void){
         }
         const long alvo6[7] = {1,6,15,20,15,6,1};     /* a 6.ª linha, que se sabe */
         for(int i = 0; i <= 6; i++) if(pas[i] != alvo6[i]) pascal_ok = 0;
-        /* o cruzado: antissimétrico, e a×a = 0 */
-        long anti = 0, nulo = 0, viv = 0, cc = 0;
+        /* o cruzado: antissimétrico, e a×a = 0 — rota int32 com produtos int64 */
+        long anti = 0, nulo = 0, viv = 0, cc = 0, cruz_i32 = 0;
         for(long t = 0; t < 200; t++){
-            long a[3], b[3], ab[3], ba[3], aa[3];
+            int32_t a[3], b[3], ab[3], ba[3], aa[3];
+            long al[3], bl[3], abl[3];
             for(int i = 0; i < 3; i++){
-                a[i] = ((t*7 + i*3) % 11) - 5;
-                b[i] = ((t*5 + i*2) % 9)  - 4;
+                a[i] = (int32_t)(((t*7 + i*3) % 11) - 5);
+                b[i] = (int32_t)(((t*5 + i*2) % 9)  - 4);
+                al[i] = a[i]; bl[i] = b[i];
             }
-            rt_cruz3(a, b, ab); rt_cruz3(b, a, ba); rt_cruz3(a, a, aa);
+            rt_cruz3_i32(a, b, ab); rt_cruz3_i32(b, a, ba); rt_cruz3_i32(a, a, aa);
+            rt_cruz3(al, bl, abl);
             cc++;
-            int ant = 1, nul = 1, vv = 0;
+            int ant = 1, nul = 1, vv = 0, bate = 1;
             for(int i = 0; i < 3; i++){
                 if(ab[i] != -ba[i]) ant = 0;
                 if(aa[i] != 0) nul = 0;
                 if(ab[i]) vv = 1;
+                if(ab[i] != abl[i]) bate = 0;
             }
             anti += ant; nulo += nul; viv += vv;
+            if(bate) cruz_i32++;
         }
-        /* e a decomposição: 2M = (M+Mᵀ) + (M−Mᵀ), com S simétrica e A antissimétrica */
-        long dec = 0, dtot = 0;
+        /* e a decomposição: 2M = (M+Mᵀ) + (M−Mᵀ) */
+        long dec = 0, dtot = 0, dec_i32 = 0;
         for(long t = 0; t < 100; t++){
-            long M[16], S2[16], A2[16];
-            for(int i = 0; i < 16; i++) M[i] = ((t*11 + i*3) % 13) - 6;
-            rt_dir_cruz(M, 4, S2, A2);
-            int bom = 1;
+            int32_t M[16], S2[16], A2[16];
+            long Ml[16], S2l[16], A2l[16];
+            for(int i = 0; i < 16; i++){
+                M[i] = (int32_t)(((t*11 + i*3) % 13) - 6);
+                Ml[i] = M[i];
+            }
+            rt_dir_cruz_i32(M, 4, S2, A2);
+            rt_dir_cruz(Ml, 4, S2l, A2l);
+            int bom = 1, bate = 1;
             for(int i = 0; i < 4 && bom; i++) for(int j = 0; j < 4; j++){
                 if(S2[i*4+j] + A2[i*4+j] != 2*M[i*4+j]) { bom = 0; break; }
                 if(S2[i*4+j] != S2[j*4+i])              { bom = 0; break; }
                 if(A2[i*4+j] != -A2[j*4+i])             { bom = 0; break; }
+                if(S2[i*4+j] != S2l[i*4+j] || A2[i*4+j] != A2l[i*4+j]) bate = 0;
             }
             dtot++; dec += bom;
+            if(bate) dec_i32++;
         }
         printf("      a convolução de (x+1)^6 dá a linha de Pascal: %s\n",
                pascal_ok ? "1 6 15 20 15 6 1" : "NÃO");
+        printf("      rt_cruz3_i32 = rt_cruz3 (long) .......... %ld de %ld\n",
+               cruz_i32, cc);
         printf("      o cruzado é antissimétrico em %ld de %ld, a×a = 0 em %ld, e NÃO nulo em %ld\n",
                anti, cc, nulo, viv);
+        printf("      rt_dir_cruz_i32 = long .................. %ld de %ld\n",
+               dec_i32, dtot);
         printf("      e 2M = (M+Mᵀ) + (M−Mᵀ), com as duas metades no seu espaço: %ld de %ld\n\n",
                dec, dtot);
-        ok("A CONVOLUÇÃO É O PRODUTO DE POLINÓMIOS — e (x+1)^6 dá a linha de Pascal,"
-           " 1 6 15 20 15 6 1, que é o caso que se sabe de cor. O CRUZADO é antissimétrico"
-           " nos 200 pares e a×a é zero em todos, com os não nulos contados para «troca de"
-           " sinal» não valer por 0 = −0. E a DECOMPOSIÇÃO devolve: 2M = (M+Mᵀ) + (M−Mᵀ),"
-           " com a primeira metade simétrica e a segunda antissimétrica, em 100 matrizes",
-           pascal_ok && anti == cc && nulo == cc && viv > cc/2 && dec == dtot);
+        ok("A CONVOLUÇÃO É O PRODUTO DE POLINÓMIOS — e (x+1)^6 dá a linha de Pascal."
+           " O CRUZADO em int32 é antissimétrico e concorda com long; rt_dir_cruz_i32 idem."
+           " A DECOMPOSIÇÃO devolve 2M = (M+Mᵀ) + (M−Mᵀ) em 100 matrizes",
+           pascal_ok && anti == cc && nulo == cc && viv > cc/2 && dec == dtot
+           && cruz_i32 == cc && dec_i32 == dtot);
     }
 
     /* ═══ §R11 A COMPANHEIRA E O TRAÇO DAS POTÊNCIAS ════════════════════════ */
     printf("\n§R11 rt_companheira e rt_tracos — Tr(Cᵏ) é a soma das potências das raízes.\n\n");
     {
         /* x² = m·x + 1: os traços são os t_k de Lucas, e t_k = m·t_{k−1} + t_{k−2} */
-        long casos = 0, bate_rec = 0, bate_t0 = 0;
+        long casos = 0, bate_rec = 0, bate_t0 = 0, bate_i32 = 0, tr_i32 = 0;
         for(long m = 1; m <= 6; m++){
-            long c[2] = {1, m}, C[4], tr[14];         /* xⁿ = 1·x⁰ + m·x¹ */
+            long c[2] = {1, m}, C[4], tr[14];
+            int32_t ci[2] = {1, (int32_t)m}, Ci[4];
+            int64_t tri[14];
             rt_companheira(c, 2, C);
             rt_tracos(C, 2, tr, 14);
-            if(tr[0] == 2) bate_t0++;                 /* Tr(I) = n = 2 */
+            rt_companheira_i32(ci, 2, Ci);
+            rt_tracos_i32(Ci, 2, tri, 14);
+            int metal_ok = 1;
+            for(int k = 0; k < 14; k++){
+                if(tr[k] != tri[k]) metal_ok = 0;
+            }
+            if(metal_ok) bate_i32++;
+            if(tr[0] == 2) bate_t0++;
             for(int k = 2; k < 14; k++){
                 casos++;
-                if(tr[k] == m*tr[k-1] + tr[k-2]) bate_rec++;   /* Newton */
+                if(tr[k] == m*tr[k-1] + tr[k-2]) bate_rec++;
+                if(tri[k] == (int64_t)m*tri[k-1] + tri[k-2]) tr_i32++;
             }
         }
         /* e o GUME: uma companheira com o índice na LINHA em vez da coluna — o erro que
@@ -502,15 +534,17 @@ int main(void){
         }
         printf("      6 metais, 12 potências cada: Tr(Cᵏ) obedece a Newton em %ld de %ld,\n"
                "      e Tr(C⁰) = n em %ld de 6\n", bate_rec, casos, bate_t0);
+        printf("      rt_tracos_i32 = rt_tracos (long) ........ %ld de 6 metais\n",
+               bate_i32);
+        printf("      recorrência Newton na rota int64 ........ %ld de %ld\n",
+               tr_i32, casos);
         printf("      GUME: com a companheira TRANSPOSTA a recorrência quebra em %ld dos 4\n\n",
                errado);
-        ok("A COMPANHEIRA E O TRAÇO DAS SUAS POTÊNCIAS: Tr(Cᵏ) É a soma das potências das"
-           " raízes, e obedece à recorrência do próprio polinómio — Newton, sem avaliar raiz"
-           " nenhuma. Com Tr(C⁰) = n, que é a dimensão. E com o gume que me custou uma"
-           " asserção no analog.c §B.8: a acção é nas LINHAS, logo o índice sobe na COLUNA;"
-           " com a companheira transposta a recorrência quebra, e é isso que distingue a"
-           " construção certa da que passa por acaso",
-           bate_rec == casos && bate_t0 == 6 && errado > 0 && casos == 72);
+        ok("A COMPANHEIRA E O TRAÇO DAS SUAS POTÊNCIAS: Tr(Cᵏ) obedece a Newton, e a"
+           " rota int32/int64 concorda com long em todos os seis metais. Com Tr(C⁰) = n."
+           " E com o gume: a companheira transposta quebra a recorrência",
+           bate_rec == casos && bate_t0 == 6 && errado > 0 && casos == 72
+           && bate_i32 == 6 && tr_i32 == casos);
     }
 
     /* ═══ §R12 KRONECKER, E A LEI DO DETERMINANTE ═══════════════════════════ */
@@ -561,38 +595,35 @@ int main(void){
          * o ZERO da forma; a dobra é o que o torna inalcançável.
          *
          * E é uma DOBRA a sério: aplicada DUAS vezes, o sinal volta. */
-        long troca = 0, encolhe = 0, casos = 0, dobra2 = 0, no_cone = 0;
+        long troca = 0, encolhe = 0, casos = 0, dobra2 = 0, no_cone = 0, bate_i32 = 0;
         for(long m = 1; m <= 6; m++)
         for(long p = 1; p <= 60; p++) for(long q = 1; q < p; q++){
-            /* a DOBRA é agora a peça da lib — rt_dobra —, e o predicado que diz o que ela
-             * faz à forma é rt_dobra_inverte. O que aqui estava era a mesma conta escrita
-             * à mão, e escrever a peça duas vezes é a maneira de as duas divergirem. */
             long F  = rt_forma(p, q, m);
-            long p1 = p, q1 = q; rt_dobra(m, &p1, &q1);       /* a descida, da lib */
+            long p1 = p, q1 = q; rt_dobra(m, &p1, &q1);
             casos++;
-            if(rt_dobra_inverte(m, p, q)) troca++;            /* F(dobra) = −F */
-            long p2 = p1, q2 = q1; rt_dobra(m, &p2, &q2);     /* e outra vez */
-            if(rt_forma(p2, q2, m) == F) dobra2++;            /* a involução fecha */
-            /* o encolhimento, só onde o cone o promete */
-            /* O CONE É DOS DOIS LADOS, e a primeira versão desta linha só tinha o de
-             * baixo: 0 < p − m·q < q pede m·q < p < (m+1)·q, e sem o tecto o encolhimento
-             * dava 1447 de 4230. A asserção caiu e estava certa em cair — o cone é onde a
-             * descida encolhe, e fora dele ela não promete nada. */
+            if(rt_dobra_inverte(m, p, q)) troca++;
+            long p2 = p1, q2 = q1; rt_dobra(m, &p2, &q2);
+            if(rt_forma(p2, q2, m) == F) dobra2++;
             if(rt_no_cone(m, p, q)){ no_cone++; if(q1 > 0 && q1 < q) encolhe++; }
+            int32_t pi = (int32_t)p1, qi = (int32_t)q1, p2i = (int32_t)p2, q2i = (int32_t)q2;
+            if(rt_dobra_inverte_i32((int32_t)m, (int32_t)p, (int32_t)q)
+               && rt_forma_i32(p2i, q2i, (int32_t)m) == (int32_t)F
+               && pi == p1 && qi == q1 && p2i == p2 && q2i == q2
+               && (!rt_no_cone(m, p, q) || rt_no_cone_i32((int32_t)m, (int32_t)p, (int32_t)q)))
+                bate_i32++;
         }
         printf("      F(q, p−mq) = −F(p,q) em %ld de %ld pares — a dobra TROCA o sinal\n",
                troca, casos);
+        printf("      rt_dobra_i32 = rt_dobra (long) ............ %ld de %ld\n",
+               bate_i32, casos);
         printf("      e duas descidas devolvem-no: %ld de %ld — a involução fecha\n", dobra2, casos);
         printf("      e no cone p > m·q o denominador ENCOLHE: %ld de %ld\n\n", encolhe, no_cone);
-        ok("A DOBRA NO PONTO FIXO, e é ela que prova o corte sem varrer nada: com"
-           " F(p,q) = p² − m·p·q − q², a descida (p,q) ⟼ (q, p−m·q) TROCA O SINAL da forma"
-           " — F(q,p−mq) = −F(p,q), exacto em ℤ —, e aplicada duas vezes devolve-o: é uma"
-           " involução com o espectro {+1,−1} de sempre. E no cone o denominador ENCOLHE,"
-           " 0 < p−m·q < q. As duas juntas dão descida infinita em ℕ, impossível — logo a"
-           " forma nunca se anula, e o ponto fixo (que é o ZERO dela) não está no andar. A"
-           " dobra é o que o torna inalcançável",
+        ok("A DOBRA NO PONTO FIXO, e é ela que prova o corte: rt_dobra_i32 concorda com"
+           " long no envelope medido. A descida TROCA O SINAL da forma, fecha em involução,"
+           " e no cone o denominador ENCOLHE — logo a forma nunca se anula e o ponto fixo"
+           " não está no andar",
            troca == casos && dobra2 == casos && encolhe == no_cone
-           && casos > 0 && no_cone > 0);
+           && bate_i32 == casos && casos > 0 && no_cone > 0);
     }
 
     /* ═══ §R12c O OPERADOR COMO LEITOR/ESCRITOR — e o par fecha ════════════ */
@@ -629,6 +660,128 @@ int main(void){
            " uma divergência e sem a palavra saturar. É o thm:operador realizado: um"
            " operador, um espelho, e o rasto que eles deixam",
            mau == 0 && passos == 12 && w.saturou == 0);
+    }
+
+    /* ═══ §R12d A PALAVRA NO DISCO — slots consecutivos, MOVE, não array ═══════════ */
+    printf("\n§R12d a FC vive nos SLOTS: um termo por slot, e o acumulador é o disco.\n\n");
+    {
+        long mau = 0, passos = 0;
+        RtCfSlot ws = { S_CF, RT_CF_FD_ISA };
+        rt_cf_slot_init(&ws, 1, RT_CF_SLOT_BASE);
+        RtCf wm = { 1, {0}, 0, 0 };
+        for(int k = 0; k < 12; k++){
+            if(!rt_cf_slot_escreve(&ws, 1)) break;
+            if(!rt_op_escreve(&wm, 1)) break;
+            long ps, qs, pm, qm, P, Q;
+            if(!rt_cf_slot_le(&ws, k, &ps, &qs)) break;
+            if(!rt_op_le(&wm, k, &pm, &qm)) break;
+            rt_orbita(1, k+1, &P, &Q);
+            passos++;
+            if(ps != P || qs != Q || pm != P || qm != Q || ps != pm || qs != qm) mau++;
+        }
+        long p391 = 0, q299 = 0, pr = 0, qr = 0;
+        RtCfSlot wf = { S_CF + S_CF_STRIDE, RT_CF_FD_ISA };
+        rt_cf_slot_de(1, 391, 299, &wf);
+        rt_cf_slot_para(&wf, &p391, &q299);
+        RtCf wr; rt_cf_de(1, 391, 299, &wr);
+        rt_cf_para(&wr, &pr, &qr);
+        int volta = (p391 == pr && q299 == qr && p391*299 == 391*q299);
+        printf("      ouro: %ld passos slot vs mem vs órbita, %ld divergências\n", passos, mau);
+        printf("      391/299: slot (%ld/%ld) = mem (%ld/%ld) %s\n\n",
+               p391, q299, pr, qr, volta ? "sim" : "NAO");
+        ok("a FC NÃO É ARRAY — é SLOT: rt_cf_slot_escreve/le bate com rt_op_escreve/le e"
+           " com rt_orbita, termo a termo nos slots consecutivos da ISA. E ida/volta"
+           " p/q ↔ palavra no disco bate com RtCf em RAM",
+           mau == 0 && passos == 12 && volta);
+    }
+
+    /* ═══ §R12e A PALAVRA NO .mem — pread/pwrite, o mesmo layout, outro backend ═══ */
+    printf("\n§R12e a FC no ficheiro .mem: slot_mem bate com isa_disk.\n\n");
+    {
+        const char *path = "dados/rtcf_tmp.mem";
+        int fd = open(path, O_RDWR | O_CREAT | O_TRUNC, 0644);
+        long need = (long)S_CF_END * SLOT_WORD_BYTES;
+        ftruncate(fd, need);
+        RtCfSlot wd = rt_cf_slot_word(0, fd);
+        RtCfSlot wi = rt_cf_slot_word(1, RT_CF_FD_ISA);
+        rt_cf_slot_init(&wd, 1, wd.base);
+        rt_cf_slot_init(&wi, 1, wi.base);
+        long mau = 0;
+        for(int k = 0; k < 12; k++){
+            if(!rt_cf_slot_escreve(&wd, 1)) break;
+            if(!rt_cf_slot_escreve(&wi, 1)) break;
+            long pd, qd, pi, qi;
+            if(!rt_cf_slot_le(&wd, k, &pd, &qd)) break;
+            if(!rt_cf_slot_le(&wi, k, &pi, &qi)) break;
+            if(pd != pi || qd != qi) mau++;
+        }
+        long p391d, q391d, p391i, q391i;
+        RtCfSlot wf = rt_cf_slot_word(2, fd);
+        RtCfSlot wg = rt_cf_slot_word(3, RT_CF_FD_ISA);
+        rt_cf_slot_de(1, 391, 299, &wf);
+        rt_cf_slot_de(1, 391, 299, &wg);
+        rt_cf_slot_para(&wf, &p391d, &q391d);
+        rt_cf_slot_para(&wg, &p391i, &q391i);
+        int volta = (p391d == p391i && q391d == q391i);
+        /* persistência: fecha, reabre, lê convergente do disco */
+        long base = wd.base;
+        close(fd);
+        fd = open(path, O_RDWR);
+        wd.fd = fd;
+        long pp = 0, qq = 0;
+        int rele = rt_cf_slot_le(&wd, 11, &pp, &qq);
+        unlink(path);
+        close(fd);
+        printf("      ouro disco vs isa: %ld divergências; 391/299 %s; releitura após"
+               " fechar: %ld/%ld %s\n\n", mau, volta ? "ok" : "NAO", pp, qq,
+               rele && pp == 233 && qq == 144 ? "ok" : "NAO");
+        ok("a FC no .mem É a mesma peça: slot_mem_grava/le no fd bate com isa_disk, e"
+           " sobrevive a fechar o processo — o acumulador é o disco, não o array",
+           mau == 0 && volta && rele && pp == 233 && qq == 144);
+    }
+
+    /* ═══ §R12f S_CF no mapa — endereço bate com slot_map.h ═════════════════════════ */
+    printf("\n§R12f S_CF=%u no mapa do banco: a palavra 0 começa no slot certo.\n\n",
+           (unsigned)S_CF);
+    {
+        int mapa_ok = (rt_cf_slot_banco(0) == (long)S_CF)
+                   && (rt_cf_slot_banco(1) == (long)(S_CF + S_CF_STRIDE))
+                   && (S_CF_END == S_CF + S_CF_WORDS * S_CF_STRIDE)
+                   && (S_CF_END <= 4096u);
+        printf("      palavra 0 → slot %ld, palavra 1 → %ld, região até %u\n\n",
+               rt_cf_slot_banco(0), rt_cf_slot_banco(1), (unsigned)S_CF_END);
+        ok("S_CF está reservado no mapa do .mem — entre S_VIVO e S_LIN, com stride"
+           " RT_CF_MAX+2, e rt_cf_slot_banco(i) aponta para o slot base correcto",
+           mapa_ok);
+    }
+
+    /* ═══ §R12g O CAMINHO DO SQL — slot_mem_le lê o que rt_cf_slot grava ════════════ */
+    printf("\n§R12g mem_le ≡ slot_mem: o caminho do sql.c lê o que rt_cf_slot grava.\n\n");
+    {
+        const char *path = "dados/rtcf_sql.mem";
+        int fd = rt_cf_slot_mem_abre(path);
+        RtCfSlot w = rt_cf_slot_word(0, fd);
+        rt_cf_slot_de(1, 22, 7, &w);
+        unsigned base = cf_slot_base(0);
+        long mau = 0;
+        SlotWord meta = slot_mem_le(fd, base);
+        int wn = rt_cf_slot_n(&w);
+        if(meta.total != 1 || meta.e != wn) mau++;
+        for(int i = 0; i < wn; i++){
+            SlotWord tw = slot_mem_le(fd, base + 1u + (unsigned)i);
+            if(tw.total != rt_cf_slot_termo(&w, i) || tw.e != 0) mau++;
+        }
+        SlotWord fl = slot_mem_le(fd, base + (unsigned)RT_CF_MAX + 1u);
+        if(fl.total != (long)rt_cf_slot_saturou(&w)) mau++;
+        long p22 = 0, q7 = 0;
+        int volta = rt_cf_slot_para(&w, &p22, &q7);
+        close(fd);
+        unlink(path);
+        printf("      22/7: %ld termos, slot_mem vs rt_cf_slot: %ld divergências;"
+               " volta %s\n\n", (long)wn, mau, volta && p22 == 22 && q7 == 7 ? "ok" : "NAO");
+        ok("mem_le no banco usa slot_mem_grava/le — o que rt_cf_slot escreve no fd é"
+           " byte-a-byte o que sql.c lê em S_CF: meta, termos consecutivos, flag saturou",
+           mau == 0 && volta && p22 == 22 && q7 == 7);
     }
 
     /* ═══ §R13 O PONTO FIXO: NÃO CABE EM ℚ, E CABE EM 𝔽ₚ ═══════════════════ */
@@ -1691,6 +1844,33 @@ printf("\n§R24 Normalizar é escolher a unidade — e depois tudo é inteiro.\n
         int op_vc = rt_ordem_vector(&OPS[1], 3, 2, 24);
         int gt_pt = rt_ordem_ponto (&OPS[2], 3, 2, 24);
         int gt_vc = rt_ordem_vector(&OPS[2], 3, 2, 24);
+        int op_pt32 = rt_ordem_ponto_i32(&OPS[1], 3, 2, 24);
+        int op_vc32 = rt_ordem_vector_i32(&OPS[1], 3, 2, 24);
+        int op_pt16 = rt_ordem_ponto_i16(&OPS[1], 3, 2, 24);
+        int op_vc16 = rt_ordem_vector_i16(&OPS[1], 3, 2, 24);
+        long lp, lq; int32_t ip, iq;
+        int16_t hp16, hq16;
+        rt_opera(&OPS[0], 3, 2, &lp, &lq);
+        rt_opera_i32(&OPS[0], 3, 2, &ip, &iq);
+        rt_opera_i16(&OPS[0], 3, 2, &hp16, &hq16);
+        int i32_bate = (lp == ip && lq == iq);
+        int i16_bate = (hp16 == (int16_t)ip && hq16 == (int16_t)iq && lp == hp16 && lq == hq16);
+        int32_t rp32, rq32;
+        int inv32 = rt_inverte_i32(&OPS[0], ip, iq, &rp32, &rq32);
+        int32_t cip, ciq, crp, crq;
+        int ciclo32 = rt_ciclo_i32(&OPS[0], rt_iv_palavra, 3, 2, &cip, &ciq);
+        int16_t cip16, ciq16;
+        int ciclo16 = rt_ciclo_i16(&OPS[0], rt_iv_palavra, 3, 2, &cip16, &ciq16);
+        long crpl, crql;
+        int ciclo_l = rt_ciclo(&OPS[0], rt_iv_palavra, 3, 2, &crpl, &crql);
+        int ciclo32_bate = ciclo32 && ciclo_l && cip == crpl && ciq == crql;
+        int ciclo16_bate = ciclo16 && ciclo32 && cip16 == (int16_t)cip && ciq16 == (int16_t)ciq;
+        int32_t ia[3] = {3, 2, 1}, ib[3] = {1, 0, 2}, ic[3], iv[3];
+        long la[3] = {3, 2, 1}, lb[3] = {1, 0, 2};
+        rt_cruz_i32(ia, ib, 3, ic);
+        rt_cruz3_i32(ia, ib, iv);
+        int cruz32 = (iv[0] == ic[1*3+2] && iv[1] == ic[2*3+0] && iv[2] == ic[0*3+1]);
+        int dir32 = (rt_dir_i32(ia, ib, 3) == rt_dir(la, lb, 3));
         printf("\n  §R27 o ciclo universal, na arquitectura\n");
         printf("      ciclos que a peça correu ......... %ld   e fecharam %ld\n", ciclos, fecha);
         printf("      operadores sem |det| = 1: RECUSA . %ld de %ld\n", recusa, recusa_tot);
@@ -1703,7 +1883,11 @@ printf("\n§R24 Normalizar é escolher a unidade — e depois tudo é inteiro.\n
            " sem |det| = 1, que é a condição do toro. As duas ordens saem da mesma peça: o"
            " i tem 2 no ponto e 4 no vector, e o gato não fecha em nenhuma",
            ciclos > 0 && fecha == ciclos && recusa_tot > 0 && recusa == recusa_tot &&
-           op_pt == 2 && op_vc == 4 && gt_pt == 0 && gt_vc == 0);
+           op_pt == 2 && op_vc == 4 && gt_pt == 0 && gt_vc == 0 &&
+           op_pt32 == op_pt && op_vc32 == op_vc &&
+           op_pt16 == op_pt && op_vc16 == op_vc &&
+           i32_bate && i16_bate && inv32 && rp32 == 3 && rq32 == 2 &&
+           ciclo32_bate && ciclo16_bate && cruz32 && dir32);
     }
 
     /* ─── §R28 ── DIR e CRUZ dos operadores: o espectro comum ───────────────────────

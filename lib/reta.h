@@ -50,6 +50,7 @@
 #ifndef RETA_H
 #define RETA_H
 
+#include <stdint.h>
 #include "inteiros.h"      /* iz_gcd, iz_diofantina — a canónica do mdc */
 
 #ifndef RT_MAX
@@ -98,16 +99,29 @@ static void rt_cruz(const long *a, const long *b, int n, long *C){
 /* e a norma é o directo consigo próprio — não é uma operação nova */
 static long rt_norma(const long *a, int n){ return rt_dir(a, a, n); }
 
+/* Fase B/D: Dir e Cruz em int32 — acumulação int64; long mantém vectores grandes */
+static int32_t rt_dir_i32(const int32_t *a, const int32_t *b, int n){
+    int64_t s = 0;
+    for(int i = 0; i < n; i++) s += (int64_t)a[i]*b[i];
+    return (int32_t)s;
+}
+static void rt_cruz_i32(const int32_t *a, const int32_t *b, int n, int32_t *C){
+    for(int i = 0; i < n; i++) for(int j = 0; j < n; j++)
+        C[i*n + j] = (int32_t)((int64_t)a[i]*b[j] - (int64_t)a[j]*b[i]);
+}
+static int32_t rt_norma_i32(const int32_t *a, int n){ return rt_dir_i32(a, a, n); }
+
 /* ── A POTÊNCIA INTEIRA ──────────────────────────────────────────────────────────────
  * Cinco cópias no repositório antes disto. Sem vírgula e sem `pow`. */
-static long rt_ipow(long base, int e){
-    long r = 1;
+static int32_t rt_ipow(int32_t base, int e){
+    int32_t r = 1;
     while(e-- > 0) r *= base;
     return r;
 }
 
 /* ── O INVERSO EM 𝔽ₚ, POR FERMAT ────────────────────────────────────────────────────
- * a^(p−2) mod p. Sete cópias antes disto. Nenhuma divisão. */
+ * a^(p−2) mod p. Sete cópias antes disto. Nenhuma divisão.
+ * Mantém `long`: P pode ser 2³¹−1 (estado_caos, milenio_trial). */
 static long rt_inv_mod(long a, long p){
     long r = 1, e = p - 2;
     a = ((a % p) + p) % p;
@@ -201,6 +215,28 @@ static void rt_orbita(long m, int k, long *p, long *q){
     *p = P; *q = Q;
 }
 
+/* Fase B: órbita/dobra/forma/reversão em int32 — convergentes no envelope medido */
+static int rt_orbita_i32(int32_t m, int k, int32_t *p, int32_t *q){
+    int64_t P = 1, Q = 0;
+    for(int t = 0; t < k; t++){ int64_t np = (int64_t)m*P + Q; Q = P; P = np; }
+    if(P != (int32_t)P || Q != (int32_t)Q) return 0;
+    *p = (int32_t)P; *q = (int32_t)Q;
+    return 1;
+}
+static void rt_dobra_i32(int32_t m, int32_t *p, int32_t *q){
+    int32_t np = *q, nq = *p - m * (*q);
+    *p = np; *q = nq;
+}
+static int32_t rt_forma_i32(int32_t p, int32_t q, int32_t m){
+    return (int32_t)((int64_t)p*p - (int64_t)m*p*q - (int64_t)q*q);
+}
+static int rt_no_cone_i32(int32_t m, int32_t p, int32_t q){
+    return q > 0 && p > m*q && p < (m+1)*q;
+}
+static void rt_reverte_i32(const int32_t *a, int n, int32_t *r){
+    for(int k = 0; k <= n; k++) r[k] = a[n-k];
+}
+
 /* ── O TEOREMA DO OPERADOR, realizado: a DOBRA e o ACUMULADOR ────────────────────────
  *
  * `thm:operador` do universal.tex: a indução, a meta-indução e o acumulador não são três
@@ -225,6 +261,11 @@ static int rt_dobra_inverte(long m, long p, long q){
     long F = rt_forma(p, q, m), P = p, Q = q;
     rt_dobra(m, &P, &Q);
     return rt_forma(P, Q, m) == -F;
+}
+static int rt_dobra_inverte_i32(int32_t m, int32_t p, int32_t q){
+    int32_t F = rt_forma_i32(p, q, m), P = p, Q = q;
+    rt_dobra_i32(m, &P, &Q);
+    return rt_forma_i32(P, Q, m) == -F;
 }
 
 /* O CONE onde a dobra ENCOLHE o denominador: 0 < p − m·q < q, isto é m·q < p < (m+1)·q.
@@ -315,6 +356,11 @@ static void rt_cruz3(const long *a, const long *b, long *c){
     c[1] = a[2]*b[0] - a[0]*b[2];
     c[2] = a[0]*b[1] - a[1]*b[0];
 }
+static void rt_cruz3_i32(const int32_t *a, const int32_t *b, int32_t *c){
+    c[0] = (int32_t)((int64_t)a[1]*b[2] - (int64_t)a[2]*b[1]);
+    c[1] = (int32_t)((int64_t)a[2]*b[0] - (int64_t)a[0]*b[2]);
+    c[2] = (int32_t)((int64_t)a[0]*b[1] - (int64_t)a[1]*b[0]);
+}
 
 /* ── A MESMA DECOMPOSIÇÃO, AGORA EM MATRIZES ─────────────────────────────────────────
  * Dir e Cruz aplicados a uma matriz em vez de a um par de vectores — o espelho é o
@@ -322,6 +368,12 @@ static void rt_cruz3(const long *a, const long *b, long *c){
  * EM DOBRO, para não dividir: 2S = M + Mᵀ e 2A = M − Mᵀ. A decomposição existe quando 2
  * é invertível — em característica 2 as duas colapsam (medido em operacao.c §O10). */
 static void rt_dir_cruz(const long *M, int n, long *S2, long *A2){
+    for(int i = 0; i < n; i++) for(int j = 0; j < n; j++){
+        S2[i*n+j] = M[i*n+j] + M[j*n+i];
+        A2[i*n+j] = M[i*n+j] - M[j*n+i];
+    }
+}
+static void rt_dir_cruz_i32(const int32_t *M, int n, int32_t *S2, int32_t *A2){
     for(int i = 0; i < n; i++) for(int j = 0; j < n; j++){
         S2[i*n+j] = M[i*n+j] + M[j*n+i];
         A2[i*n+j] = M[i*n+j] - M[j*n+i];
@@ -353,6 +405,27 @@ static void rt_tracos(const long *C, int n, long *tr, int k){
     for(int i = 0; i < n; i++) P[i*n+i] = 1;
     for(int t = 0; t < k; t++){
         long s = 0;
+        for(int i = 0; i < n; i++) s += P[i*n+i];
+        tr[t] = s;
+        for(int i = 0; i < n*n; i++) N[i] = 0;
+        for(int i = 0; i < n; i++) for(int j = 0; j < n; j++)
+            for(int l = 0; l < n; l++) N[i*n+j] += P[i*n+l]*C[l*n+j];
+        for(int i = 0; i < n*n; i++) P[i] = N[i];
+    }
+}
+
+/* Fase B: companheira/tracos com coeficientes int32 — acumulação int64 nos traços */
+static void rt_companheira_i32(const int32_t *c, int n, int32_t *C){
+    for(int i = 0; i < n*n; i++) C[i] = 0;
+    for(int i = 0; i + 1 < n; i++) C[i*n + (i+1)] = 1;
+    for(int j = 0; j < n; j++) C[(n-1)*n + j] = c[j];
+}
+static void rt_tracos_i32(const int32_t *C, int n, int64_t *tr, int k){
+    int64_t P[RT_MAX*RT_MAX], N[RT_MAX*RT_MAX];
+    for(int i = 0; i < n*n; i++) P[i] = 0;
+    for(int i = 0; i < n; i++) P[i*n+i] = 1;
+    for(int t = 0; t < k; t++){
+        int64_t s = 0;
         for(int i = 0; i < n; i++) s += P[i*n+i];
         tr[t] = s;
         for(int i = 0; i < n*n; i++) N[i] = 0;
@@ -405,17 +478,16 @@ static void rt_kron(const long *A, int a, const long *B, int b, long *K, int pk)
 /* ── (iii) O PONTO FIXO EM ℙ¹(ℚ): decide-se pelo DISCRIMINANTE ───────────────────────
  * Devolve 1 se D = m² + 4 é quadrado perfeito — isto é, se o ponto fixo cabe no andar.
  * Para m ≥ 1 devolve sempre 0, e a razão é o intervalo, não uma varredura. */
-static int rt_fixo_racional(long m){
-    long D = m*m + 4, r = 0;
-    while(r*r < D) r++;
-    return r*r == D;
+static int rt_fixo_racional(int32_t m){
+    int64_t D = (int64_t)m*m + 4;
+    int32_t r = 0;
+    while((int64_t)r*r < D) r++;
+    return (int64_t)r*r == D;
 }
-
-/* e o PASSO que o prova, exibido: entre m² e (m+2)² só cabe (m+1)², e esse pede 2m = 3.
- * Devolve o único candidato, ou 0 se nem ele cabe no intervalo. */
-static long rt_fixo_candidato(long m){
-    long D = m*m + 4;
-    return (D > m*m && D < (m+2)*(m+2)) ? (m+1)*(m+1) : 0;
+static int32_t rt_fixo_candidato(int32_t m){
+    int64_t D = (int64_t)m*m + 4;
+    int64_t lo = (int64_t)m*m, hi = (int64_t)(m+2)*(m+2);
+    return (D > lo && D < hi) ? (int32_t)((m+1)*(m+1)) : 0;
 }
 
 /* ── (iv) A LEI 8: em 𝔽ₚ o ponto fixo EXISTE quando D é resíduo quadrático ───────────
@@ -463,8 +535,27 @@ static void rt_volta(long m, long p, long q, long *np, long *nq){
 /* a DOBRA do sinal, explícita: x ↦ (|x|, s) com s ∈ {+1,−1,0}, e a volta x = |x|·s.
  * É a decomposição de ℤ em ℕ × {±1} que a `cor:cadeia` enuncia, e ν∘ν = id é o que a
  * torna uma dobra e não uma projecção — nada se perde, e a volta devolve. */
-static long rt_sinal(long x){ return x > 0 ? 1 : (x < 0 ? -1 : 0); }
-static long rt_modulo(long x){ return x < 0 ? -x : x; }
+static int32_t rt_sinal(int32_t x){ return x > 0 ? 1 : (x < 0 ? -1 : 0); }
+static int32_t rt_modulo(int32_t x){ return x < 0 ? -x : x; }
+
+/* Fase B: mdc/inverso em int32 — coordenadas do envelope E₁₆; long mantém vectores grandes */
+static int32_t rt_mdc_i32(int32_t a, int32_t b){
+    if(a < 0) a = -a;
+    if(b < 0) b = -b;
+    while(b){ int32_t t = a % b; a = b; b = t; }
+    return a;
+}
+static int32_t rt_inv_mod_i32(int32_t a, int32_t p){
+    int64_t r = 1, e = (int64_t)p - 2;
+    a = (int32_t)(((a % p) + p) % p);
+    int64_t base = a;
+    while(e){
+        if(e & 1) r = r * base % p;
+        base = base * base % p;
+        e >>= 1;
+    }
+    return (int32_t)r;
+}
 
 static long rt_mdc(long a, long b){
     if(a < 0) a = -a;
@@ -541,7 +632,7 @@ static int rt_mais_alinhado(const long *a, const long *b, const long *c, const l
 /* ── O MÓDULO POSITIVO: 23 cópias ────────────────────────────────────────────────────
  * Em C o resto herda o sinal do dividendo, logo −3 % 7 dá −3 e não 4. O representante
  * canónico em ℤ/pℤ é o não negativo — é a mesma dobra do sinal, um andar acima. */
-static long rt_mod(long x, long p){ return ((x % p) + p) % p; }
+static int32_t rt_mod(int32_t x, int32_t p){ return (int32_t)(((x % p) + p) % p); }
 
 /* ── A TRANSPOSTA: 15 cópias — e ela É o espelho τ ───────────────────────────────────
  * τ(M) = Mᵀ é a involução que reparte Dir e Cruz nas matrizes. Não é um utilitário: é
@@ -673,10 +764,17 @@ static long rt_traco_metalico(long m, int k){
 
 /* O CRUZADO EM ℤ²: a entrada independente de Cruz, e É o determinante da matriz que os
  * dois vectores formam. Uma coisa, dois nomes — e é a área. */
-static long rt_cruz2(const long *u, const long *v){ return u[0]*v[1] - u[1]*v[0]; }
+static long rt_cruz2(const long *u, const long *v){
+    return (long)((int64_t)u[0]*v[1] - (int64_t)u[1]*v[0]);
+}
+static int32_t rt_cruz2_i32(const int32_t *u, const int32_t *v){
+    return (int32_t)((int64_t)u[0]*v[1] - (int64_t)u[1]*v[0]);
+}
 
 /* o mesmo, com as quatro entradas soltas: o `a*d − b*c` que aparece 23 vezes no repo */
-static long rt_det2(long a, long b, long c, long d){ return a*d - b*c; }
+static long rt_det2(long a, long b, long c, long d){
+    return (long)((int64_t)a*d - (int64_t)b*c);
+}
 
 /* aplicar uma matriz n×n a um vector, e o caso 2×2 que é o da órbita */
 static void rt_aplica(const long *M, const long *v, int n, long *r){
@@ -775,11 +873,12 @@ static int rt_raiz_exacta(long x, long *r){
 #define RT_CF_MAX 48
 
 typedef struct { int sinal; long a[RT_CF_MAX]; int n; int saturou; } RtCf;
+/* Representação canónica da palavra: slots consecutivos no disco — ver rt_cf_slot.h */
 
 /* «−3.14159» ⟼ sinal −1, p = 314159, q = 100000. EXACTO, e sem uma divisão de reais.
  * Devolve 1 se leu, 0 se o texto não é um decimal ou se os inteiros não chegam.
  * O expoente («1e3») também entra, e multiplica p ou q por 10 tantas vezes. */
-static int rt_le_decimal(const char *s, int *sinal, long *p, long *q){
+static int rt_le_decimal_end(const char *s, int *sinal, long *p, long *q, const char **end){
     int i = 0;
     while(s[i] == ' ' || s[i] == '\t') i++;
     *sinal = 1;
@@ -812,7 +911,11 @@ static int rt_le_decimal(const char *s, int *sinal, long *p, long *q){
         }
     }
     *p = v; *q = d;
+    if(end) *end = s + i;
     return 1;
+}
+static int rt_le_decimal(const char *s, int *sinal, long *p, long *q){
+    return rt_le_decimal_end(s, sinal, p, q, NULL);
 }
 
 /* p/q ⟼ a palavra [a₀; a₁, …, aₙ]. É EUCLIDES — a mesma descida do mdc, lida noutra coluna.
@@ -1476,16 +1579,23 @@ static int rt_periodo_shift(long p, long q, long base, int tecto){
  * não fecha — `rt_inverte` RECUSA, e recusar é dizer, não truncar.
  * ═══════════════════════════════════════════════════════════════════════════════════ */
 
-typedef struct { long T[4]; } RtOp;          /* [T00 T01; T10 T11], em ordem de leitura */
+typedef struct { int16_t T[4]; } RtOp;     /* SL(2,ℤ): entradas em E₁₆; (p,q) ainda long */
 
-static long rt_op_det(const RtOp *o){ return o->T[0]*o->T[3] - o->T[1]*o->T[2]; }
+static int32_t rt_op_det_i32(const RtOp *o){
+    return (int32_t)o->T[0]*o->T[3] - (int32_t)o->T[1]*o->T[2];
+}
+
+static long rt_op_det(const RtOp *o){
+    return rt_op_det_i32(o);
+}
 
 /* o operador serve ao ciclo exactamente quando |det| = 1 — é a condição do toro */
-static int rt_op_valido(const RtOp *o){ long d = rt_op_det(o); return d == 1 || d == -1; }
+static int rt_op_valido(const RtOp *o){ int32_t d = rt_op_det_i32(o); return d == 1 || d == -1; }
 
-/* OPERA: em ℙ¹, sem dividir */
+/* OPERA: em ℙ¹, sem dividir — coordenadas (p,q) em long; produtos via int32 implícito */
 static void rt_opera(const RtOp *o, long p, long q, long *rp, long *rq){
-    long a = o->T[0]*p + o->T[1]*q, b = o->T[2]*p + o->T[3]*q;
+    long a = (long)o->T[0]*p + (long)o->T[1]*q;
+    long b = (long)o->T[2]*p + (long)o->T[3]*q;
     *rp = a; *rq = b;
 }
 
@@ -1494,9 +1604,80 @@ static void rt_opera(const RtOp *o, long p, long q, long *rp, long *rq){
 static int rt_inverte(const RtOp *o, long p, long q, long *rp, long *rq){
     long d = rt_op_det(o);
     if(d != 1 && d != -1) return 0;
-    RtOp inv = {{ o->T[3]/d, -o->T[1]/d, -o->T[2]/d, o->T[0]/d }};
+    RtOp inv = {{
+        (int16_t)(o->T[3]/d), (int16_t)(-o->T[1]/d),
+        (int16_t)(-o->T[2]/d), (int16_t)(o->T[0]/d)
+    }};
     rt_opera(&inv, p, q, rp, rq);
     return 1;
+}
+
+/* OPERA/INVERTE em int32 — coordenadas pequenas do ciclo (Fase B/D); entradas T em int16 */
+static void rt_opera_i32(const RtOp *o, int32_t p, int32_t q, int32_t *rp, int32_t *rq){
+    *rp = (int32_t)o->T[0]*p + (int32_t)o->T[1]*q;
+    *rq = (int32_t)o->T[2]*p + (int32_t)o->T[3]*q;
+}
+static int rt_inverte_i32(const RtOp *o, int32_t p, int32_t q, int32_t *rp, int32_t *rq){
+    int32_t d = rt_op_det_i32(o);
+    if(d != 1 && d != -1) return 0;
+    RtOp inv = {{
+        (int16_t)(o->T[3]/d), (int16_t)(-o->T[1]/d),
+        (int16_t)(-o->T[2]/d), (int16_t)(o->T[0]/d)
+    }};
+    rt_opera_i32(&inv, p, q, rp, rq);
+    return 1;
+}
+
+/* a ORDEM do operador em int32 — mesma semântica que rt_ordem_* (Fase B) */
+static int rt_ordem_ponto_i32(const RtOp *o, int32_t p, int32_t q, int tecto){
+    int32_t P = p, Q = q;
+    for(int k = 1; k <= tecto; k++){
+        int32_t np, nq; rt_opera_i32(o, P, Q, &np, &nq); P = np; Q = nq;
+        if(Q != 0 && (int64_t)p*Q == (int64_t)P*q) return k;
+        if(P == 0 && Q == 0) return 0;
+    }
+    return 0;
+}
+static int rt_ordem_vector_i32(const RtOp *o, int32_t p, int32_t q, int tecto){
+    int32_t P = p, Q = q;
+    for(int k = 1; k <= tecto; k++){
+        int32_t np, nq; rt_opera_i32(o, P, Q, &np, &nq); P = np; Q = nq;
+        if(P == p && Q == q) return k;
+    }
+    return 0;
+}
+
+/* OPERA/INVERTE em int16 — coordenadas em E₁₆; acumula int32 (Fase D) */
+static void rt_opera_i16(const RtOp *o, int16_t p, int16_t q, int16_t *rp, int16_t *rq){
+    *rp = (int16_t)((int32_t)o->T[0]*p + (int32_t)o->T[1]*q);
+    *rq = (int16_t)((int32_t)o->T[2]*p + (int32_t)o->T[3]*q);
+}
+static int rt_inverte_i16(const RtOp *o, int16_t p, int16_t q, int16_t *rp, int16_t *rq){
+    int32_t d = rt_op_det_i32(o);
+    if(d != 1 && d != -1) return 0;
+    RtOp inv = {{
+        (int16_t)(o->T[3]/d), (int16_t)(-o->T[1]/d),
+        (int16_t)(-o->T[2]/d), (int16_t)(o->T[0]/d)
+    }};
+    rt_opera_i16(&inv, p, q, rp, rq);
+    return 1;
+}
+static int rt_ordem_ponto_i16(const RtOp *o, int16_t p, int16_t q, int tecto){
+    int16_t P = p, Q = q;
+    for(int k = 1; k <= tecto; k++){
+        int16_t np, nq; rt_opera_i16(o, P, Q, &np, &nq); P = np; Q = nq;
+        if(Q != 0 && (int32_t)p*Q == (int32_t)P*q) return k;
+        if(P == 0 && Q == 0) return 0;
+    }
+    return 0;
+}
+static int rt_ordem_vector_i16(const RtOp *o, int16_t p, int16_t q, int tecto){
+    int16_t P = p, Q = q;
+    for(int k = 1; k <= tecto; k++){
+        int16_t np, nq; rt_opera_i16(o, P, Q, &np, &nq); P = np; Q = nq;
+        if(P == p && Q == q) return k;
+    }
+    return 0;
 }
 
 /* a ORDEM do operador, e são DUAS: no PONTO (ℙ¹, onde v e −v são o mesmo) e no VECTOR
@@ -1556,6 +1737,54 @@ static int rt_ciclo(const RtOp *o, RtIdaVolta cod, long p, long q, long *rp, lon
     return cod(ri, rj, rp, rq);
 }
 
+/* ciclo universal em int32 — opera/inverte via rt_opera_i32; codificação ainda long (FC) */
+static int rt_ciclo_i32(const RtOp *o, RtIdaVolta cod, int32_t p, int32_t q,
+                        int32_t *rp, int32_t *rq){
+    int32_t a, b, c, d;
+    if(!rt_op_valido(o)) return 0;
+    rt_opera_i32(o, p, q, &a, &b);
+    if(!rt_inverte_i32(o, a, b, &c, &d)) return 0;
+    if(d == 0) return 0;
+    int32_t ri = c, rj = d;
+    if(rj < 0){ ri = -ri; rj = -rj; }
+    if(ri < 0) return 0;
+    if(!cod){
+        if(rp) *rp = ri;
+        if(rq) *rq = rj;
+        return 1;
+    }
+    long lr, lq;
+    if(!cod((long)ri, (long)rj, &lr, &lq)) return 0;
+    if(lr != (int32_t)lr || lq != (int32_t)lq) return 0;
+    if(rp) *rp = (int32_t)lr;
+    if(rq) *rq = (int32_t)lq;
+    return 1;
+}
+
+/* ciclo universal em int16 — opera/inverte via rt_opera_i16 */
+static int rt_ciclo_i16(const RtOp *o, RtIdaVolta cod, int16_t p, int16_t q,
+                        int16_t *rp, int16_t *rq){
+    int16_t a, b, c, d;
+    if(!rt_op_valido(o)) return 0;
+    rt_opera_i16(o, p, q, &a, &b);
+    if(!rt_inverte_i16(o, a, b, &c, &d)) return 0;
+    if(d == 0) return 0;
+    int16_t ri = c, rj = d;
+    if(rj < 0){ ri = (int16_t)-ri; rj = (int16_t)-rj; }
+    if(ri < 0) return 0;
+    if(!cod){
+        if(rp) *rp = ri;
+        if(rq) *rq = rj;
+        return 1;
+    }
+    long lr, lq;
+    if(!cod((long)ri, (long)rj, &lr, &lq)) return 0;
+    if(lr != (int16_t)lr || lq != (int16_t)lq) return 0;
+    if(rp) *rp = (int16_t)lr;
+    if(rq) *rq = (int16_t)lq;
+    return 1;
+}
+
 /* ── DIR e CRUZ dos operadores, e o que CRUZ mede ────────────────────────────────────
  *
  * A lib já tem `rt_dir` e `rt_cruz` — as duas leituras sobre VECTORES. Estas são sobre
@@ -1577,18 +1806,18 @@ static int rt_ciclo(const RtOp *o, RtIdaVolta cod, long p, long q, long *rp, lon
  * convolução só vira produto ponto a ponto quando o par tem espectro comum. */
 static void rt_dir_op(const RtOp *A, const RtOp *B, long *R){
     long AB[4], BA[4];
-    AB[0]=A->T[0]*B->T[0]+A->T[1]*B->T[2]; AB[1]=A->T[0]*B->T[1]+A->T[1]*B->T[3];
-    AB[2]=A->T[2]*B->T[0]+A->T[3]*B->T[2]; AB[3]=A->T[2]*B->T[1]+A->T[3]*B->T[3];
-    BA[0]=B->T[0]*A->T[0]+B->T[1]*A->T[2]; BA[1]=B->T[0]*A->T[1]+B->T[1]*A->T[3];
-    BA[2]=B->T[2]*A->T[0]+B->T[3]*A->T[2]; BA[3]=B->T[2]*A->T[1]+B->T[3]*A->T[3];
+    AB[0]=(long)A->T[0]*B->T[0]+(long)A->T[1]*B->T[2]; AB[1]=(long)A->T[0]*B->T[1]+(long)A->T[1]*B->T[3];
+    AB[2]=(long)A->T[2]*B->T[0]+(long)A->T[3]*B->T[2]; AB[3]=(long)A->T[2]*B->T[1]+(long)A->T[3]*B->T[3];
+    BA[0]=(long)B->T[0]*A->T[0]+(long)B->T[1]*A->T[2]; BA[1]=(long)B->T[0]*A->T[1]+(long)B->T[1]*A->T[3];
+    BA[2]=(long)B->T[2]*A->T[0]+(long)B->T[3]*A->T[2]; BA[3]=(long)B->T[2]*A->T[1]+(long)B->T[3]*A->T[3];
     for(int i = 0; i < 4; i++) R[i] = AB[i] + BA[i];
 }
 static void rt_cruz_op(const RtOp *A, const RtOp *B, long *R){
     long AB[4], BA[4];
-    AB[0]=A->T[0]*B->T[0]+A->T[1]*B->T[2]; AB[1]=A->T[0]*B->T[1]+A->T[1]*B->T[3];
-    AB[2]=A->T[2]*B->T[0]+A->T[3]*B->T[2]; AB[3]=A->T[2]*B->T[1]+A->T[3]*B->T[3];
-    BA[0]=B->T[0]*A->T[0]+B->T[1]*A->T[2]; BA[1]=B->T[0]*A->T[1]+B->T[1]*A->T[3];
-    BA[2]=B->T[2]*A->T[0]+B->T[3]*A->T[2]; BA[3]=B->T[2]*A->T[1]+B->T[3]*A->T[3];
+    AB[0]=(long)A->T[0]*B->T[0]+(long)A->T[1]*B->T[2]; AB[1]=(long)A->T[0]*B->T[1]+(long)A->T[1]*B->T[3];
+    AB[2]=(long)A->T[2]*B->T[0]+(long)A->T[3]*B->T[2]; AB[3]=(long)A->T[2]*B->T[1]+(long)A->T[3]*B->T[3];
+    BA[0]=(long)B->T[0]*A->T[0]+(long)B->T[1]*A->T[2]; BA[1]=(long)B->T[0]*A->T[1]+(long)B->T[1]*A->T[3];
+    BA[2]=(long)B->T[2]*A->T[0]+(long)B->T[3]*A->T[2]; BA[3]=(long)B->T[2]*A->T[1]+(long)B->T[3]*A->T[3];
     for(int i = 0; i < 4; i++) R[i] = AB[i] - BA[i];
 }
 

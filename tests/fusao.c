@@ -1,6 +1,6 @@
 /* fusao.c — A FUSÃO DE CORPOS VIA LA HIRE: dois geram um terceiro, e o que se conserva.
  *
- * O recado do Aarão no eval.txt: "vê fusão de corpos via La Hire, generaliza o processo La Hire —
+ * O recado do Aarão no ordem do coordenador: "vê fusão de corpos via La Hire, generaliza o processo La Hire —
  * se trata apenas de multiplicação entre as bases, reorientação dos espaços duais. Dois DNAs geram
  * um terceiro. Verificar lei de conservação da simetria nos 3 corpos, via corpo áureo. Vê o
  * viveiro de novo."

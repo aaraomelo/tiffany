@@ -19,7 +19,7 @@
 #include <string.h>
 #include "unidade.h"
 
-typedef long long L;
+typedef long L;
 enum { NSLOT = 16 };
 
 /* os tamanhos máximos por slot, como em tex.c / libc.c (fonte e source 4 MB,
@@ -58,7 +58,7 @@ int main(void){
     int compacto = 1;
     for(int i = 1; i < NSLOT; i++) if(OFF[i] != OFF[i-1] + TAM[i-1]) compacto = 0;
     if(OFF[NSLOT-1] + TAM[NSLOT-1] != DISCO_TAM) compacto = 0;
-    printf("      %d slots, total %lld bytes (%lld MB); OFF[3]=%lld OFF[14]=%lld\n\n",
+    printf("      %d slots, total %ld bytes (%ld MB); OFF[3]=%ld OFF[14]=%ld\n\n",
            NSLOT, DISCO_TAM, DISCO_TAM >> 20, OFF[3], OFF[14]);
     ok("§W1 o layout é COMPACTO e não-sobreposto: cada slot começa onde o anterior acaba"
        " (OFF[i+1]=OFF[i]+TAM[i]) e o todo cabe no array --- em wasm a memória é pequena, ao contrário"
@@ -91,7 +91,7 @@ int main(void){
     L residuo = 0;
     for(L k = 0; k < 100000; k++) s[k] = (unsigned char)((k*7 + 3) & 0xFF);
     for(L k = 0; k < 100000; k++) if(s[k] != (unsigned char)((k*7 + 3) & 0xFF)) residuo++;
-    printf("§W3  escrito+relido 100000 bytes no slot 4: resíduo %lld\n\n", residuo);
+    printf("§W3  escrito+relido 100000 bytes no slot 4: resíduo %ld\n\n", residuo);
     ok("§W3 a VOLTA lê o que se escreveu, byte a byte (resíduo 0): o slot É a memória, não há ida ao"
        " ficheiro e por isso não há onde perder --- é a mesma régua do disco_mmap, outro mecanismo",
        residuo == 0);

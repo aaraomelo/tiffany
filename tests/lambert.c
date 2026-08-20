@@ -46,10 +46,10 @@
  *   cc -O2 -std=c99 -I../lib lambert.c -o lambert && ./lambert
  */
 #include <stdio.h>
+#include "i128.h"
 #include "unidade.h"
 
-typedef long long L;
-typedef __int128 I128;
+typedef long L;
 
 typedef struct { long re, im; } G;                 /* ℤ[i] */
 
@@ -76,8 +76,8 @@ static int garg_eixo(G z){                         /* arg em quartos; −1 se n�
 }
 
 static I128 ipow(long b, int e){
-    I128 r = 1;
-    for(int i = 0; i < e; i++) r *= b;
+    I128 r = i128_from_i64(1);
+    for(int i = 0; i < e; i++) r = i128_smul_i128(r, b);
     return r;
 }
 
@@ -178,8 +178,8 @@ int main(void){
         for(int n = 1; n <= 12; n++){
             nc++;
             if(C[n][1] * fat[n-1] == fat[n]) cruz++;        /* Pascal vs factorial: dois n */
-            if(n >= 9) printf("      %-4d %-7ld %-12lld %s\n",
-                              n, C[n][1], (long long)(fat[n]/fat[n-1]),
+            if(n >= 9) printf("      %-4d %-7ld %-12ld %s\n",
+                              n, C[n][1], (long)(fat[n]/fat[n-1]),
                               C[n][1]*fat[n-1]==fat[n] ? "sim" : "NAO");
         }
         for(int n = 0; n <= 12; n++)
@@ -224,7 +224,7 @@ int main(void){
             cat /= (k+1);
             ks++;
             if(cay == cat) iguais++; else divergem++;
-            printf("      %-4lld %-16lld %-14lld %s\n", k, cay, cat, cay==cat?"sim":"NÃO");
+            printf("      %-4ld %-16ld %-14ld %s\n", k, cay, cat, cay==cat?"sim":"NÃO");
         }
         printf("      k testados: %d   iguais: %d   diferentes: %d\n", ks, iguais, divergem);
         ok("Cayley NÃO é Catalan: coincidem só em k = 1, e divergem de k = 2 em diante",
@@ -239,7 +239,7 @@ int main(void){
         printf("      as razões: Catalan → 4 = 1/(1/4),  Lambert → e = 1/(1/e)\n\n");
 
         {
-            long long C[24]; C[0] = 1;
+            long C[24]; C[0] = 1;
             for(int k = 0; k < 22; k++) C[k+1] = C[k]*2*(2*k+1)/(k+2);
             int mau_forma = 0, mau_lei = 0, nk = 0;
             printf("      k    C_k         C_{k+1}/C_k = 2(2k+1)/(k+2)     (4 - razao)(k+2)\n");
@@ -247,7 +247,7 @@ int main(void){
                 if(C[k+1]*(k+2) != C[k]*2*(2*k+1)) mau_forma++;
                 if(4*C[k]*(k+2) - C[k+1]*(k+2) != 6*C[k]) mau_lei++;
                 nk++;
-                if(k >= 16) printf("      %-4d %-11lld %-30s %lld\n", k, C[k], "(cruzado inteiro)",
+                if(k >= 16) printf("      %-4d %-11ld %-30s %ld\n", k, C[k], "(cruzado inteiro)",
                                    (4*C[k]*(k+2) - C[k+1]*(k+2))/C[k]);
             }
             printf("      %d valores de k, discordancias: forma fechada %d, lei do erro %d\n\n",
@@ -264,10 +264,10 @@ int main(void){
             int cresce = 0, desce = 0, nk = 0;
             printf("      k     (k+1)^{2k+1} ? k^k(k+2)^{k+1}     lado de cima desce?\n");
             for(int k = 2; k <= 12; k++){
-                I128 loL = ipow(k+1, 2*k+1), loR = ipow(k, k) * ipow(k+2, k+1);
-                I128 hiL = ipow(k+1, 2*k+3), hiR = ipow(k, k+1) * ipow(k+2, k+2);
-                int ok_lo = loL < loR;
-                int ok_hi = hiL > hiR;
+                I128 loL = ipow(k+1, 2*k+1), loR = i128_mul(ipow(k, k), ipow(k+2, k+1));
+                I128 hiL = ipow(k+1, 2*k+3), hiR = i128_mul(ipow(k, k+1), ipow(k+2, k+2));
+                int ok_lo = i128_cmp(loL, loR) < 0;
+                int ok_hi = i128_cmp(hiL, hiR) > 0;
                 if(ok_lo) cresce++;
                 if(ok_hi) desce++;
                 nk++;
@@ -442,15 +442,16 @@ int main(void){
         int meds = 0, inv_ok = 0;
         for(long t = 1; t <= 8; t++){
             long a = -1 + t, b = -1 - t;
-            I128 delta = (I128)a - b;
-            I128 ab = (I128)a * b;
-            I128 den = (I128)(1+a)*(1+b);
-            I128 I = delta * delta * ab;
-            I128 alvo = (I128)(-4) * (1 - t*t) * den;
+            I128 delta = i128_sub(i128_from_i64(a), i128_from_i64(b));
+            I128 ab = i128_smul(a, b);
+            I128 den = i128_smul(1 + a, 1 + b);
+            I128 I = i128_mul(i128_mul(delta, delta), ab);
+            I128 alvo = i128_mul(i128_smul(-4, 1 - t*t), den);
             meds++;
-            if(I == alvo) inv_ok++;
-            printf("      %-4ld %-8ld  %lld              %lld\n",
-                   t, (long)delta, (long long)(I/den), (long long)(-4*(1-t*t)));
+            if(i128_cmp(I, alvo) == 0) inv_ok++;
+            printf("      %-4ld %-8ld  %ld              %ld\n",
+                   t, (long)i128_to_i64(delta), (long)i128_to_i64(i128_div(I, den)),
+                   (long)(-4*(1-t*t)));
         }
         printf("      o invariante (ΔW)·(Wr·z) = −4(1−t²) em %d dos %d\n", inv_ok, meds);
         ok("o Wronskiano no modelo local tem invariante −4(1−t²) — em t=0 seria −4, e 4e é −4/(−1/e)",

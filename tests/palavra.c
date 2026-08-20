@@ -53,34 +53,30 @@
 #include "unidade.h"
 #include <stdlib.h>
 #include <limits.h>
+#include <stdint.h>
+#include "i128.h"
+#include "le_emb.h"   /* EMB_S=10⁴ — fronteira I/O (raiz β_{n,m}, convergência p.u.) */
 
-typedef long long L;
+typedef int64_t L;
 
 #define KMAX 64
 
 static L mdc(L a, L b){ if(a<0) a=-a; if(b<0) b=-b; while(b){ L t=a%b; a=b; b=t; } return a; }
 
-/* β_{n,m}(x) = x^n − m x^{n−1} − 1; raiz em 1/S-unidades (S=10000), bissecção __int128. */
+/* β_{n,m}(x) = x^n − m x^{n−1} − 1; raiz em 1/EMB_S-unidades, bissecção em I128. */
 static long raiz_nm_mil(int n, L m){
-    const long S = 10000;
-    long lo = S, hi = (long)(m + 2) * S;
-    __int128 Sn = 1;
-    for(int i = 0; i < n; i++) Sn *= S;
+    long lo = EMB_S, hi = (long)(m + 2) * EMB_S;
+    I128 Sn = i128_from_i64(1);
+    for(int i = 0; i < n; i++) Sn = i128_smul_i128(Sn, EMB_S);
     while(hi - lo > 1){
         long mid = lo + (hi - lo) / 2;
-        __int128 x = mid, xp = 1;
-        for(int i = 0; i < n; i++){
-            if(i > 0) xp *= x;
-            else xp = x;
-        }
-        __int128 v = xp;
-        xp = 1;
-        for(int i = 0; i < n-1; i++){
-            if(i > 0) xp *= x;
-            else xp = x;
-        }
-        v -= (__int128)m * xp * S + Sn;
-        if(v < 0) lo = mid; else hi = mid;
+        I128 v = i128_from_i64(mid);
+        for(int i = 1; i < n; i++) v = i128_smul_i128(v, mid);
+        I128 xp = i128_from_i64(1);
+        for(int i = 0; i < n - 1; i++)
+            xp = (i == 0) ? i128_from_i64(mid) : i128_smul_i128(xp, mid);
+        v = i128_sub(v, i128_add(i128_mul(i128_from_i64(m), i128_smul_i128(xp, EMB_S)), Sn));
+        if(i128_cmp(v, i128_zero()) < 0) lo = mid; else hi = mid;
     }
     return lo + (hi - lo) / 2;
 }
@@ -612,16 +608,18 @@ int main(void){
             /* (a) alternam os lados à volta de σ: sinal de (p_k − σ q_k) alterna.
              * Em inteiros: σ é raiz de x²−mx−1, logo compara-se p_k² − m p_k q_k − q_k²
              * com 0 — que é N(p_k + q_k σ) e tem sinal (−1)^k. Sem um único float. */
-            /* A 1.ª versão corria k até 19 em long long: p[19]² para m=8 vale 2,4e36,
+            /* A 1.ª versão corria k até 19 em long: p[19]² para m=8 vale 2,4e36,
              * muito além de 2^63. A asserção PASSAVA porque a norma verdadeira é ±1 e a
              * aritmética mod 2^64 preserva-a — resultado certo por sorte estrutural, através
              * de comportamento indefinido. Um revisor apanhou-o. Agora em __int128, que
              * cobre folgadamente todos os k usados. */
             int alt=1, sant=0;
             for(int k=0;k<20;k++){
-                __int128 P=p[k], Q=q[k];
-                __int128 n = P*P - (__int128)m*P*Q - Q*Q;
-                int sg = (n>0)-(n<0);
+                I128 nrm = i128_sub(
+                    i128_sub(i128_smul(p[k], p[k]),
+                        i128_mul(i128_from_i64(m), i128_smul(p[k], q[k]))),
+                    i128_smul(q[k], q[k]));
+                int sg = i128_cmp(nrm, i128_zero()) > 0 ? 1 : (i128_cmp(nrm, i128_zero()) < 0 ? -1 : 0);
                 if(sg==0){ alt=0; break; }
                 if(sant && sg==sant) alt=0;
                 sant=sg;
@@ -634,11 +632,15 @@ int main(void){
             if(pg) pg_ok++;
 
             /* (c) a distância decresce em P.G. de razão 1/σ² — produto cruzado */
-            __int128 P7=p[7], Q7=q[7];
-            __int128 norma = P7*P7 - (__int128)m*P7*Q7 - Q7*Q7;
-            if(norma < 0) norma = -norma;
-            __int128 q78 = (__int128)q[7]*q[8], q910 = (__int128)q[9]*q[10], q1112 = (__int128)q[11]*q[12];
-            if(norma == 1 && q78 < q910 && q910 < q1112) aperta_ok++;
+            I128 norma = i128_sub(
+                i128_sub(i128_smul(p[7], p[7]),
+                    i128_mul(i128_from_i64(m), i128_smul(p[7], q[7]))),
+                i128_smul(q[7], q[7]));
+            if(i128_cmp(norma, i128_zero()) < 0) norma = i128_neg(norma);
+            I128 q78 = i128_smul(q[7], q[8]);
+            I128 q910 = i128_smul(q[9], q[10]), q1112 = i128_smul(q[11], q[12]);
+            if(i128_cmp(norma, i128_from_i64(1)) == 0
+               && i128_cmp(q78, q910) < 0 && i128_cmp(q910, q1112) < 0) aperta_ok++;
 
             if(m<=3)
                 printf("      %lld  %lld %lld %lld %lld %lld %lld%*s %lld/%lld\n",
@@ -667,39 +669,43 @@ int main(void){
         printf("\n      EM P.U.: divide-se pela razão e todas as classes colapsam numa só lei\n");
         printf("      n  m    σ (milésimos)   gap k=20/k=30      convergiu?\n");
         {
-            int corpos=0, converge=0, encolhe=0; __int128 pior=0; int pior_n=0; L pior_m=0;
-            const long S = 10000;
+            int corpos=0, converge=0, encolhe=0; I128 pior=i128_zero(); int pior_n=0; L pior_m=0;
             for(int n=2;n<=5;n++) for(L m=1;m<=4;m++){
-                __int128 t[64]; for(int k=0;k<64;k++) t[k]=0;
-                t[0]=n; t[n-1]=1;
-                for(int k=n;k<64;k++) t[k] = (__int128)m*t[k-1] + t[k-n];
+                I128 t[64]; for(int k=0;k<64;k++) t[k]=i128_zero();
+                t[0]=i128_from_i64(n); t[n-1]=i128_from_i64(1);
+                for(int k=n;k<64;k++)
+                    t[k] = i128_add(i128_smul_i128(t[k-1], m), t[k-n]);
                 corpos++;
-                __int128 e20, e30;
+                I128 e20, e30;
                 if(n == 2){
                     L p[32], q[32]; conv_metal(m, p, q);
-                    e20 = t[20]*q[19] - t[19]*p[19]; if(e20 < 0) e20 = -e20;
-                    e30 = t[30]*q[29] - t[29]*p[29]; if(e30 < 0) e30 = -e30;
-                    if(e30 * 10000 < t[30] * q[29]) converge++;
-                    if(e30 <= e20) encolhe++;
-                    if(e20 > pior){ pior=e20; pior_n=n; pior_m=m; }
+                    e20 = i128_sub(i128_smul_i128(t[20], q[19]), i128_smul_i128(t[19], p[19]));
+                    if(i128_cmp(e20, i128_zero()) < 0) e20 = i128_neg(e20);
+                    e30 = i128_sub(i128_smul_i128(t[30], q[29]), i128_smul_i128(t[29], p[29]));
+                    if(i128_cmp(e30, i128_zero()) < 0) e30 = i128_neg(e30);
+                    if(i128_cmp(i128_smul_i128(e30, EMB_S), i128_smul_i128(t[30], q[29])) < 0) converge++;
+                    if(i128_cmp(e30, e20) <= 0) encolhe++;
+                    if(i128_cmp(e20, pior) > 0){ pior=e20; pior_n=n; pior_m=m; }
                     if((n<=3 && m<=2) || (n>=4 && m==1))
                         printf("      %d  %lld   conv.%lld   %lld/%lld        %s\n",
                                n, m, q[29],
-                               (long long)e20, (long long)e30,
-                               e30 * 10000 < t[30] * q[29] ? "sim" : "NÃO");
+                               (long)i128_to_i64(e20), (long)i128_to_i64(e30),
+                               i128_cmp(i128_smul_i128(e30, EMB_S), i128_smul_i128(t[30], q[29])) < 0 ? "sim" : "NÃO");
                 } else {
                     long sg = raiz_nm_mil(n, m);
-                    e20 = t[20]*S - (__int128)sg*t[19]; if(e20 < 0) e20 = -e20;
-                    e30 = t[30]*S - (__int128)sg*t[29]; if(e30 < 0) e30 = -e30;
-                    __int128 slack = t[29]*t[19]/S;
-                    if(e30 * 10000 < (__int128)sg * t[29]) converge++;
-                    if(e30*t[19] <= e20*t[29] + slack) encolhe++;
-                    if(e20 > pior){ pior=e20; pior_n=n; pior_m=m; }
+                    e20 = i128_sub(i128_smul_i128(t[20], EMB_S), i128_mul(i128_from_i64(sg), t[19]));
+                    if(i128_cmp(e20, i128_zero()) < 0) e20 = i128_neg(e20);
+                    e30 = i128_sub(i128_smul_i128(t[30], EMB_S), i128_mul(i128_from_i64(sg), t[29]));
+                    if(i128_cmp(e30, i128_zero()) < 0) e30 = i128_neg(e30);
+                    I128 slack = i128_div_i64(i128_mul(t[29], t[19]), EMB_S);
+                    if(i128_cmp(i128_smul_i128(e30, EMB_S), i128_mul(i128_from_i64(sg), t[29])) < 0) converge++;
+                    if(i128_cmp(i128_mul(e30, t[19]), i128_add(i128_mul(e20, t[29]), slack)) <= 0) encolhe++;
+                    if(i128_cmp(e20, pior) > 0){ pior=e20; pior_n=n; pior_m=m; }
                     if((n<=3 && m<=2) || (n>=4 && m==1))
                         printf("      %d  %lld   %8ld   %lld/%lld        %s\n",
                                n, m, sg,
-                               (long long)e20, (long long)e30,
-                               e30 * 10000 < (__int128)sg * t[29] ? "sim" : "NÃO");
+                               (long)i128_to_i64(e20), (long)i128_to_i64(e30),
+                               i128_cmp(i128_smul_i128(e30, EMB_S), i128_mul(i128_from_i64(sg), t[29])) < 0 ? "sim" : "NÃO");
                 }
             }
             printf("      corpos K_{n,m} testados (n=2..5, m=1..4): %d\n", corpos);
@@ -717,16 +723,17 @@ int main(void){
          * E da semente escolhida. Dizer "todas as classes colapsam na mesma coisa" sem isto
          * insinuava que os corpos são o mesmo objeto — e eles não são. */
         {
-            __int128 c[16]; int nc=0, distintas=0;
+            I128 c[16]; int nc=0, distintas=0;
             for(int n=2;n<=5;n++) for(L m=1;m<=4;m++){
-                __int128 t[64]; for(int k=0;k<64;k++) t[k]=0;
-                t[0]=n; t[n-1]=1;
-                for(int k=n;k<64;k++) t[k] = (__int128)m*t[k-1] + t[k-n];
-                c[nc++] = t[30]*t[29];
+                I128 t[64]; for(int k=0;k<64;k++) t[k]=i128_zero();
+                t[0]=i128_from_i64(n); t[n-1]=i128_from_i64(1);
+                for(int k=n;k<64;k++)
+                    t[k] = i128_add(i128_smul_i128(t[k-1], m), t[k-n]);
+                c[nc++] = i128_mul(t[30], t[29]);
             }
             for(int i=0;i<nc;i++){
                 int novo = 1;
-                for(int j=0;j<i;j++) if(c[i] == c[j]) novo = 0;
+                for(int j=0;j<i;j++) if(i128_cmp(c[i], c[j]) == 0) novo = 0;
                 if(novo) distintas++;
             }
             printf("      e as CONSTANTES t_k/σ^k: %d corpos, %d valores DISTINTOS\n",

@@ -40,6 +40,8 @@
  *   cc -O2 -std=c99 -I. cruza.c -lm -o cruza && ./cruza
  */
 #define _GNU_SOURCE
+#include <stdint.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include "../lib/disco.h"
 #include <stdlib.h>
@@ -176,7 +178,7 @@ disco_prende(DISCO_BASE(26),"dados/cruza_filho.bin",(size_t)NPESO,1);
         filho[i]   = (unsigned char)(px & 0xFF);
         filho[i+1] = (unsigned char)(py & 0xFF);
     }
-    printf("      pesos lidos de cada pai      %d bytes (deslocamento %lld)\n", NPESO, (long long)off);
+    printf("      pesos lidos de cada pai      %d bytes (deslocamento %" PRId64 ")\n", NPESO, (int64_t)off);
     printf("      fusões medidas               %ld\n", casos);
     printf("      onde N(filho) ≠ N(pai)·N(mãe) %ld\n\n", mau);
     ok("a norma do filho é o produto das normas dos pais — em pesos reais", mau == 0);

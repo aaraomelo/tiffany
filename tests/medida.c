@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include "unidade.h"
 
-typedef long long L;
+typedef long L;
 
 static L mdc(L a, L b){ if(a < 0) a = -a; if(b < 0) b = -b;
     while(b){ L t = a % b; a = b; b = t; } return a ? a : 1; }
@@ -44,7 +44,7 @@ static void m1(void){
                     /* λ = conta/q; b−a = (p2−p1)/Q; igualdade por produto cruzado */
                     if(conta * Q == (p2 - p1) * q) iguais++;
                 }
-    printf("   %lld intervalos racionais, quatro escalas comensuraveis cada: %lld exactos\n",
+    printf("   %ld intervalos racionais, quatro escalas comensuraveis cada: %ld exactos\n",
            casos, iguais);
     ok("§M1 λ([a,b]) = b−a EXACTO em racionais: o contador marca a marca = a forma fechada",
        casos > 500 && iguais == casos);
@@ -64,8 +64,8 @@ static void m1(void){
             if(dif == 0) exactos++;
             if(dif > -Q && dif < Q) enquadra++;        /* |λ−(b−a)| < 1/q */
         }
-    printf("   controlo: escala nao comensuravel — %lld/%lld enquadram a menos de um passo,"
-           " %lld exactos\n", enquadra, c2, exactos);
+    printf("   controlo: escala nao comensuravel — %ld/%ld enquadram a menos de um passo,"
+           " %ld exactos\n", enquadra, c2, exactos);
     ok("§M1 e o controlo: fora da escala comensuravel o contador ENQUADRA (a menos de um"
        " passo) mas nao iguala sempre — a exactidao e' da escala, nao do acaso",
        enquadra == c2 && exactos < c2);
@@ -85,7 +85,7 @@ static void m2(void){
         /* o residuo ε/2^n < 1/q para q = 1000: en·q < ed·2^n ? */
         if(en * 1000 < ed * p2n && !desce) desce = n;
     }
-    printf("   soma parcial < ε nas 40 ordens; o residuo desce abaixo de 1/1000 em n=%lld\n",
+    printf("   soma parcial < ε nas 40 ordens; o residuo desce abaixo de 1/1000 em n=%ld\n",
            desce);
     ok("§M2 a serie da metade fecha POR BAIXO de ε em toda ordem, e o residuo desce"
        " abaixo de qualquer regua", fecha && desce > 0);
@@ -117,7 +117,7 @@ static void m2(void){
     }
     L livres = q + 1 - cobertas;
     /* a afirmacao: livres/q >= 1 − ε − (as sobras de arredondar, uma por cobertura) */
-    printf("   escala q=%lld: %lld marcas cobertas, %lld livres (ε=1/10)\n", q, cobertas, livres);
+    printf("   escala q=%ld: %ld marcas cobertas, %ld livres (ε=1/10)\n", q, cobertas, livres);
     ok("§M2 fura-se o contavel e a regua NAO se move: as marcas livres excedem (1−ε)·q",
        livres * ed > (ed - en) * q);
 
@@ -135,7 +135,7 @@ static void m2(void){
         if(num * hd > hn * den && !passou_eps) passou_eps = k;
         if(num > den && !passou_um) passou_um = k;
     }
-    printf("   controlo: a serie ε/k passa de ε em k=%lld e passa de 1 em k=%lld\n",
+    printf("   controlo: a serie ε/k passa de ε em k=%ld e passa de 1 em k=%ld\n",
            passou_eps, passou_um);
     ok("§M2 e o controlo: a serie errada NAO fecha — passa de ε e passa do intervalo"
        " inteiro; o furo barato e' o da METADE", passou_eps > 0 && passou_um > 0);
@@ -165,7 +165,7 @@ static void m3(void){
         for(L k = 0; k < q; k++){ sup_num += 1; inf_num += 0; }
         if(sup_num - inf_num == q) gap_um++;           /* gap·q = q  ⟺  gap = 1 */
     }
-    printf("   em %lld escalas (q ate 4096) o gap superior−inferior e' 1 em todas\n", escalas);
+    printf("   em %ld escalas (q ate 4096) o gap superior−inferior e' 1 em todas\n", escalas);
     ok("§M3 o corte do DOMINIO nao fecha em escala NENHUMA: o gap e' 1 sempre — o residuo"
        " onde nao pode ser zero, nao e'", escalas == gap_um && escalas > 8);
 
@@ -219,7 +219,7 @@ static void m4(void){
             if(col == lin) iguais++;
         }
     }
-    printf("   %lld pares (grelha, funcao): %lld com colunas = linhas, exacto\n", casos, iguais);
+    printf("   %ld pares (grelha, funcao): %ld com colunas = linhas, exacto\n", casos, iguais);
     ok("§M4 cortar o dominio e cortar a imagem dao o MESMO numero onde ambos fecham —"
        " a transposicao e' exacta, em inteiros", casos > 100 && iguais == casos);
 
@@ -253,7 +253,7 @@ static void m5(void){
             casos++;
             if(antes - depois == 1) bons++;            /* UMA marca: 1/q, que desce a zero */
         }
-    printf("   %lld furos em cinco escalas: todos custam exactamente uma marca\n", casos);
+    printf("   %ld furos em cinco escalas: todos custam exactamente uma marca\n", casos);
     ok("§M5 furar UM ponto custa UMA marca — 1/q, que desce a zero com a escala: o ponto"
        " nao pesa", casos == bons && casos > 10);
 }

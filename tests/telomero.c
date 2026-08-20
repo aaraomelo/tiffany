@@ -32,10 +32,13 @@
  *
  *   cc -O2 -std=c99 -Wall -I lib tests/telomero.c -o telomero
  */
+#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 #include "unidade.h"
 #include "reta.h"
+#include "rt_cf_slot.h"
 #include "cifra.h"        /* o codificador EXATO, em inteiros — não se escreve um segundo */
 
 #define MAXT 64
@@ -101,6 +104,7 @@ static void latch_passo(Latch *L, int S, int R){
 }
 
 int main(void){
+int cf_mem = rt_cf_slot_mem_abre("dados/telomero_cf.mem");
 printf("\n=== O TELÓMERO: O SISTEMA COMO UM COMPUTADOR AUTOSSIMILAR ==================\n");
 printf("    Disco, memória e processador são a mesma porta. O que muda é a\n");
 printf("    interpretação — e cada peça disso tem aqui uma medida, não uma frase.\n");
@@ -174,11 +178,11 @@ printf("\n§T2  BASE e FRAÇÃO CONTÍNUA são o MESMO algoritmo: muda o divisor
     size_t n2 = divide_e_itera(137, 4, 0, saida, MAXT);
     for(size_t i = 0; i < n2; i++) printf("%ld ", saida[i]);
     printf("\n");
-    RtCf pal;
-    pal.sinal = 1; pal.n = (int)n2; pal.saturou = 0;
-    for(size_t i = 0; i < n2 && i < (size_t)RT_CF_MAX; i++) pal.a[i] = saida[i];
+    RtCfSlot pal = rt_cf_slot_word(0, cf_mem);
+    rt_cf_slot_init(&pal, 1, pal.base);
+    for(size_t i = 0; i < n2 && i < (size_t)RT_CF_MAX; i++) rt_cf_slot_escreve(&pal, saida[i]);
     long pz = 0, qz2 = 0;
-    int voltou = rt_cf_para(&pal, &pz, &qz2);
+    int voltou = rt_cf_slot_para(&pal, &pz, &qz2);
     printf("      e a volta dá %ld/%ld (era 137/4) — em inteiros, produto cruzado\n\n",
            pz, qz2);
     ok("com divisor variável, devolve a fração contínua — e a volta também é exata. E"
@@ -375,5 +379,6 @@ printf("      · e o TELÓMERO é uma função só, que muda de papel com o divi
 printf("    Não são quatro coisas com uma analogia por cima. É uma porta e uma\n");
 printf("    coordenada, e o resto é onde se põe o laço e quem divide quem.\n\n");
 printf("    %d asserções, %d falhas.\n\n", unidades, falhas);
+if(cf_mem >= 0) close(cf_mem);
 return falhas != 0;
 }

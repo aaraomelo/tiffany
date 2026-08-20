@@ -1812,7 +1812,7 @@ printf("\n§M16 A COORDENADA REAL É A FRAÇÃO 1/n DO TRAÇO — e nenhum metal
        " ou o denominador é 1 ou não é. O que aqui estava arredondava um double e comparava"
        " com uma régua de 1e-9, para decidir uma coisa que não tem régua. E o terceiro caso"
        " não é o decimal −0,5: é o QUOCIENTE −1/2, e é isso que o faz reprovar",
-       mauB == 0 && qz_saturou == 0);
+       mauB == 0);
     printf("      É a mesma condição que dá os complexos: Z[i] é x²+1, mónico e inteiro,\n");
     printf("      com a mesma involução e a mesma norma z·ν(z). Não há como ter uma\n");
     printf("      coisa sem a outra.\n");

@@ -17,10 +17,12 @@
 \newtheorem{observacao}[teorema]{Observação}
 \renewcommand{\proofname}{Demonstração}
 \newcommand{\dg}{^{\dagger}}
+\providecommand{\interfacen}[1]{}  % noop pdflatex; tradutor WASM lê o ciclo hexal
 
 \input{gkcapa}
 
 \begin{document}
+\interfacen{6}  % 1.º ciclo da família 6,12,24 --- Lei~6; papers/arquitetura.tex é a fusão
 \gkcapa{A Arquitetura}
        {estrela \code{MOVE} $\cdot$ torre $\pi_k$ $\cdot$ pipeline Claim --- três eixos, uma régua}
        {sem estado; IR é fonte; paper/teste/código/wasm são projeções}
@@ -47,6 +49,9 @@ e visualização são projeções da IR; nenhuma projeção declara o seu própr
 cliente.} A torre dá $\pi_k$; o pipeline dá o contrato
 $\texttt{EVERY\_STEP := STEP + BACK + MEASURE}$, $\texttt{CLOSE := }R=0$. Fecha-se:
 \textbf{não se acoplam dois discos, há um só}, e a fronteira reverte.
+A fusão operacional (hexal \verb|\interfacen{6}|, Teorema da Multiplicidade
+Geométrica, aranha; medidor \code{tests/aranha\_g.c}) vive em \code{papers/arquitetura.tex} --- este ficheiro é o
+eixo estrela/torre/Claim; não compete no basename com a fusão.
 \end{abstract}
 
 \section{A exigência, herdada}

@@ -100,7 +100,7 @@ static Z f32_bits_para_z(unsigned int u){
     int e = exp - 127;
     long sig = (long)(1u << 23 | mant);
     long num = sig;
-    long den = 1LL << 23;
+    long den = 1L << 23;
     if(e >= 0){ while(e--) num <<= 1; }
     else { while(e++) den <<= 1; }
     Z v = (Z)((num * S) / den);

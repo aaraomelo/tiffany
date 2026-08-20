@@ -53,6 +53,7 @@
  */
 #include <stdio.h>
 #include <limits.h>
+#include "i128.h"
 #include "racionais.h"
 #include "linear.h"
 #include "reta.h"      /* Dir e Cruz: a operação */
@@ -167,28 +168,24 @@ printf("\n§G3  O CONSTRUTOR DA GRADUAÇÃO não tem topo: só a REALIZAÇÃO ac
     long mal = 0, tot = 0;
     printf("      n     andares não nulos (Λ⁰..Λⁿ)   Λⁿ⁺¹     Σ dim = 2ⁿ\n");
     for(int n = 1; n <= 14; n++){
-        __int128 soma = 0, c = 1;
+        I128 soma = i128_zero(), c = i128_from_i64(1);
         for(int k = 0; k <= n; k++){
-            if(k) c = c * (n - k + 1) / k;
-            soma += c;
+            if(k) c = i128_div(i128_smul_i128(c, n - k + 1), i128_from_i64(k));
+            soma = i128_add(soma, c);
         }
-        __int128 dois = 1;
-        for(int t = 0; t < n; t++) dois *= 2;
-        /* dim Λⁿ⁺¹(ℝⁿ) = C(n, n+1) = 0 — o passo seguinte é ZERO, e é só isso que acaba */
-        /* `dim_acima = 0` escrito à mão era o valor impresso como se tivesse sido
-         * calculado. C(n, n+1) é zero porque não há como escolher n+1 de n — e isso
-         * calcula-se com a MESMA recorrência que gerou a linha toda, um passo além. */
+        I128 dois = i128_from_i64(1);
+        for(int t = 0; t < n; t++) dois = i128_smul_i128(dois, 2);
         long dim_acima = 0;
-        { __int128 cc = 1;
+        { I128 cc = i128_from_i64(1);
           for(int k = 1; k <= n + 1; k++){
-              if(k > n){ cc = 0; break; }             /* o andar acima do topo: vazio */
-              cc = cc * (n - k + 1) / k;
+              if(k > n){ cc = i128_zero(); break; }
+              cc = i128_div(i128_smul_i128(cc, n - k + 1), i128_from_i64(k));
           }
-          dim_acima = (long)cc; }
-        if(soma != dois) mal++;
+          dim_acima = (long)i128_to_i64(cc); }
+        if(i128_cmp(soma, dois) != 0) mal++;
         tot++;
         if(n <= 6 || n == 14)
-            printf("      %-5d %-28d %-8ld %lld\n", n, n+1, dim_acima, (long long)soma);
+            printf("      %-5d %-28d %-8ld %ld\n", n, n+1, dim_acima, (long)i128_to_i64(soma));
     }
     printf("\n");
     ok("A GRADUAÇÃO É UM SEGUNDO CONSTRUTOR SEM TOPO, e do mesmo lado que o primeiro: a"

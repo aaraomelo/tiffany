@@ -5,25 +5,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
+#include <inttypes.h>
 #include "reta.h"
 #include "unidade.h"
 
-typedef struct { long long n, d; } Q;
+typedef struct { int64_t n, d; } Q;
 
-static long long q_gcd(long long a, long long b){
+static int64_t q_gcd(int64_t a, int64_t b){
     if(a < 0) a = -a; if(b < 0) b = -b;
-    while(b){ long long t = a % b; a = b; b = t; }
+    while(b){ int64_t t = a % b; a = b; b = t; }
     return a ? a : 1;
 }
 static Q q_norm(Q x){
-    long long g = q_gcd(x.n, x.d);
+    int64_t g = q_gcd(x.n, x.d);
     if(g <= 0) g = 1;
     if(x.d < 0){ g = -g; }
     return (Q){ x.n/g, x.d/g };
 }
 static Q q_mul(Q a, Q b){ return q_norm((Q){ a.n*b.n, a.d*b.d }); }
 static Q q_add(Q a, Q b){
-    long long den = a.d * b.d;
+    int64_t den = a.d * b.d;
     return q_norm((Q){ a.n*b.d + b.n*a.d, den });
 }
 
@@ -48,12 +50,12 @@ static Q isserlis_q(const int *idx, int n, int *usado){
 
 static int q_eq(Q a, Q b){ return a.n * b.d == b.n * a.d; }
 
-static long long conta_emparelhamentos(int n, int *usado){
+static int64_t conta_emparelhamentos(int n, int *usado){
     int primeiro = -1;
     for(int i = 0; i < n; i++) if(!usado[i]){ primeiro = i; break; }
     if(primeiro < 0) return 1;
     usado[primeiro] = 1;
-    long long c = 0;
+    int64_t c = 0;
     for(int j = primeiro + 1; j < n; j++){
         if(usado[j]) continue;
         usado[j] = 1;
@@ -63,9 +65,9 @@ static long long conta_emparelhamentos(int n, int *usado){
     usado[primeiro] = 0;
     return c;
 }
-static long long dupfat(long long n){
-    long long r = 1;
-    for(long long i = n; i > 1; i -= 2) r *= i;
+static int64_t dupfat(int64_t n){
+    int64_t r = 1;
+    for(int64_t i = n; i > 1; i -= 2) r *= i;
     return r;
 }
 
@@ -93,7 +95,7 @@ printf("\n§I1  Isserlis contra valores exactos em ℚ — Σ = [[1,1/2],[1/2,1]
         int usado[8]; memset(usado, 0, sizeof usado);
         Q vi = isserlis_q(casos[c].idx, casos[c].p, usado);
         int okq = q_eq(vi, casos[c].esp);
-        printf("      %-14s %6lld/%-6lld   %6lld/%-6lld   %s\n",
+        printf("      %-14s %6" PRId64 "/%-6" PRId64 "   %6" PRId64 "/%-6" PRId64 "   %s\n",
                casos[c].nome, vi.n, vi.d, casos[c].esp.n, casos[c].esp.d, okq?"✓":"✗");
         if(!okq) mau++;
     }
@@ -108,9 +110,9 @@ printf("\n§I2  A contagem: os emparelhamentos de 2n pontos são (2n−1)!!.\n\n
     printf("      2n    força bruta    (2n−1)!!\n");
     for(int n = 1; n <= 6; n++){
         int usado[16]; memset(usado, 0, sizeof usado);
-        long long c = conta_emparelhamentos(2*n, usado);
-        long long f = dupfat(2*n - 1);
-        printf("      %2d    %11lld    %8lld\n", 2*n, c, f);
+        int64_t c = conta_emparelhamentos(2*n, usado);
+        int64_t f = dupfat(2*n - 1);
+        printf("      %2d    %11" PRId64 "    %8" PRId64 "\n", 2*n, c, f);
         if(c != f) mau++;
     }
     ok("a contagem bate o duplo fatorial, sem exceção", mau == 0);
@@ -120,15 +122,15 @@ printf("\n§I3  N_k É um número de Isserlis — e isso a tabela do capítulo n
 printf("     Ela dá N_k = 3, 15, 105, 945 para k = 3, 5, 7, 9. Conferindo contra a\n");
 printf("     contagem de emparelhamentos de k+1 pontos, por força bruta:\n\n");
 {
-    long long Nk_tabela[4] = {3, 15, 105, 945};
+    int64_t Nk_tabela[4] = {3, 15, 105, 945};
     int ks[4] = {3, 5, 7, 9};
     int mau = 0;
     printf("      k    N_k (tabela)   emparelhamentos de k+1 pontos   k!!\n");
     for(int i = 0; i < 4; i++){
         int usado[16]; memset(usado, 0, sizeof usado);
-        long long c = conta_emparelhamentos(ks[i] + 1, usado);
-        long long d = dupfat(ks[i]);
-        printf("      %d    %12lld   %29lld   %6lld\n", ks[i], Nk_tabela[i], c, d);
+        int64_t c = conta_emparelhamentos(ks[i] + 1, usado);
+        int64_t d = dupfat(ks[i]);
+        printf("      %d    %12" PRId64 "   %29" PRId64 "   %6" PRId64 "\n", ks[i], Nk_tabela[i], c, d);
         if(c != Nk_tabela[i] || d != Nk_tabela[i]) mau++;
     }
     ok("N_k = emparelhamentos de k+1 pontos = k!!", mau == 0);
@@ -139,18 +141,18 @@ printf("     contagem de emparelhamentos de k+1 pontos, por força bruta:\n\n");
 
 printf("\n§I4  As constantes fechadas contra a tabela — e as duas formas de C_k².\n\n");
 {
-    long long Nk[4] = {3, 15, 105, 945}, ak[4] = {192, 1152, 6912, 41472};
-    long long Ck2[4] = {36, 1080, 45360, 2449440};
+    int64_t Nk[4] = {3, 15, 105, 945}, ak[4] = {192, 1152, 6912, 41472};
+    int64_t Ck2[4] = {36, 1080, 45360, 2449440};
     int ks[4] = {3, 5, 7, 9};
-    const long long bk = 16;
+    const int64_t bk = 16;
     int mau_a = 0, mau_c1 = 0, mau_c2 = 0;
     printf("      k    a_k = 32·6^((k−1)/2)   N_k·a_k/b_k    2k(k−2)!!·6^((k−1)/2)   tabela\n");
     for(int i = 0; i < 4; i++){
         int k = ks[i];
-        long long a = 32 * rt_ipow(6, (k-1)/2);
-        long long c1 = Nk[i] * a / bk;
-        long long c2 = 2LL * k * dupfat(k-2) * rt_ipow(6, (k-1)/2);
-        printf("      %d    %20lld   %11lld    %21lld   %8lld\n", k, a, c1, c2, Ck2[i]);
+        int64_t a = 32 * rt_ipow(6, (k-1)/2);
+        int64_t c1 = Nk[i] * a / bk;
+        int64_t c2 = 2LL * k * dupfat(k-2) * rt_ipow(6, (k-1)/2);
+        printf("      %d    %20" PRId64 "   %11" PRId64 "    %21" PRId64 "   %8" PRId64 "\n", k, a, c1, c2, Ck2[i]);
         if(a != ak[i]) mau_a++;
         if(c1 != Ck2[i]) mau_c1++;
         if(c2 != Ck2[i]) mau_c2++;
@@ -162,7 +164,7 @@ printf("\n§I4  As constantes fechadas contra a tabela — e as duas formas de C
     int mau_id = 0;
     for(int i = 0; i < 4; i++){
         int k = ks[i];
-        if(dupfat(k) != (long long)k * dupfat(k-2)) mau_id++;
+        if(dupfat(k) != (int64_t)k * dupfat(k-2)) mau_id++;
         if(32*rt_ipow(6,(k-1)/2) != bk * 2 * rt_ipow(6,(k-1)/2)) mau_id++;
     }
     ok("as duas formas são UMA identidade (k!! = k·(k−2)!!, a_k/b_k = 2·6^…)", mau_id == 0);

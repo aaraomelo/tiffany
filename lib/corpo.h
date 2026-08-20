@@ -1,6 +1,6 @@
 /* corpo.h — ONDE «TODA OPERAÇÃO QUE TEM FIBRA TEM VOLTA» VIRA ESTRUTURA FORMAL.
  *
- * O `eval.txt` fecha o andar com a frase que fecha a escada toda:
+ *  ordem do coordenador fecha o andar com a frase que fecha a escada toda:
  *
  *     «corpo é praticamente o ponto em que "toda operação que tem fibra tem volta" vira
  *      uma estrutura algébrica formal. A EXCEÇÃO continua sendo exatamente a que vocês

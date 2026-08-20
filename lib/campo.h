@@ -1,6 +1,6 @@
 /* campo.h — CÁLCULO III: campos, fluxo, circulação, e a BORDA.
  *
- * O `eval.txt` fecha a sequência do andar com uma frase só:
+ *  ordem do coordenador fecha a sequência do andar com uma frase só:
  *
  *        número → vetor → operador → campo → BORDA
  *

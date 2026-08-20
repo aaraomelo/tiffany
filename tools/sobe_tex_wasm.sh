@@ -30,6 +30,12 @@ PRE='#define SEEK_SET 0
 #define stdout 1
 #define stdin 3
 #define TEX_COM_LIBC_WASM 1
+typedef unsigned long long uint64_t;
+typedef long long int64_t;
+typedef int int32_t;
+typedef unsigned int uint32_t;
+#define INT32_MIN (-2147483647-1)
+#define INT32_MAX 2147483647
 '
 {
   printf '%s' "$PRE"

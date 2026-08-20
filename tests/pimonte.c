@@ -32,7 +32,7 @@
 #include <stdio.h>
 #include "../lib/unidade.h"
 
-typedef long long L;
+typedef long L;
 
 /* N(R) = #{(x,y) em Z^2 : x^2 + y^2 <= R^2} — contagem EXATA, so' inteiros */
 static L conta_disco(L R){
@@ -58,7 +58,7 @@ int main(void){
     for(int i=0;i<6;i++){
         L R=Rs[i], N=conta_disco(R);
         q[i] = N*1000000LL/(R*R);
-        printf("      %5lld  %14lld      %lld\n", R, N, q[i]);
+        printf("      %5ld  %14ld      %ld\n", R, N, q[i]);
     }
     /* pi em milionesimos = 3141592 (nao escrito: vem de pidual.c, que o produziu por tres
      * somas alternadas independentes). aqui uso-o so' para COMPARAR, e a comparacao e' o
@@ -70,7 +70,7 @@ int main(void){
        err_fino < 3000);
 
     /* ═══ §M2 — a regua mais fina mede melhor, e mede-se quanto ════════════════════════ */
-    printf("      desvio com R=10: %lld milionesimos;  com R=3000: %lld  (reduziu %lldx)\n",
+    printf("      desvio com R=10: %ld milionesimos;  com R=3000: %ld  (reduziu %ldx)\n",
            err_grosso, err_fino, err_fino? err_grosso/err_fino : 0);
     ok("apertar o encaixe melhora a medida: o desvio cai por mais de uma ordem de grandeza",
        err_fino*10 < err_grosso);
@@ -97,7 +97,7 @@ int main(void){
             if(x*x + y*y <= LADO*LADO) dentro++;         /* criterio, em inteiros */
         }
         mc[i] = dentro*4000000LL/T;
-        printf("      %10lld  %12lld      %lld\n", T, dentro, mc[i]);
+        printf("      %10ld  %12ld      %ld\n", T, dentro, mc[i]);
     }
     L emc = mc[2]-PI6; if(emc<0) emc=-emc;
     ok("o Monte Carlo tende a pi: com 2 milhoes de tentativas o desvio e' pequeno",
@@ -105,7 +105,7 @@ int main(void){
 
     /* e o acaso e' PIOR que a contagem exata com trabalho comparavel — o que e' o ponto:
      * a proposta cega paga a cegueira. */
-    printf("      desvio Monte Carlo (2e6 pontos): %lld;  contagem exata (R=3000): %lld\n",
+    printf("      desvio Monte Carlo (2e6 pontos): %ld;  contagem exata (R=3000): %ld\n",
            emc, err_fino);
     ok("e a contagem exata bate o acaso: quem tem a regua ordenada nao precisa de tentar",
        err_fino <= emc);

@@ -1,6 +1,6 @@
 /* tensor.h — GRAM, SYLVESTER, JORDAN, TENSOR E EXTERIOR.
  *
- * O `eval.txt` sobe a álgebra linear até à geometria, e traz três coisas que mudam o
+ *  ordem do coordenador sobe a álgebra linear até à geometria, e traz três coisas que mudam o
  * modo de medir — não só o conteúdo:
  *
  * 1. «NÃO BASTA OLHAR PARA A MATRIZ; é preciso PROCURAR TESTEMUNHAS v com Q(v) > 0,
@@ -66,7 +66,7 @@ static int gr_polariza(Mat G, Vec u, Vec v, Qz *saida){
 }
 /* ── O POLINÓMIO MÍNIMO (2×2) ──────────────────────────────────────────────────
  * Grau 1 quando A é escalar (A = λI, e então A − λI = 0); grau 2 caso contrário, e aí
- * coincide com o característico. É a distinção que o `eval.txt` pede a seguir ao
+ * coincide com o característico. É a distinção que  ordem do coordenador pede a seguir ao
  * Cayley–Hamilton — o mínimo pode ser MENOR que o característico. */
 static int esp_minimo_grau(Mat A){
     Qz d = A.a[0][0];

@@ -13,14 +13,15 @@
 #ifndef ELETRICO_H
 #define ELETRICO_H
 
+#include <stdint.h>
 #include <math.h>                      /* os medidores que ainda não migraram puxavam daqui */
+#include "i128.h"
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
 #define VT 0.025852                    /* 25852/1000000 V a 300 K — a constante, não o tipo */
 
-typedef long long LL;
-typedef __int128 I128;
+typedef int64_t LL;
 
 /* ---- KIRCHHOFF: a SOMA. Série soma; paralelo lê-se sem dividir. ------------------- */
 static long el_serie(const long *R, int n){
@@ -79,21 +80,28 @@ static long el_detector_num(long z1, long z2, long z3, long zx_n, long zx_d){
 #ifndef EL_AMP
 #define EL_AMP 1000000LL
 #endif
+static void el_vel_passo(long R, long L, long C, long hn, long hd, LL *q, LL *ii, I128 a_den){
+    I128 div_v = i128_smul_i128(a_den, 2 * hd);
+    I128 a_num = i128_neg(i128_add(
+        i128_smul_i128(i128_smul(R, *ii), C), i128_from_i64(*q)));
+    I128 i2 = i128_add(
+        i128_mul(i128_smul_i128(i128_smul(*ii, hd), 2), a_den),
+        i128_smul_i128(a_num, hn));
+    *ii = (LL)i128_to_i64(i128_div(i2, div_v));
+}
 static void el_simula(long R, long L, long C, long hn, long hd, int passos,
                       long *qf, long *if_, int *sings){
     LL q = EL_AMP, ii = 0;
     int prev = 1, sc = 0;
-    I128 a_den = (I128)L * C;
-    if(hd == 0 || a_den == 0){ if(qf) *qf = 0; if(if_) *if_ = 0; if(sings) *sings = 0; return; }
+    I128 a_den = i128_smul(L, C);
+    if(hd == 0 || i128_is_zero(a_den)){
+        if(qf) *qf = 0; if(if_) *if_ = 0; if(sings) *sings = 0; return;
+    }
     for(int k = 0; k < passos; k++){
-        I128 a_num = -(I128)R * ii * C - q;
-        I128 i2 = (I128)ii * hd * 2 * a_den + (I128)hn * a_num;
-        ii = (LL)(i2 / (2 * hd * a_den));
-        I128 q2 = (I128)q * hd + (I128)hn * ii;
-        q = (LL)(q2 / hd);
-        a_num = -(I128)R * ii * C - q;
-        i2 = (I128)ii * hd * 2 * a_den + (I128)hn * a_num;
-        ii = (LL)(i2 / (2 * hd * a_den));
+        el_vel_passo(R, L, C, hn, hd, &q, &ii, a_den);
+        I128 q2 = i128_add(i128_smul(q, hd), i128_smul_i128(i128_from_i64(ii), hn));
+        q = (LL)i128_to_i64(i128_div(q2, i128_from_i64(hd)));
+        el_vel_passo(R, L, C, hn, hd, &q, &ii, a_den);
         int s = q > 0 ? 1 : q < 0 ? -1 : 0;
         if(s && prev && s != prev) sc++;
         if(s) prev = s;

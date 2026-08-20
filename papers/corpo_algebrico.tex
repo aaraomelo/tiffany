@@ -341,8 +341,9 @@ objectos. \emph{Uma quarta casa obrigaria $\tau$ a tomar quatro valores}, e ent�
 seria o sinal de coisa nenhuma.
 
 \textbf{Tudo o mais é REALIZAÇÃO, e realizações vivem DENTRO de uma das três posições} ---
-nunca ao lado delas. O \code{papers/corpo\_computacional.tex} é uma delas, e a sua posição
-lê-se pelo que consome: tudo o que ele usa vem do centro e do $\tau=-1$, o lado que
+nunca ao lado delas. O \code{papers/arquitetura.tex} (dual sort, firma algébrica,
+slots e aranha estigmérgica) é uma delas; a posição
+lê-se pelo que consome: tudo o que usam vem do centro e do $\tau=-1$, o lado que
 \emph{fecha}, porque ordenar é um processo que \textbf{termina}. \emph{Se algo é
 computacional, ele é uma realização dentro de uma das três --- não uma casa nova.}
 
@@ -1517,7 +1518,16 @@ tem oito posições, \textbf{reutilizadas bloco a bloco}. $\square$
 \end{teorema}
 \colunas{a dobra $1\to2\to4\to8$ e o ciclo de período oito}
         {os oito bits reusados em cada andar}
-        {\code{geometria\_real.c} \S L3}
+        {\code{geometria\_real.c} \S L3;
+         \code{tests/torre\_alg.c} \S T3 mede a subida $16\to32\to64$}
+
+\noindent\textbf{Contrato e medidor.} A realização computacional da torre
+fixa-se em \code{lib/torre\_alg.h}: involução ($\nu^2=\mathrm{id}$),
+retração ($\Sigma\circ\Pi=\mathrm{Id}$ sobre \code{lib/rt\_cf\_slot.h} e
+\code{.mem}), subida ($T_k\to T_{k+1}$ por \code{lib/torre.h}). O medidor
+\code{tests/torre\_alg.c} §T1--§T4 verifica os três pipelines e a distinção
+$\text{involução}\neq\text{retração}\neq\text{subida}$; ver também
+\code{racionais.tex} (degrau $\mathbb{Z}\to\mathbb{Q}$).
 
 %======================================================================
 \section{O invariante topológico não vê o andar --- e quem vê é a
@@ -1633,7 +1643,8 @@ $\square$
 \colunas{o par cone/espiral e a distinção involução\,/\,retração}
         {o motor da construção, independente da família metálica}
         {\code{geometria\_real.c} \S L11c: $3600$ racionais, $\Sigma\circ\Pi=\mathrm{Id}$
-em todos}
+em todos; \code{tests/torre\_alg.c} \S T2: retração exacta nos slots;
+\S T4: involução $\neq$ retração}
 
 \noindent\textbf{E o metálico é o ponto fixo da
 transformação de Möbius associada ao cone, $x\mapsto m+1/x$} --- a sucessão de quociente
@@ -3884,7 +3895,7 @@ aproxima $\mathbb{R}$ nem o afasta: $\mathbb{R}$ alcança-se pelo
 \textbf{corte}, que é \emph{perpendicular} à descida --- o outro lado do
 eixo de Pontryagin. \emph{O bit não está mais longe de $\mathbb{R}$ do
 que o double estava}: estão os dois do mesmo lado, e nenhum lá chega.
-\emph{Medido:} \code{tests/cadeia.c} ($7{:}0$).
+\emph{Medido:} \code{tests/cadeia.c} ($9{:}0$).
 
 \textbf{E a migração não se faz mecanicamente.} Cada ocorrência de um
 tipo classifica-se antes de se reduzir --- \emph{estrutura}, que decide a

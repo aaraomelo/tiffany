@@ -25,20 +25,25 @@
  *   cc -O2 -std=c99 tres_regimes.c -o tres_regimes && ./tres_regimes
  */
 #include <stdio.h>
+#include "i128.h"
 #include "corpos.h"
 #include "unidade.h"
 
-typedef __int128 i128;
-static void conv(const long *a, int n, i128 *q_out){
-    i128 q0 = 0, q1 = 1;
-    for(int i=0;i<n;i++){ i128 t = (i128)a[i]*q1 + q0; q0 = q1; q1 = t; q_out[i] = q1; }
+static void conv(const long *a, int n, I128 *q_out){
+    I128 q0 = i128_zero(), q1 = i128_from_i64(1);
+    for(int i=0;i<n;i++){ I128 t = i128_add(i128_smul_i128(q1, a[i]), q0); q0 = q1; q1 = t; q_out[i] = q1; }
 }
-static void pr(i128 v){
-    if(v == 0){ printf("0"); return; }
+static void pr(I128 v){
+    if(i128_is_zero(v)){ printf("0"); return; }
     char b[48]; int k=0;
-    while(v > 0 && k < 47){ b[k++] = '0' + (int)(v % 10); v /= 10; }
+    I128 ten = i128_from_i64(10);
+    while(i128_cmp(v, i128_zero()) > 0 && k < 47){
+        b[k++] = '0' + (int)i128_to_i64(i128_mod(v, ten));
+        v = i128_div(v, ten);
+    }
     while(k) putchar(b[--k]);
 }
+static long pl(I128 v){ return (long)i128_to_i64(v); }
 
 int main(void){
 printf("\n=== OS TRÊS REGIMES DA CIFRA ==============================================\n");
@@ -48,13 +53,12 @@ printf("\n§T1  O CONSTANTE [1,1,1,…]: q_n é Fibonacci — o crescimento MAIS
 {
     int mau = 0;
     long a[14]; for(int i=0;i<14;i++) a[i]=1;
-    i128 q[14]; conv(a,14,q);
+    I128 q[14]; conv(a,14,q);
     printf("      n     q_n      razão q_n/q_{n−1}\n");
     for(int i=1;i<6;i++){
-        printf("      %-5d ", i+1); pr(q[i]); printf("        ~ %ld\n", (long)q[i]/(long)q[i-1]);
+        printf("      %-5d ", i+1); pr(q[i]); printf("        ~ %ld\n", pl(q[i])/pl(q[i-1]));
     }
-    /* Fibonacci: q_n = q_{n−1} + q_{n−2}, e a razão → φ */
-    for(int i=2;i<14;i++) if(q[i] != q[i-1] + q[i-2]) mau++;
+    for(int i=2;i<14;i++) if(i128_cmp(q[i], i128_add(q[i-1], q[i-2])) != 0) mau++;
     ok("com termos todos 1, q_n é Fibonacci e a razão tende a φ — o mínimo possível", mau == 0);
     printf("\n      É o número MAIS MAL aproximável que existe: nenhum racional se lhe chega mais\n");
     printf("      depressa. É o círculo — o mais fechado, o que menos abre.\n");
@@ -63,11 +67,11 @@ printf("\n§T1  O CONSTANTE [1,1,1,…]: q_n é Fibonacci — o crescimento MAIS
 printf("\n§T2  PA [1,2,3,4,…]: os termos crescem, e q_n acelera.\n\n");
 {
     long a[12]; for(int i=0;i<12;i++) a[i]=i+1;
-    i128 q[12]; conv(a,12,q);
+    I128 q[12]; conv(a,12,q);
     printf("      n     q_n\n");
     for(int i=1;i<6;i++){ printf("      %-5d ", i+1); pr(q[i]); printf("\n"); }
     ok("com PA os termos crescem linearmente, e q_n cresce mais depressa que Fibonacci",
-       (long)q[9] > 0);
+       i128_cmp(q[9], i128_zero()) > 0);
     printf("\n      Já não é quadrático: uma cifra de termos ILIMITADOS não é periódica, logo o\n");
     printf("      número não é raiz de quadrática. Saiu da família real — abriu.\n");
 }
@@ -75,11 +79,11 @@ printf("\n§T2  PA [1,2,3,4,…]: os termos crescem, e q_n acelera.\n\n");
 printf("\n§T3  PG [1,2,4,8,…]: q_n EXPLODE.\n\n");
 {
     long a[10]; long v=1; for(int i=0;i<10;i++){ a[i]=v; v*=2; }
-    i128 q[10]; conv(a,10,q);
+    I128 q[10]; conv(a,10,q);
     printf("      n     q_n\n");
     for(int i=1;i<6;i++){ printf("      %-5d ", i+1); pr(q[i]); printf("\n"); }
     ok("com PG o crescimento é duplamente exponencial — a aproximação é de qualquer ordem",
-       (long)q[8] > 0);
+       i128_cmp(q[8], i128_zero()) > 0);
     printf("\n      É o regime de Liouville: aproxima-se tão bem por racionais que deixa de ser\n");
     printf("      algébrico. Abriu de vez.\n");
 }
@@ -93,10 +97,10 @@ printf("\n§T4  E é o termo SEGUINTE que abre: |α − p/q| ≈ 1/(q_n·q_{n+1}
     printf("      [1,2,4,8,…]    2^n       ínfimo            quase exato — abriu\n");
     /* mede-se: q_{n+1} = a_{n+1}·q_n + q_{n−1}, logo o termo seguinte MULTIPLICA o denominador */
     long a[10]; for(int i=0;i<10;i++) a[i] = 1;
-    i128 q1[10]; conv(a,10,q1);
+    I128 q1[10]; conv(a,10,q1);
     for(int i=0;i<10;i++) a[i] = (i+1)*3;
-    i128 q2[10]; conv(a,10,q2);
-    if(!(q2[8] > q1[8])) mau++;                       /* termos maiores ⟹ q maior ⟹ melhor aprox */
+    I128 q2[10]; conv(a,10,q2);
+    if(i128_cmp(q2[8], q1[8]) <= 0) mau++;                       /* termos maiores ⟹ q maior ⟹ melhor aprox */
     ok("o termo seguinte MULTIPLICA o denominador — e é ele que decide a abertura", mau == 0);
     printf("\n      É a mecânica que ele descreveu: o tamanho do termo é a abertura. Constante =\n");
     printf("      fechado (círculo); crescente = abre; explosivo = escancarado.\n");

@@ -92,7 +92,7 @@ static int bl_e(BlCtx *c){                          /* ⊗ — o AND */
     }
     return v;
 }
-/* A NOTAÇÃO É A DO `eval.txt`, E DIZ-SE: ali o `+` é o OU («A + AB = A», «F = AB +
+/* A NOTAÇÃO É A DO COORDENADOR, E DIZ-SE: ali o `+` é o OU («A + AB = A», «F = AB +
  * AB'»), que é a convenção da álgebra booleana e dos circuitos. O XOR tem sinal
  * próprio: `^` ou a palavra `xor`. Ler o `+` como XOR dava «a + ab = a·b̄» — certo em
  * GF(2) e ERRADO no ficheiro que manda aqui; e um `+` ambíguo é pior que os dois.
@@ -166,7 +166,7 @@ static int bl_val_anf(const unsigned char *anf, int nv, unsigned x){
 }
 /* ─── OS CONJUNTOS: a pertença é a variável, e a prova é a tabela ────────────────
  *
- * O `eval.txt` dá a ponte inteira e diz para que serve:
+ *  ordem do coordenador dá a ponte inteira e diz para que serve:
  *
  *     conjuntos ↔ Booleano ↔ árvore ↔ prova
  *
@@ -219,7 +219,7 @@ static void conj_traduz(const char *s, char *out, size_t lim){
 
 /* ─── A SIMPLIFICAÇÃO, E A LEI EM CADA TRANSIÇÃO ─────────────────────────────────
  *
- * O `eval.txt` põe a caixa de ferramentas inteira — idempotência, dominação, absorção,
+ *  ordem do coordenador põe a caixa de ferramentas inteira — idempotência, dominação, absorção,
  * involução, De Morgan, dualidade, DNF/CNF, Shannon — e acaba com a regra desta casa:
  * «fazendo cada um com VOLTA OBRIGATÓRIA: transformação → resultado → reconstrução».
  *

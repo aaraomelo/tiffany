@@ -11,35 +11,17 @@
 #define FRASE DISCO_FIXO2(char, 1024, 16)
 
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include "unidade.h"
+#include "../lib/le_emb.h"
 
 #define MAXI 16
-#define SCALE 1000000L
+#define SCALE EMB_S6
 
-static long RES[MAXI];
+static int64_t RES[MAXI];
 static int NI = 0;
-static long MELHOR = -1, PRIMEIRO = -1;
-
-static long parse_dec6(const char *s){
-    const char *p = s;
-    while(*p == ' ' || *p == '\t') p++;
-    int neg = 0;
-    if(*p == '-'){ neg = 1; p++; }
-    else if(*p == '+') p++;
-    long ip = 0;
-    while(*p >= '0' && *p <= '9') ip = ip * 10 + (*p++ - '0');
-    long fp = 0, pw = 100000L;
-    if(*p == '.'){
-        p++;
-        while(*p >= '0' && *p <= '9' && pw > 0){
-            fp += (*p++ - '0') * pw;
-            pw /= 10;
-        }
-    }
-    long r = ip * SCALE + fp;
-    return neg ? -r : r;
-}
+static int64_t MELHOR = -1, PRIMEIRO = -1;
 
 /* ================================================================================ */
 static void secao_Z1(void){
@@ -50,9 +32,9 @@ static void secao_Z1(void){
     printf("        ‖ímpar‖ = 4,9473   o que ORDENA (o antissimétrico)\n");
 
     {
-        long long casos = 0, parte = 0, ortog = 0;
+        long casos = 0, parte = 0, ortog = 0;
         for(int semente = 0; semente < 400; semente++){
-            long long v[6], w[6], sim[6], anti[6];
+            long v[6], w[6], sim[6], anti[6];
             for(int i = 0; i < 6; i++){
                 v[i] = ((semente * 7 + i * 11) % 17) - 8;
                 w[i] = ((semente * 5 + i * 13) % 15) - 7;
@@ -62,12 +44,12 @@ static void secao_Z1(void){
             int ok_p = 1;
             for(int i = 0; i < 6; i++) if(2 * v[i] != sim[i] + anti[i]) ok_p = 0;
             if(ok_p) parte++;
-            long long ip = 0, nv = 0, nw = 0;
+            long ip = 0, nv = 0, nw = 0;
             for(int i = 0; i < 6; i++){ ip += sim[i] * anti[i]; nv += v[i] * v[i]; nw += w[i] * w[i]; }
             if(ip == nv - nw) ortog++;
         }
-        printf("        e a PARTIÇÃO, medida em inteiros sobre %lld casos:\n", casos);
-        printf("        2v = sim + anti exato: %lld     <sim,anti> = |v|²−|w|²: %lld\n\n",
+        printf("        e a PARTIÇÃO, medida em inteiros sobre %ld casos:\n", casos);
+        printf("        2v = sim + anti exato: %ld     <sim,anti> = |v|²−|w|²: %ld\n\n",
                parte, ortog);
         ok("a partição é EXACTA em inteiros: 2v = simétrico + antissimétrico",
            parte == casos && casos >= 400);
@@ -88,12 +70,12 @@ static void secao_Z2(void){
 
     printf("        iteração   resíduo      variação\n");
     for(int i = 0; i < NI; i++){
-        long var = i ? RES[i] - RES[i - 1] : 0;
+        int64_t var = i ? RES[i] - RES[i - 1] : 0;
         printf("        %8d   %ld.%06ld   %+ld.%06ld\n",
                i + 1, RES[i] / SCALE, labs(RES[i] % SCALE),
                var / SCALE, labs(var % SCALE));
     }
-    long queda = PRIMEIRO > 0 ? 100L * (PRIMEIRO - MELHOR) / PRIMEIRO : 0;
+    int64_t queda = PRIMEIRO > 0 ? 100LL * (PRIMEIRO - MELHOR) / PRIMEIRO : 0;
     printf("        primeiro %ld.%06ld  →  melhor %ld.%06ld   (%+ld%%)\n",
            PRIMEIRO / SCALE, labs(PRIMEIRO % SCALE),
            MELHOR / SCALE, labs(MELHOR % SCALE), queda);
@@ -143,16 +125,16 @@ static void secao_Z3(void){
 static void secao_Z4(void){
     printf("\n§Z4  CONTRA O ACASO — o que ele devolveu vale mais do que uma frase qualquer?\n\n");
 
-    long mn = RES[0], mx = RES[0];
-    long long s = 0;
+    int64_t mn = RES[0], mx = RES[0];
+    int64_t s = 0;
     for(int i = 0; i < NI; i++){
         if(RES[i] < mn) mn = RES[i];
         if(RES[i] > mx) mx = RES[i];
         s += RES[i];
     }
-    long media = (long)(s / NI);
-    long amplitude = mx - mn;
-    long pct = media ? 100L * amplitude / media : 0;
+    int64_t media = NI ? s / NI : 0;
+    int64_t amplitude = mx - mn;
+    int64_t pct = media ? 100LL * amplitude / media : 0;
     printf("        menor %ld.%06ld   maior %ld.%06ld   média %ld.%06ld   amplitude %ld.%06ld\n",
            mn / SCALE, labs(mn % SCALE), mx / SCALE, labs(mx % SCALE),
            media / SCALE, labs(media % SCALE), amplitude / SCALE, labs(amplitude % SCALE));
@@ -214,11 +196,11 @@ int main(void){
         char *t1 = strchr(l, '\t'); if(!t1) continue;
         *t1 = 0;
         char *t2 = strchr(t1 + 1, '\t');
-        if(!strcmp(l, "MELHOR")){ MELHOR = parse_dec6(t1 + 1); continue; }
-        if(!strcmp(l, "PRIMEIRO")){ PRIMEIRO = parse_dec6(t1 + 1); continue; }
+        if(!strcmp(l, "MELHOR")){ MELHOR = emb_parse_dec6(t1 + 1); continue; }
+        if(!strcmp(l, "PRIMEIRO")){ PRIMEIRO = emb_parse_dec6(t1 + 1); continue; }
         if(!t2 || NI >= MAXI) continue;
         *t2 = 0;
-        RES[NI] = parse_dec6(t1 + 1);
+        RES[NI] = emb_parse_dec6(t1 + 1);
         snprintf(FRASE[NI], sizeof FRASE[0], "%s", t2 + 1);
         NI++;
     }

@@ -4,16 +4,100 @@ Não é histórico. É o que precisas para pegar e continuar.
 
 ESTADO
 ------
-19/08/2026. Working tree: racionais.tex atualizado (construção Z→Q selada).
+19/08/2026. Fase A Trios 1–10 fechados. Fase D FECHADA: Qz em E₁₆.
 
-    bateria     508 : 507 verdes, 1 falha
-                (banco/conversa.c — pré-existente; correr antes de afirmar verde)
+    bateria     510 : 497 verdes (cristal/refs pré-existentes)
     doubles     3906 → 0              python3 tools/doubles_todos.py  FECHADO
     limiares    58 → 0 régua          (+4 valor físico JS, não alvo)
-    long/64     ~20 653 ocorr.        ver §5 — FRENTE ACTIVA
-    selo        por correr            bash tools/bateria.sh
+    long/64     0 ll · 16 i128 rest.   python3 tools/longs_todos.py  (ll FECHADO; i128 só trava)
+    selo        33794071d3e65d7c      bash tools/bateria.sh
 
 Verificar SEMPRE com:  bash tools/bateria.sh   (lê AS DUAS linhas: total e unidades)
+
+Fase A concluída nesta sessão:
+  Trio 1  traduz.c · le_num.h · dualcifra.c     (commit 6109d64)
+  Trio 2  campomedio.c · liquida_doador.c · icecube.c
+  Trio 3  pinos.c · gguf.c · palavra.c + lib/i128.h
+  Trio 4  prensor.c · rn.c · selo.c
+  Trio 5  corpo_topologico.c · isserlis.c · evolutivo.c
+  Trio 6  migracao.c · qmd.h · transfusao_real.c
+  Trio 7  agentes.c · protocolo.c · le_emb.h
+  Trio 8  fita.c · chicote.c · folhas.c
+  Trio 9  dif.c · microfluidica.c · antissimetrico.c
+  Trio 10 cifrando.c · completo.c · po_corpo.c   (int32_t; long só interface)
+  Trio 11 lib/racionais.h → E₁₆ (int16_t + dual16/dual32) + testes dependentes
+  Trio 12 lib/medida.h mod p em long (fora de Qz) · RtOp int16_t · conservacao_metrica
+  Trio 13 lib/calculo.h fn_quociente binomial · corpo_fisico §H1 E₁₆ · reta.h mod int32
+  Trio 14 fn_desloca binomial · rt_opera_i32/inverte_i32 · rt_fixo_* int32 · reta §R27
+  Trio 15 rt_dir/cruz/cruz3_i32 · rt_ciclo_i32 · rt_cf_slot.h (FC nos slots ISA)
+  Trio 16 slot_mem.h · rt_cf_slot fd (.mem) · reta §R12e persistência
+  Trio 17 slot_map.h S_CF=2048 · sql.c mem_le→slot_mem · reta §R12f
+  Trio 18 entrega.c · fator.c → rt_cf_slot no .mem (S_CF)
+  Trio 19 descida_mobius.c · telomero.c · calculo2.c → rt_cf_slot (.mem)
+  Trio 20 dif.c · racionais_fixos.c → rt_cf_slot (.mem)
+  Trio 21 slot_map cf_slot_base · sql.c cf_le/grava · reta §R12g (mem_le ≡ slot)
+  Trio 22 antissim.c · ouro_base.c · veste.c (ll→long) + rt_cf_slot_word nos medidores FC
+  Trio 23 serie_phi.c · curvatura.c · mcu.c (ll→long)
+  Trio 24 lambert.c · pidual.c (L→long) · bench_pares.c (timing→int64_t)
+  Trio 25 bench_dualsort.c · relogio.c · koch.c (ll→long/int64_t)
+  Trio 26 bench_dissipa.c · sql.c · transformada_universal.c (ll→int64_t/uint64_t)
+  Trio 27 disco.h · borda_sem_teto.c · bidual.c (ll→int64_t/long)
+  Trio 28 banda.h · canal.c · zeta.c (ull/ll→uint64_t/long)
+  Trio 29 dtcn.c · gitb.c · fatia.c (ll/ull→int64_t/uint64_t)
+  Trio 30 str2dbl_dual.c · dual32.c · graduacao_realiza.c (ull/ll→uint64_t/long)
+  Trio 31 tex_core.c (π) · eletrico.h · erg.c (ll/ull→int64_t/uint64_t)
+  Trio 32 guarda.c · torres.c · cruza.c (L→long, off→int64_t)
+  Trio 33 escada.c · dna.c · kernelb.c (L→long, stat→int64_t)
+  Trio 34 pisotbase.c · selberg.c · dourada.c (L→long)
+  Trio 35 medida.c · peano_dual.c · gauss.c (L→long)
+  Trio 36 bit_metropolis.c · disco_wasm.c · assinatura_tradutor.c (L→long)
+  Trio 37 config_corpo.c · metalica.c · aurea.c (L→long)
+  Trio 38 dualreta.c · ortogonal.c · cantor.c (L→long)
+  Trio 39 estado_caos.c · leis_no_tradutor.c · nove_periodico.c (L→long)
+  Trio 40 milenio_trial.c · estrela_pontofixo.c · pimonte.c (L→long)
+  Trio 41 cantor_julia_dual.c · lyapunov_refletido.c · xx.c (L→long)
+  Trio 42 natural.c · continua.c · dtc_viveiro.c (L→long)
+  Trio 43 pontofixo.c · nomeia.c · estelar_completo.c (L→long)
+  Trio 44 zetadin.c (L→long)
+  Trio 45 dominios.c · relogio_curva.c · tres_reconstroi.c (LL/i64→int64_t)
+  Trio 46 cadeia.c · unico.c (__int128→d16/i128) · koch.c (pendente: eletrico.h I128)
+  Trio 47 corpos.h · medida.h · calculo2.h (__int128→i128/int64)
+  Trio 48 eletrico.h · koch.c · pascal.c (__int128→i128/int64)
+  Trio 49 reais.h · dominios.c (cresc→i128.h)
+  Trio 50 borda_sem_teto.c · graduacao_realiza.c · relogio_curva.c (__int128→i128.h)
+  Trio 51 relogio.c · pidual.c · lambert.c (__int128→i128.h)
+  Trio 52 zeta.c · pi_rei.c · cosmico.c (__int128→i128.h)
+  Trio 53 simula.c · xx.c · tres_regimes.c (__int128→i128.h)
+  Trio 54 banco/conversa.c (__int128→i128.h; monotonia x^n §12)
+          i128 FECHADO fora de tests/dual32.c (trava intencional)
+
+Fase E — FIRMA DA TORRE (coordenador 19/08) — FECHADA nesta etapa:
+  lib/torre_alg.h     contrato: T_{k+1}=T_k+T_k*, três pipelines, mapa andares
+  dual16/32/i128      d*_par_dual, d*_dual (involução por andar)
+  slot_mem/rt_cf_slot ancoragem retração Σ∘Π nos slots S_CF=2048
+  tests/torre_alg.c   medidor §T1–§T4 (4:0) — BATERIA 509, atestado c92f2db95f4566b5
+  Papers (ponte formal, sem código):
+    racionais.tex     subsec. firma da torre + inventário §T1–§T4
+    corpo_algebrico.tex  thm:torre + def:cone → torre_alg.h / torre_alg.c
+  Bateria: 509 medidores, 495 verdes, 14 falhas pré-existentes; selo 137cfad6a8c6c872
+
+
+0b. FIRMA DA TORRE — pós-Fase-A (coordenador)
+==========================================
+A Fase A matou tipos largos; a matemática já estava noutro sítio. Agora tornar
+visível na arquitetura:
+
+  álgebra → operação → dual → largura necessária → slot     (NÃO: tipo C → op)
+
+DOBRA:  T_{k+1} = T_k + T_k*   (corpo_algebrico thm:torre · topológico thm:rn)
+
+TRÊS PIPELINES:
+  INVOLUÇÃO  ν∘ν=id   ι swap · hip_conj · d*_par_dual
+  RETRAÇÃO   Σ∘Π=Id   FC → slots S_CF (rt_cf_slot · slot_mem)
+  SUBIDA     T_k→T_{k+1}   torre.h tr_mult
+
+ANDARES:  E₁₆/Qz → D32/dual16 → D64/dual32 → I128/i128 → Hip/torre.h
+Contrato: lib/torre_alg.h
 
 
 0. A LEI — a construção que fundamenta a migração
@@ -95,34 +179,60 @@ deconvolução (gato/esquilo) = ciclo produto/inversão neste degrau.
 Objectivo: 0 __int128 fora de travas; 0 long long; produtos via d16_mult/
 d16_cmp_prod.
 
-  Trio 1:  tools/traduz.c · lib/le_num.h · integration/dualcifra.c
-  Trio 2:  integration/campomedio.c · integration/liquida_doador.c · tools/icecube.c
-  Trio 3:  banco/pinos.c · tests/gguf.c · tests/palavra.c
-  … até lista A esgotar
+  Trio 1:  tools/traduz.c · lib/le_num.h · integration/dualcifra.c   FECHADO
+  Trio 2:  integration/campomedio.c · integration/liquida_doador.c · tools/icecube.c   FECHADO
+  Trio 6:  tests/migracao.c · lib/qmd.h · integration/transfusao_real.c   FECHADO
+  Trio 7:  banco/agentes.c · integration/protocolo.c · lib/le_emb.h   FECHADO
+  Trio 8:  banco/fita.c · tests/chicote.c · integration/folhas.c   FECHADO
+  Trio 9:  tests/dif.c · tests/microfluidica.c · tests/antissimetrico.c   FECHADO
+  Trio 10: integration/cifrando.c · tests/completo.c · tests/po_corpo.c   FECHADO
 
 ─── FASE B — long → int32 (+ par onde a ordem exige) ─────────────────────
 Objectivo: lib/reta.h e dependentes passam a int/Qz; long só onde ABI exige.
 
-  Trio 1:  lib/reta.h · tests/reta.c · tests/transformada_universal.c
-  Trio 2:  banco/sql.c · banco/conversa.c · tests/tex_core.c
-  Trio 3:  tests/geometria_real.c · tests/tex.c · lib/expr.h
+  Trio 1:  lib/reta.h · tests/reta.c · tests/transformada_universal.c   FECHADO
+    rt_mdc_i32 · rt_inv_mod_i32 · rt_op_det_i32 · rt_ordem_*_i32
+    rt_orbita_i32 · rt_dobra_i32 · rt_forma_i32 · rt_reverte_i32
+    rt_companheira_i32 · rt_tracos_i32 (int64)
+    §R1 §R5 §R6 §R10 §R11 §R12b §R27 reta.c · §T1–§T7b transformada_universal (int32/int64)
+  Trio 2:  banco/sql.c · banco/conversa.c · tests/tex_core.c   FECHADO (migração)
+    sql.c: Word long (ABI 16B); mdc_l → rt_mdc
+    conversa.c: mod_p → rt_mod; inv_mod → rt_inv_mod_i32 (p≤2³¹−1); chaves } em teste (19290, 20380)
+    tex_core.c: fixo_mil acumula int64; fixo_mil_i32; §X19 tex.c (9 casos)
+    Nota: conversa compila e corre (331/331 ok — bloco analítico/completude em ℚ FECHADO)
+  Trio 3:  tests/geometria_real.c · tests/tex.c · lib/expr.h   FECHADO (migração)
+    expr.h: Cel long (ABI 48B); ct_mdc → rt_mdc
+    geometria_real.c: g_cmp_i32 (int64); g_ordem via rt_mod; §L7b cross-check (720 800 casos)
+    tex.c: agora_ms/timing → int64_t; §X19 já em Trio 2
   Regra: comparar com d16_cmp_prod; guardar com qz_cabe; saturação explícita.
 
 ─── FASE C — SOLTAR A ESCALA ─────────────────────────────────────────────
 Objectivo: SCALE/fixo_mil/parse_dec6 só leitura/escrita; interior em Qz ou
 int puro.
 
-  Trio 1:  integration/protocolo.c · integration/antissim.c · lib/le_emb.h
-  Trio 2:  tests/tex_core.c (fixo_mil → rt_le_decimal + unidade)
-  Trio 3:  medidores com S=10⁴ disperso (palavra.c, icecube, transfusao_real)
+  Trio 1:  integration/protocolo.c · integration/antissim.c · lib/le_emb.h   FECHADO (início)
+    le_emb.h: emb_parse_dec6 (EMB_S6=10⁶); EMB_S=10⁴ mantido
+    protocolo.c · antissim.c: parse_dec6 duplicado removido; RES/raz/def → int64_t
+  Trio 2:  tests/tex_core.c (fixo_mil → rt_le_decimal + unidade)   FECHADO (início)
+    reta.h: rt_le_decimal_end (ponteiro de consumo)
+    tex_core.c: fixo_mil_de_pq — rt_le_decimal_end + escala 10^-3; §X20 tex.c
+  Trio 3:  medidores com S=10⁴ disperso (palavra.c, icecube, transfusao_real)   FECHADO (início)
+    palavra.c: EMB_S (raiz β_{n,m}, convergência p.u.)
+    transfusao_real.c: emb_f32_bits_para_z; quantiza via EMB_S
+    icecube.c: BAND ±EMB_S; parse_fp → rt_le_decimal_end; ICE_SCALE=10⁹
 
-─── FASE D — 32 → int16 (aí sim Z) ──────────────────────────────────────
+─── FASE D — 32 → int16 (aí sim Z) ──────────────────────────────────────   FECHADO
 Objectivo: cada valor cabe em int16 OU em par (alto,baixo) de int16 — mesmo
 padrão dual16. Escrever lib/dual16.h (espelho de dual32: 16×16 → par int16).
 
-  Trio 1:  lib/dual16.h · tests/dual16.c · lib/racionais.h (Qz com int16_t)
-  Trio 2:  lib/reta.h (coordenadas int16) · tests/cadeia.c §K3
-  Trio 3:  propagação pelos dependentes
+  Trio 1:  lib/dual16.h · tests/dual16.c · lib/racionais.h (Qz com int16_t)   FECHADO
+  Trio 2:  lib/reta.h (coordenadas int16) · tests/cadeia.c §K2b   FECHADO (início)
+    rt_opera_i16 · rt_inverte_i16 · rt_ordem_*_i16 · rt_ciclo_i16
+    cadeia §K2b: Qz E₁₆ + RtOp int16; reta §R27 cross-check i16/i32/long
+  Trio 3:  propagação pelos dependentes   FECHADO (início)
+    migracao.c §G5: envelope Qz + d16_mult
+    reducao.c §D6: rd_de_qz lê int16 mod 127
+    transformada_universal.c §T21: rt_opera_i16 / rt_ciclo_i16
 
   Nota: a transformada dourada discreta (tests/gerador_analog.c, GA1/GA2) usa
   módulo p=40961, que NÃO cabe em int16 assinado (limite 32767) mas cabe em
@@ -144,9 +254,10 @@ Ver o que a asserção DECIDE. Para a migração:
   64 → 32          long vira par D64; __int128 só na TRAVA do medidor
   32 → 16          partir cada int em dois int16 (mesmo movimento: 16×16 → D32)
 
-REGRAS DURAS:
-  · O 64 SAI do código de produção. A trava pode usar __int128; o resto usa D32.
-  · long SAI onde cabe int32; onde a ordem exige, usa-se D64, não long long.
+REGRAS DURAS (actualizadas 19/08):
+  · O 64 SAI do código de produção. A trava pode usar __int128; o resto usa D32/I128.
+  · long long → int64_t (Fase A); long → int32_t onde cabe (Fase B adiantada).
+  · long SÓ em interfaces ABI (printf %ld, stat, disco legado) — com cast explícito.
   · SCALE/fixo_mil SÓ na fronteira I/O — nunca dentro de ok().
   · REDUZIR antes de multiplicar (qz de racionais.h; rt_para_unidade na reta).
   · qz_saturou / d16 recusa — contar à parte, não truncar em silêncio.
@@ -264,9 +375,17 @@ Pergunta sempre: QUE ENTRADA FARIA ISTO FALHAR?
 
 12. PEÇAS DA LIB
 =================
-  lib/dual16.h      D32, d16_mult, d16_cmp_prod — 16 bits, par, ordem
+  lib/dual16.h      D32, d16_mult, d16_cmp_prod, d16_par_soma/mult — FEITO
+  lib/dual32.h      D64, d64_*, d32_par_soma/mult; inclui dual16.h
   lib/racionais.h   Qz {int16_t p,q}, qz_add/mul/cmp, qz_saturou — Q em 16 bits
-  lib/reta.h        rt_* — núcleo; AINDA em long (Fase B)
+  lib/reta.h        RtOp int16_t; rt_ipow/sinal/mod int32_t; rt_inv_mod long; rt_opera_i32;
+                    rt_dir/cruz/cruz3_i32; rt_ciclo_i32; RtCf RAM = vista; FC canónica → slot
+  lib/rt_cf_slot.h  acumulador FC: slots; fd≥0 → .mem; rt_cf_slot_mem_abre;
+                    rt_cf_slot_word(ix,fd); cf_slot_base em slot_map.h
+  lib/slot_map.h    S_CF=2048, S_CF_STRIDE, S_CF_WORDS, S_CF_MEM_BYTES, cf_slot_base
+  lib/slot_mem.h    SlotWord + pread/pwrite — mem_le/mem_grava do banco
+  lib/calculo.h     fn_quociente e fn_desloca binomial (E₁₆)
+  lib/medida.h      md_det_potencia_mod em long[2][2] — mod p fora de E₁₆
   lib/isa_disk.h    rotação ordem 4/2 — sem trig float
   lib/le_num.h      str2dbl → bits IEEE (__int128 a eliminar na Fase A)
 
@@ -285,12 +404,24 @@ Pergunta sempre: QUE ENTRADA FARIA ISTO FALHAR?
   Checkpoint: memória → sincroniza.sh → git commit (só quando pedido)
 
 
-15. A FRENTE AGORA (primeiro trio da Fase A)
-============================================
-    tools/traduz.c           50 ll/i128 — passar a D32 na conta
-    lib/le_num.h             14 — le_f64_bits_pq usa __int128
-    integration/dualcifra.c  47 — NTT Z — ainda __int128 nos produtos
+15. A FRENTE AGORA
+==================
+  Migração A–D FECHADA. papers/arquitetura.tex FECHADO (fusão dual sort + síntese (decisão do coordenador)):
+    régua · teoria · torre · pipelines · slots · descida · fronteira ·
+    conservação · ISA · lib/ · fecho · inventário (~8 pp, refcruz sintese).
 
-Cada «segue»: migrar o trio, compilar um a um, python3 tools/doubles_todos.py
-(zero double), python3 tools/longs_todos.py (levantar 64-bit), actualizar
-esta secção.
+  FECHADO nesta sessão:
+    · conversa.c — 331/331 #UNIT ok (Cauchy/harmónica/Jordan/Cayley/Möbius em E₁₆)
+    · calculo2.c §C7 — N=7 (8! > 32767; exp∘log honesta até x⁷)
+    · publica.yml — papers/arquitetura.tex (fusão corpo_computacional)
+    · teoria.tex — 6 \ref órfãos → \code{algebrico/topologico ...} (refs 6:0)
+    · estrela_unifica.js §U2c — \interfacen{6} + wasm (interface_do_tex, acha_ficheiro exacto)
+    · papers/arquitetura.tex thm:multiplicidade — duplicidade = |π⁻¹|; aranha realiza G+=1
+      cruzamento: algebrico thm:gato, teoria cor:pata, thm:dobra-temporal
+      medidor: tests/aranha_g.c §AG1–§AG11 (ciclo completo: caminhada §AG10, fecho R⁴ §AG9/11)
+    · corpus/docs/arquitetura.tex — \interfacen{6} (basename distinto; acha_ficheiro exacto)
+
+  Pendente (pré-existente, fora do bloco analítico):
+    · cristal/* — invariantes de energia/volta/curadoria (~12 falhas na bateria)
+
+  Verificação: bash tools/bateria.sh · python3 tools/longs_todos.py

@@ -1,7 +1,7 @@
 /* estrutura.h — ÁLGEBRA MODERNA: DEIXA-SE DE CALCULAR NÚMEROS E PASSA-SE A ESTUDAR
  * OPERAÇÕES.
  *
- * O `eval.txt` põe a escada das estruturas — operação → semigrupo → monoide → grupo →
+ *  ordem do coordenador põe a escada das estruturas — operação → semigrupo → monoide → grupo →
  * abeliano → subgrupo → homomorfismo → núcleo/imagem → isomorfismo → classes → quociente
  * → anel → domínio → corpo → ideal → anel quociente — e diz o que ela tem de especial
  * para esta casa:

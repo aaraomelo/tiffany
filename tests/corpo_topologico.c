@@ -35,10 +35,12 @@
  *   cc -O2 -std=c99 -Wall -I../lib corpo_topologico.c -o corpo_topologico && ./corpo_topologico
  */
 #include <stdio.h>
+#include <stdint.h>
+#include <inttypes.h>
 #include "oito.h"
 #include "unidade.h"
 
-typedef long long L;
+typedef int64_t L;
 
 static long gcdl(long a, long b){
     if(a < 0) a = -a;
@@ -94,24 +96,24 @@ static long pi_gentil_regua(int dim, int alc){
     int iters = (dim > 1) ? (log2i(dim) + dim - 2) : 1;
     if(iters > C) iters = C;
     long S = 1L << 30;
-    long long sq = S;
+    int64_t sq = S;
     for(int s = 0; s < iters; s++){
-        long long sq2 = (sq * sq) / S, inner = S - sq2;
+        int64_t sq2 = (sq * sq) / S, inner = S - sq2;
         if(inner < 0) inner = 0;
-        { unsigned long long ux = (unsigned long long)inner * (unsigned long long)S;
-          unsigned long long g = ux, h = (g + 1) / 2;
+        { uint64_t ux = (uint64_t)inner * (uint64_t)S;
+          uint64_t g = ux, h = (g + 1) / 2;
           while(h < g){ g = h; h = (g + ux / g) / 2; }
-          inner = (long long)g; }
-        { unsigned long long ux = (unsigned long long)(2 * S + 2 * inner) * (unsigned long long)S;
-          unsigned long long g = ux, h = (g + 1) / 2;
+          inner = (int64_t)g; }
+        { uint64_t ux = (uint64_t)(2 * S + 2 * inner) * (uint64_t)S;
+          uint64_t g = ux, h = (g + 1) / 2;
           while(h < g){ g = h; h = (g + ux / g) / 2; }
           if(g <= 0) g = 1;
-          sq = (sq * S) / (long long)g; }
+          sq = (sq * S) / (int64_t)g; }
     }
-    unsigned long long num = (unsigned long long)sq * 1000000000ULL;
+    uint64_t num = (uint64_t)sq * 1000000000ULL;
     int e = iters + 1;
     while(e > 0){ num <<= 1; e--; }
-    return (long)(num / (unsigned long long)S);
+    return (long)(num / (uint64_t)S);
 }
 
 int main(void){
@@ -177,7 +179,7 @@ int main(void){
                 int xv, yv; encher(inv[x][y], K, &xv, &yv);
                 if(xv != x || yv != y) residuo++;
             }
-        printf("§CP4  Peano K=%d: %d×%d, %lld casas, repetida? %s, resíduo %lld\n\n",
+        printf("§CP4  Peano K=%d: %d×%d, %" PRId64 " casas, repetida? %s, resíduo %" PRId64 "\n\n",
                K, lado, lado, total, repetida ? "sim" : "nao", residuo);
         ok("§CP4 corpo de Peano: φ_K bijeção, contar∘encher=id, resíduo 0",
            !repetida && residuo == 0);
@@ -255,7 +257,7 @@ int main(void){
                 int xv, yv; encher(d, K, &xv, &yv);  /* ν(contar) = encher */
                 if(xv != x || yv != y) nu_res++;
             }
-        printf("§CP9  ν Peano: contar∘encher e encher∘contar, resíduo %lld\n\n", nu_res);
+        printf("§CP9  ν Peano: contar∘encher e encher∘contar, resíduo %" PRId64 "\n\n", nu_res);
         ok("§CP9 dual ν em Peano: troca φ↔φ⁻¹; ν²=id, resíduo 0",
            nu_res == 0);
     }
@@ -1154,7 +1156,7 @@ int main(void){
            maestro && orq && sinfonica && filarmonica && camara && orq_cordas && hier);
     }
 
-    /* ========== AUDITORIA CP23–CP35 (eval.txt) ========== */
+    /* ========== AUDITORIA CP23–CP35 (ordem do coordenador) ========== */
 
     /* §CP23 separação lei / torre / catálogo / reticulado */
     {

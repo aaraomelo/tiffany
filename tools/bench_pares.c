@@ -22,6 +22,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <stdint.h>
+#include <inttypes.h>
 
 typedef struct { long a, b; } Par;
 
@@ -100,13 +102,13 @@ static int cmp(const void *x, const void *y){
 static unsigned long sem = 88172645463325252UL;
 static unsigned long rnd(void){ sem ^= sem<<13; sem ^= sem>>7; sem ^= sem<<17; return sem; }
 
-static long long agora_ns(void){
+static int64_t agora_ns(void){
     struct timespec t; clock_gettime(CLOCK_MONOTONIC, &t);
-    return (long long)t.tv_sec * 1000000000LL + (long long)t.tv_nsec;
+    return (int64_t)t.tv_sec * 1000000000 + (int64_t)t.tv_nsec;
 }
-static void ms10_print(long long ns){
-    long long v = (ns + 50000) / 100000;
-    printf("%10lld.%lld", v / 10, v % 10);
+static void ms10_print(int64_t ns){
+    int64_t v = (ns + 50000) / 100000;
+    printf("%10" PRId64 ".%" PRId64, v / 10, v % 10);
 }
 
 int main(void){
@@ -126,8 +128,8 @@ int main(void){
             orig[i].a = (long)(rnd() % (unsigned long)chaves[c]);
             orig[i].b = (long)(rnd() % 1000000);
         }
-        long long d[4];
-        memcpy(v, orig, N*sizeof(Par)); long long t0=agora_ns(); dual_pares(v, N, 0); d[0]=agora_ns()-t0;
+        int64_t d[4];
+        memcpy(v, orig, N*sizeof(Par)); int64_t t0=agora_ns(); dual_pares(v, N, 0); d[0]=agora_ns()-t0;
         long mau = 0; for(long i=1;i<N;i++) if(menor(v[i],v[i-1])) mau++;
         memcpy(v, orig, N*sizeof(Par)); t0=agora_ns(); qsort(v,N,sizeof(Par),cmp); d[1]=agora_ns()-t0;
         memcpy(v, orig, N*sizeof(Par)); t0=agora_ns(); quick(v, N);                d[2]=agora_ns()-t0;

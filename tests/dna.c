@@ -1,6 +1,6 @@
 /* dna.c — A FITA BIOLÓGICA: máquina de estados auditável, e ONDE a reversão se parte.
  *
- * O recado do Aarão no eval.txt: "pegue um genoma real e construa uma simulação do DNA como duas
+ * O recado do Aarão no ordem do coordenador: "pegue um genoma real e construa uma simulação do DNA como duas
  * fitas complementares [...] modele replicação semiconservativa, transcrição, tradução, mutações,
  * reparo, crescimento, divisão, e reversão computacional [...] para cada etapa, gere estado
  * anterior, operação, estado posterior, informação preservada, informação perdida, checksum, e
@@ -235,10 +235,10 @@ printf("\n§N4  TRADUÇÃO: 64 → 21 PARECE perder — e o lado dual mostra que
      *     Σ_c n_c = 64 e cada codão cai em exatamente um aminoácido.
      * É isso que se mede aqui, em inteiros: a partição é exata e não perde nem duplica. */
     {
-        long long soma = 0, classes = 0;
+        long soma = 0, classes = 0;
         for(int c = 0; c < 128; c++) if(conta[c]){ soma += conta[c]; classes++; }
         printf("        e nas CONTAGENS (onde a identidade vive, e é inteira):\n");
-        printf("        Σ_c n_c = %lld   sobre %lld aminoácidos   (tem de ser 64)\n\n",
+        printf("        Σ_c n_c = %ld   sobre %ld aminoácidos   (tem de ser 64)\n\n",
                soma, classes);
         ok("a partição é EXATA: os 64 codões repartem-se sem perder nem duplicar",
            soma == 64);

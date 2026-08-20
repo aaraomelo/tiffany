@@ -5,30 +5,33 @@
  *      migração + EQUIVALÊNCIA EXAUSTIVA + zero ramos onde a lei os absorve
  *
  * com a exigência de «não aceitar que algum ramo volte escondido dentro de uma camada
- * inferior». O `Qz` desta casa passou de `{long p, q}` para `{int p, q}`, com o par de
- * 32 bits a segurar os intermédios e o que não cabe CONTADO em vez de enrolado.
+ * inferior». O `Qz` desta casa passou de `{long p, q}` para `{int16_t p, q}`, com o par
+ * D32 a segurar os intermédios 16×16 e o que não cabe CONTADO em vez de enrolado.
  *
  * §G0  a aritmética migrada contra a régua larga — soma, produto e ORDEM
  * §G1  o que MUDOU no sistema: comparar em vez de FORMAR, em quatro sítios
  * §G2  o guarda que passou a PERGUNTAR à operação em vez de adivinhar o tecto
  * §G3  o tecto honesto: nunca se compara contra um valor saturado
  * §G4  e o que continua a saturar, dito — porque um relatório sem preço está errado
+ * §G5  o envelope E₁₆: Qz = 32 bits, d16_mult nos componentes
  */
 #include <stdio.h>
+#include "dual16.h"
 #include "dual32.h"
+#include "i128.h"
 #include "racionais.h"
 #include "unidade.h"
 
-static int mesmo(Qz r, __int128 p, __int128 q){
-    if(q < 0){ p = -p; q = -q; }
-    return (__int128)r.p * q == p * (__int128)r.q;
+static int mesmo(Qz r, I128 p, I128 q){
+    if(i128_negativo(q)){ p = i128_neg(p); q = i128_neg(q); }
+    return i128_cmp(i128_smul_i128(q, r.p), i128_smul_i128(p, r.q)) == 0;
 }
 
 int main(void){
-    printf("\n=== A MIGRAÇÃO: o racional em 32 bits, e o critério cumprido ===\n");
+    printf("\n=== A MIGRAÇÃO: o racional em E₁₆, e o critério cumprido ===\n");
 
     /* ═══ §G0 A EQUIVALÊNCIA CONTRA A RÉGUA LARGA ════════════════════════════ */
-    printf("\n§G0 A aritmética migrada contra o __int128 — soma, produto e ordem.\n\n");
+    printf("\n§G0 A aritmética migrada contra a régua larga — soma, produto e ordem.\n\n");
     {
         long mal_s = 0, mal_m = 0, mal_o = 0, cas = 0, sat = 0;
         for(long ap = -40; ap <= 40; ap++) for(long aq = 1; aq <= 20; aq++)
@@ -38,10 +41,12 @@ int main(void){
             Qz s = qz_soma(a,b), m = qz_mult(a,b);
             cas++;
             if(qz_saturou != antes){ sat++; continue; }
-            if(!mesmo(s, (__int128)a.p*b.q + (__int128)b.p*a.q, (__int128)a.q*b.q)) mal_s++;
-            if(!mesmo(m, (__int128)a.p*b.p, (__int128)a.q*b.q)) mal_m++;
+            I128 sp = i128_add(i128_smul(a.p, b.q), i128_smul(b.p, a.q));
+            I128 sq = i128_smul(a.q, b.q);
+            if(!mesmo(s, sp, sq)) mal_s++;
+            if(!mesmo(m, i128_smul(a.p, b.p), i128_smul(a.q, b.q))) mal_m++;
             int meu = qz_menor(a,b);
-            int reg = ((__int128)a.p*b.q < (__int128)b.p*a.q);
+            int reg = d16_cmp_prod(a.p, b.q, b.p, a.q) < 0;
             if(meu != reg) mal_o++;
         }
         printf("      %ld casos: soma %ld, produto %ld, ordem %ld divergências;"
@@ -64,10 +69,11 @@ int main(void){
             Qz a = qz(ap,q), b = qz(bp,q), e = qz(1,4);
             cas++;
             int meu = qz_dist_menor(a,b,e);
-            __int128 n = (__int128)a.p*b.q - (__int128)b.p*a.q;
-            if(n < 0) n = -n;
-            __int128 esq = n * e.q, dir = (__int128)e.p * a.q * b.q;
-            if(meu != (esq < dir)) mal++;
+            I128 n = i128_sub(i128_smul(a.p, b.q), i128_smul(b.p, a.q));
+            n = i128_abs(n);
+            I128 esq = i128_smul_i128(n, e.q);
+            I128 dir = i128_smul(e.p, (int64_t)a.q * b.q);
+            if(meu != (i128_cmp(esq, dir) < 0)) mal++;
         }
         /* x² contra c sem construir x² */
         long malq = 0, casq = 0;
@@ -77,8 +83,9 @@ int main(void){
             int meu = qz_cmp_quad(x, 2, &bom);
             casq++;
             if(!bom) continue;
-            __int128 e = (__int128)x.p*x.p, d = 2*(__int128)x.q*x.q;
-            int reg = e < d ? -1 : (e > d ? 1 : 0);
+            I128 e = i128_smul(x.p, x.p);
+            I128 d = i128_smul(2, (int64_t)x.q * x.q);
+            int reg = i128_cmp(e, d);
             if(meu != reg) malq++;
         }
         printf("      |a − b| < ε sem formar a diferença: %ld divergências em %ld\n",
@@ -110,7 +117,7 @@ int main(void){
         ok("O GUARDA PERGUNTA À OPERAÇÃO EM VEZ DE ADIVINHAR O TECTO, e a diferença é a"
            " que esta casa passou o dia a aprender: um guarda que compara com um número"
            " que EU escolhi mede a minha escolha, não a operação. Pior — quando o tipo"
-           " encolheu, o guarda largo continuou a dizer «cabe», o racional grampeou, e o"
+           " encolheu, o guarda largo continuava a dizer «cabe», o racional grampeou, e o"
            " que restava era o CADÁVER da conta a passar por resultado. Agora o `qz` conta"
            " o que não lhe coube e o guarda lê esse contador: a detecção está DENTRO da"
            " conta",
@@ -163,6 +170,25 @@ int main(void){
            " tornou o tecto VISÍVEL e METADE. E é essa visibilidade que vale, porque o"
            " defeito nunca foi o tecto: foi o tecto silencioso",
            cresceu > 0 && cresceu < 40 && sat_fim > sat_ini); }
+    }
+
+    /* ═══ §G5 O ENVELOPE E₁₆ ════════════════════════════════════════════════ */
+    printf("\n§G5 O envelope E₁₆: Qz cabe em 32 bits, e d16_mult bate int32.\n\n");
+    {
+        long mal = 0, cas = 0;
+        for(int16_t ap = -80; ap <= 80; ap++) for(int16_t aq = 1; aq <= 40; aq++){
+            Qz x = qz(ap, aq);
+            cas++;
+            if((int)sizeof(Qz) != 4) mal++;
+            if(!qz_cabe(x.p) || !qz_cabe(x.q)) mal++;
+            D32 pq = d16_mult(x.p, x.q);
+            if(d32_to_i32(pq) != (int32_t)x.p * (int32_t)x.q) mal++;
+        }
+        printf("      sizeof(Qz) = %zu;  %ld racionais: %ld falhas de envelope\n",
+               sizeof(Qz), cas, mal);
+        ok("O ENVELOPE E₁₆ FECHA: Qz são dois int16 (32 bits), cada produto p·q é exacto"
+           " em D32 via d16_mult, e qz_cabe confirma que o guarda leu antes de grampear",
+           mal == 0 && cas > 6000);
     }
 
     printf("\n=== %ld asserções, %ld falhas, %ld saturações (à parte) ===\n",

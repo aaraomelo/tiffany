@@ -36,6 +36,7 @@
  *
  *   cc -O2 -std=c99 -I../lib dtcn.c -o dtcn && ./dtcn
  */
+#include <stdint.h>
 #include <stdio.h>
 #include "reta.h"
 #include "unidade.h"
@@ -337,7 +338,7 @@ printf("\n§H7  As BANDAS derivadas do imposto — e a economia, medida.\n\n");
         int cresce = 1;
         if(ant_num >= 0){
             /* b²/nw2  >  ant_num/ant_den  ⇔  b²·ant_den > ant_num·nw2 */
-            if((long long)m * ant_den < (long long)ant_num * nw2) cresce = 0;
+            if((int64_t)m * ant_den < (int64_t)ant_num * nw2) cresce = 0;
             if(!cresce) malMono++;
         }
         printf("      (%ld,%ld)               %-6ld %-6ld  %ld/%ld              %s\n",

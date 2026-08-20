@@ -45,7 +45,7 @@
 #include "unidade.h"
 #include <string.h>
 
-typedef long long L;
+typedef long L;
 
 /* caminho de p/q na árvore de Stern-Brocot */
 static void caminho(L p, L q, char *out, int max){
@@ -128,7 +128,7 @@ int main(void){
             caminho(T[i].p, T[i].q, c, 40);
             casos++;
             if(c[0]) bate++;
-            printf("      %lld/%-6lld %-17s %-17d %s\n",
+            printf("      %ld/%-6ld %-17s %-17d %s\n",
                    T[i].p, T[i].q, c, maior_corrida(c), T[i].fc);
         }
         printf("      racionais: %d   com caminho encontrado: %d\n", casos, bate);
@@ -152,7 +152,7 @@ int main(void){
             int mc = maior_corrida(c);
             metais++;
             if(mc == (int)m) corrida_ok++;
-            printf("      %s  %lld   %lld/%-9lld %-24s %d\n", nome[m], m, p[4], q[4], c, mc);
+            printf("      %s  %ld   %ld/%-9ld %-24s %d\n", nome[m], m, p[4], q[4], c, mc);
         }
         printf("      metais: %d   com a maior corrida = m: %d\n", metais, corrida_ok);
         ok("o m E o comprimento da corrida: ouro alterna a cada 1, prata a cada 2, bronze a cada 3",
@@ -182,7 +182,7 @@ int main(void){
             }
             metais++;
             if(bom) alt_ok++;
-            if(m<=3) printf("      %-4lld %s\n", m, lin);
+            if(m<=3) printf("      %-4ld %s\n", m, lin);
         }
         printf("      metais: %d   com alternancia perfeita: %d\n", metais, alt_ok);
         int per_troca = isa_periodo_giro(ISA_S_TROCA);
@@ -221,7 +221,7 @@ int main(void){
             L c2 = q[10]*q[10] - q[8]*q[12]; if(c2 < 0) c2 = -c2;
             L c3 = q[12]*q[12] - q[10]*q[14]; if(c3 < 0) c3 = -c3;
             if(c1 * q[10] > c2 * q[6] && c2 * q[12] > c3 * q[8]) raz_ok++;
-            if(m<=3) printf("      %-4lld %lld %lld %lld %lld%*s %lld %lld %lld %lld%*s %-13lld %lld/%lld\n",
+            if(m<=3) printf("      %-4ld %ld %ld %ld %ld%*s %ld %ld %ld %ld%*s %-13ld %ld/%ld\n",
                             m, q[0],q[2],q[4],q[6], 8, "", q[1],q[3],q[5],q[7], 6, "",
                             t2, q[10], q[8]);
         }
@@ -269,7 +269,7 @@ int main(void){
             for(int k=1;k<9;k++) if(!(b[k] > a[k])) maior=0;
             metais++;
             if(maior) cresce++;
-            if(m<=4) printf("      %-4lld %lld %lld %lld %lld %lld %lld%*s%s\n",
+            if(m<=4) printf("      %-4ld %ld %ld %ld %ld %ld %ld%*s%s\n",
                             m, a[1],a[2],a[3],a[4],a[5],a[6], 10, "", maior?"sim":"NAO");
         }
         printf("      metais: %d   com q_k(m+1) > q_k(m) em todo k: %d\n", metais, cresce);
@@ -296,7 +296,7 @@ int main(void){
         for(int k=0;k<12;k+=2){
             L nn = p[k]*p[k] - m*p[k]*q[k] - q[k]*q[k];
             int sg = (nn>0)-(nn<0);
-            printf("%lld/%lld ", p[k], q[k]);
+            printf("%ld/%ld ", p[k], q[k]);
             n++;
             if(sant && sg != sant) cruza++;
             if(!sant) sant = sg;

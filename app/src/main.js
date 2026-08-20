@@ -125,7 +125,8 @@ const ATUALIZADO_BR = dataCurta(ATUALIZADO)
 
 function docs(dd) {
   const ic = { 'enredo.pdf': '📜', 'teoria.pdf': '📐', 'catalogo.pdf': '📖', 'livro.pdf': '📚',
-               'corpo_analitico.pdf': '⭐', 'computacional.pdf': '🔀', 'fisica.pdf': '⚛️',
+               'corpo_analitico.pdf': '⭐', 'computacional.pdf': '🔀',
+               'computacional.pdf': '📐', 'fisica.pdf': '⚛️',
                'medida.pdf': '📏', 'milenio.pdf': '∞', 'arquitetura.pdf': '🏗️',
                'corpo-peano.pdf': '🎵', 'partitura.pdf': '🎼' }
   const items = dd.map((d) => {

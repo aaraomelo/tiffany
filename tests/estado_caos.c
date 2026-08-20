@@ -27,7 +27,7 @@
 #include "reta.h"      /* as operações da recta */
 #include "unidade.h"
 
-typedef long long L;
+typedef long L;
 static const L P = 2147483647; /* 2^31 - 1, primo de Mersenne: o corpo dos dados */
 
 /* a estrela: ν(x) = -1/x  (mod P). ν∘ν = id. */
@@ -60,7 +60,7 @@ int main(void){
             if(d != 0) contaminados++;              /* contou um passo contaminado (de J em diante) */
             if(d != esperado) dobra_sempre = 0;     /* d_n = 2^(n-J), a amplificação exata */
             if(n <= J + 5)
-                printf("        %3d | %26lld | %lld\n", n, d, esperado);
+                printf("        %3d | %26ld | %ld\n", n, d, esperado);
             esperado = (2*esperado) % P;            /* 2^(n-J+1) para o próximo */
         }
     }

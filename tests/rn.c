@@ -30,6 +30,8 @@
  *   cc -O2 -std=c99 rn.c -lm -o rn && ./rn
  */
 #include <stdio.h>
+#include <stdint.h>
+#include <inttypes.h>
 #include "reta.h"      /* Dir e Cruz: a operação */
 #include "unidade.h"
 
@@ -151,15 +153,15 @@ printf("\n§R3  Em C o cruzado é zero, e é por isso que C comuta.\n\n");
      * e uma identidade sobre inteiros. A versao anterior media UM par em long com
      * tolerancia 1e-12; aqui varre-se uma familia e compara-se com IGUALDADE. */
     {
-        long long tot=0, comuta=0;
-        for(long long a=-6;a<=6;a++) for(long long b=-6;b<=6;b++)
-        for(long long c=-6;c<=6;c++) for(long long d=-6;d<=6;d++){
-            long long p0 = a*c - b*d, p1 = a*d + b*c;
-            long long q0 = c*a - d*b, q1 = c*b + d*a;
+        int64_t tot=0, comuta=0;
+        for(int64_t a=-6;a<=6;a++) for(int64_t b=-6;b<=6;b++)
+        for(int64_t c=-6;c<=6;c++) for(int64_t d=-6;d<=6;d++){
+            int64_t p0 = a*c - b*d, p1 = a*d + b*c;
+            int64_t q0 = c*a - d*b, q1 = c*b + d*a;
             tot++;
             if(p0==q0 && p1==q1) comuta++;
         }
-        printf("      pares de Z[i]: %lld   com (a+bi)(c+di) = (c+di)(a+bi): %lld\n\n",
+        printf("      pares de Z[i]: %" PRId64 "   com (a+bi)(c+di) = (c+di)(a+bi): %" PRId64 "\n\n",
                tot, comuta);
         ok("C comuta — e a razao e a dimensao do vetor: EXATO em inteiros",
            comuta == tot && tot > 20000);
@@ -181,22 +183,22 @@ printf("\n§R4  E o cruzado só existe em dim 1, 3 e 7 — é isso que limita a 
     printf("      7  (R^8)            existe     O       não      NÃO\n");
     printf("      15 (R^16)           NÃO HÁ     S       não      não, e há divisores de zero\n\n");
     /* A identidade de Lagrange é POLINOMIAL e os vetores são de inteiros — logo mede-se em
-     * long long, com igualdade EXATA e sem tolerância nenhuma. A versão anterior media UM
+     * int64_t, com igualdade EXATA e sem tolerância nenhuma. A versão anterior media UM
      * par em long com `(lhs-rhs) == 0`: media a aritmética de vírgula flutuante
      * sobre um objeto que é inteiro do princípio ao fim. E varre-se uma família. */
     {
-        long long tot = 0, iguais = 0;
-        for(long long ax=-4; ax<=4; ax++) for(long long ay=-4; ay<=4; ay++)
-        for(long long az=-4; az<=4; az++) for(long long bx=-3; bx<=3; bx++)
-        for(long long by=-3; by<=3; by++) for(long long bz=-3; bz<=3; bz++){
-            long long cx = ay*bz - az*by, cy = az*bx - ax*bz, cz = ax*by - ay*bx;
-            long long lhs = cx*cx + cy*cy + cz*cz;
-            long long aa = ax*ax+ay*ay+az*az, bb = bx*bx+by*by+bz*bz;
-            long long ab = ax*bx+ay*by+az*bz;
+        int64_t tot = 0, iguais = 0;
+        for(int64_t ax=-4; ax<=4; ax++) for(int64_t ay=-4; ay<=4; ay++)
+        for(int64_t az=-4; az<=4; az++) for(int64_t bx=-3; bx<=3; bx++)
+        for(int64_t by=-3; by<=3; by++) for(int64_t bz=-3; bz<=3; bz++){
+            int64_t cx = ay*bz - az*by, cy = az*bx - ax*bz, cz = ax*by - ay*bx;
+            int64_t lhs = cx*cx + cy*cy + cz*cz;
+            int64_t aa = ax*ax+ay*ay+az*az, bb = bx*bx+by*by+bz*bz;
+            int64_t ab = ax*bx+ay*by+az*bz;
             tot++;
             if(lhs == aa*bb - ab*ab) iguais++;
         }
-        printf("      pares (a,b) de Z^3 varridos: %lld   com |axb|^2 = |a|^2|b|^2 - <a,b>^2: %lld\n\n",
+        printf("      pares (a,b) de Z^3 varridos: %" PRId64 "   com |axb|^2 = |a|^2|b|^2 - <a,b>^2: %" PRId64 "\n\n",
                tot, iguais);
         ok("a identidade de Lagrange vale em dim 3, EXATA em inteiros — sem tolerancia",
            iguais == tot && tot > 100000);
@@ -241,34 +243,34 @@ printf("\n§R5  E OS DOIS SÃO AS DUAS METADES DE QUALQUER PRODUTO BILINEAR.\n\n
      * antissimetrico. Mede-se DOBRADO (2B = 2S + 2A) para ficar em inteiros, e sobre
      * uma familia de bilineares com coeficientes inteiros. */
     {
-        long long casos=0, sim_ok=0, anti_ok=0, soma_ok=0;
+        int64_t casos=0, sim_ok=0, anti_ok=0, soma_ok=0;
         for(int sem=0; sem<300; sem++){
-            long long M[3][3];
+            int64_t M[3][3];
             for(int i2=0;i2<3;i2++) for(int j2=0;j2<3;j2++)
                 M[i2][j2] = ((sem*7 + i2*11 + j2*5) % 13) - 6;
             for(int p=0;p<4;p++){
-                long long a[3], b[3];
+                int64_t a[3], b[3];
                 for(int i2=0;i2<3;i2++){
                     a[i2] = ((sem+p*3+i2*2) % 9) - 4;
                     b[i2] = ((sem*2+p+i2*5) % 11) - 5;
                 }
-                long long Bab=0, Bba=0;
+                int64_t Bab=0, Bba=0;
                 for(int i2=0;i2<3;i2++) for(int j2=0;j2<3;j2++){
                     Bab += M[i2][j2]*a[i2]*b[j2];
                     Bba += M[i2][j2]*b[i2]*a[j2];
                 }
-                long long S2 = Bab + Bba, A2 = Bab - Bba;   /* 2S e 2A, inteiros */
-                long long S2t = Bba + Bab, A2t = Bba - Bab; /* trocando a e b */
+                int64_t S2 = Bab + Bba, A2 = Bab - Bba;   /* 2S e 2A, inteiros */
+                int64_t S2t = Bba + Bab, A2t = Bba - Bab; /* trocando a e b */
                 casos++;
                 if(S2 == S2t) sim_ok++;                     /* S nao muda */
                 if(A2 == -A2t) anti_ok++;                   /* A troca de sinal */
                 if(S2 + A2 == 2*Bab) soma_ok++;             /* 2S + 2A = 2B */
             }
         }
-        printf("      bilineares de coeficientes inteiros, %lld pares:\n", casos);
-        printf("        2S nao muda ao trocar a e b:   %lld\n", sim_ok);
-        printf("        2A troca de sinal:             %lld\n", anti_ok);
-        printf("        2S + 2A = 2B:                  %lld\n\n", soma_ok);
+        printf("      bilineares de coeficientes inteiros, %" PRId64 " pares:\n", casos);
+        printf("        2S nao muda ao trocar a e b:   %" PRId64 "\n", sim_ok);
+        printf("        2A troca de sinal:             %" PRId64 "\n", anti_ok);
+        printf("        2S + 2A = 2B:                  %" PRId64 "\n\n", soma_ok);
         ok("todo bilinear e a soma de uma parte simetrica e uma antissimetrica — EXATO",
            sim_ok==casos && anti_ok==casos && soma_ok==casos && casos>=1200);
     }
@@ -291,17 +293,17 @@ printf("\n§R5  E OS DOIS SÃO AS DUAS METADES DE QUALQUER PRODUTO BILINEAR.\n\n
     {
         /* ⟨a×b,a⟩ = 0 e a×a = 0 sao IDENTIDADES POLINOMIAIS: medem-se em inteiros, com
          * igualdade, e sobre uma familia — nao num par em long com tolerancia. */
-        long long tot=0, perp_ok=0, aa_ok=0;
-        for(long long ax=-3;ax<=3;ax++) for(long long ay=-3;ay<=3;ay++)
-        for(long long az=-3;az<=3;az++) for(long long bx=-3;bx<=3;bx++)
-        for(long long by=-3;by<=3;by++) for(long long bz=-3;bz<=3;bz++){
-            long long cx=ay*bz-az*by, cy=az*bx-ax*bz, cz=ax*by-ay*bx;
+        int64_t tot=0, perp_ok=0, aa_ok=0;
+        for(int64_t ax=-3;ax<=3;ax++) for(int64_t ay=-3;ay<=3;ay++)
+        for(int64_t az=-3;az<=3;az++) for(int64_t bx=-3;bx<=3;bx++)
+        for(int64_t by=-3;by<=3;by++) for(int64_t bz=-3;bz<=3;bz++){
+            int64_t cx=ay*bz-az*by, cy=az*bx-ax*bz, cz=ax*by-ay*bx;
             tot++;
             if(cx*ax+cy*ay+cz*az == 0 && cx*bx+cy*by+cz*bz == 0) perp_ok++;
-            long long ux=ay*az-az*ay, uy=az*ax-ax*az, uz=ax*ay-ay*ax;
+            int64_t ux=ay*az-az*ay, uy=az*ax-ax*az, uz=ax*ay-ay*ax;
             if(ux==0 && uy==0 && uz==0) aa_ok++;
         }
-        printf("      pares de Z^3: %lld   com <axb,a> = <axb,b> = 0: %lld   com axa = 0: %lld\n\n",
+        printf("      pares de Z^3: %" PRId64 "   com <axb,a> = <axb,b> = 0: %" PRId64 "   com axa = 0: %" PRId64 "\n\n",
                tot, perp_ok, aa_ok);
         ok("o cruzado sai perpendicular aos dois, e axa = 0 — EXATO em inteiros",
            perp_ok == tot && aa_ok == tot && tot > 100000);

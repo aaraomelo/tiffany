@@ -35,6 +35,8 @@
 #ifndef CORPOS_H
 #define CORPOS_H
 
+#include "i128.h"
+
 /* Isto é um cabeçalho de BIBLIOTECA: cada cliente usa as operações de que precisa, e as outras
  * ficam por usar sem que isso seja defeito. O aviso é do compilador a não saber disso. */
 #pragma GCC diagnostic push
@@ -160,9 +162,10 @@ static int au_sinal(long x, long y, long m){          /* sinal de x + y·σ, exa
     if(y > 0 && P >= 0) return (P || y) ? 1 : 0;
     if(y < 0 && P <= 0) return (P || y) ? -1 : 0;
     /* sinais opostos: decide-se comparando os quadrados — e nenhum lado é negativo */
-    __int128 a2 = (__int128)P*P, b2 = (__int128)y*y*D;
-    if(y > 0) return (b2 > a2) ? 1 : ((b2 < a2) ? -1 : 0);
-    return (a2 > b2) ? 1 : ((a2 < b2) ? -1 : 0);
+    I128 a2 = i128_smul(P, P);
+    I128 b2 = i128_smul_i128(i128_smul(y, y), D);
+    if(y > 0) return i128_cmp(b2, a2);
+    return i128_cmp(a2, b2);
 }
 static int au_cmp(Par u, Par v, long m){              /* u < v ? no áureo (Δ>0) */
     return au_sinal(u.a - v.a, u.b - v.b, m); }

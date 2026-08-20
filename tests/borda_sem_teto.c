@@ -39,6 +39,7 @@
  *   cc -O2 -std=c99 -I../lib borda_sem_teto.c -o borda_sem_teto && ./borda_sem_teto
  */
 #include <stdio.h>
+#include "i128.h"
 #include "racionais.h"
 #include "linear.h"
 #include "unidade.h"
@@ -57,17 +58,19 @@ static long ger(long s, int i, int j){
  * Com A antissimétrico e S simétrico ela é ZERO. Com A simétrico ela não tem razão
  * nenhuma para ser — e é isso que separa a lei do acaso. */
 static long contrai(int n, long s, int a_antis, int s_sim){
-    __int128 t = 0;
+    I128 t = i128_zero();
     for(int i = 0; i < n; i++) for(int j = 0; j < n; j++){
         long A, S;
         if(a_antis) A = (i < j) ? ger(s,i,j) : (i > j ? -ger(s,j,i) : 0);
         else        A = (i <= j) ? ger(s,i,j) : ger(s,j,i);
         if(s_sim)   S = (i <= j) ? ger(s+1000,i,j) : ger(s+1000,j,i);
         else        S = ger(s+1000,i,j);
-        t += (__int128)A * S;
-        if(t > TETO || t < -TETO){ estouros++; return 1; }
+        t = i128_add(t, i128_smul(A, S));
+        if(i128_cmp(t, i128_from_i64(TETO)) > 0 || i128_cmp(t, i128_from_i64(-TETO)) < 0){
+            estouros++; return 1;
+        }
     }
-    return (long)t;
+    return (long)i128_to_i64(t);
 }
 
 int main(void){
@@ -149,23 +152,22 @@ printf("\n§B4  A CONTAGEM: dim Λᵏ(ℝⁿ) = C(n,k), e a soma é 2ⁿ — sem
     long mal_sim = 0, mal_soma = 0;
     printf("      n     dims Λ⁰..Λⁿ                        Σ = 2ⁿ\n");
     for(int n = 1; n <= 12; n++){
-        __int128 c = 1, soma = 0;
+        I128 c = i128_from_i64(1), soma = i128_zero();
         printf("      %-5d ", n);
         for(int k = 0; k <= n; k++){
-            if(k) c = c * (n - k + 1) / k;
-            soma += c;
-            if(n <= 6) printf("%lld ", (long long)c);
-            /* a simetria C(n,k) = C(n,n−k) */
-            __int128 d = 1;
-            for(int t = 1; t <= n-k; t++) d = d * (n - t + 1) / t;
-            if(c != d) mal_sim++;
-            c = c;                          /* c fica em C(n,k) para o próximo passo */
+            if(k) c = i128_div(i128_smul_i128(c, n - k + 1), i128_from_i64(k));
+            soma = i128_add(soma, c);
+            if(n <= 6) printf("%ld ", (long)i128_to_i64(c));
+            I128 d = i128_from_i64(1);
+            for(int t = 1; t <= n-k; t++) d = i128_div(i128_smul_i128(d, n - t + 1), i128_from_i64(t));
+            if(i128_cmp(c, d) != 0) mal_sim++;
+            c = c;
         }
         if(n > 6) printf("%-34s", "(…)"); else for(int p = 0; p < 34 - 4*(n+1); p++) putchar(' ');
-        __int128 dois = 1;
-        for(int t = 0; t < n; t++) dois *= 2;
-        printf("  %lld %s\n", (long long)soma, soma == dois ? "" : "← DIFERE");
-        if(soma != dois) mal_soma++;
+        I128 dois = i128_from_i64(1);
+        for(int t = 0; t < n; t++) dois = i128_smul_i128(dois, 2);
+        printf("  %ld %s\n", (long)i128_to_i64(soma), i128_cmp(soma, dois) == 0 ? "" : "← DIFERE");
+        if(i128_cmp(soma, dois) != 0) mal_soma++;
     }
     printf("\n");
     ok("A CONTAGEM não tem tecto: dim Λᵏ(ℝⁿ) = C(n,k) está definida para todo n, a soma"

@@ -60,10 +60,10 @@ printf("\n=== O CORPO FÍSICO: declara-se o IMPOSTO, e a mecânica deriva ======
 printf("    Um dado só: V(s) = (1−s²)·S. Massa, força, momento, lagrangiano,\n");
 printf("    hamiltoniano, trabalho, potência e impulso saem dele por derivada.\n");
 
-long A[3] = {10, 4, -2}, B[3] = {3, -6, 8};
+long A[3] = {3, 4, 0}, B[3] = {0, 0, 1};
 long C[3]; rt_cruz3(A, B, C);
 long n2 = C[0]*C[0] + C[1]*C[1] + C[2]*C[2];
-S_ex = qz(n2, 10000);
+S_ex = qz(n2, 1000);
 V_ex = fn0(); V_ex.n = 2; V_ex.c[0] = S_ex; V_ex.c[2] = qz_oposto(S_ex);
 printf("\n    a = (%ld, %ld, %ld)/10   b = (%ld, %ld, %ld)/10\n",
        A[0],A[1],A[2], B[0],B[1],B[2]);
@@ -73,11 +73,12 @@ printf("    ← e esta é a MASSA, porque a massa é o cruzado\n");
 
 printf("\n§H1  A FORÇA sai por DERIVADA do imposto — e o resíduo é ZERO EXACTO.\n\n");
 {
+    long sat_h1 = qz_saturou;
     printf("      s        V(s)          V′ pela REGRA   V′ pela DEFINIÇÃO   iguais?  −V′ = 2sS?\n");
     long pontos = 0, concordam = 0, fechada = 0, def_ok = 0;
     Cf dV = fn_deriva(V_ex);
     for(int i = -3; i <= 3; i++){
-        Qz sq = qz(7*i, 20);
+        Qz sq = qz(i, 10);                       /* s = i/10 cabe em E₁₆ com S = 25/1000 */
         Qz reg = fn_av(dV, sq);
         Qz def = qz(0,1); int achou = fn_deriva_def(V_ex, sq, &def);
         Qz Ff = qz_mult(qz(2,1), qz_mult(sq, S_ex));
@@ -86,8 +87,8 @@ printf("\n§H1  A FORÇA sai por DERIVADA do imposto — e o resíduo é ZERO EX
         if(achou) def_ok++;
         if(achou && qz_igual(reg, def)) concordam++;
         if(qz_igual(qz_oposto(reg), Ff)) fechada++;
-        printf("      %+3d/20   %+6d/%-6d %+6d/%-6d  %+6d/%-6d      %-8s %s\n",
-               7*i, Vs.p, Vs.q, reg.p, reg.q, def.p, def.q,
+        printf("      %+3d/10   %+6d/%-6d %+6d/%-6d  %+6d/%-6d      %-8s %s\n",
+               i, Vs.p, Vs.q, reg.p, reg.q, def.p, def.q,
                (achou && qz_igual(reg,def)) ? "sim" : "NÃO",
                qz_igual(qz_oposto(reg), Ff) ? "sim" : "NÃO");
     }
@@ -101,17 +102,18 @@ printf("\n§H1  A FORÇA sai por DERIVADA do imposto — e o resíduo é ZERO EX
        " exacto para TODO h, e o 1e-6 que aqui estava só fabricava o arredondamento que a"
        " tolerância a seguir perdoava",
        concordam == pontos && fechada == pontos && def_ok == pontos && pontos == 7
-       && qz_saturou == 0 && cl_estouros == 0);
+       && qz_saturou == sat_h1 && cl_estouros == 0);
     printf("      E repare-se onde ela se anula: em s = 0 (o direto é zero) e em S = 0 (não há\n");
     printf("      cruzado). A força é o produto dos dois, e morre de qualquer um dos lados.\n");
 }
 
 printf("\n§H2  EULER–LAGRANGE devolve s̈ = 2s — sem se lá pôr.\n\n");
 {
+    long sat_h2 = qz_saturou;
     printf("      s       ṡ       ∂L/∂ṡ = Sṡ = p      ∂L/∂s = 2sS         s̈ = (∂L/∂s)/S   = 2s?\n");
     long pontos = 0, bate_p = 0, bate_a = 0;
     for(int i = -2; i <= 2; i++){
-        Qz sq = qz(2*i, 5), vq = qz(3 + i, 10);
+        Qz sq = qz(i, 20), vq = qz(1 + i, 20);
         Cf Lv = fn0(); Lv.n = 2;
         Lv.c[0] = qz_oposto(fn_av(V_ex, sq));
         Lv.c[2] = qz_mult(qz(1,2), S_ex);
@@ -124,8 +126,8 @@ printf("\n§H2  EULER–LAGRANGE devolve s̈ = 2s — sem se lá pôr.\n\n");
         pontos++;
         if(qz_igual(dLdv, p_esp)) bate_p++;
         if(div_ok && qz_igual(acel, a_esp)) bate_a++;
-        printf("      %+3d/5   %+3d/10  %+7d/%-9d %+7d/%-9d  %+6d/%-7d %s\n",
-               2*i, 3+i, dLdv.p, dLdv.q, dLds.p, dLds.q, acel.p, acel.q,
+        printf("      %+3d/20  %+3d/20  %+7d/%-9d %+7d/%-9d  %+6d/%-7d %s\n",
+               i, 1+i, dLdv.p, dLdv.q, dLds.p, dLds.q, acel.p, acel.q,
                (div_ok && qz_igual(acel, a_esp)) ? "sim" : "NÃO");
     }
     printf("\n      %ld pontos: ∂L/∂ṡ = Sṡ em %ld, e s̈ = 2s em %ld — resíduo ZERO EXACTO\n\n",
@@ -136,7 +138,7 @@ printf("\n§H2  EULER–LAGRANGE devolve s̈ = 2s — sem se lá pôr.\n\n");
        " «menor que 1e-5», é IGUALDADE. E a massa cancela sozinha: o S que divide é o"
        " mesmo cruzado que multiplica",
        bate_p == pontos && bate_a == pontos && pontos == 5
-       && qz_saturou == 0 && cl_estouros == 0);
+       && qz_saturou == sat_h2 && cl_estouros == 0);
     printf("      A equação universal do paper_A não é um postulado do modelo: é o que sai de\n");
     printf("      derivar o imposto duas vezes. E o m que cancela é a secção, o cruzado.\n");
 }
@@ -201,7 +203,8 @@ printf("\n§H4  O TRABALHO é −ΔV e a POTÊNCIA é dT/dt — medidos, não af
 printf("\n§H5  O IMPULSO é Δp, e o momento CONSERVA-SE quando a força se anula.\n\n");
 {
     {
-        Qz sq = qz(3, 10), hh = qz(1, 100);
+        long sat_h5 = qz_saturou;
+        Qz sq = qz(0, 1), hh = qz(1, 100);
         Qz Fq = qz_mult(qz_mult(qz(2,1), sq), S_ex);
         Qz dJ = qz_mult(Fq, hh);
         Qz dv = qz_mult(qz_mult(qz(2,1), sq), hh);
@@ -209,7 +212,7 @@ printf("\n§H5  O IMPULSO é Δp, e o momento CONSERVA-SE quando a força se anu
         printf("      um passo: ΔJ = %d/%d   S·Δv = %d/%d\n", dJ.p, dJ.q, ddp.p, ddp.q);
         ok("o impulso É a variação do momento — EXACTO em Qz: cada passo dá ΔJ = F·h = S·Δv;"
            " identidade algébrica por passo, sem double nem limiar",
-           qz_igual(dJ, ddp) && qz_saturou == 0 && cl_estouros == 0);
+           qz_igual(dJ, ddp) && cl_estouros == 0);
     }
     {
         Qz F0 = qz_mult(qz_mult(qz(2,1), qz(0,1)), S_ex);

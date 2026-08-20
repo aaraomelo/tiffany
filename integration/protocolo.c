@@ -11,39 +11,21 @@
 #define LINHA DISCO_FIXO2(char, 512, 72)
 
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include "unidade.h"
+#include "../lib/le_emb.h"
 
 #define MAXL 512
-#define SCALE 1000000L
+#define SCALE EMB_S6
 
 static int NL = 0;
 
-static long parse_dec6(const char *s){
-    const char *p = s;
-    while(*p == ' ' || *p == '\t') p++;
-    int neg = 0;
-    if(*p == '-'){ neg = 1; p++; }
-    else if(*p == '+') p++;
-    long ip = 0;
-    while(*p >= '0' && *p <= '9') ip = ip * 10 + (*p++ - '0');
-    long fp = 0, pw = 100000L;
-    if(*p == '.'){
-        p++;
-        while(*p >= '0' && *p <= '9' && pw > 0){
-            fp += (*p++ - '0') * pw;
-            pw /= 10;
-        }
-    }
-    long r = ip * SCALE + fp;
-    return neg ? -r : r;
-}
-
-static long isqrt_ll(long long n){
+static int64_t isqrt_i64(int64_t n){
     if(n <= 0) return 0;
-    long long x = n, y = (x + 1) >> 1;
+    int64_t x = n, y = (x + 1) >> 1;
     while(y < x){ x = y; y = (x + n / x) >> 1; }
-    return (long)x;
+    return (int64_t)x;
 }
 
 static int conta(const char *padrao){
@@ -127,11 +109,11 @@ static void secao_P3(void){
 
 /* ================================================================================ */
 static long ida_media(void){
-    long long s = 0; int n = 0;
+    int64_t s = 0; int n = 0;
     for(int i = 0; i < NL; i++){
         char *q = strstr(LINHA[i], "ida=");
         if(!q) continue;
-        s += parse_dec6(q + 4); n++;
+        s += emb_parse_dec6(q + 4); n++;
     }
     return n ? (long)(s / n) : 0;
 }
@@ -167,7 +149,7 @@ static void secao_P5(void){
 
     printf("        tema                       ν∘ν       ida     ν∘ν/ida\n");
     int n = 0, deriva = 0;
-    long long soma_raz = 0;
+    int64_t soma_raz = 0;
     for(int i = 0; i < NL; i++){
         char *p = strstr(LINHA[i], "volta/ida=");
         if(p) p += 4;
@@ -175,10 +157,10 @@ static void secao_P5(void){
         char *q = strstr(LINHA[i], "ida=");
         if(q && p && q < p + 8) q = strstr(p + 8, "ida=");
         if(!p || !q) continue;
-        long r = parse_dec6(strchr(p, '=') + 1);
-        long ida = parse_dec6(q + 4);
+        int64_t r = emb_parse_dec6(strchr(p, '=') + 1);
+        int64_t ida = emb_parse_dec6(q + 4);
         if(ida < SCALE / 1000000) continue;
-        long raz = r * SCALE / ida;
+        int64_t raz = r * SCALE / ida;
         soma_raz += raz; n++;
         if(raz * 10 > SCALE * 3) deriva++;             /* raz > 0,3 */
         char nome[40] = {0};
@@ -202,7 +184,7 @@ static void secao_P5(void){
     for(int i = 0; i < NL; i++){
         char *p1 = strstr(LINHA[i], "nu.nu="), *q1 = strstr(LINHA[i], "ida=");
         if(!p1 || !q1) continue;
-        long r = parse_dec6(p1 + 6), ida = parse_dec6(q1 + 4);
+        int64_t r = emb_parse_dec6(p1 + 6), ida = emb_parse_dec6(q1 + 4);
         if(r == ida && ida > SCALE / 20) fixos++;
     }
     printf("        casos com ν∘ν = ida EXATAMENTE (logo S₂ = A): %d\n", fixos);
@@ -233,7 +215,7 @@ static void secao_P6(void){
 
     FILE *f = fopen("/tmp/protocolo_base.tsv", "r");
     int n = 0;
-    long raz[64], def[64];
+    int64_t raz[64], def[64];
     char linha[2048];
     if(f){
         while(n < 64 && fgets(linha, sizeof linha, f)){
@@ -241,23 +223,23 @@ static void secao_P6(void){
             char *t2 = strchr(t1 + 1, 0x09); if(!t2) continue;
             char *t3 = strchr(t2 + 1, 0x09); if(!t3) continue;
             char *t4 = strchr(t3 + 1, 0x09); if(!t4) continue;
-            raz[n] = parse_dec6(t2 + 1); def[n] = parse_dec6(t4 + 1); n++;
+            raz[n] = emb_parse_dec6(t2 + 1); def[n] = emb_parse_dec6(t4 + 1); n++;
         }
         fclose(f);
     }
     printf("        a base ficou com %d entradas (o antigo deixava-a VAZIA)\n", n);
     ok("a base tem entradas — o critério novo deixou alguém passar", n >= 5);
 
-    long long mu = 0;
+    int64_t mu = 0;
     for(int i = 0; i < n; i++) mu += raz[i];
     mu /= (n ? n : 1);
-    long long sg2 = 0;
+    int64_t sg2 = 0;
     for(int i = 0; i < n; i++){
-        long long d = raz[i] - mu;
+        int64_t d = raz[i] - mu;
         sg2 += d * d;
     }
     sg2 /= (n ? n : 1);
-    long sg = isqrt_ll(sg2);
+    int64_t sg = isqrt_i64(sg2);
     printf("        o campo: média %ld.%06ld, desvio %ld.%06ld, limiar 2σ = %ld.%06ld\n",
            (long)(mu / SCALE), (long)(labs(mu % SCALE)),
            sg / SCALE, labs(sg % SCALE),
@@ -265,21 +247,21 @@ static void secao_P6(void){
     ok("o campo é apertado — o desvio é uma ordem menor que a média", sg * 10 < mu);
 
     int m2 = 2 * n;
-    long b2[128];
+    int64_t b2[128];
     for(int i = 0; i < n; i++){
         b2[i] = labs(raz[i]);
         b2[n + i] = (raz[i] != 0) ? labs(-SCALE * SCALE / raz[i]) : SCALE;
     }
-    long long mu2 = 0;
+    int64_t mu2 = 0;
     for(int i = 0; i < m2; i++) mu2 += b2[i];
     mu2 /= m2;
-    long long sg2b = 0;
+    int64_t sg2b = 0;
     for(int i = 0; i < m2; i++){
-        long long d = b2[i] - mu2;
+        int64_t d = b2[i] - mu2;
         sg2b += d * d;
     }
     sg2b /= m2;
-    long sg2v = isqrt_ll(sg2b);
+    int64_t sg2v = isqrt_i64(sg2b);
     int dentro = 0;
     for(int i = 0; i < m2; i++)
         if(labs(b2[i] - mu2) < 2 * sg2v) dentro++;
@@ -292,23 +274,23 @@ static void secao_P6(void){
 
     {
         int apanha_pos = 0, apanha_neg = 0;
-        long t[130];
+        int64_t t[130];
         for(int caso = 0; caso < 2; caso++){
-            long intruso = caso ? -SCALE / 2 : SCALE + SCALE / 2;  /* −0,5 / +1,5 */
+            int64_t intruso = caso ? -SCALE / 2 : SCALE + SCALE / 2;  /* −0,5 / +1,5 */
             for(int i = 0; i < n; i++){ t[i] = labs(raz[i]); t[n + i] = labs(-SCALE * SCALE / raz[i]); }
             t[2 * n] = labs(intruso);
             t[2 * n + 1] = (intruso != 0) ? labs(-SCALE * SCALE / intruso) : SCALE;
             int mt = 2 * n + 2, f = 0;
-            long long a = 0;
+            int64_t a = 0;
             for(int i = 0; i < mt; i++) a += t[i];
             a /= mt;
-            long long d2 = 0;
+            int64_t d2 = 0;
             for(int i = 0; i < mt; i++){
-                long long e = t[i] - a;
+                int64_t e = t[i] - a;
                 d2 += e * e;
             }
             d2 /= mt;
-            long d = isqrt_ll(d2);
+            int64_t d = isqrt_i64(d2);
             for(int i = 0; i < mt; i++) if(labs(t[i] - a) >= 2 * d) f++;
             if(caso) apanha_neg = f; else apanha_pos = f;
         }
@@ -318,8 +300,8 @@ static void secao_P6(void){
            " apanhava um negativo", apanha_pos > 0 && apanha_neg > 0);
     }
 
-    long dmin = 9223372036854775807LL, dmax = -9223372036854775807LL;
-    long long dm = 0;
+    int64_t dmin = 9223372036854775807LL, dmax = -9223372036854775807LL;
+    int64_t dm = 0;
     for(int i = 0; i < n; i++){
         if(def[i] < dmin) dmin = def[i];
         if(def[i] > dmax) dmax = def[i];

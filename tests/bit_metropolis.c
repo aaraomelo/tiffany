@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include "unidade.h"
 
-typedef long long L;
+typedef long L;
 #define N 41                     /* o reticulado N×N, centrado em (N/2,N/2) */
 #define R 18                     /* o disco x²+y² <= R² (relativo ao centro) */
 
@@ -66,7 +66,7 @@ int main(void){
         total_t++; if(dx*dx + dy*dy <= (L)R*R) dentro_t++;
     }
     L cobertas = 0; for(int j = 0; j < N; j++) for(int i = 0; i < N; i++) if(visita[i][j]) cobertas++;
-    printf("§B1  o rastro de UM bit cobre %lld de %d casas (cobertura %lld%%)\n\n",
+    printf("§B1  o rastro de UM bit cobre %ld de %d casas (cobertura %ld%%)\n\n",
            cobertas, N*N, 100*cobertas/(N*N));
     ok("§B1 o BIT UNICO aleatorio PREENCHE o espaco: o rastro visita TODAS as casas do"
        " reticulado — a curva vira area", cobertas == (L)N*N);
@@ -95,9 +95,9 @@ int main(void){
     }
     L erro_poucos = soma_poucos / M, erro_muitos = soma_muitos / M;
     printf("§B2  medida de Lebesgue do disco (fracao da area), em milionesimos:\n");
-    printf("     ORDENADA (contar casas, EXATO) ................. %lld\n", medida_ordenada);
-    printf("     RASTRO   (uma corrida, %lld passos) ............ %lld\n", passos, medida_rastro);
-    printf("     erro MEDIO sobre %d sementes: %lld passos -> %lld ppm ; %lld passos -> %lld ppm\n\n",
+    printf("     ORDENADA (contar casas, EXATO) ................. %ld\n", medida_ordenada);
+    printf("     RASTRO   (uma corrida, %ld passos) ............ %ld\n", passos, medida_rastro);
+    printf("     erro MEDIO sobre %d sementes: %ld passos -> %ld ppm ; %ld passos -> %ld ppm\n\n",
            M, poucos, erro_poucos, muitos, erro_muitos);
     ok("§B2 a medida de Lebesgue pelo RASTRO aleatorio (Metropolis) bate com a CONTAGEM"
        " ordenada — o par —, e o erro MEDIO (sobre sementes) DESCE com mais passos: converge, e"
@@ -108,9 +108,9 @@ int main(void){
      * de dimensao 1 no plano 2D, que cobre O(N) casas de N² -> fracao -> 0 (medida ZERO). O
      * bit ALEATORIO cobre N² (medida CHEIA). E' o furar de medida.tex: a curva nao pesa. */
     L curva = N;                                    /* uma linha: N casas visitadas, deterministas */
-    printf("§B3  a curva determinista cobre %lld de %d (fracao 1/N = %lld ppm -> 0: medida ZERO);\n",
+    printf("§B3  a curva determinista cobre %ld de %d (fracao 1/N = %ld ppm -> 0: medida ZERO);\n",
            curva, N*N, curva*1000000/(N*N));
-    printf("     o rastro aleatorio cobre %lld de %d (medida CHEIA).\n\n", cobertas, N*N);
+    printf("     o rastro aleatorio cobre %ld de %d (medida CHEIA).\n\n", cobertas, N*N);
     /* a curva cobre N de N² = 1/N da area, que -> 0 quando N cresce (medida de Lebesgue ZERO);
      * o rastro aleatorio cobre N² (medida CHEIA). Aqui N=41, logo 1/N < 1/10. */
     ok("§B3 o PAR: a curva determinista (o gato) tem medida de Lebesgue ZERO (cobre 1/N -> 0); o"

@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include "unidade.h"
 
-typedef long long L;
+typedef long L;
 
 /* o eixo do MOVE, como em tex.c (L3096, L3121): os três sentidos da mesma porta */
 #define MOVE_EMITE    (-1)   /* compor o PDF   (LaTeX -> PDF) */
@@ -63,7 +63,7 @@ int main(void){
         L volta = cent * 100;
         residuo_cent += (XMIL[i] > volta) ? (XMIL[i]-volta) : (volta-XMIL[i]);
     }
-    printf("§T1  dual LaTeX<->PDF: volta em milésimos, resíduo %lld ; mutação em centésimos, resíduo %lld\n\n",
+    printf("§T1  dual LaTeX<->PDF: volta em milésimos, resíduo %ld ; mutação em centésimos, resíduo %ld\n\n",
            residuo_int, residuo_cent);
     ok("§T1 a Lei 1 DUAL do tradutor é LaTeX<->PDF: MOVE(-1) emite o corpo (x,y em milésimos), MOVE(+1)"
        " absorve-o, e a volta FECHA com resíduo 0 por construção inteira; a mutação (escrever em"
@@ -106,7 +106,7 @@ int main(void){
     int cauda[NG], residuo_cauda = 0;               /* a cauda reversível GUARDA o # (aqui o \emph) */
     for(int i = 0; i < NG; i++) cauda[i] = emph_origem[i];        /* seccao_custom, ignorada pelo leitor */
     for(int i = 0; i < NG; i++) residuo_cauda += (cauda[i] != emph_origem[i]);   /* a volta lê-a */
-    printf("§T3  corpo volta: resíduo %lld ; \\emph pela página: resíduo %d (largado, correcto) ;"
+    printf("§T3  corpo volta: resíduo %ld ; \\emph pela página: resíduo %d (largado, correcto) ;"
            " \\emph pela cauda reversível: resíduo %d\n\n", residuo_corpo, residuo_emph_pagina, residuo_cauda);
     ok("§T3 a Lei 2 BIDUAL (K**=K) do tradutor tem DUAS metades nomeadas: a projeção LaTeX->PDF larga"
        " a marcação (\\emph), e o CORPO (glifo,x,y) volta exacto pela página (resíduo 0) --- exigir o"
@@ -130,8 +130,8 @@ int main(void){
     /* duas portas (a má): a de escrever soma um viés b, a de ler não o tira */
     L b = 7;   L slot_dois = valor + b;   L le_dois = slot_dois;   /* não desfaz o viés */
     L res_duas = (le_dois > valor) ? le_dois-valor : valor-le_dois;
-    printf("§T4  UMA porta (involução nas duas ordens): resíduo %lld e %lld ; DUAS portas (com viés):"
-           " resíduo %lld\n\n", res_uma_a, res_uma_b, res_duas);
+    printf("§T4  UMA porta (involução nas duas ordens): resíduo %ld e %ld ; DUAS portas (com viés):"
+           " resíduo %ld\n\n", res_uma_a, res_uma_b, res_duas);
     ok("§T4 a Lei 6 HEXAL é o próprio tradutor: a INTERFACE que casa o dual (LaTeX<->PDF) pelo trial"
        " (o eixo do MOVE). O que a torna UMA porta e não duas: é involutiva nas DUAS ordens ---"
        " emite∘absorve = absorve∘emite = id, resíduo 0 dos dois lados, porque é o mesmo caminho ao"

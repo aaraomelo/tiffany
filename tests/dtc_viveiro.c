@@ -23,7 +23,7 @@
 #include "reta.h"      /* Dir e Cruz: a operação */
 #include "unidade.h"
 
-typedef long long L;
+typedef long L;
 enum { N = 4 };                                    /* a torre: 4 andares */
 
 /* o torque É o produto cruzado; a massa reactiva é ‖a×b‖² (inteiro) */
@@ -71,7 +71,7 @@ int main(void){
         if(massa[k] > 0 && pm != massa[k]) casa = 0;/* máximo no meio */
         if(sdtc*sdtc != 1) casa = 0;               /* o DTC escolhe ±1 (a banda) */
         if(pcasado != 0) casa = 0;                 /* e casa: imposto 0 */
-        printf("        %d   |   %2lld   |  %3lld   |  %2lld   %3lld   %2lld  |     %+lld      |   %lld\n",
+        printf("        %d   |   %2ld   |  %3ld   |  %2ld   %3ld   %2ld  |     %+ld      |   %ld\n",
                k+1, per[k], massa[k], p0, pm, pp, sdtc, pcasado);
     }
     printf("\n");
@@ -91,7 +91,7 @@ int main(void){
         int todos = 1; for(int k = 0; k < N; k++) if(m % per[k] != 0){ todos = 0; break; }
         if(todos){ menor = 0; break; }
     }
-    printf("§W2  períodos {%lld,%lld,%lld,%lld} → lcm esquerda=%lld, direita=%lld (independente da ordem)\n\n",
+    printf("§W2  períodos {%ld,%ld,%ld,%ld} → lcm esquerda=%ld, direita=%ld (independente da ordem)\n\n",
            per[0],per[1],per[2],per[3], lcm_esq, lcm_dir);
     ok("§W2 o VIVEIRO sincroniza pelo lcm: o fold ⋁_k R^{a_k}=R^{lcm} é independente da ordem"
        " (esquerda=direita), contém cada andar (a_k | lcm) e é o MENOR que os contém --- comutativo,"
@@ -113,7 +113,7 @@ int main(void){
         if(imposto(sdtc, massa[k]) != 0) torre_casa = 0;
         if(lcm_esq % per[k] != 0) torre_casa = 0;   /* alinhado no lcm */
     }
-    printf("§W3  primeiro instante em que TODOS os andares batem juntos: t=%lld (= lcm); antes, nunca todos\n\n",
+    printf("§W3  primeiro instante em que TODOS os andares batem juntos: t=%ld (= lcm); antes, nunca todos\n\n",
            primeiro_junto);
     ok("§W3 a TORRE casa NO lcm: o primeiro instante em que todos os relógios estão na origem é t=lcm"
        " (residuo 0), e aí cada andar está casado pelo seu DTC (s=±1, imposto 0). Um DTC por andar,"

@@ -6,7 +6,7 @@
     "enredo": "enredo.tex",
     "livro": "livro.tex",
     "corpo_analitico": "papers/corpo_analitico.tex",
-    "computacional": "papers/corpo_computacional.tex",
+    "computacional": "papers/arquitetura.tex",
     "conversa": "corpus/fala/conversa.tex",
     "conversa-gabarito": "corpus/fala/conversa_gabarito.tex",
     "conversa-arvore-n2": "corpus/fala/conversa_arvore_n2.tex",

@@ -1,8 +1,8 @@
 % !TeX program = pdflatex
 % ─────────────────────────────────────────────────────────────────────────────
-%  papers/corpo_computacional.tex — O CORPO COMPUTACIONAL (era dualsort.tex, 18/08).
+%  papers/arquitetura.tex — ARQUITETURA COMPUTACIONAL (fusão 08/2026).
 %
-%  Compila sozinho:  pdflatex corpo_computacional.tex
+%  Compila: pdflatex arquitetura.tex
 %
 %  Nada aqui vem de fora. As peças são a estaca, a Lei 2, a bidualidade e o
 %  trial, e todas estão demonstradas na Teoria e medidas em tests/dualsort.c.
@@ -22,15 +22,26 @@
 \newcommand{\R}{\ensuremath{\mathbb{R}}}
 \newcommand{\medido}[1]{\par\medskip\noindent{\small\color{cinza}\textbf{Medido.} #1}\par\medskip}
 \newtheorem{teorema}{Teorema}
+
+\newcommand{\sepcol}{\quad\penalty0$\big|$\quad\penalty0}
+\newcommand{\colunas}[3]{%
+\par\smallskip\noindent{\footnotesize\raggedright
+\textbf{prova} (Universal): #1\sepcol
+\textbf{realiza} (aqui): #2\sepcol
+\textbf{verifica}: #3\par}\smallskip}
+\providecommand{\interfacen}[1]{}  % noop pdflatex; tradutor WASM lê antes da expansão
+\newtheorem{lema}{Lema}
 \newtheorem{definicao}[teorema]{Definição}
+\newtheorem{corolario}[teorema]{Corolário}
 \renewcommand{\proofname}{Demonstração}
 
 \input{gkcapa}
 
 \begin{document}
-\gkcapa{A realização COMPUTACIONAL}
-       {o dual sort: ordenar é descer pela estaca}
-       {uma realização DENTRO do $\tau=-1$ --- não uma quarta casa}
+\interfacen{6}  % hexal: 1.º ciclo da família 6,12,24 — Lei~6 computacional
+\gkcapa{A Arquitetura}
+       {dual sort · régua · torre · slots · aranha estigmérgica}
+       {realização dentro do $\tau=-1$ --- ordenar, banco e firma algébrica}
 \maketitle
 
 \section*{Onde este documento vive: DENTRO do polo $\tau=-1$}
@@ -83,6 +94,20 @@ a \textbf{Lei 2} $-f=f^{-1}$, a \textbf{bidualidade} $J^{4}=\mathrm{id}$ e o \te
 elemento é comparado com outro. \textbf{A permutação é o dual}, e guardá-la torna o processo
 \emph{invertível}: a volta é exata e o apagamento é \textbf{zero}. O critério não é a lista sair
 crescente --- é a volta fechar.
+\smallskip\noindent\textbf{Formulação operacional} (decisão do coordenador):
+a régua determina a transformação admissível; a involução garante reversibilidade;
+o invariante conservado ($|\det T|=1$, $\Sigma\circ\Pi=\mathrm{Id}$) garante que
+a realização permaneça no mesmo espaço de medida. O agente não aprende geometria:
+\textbf{realiza-a} sob lei conservativa --- lê, opera, escreve; a memória é o
+estado geométrico do ambiente.
+\smallskip\noindent\textbf{Interface hexal (Lei~6):} soma $=$ produto \emph{só} na interface
+$\iota_k=6\cdot2^{\lfloor k/3\rfloor}$ --- o 1.º ciclo é $6$, depois $12$, $24$
+(\code{topologico sec:Interface hexal e operadores}). O tradutor regista o ciclo
+declarado em \verb|\interfacen{6}| no \code{/SementeEstrela} do PDF.
+\smallskip\noindent\textbf{Multiplicidade geométrica:} duplicidade
+$=$ fibra não trivial da projecção $\pi$ --- a memória é $G(x)=|\pi^{-1}(x)|$,
+não uma história no agente (\S\ref{sec:aranha}, Teor.~\ref{thm:multiplicidade}).
+
 \end{abstract}
 
 \section{A referência são os naturais}
@@ -826,9 +851,651 @@ saída é verificada por \textbf{três} caminhos independentes --- crescente, ig
 elemento a uma ordenação por comparação, e a soma conservada (\code{tools/bench\_dissipa.c},
 \code{tests/dualsort.c}).}
 
+\part*{Firma algébrica: régua, torre e slots}\addcontentsline{toc}{section}{Firma algébrica}
+
+\section{O lema: régua antes do espaço}\label{sec:regua}
+
+\begin{lema}[régua antes do espaço]
+A régua não mede um espaço previamente dado; ela determina a estrutura pela
+qual o espaço discreto pode ser construído e reconhecido como realização da
+álgebra da régua.
+\end{lema}
+
+\noindent A cadeia conceptual (decisão do coordenador, 08/2026) \textbf{não} é
+$\text{espaço}\to\text{agente}\to\text{trajetória}$. É:
+\[
+\boxed{
+\text{régua}
+;\longrightarrow;
+\text{operação}
+;\longrightarrow;
+\text{dual/involução}
+;\longrightarrow;
+\text{vizinhança}
+;\longrightarrow;
+\text{espaço construído}
+}
+\]
+O agente (autómato, tradutor, banco, aranha estigmérgica) \textbf{não carrega o
+mapa}: o mapa é \textbf{estado do ambiente}, e a regra local de
+leitura/escrita produz a geometria global. Não é «a métrica cria o espaço» no
+sentido da geometria diferencial --- é mais específico: \emph{o espaço discreto
+é uma realização da álgebra admissível pela régua}.
+
+\medskip\noindent Em uma linha:
+\[
+\boxed{\text{não é o agente que conhece o espaço; é a régua que torna o
+espaço legível.}}
+\]
+
+\medskip\noindent O contrato executável dessa leitura está em
+\code{lib/torre\_alg.h}: a ordem é sempre
+$\text{álgebra}\to\text{operação}\to\text{dual}\to\text{largura}\to\text{slot}$,
+e nunca $\texttt{long}\to\text{operação}$.
+
+\medido{Contrato \code{lib/torre\_alg.h}; firma algébrica
+\code{tests/torre\_alg.c} §T1--§T4 ($4/4$ por pipeline).}
+\colunas{lema conceptual (decisão do coordenador); \code{teoria thm:transporte} --- a régua não transporta}
+        {contrato \code{torre\_alg.h}; ordem álgebra$\to$slot}
+        {\code{tests/torre\_alg.c} §T1--§T4}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Fundamento na teoria}\label{sec:teoria}
+
+\noindent A \emph{Teoria} (\code{teoria sec:torreconta}, \code{teoria thm:torrecruz})
+fixa a torre como cruz iterada: $A_{n+1}=A_n^{\times}$, $\dim A_n=2^{n}\dim A_0$,
+sinal $(-1)^{n}$ na componente nova. \textbf{Nenhum andar é construído; todos são
+lidos do anterior} --- o que o código materializa como largura exigida pelo
+produto, não como escolha de tipo C.
+
+\medskip\noindent A régua e a norma fecham-se em \code{teoria sec:normaregua}:
+\emph{a norma é o inverso da régua}, e o ponto fixo da involução é onde medir
+custa menos. O \code{teoria thm:transporte} impede confundir réguas: a volta
+transporta; a régua em si não --- cada corpo traz a sua.
+
+\medskip\noindent As duas escadas (\code{teoria sec:duasescadas}) descem e sobem
+em sentidos opostos: descer perde régua minha; subir paga em largura. A cadeia
+\code{tests/cadeia.c} mede a descida; \code{dual16.h}--\code{i128.h} medem a
+subida por dobra.
+
+\colunas{\code{teoria thm:torrecruz}; \code{teoria sec:normaregua}}
+        {torre de larguras $E_{16}\to D_{32}\to\cdots$}
+        {\code{tests/cadeia.c}; \code{tests/dual16.c}; \code{tests/migracao.c}}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{A torre de larguras: dobra, não tipo C}\label{sec:torre}
+
+\noindent O \emph{Corpo Algébrico} (\code{algebrico thm:torre}) fixa a subida:
+\[
+T_{k+1}=T_k+T_k^{\ast},\qquad d_{k+1}=2d_k.
+\]
+A passagem de andar \textbf{não inventa aritmética nova}: duplica a estrutura
+pela dualidade. O que cresce é o \textbf{objecto}, não a máquina.
+
+\medskip\noindent Na realização pós-migração A--D, cada produto exige a
+\emph{memória da divisão} (dualidade):
+\[
+E_{16}\;\xrightarrow{\;16\times16\;}\;D_{32}\;\xrightarrow{\;32\times32\;}\;
+D_{64}\;\xrightarrow{\;64\times64\;}\;I_{128}\;\xrightarrow{\;\cdots\;}
+\]
+Esta escada \textbf{não} é escolha de tipo C: é
+$\text{representação}\xrightarrow{\text{dual/dobra}}\text{representação seguinte}$.
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+andar & header & objecto \\
+\midrule
+$E_{16}$ & \code{racionais.h} & \code{Qz \{int16\_t p,q\}} \\
+32 & \code{dual16.h} & par \code{D32} --- produto $16\times16$ \\
+64 & \code{dual32.h} & par \code{D64} --- produto $32\times32$ \\
+128 & \code{i128.h} & par de \code{int64} --- trava/medidor \\
+$2^n\!\cdot\!\dim$ & \code{torre.h} & hip\_soma, hip\_mult, hip\_conj \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent O envelope canónico de $\Q$ neste andar (\code{racionais.tex}
+\code{sec:ja}):
+\[
+E_{16}=\bigl\{(p,q)\in\Z^{2}:
+-32768\le p\le 32767,\;1\le q\le 32767,\;\gcd(|p|,q)=1\bigr\}.
+\]
+\code{Qz} não realiza todo $\Q$ --- é janela finita medida; saturação conta-se
+à parte (\code{qz\_saturou}).
+
+\medido{\code{tests/dual16.c} §E0--§E3 ($5/5$); \code{tests/dual32.c} (trava
+\code{\_\_int128}); \code{tests/migracao.c} §G5: \code{sizeof(Qz)=4},
+\code{d16\_mult} concorda com int32 em $6480$ casos.}
+\colunas{\code{algebrico thm:torre}; \code{topologico thm:rn}}
+        {headers \code{dual16}/\code{dual32}/\code{i128}; envelope $E_{16}$}
+        {\code{tests/dual16.c}; \code{tests/migracao.c} §G5}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Três pipelines --- não confundir}\label{sec:pipelines}
+
+\noindent (\code{lib/torre\_alg.h}, ordem do coordenador (§3),
+\code{algebrico def:cone}, \code{algebrico thm:cone})
+
+\begin{enumerate}\itemsep4pt
+\item \textbf{Involução} $\nu^2=\mathrm{id}$ --- estrutural\\
+      swap $\iota(p,q)=(q,p)$; \code{hip\_conj} (\code{torre.h}).\\
+      \emph{Volta ao mesmo objecto.}
+\item \textbf{Retração} $\Sigma\circ\Pi=\mathrm{Id}$ --- representação\\
+      palavra FC $\leftrightarrow$ slots \code{.mem}
+      (\code{rt\_cf\_slot.h}, \code{slot\_mem.h}, \code{S\_CF=2048}).\\
+      \emph{Desce da realização para a representação; só um lado fecha.}
+\item \textbf{Subida} $T_{k+1}=T_k+T_k^{\ast}$ --- construção\\
+      dobra (\code{torre.h}, \code{algebrico thm:torre}).\\
+      \emph{Constrói o próximo espaço; a largura exigida segue a operação.}
+\end{enumerate}
+
+\medskip\noindent A distinção formal (\code{algebrico thm:cone}):
+\[
+\boxed{
+\begin{array}{lll}
+\text{INVOLUÇÃO} & \nu\circ\nu=\mathrm{id} & \text{mesmo espaço, ida e volta simétricas}\\[2pt]
+\text{RETRAÇÃO} & \Sigma\circ\Pi=\mathrm{Id} & \text{espaços diferentes; $\Pi\circ\Sigma\neq\mathrm{Id}$}
+\end{array}}
+\]
+Retração $\neq$ involução $\neq$ subida: domínios, representações e efeitos
+distintos. Medido explicitamente em \code{tests/torre\_alg.c} §T4 --- mesmo
+quando, em casos particulares, dois caminhos devolvem o mesmo valor numérico.
+
+\medskip\noindent\textbf{Consequência para a torre} (decisão do coordenador): subir
+$\neq$ perder informação; descer $\neq$ lembrar o passado. A informação está
+na \emph{representação}; a operação reversível recupera-a.
+
+\medido{\code{tests/torre\_alg.c} §T1--§T4; \code{tests/reta.c} §R27:
+\code{rt\_ciclo\_i16/i32/long} concordam;
+\code{tests/transformada\_universal.c} §T21: RtOp $T\in E_{16}$ opera
+coordenadas \code{int16}.}
+\colunas{\code{algebrico def:cone} / \code{thm:cone}}
+        {três pipelines em \code{torre\_alg.h}}
+        {\code{tests/torre\_alg.c} §T1--§T4; §T4 distingue os três}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Slots: realização persistente da palavra}\label{sec:slots}
+
+\noindent Fecho ordem do coordenador (§4): \textbf{memória = estado geométrico do
+ambiente}. O slot deixa de ser «ficheiro» ou «banco de dados que acumula
+histórico»: é \textbf{realização persistente} da palavra algébrica.
+
+\medskip\noindent Ciclo estigmérgico (autómato, tradutor, \code{sql.c}):
+\[
+\text{lê}\;\to\;\text{opera}\;\to\;\text{escreve},
+\]
+e a operação seguinte encontra ambiente já transformado. A transformação
+$G\mapsto G'$ não é memória narrativa do agente --- é transformação do
+espaço de trabalho.
+
+\medskip\noindent Peças do contrato:
+\begin{itemize}\itemsep2pt
+\item \code{SlotWord \{total, e\}} --- 16 bytes/slot (ABI disco)
+\item \code{S\_CF=2048}, \code{rt\_cf\_slot\_*} --- acumulador FC; soma de
+      coeficientes + carry; produto = convolução + carry
+\item \code{slot\_mem.h} --- \code{pread/pwrite}; caminho \code{sql.c},
+      \code{conversa.c}, \code{isa\_disk.h}
+\end{itemize}
+
+\medskip\noindent O par $\Pi/\Sigma$ (\code{algebrico def:cone}): $\Pi$ desce
+escrevendo quocientes; $\Sigma$ sobe recompondo. Nos slots, a retração é
+\emph{exacta} --- quatro racionais, ida e volta, sem \code{float}
+(\code{tests/torre\_alg.c} §T2).
+
+\medido{\code{tests/reta.c} §R12d--§R12g (persistência FC);
+\code{tests/dualsort\_banco.c} (árvore oito slots, repetidos no contador);
+este documento §banco.}
+\colunas{\code{algebrico def:cone}; \code{topologico def:peano} (endereço)}
+        {slots \code{.mem}, \code{S\_CF=2048}, ciclo lê$\to$opera$\to$escreve}
+        {\code{tests/reta.c} §R12d--§R12g; \code{tests/dualsort\_banco.c}}
+
+% ═══════════════════════════════════════════════════════════════════════════
+
+\section{Algoritmo da aranha estigmérgica}\label{sec:aranha}
+
+\noindent A aranha não \emph{cria} o padrão e não \emph{sente} no sentido cognitivo:
+é \textbf{realização dinâmica} do Teor.~\ref{thm:multiplicidade}. O mapa não vive
+na cabeça do agente --- é o campo $G$ no ambiente; a regra local
+lê$\to$opera$\to$escreve e a geometria global emerge por retroacção
+(decisão do coordenador, 08/2026).
+
+\begin{teorema}[a multiplicidade geométrica --- duplicidade é fibra, memória é $G$]\label{thm:multiplicidade}
+Seja $I=\{0,1,\ldots,N\}$ a parametrização de uma trajetória discreta e
+\[
+\pi\colon I\longrightarrow\Z^{2}
+\]
+a realização que associa a cada índice a célula ocupada. A
+\textbf{multiplicidade geométrica} é
+\[
+G(x)=\bigl|\pi^{-1}(x)\bigr|,\qquad x\in\Z^{2}.
+\]
+Então:
+\begin{enumerate}\itemsep2pt
+\item \textbf{Duplicidade $=$ dobra.} Para $i\neq j$, $\pi(i)=\pi(j)$ se e
+      só se dois pontos distintos da parametrização foram identificados na
+      realização. A relação $i\sim j\iff\pi(i)=\pi(j)$ \emph{é} a dobra
+      geométrica da trajetória --- não uma metáfora.
+\item \textbf{$G$ regista a dobra.} $G(x)>1$ é exactamente a presença de
+      uma duplicidade na célula $x$.
+\item \textbf{A memória não pertence ao agente.} Escrita incremental
+      \[
+      G_{t+1}(x)=G_{t}(x)+\mathbf{1}_{\{x=\pi(t)\}}
+      \]
+      materializa no espaço tudo o que distingue região já percorrida de
+      região nova. O agente \textbf{não} conserva a sequência
+      $\pi(0),\ldots,\pi(t)$.
+\item \textbf{Sentir é ler $G$.} A leitura local
+      $\mathcal{P}_{t}(x)=\bigl(G_{t}(y)\bigr)_{y\in V(x)}$ distingue
+      $G=0$ (célula ainda não realizada) de $G>0$ (já realizada). A
+      distinção é propriedade do espaço, não propriedade cognitiva.
+\end{enumerate}
+A memória estigmérgica é a composição
+\[
+\boxed{
+\text{trajetória}
+\xrightarrow{\ \pi\ }
+\text{dobra}
+\xrightarrow{\ |\pi^{-1}|\ }
+\text{multiplicidade}
+\xrightarrow{\ \text{leitura local}\ }
+\text{percepção}.
+}
+\]
+\end{teorema}
+
+\begin{proof}
+Por definição $G(x)$ conta a fibra. O ponto~(1) é a equivalência
+$i\sim j$. O ponto~(2) é $G(x)>1\Leftrightarrow$ a classe de $x$ tem mais
+de um índice. O ponto~(3) é a recência: cada incremento escreve o mesmo
+bit que a história listaria, e a lista deixa de ser necessária. O
+ponto~(4) lê o valor já escrito.
+\end{proof}
+
+\noindent\textbf{O que isto \emph{não} duplica.} A \textbf{dobra da torre}
+$T_{k+1}=T_{k}+T_{k}^{\ast}$ (\S\ref{sec:torre}) duplica a \emph{álgebra}.
+A dobra da trajetória identifica \emph{índices} na grade. São duas dobras,
+dois objectos. A que o gato já media é a segunda, lida noutro sítio:
+\code{teoria cor:pata} --- \emph{uma pata pisa a marca da outra}; a marca
+não diz quantas patas a produziram; conservar $|\det|=1$
+(\code{algebrico thm:gato}) \textbf{não} conserva o percurso. Aqui $G$
+\emph{reconta a fibra} que a projecção do gato perdia: estado $\neq$ traço
+observado, e $G$ é o traço.
+
+\medskip\noindent\textbf{A curva do dragão (Heighway)} é o modelo
+geométrico mínimo da identificação $\pi(i)=\pi(j)$: auto-intersecção
+$\Rightarrow$ $G>1$. Medido em \code{tests/aranha\_g.c} §AG1--§AG11
+(caminhada Heighway, campo $G$ na grade, recta injectiva como controlo).
+Cruza com o que já \emph{há}: endereçamento Peano
+(\code{topologico def:peano}), a garrafa de Koch (\code{tests/koch.c}: o
+que não tem dual não atravessa), a deformação de Hilbert
+(\code{lib/cifra.h}), e a fibra $2$ da dobra temporal
+(\code{teoria thm:dobra-temporal}, $x\mapsto x^{2}$).
+
+\begin{corolario}[sentir é ler multiplicidade --- e $\mathrm{GF}(2)$ conserva a paridade]
+Um agente cujo estado interno não contém a trajetória, mas que escreve
+cada passagem em $G$ e depois lê $G$, distingue regiões já percorridas
+exclusivamente por leitura local. No limite binário $G(x)\bmod 2$, perde-se
+a \emph{profundidade} da dobra e conserva-se a \textbf{assinatura de
+paridade}: $0$ par, $1$ ímpar. A descida $E_{16}\to\mathrm{GF}(2)$
+(\S\ref{sec:descida}) não elimina a duplicidade --- elimina só a
+informação de quantas vezes ela ocorreu
+(\code{tests/aranha\_g.c} §AG6--§AG7: $G=0$ e $G=2$ colidem em $B=0$).
+\end{corolario}
+
+\medskip\noindent\textbf{Realização: o ciclo da aranha.}
+Cada passo do autómato \emph{é} um cláusula do teorema, não um extra:
+\begin{enumerate}\itemsep3pt
+\item \textbf{Escrita} --- $G[y,x]\mathrel{+}=1$ realiza
+      $G_{t+1}=G_{t}+\mathbf{1}_{\{\pi(t)\}}$ (cláusula~3;
+      \code{tests/aranha\_g.c} §AG10).
+\item \textbf{Leitura} --- as quatro vizinhanças relativas são
+      $\mathcal{P}_{t}(x)$ sobre $V(x)$; fronteira $\Rightarrow$ obstáculo
+      ($+\infty$) (cláusula~4).
+\item \textbf{Decisão} --- gradiente de exploração: prefere menor $G$ na
+      vizinhança --- lê a dobra, não pergunta «por onde passei?»
+      (\code{tests/aranha\_g.c} §AG8).
+\item \textbf{Fecho} --- após $N_{\mathrm{expl}}$ passos, rotor
+      $R^{4}=\mathrm{id}$ (Lei~2, \S\ref{sec:pecas}): rotação à direita +
+      marca forte (\code{tests/aranha\_g.c} §AG9, §AG11). O fechamento é o mesmo $J^{4}=\mathrm{id}$ da
+      bidualidade, agora na grade.
+\end{enumerate}
+
+\medskip\noindent A cadeia do \emph{eval} fecha aqui, e não na cabeça:
+\[
+\boxed{
+\text{representação}
+\longrightarrow
+\text{realização}
+\longrightarrow
+\text{identificação}
+\longrightarrow
+\text{multiplicidade}.
+}
+\]
+A aranha é só o último passo dinâmico. O mecanismo é $\pi$ e $G$.
+
+\medskip\noindent\textbf{Ponte com slots e banco.}
+O mesmo ciclo lê$\to$opera$\to$escreve governa autómato, tradutor, \code{sql.c} e
+\code{conversa.c}: $G\mapsto G'$ é transformação do espaço de trabalho
+(\S\ref{sec:slots}). Em $\mathrm{GF}(2)$ o agente reduz-se ao \textbf{ciclo de
+clock} do operador algébrico --- não por heurística: a descida fechou
+invariantes e a paridade de $G$ é o bit que sobrou (\S\ref{sec:descida};
+\code{tests/cadeia.c} §K3).
+
+\medskip\noindent Em uma linha:
+\[
+\boxed{\text{não é o agente que conhece o espaço; é a régua que torna o
+espaço legível.}}
+\]
+
+\medido{Teor.~\ref{thm:multiplicidade}:
+\code{tests/aranha\_g.c} §AG1--§AG11 (Heighway $G>1$; recta $G\le1$;
+paridade $G\bmod2$; descida $\mathrm{GF}(2)$ §AG6--§AG7; decisão min-$G$ §AG8;
+caminhada §AG10; fecho $R^{4}$ §AG9/§AG11); fibra \code{tests/conservacao\_metrica.c} §M10
+(\code{teoria cor:pata}); ciclo de slots \code{tests/reta.c} §R12d--§R12g;
+\code{tests/dualsort\_banco.c}; GF(2) \code{tests/cadeia.c} §K3;
+Koch \code{tests/koch.c}.}
+\colunas{\code{algebrico thm:gato}; \code{teoria cor:pata};
+\code{teoria thm:dobra-temporal}}
+        {ciclo lê$\to$opera$\to$escreve; $G[y,x]\mathrel{+}=1$}
+        {\code{tests/aranha\_g.c} §AG1--§AG11;
+         \code{tests/conservacao\_metrica.c} §M10; \code{tests/cadeia.c} §K3}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Interface hexal --- Lei~6 e o ciclo $6,12,24$}\label{sec:hexal}
+
+\noindent A \textbf{hexal} é o único andar onde $\oplus=\otimes$ na interface: o relógio
+do computacional (\code{topologico thm:periodos}). Os valores $6,12,24$ \textbf{não} são
+períodos fundamentais --- são \emph{interfaces derivadas}:
+\[
+6=\operatorname{lcm}(2,3),\quad
+12=\operatorname{lcm}(2,3,4),\quad
+24=\operatorname{lcm}(2,3,4,8).
+\]
+Na realização deste paper o 1.º ciclo é declarado por \verb|\interfacen{6}| e viaja no
+PDF como \code{/Interface~6} na \code{/SementeEstrela} --- o contrato que
+\code{tests/estrela\_unifica.js} §U2c mede.
+
+\medskip\noindent A fórmula operacional (espiral do tradutor, \code{tests/tex\_core.c}):
+\[
+\iota_k = 6\cdot 2^{\lfloor k/3\rfloor},\qquad
+\text{Dim} = 2^{\text{alcance}+1},\qquad
+\text{Lado} = \begin{cases}0\text{ (Hurwitz)} & k<3\\ 1\text{ (Gentil)} & k\ge 3\end{cases}
+\]
+Subir três andares na espiral duplica a interface --- e é isso que separa contar de integrar
+sem confundir réguas (\code{teoria thm:transporte}).
+
+\medido{\code{tests/estrela\_unifica.js} §U2c (\code{/Interface~6});
+\code{tests/traduz\_pi\_dim.js} (família completa);
+\code{tests/corpo\_topologico.c} (Lei~6).}
+\colunas{\code{topologico sec:Interface hexal}; \code{analitico thm:estrelaseis}}
+        {\verb|\interfacen{6}| no \code{.tex}; \code{/SementeEstrela} no PDF}
+        {\code{tests/estrela\_unifica.js} §U2--§U2c; \code{tests/tex\_wasm.js} §T5--§T6}
+
+\section{Descida de representação}\label{sec:descida}
+
+\noindent\textbf{Princípio da descida} (decisão do coordenador): a descida de escala
+não é arredondamento nem perda de precisão abstracta --- é \textbf{projeção
+homomórfica} que preserva a estrutura invariante da régua, enquanto descarta
+\emph{régua minha} (limiar de \code{double}, tecto silencioso de \code{long},
+sinal normalizado).
+
+\medskip\noindent A cadeia medida (\code{tests/cadeia.c}):
+\[
+\text{long}\;\to\;64\;\to\;32\;\to\;E_{16}\;\to\;\mathbb{F}_{127}\;\to\;\mathrm{GF}(2).
+\]
+
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+degrau & o que se perde / o que se mantém \\
+\midrule
+64$\to$32 & tecto \code{long}; produto exacto em par \\
+32$\to$16 & envelope \code{Qz}; aritmética projectiva em int16 \\
+16$\to\mathbb{F}_{127}$ & redução mod $127$ (\code{tests/reducao.c} §D6) \\
+127$\to\mathrm{GF}(2)$ & sinal; involução $\nu^2=1$ $\to$ $\neg\neg x=x$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent\textbf{O real não está na cadeia} --- alcança-se pelo
+\textbf{corte} (Pontryagin), perpendicular à descida
+(\code{algebrico sec:pontofixo}). Em $\mathrm{GF}(2)$ a
+conservação e a involução tornam-se leis binárias rígidas (reversibilidade
+lógica); a álgebra \emph{ainda opera} no fim da cadeia
+(\code{tests/cadeia.c} §K3).
+
+\medido{\code{tests/cadeia.c} ($9/9$): §K2b confirma $Q_z\in E_{16}$ e
+\code{rt\_opera\_i16}; §K3 exaustão $\mathbb{P}^1(\mathbb{F}_{127})=128$
+pontos; \code{tests/reducao.c} §D6 lê $E_{16}$ sem widen;
+\code{tests/aranha\_g.c} §AG6--§AG7 ($G\bmod2$ na grade).}
+\colunas{\code{teoria sec:duasescadas}; \code{algebrico sec:pontofixo} (corte)}
+        {cadeia long$\to$GF(2); perde régua minha, não lei}
+        {\code{tests/cadeia.c} $9/9$; \code{tests/reducao.c} §D6}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Fronteira I/O: escala só na leitura}\label{sec:fronteira}
+
+\noindent Fase C da migração: factor de escala \textbf{só} na fronteira; o
+interior opera em \code{int64}, $\Q_z$, ou coordenadas \code{int16} sem
+denominador físico carregado.
+
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+escala & onde \\
+\midrule
+\code{EMB\_S}$=10^4$ & \code{le\_emb.h}, \code{palavra.c}, \code{transfusao\_real.c} \\
+\code{EMB\_S6}$=10^6$ & \code{protocolo.c}, \code{antissim.c} \\
+$10^{-3}$ ponto & \code{tex\_core.c} via \code{rt\_le\_decimal\_end} \\
+\code{ICE\_SCALE}$=10^9$ & \code{tools/icecube.c} (templates) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent Regra: parse decimal $\to$ inteiro fixo $\to$ operação
+algébrica $\to$ (se necessário) formatação na saída. Nenhum \code{double} no
+caminho dos medidores Q1--Q8 de \code{racionais.tex}.
+
+\medido{\code{tests/tex.c} §X20 (seis casos \code{rt\_le\_decimal\_end});
+\code{tests/palavra.c}; \code{integration/protocolo.c}.}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Conservação e reversibilidade}\label{sec:conservacao}
+
+\noindent Fecho (coordenador): \textbf{régua + involução + conservação}.
+Antes da cadeia longa, a ordem conceptual é:
+\[
+\boxed{
+\text{Régua}
+;\longrightarrow;
+\text{espaço}
+;\longrightarrow;
+\text{operação}
+;\longrightarrow;
+\text{involução}
+;\longrightarrow;
+\text{invariante}
+}
+\]
+e, no caso conservativo, $\boxed{\det T=1}$ impede confundir dobra com expansão
+de escala.
+
+\medskip\noindent A cadeia de realização (implementação):
+\[
+\boxed{
+\text{Régua}
+\rightarrow
+\text{Álgebra}
+\rightarrow
+\text{Dobra}
+\rightarrow
+\text{Involução}
+\rightarrow
+\text{Slot}
+\rightarrow
+\text{Espaço}
+\rightarrow
+\text{Conservação}
+\rightarrow
+\text{Retração}
+}
+\]
+com $\boxed{\Sigma\circ\Pi=\mathrm{Id}}$ a fechar o ciclo.
+
+\medskip\noindent\textbf{Formulação segura} (decisão do coordenador): a conservação
+de área/medida \textbf{tem de ser demonstrada} para a transformação
+específica --- aqui, não por metáfora:
+\begin{itemize}\itemsep2pt
+\item $|\det T|=1$ --- operador SL$(2,\Z)$; inversa inteira
+      (\code{rt\_inverte}); \code{algebrico thm:cone}
+\item \code{algebrico thm:conservacao}: $\gcd$ conserva-se na descida; $q$ é o
+      orçamento que se esgota; paragem devolve energia inteira
+\item Dual sort: apagamento zero quando se guarda a permutação
+      (este documento)
+\item Retração exacta nos slots (§T2); contagem de bits apagados em
+      \code{tools/bench\_dissipa.c}
+\end{itemize}
+
+\medskip\noindent $\det T=1$ impede confundir a dobra com expansão de escala:
+a passagem $E_{16}\to D_{32}\to\cdots$ realiza o objecto numa dimensão
+algébrica maior, enquanto a involução dá o caminho de retorno e a
+conservação impede introduzir ou destruir conteúdo.
+
+\medido{\code{tests/dualsort.c}; \code{tests/conservacao\_metrica.c};
+\code{tests/torre\_alg.c} §T2; \code{tests/descida\_mobius.c} §M10.}
+\colunas{\code{algebrico thm:conservacao}; decisão do coordenador (fecho régua+involução+conservação)}
+        {SL$(2,\Z)$; apagamento zero; $\Sigma\circ\Pi=\mathrm{Id}$ nos slots}
+        {\code{tests/conservacao\_metrica.c}; \code{tests/dualsort.c}; §T2}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{ISA: \code{MOVE} e o slot como operação}\label{sec:isa}
+
+\noindent O \emph{Catálogo} reduz a máquina a \textbf{uma} operação:
+\code{MOVE(destino, sentido)} --- leitura ($+1$), escrita ($-1$), salto (pc como
+destino). O irredutível booleano vive \textbf{no slot}, não no processador
+(\code{NAND} retém operação, não valor). Isto fecha com a ordem do coordenador (§4): memória =
+estado geométrico; o slot é onde a palavra algébrica se materializa.
+
+\medskip\noindent A promoção $(S,A)$ com $S+A=x$ é o $\dim A_{n+1}=2\dim A_n$ da
+torre escrito como ferramenta (\code{catalogo thm:dimconta}): promover dobra a
+dimensão; descer recompõe sem apagar. Escrever o par é a dual da escrita directa
+--- o centro ($S$) conserva o velho; só a parte antissimétrica ($A$) emite.
+
+\medskip\noindent No banco, oito \emph{slots} por nó, seis filhos por registo:
+inserir desce pelos símbolos; ordenar percorre (este documento;
+\code{tests/dualsort\_banco.c}). A mesma \code{MOVE} serve $500$ corpos sem
+instrução nova (\code{tests/move.c}).
+
+\medido{\code{tests/move.c}; \code{tests/isa4.c}; \code{tests/dualsort\_banco.c};
+\code{tests/promove.c} (promover/desce $1\to2\to4$).}
+\colunas{\code{catalogo thm:dimconta}; \code{catalogo thm:duasinvol}}
+        {\code{MOVE}; slots \code{.mem}; árvore oito slots}
+        {\code{tests/move.c}; \code{tests/dualsort\_banco.c}}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Contrato \code{lib/}: mapa dos headers}\label{sec:lib}
+
+\noindent \code{lib/torre\_alg.h} é o índice; a aritmética vive nos headers de
+andar. Ordem de leitura recomendada:
+
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+header & papel \\
+\midrule
+\code{torre\_alg.h} & contrato: três pipelines, mapa de andares \\
+\code{racionais.h} & $E_{16}$, \code{Qz}, operações $\Q$ \\
+\code{dual16.h} / \code{dual32.h} / \code{i128.h} & produto exacto por dobra \\
+\code{torre.h} & hip\_*, subida Cayley--Dickson \\
+\code{reta.h} & RtOp, ciclo, inversão, mod por largura \\
+\code{rt\_cf\_slot.h} & FC nos slots; retração $\Sigma\circ\Pi$ \\
+\code{slot\_map.h} & \code{S\_CF=2048}, layout \code{.mem} \\
+\code{slot\_mem.h} & \code{pread/pwrite} persistente \\
+\code{le\_emb.h} & fronteira \code{EMB\_S}, parse decimal \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Regra do contrato: incluir o header de \emph{andar} quando se
+implementa; incluir \code{torre\_alg.h} quando se \emph{documenta} ou se verifica
+a firma (\code{tests/torre\_alg.c}).
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Fecho: realizabilidade e o que se afirma}\label{sec:fecho}
+
+\noindent Este paper é o \textbf{teste de fogo} do formalismo: partir da
+fundação algébrica/topológica e aterrar na arquitetura restrita
+$E_{16}\to\mathbb{F}_{127}\to\mathrm{GF}(2)$ sem perder involução nem
+conservação --- antes, torná-las \textbf{leis binárias rígidas} no limite
+(reversibilidade lógica, $\neg\neg x=x$, matrizes unimodulares sobre
+$\mathbb{F}_2$).
+
+\medskip\noindent\textbf{O que se afirma} (e o que não):
+\begin{itemize}\itemsep3pt
+\item \textbf{Afirmado:} a largura segue a dobra; três pipelines distintos;
+      slots como realização persistente da palavra; descida como projeção
+      homomórfica que descarta régua minha; conservação via $|\det|=1$ e
+      retração exacta --- medidos, não metaforizados.
+\item \textbf{Não afirmado:} que «conservação da área» vale por analogia;
+      que o autómato \emph{aprende} a teia --- \emph{realiza-a} sob lei
+      conservativa (Teor.~\ref{thm:multiplicidade}: lê $G$, não narra);
+      que o slot é armazém passivo; que a curva do dragão está medida em
+      \code{tests/aranha\_g.c} (Heighway; o L-system em si não está no repo).
+\end{itemize}
+
+\medskip\noindent\textbf{Divisor de águas} (decisão do coordenador): slot $\neq$ ficheiro.
+Quando slot e malha operam sob conservação, o sistema deixa de acumular estado
+histórico desnecessário e passa a ser projeção onde \emph{a informação reside
+na geometria da representação}. É isto que separa arquitectura de dados
+convencional de sistema formalmente rigoroso --- e é o que \code{lib/torre\_alg.h}
+fixa como contrato verificável.
+
+\medido{\code{tests/cadeia.c} §K3 (álgebra opera em GF(2));
+\code{tests/torre\_alg.c} (três pipelines); \code{tests/move.c}
+(\code{MOVE} única); \code{bash tools/bateria.sh} (contagem global).}
+\colunas{decisão do coordenador (fecho conceptual, 08/2026)}
+        {migração A--D; \code{torre\_alg.h}; medidores §\ref{sec:lib}}
+        {bateria + \code{refcruz.py}; inventário abaixo}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section*{Inventário (medidores âncora)}
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+tema & medidor & resultado \\
+\midrule
+$16\times16$ & \code{tests/dual16.c} & $5/5$ \\
+$\Q$ migrado & \code{tests/migracao.c} & $6/6$ \\
+descida & \code{tests/cadeia.c} & $9/9$ \\
+firma torre & \code{tests/torre\_alg.c} & §T1--§T4 ($4/4$ cada) \\
+$\Q$ analítico & \code{banco/conversa.c} & 331/331 (completude em $E_{16}$) \\
+quadratura & \code{tests/calculo2.c} & §C1--§C10 \\
+recta / ciclo & \code{tests/reta.c} & $43/43$ \\
+transformada & \code{tests/transformada\_universal.c} & §T21 \\
+ponte $\mathbb{F}_{127}$ & \code{tests/reducao.c} & §D6 \\
+$\Q$ fixos & \code{tests/racionais\_fixos.c} & §Q1--§Q8 \\
+ordenar / banco & \code{tests/dualsort.c} & ver §\ref{sec:pecas} \\
+MOVE / ISA & \code{tests/move.c} & ver §\ref{sec:isa} \\
+promover / par & \code{tests/promove.c} & $1\to2\to4$ \\
+fibra / pata & \code{tests/conservacao\_metrica.c} & §M10 (\code{teoria cor:pata}) \\
+multiplicidade $G$ & \code{tests/aranha\_g.c} & §AG1--§AG11 (ciclo completo) \\
+hexal PDF & \code{tests/estrela\_unifica.js} & §U2c (\code{/Interface~6}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent Referências cruzadas: \code{python3 tools/refcruz.py}
+(\code{arquitetura}/\code{sintese}). PDF: \code{/docs/computacional.pdf}
+(\code{papers/arquitetura.tex}). Números: \code{bash tools/bateria.sh}.
+Selo em \code{tools/atestados.txt}. Referências órfãs: \code{tests/refs.c} ($6/6$).
+
 \vfill
 {\footnotesize\color{cinza}\noindent
-Teoria, catálogo e medidores em
+Irmãos: \code{corpo\_algebrico.tex} · \code{corpo\_topologico.tex} ·
+\code{racionais.tex} · \code{catalogo.tex}. Teoria e catálogo em
 \href{https://goldenkingdom.patriatechnology.com}{goldenkingdom.patriatechnology.com}.
 CC BY 4.0 (textos) $\cdot$ MIT (código).\par}
 

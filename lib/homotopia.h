@@ -1,6 +1,6 @@
 /* homotopia.h — O BURACO QUE NENHUM PONTO VÊ.
  *
- * O `eval.txt`: «o círculo força a distinguir LOCALMENTE IGUAL ≠ GLOBALMENTE IGUAL. A
+ *  ordem do coordenador: «o círculo força a distinguir LOCALMENTE IGUAL ≠ GLOBALMENTE IGUAL. A
  * reta pode ser contraída a um ponto; o círculo não. Aí vamos descobrir se ele consegue
  * capturar um BURACO QUE NÃO É VISÍVEL POR NENHUM PONTO ISOLADAMENTE.»
  *

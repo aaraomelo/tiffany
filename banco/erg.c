@@ -49,6 +49,8 @@
  *   ./erg                              sem argumentos: corre a bateria de medidas
  */
 #define _POSIX_C_SOURCE 200809L
+#include <stdint.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -865,7 +867,7 @@ int main(int argc, char **argv){
         off_t len = lseek(fprog, 0, SEEK_END);
         if(abre_mem(argv[3]) < 0){ fprintf(stderr, "não abriu %s\n", argv[3]); return 1; }
         long passos = rodar((unsigned)len, teto);
-        printf("%ld passos, %lld bytes de programa\n", passos, (long long)len);
+        printf("%ld passos, %" PRId64 " bytes de programa\n", passos, (int64_t)len);
         return 0;
     }
     if(argc >= 2 && !strcmp(argv[1], "desmonta")){

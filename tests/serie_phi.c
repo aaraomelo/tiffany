@@ -60,7 +60,7 @@ int main(void){
         long ca, cb;
         qmd_conj(am1, &ca, &cb);
         Qmd prod = qmd_mul(am1, qmd_make(ca, cb, am1.den), casos[i].m, casos[i].D);
-        long long den2 = (long long)am1.den * am1.den;
+        long den2 = am1.den * am1.den;
         if(!qmd_eq(prod, qmd_make((long)qmd_norm_am1(casos[i].alpha, casos[i].m, casos[i].D),
                                   0, (long)den2)))
             mal_conj++;
@@ -120,8 +120,7 @@ int main(void){
                !qmd_eq(inv_err, qmd_inv(am1, m, D)));
         }
         {
-            long long norm_err = (long long)am1.a * am1.a
-                + (long long)am1.b * am1.b * m * m * D;
+            long norm_err = am1.a * am1.a + am1.b * am1.b * m * m * D;
             ok("controlo: norma com sinal ERRADO (+b²m²D) ≠ norma real",
                norm_err != qmd_norm_num(am1, m, D));
         }

@@ -40,7 +40,7 @@
 #include "unidade.h"
 #include <stdlib.h>
 
-typedef long long L;
+typedef long L;
 typedef struct { L a, b; } G;                 /* a + b i */
 
 static G g_add(G x, G y){ return (G){x.a+y.a, x.b+y.b}; }
@@ -78,7 +78,7 @@ int main(void){
         for(L a=-3;a<=3;a++) for(L b=-3;b<=3;b++)
             if(g_nrm((G){a,b}) == 1 && n<8) un[n++] = (G){a,b};
         printf("      unidades (N = 1): ");
-        for(int i=0;i<n;i++) printf("%+lld%+lldi  ", un[i].a, un[i].b);
+        for(int i=0;i<n;i++) printf("%+ld%+ldi  ", un[i].a, un[i].b);
         printf("\n");
         ok("são EXATAMENTE 4 — contra as 2 de Z", n==4);
 
@@ -87,7 +87,7 @@ int main(void){
         printf("      potências de i: ");
         for(int k=1;k<=6;k++){
             p = g_mul(p, i1);
-            printf("i^%d = %+lld%+lldi   ", k, p.a, p.b);
+            printf("i^%d = %+ld%+ldi   ", k, p.a, p.b);
             if(g_eq(p,(G){1,0}) && !ordem) ordem = k;
         }
         printf("\n      ordem de i: %d\n", ordem);
@@ -278,7 +278,7 @@ int main(void){
                         && g_eq(r10,(G){0,0}) && g_eq(r11,(G){1,0})) ordem_R = k;
         }
         G detR = g_sub(g_mul(R00,R11), g_mul(R01,R10));
-        printf("      R   = [[i,0],[0,1]] em Z[i]:   ordem %d — RODA   (det = %+lld%+lldi)\n",
+        printf("      R   = [[i,0],[0,1]] em Z[i]:   ordem %d — RODA   (det = %+ld%+ldi)\n",
                ordem_R, detR.a, detR.b);
         ok("em Z a torção fecha em DOIS: A_0² = I, e é involução", ordem_A==2);
         ok("em Z[i] há torção que fecha em QUATRO, e não antes", ordem_R==4);

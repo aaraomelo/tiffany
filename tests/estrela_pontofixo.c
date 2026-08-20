@@ -29,7 +29,7 @@
 #include <stdio.h>
 #include "unidade.h"
 
-typedef long long L;
+typedef long L;
 
 /* ── ℤ[i]: inteiros de Gauss, para derivar o ponto fixo em inteiros ──────────────────────── */
 typedef struct { L re, im; } Z;
@@ -47,7 +47,7 @@ int main(void){
     int e_menos_um = (ii.re == -1 && ii.im == 0);
     int real_serve = 0;                                  /* algum x REAL (im=0) com x²=−1 ? */
     for(L x = -1000; x <= 1000; x++){ Z r = zmul((Z){x,0},(Z){x,0}); if(r.re==-1 && r.im==0) real_serve = 1; }
-    printf("§P1  ν(x)=−1/x, ν(x)=x  =>  x²=−1.  i² = (%lld,%lld) ; algum real serve? %s\n\n",
+    printf("§P1  ν(x)=−1/x, ν(x)=x  =>  x²=−1.  i² = (%ld,%ld) ; algum real serve? %s\n\n",
            ii.re, ii.im, real_serve ? "sim" : "NAO");
     ok("§P1 o ponto fixo da estrela DERIVA-SE: ν(x)=x força x²=−1, e em ℤ[i] isso é i (i²=−1 exato);"
        " NAO ha ponto fixo real, por isso o bit atravessa para o imaginario", e_menos_um && !real_serve);
@@ -65,7 +65,7 @@ int main(void){
         /* uma fora e outra dentro <=> raízes de sinais opostos e |produto|=1 <=> prod=−1 */
         if(prod != -1 || soma <= 0) fora_dentro_ok = 0;
     }
-    printf("§P2  |ponto fixo|² = |i|² = %lld ; σ·σ† = −1 (Vieta) em 40 metais? %s\n\n",
+    printf("§P2  |ponto fixo|² = |i|² = %ld ; σ·σ† = −1 (Vieta) em 40 metais? %s\n\n",
            nfix, fora_dentro_ok ? "sim" : "nao");
     ok("§P2 o ponto fixo esta na FRONTEIRA |x|=1 (|i|²=1): pela Vieta do metal x²−mx−1, σ·σ†=−1 logo"
        " |σ||σ†|=1 — uma raiz FORA (|σ|>1) e outra DENTRO (|σ†|<1), e o circulo e' a media geometrica",
@@ -93,7 +93,7 @@ int main(void){
         }
     }
     L dois_k = 1; for(int k = 1; k <= 6; k++) dois_k *= 2;   /* fora do círculo: 2^6 = 64, explode */
-    printf("§P3  |i^k|=1 (k=1..12)? %s ; |N(σ^k)|=1 na torre metálica? %s ; fora: 2^6=%lld (cresce)\n\n",
+    printf("§P3  |i^k|=1 (k=1..12)? %s ; |N(σ^k)|=1 na torre metálica? %s ; fora: 2^6=%ld (cresce)\n\n",
            norma_presa ? "sim" : "nao", metal_norma_ok ? "sim" : "nao", dois_k);
     ok("§P3 o bit ATRAVESSA: em |x|=1 a norma e' imune ao expoente — |i^k|=1 (a rotação) e"
        " |N(σ^k)|=1 (a torre metálica), a norma presa em 1 dos DOIS lados; fora do circulo cresce."
@@ -112,7 +112,7 @@ int main(void){
          * Se o produto fosse +1 (erro comum), daria n²−4. É isso que esta conta pode desmentir. */
         L soma = n, prod = -1;
         L D = soma*soma - 4*prod;                          /* discriminante por Vieta */
-        printf("     n=%d (%s): a²−%d·a−1=0, D=(σ−σ†)²=%lld²−4·(%lld)= %lld  (esperada %lld)\n",
+        printf("     n=%d (%s): a²−%d·a−1=0, D=(σ−σ†)²=%ld²−4·(%ld)= %ld  (esperada %ld)\n",
                n, n==1?"OURO":n==2?"prata":n==3?"bronze":"", n, soma, prod, D, esperadas[n]);
         if(D != esperadas[n]) dobra_ok = 0;
     }

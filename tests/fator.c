@@ -51,8 +51,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include "unidade.h"
 #include "reta.h"
+#include "rt_cf_slot.h"
 
 #define D 24        /* dimensão dos vetores de prova */
 #define M 12        /* quantos vetores */
@@ -218,8 +221,9 @@ printf("\n§W3  HIPÉRBOLE contra CÍRCULO: quem precisa da régua infinita.\n\n
 
 printf("\n§W4  A RÉGUA INFINITA representa o que diverge, e sai INTEIRA.\n\n");
 {
+    int cf_mem = rt_cf_slot_mem_abre("dados/fator_cf.mem");
     /* "ele sai inteiro, usa a régua infinita". A fracção contínua devolve INTEIROS exactos,
-     * e reconstrói de volta. Mede-se a volta: rt_cf_de e rt_cf_para, igualdade em ℤ. */
+     * e reconstrói de volta. Mede-se a volta: rt_cf_slot_de e rt_cf_slot_para, igualdade em ℤ. */
     struct { long p, q; const char *nome; } t[] = {
         { 22,  7, "22/7" },
         { 355, 113, "355/113" },
@@ -230,16 +234,19 @@ printf("\n§W4  A RÉGUA INFINITA representa o que diverge, e sai INTEIRA.\n\n")
     printf("      racional          a régua (quocientes)          volta     bate\n");
     int mal = 0;
     for(size_t i = 0; i < sizeof t/sizeof *t; i++){
-        RtCf c; long P, Q;
-        rt_cf_de(1, t[i].p, t[i].q, &c);
-        int volta = rt_cf_para(&c, &P, &Q);
-        int bate = volta && !c.saturou && P*t[i].q == t[i].p*Q && Q != 0;
+        RtCfSlot c = rt_cf_slot_word((unsigned)i, cf_mem);
+        long P = 0, Q = 1;
+        rt_cf_slot_de(1, t[i].p, t[i].q, &c);
+        int cn = rt_cf_slot_n(&c);
+        int volta = rt_cf_slot_para(&c, &P, &Q);
+        int bate = volta && !rt_cf_slot_saturou(&c) && P*t[i].q == t[i].p*Q && Q != 0;
         if(!bate) mal++;
         printf("      %-17s [", t[i].nome);
-        for(int k = 0; k < c.n && k < 6; k++)
-            printf("%ld%s", c.a[k], k < c.n-1 && k < 5 ? "; " : "");
+        for(int k = 0; k < cn && k < 6; k++)
+            printf("%ld%s", rt_cf_slot_termo(&c, k), k < cn-1 && k < 5 ? "; " : "");
         printf("]   %ld/%ld   %s\n", P, Q, bate ? "sim" : "nao");
     }
+    if(cf_mem >= 0) close(cf_mem);
     printf("\n");
     ok("a régua reconstrói o racional a partir dos INTEIROS, ida e volta exactas",
        mal == 0);

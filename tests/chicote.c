@@ -26,12 +26,14 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
+#include <inttypes.h>
 
 #include "unidade.h"
 
-typedef struct { long long a[2][2]; } M2;
+typedef struct { int64_t a[2][2]; } M2;
 
-static M2 gato(long long m){ M2 A = {{{m,1},{1,0}}}; return A; }
+static M2 gato(int64_t m){ M2 A = {{{m,1},{1,0}}}; return A; }
 static M2 ident(void){ M2 I = {{{1,0},{0,1}}}; return I; }
 
 /* a contração de Einstein: (A·B)^i_k = Σ_j A^i_j B^j_k. Escrita com o índice repetido à mostra. */
@@ -39,25 +41,25 @@ static M2 contrai(M2 A, M2 B){
     M2 C;
     for(int i = 0; i < 2; i++)
         for(int k = 0; k < 2; k++){
-            long long s = 0;
+            int64_t s = 0;
             for(int j = 0; j < 2; j++) s += A.a[i][j] * B.a[j][k];   /* j é o índice contraído */
             C.a[i][k] = s;
         }
     return C;
 }
 static M2 transp(M2 A){ M2 T; for(int i=0;i<2;i++) for(int j=0;j<2;j++) T.a[i][j] = A.a[j][i]; return T; }
-static long long det2(M2 A){ return A.a[0][0]*A.a[1][1] - A.a[0][1]*A.a[1][0]; }
+static int64_t det2(M2 A){ return A.a[0][0]*A.a[1][1] - A.a[0][1]*A.a[1][0]; }
 static int igual(M2 A, M2 B){
     for(int i=0;i<2;i++) for(int j=0;j<2;j++) if(A.a[i][j] != B.a[i][j]) return 0;
     return 1;
 }
-static M2 escala(M2 A, long long c){
+static M2 escala(M2 A, int64_t c){
     M2 B; for(int i=0;i<2;i++) for(int j=0;j<2;j++) B.a[i][j] = c*A.a[i][j]; return B;
 }
 
 /* §H2 — todas as parentizações de A_i..A_j, conferidas contra a canônica (esquerda p/ direita) */
 static M2 FAT[10];
-static long long parentizacoes = 0;
+static int64_t parentizacoes = 0;
 static M2 canonica(int i, int j){
     M2 R = FAT[i];
     for(int t = i+1; t <= j; t++) R = contrai(R, FAT[t]);
@@ -77,8 +79,8 @@ static int todas_concordam(int i, int j){
     return bom;
 }
 /* Catalan(n) = (2n)! / (n!(n+1)!), por recorrência inteira */
-static long long catalan(int n){
-    long long c = 1;
+static int64_t catalan(int n){
+    int64_t c = 1;
     for(int i = 0; i < n; i++) c = c * 2*(2*i+1) / (i+2);
     return c;
 }
@@ -91,7 +93,7 @@ printf("    Andar na régua mineral é aplicar o gato; e compor gatos é contrai
 printf("\n§H1  Compor gatos É a contração de Einstein — exato, em inteiros.\n\n");
 {
     int mau = 0; long testes = 0;
-    for(long long m = 1; m <= 4; m++) for(long long n = 1; n <= 4; n++){
+    for(int64_t m = 1; m <= 4; m++) for(int64_t n = 1; n <= 4; n++){
         M2 A = gato(m), B = gato(n);
         M2 C = contrai(A, B);
         /* a conta à mão, índice por índice */
@@ -108,7 +110,7 @@ printf("\n§H1  Compor gatos É a contração de Einstein — exato, em inteiros
     printf("      afirmação vista de outro lado.\n");
     M2 A = gato(1), P = ident();
     printf("      m=1, A^k: ");
-    for(int k = 1; k <= 8; k++){ P = contrai(P, A); printf("%lld ", P.a[0][1]); }
+    for(int k = 1; k <= 8; k++){ P = contrai(P, A); printf("%" PRId64 " ", P.a[0][1]); }
     printf(" (F_k)\n");
 }
 
@@ -123,7 +125,7 @@ printf("     a k-ária não escolhe nenhuma. Se todas concordam, a escolha era a
         for(int i = 0; i < k; i++) FAT[i] = gato(1 + (i % 4));   /* fatores distintos, de propósito */
         parentizacoes = 0;
         int bom = todas_concordam(0, k-1);
-        printf("      %d    %13lld   %s\n", k, catalan(k-1), bom ? "sim ✓" : "NÃO ✗");
+        printf("      %d    %13" PRId64 "   %s\n", k, catalan(k-1), bom ? "sim ✓" : "NÃO ✗");
         if(!bom) bom_geral = 0;
     }
     ok("a contração k-ária é bem-definida (associatividade)", bom_geral);
@@ -141,7 +143,7 @@ printf("     σσ'=−1 e σ+σ'=m, sobra M = [[−2, m], [m, 2]] — inteiro, s
     M2 Om = {{{0,1},{-1,0}}};                       /* Ω: a antissimétrica (o volume) */
     int mau_o = 0, mau_m = 0;
     printf("      m    det A    A^tΩA = det·Ω    A^tMA = −M\n");
-    for(long long m = 1; m <= 5; m++){
+    for(int64_t m = 1; m <= 5; m++){
         M2 A = gato(m);
         M2 Mc = {{{-2, m},{m, 2}}};                 /* M: a simétrica (o cone) */
         M2 e1 = contrai(contrai(transp(A), Om), A);
@@ -150,7 +152,7 @@ printf("     σσ'=−1 e σ+σ'=m, sobra M = [[−2, m], [m, 2]] — inteiro, s
         int c = igual(e2, escala(Mc, -1));
         if(!o) mau_o++;
         if(!c) mau_m++;
-        printf("      %lld    %+lld       %s              %s\n",
+        printf("      %" PRId64 "    %+" PRId64 "       %s              %s\n",
                m, det2(A), o ? "sim ✓" : "NÃO ✗", c ? "sim ✓" : "NÃO ✗");
     }
     ok("A^tΩA = det(A)·Ω  (a identidade simplética)", mau_o == 0);
@@ -168,12 +170,12 @@ printf("     p_N(x) = x^N − m·x^(N−1) − 1  ⟹  p'_N(x) = x^(N−2)·( N�
     int mau = 0;
     printf("      N    grau de p'    raízes finitas (com multiplicidade)    x = m(N−1)/N\n");
     for(int N = 2; N <= 8; N++){
-        long long m = 3;
+        int64_t m = 3;
         int grau = N - 1;
         int raizes = (N - 2) + 1;                   /* 0 com multiplicidade N−2, mais uma */
         int bate = (grau == N-1) && (raizes == N-1);
         if(!bate) mau++;
-        printf("      %d    %10d    %34d    %lld/%d\n", N, grau, raizes, m*(N-1), N);
+        printf("      %d    %10d    %34d    %" PRId64 "/%d\n", N, grau, raizes, m*(N-1), N);
     }
     ok("o número de pontos críticos finitos é exatamente N−1", mau == 0);
     printf("\n      Para os metais (N=2): UM ponto crítico, o vértice da parábola — em x=m/2.\n");

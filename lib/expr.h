@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include "reta.h"
 
 /* a célula da fita: {tipo, valor} */
 #define C_VAZIO 0            /* célula já consumida por uma dobra */
@@ -71,7 +72,7 @@
  * Medido em dual.c: i tem ordem 4 (um quarto de volta) e i* tem ordem 2 (uma reflexão) — e é a
  * ordem 2 que "garante a reversão", porque involução desdobra sempre. O direto continua a ser o
  * caso sig = 0, como o real era o caso ip = 0 e o inteiro o caso den = 1. */
-typedef struct { long tipo, val, den, ip, iq, sig; } Cel;
+typedef struct { long tipo, val, den, ip, iq, sig; } Cel;  /* 48 B/célula — ABI disco; long obrig. */
 #define CS ((long)sizeof(Cel))
 
 #define CT_FITA  0           /* a fita começa na célula 0 */
@@ -97,16 +98,10 @@ static void ct_cel(int fd, long i, Cel c){ pwrite(fd, &c, CS, i*CS); }
 static void ct_poe(int fd, long i, long t, long v){ ct_poeq(fd, i, t, v, 1); }
 
 /* EUCLIDES — o mesmo que gera a cifra, aqui a reduzir a fração ao representante canónico. */
-static long ct_mdc(long a, long b){
-    if(a < 0) a = -a;
-    if(b < 0) b = -b;
-    while(b){ long t = a % b; a = b; b = t; }
-    return a ? a : 1;
-}
 /* a forma reduzida, com o sinal sempre no numerador */
 static void ct_reduz(long *p, long *q){
     if(*q < 0){ *p = -*p; *q = -*q; }
-    long g = ct_mdc(*p, *q);
+    long g = rt_mdc(*p, *q);
     *p /= g; *q /= g;
 }
 static int ct_mulcabe(long a, long b){
@@ -509,10 +504,10 @@ static int ct_passo(int fd, long n, char *porque, size_t lim){
                 long ar = rr, aq = rq, ai = ri, aiq = riq;
                 long br = A.val, bq = A.den?A.den:1, bi = A.ip, biq = A.iq?A.iq:1;
                 long p1n = ar*br, p1d = aq*bq, p2n = ai*bi, p2d = aiq*biq;
-                long g = ct_mdc(p1d, p2d); rq = p1d*(p2d/g);
+                long g = rt_mdc(p1d, p2d); rq = p1d*(p2d/g);
                 rr = p1n*(p2d/g) + S*p2n*(p1d/g);
                 long q1n = ar*bi, q1d = aq*biq, q2n = ai*br, q2d = aiq*bq;
-                long g2 = ct_mdc(q1d, q2d); riq = q1d*(q2d/g2);
+                long g2 = rt_mdc(q1d, q2d); riq = q1d*(q2d/g2);
                 ri = q1n*(q2d/g2) + q2n*(q1d/g2);
                 ct_reduz(&rr, &rq); ct_reduz(&ri, &riq);
             }
@@ -663,9 +658,9 @@ static int ct_passo(int fd, long n, char *porque, size_t lim){
                 long S = sg ? +1 : -1;
                 if(quero == '+' || quero == '-'){
                     long s1 = quero == '-' ? -1 : 1;
-                    long g = ct_mdc(aq, bq2); rq2 = aq * (bq2/g);
+                    long g = rt_mdc(aq, bq2); rq2 = aq * (bq2/g);
                     rr = ar*(bq2/g) + s1*br*(aq/g);
-                    long g2 = ct_mdc(aiq, biq); riq = aiq * (biq/g2);
+                    long g2 = rt_mdc(aiq, biq); riq = aiq * (biq/g2);
                     ri = ai*(biq/g2) + s1*bi*(aiq/g2);
                 }
                 else if(quero == '*'){
@@ -673,10 +668,10 @@ static int ct_passo(int fd, long n, char *porque, size_t lim){
                      * S = -1 dá o direto; S = +1 dá o dual. A segunda componente é a MESMA nas
                      * duas — medido em dual.c §U1: as duas álgebras diferem só no termo bd. */
                     long p1n = ar*br, p1d = aq*bq2, p2n = ai*bi, p2d = aiq*biq;
-                    long g = ct_mdc(p1d, p2d); rq2 = p1d * (p2d/g);
+                    long g = rt_mdc(p1d, p2d); rq2 = p1d * (p2d/g);
                     rr = p1n*(p2d/g) + S*p2n*(p1d/g);
                     long q1n = ar*bi, q1d = aq*biq, q2n = ai*br, q2d = aiq*bq2;
-                    long g2 = ct_mdc(q1d, q2d); riq = q1d * (q2d/g2);
+                    long g2 = rt_mdc(q1d, q2d); riq = q1d * (q2d/g2);
                     ri = q1n*(q2d/g2) + q2n*(q1d/g2);
                 }
                 else if(quero == '/'){
@@ -699,11 +694,11 @@ static int ct_passo(int fd, long n, char *porque, size_t lim){
                         return -1;
                     }
                     long p1n = ar*br, p1d = aq*bq2, p2n = ai*bi, p2d = aiq*biq;
-                    long g = ct_mdc(p1d, p2d); long tn = p1n*(p2d/g) - S*p2n*(p1d/g);
+                    long g = rt_mdc(p1d, p2d); long tn = p1n*(p2d/g) - S*p2n*(p1d/g);
                     long td = p1d * (p2d/g);
                     rr = tn * nd; rq2 = td * nn;
                     long q1n = ai*br, q1d = aiq*bq2, q2n = ar*bi, q2d = aq*biq;
-                    long g2 = ct_mdc(q1d, q2d); long un = q1n*(q2d/g2) - q2n*(q1d/g2);
+                    long g2 = rt_mdc(q1d, q2d); long un = q1n*(q2d/g2) - q2n*(q1d/g2);
                     long ud = q1d * (q2d/g2);
                     ri = un * nd; riq = ud * nn;
                 }
@@ -752,7 +747,7 @@ static int ct_passo(int fd, long n, char *porque, size_t lim){
             }
             else {
                 /* a soma pede denominador comum, e o comum é o produto reduzido pelo mdc */
-                long g = ct_mdc(qa, qb), m1 = qb / g;
+                long g = rt_mdc(qa, qb), m1 = qb / g;
                 if(!ct_mulcabe(qa, m1) || !ct_mulcabe(pa, m1) || !ct_mulcabe(pb, qa/g)){
                     snprintf(porque, lim, "esta soma pede um denominador que não cabe na máquina");
                     return -1;
@@ -1209,7 +1204,7 @@ static int ct_lado(int fd, const char *txt, long xv, long *p, long *q){
 }
 /* a - b em Q */
 static void ct_sub(long ap, long aq, long bp, long bq, long *rp, long *rq){
-    long g = ct_mdc(aq, bq);
+    long g = rt_mdc(aq, bq);
     *rq = aq * (bq / g);
     *rp = ap * (bq / g) - bp * (aq / g);
     ct_reduz(rp, rq);

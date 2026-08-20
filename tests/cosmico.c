@@ -35,9 +35,8 @@
  *   cc -O2 -std=c99 -I lib tests/cosmico.c -o cosmico && ./cosmico
  */
 #include <stdio.h>
+#include "i128.h"
 #include "unidade.h"
-
-typedef __int128 I128;
 
 /* temperaturas em milésimos de kelvin — os decimais escritos, logo racionais */
 #define Tq_m    310150L          /* 37 °C */
@@ -55,9 +54,10 @@ static long mdc(long a, long b){
     while(b){ long t = a % b; a = b; b = t; }
     return a ? a : 1;
 }
+
 static I128 ipow(long b, int e){
-    I128 r = 1;
-    for(int i = 0; i < e; i++) r *= b;
+    I128 r = i128_from_i64(1), bb = i128_from_i64(b);
+    for(int i = 0; i < e; i++) r = i128_mul(r, bb);
     return r;
 }
 
@@ -334,8 +334,8 @@ int main(void){
         /* a lei GEOMÉTRICA: (23/25)^{24} entre 1/8 e 1/7, por corte em __int128.
          * exp(−kt) era o transporte; o mapa discreto e' a lei. */
         I128 p23 = ipow(23, 24), p25 = ipow(25, 24);
-        int queda_lo = (p25 < (I128)8 * p23);           /* (23/25)^24 > 1/8 */
-        int queda_hi = ((I128)7 * p23 < p25);           /* (23/25)^24 < 1/7 */
+        int queda_lo = i128_cmp(p25, i128_mul(i128_from_i64(8), p23)) < 0;
+        int queda_hi = i128_cmp(i128_mul(i128_from_i64(7), p23), p25) < 0;
         printf("     -> as 24 h o gradiente e' (23/25)^24 do inicial, entre 1/8 e 1/7"
                " (corte, sem raiz e sem exp).\n");
         ok("e no limite ele VIRA ambiente: a diferenca tende a zero, e nao a outra coisa."
@@ -373,25 +373,19 @@ int main(void){
 
         /* HEADJACK: Carnot cai com o gradiente. Vivo: 1500/31015. Morto no ar: 0.
          * As 24 h, T = TA + g0·(23/25)^24, e = g / T. A razao vivo/24h fica entre 7 e 8. */
-        I128 n24 = (I128)1500 * p23;
-        I128 d24 = (I128)TA_z * p25 + n24;
-        /* R = ec_vivo / ec_24 = 31015^{-1} d24 / n24 * 1500, com ec_vivo = 1500/31015
-         *     = d24 / (31015 · 23^{24})  wait n24 = 1500·23^{24}, ec24 = n24/d24
-         * R = (1500/31015) / (n24/d24) = 1500 · d24 / (31015 · n24)
-         *   = d24 / (31015 · 23^{24})
-         * 7 < R < 8  ⇔  7·31015·23^{24} < d24 < 8·31015·23^{24} */
-        I128 lo = (I128)7 * (I128)TC_z * p23;
-        I128 hi = (I128)8 * (I128)TC_z * p23;
-        int headjack_cai = (n24 > 0 && lo < d24 && d24 < hi);
+        I128 n24 = i128_mul(i128_from_i64(1500), p23);
+        I128 d24 = i128_add(i128_mul(i128_from_i64(TA_z), p25), n24);
+        I128 lo = i128_mul(i128_from_i64(7 * TC_z), p23);
+        I128 hi = i128_mul(i128_from_i64(8 * TC_z), p23);
+        int headjack_cai = (!i128_is_zero(n24) && i128_cmp(lo, d24) < 0 && i128_cmp(d24, hi) < 0);
         printf("     -> Carnot as 24 h: a razao ao vivo esta' entre 7 e 8"
                " (7.TC.23^24 < d24 < 8.TC.23^24).\n");
         ok("E O HEADJACK PARA: a eficiencia cai com o gradiente, e num corpo frio ela e' zero."
-           " As 24 h a razao ao Carnot vivo esta' entre 7 e 8, enquadrada em __int128 sem"
+           " As 24 h a razao ao Carnot vivo esta' entre 7 e 8, enquadrada em I128 sem"
            " exp. O `< ec_vivo/3` tinha o dobro da folga, e os ppm vinham de avaliar a"
            " exponencial",
            headjack_cai && (TC_z - TA_z) > 0);
         puts("        A maquina nao para por avaria: para porque o corpo parou de a alimentar.");
-        puts("");
         puts("        E o travessia.c ja tinha dito o que se pode decidir aqui: MORTO != VIVO e");
         puts("        decidivel — basta olhar para dT/dt, e o sinal dele decide. A TRAVESSIA e");
         puts("        que nao: o instante em que a seta deixou de ser mantida nao esta na curva,");

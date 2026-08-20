@@ -14,31 +14,17 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
+#include "../lib/i128.h"
+#include "../lib/le_emb.h"   /* EMB_S=10⁴ — fronteira float32→ℤ */
 #include "unidade.h"
 
 #define MAXV 64
 #define MAXD 1024
-#define S    10000L                     /* escala fixa: float32 → ℤ */
 
 static int NV = 0, ND = 0;
 
-typedef long long Z;
-typedef __int128 I128;
-
-static Z f32_bits_para_z(unsigned int u){
-    int sign = (int)(u >> 31);
-    int exp  = (int)((u >> 23) & 0xFF);
-    unsigned mant = u & 0x7FFFFFu;
-    if(exp == 0) return 0;
-    int e = exp - 127;
-    long long sig = (long long)(1u << 23 | mant);
-    long long num = sig;
-    long long den = 1LL << 23;
-    if(e >= 0){ while(e--) num <<= 1; }
-    else { while(e++) den <<= 1; }
-    Z v = (Z)((num * S) / den);
-    return sign ? -v : v;
-}
+typedef int64_t Z;
 
 static const char *acha(const char *pedido){
     if(pedido){ FILE *f = fopen(pedido, "r"); if(f){ fclose(f); return pedido; } }
@@ -61,7 +47,7 @@ static int carrega(const char *cam){
             if(p[0] != '0' || (p[1] != 'x' && p[1] != 'X')) break;
             unsigned long bits = strtoul(p, &fim, 16);
             if(fim == p) break;
-            V[NV][d++] = f32_bits_para_z((unsigned)bits);
+            V[NV][d++] = (long)emb_f32_bits_para_z((unsigned)bits);
             p = fim;
         }
         if(d < 8) continue;
@@ -86,35 +72,35 @@ static Regua regua_de(const long *x, int n){
     return r;
 }
 
-/* cos² ? (cmp_num/cmp_den)²  via produto cruzado em __int128 */
+/* cos² ? (cmp_num/cmp_den)²  via produto cruzado em I128 (i128.h) */
 static int cos_gt_vecs(const long *a, const long *b, int n, long cmp_num, long cmp_den){
-    I128 dot = 0, na = 0, nb = 0;
+    I128 dot = i128_zero(), na = i128_zero(), nb = i128_zero();
     for(int i = 0; i < n; i++){
-        dot += (I128)a[i] * b[i];
-        na  += (I128)a[i] * a[i];
-        nb  += (I128)b[i] * b[i];
+        dot = i128_add(dot, i128_smul(a[i], b[i]));
+        na  = i128_add(na,  i128_smul(a[i], a[i]));
+        nb  = i128_add(nb,  i128_smul(b[i], b[i]));
     }
-    if(na <= 0 || nb <= 0) return 0;
-    I128 lhs = dot * dot * (I128)cmp_den * cmp_den;
-    I128 rhs = (I128)cmp_num * cmp_num * na * nb;
-    return lhs > rhs;
+    if(i128_cmp(na, i128_zero()) <= 0 || i128_cmp(nb, i128_zero()) <= 0) return 0;
+    I128 lhs = i128_mul(i128_mul(dot, dot), i128_smul(cmp_den, cmp_den));
+    I128 rhs = i128_mul(i128_smul(cmp_num, cmp_num), i128_mul(na, nb));
+    return i128_cmp(lhs, rhs) > 0;
 }
 static int cos_lt_vecs(const long *a, const long *b, int n, long cmp_num, long cmp_den){
-    I128 dot = 0, na = 0, nb = 0;
+    I128 dot = i128_zero(), na = i128_zero(), nb = i128_zero();
     for(int i = 0; i < n; i++){
-        dot += (I128)a[i] * b[i];
-        na  += (I128)a[i] * a[i];
-        nb  += (I128)b[i] * b[i];
+        dot = i128_add(dot, i128_smul(a[i], b[i]));
+        na  = i128_add(na,  i128_smul(a[i], a[i]));
+        nb  = i128_add(nb,  i128_smul(b[i], b[i]));
     }
-    if(na <= 0 || nb <= 0) return 1;
-    I128 lhs = dot * dot * (I128)cmp_den * cmp_den;
-    I128 rhs = (I128)cmp_num * cmp_num * na * nb;
-    return lhs < rhs;
+    if(i128_cmp(na, i128_zero()) <= 0 || i128_cmp(nb, i128_zero()) <= 0) return 1;
+    I128 lhs = i128_mul(i128_mul(dot, dot), i128_smul(cmp_den, cmp_den));
+    I128 rhs = i128_mul(i128_smul(cmp_num, cmp_num), i128_mul(na, nb));
+    return i128_cmp(lhs, rhs) < 0;
 }
 
-static long isqrt_ll(long long n){
+static long isqrt_ll(int64_t n){
     if(n <= 0) return 0;
-    long long x = n, y = (x + 1) >> 1;
+    int64_t x = n, y = (x + 1) >> 1;
     while(y < x){ x = y; y = (x + n / x) >> 1; }
     return (long)x;
 }
@@ -124,33 +110,33 @@ static void secao_V1(const char *cam){
     printf("\n§V1  O DOADOR REAL — o que chegou\n\n");
 
     long mn = V[0][0], mx = V[0][0];
-    long long soma = 0, soma2 = 0;
+    int64_t soma = 0, soma2 = 0;
     long n = 0;
     for(int i = 0; i < NV; i++) for(int d = 0; d < ND; d++){
         long x = V[i][d];
         if(x < mn) mn = x; if(x > mx) mx = x;
-        soma += x; soma2 += (long long)x * x; n++;
+        soma += x; soma2 += (int64_t)x * x; n++;
     }
     long media = (long)(soma / n);
-    long long var = soma2 / n - (long long)media * media;
+    int64_t var = soma2 / n - (int64_t)media * media;
     long dp = isqrt_ll(var > 0 ? var : 0);
     printf("     %s\n", cam);
     printf("        vetores      %d\n", NV);
     printf("        dimensões    %d\n", ND);
-    printf("        intervalo    [%ld , %ld]   (×1/%ld)\n", mn, mx, S);
+    printf("        intervalo    [%ld , %ld]   (×1/%ld)\n", mn, mx, EMB_S);
     printf("        média        %ld      desvio %ld\n", media, dp);
 
     ok("chegaram vetores do doador — sem isto não há transfusão a medir", NV >= 8);
     ok("e têm 768 dimensões, que é o espaço do nomic-embed-text", ND == 768);
     ok("os valores não são todos iguais — o doador não devolveu constante",
-       mx - mn > S / 1000);
+       mx - mn > EMB_S / 1000);
 
     int iguais = 0;
     for(int i = 0; i < NV; i++) for(int j = i + 1; j < NV; j++){
-        long long d2 = 0;
+        int64_t d2 = 0;
         for(int k = 0; k < ND; k++){
             long e = V[i][k] - V[j][k];
-            d2 += (long long)e * e;
+            d2 += (int64_t)e * e;
         }
         if(d2 == 0) iguais++;
     }
@@ -164,14 +150,14 @@ static void secao_V2(void){
     printf("\n§V2  A QUANTIZAÇÃO: a porta do banco, e a escala MEDIDA\n\n");
 
     printf("        escala        erro relativo médio (×10⁶)     |maior inteiro|\n");
-    long escalas[] = { 10, 100, 1000, 10000, 100000, 1000000 };
+    long escalas[] = { 10, 100, 1000, EMB_S, 100000, 1000000 };
     long erro_em[6]; long maior_em[6];
     for(int e = 0; e < 6; e++){
-        long long soma = 0; long maior = 0, cont = 0;
+        int64_t soma = 0; long maior = 0, cont = 0;
         for(int i = 0; i < NV; i++) for(int d = 0; d < ND; d++){
-            /* V já está ×S; re-escala para escalas[e] e volta */
-            long q = (V[i][d] * escalas[e] + (V[i][d] >= 0 ? S/2 : -(S/2))) / S;
-            long volta = (q * S + (q >= 0 ? escalas[e]/2 : -(escalas[e]/2))) / escalas[e];
+            /* V já está ×EMB_S; re-escala para escalas[e] e volta */
+            long q = (V[i][d] * escalas[e] + (V[i][d] >= 0 ? EMB_S/2 : -(EMB_S/2))) / EMB_S;
+            long volta = (q * EMB_S + (q >= 0 ? escalas[e]/2 : -(escalas[e]/2))) / escalas[e];
             long den = labs(V[i][d]) > 0 ? labs(V[i][d]) : 1;
             soma += labs(volta - V[i][d]) * 1000000L / den;
             if(labs(q) > maior) maior = labs(q);
@@ -188,8 +174,8 @@ static void secao_V2(void){
     ok("e o maior inteiro cabe na palavra do banco em todas as escalas testadas",
        maior_em[5] < (1L << 62));
 
-    printf("     escolhida: 10000 — o erro é %ld×10⁻⁶ e o inteiro fica em %ld\n",
-           erro_em[3], maior_em[3]);
+    printf("     escolhida: %ld — o erro é %ld×10⁻⁶ e o inteiro fica em %ld\n",
+           EMB_S, erro_em[3], maior_em[3]);
 
     conclui("a escala não se escolheu: varreu-se, e o número saiu da varredura.");
 }
@@ -197,13 +183,13 @@ static void secao_V2(void){
 /* ================================================================================ */
 static void quantiza(long escala){
     for(int d = 0; d < ND; d++) for(int i = 0; i < NV; i++)
-        QUANT[d][i] = (V[i][d] * escala + (V[i][d] >= 0 ? S/2 : -(S/2))) / S;
+        QUANT[d][i] = (V[i][d] * escala + (V[i][d] >= 0 ? EMB_S/2 : -(EMB_S/2))) / EMB_S;
 }
 
 static void secao_V3(void){
     printf("\n§V3  QUANTO FECHA — e o doador não tinha por que fechar\n\n");
 
-    quantiza(10000);
+    quantiza(EMB_S);
     int fecham = 0, com_previsao = 0;
     long prev_ok = 0, prev_tot = 0;
     for(int d = 0; d < ND; d++){
@@ -239,7 +225,7 @@ static void secao_V3(void){
 static void secao_V4(void){
     printf("\n§V4  O QUE SE RECUPERA — o cosseno entre o original e o reconstruído\n\n");
 
-    quantiza(10000);
+    quantiza(EMB_S);
     int por_regua = 0, por_valor = 0;
     for(int d = 0; d < ND; d++){
         Regua r = regua_de(QUANT[d], 4);
@@ -277,7 +263,7 @@ static void secao_V4(void){
     int pior2_cai = 0;
     for(int i = 0; i < NV; i++){
         long rec[MAXD];
-        for(int d = 0; d < ND; d++) rec[d] = QUANT[d][i] * (S / 2);  /* escala 2 → ×S/2 */
+        for(int d = 0; d < ND; d++) rec[d] = QUANT[d][i] * (EMB_S / 2);  /* escala 2 → ×EMB_S/2 */
         if(cos_lt_vecs(V[i], rec, ND, 999, 1000)){ pior2_cai = 1; break; }
     }
     printf("        com escala 2 (grosseira), o pior cosseno cai abaixo de 0,999? %s\n",
@@ -291,7 +277,7 @@ static void secao_V4(void){
 static void secao_V6(void){
     printf("\n§V6  A HIPÓTESE CERTA: a recorrência ENTRE dimensões, não ao longo das frases\n\n");
 
-    quantiza(10000);
+    quantiza(EMB_S);
     long janelas = 0, fecharam = 0, previram = 0;
     for(int i = 0; i < NV; i++){
         for(int d = 0; d + 4 < ND; d++){
@@ -354,7 +340,7 @@ static void secao_V6(void){
 static void secao_V5(void){
     printf("\n§V5  O CUSTO REAL, em bytes\n\n");
 
-    quantiza(10000);
+    quantiza(EMB_S);
     long por_regua = 0;
     for(int d = 0; d < ND; d++) if(regua_de(QUANT[d], 4).fechou) por_regua++;
     long por_valor = ND - por_regua;

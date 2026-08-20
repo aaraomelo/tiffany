@@ -2,7 +2,7 @@
  *
  *     E: y² = x³ + ax + b,   com  4a³ + 27b² ≠ 0   (não singular)
  *
- * O `eval.txt` diz porque é que este andar é o teste certo: «reta → interseção →
+ *  ordem do coordenador diz porque é que este andar é o teste certo: «reta → interseção →
  * reflexão → novo ponto → repetição», e sobretudo esta frase, que já é a língua da casa:
  *
  *     «a FIBRA determina qual operação existe»

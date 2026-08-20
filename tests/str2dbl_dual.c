@@ -12,6 +12,7 @@
  *
  *   cc -O2 -std=c99 -Wall -I../lib str2dbl_dual.c -o str2dbl_dual && ./str2dbl_dual
  */
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,7 +21,7 @@
 
 /* dois longs são os MESMOS 64 bits IEEE? */
 static int mesmos_bits(long a, long b){
-    unsigned long long x, y; memcpy(&x, &a, 8); memcpy(&y, &b, 8);
+    uint64_t x, y; memcpy(&x, &a, 8); memcpy(&y, &b, 8);
     return x == y;
 }
 /* strtod da libc, mas devolve os bits — a referência da trava */

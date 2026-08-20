@@ -52,24 +52,24 @@ int main(void){
          * termos, reordenados. Nao ha nada a arredondar. A versao anterior usava vetores de
          * double e comparava com 1e-12 — media o arredondamento de uma identidade exata.
          * Em inteiros ela e igualdade, e varre-se uma familia em vez de um caso. */
-        long long casos = 0, iguais = 0;
+        long casos = 0, iguais = 0;
         for(int semente = 0; semente < 500; semente++){
-            long long f[8], c[8];
+            long f[8], c[8];
             int idx[8];
             for(int i = 0; i < 8; i++){
                 f[i]   = ((semente*7 + i*13) % 21) - 10;
                 c[i]   = ((semente*11 + i*5) % 19) - 9;
                 idx[i] = (semente*3 + i*i) % 8;
             }
-            long long Af[8], Ac[8];
+            long Af[8], Ac[8];
             for(int i = 0; i < 8; i++){ Af[i] = f[idx[i]]; Ac[i] = 0; }
             for(int i = 0; i < 8; i++) Ac[idx[i]] += c[i];
-            long long e1 = 0, e2 = 0;
+            long e1 = 0, e2 = 0;
             for(int i = 0; i < 8; i++){ e1 += Af[i]*c[i]; e2 += f[i]*Ac[i]; }
             casos++;
             if(e1 == e2) iguais++;
         }
-        printf("     -> %lld pares (f,c,idx) em Z^8, com <Af,c> == <f,A'c> EXATO: %lld\n",
+        printf("     -> %ld pares (f,c,idx) em Z^8, com <Af,c> == <f,A'c> EXATO: %ld\n",
                casos, iguais);
         ok("LER e ESCREVER sao adjuntos: <Af,c> = <f,A'c>, IGUALDADE em inteiros",
            iguais == casos && casos >= 500);

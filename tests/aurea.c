@@ -35,7 +35,7 @@
 #include "unidade.h"
 #include "reta.h"
 
-typedef long long L;
+typedef long L;
 
 /* (a,b) representa a + b·φ, com φ² = φ+1. */
 static void zphi_mul(L a, L b, L c, L d, L *sa, L *sb){
@@ -61,9 +61,9 @@ int main(void){
         }
         const L m_ouro = 1;
         bd[0] = 1; bd[1] = -m_ouro; bd[2] = -1;
-        printf("      o polinomio de f'=f^-1:  %lldx^2 %+lldx %+lld   (de b−1 = 1/b)\n",
+        printf("      o polinomio de f'=f^-1:  %ldx^2 %+ldx %+ld   (de b−1 = 1/b)\n",
                cf[0], cf[1], cf[2]);
-        printf("      a borda com m=%lld:         %lldx^2 %+lldx %+lld   (de x² = mx+1)\n",
+        printf("      a borda com m=%ld:         %ldx^2 %+ldx %+ld   (de x² = mx+1)\n",
                m_ouro, bd[0], bd[1], bd[2]);
         ok("OS COEFICIENTES COINCIDEM — A MESMA EQUACAO, EM INTEIROS, e agora os dois"
            " lados DERIVAM: o de f'=f^{-1} sai da equacao dos expoentes b−1 = 1/b"
@@ -89,7 +89,7 @@ int main(void){
             rt_zd_mul(1, -1, 1, 1, 5, &ea, &eb);
             long norma2phi = rt_zd_norma(1, 1, 5);
             L expoente = ea / 4;
-            printf("      o expoente (1-phi)phi reduz-se por phi^2 = phi+1 a %lld — INTEIRO,\n"
+            printf("      o expoente (1-phi)phi reduz-se por phi^2 = phi+1 a %ld — INTEIRO,\n"
                    "      e a reducao ACONTECE: 2(1-phi).2phi = %ld + %ld raiz5, e a norma de\n"
                    "      2phi da' %ld — o mesmo -4, donde o expoente e' -4/4\n",
                    expoente, ea, eb, norma2phi);
@@ -114,9 +114,9 @@ int main(void){
         zphi_mul(-1, 1, -1, 1, &q1a, &q1b);          /* (φ−1)² */
         zphi_mul(0, 1,  0, 1, &s2a, &s2b);           /* φ²  quer 1+φ */
         printf("      em Z[phi], sem uma casa decimal:\n");
-        printf("        phi*(phi-1)  = %lld %+lld*phi     (queria 1 + 0*phi)\n", p1a, p1b);
-        printf("        (phi-1)^2    = %lld %+lld*phi     (queria 2 - 1*phi)\n", q1a, q1b);
-        printf("        phi^2        = %lld %+lld*phi     (queria 1 + 1*phi)\n", s2a, s2b);
+        printf("        phi*(phi-1)  = %ld %+ld*phi     (queria 1 + 0*phi)\n", p1a, p1b);
+        printf("        (phi-1)^2    = %ld %+ld*phi     (queria 2 - 1*phi)\n", q1a, q1b);
+        printf("        phi^2        = %ld %+ld*phi     (queria 1 + 1*phi)\n", s2a, s2b);
         ok("f' = f^{-1} reduz-se a phi*(phi-1) = 1 em Z[phi] — expoente, residuo 0 exato."
            " pow/1e-14 mediam IEEE de sqrt(5); a conta e' a borda",
            p1a==1 && p1b==0 && s2a==1 && s2b==1);
@@ -175,7 +175,7 @@ int main(void){
             ks += 1;
             if(k%2==0 && t > 0) pares_pos += 1;
             if(k%2==1 && t < 0) impares_neg += 1;
-            if(k <= 6) printf("      %-4d %+-16lld  %s\n", k, t, k%2==0?"+ (par)":"- (impar)");
+            if(k <= 6) printf("      %-4d %+-16ld  %s\n", k, t, k%2==0?"+ (par)":"- (impar)");
         }
         printf("      termos: %d   pares positivos: %d   ímpares negativos: %d\n",
                ks, pares_pos, impares_neg);
@@ -266,7 +266,7 @@ int main(void){
             /* φ^n = F_n φ + F_{n−1} em ℤ[φ]: parte de 1 e multiplica por φ a cada n */
             L qa, qb; zphi_mul(pa, pb, 0, 1, &qa, &qb); pa = qa; pb = qb;
             if(pa == F[n-1] && pb == F[n]) pot_ok += 1;
-            if(n <= 4) printf("      %d    [[%lld,%lld],[%lld,%lld]]%*s [[%lld,%lld],[%lld,%lld]]\n",
+            if(n <= 4) printf("      %d    [[%ld,%ld],[%ld,%ld]]%*s [[%ld,%ld],[%ld,%ld]]\n",
                             n, a00, a01, a10, a11, 18, "", F[n-1], F[n], F[n], F[n+1]);
         }
         printf("      n testados: %d   com M^n = [[F_{n-1},F_n],[F_n,F_{n+1}]]: %d\n", ns, mat_ok);
@@ -275,7 +275,7 @@ int main(void){
            " F_n+F_{n-1}=F_{n+1} era a definicao relida; agora φ^n em Z[phi] contra F",
            pot_ok==ns);
 
-        printf("      M = [[0,1],[1,1]]:  det = %lld   traco = %lld   ⟹  x^2 - x - 1 = 0\n",
+        printf("      M = [[0,1],[1,1]]:  det = %ld   traco = %ld   ⟹  x^2 - x - 1 = 0\n",
                Mdet, Mtr);
         ok("det = -1 e traco = 1, logo os autovalores sao raizes de x^2 - x - 1"
            " e o produto e det M = -1 por Vieta. Sai de M^1, nao de 0*1-1*1 escrito a mao",

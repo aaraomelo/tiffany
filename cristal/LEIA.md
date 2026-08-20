@@ -1,6 +1,6 @@
 # O cristal recuperado
 
-A arqueologia do eval.txt (13/08): localizar → inventariar → proveniência →
+A arqueologia do coordenador (13/08): localizar → inventariar → proveniência →
 extrair → gerar LaTeX → medir a volta. **A regra de ouro: não converter o
 corpus antes de conseguir reconstruí-lo.**
 

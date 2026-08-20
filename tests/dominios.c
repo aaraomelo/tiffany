@@ -16,13 +16,15 @@
  *
  *   cc -O2 -std=c99 -I../lib dominios.c -o dominios && ./dominios
  */
+#include <stdint.h>
+#include <inttypes.h>
 #include <stdio.h>
+#include "i128.h"
 #include <stdlib.h>
 #include <string.h>
 #include "reta.h"
 
-typedef long long LL;
-typedef __int128 I128;
+typedef int64_t LL;
 
 typedef struct {
     const char *nome, *equacao, *inercia, *perda, *rigidez;
@@ -96,16 +98,18 @@ static void dilata(const long *v, long *o, int n){
 /* Euler em ℤ: y += (hn/hd) v,  v += (hn/hd) (-(k/m) y - (c/m) v). y(0)=1 em escala AMP. */
 static LL cresc(long m, long c, long k, long hn, long hd, int n){
     LL Y = AMP, V = 0, maxa = AMP;
-    I128 cap = (I128)AMP * 1000000000LL;
-    if(hd == 0 || m == 0) return (LL)cap;
+    I128 cap = i128_smul(AMP, 1000000000LL);
+    if(hd == 0 || m == 0) return (LL)i128_to_i64(cap);
     for(int i = 0; i < n; i++){
-        I128 nY = (I128)Y * hd + (I128)hn * V;
-        I128 nV = (I128)V * hd * m + (I128)hn * (-(I128)k * Y - (I128)c * V);
-        Y = (LL)(nY / hd);
-        V = (LL)(nV / ((I128)hd * m));
+        I128 nY = i128_add(i128_smul_i128(i128_from_i64(Y), hd), i128_smul_i128(i128_from_i64(V), hn));
+        I128 nV = i128_add(
+            i128_smul_i128(i128_smul_i128(i128_from_i64(V), hd), m),
+            i128_smul_i128(i128_neg(i128_add(i128_smul(k, Y), i128_smul(c, V))), hn));
+        Y = (LL)i128_to_i64(i128_div(nY, i128_from_i64(hd)));
+        V = (LL)i128_to_i64(i128_div(nV, i128_smul(hd, m)));
         LL a = Y >= 0 ? Y : -Y;
         if(a > maxa) maxa = a;
-        if((I128)a > cap) return a;
+        if(i128_cmp(i128_from_i64(a), cap) > 0) return a;
     }
     return maxa;
 }
@@ -359,7 +363,7 @@ int main(void){
            melhor == NDOM);
         ok("e REFINAR nunca piora, nos cinco: e a lei do metodo, nao um numero meu",
            refina == NDOM);
-        printf("     -> pior crescimento: %lld (h=m/(10.piso w)) contra %lld (h=1/50).\n",
+        printf("     -> pior crescimento: %" PRId64 " (h=m/(10.piso w)) contra %" PRId64 " (h=1/50).\n",
                pior_esc, pior_fix);
         puts("        Com h fixo as cinco figuras morriam em 'Dimension too large'; com h");
         puts("        escalado as cinco compilam. Era a ESCALA, nao a logica.");

@@ -28,6 +28,7 @@
  *
  *   cc -O2 -std=c99 -Wall -I../lib pascal.c -o pascal
  */
+#include <stdint.h>
 #include <stdio.h>
 #include "unidade.h"
 
@@ -185,7 +186,7 @@ int main(void){
                 /* a fraccao DESCE (a faixa fixa perde massa relativa a' medida que a
                  * distribuicao alarga) — o que importa e' que ela desce MONOTONA, que e'
                  * a espiral a abrir de forma ordenada e nao ao acaso */
-                if((__int128)dentro * ant_den > (__int128)ant_num * den) mau++;
+                if((int64_t)dentro * ant_den > (int64_t)ant_num * den) mau++;
             }
             ant_num = dentro; ant_den = den;
         }

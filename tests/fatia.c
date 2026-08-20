@@ -20,13 +20,14 @@
  *
  *   cc -O2 -std=c99 fatia.c -o fatia && ./fatia
  */
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include "unidade.h"
 
 #define W 32                      /* bits do número */
 #define P 64                      /* números em paralelo: a largura da palavra */
-typedef unsigned long long u64;
+typedef uint64_t u64;
 
 /* Um número fatiado: s[i] guarda o BIT i dos 64 números, um por posição da palavra. */
 typedef struct { u64 s[W]; } Fatia;

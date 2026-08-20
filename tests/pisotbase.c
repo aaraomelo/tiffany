@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include "unidade.h"
 
-typedef long long L;
+typedef long L;
 
 /* (A,B) significa A + B·σ, com σ² = nσ + 1 */
 static void zsig_mul(long n, long A, long B, long C, long D, long *RA, long *RB){
@@ -35,7 +35,7 @@ int main(void){
             L bd[3] = { 1, -n, -1 };
             ns++;
             if(cf[0]==bd[0] && cf[1]==bd[1] && cf[2]==bd[2]) bate++;
-            if(n<=3) printf("      %-3lld x^2 %+lld x %+lld            x^2 %+lld x %+lld          sim       %s\n",
+            if(n<=3) printf("      %-3ld x^2 %+ld x %+ld            x^2 %+ld x %+ld          sim       %s\n",
                             n, cf[1], cf[2], bd[1], bd[2], nome[n]);
         }
         printf("      n testados: %d   com o polinomio a coincidir com a borda: %d\n", ns, bate);
@@ -111,9 +111,9 @@ int main(void){
             if(!cons) sem11++;
             if(soma==n) exatos++;
             if(n==10||n==33||n==100){
-                printf("      %-5lld ", n);
-                for(int i=0;i<ni;i++) printf("%lld ", F[idx[i]]);
-                printf("%*s %-7lld %s\n", (int)(24-3*ni), "", soma, cons?"SIM":"nao");
+                printf("      %-5ld ", n);
+                for(int i=0;i<ni;i++) printf("%ld ", F[idx[i]]);
+                printf("%*s %-7ld %s\n", (int)(24-3*ni), "", soma, cons?"SIM":"nao");
             }
         }
         printf("      inteiros 1..200: %d   sem dois consecutivos: %d   com a soma exata: %d\n",
@@ -136,7 +136,7 @@ int main(void){
             for(int k=2;k<16;k++) if(t[k] != m*t[k-1]+t[k-2]) rec_ok=0;
             int grande = (t[5] >= 3 && t[12] >= 3);
             if(rec_ok && grande) lei++;
-            if(m<=4) printf("      %-4lld %-5lld %-10lld %-14s %s\n",
+            if(m<=4) printf("      %-4ld %-5ld %-10ld %-14s %s\n",
                             m, t[5], t[12], rec_ok?"sim":"NAO", grande?"sim":"nao");
         }
         printf("      metais: %d   com t_n inteiro e >= 3: %d\n", metais, lei);
@@ -161,7 +161,7 @@ int main(void){
             if(fecha) todos++;
             if(m==1 && fecha) ouro_ok=1;          /* d(1)=11 */
             if(m==2 && fecha) prata_ok=1;         /* d(1)=21 */
-            printf("      %-4lld %lld1        %s\n", m, m, fecha ? "sim" : "NAO");
+            printf("      %-4ld %ld1        %s\n", m, m, fecha ? "sim" : "NAO");
         }
         ok("d(1) = 11 no ouro — e por isso a palavra proibida e '11'", ouro_ok);
         ok("e a prata tem d(1)=21 (digitos {0,1,2}): o 20 era floor de 0,999 em double",
@@ -180,7 +180,7 @@ int main(void){
         }
         L n_prod = 7 - 6 + 1;            /* θθ' −(θ+θ') +1 */
         printf("      metalicos m=1..8: (σ−1)(σ'−1)=−m < 0 em %d — conjugado < 1\n", metal_conj);
-        printf("      x^2−6x+7:         (θ−1)(θ'−1)=%lld > 0 — AMBOS > 1, nao e Pisot\n", n_prod);
+        printf("      x^2−6x+7:         (θ−1)(θ'−1)=%ld > 0 — AMBOS > 1, nao e Pisot\n", n_prod);
         ok("um NAO-Pisot tem conjugado ≥ 1 — ||θ^n|| NAO vai a 0, e a base vaza."
            " Sem π, sem pow: o criterio e o sinal de (θ−1)(θ'−1) em Z",
            metal_conj==8 && n_prod > 0);

@@ -1,7 +1,7 @@
 #!/bin/bash
 # gabarito_arvore.sh — sobe a complexidade explorando a árvore do ollama.
 #
-# eval.txt: cotidiano → contexto → intenção → diálogo mais complexo → (teoria depois)
+# coordenador: cotidiano → contexto → intenção → diálogo mais complexo → (teoria depois)
 # Entra pelo assunto banal e ramifica: follow-ups, preferências, planos, empatia.
 # Continua SEM Dual Sort / Maestro / papers.
 #

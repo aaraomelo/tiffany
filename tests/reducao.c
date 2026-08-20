@@ -12,8 +12,10 @@
  * §D5  o custo: o refutador varre TODOS os casos e não tem um ramo
  */
 #include <stdio.h>
+#include "dual16.h"
 #include "dual32.h"
 #include "racionais.h"
+#include "reta.h"
 #include "reducao.h"
 #include "unidade.h"
 
@@ -181,6 +183,33 @@ int main(void){
            " que permite trazer o desmentido de volta. Provar continua a ser trabalho de"
            " ℚ; DESMENTIR passa a ser trabalho de 𝔽₁₂₇",
            sat == 0 && cas == 16128);
+    }
+
+    /* ═══ §D6 A PONTE LÊ E₁₆: int16 mod 127, sem widen silencioso ═══════════ */
+    printf("\n§D6 A redução lê p e q em E₁₆ — mod 127 directo.\n\n");
+    {
+        long mal = 0, cas = 0, col = 0;
+        for(int16_t p = -126; p <= 126; p++) for(int16_t q = 1; q <= 126; q++){
+            Qz x = { p, q };
+            Pr r;
+            cas++;
+            if(!rd_de_qz(x, &r)){ mal++; continue; }
+            int pm = (p % (int)SR_P + (int)SR_P) % (int)SR_P;
+            int qm = (q % (int)SR_P + (int)SR_P) % (int)SR_P;
+            if(qm == 0){ if(!sr_e_inf(r)) mal++; continue; }
+            /* forma afim [pm·qm⁻¹ : 1] quando qm ≠ 0 */
+            long inv = rt_inv_mod((long)qm, (long)SR_P);
+            Pr esp = sr_pt((Fp)((long)pm * inv % (long)SR_P), (Fp)1);
+            if(!sr_igual(r, esp)) mal++;
+            /* colisão mod 127: distintos em ℚ podem coincidir — contar à parte */
+            for(int16_t p2 = p + 1; p2 <= p + 127 && p2 <= 126; p2 += 127)
+                if(rd_de_qz((Qz){p2, q}, &r) && sr_igual(r, esp)) col++;
+        }
+        printf("      %ld pares (p,q) int16: %ld falhas; colisões mod 127 contadas %ld\n",
+               cas, mal, col);
+        ok("A REDUÇÃO LÊ E₁₆ SEM WIDEN: p mod 127 e q mod 127 saem dos int16 directamente,"
+           " e a forma afim bate sr_pt — a ponte herda o envelope da migração",
+           mal == 0 && cas > 15000);
     }
 
     printf("\n=== %ld asserções, %ld falhas, %ld recusas da ponte ===\n",

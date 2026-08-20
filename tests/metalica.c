@@ -41,7 +41,7 @@
 #include <stdlib.h>
 #include "../lib/unidade.h"
 
-typedef long long L;
+typedef long L;
 
 /* ─── o anel A_n = Z[sigma], sigma^2 = n·sigma + 1 ────────────────────────────────────
  * Um elemento e' p + q·sigma com p,q em Z. A reducao usa a borda e mais nada; nao ha'
@@ -214,7 +214,7 @@ int main(void){
         while(r*r < d) r++;                      /* raiz inteira por busca, sem sqrt */
         if(r*r == d){ quadrados++; if(onde < 0) onde = n; }
     }
-    printf("      Delta = n^2+4 e' quadrado perfeito em %d dos 100001 casos (n = %lld)\n", quadrados, onde);
+    printf("      Delta = n^2+4 e' quadrado perfeito em %d dos 100001 casos (n = %ld)\n", quadrados, onde);
     ok("n = 0 e' o UNICO n em [0,100000] com Delta quadrado: o unico onde o anel decompoe",
        quadrados == 1 && onde == 0);
 

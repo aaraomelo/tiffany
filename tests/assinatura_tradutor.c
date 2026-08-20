@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include "unidade.h"
 
-typedef long long L;
+typedef long L;
 
 /* o eixo da operação medida(): os três estados do trial, como em tex.c */
 #define EIXO_ESCALA   1
@@ -75,7 +75,7 @@ int main(void){
         erro_inteiro += imposto(+1);                /* o inversor casa: s=+1, imposto 0, cada passo */
         erro_double  += imposto(0);                 /* o "double": fora do eixo, imposto 1, propaga */
     }
-    printf("§A3  em %lld passos: erro do inteiro (inversor, s=±1) = %lld ; erro do double (s=0) = %lld\n\n",
+    printf("§A3  em %ld passos: erro do inteiro (inversor, s=±1) = %ld ; erro do double (s=0) = %ld\n\n",
            N, erro_inteiro, erro_double);
     ok("§A3 o DOUBLE é o imposto que PROPAGA: realizado pelo inversor (inteiro, s=±1) o imposto é 0 e a"
        " soma é exacta (erro 0 em 500 passos); um double (fora do eixo, s=0) tem imposto 1 por passo e"

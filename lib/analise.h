@@ -1,6 +1,6 @@
 /* analise.h — ANÁLISE REAL: só o que faltava, e as CINCO VIAS SEM ÁRBITRO.
  *
- * O `eval.txt` traz 25 problemas e diz o que este andar é: «a Análise Real não inventa
+ *  ordem do coordenador traz 25 problemas e diz o que este andar é: «a Análise Real não inventa
  * outro andar — ela finalmente explica, com toda a maquinaria formal, POR QUE O ANDAR ℝ
  * PRECISAVA DE EXISTIR».
  *
@@ -35,8 +35,8 @@
 static long an_estouros = 0;
 
 static Qz an_abs(Qz x){ return x.p < 0 ? qz_oposto(x) : x; }
-static int an_menor(Qz a, Qz b){ return a.p * b.q < b.p * a.q; }
-static int an_menor_ig(Qz a, Qz b){ return a.p * b.q <= b.p * a.q; }
+static int an_menor(Qz a, Qz b){ return qz_menor(a, b); }
+static int an_menor_ig(Qz a, Qz b){ return qz_menor(a, b) || qz_igual(a, b); }
 
 /* ── COMPARAR x² COM UM INTEIRO SEM ELEVAR AO QUADRADO DENTRO DO TIPO ──────────
  * As cinco vias comparam sempre a mesma coisa: x² contra 2. Mas `qz_mult(x,x)` faz p·p
@@ -246,9 +246,18 @@ static int an_delta(Qz a, Qz eps, Qz *delta){
     return 1;
 }
 static int an_delta_serve(Qz a, Qz delta, Qz eps){
-    Qz x = qz_soma(a, delta);                       /* o pior ponto da bola */
-    Qz d = an_abs(qz_soma(qz_mult(x,x), qz_oposto(qz_mult(a,a))));
-    return an_menor_ig(d, eps);
+    if(eps.p <= 0 || eps.q <= 0) return 0;
+    long ap = a.p < 0 ? -a.p : a.p, dp = delta.p < 0 ? -delta.p : delta.p;
+    I128 dois_ad = i128_smul((int64_t)(2 * ap), (int64_t)dp);
+    dois_ad = i128_smul_i128(dois_ad, (int64_t)delta.q);
+    I128 dd = i128_smul((int64_t)dp, (int64_t)dp);
+    dd = i128_smul_i128(dd, (int64_t)a.q);
+    I128 soma = i128_add(dois_ad, dd);
+    I128 esq = i128_smul_i128(soma, (int64_t)eps.q);
+    I128 dir = i128_smul((int64_t)a.q, (int64_t)delta.q);
+    dir = i128_smul_i128(dir, (int64_t)delta.q);
+    dir = i128_smul_i128(dir, (int64_t)eps.p);
+    return i128_cmp(esq, dir) <= 0;
 }
 /* a forma SEQUENCIAL: xₙ → a implica f(xₙ) → f(a), e as duas distâncias exibem-se */
 static void an_sequencial(Cf f, Qz a, long n, Qz *dx, Qz *df){

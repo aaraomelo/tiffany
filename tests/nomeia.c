@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef long long L;
+typedef long L;
 #define KMAX 96
 
 static L mdc(L a, L b){ if(a<0)a=-a; if(b<0)b=-b; while(b){ L t=a%b; a=b; b=t; } return a; }
@@ -143,11 +143,11 @@ int main(int argc, char **argv){
         if(q < 0){ p = -p; q = -q; }
         L a[KMAX]; int k = nome(p,q,a);
         if(k >= KMAX){ fprintf(stderr, "nomeia: palavra maior que %d\n", KMAX); return 3; }
-        printf("[%lld", a[0]);
-        for(int i=1;i<k;i++) printf("%s%lld", i==1?";":",", a[i]);
+        printf("[%ld", a[0]);
+        for(int i=1;i<k;i++) printf("%s%ld", i==1?";":",", a[i]);
         printf("]\n");
         /* a cabeça é Z, o resto é N* — e é a única letra que pode ser <= 0 */
-        if(k > 1) printf("  cabeça em Z: %lld    palavra em N*: %d dígitos, todos >= 1\n", a[0], k-1);
+        if(k > 1) printf("  cabeça em Z: %ld    palavra em N*: %d dígitos, todos >= 1\n", a[0], k-1);
         return 0;
     }
 
@@ -158,7 +158,7 @@ int main(int argc, char **argv){
         for(int i=0;i<k;i++){
             a[i] = atoll(argv[i+2]);
             if(i > 0 && a[i] < 1){
-                fprintf(stderr, "nomeia: a_%d = %lld — os dígitos a partir do 1.o têm de ser >= 1,\n"
+                fprintf(stderr, "nomeia: a_%d = %ld — os dígitos a partir do 1.o têm de ser >= 1,\n"
                                 "        senão a palavra deixa de ser única: [a,0,b] = [a+b].\n", i, a[i]);
                 return 2;
             }
@@ -170,8 +170,8 @@ int main(int argc, char **argv){
             fprintf(stderr, "nomeia: a palavra acaba em 1 — não é a forma canónica.\n"
                             "        [.., a, 1] = [.., a+1], e o mesmo racional teria duas palavras.\n"
                             "        a canónica é: ");
-            for(int i=0;i<k-2;i++) fprintf(stderr, "%lld ", a[i]);
-            fprintf(stderr, "%lld\n", a[k-2]+1);
+            for(int i=0;i<k-2;i++) fprintf(stderr, "%ld ", a[i]);
+            fprintf(stderr, "%ld\n", a[k-2]+1);
             return 2;
         }
         L m00,m01,m10,m11; mob(a,k,&m00,&m01,&m10,&m11);
@@ -179,10 +179,10 @@ int main(int argc, char **argv){
         if(q == 0){ printf("infinito (denominador 0)\n"); return 0; }
         if(q < 0){ p = -p; q = -q; }
         L g = mdc(p,q); if(g > 1){ p/=g; q/=g; }
-        printf("%lld/%lld\n", p, q);
-        printf("  M_w = [[%lld, %lld], [%lld, %lld]]   det = %lld   (a inversa é INTEIRA)\n",
+        printf("%ld/%ld\n", p, q);
+        printf("  M_w = [[%ld, %ld], [%ld, %ld]]   det = %ld   (a inversa é INTEIRA)\n",
                m00,m01,m10,m11, m00*m11-m01*m10);
-        printf("  os dois convergentes: %lld/%lld e %lld/%lld — um por defeito, outro por excesso\n",
+        printf("  os dois convergentes: %ld/%ld e %ld/%ld — um por defeito, outro por excesso\n",
                m00,m10, m01,m11);
         return 0;
     }
@@ -191,10 +191,10 @@ int main(int argc, char **argv){
         if(argc != 3){ uso(); return 2; }
         L m = atoll(argv[2]);
         if(m < 1){ fprintf(stderr, "nomeia: metal >= 1\n"); return 2; }
-        printf("sigma_%lld = [%lld; %lld, %lld, ...]   período 1\n", m, m, m, m);
-        printf("  quadrática: x^2 - %lld x - 1 = 0     D = %lld\n", m, m*m+4);
-        printf("  A_%lld = [[%lld, 1], [1, 0]]   det = -1\n", m, m);
-        printf("  e o ponto fixo atrativo de x -> %lld + 1/x É sigma_%lld\n", m, m);
+        printf("sigma_%ld = [%ld; %ld, %ld, ...]   período 1\n", m, m, m, m);
+        printf("  quadrática: x^2 - %ld x - 1 = 0     D = %ld\n", m, m*m+4);
+        printf("  A_%ld = [[%ld, 1], [1, 0]]   det = -1\n", m, m);
+        printf("  e o ponto fixo atrativo de x -> %ld + 1/x É sigma_%ld\n", m, m);
         return 0;
     }
 
@@ -208,15 +208,15 @@ int main(int argc, char **argv){
         L K00,K01,K10,K11; mob(k,n,&K00,&K01,&K10,&K11);
         L det = K00*K11 - K01*K10;
         if(det != 1 && det != -1){                    /* não pode acontecer, mas é dito */
-            fprintf(stderr, "nomeia: det = %lld — a chave saiu de GL2(Z)\n", det);
+            fprintf(stderr, "nomeia: det = %ld — a chave saiu de GL2(Z)\n", det);
             return 3;
         }
         if(cifrar){
-            printf("%lld %lld\n", K00*x + K01*y, K10*x + K11*y);
+            printf("%ld %ld\n", K00*x + K01*y, K10*x + K11*y);
         } else {
-            printf("%lld %lld\n", ( K11*x - K01*y)/det, (-K10*x + K00*y)/det);
+            printf("%ld %ld\n", ( K11*x - K01*y)/det, (-K10*x + K00*y)/det);
         }
-        fprintf(stderr, "  chave: %d dígitos   K = [[%lld, %lld], [%lld, %lld]]   det = %lld\n",
+        fprintf(stderr, "  chave: %d dígitos   K = [[%ld, %ld], [%ld, %ld]]   det = %ld\n",
                 n, K00,K01,K10,K11, det);
         return 0;
     }

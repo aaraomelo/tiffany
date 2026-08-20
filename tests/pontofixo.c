@@ -22,7 +22,7 @@
 #include "isa_disk.h"
 #include "unidade.h"
 
-typedef long long L;
+typedef long L;
 
 /* ─── polinómios em Z[x], com o grau guardado à parte ─────────────────────────────────── */
 #define GMAX 64
@@ -440,7 +440,7 @@ int main(void){
             L N = a*a + a*b + b*b;
             if(N != 1) mau++;
             ks++;
-            if(k <= 7) printf("      %-4d %+lld %+lld·r%*s %lld\n", k, a, b, 8, "", N);
+            if(k <= 7) printf("      %-4d %+ld %+ld·r%*s %ld\n", k, a, b, 8, "", N);
         }
         printf("\n      %d potencias, com norma diferente de 1: %d\n\n", ks, mau);
         ok("a norma de r^k e' 1 para TODO k — a magnitude nao se move, em inteiros",
@@ -475,11 +475,11 @@ int main(void){
         L va = 1, vb = -1;
         /* r·ν(r) tem de dar 1: (0 + 1r)(1 − 1r) = r − r² = r − (r−1) = 1 */
         L pa = a*va + (-(b*vb)), pb = a*vb + b*va + b*vb;   /* produto com r² = r − 1 */
-        printf("      r = %+lld %+lld·r     nu(r) = %+lld %+lld·r     r·nu(r) = %+lld %+lld·r\n",
+        printf("      r = %+ld %+ld·r     nu(r) = %+ld %+ld·r     r·nu(r) = %+ld %+ld·r\n",
                a, b, va, vb, pa, pb);
         /* e as normas: iguais, porque N(r) = N(ν(r)) = 1 */
         L Nr = a*a + a*b + b*b, Nv = va*va + va*vb + vb*vb;
-        printf("      N(r) = %lld    N(nu(r)) = %lld    — as duas coordenadas com o MESMO tamanho\n\n", Nr, Nv);
+        printf("      N(r) = %ld    N(nu(r)) = %ld    — as duas coordenadas com o MESMO tamanho\n\n", Nr, Nv);
         ok("r·nu(r) = 1 exato: o dual de r e' o seu inverso, e nao um vizinho",
            pa == 1 && pb == 0);
         ok("e N(r) = N(nu(r)) = 1: as duas coordenadas deixam de separar por TAMANHO — a fronteira",
@@ -508,9 +508,9 @@ int main(void){
             if(na == a && nb == b) fixos++;
             elementos++;
         }
-        printf("      elementos: %lld     imagens distintas: %lld     nu(nu(x)) != x em: %lld\n",
+        printf("      elementos: %ld     imagens distintas: %ld     nu(nu(x)) != x em: %ld\n",
                elementos, n_img, mau_inv);
-        printf("      e os pontos fixos de nu (onde as duas coordenadas coincidem): %lld\n\n", fixos);
+        printf("      e os pontos fixos de nu (onde as duas coordenadas coincidem): %ld\n\n", fixos);
         ok("a traducao e BIUNIVOCA: nu e' bijecao — tantas imagens quantos elementos, sem colisao",
            n_img == elementos && elementos == p*p);
         ok("e a volta e' a PROPRIA traducao: nu(nu(x)) = x em todos — nao ha segundo mapa",
@@ -588,7 +588,7 @@ int main(void){
             if(S2a == Sna && S2b == Snb) sem_a++;   /* a simétrica não separa os dois lados */
             casos++;
             if(a == 2 && b == 1)
-                printf("      %+lld%+lld·r        (%+lld%+lld·r)/2      (%+lld%+lld·r)/2      sim     sim        NAO\n",
+                printf("      %+ld%+ld·r        (%+ld%+ld·r)/2      (%+ld%+ld·r)/2      sim     sim        NAO\n",
                        a, b, S2a, S2b, A2a, A2b);
         }
         printf("\n      %ld pares: reconstroem-se de S+A em %d; e a simetrica sozinha nao separa em %d\n\n",
