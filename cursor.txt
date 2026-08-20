@@ -16,7 +16,8 @@ Fase PG: Trios PG1–PG4 FECHADOS. A PROMOÇÃO (saturo→promove) está PROPAGA
     long/64     0 ll · 16 i128 rest.   python3 tools/longs_todos.py  (ll FECHADO; i128 só dual32.c)
     formatos    0 avisos -Wformat no repo (eram 216; ver §17)
     git         0 includes fora do repositório  tests/refs.c §R5  (eram 3 headers)
-    selo        2720752db897a5b0      bash tools/bateria.sh
+    js          5 medidores .js passaram a emitir #UNIT: 26 unidades finas (§22)
+    selo        44f982a7e2563880      bash tools/bateria.sh
 
 Verificar SEMPRE com:  bash tools/bateria.sh   (lê AS DUAS linhas: total e unidades)
 
@@ -659,13 +660,16 @@ TRIOS (ordem de trabalho — um de cada vez)
     · Describe(S)→ParamDesc+NoData; Close
     · tests/pgwire.c §W5–§W6: Bind $1=7 ≡ Simple WHERE a=7
 
-  Trio PG5 — FACHADA libpq-LIKE (opcional, apps C)
-    · lib/pqlike.h: PQconnectdb/PQexec/PQntuples/PQgetvalue — implementação
-      nossa sobre pgwire (cliente)
-    · NÃO linkar -lpq do sistema no servidor
-    · Medidor: mesmo teste PG2 via pqlike
+  Trio PG5 — FACHADA libpq-LIKE                     FECHADO (20/08)
+    · lib/pqlike.h: PQconnectdb/PQexec/PQntuples/PQgetvalue/PQcmdStatus/
+      PQresultStatus/PQerrorMessage/PQfinish — sobre o FEBE da casa, sem -lpq
+    · SEM malloc: um PGresult por ligação. Consequência DITA no cabeçalho —
+      dois PQexec seguidos sobrescrevem o primeiro resultado
+    · tests/pgwire.c §W7: a MESMA consulta por sql_api e por PQexec dá as
+      mesmas linhas, células e tag (0 divergências) — dois caminhos, não um
+    · e o GUME apanhou um defeito REAL do motor: ver §20
 
-  Trio PG6 — CATÁLOGO MÍNIMO (quando uma app real exigir)
+  Trio PG6 — CATÁLOGO MÍNIMO (quando uma app real exigir)   ← PRÓXIMO
     · Respostas stub a `SELECT version()`, `SHOW`, `pg_catalog` mínimo
       que o driver pede no connect — cada um medido, sem fingir PG completo
 
@@ -790,8 +794,9 @@ O QUE ISTO DESTAPOU — e NÃO está fechado
 
 PRÓXIMO PASSO OPERACIONAL
 -------------------------
-  Ver §18: os literais fecharam. Segue Trio PG5 (fachada pqlike, opcional) ou
-  PG6 se uma app real pedir catálogo.
+  Ver §18 e §20: literais e PG5 fechados. Segue Trio PG6 (catálogo mínimo:
+  version(), SHOW, o pg_catalog que um driver pede ao ligar) quando uma app
+  real o exigir — cada resposta com medidor, sem fingir PG completo.
 
 
 18. A ARITMÉTICA DE VÍRGULA — 67 → 0, e o que ela escondia
@@ -910,3 +915,105 @@ assinatura do `refs.c`: nada falha deste lado. Aqui compila, num clone não exis
 
   Os ELF de `cc` soltos em tests/ (calculo2, dominios, koch, refs, reta, …)
   entraram na lista do .gitignore, que já os enumerava um a um.
+
+
+20. A TABELA NÃO TINHA NOME — e o gume do PG5 é que o apanhou
+===============================================================
+O §W7 mede a fachada pelos DOIS caminhos (sql_api directo vs PQexec pelo socket) e
+traz o gume do lado que tem de falhar: uma consulta inválida tem de chegar como
+`PGRES_FATAL_ERROR` com mensagem. Ela chegava como **PGRES_TUPLES_OK**.
+
+A causa não era da fachada. Era do motor:
+
+    SELECT * FROM tabela_que_nao_existe   →   devolvia as linhas da tabela que lá está
+
+O catálogo (`S_CAT`) guardava só `{ncols, nrows}`: a relação NÃO TINHA NOME. O
+`varre()` lia o `FROM x` para uma variável e nunca a usava — nos TRÊS ramos
+(SELECT, UPDATE, DELETE) —, e o `insere()` o mesmo com o `INSERT INTO x`. Uma
+aplicação que se enganasse no nome recebia dados de outra tabela e não tinha como
+saber; pela porta FEBE isso chega ao driver como um SELECT bem sucedido.
+
+  correcção   S_NOME = 192..207 (16 Words, dois caracteres por Word — Lei 7),
+              escrito no CREATE TABLE, conferido no SELECT/UPDATE/DELETE/INSERT
+  normalizar  minúsculas: `FROM T` depois de `CREATE TABLE t` tem de passar, e
+              recusar isso era uma recusa ERRADA — das que só aparecem em produção
+  compat      base antiga lê nome vazio → aceita qualquer nome (a mesma porta que
+              o CORPO_INTEIRO tem por ser o código 0)
+  mensagem    `relation "x" does not exist` — a redacção que um driver espera
+
+  Verificação: sql 86/86 · pgwire §W0–§W7 · pgwire_smoke ok · bateria 528:528
+
+  GUME (cinco mutações, todas caem): a recusa desligada · o CREATE sem guardar o
+  nome · PQgetvalue a devolver sempre a mesma célula · a tag do lado FEBE mudada ·
+  o PQexec sem ler DataRow.
+  E uma sobreviveu primeiro por gume mal feito meu: apagar a COMPARAÇÃO da tag não
+  faz cair, porque a tag batia à mesma — mutar o DETECTOR remove a medida em vez de
+  partir o código. A mutação certa é no DADO.
+
+
+21. A ÁRVORE DA EXPRESSÃO PISAVA O CORPO DA COLUNA
+====================================================
+Achado a seguir ao §20, a ler o mapa de slots do `sql.c`:
+
+    S_CORPO   60..67    o corpo declarado de cada coluna {código, parâmetro}
+    S_EXPR    64..191   os temporários da árvore do WHERE
+
+As duas regiões **sobrepunham-se em 64..67**, que são as colunas 4 a 7. Numa
+tabela com CINCO colunas ou mais, o primeiro SELECT com expressão escrevia o
+temporário por cima da declaração — e ficava no disco. Medido: uma coluna
+`MORFICO(6)`, o par (3,6), voltava (1,0), que é RACIONAL. A partir daí a
+aritmética daquela coluna é a álgebra errada, para sempre, e nada o diz.
+
+Ninguém lá chegou porque TODAS as tabelas dos medidores têm três colunas —
+«varrer onde o defeito não vive», e desta vez o regime era o número de colunas.
+
+  correcção  S_EXPR 64→72 (72..199) e S_NOME 192→224, com folga declarada entre
+             as três regiões em vez de encostadas. S_CORPO fica onde está, para
+             as bases antigas não perderem a declaração.
+  medida     banco/sql.c, no bloco do CORPO DA COLUNA: uma tabela de SEIS colunas,
+             o par (corpo, parâmetro) lido ANTES e DEPOIS de um SELECT com WHERE
+  gume       repor S_EXPR=64 → cai; e usar três colunas no medidor → cai também
+             (a escolha do regime é parte da medida)
+  e o exit   `sql teste` tinha `return 0` FIXO: dezenas de `ok()` e o exit sempre
+             verde. Agora segue `falhas`. Quem o apanhava era a rede da bateria,
+             e uma rede não substitui o medidor dizer a verdade sobre si.
+
+
+22. AS DUAS FRENTES EM PARALELO — o que elas acharam, e o que eu verifiquei
+============================================================================
+Enquanto o PG5 corria, duas varreduras em paralelo: a CADEIA DOS PAPERS e o lado
+JAVASCRIPT. Nada entrou sem eu correr o medidor citado.
+
+PAPERS — números desactualizados, e limiares de vírgula em prosa
+  · naturais.tex     §NB0--§NB11 (12:0) → §NB0--§NB13 (14:0)   [medido: 14 ok]
+  · reais.tex        tres_caminhos 12:0 e 14:0 → 15:0 (o §RE6b de hoje);
+                     fractais §FR0--§FR6 (7:0) → §FR0--§FR8 (9:0)  [medido: 9]
+  · corpo_algebrico  cuspide (8:0) → (15:0)  [medido: 15]
+  · analitico/fisica/milenio: o «|geo−dobra| ≤ 6×10⁻¹²» e o «erro_n·c_n < 1/2»
+    SAÍRAM — o luz_periodo.c já não os tem. A lei da torre escreve-se sem π
+    (q_{2n} = q_n·2^{n+1}, exacto em 3 passos) e o teste decisivo corre em dois
+    instrumentos EXACTOS (G^{q/2} = −I e D² = 2 no passo q/2). §L6a--§L6b.
+  · torre_fundacao   caminho para um `corpo_computacional.tex` que não existe
+  · E UM QUE EU RECUSEI: a frase «restam 54 literais decimais no código» é a
+    DEFINIÇÃO DA CONSULTA, não um facto — o `genealogia.sh` varre o ficheiro
+    inteiro, comentários e cadeias INCLUÍDOS. O `115.871` é «115 871 decisões»
+    e o `1.618` é a entrada de um caso de leitura. Em código são ZERO. A frase
+    ficou a dizer o que cada régua mede.
+
+JAVASCRIPT — o limiar escrito à mão, nos dois medidores onde ele decidia
+  · escala.js        `|r − φ^(1/3)| > 0,002` era régua minha, em doubles. Agora a
+                     caixa vem da FONTE: o estilo.tex escreve duas casas, logo
+                     cada degrau é inteiro ± meia centésima, e a razão vive em
+                     [(2b−1)/(2a+1), (2b+1)/(2a−1)] — decidida em BigInt por
+                     2p³ vs (1+√5)q³, sem raiz cúbica e sem vírgula. E o gume é
+                     MEDIDO: quantas unidades da última casa é preciso mexer para
+                     a lei cair (1 centésima chega).
+  · traduz_pi_dim.js `|piMotor − piHarness| > 0.001` → IGUALDADE EXACTA em nanos
+                     inteiros, os dois lados em BigInt. 42 de 42 linhas comparadas
+                     e 42 iguais; um nano de perturbação derruba 40.
+
+E O QUE EU ACHEI AO VERIFICAR: cinco medidores `.js` chamavam `ok()` e NÃO
+emitiam `#UNIT` — app_arranca (6), design_no_pdf (4), dois_streams (5),
+escala (4), sem_chute (7). A bateria contava UMA unidade grossa (o exit) por
+ficheiro: 26 asserções escondidas atrás de 5. Corrigido; é a mesma lição que o
+`bateria.sh` já tinha escrita em comentário sobre todo o .py e .js.

@@ -1734,6 +1734,7 @@ comando & camada & efeito \\
 \code{/sql} (Vite) & HTTP & \code{POST} com a query; stdout do \code{sql} \\
 \code{/corpo/*} & HTTP & lê o banco, não o filesystem do repo \\
 \code{pgwire} (FEBE) & TCP & apps: listener em \code{banco/} (\code{pgwire}); porto 5432 se livre, senão 55432 \\
+\code{pqlike} & C & fachada \code{PQconnectdb}/\code{PQexec} da casa, sobre o mesmo wire (\code{lib/pqlike.h}) \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -1765,7 +1766,7 @@ lê$\to$opera$\to$escreve no ambiente --- não um servidor à parte.
 \medido{\code{banco/sql.c}; \code{app/vite.config.js} (\code{/sql}, \code{/corpo});
 \code{tests/interface\_padrao.js}; \code{tests/backends\_wasm.js} §W5;
 \code{tests/fonte\_banco.c} (fonte sobe/desce);
-\code{tests/pgwire.c} §W0--§W6 (FEBE --- Trios PG1--PG4; Simple + Extended + listener TCP; sem Postgres instalado).}
+\code{tests/pgwire.c} §W0--§W7 (FEBE --- Trios PG1--PG5; Simple + Extended + listener TCP + fachada \code{lib/pqlike.h}; sem Postgres instalado e sem \code{-lpq}).}
 \colunas{\code{topologico def:peano}; porta \code{MOVE}}
         {\code{sql.c} $\mapsto$ ISA; blobs \code{\_corpo}; manifesto backends}
         {\code{interface\_padrao.js}; \code{backends\_wasm.js}; bateria \code{sql}}
@@ -1947,7 +1948,7 @@ frase$\to$órbita inversa & \code{tests/idioma\_orbita.c} & §IO1--§IO5 (corpus
 álgebra ES / dragão & \code{tests/espanhol\_aranha.c} & §EA1--§EA8 (ñ↔nh; mesma tubagem) \\
 hexal PDF & \code{tests/estrela\_unifica.js} & §U2c (\code{/Interface~6}) \\
 API SQL / interface & \code{tests/interface\_padrao.js} & $8/8$ (\code{interface\_padrao=sql}) \\
-FEBE / pgwire & \code{tests/pgwire.c} & §W0--§W6 (Trios PG1--PG4) \\
+FEBE / pgwire & \code{tests/pgwire.c} & §W0--§W7 (Trios PG1--PG5) \\
 backends ISA & \code{tests/backends\_wasm.js} & §W0--§W7 (sql+latex) \\
 fonte no banco & \code{tests/fonte\_banco.c} & §F1--§F4 \\
 \bottomrule

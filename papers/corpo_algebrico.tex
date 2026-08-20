@@ -2547,7 +2547,7 @@ $\square$
         {$\operatorname{disc}=0$ é onde as folhas colidem; $\tau=\operatorname{sign}
 (\operatorname{disc})$ é o trial e indexa a dimensão $\tau+1$; cada racional ancora uma
 cúspide; e $\operatorname{rev}(\tau)=\tau\iff\tau=0$}
-        {\code{tests/cuspide.c} ($8{:}0$): os três regimes povoados em $372$ operadores;
+        {\code{tests/cuspide.c} ($15{:}0$): os três regimes povoados em $372$ operadores;
 $183$ racionais a ancorarem $183$ cúspides com o ponto fixo certo, e $8$ de $8$ gatos sem
 ponto fixo racional; a degenerescência na cúspide em $78$ de $78$; $129$ cúspides todas na
 órbita de $[1:0]$ e $202$ de $202$ mediantes vizinhas dos dois; «atravessa $\iff$ derruba» em $56$ de $56$ e ZERO travessias a saltar por cima; e
@@ -3962,11 +3962,12 @@ $\mathrm{NUL}\mapsto\mathrm{DEL}$ --- que é $0\mapsto\infty$ escrito em
 caracteres. \emph{Mede-se} (\leitura{teoria cor:exaustao}).
 
 \subsection*{A cadeia da descida, e o que ela NÃO faz}
-O sistema desceu de representação em quatro degraus ---
-$\text{double}\to\text{long}\to\text{int}\to\text{uint8}\to\text{bit}$ ---
+O sistema desceu de representação até o \code{double} sair da cadeia, e o que
+resta é medido degrau a degrau ---
+$\mathrm{W}_8^{2}\to\text{long}\to64\to32\to\text{uint8}\to\text{bit}$ ---
 e em nenhum se perdeu a matemática. O que se perdeu, de cada vez, não era
-do objecto: o \emph{limiar} do double (os valores já eram inteiros), a
-\emph{ilusão} de tecto infinito do \code{long}, e o \emph{sinal} --- que
+do objecto: o \emph{limiar} do \code{long} (os valores já eram inteiros), a
+\emph{ilusão} de tecto infinito do mesmo \code{long}, e o \emph{sinal} --- que
 em $\mathrm{GF}(2)$ não existe, porque $-x=x$, e é essa ausência que faz
 os ramos desaparecerem. A única perda real está no terceiro degrau e
 diz-se: a \textbf{característica} muda, e por isso a face finita refuta e
@@ -3976,7 +3977,7 @@ não prova.
 aproxima $\mathbb{R}$ nem o afasta: $\mathbb{R}$ alcança-se pelo
 \textbf{corte}, que é \emph{perpendicular} à descida --- o outro lado do
 eixo de Pontryagin. \emph{O bit não está mais longe de $\mathbb{R}$ do
-que o double estava}: estão os dois do mesmo lado, e nenhum lá chega.
+que o \code{long} estava}: estão os dois do mesmo lado, e nenhum lá chega.
 \emph{Medido:} \code{tests/cadeia.c} ($10{:}0$).
 
 \textbf{E a migração não se faz mecanicamente.} Cada ocorrência de um
@@ -3986,15 +3987,15 @@ representação de tudo o resto; \emph{realização}, onde a conta acontece;
 \emph{apresentação}, que não entra em conta nenhuma. A ordem certa é
 medição primeiro (é defeito), estrutura depois (é alavanca), realização a
 seguir; a apresentação fica, porque reduzir um \code{printf} é estética.
-\emph{Auditado:} \code{tools/audita\_tipos.sh} --- para o \code{double},
-$3616$ ocorrências em $165$ ficheiros: $68$ estrutura, $3157$ realização,
-$350$ \textbf{medição}, $41$ apresentação.
+\emph{Auditado:} \code{tools/audita\_tipos.sh} --- e a régua está hoje em
+\textbf{zero}: nenhuma ocorrência de \code{double}, em ficheiro nenhum, em
+nenhuma das quatro classes.
 
 \textbf{E cada limiar tem uma de três causas, só uma honesta.} A triagem
-(\code{tools/triagem\_limiares.sh}) encontra $918$ limiares
-\code{1e-N} no repositório e separa-os:
+(\code{tools/triagem\_limiares.sh}) separa os limiares \code{1e-N} do
+repositório nestas três, e hoje não encontra \textbf{nenhum}:
 \begin{itemize}
-\item \textbf{(A) decoração} --- $583$: não há função transcendente na
+\item \textbf{(A) decoração}: não há função transcendente na
 conta. O limiar não é preciso, e a comparação pode ser por
 \emph{igualdade}: o resíduo é zero. O pior caso desta classe é o limiar
 a dar cara de medição a uma \textbf{tautologia} --- uma matriz
@@ -4037,8 +4038,15 @@ disfarçado de decimal;
 mas tem de ser \textbf{declarada}: um número medido não é um número
 derivado.
 \end{itemize}
-\emph{Auditado:} \code{tools/genealogia.sh}, sobre os $191$ literais
-decimais do repositório. E o caso sem desculpa é o literal que é o
+\emph{Auditado:} \code{tools/genealogia.sh}, que conta $54$ decimais distintos
+--- e é preciso dizer O QUE ele conta, senão o número afirma o contrário do que
+mede: ele varre o ficheiro inteiro, \emph{incluindo comentários e cadeias de
+texto}. Em código não resta nenhum (\code{tools/doubles\_todos.py}: zero do tipo
+\code{double}/\code{float} e zero literais de vírgula, com a trava declarada em
+\code{tools/libc.c}, que realiza o IEEE para wasm). Os $54$ são decimais
+\emph{escritos} --- \code{115.871} são «115\,871 decisões», \code{1.618} é a
+entrada de um caso de leitura --- e a pergunta continua a valer para eles: um
+número escrito também apresenta a sua genealogia. E o caso sem desculpa é o literal que é o
 \emph{resultado} de uma conta que o programa podia fazer --- foi o que se
 encontrou em \code{tests/escada.c}, a comparar com
 $0{,}742742944625$ e um limiar $10^{-11}$ a segurá-lo, quando esse número

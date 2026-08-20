@@ -36,6 +36,9 @@ const raiz = path.join(__dirname, '..', 'app')
 let falhas = 0
 const ok = (msg, cond) => {
   console.log('      ' + (cond ? '✓' : '✗') + '  ' + msg)
+  /* a UNIDADE conta-se: sem esta linha a bateria soma UMA unidade grossa (o exit)
+   * por este ficheiro inteiro, e as asserções finas desaparecem do total. */
+  console.log('#UNIT ' + (cond ? 'ok' : 'falha') + ' ' + msg)
   if (!cond) falhas++
 }
 

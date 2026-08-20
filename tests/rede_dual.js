@@ -117,22 +117,63 @@ const esc = (x) => Math.round(x * 1e12)
 
   /* §R5 conjugação reversível F_H = D∘F_P⁻¹∘D⁻¹ — álgebra exacta, sem diferenças finitas */
   {
-    const c = 0.17
-    const alpha = 1.7
-    const D = (x) => 2 * c - x
-    const Fp = (x) => c + alpha * (x - c)
-    const FpInv = (y) => c + (y - c) / alpha
-    const Fh = (x) => D(FpInv(D(x)))
+    /* auditoria 20/08: `alpha*(1/alpha)===1` e `log(alpha)+log(1/alpha)===0`
+     * passavam por ACIDENTE do IEEE, não por álgebra — varridos os α de 1,10 a
+     * 3,00 em centésimas, o primeiro falha em 23 de 191 e o segundo em 91 de
+     * 191. Com α=1,7 calha darem verdade; com α=1,9 o segundo dá falso e a
+     * conjugação é a MESMA. Aqui o objecto é racional (c=17/100, α=17/10), e
+     * mede-se em racionais exactos — e os multiplicadores não se escrevem:
+     * TIRAM-SE dos mapas, que é o que faz disto dois caminhos e não uma
+     * identidade copiada de um lado para o outro. */
+    const F = (n, d) => { /* racional reduzido, denominador positivo */
+      n = BigInt(n); d = BigInt(d)
+      if (d < 0n) { n = -n; d = -d }
+      let a = n < 0n ? -n : n, b = d
+      while (b) { [a, b] = [b, a % b] }
+      const g = a || 1n
+      return { n: n / g, d: d / g }
+    }
+    const add = (x, y) => F(x.n * y.d + y.n * x.d, x.d * y.d)
+    const sub = (x, y) => F(x.n * y.d - y.n * x.d, x.d * y.d)
+    const mul = (x, y) => F(x.n * y.n, x.d * y.d)
+    const div = (x, y) => F(x.n * y.d, x.d * y.n)
+    const eq = (x, y) => x.n === y.n && x.d === y.d
+    const UM = F(1, 1)
+
+    /* c = 0,17 e α = 1,7 são RACIONAIS escritos em decimal — 17/100 e 17/10 */
+    const cq = F(17, 100), aq = F(17, 10)
+    const Dm = (x) => sub(mul(F(2, 1), cq), x)                 /* D(x) = 2c − x */
+    const frente = (a) => (x) => add(cq, mul(a, sub(x, cq)))   /* F_P(x) = c + α(x−c) */
+    const inversa = (a) => (y) => add(cq, div(sub(y, cq), a))  /* F_P⁻¹ */
+    const volta = (a) => (x) => Dm(inversa(a)(Dm(x)))          /* F_H = D∘F_P⁻¹∘D */
+    const Fp = frente(aq), Fh = volta(aq)
+
+    /* o multiplicador NÃO se escreve: mede-se do mapa, em dois pontos racionais */
+    const mult = (G) => { const x0 = F(0, 1), x1 = F(1, 1); return div(sub(G(x1), G(x0)), sub(x1, x0)) }
+    const mP = mult(Fp), mH = mult(Fh)
 
     let mauId = 0
-    const xs = [-0.9, -0.4, 0, 0.11, 0.5, 0.88]
+    const xs = [F(-9, 10), F(-2, 5), F(0, 1), F(11, 100), F(1, 2), F(22, 25)]
     for (const x of xs) {
-      if (esc(Fh(Fp(x))) !== esc(x)) mauId++
+      if (!eq(Fh(Fp(x)), x)) mauId++
     }
-    ok('§R5 DF_H·DF_P = I (jacobiano numérico)', alpha * (1 / alpha) === 1)
-    ok('§R5 F_H∘F_P = id no admissível', mauId === 0)
-    ok('§R5 λ⁺+λ⁻=0 pela conjugação (não pelo atrator Hopfield)',
-      Math.log(alpha) + Math.log(1 / alpha) === 0)
+    ok('§R5 DF_H·DF_P = I — os dois multiplicadores TIRADOS dos mapas (não escritos), e o produto' +
+       ' é 1 em racionais exactos: ' + mP.n + '/' + mP.d + ' · ' + mH.n + '/' + mH.d,
+      eq(mul(mP, mH), UM) && !eq(mP, UM))
+    ok('§R5 F_H∘F_P = id no admissível (igualdade EXACTA de racionais, sem escala 1e12)', mauId === 0 && xs.length >= 6)
+    /* λ⁺+λ⁻ = log m_P + log m_H = 0 ⟺ m_P·m_H = 1. E o que se afirma não é que
+     * calha em α=1,7: é que vale em TODA a família — se a construção de F_H
+     * estivesse errada, caía aqui e não no α escolhido. */
+    let alphas = 0, mausL = 0
+    for (let k = 110; k <= 300; k++) {
+      const a2 = F(k, 100)
+      alphas++
+      if (!eq(mul(mult(frente(a2)), mult(volta(a2))), UM)) mausL++
+    }
+    ok('§R5 λ⁺+λ⁻=0 pela conjugação (não pelo atrator Hopfield): log m_P + log m_H = 0 ⟺ m_P·m_H = 1,' +
+       ' e vale em ' + alphas + ' α racionais de 1,10 a 3,00 — não só no 1,7 que estava escrito.' +
+       ' Falhas: ' + mausL,
+      mausL === 0 && alphas === 191)
     const e = criarEstadoRede({ delta: 0.05 })
     const f = 'perturba pela banda'
     let p = passoRedeDual(e, f)

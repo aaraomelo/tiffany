@@ -35,7 +35,13 @@ const { execSync } = require('child_process')
 const RAIZ = path.join(__dirname, '..')
 const TEX = path.join(RAIZ, 'tests', 'tex')
 let falhas = 0
-const ok = (m, c) => { console.log('      ' + (c ? '✓' : '✗') + '  ' + m); if (!c) falhas++ }
+const ok = (m, c) => {
+  console.log('      ' + (c ? '✓' : '✗') + '  ' + m)
+  /* a UNIDADE conta-se: sem esta linha a bateria soma UMA unidade grossa (o exit)
+   * por este ficheiro inteiro, e as asserções finas desaparecem do total. */
+  console.log('#UNIT ' + (c ? 'ok' : 'falha') + ' ' + m)
+  if (!c) falhas++
+}
 
 if (!fs.existsSync(TEX)) {
   console.log('\n  o tradutor tests/tex não está compilado.  NÃO MEDIU.\n'); process.exit(2)

@@ -27,6 +27,19 @@ function isqrt (x) {
   while (h < g) { g = h; h = (g + x / g) / 2n }
   return g
 }
+/* π_n do lado de Hurwitz, em NANOS INTEIROS — a mesma unidade em que o motor
+ * escreve /PiN. O valor é q·s/2^30 exacto; os nanos são o seu chão. */
+function piFixoN (q) {
+  const S = 1n << 30n
+  q = BigInt(q)
+  let c = -S, m2 = 2n
+  while (m2 < q) {
+    c = isqrt(((S + c) / 2n) * S)
+    m2 *= 2n
+  }
+  const s = isqrt(((S - c) / 2n) * S)
+  return (q * s * 1000000000n) / S
+}
 function piFixo (q) {
   const S = 1 << 30
   q = BigInt(q)
@@ -54,6 +67,25 @@ function reguaCap (alc) {
 function reguaL (alc) {
   return 30
 }
+/* o lado de Gentil, em NANOS INTEIROS. Aqui a passagem a BigInt não é só
+ * higiene: `sq*sq` e `(2S+2·inner)·S` valem ~2^61, e em double perdem os bits
+ * abaixo de 2^53 — o chão que se tira a seguir pode cair do lado errado. */
+function piGentilFixoN (dim, alc) {
+  let iters = dim <= 1 ? 1 : log2dim(dim) + dim - 2
+  const cap = reguaCap(alc)
+  if (iters > cap) iters = cap
+  const S = 1n << 30n
+  let sq = S
+  for (let s = 0; s < iters; s++) {
+    const sq2 = (sq * sq) / S
+    const inner = isqrt((S - sq2) * S)
+    const g = isqrt((2n * S + 2n * inner) * S)
+    sq = (sq * S) / g
+  }
+  let num = sq * 1000000000n
+  for (let i = 0; i <= iters; i++) num <<= 1n
+  return num / S
+}
 function piGentilFixo (dim, alc) {
   let iters = dim <= 1 ? 1 : log2dim(dim) + dim - 2
   const cap = reguaCap(alc)
@@ -76,17 +108,19 @@ function qDim (n) { return n * (2 ** (n - 1)) }
 function medidaPi (dim, alc) {
   const q = qDim(dim)
   const c = q / 2
-  let pi, hurwitz = true
+  let pi, piN, hurwitz = true
   if (dim >= 16 || q > (1 << 20)) {
     hurwitz = false
     pi = piGentilFixo(dim, alc)
+    piN = Number(piGentilFixoN(dim, alc))
   } else {
     pi = piFixo(q)
+    piN = Number(piFixoN(q))
   }
   const err = Math.abs(pi - PI)
   const bits = err > 0 ? -Math.log2(err) : Infinity
   const fecha = err * c < 0.5
-  return { q, c, pi, err, bits, fecha, hurwitz }
+  return { q, c, pi, piN, err, bits, fecha, hurwitz }
 }
 
 function parseSemente (latin) {
@@ -327,6 +361,10 @@ function bitsDif (a, b) {
       torreBate,
       pi, bitsPi, fecha, gentil,
       piMotor, piHarness: piM ? piM.pi : null,
+      /* os DOIS caminhos na unidade em que ambos são inteiros: /PiN do motor
+       * e os nanos do harness. Sem vírgula não há régua para escolher. */
+      piMotorN: sem && sem.piN != null ? sem.piN : null,
+      piHarnessN: piM ? piM.piN : null,
       lyapBits: lyap.bits,
       lyapDif: lyap.dif,
       forms, ms, tam, ok: true,
@@ -385,7 +423,11 @@ function bitsDif (a, b) {
       r.reguaL !== reguaL(r.alcance) ||
       (r.torreDim != null && r.torreDim !== r.dim) ||
       !torreOk ||
-      (r.piHarness != null && Math.abs(r.piMotor - r.piHarness) > 0.001)
+      /* os dois caminhos até π_n — o motor no PDF e o harness aqui — têm de
+       * dar o MESMO INTEIRO de nanos. O `> 0.001` que aqui estava era duas
+       * mil vezes mais largo do que o que os dois lados realmente dão, e
+       * dava-o em doubles: a régua era minha, não do objecto. */
+      (r.piHarnessN != null && r.piMotorN !== r.piHarnessN)
   }).length
   console.log(`#TOTAL ${ok.length} ${falhas}`)
   process.exit(falhas ? 1 : 0)

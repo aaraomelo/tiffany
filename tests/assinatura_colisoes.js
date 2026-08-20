@@ -123,18 +123,38 @@ ok('§C1 CEGUEIRA DO OBSERVADOR DUAL encontrada em dados orgânicos (ouro metodo
   const N = 30000
   let achadas = 0
   const visto = new Map()
+  /* auditoria 20/08: a asserção era `true` — o orçamento era reportado e não
+   * era MEDIDO. A frase diz «varrido», e é isso que passa a ser verificado: N
+   * cadeias geradas, todas no espaço declarado (a–d, 6–11). Não se afirma que
+   * não há colisões: `achadas` continua a ser um número dito, e é deliberado. */
+  let geradas = 0, repetidas = 0, minLen = Infinity, maxLen = 0, foraDoAlfabeto = 0
   for (let t = 0; t < N; t++) {
     let s = ''
     const n = 6 + lcg() % 6
     for (let i = 0; i < n; i++) s += String.fromCharCode(97 + lcg() % 4)  /* a-d */
+    geradas++
+    if (s.length < minLen) minLen = s.length
+    if (s.length > maxLen) maxLen = s.length
+    if (/[^a-d]/.test(s)) foraDoAlfabeto++
     const a = assinatura(s)
     const chave = a.E + '|' + a.f1 + '|' + a.f2
     const antes = visto.get(chave)
     if (antes !== undefined && antes !== s) achadas++
-    else visto.set(chave, s)
+    else { if (antes !== undefined) repetidas++; visto.set(chave, s) }
   }
   console.log(`§C3: ${N} cadeias aleatórias (a–d, 6–11), colisões de (E,Φ,Φ₂): ${achadas}`)
-  ok('§C3 orçamento varrido e reportado — a escada continua além do que se varreu', true)
+  console.log(`      orçamento: ${geradas} geradas = ${visto.size} assinaturas novas + ${repetidas} repetidas + ${achadas} colisões · comprimentos ${minLen}–${maxLen} · fora do alfabeto ${foraDoAlfabeto}`)
+  /* `geradas === N` não servia: os dois lados vinham do mesmo sítio (o laço é
+   * `t < N`), e mudar N mexia nos dois ao mesmo tempo. O que PODE falhar é a
+   * CONTABILIDADE — cada cadeia gerada classificada uma vez e uma só — e o
+   * espaço declarado. É um defeito real num contador de colisões contar mal. */
+  ok('§C3 orçamento varrido e reportado — ' + geradas + ' cadeias no espaço declarado (a–d,' +
+     ' comprimentos ' + minLen + '–' + maxLen + '), e a varredura FECHA: cada gerada é uma' +
+     ' assinatura nova (' + visto.size + '), uma repetição (' + repetidas + ') ou uma colisão (' +
+     achadas + '). O número de colisões continua DITO e não afirmado: a escada continua além do' +
+     ' que se varreu',
+    visto.size + repetidas + achadas === geradas &&
+    minLen === 6 && maxLen === 11 && foraDoAlfabeto === 0 && visto.size > 0)
   if (achadas > 0) {
     console.log('  (E,Φ,Φ₂) também colide no espaço pequeno: a escada dos momentos')
     console.log('  só satura no espectro completo — o byte a byte do medidor v2.')

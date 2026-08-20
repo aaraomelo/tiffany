@@ -159,15 +159,15 @@ bits), e para lá dela não volta --- $\lambda_{\text{medida}}>0$, a medida é e
 discreto até à dimensão $16$, e o seu ``erro'' é o círculo idealizado, que a natureza não tem.}
 
 \smallskip
-\noindent E o mecanismo é agora \textbf{propriedade operacional, medida}: o $\pi_n$ de cada
-dimensão é \emph{saída} da dobra (a meia-corda de Arquimedes, dois bits por dobra, sem uma
-constante escrita), a luz da dimensão é a meia volta $c_n=q_n/2$ do seu relógio de
-$q_n=n\,2^{n-1}$ marcas ($32=2^5$ em $n=4$), e \textbf{o limite dimensional é função de $c_n$}:
-a dimensão fecha quando $\mathrm{erro}_n\cdot c_n<\tfrac12$ marca --- a primeira que fecha é a
-$4$. E a relação $c_n=\pi_n R_n$ \textbf{não é identidade por construção}: o $R$ mede-se de
-\emph{outro} instrumento --- a órbita desenhada, o diâmetro tirado das coordenadas --- e o $\pi$
-geométrico (perímetro contado/diâmetro medido) concorda com o da dobra a $6\times10^{-12}$, com a
-órbita a fechar na origem (\code{tests/luz\_periodo.c}, §L6).
+\noindent E o mecanismo é agora \textbf{propriedade operacional, medida}: a luz da dimensão é a
+meia volta $c_n=q_n/2$ do seu relógio de $q_n=n\,2^{n-1}$ marcas ($32=2^5$ em $n=4$), a lei da
+torre escreve-se \emph{sem} $\pi$ --- cada passo $n\to2n$ multiplica o relógio por $2^{n+1}$, e o
+$\pi_n$ da meia-corda de Arquimedes era o transporte, não a lei ---, e \textbf{o limite dimensional
+é função de $c_n$}: cada $c$ determina o seu $n$, e o percurso fecha exactamente quando $n$ é par.
+E a relação $c_n=\pi_n R_n$ \textbf{não é identidade por construção}: o teste decisivo corre em dois
+instrumentos exactos --- a álgebra ($G^{q/2}=-I$, a meia volta) e a geometria (no passo $q/2$ a
+posição é $(1,1)$, $D^{2}=2$) ---, com a órbita a fechar na origem sem uma raiz
+(\code{tests/luz\_periodo.c}, §L6a--§L6b).
 
 \smallskip
 \noindent E é por isto que as mesmas leis valem em \emph{todas} as dimensões medidas

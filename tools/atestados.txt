@@ -11,7 +11,7 @@ amplifica 38cf0844d0c76bd1 0
 analiticas 970ca1566c452f3a 0
 analog f086e95d46219f68 0
 antissimetrico e48993492f8aa75d 0
-app_arranca abb24b0fe22e3ae2 0
+app_arranca ab17cde0c17eb0aa 0
 aranha_g 448e1f5e4400277c 0
 aranha_inversa ac86462a26ec984e 0
 aritmetica bed8e054171e6849 0
@@ -20,7 +20,7 @@ arraytermico d700a92b448f7ffd 0
 artefato ae99b4cae14e442f 0
 assinatura 15ed7d9ee13ee350 0
 assinatura_banal 80eb20648a0babdb 0
-assinatura_colisoes 3c0d9a83e88f310f 0
+assinatura_colisoes c2fdfeec9e23724d 0
 assinatura_tradutor 23c1bfad85d49ce7 0
 ataque c78468dfbc3c4203 0
 aurea f4c540cb10500c79 0
@@ -132,7 +132,7 @@ derivacao_primitivas 3d04c680af7012a7 0
 descida_mobius 35d55f28509bc55d 0
 desenha 5918033b43ea7382 0
 design f782a62b62cb35d7 0
-design_no_pdf 39222a233316ff71 0
+design_no_pdf 56c19bf7591a6b78 0
 diagonal 3e9007a09dd88e37 0
 dif d43e05ab163eeae1 0
 diferentes a873820175665161 0
@@ -146,7 +146,7 @@ dissipa 5b58decdaef8f8e4 0
 dissipa_pagina 7faa928d7f9722ab 0
 distancia 9c2e84d02704c20a 0
 dna 91ca1866b22e5466 0
-dois_streams 247b877ca4d76fea 0
+dois_streams 1248e3df62bbe48b 0
 dominios 26029d8f5ea9480b 0
 dourada 8133e2c774ab1242 0
 dourada_banco d8495af90c42bb1b 0
@@ -183,7 +183,7 @@ entropia_dual 0e62dee11e3fc413 0
 equivalencia_universal db7d0dc65a704ccf 0
 erg 018ff0de6dcd8a6a 0
 escada ae20f8b70c7d45e4 0
-escala cbfb95a30df86d4b 0
+escala 0b7bd90b9b7b5b0e 0
 escala_dourada 5c990fc76f6f0948 0
 escala_espaco 26ed3534a655fc9d 0
 escuros 6bc3e85125c6c969 0
@@ -366,7 +366,7 @@ patria_front bd725634b0b6534c 0
 pdf_corpo a55c0f4e9ed9661c 0
 peano_dual bce380b1c987657b 0
 pendulo 0a54853abfecdeb8 0
-pgwire 9f21e4e4d036bf80 0
+pgwire 3e746d2be16d7073 0
 pi edf300fc9ada26c6 0
 pi_familia ea3960ed8925d824 0
 pi_rei ff4bb7390314755b 0
@@ -410,7 +410,7 @@ real_caminho 8e59cbaaf2b0ed87 0
 recaman 45eb0b4cd4a3a575 0
 reconstroi b1bd0e529a16dcd0 0
 recursao 268dd5df56bb546b 0
-rede_dual 0ba473f1e9c8a100 0
+rede_dual 49f812c9dca4966e 0
 reducao 934266441641ea30 0
 refracao 3626e5b9542b2291 0
 refs 1759d2ac34f83bd7 0
@@ -441,7 +441,7 @@ sair_pu a64d5e2b256b4dc8 0
 saltos 93de14f9c7a1d0c7 0
 selberg 48f58a9cd271066d 0
 selo 178fcc4bb50fd9d2 0
-sem_chute 7ac03d19c66454b5 0
+sem_chute 24795263dabc197f 0
 sem_ramo 81a20f7c9df8d1e2 0
 semantico 458155145c6d26d3 0
 semente bdf47d333634825f 0
@@ -456,7 +456,7 @@ sombra_cone 5e3a81a74d93d005 0
 sombras 4cdee1845f8c56fd 0
 spinor32 52cc87063065a82e 0
 spline 5fa4c5faf3ddbb4c 0
-sql c357e14bf4650557 0
+sql dd05095ac786f375 0
 sshb b5b379cf1a3d89ff 0
 str2dbl_dual 7a67f5b0e1b47955 0
 superficie_tate 42631bd983dc985c 0
@@ -486,7 +486,7 @@ torre_induc 30e9703511504c95 0
 torres 6ff6769aa88a97d3 0
 traducao 6076f1d6ab383851 0
 traduz e655c2b9f39adbf9 0
-traduz_pi_dim e3de288015d88fdc 0
+traduz_pi_dim c35b41ffcb28909f 0
 traduz_volta 7b40fc8a3fe4494b 0
 transforma 8a5c3123aa36b37f 0
 transformada 57edcd6ed679edc5 0

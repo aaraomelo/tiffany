@@ -146,7 +146,7 @@ existisse. A exigência é a mesma; o que muda é que agora ela \textbf{tem ende
         {recebe oito peças canónicas do centro e acrescenta TRÊS --- graduação, continuação
 e limite}
         {\code{tools/refcruz.py} confere que cada uma das oito aponta para um label que
-existe no \code{universal.tex}; \code{tests/cuspide.c} \S C12 mede que $\tau=+1$ é o
+existe no \code{papers/corpo\_algebrico.tex}; \code{tests/cuspide.c} \S C12 mede que $\tau=+1$ é o
 regime que NÃO fecha, e é essa a razão de o alcance viver deste lado}
 
 \section{A exigência}\label{sec:exigencia}
@@ -1327,22 +1327,23 @@ nenhuma.
 da dimensão $n$ tem $q_n=n\,2^{n-1}$ marcas, $c_n=q_n/2$ é a meia volta, e o $\pi_n$ é
 \emph{saída} da dobra (dois bits por dobra), não entrada. Na torre da estrela ($n=2,4,8,16$) o
 período é potência de dois \emph{pura} --- a interface do octonião dual segue em alta dimensão, não
-mura na $8$ --- e o \textbf{limite dimensional é função da luz da dimensão}: ela fecha quando o erro
-do seu $\pi$ já não move meia marca de $c_n$, e a primeira que fecha é $n=4$. Daí a regra do
+mura na $8$ --- e o \textbf{limite dimensional é função da luz da dimensão}: cada $c_n$ determina o
+seu $n$, e o percurso fecha exactamente quando $n$ é par, sem régua nenhuma sobre o erro de $\pi$. Daí a regra do
 desenho: \emph{nunca se amputa um polinómio} --- elevar o grau é exacto (a linha de Pascal), e o
 grau e o passo sobem até fechar na régua, decididos pelo relógio do corpo estelar.
 
 \medido{$q_4=32=2^5$ e $c_4=16$ marcas; o percurso de todas as arestas fecha nas dimensões pares e
-não nas ímpares; na torre $n=2,4,8,16$ o $q_n$ é potência de $2$ pura; $\pi_n$ sai da meia-corda de
-Arquimedes com erro a cair dois bits por dobra (a forma do cosseno \emph{cancela} além da dobra
-$26$, a da meia-corda não); e o limite dimensional: $\mathrm{erro}_n\cdot c_n$ dá $0{,}63$ marcas
-em $n=2$ (não fecha), $0{,}08$ em $n=4$ (\textbf{fecha}), e desce daí --- a primeira dimensão que
-fecha é a $4$; e o \textbf{teste decisivo} que separa a relação $c_n=\pi_n R_n$ de uma identidade
-por construção: o $R$ vem de \emph{outro instrumento} --- a órbita DESENHADA (q passos de aresta
-unitária, uma marca de rotação por passo), com o diâmetro medido das coordenadas --- e o $\pi$
-geométrico (perímetro contado sobre diâmetro medido) concorda com o da dobra à precisão do próprio
-desenho, $|geo-dobra|\le 6\times10^{-12}$, com a órbita a fechar na origem
-(\code{tests/luz\_periodo.c} §L6); e o relógio desenha a curva plana decidindo o grau
+não nas ímpares; na torre $n=2,4,8,16$ o $q_n$ é potência de $2$ pura; a lei \emph{sem} $\pi$ --- cada
+passo da torre $n\to2n$ multiplica o relógio por $2^{n+1}$, $q_{2n}=q_n\cdot2^{n+1}$, exacto nos três
+passos $4\to32\to1024\to524\,288$, e o $\pi_n$ que saía da meia-corda de Arquimedes com o erro a cair
+dois bits por dobra era o \emph{transporte}, não a lei; o limite dimensional como função da luz --- as
+quatro luzes da torre são $2$, $16$, $512$, $262\,144$, cada $c$ determina o seu $n$, e as quatro
+fecham por $n$ ser par; e o \textbf{teste decisivo} que separa a relação $c_n=\pi_n R_n$ de uma
+identidade por construção, agora em dois instrumentos \emph{exactos}: a álgebra ($G^{q/2}=-I$, a meia
+volta) e a geometria (no passo $q/2$ a posição é $(1,1)$, $D^{2}=2$), com a órbita a fechar na origem
+sem uma raiz ($G=\mathrm{rot}\,90$, $\det=1$, $G^{4}=I$) --- o resíduo entre o $\pi$ geométrico e o da
+dobra era do desenho em vírgula flutuante, e saiu com ele
+(\code{tests/luz\_periodo.c} §L6a--§L6b); e o relógio desenha a curva plana decidindo o grau
 --- o «o» em $1$, o «e» em $13$, o tempo é o arco ($11$ contra $1$ no controlo), a roupa é o rasto
 de grau $1$ e a cúbica é só a referência (\code{tests/relogio\_curva.c}).}
 
@@ -3043,7 +3044,7 @@ comparação, e Lagrange é homogénea de grau~4.
 \emph{Verificado:} \code{tests/entrega.c} ($11{:}0$). A ida e volta pela
 palavra é exacta nos $10\,000$ decimais de três casas e a comparação é por
 produto cruzado --- a \emph{mesma} fracção, não uma que difere abaixo de uma
-régua; pelo \code{double}, com os mesmos números, $175$ deles não voltam, e
+régua; pelo \code{double}, com os mesmos números, só $80$ voltam, e
 é esse par de números lado a lado que dá conteúdo ao primeiro. Mede-se
 ainda que a palavra \textbf{é} Euclides --- os seus quocientes são os do
 algoritmo do mdc, um a um e na mesma ordem, em $3600$ pares --- e que os

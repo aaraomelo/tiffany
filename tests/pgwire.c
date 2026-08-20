@@ -11,6 +11,8 @@
  *   §W4  listener TCP 127.0.0.1: SSL→N, Startup, Query SELECT, Terminate
  *   §W5  Extended: Parse/Bind($1)/Execute/Sync ≡ Simple WHERE a=7
  *   §W6  Describe statement + Close + Sync
+ *   §W7  fachada pqlike (Trio PG5): PQconnectdb/PQexec/PQntuples/PQgetvalue sobre o
+ *        NOSSO wire — sem -lpq — e a MESMA consulta pelos dois caminhos
  *
  *   cc -O2 -std=c99 -w -Ilib -Ibanco -DSQL_NO_MAIN -DPGWIRE_NO_MAIN -o /tmp/pgwire \
  *      tests/pgwire.c banco/sql.c banco/pgwire.c -lm && /tmp/pgwire
@@ -28,6 +30,7 @@
 #include "pgwire.h"
 #include "pgwire_api.h"
 #include "pgwire_sess.h"
+#include "pqlike.h"
 
 /* Lê mensagens tipadas até ReadyForQuery (ou erro). */
 static int cli_ate_ready(int fd, uint8_t *acc, int cap, int *nacc){
@@ -636,6 +639,164 @@ int main(void){
                viu_t, viu_n, viu_3, viu_z, sess.stmt_n.vivo, mal ? "FALHA" : "ok");
         ok("§W6 Describe(S)→ParamDesc+NoData; Close(S); Sync→Ready",
            mal == 0 && viu_t && viu_n && viu_3 && viu_z);
+    }
+
+    /* ═══ §W7 A FACHADA pqlike (Trio PG5) ════════════════════════════════════
+     * A porta que uma aplicação C conhece é `PQconnectdb`/`PQexec`, e ela está
+     * escrita AQUI (lib/pqlike.h) sobre o FEBE da casa — não se linka `-lpq`.
+     *
+     * E o que se mede não é «a fachada corre»: é que os DOIS CAMINHOS pelo mesmo
+     * objecto concordam. A mesma base, a mesma consulta, por `sql_api` directo e
+     * por PQexec através do socket, têm de dar as mesmas linhas, as mesmas células
+     * e a mesma tag. Se só se medisse a fachada, ela podia devolver qualquer coisa
+     * consistente consigo própria.
+     *
+     * O gume é o outro lado: uma consulta INVÁLIDA tem de chegar como
+     * PGRES_FATAL_ERROR com mensagem, e não como um resultado vazio — um erro que
+     * se parece com «zero linhas» é o pior desfecho para quem chama. */
+    printf("\n§W7 pqlike: PQconnectdb/PQexec ≡ sql_api, e o erro chega como erro.\n\n");
+    {
+        const char *base = "/tmp/pgwire_w7";
+        SqlOut ref, seed;
+        int sv[2] = {-1, -1}, mal = 0;
+        pid_t kid = -1;
+        char linhas_ref[SQL_OUT_MAX_ROWS][SQL_OUT_MAX_COLS][SQL_OUT_CELL];
+        char tag_ref[80];
+        int ncols_ref = 0, nrows_ref = 0;
+
+        unlink("/tmp/pgwire_w7.mem");
+        unlink("/tmp/pgwire_w7.prog");
+        signal(SIGPIPE, SIG_IGN);
+
+        /* (1) o CAMINHO DIRECTO: semeia e guarda a referência */
+        if(!sql_abrir(base)) mal++;
+        else{
+            sql_executa("CREATE TABLE t (a,b,c)", &seed);
+            sql_executa("INSERT INTO t VALUES (7,10,20)", &seed);
+            sql_executa("INSERT INTO t VALUES (3,30,40)", &seed);
+            if(!sql_executa("SELECT * FROM t", &ref) || !ref.ok) mal++;
+            ncols_ref = ref.ncols; nrows_ref = ref.nrows;
+            snprintf(tag_ref, sizeof tag_ref, "%s", ref.tag);
+            memcpy(linhas_ref, ref.cell, sizeof linhas_ref);
+            sql_fechar();
+        }
+        printf("      directo (sql_api): %d linhas x %d colunas, tag=%s\n",
+               nrows_ref, ncols_ref, tag_ref);
+
+        if(pipe(sv) < 0) mal++;
+        if(!mal) kid = fork();
+        if(!mal && kid < 0) mal++;
+
+        if(!mal && kid == 0){
+            int lfd, cfd, porto = 0, n = 0;
+            close(sv[0]);
+            if(!sql_abrir(base)) _exit(3);
+            lfd = pgwire_listen(0, &porto);
+            if(lfd < 0){ sql_fechar(); _exit(4); }
+            {
+                uint8_t msg[3];
+                msg[0] = (uint8_t)((porto >> 8) & 0xff);
+                msg[1] = (uint8_t)(porto & 0xff);
+                msg[2] = 'R';
+                if(write(sv[1], msg, 3) != 3){ close(lfd); sql_fechar(); _exit(5); }
+            }
+            /* duas ligações: a boa e a do gume */
+            for(n = 0; n < 2; n++){
+                cfd = accept(lfd, NULL, NULL);
+                if(cfd < 0) break;
+                pgwire_serve_conn(cfd, 77, 88);
+                close(cfd);
+            }
+            close(lfd); sql_fechar();
+            _exit(0);
+        }
+
+        if(!mal && kid > 0){
+            uint8_t msg[3];
+            int porto = 0, st = -1;
+            char conninfo[128];
+            PGconn *c;
+            PGresult *r;
+
+            close(sv[1]); sv[1] = -1;
+            if(read(sv[0], msg, 3) != 3 || msg[2] != 'R') mal++;
+            else porto = ((int)msg[0] << 8) | (int)msg[1];
+            close(sv[0]); sv[0] = -1;
+            snprintf(conninfo, sizeof conninfo,
+                     "host=127.0.0.1 port=%d user=tiffany dbname=reino", porto);
+
+            /* (2) o CAMINHO DA FACHADA */
+            c = PQconnectdb(conninfo);
+            if(PQstatus(c) != CONNECTION_OK){
+                printf("      PQconnectdb: %s\n", PQerrorMessage(c));
+                mal++;
+            }else{
+                const char *sv_ver = PQparameterStatus(c, "server_version");
+                printf("      PQconnectdb ok · servidor=%s · backend pid=%d\n",
+                       sv_ver ? sv_ver : "(sem)", PQbackendPID(c));
+                if(!sv_ver || !sv_ver[0]) mal++;
+
+                r = PQexec(c, "SELECT * FROM t");
+                if(PQresultStatus(r) != PGRES_TUPLES_OK){
+                    printf("      PQexec: %s (%s)\n",
+                           PQresStatus(PQresultStatus(r)), PQresultErrorMessage(r));
+                    mal++;
+                }else{
+                    int i, j, difs = 0;
+                    if(PQntuples(r) != nrows_ref || PQnfields(r) != ncols_ref) difs++;
+                    for(i = 0; i < PQntuples(r) && i < nrows_ref; i++)
+                        for(j = 0; j < PQnfields(r) && j < ncols_ref; j++)
+                            if(strcmp(PQgetvalue(r, i, j), linhas_ref[i][j]) != 0) difs++;
+                    if(strcmp(PQcmdStatus(r), tag_ref) != 0) difs++;
+                    if(PQresultTruncado(r)) difs++;
+                    printf("      pqlike (FEBE):     %d linhas x %d colunas, tag=%s\n",
+                           PQntuples(r), PQnfields(r), PQcmdStatus(r));
+                    printf("      célula (0,0)=%s (1,0)=%s · divergências entre os"
+                           " dois caminhos: %d\n",
+                           PQgetvalue(r, 0, 0), PQgetvalue(r, 1, 0), difs);
+                    if(difs) mal++;
+                }
+                PQclear(r);
+                PQfinish(c);
+            }
+
+            /* (3) O GUME: o erro tem de CHEGAR como erro, e não como zero linhas */
+            {
+                PGconn *c2 = PQconnectdb(conninfo);
+                int erro_ok = 0;
+                if(PQstatus(c2) == CONNECTION_OK){
+                    PGresult *r2 = PQexec(c2, "SELECT * FROM tabela_que_nao_existe");
+                    erro_ok = (PQresultStatus(r2) == PGRES_FATAL_ERROR)
+                           && PQresultErrorMessage(r2)[0] != 0
+                           && PQntuples(r2) == 0;
+                    printf("      consulta inválida → %s  «%s»\n",
+                           PQresStatus(PQresultStatus(r2)), PQresultErrorMessage(r2));
+                    PQclear(r2);
+                    PQfinish(c2);
+                }
+                if(!erro_ok) mal++;
+            }
+
+            waitpid(kid, &st, 0);
+            if(!WIFEXITED(st) || WEXITSTATUS(st) != 0){
+                printf("      filho saiu %d/%d\n", WIFEXITED(st), WEXITSTATUS(st));
+                mal++;
+            }
+        }
+        if(sv[0] >= 0) close(sv[0]);
+        if(sv[1] >= 0) close(sv[1]);
+
+        printf("\n");
+        ok("§W7 A FACHADA libpq É NOSSA E OS DOIS CAMINHOS CONCORDAM: `PQconnectdb`,"
+           " `PQexec`, `PQntuples`, `PQgetvalue` e `PQcmdStatus` escritos em"
+           " lib/pqlike.h sobre o FEBE da casa — sem `-lpq` do sistema —, e a mesma"
+           " consulta pela porta directa (sql_api) e pelo socket dá as MESMAS linhas,"
+           " as mesmas células e a mesma tag. Medir só a fachada não dizia nada: ela"
+           " podia ser consistente consigo própria e errada. E o gume é o lado que"
+           " tem de falhar — uma tabela que não existe chega como PGRES_FATAL_ERROR"
+           " COM mensagem, e não como um SELECT de zero linhas, que é o desfecho que"
+           " engana quem chama",
+           mal == 0 && nrows_ref == 2 && ncols_ref == 3);
     }
 
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);

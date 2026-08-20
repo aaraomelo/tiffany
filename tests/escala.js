@@ -35,14 +35,41 @@ const RAIZ = path.join(__dirname, '..')
 const TEX = path.join(RAIZ, 'tests', 'tex')
 const ESTILO = path.join(RAIZ, 'estilo.tex')
 let falhas = 0
-const ok = (m, c) => { console.log('      ' + (c ? '✓' : '✗') + '  ' + m); if (!c) falhas++ }
+const ok = (m, c) => {
+  console.log('      ' + (c ? '✓' : '✗') + '  ' + m)
+  /* a UNIDADE conta-se: sem esta linha a bateria soma UMA unidade grossa (o exit)
+   * por este ficheiro inteiro, e as asserções finas desaparecem do total. */
+  console.log('#UNIT ' + (c ? 'ok' : 'falha') + ' ' + m)
+  if (!c) falhas++
+}
 
 if (!fs.existsSync(TEX)) { console.log('\n  tests/tex não compilado.  NÃO MEDIU.\n'); process.exit(2) }
+
+/* O estilo.tex escreve DECIMAIS, e um decimal escrito com e casas é um INTEIRO
+ * sobre 10^e — não um double. Lê-se assim: `n` é o inteiro e `e` as casas que a
+ * FONTE escreveu. A meia-unidade da última casa (o que o autor do estilo podia
+ * ter querido e arredondou) é a única folga que existe, e sai da fonte: não é
+ * um número escolhido por mim. Guarda-se em escala DUPLA — 2n ± 1 sobre 2·10^e
+ * — para que a meia-unidade seja inteira. */
+function lerDecimal (txt) {
+  const [ip, fp = ''] = txt.split('.')
+  return { n: BigInt(ip + fp), e: fp.length }
+}
+/* a caixa do valor v = n/10^e, em vigésimos-de-última-casa: [lo, hi] / (2·10^e) */
+const caixa = (d) => ({ lo: 2n * d.n - 1n, hi: 2n * d.n + 1n, den: 2n * 10n ** BigInt(d.e) })
+/* p/q < φ^(1/3)  ⟺  2p³ < (1+√5)q³   (p, q > 0) — inteiro, sem raiz calculada */
+const menorQueRaiz3Phi = (p, q) => { const d = 2n * p ** 3n - q ** 3n; return d <= 0n || d * d < 5n * q ** 6n }
+const maiorQueRaiz3Phi = (p, q) => { const d = 2n * p ** 3n - q ** 3n; return d > 0n && d * d > 5n * q ** 6n }
+/* a/b < c/d com b,d > 0 */
+const fracMenor = (a, b, c, d) => a * d < c * b
 
 function degraus () {
   const s = fs.readFileSync(ESTILO, 'utf8')
   return [...s.matchAll(/\\fontsize\{([\d.]+)\}\{([\d.]+)\}/g)]
-    .map((m) => ({ corpo: parseFloat(m[1]), entre: parseFloat(m[2]) }))
+    .map((m) => ({
+      corpo: parseFloat(m[1]), entre: parseFloat(m[2]),
+      corpoD: lerDecimal(m[1]), entreD: lerDecimal(m[2]),
+    }))
     .sort((a, b) => a.corpo - b.corpo)
 }
 function compoe (fonte, saida) {
@@ -66,37 +93,108 @@ const RAIZ3 = Math.pow(PHI, 1 / 3)
 
 console.log('§T1  A escala é GEOMÉTRICA, e a razão é φ^(1/3).\n')
 {
-  console.log('      degrau   corpo    razão ao anterior')
-  let fora = 0, pares = 0
+  /* auditoria 20/08: o `|r − φ^(1/3)| > 0,002` era uma régua ESCRITA À MÃO, e em
+   * doubles. A régua do objecto é outra e já cá estava: o estilo escreve os
+   * degraus com duas casas, logo cada degrau é um inteiro ± meia centésima. A
+   * razão de dois degraus vive então na caixa [ (2b−1)/(2a+1), (2b+1)/(2a−1) ],
+   * e a asserção é que φ^(1/3) CAI DENTRO dela — decidida em BigInt, sem raiz
+   * cúbica calculada e sem uma vírgula em lado nenhum. É mais apertada que o
+   * 0,002 nos degraus grandes e mais larga nos pequenos, porque é a folga que
+   * a FONTE tem, e não a que eu escolhi. */
+  /* a lei, como função dos degraus: dá para reaplicar a degraus PERTURBADOS, e é
+   * assim que o gume deixa de ser um sed meu e passa a ser medida */
+  const leiT1 = (cs) => {
+    let fora = 0
+    for (let i = 1; i < cs.length - 1; i++) {      /* o último salta um degrau: 23,42 = φ^(2/3)·16,99 */
+      const a = caixa(cs[i - 1]), b = caixa(cs[i])
+      if (!(menorQueRaiz3Phi(b.lo * a.den, a.hi * b.den) &&
+            maiorQueRaiz3Phi(b.hi * a.den, a.lo * b.den))) fora++
+    }
+    return fora
+  }
+  const cs = D.map((d) => d.corpoD)
+  const pares = D.length - 2
+  console.log('      degrau   corpo    razão ao anterior   caixa da razão contém φ^(1/3)')
   for (let i = 0; i < D.length; i++) {
     const r = i ? D[i].corpo / D[i - 1].corpo : 0
-    if (i && i < D.length - 1) {                  /* o último salta um degrau: 23,42 = φ^(2/3)·16,99 */
-      pares++
-      if (Math.abs(r - RAIZ3) > 0.002) fora++
-    }
-    console.log('      ' + String(i).padEnd(8) + String(D[i].corpo).padEnd(8) + (i ? r.toFixed(4) : '—'))
+    const um = (i && i < D.length - 1)
+      ? (leiT1([cs[i - 1], cs[i], cs[i]]) === 0 ? 'sim' : 'NÃO') : ''
+    console.log('      ' + String(i).padEnd(8) + String(D[i].corpo).padEnd(8) +
+                (i ? r.toFixed(4) : '—').padEnd(20) + um)
   }
-  console.log('\n      φ^(1/3) = ' + RAIZ3.toFixed(4) + '   —  e os ' + pares + ' pares batem a menos de 0,002')
+  const fora = leiT1(cs)
+  /* O GUME, medido e não afirmado: de quantas unidades da ÚLTIMA CASA é preciso
+   * mexer um degrau para a lei cair? Se fosse ∞ a lei não podia falhar. */
+  let gumeT1 = Infinity, ondeT1 = -1
+  for (let i = 0; i < cs.length; i++) {
+    for (let k = 1; k <= 20 && k < gumeT1; k++) {
+      for (const sg of [1n, -1n]) {
+        const p = cs.map((d, j) => (j === i ? { n: d.n + sg * BigInt(k), e: d.e } : d))
+        if (leiT1(p) > 0) { gumeT1 = k; ondeT1 = i }
+      }
+    }
+  }
+  console.log('\n      φ^(1/3) ≈ ' + RAIZ3.toFixed(4) + '   —  e cai na caixa dos ' + pares +
+              ' pares, ' + (fora === 0 ? 'em todos' : 'fora em ' + fora))
+  console.log('      GUME: bastam ' + gumeT1 + ' centésimas no degrau ' + ondeT1 + ' para a lei cair')
   /* NÃO se afirma que a escala é bonita: afirma-se que a razão é CONSTANTE e igual a um número
    * que o sistema já tem. Se fosse constante e igual a outra coisa, isto falhava — e falhava
    * bem, porque aí não seria φ. */
-  ok('a escala é geométrica e a razão é φ^(1/3) = ' + RAIZ3.toFixed(4) + ', em ' + pares +
-     ' pares consecutivos e a menos de 0,002. Não se afirma que a escala é bonita: afirma-se que' +
-     ' a razão é CONSTANTE e igual a um número que o sistema já tem. Se fosse constante e igual' +
-     ' a outra coisa, isto falhava — e falhava bem', fora === 0 && pares >= 4)
+  ok('a escala é geométrica e a razão é φ^(1/3) em ' + pares + ' pares consecutivos: a razão de' +
+     ' cada par, com a folga das duas casas que o estilo.tex escreve, contém φ^(1/3) — e a' +
+     ' decisão é em INTEIROS (2p³ vs (1+√5)q³), sem raiz cúbica e sem limiar meu. E a lei PODE' +
+     ' cair: ' + gumeT1 + ' centésimas no degrau ' + ondeT1 + ' chegam. Não se afirma que a escala' +
+     ' é bonita: afirma-se que a razão é CONSTANTE e igual a um número que o sistema já tem',
+     fora === 0 && pares >= 4 && gumeT1 < Infinity)
 }
 
 console.log('\n§T2  A entrelinha é uma razão CONSTANTE do corpo — a mesma nos sete.\n')
 {
+  /* auditoria 20/08: «dispersão < 0,002» e «|média − 1,4| > 0,04» eram duas
+   * réguas minhas sobre uma média de doubles. O que se quer dizer — «é a MESMA
+   * razão nos sete» — diz-se sem régua nenhuma: cada degrau dá uma CAIXA para
+   * entre/corpo (o inteiro escrito ± meia centésima), e a razão é a mesma sse
+   * as oito caixas se INTERSECTAM. É um facto sobre racionais, e é ou não é.
+   * E «não é 1,4» passa a ser: 7/5 está FORA dessa intersecção. */
   const rs = D.map((d) => d.entre / d.corpo)
-  const min = Math.min(...rs), max = Math.max(...rs), med = rs.reduce((a, b) => a + b, 0) / rs.length
+  /* a intersecção das caixas, como função dos pares (corpo, entre) */
+  const leiT2 = (ds) => {
+    let LN = 0n, LD = 1n, HN = 1n, HD = 0n          /* [LN/LD, HN/HD], começa em [0, ∞) */
+    for (const d of ds) {
+      const c = caixa(d.corpoD), e = caixa(d.entreD)
+      const ln = e.lo * c.den, ld = c.hi * e.den    /* mínimo possível de entre/corpo */
+      const hn = e.hi * c.den, hd = c.lo * e.den    /* máximo possível */
+      if (fracMenor(LN, LD, ln, ld)) { LN = ln; LD = ld }
+      if (HD === 0n || fracMenor(hn, hd, HN, HD)) { HN = hn; HD = hd }
+    }
+    return { LN, LD, HN, HD, cruzam: fracMenor(LN, LD, HN, HD) }
+  }
+  const I = leiT2(D)
+  const cruzam = I.cruzam
+  const foraDoSete = fracMenor(7n, 5n, I.LN, I.LD) || fracMenor(I.HN, I.HD, 7n, 5n)
+  /* o GUME, medido: quantas centésimas de entrelinha esvaziam a intersecção */
+  let gumeT2 = Infinity, ondeT2 = -1
+  for (let i = 0; i < D.length; i++) {
+    for (let k = 1; k <= 20 && k < gumeT2; k++) {
+      for (const sg of [1n, -1n]) {
+        const p = D.map((d, j) => (j === i
+          ? { ...d, entreD: { n: d.entreD.n + sg * BigInt(k), e: d.entreD.e } } : d))
+        if (!leiT2(p).cruzam) { gumeT2 = k; ondeT2 = i }
+      }
+    }
+  }
   console.log('      entrelinha/corpo: ' + rs.map((r) => r.toFixed(4)).join('  '))
-  console.log('      mínimo ' + min.toFixed(4) + '   máximo ' + max.toFixed(4) + '   dispersão ' +
-              (max - min).toFixed(4))
-  console.log('      e o tradutor usava 14/10 = 1,4000 — perto, e outra coisa')
-  ok('a entrelinha é a MESMA razão do corpo nos sete degraus, com dispersão abaixo de 0,002 —' +
-     ' e é ' + med.toFixed(4) + ', não 1,4. A diferença é pequena e é o que faz o texto parecer' +
-     ' apertado: a entrelinha é o que dá ar à página', (max - min) < 0.002 && Math.abs(med - 1.4) > 0.04)
+  console.log('      as ' + D.length + ' caixas intersectam-se: ' + cruzam + ' — e a intersecção é' +
+              ' [' + (Number(I.LN) / Number(I.LD)).toFixed(6) + ', ' + (Number(I.HN) / Number(I.HD)).toFixed(6) + ']')
+  console.log('      e o tradutor usava 14/10 = 1,4 — que está ' + (foraDoSete ? 'FORA' : 'dentro') +
+              ' dessa intersecção')
+  console.log('      GUME: ' + gumeT2 + ' centésimas na entrelinha do degrau ' + ondeT2 + ' esvaziam-na')
+  ok('a entrelinha é a MESMA razão do corpo nos ' + D.length + ' degraus — as caixas que as duas' +
+     ' casas do estilo.tex dão a entre/corpo têm intersecção NÃO VAZIA, logo existe uma razão' +
+     ' única compatível com os oito. E 7/5 está fora dela: o 1,4 do tradutor é perto e é outra' +
+     ' coisa. Tudo em racionais exactos, sem média e sem limiar — e a lei PODE cair: ' + gumeT2 +
+     ' centésimas na entrelinha do degrau ' + ondeT2 + ' chegam',
+     cruzam && foraDoSete && gumeT2 < Infinity)
 }
 
 console.log('\n§T3  E o PDF usa os degraus da escala, não 10 e 14.\n')

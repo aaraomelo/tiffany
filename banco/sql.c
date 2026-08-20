@@ -172,7 +172,33 @@ typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
 #define S_MT      57         /* mascara {total=todos os bits, e=0} — limpa o .e apos GOLD */
 #define S_KZ      49         /* 49..56  o zero de cada comparação (a contração compara com 0) */
 #define S_LIN     4096       /* 4096+  o rascunho de cada átomo: acc, prod, cnt, passo…   */
-#define S_EXPR    64         /* 64..191  os temporários da árvore da expressão          */
+/* A ÁRVORE DA EXPRESSÃO COMEÇAVA EM 64 — E O CORPO DA COLUNA VIVE EM 60..67.
+ *
+ * As duas regiões PISAVAM-SE em 64..67, que são as colunas 4 a 7. Numa tabela com
+ * cinco colunas ou mais, o primeiro SELECT com WHERE escrevia o temporário da raiz
+ * por cima do corpo declarado, E FICAVA NO DISCO: medido, uma coluna `MORFICO(6)`
+ * — o par (3,6) — passava a (1,0), que é RACIONAL. A partir daí a aritmética
+ * daquela coluna é a álgebra errada, para sempre, e nada o diz.
+ *
+ * Ninguém o apanhou porque todas as tabelas dos medidores têm três colunas.
+ *
+ * A árvore desce por `dest+2` e `dest+34` recursivamente, e o espaço reservado era
+ * 128 slots. Fica 72..199, e o nome da tabela vai para 224 — com folga declarada
+ * entre as três regiões em vez de encostadas. */
+#define S_EXPR    72         /* 72..199  os temporários da árvore da expressão          */
+/* O NOME DA TABELA — 192..207, dois caracteres por Word (Lei 7: o par são dois átomos).
+ *
+ * O catálogo guardava só {ncols, nrows}: a relação não tinha NOME. O `varre` lia o
+ * `FROM x` para uma variável e nunca a usava, e o mesmo no `INSERT INTO x`. A
+ * consequência não é cosmética — `SELECT * FROM tabela_que_nao_existe` devolvia as
+ * linhas da tabela que lá estava, e uma aplicação que se enganasse no nome recebia
+ * dados de outra e não tinha como saber. Pela porta FEBE isso chega ao driver como um
+ * SELECT bem sucedido.
+ *
+ * Base ANTIGA: o nome lê-se vazio (os slots estavam a zero) e aí aceita-se qualquer
+ * nome — é a mesma compatibilidade que o CORPO_INTEIRO tem por ser o código 0. */
+#define S_NOME    224        /* 224..239: 16 Words = 32 caracteres (folga até S_MATCH) */
+#define S_NOME_N  16
 #define S_MATCH   256        /* bitmap do resultado, uma linha por slot (256..511)      */
 #define MAXCOND   4          /* condições por termo                                     */
 #define MAXTERMO  4          /* termos ligados por OR                                   */
@@ -389,6 +415,58 @@ static Word cf_le(unsigned word_ix, unsigned rel){
 static void cf_grava(unsigned word_ix, unsigned rel, Word w){
     mem_grava(cf_slot_base(word_ix) + rel, w);
 }
+/* ── O NOME DA TABELA no catálogo ──────────────────────────────────────────────
+ * Dois caracteres por Word, minúsculas normalizadas: o SQL não distingue maiúsculas
+ * no identificador, e comparar sem normalizar recusaria `FROM T` depois de
+ * `CREATE TABLE t` — que é uma recusa errada, e das que só aparecem em produção. */
+static char baixa1(char c){ return (c >= 'A' && c <= 'Z') ? (char)(c - 'A' + 'a') : c; }
+
+static void cat_nome_grava(const char *nome){
+    char n[S_NOME_N * 2 + 1];
+    int i;
+    snprintf(n, sizeof n, "%s", nome ? nome : "");
+    for(i = 0; n[i]; i++) n[i] = baixa1(n[i]);
+    for(i = (int)strlen(n); i < S_NOME_N * 2; i++) n[i] = 0;
+    for(i = 0; i < S_NOME_N; i++)
+        mem_grava(S_NOME + (unsigned)i, w8((unsigned)(unsigned char)n[2*i],
+                                          (unsigned)(unsigned char)n[2*i + 1]));
+}
+
+static void cat_nome_le(char *out, int cap){
+    int i, j = 0;
+    for(i = 0; i < S_NOME_N && j + 2 < cap; i++){
+        Word w = mem_le(S_NOME + (unsigned)i);
+        out[j++] = (char)w.total;
+        out[j++] = (char)w.e;
+    }
+    if(j < cap) out[j] = 0; else out[cap - 1] = 0;
+}
+
+/* 1 = é esta tabela (ou a base é antiga e não tem nome guardado); 0 = não é. */
+static int cat_nome_bate(const char *nome){
+    char guardado[S_NOME_N * 2 + 2], pedido[S_NOME_N * 2 + 2];
+    int i;
+    cat_nome_le(guardado, (int)sizeof guardado);
+    if(!guardado[0]) return 1;                    /* base sem nome: compatibilidade */
+    snprintf(pedido, sizeof pedido, "%s", nome ? nome : "");
+    for(i = 0; pedido[i]; i++) pedido[i] = baixa1(pedido[i]);
+    return strcmp(guardado, pedido) == 0;
+}
+
+/* a recusa DIZ-SE, e diz qual é a tabela que existe — senão o erro não ajuda ninguém */
+static int cat_nome_recusa(const char *nome){
+    char guardado[S_NOME_N * 2 + 2];
+    cat_nome_le(guardado, (int)sizeof guardado);
+    printf("erro: a tabela «%s» não existe nesta base — a que existe é «%s».\n"
+           " A consulta é RECUSADA, e nada é devolvido.\n", nome ? nome : "", guardado);
+    if(sql_cap){
+        sql_cap->ok = 0;
+        snprintf(sql_cap->err, sizeof sql_cap->err,
+                 "relation \"%s\" does not exist", nome ? nome : "");
+    }
+    return 0;
+}
+
 /* A BARREIRA DO BANCO: dado, fsync, ponteiro, fsync.
  *
  * banco.c já tinha esta disciplina e o SQL não: aqui as células e o catálogo iam no MESMO
@@ -834,6 +912,7 @@ static int cria(const char *resto){
         }
         printf("\n");
     }
+    cat_nome_grava(nome);            /* a relação passa a TER nome, e é este */
     if(sql_cap){
         snprintf(sql_cap->tag, sizeof sql_cap->tag, "CREATE TABLE");
         sql_cap->ncols = 0; sql_cap->nrows = 0;
@@ -846,6 +925,7 @@ static int insere(const char *resto){
     char nome[64];
     if(!palavra(&p, "INTO")) return 0;
     if(!ident(&p, nome, sizeof nome)) return 0;
+    if(!cat_nome_bate(nome)) return cat_nome_recusa(nome);
     if(!palavra(&p, "VALUES")) return 0;
     pula(&p); if(*p != '(') return 0; p++;
 
@@ -1913,6 +1993,8 @@ static int varre(const char *resto, int acao){
         if(!palavra(&p, "FROM")) return 0;
         if(!ident(&p, nome, sizeof nome)) return 0;
     }
+    /* o nome foi lido nos TRÊS ramos e não era usado em nenhum: agora decide */
+    if(!cat_nome_bate(nome)) return cat_nome_recusa(nome);
     citadas_where = 0;
     tem_where = le_where(&p, &cl);
     if(tem_where < 0){
@@ -3208,6 +3290,39 @@ int main(int argc, char **argv){
                 Word w = mem_le(S_CORPO + (unsigned)cs[q].col);
                 ok(cs[q].rot, w.total == cs[q].corpo && w.e == cs[q].parm);
             }
+            /* E O CORPO TEM DE SOBREVIVER A UMA CONSULTA — que é onde ele morria.
+             *
+             * O corpo vive em S_CORPO..S_CORPO+7 e a árvore do WHERE começava em 64,
+             * que é S_CORPO+4: numa tabela de CINCO colunas ou mais, o primeiro
+             * SELECT com expressão escrevia o temporário por cima da declaração e
+             * DEIXAVA-O NO DISCO. Uma coluna MORFICO(6) — o par (3,6) — voltava
+             * (1,0), que é RACIONAL, e a álgebra daquela coluna passava a ser outra
+             * sem que nada o dissesse. Todas as tabelas dos medidores tinham três
+             * colunas, e por isso ninguém lá chegou.
+             *
+             * A asserção mede o PAR (corpo, parâmetro) ANTES e DEPOIS: são os dois
+             * lados do mesmo facto, e sem o «antes» a igualdade podia ser dois lixos
+             * iguais. E o caso escolhido tem SEIS colunas de propósito — com três,
+             * este medidor passava sem tocar no defeito. */
+            {
+                Word a0, a1, d0, d1;
+                executa("CREATE TABLE seis (a,b,c,d,e MORFICO,f AUREO)");
+                executa("INSERT INTO seis VALUES (1,2,3,4,5,6)");
+                a0 = mem_le(S_CORPO + 4); a1 = mem_le(S_CORPO + 5);
+                executa("SELECT * FROM seis WHERE 2*a + b - c + d - a > 0");
+                d0 = mem_le(S_CORPO + 4); d1 = mem_le(S_CORPO + 5);
+                printf("     coluna 4: (%u,%u) antes → (%u,%u) depois do WHERE\n",
+                       (unsigned)a0.total, (unsigned)a0.e, (unsigned)d0.total, (unsigned)d0.e);
+                printf("     coluna 5: (%u,%u) antes → (%u,%u) depois do WHERE\n",
+                       (unsigned)a1.total, (unsigned)a1.e, (unsigned)d1.total, (unsigned)d1.e);
+                ok("o corpo da coluna SOBREVIVE a um SELECT com WHERE, e mede-se numa"
+                   " tabela de SEIS colunas — a árvore da expressão pisava S_CORPO+4..7"
+                   " e a declaração MORFICO(6) voltava RACIONAL, no disco e em silêncio",
+                   a0.total == CORPO_MORFICO && a0.e == 6
+                   && a1.total == CORPO_AUREO && a1.e == 1
+                   && d0.total == a0.total && d0.e == a0.e
+                   && d1.total == a1.total && d1.e == a1.e);
+            }
             executa("CREATE TABLE t (a,b,c)");     /* repõe a tabela do resto do teste */
             executa("INSERT INTO t VALUES (7,10,20)");
             executa("INSERT INTO t VALUES (3,30,40)");
@@ -4160,8 +4275,12 @@ int main(int argc, char **argv){
         fprog = open(g, O_RDWR|O_CREAT|O_TRUNC, 0644);
         printf("$ SELECT * FROM t WHERE a = 7\n"); executa("SELECT * FROM t WHERE a = 7");
         fechar_base();
-        printf("\n");
-        return 0;
+        /* O EXIT SEGUE AS UNIDADES. Estava `return 0` fixo: o modo teste emitia dezenas
+         * de `ok()` e saía SEMPRE 0, logo uma asserção vermelha dava verde no exit.
+         * Quem apanhava era a rede da bateria (exit 0 com unidade vermelha é FALHA), e
+         * uma rede não substitui o medidor dizer a verdade sobre si. */
+        printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
+        return falhas ? 1 : 0;
     }
     /* O SCRIPT: um comando por linha, lido da entrada. É por aqui que um produtor de fora — o
      * pipe do Stratum, por exemplo — despeja o que tem sem ter de chamar o binário uma vez por
