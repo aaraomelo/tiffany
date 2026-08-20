@@ -9,11 +9,11 @@ Fase E (descida 8 bits): Trios 1–3 FECHADOS; reducao §DW liga W_8²→𝔽₁
 
     inteiros    §NT1–§NT11b (14/14) · cadeia §KW (10/10) · migracao §GW (7/7)
     reducao     §DW (8/8) · dual16 §EW (6/6) · transformada §TW (26/26) · palavra §PW (34/34)
-    bateria     510 : 497 verdes (cristal/refs pré-existentes)
+    bateria     513 : 500 verdes, 13 falhas (cristal/refs pré-existentes)
     doubles     3906 → 0              python3 tools/doubles_todos.py  FECHADO
     limiares    58 → 0 régua          (+4 valor físico JS, não alvo)
     long/64     0 ll · 16 i128 rest.   python3 tools/longs_todos.py  (ll FECHADO; i128 só trava)
-    selo        33794071d3e65d7c      bash tools/bateria.sh
+    selo        4e94e51a8af9a844      bash tools/bateria.sh
 
 Verificar SEMPRE com:  bash tools/bateria.sh   (lê AS DUAS linhas: total e unidades)
 
@@ -292,6 +292,9 @@ Objectivo: propagar W_8 / uint16-cruz / G_geom pela torre sem contaminar ∼.
     transformada §TW: RtOp coord. byte — 26/26 asserções
     palavra §PW: fronteira W_8 vs EMB_S interior — 34/34 asserções
 
+  eval.txt (inteiros.tex): 4/4 correcções obrigatórias FECHADAS
+    anel no quociente · isometria discreta · unimodular · ordem transportada
+
   Medidores âncora:
     §NT8   equivalência uint16 vs wrap
     §NT11  wrap≠sat; contadores
@@ -303,6 +306,12 @@ Objectivo: propagar W_8 / uint16-cruz / G_geom pela torre sem contaminar ∼.
     · definir ℤ ou ∼ via mod 256
     · confundir G_alg com memória finita
     · chamar homeomorfismo o que é isometria discreta d=µ(△)
+
+
+─── FASE F — SELAGEM (pós-descida) ─────────────────────────── FECHADA ───
+  bateria 513 : 500 verdes · selo 4e94e51a8af9a844
+  atestados actualizados: dual16 · palavra · reducao · transformada_universal
+  refcruz: inteiros.tex alinhado (dívida sec:dourada pré-existente)
 
 
 4. O MÉTODO — como se tira um tipo largo ou uma escala
