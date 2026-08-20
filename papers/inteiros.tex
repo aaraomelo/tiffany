@@ -1,0 +1,807 @@
+% !TeX program = pdflatex
+% papers/inteiros.tex — O DEGRAU N → Z: reversibilidade da soma, palavra em 8 bits.
+%
+% Auto-contido: cd papers && pdflatex inteiros.tex
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[portuguese]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\newtheorem{teorema}{Teorema}
+\newtheorem{proposicao}[teorema]{Proposição}
+\newtheorem{corolario}[teorema]{Corolário}
+\newtheorem{definicao}{Definição}
+\newtheorem{observacao}{Observação}
+
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\abs}[1]{\lvert #1\rvert}
+\newcommand{\dg}{^{\dagger}}
+\newcommand{\Word}{\mathcal{W}}
+\newcommand{\sepcol}{\quad\penalty0$\big|$\quad\penalty0}
+\newcommand{\colunas}[3]{%
+  \par\smallskip\noindent{\footnotesize\raggedright
+  \textbf{prova} (Algébrico): #1\sepcol
+  \textbf{realiza} (aqui): #2\sepcol
+  \textbf{verifica}: #3\par}\smallskip}
+
+\definecolor{cinza}{gray}{0.35}
+\newcommand{\medido}[1]{\par\medskip\noindent{\small\color{cinza}\textbf{Medido.} #1}\par\medskip}
+
+\input{gkcapa}
+
+\begin{document}
+\gkcapa{Os inteiros a partir dos naturais}
+       {$\mathbb{Z}=\mathbb{N}^{2}/{\sim}$ --- classe de equivalência,
+        soma cruzada $a+d=b+c$}
+       {oito leis, pares, soma cruzada, $\nu$, memória por duplicidade}
+\maketitle
+
+%======================================================================
+\begin{abstract}
+Degrau $k{=}0$ da torre (\code{analitico thm:tecidos}): construção dual
+$T+T^{*}$ --- $\mathbb{N}^{2}/{\sim}$ com $(a,b)\sim(c,d)\iff a+d=b+c$.
+O inteiro é a \textbf{classe} $[(a,b)]$; $\Phi([(a,b)])=a-b$.
+\end{abstract}
+
+%======================================================================
+\section*{Onde este documento vive}
+
+Paper \textbf{primeiro} da torre $T_{k+1}=T_k+T_k^{*}$
+(\code{analitico thm:tecidos}):
+\[
+\mathbb{N}\!\to\!\mathbb{Z}\!\to\!\mathbb{Q}\!\to\!\mathbb{R}
+\quad\text{(soma)}\quad\text{(mult.)}\quad\text{(corte)}.
+\]
+\textbf{Molde dual} (Lei~4, $T+T^{*}$): duplicar, ler nos dois lados,
+quocientar. Em $\mathbb{N}$ a soma é total e a subtracção é \textbf{parcial}
+(\code{teoria thm:fibra-por-andar}). Em $\mathbb{Z}$ a subtracção torna-se
+\textbf{total}; paga-se o \textbf{sinal} e a \textbf{boa ordem} de $\mathbb{N}$
+--- \emph{não} a ordem total de $\mathbb{Z}$, que permanece via
+$\Phi$ após o quociente (Def.~\ref{def:espaco}). A folha $\iota(a,b)=(b,a)$ realiza o dual no
+espaço; $\nu(z)=-z$ no quociente (\code{algebrico cor:cadeia},
+$\mathbb{Z}=\mathbb{N}+{}$sinal).
+
+\medskip\noindent\textbf{Dois circuitos em paralelo} (padrão de toda a série):
+\[
+\mathbb{N}\xrightarrow{T+T^{*}}\mathbb{N}^{2}
+\xrightarrow[\mathrm{Cruz}]{\mathrm{Dir}}\xrightarrow{\,q\,}\mathbb{Z}
+\qquad
+I\xrightarrow{p}\mathbb{Z}^{2}\xrightarrow{|p^{-1}|}G_{\mathrm{geom}}.
+\]
+O \emph{Racionais} (\code{racionais sec:torre}) trata o degrau seguinte com o
+mesmo molde e produto cruzado.
+
+\medskip\noindent\textbf{O que este documento RECEBE e o que ACRESCENTA}
+--- a mesma estrutura que no \emph{Racionais} e no \emph{Corpo Algébrico}
+(\code{algebrico def:espaco}):
+
+\[
+\boxed{
+\begin{array}{lll}
+\textbf{RECEBE do centro} & \textbf{onde está lá} & \textbf{o que se faz aqui}\\[3pt]
+\text{a torre }T_{k+1}=T_k+T_k^{*} & \code{analitico thm:tecidos} & \text{instancia o degrau }k{=}0\\[2pt]
+\text{as oito leis} & \code{analitico sub:oitoleis} & \text{Leis 0--4,7 explícitas; 5--6 recebidas}\\[2pt]
+\text{o par dual e Dir/Cruz} & \code{algebrico def:espaco} & \text{soma cruzada em }\mathbb{N}^{2}\\[2pt]
+\text{Peano e cúspide} & \code{algebrico thm:cuspide} & \text{prova Peano; cúspide realiza}\\[6pt]
+\textbf{ACRESCENTA} & \multicolumn{2}{l}{\text{---e é só isto---}}\\[3pt]
+\text{a REPRESENTAÇÃO por pares} & \text{Def.~\ref{def:espaco}} & V_{\mathrm{int}}/{\sim}=\mathbb{Z}\\[2pt]
+\text{a EQUIVALÊNCIA }$\sim$ & \text{Prop.~\ref{prop:equiv}} & $a+d=b+c$ antes do quociente\\[2pt]
+\text{o ISOMORFISMO $\Phi$} & \text{Thm.~\ref{thm:z}} & $\Phi([(a,b)])=a-b$\\[2pt]
+\text{a FOLHA e $\nu$} & \text{§\ref{sec:sinal}} & inversao $\nu(z)=-z$; $\Phi(\nu(x))=-\Phi(x)$\\[2pt]
+\text{dois circuitos }$q\parallel p$ & \text{§\ref{sec:memoria}} & $G_{\mathrm{alg}}$ vs.\ $G_{\mathrm{geom}}$; $\Word_8$
+\end{array}}
+\]
+
+%======================================================================
+\section{As oito leis --- marcos da construção}\label{sec:leis}
+
+\noindent As oito leis (\code{analitico sub:oitoleis}) \emph{estruturam} este
+paper --- não decoram. Cada lei é primitiva com operador e medidor; neste
+degrau $k{=}0$ realizam-se no molde dual $T+T^{*}$:
+duplicar $\to$ ler em paralelo ($\mathrm{Dir}/\mathrm{Cruz}$) $\to$ quocientar.
+
+\begin{center}\small
+\begin{tabular}{@{}clp{4.6cm}cl@{}}
+\toprule
+ & lei (centro) & realização $\mathbb{N}\!\to\!\mathbb{Z}$ & estatuto & § \\
+\midrule
+\textbf{0} & divisão do zero & folha; $[(1,0)]\oplus[(0,1)]\sim0$; $0\dg=\infty$ elevado & explícita & \ref{sec:peano}, \ref{sec:sinal} \\
+\textbf{1} & dual ($1\dg=-1$) & $\iota$; $\nu(z)=-z$; $\mathbb{Z}=\mathbb{N}+{}$sinal & explícita & \ref{sec:sinal} \\
+\textbf{2} & bidual ($T\dg=-T$) & $\mathrm{Dir}/\mathrm{Cruz}$; aranha $R^{4}=\mathrm{id}$ & mista & \ref{sec:espaco}, \ref{sec:memoria} \\
+\textbf{3} & trial $\{-1,0,+1\}$ & cúspide $\tau=0$; $+0=-0$; cúspide realiza $P(0)$ & explícita & \ref{sec:peano} \\
+\textbf{4} & tetral ($T+T^{*}$) & $\sim$; classe $[(a,b)]$; $\Phi$; Peano & explícita & \ref{sec:peano}, \ref{sec:espaco} \\
+\textbf{5} & pental ($x^{2}=-1$) & $G_{\mathrm{geom}}\bmod2$ & recebida & \ref{sec:memoria} \\
+\textbf{6} & hexal (interface) & $\otimes\leftrightarrow(a-b)(c-d)$ & recebida & \ref{sec:ops} \\
+\textbf{7} & octonião dual & $q$ vs.\ $p$; par $\neq$ classe; $G$ & explícita & \ref{sec:espaco}, \ref{sec:memoria} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{Hierarquia} (como \code{racionais.tex}): \emph{recebe} do
+\emph{Corpo Algébrico}/\emph{Analítico}; \emph{realiza} neste degrau;
+\emph{verifica} nos medidores. Leis~5 e~6 não se derivam aqui --- interface
+herdada. Leis~0, 1, 3, 4, 7 têm realização interna imediata em
+$\mathbb{N}^{2}/{\sim}$.
+
+%----------------------------------------------------------------------
+\subsection{Justificação das oito leis neste degrau}\label{sec:leis-realizadas}
+
+\noindent Cada entrada segue \textbf{prova} $\mid$ \textbf{realiza} $\mid$
+\textbf{verifica}.
+
+\medskip\noindent\textbf{Lei~0} (divisão do zero).
+\emph{Prova:} \code{algebrico sec:lei0}, \code{thm:inversao-dual} --- o
+cancelamento $1+(-1)=0$ não se postula.
+\emph{Realiza:} subtracção parcial em $\mathbb{N}$ (§N0); folha
+$[(1,0)]\oplus[(0,1)]\sim[(0,0)]$ induzida por $1+0=1+0$; elevação
+$\infty\oplus(-1)=0$ (§M8).
+\emph{Verifica:} \code{aritmetica.c} §N0; §NT5; §M8.
+
+\medskip\noindent\textbf{Lei~1} (dual).
+\emph{Prova:} \code{algebrico cor:cadeia} ($\mathbb{Z}=\mathbb{N}+{}$sinal),
+\code{thm:inversao-dual} ($a-b=a\oplus b^{\dagger}$).
+\emph{Realiza:} $\iota(a,b)=(b,a)$ no espaço; $\nu([(a,b)])=-(a-b)$ no
+quociente; $\nu^{2}=\mathrm{id}$, $\nu(xy)=-\nu(x)\nu(y)$.
+\emph{Verifica:} §NT6, §NT6b, §NT9.
+
+\medskip\noindent\textbf{Lei~2} (bidual).
+\emph{Prova:} \code{analitico sub:oitoleis} --- $T\dg=-T$ no sector
+antissimétrico; \emph{não} confundir com $\iota$ (Lei~1) nem com
+$V^{**}$ (degrau seguinte, \code{racionais.tex}).
+\emph{Realiza:} duas réguas em paralelo --- $\mathrm{Dir}=D(a,b)=a+b$ e, no
+quociente, $\mathrm{Cruz}=\Phi$ (Def.~\ref{def:espaco}); geometricamente
+$T\dg=-T$ é \emph{recebida} da camada algébrica; a realização geométrica
+neste degrau é $R^{4}=\mathrm{id}$ na aranha (§AG9) --- \emph{não} deduzida
+de $\mathbb{N}^{2}/{\sim}$.
+\emph{Verifica:} §NT10 (Dir $\neq$ invariante; Cruz $=$ invariante); §AG9.
+
+\medskip\noindent\textbf{Lei~3} (trial).
+\emph{Prova:} \code{algebrico thm:cuspide}, \code{thm:unificacao} ---
+$\tau\in\{-1,0,+1\}$; centro $\tau=0$.
+\emph{Realiza:} cúspide ($\tau=0$, $+0=-0$) \emph{realiza} leitura de $P(0)$;
+ordens $2,3,4$ da tríade medidas (\code{lei8\_trial.c}).
+\emph{Verifica:} \code{cuspide.c} §C4--§C7; \code{lei8\_trial.c} §L1--§L3.
+
+\medskip\noindent\textbf{Lei~4} (tetral, $T+T^{*}$).
+\emph{Prova:} \code{analitico thm:tecidos} --- $T_{k+1}=T_k+T_k^{*}$;
+\code{algebrico def:inducao} --- indução/meta-indução.
+\emph{Realiza:} duplicação $\mathbb{N}\to\mathbb{N}^{2}$; Prop.~\ref{prop:equiv}
+($\sim$ equivalência); classe $[(a,b)]$; Thm.~\ref{thm:z} ($\Phi$); Peano
+(Cor.~\ref{cor:peano-soma}).
+\emph{Verifica:} §NP; §M0; §NT1--§NT3.
+
+\medskip\noindent\textbf{Lei~5} (pental, $x^{2}=-1$).
+\emph{Prova:} \code{algebrico} --- interface binária no centro algébrico
+(\emph{não} deste paper).
+\emph{Realiza:} projeção $G_{\mathrm{geom}}\mapsto G_{\mathrm{geom}}\bmod2$
+na descida geométrica.
+\emph{Verifica:} \code{aranha\_g.c} §AG6--§AG7.
+
+\medskip\noindent\textbf{Lei~6} (hexal, interface).
+\emph{Prova:} \code{analitico thm:estrelaseis} --- soma$=$produto é
+interface do hexal (\emph{não} demonstrada neste degrau).
+\emph{Realiza:} $\otimes$ bem-definido; $\mathrm{Cruz}(\otimes)=(a-b)(c-d)$
+--- compatível com a interface, pré-$\mathbb{Q}$.
+\emph{Verifica:} §NT4.
+
+\medskip\noindent\textbf{Lei~7} (octonião dual, ligar sem fundir).
+\emph{Prova:} \code{algebrico def:espaco} --- par distinto do quociente;
+\code{arquitetura thm:multiplicidade} --- memória por duplicidade.
+\emph{Realiza:} $q\colon\mathbb{N}^{2}\to\mathbb{Z}$ vs.\
+$p\colon I\to\mathbb{Z}^{2}$; $G_{\mathrm{alg}}$ vs.\ $G_{\mathrm{geom}}$
+(Obs.~\ref{obs:galg}); envelope $\Word_8$ restrige fibra (Def.~\ref{def:w8}).
+\emph{Verifica:} §NT1--§NT2, §NT7--§NT11; §AG1--§AG11.
+
+\medskip\noindent\textbf{RECEBE} (\code{algebrico def:espaco}): molde dual,
+torre, fibra/pagamento, tríade, cúspide, Dir/Cruz.
+\textbf{ACRESCENTA}: $\mathbb{N}^{2}/{\sim}\cong\mathbb{Z}$, folha, $\Phi$,
+dois circuitos $q\parallel p$, envelope $\Word_8$.
+
+%======================================================================
+\section{Os naturais --- Leis 0, 3 e 4}\label{sec:peano}
+
+\begin{definicao}[Os naturais]\label{def:peano}
+$\mathbb{N}=\{0,1,2,\ldots\}$ com sucessor $S(n)=n+1$, Peano (incluso $0$):
+$S(n)\neq0$; $S$ injectivo; \textbf{indução}
+($P(0)\wedge\forall n(P(n)\Rightarrow P(S(n)))\Rightarrow\forall n\,P(n)$);
+soma e produto recursivos usuais.
+\end{definicao}
+
+A indução de Peano fornece a prova ascendente (Thm.~\ref{thm:peano-ind}).
+A meta-indução (\code{thm:meta-inducao}) é camada de \textbf{realização/verificação}
+nos medidores --- não substitui o axioma de indução.
+
+\noindent\textbf{Lei~3} (trial): a verificação pelos dois lados passa pela
+tríade Cantor/Viviani/Julia (\code{algebrico thm:unificacao}) e pela
+cúspide (\code{algebrico thm:cuspide}): $\tau=\operatorname{sign}(\mathrm{disc})
+\in\{-1,0,+1\}$; o centro é $\tau=0$ com $+0=-0$; Cantor/Julia
+($\nu^{2}=\mathrm{id}$) fixam a álgebra e trocam as pontas; o fractal de
+Farey é a órbita das cúspides (\code{cuspide.c} §C4). A prova de $P(0)$
+usa só Peano (Thm.~\ref{thm:peano-ind}); a cúspide ($\tau=0$, $+0=-0$)
+\emph{realiza} a leitura geométrica dessa base (\code{cuspide.c} §C7).
+
+\noindent\textbf{Lei~0} (nome do centro algébrico: \emph{divisão do zero} --- neste
+degrau \textbf{não} é divisão aritmética $1/0$; é decomposição dual da classe
+nula): em $(\mathbb{N},+)$ a subtracção é parcial ---
+$a+x=b$ só quando $b\ge a$ (\code{aritmetica.c} §N0). A cadeia do degrau:
+\[
+\boxed{
+\text{subtracção parcial em }\mathbb{N}
+\;\longrightarrow\;
+\text{duplicação }V_{\mathrm{int}}=\mathbb{N}^{2}
+\;\longrightarrow\;
+\text{quociente }\mathbb{N}^{2}/{\sim}
+\;\longrightarrow\;
+\text{subtracção total em }\mathbb{Z}
+}
+\]
+Paga-se em $\mathbb{Z}$ pela folha (\S\ref{sec:sinal}), onde a construção
+\emph{demonstra}
+\[
+[(1,0)]+[(0,1)]=[(1,1)]=[(0,0)]:
+\]
+ou, ao nível dos representantes, $(1,1)\sim(0,0)$.
+Não se postula o cancelamento: é \textbf{induzido pela equivalência}
+($1+0=1+0$); geometricamente, a folha $\iota$ realiza-o
+(\code{algebrico thm:inversao-dual}).
+
+\begin{teorema}[Esquema de indução]\label{thm:peano-ind}
+Se $P$ verifica $P(0)$ e $\forall n\,(P(n)\Rightarrow P(S(n)))$, então
+$\forall n\in\mathbb{N}\,P(n)$.
+\end{teorema}
+
+\begin{proof}
+Axioma de indução de Peano (Def.~\ref{def:peano}). $\square$
+\end{proof}
+
+\begin{corolario}[Soma recursiva]\label{cor:peano-soma}
+Para todo $n,m\in\mathbb{N}$: $\mathrm{nt\_soma}(n,m)=n+m$.
+\end{corolario}
+
+\begin{proof}
+Indução em $m$. Base $m=0$: $\mathrm{nt\_soma}(n,0)=n=n+0$. Passo:
+$\mathrm{nt\_soma}(n,S(m))=S(\mathrm{nt\_soma}(n,m))=S(n+m)=n+S(m)$ pela
+definição recursiva e hipótese de indução. \emph{Prova:} só Peano
+(Def.~\ref{def:peano}, Thm.~\ref{thm:peano-ind}). \emph{Realiza:} a cúspide
+($\tau=0$, $+0=-0$) e a Lei~4 leem o passo dualmente
+(\code{cuspide.c} §C7). \emph{Verifica:} \code{aritmetica.c} §NP;
+\code{conservacao\_metrica.c} §M0. $\square$
+\end{proof}
+
+\colunas{\code{def:inducao}; \code{thm:unificacao}; \code{thm:cuspide}}
+        {Peano; trial; subtracção parcial; indução em $m$}
+        {§NP; §M0; \code{cuspide.c} §C4--§C7; \code{lei8\_trial.c}}
+
+%======================================================================
+\section{O espaço de pares e a classe --- Leis 2, 4 e 7}\label{sec:espaco}
+
+\begin{definicao}[O espaço de pares e a relação]\label{def:espaco}
+\textbf{Lei~4} ($T+T^{*}$): o espaço total é
+\[
+\boxed{\;V_{\mathrm{int}}=\mathbb{N}^{2}\;}
+\]
+--- duplicação de $\mathbb{N}$ --- com involução $\iota(a,b)=(b,a)$
+(\textbf{Lei~1} no espaço). A relação de equivalência vive em $V_{\mathrm{int}}$:
+\[
+\boxed{\;(a,b)\sim(c,d)\iff a+d=b+c\;}
+\]
+A condição é a \textbf{soma cruzada nula}: dois naturais por lado, nenhuma
+subtracção em $\mathbb{N}$.
+
+\medskip\noindent
+O inteiro é a \textbf{classe de equivalência} (como em
+\code{racionais.tex} Def.~\ref{def:espaco}):
+\[
+\boxed{\;
+\mathbb{Z}=V_{\mathrm{int}}/{\sim}
+\;=\;\mathbb{N}^{2}/{\sim}\;}
+\]
+Elemento típico: $[(a,b)]$ --- par $\neq$ classe (\textbf{Lei~7}).
+
+\medskip\noindent
+\textbf{Duas leituras em paralelo} --- \textbf{Lei~2} e \textbf{Lei~4}
+(\code{algebrico def:espaco}). \emph{Antes} do quociente não se usa
+subtracção em $\mathbb{N}$:
+\[
+D(a,b):=a+b\qquad\text{(Dir)},\qquad
+C_{\times}(a,b;c,d):\ a+d=b+c\qquad\text{(soma cruzada)}.
+\]
+Depois de $\Phi$ (Thm.~\ref{thm:z}), no quociente:
+\[
+\boxed{\;\mathrm{Cruz}(x):=\Phi(x),\qquad
+D([(a,b)])=a+b\ \text{(não invariante)}.\;}
+\]
+Ex.: $(2,0)\sim(3,1)$ --- $\mathrm{Cruz}$ vale $2$ em ambos, mas
+$D(2,0)=2\neq D(3,1)=4$ (\code{tests/inteiros.c} §NT10).
+\end{definicao}
+
+\begin{proposicao}[$\sim$ é relação de equivalência]\label{prop:equiv}
+Em $V_{\mathrm{int}}=\mathbb{N}^{2}$:
+\begin{enumerate}\itemsep2pt
+\item \textbf{Reflexiva:} $(a,b)\sim(a,b)$ pois $a+b=b+a$.
+\item \textbf{Simétrica:} $a+d=b+c\Rightarrow c+b=a+d$, logo $(c,d)\sim(a,b)$.
+\item \textbf{Transitiva:} se $a+d=b+c$ e $c+f=d+e$, somando
+      $a+d+c+f=b+c+d+e$; por comutatividade
+      $(a+f)+(c+d)=(b+e)+(c+d)$; pela cancelabilidade em $\mathbb{N}$,
+      $a+f=b+e$, logo $(a,b)\sim(e,f)$.
+\end{enumerate}
+\end{proposicao}
+
+\begin{proof}
+(1)--(2) imediatos. (3) Dadas $a+d=b+c$ e $c+f=d+e$, soma-se:
+$a+d+c+f=b+c+d+e$. Por comutatividade,
+$(a+f)+(c+d)=(b+e)+(c+d)$; pela cancelabilidade da soma em $\mathbb{N}$,
+$a+f=b+e$, logo $(a,b)\sim(e,f)$. $\square$
+\end{proof}
+
+\begin{proposicao}[Soma cruzada]\label{prop:somacruz}
+$(a,b)\sim(c,d)\iff C_{\times}(a,b;c,d)\iff a+d=b+c$.
+\end{proposicao}
+
+\begin{proof}
+Definição de $\sim$. $\square$
+\end{proof}
+
+\begin{teorema}[Construção dos inteiros]\label{thm:z}
+Seja $V_{\mathrm{int}}=\mathbb{N}^{2}$ com $(a,b)\sim(c,d)\iff a+d=b+c$
+(Prop.~\ref{prop:equiv}). Então o quociente $\mathbb{Z}=V_{\mathrm{int}}/{\sim}$ recebe estrutura
+de anel; o mapa
+\[
+\boxed{\;
+\Phi\colon V_{\mathrm{int}}/{\sim}\;\overset{\cong}{\longrightarrow}\;\mathbb{Z},\qquad
+\Phi([(a,b)])=a-b\;}
+\]
+é isomorfismo de anéis (identificação com $\mathbb{Z}$ usual). Sob $\Phi$,
+\[
+(a,b)\oplus(c,d)=(a+c,b+d),\qquad
+(a,b)\otimes(c,d)=(ac+bd,ad+bc)
+\]
+(Def.~\ref{def:ops}) induzem $+$ e $\cdot$ usuais. Elementos especiais:
+\[
+0=[(0,0)]=[(n,n)],\qquad +1=[(1,0)],\qquad -1=[(0,1)].
+\]
+Além disso, $[(a,b)]=[(c,d)]\iff a-b=c-d$ e
+\[
+[(a,b)]\le[(c,d)]\iff a-b\le c-d
+\]
+(\emph{ordem transportada} por $\Phi$ --- não há ordem
+componente-a-componente canônica em $\mathbb{N}^{2}$ cuja descida ao
+quociente produza a ordem usual de $\mathbb{Z}$).
+\end{teorema}
+
+\begin{proof}[Prova]
+(1) $\Phi$ bem-definida: Prop.~\ref{prop:somacruz}.
+(2) Sobrejetiva: $k\in\mathbb{Z}$ --- se $k\ge0$, $\Phi([(k,0)])=k$; se
+$k<0$, $\Phi([(0,-k)])=k$.
+(3) Injectiva: $\Phi([(a,b)])=\Phi([(c,d)])$ $\Rightarrow$ $a-b=c-d$
+$\Rightarrow$ $a+d=b+c$ $\Rightarrow$ $[(a,b)]=[(c,d)]$.
+(4) $\Phi$ preserva $+$ e $\cdot$: Thm.~\ref{thm:bem-definido}.
+(5) Como $\Phi$ é bijecção e transporta $\oplus,\otimes$ para $+,\cdot$
+usuais, associatividade, comutatividade, distributividade, identidades e
+inversos em $\mathbb{Z}$ descem a $V_{\mathrm{int}}/{\sim}$: o quociente
+\textbf{é} anel e $\Phi$ isomorfismo de anéis.
+(6) Ordem: $x\le y\iff\Phi(x)\le\Phi(y)$ com a ordem usual em $\mathbb{Z}$.
+$\square$
+\end{proof}
+
+\noindent O objecto novo deste degrau não é uma nova operação sobre números: é
+a representação que torna a subtracção total no quociente:
+\[
+\boxed{
+\begin{array}{c}
+\text{pares de naturais }V_{\mathrm{int}}=\mathbb{N}^{2}\\
+\downarrow\\
+\text{soma cruzada }a+d=b+c\\
+\downarrow\\
+\text{classe de equivalência }[(a,b)]\\
+\downarrow\\
+\mathbb{Z}=V_{\mathrm{int}}/{\sim}\\
+\downarrow\\
+\bar\iota=\nu\ \text{(swap)}\\
+\downarrow\\
+x\mapsto -x
+\end{array}}
+\]
+
+\begin{corolario}[Ordem no quociente]\label{cor:ordem}
+A ordem total de $\mathbb{Z}=V_{\mathrm{int}}/{\sim}$ é
+\[
+x\le y\iff\Phi(x)\le\Phi(y)\iff\mathrm{Cruz}(x)\le\mathrm{Cruz}(y).
+\]
+Ela \textbf{não} coincide com ordem componente-a-componente canônica em
+$\mathbb{N}^{2}$: a ordem do quociente é a transportada por $\Phi$.
+\end{corolario}
+
+\begin{observacao}[Molde do degrau seguinte]
+$\mathbb{N}\!\to\!\mathbb{Z}$: $a+d=b+c$ (soma cruzada). $\mathbb{Z}\!\to\!\mathbb{Q}$:
+$ad=bc$ (produto cruzado; \code{racionais.tex} Thm.~\ref{thm:q}). Analogia:
+\[
+\boxed{\text{soma cruzada}\longrightarrow\text{produto cruzado}}.
+\]
+\end{observacao}
+
+\medskip\noindent\textbf{Lei~7} --- projeção quociente e fibra:
+\[
+q\colon V_{\mathrm{int}}\to\mathbb{Z},\qquad q(a,b)=[(a,b)],\qquad
+q^{-1}(z)=\{(a,b)\in\mathbb{N}^{2}:a-b=z\}.
+\]
+Ex.: $(3,1)\sim(2,0)$ --- ambos em $q^{-1}(2)$; o par guarda
+\textbf{representação}, a classe $[(a,b)]$ guarda o \textbf{valor}.
+$G_{\mathrm{alg}}(z):=|q^{-1}(z)|$ (\S\ref{sec:memoria}).
+
+\medskip\noindent\textbf{Lei~1} --- o swap desce ao quociente:
+\[
+\boxed{\;
+\iota:V_{\mathrm{int}}\to V_{\mathrm{int}},\quad
+\bar\iota:\mathbb{Z}\to\mathbb{Z},\quad
+\bar\iota([(a,b)])=[(b,a)],\quad
+\nu=\bar\iota,\quad
+\Phi(\nu(x))=-\Phi(x).\;}
+\]
+Se $(a,b)\sim(c,d)$, então $a+d=b+c$ implica $b+c=a+d$, logo
+$\iota(a,b)\sim\iota(c,d)$: $\bar\iota$ é bem-definida
+(\code{racionais.tex} §\ref{sec:espaco}, mesmo argumento).
+
+\colunas{\code{algebrico def:espaco}; \code{racionais def:espaco}}
+        {$\sim$ equivalência; classe $[(a,b)]$; $\Phi=a-b$; $\bar\iota$}
+        {§NT1--§NT2, §NT10}
+
+%======================================================================
+\section{Operações e folha --- Leis 1 e 6}\label{sec:ops}
+
+\begin{definicao}[Operações no par]\label{def:ops}
+Operações em $V_{\mathrm{int}}=\mathbb{N}^{2}$ \emph{antes} do quociente:
+\[
+(a,b)\oplus(c,d):=(a+c,b+d),\qquad
+(a,b)\otimes(c,d):=(ac+bd,ad+bc),\qquad
+\boxed{\;\ominus(a,b):=\iota(a,b)=(b,a).\;}
+\]
+$\mathbb{N}^{2}$ com $\oplus$ e $\otimes$ \textbf{não} é anel --- a
+estrutura desce a $V_{\mathrm{int}}/{\sim}\cong\mathbb{Z}$ (Thm.~\ref{thm:z}).
+\end{definicao}
+
+\noindent\textbf{Lei~6} (interface recebida): no quociente, com
+$\mathrm{Cruz}=\Phi$,
+\[
+\boxed{\;
+\mathrm{Cruz}(x\cdot y)=\mathrm{Cruz}(x)\cdot\mathrm{Cruz}(y)\;}
+\]
+--- pois $\Phi(xy)=\Phi(x)\Phi(y)$; a identidade ``soma$=$produto'' pertence
+ao degrau anterior.
+
+\begin{teorema}[Bem-definido]\label{thm:bem-definido}
+Se $(a,b)\sim(a',b')$, $(c,d)\sim(c',d')$, então $\oplus$ e $\otimes$
+descendem a $+$ e $\cdot$ em $\mathbb{Z}$; $\iota(a,b)=(a,b)\iff a=b$.
+\end{teorema}
+
+\begin{proof}
+\textbf{(1)} Soma: $(a+c)+(b'+d')=(a'+c')+(b+d)$ implica
+$(a+c,b+d)\sim(a'+c',b'+d')$.
+\textbf{(2)} Produto: $\Phi([(a,b)]\otimes[(c,d)])=(ac+bd)-(ad+bc)
+=(\Phi([(a,b)]))(\Phi([(c,d)]))$.
+\textbf{(3)} $\iota(a,b)=(a,b)\iff a=b$. $\square$
+\end{proof}
+
+\begin{proposicao}[Fixos]\label{prop:fixos}
+$\operatorname{Fix}(\iota)=\{(n,n)\}$ no espaço;
+$\operatorname{Fix}(\nu)=\{0_{\mathbb{Z}}\}$ no quociente.
+\end{proposicao}
+
+\begin{corolario}[Embedding e folha]\label{cor:folha}
+$\eta(n)=[(n,0)]$ injectivo; $0_{\mathbb{Z}}=[(n,n)]$;
+oposto $=[(b,a)]$. Folha: $(n,0)\mapsto(0,n)$ e
+$[(n,0)]\oplus[(0,n)]\sim[(0,0)]$.
+\end{corolario}
+
+\colunas{\code{thm:operacao}}
+        {$\oplus$, $\otimes$, $\ominus$}
+        {§NT3--§NT5}
+
+%======================================================================
+\section{Sinal e involução --- Leis 0 e 1}\label{sec:sinal}
+
+\noindent\textbf{Lei~1}: $\mathbb{Z}=\mathbb{N}+{}$sinal
+(\code{algebrico cor:cadeia}). O sinal é escolha de metade após o espelho:
+$+1=[(1,0)]$, $-1=[(0,1)]$, $a-b=a\oplus b^{\dagger}$ com $1^{\dagger}=-1$
+(\code{algebrico thm:inversao-dual}).
+
+\begin{definicao}[Involuções --- três papéis distintos]\label{def:nu}
+\[
+\boxed{
+\iota\ \text{(Lei~1, espaço)},\quad
+\bar\iota=\nu\ \text{(Lei~1, quociente)},\quad
+\dagger\ \text{(Lei~0/1, operação recebida)}.
+}
+\]
+$\iota(a,b)=(b,a)=\ominus(a,b)$; $\nu([(a,b)])=\bar\iota([(a,b)])=[(b,a)]$;
+$\nu=\bar\iota=q\circ\iota$ (§\ref{sec:espaco}). Dual no espaço
+$\xrightarrow{q}$ inverso aditivo no quociente:
+\[
+\boxed{
+\begin{array}{ccc}
+V_{\mathrm{int}} & \xrightarrow{\;\iota\;} & V_{\mathrm{int}} \\
+\downarrow q && \downarrow q \\
+\mathbb{Z} & \xrightarrow{\;\nu\;} & \mathbb{Z}
+\end{array}
+\qquad q\circ\iota=\nu\circ q.}
+\]
+\end{definicao}
+
+\begin{teorema}[$\nu$ --- Lei~1]\label{thm:nu}
+Com $\nu=-\mathrm{id}_{\mathbb{Z}}$: $\nu\circ\nu=\mathrm{id}$;
+$\mathrm{Fix}(\nu)=\{0\}$; $\nu(x+y)=\nu(x)+\nu(y)$;
+$\boxed{\nu(xy)=-\nu(x)\nu(y)}$.
+Portanto $\nu$ é automorfismo \emph{aditivo} involutivo --- \emph{não} é,
+em geral, automorfismo multiplicativo de anel.
+\end{teorema}
+
+\begin{proof}
+(1)--(2) directos do swap. (3) como antes. (4)
+$\nu(xy)=-(xy)$ e $-\nu(x)\nu(y)=-(-x)(-y)=-(xy)$. $\square$
+\end{proof}
+
+\begin{teorema}[Mediante --- elevação de $\infty+1=-1$]\label{thm:mediante}
+$1+(-1)=0$. A componente $0\dg=\infty$ pertence à \textbf{interface recebida}
+da camada projectiva/Möbius (\code{algebrico sec:lei0}) --- \emph{não} é
+necessária para $\mathbb{N}^{2}/{\sim}\cong\mathbb{Z}$. No sector
+projectivo, a interface possui $M(\infty)=-1$ e $\infty\oplus(-1)=0$
+(\code{descida\_mobius.c} §M8). \textbf{Neste degrau}, a realização
+independente da mesma folha é
+$[(1,0)]+[(0,1)]=[(0,0)]$, sem dependência lógica do sector projectivo.
+\end{teorema}
+
+\colunas{\code{cor:cadeia}; \code{sec:lei0}}
+        {$\nu$; folha; $+1,-1,0$}
+        {§NT5--§NT6b, §NT9; §M8}
+
+%======================================================================
+\section{Memória por duplicidade --- Leis 2, 5 e 7}\label{sec:memoria}
+
+\noindent\textbf{Lei~7} materializa-se dinamicamente
+(\code{arquitetura thm:multiplicidade}). Realização geométrica
+$p\colon I\to\mathbb{Z}^{2}$, $G_{\mathrm{geom}}(x):=|p^{-1}(x)|$:
+\[
+\boxed{
+\text{trajetória}\xrightarrow{\,p\,}\text{dobra}\xrightarrow{|p^{-1}|}
+G_{\mathrm{geom}}\xrightarrow{\text{leitura}}\text{percepção}.
+}
+\]
+Duplicidade: $p(i)=p(j)$ com $i\neq j$ $\Rightarrow$ $G_{\mathrm{geom}}(p(i))>1$.
+Memória no \textbf{espaço}: $G_{t+1}(x)=G_{t}(x)+\mathbf{1}_{\{x=p(t)\}}$.
+
+\medskip\noindent\textbf{Realização com dobra.} O teorema é sobre $p$ e
+$G_{\mathrm{geom}}$; a curva do dragão (Heighway) é \textbf{teste} recursivo
+de dobra (\code{aranha\_g.c} §AG2). Recta injectiva: $G_{\mathrm{geom}}\equiv1$
+(§AG3) --- controlo sem identificação de índices.
+
+\medskip\noindent\textbf{Aranha estigmérgica}: lê $G_{\mathrm{geom}}$ (§AG8),
+escreve sem memória interna (§AG10). \textbf{Lei~2}:
+$T\dg=-T\leadsto R^{4}=\mathrm{id}$ --- realização geométrica, não
+identidade formal (§AG9).
+
+\medskip\noindent\textbf{Lei~5} (interface recebida do \emph{Corpo Algébrico}):
+$x^{2}=-1$ fornece a interface binária no centro algébrico; aqui
+realiza-se a projeção $G_{\mathrm{geom}}\mapsto G_{\mathrm{geom}}\bmod 2$
+(§AG6--§AG7) --- \emph{não} é derivação deste paper.
+
+\medskip\noindent\textbf{Dois padrões, dois espaços.}
+\begin{enumerate}\itemsep2pt
+\item \textbf{Fibra algébrica}: $q(a,b)=[(a,b)]$,
+      $q^{-1}(z)=\{(a,b):a-b=z\}$, $G_{\mathrm{alg}}(z)=|q^{-1}(z)|$.
+      Ex.: $(3,1)\sim(2,0)$ --- o par guarda \textbf{representação}; a
+      classe guarda o \textbf{valor quocientado}.
+\item \textbf{Fibra geométrica}: $p(i)=x$,
+      $p^{-1}(x)=\{i\in I:p(i)=x\}$, $G_{\mathrm{geom}}(x)=|p^{-1}(x)|$.
+      O índice/célula fornece o \textbf{endereço} espacial.
+\end{enumerate}
+\[
+\boxed{
+G_{\mathrm{alg}}\neq G_{\mathrm{geom}},\qquad
+G_{\mathrm{alg}}(z)=\aleph_0\ \text{(fibra estrutural)},\qquad
+G_{\mathrm{geom}}(x)=|p^{-1}(x)|\ \text{(multiplicidade da trajetória)}.
+}
+\]
+\begin{observacao}[$G_{\mathrm{alg}}$ no espaço ilimitado]\label{obs:galg}
+Em $\mathbb{N}^{2}$ sem envelope, $q^{-1}(z)=\{(a,b):a-b=z\}$ é
+\textbf{infinita enumerável} para todo $z$ (ex.: $z=2$:
+$(2,0),(3,1),(4,2),\ldots$). Logo $G_{\mathrm{alg}}(z)=\aleph_0$:
+cardinalidade \emph{estrutural}, não contador finito de memória --- a
+fibra algébrica não é «memória acumulada»; é propriedade cardinal de $q$.
+A memória operacional é $G_{\mathrm{geom}}$ (multiplicidade temporal de $p$,
+ou fibra restrita a $\Word_8$).
+\end{observacao}
+Mesmo padrão estrutural (duplicar $\to$ identificar $\to$ contar $\to$
+projectar); espaços distintos.
+
+\subsection{Par homomorfismo/difeomorfismo e conservação de área}\label{sec:metrica-dragao}
+
+O \emph{Corpo Algébrico} (\code{algebrico thm:metrica}) distingue três
+camadas: a métrica canónica de Lebesgue
+$d(A,B)=\mu(A\triangle B)$ --- no espaço discreto, preservar a métrica
+reduz-se a preservar a medida de contagem; já a \textbf{conservação da
+área} exige o jacobiano: $\mu(TA)=|\det T|\,\mu(A)$. No reticulado,
+$[\mathbb{Z}^{2}:T(\mathbb{Z}^{2})]=|\det T|$ (\code{metrica.c} §M8).
+O \emph{Corpo Topológico} (\code{topologico thm:det-volume}) identifica
+$|\det A_m|=1$ com o factor de volume do gato.
+
+\medskip\noindent\textbf{Neste degrau}, o par algébrico/topológico
+realiza-se em $\mathbb{Z}^{2}$:
+\[
+\boxed{
+\begin{array}{ll}
+\textbf{HOMOMORFISMO} & \Phi:V_{\mathrm{int}}/{\sim}\overset{\cong}{\to}\mathbb{Z}\ \text{(anel)};\\
+& \nu=-\mathrm{id}_{\mathbb{Z}}\ \text{--- automorfismo aditivo, não de anel}\\[4pt]
+\textbf{ISOMETRIA DISCRETA} & d(A,B)=\mu(A\triangle B)\ \text{no toro finito:}\\
+& \text{bijecção preserva contagem}\Rightarrow\text{isometria (§M1--§M2)}\\[4pt]
+\textbf{UNIMODULAR} & T\in\mathrm{GL}(2,\mathbb{Z}),\ |\det T|=1:\ \text{automorfismo}\\
+& \text{do reticulado; extensão linear a }\mathbb{R}^{2}\ \text{é difeomorfismo}\\
+& \text{que preserva área; }\mu(TA)=\mu(A)\ \text{(§M3, §M8)}
+\end{array}}
+\]
+
+\medskip\noindent\textbf{Dragão como teste de dobra.} A projeção
+$p\colon I\to\mathbb{Z}^{2}$ percorre o reticulado; cada passo é
+translação ($|\det|=1$). A curva do dragão (Heighway) \textbf{dobra} e
+produz $G_{\mathrm{geom}}(x)>1$ (§AG2): duplicidade de pré-imagem no
+espaço, sem perder contagem total ($\sum_x G_{\mathrm{geom}}(x)=|I|$, §AG5).
+A conservação de \textbf{área discreta} (células) sob mapas unimodulares
+é orthogonal à fibra algébrica $G_{\mathrm{alg}}=\aleph_0$: o dragão
+testa \textbf{memória geométrica por dobra}, não o cardinal de
+$q^{-1}(z)$. A descida $G_{\mathrm{geom}}\bmod 2$ (§AG6--§AG7) perde
+profundidade --- exactamente como a interface binária do centro algébrico.
+
+\colunas{\code{algebrico thm:metrica}; \code{topologico thm:det-volume}}
+        {$\Phi$; isometria $d=\mu(\triangle)$; unimodular $|\det|=1$; dragão}
+        {\code{metrica.c} §M3--§M8; \code{aranha\_g.c} §AG2, §AG5--§AG7}
+
+\colunas{\code{thm:multiplicidade}; \code{def:peano}}
+        {$G_{\mathrm{geom}}=|p^{-1}|$; dragão como teste}
+        {\code{aranha\_g.c} §AG1--§AG11}
+
+%======================================================================
+\section{Envelope $\Word_8$ --- Lei~7 na descida}\label{sec:palavra8}
+
+\noindent\textbf{Lei~7} restringe a fibra a um envelope finito; \textbf{Lei~4}
+materializa $T+T^{*}$ em representação computável antes do overflow.
+
+\noindent $\Word_8=\{0,\ldots,255\}$: \textbf{envelope finito de 8 bits}
+dos naturais --- $\mathbb{N}$ não se redefine como $\Word_8$.
+$\operatorname{succ}_8(w):=(w+1)\bmod 256$; wrap contado (\code{lib/naturais.h},
+\code{nt\_wrap}) --- \emph{não} é Peano. Cadeia:
+$\Word_8\to E_{16}\to\cdots\to\mathrm{GF}(2)$
+(\code{arquitetura sec:descida}).
+
+\begin{definicao}[Leitura cruzada exacta e projeções]\label{def:w8}
+Par $(a,b)\in\Word_8^{2}$. A equivalência $(a,b)\sim(c,d)$ testa-se pela
+\textbf{leitura cruzada exacta} em $\mathbb{N}$:
+\[
+\widetilde{C}(a,d):=a+d\in\{0,\ldots,510\}
+\quad\text{(uint16, como \code{d16\_mult} em \code{racionais.tex})}.
+\]
+$(a,b)\sim(c,d)\iff \widetilde{C}(a,d)=\widetilde{C}(b,c)$ --- \emph{sem}
+projectar para o byte. Quando o resultado deve \textbf{armazenar-se} em
+$\Word_8$, há duas políticas distintas:
+\[
+\pi_{\mathrm{wrap}}(s):=s\bmod 256,\qquad
+\pi_{\mathrm{sat}}(s):=\min(s,255).
+\]
+Contadores \code{w8\_wrap} e \code{w8\_saturou} registam transbordos
+\textbf{contados à parte dos defeitos} (cf.\ \code{qz\_saturou} em
+\code{racionais.tex}, §Resultados já obtidos).
+\end{definicao}
+
+\begin{proposicao}[Políticas de overflow]\label{prop:perde8}
+$\pi_{\mathrm{wrap}}$ e $\pi_{\mathrm{sat}}$ são construções distintas:
+para $s>255$, $\pi_{\mathrm{wrap}}(s)\neq\pi_{\mathrm{sat}}(s)$ em geral
+(ex.: $s=256$ dá $0$ vs.\ $255$). A equivalência $\sim$ em $\Word_8^{2}$
+\textbf{não} depende de nenhuma das duas --- usa $\widetilde{C}$ em uint16
+(§NT8). Só a \emph{escrita} no envelope escolhe política.
+\end{proposicao}
+
+\medskip\noindent\textbf{Implementação} (\code{lib/naturais.h}):
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+operação & função & o que faz & nota \\
+\midrule
+equiv.\ cruzada & \code{w8\_equiv} & $a+d=b+c$ em uint16 & não projecta \\
+projeção wrap & \code{w8\_proj\_wrap} & $s\bmod 256$ & conta \code{w8\_wrap} \\
+projeção sat. & \code{w8\_proj\_sat} & $\min(s,255)$ & conta \code{w8\_saturou} \\
+sucessor byte & \code{nt\_S} em $\Word_8$ & wrap $255\to0$ & conta \code{nt\_wrap} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medido{\code{inteiros.c} §NT1--§NT11; \code{aranha\_g.c} §AG6--§AG7;
+\code{cadeia.c} §KW ($10/10$); \code{migracao.c} §GW ($7/7$).}
+
+%======================================================================
+\section{Fundamentação --- inventário das oito leis}\label{sec:fundamentacao}
+
+\begin{center}\scriptsize
+\begin{tabular}{@{}cllll@{}}
+\toprule
+lei & enunciado (centro) & realização & medidor & \\
+\midrule
+0 & $0=(+1)\oplus(-1)$; $0\dg=\infty$
+  & subtracção parcial; folha; §M8 & §N0; §NT5; §M8 & $\checkmark$ \\
+1 & $1\dg=-1$; $\nu^{2}=\mathrm{id}$
+  & $\iota$; $\nu$; $\mathbb{N}+{}$sinal & §NT6; §NT6b; §NT9 & $\checkmark$ \\
+2 & $T\dg=-T$
+  & Dir/Cruz; $R^{4}=\mathrm{id}$ aranha & §NT10; §AG9 & $\checkmark$ \\
+3 & trial $\{-1,0,+1\}$
+  & cúspide; $+0=-0$; ordens 2,3,4 & §C4--§C7; §L1--§L3 & $\checkmark$ \\
+4 & $T+T^{*}$
+  & $\sim$ equivalência; classe; Thm.\ $\Phi$; Peano & §NP; §M0; §NT1--§NT3 & $\checkmark$ \\
+5 & $x^{2}=-1$ (recebida)
+  & $G_{\mathrm{geom}}\bmod2$ & §AG6--§AG7 & $\checkmark$ \\
+6 & hexal (recebida)
+  & $\otimes$; $(a-b)(c-d)$ & §NT4 & $\checkmark$ \\
+7 & ligar sem fundir
+  & $q\parallel p$; $G$; $\Word_8$ & §NT1--§NT2; §NT7--§NT11; §AG1--§AG11 & $\checkmark$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Nenhuma linha substitui demonstração matemática: verifica realização
+finita nos domínios indicados (\code{racionais.tex}, §Resultados já obtidos).
+Leis~5--6: interface \emph{recebida}, não derivada aqui.
+
+%======================================================================
+\section*{Síntese --- oito leis, dois circuitos}
+
+\noindent Cada lei com prova $\mid$ realiza $\mid$ verifica
+(§\ref{sec:leis-realizadas}):
+
+\begin{itemize}\itemsep2pt
+\item[\textbf{0}] Fibra parcial em $\mathbb{N}$; folha induz $0$; $\infty\oplus(-1)=0$.
+\item[\textbf{1}] $\iota$ no par; $\nu(z)=-z$; $\nu(xy)=-\nu(x)\nu(y)$.
+\item[\textbf{2}] $T\dg=-T$ recebida; realização $R^{4}=\mathrm{id}$ na aranha (§AG9).
+\item[\textbf{3}] Trial $\tau=0$; cúspide \emph{realiza} leitura de $P(0)$; ordens 2,3,4.
+\item[\textbf{4}] $T+T^{*}$: $\sim$; classe $[(a,b)]$; $\Phi=a-b$; Peano.
+\item[\textbf{5}] Interface recebida: $G_{\mathrm{geom}}\bmod2$.
+\item[\textbf{6}] Interface recebida: $\otimes\leftrightarrow(a-b)(c-d)$.
+\item[\textbf{7}] $q\parallel p$; representante $\neq$ classe; memória $=|p^{-1}|$; $\Word_8$.
+\end{itemize}
+
+\medskip\noindent\textbf{Dois circuitos paralelos:}
+\[
+\mathbb{N}\xrightarrow{\text{duplicação}}\mathbb{N}^{2}
+\xrightarrow{q}\mathbb{Z}
+\qquad
+I\xrightarrow{p}\mathbb{Z}^{2}
+\xrightarrow{|p^{-1}|}G_{\mathrm{geom}}
+\xrightarrow{\bmod 2}\mathbb{Z}/2\mathbb{Z}\cong\mathrm{GF}(2).
+\]
+\[
+\boxed{
+\begin{array}{c}
+\mathbb{N}\xrightarrow{\text{duplicar}}\mathbb{N}^{2}
+\xrightarrow{\;q\;} V_{\mathrm{int}}/{\sim}\;\cong\;\mathbb{Z}\\[2pt]
+(a,b)\sim(c,d)\iff a+d=b+c,\qquad
+\Phi([(a,b)])=a-b
+\end{array}}
+\]
+\[
+\boxed{
+[(a,b)]\xmapsto{\nu}[(b,a)],\qquad
+\Phi(\nu(x))=-\Phi(x),\qquad
+[(n,0)]\oplus[(0,n)]\sim[(0,0)].
+}
+\]
+Descida para 8 bits: equivalência por uint16 exacto; wrap e saturação
+contados à parte na escrita (Def.~\ref{def:w8}).
+
+\medskip\noindent
+\code{python3 tools/refcruz.py} (chave \code{inteiros}) ·
+\code{racionais.tex} · \code{corpo\_algebrico.tex} · \code{arquitetura.tex}.
+
+\vfill
+{\footnotesize\color{cinza}\noindent CC BY 4.0 (textos) $\cdot$ MIT (código).\par}
+
+\end{document}

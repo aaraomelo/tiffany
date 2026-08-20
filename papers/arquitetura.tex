@@ -21,6 +21,7 @@
 \newcommand{\Q}{\ensuremath{\mathbb{Q}}}
 \newcommand{\R}{\ensuremath{\mathbb{R}}}
 \newcommand{\medido}[1]{\par\medskip\noindent{\small\color{cinza}\textbf{Medido.} #1}\par\medskip}
+\newcommand{\Word}{\mathcal{W}}
 \newtheorem{teorema}{Teorema}
 
 \newcommand{\sepcol}{\quad\penalty0$\big|$\quad\penalty0}
@@ -1241,7 +1242,49 @@ homomórfica} que preserva a estrutura invariante da régua, enquanto descarta
 \emph{régua minha} (limiar de \code{double}, tecto silencioso de \code{long},
 sinal normalizado).
 
-\medskip\noindent A cadeia medida (\code{tests/cadeia.c}):
+\subsection*{Degrau $k{=}0$: inteiros e palavra de 8 bits}
+
+O paper \code{inteiros.tex} fecha a construção $\mathbb{N}\!\to\!\mathbb{Z}$
+(\emph{prova} $\mid$ \emph{realiza} $\mid$ \emph{verifica}). A descida
+computacional \textbf{não redefine} $\mathbb{N}$:
+\[
+\boxed{\mathbb{N}\neq\Word_8=\{0,\ldots,255\}}
+\]
+--- $\Word_8$ é \textbf{envelope} finito; o par $(a,b)\in\Word_8^{2}$ testa
+equivalência por soma cruzada \emph{exacta} em uint16 ($a+d=b+c$), enquanto
+$\pi_{\mathrm{wrap}}$ e $\pi_{\mathrm{sat}}$ só entram na \textbf{escrita}
+(\code{lib/naturais.h}, \code{tests/inteiros.c} §NT7--§NT11).
+
+\medskip\noindent\textbf{Cadeia do degrau} (objecto $\to$ realização):
+\[
+\boxed{
+\mathbb{N}^{2}/{\sim}\;\cong\;\mathbb{Z}
+\;\xrightarrow{\;\Word_8\;}
+\mathbb{Z}^{2}\;\text{(via }p\text{)}
+\;\xrightarrow{\;G_{\mathrm{geom}}\;}
+\text{memória por dobra}
+\;\xrightarrow{\;\bmod 2\;}
+\mathrm{GF}(2)
+}
+\]
+Dois circuitos em paralelo (\code{inteiros.tex}): $q$ (fibra algébrica,
+$G_{\mathrm{alg}}=\aleph_0$) e $p$ (fibra geométrica, dragão §AG2,
+$G_{\mathrm{geom}}=|p^{-1}|$). A paridade $G\bmod 2$ é o bit que sobrevive
+(\code{tests/aranha\_g.c} §AG6--§AG7).
+
+\medskip\noindent\textbf{Ligação à cadeia global} abaixo: $\Word_8$ alimenta
+$E_{16}$ quando o par sobe para inteiros de 16~bits; a equivalência em
+uint16 precede qualquer projeção para byte, como \code{d16\_mult} precede
+\code{Qz} em \code{racionais.tex}.
+
+\medido{\code{inteiros.c} §NT1--§NT11 ($14/14$); \code{aranha\_g.c} §AG1--§AG11;
+\code{metrica.c} §M3--§M8 (conservação $|\det|=1$ em $\mathbb{Z}^{2}$);
+\code{migracao.c} §GW; \code{cadeia.c} §KW ($10/10$).}
+\colunas{\code{inteiros.tex}; \code{algebrico thm:metrica}}
+        {$\Word_8$; cruz uint16; $G_{\mathrm{alg}}\neq G_{\mathrm{geom}}$; dragão}
+        {§NT1--§NT11; §AG2, §AG5--§AG7; §M8}
+
+\subsection*{Cadeia long$\to\mathrm{GF}(2)$ (degraus superiores)}
 \[
 \text{long}\;\to\;64\;\to\;32\;\to\;E_{16}\;\to\;\mathbb{F}_{127}\;\to\;\mathrm{GF}(2).
 \]
@@ -1251,6 +1294,8 @@ sinal normalizado).
 \toprule
 degrau & o que se perde / o que se mantém \\
 \midrule
+$\Word_8$ (par) & equivalência por uint16; wrap/sat só na escrita \\
+$\Word_8\to E_{16}$ & byte $\to$ par int16; soma cruzada antes do overflow \\
 64$\to$32 & tecto \code{long}; produto exacto em par \\
 32$\to$16 & envelope \code{Qz}; aritmética projectiva em int16 \\
 16$\to\mathbb{F}_{127}$ & redução mod $127$ (\code{tests/reducao.c} §D6) \\
@@ -1266,13 +1311,14 @@ conservação e a involução tornam-se leis binárias rígidas (reversibilidade
 lógica); a álgebra \emph{ainda opera} no fim da cadeia
 (\code{tests/cadeia.c} §K3).
 
-\medido{\code{tests/cadeia.c} ($9/9$): §K2b confirma $Q_z\in E_{16}$ e
+\medskip\noindent A cadeia medida (\code{tests/cadeia.c}): §KW confirma
+$(a,b)\sim(c,d)$ em uint16 antes do \code{long}; §K2b confirma $Q_z\in E_{16}$ e
 \code{rt\_opera\_i16}; §K3 exaustão $\mathbb{P}^1(\mathbb{F}_{127})=128$
 pontos; \code{tests/reducao.c} §D6 lê $E_{16}$ sem widen;
 \code{tests/aranha\_g.c} §AG6--§AG7 ($G\bmod2$ na grade).}
 \colunas{\code{teoria sec:duasescadas}; \code{algebrico sec:pontofixo} (corte)}
-        {cadeia long$\to$GF(2); perde régua minha, não lei}
-        {\code{tests/cadeia.c} $9/9$; \code{tests/reducao.c} §D6}
+        {cadeia $\Word_8^2\to\text{long}\to\mathrm{GF}(2)$; perde régua minha, não lei}
+        {\code{tests/cadeia.c} $10/10$; \code{tests/reducao.c} §D6}
 
 % ═══════════════════════════════════════════════════════════════════════════
 \section{Fronteira I/O: escala só na leitura}\label{sec:fronteira}
@@ -1468,8 +1514,8 @@ fixa como contrato verificável.
 tema & medidor & resultado \\
 \midrule
 $16\times16$ & \code{tests/dual16.c} & $5/5$ \\
-$\Q$ migrado & \code{tests/migracao.c} & $6/6$ \\
-descida & \code{tests/cadeia.c} & $9/9$ \\
+$\Q$ migrado & \code{tests/migracao.c} & $7/7$ \\
+descida & \code{tests/cadeia.c} & $10/10$ \\
 firma torre & \code{tests/torre\_alg.c} & §T1--§T4 ($4/4$ cada) \\
 $\Q$ analítico & \code{banco/conversa.c} & 331/331 (completude em $E_{16}$) \\
 quadratura & \code{tests/calculo2.c} & §C1--§C10 \\

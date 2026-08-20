@@ -24,6 +24,8 @@ import re, sys, os
 DOCS = {'algebrico':'papers/corpo_algebrico.tex', 'topologico':'papers/corpo_topologico.tex',
         'analitico':'papers/corpo_analitico.tex', 'computacional':'papers/arquitetura.tex',
         'sintese':'papers/arquitetura.tex',
+        'inteiros':'papers/inteiros.tex', 'racionais':'papers/racionais.tex',
+        'arquitetura':'papers/arquitetura.tex',
         'teoria':'teoria.tex', 'catalogo':'catalogo.tex', 'enredo':'enredo.tex'}
 CENTRO = 'algebrico'
 # A TRÍADE É DE TRÊS. `computacional`/`sintese` NÃO são lados: são realizações dentro do

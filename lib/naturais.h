@@ -20,6 +20,8 @@
 #ifndef NATURAIS_H
 #define NATURAIS_H
 
+#include <stdint.h>
+
 /* ── OS NATURAIS NÃO TÊM SINAL, e o tipo tem de o dizer ────────────────────────
  * Este ficheiro estava todo em `long` — com sinal — para representar ℕ. Um natural não
  * tem sinal, e o tipo que o carrega não deve ter: `unsigned long` é a aritmética natural,
@@ -127,5 +129,29 @@ static unsigned long nt_refaz(const unsigned long *pr, const int *ex, int k){  /
 static int nt_menor(unsigned conj, int n, unsigned long *m){
     for(int k = 0; k < n; k++) if(conj & (1u << k)){ *m = (unsigned long)k; return 1; }
     return 0;                                          /* vazio: não tem menor */
+}
+
+/* ── W_8: leitura cruzada exacta em uint16; projeções contadas à parte ───────────
+ * Como `d16_mult` em `racionais.tex`: a equivalência a+d=b+c calcula-se SEM
+ * projectar para o byte. Só quando o resultado se ARMAZENA em W_8 é que entra
+ * wrap (mod 256) ou saturação (min(,255)) — políticas distintas, contadores distintos. */
+static long w8_wrap = 0;       /* projeções mod 256 — contadas, não enroladas */
+static long w8_saturou = 0;    /* truncamentos em 255 — contados à parte */
+
+static uint16_t w8_cruz_ld(uint8_t a, uint8_t d){ return (uint16_t)a + (uint16_t)d; }
+static uint16_t w8_cruz_bc(uint8_t b, uint8_t c){ return (uint16_t)b + (uint16_t)c; }
+
+static int w8_equiv(uint8_t a, uint8_t b, uint8_t c, uint8_t d){
+    return w8_cruz_ld(a, d) == w8_cruz_bc(b, c);
+}
+
+static uint8_t w8_proj_wrap(uint16_t s){
+    if(s > 255u) w8_wrap++;
+    return (uint8_t)s;
+}
+
+static uint8_t w8_proj_sat(uint16_t s){
+    if(s > 255u){ w8_saturou++; return 255; }
+    return (uint8_t)s;
 }
 #endif

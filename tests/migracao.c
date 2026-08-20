@@ -8,6 +8,7 @@
  * inferior». O `Qz` desta casa passou de `{long p, q}` para `{int16_t p, q}`, com o par
  * D32 a segurar os intermédios 16×16 e o que não cabe CONTADO em vez de enrolado.
  *
+ * §GW  W_8² → E₁₆: equivalência uint16 antes do envelope Qz
  * §G0  a aritmética migrada contra a régua larga — soma, produto e ORDEM
  * §G1  o que MUDOU no sistema: comparar em vez de FORMAR, em quatro sítios
  * §G2  o guarda que passou a PERGUNTAR à operação em vez de adivinhar o tecto
@@ -16,6 +17,9 @@
  * §G5  o envelope E₁₆: Qz = 32 bits, d16_mult nos componentes
  */
 #include <stdio.h>
+#include <stdint.h>
+#include "naturais.h"
+#include "inteiros.h"
 #include "dual16.h"
 #include "dual32.h"
 #include "i128.h"
@@ -27,8 +31,49 @@ static int mesmo(Qz r, I128 p, I128 q){
     return i128_cmp(i128_smul_i128(q, r.p), i128_smul_i128(p, r.q)) == 0;
 }
 
+/* Φ([(a,b)]) = a−b em E₁₆: bytes como ℕ, sem projectar antes da cruz */
+static int16_t w8_phi(uint8_t a, uint8_t b){
+    return (int16_t)a - (int16_t)b;
+}
+
 int main(void){
-    printf("\n=== A MIGRAÇÃO: o racional em E₁₆, e o critério cumprido ===\n");
+    printf("\n=== A MIGRAÇÃO: W_8² → E₁₆ → o racional, e o critério cumprido ===\n");
+
+    /* ═══ §GW W_8² → E₁₆: inteiros antes do Qz ═════════════════════════════ */
+    printf("\n§GW Envelope W_8²: equivalência uint16, depois Φ sobe para E₁₆.\n\n");
+    {
+        long eq_ok = 0, eq_tot = 0, phi_ok = 0, phi_tot = 0, qz_ok = 0, qz_tot = 0;
+        for(int a = 0; a < 256; a += 11) for(int b = 0; b < 256; b += 13)
+        for(int c = 0; c < 256; c += 17) for(int d = 0; d < 256; d += 19){
+            uint8_t ua = (uint8_t)a, ub = (uint8_t)b, uc = (uint8_t)c, ud = (uint8_t)d;
+            eq_tot++;
+            if(w8_equiv(ua, ub, uc, ud) == iz_equiv(a, b, c, d)) eq_ok++;
+            if(!w8_equiv(ua, ub, uc, ud)) continue;
+            phi_tot++;
+            if(w8_phi(ua, ub) == w8_phi(uc, ud)) phi_ok++;
+            Qz qa = qz_de_inteiro((long)w8_phi(ua, ub));
+            Qz qc = qz_de_inteiro((long)w8_phi(uc, ud));
+            qz_tot++;
+            if(qz_igual(qa, qc) && qz_cabe(qa.p) && qz_cabe(qa.q)) qz_ok++;
+        }
+        /* NT10 em miniatura: Cruz igual, Dir diferente — wrap no byte não entra na ∼ */
+        int nt10 = w8_equiv(2, 0, 3, 1)
+            && w8_phi(2, 0) == w8_phi(3, 1)
+            && qz_igual(qz_de_inteiro(2), qz_de_inteiro(2))
+            && (2u + 0u) != (3u + 1u);
+        w8_wrap = 0; w8_saturou = 0;
+        uint16_t cruz = w8_cruz_ld(200, 100);   /* 300 — exacto em uint16 */
+        uint8_t w = w8_proj_wrap(cruz), s = w8_proj_sat(cruz);
+        int pol = (cruz == 300u && w == 44 && s == 255 && w8_wrap == 1 && w8_saturou == 1);
+        printf("      amostra W_8⁴: equiv %ld/%ld; Φ invariante %ld/%ld;"
+               " Qz igual %ld/%ld\n", eq_ok, eq_tot, phi_ok, phi_tot, qz_ok, qz_tot);
+        printf("      (2,0)~(3,1)? %s; cruz(200,100)=%u wrap=%u sat=%u\n",
+               nt10 ? "sim" : "nao", (unsigned)cruz, (unsigned)w, (unsigned)s);
+        ok("§GW W_8²→E₁₆: ∼ em uint16; Φ([(a,b)]) sobe para Qz sem wrap; equivalentes"
+           " dão o mesmo racional em E₁₆",
+           eq_tot > 0 && eq_ok == eq_tot && phi_tot > 0 && phi_ok == phi_tot
+           && qz_tot > 0 && qz_ok == qz_tot && nt10 && pol);
+    }
 
     /* ═══ §G0 A EQUIVALÊNCIA CONTRA A RÉGUA LARGA ════════════════════════════ */
     printf("\n§G0 A aritmética migrada contra a régua larga — soma, produto e ordem.\n\n");

@@ -78,7 +78,7 @@ $T_{k+1}=T_k+T_k^{*}$.
 \begin{array}{lllll}
 \mathbb{N} & \longrightarrow & \mathbb{Z}
  & \text{(reversibilidade da \textbf{soma})}
- & \text{ponto fixo: }0\\[4pt]
+ & \text{\code{inteiros.tex}; ponto fixo: }0\\[4pt]
 \mathbb{Z} & \longrightarrow & \operatorname{Frac}(\mathbb{Z})=\mathbb{Q}
  & \text{(reversibilidade da \textbf{multiplicação})}
  & \operatorname{Fix}(\iota\vert_{\mathbb{Q}^{\times}})=\{\pm1\}\\[4pt]
@@ -99,9 +99,12 @@ Algébrico (\code{algebrico def:espaco}):
 \text{a torre }T_{k+1}=T_k+T_k^{*} & \code{analitico thm:tecidos} & \text{instancia o degrau }k{=}1\\[2pt]
 \text{as oito leis} & \code{analitico sub:oitoleis} & \text{Leis 0--3,5 explícitas; 4,6,7 herdadas}\\[2pt]
 \text{a operação }\star & \code{algebrico thm:operacao} & \text{Dir e Cruz em pares de inteiros}\\[2pt]
-\text{o par dual e }|\det|=1 & \code{algebrico thm:fixo-dual} & \iota(a,b)=(b,a),\ a^2=b^2\Rightarrow\pm1\\[6pt]
+\text{o par dual e }|\det|=1 & \code{algebrico thm:fixo-dual} & \iota(a,b)=(b,a),\ a^2=b^2\Rightarrow\pm1\\[2pt]
+\text{degrau anterior }\mathbb{N}\!\to\!\mathbb{Z} & \code{inteiros.tex} & \text{soma cruzada }a+d=b+c\\[6pt]
 \textbf{ACRESCENTA} & \multicolumn{2}{l}{\text{---e é só isto---}}\\[3pt]
 \text{a REPRESENTAÇÃO por pares} & \text{Def.~\ref{def:espaco}} & V_{\mathrm{rat}}/{\sim}=\mathbb{Q}\\[2pt]
+\text{a EQUIVALÊNCIA }$\sim$ & \text{Prop.~\ref{prop:equiv}} & $ad=bc$ antes do quociente\\[2pt]
+\text{o ISOMORFISMO }$\Psi$ & \text{Thm.~\ref{thm:q}} & $\Psi([(a,b)])=a/b$\\[2pt]
 \text{o INVERSO = swap} & \text{Def.~\ref{def:ops}} & (a,b)^{-1}=(b,a)\\[2pt]
 \text{o PRODUTO CRUZADO} & \text{Prop.~\ref{prop:dircr}} & \text{Cruz}=ad-bc:\text{ equiv., ordem}\\[2pt]
 \text{a REDUÇÃO por }\gcd & \S\ref{sec:reduz} & \text{forma canónica do par}
@@ -110,8 +113,9 @@ Algébrico (\code{algebrico def:espaco}):
 
 \section{A posição na torre}\label{sec:torre}
 
-Este paper trata o \textbf{segundo} degrau. A operação nova que torna os
-elementos não nulos reversíveis é realizada pelo swap $(a,b)\mapsto(b,a)$.
+Este paper trata o \textbf{segundo} degrau. A operação nova que torna a
+multiplicação reversível \textbf{fora do zero} é realizada pelo swap
+$(a,b)\mapsto(b,a)$: para $[(a,b)]\neq 0$, $[(a,b)]^{-1}=[(b,a)]$.
 
 %======================================================================
 \section{O espaço de pares e a involução dual}\label{sec:espaco}
@@ -130,13 +134,16 @@ V^{\times} = \{(a,b)\in\mathbb{Z}^{2}: ab\neq 0\}
 \]
 A relação de equivalência vive em $V_{\mathrm{rat}}$:
 \[
-(a,b)\sim(c,d)\iff ad=bc.
+\boxed{\;(a,b)\sim(c,d)\iff ad=bc.\;}
 \]
-O racional é a classe:
+O racional é a \textbf{classe de equivalência} (molde de
+\code{inteiros.tex}):
 \[
+\boxed{\;
 \mathbb{Q}=V_{\mathrm{rat}}/{\sim}
-\;=\;\{(a,b)\in\mathbb{Z}^{2}:b\neq 0\}/{\sim}.
+\;=\;\{(a,b)\in\mathbb{Z}^{2}:b\neq 0\}/{\sim}\;}
 \]
+Elemento típico: $[(a,b)]$ --- par $\neq$ classe (\textbf{Lei~7}).
 A condição de
 equivalência é o \textbf{produto cruzado}: dois inteiros, um produto, nenhuma
 divisão.
@@ -282,11 +289,31 @@ pela involução $\iota$, conforme a convenção da torre
 $V^{*}=\operatorname{Hom}(V,\mathbb{Z})$.
 \end{definicao}
 
+\begin{proposicao}[$\sim$ é relação de equivalência]\label{prop:equiv}
+Em $V_{\mathrm{rat}}$:
+\begin{enumerate}\itemsep2pt
+\item \textbf{Reflexiva:} $(a,b)\sim(a,b)$ pois $ab=ab$.
+\item \textbf{Simétrica:} $ad=bc\Rightarrow cb=da$, logo $(c,d)\sim(a,b)$.
+\item \textbf{Transitiva:} se $ad=bc$ e $cf=de$ com $d\neq 0$, então
+      $af\cdot d=be\cdot d$, logo $af=be$ e $(a,b)\sim(e,f)$.
+\end{enumerate}
+\end{proposicao}
+
+\begin{proof}
+(1)--(2) imediatos. (3) só usa aritmética em $\mathbb{Z}$ --- sem invocar
+$\mathbb{Q}$ antes do quociente estar definido. $\square$
+\end{proof}
+
 \begin{teorema}[Construção inteira de $\mathbb{Q}$]\label{thm:q}
 Seja $V_{\mathrm{rat}}=\{(a,b)\in\mathbb{Z}^{2}:b\neq0\}$ com
-$(a,b)\sim(c,d)\iff ad=bc$. Então o quociente $V_{\mathrm{rat}}/{\sim}$ é um
-corpo, isomorfo a $\mathbb{Q}$, via $[(a,b)]\longmapsto a/b$. Sob esse
-isomorfismo, as operações
+$(a,b)\sim(c,d)\iff ad=bc$ (Prop.~\ref{prop:equiv}). Então o quociente
+$V_{\mathrm{rat}}/{\sim}$ é um corpo; o mapa
+\[
+\boxed{\;
+\Psi\colon V_{\mathrm{rat}}/{\sim}\;\overset{\cong}{\longrightarrow}\;\mathbb{Q},\qquad
+\Psi([(a,b)])=a/b\;}
+\]
+é isomorfismo de corpos. Sob $\Psi$, as operações
 \[
 (a,b)\oplus(c,d)=(ad+bc,\;bd),\qquad
 (a,b)\otimes(c,d)=(ac,\;bd)
@@ -302,21 +329,40 @@ com $[(a,b)]\neq 0\iff a\neq 0$. Além disso,
 \]
 e, para $b,d>0$,
 \[
-[(a,b)]<[(c,d)]\iff ad-bc<0.
+[(a,b)]<[(c,d)]\iff ad-bc<0
 \]
+(\emph{ordem transportada} por $\Psi$ com denominadores positivos --- não ordem
+canônica dos pares).
 \end{teorema}
 
 \begin{proof}[Prova]
-(1) $\sim$ é equivalência: reflexiva ($ab=ab$), simétrica ($ad=bc\Rightarrow
-cb=da$), transitiva ($ad=bc$ e $cf=de$ com $d\neq 0$ implicam $af\cdot d=
-be\cdot d$, logo $af=be$).
-(2) Soma e produto são bem definidos (Prop.~\ref{prop:bemdef}).
-(3) Neutro aditivo: $(0,1)\oplus(a,b)=(0\cdot b+1\cdot a,\,1\cdot b)=(a,b)$.
-(4) Neutro multiplicativo: $(1,1)\otimes(a,b)=(a,b)$.
-(5) Oposto: $(a,b)\oplus(-a,b)=(ab-ab,\,b^{2})=(0,b^{2})\sim(0,1)$.
-(6) Inverso: $(a,b)\otimes(b,a)=(ab,ab)\sim(1,1)$, $a\neq 0$.
+(1) $\Psi$ bem-definida: Prop.~\ref{prop:dircr} (iii).
+(2) Sobrejetiva: $q\in\mathbb{Q}$ --- representante $(p,q)$ com $q>0$.
+(3) Injectiva: $\Psi([(a,b)])=\Psi([(c,d)])$ $\Rightarrow$ $a/b=c/d$
+$\Rightarrow$ $ad=bc$ $\Rightarrow$ $[(a,b)]=[(c,d)]$.
+(4) Soma e produto bem definidos: Prop.~\ref{prop:bemdef}.
+(5) Neutro aditivo: $(0,1)\oplus(a,b)=(a,b)$; multiplicativo: $(1,1)\otimes(a,b)=(a,b)$.
+(6) Oposto: $(a,b)\oplus(-a,b)\sim(0,1)$; inverso: $(a,b)\otimes(b,a)\sim(1,1)$, $a\neq 0$.
 (7) Distributividade: verificação directa sobre representantes.
+(8) Ordem: comparar $ad$ e $bc$ com $b,d>0$. $\square$
 \end{proof}
+
+\begin{corolario}[Ordem no quociente]\label{cor:ordem}
+Para representantes com $b,d>0$,
+\[
+x<y\iff\Psi(x)<\Psi(y)\iff\mathrm{Cruz}(x,y)<0.
+\]
+Ela \textbf{não} coincide com a ordem lexicográfica dos pares
+$(a,b)\in\mathbb{Z}^{2}$.
+\end{corolario}
+
+\begin{observacao}[Molde do degrau anterior]
+$\mathbb{N}\!\to\!\mathbb{Z}$ (\code{inteiros.tex}): $a+d=b+c$ (soma cruzada).
+$\mathbb{Z}\!\to\!\mathbb{Q}$ (aqui): $ad=bc$ (produto cruzado). Analogia:
+\[
+\boxed{\text{soma cruzada}\longrightarrow\text{produto cruzado}}.
+\]
+\end{observacao}
 
 \begin{teorema}[O swap é a inversão multiplicativa]\label{thm:swap-inverso}
 A aplicação $\iota:V^{\times}\to V^{\times}$, $\iota(a,b)=(b,a)$, preserva
@@ -486,7 +532,7 @@ Os projectores $P_{\pm}$ são introduzidos apenas como interpretação racional
 da decomposição; Dir e Cruz permanecem definidos integralmente.
 
 \medskip\noindent\textbf{A derivação pela transformada.} No Algébrico
-(\code{algebrico cor:dir-cruz}), Dir é o que a transformada vê --- o produto
+(\code{analitico cor:dir-cruz-folhas}), Dir é o que a transformada vê --- o produto
 folha a folha --- e Cruz é o que sobra quando as folhas coincidem. Neste
 degrau, com uma única folha $\operatorname{eval}$:
 \begin{itemize}
@@ -539,16 +585,17 @@ $\mathbb{Q}^{\times}$, não de $\mathbb{Q}$, pois $0$ não possui inverso
 (\code{lib/racionais.h}, \code{qz\_inverso}):
 \[
 \boxed{
+\begin{array}{c}
 \mathbb{Q}^{\times}
 \overset{\iota}{\longrightarrow}
 \mathbb{Q}^{\times}
-\qquad\text{(swap nos invertíveis)},
-\qquad
+\qquad\text{(swap nos invertíveis)},\\[4pt]
 \mathbb{P}^{1}(\mathbb{Q})
 \overset{\iota}{\longrightarrow}
 \mathbb{P}^{1}(\mathbb{Q})
 \quad\text{(swap total)}.
-}
+\end{array}}
+\]
 
 %======================================================================
 \section{A redução: o fator comum removido}\label{sec:reduz}
@@ -1031,7 +1078,7 @@ saturação contada & \code{qz\_saturou} & \code{lib/racionais.h} & $\checkmark$
 $16\times16$ exacto em par & \code{d16\_mult} & \code{lib/dual16.h} & $\checkmark$ \\
 ordem por prod.\ cruzado & \code{d16\_cmp\_prod} & \code{lib/dual16.h} & $\checkmark$ \\
 produto 16×16 vs int32 & §E0--§E3 & \code{tests/dual16.c} & $5/5$ \\
-migração Q em E₁₆ & §G0--§G5 & \code{tests/migracao.c} & $6/6$ \\
+migração Q em E₁₆ & §GW, §G0--§G5 & \code{tests/migracao.c} & $7/7$ \\
 descida 32→16 & §K2b & \code{tests/cadeia.c} & $\checkmark$ \\
 RtOp coord.\ int16 & §R27 §T21 & \code{tests/reta.c} & $\checkmark$ \\
 $|a-b|<\varepsilon$ & \code{qz\_dist\_menor} & \code{lib/racionais.h} & $\checkmark$ \\
@@ -1064,5 +1111,31 @@ A migração para \code{int16} não está a inventar uma representação
 computacional nova: está a materializar o andar
 $\mathbb{Z}\to\operatorname{Frac}(\mathbb{Z})$ que já estava implícito na
 torre.
+
+%======================================================================
+\section*{Síntese --- núcleo $\mathbb{Z}\!\to\!\mathbb{Q}$}
+
+\[
+\boxed{
+\begin{array}{c}
+\mathbb{Z}\xrightarrow{\text{duplicar}}V_{\mathrm{rat}}\subset\mathbb{Z}^{2}
+\xrightarrow{\;q\;} V_{\mathrm{rat}}/{\sim}\;\cong\;\mathbb{Q}\\[2pt]
+(a,b)\sim(c,d)\iff ad=bc,\qquad
+\Psi([(a,b)])=a/b
+\end{array}}
+\]
+\[
+\boxed{
+[(a,b)]\xmapsto{\bar\iota}[(b,a)],\qquad
+\Psi(\bar\iota(x))=1/\Psi(x)\ \ (x\neq 0),\qquad
+[(a,b)]\otimes[(b,a)]\sim[(1,1)].
+}
+\]
+Descida para 16 bits: equivalência por produto cruzado exacto em int32;
+saturação contada à parte na escrita (\S\ref{sec:ja}).
+
+\medskip\noindent
+\code{python3 tools/refcruz.py} (chave \code{racionais}) ·
+\code{inteiros.tex} · \code{corpo\_algebrico.tex} · \code{arquitetura.tex}.
 
 \end{document}

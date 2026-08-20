@@ -196,6 +196,11 @@ tests/wasm_sobe
 /corpo-estelar.pdf
 /papers/*.pdf
 tests/assinatura_tradutor
+tests/aranha_g
+tests/cadeia
+tests/inteiros
+tests/metrica
+tests/migracao
 tests/config_corpo
 tests/disco_wasm
 tests/dtc_viveiro

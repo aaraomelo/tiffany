@@ -5,7 +5,7 @@
  * binária, e não perdemos nada. Mostra toda a cadeia. A transição para o real é o corte.»
  *
  * ── A CADEIA ──────────────────────────────────────────────────────────────────
- *      long  →  long (64)  →  int (32)  →  uint8 (𝔽₁₂₇)  →  bit (GF(2))
+ *      W_8² (ℕ²/∼)  →  long  →  long (64)  →  int (32)  →  uint8 (𝔽₁₂₇)  →  bit (GF(2))
  *
  * e em cada degrau a pergunta é a mesma: O QUE SE PERDEU? A resposta medida é «nada» —
  * e o que se GANHOU foi, de cada vez, tornar visível um tecto que antes era silencioso.
@@ -20,6 +20,7 @@
  * que o long estava — e não está: estão os dois do mesmo lado, e nenhum lá chega.
  *
  * §K0  a cadeia, degrau a degrau, com o que se perdeu e o que se ganhou
+ * §KW  W_8 (par ℕ²): equivalência por soma cruzada em uint16 — antes do long
  * §K1  long → inteiro: os valores JÁ eram inteiros, e o long só trazia um limiar
  * §K2  64 → 32: a ordem passa pelo par e fica EXACTA — nada se perde, o tecto aparece
  * §K2b 32 → 16: Qz em E₁₆, RtOp em int16 — coordenadas pequenas do ciclo
@@ -29,6 +30,7 @@
  * §K6  o balanço: o que cada degrau custou, e o que cada um comprou
  */
 #include <stdio.h>
+#include "naturais.h"
 #include "dual16.h"
 #include "dual32.h"
 #include "racionais.h"
@@ -39,25 +41,51 @@
 #include "unidade.h"
 
 int main(void){
-    printf("\n=== A CADEIA DA DESCIDA: long → 64 → 32 → uint8 → bit ===\n");
+    printf("\n=== A CADEIA DA DESCIDA: W_8² → long → 64 → 32 → uint8 → bit ===\n");
 
     /* ═══ §K0 A CADEIA ═══════════════════════════════════════════════════════ */
     printf("\n§K0 Os degraus, e a pergunta é sempre a mesma: o que se perdeu?\n\n");
     {
         printf("        degrau              o que se perdeu     o que se ganhou\n");
         printf("        ──────────────────────────────────────────────────────────────\n");
+        printf("        W_8² (par ℕ²)       NADA (objecto)      ∼ por uint16; wrap/sat só escrita\n");
         printf("        long → inteiro    NADA                o limiar 1e−9 desapareceu\n");
         printf("        64 → 32 bits        NADA                o tecto ficou VISÍVEL\n");
         printf("        32 → uint8 (𝔽₁₂₇)   a característica    o espaço ficou EXAUSTÍVEL\n");
         printf("        uint8 → bit (GF2)   o sinal             os ramos desapareceram\n\n");
         printf("        e a transição para ℝ NÃO é um degrau desta escada: é o CORTE.\n");
-        ok("A CADEIA TEM QUATRO DEGRAUS E EM NENHUM SE PERDEU A MATEMÁTICA. O que se perdeu"
+        ok("A CADEIA TEM CINCO DEGRAUS E EM NENHUM SE PERDEU A MATEMÁTICA. O que se perdeu"
            " foi, de cada vez, uma coisa que não era do objecto: o limiar do long, a"
            " ilusão de tecto infinito do `long`, e o sinal — que em GF(2) não existe porque"
            " −x = x. E o que se ganhou foi sempre o mesmo: tornar VISÍVEL um limite que"
            " antes era silencioso. A única perda real está no terceiro degrau e diz-se: a"
            " CARACTERÍSTICA muda, e por isso 𝔽₁₂₇ é uma face que refuta e não prova",
            1);
+    }
+
+    /* ═══ §KW W_8²: equivalência inteiros antes do long ════════════════════════ */
+    printf("\n§KW Degrau inteiros: par em W_8², soma cruzada em uint16.\n\n");
+    {
+        long cas = 0, bate = 0, diverge = 0;
+        for(int a = 0; a < 256; a += 17) for(int b = 0; b < 256; b += 19)
+        for(int c = 0; c < 256; c += 23) for(int d = 0; d < 256; d += 29){
+            cas++;
+            int eq = w8_equiv((uint8_t)a, (uint8_t)b, (uint8_t)c, (uint8_t)d);
+            int ref = w8_cruz_ld((uint8_t)a, (uint8_t)d) == w8_cruz_bc((uint8_t)b, (uint8_t)c);
+            if(eq == ref) bate++; else diverge++;
+        }
+        /* NT10 em miniatura: (2,0)~(3,1) — Cruz igual, Dir diferente */
+        int nt10 = w8_equiv(2, 0, 3, 1)
+            && w8_cruz_ld(2, 1) == w8_cruz_bc(0, 3)
+            && (2u + 0u) != (3u + 1u);
+        w8_wrap = 0; w8_saturou = 0;
+        uint8_t w300 = w8_proj_wrap(300), s300 = w8_proj_sat(300);
+        int pol = (w300 == 44 && s300 == 255 && w8_wrap == 1 && w8_saturou == 1);
+        printf("      amostra %ld quádruplos W_8⁴: %ld batem, %ld divergem\n", cas, bate, diverge);
+        printf("      (2,0)~(3,1)? %s; wrap(300)=%u sat(300)=%u (w8_wrap=%ld w8_saturou=%ld)\n",
+               nt10 ? "sim" : "nao", w300, s300, w8_wrap, w8_saturou);
+        ok("§KW W_8²: (a,b)~(c,d) ⟺ a+d=b+c em uint16 — ℕ≠W_8, equivalência separada de wrap/sat",
+           cas > 0 && diverge == 0 && bate == cas && nt10 && pol);
     }
 
     /* ═══ §K1 DOUBLE → INTEIRO: os valores já eram inteiros ══════════════════ */
