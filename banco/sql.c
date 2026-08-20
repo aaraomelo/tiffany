@@ -74,6 +74,7 @@
 #include <ctype.h>
 #include <strings.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 #include "unidade.h"
 #include "contrato.h"   /* o toolkit: a tríade ⊕ ⊗ ∏ de cada corpo */
 
@@ -176,6 +177,7 @@ typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
 
 /* ---------------- a memória É o disco ---------------- */
 static int fmem = -1, fprog = -1;
+static char g_base[512];          /* caminho da base aberta — blobs em <base>_corpo/ */
 
 /* O backend do canal. Trocar isto por STOMP ou por TCP é trocar estas duas funções — o banco
  * não distingue, porque o que ele faz é sempre ler um slot e escrever um slot. */
@@ -2790,6 +2792,129 @@ static int busca_texto(const char *p){
     printf("\n      MAIS PROXIMO: %s (prefixo %zu)\n", vis, melhor);
     return 1;
 }
+
+/* ---------------- IMPORT: linguagens e corpo entram pelo SQL ---------------- */
+static int poe_chave_texto(const char *s){
+    long a[MAXT]; size_t n; char rot[128];
+    char buf[512]; const char *p = buf;
+    snprintf(buf, sizeof buf, "'%s'", s);
+    if(!cifra_entrada(&p, a, MAXT, &n, rot, sizeof rot)) return 0;
+    cif_poe(a, n);
+    return 1;
+}
+static void le_caminho_arg(const char **p, char *cam, size_t cap, const char *def){
+    pula(p);
+    if(**p == '\'' || **p == '"'){
+        char asp = *(*p)++;
+        size_t k = 0;
+        while(**p && **p != asp && k + 1 < cap) cam[k++] = *(*p)++;
+        cam[k] = 0;
+        if(**p == asp) (*p)++;
+    } else snprintf(cam, cap, "%s", def);
+}
+static int import_linguagens(const char *p){
+    char cam[512];
+    le_caminho_arg(&p, cam, sizeof cam, "../conecthus/backends/manifesto.json");
+    FILE *f = fopen(cam, "rb");
+    if(!f){ printf("nao abri: %s\n", cam); return 0; }
+    fseek(f, 0, SEEK_END); long st = ftell(f); fseek(f, 0, SEEK_SET);
+    if(st <= 0 || st > 1<<20){ fclose(f); return 0; }
+    char *buf = (char*)malloc((size_t)st + 1);
+    if(!buf){ fclose(f); return 0; }
+    if((long)fread(buf, 1, (size_t)st, f) != st){ free(buf); fclose(f); return 0; }
+    buf[st] = 0; fclose(f);
+    long antes = txt_n(), postas = 0;
+    for(char *q = buf; (q = strstr(q, "\"nome\"")); q++){
+        char nome[64] = "", faz[64] = "";
+        long pp = 0, qq = 0, rr = 0;
+        if(sscanf(q, "\"nome\": \"%63[^\"]\"", nome) != 1) continue;
+        char *bl = q; char *fim = q + 400; if(fim > buf + st) fim = buf + st;
+        for(char *t = bl; t < fim; t++){
+            if(!faz[0] && sscanf(t, "\"faz\": \"%63[^\"]\"", faz) == 1) continue;
+            if(!pp && sscanf(t, "\"p\": %ld", &pp) == 1) continue;
+            if(!qq && sscanf(t, "\"q\": %ld", &qq) == 1) continue;
+            if(!rr && sscanf(t, "\"r\": %ld", &rr) == 1) continue;
+        }
+        if(!nome[0] || !faz[0]) continue;
+        char entrada[160];
+        snprintf(entrada, sizeof entrada, "linguagem/%s|%ld,%ld,%ld|%s", nome, pp, qq, rr, faz);
+        if(poe_chave_texto(entrada)) postas++;
+    }
+    free(buf);
+    printf("      IMPORT LINGUAGENS: %ld entradas (%ld -> %ld)\n", postas, antes, txt_n());
+    return postas > 0;
+}
+/* Blobs do corpo: <base>_corpo/<rel> — fonte de verdade ao lado do .mem.
+ * Índice TEXTO (corpo/<rel>) + bytes no disco do banco. GET CORPO devolve os bytes. */
+static void corpo_dir(char *out, size_t cap){
+    snprintf(out, cap, "%s_corpo", g_base[0] ? g_base : "/tmp/sql_corpo");
+}
+static int mkdirs_para(const char *caminho){
+    char tmp[1024]; snprintf(tmp, sizeof tmp, "%s", caminho);
+    for(char *q = tmp + 1; *q; q++){
+        if(*q != '/') continue;
+        *q = 0; mkdir(tmp, 0755); *q = '/';
+    }
+    return 1;
+}
+static int copia_ficheiro(const char *de, const char *para){
+    FILE *in = fopen(de, "rb"); if(!in) return 0;
+    mkdirs_para(para);
+    FILE *out = fopen(para, "wb"); if(!out){ fclose(in); return 0; }
+    unsigned char buf[8192]; size_t n; int ok = 1;
+    while((n = fread(buf, 1, sizeof buf, in)) > 0)
+        if(fwrite(buf, 1, n, out) != n){ ok = 0; break; }
+    fclose(in); fclose(out);
+    return ok;
+}
+static int import_corpo(const char *p){
+    char cam[512], raiz[512], dest_raiz[640];
+    le_caminho_arg(&p, cam, sizeof cam, "../app/src/corpo.json");
+    le_caminho_arg(&p, raiz, sizeof raiz, "..");
+    corpo_dir(dest_raiz, sizeof dest_raiz);
+    mkdir(dest_raiz, 0755);
+    FILE *f = fopen(cam, "rb");
+    if(!f){ fprintf(stderr, "nao abri: %s\n", cam); return 0; }
+    long antes = txt_n(), postas = 0, blobs = 0, lidos = 0;
+    char lin[1024];
+    while(fgets(lin, sizeof lin, f)){
+        char rel[512];
+        if(sscanf(lin, " \"%511[^\"]\",", rel) != 1 &&
+           sscanf(lin, " \"%511[^\"]\"", rel) != 1) continue;
+        if(!strchr(rel, '/') && !strchr(rel, '.')) continue;  /* só caminhos, não chaves JSON */
+        lidos++;
+        char de[1024], para[1280], chave[576];
+        snprintf(de, sizeof de, "%s/%s", raiz, rel);
+        snprintf(para, sizeof para, "%s/%s", dest_raiz, rel);
+        snprintf(chave, sizeof chave, "corpo/%s", rel);
+        if(poe_chave_texto(chave)) postas++;
+        if(copia_ficheiro(de, para)) blobs++;
+        else fprintf(stderr, "      sem blob: %s\n", rel);
+    }
+    fclose(f);
+    printf("      IMPORT CORPO: %ld chaves, %ld blobs em %s (%ld ficheiros; txt %ld -> %ld)\n",
+           postas, blobs, dest_raiz, lidos, antes, txt_n());
+    return blobs > 0 || postas > 0;
+}
+/* GET CORPO 'rel' — bytes crus em stdout; estado em stderr. Vite /corpo/* usa isto. */
+static int get_corpo(const char *p){
+    char rel[512], para[1280], raiz[640];
+    le_caminho_arg(&p, rel, sizeof rel, "");
+    if(!rel[0]){ fprintf(stderr, "GET CORPO: falta o caminho\n"); return 0; }
+    if(!strncmp(rel, "corpo/", 6)) memmove(rel, rel + 6, strlen(rel + 6) + 1);
+    corpo_dir(raiz, sizeof raiz);
+    snprintf(para, sizeof para, "%s/%s", raiz, rel);
+    FILE *f = fopen(para, "rb");
+    if(!f){ fprintf(stderr, "GET CORPO: nao esta no banco: %s\n", rel); return 0; }
+    unsigned char buf[8192]; size_t n;
+    while((n = fread(buf, 1, sizeof buf, f)) > 0)
+        if(fwrite(buf, 1, n, stdout) != n){ fclose(f); return 0; }
+    fclose(f);
+    fflush(stdout);
+    fprintf(stderr, "GET CORPO: %s (%s)\n", rel, para);
+    return 1;
+}
+
 static int executa(const char *sql){
     const char *p = sql;
     if(palavra(&p, "CREATE")){ if(!palavra(&p, "TABLE")) return 0; return cria(p); }
@@ -2797,6 +2922,17 @@ static int executa(const char *sql){
         const char *q = p; pula(&q);
         if(!strncasecmp(q, "TEXTO", 5)) return insere_texto(q+5);
         return insere(p);
+    }
+    if(palavra(&p, "IMPORT")){
+        const char *q = p; pula(&q);
+        if(!strncasecmp(q, "LINGUAGENS", 10)) return import_linguagens(q+10);
+        if(!strncasecmp(q, "CORPO", 5)) return import_corpo(q+5);
+        return 0;
+    }
+    if(palavra(&p, "GET")){
+        const char *q = p; pula(&q);
+        if(!strncasecmp(q, "CORPO", 5)) return get_corpo(q+5);
+        return 0;
     }
     if(palavra(&p, "BUSCA")){
         const char *q = p; pula(&q);
@@ -2828,6 +2964,7 @@ static int executa(const char *sql){
 
 static int abrir_base(const char *base){
     char m[512], g[512];
+    snprintf(g_base, sizeof g_base, "%s", base);
     snprintf(m, sizeof m, "%s.mem", base);
     snprintf(g, sizeof g, "%s.prog", base);
     fmem  = open(m, O_RDWR|O_CREAT, 0644);

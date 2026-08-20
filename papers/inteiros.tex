@@ -19,6 +19,7 @@
 \newtheorem{observacao}{Observação}
 
 \newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\FF}{\mathbb{F}}
 \newcommand{\abs}[1]{\lvert #1\rvert}
 \newcommand{\dg}{^{\dagger}}
 \newcommand{\Word}{\mathcal{W}}
@@ -51,12 +52,93 @@ O inteiro é a \textbf{classe} $[(a,b)]$; $\Phi([(a,b)])=a-b$.
 %======================================================================
 \section*{Onde este documento vive}
 
-Paper \textbf{primeiro} da torre $T_{k+1}=T_k+T_k^{*}$
-(\code{analitico thm:tecidos}):
+Degrau $k=0$ da torre $T_{k+1}=T_k+T_k^{*}$
+(\code{analitico thm:tecidos}) --- o \textbf{segundo} da construção, que se lê
+num sentido só:
+
 \[
-\mathbb{N}\!\to\!\mathbb{Z}\!\to\!\mathbb{Q}\!\to\!\mathbb{R}
-\quad\text{(soma)}\quad\text{(mult.)}\quad\text{(corte)}.
+\boxed{\;
+\underbrace{\FF_2}_{\text{um bit}}
+\;\xrightarrow[\text{3 dobras duais}]{\ \code{naturais}\ }\;
+\underbrace{F_8\equiv\Word_8}_{\{0,\ldots,255\}}
+\;\xrightarrow[\text{TRANSPORTE}]{}\;
+\mathbb{N}
+\;\xrightarrow[\text{soma}]{\ \code{inteiros}\ }\;
+\mathbb{Z}
+\;\xrightarrow[\text{produto}]{\ \code{racionais}\ }\;
+\mathbb{Q}
+\;\xrightarrow[\text{corte}]{\ \code{reais}\ }\;
+\mathbb{R}\;}
 \]
+\noindent{\footnotesize Lê-se da esquerda para a direita: é o sentido em que se
+\textbf{constrói}. Cada paper recebe o objecto do degrau à sua esquerda e
+entrega o do degrau à sua direita; nenhum redefine o que recebeu.\par}
+
+\noindent A cadeia completa, comum aos três papers
+--- a mesma nos três:
+
+\begin{center}\small
+\begin{tabular}{@{}clllll@{}}
+\toprule
+$k$ & degrau & ganha volta & paga & dual do andar (e o seu Fix) & paper \\
+\midrule
+$-1$ & $F_1\!\to\!F_2\!\to\!F_4\!\to\!F_8$ & a \textbf{largura} (3 dobras)
+     & a \textbf{ordem} (car.\ $2$) & $x^{*}$ (2.ª raiz); Fix $=$ andar de baixo
+     & \code{naturais.tex} \\
+$0$  & $\mathbb{N}\!\to\!\mathbb{Z}$ & a \textbf{soma}
+     & o sinal e a boa ordem & $\iota(a,b)=(b,a)\Rightarrow$ oposto; Fix $=\{0\}$
+     & \code{inteiros.tex} \\
+$1$  & $\mathbb{Z}\!\to\!\mathbb{Q}$ & a \textbf{multiplicação}
+     & $0^{-1}$ não existe & $\iota(a,b)=(b,a)\Rightarrow$ inverso; Fix $=\{\pm1\}$
+     & \code{racionais.tex} \\
+$2$  & $\mathbb{Q}\!\to\!\mathbb{R}$ & o \textbf{corte} (completação)
+     & a \textbf{enumerabilidade} & $(A,B)\mapsto(B,A)$; Fix: o corte que fecha
+     & \code{reais.tex} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent{\footnotesize A numeração é a de \code{arquitetura sec:descida},
+onde $k=0$ é $\mathbb{N}\!\to\!\mathbb{Z}$; a torre binária é \emph{anterior} a
+esse degrau, e por isso $k=-1$. O passo é sempre $T_{k+1}=T_k+T_k^{*}$
+(\code{analitico thm:tecidos}). \textbf{Entre $k=-1$ e $k=0$ não há dobra:
+há o TRANSPORTE} --- $a+b=(a\oplus b)+2(a\wedge b)$
+(\code{naturais.tex thm:transporte}) ---, e é ele que leva o suporte $\Word_8$
+do topo da torre binária às operações de $\mathbb{N}$. Nos degraus $k\ge0$
+duplica-se e \textbf{quocienta-se}; em $k=-1$ duplica-se e \textbf{não} se
+quocienta (a segunda cópia é multiplicada por $\sigma$).\par}
+
+\noindent E o dual, que em cada degrau tem \emph{duas} partes:
+
+\[
+\boxed{
+\begin{array}{lll}
+ & \textbf{dual do CENTRO (Lei 1)} & \textbf{dual do ANDAR (o que o degrau acrescenta)}\\[3pt]
+k=-1 & \nu(x)=-x=x\ \text{(degenera)} & x^{*}=(a_0{+}a_1)+a_1\sigma\ \Rightarrow\ T=x\oplus x^{*},\ N=x\otimes x^{*}\\[2pt]
+k=0  & \nu(z)=-z & \iota(a,b)=(b,a)\ \Rightarrow\ \text{oposto aditivo}\\[2pt]
+k=1  & \nu(a,b)=(-a,b) & \iota(a,b)=(b,a)\ \Rightarrow\ \text{inverso multiplicativo}
+\end{array}}
+\]
+\noindent{\footnotesize \textbf{O mesmo \emph{swap} induz o oposto num degrau e
+o inverso no seguinte} --- é o dado que muda de papel, não a fórmula. E em
+$k=-1$ o dual do centro degenera ($-x=x$), pelo que o dual tem de vir de outro
+sítio: da segunda raiz de $\sigma^2+\sigma+\lambda$. Nenhuma destas involuções
+é o dual linear $V\!\cong\!V^{**}$ da Lei~2, nem o dual quadrático
+$s\dg=-1/s$ do \emph{Corpo Algébrico}: são quatro noções, e não se confundem.\par}
+
+\noindent\textbf{O que RECEBE do degrau anterior.} $\mathbb{N}$ entra aqui
+por Peano (Def.~\ref{def:peano}) --- \emph{não} se constrói neste paper. O
+degrau anterior (\code{naturais.tex}, $k=-1$) ergue a torre binária
+$F_1\!\to\!F_8$ e entrega o \textbf{suporte}: o envelope $\Word_8$ de
+§\ref{sec:palavra8} é o suporte de $F_8$, com os andares de baixo como
+prefixos. A passagem desse suporte para as operações de $\mathbb{N}$ é o
+\textbf{transporte}, e não uma dobra --- por isso $\mathbb{N}$ chega aqui como
+hipótese e não como construção.
+
+\medskip\noindent\textbf{O que ENTREGA ao degrau seguinte.} Ao
+\code{racionais.tex} ($k=1$) entrega $\mathbb{Z}$ e o \emph{mesmo} molde de
+pares: lá o par volta, com produto cruzado em vez de soma cruzada, e o mesmo
+\emph{swap} $\iota(a,b)=(b,a)$ passa a induzir o inverso em vez do oposto.
+Entrega também a descida $\Word_8\to E_{16}$ (§\ref{sec:palavra8}).
 \textbf{Molde dual} (Lei~4, $T+T^{*}$): duplicar, ler nos dois lados,
 quocientar. Em $\mathbb{N}$ a soma é total e a subtracção é \textbf{parcial}
 (\code{teoria thm:fibra-por-andar}). Em $\mathbb{Z}$ a subtracção torna-se
@@ -90,15 +172,74 @@ mesmo molde e produto cruzado.
 \text{Peano e cúspide} & \code{algebrico thm:cuspide} & \text{prova Peano; cúspide realiza}\\[6pt]
 \textbf{ACRESCENTA} & \multicolumn{2}{l}{\text{---e é só isto---}}\\[3pt]
 \text{a REPRESENTAÇÃO por pares} & \text{Def.~\ref{def:espaco}} & V_{\mathrm{int}}/{\sim}=\mathbb{Z}\\[2pt]
-\text{a EQUIVALÊNCIA }$\sim$ & \text{Prop.~\ref{prop:equiv}} & $a+d=b+c$ antes do quociente\\[2pt]
-\text{o ISOMORFISMO $\Phi$} & \text{Thm.~\ref{thm:z}} & $\Phi([(a,b)])=a-b$\\[2pt]
-\text{a FOLHA e $\nu$} & \text{§\ref{sec:sinal}} & inversao $\nu(z)=-z$; $\Phi(\nu(x))=-\Phi(x)$\\[2pt]
-\text{dois circuitos }$q\parallel p$ & \text{§\ref{sec:memoria}} & $G_{\mathrm{alg}}$ vs.\ $G_{\mathrm{geom}}$; $\Word_8$
+\text{a EQUIVALÊNCIA }{\sim} & \text{Prop.~\ref{prop:equiv}} & a+d=b+c\ \text{antes do quociente}\\[2pt]
+\text{o ISOMORFISMO }\Phi & \text{Thm.~\ref{thm:z}} & \Phi([(a,b)])=a-b\\[2pt]
+\text{a FOLHA e }\nu & \text{§\ref{sec:sinal}} & \text{inversão }\nu(z)=-z;\ \Phi(\nu(x))=-\Phi(x)\\[2pt]
+\text{dois circuitos }q\parallel p & \text{§\ref{sec:memoria}} & G_{\mathrm{alg}}\ \text{vs.}\ G_{\mathrm{geom}};\ \Word_8
 \end{array}}
 \]
 
 %======================================================================
 \section{As oito leis --- marcos da construção}\label{sec:leis}
+
+\noindent Onde cada lei vive na cadeia --- tabela comum aos três papers
+--- a mesma nos três:
+
+\begin{center}\footnotesize
+\begin{tabular}{@{}cp{2.75cm}p{2.75cm}p{2.75cm}p{2.75cm}@{}}
+\toprule
+lei & $k{=}-1$: $F_1\!\to\!F_8$ & $k{=}0$: $\mathbb{N}\!\to\!\mathbb{Z}$ & $k{=}1$: $\mathbb{Z}\!\to\!\mathbb{Q}$ & $k{=}2$: $\mathbb{Q}\!\to\!\mathbb{R}$ \\
+\midrule
+\textbf{0} divisão do zero
+ & $x\oplus x=0$; só o $0$ sem inversa \hfill\textsc{expl.}
+ & subtracção parcial; folha $[(1,0)]\oplus[(0,1)]=0$ \hfill\textsc{expl.}
+ & $0^{-1}$ não existe; $0\!\leftrightarrow\!\infty$ \hfill\textsc{mista}
+ & o \textbf{buraco}: corte sem racional em cima \hfill\textsc{expl.} \\
+\textbf{1} dual ($1\dg=-1$)
+ & \emph{degenera}: $-x=x$ \hfill\textsc{expl.}
+ & $\iota$ no par; $\nu(z)=-z$ \hfill\textsc{expl.}
+ & $\nu(a,b)=(-a,b)$ \hfill\textsc{expl.}
+ & $\nu(x)=-x$; do andar: $(A,B)\!\mapsto\!(B,A)$ \hfill\textsc{expl.} \\
+\textbf{2} bidual
+ & $x^{**}=x$; automorfismo \hfill\textsc{expl.}
+ & Dir/Cruz; $R^{4}=\mathrm{id}$ \hfill\textsc{mista}
+ & $V\cong V^{**}$ canónico \hfill\textsc{canón.}
+ & $B=\mathbb{Q}\setminus A$: complementar $2\times$ \hfill\textsc{expl.} \\
+\textbf{3} trial $\{-1,0,+1\}$
+ & \emph{degenera}: sem cúspide \hfill\textsc{expl.}
+ & cúspide $\tau=0$; $+0=-0$ \hfill\textsc{expl.}
+ & $\operatorname{sgn}(a/b)$ \hfill\textsc{expl.}
+ & $\tau=0$ é \emph{vazio} $\iff$ irracional \hfill\textsc{expl.} \\
+\textbf{4} tetral $T+T^{*}$
+ & $F_{2w}=F_w\oplus\sigma F_w$ \hfill\textsc{expl.}
+ & $\mathbb{N}^{2}/{\sim}$; classe $[(a,b)]$ \hfill\textsc{expl.}
+ & recebida (\code{thm:juntas}) \hfill\textsc{receb.}
+ & $(A,B)$, e quocientar aberto/fechado \hfill\textsc{expl.} \\
+\textbf{5} pental $x^{2}=-1$
+ & \emph{degenera}: uma raiz só \hfill\textsc{expl.}
+ & $G_{\mathrm{geom}}\bmod2$ \hfill\textsc{receb.}
+ & $J(a,b)=(-b,a)$, $J^{2}=-I$ \hfill\textsc{expl.}
+ & \emph{não existe}: ordenado \hfill\textsc{expl.} \\
+\textbf{6} hexal (interface)
+ & base ortonormal: coordenada $=$ ler o bit \hfill\textsc{receb.}
+ & $\otimes\leftrightarrow(a-b)(c-d)$ \hfill\textsc{receb.}
+ & interface \hfill\textsc{receb.}
+ & densidade de $\mathbb{Q}$ em $\mathbb{R}$ \hfill\textsc{receb.} \\
+\textbf{7} octonião dual
+ & encaixe por prefixos \hfill\textsc{expl.}
+ & $q\parallel p$; par $\neq$ classe; $\Word_8$ \hfill\textsc{expl.}
+ & junta dual \hfill\textsc{receb.}
+ & três realizações ligadas sem fundidas \hfill\textsc{expl.} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent{\footnotesize \textsc{expl.} realizada neste degrau ·
+\textsc{receb.} interface herdada do centro, não derivada aqui ·
+\textsc{mista}/\textsc{canón.} ver o paper do degrau.
+\textbf{Três leis degeneram em $k=-1$} (1, 3, 5) --- e é isso que permite a
+torre binária dobrar sem excepção. A Lei~5 falta nos dois extremos por razões
+\emph{opostas}: em $k=-1$ por característica~2, em $k=2$ por ordem.
+\textbf{Nenhum degrau realiza as oito}; a coluna diz onde cada uma vive.\par}
 
 \noindent As oito leis (\code{analitico sub:oitoleis}) \emph{estruturam} este
 paper --- não decoram. Cada lei é primitiva com operador e medidor; neste
@@ -380,15 +521,28 @@ quociente produza a ordem usual de $\mathbb{Z}$).
 $k<0$, $\Phi([(0,-k)])=k$.
 (3) Injectiva: $\Phi([(a,b)])=\Phi([(c,d)])$ $\Rightarrow$ $a-b=c-d$
 $\Rightarrow$ $a+d=b+c$ $\Rightarrow$ $[(a,b)]=[(c,d)]$.
-(4) $\Phi$ preserva $+$ e $\cdot$: Thm.~\ref{thm:bem-definido}.
-(5) $(\mathbb{Z},+,\cdot)$ é anel. Como $\Phi$ é bijecção e
-$\Phi(x\oplus y)=\Phi(x)+\Phi(y)$,
-$\Phi(x\otimes y)=\Phi(x)\Phi(y)$, transportam-se os axiomas: associatividade
-e comutatividade de $\oplus$ e $\otimes$, distributividade,
-$[(0,0)]$ neutro de $\oplus$, $[(1,0)]$ neutro de $\otimes$,
-$[(b,a)]$ oposto aditivo de $[(a,b)]$. Logo
-$(V_{\mathrm{int}}/{\sim},\oplus,\otimes)$ \textbf{é} anel e $\Phi$ isomorfismo
-de anéis.
+(4) $\Phi$ preserva $\oplus$ e $\otimes$: Thm.~\ref{thm:bem-definido} --- as
+operações descem ao quociente.
+(5) \textbf{Anel no quociente.} Pelo Thm.~\ref{thm:bem-definido}, $\oplus$ e
+$\otimes$ são bem-definidas em $V_{\mathrm{int}}/{\sim}$ (independentes do
+representante). Verificam-se os axiomas directamente no quociente:
+\begin{itemize}\itemsep1pt
+\item \emph{Adição:} associatividade e comutatividade herdam-se de
+      $\mathbb{N}^{2}$; $[(0,0)]$ é neutro pois
+      $(a,b)\oplus(0,0)=(a,b)$; oposto $[(b,a)]$ pois
+      $(a,b)\oplus(b,a)=(a+b,b+a)\sim(0,0)$.
+\item \emph{Multiplicação:} $\Phi([(a,b)]\otimes[(c,d)])=(a-b)(c-d)$; a
+      associatividade e comutatividade de $\cdot$ em $\mathbb{Z}$ transportam-se
+      por $\Phi$; $[(1,0)]$ é neutro pois $\Phi([(1,0)])=1$.
+\item \emph{Distributividade:}
+      $\Phi(x\otimes(y\oplus z))=\Phi(x)\bigl(\Phi(y)+\Phi(z)\bigr)
+      =\Phi(x)\Phi(y)+\Phi(x)\Phi(z)
+      =\Phi(x\otimes y)+\Phi(x\otimes z)$; pela injectividade de $\Phi$,
+      $x\otimes(y\oplus z)=x\otimes y\oplus x\otimes z$.
+\end{itemize}
+Logo $(V_{\mathrm{int}}/{\sim},\oplus,\otimes)$ \textbf{é} anel. Como
+$\Phi$ é isomorfismo de anéis (bijecção que preserva $+$ e $\cdot$), identifica-se
+com $\mathbb{Z}$ usual.
 (6) Ordem: $x\le y\iff\Phi(x)\le\Phi(y)$ com a ordem usual em $\mathbb{Z}$.
 $\square$
 \end{proof}
@@ -423,7 +577,7 @@ $\mathbb{N}^{2}$: a ordem do quociente é a transportada por $\Phi$.
 
 \begin{observacao}[Molde do degrau seguinte]
 $\mathbb{N}\!\to\!\mathbb{Z}$: $a+d=b+c$ (soma cruzada). $\mathbb{Z}\!\to\!\mathbb{Q}$:
-$ad=bc$ (produto cruzado; \code{racionais.tex} Thm.~\ref{thm:q}). Analogia:
+$ad=bc$ (produto cruzado; \code{racionais thm:q}). Analogia:
 \[
 \boxed{\text{soma cruzada}\longrightarrow\text{produto cruzado}}.
 \]
@@ -484,10 +638,21 @@ descendem a $+$ e $\cdot$ em $\mathbb{Z}$; $\iota(a,b)=(a,b)\iff a=b$.
 \end{teorema}
 
 \begin{proof}
-\textbf{(1)} Soma: $(a+c)+(b'+d')=(a'+c')+(b+d)$ implica
-$(a+c,b+d)\sim(a'+c',b'+d')$.
-\textbf{(2)} Produto: $\Phi([(a,b)]\otimes[(c,d)])=(ac+bd)-(ad+bc)
-=(\Phi([(a,b)]))(\Phi([(c,d)]))$.
+\textbf{(1) Soma:} se $(a,b)\sim(a',b')$ e $(c,d)\sim(c',d')$, então
+$a+b'=b+a'$ e $c+d'=d+c'$. Somando:
+\[
+(a+c)+(b'+d')=(a+b')+(c+d')=(b+a')+(d+c')=(a'+c')+(b+d),
+\]
+logo $(a+c,b+d)\sim(a'+c',b'+d')$.
+\textbf{(2) Produto:} se $(a,b)\sim(a',b')$ e $(c,d)\sim(c',d')$, então
+$a-b=a'-b'$ e $c-d=c'-d'$. Logo
+\[
+(ac+bd)-(ad+bc)=(a-b)(c-d)=(a'-b')(c'-d')=(a'c'+b'd')-(a'd'+b'c'),
+\]
+donde $(ac+bd)+(a'd'+b'c')=(a'c'+b'd')+(ad+bc)$, ou seja,
+$(ac+bd,ad+bc)\sim(a'c'+b'd',a'd'+b'c')$. Também
+$\Phi([(a,b)]\otimes[(c,d)])=(a-b)(c-d)=\Phi(x)\Phi(y)$ para
+$x=[(a,b)]$, $y=[(c,d)]$.
 \textbf{(3)} $\iota(a,b)=(a,b)\iff a=b$. $\square$
 \end{proof}
 
@@ -622,14 +787,17 @@ ou fibra restrita a $\Word_8$).
 Mesmo padrão estrutural (duplicar $\to$ identificar $\to$ contar $\to$
 projectar); espaços distintos.
 
-\subsection{Par homomorfismo/difeomorfismo e conservação de área}\label{sec:metrica-dragao}
+\subsection{Par homomorfismo/unimodular e conservação de área}\label{sec:metrica-dragao}
 
 O \emph{Corpo Algébrico} (\code{algebrico thm:metrica}) distingue três
 camadas: a métrica canónica de Lebesgue
-$d(A,B)=\mu(A\triangle B)$ --- no espaço discreto, preservar a métrica
-reduz-se a preservar a medida de contagem; já a \textbf{conservação da
-área} exige o jacobiano: $\mu(TA)=|\det T|\,\mu(A)$. No reticulado,
-$[\mathbb{Z}^{2}:T(\mathbb{Z}^{2})]=|\det T|$ (\code{metrica.c} §M8).
+$d(A,B)=\mu(A\triangle B)$ --- no espaço \textbf{discreto}, preservar a
+métrica reduz-se a preservar a medida de contagem: uma bijecção do conjunto
+finito é \textbf{isometria discreta} ($d(TA,TB)=d(A,B)$), e \emph{não} se
+confunde com homeomorfismo contínuo (no finito toda permutação é homeomorfismo
+e não distingue métrica nenhuma; cf.\ \code{algebrico thm:metrica}).
+Já a \textbf{conservação da área} exige o jacobiano: $\mu(TA)=|\det T|\,\mu(A)$.
+No reticulado, $[\mathbb{Z}^{2}:T(\mathbb{Z}^{2})]=|\det T|$ (\code{metrica.c} §M8).
 O \emph{Corpo Topológico} (\code{topologico thm:det-volume}) identifica
 $|\det A_m|=1$ com o factor de volume do gato.
 
@@ -643,8 +811,10 @@ realiza-se em $\mathbb{Z}^{2}$:
 \textbf{ISOMETRIA DISCRETA} & d(A,B)=\mu(A\triangle B)\ \text{no toro finito:}\\
 & \text{bijecção preserva contagem}\Rightarrow\text{isometria (§M1--§M2)}\\[4pt]
 \textbf{UNIMODULAR} & T\in\mathrm{GL}(2,\mathbb{Z}),\ |\det T|=1:\ \text{automorfismo}\\
-& \text{do reticulado; extensão linear a }\mathbb{R}^{2}\ \text{é difeomorfismo}\\
-& \text{que preserva área; }\mu(TA)=\mu(A)\ \text{(§M3, §M8)}
+& \text{do reticulado }\mathbb{Z}^{2};\ \text{a extensão }\mathbb{R}\text{-linear}\\
+& T_{\mathbb{R}}\colon\mathbb{R}^{2}\to\mathbb{R}^{2}\ \text{é difeomorfismo}\\
+& \text{(jacobiano constante }\det T=\pm1\text{) que preserva área;}\\
+& \mu(TA)=\mu(A)\ \text{(§M3, §M8)}
 \end{array}}
 \]
 
@@ -794,7 +964,7 @@ I\xrightarrow{p}\mathbb{Z}^{2}
 \]
 \[
 \boxed{
-[(a,b)]\xmapsto{\nu}[(b,a)],\qquad
+[(a,b)]\xrightarrow{\ \nu\ }[(b,a)],\qquad
 \Phi(\nu(x))=-\Phi(x),\qquad
 [(n,0)]\oplus[(0,n)]\sim[(0,0)].
 }

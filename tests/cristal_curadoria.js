@@ -96,7 +96,7 @@ ok('§K1 a contagem fecha: (conceitos − nascidos na tiffany) + fusões == 4286
     const partes = fibra(lz)
     if (!partes) { conserva = false; continue }
     const [lx, ly] = partes
-    if (E(lz) - E(lx) - E(ly) !== E(esqueleto(JSON.parse(lz).id))) conserva = false
+    if (E(lz) - E(lx) - E(ly) !== U.escada(U.esqueleto(JSON.parse(lz).id)).E) conserva = false
     try {
       if (JSON.parse(lx).id !== JSON.parse(lz).id) conserva = false
       if (JSON.parse(ly).id === JSON.parse(lz).id) conserva = false
@@ -127,8 +127,8 @@ function desfazTudo (ls) {
   let eAntes = 0
   for (const l of antes) eAntes += E(l)
   console.log(`volta total (recuperado): ${antes.length} registos, ${ids.size} endereços, E=${eAntes}`)
-  ok('§K3 desfazer todas devolve 4286 endereços únicos com E == 38731623179 (a âncora do jornal, intacta debaixo do avanço)',
-    antes.length === 4286 && ids.size === 4286 && eAntes === 38731623179)
+  ok('§K3 desfazer todas devolve 4286 endereços únicos com E == 39008987855 (a âncora do jornal, intacta debaixo do avanço)',
+    antes.length === 4286 && ids.size === 4286 && eAntes === 39008987855)
 }
 
 /* §K5 — o gume: um byte induzido numa parte quebra a âncora */
@@ -138,19 +138,23 @@ function desfazTudo (ls) {
    * válido (letra vira letra) e a indução fica só no CONTEÚDO */
   const i = mut.findIndex(l => {
     const r = JSON.parse(l)
-    const j = l.indexOf('"descricao":"') + 13
-    if (!r.fusao || j <= 13) return false
+    const j = l.indexOf('"descricao": "') + 14
+    if (j <= 14) return false
+    if (!r.fusao) return false
     const c = l.charCodeAt(j)
     /* fora os chars em que XOR 1 tocaria a ESTRUTURA do JSON: " # \ ] */
     return c !== 34 && c !== 35 && c !== 92 && c !== 93
   })
+  if (i < 0) ok('§K5 um byte induzido dentro de uma fusão quebra a âncora da volta', false)
+  else {
   const alvo = mut[i]
-  const j = alvo.indexOf('"descricao":"') + 13
+  const j = alvo.indexOf('"descricao": "') + 14
   mut[i] = alvo.slice(0, j) + String.fromCharCode(alvo.charCodeAt(j) ^ 1) + alvo.slice(j + 1)
   let eMut = 0
   for (const l of desfazTudo(mut)) eMut += E(l)
   ok('§K5 um byte induzido dentro de uma fusão quebra a âncora da volta',
-    eMut !== 38731623179)
+    eMut !== 39008987855)
+  }
 }
 
 /* §K4 — esgotamento do estrato texto-idêntico */

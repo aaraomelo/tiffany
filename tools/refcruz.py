@@ -24,7 +24,8 @@ import re, sys, os
 DOCS = {'algebrico':'papers/corpo_algebrico.tex', 'topologico':'papers/corpo_topologico.tex',
         'analitico':'papers/corpo_analitico.tex', 'computacional':'papers/arquitetura.tex',
         'sintese':'papers/arquitetura.tex',
-        'inteiros':'papers/inteiros.tex', 'racionais':'papers/racionais.tex',
+        'naturais':'papers/naturais.tex', 'inteiros':'papers/inteiros.tex',
+        'racionais':'papers/racionais.tex', 'reais':'papers/reais.tex',
         'arquitetura':'papers/arquitetura.tex',
         'teoria':'teoria.tex', 'catalogo':'catalogo.tex', 'enredo':'enredo.tex'}
 CENTRO = 'algebrico'
@@ -44,6 +45,12 @@ for nome, f in DOCS.items():
         labels.setdefault(m.group(1), set()).add(nome)
 
 CIT = re.compile(r'\\code\{([a-z_]+)[ ~]+((?:thm|def|sec|cor|prop|lem|sub|eq|fig|tab):[a-zA-Z0-9_\\-]+)\}')
+# E A MARCA QUE FALTAVA. A §sec:dividas dizia: «um detector não distingue "citar para
+# fundar" de "citar uma leitura": ele vê o centro a apontar para fora e conta». Passa a
+# distinguir, porque a citação passa a dizer o que é: \leitura{doc lab} imprime igual
+# (é \code por dentro) e declara que aponta a ORIGEM ou lê — não que se funda ali.
+# Continua a conferir o documento e o label: uma leitura pode apodrecer como qualquer outra.
+LEIT = re.compile(r'\\leitura\{([a-z_]+)[ ~]+((?:thm|def|sec|cor|prop|lem|sub|eq|fig|tab):[a-zA-Z0-9_\\-]+)\}')
 
 def faixa_dividas(src):
     """onde começa e acaba a §sec:dividas — as citações lá dentro são inventário."""
@@ -57,6 +64,19 @@ for nome, f in DOCS.items():
     _src = open(f, encoding='utf-8').read()
     _di, _df = faixa_dividas(_src)
     dentro_das_dividas = lambda pos: _di >= 0 and _di <= pos <= _df
+    for m in LEIT.finditer(_src):
+        alvo, lab = m.group(1), m.group(2).replace('\\_', '_')
+        if alvo not in DOCS:
+            mortas.append((nome, alvo, lab, 'documento não existe (leitura)')); continue
+        if alvo not in labels.get(lab, set()):
+            onde = ', '.join(sorted(labels.get(lab, set()))) or 'nenhum'
+            erradas.append((nome, alvo, lab, f'o label vive em: {onde} (leitura)')); continue
+        if nome == CENTRO and dentro_das_dividas(m.start()):
+            direccoes['inventário (a §sec:dividas a nomear-se)'] = \
+                direccoes.get('inventário (a §sec:dividas a nomear-se)', 0) + 1
+            continue
+        k = 'leitura (aponta a origem, NÃO funda)'
+        direccoes[k] = direccoes.get(k, 0) + 1
     for m in CIT.finditer(_src):
         alvo, lab = m.group(1), m.group(2).replace('\\_', '_')
         if alvo not in DOCS:

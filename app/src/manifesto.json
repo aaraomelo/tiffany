@@ -85,6 +85,22 @@
       "arquivo": "/docs/computacional.pdf"
     },
     {
+      "nome": "Os naturais — F₂→ℕ, torre binária e transporte",
+      "arquivo": "/docs/naturais.pdf"
+    },
+    {
+      "nome": "Os inteiros — reversibilidade da soma",
+      "arquivo": "/docs/inteiros.pdf"
+    },
+    {
+      "nome": "Os racionais — reversibilidade da multiplicação",
+      "arquivo": "/docs/racionais.pdf"
+    },
+    {
+      "nome": "Os reais — corte, Möbius e fracção contínua",
+      "arquivo": "/docs/reais.pdf"
+    },
+    {
       "nome": "A Física — leis → observável → teste",
       "arquivo": "/docs/fisica.pdf"
     },

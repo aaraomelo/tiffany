@@ -817,7 +817,10 @@ int main(void)
             { "dafny",    "decidir",  1, 1, 0 },
             { "isabelle", "provar",   0, 1, 1 },
             { "latex",    "compor",   1, 1, 1 },
+            { "sql",      "consultar",1, 1, 1 },
             { "claim",    "afirmar",  1, 1, 0 },
+            { "control",  "selecionar",1,1,0 },
+            { "isa",      "mover",    1, 1, 1 },
         };
         int n = (int)(sizeof lin / sizeof lin[0]);
         long postas = 0, resid = 0, sem_assinatura = 0;
@@ -865,7 +868,7 @@ int main(void)
                " diferente\n", graus_distintos, n);
         printf("        e a de Dafny e' (1,1,0) — a da propria TRIADE: decidir e' cortar em"
                " dois\n\n");
-        ok("as DEZ LINGUAGENS sao realizacoes e NENHUMA e' privilegiada — e' a roupa no sitio"
+        ok("as LINGUAGENS sao realizacoes e NENHUMA e' privilegiada — e' a roupa no sitio"
            " onde eu nao a tinha visto: uma linguagem e' o que MUDA com a base, e o predicado e'"
            " o que nao muda. Nao sao dez implementacoes de que uma seja a verdadeira: sao"
            " realizacoes do mesmo predicado, e ele nao mora em nenhuma. Entram no banco pela"

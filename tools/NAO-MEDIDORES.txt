@@ -36,6 +36,9 @@ tools/traduz.c         o tradutor C->WASM: traduz, não afirma. Quem mede é tes
                        — dois caminhos que têm de concordar (cc do sistema vs este) e a VOLTA
                        (o módulo devolve as assinaturas). O tradutor sozinho tem ZERO asserções.
 
+tests/tex_core.c       núcleo do compositor LaTeX — incluído por tests/tex.c, não medidor
+                       standalone (sem main). Quem mede é tests/tex.c e tests/tex_wasm.js.
+
 tools/isa.c            a ISA do broca-so transcrita no subconjunto que sobe para wasm: é a
                        máquina, não afirma nada. Quem mede é tests/isa_wasm.js — MOVE reverte,
                        os metais desfazem-se, e os períodos 4 e 2 saem dela.

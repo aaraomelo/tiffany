@@ -5,8 +5,9 @@
  * §W2  claim: Pareto/Why/Kanban fecham R (CLOSE) e mutação denuncia
  * §W3  isa: porta única MOVE
  * §W4  latex: compor† = descompor (involução)
- * §W5  isabelle x⊕x=0
- * §W6  control: RETAIN/MOVE/RETRACT na arena (8 eixos)
+ * §W5  sql: compilar† = descompilar (interface padrão)
+ * §W6  isabelle x⊕x=0
+ * §W7  control: RETAIN/MOVE/RETRACT na arena (8 eixos)
  */
 'use strict';
 const fs = require('fs');
@@ -176,16 +177,28 @@ function i32(ex) { return new Int32Array(ex.DISCO.buffer, BASE); }
         ok('§W4 latex compor†=descompor', back === '\\section{Oi}');
     }
 
+    /* §W5 sql involução (interface padrão) */
+    {
+        const S = await load('consultar.wasm');
+        const m = u8(S);
+        const src = enc.encode("INSERT TEXTO 'ouro'");
+        m.set(src, BASE + 100);
+        const n1 = S.sql_compilar(100, src.length, 2000);
+        const n2 = S.sql_descompilar(2000, n1, 4000);
+        const back = dec.decode(m.slice(BASE + 4000, BASE + 4000 + n2));
+        ok('§W5 sql compilar†=descompilar (interface padrão)', back === "INSERT TEXTO 'ouro'");
+    }
+
     /* isabelle residual */
     {
         const p = await load('provar.wasm');
         const a = i32(p);
         for (let i = 0; i < 8; i++) a[i] = (i + 1) * 17;
         const falhasXor = p.provar_xor_nulo(8);
-        ok('§W5 isabelle x⊕x=0', falhasXor === 0);
+        ok('§W6 isabelle x⊕x=0', falhasXor === 0);
     }
 
-    /* §W6 Controlo em wasm (8 eixos) */
+    /* §W7 Controlo em wasm (8 eixos) */
     {
         const ctl = await load('control.wasm');
         const a = i32(ctl);
@@ -194,16 +207,16 @@ function i32(ex) { return new Int32Array(ex.DISCO.buffer, BASE); }
         a[1 + 1] = 0; // theta_R = 0
         a[9] = 0; // R=0
         for (let i = 0; i < 8; i++) a[10 + i] = 0; // D=0
-        ok('§W6 RETAIN quando R=0 e D=0', ctl.control_decide() === 0 && a[18] === 0);
+        ok('§W7 RETAIN quando R=0 e D=0', ctl.control_decide() === 0 && a[18] === 0);
         a[9] = 3; // R≠0
-        ok('§W6 RETRACT quando R≠0', ctl.control_decide() === 2);
+        ok('§W7 RETRACT quando R≠0', ctl.control_decide() === 2);
         a[9] = 0; a[10] = 99; // L1 grande
-        ok('§W6 MOVE quando D>Θ', ctl.control_decide() === 1);
+        ok('§W7 MOVE quando D>Θ', ctl.control_decide() === 1);
         a[20] = 2; a[21] = 10; a[22] = 20;
         a[40] = 2; a[41] = 12; a[42] = 18;
         a[60] = 0; a[61] = 0; a[62] = 0; a[63] = 0;
         ctl.control_dist_arena();
-        ok('§W6 dist L1=4 caixa=2 forma=2 teclado=0',
+        ok('§W7 dist L1=4 caixa=2 forma=2 teclado=0',
             a[10] === 4 && a[14] === 2 && a[15] === 0 && a[17] === 2);
     }
 

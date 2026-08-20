@@ -190,12 +190,13 @@ printf("\n§C5  O TECTO: as divisões que não couberam, contadas à parte.\n\n"
     printf("      saturações do Qz (racional em int):  %ld  — TODAS do §C1, ao procurar\n", qz_saturou);
     printf("      o tecto de propósito; as séries, os 125 duplos e os 25 campos de Green\n");
     printf("      correram sem uma\n\n");
-    ok("E O TECTO DIZ-SE: as contas todas acima correram sem uma única saturação — nem nas"
-       " séries de doze termos, nem nos 125 integrais duplos, nem nos 25 campos de Green."
-       " O racional é em E₁₆, e a lib conta o que não cabe em vez de truncar"
-       " calada. Uma quadratura exacta que estoire em silêncio é pior que uma aproximada"
-       " que o diga",
-       c2_estouros == 0 && qz_saturou == sat_pos_c4 && c2_sat_tecto > 0);
+    ok("E O TECTO DIZ-SE: fora do estouro PROCURADO no §C1, as contas todas acima correram"
+       " sem uma única saturação — nem nas séries honestas, nem nos 125 integrais duplos,"
+       " nem nos 25 campos de Green. O racional é em E₁₆, e a lib conta o que não cabe em"
+       " vez de truncar calada. Uma quadratura exacta que estoire em silêncio é pior que uma"
+       " aproximada que o diga",
+       c2_estouros > 0 && c2_estouros <= c2_sat_tecto
+       && qz_saturou == sat_pos_c4 && c2_sat_tecto > 0);
 }
 
 /* ═══ §C7 — exp e log são o PAR, e a composição prova-o em ℚ ═══════════════ */

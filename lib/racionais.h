@@ -40,6 +40,7 @@
 #include "i128.h"
 
 typedef struct { int16_t p, q; } Qz;         /* p/q em E₁₆, com q ≠ 0 */
+typedef struct { I128 p, q; } QzP;           /* par promovido — classe exacta fora de E₁₆ */
 
 static long qz_saturou = 0;    /* o que não coube — contado À PARTE dos defeitos */
 
@@ -192,4 +193,114 @@ static int qz_dist_menor_ig(Qz a, Qz b, Qz eps){
 }
 /* a inclusão ℤ ↪ ℚ: n ↦ n/1 */
 static Qz qz_de_inteiro(long n){ return qz(n, 1); }
+
+/* ── PROMOÇÃO: saturo → par exacto no andar I128 (caminho novo; qz() estreito intacto) ──
+ * O detector é o mesmo princípio: não cabe em E₁₆ ⟺ alto ≠ 0 no sentido do par reduzido.
+ * Não substitui qz() no caminho quente até decisão do coordenador — só expõe o resultado
+ * exacto para quem precisa de ler a classe depois de qz_saturou. */
+static int qz_prom_sat(QzP w){
+    if(!i128_fits_i64(w.p) || !i128_fits_i64(w.q)) return 1;
+    long p = i128_to_i64(w.p), q = i128_to_i64(w.q);
+    return !qz_cabe(p) || !qz_cabe(q);
+}
+static QzP qz_prom(long p, long q){
+    QzP r;
+    if(q < 0){ p = -p; q = -q; }
+    long g = qz_mdc(p, q);
+    p /= g; q /= g;
+    if(p == 0) q = 1;
+    r.p = i128_from_i64(p);
+    r.q = i128_from_i64(q);
+    return r;
+}
+static QzP qz_prom_de(Qz a){
+    QzP r;
+    r.p = i128_from_i64((int64_t)a.p);
+    r.q = i128_from_i64((int64_t)a.q);
+    return r;
+}
+static int qz_prom_igual(QzP x, QzP y){
+    if(!i128_fits_i64(x.p) || !i128_fits_i64(x.q) ||
+       !i128_fits_i64(y.p) || !i128_fits_i64(y.q)) return 0;
+    return i128_cmp(i128_smul(i128_to_i64(x.p), i128_to_i64(y.q)),
+                      i128_smul(i128_to_i64(y.p), i128_to_i64(x.q))) == 0;
+}
+static Qz qz_prom_estreita(QzP w){ return qz(i128_to_i64(w.p), i128_to_i64(w.q)); }
+static int qz_prom_estreito_bate(Qz r, QzP ex){
+    if(qz_prom_sat(ex)) return 0;                /* saturado: qz(ex) também dá tecto */
+    if(!i128_fits_i64(ex.p) || !i128_fits_i64(ex.q)) return 0;
+    return qz_igual(r, qz(i128_to_i64(ex.p), i128_to_i64(ex.q)));
+}
+static QzP qz_prom_soma(Qz a, Qz b){
+    long g = qz_mdc(a.q, b.q);
+    long bq = b.q / g, aq = a.q / g;
+    long n1 = (long)a.p * bq, n2 = (long)b.p * aq;
+    long den = (long)a.q * bq;
+    return qz_prom(n1 + n2, den);
+}
+static QzP qz_prom_soma_pp(QzP a, QzP b){
+    I128 n1 = i128_smul_i128(a.p, i128_to_i64(b.q));
+    I128 n2 = i128_smul_i128(b.p, i128_to_i64(a.q));
+    I128 den = i128_smul_i128(a.q, i128_to_i64(b.q));
+    return qz_prom(i128_to_i64(i128_add(n1, n2)), i128_to_i64(den));
+}
+static QzP qz_prom_mult(Qz a, Qz b){
+    long g1 = qz_mdc(a.p, b.q), g2 = qz_mdc(b.p, a.q);
+    long ap = a.p / g1, bq = b.q / g1;
+    long bp = b.p / g2, aq = a.q / g2;
+    return qz_prom(ap * bp, aq * bq);
+}
+static QzP qz_prom_mult_pp(QzP a, QzP b){
+    return qz_prom(i128_to_i64(i128_smul_i128(a.p, i128_to_i64(b.p))),
+                 i128_to_i64(i128_smul_i128(a.q, i128_to_i64(b.q))));
+}
+
+/* ── QzX: estreito + promovido juntos — caminho de migração (qz() legado intacto) ──
+ * Quem precisa do exacto lê .promovido quando .saturo; quem ainda consome Qz usa
+ * .estreito (comportamento actual, incluindo ±32767). */
+typedef struct { Qz estreito; QzP promovido; int saturo; } QzX;
+
+static QzX qz_x(long p, long q){
+    QzX r;
+    r.promovido = qz_prom(p, q);
+    r.saturo = qz_prom_sat(r.promovido);
+    r.estreito = qz(p, q);
+    return r;
+}
+static QzX qz_x_de(Qz a){
+    QzX r;
+    r.promovido = qz_prom_de(a);
+    r.saturo = qz_prom_sat(r.promovido);
+    r.estreito = a;
+    return r;
+}
+static QzX qz_x_soma(Qz a, Qz b){
+    QzX r;
+    r.promovido = qz_prom_soma(a, b);
+    r.saturo = qz_prom_sat(r.promovido);
+    if(!r.saturo)
+        r.estreito = qz(i128_to_i64(r.promovido.p), i128_to_i64(r.promovido.q));
+    else
+        r.estreito = qz_soma(a, b);
+    return r;
+}
+static QzX qz_x_mult(Qz a, Qz b){
+    QzX r;
+    r.promovido = qz_prom_mult(a, b);
+    r.saturo = qz_prom_sat(r.promovido);
+    if(!r.saturo)
+        r.estreito = qz(i128_to_i64(r.promovido.p), i128_to_i64(r.promovido.q));
+    else
+        r.estreito = qz_mult(a, b);
+    return r;
+}
+static int qz_x_divide(Qz a, Qz b, QzX *r){
+    Qz i;
+    if(!qz_inverso(b, &i)) return 0;
+    if(r) *r = qz_x_mult(a, i);
+    return 1;
+}
+static int qz_x_igual(QzX a, QzX b){
+    return qz_prom_igual(a.promovido, b.promovido);
+}
 #endif

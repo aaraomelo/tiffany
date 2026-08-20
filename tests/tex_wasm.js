@@ -23,6 +23,7 @@
  *   §T5  Alonzo (a composição): giros, boxed, smallmatrix — /SementeEstrela viaja
  *   §T6  Caelum (o esqueleto): /AssinaturaOito, 256 componentes, dois caminhos batem
  *   §T7  volta_compila: computacional×2 id (1 bit)
+ *   §T8  cadeia aritmética: naturais→reais compõem no corpo medido
  */
 'use strict';
 const fs = require('fs');
@@ -46,6 +47,7 @@ console.log('=== O CORPO TRADUTOR SOBE INTEIRO: tex.c -> wasm ===\n');
  * prelúdio de constantes que os #include dariam (SEEK_*, NULL, stderr como sink). */
 const PRELUDIO = '#define SEEK_SET 0\n#define SEEK_CUR 1\n#define SEEK_END 2\n' +
                  '#define NULL 0\n#define EOF (-1)\n#define stderr 0\n#define stdout 1\n#define stdin 3\n' +
+                 '#define INT32_MIN (-2147483647-1)\n#define INT32_MAX 2147483647\n' +
                  '#define TEX_COM_LIBC_WASM 1\n';
 const w = path.join(TMP, 'tex_wasm.wasm');
 const unido = path.join(TMP, 'tex_wasm_unido.c');
@@ -377,6 +379,56 @@ catch (e) {
     console.log(`   §T7 computacional×2 rc=${d1.rc}/${d2.rc} tam=${d1.tam}/${d2.tam} Forms=${f1}/${f2}`);
     ok('§T7 volta_compila: a segunda composição é a mesma (1 bit, sem recorrência) — resíduo 0',
        !trap && d1.rc === 0 && d2.rc === 0 && d1.tam === d2.tam && f1 === f2 && f1 > 50 && d1.tam > 1e5);
+
+    /* §T8 cadeia aritmética — F₂→ℕ→ℤ→ℚ→ℝ no corpo medido (lazy, como T7). */
+    const CADEIA = ['papers/naturais.tex', 'papers/inteiros.tex',
+                    'papers/racionais.tex', 'papers/reais.tex'];
+    let t8mal = 0, t8ok = 0;
+    try {
+        const cache8 = new Map(man.ficheiros.map((f) => [f, fs.readFileSync(path.join(RAIZ, f))]));
+        const poeSet8 = new Set();
+        let E8 = null;
+        const mem8 = () => new Uint8Array(E8.DISCO.buffer);
+        const res8 = (n) => { const p = num(E8.vfs_reserva(n)); if (!p) throw new Error('vfs'); return p; };
+        const str8 = (s) => { const nb = Buffer.from(s, 'latin1'); const p = res8(nb.length + 1); mem8().set(nb, p); mem8()[p + nb.length] = 0; return p; };
+        const poe8 = (nome, bytes) => {
+            const pN = str8(nome); const pD = res8(Math.max(bytes.length, 0) + 1);
+            if (bytes.length) mem8().set(bytes instanceof Buffer ? bytes : Buffer.from(bytes), pD);
+            mem8()[pD + bytes.length] = 0;
+            if (!E8.poe_ficheiro(pN, pD, bytes.length)) throw new Error('poe ' + nome);
+        };
+        const { hitCorpo } = require('./tex_env.js');
+        const hit8 = (nome) => hitCorpo(cache8, nome);
+        E8 = instanciaTex(M, (ptr) => {
+            const v = mem8(); let s = '';
+            for (let i = ptr; i < v.length && v[i]; i++) s += String.fromCharCode(v[i]);
+            const h = hit8(s); if (!h) return 0;
+            if (poeSet8.has(h.nome)) return 1;
+            poe8(h.nome, h.u8); poeSet8.add(h.nome); return 1;
+        }).exports;
+        E8.inicia_wasm();
+        if (typeof E8.marca_vfs === 'function') E8.marca_vfs();
+        const comp8 = (nome) => {
+            E8.limpa_saida();
+            const rc = num(E8.compila_ficheiro(str8(nome), str8('saida.pdf')));
+            const tam = num(E8.tam_saida());
+            const end = num(E8.MOVE(14, 1));
+            const pdf = Buffer.from(mem8().slice(end, end + tam));
+            return { rc, tam, pdf };
+        };
+        for (const tex of CADEIA) {
+            if (typeof E8.volta_compila === 'function') E8.volta_compila();
+            poeSet8.clear();
+            const R = comp8(tex);
+            const forms = R.pdf ? (R.pdf.toString('latin1').match(/\/Subtype\/Form/g) || []).length : 0;
+            const eof = R.pdf && R.pdf.includes(Buffer.from('%%EOF'));
+            console.log(`   §T8 ${tex} rc=${R.rc} bytes=${R.tam} Forms=${forms} eof=${eof}`);
+            if (R.rc !== 0 || !eof || forms < 10 || R.tam < 50000) t8mal++;
+            else t8ok++;
+        }
+    } catch (e) { trap = String(e && e.message || e).slice(0, 200); t8mal++; }
+    ok('§T8 cadeia aritmética: naturais/inteiros/racionais/reais compõem no corpo medido',
+       !trap && t8mal === 0 && t8ok === CADEIA.length);
 }
 
 console.log('\n==========================================================================');

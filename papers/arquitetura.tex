@@ -1,11 +1,12 @@
 % !TeX program = pdflatex
 % ─────────────────────────────────────────────────────────────────────────────
-%  papers/arquitetura.tex — ARQUITETURA COMPUTACIONAL (fusão 08/2026).
+%  papers/arquitetura.tex — ARQUITETURA COMPUTACIONAL (byte level · API SQL).
 %
 %  Compila: pdflatex arquitetura.tex
 %
-%  Nada aqui vem de fora. As peças são a estaca, a Lei 2, a bidualidade e o
-%  trial, e todas estão demonstradas na Teoria e medidas em tests/dualsort.c.
+%  Apresentação (20/08/2026): o átomo é o BYTE; a máquina é a ISA nos slots;
+%  a interface comercial é SQL (banco/sql.c) que traduz queries e programas
+%  para a mesma ISA. LaTeX e as outras linguagens são backends, não a porta.
 % ─────────────────────────────────────────────────────────────────────────────
 \documentclass[11pt,a4paper]{article}
 \usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[brazil]{babel}
@@ -16,6 +17,8 @@
 
 \definecolor{cinza}{gray}{0.35}
 \newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\dg}{^{\dagger}}
+\newcommand{\abs}[1]{\lvert #1\rvert}
 \newcommand{\N}{\ensuremath{\mathbb{N}}}
 \newcommand{\Z}{\ensuremath{\mathbb{Z}}}
 \newcommand{\Q}{\ensuremath{\mathbb{Q}}}
@@ -41,9 +44,37 @@
 \begin{document}
 \interfacen{6}  % hexal: 1.º ciclo da família 6,12,24 — Lei~6 computacional
 \gkcapa{A Arquitetura}
-       {dual sort · régua · torre · slots · aranha estigmérgica}
-       {realização dentro do $\tau=-1$ --- ordenar, banco e firma algébrica}
+       {byte level · slots · ISA · API SQL}
+       {do bit à query --- a máquina no metal e a porta comercial}
 \maketitle
+
+\section*{Três camadas, uma máquina}
+
+\noindent Esta arquitectura apresenta-se em \textbf{três camadas} que não se confundem:
+
+\begin{center}\small
+\begin{tabular}{@{}llp{0.42\textwidth}@{}}
+\toprule
+camada & o que é & onde mora \\
+\midrule
+\textbf{byte level} & o átomo: $\Word_8$, GF(2), slot de 16\,B & \code{naturais}, \code{binario.h}, slots \\
+\textbf{ISA / metal} & \code{MOVE}, \code{LOAD}/\code{STORE}, disco=\code{.mem} & \code{banco/sql.c}, \code{erg.c} \\
+\textbf{API SQL} & a porta comercial: query $\mapsto$ programa ISA & \code{SELECT}/\code{INSERT}/\code{IMPORT}/\code{GET} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent\textbf{A interface padrão é SQL}, não LaTeX.
+Quando nada se especifica, o corpo entra e sai como query
+(\code{conecthus/backends/manifesto.json}: \code{interface\_padrao=sql}).
+LaTeX continua backend com tradutor pleno (\code{tex.wasm});
+C, PTX, WASM, Dafny, claim, ISA --- realizações da mesma porta \code{MOVE}.
+O SQL \emph{traduz programas}: a query compila para bytecode da ISA e corre
+com a memória no disco, sem RAM para a tabela.
+
+\medido{\code{tests/interface\_padrao.js} (8/8);
+\code{conecthus/backends/sql/consultar.c} $\leftrightarrow$ \code{consultar.wasm};
+\code{banco/sql.c} (pleno); \code{IMPORT CORPO}/\code{GET CORPO}.}
 
 \section*{Onde este documento vive: DENTRO do polo $\tau=-1$}
 
@@ -58,6 +89,45 @@ o centro não é o terceiro lado dela --- é o lugar \emph{anterior} à separaç
 
 \noindent\emph{Este documento é uma REALIZAÇÃO, e vive dentro do $\tau=-1$}, o polo que
 fecha. A posição não se escolhe: \textbf{lê-se pelo que ele consome}.
+
+\medskip\noindent\textbf{E o que ele consome tem agora uma cadeia por baixo.} A
+construção aritmética está feita em cinco papers, e lê-se num sentido só:
+\[
+\boxed{\;
+\underbrace{\mathbb{F}_2}_{\text{um bit}}
+\;\xrightarrow[\text{3 dobras}]{\ \code{naturais}\ }\;
+\underbrace{F_8\equiv\Word_8}_{\{0,\ldots,255\}}
+\;\xrightarrow[\text{TRANSPORTE}]{}\;
+\mathbb{N}
+\;\xrightarrow[\text{soma}]{\ \code{inteiros}\ }\;
+\mathbb{Z}
+\;\xrightarrow[\text{produto}]{\ \code{racionais}\ }\;
+\mathbb{Q}
+\;\xrightarrow[\text{corte}]{\ \code{reais}\ }\;
+\mathbb{R}
+\;\xrightarrow[\text{dobra}]{\ \code{algebrico}\ }\;
+\mathbb{R}^{n}\;}
+\]
+\noindent\textbf{Esta arquitectura é a SÍNTESE dessa cadeia no $\tau=-1$}: onde os cinco
+constroem o \emph{objecto}, ela constrói a \emph{máquina} que o executa --- e cada peça
+dela tem o degrau de onde vem. O primeiro degrau é o \textbf{byte}: tudo o que
+segue (slot, ISA, SQL) é realização de $\Word_8$ e da descida a GF(2).
+\[
+\begin{array}{lll}
+\textbf{o que EXECUTA aqui} & \textbf{o degrau que o constrói} & \textbf{onde}\\[3pt]
+\Word_8\text{: o envelope de 8 bits} & \text{o suporte de }F_8\text{, com encaixe} & \code{naturais thm:encaixe}\\[2pt]
+\text{a descida a }\mathrm{GF}(2) & \text{a torre binária, régua derivada} & \code{naturais def:dobra}\\[2pt]
+\text{a soma com transporte} & a+b=(a\oplus b)+2(a\wedge b) & \code{naturais thm:transporte}\\[2pt]
+\text{o par }(a,b)\text{ e a classe} & \mathbb{N}^{2}/{\sim}=\mathbb{Z} & \code{inteiros thm:z}\\[2pt]
+E_{16}\text{: o par }\code{Qz} & \text{o inverso é o \emph{swap}} & \code{racionais thm:q}\\[2pt]
+\text{o corte e o encaixotamento} & \text{a decisão inteira, três caminhos} & \code{reais thm:tres}\\[2pt]
+\text{a subida }T_{k+1}=T_k+T_k^{*} & \text{a torre, e o tecto de Hurwitz} & \code{algebrico thm:torre}
+\end{array}
+\]
+\noindent\emph{A regra é a de sempre}: o degrau prova e mede o objecto; aqui executa-se, e
+não se redemonstra. Onde esta arquitectura tinha realização própria de algo que a cadeia
+passou a fundar --- o envelope $\Word_8$, a promoção por saturação, a escada de larguras
+--- ela cita o degrau e fica com a \textbf{máquina}.
 
 \[
 \begin{array}{lll}
@@ -933,6 +1003,43 @@ T_{k+1}=T_k+T_k^{\ast},\qquad d_{k+1}=2d_k.
 A passagem de andar \textbf{não inventa aritmética nova}: duplica a estrutura
 pela dualidade. O que cresce é o \textbf{objecto}, não a máquina.
 
+\medskip\noindent\textbf{A subida é um \emph{unfold}, e o seu dual já está na
+casa.} Subir é gerar o andar seguinte a partir do actual; descer é colapsá-lo de
+volta --- o par \emph{unfold}/\emph{fold}, realizado em \code{lib/promove.h}
+como \emph{operação} e não como verificação:
+\[
+\boxed{
+\begin{array}{lll}
+\textbf{PROMOVE} & x\mapsto(S,A) & \text{\emph{unfold}: a dimensão dobra,
+   }d_{k+1}=2d_k\\[2pt]
+\textbf{DESCE} & (S,A)\mapsto S+A & \text{\emph{fold}: resíduo }0
+\end{array}}
+\]
+com $S=(x+x\dg)/2$ e $A=(x-x\dg)/2$, divisão exacta porque a involução a
+garante --- e por isso a ferramenta só serve onde há dual. O nome
+\emph{unfold} não acrescenta mecanismo: nomeia o que a
+\code{lib/promove.h} já faz, e liga-o à subida da torre
+(\code{algebrico thm:torre}) e ao terceiro pipeline de §\ref{sec:pipelines}.
+
+\medskip\noindent\textbf{E a subida é ESTRITA: não pode ser preguiçosa.} A
+régua de cada andar é um \emph{valor} computado no andar anterior ---
+$\lambda_{k+1}=\operatorname{busca}(F_k)$ em \code{naturais.tex}
+(Prop.~régua derivada), e a joia do \code{algebrico thm:autossimilar}:
+\emph{o metal do andar~1 é a régua do andar~2}. Logo o andar anterior tem de
+estar \textbf{materializado} antes de o seguinte existir; a dependência é do
+objecto, não do agendamento --- e por isso não há aqui idioma de avaliação a
+importar. Adiar a derivação não adia trabalho: impede a construção.
+
+\medido{\code{tests/promove.c} §Q1 (dobra $1\to2$), §Q4 (duas promoções
+$1\to2\to4$ e duas descidas, $34\,969$ casos, resíduo $0$) e §Q5 --- o
+\textbf{controlo}: sem involução a promoção não fecha, $7813$ falhas em
+$15\,025$. Estrictude: \code{tests/naturais.c} §NB0 (régua derivada em cada
+andar) e o gume --- com a régua escrita à mão em vez de derivada, caem $4$ das
+$12$ asserções.}
+\colunas{\code{algebrico thm:torre}; \code{algebrico thm:autossimilar}}
+        {\emph{unfold}/\emph{fold} $=$ PROMOVE/DESCE; subida estrita}
+        {\code{tests/promove.c} §Q1, §Q4, §Q5; \code{tests/naturais.c} §NB0}
+
 \medskip\noindent Na realização pós-migração A--D, cada produto exige a
 \emph{memória da divisão} (dualidade):
 \[
@@ -964,6 +1071,40 @@ E_{16}=\bigl\{(p,q)\in\Z^{2}:
 \]
 \code{Qz} não realiza todo $\Q$ --- é janela finita medida; saturação conta-se
 à parte (\code{qz\_saturou}).
+
+\medskip\noindent\textbf{A escada é UMA lei com a largura por argumento --- medido.}
+Postos lado a lado, \code{d16\_mult\_u} (\code{dual16.h}) e \code{d64\_mult}
+(\code{dual32.h}) são o mesmo texto com $16$ trocado por $32$: quatro parcelas de
+meia largura, a soma do meio a transbordar, o transporte lido pela volta do
+\code{unsigned}. \code{lib/largura.h} escreve essa lei \textbf{uma} vez, com $w$
+por argumento, e reproduz os dois headers par a par --- \emph{sem lhes tocar}:
+\[
+\boxed{\;\code{lg\_mult}(w,a,b)=(\text{alto},\text{baixo}),
+\qquad w\in\{1,2,4,8,16,32\}\;}
+\]
+A aritmética é $\bmod\,2^{w}$ explícita: o tipo da máquina é o \textbf{veículo},
+$w$ é o \textbf{parâmetro}. O tecto $w\le32$ é do veículo --- o par ocupa
+$2w\le64$ bits ---, não da lei: acima disso o próprio veículo tem de ser um par,
+que é o andar do \code{i128.h}. E a mesma dobra composta com XOR em vez de soma
+dá o produto de $\mathbb{F}_2$ sem redução: no produto, como na soma
+(\code{naturais.tex thm:transporte}), a única diferença entre as duas aritméticas
+é o \textbf{transporte}.
+
+\medskip\noindent\textbf{O que isto autoriza, e o que não.} Autoriza afirmar,
+com evidência medida, que a especialização por andar é \emph{evitável}. \emph{Não}
+autoriza remover os headers: caminho novo primeiro, equivalência medida, remoção
+por último --- e a remoção é decisão do coordenador, não consequência da medida.
+
+\medido{\code{tests/largura.c} §LG0--§LG5 ($6{:}0$): §LG0 seis andares contra o
+produto nativo ($465\,940$ pares, $w\le8$ exaustivo); §LG1 $=$ \code{d16\_mult\_u}
+e §LG2 $=$ \code{d64\_mult}, $300\,064$ pares cada, zero divergências; §LG3 o par
+é a memória da divisão ($199\,952$ de $200\,000$ produtos com alto $\neq0$); §LG4
+a mesma dobra com XOR dá o produto de $\mathbb{F}_2$ (contra \code{bn\_clmul},
+$65\,536$ pares); §LG5 o \textbf{controlo} --- retirando o transporte do meio,
+$2994$ pares divergem. Gume: três mutações no construtor, $4/4/1$ asserções caídas.}
+\colunas{\code{algebrico thm:torre} (a subida); \code{algebrico thm:autossimilar}}
+        {\code{lg\_mult}$(w,\cdot,\cdot)$: um corpo, seis andares}
+        {\code{tests/largura.c} §LG0--§LG5; contra \code{dual16.h}/\code{dual32.h}}
 
 \medido{\code{tests/dual16.c} §E0--§EW ($6/6$); \code{tests/dual32.c} (trava
 \code{\_\_int128}); \code{tests/migracao.c} §G5: \code{sizeof(Qz)=4},
@@ -1002,6 +1143,47 @@ E_{16}=\bigl\{(p,q)\in\Z^{2}:
 Retração $\neq$ involução $\neq$ subida: domínios, representações e efeitos
 distintos. Medido explicitamente em \code{tests/torre\_alg.c} §T4 --- mesmo
 quando, em casos particulares, dois caminhos devolvem o mesmo valor numérico.
+
+\medskip\noindent\textbf{«A largura exigida segue a operação»: o que falta é a
+realização, e ela está demonstrada.} O gatilho já existia --- \code{w8\_wrap},
+\code{w8\_saturou}, \code{qz\_saturou} contam o que não coube ---, mas o que se faz
+a seguir é truncar, enrolar ou devolver $\pm32767$: conta-se com honestidade um
+valor que não é o resultado. A promoção não pede mecanismo novo, porque o par que
+o construtor devolve \emph{já é} o andar de cima:
+\[
+\boxed{\;\textsc{saturou}\iff \text{alto}\neq0
+\qquad\qquad
+\textsc{promove}=\text{ler o par no andar de cima}\;}
+\]
+--- o detector vem \emph{dentro} do resultado, sem comparação com limite nenhum, e
+é o \code{promove.h} literal: \emph{escrever o par não apaga nada, porque o par
+contém a volta}. Deitar fora o alto é a única linha que perde.
+
+\medskip\noindent\textbf{A troca está demonstrada; fazê-la é decisão do
+coordenador.} Mede-se a \textbf{preservação de resultado}, que é o que uma
+substituição em caminho quente tem de mostrar \emph{antes}: onde não satura, o
+promovido coincide com as duas políticas actuais em todos os casos --- a troca não
+mexeria em nada que hoje está certo. Onde satura, truncar erra em \emph{todos} e
+promover acerta em todos; e as duas políticas de hoje nem entre si concordam.
+Nada foi substituído.
+
+\medido{\code{tests/promocao.c} §SP0--§SP5 ($6{:}0$), exaustivo nos $65\,536$ pares
+de $\Word_8$: §SP0 o detector ($63\,568$ produtos e $32\,640$ somas saturam; zero
+enganos); §SP1 \textbf{preservação} --- nos $32\,896$ pares que cabem, enrolar,
+saturar e promover dão o mesmo, zero diferenças; §SP2 onde satura, truncar erra em
+$63\,568/63\,568$, promover em $0$, e wrap$\neq$sat em $63\,448$; §SP3 encadeia
+$8\to16\to32$ com resíduo $0$ ($100\,000$ cadeias), como \code{promove.c} §Q4;
+§SP4 quantifica o custo actual no \code{Qz} ($240$ chamadas fora do tecto, todas
+devolvendo $\pm32767$); §SP5 o \textbf{controlo} --- o detector poupa metade na
+soma ($50{,}2\%$ cabe) e quase nada no produto ($3{,}0\%$), pelo que o argumento
+da economia vale na soma e o do produto é só correcção. Gume: duas mutações,
+$4/3$ asserções caídas.}
+\medido{\code{tests/promocao\_qz.c} §SQ0--§SQ6 ($7{:}0$): detector
+$=$ não cabe em $E_{16}$; §SQ6 \code{QzX} no mesmo passo.
+\code{lib/racionais.h}: \code{QzP}/\code{qz\_prom*}, \code{QzX}/\code{qz\_x*}
+(estreito legado + promovido exacto; \code{qz()} intacto).
+Cadeia \code{naturais→reais} no corpo WASM (\code{corpo.sh}, 72 ficheiros;
+\code{tex\_wasm.js} §T8).}
 
 \medskip\noindent\textbf{Consequência para a torre} (decisão do coordenador): subir
 $\neq$ perder informação; descer $\neq$ lembrar o passado. A informação está
@@ -1218,7 +1400,7 @@ Na realização deste paper o 1.º ciclo é declarado por \verb|\interfacen{6}| 
 PDF como \code{/Interface~6} na \code{/SementeEstrela} --- o contrato que
 \code{tests/estrela\_unifica.js} §U2c mede.
 
-\medskip\noindent A fórmula operacional (espiral do tradutor, \code{tests/tex\_core.c}):
+\medskip\noindent A fórmula operacional (espiral do tradutor, \code{tests/tex.c}):
 \[
 \iota_k = 6\cdot 2^{\lfloor k/3\rfloor},\qquad
 \text{Dim} = 2^{\text{alcance}+1},\qquad
@@ -1231,7 +1413,7 @@ sem confundir réguas (\code{teoria thm:transporte}).
 \code{tests/traduz\_pi\_dim.js} (família completa);
 \code{tests/corpo\_topologico.c} (Lei~6).}
 \colunas{\code{topologico sec:Interface hexal}; \code{analitico thm:estrelaseis}}
-        {\verb|\interfacen{6}| no \code{.tex}; \code{/SementeEstrela} no PDF}
+        {\code{\textbackslash interfacen\{6\}} no \code{.tex}; \code{/SementeEstrela} no PDF}
         {\code{tests/estrela\_unifica.js} §U2--§U2c; \code{tests/tex\_wasm.js} §T5--§T6}
 
 \section{Descida de representação}\label{sec:descida}
@@ -1318,7 +1500,7 @@ $(a,b)\sim(c,d)$ em uint16 antes do \code{long}; \code{reducao.c} §DW fecha
 $W_8^2\to E_{16}\to\mathbb{F}_{127}$; §K2b confirma $Q_z\in E_{16}$ e
 \code{rt\_opera\_i16}; §K3 exaustão $\mathbb{P}^1(\mathbb{F}_{127})=128$
 pontos; \code{tests/reducao.c} §D6 lê $E_{16}$ sem widen;
-\code{tests/aranha\_g.c} §AG6--§AG7 ($G\bmod2$ na grade).}
+\code{tests/aranha\_g.c} §AG6--§AG7 ($G\bmod2$ na grade).
 \colunas{\code{teoria sec:duasescadas}; \code{algebrico sec:pontofixo} (corte)}
         {cadeia $\Word_8^2\to\text{long}\to\mathrm{GF}(2)$; perde régua minha, não lei}
         {\code{tests/cadeia.c} $10/10$; \code{tests/reducao.c} §DW, §D6}
@@ -1419,6 +1601,52 @@ conservação impede introduzir ou destruir conteúdo.
         {\code{tests/conservacao\_metrica.c}; \code{tests/dualsort.c}; §T2}
 
 % ═══════════════════════════════════════════════════════════════════════════
+\section{API comercial: SQL traduz para a ISA}\label{sec:api-sql}
+
+\noindent\textbf{Produto.} A face pública do sistema é SQL. Não é Postgres
+externo: é \code{banco/sql.c} --- SQL no metal. A query compila para a ISA
+do broca-so; a memória da tabela vive em \code{.mem} (\code{pread}/\code{pwrite});
+o programa vive em \code{.prog}. Sem RAM para a tabela.
+
+\medskip\noindent\textbf{O que a API expõe} (e o que traduz por baixo):
+\begin{center}\small
+\begin{tabular}{@{}llp{0.38\textwidth}@{}}
+\toprule
+comando & camada & efeito \\
+\midrule
+\code{CREATE}/\code{INSERT}/\code{SELECT}/\ldots & ISA & bytecode + varredura em slots \\
+\code{INSERT TEXTO}/\code{BUSCA}/\code{ACHA} & cifra & índice por assinatura, não por string \\
+\code{IMPORT LINGUAGENS} & manifesto & backends ISA $\to$ índice \\
+\code{IMPORT CORPO} & fonte & blobs em \code{<base>\_corpo/} + chaves \\
+\code{GET CORPO} & I/O & bytes crus --- o front serve daqui \\
+\code{/sql} (Vite) & HTTP & \code{POST} com a query; stdout do \code{sql} \\
+\code{/corpo/*} & HTTP & lê o banco, não o filesystem do repo \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent\textbf{Tradutor universal.} SQL é a \emph{porta}; as linguagens
+do manifesto (\code{latex}, \code{c}, \code{ptx}, \code{wasm}, \code{dafny},
+\code{claim}, \code{isa}, \ldots) são \emph{backends}. Cada uma sobe por
+\code{tools/traduz} $\to$ \code{*.wasm}. O LaTeX tem o único tradutor pleno
+documento$\leftrightarrow$PDF (\code{tex.wasm}); isso não o torna interface ---
+torna-o a realização de ``compor''. A interface padrão declara-se
+\code{interface\_padrao=sql} e mede-se em \code{tests/interface\_padrao.js}.
+
+\medskip\noindent\textbf{Byte level por baixo.} Cada slot é 16\,bytes
+(\code{SlotWord \{total, e\}}). \code{LOAD}/\code{STORE} mudam de backend
+(disco, canal, pool) sem a ISA crescer. A árvore do banco são oito slots por
+nó. Ordenar, consultar e importar o corpo são o mesmo ciclo
+lê$\to$opera$\to$escreve no ambiente --- não um servidor à parte.
+
+\medido{\code{banco/sql.c}; \code{app/vite.config.js} (\code{/sql}, \code{/corpo});
+\code{tests/interface\_padrao.js}; \code{tests/backends\_wasm.js} §W5;
+\code{tests/fonte\_banco.c} (fonte sobe/desce).}
+\colunas{\code{topologico def:peano}; porta \code{MOVE}}
+        {\code{sql.c} $\mapsto$ ISA; blobs \code{\_corpo}; manifesto backends}
+        {\code{interface\_padrao.js}; \code{backends\_wasm.js}; bateria \code{sql}}
+
+% ═══════════════════════════════════════════════════════════════════════════
 \section{ISA: \code{MOVE} e o slot como operação}\label{sec:isa}
 
 \noindent O \emph{Catálogo} reduz a máquina a \textbf{uma} operação:
@@ -1455,7 +1683,11 @@ andar. Ordem de leitura recomendada:
 header & papel \\
 \midrule
 \code{torre\_alg.h} & contrato: três pipelines, mapa de andares \\
-\code{racionais.h} & $E_{16}$, \code{Qz}, operações $\Q$ \\
+\code{binario.h} & torre $F_1\to F_8$: $\oplus$, $\otimes$, régua derivada \\
+\code{largura.h} & \code{lg\_mult}$(w,\cdot,\cdot)$: uma lei, $w$ parâmetro \\
+\code{promove.h} & unfold/fold: \code{promove}/\code{desce}, par $(S,A)$ \\
+\code{naturais.h} & envelope $\Word_8$, cruz uint16, wrap/sat contados \\
+\code{racionais.h} & $E_{16}$, \code{Qz}/\code{QzP}/\code{QzX}, operações $\Q$ \\
 \code{dual16.h} / \code{dual32.h} / \code{i128.h} & produto exacto por dobra \\
 \code{torre.h} & hip\_*, subida Cayley--Dickson \\
 \code{reta.h} & RtOp, ciclo, inversão, mod por largura \\
@@ -1486,12 +1718,16 @@ $\mathbb{F}_2$).
 \item \textbf{Afirmado:} a largura segue a dobra; três pipelines distintos;
       slots como realização persistente da palavra; descida como projeção
       homomórfica que descarta régua minha; conservação via $|\det|=1$ e
-      retração exacta --- medidos, não metaforizados.
+      retração exacta --- medidos, não metaforizados;
+      \textbf{byte level} como átomo ($\Word_8$, GF(2)); \textbf{SQL como
+      API comercial} que traduz para a mesma ISA (\S\ref{sec:api-sql}).
 \item \textbf{Não afirmado:} que «conservação da área» vale por analogia;
       que o autómato \emph{aprende} a teia --- \emph{realiza-a} sob lei
       conservativa (Teor.~\ref{thm:multiplicidade}: lê $G$, não narra);
       que o slot é armazém passivo; que a curva do dragão está medida em
-      \code{tests/aranha\_g.c} (Heighway; o L-system em si não está no repo).
+      \code{tests/aranha\_g.c} (Heighway; o L-system em si não está no repo);
+      que Postgres (ou outro SGBD externo) é a fonte de verdade --- a fonte
+      é \code{banco/sql.c} + \code{.mem} + \code{\_corpo}.
 \end{itemize}
 
 \medskip\noindent\textbf{Divisor de águas} (decisão do coordenador): slot $\neq$ ficheiro.
@@ -1529,9 +1765,16 @@ $\Q$ fixos & \code{tests/racionais\_fixos.c} & §Q1--§Q8 \\
 ordenar / banco & \code{tests/dualsort.c} & ver §\ref{sec:pecas} \\
 MOVE / ISA & \code{tests/move.c} & ver §\ref{sec:isa} \\
 promover / par & \code{tests/promove.c} & $1\to2\to4$ \\
+torre binária & \code{tests/naturais.c} & §NB0--§NB13 ($14/14$) \\
+escada largura & \code{tests/largura.c} & §LG0--§LG5 ($6/6$) \\
+saturo W$_8$ & \code{tests/promocao.c} & §SP0--§SP5 ($6/6$) \\
+saturo Qz & \code{tests/promocao\_qz.c} & §SQ0--§SQ6 ($7/7$) \\
 fibra / pata & \code{tests/conservacao\_metrica.c} & §M10 (\code{teoria cor:pata}) \\
 multiplicidade $G$ & \code{tests/aranha\_g.c} & §AG1--§AG11 (ciclo completo) \\
 hexal PDF & \code{tests/estrela\_unifica.js} & §U2c (\code{/Interface~6}) \\
+API SQL / interface & \code{tests/interface\_padrao.js} & $8/8$ (\code{interface\_padrao=sql}) \\
+backends ISA & \code{tests/backends\_wasm.js} & §W0--§W7 (sql+latex) \\
+fonte no banco & \code{tests/fonte\_banco.c} & §F1--§F4 \\
 \bottomrule
 \end{tabular}
 \end{center}

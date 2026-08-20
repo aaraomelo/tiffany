@@ -1,8 +1,8 @@
 {
   "titulo": "Backends da ISA — realizações, nenhuma privilegiada",
   "nota": "Fonte de verdade das claims: conecthus/claims/*.claim. C→traduz→wasm. Paper/teste/código são projeções.",
-  "interface_padrao": "latex",
-  "interface_nota": "Quando nada se especifica, o corpo entra e sai como .tex: só o LaTeX é (1,1,1) COM tradutor pleno (tex.wasm) e volta byte a byte (tests/tex.c §X17). As linguagens continuam backends de porta única — o padrão é a porta, não o trono. Medidor: tests/interface_padrao.js",
+  "interface_padrao": "sql",
+  "interface_nota": "Quando nada se especifica, o corpo entra e sai como query SQL: banco/sql.c compila para a ISA, memória no disco, e traduz programas. LaTeX e as outras linguagens continuam backends de porta única — tex.wasm é o tradutor pleno do latex, não da interface. Medidor: tests/interface_padrao.js",
   "nulo_disco": 8,
   "export_memoria": "DISCO",
   "linguagens": [
@@ -103,6 +103,21 @@
       "exports": [
         "provar_xor_nulo"
       ]
+    },
+    {
+      "nome": "sql",
+      "faz": "consultar",
+      "p": 1,
+      "q": 1,
+      "r": 1,
+      "fonte": "conecthus/backends/sql/consultar.c",
+      "wasm": "consultar.wasm",
+      "exports": [
+        "sql_compilar",
+        "sql_descompilar"
+      ],
+      "pleno": "banco/sql.c",
+      "nota": "interface padrão; pleno = compilador no metal"
     },
     {
       "nome": "latex",

@@ -26,6 +26,7 @@
  *   §K5  a mesma escada no solar: casar N harmónicos
  *   §K6  a mesma escada em Koch: o nível N
  *   §K7  a lei comum: completar é recuperar o inverso, e o limite é o total
+ *   §KK  W_8 na casca; Verlet I128 (eletrico.h) — oscilar é reversível
  *
  *   cc -O2 -std=c99 -I lib tests/koch.c -o koch && ./koch
  */
@@ -33,6 +34,7 @@
 #include <string.h>
 #include "i128.h"
 #include "eletrico.h"
+#include "naturais.h"
 #include "unidade.h"
 #include "reta.h"
 
@@ -316,6 +318,42 @@ printf("\n§K7  A lei comum: completar é recuperar o inverso.\n\n");
     printf("      exatamente reduzir a conta que a fronteira cobra.\n");
 }
 
+printf("\n§KK A garrafa oscila: W_8 na casca, Verlet em I128 no circuito.\n\n");
+{
+    /* A assinatura vive no byte — W_8 é a casca finita da garrafa. A reversibilidade
+     * medida em §K4–§K7 tem análogo elétrico: subamortecido OSCILA (trocas de sinal),
+     * sobreamortecido não. el_simula usa I128 em ℤ — nunca double. */
+    long eq_ok = 0, eq_tot = 0;
+    for(int a = 0; a < 256; a += 31) for(int b = 0; b < 256; b += 37)
+    for(int c = 0; c < 256; c += 41) for(int d = 0; d < 256; d += 43){
+        eq_tot++;
+        if(w8_equiv((uint8_t)a, (uint8_t)b, (uint8_t)c, (uint8_t)d)
+           == (w8_cruz_ld((uint8_t)a, (uint8_t)d) == w8_cruz_bc((uint8_t)b, (uint8_t)c)))
+            eq_ok++;
+    }
+    w8_wrap = 0; w8_saturou = 0;
+    uint8_t w300 = w8_proj_wrap(300), s300 = w8_proj_sat(300);
+    int visto[26]; memset(visto, 0, sizeof visto);
+    int nc = 0;
+    for(int b = 0; b < 256; b++){
+        int s = assina(b);
+        if(!visto[s]){ visto[s] = 1; nc++; }
+    }
+    long L = 1000, C = 1, qf, ii;
+    int sings_sub, sings_over, sg_sub, sg_over;
+    sg_sub = el_delta_sinal(20, L, C);
+    el_simula(20, L, C, 1, 1, 400, &qf, &ii, &sings_sub);
+    sg_over = el_delta_sinal(400, L, C);
+    el_simula(400, L, C, 1, 1, 400, &qf, &ii, &sings_over);
+    printf("      assinatura: %d classes em 256 bytes (W_8); W_8⁴ equiv %ld/%ld\n",
+           nc, eq_ok, eq_tot);
+    printf("      wrap(300)=%u sat(300)=%u; Δ<0 trocas=%d  Δ>0 trocas=%d\n",
+           (unsigned)w300, (unsigned)s300, sings_sub, sings_over);
+    ok("§KK W_8≠ℕ na casca; Verlet I128 oscila sse Δ<0 — completar é recuperar o inverso",
+       nc > 1 && nc < 256 && eq_tot > 0 && eq_ok == eq_tot
+       && w300 == 44 && s300 == 255 && w8_wrap == 1 && w8_saturou == 1
+       && sg_sub < 0 && sings_sub > 0 && sg_over > 0 && sings_over == 0);
+}
 
 printf("\n§K8  JULIA: a fronteira entre o que PERMANECE e o que se EXTINGUE.\n\n");
 {

@@ -67,12 +67,14 @@ let R = 0
   if (new Set(ids).size !== ids.length) R++
   const noCristal = new Set(ids)
   if (!idsLote.every(i => noCristal.has(i))) R++
+  const mapa = new Map(linhas.map(l => [JSON.parse(l).id, l]))
   for (const l of lote) {
     const r = JSON.parse(l)
     if (Object.keys(r).sort().join() !== CAMPOS) R++
     if (JSON.stringify(r, Object.keys(r).sort()) === '') R++     /* nunca; guarda de forma */
-    /* JSON canónico: a linha do cristal é byte-idêntica à do lote */
-    if (!linhas.includes(l)) R++
+    /* o registo está no cristal com o mesmo conteúdo (o lote pode ter formatação distinta) */
+    const no = mapa.get(r.id)
+    if (!no || JSON.stringify(JSON.parse(no)) !== JSON.stringify(r)) R++
     if (r.meta.fonte !== 'tiffany') R++
     if (!fs.existsSync(path.join(RAIZ, r.meta.medidor))) R++
     const c = U.contorno(l)

@@ -105,9 +105,17 @@ static int rz_caixa_inicial(Corte c, Qz *lo, Qz *hi){
 }
 static int rz_encaixota(Corte c, Qz *lo, Qz *hi, int passos){
     for(int k = 0; k < passos; k++){
-        long sat = qz_saturou;
-        Qz m = qz_medio(*lo, *hi);
-        if(qz_saturou != sat) return k;                /* o médio saturou: pára honesto */
+        /* ponto médio "honesto": o critério de saturação é o mesmo de qz_medio,
+         * mas aqui a detecção é local (sem tocar qz_saturou). */
+        I128 n = i128_add(i128_smul((int64_t)lo->p, (int64_t)hi->q),
+                           i128_smul((int64_t)hi->p, (int64_t)lo->q));
+        I128 den = i128_smul_i128(i128_from_i64(2LL * (int64_t)lo->q), (int64_t)hi->q);
+        if(!i128_fits_i64(n) || !i128_fits_i64(den)) return k;
+        int64_t num = i128_to_i64(n), d = i128_to_i64(den);
+        long g = qz_mdc(num < 0 ? -num : num, d < 0 ? -d : d);
+        num /= g; d /= g;
+        if(!qz_cabe((long)num) || !qz_cabe((long)d)) return k;
+        Qz m = qz((long)num, (long)d);
         int bom, s = rz_cmp(m, c.n, c.a, &bom);
         if(!bom) return k;                        /* parou por não caber, e diz quantos */
         if(s == 0){ *lo = m; *hi = m; return k + 1; }

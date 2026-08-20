@@ -240,12 +240,11 @@ def corpo_secao(r, hid):
     return linhas
 
 
-def secao(r):
+def secao(r, linha_orig):
     """Uma \\section por registo da fonte; o registo viaja no %CRISTAL. Um
     registo de fusão (tools/cristal_cura.py) desdobra-se: corpo da face
     mantida, segunda face à vista quando a prosa difere, nota de curadoria."""
-    cab = ['%CRISTAL ' + json.dumps(r, ensure_ascii=False, sort_keys=True,
-                                    separators=(',', ':'))]
+    cab = ['%CRISTAL ' + linha_orig]
     if 'fusao' not in r:
         return '\n'.join(cab + corpo_secao(r, r['id'])) + '\n'
     x, y = r['fusao']
@@ -273,18 +272,21 @@ def main():
     grupos = {g: [] for g in list(GRUPOS) + ['diversos']}
     with open(FONTE, encoding='utf-8') as f:
         for linha in f:
-            r = json.loads(linha)
+            s = linha.rstrip('\n')
+            if not s:
+                continue
+            r = json.loads(s)
             meta = r.get('meta') or ('fusao' in r and r['fusao'][0].get('meta')) or {}
             dom = meta.get('dominio', '(sem)')
-            grupos[dom2grupo.get(dom, 'diversos')].append(r)
+            grupos[dom2grupo.get(dom, 'diversos')].append((r, s))
     total = 0
     for g, rs in grupos.items():
         titulo, sub = TITULO[g]
         caminho = os.path.join(PAPERS, 'cristal_%s.tex' % g)
         with open(caminho, 'w', encoding='utf-8') as f:
             f.write(CAB % {'g': g, 'titulo': titulo, 'sub': sub, 'n': len(rs)})
-            for r in rs:
-                f.write('\n' + secao(r))
+            for r, s in rs:
+                f.write('\n' + secao(r, s))
             f.write('\n\\end{document}\n')
         total += len(rs)
         print('papers/cristal_%s.tex: %d conceitos' % (g, len(rs)))

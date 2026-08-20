@@ -49,6 +49,12 @@ static long c2_estouros = 0;
 typedef struct { Qz a[C2_MAX+1]; int n; } Sr;
 
 static Sr sr0(void){ Sr s; s.n = C2_MAX; for(int i = 0; i <= C2_MAX; i++) s.a[i] = qz(0,1); return s; }
+static int c2_divide_segura(Qz a, Qz b, Qz *r){
+    QzX x;
+    if(!qz_x_divide(a, b, &x) || x.saturo){ c2_estouros++; return 0; }
+    *r = x.estreito;
+    return 1;
+}
 static Sr sr_soma(Sr x, Sr y){
     Sr r = sr0();
     for(int i = 0; i <= C2_MAX; i++) r.a[i] = qz_soma(x.a[i], y.a[i]);
@@ -94,8 +100,7 @@ static Sr sr_exp(int termos){                    /* eˣ = Σ xⁿ/n! */
         s.a[i] = t;
         ult = i;
         if(i < termos && i < C2_MAX){
-            long antes = qz_saturou;
-            if(!qz_divide(t, qz_de_inteiro(i + 1), &t) || qz_saturou != antes) break;
+            if(!c2_divide_segura(t, qz_de_inteiro(i + 1), &t)) break;
         }
     }
     s.n = ult;
@@ -136,10 +141,8 @@ static Sr sr_sin(int termos){
         ult = i;
         sign = -sign;
         if(i + 2 <= termos && i + 2 <= C2_MAX){
-            long antes = qz_saturou;
-            if(!qz_divide(t, qz_de_inteiro(i + 1), &t) || qz_saturou != antes) break;
-            antes = qz_saturou;
-            if(!qz_divide(t, qz_de_inteiro(i + 2), &t) || qz_saturou != antes) break;
+            if(!c2_divide_segura(t, qz_de_inteiro(i + 1), &t)) break;
+            if(!c2_divide_segura(t, qz_de_inteiro(i + 2), &t)) break;
         }
     }
     s.n = ult;
@@ -154,10 +157,8 @@ static Sr sr_cos(int termos){
         ult = i;
         sign = -sign;
         if(i + 2 <= termos && i + 2 <= C2_MAX){
-            long antes = qz_saturou;
-            if(!qz_divide(t, qz_de_inteiro(i + 1), &t) || qz_saturou != antes) break;
-            antes = qz_saturou;
-            if(!qz_divide(t, qz_de_inteiro(i + 2), &t) || qz_saturou != antes) break;
+            if(!c2_divide_segura(t, qz_de_inteiro(i + 1), &t)) break;
+            if(!c2_divide_segura(t, qz_de_inteiro(i + 2), &t)) break;
         }
     }
     s.n = ult;
@@ -194,10 +195,9 @@ static Sr sr_cos(int termos){
  * coube, e o guarda lê esse contador. A detecção está dentro da conta, e não numa
  * releitura do valor depois de ele já ter enrolado. */
 static int c2_soma_segura(Qz a, Qz b, Qz *r){
-    long antes = qz_saturou;
-    Qz s = qz_soma(a, b);
-    if(qz_saturou != antes){ c2_estouros++; return 0; }
-    *r = s;
+    QzX x = qz_x_soma(a, b);
+    if(x.saturo){ c2_estouros++; return 0; }
+    *r = x.estreito;
     return 1;
 }
 /* a soma parcial exacta — mas com o estouro DETECTADO e devolvido, em vez de escondido */
@@ -206,10 +206,12 @@ static int sr_p_parcial(long p, long N, Qz *saida){
     for(long n = 1; n <= N; n++){
         /* nº: o denominador é n^p, e ele também tem de caber — a mesma pergunta,
          * feita ao mesmo contador em vez de a um número que eu escolhesse */
-        long antes = qz_saturou;
         Qz t = qz(1,1);
-        for(long k = 0; k < p; k++) t = qz_mult(t, qz(1, n));
-        if(qz_saturou != antes){ c2_estouros++; return 0; }
+        for(long k = 0; k < p; k++){
+            QzX x = qz_x_mult(t, qz(1, n));
+            if(x.saturo){ c2_estouros++; return 0; }
+            t = x.estreito;
+        }
         if(!c2_soma_segura(s, t, &s)) return 0;
     }
     *saida = s;

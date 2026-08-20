@@ -234,7 +234,7 @@ ssh)
 
 sql)
   # SQL NO METAL: compila para a MESMA ISA, e a memória é o disco.
-  [ -x /tmp/sqlb ] || cc -O2 -std=c99 "$CD/sql.c" -lm -o /tmp/sqlb 2>/dev/null
+  [ -x /tmp/sqlb ] || cc -O2 -std=c99 -I"$RAIZ/lib" -I"$RAIZ/banco" "$RAIZ/banco/sql.c" -lm -o /tmp/sqlb 2>/dev/null
   shift
   if [ $# -eq 0 ]; then
     az "SQL NO METAL — a mesma ISA, e o disco é a memória"

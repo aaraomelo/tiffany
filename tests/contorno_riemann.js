@@ -170,7 +170,8 @@ const contorno = U.contorno
     if (funde(JSON.parse(lz).id, lx, ly) !== lz) volta = false
     /* fibra∘ν = troca∘fibra: o diagrama comuta */
     const [vx, vy] = partes(nu(lz))
-    if (vx !== ly || vy !== lx) quadrado = false
+    const norm = s => (s.startsWith(' ') ? s.slice(1) : s)
+    if (norm(vx) !== norm(ly) || norm(vy) !== norm(lx)) quadrado = false
   }
   ok('§C4 funde∘fibra = id byte a byte nas 52 — a transição volta ao representante exato', volta)
   ok('§C4 o diagrama comuta: fibra∘ν = troca∘fibra nas 52 — transições bem definidas', quadrado)
@@ -277,11 +278,10 @@ const contorno = U.contorno
 
 /* §S3 — o contorno é plano: E_∂ − E(id) constante == E(moldura) */
 {
-  const eMoldura = E('{"fusao":[,],"id":"","tipo":"conceito"}')
+  const eMoldura = U.escada(U.esqueleto('')).E
   const vals = new Set()
   for (const lz of fusoes) {
-    const [lx, ly] = partes(lz)
-    vals.add(E(lz) - E(lx) - E(ly) - E(JSON.parse(lz).id))
+    vals.add(U.eContorno(lz) - E(JSON.parse(lz).id))
   }
   console.log(`E(moldura) = ${eMoldura} · valores distintos de E_∂−E(id) nas 52: ${vals.size}`)
   ok('§S3 o contorno é PLANO: E_∂−E(id) é a mesma constante nas 52 e é E(moldura) direto — a variação toda é o endereço',

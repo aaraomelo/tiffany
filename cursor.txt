@@ -9,11 +9,11 @@ Fase E (descida 8 bits): Trios 1–3 FECHADOS; reducao §DW liga W_8²→𝔽₁
 
     inteiros    §NT1–§NT11b (14/14) · cadeia §KW (10/10) · migracao §GW (7/7)
     reducao     §DW (8/8) · dual16 §EW (6/6) · transformada §TW (26/26) · palavra §PW (34/34)
-    bateria     513 : 500 verdes, 13 falhas (cristal/refs pré-existentes)
+    bateria     519 : 519 verdes, 0 falhas
     doubles     3906 → 0              python3 tools/doubles_todos.py  FECHADO
     limiares    58 → 0 régua          (+4 valor físico JS, não alvo)
-    long/64     0 ll · 16 i128 rest.   python3 tools/longs_todos.py  (ll FECHADO; i128 só trava)
-    selo        4e94e51a8af9a844      bash tools/bateria.sh
+    long/64     0 ll · 16 i128 rest.   python3 tools/longs_todos.py  (ll FECHADO; i128 só dual32.c)
+    selo        830380933e103ef8      bash tools/bateria.sh
 
 Verificar SEMPRE com:  bash tools/bateria.sh   (lê AS DUAS linhas: total e unidades)
 
@@ -63,15 +63,15 @@ Fase A concluída nesta sessão:
   Trio 43 pontofixo.c · nomeia.c · estelar_completo.c (L→long)
   Trio 44 zetadin.c (L→long)
   Trio 45 dominios.c · relogio_curva.c · tres_reconstroi.c (LL/i64→int64_t)
-  Trio 46 cadeia.c · unico.c (__int128→d16/i128) · koch.c (pendente: eletrico.h I128)
-  Trio 47 corpos.h · medida.h · calculo2.h (__int128→i128/int64)
-  Trio 48 eletrico.h · koch.c · pascal.c (__int128→i128/int64)
-  Trio 49 reais.h · dominios.c (cresc→i128.h)
-  Trio 50 borda_sem_teto.c · graduacao_realiza.c · relogio_curva.c (__int128→i128.h)
-  Trio 51 relogio.c · pidual.c · lambert.c (__int128→i128.h)
-  Trio 52 zeta.c · pi_rei.c · cosmico.c (__int128→i128.h)
-  Trio 53 simula.c · xx.c · tres_regimes.c (__int128→i128.h)
-  Trio 54 banco/conversa.c (__int128→i128.h; monotonia x^n §12)
+  Trio 46 cadeia.c · unico.c · koch.c (§KK W_8 + eletrico I128)   FECHADO
+  Trio 47 corpos.h · medida.h · calculo2.h (i128; sem __int128 no código)
+  Trio 48 eletrico.h · koch.c · pascal.c (I128 Verlet; pascal sem __int128)
+  Trio 49 reais.h · dominios.c (cresc→i128.h)                    FECHADO
+  Trio 50 borda_sem_teto.c · graduacao_realiza.c · relogio_curva.c FECHADO
+  Trio 51 relogio.c · pidual.c · lambert.c                        FECHADO
+  Trio 52 zeta.c · pi_rei.c · cosmico.c                           FECHADO
+  Trio 53 simula.c · xx.c · tres_regimes.c                        FECHADO
+  Trio 54 banco/conversa.c (monotonia x^n §12)                    FECHADO
           i128 FECHADO fora de tests/dual32.c (trava intencional)
 
 Fase E — FIRMA DA TORRE (coordenador 19/08) — FECHADA nesta etapa:
@@ -292,8 +292,11 @@ Objectivo: propagar W_8 / uint16-cruz / G_geom pela torre sem contaminar ∼.
     transformada §TW: RtOp coord. byte — 26/26 asserções
     palavra §PW: fronteira W_8 vs EMB_S interior — 34/34 asserções
 
-  eval.txt (inteiros.tex): 4/4 correcções obrigatórias FECHADAS
-    anel no quociente · isometria discreta · unimodular · ordem transportada
+  eval.txt (torre/unfold): (a)(b) FECHADOS · (c) demonstrado, troca pendente coordenador
+    (a) sec:torre — unfold/fold = PROMOVE/DESCE; subida estrita (λ_{k+1}=busca(F_k))
+    (b) lib/largura.h + tests/largura.c §LG0–§LG5 = dual16/dual32 bit a bit
+    (c) tests/promocao.c §SP (W_8) + tests/promocao_qz.c §SQ (Qz) — preservação medida;
+        substituir trunca→promove no código ainda não feito
 
   Medidores âncora:
     §NT8   equivalência uint16 vs wrap
@@ -478,22 +481,21 @@ Pergunta sempre: QUE ENTRADA FARIA ISTO FALHAR?
 
 15. A FRENTE AGORA
 ==================
-  Migração A–D FECHADA. papers/arquitetura.tex FECHADO (fusão dual sort + síntese (decisão do coordenador)):
-    régua · teoria · torre · pipelines · slots · descida · fronteira ·
-    conservação · ISA · lib/ · fecho · inventário (~8 pp, refcruz sintese).
+  20/08/2026 — banco próprio + interface SQL + arquitetura byte-level.
 
-  FECHADO nesta sessão:
-    · conversa.c — 331/331 #UNIT ok (Cauchy/harmónica/Jordan/Cayley/Möbius em E₁₆)
-    · calculo2.c §C7 — N=7 (8! > 32767; exp∘log honesta até x⁷)
-    · publica.yml — papers/arquitetura.tex (fusão corpo_computacional)
-    · teoria.tex — 6 \ref órfãos → \code{algebrico/topologico ...} (refs 6:0)
-    · estrela_unifica.js §U2c — \interfacen{6} + wasm (interface_do_tex, acha_ficheiro exacto)
-    · papers/arquitetura.tex thm:multiplicidade — duplicidade = |π⁻¹|; aranha realiza G+=1
-      cruzamento: algebrico thm:gato, teoria cor:pata, thm:dobra-temporal
-      medidor: tests/aranha_g.c §AG1–§AG11 (ciclo completo: caminhada §AG10, fecho R⁴ §AG9/11)
-    · corpus/docs/arquitetura.tex — \interfacen{6} (basename distinto; acha_ficheiro exacto)
+  FECHADO nesta etapa:
+    · interface_padrao = sql (manifesto + tests/interface_padrao.js 8/8)
+    · conecthus/backends/sql/consultar.c → consultar.wasm (involução §W5)
+    · banco/sql.c: IMPORT LINGUAGENS / IMPORT CORPO / GET CORPO
+      (blobs em <base>_corpo/; índice TEXTO)
+    · app/vite.config.js: /sql + /corpo/* serve do banco (.torre/reino_corpo)
+    · papers/arquitetura.tex reestruturado: capa byte level · API SQL;
+      §Três camadas; §sec:api-sql; inventário interface/backends/fonte
+      (PDF 23 pp, pdflatex OK)
 
-  Pendente (pré-existente, fora do bloco analítico):
-    · cristal/* — invariantes de energia/volta/curadoria (~12 falhas na bateria)
+  Pendente natural:
+    · re-atestar interface_padrao / backends_wasm / sql na bateria
+    · bit-level fino (além de Word_8) quando o coordenador mandar
 
-  Verificação: bash tools/bateria.sh · python3 tools/longs_todos.py
+  Verificação: bash tools/bateria.sh · node tests/interface_padrao.js
+  IMPORT: ./tiffany_sql .torre/reino "IMPORT CORPO 'app/src/corpo.json' '.'"

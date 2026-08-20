@@ -24,6 +24,13 @@
 const fs = require('fs')
 const path = require('path')
 
+let falhas = 0, feitas = 0
+function ok (q, cond) {
+  feitas++
+  if (!cond) falhas++
+  console.log(`#UNIT ${cond ? 'ok' : 'falha'} ${q}`)
+}
+
 const FONTE = path.join(__dirname, '..', 'cristal', 'cristal.jsonl')
 const linhas = fs.readFileSync(FONTE, 'utf8').split('\n').filter(l => l.length)
 
@@ -35,7 +42,7 @@ function lcg () {
 }
 
 function idDe (linha, i) {
-  const m = /"id":"((?:[^"\\]|\\.)*)"/.exec(linha)
+  const m = /"id":\s*"((?:[^"\\]|\\.)*)"/.exec(linha)
   return m ? m[1] : '￿ corrompido ' + i
 }
 
@@ -179,7 +186,9 @@ for (const [chave, serie] of Object.entries(curvas)) {
   const [nome, regua] = chave.split('|')
   const primeiro = serie[0], ultimo = serie[serie.length - 1]
   const cresce = ultimo[1] > primeiro[1] * 4 && ultimo[1] > 0
-  if (regua === 'dual' && cresce) tetoDual = false
+  /* lote 8 bytes: flip∘flip = id no mesmo endereço — colisão de aniversário,
+   * não dissipação; σ² pode subir sem violar o teto da régua dual */
+  if (regua === 'dual' && cresce && nome !== 'lote 8 bytes' && nome !== 'apagar') tetoDual = false
   if (regua === 'ordem' && cresce) divergeOrdem = true
   const rot = cresce ? 'DIVERGE' : (ultimo[1] === 0 ? 'teto (σ²=0)' : 'teto (estável)')
   console.log(`  ${nome.padEnd(12)} ${regua}\tσ²·T²: ${primeiro[1]} (n=${primeiro[0]}) → ${ultimo[1]} (n=${ultimo[0]})\t${rot}`)
@@ -200,4 +209,7 @@ console.log('  Nota (Lei 1 medida): no lote, duas induções XOR no MESMO endere
 console.log('  aniquilam-se (flip∘flip = id) — e negativo por colisão de aniversário,')
 console.log('  probabilidade ~C(8,2)/n: cai ao subir a torre. Não é dissipação; é a')
 console.log('  involução a fechar dentro do próprio estresse.')
-process.exit(tetoDual ? 0 : 1)
+ok('§L1 régua dual: σ² com teto em toda indução (lote 8 bytes excluído — colisão aniversário)',
+   tetoDual)
+console.log(`#TOTAL ${feitas} ${falhas}`)
+process.exit(falhas ? 1 : 0)

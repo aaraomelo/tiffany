@@ -1,8 +1,8 @@
 {
   "medido_por": "tools/corpo.sh — fopen interceptado, não lista à mão",
   "regra": "o front serve estes de onde eles estão; nada é copiado para o dist",
-  "soma": "09abaa5165ce20a3",
-  "bytes": 6264639,
+  "soma": "caba3c9b6ba15c39",
+  "bytes": 6476229,
   "ficheiros": [
     "catalogo.tex",
     "conecthus/fundamento.tex",
@@ -71,6 +71,10 @@
     "papers/corpo_topologico.tex",
     "papers/estilo.tex",
     "papers/gkcapa.tex",
+    "papers/inteiros.tex",
+    "papers/naturais.tex",
+    "papers/racionais.tex",
+    "papers/reais.tex",
     "teoria.tex"
   ]
 }

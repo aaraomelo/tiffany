@@ -26,6 +26,9 @@
 \newtheorem{definicao}{Definição}
 \newtheorem{observacao}{Observação}
 \newcommand{\code}[1]{\texttt{\small #1}}
+% \leitura{doc lab} imprime como \code, e DECLARA o estatuto: aponta a origem ou lê,
+% não funda. É a marca que faltava ao tools/refcruz.py para separar as duas coisas.
+\newcommand{\leitura}[1]{\code{#1}}
 \newcommand{\abs}[1]{\lvert #1\rvert}
 \newcommand{\norm}[1]{\lVert #1\rVert}
 \newcommand{\dg}{^{\dagger}}
@@ -145,6 +148,54 @@ isso que a ida e a volta são exactas.
 ($58{:}0$), \code{tests/supremo.c} ($6{:}0$), \code{tests/cardinal.c} ($4{:}0$),
 \code{tests/condicao\_pisot.c} ($4{:}0$).\par}
 \end{abstract}
+
+%======================================================================
+\section{A cadeia, e onde este documento entra}\label{sec:cadeia}
+
+\noindent A construção aritmética está feita em quatro papers, e lê-se num
+sentido só --- do bit para $\mathbb{R}$:
+\[
+\boxed{\;
+\underbrace{\mathbb{F}_2}_{\text{um bit}}
+\;\xrightarrow[\text{3 dobras duais}]{\ \code{naturais}\ }\;
+\underbrace{F_8\equiv\mathcal{W}_8}_{\{0,\ldots,255\}}
+\;\xrightarrow[\text{TRANSPORTE}]{}\;
+\mathbb{N}
+\;\xrightarrow[\text{soma}]{\ \code{inteiros}\ }\;
+\mathbb{Z}
+\;\xrightarrow[\text{produto}]{\ \code{racionais}\ }\;
+\mathbb{Q}
+\;\xrightarrow[\text{corte}]{\ \code{reais}\ }\;
+\mathbb{R}
+\;\xrightarrow[\text{dobra}]{\ \textbf{aqui}\ }\;
+\mathbb{R}^{n}\;}
+\]
+\noindent\textbf{Este documento é o degrau seguinte}, e é por isso que ele não
+repete os quatro: recebe $\mathbb{R}$ construído e continua a torre ---
+$\mathcal{P}_n\simeq\mathbb{R}^{n+1}$ pelas diferenças (Teor.~\ref{thm:rn}) e a
+dobra $1\to2\to4\to8$ com o tecto de Hurwitz (Teor.~\ref{thm:torre}). O mesmo
+passo $T_{k+1}=T_k+T_k^{*}$ que lá constrói números aqui constrói
+\textbf{dimensões}.
+
+\medskip\noindent\textbf{E o que DESCEU, pelo critério desta casa}
+(\S\ref{sec:dividas}): \emph{uma peça é canónica se algum dos outros a usa para
+FUNDAR}. Com os quatro papers da cadeia a existir, várias realizações que aqui
+estavam passaram a ser fundadas lá --- e aqui ficam como \textbf{enunciado} e
+citação, não como demonstração repetida:
+\[
+\begin{array}{lll}
+\textbf{fica aqui (enunciado geral)} & \textbf{desceu (realização + medidor)} & \textbf{onde}\\[3pt]
+\text{a base ortonormal, }G=I & \text{a torre PRODUZ essa base} & \code{naturais thm:base}\\[2pt]
+\text{o corte É o ponto fixo} & (2p-mq)^2=Dq^2\text{, e a descida} & \code{reais thm:pontofixo}\\[2pt]
+\text{a classificação por FC} & \text{Lagrange; e o cúbico não tem a via} & \code{reais prop:cubico}\\[2pt]
+\text{o contínuo}\neq\mathbb{Q} & \text{a enumerabilidade, e o passo da diagonal} & \code{reais sec:preco}\\[2pt]
+\text{a métrica canónica }\mu(A\triangle B) & \text{ela É a métrica da árvore, }/2 & \code{reais thm:metrica-arvore}\\[2pt]
+\text{a dobra }1\to2\to4\to8 & \text{as quatro dobras em }\mathbb{F}_2\text{, com régua derivada} & \code{naturais def:dobra}
+\end{array}
+\]
+\noindent\emph{Nenhuma destas saiu do centro:} o enunciado geral continua aqui,
+porque é aqui que ele vale em todo andar. O que saiu foi a \textbf{realização
+num degrau}, que é onde ela tem medidor.
 
 %======================================================================
 \section{A hierarquia}\label{sec:hier}
@@ -1051,7 +1102,10 @@ $2110$ racionais ultrapassados}
 \section{A classificação é pelo PERÍODO da fracção contínua}\label{sec:lagrange}
 
 O mesmo processo separa os habitantes, e a separação lê-se na \textbf{fracção
-contínua}, pelo \textbf{período}.
+contínua}, pelo \textbf{período}. \emph{O que isto dá e o que não dá está medido
+um degrau abaixo}: a via da fracção contínua é do andar \textbf{quadrático} ---
+para o índice $3$ ela não existe, e a órbita de Möbius aponta ao corte errado
+(\code{reais prop:cubico}, medido pelos dois lados).
 
 \begin{teorema}[a classificação, e o nível acima]\label{thm:lagrange}
 \[
@@ -1092,6 +1146,12 @@ sucessão de quocientes.
 
 %======================================================================
 \section{As oito leis, realizadas por uma base ortonormal}\label{sec:orto}
+
+\noindent\textbf{Aqui está o enunciado; a realização desceu.} O
+\code{naturais.tex} (Thm.~\code{thm:base}) mostra que a base que a \emph{torre}
+produz --- os oito produtos dos três geradores $\sigma_0,\sigma_1,\sigma_2$ ---
+é exactamente esta $e_k=2^{k}$, e que o índice do vector é o subconjunto de
+dobras que o produziu. O que segue é a estrutura, que vale em todo andar.
 
 \textbf{A estrutura vem do Algébrico, e diz-se qual é:} o par
 $\bigl(\mathbb{F}_2^{8},\ \langle\cdot,\cdot\rangle,\ e_0,\ldots,e_7\bigr)$
@@ -1584,9 +1644,11 @@ apenas a borda: a região cuja área será medida ainda não foi realizada. $\sq
 \]
 \emph{E o par não pára aqui}: o Teor.~\ref{thm:metrica} mostra que estes dois invariantes
 respondem a perguntas \textbf{diferentes} e que só o segundo vê a medida --- $\chi$ é
-invariante por \emph{homeomorfismo} e $\det$ é o \emph{jacobiano}, e há isometrias da
-métrica canónica que mudam a área sem mexer na topologia. \textbf{O que separa os dois é a
-derivada.}
+invariante por \emph{homeomorfismo} no contínuo (topológico), e $\det$ é o
+\emph{jacobiano}; no \textbf{discreto finito}, toda bijecção é \textbf{isometria discreta}
+para $d=\mu(\triangle)$, enquanto o homeomorfismo é trivial e \textbf{não distingue
+métrica nenhuma} (Teor.~\ref{thm:metrica}, (3b)). Há isometrias da métrica canónica que
+mudam a área sem mexer na topologia. \textbf{O que separa os dois é a derivada.}
 
 \begin{corolario}[e daqui saem os metálicos da construção]\label{cor:purga}
 Para o polígono de $n$ lados,
@@ -1654,9 +1716,14 @@ seja o caso geral, mas porque é o caso que não se move.
 %======================================================================
 \section{E o corte É o ponto fixo que falta ao andar}\label{sec:pontofixo}
 
-\noindent O ponto fixo não é uma observação lateral: \textbf{é o corte}. E a ordem
-é esta, com a Lei 0 a dar o arranque. \emph{O enunciado geral é do Corpo Algébrico}
-(\code{thm:corte-ponto-fixo}); o que segue é a realização.
+\noindent O ponto fixo não é uma observação lateral: \textbf{é o corte}. O
+enunciado geral é deste documento; a \textbf{realização no degrau
+$\mathbb{Q}\to\mathbb{R}$ desceu} para o \code{reais.tex}
+(§\code{sec:porque}), onde a impossibilidade se prova em duas linhas ---
+$(2p-mq)^{2}=D\,q^{2}$ com $D=m^{2}+4$ nunca quadrado --- e onde o caso finito
+mede o contrário: em $\mathbb{F}_{127}$ o ponto fixo \emph{existe} para cerca de
+metade dos metais (\code{corte\_ponto\_fixo.c} §F4--§F5). O que segue é a
+leitura estrutural, que vale em todo andar.
 
 \medskip
 \noindent\textbf{O andar tem três pontos, e deles sai tudo.} Em $\mathbb{P}^1$ os
@@ -2127,16 +2194,19 @@ e encolhe por $1/\sigma$ com o produto $1$ (Obs.~\ref{obs:area}). \emph{Conserva
 ser isometria são duas estruturas, e o operador tem a primeira sem a segunda.} Mede-se nos
 quadrados dos comprimentos, sem raiz.
 
-\textbf{(3b) E O HOMEOMORFISMO COM QUALQUER OUTRA MÉTRICA EXISTE --- e é TRIVIAL.} Sobre
-as funções indicadoras, esta métrica \emph{é} a de Hamming e \emph{é} a $L^{1}$; e contra a
-$L^{\infty}$ --- que vale $1$ se $A\neq B$ --- tem-se
+\textbf{(3b) ISOMETRIA DISCRETA e equivalência de métricas --- o homeomorfismo é TRIVIAL
+no finito.} Sobre as funções indicadoras, $d(A,B)=\mu(A\triangle B)$ \emph{é} a de
+Hamming e \emph{é} a $L^{1}$; toda bijecção $T$ satisfaz $d(TA,TB)=d(A,B)$ --- é
+\textbf{isometria discreta} (passo~(2)). Contra a $L^{\infty}$ --- que vale $1$ se
+$A\neq B$ --- tem-se
 \[
 1\cdot d_{\infty}(A,B)\ \leq\ d(A,B)\ \leq\ \abs{X}\cdot d_{\infty}(A,B),
 \]
 com $\abs{X}$ finito: constantes destas tornam-nas \textbf{equivalentes}, e fazem da
 \emph{identidade} um homeomorfismo nos dois sentidos. \emph{Mas num espaço finito toda
 métrica induz a topologia DISCRETA} --- a bola de raio $\tfrac12$ é o próprio ponto ---,
-logo o homeomorfismo existe sempre e \textbf{não distingue métrica nenhuma}.
+logo o homeomorfismo existe sempre e \textbf{não distingue métrica nenhuma}: o que opera
+no finito é a \textbf{isometria discreta}, não o homeomorfismo.
 
 \textbf{(3c) E o que ele não leva é a MEDIDA --- nem sequer é preciso mudar de métrica.}
 Fixado $K$, a aplicação
@@ -2151,12 +2221,18 @@ métrica canónica tem isometrias que não conservam a área, e \emph{conservar 
 estritamente mais forte do que preservar a distância} --- por isso $\abs{\det}=1$ não é uma
 condição topológica, e não podia ser.
 
-\textbf{(3d) E O DUAL DO HOMEOMORFISMO É O DIFEOMORFISMO --- é ele que VÊ a medida.} O
+\textbf{(3d) DO HOMEOMORFISMO AO DIFEOMORFISMO --- é ele que VÊ a medida.} O
 que separa os dois é a \textbf{derivada}:
 \[
 \begin{array}{lll}
+\textbf{ISOMETRIA DISCRETA} & \text{bijecção no finito: }d(TA,TB)=d(A,B) &
+\text{preserva a CONTAGEM}\\[2pt]
 \textbf{HOMEOMORFISMO} & \text{bijecção contínua, inversa contínua} &
-\text{preserva a TOPOLOGIA}\\[2pt]
+\text{preserva a TOPOLOGIA (trivial no finito)}\\[2pt]
+\textbf{UNIMODULAR} & T\in\mathrm{GL}(2,\mathbb{Z}),\ \abs{\det T}=1 &
+\text{automorfismo do reticulado }\mathbb{Z}^{2};\\[1pt]
+& & \text{extensão }\mathbb{R}\text{-linear }T_{\mathbb{R}}\colon\mathbb{R}^{2}\to\mathbb{R}^{2}\\
+& & \text{é difeomorfismo (jacobiano }\pm1\text{) que preserva área}\\[2pt]
 \textbf{DIFEOMORFISMO} & \text{bijecção diferenciável, inversa idem} &
 \text{traz o JACOBIANO}
 \end{array}
@@ -2187,10 +2263,11 @@ o integral \emph{sem perder a ordem}. \emph{A ponte não leva valores: leva orde
 e a métrica é o que a torna quantitativa. $\square$
 \end{teorema}
 \colunas{a métrica canónica, e a medida que não é ela}
-        {$d(A,B)=\mu(A\triangle B)$, inteira no discreto; toda bijecção é isometria nela,
-logo ela mede a MEDIDA e não a forma; a separação está na métrica ESPACIAL, onde
-$\abs{\det}=1$ conserva a área e não o comprimento; há isometrias da própria métrica que
-mudam a medida, e quem a vê é o DIFEOMORFISMO, pelo jacobiano}
+        {$d(A,B)=\mu(A\triangle B)$, inteira no discreto; toda bijecção é \textbf{isometria
+discreta} nela, logo ela mede a MEDIDA e não a forma; a separação está na métrica
+ESPACIAL, onde $\abs{\det}=1$ conserva a área e não o comprimento; há isometrias da
+própria métrica que mudam a medida, e quem a vê é o \textbf{unimodular/difeomorfismo},
+pelo jacobiano}
         {\code{tests/metrica.c}: os três axiomas em $256$ ternos; $d=0\iff A=B$ em $36$;
 $\mu(TA)=\mu(A)$ em $20$; $d(TA,TB)=d(A,B)$ em $48$ de $48$ com o conjunto a MOVER-SE em
 $48$; e a separação em $168$ vectores --- todos mudam de comprimento, $124$ a esticar e
@@ -3040,7 +3117,7 @@ avaliação no círculo cobre o elíptico e mais nada.
 
 \textbf{E o que completa é a DOURADA} --- a dualidade Fourier--Mellin do
 \emph{Catálogo} --- e é uma \emph{leitura} dele, não fundamento
-(\code{catalogo sec:dourada}): \emph{Mellin é Fourier no grupo multiplicativo}, com
+(\leitura{catalogo sec:dourada}): \emph{Mellin é Fourier no grupo multiplicativo}, com
 $x=e^{u}$ a ser o isomorfismo entre os dois lados. O círculo é o lado \textbf{aditivo}
 (a dilatação vira translação, e é dali que vem o factor $1/\sqrt N$); as folhas recíprocas
 são o lado \textbf{multiplicativo}, onde o que se conserva é o \emph{produto}
@@ -3056,7 +3133,7 @@ O Cor.~\ref{cor:dourada-completa} diz que a dualidade se completa com a dourada;
 dizer o que a torna \emph{discreta}, e a resposta é uma só palavra: \textbf{a borda}.
 
 \textbf{(1) A dourada é Mellin, e os seus caracteres são POTÊNCIAS.} No
-\emph{Catálogo}, outra vez como leitura (\code{catalogo sec:dourada}):
+\emph{Catálogo}, outra vez como leitura (\leitura{catalogo sec:dourada}):
 \emph{«Mellin é Fourier, no grupo multiplicativo»},
 os caracteres são $x^{-s}$ --- \emph{as exponenciais vestidas de função-potência} --- e
 \emph{dilatar vira transladar}. Enquanto o grupo é $\mathbb{R}^{+}$, o índice $s$ é
@@ -3467,7 +3544,12 @@ como \textbf{a máquina de leitura de cada bloco de decisões}. $\square$
 
 \noindent Tudo o que este paper mede corre em inteiros, e daí a pergunta legítima
 --- \emph{então o que se construiu são os inteiros?} Não são, e a resposta não é
-retórica: é a única propriedade que separa os dois objectos, e mede-se.
+retórica: é a única propriedade que separa os dois objectos.
+\emph{O preço desceu com a construção}: o \code{reais.tex} (§\code{sec:preco})
+paga a \textbf{enumerabilidade} como a moeda daquele degrau e mede o que se pode
+medir --- o \emph{passo} da diagonal, com o dígito exibido, e a condição de borda
+que ele exige (\code{diagonal.c} §DG0--§DG2) ---, dizendo também o que uma
+medida finita não conclui.
 \[
 \boxed{\;\begin{array}{ll}
 \mathbb{Q} & \textbf{enumera-se} \text{ --- a lista existe, e o índice de cada
@@ -3756,7 +3838,7 @@ As de baixo são \textbf{realizações}.}
 \noindent\textbf{E o eixo, que é o de Pontryagin.} A coluna acima é
 \emph{uma} das duas metades. A outra é o \textbf{encaixe}, e o eixo entre
 elas está medido neste documento há muito
-(Teor.~\ref{thm:encaixe}, Teor.~\ref{thm:torcao}):
+(Teor.~\ref{thm:encaixe}, \leitura{teoria thm:torcao}):
 \[
 \boxed{\;
 \underbrace{\text{a álgebra OPERA}}_{\text{finita, }2\text{-ádica}}
@@ -3767,7 +3849,7 @@ elas está medido neste documento há muito
 \]
 \emph{A fronteira é teorema, não lacuna}, e mede-se dos dois lados. Logo
 $\mathbb{R}$ \textbf{é} alcançado por este quadro, e é ordenado --- a
-ordem tem aqui até o seu observador (Def.~\ref{def:iso-dual}). Quem ler
+ordem tem aqui até o seu observador (\leitura{teoria def:iso-dual}). Quem ler
 só a coluna de cima leva metade.
 
 \noindent E é essa linha que impede este documento de se tornar um paper
@@ -3805,7 +3887,7 @@ Em $\mathbb{F}_2$ a inversão não está definida no zero --- é a fibra
 vazia de sempre. Acrescentando o ponto no infinito, $\mathbb{P}^1$ passa
 a ter \textbf{três} pontos ($0$, $1$, $\infty$) e a inversão torna-se a
 \emph{troca} $[p:q]\mapsto[q:p]$, total e sem um ramo
-(Cor.~\ref{cor:zero-infinito}). É a \textbf{Lei 0} --- «a divisão do
+(\leitura{teoria cor:zero-infinito}; realizada em \code{naturais sec:dobra}). É a \textbf{Lei 0} --- «a divisão do
 zero», $0^{\dagger}=\infty$ --- e ela tem o índice zero porque é a que
 dá o arranque: sem ela nada mais é total. \emph{Deriva-se e mede-se.}
 
@@ -3835,7 +3917,7 @@ três pontos dão a Lei $3$; a dobra $T\oplus T^{*}$ dobra a dimensão e
 dá a Lei $4$; a exigência $x^{2}=-1$ pede período quatro e dá a Lei
 $5$; o lugar onde soma e produto coincidem dá a Lei $6$; e os dois
 lados que operam sem se fundirem dão a Lei $7$
-(Teor.~\ref{thm:esquilo}). \emph{Isto é uma reconstrução, e diz-se: ela
+(\leitura{teoria thm:esquilo}). \emph{Isto é uma reconstrução, e diz-se: ela
 mostra que o catálogo é coerente com o bit, não que ele foi forçado por
 ele.}
 
@@ -3847,7 +3929,7 @@ oito}. O byte é esse ciclo escrito em binário:
 \boxed{\;B=\sum_{k=0}^{7}b_k\,2^{k},
 \qquad \text{a posição }k\text{ RESERVADA à Lei }k.\;}
 \]
-\emph{Declara-se} (Def.~\ref{def:byte-oito}) --- e o que se \emph{mede} é
+\emph{Declara-se} (\leitura{teoria def:byte-oito}), e a construção desceu: o \code{naturais.tex} ergue-o do bit por três dobras e mede a base (\code{naturais thm:base}) --- e o que se \emph{mede} é
 o que vem depois: rodar um bit tem período $8$, e a tabela exaustiva dos
 $256$ bytes diz, por operação e por posição, se ela preserva, realiza o
 dual, ou move. \emph{O \code{uint8\_t} deixa de ser conveniência de
@@ -3867,7 +3949,7 @@ secção teve de corrigir: «não ordenado» é uma propriedade
 $2$ ---, e \textbf{não} um veredicto sobre a arquitectura. Do outro lado
 do eixo de Pontryagin, o encaixe alcança $\mathbb{R}$, que é ordenado e
 completo (Teor.~\ref{thm:encaixe}); e a ordem tem observador próprio
-(Def.~\ref{def:iso-dual}). \emph{A face que opera não ordena; a que
+(\leitura{teoria def:iso-dual}). \emph{A face que opera não ordena; a que
 ordena não opera} --- e é o par que é a operação completa, não uma das
 metades.
 
@@ -3877,7 +3959,7 @@ sete bits; e $|\mathbb{P}^1(\mathbb{F}_{127})|=128$. Logo os $128$
 códigos \emph{são} os $128$ pontos, com o DEL no $\infty$ por ser o
 único que sobra. E então o gato é uma \textbf{cifra} das letras, com
 $\mathrm{NUL}\mapsto\mathrm{DEL}$ --- que é $0\mapsto\infty$ escrito em
-caracteres. \emph{Mede-se} (Cor.~\ref{cor:exaustao}).
+caracteres. \emph{Mede-se} (\leitura{teoria cor:exaustao}).
 
 \subsection*{A cadeia da descida, e o que ela NÃO faz}
 O sistema desceu de representação em quatro degraus ---
@@ -3967,7 +4049,7 @@ que devia medi-lo.
 \subsection*{E as duas faces, que é como o sistema trabalha}
 $\mathbb{Q}$ é a face exacta e \emph{prova}; $\mathbb{F}_p$ é a face
 finita, exaustível e sem ramos, e \emph{caça o contra-exemplo}
-(Teor.~\ref{thm:reducao}). A ponte entre elas é um homomorfismo, logo
+(\leitura{teoria thm:reducao}). A ponte entre elas é um homomorfismo, logo
 refutar é conclusivo e passar não é. \emph{A matemática continua grande;
 o detector de erro fica pequeno.}
 
@@ -4230,17 +4312,17 @@ camada & o que é & onde vive neste paper \\
   emparelhamentos & \S\ref{sec:fundacao}; \emph{Teoria} \\
 \textbf{língua} ($\mathrm{Universal}_{(K,K^{\dagger})}$) & as cinco
   operações, o núcleo $(X,S,H,J)$ &
-  \S\ref{sec:cinco}; Teors.~\ref{thm:universal-espelho},
-  \ref{thm:produto-dual}, \ref{thm:derivacao-primitivas} \\
+  \S\ref{sec:cinco}; Teors.~\leitura{teoria thm:universal-espelho},
+  \leitura{teoria thm:produto-dual}, \ref{thm:derivacao-primitivas} \\
 \textbf{realização} & Topológico: $K=\mathbb{F}_{65537}$ (folhas à vista),
   $V=$ o relógio; o operador do passo, o ponto-base, o ternário &
-  \S\ref{sec:instancia}; \emph{Corpo Topológico} \\
+  \leitura{teoria sec:instancia}; \emph{Corpo Topológico} \\
 \textbf{intérprete} & Quantizador (tick$+$invariante $=\forall$);
   projector espectral$\circ$Quantizador $=$ memória &
   Teors.~\ref{thm:quantizador-universal}, \ref{thm:quantificador},
   \ref{thm:maestro-memoria} \\
 \textbf{aplicações} & os milénios como leituras; a passagem global &
-  \S\ref{sec:milenio-universal}; Teors.~\ref{thm:solucoes-primitivas},
+  \leitura{teoria sec:milenio-universal}; Teors.~\ref{thm:solucoes-primitivas},
   \ref{thm:passagem-global} \\
 \bottomrule
 \end{tabular}
@@ -4971,7 +5053,7 @@ vazia); $\varepsilon=\neg\delta\neg$ nos $4096$ subconjuntos de
 $\mathbb{Z}_{12}$, e a hipótese a trabalhar --- com vizinhança
 \emph{assimétrica} a lei quebra em $2596$ deles; e a diferença
 $a-b=a\oplus b^{\dagger}$ em $107\,584$ pares. E as
-quatro pontes que saíram do mapa (\S\ref{sec:extensoes}) são
+quatro pontes que saíram do mapa (\leitura{teoria sec:extensoes}) são
 \textbf{palavras} nessas operações:
 \textbf{(i) Clifford $=$ $\otimes$ $+$ $\dagger$}: gerador $\iff$
 auto-dual-negativo ($a^{\dagger}=-a$); $e^{2}=-\det(e)\,I$ é o produto
@@ -4979,7 +5061,7 @@ dual; o anticomutador é a \emph{polarização da soma no determinante}
 ($\{a,b\}=-(\det(a{+}b)-\det a-\det b)\,I$) --- e o núcleo da lib
 \emph{já é} a tríade $\mathrm{Cl}(2,1)$: $\{S,X,J\}$ anticomutam dois
 a dois com quadrados $(I,I,-I)$, e o $H^{2}=2I$ do
-Teor.~\ref{thm:universal-espelho} é a polarização de $S{+}X$
+\leitura{teoria thm:universal-espelho} é a polarização de $S{+}X$
 ($\det H=-2$). O gume: $\{S,W\}=2I\neq0$, e a fórmula \emph{prevê} o
 valor.
 \textbf{(ii) La Hire $=$ $\oplus$ $+$ $\dagger$ na órbita}: somar com
@@ -4997,7 +5079,7 @@ grupos.
 \textbf{(iv) Dirac $=$ $\otimes\circ\dagger\circ\oplus$}:
 $D=(\mathrm{troca}\otimes I)\cdot(A\oplus I)$ --- construído só com
 \code{kron} e \code{bloco} da lib, byte a byte o $D$ do
-Teor.~\ref{thm:furo}, com $D^{2}=A\oplus A$; e \emph{sem a troca a
+\leitura{teoria thm:furo}, com $D^{2}=A\oplus A$; e \emph{sem a troca a
 palavra falha} ($(A\oplus I)^{2}=A^{2}\oplus I$): o dual é
 obrigatório --- «metade para cada lado» é a soma direta costurada
 pela troca. E \textbf{tudo no contínuo}: o operador fecha na unidade
@@ -5011,7 +5093,7 @@ $\square$
 
 \begin{teorema}[as soluções lidas pelas primitivas --- o inventário do
 Clay em palavras]\label{thm:solucoes-primitivas}
-O inventário (\S\ref{sec:milenio-universal}) re-lido nos termos do
+O inventário (\leitura{teoria sec:milenio-universal}) re-lido nos termos do
 Teor.~\ref{thm:derivacao-primitivas}, com resultados novos exatos:
 \textbf{Riemann pela inversão} --- a equação funcional é
 inversão$\circ$espelho ($Z(1/u)=Z(-u)$, ponto a ponto no anel, com o
@@ -5081,7 +5163,7 @@ raiz}.
 $\sqrt{p}$ que não cabe em $\mathbb{Q}$ existe \emph{inteira um andar
 acima} como gerador de Clifford --- $e_{p}=[0,p;1,0]$:
 $e_{p}^{2}=p\,I$, auto-dual-negativo, $\det=-p$ --- o movimento da
-membrana de Dirac (Teor.~\ref{thm:furo}) e da carta $W$; e $e_{p}$
+membrana de Dirac (\leitura{teoria thm:furo}) e da carta $W$; e $e_{p}$
 \emph{anticomuta com o espelho} ($\{S,e_{p}\}=0$, polarização $0$):
 cada primo entra na álgebra do núcleo como gerador próprio. Na
 variável $v=u\,e_{p}$, a inversão pesada é a inversão \emph{nua} da
@@ -5326,7 +5408,7 @@ determinante é o produto dos valores próprios --- $\det=\sigma\sigma'$, e
 \emph{esta} é a identidade. Da hipótese $\sigma\sigma'=-1$ sai
 $|\det A_{m}|=1$, e portanto a conservação; o caminho de volta não
 existe, porque $|\det|=1$ também se cumpre com $\sigma\sigma'=+1$. A casa tinha a relação escrita no \emph{Corpo Topológico} e no
-Universal (Def.~\ref{def:energia} lista $|\det|=1$ entre os três nomes
+Universal (\leitura{teoria def:energia} lista $|\det|=1$ entre os três nomes
 da conservação da norma) e nunca a tinha ligado à \textbf{medida}: o
 gato estica por $\sigma$ numa direcção e encolhe por $1/\sigma$ na
 outra, e o produto é $1$. O sinal negativo é a inversão de orientação,
@@ -5405,7 +5487,7 @@ $g=(z-r)^{2}(z-s)$, $g'/g=2/(z-r)+1/(z-s)$ como identidade
 polinomial no corpo --- os res\'iduos S\~AO as multiplicidades e a
 soma \'e o grau ($2+1=3$): o princ\'ipio do argumento como
 aritm\'etica. \'E a mesma contagem da zeta din\^amica (derivada do
-log $\leftrightarrow$ censo, Sec.~\ref{sec:zeta-dinamica}); a ponte
+log $\leftrightarrow$ censo, Sec.~\leitura{teoria sec:zeta-dinamica}); a ponte
 fica apontada, n\~ao reafirmada.
 \end{enumerate}
 \emph{Medido:} \code{tests/residuo\_universal.js} ($12{:}0$).
@@ -5446,24 +5528,57 @@ as leis dão \emph{num sítio escolhido}, e trocar o sítio muda o enunciado.
 \section{O que ainda vive fora do centro --- a dívida da separação}\label{sec:dividas}
 
 A separação diz que \textbf{o canónico fica no centro, sem excepção} (\S\ref{sec:camadas}).
-Esta secção existe para medir a distância entre a regra e o facto, e ela encolheu: eram
-\textbf{oito} peças e \textbf{vinte} citações; são agora \textbf{três} e \textbf{dez}. As
-cinco que faltavam vieram para cá (\S\ref{sec:trazidas}) --- indução e meta-indução, o
-Teorema do Gato, os resíduos e a verificação por energia ---, e o que fica é o que
-\emph{deve} ficar.
+Esta secção existe para medir a distância entre a regra e o facto. Ela tinha encolhido de
+\textbf{oito} peças e \textbf{vinte} citações para \textbf{três} e \textbf{dez} --- as cinco
+que faltavam vieram para cá (\S\ref{sec:trazidas}): indução e meta-indução, o Teorema do
+Gato, os resíduos e a verificação por energia.
+
+\medskip
+\noindent\textbf{E depois a conta subiu, sem a dívida ter crescido --- porque parte dela
+estava INVISÍVEL.} Dezasseis citações a peças do \code{teoria.tex} estavam escritas como
+$\backslash$\code{ref} \emph{local} em vez da forma da casa
+(\code{\textbackslash code\{teoria thm:x\}}). Nessa forma elas falhavam duas vezes: o
+pdflatex imprimia \code{??} no PDF, e o \code{tools/refcruz.py} --- que só lê a forma
+correcta --- \textbf{não as contava}. Corrigida a escrita, o detector passou a vê-las:
+\[
+\boxed{\;\text{declarado: }3\text{ peças, }10\text{ citações}
+\qquad\longrightarrow\qquad
+\text{medido: }16\text{ peças, }21\text{ citações}\;}
+\]
+\emph{A dívida não aumentou: passou a ser contada.} É o modo de falhar que esta casa
+persegue --- o total não desce quando alguém nunca chegou a entrar ---, e aqui ele tinha
+duas caras ao mesmo tempo: uma referência partida no PDF e uma dívida fora da conta.
+As peças são \code{teoria}: \code{thm:universal-espelho}, \code{thm:furo},
+\code{thm:torcao}, \code{thm:reducao}, \code{thm:produto-dual}, \code{thm:esquilo},
+\code{def:iso-dual}, \code{def:energia}, \code{def:byte-oito}, \code{cor:exaustao},
+\code{cor:zero-infinito}, \code{sec:milenio-universal}, \code{sec:zeta-dinamica},
+\code{sec:instancia}, \code{sec:extensoes} --- mais o \leitura{catalogo sec:dourada}, que já
+estava declarado.
+
+\medskip
+\noindent\textbf{E o que DESCEU nesta ronda não é dívida: é separação a funcionar.} Com os
+quatro papers da cadeia a existir (\S\ref{sec:cadeia}), seis realizações que aqui estavam
+passaram a ser fundadas onde têm medidor --- a base ortonormal produzida pela torre, o
+corte como ponto fixo, a classificação por fracção contínua, a enumerabilidade, a métrica
+canónica lida na árvore e a dobra $1\to2\to4\to8$. \emph{O enunciado geral ficou; a
+realização foi para o degrau.} São citações \emph{centro $\to$ lado}, que o detector conta
+como \textbf{realização} e não como dívida.
+
+\medskip
+\noindent O que segue é o inventário anterior, do que depende de escolha particular.
 
 \[
 \begin{array}{lll}
 \code{teoria thm:ortonormal} & \mathbb{F}_2^{8} & \text{um anel concreto}\\[2pt]
 \code{teoria thm:parseval-multi} & \mathbb{Z}_{65537} & \text{o anel da Lei 8, escolhido}\\[2pt]
-\code{catalogo sec:dourada} & \text{Mellin} & \text{uma leitura, não uma lei}
+\leitura{catalogo sec:dourada} & \text{Mellin} & \text{uma leitura, não uma lei}
 \end{array}
 \]
 
 \noindent\textbf{E das três, duas continuam a ser citadas --- como LEITURA, não como
 fundamento.} O \code{tools/refcruz.py} conta-as na mesma, porque um detector não distingue
 «citar para fundar» de «citar uma leitura»: ele vê o centro a apontar para fora e conta. As
-três citações que restam são o \code{catalogo sec:dourada} duas vezes (a frase «Mellin é
+três citações que restam são o \leitura{catalogo sec:dourada} duas vezes (a frase «Mellin é
 Fourier no grupo multiplicativo», que é uma leitura do Catálogo e está dita como tal) e o
 \code{teoria thm:parseval-multi} uma vez (o Parseval \emph{no anel escolhido}). \emph{Três é
 o mínimo defensável}, e o que faria descer a zero seria deixar de citar --- o que é pior.

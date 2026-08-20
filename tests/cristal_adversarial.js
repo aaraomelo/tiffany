@@ -48,7 +48,7 @@ function lcg () {
 }
 
 function idDe (l, i) {
-  const m = /"id":"((?:[^"\\]|\\.)*)"/.exec(l)
+  const m = /"id":\s*"((?:[^"\\]|\\.)*)"/.exec(l)
   return m ? m[1] : '￿ corrompido ' + i
 }
 
@@ -121,9 +121,9 @@ function rAssinatura (regs) {
 
 /* ── as transformações ────────────────────────────────────────────────────── */
 function span (l) {
-  const p = l.indexOf('"descricao":"')
-  if (p < 0) return null
-  const ini = p + 13
+  const m = /"descricao":\s*"/.exec(l)
+  if (!m) return null
+  const ini = m.index + m[0].length
   let fim = ini
   while (fim < l.length && !(l[fim] === '"' && l[fim - 1] !== '\\')) fim++
   return fim - ini > 8 ? [ini, fim] : null

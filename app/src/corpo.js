@@ -7,9 +7,9 @@
 // Uma lista à mão envelhece calada — muda-se um `\fontsize` no estilo, entra um corpo novo
 // que ninguém pôs no manifesto, e o pedido cai com um 404 que não explica nada.
 //
-// NADA É COPIADO. O `vite.config.js` já o diz sobre o PDF — «não se move nenhum ficheiro de
-// lugar, e não fica cópia nenhuma no dist» — e aqui é igual: o manifesto guarda CAMINHOS, e o
-// ficheiro sai de onde vive. Copiar seria gravar, e uma gravação envelhece.
+// NADA É COPIADO PARA O DIST À PARTIR DO REPO. O Vite serve /corpo/* do BANCO
+// (`.torre/reino_corpo`, populado por `IMPORT CORPO` no sql.c). O manifesto
+// continua a ser o PORTÃO: só sai o que tools/corpo.sh mediu.
 //
 // ── E O MANIFESTO É O PORTÃO ──────────────────────────────────────────────────────────
 //

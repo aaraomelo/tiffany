@@ -1,0 +1,881 @@
+% !TeX program = pdflatex
+% papers/reais.tex — O DEGRAU Q → R: o corte como par dual, e os três caminhos.
+% Convenção herdada do naturais.tex: F_w := GF(2^w) — o índice conta BITS.
+%
+% Auto-contido: cd papers && pdflatex reais.tex
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[portuguese]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\newtheorem{teorema}{Teorema}
+\newtheorem{proposicao}[teorema]{Proposição}
+\newtheorem{corolario}[teorema]{Corolário}
+\newtheorem{lema}[teorema]{Lema}
+\newtheorem{definicao}{Definição}
+\newtheorem{observacao}{Observação}
+
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\FF}{\mathbb{F}}
+\newcommand{\Word}{\mathcal{W}}
+\newcommand{\dg}{^{\dagger}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\sepcol}{\quad\penalty0$\big|$\quad\penalty0}
+\newcommand{\colunas}[3]{%
+  \par\smallskip\noindent{\footnotesize\raggedright
+  \textbf{prova} (Algébrico): #1\sepcol
+  \textbf{realiza} (aqui): #2\sepcol
+  \textbf{verifica}: #3\par}\smallskip}
+
+\definecolor{cinza}{gray}{0.35}
+\newcommand{\medido}[1]{\par\medskip\noindent{\small\color{cinza}\textbf{Medido.} #1}\par\medskip}
+
+\input{gkcapa}
+
+\begin{document}
+\gkcapa{Os reais a partir dos racionais}
+       {$\R=\Q+$ os cortes --- a decisão inteira, o ponto fixo da Möbius
+        e a fracção contínua são o mesmo real}
+       {corte, par dual, ponto fixo, fracção contínua, completude nas duas direcções}
+\maketitle
+
+%======================================================================
+\begin{abstract}
+Degrau $k=2$ e último da cadeia aritmética. O real \textbf{não é uma tira de
+casas}: é a \textbf{decisão} sobre cada racional --- abaixo ou acima ---, e a
+decisão é inteira ($p^{n}$ contra $a\,q^{n}$). O corte é o \textbf{par dual}
+deste andar: $(A,B)$ com $A\cup B=\Q$, e o quociente identifica aberto com
+fechado. Três realizações --- o corte, o ponto fixo da Möbius e a fracção
+contínua --- não são três aproximações: são \textbf{três representantes da mesma
+classe}, e a equivalência mede-se (§\ref{sec:tres}). O corte existe porque o
+ponto fixo da Möbius \emph{não está} em $\mathbb{P}^1(\Q)$, e isso prova-se em
+duas linhas, sem varredura (§\ref{sec:porque}). A completude mede-se nas
+\textbf{duas} direcções (§\ref{sec:continuidade}), e o que se paga é a
+enumerabilidade (§\ref{sec:preco}).
+\end{abstract}
+
+%======================================================================
+\section*{Onde este documento vive}
+
+Degrau $k=2$ da torre $T_{k+1}=T_k+T_k^{*}$ (\code{analitico thm:tecidos}) --- o
+\textbf{quarto} da construção, que se lê num sentido só:
+
+\[
+\boxed{\;
+\underbrace{\FF_2}_{\text{um bit}}
+\;\xrightarrow[\text{3 dobras duais}]{\ \code{naturais}\ }\;
+\underbrace{F_8\equiv\Word_8}_{\{0,\ldots,255\}}
+\;\xrightarrow[\text{TRANSPORTE}]{}\;
+\mathbb{N}
+\;\xrightarrow[\text{soma}]{\ \code{inteiros}\ }\;
+\mathbb{Z}
+\;\xrightarrow[\text{produto}]{\ \code{racionais}\ }\;
+\Q
+\;\xrightarrow[\text{corte}]{\ \code{reais}\ }\;
+\R\;}
+\]
+\noindent{\footnotesize Lê-se da esquerda para a direita: é o sentido em que se
+\textbf{constrói}. Cada paper recebe o objecto do degrau à sua esquerda e
+entrega o do degrau à sua direita; nenhum redefine o que recebeu.\par}
+
+\begin{center}\small
+\begin{tabular}{@{}clllll@{}}
+\toprule
+$k$ & degrau & ganha volta & paga & dual do andar (e o seu Fix) & paper \\
+\midrule
+$-1$ & $F_1\!\to\!F_2\!\to\!F_4\!\to\!F_8$ & a \textbf{largura} (3 dobras)
+     & a \textbf{ordem} (car.\ $2$) & $x^{*}$ (2.ª raiz); Fix $=$ andar de baixo
+     & \code{naturais.tex} \\
+$0$  & $\mathbb{N}\!\to\!\mathbb{Z}$ & a \textbf{soma}
+     & o sinal e a boa ordem & $\iota(a,b)=(b,a)\Rightarrow$ oposto; Fix $=\{0\}$
+     & \code{inteiros.tex} \\
+$1$  & $\mathbb{Z}\!\to\!\Q$ & a \textbf{multiplicação}
+     & $0^{-1}$ não existe & $\iota(a,b)=(b,a)\Rightarrow$ inverso; Fix $=\{\pm1\}$
+     & \code{racionais.tex} \\
+$2$  & $\Q\!\to\!\R$ & o \textbf{corte} (completação)
+     & a \textbf{enumerabilidade} & $(A,B)\mapsto(B,A)$; Fix: o corte que fecha
+     & \code{reais.tex} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent{\footnotesize A numeração é a de \code{arquitetura sec:descida}, onde
+$k=0$ é $\mathbb{N}\!\to\!\mathbb{Z}$. \textbf{Entre $k=-1$ e $k=0$ não há
+dobra: há o TRANSPORTE} (\code{naturais.tex thm:transporte}). Nos degraus
+$k\ge0$ duplica-se e \textbf{quocienta-se} --- e este não é excepção: duplica-se
+$\Q$ no par $(A,B)$ e quocienta-se identificando aberto com fechado
+(Def.~\ref{def:corte}).\par}
+
+\medskip\noindent\textbf{O que RECEBE do degrau anterior.} $\Q$ e o par
+$\code{Qz}$ de \code{int16} (\code{racionais.tex}, \code{lib/racionais.h}); a
+Möbius inteira e o produto cruzado; a fracção contínua (\code{lib/cifra.h},
+\code{lado}); e o envelope $E_{16}$ com o contador \code{qz\_saturou}. O
+\code{racionais.tex} §\code{sec:qstar} já \emph{anunciava} os três caminhos ---
+o que faltava era medi-los (§\ref{sec:tres}).
+
+\medskip\noindent\textbf{O que ENTREGA.} $\R$ ordenado e completo, e com ele o
+fim da cadeia aritmética: o degrau seguinte não é mais um andar da torre
+aritmética, é a mudança de eixo --- o \emph{Corpo Algébrico} e o
+\emph{Topológico} recebem $\R$ e trabalham-no pelo lado da operação e do
+espaço (\code{algebrico thm:encaixe}, \code{topologico thm:rn}). Este paper
+\textbf{não} refaz o que esses fazem: constrói o objecto que eles usam.
+
+\medskip\noindent\textbf{E o que NÃO se faz aqui.} Não entra decimal. Um
+\code{double} seria a negação exacta deste andar --- ele afirma que o real
+\emph{é} uma tira de casas, e o corte diz que o real é a \emph{decisão} sobre
+cada racional (\code{lib/reais.h}).
+
+%======================================================================
+\section{As oito leis --- marcos da construção}\label{sec:leis}
+
+\noindent Onde cada lei vive na cadeia --- a mesma tabela nos quatro papers:
+
+\begin{center}\footnotesize
+\begin{tabular}{@{}cp{2.75cm}p{2.75cm}p{2.75cm}p{2.75cm}@{}}
+\toprule
+lei & $k{=}-1$: $F_1\!\to\!F_8$ & $k{=}0$: $\mathbb{N}\!\to\!\mathbb{Z}$ & $k{=}1$: $\mathbb{Z}\!\to\!\mathbb{Q}$ & $k{=}2$: $\mathbb{Q}\!\to\!\mathbb{R}$ \\
+\midrule
+\textbf{0} divisão do zero
+ & $x\oplus x=0$; só o $0$ sem inversa \hfill\textsc{expl.}
+ & subtracção parcial; folha $[(1,0)]\oplus[(0,1)]=0$ \hfill\textsc{expl.}
+ & $0^{-1}$ não existe; $0\!\leftrightarrow\!\infty$ \hfill\textsc{mista}
+ & o \textbf{buraco}: corte sem racional em cima \hfill\textsc{expl.} \\
+\textbf{1} dual ($1\dg=-1$)
+ & \emph{degenera}: $-x=x$ \hfill\textsc{expl.}
+ & $\iota$ no par; $\nu(z)=-z$ \hfill\textsc{expl.}
+ & $\nu(a,b)=(-a,b)$ \hfill\textsc{expl.}
+ & $\nu(x)=-x$; do andar: $(A,B)\!\mapsto\!(B,A)$ \hfill\textsc{expl.} \\
+\textbf{2} bidual
+ & $x^{**}=x$; automorfismo \hfill\textsc{expl.}
+ & Dir/Cruz; $R^{4}=\mathrm{id}$ \hfill\textsc{mista}
+ & $V\cong V^{**}$ canónico \hfill\textsc{canón.}
+ & $B=\mathbb{Q}\setminus A$: complementar $2\times$ \hfill\textsc{expl.} \\
+\textbf{3} trial $\{-1,0,+1\}$
+ & \emph{degenera}: sem cúspide \hfill\textsc{expl.}
+ & cúspide $\tau=0$; $+0=-0$ \hfill\textsc{expl.}
+ & $\operatorname{sgn}(a/b)$ \hfill\textsc{expl.}
+ & $\tau=0$ é \emph{vazio} $\iff$ irracional \hfill\textsc{expl.} \\
+\textbf{4} tetral $T+T^{*}$
+ & $F_{2w}=F_w\oplus\sigma F_w$ \hfill\textsc{expl.}
+ & $\mathbb{N}^{2}/{\sim}$; classe $[(a,b)]$ \hfill\textsc{expl.}
+ & recebida (\code{thm:juntas}) \hfill\textsc{receb.}
+ & $(A,B)$, e quocientar aberto/fechado \hfill\textsc{expl.} \\
+\textbf{5} pental $x^{2}=-1$
+ & \emph{degenera}: uma raiz só \hfill\textsc{expl.}
+ & $G_{\mathrm{geom}}\bmod2$ \hfill\textsc{receb.}
+ & $J(a,b)=(-b,a)$, $J^{2}=-I$ \hfill\textsc{expl.}
+ & \emph{não existe}: ordenado \hfill\textsc{expl.} \\
+\textbf{6} hexal (interface)
+ & base ortonormal: coordenada $=$ ler o bit \hfill\textsc{receb.}
+ & $\otimes\leftrightarrow(a-b)(c-d)$ \hfill\textsc{receb.}
+ & interface \hfill\textsc{receb.}
+ & densidade de $\mathbb{Q}$ em $\mathbb{R}$ \hfill\textsc{receb.} \\
+\textbf{7} octonião dual
+ & encaixe por prefixos \hfill\textsc{expl.}
+ & $q\parallel p$; par $\neq$ classe; $\Word_8$ \hfill\textsc{expl.}
+ & junta dual \hfill\textsc{receb.}
+ & três realizações ligadas sem fundidas \hfill\textsc{expl.} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent{\footnotesize \textsc{expl.} realizada neste degrau ·
+\textsc{receb.} interface herdada do centro, não derivada aqui ·
+\textsc{mista}/\textsc{canón.} ver o paper do degrau.
+\textbf{Três leis degeneram em $k=-1$} (1, 3, 5) --- e é isso que permite a
+torre binária dobrar sem excepção. A Lei~5 falta nos dois extremos por razões
+\emph{opostas}: em $k=-1$ por característica~2, em $k=2$ por ordem.
+\textbf{Nenhum degrau realiza as oito}; a coluna diz onde cada uma vive.\par}
+
+\noindent E, neste degrau, com o § onde cada uma se realiza:
+
+\begin{center}\small
+\begin{tabular}{@{}clp{5.2cm}cl@{}}
+\toprule
+ & lei (centro) & realização $\Q\!\to\!\R$ & estatuto & § \\
+\midrule
+\textbf{0} & divisão do zero & o \textbf{buraco}: corte sem racional em cima; $0\leftrightarrow\infty$ em $\mathbb{P}^1$ & explícita & \ref{sec:corte}, \ref{sec:porque} \\
+\textbf{1} & dual ($1\dg=-1$) & $\nu(x)=-x$; e o dual do andar é a troca $(A,B)\mapsto(B,A)$ & explícita & \ref{sec:corte} \\
+\textbf{2} & bidual & $B=\Q\setminus A$: complementar duas vezes é a identidade & explícita & \ref{sec:corte} \\
+\textbf{3} & trial $\{-1,0,+1\}$ & \code{rz\_cmp} devolve os três; $\tau=0$ (em cima) é \emph{vazio} $\iff$ irracional & explícita & \ref{sec:corte} \\
+\textbf{4} & tetral ($T+T^{*}$) & $\R=\{(A,B)\}$: duplicar $\Q$ e quocientar aberto/fechado & explícita & \ref{sec:corte} \\
+\textbf{5} & pental ($x^{2}=-1$) & \emph{não existe}: $\R$ é ordenado, logo $-1$ não é quadrado & explícita & \ref{sec:ordem} \\
+\textbf{6} & hexal (interface) & densidade: entre dois reais há sempre um racional & recebida & \ref{sec:continuidade} \\
+\textbf{7} & octonião dual & três realizações \emph{ligadas sem fundidas}; e o tecto declarado & explícita & \ref{sec:tres}, \ref{sec:preco} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent A Lei~3 é aqui \textbf{literal}, e não analogia: a comparação
+\code{rz\_cmp} devolve $-1$, $0$ ou $+1$ --- abaixo, em cima, acima ---, e o
+andar inteiro existe porque o caso do meio é \emph{vazio} exactamente quando
+$a$ não é potência $n$-ésima perfeita. A Lei~5, ao contrário do degrau $k=-1$
+(onde degenerava por característica~2), aqui \textbf{não existe por ordem}: as
+duas faces do eixo de Pontryagin outra vez (\code{algebrico}, §O byte).
+
+%======================================================================
+\section{O corte --- Leis 0, 1, 2, 3 e 4}\label{sec:corte}
+
+\begin{definicao}[o corte, e é um par]\label{def:corte}
+Para $a\in\mathbb{N}$ e $n\in\{1,2,3\}$, o corte de $\sqrt[n]{a}$ é o par
+\[
+\boxed{\;A=\{q\in\Q: q\le 0\ \text{ou}\ q^{n}<a\},\qquad B=\Q\setminus A\;}
+\]
+--- \textbf{Lei 4} ($T+T^{*}$): duplica-se $\Q$ nas duas classes; \textbf{Lei 1}:
+o dual do andar é a troca $(A,B)\mapsto(B,A)$; \textbf{Lei 2}: complementar duas
+vezes devolve $A$. A decisão é \textbf{inteira}: $q=p/d$ está em $A$ conforme
+$p^{n}$ compare com $a\,d^{n}$, e nenhuma casa decimal entra
+(\code{lib/reais.h}, \code{rz\_cmp}). O \textbf{quociente} identifica os dois
+representantes do mesmo real quando $A$ tem máximo: $(A,B)$ e
+$(A\setminus\{\max A\},B\cup\{\max A\})$ são o mesmo corte.
+\end{definicao}
+
+\begin{proposicao}[o corte é aberto, e $A$ nunca tem máximo]\label{prop:aberto}
+Com a Def.~\ref{def:corte}, se $r\in\Q$ e $r^{n}=a$ então $r\notin A$: a
+condição é $q^{n}<a$ \emph{estrita}. Logo $A$ não tem máximo, nem no caso em
+que o corte fecha em $\Q$.
+\end{proposicao}
+
+\begin{proof}
+Imediato da definição. \emph{Verifica:} \code{tres\_caminhos.c} §RE5 --- para
+$a=4,9,16,25$ a raiz existe, está \textbf{em cima} do corte
+(\code{rz\_no\_corte}) e \textbf{não} pertence a $A$, nos quatro casos.
+\emph{E é aqui que a escolha se decide}: nos radicandos irracionais as versões
+aberta e fechada são indistinguíveis --- só um quadrado perfeito as separa,
+e por isso a asserção tinha de vir com um. $\square$
+\end{proof}
+
+\begin{teorema}[o corte fecha em $\Q$ exactamente nas potências perfeitas]\label{thm:fecha}
+Existe $q\in\Q$ com $q^{n}=a$ se e só se $a$ é potência $n$-ésima perfeita em
+$\mathbb{N}$; e então $q$ é inteiro.
+\end{teorema}
+
+\begin{proof}
+Se $q=p/d$ reduzida e $p^{n}=a\,d^{n}$, então $d^{n}\mid p^{n}$; como
+$\gcd(p,d)=1$, vem $d=1$ (é o mesmo argumento da irracionalidade de $\sqrt2$,
+\code{racionais.tex} §\code{sec:sqrt2}, no caso geral). Logo $q=p\in\mathbb{Z}$
+e $a=p^{n}$.
+\emph{Realiza:} \code{rz\_fecha\_em\_q}, que usa a régua da casa (\code{raizi})
+e não tentativa. \emph{Verifica:} §RE0 --- varridos $16\,200$ racionais para
+$a=2,3,5,7,10$, \textbf{nenhum} cai em cima do corte; e para $a=4,9,16,25$ ele
+fecha nos quatro, com a raiz exibida. $\square$
+\end{proof}
+
+\begin{observacao}[a Lei 3 é a tricotomia, e é ela que define o andar]
+\code{rz\_cmp} devolve $\tau\in\{-1,0,+1\}$ para cada racional. O real
+\emph{novo} é exactamente o caso em que $\tau=0$ nunca ocorre: o corte separa
+$\Q$ em dois sem que nenhum racional fique no meio. Onde $\tau=0$ ocorre, o
+andar não tem trabalho --- $\Q$ já continha o ponto (§RE5).
+\end{observacao}
+
+\colunas{\code{algebrico thm:cuspide} (o trial); \code{analitico thm:tecidos}}
+        {$(A,B)$; decisão inteira; quociente aberto/fechado}
+        {\code{tres\_caminhos.c} §RE0, §RE5; \code{reais.c} §R3}
+
+%======================================================================
+\section{Por que o corte existe --- o ponto fixo que $\Q$ não tem}\label{sec:porque}
+
+\noindent A construção acima \emph{define} o real; esta secção diz \textbf{por
+que} ele falta. A resposta não é «$\Q$ tem buracos» --- é estrutural:
+
+\begin{teorema}[o corte é o ponto fixo da Möbius visto do andar que não o contém]\label{thm:pontofixo}
+Seja $A_m=\bigl(\begin{smallmatrix}m&1\\1&0\end{smallmatrix}\bigr)$, cuja acção
+em $\mathbb{P}^1$ é $x\mapsto m+1/x$. O ponto fixo satisfaz $x^{2}=mx+1$, isto
+é, em coordenadas homogéneas $p^{2}-mpq-q^{2}=0$. Completando o quadrado,
+\[
+\boxed{\;(2p-mq)^{2}=D\,q^{2},\qquad D=m^{2}+4\;}
+\]
+--- o ponto fixo vive em $\mathbb{P}^1(\Q)$ \textbf{exactamente} quando $D$ é
+quadrado perfeito. E $D$ nunca o é: $m^{2}<D<(m+2)^{2}$ para todo $m\ge1$, logo
+o único candidato é $(m+1)^{2}$, que pede $2m=3$ --- sem solução em
+$\mathbb{Z}$.
+\end{teorema}
+
+\begin{proof}
+A equivalência é a fórmula acima. Para a segunda parte:
+$m^{2}<m^{2}+4$ e $m^{2}+4<m^{2}+4m+4=(m+2)^{2}$ quando $m\ge1$; entre
+$m^{2}$ e $(m+2)^{2}$ o único quadrado é $(m+1)^{2}=m^{2}+2m+1$, e
+$m^{2}+4=m^{2}+2m+1$ dá $2m=3$.
+\emph{É o \textbf{passo} e não a lista}: varrer $m$ confirmaria a conclusão sem
+medir a prova. \emph{Verifica:} \code{corte\_ponto\_fixo.c} §F5; e §F3 dá a
+mesma conclusão pela \textbf{descida infinita}, com a identidade
+$q^{2}-mq(p-mq)-(p-mq)^{2}=-(p^{2}-mpq-q^{2})$ a levar solução em solução
+enquanto o denominador encolhe estritamente. $\square$
+\end{proof}
+
+\begin{corolario}[e na face finita ele está lá]\label{cor:finito}
+A \emph{mesma} equação $x^{2}=mx+1$ tem raiz em $\FF_{127}$ para cerca de
+metade dos metais --- exactamente quando $D$ é resíduo quadrático ---, e aí a
+órbita cai no ponto fixo e não há corte a fazer. \emph{O corte não é um defeito
+de $\Q$: é o que acontece quando a equação do ponto fixo não fecha no corpo
+onde a órbita corre.} \emph{Verifica:} §F4, exaustivo nos $126$ metais, por duas
+rotas que concordam (a busca da raiz e o critério de Euler).
+\end{corolario}
+
+\begin{observacao}[e há volta, porque $|\det|=1$]
+De $\det A_m=-1$ vem $A_m^{-1}=\bigl(\begin{smallmatrix}0&1\\1&-m\end{smallmatrix}\bigr)$
+\textbf{inteira}: a descida é a órbita para trás, e é letra por letra a
+descida do §F3 (\code{corte\_ponto\_fixo.c} §F6). A ida cresce, a volta desce
+pelo mesmo caminho, e chega ao $\infty$ exacto --- é o fator de potência
+unitário do \code{algebrico} a tornar a volta exacta.
+\end{observacao}
+
+\colunas{\code{algebrico thm:corpo-dual}; \code{teoria thm:torrecruz}}
+        {$(2p-mq)^{2}=Dq^{2}$; descida; a volta por $|\det|=1$}
+        {\code{corte\_ponto\_fixo.c} §F3--§F6 ($6{:}0$)}
+
+%======================================================================
+\section{Os três caminhos são a mesma classe}\label{sec:tres}
+
+\noindent O \code{lib/cauchy.h} diz: \emph{«não são três aproximações de
+$\sqrt2$: são três representantes da mesma classe, e a equivalência mede-se»}.
+Mediu-se agora --- até este documento, nenhum medidor chamava
+\code{rz\_abaixo}, \code{rz\_encaixota} ou \code{rz\_passo}.
+
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+caminho & o que faz & realização & natureza \\
+\midrule
+\textbf{1. o corte} & diz \emph{onde} está & \code{Corte\{a,n\}}, \code{rz\_abaixo} & estático: uma decisão \\
+\textbf{2. o ponto fixo} & \emph{vai lá} & \code{rz\_passo}: $x\mapsto\frac{a+bx}{x+b}$ & dinâmico: uma órbita \\
+\textbf{3. a fracção contínua} & \emph{escreve-o} & \code{lado} (\code{cifra.h}) & periódica (Lagrange) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{teorema}[equivalência]\label{thm:tres}
+Para $a\in\{2,3,5,7,10\}$, as quatro sucessões --- a órbita de Möbius, as duas
+pontas do encaixotamento e os convergentes --- \textbf{apontam ao mesmo corte}
+(entram na moldura e não voltam a sair) e são equivalentes duas a duas no
+sentido de Cauchy, com $\varepsilon$ \emph{exibido} e $N$ devolvido como
+testemunha.
+\end{teorema}
+
+\begin{proof}[Medida]
+\code{tres\_caminhos.c} §RE2: $\varepsilon=1/1000$; \code{cy\_aponta} dá $1$ nas
+quatro sucessões e nos cinco radicandos; \code{cy\_equiv}(Möbius, FC) devolve
+$N=4,6,3,6,3$ e \code{cy\_equiv}(LO, HI) devolve $N=10$ em todos.
+\emph{Sem $N$ exibido não há afirmação} --- é a regra da casa aplicada à
+análise (\code{lib/cauchy.h}). $\square$
+\end{proof}
+
+\begin{proposicao}[cada caminho tem a sua lei, e são diferentes]\label{prop:leis3}
+\textbf{(i)} Os convergentes \textbf{alternam} de lado do corte --- par dentro
+de $A$, ímpar fora ---, medido pela decisão inteira e não por decimal ($46$
+convergentes, zero fora do lado esperado; §RE3).
+\textbf{(ii)} A órbita de Möbius é \textbf{monótona} e fica sempre do
+\emph{mesmo} lado: com $b=\lfloor\sqrt a\rfloor+1$ tem-se $b^{2}>a$, o erro
+multiplica-se por um factor de sinal fixo, e as cinco órbitas são crescentes
+(§RE4).
+\textbf{(iii)} O encaixotamento tem largura \textbf{exacta}
+$(b_0-a_0)/2^{k}$ --- não «tende a zero»: \emph{é} essa fracção --- e as duas
+pontas nunca largam o corte (§RE1).
+\end{proposicao}
+
+\noindent São três leis distintas a convergir para o mesmo objecto: se um dos
+caminhos discordasse num único racional, um deles estaria errado --- e é isso
+que a medida existe para apanhar.
+
+\begin{proposicao}[$\sim$ é equivalência, e separa]\label{prop:classe}
+A relação «a diferença vai a zero» é reflexiva, simétrica e transitiva sobre as
+sucessões deste andar --- e \textbf{separa}: sucessões de radicandos distintos
+não caem na mesma classe (seis pares ordenados). O quociente por ela é que
+\emph{é} o real.
+\end{proposicao}
+
+\begin{observacao}[duas coisas que a medida obrigou a dizer]
+\textbf{(i)} A transitividade pede a \textbf{desigualdade triangular à vista}
+--- hipóteses a $\varepsilon/2$, conclusão a $\varepsilon$ ---, porque a relação
+a $\varepsilon$ \emph{fixo} não é transitiva; a asserção caiu na primeira
+escrita por pedir as três com o mesmo $\varepsilon$.
+\textbf{(ii)} O $\varepsilon$ \textbf{não se escolhe: deriva-se}. As quatro
+sucessões têm horizontes honestos muito diferentes --- a órbita de Möbius satura
+por volta do índice $7$--$11$, o encaixe chega a $13$--$14$ ---, logo a
+comparação só pode usar o menor deles, $h$, e $\varepsilon=4/2^{h}$: a largura
+que o encaixe garante ali, com uma dobra para a triangular e outra de folga.
+(\code{tres\_caminhos.c} §RE8, com os horizontes impressos.)
+\end{observacao}
+
+\begin{proposicao}[o índice sobe, e a régua não transporta toda]\label{prop:cubico}
+Para $n=3$: o corte continua a decidir e o encaixe continua a cercar --- os
+cubos perfeitos fecham ($8,27,64$) com o corte \emph{aberto}, e $\sqrt[3]{2}$,
+$\sqrt[3]{3}$, $\sqrt[3]{5}$ ficam cercados. Mas o \textbf{terceiro caminho não
+é o mesmo objecto}: \code{rz\_passo} é o ponto fixo de $x^{2}=a$, e aplicado a
+um corte cúbico aponta ao corte \emph{errado} --- medido pelos dois lados,
+aponta ao quadrático em $3/3$ e ao cúbico em $0/3$. É Lagrange do lado da
+escrita: a fracção contínua é periódica para o irracional \emph{quadrático}, e o
+cúbico não tem essa via. \emph{Dois caminhos sobem de índice; o terceiro é do
+andar quadrático, e não se finge que é geral.} (§RE7.)
+\end{proposicao}
+
+\begin{teorema}[as operações descem ao quociente]\label{thm:desce}
+Se $x\sim x'$ e $y\sim y'$ então $x+y\sim x'+y'$ e $x\cdot y\sim x'\cdot y'$ ---
+com uma diferença que \emph{tem} de ser dita: o produto pede uma \textbf{hipótese
+a mais}. Para a soma basta $|(x+y)-(x'+y')|\le|x-x'|+|y-y'|$; para o produto,
+\[
+|xy-x'y'|\;\le\;|x|\,|y-y'|+|y'|\,|x-x'|,
+\]
+e sem \textbf{cota} nos factores não há controlo --- é por isso que a limitação
+das sucessões de Cauchy entra aqui, e só aqui.
+\end{teorema}
+
+\begin{proof}[Medida]
+\code{tres\_caminhos.c} §RE10 e §RE11: somando (e multiplicando) a órbita de
+Möbius de $\sqrt a$ com a de $\sqrt b$, e depois a ponta esquerda do encaixe de
+$\sqrt a$ com a de $\sqrt b$ --- quatro sucessões, duas classes, dois
+representantes cada ---, os dois resultados concordam nos três pares
+$(2,3),(2,5),(3,5)$. As quatro são limitadas no horizonte.
+\emph{Escopo:} os horizontes honestos são curtos ($3$ para a soma, $2$--$3$ para
+o produto) porque multiplicar denominadores esgota o envelope de $16$ bits
+depressa; o que se mede é o que cabe, e o horizonte diz-se. $\square$
+\end{proof}
+
+\begin{observacao}[três controlos que a medida obrigou a refazer]
+\textbf{(i)} O controlo do §RE10 não pode ser «ficar fora do $\varepsilon$»:
+com horizonte curto o $\varepsilon$ derivado é grosseiro, e duas classes
+distintas chegam a estar mais próximas que ele. O critério é a \textbf{dinâmica}
+--- entre representantes da mesma classe a distância encolhe e fica muito menor
+que a de classes distintas.
+\textbf{(ii)} Nenhuma varredura mostra que uma sucessão é \emph{ilimitada}; e
+dizer que a cota da órbita é «estável» também seria falso, porque ela é
+crescente. Mede-se o sintoma: alargando o horizonte de $2$ para $16$, a
+harmónica \textbf{atravessa} a cota fixa $2$ ($11/6\to7381/2520$) e a órbita
+fica sempre sob $3/2$ ($7/5\to27720/19601$).
+\textbf{(iii)} A distância entre cotas \emph{não} se constrói: com denominadores
+destes tamanhos o \code{cy\_dist} satura e devolveria $32767$ --- comparar contra
+isso seria comparar contra lixo. Compara-se por \textbf{ordem}, que o
+\code{qz\_menor} faz por produto cruzado sem construir nada.
+\end{observacao}
+
+\medido{\code{tests/tres\_caminhos.c} §RE0--§RE11 ($12{:}0$): §RE0 $16\,200$
+racionais decididos, zero indecisos, zero em cima para os irracionais e $4/4$
+para os quadrados; §RE1 o encaixe, doze dobras exactas nos cinco radicandos;
+§RE2 os três caminhos (Thm.~\ref{thm:tres}); §RE3 $46$ convergentes a alternar;
+§RE4 cinco órbitas monótonas; §RE5 o controlo dos quadrados perfeitos, com o
+corte \textbf{aberto}; §RE6 o tecto; §RE7 o cúbico (Prop.~\ref{prop:cubico});
+§RE8 a classe (Prop.~\ref{prop:classe}); §RE9 o \textbf{controlo de Cauchy} ---
+a harmónica tem saltos $1/(n+2)$ a ir a zero e \emph{não} é de Cauchy, a
+alternada nem saltos, e a constante é: sem isto, §RE8 mediria a equivalência num
+conjunto onde tudo passa; §RE10 e §RE11 as operações a descer
+(Thm.~\ref{thm:desce}). Gume: cinco mutações --- três em \code{lib/reais.h}
+($2/1/1$ asserções caídas) e duas em \code{lib/cauchy.h}: a ponta do encaixe
+tirada de outro radicando derruba $3$, e a cota deixada de medir derruba $1$ --- e a segunda mutação (trocar $q^{n}<a$ por
+$q^{n}\le a$) \textbf{sobrevivia} até §RE5 medir a abertura do corte.}
+
+%======================================================================
+\section{A completude, nas duas direcções}\label{sec:continuidade}
+
+\noindent A casa media, em três sítios, sempre a \emph{mesma} direcção: dado o
+habitante $x$, a classe racional dele cresce, fica abaixo e ultrapassa todo
+racional menor --- logo $x$ é o supremo da sua própria classe. Isso constrói o
+\textbf{corte a partir do habitante}, e é verdade; mas não é a continuidade.
+\textbf{A continuidade é a volta}:
+
+\[
+\boxed{\;\text{dado }S\subset\R\text{ não vazio e limitado superiormente,}
+\quad\textbf{existe}\ \sup S\;}
+\]
+
+\begin{teorema}[a volta, construída em inteiros]\label{thm:sup}
+Para $S=\{r\in\Q: r^{2}<2\}$ nenhum racional é o menor majorante, e a
+testemunha é a matriz $\bigl(\begin{smallmatrix}3&4\\2&3\end{smallmatrix}\bigr)$
+de determinante $1$ --- a unidade fundamental de $\mathbb{Z}[\sqrt2]$ ao
+quadrado, $(1+\sqrt2)^{2}=3+2\sqrt2$. O que a torna testemunha são \textbf{duas
+identidades inteiras} válidas em todos os candidatos:
+\[
+(3p+4q)^{2}-2(2p+3q)^{2}=p^{2}-2q^{2}
+\quad\text{(preserva o lado)},
+\]
+\[
+(3p+4q)q-p(2p+3q)=2(2q^{2}-p^{2})
+\quad\text{(move na direcção do lado)}.
+\]
+Quem está abaixo sobe ficando em $S$; quem está acima desce continuando
+majorante. E não há empate, porque $p^{2}=2q^{2}$ é a descida proibida. No
+objecto o supremo \textbf{existe}, e o caminho dele exibe-se em inteiros.
+\end{teorema}
+
+\begin{observacao}[a borda não parte a construção]
+O supremo de $\{1-1/n\}$ é $1$, que é \textbf{diádico} e portanto tem dois
+caminhos: $m_k=2^{k}-1$ (o $\ldots0111\ldots$, por baixo) e $2^{k}$ (o nó). A
+soma $(2^{k}-1)+1=2^{k}$ fecha \emph{exacta} em todos os níveis e $\sim$
+identifica-os: é \emph{um} elemento e não dois. E o supremo \textbf{não}
+pertence a $S$ --- nenhum $1-1/n$ atinge $1$ ---, que é exactamente o caso em
+que a continuidade tem de trabalhar. (\code{supremo.c} §S4.)
+\end{observacao}
+
+\begin{observacao}[duas testemunhas independentes]
+A matriz acima e o passo de \textbf{Newton} $(p,q)\mapsto(p^{2}+2q^{2},2pq)$
+cumprem a mesma tese por caminhos que não se apoiam um no outro: a primeira
+multiplica pela unidade fixa e é \emph{linear}; a segunda \emph{eleva ao
+quadrado}. Vivem no mesmo grupo e coincidem só em $3/2$ (\code{supremo.c} §S5).
+\end{observacao}
+
+\colunas{\code{analitico thm:central-continuo}; \code{algebrico thm:encaixe}}
+        {a volta: existe $\sup S$; testemunhas em $\mathbb{Z}[\sqrt2]$}
+        {\code{supremo.c} §S1--§S5 ($6{:}0$)}
+
+%======================================================================
+\section{A ordem, e qual face a tem}\label{sec:ordem}
+
+\begin{teorema}[$\R$ é o único corpo ordenado completo]\label{thm:unico}
+Ser corpo e ser ordenável são \textbf{independentes}: $\mathbb{Z}/5$ é corpo e
+não ordena ($1$ somado cinco vezes dá $0$); o tropical $(\max,+)$ ordena e não é
+corpo. O critério é exacto (\textbf{Artin--Schreier}): ordenável $\iff$ $-1$
+\emph{não} é soma de quadrados --- em $\Q(i)$ um quadrado basta, em $\Q(\sqrt5)$
+nenhum quadrado é negativo. E $\R$ é especial num eixo \textbf{nomeado}: é o
+único corpo ordenado \emph{completo}, a menos de isomorfismo.
+\end{teorema}
+
+\begin{proof}[Medida e escopo]
+\code{tests/reais.c} §R1--§R5 ($3{:}0$ --- três asserções e duas
+\emph{conclusões}, que não são asserções e por isso não entram na conta): os
+quatro casos existem e medem-se;
+o critério separa $\Q(i)$ de $\Q(\sqrt5)$; $\Q$ falha a completude, exibido sem
+decimal pelos convergentes de $\sqrt2$ com $|p^{2}-2q^{2}|=1$ (Pell); e nenhum
+corpo do catálogo é isomorfo a $\R$, porque todos são contáveis.
+\code{ordenado.c} §U0--§U6 ($7{:}0$) firma o mesmo do lado do corpo universal.
+$\square$
+\end{proof}
+
+\medskip\noindent\textbf{Lei 5, e o preço.} Num corpo ordenado $-1$ não é
+quadrado, logo \textbf{não há $i$ em $\R$}. Compare-se com o degrau $k=-1$,
+onde a Lei~5 também não se realiza --- mas por característica~2
+($x^{2}=1$ tem uma só raiz). \emph{As duas faces do eixo de Pontryagin: a que
+opera não ordena; a que ordena não opera} (\code{algebrico}, §O byte). $\R$
+está do lado que ordena, e paga com o fecho algébrico --- que $\mathbb{C}$
+ganha perdendo a ordem.
+
+%======================================================================
+\section{O preço, o tecto, e o que fica por medir}\label{sec:preco}
+
+\noindent\textbf{O que se paga neste degrau é a enumerabilidade.} $\Q$ é
+contável e $\R$ não; foi essa a moeda. Os degraus anteriores pagaram a ordem
+($k=-1$), o sinal e a boa ordem ($k=0$) e o inverso do zero ($k=1$) --- aqui
+paga-se poder listar.
+
+\medskip\noindent\textbf{O tecto declara-se, e a recusa conta-se.} Fora do
+domínio em que o \code{i128} chega --- índice $n\le3$, numerador e denominador
+até $2^{30}$ --- a comparação \textbf{não} devolve um palpite: põe a bandeira a
+zero, e \code{rz\_abaixo} responde $-1$, que não é «dentro» nem «fora», é
+\emph{não mediu}. As asserções descartam esses casos em vez de os contar como
+acertos (§RE6). Do mesmo modo, o encaixotamento pára quando o ponto médio satura
+e devolve \emph{quantos} passos honestos fez, e \code{cy\_teto\_honesto} corta o
+varrimento no último índice em que o termo ainda é o termo.
+\emph{Uma saturação não é um resultado.}
+
+\medskip\noindent\textbf{A incontabilidade: mede-se o PASSO, e diz-se o que não
+se mede.} A conclusão de Cantor é sobre listas infinitas e não cabe numa
+varredura --- mas a \emph{prova} não é sobre o infinito: é um passo finito, e o
+passo mede-se. Dada uma lista com uma linha por índice, a diagonal difere da
+linha $i$ no dígito $i$, com o dígito exibido e a diferença confirmada também em
+\textbf{valor exacto} (§DG0).
+
+\medskip\noindent\textbf{E a diagonal tem de sair da borda}, que é onde este
+argumento se partiria. Em base $2$ o mesmo real tem dois caminhos ---
+$\ldots0111\ldots$ e $\ldots1000\ldots$ ---, e a razão é exacta: com $M$ dígitos
+distam $1/2^{M}$, que não é zero mas vai a zero, e no limite são o \emph{mesmo}
+real. É o \code{supremo.c} §S4 visto deste lado. Uma diagonal que garanta
+diferença em \emph{dígitos} não garante diferença em \emph{valor}. A régua que
+resolve muda de base: em base $3$ com dígitos $\{0,1\}$, a cauda inteira vale
+\emph{metade} do dígito actual --- $\sum_{j>i}3^{-j}=3^{-i}/2$ --- e nunca o
+alcança; medido nas $1024$ sequências de dez dígitos, \textbf{zero} colisões de
+valor (§DG1).
+
+\medskip\noindent\textbf{O que uma medida finita não conclui}, e é a parte que
+costuma faltar: com $2^{N}$ linhas de $N$ dígitos a diagonal \emph{está} na
+lista --- ela própria é uma palavra de $N$ dígitos. O argumento de Cantor não
+usa uma lista qualquer: usa uma lista \textbf{indexada}, uma linha por natural,
+e é daí que a diagonal tira o poder. Medido o contraste: na lista completa
+($256$ palavras de $8$ dígitos) a diagonal está lá; na indexada, não (§DG2).
+Logo esta casa mede o passo e a condição de borda, e \textbf{não} mede a
+incontabilidade --- que continua um teorema, e não um resultado desta máquina.
+
+\medido{\code{tests/diagonal.c} §DG0--§DG2 ($3{:}0$): o passo com $12$ linhas,
+diferença no dígito e no valor; a borda com a distância exacta $1/2^{12}$ e as
+$1024$ sequências sem colisão; o contraste completa/indexada. Gume: a diagonal
+sem inverter o dígito derruba $1$ asserção.}
+
+\medskip\noindent\textbf{As duas dívidas, pagas.}
+\textbf{(i) A ordem desce} --- e com a ressalva junto. Entre classes
+\emph{distintas} ela desce: quaisquer representantes de $\sqrt a$ e $\sqrt b$,
+nas quatro combinações e nos três pares, dão a mesma resposta a «qual é o menor»
+($12/12$). Mas \emph{dentro} de uma classe a comparação termo a termo afirma uma
+ordem que no quociente não existe: $\mathrm{LO}_n<\mathrm{HI}_n$
+\textbf{estritamente} em todos os termos, e no entanto $\mathrm{LO}\sim\mathrm{HI}$
+(§RE2). \emph{É por isso que a ordem em $\R$ se define por «existe racional entre
+os dois» e não por comparar termos} (§RE12).
+
+\textbf{(ii) A soma de cortes ganhou realização.} A \code{lib/reais.h} não tem
+$A+B$, mas ela faz-se com o que lá está: somam-se os \textbf{encaixes}, ponta a
+ponta. E há um segundo caminho que não partilha código com o primeiro ---
+$\sqrt2+\sqrt3$ satisfaz $(s^{2}-5)^{2}=24$, logo o corte da soma tem critério
+\textbf{inteiro} próprio,
+\[
+\tfrac{p}{d}<\sqrt2+\sqrt3
+\iff p\le0\ \text{ou}\ p^{2}\le5d^{2}\ \text{ou}\ (p^{2}-5d^{2})^{2}<24\,d^{4},
+\]
+e os dois concordam: dos racionais varridos, os $6509$ abaixo do encaixe somado
+pertencem a $A+B$ e os $6283$ acima não, sem uma anomalia (§RE13).
+\emph{O lado estático (cortes) e o dinâmico (sucessões, §RE10) dão o mesmo
+objecto.}
+
+%======================================================================
+\section{Os fractais deste andar}\label{sec:fractais}
+
+\noindent Cantor, Julia e o dragão aparecem na casa noutros elos. Cada um tem
+uma peça que é \emph{deste} andar --- e é só essa que aqui se mede.
+
+\subsection*{Cantor: uma condição sobre a decisão}
+
+O conjunto de Cantor são os reais cuja expansão ternária \textbf{evita o dígito
+$1$} --- uma restrição sobre a decisão em cada nível, que é exactamente o que o
+corte é. A representação é \textbf{única}, e a conta que o garante é a mesma que
+o §DG1 usou para a diagonal sair da borda: a cauda de $2$s vale $3^{D-1}-1$ e
+fica a \emph{uma} unidade de $3^{-D}$ do dígito $1$, alcançando-o exactamente no
+limite ($0{,}0222\ldots=0{,}1$). E é isso que salva a unicidade: \emph{o valor
+onde as duas escritas colidiriam tem o dígito $1$, e o dígito $1$ está fora do
+conjunto}. Medido: $1024$ pontos de nível $10$, zero colisões (§FR0).
+
+\subsection*{O shift é a dobra, e Julia é o seu dual}
+
+Cada dobra do encaixotamento pergunta se o ponto médio está abaixo ou acima do
+corte, e a resposta é \textbf{um bit}; a expansão binária do mesmo real é a
+órbita de $x\mapsto2x\bmod1$, onde cada passo lê \textbf{um bit}. São o mesmo
+objecto: medido em cinco radicandos, $50$ bits, \textbf{zero divergências} ---
+e por dois caminhos que não partilham código (um bissecta em \code{Qz} e
+pergunta ao corte, o outro conta inteiros $t$ com $t^{2}\le4^{i}a$) (§FR1).
+O dual multiplicativo é Julia: $\theta\mapsto2\theta$ é $z\mapsto z^{2}$,
+conjugados por $z=e^{2\pi i\theta}$ (\code{cantor\_julia\_dual.c} §CJ1). E a
+diferença entre racional e real lê-se na órbita: com denominador ímpar o shift
+\textbf{cicla}, com o período exibido ($1/3\to2$, $1/5\to4$, $1/7\to3$,
+$1/9\to6$); a palavra de $\sqrt2$ não exibe período no horizonte --- e
+\emph{«não repetiu nos catorze bits» não é «não repete»}, que é teorema e não
+medida (§FR2).
+
+\subsection*{A métrica, e a dimensão como corte}
+
+A régua deste espaço não é importada nem é minha: é a \textbf{canónica da casa},
+lida nos cilindros. Dois reais distam pelo nível em que os ramos se separam,
+\[
+\boxed{\;d_b(x,y)=b^{-n},\qquad n=\text{primeiro dígito diferente, base }b\;}
+\]
+e ela é \textbf{ultramétrica} --- $d(x,z)\le\max\bigl(d(x,y),d(y,z)\bigr)$, mais
+forte que a triangular ---, verificada em \emph{todas} as bases de $2$ a $6$,
+$2\,948\,768$ triplos, sem uma falha (§FR4, §FR7). É a mesma árvore que o
+encaixotamento percorre: cada dobra é um nível.
+
+\begin{teorema}[a métrica da árvore É a canónica de Lebesgue]\label{thm:metrica-arvore}
+O \code{algebrico thm:metrica} fixa a métrica canónica como a da diferença
+simétrica, $d(A,B)=\mu(A\,\triangle\,B)$ --- pseudométrica nos conjuntos, métrica
+no quociente pelos de medida nula. Identificando cada real com o seu
+\textbf{cilindro}, se $x$ e $y$ se separam no nível $n$ então os cilindros de
+nível $n{+}1$ são \emph{disjuntos}, cada um de medida $b^{-(n+1)}$, logo
+\[
+\boxed{\;\mu(A\,\triangle\,B)=2\,b^{-(n+1)}=2\,d_b(x,y)\;}
+\]
+--- \emph{a métrica da árvore é exactamente metade da canónica}, com factor $2$
+constante: o mesmo em toda base e todo nível. Vale ainda o que o teorema pede do
+outro lado: \textbf{toda bijecção é isometria} nela (\code{thm:metrica}~(2)).
+\end{teorema}
+
+\begin{proof}
+Os dois cilindros coincidem até ao nível $n$ e são disjuntos a partir dele, pelo
+que a diferença simétrica são as folhas dos dois --- e conta-se em folhas, sem
+uma divisão.
+\emph{Verifica:} §FR7 --- bases $2$ a $6$, $16\,516$ pares, o factor $2$ exacto
+em todos; a isometria medida com a permutação cíclica dos dígitos, zero falhas.
+$\square$
+\end{proof}
+
+\noindent Portanto a métrica não se acrescenta a este andar: \textbf{promove-se}
+a que já era canónica na casa. O que a árvore dá é a leitura dela nos cilindros
+--- e, com ela, a dimensão.
+
+\begin{teorema}[a dimensão é um corte --- e fecha ou não pela aritmética]\label{thm:dim}
+Guardando $k$ dos $b$ dígitos, a cobertura canónica de nível $n$ tem $k^{n}$
+peças de diâmetro $b^{-n}$, logo $\sum(\mathrm{diam})^{s}=(k\,b^{-s})^{n}$, que
+só não é $0$ nem $\infty$ quando $k=b^{s}$. Esse $s$ é o corte
+\[
+\boxed{\;A=\Bigl\{\tfrac{p}{q}\in\Q^{+}: b^{p}<k^{q}\Bigr\}\;}
+\]
+--- decidido por comparação \textbf{inteira} --- e ele \textbf{fecha em $\Q$ se e
+só se $b$ e $k$ são potências de um mesmo inteiro} $m$ (com $b=m^{i}$, $k=m^{j}$
+dá $s=j/i$).
+\end{teorema}
+
+\begin{proof}
+A equivalência é a conta acima. Se $b=m^{i}$ e $k=m^{j}$, então $b^{p}=k^{q}$
+para $p=j$, $q=i$. Reciprocamente, $b^{p}=k^{q}$ com $p,q\ge1$ força $b$ e $k$ a
+terem os mesmos primos com expoentes proporcionais --- pelo teorema fundamental
+da aritmética ---, e $m$ é a raiz comum. \emph{É o mesmo argumento que faz
+$\sqrt2$ irracional} (Thm.~\ref{thm:fecha}).
+\emph{Verifica:} §FR5 e §FR8, por \textbf{dois caminhos} que não se olham --- um
+procura $p,q$ com $b^{p}=k^{q}$, o outro pergunta se há potência comum:
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+$(b,k)$ & o conjunto & racionais \emph{em cima} & $s$ \\
+\midrule
+$(3,2)$ & Cantor clássico & $0$ & irracional \\
+$(5,3)$ & $3$ de $5$ & $0$ & irracional \\
+$(4,2)$ & $2$ de $4$ & $12$ & $1/2$ \\
+$(8,2)$ & $2$ de $8$ & $8$ & $1/3$ \\
+$(2,2)$ & o intervalo & $24$ & $1$ \\
+$(5,1)$ & um ponto & --- (nada abaixo) & $0$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+$\square$
+\end{proof}
+
+\begin{observacao}[a dimensão nem sempre é irracional, e foi o gume que o disse]
+Na primeira escrita esta asserção rotulava $2$-de-$4$ de irracional, e caiu:
+$\log2/\log4=1/2$, e o corte \emph{fecha}. É o §RE5 outra vez, um andar acima ---
+\emph{este andar só acrescenta onde $\Q$ não chega}, e a dimensão de um Cantor
+com potência comum já vive em $\Q$.
+\end{observacao}
+
+\noindent Logo a dimensão não é um número trazido de fora: é um habitante deste
+andar, construído como qualquer outro. (O \code{teoria.tex} diz «fractal
+clássico não se afirma» --- di-lo de \emph{um} elo, e aponta que a régua existe
+noutro; aqui ela deriva-se da métrica da árvore. Não se afirma medida nem
+auto-semelhança: só o que a cobertura canónica dá.)
+
+\subsection*{O dragão preenche, e a aranha paga por isso}
+
+A dobra é o mesmo passo --- dividir e escolher um lado --- e dá dois
+comportamentos. No plano, a curva do dragão \textbf{funde}: passa mais de uma
+vez pela mesma célula ($G>1$; $335$ revisitas em $1024$ passos), e é essa
+duplicidade que o \code{inteiros.tex} §\code{sec:metrica-dragao} usa como
+memória geométrica. Na recta, o mesmo passo \textbf{encaixa}: cada intervalo
+está contido no anterior e é estritamente menor, em todas as dobras, sem
+revisitar nada (§FR3).
+
+E o dragão \textbf{ocupa área}: quadruplicando os passos, as células distintas
+multiplicam-se por cerca de quatro ($190\to690\to2558$; razões $3{,}63$ e
+$3{,}70$) --- contagem de caixas, sem um único logaritmo. Mas paga: a
+\textbf{aranha} que o percorre escreve uma marca por passo ($4096$ marcas em
+$4096$ passos, o $G$ do \code{aranha\_g.c}), porque no plano o caminho volta ao
+mesmo sítio e sem marca não sabe. \emph{Na recta o encaixe escreve zero}: cada
+dobra substitui uma ponta, e a decisão seguinte pergunta ao corte, não ao
+passado (§FR6).
+
+\[
+\boxed{\;\text{no plano: dobra}\Rightarrow\text{funde}\Rightarrow\text{precisa de memória}
+\qquad\text{na recta: dobra}\Rightarrow\text{encaixa}\Rightarrow\text{memória zero}\;}
+\]
+
+\medido{\code{tests/fractais.c} §FR0--§FR8 ($9{:}0$): Cantor ($1024$ pontos, zero
+colisões, cauda a uma unidade do dígito $1$); o shift $=$ a dobra ($50$ bits,
+zero divergências); as órbitas periódicas; o dragão a funder e o encaixe a
+encaixar; a ultramétrica ($262\,144$ triplos em base $3$, e $2\,948\,768$ nas
+bases $2$--$6$); o \textbf{gancho} $\mu(A\triangle B)=2d_b$ em $16\,516$ pares e
+a isometria (§FR7); a dimensão como corte, com os casos racionais e irracionais
+separados por dois caminhos (§FR5, §FR8); a contagem de caixas e a memória.
+Gume: três mutações, $1/1/1$ asserções caídas --- o nível de separação lido do
+fim em vez do princípio, o factor do gancho posto a $3$, e o segundo caminho da
+dimensão desligado. Recebido:
+\code{cantor\_julia\_dual.c} §CJ1--§CJ8; \code{aranha\_g.c} §AG1--§AG11;
+\code{cantor.c} §K1--§K7.}
+\colunas{\code{algebrico thm:metrica} (a métrica canónica); \code{teoria} (a régua noutro elo)}
+        {métrica da árvore; dimensão como corte; dobra na recta vs no plano}
+        {\code{tests/fractais.c} §FR0--§FR6}
+
+%======================================================================
+\section{Referências}\label{sec:refs}
+
+\subsection*{Na casa}
+
+\begin{center}\small
+\begin{tabular}{@{}llp{6.8cm}@{}}
+\toprule
+onde & § & o que dá \\
+\midrule
+\code{lib/reais.h} & --- & o \code{Corte}, \code{rz\_cmp}/\code{rz\_abaixo}, o encaixotamento e \code{rz\_passo}; e o tecto \code{RZ\_TETO} \\
+\code{lib/cauchy.h} & --- & a sucessão como objecto; os três caminhos como \code{Suc}; $\varepsilon$ racional e $N$ testemunha; \code{cy\_teto\_honesto} \\
+\code{lib/cifra.h} & --- & \code{lado}: a fracção contínua, e o dual $(B,-C)$ \\
+\code{tests/tres\_caminhos.c} & §RE0--§RE6 & \textbf{acrescentado aqui}: os três caminhos medidos \\
+\code{tests/fractais.c} & §FR0--§FR6 & \textbf{acrescentado aqui}: Cantor, o shift, a ultramétrica da árvore, a dimensão como corte, o dragão e a aranha \\
+\code{tests/aranha\_g.c} & §AG1--§AG11 & a curva do dragão dobra ($G>1$); a memória geométrica \\
+\code{tests/cantor\_julia\_dual.c} & §CJ1--§CJ8 & o shift aditivo É o quadrado multiplicativo \\
+\code{tests/diagonal.c} & §DG0--§DG2 & \textbf{acrescentado aqui}: o passo da diagonal, a borda diádica, e o que a medida finita não conclui \\
+\code{tests/corte\_ponto\_fixo.c} & §F1--§F6 & o corte É o ponto fixo; a prova em duas linhas; a volta por $|\det|=1$ \\
+\code{tests/supremo.c} & §S1--§S5 & a continuidade na direcção que faltava; as duas testemunhas \\
+\code{tests/reais.c} & §R1--§R5 & corpo vs.\ ordenável; Artin--Schreier; $\R$ único ordenado completo \\
+\code{tests/ordenado.c} & §U0--§U6 & o corpo universal é ordenado e completo, e em que face \\
+\code{tests/descida\_mobius.c} & §M1--§M12 & Euclides $=$ Möbius; a descida cospe a FC do operador \\
+\code{papers/racionais.tex} & \code{sec:qstar} & o degrau anterior, e o anúncio dos três caminhos \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Fora}
+
+\begin{itemize}\itemsep2pt
+\item R.~Dedekind, \emph{Stetigkeit und irrationale Zahlen}, 1872 --- o corte, e
+a escolha aberto/fechado da Prop.~\ref{prop:aberto}.
+\item G.~Cantor, 1872 --- a construção dual, por sucessões fundamentais;
+\code{lib/cauchy.h} realiza-a.
+\item J.-L.~Lagrange, 1770 --- a fracção contínua de um irracional quadrático é
+periódica: é o que faz a terceira via \emph{escrever} o real, e é também o que
+limita §RE2 a $n=2$.
+\item A.~Khinchin, \emph{Continued Fractions}, 1935 --- a alternância dos
+convergentes (Prop.~\ref{prop:leis3}(i)).
+\item E.~Artin, O.~Schreier, 1926 --- ordenável $\iff$ $-1$ não é soma de
+quadrados (Thm.~\ref{thm:unico}).
+\item M.~Stern (1858), A.~Brocot (1861) --- a árvore dos racionais, que é a
+mesma órbita de $\mathrm{PSL}(2,\mathbb{Z})$ do §\ref{sec:porque}.
+\item A.~Hurwitz, 1891 --- a qualidade da aproximação por convergentes.
+\item G.~Cantor, 1883 --- o conjunto ternário; aqui como condição sobre a
+expansão (§\ref{sec:fractais}).
+\item F.~Hausdorff, 1918 --- a medida e a dimensão; a cobertura canónica de
+Thm.~\ref{thm:dim}.
+\item J.~H.~Conway --- a árvore e a sua métrica do prefixo comum, que é a régua
+de §FR4.
+\end{itemize}
+
+%======================================================================
+\section*{Síntese}
+
+\[
+\boxed{
+\begin{array}{c}
+\R=\{(A,B)\}\big/\!\sim,\qquad A=\{q:q\le0\ \text{ou}\ q^{n}<a\},\ B=\Q\setminus A\\[3pt]
+\text{o corte DIZ onde}\quad\cdot\quad\text{a Möbius VAI lá}\quad\cdot\quad
+\text{a fracção contínua ESCREVE}\\[3pt]
+(2p-mq)^{2}=D\,q^{2}\ \text{sem solução}\ \Longrightarrow\ \text{o ponto fixo não está em }\mathbb{P}^1(\Q)
+\end{array}}
+\]
+
+\begin{itemize}\itemsep2pt
+\item[\textbf{0}] o buraco: o corte sem racional em cima --- e ele é a regra, não a excepção.
+\item[\textbf{1}] o dual do andar é a troca das duas classes $(A,B)\mapsto(B,A)$.
+\item[\textbf{2}] $B=\Q\setminus A$: complementar duas vezes é a identidade.
+\item[\textbf{3}] a tricotomia $\{-1,0,+1\}$ de \code{rz\_cmp}; $\tau=0$ vazio $\iff$ irracional.
+\item[\textbf{4}] duplicar $\Q$ no par e quocientar aberto/fechado.
+\item[\textbf{5}] não existe: $\R$ ordenado $\Rightarrow$ $-1$ não é quadrado.
+\item[\textbf{6}] densidade: entre dois reais há sempre um racional.
+\item[\textbf{7}] três realizações ligadas sem fundidas; e o tecto declarado.
+\end{itemize}
+
+\medido{\code{tests/tres\_caminhos.c} §RE0--§RE13 ($14{:}0$, gume $2/1/1$ e $3/1$);
+\code{diagonal.c} §DG0--§DG2 ($3{:}0$); \code{fractais.c} §FR0--§FR6 ($7{:}0$);
+\code{corte\_ponto\_fixo.c} §F1--§F6 ($6{:}0$); \code{supremo.c} §S1--§S5
+($6{:}0$); \code{reais.c} §R1--§R5 ($3{:}0$); \code{ordenado.c} §U0--§U6 ($7{:}0$);
+\code{descida\_mobius.c} §M1--§M12 ($15{:}0$).}
+
+\medskip\noindent
+\code{papers/racionais.tex} (degrau anterior) ·
+\code{papers/inteiros.tex} · \code{papers/naturais.tex} ·
+\code{papers/corpo\_algebrico.tex} · \code{lib/reais.h} · \code{lib/cauchy.h}.
+
+\vfill
+{\footnotesize\color{cinza}\noindent CC BY 4.0 (textos) $\cdot$ MIT (código).\par}
+
+\end{document}

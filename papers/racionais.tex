@@ -24,6 +24,8 @@
 \newtheorem{observacao}{Observação}
 
 \newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\Word}{\mathcal{W}}
+\newcommand{\FF}{\mathbb{F}}
 \newcommand{\abs}[1]{\lvert #1\rvert}
 \newcommand{\dg}{^{\dagger}}
 \newcommand{\sepcol}{\quad\penalty0$\big|$\quad\penalty0}
@@ -50,8 +52,9 @@
 O \emph{Corpo Algébrico} constrói $\mathbb{R}$ a partir de
 $\mathbb{Q}(m\sqrt D)$, com o espaço dual, as quatro propriedades
 (P1,P2,D1,D2), a operação $\star$, e Dir/Cruz como projectores do espelho
-$\tau$. Este paper faz o degrau \textbf{anterior} da torre dos tecidos
-(\code{analitico thm:tecidos}) com o \textbf{mesmo molde}:
+$\tau$. Este paper faz o degrau \textbf{seguinte} ao \code{inteiros.tex} na
+construção (bit $\to\mathbb{N}\to\mathbb{Z}\to\mathbb{Q}\to\mathbb{R}$), com o
+\textbf{mesmo molde} da torre dos tecidos (\code{analitico thm:tecidos}):
 \[
 \mathbb{Z} \;\longrightarrow\;
 \operatorname{Frac}(\mathbb{Z})=\mathbb{Q}.
@@ -70,23 +73,80 @@ multiplicativa $[(a,b)]^{-1}=[(b,a)]$ sobre classes.
 %======================================================================
 \section*{Onde este documento vive na torre}
 
-Este paper é o \textbf{degrau} $\mathbb{Z}\to\mathbb{Q}$ da torre dos tecidos
-(\code{analitico thm:tecidos}). O passo é sempre o mesmo:
-$T_{k+1}=T_k+T_k^{*}$.
+Este paper é o degrau $k=1$ ($\mathbb{Z}\to\mathbb{Q}$) da torre dos tecidos
+(\code{analitico thm:tecidos}) --- o \textbf{terceiro} da construção, que se lê
+num sentido só:
 
 \[
-\begin{array}{lllll}
-\mathbb{N} & \longrightarrow & \mathbb{Z}
- & \text{(reversibilidade da \textbf{soma})}
- & \text{\code{inteiros.tex}; ponto fixo: }0\\[4pt]
-\mathbb{Z} & \longrightarrow & \operatorname{Frac}(\mathbb{Z})=\mathbb{Q}
- & \text{(reversibilidade da \textbf{multiplicação})}
- & \operatorname{Fix}(\iota\vert_{\mathbb{Q}^{\times}})=\{\pm1\}\\[4pt]
-\mathbb{Q} & \longrightarrow & \mathbb{R}
- & \text{(completação --- o CORTE)}
- & \text{ponto fixo: o corte}
-\end{array}
+\boxed{\;
+\underbrace{\FF_2}_{\text{um bit}}
+\;\xrightarrow[\text{3 dobras duais}]{\ \code{naturais}\ }\;
+\underbrace{F_8\equiv\Word_8}_{\{0,\ldots,255\}}
+\;\xrightarrow[\text{TRANSPORTE}]{}\;
+\mathbb{N}
+\;\xrightarrow[\text{soma}]{\ \code{inteiros}\ }\;
+\mathbb{Z}
+\;\xrightarrow[\text{produto}]{\ \code{racionais}\ }\;
+\mathbb{Q}
+\;\xrightarrow[\text{corte}]{\ \code{reais}\ }\;
+\mathbb{R}\;}
 \]
+\noindent{\footnotesize Lê-se da esquerda para a direita: é o sentido em que se
+\textbf{constrói}. Cada paper recebe o objecto do degrau à sua esquerda e
+entrega o do degrau à sua direita; nenhum redefine o que recebeu.\par}
+
+\noindent O passo é sempre o mesmo: $T_{k+1}=T_k+T_k^{*}$. A cadeia completa,
+comum aos três papers da torre:
+
+\begin{center}\small
+\begin{tabular}{@{}clllll@{}}
+\toprule
+$k$ & degrau & ganha volta & paga & dual do andar (e o seu Fix) & paper \\
+\midrule
+$-1$ & $F_1\!\to\!F_2\!\to\!F_4\!\to\!F_8$ & a \textbf{largura} (3 dobras)
+     & a \textbf{ordem} (car.\ $2$) & $x^{*}$ (2.ª raiz); Fix $=$ andar de baixo
+     & \code{naturais.tex} \\
+$0$  & $\mathbb{N}\!\to\!\mathbb{Z}$ & a \textbf{soma}
+     & o sinal e a boa ordem & $\iota(a,b)=(b,a)\Rightarrow$ oposto; Fix $=\{0\}$
+     & \code{inteiros.tex} \\
+$1$  & $\mathbb{Z}\!\to\!\mathbb{Q}$ & a \textbf{multiplicação}
+     & $0^{-1}$ não existe & $\iota(a,b)=(b,a)\Rightarrow$ inverso; Fix $=\{\pm1\}$
+     & \code{racionais.tex} \\
+$2$  & $\mathbb{Q}\!\to\!\mathbb{R}$ & o \textbf{corte} (completação)
+     & a \textbf{enumerabilidade} & $(A,B)\mapsto(B,A)$; Fix: o corte que fecha
+     & \code{reais.tex} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent{\footnotesize A numeração é a de \code{arquitetura sec:descida},
+onde $k=0$ é $\mathbb{N}\!\to\!\mathbb{Z}$; a torre binária é \emph{anterior} a
+esse degrau, e por isso $k=-1$. O passo é sempre $T_{k+1}=T_k+T_k^{*}$
+(\code{analitico thm:tecidos}). \textbf{Entre $k=-1$ e $k=0$ não há dobra:
+há o TRANSPORTE} --- $a+b=(a\oplus b)+2(a\wedge b)$
+(\code{naturais.tex thm:transporte}) ---, e é ele que leva o suporte $\Word_8$
+do topo da torre binária às operações de $\mathbb{N}$. Nos degraus $k\ge0$
+duplica-se e \textbf{quocienta-se}; em $k=-1$ duplica-se e \textbf{não} se
+quocienta (a segunda cópia é multiplicada por $\sigma$).\par}
+
+\noindent E o dual, que em cada degrau tem \emph{duas} partes --- aqui o
+\emph{swap} $\iota$ induz o \textbf{inverso}, ao passo que um degrau abaixo
+induzia o \textbf{oposto}:
+
+\[
+\boxed{
+\begin{array}{lll}
+ & \textbf{dual do CENTRO (Lei 1)} & \textbf{dual do ANDAR (o que o degrau acrescenta)}\\[3pt]
+k=-1 & \nu(x)=-x=x\ \text{(degenera)} & x^{*}=(a_0{+}a_1)+a_1\sigma\ \Rightarrow\ T=x\oplus x^{*},\ N=x\otimes x^{*}\\[2pt]
+k=0  & \nu(z)=-z & \iota(a,b)=(b,a)\ \Rightarrow\ \text{oposto aditivo}\\[2pt]
+k=1  & \nu(a,b)=(-a,b) & \iota(a,b)=(b,a)\ \Rightarrow\ \text{inverso multiplicativo}
+\end{array}}
+\]
+\noindent{\footnotesize \textbf{O mesmo \emph{swap} induz o oposto num degrau e
+o inverso no seguinte} --- é o dado que muda de papel, não a fórmula. E em
+$k=-1$ o dual do centro degenera ($-x=x$), pelo que o dual tem de vir de outro
+sítio: da segunda raiz de $\sigma^2+\sigma+\lambda$. Nenhuma destas involuções
+é o dual linear $V\!\cong\!V^{**}$ da Lei~2, nem o dual quadrático
+$s\dg=-1/s$ do \emph{Corpo Algébrico}: são quatro noções, e não se confundem.\par}
 
 \noindent\textbf{O que este documento RECEBE e o que ACRESCENTA}
 --- a mesma estrutura que no Topológico (\code{topologico sec:recebe}) e no
@@ -100,11 +160,12 @@ Algébrico (\code{algebrico def:espaco}):
 \text{as oito leis} & \code{analitico sub:oitoleis} & \text{Leis 0--3,5 explícitas; 4,6,7 herdadas}\\[2pt]
 \text{a operação }\star & \code{algebrico thm:operacao} & \text{Dir e Cruz em pares de inteiros}\\[2pt]
 \text{o par dual e }|\det|=1 & \code{algebrico thm:fixo-dual} & \iota(a,b)=(b,a),\ a^2=b^2\Rightarrow\pm1\\[2pt]
-\text{degrau anterior }\mathbb{N}\!\to\!\mathbb{Z} & \code{inteiros.tex} & \text{soma cruzada }a+d=b+c\\[6pt]
+\text{degrau anterior }\mathbb{N}\!\to\!\mathbb{Z} & \code{inteiros.tex} & \text{soma cruzada }a+d=b+c\\[2pt]
+\text{o suporte e a base de 8} & \code{naturais.tex} & \Word_8\to E_{16}\text{: o par de \code{int16}}\\[6pt]
 \textbf{ACRESCENTA} & \multicolumn{2}{l}{\text{---e é só isto---}}\\[3pt]
 \text{a REPRESENTAÇÃO por pares} & \text{Def.~\ref{def:espaco}} & V_{\mathrm{rat}}/{\sim}=\mathbb{Q}\\[2pt]
-\text{a EQUIVALÊNCIA }$\sim$ & \text{Prop.~\ref{prop:equiv}} & $ad=bc$ antes do quociente\\[2pt]
-\text{o ISOMORFISMO }$\Psi$ & \text{Thm.~\ref{thm:q}} & $\Psi([(a,b)])=a/b$\\[2pt]
+\text{a EQUIVALÊNCIA }{\sim} & \text{Prop.~\ref{prop:equiv}} & ad=bc\ \text{antes do quociente}\\[2pt]
+\text{o ISOMORFISMO }\Psi & \text{Thm.~\ref{thm:q}} & \Psi([(a,b)])=a/b\\[2pt]
 \text{o INVERSO = swap} & \text{Def.~\ref{def:ops}} & (a,b)^{-1}=(b,a)\\[2pt]
 \text{o PRODUTO CRUZADO} & \text{Prop.~\ref{prop:dircr}} & \text{Cruz}=ad-bc:\text{ equiv., ordem}\\[2pt]
 \text{a REDUÇÃO por }\gcd & \S\ref{sec:reduz} & \text{forma canónica do par}
@@ -340,11 +401,24 @@ canônica dos pares).
 (2) Sobrejetiva: $q\in\mathbb{Q}$ --- representante $(p,q)$ com $q>0$.
 (3) Injectiva: $\Psi([(a,b)])=\Psi([(c,d)])$ $\Rightarrow$ $a/b=c/d$
 $\Rightarrow$ $ad=bc$ $\Rightarrow$ $[(a,b)]=[(c,d)]$.
-(4) Soma e produto bem definidos: Prop.~\ref{prop:bemdef}.
-(5) Neutro aditivo: $(0,1)\oplus(a,b)=(a,b)$; multiplicativo: $(1,1)\otimes(a,b)=(a,b)$.
-(6) Oposto: $(a,b)\oplus(-a,b)\sim(0,1)$; inverso: $(a,b)\otimes(b,a)\sim(1,1)$, $a\neq 0$.
-(7) Distributividade: verificação directa sobre representantes.
-(8) Ordem: comparar $ad$ e $bc$ com $b,d>0$. $\square$
+(4) $\Psi$ preserva $\oplus$ e $\otimes$: Prop.~\ref{prop:bemdef} --- as operações
+descem ao quociente.
+(5) \textbf{Corpo no quociente.} Pelo Prop.~\ref{prop:bemdef}, $\oplus$ e $\otimes$ são
+bem-definidas em $V_{\mathrm{rat}}/{\sim}$. Verificam-se os axiomas directamente:
+\begin{itemize}\itemsep1pt
+\item \emph{Adição:} $(0,1)$ neutro; $-(a,b)=(-a,b)$ oposto;
+      associatividade e comutatividade herdam-se dos inteiros nos representantes.
+\item \emph{Multiplicação:} $(1,1)$ neutro; $(a,b)\neq[(0,1)]\iff a\neq0$;
+      inverso $[(b,a)]$ pois $(a,b)\otimes(b,a)\sim(1,1)$ quando $a\neq0$.
+\item \emph{Distributividade:}
+      $\Psi\bigl(x\otimes(y\oplus z)\bigr)=\Psi(x)\bigl(\Psi(y)+\Psi(z)\bigr)
+      =\Psi(x)\Psi(y)+\Psi(x)\Psi(z)
+      =\Psi(x\otimes y)+\Psi(x\otimes z)$ em $\mathbb{Q}$; pela injectividade de
+      $\Psi$ (passo~(3)), $x\otimes(y\oplus z)=x\otimes y\oplus x\otimes z$.
+\end{itemize}
+Logo $(V_{\mathrm{rat}}/{\sim},\oplus,\otimes)$ \textbf{é} corpo; $\Psi$ isomorfismo
+de corpos com $\mathbb{Q}$ usual.
+(6) Ordem: comparar $ad$ e $bc$ com $b,d>0$. $\square$
 \end{proof}
 
 \begin{corolario}[Ordem no quociente]\label{cor:ordem}
@@ -619,6 +693,66 @@ verificada pelos testes da cadeia.
 %======================================================================
 \section{As oito leis neste andar}\label{sec:leis}
 
+\noindent Onde cada lei vive na cadeia --- tabela comum aos três papers
+--- a mesma nos três:
+
+\begin{center}\footnotesize
+\begin{tabular}{@{}cp{2.75cm}p{2.75cm}p{2.75cm}p{2.75cm}@{}}
+\toprule
+lei & $k{=}-1$: $F_1\!\to\!F_8$ & $k{=}0$: $\mathbb{N}\!\to\!\mathbb{Z}$ & $k{=}1$: $\mathbb{Z}\!\to\!\mathbb{Q}$ & $k{=}2$: $\mathbb{Q}\!\to\!\mathbb{R}$ \\
+\midrule
+\textbf{0} divisão do zero
+ & $x\oplus x=0$; só o $0$ sem inversa \hfill\textsc{expl.}
+ & subtracção parcial; folha $[(1,0)]\oplus[(0,1)]=0$ \hfill\textsc{expl.}
+ & $0^{-1}$ não existe; $0\!\leftrightarrow\!\infty$ \hfill\textsc{mista}
+ & o \textbf{buraco}: corte sem racional em cima \hfill\textsc{expl.} \\
+\textbf{1} dual ($1\dg=-1$)
+ & \emph{degenera}: $-x=x$ \hfill\textsc{expl.}
+ & $\iota$ no par; $\nu(z)=-z$ \hfill\textsc{expl.}
+ & $\nu(a,b)=(-a,b)$ \hfill\textsc{expl.}
+ & $\nu(x)=-x$; do andar: $(A,B)\!\mapsto\!(B,A)$ \hfill\textsc{expl.} \\
+\textbf{2} bidual
+ & $x^{**}=x$; automorfismo \hfill\textsc{expl.}
+ & Dir/Cruz; $R^{4}=\mathrm{id}$ \hfill\textsc{mista}
+ & $V\cong V^{**}$ canónico \hfill\textsc{canón.}
+ & $B=\mathbb{Q}\setminus A$: complementar $2\times$ \hfill\textsc{expl.} \\
+\textbf{3} trial $\{-1,0,+1\}$
+ & \emph{degenera}: sem cúspide \hfill\textsc{expl.}
+ & cúspide $\tau=0$; $+0=-0$ \hfill\textsc{expl.}
+ & $\operatorname{sgn}(a/b)$ \hfill\textsc{expl.}
+ & $\tau=0$ é \emph{vazio} $\iff$ irracional \hfill\textsc{expl.} \\
+\textbf{4} tetral $T+T^{*}$
+ & $F_{2w}=F_w\oplus\sigma F_w$ \hfill\textsc{expl.}
+ & $\mathbb{N}^{2}/{\sim}$; classe $[(a,b)]$ \hfill\textsc{expl.}
+ & recebida (\code{thm:juntas}) \hfill\textsc{receb.}
+ & $(A,B)$, e quocientar aberto/fechado \hfill\textsc{expl.} \\
+\textbf{5} pental $x^{2}=-1$
+ & \emph{degenera}: uma raiz só \hfill\textsc{expl.}
+ & $G_{\mathrm{geom}}\bmod2$ \hfill\textsc{receb.}
+ & $J(a,b)=(-b,a)$, $J^{2}=-I$ \hfill\textsc{expl.}
+ & \emph{não existe}: ordenado \hfill\textsc{expl.} \\
+\textbf{6} hexal (interface)
+ & base ortonormal: coordenada $=$ ler o bit \hfill\textsc{receb.}
+ & $\otimes\leftrightarrow(a-b)(c-d)$ \hfill\textsc{receb.}
+ & interface \hfill\textsc{receb.}
+ & densidade de $\mathbb{Q}$ em $\mathbb{R}$ \hfill\textsc{receb.} \\
+\textbf{7} octonião dual
+ & encaixe por prefixos \hfill\textsc{expl.}
+ & $q\parallel p$; par $\neq$ classe; $\Word_8$ \hfill\textsc{expl.}
+ & junta dual \hfill\textsc{receb.}
+ & três realizações ligadas sem fundidas \hfill\textsc{expl.} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent{\footnotesize \textsc{expl.} realizada neste degrau ·
+\textsc{receb.} interface herdada do centro, não derivada aqui ·
+\textsc{mista}/\textsc{canón.} ver o paper do degrau.
+\textbf{Três leis degeneram em $k=-1$} (1, 3, 5) --- e é isso que permite a
+torre binária dobrar sem excepção. A Lei~5 falta nos dois extremos por razões
+\emph{opostas}: em $k=-1$ por característica~2, em $k=2$ por ordem.
+\textbf{Nenhum degrau realiza as oito}; a coluna diz onde cada uma vive.\par}
+
+\noindent E, neste andar, com o domínio de cada realização.
 As leis não são redefinidas axiomaticamente: este paper \textbf{realiza}, no
 espaço de pares, as operações herdadas da construção universal
 (\code{analitico sub:oitoleis}). Quando a operação é explicitada, a preservação
@@ -761,7 +895,7 @@ de $\mathbb{Q}$ apresentada no Teorema~\ref{thm:q} e são usadas aqui apenas
 para posicionamento na torre.
 
 \medskip\noindent
-No \emph{Corpo Algébrico} (Teor.~\ref*{thm:cuspide} ali), a cúspide é o lugar
+No \emph{Corpo Algébrico} (\code{algebrico thm:cuspide}), a cúspide é o lugar
 onde o discriminante se anula e as duas folhas da transformada universal
 colidem: $\operatorname{disc}M=\operatorname{tr}^{2}M-4\det M=0$.
 No formalismo geométrico herdado, os racionais aparecem como dados associados
@@ -943,7 +1077,7 @@ $\operatorname{red}(0,b)=(0,1)$ para todo $b\neq 0$.
 O objecto matemático é $\mathbb{Z}^{2}$; \code{Qz} é uma realização finita
 desse objecto num envelope de $16$~bits:
 \begin{verbatim}
-    typedef struct { int16_t p, q; } Qz;   /* p/q em par de 16 bits, q ≠ 0 */
+    typedef struct { int16_t p, q; } Qz;   /* p/q em par de 16 bits, q != 0 */
 \end{verbatim}
 As operações da Def.~\ref{def:ops} estão realizadas:
 
@@ -998,7 +1132,7 @@ duas palavras de $16$~bits:
 A comparação de ordem opera directamente nos pares:
 \begin{verbatim}
     int d16_cmp_prod(int16_t a, int16_t b,
-                     int16_t c, int16_t d);  /* sinal de a·b − c·d */
+                     int16_t c, int16_t d);  /* sinal de a*b - c*d */
 \end{verbatim}
 que compara $ab$ com $cd$ \textbf{sem materializar nenhum dos dois como objecto
 \code{Qz}}: compara o alto (interpretado como signed de $16$~bits) primeiro; em caso de
@@ -1046,8 +1180,8 @@ e a soma dos dois cai em $\mathbb{Z}$ --- são os dois que dão o inteiro.
 
 \noindent Este degrau $\mathbb{Z}\to\mathbb{Q}$ é o primeiro andar em que pares,
 dualidade e produto cruzado coexistem na representação. O \emph{Corpo Algébrico}
-(\code{corpo\_algebrico.tex} Teor.~\ref{thm:torre}) dobra a estrutura por
-$T_{k+1}=T_k+T_k^{*}$; a Def.~\ref{def:cone} do mesmo documento separa
+(\code{algebrico thm:torre}) dobra a estrutura por
+$T_{k+1}=T_k+T_k^{*}$; a \code{algebrico def:cone} separa
 \textbf{involução} ($\nu\circ\nu=\mathrm{id}$) de \textbf{retração}
 ($\Sigma\circ\Pi=\mathrm{Id}$). O contrato computacional
 \code{lib/torre\_alg.h} fixa três \emph{pipelines} sobre a mesma família de
@@ -1077,9 +1211,9 @@ redução pelo $\gcd$ & \code{qz} & \code{lib/racionais.h} & $\checkmark$ \\
 saturação contada & \code{qz\_saturou} & \code{lib/racionais.h} & $\checkmark$ \\
 $16\times16$ exacto em par & \code{d16\_mult} & \code{lib/dual16.h} & $\checkmark$ \\
 ordem por prod.\ cruzado & \code{d16\_cmp\_prod} & \code{lib/dual16.h} & $\checkmark$ \\
-produto 16×16 vs int32 & §E0--§EW & \code{tests/dual16.c} & $6/6$ \\
-migração Q em E₁₆ & §GW, §G0--§G5 & \code{tests/migracao.c} & $7/7$ \\
-descida 32→16 & §K2b & \code{tests/cadeia.c} & $\checkmark$ \\
+produto $16\times16$ vs int32 & §E0--§EW & \code{tests/dual16.c} & $6/6$ \\
+migração Q em $E_{16}$ & §GW, §G0--§G5 & \code{tests/migracao.c} & $7/7$ \\
+descida $32\to16$ & §K2b & \code{tests/cadeia.c} & $\checkmark$ \\
 RtOp coord.\ int16 & §R27 §T21 & \code{tests/reta.c} & $\checkmark$ \\
 $|a-b|<\varepsilon$ & \code{qz\_dist\_menor} & \code{lib/racionais.h} & $\checkmark$ \\
 $x^2$ vs $c$ & \code{qz\_cmp\_quad} & \code{lib/racionais.h} & $\checkmark$ \\
@@ -1126,7 +1260,7 @@ torre.
 \]
 \[
 \boxed{
-[(a,b)]\xmapsto{\bar\iota}[(b,a)],\qquad
+[(a,b)]\xrightarrow{\ \bar\iota\ }[(b,a)],\qquad
 \Psi(\bar\iota(x))=1/\Psi(x)\ \ (x\neq 0),\qquad
 [(a,b)]\otimes[(b,a)]\sim[(1,1)].
 }

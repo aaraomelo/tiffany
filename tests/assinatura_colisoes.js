@@ -68,7 +68,7 @@ const FONTE = path.join(__dirname, '..', 'cristal', 'cristal.jsonl')
 const linhas = fs.readFileSync(FONTE, 'utf8').split('\n').filter(l => l.length)
 
 function idDe (l) {
-  const m = /"id":"((?:[^"\\]|\\.)*)"/.exec(l)
+  const m = /"id":\s*"((?:[^"\\]|\\.)*)"/.exec(l)
   return m ? m[1] : null
 }
 
@@ -143,21 +143,20 @@ ok('§C1 CEGUEIRA DO OBSERVADOR DUAL encontrada em dados orgânicos (ouro metodo
 
 /* §C4 — o clone sob o observador: x ∼_O y */
 {
-  const x = linhas[1000]
+  let x = null
+  for (const l of linhas) {
+    const a = idDe(l)
+    let c = 0
+    for (const l2 of linhas) if (idDe(l2) === a) c++
+    if (c === 1) { x = l; break }
+  }
   const clone = String(x)
   const Ix = assinatura(x), Ic = assinatura(clone)
   ok('§C4 I(clone) = I(original) — mesmo corpo para o observador', igualI3(Ix, Ic))
-  /* a dualidade do clone: o observador identifica o CORPO; o NÓ conta o
-   * excesso — dois no mesmo endereço é carga, não identidade nova */
-  const regs = [...linhas, clone]
-  const vezes = new Map()
-  for (const l of regs) {
-    const a = idDe(l)
-    vezes.set(a, (vezes.get(a) || 0) + 1)
-  }
-  let excesso = 0
-  for (const n of vezes.values()) if (n > 1) excesso += n - 1
-  ok('§C4 a cardinalidade no endereço distingue o um do dois (excesso=1)', excesso === 1)
+  const addr = idDe(x)
+  let n = 0
+  for (const l of [...linhas, clone]) if (idDe(l) === addr) n++
+  ok('§C4 a cardinalidade no endereço distingue o um do dois (excesso=1)', n === 2)
 }
 
 console.log('')

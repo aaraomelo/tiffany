@@ -130,20 +130,40 @@ const retainP = R =>
 function fibraP (lz) {
   const o = JSON.parse(lz)
   if (!Array.isArray(o.fusao) || o.fusao.length !== 2) return null
-  const ini = lz.indexOf('[') + 1
-  const fim = lz.lastIndexOf(']')
-  const miolo = lz.slice(ini, fim)
-  let prof = 0, corte = -1
-  for (let i = 0; i < miolo.length; i++) {
-    if (miolo[i] === '{') prof++
-    else if (miolo[i] === '}') prof--
-    else if (miolo[i] === ',' && prof === 0) { corte = i; break }
+  const pos = lz.indexOf('"fusao":')
+  if (pos < 0) return null
+  let i = pos + 8
+  while (i < lz.length && (lz[i] === ' ' || lz[i] === '\t')) i++
+  if (lz[i] !== '[') return null
+  const ini = i + 1
+  let depth = 1, inStr = false, esc = false, corte = -1, fim = -1
+  for (i = ini; i < lz.length; i++) {
+    const ch = lz[i]
+    if (inStr) {
+      if (esc) esc = false
+      else if (ch === '\\') esc = true
+      else if (ch === '"') inStr = false
+      continue
+    }
+    if (ch === '"') inStr = true
+    else if (ch === '{' || ch === '[') depth++
+    else if (ch === '}' || ch === ']') {
+      depth--
+      if (depth === 0) { fim = i; break }
+    } else if (ch === ',' && depth === 1 && corte < 0) corte = i
   }
-  if (corte < 0) return null
-  return [miolo.slice(0, corte), miolo.slice(corte + 1)]
+  if (corte < 0 || fim < 0) return null
+  let y = lz.slice(corte + 1, fim)
+  while (y.length && (y[0] === ' ' || y[0] === '\t')) y = y.slice(1)
+  return [lz.slice(ini, corte), y]
 }
 function fundeP (idZ, lx, ly) {
-  return '{"fusao":[' + lx + ',' + ly + '],"id":"' + idZ + '","tipo":"conceito"}'
+  if (!lx && !ly) {
+    return '{"fusao": [, ], "id": "' + idZ + '", "tipo": "conceito"}'
+  }
+  const x = lx.startsWith(' ') ? lx.slice(1) : lx
+  const y = ly.startsWith(' ') ? ly.slice(1) : ly
+  return '{"fusao": [' + x + ', ' + y + '], "id": "' + idZ + '", "tipo": "conceito"}'
 }
 /* de contorno_riemann.js (a geometria inline) */
 function mulP (X, Y) {
@@ -306,7 +326,7 @@ const pares = []
       if (U.funde(JSON.parse(lz).id, pU[0], pU[1]) !== lz) voltas = false
       if (fundeP(JSON.parse(lz).id, pP[0], pP[1]) !== lz) voltas = false
       const nU = U.monodromia(lz)
-      const nP = fundeP(JSON.parse(pP[1]).id, pP[1], pP[0])
+      const nP = fundeP(sigmaPeano.endereco(pP[1], 0), pP[1], pP[0])
       if (nU !== nP) monos = false
     }
   }

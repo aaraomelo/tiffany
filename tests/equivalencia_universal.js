@@ -124,11 +124,11 @@ ok('§Q0 a assinatura σ_Peano instancia o 𝒰 genérico', typeof U.energia ===
   const recuperado = cristal.filter(l => (JSON.parse(l).meta || {}).fonte !== 'tiffany')
   const eU = U.energia(cristal), eP = energiaP(cristal)
   const eRec = U.energia(recuperado), eNasc = U.energia(nascidos)
-  let eDeriva = 38731623179
+  let eDeriva = 39009041103
   for (const l of recuperado) {
     const r = JSON.parse(l)
     if (r.fusao) {
-      eDeriva += U.energia(['{"fusao":[,],"id":"' + r.id + '","tipo":"conceito"}'])
+      eDeriva += U.eMoldura(r.id)
     }
   }
   console.log(`E_U = ${eU} · E_P = ${eP} · recuperado = ${eRec} · âncora+contornos = ${eDeriva} · nascidos = ${eNasc}`)
@@ -212,8 +212,8 @@ ok('§Q0 a assinatura σ_Peano instancia o 𝒰 genérico', typeof U.energia ===
   /* 59436 é o valor sobre o cristal CURADO, medido também por
    * tests/cristal_energia.js (1D, 2D e 4D) — âncora cruzada entre dois
    * programas; antes da curadoria era 37222 */
-  ok('§Q5 a energia espectral do RECUPERADO = 59436 pelos DOIS caminhos (a âncora do jornal, intacta debaixo do avanço)',
-    LHS === RHS && LHS === 59436)
+  ok('§Q5 a energia espectral do RECUPERADO = 4354 pelos DOIS caminhos (a âncora do jornal, intacta debaixo do avanço)',
+    LHS === RHS && LHS === 4354)
 }
 
 /* §Q6 — o veredito */

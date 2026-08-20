@@ -1,0 +1,866 @@
+% !TeX program = pdflatex
+% papers/naturais.tex — O DEGRAU F_1 → ℕ: a torre binária F_{2w} = F_w + F_w*, e o transporte.
+% Convenção do documento: F_w := GF(2^w) — o índice conta BITS, nunca elementos.
+%
+% Auto-contido: cd papers && pdflatex naturais.tex
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[portuguese]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\newtheorem{teorema}{Teorema}
+\newtheorem{proposicao}[teorema]{Proposição}
+\newtheorem{corolario}[teorema]{Corolário}
+\newtheorem{lema}[teorema]{Lema}
+\newtheorem{definicao}{Definição}
+\newtheorem{observacao}{Observação}
+
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\dg}{^{\dagger}}
+\newcommand{\Word}{\mathcal{W}}
+\newcommand{\FF}{\mathbb{F}}
+\newcommand{\sepcol}{\quad\penalty0$\big|$\quad\penalty0}
+\newcommand{\colunas}[3]{%
+  \par\smallskip\noindent{\footnotesize\raggedright
+  \textbf{prova} (Algébrico): #1\sepcol
+  \textbf{realiza} (aqui): #2\sepcol
+  \textbf{verifica}: #3\par}\smallskip}
+
+\definecolor{cinza}{gray}{0.35}
+\newcommand{\medido}[1]{\par\medskip\noindent{\small\color{cinza}\textbf{Medido.} #1}\par\medskip}
+
+\input{gkcapa}
+
+\begin{document}
+\gkcapa{Os naturais a partir do binário}
+       {$F_{2w}=F_w+F_w^{*}$ --- quatro dobras de um bit ao byte,
+        e $\mathbb{N}$ é a torre mais o transporte}
+       {oito leis, dobra dual, encaixe por prefixos, base ortonormal, transporte}
+\maketitle
+
+%======================================================================
+\begin{abstract}
+\textbf{Convenção, antes de tudo:} $\FF_2$ é o corpo de dois elementos e
+\[
+\boxed{\;F_w:=\mathrm{GF}(2^{w})\;}\qquad\text{logo}\qquad
+F_1=\FF_2,\quad \lvert F_w\rvert=2^{w},\quad \lvert F_8\rvert=256 .
+\]
+O índice conta \textbf{bits}, nunca elementos --- e é o mesmo índice em todo o
+documento.
+
+\medskip \textbf{Primeiro degrau da construção.} Começa-se no bit e sobe-se:
+o que aqui se entrega é o suporte sobre o qual o \code{inteiros.tex} irá
+duplicar e quocientar ($\mathbb{N}^{2}/{\sim}=\mathbb{Z}$). Aqui duplica-se o
+\textbf{corpo} e \textbf{não} se quocienta:
+$F_{2w}=F_w\oplus\sigma F_w$ com $\sigma^{2}=\sigma+\lambda$. Partindo de
+$F_1=\FF_2$ --- um bit, duas portas --- quatro andares dão
+$F_1\to F_2\to F_4\to F_8$, de cardinais $2,4,16,256$; e o suporte do topo é
+exactamente $\Word_8=\{0,\ldots,255\}$, o envelope do \code{inteiros.tex}
+(§\ref{sec:encaixe}). A régua $\lambda_k$ não se escreve: deriva-se, e o
+que a busca devolve é $2^{2^{k}-1}$ --- a régua do \emph{nim} de Conway
+(§\ref{sec:conway}). A base dos produtos dos três geradores é
+$e_k=2^{k}$ --- a base ortonormal das oito leis (§\ref{sec:base}). E o que separa
+o corpo de $\mathbb{N}$ tem nome e conta-se: o \textbf{transporte}
+(§\ref{sec:transporte}).
+\end{abstract}
+
+%======================================================================
+\section*{Onde este documento vive}
+
+A construção lê-se num sentido só --- do bit para $\mathbb{R}$ ---, e este é
+o seu \textbf{primeiro} degrau ($k=-1$ na numeração da casa, porque a casa já
+contava a partir de $\mathbb{N}\!\to\!\mathbb{Z}$):
+
+\[
+\boxed{\;
+\underbrace{\FF_2}_{\text{um bit}}
+\;\xrightarrow[\text{3 dobras duais}]{\ \code{naturais}\ }\;
+\underbrace{F_8\equiv\Word_8}_{\{0,\ldots,255\}}
+\;\xrightarrow[\text{TRANSPORTE}]{}\;
+\mathbb{N}
+\;\xrightarrow[\text{soma}]{\ \code{inteiros}\ }\;
+\mathbb{Z}
+\;\xrightarrow[\text{produto}]{\ \code{racionais}\ }\;
+\mathbb{Q}
+\;\xrightarrow[\text{corte}]{\ \code{reais}\ }\;
+\mathbb{R}\;}
+\]
+\noindent{\footnotesize Lê-se da esquerda para a direita: é o sentido em que se
+\textbf{constrói}. Cada paper recebe o objecto do degrau à sua esquerda e
+entrega o do degrau à sua direita; nenhum redefine o que recebeu.\par}
+
+\noindent A cadeia completa, comum aos três papers
+--- a mesma nos três:
+
+\begin{center}\small
+\begin{tabular}{@{}clllll@{}}
+\toprule
+$k$ & degrau & ganha volta & paga & dual do andar (e o seu Fix) & paper \\
+\midrule
+$-1$ & $F_1\!\to\!F_2\!\to\!F_4\!\to\!F_8$ & a \textbf{largura} (3 dobras)
+     & a \textbf{ordem} (car.\ $2$) & $x^{*}$ (2.ª raiz); Fix $=$ andar de baixo
+     & \code{naturais.tex} \\
+$0$  & $\mathbb{N}\!\to\!\mathbb{Z}$ & a \textbf{soma}
+     & o sinal e a boa ordem & $\iota(a,b)=(b,a)\Rightarrow$ oposto; Fix $=\{0\}$
+     & \code{inteiros.tex} \\
+$1$  & $\mathbb{Z}\!\to\!\mathbb{Q}$ & a \textbf{multiplicação}
+     & $0^{-1}$ não existe & $\iota(a,b)=(b,a)\Rightarrow$ inverso; Fix $=\{\pm1\}$
+     & \code{racionais.tex} \\
+$2$  & $\mathbb{Q}\!\to\!\mathbb{R}$ & o \textbf{corte} (completação)
+     & a \textbf{enumerabilidade} & $(A,B)\mapsto(B,A)$; Fix: o corte que fecha
+     & \code{reais.tex} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent{\footnotesize A numeração é a de \code{arquitetura sec:descida},
+onde $k=0$ é $\mathbb{N}\!\to\!\mathbb{Z}$; a torre binária é \emph{anterior} a
+esse degrau, e por isso $k=-1$. O passo é sempre $T_{k+1}=T_k+T_k^{*}$
+(\code{analitico thm:tecidos}). \textbf{Entre $k=-1$ e $k=0$ não há dobra:
+há o TRANSPORTE} --- $a+b=(a\oplus b)+2(a\wedge b)$
+(\code{naturais.tex thm:transporte}) ---, e é ele que leva o suporte $\Word_8$
+do topo da torre binária às operações de $\mathbb{N}$. Nos degraus $k\ge0$
+duplica-se e \textbf{quocienta-se}; em $k=-1$ duplica-se e \textbf{não} se
+quocienta (a segunda cópia é multiplicada por $\sigma$).\par}
+
+\noindent E o dual, que em cada degrau tem \emph{duas} partes e não se
+confundem:
+
+\[
+\boxed{
+\begin{array}{lll}
+ & \textbf{dual do CENTRO (Lei 1)} & \textbf{dual do ANDAR (o que o degrau acrescenta)}\\[3pt]
+k=-1 & \nu(x)=-x=x\ \text{(degenera)} & x^{*}=(a_0{+}a_1)+a_1\sigma\ \Rightarrow\ T=x\oplus x^{*},\ N=x\otimes x^{*}\\[2pt]
+k=0  & \nu(z)=-z & \iota(a,b)=(b,a)\ \Rightarrow\ \text{oposto aditivo}\\[2pt]
+k=1  & \nu(a,b)=(-a,b) & \iota(a,b)=(b,a)\ \Rightarrow\ \text{inverso multiplicativo}
+\end{array}}
+\]
+\noindent{\footnotesize \textbf{O mesmo \emph{swap} induz o oposto num degrau e
+o inverso no seguinte} --- é o dado que muda de papel, não a fórmula. E em
+$k=-1$ o dual do centro degenera ($-x=x$), pelo que o dual tem de vir de outro
+sítio: da segunda raiz de $\sigma^2+\sigma+\lambda$. Nenhuma destas involuções
+é o dual linear $V\!\cong\!V^{**}$ da Lei~2, nem o dual quadrático
+$s\dg=-1/s$ do \emph{Corpo Algébrico}: são quatro noções, e não se confundem.\par}
+\textbf{Molde dual} (Lei~4, $T+T^{*}$): duplicar, ler nos dois lados. A
+diferença face aos degraus de cima é que aqui \textbf{não há quociente}: a
+segunda cópia não é identificada, é \emph{multiplicada} por $\sigma$. O que se
+paga por andar é a régua $\lambda$; o que se ganha é a largura, que dobra.
+
+\medskip\noindent\textbf{O que este degrau ENTREGA.} Ao degrau seguinte
+(\code{inteiros.tex}, $k=0$) entrega três coisas: o \textbf{suporte}
+$\Word_8=\{0,\ldots,255\}$ com o encaixe por prefixos (Thm.~\ref{thm:encaixe});
+a \textbf{soma} de $\mathbb{N}$ reconstruída a partir das duas primitivas de um
+bit (Thm.~\ref{thm:transporte}); e a \textbf{base ortonormal} de oito que
+autoriza a operação bit a bit (Thm.~\ref{thm:base}). O que \emph{não} entrega,
+e o degrau seguinte terá de comprar, é a ordem.
+
+\medskip\noindent\textbf{A leitura em uma frase.} A subtracção, que o
+\code{inteiros.tex} compra ao preço da ordem, aqui já é total no chão
+($-x=x$); e a \emph{ordem} é que fica por comprar. É o mesmo par visto do outro
+lado: \emph{a face que opera não ordena; a que ordena não opera}
+(\code{algebrico}, §O byte).
+
+\medskip\noindent\textbf{O que este documento RECEBE e o que ACRESCENTA:}
+
+\[
+\boxed{
+\begin{array}{lll}
+\textbf{RECEBE do centro} & \textbf{onde está lá} & \textbf{o que se faz aqui}\\[3pt]
+\text{a torre }T_{k+1}=T_k+T_k^{*} & \code{analitico thm:tecidos} & \text{instancia o degrau }F_1\to F_8\\[2pt]
+\text{o byte é corpo, posição }k=\text{Lei }k & \code{algebrico §O byte} & \text{constrói-o por dobras, não por }f_8\\[2pt]
+\text{a base das oito leis é ortonormal} & \code{ortonormal.c §O0} & \text{obtém-na como PRODUTOS dos geradores}\\[2pt]
+\text{o construtor }(K,m)\mapsto K[\sigma_m] & \code{algebrico thm:autossimilar} & \text{o mesmo, em característica }2\\[2pt]
+\text{o envelope }\Word_8 & \code{inteiros def:w8} & \text{mostra que }\Word_8\text{ é o SUPORTE de }F_8\\[6pt]
+\textbf{ACRESCENTA} & \multicolumn{2}{l}{\text{---e é só isto---}}\\[3pt]
+\text{o ENCAIXE por prefixos} & \text{Thm.~\ref{thm:encaixe}} & \{0,\ldots,2^{2^k}-1\}\text{ é subcorpo}\\[2pt]
+\text{a RÉGUA derivada} & \text{Prop.~\ref{prop:regua}} & \lambda_k=2^{2^{k}-1}\text{, e é a do \emph{nim}}\\[2pt]
+\text{a BASE da torre} & \text{Thm.~\ref{thm:base}} & e_k=2^k\text{ pelos três geradores}\\[2pt]
+\text{o TRANSPORTE} & \text{Thm.~\ref{thm:transporte}} & a+b=(a\oplus b)+2(a\wedge b)\\[2pt]
+\text{o ESCOPO} & \text{§\ref{sec:escopo}} & F_8\text{ é o suporte de }\Word_8,\ \text{não }\mathbb{N}
+\end{array}}
+\]
+
+%======================================================================
+\section{As oito leis --- marcos da construção}\label{sec:leis}
+
+\noindent Onde cada lei vive na cadeia --- tabela comum aos três papers
+--- a mesma nos três, para que os estatutos não divirjam entre eles:
+
+\begin{center}\footnotesize
+\begin{tabular}{@{}cp{2.75cm}p{2.75cm}p{2.75cm}p{2.75cm}@{}}
+\toprule
+lei & $k{=}-1$: $F_1\!\to\!F_8$ & $k{=}0$: $\mathbb{N}\!\to\!\mathbb{Z}$ & $k{=}1$: $\mathbb{Z}\!\to\!\mathbb{Q}$ & $k{=}2$: $\mathbb{Q}\!\to\!\mathbb{R}$ \\
+\midrule
+\textbf{0} divisão do zero
+ & $x\oplus x=0$; só o $0$ sem inversa \hfill\textsc{expl.}
+ & subtracção parcial; folha $[(1,0)]\oplus[(0,1)]=0$ \hfill\textsc{expl.}
+ & $0^{-1}$ não existe; $0\!\leftrightarrow\!\infty$ \hfill\textsc{mista}
+ & o \textbf{buraco}: corte sem racional em cima \hfill\textsc{expl.} \\
+\textbf{1} dual ($1\dg=-1$)
+ & \emph{degenera}: $-x=x$ \hfill\textsc{expl.}
+ & $\iota$ no par; $\nu(z)=-z$ \hfill\textsc{expl.}
+ & $\nu(a,b)=(-a,b)$ \hfill\textsc{expl.}
+ & $\nu(x)=-x$; do andar: $(A,B)\!\mapsto\!(B,A)$ \hfill\textsc{expl.} \\
+\textbf{2} bidual
+ & $x^{**}=x$; automorfismo \hfill\textsc{expl.}
+ & Dir/Cruz; $R^{4}=\mathrm{id}$ \hfill\textsc{mista}
+ & $V\cong V^{**}$ canónico \hfill\textsc{canón.}
+ & $B=\mathbb{Q}\setminus A$: complementar $2\times$ \hfill\textsc{expl.} \\
+\textbf{3} trial $\{-1,0,+1\}$
+ & \emph{degenera}: sem cúspide \hfill\textsc{expl.}
+ & cúspide $\tau=0$; $+0=-0$ \hfill\textsc{expl.}
+ & $\operatorname{sgn}(a/b)$ \hfill\textsc{expl.}
+ & $\tau=0$ é \emph{vazio} $\iff$ irracional \hfill\textsc{expl.} \\
+\textbf{4} tetral $T+T^{*}$
+ & $F_{2w}=F_w\oplus\sigma F_w$ \hfill\textsc{expl.}
+ & $\mathbb{N}^{2}/{\sim}$; classe $[(a,b)]$ \hfill\textsc{expl.}
+ & recebida (\code{thm:juntas}) \hfill\textsc{receb.}
+ & $(A,B)$, e quocientar aberto/fechado \hfill\textsc{expl.} \\
+\textbf{5} pental $x^{2}=-1$
+ & \emph{degenera}: uma raiz só \hfill\textsc{expl.}
+ & $G_{\mathrm{geom}}\bmod2$ \hfill\textsc{receb.}
+ & $J(a,b)=(-b,a)$, $J^{2}=-I$ \hfill\textsc{expl.}
+ & \emph{não existe}: ordenado \hfill\textsc{expl.} \\
+\textbf{6} hexal (interface)
+ & base ortonormal: coordenada $=$ ler o bit \hfill\textsc{receb.}
+ & $\otimes\leftrightarrow(a-b)(c-d)$ \hfill\textsc{receb.}
+ & interface \hfill\textsc{receb.}
+ & densidade de $\mathbb{Q}$ em $\mathbb{R}$ \hfill\textsc{receb.} \\
+\textbf{7} octonião dual
+ & encaixe por prefixos \hfill\textsc{expl.}
+ & $q\parallel p$; par $\neq$ classe; $\Word_8$ \hfill\textsc{expl.}
+ & junta dual \hfill\textsc{receb.}
+ & três realizações ligadas sem fundidas \hfill\textsc{expl.} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent{\footnotesize \textsc{expl.} realizada neste degrau ·
+\textsc{receb.} interface herdada do centro, não derivada aqui ·
+\textsc{mista}/\textsc{canón.} ver o paper do degrau.
+\textbf{Três leis degeneram em $k=-1$} (1, 3, 5) --- e é isso que permite a
+torre binária dobrar sem excepção. A Lei~5 falta nos dois extremos por razões
+\emph{opostas}: em $k=-1$ por característica~2, em $k=2$ por ordem.
+\textbf{Nenhum degrau realiza as oito}; a coluna diz onde cada uma vive.\par}
+
+\noindent E, neste degrau, com o § onde cada uma se realiza:
+
+\begin{center}\small
+\begin{tabular}{@{}clp{5.0cm}cl@{}}
+\toprule
+ & lei (centro) & realização $F_1\!\to\!F_8$ & estatuto & § \\
+\midrule
+\textbf{0} & divisão do zero & $x\oplus x=0$ imediato; $0$ sem inversa; $\mathbb{P}^1(\FF_2)$ com $0\dg=\infty$ & explícita & \ref{sec:dobra} \\
+\textbf{1} & dual ($1\dg=-1$) & degenera: $-x=x$; o dual estrutural é $x^{*}$ (a 2.ª raiz) & explícita & \ref{sec:dual} \\
+\textbf{2} & bidual ($T\dg=-T$) & $x^{**}=x$; $x^{*}$ automorfismo nos dois lados & explícita & \ref{sec:dual} \\
+\textbf{3} & trial $\{-1,0,+1\}$ & colapsa em $\{-1,+1\}$: a cúspide não existe em char.~$2$ & explícita & \ref{sec:trial} \\
+\textbf{4} & tetral ($T+T^{*}$) & $F_{2w}=F_w\oplus\sigma F_w$, $\sigma^2=\sigma+\lambda$ & explícita & \ref{sec:dobra} \\
+\textbf{5} & pental ($x^{2}=-1$) & degenera: $x^2=1\Rightarrow x=1$; o Frobenius é bijecção & explícita & \ref{sec:dual} \\
+\textbf{6} & hexal (interface) & a base ortonormal: coordenada $=$ produto interno $=$ ler o bit & recebida & \ref{sec:base} \\
+\textbf{7} & octonião dual & encaixe: os andares ligam-se sem se fundirem & explícita & \ref{sec:encaixe} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Três leis \textbf{degeneram} neste degrau (1, 3 e 5) --- e a degenerescência
+não é perda de conteúdo: é o que \emph{permite} a torre dobrar sem excepção
+(Prop.~\ref{prop:trial}). O \code{inteiros.tex} tinha duas leis
+\emph{recebidas} por não se derivarem no seu degrau; aqui só a Lei~6 o é.
+
+%======================================================================
+\section{A dobra --- Leis 0 e 4}\label{sec:dobra}
+
+\begin{definicao}[o construtor]\label{def:dobra}
+Seja $F_w=\mathrm{GF}(2^{w})$ e $\lambda\in F_w$. O andar seguinte é
+\[
+\boxed{\;F_{2w}=F_w\oplus\sigma F_w,\qquad \sigma^{2}=\sigma+\lambda\;}
+\]
+--- o \emph{mesmo} molde $T+T^{*}$ do \code{inteiros.tex}, sem quociente. Escrito
+nas primitivas, com $x=a_0+a_1\sigma$ e $y=b_0+b_1\sigma$:
+\[
+x\oplus y=(a_0\oplus b_0)+(a_1\oplus b_1)\sigma,
+\qquad
+x\otimes y=(a_0b_0\oplus\lambda a_1b_1)+(a_0b_1\oplus a_1b_0\oplus a_1b_1)\sigma .
+\]
+A \textbf{representação} é a que já existe: $a_0+a_1\sigma$ guarda-se como o
+inteiro $a_0+2^{w}a_1$, onde $w$ é a largura de $F_w$ em bits. Nenhuma codificação se
+escolhe --- as coordenadas \emph{são} os bits.
+\end{definicao}
+
+\noindent\textbf{Lei~0} neste degrau: em $\FF_2$ a soma é o XOR e o oposto é o
+próprio elemento, logo a folha $x\oplus x\dg=0$ do \code{inteiros.tex} é
+\emph{imediata} e a subtracção já é total. O que resta indivisível é o zero:
+$0$ não tem inversa, e é ele o único ponto onde a fibra falta
+(\code{algebrico sec:lei0}); em $\mathbb{P}^1(\FF_2)$ ele troca com $\infty$
+(\code{umbit.c} §B1).
+
+\begin{proposicao}[a régua deriva-se, e é a metade]\label{prop:regua}
+$\sigma^{2}+\sigma+\lambda$ é irredutível sobre $F_w$ se e só se
+$y^{2}+y\neq\lambda$ para todo $y\in F_w$ --- e isso vale para exactamente
+metade dos $\lambda$ (os de traço $1$). Procurando o \textbf{menor} $\lambda$
+que serve em cada andar obtém-se
+\[
+\boxed{\;\lambda_0=1,\quad\lambda_1=2,\quad\lambda_2=8,
+\qquad\text{isto é}\qquad \lambda_k=2^{2^{k}-1}=\tfrac{1}{2}\lvert F_{2^{k}}\rvert\;}
+\]
+--- metade da potência de Fermat que abre o andar. \textbf{Estatuto:} que este
+$\lambda$ \emph{serve} é demonstrado abaixo e reaparece como consequência das
+regras do \emph{nim} (Thm.~\ref{thm:nim}); que é o \textbf{menor} que serve está
+\emph{medido} nos três andares varridos (§NB0), não demonstrado para $k\ge3$.
+\end{proposicao}
+
+\begin{proof}
+Um polinómio de grau $2$ é redutível sobre $F_w$ exactamente quando tem raiz em
+$F_w$; $\sigma^2+\sigma+\lambda$ tem raiz $y$ sse $y^2+y=\lambda$. A aplicação
+$\wp(y)=y^2+y$ é aditiva (char.~$2$) com núcleo $\{0,1\}$, logo a sua imagem
+tem índice $2$: metade dos $\lambda$ está na imagem (redutíveis) e metade fora.
+O valor de $\lambda_k$ é o resultado da busca --- \emph{medido}, não escrito
+(\code{naturais.c} §NB0, §NB10). $\square$
+\end{proof}
+
+\begin{observacao}[nenhuma constante entra por cima]
+A régua é o único parâmetro do construtor, e é o único sítio onde uma constante
+podia entrar à mão. Ela deriva-se por varrimento exaustivo do andar de baixo;
+o valor $2^{2^k-1}$ é \emph{conclusão}, não entrada. Compare-se com a outra
+régua possível --- o polinómio $x^8+x^4+x^3+x+1$ do AES ---, que dá corpo
+igualmente legítimo e \textbf{não} encaixa (§\ref{sec:escopo}).
+\end{observacao}
+
+\colunas{\code{algebrico thm:autossimilar} ($(K,m)\mapsto K[\sigma_m]$)}
+        {$\sigma^2=\sigma+\lambda$ em char.\ $2$; $\lambda$ derivado}
+        {\code{naturais.c} §NB0 ($4/4$ andares, toda inversa exibida); §NB5}
+
+%======================================================================
+\section{O dual --- Leis 1, 2 e 5}\label{sec:dual}
+
+\begin{teorema}[a conjugação é o dual, e é o Frobenius do andar]\label{thm:dual}
+As duas raízes de $\sigma^2+\sigma+\lambda$ são $\sigma$ e $\sigma+1$. A troca
+\[
+\boxed{\;(a_0+a_1\sigma)^{*}=(a_0+a_1)+a_1\sigma\;}
+\]
+satisfaz: \textbf{(i)} $x^{**}=x$ (Lei~2); \textbf{(ii)} é automorfismo dos
+\emph{dois} lados, $(x\oplus y)^{*}=x^{*}\oplus y^{*}$ e
+$(x\otimes y)^{*}=x^{*}\otimes y^{*}$; \textbf{(iii)}
+$x^{*}=x^{\lvert F\rvert}$ --- é o Frobenius relativo ao andar de baixo;
+\textbf{(iv)} $\{x:x^{*}=x\}=F$, isto é, o conjunto de pontos fixos do dual
+\emph{é} o andar de baixo. Traço e norma descem:
+$T(x)=x\oplus x^{*}=a_1$ e $N(x)=x\otimes x^{*}\in F$.
+\end{teorema}
+
+\begin{proof}
+(i) e (ii) por cálculo directo nas fórmulas da Def.~\ref{def:dobra}; (iii)
+porque o grupo de Galois de uma extensão quadrática de corpos finitos é
+gerado pelo Frobenius $x\mapsto x^{\lvert F\rvert}$ e o único automorfismo
+não trivial é a troca das raízes; (iv) $x^{*}=x$ força $a_1=0$.
+\emph{Verifica:} \code{naturais.c} §NB2 --- involução, automorfismo em soma e
+produto, e ponto fixo $=$ prefixo, exaustivo nos três andares, zero falhas.
+$\square$
+\end{proof}
+
+\noindent\textbf{Lei~1 e Lei~5 degeneram, e diz-se como.} $1\dg=-1$ e $-1=1$:
+o dual da Lei~1 é a identidade. $x^{2}=-1$ torna-se $x^2=1$, que em
+característica $2$ tem \emph{uma} só solução, porque $x\mapsto x^2$ é bijecção
+(o Frobenius). Não há $i$ neste corpo --- e é exactamente por isso que o dual
+tem de vir da \emph{segunda raiz de uma equação nova} (Thm.~\ref{thm:dual}) e
+não da raiz de $-1$. O dual não desaparece: muda de sítio.
+
+\colunas{\code{analitico sub:oitoleis}; \code{algebrico thm:corpo-dual}}
+        {$x^{*}$ (2.ª raiz); $T$, $N$; degenerescência de 1 e 5}
+        {\code{naturais.c} §NB1, §NB2; \code{umbit.c} §B0}
+
+%======================================================================
+\section{O encaixe --- Lei 7}\label{sec:encaixe}
+
+\begin{teorema}[o suporte é o prefixo de $\mathbb{N}$]\label{thm:encaixe}
+Com a representação da Def.~\ref{def:dobra}, o suporte do andar $k$ é
+exactamente $\{0,1,\ldots,2^{2^{k}}-1\}$, e para $k<k'$ as operações do andar
+$k'$ \textbf{restringem} às do andar $k$:
+\[
+\boxed{\;\underbrace{\{0,1\}}_{F_1}\subset\underbrace{\{0,\ldots,3\}}_{F_2}
+\subset\underbrace{\{0,\ldots,15\}}_{F_4}\subset\underbrace{\{0,\ldots,255\}}_{F_8}=\Word_8\;}
+\]
+--- cadeia de subcorpos, sem conversão de representação entre andares.
+\end{teorema}
+
+\begin{proof}
+Indução. A soma é o XOR em todos os andares e não mexe em bits acima de $w$.
+Para o produto, sejam $x,y$ no andar $k'$ com $a_1=b_1=0$; então nas fórmulas
+da Def.~\ref{def:dobra} o coeficiente de $\sigma$ é
+$a_0b_1\oplus a_1b_0\oplus a_1b_1=0$ e a parte baixa é $a_0b_0$, calculada
+no andar de baixo. Logo o prefixo é fechado e a operação induzida é a do andar
+$k$. Por hipótese de indução, desce até $\FF_2$.
+\emph{Verifica:} \code{naturais.c} §NB3 --- $276$ pares, zero falhas; e
+§NB4 pelo \emph{outro} caminho: o conjunto $\{x\in F_8:x^{2^{w}}=x\}$, que
+não sabe nada da construção, tem $2^{w}$ elementos e é o mesmo prefixo, para
+$w=1,2,4,8$. $\square$
+\end{proof}
+
+\begin{corolario}[$\Word_8$ é o suporte de $F_8$]\label{cor:w8}
+O envelope $\Word_8=\{0,\ldots,255\}$ do \code{inteiros.tex} (Def.~\code{def:w8})
+não é uma restrição imposta de fora aos naturais: é o \textbf{suporte} do topo
+desta torre, e a identificação é a identidade --- o bit $j$ do inteiro é a
+coordenada $j$ na base. A cadeia
+$\Word_8\to E_{16}\to\cdots\to\mathrm{GF}(2)$ da \code{arquitetura sec:descida}
+percorre esta mesma torre \emph{ao contrário}.
+\end{corolario}
+
+\noindent\textbf{Lei~7} literal: ligar sem fundir. O par $(a_0,a_1)$ continua
+legível dentro do byte depois de multiplicado --- os andares partilham suporte
+sem se confundirem, e nenhum \emph{cast} acontece na fronteira.
+
+%======================================================================
+\section{O trial em característica 2 --- Lei 3}\label{sec:trial}
+
+\begin{proposicao}[a cúspide não existe aqui]\label{prop:trial}
+Sobre um corpo de característica $2$, $\sigma^2+\sigma+\lambda$ tem $0$ ou $2$
+raízes --- \textbf{nunca} $1$. Logo $\tau\in\{-1,+1\}$ e o caso $\tau=0$
+(\code{algebrico thm:cuspide}) é vazio neste degrau.
+\end{proposicao}
+
+\begin{proof}
+Raiz dupla exigiria anular a derivada formal, que é a constante $1$. Ou, sem
+derivadas: se $y$ é raiz, $y+1$ também é, pois
+$(y+1)^2+(y+1)+\lambda=y^2+1+y+1+\lambda=y^2+y+\lambda$; e $y\neq y+1$ porque
+$1\neq0$. Logo as raízes vêm aos pares.
+\emph{Verifica:} \code{naturais.c} §NB5 --- varridos todos os $\lambda$ dos
+três andares: $11$ com zero raízes, $11$ com duas, \textbf{zero} com uma. $\square$
+\end{proof}
+
+\begin{observacao}[por que isto importa]
+Nos degraus de cima a cúspide é o caso que exige tratamento à parte --- é onde
+as duas folhas colidem. A dobra binária não tem esse caso: cada $\lambda$ ou
+serve (duas folhas) ou não serve (nenhuma), e metade serve sempre
+(Prop.~\ref{prop:regua}). \emph{É por o trial degenerar que a torre dobra sem
+excepção} --- a ausência do caso do meio é o que torna a construção uniforme
+nos quatro andares.
+\end{observacao}
+
+%======================================================================
+\section{A base de oito, e é a ortonormal --- Lei 6}\label{sec:base}
+
+\begin{lema}[multiplicar por $\sigma$ é deslocar]\label{lem:desloc}
+Seja $\sigma$ o gerador da dobra $F_w\to F_{2w}$, isto é, o elemento
+representado pelo inteiro $2^{w}$. Então, para todo $x\in F_w$ (ou seja,
+$x<2^{w}$ como inteiro),
+\[
+x\otimes\sigma=2^{w}x\qquad\text{(o produto \emph{ordinário} em }\mathbb{N}).
+\]
+\end{lema}
+
+\begin{proof}
+Na Def.~\ref{def:dobra}, $x=(x,0)$ e $\sigma=(0,1)$. A parte baixa do produto é
+$a_0b_0\oplus\lambda a_1b_1=x\cdot0\oplus\lambda\cdot0\cdot1=0$ e o coeficiente
+de $\sigma$ é $a_0b_1\oplus a_1b_0\oplus a_1b_1=x$. Logo
+$x\otimes\sigma=(0,x)$, que se guarda como o inteiro $0+2^{w}x$. $\square$
+\end{proof}
+
+\begin{teorema}[a base dos produtos dos três geradores é $e_k=2^{k}$]\label{thm:base}
+Sejam $\sigma_0=2$, $\sigma_1=4$, $\sigma_2=16$ os geradores das três dobras
+(o primeiro elemento novo de cada andar). Então, para $k=0,\ldots,7$,
+\[
+\boxed{\;e_k\;=\;\prod_{j:\,k_j=1}\sigma_j\;=\;2^{k},
+\qquad k=k_0+2k_1+4k_2\;}
+\]
+--- \emph{o índice do vector é o subconjunto de dobras que o produziu, lido em
+binário}. Esta é a base $\{1,2,4,\ldots,128\}$ que \code{ortonormal.c} §O0
+mostra ser \textbf{ortonormal} para $\langle a,b\rangle=$ paridade$(a\wedge b)$,
+a única forma bilinear de $\FF_2$: $\langle e_i,e_j\rangle=\delta_{ij}$.
+\end{teorema}
+
+\begin{proof}
+\textbf{(i) É base.} Pela multiplicatividade do grau numa torre de extensões:
+se $B$ é base de $L/K$ e $C$ é base de $M/L$, então $\{bc\}$ é base de $M/K$.
+Aplicada três vezes a
+$\FF_2\subset F_2\subset F_4\subset F_8$ com as bases relativas
+$\{1,\sigma_0\}$, $\{1,\sigma_1\}$, $\{1,\sigma_2\}$, dá base de $F_8$ sobre
+$\FF_2$ com $2^{3}=8$ elementos, que são os produtos
+$\sigma_0^{k_0}\sigma_1^{k_1}\sigma_2^{k_2}$.
+\emph{Não} se trata de um produto tensorial de corpos --- as extensões são
+\textbf{encaixadas}, não independentes, e de facto
+$F_2\otimes_{\FF_2}F_2$ nem sequer é corpo. O que se usa é só a
+multiplicatividade do grau.
+
+\textbf{(ii) O valor é $2^{k}$.} Por indução no número de factores, ordenados
+por $j$ crescente. O produto parcial dos factores de índice $<j$ pertence a
+$F_{2^{j}}$ --- ou seja, é um inteiro $<2^{2^{j}}$ ---, porque $\sigma_i$ com
+$i<j$ vive no andar $F_{2^{j}}$. Multiplicá-lo por $\sigma_j$ é então, pelo
+Lema~\ref{lem:desloc}, deslocá-lo $2^{j}$ bits. Logo
+\[
+e_k=2^{k_0}\cdot2^{2k_1}\cdot2^{4k_2}=2^{\,k_0+2k_1+4k_2}=2^{k}.
+\]
+Nenhum passo reduz módulo $\sigma_j^2=\sigma_j+\lambda_j$: a redução só entra
+quando um gerador se multiplica \emph{por si próprio}, e nos $e_k$ cada
+gerador aparece no máximo uma vez.
+
+\textbf{(iii)} Gram $=I$ é \code{ortonormal.c} §O0.
+\emph{Verifica:} \code{naturais.c} §NB11 --- os oito produtos, a Gram e a
+filtração, zero falhas. $\square$
+\end{proof}
+
+\noindent\textbf{Terminologia, para não haver briga.} Chama-se a
+$\{1,2,4,\ldots,128\}$ a \emph{base dos produtos dos geradores} --- é uma base
+\textbf{vectorial} de $F_8$ sobre $\FF_2$, cujos elementos se obtêm
+multiplicativamente. \emph{Não} se invoca aqui a noção técnica de «base
+multiplicativa» de um corpo.
+
+\begin{corolario}[a coordenada é ler o bit, e o encaixe é a filtração]
+Porque a Gram é a identidade, a coordenada recupera-se por
+$a_k=\langle a,e_k\rangle$ --- um AND e uma paridade, isto é, \emph{ler o bit};
+numa base qualquer seria preciso inverter a matriz de Gram
+(\code{ortonormal.c} §O2, §O4). E os $w$ primeiros vectores da base geram
+$F_w$: o encaixe do Thm.~\ref{thm:encaixe} é a \textbf{filtração} desta
+base. \emph{O \code{uint8\_t} não é conveniência de máquina: é a base
+ortonormal escrita em hardware}, e agora também a base que a torre produz
+pelos seus geradores.
+\end{corolario}
+
+%======================================================================
+\section{$\mathbb{N}$ é a torre mais o transporte}\label{sec:transporte}
+
+\noindent Chegados ao topo, o suporte já é $\Word_8$ --- mas as operações são
+as do corpo, não as de $\mathbb{N}$. Falta exactamente uma coisa, e ela tem nome.
+
+\begin{lema}[a decomposição]\label{lem:carry}
+Para todos $a,b\in\mathbb{N}$:
+\[
+\boxed{\;a+b=(a\oplus b)+2\,(a\wedge b)\;}
+\]
+\end{lema}
+
+\begin{proof}
+Posição a posição: para $a_j,b_j\in\{0,1\}$ verifica-se nos quatro casos que
+$a_j+b_j=(a_j\oplus b_j)+2(a_j\wedge b_j)$ em $\mathbb{N}$. Multiplicando por
+$2^{j}$ e somando em $j$:
+$a+b=\sum_j 2^{j}(a_j+b_j)=(a\oplus b)+2(a\wedge b)$. $\square$
+\end{proof}
+
+\begin{teorema}[$\mathbb{N}$ do binário]\label{thm:transporte}
+A iteração
+\[
+(a,b)\longmapsto\bigl(a\oplus b,\;2\,(a\wedge b)\bigr)
+\]
+preserva a soma (Lema~\ref{lem:carry}) e \textbf{converge em tempo finito}: se
+$a,b<2^{n}$, ao fim de no máximo $n+1$ passos o par é $(a+b,\,0)$,
+\[
+\boxed{\;(a,b)\longmapsto(a\oplus b,\;2(a\wedge b))\longmapsto\cdots
+\longmapsto(a+b,\;0)\;}
+\]
+--- o transporte a ser propagado, literalmente. Os pontos fixos da iteração são
+exactamente os pares $(x,0)$, e a soma de $\mathbb{N}$ é a primeira coordenada
+daquele que se alcança. As duas operações que a iteração usa são a soma e o
+produto de $\FF_2$, as únicas primitivas de um bit; o produto de $\mathbb{N}$
+segue por deslocamento e soma.
+\end{teorema}
+
+\begin{proof}
+Preservação: Lema~\ref{lem:carry}. Terminação, que é onde está a tese ---
+com a medida escrita, porque é ela que faz o argumento:
+\[
+v(x):=\text{índice do bit não nulo mais baixo de }x\quad(x\neq0),
+\qquad v(0):=+\infty .
+\]
+Seja $(a',b')=(a\oplus b,\,2(a\wedge b))$ o passo, com $b\neq0$. Como
+$a\wedge b$ só tem bits onde \emph{ambos} têm, $v(a\wedge b)\ge v(b)$; e
+duplicar acrescenta um: $v(b')=v(a\wedge b)+1\ge v(b)+1$. Logo $v$ do segundo
+componente \textbf{cresce estritamente} a cada passo. Falta o tecto: se
+$a,b<2^{n}$ então $a\oplus b<2^{n}$ e $2(a\wedge b)<2^{n+1}$, e a partir daí a
+propriedade mantém-se --- nenhum componente passa de $2^{n+1}$. Um valor não
+nulo abaixo de $2^{n+1}$ tem $v\le n$; como $v$ cresce de pelo menos $1$ por
+passo a partir de $v(b)\ge0$, ao fim de no máximo $n+1$ passos já não há valor
+não nulo possível, isto é, $b=0$.
+\emph{Verifica:} \code{naturais.c} §NB7 --- nos $65\,536$ pares de $\Word_8$
+o resultado bate com a definição recursiva de Peano
+($n+0=n$, $n+S(m)=S(n+m)$, \code{naturais.h}), zero falhas, e o número máximo
+de passos observado é $9=8+1$ --- a medida encontra exactamente o limite
+$n+1$ da prova, e não um limite mais folgado.
+$\square$
+\end{proof}
+
+\begin{corolario}[quanto vale o transporte]\label{cor:3n}
+$a\oplus b=a+b$ exactamente quando $a\wedge b=0$. Em $\Word_8$ isso são
+$3^{8}=6561$ dos $65\,536$ pares --- cada posição admite três estados
+($0/0$, $1/0$, $0/1$) e o quarto é o que gera transporte.
+\emph{A soma de $\FF_2$ é a soma de $\mathbb{N}$ com o transporte desligado.}
+(\code{naturais.c} §NB6: $6561$ dos dois lados, e o $\iff$ verificado par a par.)
+\end{corolario}
+
+\medskip\noindent\textbf{A leitura.} A torre dá o \emph{conjunto} e a
+\emph{reversibilidade}; o que ela não guarda é a memória entre posições. Em
+$\FF_2$ cada bit opera isolado --- é isso que faz a operação bit a bit
+(Thm.~\ref{thm:base}) --- e é isso, exactamente, que $\mathbb{N}$ acrescenta:
+\[
+\boxed{\;\mathbb{N}\big|_{\Word_8}\;=\;F_8\;+\;\text{transporte}\;}
+\]
+\medskip\noindent\textbf{E a ordem, em gaveta separada.} O
+Thm.~\ref{thm:transporte} reconstrói a \emph{soma}, e só ela. A desigualdade
+$a+b\ge a$ é uma propriedade da ordem usual de $\mathbb{N}$ --- que vive no
+suporte enquanto conjunto de naturais, não nas operações do corpo --- e vale
+para a soma reconstruída porque essa soma \emph{é} a soma usual, não porque o
+teorema a produza. Do outro lado: $F_8$, com as suas próprias operações, não
+admite ordem de corpo (§\ref{sec:escopo}). O mesmo conjunto de representantes
+carrega as duas coisas, e elas não se demonstram uma à outra.
+
+\colunas{\code{inteiros def:peano} (recebida do \code{inteiros.tex})}
+        {Lema~\ref{lem:carry}; ponto fixo de $(\oplus,\wedge)$}
+        {§NB6 ($6561=3^8$); §NB7 ($65\,536$ pares contra Peano, $\le9$ passos)}
+
+%======================================================================
+\section{A régua mínima é a do \emph{nim}}\label{sec:conway}
+
+\noindent A nim-soma é o XOR e a nim-multiplicação é a operação que torna os
+ordinais um corpo de característica $2$ (Conway, \emph{ONAG}, cap.~6). Dela
+usam-se aqui duas regras, para $\Phi=2^{2^{k}}$ uma \emph{potência de Fermat}:
+\[
+\textbf{(N1)}\quad \Phi\otimes\Phi=\tfrac{3}{2}\Phi=\Phi\oplus\tfrac{\Phi}{2},
+\qquad
+\textbf{(N2)}\quad \Phi\otimes x=\Phi\,x\ \ \text{(produto ordinário)}\ \ \text{para }x<\Phi .
+\]
+
+\begin{teorema}[a torre é o nim]\label{thm:nim}
+Admitidas \textbf{(N1)} e \textbf{(N2)}, o produto da torre da
+Def.~\ref{def:dobra} com $\lambda_k=2^{2^{k}-1}=\Phi/2$ coincide com o
+nim-produto em \textbf{todos} os andares.
+\end{teorema}
+
+\begin{proof}
+Indução no andar. \emph{Base:} em $\{0,1\}$ o nim-produto é o AND, que é o
+produto de $F_1$. \emph{Passo:} sejam $a=a_1\Phi\oplus a_0$ e
+$b=b_1\Phi\oplus b_0$ com $a_i,b_i<\Phi$. Pela distributividade do nim,
+\[
+a\otimes b=(a_1\otimes b_1)\otimes(\Phi\otimes\Phi)
+\;\oplus\;\bigl(a_1\otimes b_0\oplus a_0\otimes b_1\bigr)\otimes\Phi
+\;\oplus\;a_0\otimes b_0 .
+\]
+Por \textbf{(N1)}, $(a_1\otimes b_1)\otimes(\Phi\oplus\Phi/2)
+=(a_1\otimes b_1)\otimes\Phi\;\oplus\;(a_1\otimes b_1)\otimes(\Phi/2)$; e por
+\textbf{(N2)} cada $\otimes\Phi$ é o deslocamento de $2^{k}$ bits. Separando a
+parte alta da baixa:
+\[
+\text{alto}=a_1b_1\oplus a_1b_0\oplus a_0b_1,
+\qquad
+\text{baixo}=a_0b_0\oplus\lambda\,(a_1b_1),\qquad \lambda=\Phi/2,
+\]
+que é \emph{exactamente} a Def.~\ref{def:dobra}. Os produtos $a_ib_j$ são do
+andar de baixo, onde as duas operações já coincidem por hipótese de indução.
+$\square$
+\end{proof}
+
+\begin{observacao}[estatuto de cada peça, que é onde este resultado se podia inflar]
+\textbf{(N1)} e \textbf{(N2)} são resultados de Conway --- \emph{citados}, não
+demonstrados aqui. O que este documento acrescenta é a indução acima e, do
+lado da medida, a verificação das duas regras \textbf{na própria torre}:
+$\Phi\otimes\Phi=\Phi\oplus\Phi/2$ e $\Phi\otimes x=\Phi x$ para todo
+$x<\Phi$, nos três andares, zero falhas (\code{naturais.c} §NB10). A ponte
+para o \emph{nim} não é só citada: é medida do lado de cá.
+\end{observacao}
+
+\begin{proposicao}[verificação independente, e o seu escopo]\label{prop:mex}
+O nim-produto definido pelo \emph{mex},
+\[
+a\otimes b=\operatorname{mex}\{\,a'\otimes b\oplus a\otimes b'\oplus a'\otimes b'
+\;:\;a'<a,\;b'<b\,\},
+\]
+--- definição puramente combinatória, que não conhece $\sigma$, $\lambda$ nem
+polinómio nenhum --- coincide com o produto da torre. \textbf{Escopo:} medido
+exaustivamente em $F_4$ ($256$ pares, zero falhas) e verificado nos mesmos
+pares dentro de $F_8$; o topo inteiro pelo mex \textbf{não} se varreu
+($256^{4}$ candidatos), e isso não é o que sustenta o Thm.~\ref{thm:nim} --- o
+que o sustenta é a indução, e esta proposição é o controlo por um caminho que
+não partilha código com ela.
+\end{proposicao}
+
+\begin{proposicao}[o menor $\lambda$, medido]\label{prop:menor}
+Nos três andares varridos, $\lambda_k=2^{2^{k}-1}$ é também o \textbf{menor}
+$\lambda$ que serve (\code{naturais.c} §NB0). Para $k\ge3$ isto é
+\emph{conjectura}: não está medido nem demonstrado. O Thm.~\ref{thm:nim} não
+depende disto --- depende só de $\lambda_k=\Phi/2$.
+\end{proposicao}
+
+\medskip\noindent A leitura que isto sustenta, e só ela: os naturais que Conway
+obteve como corpo pela combinatória de um jogo e os que a dobra dual constrói
+pela álgebra são o mesmo objecto, e a razão comum é o \textbf{encaixe nos
+prefixos} --- a propriedade que o Thm.~\ref{thm:encaixe} demonstra e que a
+realização pelo polinómio do AES não tem (§\ref{sec:escopo}).
+
+%======================================================================
+\section{O escopo, e o gume}\label{sec:escopo}
+
+\noindent\textbf{O que $F_8$ não é.} $F_8$ \textbf{não} é $\mathbb{N}$:
+é finito; tem característica $2$ --- medido, $1+1=0$ em duas parcelas --- e
+portanto não admite ordem de corpo (\code{algebrico}, §O byte). O que é
+verdade, e é o que se mediu: o \emph{suporte} de $F_8$ é $\Word_8$ pela
+identidade; os andares de baixo são os prefixos; e as duas operações de
+$\mathbb{N}$ nesse suporte reconstroem-se das duas de $\FF_2$ mais o
+transporte (Thm.~\ref{thm:transporte}). $\mathbb{N}$ inteiro não é o topo desta
+torre --- a torre não pára em $8$, e o que pára em $8$ é a norma
+(\code{algebrico}, Hurwitz), não o objecto.
+
+\medskip\noindent\textbf{O gume: duas réguas para o mesmo conjunto.}
+Comece-se por dizer o que \emph{não} é o resultado: quaisquer dois corpos de
+$256$ elementos são isomorfos, e portanto nada se afirma sobre o corpo
+\emph{abstracto}. O que se compara são \textbf{realizações} --- duas maneiras
+de pôr as operações sobre o mesmo conjunto de representantes
+$\{0,\ldots,255\}$.
+
+O produto do AES (módulo $x^{8}+x^{4}+x^{3}+x+1$) é uma régua perfeitamente
+válida: dá corpo, e todo não nulo tem inversa (medido: zero elementos sem
+inversa). O que ela não tem é a filtração:
+\[
+2\otimes_{\mathrm{AES}}8=x\cdot x^{3}=x^{4}=16\notin\{0,\ldots,15\},
+\qquad\text{enquanto}\qquad
+2\otimes_{\mathrm{torre}}8=12\in\{0,\ldots,15\},
+\]
+e ao todo $176$ dos $256$ produtos de $\{0,\ldots,15\}$ saem do conjunto no
+AES. (Um isomorfismo entre as duas realizações existe, claro --- o que ele não
+faz é preservar os prefixos.) Logo:
+\[
+\boxed{\;\text{a REALIZAÇÃO pela dobra dual possui a filtração pelos prefixos}
+\ \{0,\ldots,2^{2^{k}}-1\};\ \text{a do AES não.}\;}
+\]
+Não é o byte nem a característica $2$ que dão o encaixe --- é a torre. A régua
+que se escolhe é parte do resultado (\code{naturais.c} §NB8), e este é
+provavelmente o resultado estrutural do documento.
+
+\medskip\noindent\textbf{O gume automático.} Três mutações no objecto,
+compiladas e corridas: régua fixa em $1$ em vez de derivada
+($4$ asserções caem); o alto do produto sem o cancelamento de Karatsuba
+($3$ caem); o transporte sem deslocamento ($1$ cai). Nenhuma sobreviveu
+silenciosa.
+
+\medskip\noindent\textbf{Duas dívidas pagas.} \textbf{(i)} O teorema de
+\textbf{Kummer} --- o número de transportes ao somar $a$ e $b$ em base $2$ é
+$v_2\binom{a+b}{a}$ --- está agora medido: contar os transportes dá exactamente
+$s_2(a)+s_2(b)-s_2(a+b)$, que por Legendre é essa valuação, nos $65\,536$ pares
+de $\Word_8$ sem uma divergência (§NB12). O que o Cor.~\ref{cor:3n} contava
+--- \emph{quantos} pares não têm transporte --- ganha o outro lado: \emph{quantos}
+transportes tem cada par, e o número não é empírico, é a valuação $2$-ádica de um
+binomial.
+\textbf{(ii)} O \emph{menor} $\lambda$ ganhou mais um andar: no degrau que ergue
+$F_8$ até $F_{16}$ (os $65\,536$ elementos), a busca devolve
+$\lambda_3=128=\Phi/2$, e servem $128$ dos $256$ candidatos --- a mesma
+repartição ao meio da Prop.~\ref{prop:regua}, pelo traço (§NB13). Continua
+conjectura para $k\ge4$.
+
+\medskip\noindent\textbf{Por medir}, e diz-se: as regras
+\textbf{(N1)}/\textbf{(N2)} em geral --- aqui são citadas de Conway e medidas
+só nos três andares (Thm.~\ref{thm:nim}); a verificação pelo mex tem o escopo
+da Prop.~\ref{prop:mex}; e o teorema de Kummer --- o número de transportes ao somar $a$ e $b$ em base $2$ é
+$v_2\binom{a+b}{a}$ --- que dá o Cor.~\ref{cor:3n} em forma fechada, e está medido em §NB12.
+
+%======================================================================
+\section{Referências}\label{sec:refs}
+
+\subsection*{Na casa --- o que este paper recebe, e onde está}
+
+\begin{center}\small
+\begin{tabular}{@{}llp{7.2cm}@{}}
+\toprule
+onde & § & o que dá \\
+\midrule
+\code{papers/corpo\_algebrico.tex} & §O byte & $B=\sum b_k2^k$, posição $k$ à Lei $k$; a dobra $1\to2\to4\to8$; o produto módulo irredutível de grau oito; e o escopo de «não ordenado» \\
+\code{papers/corpo\_algebrico.tex} & \code{thm:autossimilar} & o construtor $(K,m)\mapsto K[\sigma_m]$, $\sigma^2=m\sigma+1$: o mesmo código dá andar após andar; «o metal do andar 1 é a régua do andar 2» \\
+\code{papers/corpo\_algebrico.tex} & \code{thm:gerador-primos} & a escada de Fermat $2^{2^{j}}$: $16\to17$, $256\to257$, $65536\to65537$ \\
+\code{papers/inteiros.tex} & \code{sec:palavra8} & $\Word_8$, leitura cruzada exacta, wrap/saturação contados à parte \\
+\code{papers/arquitetura.tex} & \code{sec:descida} & a cadeia $\Word_8\to E_{16}\to\FF_{127}\to\mathrm{GF}(2)$ \\
+\code{tests/ortonormal.c} & §O0--§O5 & a base das oito leis é ortonormal (Gram $=I$); a coordenada é ler o bit; o preço (vectores isótropos) \\
+\code{tests/umbit.c} & §B0--§B7 & $\FF_2$ nu; $\mathbb{P}^1(\FF_2)$; as oito leis como transformações do byte; o ciclo de período oito \\
+\code{lib/corpo256.h} & --- & o byte como corpo pela régua do AES; $c6\_base(k)$ \\
+\code{lib/gf2n.h} & --- & $\mathrm{GF}(2^n)=\FF_2[x]/(f_n)$; o Frobenius como dual \\
+\code{lib/naturais.h} & --- & Peano P1--P5, soma e produto recursivos; $\Word_8$ \\
+\code{lib/booleana.h} & --- & a ANF de Zhegalkin pela transformada de Möbius (involução) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{Acrescentado por este paper:} \code{lib/binario.h} (a torre) e
+\code{tests/naturais.c} (§NB0--§NB11).
+
+\subsection*{Fora --- e o que cada uma responde}
+
+\begin{itemize}\itemsep2pt
+\item G.~Peano, \emph{Arithmetices principia, nova methodo exposita}, 1889;
+H.~Grassmann, \emph{Lehrbuch der Arithmetik}, 1861 --- a definição recursiva
+contra a qual §NB7 mede.
+\item J.~H.~Conway, \emph{On Numbers and Games}, Academic Press, 1976,
+cap.~6 --- o Corpo $\mathrm{On}_2$: os ordinais com nim-soma e nim-produto
+formam um corpo algebricamente fechado de característica $2$, e os naturais
+menores que $2^{2^{n}}$ formam subcorpo. \textbf{De lá vêm (N1) e (N2)}, as
+duas regras das potências de Fermat de que a prova do Thm.~\ref{thm:nim}
+depende --- e que este documento não demonstra, só mede na torre.
+\item H.~W.~Lenstra Jr., \emph{Nim multiplication}, Séminaire de Théorie des
+Nombres de Bordeaux, 1977--78 --- a estrutura do mesmo corpo.
+\item J.~H.~Conway, N.~J.~A.~Sloane, \emph{Lexicographic codes:
+error-correcting codes from game theory}, IEEE Trans.\ Inform.\ Theory 32
+(1986) --- a mesma aritmética a construir códigos, que é a ponte para
+$E_{16}$ da \code{arquitetura sec:descida}.
+\item E.~E.~Kummer, J.~reine angew.\ Math.\ 44 (1852) --- o número de
+transportes na soma em base $p$ é $v_p\binom{a+b}{a}$: a forma fechada do
+Cor.~\ref{cor:3n}, \emph{por medir}.
+\item A.~Satoh \emph{et al.}, ASIACRYPT 2001; D.~Canright, \emph{A very
+compact S-box for AES}, CHES 2005 --- a mesma torre
+$F_1\to F_2\to F_4\to F_8$ (na notação por cardinais daqueles autores,
+$\FF_2\to\FF_4\to\FF_{16}\to\FF_{256}$) usada para reduzir hardware: a
+construção é conhecida na engenharia; o que aqui se acrescenta é o
+\emph{encaixe nos prefixos} como propriedade e o transporte como o que falta
+para $\mathbb{N}$.
+\item J.~Daemen, V.~Rijmen, \emph{The Design of Rijndael}, Springer 2002 ---
+a régua $x^8+x^4+x^3+x+1$ do gume de §\ref{sec:escopo}.
+\item R.~D.~Schafer, \emph{An Introduction to Nonassociative Algebras}, 1966;
+J.~Baez, \emph{The Octonions}, Bull.\ AMS 39 (2002) --- Cayley--Dickson,
+$A_{n+1}=A_n\oplus A_n$ com conjugação: o mesmo molde $T+T^{*}$ em
+característica $0$, onde a norma pára em $8$.
+\item I.~Zhegalkin, 1927; M.~H.~Stone, 1936 --- a lógica é $\FF_2$
+(\code{booleana.h}).
+\item D.~E.~Knuth, \emph{TAOCP} vol.~2 §4.3.1 --- a adição em base $2$ e o
+transporte.
+\end{itemize}
+
+%======================================================================
+\section*{Síntese}
+
+\[
+\boxed{
+\begin{array}{c}
+F_1\;\xrightarrow{\;+\sigma_0\;}\;F_2\;\xrightarrow{\;+\sigma_1\;}\;F_4
+\;\xrightarrow{\;+\sigma_2\;}\;F_8\;=\;\Word_8,
+\qquad F_w=\mathrm{GF}(2^{w})\\[3pt]
+\sigma_j^{2}=\sigma_j+\lambda_j,\qquad \lambda_j=2^{2^{j}-1},\qquad
+e_k=\textstyle\prod_{k_j=1}\sigma_j=2^{k}\\[3pt]
+\mathbb{N}\big|_{\Word_8}=F_8+\text{transporte},\qquad
+a+b=(a\oplus b)+2(a\wedge b)
+\end{array}}
+\]
+
+\begin{itemize}\itemsep2pt
+\item[\textbf{0}] $x\oplus x=0$ imediato; a subtracção é total no chão; só o $0$ fica sem inversa.
+\item[\textbf{1}] degenera ($-x=x$); o dual muda de sítio: é a segunda raiz, $x^{*}$.
+\item[\textbf{2}] $x^{**}=x$; $x^{*}$ é automorfismo dos dois lados e fixa o andar de baixo.
+\item[\textbf{3}] degenera em $\{-1,+1\}$: sem cúspide, a torre dobra sem excepção.
+\item[\textbf{4}] $F_{2w}=F_w\oplus\sigma F_w$ --- o molde do \code{inteiros.tex} sem quociente.
+\item[\textbf{5}] degenera: $x^2=1$ tem uma só raiz; não há $i$ neste corpo.
+\item[\textbf{6}] a base dos produtos dos geradores é ortonormal, e por isso a coordenada é ler o bit.
+\item[\textbf{7}] encaixe por prefixos: os andares ligam-se sem se fundirem.
+\end{itemize}
+
+\medido{\code{tests/naturais.c} §NB0--§NB11 ($12{:}0$): torre e inversas §NB0;
+soma involutiva §NB1; dual §NB2; encaixe §NB3 ($276$ pares);
+Frobenius §NB4; trial §NB5 ($11$/$0$/$11$); transporte §NB6 ($3^{8}=6561$);
+Peano §NB7 ($65\,536$ pares, $\le9$ passos); gume das duas réguas §NB8
+($176$ produtos saem no AES); escopo §NB9; \emph{nim} §NB10 --- mex em $F_4$,
+e as regras (N1) $\Phi\otimes\Phi=\Phi\oplus\Phi/2$ e (N2)
+$\Phi\otimes x=\Phi x$ medidas na torre, zero falhas; base
+ortonormal §NB11; \textbf{Kummer} §NB12 ($65\,536$ pares, zero divergências,
+máximo $8$ transportes); $\lambda_3=128$ §NB13. Gume: três mutações, $4/3/1$ asserções caídas.
+Recebido: \code{tests/ortonormal.c} §O0; \code{tests/umbit.c} §B0--§B7.}
+
+\medskip\noindent
+\code{papers/inteiros.tex} · \code{papers/corpo\_algebrico.tex} ·
+\code{papers/arquitetura.tex} · \code{lib/binario.h}.
+
+\vfill
+{\footnotesize\color{cinza}\noindent CC BY 4.0 (textos) $\cdot$ MIT (código).\par}
+
+\end{document}
