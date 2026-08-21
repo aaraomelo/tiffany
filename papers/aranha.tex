@@ -1692,19 +1692,29 @@ comprimento (Teor.~\ref{thm:medida}).
 \section{A escada, andar a andar}\label{sec:escada}
 
 \noindent A construção de $\N$, $\Z$, $\Q$ e $\R$ está feita e demonstrada
-noutros documentos desta obra. O que se verifica aqui é outra coisa: que
-\emph{cada degrau dela} é uma realização no sentido da Def.~\ref{def:objeto},
-e que o campo $G$ conta, em cada um, a classe de equivalência que o define.
+noutros documentos desta obra. O que se verifica aqui é outra coisa: que os
+degraus construídos por \emph{quociente} são realizações no sentido da
+Def.~\ref{def:objeto}, com $G$ a contar a classe de equivalência que os define.
 
-\begin{teorema}[cada andar é uma realização]\label{thm:escada}
-Nos quatro casos abaixo, $\pi$ é uma realização, $\sum_x G(x)=\abs{I}$, e a
-fibra $\pi^{-1}(x)$ \emph{é} a classe de equivalência do andar:
+\medskip\noindent\textbf{E são três, não quatro.} O primeiro degrau é de outra
+natureza, e o documento dos naturais di-lo à letra: ali \emph{não há quociente}
+--- a segunda cópia da dobra $F_{2w}=F_w\oplus\sigma F_w$ não é identificada, é
+\emph{multiplicada} por $\sigma$. $\N$ é a torre mais o transporte, e não um
+conjunto de classes. A linha de $\N$ na tabela abaixo é, por isso, de estatuto
+diferente das outras três: é uma realização legítima --- a soma tem fibras ---
+mas não é o que define o andar.
+
+\begin{teorema}[os degraus por quociente são realizações]\label{thm:escada}
+Nos quatro casos abaixo, $\pi$ é uma realização e $\sum_x G(x)=\abs{I}$. Nos
+três últimos --- os que a obra constrói \emph{por quociente} --- a fibra
+$\pi^{-1}(x)$ \emph{é} a classe de equivalência que define o andar. No primeiro,
+$\N$, não há quociente a identificar, e a fibra é a da soma:
 \begin{center}\footnotesize
 \begin{tabular}{@{}llll@{}}
 \toprule
 andar & $\pi\colon I\to X$ & a fibra é & o representante $k=1$ \\
 \midrule
-$\N$ & $(x,y)\mapsto x\oplus y$ & $\{(x,x\oplus z)\}$, de tamanho $\lvert F_w\rvert$ & $x\oplus z$ \\
+$\N$ \emph{(sem quociente)} & $(x,y)\mapsto x\oplus y$ & a fibra da soma, de tamanho $\lvert F_w\rvert$ & $x\oplus z$ \\
 $\Z=\N^2/{\sim}$ & $(a,b)\mapsto a-b$ & $a+d=b+c$ & $a=0$ ou $b=0$ \\
 $\Q=\operatorname{Frac}(\Z)$ & $(p,q)\mapsto p/q$ reduzido & $ps=qr$ & o irredutível \\
 $\R$ & $q\mapsto$ o corte de $p$ bits & a bola ultramétrica (§\ref{sec:ultra}) & o menor do cilindro \\
@@ -1716,17 +1726,21 @@ $\R$ & $q\mapsto$ o corte de $p$ bits & a bola ultramétrica (§\ref{sec:ultra})
 \begin{proof}
 Em cada linha, $\pi$ está definida em todo o domínio e o contradomínio tem
 igualdade decidível, o que é a Def.~\ref{def:objeto}; a conservação é o
-Lema~\ref{lem:conserva}. Que a fibra é a classe: $\pi(u)=\pi(v)$ é, linha a
-linha, $x\oplus y=x'\oplus y'$, $a-b=c-d$ (isto é $a+d=b+c$), $p/q=r/s$ (isto é
-$ps=qr$), e ter o mesmo prefixo de $p$ bits --- que são exatamente as relações
-que definem cada andar. O representante $k=1$ é o primeiro da fibra na ordem do
+Lema~\ref{lem:conserva}. Nas três últimas linhas, $\pi(u)=\pi(v)$ é,
+respetivamente, $a-b=c-d$ (isto é $a+d=b+c$), $p/q=r/s$ (isto é $ps=qr$), e ter
+o mesmo prefixo de $p$ bits --- que são exatamente as relações que definem esses
+andares. Na primeira, $\pi(u)=\pi(v)$ é $x\oplus y=x'\oplus y'$, que é uma
+relação legítima mas não a que constrói $\N$. O representante $k=1$ é o primeiro da fibra na ordem do
 domínio, e a enumeração escolhida fá-lo coincidir com o canónico.
 \end{proof}
 
-\medskip\noindent Duas leituras. A primeira é que \emph{quociente} e
-\emph{dobra} são a mesma operação vista de dois lados: passar ao quociente é
-projetar, e a multiplicidade é o tamanho da classe --- o que o documento dos
-inteiros chama ``memória por duplicidade'' é este campo. A segunda é sobre o
+\medskip\noindent Duas leituras. A primeira, em uma frase:
+\[
+\boxed{\ \text{quocientar é esquecer a distinção; }G\text{ mede quantos elementos
+foram esquecidos juntos.}\ }
+\]
+Passar ao quociente é projetar, e a multiplicidade é o tamanho da classe --- o
+que o documento dos inteiros chama ``memória por duplicidade'' é este campo. A segunda é sobre o
 levantamento: marcar cada fibra com $k=1$ \emph{é} escolher o representante
 canónico, e em $\Q$ isso dá literalmente a fração irredutível.
 

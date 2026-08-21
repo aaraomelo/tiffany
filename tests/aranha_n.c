@@ -3329,18 +3329,23 @@ int main(void){
         }
         printf("\n");
 
-        ok("A ARANHA REALIZA CADA ANDAR DA ESCADA, e não por analogia: cada degrau da"
-           " construção é literalmente uma realização π: I → X no sentido da definição"
-           " deste paper, e o campo G conta a sua FIBRA. Em ℕ, a dobra F_{2w} = F_w ⊕"
-           " σF_w dá π(x,y) = x⊕y, com fibra de tamanho |F_w|. Em ℤ = ℕ²/∼, a relação"
+        ok("OS DEGRAUS POR QUOCIENTE SÃO REALIZAÇÕES, e não por analogia: cada um é"
+           " literalmente um π: I → X no sentido da definição deste paper, e o campo G"
+           " conta a sua FIBRA — que É a classe de equivalência do andar. E SÃO TRÊS,"
+           " NÃO QUATRO: o `naturais.tex` diz à letra que ali NÃO HÁ QUOCIENTE — a"
+           " segunda cópia da dobra não é identificada, é MULTIPLICADA por σ, e ℕ é a"
+           " torre mais o transporte. A linha de ℕ aqui é de outro estatuto: π(x,y) ="
+           " x⊕y tem fibra de tamanho |F_w| e é uma realização legítima, mas não é o"
+           " que define o andar. Em ℤ = ℕ²/∼, a relação"
            " (a,b) ∼ (c,d) ⟺ a+d = b+c É a fibra de π(a,b) = a−b, e G conta os"
            " representantes — o que o `inteiros.tex` chama «memória por duplicidade» é"
            " este campo. Em ℚ = Frac(ℤ), a relação ps = qr é a fibra da redução, e o"
            " representante que o levantamento marca com k = 1 é EXACTAMENTE o"
            " irredutível. Em ℝ, o corte é a bola ultramétrica do §AN6, e a fibra são os"
-           " racionais que decidem igual até à profundidade dada. Nos quatro: ∑G = |I|,"
-           " a fibra é a classe de equivalência do andar, e o primeiro representante é"
-           " o canónico. A escada não foi construída pela aranha — ela já estava"
+           " racionais que decidem igual até à profundidade dada. Nos quatro: ∑G = |I|"
+           " e o primeiro representante é o canónico; nos TRÊS por quociente, a fibra é"
+           " a classe. Em uma frase: QUOCIENTAR É ESQUECER A DISTINÇÃO, e G mede"
+           " QUANTOS ELEMENTOS FORAM ESQUECIDOS JUNTOS. A escada não foi construída pela aranha — ela já estava"
            " provada; o que se mede aqui é que o MESMO mecanismo a percorre inteira",
            mau == 0);
     }

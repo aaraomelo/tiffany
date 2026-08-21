@@ -2426,3 +2426,38 @@ inteira. Isso é mais forte do que a ressalva E não insinua.
   gume      61 mutações, 61 mordem
   bateria   529 : 529, 0 falhas · 31 unidades passaram, 0 falharam
   paper     24 páginas
+
+§52 — SÃO TRÊS, NÃO QUATRO: o degrau que não é quociente
+=========================================================
+A revisão externa validou o §51 e propôs uma frase melhor do que a minha. Mas
+ao verificá-la contra a base encontrei uma imprecisão MINHA, e foi o
+`naturais.tex` que a apanhou — não o revisor.
+
+Eu tinha escrito «cada degrau da escada é um quociente e G conta a classe». O
+`naturais.tex` diz À LETRA, três vezes:
+     «aqui NÃO HÁ QUOCIENTE: a segunda cópia não é identificada, é
+      MULTIPLICADA por σ»
+     «o mesmo molde T+T* do inteiros.tex, SEM QUOCIENTE»
+     «ℕ é a TORRE MAIS O TRANSPORTE»
+
+Logo SÃO TRÊS os degraus por quociente — ℤ, ℚ, ℝ — e ℕ é de outra natureza. A
+minha linha de ℕ (π(x,y) = x⊕y) continua a ser uma realização legítima, com
+fibra de tamanho |F_w|, mas NÃO É O QUE DEFINE O ANDAR. Corrigido no teorema, na
+tabela, na prova e no medidor.
+
+E isto torna a tabela MAIS forte, não menos: mostra onde a identificação vale e
+onde não vale. Uma tabela em que as quatro linhas fossem «o mesmo» estaria a
+apagar a distinção que o primeiro andar faz questão de marcar.
+
+A FRASE QUE ENTROU, e é melhor que a minha:
+     QUOCIENTAR É ESQUECER A DISTINÇÃO;
+     G MEDE QUANTOS ELEMENTOS FORAM ESQUECIDOS JUNTOS.
+
+E o que NÃO entrou, das duas revisões: «perfeição matemática absoluta»,
+«estatura monumental», «propriedade fundamental da teoria dos conjuntos». São
+elogios, não medições — e a última é maior do que os quatro andares que medi.
+Uma delas repete, pela segunda vez, que o meu ficheiro é o `peano_dual.c`; não
+é — esse é da casa e nunca lhe toquei. O meu é o `aranha_n.c`.
+
+  bateria   529 : 529, 0 falhas · 31 unidades
+  paper     24 páginas
