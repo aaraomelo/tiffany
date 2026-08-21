@@ -1,0 +1,132 @@
+name: Publicar o ERP
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  O ERP vive em plataforma/ desde 20/08/2026, e este workflow é o que o põe no
+#  ar. Substitui os dois que vieram com ele (deploy.yml e deploy-homolog.yml, do
+#  Patria-Labs/patria-erp, hoje arquivado): o GitHub só corre os workflows da
+#  RAIZ do repositório, portanto aqueles eram letra morta e foram absorvidos por
+#  este. O repositório da Patria saiu da jogada; o SERVIDOR é o mesmo.
+#
+#  O QUE MUDOU EM RELAÇÃO AO ANTIGO, e é a única diferença de comportamento:
+#  lá, `push` no main publicava em PRODUÇÃO. Aqui o tronco é o `master` e é o
+#  tronco de trabalho diário — um commit distraído no ERP não pode chegar aos
+#  tenants. Então: push publica em HOMOLOGAÇÃO, e produção é sempre um acto
+#  deliberado (workflow_dispatch com o ambiente escolhido à mão).
+#
+#  E o `paths:` é o que impede que os commits sobre a teoria disparem deploys:
+#  só mexer em plataforma/ (ou neste ficheiro) acorda o workflow.
+#
+#  ONDE ISTO CHEGA, no servidor srv1559444.hstgr.cloud:
+#    produção     {tenant}.patriatechnology.com -> :8090  container patria-erp
+#                 (wildcard, o nginx passa o subdomínio no header X-Tenant)
+#    homologação  erp-homolog.patriatechnology.com -> :8091  patria-erp-homolog
+#  O rsync leva a fonte para /root/patria-erp[-homolog]/ e o deploy.sh de lá faz
+#  o `docker build` e troca o container. Os segredos do runtime (senha da base,
+#  JWT, SMTP) são ficheiros em /root/.erp_* no servidor — não passam por aqui.
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'plataforma/**'
+      - '.github/workflows/erp.yml'
+  workflow_dispatch:
+    inputs:
+      ambiente:
+        description: 'Onde publicar'
+        type: choice
+        options: [homolog, producao]
+        default: homolog
+      seed:
+        description: 'Rodar o seed de módulos/packs depois (em homolog corre sempre)'
+        type: boolean
+        default: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: plataforma/erp-api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Instalar dependências
+        run: npm ci
+      - name: Prisma generate
+        # a URL é de mentira e não se liga a nada: o generate só precisa dela
+        # para validar o schema. Quem se liga é o container, no servidor.
+        run: DATABASE_URL="postgresql://build:build@localhost:5432/build" npx prisma generate
+      - name: Testes (RLS, contrato de perfis, guardrail)
+        run: npm test
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Qual ambiente
+        id: alvo
+        run: |
+          # push -> homolog, sempre. dispatch -> o que foi escolhido.
+          AMB="${{ github.event.inputs.ambiente || 'homolog' }}"
+          if [ "$AMB" = "producao" ]; then
+            echo "dir=/root/patria-erp"           >> "$GITHUB_OUTPUT"
+            echo "script=deploy/deploy.sh"        >> "$GITHUB_OUTPUT"
+            echo "seed_script=deploy/seed.sh"     >> "$GITHUB_OUTPUT"
+            echo "porta=8090"                     >> "$GITHUB_OUTPUT"
+            echo "seed_sempre=nao"                >> "$GITHUB_OUTPUT"
+          else
+            echo "dir=/root/patria-erp-homolog"       >> "$GITHUB_OUTPUT"
+            echo "script=deploy/deploy-homolog.sh"    >> "$GITHUB_OUTPUT"
+            echo "seed_script=deploy/seed-homolog.sh" >> "$GITHUB_OUTPUT"
+            echo "porta=8091"                         >> "$GITHUB_OUTPUT"
+            echo "seed_sempre=sim"                    >> "$GITHUB_OUTPUT"
+          fi
+          echo "ambiente=$AMB" >> "$GITHUB_OUTPUT"
+          echo "→ $AMB"
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          {
+            echo "Host server"
+            echo "  HostName ${{ vars.SSH_HOST }}"
+            echo "  User ${{ vars.SSH_USER }}"
+            echo "  AddressFamily inet"
+            echo "  ConnectTimeout 30"
+            echo "  StrictHostKeyChecking accept-new"
+          } >> ~/.ssh/config
+          for i in 1 2 3; do ssh-keyscan -4 -H ${{ vars.SSH_HOST }} >> ~/.ssh/known_hosts 2>/dev/null && break; sleep 3; done
+
+      - name: Sync source
+        # a origem é plataforma/ e não ./ — é a única mudança de caminho que a
+        # mudança de casa obrigou. Os excludes continuam relativos à origem.
+        run: |
+          rsync -az --delete \
+            --exclude node_modules --exclude dist --exclude .git \
+            --exclude 'erp-api/public' --exclude estrategia --exclude .claude \
+            --exclude clients \
+            plataforma/ server:${{ steps.alvo.outputs.dir }}/
+
+      - name: Build & restart
+        run: ssh server 'sh ${{ steps.alvo.outputs.dir }}/${{ steps.alvo.outputs.script }}'
+
+      - name: Seed
+        if: ${{ steps.alvo.outputs.seed_sempre == 'sim' || inputs.seed }}
+        run: ssh server 'sh ${{ steps.alvo.outputs.dir }}/${{ steps.alvo.outputs.seed_script }}'
+
+      - name: Smoke test
+        run: |
+          for i in $(seq 1 15); do
+            code=$(ssh server 'curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:${{ steps.alvo.outputs.porta }}/api/health' || echo 000)
+            echo "tentativa $i: health=$code"
+            [ "$code" = "200" ] && exit 0
+            sleep 4
+          done
+          echo "health nao ficou 200 a tempo em ${{ steps.alvo.outputs.ambiente }}"; exit 1
