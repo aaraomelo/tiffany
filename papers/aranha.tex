@@ -11,7 +11,7 @@
 % ─────────────────────────────────────────────────────────────────────────────
 \documentclass[11pt,a4paper]{article}
 \usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[brazil]{babel}
-\usepackage{amsmath,amssymb,amsthm}
+\usepackage{amsmath,amssymb,amsthm}\usepackage{amscd}
 \usepackage[margin=2.4cm]{geometry}
 \usepackage{booktabs}\usepackage{xcolor}
 \usepackage[hidelinks]{hyperref}
@@ -277,6 +277,17 @@ vizinhos. Nos passos 1 a 3 ela entra só como $\lvert V(x)\rvert=2n$; no fecho,
 ela decide \emph{quantos} rotores há. E o fecho é o mesmo $J^{4}=\mathrm{id}$ da
 bidualidade: em $\Z^2$ há um plano e um rotor, que é a razão por que ali os dois
 se confundem.
+
+\medskip\noindent\textbf{E é o grau que proíbe coisas.} A cláusula~(4) não é só
+onde a dimensão entra: é onde ela \emph{decide}. Uma aplicação injetiva das
+células de $\Z^2$ na reta que quisesse além disso levar vizinhos em vizinhos
+precisaria de $4$ posições adjacentes à imagem de um vértice interior, e a reta
+oferece $2$. Logo
+\[
+\boxed{\ \text{injeção de células}\ \not\Rightarrow\ \text{injeção de vizinhanças}\ }
+\]
+e a §\ref{sec:dual} vive inteiramente deste facto: nenhuma habilidade de
+construção o contorna, porque é uma contagem de graus.
 
 \medskip\noindent\textbf{Leitura.} Enunciar o teorema em $\Z^2$ e realizá-lo num
 arranjo do plano dá a impressão de que o $2$ é do teorema. Não é: é do exemplo, e
@@ -1129,10 +1140,12 @@ posições. É a cláusula (3) do Teorema~\ref{thm:multiplicidade} a pagar-se.
 % ═══════════════════════════════════════════════════════════════════════════
 \section{A realização contrária: dobra contra buraco}\label{sec:dual}
 
-\noindent A realização comprime o parâmetro no espaço, e o excesso de índices
-aparece como \textbf{dobra}: $G>1$. A pergunta dual é o que acontece na direção
-contrária --- do espaço para o parâmetro --- e a resposta não é ``a inversa'',
-porque não há uma.
+\noindent A realização comprime o parâmetro no espaço --- \emph{encher} ---, e o
+excesso de índices aparece como \textbf{dobra}: $G>1$. A pergunta dual é o que
+acontece na direção contrária --- \emph{contar}, do espaço para o parâmetro --- e
+a resposta não é ``a inversa'', porque não há uma: pelo Teor.~\ref{thm:dimensao}
+o grau proíbe-a. O que há é uma \textbf{realização injetiva do espaço na régua},
+que preserva a identidade das células e não pode preservar a adjacência.
 
 \begin{teorema}[a realização contrária, e o que ela paga]\label{thm:contraria}
 Seja $Q_M=\{0,\dots,M-1\}^2$ o quadrado discreto e $q_0,\dots,q_{M^2-1}$ uma
@@ -1160,13 +1173,12 @@ Injetividade: $t\mapsto2t$ é injetiva e a enumeração é bijetiva sobre $Q_M$.
 Não sobrejetividade: $\operatorname{im}\rho\subseteq2\Z$.
 \end{proof}
 
-\medskip\noindent\textbf{E não se pode pedir as duas coisas.} Se além de
-injetiva se exigisse que $\rho$ levasse vizinhos em vizinhos, ela seria um
-mergulho de grafos de $Q_M$ no caminho --- e isso não existe, por uma razão que
-já está neste paper: pelo Teor.~\ref{thm:dimensao} um vértice interior do
-quadrado tem $\lvert V(x)\rvert=4$ vizinhos distintos, enquanto na reta
-$\lvert V\rvert=2$. Quatro imagens distintas e adjacentes não cabem em dois
-lugares. \emph{O grau decide}, e não a habilidade de quem constrói.
+\medskip\noindent\textbf{E não se pode pedir as duas coisas} --- é o que a
+§\ref{sec:dimensao} já disse: um vértice interior tem $4$ vizinhos e a reta dá
+$2$, logo nenhuma injeção de células é injeção de vizinhanças. Por isso $\rho$
+não se chama aqui ``curva do quadrado na reta'': chama-se \textbf{realização
+injetiva do quadrado na régua}, e o nome carrega o que ela preserva --- a
+identidade das células --- e o que não pode preservar.
 
 \medskip\noindent Donde a dualidade é entre \textbf{dobra} e \textbf{buraco}, e
 não entre duas inversas. Quem comprime o parâmetro no espaço paga com $G>1$;
@@ -1175,12 +1187,26 @@ $(\pi,\rho)$ é a mesma \emph{retração} de sempre: pode-se ter
 $\pi\circ\rho=\mathrm{id}_X$, mas nunca $\rho\circ\pi=\mathrm{id}_I$ --- o que
 sobra na reta não tem de onde vir.
 
-\medskip\noindent\textbf{E o levantamento é a ponte, outra vez.} Com
-$\abs{I}=2\abs{X}$ e $\pi$ a cobrir cada célula duas vezes, tem-se $G\equiv2$; a
-folha $k(i)\in\{1,2\}$ do Teor.~\ref{thm:levantamento} é \emph{exatamente} o bit
-que $\pi$ deitou fora, e $\tilde\pi$ é injetiva sobre $\abs{I}$ pontos. A
-retração vira bijeção ao preço de uma coordenada --- que é o mesmo preço de
-sempre.
+\medskip\noindent\textbf{E o levantamento fecha o quadrado.} Com
+$\abs{I}=2\abs{X}$ e $\pi$ a cobrir cada célula duas vezes, tem-se $G\equiv2$, a
+fibra sobre cada célula é $\{1,2\}$, e a folha $k(i)$ do
+Teor.~\ref{thm:levantamento} é \emph{exatamente} o bit que $\pi$ deitou fora.
+Nenhuma folha fica por usar, de modo que $\tilde\pi$ não é apenas injetiva: é
+\textbf{bijeção}, e o diagrama comuta:
+\[
+\begin{CD}
+I @>{\tilde\pi}>{\cong}> X\times\{1,2\}\\
+@V{\pi}VV @VV{\operatorname{pr}_X}V\\
+X @= X
+\end{CD}
+\qquad\qquad
+X\ \overset{\rho}{\lhook\joinrel\longrightarrow}\ I
+\]
+--- à esquerda a dobra desfeita, à direita o buraco. Em uma linha:
+\[
+\boxed{\ \text{perder uma coordenada}\iff\text{criar multiplicidade},\qquad
+\text{recuperá-la}\iff\text{desdobrar}.\ }
+\]
 
 % ═══════════════════════════════════════════════════════════════════════════
 \section{O espaço e o tempo}\label{sec:leitura}
@@ -1490,7 +1516,7 @@ comprimento (Teor.~\ref{thm:medida}).
 \toprule
 $n$ & realização & $\abs{I}$ & $\max G$ & células & dobra & percurso & \\
 \midrule
-$1$ & Cantor & $512$ & $1$ & $512$ & não & não & o endereço ternário do terço médio; e um dos lados da §\ref{sec:dual} \\
+$1$ & Cantor & $512$ & $1$ & $512$ & não & não & o endereço ternário do terço médio --- e o lado \emph{contar} da §\ref{sec:dual} \\
 $2$ & Heighway & $4097$ & $2$ & $2558$ & sim & sim & a curva da §\ref{sec:dragao} \\
 $3$ & dragão no espaço & $2049$ & $3$ & $1750$ & sim & sim & a mesma dobra com o plano da viragem a rodar \\
 $2$ & espiral quadrada & $4097$ & $1025$ & $4$ & sim & sim & sempre à esquerda \\
@@ -1581,7 +1607,8 @@ com o percurso injetivo a dar excesso zero; convolução diagonalizada e
 deconvolução com resíduo $0$; e a degenerescência exibida);
 Teor.~\ref{thm:contraria} §AN29 (contar injetiva com $256$ lugares por usar;
 encher com $G\equiv2$; $\pi\circ\rho=\mathrm{id}$ e $\rho\circ\pi$ a falhar em
-$256$ de $512$; a serpentina com $\rho=2t$; e o grau $4$ contra $2$);
+$256$ de $512$; $\tilde\pi$ bijetiva sobre $X\times\{1,2\}$, $512$ de $512$; a
+serpentina com $\rho=2t$; e o grau $4$ contra $2$);
 os três pontos da revisão externa §AN28 ($\tau=N$ com
 $g=\bigl(\begin{smallmatrix}1&3\\3&1\end{smallmatrix}\bigr)$, que tem a diagonal
 a $1$ e o cruzado a $3$; $G=1$ na imagem e $0$ fora; e $c=\tfrac1nF(f)$ a

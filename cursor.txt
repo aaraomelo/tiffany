@@ -2132,3 +2132,39 @@ injectiva sobre 512 = |I|. A retracção vira bijecção ao preço de uma coorde
   gume      50 mutações, 50 mordem
   bateria   529 : 529, 0 falhas · 28 unidades passaram, 0 falharam
   paper     20 páginas
+
+§44 — O FECHO DA DUALIDADE: a bijecção, o diagrama, e o nome certo
+==================================================================
+Segunda passagem da revisão externa sobre a curva dual. Aprovou a matemática
+central — «não mexeria mais» — e pediu três coisas, todas boas.
+
+O QUE FALTAVA MEDIR, e é o que fecha o quadrado: π̃ ali não é só INJECTIVA, é
+BIJECÇÃO. Como G ≡ 2 EXACTAMENTE, a fibra sobre cada célula é {1,2} e nenhuma
+folha fica por usar:
+     |im π̃| = 2·|X| = 512 = |I|
+Medido: 512 pontos, cada um UMA vez. A retracção vira bijecção, e o diagrama
+comuta:
+        I  --π̃, ≅-->  X × {1,2}          e ao lado    X --ρ--> I
+        |                 |
+        π               pr_X
+        v                 v
+        X  ===========    X
+À esquerda a dobra desfeita, à direita o buraco. Em uma linha:
+     perder uma coordenada ⟺ criar multiplicidade
+     recuperá-la           ⟺ desdobrar
+
+O NOME ESTAVA ERRADO. Eu chamava-lhe «curva do quadrado na recta», e isso deixa
+ler que se está a construir uma inversa geométrica do Cantor — que não existe.
+Passa a chamar-se REALIZAÇÃO INJECTIVA DO QUADRADO NA RÉGUA, e o nome carrega o
+que ela preserva (a identidade das células) e o que não pode preservar (a
+adjacência local).
+
+E O ARGUMENTO DO GRAU SUBIU DE SÍTIO: estava na §dual, e o lugar dele é JUNTO AO
+TEOREMA DA DIMENSÃO, porque é lá que ele deixa de ser lateral:
+     injecção de células  ⇏  injecção de vizinhanças
+Um vértice interior tem |V| = 4 e a recta dá 2. Não é dificuldade de construção
+— é contagem de graus, e é o thm:dimensao a decidir. A §dual inteira vive disto.
+
+  gume      52 mutações, 52 mordem
+  bateria   529 : 529, 0 falhas · 28 unidades passaram, 0 falharam
+  paper     21 páginas

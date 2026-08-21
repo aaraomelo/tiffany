@@ -2779,9 +2779,29 @@ int main(void){
             long bit_alto = (t >= PD_X) ? 2 : 1;      /* a metade da recta de onde veio */
             if(k_de[t] != bit_alto) folha_mau++;
         }
-        printf("      a folha k(i) É o bit que encher deitou fora: %s\n\n",
+        printf("      a folha k(i) É o bit que encher deitou fora: %s\n",
                folha_mau ? "NÃO" : "sim, nos 512");
         if(folha_mau) mau++;
+
+        /* E AQUI π̃ NÃO É SÓ INJECTIVA — É BIJECÇÃO sobre X × {1,2}. Como G ≡ 2
+         * exactamente, a fibra sobre cada célula é {1,2} e nenhuma folha fica por
+         * usar: |im π̃| = 2·|X| = |I|. É o quadrado a fechar. */
+        an_zera(3);
+        long cobre_mau = 0;
+        for(long t = 0; t < nt; t++){
+            Vet lev = traj[t]; lev.c[2] = (int)k_de[t];
+            an_visita(lev);
+        }
+        long celulas_lev = an_ocupadas;
+        for(int x = 0; x < PD_Q; x++)
+            for(int y = 0; y < PD_Q; y++)
+                for(int kk = 1; kk <= 2; kk++){
+                    Vet w = vet0(); w.c[0] = x; w.c[1] = y; w.c[2] = kk;
+                    if(an_le(w) != 1) cobre_mau++;      /* cada (x,k) uma vez */
+                }
+        printf("      π̃: I → X × {1,2} é BIJECÇÃO: %ld pontos de %d, cada um uma vez: %s\n\n",
+               celulas_lev, 2*PD_X, cobre_mau ? "NÃO" : "sim");
+        if(celulas_lev != 2*PD_X || cobre_mau) mau++;
 
         /* (e) A CONSTRUÇÃO MAIS LIMPA, e não é a minha: enumerar o quadrado em
          *     SERPENTINA — q_0, q_1, …, q_{M²−1}, cada ponto uma vez — e lançar
@@ -2842,7 +2862,8 @@ int main(void){
            " contar∘encher falha em 256 de 512 — exactamente na metade que contar"
            " nunca usa. Só um lado fecha. E o que o LEVANTAMENTO repõe é precisamente"
            " o que se perdeu: a folha k(i) ∈ {1,2} É o bit que encher deitou fora, e"
-           " com ela π̃ volta a ser injectiva sobre 512 = |I|. A retracção vira bijecção"
+           " com ela π̃ não é só injectiva — é BIJECÇÃO sobre X × {1,2}, porque G ≡ 2"
+           " exactamente e nenhuma folha fica por usar: 512 pontos, cada um uma vez. A retracção vira bijecção"
            " ao preço de uma coordenada — que é o Teor. do levantamento outra vez, aqui"
            " no par de Cantor. E A CONSTRUÇÃO MAIS LIMPA NÃO É ESTA: é enumerar o"
            " quadrado em SERPENTINA e lançar na recta com ρ(q_t) = 2t, ficando a"
