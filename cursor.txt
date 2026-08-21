@@ -1730,3 +1730,69 @@ A ESCOLHA DO FACTOR É PARTE DA MEDIDA, e custou duas tentativas:
   gume      21 mutações, 21 mordem
   bateria   529 : 529, 0 falhas · 12 unidades passaram, 0 falharam
   paper     12 páginas
+
+§37 — A REVISÃO QUE ELE MANDOU FAZER: o que eu ainda tinha descaracterizado
+===========================================================================
+«ve o resto do paper se tem mais coisa descaracterizada, se eu nao vejo isso vc
+ia sangrar todas as maquinas que rodassem isso a troco de nada».
+
+OITO. E a do custo era a que sangrava.
+
+1. A CAIXA. A da base é
+     trajetória --π--> DOBRA --|π⁻¹|--> MULTIPLICIDADE --leitura--> PERCEPÇÃO
+   e eu tinha escrito
+     trajetória --π--> célula --+1--> campo G --leitura--> DECISÃO.
+   Reescrevi as quatro etiquetas, e a última — percepção — virou decisão. O
+   mesmo erro do ciclo, noutro sítio do documento.
+2. O CUSTO. Eu escrevia «cada passo com uma leitura e uma escrita: Θ(|I|)» e
+   «O(1) amortizado». A cláusula 4 lê a VIZINHANÇA: são 2n leituras por passo,
+   logo Θ(n·|I|). Quem implementasse o que eu escrevi acharia o custo n vezes
+   menor do que ele é. Agora está CONTADO (§AN14): o contador diz 2n por passo,
+   nem uma a mais — e é isso que prova que o autómato não varre.
+3. O LEMA ENCAIXADO. A conservação estava entre o teorema e a prova dele: duas
+   «Demonstração» seguidas, a segunda a parecer do lema.
+4. «A cláusula (3) é um algoritmo» — o ciclo são as QUATRO.
+5. CONTEÚDO DA BASE QUE EU TINHA APAGADO: a curva inversa do dragão é π̃(I); a
+   recta é o caso degenerado; o endereçamento de Peano é OUTRO levantamento.
+6. A VIZINHANÇA FORA DA GRADE. Eu escrevia «a única coisa que X tinha de ter era
+   igualdade» — falso desde que a cláusula 4 voltou ao lugar. Na ÁRVORE cada
+   bola tem exactamente UM irmão e os dois particionam a mãe: |V| = 1, não 2n.
+   Medido em cinco níveis. Isso não enfraquece o thm:dimensao — confirma-o.
+7. O ALGORITMO ANTES DA CONSTRUÇÃO. «que algoritmo genérico é esse que é
+   apresentado antes da construção?» O ciclo passou para depois da vizinhança:
+   ele CAI da construção, não a precede.
+8. OBJECTOS COM VONTADE. «o invariante tem de separar» — ele não faz nada, não
+   tem acção nem dever. E «a memória é do algoritmo» — o algoritmo não tem
+   cabeça. Saíram, com «a aranha não sabe que é uma máquina» e o resto.
+
+E O RASTRO DO MEU FRACASSO, que ele mandou tirar: «E o que não serve como
+verificação…» era eu a contar o meu erro no meio do paper. Saiu. Com ele saíram
+«O que é acrescento e o que não é», «O que isto arruma» e «E a memória é do
+algoritmo, não da tabela».
+
+O QUE ELE MANDOU PÔR, E ERA O ALVO QUE EU TINHA FALHADO
+  · O DIRECTO É ζ E O INVERSO É μ (§AN15, sec:zeta). Na álgebra de incidência
+    de (I,≤): a escrita da cláusula 3 É a convolução com ζ, e o Algoritmo B É a
+    deconvolução com μ = ζ⁻¹, que na ordem total é a diferença finita. Medido
+    nas duas direcções, resíduo 0, na fibra MAIS FUNDA da realização (G=9). E o
+    levantamento é a mesma convolução restrita à fibra. É A MESMA inversão que o
+    `lib/dirichlet.h` corre na árvore dos divisores: F = f*1 e f = F*μ. A aranha
+    não precisava de transformada nova — precisava da inversa de ζ, que já tinha
+    nome em dois sítios da casa.
+  · Título: A ARANHA ESTIGMÉRGICA. Subtítulo: convolução e deconvolução.
+  · Abstract em três: de onde parte · para onde vai · o que usa.
+
+E O ENQUADRAMENTO QUE FALTAVA (§AN16, sec:medida): «a métrica que realiza a
+memória no espaço, invariante». A casa já o tinha em conservacao_metrica.c §M10
+— «A PATA QUE SOME NA MARCA: a projecção conserva a MEDIDA e perde a FIBRA».
+É por ISTO que G existe. Medido: Heighway, espiral e recta com |I| = ∑G = 4097
+nas três, e o campo a separá-las por completo:
+     Heighway  2558 células, max G 2
+     espiral      4 células, max G 1025
+     recta     4097 células, max G 1
+Donde: qualquer quantidade invariante da medida não separa realizações — que é,
+na linguagem da casa, o que eu tinha achado sozinho e baptizado mal.
+
+  gume      26 mutações, 26 mordem
+  bateria   529 : 529, 0 falhas · 15 unidades passaram, 0 falharam
+  paper     14 páginas

@@ -42,6 +42,12 @@
  *   §AN9  a ARANHA INVERSA em ℤⁿ: π̃ sobe UM andar, e a VOLTA devolve G
  *   §AN10 quem lê o ESPAÇO e quem lê o ÍNDICE: a aranha e o dragão são duais
  *   §AN11 a SÉRIE DE π: o campo lê o custo, e o valor sai por três caminhos
+ *   §AN14 a vizinhança na ÁRVORE é 1 e não 2n · e o custo CONTADO: 2n
+ *         leituras por passo, nem uma a mais — o autómato não varre
+ *   §AN16 a MEDIDA conserva-se e a FIBRA perde-se: mesma ∑G, dobras diferentes
+ *         — é por isto que G existe
+ *   §AN15 a ARANHA É ζ e a INVERSA É μ = ζ⁻¹: acumular e desacumular, a mesma
+ *         inversão que o `dirichlet.h` corre na árvore dos divisores
  *   §AN13 o CICLO: escrita · leitura · decisão · fecho, em ℤⁿ — cada passo
  *         É uma cláusula, e o gradiente não delibera: lê o mínimo do chão
  *   §AN12 a TRANSFORMADA ALGÉBRICA: a ida é Dirac, a dobra é a NORMA, e a
@@ -102,8 +108,11 @@ static int an_visita(Vet v){
     an_G[i]++;
     return 1;
 }
-/* cláusula 4: SENTIR É LER G */
+/* cláusula 4: SENTIR É LER G. O contador existe para o custo ser CONTADO e não
+ * afirmado: o §AN14 zera-o, corre o ciclo, e lê quantas leituras foram feitas. */
+static long an_leituras = 0;
 static long an_le(Vet v){
+    an_leituras++;
     long i = an_slot(v);
     return (i < 0 || !an_vivo[i]) ? 0 : an_G[i];
 }
@@ -1160,6 +1169,250 @@ int main(void){
            " e em ℤⁿ há n(n−1)/2 deles: nenhum em ℤ¹, um em ℤ², três em ℤ³, seis em ℤ⁴,"
            " e em cada um o rotor fecha",
            mau == 0 && dims == 4);
+    }
+
+
+    /* ═══ §AN14: a vizinhança na ÁRVORE, e o custo CONTADO ═══════════════════ */
+    printf("\n§AN14  a vizinhança fora da grade, e o custo contado passo a passo.\n\n");
+    {
+        long mau = 0;
+        const int NB = 10;
+        printf("      nível p   bolas   irmãos por bola   união = mãe\n");
+        for(int prof = 1; prof <= 5; prof++){
+            long bolas = 1L << prof, irmaos_mau = 0, uniao_mau = 0;
+            for(long b = 0; b < bolas; b++){
+                long irm = b ^ 1L, mae = b >> 1, conta = 0;
+                for(long c = 0; c < bolas; c++)
+                    if(c != b && (c >> 1) == mae) conta++;
+                if(conta != 1) irmaos_mau++;
+                for(long x = 0; x < (1L << NB); x += 8){
+                    long pb = x >> (NB - prof), pm = x >> (NB - prof + 1);
+                    int em_b = (pb == b), em_i = (pb == irm), em_mae = (pm == mae);
+                    if(em_mae != (em_b || em_i)) uniao_mau++;
+                    if(em_b && em_i) uniao_mau++;
+                }
+            }
+            printf("      %-9d %-7ld %-17s %s\n", prof, bolas,
+                   irmaos_mau ? "NÃO" : "1, sempre", uniao_mau ? "NÃO" : "sim");
+            if(irmaos_mau || uniao_mau) mau++;
+        }
+        printf("\n      n   passos   leituras   por passo   2n   varre?\n");
+        const long T = 64;
+        for(int n = 1; n <= 4; n++){
+            an_zera(n);
+            Vet x = vet0();
+            an_visita(x);
+            an_leituras = 0;
+            for(long t = 0; t < T; t++){
+                long melhorg = -1; Vet melhor = x;
+                for(int i = 0; i < n; i++)
+                    for(int sg = -1; sg <= 1; sg += 2){
+                        Vet v = x; v.c[i] += sg;
+                        long g = an_le(v);
+                        if(melhorg < 0 || g < melhorg){ melhorg = g; melhor = v; }
+                    }
+                x = melhor;
+                an_visita(x);
+            }
+            printf("      %d   %-8ld %-10ld %-11ld %-4d %s\n",
+                   n, T, an_leituras, an_leituras/T, 2*n,
+                   (an_leituras == T*2*n) ? "não" : "SIM");
+            if(an_leituras != T * 2 * n) mau++;
+        }
+        printf("\n");
+        ok("O CUSTO É CONTADO, E A VIZINHANÇA NÃO É SEMPRE 2n. Primeiro: na ÁRVORE do"
+           " encaixe cada bola tem EXACTAMENTE UM irmão — o mesmo prefixo com o último"
+           " bit trocado — e os dois particionam a bola-mãe, medido em cinco níveis."
+           " Logo |V(x)| = 1 ali, contra 2n na grade: a cláusula 4 é o sítio onde a"
+           " estrutura entra, e trocar a estrutura troca exactamente esse número, mais"
+           " nada. Segundo, e é o que impede a afirmação de custo de ser conversa: o"
+           " contador de leituras diz que o ciclo faz EXACTAMENTE 2n leituras por passo"
+           " em ℤ¹ a ℤ⁴ — nem uma a mais. O autómato NÃO VARRE o espaço: lê a"
+           " vizinhança e escreve num ponto, e o custo é Θ(n·|I|) em tempo e Θ(|I|) em"
+           " memória, sem dependência de |X|. Escrever «uma leitura e uma escrita por"
+           " passo» — como eu tinha escrito — esquecia a cláusula 4 e prometia um custo"
+           " n vezes menor do que o que o ciclo faz",
+           mau == 0);
+    }
+
+    /* ═══ §AN15: a ARANHA É ζ, E A INVERSA É μ — convolução e deconvolução ═══ */
+    printf("\n§AN15  o directo e o inverso da aranha: convolução com ζ, deconvolução com μ.\n\n");
+    {
+        /* A álgebra de incidência da ordem (I, ≤): ζ(u,t) = 1 se u ≤ t, e a sua
+         * inversa μ, que na ordem TOTAL é a diferença finita — μ(t,t) = 1,
+         * μ(t−1,t) = −1, e zero no resto. É o mesmo par «F = f*1, f = F*μ» que o
+         * `lib/dirichlet.h` corre sobre a árvore dos divisores: só muda a ordem. */
+        const long TT = 64;
+        long mau = 0;
+
+        /* (a) μ é MESMO a inversa de ζ: Σ_v ζ(u,v)·μ(v,t) = δ(u,t) */
+        long falhas_inv = 0;
+        for(long u = 0; u < TT; u++)
+            for(long t = 0; t < TT; t++){
+                long soma = 0;
+                for(long v = u; v <= t; v++){
+                    long z = 1;                          /* ζ(u,v) = 1, pois u ≤ v */
+                    long m = (v == t) ? 1 : ((v == t-1) ? -1 : 0);
+                    soma += z * m;
+                }
+                if(soma != (u == t)) falhas_inv++;
+            }
+        printf("      μ = ζ⁻¹ na ordem (I,≤):  %s em %ld pares\n",
+               falhas_inv ? "FALHA" : "confirmado", TT*TT);
+        if(falhas_inv) mau++;
+
+        /* (b) A ARANHA DIRECTA É A CONVOLUÇÃO COM ζ. Sobre uma célula fixa x,
+         *     seja a(t) = 1 se π(t) = x. Então G_t(x) = Σ_{u≤t} a(u) = (a*ζ)(t),
+         *     e isso tem de bater com a escrita incremental do §AN1. */
+        /* O REGIME: não serve uma célula qualquer. A fibra só é testada onde ela é
+         * FUNDA, por isso escolhe-se a de MAIOR G — e a realização é a da ISA, que
+         * dobra doze vezes, e não o dragão, que dobra duas. */
+        long nt = real_isa(400);
+        const int DIM = 4;
+        an_zera(DIM);
+        for(long t = 0; t < nt; t++) an_visita(traj[t]);
+        Vet alvo = traj[0]; long melhorG = 0;
+        for(long t = 0; t < nt; t++){
+            long g = an_le(traj[t]);
+            if(g > melhorG){ melhorG = g; alvo = traj[t]; }
+        }
+        printf("      a fibra escolhida é a mais funda: G = %ld\n", melhorG);
+        long a_de[512], Gconv[512], Ginc[512];
+        an_zera(DIM);
+        for(long t = 0; t < nt && t < 512; t++){
+            a_de[t] = an_igual(traj[t], alvo);
+            an_visita(traj[t]);
+            Ginc[t] = an_le(alvo);               /* a escrita incremental, cláusula 3 */
+            (void)0;
+        }
+        long n_use = nt < 512 ? nt : 512;
+        for(long t = 0; t < n_use; t++){
+            long s = 0;
+            for(long u = 0; u <= t; u++) s += a_de[u];    /* (a * ζ)(t) */
+            Gconv[t] = s;
+        }
+        long dif_dir = 0;
+        for(long t = 0; t < n_use; t++) if(Gconv[t] != Ginc[t]) dif_dir++;
+        printf("      directo   G_t(x) = (a * ζ)(t):  divergências %ld em %ld passos\n",
+               dif_dir, n_use);
+        if(dif_dir) mau++;
+
+        /* (c) A ARANHA INVERSA É A DECONVOLUÇÃO COM μ: (G * μ)(t) = a(t). Isto É
+         *     o Algoritmo B — a marca individual de cada passo volta da acumulação,
+         *     e não é preciso guardar a trajectória para a obter. */
+        long dif_inv = 0, marcas = 0;
+        for(long t = 0; t < n_use; t++){
+            long rec = Ginc[t] - (t ? Ginc[t-1] : 0);     /* (G * μ)(t) */
+            if(rec != a_de[t]) dif_inv++;
+            marcas += rec;
+        }
+        printf("      inverso   a(t) = (G * μ)(t):    divergências %ld · marcas recuperadas %ld\n",
+               dif_inv, marcas);
+        if(dif_inv || marcas != Gconv[n_use-1]) mau++;
+
+        /* (d) E O LEVANTAMENTO É A MESMA CONVOLUÇÃO, RESTRITA À FIBRA: k(i) é a
+         *     acumulação de a ao longo da fibra, e desacumulá-la dá 1 em cada
+         *     visita — que é exactamente G̃ ≡ 1. */
+        long ks[512], nk = 0;
+        for(long t = 0; t < n_use; t++) if(a_de[t]) ks[nk++] = Ginc[t];
+        long fib_mau = 0;
+        for(long r = 0; r < nk; r++){
+            if(ks[r] != r + 1) fib_mau++;                 /* k = a acumulação */
+            long d = ks[r] - (r ? ks[r-1] : 0);           /* desacumular: sempre 1 */
+            if(d != 1) fib_mau++;
+        }
+        printf("      na fibra  k(i) = acumulação · desacumulada = 1 em cada visita:"
+               " %s (%ld visitas)\n", fib_mau ? "NÃO" : "sim", nk);
+        if(fib_mau || nk != melhorG || nk < 5) mau++;
+
+        /* (e) E É A MESMA INVERSÃO DA ÁRVORE DOS DIVISORES, que a casa já corre:
+         *     F = f*1 e f = F*μ com o μ de Möbius. Trocar a ORDEM — de (I,≤) para
+         *     a divisibilidade — não troca a álgebra: ζ acumula, μ desacumula. */
+        long fD[64], FD[64], gD[64], dif_div = 0;
+        for(long n = 1; n < 64; n++) fD[n] = (n * 7) % 5 + 1;
+        for(long n = 1; n < 64; n++){
+            long s = 0;
+            for(long d = 1; d <= n; d++) if(n % d == 0) s += fD[d];
+            FD[n] = s;                                    /* F = f * 1 */
+        }
+        for(long n = 1; n < 64; n++){
+            long s = 0;
+            for(long d = 1; d <= n; d++) if(n % d == 0){
+                /* μ de Möbius, calculado pela factorização: 0 se tem quadrado */
+                long m = 1, k = d;
+                for(long q = 2; q * q <= k; q++)
+                    if(k % q == 0){ k /= q; if(k % q == 0){ m = 0; break; } m = -m; }
+                if(m && k > 1) m = -m;
+                s += m * FD[n/d];
+            }
+            gD[n] = s;                                    /* f = F * μ */
+        }
+        for(long n = 1; n < 64; n++) if(gD[n] != fD[n]) dif_div++;
+        printf("      e na árvore dos divisores: f = (f*1)*μ com %ld divergências em 63\n\n",
+               dif_div);
+        if(dif_div) mau++;
+
+        ok("O DIRECTO E O INVERSO DA ARANHA SÃO CONVOLUÇÃO E DECONVOLUÇÃO, e não por"
+           " analogia: na álgebra de incidência da ordem (I,≤), a escrita incremental"
+           " da cláusula 3 É a convolução com ζ — G_t(x) = Σ_{u≤t} a(u) = (a*ζ)(t) —, e"
+           " o Algoritmo B É a deconvolução com μ = ζ⁻¹, que na ordem total é a"
+           " diferença finita: (G*μ)(t) devolve a marca individual de cada passo. Mede-se"
+           " nas duas direcções sobre o passo da ISA em ℤ⁴, resíduo 0. E o LEVANTAMENTO é"
+           " a mesma convolução restrita à FIBRA: k(i) é a acumulação ao longo dela, e"
+           " desacumular dá 1 em cada visita, que é o G̃ ≡ 1 do §AN9 dito na outra"
+           " linguagem — e mede-se na fibra MAIS FUNDA que a realização tem, não numa"
+           " qualquer: numa fibra de duas visitas quase não há o que desacumular. Por fim, é A MESMA inversão que a casa já corre na árvore dos"
+           " divisores — F = f*1 e f = F*μ (`lib/dirichlet.h`): trocar a ORDEM não troca"
+           " a álgebra, ζ acumula e μ desacumula. A aranha não precisava de uma"
+           " transformada nova: precisava da inversa de ζ, e ela já tinha nome",
+           mau == 0);
+    }
+
+
+    /* ═══ §AN16: a MEDIDA conserva-se e a FIBRA perde-se ═════════════════════ */
+    printf("\n§AN16  a medida não distingue: mesma ∑G, dobras diferentes.\n\n");
+    {
+        long mau = 0;
+        /* a espiral quadrada: a mesma regra do dragão com a viragem SEMPRE à
+         * esquerda. Mesmo número de passos, e por isso a mesma medida. */
+        long nd = real_dragao(4096);
+        Res rd = an_corre(2, nd);
+        long nesp = 0;
+        {
+            int x = 0, y = 0, dx = 1, dy = 0;
+            Vet v = vet0(); traj[nesp++] = v;
+            for(long t = 0; t < 4096 && nesp < AN_IMAX; t++){
+                x += dx; y += dy;
+                v = vet0(); v.c[0] = x; v.c[1] = y; traj[nesp++] = v;
+                int a = -dy, b = dx; dx = a; dy = b;      /* sempre à esquerda */
+            }
+        }
+        Res re = an_corre(2, nesp);
+        long nr = real_recta(4096, 2);
+        Res rr = an_corre(2, nr);
+        printf("      realização    |I|     ∑G      células   max G\n");
+        printf("      Heighway      %-7ld %-7ld %-9ld %ld\n", rd.nt, rd.soma, rd.celulas, rd.max_g);
+        printf("      espiral       %-7ld %-7ld %-9ld %ld\n", re.nt, re.soma, re.celulas, re.max_g);
+        printf("      recta         %-7ld %-7ld %-9ld %ld\n\n", rr.nt, rr.soma, rr.celulas, rr.max_g);
+        /* a MEDIDA é a mesma nas três; a FIBRA não */
+        int medida_igual = (rd.nt == re.nt && re.nt == rr.nt
+                         && rd.soma == re.soma && re.soma == rr.soma
+                         && rd.soma == rd.nt);
+        int fibra_difere = (rd.max_g != re.max_g) || (rd.celulas != re.celulas);
+        int controlo = (rr.max_g == 1);
+        if(!medida_igual || !fibra_difere || !controlo) mau++;
+        if(!rd.recontou || !re.recontou || !rr.recontou) mau++;
+
+        ok("A MEDIDA CONSERVA-SE E A FIBRA PERDE-SE, e é esta a razão de ser de G: três"
+           " realizações com o MESMO |I| e a MESMA ∑G — a curva de Heighway, a espiral"
+           " quadrada e a recta — têm dobras diferentes. A medida de contagem é cega à"
+           " identificação que a projecção faz: duas patas produzem uma marca, e a marca"
+           " não diz quantas patas a produziram. Donde a consequência prática, e o gume"
+           " confirmou-a: qualquer quantidade que seja invariante da medida — ∑G, |I| —"
+           " não separa realizações, e usá-la para as distinguir não distingue nada."
+           " O que separa é o campo: max G e o número de células. E a recta é o"
+           " controlo, com a fibra trivial",
+           mau == 0);
     }
 
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);

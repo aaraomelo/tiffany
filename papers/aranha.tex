@@ -39,28 +39,39 @@
 
 \begin{document}
 \interfacen{6}
-\gkcapa{A Aranha}
-       {multiplicidade geométrica · memória no espaço}
-       {a dobra que a projecção faz, e a coordenada que a desfaz}
+\gkcapa{A Aranha Estigmérgica}
+       {convolução e deconvolução}
+       {a memória no espaço, e a operação que a desfaz}
 \maketitle
 
 \begin{abstract}\noindent
-Uma trajetória discreta realizada num espaço identifica índices distintos na
-mesma célula. Essa identificação \emph{é} a dobra da trajetória, e o número de
-índices por célula --- a \textbf{multiplicidade geométrica} $G$ --- é a memória
-de que essa dobra aconteceu. Prova-se aqui que $G$ é registável por
-\textbf{escrita local no espaço}, sem que o agente conserve a sua própria
-história; que a dimensão do espaço entra num sítio só, a vizinhança, e como
-$\abs{V(x)}=2n$; que a fibra perdida pela projeção volta como \emph{uma}
-coordenada de folha, seja qual for a dimensão, com volta exata; que em espaços
-ultramétricos a célula \emph{é} a bola e as bolas particionam; e que numa órbita
-determinista $G$ conta o período. Fecha-se com a curva de Heighway obtida por
-dois caminhos disjuntos --- uma régua de bits e a dobra $D_{k+1}=D_k+D_k^{*}$
---- e com a demonstração de que coincidem.
+\textbf{De onde parte.} De um só dado: uma trajetória discreta $I=\{0,\dots,N\}$
+e a sua realização $\pi\colon I\to X$ num conjunto $X$ com igualdade decidível.
+Não se supõe métrica, nem dimensão, nem estrutura algébrica em $X$. A realização
+identifica índices distintos na mesma célula, e essa identificação \emph{é} a
+dobra da trajetória; a \textbf{multiplicidade} $G(x)=\lvert\pi^{-1}(x)\rvert$
+conta-a.
 
-\medskip\noindent\textbf{Auto-contenção.} Todo enunciado usado está enunciado e
-demonstrado neste documento. Onde um irmão da mesma obra já dizia o mesmo, o
-texto foi duplicado em vez de referenciado.
+\medskip\noindent\textbf{Para onde vai.} Para o par de operações que a aranha
+executa, e que são uma inversa da outra. Escrever o campo é a
+\textbf{convolução} com $\zeta$ na ordem $(I,\le)$; recuperar o passo é a
+\textbf{deconvolução} com $\mu=\zeta^{-1}$, que nessa ordem é a diferença finita.
+Enquanto a família $\{G_t\}$ existe, a trajetória inteira volta sem nada dela ter
+sido guardado; retendo só $G=G_N$, o que se perde repõe-se com \emph{uma}
+coordenada de folha, seja qual for a dimensão, e com volta exata. Pelo caminho:
+a dimensão de $X$ entra num sítio único --- a vizinhança, $\lvert V(x)\rvert=2n$
+na grade e $1$ na árvore ---; sobre ultramétricos a célula \emph{é} a bola; numa
+órbita determinista $G$ conta o período; e a dobra lê-se na norma do espectro,
+sem visitar a trajetória.
+
+\medskip\noindent\textbf{O que usa.} Para as três primeiras cláusulas do
+teorema, só a igualdade em $X$. Para a quarta, uma vizinhança. Para a inversão,
+a álgebra de incidência de uma ordem --- a mesma de que a inversão de Möbius na
+árvore dos divisores é o outro caso. E para a leitura espectral, os caracteres
+de $(\Z/2)^m$, que valem $\pm1$: tudo corre em inteiros, sem uma vírgula.
+
+\medskip\noindent Todo enunciado usado é enunciado e demonstrado aqui; onde um
+irmão da mesma obra já dizia o mesmo, o texto foi duplicado e não referenciado.
 \end{abstract}
 
 % ═══════════════════════════════════════════════════════════════════════════
@@ -101,6 +112,42 @@ A relação $i\sim j \iff \pi(i)=\pi(j)$ é uma equivalência em $I$. Chama-se
 \end{definicao}
 
 % ═══════════════════════════════════════════════════════════════════════════
+\section{Por que $G$ é preciso: a medida não chega}\label{sec:medida}
+
+\noindent Antes de contar a dobra convém dizer o que a torna invisível. Uma
+realização transporta uma \emph{medida}, e há transformações que a conservam
+exatamente --- as de determinante $\pm1$. O que elas não conservam é o percurso.
+
+\begin{teorema}[a medida conserva-se, a fibra perde-se]\label{thm:medida}
+Sejam $\pi,\pi'\colon I\to X$ duas realizações com o mesmo $\abs{I}$. Então
+\[
+\sum_x G_\pi(x)=\sum_x G_{\pi'}(x)=\abs{I}
+\]
+sempre, quaisquer que sejam as duas --- pelo Lema~\ref{lem:conserva}. Em
+particular a medida de contagem não distingue realizações: existem $\pi$ e
+$\pi'$ com a mesma medida e dobras diferentes, isto é, com
+$\max G_\pi\neq\max G_{\pi'}$.
+\end{teorema}
+
+\begin{proof}
+A igualdade é o Lema~\ref{lem:conserva} aplicado duas vezes. Para a segunda
+afirmação basta uma testemunha: a curva de Heighway de $2^{12}$ passos e a
+espiral quadrada do mesmo comprimento têm ambas $\abs{I}=2^{12}+1$ e
+$\sum G=\abs{I}$, e multiplicidades máximas distintas.
+\end{proof}
+
+\medskip\noindent\textbf{É esta a razão de ser de $G$.} A projeção identifica
+índices, e o que dela se conserva --- a medida --- é cego a essa identificação:
+duas patas produzem uma marca, e a marca não diz quantas patas a produziram. $G$
+reconta exatamente o que a métrica esquece, e por isso a informação tem de ficar
+\textbf{no espaço}: não é do agente, que não a guarda, nem do procedimento, que
+não a tem. É a marca, e a marca está no chão.
+
+\medskip\noindent Daqui em diante, sempre que uma quantidade se propuser a
+distinguir realizações, a pergunta é se ela é ou não invariante da medida ---
+porque as que são, não distinguem.
+
+% ═══════════════════════════════════════════════════════════════════════════
 \section{A multiplicidade: quatro cláusulas, nenhuma sobre o espaço}
 
 \begin{teorema}[multiplicidade geométrica]\label{thm:multiplicidade}
@@ -128,18 +175,6 @@ corrente. Nenhum passo consulta $\pi(0),\dots,\pi(t)$.
 \end{enumerate}
 \end{teorema}
 
-\begin{lema}[conservação]\label{lem:conserva}
-$\displaystyle\sum_{x\in X}G(x)=\abs{I}=N+1$, e a soma é finita porque
-$\operatorname{supp}G$ tem no máximo $\abs{I}$ elementos.
-\end{lema}
-
-\begin{proof}
-As fibras $\pi^{-1}(x)$, $x\in\operatorname{im}\pi$, particionam $I$, e a
-cardinalidade é aditiva sobre partições finitas:
-$\sum_x\lvert\pi^{-1}(x)\rvert=\lvert I\rvert$. Fora do suporte os termos são
-nulos.
-\end{proof}
-
 \begin{proof}
 (1) e (2) são a definição de fibra e a sua cardinalidade.
 
@@ -157,6 +192,18 @@ espaço, e não no agente, por (3). Nenhum passo desta leitura consulta
 $\pi(0),\dots,\pi(t)$.
 \end{proof}
 
+\begin{lema}[conservação]\label{lem:conserva}
+$\displaystyle\sum_{x\in X}G(x)=\abs{I}=N+1$, e a soma é finita porque
+$\operatorname{supp}G$ tem no máximo $\abs{I}$ elementos.
+\end{lema}
+
+\begin{proof}
+As fibras $\pi^{-1}(x)$, $x\in\operatorname{im}\pi$, particionam $I$, e a
+cardinalidade é aditiva sobre partições finitas:
+$\sum_x\lvert\pi^{-1}(x)\rvert=\lvert I\rvert$. Fora do suporte os termos são
+nulos.
+\end{proof}
+
 \medskip\noindent\textbf{O que a prova usou.} As cláusulas (1)--(3) usam só a
 igualdade em $X$: para decidir $x=\pi(t+1)$ e para formar as fibras. Nenhuma
 delas menciona mais estrutura. A cláusula~(4) pede uma coisa a mais, e uma só
@@ -165,69 +212,14 @@ delas menciona mais estrutura. A cláusula~(4) pede uma coisa a mais, e uma só
 fenómeno do plano, e o sítio por onde o plano entrava está isolado numa
 cláusula.
 
-\medskip\noindent A composição que o teorema exibe é
+\medskip\noindent A memória estigmérgica é a composição
 \[
-\boxed{\ \text{trajetória}\ \xrightarrow{\ \pi\ }\ \text{célula}\
-\xrightarrow{\ +1\ }\ \text{campo }G\ \xrightarrow{\ \text{leitura local}\ }\
-\text{decisão}\ }
+\boxed{\ \text{trajetória}\ \xrightarrow{\ \pi\ }\ \text{dobra}\
+\xrightarrow{\ \lvert\pi^{-1}\rvert\ }\ \text{multiplicidade}\
+\xrightarrow{\ \text{leitura local}\ }\ \text{percepção}\ }
 \]
-e o agente é o que fecha o ciclo lendo o que ele próprio escreveu, sem guardar
-que o escreveu.
-
-% ═══════════════════════════════════════════════════════════════════════════
-\section{O algoritmo}\label{sec:algoritmo}
-
-\noindent A cláusula (3) do Teorema~\ref{thm:multiplicidade} \emph{é} um
-algoritmo. Escrito:
-
-\medskip\noindent\textbf{O ciclo da aranha.} Cada passo do autómato \emph{é}
-uma cláusula do Teor.~\ref{thm:multiplicidade}, e nenhum é um extra:
-
-\begin{enumerate}\itemsep3pt
-\item[1.] \textbf{Escrita} --- $G(x)\mathrel{+}=1$ na célula corrente $x=\pi(t)$.
-      Realiza a cláusula~(3).
-\item[2.] \textbf{Leitura} --- $\mathcal{P}_{t}(x)=\bigl(G_t(y)\bigr)_{y\in V(x)}$
-      sobre a vizinhança; a fronteira lê-se como obstáculo, $+\infty$. Realiza a
-      cláusula~(4).
-\item[3.] \textbf{Decisão} --- gradiente de exploração: o passo vai ao vizinho de
-      \emph{menor} $G$. Lê a dobra; não pergunta ``por onde passei?''.
-\item[4.] \textbf{Fecho} --- ao fim dos passos de exploração, o rotor
-      $R^{4}=\mathrm{id}$: rotação à direita e marca forte. É o mesmo
-      $J^{4}=\mathrm{id}$ da bidualidade, agora na grade.
-\end{enumerate}
-
-\medskip\noindent\textbf{Não há deliberação em passo nenhum.} A decisão do
-ponto~3 não é uma escolha entre planos: é o mínimo de $\mathcal{P}_t(x)$, e
-$\mathcal{P}_t(x)$ é o que está escrito no chão. O agente não compara percursos
-nem avalia futuros --- reage à marca. É por isso que a cláusula~(3) tem o peso
-que tem: \emph{tirada a marca do espaço, não sobra estado de onde decidir}. Um
-agente que guardasse $\pi(0),\dots,\pi(t)$ teria a informação toda e o campo
-seria supérfluo; a aranha é o caso em que ele não é.
-
-\medskip\noindent\textbf{Estado.} O autómato mantém $G$ --- que está no espaço
---- e a célula corrente. Não mantém a sequência.
-
-\medskip\noindent E a cadeia fecha no espaço, e não na cabeça:
-\[
-\boxed{\ \text{representação}\longrightarrow\text{realização}
-\longrightarrow\text{identificação}\longrightarrow\text{multiplicidade}\ }
-\]
-com a aranha a ser só o último passo dinâmico. O mecanismo é $\pi$ e $G$.
-
-\medskip\noindent\textbf{Representação de $G$.} O campo é uma aplicação
-$\operatorname{supp}G\to\N$ com $\lvert\operatorname{supp}G\rvert\le\abs{I}$.
-Armazená-lo como \emph{tabela sobre $X$} --- por exemplo um arranjo
-$G[m]\times[m]$ quando $X=\Z^2$ --- é uma escolha de representação, não o
-algoritmo: custa $\lvert X\rvert$ e não $\abs{I}$, e em $\Z^3$ com $m=2048$ pede
-$2048^3$ células. A representação fiel à cláusula (3) é \textbf{esparsa}: a
-memória existe onde a trajetória passou. Com endereçamento aberto num arranjo
-fixo de capacidade $C\ge2\abs{I}$, o custo é $O(1)$ amortizado por passo e a
-memória total é $O(\abs{I})$, decidida antes de correr --- não há alocação
-dinâmica em parte nenhuma do algoritmo.
-
-\medskip\noindent\textbf{Complexidade.} $N+1$ passos, cada um com uma leitura e
-uma escrita: $\Theta(\abs{I})$ operações, $\Theta(\abs{I})$ memória, e nenhuma
-dependência de $\lvert X\rvert$.
+e a última seta termina em \textbf{percepção}, não em decisão: o que a leitura
+produz é a distinção realizada/não realizada, e essa distinção é do espaço.
 
 % ═══════════════════════════════════════════════════════════════════════════
 \section{Onde a dimensão entra}\label{sec:dimensao}
@@ -285,8 +277,79 @@ se confundem.
 \medskip\noindent\textbf{Leitura.} Enunciar o teorema em $\Z^2$ e realizá-lo num
 arranjo do plano dá a impressão de que o $2$ é do teorema. Não é: é do exemplo, e
 do arranjo. O $n$ aparece uma vez, no tamanho da vizinhança --- e é aí, e só aí,
-que o gradiente do passo~3 tem de olhar para $2n$ valores em vez de $4$. O resto
-do ciclo não sabe em que dimensão está.
+que o gradiente do passo~3 lê $2n$ valores em vez de $4$. Os outros três passos
+correm iguais em qualquer dimensão.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{O ciclo da aranha}\label{sec:algoritmo}
+
+\noindent Agora que a construção está feita --- objeto, multiplicidade,
+vizinhança ---, o autómato \emph{cai} dela: o Teorema~\ref{thm:multiplicidade}
+já \textbf{é} um autómato, com as quatro cláusulas a serem os quatro passos e a
+ordem delas a ser a ordem em que ele corre. Não há aqui um algoritmo genérico
+proposto de fora e depois justificado; há a construção lida como dinâmica, que
+é o último passo da cadeia
+representação $\to$ realização $\to$ identificação $\to$ multiplicidade.
+
+\medskip\noindent\textbf{O ciclo da aranha.} Cada passo do autómato \emph{é}
+uma cláusula do Teor.~\ref{thm:multiplicidade}, e nenhum é um extra:
+
+\begin{enumerate}\itemsep3pt
+\item[1.] \textbf{Escrita} --- $G(x)\mathrel{+}=1$ na célula corrente $x=\pi(t)$.
+      Realiza a cláusula~(3).
+\item[2.] \textbf{Leitura} --- $\mathcal{P}_{t}(x)=\bigl(G_t(y)\bigr)_{y\in V(x)}$
+      sobre a vizinhança; a fronteira lê-se como obstáculo, $+\infty$. Realiza a
+      cláusula~(4).
+\item[3.] \textbf{Decisão} --- gradiente de exploração: o passo vai ao vizinho de
+      \emph{menor} $G$. Lê a dobra; não pergunta ``por onde passei?''.
+\item[4.] \textbf{Fecho} --- ao fim dos passos de exploração, o rotor
+      $R^{4}=\mathrm{id}$: rotação à direita e marca forte. É o mesmo
+      $J^{4}=\mathrm{id}$ da bidualidade, agora na grade.
+\end{enumerate}
+
+\medskip\noindent\textbf{Não há deliberação em passo nenhum.} A decisão do
+ponto~3 não é uma escolha entre planos: é o mínimo de $\mathcal{P}_t(x)$, e
+$\mathcal{P}_t(x)$ é o que está escrito no chão. O agente não compara percursos
+nem avalia futuros --- reage à marca. É por isso que a cláusula~(3) tem o peso
+que tem: \emph{tirada a marca do espaço, não sobra estado de onde decidir}. Um
+agente que guardasse $\pi(0),\dots,\pi(t)$ teria a informação toda e o campo
+seria supérfluo; a aranha é o caso em que ele não é.
+
+\medskip\noindent\textbf{Estado.} O autómato mantém $G$ --- que está no espaço
+--- e a célula corrente. Não mantém a sequência.
+
+\medskip\noindent E a cadeia fecha no espaço, e não na cabeça:
+\[
+\boxed{\ \text{representação}\longrightarrow\text{realização}
+\longrightarrow\text{identificação}\longrightarrow\text{multiplicidade}\ }
+\]
+com a aranha a ser só o último passo dinâmico. O mecanismo é $\pi$ e $G$.
+
+\medskip\noindent\textbf{Representação de $G$.} O campo é uma aplicação
+$\operatorname{supp}G\to\N$ com $\lvert\operatorname{supp}G\rvert\le\abs{I}$.
+Armazená-lo como \emph{tabela sobre $X$} --- por exemplo um arranjo
+$G[m]\times[m]$ quando $X=\Z^2$ --- é uma escolha de representação, não o
+algoritmo: custa $\lvert X\rvert$ e não $\abs{I}$, e em $\Z^3$ com $m=2048$ pede
+$2048^3$ células. A representação fiel à cláusula (3) é \textbf{esparsa}: a
+memória existe onde a trajetória passou. Com endereçamento aberto num arranjo
+fixo de capacidade $C\ge2\abs{I}$, uma escrita ou leitura custa $O(1)$ esperado
+--- é a estrutura de dados, não o teorema --- e a memória total é $O(\abs{I})$,
+decidida antes de correr: não há alocação dinâmica em parte nenhuma.
+
+\medskip\noindent\textbf{Complexidade, e onde o $n$ aparece nela.} São $N+1$
+passos. O passo~1 escreve num ponto: $O(1)$. Os passos~2 e~3 leem
+$\lvert V(x)\rvert$ valores e tomam o mínimo: $\Theta(\lvert V(x)\rvert)$, que
+em $\Z^n$ é $\Theta(n)$. Total:
+\[
+\Theta\bigl(n\,\abs{I}\bigr)\ \text{operações},\qquad
+\Theta\bigl(\abs{I}\bigr)\ \text{memória},
+\]
+e \textbf{nenhuma dependência de $\lvert X\rvert$} --- que é a afirmação que
+importa, porque é a que separa o algoritmo da tabela. Dizer ``uma leitura e uma
+escrita por passo'' seria esquecer a cláusula~(4): a leitura é sobre a
+vizinhança inteira, e é ela que traz o factor $n$. Não é varredura do espaço ---
+é leitura de $2n$ células vizinhas, o mesmo em qualquer ponto e em qualquer
+instante.
 
 % ═══════════════════════════════════════════════════════════════════════════
 \section{O levantamento, e a volta}\label{sec:inversa}
@@ -318,6 +381,12 @@ dado, por $G(x)=\bigl\lvert\{i:\operatorname{pr}_1\tilde\pi(i)=x\}\bigr\rvert$.
 \end{enumerate}
 Além disso, se $X=\Z^n$ então $X\times\N\subseteq\Z^{n+1}$: o levantamento sobe
 \textbf{um} andar, seja qual for $n$.
+
+A \textbf{curva inversa do dragão} é $\tilde\pi(I)$: mesma órbita combinatória,
+representação sem auto-interseção no espaço total. A reta injetiva é o caso
+degenerado, $G\equiv1$ já na base --- folha única. E o endereçamento de Peano é
+\emph{outro} levantamento: índice $\mapsto$ endereço injetivo, com
+$G\equiv1$ por construção e sem precisar de $k$.
 \end{teorema}
 
 \begin{proof}
@@ -355,10 +424,9 @@ O campo $c$ é o próprio $G$ parcial: o Algoritmo~B é o Algoritmo~A com o valo
 lido a sair. Não inventa geometria --- desfaz a identificação $i\sim j$ que a
 realização tinha feito.
 
-\medskip\noindent\textbf{Três observações que a prática obriga a escrever.}
+\medskip\noindent\textbf{Duas notas sobre a execução.}
 
-\emph{Primeira:} a injetividade de $\tilde\pi$ não precisa de ser verificada par
-a par. Basta correr o Algoritmo~A \emph{sobre $\tilde\pi$}, em dimensão $n+1$, e
+\emph{Primeira:} a injetividade de $\tilde\pi$ verifica-se sem comparar pares. Basta correr o Algoritmo~A \emph{sobre $\tilde\pi$}, em dimensão $n+1$, e
 ler $\max\tilde G$. Isto é uma verificação por outro caminho, não a mesma conta
 duas vezes: a prova de (1) usa (3) e a ordem dos índices; a corrida usa só a
 igualdade de vetores.
@@ -368,9 +436,87 @@ campo em dimensão $n$ sobre os vetores de $\Z^{n+1}$ \emph{é} a projeção ---
 folha está no vetor e o campo não a lê. Escrever ``zerar a última coordenada''
 antes de recontar é uma linha que não faz nada.
 
-\emph{Terceira:} a volta (5) é o que distingue um \emph{inverso} de um
-\emph{levantamento}. Um levantamento que não devolvesse $G$ teria acrescentado
-informação em vez de reorganizar a que havia.
+A volta (5) é o que distingue um \emph{inverso} de um \emph{levantamento}: um
+levantamento que não devolvesse $G$ teria acrescentado informação em vez de
+reorganizar a que havia.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{O directo é $\zeta$, o inverso é $\mu$}\label{sec:zeta}
+
+\noindent As duas operações da aranha --- escrever o campo e recuperar o passo
+--- não são duas invenções. São a \textbf{convolução} e a \textbf{deconvolução}
+da álgebra de incidência da ordem $(I,\le)$, e a inversa que a segunda usa é a
+mesma que a obra já corre na árvore dos divisores.
+
+\begin{definicao}[a álgebra de incidência de $(I,\le)$]\label{def:incid}
+Para $u\le t$ em $I$, ponha-se $\zeta(u,t)=1$. A convolução de duas funções da
+ordem é $(f*g)(u,t)=\sum_{u\le v\le t}f(u,v)\,g(v,t)$, e sobre funções de um só
+índice ela lê-se
+\[
+(a*\zeta)(t)=\sum_{u\le t}a(u).
+\]
+\end{definicao}
+
+\begin{teorema}[$\mu=\zeta^{-1}$ na ordem total]\label{thm:mu}
+Na ordem total, a inversa de $\zeta$ é
+\[
+\mu(t,t)=1,\qquad \mu(t-1,t)=-1,\qquad \mu(u,t)=0 \text{ nos restantes},
+\]
+isto é, a \emph{diferença finita}: $(b*\mu)(t)=b(t)-b(t-1)$.
+\end{teorema}
+
+\begin{proof}
+$(\zeta*\mu)(u,t)=\sum_{u\le v\le t}\mu(v,t)$. Se $u=t$ a soma tem um termo,
+$\mu(t,t)=1$. Se $u<t$, os únicos termos não nulos são $v=t-1$ e $v=t$, ambos no
+intervalo, e somam $-1+1=0$. Logo $\zeta*\mu=\delta$, e $\mu=\zeta^{-1}$.
+\end{proof}
+
+\begin{teorema}[o ciclo é $\zeta$; o Algoritmo B é $\mu$]\label{thm:zeta-mu}
+Fixe-se $x\in X$ e ponha-se $a_x(t)=\mathbf{1}_{\{\pi(t)=x\}}$. Então:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{A escrita é a convolução com $\zeta$:}
+      $G_t(x)=(a_x*\zeta)(t)$. A cláusula~(3) do
+      Teor.~\ref{thm:multiplicidade} \emph{é} esta identidade.
+\item[(2)] \textbf{A recuperação é a deconvolução com $\mu$:}
+      $a_x(t)=(G_\bullet(x)*\mu)(t)=G_t(x)-G_{t-1}(x)$. Conhecida a família
+      $\{G_t\}$, a trajetória inteira volta --- sem que nada dela tenha sido
+      guardado.
+\item[(3)] \textbf{O levantamento é a mesma convolução, na fibra:}
+      $k(i)=G_i(\pi(i))$ é a acumulação de $a_{\pi(i)}$ ao longo da fibra, e a
+      sua diferença finita vale $1$ em cada visita. Isto \emph{é}
+      $\tilde G\equiv1$ do Teor.~\ref{thm:levantamento}, dito na outra
+      linguagem.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) $G_t(x)=\lvert\{u\le t:\pi(u)=x\}\rvert=\sum_{u\le t}a_x(u)$, que é
+$(a_x*\zeta)(t)$ pela Def.~\ref{def:incid}.
+
+(2) Aplique-se $\mu=\zeta^{-1}$ (Teor.~\ref{thm:mu}) a (1):
+$(G_\bullet(x)*\mu)=(a_x*\zeta*\mu)=a_x*\delta=a_x$. Explicitamente é a
+diferença $G_t(x)-G_{t-1}(x)$, que vale $1$ exatamente quando $\pi(t)=x$.
+
+(3) Sejam $i_1<\dots<i_g$ a fibra de $x$. Por (1) com $t=i_r$,
+$k(i_r)=G_{i_r}(x)=\sum_{u\le i_r}a_x(u)=r$. A diferença finita da sucessão
+$(r)_{r=1..g}$ é constante igual a $1$; e um levantamento com valor $1$ em cada
+ponto é um levantamento com $\tilde G\equiv1$.
+\end{proof}
+
+\begin{corolario}[é a mesma inversão da árvore dos divisores]\label{cor:mobius}
+Troque-se a ordem $(I,\le)$ pela divisibilidade em $\N$. A mesma
+Def.~\ref{def:incid} dá $F=f*\mathbf{1}$, isto é
+$F(n)=\sum_{d\mid n}f(d)$, e a inversa de $\mathbf{1}$ é a função de Möbius:
+$f=F*\mu$, ou seja $f(n)=\sum_{d\mid n}\mu(d)F(n/d)$. A álgebra não muda ---
+$\zeta$ acumula, $\mu$ desacumula --- e só muda a ordem sobre a qual se acumula.
+\end{corolario}
+
+\medskip\noindent\textbf{Duas convoluções, dois papéis.} A desta secção é a da
+\emph{ordem} $(I,\le)$, e serve para o directo e o inverso da própria aranha. A
+da §\ref{sec:transf} é a do \emph{grupo} $(\Z/2)^m$, e serve para compor e
+decompor \emph{campos} de percursos diferentes. Não são a mesma operação, e
+convém não as confundir: uma acumula ao longo do tempo, a outra soma sobre o
+espaço.
 
 % ═══════════════════════════════════════════════════════════════════════════
 \section{Espaços ultramétricos: a célula é a bola}\label{sec:ultra}
@@ -439,9 +585,30 @@ $\sum_x G(x)=\abs{I}$ não exige cuidado nenhum aqui: não há sobreposição a 
 \medskip\noindent\textbf{E é a métrica do corte.} Dois reais construídos como
 cortes estão próximos nesta métrica quando \emph{concordam até fundo}: a
 distância decai com a profundidade em que a expansão binária ainda coincide.
-É a topologia que o encaixe induz, e o campo $G$ corre nela com o Algoritmo~A
-inalterado --- a única coisa que $X$ tinha de ter era igualdade, e bolas
-comparam-se por igualdade.
+É a topologia que o encaixe induz.
+
+\begin{teorema}[a vizinhança na árvore, e ela não é $2n$]\label{thm:viz-arvore}
+As cláusulas (1)--(3) do Teor.~\ref{thm:multiplicidade} correm sobre a árvore
+sem alteração, porque só pedem igualdade. A cláusula~(4) pede uma
+\emph{vizinhança}, e a árvore dá uma: cada bola de raio $2^{-p}$ tem
+\textbf{exatamente um} irmão --- a bola com o mesmo prefixo de $p-1$ bits e o
+bit seguinte trocado --- e as duas particionam a bola-mãe de raio $2^{-(p-1)}$.
+Logo $\lvert V(x)\rvert=1$, e o custo dos passos 2 e 3 é $\Theta(1)$ e não
+$\Theta(n)$.
+\end{teorema}
+
+\begin{proof}
+Fixado $p$, uma bola de raio $2^{-p}$ é o conjunto dos pontos com um prefixo de
+$p$ bits dado (Teor.~\ref{thm:bolas}(2): as bolas particionam, e o prefixo é a
+etiqueta da classe). Trocar o $p$-ésimo bit dá outro prefixo de $p$ bits com o
+mesmo início de $p-1$; há um só, porque o bit é binário. A união das duas é
+exatamente o conjunto dos pontos com o prefixo de $p-1$ bits, que é a bola-mãe.
+\end{proof}
+
+\medskip\noindent Isto não enfraquece o Teor.~\ref{thm:dimensao} --- confirma-o.
+A dimensão entra num sítio único, a vizinhança; e trocar a estrutura de $X$ troca
+exatamente esse número, $2n$ na grade e $1$ na árvore. Os outros três passos do
+ciclo são os mesmos.
 
 % ═══════════════════════════════════════════════════════════════════════════
 \section{A transformada algébrica sobre o campo}\label{sec:transf}
@@ -661,8 +828,8 @@ dobra desaparece, $\tilde G\equiv1$. As três coisas ---
 valer ao mesmo tempo.
 \end{corolario}
 
-\medskip\noindent\textbf{E não é uma opinião sobre a construção.} Que o passo
-lê o índice verifica-se: procura-se na trajetória a mesma célula com sucessores
+\medskip\noindent\textbf{E verifica-se.} Que o passo lê o índice não se
+argumenta: procura-se na trajetória a mesma célula com sucessores
 \emph{diferentes}. Na curva de Heighway ela existe --- a viragem
 $\code{drag\_esq}(s)$ lê $s$, não lê onde a curva está --- e a testemunha exibe-se
 com os quatro índices. No Julia, no relógio e na reta não existe.
@@ -818,18 +985,12 @@ $\tau(M+1)=\tau(2^{k}+1)$, e $2^{k}+1$ é ímpar com $2^{k}+1\equiv1\pmod4$ para
 $k\ge2$, valor constante.
 \end{proof}
 
-\medskip\noindent\textbf{Por que isto é uma verificação e não uma repetição.} A
+\medskip\noindent\textbf{Duas construções, nenhuma linha em comum.} A
 Def.~\ref{def:bits} decide cada viragem por uma conta sobre os bits do índice; a
 Def.~\ref{def:dobrar} nunca olha para um índice --- copia, inverte e roda a curva
-inteira. Não partilham uma linha. Quando duas construções assim coincidem em
-$2^{12}$ pontos, o que se testou foi o objeto, não o contador.
-
-\medskip\noindent\textbf{E o que não serve como verificação.} Comparar
-$\abs{I}$ ou $\sum_x G(x)$ entre duas implementações \emph{não} distingue o
-dragão de coisa nenhuma: pelo Lema~\ref{lem:conserva},
-$\sum G=\abs{I}$ vale para \emph{qualquer} realização com o mesmo número de
-passos. Uma espiral quadrada passa nesse teste. O invariante tem de separar a
-classe que se afirma estar a separar.
+inteira. A coincidência em $2^{12}$ pontos é sobre a curva, e não sobre a
+medida: $\abs{I}$ e $\sum_x G(x)$ coincidem para qualquer realização do mesmo
+comprimento (Teor.~\ref{thm:medida}).
 
 % ═══════════════════════════════════════════════════════════════════════════
 \section{Realizações}\label{sec:realizacoes}
@@ -854,7 +1015,7 @@ o campo lê-lhe o período $4$ com cauda $0$ \\
 $1$ & as somas parciais & §\ref{sec:serie}: a série do número $\pi$ em inteiros;
 período $1$, e a cauda é o custo \\
 $4$ & o passo da máquina & $(\text{registo},\text{slot},\text{banco},\text{andar})$;
-a aranha não sabe que é uma máquina, lê e escreve o mesmo $G$ \\
+nada no ciclo distingue este caso dos outros \\
 $k$ & a árvore do encaixe & §\ref{sec:ultra}: a célula \emph{é} a bola \\
 \bottomrule
 \end{tabular}
@@ -872,13 +1033,6 @@ A grandeza compara as duas curvas, que são construções distintas --- a de $\Z
 roda o plano da viragem --- e não os dois espaços. A dimensão, essa, já apareceu
 onde tinha de aparecer: no Teor.~\ref{thm:dimensao}, $\lvert V(x)\rvert=2n$.
 
-\medskip\noindent\textbf{E a memória é do algoritmo, não da tabela.} O
-Teor.~\ref{thm:multiplicidade}(3) escreve num ponto por passo, e o suporte de $G$
-tem no máximo $\abs{I}$ pontos: o custo é $\Theta(\abs{I})$ em qualquer $n$, como
-a §\ref{sec:algoritmo} conta. Um arranjo denso sobre $X$ custaria
-$\lvert X\rvert$ --- em $\Z^3$ com lado $2048$, $2048^3$ células --- e essa é uma
-propriedade da tabela escolhida.
-
 % ═══════════════════════════════════════════════════════════════════════════
 \section{Medido}
 
@@ -893,9 +1047,17 @@ falha ambas com o mesmo raio);
 Teor.~\ref{thm:periodo} §AN8 ($\lvert\{G>1\}\rvert=p$ e $\lvert\{G=1\}\rvert=\mu$
 sobre $z\mapsto z^2+c$ em $\Z[i]$, com o período obtido por busca independente e
 a órbita que escapa como controlo);
-ciclo em $\Z^n$ e Teor.~\ref{thm:fecho} §AN13 (leitura a distinguir $G{=}0$ de
+ciclo em $\Z^n$ e Teor.~\ref{thm:fecho} §AN13;
+Teor.~\ref{thm:viz-arvore} e o custo \textbf{contado} §AN14 ($2n$ leituras por
+passo, nem uma a mais --- o autómato não varre) (leitura a distinguir $G{=}0$ de
 $G{>}0$; gradiente a escolher o mínimo; fronteira $+\infty$ com controlo; e
 $0,1,3,6$ planos com $R^4=\mathrm{id}$);
+Teor.~\ref{thm:medida} §AN16 (a mesma medida com dobras diferentes: Heighway e
+a espiral, e a reta como controlo);
+Teor.~\ref{thm:mu}, \ref{thm:zeta-mu} e Cor.~\ref{cor:mobius} §AN15
+($\mu=\zeta^{-1}$ em $4096$ pares; o directo e o inverso com resíduo $0$ sobre a
+fibra mais funda que a realização tem; e a mesma inversão na árvore dos
+divisores);
 Teor.~\ref{thm:dirac}, \ref{thm:dobra-norma} e \ref{thm:conv} §AN12
 (a ida como soma de Diracs; a dobra na norma por três caminhos, com o percurso
 injetivo a dar excesso zero; convolução diagonalizada e deconvolução com resíduo
@@ -915,9 +1077,9 @@ o plano \code{tests/aranha\_g.c} §AG1--§AG11 e
 (a fibra volta como uma coordenada); Teor.~\ref{thm:bolas} (partição);
 Teor.~\ref{thm:periodo} ($\mu$ e $p$ no campo);
 Teor.~\ref{thm:leitura} (dobrar sem período obriga a ler o índice)}
-        {campo esparso, $O(1)$/passo, sem alocação dinâmica;
+        {campo esparso, $\Theta(n)$/passo, memória $\Theta(|I|)$, sem alocação dinâmica;
          $\Z^1$--$\Z^4$, árvore, $\Z[i]$}
-        {\code{tests/aranha\_n.c} §AN1--§AN13;
+        {\code{tests/aranha\_n.c} §AN1--§AN16;
          \code{tests/aranha\_g.c} §AG1--§AG11;
          \code{tests/aranha\_inversa.c} §AI1--§AI7}
 
