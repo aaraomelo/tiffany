@@ -3030,6 +3030,9 @@ static int checa_corpos(unsigned citadas, long ncols){
 }
 
 /* lê `*` ou `c1, c2, …` até ao FROM; devolve 0 se não reconhecer */
+static int  agr_op = 0;              /* 0 nenhuma; 1 sum, 2 max, 3 min */
+static char agr_col[64] = "";        /* a coluna que a agregação lê */
+
 static int lista_colunas(const char **pp, char *out, int cap){
     const char *p = *pp;
     int n = 0;
@@ -3038,6 +3041,34 @@ static int lista_colunas(const char **pp, char *out, int cap){
     for(;;){
         char nome[64];
         if(!ident(&p, nome, sizeof nome)) return 0;
+        /* AS AGREGAÇÕES SÃO LEITURAS DA FIBRA, e reconhecem-se aqui.
+         *
+         * O GROUP BY parte a tabela em fibras; cada uma tem um tamanho — que é
+         * G(x), o `count` — e um conteúdo. As outras três lêem esse conteúdo:
+         * `max` e `min` são os EXTREMOS da fibra, `sum` é a soma sobre ela. Não
+         * há uma varredura nova: a fibra já sai contígua da árvore, e estas
+         * lêem-na de passagem. */
+        { const char *q = p; pula(&q);
+          if(*q == '('){
+              int qual = !strcasecmp(nome,"SUM") ? 1 : !strcasecmp(nome,"MAX") ? 2
+                       : !strcasecmp(nome,"MIN") ? 3 : 0;
+              if(qual){
+                  q++; pula(&q);
+                  char arg[64];
+                  if(!ident(&q, arg, sizeof arg)) return 0;
+                  pula(&q); if(*q != ')') return 0; q++;
+                  agr_op = qual; snprintf(agr_col, sizeof agr_col, "%s", arg);
+                  /* a agregação conta como coluna pedida: sem isto a lista sai
+                   * VAZIA e o SELECT era recusado por não ter colunas */
+                  /* o que entra na lista é o ARGUMENTO — a coluna que existe —,
+                   * e não o nome da função: sem isto o SELECT era recusado por
+                   * não achar uma coluna chamada «sum» */
+                  n += snprintf(out + n, (size_t)(cap - n), "%s%s", n ? "," : "", arg);
+                  p = q; pula(&p);
+                  if(*p == ','){ p++; continue; }
+                  break;
+              }
+          } }
         n += snprintf(out + n, (size_t)(cap - n), "%s%s", n ? "," : "", nome);
         pula(&p);
         if(*p == ','){ p++; continue; }
@@ -3358,6 +3389,7 @@ static int varre(const char *resto, int acao){
          * indexa um valor — recusa-se em vez de devolver repetidos. */
         pula(&p);
         dis_usa = palavra(&p, "DISTINCT") ? 1 : 0;
+        agr_op = 0; agr_col[0] = 0;      /* zera-se ANTES de quem lê, não depois */
         if(!lista_colunas(&p, cols, sizeof cols)) return 0;
         if(!palavra(&p, "FROM")) return 0;
         if(!ident(&p, nome, sizeof nome)) return 0;
@@ -3914,6 +3946,13 @@ static int varre(const char *resto, int acao){
      * dos grupos é o número de linhas que casaram. */
     if(acao == ACAO_MARCA && grp_col[0]){
         int gc = col_indice(grp_col);
+        if(agr_op && col_indice(agr_col) < 0){
+            printf("erro: a coluna «%s» não existe — a agregação é RECUSADA.\n", agr_col);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "column \"%s\" does not exist", agr_col); }
+            return 0;
+        }
         int postos = 0;
         long seq[SQL_OUT_MAX_ROWS]; int n = 0;
         ord_limpa();
@@ -3938,21 +3977,41 @@ static int varre(const char *resto, int acao){
             snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "%s", grp_col);
             snprintf(sql_cap->col[1], sizeof sql_cap->col[1], "count");
             sql_cap->tipo[0] = SQL_TIPO_INT4; sql_cap->tipo[1] = SQL_TIPO_INT8;
+            if(agr_op){
+                sql_cap->ncols = 3;
+                snprintf(sql_cap->col[2], sizeof sql_cap->col[2], "%s",
+                         agr_op == 1 ? "sum" : agr_op == 2 ? "max" : "min");
+                sql_cap->tipo[2] = SQL_TIPO_INT4;
+            }
         }
         { long grupos = 0, soma = 0, k = 0;
           while(k < n){
               long v = celula_valor(seq[k], gc, ncols), g = 0;
-              while(k < n && celula_valor(seq[k], gc, ncols) == v){ g++; k++; }
+              long ag = 0; int ag_viu = 0;
+              int ac = agr_op ? col_indice(agr_col) : -1;
+              while(k < n && celula_valor(seq[k], gc, ncols) == v){
+                  if(ac >= 0){                       /* lê a fibra de passagem */
+                      long w = celula_valor(seq[k], ac, ncols);
+                      if(!ag_viu){ ag = w; ag_viu = 1; }
+                      else if(agr_op == 1) ag += w;
+                      else if(agr_op == 2){ if(w > ag) ag = w; }
+                      else if(agr_op == 3){ if(w < ag) ag = w; }
+                  }
+                  g++; k++;
+              }
               /* o HAVING: filtra a fibra pelo seu G. `count(*) > 1` é pedir as
                * células onde a realização DOBROU — thm:multiplicidade (2). */
               if(hav_op == 1 && !(g >  hav_n)) continue;
               if(hav_op == 2 && !(g <  hav_n)) continue;
               if(hav_op == 3 && !(g == hav_n)) continue;
               if(lim_n >= 0 && grupos >= lim_n) break;      /* o prefixo */
-              printf("   %ld | %ld\n", v, g);
+              if(ac >= 0) printf("   %ld | %ld | %ld\n", v, g, ag);
+              else        printf("   %ld | %ld\n", v, g);
               if(sql_cap && sql_cap->nrows < SQL_OUT_MAX_ROWS){
                   snprintf(sql_cap->cell[sql_cap->nrows][0], SQL_OUT_CELL, "%ld", v);
                   snprintf(sql_cap->cell[sql_cap->nrows][1], SQL_OUT_CELL, "%ld", g);
+                  if(ac >= 0)
+                      snprintf(sql_cap->cell[sql_cap->nrows][2], SQL_OUT_CELL, "%ld", ag);
                   sql_cap->nrows++;
               }
               grupos++; soma += g;
