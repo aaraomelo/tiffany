@@ -185,7 +185,8 @@ typedef char zonas_cabem_na_isa[(ZONA(4) <= ISA_TECTO) ? 1 : -1];
 #define S_CB      (S_CAB + 500u)          /* coinbase em átomos */
 #define S_FOLD_ARG (S_CB + 800u)         /* u32 LE base do OP_FOLD */
 #define S_FAIXA   (S_FOLD_ARG + 4u)      /* u32 LE de, u32 LE ate — OP_MARTELO */
-/* o S_CONTA saiu: contar é ∑ sobre o campo (bits_conta), não um contador
+#define S_CONTA   218        /* o valor que SAI da escrita — Algoritmo B */
+/* (era: contar é ∑ sobre o campo (bits_conta), não um contador
  * a ser incrementado por linha. Ver `neuronio.c`: «∑ soma popcount». */
 #define S_MASK    5          /* a máscara do bit de sinal — é ela que dá o < e o >     */
 #define S_MASK16  59         /* o mesmo, um andar acima: {0, 0x80} — o bit 15 do par   */
@@ -220,8 +221,12 @@ typedef char zonas_cabem_na_isa[(ZONA(4) <= ISA_TECTO) ? 1 : -1];
  * Pelo `thm:BI` a dobra DUPLICA a largura, e o `§sec:torre` da arquitectura diz
  * o que fazer quando não cabe: T_{k+1} = T_k + T_k*, «o que cresce é o OBJECTO,
  * não a máquina». O que limita é o mapa de slots, que é da máquina. */
-#define S_NR      69         /* o TOPO: quantos slots de linha já foram usados */
-#define S_UM16    70         /* a constante 1 do OP_ADD16 que sobe o TOPO de andar       */
+#define S_NR      216        /* o TOPO: quantos slots de linha já foram usados.
+                              * Estava em 69 — entre o S_VA (68) e o S_EXPR (72)
+                              * — e era PISADO: o topo passava a 2 depois de uma
+                              * consulta, e a tabela encolhia. 216..223 é a folga
+                              * entre o S_BITM (200..215) e o S_NOME (224). */
+#define S_UM16    217        /* a constante 1 do OP_ADD16 que sobe o TOPO de andar       */
 #define S_DIA     58         /* o DIÁRIO: {total = ação pendente, e = coluna do SET}      */
 /* O CORPO DE CADA COLUNA — passo 1 de 6 do catálogo em SQL (ver docs/TOOLKIT.md).
  *
@@ -702,7 +707,15 @@ static void bit_poe(unsigned base, long i, int liga){
  * saber o que o campo já diz. */
 static long bits_conta(unsigned base, long n){
     long soma = 0;
-    for(long sl = 0; sl <= n / (long)SLOT_BITS; sl++){
+    /* O TECTO É O DA ZONA, e verifica-se. O bitmap do resultado ocupa de
+     * S_MATCH a S_VIVO; percorrer além disso é ler outra zona — devagar, e a
+     * contar bits que não são de ninguém. Um `n` grande vindo de um catálogo
+     * ainda por abrir bastava para isso. */
+    long tecto = (long)(S_VIVO - S_MATCH) - 1;
+    long ate = n / (long)SLOT_BITS;
+    if(ate > tecto) ate = tecto;
+    if(ate < 0) ate = 0;
+    for(long sl = 0; sl <= ate; sl++){
         Word w = mem_le(base + (unsigned)sl);
         for(unsigned a = 0; a < WORD_ISA_ATOMS; a++){
             unsigned v = atomo_le(w, a);
@@ -1350,6 +1363,23 @@ static long rodar(unsigned prog_len){
 /* ---------------- o montador: escreve o bytecode NO DISCO ---------------- */
 static unsigned pc_emit = 0;
 static void emit1(unsigned char b){ pwrite(fprog, &b, 1, (off_t)pc_emit); pc_emit++; }
+
+/* O SALTO É UM BYTE COM SINAL, E O TECTO É 127.
+ *
+ * O `MOVE_pc` lê o deslocamento com `(signed char)`; escrevê-lo com
+ * `(unsigned char)` faz de um corpo de 128..255 um salto NEGATIVO — para trás
+ * —, e a máquina fica a rodar até o guarda dos cinquenta milhões de passos a
+ * parar. Por linha. Duas réguas para o mesmo número: escrito numa, lido noutra.
+ *
+ * Havia CINCO sítios a escrever o deslocamento e nenhum a medi-lo. Passa a
+ * haver um só, e quem estourar levanta a bandeira: a consulta é RECUSADA com a
+ * razão, em vez de a máquina não voltar. */
+static int salto_estourou = 0;
+static void salto_poe(unsigned pos, unsigned ini){
+    long d = (long)pc_emit - (long)ini;
+    if(d > 127 || d < 0){ salto_estourou = 1; d = 0; }
+    { unsigned char b = (unsigned char)d; pwrite(fprog, &b, 1, (off_t)pos); }
+}
 /* A VARREDURA É UMA PROGRESSÃO ARITMÉTICA NO ENDEREÇO.
  *
  * A ISA não tem endereçamento indireto — o slot é imediato na instrução (e LOADS, que eu
@@ -2279,8 +2309,7 @@ static void emit_teste(unsigned sc, int cmp_op, long k, unsigned destino, unsign
     unsigned pos = pc_emit; emit1(0);
     unsigned ini = pc_emit;
     emit_copia(S_UM, destino);
-    unsigned char rel = (unsigned char)(pc_emit - ini);
-    pwrite(fprog, &rel, 1, (off_t)pos);
+    salto_poe(pos, ini);
 }
 
 /* MULTIPLICAÇÃO POR CONSTANTE, NAS COORDENADAS DO REI.
@@ -2413,8 +2442,7 @@ static void emit_mul16(unsigned dest, unsigned X, unsigned Y, unsigned base){
         unsigned pos = pc_emit; emit1(0);
         unsigned ini = pc_emit;
         MOVE(dest, +1); MOVE(desl, +1); emit1(OP_ADD16); MOVE(dest, -1);
-        { unsigned char rel = (unsigned char)(pc_emit - ini);
-          pwrite(fprog, &rel, 1, (off_t)pos); }
+        { salto_poe(pos, ini); }
         /* e o deslocamento: x << 1 é x + x (lem:desloc) */
         if(i < 15){
             MOVE(desl, +1); MOVE(desl, +1); emit1(OP_ADD16); MOVE(desl, -1);
@@ -2447,8 +2475,7 @@ static void emit_teste16(unsigned sc, int cmp_op, unsigned destino, unsigned ksl
     unsigned pos = pc_emit; emit1(0);
     unsigned ini = pc_emit;
     emit_copia(S_UM, destino);
-    unsigned char rel = (unsigned char)(pc_emit - ini);
-    pwrite(fprog, &rel, 1, (off_t)pos);
+    salto_poe(pos, ini);
 }
 
 /* A FORMA LINEAR INTEIRA TEM DE CABER, e não só cada coluna. O avaliador decide
@@ -2886,22 +2913,52 @@ static void emit_linha(long i, long ncols, const struct arvore *a, int tem_where
     MOVE_M(S_BITM,  +1, REL_MASC);
     emit1(OP_OR);
     MOVE_M(S_MATCH, -1, REL_BITMAP);
-    /* E NÃO SE CONTA AQUI. O bit que se acabou de ligar É a contagem: quem
-     * quiser o número soma os popcounts do campo (∑, o Kirchhoff do
-     * `neuronio.c`). Um contador incrementado por linha era guardar duas vezes
-     * a mesma informação — e foi por viver num byte que dava a volta aos 255. */
-    { unsigned char d = (unsigned char)(pc_emit - ini);
-      pwrite(fprog, &d, 1, (off_t)pos);
-      /* o salto do vivo é mais longo: salta também o teste do ACC */
-      unsigned char dv = (unsigned char)(pc_emit - (pos_v + 1));
-      pwrite(fprog, &dv, 1, (off_t)pos_v); }
+    /* e o valor SAI daqui: marcar e contar são o mesmo passo (Algoritmo B) */
+    MOVE(S_CONTA, +1);
+    MOVE(S_UM16, +1);
+    emit1(OP_ADD16);
+    MOVE(S_CONTA, -1);
+    /* O SALTO É DE UM BYTE, E ISSO VERIFICA-SE.
+     *
+     * O deslocamento do JZ ocupa UM byte no programa. Enquanto o corpo do
+     * molde coube em 255, um `(unsigned char)` bastava; quando cresceu — o
+     * teste do bit do vivo acrescentou instruções —, o deslocamento truncou e o
+     * salto passou a apontar PARA TRÁS. A máquina entrava em ciclo e não havia
+     * mensagem nenhuma: o programa estava sintaticamente bem e semanticamente
+     * ao contrário.
+     *
+     * É «o número que não cabe» outra vez, e a resposta é a de sempre: mede-se
+     * antes de escrever, e RECUSA-SE. Uma consulta recusada com a razão é
+     * tratável; um motor que não volta, não. */
+    { long d1 = (long)(pc_emit - ini);
+      long d2 = (long)(pc_emit - (pos_v + 1));
+      /* O TECTO É 127, E NÃO 255: o `passo` lê o deslocamento com
+       * `(signed char)`, logo o byte que eu escrevia sem sinal é lido COM.
+       * Um corpo entre 128 e 255 virava um salto NEGATIVO — para trás —, e a
+       * máquina dava 50 milhões de passos por linha antes de o guarda a parar.
+       * Duas réguas para o mesmo número, escrito numa e lido noutra. */
+      if(d1 > 127 || d2 > 127 || d1 < 0 || d2 < 0){
+          printf("erro: o corpo da varredura não cabe no salto, que é um byte COM"
+                 " SINAL (%ld e %ld, tecto 127) — RECUSADA.\n", d1, d2);
+          if(sql_cap){ sql_cap->ok = 0;
+              snprintf(sql_cap->err, sizeof sql_cap->err,
+                       "condicao complexa demais: o salto do bytecode e de um byte"); }
+          pc_emit = 0;
+          return;
+      }
+      { unsigned char d = (unsigned char)d1, dv = (unsigned char)d2;
+        pwrite(fprog, &d, 1, (off_t)pos);
+        pwrite(fprog, &dv, 1, (off_t)pos_v); } }
+    (void)0;
 }
 
 /* prepara as constantes e devolve o catálogo */
 static void prepara(long v, long col_do_set){
     Word w = {0,0};
     mem_grava(S_ZERO, w);
+    mem_grava(S_CONTA, w);                /* o valor recomeça a cada varredura */
     w.total = 1; w.e = 0;                 mem_grava(S_UM, w);
+    w.total = 1; w.e = 0;                 mem_grava(S_UM16, w);
     /* o valor do SET em DEZASSEIS bits: o baixo no S_V, o alto no S_VA. Escrever
      * só o baixo deixava o átomo alto do valor ANTERIOR na célula — um
      * `SET saldo = 30000` sobre um saldo de 20000 dava 20016, e nada o dizia. */
@@ -2955,8 +3012,7 @@ static long aplica_diario(long ncols, long nrows, int acao, int col_set){
             emit1(OP_AND);
             MOVE(S_VIVO + (unsigned)((unsigned long)i / SLOT_BITS), -1);
         }
-        unsigned char rel = (unsigned char)(pc_emit - ini);
-        pwrite(fprog, &rel, 1, (off_t)pos);
+        salto_poe(pos, ini);
     }
     emit1(OP_HALT);
     return rodar(pc_emit);
@@ -3680,17 +3736,36 @@ static int varre(const char *resto, int acao){
     for(long i = 0; i <= nrows / (long)SLOT_BITS; i++) mem_grava(S_MATCH + (unsigned)i, z);
 
     /* UM molde só, o da linha 0 — e depois a PA anda com ele por todas as linhas. */
-    pc_emit = 0; nrel = 0; rel_ncols = ncols;
+    pc_emit = 0; nrel = 0; rel_ncols = ncols; salto_estourou = 0;
     emit_linha(0, ncols, &cl, tem_where, acao, col_set);
     emit1(OP_HALT);
     rel_ncols = 0;
+    if(salto_estourou){
+        printf("erro: a condição gera um corpo maior do que o salto de um byte com"
+               " sinal alcança (127) — RECUSADA.\n");
+        if(sql_cap){ sql_cap->ok = 0;
+            snprintf(sql_cap->err, sizeof sql_cap->err,
+                     "condicao complexa demais para o salto do bytecode"); }
+        return 0;
+    }
     long passos = 0;
     for(long i = 0; i < nrows; i++){ rel_anda(i); passos += rodar(pc_emit); }
 
     unsigned long soma = 1469598103934665603UL;
     for(unsigned q = 0; q < pc_emit; q++){ soma ^= prog_le(q); soma *= 1099511628211UL; }
 
-    long achou = bits_conta(S_MATCH, nrows);   /* ∑ = popcount do campo */
+    /* O VALOR SAI DA ESCRITA — Algoritmo B, e não uma recontagem.
+     *
+     * `aranha.tex §a inversa`: «o campo c é o próprio G parcial: o Algoritmo B
+     * é o Algoritmo A com O VALOR LIDO A SAIR». E a §do ciclo é explícita sobre
+     * o custo: «armazená-lo como TABELA SOBRE X é uma escolha de representação,
+     * não o algoritmo — custa |X| e não |I|», com «NENHUMA DEPENDÊNCIA DE |X|,
+     * que é a afirmação que importa, porque é a que separa o algoritmo da
+     * tabela». Somar o bitmap inteiro a cada consulta era voltar à tabela.
+     *
+     * O contador vive nos dois componentes (ADD16) — era só isso que lhe
+     * faltava quando dava a volta aos 255. */
+    long achou = (long)par_le(S_CONTA);
     ultima_conta = achou;
     if(acao != ACAO_MARCA){
         /* o bitmap (o diário) já está no disco; agora o COMPROMISSO, e só depois o efeito. */
@@ -5332,7 +5407,13 @@ static int executa(const char *sql){
                     snprintf(resto, sizeof resto, "*%s", fim + 1);
                     ok = varre(resto, ACAO_MARCA);
                     if(sql_cap){
-                        long n = bits_conta(S_MATCH, cat_nrows());
+                        /* o número é o que o `varre` ACABOU de apurar — ∑
+                         * sobre o campo, guardado em `ultima_conta`. Recontá-lo
+                         * aqui era a segunda contagem que este bloco diz não
+                         * fazer, e pior: com `cat_nrows()` lido depois de a
+                         * varredura poder ter trocado a tabela aberta, o campo
+                         * era percorrido pelo tamanho de OUTRA. */
+                        long n = ultima_conta;
                         memset(sql_cap, 0, sizeof *sql_cap);
                         sql_cap->ok = 1; sql_cap->ncols = 1; sql_cap->nrows = 1;
                         sql_cap->tipo[0] = SQL_TIPO_INT8;

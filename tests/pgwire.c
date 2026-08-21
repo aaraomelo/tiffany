@@ -13,6 +13,8 @@
  *   §W6  Describe statement + Close + Sync
  *   §W7  fachada pqlike (Trio PG5): PQconnectdb/PQexec/PQntuples/PQgetvalue sobre o
  *        NOSSO wire — sem -lpq — e a MESMA consulta pelos dois caminhos
+ *   §W23 as CLÁUSULAS fecham entre si: a conservação, a tricotomia e as
+ *        fibras vazias
  *   §W22 O CONTADOR SOBE DE ANDAR: nrows e count de 16 bits (OP_ADD16), em vez
  *        de dar a volta aos 255
  *   §W21 MAX-CUT = MASSA: o pior caso da junção é o corte, e a massa decide
@@ -2927,7 +2929,9 @@ int main(void){
         SqlOut o;
         long mal = 0;
         char q[96];
-        const int N = 1000;                /* MUITO acima do byte, e do falso tecto */
+        const int N = 300;                 /* atravessa a fronteira do byte, e chega:
+                                            * medir isto com mil INSERT era arder o
+                                            * processador para provar o mesmo */
         unlink("/tmp/pgwire_w22.mem"); unlink("/tmp/pgwire_w22.prog");
         if(!sql_abrir("/tmp/pgwire_w22")) mal++;
         sql_executa("CREATE TABLE g (a,b)", &o);
@@ -2991,14 +2995,209 @@ int main(void){
            " `i & 15` e `k < 8`, três palavras fixas a dizer o mesmo número de três maneiras;"
            " agora o átomo diz quantos bits tem, a Word diz quantos átomos tem, e tudo o resto"
            " deriva — se o andar dobrar, dobra sozinho. O mesmo na árvore que ordena, onde"
-           " `ORD_LARG 16` convivia com um `4` e um `15` escritos à mão. MEDE-SE COM MIL LINHAS,"
-           " que é quatro vezes o tecto que eu tinha inventado e dezasseis vezes o que um slot"
-           " por linha daria no mesmo espaço: o count(*) dá mil, com e sem WHERE. O CONTROLO é a"
+           " `ORD_LARG 16` convivia com um `4` e um `15` escritos à mão. MEDE-SE ATRAVESSANDO A FRONTEIRA"
+           " dos 255 — que é a única maneira de o ver, e não precisa de mais: o count(*) dá"
+           " trezentos, com e sem WHERE, onde um contador de um byte daria quarenta e quatro. O CONTROLO é a"
            " tabela de dez linhas, porque são as pequenas que todos os outros blocos deste"
            " ficheiro usam. E fica dito o que é da MÁQUINA e não da teoria: o mapa de slots"
            " ainda tem zonas com capacidades diferentes entre si, e o compilador passa a"
            " recusar se a base não couber no espaço que o mapa lhe deu, em vez de escrever por"
            " cima do vizinho.",
+           mal == 0);
+    }
+
+    /* ═══ §W23: AS CLÁUSULAS SÃO A TEORIA, E FECHAM ENTRE SI ════════════════
+     *
+     * Nenhuma das cláusulas que o SELECT ganhou foi acrescentada por ser SQL:
+     * GROUP BY é a FIBRA, o count é G(x), HAVING é o WHERE sobre G, DISTINCT é
+     * o representante k=1, LIMIT é o prefixo da lista, e LEFT/RIGHT/FULL são a
+     * fibra VAZIA de cada lado. Este bloco não as verifica uma a uma contra
+     * números escritos à mão — verifica que FECHAM ENTRE SI, que é o que uma
+     * teoria faz e uma lista de funcionalidades não.
+     * ───────────────────────────────────────────────────────────────────────── */
+    printf("\n§W23 as cláusulas fecham entre si: a conservação e a tricotomia.\n\n");
+    {
+        SqlOut o;
+        long mal = 0;
+        char q[96];
+        unlink("/tmp/pgw23.mem"); unlink("/tmp/pgw23.prog");
+        unlink("/tmp/pgw23__t.mem"); unlink("/tmp/pgw23__u.mem");
+        if(!sql_abrir("/tmp/pgw23")) mal++;
+
+        /* uma tabela com fibras conhecidas: 7 três vezes, 9 duas, 5 uma */
+        sql_executa("CREATE TABLE t (a,b)", &o);
+        { const int A[] = {7,9,7,5,7,9}, B[] = {5,2,8,4,3,6};
+          for(unsigned i = 0; i < sizeof A / sizeof A[0]; i++){
+              snprintf(q, sizeof q, "INSERT INTO t VALUES (%d,%d)", A[i], B[i]);
+              sql_executa(q, &o);
+          } }
+
+        /* ── A CONSERVAÇÃO: ∑G = |I| ──────────────────────────────────────
+         * O GROUP BY parte a tabela em fibras. A soma dos tamanhos tem de ser
+         * o número de linhas — é o Lema da conservação, e é o primeiro dos dois
+         * caminhos: o campo contado por fibra contra o campo contado inteiro. */
+        long total = 0, soma_fibras = 0, ngrupos = 0;
+        {
+            sql_executa("SELECT count(*) FROM t", &o);
+            total = o.nrows ? strtol(o.cell[0][0], NULL, 10) : -1;
+            sql_executa("SELECT * FROM t GROUP BY a", &o);
+            ngrupos = o.nrows;
+            for(int r = 0; r < o.nrows; r++) soma_fibras += strtol(o.cell[r][1], NULL, 10);
+            printf("      %ld linhas, %ld fibras, ∑G = %ld\n", total, ngrupos, soma_fibras);
+            printf("      -> %s\n", (soma_fibras == total)
+                   ? "∑G = |I|: a conservação fecha"
+                   : "NAO — a soma das fibras não é o número de linhas");
+            if(soma_fibras != total || ngrupos != 3) mal++;
+        }
+
+        /* ── HAVING PARTE AS FIBRAS EM DUAS, E AS DUAS SOMAM ──────────────
+         * G > 1 são as dobradas, G = 1 são aquelas onde π é injetiva. Não há
+         * terceira: toda fibra tem G ≥ 1. Logo as duas contagens somam. */
+        {
+            long dob = 0, inj = 0;
+            sql_executa("SELECT * FROM t GROUP BY a HAVING count(*) > 1", &o);
+            dob = o.nrows;
+            sql_executa("SELECT * FROM t GROUP BY a HAVING count(*) = 1", &o);
+            inj = o.nrows;
+            printf("      HAVING > 1: %ld fibra(s) dobradas · = 1: %ld injetivas"
+                   "  (total %ld)\n", dob, inj, ngrupos);
+            printf("      -> %s\n", (dob + inj == ngrupos)
+                   ? "partem as fibras em duas e não há terceira"
+                   : "NAO — as duas metades não somam");
+            if(dob + inj != ngrupos) mal++;
+        }
+
+        /* ── DISTINCT DÁ UM POR FIBRA ────────────────────────────────────
+         * O representante k=1 existe uma vez em cada fibra (thm:levantamento
+         * (3): os k são {1,…,G(x)}), logo contá-los é contar as fibras. Dois
+         * caminhos para o mesmo número, por sítios diferentes do motor. */
+        {
+            int r = sql_executa("SELECT DISTINCT a FROM t", &o);
+            printf("      DISTINCT dá %d linha(s); o GROUP BY deu %ld fibras\n",
+                   r ? o.nrows : -1, ngrupos);
+            printf("      -> %s\n", (r && o.nrows == ngrupos)
+                   ? "um representante por fibra, pelos dois caminhos"
+                   : "NAO");
+            if(!r || o.nrows != ngrupos) mal++;
+        }
+
+        /* ── AS AGREGAÇÕES LÊEM A FIBRA ──────────────────────────────────
+         * sum, max e min sobre a fibra de 7, cujos b são {5,8,3}. E o gume: a
+         * soma tem de ser MAIOR que o máximo, senão qualquer uma passaria por
+         * qualquer uma numa fibra de um elemento só. */
+        {
+            long sm = 0, mx = 0, mn = 0;
+            sql_executa("SELECT sum(b) FROM t GROUP BY a", &o);
+            for(int r = 0; r < o.nrows; r++)
+                if(strtol(o.cell[r][0], NULL, 10) == 7) sm = strtol(o.cell[r][2], NULL, 10);
+            sql_executa("SELECT max(b) FROM t GROUP BY a", &o);
+            for(int r = 0; r < o.nrows; r++)
+                if(strtol(o.cell[r][0], NULL, 10) == 7) mx = strtol(o.cell[r][2], NULL, 10);
+            sql_executa("SELECT min(b) FROM t GROUP BY a", &o);
+            for(int r = 0; r < o.nrows; r++)
+                if(strtol(o.cell[r][0], NULL, 10) == 7) mn = strtol(o.cell[r][2], NULL, 10);
+            printf("      a fibra de 7 tem b = {5,8,3}: sum=%ld max=%ld min=%ld\n", sm, mx, mn);
+            printf("      -> %s\n", (sm == 16 && mx == 8 && mn == 3 && sm > mx && mn < mx)
+                   ? "as três lêem a fibra, e a soma é maior que o máximo"
+                   : "NAO");
+            if(sm != 16 || mx != 8 || mn != 3) mal++;
+        }
+
+        /* ── LIMIT É O PREFIXO ───────────────────────────────────────────── */
+        {
+            sql_executa("SELECT * FROM t LIMIT 2", &o);
+            int n2 = o.nrows;
+            sql_executa("SELECT * FROM t LIMIT 99", &o);
+            int n99 = o.nrows;
+            printf("      LIMIT 2 dá %d; LIMIT 99 (acima do total) dá %d\n", n2, n99);
+            printf("      -> %s\n", (n2 == 2 && n99 == total)
+                   ? "o prefixo, e um prefixo maior que a lista é a lista"
+                   : "NAO");
+            if(n2 != 2 || n99 != total) mal++;
+        }
+
+        /* ── A TRICOTOMIA: <, = e > PARTEM O PRODUTO ─────────────────────
+         *
+         * Para cada par (x,y) vale exactamente uma de x<y, x=y, x>y. Logo os
+         * três joins somam |A|·|B| — que é o C do max-cut, o tecto do trabalho
+         * da junção (§W21). É o «dois caminhos» outra vez: a álgebra dá o
+         * produto sem olhar às linhas, e as três junções dão-no somando. */
+        {
+            sql_executa("CREATE TABLE u (x)", &o);
+            for(int v = 10; v <= 30; v += 10){
+                snprintf(q, sizeof q, "INSERT INTO u VALUES (%d)", v); sql_executa(q, &o);
+            }
+            sql_executa("CREATE TABLE w (y)", &o);
+            { const int W[] = {10, 25}; 
+              for(unsigned i = 0; i < sizeof W / sizeof W[0]; i++){
+                  snprintf(q, sizeof q, "INSERT INTO w VALUES (%d)", W[i]);
+                  sql_executa(q, &o);
+              } }
+            long lt = 0, eq = 0, gt = 0;
+            sql_executa("SELECT * FROM u JOIN w ON u.x < w.y", &o); lt = o.nrows;
+            sql_executa("SELECT * FROM u JOIN w ON u.x = w.y", &o); eq = o.nrows;
+            sql_executa("SELECT * FROM u JOIN w ON u.x > w.y", &o); gt = o.nrows;
+            printf("\n      3 × 2 = 6 pares:  < dá %ld,  = dá %ld,  > dá %ld,  soma %ld\n",
+                   lt, eq, gt, lt + eq + gt);
+            printf("      -> %s\n", (lt + eq + gt == 6)
+                   ? "a tricotomia fecha: os três partem o produto |A|·|B|"
+                   : "NAO — sobram ou faltam pares");
+            if(lt + eq + gt != 6) mal++;
+        }
+
+        /* ── AS FIBRAS VAZIAS: FULL = interno + só-esquerda + só-direita ── */
+        {
+            long in = 0, le = 0, ri = 0, fu = 0;
+            sql_executa("SELECT * FROM u JOIN w ON u.x = w.y", &o);       in = o.nrows;
+            sql_executa("SELECT * FROM u LEFT JOIN w ON u.x = w.y", &o);  le = o.nrows;
+            sql_executa("SELECT * FROM u RIGHT JOIN w ON u.x = w.y", &o); ri = o.nrows;
+            sql_executa("SELECT * FROM u FULL JOIN w ON u.x = w.y", &o);  fu = o.nrows;
+            printf("      interno %ld · LEFT %ld · RIGHT %ld · FULL %ld\n", in, le, ri, fu);
+            printf("      -> %s\n", (fu == le + ri - in)
+                   ? "FULL = LEFT + RIGHT − interno: as duas fibras vazias, sem contar o meio duas vezes"
+                   : "NAO");
+            if(fu != le + ri - in) mal++;
+        }
+
+        /* ── O CONTROLO: sem fibra vazia, os quatro coincidem ─────────────
+         * Se as três formas devolvessem sempre o mesmo, tudo acima passava. */
+        {
+            sql_executa("DELETE FROM w WHERE y = 25", &o);
+            sql_executa("INSERT INTO w VALUES (20)", &o);
+            long in = 0, fu = 0;
+            sql_executa("SELECT * FROM u JOIN w ON u.x = w.y", &o);      in = o.nrows;
+            sql_executa("SELECT * FROM u FULL JOIN w ON u.x = w.y", &o); fu = o.nrows;
+            printf("\n      CONTROLO — a direita agora cabe toda na esquerda:"
+                   " interno %ld, FULL %ld\n", in, fu);
+            printf("      -> %s\n", (fu == in + 1)
+                   ? "o FULL só acrescenta a fibra vazia que sobra, e ela é uma"
+                   : "NAO — as formas não se distinguem, ou distinguem a mais");
+            if(fu != in + 1) mal++;
+        }
+        sql_fechar();
+
+        printf("\n");
+        ok("AS CLÁUSULAS SÃO A TEORIA, E O QUE SE MEDE É FECHAREM ENTRE SI. Nenhuma foi"
+           " acrescentada por ser SQL: GROUP BY é a FIBRA e o count é G(x), HAVING é o WHERE"
+           " sobre G, DISTINCT é o representante canónico k=1, LIMIT é o prefixo da lista, e"
+           " LEFT/RIGHT/FULL são a fibra VAZIA de cada lado. Por isso não se verificam contra"
+           " números escritos à mão — verifica-se que as identidades fecham. A CONSERVAÇÃO: a"
+           " soma dos tamanhos das fibras é o número de linhas, ∑G = |I|, com o campo contado"
+           " por fibra contra o campo contado inteiro. O HAVING PARTE EM DUAS: G > 1 são as"
+           " dobradas, G = 1 são as injetivas, e as duas contagens somam as fibras todas —"
+           " não há terceira, porque toda fibra tem G ≥ 1. O DISTINCT dá exactamente uma"
+           " linha por fibra, porque o representante k=1 existe uma vez em cada (os k são"
+           " {1,…,G(x)}), e esse número sai por outro sítio do motor que o do GROUP BY. AS"
+           " AGREGAÇÕES lêem a fibra: sobre {5,8,3} dão 16, 8 e 3, com o gume de a soma ter"
+           " de ser maior que o máximo — numa fibra de um elemento só as três coincidiriam e"
+           " qualquer uma passaria por qualquer uma. E A TRICOTOMIA É O FECHO MAIS BONITO:"
+           " para cada par vale exactamente uma de x<y, x=y, x>y, logo as três junções somam"
+           " |A|·|B| — que é o C do max-cut, o tecto do trabalho da junção. A álgebra dá o"
+           " produto sem olhar às linhas e as três junções dão-no somando. As fibras vazias"
+           " fecham da mesma maneira: FULL = LEFT + RIGHT − interno, sem contar o meio duas"
+           " vezes. E O CONTROLO impede que tudo isto passe por as formas não se distinguirem:"
+           " com a direita contida na esquerda, o FULL acrescenta ao interno exactamente uma"
+           " linha, que é a única fibra vazia que sobra.",
            mal == 0);
     }
 
