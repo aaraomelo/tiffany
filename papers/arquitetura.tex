@@ -2059,7 +2059,8 @@ dobrou.
 \medskip\noindent\textbf{E o que a porta não faz, RECUSA com a razão.} Um erro
 disfarçado de resultado vazio é o pior desfecho para quem chama, e a regra vale
 nos dois sentidos: \code{DISTINCT} pede uma coluna --- a linha inteira não é
-indexável pela árvore ---; a junção corre em duas tabelas;
+indexável pela árvore ---; a junção encadeia dois cortes --- a saída de um é a entrada do
+seguinte ---, e a segunda é sempre interna;
 e se a árvore não couber, a
 consulta é recusada em vez de devolver metade de uma ordem, de um grupo ou de
 uma junção.

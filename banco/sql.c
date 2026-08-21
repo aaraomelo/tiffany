@@ -3298,6 +3298,9 @@ static int j_casam(long v, int *saida, int cap){
 /* lê `JOIN <tab> ON <a>.<x> = <b>.<y>`; devolve 1 se leu, 0 se não é join */
 enum { J_IG = 0, J_LT, J_LE, J_GT, J_GE };
 static int j_op = J_IG;              /* o operador do ON */
+static char j2_tab[64] = "";         /* a TERCEIRA tabela, se houver */
+static char j2_esq[64] = "", j2_dir[64] = "";
+static int  j2_op = J_IG;
 static int j_left = 0;               /* 1 se LEFT: a fibra vazia da esquerda */
 static int j_right = 0;              /* 1 se RIGHT: a fibra vazia da direita  */
 
@@ -3393,8 +3396,35 @@ static int varre(const char *resto, int acao){
         if(!lista_colunas(&p, cols, sizeof cols)) return 0;
         if(!palavra(&p, "FROM")) return 0;
         if(!ident(&p, nome, sizeof nome)) return 0;
-        j_tab_dir[0] = 0;
-        le_join(&p, nome);          /* se houver JOIN, fica lido aqui */
+        j_tab_dir[0] = 0; j2_tab[0] = 0;
+        if(le_join(&p, nome)){
+            /* A TERCEIRA TABELA É A COMPOSIÇÃO DE DOIS CORTES.
+             *
+             * Um JOIN é uma bipartição; dois JOIN são duas, e a segunda corre
+             * sobre o resultado da primeira. Não é uma junção de três lados —
+             * é a mesma operação duas vezes, com a saída da primeira a ser a
+             * esquerda da segunda. Por isso o parser lê o segundo ON contra as
+             * colunas que já estão à esquerda, e o motor não precisa de saber
+             * de onde elas vieram. */
+            char guarda_t[64], guarda_e[64], guarda_d[64];
+            int guarda_op = j_op, guarda_l = j_left, guarda_r = j_right;
+            snprintf(guarda_t, sizeof guarda_t, "%s", j_tab_dir);
+            snprintf(guarda_e, sizeof guarda_e, "%s", j_col_esq);
+            snprintf(guarda_d, sizeof guarda_d, "%s", j_col_dir);
+            /* o segundo ON fala da tabela que a PRIMEIRA junção trouxe — a
+             * esquerda dele é a direita dela, porque a saída de um corte é a
+             * entrada do seguinte */
+            if(le_join(&p, guarda_t)){
+                snprintf(j2_tab, sizeof j2_tab, "%s", j_tab_dir);
+                snprintf(j2_esq, sizeof j2_esq, "%s", j_col_esq);
+                snprintf(j2_dir, sizeof j2_dir, "%s", j_col_dir);
+                j2_op = j_op;
+            }
+            snprintf(j_tab_dir, sizeof j_tab_dir, "%s", guarda_t);
+            snprintf(j_col_esq, sizeof j_col_esq, "%s", guarda_e);
+            snprintf(j_col_dir, sizeof j_col_dir, "%s", guarda_d);
+            j_op = guarda_op; j_left = guarda_l; j_right = guarda_r;
+        }
         proj_n = (strcmp(cols, "*") == 0) ? 0 : -1;   /* −1: resolver depois de abrir */
         snprintf(proj_cols, sizeof proj_cols, "%s", cols);
     } else if(acao == ACAO_SET){
@@ -3809,6 +3839,8 @@ static int varre(const char *resto, int acao){
          * São J_MAXLIN = 64 linhas, logo cabem num inteiro de 64 bits — o mesmo
          * bit level do bitmap das linhas, à escala da junção. */
         unsigned long long usados = 0ULL;
+        static Word nova[J_MAXLIN][J_MAXCOL];      /* o resultado do 1.º corte */
+        int nova_ne = 0;
         { long saiu = 0;
           for(int e = 0; e < ne; e++){
             int casos[J_MAXLIN], nca;
@@ -3849,6 +3881,19 @@ static int varre(const char *resto, int acao){
                 int d = casos[k];
                 if(d >= nd) continue;
                 if(d < 64) usados |= (1ULL << d);      /* liga a coordenada d */
+                /* HÁ SEGUNDA JUNÇÃO: o par não sai — passa a ser a ESQUERDA
+                 * dela. A saída do primeiro corte é a entrada do segundo. */
+                if(j2_tab[0]){
+                    if(nova_ne < J_MAXLIN){
+                        for(long j = 0; j < nc_esq && j < J_MAXCOL; j++)
+                            nova[nova_ne][j] = esq[e][j];
+                        for(long j = 0; j < ncols_dir && nc_esq + j < J_MAXCOL; j++)
+                            nova[nova_ne][nc_esq + j] =
+                                mem_le(S_JDIR + (unsigned)(d*J_MAXCOL + j));
+                        nova_ne++;
+                    }
+                    continue;
+                }
                 printf("   ");
                 for(long j = 0; j < nc_esq; j++){
                     long ve = (long)esq[e][j].total | ((long)esq[e][j].e << 8);
@@ -3896,6 +3941,81 @@ static int varre(const char *resto, int acao){
                   if(sql_cap && sql_cap->nrows < SQL_OUT_MAX_ROWS) sql_cap->nrows++;
                   saiu++;
               }
+          }
+          /* A SEGUNDA JUNÇÃO, sobre o que a primeira deu. É a MESMA operação:
+           * a esquerda passa a ser o par (A|B), a direita é a terceira tabela,
+           * e o ON procura-se nas colunas que já lá estão. */
+          if(j2_tab[0]){
+              long nc2 = nc_esq + ncols_dir;
+              if(nc2 > J_MAXCOL) nc2 = J_MAXCOL;
+              snprintf(j_tab_dir, sizeof j_tab_dir, "%s", j2_tab);
+              snprintf(j_col_dir, sizeof j_col_dir, "%s", j2_dir);
+              j_op = j2_op; j_left = 0; j_right = 0;
+              { char t2[64]; snprintf(t2, sizeof t2, "%s", j2_tab); j2_tab[0] = 0;
+                long nd2c = 0;
+                /* o índice da coluna do ON na esquerda composta: procura-se nos
+                 * nomes que já se leram da esquerda e nos da direita anterior */
+                int oc2 = -1;
+                for(long j = 0; j < nc_esq && j < J_MAXCOL; j++)
+                    if(nome_esq[j][0] && !strcasecmp(nome_esq[j], j2_esq)){ oc2 = (int)j; break; }
+                if(oc2 < 0){
+                    /* está nas colunas da direita anterior, que ficou aberta */
+                    int k2 = col_indice(j2_esq);
+                    if(k2 >= 0) oc2 = (int)(nc_esq + k2);
+                }
+                if(oc2 < 0){
+                    printf("erro: a coluna «%s» do segundo ON não está no que a"
+                           " primeira junção deu — RECUSADA.\n", j2_esq);
+                    if(sql_cap){ sql_cap->ok = 0;
+                        snprintf(sql_cap->err, sizeof sql_cap->err,
+                                 "column \"%s\" does not exist", j2_esq); }
+                    return 0;
+                }
+                nd2c = 0;
+                { int nd2 = j_carrega_direita(&nd2c);
+                  if(nd2 < 0){
+                      printf("erro: a terceira tabela não coube — RECUSADA.\n");
+                      if(sql_cap){ sql_cap->ok = 0;
+                          snprintf(sql_cap->err, sizeof sql_cap->err,
+                                   "JOIN: a terceira tabela nao coube"); }
+                      return 0;
+                  }
+                  for(int e2 = 0; e2 < nova_ne; e2++){
+                      long v2 = (long)nova[e2][oc2].total | ((long)nova[e2][oc2].e << 8);
+                      int cs[J_MAXLIN], nc2a = j_casam(v2, cs, J_MAXLIN);
+                      for(int k = 0; k < nc2a; k++){
+                          int d2 = cs[k];
+                          if(d2 >= nd2) continue;
+                          printf("   ");
+                          for(long j = 0; j < nc2; j++){
+                              long ve = (long)nova[e2][j].total | ((long)nova[e2][j].e << 8);
+                              printf("%ld | ", ve);
+                              if(sql_cap && sql_cap->nrows < SQL_OUT_MAX_ROWS && j < SQL_OUT_MAX_COLS)
+                                  snprintf(sql_cap->cell[sql_cap->nrows][j], SQL_OUT_CELL, "%ld", ve);
+                          }
+                          for(long j = 0; j < nd2c; j++){
+                              Word w = mem_le(S_JDIR + (unsigned)(d2*J_MAXCOL + j));
+                              long v = (long)w.total | ((long)w.e << 8);
+                              printf("%ld", v);
+                              if(j + 1 < nd2c) printf(" | ");
+                              { int col = (int)(nc2 + j);
+                                if(sql_cap && sql_cap->nrows < SQL_OUT_MAX_ROWS && col < SQL_OUT_MAX_COLS)
+                                    snprintf(sql_cap->cell[sql_cap->nrows][col], SQL_OUT_CELL, "%ld", v); }
+                          }
+                          printf("\n");
+                          if(sql_cap){
+                              if(sql_cap->nrows < SQL_OUT_MAX_ROWS) sql_cap->nrows++;
+                              sql_cap->ncols = (int)(nc2 + nd2c) > SQL_OUT_MAX_COLS
+                                             ? SQL_OUT_MAX_COLS : (int)(nc2 + nd2c);
+                          }
+                          saiu++;
+                      }
+                  }
+                  printf("-- JOIN de três: %d par(es) da primeira, %d linha(s) na"
+                         " terceira, %ld emitidas\n", nova_ne, nd2, saiu); }
+                (void)t2; }
+              if(sql_cap) snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT %ld", saiu);
+              return 1;
           }
           if(sql_cap) snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT %ld", saiu);
           printf("-- JOIN: %ld linha(s) da esquerda, %d da direita, %ld emitidas\n",
