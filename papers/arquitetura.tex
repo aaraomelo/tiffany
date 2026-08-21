@@ -1404,6 +1404,93 @@ apaga $k$ e devolve $\pi$. A igualdade $|I|=\sum G$ é §AG5; cada
 ponto de $\mathrm{im}\,\tilde\pi$ corresponde a exactamente um índice.
 \end{proof}
 
+\begin{corolario}[a aranha em $\Z^{n}$ --- o teorema não usa o $2$]\label{cor:aranha-n}
+No Teor.~\ref{thm:multiplicidade} substitua-se $\Z^{2}$ por um conjunto $X$
+qualquer com igualdade decidível. As cláusulas 1--3 sobrevivem sem alteração:
+$i\sim j\iff\pi(i)=\pi(j)$ é a fibra de \emph{uma aplicação}, $G=|\pi^{-1}|$
+conta-a, e a escrita $G_{t+1}=G_{t}+\mathbf{1}_{\pi(t)}$ é local no
+contradomínio. A dimensão entra num sítio só --- a cláusula 4, onde
+$|V(x)|=2n$ na grade. O $2$ era do exemplo, não do teorema. Em particular:
+\begin{enumerate}\itemsep2pt
+\item \textbf{$X=\Z^{n}$.} O mesmo algoritmo realiza o Cantor ($n=1$), o
+      dragão ($n=2$), o dragão no espaço ($n=3$) e o passo da ISA
+      $(\text{registo},\text{slot},\text{banco},\text{andar})$ ($n=4$), e nos
+      quatro $\sum_{x}G(x)=|I|$ com a recontagem a bater. O campo é
+      \textbf{esparso}: a memória vive onde a trajetória passou, que é a
+      cláusula 3 lida à letra --- o array $G[2048][2048]$ é uma escolha de
+      representação, e em $\Z^{3}$ pediria $34$\,GB.
+\item \textbf{$X$ ultramétrico.} Com $X$ a árvore do encaixe e
+      $d(i,j)=2^{-p}$, $p$ a profundidade da primeira divergência --- a métrica
+      que o corte induz nos reais (\code{reais def:corte}) --- a célula de
+      $\pi$ \emph{é} a bola. O que distingue esta métrica da euclidiana não é
+      a desigualdade $d(a,b)\le\max\{d(a,c),d(c,b)\}$ estar escrita mais
+      apertada: é as bolas \textbf{particionarem} e todo o ponto de uma ser
+      seu centro. Por isso $\sum G=|I|$ sem sobreposição --- não há
+      sobreposição a haver.
+\item \textbf{Órbitas deterministas: $G$ lê o período.} Se $\pi(t+1)$ é função
+      de $\pi(t)$, a célula \emph{é} o estado, e voltar a uma célula é fechar a
+      órbita. Então
+      \[
+      \bigl|\{x:G(x)>1\}\bigr|\;=\;\text{período},\qquad
+      \bigl|\{x:G(x)=1\}\bigr|\;=\;\text{cauda},
+      \]
+      o $\rho$ de Floyd lido no chão: o algoritmo clássico precisa de duas
+      patas, lebre e tartaruga, porque o agente não tem memória; a aranha tem
+      uma só, porque a memória não é dela --- é do espaço (cláusula 3).
+      Medido em $z\mapsto z^{2}+c$ sobre $\Z[i]$, com a órbita que escapa como
+      controlo ($G\equiv1$).
+\end{enumerate}
+\end{corolario}
+
+\begin{proof}
+Nenhuma das cláusulas 1--3 menciona a estrutura de $\Z^{2}$: a primeira é a
+definição de fibra, a segunda a sua cardinalidade, a terceira uma escrita
+indexada por um ponto do contradomínio. A cláusula 4 usa a vizinhança, e é aí
+que $n$ aparece, como $|V(x)|=2n$. Para (2), se duas bolas de raio $2^{-p}$ se
+intersectam, os seus centros concordam nos primeiros $p$ bits, logo têm o mesmo
+prefixo e as bolas coincidem; a partição é a fibra do prefixo, e $\pi$ é essa
+projecção. Para (3), $\pi$ determinista e $\pi(i)=\pi(j)$ com $i<j$ dá
+$\pi(i+m)=\pi(j+m)$ para todo $m$, logo a órbita é periódica de período
+$j-i$ a partir de $i$; as células visitadas mais de uma vez são exactamente as
+do ciclo.
+\end{proof}
+
+\medskip\noindent\textbf{O que este corolário \emph{não} diz.} A
+multiplicidade máxima não compara dimensões. Medido, o dragão de
+$\Z^{3}$ tem $\max G=3$ contra $2$ do plano --- mais, não menos --- e a razão
+não é haver mais onde virar: a curva de $\Z^{3}$ é \emph{outra}, com o plano da
+viragem a rodar de eixo. $\max G$ compara curvas, não espaços.
+
+\begin{corolario}[o levantamento sobe UM andar, e a volta devolve $G$]\label{cor:aranha-inversa-n}
+Com $\pi\colon I\to\Z^{n}$ e $k(i)$ o número de visita, o levantamento
+$\tilde\pi=(\pi,k)$ tem contradomínio $\Z^{n}\times\N$: a folha é
+\textbf{uma} coordenada, seja qual for $n$ --- não $n$ delas. As quatro
+cláusulas do Teor.~\ref{thm:aranha-inversa} passam sem alteração, e a
+injectividade não precisa de ser verificada par a par: é a \emph{própria
+aranha} a correr em dimensão $n+1$ sobre $\tilde\pi(I)$, e o campo devolve
+$\tilde G\equiv1$ com $|\mathrm{im}\,\tilde\pi|=|I|$. A projecção
+$\mathrm{pr}_{1}$ não é um passo que se escreva: é o campo em dimensão $n$
+a correr sobre os mesmos vectores --- a folha está lá e o campo não a lê,
+que é esquecer a última coordenada. Donde a \textbf{volta}: sem o campo da
+base, recontar o levantamento em dimensão $n$ devolve o $G$ original célula
+a célula, resíduo $0$. É isto que faz dele um inverso e não apenas um
+levantamento.
+\end{corolario}
+
+\medskip\noindent E a régua do dragão: a curva de Heighway sai por dois
+caminhos sem uma linha em comum --- a régua de bits
+$\code{drag\_esq}(k)=[((k\wedge-k)\ll1)\wedge k\neq0]$ e a \textbf{dobra}
+\[
+D_{k+1}\;=\;D_{k}+D_{k}^{*},
+\]
+com $D^{*}$ a curva percorrida ao contrário e rodada de $90^{\circ}$ em torno
+do ponto final. É o passo da torre (\code{lib/torre\_alg.h}:
+$T_{k+1}=T_{k}+T_{k}^{*}$) a aparecer numa curva --- dobrar a tira ao meio é
+colar-lhe a sua própria imagem invertida. Coincidem ponto a ponto em
+$k=1,\ldots,12$, e o sinal da rotação não se escolhe: correm-se os dois e
+exige-se que exactamente um bata, o mesmo em todas as ordens.
+
+
 \medskip\noindent\textbf{Algoritmo (inverso da aranha).}
 Dada uma órbita realizada $\pi$ (ou o campo $G$ com a sequência de
 células visitadas):
@@ -1476,6 +1563,10 @@ paridade $G\bmod2$; descida $\mathrm{GF}(2)$ §AG6--§AG7; decisão min-$G$ §AG
 caminhada §AG10; fecho $R^{4}$ §AG9/§AG11); fibra \code{tests/conservacao\_metrica.c} §M10
 (\code{teoria cor:pata}); Teor.~\ref{thm:aranha-inversa}
 \code{tests/aranha\_inversa.c} §AI1--§AI7 (levantamento $\tilde G\equiv1$);
+Cor.~\ref{cor:aranha-n} e Cor.~\ref{cor:aranha-inversa-n}
+\code{tests/aranha\_n.c} §AN1--§AN9
+($\Z^{1}$--$\Z^{4}$; bits $=$ dobra $D_{k}+D_{k}^{*}$ §AN3; bolas particionam
+§AN6; $|\{G>1\}|=$ período §AN8; inversa em $\Z^{n}$ e a volta §AN9);
 \code{tests/idioma\_orbita.c} §IO1--§IO5 (frase$\to\tilde\pi$);
 ciclo de slots \code{tests/reta.c} §R12d--§R12g;
 \code{tests/dualsort\_banco.c}; GF(2) \code{tests/cadeia.c} §K3;

@@ -1570,3 +1570,56 @@ não é o dual: é a ausência dele com o nome certo.
              D32 vira identidade → cai também, e esse andar já lá estava
 
   bateria    101 medidores reabertos pelo i128.h, 1232 unidades, 0 falhas
+
+§34 — A ARANHA EM ℤⁿ, E A INVERSA TAMBÉM (tests/aranha_n.c, §AN1–§AN9)
+======================================================================
+Pergunta: o `thm:multiplicidade` está escrito para π: I → ℤ² e realizado num
+array G[2048][2048]. Generaliza? Em ℤ³ esse array pediria 34 GB, e a torre vai
+a oito andares.
+
+O TEOREMA NÃO USA O 2. Lidas as quatro cláusulas uma a uma: duplicidade é a
+FIBRA de uma aplicação, G conta a fibra, a escrita é local no contradomínio.
+Nenhuma menciona a dimensão. Só a cláusula 4 — sentir é ler G na vizinhança —
+e usa-a como |V(x)| = 2n. O 2 era do exemplo. Escrito uma vez com n por
+parâmetro, o mesmo código correu ℤ¹ a ℤ⁴ sem uma linha diferente:
+Cantor · dragão · dragão no espaço · o passo da ISA (registo,slot,banco,andar).
+
+O campo é ESPARSO, por endereçamento aberto num arena fixo: a memória vive
+onde a trajectória passou, que é a cláusula 3 lida à letra.
+
+TRÊS COISAS QUE O MEDIDOR TROUXE E O PAPER NÃO TINHA
+  · A ULTRAMÉTRICA não é uma desigualdade mais apertada: é as BOLAS
+    PARTICIONAREM, e todo ponto de uma ser seu centro. A célula de π É a bola,
+    e ∑G = |I| sem sobreposição porque não há sobreposição a haver. A recta,
+    com o mesmo raio, falha as duas coisas.
+  · O CAMPO G LÊ O PERÍODO. Numa órbita determinista (z ↦ z²+c em ℤ[i]) a
+    célula É o estado, logo |{x : G(x)>1}| = período e {G=1} = a cauda. É o ρ
+    de Floyd lido no chão: o clássico precisa de duas patas porque o agente não
+    tem memória; a aranha tem uma, porque a memória é do espaço.
+  · A INVERSA SOBE UM ANDAR SÓ. π̃ = (π,k) leva ℤⁿ em ℤⁿ⁺¹ — a folha é UMA
+    coordenada, não n. E a injectividade não se verifica par a par: é a própria
+    aranha a correr em dimensão n+1. A VOLTA fecha: sem o campo da base,
+    recontar o levantamento em dimensão n devolve o G original, resíduo 0.
+
+O QUE O GUME APANHOU EM MIM (13 mutações, 13 mordem)
+1. A PREVISÃO ESCRITA ANTES DA MEDIDA. Afirmei que o dragão dobraria MENOS em
+   ℤ³ «porque há mais onde virar». Dobra MAIS, 3 contra 2 — e a razão não é a
+   dimensão: a curva de ℤ³ é OUTRA. max G compara curvas, não espaços.
+2. «DOIS CAMINHOS» QUE NÃO DISTINGUIAM NADA. A §AN3 comparava |I| e ∑G com o
+   aranha_g.c — números verdadeiros para QUALQUER trajectória do mesmo
+   comprimento. Uma espiral sobrevivia-lhe. A régua certa é a DOBRA:
+   D_{k+1} = D_k + D_k*, o dual sendo a curva ao contrário rodada de 90°. É o
+   passo da torre numa curva, e bate com a régua de bits ponto a ponto em
+   k=1..12 — com o sinal da rotação a não ser escolhido por mim: correm-se os
+   dois e exige-se que exactamente um bata, o mesmo em todas as ordens.
+3. O NÚMERO À MÃO, OUTRA VEZ. Contei o Cantor entre as realizações que dobram.
+   A §AN4 tinha-o medido a max G = 1 três secções antes. São dois controlos.
+4. UM PASSO DECORATIVO. `v.c[n] = 0` antes de projectar não fazia nada: o campo
+   de dimensão n já não lê a coordenada n. pr₁ não é um passo que se escreva —
+   é o campo a não olhar. Só o gume o disse (a mutação sobrevivia).
+5. E DUAS MUTAÇÕES MINHAS MAL FEITAS antes de acusar o código: bolas encaixadas
+   continuam ultramétricas, e um desalinhamento de 3 não atravessa um bloco de
+   64 quando se varre de 8 em 8.
+
+  papers    arquitetura.tex Cor. cor:aranha-n e Cor. cor:aranha-inversa-n
+  bateria   529 : 529, 0 falhas · 8 unidades passaram, 0 falharam
