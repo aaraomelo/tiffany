@@ -28,7 +28,7 @@ rsync -az --delete --exclude 'repo.git' -e "ssh $SSH_OPTS" \
       app/dist/ $SSH_USER@$SSH_HOST:/var/www/goldenkingdom/
 ```
 
-**O `--exclude 'repo.git'` é obrigatório**: o clone público (238 MB) vive DENTRO do directório de publicação e não vem no build — um `--delete` cego apaga-o e o `git clone` público morre sem ninguém dar por isso. Confirmar depois de enviar.
+~~**O `--exclude 'repo.git'` é obrigatório**~~ — **caducou em 20/08/2026**: o espelho público saiu da Patria (o repositório passou a privado) e já não há nada dentro do directório de publicação a preservar, portanto o `--delete` pode ser cego. Ficou registado porque a razão continua a valer para qualquer outra coisa que passe a viver no `DEPLOY_DIR` sem vir no build: era o clone público (312 MB no fim) a ser apagado por um `--delete` sem ninguém dar por isso. Ver [[project-publicacao-patria]].
 
 **A chave é `~/.ssh/id_rsa_patria`** (root@srv1559444.hstgr.cloud). Copiada para `segredo/`, com `.env` ao lado — ambos no `.gitignore`, escrito ANTES de copiar.
 

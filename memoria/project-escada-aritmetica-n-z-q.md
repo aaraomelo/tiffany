@@ -42,5 +42,5 @@ Falas: `prova que (a/b)/(c/d) = ad/bc`, `inverso de 3/7`, `inverso de 0` (o gume
 
 **O andar seguinte é ℝ**, e ele já disse por onde: «os racionais já têm operações e ordem
 mas ainda têm **buracos**» — completude, Cauchy, cortes de Dedekind, e a construção
-geométrica da reta que ele persegue (ver [[project-checkpoint-2026-08-14-curadoria.md]] e
+geométrica da reta que ele persegue (ver [[project-checkpoint-2026-08-14-curadoria]] e
 a reta real geométrica do commit `9a85359`). É a porta do **relógio da reta**.

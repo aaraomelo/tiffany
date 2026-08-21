@@ -96,7 +96,7 @@ metadata:
 - **§L5+fprintf: UMA raiz nomeada até ao osso**: a descida do traduz morre no sscanf (fn=29, call com pilha vazia; anel de 16 opcodes FICA no traduz como diagnóstico) — o **va_arg do subida IÇA código (memmove no COD) e a leitura linear da descida desfasa a pilha**. Sessão própria de compilador.
 - Bateria **422: 421 verdes, 1** (libc_wasm, causa=um mecanismo). Método que pagou: caso mínimo → bissecção → variantes → instrumentação com anel → raiz.
 
-Relacionado: [[checkpoint-2026-08-13-cristal]], [[feedback-a-referencia-escrita-a-mao]], [[feedback-dois-caminhos]], [[feedback-a-base-ja-existe]], [[feedback-normalizar-nao-e-medir]], [[feedback-o-medidor-que-nunca-mediu]], [[feedback-a-regua-nao-transporta]].
+Relacionado: [[project-checkpoint-2026-08-13-cristal]], [[feedback-a-referencia-escrita-a-mao]], [[feedback-dois-caminhos]], [[feedback-a-base-ja-existe]], [[feedback-normalizar-nao-e-medir]], [[feedback-o-medidor-que-nunca-mediu]], [[feedback-a-regua-nao-transporta]].
 
 ## O portão de ouro (fim do dia, a687cbd)
 

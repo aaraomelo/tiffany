@@ -1,6 +1,6 @@
 ---
 name: project-publicacao-patria
-description: "Como o tiffany chega ao ar: o fork na Patria, o front do goldenkingdom, os dois workflows cruzados, e as três armadilhas do deploy"
+description: "Como o tiffany chega ao ar: o front do goldenkingdom, os workflows, as armadilhas do deploy — e o fork na Patria, que saiu da jogada em 20/08/2026"
 metadata: 
   node_type: memory
   type: project
@@ -20,14 +20,18 @@ Dourado (`chess/app`, Vite) e, agora, os papers do tiffany.
                               ^
                          repository_dispatch: tiffany-atualizado
 
-- **O fork**: `/root/tiffany-repo.git` (bare) na VPS, e uma cópia servida por *dumb HTTP* em
-  `/var/www/goldenkingdom/repo.git`. O front tem um botão para ele; `git clone
-  https://goldenkingdom.patriatechnology.com/repo.git` funciona.
+- **O fork SAIU DA JOGADA em 20/08/2026** (era `/root/tiffany-repo.git` bare na VPS, mais uma
+  cópia de 312 MB servida por *dumb HTTP* em `/var/www/goldenkingdom/repo.git`, com botão no
+  front). O repositório passou a **privado** no GitHub e o espelho público foi apagado: os dois
+  diretórios já não existem, o passo «Espelhar no fork da Patria» saiu do `publica.yml`, o botão
+  saiu do `main.js`, e o `location /repo.git/` ficou na config a devolver **`return 404`** — sem
+  ele, o fallback do SPA responderia 200 + HTML a quem pedisse. O remote `patria` saiu do clone
+  local. **Nada do tiffany vive na VPS além do site.**
 - **Três documentos no ar**, e só três: **teoria**, **catálogo**, **enredo**. O GDD e o manual
   vivem *dentro* do enredo; o microprocessador saiu da página. A contagem está em **quatro
   sítios** (manifesto, ícones, validação pré-deploy, health check) de propósito.
-- **Nenhum binário no git.** Os PDFs são compilados no deploy a partir do `.tex` — os do tiffany
-  saem de `pdflatex` sobre o próprio fork.
+- **Nenhum binário no git.** Os PDFs são compilados no deploy a partir do `.tex` (na época, com
+  `pdflatex` sobre o próprio fork; hoje a composição é no cliente, com o `tex.wasm`).
 
 ## O enredo só entrou no pipeline a 02/08 — e o que isso escondia
 

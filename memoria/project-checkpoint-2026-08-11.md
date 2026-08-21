@@ -35,4 +35,4 @@ S=2³⁰ esgota ~2⁹ dobras — a história do α). Sob o ulimit da bateria o m
 e os §V correm pelo cc (dois caminhos).
 
 **Pendente:** deploy (o push foi [skip ci]); o wasm vermelho de ontem ficou VERDE.
-Ver [[compor-nao-ancorar]] — as três voltas do erro de composição deste dia.
+Ver [[feedback-compor-nao-ancorar]] — as três voltas do erro de composição deste dia.

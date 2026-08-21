@@ -42,4 +42,4 @@ medida.
 
 Duas vezes no mesmo dia, e as duas dentro de uma correcção de tautologias.
 
-Ver [[feedback-assercoes-vazias]], [[feedback-dois-caminhos]], [[feedback-gume-automatico]].
+Ver [[feedback-assercoes-vazias]], [[feedback-dois-caminhos]], [[project-gume-automatico]].
