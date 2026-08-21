@@ -691,6 +691,62 @@ static int ula_menor16(W16 a, W16 b){
     return emp != 0;
 }
 static int ula_igual16(W16 a, W16 b){ return a.baixo == b.baixo && a.alto == b.alto; }
+
+/* ══ A DOBRA DO REI — GOLD em dezasseis bits ═════════════════════════════════
+ *
+ * A ISA não tem MUL. `n·x` faz-se por ZECKENDORF: todo inteiro é soma de
+ * Fibonacci NÃO consecutivos, de um único jeito, e cada F(k) é uma potência do
+ * rei — GOLD = (a,b) ↦ (a+b, a), com σ² = σ + 1. Partindo de (x, 0):
+ *
+ *     (x,0) → (x,x) → (2x,x) → (3x,2x) → (5x,3x) → …
+ *      k aplicações dão  a = F(k+1)·x
+ *
+ * Em oito bits o estado do rei é a Word: `a` no `.total` e `b` no `.e`. É por
+ * isso que o segundo átomo NÃO está livre — e foi isso que travou o alargamento
+ * do avaliador (§27).
+ *
+ * A dobra é a mesma do §26, aplicada ao REI em vez de à soma: o estado passa a
+ * ser um PAR de valores de dezasseis bits, e o `+` lá dentro é o `ula_add16`,
+ * onde o vai-um atravessa o átomo. Nada aqui usa o `+` do C sobre os valores.
+ *
+ * E o que sai do andar DIZ-SE: `n·x` acima de 65535 marca transbordo e não
+ * enrola — é a mesma regra que o §24 pôs na célula. */
+typedef struct { W16 a, b; } G16;          /* o estado do rei, um andar acima */
+
+static G16 gold16(G16 w, Word8 *transbordo){
+    G16 r; Word8 t = 0;
+    r.a = ula_add16(w.a, w.b, &t);         /* a' = a + b, com o vai-um a atravessar */
+    r.b = w.a;                             /* b' = a — o deslocamento */
+    if(transbordo && t) *transbordo = 1;
+    return r;
+}
+
+/* F(k+1)·x por k deslocamentos do rei, partindo de (x, 0) */
+static W16 fib_vezes16(W16 x, int k, Word8 *transbordo){
+    G16 w; w.a = x; w.b = w16_de(0);
+    for(int t = 0; t < k; t++) w = gold16(w, transbordo);
+    return w.a;
+}
+
+/* n·x = Σ F(k_i)·x, com n em Zeckendorf — o mesmo desenho do `emit_mul_zeck`,
+ * um andar acima. O custo é o número de dígitos de Zeckendorf, ~log_φ(n). */
+static W16 mul16_zeck(unsigned n, W16 x, Word8 *transbordo){
+    unsigned fib[24]; int nf = 2;
+    W16 acc = w16_de(0);
+    fib[0] = 1; fib[1] = 2;                     /* F(2), F(3), … */
+    while(fib[nf-1] <= n/2 + 1 && nf < 23){ fib[nf] = fib[nf-1] + fib[nf-2]; nf++; }
+    unsigned r = n;
+    for(int i = nf-1; i >= 0 && r > 0; i--){
+        if(fib[i] > r) continue;
+        r -= fib[i];
+        /* fib[i] = F(i+2), logo são i+1 deslocamentos — errar isto acerta só em n = 1 */
+        W16 parcela = fib_vezes16(x, i + 1, transbordo);
+        Word8 t = 0;
+        acc = ula_add16(acc, parcela, &t);
+        if(transbordo && t) *transbordo = 1;
+    }
+    return acc;
+}
 /* GOLD: A_1 = [[1,1],[1,0]] — ×σ, σ²=σ+1. NEGRO: inversa (det −1). Envelope Word_8. */
 static Word cifra_an(Word w, int n){
     Word r = { (Word8)((int)n*(int)w.total + (int)w.e), w.total }; return r; }
@@ -3881,6 +3937,74 @@ int main(int argc, char **argv){
                    " vai-um passava em tudo o que não atravessa",
                    mau == 0 && casos == 100 && atravessa > 10
                    && t8 == 0 && w16_val(t16) == 256 && tr == 0);
+            }
+            /* ── A DOBRA DO REI: GOLD em dezasseis bits ──────────────────────────
+             * A ISA não tem MUL: `n·x` é ZECKENDORF, e cada F(k) é uma potência do
+             * rei, GOLD = (a,b) ↦ (a+b, a). O estado do rei É a Word — `a` no
+             * `.total`, `b` no `.e` —, e é por isso que o segundo átomo não está
+             * livre e que o avaliador ficou em oito bits (§27).
+             *
+             * A dobra é a do §26 aplicada ao REI em vez de à soma: o estado passa a
+             * ser um par de valores de dezasseis bits e o `+` lá dentro é o
+             * `ula_add16`. Mede-se SOZINHA, com o caminho velho intacto.
+             *
+             * Três coisas, e a terceira é a que interessa:
+             *   (a) GOLD^k (x,0) dá mesmo F(k+1)·x — o rei é Fibonacci
+             *   (b) n·x por Zeckendorf bate com n·x, varrido
+             *   (c) E O GUME: onde o rei de OITO bits parte. 3·100 = 300 enrola
+             *       para 44 lá, e dá 300 aqui. Sem esse caso, um GOLD de 16 que
+             *       ignorasse o transporte passava em tudo o que não atravessa. */
+            {
+                long mau = 0, casos = 0, largos = 0, acima = 0;
+                /* (a) o rei É Fibonacci */
+                const unsigned F[] = { 1,1,2,3,5,8,13,21,34,55,89,144,233,377,610,987 };
+                for(int k = 1; k <= 15; k++){
+                    Word8 tr = 0;
+                    W16 r = fib_vezes16(w16_de(7), k, &tr);
+                    unsigned esperado = F[k] * 7u;
+                    if(esperado <= 0xFFFFu && (w16_val(r) != esperado || tr)) mau++;
+                }
+                /* (b) n·x por Zeckendorf, varrido onde o transporte decide */
+                /* o regime TEM de conter o defeito: com n ≤ 40 e x ≤ 300 o produto
+                 * nunca passa de 12000, logo o ramo do transbordo NUNCA CORRIA e a
+                 * bandeira do andar ficava por medir — tirá-la não derrubava nada.
+                 * Agora vai até 300·300 = 90000, bem acima do tecto de 65535. */
+                for(unsigned n = 0; n <= 300; n += 7)
+                for(unsigned x = 0; x <= 300; x += 37){
+                    Word8 tr = 0;
+                    W16 r = mul16_zeck(n, w16_de(x), &tr);
+                    unsigned esperado = n * x;
+                    casos++;
+                    if(esperado > 255u) largos++;
+                    if(esperado <= 0xFFFFu){ if(w16_val(r) != esperado || tr) mau++; }
+                    else { acima++; if(!tr) mau++; }    /* acima do andar, TEM de dizer */
+                }
+                /* (c) o gume: onde o rei de oito bits parte */
+                Word w8est = { 100, 0 };                 /* (x, 0) em oito bits */
+                for(int t = 0; t < 3; t++) w8est = cifra_an(w8est, 1);   /* GOLD³ → 3·x */
+                Word8 tr16 = 0;
+                W16 r16 = mul16_zeck(3, w16_de(100), &tr16);
+                printf("\n     GOLD16: %ld produtos (%ld acima de 255, %ld acima de 65535),"
+                       " %ld falhas\n"
+                       "     e onde o rei de 8 parte: 3·100 = %u nele, %u no andar de cima\n",
+                       casos, largos, acima, mau, (unsigned)w8est.total, w16_val(r16));
+                ok("A DOBRA DO REI: GOLD em dezasseis bits. A ISA não tem MUL — `n·x` é"
+                   " ZECKENDORF, todo inteiro é soma de Fibonacci não consecutivos e cada"
+                   " F(k) é uma potência do rei, GOLD = (a,b) ↦ (a+b, a). O estado do rei É"
+                   " a Word, e é por isso que o segundo átomo não está livre e o avaliador"
+                   " ficou em oito bits. Aqui o estado passa a um PAR de valores de 16 e o"
+                   " `+` lá dentro é o `ula_add16`, onde o vai-um atravessa: GOLD^k (x,0) dá"
+                   " F(k+1)·x nos quinze primeiros, e n·x bate no varrimento — com o que"
+                   " passa do andar DITO em vez de enrolado — e o varrimento SOBE ao"
+                   " tecto de propósito, até 300·300 = 90000, senão o ramo do transbordo"
+                   " nunca corria e a bandeira ficava por medir. E o gume é o sítio onde o"
+                   " rei de oito parte: 3·100 dá 44 nele e 300 aqui",
+                   /* `acima > 0` e não um número escolhido: o que se afirma é que o
+                    * ramo do transbordo É VISITADO e que TODOS os que lá caem o dizem
+                    * (o `mau` conta os que não dissessem). Pôr aqui o 17 que hoje sai
+                    * era escrever o resultado da medição dentro dela. */
+                   mau == 0 && casos == 387 && largos > 100 && acima > 0
+                   && w8est.total == 44 && w16_val(r16) == 300 && tr16 == 0);
             }
             /* ── E A BASE ANTIGA CONTINUA A ANDAR ────────────────────────────────
              * A letra é o RECURSO, e um recurso que nunca corre não é compatibilidade:

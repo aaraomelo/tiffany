@@ -17,7 +17,7 @@ Fase PG: Trios PG1–PG4 FECHADOS. A PROMOÇÃO (saturo→promove) está PROPAGA
     formatos    0 avisos -Wformat no repo (eram 216; ver §17)
     git         0 includes fora do repositório  tests/refs.c §R5  (eram 3 headers)
     js          5 medidores .js passaram a emitir #UNIT: 26 unidades finas (§22)
-    selo        1beb6d3fa1bb01f0      bash tools/bateria.sh
+    selo        72cd31064e3d00c0      bash tools/bateria.sh
 
 Verificar SEMPRE com:  bash tools/bateria.sh   (lê AS DUAS linhas: total e unidades)
 
@@ -1289,3 +1289,49 @@ liguei-os ao despacho, e tirei-os: sem um `emit` que os use são um ramo que
 ninguém corre — a `ula_add16` e companhia ficam, porque essas TÊM utilizador (o
 medidor do §26). O andar existe e está provado; o que falta é o caminho, e o
 caminho é o avaliador inteiro.
+
+
+28. A DOBRA DO REI — GOLD em dezasseis bits
+=============================================
+O §26 dobrou a SOMA (o vai-um atravessa o átomo). Este dobra o REI, que é o que
+o avaliador precisa: a ISA não tem MUL, e `n·x` faz-se por ZECKENDORF —
+
+    todo inteiro é soma de Fibonacci NÃO consecutivos, de um único jeito
+    F(k) é uma potência do rei:  GOLD = (a,b) ↦ (a+b, a),  σ² = σ + 1
+    de (x,0):  (x,x) → (2x,x) → (3x,2x) → (5x,3x) → …   k passos dão F(k+1)·x
+
+Em oito bits o estado do rei É a Word — `a` no `.total`, `b` no `.e` — e é
+exactamente por isso que o segundo átomo não está livre (§27).
+
+FEITO
+-----
+  G16 {a,b}      o estado do rei um andar acima: um PAR de valores de 16 bits
+  gold16         (a,b) ↦ (a+b, a), com o `+` a ser `ula_add16` — o vai-um
+                 atravessa o átomo, e o que passa do andar DIZ-SE
+  fib_vezes16    F(k+1)·x por k deslocamentos, de (x,0)
+  mul16_zeck     n·x = Σ F(k_i)·x, o mesmo desenho do `emit_mul_zeck` um andar
+                 acima; custo ~log_φ(n), não n
+
+  medidor  o rei É Fibonacci nos quinze primeiros · 387 produtos varridos, 336
+           acima de 255 e 17 ACIMA DE 65535 — e todos os que passam do tecto
+           dizem-no · E O GUME: 3·100 dá 44 no rei de oito e 300 aqui
+  gume     o GOLD sem deslocar (b'=b) → 326 de 387 caem · o Zeckendorf com i em
+           vez de i+1 → 312 · o transbordo do gold16 perdido → 2
+
+E UMA ARMADILHA DO MEU PRÓPRIO MEDIDOR, que vale mais que o resto: a primeira
+varredura ia até n ≤ 40, x ≤ 300 — produto máximo 12000, LONGE do tecto de
+65535. O ramo do transbordo NUNCA CORRIA, e por isso tirar a bandeira do andar
+não derrubava nada. Não era guarda redundante nem ramo morto: era o REGIME do
+meu varrimento a não conter o defeito. Subiu para 300·300 = 90000, e a mutação
+passou a cair. E a exigência ficou `acima > 0` — que o ramo é VISITADO —, não o
+17 que hoje sai: pôr ali o número medido era escrever o resultado dentro da
+medição.
+
+O QUE FALTA PARA O AVALIADOR (as duas peças que sobram)
+--------------------------------------------------------
+  · o valor em DOIS Words no caminho emitido, e o GOLD da ISA a deslocar sobre
+    esse par — a `gold16` é a lei; falta o `emit`
+  · o acumulador em 32: `c_i·x_i` com c_i e x_i de 16 bits pede-o, e é onde a
+    torre dobra outra vez (a mesma conta, um andar acima)
+  · e OP_ADD/OP_SUB ficam componente a componente — o catálogo guarda
+    {ncols, nrows} numa Word e o `nrows++` soma ao `.e`
