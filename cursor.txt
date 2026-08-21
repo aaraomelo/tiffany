@@ -2742,3 +2742,36 @@ não resultados. E ela chama ℚ e ℝ aos degraus — que este documento já n�
 
   bateria   529 : 529, 0 falhas
   paper     27 páginas
+
+§61 — O ROTEIRO: as perguntas que o objecto obriga
+===================================================
+A revisão não trouxe correcções — trouxe uma observação sobre a ordem: a
+metáfora não foi posta em cima da matemática. Observam-se duas maneiras de
+construir, e as perguntas simples que daí saem já são o paper:
+
+     Como constrói?                    a aresta É a memória da divisão
+     Como sabe por onde passou?        não sabe — a marca está no espaço
+     O que acontece quando volta?      a dobra, G > 1
+     Como se representam os passos?    por uma palavra no alfabeto das arestas
+     Como se codifica um finito?       em ⌈log₂ n⌉ bits, e não em menos
+     Como se continua sem terminar?    caminhando: cada decisão é finita
+     Como se constroem os degraus?     por quociente da caminhada
+     O que têm todos em comum?         a fibra da realização
+     E o que mede a fibra?             G
+     E se forem muitos construtores?   o campo não os distingue
+
+Entrou como ROTEIRO à entrada, com a referência de cada resposta — e verifiquei
+os dez rótulos antes de escrever. Não é narrativa de descoberta (que a casa
+manda tirar dos papers): é a ordem lógica das perguntas, e cada linha aponta
+para um enunciado com prova.
+
+E o título fica justificado pelo mesmo motivo: a aranha e a abelha não são
+enfeite, são as duas arquitecturas de que as perguntas saíram — e o thm:agentes
+mostra que o campo não as distingue.
+
+Da segunda revisão não aproveitei nada: repete pela terceira vez que o ficheiro
+é o `peano_dual.c` (não é — esse é da casa, o meu é o `aranha_n.c`) e diz 26
+páginas quando são 27.
+
+  bateria   529 : 529, 0 falhas
+  paper     27 páginas
