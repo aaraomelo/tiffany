@@ -593,6 +593,73 @@ static Word ula_or (Word a, Word b){ Word na = ula_nand(a,a), nb = ula_nand(b,b)
                                      return ula_nand(na,nb); }
 static Word ula_xor(Word a, Word b){ Word r = { ula_xor_w(a.total,b.total), ula_xor_w(a.e,b.e) }; return r; }
 static int  zero(Word w){ return w.total == 0 && w.e == 0; }
+
+/* ══ O ANDAR SEGUINTE DA TORRE: o transporte ATRAVESSA o átomo ═══════════════
+ *
+ * A ULA de cima soma componente a componente e o transporte NÃO passa de um
+ * átomo para o outro — e isso está certo, porque a Word é um PAR (numerador,
+ * denominador) e não um número de dezasseis bits. É por isso que uma célula
+ * segura 0..255 e que o `INSERT ... VALUES (500,...)` é recusado.
+ *
+ * Para a célula crescer, o par tem de poder ser lido também como UM número —
+ * e isso é exactamente a dobra da torre: T_{k+1} = T_k + T_k*. O transporte
+ * dentro do átomo é `thm:transporte`, a + b = (a⊕b) + 2(a∧b); o transporte
+ * ENTRE átomos é a mesma lei um andar acima, com o vai-um do primeiro a entrar
+ * como cin do segundo. Nada aqui usa o `+` do C: tudo sai do NAND.
+ *
+ * Isto é o andar, medido sozinho. A célula continua onde estava — o caminho
+ * novo primeiro, o velho intacto, que é como o pgwire entrou. */
+typedef struct { Word8 baixo, alto; } W16;    /* Word_8² lida como um número */
+
+static inline W16 w16_de(unsigned v){
+    W16 r; r.baixo = (Word8)(v & 255u); r.alto = (Word8)((v >> 8) & 255u); return r;
+}
+static inline unsigned w16_val(W16 w){
+    return (unsigned)w.baixo | ((unsigned)w.alto << 8);
+}
+
+/* a soma de oito bits COM o vai-um à entrada e à saída — só NAND lá dentro */
+static Word8 ula_soma_c(Word8 a, Word8 b, Word8 cin, Word8 *cout){
+    Word8 s = 0, c = cin;
+    for(int i = 0; i < 8; i++){
+        Word8 ai = (Word8)((a >> i) & 1u), bi = (Word8)((b >> i) & 1u);
+        Word8 x  = ula_xor_w(ai, bi);
+        Word8 si = ula_xor_w(x, c);
+        /* vai-um = (ai∧bi) ∨ (c∧(ai⊕bi)), escrito só com NAND */
+        Word8 c1 = ula_and_w(ai, bi), c2 = ula_and_w(c, x);
+        c = ula_nand_w(ula_nand_w(c1, c1), ula_nand_w(c2, c2));
+        s = (Word8)(s | (Word8)(si << i));
+    }
+    *cout = (Word8)(c & 1u);
+    return s;
+}
+
+/* e a DOBRA: o vai-um do átomo baixo entra no alto. É o mesmo teorema, um
+ * andar acima — e é isto que faz de dois átomos um número. */
+static W16 ula_add16(W16 a, W16 b, Word8 *transbordo){
+    W16 r; Word8 c1 = 0, c2 = 0;
+    r.baixo = ula_soma_c(a.baixo, b.baixo, 0, &c1);
+    r.alto  = ula_soma_c(a.alto,  b.alto,  c1, &c2);
+    if(transbordo) *transbordo = c2;          /* o que sai do andar diz-se */
+    return r;
+}
+/* a − b = a + (~b) + 1, com o mesmo vai-um a atravessar */
+static W16 ula_sub16(W16 a, W16 b, Word8 *empresta){
+    W16 nb; Word8 c1 = 0, c2 = 0; W16 r;
+    nb.baixo = ula_nand_w(b.baixo, b.baixo);
+    nb.alto  = ula_nand_w(b.alto,  b.alto);
+    r.baixo = ula_soma_c(a.baixo, nb.baixo, 1, &c1);
+    r.alto  = ula_soma_c(a.alto,  nb.alto,  c1, &c2);
+    if(empresta) *empresta = (Word8)(c2 ? 0u : 1u);   /* sem vai-um final = pediu emprestado */
+    return r;
+}
+/* a < b sem formar a diferença fora do andar: é o empréstimo do sub */
+static int ula_menor16(W16 a, W16 b){
+    Word8 emp = 0;
+    (void)ula_sub16(a, b, &emp);
+    return emp != 0;
+}
+static int ula_igual16(W16 a, W16 b){ return a.baixo == b.baixo && a.alto == b.alto; }
 /* GOLD: A_1 = [[1,1],[1,0]] — ×σ, σ²=σ+1. NEGRO: inversa (det −1). Envelope Word_8. */
 static Word cifra_an(Word w, int n){
     Word r = { (Word8)((int)n*(int)w.total + (int)w.e), w.total }; return r; }
@@ -3681,6 +3748,56 @@ int main(int argc, char **argv){
                    && !strcmp(c1.col[2], "saldo") && c1.nrows == 1
                    && !mau_nome && !set_mau && set_bom && !letra_vale
                    && !strcmp(c4.cell[0][2], "99") && !strcmp(c4.cell[1][2], "50"));
+            }
+            /* ── O ANDAR SEGUINTE DA TORRE: o transporte ATRAVESSA o átomo ───────
+             * A célula segura 0..255 porque a ULA soma componente a componente e o
+             * vai-um NÃO passa de um átomo para o outro. Para ela crescer, o par tem
+             * de poder ser lido como UM número — e isso é a dobra: o vai-um do átomo
+             * baixo entra no alto, que é `thm:transporte` um andar acima.
+             *
+             * Mede-se o andar SOZINHO, antes de mexer na célula — o caminho novo
+             * primeiro, o velho intacto. E o gume é o sítio onde a ULA de baixo pára:
+             * 255+1 dá 0 nela e tem de dar 256 aqui. Sem esse caso, uma soma de 16
+             * bits que ignorasse o vai-um passava em tudo o que não atravessa. */
+            {
+                long mau = 0, atravessa = 0, casos = 0;
+                /* varre-se o andar todo nos sítios onde o transporte decide */
+                const unsigned A[] = { 0, 1, 200, 255, 256, 300, 1000, 32767, 65280, 65535 };
+                const unsigned B[] = { 0, 1, 55, 255, 256, 999, 65535, 1, 255, 1 };
+                for(unsigned i = 0; i < sizeof A/sizeof *A; i++)
+                for(unsigned j = 0; j < sizeof B/sizeof *B; j++){
+                    Word8 tr = 0;
+                    W16 r = ula_add16(w16_de(A[i]), w16_de(B[j]), &tr);
+                    unsigned esperado = (A[i] + B[j]) & 0xFFFFu;
+                    casos++;
+                    if(w16_val(r) != esperado) mau++;
+                    if(tr != ((A[i] + B[j]) > 0xFFFFu)) mau++;
+                    /* o transporte atravessou? (o átomo baixo transbordou) */
+                    if(((A[i] & 255u) + (B[j] & 255u)) > 255u) atravessa++;
+                    /* e a subtracção e a ordem, no mesmo par */
+                    Word8 emp = 0;
+                    W16 d = ula_sub16(w16_de(A[i]), w16_de(B[j]), &emp);
+                    if(w16_val(d) != ((A[i] - B[j]) & 0xFFFFu)) mau++;
+                    if((emp != 0) != (A[i] < B[j])) mau++;
+                    if(ula_menor16(w16_de(A[i]), w16_de(B[j])) != (A[i] < B[j])) mau++;
+                    if(ula_igual16(w16_de(A[i]), w16_de(B[j])) != (A[i] == B[j])) mau++;
+                }
+                /* O GUME: onde a ULA de BAIXO pára. 255+1 dá 0 nela, 256 aqui. */
+                Word8 t8 = ula_soma_w(255, 1);
+                Word8 tr = 0;
+                W16 t16 = ula_add16(w16_de(255), w16_de(1), &tr);
+                printf("\n     16 bits: %ld pares, %ld falhas · o transporte atravessa em %ld"
+                       " deles\n     e onde a ULA de 8 pára: 255+1 = %u nela, %u no andar de"
+                       " cima\n", casos, mau, atravessa, (unsigned)t8, w16_val(t16));
+                ok("O TRANSPORTE ATRAVESSA O ÁTOMO, e é isso que faz de dois átomos UM"
+                   " número: `thm:transporte` um andar acima, com o vai-um do baixo a entrar"
+                   " como cin do alto — e tudo construído do NAND, sem um `+` do C. A soma, a"
+                   " subtracção e a ORDEM batem nos pares varridos, o transbordo do andar"
+                   " diz-se em vez de se perder, e o gume é o sítio onde a ULA de baixo pára:"
+                   " 255+1 dá 0 nela e 256 aqui. Sem esse caso, uma soma que ignorasse o"
+                   " vai-um passava em tudo o que não atravessa",
+                   mau == 0 && casos == 100 && atravessa > 10
+                   && t8 == 0 && w16_val(t16) == 256 && tr == 0);
             }
             /* ── E A BASE ANTIGA CONTINUA A ANDAR ────────────────────────────────
              * A letra é o RECURSO, e um recurso que nunca corre não é compatibilidade:

@@ -17,7 +17,7 @@ Fase PG: Trios PG1–PG4 FECHADOS. A PROMOÇÃO (saturo→promove) está PROPAGA
     formatos    0 avisos -Wformat no repo (eram 216; ver §17)
     git         0 includes fora do repositório  tests/refs.c §R5  (eram 3 headers)
     js          5 medidores .js passaram a emitir #UNIT: 26 unidades finas (§22)
-    selo        6cd2c7a6a1b70680      bash tools/bateria.sh
+    selo        95641528b8eb3bd0      bash tools/bateria.sh
 
 Verificar SEMPRE com:  bash tools/bateria.sh   (lê AS DUAS linhas: total e unidades)
 
@@ -1177,3 +1177,47 @@ PRÓXIMO
   · o alcance de uma célula é UM átomo (0..255) — alargar é subir a torre, uma
     célula de Word_8⁴. É o que falta para «funcional» a sério.
   · catálogo mínimo do PG6 (version(), SHOW, o que um driver pede ao ligar)
+
+
+26. O ANDAR SEGUINTE DA TORRE — o transporte atravessa o átomo
+================================================================
+Porque é que uma célula segura 0..255: a ULA soma COMPONENTE A COMPONENTE e o
+vai-um não passa de um átomo para o outro.
+
+    ula_add(a,b) = { soma8(a.total,b.total), soma8(a.e,b.e) }
+
+E isso está CERTO onde está: a Word é um PAR (numerador, denominador; ou a+bσ),
+não um número de dezasseis bits. O par não é um número por acaso — é-o quando o
+transporte atravessa, e é essa a dobra: T_{k+1} = T_k + T_k*.
+
+  dentro do átomo   a + b = (a⊕b) + 2(a∧b)          thm:transporte
+  entre átomos      o vai-um do baixo entra como cin do alto — a MESMA lei,
+                    um andar acima
+
+FEITO NESTA ETAPA (o andar sozinho, a célula ainda onde estava):
+  W16 {baixo, alto} · ula_soma_c (soma de 8 com vai-um à entrada e à saída)
+  ula_add16 · ula_sub16 (a + ~b + 1, com o mesmo vai-um a atravessar)
+  ula_menor16 (a ordem É o empréstimo do sub) · ula_igual16
+  Tudo construído do NAND — não há um `+` do C lá dentro.
+
+  medidor  banco/sql.c: 100 pares varridos nos sítios onde o transporte decide,
+           soma/subtracção/ordem/igualdade a bater, o transbordo do andar dito
+           em vez de perdido, e o transporte a atravessar em 40 deles.
+           E O GUME é o sítio onde a ULA de BAIXO pára: 255+1 dá 0 nela e 256
+           aqui. Sem esse caso, uma soma que ignorasse o vai-um passava em tudo
+           o que não atravessa.
+  gume     o vai-um a não atravessar → 49 de 100 caem · o transbordo perdido →
+           19 · a ordem só pelo átomo alto → 12
+
+O QUE FALTA PARA A CÉLULA CRESCER (e é trabalho próprio, não é este)
+--------------------------------------------------------------------
+A aritmética está provada; falta o CAMINHO DO DADO:
+  · a célula passa a ocupar DOIS Words — `S_LINHAS + 2·(i·ncols + j)` —, um
+    para o numerador (baixo,alto) e outro para o denominador
+  · o programa emitido copia DOIS Words por célula (emit_copia × 2)
+  · OP_CMP e a comparação do WHERE passam a 16 bits: hoje é um OP_SUB de 8 e o
+    bit de sinal por S_MASK; passa a ser o empréstimo do sub de 16
+  · 23 sítios com S_LINHAS, 5 com S_DEN, o escritor, o leitor — e os medidores
+    que lêem slots à mão (`mem_le(S_LINHAS + 0)`, `+2`, `+4`) mudam de endereço
+Enquanto isso não for feito, o que não cabe é RECUSADO (§24) — o que não se pode
+é guardar lixo em silêncio.
