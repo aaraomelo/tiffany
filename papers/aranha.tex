@@ -45,8 +45,8 @@
 \maketitle
 
 \begin{abstract}\noindent
-\textbf{De onde parte.} De um só dado: uma trajetória discreta $I=\{0,\dots,N\}$
-e a sua realização $\pi\colon I\to X$ num conjunto $X$ com igualdade decidível.
+\textbf{De onde parte.} De um só dado: uma \emph{lista de símbolos} $I$ e a sua
+realização $\pi\colon I\to X$ num conjunto $X$ com igualdade decidível.
 Não se supõe métrica, nem dimensão, nem estrutura algébrica em $X$. A realização
 identifica índices distintos na mesma célula, e essa identificação \emph{é} a
 dobra da trajetória; a \textbf{multiplicidade} $G(x)=\lvert\pi^{-1}(x)\rvert$
@@ -88,8 +88,8 @@ E há uma segunda afirmação, igualmente medida: a escada
 $\N\to\Z\to\Q\to\R$ --- que a obra constrói noutros documentos e ali demonstra
 --- tem \emph{cada degrau} na forma da Def.~\ref{def:objeto}; nos três que são
 construídos por quociente, $G$ conta a classe de equivalência do andar
-(§\ref{sec:escada}). Nada disto pressupõe $\N$: parte-se de uma tupla, e $\N$ é
-uma das realizações. Não se reivindica que este
+(§\ref{sec:escada}) --- e $\N$ entra ali como uma das realizações, não como
+ponto de partida. Não se reivindica que este
 mecanismo construa a escada: ela já estava provada. O que se mostra é que é o
 \emph{mesmo} mecanismo que a percorre inteira.
 
@@ -101,10 +101,10 @@ irmão da mesma obra já dizia o mesmo, o texto foi duplicado e não referenciad
 \section{O objeto}\label{sec:objeto}
 
 \begin{definicao}[trajetória, realização, multiplicidade]\label{def:objeto}
-Seja $I$ uma \textbf{tupla de símbolos}: uma sucessão finita e ordenada
-$I=(i_0\prec i_1\prec\cdots\prec i_N)$ de elementos distinguíveis --- um
-\emph{alfabeto} com uma ordem, e nada mais. É a \textbf{parametrização}, e é tudo
-o que se supõe do lado de partida: em particular, \emph{não} se supõe $\N$.
+Seja $I$ uma \textbf{lista de símbolos}: uma sucessão finita e ordenada
+$I=(i_0\prec i_1\prec\cdots\prec i_N)$ de elementos distinguíveis --- letras,
+pedras, frutos, o que sejam. É a \textbf{parametrização}, e é tudo o que se supõe
+do lado de partida.
 Seja $X$ um conjunto com igualdade decidível. Uma \textbf{realização} é uma
 aplicação
 \[
@@ -120,20 +120,22 @@ finito por $I$ o ser. O \textbf{suporte} de $G$ é
 $\operatorname{supp}G=\{x\in X: G(x)>0\}=\operatorname{im}\pi$.
 \end{definicao}
 
-\medskip\noindent\textbf{Porque símbolos, e não $\N$.} Escrever
-$I=\{0,\dots,N\}$ importaria $\N$ como dado primitivo --- e $\N$ é ele próprio
-uma \emph{realização}, como se verá na §\ref{sec:escada}. Uma tupla de símbolos
-dá o que a construção precisa e nada mais: elementos que se distinguem e uma
-ordem em que se sucedem. Contá-los já é realizá-los, e ao resultado dessa
-realização é que se chama $\N$; usá-lo antes seria pressupor o que se quer obter.
+\medskip\noindent\textbf{Uma lista enumera-se por ser lista.} Não é preciso
+mais: os símbolos distinguem-se e sucedem-se, e é disso, e só disso, que a
+construção se serve.
 
-\medskip\noindent\textbf{E há dois alfabetos, que não se confundem.} O de $I$ ---
-os símbolos que se percorrem --- e o das \emph{direções de aresta}
-(§\ref{sec:geo}), no qual se escreve o passo. O primeiro é a fita; o
-segundo é o que a máquina faz a cada símbolo dela. Ao longo do documento, a
-aranha é um \textbf{autómato}: percorre a tupla, e em cada símbolo escreve no
-espaço, lê a vizinhança e move-se --- o ciclo da §\ref{sec:algoritmo}, cujos
-quatro passos são as quatro cláusulas do Teor.~\ref{thm:multiplicidade}.
+\medskip\noindent\textbf{Dois alfabetos, que não se confundem.} O de $I$ --- os
+símbolos que se percorrem --- e o das \emph{direções de aresta}
+(§\ref{sec:geo}), no qual se escreve o passo. O primeiro é a fita; o segundo é o
+que a máquina faz a cada símbolo dela. Porque a aranha é um \textbf{autómato}:
+percorre a lista e, em cada símbolo, escreve no espaço, lê a vizinhança e
+move-se --- o ciclo da §\ref{sec:algoritmo}, cujos quatro passos são as quatro
+cláusulas do Teor.~\ref{thm:multiplicidade}.
+
+\medskip\noindent\textbf{E a construção é geométrica.} O que se constrói são
+vértices, arestas, graus, percursos, cortes e uma métrica --- e cada resultado
+adiante é uma afirmação sobre esses objetos. Os símbolos entram como o que se
+percorre; a geometria é o que a percorrência produz.
 
 \medskip\noindent\textbf{A letra.} $\pi$ é aqui a \textbf{projeção} --- a letra
 padrão do fibrado, e a mesma do $\pi_k$ com que o Maestro desce um andar da
@@ -413,8 +415,7 @@ aplicações de um operador}. São dois, um de cada lado de $\pi$.
 
 \begin{definicao}[os dois operadores]\label{def:ops}
 No domínio, o \textbf{deslocamento} $S$ da tupla: $S\delta_{i_t}=\delta_{i_{t+1}}$,
-que leva cada índice no seguinte da ordem. (Realizado em $\N$, é o
-\emph{sucessor}; mas a operação é da tupla, e não pede $\N$.) No contradomínio, a
+que leva cada símbolo no seguinte da lista. No contradomínio, a
 \textbf{adjacência} $A$ do grafo, $(Af)(x)=\sum_{y\in V(x)}f(y)$.
 \end{definicao}
 
@@ -687,8 +688,8 @@ estado \emph{no agente}.
 \]
 com a aranha a ser só o último passo dinâmico. O mecanismo é $\pi$ e $G$.
 
-\medskip\noindent\textbf{Representação de $G$.} O campo é uma aplicação
-$\operatorname{supp}G\to\N$ com $\lvert\operatorname{supp}G\rvert\le\abs{I}$.
+\medskip\noindent\textbf{Representação de $G$.} O campo atribui a cada célula do
+seu suporte um cardinal, e $\lvert\operatorname{supp}G\rvert\le\abs{I}$.
 Armazená-lo como \emph{tabela sobre $X$} --- por exemplo um arranjo
 $G[m]\times[m]$ quando $X=\Z^2$ --- é uma escolha de representação, não o
 algoritmo: custa $\lvert X\rvert$ e não $\abs{I}$, e em $\Z^3$ com $m=2048$ pede
@@ -1736,15 +1737,14 @@ noutros documentos desta obra. O que se verifica aqui é outra coisa: que os
 degraus construídos por \emph{quociente} são realizações no sentido da
 Def.~\ref{def:objeto}, com $G$ a contar a classe de equivalência que os define.
 
-\medskip\noindent\textbf{$\N$ é uma realização, e não um pressuposto.} A
-Def.~\ref{def:objeto} parte de uma \emph{tupla}, não de $\N$; contar as
-aplicações de $S$ ao longo dela é já uma realização, e o que ela produz é $\N$.
-Por isso $\N$ entra na tabela abaixo como os outros --- com a diferença de que o
-documento dos naturais o constrói \emph{sem quociente}: a segunda cópia da dobra
-$F_{2w}=F_w\oplus\sigma F_w$ não é identificada, é \emph{multiplicada} por
-$\sigma$. Donde, na tabela, a fibra de $\N$ é a da soma, e não uma classe de
-equivalência --- ao contrário de $\Z$, $\Q$ e $\R$, que a obra constrói
-\emph{por} quociente.
+\medskip\noindent\textbf{$\N$ é uma das realizações.} Contar os símbolos de uma
+lista é realizá-la, e $\N$ é o que essa realização produz --- razão por que
+entra na tabela abaixo como os outros andares. Há uma diferença, e é factual: o
+documento dos naturais constrói $\N$ \emph{sem quociente} --- a segunda cópia da
+dobra $F_{2w}=F_w\oplus\sigma F_w$ não é identificada, é \emph{multiplicada} por
+$\sigma$ ---, ao passo que $\Z$, $\Q$ e $\R$ são construídos \emph{por}
+quociente. Daí que, na tabela, a fibra de $\N$ seja a da soma e não uma classe
+de equivalência.
 
 \begin{teorema}[os degraus por quociente são realizações]\label{thm:escada}
 Nos quatro casos abaixo, $\pi$ é uma realização e $\sum_x G(x)=\abs{I}$. Nos

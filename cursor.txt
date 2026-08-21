@@ -2531,3 +2531,37 @@ TUPLA» — realizado em ℕ é o sucessor, mas a operação é da tupla e não 
 
   bateria   529 : 529, 0 falhas
   paper     24 páginas
+
+§55 — UMA LISTA ENUMERA-SE POR SER LISTA
+=========================================
+«tira essa confusão de ℕ daí — a lista são só símbolos, já falei ALFABETO; uma
+lista é enumerável POR DEFINIÇÃO e pronto. Pode ser lista de frutas, animais,
+pedras, letras, qualquer coisa. Não tem porquê invocar ℕ tantas vezes.» E: «a
+construção é GEOMÉTRICA».
+
+O QUE EU ESTAVA A FAZER, e é um vício: depois de tirar ℕ da definição, fiquei a
+ARGUMENTAR CONTRA ℕ — «não se supõe ℕ», «Porque símbolos, e não ℕ», «importaria
+ℕ como dado primitivo», «ℕ é uma realização, e não um pressuposto», «a operação
+é da tupla e não pede ℕ». Cinco frases a explicar por que não uso ℕ, o que é
+continuar a invocá-lo. Na fundação eram SEIS ocorrências; agora são DUAS, e as
+duas estão na frase sobre a escada, onde ℕ é o assunto.
+
+AGORA A ENTRADA É AFIRMATIVA:
+     I é uma LISTA DE SÍMBOLOS: uma sucessão finita e ordenada de elementos
+     distinguíveis — letras, pedras, frutos, o que sejam.
+     UMA LISTA ENUMERA-SE POR SER LISTA. Não é preciso mais: os símbolos
+     distinguem-se e sucedem-se, e é disso, e só disso, que a construção se
+     serve.
+E o S deixou de ser «realizado em ℕ é o sucessor»: é o DESLOCAMENTO DA LISTA,
+que leva cada símbolo no seguinte. Ponto.
+
+E A CONSTRUÇÃO É GEOMÉTRICA, dito à entrada e não a meio: o que se constrói são
+VÉRTICES, ARESTAS, GRAUS, PERCURSOS, CORTES e uma MÉTRICA — e cada resultado
+adiante é uma afirmação sobre esses objectos. Os símbolos entram como o que se
+percorre; a geometria é o que a percorrência produz.
+
+  no total     de 25 ocorrências de ℕ para 17, e as que ficam estão na §escada
+               (onde ℕ é o assunto), no levantamento (X × ℕ, a folha) e no
+               Möbius (a divisibilidade)
+  bateria      529 : 529, 0 falhas
+  paper        24 páginas
