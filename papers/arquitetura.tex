@@ -2131,6 +2131,33 @@ inserir desce pelos símbolos; ordenar percorre (este documento;
 \code{tests/dualsort\_banco.c}). A mesma \code{MOVE} serve $500$ corpos sem
 instrução nova (\code{tests/move.c}).
 
+\medskip\noindent\textbf{E a mesma árvore, quando NÃO se limpa, é o índice.} O
+\code{ORDER BY}, o \code{JOIN} e o \code{GROUP BY} constroem-na e deitam-na fora
+a cada consulta --- é rascunho. Um índice é a \emph{mesma} árvore com outra
+base: mora noutra zona, acima do tecto da \textsc{isa} e \textbf{dentro do
+ficheiro da tabela}, pelo que é do disco que é lido e nada o segura entre
+consultas. A lei é uma; o que muda é o sítio, e é por isso que as funções da
+árvore levam a base por parâmetro em vez de a terem escrita.
+
+\medskip\noindent\textbf{Descer é o corte, e o corte não varre.} Esta secção já
+o dizia --- \emph{são precisos $\log n$ cortes para igualar uma ordem, e esse
+número é a profundidade} ---, e o \code{aranha.tex} §\emph{o ciclo da aranha}
+diz o outro lado: \emph{nenhuma dependência de $\lvert X\rvert$, e é a afirmação
+que importa, porque é a que separa o algoritmo da tabela}. O motor varria o
+espaço inteiro por cada \code{WHERE}; com o índice, a forma $\text{col}=k$
+desce e mais nada corre.
+
+\medskip\noindent E o que se \textbf{mede} são os \emph{nós}, não os passos:
+com índice os passos da \textsc{isa} são \emph{zero}, e zero não distingue
+não-ter-corrido de não-ter-feito-nada. São $40$ nós em tabelas de $20$, $40$ e
+$80$ linhas --- o mesmo número --- contra $2280$, $4560$ e $9120$ passos sem
+ele. O crescimento do segundo é que dá conteúdo à constância do primeiro.
+
+\medskip\noindent\textbf{E um índice velho não mente.} O cabeçalho guarda a
+coluna e quantas linhas havia quando ele foi feito; se o número mudou, é
+\emph{ignorado} e a varredura corre. Custa tempo, nunca correção --- que é a
+única troca que um índice pode fazer sem deixar de ser um.
+
 \medskip\noindent\textbf{E há uma instrução que não opera sobre os dados: serve
 para NÃO RAMIFICAR.} Ela chama-se \code{ESPALHA}, e devolve a máscara
 \emph{inteira} se o argumento é não-nulo e zero se é nulo --- leva o booleano da
@@ -2165,7 +2192,9 @@ o \code{ESPALHA} não é um corpo nem uma aritmética, é a supressão de um des
 \medido{\code{tests/move.c}; \code{tests/isa4.c}; \code{tests/dualsort\_banco.c};
 \code{tests/promove.c} (promover/desce $1\to2\to4$);
 \code{tests/pgwire.c} §W24 (custo igual nos três conteúdos, e o dobro exacto com
-o dobro das linhas) e §W25.}
+o dobro das linhas), §W25--§W26 (a pertença e o join do reticulado) e §W27 (o
+índice: $40$ nós em $20$, $40$ e $80$ linhas, contra passos que crescem; e o
+índice velho a ser ignorado sem errar).}
 \colunas{\code{catalogo thm:dimconta}; \code{catalogo thm:duasinvol}}
         {\code{MOVE}; slots \code{.mem}; árvore oito slots}
         {\code{tests/move.c}; \code{tests/dualsort\_banco.c}}
