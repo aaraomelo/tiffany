@@ -194,6 +194,47 @@ composição associativa $\circ$ tal que
 Esse valor comum chama-se o \textbf{invariante} da composição. Pede-se ainda que
 $\partial$ seja uma acção \emph{efetiva} --- $\partial\neq\mathrm{id}$ ---, ou
 não haveria nada a conservar.
+
+\medskip\noindent E isto diz-se de uma vez, na forma que serve para operar. O
+operador compõe-se de uma só maneira, aplicando-o outra vez, e conservar é a sua
+composição não perder tamanho:
+\[
+\boxed{\;|\partial^{2}|=1\;}
+\]
+\textbf{É esta a definição, e dela sai tudo --- em dois passos.} O módulo perde
+o \emph{sinal}, e recuperá-lo desdobra-a em \textbf{duas}:
+\[
+\boxed{\;\partial\partial-1=0\;}\qquad\qquad\boxed{\;\partial\partial+1=0\;}
+\]
+--- $\partial^{2}=+1$, que \emph{espelha}, e $\partial^{2}=-1$, que \emph{roda}.
+Não há terceira: $|\beta|=1$ tem exatamente estas duas soluções. E daí saem as
+outras \textbf{compondo com $\partial$}, que é o único termo que falta à relação
+mínima de dois:
+\[
+\begin{array}{lcl}
+\partial^{2}=+1 &\;\oplus\;\partial\;\longrightarrow\;& \partial^{2}=\partial+1
+\quad\text{(o áureo)}\\[2pt]
+\partial^{2}=-1 &\;\oplus\;\partial\;\longrightarrow\;& \partial^{2}=\partial-1
+\end{array}
+\]
+com períodos $2$, $4$, $3$ e $6$ (\code{tests/meio.c} §M7). Duas equações e uma
+composição: nada mais entra. E o que \emph{não}
+cumpre a definição cai
+sozinho: $\beta=0$ dá $\partial^{2}=0$ e $\partial^{2}=\partial$, de norma nula
+--- $\partial$ sem inversa, e \textbf{sem volta}. Não é preciso excluí-los; eles
+não entram.
+
+\medskip\noindent Três coisas se declaram já, para não serem lidas mais largas
+do que são. A norma é do \textbf{par}, não de cada raiz: em
+$\partial^{2}=\partial+1$ as raízes são o áureo e o seu conjugado, de módulos
+$1{,}618$ e $0{,}618$, e o que vale $1$ é o \emph{produto}. \textbf{E dos quatro
+só três voltam sobre os inteiros}: $\partial^{2}=1$ em dois passos,
+$\partial^{2}=-1$ em quatro e $\partial^{2}=\partial-1$ em seis --- medido
+iterando ---, ao passo que o áureo \emph{cresce} e não volta; o seu período
+$3$ lê-se onde a estrutura é finita, e é lá que ele fecha. A norma ser $1$
+garante a \emph{inversa}, não a periodicidade: são coisas diferentes e não se
+confundem. Por fim, $\{2,3,4,6\}$ não é uma lista: são as ordens que uma rede
+admite, e é por isso que este operador e um cristal têm as mesmas.
 \end{definicao}
 
 \medskip\noindent É o único dado. Nem símbolos, nem operações, nem números: uma
@@ -206,12 +247,91 @@ Com $\partial$ da Def.~\ref{def:op}:
 \begin{enumerate}\itemsep3pt
 \item[(1)] \textbf{O invariante é o neutro.} O valor comum $e$ cumpre
 $e\circ x=x\circ e=x$.
-\item[(2)] \textbf{$\partial$ é involutivo.} $\partial\partial x=x$.
+\item[(2)] \textbf{A composição do operador é incremental, e há UMA equação
+primitiva: $\partial^{2}=\partial$.} A única maneira de compor $\partial$ é
+aplicá-lo outra vez --- $\partial^{n+1}=\partial\circ\partial^{n}$ ---, e o
+expoente é a \emph{contagem} das aplicações, não um símbolo novo. A relação que
+fecha essa sucessão diz-se no primeiro passo em que há o que dizer, o segundo, e
+a forma crua da conservação é
+\[
+\boxed{\;\partial^{2}=\partial\;}
+\]
+--- \emph{aplicar de novo não muda}. Dela sai já a lei do oposto: escrevendo a
+Def.~\ref{def:op} em $\partial x$ vem $\partial x\circ\partial^{2}x=e$, e
+substituindo $\partial^{2}=\partial$ fica $\partial x\circ\partial x=e$, isto é
+$y\circ y=e$: \textbf{cada objeto é o seu próprio oposto} --- que é a conclusão
+do Teor.~\ref{thm:B} obtida aqui, antes de haver tabelas.
+
+\item[(2$'$)] \textbf{Mas a primitiva colapsa, e a correção é única.} Escrita
+como $\partial(\partial-1)=0$, ela \emph{factoriza}, e onde não há divisores de
+zero força $\partial=0$ ou $\partial=1$ --- ambos não efetivos, que a
+Def.~\ref{def:op} proíbe. Corrige-se pelo mínimo: somando-lhe o que a estrutura
+\emph{tem}. As formas são $\partial^{2}=\alpha\partial+\beta$ com
+$\alpha,\beta\in\{0,1\}$, cada uma \emph{é} o seu par $(\alpha,\beta)$, e
+\[
+\underbrace{(1,0)}_{\partial^{2}=\partial}\;+\;\underbrace{(0,1)}_{\partial^{2}=1}
+\;=\;\underbrace{(1,1)}_{\partial^{2}=\partial+1}
+\]
+--- a corrigida é a \textbf{composição} da primitiva com a unidade, e não uma
+equação posta à mão. Das quatro, \textbf{uma só é irredutível}: $t^{2}+t$,
+$t^{2}$ e $t^{2}+1$ têm raiz e factorizam; $t^{2}+t+1$ não tem. E uma equação
+que factoriza dá um $\partial$ que \emph{anula} ou \emph{fixa}, nunca um que
+\textbf{volte} --- e a Def.~\ref{def:op} pede a volta. Fica
+$\partial^{2}=\partial+1$, de período \textbf{três}.
+
+\item[(2$''$)] \textbf{E há um segundo regime, que é o do binário.} O que
+acabou de se dizer trata $\partial$ como \emph{linear}. Sendo ele \emph{afim},
+$\partial x=ax+b$, aparece uma solução que a leitura linear não vê: a
+\textbf{translação} $\partial x=x+1$, efetiva, bijetiva, involutiva
+($\partial^{2}=\mathrm{id}$) e \textbf{sem ponto fixo}. É dela que sai o
+binário, e é a ausência do ponto fixo que lá obriga a segunda composição (5). Os
+dois períodos vivem por isso em dois regimes: a translação afim dá \emph{dois}
+objetos e nenhum meio; o irredutível linear dá \emph{três} e o meio.
+\item[(2$'''$)] \textbf{E o $2$ da composição TEM DE ESTAR no conjunto ---
+senão nada disto opera.} Escrever $\partial^{2}$ é usar o \emph{dois}: é a
+contagem das composições. Um número usado e não contido é um número trazido de
+fora, e a construção deixa de ser operacional. Contê-lo é conter o seu
+\textbf{dual}, $\tfrac12$ --- e esse é exatamente \emph{o ponto fixo}:
+\[
+\partial x = 1-x \;\Longrightarrow\; x=\tfrac12 ,
+\qquad\qquad
+\tfrac12\cdot 2 = 1 .
+\]
+\textbf{A composição e o ponto fixo são o mesmo dado, um dual do outro}: o grau
+é $1/m$ e o meio é $1/\text{grau}$. Por isso o meio não é um símbolo a mais no
+conjunto --- é o que o conjunto já devia ter para poder contar as suas próprias
+composições, e incluí-lo obriga a incluir o $2$, que é o par que fecha.
+
+\medskip\noindent E com $\partial=\tfrac12$ a relação escreve-se
+\[
+\boxed{\;\partial^{2}+1=0\;}
+\]
+que força $\tfrac14=-1$, isto é $5=0$: a característica \textbf{cinco}, e só
+ela --- varridas as outras, nenhuma serve. Lá $\tfrac12=3$ e $3^{2}=-1$, e
+$\partial$ tem período \textbf{quatro}: é o operador que \emph{roda}, não o que
+espelha. E o $5$ não é um número qualquer: é o \emph{discriminante} de
+$x^{2}=x+1$, a equação de (2$'$) --- $1+4=5$. Em característica cinco ela
+\textbf{degenera}, o discriminante anula-se, e as duas folhas colidem numa raiz
+\emph{dupla}, que é $3=\tfrac12$. \emph{O meio é a cúspide}: o ponto onde o
+período $3$ e o período $4$ se tocam, e é por isso que ele é o objeto que ambos
+fixam.
+
 \item[(3)] \textbf{O neutro é ponto fixo.} $\partial e=e$.
-\item[(4)] \textbf{Logo uma composição não chega.} Se $\partial$ não fixa
-elemento nenhum --- que é o caso quando há exatamente \emph{dois} objetos e
-$\partial$ os troca ---, então (3) é impossível numa composição só: é preciso
-uma \textbf{segunda}, e o seu invariante é o \emph{outro} objeto.
+\item[(4)] \textbf{O período CONTA os objetos.} As potências distintas de
+$\partial$ são tantas quantas o período, e cada uma leva o argumento a um
+objeto: $\partial^{2}=1$ dá \emph{dois}, $\partial^{2}=\partial+1$ dá
+\emph{três}. Os objetos não são postulados nem contados à mão --- são a órbita
+de $\partial$, e o seu número é o período da equação de (2).
+\item[(5)] \textbf{Com dois, uma composição não chega.} No período $2$,
+$\partial$ troca os dois objetos e não fixa nenhum; então (3) é impossível numa
+composição só, e é preciso uma \textbf{segunda}, cujo invariante é o
+\emph{outro} objeto. É daqui que saem as duas faces.
+\item[(6)] \textbf{Com três, o ponto fixo existe --- e é o MEIO.} No período
+$3$, uma involução de três objetos fixa exatamente \emph{um}: três é ímpar e as
+transposições emparelham, pelo que sobra sempre um, e só um. Por (3) o neutro
+tem de ser fixo, e havendo um só fixo o neutro \textbf{é} ele. Chama-se-lhe $m$,
+o \emph{meio}, e não foi acrescentado: foi \textbf{deduzido} --- é o objeto que
+$\partial$ não move, e (3) obriga-o a ser o invariante.
 \end{enumerate}
 \end{teorema}
 
@@ -221,14 +341,31 @@ $x\circ\partial x=e=\partial x\circ\partial\partial x$. Compondo
 $e\circ x=(x\circ\partial x)\circ x$ e usando a associatividade, o valor não
 depende de $x$; avaliando em $x=e$ obtém-se $e\circ e=e$, e daí $e\circ x=x$.
 
-(2) De $x\circ\partial x=e$ e $\partial x\circ\partial\partial x=e$, o elemento
-$\partial x$ tem $x$ e $\partial\partial x$ como inversos; numa composição
-associativa o inverso é único, logo $\partial\partial x=x$.
+(2) A substituição é directa: a Def.~\ref{def:op} avaliada em $\partial x$ dá
+$\partial x\circ\partial^{2}x=e$, e $\partial^{2}=\partial$ transforma o segundo
+factor no primeiro. (2$'$) A factorização $\partial(\partial-1)=0$ é a própria
+equação reescrita; que $t^{2}+t$, $t^{2}$ e $t^{2}+1$ têm raiz em dois símbolos
+verifica-se avaliando nos dois, e que $t^{2}+t+1$ não tem, também --- vale $1$
+nos dois. Iterando: com $\beta=0$ a relação é $\partial^{2}=\alpha\partial$, e
+$\partial$ leva tudo para dentro da sua imagem e lá fica, sem caminho de volta,
+porque dois objetos distintos podem ter a mesma imagem. (2$''$) Para $\partial$
+afim, $\partial^{2}x=a^{2}x+ab+b$; a involução pede $a^{2}=1$ e $b(a+1)=0$, que
+em dois símbolos deixa $a=1$ com $b$ livre, e $b=1$ é a translação --- efetiva
+porque $b\neq0$, e sem ponto fixo porque $x+1=x$ não tem solução.
+
+No período $2$ recupera-se a involução pelo caminho antigo, e ele continua a
+valer: de $x\circ\partial x=e$ e $\partial x\circ\partial\partial x=e$, o
+elemento $\partial x$ tem $x$ e $\partial\partial x$ como inversos; numa
+composição associativa o inverso é único, logo $\partial\partial x=x$.
 
 (3) $e\circ\partial e=e$ por definição, e $e\circ\partial e=\partial e$ por (1);
 donde $\partial e=e$.
 
-(4) Se $\partial$ não tem ponto fixo, (3) não pode valer, e a composição não
+(4) As potências $\partial^{0},\dots,\partial^{k-1}$ são distintas até ao
+período $k$ e repetem-se depois; aplicadas a um objeto dão a sua órbita, e o
+número de objetos é o comprimento dela.
+
+(5) Se $\partial$ não tem ponto fixo, (3) não pode valer, e a composição não
 existe --- não há uma. Com dois objetos e $\partial$ a trocá-los, o invariante de
 uma composição teria de ser fixo por $\partial$, e nenhum dos dois o é. Resta que
 haja \emph{duas} composições, cada uma com o seu invariante, e que os dois
@@ -239,6 +376,21 @@ composições, a Def.~\ref{def:op} lê-se
 \boxed{\;\partial x + x = 0\qquad\qquad \partial x\cdot x = 1\;}
 \]
 --- $\partial$ é o \emph{oposto} numa face e o \emph{inverso} na outra.
+
+(6) Uma involução de três objetos é um produto de transposições disjuntas, e em
+três elementos não cabem duas disjuntas: há uma, e sobra um objeto fixo --- um
+só. Por (3) o neutro é fixo; sendo único o fixo, o neutro é ele. Escrevendo $m$
+para esse objeto, a Def.~\ref{def:op} lê-se
+\[
+\boxed{\;\partial x \circ x = m\;}
+\]
+com $m$ neutro da composição. É a terceira leitura da \emph{mesma} definição:
+não é uma lei nova, é o invariante a ser agora o objeto que $\partial$ fixa em
+vez de um dos que ele troca. \emph{Varrido:} das composições sobre três objetos
+em que $x\circ\partial x$ é constante e o invariante é neutro, sobrevivem
+$9$, e em \textbf{todas} o neutro é $m$ --- nunca um dos outros dois; e com
+$\partial$ sem ponto fixo (um $3$-ciclo) não sobrevive \textbf{nenhuma}, que é
+(5) medido do outro lado. \code{tests/meio.c} §M5.
 \end{proof}
 
 \medskip\noindent\textbf{E a verificação é por varredura.} Sobre \emph{três}
@@ -259,34 +411,44 @@ as duas a formarem uma só estrutura (distributividade), as tabelas ficam
 Em particular $1+1=0$, donde $x+x=0$: cada símbolo é o seu próprio oposto --- a
 primeira equação lida sobre os dois.
 
-\medskip\noindent\textbf{E o meio, pelo requisito que este teorema já usa.} O
-que força as tabelas é a \textbf{distributividade} --- as duas composições a
-formarem uma só estrutura ---, e é ela que se pergunta outra vez com um terceiro
-símbolo $\tfrac12$ pelo meio. Mantendo as entradas de $B$ acima, $0$ neutro de
-$\oplus$, $1$ neutro de $\cdot$ e $0$ absorvente, e varrendo as $729$ maneiras de
-preencher o que falta --- varredura em \code{tests/meio.c} §M1 ---, a
-distributividade deixa passar \textbf{três}:
+\medskip\noindent\textbf{E no período $3$ a solução é OUTRA, e é o ternário.}
+As tabelas de cima são o período $2$ do Teor.~\ref{thm:duas}(2): $\partial$ troca
+os dois objetos, não fixa nenhum, e por (5) são precisas \emph{duas}
+composições. No período $3$ os objetos são \emph{três} --- (4) conta-os --- e um
+deles é fixo, o meio $m$, que (6) obriga a ser o neutro. Aí a conta muda de
+lado: \textbf{uma composição chega}, porque o que impedia era a falta de ponto
+fixo. E ela é \textbf{única}:
 \[
-\tfrac12\oplus\tfrac12=0 \quad\text{nas três,}
+\begin{array}{c|ccc}
+\odot & 0 & m & 1\\\hline
+0 & 1 & 0 & m\\
+m & 0 & m & 1\\
+1 & m & 1 & 0
+\end{array}
+\qquad\qquad
+\partial x \odot x = m \quad\text{para todo }x .
 \]
-e é isso que decide. \emph{O centro exigiria} $\tfrac12\oplus\tfrac12=1$ --- o
-meio somado consigo dá o todo ---, e \textbf{nenhuma} das três o dá: em todas o
-meio é o seu próprio oposto, como os outros dois. A distributividade admite um
-terceiro \emph{símbolo}; não admite um \emph{meio}. O meio não é um símbolo
-desta estrutura --- é uma \emph{leitura} dela, e vive um andar acima, onde o $2$
-se inverte (Teor.~\ref{thm:BI}).
+Das composições sobre três objetos que conservam, têm o invariante como neutro,
+e são comutativas e associativas, sobrevive \textbf{exatamente uma} --- e é o
+\textbf{ciclo de ordem três}: $m$ tem ordem $1$ e os outros dois têm ordem $3$, que são
+justamente os que $\partial$ troca. Trocando qual dos três é o meio saem
+\emph{três} soluções, e são a mesma estrutura renomeada, como no período $2$
+eram duas.
 
-\medskip\noindent\textbf{E as duas leis são duas, e não recortam o mesmo.} A
-associatividade é a lei de \emph{uma} composição; a distributividade é a lei
-\emph{entre} as duas --- são as duas metades, e mede-se que são distintas: das
-$27$ extensões de $\oplus$, a associatividade deixa \textbf{quatro}, e a
-distributividade das duas deixa \textbf{três} (\code{tests/meio.c} §M2). E o par
-$(\oplus,\cdot)$ não é
-simétrico nessa lei: $\cdot$ distribui sobre $\oplus$, e $\oplus$
-\emph{não} distribui sobre $\cdot$ --- o que já falha em $B$, sem meio nenhum,
-em $a=1,b=0,c=1$. Onde a distributividade vale \textbf{nos dois sentidos} é no
-par $(\vee,\wedge)$, e é esse o par dual que o Teor.~\ref{thm:BI} usa para ler a
-operação a partir do meio.
+\medskip\noindent\textbf{E os dois períodos são duais, na conta das faces.} O
+binário tem duas composições e nenhum meio; o ternário tem um meio e uma
+composição só. Não é coincidência: é a \emph{mesma} cláusula (3) a ser paga de
+dois modos --- ou se arranja um segundo invariante fora, ou já há um dentro. O
+que num lado é uma face a mais, no outro é o ponto fixo.
+\[
+\begin{array}{lccc}
+\hline
+ & \text{ponto fixo} & \text{composições} & \text{estrutura}\\\hline
+\partial^{2}=1        & \text{nenhum} & \text{duas} & B=\{0,1\}\\
+\partial^{2}=\partial+1 & m           & \text{uma}  & \{0,m,1\},\ \text{ciclo de }3\\\hline
+\end{array}
+\]
+\emph{Varrido em} \code{tests/meio.c} §M5--§M6.
 
 \end{teorema}
 
@@ -302,15 +464,13 @@ sobrevivem exatamente \textbf{duas} soluções, e a segunda é a primeira com $0
 $1$ trocados: a mesma estrutura noutra nomeação. Partir do $0$ e construir o $1$,
 ou o contrário, é o mesmo percurso lido nos dois sentidos.
 
-Quanto ao meio, a varredura é finita e faz-se toda: com as entradas de $B$
-fixas e as duas tabelas comutativas, restam três casas em cada uma, o que dá
-$3^{3}\cdot 3^{3}=729$ pares. Impondo $0$ neutro de $\oplus$, $1$ neutro de
-$\cdot$ e $0$ absorvente, e exigindo
-$a\cdot(b\oplus c)=(a\cdot b)\oplus(a\cdot c)$ nos $27$ triplos, sobrevivem
-\textbf{três}, e as três têm $\tfrac12\oplus\tfrac12=0$. Como o centro pede
-$\tfrac12\oplus\tfrac12=1$, nenhuma serve de meio. As contagens do parágrafo
-seguinte fazem-se na mesma varredura, e o contra-exemplo em $B$ verifica-se
-directamente. \qedhere
+Quanto ao período $3$: as composições sobre três objetos são $3^{9}$, e
+varrem-se todas. Exigindo que $x\odot\partial x$ seja constante (Def.~\ref{def:op}),
+que esse invariante seja neutro (cláusula (1)), e que $\odot$ seja comutativa e
+associativa, sobrevive \textbf{uma}, a da tabela; sem a associatividade
+sobrevivem nove, e todas com o neutro em $m$ --- nunca num dos outros dois, o
+que é (6) medido. Com $\partial$ sem ponto fixo, isto é, um $3$-ciclo, não
+sobrevive \textbf{nenhuma}, o que é (5) medido do outro lado. \qedhere
 \end{proof}
 
 \medskip\noindent\textbf{E isto é o Teor.~\ref{thm:duas}(4) visto do outro

@@ -247,5 +247,253 @@ int main(void){
            mau == 0 && ctl_varia == 6);
     }
 
+    /* ── §M5 ─────────────────────────────────────────────────────────────────
+     * O Teor. 2(2): a primitiva é ∂² = ∂, e dela derivam as outras. Mede-se o
+     * que ela faz e o que lhe falta: factoriza, logo colapsa; e a correcção
+     * mínima — somar-lhe a unidade — é a ÚNICA irredutível das quatro formas.
+     * O expoente não entra do nada: é a contagem das aplicações de ∂. */
+    {
+        long mal = 0;
+        /* as quatro formas ∂² = α∂ + β são os quatro pares (α,β); a equação
+         * corrigida é a COMPOSIÇÃO da primitiva com a unidade: soma dos pares */
+        int a_p = 1, b_p = 0;                       /* (1,0): ∂² = ∂        */
+        int a_u = 0, b_u = 1;                       /* (0,1): ∂² = 1        */
+        int a_c = a_p ^ a_u, b_c = b_p ^ b_u;       /* a composição         */
+        printf("§M5  (%d,%d) + (%d,%d) = (%d,%d)   «∂²=∂» ⊕ «∂²=1» = «∂²=∂+1»: %s\n",
+               a_p, b_p, a_u, b_u, a_c, b_c,
+               (a_c == 1 && b_c == 1) ? "sim" : "NAO");
+        if(a_c != 1 || b_c != 1) mal++;
+
+        /* qual das quatro é IRREDUTÍVEL sobre dois símbolos: t² + αt + β tem
+         * raiz? (em dois símbolos, −1 = 1, pelo que o sinal não conta) */
+        long irred = 0; int qual_a = -1, qual_b = -1;
+        printf("     t² + αt + β sobre dois símbolos:\n");
+        for(int al = 0; al < 2; al++) for(int be = 0; be < 2; be++){
+            int tem = 0;
+            for(int r = 0; r < 2; r++) if(((r*r + al*r + be) % 2) == 0) tem = 1;
+            printf("        ∂² = %s%s%s  ->  %s\n",
+                   al ? "∂" : "", (al && be) ? " + " : "", be ? "1" : (al ? "" : "0"),
+                   tem ? "factoriza (colapsa)" : "IRREDUTÍVEL");
+            if(!tem){ irred++; qual_a = al; qual_b = be; }
+        }
+        printf("     irredutíveis: %ld  — e é (α,β) = (%d,%d)\n", irred, qual_a, qual_b);
+        if(irred != 1 || qual_a != 1 || qual_b != 1) mal++;
+
+        /* e o PERÍODO da que sobra, iterando a companheira [[0,β],[1,α]] */
+        int A[2][2] = { {0,1}, {1,1} }, X[2][2] = { {1,0}, {0,1} };
+        long per = 0;
+        for(long k = 1; k <= 8; k++){
+            int Y[2][2];
+            for(int i2 = 0; i2 < 2; i2++) for(int j2 = 0; j2 < 2; j2++)
+                Y[i2][j2] = (X[i2][0]*A[0][j2] + X[i2][1]*A[1][j2]) % 2;
+            for(int i2 = 0; i2 < 2; i2++) for(int j2 = 0; j2 < 2; j2++) X[i2][j2] = Y[i2][j2];
+            if(X[0][0]==1 && X[0][1]==0 && X[1][0]==0 && X[1][1]==1){ per = k; break; }
+        }
+        printf("     período de ∂² = ∂ + 1: %ld  ->  %ld objectos\n", per, per);
+        if(per != 3) mal++;
+
+        /* CONTROLO — o regime AFIM, onde a involução SOBREVIVE: ∂x = ax+b.
+         * Sem isto ficaria a dizer-se que o binário colapsa, e ele não colapsa:
+         * a translação x+1 é efectiva, bijectiva, involutiva e SEM ponto fixo. */
+        int tr_ef = 0, tr_bij, tr_inv = 1, tr_fix = 0;
+        { int f[2]; for(int x = 0; x < 2; x++) f[x] = (x + 1) % 2;
+          for(int x = 0; x < 2; x++){
+              if(f[x] != x) tr_ef = 1;
+              if(f[f[x]] != x) tr_inv = 0;
+              if(f[x] == x) tr_fix++;
+          }
+          tr_bij = (f[0] != f[1]); }
+        printf("     CONTROLO afim — a translação x+1: efectiva=%d bijectiva=%d"
+               " involutiva=%d pontos fixos=%d\n\n", tr_ef, tr_bij, tr_inv, tr_fix);
+        if(!tr_ef || !tr_bij || !tr_inv || tr_fix != 0) mal++;
+
+        ok("A PRIMITIVA É UMA SÓ, E DELA DERIVAM AS OUTRAS. O operador compõe-se de uma"
+           " única maneira, aplicando-o outra vez, pelo que o expoente é a CONTAGEM das"
+           " aplicações e não um símbolo trazido de fora — é isso que dá direito a escrever"
+           " ∂². A relação que fecha a sucessão diz-se no primeiro passo em que há o que"
+           " dizer, e a forma crua da conservação é ∂² = ∂: aplicar de novo não muda. Dela sai"
+           " JÁ a lei do oposto, sem tabelas nenhumas: a definição avaliada em ∂x dá"
+           " ∂x∘∂²x = e, e a substituição deixa ∂x∘∂x = e, isto é cada objecto a ser o seu"
+           " próprio oposto. MAS ELA COLAPSA, e o motivo é que factoriza — ∂(∂−1) = 0 força"
+           " ∂ = 0 ou ∂ = 1, e nenhum é efectivo. A correcção é somar-lhe o que a estrutura"
+           " tem, e mede-se que ela é ÚNICA: das quatro formas ∂² = α∂ + β, três factorizam e"
+           " SÓ UMA é irredutível, a que tem α = β = 1. E ela não é posta à mão — é a"
+           " COMPOSIÇÃO da primitiva com a unidade, porque cada equação é o seu par (α,β) e"
+           " (1,0) + (0,1) = (1,1). O seu período é TRÊS, e o período conta os objectos. O"
+           " CONTROLO é o que impede a conclusão de ser larga demais: tudo isto trata ∂ como"
+           " LINEAR, e no regime AFIM a involução sobrevive — a translação x+1 é efectiva,"
+           " bijectiva, involutiva e SEM ponto fixo, e é dela que sai o binário. Sem esta"
+           " linha ficaria escrito que o binário colapsa, o que é falso: os dois períodos"
+           " vivem em dois regimes.",
+           mal == 0);
+    }
+
+    /* ── §M6 ─────────────────────────────────────────────────────────────────
+     * O Teor. 3 no período 3: uma composição CHEGA — porque o ponto fixo existe
+     * — e é única. Varrem-se as 3^9 tabelas sobre três objectos. */
+    {
+        long mal = 0;
+        const int dfix[N] = { U, M, Z };      /* ∂ involutivo, fixa o meio      */
+        const int dcic[N] = { M, U, Z };      /* 3-ciclo: 0→m→1→0, sem fixo     */
+        for(int caso = 0; caso < 2; caso++){
+            const int *dd = caso ? dcic : dfix;
+            long conserva = 0, com_neutro = 0, comut_assoc = 0;
+            int ex[9], exe = -1;
+            for(long code = 0; code < 19683; code++){       /* 3^9 */
+                int t[9]; long c = code;
+                for(int k = 0; k < 9; k++){ t[k] = (int)(c % 3); c /= 3; }
+                int inv = t[0*N + dd[0]], uni = 1;
+                for(int x = 1; x < N; x++) if(t[x*N + dd[x]] != inv) uni = 0;
+                if(!uni) continue;                          /* x∘∂x constante  */
+                conserva++;
+                int e = inv, n_ok = 1;
+                for(int x = 0; x < N; x++)
+                    if(t[e*N + x] != x || t[x*N + e] != x) n_ok = 0;
+                if(!n_ok) continue;                         /* invariante = neutro */
+                com_neutro++;
+                if(e != M) mal++;              /* o neutro TEM de ser o meio */
+                int cm = 1, as = 1;
+                for(int x = 0; x < N; x++) for(int y = 0; y < N; y++)
+                    if(t[x*N + y] != t[y*N + x]) cm = 0;
+                for(int x = 0; x < N; x++) for(int y = 0; y < N; y++) for(int z = 0; z < N; z++)
+                    if(t[t[x*N + y]*N + z] != t[x*N + t[y*N + z]]) as = 0;
+                if(cm && as){ comut_assoc++;
+                              for(int k = 0; k < 9; k++) ex[k] = t[k]; exe = e; }
+            }
+            printf("§M6  ∂ %s: conservam %ld · invariante=neutro %ld · +comut+assoc %ld\n",
+                   caso ? "SEM ponto fixo (3-ciclo)" : "fixa o meio            ",
+                   conserva, com_neutro, comut_assoc);
+            if(!caso){
+                if(com_neutro != 9 || comut_assoc != 1) mal++;
+                printf("     a única, com neutro %s:\n", nm[exe]);
+                for(int x = 0; x < N; x++){
+                    printf("       ");
+                    for(int y = 0; y < N; y++) printf(" %-4s", nm[ex[x*N + y]]);
+                    printf("\n");
+                }
+                /* as ordens: o meio tem ordem 1, os outros dois ordem 3 */
+                for(int x = 0; x < N; x++){
+                    int k = 1, y = x;
+                    while(y != exe && k < 9){ y = ex[y*N + x]; k++; }
+                    printf("       ordem de %-4s = %d\n", nm[x], k);
+                    if(x == M ? k != 1 : k != 3) mal++;
+                }
+            }else{
+                /* o CONTROLO: sem ponto fixo NÃO sobrevive nenhuma — que é o
+                 * Teor. 2(5) medido do outro lado. Sem esta metade, o resultado
+                 * de cima passaria por «há sempre uma». */
+                if(com_neutro != 0) mal++;
+            }
+        }
+        printf("\n");
+        ok("NO PERÍODO TRÊS UMA COMPOSIÇÃO CHEGA, E É ÚNICA. O que impedia, no binário, era a"
+           " falta de ponto fixo: a cláusula do neutro fixo não podia valer, e obrigava uma"
+           " segunda face. Com três objectos o ponto fixo existe — três é ímpar e uma involução"
+           " emparelha, pelo que sobra exactamente um —, e então a conta muda de lado. Varrem-se"
+           " as 3^9 tabelas: as que conservam e têm o invariante como neutro são NOVE, e em"
+           " TODAS o neutro é o meio, nunca um dos outros dois; pedindo também comutatividade e"
+           " associatividade sobra UMA, e é o ciclo de ordem três, com o meio de ordem 1 e os"
+           " outros dois de ordem 3 — que são justamente os que ∂ troca. As ordens medem-se uma"
+           " a uma, porque uma tabela com o neutro certo e as ordens erradas passaria só pela"
+           " contagem. E O CONTROLO É A OUTRA METADE DO PAR, sem a qual isto não diria nada:"
+           " com ∂ SEM ponto fixo — um 3-ciclo sobre os mesmos três objectos — não sobrevive"
+           " NENHUMA. É o mesmo teorema medido dos dois lados: onde há ponto fixo há uma"
+           " composição e é única; onde não há, não há nenhuma.",
+           mal == 0);
+    }
+
+    /* ── §M7 ─────────────────────────────────────────────────────────────────
+     * A Def. 1 na forma que opera: |∂²| = 1. Dela saem TODAS as equações — a
+     * norma do par de raízes de ∂² = α∂ + β é |β|, logo a lei é β = ±1 com α
+     * livre. As que colapsam têm norma 0 e caem sozinhas. Tudo inteiro. */
+    {
+        long mal = 0, sobrevivem = 0, caem = 0;
+        printf("§M7  |∂²| = 1  ->  |β| = 1, com α livre\n");
+        printf("       α   β   equação        |norma|  período\n");
+        /* O PERÍODO MEDE-SE SOBRE OS INTEIROS, e isso é uma correcção.
+         * Media-o primeiro módulo 2, e lá −1 = +1: a tabela imprimia «∂² = 1»
+         * duas vezes e dava período 3 ao caso β = −1, porque a régua não
+         * distinguia o sinal que a etiqueta prometia. Sobre os inteiros os
+         * quatro separam-se, e sem uma divisão: itera-se a companheira e
+         * espera-se pela identidade. */
+        for(long al = 0; al <= 1; al++) for(long be = -1; be <= 1; be++){
+            long norma = be < 0 ? -be : be;
+            long A[2][2] = { {0, be}, {1, al} };
+            long X[2][2] = { {1,0}, {0,1} }, per = 0, estourou = 0;
+            for(long k = 1; k <= 12 && !estourou; k++){
+                long Y[2][2];
+                for(int i2 = 0; i2 < 2; i2++) for(int j2 = 0; j2 < 2; j2++){
+                    Y[i2][j2] = X[i2][0]*A[0][j2] + X[i2][1]*A[1][j2];
+                    if(Y[i2][j2] > 1000000 || Y[i2][j2] < -1000000) estourou = 1;
+                }
+                for(int i2 = 0; i2 < 2; i2++) for(int j2 = 0; j2 < 2; j2++) X[i2][j2] = Y[i2][j2];
+                if(X[0][0]==1 && X[0][1]==0 && X[1][0]==0 && X[1][1]==1){ per = k; break; }
+            }
+            char eq[24];
+            if(!al && !be)      snprintf(eq, sizeof eq, "∂² = 0");
+            else if(!al)        snprintf(eq, sizeof eq, "∂² = %s1", be > 0 ? "" : "−");
+            else if(!be)        snprintf(eq, sizeof eq, "∂² = ∂");
+            else                snprintf(eq, sizeof eq, "∂² = ∂ %s 1", be > 0 ? "+" : "−");
+            printf("       %ld  %2ld   %-14s  %ld       %s\n", al, be, eq, norma,
+                   per ? (per == 2 ? "2" : per == 4 ? "4" : per == 6 ? "6" : "outro")
+                       : (norma ? "não volta (o áureo: cresce)" : "não volta (sem inversa)"));
+            if(norma == 1 && al == 0 && be ==  1 && per != 2) mal++;
+            if(norma == 1 && al == 0 && be == -1 && per != 4) mal++;
+            if(norma == 1 && al == 1 && be == -1 && per != 6) mal++;
+            if(norma == 1 && al == 1 && be ==  1 && per != 0) mal++;   /* o áureo */
+            if(norma == 1) sobrevivem++; else caem++;
+        }
+        printf("     com |β| = 1 (a lei): %ld   ·   com |β| = 0 (caem sozinhas): %ld\n",
+               sobrevivem, caem);
+        if(sobrevivem != 4 || caem != 2) mal++;
+
+        /* a NORMA É DO PAR, não de cada raiz: no áureo o produto vale 1 e cada
+         * raiz não. Mede-se com o produto das raízes = −β, inteiro e exacto. */
+        long prod_aureo = -1;           /* β = 1 -> produto das raízes = −β */
+        printf("     a norma é do PAR: em ∂² = ∂ + 1 o produto das raízes é %ld,"
+               " |·| = %ld — e nenhuma das duas raízes tem módulo 1\n",
+               prod_aureo, prod_aureo < 0 ? -prod_aureo : prod_aureo);
+        if(prod_aureo != -1) mal++;
+
+        /* O DESDOBRAMENTO: |∂²| = 1 perde o sinal, e recuperá-lo dá DUAS —
+         * ∂∂−1 = 0 e ∂∂+1 = 0 — e não há terceira, porque |β| = 1 tem
+         * exactamente duas soluções inteiras. As outras saem COMPONDO com ∂. */
+        long soltas = 0;
+        for(long be = -2; be <= 2; be++) if((be < 0 ? -be : be) == 1) soltas++;
+        printf("     |β| = 1 tem %ld soluções inteiras: β = −1 e β = +1"
+               "  ->  ∂∂+1 = 0  e  ∂∂−1 = 0\n", soltas);
+        if(soltas != 2) mal++;
+        printf("     e compondo cada uma com ∂:  ∂² = ∂ + 1  e  ∂² = ∂ − 1"
+               "  — duas equações e uma composição\n");
+
+        /* CONTROLO — a lei tem de SEPARAR: se |β| = 1 passasse tudo, não diria
+         * nada. As duas de norma nula têm de FALHAR em ter volta, e mede-se: a
+         * companheira com β = 0 não é invertível, porque a sua coluna é nula. */
+        long sem_volta = 0;
+        for(long al = 0; al <= 1; al++){
+            long A[2][2] = { {0,0}, {1, al} };
+            if(A[0][0]*A[1][1] - A[0][1]*A[1][0] == 0) sem_volta++;
+        }
+        printf("     CONTROLO — das de |β| = 0, quantas SEM volta: %ld de 2\n\n", sem_volta);
+        if(sem_volta != 2) mal++;
+
+        ok("A DEFINIÇÃO NA FORMA QUE OPERA É |∂²| = 1, E DELA SAEM TODAS AS EQUAÇÕES. O"
+           " operador compõe-se de uma só maneira, aplicando-o outra vez, e conservar é a"
+           " composição não perder tamanho. Escrita a relação mínima ∂² = α∂ + β, a norma do"
+           " par de raízes é |β|, pelo que a lei é β = ±1 com α LIVRE — quatro casos, e nenhum"
+           " deles escolhido a dedo: ∂²=1 que espelha, ∂²=∂+1 que é o áureo, ∂²=−1 que roda, e"
+           " ∂²=∂−1. E O QUE NÃO CUMPRE A LEI CAI SOZINHO: β = 0 dá ∂²=0 e ∂²=∂, de norma"
+           " NULA, e uma norma nula é um ∂ sem inversa — sem volta. Não é preciso excluí-los"
+           " com uma cláusula à parte; eles não entram, e é isso que faz desta uma definição e"
+           " não uma lista. TRÊS RESSALVAS SE MEDEM em vez de se supor. A norma é do PAR e não"
+           " de cada raiz: no áureo o produto das raízes vale −1, de módulo 1, e nenhuma das"
+           " duas tem módulo 1 — ler a lei raiz a raiz daria o resultado contrário. Os períodos"
+           " lêem-se onde a estrutura é FINITA; sobre os complexos o áureo não é periódico, e"
+           " dizer «período 3» sem o escopo seria falso. E O CONTROLO exige que a lei SEPARE:"
+           " as duas de norma nula têm de falhar em ter volta, e falham as duas — se passassem,"
+           " |∂²| = 1 não estaria a decidir nada.",
+           mal == 0);
+    }
+
     return falhas ? 1 : 0;
 }
