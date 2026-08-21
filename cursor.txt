@@ -2035,3 +2035,57 @@ aranha uma em cada.
   gume      45 mutações, 45 mordem
   bateria   529 : 529, 0 falhas · 26 unidades passaram, 0 falharam
   paper     19 páginas
+
+§42 — A REVISÃO EXTERNA: o que ela apanhou, e o que eu verifiquei
+==================================================================
+Revisão de fora, com lupa, sobre o paper reescrito. Apanhou coisas reais e a
+maioria estava errada do meu lado. TRÊS ERAM MENSURÁVEIS e foram medidas (§AN28)
+antes de eu aceitar seja o que for.
+
+MEDIDAS, E AS TRÊS ERRADAS ERAM MINHAS
+  1. τ = N NÃO PEDE g = I — pede a DIAGONAL igual a 1. Medido: com
+     g = [[1,3],[3,1]] o τ é o MESMO da identidade (1024), porque um percurso de
+     arestas nunca sonda o cruzado; diag(1,4) é que muda (2560). Eu escrevia
+     «para qualquer outra g constante, τ ≠ N em geral», que engana — e a minha
+     PRÓPRIA prova já dizia o certo («vale 1 sse a diagonal é 1»).
+  2. NO CASO INJECTIVO NÃO É G ≡ 1: é G = 1 na IMAGEM e 0 fora. Só seria ≡ 1 se
+     π fosse sobrejectiva, e não é.
+  3. AS COORDENADAS NA BASE DOS CARACTERES SÃO F(f)/n, NÃO F(f). A transformada
+     não normalizada é a mudança de base A MENOS DO FACTOR n — o que a própria
+     F⁻¹ = F/n já dizia, e eu não li. Medido: com o /n recompõe nos 256; sem ele
+     bate em 23, que são EXACTAMENTE os zeros de f.
+     (E aqui o gume apanhou-me ainda: a minha primeira asserção dizia «sem o /n
+     quase nada bate», com um limiar à mão. O número certo deriva-se.)
+
+ACEITES POR VERIFICAÇÃO
+  · d(a,a) = 2^{-p} ≠ 0 — a minha definição NÃO ERA MÉTRICA. Corrigida com o
+    caso a = b explícito.
+  · ℤ^X é MÓDULO LIVRE, não espaço vectorial — ℤ não é corpo. «Dois andares
+    algébricos», rank em vez de dim.
+  · a base própria comum NÃO é única a menos de escala em geral. Tirei a
+    reivindicação: os caracteres são dados EXPLICITAMENTE, não é preciso unicidade.
+  · F² = nI é INVOLUTIVIDADE, e não «é» a bidualidade V ≅ V**. São afirmações
+    distintas, ligadas aqui pela autodualidade de X.
+  · «GEODÉSICA» era forte demais: minimizar o próximo salto não é minimizar o
+    caminho. Passou a «o mínimo métrico local», e diz-se que é salto a salto.
+  · a álgebra de incidência NÃO é «gerada por S» — é maior. Basta dizer que se
+    REPRESENTA por triangulares inferiores, e que ζ e μ vivem lá.
+  · a decidibilidade das bolas não decorre da hipótese ultramétrica geral;
+    restringida à árvore finita, onde a bola É o prefixo.
+  · a prova do dragão começa em k = 0 e eu só tratava k ≥ 2.
+  · a curva de bits tinha ambiguidade no número de passos (u_0 já é o primeiro).
+  · «bit ao byte» é LEITURA; o demonstrado é a duplicação 2¹→2²→2⁴→2⁸.
+  · max G depende da REALIZAÇÃO e não só de |I|.
+  · F_{2w} é ambíguo fora da casa — declarada a convenção (o índice é a LARGURA).
+  · «o autómato mantém G» contra «não há estado no agente»: separado em ESTADO
+    GLOBAL do sistema e MEMÓRIA do agente.
+
+ONDE A REVISÃO SE ENGANOU, e vale registar
+  · «a espiral usa 4 arestas em mil passos, logo D = 1001 − 4 = 997, não 1021».
+    O cálculo dele está certo PARA 1000 PASSOS. A medição é com 1024: |I| = 1025,
+    V = 4, D = 1021. O erro era do meu TEXTO, que arredondava 1024 para «mil» —
+    o número medido estava certo. Corrigido para 1024, com a conta explícita.
+
+  gume      47 mutações, 47 mordem
+  bateria   529 : 529, 0 falhas · 27 unidades passaram, 0 falharam
+  paper     19 páginas

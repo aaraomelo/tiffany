@@ -44,6 +44,8 @@
  *   §AN11 a SÉRIE DE π: o campo lê o custo, e o valor sai por três caminhos
  *   §AN14 a vizinhança na ÁRVORE é 1 e não 2n · e o custo CONTADO: 2n
  *         leituras por passo, nem uma a mais — o autómato não varre
+ *   §AN28 A REVISÃO EXTERNA medida: τ = N pede a DIAGONAL 1 e não g = I · no
+ *         injectivo G = 1 na IMAGEM · as coordenadas são F(f)/n e não F(f)
  *   §AN27 O OUTRO LADO: W = ℤ^I com S NILPOTENTE (bloco de Jordan, não
  *         diagonaliza) — e é por isso que 1−S inverte SEMPRE, ao contrário de C_f
  *   §AN26 A ESTRUTURA LINEAR: X sobre 𝔽₂ e V = ℤ^X sobre ℤ · o anel de grupo ·
@@ -2581,6 +2583,96 @@ int main(void){
            " SEMPRE, por nilpotência; no contradomínio existe se e só se nenhum valor"
            " próprio se anula. Duas álgebras lineares, dois motivos de invertibilidade,"
            " e as duas operações da aranha uma em cada",
+           mau == 0);
+    }
+
+
+    /* ═══ §AN28: OS PONTOS DA REVISÃO EXTERNA, MEDIDOS ═══════════════════════ */
+    printf("\n§AN28  a revisão externa: o que ela apanhou, verificado aqui.\n\n");
+    {
+        long mau = 0;
+
+        /* (1) τ = N NÃO EXIGE g = I: exige a DIAGONAL igual a 1. Os termos fora da
+         *     diagonal são invisíveis a um percurso de arestas (§AN21), logo uma g
+         *     com diagonal 1 e cruzado qualquer dá o MESMO τ. Eu tinha escrito
+         *     «para qualquer outra g constante, τ ≠ N em geral», que engana. */
+        long nt = real_dragao(1024);
+        long g_id[2][2]   = {{1,0},{0,1}};
+        long g_cruz1[2][2]= {{1,3},{3,1}};      /* diagonal 1, cruzado 3 */
+        long g_dif[2][2]  = {{1,0},{0,4}};      /* diagonal NÃO constante */
+        long taus[3];
+        for(int m = 0; m < 3; m++){
+            long (*g)[2] = (m == 0) ? g_id : (m == 1) ? g_cruz1 : g_dif;
+            long soma = 0;
+            for(long t = 0; t + 1 < nt; t++){
+                long dx[2];
+                for(int i = 0; i < 2; i++) dx[i] = traj[t+1].c[i] - traj[t].c[i];
+                for(int u = 0; u < 2; u++) for(int v = 0; v < 2; v++)
+                    soma += g[u][v] * dx[u] * dx[v];
+            }
+            taus[m] = soma;
+        }
+        printf("      g = I          τ = %ld   (N = %ld)\n", taus[0], nt-1);
+        printf("      g = [[1,3],[3,1]]  τ = %ld   diagonal 1, cruzado 3 → MESMO τ\n", taus[1]);
+        printf("      g = diag(1,4)  τ = %ld   diagonal não constante → outro τ\n\n", taus[2]);
+        if(taus[0] != nt-1 || taus[1] != nt-1) mau++;   /* diagonal 1 ⟹ τ = N */
+        if(taus[2] == nt-1) mau++;                      /* diagonal ≠ 1 ⟹ τ ≠ N */
+
+        /* (2) NO CASO INJECTIVO NÃO É G ≡ 1: é G = 1 NA IMAGEM e 0 fora. A
+         *     diferença só desaparece se π for sobrejectiva, e não é. */
+        long ninj = 0;
+        for(long t = 0; t <= 512 && ninj < AN_IMAX; t++){
+            Vet v = vet0(); v.c[0] = (int)t; traj[ninj++] = v;
+        }
+        Res ri = an_corre(2, ninj);
+        long fora_da_imagem = 0;
+        {   /* um ponto que a trajectória não visitou tem G = 0, não 1 */
+            Vet longe = vet0(); longe.c[0] = 99999;
+            if(an_le(longe) == 0) fora_da_imagem = 1;
+        }
+        printf("      injectiva: |im π| = %ld · G = 1 na imagem · G = 0 fora: %s\n",
+               ri.celulas, fora_da_imagem ? "sim" : "NÃO");
+        if(ri.celulas != ninj || ri.max_g != 1 || !fora_da_imagem) mau++;
+
+        /* (3) AS COORDENADAS NA BASE DOS CARACTERES SÃO F(f)/n, e não F(f). A
+         *     transformada não normalizada NÃO é a mudança de coordenadas: é ela
+         *     a menos do factor n. Mede-se recompondo f a partir das coordenadas. */
+        static long ff[TA_N], FF[TA_N], rec[TA_N];
+        for(long i = 0; i < TA_N; i++) ff[i] = (i*13) % 11 - 5;
+        ta_F(ff, FF);
+        long coord_mau = 0, sem_n_mau = 0;
+        for(long x = 0; x < TA_N; x++){
+            long acc = 0, acc_sem = 0;
+            for(long k = 0; k < TA_N; k++){
+                acc     += FF[k] * ta_chi(k, x);          /* Σ_k F(f)_k χ_k(x) */
+                acc_sem += FF[k] * ta_chi(k, x);
+            }
+            if(acc % TA_N || acc / TA_N != ff[x]) coord_mau++;   /* com o /n bate */
+            if(acc_sem == ff[x]) sem_n_mau++;                    /* sem o /n não */
+            rec[x] = acc / TA_N;
+        }
+        /* sem o /n, acc = n·f(x), que só é igual a f(x) quando f(x) = 0 — logo os
+         * casos que «batem» são EXACTAMENTE os zeros de f, e isso conta-se. */
+        long zeros_f = 0;
+        for(long x = 0; x < TA_N; x++) if(ff[x] == 0) zeros_f++;
+        printf("      f = Σ_k (F(f)_k / n)·χ_k: %s\n", coord_mau ? "NÃO" : "sim");
+        printf("      e sem o /n bate em %ld de %d — que são exactamente os %ld zeros de f\n\n",
+               sem_n_mau, TA_N, zeros_f);
+        if(coord_mau) mau++;
+        if(sem_n_mau != zeros_f) mau++;
+
+        ok("A REVISÃO EXTERNA APANHOU TRÊS COISAS QUE SE MEDEM, e as três estavam"
+           " erradas do meu lado. PRIMEIRA: eu escrevia que τ = N pede g = I, e o que"
+           " ele pede é a DIAGONAL igual a 1 — medido, g = [[1,3],[3,1]] dá o mesmo τ"
+           " que a identidade, porque um percurso de arestas nunca sonda o termo"
+           " cruzado; o que muda τ é a diagonal, e diag(1,4) muda-o. SEGUNDA: no caso"
+           " injectivo não é G ≡ 1 — é G = 1 na IMAGEM e 0 fora dela, e a diferença só"
+           " desapareceria se π fosse sobrejectiva. TERCEIRA, e é a mais fina: as"
+           " coordenadas de f na base dos caracteres são F(f)/n e NÃO F(f) — a"
+           " transformada não normalizada é a mudança de base a menos do factor n, o"
+           " que a própria F⁻¹ = F/n já dizia. Recomposto com o /n bate nos 256; sem"
+           " ele só bate onde f se anula, porque aí n·f(x) = f(x) — e o número de"
+           " casos que batem é exactamente o número de zeros de f",
            mau == 0);
     }
 

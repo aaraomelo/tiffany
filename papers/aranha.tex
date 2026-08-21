@@ -316,11 +316,14 @@ um emparelhamento perfeito com $2^{m-1}$ arestas. A contagem $m\,2^{m-1}$ sai de
 cada um dos $2^m$ vértices ter grau $m$.
 \end{proof}
 
-\medskip\noindent\textbf{E o espaço não foi escolhido.} A construção dos
-naturais dá o andar seguinte por $F_{2w}=F_w\oplus\sigma F_w$, com
+\medskip\noindent\textbf{E o espaço não foi escolhido.} Segue-se aqui a
+convenção da construção dos naturais, em que o índice é a \emph{largura em
+bits}: $F_w$ denota $\mathrm{GF}(2^{w})$, e não um corpo de cardinalidade $w$.
+Com ela, o andar seguinte é $F_{2w}=F_w\oplus\sigma F_w$, com
 $\sigma^2=\sigma+\lambda$. Em característica $2$ a soma é o ou-exclusivo
-coordenada a coordenada, logo \emph{como grupo aditivo} $F_{2w}$ é
-$(\Z/2)^{2w}$, e o seu grafo com os geradores canónicos \textbf{é} $Q_{2w}$:
+coordenada a coordenada, logo $(F_{2w},+)\cong(\Z/2)^{2w}$ --- isto é,
+$\mathrm{GF}(2^{2w})$ como grupo aditivo é o espaço binário de dimensão $2w$ ---
+e o seu grafo com os geradores canónicos \textbf{é} $Q_{2w}$:
 duas cópias de $F_w$ ligadas pelo emparelhamento $\sigma$. É a mesma dobra
 $T+T^{*}$ em três sítios --- a curva da §\ref{sec:dragao}, a torre, e o grafo em
 que a transformada da §\ref{sec:transf} vive. O espaço da aranha é o que a
@@ -345,8 +348,10 @@ $j$-ésima anula a medida de $e_j$.
 
 \medskip\noindent Como a base é ortonormal, \emph{medir} e \emph{ler o bit} são a
 mesma operação --- e é por isso que a forma bilinear que dá o caractere da
-§\ref{sec:transf} é a mesma que dá as coordenadas. O oito não foi escolhido: é
-$2^{3}$, as três dobras que levam o bit ao byte.
+§\ref{sec:transf} é a mesma que dá as coordenadas. E o oito não foi escolhido:
+a dimensão cresce por \emph{duplicação}, $2^{1}\to2^{2}\to2^{4}\to2^{8}$, e $8$
+é o que três dobras binárias dão. (Que isso leve ``do bit ao byte'' é leitura,
+não é a prova.)
 
 \subsection*{O operador}
 
@@ -428,8 +433,8 @@ Para um grafo conexo de dimensão $1$, $b_1=A-V+1$, donde $b_1=1-\chi$. Com
 $A=N=\abs{I}-1$ vem $b_1=\abs{I}-1-V+1=\abs{I}-V=D$.
 \end{proof}
 
-\medskip\noindent A hipótese é necessária: a espiral quadrada usa $4$ arestas em
-mil passos, e aí $b_1=1$ com $D=1021$. Sem ela, o que $G$ conta por
+\medskip\noindent A hipótese é necessária: a espiral quadrada de $1024$ passos
+usa $4$ arestas, e aí $b_1=1$ com $D=\abs{I}-V=1025-4=1021$. Sem ela, o que $G$ conta por
 \emph{vértice} deixa de ser o que a topologia conta em \emph{ciclos}. E a reta
 axial dá $\chi=1$ com $b_1=0$: percorrer sem dobrar é percorrer uma
 \textbf{árvore}.
@@ -488,8 +493,11 @@ que tem: \emph{tirada a marca do espaço, não sobra estado de onde decidir}. Um
 agente que guardasse $\pi(0),\dots,\pi(t)$ teria a informação toda e o campo
 seria supérfluo; a aranha é o caso em que ele não é.
 
-\medskip\noindent\textbf{Estado.} O autómato mantém $G$ --- que está no espaço
---- e a célula corrente. Não mantém a sequência.
+\medskip\noindent\textbf{Estado global, e memória do agente.} O \emph{sistema}
+mantém dois dados: o campo $G$, que está no espaço, e a célula corrente. O
+\emph{agente} não mantém nenhum dos dois como história: não guarda
+$\pi(0),\dots,\pi(t)$. Dizer ``não há estado'' seria falso --- o que não há é
+estado \emph{no agente}.
 
 \medskip\noindent E a cadeia fecha no espaço, e não na cabeça:
 \[
@@ -632,8 +640,8 @@ mesma que a obra já corre na árvore dos divisores.
 \begin{definicao}[$W$, e $S$ como matriz]\label{def:incid}
 $W=\Z^{I}$ com a base canónica $\{\delta_t\}$, $\dim W=\abs{I}$. Na base, o
 deslocamento $S$ da Def.~\ref{def:ops} é a matriz \textbf{subdiagonal de uns},
-$S_{ij}=[\,i=j+1\,]$. A \textbf{álgebra de incidência} de $(I,\le)$ é a álgebra
-das matrizes triangulares inferiores geradas por $S$, com
+$S_{ij}=[\,i=j+1\,]$. A álgebra de incidência de $(I,\le)$ representa-se, nesta base, por matrizes
+triangulares inferiores; nela vivem
 \[
 \zeta=\sum_{j\ge0}S^{j}\quad(\text{a triangular de uns}),\qquad
 \mu=1-S ,
@@ -734,12 +742,15 @@ soma sobre o \emph{contradomínio} $X$.
 tem uma, a relação entre $G$ e as bolas diz o que a métrica é.
 
 \begin{definicao}[a árvore do encaixe]\label{def:arvore}
-Para $a,b$ inteiros de $p$ bits, seja $\delta(a,b)$ a profundidade da primeira
-divergência: o menor $q\ge0$ tal que os bits de peso $p-1,\dots,p-q$ de $a$ e $b$
-coincidem e o de peso $p-1-q$ difere; e $\delta(a,a)=p$. Ponha-se
+Para $a\neq b$ inteiros de $p$ bits, seja $\delta(a,b)$ a profundidade da
+primeira divergência: o menor $q\ge0$ tal que os bits de peso $p-1,\dots,p-q$ de
+$a$ e $b$ coincidem e o de peso $p-1-q$ difere. Ponha-se
 \[
-d(a,b)=2^{-\delta(a,b)} .
+d(a,b)=\begin{cases}0,&a=b,\\[2pt] 2^{-\delta(a,b)},&a\neq b.\end{cases}
 \]
+A separação --- $d(a,b)=0$ se e só se $a=b$ --- é parte da definição, e não uma
+consequência a verificar: com $\delta(a,a)=p$ viria $d(a,a)=2^{-p}\neq0$, e não
+seria métrica.
 \end{definicao}
 
 \begin{lema}[$d$ é ultramétrica]\label{lem:ultra}
@@ -779,10 +790,12 @@ argumento com os papéis trocados.
 interseção é vazia, nada há a provar. Que cobrem $X$ é imediato:
 $a\in B(a,r)$.
 
-(3) A aplicação $i\mapsto\pi_r(i)$ está bem definida por (2) --- há
-\emph{exatamente} uma bola de raio $r$ contendo $i$ --- e o contradomínio tem
-igualdade decidível (duas bolas são iguais ou disjuntas, e testa-se pela
-interseção). A afirmação sobre $G$ é a Def.~\ref{def:objeto}.
+(3) A aplicação $i\mapsto\pi_r(i)$ está bem definida por (2): há
+\emph{exatamente} uma bola de raio $r$ contendo $i$. Quanto à igualdade no
+contradomínio, ela não decorre da hipótese ultramétrica em geral --- mas na
+árvore finita de $p$ bits, que é a realização usada aqui, cada bola é
+identificada pelo seu \emph{prefixo}, e a igualdade das células reduz-se à
+igualdade de prefixos. A afirmação sobre $G$ é a Def.~\ref{def:objeto}.
 \end{proof}
 
 \medskip\noindent\textbf{O que a ultramétrica é, e o que não é.} Não é uma
@@ -823,16 +836,19 @@ outros três passos do ciclo são os mesmos nas duas.
 \section{A estrutura linear: o espaço, o dual, a transformada}\label{sec:transf}
 
 \noindent Tudo o que se segue é construção sobre a base, no discreto, e com
-funções genéricas. Convém começar por separar \textbf{dois espaços vetoriais},
-que vivem em andares diferentes e se confundem com facilidade.
+funções genéricas. Convém começar por separar \textbf{dois andares algébricos},
+que se confundem com facilidade --- e não são da mesma natureza: em baixo um
+espaço vetorial sobre um corpo, em cima um módulo livre sobre \Z.
 
 \begin{definicao}[os dois andares]\label{def:doisandares}
 \textbf{Em baixo}, o espaço onde a trajetória anda: $X=F_{2^m}$ como espaço
 vetorial sobre $\mathbb{F}_2$, de dimensão $m$, com a base $\{e_k=2^{k}\}$ do
 Teor.~\ref{thm:base8} --- e as direções de aresta de $Q_m$ \emph{são} essa base.
-\textbf{Em cima}, o espaço das funções sobre ele:
+\textbf{Em cima}, o espaço das funções sobre ele --- que é um \emph{módulo
+livre} sobre \Z, e não um espaço vetorial, porque \Z\ não é corpo:
 \[
-V=\Z^{X},\qquad \dim V=n=2^{m},\qquad \text{base canónica } \{\delta_x\}_{x\in X},
+V=\Z^{X}\cong\Z^{n},\qquad \operatorname{rank}_{\Z}V=n=2^{m},
+\qquad \text{base } \{\delta_x\}_{x\in X},
 \]
 onde $\delta_x(y)=[\,y=x\,]$. O campo $G$ é um \textbf{vetor} de $V$, e a sua
 escrita na base canónica
@@ -857,7 +873,8 @@ unidade $\delta_0$.
 \end{definicao}
 
 \begin{lema}[os operadores de convolução comutam]\label{lem:comuta}
-Para cada $f\in V$, $C_f\colon V\to V$, $C_f(g)=f*g$, é linear, e
+Com o produto da Def.~\ref{def:conv}, para cada $f\in V$ o operador
+$C_f\colon V\to V$, $C_f(g)=f*g$, é linear, e
 $C_fC_g=C_gC_f=C_{f*g}$.
 \end{lema}
 
@@ -866,10 +883,12 @@ Linearidade e comutatividade herdam-se do produto de $\Z[X]$, que é comutativo 
 associativo por $X$ o ser. Explicitamente, $C_f C_g(h)=f*(g*h)=(f*g)*h=C_{f*g}(h)$.
 \end{proof}
 
-\medskip\noindent É este lema que obriga o resto. Uma família de operadores
-lineares que \emph{comutam} admite, quando diagonalizável, uma base própria
-\textbf{comum}. A pergunta deixa de ser ``que transformada escolher'' e passa a
-ser ``qual é essa base'' --- e ela é única a menos de escala.
+\medskip\noindent É este lema que conduz ao resto: os operadores de convolução,
+por comutarem, admitem diagonalização simultânea. A pergunta deixa de ser ``que
+transformada escolher'' e passa a ser ``qual é a base que diagonaliza a álgebra
+de convolução''. Nesta realização ela é dada \emph{explicitamente} pelos
+caracteres de $X$, construídos abaixo --- não se reivindica unicidade, que em
+geral falha quando há espaços próprios comuns de dimensão maior que um.
 
 \subsection*{O dual, e quem são os vetores próprios}
 
@@ -899,7 +918,7 @@ $\chi_{k\oplus e_b}(d)=-\chi_k(d)$, e a soma cancela aos pares.
 \end{proof}
 
 \begin{teorema}[os caracteres são a base própria comum]\label{thm:proprios}
-Para todos $f\in V$ e $k\in X$,
+Com $\chi$ da Def.~\ref{def:dual}, para todos $f\in V$ e $k\in X$,
 \[
 \boxed{\;C_f\,\chi_k \;=\; \widehat{f}(k)\,\chi_k,\qquad
 \widehat{f}(k):=\sum_j f(j)\chi_k(j)\;}
@@ -920,17 +939,24 @@ ortogonal de vetores não nulos é livre.
 \subsection*{A transformada é a mudança de base}
 
 \begin{definicao}[a transformada]\label{def:transf}
-$F\colon V\to V$, $F(f)_k=\widehat{f}(k)=\langle\chi_k,f\rangle$. Na base
-canónica a sua matriz é $H_{kx}=\chi_k(x)$, com entradas $\pm1$: a transformada é
-a \textbf{mudança de coordenadas} de $\{\delta_x\}$ para $\{\chi_k\}$, e é
-inteira.
+$F\colon V\to V$, $F(f)_k=\widehat{f}(k)=\langle\chi_k,f\rangle=\sum_x f(x)\chi_k(x)$.
+Na base canónica a sua matriz é $H_{kx}=\chi_k(x)$, com entradas $\pm1$: é a
+\textbf{avaliação nos caracteres}, inteira.
 \end{definicao}
 
-\medskip\noindent Em particular $F(\delta_a)_k=\chi_k(a)$: as colunas de $H$ são
-as imagens da base canónica, que é o que uma matriz de mudança de base é.
+\medskip\noindent\textbf{E ela é a mudança de base \emph{não normalizada}.} As
+coordenadas $c$ de $f$ na base $\{\chi_k\}$ --- isto é, os $c$ com
+$f=\sum_k c_k\chi_k$ --- obtêm-se emparelhando com $\chi_j$ e usando a
+ortogonalidade: $\langle\chi_j,f\rangle=n\,c_j$. Logo
+\[
+\boxed{\;c=\tfrac1n\,F(f)\;}
+\]
+e é $n^{-1}F$, e não $F$, a mudança de coordenadas propriamente dita --- o que a
+igualdade $F^{-1}=\tfrac1nF$ do Teor.~\ref{thm:H} já dizia. Em particular
+$F(\delta_a)_k=\chi_k(a)$: a coluna $a$ de $H$ é a imagem de $\delta_a$.
 
-\begin{teorema}[inversa, bidualidade e Parseval]\label{thm:H}
-$H^{2}=n\,I$; logo $F$ é invertível com $F^{-1}=\tfrac1n F$, e
+\begin{teorema}[inversa, involutividade e Parseval]\label{thm:H}
+Com $H$ da Def.~\ref{def:transf}, $H^{2}=n\,I$; logo $F$ é invertível com $F^{-1}=\tfrac1n F$, e
 \[
 F\circ F=n\cdot\mathrm{id},\qquad
 \lVert F(f)\rVert^{2}=n\lVert f\rVert^{2}.
@@ -944,11 +970,13 @@ sai da mesma soma: $\lVert Hf\rVert^2=\sum_k\sum_{j,j'}f_jf_{j'}\chi_k(j)\chi_k(
 =n\lVert f\rVert^2$.
 \end{proof}
 
-\medskip\noindent $F\circ F=n\cdot\mathrm{id}$ é a \textbf{bidualidade} lida em
-coordenadas: passar ao dual duas vezes devolve o espaço, a menos da escala. E é
-por $X$ ser autodual --- $\widehat{X}\cong X$ pela forma $\langle\cdot,\cdot\rangle$ ---
-que os caracteres se indexam pelos próprios pontos de $X$, e a matriz é
-simétrica.
+\medskip\noindent $F\circ F=n\cdot\mathrm{id}$ é a \textbf{involutividade} da
+transformada não normalizada: aplicá-la duas vezes devolve o vetor a menos da
+escala. Convém não a confundir com a \textbf{bidualidade} $V\cong V^{**}$, que é
+uma afirmação independente e canónica. O que as liga aqui é $X$ ser
+\emph{autodual} --- $\widehat X\cong X$ pela forma $\langle\cdot,\cdot\rangle$ ---,
+o que permite indexar os caracteres pelos próprios pontos de $X$, sem trocar o
+conjunto de índices; e é daí que a matriz sai simétrica.
 
 \subsection*{O que daqui se lê}
 
@@ -1042,8 +1070,9 @@ Se $N\ge\ell+2p-1$, então
 \qquad\text{e}\qquad
 \bigl\lvert\{x: G(x)=1\}\bigr\rvert=\ell .
 \]
-Se, pelo contrário, $\pi$ é injetiva, então $G\equiv1$ e ambos os conjuntos são,
-respetivamente, vazio e $\operatorname{im}\pi$.
+Se, pelo contrário, $\pi$ é injetiva, então $G=1$ na imagem e $0$ fora dela ---
+$G\equiv1$ só se $\pi$ for sobrejetiva ---, e os dois conjuntos são,
+respetivamente, $\varnothing$ e $\operatorname{im}\pi$.
 \end{teorema}
 
 \begin{proof}
@@ -1149,15 +1178,18 @@ percurso da grade. Para os medir seria preciso um salto diagonal --- que, pela
 Def.~\ref{def:percurso}, não é aresta.
 
 \begin{teorema}[a régua canónica]\label{thm:gcanon}
-Com $g_{uv}=\delta_{uv}$, toda aresta dá $d\tau^{2}=1$ e portanto $\tau=N$: o
-\textbf{tempo próprio coincide com o parâmetro}. Para qualquer outra $g$
-constante, $\tau\neq N$ em geral.
+Uma aresta na direção $i$ dá $d\tau^{2}=g_{ii}$. Logo $\tau=N$ --- o
+\textbf{tempo próprio coincide com o parâmetro} --- se e só se $g_{ii}=1$ para
+toda direção usada; e isso \emph{não} exige $g=\mathrm{id}$: os termos fora da
+diagonal permanecem invisíveis a um percurso de arestas.
 \end{teorema}
 
 \begin{proof}
-Uma aresta é $dx=\pm e_i$, logo $g_{uv}dx^udx^v=g_{ii}$, que vale $1$ para todo
-$i$ se e só se a diagonal de $g$ é constante igual a $1$. Somando sobre os $N$
-saltos vem $\tau=N$.
+Uma aresta é $dx=\pm e_i$, logo $g_{uv}dx^udx^v=g_{ii}$: só a diagonal é
+sondada. Somando sobre os $N$ saltos vem $\tau=\sum_t g_{i(t)i(t)}$, que é $N$
+exatamente quando cada $g_{ii}$ usado vale $1$. Em particular
+$g=\bigl(\begin{smallmatrix}1&3\\3&1\end{smallmatrix}\bigr)$ dá o mesmo $\tau$
+que a identidade, e $\operatorname{diag}(1,4)$ não.
 \end{proof}
 
 \medskip\noindent É esta a razão de a grade ser a régua barata: nela, variar o
@@ -1177,10 +1209,11 @@ tempo passa outro --- e é a memória, ao ficar no espaço, que o curva. Com
 $G\equiv1$ a métrica é plana e $\tau=N$; onde há dobra, $\tau$ afasta-se do
 parâmetro.
 
-\begin{teorema}[o passo é uma geodésica]\label{thm:geodesica}
+\begin{teorema}[o passo é o mínimo métrico local]\label{thm:geodesica}
 Se $h=\mathrm{id}$, o vizinho de menor $G$ é o vizinho de menor $d\tau^{2}$, e
-portanto o passo~3 do ciclo (§\ref{sec:algoritmo}) move-se por onde o tempo
-próprio é mínimo. A hipótese é necessária: para $h$ anisotrópica as duas escolhas
+portanto o passo~3 do ciclo (§\ref{sec:algoritmo}) move-se, a cada salto, por
+onde o tempo próprio é mínimo. (Isto é minimização \emph{local}, salto a salto;
+não se afirma minimização do comprimento total.) A hipótese é necessária: para $h$ anisotrópica as duas escolhas
 divergem.
 \end{teorema}
 
@@ -1191,8 +1224,8 @@ vizinho de $G$ maior pode ter $d\tau^{2}$ menor; exibe-se um.
 \end{proof}
 
 \medskip\noindent Fica assim dito o que o passo~3 é: não uma heurística de
-exploração nem uma escolha, mas o movimento que a métrica impõe. A aranha não
-decide --- \emph{cai}.
+exploração nem uma escolha, mas o mínimo que a métrica impõe em cada salto. A
+aranha não decide --- \emph{cai}.
 
 
 
@@ -1305,10 +1338,10 @@ Para $k\ge1$ escreva-se $k=2^{a}m$ com $m$ ímpar. Ponha-se
 \[
 \upsilon(k)=\begin{cases}+1 & m\equiv1\pmod 4\\[2pt] -1 & m\equiv3\pmod 4.\end{cases}
 \]
-A \textbf{curva de bits} $C_K$ é a sucessão de pontos $P_0=(0,0)$,
-$P_{s+1}=P_s+u_s$, onde $u_0=(1,0)$ e $u_{s}=R_{\upsilon(s)}\,u_{s-1}$, com
-$R_{+1}$ a rotação de $+90^{\circ}$ e $R_{-1}$ a de $-90^{\circ}$, para
-$s=1,\dots,2^{K}-1$.
+A \textbf{curva de bits} $C_K$ é a sucessão $P_0=(0,0)$, $P_1=P_0+u_0$ com
+$u_0=(1,0)$, e $P_{s+1}=P_s+u_s$ para $s=1,\dots,2^{K}-1$, onde
+$u_{s}=R_{\upsilon(s)}\,u_{s-1}$, com $R_{+1}$ a rotação de $+90^{\circ}$ e
+$R_{-1}$ a de $-90^{\circ}$. São $2^{K}$ passos ao todo.
 \end{definicao}
 
 \begin{definicao}[a dobra]\label{def:dobrar}
@@ -1379,8 +1412,9 @@ $\{\pm1\}$. Portanto a segunda metade de $C_{k+1}$ é
 $F+R\,(F-P_{M-j})$, que é $D_k^{*}$, e $C_{k+1}=D_k+D_k^{*}=D_{k+1}$.
 
 Que o sinal de $R$ é o \emph{mesmo} para todo $k$: ele é determinado por
-$\upsilon(M+1)=\upsilon(2^{k}+1)$, e $2^{k}+1$ é ímpar com $2^{k}+1\equiv1\pmod4$ para
-$k\ge2$, valor constante.
+$\upsilon(M+1)=\upsilon(2^{k}+1)$. Os casos $k=0$ e $k=1$ verificam-se
+diretamente ($\upsilon(2)=\upsilon(3)$ calculam-se da Def.~\ref{def:bits}); e
+para $k\ge2$, $2^{k}+1$ é ímpar com $2^{k}+1\equiv1\pmod4$, valor constante.
 \end{proof}
 
 \medskip\noindent\textbf{Duas construções, nenhuma linha em comum.} A
@@ -1405,7 +1439,7 @@ $2$ & Heighway & $4097$ & $2$ & $2558$ & sim & sim & a curva da §\ref{sec:draga
 $3$ & dragão no espaço & $2049$ & $3$ & $1750$ & sim & sim & a mesma dobra com o plano da viragem a rodar \\
 $2$ & espiral quadrada & $4097$ & $1025$ & $4$ & sim & sim & sempre à esquerda \\
 $2$ & reta axial & $4097$ & $1$ & $4097$ & não & sim & $x\mapsto x+e_0$ \\
-$2$ & reta diagonal & $4097$ & $1$ & $4097$ & não & não & passo $(1,1)$ \\
+$2$ & reta diagonal & $4097$ & $1$ & $4097$ & não & não & passo $(1,1)$: não é aresta \\
 $2$ & relógio $J$ & $61$ & $16$ & $4$ & sim & não & $(a,b)\mapsto(-b,a)$, período $4$ \\
 $2$ & Julia, $c=-1$ & $61$ & $31$ & $2$ & sim & sim & $z\mapsto z^{2}+c$ em $\Z[i]$ \\
 $4$ & o passo da máquina & $512$ & $12$ & $48$ & sim & não & (registo, slot, banco, andar) \\
@@ -1413,8 +1447,10 @@ $4$ & o passo da máquina & $512$ & $12$ & $48$ & sim & não & (registo, slot, b
 \end{tabular}
 \end{center}
 
-\medskip\noindent Os números dependem de $\abs{I}$, e por isso ele está na
-tabela: $\max G$ não é propriedade da curva sozinha. Duas realizações ficam de
+\medskip\noindent Os números dependem da realização \emph{e} do comprimento
+$\abs{I}$, e por isso ambos aparecem na tabela: $\max G$ não é propriedade
+puramente geométrica da imagem da curva --- depende de quantas vezes a
+parametrização visita cada célula. Duas realizações ficam de
 fora por serem de outro tipo: as \emph{somas parciais} da §\ref{sec:serie}, com
 período $1$ e a cauda a ser o custo; e a \emph{árvore do encaixe} da
 §\ref{sec:ultra}, onde a célula é a bola e $\lvert V\rvert=1$.
@@ -1487,6 +1523,10 @@ Def.~\ref{def:doisandares}, Teor.~\ref{thm:dobra-norma} e \ref{thm:conv} §AN12
 (as coordenadas do campo na base canónica; a dobra na norma por três caminhos,
 com o percurso injetivo a dar excesso zero; convolução diagonalizada e
 deconvolução com resíduo $0$; e a degenerescência exibida);
+os três pontos da revisão externa §AN28 ($\tau=N$ com
+$g=\bigl(\begin{smallmatrix}1&3\\3&1\end{smallmatrix}\bigr)$, que tem a diagonal
+a $1$ e o cruzado a $3$; $G=1$ na imagem e $0$ fora; e $c=\tfrac1nF(f)$ a
+recompor $f$ nos $256$, com o passo sem $n$ a bater só nos zeros de $f$);
 Lema~\ref{lem:comuta}, Teor.~\ref{thm:proprios} e \ref{thm:H} §AN26
 ($\delta_a*\delta_b=\delta_{a\oplus b}$; $C_fC_g=C_gC_f$;
 $C_f\chi_k=\widehat f(k)\chi_k$; $F\circ F=n\cdot\mathrm{id}$; e
@@ -1508,7 +1548,7 @@ Teor.~\ref{thm:periodo} ($\mu$ e $p$ no campo);
 Teor.~\ref{thm:leitura} (dobrar sem período obriga a ler o índice)}
         {campo esparso, $\Theta(n)$/passo, memória $\Theta(|I|)$, sem alocação dinâmica;
          $\Z^1$--$\Z^4$, árvore, $\Z[i]$}
-        {\code{tests/aranha\_n.c} §AN1--§AN27;
+        {\code{tests/aranha\_n.c} §AN1--§AN28;
          \code{tests/aranha\_g.c} §AG1--§AG11;
          \code{tests/aranha\_inversa.c} §AI1--§AI7}
 
