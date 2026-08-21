@@ -13,6 +13,8 @@
  *   §W6  Describe statement + Close + Sync
  *   §W7  fachada pqlike (Trio PG5): PQconnectdb/PQexec/PQntuples/PQgetvalue sobre o
  *        NOSSO wire — sem -lpq — e a MESMA consulta pelos dois caminhos
+ *   §W12 o tipo `vector` no catálogo, e os scripts do repo como FUNÇÕES —
+ *        com a lista branca e o gume a forçar a porta
  *   §W11 pg_type lido COMO TABELA, e a diferença entre zero linhas e recusa
  *   §W10 a lista de tabelas do \dt por reconhecimento de assinatura, e a
  *        FRONTEIRA: o resto de pg_catalog continua recusado
@@ -31,6 +33,8 @@
 #include <signal.h>
 #include <sys/socket.h>
 #include <sys/wait.h>
+#include <ctype.h>
+#include <stdlib.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include "unidade.h"
@@ -1307,7 +1311,11 @@ int main(void){
         /* (a) o que SE SERVE */
         {
             struct { const char *q; int nc; int nl; const char *c00; } bons[] = {
-                { "SELECT oid, typname FROM pg_type",                        2, 9, "16"   },
+                /* dez tipos: os nove base e o `vector` que o §W12 acrescentou.
+                 * Este número teve de ser corrigido quando o vector entrou —
+                 * foi o medidor a apanhar a mudança, e é para isso que ele
+                 * conta linhas em vez de dizer «devolveu alguma coisa». */
+                { "SELECT oid, typname FROM pg_type",                       2, 10, "16"   },
                 { "SELECT oid FROM pg_type WHERE typname = 'int4'",          1, 1, "23"   },
                 { "SELECT typname, typlen FROM pg_catalog.pg_type WHERE oid = 25", 2, 1, "text" },
                 { "SELECT * FROM pg_type WHERE typname = 'bool'",            6, 1, "16"   },
@@ -1386,7 +1394,7 @@ int main(void){
            " reconhecimento de assinatura e ficou dito que era isso; aqui fez-se o"
            " contrário, porque se pode: pg_type tem linhas e colunas, e o que faltava era"
            " um SELECT que a soubesse ler — colunas, FROM, e um WHERE de uma igualdade,"
-           " mais nada. Servem-se nove tipos, e são os que este servidor sabe ANUNCIAR:"
+           " mais nada. Servem-se dez tipos, e são os que este servidor sabe ANUNCIAR:"
            " pôr aqui a lista longa do Postgres seria descrever um servidor que não somos."
            " O QUE SE MEDE É A DIFERENÇA ENTRE AS DUAS MANEIRAS DE NÃO RESPONDER, e elas"
            " não são a mesma: um WHERE sobre um tipo inexistente dá ZERO LINHAS COM"
@@ -1400,6 +1408,168 @@ int main(void){
            " catálogo declaram o seu próprio tipo (oid e typlen int4, typname text), com o"
            " CONTROLO a exigir que os OIDs que o RowDescription anuncia estejam na tabela"
            " — senão o cliente receberia um tipo que o catálogo não sabe resolver.",
+           mal == 0);
+    }
+
+    /* ═══ §W12: O TIPO vector, E OS SCRIPTS COMO FUNÇÕES ═════════════════════
+     *
+     * Duas coisas, e a segunda tem uma faca dentro.
+     *
+     * O `vector` do pgvector não tem OID fixo — é uma extensão, e o número sai
+     * do catálogo da instância. O cliente descobre-o perguntando ao pg_type, e
+     * é por isso que este servidor tem de o servir.
+     *
+     * E as FUNÇÕES: umas calculam aqui (Walsh, exacto, ±1 e sem vírgula); outras
+     * CORREM UM SCRIPT DO REPOSITÓRIO. Executar é executar, e é aí que se mede a
+     * sério: a lista é branca e fixa em compilação, e o argumento que não passa
+     * o filtro RECUSA a chamada — não é saneado em silêncio, porque sanear em
+     * silêncio deixa o chamador a pensar que correu o que pediu.
+     * ───────────────────────────────────────────────────────────────────────── */
+    printf("\n§W12 o tipo vector, e os scripts do repositório como funções.\n\n");
+    {
+        SqlOut o;
+        long mal = 0;
+
+        /* (a) o vector no catálogo, para o cliente o descobrir */
+        {
+            int r = sql_executa("SELECT oid, typlen FROM pg_type WHERE typname = 'vector'", &o);
+            int bate = r && o.nrows == 1 && atoi(o.cell[0][0]) == PG_OID_VECTOR
+                       && atoi(o.cell[0][1]) == -1;
+            printf("      pg_type WHERE typname='vector' -> oid=%s typlen=%s  %s\n",
+                   o.nrows ? o.cell[0][0] : "?", o.nrows ? o.cell[0][1] : "?",
+                   bate ? "(o cliente pode descobri-lo)" : "NAO BATE");
+            if(!bate) mal++;
+        }
+
+        /* (b) as internas, e o Walsh tem de estar CERTO — não basta devolver
+         * qualquer coisa entre parênteses rectos. Compara-se com a definição. */
+        {
+            int r = sql_executa("SELECT tiffany_walsh(3, 4)", &o);
+            int bate = r && o.nrows == 1 && o.tipo[0] == SQL_TIPO_TEXT;
+            int difs = 0;
+            if(bate){
+                /* chi_k(j) = (−1)^paridade(k AND j), recalculado aqui, à parte */
+                const char *p = o.cell[0][0];
+                for(int j = 0; j < 16; j++){
+                    int par = 0, v = 3 & j, esperado;
+                    while(v){ par ^= v & 1; v >>= 1; }
+                    esperado = par ? -1 : 1;
+                    while(*p && *p != '-' && !isdigit((unsigned char)*p)) p++;
+                    { int lido = atoi(p);
+                      if(lido != esperado) difs++;
+                      if(*p == '-') p++;
+                      while(isdigit((unsigned char)*p)) p++; }
+                }
+            }
+            printf("      tiffany_walsh(3,4) = %s\n", o.nrows ? o.cell[0][0] : "?");
+            printf("      e bate com (−1)^paridade(k∧j) nos 16 pontos: %s\n",
+                   (bate && !difs) ? "sim" : "NAO");
+            if(!bate || difs) mal++;
+        }
+
+        /* (c) pg_proc: o cliente tem de poder DESCOBRIR o que há. Uma função que
+         * só quem a escreveu conhece não é uma interface. */
+        {
+            int r = sql_executa("SELECT proname, pronargs FROM pg_proc", &o);
+            int bate = r && o.ncols == 4 && o.nrows >= 6;
+            printf("\n      pg_proc -> %d funções anunciadas: %s\n", o.nrows,
+                   bate ? "sim" : "NAO");
+            if(!bate) mal++;
+        }
+
+        /* (d) UM SCRIPT DO REPOSITÓRIO — e as DUAS situações são legítimas.
+         *
+         * O script tem um caminho relativo à raiz do repositório, e um servidor
+         * arranca de onde o arrancarem. Isto apareceu MEDIDO: este bloco passava
+         * corrido da raiz e falhava dentro da bateria, que corre de outro sítio.
+         * A resposta certa não é forçar o caminho — é exigir o comportamento
+         * honesto em cada caso: com repositório à vista, o script CORRE; sem
+         * ele, a chamada é RECUSADA COM MENSAGEM. O que não pode acontecer é
+         * devolver uma linha vazia com sucesso. */
+        {
+            int r = sql_executa("SELECT tiffany_painel()", &o);
+            int correu  = r && o.nrows == 1 && o.cell[0][0][0];
+            int recusou = !r && o.err[0];
+            printf("      tiffany_painel() -> %s%.48s%s  %s\n",
+                   correu ? "\"" : "", correu ? o.cell[0][0] : (o.err[0] ? o.err : "(nada)"),
+                   correu ? "\"" : "",
+                   correu ? "(o script correu)"
+                          : (recusou ? "(sem repositório à vista: recusado com mensagem)"
+                                     : "NAO — nem correu nem recusou"));
+            if(!correu && !recusou) mal++;
+        }
+
+        /* ── O GUME, e é o que decide se isto pode existir ────────────────────
+         * Expor scripts por SQL é abrir uma porta. As quatro linhas abaixo são
+         * as maneiras de a forçar, e as quatro têm de bater na madeira. */
+        {
+            const char *ataques[] = {
+                "SELECT tiffany_painel('; rm -rf /tmp/alvo')",
+                "SELECT tiffany_campo('$(whoami)')",
+                "SELECT tiffany_campo('a b')",
+                "SELECT tiffany_painel('`id`')",
+                "SELECT tiffany_walsh(1)",
+                "SELECT rm()",
+            };
+            int recusados = 0, com_msg = 0;
+            printf("\n      o gume — forçar a porta:\n");
+            for(unsigned k = 0; k < sizeof ataques / sizeof ataques[0]; k++){
+                int r = sql_executa(ataques[k], &o);
+                if(!r) recusados++;
+                if(!r && o.err[0]) com_msg++;
+                printf("        %-45s %s\n", ataques[k],
+                       r ? "PASSOU (MAU)" : "recusado");
+            }
+            printf("      recusados %d de 6, com mensagem %d\n", recusados, com_msg);
+            if(recusados != 6) mal++;
+            /* e o alvo do primeiro ataque tem de continuar lá */
+            {
+                FILE *fp = fopen("/tmp/alvo_w12", "w");
+                if(fp){ fputs("intacto\n", fp); fclose(fp); }
+                sql_executa("SELECT tiffany_painel('; rm -f /tmp/alvo_w12')", &o);
+                fp = fopen("/tmp/alvo_w12", "r");
+                printf("      e o ficheiro que o ataque queria apagar: %s\n",
+                       fp ? "INTACTO" : "APAGADO (MAU)");
+                if(!fp) mal++; else fclose(fp);
+                unlink("/tmp/alvo_w12");
+            }
+        }
+
+        /* (e) o CONTROLO: a lista é branca, logo um script do repo que NÃO
+         * esteja nela não corre — mesmo existindo e sendo inofensivo. */
+        {
+            int r = sql_executa("SELECT tiffany_semear()", &o);
+            printf("\n      CONTROLO — `tools/semear.sh` existe no repo mas não está na"
+                   " lista: %s\n", r ? "CORREU (mau)" : "não corre");
+            if(r) mal++;
+        }
+
+        printf("\n");
+        ok("O vector DECLARA-SE E AS FUNÇÕES CORREM — COM A PORTA FECHADA. O `vector` do"
+           " pgvector não tem OID fixo, porque é uma extensão e o número sai do catálogo da"
+           " instância: o cliente descobre-o perguntando ao pg_type, e por isso este"
+           " servidor serve-o, com typlen −1. Declara-se o tipo; NÃO se finge que o motor o"
+           " guarda, porque o motor guarda inteiros. As FUNÇÕES são de duas espécies. As"
+           " internas calculam aqui, e mede-se que estão CERTAS e não apenas que devolvem"
+           " algo entre parênteses rectos: o caractere de Walsh é recalculado à parte, pela"
+           " definição (−1)^paridade(k∧j), e comparado nos dezasseis pontos. As outras"
+           " CORREM UM SCRIPT DO REPOSITÓRIO, e é aí que está a faca: executar é executar."
+           " A lista é BRANCA e fixa em compilação, os argumentos passam por um filtro de"
+           " [A-Za-z0-9_.-], e o que não passa RECUSA a chamada — não é saneado em"
+           " silêncio, porque sanear em silêncio deixa quem chamou a pensar que correu o"
+           " que pediu. Mede-se a forçar a porta de seis maneiras: ponto e vírgula com rm,"
+           " substituição de comando com $() e com crases, espaço no argumento, aridade"
+           " errada, e um nome fora da lista — as seis batem na madeira, e um ficheiro"
+           " posto como isco continua INTACTO depois do ataque. E o CONTROLO fecha o"
+           " raciocínio: um script que EXISTE no repositório e é inofensivo também não"
+           " corre, porque não está na lista — é a lista que decide, não o acaso. E HÁ UM"
+           " SEGUNDO ACHADO, que veio da bateria e não deste ficheiro: o script tem caminho"
+           " relativo à raiz do repositório, e um servidor arranca de onde o arrancarem —"
+           " este bloco passava corrido da raiz e FALHAVA dentro da bateria, que corre"
+           " noutro sítio. A resposta não foi forçar o caminho: a raiz declara-se em"
+           " TIFFANY_RAIZ ou procura-se para cima, e quando não há repositório à vista a"
+           " chamada é RECUSADA COM MENSAGEM em vez de devolver vazio. As duas situações"
+           " são legítimas e as duas se medem; o que não pode acontecer é a terceira.",
            mal == 0);
     }
 

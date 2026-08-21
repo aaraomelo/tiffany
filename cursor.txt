@@ -3251,3 +3251,56 @@ tipo que não sabe resolver.
 
   pgwire.c 13 asserções, 0 falhas
   bateria 529 : 529, 111 unidades, 0 falhas
+
+§71 — O TIPO vector, OS SCRIPTS COMO FUNÇÕES, E O CAMINHO QUE SÓ FUNCIONAVA AQUI
+=================================================================================
+«segue com postgres, põe o pgvector e também os scripts do repo como funções».
+
+O vector DO pgvector NÃO TEM OID FIXO — é uma extensão, e o número sai do
+catálogo da instância. Os clientes descobrem-no perguntando
+`SELECT oid FROM pg_type WHERE typname='vector'`, e é por isso que este servidor
+tem de o servir: OID 16385, na zona dos OIDs de utilizador (≥ 16384) para não
+colidir com os fixos, typlen −1. DECLARA-SE o tipo; NÃO se finge que o motor o
+guarda, porque o motor guarda inteiros.
+
+AS FUNÇÕES, e são de duas espécies:
+  INTERNAS  calculadas em C. `tiffany_walsh(k,m)` devolve o caractere de Walsh
+            em ±1 — a casa tem isto exacto e sem vírgula, e o `vector` é só a
+            roupa de texto: [1,-1,-1,1,…]. E MEDE-SE QUE ESTÁ CERTO, não que
+            devolve algo entre parênteses rectos: recalcula-se (−1)^paridade(k∧j)
+            à parte e compara-se nos dezasseis pontos.
+  SCRIPTS   correm um programa do repositório. `tiffany_painel()`,
+            `tiffany_bateria()`, `tiffany_cobertura()`.
+
+E AQUI ESTÁ A FACA: executar é executar. A lista é BRANCA e fixa em compilação;
+os argumentos passam por [A-Za-z0-9_.-]; e o que não passa RECUSA a chamada —
+não é saneado em silêncio, porque sanear em silêncio deixa quem chamou a pensar
+que correu o que pediu. Nenhuma função escreve: a lista tem só leitores.
+
+O GUME forçou a porta de seis maneiras, e as seis bateram na madeira:
+     '; rm -rf /tmp/alvo'    $(whoami)    'a b'    `id`    aridade errada    rm()
+e um ficheiro posto como ISCO continua INTACTO depois do ataque. O CONTROLO
+fecha: `tools/semear.sh` EXISTE no repo e é inofensivo, e também não corre —
+é a lista que decide, não o acaso.
+
+E O ACHADO VEIO DA BATERIA, não deste ficheiro: o §W12 PASSAVA isolado e
+FALHAVA na bateria. A diferença era o DIRECTÓRIO — `bash tools/painel.sh` é
+caminho relativo, e um servidor arranca de onde o arrancarem. Um servidor que
+só funciona no directório certo funciona por ACASO.
+
+  A resposta não foi forçar o caminho. A raiz declara-se em TIFFANY_RAIZ ou
+  procura-se para cima; e quando não há repositório à vista, a chamada é
+  RECUSADA COM MENSAGEM em vez de devolver vazio. AS DUAS SITUAÇÕES SÃO
+  LEGÍTIMAS e as duas se medem — o que não pode acontecer é a terceira, que é
+  devolver linha vazia com sucesso.
+
+E outra vez a fronteira a mover-se: o §W11 contava NOVE tipos e o vector fez
+dez. O medidor apanhou porque conta LINHAS, e não porque «devolveu alguma coisa».
+
+NO psql REAL (16.14):
+     SELECT oid, typname FROM pg_type WHERE typname='vector'   16385 | vector
+     SELECT proname, pronargs, descricao FROM pg_proc          as seis funções
+     SELECT tiffany_walsh(5, 3)                                [1,-1,1,-1,-1,1,-1,1]
+
+  pgwire.c 14 asserções, 0 falhas
+  bateria 529 : 529, 112 unidades, 0 falhas

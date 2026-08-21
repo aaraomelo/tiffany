@@ -52,6 +52,12 @@
 #define PG_OID_FLOAT8       701
 #define PG_OID_VARCHAR     1043
 #define PG_OID_NUMERIC     1700
+/* O `vector` do pgvector NÃO tem OID fixo no Postgres — é uma extensão, e o
+ * número sai do catálogo da instância. Os clientes descobrem-no perguntando
+ * `SELECT oid FROM pg_type WHERE typname = 'vector'`, e é por isso que este
+ * servidor tem de o servir. O número aqui é o desta casa, e vive na zona dos
+ * OIDs de utilizador (>= 16384) precisamente para não colidir com os fixos. */
+#define PG_OID_VECTOR     16385
 
 /* ReadyForQuery — estado de transacção */
 #define PG_TX_IDLE           'I'

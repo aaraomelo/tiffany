@@ -34,6 +34,7 @@
 #include <dirent.h>
 #include "sql_api.h"
 #include "pgmsg.h"
+#include "pgfunc.h"
 
 #define PGCAT_MAX_PARAM   24
 #define PGCAT_NOME        48
@@ -229,6 +230,10 @@ static const PgTipo pgcat_tipo_tab[] = {
     { PG_OID_FLOAT8,  "float8",   8, "N", 0 },
     { PG_OID_VARCHAR, "varchar", -1, "S", 0 },
     { PG_OID_NUMERIC, "numeric", -1, "N", 0 },
+    /* o vector do pgvector: texto no formato [a,b,c]. Este servidor PRODUZ
+     * vetores (as funções abaixo), mas não os GUARDA — o motor guarda inteiros,
+     * e dizer o contrário seria descrever um armazenamento que não existe. */
+    { PG_OID_VECTOR,  "vector",  -1, "U", 1 },
 };
 #define PGCAT_NTIPOS ((int)(sizeof pgcat_tipo_tab / sizeof pgcat_tipo_tab[0]))
 
@@ -362,6 +367,109 @@ static int pgcat_le_pg_type(const char *sql, SqlOut *out){
     return 1;
 }
 
+/* ── SELECT tiffany_xxx(args) e SELECT … FROM pg_proc ────────────────────── */
+static int pgcat_chama_func(const char *sql, SqlOut *out){
+    const char *p, *q;
+    char nome[64], a1[PGF_ARG_MAX] = "", a2[PGF_ARG_MAX] = "", res[SQL_OUT_CELL];
+    const PgFunc *f;
+    int nargs = 0;
+
+    if((p = pgcat_pal(sql, "SELECT")) == NULL) return 0;
+    q = pgcat_ident(p, nome, sizeof nome);
+    if(!strncasecmp(nome, "pg_catalog.", 11)) memmove(nome, nome + 11, strlen(nome) - 10);
+    f = pgfunc_acha(nome);
+    if(!f) return 0;                                  /* não é função nossa */
+
+    #define PGF_RECUSA(msg) do {                                              \
+        if(out){ memset(out, 0, sizeof *out); out->ok = 0;                    \
+                 snprintf(out->err, sizeof out->err, "%s: %s", nome, (msg)); }\
+        return 1;                                                             \
+    } while(0)
+
+    q = pgcat_pula(q);
+    if(*q != '(') PGF_RECUSA("faltam os parênteses");
+    q = pgcat_pula(q + 1);
+    if(*q != ')'){
+        int i = 0;
+        while(*q && *q != ',' && *q != ')' && i + 1 < PGF_ARG_MAX) a1[i++] = *q++;
+        a1[i] = 0; pgcat_limpa(a1); nargs = 1;
+        q = pgcat_pula(q);
+        if(*q == ','){
+            q = pgcat_pula(q + 1); i = 0;
+            while(*q && *q != ')' && i + 1 < PGF_ARG_MAX) a2[i++] = *q++;
+            a2[i] = 0; pgcat_limpa(a2); nargs = 2;
+        }
+    }
+    if(*q != ')') PGF_RECUSA("faltou fechar os parênteses");
+    if(nargs != f->nargs) PGF_RECUSA("número de argumentos errado");
+
+    res[0] = 0;
+    if(f->especie == PGF_INTERNA){
+        if(!strcasecmp(f->nome, "tiffany_versao")) snprintf(res, sizeof res, "%s", PGCAT_VERSAO);
+        else if(!strcasecmp(f->nome, "tiffany_walsh")){
+            if(!pgfunc_arg_limpo(a1) || !pgfunc_arg_limpo(a2))
+                PGF_RECUSA("argumento com caracteres não permitidos");
+            pgf_walsh(atoi(a1), atoi(a2), res, (int)sizeof res);
+        }
+        else if(!strcasecmp(f->nome, "tiffany_campo")){
+            if(!pgfunc_arg_limpo(a1)) PGF_RECUSA("argumento com caracteres não permitidos");
+            pgf_campo_recta(atoi(a1), res, (int)sizeof res);
+        }
+    }else{
+        if(nargs && !pgfunc_arg_limpo(a1))
+            PGF_RECUSA("argumento com caracteres não permitidos — a chamada é recusada,"
+                       " e não saneada em silêncio");
+        if(!pgf_corre_script(f, nargs ? a1 : NULL, res, (int)sizeof res))
+            PGF_RECUSA("o script não devolveu nada");
+    }
+    if(!res[0]) PGF_RECUSA("sem resultado");
+    if(out){
+        memset(out, 0, sizeof *out);
+        out->ok = 1; out->ncols = 1; out->nrows = 1;
+        out->tipo[0] = (f->devolve == PG_OID_INT4) ? SQL_TIPO_INT4 : SQL_TIPO_TEXT;
+        snprintf(out->col[0], sizeof out->col[0], "%s", f->nome);
+        snprintf(out->cell[0][0], SQL_OUT_CELL, "%s", res);
+        snprintf(out->tag, sizeof out->tag, "SELECT 1");
+    }
+    #undef PGF_RECUSA
+    return 1;
+}
+
+/* pg_proc: o cliente tem de poder DESCOBRIR o que há, ou as funções são
+ * segredo — e uma função que só quem escreveu conhece não é uma interface. */
+static int pgcat_le_pg_proc(const char *sql, SqlOut *out){
+    const char *p, *q;
+    char tab[64];
+    if((p = pgcat_pal(sql, "SELECT")) == NULL) return 0;
+    q = strstr(p, "FROM");
+    if(!q) return 0;
+    q = pgcat_pula(q + 4);
+    q = pgcat_ident(q, tab, sizeof tab);
+    if(!strncasecmp(tab, "pg_catalog.", 11)) memmove(tab, tab + 11, strlen(tab) - 10);
+    if(!pgcat_ieq(tab, "pg_proc")) return 0;
+    if(out){
+        int n = 0;
+        memset(out, 0, sizeof *out);
+        out->ok = 1; out->ncols = 4;
+        out->tipo[0] = SQL_TIPO_TEXT; out->tipo[1] = SQL_TIPO_INT4;
+        out->tipo[2] = SQL_TIPO_INT4; out->tipo[3] = SQL_TIPO_TEXT;
+        snprintf(out->col[0], sizeof out->col[0], "proname");
+        snprintf(out->col[1], sizeof out->col[1], "pronargs");
+        snprintf(out->col[2], sizeof out->col[2], "prorettype");
+        snprintf(out->col[3], sizeof out->col[3], "descricao");
+        for(int i = 0; i < PGF_N && n < SQL_OUT_MAX_ROWS; i++){
+            snprintf(out->cell[n][0], SQL_OUT_CELL, "%s", pgfunc_tab[i].nome);
+            snprintf(out->cell[n][1], SQL_OUT_CELL, "%d", pgfunc_tab[i].nargs);
+            snprintf(out->cell[n][2], SQL_OUT_CELL, "%d", pgfunc_tab[i].devolve);
+            snprintf(out->cell[n][3], SQL_OUT_CELL, "%s", pgfunc_tab[i].doc);
+            n++;
+        }
+        out->nrows = n;
+        snprintf(out->tag, sizeof out->tag, "SELECT %d", n);
+    }
+    return 1;
+}
+
 /* Devolve 1 se ESTA camada tratou a consulta (e preencheu out); 0 se não é
  * dela — e então o motor corre, como se esta camada não existisse. */
 static int pgcat_responde(const char *sql, SqlOut *out){
@@ -439,8 +547,12 @@ static int pgcat_responde(const char *sql, SqlOut *out){
     /* ── a consulta do \dt, reconhecida pela assinatura ─────────────────── */
     if(pgcat_e_lista_tabelas(sql)) return pgcat_lista_tabelas(out);
 
-    /* ── pg_type, lido como tabela ──────────────────────────────────────── */
+    /* ── pg_type e pg_proc, lidos como tabelas ─────────────────────────── */
     if(pgcat_le_pg_type(sql, out)) return 1;
+    if(pgcat_le_pg_proc(sql, out)) return 1;
+
+    /* ── as funções da casa ─────────────────────────────────────────────── */
+    if(pgcat_chama_func(sql, out)) return 1;
 
     /* ── SELECT <função de catálogo>() ──────────────────────────────────── */
     if((p = pgcat_pal(sql, "SELECT")) != NULL){
