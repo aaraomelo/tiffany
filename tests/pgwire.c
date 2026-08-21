@@ -2976,7 +2976,7 @@ int main(void){
         }
 
         printf("\n");
-        ok("A PALAVRA É UM BIT, E A LINHA É A COORDENADA. `naturais.tex thm:base`: os produtos'
+        ok("A PALAVRA É UM BIT, E A LINHA É A COORDENADA. `naturais.tex thm:base`: os produtos"
            " dos geradores dão e_k = 2^k, e essa base é ORTONORMAL para ⟨a,b⟩ = paridade(a∧b),"
            " com ⟨e_i,e_j⟩ = δ_ij; e o `cor:w8`: «a identificação é a IDENTIDADE — o bit j do"
            " inteiro é a COORDENADA j na base». Um bitmap não gasta por isso um slot por linha:"
