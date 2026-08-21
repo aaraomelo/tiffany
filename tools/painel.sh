@@ -208,22 +208,19 @@ patria)
   # comia-se a si próprio e o bloco saía vazio, o que é pior do que sair errado.
   dados=$(timeout 40 ssh -o ConnectTimeout=15 -o BatchMode=yes patria \
     'df -h / | tail -1; free -h | grep ^Mem:; nproc;
-     du -sh /var/www/goldenkingdom 2>/dev/null | cut -f1;
-     du -sh /root/tiffany-repo.git 2>/dev/null | cut -f1;
-     du -sh /var/www/goldenkingdom/repo.git 2>/dev/null | cut -f1;
-     git --git-dir=/var/www/goldenkingdom/repo.git rev-list --count HEAD 2>/dev/null' 2>/dev/null)
+     du -sh /var/www/goldenkingdom 2>/dev/null | cut -f1' 2>/dev/null)
   set -- $(echo "$dados" | sed -n 1p)          # df:  fs size used avail use% mount
   linha "disco" "$4 livres de $2  ($5 usado)"
   set -- $(echo "$dados" | sed -n 2p)          # free: Mem: total used free shared buff avail
   linha "memória" "$7 disponíveis de $2"
   linha "cpus"            "$(echo "$dados" | sed -n 3p)"
   linha "o nosso site"    "$(echo "$dados" | sed -n 4p)"
-  linha "o repo bare"     "$(echo "$dados" | sed -n 5p)"
-  linha "o fork servido"  "$(echo "$dados" | sed -n 6p)"
-  linha "commits no fork" "$(echo "$dados" | sed -n 7p)"
+  # o repo bare e o fork servido por dumb HTTP saíram da Patria em 2026-08-20 — o
+  # repositório é privado e lá já não vive cópia nenhuma dele. Ficou só o site.
   echo
   echo "  a config servida está versionada em  app/nginx/goldenkingdom.conf"
-  echo "  e medida por  ./painel.sh nginx  — inclusive as três peças que impedem o clone de partir."
+  echo "  e medida por  ./painel.sh nginx  — inclusive as três peças que FECHAM o /repo.git/ sem
+  o deixar a meio (o espelho saiu daqui em 2026-08-20)."
   ;;
 
 ssh)

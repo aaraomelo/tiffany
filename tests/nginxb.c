@@ -23,7 +23,8 @@
  * tenta descomprimi-lo, e cospe *"inflate: data stream error"*. O clone até recupera pelo
  * packfile, mas com dois erros pelo caminho.
  *
- * *O conserto é uma linha de prefixo mais longo:* `location /repo.git/` com `try_files $uri =404`.
+ * *O conserto é uma linha de prefixo mais longo:* `location /repo.git/`, que devolvia `=404`
+ * enquanto o espelho existiu e devolve `return 404` desde que ele saiu (2026-08-20).
  * Um objeto que não existe passa a devolver **404**, que é o que o git espera. E é a regra do
  * trie que garante que ele ganha do `location /` — não a ordem no ficheiro.
  *
@@ -161,7 +162,8 @@ static void secao_N3(const char *conf){
      * index.html a QUALQUER caminho que não exista. O git, a clonar por dumb HTTP, pede um
      * objeto solto, recebe HTML, tenta inflar, e cospe "inflate: data stream error". */
     printf("     o fallback:   location /        try_files $uri $uri/ /index.html   → 200 + HTML\n");
-    printf("     o conserto:   location /repo.git/   try_files $uri =404            → 404\n\n");
+    printf("     o conserto:   location /repo.git/   return 404                     → 404\n");
+    printf("     (era try_files $uri =404 enquanto o espelho existiu: o mesmo 404, servindo)\n\n");
 
     /* SEM a linha do repo, o pedido cai no fallback. COM ela, o prefixo mais longo ganha. */
     Loc sem[] = { { "/", 0 } };
@@ -171,14 +173,16 @@ static void secao_N3(const char *conf){
     int a = casa_mais_longo(sem, 1, pedido);
     int b = casa_mais_longo(com, 2, pedido);
     printf("        sem o location /repo.git/ →  %s   (o fallback: 200 + index.html)\n", sem[a].pref);
-    printf("        com o location /repo.git/ →  %s   (=404, que é o que o git espera)\n", com[b].pref);
+    printf("        com o location /repo.git/ →  %s   (404 seco, e não HTML disfarçado)\n", com[b].pref);
 
     ok("sem a linha, o objeto inexistente cai no fallback do SPA", a == 0 && !strcmp(sem[a].pref, "/"));
-    ok("com a linha, o prefixo mais longo ganha e o git recebe 404",
+    ok("com a linha, o prefixo mais longo ganha e o pedido recebe 404",
        b == 1 && !strcmp(com[b].pref, "/repo.git/"));
 
-    /* E A CONFIG REAL TEM DE TER AS TRÊS PEÇAS — senão o site em produção volta a partir o
-     * clone. Isto mede o ficheiro, não a minha lembrança dele. */
+    /* E A CONFIG REAL TEM DE TER AS TRÊS PEÇAS. Mudaram de sinal em 2026-08-20: o espelho
+     * saiu da Patria (o repositório é privado), e o mesmo prefixo mais longo que servia o
+     * clone passou a FECHÁ-LO. O que se confere é o fecho, e continua a ser o ficheiro que
+     * responde — não a minha lembrança dele. */
     FILE *f = fopen(conf, "r");
     if(!f){ ok("a config real abre para conferência", 0); return; }
     char tudo[16384] = {0};
@@ -187,17 +191,18 @@ static void secao_N3(const char *conf){
     fclose(f);
 
     int tem_repo   = strstr(tudo, "location /repo.git/") != NULL;
-    int tem_404    = strstr(tudo, "=404") != NULL;
-    int tem_gzipoff= strstr(tudo, "gzip off") != NULL;
-    printf("\n        na config real:  location /repo.git/  %s   =404  %s   gzip off  %s\n",
-           tem_repo?"sim":"NÃO", tem_404?"sim":"NÃO", tem_gzipoff?"sim":"NÃO");
+    int tem_return = strstr(tudo, "return 404") != NULL;
+    int tem_alias  = strstr(tudo, "alias /var/www/goldenkingdom/repo.git") != NULL;
+    printf("\n        na config real:  location /repo.git/  %s   return 404  %s   alias  %s\n",
+           tem_repo?"sim":"NÃO", tem_return?"sim":"NÃO", tem_alias?"AINDA":"nenhum");
     ok("a config em produção tem o location /repo.git/ — a armadilha está tapada", tem_repo);
-    ok("com try_files =404, e não o fallback", tem_404);
-    /* o gzip off é a SEGUNDA armadilha: o nginx a comprimir o commit-graph faz o git dizer
-     * exatamente o mesmo "inflate: data stream error", por outra razão. */
-    ok("e gzip off — o nginx a comprimir objetos dá o MESMO erro por outra via", tem_gzipoff);
+    ok("e o que ele devolve é 404 por return, não o fallback do SPA", tem_return);
+    /* A terceira peça é uma AUSÊNCIA, e é o que separa fechar de servir: enquanto houvesse
+     * alias, o 404 seria só dos objetos que faltam — com ele fora, não há nada a servir. */
+    ok("e nenhum alias para o espelho — não é um clone partido, é um clone que não existe",
+       !tem_alias);
 
-    conclui("duas armadilhas, o mesmo sintoma: o git a inflar o que não era zlib.");
+    conclui("a mesma regra de casamento serviu o clone e agora fecha-o: o que mudou foi o corpo do bloco.");
 }
 
 /* ================================================================================ */
@@ -251,10 +256,10 @@ int main(int argc, char **argv){
     printf("  %d asserções, %d falhas\n", unidades, falhas);
     if(!falhas){
         printf("  RESIDUO 0\n\n");
-        puts("  E O QUE ISTO GUARDA: a config em produção tem as três peças que impedem o clone");
-        puts("  de partir — o location /repo.git/, o =404 e o gzip off. Não é lembrança minha:");
-        puts("  o medidor lê o ficheiro. Se alguém as tirar, esta bateria fica vermelha ANTES de");
-        puts("  o próximo clone falhar.");
+        puts("  E O QUE ISTO GUARDA: a config em produção tem as três peças que fecham o espelho");
+        puts("  sem o deixar a meio — o location /repo.git/, o return 404 e nenhum alias. Não é");
+        puts("  lembrança minha: o medidor lê o ficheiro. Se alguém repuser o alias, ou tirar o");
+        puts("  bloco e deixar o fallback do SPA responder 200 + HTML, a bateria fica vermelha.");
     } else printf("  NAO FECHOU\n");
     return falhas ? 1 : 0;
 }

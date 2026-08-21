@@ -12904,10 +12904,14 @@ diferem sem ninguém ter escrito. É o que a cifra faz: o valor sai da conta, n�
 
 \emph{No nginx, a armadilha que custou um deploy fica medida contra o ficheiro em produção:} o
 fallback do SPA devolve \textbf{200 + HTML} a um objeto que não existe, e o git a clonar por dumb
-HTTP tenta inflá-lo --- \emph{``inflate: data stream error''}. O conserto é uma linha de prefixo
-mais longo (\code{location /repo.git/} com \code{try\_files \$uri =404}), e o medidor \textbf{lê a
-config servida}: se alguém tirar o \code{=404} ou o \code{gzip off}, a bateria fica vermelha
-\emph{antes} de o próximo clone falhar. \textbf{21 unidades, resíduo 0.}
+HTTP tenta inflá-lo --- \emph{``inflate: data stream error''}. O conserto foi uma linha de prefixo
+mais longo, \code{location /repo.git/}. \emph{E depois a mesma linha mudou de ofício:} em
+2026-08-20 o repositório passou a privado, o espelho saiu da Patria, e o bloco --- que servia o
+clone com \code{try\_files \$uri =404} --- passou a \code{return 404}. A regra de casamento é a
+mesma; o que mudou foi o corpo do bloco, e é isso que o prefixo mais longo permite: servir e fechar
+com a mesma estrutura. O medidor \textbf{lê a config servida} nos dois estados --- agora exige o
+\code{return 404} e a \emph{ausência} do \code{alias}: repor o alias, ou tirar o bloco e deixar o
+fallback responder 200 + HTML, deixa a bateria vermelha. \textbf{21 unidades, resíduo 0.}
 
 \emph{E o que ``controle total'' quer dizer aqui} --- menos do que parece, e melhor: o dispositivo
 não precisa de escalonador nem de drivers. Precisa de \textbf{ler}, de \textbf{escrever} e de

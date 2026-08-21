@@ -576,6 +576,60 @@ retroactivamente pela aplicação).
 }
 \]
 
+\subsection*{A realização: o \code{JOIN} do banco é o corte, e lê-se duas vezes}
+
+O motor SQL de \code{banco/sql.c} realiza a junção de igualdade pela metade do \emph{corte}, na
+mesma árvore que realiza a metade da \emph{ordem}. Não há uma terceira estrutura: a tabela da
+direita é copiada para a zona \code{S\_JDIR} do \code{.mem} e indexada na árvore que ordena; cada
+linha da esquerda desce por ela e encontra a sua classe. O que na ordem é percorrer todos os
+símbolos é aqui descer por um só.
+
+\smallskip
+\noindent E o tamanho dessa junção lê-se por \textbf{dois caminhos independentes}. Sejam $f$ e $g$
+os histogramas das duas colunas de junção --- o campo $G$ de cada valor, a sua fibra. O número de
+pares é $\sum_v f(v)\,g(v)$, e isso \emph{é} a convolução avaliada na origem, porque neste grupo
+$x\oplus x=0$ e a reflexão é a identidade:
+\[
+  (f*g)(0)\;=\;\sum_x f(x)\,g(x\oplus 0)\;=\;\sum_x f(x)\,g(x)
+  \qquad\text{e, pelo teorema da convolução,}\qquad
+  (f*g)(0)\;=\;2^{-m}\sum_k \widehat f(k)\,\widehat g(k).
+\]
+O primeiro caminho casa as linhas uma a uma; o segundo \textbf{nunca as visita} --- transforma dois
+histogramas, multiplica ponto a ponto e soma, com os caracteres em $\pm 1$ e tudo inteiro. Os dois
+têm de dar o mesmo número, e é essa coincidência que se mede: nenhum dos dois, sozinho, mostraria
+que o outro está errado. \emph{O enunciado da convolução e o do carácter ficam no corpo}
+(\code{papers/aranha.tex}, Teor.~da convolução e Def.~da transformada); aqui regista-se apenas que a
+máquina os executa.
+
+\smallskip
+\noindent Os números desta máquina, e os seus limites declarados:
+
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+domínio do espectro & $2^{m}$ com $m=8$ --- $256$ pontos \\
+o que não cabe & contado à parte, e a divergência é medida, não escondida \\
+tecto da direita & se a tabela direita não couber em \code{S\_JDIR}, a junção \textbf{recusa} \\
+o que não faz & só igualdade (não $<$, $>$), só duas tabelas, sem \code{LEFT}/\code{RIGHT}/\code{OUTER} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent O contador do que não cabe não é zelo: o espectro vive em $2^m$ pontos, e um par cujo
+valor caia fora do domínio é visto pela contagem directa e não pelo espectro. Medido: com um par em
+$300$, a junção devolve sete e o espectro devolve seis --- e é o contador que diz porquê. Um número
+certo sobre outro conjunto não é um número certo.
+
+\smallskip
+\noindent Prende-se ainda a \textbf{coordenada zero}, e não apenas o produto: $\chi_0\equiv 1$, logo
+$\widehat f(0)=\sum_x f(x)=|I|$, o número de linhas vivas. Sem essa amarra o que se media era só
+$\sum_k \widehat f(k)\widehat g(k)$, e esse produto sobrevive a uma transformada errada --- trocar
+$k\wedge x$ por $k\vee x$ deixa-o intacto, porque $(k\vee x)\oplus(k\vee y)=(x\oplus y)\wedge\neg k$
+e $\neg k$ percorre o mesmo grupo. O que essa troca move é a coordenada zero.
+
+\medskip
+\noindent \textsc{medido em} \code{tests/pgwire.c} §W19 (a bipartição) e §W20 (o saldo espectral).
+
 \subsection*{O Maestro é escala-invariante}
 
 O Teorema do Maestro (\emph{corpo de Peano}) realiza
@@ -1997,7 +2051,7 @@ EX1--EX20 & \code{reais\_exercicios.tex} & provas em $\mathbb{R}$ \\
 \end{center}
 
 \medskip\noindent Nomes exactos do catálogo disparam o
-\code{*_resolve} ao vivo; frases longas apontam ao TeX
+\code{*\_resolve} ao vivo; frases longas apontam ao TeX
 (\code{tools/semear.sh}, \code{tools/indexa\_tex\_vivo.py}). Colisões de
 título resolvem-se por sufixo distintivo (ex.\ \code{lagrange multiplicadores},
 \code{valor medio na analise}, \code{green no plano}).
@@ -2038,7 +2092,7 @@ aranha inversa / $G\equiv1$ & \code{tests/aranha\_inversa.c} & §AI1--§AI7 (lev
 frase$\to$órbita inversa & \code{tests/idioma\_orbita.c} & §IO1--§IO5 (corpus$\to\tilde\pi$) \\
 álgebra PT / dragão & \code{tests/portugues\_aranha.c} & §PA1--§PA8 ($\Sigma\subseteq\Word_8\to G$) \\
 álgebra EN / dragão & \code{tests/ingles\_aranha.c} & §IA1--§IA8 (mesma tubagem) \\
-álgebra ES / dragão & \code{tests/espanhol\_aranha.c} & §EA1--§EA8 (ñ↔nh; mesma tubagem) \\
+álgebra ES / dragão & \code{tests/espanhol\_aranha.c} & §EA1--§EA8 (ñ$\leftrightarrow$nh; mesma tubagem) \\
 hexal PDF & \code{tests/estrela\_unifica.js} & §U2c (\code{/Interface~6}) \\
 API SQL / interface & \code{tests/interface\_padrao.js} & $8/8$ (\code{interface\_padrao=sql}) \\
 FEBE / pgwire & \code{tests/pgwire.c} & §W0--§W7 (Trios PG1--PG5) \\

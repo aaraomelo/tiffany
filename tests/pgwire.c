@@ -13,6 +13,8 @@
  *   §W6  Describe statement + Close + Sync
  *   §W7  fachada pqlike (Trio PG5): PQconnectdb/PQexec/PQntuples/PQgetvalue sobre o
  *        NOSSO wire — sem -lpq — e a MESMA consulta pelos dois caminhos
+ *   §W20 o SALDO ESPECTRAL: o tamanho do join pela transformada, sem casar
+ *        linhas — dois caminhos para o mesmo número
  *   §W19 o JOIN como BIPARTIÇÃO — o corte, dual da ordem, na mesma árvore
  *   §W18 o ORDER BY pela ÁRVORE do banco, com a fibra dos repetidos separada
  *   §W17 a PROJECÇÃO de colunas, e ORDER BY/LIMIT recusados em vez de ignorados
@@ -2487,6 +2489,212 @@ int main(void){
            " número. O CONTROLO recusa a coluna inexistente de cada lado, nomeando a tabela"
            " certa, e exige que um SELECT simples continue a correr depois do join, porque"
            " ele troca a tabela aberta por baixo da sessão.",
+           mal == 0);
+    }
+
+    /* ═══ §W20: O SALDO ESPECTRAL — o tamanho do join SEM casar linhas ══════
+     *
+     * O tamanho de um join de igualdade é Σ_v f(v)·g(v), com f e g os
+     * histogramas das duas colunas. E isso É a CONVOLUÇÃO AVALIADA NA ORIGEM:
+     *
+     *     (f*g)(0) = Σ_x f(x)·g(x⊕0) = Σ_x f(x)·g(x)
+     *
+     * porque neste grupo x⊕x = 0 e a reflexão é a identidade. Pelo teorema da
+     * convolução do `aranha.tex` — F(f*g) = F(f)·F(g) ponto a ponto — o mesmo
+     * número lê-se no ESPECTRO:
+     *
+     *     (f*g)(0) = 2^{-m} · Σ_k F(f)_k · F(g)_k
+     *
+     * São DOIS CAMINHOS para o mesmo número: um casa as linhas, o outro nunca
+     * as visita. Se um join estivesse errado, os dois divergiriam.
+     * ───────────────────────────────────────────────────────────────────────── */
+    printf("\n§W20 o saldo espectral: o tamanho do join lido na transformada.\n\n");
+    {
+        const char *base = "/tmp/pgwire_w20";
+        SqlOut o;
+        long mal = 0;
+        enum { M = 8, N = 1 << M };
+        static long f[N], g[N];
+        static long Ff[N], Fg[N];
+        long fora_f = 0, fora_g = 0;
+        unlink("/tmp/pgwire_w20.mem");   unlink("/tmp/pgwire_w20.prog");
+        unlink("/tmp/pgwire_w20__cli.mem"); unlink("/tmp/pgwire_w20__ped.mem");
+        if(!sql_abrir(base)) mal++;
+        sql_executa("CREATE TABLE cli (id,saldo)", &o);
+        for(int i = 1; i <= 6; i++){
+            char q[96]; snprintf(q, sizeof q, "INSERT INTO cli VALUES (%d,%d)", i, i*10);
+            sql_executa(q, &o);
+        }
+        sql_executa("CREATE TABLE ped (cid,valor)", &o);
+        { const int cids[] = { 1, 1, 3, 3, 3, 4, 9 };   /* fibras de 2, 3, 1 e uma órfã */
+          for(unsigned k = 0; k < sizeof cids / sizeof cids[0]; k++){
+              char q[96];
+              snprintf(q, sizeof q, "INSERT INTO ped VALUES (%d,%d)", cids[k], (int)k);
+              sql_executa(q, &o);
+          } }
+
+        /* ── caminho 1: CASAR AS LINHAS (o join do §W19) ──────────────────── */
+        int n_join = 0;
+        {
+            int r = sql_executa("SELECT * FROM cli JOIN ped ON cli.id = ped.cid", &o);
+            n_join = r ? o.nrows : -1;
+            printf("      caminho 1 — casar as linhas: o join devolve %d\n", n_join);
+            if(!r) mal++;
+        }
+
+        /* ── caminho 2: O ESPECTRO, sem visitar uma única linha ───────────── */
+        long por_espectro = 0, por_produto = 0;
+        {
+            int nf = sql_histograma("cli", "id",  f, N, &fora_f);
+            int ng = sql_histograma("ped", "cid", g, N, &fora_g);
+            if(nf < 0 || ng < 0) mal++;
+            /* (f*g)(0) directo, para ver que o espectro não é o único caminho */
+            for(int v = 0; v < N; v++) por_produto += f[v] * g[v];
+            /* a transformada: F(f)_k = Σ_x f(x)·χ_k(x), com χ em ±1 e inteira */
+            for(int k = 0; k < N; k++){
+                long af = 0, ag = 0;
+                for(int x = 0; x < N; x++){
+                    int par = 0, t = k & x;
+                    while(t){ par ^= t & 1; t >>= 1; }
+                    if(par){ af -= f[x]; ag -= g[x]; }
+                    else   { af += f[x]; ag += g[x]; }
+                }
+                Ff[k] = af; Fg[k] = ag;
+            }
+            { long soma = 0;
+              for(int k = 0; k < N; k++) soma += Ff[k] * Fg[k];
+              por_espectro = soma / N; }          /* 2^{-m} · Σ_k F(f)_k F(g)_k */
+            /* A COORDENADA ZERO É A MASSA. χ_0 ≡ 1, logo F(f)_0 = Σ_x f(x) = |I|,
+             * o número de linhas vivas. Sem isto o bloco prendia só o PRODUTO
+             * Σ_k F(f)_k·F(g)_k, e uma transformada errada podia atravessá-lo:
+             * trocar k&x por k|x, por exemplo, deixa o produto INTACTO — porque
+             * (k|x)⊕(k|y) = (x⊕y)&~k e ~k percorre o mesmo grupo — mas move a
+             * coordenada zero, que aqui tem valor conhecido de antemão. */
+            printf("      a coordenada zero: F(f)_0 = %ld (cli tem %d linhas),"
+                   " F(g)_0 = %ld (ped tem %d)\n", Ff[0], 6, Fg[0], 7);
+            if(Ff[0] != 6 || Fg[0] != 7) mal++;
+            printf("      caminho 2 — o espectro:      2^-m · Σ F(f)·F(g) = %ld\n",
+                   por_espectro);
+            printf("      e o produto directo Σ f(v)·g(v) = %ld\n", por_produto);
+            printf("      (valores fora do domínio de %d: %ld e %ld)\n", N, fora_f, fora_g);
+        }
+
+        /* ── OS DOIS CAMINHOS TÊM DE DAR O MESMO ─────────────────────────── */
+        {
+            int batem = (n_join == por_espectro) && (por_espectro == por_produto);
+            printf("\n      -> %ld = %ld = %d : %s\n", por_espectro, por_produto, n_join,
+                   batem ? "OS DOIS CAMINHOS CONCORDAM" : "DIVERGEM");
+            if(!batem) mal++;
+            /* e o número tem de ser o esperado: 2 + 3 + 1 pares */
+            printf("      e o valor é o esperado (1 tem 2 pedidos, 3 tem 3, 4 tem 1): %s\n",
+                   (por_espectro == 6) ? "6, sim" : "NAO");
+            if(por_espectro != 6) mal++;
+        }
+
+        /* ── O REGIME DAS LINHAS APAGADAS ────────────────────────────────
+         * Sem um DELETE, o ramo que salta as linhas mortas nunca corre e o
+         * gume não morde lá. Apaga-se o cliente 3, que é o de fibra maior:
+         * o saldo tem de CAIR de 6 para 3, nos DOIS caminhos. */
+        {
+            long f2[N] = {0}, g2[N] = {0}, fx = 0;
+            long depois = 0;
+            int nj;
+            sql_executa("DELETE FROM cli WHERE id = 3", &o);
+            sql_histograma("cli", "id",  f2, N, &fx);
+            sql_histograma("ped", "cid", g2, N, &fx);
+            for(int v = 0; v < N; v++) depois += f2[v] * g2[v];
+            nj = sql_executa("SELECT * FROM cli JOIN ped ON cli.id = ped.cid", &o)
+                 ? o.nrows : -1;
+            printf("\n      APAGA-SE o cliente 3 (o de fibra 3): Σ f·g = %ld, join = %d\n",
+                   depois, nj);
+            printf("      -> %s\n", (depois == 3 && nj == 3)
+                   ? "6 - 3 = 3 dos dois lados: a linha morta saiu do histograma"
+                   : "NAO — o histograma continua a contar quem já não está lá");
+            if(depois != 3 || nj != 3) mal++;
+            sql_executa("INSERT INTO cli VALUES (3,30)", &o);   /* repõe */
+        }
+
+        /* ── O REGIME DE FORA DO DOMÍNIO ─────────────────────────────────
+         * O espectro vive em 2^m pontos. Um valor que não caiba lá é um par
+         * que a contagem directa vê e o espectro NÃO — e é por isso que o
+         * `fora` se conta. Mede-se a divergência LEGÍTIMA, em vez de fingir
+         * que ela não existe: com fora > 0, os dois caminhos podem discordar,
+         * e o número espectral é um número certo sobre OUTRO conjunto. */
+        {
+            long f3[N] = {0}, g3[N] = {0}, ff = 0, fg = 0, prod = 0;
+            int nj;
+            sql_executa("INSERT INTO cli VALUES (300,1)", &o);
+            sql_executa("INSERT INTO ped VALUES (300,99)", &o);   /* casa, e não cabe */
+            sql_histograma("cli", "id",  f3, N, &ff);
+            sql_histograma("ped", "cid", g3, N, &fg);
+            for(int v = 0; v < N; v++) prod += f3[v] * g3[v];
+            nj = sql_executa("SELECT * FROM cli JOIN ped ON cli.id = ped.cid", &o)
+                 ? o.nrows : -1;
+            printf("\n      UM PAR FORA DO DOMÍNIO (300, com 2^m = %d):"
+                   " fora = %ld e %ld\n", N, ff, fg);
+            printf("      espectro Σ f·g = %ld, join directo = %d\n", prod, nj);
+            printf("      -> %s\n",
+                   (ff == 1 && fg == 1 && prod == 6 && nj == 7)
+                   ? "o join vê 7, o espectro vê 6, e o `fora` DIZ PORQUÊ: 300 não cabe"
+                   : "NAO — a divergência não foi contada");
+            if(ff != 1 || fg != 1 || prod != 6 || nj != 7) mal++;
+            sql_executa("DELETE FROM cli WHERE id = 300", &o);
+            sql_executa("DELETE FROM ped WHERE cid = 300", &o);
+        }
+
+        /* ── O CONTROLO: sem intersecção, o saldo tem de ser ZERO. Se o cálculo
+         * espectral devolvesse sempre um número plausível, era aqui que se via. */
+        {
+            unlink("/tmp/pgwire_w20__z.mem");
+            sql_executa("CREATE TABLE z (k,v)", &o);
+            sql_executa("INSERT INTO z VALUES (100,1)", &o);
+            sql_executa("INSERT INTO z VALUES (101,2)", &o);
+            long h[N]; long fz = 0;
+            sql_histograma("z", "k", h, N, &fz);
+            long soma = 0;
+            for(int v = 0; v < N; v++) soma += f[v] * h[v];
+            int r = sql_executa("SELECT * FROM cli JOIN z ON cli.id = z.k", &o);
+            printf("\n      CONTROLO — tabelas sem valores em comum:"
+                   " Σ f·h = %ld, e o join devolve %d linhas\n",
+                   soma, r ? o.nrows : -1);
+            printf("      -> %s\n", (soma == 0 && r && o.nrows == 0)
+                   ? "zero dos dois lados, como tem de ser"
+                   : "NAO — um dos caminhos inventou pares");
+            if(soma != 0 || !r || o.nrows != 0) mal++;
+        }
+        sql_fechar();
+
+        printf("\n");
+        ok("O TAMANHO DO JOIN LÊ-SE NO ESPECTRO, SEM CASAR UMA LINHA. O número de pares de um"
+           " join de igualdade é Σ_v f(v)·g(v), com f e g os histogramas das duas colunas —"
+           " e isso É a CONVOLUÇÃO AVALIADA NA ORIGEM, porque neste grupo x⊕x = 0 e a"
+           " reflexão é a identidade: (f*g)(0) = Σ_x f(x)·g(x⊕0). Pelo teorema da convolução"
+           " do `aranha.tex` — F(f*g) = F(f)·F(g) ponto a ponto — o mesmo número sai de"
+           " 2^{-m}·Σ_k F(f)_k·F(g)_k, com os caracteres em ±1 e tudo inteiro, sem uma"
+           " vírgula. SÃO DOIS CAMINHOS PARA O MESMO NÚMERO: o primeiro casa as linhas uma a"
+           " uma pela árvore (§W19), o segundo NUNCA AS VISITA — transforma dois"
+           " histogramas, multiplica ponto a ponto e soma. E os dois têm de dar o mesmo:"
+           " seis, que é a soma das fibras (um valor com dois pedidos, outro com três, outro"
+           " com um). Se o join estivesse errado, ou se a transformada estivesse errada, os"
+           " números divergiam — nenhum dos dois sozinho o mostraria. E O CONTROLO é o caso"
+           " em que o saldo tem de ser ZERO: duas tabelas sem um único valor em comum dão"
+           " zero dos dois lados, o que impede o cálculo espectral de passar por devolver"
+           " sempre um número plausível. E MEDE-SE NOS DOIS REGIMES onde"
+           " o cálculo pode mentir sem que se veja. O primeiro é a LINHA APAGADA: apaga-se o"
+           " cliente de fibra maior e o saldo tem de cair de seis para três dos dois lados —"
+           " um histograma que contasse quem já não está lá dava o número velho e ninguém"
+           " reparava. O segundo é O QUE NÃO CABE: o espectro vive em 2^m pontos, e um par"
+           " cujo valor caia fora do domínio é visto pela contagem directa e NÃO pelo"
+           " espectro. Aqui essa divergência é medida em vez de escondida — o join devolve"
+           " sete, o espectro devolve seis, e o contador `fora` diz exactamente porquê. Um"
+           " número certo sobre outro conjunto não é um número certo, e o que o declara é o"
+           " `fora`, não a esperança de que todos os valores caibam. E PRENDE-SE A"
+           " TRANSFORMADA, e não apenas o produto: a coordenada zero é a MASSA, porque"
+           " χ_0 ≡ 1 e portanto F(f)_0 = Σ_x f(x) = |I|, o número de linhas vivas — seis e"
+           " sete, sabidos de antemão. Sem essa amarra o bloco media só Σ_k F(f)_k·F(g)_k, e"
+           " esse produto sobrevive a uma transformada errada: trocar k∧x por k∨x deixa-o"
+           " INTACTO, porque (k∨x)⊕(k∨y) = (x⊕y)∧¬k e ¬k percorre o mesmo grupo. O que essa"
+           " troca move é a coordenada zero, e é lá que agora se mede.",
            mal == 0);
     }
 

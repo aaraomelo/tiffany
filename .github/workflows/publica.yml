@@ -16,8 +16,11 @@ name: Publicar na Patria
 #    2. compila o CV (curriculo/cv.tex) → /docs/cv.pdf — estático; não entra no
 #       corpo do tradutor WASM;
 #    3. constrói o app (Vite): dist/wasm/tex.wasm + dist/corpo/ + cv.pdf;
-#    4. espelha o repo no fork que a Patria serve para clone público;
-#    5. manda o artefato ao servidor por scp, e ele troca o diretório.
+#    4. manda o artefato ao servidor por scp, e ele troca o diretório.
+#
+#  O passo que espelhava o repo num fork servido por dumb HTTP na Patria SAIU em
+#  2026-08-20: o repositório passou a privado e o espelho público com ele. Ficou
+#  um deploy só — artefato e nada mais atravessa o SSH.
 #
 #  Os .tex partilham um preâmbulo — estilo.tex — e cada um é um `subfiles`:
 #  continua a compilar sozinho (`pdflatex teoria.tex`) e também entra no
@@ -132,51 +135,6 @@ jobs:
             sleep 5
           done
 
-      - name: Espelhar no fork da Patria
-        run: |
-          # Sem alias `server` e sem ~/.ssh/config: este job corre DENTRO de um
-          # container e o ssh não apanhou o config lá — deu três "Could not
-          # resolve hostname server" e o passo ainda assim devolveu 0, e o site
-          # ficou dois dias com o build antigo. Host direto, e falha a sério.
-          set -e
-          HOST="${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}"
-          SSHOPT="-i $HOME/.ssh/id_rsa -o StrictHostKeyChecking=accept-new -o ConnectTimeout=30 -o ServerAliveInterval=15"
-          export GIT_SSH_COMMAND="ssh $SSHOPT"
-          # RETENTATIVAS, e não por gosto: este passo caiu muitas vezes com
-          # "connect to host ... port 22: Connection timed out", sempre depois de
-          # o portão ter compilado tudo, e sempre a passar na corrida seguinte
-          # sem se tocar em nada. É o servidor a não atender, não o código.
-          ok=0
-          for n in 1 2 3; do
-            git push --mirror "$HOST:/root/tiffany-repo.git" && { ok=1; break; }
-            echo "   tentativa $n falhou; nova em $((n*20))s" >&2
-            sleep $((n*20))
-          done
-          [ "$ok" = 1 ] || { echo "❌ o espelho não subiu em 3 tentativas"; exit 1; }
-
-          # e o que o front serve para clone, atualizado a partir do bare — sem
-          # commit-graph, que o nginx gzip-a e faz o git cuspir "inflate: data
-          # stream error" no clone. O script vai a FICHEIRO e não por heredoc:
-          # um heredoc é lido UMA vez, e a segunda tentativa mandaria stdin
-          # vazio — um ssh que "corre bem" e não executa nada.
-          cat > /tmp/espelha.sh <<'REMOTO'
-            set -e
-            D=/var/www/goldenkingdom/repo.git
-            [ -d "$D" ] || git clone -q --bare /root/tiffany-repo.git "$D"
-            git --git-dir="$D" fetch -q /root/tiffany-repo.git '+refs/*:refs/*'
-            git --git-dir="$D" update-server-info
-            rm -rf "$D/objects/info/commit-graph" "$D/objects/info/commit-graphs"
-            chmod -R a+rX "$D"
-            echo "fork: $(git --git-dir=$D rev-list --count HEAD) commits"
-          REMOTO
-          ok=0
-          for n in 1 2 3; do
-            ssh $SSHOPT "$HOST" bash -s < /tmp/espelha.sh && { ok=1; break; }
-            echo "   tentativa $n falhou; nova em $((n*20))s" >&2
-            sleep $((n*20))
-          done
-          [ "$ok" = 1 ] || { echo "❌ o fork não atualizou em 3 tentativas"; exit 1; }
-
       - name: Publicar no servidor
         run: |
           # SEM R2. O artefato vai por scp, direto.
@@ -202,15 +160,15 @@ jobs:
           #!/bin/bash
           set -e
           DEPLOY_DIR="${1:-/var/www/goldenkingdom}"
-          # o repo.git servido por dumb HTTP vive DENTRO do DEPLOY_DIR e não vem
-          # no artefato: extrai-se para um diretório novo e troca-se, preservando-o.
-          # Um rsync --delete cego apagava o fork, e o clone público morria sem
-          # ninguém dar por isso.
+          # extrai-se para um diretório novo e troca-se de uma vez. O --exclude 'repo.git'
+          # que aqui esteve guardava o espelho do repositório, que vivia DENTRO do
+          # DEPLOY_DIR e não vinha no artefato; o espelho saiu da jogada em 2026-08-20
+          # (o repositório é privado), e sem nada a preservar o --delete é limpo.
           rm -rf /tmp/gk-novo && mkdir -p /tmp/gk-novo
           tar -xzf /tmp/gk-deploy.tar.gz -C /tmp/gk-novo
           rm -f /tmp/gk-deploy.tar.gz
           mkdir -p "$DEPLOY_DIR"
-          rsync -a --delete --exclude 'repo.git' /tmp/gk-novo/ "$DEPLOY_DIR/"
+          rsync -a --delete /tmp/gk-novo/ "$DEPLOY_DIR/"
           rm -rf /tmp/gk-novo
           chmod -R a+rX "$DEPLOY_DIR"
 

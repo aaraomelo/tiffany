@@ -87,12 +87,12 @@ estão na arquitetura.tex.
 
 4. ESTADO ACTUAL (21/08/2026)
 ─────────────────────────────
-     bateria      529 : 529 verdes, 0 falhas · 116 unidades
+     bateria      529 : 529 verdes, 0 falhas · 120 unidades
      aranha.tex   29 pág · 0 erros · 0 refs mortas · thm:escada = Teorema 64
      arquitetura  27 pág · 0 provas locais · 0 enunciados sem remissão
 
 O BANCO FALA POSTGRES. `banco/pgwire.c` + `lib/pgwire.h` + `banco/pgcat.h`,
-FEBE escrito do zero, sem libpq. Medido em tests/pgwire.c (18 asserções):
+FEBE escrito do zero, sem libpq. Medido em tests/pgwire.c (22 asserções):
 
      §W0–W6   frames, Startup, handshake, Simple Query, TCP, Extended, Describe
      §W7      fachada pqlike (PQconnectdb/PQexec) sobre o nosso wire
@@ -108,6 +108,8 @@ FEBE escrito do zero, sem libpq. Medido em tests/pgwire.c (18 asserções):
      §W17     a PROJECÇÃO de colunas; LIMIT e GROUP BY recusados com a razão
      §W18     o ORDER BY pela ÁRVORE do banco, com a fibra dos repetidos separada
      §W19     o JOIN como BIPARTIÇÃO — o corte, na mesma árvore (passo 1 da §7)
+     §W20     o SALDO ESPECTRAL: (f*g)(0) = 2^-m Σ F(f)F(g) — o tamanho do join
+              SEM casar uma linha, e tem de bater com §W19 (passo 2 da §7)
 
 O psql REAL (16.14, via `docker run --rm --network host postgres:16 psql`)
 liga-se e faz o ciclo todo: \l, \dt, \d, CREATE, INSERT, UPDATE, DELETE,
@@ -172,10 +174,18 @@ O QUE FALTA, e é a metade do CORTE:
       que na ordem é «percorrer todos os símbolos» é aqui «descer por um só».
       Mede-se a bipartição dos DOIS lados — sem par não sai — e que NÃO é o
       produto cartesiano. Tecto declarado: se a direita não couber, RECUSA.
-   2. POR FAZER — o SALDO como segundo caminho: F(G)_k = Σ_t χ_k(π(t)) dá o
-      tamanho do corte SEM visitar as linhas, e tem de bater com a contagem
-      directa. É o «dois caminhos» aplicado ao join, e o `aranha_n.c` §AN12 já
-      mede a transformada.
+   2. FEITO (§W20). O SALDO como segundo caminho. O tamanho de um join de
+      igualdade é Σ_v f(v)·g(v), com f e g os histogramas das duas colunas
+      (`sql_histograma`) — e isso É A CONVOLUÇÃO NA ORIGEM, porque x⊕x = 0 e a
+      reflexão é a identidade: (f*g)(0) = Σ_x f(x)·g(x⊕0). Pelo teorema da
+      convolução, o mesmo número sai de 2^-m · Σ_k F(f)_k·F(g)_k, inteiro e
+      sem uma vírgula. O primeiro caminho casa as linhas; o segundo NUNCA AS
+      VISITA. Regimes medidos, porque sem eles o gume não morde: a LINHA
+      APAGADA (o saldo cai 6 → 3 dos dois lados) e O QUE NÃO CABE (um par em
+      300 com 2^m = 256: o join vê 7, o espectro vê 6, e o contador `fora` diz
+      porquê). Prende-se a COORDENADA ZERO e não só o produto: χ_0 ≡ 1, logo
+      F(f)_0 = |I| — sem isso, trocar k∧x por k∨x passava, porque
+      (k∨x)⊕(k∨y) = (x⊕y)∧¬k e ¬k percorre o mesmo grupo.
    3. POR FAZER — max-cut = massa (M = 4C/n, C = |A|·|B|) para dizer QUAL junção
       é a mais barata: é o que um planeador de consultas decide à mão.
 

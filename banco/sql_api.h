@@ -50,5 +50,9 @@ long sql_tx_escritas(void);
 /* o campo G da transacção corrente, lido na pilha: |I|, |supp G| e max G */
 void sql_tx_fibra(long *escritas, long *slots_distintos, long *maior_G,
                   long *soma_G);
+/* o histograma de uma coluna — o campo G dos seus valores, para o passo
+ * espectral: o tamanho de um join é (f*g)(0), a convolução na origem */
+int  sql_histograma(const char *tabela, const char *coluna, long *hist, int n,
+                    long *fora);
 
 #endif

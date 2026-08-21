@@ -15,9 +15,11 @@
 #  está de pé, o outro serve; quando cai, este é a saída. Trocar o `runs-on` do
 #  workflow principal deixaria a publicação presa se o runner local parasse.
 #
-#  SEGURANÇA — e é o que decide se isto se pode fazer. O repositório é PÚBLICO,
-#  e o GitHub desaconselha runners próprios em repos públicos: quem faz fork
-#  pode abrir um PR cujo workflow corre na nossa máquina. O que fecha isso aqui:
+#  SEGURANÇA — e é o que decide se isto se pode fazer. O repositório era PÚBLICO
+#  quando isto se escreveu (é PRIVADO desde 2026-08-20), e o GitHub desaconselha
+#  runners próprios em repos públicos: quem faz fork pode abrir um PR cujo
+#  workflow corre na nossa máquina. Privado, ninguém de fora abre PR nenhum — mas
+#  as guardas ficam, porque a visibilidade é reversível e elas não custam nada:
 #
 #    · o gatilho é SÓ `workflow_dispatch` — ninguém o dispara sem escrita no repo
 #    · NÃO há `pull_request` em nenhum workflow deste repositório
@@ -90,7 +92,7 @@ jobs:
         run: |
           set -e
           DEPLOY_DIR="${{ inputs.destino || '/var/www/goldenkingdom' }}"
-          rsync -a --delete --exclude 'repo.git' app/dist/ "$DEPLOY_DIR/"
+          rsync -a --delete app/dist/ "$DEPLOY_DIR/"
           chmod -R a+rX "$DEPLOY_DIR"
           echo "✅ publicado em $DEPLOY_DIR"
 

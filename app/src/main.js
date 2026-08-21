@@ -180,8 +180,6 @@ function hero(m) {
           <a class="btn ghost" href="#assistente"
              title="Fala local — banda = Assinatura(corpo)">✦ Assistente</a>
           <a class="btn ghost" href="#trailer">▶ Ver o trailer</a>
-          <a class="btn ghost" href="/repo.git" target="_blank" rel="noopener"
-             title="git clone https://goldenkingdom.patriatechnology.com/repo.git">⑂ O repositório</a>
         </div>
       </div>
       <div class="heroart motor" data-peca="coracao_revela" aria-label="O coração do reino"></div>

@@ -4555,6 +4555,38 @@ int sql_cols_de(const char *tabela, char nomes[][32], int cap){
     return lidas;
 }
 
+/* O HISTOGRAMA de uma coluna: quantas linhas têm cada valor.
+ *
+ * É o campo G da coluna — a fibra de cada valor —, e é o que o passo espectral
+ * precisa: o tamanho de um join de igualdade é Σ_v f(v)·g(v), que é a
+ * CONVOLUÇÃO AVALIADA NA ORIGEM, (f*g)(0). Pelo Teor. da convolução do
+ * `aranha.tex` isso lê-se no espectro sem casar uma única linha.
+ *
+ * O domínio é 2^m: valores fora dele não entram, e o contador `fora` diz
+ * quantos — sem isso o número espectral estaria certo sobre outro conjunto. */
+int sql_histograma(const char *tabela, const char *coluna, long *hist, int n,
+                   long *fora){
+    char antes[64];
+    Word cat;
+    long nc, nr;
+    int oc, dentro = 0;
+    if(fora) *fora = 0;
+    for(int i = 0; i < n; i++) hist[i] = 0;
+    snprintf(antes, sizeof antes, "%s", g_tabela);
+    if(!usa_tabela(tabela, 0)) return -1;
+    oc = col_indice(coluna);
+    if(oc < 0){ if(antes[0]) usa_tabela(antes, 0); return -1; }
+    cat = mem_le(S_CAT); nc = cat.total; nr = cat.e;
+    for(long i = 0; i < nr; i++){
+        if(mem_le(S_VIVO + (unsigned)i).total == 0) continue;
+        { long v = celula_valor(i, oc, nc);
+          if(v >= 0 && v < n){ hist[v]++; dentro++; }
+          else if(fora) (*fora)++; }
+    }
+    if(antes[0]) usa_tabela(antes, 0);
+    return dentro;
+}
+
 int sql_executa(const char *sql, SqlOut *out){
     if(out){ memset(out, 0, sizeof *out); sql_cap = out; }
     else sql_cap = NULL;
