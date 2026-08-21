@@ -6,7 +6,12 @@
 #ifndef SQL_API_H
 #define SQL_API_H
 
-#define SQL_OUT_MAX_COLS 8
+/* DEZASSEIS, e não oito. O oito bastava para as tabelas desta casa e para tudo
+ * o que os medidores pediam — e caiu no primeiro cliente real: o `\d` do psql
+ * pede TREZE colunas de propriedades numa só linha, lê-as por POSIÇÃO, e
+ * truncar não serve, porque a posição oito passa a ser outra coisa. O limite
+ * era invisível enquanto quem perguntava éramos nós. */
+#define SQL_OUT_MAX_COLS 16
 #define SQL_OUT_MAX_ROWS 64
 #define SQL_OUT_CELL     64
 #define SQL_TIPO_INT4    23
@@ -31,5 +36,7 @@ int  sql_abrir(const char *base);
 void sql_fechar(void);
 /* executa e, se out!=NULL, preenche tag/linhas (SELECT) ou só tag (DDL/DML) */
 int  sql_executa(const char *sql, SqlOut *out);
+/* os nomes das colunas de uma tabela — para o catálogo, que não os pode inventar */
+int  sql_cols_de(const char *tabela, char nomes[][32], int cap);
 
 #endif

@@ -32,6 +32,7 @@
 #include <ctype.h>
 #include <strings.h>
 #include <dirent.h>
+#include <unistd.h>
 #include "sql_api.h"
 #include "pgmsg.h"
 #include "pgfunc.h"
@@ -62,6 +63,7 @@ static char pgcat_base[128] = "tiffany";
 static char pgcat_user[64]  = "tiffany";
 
 /* ── utilitários: comparação sem maiúsculas, e o corte dos brancos ─────────── */
+static char baixa1_pgcat(char c){ return (c >= 'A' && c <= 'Z') ? (char)(c - 'A' + 'a') : c; }
 static int pgcat_ieq(const char *a, const char *b){
     while(*a && *b){
         if(tolower((unsigned char)*a) != tolower((unsigned char)*b)) return 0;
@@ -125,6 +127,22 @@ static void pgcat_so_tag(SqlOut *o, const char *tag){
     snprintf(o->tag, sizeof o->tag, "%s", tag);
 }
 
+/* ── o OID de uma tabela: estável, e derivado do NOME ────────────────────────
+ *
+ * O `\d cliente` precisa de um oid para depois pedir as colunas por ele. O
+ * número tem de ser ESTÁVEL entre corridas — se mudasse, a segunda consulta do
+ * psql não encontraria a tabela que a primeira lhe deu — e por isso sai do nome,
+ * e não de um contador. Vive acima de 16384, a zona dos objectos de utilizador.
+ */
+static int pgcat_oid_de(const char *nome){
+    unsigned h = 2166136261u;                  /* FNV-1a, e chega para isto */
+    for(const char *p = nome; p && *p; p++){
+        h ^= (unsigned char)baixa1_pgcat(*p);
+        h *= 16777619u;
+    }
+    return (int)(16384u + (h % 40000u));
+}
+
 /* ── \dt e \d: RECONHECIMENTO DE PADRÃO, e convém dizer o que isto é ─────────
  *
  * O `\dt` do psql não pergunta «que tabelas há»: manda uma consulta com JOIN
@@ -141,6 +159,23 @@ static void pgcat_so_tag(SqlOut *o, const char *tag){
  * ───────────────────────────────────────────────────────────────────────────── */
 static char pgcat_dir[512]  = ".";
 static char pgcat_pref[128] = "";
+
+/* A PRIMEIRA consulta do `\d <tabela>`: pg_class com o nome dentro de um regex
+ * `^(nome)$`. Reconhece-se pela assinatura e devolve-se oid, esquema e nome —
+ * mas SÓ se a tabela existir de facto no disco: inventar um oid para uma tabela
+ * que não há faria o psql pedir as colunas de coisa nenhuma. */
+static int pgcat_e_procura_tabela(const char *sql, char *nome, int cap){
+    const char *a, *b;
+    if(!strstr(sql, "pg_catalog.pg_class")) return 0;
+    if(!strstr(sql, "relname")) return 0;
+    a = strstr(sql, "'^(");
+    if(!a) return 0;
+    a += 3;
+    b = strstr(a, ")$'");
+    if(!b || b - a >= cap) return 0;
+    snprintf(nome, (size_t)(b - a + 1), "%s", a);
+    return 1;
+}
 
 static int pgcat_e_lista_tabelas(const char *sql){
     /* a assinatura: as três coisas que só a consulta do \dt tem juntas */
@@ -543,6 +578,148 @@ static int pgcat_responde(const char *sql, SqlOut *out){
     if(pgcat_pal(sql, "BEGIN"))    { pgcat_so_tag(out, "BEGIN");    return 1; }
     if(pgcat_pal(sql, "COMMIT"))   { pgcat_so_tag(out, "COMMIT");   return 1; }
     if(pgcat_pal(sql, "ROLLBACK")) { pgcat_so_tag(out, "ROLLBACK"); return 1; }
+
+    /* ── a procura de UMA tabela pelo nome (1.ª consulta do \d) ─────────── */
+    {
+        char alvo_nome[64];
+        if(pgcat_e_procura_tabela(sql, alvo_nome, sizeof alvo_nome)){
+            char cam[700];
+            snprintf(cam, sizeof cam, "%s/%s%s.mem", pgcat_dir, pgcat_pref, alvo_nome);
+            if(out){
+                memset(out, 0, sizeof *out);
+                out->ok = 1; out->ncols = 3;
+                out->tipo[0] = SQL_TIPO_INT4;
+                out->tipo[1] = out->tipo[2] = SQL_TIPO_TEXT;
+                snprintf(out->col[0], sizeof out->col[0], "oid");
+                snprintf(out->col[1], sizeof out->col[1], "nspname");
+                snprintf(out->col[2], sizeof out->col[2], "relname");
+                if(access(cam, F_OK) == 0){        /* só se existir mesmo */
+                    snprintf(out->cell[0][0], SQL_OUT_CELL, "%d", pgcat_oid_de(alvo_nome));
+                    snprintf(out->cell[0][1], SQL_OUT_CELL, "public");
+                    snprintf(out->cell[0][2], SQL_OUT_CELL, "%s", alvo_nome);
+                    out->nrows = 1;
+                }else{
+                    out->nrows = 0;                /* não há: zero linhas, sem erro */
+                }
+                snprintf(out->tag, sizeof out->tag, "SELECT %d", out->nrows);
+            }
+            return 1;
+        }
+    }
+
+    /* ── as tabelas de catálogo que, aqui, estão VAZIAS ──────────────────
+     *
+     * Uma tabela desta casa não tem herança, nem índices, nem restrições, nem
+     * regras, nem gatilhos, nem políticas. O `\d` pergunta por todas elas em
+     * sequência, e a resposta certa é ZERO LINHAS — não é uma recusa.
+     *
+     * A distinção é a mesma do §W11 e vale a pena repeti-la: recusar diz «não
+     * sei responder»; zero linhas diz «sei, e não há nada». Aqui SABE-SE: não
+     * há mesmo. Recusar faria o psql tratar uma tabela perfeitamente descrita
+     * como um erro. */
+    {
+        static const char *vazias[] = {
+            "pg_catalog.pg_inherits", "pg_catalog.pg_index",
+            "pg_catalog.pg_constraint", "pg_catalog.pg_rewrite",
+            "pg_catalog.pg_trigger", "pg_catalog.pg_policy",
+            "pg_catalog.pg_statistic_ext", "pg_catalog.pg_publication",
+        };
+        for(unsigned k = 0; k < sizeof vazias / sizeof vazias[0]; k++){
+            if(strstr(sql, vazias[k])){
+                if(out){
+                    memset(out, 0, sizeof *out);
+                    out->ok = 1; out->ncols = 1; out->nrows = 0;
+                    out->tipo[0] = SQL_TIPO_TEXT;
+                    snprintf(out->col[0], sizeof out->col[0], "%s", "?column?");
+                    snprintf(out->tag, sizeof out->tag, "SELECT 0");
+                }
+                return 1;
+            }
+        }
+    }
+
+    /* ── a 3.ª consulta do \d: as COLUNAS, por oid da relação ────────────
+     * Sete colunas, lidas por posição. O nome e o número vêm do MOTOR — o
+     * catálogo não os inventa —, e o oid da relação resolve-se procurando entre
+     * as tabelas do disco aquela cujo nome dá aquele oid. */
+    if(strstr(sql, "pg_catalog.pg_attribute") && strstr(sql, "attrelid")){
+        char alvo[64] = "";
+        int oid_pedido = 0;
+        { const char *a = strstr(sql, "attrelid = '");
+          if(a) oid_pedido = atoi(a + 12); }
+        if(oid_pedido){
+            DIR *d = opendir(pgcat_dir);
+            size_t plen = strlen(pgcat_pref);
+            struct dirent *e;
+            if(d){
+                while((e = readdir(d)) != NULL){
+                    const char *nm = e->d_name;
+                    size_t L = strlen(nm);
+                    if(plen == 0 || strncmp(nm, pgcat_pref, plen)) continue;
+                    if(L < plen + 4 || strcmp(nm + L - 4, ".mem")) continue;
+                    { char cand[64];
+                      snprintf(cand, sizeof cand, "%.*s", (int)(L - plen - 4), nm + plen);
+                      if(cand[0] && pgcat_oid_de(cand) == oid_pedido){
+                          snprintf(alvo, sizeof alvo, "%s", cand); break; } }
+                }
+                closedir(d);
+            }
+        }
+        if(out){
+            char nomes[SQL_OUT_MAX_COLS][32];
+            int n = alvo[0] ? sql_cols_de(alvo, nomes, SQL_OUT_MAX_COLS) : 0;
+            memset(out, 0, sizeof *out);
+            out->ok = 1; out->ncols = 7;
+            { const char *c[7] = { "attname", "format_type", "pg_get_expr",
+                                   "attnotnull", "attcollation", "attidentity",
+                                   "attgenerated" };
+              for(int j = 0; j < 7; j++){
+                  snprintf(out->col[j], sizeof out->col[j], "%s", c[j]);
+                  out->tipo[j] = SQL_TIPO_TEXT;
+              } }
+            for(int i = 0; i < n && i < SQL_OUT_MAX_ROWS; i++){
+                snprintf(out->cell[i][0], SQL_OUT_CELL, "%s", nomes[i]);
+                snprintf(out->cell[i][1], SQL_OUT_CELL, "integer");  /* o motor */
+                out->cell[i][2][0] = 0;                              /* sem default */
+                snprintf(out->cell[i][3], SQL_OUT_CELL, "f");        /* not null */
+                out->cell[i][4][0] = 0;
+                out->cell[i][5][0] = 0;
+                out->cell[i][6][0] = 0;
+            }
+            out->nrows = n;
+            snprintf(out->tag, sizeof out->tag, "SELECT %d", n);
+        }
+        return 1;
+    }
+
+    /* ── a 2.ª consulta do \d: as propriedades da relação, por oid ───────
+     * Treze colunas, e o psql lê-as por POSIÇÃO — não por nome. Devolve-se o
+     * que uma tabela desta casa é: sem índices, sem regras, sem gatilhos, sem
+     * partições e sem tablespace. Dizer o contrário faria o psql pedir coisas
+     * que não existem. */
+    if(strstr(sql, "pg_catalog.pg_class") && strstr(sql, "relchecks")
+       && strstr(sql, "relpersistence")){
+        if(out){
+            const char *v[13] = { "0", "r", "f", "f", "f", "f", "f",
+                                  "f", "f", "", "0", "", "p" };
+            const char *c[13] = { "relchecks", "relkind", "relhasindex",
+                                  "relhasrules", "relhastriggers", "?column?",
+                                  "?column?", "relhasoids", "relispartition",
+                                  "?column?", "reltablespace", "?column?",
+                                  "relpersistence" };
+            memset(out, 0, sizeof *out);
+            out->ok = 1;
+            out->ncols = (13 > SQL_OUT_MAX_COLS) ? SQL_OUT_MAX_COLS : 13;
+            for(int j = 0; j < out->ncols; j++){
+                snprintf(out->col[j], sizeof out->col[j], "%s", c[j]);
+                out->tipo[j] = (j == 0 || j == 10) ? SQL_TIPO_INT4 : SQL_TIPO_TEXT;
+                snprintf(out->cell[0][j], SQL_OUT_CELL, "%s", v[j]);
+            }
+            out->nrows = 1;
+            snprintf(out->tag, sizeof out->tag, "SELECT 1");
+        }
+        return 1;
+    }
 
     /* ── a consulta do \dt, reconhecida pela assinatura ─────────────────── */
     if(pgcat_e_lista_tabelas(sql)) return pgcat_lista_tabelas(out);

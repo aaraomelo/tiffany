@@ -13,6 +13,7 @@
  *   §W6  Describe statement + Close + Sync
  *   §W7  fachada pqlike (Trio PG5): PQconnectdb/PQexec/PQntuples/PQgetvalue sobre o
  *        NOSSO wire — sem -lpq — e a MESMA consulta pelos dois caminhos
+ *   §W13 o `\d <tabela>`: cinco consultas, o oid estável, as colunas do motor
  *   §W12 o tipo `vector` no catálogo, e os scripts do repo como FUNÇÕES —
  *        com a lista branca e o gume a forçar a porta
  *   §W11 pg_type lido COMO TABELA, e a diferença entre zero linhas e recusa
@@ -42,6 +43,7 @@
 #include "pgwire_api.h"
 #include "pgwire_sess.h"
 #include "pqlike.h"
+#include "pgcat.h"
 
 /* Lê mensagens tipadas até ReadyForQuery (ou erro). */
 static int cli_ate_ready(int fd, uint8_t *acc, int cap, int *nacc){
@@ -1570,6 +1572,172 @@ int main(void){
            " TIFFANY_RAIZ ou procura-se para cima, e quando não há repositório à vista a"
            " chamada é RECUSADA COM MENSAGEM em vez de devolver vazio. As duas situações"
            " são legítimas e as duas se medem; o que não pode acontecer é a terceira.",
+           mal == 0);
+    }
+
+    /* ═══ §W13: O `\d <tabela>`, QUE SÃO CINCO CONSULTAS ═════════════════════
+     *
+     * O psql não pergunta «quais são as colunas». Faz uma sequência: acha o oid
+     * pelo nome, pede as propriedades da relação, pede os atributos por oid, e
+     * depois pergunta por herança, índices, restrições, regras e gatilhos.
+     *
+     * E há aqui DUAS coisas que se medem e não são a mesma:
+     *   · o oid tem de ser ESTÁVEL — a segunda consulta usa o que a primeira
+     *     deu, e um oid que mudasse entre as duas partia a sequência
+     *   · as tabelas de catálogo vazias devolvem ZERO LINHAS, não recusa: aqui
+     *     SABE-SE que não há herança nem índices. Recusar faria o psql tratar
+     *     uma tabela bem descrita como erro.
+     * ───────────────────────────────────────────────────────────────────────── */
+    printf("\n§W13 o \\d <tabela>: o oid estável, as colunas do motor, e o vazio.\n\n");
+    {
+        const char *base = "/tmp/pgwire_w13";
+        SqlOut o;
+        long mal = 0;
+        int oid1 = 0, oid2 = 0;
+        char q[512];
+
+        unlink("/tmp/pgwire_w13.mem");
+        unlink("/tmp/pgwire_w13.prog");
+        unlink("/tmp/pgwire_w13__conta.mem");
+        if(!sql_abrir(base)) mal++;
+        sql_executa("CREATE TABLE conta (numero,titular,saldo)", &o);
+
+        /* (1) achar o oid pelo nome — e ele tem de ser ESTÁVEL */
+        snprintf(q, sizeof q,
+                 "SELECT c.oid, n.nspname, c.relname FROM pg_catalog.pg_class c "
+                 "LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace "
+                 "WHERE c.relname OPERATOR(pg_catalog.~) '^(conta)$' ORDER BY 2, 3;");
+        {
+            int r = sql_executa(q, &o);
+            int bate = r && o.nrows == 1 && !strcmp(o.cell[0][2], "conta")
+                       && o.tipo[0] == SQL_TIPO_INT4;
+            oid1 = o.nrows ? atoi(o.cell[0][0]) : 0;
+            r = sql_executa(q, &o);
+            oid2 = (r && o.nrows) ? atoi(o.cell[0][0]) : 0;
+            printf("      1) o oid de «conta»: %d, e outra vez: %d  -> %s\n",
+                   oid1, oid2, (oid1 && oid1 == oid2) ? "ESTÁVEL" : "MUDOU (mau)");
+            if(!bate || !oid1 || oid1 != oid2) mal++;
+        }
+
+        /* e uma tabela que NÃO existe dá zero linhas, sem erro */
+        {
+            snprintf(q, sizeof q,
+                     "SELECT c.oid, c.relname FROM pg_catalog.pg_class c "
+                     "WHERE c.relname OPERATOR(pg_catalog.~) '^(nao_ha_esta)$';");
+            int r = sql_executa(q, &o);
+            int bate = r && o.ok && o.nrows == 0 && !o.err[0];
+            printf("      e uma tabela que não existe -> %d linhas, sem erro: %s\n",
+                   o.nrows, bate ? "sim" : "NAO");
+            if(!bate) mal++;
+        }
+
+        /* (2) as propriedades da relação: TREZE colunas, lidas por POSIÇÃO */
+        {
+            snprintf(q, sizeof q,
+                     "SELECT c.relchecks, c.relkind, c.relhasindex, c.relhasrules, "
+                     "c.relhastriggers, false, false, c.relhasoids, false as relispartition, "
+                     "'', c.reltablespace, '', c.relpersistence "
+                     "FROM pg_catalog.pg_class c WHERE c.oid = '%d';", oid1);
+            int r = sql_executa(q, &o);
+            int bate = r && o.nrows == 1 && o.ncols == 13 && !strcmp(o.cell[0][1], "r");
+            printf("      2) propriedades da relação -> %d colunas (relkind=%s): %s\n",
+                   o.ncols, o.nrows ? o.cell[0][1] : "?", bate ? "sim" : "NAO");
+            if(!bate) mal++;
+            /* e treze não cabiam em oito: o limite subiu por causa disto */
+            if(o.ncols > SQL_OUT_MAX_COLS) mal++;
+        }
+
+        /* (3) os ATRIBUTOS, e eles vêm do MOTOR — não são inventados */
+        {
+            snprintf(q, sizeof q,
+                     "SELECT a.attname, pg_catalog.format_type(a.atttypid, a.atttypmod) "
+                     "FROM pg_catalog.pg_attribute a WHERE a.attrelid = '%d' "
+                     "AND a.attnum > 0 ORDER BY a.attnum;", oid1);
+            int r = sql_executa(q, &o);
+            int bate = r && o.nrows == 3
+                       && !strcmp(o.cell[0][0], "numero")
+                       && !strcmp(o.cell[1][0], "titular")
+                       && !strcmp(o.cell[2][0], "saldo")
+                       && !strcmp(o.cell[0][1], "integer");
+            printf("      3) as colunas -> %d: %s, %s, %s  (tipo %s)  %s\n", o.nrows,
+                   o.nrows > 0 ? o.cell[0][0] : "?", o.nrows > 1 ? o.cell[1][0] : "?",
+                   o.nrows > 2 ? o.cell[2][0] : "?", o.nrows ? o.cell[0][1] : "?",
+                   bate ? "(vêm do motor)" : "NAO BATEM");
+            if(!bate) mal++;
+        }
+
+        /* O CONTROLO das colunas: outra tabela, outras colunas. Se viessem de um
+         * sítio fixo, as duas dariam o mesmo — e a asserção de cima passaria à
+         * mesma. */
+        {
+            unlink("/tmp/pgwire_w13__par.mem");
+            sql_executa("CREATE TABLE par (x,y)", &o);
+            snprintf(q, sizeof q,
+                     "SELECT a.attname FROM pg_catalog.pg_attribute a "
+                     "WHERE a.attrelid = '%d' AND a.attnum > 0;", pgcat_oid_de("par"));
+            int r = sql_executa(q, &o);
+            int bate = r && o.nrows == 2 && !strcmp(o.cell[0][0], "x")
+                       && !strcmp(o.cell[1][0], "y");
+            printf("      CONTROLO — outra tabela, outras colunas: %d (%s,%s) %s\n",
+                   o.nrows, o.nrows ? o.cell[0][0] : "?", o.nrows > 1 ? o.cell[1][0] : "?",
+                   bate ? "sim" : "NAO");
+            if(!bate) mal++;
+        }
+
+        /* (4) e a sessão NÃO pode ficar mexida: o catálogo abriu outra tabela
+         * para ler as colunas, e tem de a repor. */
+        {
+            sql_executa("INSERT INTO conta VALUES (1,10,100)", &o);
+            snprintf(q, sizeof q,
+                     "SELECT a.attname FROM pg_catalog.pg_attribute a "
+                     "WHERE a.attrelid = '%d' AND a.attnum > 0;", pgcat_oid_de("par"));
+            sql_executa(q, &o);                       /* isto abre a «par» */
+            int r = sql_executa("SELECT * FROM conta", &o);
+            int bate = r && o.nrows == 1 && o.ncols == 3;
+            printf("      4) depois de o catálogo ler outra tabela, a sessão continua"
+                   " na «conta»: %s\n", bate ? "sim" : "NAO — a sessão foi mexida");
+            if(!bate) mal++;
+        }
+
+        /* (5) as tabelas de catálogo VAZIAS: zero linhas, e não recusa */
+        {
+            const char *vazias[] = {
+                "SELECT c.oid FROM pg_catalog.pg_inherits i WHERE i.inhrelid = '1'",
+                "SELECT i.indexrelid FROM pg_catalog.pg_index i WHERE i.indrelid = '1'",
+                "SELECT r.rulename FROM pg_catalog.pg_rewrite r",
+                "SELECT t.tgname FROM pg_catalog.pg_trigger t",
+            };
+            int zeros = 0;
+            printf("\n      5) o catálogo vazio — zero linhas, e NÃO recusa:\n");
+            for(unsigned k = 0; k < sizeof vazias / sizeof vazias[0]; k++){
+                int r = sql_executa(vazias[k], &o);
+                int zero = r && o.ok && o.nrows == 0 && !o.err[0];
+                if(zero) zeros++;
+                printf("        %-52s %s\n", vazias[k],
+                       zero ? "0 linhas, com sucesso" : (r ? "linhas a mais" : "RECUSOU (mau)"));
+            }
+            if(zeros != 4) mal++;
+        }
+        sql_fechar();
+
+        printf("\n");
+        ok("O `\\d <tabela>` RESPONDE, E SÃO CINCO CONSULTAS. O psql não pergunta «quais são"
+           " as colunas»: acha o oid pelo nome, pede as propriedades da relação, pede os"
+           " atributos por oid, e depois pergunta por herança, índices, regras e gatilhos."
+           " Três coisas se medem aqui, e nenhuma é a mesma. PRIMEIRA, o oid tem de ser"
+           " ESTÁVEL, porque a segunda consulta usa o que a primeira deu — sai do NOME por"
+           " hash, e não de um contador, e mede-se pedindo duas vezes. SEGUNDA, as colunas"
+           " vêm do MOTOR e não são inventadas: o catálogo abre a tabela, lê os nomes"
+           " guardados no .mem e RESTAURA a que estava aberta, porque uma consulta de"
+           " catálogo não pode mudar a sessão por baixo de quem a fez — e isso mede-se a"
+           " seguir, inserindo e relendo. O CONTROLO é outra tabela com outras colunas: se"
+           " os nomes viessem de um sítio fixo, as duas dariam o mesmo e a asserção passava"
+           " à mesma. TERCEIRA, as tabelas de catálogo vazias devolvem ZERO LINHAS e não"
+           " recusa — aqui SABE-SE que não há herança nem índices, e recusar faria o psql"
+           " tratar uma tabela bem descrita como um erro. E houve um limite a cair pelo"
+           " caminho: as propriedades da relação são TREZE colunas lidas por posição, e o"
+           " SqlOut tinha oito — bastava para as tabelas desta casa e para tudo o que os"
+           " medidores pediam, e caiu no primeiro cliente real.",
            mal == 0);
     }
 

@@ -3950,6 +3950,32 @@ int sql_abrir(const char *base){
     return abrir_base(base);
 }
 void sql_fechar(void){ fechar_base(); sql_cap = NULL; }
+/* AS COLUNAS DE UMA TABELA, para o catálogo responder ao `\d <tabela>`.
+ *
+ * O catálogo não pode inventar isto: os nomes e o número das colunas estão no
+ * .mem da tabela, e só o motor os sabe ler. Abre-se a tabela pedida, lê-se, e
+ * RESTAURA-SE a que estava aberta — uma consulta de catálogo não pode mudar o
+ * estado da sessão por baixo de quem a fez. */
+int sql_cols_de(const char *tabela, char nomes[][32], int cap){
+    char antes[64];
+    long n;
+    int lidas = 0;
+    if(!tabela || !tabela[0]) return 0;
+    snprintf(antes, sizeof antes, "%s", g_tabela);
+    if(!usa_tabela(tabela, 0)) return 0;
+    n = mem_le(S_CAT).total;
+    if(n < 0) n = 0;
+    for(int j = 0; j < (int)n && j < cap; j++){
+        char cn[S_COLNOME_W * 2 + 2];
+        col_nome_le(j, cn, (int)sizeof cn);
+        if(cn[0]) snprintf(nomes[j], 32, "%s", cn);
+        else      snprintf(nomes[j], 32, "%c", 'a' + j);
+        lidas++;
+    }
+    if(antes[0]) usa_tabela(antes, 0);            /* a sessão fica como estava */
+    return lidas;
+}
+
 int sql_executa(const char *sql, SqlOut *out){
     if(out){ memset(out, 0, sizeof *out); sql_cap = out; }
     else sql_cap = NULL;

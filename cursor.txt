@@ -3304,3 +3304,48 @@ NO psql REAL (16.14):
 
   pgwire.c 14 asserções, 0 falhas
   bateria 529 : 529, 112 unidades, 0 falhas
+
+§72 — O `\d <tabela>` SÃO CINCO CONSULTAS, E O OITO CAIU NO PRIMEIRO CLIENTE REAL
+==================================================================================
+O psql não pergunta «quais são as colunas». Faz uma SEQUÊNCIA, e cada passo usa
+o que o anterior devolveu:
+
+     1. pg_class + regex '^(nome)$'      →  o oid da tabela
+     2. pg_class WHERE oid = N           →  TREZE colunas de propriedades
+     3. pg_attribute WHERE attrelid = N  →  as colunas
+     4. pg_inherits, pg_index, …         →  herança, índices, regras, gatilhos
+
+TRÊS COISAS SE MEDEM, e nenhuma é a mesma:
+
+  · O OID TEM DE SER ESTÁVEL. A consulta 2 usa o que a 1 deu; um oid que mudasse
+    entre as duas partia a sequência. Sai do NOME por hash (FNV-1a), e não de um
+    contador — e mede-se pedindo DUAS vezes.
+
+  · AS COLUNAS VÊM DO MOTOR. O catálogo não as pode inventar: abre a tabela, lê
+    os nomes guardados no .mem, e RESTAURA a que estava aberta — uma consulta de
+    catálogo não pode mudar a sessão por baixo de quem a fez. Mede-se a seguir,
+    inserindo e relendo. E o CONTROLO é outra tabela com outras colunas: se os
+    nomes viessem de um sítio fixo, as duas davam o mesmo e a asserção passava.
+
+  · AS TABELAS DE CATÁLOGO VAZIAS DÃO ZERO LINHAS, NÃO RECUSA. Aqui SABE-SE que
+    não há herança nem índices. Recusar faria o psql tratar uma tabela bem
+    descrita como um erro. É a mesma distinção do §W11, do outro lado: recusar
+    diz «não sei responder», zero linhas diz «sei, e não há nada».
+
+E UM LIMITE CAIU PELO CAMINHO: `SQL_OUT_MAX_COLS` era OITO. As propriedades da
+relação são TREZE colunas, lidas por POSIÇÃO, e truncar não serve — a posição
+oito passa a ser outra coisa. O psql disse-o à letra:
+
+     column number 8 is out of range 0..7
+
+  O oito bastava para as tabelas desta casa e para tudo o que os medidores
+  pediam. Era invisível ENQUANTO QUEM PERGUNTAVA ÉRAMOS NÓS.
+
+NO psql REAL:
+              Table "public.cliente"           Table "public.produto"
+      Column |  Type   | …              Column |  Type   | …
+      id     | integer                  sku    | integer
+      saldo  | integer                  preco  | integer
+
+  pgwire.c 15 asserções, 0 falhas
+  bateria 529 : 529, 113 unidades, 0 falhas
