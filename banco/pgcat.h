@@ -33,6 +33,7 @@
 #include <strings.h>
 #include <dirent.h>
 #include "sql_api.h"
+#include "pgmsg.h"
 
 #define PGCAT_MAX_PARAM   24
 #define PGCAT_NOME        48
@@ -192,6 +193,175 @@ static int pgcat_lista_tabelas(SqlOut *out){
     return 1;
 }
 
+/* ── pg_type: uma TABELA de catálogo, e um SELECT pequeno por cima ───────────
+ *
+ * O `\dt` resolveu-se por reconhecimento de assinatura, e disse-se que era isso.
+ * Aqui faz-se o contrário, porque se pode: `pg_type` É uma tabela — linhas e
+ * colunas —, e o que falta é um SELECT que a saiba ler. Escreve-se esse SELECT,
+ * pequeno e declarado:
+ *
+ *     SELECT <colunas|*> FROM [pg_catalog.]pg_type [WHERE <col> = <valor>]
+ *
+ * Sem junções, sem ORDER BY, sem funções. O que não couber nisto é RECUSADO —
+ * e a recusa é a parte honesta: um catálogo que respondesse por aproximação
+ * seria pior do que não existir, porque o cliente confia no que ele diz.
+ *
+ * E OS TIPOS SÃO OS QUE ESTE SERVIDOR SABE ANUNCIAR, nem mais um. Pôr aqui uma
+ * lista longa copiada do Postgres seria descrever um servidor que não somos: o
+ * motor guarda inteiros, e o catálogo declara texto. Os outros estão na tabela
+ * porque um cliente pode perguntar pelo OID deles — não porque os produzamos.
+ * ───────────────────────────────────────────────────────────────────────────── */
+typedef struct {
+    int oid;
+    const char *typname;
+    int typlen;           /* −1 = variável */
+    const char *categoria;/* typcategory do Postgres: N numérico, S string, B booleano */
+    int anunciado;        /* 1 = este servidor produz colunas deste tipo */
+} PgTipo;
+
+static const PgTipo pgcat_tipo_tab[] = {
+    { PG_OID_BOOL,    "bool",     1, "B", 0 },
+    { PG_OID_INT8,    "int8",     8, "N", 0 },
+    { PG_OID_INT2,    "int2",     2, "N", 0 },
+    { PG_OID_INT4,    "int4",     4, "N", 1 },   /* o motor */
+    { PG_OID_TEXT,    "text",    -1, "S", 1 },   /* o catálogo */
+    { PG_OID_OID,     "oid",      4, "N", 0 },
+    { PG_OID_FLOAT8,  "float8",   8, "N", 0 },
+    { PG_OID_VARCHAR, "varchar", -1, "S", 0 },
+    { PG_OID_NUMERIC, "numeric", -1, "N", 0 },
+};
+#define PGCAT_NTIPOS ((int)(sizeof pgcat_tipo_tab / sizeof pgcat_tipo_tab[0]))
+
+/* as colunas que se sabem servir; qualquer outra faz a consulta ser recusada */
+static const char *pgcat_tipo_cols[] = {
+    "oid", "typname", "typlen", "typcategory", "typtype", "typnamespace"
+};
+#define PGCAT_NTCOLS ((int)(sizeof pgcat_tipo_cols / sizeof pgcat_tipo_cols[0]))
+
+static int pgcat_tipo_col_idx(const char *nome){
+    for(int i = 0; i < PGCAT_NTCOLS; i++)
+        if(pgcat_ieq(nome, pgcat_tipo_cols[i])) return i;
+    return -1;
+}
+static void pgcat_tipo_valor(const PgTipo *t, int c, char *dst, int cap){
+    switch(c){
+        case 0: snprintf(dst, cap, "%d", t->oid);       break;
+        case 1: snprintf(dst, cap, "%s", t->typname);   break;
+        case 2: snprintf(dst, cap, "%d", t->typlen);    break;
+        case 3: snprintf(dst, cap, "%s", t->categoria); break;
+        case 4: snprintf(dst, cap, "b");                break;  /* typtype: base */
+        case 5: snprintf(dst, cap, "11");               break;  /* pg_catalog   */
+        default: dst[0] = 0;
+    }
+}
+/* o tipo da COLUNA do catálogo — para o RowDescription não mentir outra vez */
+static int pgcat_tipo_col_oid(int c){
+    return (c == 0 || c == 2 || c == 5) ? SQL_TIPO_INT4 : SQL_TIPO_TEXT;
+}
+
+/* SELECT … FROM pg_type [WHERE col = valor]. Devolve 1 se tratou. */
+static int pgcat_le_pg_type(const char *sql, SqlOut *out){
+    const char *p, *q;
+    char lista[256] = "", tab[64] = "", wcol[48] = "", wval[64] = "";
+    int cols[SQL_OUT_MAX_COLS], nc = 0, tudo = 0, tem_where = 0;
+
+    if((p = pgcat_pal(sql, "SELECT")) == NULL) return 0;
+    /* a lista de colunas, até ao FROM */
+    q = p;
+    { int i = 0;
+      while(*q && strncasecmp(q, "FROM", 4)){
+          if(i + 1 < (int)sizeof lista) lista[i++] = *q;
+          q++;
+      }
+      lista[i] = 0;
+    }
+    if(!*q) return 0;
+    q = pgcat_pula(q + 4);
+    q = pgcat_ident(q, tab, sizeof tab);
+    if(!strncasecmp(tab, "pg_catalog.", 11)) memmove(tab, tab + 11, strlen(tab) - 10);
+    if(!pgcat_ieq(tab, "pg_type")) return 0;          /* não é esta tabela: passa */
+
+    /* DAQUI EM DIANTE A CONSULTA É NOSSA. O que não coubermos servir é ERRO COM
+     * MENSAGEM — não se devolve ao motor, que responderia «zero colunas, zero
+     * linhas» com sucesso, e um erro disfarçado de resultado vazio é o pior
+     * desfecho para quem chama. */
+    #define PGT_RECUSA(msg) do {                                            \
+        if(out){ memset(out, 0, sizeof *out); out->ok = 0;                  \
+                 snprintf(out->err, sizeof out->err,                        \
+                          "pg_type: %s — este catálogo serve apenas "       \
+                          "SELECT <colunas> FROM pg_type [WHERE <col> = <valor>]", (msg)); } \
+        return 1;                                                           \
+    } while(0)
+
+    /* o WHERE, se houver — uma igualdade e mais nada */
+    q = pgcat_pula(q);
+    if(*q == ';') q++;
+    q = pgcat_pula(q);
+    if(*q){
+        const char *w = pgcat_pal(q, "WHERE");
+        if(!w) PGT_RECUSA("só se entende WHERE depois do nome da tabela");
+        w = pgcat_ident(w, wcol, sizeof wcol);
+        w = pgcat_pula(w);
+        if(*w != '=') PGT_RECUSA("no WHERE só se entende uma igualdade");
+        w = pgcat_pula(w + 1);
+        snprintf(wval, sizeof wval, "%s", w);
+        pgcat_limpa(wval);
+        if(pgcat_tipo_col_idx(wcol) < 0) PGT_RECUSA("coluna desconhecida no WHERE");
+        tem_where = 1;
+    }
+
+    /* as colunas pedidas */
+    {
+        const char *r = lista;
+        char nome[48];
+        while(*r){
+            while(*r == ' ' || *r == ',' || *r == '\t' || *r == '\n') r++;
+            if(!*r) break;
+            if(*r == '*'){ tudo = 1; r++; continue; }
+            { const char *ini = r;
+              int i = 0;
+              while(*r && *r != ',' && *r != ' ' && *r != '\t' && *r != '\n'){
+                  if(i + 1 < (int)sizeof nome) nome[i++] = *r;
+                  r++;
+              }
+              nome[i] = 0;
+              if(!i){ (void)ini; continue; }
+              if(!strncasecmp(nome, "t.", 2)) memmove(nome, nome + 2, strlen(nome) - 1);
+              { int c = pgcat_tipo_col_idx(nome);
+                if(c < 0) PGT_RECUSA("coluna que este catálogo não serve");
+                if(nc < SQL_OUT_MAX_COLS) cols[nc++] = c;
+              }
+            }
+        }
+    }
+    if(tudo){ nc = 0; for(int i = 0; i < PGCAT_NTCOLS && nc < SQL_OUT_MAX_COLS; i++) cols[nc++] = i; }
+    if(nc == 0) PGT_RECUSA("nenhuma coluna reconhecida");
+
+    if(out){
+        int n = 0;
+        memset(out, 0, sizeof *out);
+        out->ok = 1; out->ncols = nc;
+        for(int j = 0; j < nc; j++){
+            snprintf(out->col[j], sizeof out->col[j], "%s", pgcat_tipo_cols[cols[j]]);
+            out->tipo[j] = pgcat_tipo_col_oid(cols[j]);
+        }
+        for(int i = 0; i < PGCAT_NTIPOS && n < SQL_OUT_MAX_ROWS; i++){
+            if(tem_where){
+                char v[64];
+                pgcat_tipo_valor(&pgcat_tipo_tab[i], pgcat_tipo_col_idx(wcol), v, sizeof v);
+                if(strcmp(v, wval)) continue;
+            }
+            for(int j = 0; j < nc; j++)
+                pgcat_tipo_valor(&pgcat_tipo_tab[i], cols[j], out->cell[n][j], SQL_OUT_CELL);
+            n++;
+        }
+        out->nrows = n;
+        snprintf(out->tag, sizeof out->tag, "SELECT %d", n);
+    }
+    #undef PGT_RECUSA
+    return 1;
+}
+
 /* Devolve 1 se ESTA camada tratou a consulta (e preencheu out); 0 se não é
  * dela — e então o motor corre, como se esta camada não existisse. */
 static int pgcat_responde(const char *sql, SqlOut *out){
@@ -268,6 +438,9 @@ static int pgcat_responde(const char *sql, SqlOut *out){
 
     /* ── a consulta do \dt, reconhecida pela assinatura ─────────────────── */
     if(pgcat_e_lista_tabelas(sql)) return pgcat_lista_tabelas(out);
+
+    /* ── pg_type, lido como tabela ──────────────────────────────────────── */
+    if(pgcat_le_pg_type(sql, out)) return 1;
 
     /* ── SELECT <função de catálogo>() ──────────────────────────────────── */
     if((p = pgcat_pal(sql, "SELECT")) != NULL){

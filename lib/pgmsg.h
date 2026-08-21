@@ -40,8 +40,18 @@
 #define PG_MSG_PARAM_DESC     't'  /* B ParameterDescription */
 
 /* OIDs mínimos (pg_type) — texto FEBE; int4 para colunas numéricas do metal */
+/* Os OIDs de tipo. São os NÚMEROS DO POSTGRES, e não uma numeração nossa: um
+ * cliente que receba 23 espera int4, e é essa a única razão de eles existirem.
+ * A lista é curta de propósito — só o que este servidor sabe ANUNCIAR. */
+#define PG_OID_BOOL          16
+#define PG_OID_INT8          20
+#define PG_OID_INT2          21
 #define PG_OID_INT4          23
 #define PG_OID_TEXT          25
+#define PG_OID_OID           26
+#define PG_OID_FLOAT8       701
+#define PG_OID_VARCHAR     1043
+#define PG_OID_NUMERIC     1700
 
 /* ReadyForQuery — estado de transacção */
 #define PG_TX_IDLE           'I'

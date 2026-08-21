@@ -13,6 +13,7 @@
  *   §W6  Describe statement + Close + Sync
  *   §W7  fachada pqlike (Trio PG5): PQconnectdb/PQexec/PQntuples/PQgetvalue sobre o
  *        NOSSO wire — sem -lpq — e a MESMA consulta pelos dois caminhos
+ *   §W11 pg_type lido COMO TABELA, e a diferença entre zero linhas e recusa
  *   §W10 a lista de tabelas do \dt por reconhecimento de assinatura, e a
  *        FRONTEIRA: o resto de pg_catalog continua recusado
  *   §W9  o TIPO acompanha a coluna: catálogo TEXT, motor INT4 — e o gume é as
@@ -1183,9 +1184,12 @@ int main(void){
      * pela assinatura e responde-se com as tabelas do disco — é compatibilidade,
      * não é um pg_catalog, e a asserção diz isso.
      *
-     * O GUME é a fronteira: uma consulta a pg_catalog que NÃO seja esta tem de
+     * O GUME é a fronteira: uma consulta a pg_catalog que não seja servida tem de
      * ser RECUSADA. Um reconhecedor demasiado largo responderia a qualquer coisa
-     * com «pg_» dentro, e responder ao acaso é pior do que recusar.
+     * com «pg_» dentro, e responder ao acaso é pior do que recusar. A fronteira
+     * MOVE-SE quando o catálogo cresce — o §W11 trouxe pg_type para dentro, e
+     * esta lista teve de ser corrigida por causa disso: foi o medidor a apanhar
+     * a contradição entre dois blocos, que é para o que ele serve.
      * ───────────────────────────────────────────────────────────────────────── */
     printf("\n§W10 a lista de tabelas do \\dt, e o que fica de fora.\n\n");
     {
@@ -1227,13 +1231,17 @@ int main(void){
         /* ── O GUME: a fronteira. Estas são de pg_catalog e NÃO são a assinatura;
          * têm de ser recusadas, e não respondidas ao acaso. */
         {
+            /* A FRONTEIRA MUDOU, e o medidor apanhou-o: o §W11 passou a servir
+             * pg_type como tabela, e estas duas linhas — que aqui exigiam recusa
+             * — passaram a responder. Ficam de fora do catálogo o que continua
+             * fora dele: as junções, as funções e as tabelas não servidas. */
             const char *fora[] = {
-                "SELECT * FROM pg_catalog.pg_type",
-                "SELECT oid, typname FROM pg_type WHERE typname = 'int4'",
                 "SELECT pg_catalog.pg_get_userbyid(10)",
+                "SELECT * FROM pg_catalog.pg_attribute",
+                "SELECT a.attname FROM pg_attribute a JOIN pg_class c ON 1=1",
             };
             int recusadas = 0;
-            printf("\n      a fronteira — o que NÃO é a assinatura tem de ser recusado:\n");
+            printf("\n      a fronteira — o que continua fora tem de ser recusado:\n");
             for(unsigned k = 0; k < sizeof fora / sizeof fora[0]; k++){
                 int r = sql_executa(fora[k], &o);
                 printf("        %-52s %s\n", fora[k], r ? "RESPONDEU (mau)" : "recusado");
@@ -1268,7 +1276,130 @@ int main(void){
            " função de catálogo — têm de ser RECUSADAS, e são as três. Um reconhecedor"
            " demasiado largo responderia a qualquer coisa com «pg_» dentro, e responder ao"
            " acaso é pior do que recusar: quem chama sabe lidar com um erro, não sabe lidar"
-           " com uma resposta inventada. E o motor continua intacto ao lado, com o seu int4.",
+           " com uma resposta inventada. A FRONTEIRA MOVE-SE quando o catálogo cresce: o"
+           " §W11 trouxe o pg_type para dentro, e as duas linhas que aqui exigiam recusá-lo"
+           " passaram a falhar — foi este medidor a apanhar a contradição entre dois blocos"
+           " seus, que é para o que ele serve. Ficam de fora as funções de catálogo, as"
+           " tabelas não servidas e as junções. E o motor continua intacto ao lado, com o"
+           " seu int4.",
+           mal == 0);
+    }
+
+    /* ═══ §W11: pg_type COMO TABELA, e as duas maneiras de não responder ═════
+     *
+     * O \dt resolveu-se por reconhecimento de assinatura, e ficou dito que era
+     * isso. Aqui faz-se o contrário, porque se pode: pg_type É uma tabela, e o
+     * que faltava era um SELECT que a soubesse ler. Escreveu-se esse SELECT —
+     * colunas, FROM, e um WHERE de uma igualdade. Mais nada.
+     *
+     * E O QUE SE MEDE É A DIFERENÇA ENTRE AS DUAS MANEIRAS DE NÃO RESPONDER:
+     *   · ZERO LINHAS  — a consulta é válida e não há resultado
+     *   · RECUSA       — a consulta não cabe no que sabemos servir
+     * Confundi-las é o defeito que este próprio ficheiro persegue desde o §W7:
+     * um erro disfarçado de resultado vazio é o pior desfecho para quem chama.
+     * ───────────────────────────────────────────────────────────────────────── */
+    printf("\n§W11 pg_type como tabela: o que se serve, e as duas não-respostas.\n\n");
+    {
+        SqlOut o;
+        long mal = 0;
+
+        printf("      consulta                                          resultado\n");
+        /* (a) o que SE SERVE */
+        {
+            struct { const char *q; int nc; int nl; const char *c00; } bons[] = {
+                { "SELECT oid, typname FROM pg_type",                        2, 9, "16"   },
+                { "SELECT oid FROM pg_type WHERE typname = 'int4'",          1, 1, "23"   },
+                { "SELECT typname, typlen FROM pg_catalog.pg_type WHERE oid = 25", 2, 1, "text" },
+                { "SELECT * FROM pg_type WHERE typname = 'bool'",            6, 1, "16"   },
+            };
+            for(unsigned k = 0; k < sizeof bons / sizeof bons[0]; k++){
+                int r = sql_executa(bons[k].q, &o);
+                int bate = r && o.ncols == bons[k].nc && o.nrows == bons[k].nl
+                           && (bons[k].nl == 0 || !strcmp(o.cell[0][0], bons[k].c00));
+                printf("      %-49s %d col x %d lin  %s\n", bons[k].q, o.ncols, o.nrows,
+                       bate ? "ok" : "NAO BATE");
+                if(!bate) mal++;
+            }
+        }
+
+        /* (b) ZERO LINHAS: a consulta é válida, o tipo é que não existe */
+        {
+            int r = sql_executa("SELECT typname FROM pg_type WHERE typname = 'nao_ha'", &o);
+            int bate = r && o.ok && o.ncols == 1 && o.nrows == 0 && !o.err[0];
+            printf("\n      WHERE de um tipo que não existe -> %s (ok=%d, %d linhas, sem erro)\n",
+                   bate ? "ZERO LINHAS, com sucesso" : "NAO", o.ok, o.nrows);
+            if(!bate) mal++;
+        }
+
+        /* (c) RECUSA: a consulta não cabe no que sabemos — e tem de trazer MENSAGEM */
+        {
+            const char *fora[] = {
+                "SELECT typrelid FROM pg_type",                    /* coluna que não servimos */
+                "SELECT typname FROM pg_type ORDER BY oid",        /* não há ORDER BY        */
+                "SELECT typname FROM pg_type WHERE typlen > 4",    /* só igualdade no WHERE  */
+                "SELECT typname FROM pg_type WHERE zzz = 1",       /* coluna no WHERE        */
+            };
+            int recusadas = 0, com_msg = 0;
+            printf("\n      o que NÃO cabe tem de ser recusado COM mensagem:\n");
+            for(unsigned k = 0; k < sizeof fora / sizeof fora[0]; k++){
+                int r = sql_executa(fora[k], &o);
+                if(!r) recusadas++;
+                if(!r && o.err[0]) com_msg++;
+                printf("        %-46s %s%s\n", fora[k],
+                       r ? "RESPONDEU (mau)" : "recusado",
+                       (!r && o.err[0]) ? ", com mensagem" : (!r ? ", SEM mensagem" : ""));
+            }
+            if(recusadas != 4 || com_msg != 4) mal++;
+        }
+
+        /* (d) e o TIPO das colunas do próprio catálogo: oid e typlen são int4,
+         * typname é text. Um catálogo de tipos que mentisse no seu próprio tipo
+         * seria a piada completa. */
+        {
+            int r = sql_executa("SELECT oid, typname, typlen FROM pg_type", &o);
+            int bate = r && o.ncols == 3
+                       && o.tipo[0] == SQL_TIPO_INT4
+                       && o.tipo[1] == SQL_TIPO_TEXT
+                       && o.tipo[2] == SQL_TIPO_INT4;
+            printf("\n      e o tipo das colunas do catálogo: oid=%d typname=%d typlen=%d -> %s\n",
+                   o.tipo[0], o.tipo[1], o.tipo[2], bate ? "int4/text/int4" : "NAO BATE");
+            if(!bate) mal++;
+        }
+
+        /* (e) O CONTROLO: os OIDs que o servidor ANUNCIA têm de estar na tabela.
+         * Se o RowDescription usasse um número que o pg_type não conhece, o
+         * cliente ficava com um tipo que não sabe resolver. */
+        {
+            int achou_int4 = 0, achou_text = 0;
+            sql_executa("SELECT oid FROM pg_type WHERE typname = 'int4'", &o);
+            achou_int4 = (o.nrows == 1 && atoi(o.cell[0][0]) == SQL_TIPO_INT4);
+            sql_executa("SELECT oid FROM pg_type WHERE typname = 'text'", &o);
+            achou_text = (o.nrows == 1 && atoi(o.cell[0][0]) == SQL_TIPO_TEXT);
+            printf("      CONTROLO — os OIDs anunciados estão no catálogo:"
+                   " int4=%s text=%s\n",
+                   achou_int4 ? "sim" : "NAO", achou_text ? "sim" : "NAO");
+            if(!achou_int4 || !achou_text) mal++;
+        }
+
+        printf("\n");
+        ok("pg_type É UMA TABELA, E LÊ-SE COMO TABELA. O `\\dt` resolveu-se por"
+           " reconhecimento de assinatura e ficou dito que era isso; aqui fez-se o"
+           " contrário, porque se pode: pg_type tem linhas e colunas, e o que faltava era"
+           " um SELECT que a soubesse ler — colunas, FROM, e um WHERE de uma igualdade,"
+           " mais nada. Servem-se nove tipos, e são os que este servidor sabe ANUNCIAR:"
+           " pôr aqui a lista longa do Postgres seria descrever um servidor que não somos."
+           " O QUE SE MEDE É A DIFERENÇA ENTRE AS DUAS MANEIRAS DE NÃO RESPONDER, e elas"
+           " não são a mesma: um WHERE sobre um tipo inexistente dá ZERO LINHAS COM"
+           " SUCESSO — a consulta era válida —, ao passo que uma coluna que não servimos,"
+           " um ORDER BY ou uma desigualdade são RECUSADOS COM MENSAGEM. Confundi-las é o"
+           " defeito que este ficheiro persegue desde o §W7: um erro disfarçado de"
+           " resultado vazio é o pior desfecho para quem chama. À primeira escrita eram"
+           " confundidas — a consulta caía no motor e voltava «zero colunas, zero linhas»"
+           " com sucesso — e foi preciso fazer com que, a partir do momento em que a"
+           " tabela é pg_type, a falha seja NOSSA e traga mensagem. E as colunas do"
+           " catálogo declaram o seu próprio tipo (oid e typlen int4, typname text), com o"
+           " CONTROLO a exigir que os OIDs que o RowDescription anuncia estejam na tabela"
+           " — senão o cliente receberia um tipo que o catálogo não sabe resolver.",
            mal == 0);
     }
 

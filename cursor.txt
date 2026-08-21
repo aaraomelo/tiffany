@@ -3205,3 +3205,49 @@ contar com ela.
 
   pgwire.c 12 asserções, 0 falhas
   bateria 529 : 529, 110 unidades, 0 falhas
+
+§70 — pg_type COMO TABELA, E AS DUAS MANEIRAS DE NÃO RESPONDER
+===============================================================
+«segue com o pg_type e os tipos».
+
+O `\dt` resolveu-se por RECONHECIMENTO DE ASSINATURA, e ficou dito que era isso.
+Aqui fez-se o contrário, porque se pode: **pg_type É uma tabela** — linhas e
+colunas — e o que faltava era um SELECT que a soubesse ler. Escreveu-se esse
+SELECT, pequeno e declarado:
+
+     SELECT <colunas|*> FROM [pg_catalog.]pg_type [WHERE <col> = <valor>]
+
+Sem junções, sem ORDER BY, sem funções. Nove tipos, e são os que este servidor
+sabe ANUNCIAR — pôr aqui a lista longa do Postgres seria descrever um servidor
+que não somos. Os OIDs são os NÚMEROS DO POSTGRES e não uma numeração nossa: um
+cliente que receba 23 espera int4, e é essa a única razão de eles existirem.
+
+E O QUE SE MEDE É A DIFERENÇA ENTRE AS DUAS MANEIRAS DE NÃO RESPONDER:
+     WHERE typname = 'nao_ha'      →  ZERO LINHAS, com SUCESSO (a consulta era válida)
+     SELECT typrelid FROM pg_type  →  RECUSA, com MENSAGEM (não sabemos servir)
+
+À PRIMEIRA ESCRITA EU CONFUNDI-AS. A consulta caía no motor e voltava «0 colunas,
+0 linhas» com sucesso — exactamente o erro disfarçado de resultado vazio que
+este ficheiro persegue desde o §W7, e que eu tinha acabado de escrever na
+asserção do §W10. A correcção: a partir do momento em que a tabela É pg_type, a
+falha é NOSSA e traz mensagem.
+
+E O MEDIDOR APANHOU UMA CONTRADIÇÃO ENTRE DOIS BLOCOS SEUS: o §W10 afirmava que
+`SELECT * FROM pg_catalog.pg_type` tinha de ser RECUSADO — era a fronteira de
+então. O §W11 trouxe o pg_type para dentro, e as duas linhas passaram a falhar.
+A FRONTEIRA MOVE-SE QUANDO O CATÁLOGO CRESCE, e é preciso movê-la à mão: ficam
+de fora as funções de catálogo, as tabelas não servidas e as junções.
+
+NO psql REAL (16.14):
+     SELECT oid, typname, typlen FROM pg_type      9 linhas
+     SELECT oid FROM pg_type WHERE typname='int4'  23
+     SELECT typrelid FROM pg_type                  ERROR com a mensagem que explica
+  e o alinhamento outra vez a confirmar os tipos: oid e typlen à DIREITA (int4),
+  typname à ESQUERDA (text).
+
+E O CONTROLO: os OIDs que o RowDescription ANUNCIA têm de estar na tabela. Se o
+servidor anunciasse um número que o pg_type não conhece, o cliente ficava com um
+tipo que não sabe resolver.
+
+  pgwire.c 13 asserções, 0 falhas
+  bateria 529 : 529, 111 unidades, 0 falhas
