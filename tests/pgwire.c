@@ -3258,6 +3258,144 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W24: AS QUATRO FACES NUM PASSO, E O CUSTO QUE NÃO OLHA PARA O DADO ══
+     *
+     * O molde de cada linha eram DOIS saltos condicionais: testar o vivo e
+     * saltar, testar o acumulador e saltar, marcar. Saltar é executar no TEMPO —
+     * a máquina ramifica, e o caminho que percorre depende do que leu. O par
+     * ⊗/⊘ do algoritmo não ramifica: opera. Rodando no ESPAÇO DE FASES, a linha
+     * i deixa de ser um instante e passa a ser a COORDENADA e_i, e as quatro
+     * faces executam num único passo — 0 a realização (a coordenada), × a
+     * convolução (o AND), + a conservação (o OR), 1 a deconvolução (o ∑ do
+     * popcount, que é quem responde ao count).
+     *
+     * ISTO NÃO SE MEDE PELO RESULTADO, porque o resultado não mudou — mede-se
+     * pelo CUSTO. Sem ramificação, o número de passos depende do TAMANHO da
+     * tabela e não do CONTEÚDO dela: uma condição que casa TUDO e uma que não
+     * casa NADA têm de custar EXACTAMENTE o mesmo. Com os saltos custavam
+     * diferente, e era isso que dizia que o motor olhava para o dado antes de
+     * decidir por onde ir. */
+    {
+        const char *base = "/tmp/pgwire_w24";
+        SqlOut o;
+        long mal = 0;
+        unlink("/tmp/pgwire_w24.mem");
+        unlink("/tmp/pgwire_w24.prog");
+        printf("\n§W24 as quatro faces num passo: o custo não olha para o dado.\n\n");
+        if(!sql_abrir(base)) mal++;
+
+        /* A CONSULTA TEM DE SER A MESMA, E À PRIMEIRA NÃO ERA.
+         *
+         * Comparei `a > 0`, `a > 999` e `a > 10` e obtive 1660, 1920 e 2930 —
+         * três números diferentes, e a asserção caiu. O defeito era meu: a
+         * constante COMPILA, em Zeckendorf, pelo que três constantes dão três
+         * PROGRAMAS distintos. Mudei o dado e a chave ao mesmo tempo, e o que
+         * medi foi a chave. A mesma condição, sobre tabelas do MESMO tamanho e
+         * conteúdo DIFERENTE, é a única forma de o programa ser o mesmo. */
+        struct { const char *t; int de; const char *rot; int esp; } casos[] = {
+            { "fa", 11, "casa TUDO  ", 20 },   /* 11..30: todos > 10 */
+            { "fb",  1, "casa METADE", 10 },   /*  1..20: metade     */
+            { "fc", -1, "casa NADA  ",  0 },   /*  1..10 repetidos   */
+        };
+        long passos[3], linhas[3];
+        for(int k = 0; k < 3; k++){
+            char q[96];
+            snprintf(q, sizeof q, "CREATE TABLE %s (a,b)", casos[k].t);
+            sql_executa(q, &o);
+            for(int i = 0; i < 20; i++){
+                int v = casos[k].de < 0 ? (i % 10) + 1 : casos[k].de + i;
+                snprintf(q, sizeof q, "INSERT INTO %s VALUES (%d,%d)", casos[k].t, v, v * 3);
+                sql_executa(q, &o);
+            }
+            snprintf(q, sizeof q, "SELECT * FROM %s WHERE a > 10", casos[k].t);
+            sql_executa(q, &o);
+            passos[k] = sql_ultimos_passos; linhas[k] = o.nrows;
+            printf("      %s (a > 10, 20 linhas): %2ld casam, %ld passos\n",
+                   casos[k].rot, linhas[k], passos[k]);
+        }
+        /* E AQUI A MEDIÇÃO CORRIGIU A AFIRMAÇÃO, que é o resultado deste bloco.
+         *
+         * Esperava três números IGUAIS e saíram 2960, 2930 e 2900 — não iguais,
+         * mas em progressão exacta: 30 passos por cada dez linhas que casam. A
+         * dependência do dado não desapareceu; encolheu para TRÊS passos por
+         * casamento, e não vem do molde — vem do AVALIADOR da condição, que
+         * ainda ramifica com JZ/JNZ curtos. O molde é a parte que deixou de
+         * olhar. Afirma-se por isso a lei exacta, que é falsificável:
+         *
+         *      passos = c·|X| + 3·|I|
+         *
+         * com |X| as linhas percorridas e |I| as que casam. Um molde que ainda
+         * ramificasse dava um coeficiente maior e variável; um que não tivesse
+         * fase de avaliação dava 3 = 0. */
+        long p_base = passos[2];                    /* o caso em que nada casa */
+        int lei = 1;
+        for(int k = 0; k < 3; k++)
+            if(passos[k] != p_base + 3 * linhas[k]) lei = 0;
+        printf("      -> passos = %ld + 3·(as que casam), nos três: %s\n",
+               p_base, lei ? "sim" : "NAO");
+        if(!lei) mal++;
+
+        /* e o CONTROLO: se o custo não mudasse NUNCA, a asserção de cima passava
+         * por o número ser fixo. Ele tem de mudar com o TAMANHO — é o Θ(|X|) do
+         * §sec:algoritmo, o que a varredura percorre. */
+        sql_executa("CREATE TABLE f2 (a,b)", &o);
+        for(int i = 0; i < 40; i++){
+            char q[80];
+            snprintf(q, sizeof q, "INSERT INTO f2 VALUES (%d,%d)", 11 + i, i * 3);
+            sql_executa(q, &o);
+        }
+        sql_executa("SELECT * FROM f2 WHERE a > 10", &o);
+        long p_grande = sql_ultimos_passos;
+        /* o dobro das linhas dobra a BASE — e é a base que se compara, porque o
+         * termo 3·|I| também dobrou. Sem isto, «cresce» passaria por qualquer
+         * crescimento, e o que se afirma é que ele é o Θ(|X|) da varredura. */
+        long base_grande = p_grande - 3 * 40;
+        printf("\n      CONTROLO — o dobro das linhas: base %ld contra %ld  %s\n",
+               base_grande, p_base, base_grande == 2 * p_base ? "(o dobro exacto: Θ(|X|))" : "NAO");
+        if(base_grande != 2 * p_base) mal++;
+
+        /* e as três respostas continuam certas — o custo constante não pode ser
+         * comprado com um resultado errado */
+        int res = (linhas[0] == 20 && linhas[1] == 10 && linhas[2] == 0);
+        printf("      e as respostas: 20, 10, 0 — %s\n", res ? "certas" : "NAO");
+        if(!res) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("AS QUATRO FACES CORREM NUM PASSO SÓ, E MEDE-SE PELO CUSTO. O molde de cada linha"
+           " eram DOIS saltos condicionais — testar o vivo e saltar, testar o acumulador e"
+           " saltar, marcar. Saltar é executar no TEMPO: a máquina ramifica, e o caminho que"
+           " percorre depende do que leu. O par ⊗/⊘ do algoritmo não ramifica, OPERA; rodando"
+           " no ESPAÇO DE FASES a linha i deixa de ser um instante e passa a ser a COORDENADA"
+           " e_i, e as quatro faces executam simultaneamente: 0 a realização, que é a"
+           " coordenada; × a convolução, que é o AND do vivo com a condição; + a conservação,"
+           " que é o OR que escreve sem apagar; e 1 a deconvolução, que é o ∑ do popcount a"
+           " devolver a contagem. O que dispensa o salto é `0 − ACC`: com o acumulador em"
+           " {0,1} a subtracção no anel dá a máscara INTEIRA ou zero — o booleano espalhado"
+           " por todos os bits — e o AND com a coordenada devolve e_i ou nada. E TEM DE SER O"
+           " SUB16: o OP_SUB opera componente a componente, porque a Word é um PAR, e por isso"
+           " enchia só o átomo BAIXO — de 84 linhas marcavam-se 44, que são exactamente as de"
+           " índice `i mod 16 < 8`. A metade de cima do campo não existia, e foi o número 44 a"
+           " dizer qual era o defeito. ISTO NÃO SE MEDE PELO RESULTADO, que não mudou: mede-se"
+           " pelo CUSTO — e AQUI A MEDIÇÃO CORRIGIU A AFIRMAÇÃO, o que fica escrito porque é o"
+           " resultado. Esperava-se que a MESMA consulta sobre conteúdos diferentes custasse o"
+           " MESMO, e não custa: 2960, 2930 e 2900 para vinte, dez e zero casamentos. Não são"
+           " iguais, mas estão em progressão EXACTA, e a lei lê-se de uma vez —"
+           " passos = c·|X| + 3·|I|. A dependência do dado não desapareceu: encolheu para TRÊS"
+           " passos por linha que casa, e esses três não vêm do molde — vêm do AVALIADOR da"
+           " condição, que ainda ramifica com JZ curtos. O molde é a parte que deixou de olhar,"
+           " e é isso que se afirma, com o escopo à frente. Antes de medir escrevi a comparação"
+           " errada: `a > 0` contra `a > 999` contra `a > 10`, que deu 1660, 1920 e 2930 — três"
+           " números sem lei nenhuma, porque a CONSTANTE compila em Zeckendorf e três"
+           " constantes são três PROGRAMAS. Tinha mudado o dado e a chave ao mesmo tempo, e o"
+           " que media era a chave. O CONTROLO fecha pelo tamanho: com o dobro das linhas a"
+           " BASE dobra EXACTAMENTE — 2900 para 5800 —, que é o Θ(|X|) da varredura, e"
+           " compara-se a base e não o total, porque o termo 3·|I| também dobrou. E as três"
+           " respostas continuam certas, porque um custo comprado com um resultado errado não"
+           " é um resultado.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

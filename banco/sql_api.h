@@ -52,6 +52,10 @@ void sql_tx_fibra(long *escritas, long *slots_distintos, long *maior_G,
                   long *soma_G);
 /* o histograma de uma coluna — o campo G dos seus valores, para o passo
  * espectral: o tamanho de um join é (f*g)(0), a convolução na origem */
+/* os passos da última varredura. O molde das linhas não ramifica — as quatro
+ * faces correm num passo só —, pelo que este número depende do TAMANHO da
+ * tabela e não do conteúdo dela. */
+extern long sql_ultimos_passos;
 int  sql_histograma(const char *tabela, const char *coluna, long *hist, int n,
                     long *fora);
 

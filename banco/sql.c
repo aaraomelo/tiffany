@@ -155,6 +155,8 @@ typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
 #define S_ZERO    1
 #define S_UM      2
 #define S_TMP     3
+#define S_ESP     4          /* 0−ACC: o booleano ESPALHADO por todos os bits —
+                              * é ele que dispensa o salto condicional do molde */
 /* O MARTELO: cabeçalho 80 átomos + alvo 32 átomos. Longe das linhas. */
 /* O CANAL É UM BACKEND DE LOAD/STORE, NÃO UM PROTOCOLO À PARTE.
  *
@@ -189,7 +191,6 @@ typedef char zonas_cabem_na_isa[(ZONA(4) <= ISA_TECTO) ? 1 : -1];
 #define S_CB      (S_CAB + 500u)          /* coinbase em átomos */
 #define S_FOLD_ARG (S_CB + 800u)         /* u32 LE base do OP_FOLD */
 #define S_FAIXA   (S_FOLD_ARG + 4u)      /* u32 LE de, u32 LE ate — OP_MARTELO */
-#define S_CONTA   218        /* o valor que SAI da escrita — Algoritmo B */
 /* (era: contar é ∑ sobre o campo (bits_conta), não um contador
  * a ser incrementado por linha. Ver `neuronio.c`: «∑ soma popcount». */
 #define S_MASK    5          /* a máscara do bit de sinal — é ela que dá o < e o >     */
@@ -2898,76 +2899,82 @@ static void emit_linha(long i, long ncols, const struct arvore *a, int tem_where
         emit_copia(S_UM, S_ACC);
     }
 
-    /* O VIVO É UM BIT, E ISOLA-SE COM A COORDENADA.
+    /* AS QUATRO FACES NUM PASSO SÓ, E NO ESPAÇO DE FASES.
      *
-     * Era `ACC & vivo` com o vivo a valer 0 ou 1 num slot inteiro. Agora o vivo
-     * é o bit i, e o AND com e_k dá 0 ou e_k — que não se pode cruzar com um
-     * ACC de 0 ou 1, porque a base é ortonormal e ⟨e_i,e_j⟩ = δ_ij: só a
-     * coordenada 0 sobreviveria. Testa-se por isso à parte, com salto próprio
-     * para o mesmo fim. */
+     * Isto eram DOIS saltos condicionais por linha: testar o vivo e saltar,
+     * testar o ACC e saltar, marcar. Saltar é executar no TEMPO — a máquina
+     * decide, ramifica, e o que se mede é a trajectória. E o defeito que aqui
+     * viveu meses veio inteiro daí: o deslocamento do JZ não cabia, o salto ia
+     * para trás, e o motor não voltava.
+     *
+     * O par ⊗/⊘ do algoritmo não ramifica: opera. Rodando no ESPAÇO DE FASES em
+     * vez do tempo, a linha i deixa de ser um instante e passa a ser a
+     * COORDENADA e_i — e a variação ao longo de i, que era o tempo, sai como o
+     * deslocamento nesse espaço, que é o que o relocador já faz. Então as
+     * quatro faces executam SIMULTANEAMENTE, num único passo:
+     *
+     *   0  realização    e_i, a coordenada — onde a linha vive
+     *   ×  convolução    o AND que cruza o vivo com a condição
+     *   +  conservação   o OR que escreve, e nunca desliga o que já lá está
+     *   1  deconvolução  o ∑ do popcount, que devolve a contagem do campo
+     *
+     *       match |= (VIVO ∧ e_i) ∧ (0 − ACC)
+     *
+     * O `0 − ACC` é o que dispensa o salto: com ACC em {0,1}, a subtracção no
+     * anel dá 0x00 ou 0xFF — o booleano ESPALHADO por todos os bits —, e o AND
+     * com a coordenada devolve 0 ou e_i. É a mesma resposta, sem ramificar.
+     *
+     * E o contador SAIU. Eram quatro instruções por linha a somar 1 a S_CONTA,
+     * e S_CONTA não era lido em parte nenhuma: quem responde ao count(*) é o
+     * `bits_conta`, o popcount sobre o campo — a face 1, a deconvolução. Contar
+     * ao mesmo tempo que se marca era contar DUAS vezes, e a segunda não
+     * chegava a lado nenhum. */
+    (void)col_set;
     MOVE_M(S_VIVO, +1, REL_BITMAP);
     MOVE_M(S_BITM, +1, REL_MASC);
-    emit1(OP_AND);
+    emit1(OP_AND);                       /* vivo_i = VIVO ∧ e_i  (0 ou e_i) */
     MOVE(S_TMP, -1);
-    MOVE(S_TMP, +1);
-    MOVE(S_ZERO, +1);
-    emit1(OP_CMP);
-    emit1(OP_JZ);
-    unsigned pos_v = pc_emit; emit1(0); emit1(0);
 
-    MOVE(S_ACC, +1);
+    MOVE(S_ACC,  +1);
     MOVE(S_ZERO, +1);
-    emit1(OP_CMP);
-    emit1(OP_JZ);
-    unsigned pos = pc_emit; emit1(0); emit1(0);
-    unsigned ini = pc_emit;
-    /* A varredura NÃO grava mais o efeito: ela só MARCA. O bitmap de casamento passa a ser o
-     * diário de intenção, e quem aplica é a fase 3, depois do compromisso. Assim a queda no
-     * meio da varredura não deixa metade das linhas mudadas. */
-    (void)col_set;
-    /* marcar é LIGAR A COORDENADA: slot |= e_k */
+    /* A SUBTRACÇÃO TEM DE ATRAVESSAR O ÁTOMO, e o OP_SUB não atravessa.
+     *
+     * O `0 − ACC` espalha o booleano por todos os bits — mas o OP_SUB opera
+     * componente a componente, porque a Word é um PAR e o vai-um não passa de um
+     * átomo para o outro. Com ACC = {1,0} dava {0xFF,0}: só o átomo BAIXO ficava
+     * cheio, e as coordenadas e_8..e_15 nunca acendiam. Mediu-se ao número: de
+     * 84 linhas marcavam-se 44 = 5×8 + 4, que são exactamente as de índice com
+     * `i mod 16 < 8`. A metade de cima do campo não existia.
+     *
+     * Aqui a Word não é um par: é UM número de dezasseis bits, e o espalhamento
+     * quer os dezasseis. É o OP_SUB16 — o mesmo andar da torre que a célula usa
+     * para crescer —, e `0 − 1` dá 0xFFFF, que é a máscara inteira. */
+    emit1(OP_SUB16);                     /* 0 − ACC = 0x0000 ou 0xFFFF */
+    MOVE(S_ESP, -1);
+
+    MOVE(S_TMP, +1);
+    MOVE(S_ESP, +1);
+    emit1(OP_AND);                       /* × : a coordenada, se a condição vale */
+    MOVE(S_TMP, -1);
+
     MOVE_M(S_MATCH, +1, REL_BITMAP);
-    MOVE_M(S_BITM,  +1, REL_MASC);
-    emit1(OP_OR);
+    MOVE(S_TMP, +1);
+    emit1(OP_OR);                        /* + : conserva o que já estava marcado */
     MOVE_M(S_MATCH, -1, REL_BITMAP);
-    /* e o valor SAI daqui: marcar e contar são o mesmo passo (Algoritmo B) */
-    MOVE(S_CONTA, +1);
-    MOVE(S_UM16, +1);
-    emit1(OP_ADD16);
-    MOVE(S_CONTA, -1);
-    /* O SALTO É DE UM BYTE, E ISSO VERIFICA-SE.
+    /* NÃO HÁ SALTOS A RESOLVER, e é isso que este bloco passou a dizer.
      *
-     * O deslocamento do JZ ocupa UM byte no programa. Enquanto o corpo do
-     * molde coube em 255, um `(unsigned char)` bastava; quando cresceu — o
-     * teste do bit do vivo acrescentou instruções —, o deslocamento truncou e o
-     * salto passou a apontar PARA TRÁS. A máquina entrava em ciclo e não havia
-     * mensagem nenhuma: o programa estava sintaticamente bem e semanticamente
-     * ao contrário.
-     *
-     * É «o número que não cabe» outra vez, e a resposta é a de sempre: mede-se
-     * antes de escrever, e RECUSA-SE. Uma consulta recusada com a razão é
-     * tratável; um motor que não volta, não. */
-    { long d1 = (long)(pc_emit - ini);
-      long d2 = (long)(pc_emit - (pos_v + 2));
-      /* O DESLOCAMENTO É UMA WORD, como tudo nesta máquina: o par de átomos.
-       * Estava num átomo só, lido com sinal — alcance 127 —, e um corpo maior
-       * virava salto para trás. Não se põe uma recusa à volta disso: o que
-       * cresce SOBE, d_{k+1} = 2·d_k. */
-      (void)d1; (void)d2;
-      salto_poe(pos, ini);
-      { long dv = (long)pc_emit - (long)(pos_v + 2);
-        if(dv > 32767 || dv < -32768) salto_estourou = 1;
-        { unsigned char lo = (unsigned char)((unsigned long)dv & 255u);
-          unsigned char hi = (unsigned char)(((unsigned long)dv >> 8) & 255u);
-          pwrite(fprog, &lo, 1, (off_t)pos_v);
-          pwrite(fprog, &hi, 1, (off_t)(pos_v + 1)); } } }
+     * Aqui media-se e recusava-se o deslocamento do JZ, porque ele não cabia num
+     * átomo e o salto ia para trás — «o número que não cabe», e a máquina a não
+     * voltar. Depois passou a Word e alcançou 32767. Agora não há nenhum: o
+     * molde não ramifica, logo não há distância nenhuma para caber. O limite não
+     * foi levantado — deixou de existir, que é o que acontece quando o passo
+     * corre no espaço em vez do tempo. */
 }
 
 /* prepara as constantes e devolve o catálogo */
 static void prepara(long v, long col_do_set){
     Word w = {0,0};
     mem_grava(S_ZERO, w);
-    mem_grava(S_CONTA, w);                /* o valor recomeça a cada varredura */
     w.total = 1; w.e = 0;                 mem_grava(S_UM, w);
     w.total = 1; w.e = 0;                 mem_grava(S_UM16, w);
     /* o valor do SET em DEZASSEIS bits: o baixo no S_V, o alto no S_VA. Escrever
@@ -3061,6 +3068,9 @@ static void refaz_diario(void){
  * sql.c não afirmava nada, e por isso estava fora da bateria — mudei-o uma dúzia de vezes
  * hoje e só o verifiquei à mão. */
 static long ultima_conta = 0;
+/* os passos da última varredura — a única maneira de AFIRMAR que o molde deixou
+ * de ramificar, em vez de o supor: sem salto, o custo não depende do dado. */
+long sql_ultimos_passos = 0;
 
 
 /* ---------------- A DISTÂNCIA NO WHERE: só se compara dentro da classe ----------------
@@ -3830,6 +3840,7 @@ static int varre(const char *resto, int acao){
         barreira();
     }
     const char *nome_acao = acao == ACAO_MARCA ? "lida(s)" : (acao == ACAO_SET ? "atualizada(s)" : "apagada(s)");
+    sql_ultimos_passos = passos;
     printf("-- %u bytes de ISA [%04lx], %d átomo(s), %ld passos, %ld linha(s) %s\n",
            pc_emit, soma & 0xFFFF, tem_where ? cl.natomo : 0, passos, achou, nome_acao);
     if(acao != ACAO_MARCA){
