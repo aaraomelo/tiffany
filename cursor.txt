@@ -2495,3 +2495,39 @@ o que MEDE O QUE OS PASSOS DEIXARAM. Corrigido, com os três nomeados.
   gume      62 mutações, 62 mordem
   bateria   529 : 529, 0 falhas · 31 unidades passaram, 0 falharam
   paper     24 páginas
+
+§54 — A TUPLA DE SÍMBOLOS, E O AUTÓMATO
+========================================
+«não é o domínio, tira ℕ disso; na Def. 1 é só definir I como uma TUPLA
+(ordenada) e os naturais viram REALIZAÇÃO de novo, que é o que é.» E logo a
+seguir: «é uma tupla de SÍMBOLOS, um ALFABETO» e «a aranha é um AUTÓMATO».
+
+O ERRO DE FUNDAÇÃO ERA MEU, e o §53 só o tinha meio corrigido. Eu escrevia
+     I = {0,…,N}, um SEGMENTO INICIAL DE ℕ
+o que IMPORTA ℕ como dado primitivo — para depois «descobrir», três secções à
+frente, que ℕ é uma realização. Pressupunha o que queria obter.
+
+AGORA:
+     I é uma TUPLA DE SÍMBOLOS: uma sucessão finita e ordenada de elementos
+     distinguíveis — um alfabeto com uma ordem, e nada mais.
+Contar esses símbolos JÁ É REALIZÁ-LOS, e ao resultado dessa realização é que se
+chama ℕ. Donde ℕ volta à tabela da escada COM O MESMO ESTATUTO dos outros — a
+diferença que resta é factual e é da casa: a obra constrói ℤ, ℚ e ℝ POR
+quociente, e ℕ SEM quociente (a segunda cópia da dobra não é identificada, é
+multiplicada por σ).
+
+E DOIS ALFABETOS, QUE NÃO SE CONFUNDEM:
+     o de I                        — os símbolos que se percorrem: a FITA
+     o das direcções de aresta     — no qual se escreve o passo
+O primeiro é a fita; o segundo é o que a máquina FAZ a cada símbolo dela.
+
+E A ARANHA É UM AUTÓMATO — já estava no paper («o Teorema É um autómato: as
+quatro cláusulas são os quatro passos»), mas agora está dito onde tem de estar,
+na entrada: percorre a tupla, e em cada símbolo escreve no espaço, lê a
+vizinhança e move-se.
+
+Também: o `S` deixou de ser «o sucessor» e passou a ser «o DESLOCAMENTO DA
+TUPLA» — realizado em ℕ é o sucessor, mas a operação é da tupla e não pede ℕ.
+
+  bateria   529 : 529, 0 falhas
+  paper     24 páginas

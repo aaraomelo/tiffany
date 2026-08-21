@@ -84,10 +84,12 @@ uma vez deixam o mesmo campo.
 \medskip\noindent\textbf{O alcance.} De um só dado --- uma aplicação e a
 igualdade no contradomínio --- saem, com demonstração, o percurso, a memória, a
 multiplicidade, o tempo, a métrica, a transformada e as dualidades que os ligam.
-E há uma segunda afirmação, mais forte e igualmente medida: a escada
+E há uma segunda afirmação, igualmente medida: a escada
 $\N\to\Z\to\Q\to\R$ --- que a obra constrói noutros documentos e ali demonstra
---- tem \emph{cada degrau} na forma da Def.~\ref{def:objeto}, com $G$ a contar a
-classe de equivalência do andar (§\ref{sec:escada}). Não se reivindica que este
+--- tem \emph{cada degrau} na forma da Def.~\ref{def:objeto}; nos três que são
+construídos por quociente, $G$ conta a classe de equivalência do andar
+(§\ref{sec:escada}). Nada disto pressupõe $\N$: parte-se de uma tupla, e $\N$ é
+uma das realizações. Não se reivindica que este
 mecanismo construa a escada: ela já estava provada. O que se mostra é que é o
 \emph{mesmo} mecanismo que a percorre inteira.
 
@@ -99,20 +101,39 @@ irmão da mesma obra já dizia o mesmo, o texto foi duplicado e não referenciad
 \section{O objeto}\label{sec:objeto}
 
 \begin{definicao}[trajetória, realização, multiplicidade]\label{def:objeto}
-Seja $I=\{0,1,\dots,N\}$ um segmento inicial de \N\ --- a \textbf{parametrização}
---- e $X$ um conjunto com igualdade decidível. Uma \textbf{realização} é uma
+Seja $I$ uma \textbf{tupla de símbolos}: uma sucessão finita e ordenada
+$I=(i_0\prec i_1\prec\cdots\prec i_N)$ de elementos distinguíveis --- um
+\emph{alfabeto} com uma ordem, e nada mais. É a \textbf{parametrização}, e é tudo
+o que se supõe do lado de partida: em particular, \emph{não} se supõe $\N$.
+Seja $X$ um conjunto com igualdade decidível. Uma \textbf{realização} é uma
 aplicação
 \[
 \pi\colon I\longrightarrow X ,
 \]
 lida como ``o índice $i$ ocupa a célula $\pi(i)$''. A \textbf{multiplicidade
-geométrica} de $\pi$ é
+geométrica} de $\pi$ é o cardinal da fibra,
 \[
-G\colon X\to\N,\qquad G(x)=\bigl\lvert\pi^{-1}(x)\bigr\rvert
-=\bigl\lvert\{i\in I:\pi(i)=x\}\bigr\rvert .
+G(x)=\bigl\lvert\pi^{-1}(x)\bigr\rvert
+=\bigl\lvert\{i\in I:\pi(i)=x\}\bigr\rvert ,
 \]
-O \textbf{suporte} de $G$ é $\operatorname{supp}G=\{x\in X: G(x)>0\}=\operatorname{im}\pi$.
+finito por $I$ o ser. O \textbf{suporte} de $G$ é
+$\operatorname{supp}G=\{x\in X: G(x)>0\}=\operatorname{im}\pi$.
 \end{definicao}
+
+\medskip\noindent\textbf{Porque símbolos, e não $\N$.} Escrever
+$I=\{0,\dots,N\}$ importaria $\N$ como dado primitivo --- e $\N$ é ele próprio
+uma \emph{realização}, como se verá na §\ref{sec:escada}. Uma tupla de símbolos
+dá o que a construção precisa e nada mais: elementos que se distinguem e uma
+ordem em que se sucedem. Contá-los já é realizá-los, e ao resultado dessa
+realização é que se chama $\N$; usá-lo antes seria pressupor o que se quer obter.
+
+\medskip\noindent\textbf{E há dois alfabetos, que não se confundem.} O de $I$ ---
+os símbolos que se percorrem --- e o das \emph{direções de aresta}
+(§\ref{sec:geo}), no qual se escreve o passo. O primeiro é a fita; o
+segundo é o que a máquina faz a cada símbolo dela. Ao longo do documento, a
+aranha é um \textbf{autómato}: percorre a tupla, e em cada símbolo escreve no
+espaço, lê a vizinhança e move-se --- o ciclo da §\ref{sec:algoritmo}, cujos
+quatro passos são as quatro cláusulas do Teor.~\ref{thm:multiplicidade}.
 
 \medskip\noindent\textbf{A letra.} $\pi$ é aqui a \textbf{projeção} --- a letra
 padrão do fibrado, e a mesma do $\pi_k$ com que o Maestro desce um andar da
@@ -391,8 +412,9 @@ não é a prova.)
 aplicações de um operador}. São dois, um de cada lado de $\pi$.
 
 \begin{definicao}[os dois operadores]\label{def:ops}
-No domínio, o \textbf{deslocamento} $S$, $(Sa)(t)=a(t-1)$ --- que na base é
-$S\delta_t=\delta_{t+1}$, isto é, o \textbf{sucessor}. No contradomínio, a
+No domínio, o \textbf{deslocamento} $S$ da tupla: $S\delta_{i_t}=\delta_{i_{t+1}}$,
+que leva cada índice no seguinte da ordem. (Realizado em $\N$, é o
+\emph{sucessor}; mas a operação é da tupla, e não pede $\N$.) No contradomínio, a
 \textbf{adjacência} $A$ do grafo, $(Af)(x)=\sum_{y\in V(x)}f(y)$.
 \end{definicao}
 
@@ -1403,14 +1425,14 @@ o deslocamento $S$ da Def.~\ref{def:ops}, e a sua diferença $\mu=1-S$ é a
 \begin{definicao}[o tempo, e as duas grandezas que o acompanham]\label{def:tempo}
 Três coisas distintas, cada uma com o seu nome:
 \begin{enumerate}\itemsep3pt
-\item[(i)] O \textbf{tempo} é o parâmetro $t$: a \emph{contagem das aplicações
-      do operador} $S$. Como $S$ é o sucessor --- $S\delta_t=\delta_{t+1}$ ---,
-      isto é dizer que o tempo \emph{é} a ordem de $\N$, e que $I$ é o segmento
-      inicial dela.
+\item[(i)] O \textbf{tempo} é o parâmetro: a \emph{contagem das aplicações do
+      operador} $S$ ao longo da tupla. Contar essas aplicações é precisamente
+      realizar $I$ em $\N$ --- de modo que dizer ``o tempo'' e dizer ``a
+      realização da tupla que conta'' é dizer a mesma coisa.
 \item[(ii)] O \textbf{tempo próprio} $\tau$ é o mesmo percurso \emph{medido por
       uma régua}: $d\tau^{2}=g_{uv}dx^udx^v$. Coincide com $t$ exatamente quando
-      a diagonal de $g$ usada vale $1$ (Teor.~\ref{thm:gcanon}); com outra $g$,
-      não.
+      a diagonal de $g$ usada vale $1$ --- ver a subsecção seguinte; com outra
+      $g$, não.
 \item[(iii)] A \textbf{dobra acumulada} $D=\theta*\zeta$, com
       $\theta(t)=[\,G_{t}(\pi(t))>1\,]$, e $\mu D=\theta$. Esta \emph{não} é um
       tempo: é memória. O que dela se lê é a \textbf{taxa de dobras} $dD/d\tau$,
@@ -1714,18 +1736,15 @@ noutros documentos desta obra. O que se verifica aqui é outra coisa: que os
 degraus construídos por \emph{quociente} são realizações no sentido da
 Def.~\ref{def:objeto}, com $G$ a contar a classe de equivalência que os define.
 
-\medskip\noindent\textbf{E são três, não quatro --- porque $\N$ é o outro lado.}
-O documento dos naturais di-lo à letra: ali \emph{não há quociente} --- a segunda
-cópia da dobra $F_{2w}=F_w\oplus\sigma F_w$ não é identificada, é
-\emph{multiplicada} por $\sigma$. Mas a razão estrutural é mais simples do que
-isso: \textbf{$\N$ não está do lado onde se identifica}. Ele é o \emph{domínio} ---
-o próprio $I$, que a Def.~\ref{def:objeto} chama ``um segmento inicial de $\N$''
---- enquanto $\Z$, $\Q$ e $\R$ são construídos por quociente no
-\emph{contradomínio}. E é a ordem total de $\N$ que dá o resto: o operador $S$ da
-Def.~\ref{def:ops} é o \textbf{sucessor}, o tempo é a contagem das suas
-aplicações (Def.~\ref{def:tempo}), e $\zeta$ é a acumulação ao longo dessa ordem.
-A linha de $\N$ na tabela abaixo é, por isso, de outro estatuto: uma realização
-legítima --- a soma tem fibras --- mas não o que define o andar.
+\medskip\noindent\textbf{$\N$ é uma realização, e não um pressuposto.} A
+Def.~\ref{def:objeto} parte de uma \emph{tupla}, não de $\N$; contar as
+aplicações de $S$ ao longo dela é já uma realização, e o que ela produz é $\N$.
+Por isso $\N$ entra na tabela abaixo como os outros --- com a diferença de que o
+documento dos naturais o constrói \emph{sem quociente}: a segunda cópia da dobra
+$F_{2w}=F_w\oplus\sigma F_w$ não é identificada, é \emph{multiplicada} por
+$\sigma$. Donde, na tabela, a fibra de $\N$ é a da soma, e não uma classe de
+equivalência --- ao contrário de $\Z$, $\Q$ e $\R$, que a obra constrói
+\emph{por} quociente.
 
 \begin{teorema}[os degraus por quociente são realizações]\label{thm:escada}
 Nos quatro casos abaixo, $\pi$ é uma realização e $\sum_x G(x)=\abs{I}$. Nos
