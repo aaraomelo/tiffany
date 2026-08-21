@@ -258,6 +258,36 @@ as duas a formarem uma só estrutura (distributividade), as tabelas ficam
 \]
 Em particular $1+1=0$, donde $x+x=0$: cada símbolo é o seu próprio oposto --- a
 primeira equação lida sobre os dois.
+
+\medskip\noindent\textbf{E o meio, pelo requisito que este teorema já usa.} O
+que força as tabelas é a \textbf{distributividade} --- as duas composições a
+formarem uma só estrutura ---, e é ela que se pergunta outra vez com um terceiro
+símbolo $\tfrac12$ pelo meio. Mantendo as entradas de $B$ acima, $0$ neutro de
+$\oplus$, $1$ neutro de $\cdot$ e $0$ absorvente, e varrendo as $729$ maneiras de
+preencher o que falta --- varredura em \code{tests/meio.c} §M1 ---, a
+distributividade deixa passar \textbf{três}:
+\[
+\tfrac12\oplus\tfrac12=0 \quad\text{nas três,}
+\]
+e é isso que decide. \emph{O centro exigiria} $\tfrac12\oplus\tfrac12=1$ --- o
+meio somado consigo dá o todo ---, e \textbf{nenhuma} das três o dá: em todas o
+meio é o seu próprio oposto, como os outros dois. A distributividade admite um
+terceiro \emph{símbolo}; não admite um \emph{meio}. O meio não é um símbolo
+desta estrutura --- é uma \emph{leitura} dela, e vive um andar acima, onde o $2$
+se inverte (Teor.~\ref{thm:BI}).
+
+\medskip\noindent\textbf{E as duas leis são duas, e não recortam o mesmo.} A
+associatividade é a lei de \emph{uma} composição; a distributividade é a lei
+\emph{entre} as duas --- são as duas metades, e mede-se que são distintas: das
+$27$ extensões de $\oplus$, a associatividade deixa \textbf{quatro}, e a
+distributividade das duas deixa \textbf{três} (\code{tests/meio.c} §M2). E o par
+$(\oplus,\cdot)$ não é
+simétrico nessa lei: $\cdot$ distribui sobre $\oplus$, e $\oplus$
+\emph{não} distribui sobre $\cdot$ --- o que já falha em $B$, sem meio nenhum,
+em $a=1,b=0,c=1$. Onde a distributividade vale \textbf{nos dois sentidos} é no
+par $(\vee,\wedge)$, e é esse o par dual que o Teor.~\ref{thm:BI} usa para ler a
+operação a partir do meio.
+
 \end{teorema}
 
 \begin{proof}
@@ -271,7 +301,28 @@ Varrendo os pares de tabelas sobre dois símbolos com invariantes distintos,
 sobrevivem exatamente \textbf{duas} soluções, e a segunda é a primeira com $0$ e
 $1$ trocados: a mesma estrutura noutra nomeação. Partir do $0$ e construir o $1$,
 ou o contrário, é o mesmo percurso lido nos dois sentidos.
+
+Quanto ao meio, a varredura é finita e faz-se toda: com as entradas de $B$
+fixas e as duas tabelas comutativas, restam três casas em cada uma, o que dá
+$3^{3}\cdot 3^{3}=729$ pares. Impondo $0$ neutro de $\oplus$, $1$ neutro de
+$\cdot$ e $0$ absorvente, e exigindo
+$a\cdot(b\oplus c)=(a\cdot b)\oplus(a\cdot c)$ nos $27$ triplos, sobrevivem
+\textbf{três}, e as três têm $\tfrac12\oplus\tfrac12=0$. Como o centro pede
+$\tfrac12\oplus\tfrac12=1$, nenhuma serve de meio. As contagens do parágrafo
+seguinte fazem-se na mesma varredura, e o contra-exemplo em $B$ verifica-se
+directamente. \qedhere
 \end{proof}
+
+\medskip\noindent\textbf{E isto é o Teor.~\ref{thm:duas}(4) visto do outro
+lado.} Lá, o que força \emph{duas} composições é $\partial$ \textbf{não} ter
+ponto fixo em $B$; o meio seria esse ponto fixo, e é justamente ele que a
+distributividade não deixa entrar como símbolo. Os dois resultados dizem o
+mesmo: $B$ não contém o seu centro, e não o contém \emph{porque} contê-lo
+partiria a estrutura --- não por falta de sítio. É o que a varredura dos
+\emph{três} símbolos já dizia (p.~\pageref{thm:duas}), e é onde a escada paga o
+que costuma pagar: o meio existe, mas um andar acima, onde o $2$ se inverte, e
+lá ele não é símbolo nenhum --- é a metade da leitura que o
+Teor.~\ref{thm:BI} devolve, com a outra metade, que é o sinal, junto.
 
 \begin{definicao}[o binário]\label{def:B}
 $B$ é o conjunto dos dois símbolos do Teor.~\ref{thm:B}.
@@ -292,6 +343,46 @@ andares uns dentro dos outros,
 \]
 com as palavras de largura $w$ em número de $2^{w}$ e a dobra a duplicar a
 largura. A \textbf{lista} $I$ é essa ordem.
+
+\medskip\noindent\textbf{E a mesma identidade lê-se a partir do meio}, passando
+o $2$ para o outro lado. Com a \textbf{média} $m=\tfrac{a+b}{2}$ e o
+\textbf{desvio} $\delta=\tfrac{a-b}{2}$ --- \emph{com sinal} ---,
+\[
+\boxed{\;a \;=\; m+\delta\,,\qquad\qquad b \;=\; m-\delta\;}
+\]
+e isto é uma \textbf{igualdade}, não uma aproximação: o par $(m,\delta)$ e o par
+$(a,b)$ são a mesma coisa escrita duas vezes, e a volta $\,(m,\delta)\mapsto
+(m+\delta,\,m-\delta)$ devolve o par \emph{ordenado} com resíduo $0$
+(\code{tests/meio.c} §M3). $m$ é a
+parte que $\partial$ fixa e $\delta$ a parte que ele reflete: é a decomposição em
+simétrico e antissimétrico, e é ela que torna a operação legível --- não são
+duas coisas, é um centro e um afastamento.
+
+\medskip\noindent\textbf{E só depois entram $\vee$ e $\wedge$}, que é onde a
+intensidade aparece:
+\[
+a\vee b \;=\; m+|\delta|\,,\qquad\qquad a\wedge b \;=\; m-|\delta| .
+\]
+O módulo não é o objeto: é a \emph{intensidade}, e a intensidade é
+\textbf{metade}. O que ela deixa cair é o sinal de $\delta$, isto é, \emph{qual
+dos dois é qual} --- e isso mede-se: os nove pares ordenados de
+$\{0,\tfrac12,1\}$ caem em \textbf{seis} imagens por $(a\vee b,a\wedge b)$, e as
+três colisões são exatamente os pares trocados. Por $(m,\delta)$ são nove em
+nove. A soma guarda o par; o módulo guarda só o quanto.
+
+\medskip\noindent\textbf{E daqui sai a conservação, que não foi pedida.} O
+produto do par escreve-se, por distributividade,
+\[
+\boxed{\;a\,b \;=\; (m+\delta)(m-\delta) \;=\; m^{2}-\delta^{2}\;}
+\]
+e $\partial$, que troca $a$ com $b$, troca o \emph{sinal} de $\delta$ e fixa $m$.
+Como $\delta$ entra ao \textbf{quadrado}, o que $\partial$ move não sobrevive:
+$m^{2}-\delta^{2}$ é \emph{invariante}. A conservação da norma não é uma
+hipótese posta à entrada --- é o que a decomposição dá, depois de as leis
+estarem no sítio, e é a forma quadrática do par a aparecer sozinha
+(\code{tests/meio.c} §M4, com o controlo a exigir que a troca mova de facto o
+desvio em seis dos nove pares --- se ela fosse a identidade, qualquer expressão
+seria invariante e não haveria teorema nenhum).
 \end{teorema}
 
 \begin{proof}
@@ -301,6 +392,17 @@ vem a identidade. Na iteração, $a\wedge b$ multiplicado por $2$ desloca-se uma
 posição para cima, de modo que ao fim de tantos passos quantos os bits da
 largura a segunda componente é nula. O encaixe é a restrição das operações de um
 andar ao anterior, e a ordem resultante é total.
+
+A forma do meio é imediata e não usa a identidade: de $m=\tfrac{a+b}{2}$ e
+$\delta=\tfrac{a-b}{2}$ vem $m+\delta=a$ e $m-\delta=b$, somando e subtraindo. O
+sistema é triangular e inverte-se sem condição nenhuma --- é por isso que a
+volta é exata, e é por isso que \emph{não} aparece aqui módulo nenhum. Os
+extremos $\vee$ e $\wedge$ pedem-no: escolher o maior é perguntar o \emph{sinal}
+de $\delta$ e deitá-lo fora, ficando com $|\delta|$; daí $m\pm|\delta|$, e daí a
+perda, que se conta nos nove pares ordenados. Por fim
+$ab=(m+\delta)(m-\delta)=m^{2}-\delta^{2}$ é o produto expandido pela
+distributividade, e a troca $a\leftrightarrow b$ é $\delta\mapsto-\delta$ com
+$m$ fixo, que a potência par absorve.
 \end{proof}
 
 \begin{teorema}[o processo dá as coordenadas, e elas são a representação]\label{thm:coord}
