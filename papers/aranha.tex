@@ -527,6 +527,11 @@ Em duas linhas:
 No hipercubo isto é literal: a posição retém apenas a \emph{paridade} de cada
 letra, e toda a ordem é o que a projeção esquece.
 
+\medskip\noindent\textbf{A aresta guarda a divisão; a colagem produz a
+identificação.} Antes de $T$, cada passo sabe de que lado saiu --- é a aresta.
+Depois de $T$, duas partes distintas da folha podem cair na mesma região, e a
+posição deixa de distinguir as origens: $G$ conta quantas foram coladas ali.
+
 \medskip\noindent\textbf{E a estrutura não é a geometria.} A palavra vive no
 alfabeto; a geometria entra por $T$. Vale a pena dizê-lo com uma imagem, porque
 ela é literal: a \textbf{palavra é a folha} --- plana, de ordem total, escrita
@@ -1260,6 +1265,25 @@ Injetividade: $t\mapsto2t$ é injetiva e a enumeração é bijetiva sobre $Q_M$.
 Não sobrejetividade: $\operatorname{im}\rho\subseteq2\Z$.
 \end{proof}
 
+\begin{corolario}[a folga é uma só]\label{cor:folga}
+Com $\pi$ sobrejetiva sobre $X$ e $\rho$ injetiva sobre $X$, as duas perguntas
+--- \emph{quantas partes da folha foram coladas nesta célula?} e \emph{quantos
+pontos da régua ainda estão sem folha?} --- têm a mesma resposta:
+\[
+\sum_{x}\bigl(G(x)-1\bigr)\;=\;\abs{I}-\abs{X}\;=\;\abs{I}-\lvert\operatorname{im}\rho\rvert .
+\]
+\end{corolario}
+
+\begin{proof}
+A soma da esquerda é $\sum_x G(x)-\lvert\operatorname{supp}G\rvert$, que pelo
+Lema~\ref{lem:conserva} é $\abs{I}-\abs{X}$, já que $\pi$ é sobrejetiva. A da
+direita é $\abs{I}-\abs{X}$ porque $\rho$ é injetiva com domínio $X$.
+\end{proof}
+
+\medskip\noindent Não é coincidência de números: é a \emph{mesma} folga vista
+pelos dois mapas. Do lado de $\pi$ ela aparece como colagem em excesso; do lado
+de $\rho$, como lugar por preencher.
+
 \medskip\noindent\textbf{E não se pode pedir as duas coisas} --- é o que a
 §\ref{sec:dimensao} já disse: um vértice interior tem $4$ vizinhos e a reta dá
 $2$, logo nenhuma injeção de células é injeção de vizinhanças. Por isso $\rho$
@@ -1704,7 +1728,9 @@ Teor.~\ref{thm:palavra} §AN30 (as $1024$ letras do dragão; a reconstrução co
 divergência $0$; a palavra permutada a chegar ao mesmo fim por outro caminho; a
 paridade no hipercubo; e a mesma palavra com três $T$ a dar $\max G$ de $2$, $1$
 e $28$);
-Teor.~\ref{thm:contraria} §AN29 (contar injetiva com $256$ lugares por usar;
+Teor.~\ref{thm:contraria} e Cor.~\ref{cor:folga} §AN29 ($\sum(G-1)=256$ e
+$\abs{I}-\lvert\operatorname{im}\rho\rvert=256$, que é $\abs{I}-\abs{X}$;
+contar injetiva com $256$ lugares por usar;
 encher com $G\equiv2$; $\pi\circ\rho=\mathrm{id}$ e $\rho\circ\pi$ a falhar em
 $256$ de $512$; $\tilde\pi$ bijetiva sobre $X\times\{1,2\}$, $512$ de $512$; a
 serpentina com $\rho=2t$; e o grau $4$ contra $2$);

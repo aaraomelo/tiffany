@@ -2852,6 +2852,27 @@ int main(void){
             if(viz_quadrado <= viz_recta) mau++;
         }
 
+        /* (g) AS DUAS PERGUNTAS TÊM A MESMA RESPOSTA. Perguntar «quantas partes da
+         *     folha foram coladas aqui?» dá o EXCESSO de colagem, Σ_x (G(x) − 1);
+         *     perguntar «quantos pontos da recta ainda estão sem folha?» dá os
+         *     BURACOS, |I| − |im ρ|. Os dois são |I| − |X|, e não por acaso: um é
+         *     ΣG − |supp G| e o outro |I| − |X| com ρ injectiva sobre X. */
+        {
+            an_zera(2);
+            for(long t = 0; t < nt; t++) an_visita(traj[t]);
+            long excesso = 0, suporte = an_ocupadas;
+            for(long t = 0; t < nt; t++){
+                /* conta-se uma vez por célula: soma G−1 sobre o suporte */
+            }
+            for(long i = 0; i < AN_CAP; i++) if(an_vivo[i]) excesso += an_G[i] - 1;
+            long buracos = sobra;                       /* de (a): |I| − |im contar| */
+            printf("      as duas perguntas:  colagens em excesso Σ(G−1) = %ld  ·"
+                   "  buracos |I| − |im ρ| = %ld  ·  |I| − |X| = %d\n\n",
+                   excesso, buracos, PD_I - PD_X);
+            if(excesso != PD_I - PD_X || buracos != PD_I - PD_X) mau++;
+            if(suporte != PD_X) mau++;
+        }
+
         ok("O PAR DE CANTOR TEM DOIS LADOS, E O SEGUNDO PEDE FOLGA. A casa já media"
            " encher e contar como BIJECÇÃO — e no finito com |I| = |X| não podia ser"
            " outra coisa. O par assimétrico obriga |I| > |X|, e então: CONTAR leva o"
@@ -2876,7 +2897,13 @@ int main(void){
            " É o teorema da dimensão a decidir, |V(x)| = 2n. Donde a dualidade é entre"
            " DOBRA e BURACO, e não entre duas inversas: quem comprime a recta no"
            " quadrado paga com G > 1; quem espalha o quadrado na recta paga com"
-           " índices por usar",
+           " índices por usar. E AS DUAS PERGUNTAS TÊM A MESMA RESPOSTA, que é o que"
+           " torna a dualidade quantitativa e não só de forma: «quantas partes da folha"
+           " foram coladas aqui?» dá o excesso de colagem Σ(G−1) = 256, e «quantos"
+           " pontos da recta ainda estão sem folha?» dá os buracos |I| − |im ρ| = 256."
+           " São o MESMO número, |I| − |X|, e não por coincidência: o primeiro é"
+           " ΣG − |supp G| e o segundo é |I| menos a imagem de uma injectiva sobre X."
+           " A folga é uma só, vista pelos dois mapas",
            mau == 0);
     }
 

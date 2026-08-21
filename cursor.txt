@@ -2253,3 +2253,29 @@ A REVISÃO GERAL DAS 22 PÁGINAS, com as ferramentas que montei:
   gume      55 mutações, 55 mordem
   bateria   529 : 529, 0 falhas · 29 unidades passaram, 0 falharam
   paper     22 páginas
+
+§47 — A FOLGA É UMA SÓ: as duas perguntas têm a mesma resposta
+===============================================================
+A imagem da folha colada tinha uma consequência que eu não tinha visto, e estava
+na última frase dele: «em vez de perguntar QUANTAS PARTES DA FOLHA CAÍRAM AQUI,
+perguntar QUAIS PONTOS DA SUPERFÍCIE AINDA PRECISAM DE UM LUGAR NA FOLHA».
+
+São duas perguntas — e têm a MESMA RESPOSTA (§AN29, cor:folga):
+     colagens em excesso   Σ_x (G(x) − 1)          = 256
+     buracos               |I| − |im ρ|            = 256
+     e ambos são           |I| − |X|               = 256
+Não é coincidência de números: o primeiro é ΣG − |supp G|, que pelo lema da
+conservação é |I| − |X| quando π é sobrejectiva; o segundo é |I| − |X| porque ρ
+é injectiva com domínio X. É A MESMA FOLGA VISTA PELOS DOIS MAPAS — do lado de π
+aparece como colagem em excesso, do lado de ρ como lugar por preencher.
+
+Isto é o que torna a dualidade dobra/buraco QUANTITATIVA e não só de forma.
+
+E a leitura da colagem, que ficou no paper: antes de T, cada passo sabe de que
+lado saiu — é a aresta. Depois de T, duas partes distintas da folha podem cair
+na mesma região, e a posição deixa de distinguir as origens; G conta quantas
+foram coladas ali.
+
+  gume      56 mutações, 56 mordem
+  bateria   529 : 529, 0 falhas · 29 unidades passaram, 0 falharam
+  paper     22 páginas
