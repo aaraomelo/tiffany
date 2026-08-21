@@ -1922,3 +1922,66 @@ DUAS ASSERÇÕES MINHAS QUE O GUME APANHOU
   gume      37 mutações, 37 mordem
   bateria   529 : 529, 0 falhas · 21 unidades passaram, 0 falharam
   paper     17 páginas
+
+§40 — A LEITURA COMPLETA DO PAPER: consistência, colisões de símbolo, e a BASE
+==============================================================================
+«le o paper todo de novo e ve se ficou consistente». Li as 1300 linhas.
+
+ESTRUTURA — 16 REFERÊNCIAS PARA A FRENTE, e as graves eram provas a usar o que
+ainda não existia. Todas da minha reorganização:
+  · o bloco do OPERADOR estava no FIM da §espaço-tempo, depois de o tempo e a
+    métrica o usarem. Voltou para a §geo, que já o prometia no título.
+  · o lem:orto vinha DEPOIS do thm:modos, cuja prova o usa.
+  · o lem:conserva estava encaixado ENTRE o teorema e a prova dele (duas
+    «Demonstração» seguidas), e o thm:medida usava-o antes. Passou à §objeto.
+  · o thm:shift enunciava ζ e μ antes de ζ existir. Reescrito só com S: gera a
+    acumulação Z = (1−S)⁻¹, e a §zeta é que lhes dá os nomes da incidência.
+  Ficaram 7, todas apontadores de secção legítimos. E 0 labels sem uso (havia 14
+  definições que nenhuma prova citava — as provas passaram a apoiar-se nelas).
+
+COLISÕES DE SÍMBOLO — QUATRO, e todas minhas:
+  μ    a CAUDA do §periodo contra a deconvolução μ = ζ⁻¹     → cauda vira ℓ
+  d    a dobra por salto d(t) contra a distância d(a,b)      → dobra vira θ
+  τ    a régua de bits τ(k) contra o tempo próprio dτ²       → régua vira υ
+       (a primeira tentativa foi ε, que JÁ era o sinal ±1 na prova do thm:dimensao)
+Isto é [[feedback-duas-reguas]] outra vez, e o sintoma foi o mesmo: letras
+coladas em secções que nasceram em alturas diferentes.
+
+CONTEÚDO
+  · a §medida abria a prometer «transformações de determinante ±1» e o teorema
+    não fala de determinante nenhum. A medida aqui é a de CONTAGEM.
+  · «G reconta o que a MÉTRICA esquece» — era MEDIDA, na frase seguinte à que eu
+    tinha acabado de corrigir.
+  · a TABELA das realizações não listava a recta nem a espiral, que o paper usa
+    como controlos, e não dizia quais são percursos. Agora está MEDIDA (§AN23) —
+    e a medição corrigiu-me três: o relógio tem max G = 16 e não 4 (eu tinha
+    escrito o PERÍODO no lugar do máximo), o Julia É percurso, o Cantor NÃO é.
+
+O QUE ELE MANDOU ACRESCENTAR, E ERA O FECHO
+  · AS RÉGUAS FORMAM UMA BASE, E SÃO OITO (§AN24, thm:base8). As direcções de
+    aresta de Q_8 são os e_k = 2^k — a base que o `naturais.tex` thm:base
+    constrói como PRODUTOS dos três geradores das três dobras, ORTONORMAL para
+    ⟨a,b⟩ = paridade(a∧b). É EXACTAMENTE a forma bilinear do meu caractere.
+    Uma régua é um peso por direcção: cada uma cega às outras sete, as oito
+    compostas medem todo salto, e tirando uma fica uma direcção por medir.
+    E como a base é ortonormal, MEDIR e LER O BIT são a mesma operação: os 256
+    elementos reconstroem-se das coordenadas. O oito é 2³, as três dobras.
+  · π_k EM k DISCRETO (cor:pik): na representação em que a coordenada É o bit,
+    π_k(a) = a mod 2^{2^k} — TRUNCAR — e sobrevivem 2^k réguas das oito.
+  · EULER (thm:euler): o subgrafo percorrido tem χ = V − A e b₁ = 1 − χ. E SOB
+    A HIPÓTESE de nenhuma aresta se repetir, b₁ = D = |I| − V: cada dobra fecha
+    um ciclo e um só. No dragão dá 335 dos dois lados — e o 335 é o mesmo número
+    que o §AN20 conta como dobras, o que eu não tinha previsto. A hipótese
+    mede-se: a espiral usa 4 arestas em mil passos e dá b₁ = 1 com D = 1021. E a
+    recta axial dá χ = 1, b₁ = 0 — percorrer sem dobrar é percorrer uma ÁRVORE.
+
+O GUME APANHOU MAIS DUAS TAUTOLOGIAS MINHAS
+  · nas oito réguas eu escrevia `soma += (i == k)` — comparar um índice consigo
+    mesmo. Agora as réguas aplicam-se a SALTOS (vectores), como formas.
+  · e duas mutações minhas mal feitas: `(u==k || v==k)` não muda nada porque a
+    aresta só sonda a diagonal (é o mesmo facto do termo cruzado), e mutar UMA
+    das duas coordenadas da chave da aresta não chega.
+
+  gume      41 mutações, 41 mordem
+  bateria   529 : 529, 0 falhas · 24 unidades passaram, 0 falharam
+  paper     18 páginas

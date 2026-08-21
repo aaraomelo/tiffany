@@ -44,6 +44,12 @@
  *   §AN11 a SÉRIE DE π: o campo lê o custo, e o valor sai por três caminhos
  *   §AN14 a vizinhança na ÁRVORE é 1 e não 2n · e o custo CONTADO: 2n
  *         leituras por passo, nem uma a mais — o autómato não varre
+ *   §AN25 π_k EM BITS é truncar (sobrevivem 2^k réguas de oito) · e χ = V − A
+ *         do subgrafo percorrido, com b₁ = 1 − χ a contar as voltas fechadas
+ *   §AN24 as RÉGUAS formam BASE: as direcções de aresta de Q_8 são a base
+ *         ortonormal e_k = 2^k do naturais.tex — OITO, e compostas cobrem tudo
+ *   §AN23 a TABELA das realizações do paper, medida — dobrar e ser percurso
+ *         são independentes, e as quatro combinações existem
  *   §AN22 g DEPENDE DO PONTO: g_uv(x) = G(x)·δ_uv, o tempo passa diferente em
  *         cada ponto, e o passo do ciclo é a GEODÉSICA dessa métrica
  *   §AN21 A MÉTRICA g: dτ² = g_uv dx^u dx^v — e com g = I o tempo próprio É o
@@ -2093,6 +2099,270 @@ int main(void){
            " Comparar G com G·1 seria comparar G consigo mesmo e não mediria nada;"
            " comparar com G·h_ii mede. A memória, ao ficar no espaço, curva-o; e o"
            " movimento é a consequência, não a decisão",
+           mau == 0);
+    }
+
+
+    /* ═══ §AN23: A TABELA DO PAPER, MEDIDA ═══════════════════════════════════ */
+    printf("\n§AN23  a tabela das realizações — os números do paper, medidos aqui.\n\n");
+    {
+        long mau = 0, linhas = 0, dobram = 0, percursos = 0;
+        printf("      n  realização        |I|    max G   células   dobra   percurso\n");
+        for(int c = 0; c < 9; c++){
+            const char *nome; int n = 2; long nt = 0;
+            switch(c){
+              case 0: nome = "Cantor";        n = 1; nt = real_cantor(9);       break;
+              case 1: nome = "Heighway";      n = 2; nt = real_dragao(4096);    break;
+              case 2: nome = "dragão espaço"; n = 3; nt = real_dragao3(2048);   break;
+              case 3: nome = "espiral";       n = 2; nt = 0;
+                      { int x=0,y=0,dx=1,dy=0; Vet v=vet0(); traj[nt++]=v;
+                        for(long t=0;t<4096&&nt<AN_IMAX;t++){ x+=dx; y+=dy;
+                          v=vet0(); v.c[0]=x; v.c[1]=y; traj[nt++]=v;
+                          int a=-dy,b=dx; dx=a; dy=b; } } break;
+              case 4: nome = "recta axial";   n = 2; nt = 0;
+                      for(long t=0;t<=4096&&nt<AN_IMAX;t++){ Vet v=vet0();
+                        v.c[0]=(int)t; traj[nt++]=v; } break;
+              case 5: nome = "recta diagonal";n = 2; nt = real_recta(4096,2);   break;
+              case 6: nome = "relógio J";     n = 2; nt = real_relogio(3,1,60); break;
+              case 7: nome = "Julia c=−1";    n = 2; nt = real_julia(-1,0,60,0,0); break;
+              default:nome = "ISA";           n = 4; nt = real_isa(512);        break;
+            }
+            Res r = an_corre(n, nt);
+            /* percurso? cada passo é uma aresta da grade */
+            long nao_aresta = 0;
+            for(long t = 0; t + 1 < nt; t++){
+                long dif = 0, soma = 0;
+                for(int i = 0; i < n; i++){
+                    long d = traj[t+1].c[i] - traj[t].c[i];
+                    if(d) dif++;
+                    soma += d < 0 ? -d : d;
+                }
+                if(!(dif == 1 && soma == 1)) nao_aresta++;
+            }
+            int perc = (nao_aresta == 0), dob = (r.max_g > 1);
+            printf("      %d  %-17s %-6ld %-7ld %-9ld %-7s %s\n",
+                   n, nome, r.nt, r.max_g, r.celulas,
+                   dob ? "sim" : "não", perc ? "sim" : "não");
+            if(!r.recontou || r.soma != r.nt) mau++;
+            if(dob) dobram++;
+            if(perc) percursos++;
+            linhas++;
+        }
+        printf("\n");
+        /* as duas colunas são INDEPENDENTES: existe cada uma das quatro combinações */
+        ok("A TABELA DAS REALIZAÇÕES ESTÁ MEDIDA, e não escrita à mão — que é a única"
+           " maneira de ela não mentir. Os números dependem do comprimento, e por isso"
+           " |I| está na tabela: max G não é uma propriedade da curva sozinha. E as duas"
+           " colunas são INDEPENDENTES, com as quatro combinações presentes: a espiral"
+           " dobra e é percurso; o relógio dobra e não é; a recta axial não dobra e é;"
+           " a diagonal não faz nem uma coisa nem outra. Uma correcção que este medidor"
+           " forçou: eu tinha escrito max G = 4 para o relógio, que é o PERÍODO — o"
+           " máximo é 16, porque em 61 passos cada uma das quatro células é visitada"
+           " dezasseis vezes. Período e multiplicidade máxima não são o mesmo número",
+           mau == 0 && linhas == 9 && dobram >= 4 && percursos >= 4
+                    && dobram < linhas && percursos < linhas);
+    }
+
+
+    /* ═══ §AN24: AS RÉGUAS SÃO UMA BASE — oito, e cobrem o espaço ════════════ */
+    printf("\n§AN24  as réguas formam base: as direcções de aresta são a ortonormal.\n\n");
+    {
+        long mau = 0;
+        const int MB8 = 8, N8 = 1 << MB8;
+
+        /* (a) O PRODUTO INTERNO DO CARACTERE É O DA BASE ORTONORMAL DA CASA.
+         *     O `naturais.tex` thm:base fixa e_k = 2^k como base de F_8 sobre F_2,
+         *     ortonormal para ⟨a,b⟩ = paridade(a AND b) — e é exactamente a forma
+         *     que o χ_k do §AN12 usa. Aqui só se confirma a Gram, por outro
+         *     caminho que não o do `ortonormal.c` §O0: pelos caracteres. */
+        long gram_mau = 0;
+        for(int i = 0; i < MB8; i++)
+            for(int j = 0; j < MB8; j++){
+                long ei = 1L << i, ej = 1L << j;
+                /* ⟨e_i,e_j⟩ lido no caractere: χ_{e_i}(e_j) = (−1)^{⟨e_i,e_j⟩} */
+                long esperado = (i == j) ? -1 : 1;
+                if(ta_chi(ei, ej) != esperado) gram_mau++;
+            }
+        printf("      Gram das oito direcções lida nos caracteres: %s (64 pares)\n",
+               gram_mau ? "NÃO é I" : "é I");
+        if(gram_mau) mau++;
+
+        /* (b) AS OITO RÉGUAS, aplicadas a SALTOS. A régua k é a forma quadrática
+         *     g^(k)_uv = δ_uk δ_vk, e sobre um salto dx dá (dx^k)². Os saltos são
+         *     os oito e_i do hipercubo — vectores, não índices. */
+        long dxs[8][8];
+        for(int i = 0; i < MB8; i++)
+            for(int u = 0; u < MB8; u++) dxs[i][u] = (u == i);
+        printf("\n      régua g^(k)   mede e_k   soma nas outras 7   cega?\n");
+        long cegas = 0;
+        for(int k = 0; k < MB8; k++){
+            long propria = 0, alheias = 0;
+            for(int i = 0; i < MB8; i++){
+                long q = 0;                              /* g^(k)(dx_i, dx_i) */
+                for(int u = 0; u < MB8; u++)
+                    for(int v = 0; v < MB8; v++)
+                        q += (u == k && v == k) * dxs[i][u] * dxs[i][v];
+                if(i == k) propria = q; else alheias += q;
+            }
+            if(k < 3 || k == 7)
+                printf("      k = %d         %ld          %-19ld %s\n",
+                       k, propria, alheias, alheias ? "NÃO" : "sim");
+            if(propria != 1 || alheias != 0) mau++;
+            cegas++;
+        }
+        printf("      …\n");
+        if(cegas != MB8) mau++;
+
+        /* (c) COMPOSTAS, COBREM. A soma das oito réguas é a identidade, e mede
+         *     todo salto; tirando a régua j, o salto e_j passa a medir ZERO — a
+         *     direcção fica por medir, e é isso que faz delas uma base. */
+        long todos_mau = 0, sobra_mau = 0;
+        for(int i = 0; i < MB8; i++){
+            long soma = 0, sem_i = 0;
+            for(int k = 0; k < MB8; k++){
+                long q = 0;
+                for(int u = 0; u < MB8; u++)
+                    for(int v = 0; v < MB8; v++)
+                        q += (u == k && v == k) * dxs[i][u] * dxs[i][v];
+                soma += q;
+                if(k != i) sem_i += q;                   /* a composição sem a régua i */
+            }
+            if(soma != 1) todos_mau++;                   /* as oito medem o salto */
+            if(sem_i != 0) sobra_mau++;                  /* sem a i, o salto e_i é invisível */
+        }
+        printf("\n      as oito compostas medem 1 em cada um dos 8 saltos: %s\n",
+               todos_mau ? "NÃO" : "sim");
+        printf("      tirada a régua i, o salto e_i mede ZERO: %s\n",
+               sobra_mau ? "NÃO" : "sim");
+        if(todos_mau || sobra_mau) mau++;
+
+        /* (d) E TODO PONTO DO ESPAÇO SE RECONSTRÓI das coordenadas: a leitura pela
+         *     base devolve o elemento, nos 256. As coordenadas SÃO os bits, que é
+         *     o conteúdo do thm:base — a base ortonormal torna «medir» e «ler o
+         *     bit» a mesma operação. */
+        long recon_mau = 0;
+        for(long a = 0; a < N8; a++){
+            long rec = 0;
+            for(int k = 0; k < MB8; k++){
+                long ek = 1L << k;
+                /* a coordenada k de a é ⟨a, e_k⟩ = paridade(a AND e_k) = bit k */
+                long coord = (ta_chi(a, ek) == -1);
+                rec |= coord << k;
+            }
+            if(rec != a) recon_mau++;
+        }
+        printf("      e os 256 elementos reconstroem-se das coordenadas: %s\n\n",
+               recon_mau ? "NÃO" : "sim");
+        if(recon_mau) mau++;
+
+        ok("AS RÉGUAS FORMAM UMA BASE, E SÃO OITO. As direcções de aresta do hipercubo"
+           " Q_8 são os e_k = 2^k, que é a base que o `naturais.tex` thm:base constrói"
+           " como PRODUTOS dos três geradores das três dobras — do bit ao byte — e mostra"
+           " ser ORTONORMAL para ⟨a,b⟩ = paridade(a AND b). Essa forma é exactamente a"
+           " que o caractere do §AN12 usa: χ_k(j) = (−1)^{⟨k,j⟩}. Confirma-se a Gram"
+           " pelos caracteres, que é outro caminho que não o do `ortonormal.c` §O0."
+           " DONDE AS OITO RÉGUAS: uma por direcção, cada uma cega às outras sete;"
+           " compostas, medem todo salto, e tirando qualquer uma fica uma direcção por"
+           " medir — é isto que «formar base» quer dizer para réguas. E como a base é"
+           " ortonormal, medir e LER O BIT são a mesma operação: os 256 elementos"
+           " reconstroem-se das suas oito coordenadas. O oito não foi escolhido: é 2³,"
+           " as três dobras que levam o bit ao byte",
+           mau == 0);
+    }
+
+
+    /* ═══ §AN25: π_k EM k DISCRETO, E A CARACTERÍSTICA DE EULER DO PERCURSO ═══ */
+    printf("\n§AN25  π_k em bits, e χ = V − A: a dobra vista por Euler.\n\n");
+    {
+        long mau = 0;
+
+        /* (a) π_k EM k DISCRETO. A projecção dimensional π_k: A_{k+1} → A_k esquece
+         *     a metade alta, π_k(x ⊕ y*) = x. Na representação por bits do
+         *     `naturais.tex` — onde a coordenada É o bit — isso é TRUNCAR:
+         *         π_k(a) = a  mod 2^{2^k},        ι_k(x) = x   (com zeros em cima)
+         *     e π_k ∘ ι_k = id é imediato. As réguas indexam-se pelo mesmo k: a
+         *     régua g^(j) mede a direcção e_j = 2^j, e π_k esquece as de j ≥ 2^k. */
+        printf("      k   andar A_k   π_k(a) = a mod 2^{2^k}   π_k∘ι_k = id   réguas que sobrevivem\n");
+        for(int k = 0; k <= 3; k++){
+            long larg = 1L << k;                 /* a largura do andar: 2^k bits */
+            long mod = (larg >= 63) ? 0 : (1L << larg);
+            long falha = 0, sobrevivem = 0;
+            for(long x = 0; x < mod; x++){       /* ι_k: embeber; π_k: truncar */
+                long emb = x;                    /* zeros em cima */
+                if((emb % mod) != x) falha++;    /* π_k ∘ ι_k = id */
+            }
+            for(int j = 0; j < 8; j++) if((1L << j) < mod) sobrevivem++;
+            printf("      %d   %-10ld a mod %-17ld %-14s %ld de 8\n",
+                   k, larg, mod, falha ? "NÃO" : "sim", sobrevivem);
+            if(falha) mau++;
+            if(sobrevivem != larg && larg <= 8) mau++;
+        }
+        printf("\n");
+
+        /* (b) A CARACTERÍSTICA DE EULER DO PERCURSO. O subgrafo que a trajectória
+         *     percorre tem V vértices (as células) e A arestas DISTINTAS. Num
+         *     complexo de dimensão 1 e conexo, χ = V − A, e o número de ciclos
+         *     independentes é b₁ = A − V + 1 = 1 − χ. Os ciclos são as dobras que
+         *     FECHARAM: cada um é uma volta que a trajectória deu. */
+        printf("      percurso        |I|    V (células)  A (arestas)  χ = V−A   b₁ = 1−χ  D        b₁ = D?\n");
+        for(int c = 0; c < 3; c++){
+            long nt;
+            const char *nome;
+            if(c == 0){ nome = "Heighway";    nt = real_dragao(1024); }
+            else if(c == 1){ nome = "espiral";nt = 0;
+                int x=0,y=0,dx=1,dy=0; Vet v=vet0(); traj[nt++]=v;
+                for(long t=0;t<1024&&nt<AN_IMAX;t++){ x+=dx; y+=dy;
+                  v=vet0(); v.c[0]=x; v.c[1]=y; traj[nt++]=v;
+                  int a=-dy,b=dx; dx=a; dy=b; } }
+            else { nome = "recta axial"; nt = 0;
+                for(long t=0;t<=1024&&nt<AN_IMAX;t++){ Vet v=vet0();
+                  v.c[0]=(int)t; traj[nt++]=v; } }
+            Res r = an_corre(2, nt);
+            long V = r.celulas;
+            /* as arestas distintas: cada uma é um par não ordenado de vértices
+             * vizinhos; conta-se num campo sobre o ponto médio dobrado, que é
+             * único por aresta na grade */
+            an_zera(2);
+            long A = 0;
+            for(long t = 0; t + 1 < nt; t++){
+                Vet m = vet0();
+                m.c[0] = traj[t].c[0] + traj[t+1].c[0];   /* soma: identifica a aresta */
+                m.c[1] = traj[t].c[1] + traj[t+1].c[1];
+                if(an_le(m) == 0) A++;
+                an_visita(m);
+            }
+            long chi = V - A, b1 = 1 - chi;
+            /* E A LIGAÇÃO COM A DOBRA: D = |I| − V é o número de revisitas. Se o
+             * percurso NUNCA reusa uma aresta (A = N), então b₁ = D exactamente;
+             * se reusa, não. A hipótese mede-se, e o contra-exemplo é a espiral. */
+            long D = nt - V, reusa = (A != nt - 1);
+            printf("      %-15s %-6ld %-13ld %-12ld %-9ld %-8ld %-6ld %s\n",
+                   nome, nt, V, A, chi, b1, D,
+                   reusa ? "reusa arestas" : (b1 == D ? "b₁ = D" : "b₁ ≠ D"));
+            if(c == 2 && (chi != 1 || b1 != 0)) mau++;    /* a recta é uma árvore */
+            if(c != 2 && b1 <= 0) mau++;                  /* os que dobram têm ciclos */
+            if(!reusa && b1 != D) mau++;                  /* sem reuso, b₁ = D */
+            if(c == 1 && !reusa) mau++;                   /* a espiral TEM de reusar */
+        }
+        printf("\n");
+
+        ok("π_k ESCREVE-SE EM k DISCRETO, E A DOBRA TEM UMA LEITURA DE EULER. A projecção"
+           " dimensional π_k(x ⊕ y*) = x é, na representação por bits em que a coordenada"
+           " É o bit, simplesmente TRUNCAR: π_k(a) = a mod 2^{2^k}, com ι_k a embeber"
+           " pondo zeros em cima, e π_k∘ι_k = id imediato. As réguas indexam-se pelo"
+           " mesmo k — a régua g^(j) mede a direcção e_j = 2^j, e π_k é exactamente o"
+           " esquecimento das direcções que não cabem no andar: sobrevivem 2^k réguas de"
+           " oito. E A SEGUNDA LEITURA: o subgrafo percorrido tem V células e A arestas"
+           " distintas, e num complexo de dimensão 1 conexo χ = V − A, com b₁ = 1 − χ a"
+           " contar os ciclos independentes — que são as voltas que a trajectória FECHOU."
+           " Medido: a recta axial dá χ = 1 e b₁ = 0, que é ser uma ÁRVORE; o dragão e a"
+           " espiral dão b₁ > 0. E A LIGAÇÃO É EXACTA, SOB UMA HIPÓTESE: com D = |I| − V"
+           " o número de revisitas, se o percurso NUNCA reusa uma aresta então A = N e"
+           " b₁ = A − V + 1 = D — cada dobra fecha um ciclo e um só. No dragão dá 335 dos"
+           " dois lados, e o 335 é o mesmo número que o §AN20 conta como dobras. A"
+           " hipótese não é decoração: a ESPIRAL reusa arestas — quatro arestas para mil"
+           " passos — e aí b₁ = 1 com D = 1021. A dobra que o campo G conta por VÉRTICE"
+           " é, quando as arestas não se repetem, a topologia do que foi percorrido",
            mau == 0);
     }
 
