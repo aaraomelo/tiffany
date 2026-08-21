@@ -1202,7 +1202,16 @@ static int MOVE_no_pc(Regs *r, unsigned destino, unsigned senao, int cond){
 }
 
 static int MOVE_pc(Regs *r, unsigned pc, int cond){
-    int rel = (signed char)prog_le(pc);
+    /* O DESLOCAMENTO SOBE DE ANDAR: dois bytes, não um.
+     *
+     * Era UM byte lido com sinal, logo o salto alcançava 127 — e um corpo maior
+     * do que isso virava um salto NEGATIVO, para trás, com a máquina a rodar
+     * até o guarda a parar. Eu tratei esse 127 como um dado e fui pôr recusas à
+     * volta dele; é um TECTO MEU, e a teoria não tem tectos: `§sec:torre`,
+     * d_{k+1} = 2·d_k, «o que cresce é o OBJECTO, não a máquina». Quem não cabe
+     * PROMOVE. O deslocamento passa a ocupar o par — dois átomos, a mesma dobra
+     * do resto — e alcança 32767. */
+    int rel = (int)(short)((unsigned)prog_le(pc) | ((unsigned)prog_le(pc + 1) << 8));
     /* ── E O SALTO E' A MESMA TRANSFERENCIA: o pc e' so' mais um destino ────────────
      * A Lei 1 outra vez — 1† = -1, e a unidade e' dual. Mover um valor para um slot e
      * mover um valor para o pc sao a MESMA operacao; o que muda e' o DESTINO, e o
@@ -1213,7 +1222,7 @@ static int MOVE_pc(Regs *r, unsigned pc, int cond){
      *   destino = pc     e sentido -1   ->  era o SALTO
      *
      * Escrito assim, a ISA tem UMA operacao: mover, com destino e sentido. */
-    return MOVE_no_pc(r, (unsigned)((int)pc + 1 + rel), pc + 1, cond);
+    return MOVE_no_pc(r, (unsigned)((int)pc + 2 + rel), pc + 2, cond);
 }
 
 static int passo(Regs *r, unsigned prog_len){
@@ -1375,10 +1384,21 @@ static void emit1(unsigned char b){ pwrite(fprog, &b, 1, (off_t)pc_emit); pc_emi
  * haver um só, e quem estourar levanta a bandeira: a consulta é RECUSADA com a
  * razão, em vez de a máquina não voltar. */
 static int salto_estourou = 0;
+/* escreve o deslocamento (uma Word) na posição reservada; `d` já é relativo */
+static void salto_rel(unsigned pos, long d){
+    if(d > 32767 || d < -32768){ salto_estourou = 1; d = 0; }
+    { unsigned char lo = (unsigned char)((unsigned long)d & 255u);
+      unsigned char hi = (unsigned char)(((unsigned long)d >> 8) & 255u);
+      pwrite(fprog, &lo, 1, (off_t)pos);
+      pwrite(fprog, &hi, 1, (off_t)(pos + 1)); }
+}
 static void salto_poe(unsigned pos, unsigned ini){
     long d = (long)pc_emit - (long)ini;
-    if(d > 127 || d < 0){ salto_estourou = 1; d = 0; }
-    { unsigned char b = (unsigned char)d; pwrite(fprog, &b, 1, (off_t)pos); }
+    if(d > 32767 || d < -32768){ salto_estourou = 1; d = 0; }
+    { unsigned char lo = (unsigned char)((unsigned long)d & 255u);
+      unsigned char hi = (unsigned char)(((unsigned long)d >> 8) & 255u);
+      pwrite(fprog, &lo, 1, (off_t)pos);
+      pwrite(fprog, &hi, 1, (off_t)(pos + 1)); }
 }
 /* A VARREDURA É UMA PROGRESSÃO ARITMÉTICA NO ENDEREÇO.
  *
@@ -2290,7 +2310,7 @@ static void emit_teste(unsigned sc, int cmp_op, long k, unsigned destino, unsign
         MOVE(S_TMP, +1);
         MOVE(S_ZERO, +1);
         emit1(OP_CMP);
-        emit1(OP_JZ); emit1(2);
+        emit1(OP_JZ);  emit1(3); emit1(0);
     } else {
         if(cmp_op == '<'){ MOVE(kslot, +1); MOVE(sc, +1); }
         else             { MOVE(sc, +1); MOVE(kslot, +1); }
@@ -2303,10 +2323,10 @@ static void emit_teste(unsigned sc, int cmp_op, long k, unsigned destino, unsign
         MOVE(S_TMP, +1);
         MOVE(S_ZERO, +1);
         emit1(OP_CMP);
-        emit1(OP_JNZ); emit1(2);
+        emit1(OP_JNZ); emit1(3); emit1(0);
     }
     emit1(OP_JMP);
-    unsigned pos = pc_emit; emit1(0);
+    unsigned pos = pc_emit; emit1(0); emit1(0);
     unsigned ini = pc_emit;
     emit_copia(S_UM, destino);
     salto_poe(pos, ini);
@@ -2439,7 +2459,7 @@ static void emit_mul16(unsigned dest, unsigned X, unsigned Y, unsigned base){
         MOVE(tmp, -1);
         MOVE(tmp, +1); MOVE(S_ZERO, +1); emit1(OP_CMP);
         emit1(OP_JZ);
-        unsigned pos = pc_emit; emit1(0);
+        unsigned pos = pc_emit; emit1(0); emit1(0);
         unsigned ini = pc_emit;
         MOVE(dest, +1); MOVE(desl, +1); emit1(OP_ADD16); MOVE(dest, -1);
         { salto_poe(pos, ini); }
@@ -2460,7 +2480,7 @@ static void emit_teste16(unsigned sc, int cmp_op, unsigned destino, unsigned ksl
     if(cmp_op == '='){
         MOVE(sc, +1); MOVE(kslot, +1); emit1(OP_SUB16);
         MOVE(tmp, -1); MOVE(tmp, +1); MOVE(S_ZERO, +1); emit1(OP_CMP16);
-        emit1(OP_JZ); emit1(2);
+        emit1(OP_JZ);  emit1(3); emit1(0);
     } else {
         if(cmp_op == '<'){ MOVE(kslot, +1); MOVE(sc, +1); }
         else             { MOVE(sc, +1); MOVE(kslot, +1); }
@@ -2469,10 +2489,10 @@ static void emit_teste16(unsigned sc, int cmp_op, unsigned destino, unsigned ksl
         MOVE(S_MASK16, +1); emit1(OP_AND);        /* o bit 15: o sinal do par */
         MOVE(tmp, -1); MOVE(tmp, +1);
         MOVE(S_ZERO, +1); emit1(OP_CMP);
-        emit1(OP_JNZ); emit1(2);
+        emit1(OP_JNZ); emit1(3); emit1(0);
     }
     emit1(OP_JMP);
-    unsigned pos = pc_emit; emit1(0);
+    unsigned pos = pc_emit; emit1(0); emit1(0);
     unsigned ini = pc_emit;
     emit_copia(S_UM, destino);
     salto_poe(pos, ini);
@@ -2604,22 +2624,22 @@ static void emit_mul(unsigned dest, unsigned X, unsigned Y, unsigned base){
     MOVE(S_ZERO, +1);
     emit1(OP_CMP);                                   /* FL_ZERO sse cnt ≥ 0 */
     emit1(OP_JZ);
-    unsigned pos_pos = pc_emit; emit1(0);
+    unsigned pos_pos = pc_emit; emit1(0); emit1(0);
     /* cnt < 0 : passo = −X, delta = +1 */
     unsigned ini_neg = pc_emit;
     MOVE(X, +1); MOVE(S_ZERO, +1); emit1(OP_SUB);
     MOVE(passo, -1);                       /* R = 0 − X */
     emit_copia(S_UM, delta);
     emit1(OP_JMP);
-    unsigned pos_fim_neg = pc_emit; emit1(0);
+    unsigned pos_fim_neg = pc_emit; emit1(0); emit1(0);
     unsigned ini_pos = pc_emit;
     /* cnt ≥ 0 : passo = +X, delta = −1 */
     emit_copia(X, passo);
     MOVE(S_UM, +1); MOVE(S_ZERO, +1); emit1(OP_SUB);
     MOVE(delta, -1);                       /* R = 0 − 1 */
     unsigned depois = pc_emit;
-    { unsigned char r = (unsigned char)(ini_pos - ini_neg);   pwrite(fprog, &r, 1, (off_t)pos_pos); }
-    { unsigned char r = (unsigned char)(depois - ini_pos);    pwrite(fprog, &r, 1, (off_t)pos_fim_neg); }
+    salto_rel(pos_pos, (long)ini_pos - (long)ini_neg);
+    salto_rel(pos_fim_neg, (long)depois - (long)ini_pos);
 
     /* o laço: enquanto cnt != 0 { dest += passo ; cnt += delta } */
     unsigned topo = pc_emit;
@@ -2627,16 +2647,17 @@ static void emit_mul(unsigned dest, unsigned X, unsigned Y, unsigned base){
     MOVE(S_ZERO, +1);
     emit1(OP_CMP);                                    /* FL_ZERO sse cnt == 0 */
     emit1(OP_JZ);
-    unsigned pos_sai = pc_emit; emit1(0);
+    unsigned pos_sai = pc_emit; emit1(0); emit1(0);
     unsigned corpo = pc_emit;
     MOVE(dest, +1); MOVE(passo, +1); emit1(OP_ADD); MOVE(dest, -1);
     MOVE(cnt, +1);  MOVE(delta, +1); emit1(OP_ADD); MOVE(cnt, -1);
     emit1(OP_JMP);
-    unsigned pos_volta = pc_emit; emit1(0);
+    unsigned pos_volta = pc_emit; emit1(0); emit1(0);
     unsigned fim = pc_emit;
-    { unsigned char r = (unsigned char)(int)((int)topo - (int)pos_volta - 1);
-      pwrite(fprog, &r, 1, (off_t)pos_volta); }
-    { unsigned char r = (unsigned char)(fim - corpo); pwrite(fprog, &r, 1, (off_t)pos_sai); }
+    /* o salto PARA TRÁS do laço: o destino é `topo`, e o pc depois do
+     * deslocamento é pos_volta + 2 — dois, porque o deslocamento é uma Word */
+    salto_rel(pos_volta, (long)topo - (long)pos_volta - 2);
+    salto_rel(pos_sai, (long)fim - (long)corpo);
 }
 
 /* os átomos distintos, avaliados UMA vez por linha.
@@ -2896,13 +2917,13 @@ static void emit_linha(long i, long ncols, const struct arvore *a, int tem_where
     MOVE(S_ZERO, +1);
     emit1(OP_CMP);
     emit1(OP_JZ);
-    unsigned pos_v = pc_emit; emit1(0);
+    unsigned pos_v = pc_emit; emit1(0); emit1(0);
 
     MOVE(S_ACC, +1);
     MOVE(S_ZERO, +1);
     emit1(OP_CMP);
     emit1(OP_JZ);
-    unsigned pos = pc_emit; emit1(0);
+    unsigned pos = pc_emit; emit1(0); emit1(0);
     unsigned ini = pc_emit;
     /* A varredura NÃO grava mais o efeito: ela só MARCA. O bitmap de casamento passa a ser o
      * diário de intenção, e quem aplica é a fase 3, depois do compromisso. Assim a queda no
@@ -2931,25 +2952,19 @@ static void emit_linha(long i, long ncols, const struct arvore *a, int tem_where
      * antes de escrever, e RECUSA-SE. Uma consulta recusada com a razão é
      * tratável; um motor que não volta, não. */
     { long d1 = (long)(pc_emit - ini);
-      long d2 = (long)(pc_emit - (pos_v + 1));
-      /* O TECTO É 127, E NÃO 255: o `passo` lê o deslocamento com
-       * `(signed char)`, logo o byte que eu escrevia sem sinal é lido COM.
-       * Um corpo entre 128 e 255 virava um salto NEGATIVO — para trás —, e a
-       * máquina dava 50 milhões de passos por linha antes de o guarda a parar.
-       * Duas réguas para o mesmo número, escrito numa e lido noutra. */
-      if(d1 > 127 || d2 > 127 || d1 < 0 || d2 < 0){
-          printf("erro: o corpo da varredura não cabe no salto, que é um byte COM"
-                 " SINAL (%ld e %ld, tecto 127) — RECUSADA.\n", d1, d2);
-          if(sql_cap){ sql_cap->ok = 0;
-              snprintf(sql_cap->err, sizeof sql_cap->err,
-                       "condicao complexa demais: o salto do bytecode e de um byte"); }
-          pc_emit = 0;
-          return;
-      }
-      { unsigned char d = (unsigned char)d1, dv = (unsigned char)d2;
-        pwrite(fprog, &d, 1, (off_t)pos);
-        pwrite(fprog, &dv, 1, (off_t)pos_v); } }
-    (void)0;
+      long d2 = (long)(pc_emit - (pos_v + 2));
+      /* O DESLOCAMENTO É UMA WORD, como tudo nesta máquina: o par de átomos.
+       * Estava num átomo só, lido com sinal — alcance 127 —, e um corpo maior
+       * virava salto para trás. Não se põe uma recusa à volta disso: o que
+       * cresce SOBE, d_{k+1} = 2·d_k. */
+      (void)d1; (void)d2;
+      salto_poe(pos, ini);
+      { long dv = (long)pc_emit - (long)(pos_v + 2);
+        if(dv > 32767 || dv < -32768) salto_estourou = 1;
+        { unsigned char lo = (unsigned char)((unsigned long)dv & 255u);
+          unsigned char hi = (unsigned char)(((unsigned long)dv >> 8) & 255u);
+          pwrite(fprog, &lo, 1, (off_t)pos_v);
+          pwrite(fprog, &hi, 1, (off_t)(pos_v + 1)); } } }
 }
 
 /* prepara as constantes e devolve o catálogo */
@@ -3000,7 +3015,7 @@ static long aplica_diario(long ncols, long nrows, int acao, int col_set){
         MOVE(S_ZERO, +1);
         emit1(OP_CMP);
         emit1(OP_JZ);
-        unsigned pos = pc_emit; emit1(0);
+        unsigned pos = pc_emit; emit1(0); emit1(0);
         unsigned ini = pc_emit;
         if(acao == ACAO_SET){
             emit_copia(S_V,  S_LINHAS + (unsigned)(i*ncols + col_set));
@@ -3741,8 +3756,8 @@ static int varre(const char *resto, int acao){
     emit1(OP_HALT);
     rel_ncols = 0;
     if(salto_estourou){
-        printf("erro: a condição gera um corpo maior do que o salto de um byte com"
-               " sinal alcança (127) — RECUSADA.\n");
+        printf("erro: o corpo passa o que a Word do deslocamento alcança"
+               " (32767) — RECUSADA.\n");
         if(sql_cap){ sql_cap->ok = 0;
             snprintf(sql_cap->err, sizeof sql_cap->err,
                      "condicao complexa demais para o salto do bytecode"); }
@@ -3754,18 +3769,17 @@ static int varre(const char *resto, int acao){
     unsigned long soma = 1469598103934665603UL;
     for(unsigned q = 0; q < pc_emit; q++){ soma ^= prog_le(q); soma *= 1099511628211UL; }
 
-    /* O VALOR SAI DA ESCRITA — Algoritmo B, e não uma recontagem.
+    /* ∑G SOBRE O CAMPO, que é o Lema da conservação: ∑_x G(x) = |I|.
      *
-     * `aranha.tex §a inversa`: «o campo c é o próprio G parcial: o Algoritmo B
-     * é o Algoritmo A com O VALOR LIDO A SAIR». E a §do ciclo é explícita sobre
-     * o custo: «armazená-lo como TABELA SOBRE X é uma escolha de representação,
-     * não o algoritmo — custa |X| e não |I|», com «NENHUMA DEPENDÊNCIA DE |X|,
-     * que é a afirmação que importa, porque é a que separa o algoritmo da
-     * tabela». Somar o bitmap inteiro a cada consulta era voltar à tabela.
+     * Cheguei a tirar isto, com o argumento de que percorrer o campo era «a
+     * tabela sobre X» que a §do ciclo condena. Era má leitura minha: o campo
+     * deste motor tem uma coordenada por LINHA, e as linhas são |I| — o |X| que
+     * a §condena é o ESPAÇO DE ENDEREÇOS, o arranjo G[m]×[m] que custa |X| e
+     * não |I|. Somar as coordenadas das linhas é Θ(|I|), que é o que o teorema
+     * pede.
      *
-     * O contador vive nos dois componentes (ADD16) — era só isso que lhe
-     * faltava quando dava a volta aos 255. */
-    long achou = (long)par_le(S_CONTA);
+     * O que estava mesmo errado era o salto do bytecode, e já subiu de andar. */
+    long achou = bits_conta(S_MATCH, nrows);
     ultima_conta = achou;
     if(acao != ACAO_MARCA){
         /* o bitmap (o diário) já está no disco; agora o COMPROMISSO, e só depois o efeito. */
