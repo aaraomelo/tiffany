@@ -2362,3 +2362,31 @@ E TRÊS OBSERVAÇÕES SOBRE A TABELA, todas já demonstradas:
 
   bateria   529 : 529, 0 falhas
   paper     23 páginas
+
+§50 — O NOME QUE SE LIA AO CONTRÁRIO
+=====================================
+A revisão apanhou uma ambiguidade real no nome que eu tinha dado ao teorema:
+«G é um invariante de identidade» LÊ-SE COMO SE G IDENTIFICASSE — que é o
+oposto do que se prova. O leitor matemático lê ao contrário.
+
+     antes   «G é um invariante de identidade»
+     agora   «G NÃO VÊ O CONSTRUTOR»
+e o enunciado dito ao contrário para não se ler ao contrário: não é que G
+identifique alguma coisa — é que G NÃO MUDA quando se trocam os construtores.
+Formalmente: G é invariante sob qualquer REATRIBUIÇÃO DE AGENTES que preserve a
+ocupação.
+
+E a frase que fecha, dela e exacta, agora no paper e no medidor:
+     O CAMPO É MEMÓRIA DA CONSTRUÇÃO, E NÃO DO CONSTRUTOR.
+
+E o porquê ficou explícito: T é uma SOMA COMUTATIVA, e ela descarta o agente
+ANTES de a posição existir. Não é que o campo esqueça — é que o agente nunca
+chega lá.
+
+A tabela das dualidades ganhou a linha que faltava:
+     construção   ·   construtor   ·   — (não se repõe)
+É o único par da tabela em que o preço NÃO se paga com uma coordenada: o
+identificador não sai do campo, tem de vir de fora.
+
+  bateria   529 : 529, 0 falhas · 30 unidades
+  paper     23 páginas

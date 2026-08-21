@@ -591,10 +591,13 @@ uma cláusula do Teor.~\ref{thm:multiplicidade}, e nenhum é um extra:
       $J^{4}=\mathrm{id}$ da bidualidade, agora na grade.
 \end{enumerate}
 
-\begin{teorema}[$G$ é invariante de identidade]\label{thm:agentes}
-Sejam duas execuções com o mesmo conjunto de escritas: uma em que \emph{um}
-agente visita cada célula $K$ vezes, outra em que $K$ agentes a visitam uma vez
-cada. Os campos resultantes são iguais célula a célula, e $\abs{I}$ é o mesmo.
+\begin{teorema}[$G$ não vê o construtor]\label{thm:agentes}
+Atribua-se a cada escrita um \emph{agente}, e considerem-se duas execuções que
+produzam a mesma multiplicidade por célula --- por exemplo, uma em que \emph{um}
+agente visita cada célula $K$ vezes, e outra em que $K$ agentes a visitam uma vez
+cada. Então os campos coincidem célula a célula, e $\abs{I}$ é o mesmo. Isto é:
+$G$ é \textbf{invariante sob qualquer reatribuição de agentes} que preserve a
+ocupação.
 \end{teorema}
 
 \begin{proof}
@@ -604,14 +607,22 @@ as duas execuções produzem a mesma multiplicidade de escritas por célula, os
 campos coincidem.
 \end{proof}
 
-\medskip\noindent Noutros termos: $G$ regista \textbf{ocupação}, não
-\textbf{identidade}. Nenhuma etapa da cadeia
+\medskip\noindent Convém dizer o enunciado ao contrário para não o ler ao
+contrário: não é que $G$ \emph{identifique} coisa nenhuma --- é que $G$ não
+\emph{muda} quando se trocam os construtores. Ele regista \textbf{ocupação}, e a
+identidade de quem escreveu não entra na conta. Nenhuma etapa da cadeia
 \[
 \text{base}\longrightarrow\text{palavra de arestas}\longrightarrow T
 \longrightarrow\text{posição}\longrightarrow G
 \]
-carrega quem construiu, e por isso o campo não pode devolvê-lo. Isto não é uma
-limitação, é a cláusula~(3) a fazer o seu trabalho, e tem duas consequências. A primeira é que o mecanismo \textbf{escala}:
+carrega quem construiu --- $T$ é uma soma comutativa, e ela descarta o agente
+antes de a posição existir ---, e por isso o campo não o pode devolver. Em uma
+linha:
+\[
+\boxed{\ \text{o campo é memória da \emph{construção}, e não do \emph{construtor}}\ }
+\]
+Isto não é uma limitação, é a cláusula~(3) a fazer o seu trabalho, e tem duas
+consequências. A primeira é que o mecanismo \textbf{escala}:
 acrescentar construtores não muda nada no ciclo, e uma ocupação por
 \emph{multiplicidade de agentes} e uma expansão pela \emph{memória de um só} são
 indistinguíveis do lado do espaço. A segunda é sobre o que cada coordenada repõe:
@@ -1689,6 +1700,7 @@ vértice: $G$ & aresta: $G_{\mathrm{ar}}$ & --- (uma determina a outra) & Teor.~
 $V$: base $\{\delta_x\}$ & $V^{*}$: base $\{\chi_k\}$ & o fator $n$ & Def.~\ref{def:dual}, Teor.~\ref{thm:H} \\
 $W$: $S$ nilpotente & $V$: $C_f$ diagonalizável & inverte sempre \emph{vs} se $\widehat f\neq0$ & Lema~\ref{lem:nilp}, Teor.~\ref{thm:proprios} \\
 ocupação: muitos agentes & expansão: um agente & o identificador & Teor.~\ref{thm:agentes} \\
+construção & construtor & --- (não se repõe) & Teor.~\ref{thm:agentes} \\
 \bottomrule
 \end{tabular}
 \end{center}

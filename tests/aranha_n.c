@@ -3203,8 +3203,11 @@ int main(void){
         if(quem_separa >= ordem_separa) mau++;        /* o agente separa MENOS */
         if(quem_separa == 0) mau++;
 
-        ok("O CAMPO NÃO DISTINGUE UM AGENTE DE MUITOS, E ISSO NÃO É FALHA — É A"
-           " CLÁUSULA 3. Duas arquitecturas resolvem o mesmo problema de aumentar"
+        ok("O CAMPO É MEMÓRIA DA CONSTRUÇÃO E NÃO DO CONSTRUTOR — e isso não é falha,"
+           " é A"
+           " CLÁUSULA 3. Dito ao contrário para não se ler ao contrário: não é que G"
+           " identifique alguma coisa — é que G NÃO MUDA quando se trocam os"
+           " construtores. Duas arquitecturas resolvem o mesmo problema de aumentar"
            " estrutura sem perder a memória das divisões: uma OCUPA por multiplicidade"
            " de construtores, a outra EXPANDE pela memória de um só. Medido: um agente"
            " a dar 4 voltas e 4 agentes a dar uma volta produzem campos IGUAIS célula a"
