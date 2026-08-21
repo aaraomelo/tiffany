@@ -1688,13 +1688,68 @@ Koch \code{tests/koch.c};
 álgebra PT \code{tests/portugues\_aranha.c} §PA1--§PA8;
 álgebra EN \code{tests/ingles\_aranha.c} §IA1--§IA8;
 álgebra ES \code{tests/espanhol\_aranha.c} §EA1--§EA8.}
+\subsection*{As quatro operações, e onde cada uma vive}
+
+\noindent O corpo fixa o algoritmo em quatro operações --- \code{aranha.tex}, a
+secção \emph{o algoritmo da aranha estigmérgica}, com os enunciados \emph{a volta
+é exata, e é inteira} e \emph{um bit desenha a estrutura, e o dual é a ausência}
+(pelo nome, que a renumeração parte em silêncio). Aqui não se redemonstram:
+diz-se onde correm.
+
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+ & a operação & o que o corpo prova & onde corre \\
+\midrule
+$\oplus$ & cisão & é a realização $\pi\colon I\to X$ & o bitmap: a linha $i$ é a coordenada $i$ \\
+$\sum$ & soma (\emph{popcount}) & $\sum_x G(x)=\abs{I}$ & \code{bits\_conta} sobre o campo \\
+$\otimes$ & gato $\times\sigma$ & sobe: a convolução, $\zeta$ & \code{cifra\_an} $=$ \code{OP\_GOLD} \\
+$\oslash$ & esquilo $\times\sigma'$ & desce: a deconvolução, $\mu$ & \code{decifra\_an} $=$ \code{OP\_NEGRO\_OURO} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{O gato e o esquilo já cá estavam.} Com $n$ o metal,
+\[
+\code{cifra\_an}(a,b)=(n\,a+b,\ a),
+\qquad
+\code{decifra\_an}(a,b)=(b,\ a-n\,b),
+\]
+que são a definição do corpo coordenada a coordenada; $\oslash\circ\otimes$ é a
+identidade sem hipótese nenhuma sobre o par, porque $\lvert\det\rvert=1$ e a
+inversa é inteira. O motor tinha o algoritmo antes de o paper o nomear ---
+o que a secção nova fez foi prová-lo e dar-lhe o nome.
+
+\medskip\noindent\textbf{E $\sum$ dispensou um contador.} A contagem de linhas
+que casaram vivia num slot próprio, incrementado \emph{por linha} dentro do
+bytecode. Não é preciso: o bitmap já tem uma coordenada por linha, e quantas
+casaram é quantos bits estão ligados --- $\sum$, o \emph{popcount}. Guardar o
+número ao lado do campo era guardar duas vezes a mesma coisa, e a segunda cópia
+vivia num byte, de modo que dava a volta aos $255$. Saiu o contador; a leitura é
+do campo.
+
+\medskip\noindent\textbf{Duas grandezas que se confundiam.} Quantas linhas
+\emph{existem} é $\sum$ sobre o bitmap de vivos; onde o próximo \code{INSERT}
+escreve é o \textbf{topo}, um contador. Não são a mesma --- o \code{DELETE}
+desliga a coordenada e não move as outras --- e agora estão em sítios
+diferentes.
+
+\medskip\noindent\textbf{Não há tecto de linhas.} O corpo não o põe: a dobra
+duplica a largura (\code{aranha thm:BI}) e o que cresce sobe a torre
+(§\ref{sec:torre}, \emph{o que cresce é o objecto, não a máquina}). O que limita
+é o \textbf{mapa de slots desta máquina}, e ele é da máquina: as zonas são
+prefixos --- blocos alinhados, disjuntos por construção, que é a Lei~7 --- e o
+tecto de quem o \emph{bytecode} endereça é a largura do endereço na instrução,
+dois bytes. Quem só o C toca vive acima disso e não paga nada.
+
 \colunas{\code{algebrico thm:gato}; \code{teoria cor:pata};
 \code{teoria thm:dobra-temporal}; \code{lib/portugues.h}; \code{lib/ingles.h};
 \code{lib/espanhol.h}; \code{thm:aranha-inversa}}
         {ciclo lê$\to$opera$\to$escreve; $G[y,x]\mathrel{+}=1$;
          $\Sigma\subseteq\Word_8\to I\to\pi\to G$;
          levantamento $\tilde\pi=(\pi,k)$, $\tilde G\equiv1$}
-        {\code{tests/aranha\_g.c} §AG1--§AG11;
+        {\code{tests/neuronio.c} (a volta em toda dimensão de 2 a 8);
+         \code{tests/aranha\_g.c} §AG1--§AG11;
          \code{tests/aranha\_inversa.c} §AI1--§AI7;
          \code{tests/idioma\_orbita.c} §IO1--§IO5;
          \code{tests/portugues\_aranha.c} §PA1--§PA8;

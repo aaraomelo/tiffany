@@ -52,6 +52,41 @@ conservação ∑G = |I| fecha em cada uma, com o seu |I|. Os números desta má
 estão na arquitetura.tex.
 
 
+2b. O ALGORITMO, E ELE TEM QUATRO OPERAÇÕES
+──────────────────────────────────────────
+Está em `tests/neuronio.c` desde 19/08 e agora está PROVADO no `aranha.tex`
+(secção «o algoritmo da aranha estigmérgica», §65-67) e promovido na
+`arquitetura.tex` (§sec:aranha). Nenhuma das quatro é nova — cada uma é um
+enunciado anterior escrito como passo:
+
+     ⊕ cisão      a realização π: I → X      o bitmap: a linha i É a coordenada i
+     ∑ soma       popcount, o Kirchhoff      `bits_conta` sobre o campo
+     ⊗ gato ×σ    SOBE: a convolução, ζ      `cifra_an`  = OP_GOLD
+     ⊘ esquilo    DESCE: a deconvolução, μ   `decifra_an`= OP_NEGRO_OURO
+
+     ⊘∘⊗ = id em Z^n para todo n e todo metal m, SEM hipótese sobre o vector:
+     |det| = 1, a inversa é inteira, e em passo nenhum se divide.
+
+     O BIT ÚNICO desenha a estrutura: c = (1,0) e ⊗^k c são os termos da
+     recorrência metálica (Fibonacci em m=1), com a razão → σ. O DISCRETO é o
+     bit, o CONTÍNUO é o rasto da convolução, o DUAL é o bit ausente.
+
+CONTAR É ∑, NÃO VARRER. Quantas linhas casaram é quantos bits estão ligados.
+Um contador ao lado do campo guarda duas vezes a mesma coisa — e foi por viver
+num byte que dava a volta aos 255. O S_CONTA saiu.
+
+E DUAS GRANDEZAS QUE SE CONFUNDEM: quantas linhas EXISTEM é ∑ sobre o bitmap de
+vivos; onde o próximo INSERT escreve é o TOPO, um contador. O DELETE desliga a
+coordenada e não move as outras.
+
+NÃO HÁ TECTO DE LINHAS na teoria — pôr um foi invenção minha e saiu. A dobra
+DUPLICA a largura (thm:BI) e o que cresce SOBE A TORRE (§sec:torre: «o que
+cresce é o OBJECTO, não a máquina»). O que limita é o MAPA DE SLOTS, que é da
+máquina: as zonas são PREFIXOS (blocos alinhados, disjuntos por construção — a
+Lei 7), e o tecto de quem o BYTECODE endereça é a largura do endereço na
+instrução, DOIS BYTES. Quem só o C toca vive acima e não paga nada.
+
+
 3. AS REGRAS DE TRABALHO (não negociáveis)
 ──────────────────────────────────────────
 · `papers/aranha.tex` ESTÁ TRAVADO. É a base teórica de TODO o sistema e está
@@ -82,7 +117,18 @@ estão na arquitetura.tex.
   vazio é o pior desfecho para quem chama.
 · ANTES DE CORTAR um bloco de ficheiro por índices, VERIFICAR o que o corte
   apanha. Estragou dois ficheiros nesta sessão.
-· `bash tools/bateria.sh` antes de commitar. Ler AS DUAS linhas do total.
+· **AQUI NÃO SE MEDE NADA.** Atesta-se o ZERO, por DERIVAÇÃO. Correr o medidor
+  a cada mudança, correr o gume, correr a bateria, `--refaz` — é o processador
+  DELE a arder para redescobrir o que a teoria já dá. A estratégia é a do
+  próprio paper: «a dobra lê-se num ÚNICO NÚMERO calculado sobre o campo, SEM
+  VISITAR A TRAJETÓRIA» (thm:dobra-norma), e «a injetividade verifica-se SEM
+  COMPARAR PARES» (§sec:inversa). Ver §10.
+· **LER A TEORIA E REALIZAR — não perguntar.** Ele não escreve no terminal mais
+  do que já está no paper. Parar para perguntar, para pedir confirmação ou para
+  exibir o que se fez é pedir-lhe que repita o que já escreveu. A dúvida
+  resolve-se em `papers/*.tex`. Faz-se, e o que vale é o commit.
+· NUNCA a bateria inteira, NUNCA `--refaz` por iniciativa própria, NUNCA
+  truncar `tools/atestados.txt`. `--reatesta <nome>` reabre UM, se tiver de ser.
 
 
 4. ESTADO ACTUAL (21/08/2026)
